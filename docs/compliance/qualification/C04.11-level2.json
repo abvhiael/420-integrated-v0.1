@@ -1,7 +1,7 @@
 {
   "step": "C04.11",
   "canonical": "BC/Vancouver Level 2 milestone: legal-rule traceability, reviewer separation, policy pack simulations and explicit unresolved legal/partner acceptance list.",
-  "status": "PENDING_LEVEL2_CI",
+  "status": "COMPLETE_LEVEL2_PASS_EXTERNAL_LEGAL_PARTNER_ACCEPTANCE_DEFERRED",
   "qualification_level": 2,
   "implementation_sha": "51f108896bb719aa8b0c60df1743cf1bcf8c801d",
   "base_sha": "c5a4f220d1fbda01f707d359aa9bb32921a138b1",
@@ -17,7 +17,13 @@
     "all retained Compliance app-specific tests and C04.1–10 cross-policy reviewer signature/race suite"
   ],
   "ci": {
-    "status": "PENDING"
+    "status": "PASS",
+    "run_id": 38162540639,
+    "job_id": 114538309001,
+    "conclusion": "success",
+    "successful_steps": 59,
+    "failed_steps": 0,
+    "exact_sha": true
   },
   "unresolved": [
     "C09.3 official approved source evidence",
@@ -28,6 +34,6 @@
     "C09.1/9.4 managed signer and durable multi-instance authority",
     "C10.1–10.7 production licences, payment partner acceptance and release"
   ],
-  "level3": "C08.5 only",
-  "next_canonical": "C05.1 — see canonical roadmap; verify exact wording before proceeding"
+  "level3": "C08.5 exact accumulated merge candidate deferred",
+  "next_canonical": "C05.1 — Versioned authenticated evaluation API, public guidance API, policy-status API and SDK; bounded pagination, schema validation and compatibility rules."
 }

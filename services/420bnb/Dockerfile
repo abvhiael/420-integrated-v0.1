@@ -8,6 +8,7 @@ COPY services/420bnb/identity.py /app/identity.py
 COPY services/420bnb/authority.py /app/authority.py
 COPY services/420bnb/calendar_engine.py /app/calendar_engine.py
 COPY services/420bnb/pricing.py /app/pricing.py
+COPY services/420bnb/travel_location.py /app/travel_location.py
 USER bnb
 EXPOSE 8080
 CMD ["uvicorn","api:app","--host","0.0.0.0","--port","8080","--no-proxy-headers"]

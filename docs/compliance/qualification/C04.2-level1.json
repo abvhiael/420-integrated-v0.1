@@ -1,0 +1,39 @@
+{
+  "step": "C04.2",
+  "canonical": "Reviewer qualifications and delegation; MFA, least privilege, short-lived sessions and approval invalidation when reviewed content changes.",
+  "status": "PENDING_LEVEL1_CI_AND_INTEGRATION",
+  "qualification_level": 1,
+  "implementation_sha": "347e76315ba7cdd3fa144a5347c0c6452f77420f",
+  "branch": "audit/420compliance-c01-1-inventory-20261009",
+  "pr": 602,
+  "files": [
+    "services/complianceauth/reviewer_authorization.go",
+    "services/complianceauth/reviewer_authorization_test.go",
+    ".github/workflows/420compliance-c01-level1.yml",
+    "docs/compliance/C04.2-REVIEWER-AUTHORIZATION.md"
+  ],
+  "checks": [
+    "Reviewer and approver scope / qualification",
+    "delegation anti-self and author segregation",
+    "authenticated short sessions and recent MFA",
+    "digest-bound content change invalidation",
+    "revocation and unavailable authority fail closed"
+  ],
+  "ci": {
+    "status": "NOT_VERIFIED",
+    "run_id": null,
+    "job_id": null
+  },
+  "limitations": [
+    "No independent reviewer or MFA provider connected",
+    "Existing PolicyLifecycle.Transition still relies on trusted actor identity and does not independently call AuthorizeReview",
+    "No production durable authorization or delegation persistence"
+  ],
+  "blockers": [
+    "Pass app-specific exact-SHA CI",
+    "Wire independent fresh authorization into protected lifecycle operations before full production acceptance"
+  ],
+  "level2": "Not scheduled for C04.2",
+  "level3": "C08.5 deferred",
+  "next_canonical": "C04.3 — Federally applicable product, packaging, quantity-equivalency and promotion requirements; explicitly separate non-medical scope and payment-route legal review."
+}

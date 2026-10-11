@@ -1,11 +1,11 @@
 {
   "step": "BNB-2.6",
   "title": "420Pay and 420Swap Integration",
-  "implementation_sha": "72042ca26691b00201478086a29d9c68e9d9c556",
+  "implementation_sha": "110ef7a2a3b242c86896687594e47c79815e9fbf",
   "scope": "Repository-side Pay receipt/invoice verifier and fail-closed approved native $420 / Pay-bound 420Swap adapters",
-  "status": "PENDING_EXACT_SHA_LEVEL1",
-  "run_id": 38093008817,
-  "run_url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38093008817",
+  "status": "PASS_REPOSITORY_SIDE_LEVEL1",
+  "run_id": 38097371782,
+  "run_url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38097371782",
   "pr": 600,
   "branch": "audit/420bnb-bnb-1-1-source-reconciliation-20261009",
   "main_sha": "e60c4c74ccd0c950817f98e3da6b67546afd9e24",
@@ -29,7 +29,9 @@
   "testnet_roadmap": "T-BNB-PAY-2",
   "deferred_not_waived": true,
   "blockers": [
-    "Exact-SHA runtime and BnB CI must report success; runner currently queued",
-    "Live independently authorized Pay/Swap finality and payment-provider acceptance remain testnet-gated"
-  ]
+    "Operational Pay/Swap authorization and testnet acceptance remain deferred, not waived"
+  ],
+  "run_conclusion": "success",
+  "runtime_failed_steps": 0,
+  "bnb_workflows_passed": 10
 }

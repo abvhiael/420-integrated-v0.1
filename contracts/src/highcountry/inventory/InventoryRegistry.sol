@@ -127,25 +127,43 @@ contract InventoryRegistry {
     }
 
     /// @notice Explicit opt-in for registered manufacturing modules; never a wallet entitlement.
-    function setInventoryOperator(address operator, bool approved) external {
+    function setInventoryOperator(
+        address operator,
+        bool approved
+    ) external {
         if (operator == address(0) || operator == msg.sender) revert HCInvalidState();
         inventoryOperators[msg.sender][operator] = approved;
         emit InventoryOperatorUpdated(msg.sender, operator, approved);
     }
 
-    function reserveFor(bytes32 op, bytes32 id, address owner, uint256 amount) external {
+    function reserveFor(
+        bytes32 op,
+        bytes32 id,
+        address owner,
+        uint256 amount
+    ) external {
         if (!inventoryOperators[owner][msg.sender]) revert HCInvalidState();
         _ensureActive(id);
         ledger.reserve(op, id, owner, amount);
     }
 
-    function releaseFor(bytes32 op, bytes32 id, address owner, uint256 amount) external {
+    function releaseFor(
+        bytes32 op,
+        bytes32 id,
+        address owner,
+        uint256 amount
+    ) external {
         if (!inventoryOperators[owner][msg.sender]) revert HCInvalidState();
         _ensureActive(id);
         ledger.release(op, id, owner, amount);
     }
 
-    function consumeReservedFor(bytes32 op, bytes32 id, address owner, uint256 amount) external {
+    function consumeReservedFor(
+        bytes32 op,
+        bytes32 id,
+        address owner,
+        uint256 amount
+    ) external {
         if (!inventoryOperators[owner][msg.sender]) revert HCInvalidState();
         _ensureActive(id);
         ledger.consume(op, id, owner, amount, true);

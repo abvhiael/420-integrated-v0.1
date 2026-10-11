@@ -1,7 +1,7 @@
 {
   "step": "C05.3",
   "canonical": "Location/Maps applicability adapter; private exact addresses only where required, coarse public region output and no GPS-only proof of legal eligibility.",
-  "status": "PENDING_LEVEL1_CI",
+  "status": "COMPLETE_LEVEL1_PASS_EXTERNAL_ACCEPTANCE_DEFERRED",
   "qualification_level": 1,
   "implementation_sha": "fd3bd1d670b9e9c7402ba58581f3575bb9cd46d0",
   "base_sha": "c5a4f220d1fbda01f707d359aa9bb32921a138b1",
@@ -18,7 +18,13 @@
     "retained app-specific Compliance CI"
   ],
   "ci": {
-    "status": "PENDING"
+    "status": "PASS",
+    "run_id": 38168026094,
+    "job_id": 114554560041,
+    "conclusion": "success",
+    "successful_steps": 62,
+    "failed_steps": 0,
+    "exact_sha": true
   },
   "requirements": [
     "private trusted Location/Maps evidence resolver",

@@ -48,3 +48,31 @@ def test_jurisdiction_rejects_untrusted_scope_before_db(monkeypatch,claim):
     monkeypatch.setattr(api,"verify_authority",lambda *_:claim)
     monkeypatch.setattr(api,"db",lambda:(_ for _ in ()).throw(AssertionError("invalid policy touched db")))
     assert client.post("/v1/bnb/travel/jurisdiction-policy",json={"proof":"x"*24}).status_code==422
+
+def test_authorized_response_is_explicitly_uncacheable(monkeypatch):
+    class Cursor:
+        def execute(self,query,params):
+            assert "bnb_travel_jurisdiction_policy" in query
+            return self
+        def fetchall(self):
+            return []
+    class Connection:
+        def __enter__(self):return Cursor()
+        def __exit__(self,*args):return False
+    monkeypatch.setattr(api,"resolve_public_place",lambda _:{"region":"SK","country":"CA"})
+    monkeypatch.setattr(api,"db",lambda:Connection())
+    response=client.get("/v1/bnb/travel/authorized?place_id=public_1")
+    assert response.status_code==200
+    assert "no-store" in response.headers["cache-control"]
+    assert response.json()["listings"]==[]
+    assert response.json()["transaction_enabled"] is False
+
+def test_policy_and_binding_not_configured_cannot_be_self_approved(monkeypatch):
+    for prefix,purpose in (("BNB_LOCATION_AUTHORITY","bnb_property_place"),
+                           ("BNB_JURISDICTION_AUTHORITY","bnb_jurisdiction_policy")):
+        for suffix in ("ISSUER","AUDIENCE","PUBLIC_KEY_PEM"):
+            monkeypatch.delenv(prefix+"_"+suffix,raising=False)
+        from authority import verify_authority
+        with pytest.raises(api.HTTPException) as exc:
+            verify_authority("self-issued",prefix,purpose)
+        assert exc.value.status_code==503

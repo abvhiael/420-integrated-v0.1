@@ -3,6 +3,7 @@ from datetime import datetime,timedelta,timezone
 from uuid import uuid4
 import psycopg
 from doobr.operations import heartbeat,snapshot
+from doobr.audit_verify import verify_chain
 from doobr.auth import Denied
 DSN="host=localhost dbname=doobr_r02_12 user=postgres password=ci-only-password"
 USER="host=localhost dbname=doobr_r02_12 user=doobr_r0212_user password=ci-only-password"
@@ -40,6 +41,15 @@ class OperationsPG(unittest.TestCase):
   with self.assertRaises(Denied):
    heartbeat(connect=self.connect,tenant_id=T,instance_id=I,role="API",started_at=N,at=N-timedelta(seconds=1))
   self.assertFalse(snapshot(connect=self.connect,tenant_id=T,at=N+timedelta(hours=1))["ready"])
+ def test_chain_and_immutable_audit(self):
+  self.assertEqual(verify_chain(connect=self.connect,tenant_id=T)['entries'],0)
+  with self.connect() as db:
+   with db.transaction():
+    with db.cursor() as cur:
+     cur.execute("SELECT set_config('doobr.tenant_id',%s,true)",(T,))
+     with self.assertRaises(psycopg.errors.InsufficientPrivilege):
+      cur.execute("UPDATE doobr_private.operation_audit SET action='FAKE' WHERE tenant_id=%s",(T,))
+  self.assertEqual(verify_chain(connect=self.connect,tenant_id=OTHER)['entries'],0)
  def test_audit_tables_forced_rls_and_append_only(self):
   with self.admin.cursor() as c:
    c.execute("""SELECT count(*) FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace

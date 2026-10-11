@@ -10,7 +10,7 @@ if(process.env.COMMERCE_WEB_TEST_OUTPUT&&(!/com4-browser-[^/]+\/site$/.test(outp
 rmSync(output,{recursive:true,force:true});mkdirSync(output,{recursive:true});
 await build({entryPoints:[new URL('../app.js',import.meta.url).pathname,new URL('../public.js',import.meta.url).pathname,new URL('../operations.js',import.meta.url).pathname],bundle:true,format:'esm',target:'es2022',outdir:output,define:{COMMERCE_CONFIG:JSON.stringify(config)}});
 // Preserve source entrypoints for development while publishing the public market at /.
-for(const file of ['style.css','public.css','high-street-logo.svg'])copyFileSync(new URL('../'+file,import.meta.url),resolve(output,file));
+for(const file of ['style.css','public.css','high_street_logo.png'])copyFileSync(new URL('../'+file,import.meta.url),resolve(output,file));
 const routeLinks=html=>html.replaceAll('href="public.html"','href="/"').replaceAll('href="index.html"','href="builder.html"');
 for(const [source,destination] of [['public.html','index.html'],['public.html','public.html'],['index.html','builder.html'],['operations.html','operations.html']])writeFileSync(resolve(output,destination),routeLinks(readFileSync(new URL('../'+source,import.meta.url),'utf8')));
 

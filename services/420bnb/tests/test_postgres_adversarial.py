@@ -970,3 +970,107 @@ def test_bnb26_fail_closed_unprovisioned_pay_and_signed_finality(fixture_propert
             c.execute("DELETE FROM bnb_booking_request WHERE property_id=%s",(pid,))
             c.execute("DELETE FROM bnb_booking_policy WHERE property_id=%s",(pid,))
             c.execute("DELETE FROM bnb_audit WHERE resource_id=%s",(pid,))
+
+
+def test_bnb27_pay_owned_split_partial_refunds_and_payout_conservation(fixture_property,monkeypatch):
+    """Synthetic Pay signer tests BnB's verifier, not a real 420Pay deployment."""
+    pid,guest_headers=fixture_property
+    with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+        c.execute("INSERT INTO bnb_booking_policy(property_id,instant_enabled) VALUES (%s,true)",(pid,))
+    hold=make_bnb25_hold(pid,guest_headers,"bnb27-quote-0001","bnb27-hold-0001")
+    assert hold.status_code==201,hold.text
+    req=client.post("/v1/bnb/booking-requests",json={
+        "hold_id":hold.json()["id"],"request_type":"instant"},headers={
+        **guest_headers,"idempotency-key":"bnb27-request-0001"})
+    assert req.status_code==201,req.text
+    rid=uuid4()
+    with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+        rid=c.execute("SELECT id FROM bnb_reservation WHERE booking_request_id=%s",
+                      (req.json()["id"],)).fetchone()[0]
+        qid=c.execute("SELECT quote_id FROM bnb_reservation WHERE id=%s",(rid,)).fetchone()[0]
+        c.execute("""INSERT INTO bnb_pay_intent(id,reservation_id,quote_id,requester,
+            merchant_id,payout_controller,chain_id,asset,asset_amount,settlement_currency,
+            quoted_minor,pay_invoice_id,pay_invoice_expires,state,pay_payment_id,receipt_hash)
+            VALUES (%s,%s,%s,'guest-fixture','merchant','controller',420,'native:$420',
+            '1000','CAD',100,'invoice-bnb27',now()+interval '10 minutes',
+            'finalized','payment-bnb27',%s)""",(uuid4(),rid,qid,"0x"+"f"*64))
+        c.execute("UPDATE bnb_reservation SET status='confirmed',pay_proof_id='payment-bnb27' WHERE id=%s",(rid,))
+        c.execute("UPDATE bnb_hold SET status='confirmed' WHERE id=%s",(hold.json()["id"],))
+    private=rsa.generate_private_key(public_exponent=65537,key_size=2048)
+    issuer="https://pay-settlement.test.invalid"
+    monkeypatch.setenv("BNB_PAY_PUBLIC_KEY_PEM",private.public_key().public_bytes(
+        Encoding.PEM,PublicFormat.SubjectPublicKeyInfo).decode())
+    monkeypatch.setenv("BNB_PAY_ISSUER",issuer)
+    monkeypatch.setenv("BNB_PAY_AUDIENCE","bnb-pay")
+    def signed(model,purpose,extra):
+        now=int(time.time())
+        claim={"iss":issuer,"aud":"bnb-pay","sub":"fixture-pay","jti":str(uuid4()),
+            "iat":now,"nbf":now,"exp":now+120,"purpose":"pay-"+purpose,
+            "authority":"420Pay","registry_version":"fixture-v1",
+            "payload_hash":hashlib.sha256(model.model_dump_json().encode()).hexdigest(),
+            "settlement_authority":"420Pay","economic_event_verified":True,**extra}
+        return {"x-pay-authority-proof":jwt.encode(claim,private,algorithm="RS256")}
+    split={"reservation_id":str(rid),"pay_payment_id":"payment-bnb27",
+        "canonical_split_id":"split-bnb27","chain_id":420,"asset":"native:$420",
+        "captured_amount":"1000","host_recipient":"host-wallet",
+        "platform_recipient":"platform-wallet","developer_recipient":"dev-compensation-wallet",
+        "host_amount":"700","platform_amount":"150","developer_amount":"50",
+        "retained_amount":"100","policy_version":"governed-v1"}
+    splitproof={"payment_id":"payment-bnb27","chain_id":420,
+        "asset":"native:$420","canonical_split_id":"split-bnb27",
+        "policy_version":"governed-v1","developer_recipient_approved":True}
+    try:
+        endpoint="/v1/bnb/internal/pay/settlement-splits"
+        assert client.post(endpoint,json=split).status_code==401
+        invalid=client.post(endpoint,json={**split,"developer_amount":"51"},
+            headers=signed(api.SettlementSplitInput(**{**split,"developer_amount":"51"}),
+                           "settlement-split",splitproof))
+        assert invalid.status_code==422
+        ok=client.post(endpoint,json=split,headers=signed(
+            api.SettlementSplitInput(**split),"settlement-split",splitproof))
+        assert ok.status_code==202,ok.text
+        assert ok.json()["custody"] is False
+        assert client.post(endpoint,json=split,headers=signed(
+            api.SettlementSplitInput(**split),"settlement-split",splitproof)).json()["replayed"]
+        route="/v1/bnb/internal/pay/disbursements"
+        def event(kind,amount,recipient,operation,state="reserved",event=None,receipt=None):
+            body={"reservation_id":str(rid),"kind":kind,"amount":str(amount),
+                "recipient":recipient,"pay_operation_id":operation,"state":state,
+                "event_id":event or str(uuid4()),"chain_id":420,
+                "asset":"native:$420","policy_version":"governed-v1",
+                "receipt_hash":receipt}
+            extras={"pay_operation_id":operation,"pay_event_id":body["event_id"],
+                "chain_id":420,"asset":"native:$420","policy_version":"governed-v1",
+                "pay_beneficiary_verified":True,"original_payer_refund":True,
+                "refund_recipient":"guest-payer-wallet",
+                "receipt_finalized":state=="finalized"}
+            return client.post(route,json=body,headers=signed(api.PayDisbursementInput(**body),
+                "disbursement",extras))
+        assert event("refund",200,"guest-payer-wallet","refund-1").status_code==202
+        assert event("refund",150,"guest-payer-wallet","refund-2").status_code==202
+        assert event("host",600,"host-wallet","host-payout-1").status_code==202
+        assert event("developer",50,"dev-compensation-wallet","developer-1").status_code==202
+        # 350 refund reserves + 600 host + 50 developer = all 1000 captured.
+        assert event("platform",1,"platform-wallet","platform-overflow").status_code==409
+        assert event("refund",1,"attacker-wallet","refund-hijack").status_code==403
+        assert event("host",101,"host-wallet","host-overage").status_code==409
+        final=event("refund",200,"guest-payer-wallet","refund-1","finalized",
+            receipt="0x"+"a"*64)
+        assert final.status_code==202,final.text
+        assert event("host",600,"host-wallet","host-payout-1","failed").status_code==202
+        recovered=event("host",600,"host-wallet","host-payout-2")
+        assert recovered.status_code==202,recovered.text
+        assert event("host",600,"host-wallet","host-payout-1","reserved").status_code==409
+        view=client.get(f"/v1/bnb/reservations/{rid}/settlement",headers=guest_headers)
+        assert view.status_code==200,view.text
+        assert view.json()["captured_amount"]=="1000"
+        assert view.json()["refunded_amount"]=="200"
+        assert view.json()["remaining_liability"]=="0"
+        assert view.json()["bnb_custody"] is False
+        assert client.get(f"/v1/bnb/reservations/{rid}/settlement").status_code==401
+    finally:
+        with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+            c.execute("DELETE FROM bnb_pay_disbursement_event WHERE pay_operation_id LIKE 'refund-%' OR pay_operation_id LIKE 'host-%' OR pay_operation_id LIKE 'developer-%'")
+            c.execute("DELETE FROM bnb_pay_disbursement WHERE reservation_id=%s",(rid,))
+            c.execute("DELETE FROM bnb_settlement_split WHERE reservation_id=%s",(rid,))
+            c.execute("DELETE FROM bnb_pay_intent WHERE reservation_id=%s",(rid,))

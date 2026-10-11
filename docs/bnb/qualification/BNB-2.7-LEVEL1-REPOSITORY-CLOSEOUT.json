@@ -1,0 +1,43 @@
+{
+  "step": "BNB-2.7",
+  "canonical_title": "Settlement, Refunds and Host Payouts",
+  "qualification_level": "Level 1",
+  "status": "PENDING_REQUIRED_RUNTIME_CI",
+  "implementation_sha": "c0cedbab7fc972b226e9dfc6d8641b10b9170fea",
+  "pr": 600,
+  "branch": "audit/420bnb-bnb-1-1-source-reconciliation-20261009",
+  "main_at_step_start": "e60c4c74ccd0c950817f98e3da6b67546afd9e24",
+  "git_divergence_at_start": {
+    "behind_main": 339
+  },
+  "run_id": 38101121987,
+  "run_url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38101121987",
+  "changes": [
+    "services/420bnb/migrations/016_settlement_refund_payout.sql",
+    "services/420bnb/api.py",
+    "services/420bnb/tests/test_postgres_adversarial.py",
+    ".github/workflows/bnb-runtime.yml"
+  ],
+  "implemented": [
+    "Signed Pay-only immutable economic allocations with captured-amount equality and developer compensation recipient",
+    "Partial refund/payout reservation/finalization/failure ledger, receipt/JTI/operation replay guards",
+    "Funded per-asset conservation, category caps, and zero autonomous custody",
+    "Original-payer refund bound by Pay issuer, authorized immutable host/platform/developer payout destinations",
+    "Host payout requires checkout, fulfillment, dispute window and Pay controller authorization",
+    "Signed payment decline/provider failure/finality recovery with immutable attempt/JTI replay ledger",
+    "Guest/host-private settlement and refund accounting read projection",
+    "Targeted PostgreSQL and adversarial runtime coverage added"
+  ],
+  "unqualified": [
+    "Latest exact-SHA runtime and dependent workflow results are queued, not green",
+    "No current-main Level 3 reconciliation or full phase merge"
+  ],
+  "deferred_operational": [
+    "Canonical deployed Pay settlement, RefundManager, beneficiary registry and compensation vault provenance",
+    "Real money movement, finality-aware partial refund/payout and Fiat/Swap settlement acceptance",
+    "Independent legal fee/tax/dispute policies, operator and security/testnet authorization"
+  ],
+  "level2": "Not automatically rerun; app milestone to be decided from authoritative roadmap",
+  "level3": "Deferred to full app audit-phase closeout, one Solidity Foundry owner, separate Genesis authority owner",
+  "next_step": "Not established in this turn; read canonical repository roadmap rather than invent BNB-2.8"
+}

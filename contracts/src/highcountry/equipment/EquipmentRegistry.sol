@@ -33,6 +33,7 @@ contract EquipmentRegistry {
     mapping(bytes32 => Equipment) private _equipment;
     mapping(bytes32 => bool) public usedEarningRef;
     mapping(uint64 => uint256) public occupiedSlots;
+    mapping(uint64 => address) public placementOperator;
     mapping(uint64 => int256[6]) private _totals;
     uint256 public issuedCount;
 
@@ -107,7 +108,9 @@ contract EquipmentRegistry {
         }
         if (land.effectiveOperator(parcelId) != msg.sender) revert HCInvalidState();
         EquipmentType storage kind = _types[item.typeId];
+        if (occupiedSlots[parcelId] != 0 && placementOperator[parcelId] != msg.sender) revert HCInvalidState();
         if (occupiedSlots[parcelId] + kind.slotCost > land.growCapacityOf(parcelId)) revert HCInvalidState();
+        placementOperator[parcelId] = msg.sender;
         item.parcelId = parcelId;
         occupiedSlots[parcelId] += kind.slotCost;
         for (uint256 i; i < 6; ++i) {
@@ -123,6 +126,7 @@ contract EquipmentRegistry {
         EquipmentType storage kind = _types[item.typeId];
         item.parcelId = 0;
         occupiedSlots[parcelId] -= kind.slotCost;
+        if (occupiedSlots[parcelId] == 0) placementOperator[parcelId] = address(0);
         for (uint256 i; i < 6; ++i) {
             _totals[parcelId][i] -= kind.effects[i];
         }
@@ -133,6 +137,7 @@ contract EquipmentRegistry {
     /// @dev Do not treat this view as permission to skip CultivationEngine source/ruleset checks.
     function effectiveEffects(uint64 parcelId, address operator) external view returns (int256[6] memory values) {
         if (operator == address(0) || land.effectiveOperator(parcelId) != operator) revert HCInvalidState();
+        if (occupiedSlots[parcelId] != 0 && placementOperator[parcelId] != operator) revert HCInvalidState();
         return _totals[parcelId];
     }
 }

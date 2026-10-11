@@ -692,6 +692,36 @@ def host_dashboard(authorization:str|None=Header(None)):
             for x in rows]
 
 
+class HostPresentationInput(BaseModel):
+    title: str=Field(min_length=3,max_length=160)
+    public_region: str=Field(min_length=2,max_length=160)
+    expected_version: int=Field(ge=1,strict=True)
+
+
+@app.put("/v1/bnb/account/properties/{property_id}/presentation")
+def update_host_presentation(property_id:UUID,payload:HostPresentationInput,
+                             authorization:str|None=Header(None)):
+    actor=active_subject(authorization)
+    with db() as c:
+        with c.transaction():
+            row=c.execute("""SELECT host_subject,status,version FROM bnb_property
+                WHERE id=%s FOR UPDATE""",(property_id,)).fetchone()
+            if not row:raise HTTPException(404,"NOT_FOUND")
+            host_scope(c,property_id,actor,"edit_listing")
+            if row[1]!="draft":raise HTTPException(409,"LISTING_REVIEW_REQUIRED")
+            if row[2]!=payload.expected_version:raise HTTPException(409,"VERSION_CONFLICT")
+            c.execute("""UPDATE bnb_property SET title=%s,public_region=%s,
+                version=version+1 WHERE id=%s""",
+                (payload.title,payload.public_region,property_id))
+            version=c.execute("SELECT version FROM bnb_property WHERE id=%s",
+                              (property_id,)).fetchone()[0]
+            c.execute("""INSERT INTO bnb_audit(id,subject,action,resource_id)
+                VALUES (%s,%s,'bnb.host.presentation_updated',%s)""",
+                (uuid4(),actor,property_id))
+    return {"id":str(property_id),"version":version,"publication_approval":False,
+            "financial_permissions":[]}
+
+
 @app.get("/v1/bnb/account/properties/{property_id}/host-requests")
 def host_booking_inbox(property_id:UUID,authorization:str|None=Header(None)):
     actor=active_subject(authorization)

@@ -1463,6 +1463,49 @@ def pay_disbursement(payload:PayDisbursementInput,x_pay_authority_proof:str|None
     return {"state":payload.state,"replayed":False,"funds_moved_by_bnb":False}
 
 
+@app.post("/v1/bnb/internal/pay/failures",status_code=202)
+def pay_failure(payload:PayFailureInput,x_pay_authority_proof:str|None=Header(None)):
+    proof=signed_pay_claim(x_pay_authority_proof,"failure",payload)
+    if (proof.get("economic_event_verified") is not True or
+        proof.get("pay_attempt_id")!=payload.pay_attempt_id or
+        proof.get("failure_code")!=payload.failure_code):
+        raise HTTPException(403,"PAY_FAILURE_AUTHORITY_REQUIRED")
+    digest=hashlib.sha256(payload.model_dump_json().encode()).hexdigest()
+    with db() as c:
+        with c.transaction():
+            row=c.execute("""SELECT r.property_id FROM bnb_reservation r
+                WHERE r.id=%s""",(payload.reservation_id,)).fetchone()
+            if not row:raise HTTPException(404,"NOT_FOUND")
+            c.execute("SELECT id FROM bnb_property WHERE id=%s FOR UPDATE",(row[0],))
+            payment=c.execute("""SELECT i.state,i.pay_invoice_id,r.status
+                FROM bnb_pay_intent i JOIN bnb_reservation r ON r.id=i.reservation_id
+                WHERE i.reservation_id=%s FOR UPDATE OF i,r""",
+                (payload.reservation_id,)).fetchone()
+            if not payment or payment[1]!=payload.pay_invoice_id:
+                raise HTTPException(409,"PAY_INVOICE_MISMATCH")
+            past=c.execute("""SELECT digest FROM bnb_pay_failure_event
+                WHERE pay_attempt_id=%s""",(payload.pay_attempt_id,)).fetchone()
+            if past:
+                if past[0]!=digest:raise HTTPException(409,"PAY_FAILURE_REPLAY_CONFLICT")
+                return {"state":"recovery_required","replayed":True}
+            if payment[0]=="finalized" or payment[2]=="confirmed":
+                raise HTTPException(409,"FINALIZED_PAYMENT_CANNOT_FAIL")
+            c.execute("""INSERT INTO bnb_pay_failure_event
+                (issuer,jti,pay_attempt_id,reservation_id,pay_invoice_id,failure_code,digest)
+                VALUES (%s,%s,%s,%s,%s,%s,%s)""",
+                (proof["iss"],proof["jti"],payload.pay_attempt_id,payload.reservation_id,
+                 payload.pay_invoice_id,payload.failure_code,digest))
+            c.execute("""UPDATE bnb_pay_intent SET state='recovery_required'
+                WHERE reservation_id=%s""",(payload.reservation_id,))
+            c.execute("""UPDATE bnb_reservation SET status='recovery_required'
+                WHERE id=%s AND status='payment_pending'""",(payload.reservation_id,))
+            c.execute("""INSERT INTO bnb_outbox(id,event_type,payload)
+                VALUES (%s,'bnb.pay.failure_recovery',%s::jsonb)""",
+                (uuid4(),json.dumps({"reservation_id":str(payload.reservation_id),
+                 "pay_attempt_id":payload.pay_attempt_id})))
+    return {"state":"recovery_required","replayed":False}
+
+
 @app.get("/v1/bnb/reservations/{reservation_id}/settlement")
 def guest_settlement_projection(reservation_id:UUID,authorization:str|None=Header(None)):
     actor=active_subject(authorization)

@@ -1,7 +1,7 @@
 {
   "step": "C04.1",
   "canonical": "Draft/review/approve/schedule/activate/supersede/revoke lifecycle; enforce distinct author and independent reviewer identities.",
-  "status": "PENDING_LEVEL1_CI",
+  "status": "COMPLETE_LEVEL1_PASS",
   "qualification_level": 1,
   "implementation_sha": "694d34054bfc656998079fd62eeaa6668867a352",
   "branch": "audit/420compliance-c01-1-inventory-20261009",
@@ -20,10 +20,14 @@
     "negative,concurrency and scheduled activation tests"
   ],
   "ci": {
-    "status": "NOT_VERIFIED",
-    "run_id": null,
-    "job_id": null,
-    "required": "C04.1 dedicated race test and retained Compliance Go security, PostgreSQL and race suite"
+    "status": "PASS",
+    "run_id": 38106410949,
+    "job_id": 114372795293,
+    "conclusion": "success",
+    "exact_sha": true,
+    "required": "C04.1 dedicated race test and retained Compliance Go security, PostgreSQL and race suite",
+    "passed_steps": 47,
+    "failed_steps": 0
   },
   "limitations": [
     "Process-local lifecycle is not a durable production state machine",
@@ -32,8 +36,7 @@
     "Production carrier/regulator acceptance outstanding"
   ],
   "blockers": [
-    "Successful exact-SHA app-specific CI",
-    "Durable production lifecycle/application wiring and independent authorization integration require additional acceptance before production use"
+    "Production durable lifecycle and independently authenticated legal review remain external acceptance requirements; not Level 1 software-test blockers"
   ],
   "level2": "C03.11 completed; no new milestone triggered by ordinary C04.1",
   "level3": "C08.5 deferred",

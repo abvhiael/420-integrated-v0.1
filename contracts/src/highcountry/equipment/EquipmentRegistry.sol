@@ -4,8 +4,12 @@ pragma solidity ^0.8.24;
 import { HCInvalidId, HCInvalidState, HCZeroAddress } from "../errors/HighCountryErrors.sol";
 
 interface IEquipmentLandAuthority {
-    function effectiveOperator(uint64 parcelId) external view returns (address);
-    function growCapacityOf(uint64 parcelId) external view returns (uint32);
+    function effectiveOperator(
+        uint64 parcelId
+    ) external view returns (address);
+    function growCapacityOf(
+        uint64 parcelId
+    ) external view returns (uint32);
 }
 
 /// @notice R04.2 immutable, version-pinned earned equipment with land-authorized placement.
@@ -18,6 +22,7 @@ contract EquipmentRegistry {
         uint16 slotCost;
         bool exists;
     }
+
     struct Equipment {
         bytes32 typeId;
         bytes32 earningRef;
@@ -39,7 +44,9 @@ contract EquipmentRegistry {
 
     event TypeRegistered(bytes32 indexed typeId, bytes32 indexed catalogueVersion, uint16 slotCost);
     event IssuerSet(address indexed issuer, bool approved);
-    event EquipmentEarned(bytes32 indexed equipmentId, bytes32 indexed typeId, address indexed owner, bytes32 earningRef);
+    event EquipmentEarned(
+        bytes32 indexed equipmentId, bytes32 indexed typeId, address indexed owner, bytes32 earningRef
+    );
     event EquipmentPlaced(bytes32 indexed equipmentId, uint64 indexed parcelId, address indexed owner);
     event EquipmentRemoved(bytes32 indexed equipmentId, uint64 indexed parcelId);
 
@@ -48,23 +55,30 @@ contract EquipmentRegistry {
         _;
     }
 
-    constructor(address land_) {
+    constructor(
+        address land_
+    ) {
         if (land_ == address(0) || land_.code.length == 0) revert HCZeroAddress();
         administrator = msg.sender;
         land = IEquipmentLandAuthority(land_);
     }
 
-    function setIssuer(address issuer, bool approved) external onlyAdmin {
+    function setIssuer(
+        address issuer,
+        bool approved
+    ) external onlyAdmin {
         if (issuer == address(0)) revert HCZeroAddress();
         issuers[issuer] = approved;
         emit IssuerSet(issuer, approved);
     }
 
     /// @notice Version is immutable per typeId: upgrades require a distinct new typeId.
-    function registerType(bytes32 typeId, bytes32 version, uint16 slotCost, int16[6] calldata effects)
-        external
-        onlyAdmin
-    {
+    function registerType(
+        bytes32 typeId,
+        bytes32 version,
+        uint16 slotCost,
+        int16[6] calldata effects
+    ) external onlyAdmin {
         if (typeId == bytes32(0) || version == bytes32(0) || slotCost == 0 || _types[typeId].exists) {
             revert HCInvalidState();
         }
@@ -75,13 +89,17 @@ contract EquipmentRegistry {
         emit TypeRegistered(typeId, version, slotCost);
     }
 
-    function equipmentType(bytes32 typeId) external view returns (EquipmentType memory) {
+    function equipmentType(
+        bytes32 typeId
+    ) external view returns (EquipmentType memory) {
         EquipmentType memory record = _types[typeId];
         if (!record.exists) revert HCInvalidState();
         return record;
     }
 
-    function equipment(bytes32 equipmentId) external view returns (Equipment memory) {
+    function equipment(
+        bytes32 equipmentId
+    ) external view returns (Equipment memory) {
         Equipment memory record = _equipment[equipmentId];
         if (!record.exists) revert HCInvalidState();
         return record;
@@ -89,9 +107,16 @@ contract EquipmentRegistry {
 
     /// @notice Only authorized gameplay issuer may attest an independently earned item.
     /// @dev A local claim, wallet link or token balance cannot itself issue equipment.
-    function issue(bytes32 equipmentId, bytes32 typeId, address owner, bytes32 earningRef) external {
-        if (!issuers[msg.sender] || owner == address(0) || equipmentId == bytes32(0) || earningRef == bytes32(0)
-            || !_types[typeId].exists || _equipment[equipmentId].exists || usedEarningRef[earningRef]) {
+    function issue(
+        bytes32 equipmentId,
+        bytes32 typeId,
+        address owner,
+        bytes32 earningRef
+    ) external {
+        if (
+            !issuers[msg.sender] || owner == address(0) || equipmentId == bytes32(0) || earningRef == bytes32(0)
+                || !_types[typeId].exists || _equipment[equipmentId].exists || usedEarningRef[earningRef]
+        ) {
             revert HCInvalidState();
         }
         usedEarningRef[earningRef] = true;
@@ -101,7 +126,10 @@ contract EquipmentRegistry {
     }
 
     /// @notice Slots are bounded by authoritative parcel capacity and current operator.
-    function place(bytes32 equipmentId, uint64 parcelId) external {
+    function place(
+        bytes32 equipmentId,
+        uint64 parcelId
+    ) external {
         Equipment storage item = _equipment[equipmentId];
         if (!item.exists || item.owner != msg.sender || item.parcelId != 0 || parcelId == 0) {
             revert HCInvalidState();
@@ -119,7 +147,9 @@ contract EquipmentRegistry {
         emit EquipmentPlaced(equipmentId, parcelId, msg.sender);
     }
 
-    function remove(bytes32 equipmentId) external {
+    function remove(
+        bytes32 equipmentId
+    ) external {
         Equipment storage item = _equipment[equipmentId];
         if (!item.exists || item.owner != msg.sender || item.parcelId == 0) revert HCInvalidState();
         uint64 parcelId = item.parcelId;
@@ -135,7 +165,10 @@ contract EquipmentRegistry {
 
     /// @notice Aggregated effects are inactive after land operator changes.
     /// @dev Do not treat this view as permission to skip CultivationEngine source/ruleset checks.
-    function effectiveEffects(uint64 parcelId, address operator) external view returns (int256[6] memory values) {
+    function effectiveEffects(
+        uint64 parcelId,
+        address operator
+    ) external view returns (int256[6] memory values) {
         if (operator == address(0) || land.effectiveOperator(parcelId) != operator) revert HCInvalidState();
         if (occupiedSlots[parcelId] != 0 && placementOperator[parcelId] != operator) revert HCInvalidState();
         return _totals[parcelId];

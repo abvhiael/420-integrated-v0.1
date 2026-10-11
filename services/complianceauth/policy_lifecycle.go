@@ -62,7 +62,7 @@ func(l *PolicyLifecycle) Transition(ctx context.Context,to LifecycleState,actor,
  if l==nil||ctx==nil||ctx.Err()!=nil||actor==""||now.IsZero(){return ErrLifecycleTransition}
  l.mu.Lock();defer l.mu.Unlock()
  r:=l.record
- if r.Revision!=expectedRevision || r.State==LifecycleRevoked || r.State==LifecycleSuperseded {return ErrLifecycleTransition}
+ if r.Revision!=expectedRevision || r.State==LifecycleRevoked || r.State==LifecycleSuperseded || (len(l.events)>0 && now.Before(l.events[len(l.events)-1].At)) {return ErrLifecycleTransition}
  from:=r.State
  switch to{
  case LifecycleReviewed:

@@ -1505,10 +1505,16 @@ def test_bnb210_authorized_discovery_freshness_and_revocation(fixture_property,m
         "country":"CA","approximate":True,"latitude":None,"longitude":None})
     with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
         version=c.execute("SELECT version FROM bnb_property WHERE id=%s",(pid,)).fetchone()[0]
-        c.execute("""INSERT INTO bnb_travel_place_binding
-           (property_id,place_id,region,country,jurisdiction_id,issuer,proof_jti,proof_expires_at,property_version,marker_grid_lat,marker_grid_lon)
-           VALUES (%s,'pub_place_1','Public region','CA','CA_SK','independent-location',%s,now()+interval '4 minutes',%s,52,-107)""",
-           (pid,str(uuid4()),version))
+        c.execute("""UPDATE bnb_travel_place_binding
+           SET place_id='pub_place_1',region='Public region',country='CA',
+               jurisdiction_id='CA_SK',issuer='synthetic-location-fixture',
+               proof_jti=%s,proof_expires_at=now()+interval '4 minutes',
+               property_version=%s,marker_grid_lat=52,marker_grid_lon=-107
+           WHERE property_id=%s""",(str(uuid4()),version,pid))
+        c.execute("""UPDATE bnb_compliance_eligibility
+           SET jurisdiction_id='CA_SK',license_reference='synthetic-licence-fixture',
+               expires_at=now()+interval '4 minutes',revoked_at=NULL
+           WHERE property_id=%s""",(pid,))
         c.execute("""INSERT INTO bnb_travel_jurisdiction_policy
            (jurisdiction_id,decision,issuer,proof_jti,effective_at,expires_at,revision)
            VALUES ('CA_SK','allowed','independent-policy',%s,now()-interval '1 minute',now()+interval '4 minutes',1)

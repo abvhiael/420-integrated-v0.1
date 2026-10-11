@@ -1,7 +1,7 @@
 {
   "step": "C04.5",
   "canonical": "Vancouver retailer/business permissions and applicable municipal operating restrictions; confirm DOOBr's own business category rather than treating retailer licensing as courier authorization.",
-  "status": "PENDING_LEVEL1_CI",
+  "status": "COMPLETE_LEVEL1_PASS_EXTERNAL_ACCEPTANCE_DEFERRED",
   "qualification_level": 1,
   "implementation_sha": "e4e25e3dd1e6a68c29c8c5eb866eaac3fd5a6d3a",
   "base_sha": "c5a4f220d1fbda01f707d359aa9bb32921a138b1",
@@ -15,7 +15,13 @@
     "docs/compliance/C08.3-EXTERNAL-AUTHORITY-TESTNET-HANDOFF.md"
   ],
   "ci": {
-    "status": "PENDING"
+    "status": "PASS",
+    "run_id": 38113180771,
+    "job_id": 114392794247,
+    "conclusion": "success",
+    "successful_steps": 52,
+    "failed_steps": 0,
+    "exact_sha": true
   },
   "requirements": [
     "Separate Vancouver retail provincial licence, city business licence, approved location and development permit",
@@ -41,5 +47,6 @@
   ],
   "level2": "Not required for ordinary C04.5",
   "level3": "C08.5 deferred",
-  "next_canonical": "C04.6 — Encode retailer-origin, prepayment, transport, eligible recipient, refusal, failed-delivery return and record duties; resolve classification-dependent differences through review."
+  "next_canonical": "C04.6 — Encode retailer-origin, prepayment, transport, eligible recipient, refusal, failed-delivery return and record duties; resolve classification-dependent differences through review.",
+  "external_acceptance": "Real Vancouver licences, official DOOBr classification and jurisdiction-specific legal reviews remain C09/C10 deployment gates"
 }

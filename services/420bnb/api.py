@@ -658,7 +658,8 @@ def calendar_draft(c,property_id,actor,expected_version):
         WHERE id=%s FOR UPDATE""",(property_id,)).fetchone()
     if not row:raise HTTPException(404,"NOT_FOUND")
     host_scope(c,property_id,actor,"edit_calendar")
-    if row[1]!="draft":raise HTTPException(409,"PROPERTY_NOT_DRAFT")
+    if row[1] not in ("draft","published"):
+        raise HTTPException(409,"PROPERTY_NOT_CALENDAR_EDITABLE")
     if row[2]!=expected_version:raise HTTPException(409,"VERSION_CONFLICT")
     return row
 

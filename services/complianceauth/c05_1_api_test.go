@@ -36,4 +36,11 @@ func TestC051VersionedAPIAndSDKSecurity(t *testing.T){
  for _,path:=range []string{"/api/v1/guidance?region=BC&limit=51","/api/v1/guidance?region=BC&offset=-1","/api/v1/guidance?region=BC&other=1","/api/v1/guidance?region=%20","/api/v1/policies/status?scope=","/api/v2/guidance?region=BC"}{got:=request("GET",path,"","",api);if got==200{t.Fatalf("unsafe query accepted: %s",path)}}
  if got:=request("GET","/api/v1/evaluate","","",api);got!=405{t.Fatalf("method %d",got)}
  if got:=request("POST","/api/v1/guidance","","",api);got!=405{t.Fatalf("method %d",got)}
+ server:=httptest.NewTLSServer(api);defer server.Close()
+ client:=C051Client{BaseURL:server.URL,HTTP:server.Client(),Token:"valid"}
+ page,e:=client.GetGuidance(context.Background(),"BC");if e!=nil||len(page)!=1{t.Fatalf("sdk guidance %v %v",page,e)}
+ statuses,e:=client.PolicyStatus(context.Background(),"delivery/BC");if e!=nil||len(statuses)!=1{t.Fatalf("sdk status %v %v",statuses,e)}
+ result,e:=client.Evaluate(context.Background(),C051DecisionRequest{TenantID:"tenant",OperationRef:"order",Stage:"dispatch",Action:"review",PolicyDigest:Digest([]byte("policy")),FactsDigest:Digest([]byte("facts"))})
+ if e!=nil||result.Outcome!="REVIEW_REQUIRED"{t.Fatalf("sdk evaluation %+v %v",result,e)}
+ client.BaseURL="http://localhost";if _,e:=client.GetGuidance(context.Background(),"BC");e==nil{t.Fatal("insecure SDK origin accepted")}
 }

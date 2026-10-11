@@ -191,6 +191,8 @@ jobs:
         run: go test -race ./services/complianceauth -run TestC051VersionedAPIAndSDKSecurity -count=1 -v
       - name: C05.2 provider TLS revocation privacy and issuer-boundary race regression
         run: go test -race ./services/complianceauth -run TestC052ProviderBoundariesRevocationAndPrivacy -count=1 -v
+      - name: C05.3 Location Maps private evidence and GPS-only negative race checks
+        run: go test -race ./services/complianceauth -run TestC053LocationMapsPrivacyAndAuthority -count=1 -v
       - name: Write current C03.10 exact-SHA Level 1 qualification result
         run: |
           python3 -c 'import json,os; open("/tmp/compliance-c01-level1.json","w").write(json.dumps({"step":"C03.10","qualification_level":1,"implementation_sha":os.environ["EXPECTED_SHA"],"c03_8_publication_fence":"PASS","retained_C03_7":"PASS","retained_C03_6":"PASS","retained_C03_5":"PASS","retained_C03_4":"PASS","retained_C03_3":"PASS","retained_C03_2":"PASS","retained_C03_1":"PASS","retained_C02_10":"PASS","retained_C02_9":"PASS","retained_C02_8":"PASS","retained_C02_7":"PASS","retained_C02_6":"PASS","retained_C02_5":"PASS","retained_C02_4":"PASS","retained_C02_3":"PASS","retained_C02_2":"PASS","retained_C02_1":"PASS","retained_C01_8":"PASS","go_race":"PASS","retained_C01_7":"PASS","retained_C01_6":"PASS","retained_C01_5":"PASS","retained_C01_4":"PASS","retained_C01_3":"PASS","tests":"PASS"},indent=2)+"\\n")'

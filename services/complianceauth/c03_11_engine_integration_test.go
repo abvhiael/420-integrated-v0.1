@@ -43,7 +43,7 @@ func TestC0311EngineLevel2ReplayAndCarrierBoundary(t *testing.T) {
  if _,err:=cache.ReadCurrent(ctx,store,fence,historical);err!=nil{t.Fatal(err)}
  old:=service.Evaluate(policy,request,historical)
  replay:=service.Evaluate(policy,request,historical)
- if old.Outcome!="ALLOW"||old!=replay && (old.Outcome!=replay.Outcome||old.PolicyDigest!=replay.PolicyDigest||old.RequestDigest!=replay.RequestDigest||!old.ExpiresAt.Equal(replay.ExpiresAt)){t.Fatalf("historical decision not reproducible: %+v %+v",old,replay)}
+ if old.Outcome!="ALLOW"||(old.Outcome!=replay.Outcome||old.PolicyDigest!=replay.PolicyDigest||old.RequestDigest!=replay.RequestDigest||!old.ExpiresAt.Equal(replay.ExpiresAt)){t.Fatalf("historical decision not reproducible: %+v %+v",old,replay)}
  if old.RequestDigest==""||old.PolicyDigest!=fence.PolicyDigest{t.Fatal("historical commitments unbound")}
 
  ledger:=&ReceiptLedger{}

@@ -58,3 +58,12 @@ def test_public_projection_cannot_return_private_fields(monkeypatch):
     assert r.status_code==200,r.text
     assert "private_address" not in r.text
     assert "guest_subject" not in r.text
+
+def test_api_security_headers_on_success_and_denial(monkeypatch):
+    monkeypatch.setattr(api,"db",lambda:(_ for _ in ()).throw(AssertionError("no DB needed")))
+    for response in (client.get("/health/live"),client.get("/v1/bnb/reservations/"+str(uuid4()))):
+        assert response.headers["x-content-type-options"]=="nosniff"
+        assert response.headers["x-frame-options"]=="DENY"
+        assert response.headers["referrer-policy"]=="no-referrer"
+        assert response.headers["cache-control"].startswith("no-store")
+        assert "frame-ancestors 'none'" in response.headers["content-security-policy"]

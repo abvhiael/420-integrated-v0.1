@@ -37,8 +37,17 @@ jobs:
         run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
       - name: Install runtime dependencies
         run: python -m pip install -r services/420bnb/requirements.txt
-      - name: Apply PostgreSQL schema
-        run: python -c "import os,psycopg,pathlib; c=psycopg.connect(os.environ['BNB_DATABASE_URL']); c.execute(pathlib.Path('services/420bnb/migrations/001_initial.sql').read_text()); c.execute(pathlib.Path('services/420bnb/migrations/002_identity_access.sql').read_text()); c.execute(pathlib.Path('services/420bnb/migrations/003_recovery_claims.sql').read_text()); c.execute(pathlib.Path('services/420bnb/migrations/004_authority_replay.sql').read_text()); c.execute(pathlib.Path('services/420bnb/migrations/005_host_management.sql').read_text()); c.execute(pathlib.Path('services/420bnb/migrations/006_host_policy_media.sql').read_text()); c.execute(pathlib.Path('services/420bnb/migrations/007_media_review_nonce.sql').read_text()); c.execute(pathlib.Path('services/420bnb/migrations/008_unit_hold_allocation.sql').read_text()); c.execute(pathlib.Path('services/420bnb/migrations/009_availability_sync.sql').read_text()); c.execute(pathlib.Path('services/420bnb/migrations/010_minimum_stay_policy.sql').read_text()); c.execute(pathlib.Path('services/420bnb/migrations/011_quote_pricing.sql').read_text()); c.execute(pathlib.Path('services/420bnb/migrations/012_hold_quote_binding.sql').read_text()); c.execute(pathlib.Path('services/420bnb/migrations/013_booking_requests.sql').read_text()); c.execute(pathlib.Path('services/420bnb/migrations/014_pending_reservation_expiry.sql').read_text()); c.execute(pathlib.Path('services/420bnb/migrations/015_pay_swap_intents.sql').read_text()); c.execute(pathlib.Path('services/420bnb/migrations/016_settlement_refund_payout.sql').read_text()); c.execute(pathlib.Path('services/420bnb/migrations/017_guest_experience.sql').read_text()); c.execute(pathlib.Path('services/420bnb/migrations/018_travel_authority.sql').read_text()); c.execute(pathlib.Path('services/420bnb/migrations/019_reviews_reputation_messaging.sql').read_text()); c.execute(pathlib.Path('services/420bnb/migrations/020_compliance_eligibility.sql').read_text()); c.commit();c.close()"
+      - name: Transactional PostgreSQL schema qualification
+        run: |
+          python services/420bnb/migrate.py
+          python services/420bnb/migrate.py
+          python - <<'PY'
+          import os, psycopg
+          with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+              assert c.execute("SELECT count(*) FROM bnb_schema_migration").fetchone()[0] == 20
+          PY
+      - name: Migration ledger and parallel deployment tests
+        run: pytest -q services/420bnb/tests/test_bnb214_operations.py
       - name: Runtime security and API tests
         run: pytest -q services/420bnb/tests
       - name: Compile runtime module

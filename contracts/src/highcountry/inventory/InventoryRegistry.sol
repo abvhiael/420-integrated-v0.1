@@ -169,6 +169,14 @@ contract InventoryRegistry {
         ledger.consume(op, id, owner, amount, true);
     }
 
+    /// @notice Owner delegates an inventory operator; active consent is required at settlement.
+    /// @dev Revocation immediately prevents reserved transfer; prior reservations can still be recovered by owner.
+    function transferReservedFor(bytes32 op, bytes32 id, address owner, address to, uint256 amount) external {
+        if (!inventoryOperators[owner][msg.sender]) revert HCInvalidState();
+        _ensureActive(id);
+        ledger.transferReserved(op, id, owner, to, amount);
+    }
+
     function reserve(
         bytes32 op,
         bytes32 id,

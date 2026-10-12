@@ -116,8 +116,10 @@ contract PlantRegistry {
         );
         LeaseRegistry lease = LeaseRegistry(candidate);
         CanonicalLandPlantGate gate = lease.canonicalGate();
-        if (address(gate) == address(0) || address(gate.land()) != address(landRegistry)
-            || address(gate.plants()) != address(this)) revert HCInvalidState();
+        if (
+            address(gate) == address(0) || address(gate.land()) != address(landRegistry)
+                || address(gate.plants()) != address(this)
+        ) revert HCInvalidState();
         canonicalLeaseRegistry = lease;
         emit CanonicalRightsBound(candidate);
     }
@@ -134,8 +136,10 @@ contract PlantRegistry {
         );
         LicenseRegistry license = LicenseRegistry(candidate);
         CanonicalLandPlantGate gate = license.canonicalGate();
-        if (address(gate) == address(0) || address(gate.land()) != address(landRegistry)
-            || address(gate.plants()) != address(this)) revert HCInvalidState();
+        if (
+            address(gate) == address(0) || address(gate.land()) != address(landRegistry)
+                || address(gate.plants()) != address(this)
+        ) revert HCInvalidState();
         canonicalLicenseRegistry = license;
         emit CanonicalLicensesBound(candidate);
     }

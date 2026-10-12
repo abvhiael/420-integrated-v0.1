@@ -2,6 +2,7 @@
 pragma solidity ^0.8.24;
 import { OrganizationRegistry } from "../../../../src/highcountry/organization/OrganizationRegistry.sol";
 import { OrganizationAuthority } from "../../../../src/highcountry/organization/OrganizationAuthority.sol";
+import { OrganizationTreasuryPermissions } from "../../../../src/highcountry/organization/OrganizationTreasuryPermissions.sol";
 
 contract R0410Actor {
     function join(OrganizationRegistry r,bytes32 id) external {r.join(id);}
@@ -11,6 +12,8 @@ contract R0410Actor {
     function finalize(OrganizationRegistry r,bytes32 id,address who) external {r.finalizeExit(id,who);}
     function consume(OrganizationAuthority a,bytes32 id,bytes32 act,bytes32 scope) external {a.consume(id,act,scope);}
     function revoke(OrganizationAuthority a,bytes32 id) external {a.revoke(id);}
+    function approveTreasury(OrganizationTreasuryPermissions p,bytes32 id) external {p.approve(id);}
+    function useTreasury(OrganizationTreasuryPermissions p,bytes32 id,address beneficiary,bytes32 action,bytes32 scope,uint256 amount) external {p.consume(id,beneficiary,action,scope,amount);}
 }
 
 contract R0410OrganizationTest {
@@ -78,6 +81,39 @@ contract R0410OrganizationTest {
             (ORG,address(bob),ACTION,SCOPE,uint64(block.timestamp),uint64(block.timestamp+1 days),uint32(2))));
         require(!retained,"former admin delegated");
     }
+    function testTreasuryRequiresIndependentConsentAndExactBoundedConsumption() public {
+        R0410Actor treasury=new R0410Actor();
+        OrganizationTreasuryPermissions policy=new OrganizationTreasuryPermissions(address(r),address(treasury),address(bob));
+        bytes32 id=policy.propose(ORG,address(alice),ACTION,SCOPE,uint64(block.timestamp+1 days),500);
+        require(!policy.permitted(id,address(alice),ACTION,SCOPE,1),"admin alone authorized treasury");
+        (bool preapproval,) = address(treasury).call(abi.encodeCall(treasury.useTreasury,(policy,id,address(alice),ACTION,SCOPE,uint256(1))));
+        require(!preapproval,"unapproved treasury spend");
+        (bool forgedApprove,) = address(policy).call(abi.encodeCall(policy.approve,(id)));
+        require(!forgedApprove,"admin silently approved treasury");
+        bob.approveTreasury(policy,id);
+        require(policy.permitted(id,address(alice),ACTION,SCOPE,500),"two-party approval missing");
+        (bool oversized,) = address(treasury).call(abi.encodeCall(treasury.useTreasury,
+            (policy,id,address(alice),ACTION,SCOPE,uint256(501))));
+        require(!oversized,"overspending allowed");
+        (bool forgedCaller,) = address(policy).call(abi.encodeCall(policy.consume,
+            (id,address(alice),ACTION,SCOPE,uint256(1))));
+        require(!forgedCaller,"wrong treasury caller");
+        treasury.useTreasury(policy,id,address(alice),ACTION,SCOPE,300);
+        require(policy.permitted(id,address(alice),ACTION,SCOPE,200),"remaining limit incorrect");
+        require(!policy.permitted(id,address(alice),ACTION,SCOPE,201),"replay exceeded amount");
+        alice.leave(r,ORG);
+        require(!policy.permitted(id,address(alice),ACTION,SCOPE,1),"leaving member retained money permissions");
+    }
+
+    function testTreasuryApprovalVoidsOnAdminRotation() public {
+        R0410Actor treasury=new R0410Actor();
+        OrganizationTreasuryPermissions policy=new OrganizationTreasuryPermissions(address(r),address(treasury),address(bob));
+        bytes32 id=policy.propose(ORG,address(alice),ACTION,SCOPE,uint64(block.timestamp+1 days),100);
+        bob.approveTreasury(policy,id);
+        r.transferAdmin(ORG,address(alice));
+        require(!policy.permitted(id,address(alice),ACTION,SCOPE,1),"former admin permission survived");
+    }
+
     function testRemovalAndRevocation() public {
         bytes32 id=a.delegate(ORG,address(alice),ACTION,SCOPE,uint64(block.timestamp),uint64(block.timestamp+1 days),5);
         alice.revoke(a,id);

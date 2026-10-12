@@ -543,24 +543,36 @@ def travel_discovery(destination:str="",min_capacity:int=1,limit:int=20,offset:i
             raise HTTPException(422,"INVALID_PLACE_ID")
         except TravelLocationUnavailable:
             raise HTTPException(503,"TRAVEL_LOCATION_UNAVAILABLE")
-        # The public Travel projection does not prove a BnB property-place binding.
-        # Never silently turn a public destination name into an exact property position.
-        destination=resolved["region"]
-    listings=guest_search(region=destination,min_capacity=min_capacity,limit=limit,offset=offset)
+        # A place-specific request must never fall back to a region-wide search:
+        # neighboring places in the same region have different property authority.
+        if offset:
+            raise HTTPException(422,"PLACE_PAGINATION_UNSUPPORTED")
+        authorized=travel_authorized_listings(place_id,Response(),limit=limit)
+        if destination and destination.casefold() not in resolved["region"].casefold():
+            return {"version":"bnb-travel-discovery/v1","destination_place_id":place_id,
+                    "nonbinding":True,"transaction_enabled":False,
+                    "map_precision":"region_only","jurisdiction_authority":"independently_proved",
+                    "listings":[]}
+        listings=[{"id":entry["property_id"],"title":entry["title"],
+                   "public_region":entry["public_region"],"capacity":entry["capacity"],
+                   "nightly_minor":None,"currency":None,"map_marker":entry["map_marker"]}
+                  for entry in authorized["listings"] if entry["capacity"]>=min_capacity]
+    else:
+        listings=guest_search(region=destination,min_capacity=min_capacity,limit=limit,offset=offset)
     return {
         "version":"bnb-travel-discovery/v1",
         "destination_place_id":place_id or None,
         "nonbinding":True,
         "transaction_enabled":False,
         "map_precision":"region_only",
-        "jurisdiction_authority":"unverified",
+        "jurisdiction_authority":("independently_proved" if place_id else "unverified"),
         "listings":[{
             "property_id":entry["id"],
             "title":entry["title"],
             "public_region":entry["public_region"],
             "capacity":entry["capacity"],
             "price_preview":{"nightly_minor":entry["nightly_minor"],"currency":entry["currency"],"binding":False},
-            "map_marker":None,
+            "map_marker":entry.get("map_marker"),
             "booking_handoff":{"method":"GET","path":"/v1/bnb/listings/"+entry["id"],"side_effects":False},
             "legal_compliance_verified":False,
         } for entry in listings],

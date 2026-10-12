@@ -118,7 +118,13 @@ contract ResourceLedger {
     }
 
     /// @notice Atomic handoff of existing reserved stock; never issues or burns units.
-    function transferReserved(bytes32 op, bytes32 id, address from, address to, uint256 amount) external onlyInventory {
+    function transferReserved(
+        bytes32 op,
+        bytes32 id,
+        address from,
+        address to,
+        uint256 amount
+    ) external onlyInventory {
         _once(op, id, amount);
         if (from == address(0) || to == address(0) || from == to) revert HCInvalidState();
         Balance storage source = _balances[id][from];

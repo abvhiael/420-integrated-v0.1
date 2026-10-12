@@ -278,6 +278,7 @@ jobs:
           go test -race ./services/complianceauth -run '^TestC065' -count=1 -v
       - name: C06.6 publisher/operator control Level 1
         run: |
+          node --check services/complianceauth/operatorweb/dashboard.js
           go vet ./services/complianceauth
           go test -race ./services/complianceauth -run '^TestC066' -count=1 -v
       - name: Write current C06.5 exact-SHA Level 1 qualification result

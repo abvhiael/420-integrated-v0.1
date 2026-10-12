@@ -39,3 +39,19 @@ At initial draft PR #616 trigger, BnB 1.1–1.9, Runtime Slice, GEN-SVC-3 Travel
 - PR #616 **DRAFT/UNMERGED** and PR #600 **DRAFT/UNMERGED** pending qualified merge readiness. Subsequent main changes invalidate the recorded reconciliation base and require another reconciliation and qualification.
 
 **Completion state: BLOCKED, not complete.** This document records an actual reconciled branch and an exact candidate; it does not certify unfinished Level 3 work.
+
+## Final Level 3 execution-path audit (2026-10-11)
+
+**Verified:** PR #616 source and evidence HEAD `e896ea5e76566c102a2251846bb5f663ea2b9b48`; main still `fe21ef07359d6915bf5daac37c4bf24a24fcf19b`. Candidate compare reports ahead 458 / behind 0, 113 changed paths: 51 services, 38 docs, 10 GitHub workflows, 9 scripts, 4 genesis, 1 web. Review of changed-path scope confirms this is *not* a pure documentation or UI-only qualification.
+
+**Executed and passed** on the prior exact candidate PR HEAD: BnB 1.1–1.9, BnB Runtime Slice, GEN-SVC-3 Travel and Oracle (12 completed passing workflows; no failed executions). **Global Docs workflow skipped**, not a successful Level 3 certification.
+
+**Execution blockers traced to source:**
+- `.github/workflows/qualification.yml` defines **420 Integrated Qualification**, with `workflow_dispatch` and path-limited push/PR triggers. The BnB-specific PR did not produce a verified run.
+- `.github/workflows/genesis-address-authority.yml` owns Genesis address authority, but its audit-branch pull-request `if` excludes ordinary `audit/bnb-phase2-level3-candidate-20261012` and trigger paths do not include the BnB-only diff. Consequently no successful Genesis authority run has been proved.
+- `.github/workflows/docs-pages.yml` publishes and qualifies global Docs on pushes to main or `workflow_dispatch`; this PR cannot treat skipped Docs as qualified.
+- The GitHub connector exposed here has GitHub Actions **run/job/log inspection and failed-job reruns**, but **no workflow_dispatch** capability. It is unsafe to change canonical global workflows merely to manufacture a passing run, or to merge before test evidence.
+
+**Mandatory pending actions:** explicitly dispatch or appropriately authorize canonical Solidity Contracts full Foundry workflow **once**, separate Genesis Address Authority, 420 Integrated Qualification and nonpublishing global Docs qualification on one *identical* final source SHA, ensuring actual checkout SHA proof and CI policy ownership. Inspect all jobs and repair any errors. Preserve ~four balanced shards and caching where repository CI allows, no Genesis duplicate full Foundry execution. Perform retained client/Indexer/Search/RPC integration and architecture/security acceptance scoped to the 113 changed paths, capture publication review and official testnet deferrals. Refresh main and requalify if it moves.
+
+**Security/merge readiness:** Current BnB runtime and security regression workflow passes, independent Identity/Pay/Compliance/Location/Travel issuer authority is not demonstrated in production-equivalent testnet, and unexecuted canonical Level 3 checks remain material blockers. #616 remains DRAFT/UNMERGED; #600 remains original DRAFT/UNMERGED. No merge acceptance is granted.

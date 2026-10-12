@@ -24,6 +24,7 @@ export class HighCountryMarket {
      const k=key(owner,asset),b=s.assets.get(k)||blank();
      if(b.available>Number.MAX_SAFE_INTEGER-quantity)throw new SettlementError('asset overflow');
      b.available+=quantity;s.assets.set(k,b);s.importedAssets.add(receipt.receiptId);
+     s.assetSources.set(k,id(receipt.receiptId));
    });
  }
  async list(session,op,listingId,asset,quantity,price,expiresAt){
@@ -35,7 +36,8 @@ export class HighCountryMarket {
      const k=key(seller,asset),b=s.assets.get(k)||blank();
      if(b.available<quantity)throw new SettlementError('inventory unavailable');
      b.available-=quantity;b.reserved+=quantity;s.assets.set(k,b);
-     s.listings.set(listingId,{seller,asset,quantity,price,expiresAt,status:'active'});
+     s.listings.set(listingId,{seller,asset,quantity,price,expiresAt,status:'active',
+       sourceReceiptId:s.assetSources.get(k)||null});
    });
  }
  async cancel(session,op,listingId){

@@ -22,6 +22,8 @@ export class HighCountryMarket {
    return this.buds.operate(op,s=>{
      if(s.importedAssets.has(id(receipt.receiptId)))throw new SettlementError('duplicate source receipt');
      const k=key(owner,asset),b=s.assets.get(k)||blank();
+     if(s.assetSources.has(k)&&s.assetSources.get(k)!==receipt.receiptId)
+       throw new SettlementError('mixed escrow provenance');
      if(b.available>Number.MAX_SAFE_INTEGER-quantity)throw new SettlementError('asset overflow');
      b.available+=quantity;s.assets.set(k,b);s.importedAssets.add(receipt.receiptId);
      s.assetSources.set(k,id(receipt.receiptId));

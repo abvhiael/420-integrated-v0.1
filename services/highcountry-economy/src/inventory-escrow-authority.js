@@ -13,6 +13,7 @@ export class InventoryEscrowAuthority {
      !Number.isSafeInteger(confirmations)||confirmations<1)
     throw new SettlementError('unconfigured trusted escrow authority');
   Object.assign(this,{identity,inventory,issuer,chainId,registry,confirmations});
+  this.canonicalSettlementRequired=true;
  }
  registeredPrincipal(session){return this.identity.registeredPrincipal(session);}
  requireAssetIssuer(session){return this.identity.requireAssetIssuer(session);}

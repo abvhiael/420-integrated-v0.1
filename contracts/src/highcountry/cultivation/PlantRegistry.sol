@@ -105,11 +105,15 @@ contract PlantRegistry {
     event CanonicalRightsBound(address indexed leaseRegistry);
 
     /// @notice One-time scoped authorization of the R04.9 lease/land/plant authority triple.
-    function bindCanonicalRights(address candidate) external {
+    function bindCanonicalRights(
+        address candidate
+    ) external {
         if (address(canonicalLeaseRegistry) != address(0) || candidate.code.length == 0) revert HCInvalidState();
-        authorization.requireAuthorized(AuthorizationRequest(
-            msg.sender, ModuleIds.PLANT_REGISTRY, ActionIds.PLANT_BIND_RIGHTS, RIGHTS_BIND_SCOPE, 0
-        ));
+        authorization.requireAuthorized(
+            AuthorizationRequest(
+                msg.sender, ModuleIds.PLANT_REGISTRY, ActionIds.PLANT_BIND_RIGHTS, RIGHTS_BIND_SCOPE, 0
+            )
+        );
         LeaseRegistry lease = LeaseRegistry(candidate);
         CanonicalLandPlantGate gate = lease.canonicalGate();
         if (address(gate) == address(0) || address(gate.land()) != address(landRegistry)
@@ -119,11 +123,15 @@ contract PlantRegistry {
     }
 
     /// @notice Explicit independent authorization of LICENSE-kind parcel cultivation.
-    function bindCanonicalLicenses(address candidate) external {
+    function bindCanonicalLicenses(
+        address candidate
+    ) external {
         if (address(canonicalLicenseRegistry) != address(0) || candidate.code.length == 0) revert HCInvalidState();
-        authorization.requireAuthorized(AuthorizationRequest(
-            msg.sender, ModuleIds.PLANT_REGISTRY, ActionIds.PLANT_BIND_LICENSES, LICENSE_BIND_SCOPE, 0
-        ));
+        authorization.requireAuthorized(
+            AuthorizationRequest(
+                msg.sender, ModuleIds.PLANT_REGISTRY, ActionIds.PLANT_BIND_LICENSES, LICENSE_BIND_SCOPE, 0
+            )
+        );
         LicenseRegistry license = LicenseRegistry(candidate);
         CanonicalLandPlantGate gate = license.canonicalGate();
         if (address(gate) == address(0) || address(gate.land()) != address(landRegistry)
@@ -132,20 +140,29 @@ contract PlantRegistry {
         emit CanonicalLicensesBound(candidate);
     }
 
-    function _requireCanonicalOccupancy(uint64 parcelId, address grower) private view {
+    function _requireCanonicalOccupancy(
+        uint64 parcelId,
+        address grower
+    ) private view {
         LandRegistry.LandParcel memory p = LandRegistry(address(landRegistry)).getParcel(parcelId);
         if (p.occupancyKind == LandRegistry.OccupancyKind.NONE) return;
         if (p.occupant != grower) revert HCInvalidState();
         if (p.occupancyKind == LandRegistry.OccupancyKind.LEASE) {
-            if (address(canonicalLeaseRegistry) == address(0) ||
-                canonicalLeaseRegistry.canonicalParcelOf(p.occupancyRef) != parcelId ||
-                !canonicalLeaseRegistry.canCultivate(p.occupancyRef)) revert HCInvalidState();
+            if (
+                address(canonicalLeaseRegistry) == address(0)
+                    || canonicalLeaseRegistry.canonicalParcelOf(p.occupancyRef) != parcelId
+                    || !canonicalLeaseRegistry.canCultivate(p.occupancyRef)
+            ) revert HCInvalidState();
         } else if (p.occupancyKind == LandRegistry.OccupancyKind.LICENSE) {
             // Cultivation is explicit bit 0. A non-cultivation license never admits plants.
-            if (address(canonicalLicenseRegistry) == address(0) ||
-                canonicalLicenseRegistry.canonicalParcelOf(p.occupancyRef) != parcelId ||
-                !canonicalLicenseRegistry.usable(p.occupancyRef, grower, 1)) revert HCInvalidState();
-        } else revert HCInvalidState();
+            if (
+                address(canonicalLicenseRegistry) == address(0)
+                    || canonicalLicenseRegistry.canonicalParcelOf(p.occupancyRef) != parcelId
+                    || !canonicalLicenseRegistry.usable(p.occupancyRef, grower, 1)
+            ) revert HCInvalidState();
+        } else {
+            revert HCInvalidState();
+        }
     }
 
     IEmergencyState public emergencyState;

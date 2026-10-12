@@ -156,7 +156,7 @@ jobs:
             sleep 1
           done
           curl --fail --silent --head http://127.0.0.1:18080/ | tee /tmp/bnb-web-headers
-          rg -i "content-security-policy:.*sha256-" /tmp/bnb-web-headers
+          grep -Ei "content-security-policy:.*sha256-" /tmp/bnb-web-headers
           test "$(curl --silent -o /dev/null -w '%{http_code}' http://127.0.0.1:18080/production.py)" = 404
       - name: BNB-3.2 fail-closed packaged production command
         run: |
@@ -164,13 +164,13 @@ jobs:
           if docker run --rm bnb-test:${{ github.sha }} python production.py validate > /tmp/bnb-production-output 2>&1; then
             echo 'Unconfigured production command must fail' >&2; exit 1
           fi
-          rg '^PRODUCTION_MODE_REQUIRED$' /tmp/bnb-production-output
+          grep -E '^PRODUCTION_MODE_REQUIRED$' /tmp/bnb-production-output
           if docker run --rm -e BNB_ENV=production -e BNB_DATABASE_URL=DO-NOT-PRINT \
             bnb-test:${{ github.sha }} python -c 'import api' > /tmp/bnb-direct-output 2>&1; then
             echo 'Direct API production startup must not bypass the contract' >&2; exit 1
           fi
-          rg 'PRODUCTION_START_FAILED' /tmp/bnb-direct-output
-          if rg 'DO-NOT-PRINT' /tmp/bnb-direct-output; then
+          grep -F 'PRODUCTION_START_FAILED' /tmp/bnb-direct-output
+          if grep -F 'DO-NOT-PRINT' /tmp/bnb-direct-output; then
             echo 'Production startup leaked input' >&2; exit 1
           fi
       - name: BNB-3.2 deployment topology and TLS ingress syntax

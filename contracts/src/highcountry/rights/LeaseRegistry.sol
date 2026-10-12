@@ -133,6 +133,19 @@ contract LeaseRegistry {
         }
     }
 
+    /// @notice Reconcile a terminal canonical lease after the real PlantRegistry reports zero.
+    /// @dev Does not clear LandRegistry occupancy; separate authorized R02 action is mandatory.
+    function reconcileCanonicalExit(bytes32 id) external {
+        Lease storage l = leases[id];
+        uint64 parcelId = canonicalParcelOf[id];
+        if (msg.sender != plantAuthority || parcelId == 0 || !l.exitPending) revert Unauthorized();
+        (,,,,, uint32 active,) = canonicalGate.snapshot(parcelId);
+        if (active != 0) revert InvalidLease();
+        l.exitPending = false;
+        l.state = State.Closed;
+        emit LeaseStatus(id, l.state, false);
+    }
+
     function transferTenant(
         bytes32 id,
         address to

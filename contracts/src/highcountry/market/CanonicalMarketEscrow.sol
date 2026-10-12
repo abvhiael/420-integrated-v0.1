@@ -22,6 +22,7 @@ contract CanonicalMarketEscrow {
     event EscrowListed(bytes32 indexed listingId, address indexed owner, bytes32 indexed asset, uint256 quantity, uint64 expiresAt);
     event EscrowSettled(bytes32 indexed listingId, bytes32 indexed operationId, address indexed buyer);
     event EscrowClosed(bytes32 indexed listingId, Status status);
+    event ManualRecoveryRequired(bytes32 indexed listingId, address indexed owner, bytes32 indexed asset, uint256 quantity);
 
     constructor(address inventory_, address marketOperator_) {
         if (inventory_ == address(0) || inventory_.code.length == 0 || marketOperator_ == address(0)) {
@@ -73,7 +74,7 @@ contract CanonicalMarketEscrow {
         Listing storage l = _listings[id];
         if (l.status != Status.Active || msg.sender != l.owner) revert HCInvalidState();
         l.status = Status.Cancelled;
-        inventory.releaseFor(releaseOperation(id), l.asset, l.owner, l.quantity);
+        _releaseOrRequireManualRecovery(id, l);
         emit EscrowClosed(id, Status.Cancelled);
     }
 
@@ -81,7 +82,14 @@ contract CanonicalMarketEscrow {
         Listing storage l = _listings[id];
         if (l.status != Status.Active || block.timestamp < l.expiresAt) revert HCInvalidState();
         l.status = Status.Expired;
-        inventory.releaseFor(releaseOperation(id), l.asset, l.owner, l.quantity);
+        _releaseOrRequireManualRecovery(id, l);
         emit EscrowClosed(id, Status.Expired);
+    }    /// @dev If consent is revoked, terminate the listing and preserve the owner's
+    ///      native InventoryRegistry.release recovery right; never leave a sellable escrow.
+    function _releaseOrRequireManualRecovery(bytes32 id, Listing storage l) private {
+        try inventory.releaseFor(releaseOperation(id), l.asset, l.owner, l.quantity) {
+        } catch {
+            emit ManualRecoveryRequired(id, l.owner, l.asset, l.quantity);
+        }
     }
 }

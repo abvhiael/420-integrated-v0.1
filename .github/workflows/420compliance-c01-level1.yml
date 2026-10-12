@@ -22,6 +22,8 @@ on:
       - 'scripts/test-compliance-c06-4.cjs'
       - 'scripts/verify-compliance-c06-4.py'
       - 'docs/compliance/C06.4-*'
+      - 'docs/compliance/C06.5-*'
+      - 'scripts/verify-compliance-c06-5.py'
       - 'scripts/verify-compliance-c06-3.py'
       - 'docs/compliance/C06.3-*'
       - 'scripts/verify-compliance-c06-1.py'
@@ -64,6 +66,8 @@ on:
       - 'scripts/test-compliance-c06-4.cjs'
       - 'scripts/verify-compliance-c06-4.py'
       - 'docs/compliance/C06.4-*'
+      - 'docs/compliance/C06.5-*'
+      - 'scripts/verify-compliance-c06-5.py'
       - 'scripts/verify-compliance-c06-3.py'
       - 'docs/compliance/C06.3-*'
       - 'scripts/verify-compliance-c06-1.py'
@@ -267,6 +271,13 @@ jobs:
           python3 scripts/verify-compliance-c06-4.py
           go vet ./services/complianceauth
           go test -race ./services/complianceauth -run '^TestC064' -count=1 -v
+      - name: C06.5 authenticated independent-review Level 1
+        run: |
+          node --check services/complianceauth/reviewerweb/console.js
+          gofmt -l services/complianceauth/c06_5_*.go | tee /tmp/c065-format-diff
+          test ! -s /tmp/c065-format-diff
+          go vet ./services/complianceauth
+          go test -race ./services/complianceauth -run '^TestC065' -count=1 -v
       - name: Write current C06.4 exact-SHA Level 1 qualification result
         run: |
           python3 -c 'import json,os; open("/tmp/compliance-c01-level1.json","w").write(json.dumps({"step":"C06.4","private_author_workspace":"PASS","retained_C06_3":"PASS","informational_scenarios":"PASS","retained_C06_2":"PASS","public_browser":"PASS","retained_C06_1":"PASS","qualification_level":1,"implementation_sha":os.environ["EXPECTED_SHA"],"c03_8_publication_fence":"PASS","retained_C03_7":"PASS","retained_C03_6":"PASS","retained_C03_5":"PASS","retained_C03_4":"PASS","retained_C03_3":"PASS","retained_C03_2":"PASS","retained_C03_1":"PASS","retained_C02_10":"PASS","retained_C02_9":"PASS","retained_C02_8":"PASS","retained_C02_7":"PASS","retained_C02_6":"PASS","retained_C02_5":"PASS","retained_C02_4":"PASS","retained_C02_3":"PASS","retained_C02_2":"PASS","retained_C02_1":"PASS","retained_C01_8":"PASS","go_race":"PASS","retained_C01_7":"PASS","retained_C01_6":"PASS","retained_C01_5":"PASS","retained_C01_4":"PASS","retained_C01_3":"PASS","tests":"PASS"},indent=2)+"\n")'

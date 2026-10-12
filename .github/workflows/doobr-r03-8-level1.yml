@@ -2,7 +2,7 @@ name: DOOBR R03.8 Mobile Level 1
 on:
   push:
     branches: [roadmap/doobr-bc-vancouver-infrastructure]
-    paths: ['mobile/doobr/**','doobr/mobile_security.py','doobr/storage/tests/test_mobile_security.py','.github/workflows/doobr-r03-8-level1.yml']
+    paths: ['mobile/doobr/**','doobr/mobile_security.py','doobr/mobile_push.py','doobr/storage/tests/test_mobile_security.py','doobr/storage/tests/test_mobile_push.py','.github/workflows/doobr-r03-8-level1.yml']
   pull_request:
     paths: ['mobile/doobr/**','doobr/mobile_security.py','doobr/storage/tests/test_mobile_security.py','.github/workflows/doobr-r03-8-level1.yml']
   workflow_dispatch:
@@ -26,7 +26,8 @@ jobs:
           python-version: '3.12'
       - name: Mobile permission and notification adversarial tests
         run: |
-          python3 -m py_compile doobr/mobile_security.py
+          python3 -m py_compile doobr/mobile_security.py doobr/mobile_push.py
+          python3 -m unittest discover -s doobr/storage/tests -p test_mobile_push.py -v
           python3 -m unittest discover -s doobr/storage/tests -p test_mobile_security.py -v
       - uses: actions/setup-java@v4
         with:
@@ -44,7 +45,7 @@ jobs:
         with:
           gradle-version: '8.9'
       - name: Android debug compile
-        run: gradle -p mobile/doobr/android :app:assembleDebug --no-daemon
+        run: gradle -p mobile/doobr/android :app:assembleDebug :app:assembleRelease --no-daemon
       - name: Native manifest and privacy guard
         run: |
           python3 - <<'PY'

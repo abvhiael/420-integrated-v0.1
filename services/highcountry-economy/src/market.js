@@ -36,6 +36,8 @@ export class HighCountryMarket {
    return this.buds.operate(op,s=>{
      if(s.listings.has(listingId))throw new SettlementError('listing already used');
      const k=key(seller,asset),b=s.assets.get(k)||blank();
+     if(this.authority.canonicalSettlementRequired===true&&s.assetSources.get(k)!==listingId)
+       throw new SettlementError('canonical listing must match escrow receipt');
      if(b.available<quantity)throw new SettlementError('inventory unavailable');
      b.available-=quantity;b.reserved+=quantity;s.assets.set(k,b);
      s.listings.set(listingId,{seller,asset,quantity,price,expiresAt,status:'active',

@@ -43,4 +43,4 @@ Repository-side code/test/configuration gaps are not deferred merely because ext
 
 ## Current execution status
 
-BNB-3.1: roadmap approved; handoff/baseline already recorded, final targeted qualification and completion evidence to follow. BNB-3.2 through BNB-3.12: NOT STARTED under this adopted roadmap. Next canonical implementation step after BNB-3.1 exits is **BNB-3.2 — Production infrastructure**.
+BNB-3.1: **COMPLETE / Level 1 PASS**. Requirements candidate `14fa117ca6daf5788595cc7a6fcdaa75c5f3e643`; fast source-boundary run `38294987483`, job `114963800198`, completed SUCCESS with verified exact checkout. Scoped sequence/approval/baseline/milestone/external-gate/disabled-activation checks passed. Durable completion evidence is handoff commit `5ab5cf31ed8f05f6a963148a2c0e5a4318d3b660`. This status update changes evidence only; substantive roadmap requirements remain those qualified at the candidate. BNB-3.2 through BNB-3.12: NOT STARTED under this adopted roadmap. Next canonical implementation step after BNB-3.1 exits is **BNB-3.2 — Production infrastructure**.

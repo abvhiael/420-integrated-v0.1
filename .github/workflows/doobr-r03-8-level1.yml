@@ -32,7 +32,14 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-      - uses: android-actions/setup-android@v3
+      - name: Use preinstalled Android SDK and install pinned packages
+        run: |
+          test -n "${ANDROID_HOME:-${ANDROID_SDK_ROOT:-}}"
+          SDK="${ANDROID_HOME:-$ANDROID_SDK_ROOT}"
+          test -x "$SDK/cmdline-tools/latest/bin/sdkmanager" || test -x "$SDK/cmdline-tools/16.0/bin/sdkmanager"
+          MANAGER="$SDK/cmdline-tools/latest/bin/sdkmanager"
+          if [ ! -x "$MANAGER" ]; then MANAGER="$SDK/cmdline-tools/16.0/bin/sdkmanager"; fi
+          "$MANAGER" --install 'platforms;android-35' 'build-tools;35.0.0'
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'

@@ -35,8 +35,10 @@ contract InventoryRegistry {
     ResourceLedger public immutable ledger;
     mapping(address => bool) public issuers;
     mapping(address => mapping(address => bool)) public inventoryOperators;
+    mapping(address => mapping(address => bool)) public marketTransferOperators;
 
     event InventoryOperatorUpdated(address indexed owner, address indexed operator, bool approved);
+    event MarketTransferOperatorUpdated(address indexed owner, address indexed operator, bool approved);
     mapping(bytes32 => Resource) public resources;
     mapping(bytes32 => Lot) private _lots;
     mapping(bytes32 => bool) public importedProduct;
@@ -169,10 +171,18 @@ contract InventoryRegistry {
         ledger.consume(op, id, owner, amount, true);
     }
 
+    /// @notice Market custody transfer has distinct, explicit owner consent.
+    /// @dev Existing manufacturing operators do not inherit this new transfer authority.
+    function setMarketTransferOperator(address operator, bool approved) external {
+        if (operator == address(0) || operator == msg.sender) revert HCInvalidState();
+        marketTransferOperators[msg.sender][operator] = approved;
+        emit MarketTransferOperatorUpdated(msg.sender, operator, approved);
+    }
+
     /// @notice Owner delegates an inventory operator; active consent is required at settlement.
     /// @dev Revocation immediately prevents reserved transfer; prior reservations can still be recovered by owner.
     function transferReservedFor(bytes32 op, bytes32 id, address owner, address to, uint256 amount) external {
-        if (!inventoryOperators[owner][msg.sender]) revert HCInvalidState();
+        if (!inventoryOperators[owner][msg.sender] || !marketTransferOperators[owner][msg.sender]) revert HCInvalidState();
         _ensureActive(id);
         ledger.transferReserved(op, id, owner, to, amount);
     }

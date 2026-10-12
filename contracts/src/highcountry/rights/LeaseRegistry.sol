@@ -151,7 +151,7 @@ contract LeaseRegistry {
         address to
     ) external {
         Lease storage l = leases[id];
-        if (msg.sender != l.tenant || to == address(0) || to == l.tenant || !usable(id) || _hasPlantsOrUnresolvedOccupancy(id, l)) {
+        if (msg.sender != l.tenant || to == address(0) || to == l.tenant || !usable(id) || canonicalParcelOf[id] != 0 || _hasPlantsOrUnresolvedOccupancy(id, l)) {
             revert Unauthorized();
         }
         address old = l.tenant;
@@ -200,11 +200,11 @@ contract LeaseRegistry {
     ) external {
         Lease storage l = leases[id];
         if (l.state != State.Disputed || msg.sender != l.lessor) revert Unauthorized();
-        if (restore && block.timestamp < l.ends) {
+        if (restore && block.timestamp < l.ends && (canonicalParcelOf[id] == 0 || canonicalGate.leaseAdmissible(canonicalParcelOf[id], id, l.lessor, l.tenant))) {
             l.state = State.Active;
             l.exitPending = false;
         } else {
-            l.state = l.activePlants == 0 ? State.Closed : State.Revoked;
+            l.state = _hasPlantsOrUnresolvedOccupancy(id, l) ? State.Revoked : State.Closed;
             l.exitPending = _hasPlantsOrUnresolvedOccupancy(id, l);
         }
         emit LeaseStatus(id, l.state, l.exitPending);

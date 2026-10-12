@@ -115,6 +115,13 @@ contract R0410OrganizationTest {
             );
         require(!retained, "former admin delegated");
     }
+    function testUnknownActionCannotMasqueradeAsTreasuryOrWalletAuthority() public {
+        (bool allowed,) = address(a).call(abi.encodeCall(a.delegate,
+            (ORG,address(alice),keccak256("transfer-funds"),SCOPE,uint64(block.timestamp),
+            uint64(block.timestamp+1 days),uint32(10))));
+        require(!allowed,"arbitrary action can impersonate protected privileges");
+    }
+
     function testTreasuryRequiresIndependentConsentAndExactBoundedConsumption() public {
         R0410Actor treasury=new R0410Actor();
         OrganizationTreasuryPermissions policy=new OrganizationTreasuryPermissions(address(r),address(treasury),address(bob));

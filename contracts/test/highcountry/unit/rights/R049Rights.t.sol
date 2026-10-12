@@ -42,7 +42,7 @@ contract R049RightsTest {
         tenant.place(leases,LEASE,bytes32(uint256(1)),5,true);
         owner.revokeLease(leases,LEASE);
         require(!leases.usable(LEASE),"revoked access");
-        (,,,,,,uint256 active,LeaseRegistry.State state,bool pending)=leases.leases(LEASE);
+        (,,,,,,,uint256 active,LeaseRegistry.State state,bool pending)=leases.leases(LEASE);
         require(active==5&&state==LeaseRegistry.State.Revoked&&pending,"stranded plants erased");
         (bool add,) = address(tenant).call(abi.encodeCall(tenant.place,(leases,LEASE,bytes32(uint256(2)),1,true)));
         require(!add,"new plants on revoked lease");
@@ -50,7 +50,7 @@ contract R049RightsTest {
         require(!transfer,"active-plant transfer");
         tenant.place(leases,LEASE,bytes32(uint256(3)),5,false);
         require(!leases.usable(LEASE),"closed lease usable");
-        (,,,,,,,state,pending)=leases.leases(LEASE);
+        (,,,,,,,,state,pending)=leases.leases(LEASE);
         require(state==LeaseRegistry.State.Closed&&!pending,"plant exit incomplete");
     }
     function testRightsAndLicensesCannotEscalateAcrossOwnerChange() public {

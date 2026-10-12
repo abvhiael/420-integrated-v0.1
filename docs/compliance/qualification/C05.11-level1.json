@@ -2,7 +2,7 @@
   "step": "C05.11",
   "canonical": "Optional on-chain publication/attestation adapter only after demonstrated need; reuse Registry/Verify/governance capabilities before considering new contracts.",
   "qualification_level": 1,
-  "status": "PENDING_LEVEL1_CI",
+  "status": "COMPLETE_LEVEL1_PASS_NO_ONCHAIN_ADAPTER_REQUIRED",
   "disposition": "NO_NEW_ONCHAIN_ADAPTER_REQUIRED",
   "implementation_sha": "7fa000fa2af3524cd00878c9e7917b5149693a0f",
   "main_base_sha": "c5a4f220d1fbda01f707d359aa9bb32921a138b1",
@@ -31,5 +31,14 @@
     "C09.5 external provider acceptance",
     "C09.9 and C10 independent legal/security release"
   ],
-  "next_canonical": "C05.12 — Integration Level 2 milestone: authenticated app flows, protocol outages, policy revocation mid-order, stale Travel presence and cross-tenant adversarial tests."
+  "next_canonical": "C05.12 — Integration Level 2 milestone: authenticated app flows, protocol outages, policy revocation mid-order, stale Travel presence and cross-tenant adversarial tests.",
+  "ci": {
+    "status": "PASS",
+    "run_id": 38280239903,
+    "job_id": 114915742462,
+    "conclusion": "success",
+    "successful_steps": 70,
+    "failed_steps": 0,
+    "exact_sha": true
+  }
 }

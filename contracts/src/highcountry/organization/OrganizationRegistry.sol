@@ -12,6 +12,8 @@ contract OrganizationRegistry {
     mapping(bytes32 => Organization) public organizations;
     mapping(bytes32 => mapping(address => Membership)) public members;
     mapping(bytes32 => mapping(address => bool)) public invitations;
+    mapping(bytes32 => mapping(address => uint32)) public requestedObligationBalance;
+    mapping(bytes32 => mapping(address => bool)) public dischargeRequested;
     event OrganizationCreated(bytes32 indexed id, address indexed administrator, bytes32 metadataHash);
     event Invitation(bytes32 indexed id,address indexed account,bool invited);
     event MemberStatus(bytes32 indexed id,address indexed account,Status status,uint32 obligations);
@@ -60,14 +62,25 @@ contract OrganizationRegistry {
         emit MemberStatus(id,account,m.status,m.pendingObligations);
     }
 
-    /// @dev Only the member may acknowledge discharge; no unilateral admin forfeiture or settlement.
-    ///      Integrators MUST use independent settlement authorization before marking obligations released.
-    function acknowledgeObligation(bytes32 id,uint32 remaining) external {
+    /// @notice The member proposes a lower obligation count. This cannot release funds.
+    function requestObligationDischarge(bytes32 id,uint32 remaining) external {
         Membership storage m=members[id][msg.sender];
-        if(m.status!=Status.Active&&m.status!=Status.Leaving) revert Unauthorized();
-        if(remaining>m.pendingObligations) revert Invalid();
+        if((m.status!=Status.Active&&m.status!=Status.Leaving)||remaining>=m.pendingObligations) revert Unauthorized();
+        requestedObligationBalance[id][msg.sender]=remaining;
+        dischargeRequested[id][msg.sender]=true;
+    }
+
+    /// @notice Two-party administrative confirmation of a noncustodial obligation record.
+    /// @dev Canonical treasury settlement/dispute proofs remain independently required.
+    function confirmObligationDischarge(bytes32 id,address member) external {
+        if(msg.sender!=organizations[id].administrator||!dischargeRequested[id][member]) revert Unauthorized();
+        Membership storage m=members[id][member];
+        uint32 remaining=requestedObligationBalance[id][member];
+        if(remaining>=m.pendingObligations) revert Invalid();
+        delete dischargeRequested[id][member];
+        delete requestedObligationBalance[id][member];
         m.pendingObligations=remaining;
-        emit ObligationCount(id,msg.sender,remaining);
+        emit ObligationCount(id,member,remaining);
     }
 
     /// @dev Member opt-in reservation, not asset custody or external settlement.
@@ -75,6 +88,8 @@ contract OrganizationRegistry {
         Membership storage m=members[id][msg.sender];
         if(m.status!=Status.Active||amount==0) revert Unauthorized();
         m.pendingObligations+=amount;
+        delete dischargeRequested[id][msg.sender];
+        delete requestedObligationBalance[id][msg.sender];
         emit ObligationCount(id,msg.sender,m.pendingObligations);
     }
 

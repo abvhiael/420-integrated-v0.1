@@ -1,6 +1,13 @@
 # BNB-3.1 — Phase 2 handoff and Phase 3 baseline
 
-**State: Phase 2 repository Level 3 PASS; restricted source integration review ready; PR #616 unmerged; no approved Phase 3 baseline.**
+**State: Phase 2 repository Level 3 PASS; restricted source integration approved and merged; Phase 3 roadmap approval remains outstanding.**
+
+## Approved merged integration baseline
+
+Owner authorized restricted source integration review and merge on 2026-10-12. PR #616 merged as `2bc74d12662f60b9ea499fa5b38bc49e191b8f94`; post-merge tree has zero file differences from reviewed evidence head `8e15c748289fbff2f7d4a7ef85aa6cb619c20e77`, preserving qualified executable candidate `9cdc324a1b5bd22a2dd9f343931fef05e934b8b2`. Original #600 head `273b6c7e714fdbc7e1c96463922546f74dc83c89` is an ancestor of main and GitHub automatically marked #600 merged/closed through the incorporated implementation. Both PRs are reconciled; no second older-source merge is required.
+
+The approved integration baseline is `2bc74d12662f60b9ea499fa5b38bc49e191b8f94`. Post-merge closeout evidence commit `6e2926c21a3c8578409f07b2a03921fc677972ba` and this handoff update modify documentation only and inherit the qualified executable. Independent official-testnet/legal/issuer/Pay/operations/security deferrals remain intact. This establishes the actual merged Phase 2 source baseline; a canonical Phase 3 roadmap still requires committed approval before Phase 3 work or BNB-3.1 completion. Earlier unmerged observations below are historical.
+
 
 ## Scope authority
 
@@ -8,7 +15,7 @@ This handoff depends on canonical BNB-2.15 Level 3 closeout. A Phase 3 step list
 
 ## Verified source and evidence
 
-Implementation: `9cdc324a1b5bd22a2dd9f343931fef05e934b8b2`, frozen branch `qualification/bnb-phase2-exact-9cdc324a`. Reconciliation base main: `fe21ef07359d6915bf5daac37c4bf24a24fcf19b`. Certification PR #616 branch `audit/bnb-phase2-level3-candidate-20261012` carries documentation-only evidence beyond that implementation. PR #600 original head `273b6c7e714fdbc7e1c96463922546f74dc83c89` remains preserved; do not merge it independently or reconcile it before qualified integration approval.
+Implementation: `9cdc324a1b5bd22a2dd9f343931fef05e934b8b2`, frozen branch `qualification/bnb-phase2-exact-9cdc324a`. Reconciliation base main: `fe21ef07359d6915bf5daac37c4bf24a24fcf19b`. Certification PR #616 branch `audit/bnb-phase2-level3-candidate-20261012` carries documentation-only evidence beyond that implementation. PR #600 original head `273b6c7e714fdbc7e1c96463922546f74dc83c89` is incorporated through merged certification #616; both PRs are merged/closed.
 
 | Gate | Run | Result at this update |
 | --- | --- | --- |
@@ -31,7 +38,7 @@ Reviewed runtime boundaries include verified sessions/recovery epochs, independe
 
 [BNB testnet roadmap](BNB-TESTNET-WORK-ROADMAP.md) retains independent Identity/Compliance/Location/property/legal issuer provenance, actual Pay finality/reorg/refunds/payouts, manual accessibility, multi-instance deployment/failover/backup-restore and independent security acceptance. These are deferred, not waived. Preserve `travel.bnb_booking=false` and disabled booking/financial execution. Repository CI does not certify live operations.
 
-Terminal closeout evidence commit `525b3df1a96779e4ef74b9ee80a15a53db939c5b` records all mandatory repository gates PASS: 1,064 unique primary units, four shards with 16 coverage contexts each, Decision 10 fixture assertions, 790 diagnostic LCOV source records and retained artifact IDs/digests. Full logs verify exact implementation checkout for every mandatory job. Main refreshed still equals the recorded base; evidence delta is three Markdown files only. Repository source scope is ready for restricted integration approval/review; live acceptance remains deferred. Keep #616 unmerged pending integration approval; reconcile #600 only after that approval. No Phase 3 baseline exists until the actual approved merged main and canonical roadmap are recorded.
+Terminal closeout evidence commit `525b3df1a96779e4ef74b9ee80a15a53db939c5b` records all mandatory repository gates PASS: 1,064 unique primary units, four shards with 16 coverage contexts each, Decision 10 fixture assertions, 790 diagnostic LCOV source records and retained artifact IDs/digests. Full logs verify exact implementation checkout for every mandatory job. Main refreshed still equals the recorded base; evidence delta is three Markdown files only. Repository source scope is ready for restricted integration approval/review; live acceptance remains deferred. Restricted integration approval and merges are now complete as recorded above. The actual merged source baseline is established; canonical Phase 3 roadmap approval is still outstanding.
 
 ## Three-level qualification policy
 

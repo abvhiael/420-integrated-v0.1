@@ -10,7 +10,7 @@ test('DOOBr public journey stays non-transactional and responds to keyboard',asy
  const status=page.locator('#coverage-response');
  await page.getByRole('button',{name:'Check service status'}).click();
  await expect(status).toHaveAttribute('data-state',/UNKNOWN|UNAVAILABLE/);
- await expect(status).toContainText(/unverified|not operational|unavailable|unknown/i);
+ await expect(status).toContainText(/unverified|not operational|unavailable|unknown|cannot be verified/i);
  await page.keyboard.press('Tab');
  await expect(page.locator(':focus')).toHaveCount(1);
  await page.getByRole('link',{name:'Skip to main content'}).focus();

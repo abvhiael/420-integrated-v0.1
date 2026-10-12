@@ -1,0 +1,44 @@
+{
+  "schema": "420bnb.bnb-2.1.level1.repository-closeout.v1",
+  "step": "BNB-2.1",
+  "scope": "repository-side Level 1 only",
+  "implementationSha": "6186c6008a9960271d822c886af11e41dad95a1e",
+  "pullRequest": 600,
+  "branch": "audit/420bnb-bnb-1-1-source-reconciliation-20261009",
+  "status": "REPOSITORY_LEVEL1_PASS_LIVE_ACCEPTANCE_DEFERRED",
+  "qualification": {
+    "runtime": {
+      "runId": 38069293767,
+      "jobId": 114263248024,
+      "conclusion": "success",
+      "confirmedSteps": [
+        "Exact SHA",
+        "Apply PostgreSQL schema",
+        "Runtime security and API tests",
+        "Compile runtime module",
+        "Build non-root BnB container",
+        "Container staging smoke (isolated CI PostgreSQL)",
+        "Verify front-end surfaces"
+      ]
+    },
+    "bnbWorkflows": {
+      "allNineArchitectureWorkflowsSuccessful": true,
+      "runIds": [38069293685,38069293736,38069293748,38069293725,38069293792,38069293682,38069293751,38069293724,38069293674]
+    },
+    "docsQualification": "skipped (not counted as PASS)",
+    "globalLevel3Executed": false
+  },
+  "testnetHandoff": "docs/bnb/BNB-TESTNET-WORK-ROADMAP.md",
+  "liveGates": {
+    "officialIdentityDeployment": "BLOCKED",
+    "liveSessionRevocationAndSigningKeyRotation": "BLOCKED",
+    "independentPropertyIssuerApproval": "BLOCKED",
+    "crossInstanceProductionEquivalentAcceptance": "BLOCKED"
+  },
+  "operationalAcceptance": false,
+  "propertyPublicationEnabled": false,
+  "paymentsEnabled": false,
+  "mergeApprovedByThisEvidence": false,
+  "evidenceOnlyCommitInheritsImplementationSha": true,
+  "remarks": "This records targeted checks already passed on the implementation SHA. No synthetic test signer or unreviewed property claim is independent authority. PR remains draft; comprehensive BNB-2.1 acceptance is not declared."
+}

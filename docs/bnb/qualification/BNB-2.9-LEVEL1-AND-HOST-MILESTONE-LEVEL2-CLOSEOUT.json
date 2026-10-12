@@ -1,0 +1,67 @@
+{
+  "step": "BNB-2.9",
+  "name": "Complete Host Application",
+  "level1": "PASS_REPOSITORY_SIDE",
+  "level2": "PASS_APP_HOST_MILESTONE",
+  "qualified_implementation_sha": "a7c770023b661e1594721bde6dcf714e736a67f3",
+  "current_main_at_start": "1c509a0f054bcf9fa191f71db29d0dc87f54c528",
+  "pr": 600,
+  "branch": "audit/420bnb-bnb-1-1-source-reconciliation-20261009",
+  "tests": {
+    "run_id": 38107067439,
+    "job_id": 114374712313,
+    "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38107067439",
+    "status": "completed",
+    "conclusion": "success",
+    "failed_steps": 0,
+    "coverage": [
+      "PostgreSQL and Identity-scoped owner/manager authorization",
+      "Immediate delegated revocation and financial isolation",
+      "Draft and published calendar/CAS/overlap regression",
+      "Self-approval prohibition and host request lifecycle",
+      "Non-root container, browser/axe guest/host experience",
+      "All existing BnB runtime and adversarial suites"
+    ]
+  },
+  "requirements": {
+    "host_dashboard": "implemented",
+    "property_administration": "implemented",
+    "calendar": "implemented",
+    "reservations": "implemented",
+    "earnings": "Pay mirror owner-only",
+    "notifications": "in-app scoped audit notifications, not external delivery",
+    "delegated_managers": "grant/revoke, revocation, edit_calendar, handle_requests, view_reservations, safe edit_listing"
+  },
+  "level3": "DEFERRED: complete audit-phase merge-candidate exact-SHA main reconciliation; canonical Solidity inventory and separate Genesis address authority, 420 Integrated/Docs global, deployment/config",
+  "external_gates": [
+    "Real Pay/Swap settlement and payout controller acceptance",
+    "Verified host and property claims on official testnet",
+    "External notification channel delivery and manual accessibility acceptance"
+  ],
+  "next_roadmap_step": "Not verified from canonical repo",
+  "verified_main_at_evidence": "6d2932deb243328e1956619e10ef250a8bcc1d88",
+  "app_level2": {
+    "status": "PASS",
+    "app_workflows_passed": 10,
+    "app_workflows_failed": 0,
+    "workflow_run_ids": [
+      38107067361,
+      38107067417,
+      38107067464,
+      38107067398,
+      38107067406,
+      38107067473,
+      38107067368,
+      38107067421,
+      38107067380,
+      38107067439
+    ]
+  },
+  "restrictions": [
+    "Live independent property authority, actual Pay payouts and release acceptance testnet-gated",
+    "In-app audit notifications are not independently delivered external notifications",
+    "No finished Level 3 and no merged PR"
+  ],
+  "evidence_only_commit_policy": "All checks pass at exact implementation SHA a7c770023b661e1594721bde6dcf714e736a67f3; following evidence-only commit inherits SHA; changes to executable source/test/CI/config need requalification.",
+  "completion_state": "PASS: repository-side BNB-2.9 Level 1 and app-specific Level 2; operational testnet gates and phase Level 3 explicitly deferred"
+}

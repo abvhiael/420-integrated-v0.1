@@ -1,0 +1,71 @@
+{
+  "step": "BNB-2.8",
+  "canonical_title": "Complete Guest Application",
+  "status": "PASS_REPOSITORY_SIDE_LEVEL1_AND_APP_MILESTONE_LEVEL2",
+  "qualification_model": "Level 1 step and guest application milestone Level 2",
+  "implementation_sha": "594a073a6a01751a787d0610a8ba128987c1f389",
+  "pr_number": 600,
+  "branch": "audit/420bnb-bnb-1-1-source-reconciliation-20261009",
+  "main_at_step_start": "e60c4c74ccd0c950817f98e3da6b67546afd9e24",
+  "changes": [
+    "services/420bnb/migrations/017_guest_experience.sql",
+    "services/420bnb/api.py",
+    "web/bnb/index.html",
+    "services/420bnb/tests/test_postgres_adversarial.py",
+    "services/420bnb/tests/browser_accessibility.py",
+    ".github/workflows/bnb-runtime.yml"
+  ],
+  "requirements": [
+    "Published-only accommodation search and bounded public listing detail",
+    "Guest private saved stays",
+    "Guest quote/hold/request nonbinding checkout",
+    "Own reservation dashboard and canonical Pay receipt read",
+    "Request-scoped authenticated guest/host messages",
+    "Completed-confirmed-stay review with independent review moderation and public withdrawal",
+    "Mobile browser accessibility and privacy regressions"
+  ],
+  "ci": {
+    "workflow": "420BnB Runtime Slice",
+    "run_id": 38105374866,
+    "job_id": 114369664772,
+    "run_url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38105374866",
+    "conclusion": "success",
+    "failed_steps": 0,
+    "implementation_sha": "594a073a6a01751a787d0610a8ba128987c1f389"
+  },
+  "level2": {
+    "status": "PASS_APP_SCOPED",
+    "milestone": "BNB-2.8 guest API/frontend convergence",
+    "passed_app_workflows": 10,
+    "failed_app_workflows": 0,
+    "workflow_run_ids": [
+      38105374907,
+      38105374831,
+      38105374877,
+      38105374926,
+      38105374810,
+      38105374817,
+      38105374849,
+      38105374852,
+      38105374821,
+      38105374866
+    ]
+  },
+  "level3": "DEFERRED to full app-phase current-main merge candidate and canonical owner qualification",
+  "operational_blockers": [
+    "Independent accommodation/property claims and authorized real 420Pay finality",
+    "Human moderation and production trust root, not simulated by synthetic key",
+    "Manual WCAG 2.2 AA screen-reader acceptance and external operational release"
+  ],
+  "next_canonical_step": "Not verified from roadmap; do not assign a fabricated number",
+  "level1": {
+    "status": "PASS",
+    "evidence": "PostgreSQL 001–017, guest search/save/message/review and signed moderation regressions, existing BnB/Pay authority and two-process capacity tests, non-root container and Chromium WCAG automated smoke"
+  },
+  "qualifying_evidence_only_commits": "docs/bnb/BNB-2.8-COMPLETE-GUEST-APPLICATION.md and this evidence only; no executable or CI change after qualified implementation SHA",
+  "remaining_external": [
+    "Live independently authorized 420Pay and 420Swap booking/payment acceptance",
+    "Real property/host claims and moderation operations, separate trust-root acceptance",
+    "Human-operated WCAG 2.2 AA/screen reader test and production deployment acceptance"
+  ]
+}

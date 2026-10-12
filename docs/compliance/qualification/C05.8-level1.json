@@ -1,7 +1,7 @@
 {
   "step": "C05.8",
   "canonical": "Oracle integration suitability review and narrowly scoped adapter where required; preserve canonical runtime ABI and reporting-only authority. Off-chain source monitoring need not become an oracle feed.",
-  "status": "PENDING_LEVEL1_CI",
+  "status": "COMPLETE_LEVEL1_PASS_NO_ORACLE_ADAPTER_REQUIRED",
   "qualification_level": 1,
   "implementation_sha": "cf0dc454507f4da9577b1d0119c610a9c1094581",
   "base_sha": "c5a4f220d1fbda01f707d359aa9bb32921a138b1",
@@ -30,5 +30,14 @@
     "C09.5 conditional future oracle provider integration only on demonstrated need",
     "C08.5 full canonical Solidity/Genesis/global exact-SHA qualification"
   ],
-  "next_canonical": "C05.9 — Notifications outbox, subscribed app impact events, signatures, ordering, deduplication, retry and dead-letter recovery. Events invalidate permission; consumers re-read canonical policy."
+  "next_canonical": "C05.9 — Notifications outbox, subscribed app impact events, signatures, ordering, deduplication, retry and dead-letter recovery. Events invalidate permission; consumers re-read canonical policy.",
+  "ci": {
+    "status": "PASS",
+    "run_id": 38205813234,
+    "job_id": 114668941292,
+    "conclusion": "success",
+    "successful_steps": 67,
+    "failed_steps": 0,
+    "exact_sha": true
+  }
 }

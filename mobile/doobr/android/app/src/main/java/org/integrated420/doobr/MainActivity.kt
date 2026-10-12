@@ -16,6 +16,8 @@ class MainActivity : Activity() {
  private var locationGranted = false
  private var assignmentVerified = false
  private var courierConsent = false
+ private var routeExpiresAtMillis = 0L
+ private var pushPermissionGranted = false
  override fun onCreate(savedInstanceState: Bundle?) {
   super.onCreate(savedInstanceState)
   val layout = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
@@ -38,14 +40,24 @@ class MainActivity : Activity() {
  }
  override fun onRequestPermissionsResult(requestCode:Int, permissions:Array<out String>, grantResults:IntArray) {
   super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+  if(requestCode == 120) {
+   pushPermissionGranted = grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED
+  }
   if(requestCode == 110) {
    locationGranted = grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED
    if(!locationGranted) stopLocation()
   }
  }
  override fun onStop() { super.onStop(); stopLocation() }
- private fun stopLocation() { courierConsent = false }
- private fun mayCollectLocation() = locationGranted && assignmentVerified && courierConsent
+ private fun stopLocation() {
+  courierConsent = false
+  assignmentVerified = false
+  routeExpiresAtMillis = 0L
+ }
+ override fun onDestroy() { stopLocation(); super.onDestroy() }
+ private fun mayCollectLocation() = locationGranted && assignmentVerified && courierConsent && routeExpiresAtMillis > System.currentTimeMillis()
+ // Provider registration and coordinate transmission remain disabled until
+ // trusted assignment/device attestation and encrypted transport are connected.
 }
 object DeviceKey {
  fun ensureKey(): Boolean {

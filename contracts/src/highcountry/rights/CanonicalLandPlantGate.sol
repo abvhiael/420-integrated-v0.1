@@ -73,6 +73,15 @@ contract CanonicalLandPlantGate {
             && plants.activePlantsByParcel(parcelId) <= p.growCapacity;
     }
 
+    function licenseAdmissible(uint64 parcelId, bytes32 licenseId, address licensor, address licensee)
+        external view returns (bool)
+    {
+        LandRegistry.LandParcel memory p = land.getParcel(parcelId);
+        return parcelId != 0 && licenseId != bytes32(0) && p.owner == licensor && p.occupant == licensee
+            && p.occupancyKind == LandRegistry.OccupancyKind.LICENSE && p.occupancyRef == licenseId
+            && plants.activePlantsByParcel(parcelId) <= p.growCapacity;
+    }
+
     function canClearOccupancy(
         uint64 parcelId,
         bytes32 leaseId

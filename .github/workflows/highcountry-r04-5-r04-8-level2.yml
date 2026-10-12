@@ -6,7 +6,9 @@ on:
       - 'contracts/src/highcountry/progression/**'
       - 'contracts/src/highcountry/missions/**'
       - 'contracts/src/highcountry/inventory/**'
+      - 'contracts/src/highcountry/market/**'
       - 'contracts/test/highcountry/unit/inventory/**'
+      - 'contracts/test/highcountry/unit/market/**'
       - 'contracts/test/highcountry/unit/progression/**'
       - 'contracts/test/highcountry/unit/missions/**'
       - '.github/workflows/highcountry-r04-5-r04-8-level2.yml'
@@ -47,10 +49,11 @@ jobs:
           forge test --match-path 'test/highcountry/unit/progression/*.t.sol' -vv
           forge test --match-path 'test/highcountry/unit/missions/*.t.sol' -vv
           forge test --match-path 'test/highcountry/unit/inventory/*.t.sol' -vv
+          forge test --match-path 'test/highcountry/unit/market/*.t.sol' -vv
       - name: Format and security lint
         working-directory: contracts
         run: |
-          forge fmt --check src/highcountry/progression test/highcountry/unit/progression src/highcountry/missions test/highcountry/unit/missions src/highcountry/inventory test/highcountry/unit/inventory
-          forge lint src/highcountry/progression src/highcountry/missions src/highcountry/inventory --severity high med low
+          forge fmt --check src/highcountry/progression test/highcountry/unit/progression src/highcountry/missions test/highcountry/unit/missions src/highcountry/inventory test/highcountry/unit/inventory src/highcountry/market test/highcountry/unit/market
+          forge lint src/highcountry/progression src/highcountry/missions src/highcountry/inventory src/highcountry/market --severity high med low
       - name: Canonical High Country verifier
         run: python3 scripts/highcountry/verify-r01.py

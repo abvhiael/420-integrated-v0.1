@@ -2,6 +2,8 @@
 import hashlib
 import hmac
 import json
+import logging
+import time
 import os
 import sys
 from pathlib import Path
@@ -24,7 +26,24 @@ async def bounded_api_security_headers(request,call_next):
     """Prevent API data caching, MIME sniffing and browser framing.
     Identity and financial actions never depend on browser session cookies.
     """
-    response=await call_next(request)
+    started=time.monotonic()
+    trace_id=uuid4().hex
+    try:
+        response=await call_next(request)
+    except Exception:
+        logging.getLogger("bnb.operations").exception("api_request_failed",extra={
+            "route_template":"unhandled","http_method":request.method,
+            "request_id":trace_id})
+        raise
+    route=request.scope.get("route")
+    template=getattr(route,"path", "unmatched")
+    # No raw URL, token, guest identity, private address or request body is logged.
+    logging.getLogger("bnb.operations").info("api_request",extra={
+        "route_template":template,"http_method":request.method,
+        "response_status":response.status_code,
+        "duration_ms":round((time.monotonic()-started)*1000,2),
+        "request_id":trace_id})
+    response.headers["X-Request-ID"]=trace_id
     response.headers.setdefault("Cache-Control","no-store")
     response.headers["X-Content-Type-Options"]="nosniff"
     response.headers["X-Frame-Options"]="DENY"

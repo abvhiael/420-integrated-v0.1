@@ -82,9 +82,9 @@ contract CanonicalLandPlantGateR049Test {
     }
     function testCrossRegistryPlantBindingFailsClosed() public {
         R049CanonicalPlantsFixture bogus=new R049CanonicalPlantsFixture();
-        (bool ok,) = address(this).call(abi.encodePacked(type(CanonicalLandPlantGate).creationCode,
-            abi.encode(address(land),address(bogus))));
-        require(!ok,"unrelated cultivation registry accepted");
+        try new CanonicalLandPlantGate(address(land),address(bogus)) returns (CanonicalLandPlantGate) {
+            revert("unrelated cultivation registry accepted");
+        } catch {}
     }
     function testForgedParcelAndOverCapacityRejected() public {
         (bool forged,) = address(owner).call(abi.encodeCall(owner.create,

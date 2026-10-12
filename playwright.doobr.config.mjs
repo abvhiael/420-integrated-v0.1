@@ -6,6 +6,6 @@ export default defineConfig({
   {name:'desktop-keyboard',use:{...devices['Desktop Chrome']}},
   {name:'mobile-touch',use:{...devices['Pixel 7']}},
  ],
- webServer:{command:'python3 -m http.server 8769 --bind 127.0.0.1 --directory web',
+ webServer:{command:'python3 tests/browser/doobr_static_server.py',
   url:'http://127.0.0.1:8769/doobr/',reuseExistingServer:false,timeout:15000}
 });

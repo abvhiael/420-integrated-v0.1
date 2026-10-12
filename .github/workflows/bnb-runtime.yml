@@ -54,6 +54,10 @@ jobs:
         run: python -m py_compile services/420bnb/api.py
       - name: Build non-root BnB container
         run: docker build -f services/420bnb/Dockerfile -t bnb-test:${{ github.sha }} .
+      - name: Migrate from packaged non-root deploy image
+        run: |
+          docker run --rm --network host -e BNB_DATABASE_URL="$BNB_DATABASE_URL" \
+            bnb-test:${{ github.sha }} python migrate.py
       - name: Container staging smoke (isolated CI PostgreSQL)
         run: |
           set -euo pipefail

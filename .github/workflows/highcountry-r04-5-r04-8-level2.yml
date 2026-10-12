@@ -1,0 +1,53 @@
+name: High Country R04.5-R04.8 Level 2 Economic Integration
+on:
+  pull_request:
+    paths:
+      - 'services/highcountry-economy/**'
+      - 'contracts/src/highcountry/progression/**'
+      - 'contracts/src/highcountry/missions/**'
+      - 'contracts/test/highcountry/unit/progression/**'
+      - 'contracts/test/highcountry/unit/missions/**'
+      - '.github/workflows/highcountry-r04-5-r04-8-level2.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  economy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    env:
+      FOUNDRY_SRC: src/highcountry
+      FOUNDRY_TEST: test/highcountry
+      FOUNDRY_SCRIPT: script/highcountry
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Pin candidate SHA
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: BUDS plus market integration, persistence and negative paths
+        working-directory: services/highcountry-economy
+        run: npm test
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: High Country progression and mission build/sizes
+        working-directory: contracts
+        run: forge build src/highcountry --sizes
+      - name: Retained skill research discovery and mission tests
+        working-directory: contracts
+        run: |
+          forge test --match-path 'test/highcountry/unit/progression/*.t.sol' -vv
+          forge test --match-path 'test/highcountry/unit/missions/*.t.sol' -vv
+      - name: Format and security lint
+        working-directory: contracts
+        run: |
+          forge fmt --check src/highcountry/progression test/highcountry/unit/progression src/highcountry/missions test/highcountry/unit/missions
+          forge lint src/highcountry/progression src/highcountry/missions --severity high med low
+      - name: Canonical High Country verifier
+        run: python3 scripts/highcountry/verify-r01.py

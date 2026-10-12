@@ -7,6 +7,7 @@ import { OrganizationRegistry } from "./OrganizationRegistry.sol";
 contract OrganizationTreasuryPermissions {
     error Invalid();
     error Unauthorized();
+
     struct Permission {
         bytes32 organization;
         address proposer;

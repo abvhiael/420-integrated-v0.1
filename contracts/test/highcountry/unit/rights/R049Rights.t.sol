@@ -12,6 +12,7 @@ contract R049Actor {
     function revokeLease(LeaseRegistry l,bytes32 id) external {l.revoke(id);}
     function transferLease(LeaseRegistry l,bytes32 id,address to) external {l.transferTenant(id,to);}
     function resolveDispute(LeaseRegistry l,bytes32 id,bool restore) external {l.resolveDispute(id,restore);}
+    function dispute(LeaseRegistry l,bytes32 id) external {l.dispute(id);}
     function issue(LicenseRegistry l,bytes32 id,bytes32 asset,address user) external {
         l.issue(id,asset,user,3,uint64(block.timestamp),uint64(block.timestamp+300),0);
     }
@@ -94,7 +95,7 @@ contract R049RightsTest {
     function testDisputeBlocksPlacementUntilResolved() public {
         owner.registerLease(leases,LEASE,PARCEL,address(tenant),uint64(block.timestamp),uint64(block.timestamp+100));
         leases.updatePlants(LEASE,bytes32(uint256(210)),1,true);
-        leases.dispute(LEASE);
+        tenant.dispute(leases,LEASE);
         require(!leases.usable(LEASE),"disputed lease usable");
         (bool place,) = address(leases).call(abi.encodeCall(leases.updatePlants,
             (LEASE,bytes32(uint256(211)),uint256(1),true)));

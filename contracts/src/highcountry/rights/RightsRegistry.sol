@@ -63,7 +63,9 @@ contract RightsRegistry {
         address to
     ) external {
         Asset storage a = assets[asset];
-        if (!a.exists || a.frozen || a.owner != msg.sender || to == address(0) || to == msg.sender) revert Unauthorized();
+        if (!a.exists || a.frozen || a.owner != msg.sender || to == address(0) || to == msg.sender) {
+            revert Unauthorized();
+        }
         address previous = a.owner;
         a.owner = to;
         emit AssetTransferred(asset, previous, to);

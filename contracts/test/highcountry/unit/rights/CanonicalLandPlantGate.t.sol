@@ -30,6 +30,7 @@ contract R049CanonicalLandOwner {
         l.createCanonical(id,parcelId,tenant,uint64(block.timestamp),uint64(block.timestamp+1000),1,0);
     }
     function revoke(LeaseRegistry l,bytes32 id) external { l.revoke(id); }
+    function transfer(LeaseRegistry l,bytes32 id,address to) external { l.transferTenant(id,to); }
 }
 contract CanonicalLandPlantGateR049Test {
     RightsRegistry rights;
@@ -64,6 +65,9 @@ contract CanonicalLandPlantGateR049Test {
         require(!fakeReconcile,"shadow plant count accepted");
         plants.set(PARCEL,0);
         require(gate.canClearOccupancy(PARCEL,LEASE_ID),"actual canonical count not read");
+        lease.reconcileCanonicalExit(LEASE_ID);
+        (,,,,,,,,status,exitPending)=lease.leases(LEASE_ID);
+        require(status==LeaseRegistry.State.Closed&&!exitPending,"canonical exit not finalized");
     }
     function testCanonicalOwnershipAndOccupancyChangeFailClosed() public {
         owner.create(lease,LEASE_ID,PARCEL,TENANT);
@@ -81,5 +85,7 @@ contract CanonicalLandPlantGateR049Test {
         require(!gate.leaseAdmissible(PARCEL,LEASE_ID,address(owner),TENANT),"overcapacity allowed");
         plants.set(PARCEL,0);
         owner.create(lease,LEASE_ID,PARCEL,TENANT);
+        (bool shadowTransfer,) = address(owner).call(abi.encodeCall(owner.transfer,(lease,LEASE_ID,address(0xCAFE))));
+        require(!shadowTransfer,"canonical transfer skipped LandRegistry occupant transition");
     }
 }

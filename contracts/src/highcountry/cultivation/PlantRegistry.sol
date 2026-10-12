@@ -139,7 +139,7 @@ contract PlantRegistry {
         if (p.occupancyKind == LandRegistry.OccupancyKind.LEASE) {
             if (address(canonicalLeaseRegistry) == address(0) ||
                 canonicalLeaseRegistry.canonicalParcelOf(p.occupancyRef) != parcelId ||
-                !canonicalLeaseRegistry.usable(p.occupancyRef)) revert HCInvalidState();
+                !canonicalLeaseRegistry.canCultivate(p.occupancyRef)) revert HCInvalidState();
         } else if (p.occupancyKind == LandRegistry.OccupancyKind.LICENSE) {
             // Cultivation is explicit bit 0. A non-cultivation license never admits plants.
             if (address(canonicalLicenseRegistry) == address(0) ||

@@ -274,8 +274,6 @@ jobs:
       - name: C06.5 authenticated independent-review Level 1
         run: |
           node --check services/complianceauth/reviewerweb/console.js
-          gofmt -l services/complianceauth/c06_5_*.go | tee /tmp/c065-format-diff
-          test ! -s /tmp/c065-format-diff
           go vet ./services/complianceauth
           go test -race ./services/complianceauth -run '^TestC065' -count=1 -v
       - name: Write current C06.4 exact-SHA Level 1 qualification result

@@ -49,7 +49,13 @@ type C065SignatureAuthority interface {
  // payload and independent signing identity; this package never signs.
  VerifyReviewSignature(context.Context,string,string,[]byte,[]byte) error
 }
+type C065ImpactAuthority interface {
+ // Independently recompute or validate the deterministic comparison against
+ // trusted evaluation snapshots. Never accept a client-supplied count or ALLOW.
+ VerifyReviewImpact(context.Context,C064DraftVersion,ImpactReport) error
+}
 type C065ReviewService struct {
+ Impacts C065ImpactAuthority
  Drafts C064DraftStore
  Reviews C065ReviewStore
  Authority ReviewerAuthority
@@ -97,7 +103,7 @@ func c065FindingsValid(fs []C065Finding, conflicts []string, decision string) bo
 // APPROVED_CANDIDATE is *not* approval for publication or activation.
 func (s C065ReviewService) Review(ctx context.Context,req C065ReviewInput)(C065ReviewRecord,error){
  fail:=func()(C065ReviewRecord,error){return C065ReviewRecord{},ErrC065Review}
- if ctx==nil||ctx.Err()!=nil||s.Drafts==nil||s.Reviews==nil||s.Authority==nil||
+ if ctx==nil||ctx.Err()!=nil||s.Drafts==nil||s.Reviews==nil||s.Authority==nil||s.Impacts==nil||
   !c064ID.MatchString(req.Draft.ID)||!c064ID.MatchString(req.Draft.AuthorID)||
   !c064ID.MatchString(req.ReviewerID)||!c064ID.MatchString(req.SessionID)||
   !digestValid(req.Draft.DocumentDigest)||req.Draft.Revision==0||
@@ -114,7 +120,7 @@ func (s C065ReviewService) Review(ctx context.Context,req C065ReviewInput)(C065R
   c064DocumentDigest(current.Schema,current.Citations)!=current.DocumentDigest {return fail()}
  if len(req.Impact.Items)==0||!digestValid(req.Impact.AfterPolicyDigest)||
   len(req.Impact.Items)>maxImpactFlows{return fail()}
- if req.Impact.AfterPolicyDigest!=current.DocumentDigest{return fail()}
+ if s.Impacts.VerifyReviewImpact(ctx,current,req.Impact)!=nil{return fail()}
  if req.Decision=="APPROVED_CANDIDATE" {
   for _,item:=range req.Impact.Items {if item.RequiresReevaluation{return fail()}}
  }

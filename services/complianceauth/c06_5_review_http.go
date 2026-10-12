@@ -95,6 +95,13 @@ func (h C065ReviewConsole) ServeHTTP(w http.ResponseWriter,r *http.Request){
   http.SetCookie(w,&http.Cookie{Name:"__Host-420ComplianceReviewer",Path:"/",MaxAge:-1,Secure:true,HttpOnly:true,SameSite:http.SameSiteStrictMode})
   w.WriteHeader(http.StatusNoContent);return
  }
+ if strings.HasPrefix(r.URL.Path,"/api/v1/review/drafts/")&&r.Method==http.MethodGet {
+  id:=strings.TrimPrefix(r.URL.Path,"/api/v1/review/drafts/")
+  if !c064ID.MatchString(id){fail(http.StatusBadRequest);return}
+  draft,err:=h.Lookup.Lookup(ctx,s.Scope,id)
+  if err!=nil||draft.Scope!=s.Scope||draft.ID!=id||!fresh(){fail(http.StatusNotFound);return}
+  c064Write(w,draft);return
+ }
  if r.URL.Path!="/api/v1/review/drafts"||r.Method!=http.MethodPost||
  r.Header.Get("Content-Type")!="application/json"{fail(http.StatusNotFound);return}
  data,e:=io.ReadAll(http.MaxBytesReader(w,r.Body,128<<10))

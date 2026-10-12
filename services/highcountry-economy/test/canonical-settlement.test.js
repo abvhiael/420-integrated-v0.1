@@ -14,7 +14,8 @@ function setup(){
   confirmedReservedTransfer:async operationId=>state.finalized?{
     finalized:true,operationId,sourceReceiptId:'verified:1',asset:'lot:1',from:'alice',to:'bob',quantity:2
   }:null,
-  proveUnexecutedAndCancelled:async()=>state.cancelled
+  proveUnexecutedAndCancelled:async()=>state.cancelled,
+  confirmedListingClosure:async()=>state.cancelled
  };
  const market=new HighCountryMarket(store,authority,()=>100);
  const settle=new CanonicalMarketSettlement(store,authority,()=>100);
@@ -53,7 +54,8 @@ test('cancel only after irreversible proof of unexecuted canonical transfer',asy
  await t.settle.abort('abort','transfer:2');
  assert.equal(t.store.state.balances.get('bob').reserved,0);
  assert.equal(t.store.state.balances.get('bob').available,80);
- assert.equal(t.store.state.listings.get('listing').status,'active');
+ assert.equal(t.store.state.listings.get('listing').status,'cancelled');
+ assert.equal(t.store.state.assets.get(JSON.stringify(['alice','lot:1'])).reserved,0);
  await assert.rejects(t.settle.finalize('late','transfer:2'));
  await assert.rejects(t.settle.prepare('buyer','duplicate','listing','transfer:2'));
 });
@@ -66,4 +68,13 @@ test('durable intent survives restart and re-entry cannot sell twice',async()=>{
  t.state.finalized=true;
  await second.finalize('finalize','transfer:3');
  assert.equal(t.store.state.issued,80);
+});
+
+test('finalized canonical cancellation removes stale local escrow entitlement',async()=>{
+ const t=setup();await listed(t);
+ t.state.cancelled=true;
+ await t.settle.reconcileClosedListing('close','listing');
+ assert.equal(t.store.state.listings.get('listing').status,'cancelled');
+ assert.equal(t.store.state.assets.get(JSON.stringify(['alice','lot:1'])).reserved,0);
+ await assert.rejects(t.settle.reconcileClosedListing('close-again','listing'));
 });

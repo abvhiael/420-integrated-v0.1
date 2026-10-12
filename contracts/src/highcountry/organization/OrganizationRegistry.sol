@@ -1,0 +1,102 @@
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity ^0.8.24;
+
+/// @notice R04.10 organization identity and explicit, consented membership.
+/// @dev Organization admin powers have no implicit Wallet, RightsRegistry or treasury permissions.
+contract OrganizationRegistry {
+    error Invalid();
+    error Unauthorized();
+    enum Status { None, Active, Leaving, Removed }
+    struct Organization { address administrator; bool active; bytes32 metadataHash; }
+    struct Membership { Status status; uint64 joinedAt; uint64 exitRequestedAt; uint32 pendingObligations; }
+    mapping(bytes32 => Organization) public organizations;
+    mapping(bytes32 => mapping(address => Membership)) public members;
+    mapping(bytes32 => mapping(address => bool)) public invitations;
+    event OrganizationCreated(bytes32 indexed id, address indexed administrator, bytes32 metadataHash);
+    event Invitation(bytes32 indexed id,address indexed account,bool invited);
+    event MemberStatus(bytes32 indexed id,address indexed account,Status status,uint32 obligations);
+    event ObligationCount(bytes32 indexed id,address indexed account,uint32 count);
+    event AdministratorChanged(bytes32 indexed id,address indexed oldAdmin,address indexed newAdmin);
+
+    function create(bytes32 id,bytes32 metadataHash) external {
+        if(id==bytes32(0)||organizations[id].administrator!=address(0)) revert Invalid();
+        organizations[id]=Organization(msg.sender,true,metadataHash);
+        members[id][msg.sender]=Membership(Status.Active,uint64(block.timestamp),0,0);
+        emit OrganizationCreated(id,msg.sender,metadataHash);
+        emit MemberStatus(id,msg.sender,Status.Active,0);
+    }
+
+    function invite(bytes32 id,address account,bool invited) external {
+        Organization memory org=organizations[id];
+        if(!org.active||msg.sender!=org.administrator||account==address(0)||account==org.administrator) revert Unauthorized();
+        invitations[id][account]=invited;
+        emit Invitation(id,account,invited);
+    }
+
+    function join(bytes32 id) external {
+        if(!organizations[id].active||!invitations[id][msg.sender]||members[id][msg.sender].status==Status.Active
+            ||members[id][msg.sender].pendingObligations!=0) revert Invalid();
+        invitations[id][msg.sender]=false;
+        members[id][msg.sender]=Membership(Status.Active,uint64(block.timestamp),0,0);
+        emit MemberStatus(id,msg.sender,Status.Active,0);
+    }
+
+    function requestLeave(bytes32 id) external {
+        Membership storage m=members[id][msg.sender];
+        if(m.status!=Status.Active||organizations[id].administrator==msg.sender) revert Unauthorized();
+        m.status=Status.Leaving;
+        m.exitRequestedAt=uint64(block.timestamp);
+        emit MemberStatus(id,msg.sender,m.status,m.pendingObligations);
+    }
+
+    function remove(bytes32 id,address account) external {
+        if(msg.sender!=organizations[id].administrator||account==msg.sender) revert Unauthorized();
+        Membership storage m=members[id][account];
+        if(m.status!=Status.Active&&m.status!=Status.Leaving) revert Invalid();
+        if(m.pendingObligations!=0) {
+            m.status=Status.Leaving;
+            m.exitRequestedAt=uint64(block.timestamp);
+        } else m.status=Status.Removed;
+        emit MemberStatus(id,account,m.status,m.pendingObligations);
+    }
+
+    /// @dev Only the member may acknowledge discharge; no unilateral admin forfeiture or settlement.
+    ///      Integrators MUST use independent settlement authorization before marking obligations released.
+    function acknowledgeObligation(bytes32 id,uint32 remaining) external {
+        Membership storage m=members[id][msg.sender];
+        if(m.status!=Status.Active&&m.status!=Status.Leaving) revert Unauthorized();
+        if(remaining>m.pendingObligations) revert Invalid();
+        m.pendingObligations=remaining;
+        emit ObligationCount(id,msg.sender,remaining);
+    }
+
+    /// @dev Member opt-in reservation, not asset custody or external settlement.
+    function reserveObligation(bytes32 id,uint32 amount) external {
+        Membership storage m=members[id][msg.sender];
+        if(m.status!=Status.Active||amount==0) revert Unauthorized();
+        m.pendingObligations+=amount;
+        emit ObligationCount(id,msg.sender,m.pendingObligations);
+    }
+
+    function finalizeExit(bytes32 id,address account) external {
+        Membership storage m=members[id][account];
+        if(m.status!=Status.Leaving||m.pendingObligations!=0) revert Invalid();
+        if(msg.sender!=account&&msg.sender!=organizations[id].administrator) revert Unauthorized();
+        m.status=Status.Removed;
+        emit MemberStatus(id,account,m.status,0);
+    }
+
+    function transferAdmin(bytes32 id,address next) external {
+        Organization storage org=organizations[id];
+        if(msg.sender!=org.administrator||next==address(0)||next==msg.sender
+            ||members[id][next].status!=Status.Active) revert Unauthorized();
+        Membership storage prior=members[id][msg.sender];
+        if(prior.pendingObligations!=0) revert Invalid();
+        org.administrator=next;
+        emit AdministratorChanged(id,msg.sender,next);
+    }
+
+    function isActiveMember(bytes32 id,address who) external view returns(bool) {
+        return organizations[id].active&&members[id][who].status==Status.Active;
+    }
+}

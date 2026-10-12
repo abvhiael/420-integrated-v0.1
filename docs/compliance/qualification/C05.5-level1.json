@@ -1,0 +1,34 @@
+{
+  "step": "C05.5",
+  "canonical": "DOOBr refusal/return and in-flight policy-change recovery; return/safety actions use separately reviewed workflows rather than being stranded by a sale halt.",
+  "qualification_level": 1,
+  "status": "PENDING_LEVEL1_CI",
+  "implementation_sha": "820f704f36106a7347c246657e43ff7676851de5",
+  "base_sha": "c5a4f220d1fbda01f707d359aa9bb32921a138b1",
+  "branch": "audit/420compliance-c01-1-inventory-20261009",
+  "pr": 602,
+  "files": [
+    "services/complianceauth/c05_5_doobr_recovery.go",
+    "services/complianceauth/c05_5_doobr_recovery_test.go",
+    ".github/workflows/420compliance-c01-level1.yml",
+    "docs/compliance/C05.5-DOOBR-REFUSAL-RETURN-RECOVERY.md"
+  ],
+  "checks": [
+    "TestC055RefusalReturnPolicyChangeRecovery -race",
+    "retained app-specific Compliance suite and C04.9/C05.4 regressions"
+  ],
+  "limitations": [
+    "No live DOOBr refusal/return consumers",
+    "Independent operational safety reviewer and durable multi-instance store not provisioned",
+    "Real courier legal/partner authorization not assumed"
+  ],
+  "deferred": [
+    "C09.5 live issuer/storage authority",
+    "C09.6 deployed DOOBr return workflow and evidence",
+    "C09.7 replay/revocation/outage acceptance",
+    "C10 production partner/legal signoff"
+  ],
+  "level2": "C05.12",
+  "level3": "C08.5",
+  "next_canonical": "C05.6 — Travel sourced guidance, coverage status, last review date, policy version and deep link; no embedded DOOBr checkout or private courier data."
+}

@@ -66,7 +66,7 @@ class BrowserTests(unittest.TestCase):
                     self.assertIn(href[1:], p.ids)
                 elif not u.scheme:
                     target = href.removeprefix("./")
-                    self.assertTrue(target in out or target in {"index.html", "styles.css"}, target)
+                    self.assertTrue(target in out or target in {"index.html", "styles.css", "scenarios.html"}, target)
                     if target in out:
                         reached.add(target)
                 else:

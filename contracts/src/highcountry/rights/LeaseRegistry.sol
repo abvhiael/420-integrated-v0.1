@@ -21,6 +21,7 @@ contract LeaseRegistry {
         bool exitPending;
     }
     RightsRegistry public immutable rights;
+    address public immutable plantAuthority;
     mapping(bytes32=>Lease) public leases;
     mapping(bytes32=>bool) public operationUsed;
     event LeaseCreated(bytes32 indexed id,bytes32 indexed asset,address indexed tenant,uint64 ends,uint256 feeUnits);
@@ -30,6 +31,7 @@ contract LeaseRegistry {
     constructor(address rights_) {
         if(rights_==address(0)||rights_.code.length==0)revert InvalidLease();
         rights=RightsRegistry(rights_);
+        plantAuthority=msg.sender;
     }
     function create(bytes32 id,bytes32 asset,address tenant,uint64 starts,uint64 ends,uint256 scopes,uint256 feeUnits) external {
         (address owner,bool exists,bool frozen)=rights.assets(asset);
@@ -45,10 +47,10 @@ contract LeaseRegistry {
         return l.state==State.Active&&!l.exitPending&&exists&&!frozen&&owner==l.lessor&&
             block.timestamp>=l.starts&&block.timestamp<l.ends;
     }
-    /// @dev Placement/removal actor must be authorized by the current tenant; op ids are globally unique.
+    /// @dev Only the trusted cultivation/plant authority may reconcile live plants; tenants cannot falsify exits.
     function updatePlants(bytes32 id,bytes32 op,uint256 quantity,bool place) external {
         Lease storage l=leases[id];
-        if(msg.sender!=l.tenant||op==bytes32(0)||operationUsed[op])revert Unauthorized();
+        if(msg.sender!=plantAuthority||op==bytes32(0)||operationUsed[op])revert Unauthorized();
         if(place&&!usable(id))revert InvalidLease();
         if(!place&&l.state==State.None)revert InvalidLease();
         operationUsed[op]=true;

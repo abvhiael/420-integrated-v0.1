@@ -65,6 +65,14 @@ contract R041Actor {
         i.transferAvailable(op, id, to, amount);
     }
 
+    function approveOperator(InventoryRegistry i, address operator, bool approved) external {
+        i.setInventoryOperator(operator, approved);
+    }
+
+    function transferReserved(InventoryRegistry i, bytes32 op, bytes32 asset, address owner, address recipient, uint256 count) external {
+        i.transferReservedFor(op, asset, owner, recipient, count);
+    }
+
     function acquire(
         InventoryRegistry i,
         bytes32 op,
@@ -140,6 +148,28 @@ contract InventoryRegistryR041Test {
         (bool ok,) = address(inventory).call(abi.encodeCall(inventory.importHarvest, (product)));
         require(!ok, "zero harvest created inventory");
         require(!inventory.importedProduct(product), "zero import recorded");
+    }
+
+    function testMarketReservedHandoffConservesAndRevocationBlocks() public {
+        inventory.acquire(bytes32(uint256(81)), RESOURCE, address(alice), 10);
+        alice.approveOperator(inventory, address(this), true);
+        inventory.reserveFor(bytes32(uint256(82)), RESOURCE, address(alice), 7);
+        inventory.transferReservedFor(bytes32(uint256(83)), RESOURCE, address(alice), address(bob), 5);
+        ledgerCheck(RESOURCE, address(alice), 3, 2, 0);
+        ledgerCheck(RESOURCE, address(bob), 5, 0, 0);
+        require(ledger.issued(RESOURCE) == 10 && ledger.consumed(RESOURCE) == 0, "conservation");
+        (bool replay,) = address(inventory).call(abi.encodeCall(inventory.transferReservedFor,
+            (bytes32(uint256(83)), RESOURCE, address(alice), address(bob), uint256(1))));
+        require(!replay, "duplicate transfer");
+        alice.approveOperator(inventory, address(this), false);
+        (bool revoked,) = address(inventory).call(abi.encodeCall(inventory.transferReservedFor,
+            (bytes32(uint256(84)), RESOURCE, address(alice), address(bob), uint256(1))));
+        require(!revoked, "revoked market authority");
+        alice.release(inventory, bytes32(uint256(85)), RESOURCE, 2);
+        ledgerCheck(RESOURCE, address(alice), 5, 0, 0);
+        (bool stranger,) = address(bob).call(abi.encodeCall(bob.transferReserved,
+            (inventory, bytes32(uint256(86)), RESOURCE, address(alice), address(bob), uint256(1))));
+        require(!stranger, "unauthorized handoff");
     }
 
     function testRawLedgerExternalMutationForbidden() public {

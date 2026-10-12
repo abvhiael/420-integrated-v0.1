@@ -2,7 +2,7 @@ name: DOOBR R03.11 Browser And Device Emulation Level 1
 on:
   push:
     branches: [roadmap/doobr-bc-vancouver-infrastructure]
-    paths: ['tests/browser/doobr-r03-11.spec.mjs','playwright.doobr.config.mjs','web/doobr/**','web/travel/index.html','.github/workflows/doobr-r03-11-level1.yml']
+    paths: ['tests/browser/doobr-r03-11.spec.mjs','tests/browser/doobr_static_server.py','playwright.doobr.config.mjs','web/doobr/**','web/travel/index.html','.github/workflows/doobr-r03-11-level1.yml']
   pull_request:
     paths: ['tests/browser/doobr-r03-11.spec.mjs','playwright.doobr.config.mjs','web/doobr/**','web/travel/index.html','.github/workflows/doobr-r03-11-level1.yml']
   workflow_dispatch:

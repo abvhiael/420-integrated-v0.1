@@ -3,6 +3,8 @@ WORKDIR /app
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
 COPY services/420bnb/requirements.txt /app/requirements.txt
 RUN pip install --no-cache-dir -r /app/requirements.txt && useradd -r -u 10001 bnb
+COPY services/420bnb/migrate.py /app/migrate.py
+COPY services/420bnb/migrations/ /app/migrations/
 COPY services/420bnb/api.py /app/api.py
 COPY services/420bnb/identity.py /app/identity.py
 COPY services/420bnb/authority.py /app/authority.py

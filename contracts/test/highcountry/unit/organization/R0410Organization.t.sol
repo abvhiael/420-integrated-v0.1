@@ -2,22 +2,88 @@
 pragma solidity ^0.8.24;
 import { OrganizationRegistry } from "../../../../src/highcountry/organization/OrganizationRegistry.sol";
 import { OrganizationAuthority } from "../../../../src/highcountry/organization/OrganizationAuthority.sol";
-import { OrganizationTreasuryPermissions } from "../../../../src/highcountry/organization/OrganizationTreasuryPermissions.sol";
+import {
+    OrganizationTreasuryPermissions
+} from "../../../../src/highcountry/organization/OrganizationTreasuryPermissions.sol";
 
 interface VmR0410 {
-    function warp(uint256) external;
+    function warp(
+        uint256
+    ) external;
 }
 
 contract R0410Actor {
-    function join(OrganizationRegistry r,bytes32 id) external {r.join(id);}
-    function leave(OrganizationRegistry r,bytes32 id) external {r.requestLeave(id);}
-    function reserve(OrganizationRegistry r,bytes32 id,uint32 amount) external {r.reserveObligation(id,amount);}
-    function ack(OrganizationRegistry r,bytes32 id,uint32 left) external {r.requestObligationDischarge(id,left);}
-    function finalize(OrganizationRegistry r,bytes32 id,address who) external {r.finalizeExit(id,who);}
-    function consume(OrganizationAuthority a,bytes32 id,bytes32 act,bytes32 scope) external {a.consume(id,act,scope);}
-    function revoke(OrganizationAuthority a,bytes32 id) external {a.revoke(id);}
-    function approveTreasury(OrganizationTreasuryPermissions p,bytes32 id) external {p.approve(id);}
-    function useTreasury(OrganizationTreasuryPermissions p,bytes32 id,address beneficiary,bytes32 action,bytes32 scope,uint256 amount) external {p.consume(id,beneficiary,action,scope,amount);}
+    function join(
+        OrganizationRegistry r,
+        bytes32 id
+    ) external {
+        r.join(id);
+    }
+
+    function leave(
+        OrganizationRegistry r,
+        bytes32 id
+    ) external {
+        r.requestLeave(id);
+    }
+
+    function reserve(
+        OrganizationRegistry r,
+        bytes32 id,
+        uint32 amount
+    ) external {
+        r.reserveObligation(id, amount);
+    }
+
+    function ack(
+        OrganizationRegistry r,
+        bytes32 id,
+        uint32 left
+    ) external {
+        r.requestObligationDischarge(id, left);
+    }
+
+    function finalize(
+        OrganizationRegistry r,
+        bytes32 id,
+        address who
+    ) external {
+        r.finalizeExit(id, who);
+    }
+
+    function consume(
+        OrganizationAuthority a,
+        bytes32 id,
+        bytes32 act,
+        bytes32 scope
+    ) external {
+        a.consume(id, act, scope);
+    }
+
+    function revoke(
+        OrganizationAuthority a,
+        bytes32 id
+    ) external {
+        a.revoke(id);
+    }
+
+    function approveTreasury(
+        OrganizationTreasuryPermissions p,
+        bytes32 id
+    ) external {
+        p.approve(id);
+    }
+
+    function useTreasury(
+        OrganizationTreasuryPermissions p,
+        bytes32 id,
+        address beneficiary,
+        bytes32 action,
+        bytes32 scope,
+        uint256 amount
+    ) external {
+        p.consume(id, beneficiary, action, scope, amount);
+    }
 }
 
 contract R0410OrganizationTest {
@@ -48,8 +114,9 @@ contract R0410OrganizationTest {
         require(!replay, "join replay");
     }
     function testBoundedDelegationAndUseReplay() public {
-        bytes32 id =
-            a.delegate(ORG, address(alice), ACTION, SCOPE, uint64(block.timestamp), uint64(block.timestamp + 1 days), 1);
+        bytes32 id = a.delegate(
+            ORG, address(alice), ACTION, SCOPE, uint64(block.timestamp), uint64(block.timestamp + 1 days), 1
+        );
         require(a.valid(id, address(alice), ACTION, SCOPE), "valid delegate absent");
         require(!a.valid(id, address(bob), ACTION, SCOPE), "unauthorized person");
         require(!a.valid(id, address(alice), ACTION, bytes32(uint256(99))), "scope escalation");
@@ -80,22 +147,24 @@ contract R0410OrganizationTest {
         }
     }
     function testLeaveRevokesAuthorizationAndObligationsBlockExit() public {
-        bytes32 id=a.delegate(ORG,address(alice),ACTION,SCOPE,uint64(block.timestamp),uint64(block.timestamp+1 days),2);
-        alice.reserve(r,ORG,2);
-        alice.leave(r,ORG);
-        require(!a.valid(id,address(alice),ACTION,SCOPE),"leaving member retained access");
-        (bool premature,) = address(r).call(abi.encodeCall(r.finalizeExit,(ORG,address(alice))));
-        require(!premature,"outstanding obligations silently dropped");
-        alice.ack(r,ORG,0);
-        (bool unilateral,) = address(r).call(abi.encodeCall(r.finalizeExit,(ORG,address(alice))));
-        require(!unilateral,"unilateral discharge accepted");
-        r.confirmObligationDischarge(ORG,address(alice));
-        r.finalizeExit(ORG,address(alice));
-        require(!r.isActiveMember(ORG,address(alice)),"ex-member active");
+        bytes32 id =
+            a.delegate(ORG, address(alice), ACTION, SCOPE, uint64(block.timestamp), uint64(block.timestamp + 1 days), 2);
+        alice.reserve(r, ORG, 2);
+        alice.leave(r, ORG);
+        require(!a.valid(id, address(alice), ACTION, SCOPE), "leaving member retained access");
+        (bool premature,) = address(r).call(abi.encodeCall(r.finalizeExit, (ORG, address(alice))));
+        require(!premature, "outstanding obligations silently dropped");
+        alice.ack(r, ORG, 0);
+        (bool unilateral,) = address(r).call(abi.encodeCall(r.finalizeExit, (ORG, address(alice))));
+        require(!unilateral, "unilateral discharge accepted");
+        r.confirmObligationDischarge(ORG, address(alice));
+        r.finalizeExit(ORG, address(alice));
+        require(!r.isActiveMember(ORG, address(alice)), "ex-member active");
     }
     function testAdminRotationRevokesOldDelegation() public {
-        bytes32 id =
-            a.delegate(ORG, address(alice), ACTION, SCOPE, uint64(block.timestamp), uint64(block.timestamp + 1 days), 5);
+        bytes32 id = a.delegate(
+            ORG, address(alice), ACTION, SCOPE, uint64(block.timestamp), uint64(block.timestamp + 1 days), 5
+        );
         r.transferAdmin(ORG, address(alice));
         require(!a.valid(id, address(alice), ACTION, SCOPE), "old admin grants survived rotation");
         (bool retained,) = address(a)
@@ -116,58 +185,74 @@ contract R0410OrganizationTest {
         require(!retained, "former admin delegated");
     }
     function testUnknownActionCannotMasqueradeAsTreasuryOrWalletAuthority() public {
-        (bool allowed,) = address(a).call(abi.encodeCall(a.delegate,
-            (ORG,address(alice),keccak256("transfer-funds"),SCOPE,uint64(block.timestamp),
-            uint64(block.timestamp+1 days),uint32(10))));
-        require(!allowed,"arbitrary action can impersonate protected privileges");
+        (bool allowed,) = address(a)
+            .call(
+                abi.encodeCall(
+                    a.delegate,
+                    (
+                        ORG,
+                        address(alice),
+                        keccak256("transfer-funds"),
+                        SCOPE,
+                        uint64(block.timestamp),
+                        uint64(block.timestamp + 1 days),
+                        uint32(10)
+                    )
+                )
+            );
+        require(!allowed, "arbitrary action can impersonate protected privileges");
     }
 
     function testTreasuryRequiresIndependentConsentAndExactBoundedConsumption() public {
-        R0410Actor treasury=new R0410Actor();
-        OrganizationTreasuryPermissions policy=new OrganizationTreasuryPermissions(address(r),address(treasury),address(bob));
-        bytes32 id=policy.propose(ORG,address(alice),ACTION,SCOPE,uint64(block.timestamp+1 days),500);
-        require(!policy.permitted(id,address(alice),ACTION,SCOPE,1),"admin alone authorized treasury");
-        (bool preapproval,) = address(treasury).call(abi.encodeCall(treasury.useTreasury,(policy,id,address(alice),ACTION,SCOPE,uint256(1))));
-        require(!preapproval,"unapproved treasury spend");
-        (bool forgedApprove,) = address(policy).call(abi.encodeCall(policy.approve,(id)));
-        require(!forgedApprove,"admin silently approved treasury");
-        bob.approveTreasury(policy,id);
-        require(policy.permitted(id,address(alice),ACTION,SCOPE,500),"two-party approval missing");
-        (bool oversized,) = address(treasury).call(abi.encodeCall(treasury.useTreasury,
-            (policy,id,address(alice),ACTION,SCOPE,uint256(501))));
-        require(!oversized,"overspending allowed");
-        (bool forgedCaller,) = address(policy).call(abi.encodeCall(policy.consume,
-            (id,address(alice),ACTION,SCOPE,uint256(1))));
-        require(!forgedCaller,"wrong treasury caller");
-        treasury.useTreasury(policy,id,address(alice),ACTION,SCOPE,300);
-        require(policy.permitted(id,address(alice),ACTION,SCOPE,200),"remaining limit incorrect");
-        require(!policy.permitted(id,address(alice),ACTION,SCOPE,201),"replay exceeded amount");
-        alice.leave(r,ORG);
-        require(!policy.permitted(id,address(alice),ACTION,SCOPE,1),"leaving member retained money permissions");
+        R0410Actor treasury = new R0410Actor();
+        OrganizationTreasuryPermissions policy =
+            new OrganizationTreasuryPermissions(address(r), address(treasury), address(bob));
+        bytes32 id = policy.propose(ORG, address(alice), ACTION, SCOPE, uint64(block.timestamp + 1 days), 500);
+        require(!policy.permitted(id, address(alice), ACTION, SCOPE, 1), "admin alone authorized treasury");
+        (bool preapproval,) = address(treasury)
+            .call(abi.encodeCall(treasury.useTreasury, (policy, id, address(alice), ACTION, SCOPE, uint256(1))));
+        require(!preapproval, "unapproved treasury spend");
+        (bool forgedApprove,) = address(policy).call(abi.encodeCall(policy.approve, (id)));
+        require(!forgedApprove, "admin silently approved treasury");
+        bob.approveTreasury(policy, id);
+        require(policy.permitted(id, address(alice), ACTION, SCOPE, 500), "two-party approval missing");
+        (bool oversized,) = address(treasury)
+            .call(abi.encodeCall(treasury.useTreasury, (policy, id, address(alice), ACTION, SCOPE, uint256(501))));
+        require(!oversized, "overspending allowed");
+        (bool forgedCaller,) =
+            address(policy).call(abi.encodeCall(policy.consume, (id, address(alice), ACTION, SCOPE, uint256(1))));
+        require(!forgedCaller, "wrong treasury caller");
+        treasury.useTreasury(policy, id, address(alice), ACTION, SCOPE, 300);
+        require(policy.permitted(id, address(alice), ACTION, SCOPE, 200), "remaining limit incorrect");
+        require(!policy.permitted(id, address(alice), ACTION, SCOPE, 201), "replay exceeded amount");
+        alice.leave(r, ORG);
+        require(!policy.permitted(id, address(alice), ACTION, SCOPE, 1), "leaving member retained money permissions");
     }
 
     function testTreasuryApprovalVoidsOnAdminRotation() public {
-        R0410Actor treasury=new R0410Actor();
-        OrganizationTreasuryPermissions policy=new OrganizationTreasuryPermissions(address(r),address(treasury),address(bob));
-        bytes32 id=policy.propose(ORG,address(alice),ACTION,SCOPE,uint64(block.timestamp+1 days),100);
-        bob.approveTreasury(policy,id);
-        r.transferAdmin(ORG,address(alice));
-        require(!policy.permitted(id,address(alice),ACTION,SCOPE,1),"former admin permission survived");
+        R0410Actor treasury = new R0410Actor();
+        OrganizationTreasuryPermissions policy =
+            new OrganizationTreasuryPermissions(address(r), address(treasury), address(bob));
+        bytes32 id = policy.propose(ORG, address(alice), ACTION, SCOPE, uint64(block.timestamp + 1 days), 100);
+        bob.approveTreasury(policy, id);
+        r.transferAdmin(ORG, address(alice));
+        require(!policy.permitted(id, address(alice), ACTION, SCOPE, 1), "former admin permission survived");
     }
 
     function testExpiryAndReplaySafeNonceDomain() public {
-        uint64 expiry=uint64(block.timestamp+5);
-        bytes32 first=a.delegate(ORG,address(alice),ACTION,SCOPE,uint64(block.timestamp),expiry,2);
-        bytes32 second=a.delegate(ORG,address(alice),ACTION,SCOPE,uint64(block.timestamp),expiry,2);
-        require(first!=second,"grant nonce replay");
+        uint64 expiry = uint64(block.timestamp + 5);
+        bytes32 first = a.delegate(ORG, address(alice), ACTION, SCOPE, uint64(block.timestamp), expiry, 2);
+        bytes32 second = a.delegate(ORG, address(alice), ACTION, SCOPE, uint64(block.timestamp), expiry, 2);
+        require(first != second, "grant nonce replay");
         vm.warp(uint256(expiry));
-        require(!a.valid(first,address(alice),ACTION,SCOPE),"expired grant remained valid");
-        require(!a.valid(second,address(alice),ACTION,SCOPE),"expiry boundary inclusive");
+        require(!a.valid(first, address(alice), ACTION, SCOPE), "expired grant remained valid");
+        require(!a.valid(second, address(alice), ACTION, SCOPE), "expiry boundary inclusive");
     }
 
     function testRemovalAndRevocation() public {
-        bytes32 id =
-            a.delegate(ORG, address(alice), ACTION, SCOPE, uint64(block.timestamp), uint64(block.timestamp + 1 days), 5);
+        bytes32 id = a.delegate(
+            ORG, address(alice), ACTION, SCOPE, uint64(block.timestamp), uint64(block.timestamp + 1 days), 5
+        );
         alice.revoke(a, id);
         require(!a.valid(id, address(alice), ACTION, SCOPE), "delegate revocation failed");
         r.remove(ORG, address(alice));

@@ -76,3 +76,31 @@ def test_policy_and_binding_not_configured_cannot_be_self_approved(monkeypatch):
         with pytest.raises(api.HTTPException) as exc:
             verify_authority("self-issued",prefix,purpose)
         assert exc.value.status_code==503
+
+def test_place_discovery_cannot_include_other_properties_in_same_region(monkeypatch):
+    property_id="00000000-0000-0000-0000-000000000001"
+    monkeypatch.setattr(api,"resolve_public_place",lambda place_id: {
+        "place_id":place_id,"region":"Saskatchewan","country":"CA"})
+    def exact(place_id,response,limit):
+        assert place_id=="place_1"
+        return {"listings":[{"property_id":property_id,"title":"Allowed",
+            "public_region":"Saskatchewan","capacity":2,"map_marker":None}]}
+    monkeypatch.setattr(api,"travel_authorized_listings",exact)
+    monkeypatch.setattr(api,"guest_search",lambda **kwargs: (_ for _ in ()).throw(
+        AssertionError("region-wide discovery forbidden")))
+    response=client.get("/v1/bnb/travel/discovery",params={"place_id":"place_1"})
+    assert response.status_code==200
+    body=response.json()
+    assert [x["property_id"] for x in body["listings"]]==[property_id]
+    assert body["transaction_enabled"] is False
+    assert body["listings"][0]["map_marker"] is None
+    assert body["listings"][0]["price_preview"]["binding"] is False
+
+def test_place_discovery_fails_closed_on_provider_outage_and_offset(monkeypatch):
+    monkeypatch.setattr(api,"resolve_public_place",lambda _: (_ for _ in ()).throw(
+        api.TravelLocationUnavailable("offline")))
+    assert client.get("/v1/bnb/travel/discovery?place_id=place_1").status_code==503
+    monkeypatch.setattr(api,"resolve_public_place",lambda _:{"region":"SK","country":"CA"})
+    monkeypatch.setattr(api,"travel_authorized_listings",lambda *_a,**_k: (_ for _ in ()).throw(
+        AssertionError("pagination should stop before provider call")))
+    assert client.get("/v1/bnb/travel/discovery?place_id=place_1&offset=2").status_code==422

@@ -9,12 +9,15 @@ export class CanonicalMarketSettlement {
   if(typeof store?.transact!=='function'||typeof authority?.registeredPrincipal!=='function'
      ||typeof authority?.confirmedReservedTransfer!=='function'
      ||typeof authority?.proveUnexecutedAndCancelled!=='function'
+     ||typeof authority?.expectedTransferOperation!=='function'
      ||typeof clock!=='function')throw new SettlementError('missing canonical authority');
   this.store=store;this.authority=authority;this.clock=clock;this.buds=new BudsLedger(store,null);
  }
  // Atomic database reservation and listing lock. No chain call under SQL locks.
  async prepare(session,op,listingId,transferOp){
   const buyer=id(await this.authority.registeredPrincipal(session));id(listingId);id(transferOp);
+  const canonicalOp=await this.authority.expectedTransferOperation(listingId,buyer);
+  if(canonicalOp!==transferOp)throw new SettlementError('wrong deterministic transfer operation');
   return this.buds.operate(op,s=>{
    if(s.transferIntents.has(transferOp))throw new SettlementError('duplicate transfer intent');
    const l=s.listings.get(listingId);

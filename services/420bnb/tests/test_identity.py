@@ -49,7 +49,7 @@ def test_provider_missing_fails_closed(identity,monkeypatch):
     assert e.value.status_code==503
 
 @pytest.mark.parametrize("claim,value",[
-    ("jti",""),("jti","a"*257),("jti","session\\nspoof"),
+    ("jti",""),("jti","a"*257),("jti","session" + chr(10) + "spoof"),
     ("iat",True),("nbf",False),("exp",True),
 ])
 def test_reject_malformed_session_or_timestamp(identity,claim,value):

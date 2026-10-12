@@ -572,7 +572,7 @@ contract CanonicalR049PlantAdmissionIntegrationTest is PublicPlantCapacityFixtur
 
         _grant(address(this), ModuleIds.LAND_REGISTRY, ActionIds.LAND_SET_OCCUPANCY, bytes32(uint256(1)));
         land.setOccupancy(1, ALICE, LandRegistry.OccupancyKind.LEASE, LEASE_ID_R049);
-        _grant(address(this), ModuleIds.LAND_REGISTRY, ActionIds.LAND_BIND_PLANTS, bytes32(0));
+        _grant(address(this), ModuleIds.LAND_REGISTRY, ActionIds.LAND_BIND_PLANTS, land.PLANTS_BIND_SCOPE());
         land.bindCanonicalPlants(address(plants));
         leases.createCanonical(LEASE_ID_R049, 1, ALICE, uint64(block.timestamp), uint64(block.timestamp+30 days), 1, 0);
 
@@ -616,7 +616,7 @@ contract CanonicalR049LicenseAdmissionIntegrationTest is PublicPlantCapacityFixt
         rights.registerAsset(gate.parcelAsset(1), address(this));
         _grant(address(this), ModuleIds.LAND_REGISTRY, ActionIds.LAND_SET_OCCUPANCY, bytes32(uint256(1)));
         land.setOccupancy(1, ALICE, LandRegistry.OccupancyKind.LICENSE, LICENSE_ID_R049);
-        _grant(address(this), ModuleIds.LAND_REGISTRY, ActionIds.LAND_BIND_PLANTS, bytes32(0));
+        _grant(address(this), ModuleIds.LAND_REGISTRY, ActionIds.LAND_BIND_PLANTS, land.PLANTS_BIND_SCOPE());
         land.bindCanonicalPlants(address(plants));
         licenses.issueCanonical(LICENSE_ID_R049, 1, ALICE, 1, uint64(block.timestamp), uint64(block.timestamp + 30 days), 0);
         _grant(address(this), ModuleIds.PLANT_REGISTRY, ActionIds.PLANT_REGISTER, bytes32(uint256(1)));

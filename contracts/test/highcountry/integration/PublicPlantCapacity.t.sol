@@ -444,7 +444,16 @@ contract PublicPlantCapacityTest is PublicPlantCapacityFixture {
         _allocate(1, ALICE, 2);
         _public(2, ALICE, 1);
         _grant(address(this), ModuleIds.LAND_REGISTRY, ActionIds.LAND_SET_OCCUPANCY, bytes32(uint256(1)));
-        land.setOccupancy(1, BOB, LandRegistry.OccupancyKind.LEASE, keccak256("lease"));
+        bytes32 leaseId = keccak256("lease");
+        land.setOccupancy(1, BOB, LandRegistry.OccupancyKind.LEASE, leaseId);
+        RightsRegistry rights = new RightsRegistry();
+        LeaseRegistry lease = new LeaseRegistry(address(rights));
+        CanonicalLandPlantGate gate = new CanonicalLandPlantGate(address(land), address(plants));
+        lease.bindCanonicalGate(address(gate));
+        rights.registerAsset(gate.parcelAsset(1), address(this));
+        lease.createCanonical(leaseId, 1, BOB, uint64(block.timestamp), uint64(block.timestamp + 30 days), 1, 0);
+        _grant(address(this), ModuleIds.PLANT_REGISTRY, ActionIds.PLANT_BIND_RIGHTS, plants.RIGHTS_BIND_SCOPE());
+        plants.bindCanonicalRights(address(lease));
         _grant(address(this), ModuleIds.PLANT_REGISTRY, ActionIds.PLANT_REGISTER, bytes32(uint256(3)));
         _reject(
             address(plants),

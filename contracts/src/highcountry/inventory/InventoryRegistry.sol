@@ -173,7 +173,10 @@ contract InventoryRegistry {
 
     /// @notice Market custody transfer has distinct, explicit owner consent.
     /// @dev Existing manufacturing operators do not inherit this new transfer authority.
-    function setMarketTransferOperator(address operator, bool approved) external {
+    function setMarketTransferOperator(
+        address operator,
+        bool approved
+    ) external {
         if (operator == address(0) || operator == msg.sender) revert HCInvalidState();
         marketTransferOperators[msg.sender][operator] = approved;
         emit MarketTransferOperatorUpdated(msg.sender, operator, approved);
@@ -181,8 +184,16 @@ contract InventoryRegistry {
 
     /// @notice Owner delegates an inventory operator; active consent is required at settlement.
     /// @dev Revocation immediately prevents reserved transfer; prior reservations can still be recovered by owner.
-    function transferReservedFor(bytes32 op, bytes32 id, address owner, address to, uint256 amount) external {
-        if (!inventoryOperators[owner][msg.sender] || !marketTransferOperators[owner][msg.sender]) revert HCInvalidState();
+    function transferReservedFor(
+        bytes32 op,
+        bytes32 id,
+        address owner,
+        address to,
+        uint256 amount
+    ) external {
+        if (!inventoryOperators[owner][msg.sender] || !marketTransferOperators[owner][msg.sender]) {
+            revert HCInvalidState();
+        }
         _ensureActive(id);
         ledger.transferReserved(op, id, owner, to, amount);
     }

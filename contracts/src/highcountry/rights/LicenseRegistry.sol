@@ -43,17 +43,28 @@ contract LicenseRegistry {
     }
 
     /// @notice Bind the same canonical LandRegistry/PlantRegistry authority once.
-    function bindCanonicalGate(address gate) external {
-        if (msg.sender != bindingAuthority || address(canonicalGate) != address(0) || gate.code.length == 0) revert InvalidLicense();
+    function bindCanonicalGate(
+        address gate
+    ) external {
+        if (msg.sender != bindingAuthority || address(canonicalGate) != address(0) || gate.code.length == 0) {
+            revert InvalidLicense();
+        }
         canonicalGate = CanonicalLandPlantGate(gate);
         emit CanonicalGateBound(gate);
     }
 
     function issueCanonical(
-        bytes32 id, uint64 parcelId, address licensee, uint256 scopes, uint64 start, uint64 end, uint256 feeUnits
+        bytes32 id,
+        uint64 parcelId,
+        address licensee,
+        uint256 scopes,
+        uint64 start,
+        uint64 end,
+        uint256 feeUnits
     ) external {
-        if (address(canonicalGate) == address(0) ||
-            !canonicalGate.licenseAdmissible(parcelId, id, msg.sender, licensee)) revert InvalidLicense();
+        if (
+            address(canonicalGate) == address(0) || !canonicalGate.licenseAdmissible(parcelId, id, msg.sender, licensee)
+        ) revert InvalidLicense();
         bytes32 asset = canonicalGate.parcelAsset(parcelId);
         _issue(id, asset, licensee, scopes, start, end, feeUnits);
         canonicalParcelOf[id] = parcelId;
@@ -73,7 +84,15 @@ contract LicenseRegistry {
         _issue(id, asset, licensee, scopes, start, end, feeUnits);
     }
 
-    function _issue(bytes32 id, bytes32 asset, address licensee, uint256 scopes, uint64 start, uint64 end, uint256 feeUnits) private {
+    function _issue(
+        bytes32 id,
+        bytes32 asset,
+        address licensee,
+        uint256 scopes,
+        uint64 start,
+        uint64 end,
+        uint256 feeUnits
+    ) private {
         (address owner, bool exists, bool frozen) = rights.assets(asset);
         if (
             id == bytes32(0) || licenses[id].issuer != address(0) || !exists || frozen || owner != msg.sender
@@ -90,7 +109,10 @@ contract LicenseRegistry {
     ) external view returns (bool) {
         License memory l = licenses[id];
         (address owner, bool exists, bool frozen) = rights.assets(l.asset);
-        if (canonicalParcelOf[id] != 0 && !canonicalGate.licenseAdmissible(canonicalParcelOf[id], id, l.issuer, l.licensee)) return false;
+        if (
+            canonicalParcelOf[id] != 0
+                && !canonicalGate.licenseAdmissible(canonicalParcelOf[id], id, l.issuer, l.licensee)
+        ) return false;
         return l.issuer != address(0) && !l.revoked && exists && !frozen && owner == l.issuer && l.licensee == who
             && required != 0 && (l.scopes & required) == required && block.timestamp >= l.start
             && block.timestamp < l.end;
@@ -112,8 +134,8 @@ contract LicenseRegistry {
         License storage l = licenses[id];
         (address owner, bool exists, bool frozen) = rights.assets(l.asset);
         if (
-            canonicalParcelOf[id] != 0 || l.licensee != msg.sender || l.revoked || !exists || frozen || owner != l.issuer || to == address(0)
-                || to == msg.sender || block.timestamp >= l.end
+            canonicalParcelOf[id] != 0 || l.licensee != msg.sender || l.revoked || !exists || frozen
+                || owner != l.issuer || to == address(0) || to == msg.sender || block.timestamp >= l.end
         ) revert InvalidLicense();
         address from = l.licensee;
         l.licensee = to;

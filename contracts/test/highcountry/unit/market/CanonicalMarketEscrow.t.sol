@@ -4,22 +4,45 @@ import { InventoryRegistry } from "../../../../src/highcountry/inventory/Invento
 import { ResourceLedger } from "../../../../src/highcountry/inventory/ResourceLedger.sol";
 import { CanonicalMarketEscrow } from "../../../../src/highcountry/market/CanonicalMarketEscrow.sol";
 
-contract MarketEscrowProductStub {}
+contract MarketEscrowProductStub { }
+
 contract MarketSeller {
-    function approve(InventoryRegistry inv, address op, bool enabled) external {
+    function approve(
+        InventoryRegistry inv,
+        address op,
+        bool enabled
+    ) external {
         inv.setInventoryOperator(op, enabled);
         inv.setMarketTransferOperator(op, enabled);
     }
-    function open(CanonicalMarketEscrow market, bytes32 id, bytes32 asset, uint256 qty, uint64 deadline) external {
+
+    function open(
+        CanonicalMarketEscrow market,
+        bytes32 id,
+        bytes32 asset,
+        uint256 qty,
+        uint64 deadline
+    ) external {
         market.list(id, asset, qty, deadline);
     }
-    function releaseDirect(InventoryRegistry inv, bytes32 op, bytes32 asset, uint256 quantity) external {
+
+    function releaseDirect(
+        InventoryRegistry inv,
+        bytes32 op,
+        bytes32 asset,
+        uint256 quantity
+    ) external {
         inv.release(op, asset, quantity);
     }
-    function cancel(CanonicalMarketEscrow market, bytes32 id) external {
+
+    function cancel(
+        CanonicalMarketEscrow market,
+        bytes32 id
+    ) external {
         market.cancel(id);
     }
 }
+
 contract CanonicalMarketEscrowR048Test {
     InventoryRegistry inv;
     ResourceLedger ledger;
@@ -28,6 +51,7 @@ contract CanonicalMarketEscrowR048Test {
     bytes32 constant ASSET = keccak256("market-test-asset");
     bytes32 constant LISTING = keccak256("market-test-listing");
     address constant BUYER = address(0xA123);
+
     function setUp() public {
         inv = new InventoryRegistry(address(new MarketEscrowProductStub()));
         ledger = inv.ledger();
@@ -38,6 +62,7 @@ contract CanonicalMarketEscrowR048Test {
         seller.approve(inv, address(market), true);
         inv.acquire(bytes32(uint256(100)), ASSET, address(seller), 10);
     }
+
     function testSellerLockSettlementConservationAndReplay() public {
         seller.open(market, LISTING, ASSET, 6, uint64(block.timestamp + 500));
         ResourceLedger.Balance memory oldBalance = ledger.balance(ASSET, address(seller));
@@ -54,21 +79,21 @@ contract CanonicalMarketEscrowR048Test {
         (bool refund,) = address(seller).call(abi.encodeCall(seller.cancel, (market, LISTING)));
         require(!refund, "sold item refunded");
     }
+
     function testOwnerCancellationAndOneTimeListingIdentity() public {
         seller.open(market, LISTING, ASSET, 3, uint64(block.timestamp + 100));
         seller.cancel(market, LISTING);
         ResourceLedger.Balance memory b = ledger.balance(ASSET, address(seller));
         require(b.available == 10 && b.reserved == 0, "refund mismatch");
-        (bool again,) = address(seller).call(
-            abi.encodeCall(seller.open, (market, LISTING, ASSET, uint256(3), uint64(block.timestamp + 100)))
-        );
+        (bool again,) = address(seller)
+            .call(abi.encodeCall(seller.open, (market, LISTING, ASSET, uint256(3), uint64(block.timestamp + 100))));
         require(!again, "relisted consumed identity");
     }
+
     function testUnapprovedOperatorAndRevocationFailClosed() public {
         seller.approve(inv, address(market), false);
-        (bool unauthorized,) = address(seller).call(
-            abi.encodeCall(seller.open, (market, LISTING, ASSET, uint256(2), uint64(block.timestamp + 100)))
-        );
+        (bool unauthorized,) = address(seller)
+            .call(abi.encodeCall(seller.open, (market, LISTING, ASSET, uint256(2), uint64(block.timestamp + 100))));
         require(!unauthorized, "unapproved reservation");
         seller.approve(inv, address(market), true);
         seller.open(market, LISTING, ASSET, 2, uint64(block.timestamp + 100));
@@ -77,6 +102,7 @@ contract CanonicalMarketEscrowR048Test {
         require(!blocked, "revoked custody settled");
         require(market.listing(LISTING).status == CanonicalMarketEscrow.Status.Active, "rollback failed");
     }
+
     function testRevokedSellerCanCloseAndManuallyRecoverReservedStock() public {
         seller.open(market, LISTING, ASSET, 2, uint64(block.timestamp + 100));
         seller.approve(inv, address(market), false);

@@ -496,10 +496,18 @@ def revoke_compliance_eligibility(payload:ComplianceProofInput):
     with db() as c:
         with c.transaction():
             c.execute("SELECT id FROM bnb_property WHERE id=%s FOR UPDATE",(property_id,))
-            prior=c.execute("""SELECT issuer,revoked_at FROM bnb_compliance_eligibility
+            prior=c.execute("""SELECT issuer,revoked_at,jurisdiction_id,property_version,revision
+                FROM bnb_compliance_eligibility
                 WHERE property_id=%s FOR UPDATE""",(property_id,)).fetchone()
             if not prior:raise HTTPException(404,"COMPLIANCE_RECORD_NOT_FOUND")
             if prior[0]!=claims["iss"]:raise HTTPException(403,"COMPLIANCE_ISSUER_MISMATCH")
+            # Withdrawal is scoped to the same property-place and policy revision.
+            # A stale/misrouted source event cannot revoke a different jurisdiction.
+            if (claims.get("jurisdiction_id")!=prior[2]
+                or claims.get("property_version")!=prior[3]
+                or type(claims.get("revision"))!=int
+                or claims["revision"]<prior[4]):
+                raise HTTPException(403,"COMPLIANCE_REVOKE_SCOPE_MISMATCH")
             if prior[1] is not None:raise HTTPException(409,"COMPLIANCE_ALREADY_REVOKED")
             c.execute("""UPDATE bnb_compliance_eligibility SET revoked_at=now()
                 WHERE property_id=%s""",(property_id,))

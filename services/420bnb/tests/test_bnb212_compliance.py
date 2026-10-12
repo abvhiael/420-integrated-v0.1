@@ -127,6 +127,15 @@ def test_compliance_revision_scope_replay_and_independent_revocation(fixture_pro
     claims["iss"]="wrong-issuer"
     assert client.post(revoke,json=body).status_code==403
     claims["iss"]="fixture-compliance-issuer"
+    claims["jurisdiction_id"]="OTHER_PROPERTY"
+    assert client.post(revoke,json=body).status_code==403
+    claims["jurisdiction_id"]="FIXTURE_ONLY"
+    claims["property_version"]=2
+    assert client.post(revoke,json=body).status_code==403
+    claims["property_version"]=1
+    claims["revision"]=2
+    assert client.post(revoke,json=body).status_code==403
+    claims["revision"]=3
     assert client.post(revoke,json=body).status_code==200
     assert client.post(revoke,json=body).status_code==409
     assert all(str(property_id)!=item["id"] for item in client.get("/v1/bnb/listings").json())

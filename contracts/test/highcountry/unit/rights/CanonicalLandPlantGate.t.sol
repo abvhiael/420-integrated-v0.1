@@ -84,8 +84,6 @@ contract R049CanonicalLandOwner {
         l.revoke(id);
     }
 
-    
-
     function shadow(
         LeaseRegistry l,
         bytes32 id,

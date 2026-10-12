@@ -67,7 +67,12 @@ export class CanonicalMarketSettlement {
  // An unknown/pending chain status MUST strand funds for reconciliation, not double spend.
  async abort(op,transferOp){
   id(transferOp);
-  const safe=await this.authority.proveUnexecutedAndCancelled(transferOp);
+  const intent=await this.store.transact(s=>{
+   const t=s.transferIntents.get(transferOp);
+   if(!t||t.status!=='prepared')throw new SettlementError('not refundable');
+   return {...t};
+  });
+  const safe=await this.authority.proveUnexecutedAndCancelled(transferOp,intent.listingId,intent.buyer);
   if(safe!==true)throw new SettlementError('canonical transfer unresolved');
   return this.buds.operate(op,s=>{
    const t=s.transferIntents.get(transferOp);

@@ -4,6 +4,10 @@ import { OrganizationRegistry } from "../../../../src/highcountry/organization/O
 import { OrganizationAuthority } from "../../../../src/highcountry/organization/OrganizationAuthority.sol";
 import { OrganizationTreasuryPermissions } from "../../../../src/highcountry/organization/OrganizationTreasuryPermissions.sol";
 
+interface VmR0410 {
+    function warp(uint256) external;
+}
+
 contract R0410Actor {
     function join(OrganizationRegistry r,bytes32 id) external {r.join(id);}
     function leave(OrganizationRegistry r,bytes32 id) external {r.requestLeave(id);}
@@ -17,6 +21,7 @@ contract R0410Actor {
 }
 
 contract R0410OrganizationTest {
+    VmR0410 private constant vm = VmR0410(address(uint160(uint256(keccak256("hevm cheat code")))));
     OrganizationRegistry r;
     OrganizationAuthority a;
     R0410Actor alice;
@@ -112,6 +117,16 @@ contract R0410OrganizationTest {
         bob.approveTreasury(policy,id);
         r.transferAdmin(ORG,address(alice));
         require(!policy.permitted(id,address(alice),ACTION,SCOPE,1),"former admin permission survived");
+    }
+
+    function testExpiryAndReplaySafeNonceDomain() public {
+        uint64 expiry=uint64(block.timestamp+5);
+        bytes32 first=a.delegate(ORG,address(alice),ACTION,SCOPE,uint64(block.timestamp),expiry,2);
+        bytes32 second=a.delegate(ORG,address(alice),ACTION,SCOPE,uint64(block.timestamp),expiry,2);
+        require(first!=second,"grant nonce replay");
+        vm.warp(uint256(expiry));
+        require(!a.valid(first,address(alice),ACTION,SCOPE),"expired grant remained valid");
+        require(!a.valid(second,address(alice),ACTION,SCOPE),"expiry boundary inclusive");
     }
 
     function testRemovalAndRevocation() public {

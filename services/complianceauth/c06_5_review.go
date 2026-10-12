@@ -150,7 +150,7 @@ func (s C065ReviewService) Review(ctx context.Context,req C065ReviewInput)(C065R
   if s.Signatures.VerifyReviewSignature(ctx,req.ReviewerID,req.Signature.KeyID,payload,req.Signature.Signature)!=nil{return fail()}
   record.Proof=req.Signature
  }else if req.Signature.SignerID!=""||req.Signature.KeyID!=""||len(req.Signature.Signature)!=0{return fail()}
- if ctx.Err()!=nil||!time.Now().Before(authorized.ValidUntil){return fail()}
+ if ctx.Err()!=nil||!func() bool { check:=time.Now().UTC(); if s.Now!=nil {check=s.Now().UTC()}; return check.Before(authorized.ValidUntil) }(){return fail()}
  // Persistence adapter must enforce both CAS comparisons in one transaction.
  saved,err:=s.Reviews.AppendIfCurrent(ctx,record,req.Draft.Revision,req.ExpectedReviewRevision)
  if err!=nil {if errors.Is(err,ErrC065Conflict){return C065ReviewRecord{},ErrC065Conflict};return fail()}

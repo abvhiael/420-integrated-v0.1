@@ -29,11 +29,17 @@ export class BudsLedger {
   async earn(op,owner,source,proof,amount) {
     return this.operate(op,s=>{
       requireId(owner);requireId(source);requireId(proof);
-      if(s.claims.has(source+':'+proof))throw new SettlementError('replayed earning proof');
+      const proofKey=JSON.stringify([source,proof]);
+      if(s.claims.has(proofKey))throw new SettlementError('replayed earning proof');
       if(!this.catalog || this.catalog.authorize(source,proof,owner,amount)!==true) throw new SettlementError('unapproved reward');
       units(amount); if(amount===0)throw new SettlementError('zero award');
+      const limit=this.catalog.sourceLimit?.(source);
+      if(!Number.isSafeInteger(limit)||limit<=0)throw new SettlementError('unbounded source');
+      const previous=s.sourceIssued.get(source)||0;
+      if(amount>limit-previous)throw new SettlementError('source issuance cap');
+      s.sourceIssued.set(source,add(previous,amount));
       const b=this.get(s,owner);b.available=add(b.available,amount);s.issued=add(s.issued,amount);
-      s.claims.add(source+':'+proof);
+      s.claims.add(proofKey);
     });
   }
   async reserve(op,owner,amount) { return this.operate(op,s=>{
@@ -61,10 +67,10 @@ export class BudsLedger {
 }
 // Test-only copy-on-write serial transaction fixture. Never wire it to production accounts.
 export class MemoryTransactionFixture {
-  constructor(){this.state={balances:new Map(),operations:new Set(),claims:new Set(),issued:0,burned:0};}
+  constructor(){this.state={balances:new Map(),operations:new Set(),claims:new Set(),sourceIssued:new Map(),issued:0,burned:0};}
   async transact(fn){
     const s={balances:new Map([...this.state.balances].map(([k,v])=>[k,{...v}])),
-      operations:new Set(this.state.operations),claims:new Set(this.state.claims),issued:this.state.issued,burned:this.state.burned};
+      operations:new Set(this.state.operations),claims:new Set(this.state.claims),sourceIssued:new Map(this.state.sourceIssued),issued:this.state.issued,burned:this.state.burned};
     const r=fn(s);this.state=s;return r;
   }
 }

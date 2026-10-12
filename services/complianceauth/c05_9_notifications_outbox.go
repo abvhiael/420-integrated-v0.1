@@ -82,7 +82,10 @@ func DeliverComplianceImpact(ctx context.Context,store ComplianceOutboxStore,sen
  next:=now
  if err!=nil{
   attempt:=item.Attempts+1
-  if attempt>=maxAttempts{return store.FinishImpact(ctx,item,false,now,maxAttempts)}
+  if attempt>=maxAttempts {
+   if finishErr:=store.FinishImpact(ctx,item,false,now,maxAttempts);finishErr!=nil{return ErrImpactUnavailable}
+   return ErrImpactUnavailable
+  }
   delay:=time.Second*time.Duration(1<<min(attempt,10))
   next=now.Add(delay)
  }

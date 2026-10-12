@@ -1,6 +1,15 @@
 # BNB-2.15 — Phase 2 qualification and closeout (reconciled candidate)
 
-**Status: REPOSITORY LEVEL 3 PASS / RESTRICTED SOURCE INTEGRATION REVIEW READY / UNMERGED; LIVE ACCEPTANCE DEFERRED.**
+**Status: REPOSITORY LEVEL 3 PASS / RESTRICTED SOURCE INTEGRATION APPROVED AND MERGED; LIVE ACCEPTANCE DEFERRED.**
+
+## Approved integration and PR reconciliation (2026-10-12)
+
+Owner-authorized restricted source integration review completed before merge. Reviewed head `8e15c748289fbff2f7d4a7ef85aa6cb619c20e77` preserves qualified executable `9cdc324a1b5bd22a2dd9f343931fef05e934b8b2`, differing only in three Markdown paths. Main remained the recorded reconciliation base `fe21ef07359d6915bf5daac37c4bf24a24fcf19b`; all mandatory qualification jobs were refreshed and still completed SUCCESS. The proposed merge tree contained no changes from the reviewed head.
+
+**PR #616 merged to main as `2bc74d12662f60b9ea499fa5b38bc49e191b8f94`.** Post-merge compare from reviewed head to resulting main reports zero file differences and zero behind; original #600 head `273b6c7e714fdbc7e1c96463922546f74dc83c89` is an ancestor. GitHub automatically marked **#600 merged/closed** through the incorporated implementation merge `9cdc324a1b5bd22a2dd9f343931fef05e934b8b2`; no older source replay or second merge is required. Review approval is recorded in #616 comment 6130383886 and post-merge reconciliation comments on both PRs.
+
+The actual approved integration baseline is the merge SHA above. This subsequent main documentation update is evidence-only and inherits the qualified executable; it does not qualify new code or approve a Phase 3 roadmap. All live-testnet/issuer/legal/Pay/operational/independent-security deferrals and disabled financial/booking activation remain intact. Prior UNMERGED/pending observations below are historical and superseded by this section.
+
 
 ## Terminal repository Level 3 certification (2026-10-12)
 

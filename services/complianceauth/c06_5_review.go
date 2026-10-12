@@ -91,12 +91,12 @@ func c065FindingsValid(fs []C065Finding, conflicts []string, decision string) bo
  }
  seen=map[string]bool{}
  for _,id:=range conflicts {if !c064ID.MatchString(id)||seen[id]{return false};seen[id]=true}
- if decision!="FINDINGS_OPEN"&&decision!="APPROVED_CANDIDATE"&&decision!="CONFLICT_QUEUE"{return false}
+ if decision!="FINDINGS_OPEN"&&decision!="APPROVED_CANDIDATE"&&decision!="CONFLICT_QUEUE"&&decision!="CONFLICT_RESOLVED"{return false}
  if decision=="APPROVED_CANDIDATE" {
   if len(conflicts)!=0{return false}
   for _,f:=range fs {if f.Severity=="BLOCKING"{return false}}
  }
- if decision=="CONFLICT_QUEUE"&&len(conflicts)==0{return false}
+ if (decision=="CONFLICT_QUEUE"||decision=="CONFLICT_RESOLVED")&&len(conflicts)==0{return false}
  return true
 }
 // Review performs an independent, fail-closed, exact-version review request.

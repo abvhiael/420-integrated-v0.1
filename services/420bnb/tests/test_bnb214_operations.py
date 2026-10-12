@@ -61,3 +61,30 @@ def test_untracked_schema_not_silently_adopted(connected):
             # The migration ledger must not authorize an arbitrary preexisting schema.
             assert c.execute("SELECT to_regclass('public.bnb_property')").fetchone()[0] is not None
         c.execute("DROP SCHEMA bnb214_untracked CASCADE")
+
+def test_readiness_schema_guard(connected):
+    import importlib.util
+    from fastapi.testclient import TestClient
+    spec=importlib.util.spec_from_file_location("bnb214_api",Path(__file__).resolve().parents[1]/"api.py")
+    api=importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(api)
+    client=TestClient(api.app)
+    healthy=client.get("/health/ready")
+    assert healthy.status_code==200,healthy.text
+    assert healthy.json()["schema_version"]==20
+    original=api.db
+    class Cursor:
+        def execute(self,sql,*_):
+            self.sql=sql
+            return self
+        def fetchone(self):return (None,)
+    class Conn:
+        def __enter__(self):return Cursor()
+        def __exit__(self,*_):return False
+    api.db=lambda:Conn()
+    try:
+        blocked=client.get("/health/ready")
+        assert blocked.status_code==503
+        assert blocked.json()["detail"]=="SCHEMA_NOT_MIGRATED"
+    finally:
+        api.db=original

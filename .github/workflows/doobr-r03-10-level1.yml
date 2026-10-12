@@ -1,0 +1,34 @@
+name: DOOBR R03.10 Travel Card Level 1
+on:
+  push:
+    branches: [roadmap/doobr-bc-vancouver-infrastructure]
+    paths: ['doobr/travel_card.py','doobr/storage/tests/test_travel_card.py','.github/workflows/doobr-r03-10-level1.yml']
+  pull_request:
+    paths: ['doobr/travel_card.py','doobr/storage/tests/test_travel_card.py','.github/workflows/doobr-r03-10-level1.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  travel-card:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Exact SHA before
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Travel privacy, issuer and denial tests
+        run: |
+          python3 -m py_compile doobr/travel_card.py
+          python3 -m unittest discover -s doobr/storage/tests -p test_travel_card.py -v
+      - name: Exact SHA after
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"

@@ -306,9 +306,15 @@ def live():
 
 @app.get("/health/ready")
 def ready():
+    """Ready only when the expected schema is present; fail closed on drift."""
     with db() as c:
-        c.execute("SELECT 1").fetchone()
-    return {"status": "ready", "transactions_enabled": False}
+        current=c.execute("SELECT to_regclass('public.bnb_schema_migration')").fetchone()[0]
+        if current is None:
+            raise HTTPException(503,"SCHEMA_NOT_MIGRATED")
+        records=c.execute("SELECT version FROM bnb_schema_migration ORDER BY version").fetchall()
+        if [row[0] for row in records]!=list(range(1,21)):
+            raise HTTPException(503,"SCHEMA_VERSION_MISMATCH")
+    return {"status":"ready","transactions_enabled":False,"schema_version":20}
 
 
 class GuestMessageInput(BaseModel):

@@ -15,7 +15,7 @@ function setup(status=1){
   readContract:async q=>q.functionName==='listing'?row():operation,
   getContractEvents:async q=>q.eventName==='EscrowListed'?[listed]:
    q.eventName==='EscrowSettled'?(state.settled?[settled]:[]):
-   q.eventName==='EscrowClosed'?(state.closed?[closed]:[]):[]
+   q.eventName==='EscrowClosed'?(state.closed?[{...closed,args:{...closed.args,status:state.status}}]:[]):[]
  };
  return {state,reader:new CanonicalEscrowReader({client,escrow,issuer,chainId:420})};
 }

@@ -8,6 +8,7 @@ contract MarketEscrowProductStub {}
 contract MarketSeller {
     function approve(InventoryRegistry inv, address op, bool enabled) external {
         inv.setInventoryOperator(op, enabled);
+        inv.setMarketTransferOperator(op, enabled);
     }
     function open(CanonicalMarketEscrow market, bytes32 id, bytes32 asset, uint256 qty, uint64 deadline) external {
         market.list(id, asset, qty, deadline);

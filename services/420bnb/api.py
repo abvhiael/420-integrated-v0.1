@@ -31,7 +31,9 @@ async def bounded_api_security_headers(request,call_next):
     try:
         response=await call_next(request)
     except Exception:
-        logging.getLogger("bnb.operations").exception("api_request_failed",extra={
+        # Suppress unredacted exception tracebacks: they may contain DB parameters
+        # or private guest/host identifiers. The structured signal is sufficient.
+        logging.getLogger("bnb.operations").error("api_request_failed",extra={
             "route_template":"unhandled","http_method":request.method,
             "request_id":trace_id})
         raise

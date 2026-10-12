@@ -298,3 +298,25 @@ def test_concurrent_controlled_migrations(database):
             return p.controlled_migration(connection)
     with ThreadPoolExecutor(max_workers=2) as pool:
         assert list(pool.map(run, range(2))) == [20, 20]
+
+
+@pytest.mark.parametrize("table,privilege", [
+    ("bnb_schema_migration", "TRUNCATE"),
+    ("bnb_schema_migration", "REFERENCES"),
+    ("bnb_schema_migration", "TRIGGER"),
+    ("bnb_property", "TRUNCATE"),
+    ("bnb_property", "REFERENCES"),
+    ("bnb_property", "TRIGGER"),
+])
+def test_extra_table_privilege_drift_rejected(database, table, privilege):
+    admin, _, runtime = database
+    # Both identifiers and privileges come only from this fixed test inventory.
+    with psycopg.connect(**admin) as connection:
+        connection.execute(f"GRANT {privilege} ON TABLE {table} TO bnb_runtime")
+    try:
+        with psycopg.connect(**runtime) as connection:
+            with pytest.raises(p.ConfigurationError, match="DATABASE_LEDGER_WRITE|DATABASE_RUNTIME_EXTRA_PRIVILEGE"):
+                p.verify_database(connection)
+    finally:
+        with psycopg.connect(**admin) as connection:
+            connection.execute(f"REVOKE {privilege} ON TABLE {table} FROM bnb_runtime")

@@ -1,6 +1,42 @@
 # BNB-2.15 — Phase 2 qualification and closeout (reconciled candidate)
 
-**Status: BLOCKED / LEVEL 3 NOT YET QUALIFIED / DO NOT MERGE.**
+**Status: REPOSITORY LEVEL 3 PASS / RESTRICTED SOURCE INTEGRATION REVIEW READY / UNMERGED; LIVE ACCEPTANCE DEFERRED.**
+
+## Terminal repository Level 3 certification (2026-10-12)
+
+This is the authoritative current status; earlier dated BLOCKED/pending observations below are historical and superseded. Qualified executable candidate is **`9cdc324a1b5bd22a2dd9f343931fef05e934b8b2`**. The four canonical workflows used that same implementation and every mandatory job actual checkout was verified from full logs. All mandatory jobs completed SUCCESS; none is skipped, missing, cancelled, stale or a synthetic merge checkout.
+
+| Canonical qualification | Run ID | Mandatory job IDs | Terminal result |
+| --- | --- | --- | --- |
+| Solidity Contracts | 38281106064 | shards 0: 114918333042; 1: 114918332893; 2: 114918333021; 3: 114918332791; fixture: 114949010501 | PASS: all four primary/test/coverage partitions and fixture/aggregate/upload |
+| Genesis Address Authority | 38280934685 | 114917769351 | PASS; separate authority inventory, no full Foundry duplication |
+| 420 Integrated Qualification | 38280419435 | offline-core 114916098313; production-dependencies 114916098798; geth-engine 114916098570; fault-matrix 114916098644 | PASS: all four jobs |
+| Canonical global 420Docs Qualification | 38280739099 | qualify 114917129249 | PASS: 41 stages plus aggregate, no publication substitution |
+
+Solidity full canonical inventory: **1,064 unique source/test/script primary units**, four balanced partitions of 266. Full CI primary fuzz/invariant tests and deployable size checks passed. Each coverage job completed all **16 bounded compiler contexts**, 64 total within four shard jobs; full logs contain zero compiler-attempt errors and zero failed/skipped tests. Fixture checkout is the exact candidate; complete/unique inventory comparison succeeded. `Decision10DeploySeed420` compiled and ran successfully; nonempty creative-kernel fixture schema, IDs, schedule/rights versions and exact work/original/remix/treasury/vault pool amounts all passed jq assertions. Coverage aggregator reports **COVERAGE COMPLETE: four exact-SHA shards, 1064 primary units, 790 diagnostic LCOV source records**. LCOV completeness is not a claim of 100% measured coverage; canonical IR source-mapping/compiler/lint warnings remain diagnostics.
+
+| Retained Solidity artifact | Artifact ID | SHA256 archive digest |
+| --- | --- | --- |
+| shard 0 diagnostics | 11763813597 | 2f37e558c1ec8f684ee4bf71468f2c9c1dcebcd2910c1eeeac1ab626f34f1f10 |
+| shard 1 diagnostics | 11764486935 | e289e2466e6ee93a4137e1aae959b55efcf021de1a3d079e497c33346be2fed5 |
+| shard 2 diagnostics | 11764972227 | 9d0a4e5b3e9efc0569245719d3b4c8ba01e34f6ff9a199ea61c784812c7add53 |
+| shard 3 diagnostics | 11764987144 | a4b049d997a19c6faf0a4281ded10f4c28b4d4b21f9d18d9191adf54e2297f72 |
+| creative-kernel-v1-fixture | 11765662281 | 470fe7a75889f2ed994cb3262f6d0b25acc231ed3f6203fd572ce7f0863cc333 |
+| foundry-coverage-9cdc324a1b5bd22a2dd9f343931fef05e934b8b2 | 11765592447 | 85cd1f9235111cce41b3e947dc1e23df1f718fcffac28191b6d0f6bcca927f10 |
+
+Artifact metadata was unexpired at terminal inspection; repository retention is seven days despite requested 30-day coverage retention. Genesis artifact 11760927576 digest `34b7a46248f6e069940e3a50152513367deed3cb0e54cce26746a0d5ac93d87f`. This committed ledger preserves immutable run/job/artifact identifiers and observed digest evidence beyond artifact expiration.
+
+Additive registered Integrated qualification **38287212823 PASS**: offline-core 114938350985, production-dependencies 114938351325, geth-engine 114938351402, fault-matrix 114938351293, bnb-travel-exact 114938351205. All five actual checkouts are `9cdc324a1b5bd22a2dd9f343931fef05e934b8b2`; source workflow is support-only commit `2c668a20da3bae9f5b91e6249573863f4a61e521`. All nine canonical BnB validators, Travel/shared Genesis/DOOBR validations, migration plan, noncached compatibility and Travel tests, vet and build passed, replacing the excluded wrong-SHA Travel and 1.1/1.2 claims. Both initial and additive Integrated engine jobs report LIVE_ENGINE_PAYLOAD_SMOKE=PASS / LIVE_ENGINE_SMOKE=PASS; initial local connection refusal resolved during normal startup. Both fault matrices and 120-slot/118-finalized soak passed.
+
+Oracle **38205294248 attempt 2 PASS**, all four exact-SHA jobs, supersedes cancelled attempt 1. All retained runtime/Indexer/BnB evidence and detailed failure/security reconciliation below remain applicable. Automatic evidence-head checks were inspected separately: BnB 1.3–1.9/runtime and Oracle run 38289453603 (all four PASS) checked out evidence head `2d9ec7dfbe0220f43f33c50537b9784b6d5b621a`; Travel/1.1/1.2 checked out synthetic merge `37088c19e20d0b0224b55024953be7419f4e8764`. They do not replace frozen implementation proof. PR-only/push-only inapplicable Solidity jobs, skipped historical/PR Docs, cancelled Pages/support/Oracle runs and unrelated failed deployments remain EXCLUDED, never PASS.
+
+**Security assessment: repository-side reviewed scope accepted for restricted source integration review.** Session/authority, privacy, adversarial inventory, Pay proof/replay/finality and conservation regression evidence passed; no new critical BnB finding observed in reviewed source. This is not independent protocol-wide production security approval or live operational acceptance. Existing compiler/lint warnings and separately scoped baseline YAML/deployment defects remain documented below. Independent real issuers, legal/property/Compliance approval, live Pay settlement/reorg/refund/payout, durable multi-instance operations and manual accessibility/security acceptance remain deferred, not waived, in BNB-TESTNET-WORK-ROADMAP.md. Preserve disabled booking/financial activation.
+
+**Merge-readiness: mandatory repository Level 3 gates PASS; ready for bounded source integration approval/review, PR #616 remains DRAFT/UNMERGED.** Main was refreshed and remains `fe21ef07359d6915bf5daac37c4bf24a24fcf19b`. Frozen candidate comparison through evidence head 2d9ec7d contains exactly three Markdown paths: this closeout, BNB-3.1-PHASE2-HANDOFF.md and services/420bnb/README.md. No executable implementation delta, unapproved activation or CI weakening is introduced by evidence. #600 remains original draft/open/unmerged until qualified integration approval; no Phase 3 baseline is minted. Refresh main again before any merge; advancement requires reconciliation and applicable requalification.
+
+Evidence commits: dispatch ledger `1f577ba2123943b1c8c2564f37edb516090b41a2`; accurate runtime boundary README `68625e12062e372b7e7fe647c17b6e8e33942c5c`; exact-checkout/Oracle/security reconciliation `9eb1078cc6eaf743d39720be84a16cdb337bef92`; corrected handoff `2d9ec7dfbe0220f43f33c50537b9784b6d5b621a`; this terminal ledger is a further evidence-only commit, not a new executable candidate.
+
+
 
 Canonical step: BNB-2.15 — Phase 2 Qualification and Closeout: full app acceptance, roadmap reconciliation, exact-SHA Level 3 qualification, security evidence, PR reconciliation and merge readiness.
 

@@ -129,6 +129,11 @@ contract LeaseRegistry {
             && block.timestamp >= l.starts && block.timestamp < l.ends;
     }
 
+    /// @notice Scope bit zero is cultivation; other lease scopes cannot silently grant plant admission.
+    function canCultivate(bytes32 id) external view returns (bool) {
+        return (leases[id].scopes & uint256(1)) == 1 && usable(id);
+    }
+
     /// @dev Only the trusted cultivation/plant authority may reconcile live plants; tenants cannot falsify exits.
     function updatePlants(
         bytes32 id,

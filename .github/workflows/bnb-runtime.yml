@@ -180,7 +180,7 @@ jobs:
           BNB_INGRESS_IMAGE: example/ingress@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
           BNB_RUNTIME_BINDINGS_DIR: /tmp/bnb-runtime-fixture
           BNB_MIGRATION_BINDINGS_DIR: /tmp/bnb-migrator-fixture
-          BNB_INGRESS_CONFIG: services/420bnb/Caddyfile.production
+          BNB_INGRESS_CONFIG: ${{ github.workspace }}/services/420bnb/Caddyfile.production
           BNB_TLS_DIRECTORY: /tmp/bnb-tls-fixture
           BNB_API_HOST: api.example.test
           BNB_WEB_HOST: bnb.example.test

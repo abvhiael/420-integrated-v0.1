@@ -20,7 +20,9 @@ import { AuthorizationRequest, GenesisRoots } from "../types/HighCountryTypes.so
 
 interface ICanonicalPlantCountsLandR049 {
     function landRegistry() external view returns (address);
-    function activePlantsByParcel(uint64 parcelId) external view returns (uint32);
+    function activePlantsByParcel(
+        uint64 parcelId
+    ) external view returns (uint32);
 }
 
 interface IRegionRegistryHC3 {
@@ -88,7 +90,9 @@ contract LandRegistry {
     }
 
     /// @notice The unique canonical plant source must be bound before clearing occupied land.
-    function bindCanonicalPlants(address candidate) external {
+    function bindCanonicalPlants(
+        address candidate
+    ) external {
         if (address(canonicalPlants) != address(0) || candidate.code.length == 0) revert HCInvalidState();
         _requireAuthorized(ActionIds.LAND_BIND_PLANTS, 0, 0);
         if (ICanonicalPlantCountsLandR049(candidate).landRegistry() != address(this)) revert HCInvalidState();

@@ -41,6 +41,7 @@ contract R049CanonicalLandFixture {
         return parcel;
     }
 }
+
 contract R049CanonicalPlantsFixture {
     address public landRegistry;
 
@@ -58,6 +59,7 @@ contract R049CanonicalPlantsFixture {
         activePlantsByParcel[parcelId] = count;
     }
 }
+
 contract R049CanonicalLandOwner {
     function register(
         RightsRegistry r,
@@ -105,8 +107,8 @@ contract R049CanonicalLandOwner {
     ) external {
         l.transferTenant(id, to);
     }
-
 }
+
 contract CanonicalLandPlantGateR049Test {
     RightsRegistry rights;
     LeaseRegistry lease;
@@ -129,8 +131,8 @@ contract CanonicalLandPlantGateR049Test {
         lease.bindCanonicalGate(address(gate));
         land.configure(PARCEL, address(owner), TENANT, LEASE_ID);
         rights.registerAsset(gate.parcelAsset(PARCEL), address(owner));
-
     }
+
     function testCanonicalLeaseUsesActualLandAndPlantState() public {
         owner.create(lease, LEASE_ID, PARCEL, TENANT);
         require(lease.usable(LEASE_ID), "canonical lease admission failed");
@@ -147,11 +149,13 @@ contract CanonicalLandPlantGateR049Test {
         (,,,,,,,, status, exitPending) = lease.leases(LEASE_ID);
         require(status == LeaseRegistry.State.Closed && !exitPending, "canonical exit not finalized");
     }
+
     function testBoundCanonicalGateDisablesShadowLeaseEntry() public {
         (bool shadowOk,) =
             address(owner).call(abi.encodeCall(owner.shadow, (lease, LEASE_ID, gate.parcelAsset(PARCEL), TENANT)));
         require(!shadowOk, "parallel shadow lease bypassed canonical land");
     }
+
     function testCanonicalOwnershipAndOccupancyChangeFailClosed() public {
         owner.create(lease, LEASE_ID, PARCEL, TENANT);
         land.changeOwner(address(0x9999));
@@ -160,12 +164,14 @@ contract CanonicalLandPlantGateR049Test {
         land.changeOccupant(address(0x9999));
         require(!lease.usable(LEASE_ID), "stale tenant occupancy accepted");
     }
+
     function testCrossRegistryPlantBindingFailsClosed() public {
         R049CanonicalPlantsFixture bogus = new R049CanonicalPlantsFixture();
         try new CanonicalLandPlantGate(address(land), address(bogus)) returns (CanonicalLandPlantGate) {
             revert("unrelated cultivation registry accepted");
         } catch { }
     }
+
     function testForgedParcelAndOverCapacityRejected() public {
         (bool forged,) = address(owner).call(abi.encodeCall(owner.create, (lease, bytes32(uint256(7)), PARCEL, TENANT)));
         require(!forged, "unregistered canonical lease succeeded");

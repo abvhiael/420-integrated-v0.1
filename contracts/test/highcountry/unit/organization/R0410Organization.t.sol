@@ -27,7 +27,7 @@ contract R0410OrganizationTest {
     R0410Actor alice;
     R0410Actor bob;
     bytes32 constant ORG = keccak256("org");
-    bytes32 constant ACTION = keccak256("manage-plants");
+    bytes32 constant ACTION = keccak256("HC.ORG.NONCUSTODIAL.CULTIVATION");
     bytes32 constant SCOPE = keccak256("field-7");
 
     function setUp() public {

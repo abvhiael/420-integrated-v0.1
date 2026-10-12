@@ -99,34 +99,45 @@ contract OrganizationRegistry {
     }
 
     /// @notice The member proposes a lower obligation count. This cannot release funds.
-    function requestObligationDischarge(bytes32 id,uint32 remaining) external {
-        Membership storage m=members[id][msg.sender];
-        if((m.status!=Status.Active&&m.status!=Status.Leaving)||remaining>=m.pendingObligations) revert Unauthorized();
-        requestedObligationBalance[id][msg.sender]=remaining;
-        dischargeRequested[id][msg.sender]=true;
+    function requestObligationDischarge(
+        bytes32 id,
+        uint32 remaining
+    ) external {
+        Membership storage m = members[id][msg.sender];
+        if ((m.status != Status.Active && m.status != Status.Leaving) || remaining >= m.pendingObligations) {
+            revert Unauthorized();
+        }
+        requestedObligationBalance[id][msg.sender] = remaining;
+        dischargeRequested[id][msg.sender] = true;
     }
 
     /// @notice Two-party administrative confirmation of a noncustodial obligation record.
     /// @dev Canonical treasury settlement/dispute proofs remain independently required.
-    function confirmObligationDischarge(bytes32 id,address member) external {
-        if(msg.sender!=organizations[id].administrator||!dischargeRequested[id][member]) revert Unauthorized();
-        Membership storage m=members[id][member];
-        uint32 remaining=requestedObligationBalance[id][member];
-        if(remaining>=m.pendingObligations) revert Invalid();
+    function confirmObligationDischarge(
+        bytes32 id,
+        address member
+    ) external {
+        if (msg.sender != organizations[id].administrator || !dischargeRequested[id][member]) revert Unauthorized();
+        Membership storage m = members[id][member];
+        uint32 remaining = requestedObligationBalance[id][member];
+        if (remaining >= m.pendingObligations) revert Invalid();
         delete dischargeRequested[id][member];
         delete requestedObligationBalance[id][member];
-        m.pendingObligations=remaining;
-        emit ObligationCount(id,member,remaining);
+        m.pendingObligations = remaining;
+        emit ObligationCount(id, member, remaining);
     }
 
     /// @dev Member opt-in reservation, not asset custody or external settlement.
-    function reserveObligation(bytes32 id,uint32 amount) external {
-        Membership storage m=members[id][msg.sender];
-        if(m.status!=Status.Active||amount==0) revert Unauthorized();
-        m.pendingObligations+=amount;
+    function reserveObligation(
+        bytes32 id,
+        uint32 amount
+    ) external {
+        Membership storage m = members[id][msg.sender];
+        if (m.status != Status.Active || amount == 0) revert Unauthorized();
+        m.pendingObligations += amount;
         delete dischargeRequested[id][msg.sender];
         delete requestedObligationBalance[id][msg.sender];
-        emit ObligationCount(id,msg.sender,m.pendingObligations);
+        emit ObligationCount(id, msg.sender, m.pendingObligations);
     }
 
     function finalizeExit(

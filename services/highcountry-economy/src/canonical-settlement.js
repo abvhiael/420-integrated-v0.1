@@ -8,6 +8,7 @@ export class CanonicalMarketSettlement {
  constructor(store,authority,clock=()=>Date.now()){
   if(typeof store?.transact!=='function'||typeof authority?.registeredPrincipal!=='function'
      ||typeof authority?.confirmedReservedTransfer!=='function'
+     ||typeof authority?.proveUnexecutedAndCancelled!=='function'
      ||typeof clock!=='function')throw new SettlementError('missing canonical authority');
   this.store=store;this.authority=authority;this.clock=clock;this.buds=new BudsLedger(store,null);
  }
@@ -42,7 +43,8 @@ export class CanonicalMarketSettlement {
    if(!l||l.status!=='settling')throw new SettlementError('listing no longer settling');
    if(!receipt||receipt.finalized!==true||receipt.operationId!==transferOp
       ||receipt.asset!==t.asset||receipt.from!==t.seller
-      ||receipt.to!==t.buyer||receipt.quantity!==t.quantity)
+      ||receipt.to!==t.buyer||receipt.quantity!==t.quantity
+      ||(t.sourceReceiptId!==null&&receipt.sourceReceiptId!==t.sourceReceiptId))
       throw new SettlementError('no matching finalized canonical transfer');
    const buyer=this.buds.get(s,t.buyer),seller=this.buds.get(s,t.seller);
    if(buyer.reserved<t.price||seller.available>Number.MAX_SAFE_INTEGER-t.price)

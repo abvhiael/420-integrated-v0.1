@@ -1,0 +1,31 @@
+name: High Country R04.5 Level 1 Qualification
+on:
+  pull_request:
+    paths:
+      - 'services/highcountry-economy/**'
+      - '.github/workflows/highcountry-r04-5.yml'
+      - 'docs/highcountry/R04.5-*'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  highcountry-economy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Exact implementation SHA
+        env:
+          SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax and focused tests
+        working-directory: services/highcountry-economy
+        run: |
+          node --check src/buds-ledger.js
+          node --check test/buds-ledger.test.js
+          npm test

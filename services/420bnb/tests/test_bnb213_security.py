@@ -45,7 +45,7 @@ def test_signed_reputation_cross_property_scope_denied_before_db(monkeypatch):
 
 def test_public_projection_cannot_return_private_fields(monkeypatch):
     class Cursor:
-        def execute(self,sql,args):
+        def execute(self,sql,args=None):
             assert "private_address" not in sql
             assert "guest_subject" not in sql
             return self

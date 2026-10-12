@@ -32,6 +32,9 @@ contract R049CanonicalLandOwner {
         l.createCanonical(id,parcelId,tenant,uint64(block.timestamp),uint64(block.timestamp+1000),1,0);
     }
     function revoke(LeaseRegistry l,bytes32 id) external { l.revoke(id); }
+    function shadow(LeaseRegistry l,bytes32 id,bytes32 asset,address tenant) external {
+        l.create(id,asset,tenant,uint64(block.timestamp),uint64(block.timestamp+1000),1,0);
+    }
     function transfer(LeaseRegistry l,bytes32 id,address to) external { l.transferTenant(id,to); }
 }
 contract CanonicalLandPlantGateR049Test {
@@ -55,6 +58,7 @@ contract CanonicalLandPlantGateR049Test {
         lease.bindCanonicalGate(address(gate));
         land.configure(PARCEL,address(owner),TENANT,LEASE_ID);
         rights.registerAsset(gate.parcelAsset(PARCEL),address(owner));
+
     }
     function testCanonicalLeaseUsesActualLandAndPlantState() public {
         owner.create(lease,LEASE_ID,PARCEL,TENANT);
@@ -71,6 +75,11 @@ contract CanonicalLandPlantGateR049Test {
         lease.reconcileCanonicalExit(LEASE_ID);
         (,,,,,,,,status,exitPending)=lease.leases(LEASE_ID);
         require(status==LeaseRegistry.State.Closed&&!exitPending,"canonical exit not finalized");
+    }
+    function testBoundCanonicalGateDisablesShadowLeaseEntry() public {
+        (bool shadowOk,) = address(owner).call(abi.encodeCall(owner.shadow,
+            (lease,LEASE_ID,gate.parcelAsset(PARCEL),TENANT)));
+        require(!shadowOk,"parallel shadow lease bypassed canonical land");
     }
     function testCanonicalOwnershipAndOccupancyChangeFailClosed() public {
         owner.create(lease,LEASE_ID,PARCEL,TENANT);

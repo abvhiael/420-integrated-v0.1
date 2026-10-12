@@ -57,3 +57,39 @@ jobs:
           forge lint src/highcountry/progression src/highcountry/missions src/highcountry/inventory src/highcountry/market --severity high med low
       - name: Canonical High Country verifier
         run: python3 scripts/highcountry/verify-r01.py
+
+  postgres-integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: hc_ci_only
+          POSTGRES_DB: hc_economy
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d hc_economy"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Exact implementation SHA
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned PostgreSQL runtime driver
+        working-directory: services/highcountry-economy
+        run: npm install --ignore-scripts --no-audit --no-fund
+      - name: Actual SERIALIZABLE contention, replay, persistence and settlement
+        working-directory: services/highcountry-economy
+        env:
+          HC_TEST_POSTGRES_URL: postgresql://postgres:hc_ci_only@127.0.0.1:5432/hc_economy
+        run: node test/postgres-live.integration.mjs

@@ -10,6 +10,7 @@ export class CanonicalMarketSettlement {
      ||typeof authority?.confirmedReservedTransfer!=='function'
      ||typeof authority?.proveUnexecutedAndCancelled!=='function'
      ||typeof authority?.expectedTransferOperation!=='function'
+     ||typeof authority?.confirmedListingClosure!=='function'
      ||typeof clock!=='function')throw new SettlementError('missing canonical authority');
   this.store=store;this.authority=authority;this.clock=clock;this.buds=new BudsLedger(store,null);
  }
@@ -22,6 +23,8 @@ export class CanonicalMarketSettlement {
    if(s.transferIntents.has(transferOp))throw new SettlementError('duplicate transfer intent');
    const l=s.listings.get(listingId);
    if(!l||l.status!=='active'||this.clock()>=l.expiresAt||l.seller===buyer)
+     throw new SettlementError('unavailable listing');
+   if(this.authority.canonicalSettlementRequired===true&&!l.sourceReceiptId)
      throw new SettlementError('unavailable listing');
    const funds=this.buds.get(s,buyer);
    if(funds.available<l.price)throw new SettlementError('insufficient BUDS');
@@ -80,8 +83,25 @@ export class CanonicalMarketSettlement {
    const l=s.listings.get(t.listingId),buyer=this.buds.get(s,t.buyer);
    if(!l||l.status!=='settling'||buyer.reserved<t.price)throw new SettlementError('inconsistent reservation');
    buyer.reserved-=t.price;buyer.available+=t.price;
-   l.status='active';t.status='cancelled';
+   const sender=s.assets.get(JSON.stringify([t.seller,t.asset]));
+   if(!sender||sender.reserved<t.quantity)throw new SettlementError('missing original escrow');
+   sender.reserved-=t.quantity;
+   l.status='cancelled';t.status='cancelled';
    return {...t};
+  });
+ }
+ // Closing escrow on-chain invalidates its off-chain mirror: do not refund fictitious inventory.
+ async reconcileClosedListing(op,listingId) {
+  id(listingId);
+  const closed=await this.authority.confirmedListingClosure(listingId);
+  if(closed!==true)throw new SettlementError('listing closure not finalized');
+  return this.buds.operate(op,s=>{
+   const l=s.listings.get(listingId);
+   if(!l||l.status!=='active')throw new SettlementError('listing not closable');
+   const sender=s.assets.get(JSON.stringify([l.seller,l.asset]));
+   if(!sender||sender.reserved<l.quantity)throw new SettlementError('escrow mirror mismatch');
+   sender.reserved-=l.quantity;
+   l.status='cancelled';
   });
  }
 }

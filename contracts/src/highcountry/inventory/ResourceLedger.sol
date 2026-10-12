@@ -117,6 +117,17 @@ contract ResourceLedger {
         emit Movement(op, id, owner, address(0), 3, amount);
     }
 
+    /// @notice Atomic handoff of existing reserved stock; never issues or burns units.
+    function transferReserved(bytes32 op, bytes32 id, address from, address to, uint256 amount) external onlyInventory {
+        _once(op, id, amount);
+        if (from == address(0) || to == address(0) || from == to) revert HCInvalidState();
+        Balance storage source = _balances[id][from];
+        if (source.reserved < amount) revert HCInvalidState();
+        source.reserved -= amount;
+        _balances[id][to].available += amount;
+        emit Movement(op, id, from, to, 5, amount);
+    }
+
     function transferAvailable(
         bytes32 op,
         bytes32 id,

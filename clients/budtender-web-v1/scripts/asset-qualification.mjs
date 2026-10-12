@@ -22,3 +22,16 @@ if(JSON.stringify(phases)!==JSON.stringify(expected)) {
  for(const [phase,count] of Object.entries(expected)) if(phases[phase]!==count) throw Error("bad phase count: "+phase);
 }
 console.log("Budtender artwork inventory: PASS (368 distinct PNGs, lengths and SHA-256 checked)");
+
+const expansion = JSON.parse(await readFile(resolve(root,"assets/budtender/phase-3.15/registry.json"),"utf8"));
+if(expansion.asset_count!==64 || expansion.assets?.length!==64) throw Error("expected 64 expansion assets");
+for(const asset of expansion.assets){
+ if(!/^assets\/budtender\/phase-3\.15\/[a-z0-9_]+\.png$/.test(asset.path)) throw Error("bad expansion path");
+ if(paths.has(asset.path)) throw Error("duplicate expansion path");
+ paths.add(asset.path);
+ const bytes=await readFile(resolve(root,asset.path));
+ if(!bytes.subarray(0,8).equals(Buffer.from([137,80,78,71,13,10,26,10]))) throw Error("invalid expansion PNG: "+asset.path);
+ if(bytes.length<100) throw Error("empty expansion PNG: "+asset.path);
+}
+if(paths.size!==432) throw Error("expected 432 unique production assets");
+console.log("Phase 3.15: PASS (64 PNGs and full 432-path registry)");

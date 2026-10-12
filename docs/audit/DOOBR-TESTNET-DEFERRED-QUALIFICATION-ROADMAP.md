@@ -93,3 +93,9 @@ The testnet roadmap is a deferral record only. Stage-dependent Level 2 retained 
 ## Status
 DOOBR-AUDIT-9: TESTNET/EXTERNAL AUTHORIZATION GATED — NOT COMPLETE.
 DOOBR-AUDIT-10: TESTNET/RELEASE GATED — NOT COMPLETE.
+
+## R03.11 — Real devices and assisted-technology acceptance
+- [ ] Complete manual VoiceOver (iOS/macOS) and TalkBack (Android), NVDA/JAWS as available, keyboard-only no-mouse and switch-control user journeys on actual supported browsers/devices; record device, OS, browser and screen-reader versions, exact deployed candidate SHA, test operator, failures and remediation. Chromium mobile viewport emulation does not satisfy physical-device/assistive-technology acceptance.
+- [ ] Exercise offline reconnect, device revocation, location permission denial, private courier/retailer and operator workflows only against independently authenticated staging/testnet services; record negative denial paths and no identity, address or GPS disclosure. DOOBr remains non-operational while these services are absent.
+- [ ] Verify full production Playwright/browser matrix and privacy/a11y audit on approved staging deployment, plus 420Travel external handoff/actual cross-origin navigation when domain and signed presence issuer are available. No real regulated checkout may be enabled.
+- These acceptance checks carry the original **R03.11** identifier, and feed **R03.12** app-specific Level 2 and **R05.10** Level 3 at their defined milestones, without prematurely running broad global qualifications.

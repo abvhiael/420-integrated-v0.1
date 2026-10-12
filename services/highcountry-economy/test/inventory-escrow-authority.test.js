@@ -27,3 +27,13 @@ test('rejects forged, stale, unescrowed, reorged or mismatched inventory',async(
 test('rejects unconfigured production inventory adapters',()=>{
  assert.throws(()=>new InventoryEscrowAuthority({identity:{},inventory:{},issuer:'x',chainId:420,registry:'y'}));
 });
+
+test('canonical listing requires the same on-chain escrow identity and cannot bypass finality',async()=>{
+ const market=new HighCountryMarket(new MemoryTransactionFixture(),setup());
+ await market.importAsset('trusted','import',receipt);
+ await assert.rejects(market.list('alice','bad','different-listing','lot:1',2,10,Date.now()+100000));
+ await market.list('alice','correct','proof:1','lot:1',2,10,Date.now()+100000);
+ await assert.rejects(market.buy('alice','bypass','proof:1'));
+ await assert.rejects(market.cancel('alice','bypass-cancel','proof:1'));
+ await assert.rejects(market.expire('bypass-expire','proof:1'));
+});

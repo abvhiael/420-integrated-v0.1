@@ -1,7 +1,7 @@
 {
   "step": "C05.4",
   "canonical": "DOOBr order acceptance, pickup/dispatch and handover checks; prevent bypass through retries, alternate endpoints, mobile offline queues or operator actions.",
-  "status": "PENDING_LEVEL1_CI",
+  "status": "COMPLETE_LEVEL1_PASS_EXTERNAL_ACCEPTANCE_DEFERRED",
   "qualification_level": 1,
   "implementation_sha": "3eab694debae51159592980b42b5797a364fbf10",
   "base_sha": "c5a4f220d1fbda01f707d359aa9bb32921a138b1",
@@ -35,5 +35,14 @@
   ],
   "level2": "C05.12",
   "level3": "C08.5",
-  "next_canonical": "C05.5 — DOOBr refusal/return and in-flight policy-change recovery; return/safety actions use separately reviewed workflows rather than being stranded by a sale halt."
+  "next_canonical": "C05.5 — DOOBr refusal/return and in-flight policy-change recovery; return/safety actions use separately reviewed workflows rather than being stranded by a sale halt.",
+  "ci": {
+    "status": "PASS",
+    "run_id": 38170623035,
+    "job_id": 114562287381,
+    "conclusion": "success",
+    "successful_steps": 63,
+    "failed_steps": 0,
+    "exact_sha": true
+  }
 }

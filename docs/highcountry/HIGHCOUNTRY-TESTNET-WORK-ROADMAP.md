@@ -1,0 +1,33 @@
+# High Country — testnet and remaining acceptance work register
+
+**State:** OPEN / not qualified. This register preserves canonical R04/R05/R07 step ownership. It is not permission to ship, nor an assertion that requirements have passed. Added after R04.5 targeted Level 1 PASS on implementation SHA `d4cbee54fcc2c7a98706cc88cb54e1b8ccb1025e`; see `qualification/R04.5-LEVEL1-EXACT-SHA.md`.
+
+## I. Work requiring production-equivalent live testnet or external authority — deferred
+
+| Dependency | Canonical owner | Live acceptance / evidence required |
+|---|---|---|
+| Live authenticated economy database and recovery | R05.1/R05.2 and R07 | Provision externally authorized namespaces and secret-managed TLS Postgres pool, verify least-privilege SELECT/UPDATE-only service role and migration isolation, serializable concurrent writes across deployed instances, crash/restart recovery, failover/retry and backups. The committed SQL fixture is not this test. |
+| Production identity, principal and issuer credentials | R05.2 / R07 | Independently configured session authority, verified registered identities, role issuance/revocation, operator key rotation, privileged source-proof signer provenance and audit trail; prove guest saves and unauthenticated wallet strings cannot issue or spend BUDS. |
+| Trusted reward catalogue activation | R04.5 / R05 / R07 | Approve versioned numeric prices/reward ceilings and signed evidence provider, run inflation, collusion, rate-limit, anti-bot, replay, expiry, role revocation and operational monitoring on deployed services; reject fabricated/offline claims. |
+| Deployed cross-service economy observability | R05 / R07 | Real consumer/client/service, outbox/Indexer/API views and logs reconcile issued/reserved/burned state after failures; alert on accounting divergence. |
+| Release safety and operations | R07 | Security acceptance, incident response, rollback, credential compromise recovery, migration dry run, audit logs, backup restoration and live deployment/config qualification. No production readiness before explicit signoff. |
+
+## II. Repository-side and cross-feature prerequisites — NOT deferred merely for want of a testnet
+
+These must be implemented and qualified at their *own canonical steps* before live release and are **not complete in R04.5**.
+
+| Work | Retained owner / phase | Required pre-testnet deliverable |
+|---|---|---|
+| Authenticated service composition and authoritative account mapping | R05.1/R05.2 | Wire the existing `AuthenticatedEconomyService`, durable repository, reviewed catalogue, signed evidence verifier, security context, session-bound API and safe client contract. Test compromised/expired/revoked principals and prove caller-supplied owner IDs cannot authorize debits. |
+| Reward numeric catalogue & inflation guard | R04.5 plus relevant R04.6/R04.7/R04.8 catalogues | Approve per-action reward values and issuance limits; validate real source proofs and monotonic uniqueness; failure to approve numbers prevents source activation. No guessed constants or minting from local preview. |
+| Asset and BUDS atomic full-fill trade | R04.8 — Market | Implement atomic asset reservation/release and money settlement, exactly-one winner for concurrent buys, cancellation/expiry refunds, failures/retries, zero listing/trade fee, anti-self-trade and no free item/credit on half-success. Existing standalone BUDS transfer is not integrated trade. |
+| Persistent account lifecycle and migrations | R05.1/R05.3 | Durable datastore schema, migration/outbox/reconciliation and real PostgreSQL integration tests under controlled local CI; don't postpone code/tests solely because production servers aren't running. |
+| Economic app integration milestone | R04.5–R04.8 boundary | Exercise R04.5 ledger with authoritative R04.6/7 reward issuers and R04.8 asset market after those canonical steps are implemented. Conduct app-scoped Level 2, not redundant global inventories. |
+| R04 phase closeout | End of R04 after R04.14 | Exact cumulative merge-candidate SHA, reconcile current main, canonical full Foundry once via Solidity Contracts, Genesis authority independently, 420 Integrated, Docs, retained app/client/service tests, static/security and deployment/config checks. |
+
+## Guardrails
+
+- The existence of this register **does not waive any canonical roadmap step or launch criterion**. When an item can be tested in a local integration harness, write and run those tests pre-testnet.
+- Do not expose BUDS as native $420/bridged/withdrawable token; guest balances are noncanonical; neither wallet linkage nor premium status grants protected production or score multipliers.
+- Level 1 at R04.5 qualified the repository ledger core only. The app remains unreleased; R04.5 milestone, R04 Level 3 and live/testnet items retain open acceptance.
+- Preserve exact-SHA inheritance: this documentary register and corresponding evidence file are evidence-only changes and do not modify executable semantics.

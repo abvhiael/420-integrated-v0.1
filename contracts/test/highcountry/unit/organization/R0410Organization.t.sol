@@ -7,7 +7,7 @@ contract R0410Actor {
     function join(OrganizationRegistry r,bytes32 id) external {r.join(id);}
     function leave(OrganizationRegistry r,bytes32 id) external {r.requestLeave(id);}
     function reserve(OrganizationRegistry r,bytes32 id,uint32 amount) external {r.reserveObligation(id,amount);}
-    function ack(OrganizationRegistry r,bytes32 id,uint32 left) external {r.acknowledgeObligation(id,left);}
+    function ack(OrganizationRegistry r,bytes32 id,uint32 left) external {r.requestObligationDischarge(id,left);}
     function finalize(OrganizationRegistry r,bytes32 id,address who) external {r.finalizeExit(id,who);}
     function consume(OrganizationAuthority a,bytes32 id,bytes32 act,bytes32 scope) external {a.consume(id,act,scope);}
     function revoke(OrganizationAuthority a,bytes32 id) external {a.revoke(id);}
@@ -64,6 +64,9 @@ contract R0410OrganizationTest {
         (bool premature,) = address(r).call(abi.encodeCall(r.finalizeExit,(ORG,address(alice))));
         require(!premature,"outstanding obligations silently dropped");
         alice.ack(r,ORG,0);
+        (bool unilateral,) = address(r).call(abi.encodeCall(r.finalizeExit,(ORG,address(alice))));
+        require(!unilateral,"unilateral discharge accepted");
+        r.confirmObligationDischarge(ORG,address(alice));
         r.finalizeExit(ORG,address(alice));
         require(!r.isActiveMember(ORG,address(alice)),"ex-member active");
     }

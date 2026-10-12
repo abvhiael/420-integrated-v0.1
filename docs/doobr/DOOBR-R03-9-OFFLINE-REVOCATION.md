@@ -15,3 +15,10 @@ This is a Python boundary contract, **not** a durable encrypted offline native q
 External live acceptance with signed 420Identity/device/420Notifications, real APNs/FCM and device hardware, GPS revocation during active dispatch, offline-to-online network cuts and authoritative server replay are separate testnet/provider/device gates; cannot be certified using fixtures. Regulated workflows remain disabled.
 
 **Next canonical step after R03.9 completion:** R03.10 — 420Travel read-only coarse presence card and deep link, hard-failed checkout.
+
+## Authenticated HTTP replay integration
+- `doobr/mobile_replay_http.py` defines an actual private WSGI HTTP application exposing only `POST /private/v1/mobile/replay` and parsing bounded JSON; tenant/device/bearer/CSRF/origin/device trust comes exclusively from an injected server-side trusted transport verifier, never the JSON body.
+- `doobr/mobile_replay_api.py` revalidates canonical identity and device scope on each replay, filters the strict two-command allowlist, and records accepted command IDs using the transactional ledger. It cannot execute courier tracking, payments, custody or deliveries.
+- `doobr/mobile_replay_storage.py` and migration `0008_mobile_replay.sql` add tenant-RLS PostgreSQL receipts with unique (tenant,device,command) deduplication. Replay of a committed request is a no-op even across process instances.
+- `test_mobile_replay_api.py` covers duplicate receipts, revoked identity, untrusted transport, sensitive command denial, stale items and unknown fields. Exact-SHA targeted workflow also checks existing mobile permission, push and queue regressions.
+- **Not yet deployed/externally accepted:** approved private TLS ingress and connected real 420Identity/device issuer, controlled production-equivalent migration chain, trusted request attestation implementation and real device HTTP client integration. Unit-tested WSGI application with injected trust boundary does not assert operational production readiness.

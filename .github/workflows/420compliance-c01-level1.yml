@@ -14,6 +14,12 @@ on:
       - 'docs/compliance/C01.8-*'
       - 'docs/compliance/C02.1-*'
       - 'services/complianceauth/**'
+      - 'compliance/web/**'
+      - 'compliance/public/**'
+      - 'scripts/build-compliance-public.py'
+      - 'scripts/test-compliance-c06-2.py'
+      - 'scripts/verify-compliance-c06-1.py'
+      - 'docs/compliance/C06.2-*'
       - 'scripts/verify-compliance-c05-8.py'
       - 'scripts/verify-compliance-c05-11.py'
       - 'docs/compliance/C05.11-ONCHAIN-ATTESTATION-SUITABILITY.md'
@@ -44,6 +50,12 @@ on:
       - 'docs/compliance/C01.8-*'
       - 'docs/compliance/C02.1-*'
       - 'services/complianceauth/**'
+      - 'compliance/web/**'
+      - 'compliance/public/**'
+      - 'scripts/build-compliance-public.py'
+      - 'scripts/test-compliance-c06-2.py'
+      - 'scripts/verify-compliance-c06-1.py'
+      - 'docs/compliance/C06.2-*'
       - 'scripts/verify-compliance-c01-1.py'
       - 'scripts/test-compliance-c01-1.py'
       - 'scripts/verify-compliance-c01-2.py'
@@ -219,12 +231,18 @@ jobs:
           go test -race ./services/complianceauth -run TestC0512IntegrationLevel2Adversarial -count=1 -v
       - name: C06.1 accessible responsive website static qualification
         run: python3 scripts/verify-compliance-c06-1.py
-      - name: Write current C03.10 exact-SHA Level 1 qualification result
+      - name: C06.2 public browser provenance navigation and adversarial qualification
         run: |
-          python3 -c 'import json,os; open("/tmp/compliance-c01-level1.json","w").write(json.dumps({"step":"C03.10","qualification_level":1,"implementation_sha":os.environ["EXPECTED_SHA"],"c03_8_publication_fence":"PASS","retained_C03_7":"PASS","retained_C03_6":"PASS","retained_C03_5":"PASS","retained_C03_4":"PASS","retained_C03_3":"PASS","retained_C03_2":"PASS","retained_C03_1":"PASS","retained_C02_10":"PASS","retained_C02_9":"PASS","retained_C02_8":"PASS","retained_C02_7":"PASS","retained_C02_6":"PASS","retained_C02_5":"PASS","retained_C02_4":"PASS","retained_C02_3":"PASS","retained_C02_2":"PASS","retained_C02_1":"PASS","retained_C01_8":"PASS","go_race":"PASS","retained_C01_7":"PASS","retained_C01_6":"PASS","retained_C01_5":"PASS","retained_C01_4":"PASS","retained_C01_3":"PASS","tests":"PASS"},indent=2)+"\\n")'
+          python3 -m py_compile scripts/build-compliance-public.py scripts/test-compliance-c06-2.py scripts/verify-compliance-c06-1.py
+          python3 scripts/build-compliance-public.py --check
+          python3 scripts/test-compliance-c06-2.py -v
+      - name: Write current C06.2 exact-SHA Level 1 qualification result
+        run: |
+          python3 -c 'import json,os; open("/tmp/compliance-c01-level1.json","w").write(json.dumps({"step":"C06.2","public_browser":"PASS","retained_C06_1":"PASS","qualification_level":1,"implementation_sha":os.environ["EXPECTED_SHA"],"c03_8_publication_fence":"PASS","retained_C03_7":"PASS","retained_C03_6":"PASS","retained_C03_5":"PASS","retained_C03_4":"PASS","retained_C03_3":"PASS","retained_C03_2":"PASS","retained_C03_1":"PASS","retained_C02_10":"PASS","retained_C02_9":"PASS","retained_C02_8":"PASS","retained_C02_7":"PASS","retained_C02_6":"PASS","retained_C02_5":"PASS","retained_C02_4":"PASS","retained_C02_3":"PASS","retained_C02_2":"PASS","retained_C02_1":"PASS","retained_C01_8":"PASS","go_race":"PASS","retained_C01_7":"PASS","retained_C01_6":"PASS","retained_C01_5":"PASS","retained_C01_4":"PASS","retained_C01_3":"PASS","tests":"PASS"},indent=2)+"\\n")'
       - name: Retain exact-SHA qualification result
         uses: actions/upload-artifact@v4
         with:
           name: compliance-c01-level1-${{ env.EXPECTED_SHA }}
           path: /tmp/compliance-c01-level1.json
           if-no-files-found: error
+

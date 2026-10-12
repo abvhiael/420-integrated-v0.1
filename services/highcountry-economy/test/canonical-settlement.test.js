@@ -5,11 +5,12 @@ import {HighCountryMarket} from '../src/market.js';
 import {BudsLedger,MemoryTransactionFixture} from '../src/buds-ledger.js';
 function setup(){
  const store=new MemoryTransactionFixture();
- const state={finalized:false,cancelled:false};
+ const state={finalized:false,cancelled:false,expectedOp:'transfer:1'};
  const authority={
   registeredPrincipal:async who=>who==='buyer'?'bob':who==='seller'?'alice':Promise.reject(Error('guest')),
   requireAssetIssuer:async who=>{if(who!=='inventory')throw Error('issuer');},
   verifyAssetReceipt:async r=>r.receiptId==='verified:1',
+  expectedTransferOperation:async(_listing,_buyer)=>state.expectedOp||'transfer:1',
   confirmedReservedTransfer:async operationId=>state.finalized?{
     finalized:true,operationId,sourceReceiptId:'verified:1',asset:'lot:1',from:'alice',to:'bob',quantity:2
   }:null,
@@ -44,6 +45,7 @@ test('canonical transfer finality gates BUDS and conserved asset delivery',async
 });
 test('cancel only after irreversible proof of unexecuted canonical transfer',async()=>{
  const t=setup();await listed(t);
+ t.state.expectedOp='transfer:2';
  await t.settle.prepare('buyer','prepare','listing','transfer:2');
  await assert.rejects(t.settle.abort('abort-early','transfer:2'));
  assert.equal(t.store.state.balances.get('bob').reserved,60);
@@ -57,6 +59,7 @@ test('cancel only after irreversible proof of unexecuted canonical transfer',asy
 });
 test('durable intent survives restart and re-entry cannot sell twice',async()=>{
  const t=setup();await listed(t);
+ t.state.expectedOp='transfer:3';
  await t.settle.prepare('buyer','prepare','listing','transfer:3');
  const second=new CanonicalMarketSettlement(t.store,t.settle.authority,()=>100);
  await assert.rejects(second.prepare('buyer','race','listing','transfer:4'));

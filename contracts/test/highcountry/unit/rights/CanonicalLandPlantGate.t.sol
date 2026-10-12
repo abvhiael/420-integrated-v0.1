@@ -81,11 +81,31 @@ contract R049CanonicalLandOwner {
     ) external {
         l.revoke(id);
     }
-    function revoke(LeaseRegistry l,bytes32 id) external { l.revoke(id); }
-    function shadow(LeaseRegistry l,bytes32 id,bytes32 asset,address tenant) external {
-        l.create(id,asset,tenant,uint64(block.timestamp),uint64(block.timestamp+1000),1,0);
+
+    function revoke(
+        LeaseRegistry l,
+        bytes32 id
+    ) external {
+        l.revoke(id);
     }
-    function transfer(LeaseRegistry l,bytes32 id,address to) external { l.transferTenant(id,to); }
+
+    function shadow(
+        LeaseRegistry l,
+        bytes32 id,
+        bytes32 asset,
+        address tenant
+    ) external {
+        l.create(id, asset, tenant, uint64(block.timestamp), uint64(block.timestamp + 1000), 1, 0);
+    }
+
+    function transfer(
+        LeaseRegistry l,
+        bytes32 id,
+        address to
+    ) external {
+        l.transferTenant(id, to);
+    }
+
 }
 contract CanonicalLandPlantGateR049Test {
     RightsRegistry rights;
@@ -128,12 +148,12 @@ contract CanonicalLandPlantGateR049Test {
         require(status == LeaseRegistry.State.Closed && !exitPending, "canonical exit not finalized");
     }
     function testBoundCanonicalGateDisablesShadowLeaseEntry() public {
-        (bool shadowOk,) = address(owner).call(abi.encodeCall(owner.shadow,
-            (lease,LEASE_ID,gate.parcelAsset(PARCEL),TENANT)));
-        require(!shadowOk,"parallel shadow lease bypassed canonical land");
+        (bool shadowOk,) =
+            address(owner).call(abi.encodeCall(owner.shadow, (lease, LEASE_ID, gate.parcelAsset(PARCEL), TENANT)));
+        require(!shadowOk, "parallel shadow lease bypassed canonical land");
     }
     function testCanonicalOwnershipAndOccupancyChangeFailClosed() public {
-        owner.create(lease,LEASE_ID,PARCEL,TENANT);
+        owner.create(lease, LEASE_ID, PARCEL, TENANT);
         land.changeOwner(address(0x9999));
         require(!lease.usable(LEASE_ID), "stale owner accepted");
         land.changeOwner(address(owner));
@@ -141,10 +161,10 @@ contract CanonicalLandPlantGateR049Test {
         require(!lease.usable(LEASE_ID), "stale tenant occupancy accepted");
     }
     function testCrossRegistryPlantBindingFailsClosed() public {
-        R049CanonicalPlantsFixture bogus=new R049CanonicalPlantsFixture();
-        try new CanonicalLandPlantGate(address(land),address(bogus)) returns (CanonicalLandPlantGate) {
+        R049CanonicalPlantsFixture bogus = new R049CanonicalPlantsFixture();
+        try new CanonicalLandPlantGate(address(land), address(bogus)) returns (CanonicalLandPlantGate) {
             revert("unrelated cultivation registry accepted");
-        } catch {}
+        } catch { }
     }
     function testForgedParcelAndOverCapacityRejected() public {
         (bool forged,) = address(owner).call(abi.encodeCall(owner.create, (lease, bytes32(uint256(7)), PARCEL, TENANT)));

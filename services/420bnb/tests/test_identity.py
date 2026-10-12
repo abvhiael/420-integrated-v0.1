@@ -47,3 +47,28 @@ def test_provider_missing_fails_closed(identity,monkeypatch):
     with pytest.raises(HTTPException) as e:
         i.verify_external_token(identity())
     assert e.value.status_code==503
+
+@pytest.mark.parametrize("claim,value",[
+    ("jti",""),("jti","a"*257),("jti","session\\nspoof"),
+    ("iat",True),("nbf",False),("exp",True),
+])
+def test_reject_malformed_session_or_timestamp(identity,claim,value):
+    with pytest.raises(HTTPException) as error:
+        i.verify_external_token(identity(**{claim:value}))
+    assert error.value.status_code==401
+
+def test_reject_bad_credential_lifetime(identity):
+    now=int(datetime.now(timezone.utc).timestamp())
+    for claims in (
+        {"iat":now+120,"nbf":now+120,"exp":now+200},
+        {"iat":now-4000,"nbf":now-4000,"exp":now+120},
+        {"iat":now+120,"nbf":now,"exp":now+200},
+        {"iat":now-100,"nbf":now-200,"exp":now+120},
+    ):
+        with pytest.raises(HTTPException):
+            i.verify_external_token(identity(**claims))
+
+def test_reject_wrong_chain_orudience(identity):
+    for audience in ("420bnb:another-chain","420travel"):
+        with pytest.raises(HTTPException):
+            i.verify_external_token(identity(aud=audience))

@@ -19,3 +19,9 @@
 **Level 2:** R03.12 clients/travel. **Level 3:** R05.10 exact reconciled phase SHA.
 
 **Next canonical roadmap step:** R03.9 — Offline queue/reconnect, token/device revocation and location permission failure.
+
+## R03.8 native implementation follow-up
+- `mobile/doobr/ios/DOOBr.xcodeproj/project.pbxproj` adds an iOS simulator application target with signing deliberately disabled in CI. `DOOBrApp.swift` now requests OS when-in-use location and notification consent explicitly, stops location when revoked and when no verified assignment is present, and adds a device-only, user-presence protected Secure Enclave key. No precise coordinates are transmitted. This is not hardware attestation acceptance.
+- Android `MainActivity.kt` now has OS foreground location and notification permission prompts, denial handling, and onStop tracking shutdown. Assignment and courier consent cannot be self-elevated from the UI, and background location remains absent.
+- `.github/workflows/doobr-r03-8-level1.yml` now requires a real unsigned iOS simulator build on macOS as well as the Android debug build on Linux. An untriggered or failed iOS job does not count as PASS.
+- Remaining external acceptance is retained in the canonical testnet/deferred roadmap: physical device attestation, APNs/FCM delivery, external assignment proof, revocation, narrowly scoped background GPS, native device testing and app store signing. Native push receipt/registration and actual assigned-route tracking are intentionally disabled, not represented as qualified.

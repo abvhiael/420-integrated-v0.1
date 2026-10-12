@@ -9,6 +9,7 @@ import UserNotifications
  @Published private(set) var status = "Non-operational: no delivery, tracking or push registration."
  private let location = CLLocationManager()
  private var assignmentAuthorized = false
+ private var routeDeadline: Date? = nil
  private var userConsent = false
  override init() {
   super.init()
@@ -22,7 +23,7 @@ import UserNotifications
  }
  func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
   locationAllowed = manager.authorizationStatus == .authorizedWhenInUse || manager.authorizationStatus == .authorizedAlways
-  if !locationAllowed { location.stopUpdatingLocation(); userConsent = false }
+  if !locationAllowed { stopTracking() }
  }
  func requestNotifications() {
   UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { [weak self] granted, _ in
@@ -32,21 +33,26 @@ import UserNotifications
  func stopTracking() {
   userConsent = false
   location.stopUpdatingLocation()
+  assignmentAuthorized = false
+  routeDeadline = nil
  }
  func startTrackingIfAuthorized() {
   // Fail closed: assignment proof must be independently verified by a trusted
   // backend; native UI cannot set assignmentAuthorized or consent itself.
-  guard assignmentAuthorized && userConsent && locationAllowed else {
+  guard assignmentAuthorized && userConsent && locationAllowed && routeDeadline.map({ $0 > Date() }) == true else {
    location.stopUpdatingLocation()
    status = "Location unavailable without a verified assignment and permission."
    return
   }
   location.startUpdatingLocation()
  }
+ func applicationDidBecomeInactive() { stopTracking() }
  func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
   // No coordinates sent or persisted until encrypted transport and external
   // authorization are implemented. Stop immediately.
-  manager.stopUpdatingLocation()
+  guard assignmentAuthorized && userConsent && locationAllowed && routeDeadline.map({ $0 > Date() }) == true else { stopTracking(); return }
+  // No approved encrypted tracking transport: hard stop rather than store coordinates.
+  stopTracking()
  }
 }
 

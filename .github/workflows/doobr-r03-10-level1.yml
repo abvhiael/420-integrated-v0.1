@@ -2,7 +2,7 @@ name: DOOBR R03.10 Travel Card Level 1
 on:
   push:
     branches: [roadmap/doobr-bc-vancouver-infrastructure]
-    paths: ['doobr/travel_card.py','doobr/storage/tests/test_travel_card.py','.github/workflows/doobr-r03-10-level1.yml']
+    paths: ['doobr/travel_card.py','doobr/storage/tests/test_travel_card.py','web/travel/index.html','.github/workflows/doobr-r03-10-level1.yml']
   pull_request:
     paths: ['doobr/travel_card.py','doobr/storage/tests/test_travel_card.py','.github/workflows/doobr-r03-10-level1.yml']
   workflow_dispatch:
@@ -28,6 +28,14 @@ jobs:
         run: |
           python3 -m py_compile doobr/travel_card.py
           python3 -m unittest discover -s doobr/storage/tests -p test_travel_card.py -v
+          python3 - <<'PY'
+          from pathlib import Path
+          page=Path('web/travel/index.html').read_text()
+          assert 'id="doobr-coarse-presence"' in page
+          assert 'https://doobr.420integrated.org/coverage' in page
+          assert 'DOOBr checkout · Unavailable</button>' in page
+          assert 'disabled aria-label="DOOBr checkout unavailable"' in page
+          PY
       - name: Exact SHA after
         env:
           EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}

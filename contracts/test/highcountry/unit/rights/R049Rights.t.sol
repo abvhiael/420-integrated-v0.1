@@ -16,6 +16,7 @@ contract R049Actor {
     }
     function revokeLicense(LicenseRegistry l,bytes32 id) external {l.revoke(id);}
     function transferLicense(LicenseRegistry l,bytes32 id,address to) external {l.transfer(id,to);}
+    function transferOwnedAsset(RightsRegistry r,bytes32 asset,address to) external { r.transferAsset(asset,to); }
     function grant(RightsRegistry r,bytes32 id,bytes32 asset,address holder) external {
         r.grant(id,asset,holder,3,uint64(block.timestamp),uint64(block.timestamp+300));
     }
@@ -65,9 +66,9 @@ contract R049RightsTest {
         require(!rights.hasRight(g,address(tenant),1),"freeze bypass rights");
         require(!licenses.usable(LICENSE,address(tenant),1),"freeze bypass license");
         rights.freeze(PARCEL,false);
-        (bool ownerTransfer,) = address(owner).call(abi.encodeWithSignature(
-            "transferAsset(address,bytes32,address)",address(rights),PARCEL,address(stranger)));
-        require(!ownerTransfer,"missing actor method should not transfer");
+        owner.transferOwnedAsset(rights,PARCEL,address(stranger));
+        require(!rights.hasRight(g,address(tenant),1),"old owner grant survives transfer");
+        require(!licenses.usable(LICENSE,address(tenant),1),"old owner license survives transfer");
         owner.revokeLicense(licenses,LICENSE);
         require(!licenses.usable(LICENSE,address(tenant),1),"revocation bypass");
     }

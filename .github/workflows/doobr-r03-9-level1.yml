@@ -1,0 +1,36 @@
+name: DOOBR R03.9 Offline Revocation Level 1
+on:
+  push:
+    branches: [roadmap/doobr-bc-vancouver-infrastructure]
+    paths: ['doobr/mobile_offline.py','doobr/storage/tests/test_mobile_offline.py','mobile/doobr/**','.github/workflows/doobr-r03-9-level1.yml']
+  pull_request:
+    paths: ['doobr/mobile_offline.py','doobr/storage/tests/test_mobile_offline.py','mobile/doobr/**','.github/workflows/doobr-r03-9-level1.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact SHA
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Mobile offline and revocation tests
+        run: |
+          python3 -m py_compile doobr/mobile_offline.py
+          python3 -m unittest discover -s doobr/storage/tests -p test_mobile_offline.py -v
+          python3 -m unittest discover -s doobr/storage/tests -p test_mobile_security.py -v
+          python3 -m unittest discover -s doobr/storage/tests -p test_mobile_push.py -v
+      - name: Verify exact SHA after
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"

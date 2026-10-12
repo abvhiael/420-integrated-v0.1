@@ -88,3 +88,21 @@ def test_readiness_schema_guard(connected):
         assert blocked.json()["detail"]=="SCHEMA_NOT_MIGRATED"
     finally:
         api.db=original
+
+def test_operational_logs_avoid_secret_and_path_identifiers(connected,caplog):
+    import importlib.util,logging
+    from fastapi.testclient import TestClient
+    spec=importlib.util.spec_from_file_location("bnb214_telemetry",Path(__file__).resolve().parents[1]/"api.py")
+    module=importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    uri="/v1/bnb/reservations/"+ "11111111-1111-1111-1111-111111111111"
+    with caplog.at_level(logging.INFO,logger="bnb.operations"):
+        response=TestClient(module.app).get(uri)
+    assert response.status_code==401
+    trace=response.headers["x-request-id"]
+    assert len(trace)==32
+    entries=[x for x in caplog.records if x.message=="api_request"]
+    assert entries
+    assert entries[-1].route_template=="/v1/bnb/reservations/{reservation_id}"
+    assert entries[-1].request_id==trace
+    assert "11111111-1111" not in str(entries[-1].__dict__.get("route_template"))

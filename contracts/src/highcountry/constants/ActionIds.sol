@@ -54,6 +54,7 @@ library ActionIds {
 
     bytes32 internal constant PLANT_REGISTER = keccak256("HC.ACTION.PLANT_REGISTRY.REGISTER");
     bytes32 internal constant PLANT_BIND_RIGHTS = keccak256("HC.ACTION.PLANT_REGISTRY.BIND_RIGHTS");
+    bytes32 internal constant PLANT_BIND_LICENSES = keccak256("HC.ACTION.PLANT_REGISTRY.BIND_LICENSES");
     bytes32 internal constant PLANT_ADVANCE = keccak256("HC.ACTION.PLANT_REGISTRY.ADVANCE");
     bytes32 internal constant CULTIVATION_BIND_RULESETS = keccak256("HC.ACTION.CULTIVATION_ENGINE.BIND_RULESETS");
     bytes32 internal constant CULTIVATION_UPDATE = keccak256("HC.ACTION.CULTIVATION_ENGINE.UPDATE");

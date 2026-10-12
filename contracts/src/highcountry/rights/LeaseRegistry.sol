@@ -107,7 +107,9 @@ contract LeaseRegistry {
         address to
     ) external {
         Lease storage l = leases[id];
-        if (msg.sender != l.tenant || to == address(0) || to == l.tenant || !usable(id) || l.activePlants != 0) revert Unauthorized();
+        if (msg.sender != l.tenant || to == address(0) || to == l.tenant || !usable(id) || l.activePlants != 0) {
+            revert Unauthorized();
+        }
         address old = l.tenant;
         l.tenant = to;
         emit LeaseTransferred(id, old, to);

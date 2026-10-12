@@ -59,6 +59,8 @@ export class HighCountryMarket {
    b.reserved-=l.quantity;b.available+=l.quantity;
  }
  async buy(session,op,listingId){
+   if(this.authority.canonicalSettlementRequired===true)
+     throw new SettlementError('canonical custody requires finality-gated settlement');
    const buyer=id(await this.authority.registeredPrincipal(session));
    return this.buds.operate(op,s=>{
      const l=s.listings.get(id(listingId));

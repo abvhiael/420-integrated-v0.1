@@ -13,6 +13,9 @@ contract MarketSeller {
     function open(CanonicalMarketEscrow market, bytes32 id, bytes32 asset, uint256 qty, uint64 deadline) external {
         market.list(id, asset, qty, deadline);
     }
+    function releaseDirect(InventoryRegistry inv, bytes32 op, bytes32 asset, uint256 quantity) external {
+        inv.release(op, asset, quantity);
+    }
     function cancel(CanonicalMarketEscrow market, bytes32 id) external {
         market.cancel(id);
     }
@@ -74,6 +77,20 @@ contract CanonicalMarketEscrowR048Test {
         require(!blocked, "revoked custody settled");
         require(market.listing(LISTING).status == CanonicalMarketEscrow.Status.Active, "rollback failed");
     }
+    function testRevokedSellerCanCloseAndManuallyRecoverReservedStock() public {
+        seller.open(market, LISTING, ASSET, 2, uint64(block.timestamp + 100));
+        seller.approve(inv, address(market), false);
+        seller.cancel(market, LISTING);
+        require(market.listing(LISTING).status == CanonicalMarketEscrow.Status.Cancelled, "closure stranded");
+        ResourceLedger.Balance memory locked = ledger.balance(ASSET, address(seller));
+        require(locked.reserved == 2, "unexpected automatic release");
+        seller.releaseDirect(inv, bytes32(uint256(501)), ASSET, 2);
+        ResourceLedger.Balance memory restored = ledger.balance(ASSET, address(seller));
+        require(restored.reserved == 0 && restored.available == 10, "manual recovery failed");
+        (bool sold,) = address(market).call(abi.encodeCall(market.settle, (LISTING, BUYER)));
+        require(!sold, "closed escrow sold");
+    }
+
     function testSelfTradeAndCallerScope() public {
         seller.open(market, LISTING, ASSET, 2, uint64(block.timestamp + 100));
         (bool self,) = address(market).call(abi.encodeCall(market.settle, (LISTING, address(seller))));

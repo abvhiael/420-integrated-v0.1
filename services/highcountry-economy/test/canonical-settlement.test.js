@@ -11,7 +11,7 @@ function setup(){
   requireAssetIssuer:async who=>{if(who!=='inventory')throw Error('issuer');},
   verifyAssetReceipt:async r=>r.receiptId==='verified:1',
   confirmedReservedTransfer:async operationId=>state.finalized?{
-    finalized:true,operationId,asset:'lot:1',from:'alice',to:'bob',quantity:2
+    finalized:true,operationId,sourceReceiptId:'verified:1',asset:'lot:1',from:'alice',to:'bob',quantity:2
   }:null,
   proveUnexecutedAndCancelled:async()=>state.cancelled
  };
@@ -30,6 +30,7 @@ test('canonical transfer finality gates BUDS and conserved asset delivery',async
  await t.settle.prepare('buyer','prepare','listing','transfer:1');
  assert.equal(t.store.state.balances.get('bob').reserved,60);
  await assert.rejects(t.settle.finalize('early','transfer:1'));
+ assert.equal(t.store.state.transferIntents.get('transfer:1').sourceReceiptId,'verified:1');
  await assert.rejects(t.market.cancel('seller','cancel','listing'));
  await assert.rejects(t.market.buy('buyer','buy','listing'));
  t.state.finalized=true;

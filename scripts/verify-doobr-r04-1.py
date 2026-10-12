@@ -16,7 +16,7 @@ check(travel["authority"]=="REPLACEABLE_APPLICATION","Travel silently promoted")
 check("DOOBR_TRANSACTION_FLOWS" in travel["deferred_scope"],"DOOBr transaction gate removed")
 for role in ("420Identity","420Compliance","420Location","420Pay","Wallet","Arbitration","Notifications"):
  check(role in road,"missing canonical authority mention: "+role)
-for name in ("Reserve","Quote","Pay","Escrow","CancelAndSettle","DynamicPrice"):
+for name in ("Reserve","Quote","Pay","Escrow","CancelAndSettle","RequestDelivery","DynamicPrice"):
  check(re.search(r"func \(GenesisTravelTransactions\) "+name+r"\([^\n]*ErrTravelTransactionDisabled",go),
        "Travel transaction method not fail closed: "+name)
 card=(ROOT/"doobr/travel_card.py").read_text()

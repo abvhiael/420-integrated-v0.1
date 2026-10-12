@@ -29,9 +29,11 @@ export class BudsLedger {
   async earn(op,owner,source,proof,amount) {
     return this.operate(op,s=>{
       requireId(owner);requireId(source);requireId(proof);
+      if(s.claims.has(source+':'+proof))throw new SettlementError('replayed earning proof');
       if(!this.catalog || this.catalog.authorize(source,proof,owner,amount)!==true) throw new SettlementError('unapproved reward');
       units(amount); if(amount===0)throw new SettlementError('zero award');
       const b=this.get(s,owner);b.available=add(b.available,amount);s.issued=add(s.issued,amount);
+      s.claims.add(source+':'+proof);
     });
   }
   async reserve(op,owner,amount) { return this.operate(op,s=>{
@@ -52,17 +54,17 @@ export class BudsLedger {
     a.reserved-=amount;b.available=add(b.available,amount);
   });}
   async spend(op,owner,amount,sink) {return this.operate(op,s=>{
-    requireId(sink);units(amount);if(!amount)throw new SettlementError('zero sink');
+    requireId(sink);if(!this.catalog || this.catalog.authorizeSink?.(sink,owner,amount)!==true)throw new SettlementError('unapproved sink');units(amount);if(!amount)throw new SettlementError('zero sink');
     const b=this.get(s,owner);if(b.available<amount)throw new SettlementError('insufficient');
     b.available-=amount;s.burned=add(s.burned,amount);
   });}
 }
 // Test-only copy-on-write serial transaction fixture. Never wire it to production accounts.
 export class MemoryTransactionFixture {
-  constructor(){this.state={balances:new Map(),operations:new Set(),issued:0,burned:0};}
+  constructor(){this.state={balances:new Map(),operations:new Set(),claims:new Set(),issued:0,burned:0};}
   async transact(fn){
     const s={balances:new Map([...this.state.balances].map(([k,v])=>[k,{...v}])),
-      operations:new Set(this.state.operations),issued:this.state.issued,burned:this.state.burned};
+      operations:new Set(this.state.operations),claims:new Set(this.state.claims),issued:this.state.issued,burned:this.state.burned};
     const r=fn(s);this.state=s;return r;
   }
 }

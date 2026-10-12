@@ -6,7 +6,11 @@ from pathlib import Path
 
 import psycopg
 import pytest
-from migrate import apply, MIGRATIONS
+import importlib.util
+spec=importlib.util.spec_from_file_location('bnb214_migrate',Path(__file__).resolve().parents[1]/'migrate.py')
+migration=importlib.util.module_from_spec(spec)
+spec.loader.exec_module(migration)
+apply,MIGRATIONS=migration.apply,migration.MIGRATIONS
 
 
 @pytest.fixture

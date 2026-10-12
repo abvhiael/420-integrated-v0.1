@@ -8,6 +8,9 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+concurrency:
+  group: bnb-runtime-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 jobs:
   runtime:
     runs-on: ubuntu-latest
@@ -200,9 +203,35 @@ jobs:
           PY
           docker pull caddy:2
           ingress=$(docker image inspect caddy:2 --format '{{index .RepoDigests 0}}')
+          echo "BNB32_INGRESS_BASE=$ingress" >> "$GITHUB_ENV"
           docker run --rm -e BNB_API_HOST -e BNB_WEB_HOST \
             -v "$PWD/services/420bnb/Caddyfile.production:/etc/caddy/Caddyfile:ro" \
             -v "$BNB32_TLS_FIXTURE_DIR/server.crt:/run/tls/fullchain.pem:ro" \
             -v "$BNB32_TLS_FIXTURE_DIR/server.key:/run/tls/privatekey.pem:ro" \
             "$ingress" caddy validate --config /etc/caddy/Caddyfile
+
+      - name: Retain exact-source infrastructure build evidence
+        env:
+          QUALIFIED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          mkdir -p artifacts/bnb32
+          python - <<'PY'
+          import json,os,subprocess
+          def image(name):
+              value=json.loads(subprocess.check_output(['docker','image','inspect',name]))[0]
+              return {'local_image_config_id':value['Id'],'user':value['Config']['User']}
+          result={'schema':'420.bnb.infrastructure.ci.v1','qualified_sha':os.environ['QUALIFIED_SHA'],
+                  'python_base_manifest':os.environ['BNB32_PYTHON_BASE'],
+                  'ingress_manifest':os.environ['BNB32_INGRESS_BASE'],
+                  'api':image('bnb-test:'+os.environ['GITHUB_SHA']),
+                  'web':image('bnb-web:'+os.environ['GITHUB_SHA']),
+                  'registry_publication_verified':False,'live_accepted':False}
+          with open('artifacts/bnb32/build-evidence.json','w') as f:json.dump(result,f,sort_keys=True,indent=2)
+          print(json.dumps(result,sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bnb32-infrastructure-${{ github.event.pull_request.head.sha || github.sha }}
+          path: artifacts/bnb32/build-evidence.json
+          retention-days: 7
 

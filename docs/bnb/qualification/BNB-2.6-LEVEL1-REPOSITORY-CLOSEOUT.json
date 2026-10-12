@@ -1,0 +1,37 @@
+{
+  "step": "BNB-2.6",
+  "title": "420Pay and 420Swap Integration",
+  "implementation_sha": "110ef7a2a3b242c86896687594e47c79815e9fbf",
+  "scope": "Repository-side Pay receipt/invoice verifier and fail-closed approved native $420 / Pay-bound 420Swap adapters",
+  "status": "PASS_REPOSITORY_SIDE_LEVEL1",
+  "run_id": 38097371782,
+  "run_url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38097371782",
+  "pr": 600,
+  "branch": "audit/420bnb-bnb-1-1-source-reconciliation-20261009",
+  "main_sha": "e60c4c74ccd0c950817f98e3da6b67546afd9e24",
+  "app_base": "f8bbb62e1cdfe68cff25261fd4a036db1840a15c",
+  "checks": [
+    "PostgreSQL migration 015 and canonical invoice/merchant/quote binding",
+    "Verified issuer required; synthetic signing fixture not production credentials",
+    "Native $420 signed route and approved conversion; Pay-bound Swap integrity guards",
+    "FINALIZED/SETTLED assertion replay/receipt uniqueness and late finality recovery",
+    "Privacy and guest canonical receipt projection",
+    "Retained BnB multi-process inventory, frontend/Chromium and staging container regression"
+  ],
+  "level2": "Not triggered; BNB-2.5 app milestone already qualified, no newly established milestone",
+  "level3": "Deferred until BnB audit phase merge-candidate closeout",
+  "operational_blocks": [
+    "Real authorized Pay/Swap deployment, registry addresses and merchant/payout controller",
+    "Actual independent onchain finality verification and receipts, chain/reorg/fraud recovery",
+    "Approved Wallet execution, funds settlement and refund/payout flows",
+    "Operational key custody, independent review and production equivalent testnet acceptance"
+  ],
+  "testnet_roadmap": "T-BNB-PAY-2",
+  "deferred_not_waived": true,
+  "blockers": [
+    "Operational Pay/Swap authorization and testnet acceptance remain deferred, not waived"
+  ],
+  "run_conclusion": "success",
+  "runtime_failed_steps": 0,
+  "bnb_workflows_passed": 10
+}

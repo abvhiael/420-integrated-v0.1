@@ -1,0 +1,37 @@
+{
+  "step": "BNB-2.3",
+  "scope": "Availability and Calendar Engine — repository-side Level 1",
+  "status": "PASS",
+  "qualified_implementation_sha": "0b025f776d1c88ab38df959e2a5ef4a8f6a1a56b",
+  "github_pr": 600,
+  "qualified_workflow": {
+    "name": "420BnB Runtime Slice",
+    "run_id": 38087076160,
+    "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38087076160",
+    "conclusion": "success",
+    "failed_steps": 0
+  },
+  "other_app_workflows": {
+    "passed": 9,
+    "docs_qualification": "skipped — outside Level 3"
+  },
+  "qualification_areas": [
+    "PostgreSQL migrations 001–010 and API runtime/security regression tests",
+    "signed calendar sync payload integrity, provenance, replay, freshness and fail-close",
+    "published-only guest availability, property/unit capacity, half-open sweep-line peak occupancy",
+    "quantity-aware calendar blocks, transaction-safe revision/version races and property closures",
+    "strict IANA date, DST fold/gap and minimum-night enforcement",
+    "owner-only hold release, expiry and idempotency replay",
+    "two independent Uvicorn processes sharing PostgreSQL and contention tests",
+    "Chromium guest/host API-stubbed journey, mobile/desktop axe WCAG automated checks and JS syntax",
+    "non-root runtime container staging smoke"
+  ],
+  "limitations": [
+    "External calendar source governance/issuer and live signing keys require approved testnet authority; local proof tests do not establish a production trusted source",
+    "Booking/payment financial finality and property publication remain disabled",
+    "Manual WCAG 2.2 AA and independent media moderation operational approval remain separately deferred in BNB testnet work roadmap"
+  ],
+  "level2": "Not run; reserved for BNB-2 milestone boundary",
+  "level3": "Not run; reserved for phase closeout",
+  "evidence_only_commit_policy": "Documentation-only commits inherit qualified implementation SHA unless implementation/configuration/tests change."
+}

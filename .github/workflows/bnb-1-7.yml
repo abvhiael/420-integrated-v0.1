@@ -1,0 +1,31 @@
+name: 420BnB BNB-1.7 Guest Host Experience
+on:
+  pull_request:
+    paths:
+      - 'docs/bnb/**'
+      - 'scripts/validate-bnb-1-7.py'
+      - '.github/workflows/bnb-1-7.yml'
+      - 'config/420travel-genesis.json'
+      - 'config/genesis-consumer-services.json'
+      - 'genesis/svc3/travelapp/compatibility.go'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  guest-host-design:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Bind exact implementation SHA
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
+          echo "Qualified BNB-1.7 implementation SHA: $(git rev-parse HEAD)"
+      - name: BNB-1.7 scoped Level 1
+        run: python3 scripts/validate-bnb-1-7.py

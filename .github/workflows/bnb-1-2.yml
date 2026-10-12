@@ -1,0 +1,31 @@
+name: 420BnB BNB-1.2 Product Contract
+on:
+  pull_request:
+    paths:
+      - 'docs/bnb/**'
+      - 'scripts/validate-bnb-1-2.py'
+      - '.github/workflows/bnb-1-2.yml'
+      - 'config/420travel-genesis.json'
+      - 'config/genesis-consumer-services.json'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  product-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Assert checked-out implementation SHA
+        shell: bash
+        run: |
+          set -euo pipefail
+          SHA="$(git rev-parse HEAD)"
+          echo "BNB-1.2 implementation SHA: $SHA"
+          test "$SHA" = "$GITHUB_SHA"
+      - name: Validate BNB-1.2 contract and deferred Genesis boundaries
+        run: python3 scripts/validate-bnb-1-2.py

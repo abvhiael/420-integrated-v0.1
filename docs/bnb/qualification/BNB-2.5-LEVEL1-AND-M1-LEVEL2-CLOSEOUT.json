@@ -1,0 +1,70 @@
+{
+  "step": "BNB-2.5",
+  "title": "Reservation and Booking Engine",
+  "qualification_status": "PASS_REPOSITORY_SIDE",
+  "qualified_implementation_sha": "0197224ec931362773219927a9498538bb5ce913",
+  "pr": 600,
+  "branch": "audit/420bnb-bnb-1-1-source-reconciliation-20261009",
+  "main_baseline_sha_at_qualification": "e60c4c74ccd0c950817f98e3da6b67546afd9e24",
+  "prior_pr_base_sha": "f8bbb62e1cdfe68cff25261fd4a036db1840a15c",
+  "level1": {
+    "status": "PASS",
+    "workflow": "420BnB Runtime Slice",
+    "run_id": 38091207508,
+    "job_id": 114327841006,
+    "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38091207508",
+    "conclusion": "success",
+    "failed_steps": 0,
+    "coverage": [
+      "PostgreSQL migrations 001-014 and API security regressions",
+      "Active signed 420Identity sessions, guest/host scoping and transferred property revocation",
+      "Quote-bound holds, replay and double-booking inventory limits with two distinct Uvicorn OS processes",
+      "Booking request/idempotency and original hold deadline conservation",
+      "Instant opt-in, host accept/decline, guest withdraw, server-expiry and prepayment cancellation",
+      "New-quote reservation replacement and transactional rollback on calendar/capacity conflict",
+      "Staging non-root container, frontend syntax, Chromium host/guest journeys and automated axe checks"
+    ]
+  },
+  "level2": {
+    "milestone": "BNB-2.5 app integration milestone",
+    "status": "PASS_APP_SCOPED",
+    "basis": "Same exact implementation SHA; retained BnB app workflows including BNB-1.1 through BNB-1.9, plus BnB Runtime Slice. No redundant global Foundry or duplicate full runtime execution.",
+    "passed_app_workflows": 10,
+    "workflow_run_ids": [
+      38091207523,
+      38091207546,
+      38091207554,
+      38091207589,
+      38091207577,
+      38091207476,
+      38091207515,
+      38091207569,
+      38091207571,
+      38091207508
+    ]
+  },
+  "level3": {
+    "status": "DEFERRED_TO_APP_PHASE_CLOSEOUT",
+    "reason": "No complete audit-phase merge candidate or current-main reconciliation; full Solidity inventory owned by Solidity Contracts, Genesis/address-authority owned by Genesis, no duplicated Foundry."
+  },
+  "docs_global": "skipped — Level 3 not scheduled",
+  "requirements": {
+    "booking_requests": "implemented and qualified",
+    "instant_eligibility": "draft-owner opt-in and publication gate, implemented and qualified",
+    "host_approval": "server-time and current controller checks, implemented and qualified",
+    "holds": "quote-bound serialized capacity, expiry and lifecycle, implemented and qualified",
+    "confirmations": "payment_pending accepted request implemented; real Pay FINALIZED confirmation is not authorized or claimed",
+    "modifications": "atomic quote-based unfunded reservation replacement with rollback; postpayment modifications deferred",
+    "cancellations": "withdrawal, decline, prepayment cancellation/expiry implemented; funded refunds deferred"
+  },
+  "external_gates": [
+    "Real independently approved 420Pay finalized receipt and merchant controller",
+    "True paid reservation confirmation and canonical postpayment modification/cancellation/refund settlement",
+    "Live independent 420Identity/property licensing and calendar/provider trust",
+    "Human manual WCAG and independent media moderation acceptance previously handed to testnet"
+  ],
+  "testnet_reference": "docs/bnb/BNB-TESTNET-WORK-ROADMAP.md#t-bnb-booking-1--real-booking-acceptance-420pay-finality-and-postpayment-lifecycle-bnb-25",
+  "merger_status": "PR #600 remains draft, open; no reconciliation/monolithic merge",
+  "evidence_only_commits": "Allowed after exact-SHA qualification if only docs/evidence change; future executable/CI changes require new app qualification",
+  "next_canonical_step": "Not verified in repository; do not fabricate number/title"
+}

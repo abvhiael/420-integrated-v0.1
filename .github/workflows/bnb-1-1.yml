@@ -1,0 +1,36 @@
+name: 420BnB BNB-1.1 Source Reconciliation
+
+on:
+  pull_request:
+    paths:
+      - 'docs/bnb/**'
+      - 'scripts/validate-bnb-1-1.py'
+      - '.github/workflows/bnb-1-1.yml'
+      - 'config/genesis-applications.json'
+      - 'config/genesis-consumer-services.json'
+      - 'config/420travel-genesis.json'
+      - 'genesis/svc3/travelapp/compatibility.go'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-boundary:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Exact checked-out SHA
+        shell: bash
+        run: |
+          set -euo pipefail
+          HEAD_SHA="$(git rev-parse HEAD)"
+          echo "BNB-1.1 qualified implementation SHA: $HEAD_SHA"
+          test "$HEAD_SHA" = "${GITHUB_SHA}"
+      - name: BNB-1.1 source inventory and fail-closed boundaries
+        run: python3 scripts/validate-bnb-1-1.py

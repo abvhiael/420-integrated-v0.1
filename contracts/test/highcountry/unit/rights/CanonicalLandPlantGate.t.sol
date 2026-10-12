@@ -21,6 +21,8 @@ contract R049CanonicalLandFixture {
     function getParcel(uint64) external view returns (LandRegistry.LandParcel memory) { return parcel; }
 }
 contract R049CanonicalPlantsFixture {
+    address public landRegistry;
+    function bindLand(address land) external {landRegistry=land;}
     mapping(uint64 => uint32) public activePlantsByParcel;
     function set(uint64 parcelId,uint32 count) external {activePlantsByParcel[parcelId]=count;}
 }
@@ -47,6 +49,7 @@ contract CanonicalLandPlantGateR049Test {
         lease=new LeaseRegistry(address(rights));
         land=new R049CanonicalLandFixture();
         plants=new R049CanonicalPlantsFixture();
+        plants.bindLand(address(land));
         owner=new R049CanonicalLandOwner();
         gate=new CanonicalLandPlantGate(address(land),address(plants));
         lease.bindCanonicalGate(address(gate));
@@ -76,6 +79,12 @@ contract CanonicalLandPlantGateR049Test {
         land.changeOwner(address(owner));
         land.changeOccupant(address(0x9999));
         require(!lease.usable(LEASE_ID),"stale tenant occupancy accepted");
+    }
+    function testCrossRegistryPlantBindingFailsClosed() public {
+        R049CanonicalPlantsFixture bogus=new R049CanonicalPlantsFixture();
+        (bool ok,) = address(this).call(abi.encodePacked(type(CanonicalLandPlantGate).creationCode,
+            abi.encode(address(land),address(bogus))));
+        require(!ok,"unrelated cultivation registry accepted");
     }
     function testForgedParcelAndOverCapacityRejected() public {
         (bool forged,) = address(owner).call(abi.encodeCall(owner.create,

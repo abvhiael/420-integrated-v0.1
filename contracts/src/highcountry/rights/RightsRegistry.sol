@@ -8,7 +8,7 @@ contract RightsRegistry {
     error Invalid();
     error Inactive();
     struct Asset { address owner; bool exists; bool frozen; }
-    struct Grant { bytes32 asset; address holder; uint256 scopes; uint64 start; uint64 end; bool revoked; }
+    struct Grant { bytes32 asset; address issuer; address holder; uint256 scopes; uint64 start; uint64 end; bool revoked; }
     address public immutable administrator;
     mapping(bytes32 => Asset) public assets;
     mapping(bytes32 => Grant) public grants;
@@ -37,7 +37,7 @@ contract RightsRegistry {
         Asset memory a=assets[asset];
         if(grantId==bytes32(0)||grants[grantId].holder!=address(0)||!a.exists||a.frozen||
             msg.sender!=a.owner||holder==address(0)||scopes==0||end<=start||end<=block.timestamp)revert Invalid();
-        grants[grantId]=Grant(asset,holder,scopes,start,end,false);
+        grants[grantId]=Grant(asset,msg.sender,holder,scopes,start,end,false);
         emit RightsGranted(grantId,asset,holder,scopes,start,end);
     }
     function revoke(bytes32 grantId) external {
@@ -47,7 +47,7 @@ contract RightsRegistry {
     }
     function hasRight(bytes32 grantId,address holder,uint256 scope) external view returns(bool) {
         Grant memory g=grants[grantId];Asset memory a=assets[g.asset];
-        return a.exists&&!a.frozen&&!g.revoked&&g.holder==holder&&scope!=0&&
+        return a.exists&&!a.frozen&&a.owner==g.issuer&&!g.revoked&&g.holder==holder&&scope!=0&&
             (g.scopes&scope)==scope&&block.timestamp>=g.start&&block.timestamp<g.end;
     }
 }

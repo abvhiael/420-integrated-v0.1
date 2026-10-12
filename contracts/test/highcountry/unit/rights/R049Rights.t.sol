@@ -40,7 +40,7 @@ contract R049RightsTest {
     function testLeaseActivePlantRevocationNeverSilentlyEvicts() public {
         owner.registerLease(leases,LEASE,PARCEL,address(tenant),uint64(block.timestamp),uint64(block.timestamp+300));
         require(leases.usable(LEASE),"lease inactive");
-        tenant.place(leases,LEASE,bytes32(uint256(1)),5,true);
+        leases.updatePlants(LEASE,bytes32(uint256(1)),5,true);
         owner.revokeLease(leases,LEASE);
         require(!leases.usable(LEASE),"revoked access");
         (,,,,,,,uint256 active,LeaseRegistry.State state,bool pending)=leases.leases(LEASE);
@@ -49,7 +49,7 @@ contract R049RightsTest {
         require(!add,"new plants on revoked lease");
         (bool transfer,) = address(tenant).call(abi.encodeCall(tenant.transferLease,(leases,LEASE,address(stranger))));
         require(!transfer,"active-plant transfer");
-        tenant.place(leases,LEASE,bytes32(uint256(3)),5,false);
+        leases.updatePlants(LEASE,bytes32(uint256(3)),5,false);
         require(!leases.usable(LEASE),"closed lease usable");
         (,,,,,,,,state,pending)=leases.leases(LEASE);
         require(state==LeaseRegistry.State.Closed&&!pending,"plant exit incomplete");
@@ -79,8 +79,8 @@ contract R049RightsTest {
         require(!replay,"duplicate lease");
         (bool foreign,) = address(stranger).call(abi.encodeCall(stranger.place,(leases,LEASE,bytes32(uint256(10)),1,true)));
         require(!foreign,"foreign placement");
-        tenant.place(leases,LEASE,bytes32(uint256(10)),1,true);
-        (bool duplicate,) = address(tenant).call(abi.encodeCall(tenant.place,(leases,LEASE,bytes32(uint256(10)),1,true)));
+        leases.updatePlants(LEASE,bytes32(uint256(10)),1,true);
+        (bool duplicate,) = address(this).call(abi.encodeCall(leases.updatePlants,(LEASE,bytes32(uint256(10)),uint256(1),true)));
         require(!duplicate,"operation replay");
     }
 }

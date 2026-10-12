@@ -63,6 +63,27 @@ func (s C065PostgreSQLReviews) AppendIfCurrent(ctx context.Context,r C065ReviewR
  // An author edit invalidates the previous review sequence. A new sequence
  // requires explicit migration/queue reconciliation, not silent carry-forward.
  if draftRevision!=expectedDraft||headDigest!=r.DocumentDigest{return C065ReviewRecord{},ErrC065Conflict}
+ if reviewRevision==0&&r.State=="CONFLICT_RESOLVED"{return C065ReviewRecord{},ErrC065Conflict}
+ if reviewRevision>0 {
+  var previousState string
+  var previousConflicts []string
+  var raw []byte
+  err=tx.QueryRowContext(ctx,`SELECT state,record FROM compliance_review_versions
+   WHERE tenant=$1 AND domain=$2 AND jurisdiction=$3 AND draft_id=$4 AND review_revision=$5`,
+   r.Scope.Tenant,r.Scope.Domain,r.Scope.Jurisdiction,r.DraftID,reviewRevision).Scan(&previousState,&raw)
+  if err!=nil{return fail()}
+  var previous C065ReviewRecord
+  if json.Unmarshal(raw,&previous)!=nil||previous.DocumentDigest!=r.DocumentDigest{return fail()}
+  previousConflicts=previous.ConflictIDs
+  if r.State=="CONFLICT_RESOLVED" {
+   if previousState!="CONFLICT_QUEUE"||len(previousConflicts)!=len(r.ConflictIDs){return C065ReviewRecord{},ErrC065Conflict}
+   matches:=map[string]bool{}
+   for _,id:=range previousConflicts {matches[id]=true}
+   for _,id:=range r.ConflictIDs {if !matches[id]{return C065ReviewRecord{},ErrC065Conflict}}
+  }
+  if previousState=="CONFLICT_QUEUE"&&r.State!="CONFLICT_RESOLVED"{return C065ReviewRecord{},ErrC065Conflict}
+ }
+
  document,err:=json.Marshal(r)
  if err!=nil{return fail()}
  _,err=tx.ExecContext(ctx,`INSERT INTO compliance_review_versions

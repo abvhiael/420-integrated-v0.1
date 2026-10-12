@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
 import { RightsRegistry } from "./RightsRegistry.sol";
+import { CanonicalLandPlantGate } from "./CanonicalLandPlantGate.sol";
 
 /// @notice R04.9 fixed term parcel lease, consented transfers and active-plant dispute boundary.
 /// @dev Settled lease rent/fees and off-chain plant relocation are NOT implied; deposit/payment external.
@@ -29,6 +30,9 @@ contract LeaseRegistry {
     }
     RightsRegistry public immutable rights;
     address public immutable plantAuthority;
+    CanonicalLandPlantGate public canonicalGate;
+    mapping(bytes32 => uint64) public canonicalParcelOf;
+    event CanonicalGateBound(address indexed gate);
     mapping(bytes32 => Lease) public leases;
     mapping(bytes32 => bool) public operationUsed;
     event LeaseCreated(
@@ -44,6 +48,30 @@ contract LeaseRegistry {
         if (rights_ == address(0) || rights_.code.length == 0) revert InvalidLease();
         rights = RightsRegistry(rights_);
         plantAuthority = msg.sender;
+    }
+
+    /// @notice Bind a trusted canonical land/plant reader exactly once.
+    function bindCanonicalGate(address gate) external {
+        if (msg.sender != plantAuthority || address(canonicalGate) != address(0) || gate.code.length == 0) revert Unauthorized();
+        canonicalGate = CanonicalLandPlantGate(gate);
+        emit CanonicalGateBound(gate);
+    }
+
+    /// @notice Admit only parcels already occupied under this exact lease identity in R02.
+    function createCanonical(bytes32 id, uint64 parcelId, address tenant, uint64 starts, uint64 ends, uint256 scopes, uint256 feeUnits) external {
+        if (address(canonicalGate) == address(0)) revert InvalidLease();
+        bytes32 asset = canonicalGate.parcelAsset(parcelId);
+        if (!canonicalGate.leaseAdmissible(parcelId, id, msg.sender, tenant)) revert InvalidLease();
+        createInternal(id, asset, tenant, starts, ends, scopes, feeUnits);
+        canonicalParcelOf[id] = parcelId;
+    }
+
+    function createInternal(bytes32 id, bytes32 asset, address tenant, uint64 starts, uint64 ends, uint256 scopes, uint256 feeUnits) private {
+        (address owner, bool exists, bool frozen) = rights.assets(asset);
+        if (id == bytes32(0) || leases[id].state != State.None || !exists || frozen || msg.sender != owner
+            || tenant == address(0) || tenant == owner || starts >= ends || ends <= block.timestamp || scopes == 0) revert InvalidLease();
+        leases[id] = Lease(asset, owner, tenant, starts, ends, scopes, feeUnits, 0, State.Active, false);
+        emit LeaseCreated(id, asset, tenant, ends, feeUnits);
     }
 
     function create(
@@ -71,6 +99,8 @@ contract LeaseRegistry {
     ) public view returns (bool) {
         Lease memory l = leases[id];
         (address owner, bool exists, bool frozen) = rights.assets(l.asset);
+        uint64 parcelId = canonicalParcelOf[id];
+        if (parcelId != 0 && !canonicalGate.leaseAdmissible(parcelId, id, l.lessor, l.tenant)) return false;
         return l.state == State.Active && !l.exitPending && exists && !frozen && owner == l.lessor
             && block.timestamp >= l.starts && block.timestamp < l.ends;
     }
@@ -85,6 +115,7 @@ contract LeaseRegistry {
         Lease storage l = leases[id];
         if (msg.sender != plantAuthority || op == bytes32(0) || operationUsed[op]) revert Unauthorized();
         if (place && !usable(id)) revert InvalidLease();
+        if (canonicalParcelOf[id] != 0) revert InvalidLease(); // canonical occupancy is read from PlantRegistry, never self-reported
         if (!place && l.state == State.None) revert InvalidLease();
         operationUsed[op] = true;
         if (place) {

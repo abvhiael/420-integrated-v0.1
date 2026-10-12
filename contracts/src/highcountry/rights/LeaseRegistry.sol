@@ -83,6 +83,8 @@ contract LeaseRegistry {
         uint256 scopes,
         uint256 feeUnits
     ) external {
+        // Once canonical land binding is active, arbitrary shadow leases cannot bypass R02 occupancy.
+        if (address(canonicalGate) != address(0)) revert InvalidLease();
         (address owner, bool exists, bool frozen) = rights.assets(asset);
         if (
             id == bytes32(0) || leases[id].state != State.None || !exists || frozen || msg.sender != owner

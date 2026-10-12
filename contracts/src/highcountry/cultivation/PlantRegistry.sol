@@ -4,6 +4,9 @@ pragma solidity ^0.8.24;
 import { SeedRegistry } from "../genetics/SeedRegistry.sol";
 import { CloneRegistry } from "../genetics/CloneRegistry.sol";
 import { PublicCultivationAccess } from "../land/PublicCultivationAccess.sol";
+import { LandRegistry } from "../land/LandRegistry.sol";
+import { LeaseRegistry } from "../rights/LeaseRegistry.sol";
+import { CanonicalLandPlantGate } from "../rights/CanonicalLandPlantGate.sol";
 
 import { ActionIds } from "../constants/ActionIds.sol";
 import { EmergencyDomains } from "../constants/EmergencyDomains.sol";
@@ -91,6 +94,32 @@ contract PlantRegistry {
         uint64 plantedAt;
         uint64 lastAdvancedAt;
         bool exists;
+    }
+
+    LeaseRegistry public canonicalLeaseRegistry;
+    bytes32 public constant RIGHTS_BIND_SCOPE = keccak256("HC.PLANT_REGISTRY.BIND_CANONICAL_RIGHTS.V1");
+    event CanonicalRightsBound(address indexed leaseRegistry);
+
+    /// @notice One-time scoped authorization of the R04.9 lease/land/plant authority triple.
+    function bindCanonicalRights(address candidate) external {
+        if (address(canonicalLeaseRegistry) != address(0) || candidate.code.length == 0) revert HCInvalidState();
+        authorization.requireAuthorized(AuthorizationRequest(
+            msg.sender, ModuleIds.PLANT_REGISTRY, ActionIds.PLANT_BIND_RIGHTS, RIGHTS_BIND_SCOPE, 0
+        ));
+        LeaseRegistry lease = LeaseRegistry(candidate);
+        CanonicalLandPlantGate gate = lease.canonicalGate();
+        if (address(gate) == address(0) || address(gate.land()) != address(landRegistry)
+            || address(gate.plants()) != address(this)) revert HCInvalidState();
+        canonicalLeaseRegistry = lease;
+        emit CanonicalRightsBound(candidate);
+    }
+
+    function _requireCanonicalOccupancy(uint64 parcelId, address grower) private view {
+        LandRegistry.LandParcel memory p = LandRegistry(address(landRegistry)).getParcel(parcelId);
+        if (p.occupancyKind == LandRegistry.OccupancyKind.NONE) return;
+        if (p.occupancyKind != LandRegistry.OccupancyKind.LEASE || address(canonicalLeaseRegistry) == address(0)
+            || p.occupant != grower || canonicalLeaseRegistry.canonicalParcelOf(p.occupancyRef) != parcelId
+            || !canonicalLeaseRegistry.usable(p.occupancyRef)) revert HCInvalidState();
     }
 
     IEmergencyState public emergencyState;
@@ -251,6 +280,7 @@ contract PlantRegistry {
         if (!genomeRegistry.exists(genomeId) || !landRegistry.exists(landParcelId)) revert HCNotFound();
         if (address(publicAccess.plantRegistry()) != address(this)) revert HCInvalidState();
         if (landRegistry.effectiveOperator(landParcelId) != grower) revert HCInvalidState();
+        _requireCanonicalOccupancy(landParcelId, grower);
         uint32 capacity = landRegistry.growCapacityOf(landParcelId);
         uint256 used = uint256(privatePlantsByParcel[landParcelId]) + publicAccess.publicCapacityOnParcel(landParcelId);
         if (used >= capacity) revert HCCapacityExceeded(used + 1, capacity);
@@ -270,6 +300,7 @@ contract PlantRegistry {
         if (address(publicAccess.plantRegistry()) != address(this)) revert HCInvalidState();
         PublicCultivationAccess.PublicPlot memory plot = publicAccess.getPlot(plotId);
         if (!genomeRegistry.exists(genomeId) || !landRegistry.exists(plot.parcelId)) revert HCNotFound();
+        _requireCanonicalOccupancy(plot.parcelId, grower);
         uint32 allocated = publicAccess.allocationOf(plotId, grower);
         uint32 active = activePublicPlants[plotId][grower];
         if (active >= allocated) revert HCCapacityExceeded(uint256(active) + 1, allocated);

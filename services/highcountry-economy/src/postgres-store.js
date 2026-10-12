@@ -13,6 +13,7 @@ function decode(raw) {
   const claims=new Set(raw.claims);
   const sourceIssued=mapEntries(raw.sourceIssued);
   const assets=mapEntries(raw.assets ?? []);
+  const assetSources=mapEntries(raw.assetSources ?? []);
   const listings=mapEntries(raw.listings ?? []);
   const transferIntents=mapEntries(raw.transferIntents ?? []);
   const importedAssets=new Set(raw.importedAssets ?? []);
@@ -21,10 +22,10 @@ function decode(raw) {
   for(const b of balances.values())if(!safe(b.available)||!safe(b.reserved))throw new SettlementError('corrupt balance');
   for(const v of sourceIssued.values())if(!safe(v))throw new SettlementError('corrupt issuance');
   for(const b of assets.values())if(!safe(b.available)||!safe(b.reserved))throw new SettlementError('corrupt asset');
-  return {balances,operations,claims,sourceIssued,assets,listings,transferIntents,importedAssets,issued:raw.issued,burned:raw.burned};
+  return {balances,operations,claims,sourceIssued,assets,assetSources,listings,transferIntents,importedAssets,issued:raw.issued,burned:raw.burned};
 }
 const encode = s => JSON.stringify({schema:1,balances:[...s.balances],operations:[...s.operations],
-  claims:[...s.claims],sourceIssued:[...s.sourceIssued],assets:[...s.assets],listings:[...s.listings],transferIntents:[...s.transferIntents],importedAssets:[...s.importedAssets],issued:s.issued,burned:s.burned});
+  claims:[...s.claims],sourceIssued:[...s.sourceIssued],assets:[...s.assets],assetSources:[...s.assetSources],listings:[...s.listings],transferIntents:[...s.transferIntents],importedAssets:[...s.importedAssets],issued:s.issued,burned:s.burned});
 export class PostgresBudsStore {
   constructor(pool, namespace) {
     if(typeof pool?.connect!=='function'||typeof namespace!=='string'

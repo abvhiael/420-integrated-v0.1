@@ -19,7 +19,9 @@ export const ESCROW_ABI=[
   {name:'expiresAt',type:'uint64',indexed:false}]},
  {type:'event',name:'EscrowSettled',inputs:[
   {name:'listingId',type:'bytes32',indexed:true},{name:'operationId',type:'bytes32',indexed:true},
-  {name:'buyer',type:'address',indexed:true}]}
+  {name:'buyer',type:'address',indexed:true}]},
+ {type:'event',name:'EscrowClosed',inputs:[
+  {name:'listingId',type:'bytes32',indexed:true},{name:'status',type:'uint8',indexed:false}]}
 ];
 export class CanonicalEscrowReader {
  constructor({client,escrow,chainId,issuer,fromBlock=0n}) {
@@ -80,5 +82,14 @@ export class CanonicalEscrowReader {
      l.quantity<=0n||l.quantity>BigInt(Number.MAX_SAFE_INTEGER))return null;
   return {finalized:true,operationId:canon(op),sourceReceiptId:canon(e.listingId),
    from:canon(l.owner),to:canon(e.buyer),asset:canon(l.asset),quantity:Number(l.quantity)};
+ }
+ async proveUnexecutedAndCancelled(op,listingId,buyer,minConfirmations=1) {
+  if(!hex32(op)||!hex32(listingId)||!addr(buyer))return false;
+  if(canon(await this.expectedTransferOperation(listingId,buyer))!==canon(op))return false;
+  const l=await this._listing(listingId);
+  if(Number(l.status)!==3&&Number(l.status)!==4)return false;
+  const logs=await this._logs('EscrowClosed',{listingId});
+  if(logs.length!==1||Number(logs[0].args.status)!==Number(l.status))return false;
+  return this._final(logs[0],minConfirmations);
  }
 }

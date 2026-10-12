@@ -17,7 +17,7 @@ func(s *c059Outbox)PublishImpact(_ context.Context,e ComplianceImpactEvent,subs 
 }
 func(s *c059Outbox)LeaseImpact(context.Context,time.Time)(ComplianceOutboxItem,error){if s.fail{return ComplianceOutboxItem{},ErrImpactUnavailable};return s.item,nil}
 func(s *c059Outbox)FinishImpact(_ context.Context,item ComplianceOutboxItem,success bool,next time.Time,max uint32)error{
- if s.fail||s.item!=item{return ErrImpactUnavailable}
+ if s.fail||s.item.Event.EventID!=item.Event.EventID||s.item.Subscriber!=item.Subscriber||s.item.Attempts!=item.Attempts{return ErrImpactUnavailable}
  s.item.Attempts++;s.item.NextAttempt=next;s.item.Acknowledged=success;s.item.DeadLetter=!success&&s.item.Attempts>=max;return nil
 }
 type c059Sender struct{err error;n int}

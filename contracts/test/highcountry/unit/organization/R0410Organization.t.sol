@@ -105,6 +105,7 @@ contract R0410OrganizationTest {
         r.invite(ORG, address(alice), true);
         alice.join(r, ORG);
     }
+
     function testMembershipInvitationAndReplay() public {
         (bool denied,) = address(bob).call(abi.encodeCall(bob.join, (r, ORG)));
         require(!denied, "uninvited member entered");
@@ -113,6 +114,7 @@ contract R0410OrganizationTest {
         (bool replay,) = address(bob).call(abi.encodeCall(bob.join, (r, ORG)));
         require(!replay, "join replay");
     }
+
     function testBoundedDelegationAndUseReplay() public {
         bytes32 id = a.delegate(
             ORG, address(alice), ACTION, SCOPE, uint64(block.timestamp), uint64(block.timestamp + 1 days), 1
@@ -125,6 +127,7 @@ contract R0410OrganizationTest {
         alice.consume(a, id, ACTION, SCOPE);
         require(!a.valid(id, address(alice), ACTION, SCOPE), "replay allowed");
     }
+
     function testNoImplicitFinancialOrRightsAuthority() public {
         for (uint256 i = 0; i < 3; i++) {
             bytes32 forbidden = i == 0 ? a.TREASURY_ACTION() : i == 1 ? a.WALLET_ACTION() : a.RIGHTS_ACTION();
@@ -146,9 +149,11 @@ contract R0410OrganizationTest {
             require(!ok, "admin silently granted financial or rights authority");
         }
     }
+
     function testLeaveRevokesAuthorizationAndObligationsBlockExit() public {
-        bytes32 id =
-            a.delegate(ORG, address(alice), ACTION, SCOPE, uint64(block.timestamp), uint64(block.timestamp + 1 days), 2);
+        bytes32 id = a.delegate(
+            ORG, address(alice), ACTION, SCOPE, uint64(block.timestamp), uint64(block.timestamp + 1 days), 2
+        );
         alice.reserve(r, ORG, 2);
         alice.leave(r, ORG);
         require(!a.valid(id, address(alice), ACTION, SCOPE), "leaving member retained access");
@@ -161,6 +166,7 @@ contract R0410OrganizationTest {
         r.finalizeExit(ORG, address(alice));
         require(!r.isActiveMember(ORG, address(alice)), "ex-member active");
     }
+
     function testAdminRotationRevokesOldDelegation() public {
         bytes32 id = a.delegate(
             ORG, address(alice), ACTION, SCOPE, uint64(block.timestamp), uint64(block.timestamp + 1 days), 5
@@ -184,6 +190,7 @@ contract R0410OrganizationTest {
             );
         require(!retained, "former admin delegated");
     }
+
     function testUnknownActionCannotMasqueradeAsTreasuryOrWalletAuthority() public {
         (bool allowed,) = address(a)
             .call(

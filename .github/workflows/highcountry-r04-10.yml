@@ -1,0 +1,44 @@
+name: High Country R04.10 Level 1 Qualification
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/highcountry/organization/**'
+      - 'contracts/test/highcountry/unit/organization/**'
+      - '.github/workflows/highcountry-r04-10.yml'
+      - 'docs/highcountry/R04.10-*'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  organization:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      FOUNDRY_SRC: src/highcountry
+      FOUNDRY_TEST: test/highcountry
+      FOUNDRY_SCRIPT: script/highcountry
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Exact source SHA
+        env:
+          SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$SHA"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: High Country affected build
+        working-directory: contracts
+        run: forge build src/highcountry --sizes
+      - name: Organization formatting
+        working-directory: contracts
+        run: forge fmt --check src/highcountry/organization test/highcountry/unit/organization
+      - name: Organization static and security checks
+        working-directory: contracts
+        run: forge lint src/highcountry/organization --severity high med low
+      - name: Membership delegation and adversarial tests
+        working-directory: contracts
+        run: forge test --match-path 'test/highcountry/unit/organization/*.t.sol' -vv
+      - name: Canonical High Country verifier
+        run: python3 scripts/highcountry/verify-r01.py

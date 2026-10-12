@@ -69,6 +69,10 @@ contract R041Actor {
         i.setInventoryOperator(operator, approved);
     }
 
+    function approveMarketTransfer(InventoryRegistry i, address operator, bool approved) external {
+        i.setMarketTransferOperator(operator, approved);
+    }
+
     function transferReserved(InventoryRegistry i, bytes32 op, bytes32 asset, address owner, address recipient, uint256 count) external {
         i.transferReservedFor(op, asset, owner, recipient, count);
     }
@@ -153,6 +157,7 @@ contract InventoryRegistryR041Test {
     function testMarketReservedHandoffConservesAndRevocationBlocks() public {
         inventory.acquire(bytes32(uint256(81)), RESOURCE, address(alice), 10);
         alice.approveOperator(inventory, address(this), true);
+        alice.approveMarketTransfer(inventory, address(this), true);
         inventory.reserveFor(bytes32(uint256(82)), RESOURCE, address(alice), 7);
         inventory.transferReservedFor(bytes32(uint256(83)), RESOURCE, address(alice), address(bob), 5);
         ledgerCheck(RESOURCE, address(alice), 3, 2, 0);
@@ -161,7 +166,7 @@ contract InventoryRegistryR041Test {
         (bool replay,) = address(inventory).call(abi.encodeCall(inventory.transferReservedFor,
             (bytes32(uint256(83)), RESOURCE, address(alice), address(bob), uint256(1))));
         require(!replay, "duplicate transfer");
-        alice.approveOperator(inventory, address(this), false);
+        alice.approveMarketTransfer(inventory, address(this), false);
         (bool revoked,) = address(inventory).call(abi.encodeCall(inventory.transferReservedFor,
             (bytes32(uint256(84)), RESOURCE, address(alice), address(bob), uint256(1))));
         require(!revoked, "revoked market authority");

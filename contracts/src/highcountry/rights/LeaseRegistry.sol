@@ -138,12 +138,17 @@ contract LeaseRegistry {
         address to
     ) external {
         Lease storage l = leases[id];
-        if (msg.sender != l.tenant || to == address(0) || to == l.tenant || !usable(id) || l.activePlants != 0) {
+        if (msg.sender != l.tenant || to == address(0) || to == l.tenant || !usable(id) || _hasPlantsOrUnresolvedOccupancy(id, l)) {
             revert Unauthorized();
         }
         address old = l.tenant;
         l.tenant = to;
         emit LeaseTransferred(id, old, to);
+    }
+
+    function _hasPlantsOrUnresolvedOccupancy(bytes32 id, Lease storage l) private view returns (bool) {
+        uint64 parcelId = canonicalParcelOf[id];
+        return parcelId == 0 ? l.activePlants != 0 : !canonicalGate.canClearOccupancy(parcelId, id);
     }
 
     function dispute(
@@ -152,7 +157,7 @@ contract LeaseRegistry {
         Lease storage l = leases[id];
         if (l.state != State.Active || (msg.sender != l.lessor && msg.sender != l.tenant)) revert Unauthorized();
         l.state = State.Disputed;
-        l.exitPending = l.activePlants != 0;
+        l.exitPending = _hasPlantsOrUnresolvedOccupancy(id, l);
         emit LeaseStatus(id, l.state, l.exitPending);
     }
 
@@ -162,7 +167,7 @@ contract LeaseRegistry {
         Lease storage l = leases[id];
         if (msg.sender != l.lessor || l.state != State.Active) revert Unauthorized();
         l.state = State.Revoked;
-        l.exitPending = l.activePlants != 0;
+        l.exitPending = _hasPlantsOrUnresolvedOccupancy(id, l);
         emit LeaseStatus(id, l.state, l.exitPending);
     }
 
@@ -171,8 +176,8 @@ contract LeaseRegistry {
     ) external {
         Lease storage l = leases[id];
         if (l.state != State.Active || block.timestamp < l.ends) revert InvalidLease();
-        l.state = l.activePlants == 0 ? State.Closed : State.Revoked;
-        l.exitPending = l.activePlants != 0;
+        l.state = _hasPlantsOrUnresolvedOccupancy(id, l) ? State.Revoked : State.Closed;
+        l.exitPending = _hasPlantsOrUnresolvedOccupancy(id, l);
         emit LeaseStatus(id, l.state, l.exitPending);
     }
 
@@ -187,7 +192,7 @@ contract LeaseRegistry {
             l.exitPending = false;
         } else {
             l.state = l.activePlants == 0 ? State.Closed : State.Revoked;
-            l.exitPending = l.activePlants != 0;
+            l.exitPending = _hasPlantsOrUnresolvedOccupancy(id, l);
         }
         emit LeaseStatus(id, l.state, l.exitPending);
     }

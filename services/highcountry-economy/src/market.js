@@ -43,6 +43,8 @@ export class HighCountryMarket {
    });
  }
  async cancel(session,op,listingId){
+   if(this.authority.canonicalSettlementRequired===true)
+     throw new SettlementError('canonical cancellation requires finalized escrow closure');
    const seller=id(await this.authority.registeredPrincipal(session));
    return this.buds.operate(op,s=>{
      const l=s.listings.get(id(listingId));
@@ -51,6 +53,8 @@ export class HighCountryMarket {
    });
  }
  async expire(op,listingId){
+   if(this.authority.canonicalSettlementRequired===true)
+     throw new SettlementError('canonical expiry requires finalized escrow closure');
    return this.buds.operate(op,s=>{
      const l=s.listings.get(id(listingId));
      if(!l||l.status!=='active'||this.clock()<l.expiresAt)throw new SettlementError('cannot expire');

@@ -51,14 +51,26 @@ contract LeaseRegistry {
     }
 
     /// @notice Bind a trusted canonical land/plant reader exactly once.
-    function bindCanonicalGate(address gate) external {
-        if (msg.sender != plantAuthority || address(canonicalGate) != address(0) || gate.code.length == 0) revert Unauthorized();
+    function bindCanonicalGate(
+        address gate
+    ) external {
+        if (msg.sender != plantAuthority || address(canonicalGate) != address(0) || gate.code.length == 0) {
+            revert Unauthorized();
+        }
         canonicalGate = CanonicalLandPlantGate(gate);
         emit CanonicalGateBound(gate);
     }
 
     /// @notice Admit only parcels already occupied under this exact lease identity in R02.
-    function createCanonical(bytes32 id, uint64 parcelId, address tenant, uint64 starts, uint64 ends, uint256 scopes, uint256 feeUnits) external {
+    function createCanonical(
+        bytes32 id,
+        uint64 parcelId,
+        address tenant,
+        uint64 starts,
+        uint64 ends,
+        uint256 scopes,
+        uint256 feeUnits
+    ) external {
         if (address(canonicalGate) == address(0)) revert InvalidLease();
         bytes32 asset = canonicalGate.parcelAsset(parcelId);
         if (!canonicalGate.leaseAdmissible(parcelId, id, msg.sender, tenant)) revert InvalidLease();
@@ -66,10 +78,20 @@ contract LeaseRegistry {
         canonicalParcelOf[id] = parcelId;
     }
 
-    function createInternal(bytes32 id, bytes32 asset, address tenant, uint64 starts, uint64 ends, uint256 scopes, uint256 feeUnits) private {
+    function createInternal(
+        bytes32 id,
+        bytes32 asset,
+        address tenant,
+        uint64 starts,
+        uint64 ends,
+        uint256 scopes,
+        uint256 feeUnits
+    ) private {
         (address owner, bool exists, bool frozen) = rights.assets(asset);
-        if (id == bytes32(0) || leases[id].state != State.None || !exists || frozen || msg.sender != owner
-            || tenant == address(0) || tenant == owner || starts >= ends || ends <= block.timestamp || scopes == 0) revert InvalidLease();
+        if (
+            id == bytes32(0) || leases[id].state != State.None || !exists || frozen || msg.sender != owner
+                || tenant == address(0) || tenant == owner || starts >= ends || ends <= block.timestamp || scopes == 0
+        ) revert InvalidLease();
         leases[id] = Lease(asset, owner, tenant, starts, ends, scopes, feeUnits, 0, State.Active, false);
         emit LeaseCreated(id, asset, tenant, ends, feeUnits);
     }
@@ -137,7 +159,9 @@ contract LeaseRegistry {
 
     /// @notice Reconcile a terminal canonical lease after the real PlantRegistry reports zero.
     /// @dev Does not clear LandRegistry occupancy; separate authorized R02 action is mandatory.
-    function reconcileCanonicalExit(bytes32 id) external {
+    function reconcileCanonicalExit(
+        bytes32 id
+    ) external {
         Lease storage l = leases[id];
         uint64 parcelId = canonicalParcelOf[id];
         if (msg.sender != plantAuthority || parcelId == 0 || !l.exitPending) revert Unauthorized();
@@ -153,7 +177,10 @@ contract LeaseRegistry {
         address to
     ) external {
         Lease storage l = leases[id];
-        if (msg.sender != l.tenant || to == address(0) || to == l.tenant || !usable(id) || canonicalParcelOf[id] != 0 || _hasPlantsOrUnresolvedOccupancy(id, l)) {
+        if (
+            msg.sender != l.tenant || to == address(0) || to == l.tenant || !usable(id) || canonicalParcelOf[id] != 0
+                || _hasPlantsOrUnresolvedOccupancy(id, l)
+        ) {
             revert Unauthorized();
         }
         address old = l.tenant;
@@ -161,7 +188,10 @@ contract LeaseRegistry {
         emit LeaseTransferred(id, old, to);
     }
 
-    function _hasPlantsOrUnresolvedOccupancy(bytes32 id, Lease storage l) private view returns (bool) {
+    function _hasPlantsOrUnresolvedOccupancy(
+        bytes32 id,
+        Lease storage l
+    ) private view returns (bool) {
         uint64 parcelId = canonicalParcelOf[id];
         return parcelId == 0 ? l.activePlants != 0 : !canonicalGate.canClearOccupancy(parcelId, id);
     }
@@ -202,7 +232,11 @@ contract LeaseRegistry {
     ) external {
         Lease storage l = leases[id];
         if (l.state != State.Disputed || msg.sender != l.lessor) revert Unauthorized();
-        if (restore && block.timestamp < l.ends && (canonicalParcelOf[id] == 0 || canonicalGate.leaseAdmissible(canonicalParcelOf[id], id, l.lessor, l.tenant))) {
+        if (
+            restore && block.timestamp < l.ends
+                && (canonicalParcelOf[id] == 0
+                    || canonicalGate.leaseAdmissible(canonicalParcelOf[id], id, l.lessor, l.tenant))
+        ) {
             l.state = State.Active;
             l.exitPending = false;
         } else {

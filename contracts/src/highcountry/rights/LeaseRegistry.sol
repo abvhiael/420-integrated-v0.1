@@ -130,7 +130,9 @@ contract LeaseRegistry {
     }
 
     /// @notice Scope bit zero is cultivation; other lease scopes cannot silently grant plant admission.
-    function canCultivate(bytes32 id) external view returns (bool) {
+    function canCultivate(
+        bytes32 id
+    ) external view returns (bool) {
         return (leases[id].scopes & uint256(1)) == 1 && usable(id);
     }
 

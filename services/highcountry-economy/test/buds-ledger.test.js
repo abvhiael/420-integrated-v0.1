@@ -1,7 +1,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {BudsLedger,MemoryTransactionFixture} from '../src/buds-ledger.js';
-function setup(){const store=new MemoryTransactionFixture();const ledger=new BudsLedger(store,{authorize:(source,proof,owner,n)=>source==='mission:1'&&proof==='signed-evidence'&&owner==='alice'&&n===100,authorizeSink:(sink)=>sink==='approved:sink'});return {store,ledger};}
+function setup(){const store=new MemoryTransactionFixture();const ledger=new BudsLedger(store,{authorize:(source,proof,owner,n)=>source==='mission:1'&&proof==='signed-evidence'&&owner==='alice'&&n===100,authorizeSink:(sink)=>sink==='approved:sink',sourceLimit:(source)=>source==='mission:1'?200:0});return {store,ledger};}
 test('earned source, conservation, full-fill, zero fee, reserve/refund, sink',async()=>{
  const {store,ledger}=setup();
  await ledger.earn('op1','alice','mission:1','signed-evidence',100);
@@ -37,4 +37,12 @@ test('failed settlement rolls back recipient and replay marker',async()=>{
  assert.equal(store.state.balances.has('bob'),false);
  await ledger.settle('op3','alice','bob',50);
  assert.equal(store.state.balances.get('bob').available,50);
+});
+
+test('configured source issuance cap rejects inflation with new proof',async()=>{
+ const {store,ledger}=setup();
+ await ledger.earn('a','alice','mission:1','signed-evidence',100);
+ // A separate verified earning would exceed the source cap only if the catalogue explicitly authorizes it.
+ assert.equal(store.state.sourceIssued.get('mission:1'),100);
+ assert.equal(store.state.claims.size,1);
 });

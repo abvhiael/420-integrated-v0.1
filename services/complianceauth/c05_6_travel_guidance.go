@@ -51,10 +51,15 @@ func (a TravelGuidanceAdapter) Read(ctx context.Context,region,domain string,now
  // If the publication expires or is not effective, never show REVIEWED.
  coverage:=p.Coverage
  if now.Before(p.EffectiveFrom)||!now.Before(p.EffectiveUntil){coverage="UNKNOWN"}
- // Restrict summaries to a small printable public-safe vocabulary. Never
- // reflect markup, URLs, sensitive references, or full policy source.
- summary:=p.PublicSummary
- if len(summary)==0||len(summary)>400||strings.ContainsAny(summary,"<>\r\n@")||strings.Contains(strings.ToLower(summary),"checkout")||strings.Contains(strings.ToLower(summary),"courier")||strings.Contains(strings.ToLower(summary),"address"){return zero,ErrTravelGuidanceUnavailable}
+ // Source-provided public message codes are allowlisted. Never render source
+ // prose directly: forbidden field names cannot reliably detect private data.
+ messages:=map[string]string{
+  "REVIEW_RULES":"Review current local rules before travel",
+  "PARTIAL_COVERAGE":"Some local policy coverage requires independent review",
+  "COVERAGE_UNKNOWN":"Current policy coverage requires independent review",
+ }
+ summary,ok:=messages[p.PublicSummary]
+ if !ok{return zero,ErrTravelGuidanceUnavailable}
  u,e:=url.Parse(p.PublicDeepLink)
  if e!=nil||u.Scheme!="https"||u.Host!=a.AllowedPublicHost||u.User!=nil||u.RawQuery!=""||u.Fragment!=""||!strings.HasPrefix(u.Path,"/travel/policy/")||strings.Contains(u.Path,"..")||len(u.Path)>200{return zero,ErrTravelGuidanceUnavailable}
  return TravelPublicGuidance{Region:region,Domain:domain,CoverageStatus:coverage,LastReviewedAt:p.LastReviewedAt.UTC().Format("2006-01-02"),PolicyVersion:p.PolicyVersion,PolicyDigest:p.PolicyDigest,Summary:summary,DeepLink:u.String(),LegalAuthorization:false},nil

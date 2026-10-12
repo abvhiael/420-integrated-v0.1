@@ -1,7 +1,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {BudsLedger,MemoryTransactionFixture} from '../src/buds-ledger.js';
-function setup(){const store=new MemoryTransactionFixture();const ledger=new BudsLedger(store,{authorize:(source,proof,owner,n)=>source==='mission:1'&&proof==='signed-evidence'&&owner==='alice'&&n===100});return {store,ledger};}
+function setup(){const store=new MemoryTransactionFixture();const ledger=new BudsLedger(store,{authorize:(source,proof,owner,n)=>source==='mission:1'&&proof==='signed-evidence'&&owner==='alice'&&n===100,authorizeSink:(sink)=>sink==='approved:sink'});return {store,ledger};}
 test('earned source, conservation, full-fill, zero fee, reserve/refund, sink',async()=>{
  const {store,ledger}=setup();
  await ledger.earn('op1','alice','mission:1','signed-evidence',100);
@@ -19,6 +19,7 @@ test('replay, unapproved mint, overdraw, self trade, fee, unsafe units fail clos
  assert.equal(store.state.operations.size,0);
  await ledger.earn('op1','alice','mission:1','signed-evidence',100);
  await assert.rejects(ledger.earn('op1','alice','mission:1','signed-evidence',100));
+ await assert.rejects(ledger.earn('op-new','alice','mission:1','signed-evidence',100));
  await assert.rejects(ledger.reserve('overspend','alice',101));
  await ledger.reserve('op2','alice',90);
  await assert.rejects(ledger.settle('self','alice','alice',10));

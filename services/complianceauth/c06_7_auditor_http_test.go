@@ -26,7 +26,7 @@ func TestC067AuditorHTTPAuthorizationAndCSRF(t *testing.T){
   r.Header.Set("Content-Type","application/json")
   r.Header.Set("Origin",tc.origin);r.Header.Set("X-CSRF-Token",tc.csrf)
   if tc.cookie!=""{r.AddCookie(&http.Cookie{Name:"__Host-420ComplianceAuditor",Value:tc.cookie})}
-  if tc.tls{r.TLS=&tls.ConnectionState{}}
+  if tc.tls{r.TLS=&tls.ConnectionState{}}else{r.TLS=nil}
   w:=httptest.NewRecorder();h.ServeHTTP(w,r)
   if w.Code!=tc.want{t.Fatalf("status %d wanted %d",w.Code,tc.want)}
   if !strings.Contains(w.Header().Get("Cache-Control"),"no-store"){t.Fatal("private auditor response is cacheable")}

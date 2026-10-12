@@ -1,0 +1,195 @@
+{
+  "step": "C06.4",
+  "canonical": "Private author workspace with cited text, structured rule editing and version comparisons.",
+  "qualification_level": 1,
+  "status": "COMPLETE_LEVEL1_PASS_LIVE_PROVIDER_AND_BROWSER_ACCEPTANCE_DEFERRED",
+  "implementation_sha": "331e760116075e4808310cfeeb6189a46a289a16",
+  "branch": "audit/420compliance-c01-1-inventory-20261009",
+  "pr": 602,
+  "main_base_sha": "c5a4f220d1fbda01f707d359aa9bb32921a138b1",
+  "observed_main_at_start": "835e9ec8a43481f65f0b68ae83b399743efee5b2",
+  "observed_current_main_sha": "bc0faa5dafecda3de0620a9581f9953b89cd95fb",
+  "implementation_summary": "Authenticated private embedded author editor, scope-restricted integrity-checked citation preview, existing-schema draft editing, immutable PostgreSQL revisions, expected-revision CAS and private structured version comparisons. Author operations never review, approve or publish.",
+  "files_changed": [
+    ".github/workflows/420compliance-c01-level1.yml",
+    "services/complianceauth/author_workspace.go",
+    "services/complianceauth/author_workspace_postgres.go",
+    "services/complianceauth/author_workspace_test.go",
+    "services/complianceauth/author_workspace_postgres_test.go",
+    "services/complianceauth/migrations/0002_author_drafts.sql",
+    "services/complianceauth/authorweb/workspace.html",
+    "services/complianceauth/authorweb/editor.js",
+    "services/complianceauth/authorweb/style.css",
+    "scripts/test-compliance-c06-4.cjs",
+    "scripts/verify-compliance-c06-4.py",
+    "docs/compliance/C06.4-PRIVATE-AUTHOR-WORKSPACE.md"
+  ],
+  "requirements_satisfied": [
+    {
+      "requirement": "Private author workspace",
+      "result": "PASS",
+      "evidence": "Authenticated assets and APIs enforce independent author role/session/tenant/domain/jurisdiction, HTTPS/Origin/CSRF, expiry/MFA/revocation and ownership."
+    },
+    {
+      "requirement": "Cited text",
+      "result": "PASS",
+      "evidence": "Pinned source/digest/locator resolved via scoped SnapshotArchive adapter; raw integrity, pending-review state and source identity checked. Unknown, corrupt and quarantined citations fail."
+    },
+    {
+      "requirement": "Structured rule editing",
+      "result": "PASS",
+      "evidence": "Dedicated policy/graph/date/hours plus bounded typed records use existing ValidatePolicySchema. Duplicate/unknown input, unsafe integer precision, missing duties, wrong scope and provenance fail. All saved revisions remain DRAFT_REVIEW_REQUIRED."
+    },
+    {
+      "requirement": "Version comparisons",
+      "result": "PASS",
+      "evidence": "Transactional row-lock CAS and INSERT-only revisions preserve history. Private field comparisons include schema/citation differences and enforce current scope/owner access."
+    }
+  ],
+  "tests": [
+    "node --check services/complianceauth/authorweb/editor.js",
+    "node --test scripts/test-compliance-c06-4.cjs",
+    "python3 -m py_compile scripts/verify-compliance-c06-4.py",
+    "python3 scripts/verify-compliance-c06-4.py",
+    "go vet ./services/complianceauth",
+    "go test -race ./services/complianceauth -run '^TestC064' -count=1 -v",
+    "Retained Compliance source authority, Go/race/PostgreSQL and C06.1-C06.3 qualification"
+  ],
+  "level1_results": {
+    "result": "PASS",
+    "client_tests": 11,
+    "go_security_and_integration_tests": [
+      "TestC064PostgreSQLDraftCASAndPersistence",
+      "TestC064AuthorWorkspaceSecurityAndEditing",
+      "TestC064AuthorSessionAndFailureGates",
+      "TestC064AuthorArchiveCitationsIntegrity"
+    ],
+    "go_race": "PASS",
+    "go_vet": "PASS",
+    "real_postgresql": "PASS",
+    "private_asset_and_editor_static_check": "PASS",
+    "retained_app_and_public_regressions": "PASS",
+    "local_workflow_yaml_and_artifact_json_writer": "PASS"
+  },
+  "ci": {
+    "workflow": ".github/workflows/420compliance-c01-level1.yml",
+    "run_id": 38305410600,
+    "run_attempt": 1,
+    "event": "push",
+    "status": "completed",
+    "conclusion": "success",
+    "job_id": 114998139003,
+    "run_url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38305410600",
+    "implementation_sha": "331e760116075e4808310cfeeb6189a46a289a16",
+    "successful_steps": 77,
+    "failed_steps": 0,
+    "skipped_steps": 0,
+    "cancelled_steps": 0,
+    "exact_checkout_and_assertion_verified_in_logs": true,
+    "artifact_id": 11772392858,
+    "artifact_digest": "sha256:2a3a0f18a1e7047556380b3ca2788fdbba24280cc0ac94c046f03b1aae3b3be9"
+  },
+  "additional_ci": {
+    "run_id": 38305418241,
+    "event": "pull_request",
+    "status": "completed",
+    "conclusion": "success",
+    "implementation_sha": "331e760116075e4808310cfeeb6189a46a289a16",
+    "manually_dispatched": false
+  },
+  "security_adversarial_results": {
+    "result": "PASS",
+    "checks": [
+      "anonymous/private-asset protection",
+      "author role/audience/grant/MFA/expiry/revocation",
+      "tenant and author isolation",
+      "TLS/Origin/CSRF",
+      "duplicate/unknown/oversized/invalid request rejection",
+      "quarantined/corrupt/unknown citations",
+      "revocation or shortened grants during source read stops mutation",
+      "expected-revision replay/conflict rejection",
+      "no author review/publication transition",
+      "private state clearing on expiry/outage/logout and late-response suppression"
+    ]
+  },
+  "postgresql_results": {
+    "result": "PASS",
+    "independent_connections": 2,
+    "concurrent_writers": 24,
+    "required_winners": 1,
+    "tests": [
+      "initial replay rejected",
+      "immutable revision one retained",
+      "revision two persists across connections",
+      "owner/tenant isolation",
+      "cancelled save",
+      "document corruption rejected",
+      "database outage fails closed"
+    ],
+    "missing_environment_may_skip": false
+  },
+  "retained_work": {
+    "previous_implementation": "c02477b1b7532145a65e9fb986766bc9346d182b",
+    "previous_evidence_head": "aff475e372ea59357d5e131fa852f474798bd20f",
+    "canonical_numbering_unchanged": true,
+    "public_web_and_catalogue_unchanged": true,
+    "existing_source_registry_and_frozen_addresses_unchanged": true
+  },
+  "superseded_ci": {
+    "run_id": 38305144984,
+    "implementation_sha": "44483a21eb19cbcbde7816609146b241bd9fdc8f",
+    "conclusion": "cancelled",
+    "reason": "Superseded by tightened shortened-grant authorization check; never used as PASS."
+  },
+  "unrelated_baseline_failures": [
+    {
+      "workflow": "governance-deployment-audit.yml",
+      "run_id": 38305409192,
+      "status": "failure",
+      "required_for_c06_4": false,
+      "cause": "Unchanged pre-existing YAML defect."
+    },
+    {
+      "workflow": "420hz-gca.yml",
+      "run_id": 38305408195,
+      "status": "failure",
+      "required_for_c06_4": false,
+      "cause": "Unchanged pre-existing YAML defect."
+    }
+  ],
+  "nonrequired_checks": [
+    {
+      "workflow": "420Docs Qualification",
+      "run_id": 38305418134,
+      "status": "skipped",
+      "required_for_c06_4": false,
+      "treated_as_pass": false
+    }
+  ],
+  "milestones": {
+    "level2": "C06.9 — not due for this ordinary step",
+    "level3": "C08.5 — main reconciliation and comprehensive exact-SHA qualification deferred"
+  },
+  "deferred": [
+    "C06.8 actual browser accessibility/keyboard/screen-reader/device/session acceptance.",
+    "C06.9 complete public/private client journeys Level 2.",
+    "C08.5 current-main reconciliation and comprehensive Level 3 closeout.",
+    "C09/C10 genuine author issuer/session wiring, encrypted durable storage and backup, least-privilege DB role, archive retention, distributed external revocation and live legal/publication integration.",
+    "C09/C10 hosting and domain activation."
+  ],
+  "limitations": [
+    "Node controller qualification uses a minimal DOM harness, not real-browser acceptance.",
+    "Go compilation, vet, race and real PostgreSQL were executed in CI; local scratch has no Go runtime.",
+    "Independent identity provider must verify genuine author grants and mint secure session-bound CSRF/cookie assertions; test fixtures appoint no real author or legal reviewer.",
+    "Private handler and durable store are implemented integration seams, not a deployed private service.",
+    "No draft, cited snapshot or structure-only validation constitutes legal approval.",
+    "compliance.420integrated.org remains proposed, not deployed."
+  ],
+  "blockers": [],
+  "phase_closeout_blockers": [
+    "Main advanced independently; reconcile at C08.5 before merge."
+  ],
+  "evidence_only": true,
+  "evidence_sha_policy": "The commit containing this file changes evidence only and inherits the qualified implementation SHA without requalification.",
+  "next_canonical": "C06.5 — Independent review console, findings, impact analysis, approval signatures and conflict queue."
+}

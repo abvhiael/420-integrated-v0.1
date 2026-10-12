@@ -67,10 +67,10 @@ export class BudsLedger {
 }
 // Test-only copy-on-write serial transaction fixture. Never wire it to production accounts.
 export class MemoryTransactionFixture {
-  constructor(){this.state={balances:new Map(),operations:new Set(),claims:new Set(),sourceIssued:new Map(),issued:0,burned:0};}
+  constructor(){this.state={balances:new Map(),operations:new Set(),claims:new Set(),sourceIssued:new Map(),assets:new Map(),assetSources:new Map(),listings:new Map(),transferIntents:new Map(),settlementJobs:new Map(),importedAssets:new Set(),issued:0,burned:0};}
   async transact(fn){
     const s={balances:new Map([...this.state.balances].map(([k,v])=>[k,{...v}])),
-      operations:new Set(this.state.operations),claims:new Set(this.state.claims),sourceIssued:new Map(this.state.sourceIssued),issued:this.state.issued,burned:this.state.burned};
+      operations:new Set(this.state.operations),claims:new Set(this.state.claims),sourceIssued:new Map(this.state.sourceIssued),assets:new Map([...this.state.assets].map(([k,v])=>[k,{...v}])),assetSources:new Map(this.state.assetSources),listings:new Map([...this.state.listings].map(([k,v])=>[k,{...v}])),transferIntents:new Map([...this.state.transferIntents].map(([k,v])=>[k,{...v}])),settlementJobs:new Map([...this.state.settlementJobs].map(([k,v])=>[k,{...v}])),importedAssets:new Set(this.state.importedAssets),issued:this.state.issued,burned:this.state.burned};
     const r=fn(s);this.state=s;return r;
   }
 }

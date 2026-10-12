@@ -1,3 +1,5 @@
+# BNB Phase 2 qualification support: additive Travel validation of immutable implementation.
+# Support branch only; do not merge this pinned harness into main.
 # RR-10 exact-head Level 3 canonical qualification trigger; no coverage or job semantics changed.
 
 name: 420 Integrated Qualification
@@ -123,10 +125,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          ref: 9cdc324a1b5bd22a2dd9f343931fef05e934b8b2
       - name: Verify exact qualification head
         env:
-          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          EXPECTED_SHA: 9cdc324a1b5bd22a2dd9f343931fef05e934b8b2
         run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
       - uses: actions/setup-go@v5
         with:
@@ -141,10 +143,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          ref: 9cdc324a1b5bd22a2dd9f343931fef05e934b8b2
       - name: Verify exact qualification head
         env:
-          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          EXPECTED_SHA: 9cdc324a1b5bd22a2dd9f343931fef05e934b8b2
         run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
       - uses: actions/setup-go@v5
         with:
@@ -157,10 +159,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          ref: 9cdc324a1b5bd22a2dd9f343931fef05e934b8b2
       - name: Verify exact qualification head
         env:
-          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          EXPECTED_SHA: 9cdc324a1b5bd22a2dd9f343931fef05e934b8b2
         run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
       - uses: actions/setup-go@v5
         with:
@@ -179,10 +181,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          ref: 9cdc324a1b5bd22a2dd9f343931fef05e934b8b2
       - name: Verify exact qualification head
         env:
-          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          EXPECTED_SHA: 9cdc324a1b5bd22a2dd9f343931fef05e934b8b2
         run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
       - uses: actions/setup-go@v5
         with:
@@ -190,3 +192,40 @@ jobs:
       - run: make build
       - run: python3 scripts/run-fault-matrix.py
       - run: python3 scripts/run-soak.py --slots 120 --slot-ms 35
+  bnb-travel-exact:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout exact BnB implementation
+        uses: actions/checkout@v4
+        with:
+          ref: 9cdc324a1b5bd22a2dd9f343931fef05e934b8b2
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: 9cdc324a1b5bd22a2dd9f343931fef05e934b8b2
+        run: |
+          git rev-parse HEAD
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Canonical Travel and shared authority validators
+        run: |
+          python3 scripts/validate-gen-svc-3.py
+          python3 scripts/validate-gen-svc-0.py
+          python3 scripts/verify-doobr-audit-2.py
+          python3 scripts/travel-postgres-migrate.py plan
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Noncached Travel and DOOBR compatibility regressions
+        run: |
+          go test -count=1 ./genesis/svc3/travelapp -run '^(TestGenesisCompatibilitySchemas|TestGenesisTransactionMethodsAlwaysDisabled|TestDOOBRAudit3BoundaryMatrix|TestDOOBRAudit3GatewayCannotBeEnabledByInput)$' -v
+          go test -count=1 ./genesis/svc3/... ./cmd/420travel/...
+      - name: Travel static analysis and server build
+        run: |
+          go vet ./genesis/svc3/... ./cmd/420travel/...
+          go build -o /tmp/420travel ./cmd/420travel

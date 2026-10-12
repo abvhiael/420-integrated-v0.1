@@ -466,10 +466,10 @@ def ingest_compliance_eligibility(payload:ComplianceProofInput):
                 raise HTTPException(403,"COMPLIANCE_CONTROLLER_MISMATCH")
             if claims.get("property_version")!=prop[0]:
                 raise HTTPException(409,"PROPERTY_VERSION_CHANGED")
-            binding=c.execute("""SELECT jurisdiction_id FROM bnb_travel_place_binding
+            binding=c.execute("""SELECT jurisdiction_id,place_id FROM bnb_travel_place_binding
                 WHERE property_id=%s AND revoked_at IS NULL AND proof_expires_at>now()
                 AND property_version=%s""",(property_id,prop[0])).fetchone()
-            if not binding or binding[0]!=jurisdiction:
+            if not binding or binding[0]!=jurisdiction or claims.get("place_id")!=binding[1]:
                 raise HTTPException(403,"LOCATION_COMPLIANCE_SCOPE_MISMATCH")
             prior=c.execute("""SELECT revision,issuer FROM bnb_compliance_eligibility
                 WHERE property_id=%s FOR UPDATE""",(property_id,)).fetchone()

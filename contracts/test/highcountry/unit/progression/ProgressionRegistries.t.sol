@@ -1,9 +1,18 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
-import { SkillRegistry, ResearchRegistry, DiscoveryRegistry } from "../../../../src/highcountry/progression/ProgressionRegistries.sol";
+import {
+    SkillRegistry,
+    ResearchRegistry,
+    DiscoveryRegistry
+} from "../../../../src/highcountry/progression/ProgressionRegistries.sol";
 
 contract R046Attacker {
-    function forge(SkillRegistry r, address player, bytes32 id, bytes32 proof) external {
+    function forge(
+        SkillRegistry r,
+        address player,
+        bytes32 id,
+        bytes32 proof
+    ) external {
         r.attest(player, id, proof, 2);
     }
 }
@@ -16,6 +25,7 @@ contract ProgressionR046Test {
     bytes32 constant FIRST = keccak256("skill:first");
     bytes32 constant SECOND = keccak256("skill:second");
     address constant PLAYER = address(0x1234);
+
     function setUp() public {
         skill = new SkillRegistry();
         research = new ResearchRegistry();
@@ -29,41 +39,42 @@ contract ProgressionR046Test {
         research.setVerifier(address(this), true);
         discovery.setVerifier(address(this), true);
     }
+
     function testProgressCompletionPrerequisiteAndReplay() public {
-        (bool early,) = address(skill).call(
-            abi.encodeCall(skill.attest, (PLAYER, SECOND, bytes32(uint256(1)), uint32(2)))
-        );
+        (bool early,) =
+            address(skill).call(abi.encodeCall(skill.attest, (PLAYER, SECOND, bytes32(uint256(1)), uint32(2))));
         require(!early, "prerequisite bypass");
         skill.attest(PLAYER, FIRST, bytes32(uint256(1)), 2);
         skill.attest(PLAYER, FIRST, bytes32(uint256(2)), 2);
         require(skill.unlocked(PLAYER, FIRST), "not unlocked");
         skill.attest(PLAYER, SECOND, bytes32(uint256(3)), 2);
         require(skill.unlocked(PLAYER, SECOND), "dependent unlock");
-        (bool replay,) = address(skill).call(
-            abi.encodeCall(skill.attest, (PLAYER, SECOND, bytes32(uint256(3)), uint32(2)))
-        );
+        (bool replay,) =
+            address(skill).call(abi.encodeCall(skill.attest, (PLAYER, SECOND, bytes32(uint256(3)), uint32(2))));
         require(!replay, "replay accepted");
         require(skill.track(FIRST).rewardUnits == 10, "catalogue metadata");
     }
+
     function testUntrustedAndOverflowAreRejected() public {
-        (bool untrusted,) = address(attacker).call(
-            abi.encodeCall(attacker.forge, (skill, PLAYER, FIRST, bytes32(uint256(1))))
-        );
+        (bool untrusted,) =
+            address(attacker).call(abi.encodeCall(attacker.forge, (skill, PLAYER, FIRST, bytes32(uint256(1)))));
         require(!untrusted, "unauthorized progression");
-        (bool overflow,) = address(skill).call(
-            abi.encodeCall(skill.attest, (PLAYER, FIRST, bytes32(uint256(11)), uint32(3)))
-        );
+        (bool overflow,) =
+            address(skill).call(abi.encodeCall(skill.attest, (PLAYER, FIRST, bytes32(uint256(11)), uint32(3))));
         require(!overflow, "unbounded progress");
         skill.attest(PLAYER, FIRST, bytes32(uint256(1)), 2);
-        (bool reuse,) = address(skill).call(
-            abi.encodeCall(skill.attest, (PLAYER, FIRST, bytes32(uint256(1)), uint32(2)))
-        );
+        (bool reuse,) =
+            address(skill).call(abi.encodeCall(skill.attest, (PLAYER, FIRST, bytes32(uint256(1)), uint32(2))));
         require(!reuse, "double evidence");
     }
+
     function testImmutableCatalogueAndIndependentNamespaces() public {
-        (bool overwrite,) = address(skill).call(
-            abi.encodeCall(skill.registerTrack, (FIRST, bytes32(uint256(2)), bytes32(0), uint32(4), uint32(2), uint32(100)))
-        );
+        (bool overwrite,) = address(skill)
+            .call(
+                abi.encodeCall(
+                    skill.registerTrack, (FIRST, bytes32(uint256(2)), bytes32(0), uint32(4), uint32(2), uint32(100))
+                )
+            );
         require(!overwrite, "catalogue mutation");
         skill.attest(PLAYER, FIRST, bytes32(uint256(9)), 2);
         research.attest(PLAYER, FIRST, bytes32(uint256(9)), 2);

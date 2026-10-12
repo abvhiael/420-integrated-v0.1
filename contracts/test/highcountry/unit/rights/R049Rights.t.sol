@@ -11,6 +11,7 @@ contract R049Actor {
     function place(LeaseRegistry l,bytes32 id,bytes32 op,uint256 count,bool add) external {l.updatePlants(id,op,count,add);}
     function revokeLease(LeaseRegistry l,bytes32 id) external {l.revoke(id);}
     function transferLease(LeaseRegistry l,bytes32 id,address to) external {l.transferTenant(id,to);}
+    function resolveDispute(LeaseRegistry l,bytes32 id,bool restore) external {l.resolveDispute(id,restore);}
     function issue(LicenseRegistry l,bytes32 id,bytes32 asset,address user) external {
         l.issue(id,asset,user,3,uint64(block.timestamp),uint64(block.timestamp+300),0);
     }
@@ -21,7 +22,9 @@ contract R049Actor {
         r.grant(id,asset,holder,3,uint64(block.timestamp),uint64(block.timestamp+300));
     }
 }
+interface R049Vm { function warp(uint256) external; }
 contract R049RightsTest {
+    R049Vm constant vm = R049Vm(address(uint160(uint256(keccak256('hevm cheat code')))));
     RightsRegistry rights;
     LeaseRegistry leases;
     LicenseRegistry licenses;
@@ -71,6 +74,33 @@ contract R049RightsTest {
         require(!licenses.usable(LICENSE,address(tenant),1),"old owner license survives transfer");
         owner.revokeLicense(licenses,LICENSE);
         require(!licenses.usable(LICENSE,address(tenant),1),"revocation bypass");
+    }
+    function testExpiryDisablesUseButPreservesPlantExit() public {
+        owner.registerLease(leases,LEASE,PARCEL,address(tenant),uint64(block.timestamp),uint64(block.timestamp+100));
+        leases.updatePlants(LEASE,bytes32(uint256(201)),2,true);
+        owner.issue(licenses,LICENSE,PARCEL,address(tenant));
+        require(leases.usable(LEASE),"lease should start active");
+        vm.warp(block.timestamp+101);
+        require(!leases.usable(LEASE),"expired lease usable");
+        leases.expire(LEASE);
+        (,,,,,,,uint256 plants,LeaseRegistry.State state,bool pending)=leases.leases(LEASE);
+        require(plants==2&&state==LeaseRegistry.State.Revoked&&pending,"expiry destroyed live plants");
+        leases.updatePlants(LEASE,bytes32(uint256(202)),2,false);
+        (,,,,,,,,state,pending)=leases.leases(LEASE);
+        require(state==LeaseRegistry.State.Closed&&!pending,"expiry cleanup missing");
+        vm.warp(block.timestamp+300);
+        require(!licenses.usable(LICENSE,address(tenant),1),"expired license usable");
+    }
+    function testDisputeBlocksPlacementUntilResolved() public {
+        owner.registerLease(leases,LEASE,PARCEL,address(tenant),uint64(block.timestamp),uint64(block.timestamp+100));
+        leases.updatePlants(LEASE,bytes32(uint256(210)),1,true);
+        leases.dispute(LEASE);
+        require(!leases.usable(LEASE),"disputed lease usable");
+        (bool place,) = address(leases).call(abi.encodeCall(leases.updatePlants,
+            (LEASE,bytes32(uint256(211)),uint256(1),true)));
+        require(!place,"plant entered disputed site");
+        owner.resolveDispute(leases,LEASE,true);
+        require(leases.usable(LEASE),"restored dispute not usable");
     }
     function testRejectReplayAndUnauthorizedPlantAccounting() public {
         owner.registerLease(leases,LEASE,PARCEL,address(tenant),uint64(block.timestamp),uint64(block.timestamp+100));

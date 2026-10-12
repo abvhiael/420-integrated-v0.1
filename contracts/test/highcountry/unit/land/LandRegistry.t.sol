@@ -10,6 +10,14 @@ import { LandRegistry } from "../../../../src/highcountry/land/LandRegistry.sol"
 import { GenesisRoots } from "../../../../src/highcountry/types/HighCountryTypes.sol";
 import { MockCapabilityRegistry } from "../../mocks/MockCapabilityRegistry.sol";
 
+contract MockLandPlantCountR049 {
+    address public immutable landRegistry;
+    uint32 public count;
+    constructor(address land_) { landRegistry = land_; }
+    function activePlantsByParcel(uint64) external view returns (uint32) { return count; }
+    function setCount(uint32 n) external { count = n; }
+}
+
 contract MockRegionRegistryHC3Unit {
     function exists(
         uint16 regionId
@@ -148,6 +156,16 @@ contract LandRegistryHC3Test {
             );
         require(!conflictOk, "conflicting occupancy accepted");
 
+        // Fail closed when no canonical plant source is bound.
+        (bool missingBinding,) = address(land).call(abi.encodeCall(land.clearOccupancy, (uint64(4))));
+        require(!missingBinding, "unverified occupancy clearance");
+        MockLandPlantCountR049 counts = new MockLandPlantCountR049(address(land));
+        _grant(ModuleIds.LAND_REGISTRY, ActionIds.LAND_BIND_PLANTS, 0, 0, keccak256("bind-plants-4"));
+        land.bindCanonicalPlants(address(counts));
+        counts.setCount(2);
+        (bool livePlants,) = address(land).call(abi.encodeCall(land.clearOccupancy, (uint64(4))));
+        require(!livePlants, "active plant eviction permitted");
+        counts.setCount(0);
         land.clearOccupancy(4);
         require(land.effectiveOperator(4) == newOwner, "owner not restored as operator");
     }

@@ -21,6 +21,7 @@ library ActionIds {
     bytes32 internal constant LAND_TRANSFER = keccak256("HC.ACTION.LAND_REGISTRY.TRANSFER");
     bytes32 internal constant LAND_SET_OCCUPANCY = keccak256("HC.ACTION.LAND_REGISTRY.SET_OCCUPANCY");
     bytes32 internal constant LAND_CLEAR_OCCUPANCY = keccak256("HC.ACTION.LAND_REGISTRY.CLEAR_OCCUPANCY");
+    bytes32 internal constant LAND_BIND_PLANTS = keccak256("HC.ACTION.LAND_REGISTRY.BIND_PLANTS");
 
     bytes32 internal constant PUBLIC_PLOT_BIND_PLANTS = keccak256("HC.ACTION.PUBLIC_CULTIVATION_ACCESS.BIND_PLANTS");
     bytes32 internal constant PUBLIC_PLOT_REGISTER = keccak256("HC.ACTION.PUBLIC_CULTIVATION_ACCESS.REGISTER");
@@ -52,6 +53,7 @@ library ActionIds {
     bytes32 internal constant BREEDING_FINALIZE = keccak256("HC.ACTION.BREEDING_ENGINE.FINALIZE");
 
     bytes32 internal constant PLANT_REGISTER = keccak256("HC.ACTION.PLANT_REGISTRY.REGISTER");
+    bytes32 internal constant PLANT_BIND_RIGHTS = keccak256("HC.ACTION.PLANT_REGISTRY.BIND_RIGHTS");
     bytes32 internal constant PLANT_ADVANCE = keccak256("HC.ACTION.PLANT_REGISTRY.ADVANCE");
     bytes32 internal constant CULTIVATION_BIND_RULESETS = keccak256("HC.ACTION.CULTIVATION_ENGINE.BIND_RULESETS");
     bytes32 internal constant CULTIVATION_UPDATE = keccak256("HC.ACTION.CULTIVATION_ENGINE.UPDATE");

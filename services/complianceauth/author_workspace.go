@@ -289,8 +289,8 @@ func (a C064AuthorWorkspace) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	reauthorize := func() bool {
-		fresh, _, err := a.authorize(ctx, cookie.Value)
-		return err == nil && fresh.Scope == session.Scope && fresh.SubjectID == session.SubjectID && fresh.SessionID == session.SessionID && fresh.CSRFToken == session.CSRFToken
+		fresh, freshUntil, err := a.authorize(ctx, cookie.Value)
+		return err == nil && !freshUntil.Before(until) && fresh.Scope == session.Scope && fresh.SubjectID == session.SubjectID && fresh.SessionID == session.SessionID && fresh.CSRFToken == session.CSRFToken
 	}
 	path := r.URL.Path
 	assets := map[string]string{"/private/author": "workspace.html", "/private/author/workspace.html": "workspace.html", "/private/author/editor.js": "editor.js", "/private/author/style.css": "style.css"}

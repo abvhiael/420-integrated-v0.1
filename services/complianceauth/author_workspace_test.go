@@ -197,6 +197,9 @@ func TestC064AuthorSessionAndFailureGates(t *testing.T) {
 	if c064HTTP(a,"GET","/private/author",nil,nil).Code!=503 {t.Fatal("missing provider enabled workspace")}
 	a,_,_=c064Fixture();a.Sources=c064TestSource{invalid:true}
 	if c064HTTP(a,"PUT","/api/v1/author/drafts/draft1",c064Body(c064FixtureRequest()),nil).Code!=400 {t.Fatal("quarantined source accepted")}
+	a,auth,_=c064Fixture()
+	a.Sources=c064TestSource{hook:func(){auth.mu.Lock();auth.session.GrantExpiresAt=time.Now().Add(time.Second);auth.mu.Unlock()}}
+	if c064HTTP(a,"PUT","/api/v1/author/drafts/draft1",c064Body(c064FixtureRequest()),nil).Code!=401 {t.Fatal("shortened grant expiry ignored")}
 }
 
 type c064ArchiveParser struct{}

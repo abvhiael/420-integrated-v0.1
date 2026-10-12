@@ -1,0 +1,34 @@
+name: High Country R04.8 Level 1 Qualification
+on:
+  pull_request:
+    paths:
+      - 'services/highcountry-economy/**'
+      - '.github/workflows/highcountry-r04-8.yml'
+      - 'docs/highcountry/R04.8-*'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  market:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Exact implementation SHA
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax and economy plus market regressions
+        working-directory: services/highcountry-economy
+        run: |
+          node --check src/market.js
+          node --check src/buds-ledger.js
+          node --check src/postgres-store.js
+          node --check src/authenticated-service.js
+          node --check src/reviewed-catalog.js
+          npm test

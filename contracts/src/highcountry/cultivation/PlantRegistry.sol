@@ -6,6 +6,7 @@ import { CloneRegistry } from "../genetics/CloneRegistry.sol";
 import { PublicCultivationAccess } from "../land/PublicCultivationAccess.sol";
 import { LandRegistry } from "../land/LandRegistry.sol";
 import { LeaseRegistry } from "../rights/LeaseRegistry.sol";
+import { LicenseRegistry } from "../rights/LicenseRegistry.sol";
 import { CanonicalLandPlantGate } from "../rights/CanonicalLandPlantGate.sol";
 
 import { ActionIds } from "../constants/ActionIds.sol";
@@ -97,6 +98,9 @@ contract PlantRegistry {
     }
 
     LeaseRegistry public canonicalLeaseRegistry;
+    LicenseRegistry public canonicalLicenseRegistry;
+    bytes32 public constant LICENSE_BIND_SCOPE = keccak256("HC.PLANT_REGISTRY.BIND_CANONICAL_LICENSES.V1");
+    event CanonicalLicensesBound(address indexed licenseRegistry);
     bytes32 public constant RIGHTS_BIND_SCOPE = keccak256("HC.PLANT_REGISTRY.BIND_CANONICAL_RIGHTS.V1");
     event CanonicalRightsBound(address indexed leaseRegistry);
 
@@ -114,12 +118,34 @@ contract PlantRegistry {
         emit CanonicalRightsBound(candidate);
     }
 
+    /// @notice Explicit independent authorization of LICENSE-kind parcel cultivation.
+    function bindCanonicalLicenses(address candidate) external {
+        if (address(canonicalLicenseRegistry) != address(0) || candidate.code.length == 0) revert HCInvalidState();
+        authorization.requireAuthorized(AuthorizationRequest(
+            msg.sender, ModuleIds.PLANT_REGISTRY, ActionIds.PLANT_BIND_LICENSES, LICENSE_BIND_SCOPE, 0
+        ));
+        LicenseRegistry license = LicenseRegistry(candidate);
+        CanonicalLandPlantGate gate = license.canonicalGate();
+        if (address(gate) == address(0) || address(gate.land()) != address(landRegistry)
+            || address(gate.plants()) != address(this)) revert HCInvalidState();
+        canonicalLicenseRegistry = license;
+        emit CanonicalLicensesBound(candidate);
+    }
+
     function _requireCanonicalOccupancy(uint64 parcelId, address grower) private view {
         LandRegistry.LandParcel memory p = LandRegistry(address(landRegistry)).getParcel(parcelId);
         if (p.occupancyKind == LandRegistry.OccupancyKind.NONE) return;
-        if (p.occupancyKind != LandRegistry.OccupancyKind.LEASE || address(canonicalLeaseRegistry) == address(0)
-            || p.occupant != grower || canonicalLeaseRegistry.canonicalParcelOf(p.occupancyRef) != parcelId
-            || !canonicalLeaseRegistry.usable(p.occupancyRef)) revert HCInvalidState();
+        if (p.occupant != grower) revert HCInvalidState();
+        if (p.occupancyKind == LandRegistry.OccupancyKind.LEASE) {
+            if (address(canonicalLeaseRegistry) == address(0) ||
+                canonicalLeaseRegistry.canonicalParcelOf(p.occupancyRef) != parcelId ||
+                !canonicalLeaseRegistry.usable(p.occupancyRef)) revert HCInvalidState();
+        } else if (p.occupancyKind == LandRegistry.OccupancyKind.LICENSE) {
+            // Cultivation is explicit bit 0. A non-cultivation license never admits plants.
+            if (address(canonicalLicenseRegistry) == address(0) ||
+                canonicalLicenseRegistry.canonicalParcelOf(p.occupancyRef) != parcelId ||
+                !canonicalLicenseRegistry.usable(p.occupancyRef, grower, 1)) revert HCInvalidState();
+        } else revert HCInvalidState();
     }
 
     IEmergencyState public emergencyState;

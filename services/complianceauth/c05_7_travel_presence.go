@@ -54,6 +54,11 @@ func(a TravelPresenceAdapter) Read(ctx context.Context,region string,now time.Ti
  if supply.PrivateCourierCount<a.MinimumPrivateCohort{return out,nil}
  out.CourierSupply="AVAILABLE"
  out.Visible=true
- out.ExpiresAt=supply.ActiveUntil.UTC().Format(time.RFC3339)
+ // Public presence cannot outlive independently sourced policy visibility.
+ expires:=supply.ActiveUntil
+ publication,err:=a.Guidance.Source.CurrentTravelPolicy(ctx,region,"TRANSPORT")
+ if err!=nil||publication.PolicyDigest!=advice.PolicyDigest||!now.Before(publication.EffectiveUntil) {return TravelPresence{Region:region,PolicyCoverage:"UNKNOWN",LegalEligibility:"UNVERIFIED",CourierSupply:"UNKNOWN"},ErrPresenceUnavailable}
+ if publication.EffectiveUntil.Before(expires){expires=publication.EffectiveUntil}
+ out.ExpiresAt=expires.UTC().Format(time.RFC3339)
  return out,nil
 }

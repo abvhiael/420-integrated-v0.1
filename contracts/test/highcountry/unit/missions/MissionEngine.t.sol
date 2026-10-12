@@ -41,7 +41,7 @@ contract MissionR047Test {
         require(e.template(ID).rewardUnits == 10, "immutable reward catalogue");
     }
 
-    function testFailureAndNoReactivation() public {
+    function testMissionFailureAndNoReactivation() public {
         e.activate(ID);
         e.fail(address(this), ID);
         (bool revive,) = address(e).call(abi.encodeCall(e.activate, (ID)));

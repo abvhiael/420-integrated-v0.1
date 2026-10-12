@@ -83,13 +83,17 @@ export class CanonicalEscrowReader {
   return {finalized:true,operationId:canon(op),sourceReceiptId:canon(e.listingId),
    from:canon(l.owner),to:canon(e.buyer),asset:canon(l.asset),quantity:Number(l.quantity)};
  }
- async proveUnexecutedAndCancelled(op,listingId,buyer,minConfirmations=1) {
-  if(!hex32(op)||!hex32(listingId)||!addr(buyer))return false;
-  if(canon(await this.expectedTransferOperation(listingId,buyer))!==canon(op))return false;
+ async confirmedListingClosure(listingId,minConfirmations=1) {
+  if(!hex32(listingId))return false;
   const l=await this._listing(listingId);
   if(Number(l.status)!==3&&Number(l.status)!==4)return false;
   const logs=await this._logs('EscrowClosed',{listingId});
-  if(logs.length!==1||Number(logs[0].args.status)!==Number(l.status))return false;
-  return this._final(logs[0],minConfirmations);
+  return logs.length===1 && Number(logs[0].args.status)===Number(l.status)
+   && await this._final(logs[0],minConfirmations);
+ }
+ async proveUnexecutedAndCancelled(op,listingId,buyer,minConfirmations=1) {
+  if(!hex32(op)||!hex32(listingId)||!addr(buyer))return false;
+  if(canon(await this.expectedTransferOperation(listingId,buyer))!==canon(op))return false;
+  return this.confirmedListingClosure(listingId,minConfirmations);
  }
 }

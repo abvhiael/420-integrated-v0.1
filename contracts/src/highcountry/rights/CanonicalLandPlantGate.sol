@@ -5,6 +5,7 @@ import { LandRegistry } from "../land/LandRegistry.sol";
 
 interface ICanonicalPlantOccupancyR049 {
     function activePlantsByParcel(uint64 parcelId) external view returns (uint32);
+    function landRegistry() external view returns (address);
 }
 
 /// @notice Read-only R04.9 gateway to existing authoritative R02 land and cultivation records.
@@ -18,6 +19,7 @@ contract CanonicalLandPlantGate {
         if (land_.code.length == 0 || plants_.code.length == 0) revert InvalidCanonicalBinding();
         land = LandRegistry(land_);
         plants = ICanonicalPlantOccupancyR049(plants_);
+        if (plants.landRegistry() != land_) revert InvalidCanonicalBinding();
     }
 
     /// @dev Unique parcel key, not an arbitrary client-supplied shadow asset ID.

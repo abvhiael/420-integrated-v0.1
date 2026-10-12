@@ -60,6 +60,20 @@ def test_verified_binding_and_no_live_approval(bindings):
     assert contract["booking_enabled"] is False and "live_accepted" not in contract
 
 
+def test_root_execution_rejected(bindings, monkeypatch):
+    root, _, _, env = bindings
+    monkeypatch.setattr(p.os, "geteuid", lambda: 0)
+    with pytest.raises(p.ConfigurationError, match="NONROOT_PRODUCTION_REQUIRED"):
+        p.load_contract(env, root=root)
+
+
+def test_hidden_privileged_credential_rejected(bindings):
+    root, _, _, env = bindings
+    (root / "unreferenced-admin.dsn").write_text("CI-only-hidden-credential")
+    with pytest.raises(p.ConfigurationError, match="UNREFERENCED_MOUNT_FILE"):
+        p.load_contract(env, root=root)
+
+
 @pytest.mark.parametrize("field,value,code", [
     ("release_sha", "short", "RELEASE_SHA_INVALID"),
     ("release_sha", "c" * 40, "IMAGE_RELEASE_MISMATCH"),

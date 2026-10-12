@@ -27,6 +27,9 @@ contract OrganizationAuthority {
     );
     event Revoked(bytes32 indexed id);
     event Consumed(bytes32 indexed id, uint32 remainingUses);
+    bytes32 public constant CULTIVATION_ACTION = keccak256("HC.ORG.NONCUSTODIAL.CULTIVATION");
+    bytes32 public constant ROSTER_ACTION = keccak256("HC.ORG.NONCUSTODIAL.ROSTER");
+    bytes32 public constant NOTICES_ACTION = keccak256("HC.ORG.NONCUSTODIAL.NOTICES");
     bytes32 public constant TREASURY_ACTION = keccak256("HC.ORG.TREASURY");
     bytes32 public constant WALLET_ACTION = keccak256("HC.ORG.WALLET");
     bytes32 public constant RIGHTS_ACTION = keccak256("HC.ORG.RIGHTS");

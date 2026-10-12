@@ -55,10 +55,20 @@ func TestC065PostgreSQLConcurrentReviewAndStaleAuthorFencing(t *testing.T){
  record.ReviewerID="independent-reviewer"
  other:=record;other.Scope.Tenant="other-tenant"
  if _,e=rb.AppendIfCurrent(ctx,other,1,1);!errors.Is(e,ErrC065Conflict){t.Fatalf("cross-tenant replay accepted: %v",e)}
+ // The first review may queue a conflict; the next review cannot bypass it.
+ conflict:=record
+ conflict.State="CONFLICT_QUEUE"
+ conflict.ConflictIDs=[]string{"conflict-one"}
+ if _,e=ra.AppendIfCurrent(ctx,conflict,1,1);e!=nil{t.Fatalf("conflict queue write: %v",e)}
+ if _,e=rb.AppendIfCurrent(ctx,record,1,2);!errors.Is(e,ErrC065Conflict){t.Fatalf("conflict bypass accepted: %v",e)}
+ resolution:=conflict
+ resolution.State="CONFLICT_RESOLVED"
+ if _,e=rb.AppendIfCurrent(ctx,resolution,1,2);e!=nil{t.Fatalf("explicit conflict resolution failed: %v",e)}
+ if _,e=ra.AppendIfCurrent(ctx,record,1,3);e!=nil{t.Fatalf("post-resolution review failed: %v",e)}
  schema.Hours.EndLocal="18:00"
  if _,e=lb.Save(ctx,scope,"draft1","author-a",1,schema,cited,now);e!=nil{t.Fatal(e)}
  if _,e=ra.AppendIfCurrent(ctx,record,1,1);!errors.Is(e,ErrC065Conflict){t.Fatalf("stale document accepted: %v",e)}
- if e=a.DB.QueryRowContext(ctx,"SELECT count(*) FROM compliance_review_versions WHERE tenant=$1",scope.Tenant).Scan(&versions);e!=nil||versions!=1{t.Fatalf("immutable review lost: %d %v",versions,e)}
+ if e=a.DB.QueryRowContext(ctx,"SELECT count(*) FROM compliance_review_versions WHERE tenant=$1",scope.Tenant).Scan(&versions);e!=nil||versions!=4{t.Fatalf("immutable review lost: %d %v",versions,e)}
  cancelled,cancel:=context.WithCancel(ctx);cancel()
  if _,e=ra.AppendIfCurrent(cancelled,record,1,1);e==nil{t.Fatal("cancelled transaction accepted")}
 }

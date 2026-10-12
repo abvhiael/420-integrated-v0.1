@@ -95,13 +95,15 @@ contract LandRegistry {
         address candidate
     ) external {
         if (address(canonicalPlants) != address(0) || candidate.code.length == 0) revert HCInvalidState();
-        authorization.requireAuthorized(AuthorizationRequest({
-            principal: msg.sender,
-            moduleId: ModuleIds.LAND_REGISTRY,
-            actionId: ActionIds.LAND_BIND_PLANTS,
-            scopeHash: PLANTS_BIND_SCOPE,
-            amount: 0
-        }));
+        authorization.requireAuthorized(
+            AuthorizationRequest({
+                principal: msg.sender,
+                moduleId: ModuleIds.LAND_REGISTRY,
+                actionId: ActionIds.LAND_BIND_PLANTS,
+                scopeHash: PLANTS_BIND_SCOPE,
+                amount: 0
+            })
+        );
         if (ICanonicalPlantCountsLandR049(candidate).landRegistry() != address(this)) revert HCInvalidState();
         canonicalPlants = ICanonicalPlantCountsLandR049(candidate);
         emit CanonicalPlantsBound(candidate);

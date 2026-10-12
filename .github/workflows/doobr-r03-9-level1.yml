@@ -2,7 +2,7 @@ name: DOOBR R03.9 Offline Revocation Level 1
 on:
   push:
     branches: [roadmap/doobr-bc-vancouver-infrastructure]
-    paths: ['doobr/mobile_offline.py','doobr/storage/tests/test_mobile_offline.py','mobile/doobr/**','.github/workflows/doobr-r03-9-level1.yml']
+    paths: ['doobr/mobile_offline.py','doobr/mobile_replay_api.py','doobr/mobile_replay_storage.py','doobr/storage/migrations/0008_mobile_replay.sql','doobr/storage/tests/test_mobile_offline.py','doobr/storage/tests/test_mobile_replay_api.py','mobile/doobr/**','.github/workflows/doobr-r03-9-level1.yml']
   pull_request:
     paths: ['doobr/mobile_offline.py','doobr/storage/tests/test_mobile_offline.py','mobile/doobr/**','.github/workflows/doobr-r03-9-level1.yml']
   workflow_dispatch:
@@ -26,7 +26,8 @@ jobs:
           python-version: '3.12'
       - name: Mobile offline and revocation tests
         run: |
-          python3 -m py_compile doobr/mobile_offline.py
+          python3 -m py_compile doobr/mobile_offline.py doobr/mobile_replay_api.py doobr/mobile_replay_storage.py
+          python3 -m unittest discover -s doobr/storage/tests -p test_mobile_replay_api.py -v
           python3 -m unittest discover -s doobr/storage/tests -p test_mobile_offline.py -v
           python3 -m unittest discover -s doobr/storage/tests -p test_mobile_security.py -v
           python3 -m unittest discover -s doobr/storage/tests -p test_mobile_push.py -v

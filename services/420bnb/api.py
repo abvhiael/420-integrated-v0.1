@@ -55,6 +55,18 @@ async def bounded_api_security_headers(request,call_next):
 
 
 DATABASE_URL = os.getenv("BNB_DATABASE_URL", "")
+if os.getenv("BNB_ENV") == "production":
+    # Mandatory even when an operator starts uvicorn directly rather than the wrapper.
+    try:
+        from production import load_contract, verify_database
+        from psycopg.conninfo import make_conninfo
+        _contract, _bindings, _database_values = load_contract()
+        with psycopg.connect(**_database_values) as _startup_connection:
+            verify_database(_startup_connection)
+        os.environ.update(_bindings)
+        DATABASE_URL = make_conninfo(**_database_values)
+    except Exception:
+        raise RuntimeError("PRODUCTION_START_FAILED") from None
 
 
 def db():
@@ -3065,3 +3077,4 @@ def submit_property_claim(property_id: str, authorization: str | None = Header(N
                   VALUES (%s,%s,%s,%s,'pending',to_timestamp(%s))""",
                   (property_id,subject,claim["iss"],claim["jti"],claim["exp"]))
     return {"status":"pending","published":False}
+

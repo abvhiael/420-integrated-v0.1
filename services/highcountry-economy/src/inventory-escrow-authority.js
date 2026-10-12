@@ -24,7 +24,7 @@ export class InventoryEscrowAuthority {
   // Inventory adapter must read authoritative lock state, not merely trust submitted payload.
   const lock=await this.inventory.lockedEscrowReceipt(receipt.receiptId,this.confirmations);
   return !!lock && lock.finalized===true && lock.locked===true &&
-   lock.chainId===receipt.chainId&&lock.registry===receipt.registry&&
+   lock.receiptId===receipt.receiptId&&lock.chainId===receipt.chainId&&lock.registry===receipt.registry&&
    lock.issuer===receipt.issuer&&lock.owner===receipt.owner&&
    lock.asset===receipt.asset&&lock.quantity===receipt.quantity &&
    lock.consumed!==true;

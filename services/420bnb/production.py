@@ -69,6 +69,7 @@ def https_origin(value):
 
 def load_contract(environment=None, *, root=Path("/run/secrets"), purpose="runtime"):
     env = dict(os.environ if environment is None else environment)
+    require(os.geteuid() != 0, "NONROOT_PRODUCTION_REQUIRED")
     require(purpose in ("runtime", "migration"), "PURPOSE_INVALID")
     require(env.get("BNB_ENV") == "production", "PRODUCTION_MODE_REQUIRED")
     require(not env.get("BNB_DATABASE_URL") and not env.get("BNB_IDENTITY_ASSERTION_SECRET"),
@@ -105,6 +106,7 @@ def load_contract(environment=None, *, root=Path("/run/secrets"), purpose="runti
     issuers = contract.get("issuers", {})
     require(isinstance(issuers, dict) and set(issuers) == set(PREFIXES), "ISSUER_INVENTORY_INVALID")
     bindings = {}
+    allowed_files = {Path(env["BNB_DEPLOYMENT_FILE"])}
     for prefix, item in issuers.items():
         require(isinstance(item, dict), "ISSUER_BINDING_INVALID")
         https_origin(item.get("issuer"))
@@ -115,6 +117,7 @@ def load_contract(environment=None, *, root=Path("/run/secrets"), purpose="runti
         reference = item.get("approval_reference")
         require(isinstance(reference, str) and 1 <= len(reference) <= 512, "ISSUER_REFERENCE_REQUIRED")
         raw = read_mount(item.get("public_key_file", ""), root)
+        allowed_files.add(Path(item["public_key_file"]))
         require(hashlib.sha256(raw).hexdigest() == item.get("public_key_sha256"), "ISSUER_KEY_DIGEST_MISMATCH")
         try:
             key = serialization.load_pem_public_key(raw)
@@ -136,6 +139,13 @@ def load_contract(environment=None, *, root=Path("/run/secrets"), purpose="runti
     require(not any(k in values for k in ("options", "service", "passfile", "sslkey", "sslpassword")),
             "DATABASE_OVERRIDE_FORBIDDEN")
     read_mount(values.get("sslrootcert", ""), root)
+    allowed_files.update((Path(env["BNB_DATABASE_URL_FILE"]), Path(values["sslrootcert"])))
+    try:
+        present = set(root.rglob("*"))
+        require(len(present) <= 64 and not any(path.is_symlink() for path in present), "MOUNT_INVENTORY_INVALID")
+        require({path for path in present if path.is_file()} == allowed_files, "UNREFERENCED_MOUNT_FILE")
+    except OSError:
+        raise ConfigurationError("MOUNT_UNAVAILABLE") from None
     values["connect_timeout"] = "5"
     values["application_name"] = "420bnb-" + purpose
     values["channel_binding"] = "require"

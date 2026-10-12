@@ -460,8 +460,10 @@ def ingest_compliance_eligibility(payload:ComplianceProofInput):
         raise HTTPException(422,"INVALID_COMPLIANCE_CLAIMS")
     with db() as c:
         with c.transaction():
-            prop=c.execute("SELECT version FROM bnb_property WHERE id=%s FOR UPDATE",(property_id,)).fetchone()
+            prop=c.execute("SELECT version,host_subject FROM bnb_property WHERE id=%s FOR UPDATE",(property_id,)).fetchone()
             if not prop:raise HTTPException(404,"PROPERTY_NOT_FOUND")
+            if claims.get("controller_subject")!=prop[1]:
+                raise HTTPException(403,"COMPLIANCE_CONTROLLER_MISMATCH")
             if claims.get("property_version")!=prop[0]:
                 raise HTTPException(409,"PROPERTY_VERSION_CHANGED")
             binding=c.execute("""SELECT jurisdiction_id FROM bnb_travel_place_binding
@@ -469,8 +471,10 @@ def ingest_compliance_eligibility(payload:ComplianceProofInput):
                 AND property_version=%s""",(property_id,prop[0])).fetchone()
             if not binding or binding[0]!=jurisdiction:
                 raise HTTPException(403,"LOCATION_COMPLIANCE_SCOPE_MISMATCH")
-            prior=c.execute("""SELECT revision FROM bnb_compliance_eligibility
+            prior=c.execute("""SELECT revision,issuer FROM bnb_compliance_eligibility
                 WHERE property_id=%s FOR UPDATE""",(property_id,)).fetchone()
+            if prior and prior[1]!=claims["iss"]:
+                raise HTTPException(403,"COMPLIANCE_ISSUER_TRANSFER_REQUIRES_AUTHORIZATION")
             if prior and revision<=prior[0]:
                 raise HTTPException(409,"STALE_COMPLIANCE_REVISION")
             c.execute("""INSERT INTO bnb_compliance_eligibility
@@ -501,6 +505,9 @@ def revoke_compliance_eligibility(payload:ComplianceProofInput):
                 WHERE property_id=%s FOR UPDATE""",(property_id,)).fetchone()
             if not prior:raise HTTPException(404,"COMPLIANCE_RECORD_NOT_FOUND")
             if prior[0]!=claims["iss"]:raise HTTPException(403,"COMPLIANCE_ISSUER_MISMATCH")
+            controller=c.execute("SELECT host_subject FROM bnb_property WHERE id=%s",(property_id,)).fetchone()
+            if not controller or claims.get("controller_subject")!=controller[0]:
+                raise HTTPException(403,"COMPLIANCE_CONTROLLER_MISMATCH")
             # Withdrawal is scoped to the same property-place and policy revision.
             # A stale/misrouted source event cannot revoke a different jurisdiction.
             if (claims.get("jurisdiction_id")!=prior[2]

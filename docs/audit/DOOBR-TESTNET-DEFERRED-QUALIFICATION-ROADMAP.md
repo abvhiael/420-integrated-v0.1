@@ -40,6 +40,19 @@ The original canonical R03.7 identifier is preserved. **Only genuine external/de
 
 **Release posture:** private case commands and regulated delivery remain fail closed without externally authorized infrastructure; evidence for these checkboxes requires the actual approved live/testnet environment. Deferral does not imply production readiness. Proceeding beyond R03.7 in the repository roadmap requires an exact-SHA passing Level 1 covering the local implementation, and R03.12 Level 2 / R05.10 Level 3 remain future milestones.
 
+## R03.8 acceptance classification — hardware, provider, signing, testnet
+
+**R03.8 repository-side Level 1:** iOS simulator and Android debug build jobs passed on SHA `7e56690ccb50c3aab6583845c075499ae2897b0d` in workflow [#38187207249](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38187207249). This is source/build qualification, NOT live mobile acceptance. No approval to accept regulated orders or collect actual delivery GPS follows.
+
+The following gates are **deferred for independent external acceptance**, with precise prerequisite classifications:
+
+- [ ] **Physical device attestation — HARDWARE; not inherently blockchain-testnet-dependent.** Obtain suitable iOS/Android hardware and approved enrolled device identities. Verify actual Secure Enclave/AndroidKeyStore backing and attestation trust chains, challenge binding, user presence, revoked/compromised devices and migration/backup denial; compare with independently verified backend challenge acceptance. Device simulator tests are insufficient.
+- [ ] **Actual GPS acceptance — HARDWARE + AUTHORIZED BACKEND; may be staged before blockchain testnet.** Exercise foreground/background OS prompts, location service denial, force-stop, permission revocation, route completion, current tenant-scoped courier assignment, scoped consent expiry and encrypted location delivery. No continuous background capture is authorized by the current manifest or iOS entitlements; a narrowly scoped implementation and lawful permission review must precede device testing.
+- [ ] **APNs/FCM delivery — PROVIDER + 420Notifications; blockchain testnet only if its canonical event source depends on it.** Obtain approved Apple/Firebase projects, device tokens, server credentials and trusted 420Notifications endpoint. Verify payload minimization, authentic transport, token lifecycle, device/account revocation, expired events, duplicates, offline delivery and outages. Never commit provider credentials.
+- [ ] **Production signing and distribution — SIGNING/STORE ACCOUNTS; not inherently blockchain-testnet-dependent.** Use approved Apple developer team, provisioning profiles/certificates and Android signing key/Play App Signing, isolated secret store, restricted CI and artifact attestation. Verify release build signatures, entitlements, rollback and distribution acceptance. A locally compiled unsigned simulator app does not qualify production signing.
+
+**Do not defer code that can be completed offline:** secure release build configuration, device permission integration, bounded OS lifecycle behavior, safe notification-token registration interfaces, hardware attestation verifier contracts and negative tests, and repeatable unsigned release builds. This is a deferral of unavailable *external acceptance evidence*, not a waiver of local implementation requirements. The gate stays NOT COMPLETE until the appropriate hardware/provider/signing/testnet evidence is obtained. R03.12 Level 2 and R05.10 Level 3 remain separate unchanged milestones.
+
 ## R03.8 — Native mobile live/device qualification deferred (2026-10-11)
 
 - [ ] **R03.8 / R06.2 / DOOBR-AUDIT-9:** Physically verify AndroidKeyStore hardware attestation, iOS Secure Enclave, protected key lifecycle, OS-level biometric/device-credential challenges, revocation, device loss and backup extraction denial on supported iOS and Android hardware.

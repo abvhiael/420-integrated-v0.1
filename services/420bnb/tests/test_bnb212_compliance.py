@@ -108,7 +108,7 @@ def test_compliance_revision_scope_replay_and_independent_revocation(fixture_pro
         "property_id":str(property_id),"jurisdiction_id":"FIXTURE_ONLY",
         "decision":"allowed","revision":2,"license_reference":"fixture-license-2",
         "minimum_guest_age":18,"identity_required":True,
-        "property_version":1,"controller_subject":"verified-host","nbf":now-1,"exp":now+180}
+        "property_version":1,"controller_subject":"verified-host","place_id":"fixture-place","nbf":now-1,"exp":now+180}
     monkeypatch.setattr(api,"verify_authority",lambda token,prefix,purpose:dict(claims))
     url="/v1/bnb/compliance/eligibility"
     body={"proof":"synthetic-proof-token"*3}
@@ -118,6 +118,9 @@ def test_compliance_revision_scope_replay_and_independent_revocation(fixture_pro
     claims["jurisdiction_id"]="OTHER_PROPERTY"
     assert client.post(url,json=body).status_code==403
     claims["jurisdiction_id"]="FIXTURE_ONLY"
+    claims["place_id"]="other-place"
+    assert client.post(url,json=body).status_code==403
+    claims["place_id"]="fixture-place"
     claims["property_version"]=2
     assert client.post(url,json=body).status_code==409
     claims["property_version"]=1

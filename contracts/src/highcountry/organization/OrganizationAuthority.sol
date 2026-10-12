@@ -54,7 +54,9 @@ contract OrganizationAuthority {
         if (
             !active || msg.sender != admin || who == address(0) || who == admin || action == bytes32(0)
                 || scope == bytes32(0) || action == TREASURY_ACTION || action == WALLET_ACTION
-                || action == RIGHTS_ACTION || maxUses == 0 || expires <= starts || expires <= block.timestamp
+                || action == RIGHTS_ACTION
+                || (action != CULTIVATION_ACTION && action != ROSTER_ACTION && action != NOTICES_ACTION)
+                || maxUses == 0 || expires <= starts || expires <= block.timestamp
                 || !registry.isActiveMember(org, who)
         ) revert Unauthorized();
         id = keccak256(abi.encode(block.chainid, address(this), org, ++nonce[org], who, action, scope));

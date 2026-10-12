@@ -35,7 +35,7 @@ These are **authority boundaries**, not evidence that deployed authenticated ser
 
 ## Qualification status
 
-**Implementation SHA:** `c72cd70ebb20fb3c99f12d996046063c1436e2a5`; qualification workflow must finish before PASS. Evidence-only commits may reference this SHA if they change no executable/config/test content. No global Foundry, Genesis, Docs or Solidity inventories are required at R04.1. Existing R03.12 clients/Travel Level 2 remains qualified only for its recorded implementation SHA and does not qualify a different executable SHA by inheritance.
+**Implementation SHA:** `c72cd70ebb20fb3c99f12d996046063c1436e2a5`; **PASS** — GitHub Actions run #38302927304, job #114989977929 (`reuse`) completed successfully with zero failed steps, at exact implementation SHA. Evidence-only commits may reference this SHA if they change no executable/config/test content. No global Foundry, Genesis, Docs or Solidity inventories are required at R04.1. Existing R03.12 clients/Travel Level 2 remains qualified only for its recorded implementation SHA and does not qualify a different executable SHA by inheritance.
 
 **Deferrals:** live credential/registry authority, independently approved retailer/license/carrier policy, financial gateway/provider settlement, real deployed contract/address validity, and regulated business acceptance remain under R06 and DOOBR-AUDIT-9/10, not represented as implemented or authorized.
 

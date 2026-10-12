@@ -95,11 +95,15 @@ func(o C066Operations)Halt(ctx context.Context,token,environment string)error{
 }
 // PublishScheduled delegates actual authority to the preexisting independent
 // publisher. It cannot mint a review signature or bypass CAS/fencing.
-func(o C066Operations)PublishScheduled(ctx context.Context,token string,old,next PublicationFence,scheduledAt time.Time)error{
+func(o C066Operations)PublishScheduled(ctx context.Context,token string,old,next PublicationFence,signed SignedManifest,scheduledAt time.Time)error{
  s,e:=o.authorize(ctx,token)
  if e!=nil||o.Runtime==nil||o.Control==nil||scheduledAt.IsZero()||o.now().Before(scheduledAt){return ErrC066Denied}
  if old.Scope!=next.Scope||old.Scope!=controlScope("production",s.Scope.Domain,s.Scope.Jurisdiction)||
  !ValidPublicationFence(old,o.now())||!ValidPublicationFence(next,o.now()){return ErrC066Denied}
+ m:=signed.Manifest
+ if m.Environment!="production"||m.Domain!=s.Scope.Domain||m.Jurisdiction!=s.Scope.Jurisdiction||
+ m.Sequence!=next.Sequence||m.PolicyDigest!=next.PolicyDigest||
+ m.RevocationEpoch!=next.RevocationEpoch||o.Control.VerifyScheduledManifest(signed,o.now())!=nil{return ErrC066Denied}
  // Independently owned publication authorization remains mandatory in Runtime.Publish.
  fresh,e:=o.authorize(ctx,token)
  if e!=nil||fresh!=s{return ErrC066Denied}

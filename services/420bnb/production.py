@@ -178,8 +178,17 @@ def verify_database(connection, purpose="runtime"):
         ledger = connection.execute("""SELECT has_table_privilege(current_user,'public.bnb_schema_migration','SELECT'),
             has_table_privilege(current_user,'public.bnb_schema_migration','INSERT'),
             has_table_privilege(current_user,'public.bnb_schema_migration','UPDATE'),
-            has_table_privilege(current_user,'public.bnb_schema_migration','DELETE')""").fetchone()
+            has_table_privilege(current_user,'public.bnb_schema_migration','DELETE'),
+            has_table_privilege(current_user,'public.bnb_schema_migration','TRUNCATE'),
+            has_table_privilege(current_user,'public.bnb_schema_migration','REFERENCES'),
+            has_table_privilege(current_user,'public.bnb_schema_migration','TRIGGER')""").fetchone()
         require(ledger[0] and not any(ledger[1:]), "DATABASE_LEDGER_WRITE_FORBIDDEN")
+        require(not connection.execute("""SELECT EXISTS(SELECT 1 FROM pg_tables
+            WHERE schemaname='public' AND tablename ~ '^bnb_' AND
+            (has_table_privilege(current_user,format('%I.%I',schemaname,tablename),'TRUNCATE')
+             OR has_table_privilege(current_user,format('%I.%I',schemaname,tablename),'REFERENCES')
+             OR has_table_privilege(current_user,format('%I.%I',schemaname,tablename),'TRIGGER')))""").fetchone()[0],
+                "DATABASE_RUNTIME_EXTRA_PRIVILEGE_FORBIDDEN")
         require(not connection.execute("""SELECT EXISTS(SELECT 1 FROM pg_tables
             WHERE schemaname='public' AND tablename ~ '^bnb_'
             AND tableowner <> 'bnb_owner')""").fetchone()[0], "DATABASE_TABLE_OWNER_INVALID")

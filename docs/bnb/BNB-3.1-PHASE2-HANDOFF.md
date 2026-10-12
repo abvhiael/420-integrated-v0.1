@@ -1,6 +1,6 @@
 # BNB-3.1 — Phase 2 handoff and Phase 3 baseline
 
-**State: Phase 2 final gates pending; PR #616 unmerged; no approved Phase 3 baseline.**
+**State: Phase 2 repository Level 3 PASS; restricted source integration review ready; PR #616 unmerged; no approved Phase 3 baseline.**
 
 ## Scope authority
 
@@ -12,12 +12,12 @@ Implementation: `9cdc324a1b5bd22a2dd9f343931fef05e934b8b2`, frozen branch `quali
 
 | Gate | Run | Result at this update |
 | --- | --- | --- |
-| Canonical full Solidity Contracts | 38281106064 | Four primary partitions passed; shards 0/1 coverage passed; shards 2/3 coverage and dependent fixture pending |
+| Canonical full Solidity Contracts | 38281106064 | PASS: all four primary/test/coverage partitions, Decision 10 fixture, complete unique inventory and coverage aggregate |
 | Genesis Address Authority | 38280934685 | PASS; independent namespace/manifest/predeploy regressions, no duplicate Foundry |
 | 420 Integrated Qualification | 38280419435 | PASS; all four jobs actual checkout exact implementation |
 | Canonical global 420Docs Qualification | 38280739099 | PASS; all 41 stages and aggregate; not publication |
 | Oracle retry | 38205294248 attempt 2 | PASS; all four jobs exact checkout |
-| Additive pinned architecture/Travel qualification | 38287212823 | BnB/Travel job 114938351205 PASS; core repeat still pending |
+| Additive pinned architecture/Travel qualification | 38287212823 | PASS: all five jobs actual checkout exact implementation |
 
 Full log inspection corrects historical twelve-exact-pass claims: old Travel 38205294324 and BnB 1.1/1.2 38205294198 / 38205294329 checked out synthetic merge SHA `ee255885b7d2b8fab2ed97d75d12589f6ea4c467` and are excluded. The additive support run executes all nine canonical BnB validators, Travel/shared Genesis/DOOBR validators and migration plan, noncached compatibility/Travel tests, vet and build at literal checkout `9cdc324a1b5bd22a2dd9f343931fef05e934b8b2`; workflow source is tooling-only `2c668a20da3bae9f5b91e6249573863f4a61e521` on `qualification/bnb-phase2-travel-support-9cdc324a`. Do not merge that support harness into main.
 
@@ -31,7 +31,7 @@ Reviewed runtime boundaries include verified sessions/recovery epochs, independe
 
 [BNB testnet roadmap](BNB-TESTNET-WORK-ROADMAP.md) retains independent Identity/Compliance/Location/property/legal issuer provenance, actual Pay finality/reorg/refunds/payouts, manual accessibility, multi-instance deployment/failover/backup-restore and independent security acceptance. These are deferred, not waived. Preserve `travel.bnb_booking=false` and disabled booking/financial execution. Repository CI does not certify live operations.
 
-Before merge: complete every mandatory shard/fixture and additive support job, verify each actual checkout, refresh main against the recorded base, verify evidence-only delta, and record bounded repository source merge-readiness. Keep #616 unmerged until gates pass; reconcile #600 only after qualified integration approval. No Phase 3 baseline exists until the actual approved merged main and canonical roadmap are recorded.
+Terminal closeout evidence commit `525b3df1a96779e4ef74b9ee80a15a53db939c5b` records all mandatory repository gates PASS: 1,064 unique primary units, four shards with 16 coverage contexts each, Decision 10 fixture assertions, 790 diagnostic LCOV source records and retained artifact IDs/digests. Full logs verify exact implementation checkout for every mandatory job. Main refreshed still equals the recorded base; evidence delta is three Markdown files only. Repository source scope is ready for restricted integration approval/review; live acceptance remains deferred. Keep #616 unmerged pending integration approval; reconcile #600 only after that approval. No Phase 3 baseline exists until the actual approved merged main and canonical roadmap are recorded.
 
 ## Three-level qualification policy
 

@@ -13,16 +13,20 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "public");
 const REPO_ROOT = join(ROOT, "..", "..", "..");
 const ART_INVENTORY = join(REPO_ROOT, "assets", "budtender", "asset_inventory.json");
 
-type ArtEntry = { path: string; sha256: string; bytes: number };
+type ArtEntry = { path: string; sha256?: string; bytes?: number };
 const loadArtwork = async (): Promise<ArtEntry[]> => {
   const raw = JSON.parse(await readFile(ART_INVENTORY, "utf8")) as { assets?: ArtEntry[] };
   if (!Array.isArray(raw.assets)) throw new Error("invalid artwork inventory");
+  const expansion = JSON.parse(await readFile(join(REPO_ROOT, "assets", "budtender", "phase-3.15", "registry.json"), "utf8")) as { assets?: ArtEntry[] };
+  if (!Array.isArray(expansion.assets) || expansion.assets.length !== 64) throw new Error("invalid expansion inventory");
+  const combined = [...raw.assets, ...expansion.assets];
   const paths = new Set<string>();
-  for (const entry of raw.assets) {
-    if (!/^assets\/budtender\/phase-3\.(?:[1-9]|1[0-4])\/[a-z0-9_]+\.png$/.test(entry.path) || paths.has(entry.path)) throw new Error("invalid artwork path");
+  for (const entry of combined) {
+    if (!/^assets\/budtender\/phase-3\.(?:[1-9]|1[0-5])\/[a-z0-9_]+\.png$/.test(entry.path) || paths.has(entry.path)) throw new Error("invalid artwork path");
     paths.add(entry.path);
   }
-  return raw.assets;
+  if (combined.length !== 432) throw new Error("unexpected artwork inventory count");
+  return combined;
 };
 const MAX_BODY_BYTES = 16 * 1024;
 

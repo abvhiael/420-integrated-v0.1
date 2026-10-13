@@ -60,6 +60,10 @@ type C067AuditorExport struct {
  ExportDigest string `json:"export_digest"`
  PolicyApproved bool `json:"policy_approved"`
 }
+type C075CaseEvidenceRepository interface {
+ InspectForCase(context.Context,C067AuditorSession,string,string,string)(C067EvidenceItem,error)
+ RevalidateCase(context.Context,C067AuditorSession,string,string,string)error
+}
 type C067AuditorService struct {
  Authority C067AuditorAuthority
  Repository C067EvidenceRepository
@@ -71,6 +75,9 @@ func(s C067AuditorService)Export(ctx context.Context,token string,requests []C06
  fail:=func()(C067AuditorExport,error){return C067AuditorExport{},ErrC067Denied}
  if ctx==nil||ctx.Err()!=nil||len(token)<16||len(token)>4096||
  s.Authority==nil||s.Repository==nil||s.Log==nil||len(requests)==0||len(requests)>32{return fail()}
+ if controlled,ok:=s.Log.(interface{RequiresPrivacyGate()bool});ok&&controlled.RequiresPrivacyGate(){
+  if _,ok:=s.Repository.(C075CaseEvidenceRepository);!ok{return fail()}
+ }
  a,err:=s.Authority.VerifyAuditor(ctx,token)
  now:=s.now()
  if err!=nil||a.Revoked||a.Role!="auditor"||!c064ID.MatchString(a.SubjectID)||
@@ -84,7 +91,8 @@ func(s C067AuditorService)Export(ctx context.Context,token string,requests []C06
   request.Purpose!="LEGAL_AUDIT"&&request.Purpose!="INCIDENT_REVIEW"&&request.Purpose!="SOURCE_VERIFICATION"||
   seen[request.EvidenceID] {return fail()}
   seen[request.EvidenceID]=true
-  item,e:=s.Repository.Inspect(ctx,a.Scope,request.SourceID,request.EvidenceID)
+  var item C067EvidenceItem;var e error
+  if gate,ok:=s.Repository.(C075CaseEvidenceRepository);ok{item,e=gate.InspectForCase(ctx,a,request.SourceID,request.EvidenceID,request.Purpose)}else{item,e=s.Repository.Inspect(ctx,a.Scope,request.SourceID,request.EvidenceID)}
   if e!=nil||item.SourceID!=request.SourceID||item.EvidenceID!=request.EvidenceID||
   !digestValid(item.Digest)||item.ObservedAt.IsZero()||item.ObservedAt.After(now)||
   item.Status!="PARSED_PENDING_REVIEW" {return fail()}
@@ -102,6 +110,9 @@ func(s C067AuditorService)Export(ctx context.Context,token string,requests []C06
  // Reverify after durable logging; lost authority never returns evidence.
  latest,e=s.Authority.VerifyAuditor(ctx,token)
  if e!=nil||latest!=a||ctx.Err()!=nil{return fail()}
+ if gate,ok:=s.Repository.(C075CaseEvidenceRepository);ok{
+  for _,request:=range requests{if gate.RevalidateCase(ctx,a,request.SourceID,request.EvidenceID,request.Purpose)!=nil{return fail()}}
+ }
  h:=sha256.New()
  for _,item:=range export.Evidence{
   h.Write([]byte(item.SourceID));h.Write([]byte{0})

@@ -62,7 +62,7 @@ func TestC071PostgreSQLProductionStorage(t *testing.T){
  if _,err=admin.DB.ExecContext(ctx,"UPDATE compliance_author_versions SET document_digest=$1 WHERE tenant=$2",legacy.DocumentDigest,scopeA.Tenant);err!=nil{t.Fatal(err)}
  var wg sync.WaitGroup;errs:=make(chan error,2)
  for i:=0;i<2;i++{wg.Add(1);go func(){defer wg.Done();errs<-MigrateC071Database(ctx,admin.DB,c)}()};wg.Wait();close(errs);for err=range errs{if err!=nil{t.Fatal("serialized migration",err)}}
- var count int;if admin.DB.QueryRowContext(ctx,"SELECT count(*) FROM compliance_schema_migrations").Scan(&count)!=nil||count!=7{t.Fatal("migration cardinality",count)}
+ var count int;if admin.DB.QueryRowContext(ctx,"SELECT count(*) FROM compliance_schema_migrations").Scan(&count)!=nil||count!=8{t.Fatal("migration cardinality",count)}
  if _,err=admin.DB.ExecContext(ctx,"UPDATE compliance_schema_migrations SET checksum=repeat('0',64) WHERE version=5");err!=nil{t.Fatal(err)}
  if MigrateC071Database(ctx,admin.DB,c)==nil{t.Fatal("checksum drift accepted")}
  hash:=Digest([]byte(c071HardeningSQL));if _,err=admin.DB.ExecContext(ctx,"UPDATE compliance_schema_migrations SET checksum=$1 WHERE version=5",hash);err!=nil{t.Fatal(err)}

@@ -41,3 +41,6 @@ func(s C067PostgreSQLAccessLog)AppendDurable(ctx context.Context,a C067AuditAcce
  return nil
 }
 var _ C067AccessLog = C067PostgreSQLAccessLog{}
+
+// Encrypted production auditor stores require the retention/case gate.
+func(s C067PostgreSQLAccessLog)RequiresPrivacyGate()bool{return s.Cipher!=nil}

@@ -30,7 +30,7 @@ Level 1 per implementation step; Level 2 only at the named milestones; one Level
 | L01.4 | Durable PostgreSQL trip/event store, uniqueness, transactional compare-and-swap, idempotency/replay and restart tests | COMPLETE — Level 1 PASS; see L01.4 evidence |
 | L01.5 | Location routing adapter, private pickup/drop-off storage, scoped access, precision and retention | COMPLETE — Level 1 PASS; see L01.5 evidence |
 | M-L01-A | Level 2: identity + eligibility + durable trip + Location integration | COMPLETE — Level 2 PASS; see milestone evidence |
-| L01.6 | Driver availability, vehicle capacity, deterministic matching, assignment expiry and concurrent dispatch | Implemented candidate; Level 1 pending |
+| L01.6 | Driver availability, vehicle capacity, deterministic matching, assignment expiry and concurrent dispatch | COMPLETE — Level 1 PASS; see L01.6 evidence |
 | L01.7 | Immutable expiring fare quotes, currency/rounding, rider consent and explicit cancellation policy | Pending implementation; pilot economics adopted |
 | L01.8 | Scoped Pay/Wallet intents, receipts/finality, cancellation/refund and payout projections | Pending; live acceptance separately gated |
 | L01.9 | Safety incident workflow, active-trip resolution, pause/recovery, bounded operator permissions and privacy | Pending |

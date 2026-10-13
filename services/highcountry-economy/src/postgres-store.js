@@ -54,4 +54,3 @@ export class PostgresBudsStore {
     } finally {client.release();}
   }
 }
-

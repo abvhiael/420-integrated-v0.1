@@ -73,4 +73,3 @@ export class MemoryTransactionFixture {
     const r=fn(s);this.state=s;return r;
   }
 }
-

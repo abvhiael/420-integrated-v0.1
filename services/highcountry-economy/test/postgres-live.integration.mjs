@@ -81,4 +81,3 @@ try {
  try {await pool.query('DELETE FROM highcountry_buds_state WHERE namespace=$1',[ns]);}catch{}
  await pool.end();
 }
-

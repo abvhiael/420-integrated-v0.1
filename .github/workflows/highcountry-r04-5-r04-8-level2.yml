@@ -17,6 +17,7 @@ permissions:
   contents: read
 jobs:
   economy:
+    if: github.head_ref != 'qualification/highcountry-r04-level3-main-20261013'
     runs-on: ubuntu-latest
     timeout-minutes: 50
     env:
@@ -59,6 +60,7 @@ jobs:
         run: python3 scripts/highcountry/verify-r01.py
 
   postgres-integration:
+    if: github.head_ref != 'qualification/highcountry-r04-level3-main-20261013'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     services:

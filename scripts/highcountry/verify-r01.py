@@ -105,4 +105,3 @@ print(json.dumps({'status':'PASS', 'sha':subprocess.check_output(['git','rev-par
                   'enums':enum_count,'types':len(udvts),'actions':len(actions),'requirements':len(scope_rows),
                   'links':links,'harvestInputs':10001,'temperatureInputs':3001,'inputHashes':inputs,
                   'scope':'Source/specification consistency only; not runtime or full-game qualification.'},indent=2))
-

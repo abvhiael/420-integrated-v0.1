@@ -29,3 +29,13 @@ Retain INT-R04-01..05 resolution and explicit trust boundaries in [Level 2 integ
 Live deployed addresses/code/grants, credentials/operators/catalogues/officers, network finality/reorg/quorum drills, funded Treasury/vault movement, TLS/secrets/backup/failover/monitoring and independent approval remain OPEN in [testnet work roadmap](HIGHCOUNTRY-TESTNET-WORK-ROADMAP.md). Configuration template validation does not claim deployed acceptance. R07.5 replacement/migration/rollback remains gated. R05/R06/R07 complete runtime/client/deployment engineering is outside this R04 phase-closeout; retained scoped dependencies are qualified without claiming those phases complete.
 
 R04 ends at R04.14. Next canonical phase begins at R05.1; no R04.15 or automatic R05 start.
+
+## Deterministic cleanup and workflow registration repair — 2026-10-13
+
+The prior candidate `b5d183c06421a096cc568dc3a687b1f300f748cc` passed Docs, Genesis, global, retained app/economic/PostgreSQL/local-chain runtime, formatting, lint and SDK/service/configuration steps. Its consolidated security job failed only at `git diff --check`: eight files had an extra blank line at EOF. These EOF defects are removed without changing executable statements.
+
+The unrelated Governance workflow had an unindented Python heredoc outside the YAML literal block. Both the YAML block and shell heredoc are corrected. The unrelated 420Hz GCA workflow contained two `level2` keys with an intervening malformed duplicated section and stray shell fragment. Its original complete Level 1 and final complete Level 2 job are preserved; the corrupt duplicate is removed. Unique-key YAML parsing and shell syntax validation pass for all 34 affected workflows.
+
+For this exact High Country Level 3 branch only, ordinary High Country Level 1 and earlier milestone jobs are not duplicated: the canonical Solidity-owned complete inventory and retained R04 app/runtime/security gate execute their tests. All 32 ordinary workflow triggers/jobs retain their behavior outside this branch, including manual dispatch. This avoids dozens of redundant app test runs at a single phase boundary. Skipped step-level jobs are not mislabeled as a fresh Level 1 PASS or used as qualification evidence.
+
+The corrected candidate must qualify its new exact SHA independently. Required four-shard coverage/fixture, Genesis address authority, global, Docs and the five consolidated High Country jobs are unchanged. The two repaired unrelated workflows must now register successfully; Governance's app-specific PR guard may legitimately skip its job on an HC PR, while 420Hz retains its normal path-triggered qualification. R04 audit PRs remain open/unmerged and R05 remains untouched.

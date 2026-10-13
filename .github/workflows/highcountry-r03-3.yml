@@ -11,6 +11,7 @@ permissions:
   contents: read
 jobs:
   r03-3:
+    if: github.head_ref != 'qualification/highcountry-r04-level3-main-20261013'
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:

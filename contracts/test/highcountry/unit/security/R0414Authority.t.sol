@@ -11,6 +11,7 @@ contract R0414Emergency is IRestrictedEmergencyR0414 {
     bool public restricted;
     bool public releaseGranted=true;
     function bind(address c) external {require(controller==address(0));controller=c;}
+    function blockRelease() external {releaseGranted=false;}
     function isAllowedDomain(bytes32 d) external view returns(bool){return d==DOMAIN&&allowed;}
     function isRestricted(bytes32) external view returns(bool){return restricted;}
     function setRestricted(bytes32 d,bool value) external {
@@ -83,8 +84,10 @@ contract R0414AuthorityTest {
         require(!wrong,"wrong domain");
         restricter.restrict(council,DOMAIN);
         releaser.schedule(council,DOMAIN);
-        emergency.releaseGranted();
+        emergency.blockRelease();
         vm.warp(block.timestamp+council.RELEASE_DELAY());
-        releaser.release(council,DOMAIN);
+        (bool denied,) = address(releaser).call(abi.encodeCall(releaser.release,(council,DOMAIN)));
+        require(!denied,"underlying capability bypassed");
+        require(emergency.restricted(),"restriction rolled back");
     }
 }

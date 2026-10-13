@@ -64,3 +64,40 @@ def test_missing_casework_never_enumerates_reservations(monkeypatch):
     with pytest.raises(HTTPException) as denied:
         api.host_casework_view(uuid4(),None)
     assert denied.value.status_code==404
+
+
+def test_independent_casework_requires_external_signed_review_proof(monkeypatch):
+    rid=uuid4()
+    def forbid_db():
+        raise AssertionError("unauthorized review accessed database")
+    monkeypatch.setattr(api,"db",forbid_db)
+    with pytest.raises(HTTPException) as err:
+        api.independent_abuse_case_view(rid,None)
+    assert err.value.status_code==401
+    monkeypatch.setattr(api,"verify_authority",lambda *_:{
+        "sub":"reviewer","report_id":str(rid),"casework_scope":"wrong"})
+    with pytest.raises(HTTPException) as err:
+        api.independent_abuse_case_view(rid,"fixture-signed-claim")
+    assert err.value.status_code==403
+
+
+def test_hold_rejects_self_minted_or_policy_shortening(monkeypatch):
+    rid=uuid4()
+    payload=api.PrivacyHoldInput(duration_days=90,reason="legal_hold")
+    monkeypatch.setattr(api,"db",lambda:(_ for _ in ()).throw(AssertionError("db touched")))
+    with pytest.raises(HTTPException) as err:
+        api.independent_case_privacy_hold(rid,payload,None)
+    assert err.value.status_code==401
+    monkeypatch.setattr(api,"verify_authority",lambda *_:{
+        "iss":"fixture","jti":"nonce","sub":"reviewer","report_id":str(rid),
+        "hold_days":90,"reason":"legal_hold","legal_privacy_authority_verified":False})
+    with pytest.raises(HTTPException) as err:
+        api.independent_case_privacy_hold(rid,payload,"signed-fixture")
+    assert err.value.status_code==403
+    monkeypatch.setattr(api,"verify_authority",lambda *_:{
+        "iss":"fixture","jti":"nonce","sub":"reviewer","report_id":str(rid),
+        "hold_days":90,"reason":"legal_hold","legal_privacy_authority_verified":True})
+    monkeypatch.setenv("BNB_REPORT_RETENTION_DAYS","180")
+    with pytest.raises(HTTPException) as err:
+        api.independent_case_privacy_hold(rid,payload,"signed-fixture")
+    assert err.value.status_code==422

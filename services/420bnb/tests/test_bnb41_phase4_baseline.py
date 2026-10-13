@@ -18,7 +18,7 @@ def test_all_live_authority_gates_preserved():
     gates=[line.split(" — ")[0].removeprefix("## ") for line in source.splitlines() if line.startswith("## T-BNB-")]
     assert len(gates)==17 and len(set(gates))==17
     for gate in gates:
-        assert gate in roadmap or (gate.endswith("-2") and gate[:-2]+ "-1/2" in roadmap) or (gate.endswith("210A") and "T-BNB-TRAVEL-210/210A" in roadmap)
+        assert gate in roadmap or (gate in ("T-BNB-IDENTITY-1","T-BNB-IDENTITY-2") and "T-BNB-IDENTITY-1/2" in roadmap) or (gate.endswith("210A") and "T-BNB-TRAVEL-210/210A" in roadmap)
     assert "travel.bnb_booking=false" in roadmap
 
 def test_api_provider_authority_and_routes_remain_bound():

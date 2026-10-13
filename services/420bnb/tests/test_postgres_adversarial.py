@@ -1159,6 +1159,34 @@ def test_bnb27_pay_owned_split_partial_refunds_and_payout_conservation(fixture_p
         assert view.json()["remaining_liability"]=="0"
         assert view.json()["bnb_custody"] is False
         assert client.get(f"/v1/bnb/reservations/{rid}/settlement").status_code==401
+        # A separate Pay dispute can request refund, but it cannot declare a
+        # refund complete until actual Pay disbursement-finality evidence exists.
+        refund_case={**opened,"case_id":"case-bnb27-refund",
+            "event_id":"case-bnb27-refund-open"}
+        assert client.post(case_route,json=refund_case,headers=case_proof(
+            refund_case,{})).status_code==202
+        request={**refund_case,"event_id":"case-bnb27-refund-request",
+                 "revision":2,"state":"refund_requested"}
+        assert client.post(case_route,json=request,headers=case_proof(
+            request,{"refund_request_verified":True})).status_code==403
+        refund_proof={"original_payer_subject":"guest-fixture",
+            "original_pay_invoice_id":"invoice-bnb27",
+            "original_pay_payment_id":"payment-bnb27",
+            "original_payer_refund":True}
+        req=client.post(case_route,json=request,headers=case_proof(
+            request,{**refund_proof,"refund_request_verified":True}))
+        assert req.status_code==202,req.text
+        case_view=client.get(f"/v1/bnb/reservations/{rid}/orchestration",
+                             headers=guest_headers)
+        assert case_view.status_code==200,case_view.text
+        assert case_view.json()["state"]=="disputed"
+        assert case_view.json()["confirmation_verified"] is False
+        complete={**request,"event_id":"case-bnb27-refund-completed",
+                  "revision":3,"state":"resolved","resolution":"refund_completed"}
+        completed=client.post(case_route,json=complete,headers=case_proof(
+            complete,{**refund_proof,"independent_dispute_resolution_verified":True,
+                "case_resolution":"refund_completed","refund_receipt_verified":True}))
+        assert completed.status_code==202,completed.text
         failure={"reservation_id":str(rid),"pay_invoice_id":"invoice-bnb27",
                  "pay_attempt_id":"attempt-bnb27","failure_code":"settlement_failed"}
         assert client.post("/v1/bnb/internal/pay/failures",json=failure).status_code==401

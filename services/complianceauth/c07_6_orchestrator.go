@@ -4,7 +4,6 @@ import (
  "context"
  "crypto/sha256"
  "encoding/hex"
- "errors"
  "time"
 )
 
@@ -82,8 +81,9 @@ func C076Restore(ctx context.Context,plan C076RestorePlan,authority C076WitnessA
   restored.Generation!=nextGeneration||ctx.Err()!=nil{return ErrC076UnsafeRestore}
  // Release requires an independent current-state compare-and-swap in the
  // platform. Another revocation between witness and release must deny.
+ fresh,e:=authority.RecoverWitness(ctx,plan.Scope)
+ if e!=nil||ctx.Err()!=nil||fresh.Checkpoint!=witness.Checkpoint||len(fresh.Deletions)!=len(witness.Deletions){return ErrC076UnsafeRestore}
+ for i:=range fresh.Deletions{if fresh.Deletions[i]!=witness.Deletions[i]{return ErrC076UnsafeRestore}}
  if err=platform.Release(ctx,plan.Scope,nextGeneration);err!=nil{return ErrC076UnsafeRestore}
  return nil
 }
-
-var _ = errors.Is

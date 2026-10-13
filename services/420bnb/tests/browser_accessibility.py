@@ -57,7 +57,7 @@ with sync_playwright() as p:
         elif url.endswith("/v1/bnb/account/properties/"+listing_id+"/calendar"):
             route.fulfill(json=[])
         elif url.endswith("/v1/bnb/account/properties/"+listing_id+"/notifications"):
-            route.fulfill(json=[])
+            route.fulfill(status=503,json={"detail":"PROVIDER_UNAVAILABLE"})
         elif url.endswith("/v1/bnb/account/properties/"+listing_id+"/earnings"):
             route.fulfill(json={"payment_authority":"420Pay","bnb_custody":False,"rows":[]})
         elif url.endswith("/v1/bnb/account/properties/"+listing_id+"/managers"):
@@ -146,6 +146,9 @@ with sync_playwright() as p:
     session.get_by_role("button",name="Refresh host workspace").click()
     expect(session.locator("#host-workspace")).to_contain_text("Draft cabin")
     session.get_by_role("button",name="Manage property operations").click()
+    expect(session.locator("#host-workspace")).to_contain_text("Pay-reported earnings")
+    expect(session.locator("#host-workspace")).to_contain_text("This section is unavailable or your access has been revoked.")
+    expect(session.locator("#host-workspace")).to_contain_text("Reservations")
     expect(session.locator("#host-workspace")).to_contain_text("Pay-reported earnings")
     session.get_by_role("button",name="Refresh drafts").click()
     expect(session.get_by_role("heading",name="Draft cabin")).to_have_count(1)

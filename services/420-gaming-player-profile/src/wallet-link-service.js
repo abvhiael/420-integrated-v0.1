@@ -50,11 +50,11 @@ export function createHighCountryWalletService420({authority,poolForPrincipal,cl
     }
     const challenge={challengeId:randomUUID(),wallet:input.wallet.toLowerCase(),chainId:id,
       domain,nonce:randomBytes(32).toString('hex'),consentId:input.consentId,
-      policyHash:input.policyHash,expiresAt:String(Math.floor(Date.now()/1000)+300)};
+      policyHash:input.policyHash,issuedAt:String(Math.floor(Date.now()/1000)),expiresAt:String(Math.floor(Date.now()/1000)+300)};
     // Server-computed consent context commits to the actual issued challenge.
     const prepared={challenge_id:challenge.challengeId,wallet:challenge.wallet,chain_id:id,
-      domain,nonce:challenge.nonce,issued_at:String(Math.floor(Date.now()/1000)),expires_at:challenge.expiresAt};
-    // Obtain the DB clock and bind consent to that exact timestamp atomically.
+      domain,nonce:challenge.nonce,issued_at:challenge.issuedAt,expires_at:challenge.expiresAt};
+    // Database checks clock skew and stores the exact signed issuance timestamp.
     const row=await service.transaction(async tx=>{
       const preliminary=await tx.issueWalletChallenge({...challenge,contextHash:context(authority.gameId,accountId,prepared)});
       return preliminary;

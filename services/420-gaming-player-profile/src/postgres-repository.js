@@ -169,11 +169,11 @@ class ScopedTransaction {
   }
   async issueWalletChallenge(x) {
     await this.#walletGuard();
-    fields(x,['challengeId','wallet','chainId','domain','nonce','consentId','policyHash','contextHash','issuedAt','expiresAt']);
+    fields(x,['challengeId','wallet','chainId','domain','nonce','consentId','policyHash','contextHash','issuedAt','expiresAt','recoveryAuthorized']);
     requireOpaque(x.challengeId,x.domain,x.consentId);
     requireHashes(x.policyHash,x.contextHash);
     decimal(x.chainId,64,true);decimal(x.issuedAt);decimal(x.expiresAt);
-    if(!wallet(x.wallet)||!/^([0-9a-f]{64})$/.test(x.nonce))fail('invalid-input');
+    if(!wallet(x.wallet)||!/^([0-9a-f]{64})$/.test(x.nonce)||typeof x.recoveryAuthorized!=='boolean')fail('invalid-input');
     const now=(await this.#query('SELECT gaming_datastore.now_seconds() AS now')).rows[0].now;
     if(BigInt(x.issuedAt)>BigInt(now)+5n||BigInt(x.issuedAt)+5n<BigInt(now)||BigInt(x.expiresAt)<=BigInt(now)||BigInt(x.expiresAt)>BigInt(x.issuedAt)+600n)fail('challenge-expiry-invalid');
     const profile=await this.profile();
@@ -182,9 +182,9 @@ class ScopedTransaction {
     await this.recordConsent({consentId:x.consentId,purpose:'WALLET_LINK',policyHash:x.policyHash,
       contextHash:x.contextHash,nonceCommitment,expiresAt:x.expiresAt});
     return (await this.#query(`INSERT INTO gaming_datastore.wallet_challenges
-      (account_id,game_id,challenge_id,wallet,chain_id,domain,nonce,consent_id,issued_at,expires_at)
-      VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING challenge_id,wallet,chain_id,domain,nonce,issued_at,expires_at`,
-      [...this.#ids(),x.challengeId,x.wallet,x.chainId,x.domain,x.nonce,x.consentId,x.issuedAt,x.expiresAt])).rows[0];
+      (account_id,game_id,challenge_id,wallet,chain_id,domain,nonce,consent_id,issued_at,expires_at,recovery_authorized)
+      VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING challenge_id,wallet,chain_id,domain,nonce,issued_at,expires_at`,
+      [...this.#ids(),x.challengeId,x.wallet,x.chainId,x.domain,x.nonce,x.consentId,x.issuedAt,x.expiresAt,x.recoveryAuthorized])).rows[0];
   }
   async walletChallenge(challengeId) {
     await this.#walletGuard();
@@ -208,7 +208,9 @@ class ScopedTransaction {
     await this.#activeConsent(challenge.consent_id,'WALLET_LINK',contextHash);
     const active=(await this.#query(`SELECT 1 FROM gaming_datastore.wallet_links
       WHERE account_id=$1 AND game_id=$2 AND unlinked_at IS NULL FOR UPDATE`,this.#ids())).rows;
-    if(active.length)fail('wallet-link-conflict');
+    if(active.length&&!challenge.recovery_authorized)fail('wallet-link-conflict');
+    if(active.length)await this.#query(`UPDATE gaming_datastore.wallet_links
+      SET unlinked_at=gaming_datastore.now_seconds() WHERE account_id=$1 AND game_id=$2 AND unlinked_at IS NULL`,this.#ids());
     await this.#query(`UPDATE gaming_datastore.wallet_challenges SET used_at=gaming_datastore.now_seconds()
       WHERE account_id=$1 AND game_id=$2 AND challenge_id=$3`,[...this.#ids(),challengeId]);
     const row=(await this.#query(`INSERT INTO gaming_datastore.wallet_links

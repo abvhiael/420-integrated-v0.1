@@ -97,6 +97,7 @@ Each source action is listed once; family policy above applies. Scope hashes and
 - LAND_TRANSFER: `HC.ACTION.LAND_REGISTRY.TRANSFER`
 - LAND_SET_OCCUPANCY: `HC.ACTION.LAND_REGISTRY.SET_OCCUPANCY`
 - LAND_CLEAR_OCCUPANCY: `HC.ACTION.LAND_REGISTRY.CLEAR_OCCUPANCY`
+- LAND_BIND_PLANTS: `HC.ACTION.LAND_REGISTRY.BIND_PLANTS`
 - PUBLIC_PLOT_REGISTER: `HC.ACTION.PUBLIC_CULTIVATION_ACCESS.REGISTER`
 - PUBLIC_PLOT_ALLOCATE: `HC.ACTION.PUBLIC_CULTIVATION_ACCESS.ALLOCATE`
 - PUBLIC_PLOT_RELEASE: `HC.ACTION.PUBLIC_CULTIVATION_ACCESS.RELEASE`
@@ -119,6 +120,8 @@ Each source action is listed once; family policy above applies. Scope hashes and
 - BREEDING_CANCEL: `HC.ACTION.BREEDING_ENGINE.CANCEL`
 - BREEDING_FINALIZE: `HC.ACTION.BREEDING_ENGINE.FINALIZE`
 - PLANT_REGISTER: `HC.ACTION.PLANT_REGISTRY.REGISTER`
+- PLANT_BIND_RIGHTS: `HC.ACTION.PLANT_REGISTRY.BIND_RIGHTS`
+- PLANT_BIND_LICENSES: `HC.ACTION.PLANT_REGISTRY.BIND_LICENSES`
 - PLANT_ADVANCE: `HC.ACTION.PLANT_REGISTRY.ADVANCE`
 - CULTIVATION_BIND_RULESETS: `HC.ACTION.CULTIVATION_ENGINE.BIND_RULESETS`
 - CULTIVATION_UPDATE: `HC.ACTION.CULTIVATION_ENGINE.UPDATE`
@@ -151,3 +154,14 @@ Historical R02.3 wiring (superseded by R02.4 six-argument constructor and resour
 - CLONE_CONSUME: `HC.ACTION.CLONE_REGISTRY.CONSUME`
 
 R02.4 requires explicit seed/clone owner approval for the plant/parcel/plot and atomic scoped resource consumption. Source-less admission rejects; PlantRegistry now requires both resource registries in its constructor and all three reciprocal bindings before admission. Transfer invalidates approvals; termination never refunds the resource. See [source policy](R02.4-PLANT-SOURCE-CONSUMPTION.md). Clone cutting issuance and fabricated lineage/phenotype prevention remain R02.5/R02.6.
+
+
+## R04 accumulated emergency consumer binding
+
+- R04_EMERGENCY_BIND: `HC.ACTION.R04.EMERGENCY_BIND.V1`
+
+Every new R04 consumer constructor pins its independently reviewed canonical authorization root; binding rejects a controller rooted elsewhere. R04EmergencyConsumer adds one catalogued scoped action under the existing EMERGENCY_STATE component. Its exact scope commits to chain ID, consumer address and canonical EmergencyState address. Binding is one-time, bootstrap-deployer-only and independently capability-authorized; wrong principal/root/consumer/chain scope fails closed. Unbound risk ingress is disabled. This introduces no wildcard grant, new reserved address or replacement authority. Revoke each bootstrap bind grant after verified wiring.
+
+Manufacturing/equipment risk uses MANUFACTURING; escrow admission/settlement uses MARKET; new rights, leases and licenses use their distinct domains; organization/financial policy uses ORGANIZATION_GOVERNANCE; cooperative proposals/votes/execution uses COOPERATIVE_GOVERNANCE; competition entry/submission and Cup issuance use COMPETITION_ENTRY; mission/progression proof ingestion and reward claiming use MISSION_ACTIVATION. Existing domain IDs remain unchanged. Cancellation/refunds, expiry, revocation, obligation discharge, equipment retirement/recycling and canonical zero-plant exit reconciliation retain their existing authorization/accounting/replay checks and remain available under restriction. Restoring disputed leases or unfreezing rights is risk ingress and is restricted. Independent emergency controller restrict/release capabilities remain separately required.
+
+See [R04 canonical integration specification](R04-LEVEL2-CANONICAL-INTEGRATION.md) for source/finality, identity, runtime and Treasury boundaries. These repository integrations do not perform a live deployment or immutable replacement.

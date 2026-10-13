@@ -1,0 +1,64 @@
+name: High Country R04.3 Level 1 Qualification
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/highcountry/manufacturing/**'
+      - 'contracts/src/highcountry/inventory/InventoryRegistry.sol'
+      - 'contracts/test/highcountry/unit/manufacturing/**'
+      - '.github/workflows/highcountry-r04-3.yml'
+      - 'docs/highcountry/R04.3-*'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  r04-3:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      FOUNDRY_SRC: src/highcountry
+      FOUNDRY_TEST: test/highcountry
+      FOUNDRY_SCRIPT: script/highcountry
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Exact implementation SHA
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Build and production sizes
+        working-directory: contracts
+        run: forge build src/highcountry --sizes
+      - name: Focused format validation
+        working-directory: contracts
+        run: forge fmt --check src/highcountry/manufacturing/ManufacturingEngine.sol src/highcountry/inventory/InventoryRegistry.sol test/highcountry/unit/manufacturing/ManufacturingEngine.t.sol
+      - name: Focused security lint
+        working-directory: contracts
+        run: forge lint src/highcountry/manufacturing src/highcountry/inventory --severity high med low
+      - name: R04.3 manufacturing authorization/accounting/lifecycle tests
+        working-directory: contracts
+        run: forge test --match-path 'test/highcountry/unit/manufacturing/*.t.sol' -vv
+      - name: Retained inventory and equipment regression
+        working-directory: contracts
+        run: |
+          forge test --match-path 'test/highcountry/unit/inventory/*.t.sol' -vv
+          forge test --match-path 'test/highcountry/unit/equipment/*.t.sol' -vv
+      - name: ABI validation
+        working-directory: contracts
+        run: |
+          python3 - <<'PY'
+          import json,pathlib
+          for contract,expected in {
+            'ManufacturingEngine': {'registerRecipe','setRecipeActive','recipe','job','start','complete','cancel','activeJobs','maxJobsPerOwner'},
+            'InventoryRegistry': {'setInventoryOperator','reserveFor','releaseFor','consumeReservedFor'},
+          }.items():
+            a=list(pathlib.Path('out').glob('**/'+contract+'.json'))
+            assert len(a)==1,a
+            names={x['name'] for x in json.loads(a[0].read_text())['abi'] if x['type']=='function'}
+            assert expected <= names,(contract,expected-names)
+          PY
+      - name: Canonical High Country verifier
+        run: python3 scripts/highcountry/verify-r01.py

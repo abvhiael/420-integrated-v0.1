@@ -1,0 +1,44 @@
+name: High Country R04.13 Level 1 Qualification
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/highcountry/cup/**'
+      - 'contracts/test/highcountry/unit/cup/**'
+      - '.github/workflows/highcountry-r04-13.yml'
+      - 'docs/highcountry/R04.13-*'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  cup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      FOUNDRY_SRC: src/highcountry
+      FOUNDRY_TEST: test/highcountry
+      FOUNDRY_SCRIPT: script/highcountry
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Exact implementation SHA
+        env:
+          SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$SHA"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Affected build and bytecode limits
+        working-directory: contracts
+        run: forge build src/highcountry --sizes
+      - name: Cup formatting
+        working-directory: contracts
+        run: forge fmt --check src/highcountry/cup test/highcountry/unit/cup
+      - name: Cup static security lint
+        working-directory: contracts
+        run: forge lint src/highcountry/cup --severity high med low
+      - name: Cup unit and adversarial qualification
+        working-directory: contracts
+        run: forge test --match-path 'test/highcountry/unit/cup/*.t.sol' -vv
+      - name: Canonical High Country verifier
+        run: python3 scripts/highcountry/verify-r01.py

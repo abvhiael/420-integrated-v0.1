@@ -1,0 +1,54 @@
+name: High Country R04.2-R04.4 Level 2 Integration
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/highcountry/equipment/**'
+      - 'contracts/src/highcountry/manufacturing/**'
+      - 'contracts/src/highcountry/inventory/**'
+      - 'contracts/test/highcountry/unit/equipment/**'
+      - 'contracts/test/highcountry/unit/manufacturing/**'
+      - 'contracts/test/highcountry/unit/inventory/**'
+      - '.github/workflows/highcountry-r04-milestone-2.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  highcountry-r04-level2:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      FOUNDRY_SRC: src/highcountry
+      FOUNDRY_TEST: test/highcountry
+      FOUNDRY_SCRIPT: script/highcountry
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Exact candidate SHA
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Build High Country and enforce sizes
+        working-directory: contracts
+        run: forge build src/highcountry --sizes
+      - name: Equipment manufacturing inventory integration regressions
+        working-directory: contracts
+        run: |
+          forge test --match-path 'test/highcountry/unit/equipment/*.t.sol' -vv
+          forge test --match-path 'test/highcountry/unit/manufacturing/*.t.sol' -vv
+          forge test --match-path 'test/highcountry/unit/inventory/*.t.sol' -vv
+      - name: Cultivation harvest regression
+        working-directory: contracts
+        run: |
+          forge test --match-path 'test/highcountry/unit/cultivation/HarvestScoring.t.sol' -vv
+          forge test --match-path 'test/highcountry/unit/cultivation/CultivationEngine.t.sol' -vv
+      - name: Focused lint and formatting
+        working-directory: contracts
+        run: |
+          forge fmt --check src/highcountry/equipment src/highcountry/manufacturing test/highcountry/unit/equipment test/highcountry/unit/manufacturing
+          forge lint src/highcountry/equipment src/highcountry/manufacturing src/highcountry/inventory --severity high med low
+      - name: Canonical High Country verifier
+        run: python3 scripts/highcountry/verify-r01.py

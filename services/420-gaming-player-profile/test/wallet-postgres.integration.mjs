@@ -56,7 +56,7 @@ test('R05.2 actual PostgreSQL atomic wallet authentication and replay acceptance
   const service=createHighCountryWalletService420({authority,poolForPrincipal:async({accountId})=>scope[accountId],
     clientsByChain:new Map([['420',client]]),domain:'hc-example'});
   const a=mint('alpha'),b=mint('beta');
-  const input=(address,id)=>({wallet:address,chainId:'420',consentId:id,policyHash:P});
+  const input=(address,id)=>({wallet:address,chainId:'420',consentId:id,policyHash:P,consentAccepted:true});
   const signMock=(challenge,signature)=>{verified.add(signature+'|'+challenge.wallet+'|'+challenge.message);return signature;};
   const sig='0x'+'11'.repeat(65);
   await t.test('forged and expired sessions deny challenge before any write',async()=>{

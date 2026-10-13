@@ -153,3 +153,50 @@ jobs:
             exit 1
           fi
           node services/highcountry-economy/test/runtime-canonical.integration.mjs
+
+  security-client-config:
+    if: github.event_name == 'workflow_dispatch' || github.head_ref == 'qualification/highcountry-r04-level3-main-20261013'
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      FOUNDRY_SRC: src/highcountry
+      FOUNDRY_TEST: test/highcountry
+      FOUNDRY_SCRIPT: script/highcountry
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - name: Assert exact candidate and reconciled main ancestry
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          git merge-base --is-ancestor 959288c8bd33b6da0325b6a5d060e00e7bcf0e48 HEAD
+          git merge-base --is-ancestor 1cd1a94eec5783e8cd59f3671efbc99d13c0560a HEAD
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: High Country formatting
+        working-directory: contracts
+        run: forge fmt --check src/highcountry test/highcountry
+      - name: High Country static security lint
+        working-directory: contracts
+        run: forge lint src/highcountry --severity high med low
+      - name: Retained client SDK and shared service security acceptance
+        run: |
+          node --test clients/highcountry-access-v1/test/*.test.js packages/420-gaming-sdk/test/*.test.js packages/420-gaming-client-hardening/test/*.test.js packages/420-gaming-cross-game-qualification/test/*.test.js services/420-gaming-player-profile/test/*.test.js services/420-gaming-query/test/*.test.js
+      - name: Validate deployment configuration template
+        run: node scripts/gaming/verify-runtime-manifest.mjs deployments/gaming/testnet.runtime.json
+      - name: Syntax check economic runtime and tests
+        run: |
+          for file in services/highcountry-economy/src/*.js services/highcountry-economy/test/*.js services/highcountry-economy/test/*.mjs; do
+            node --check "$file"
+          done
+      - name: Whitespace and clean source checkout
+        run: |
+          git diff --check 959288c8bd33b6da0325b6a5d060e00e7bcf0e48 HEAD
+          test -z "$(git status --porcelain)"

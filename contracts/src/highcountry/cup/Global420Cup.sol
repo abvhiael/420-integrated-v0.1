@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
 
-import {R04EmergencyConsumer} from "../security/R04EmergencyConsumer.sol";
-import {EmergencyDomains} from "../constants/EmergencyDomains.sol";
+import { R04EmergencyConsumer } from "../security/R04EmergencyConsumer.sol";
+import { EmergencyDomains } from "../constants/EmergencyDomains.sol";
 import { CompetitionEngine } from "../competition/CompetitionEngine.sol";
 
 /// @title Global420Cup
@@ -36,7 +36,8 @@ contract Global420Cup is R04EmergencyConsumer {
         bytes32 indexed cupId, address indexed champion, bytes32 indexed scope, bytes32 resultCommitment
     );
 
-    constructor(address r04Authorization_, 
+    constructor(
+        address r04Authorization_,
         address engine_
     ) R04EmergencyConsumer(r04Authorization_) {
         if (engine_.code.length == 0) revert Invalid();
@@ -137,17 +138,20 @@ contract Global420Cup is R04EmergencyConsumer {
         bytes32 id
     ) external r04Unrestricted(EmergencyDomains.COMPETITION_ENTRY) {
         Cup memory c = cups[id];
-        if (!c.finalized || c.champion == address(0) || issued[id][c.champion] || !resultsCurrent(id)) revert Unauthorized();
+        if (!c.finalized || c.champion == address(0) || issued[id][c.champion] || !resultsCurrent(id)) {
+            revert Unauthorized();
+        }
         issued[id][c.champion] = true;
         emit CrossGameIssued(id, c.champion, c.crossGameScope, finalResultCommitment[id]);
     }
 
-    function resultsCurrent(bytes32 id) public view returns (bool) {
+    function resultsCurrent(
+        bytes32 id
+    ) public view returns (bool) {
         Cup memory c = cups[id];
         (,,,,,, uint32 count,,) = engine.events(c.finalEvent);
         if (count != 2) return false;
-        return c.organizer != address(0)
-            && engine.resultIsCurrent(c.semiA, engine.winners(c.semiA))
+        return c.organizer != address(0) && engine.resultIsCurrent(c.semiA, engine.winners(c.semiA))
             && engine.resultIsCurrent(c.semiB, engine.winners(c.semiB))
             && engine.resultIsCurrent(c.finalEvent, engine.entrantAt(c.finalEvent, 0))
             && engine.resultIsCurrent(c.finalEvent, engine.entrantAt(c.finalEvent, 1));
@@ -159,7 +163,7 @@ contract Global420Cup is R04EmergencyConsumer {
         bytes32 scope
     ) external view returns (bool) {
         Cup memory c = cups[id];
-        return resultsCurrent(id) && c.finalized && c.champion == player && c.crossGameScope == scope && issued[id][player];
+        return
+            resultsCurrent(id) && c.finalized && c.champion == player && c.crossGameScope == scope && issued[id][player];
     }
 }
-

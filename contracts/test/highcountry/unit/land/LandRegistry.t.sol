@@ -13,9 +13,24 @@ import { MockCapabilityRegistry } from "../../mocks/MockCapabilityRegistry.sol";
 contract MockLandPlantCountR049 {
     address public immutable landRegistry;
     uint32 public count;
-    constructor(address land_) { landRegistry = land_; }
-    function activePlantsByParcel(uint64) external view returns (uint32) { return count; }
-    function setCount(uint32 n) external { count = n; }
+
+    constructor(
+        address land_
+    ) {
+        landRegistry = land_;
+    }
+
+    function activePlantsByParcel(
+        uint64
+    ) external view returns (uint32) {
+        return count;
+    }
+
+    function setCount(
+        uint32 n
+    ) external {
+        count = n;
+    }
 }
 
 contract MockRegionRegistryHC3Unit {
@@ -160,7 +175,9 @@ contract LandRegistryHC3Test {
         (bool missingBinding,) = address(land).call(abi.encodeCall(land.clearOccupancy, (uint64(4))));
         require(!missingBinding, "unverified occupancy clearance");
         MockLandPlantCountR049 counts = new MockLandPlantCountR049(address(land));
-        _grantScope(ModuleIds.LAND_REGISTRY, ActionIds.LAND_BIND_PLANTS, land.PLANTS_BIND_SCOPE(), keccak256("bind-plants-4"));
+        _grantScope(
+            ModuleIds.LAND_REGISTRY, ActionIds.LAND_BIND_PLANTS, land.PLANTS_BIND_SCOPE(), keccak256("bind-plants-4")
+        );
         land.bindCanonicalPlants(address(counts));
         counts.setCount(2);
         (bool livePlants,) = address(land).call(abi.encodeCall(land.clearOccupancy, (uint64(4))));
@@ -197,11 +214,23 @@ contract LandRegistryHC3Test {
         require(!ok, "genesis land injected after finalization");
     }
 
-    function _grantScope(bytes32 moduleId, bytes32 actionId, bytes32 scope, bytes32 grantId) private {
+    function _grantScope(
+        bytes32 moduleId,
+        bytes32 actionId,
+        bytes32 scope,
+        bytes32 grantId
+    ) private {
         ICapabilityRegistry420.CapabilityGrant memory grant = ICapabilityRegistry420.CapabilityGrant({
-            principal: address(this), componentId: moduleId, capabilityId: actionId, scopeHash: scope,
-            perCallLimit: 0, periodLimit: 0, periodSeconds: 0, validFrom: 0,
-            validUntil: uint64(block.timestamp + 1 days), revoked: false
+            principal: address(this),
+            componentId: moduleId,
+            capabilityId: actionId,
+            scopeHash: scope,
+            perCallLimit: 0,
+            periodLimit: 0,
+            periodSeconds: 0,
+            validFrom: 0,
+            validUntil: uint64(block.timestamp + 1 days),
+            revoked: false
         });
         capabilityRegistry.setGrant(grantId, grant, 0);
     }

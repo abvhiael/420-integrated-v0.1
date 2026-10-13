@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
-import {R04EmergencyConsumer} from "../security/R04EmergencyConsumer.sol";
-import {EmergencyDomains} from "../constants/EmergencyDomains.sol";
+import { R04EmergencyConsumer } from "../security/R04EmergencyConsumer.sol";
+import { EmergencyDomains } from "../constants/EmergencyDomains.sol";
 import { OrganizationRegistry } from "./OrganizationRegistry.sol";
 
 /// @notice R04.10 noncustodial treasury permission policy requiring independent approval.
@@ -31,7 +31,8 @@ contract OrganizationTreasuryPermissions is R04EmergencyConsumer {
     event Debited(bytes32 indexed id, uint256 amount, uint256 remaining);
     event Cancelled(bytes32 indexed id);
 
-    constructor(address r04Authorization_, 
+    constructor(
+        address r04Authorization_,
         address registry_,
         address treasury_,
         address approver_
@@ -68,7 +69,7 @@ contract OrganizationTreasuryPermissions is R04EmergencyConsumer {
     /// @dev Independent financial approver is not organization administrator.
     function approve(
         bytes32 id
-    ) external  r04Unrestricted(EmergencyDomains.ORGANIZATION_GOVERNANCE) {
+    ) external r04Unrestricted(EmergencyDomains.ORGANIZATION_GOVERNANCE) {
         Permission storage p = permissions[id];
         (address admin, bool active,) = registry.organizations(p.organization);
         if (
@@ -102,7 +103,7 @@ contract OrganizationTreasuryPermissions is R04EmergencyConsumer {
         bytes32 action,
         bytes32 scope,
         uint256 amount
-    ) external  r04Unrestricted(EmergencyDomains.ORGANIZATION_GOVERNANCE) {
+    ) external r04Unrestricted(EmergencyDomains.ORGANIZATION_GOVERNANCE) {
         if (msg.sender != treasury || !permitted(id, beneficiary, action, scope, amount)) revert Unauthorized();
         Permission storage p = permissions[id];
         p.remainingAmount -= amount;
@@ -122,4 +123,3 @@ contract OrganizationTreasuryPermissions is R04EmergencyConsumer {
         emit Cancelled(id);
     }
 }
-

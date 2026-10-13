@@ -1,12 +1,14 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
-import {R04EmergencyConsumer} from "../security/R04EmergencyConsumer.sol";
-import {EmergencyDomains} from "../constants/EmergencyDomains.sol";
+import { R04EmergencyConsumer } from "../security/R04EmergencyConsumer.sol";
+import { EmergencyDomains } from "../constants/EmergencyDomains.sol";
 
 /// @notice R04.10 organization identity and explicit, consented membership.
 /// @dev Organization admin powers have no implicit Wallet, RightsRegistry or treasury permissions.
 contract OrganizationRegistry is R04EmergencyConsumer {
-    constructor(address r04Authorization_) R04EmergencyConsumer(r04Authorization_) { }
+    constructor(
+        address r04Authorization_
+    ) R04EmergencyConsumer(r04Authorization_) { }
     error Invalid();
     error Unauthorized();
     enum Status {
@@ -42,7 +44,7 @@ contract OrganizationRegistry is R04EmergencyConsumer {
     function create(
         bytes32 id,
         bytes32 metadataHash
-    ) external  r04Unrestricted(EmergencyDomains.ORGANIZATION_GOVERNANCE) {
+    ) external r04Unrestricted(EmergencyDomains.ORGANIZATION_GOVERNANCE) {
         if (id == bytes32(0) || organizations[id].administrator != address(0)) revert Invalid();
         organizations[id] = Organization(msg.sender, true, metadataHash);
         members[id][msg.sender] = Membership(Status.Active, uint64(block.timestamp), 0, 0);
@@ -54,7 +56,7 @@ contract OrganizationRegistry is R04EmergencyConsumer {
         bytes32 id,
         address account,
         bool invited
-    ) external  r04Unrestricted(EmergencyDomains.ORGANIZATION_GOVERNANCE) {
+    ) external r04Unrestricted(EmergencyDomains.ORGANIZATION_GOVERNANCE) {
         Organization memory org = organizations[id];
         if (!org.active || msg.sender != org.administrator || account == address(0) || account == org.administrator) {
             revert Unauthorized();
@@ -65,7 +67,7 @@ contract OrganizationRegistry is R04EmergencyConsumer {
 
     function join(
         bytes32 id
-    ) external  r04Unrestricted(EmergencyDomains.ORGANIZATION_GOVERNANCE) {
+    ) external r04Unrestricted(EmergencyDomains.ORGANIZATION_GOVERNANCE) {
         if (
             !organizations[id].active || !invitations[id][msg.sender] || members[id][msg.sender].status == Status.Active
                 || members[id][msg.sender].pendingObligations != 0
@@ -134,7 +136,7 @@ contract OrganizationRegistry is R04EmergencyConsumer {
     function reserveObligation(
         bytes32 id,
         uint32 amount
-    ) external  r04Unrestricted(EmergencyDomains.ORGANIZATION_GOVERNANCE) {
+    ) external r04Unrestricted(EmergencyDomains.ORGANIZATION_GOVERNANCE) {
         Membership storage m = members[id][msg.sender];
         if (m.status != Status.Active || amount == 0) revert Unauthorized();
         m.pendingObligations += amount;
@@ -157,7 +159,7 @@ contract OrganizationRegistry is R04EmergencyConsumer {
     function transferAdmin(
         bytes32 id,
         address next
-    ) external  r04Unrestricted(EmergencyDomains.ORGANIZATION_GOVERNANCE) {
+    ) external r04Unrestricted(EmergencyDomains.ORGANIZATION_GOVERNANCE) {
         Organization storage org = organizations[id];
         if (
             msg.sender != org.administrator || next == address(0) || next == msg.sender
@@ -176,4 +178,3 @@ contract OrganizationRegistry is R04EmergencyConsumer {
         return organizations[id].active && members[id][who].status == Status.Active;
     }
 }
-

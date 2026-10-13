@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
-import {R04EmergencyConsumer} from "../security/R04EmergencyConsumer.sol";
-import {EmergencyDomains} from "../constants/EmergencyDomains.sol";
+import { R04EmergencyConsumer } from "../security/R04EmergencyConsumer.sol";
+import { EmergencyDomains } from "../constants/EmergencyDomains.sol";
 
 /// @notice Versioned, proof-gated, wallet-free mission lifecycle.
 /// @dev Actual BUDS rewards require an independently authorized R04.5 issuer; this contract never mints.
@@ -49,7 +49,9 @@ contract MissionEngine is R04EmergencyConsumer {
     event Progressed(address indexed player, bytes32 indexed id, bytes32 proof, uint32 amount);
     event Transition(address indexed player, bytes32 indexed id, State state);
 
-    constructor(address r04Authorization_) R04EmergencyConsumer(r04Authorization_) {
+    constructor(
+        address r04Authorization_
+    ) R04EmergencyConsumer(r04Authorization_) {
         administrator = msg.sender;
     }
 
@@ -96,7 +98,7 @@ contract MissionEngine is R04EmergencyConsumer {
     /// @dev A mission is one-shot per account; no client-imported completion or repeat activation.
     function activate(
         bytes32 id
-    ) external  r04Unrestricted(EmergencyDomains.MISSION_ACTIVATION) {
+    ) external r04Unrestricted(EmergencyDomains.MISSION_ACTIVATION) {
         Template memory t = templates[id];
         Mission storage m = missions[msg.sender][id];
         if (
@@ -118,7 +120,7 @@ contract MissionEngine is R04EmergencyConsumer {
         bytes32 id,
         bytes32 proof,
         uint32 amount
-    ) external  r04Unrestricted(EmergencyDomains.MISSION_ACTIVATION) {
+    ) external r04Unrestricted(EmergencyDomains.MISSION_ACTIVATION) {
         Mission storage m = missions[player][id];
         if (
             !verifiers[msg.sender] || player == address(0) || m.state != State.Active || block.timestamp >= m.deadline
@@ -138,7 +140,7 @@ contract MissionEngine is R04EmergencyConsumer {
     /// @notice Claim only emits a catalogue-defined entitlement; no implicit currency transfer.
     function claim(
         bytes32 id
-    ) external  r04Unrestricted(EmergencyDomains.MISSION_ACTIVATION) {
+    ) external r04Unrestricted(EmergencyDomains.MISSION_ACTIVATION) {
         Mission storage m = missions[msg.sender][id];
         if (m.state != State.Complete || block.timestamp >= m.deadline) revert InvalidMission();
         m.state = State.Claimed;
@@ -169,4 +171,3 @@ contract MissionEngine is R04EmergencyConsumer {
         emit Transition(player, id, State.Expired);
     }
 }
-

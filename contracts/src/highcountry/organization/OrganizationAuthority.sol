@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
-import {R04EmergencyConsumer} from "../security/R04EmergencyConsumer.sol";
-import {EmergencyDomains} from "../constants/EmergencyDomains.sol";
+import { R04EmergencyConsumer } from "../security/R04EmergencyConsumer.sol";
+import { EmergencyDomains } from "../constants/EmergencyDomains.sol";
 import { OrganizationRegistry } from "./OrganizationRegistry.sol";
 
 /// @notice R04.10 bounded organizational delegation, with no implicit custody or token approval.
@@ -36,7 +36,8 @@ contract OrganizationAuthority is R04EmergencyConsumer {
     bytes32 public constant WALLET_ACTION = keccak256("HC.ORG.WALLET");
     bytes32 public constant RIGHTS_ACTION = keccak256("HC.ORG.RIGHTS");
 
-    constructor(address r04Authorization_, 
+    constructor(
+        address r04Authorization_,
         address registry_
     ) R04EmergencyConsumer(r04Authorization_) {
         if (registry_.code.length == 0) revert Invalid();
@@ -84,7 +85,7 @@ contract OrganizationAuthority is R04EmergencyConsumer {
         bytes32 id,
         bytes32 action,
         bytes32 scope
-    ) external  r04Unrestricted(EmergencyDomains.ORGANIZATION_GOVERNANCE) {
+    ) external r04Unrestricted(EmergencyDomains.ORGANIZATION_GOVERNANCE) {
         if (!valid(id, msg.sender, action, scope)) revert Unauthorized();
         Delegation storage d = delegations[id];
         unchecked {
@@ -108,4 +109,3 @@ contract OrganizationAuthority is R04EmergencyConsumer {
         emit Revoked(id);
     }
 }
-

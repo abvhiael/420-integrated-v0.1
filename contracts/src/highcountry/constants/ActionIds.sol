@@ -79,4 +79,3 @@ library ActionIds {
     bytes32 internal constant EMERGENCY_RESTRICT = keccak256("HC.ACTION.EMERGENCY_STATE.RESTRICT");
     bytes32 internal constant EMERGENCY_RELEASE = keccak256("HC.ACTION.EMERGENCY_STATE.RELEASE");
 }
-

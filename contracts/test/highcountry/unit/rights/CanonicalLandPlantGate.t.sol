@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
-import {bindRetainedR04Emergency,retainedR04AuthorizationRoot} from "../../mocks/R04EmergencyFixture.sol";
+import { bindRetainedR04Emergency, retainedR04AuthorizationRoot } from "../../mocks/R04EmergencyFixture.sol";
 import { CanonicalLandPlantGate } from "../../../../src/highcountry/rights/CanonicalLandPlantGate.sol";
 import { RightsRegistry } from "../../../../src/highcountry/rights/RightsRegistry.sol";
 import { LeaseRegistry } from "../../../../src/highcountry/rights/LeaseRegistry.sol";
@@ -179,4 +179,3 @@ contract CanonicalLandPlantGateR049Test {
         require(!shadowTransfer, "canonical transfer skipped LandRegistry occupant transition");
     }
 }
-

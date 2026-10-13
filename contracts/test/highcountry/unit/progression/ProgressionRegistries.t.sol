@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
-import {bindRetainedR04Emergency,retainedR04AuthorizationRoot} from "../../mocks/R04EmergencyFixture.sol";
+import { bindRetainedR04Emergency, retainedR04AuthorizationRoot } from "../../mocks/R04EmergencyFixture.sol";
 import {
     SkillRegistry,
     ResearchRegistry,
@@ -88,4 +88,3 @@ contract ProgressionR046Test {
         require(!skill.unlocked(PLAYER, FIRST), "cross-registry completion");
     }
 }
-

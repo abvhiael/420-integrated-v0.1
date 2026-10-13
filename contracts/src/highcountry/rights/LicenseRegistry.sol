@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
-import {R04EmergencyConsumer} from "../security/R04EmergencyConsumer.sol";
-import {EmergencyDomains} from "../constants/EmergencyDomains.sol";
+import { R04EmergencyConsumer } from "../security/R04EmergencyConsumer.sol";
+import { EmergencyDomains } from "../constants/EmergencyDomains.sol";
 import { RightsRegistry } from "./RightsRegistry.sol";
 import { CanonicalLandPlantGate } from "./CanonicalLandPlantGate.sol";
 
@@ -36,7 +36,8 @@ contract LicenseRegistry is R04EmergencyConsumer {
     event Revoked(bytes32 indexed id);
     event Transferred(bytes32 indexed id, address indexed from, address indexed to);
 
-    constructor(address r04Authorization_, 
+    constructor(
+        address r04Authorization_,
         address rights_
     ) R04EmergencyConsumer(r04Authorization_) {
         if (rights_ == address(0) || rights_.code.length == 0) revert InvalidLicense();
@@ -63,7 +64,7 @@ contract LicenseRegistry is R04EmergencyConsumer {
         uint64 start,
         uint64 end,
         uint256 feeUnits
-    ) external  r04Unrestricted(EmergencyDomains.LICENSE) {
+    ) external r04Unrestricted(EmergencyDomains.LICENSE) {
         if (
             address(canonicalGate) == address(0) || !canonicalGate.licenseAdmissible(parcelId, id, msg.sender, licensee)
         ) revert InvalidLicense();
@@ -80,7 +81,7 @@ contract LicenseRegistry is R04EmergencyConsumer {
         uint64 start,
         uint64 end,
         uint256 feeUnits
-    ) external  r04Unrestricted(EmergencyDomains.LICENSE) {
+    ) external r04Unrestricted(EmergencyDomains.LICENSE) {
         // Canonical activation removes the client-controlled shadow license entry point.
         if (address(canonicalGate) != address(0)) revert InvalidLicense();
         _issue(id, asset, licensee, scopes, start, end, feeUnits);
@@ -133,7 +134,7 @@ contract LicenseRegistry is R04EmergencyConsumer {
     function transfer(
         bytes32 id,
         address to
-    ) external  r04Unrestricted(EmergencyDomains.LICENSE) {
+    ) external r04Unrestricted(EmergencyDomains.LICENSE) {
         License storage l = licenses[id];
         (address owner, bool exists, bool frozen) = rights.assets(l.asset);
         if (
@@ -145,4 +146,3 @@ contract LicenseRegistry is R04EmergencyConsumer {
         emit Transferred(id, from, to);
     }
 }
-

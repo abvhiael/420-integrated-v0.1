@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
-import {bindRetainedR04Emergency,retainedR04AuthorizationRoot} from "../../mocks/R04EmergencyFixture.sol";
+import { bindRetainedR04Emergency, retainedR04AuthorizationRoot } from "../../mocks/R04EmergencyFixture.sol";
 import { MissionEngine } from "../../../../src/highcountry/missions/MissionEngine.sol";
 
 contract MissionR047Test {
@@ -63,4 +63,3 @@ contract MissionR047Test {
         require(!overwrite, "template overwritten");
     }
 }
-

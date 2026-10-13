@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
-import {R04EmergencyConsumer} from "../../../src/highcountry/security/R04EmergencyConsumer.sol";
-import {EmergencyDomains} from "../../../src/highcountry/constants/EmergencyDomains.sol";
+import { R04EmergencyConsumer } from "../../../src/highcountry/security/R04EmergencyConsumer.sol";
+import { EmergencyDomains } from "../../../src/highcountry/constants/EmergencyDomains.sol";
 import { EmergencyState } from "../../../src/highcountry/security/EmergencyState.sol";
 
 import { CapabilityRegistry420 } from "../../../src/system/CapabilityRegistry420.sol";
@@ -59,11 +59,18 @@ contract PublicPlantCapacityFixture {
     bytes32 internal constant GENOME = keccak256("capacity-genome");
     uint256 internal serial;
 
-    function _bindR04Canonical(R04EmergencyConsumer consumer) internal {
-        _grant(address(this),ModuleIds.EMERGENCY_STATE,consumer.R04_BIND_ACTION(),
-            consumer.emergencyBindingScope(address(emergency)));
+    function _bindR04Canonical(
+        R04EmergencyConsumer consumer
+    ) internal {
+        _grant(
+            address(this),
+            ModuleIds.EMERGENCY_STATE,
+            consumer.R04_BIND_ACTION(),
+            consumer.emergencyBindingScope(address(emergency))
+        );
         consumer.bindR04Emergency(address(emergency));
     }
+
     function setUp() public virtual {
         caps = new CapabilityRegistry420();
         auth = new HighCountryAuthorization(address(caps));
@@ -585,28 +592,40 @@ contract CanonicalR049PlantAdmissionIntegrationTest is PublicPlantCapacityFixtur
         land.setOccupancy(1, ALICE, LandRegistry.OccupancyKind.LEASE, LEASE_ID_R049);
         _grant(address(this), ModuleIds.LAND_REGISTRY, ActionIds.LAND_BIND_PLANTS, land.PLANTS_BIND_SCOPE());
         land.bindCanonicalPlants(address(plants));
-        leases.createCanonical(LEASE_ID_R049, 1, ALICE, uint64(block.timestamp), uint64(block.timestamp+30 days), 1, 0);
+        leases.createCanonical(
+            LEASE_ID_R049, 1, ALICE, uint64(block.timestamp), uint64(block.timestamp + 30 days), 1, 0
+        );
 
         _grant(address(this), ModuleIds.PLANT_REGISTRY, ActionIds.PLANT_REGISTER, bytes32(uint256(1)));
         _preparePlant(1, ALICE, 1, 0);
         // An occupied parcel cannot bypass an unbound rights authority.
-        _reject(address(plants), abi.encodeCall(plants.registerPlantFromSource,
-            (uint64(1), GENOME, ALICE, uint64(1), uint64(0), PlantRegistry.PlantSourceKind.SEED, uint64(101))),
-            HCInvalidState.selector);
+        _reject(
+            address(plants),
+            abi.encodeCall(
+                plants.registerPlantFromSource,
+                (uint64(1), GENOME, ALICE, uint64(1), uint64(0), PlantRegistry.PlantSourceKind.SEED, uint64(101))
+            ),
+            HCInvalidState.selector
+        );
 
         _grant(address(this), ModuleIds.PLANT_REGISTRY, ActionIds.PLANT_BIND_RIGHTS, plants.RIGHTS_BIND_SCOPE());
         plants.bindCanonicalRights(address(leases));
         plants.registerPlantFromSource(1, GENOME, ALICE, 1, 0, PlantRegistry.PlantSourceKind.SEED, 101);
         require(plants.activePlantsByParcel(1) == 1, "canonical plant admission missing");
-        _grant(address(this),ModuleIds.EMERGENCY_STATE,ActionIds.EMERGENCY_RESTRICT,EmergencyDomains.LEASE);
-        emergency.setRestricted(EmergencyDomains.LEASE,true);
-        require(!leases.usable(LEASE_ID_R049),"restricted canonical lease remained usable");
+        _grant(address(this), ModuleIds.EMERGENCY_STATE, ActionIds.EMERGENCY_RESTRICT, EmergencyDomains.LEASE);
+        emergency.setRestricted(EmergencyDomains.LEASE, true);
+        require(!leases.usable(LEASE_ID_R049), "restricted canonical lease remained usable");
 
         _grant(address(this), ModuleIds.PLANT_REGISTRY, ActionIds.PLANT_REGISTER, bytes32(uint256(2)));
         _preparePlant(2, ALICE, 1, 0);
-        _reject(address(plants), abi.encodeCall(plants.registerPlantFromSource,
-            (uint64(2), GENOME, ALICE, uint64(1), uint64(0), PlantRegistry.PlantSourceKind.SEED, uint64(101))),
-            HCInvalidState.selector);
+        _reject(
+            address(plants),
+            abi.encodeCall(
+                plants.registerPlantFromSource,
+                (uint64(2), GENOME, ALICE, uint64(1), uint64(0), PlantRegistry.PlantSourceKind.SEED, uint64(101))
+            ),
+            HCInvalidState.selector
+        );
 
         leases.revoke(LEASE_ID_R049);
         _grant(address(this), ModuleIds.LAND_REGISTRY, ActionIds.LAND_CLEAR_OCCUPANCY, bytes32(uint256(1)));
@@ -634,24 +653,36 @@ contract CanonicalR049LicenseAdmissionIntegrationTest is PublicPlantCapacityFixt
         land.setOccupancy(1, ALICE, LandRegistry.OccupancyKind.LICENSE, LICENSE_ID_R049);
         _grant(address(this), ModuleIds.LAND_REGISTRY, ActionIds.LAND_BIND_PLANTS, land.PLANTS_BIND_SCOPE());
         land.bindCanonicalPlants(address(plants));
-        licenses.issueCanonical(LICENSE_ID_R049, 1, ALICE, 1, uint64(block.timestamp), uint64(block.timestamp + 30 days), 0);
+        licenses.issueCanonical(
+            LICENSE_ID_R049, 1, ALICE, 1, uint64(block.timestamp), uint64(block.timestamp + 30 days), 0
+        );
         _grant(address(this), ModuleIds.PLANT_REGISTRY, ActionIds.PLANT_REGISTER, bytes32(uint256(1)));
         _preparePlant(1, ALICE, 1, 0);
-        _reject(address(plants), abi.encodeCall(plants.registerPlantFromSource,
-            (uint64(1), GENOME, ALICE, uint64(1), uint64(0), PlantRegistry.PlantSourceKind.SEED, uint64(101))),
-            HCInvalidState.selector);
+        _reject(
+            address(plants),
+            abi.encodeCall(
+                plants.registerPlantFromSource,
+                (uint64(1), GENOME, ALICE, uint64(1), uint64(0), PlantRegistry.PlantSourceKind.SEED, uint64(101))
+            ),
+            HCInvalidState.selector
+        );
         _grant(address(this), ModuleIds.PLANT_REGISTRY, ActionIds.PLANT_BIND_LICENSES, plants.LICENSE_BIND_SCOPE());
         plants.bindCanonicalLicenses(address(licenses));
         plants.registerPlantFromSource(1, GENOME, ALICE, 1, 0, PlantRegistry.PlantSourceKind.SEED, 101);
         require(plants.activePlantsByParcel(1) == 1, "licensed plant missing");
-        _grant(address(this),ModuleIds.EMERGENCY_STATE,ActionIds.EMERGENCY_RESTRICT,EmergencyDomains.LICENSE);
-        emergency.setRestricted(EmergencyDomains.LICENSE,true);
-        require(!licenses.usable(LICENSE_ID_R049,ALICE,1),"restricted canonical license remained usable");
+        _grant(address(this), ModuleIds.EMERGENCY_STATE, ActionIds.EMERGENCY_RESTRICT, EmergencyDomains.LICENSE);
+        emergency.setRestricted(EmergencyDomains.LICENSE, true);
+        require(!licenses.usable(LICENSE_ID_R049, ALICE, 1), "restricted canonical license remained usable");
         _grant(address(this), ModuleIds.PLANT_REGISTRY, ActionIds.PLANT_REGISTER, bytes32(uint256(2)));
         _preparePlant(2, ALICE, 1, 0);
-        _reject(address(plants), abi.encodeCall(plants.registerPlantFromSource,
-            (uint64(2), GENOME, ALICE, uint64(1), uint64(0), PlantRegistry.PlantSourceKind.SEED, uint64(101))),
-            HCInvalidState.selector);
+        _reject(
+            address(plants),
+            abi.encodeCall(
+                plants.registerPlantFromSource,
+                (uint64(2), GENOME, ALICE, uint64(1), uint64(0), PlantRegistry.PlantSourceKind.SEED, uint64(101))
+            ),
+            HCInvalidState.selector
+        );
         licenses.revoke(LICENSE_ID_R049);
         _grant(address(this), ModuleIds.LAND_REGISTRY, ActionIds.LAND_CLEAR_OCCUPANCY, bytes32(uint256(1)));
         _reject(address(land), abi.encodeCall(land.clearOccupancy, (uint64(1))), HCInvalidState.selector);
@@ -660,4 +691,3 @@ contract CanonicalR049LicenseAdmissionIntegrationTest is PublicPlantCapacityFixt
         require(land.effectiveOperator(1) == address(this), "licensed occupancy not released");
     }
 }
-

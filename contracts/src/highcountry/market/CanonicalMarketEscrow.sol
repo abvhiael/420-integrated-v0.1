@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
-import {R04EmergencyConsumer} from "../security/R04EmergencyConsumer.sol";
-import {EmergencyDomains} from "../constants/EmergencyDomains.sol";
+import { R04EmergencyConsumer } from "../security/R04EmergencyConsumer.sol";
+import { EmergencyDomains } from "../constants/EmergencyDomains.sol";
 
 import { InventoryRegistry } from "../inventory/InventoryRegistry.sol";
 import { HCInvalidState, HCZeroAddress } from "../errors/HighCountryErrors.sol";
@@ -37,7 +37,8 @@ contract CanonicalMarketEscrow is R04EmergencyConsumer {
         bytes32 indexed listingId, address indexed owner, bytes32 indexed asset, uint256 quantity
     );
 
-    constructor(address r04Authorization_, 
+    constructor(
+        address r04Authorization_,
         address inventory_,
         address marketOperator_
     ) R04EmergencyConsumer(r04Authorization_) {
@@ -80,7 +81,7 @@ contract CanonicalMarketEscrow is R04EmergencyConsumer {
         bytes32 asset,
         uint256 quantity,
         uint64 expiresAt
-    ) external  r04Unrestricted(EmergencyDomains.MARKET) {
+    ) external r04Unrestricted(EmergencyDomains.MARKET) {
         if (
             id == bytes32(0) || asset == bytes32(0) || quantity == 0 || expiresAt <= block.timestamp
                 || _listings[id].status != Status.None
@@ -140,4 +141,3 @@ contract CanonicalMarketEscrow is R04EmergencyConsumer {
         }
     }
 }
-

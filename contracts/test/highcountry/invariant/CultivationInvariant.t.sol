@@ -28,7 +28,11 @@ interface VmHC6Invariant {
 }
 
 contract RegionSourceHC6Invariant {
-    function exists(uint16 regionId) external pure returns (bool) { return regionId == 2; }
+    function exists(
+        uint16 regionId
+    ) external pure returns (bool) {
+        return regionId == 2;
+    }
 }
 
 /// @notice Probe the sealed phenotype and full parcel through bounded mutation attempts.
@@ -260,7 +264,13 @@ contract CultivationInvariantTest is InvariantTarget420, PlantSourcesFixture {
             new CultivationInvariantHandler(cultivation, plants, genomeId, sourceSeeds);
         _sourceGrant(caps, address(this), ModuleIds.SEED_REGISTRY, ActionIds.SEED_REGISTER, bytes32(uint256(3)), 1);
         sourceSeeds.registerSeedLot(3, genomeId, 0, address(handler), 1, keccak256("capacity-probe"));
-        _grant(address(this), ModuleIds.LAND_REGISTRY, ActionIds.LAND_TRANSFER, bytes32(uint256(21)), keccak256("handler-land"));
+        _grant(
+            address(this),
+            ModuleIds.LAND_REGISTRY,
+            ActionIds.LAND_TRANSFER,
+            bytes32(uint256(21)),
+            keccak256("handler-land")
+        );
         land.transferOwner(21, address(handler));
         targetContract(address(handler));
     }

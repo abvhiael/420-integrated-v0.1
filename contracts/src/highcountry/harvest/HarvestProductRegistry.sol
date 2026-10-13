@@ -103,4 +103,3 @@ contract HarvestProductRegistry {
         if (!p.registered) revert HCInvalidState();
     }
 }
-

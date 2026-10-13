@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
-import {R04EmergencyConsumer} from "../security/R04EmergencyConsumer.sol";
-import {EmergencyDomains} from "../constants/EmergencyDomains.sol";
+import { R04EmergencyConsumer } from "../security/R04EmergencyConsumer.sol";
+import { EmergencyDomains } from "../constants/EmergencyDomains.sol";
 
 /// @notice Shared immutable catalogue and proof-driven progression, without local-save authority.
 /// @dev Three separate registries inherit this contract and have independent namespaces and administrators.
@@ -33,7 +33,9 @@ abstract contract ProgressionRegistryCore is R04EmergencyConsumer {
     event ProgressRecorded(address indexed player, bytes32 indexed trackId, bytes32 indexed evidence, uint32 points);
     event TrackCompleted(address indexed player, bytes32 indexed trackId, uint32 rewardUnits);
 
-    constructor(address r04Authorization_) R04EmergencyConsumer(r04Authorization_) {
+    constructor(
+        address r04Authorization_
+    ) R04EmergencyConsumer(r04Authorization_) {
         administrator = msg.sender;
     }
 
@@ -107,11 +109,22 @@ abstract contract ProgressionRegistryCore is R04EmergencyConsumer {
 }
 
 /// @notice Skills: points/proofs become irreversible skill unlocks once complete.
-contract SkillRegistry is ProgressionRegistryCore { constructor(address root) ProgressionRegistryCore(root) { } }
+contract SkillRegistry is ProgressionRegistryCore {
+    constructor(
+        address root
+    ) ProgressionRegistryCore(root) { }
+}
 
 /// @notice Research: independent verified evidence and prerequisite-bound technology unlocks.
-contract ResearchRegistry is ProgressionRegistryCore { constructor(address root) ProgressionRegistryCore(root) { } }
+contract ResearchRegistry is ProgressionRegistryCore {
+    constructor(
+        address root
+    ) ProgressionRegistryCore(root) { }
+}
 
 /// @notice Discoveries: catalogue-bound unique discoveries, without imported local save claims.
-contract DiscoveryRegistry is ProgressionRegistryCore { constructor(address root) ProgressionRegistryCore(root) { } }
-
+contract DiscoveryRegistry is ProgressionRegistryCore {
+    constructor(
+        address root
+    ) ProgressionRegistryCore(root) { }
+}

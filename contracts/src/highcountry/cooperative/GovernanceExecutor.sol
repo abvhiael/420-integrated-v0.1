@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
-import {R04EmergencyConsumer} from "../security/R04EmergencyConsumer.sol";
-import {EmergencyDomains} from "../constants/EmergencyDomains.sol";
+import { R04EmergencyConsumer } from "../security/R04EmergencyConsumer.sol";
+import { EmergencyDomains } from "../constants/EmergencyDomains.sol";
 import { CooperativeGovernance } from "./CooperativeGovernance.sol";
 
 /// @notice Executor can only set inert, nonfinancial cooperative policy metadata.
@@ -12,7 +12,8 @@ contract GovernanceExecutor is R04EmergencyConsumer {
     mapping(bytes32 => mapping(bytes32 => bytes32)) public policy;
     event PolicySet(bytes32 indexed cooperative, bytes32 indexed scope, bytes32 value, bytes32 proposal);
 
-    constructor(address r04Authorization_, 
+    constructor(
+        address r04Authorization_,
         address governance_
     ) R04EmergencyConsumer(r04Authorization_) {
         if (governance_.code.length == 0) revert Unauthorized();
@@ -21,7 +22,7 @@ contract GovernanceExecutor is R04EmergencyConsumer {
 
     function execute(
         bytes32 id
-    ) external  r04Unrestricted(EmergencyDomains.COOPERATIVE_GOVERNANCE) {
+    ) external r04Unrestricted(EmergencyDomains.COOPERATIVE_GOVERNANCE) {
         if (!governance.executable(id)) revert Unauthorized();
         (bytes32 coop, bytes32 action, bytes32 scope, bytes32 value) = governance.executionPayload(id);
         if (action != governance.ACTION_SET_POLICY() || scope == bytes32(0)) revert Unauthorized();
@@ -30,4 +31,3 @@ contract GovernanceExecutor is R04EmergencyConsumer {
         emit PolicySet(coop, scope, value, id);
     }
 }
-

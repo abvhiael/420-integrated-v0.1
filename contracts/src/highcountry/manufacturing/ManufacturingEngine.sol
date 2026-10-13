@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
-import {R04EmergencyConsumer} from "../security/R04EmergencyConsumer.sol";
-import {EmergencyDomains} from "../constants/EmergencyDomains.sol";
+import { R04EmergencyConsumer } from "../security/R04EmergencyConsumer.sol";
+import { EmergencyDomains } from "../constants/EmergencyDomains.sol";
 
 import { InventoryRegistry } from "../inventory/InventoryRegistry.sol";
 import { HCInvalidState, HCZeroAddress } from "../errors/HighCountryErrors.sol";
@@ -66,7 +66,8 @@ contract ManufacturingEngine is R04EmergencyConsumer {
         _;
     }
 
-    constructor(address r04Authorization_, 
+    constructor(
+        address r04Authorization_,
         address inventory_,
         uint16 maxJobsPerOwner_
     ) R04EmergencyConsumer(r04Authorization_) {
@@ -164,7 +165,7 @@ contract ManufacturingEngine is R04EmergencyConsumer {
 
     function complete(
         bytes32 jobId
-    ) external guarded  r04Unrestricted(EmergencyDomains.MANUFACTURING) {
+    ) external guarded r04Unrestricted(EmergencyDomains.MANUFACTURING) {
         Job storage j = _jobs[jobId];
         if (j.status != Status.ACTIVE || j.owner != msg.sender) revert HCInvalidState();
         Recipe storage r = _recipes[j.recipeId];
@@ -209,4 +210,3 @@ contract ManufacturingEngine is R04EmergencyConsumer {
         emit ManufacturingCancelled(jobId, msg.sender, r.cancelLossBps);
     }
 }
-

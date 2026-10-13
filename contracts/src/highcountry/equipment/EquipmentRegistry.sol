@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
-import {R04EmergencyConsumer} from "../security/R04EmergencyConsumer.sol";
-import {EmergencyDomains} from "../constants/EmergencyDomains.sol";
+import { R04EmergencyConsumer } from "../security/R04EmergencyConsumer.sol";
+import { EmergencyDomains } from "../constants/EmergencyDomains.sol";
 
 import { HCInvalidId, HCInvalidState, HCZeroAddress } from "../errors/HighCountryErrors.sol";
 
@@ -64,7 +64,8 @@ contract EquipmentRegistry is R04EmergencyConsumer {
         _;
     }
 
-    constructor(address r04Authorization_, 
+    constructor(
+        address r04Authorization_,
         address land_
     ) R04EmergencyConsumer(r04Authorization_) {
         if (land_ == address(0) || land_.code.length == 0) revert HCZeroAddress();
@@ -121,7 +122,7 @@ contract EquipmentRegistry is R04EmergencyConsumer {
         bytes32 typeId,
         address owner,
         bytes32 earningRef
-    ) external  r04Unrestricted(EmergencyDomains.MANUFACTURING) {
+    ) external r04Unrestricted(EmergencyDomains.MANUFACTURING) {
         if (
             !issuers[msg.sender] || owner == address(0) || equipmentId == bytes32(0) || earningRef == bytes32(0)
                 || !_types[typeId].exists || _equipment[equipmentId].exists || usedEarningRef[earningRef]
@@ -182,7 +183,7 @@ contract EquipmentRegistry is R04EmergencyConsumer {
     function place(
         bytes32 equipmentId,
         uint64 parcelId
-    ) external  r04Unrestricted(EmergencyDomains.MANUFACTURING) {
+    ) external r04Unrestricted(EmergencyDomains.MANUFACTURING) {
         Equipment storage item = _equipment[equipmentId];
         if (
             !item.exists || retired[equipmentId] || disabled[equipmentId] || item.owner != msg.sender
@@ -230,4 +231,3 @@ contract EquipmentRegistry is R04EmergencyConsumer {
         return _totals[parcelId];
     }
 }
-

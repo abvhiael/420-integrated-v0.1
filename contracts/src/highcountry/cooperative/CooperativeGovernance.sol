@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
-import {R04EmergencyConsumer} from "../security/R04EmergencyConsumer.sol";
-import {EmergencyDomains} from "../constants/EmergencyDomains.sol";
+import { R04EmergencyConsumer } from "../security/R04EmergencyConsumer.sol";
+import { EmergencyDomains } from "../constants/EmergencyDomains.sol";
 import { CooperativeRegistry } from "./CooperativeRegistry.sol";
 import { OrganizationRegistry } from "../organization/OrganizationRegistry.sol";
 
@@ -39,7 +39,8 @@ contract CooperativeGovernance is R04EmergencyConsumer {
     event MarkedExecuted(bytes32 indexed id);
     address public executor;
 
-    constructor(address r04Authorization_, 
+    constructor(
+        address r04Authorization_,
         address registry_
     ) R04EmergencyConsumer(r04Authorization_) {
         if (registry_.code.length == 0) revert Invalid();
@@ -103,7 +104,7 @@ contract CooperativeGovernance is R04EmergencyConsumer {
     function vote(
         bytes32 id,
         bool support
-    ) external  r04Unrestricted(EmergencyDomains.COOPERATIVE_GOVERNANCE) {
+    ) external r04Unrestricted(EmergencyDomains.COOPERATIVE_GOVERNANCE) {
         Proposal storage p = proposals[id];
         if (
             p.end == 0 || block.timestamp >= p.end || p.cancelled || p.executed || voted[id][msg.sender]
@@ -153,10 +154,9 @@ contract CooperativeGovernance is R04EmergencyConsumer {
 
     function markExecuted(
         bytes32 id
-    ) external  r04Unrestricted(EmergencyDomains.COOPERATIVE_GOVERNANCE) {
+    ) external r04Unrestricted(EmergencyDomains.COOPERATIVE_GOVERNANCE) {
         if (msg.sender != executor || !executable(id)) revert Unauthorized();
         proposals[id].executed = true;
         emit MarkedExecuted(id);
     }
 }
-

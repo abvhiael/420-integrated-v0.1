@@ -222,7 +222,8 @@ contract InventoryRegistry {
         uint256 amount,
         bool fromReserve
     ) external {
-        if(fromReserve) _ensureKnown(id); else _ensureActive(id);
+        if (fromReserve) _ensureKnown(id);
+        else _ensureActive(id);
         ledger.consume(op, id, msg.sender, amount, fromReserve);
     }
 
@@ -238,7 +239,9 @@ contract InventoryRegistry {
 
     /// @dev Disabling catalogue ingress cannot strand a previously authorized reservation.
     ///      Recovery/burning never transfers ownership or creates new supply.
-    function _ensureKnown(bytes32 id) private view {
+    function _ensureKnown(
+        bytes32 id
+    ) private view {
         if (_lots[id].exists) return;
         Resource memory r = resources[id];
         if (!r.exists || r.harvestOnly) revert HCInvalidState();
@@ -253,4 +256,3 @@ contract InventoryRegistry {
         if (!r.exists || !r.active || r.harvestOnly) revert HCInvalidState();
     }
 }
-

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
-import {bindRetainedR04Emergency,retainedR04AuthorizationRoot} from "../../mocks/R04EmergencyFixture.sol";
+import { bindRetainedR04Emergency, retainedR04AuthorizationRoot } from "../../mocks/R04EmergencyFixture.sol";
 
 import { EquipmentRegistry } from "../../../../src/highcountry/equipment/EquipmentRegistry.sol";
 
@@ -169,4 +169,3 @@ contract EquipmentRegistryR042Test {
         require(kind.effects[0] == 30 && kind.effects[1] == -20, "changed stats");
     }
 }
-

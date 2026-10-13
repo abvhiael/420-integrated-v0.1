@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
-import {bindRetainedR04Emergency,retainedR04AuthorizationRoot} from "../../mocks/R04EmergencyFixture.sol";
+import { bindRetainedR04Emergency, retainedR04AuthorizationRoot } from "../../mocks/R04EmergencyFixture.sol";
 
 import { InventoryRegistry } from "../../../../src/highcountry/inventory/InventoryRegistry.sol";
 import { ManufacturingEngine } from "../../../../src/highcountry/manufacturing/ManufacturingEngine.sol";
@@ -154,4 +154,3 @@ contract ManufacturingEngineR043Test {
         alice.complete(engine, id);
     }
 }
-

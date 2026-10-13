@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
-import {bindRetainedR04Emergency,retainedR04AuthorizationRoot} from "../../mocks/R04EmergencyFixture.sol";
+import { bindRetainedR04Emergency, retainedR04AuthorizationRoot } from "../../mocks/R04EmergencyFixture.sol";
 import { OrganizationRegistry } from "../../../../src/highcountry/organization/OrganizationRegistry.sol";
 import { CooperativeRegistry } from "../../../../src/highcountry/cooperative/CooperativeRegistry.sol";
 import { CooperativeGovernance } from "../../../../src/highcountry/cooperative/CooperativeGovernance.sol";
@@ -144,4 +144,3 @@ contract R0411GovernanceTest {
         require(!rebind, "executor replaced");
     }
 }
-

@@ -51,7 +51,9 @@ contract MockLandRegistryHC6 {
     }
 
     // Match the canonical R02 read interface used by R04.9 admission guards.
-    function getParcel(uint64 parcelId) external view returns (LandRegistry.LandParcel memory p) {
+    function getParcel(
+        uint64 parcelId
+    ) external view returns (LandRegistry.LandParcel memory p) {
         Parcel memory mock = _parcels[parcelId];
         require(mock.exists, "parcel missing");
         p.id = parcelId;

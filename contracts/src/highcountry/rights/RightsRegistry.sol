@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
-import {R04EmergencyConsumer} from "../security/R04EmergencyConsumer.sol";
-import {EmergencyDomains} from "../constants/EmergencyDomains.sol";
+import { R04EmergencyConsumer } from "../security/R04EmergencyConsumer.sol";
+import { EmergencyDomains } from "../constants/EmergencyDomains.sol";
 
 /// @notice R04.9 immutable parcel/asset rights authority: no wallet entitlement, treasury or token custody.
 /// @dev Licensed scopes are bitmasks; rights are bounded by term and owner consent.
@@ -36,14 +36,16 @@ contract RightsRegistry is R04EmergencyConsumer {
     event RightsRevoked(bytes32 indexed grantId);
     event AssetTransferred(bytes32 indexed asset, address indexed oldOwner, address indexed newOwner);
 
-    constructor(address r04Authorization_) R04EmergencyConsumer(r04Authorization_) {
+    constructor(
+        address r04Authorization_
+    ) R04EmergencyConsumer(r04Authorization_) {
         administrator = msg.sender;
     }
 
     function registerAsset(
         bytes32 asset,
         address owner
-    ) external  r04Unrestricted(EmergencyDomains.RIGHTS) {
+    ) external r04Unrestricted(EmergencyDomains.RIGHTS) {
         if (msg.sender != administrator || asset == bytes32(0) || owner == address(0) || assets[asset].exists) {
             revert Invalid();
         }
@@ -64,7 +66,7 @@ contract RightsRegistry is R04EmergencyConsumer {
     function transferAsset(
         bytes32 asset,
         address to
-    ) external  r04Unrestricted(EmergencyDomains.RIGHTS) {
+    ) external r04Unrestricted(EmergencyDomains.RIGHTS) {
         Asset storage a = assets[asset];
         if (!a.exists || a.frozen || a.owner != msg.sender || to == address(0) || to == msg.sender) {
             revert Unauthorized();
@@ -81,7 +83,7 @@ contract RightsRegistry is R04EmergencyConsumer {
         uint256 scopes,
         uint64 start,
         uint64 end
-    ) external  r04Unrestricted(EmergencyDomains.RIGHTS) {
+    ) external r04Unrestricted(EmergencyDomains.RIGHTS) {
         Asset memory a = assets[asset];
         if (
             grantId == bytes32(0) || grants[grantId].holder != address(0) || !a.exists || a.frozen
@@ -113,4 +115,3 @@ contract RightsRegistry is R04EmergencyConsumer {
             && (g.scopes & scope) == scope && block.timestamp >= g.start && block.timestamp < g.end;
     }
 }
-

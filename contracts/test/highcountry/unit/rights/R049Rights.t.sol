@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
-import {bindRetainedR04Emergency,retainedR04AuthorizationRoot} from "../../mocks/R04EmergencyFixture.sol";
+import { bindRetainedR04Emergency, retainedR04AuthorizationRoot } from "../../mocks/R04EmergencyFixture.sol";
 import { RightsRegistry } from "../../../../src/highcountry/rights/RightsRegistry.sol";
 import { LeaseRegistry } from "../../../../src/highcountry/rights/LeaseRegistry.sol";
 import { LicenseRegistry } from "../../../../src/highcountry/rights/LicenseRegistry.sol";
@@ -225,4 +225,3 @@ contract R049RightsTest {
         require(!duplicate, "operation replay");
     }
 }
-

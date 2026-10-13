@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
-import {bindRetainedR04Emergency,retainedR04AuthorizationRoot} from "../../mocks/R04EmergencyFixture.sol";
+import { bindRetainedR04Emergency, retainedR04AuthorizationRoot } from "../../mocks/R04EmergencyFixture.sol";
 import { InventoryRegistry } from "../../../../src/highcountry/inventory/InventoryRegistry.sol";
 import { ResourceLedger } from "../../../../src/highcountry/inventory/ResourceLedger.sol";
 import { CanonicalMarketEscrow } from "../../../../src/highcountry/market/CanonicalMarketEscrow.sol";
@@ -127,4 +127,3 @@ contract CanonicalMarketEscrowR048Test {
         require(!wrongCancel, "foreign cancellation");
     }
 }
-

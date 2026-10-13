@@ -214,7 +214,9 @@ contract CompetitionEngine {
         bytes32 id
     ) external {
         EventData storage e = events[id];
-        if (e.organizer != msg.sender || e.cancelled || e.finalized || block.timestamp >= e.opens) revert Unauthorized();
+        if (e.organizer != msg.sender || e.cancelled || e.finalized || block.timestamp >= e.opens) {
+            revert Unauthorized();
+        }
         e.cancelled = true;
     }
 

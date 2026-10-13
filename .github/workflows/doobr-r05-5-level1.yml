@@ -1,0 +1,38 @@
+name: DOOBR R05.5 Licence Policy Emergency Level 1
+on:
+  push:
+    branches: [roadmap/doobr-bc-vancouver-infrastructure]
+    paths: ['doobr/transition_authority.py','doobr/storage/tests/test_r05_5_transition_authority.py','.github/workflows/doobr-r05-5-level1.yml']
+  pull_request:
+    paths: ['doobr/transition_authority.py','doobr/storage/tests/test_r05_5_transition_authority.py','.github/workflows/doobr-r05-5-level1.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  licence-policy-stop:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify exact SHA before
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"
+      - name: Licence policy stop and retained authorization regressions
+        run: |
+          set -euo pipefail
+          python3 -m py_compile doobr/transition_authority.py
+          for suite in test_r05_5_transition_authority.py test_provider_registry_adapter.py test_compliance_discovery_adapter.py test_auth.py test_retailer.py test_provenance_adapter.py test_canonical_routing.py; do
+            python3 -m unittest discover -s doobr/storage/tests -p "$suite" -v
+          done
+          python3 scripts/verify-doobr-r04-1.py
+      - name: Verify exact SHA after
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"

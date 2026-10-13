@@ -1,0 +1,76 @@
+name: DOOBR R05.6 Multi Instance Migration Restore Level 1
+on:
+  push:
+    branches: [roadmap/doobr-bc-vancouver-infrastructure]
+    paths: ['.github/workflows/doobr-r05-6-level1.yml','doobr/ops/**','doobr/storage/migrations/**','doobr/storage/tests/test_pg_operations.py']
+  pull_request:
+    paths: ['.github/workflows/doobr-r05-6-level1.yml','doobr/ops/**','doobr/storage/migrations/**','doobr/storage/tests/test_pg_operations.py']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  database-recovery:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgis/postgis:15-3.4
+        env:
+          POSTGRES_PASSWORD: ci-only-password
+          POSTGRES_USER: postgres
+          POSTGRES_DB: doobr_r02_12
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres -d doobr_r02_12"
+          --health-interval 10s --health-timeout 5s --health-retries 10
+    env:
+      PGHOST: localhost
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: ci-only-password
+      PGDATABASE: doobr_r02_12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Exact SHA before
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"
+      - name: Prepare and validate migration and recovery scripts
+        run: |
+          set -euo pipefail
+          bash -n doobr/ops/backup_encrypted.sh doobr/ops/restore_isolated.sh
+          python3 -m pip install 'psycopg[binary]==3.2.4'
+          for migration in 0001_initial 0002_identity 0003_retailer 0004_courier 0005_presence 0006_order_commands 0007_dispatch 0008_tracking 0009_return_cases 0010_outbox 0011_operations; do
+            psql -v ON_ERROR_STOP=1 -f "doobr/storage/migrations/${migration}.up.sql"
+          done
+      - name: Real PostgreSQL multiple-instance tenant and audit verification
+        run: |
+          python3 -m unittest discover -s doobr/storage/tests -p test_pg_operations.py -v
+          python3 -m unittest discover -s doobr/storage/tests -p test_r05_3_chaos.py -v
+      - name: Backup isolated restore disaster rollback and source preservation
+        run: |
+          set -euo pipefail
+          umask 077
+          trap 'rm -rf "$RUNNER_TEMP/doobr-r056"' EXIT
+          mkdir -m 700 "$RUNNER_TEMP/doobr-r056"
+          pg_dump -Fc --no-owner --no-acl -f "$RUNNER_TEMP/doobr-r056/source.dump" doobr_r02_12
+          pg_restore --list "$RUNNER_TEMP/doobr-r056/source.dump" >/dev/null
+          createdb doobr_r05_6_restored
+          pg_restore --exit-on-error --no-owner --no-acl -d doobr_r05_6_restored "$RUNNER_TEMP/doobr-r056/source.dump"
+          for database in doobr_r02_12 doobr_r05_6_restored; do
+            test "$(psql -d "$database" -Atqc "SELECT count(*) FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='doobr_private' AND c.relname IN ('operation_audit','event_outbox','return_cases','custody_evidence') AND c.relrowsecurity AND c.relforcerowsecurity")" = 4
+          done
+          psql -d doobr_r05_6_restored -v ON_ERROR_STOP=1 -f doobr/storage/migrations/0001_initial.down.sql
+          test "$(psql -d doobr_r05_6_restored -Atqc "SELECT count(*) FROM pg_namespace WHERE nspname='doobr_private'")" = 0
+          test "$(psql -d doobr_r02_12 -Atqc "SELECT count(*) FROM pg_namespace WHERE nspname='doobr_private'")" = 1
+          test "$(psql -d doobr_r02_12 -Atqc "SELECT count(*) FROM doobr_private.tenants")" -ge 2
+      - name: Exact SHA after
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"

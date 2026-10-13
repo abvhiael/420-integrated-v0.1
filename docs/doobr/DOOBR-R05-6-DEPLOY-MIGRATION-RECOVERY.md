@@ -1,0 +1,13 @@
+# DOOBr R05.6 — Multi-instance deployment, migrations, restore and rollback
+
+**Canonical roadmap:** R05.6 Multi-instance deployment, data migrations, restore/rollback. PR #601, branch `roadmap/doobr-bc-vancouver-infrastructure`, kept open/unmerged. `main` observed `bc0faa5dafecda3de0620a9581f9953b89cd95fb` (branch 393 ahead, 1110 behind at inspection). **Implementation SHA:** `040e9ef6f23570fd4ac8e80308f108b175202798`; `.github/workflows/doobr-r05-6-level1.yml`.
+
+**Verified implementation inventory:** Existing `doobr/storage/migrations/0001_initial.up.sql` through `0011_operations.up.sql` use transactional Postgres/PostGIS migrations, forced tenant RLS, private schema and authorized tenant context. `doobr/storage/migrations/0001_initial.down.sql` is a deliberately destructive development-only rollback; never run it against production. Existing operational scripts `doobr/ops/backup_encrypted.sh` and `restore_isolated.sh` enforce TLS verify-full, encrypted age backups with checksums, and an explicitly isolated destination. Existing `test_pg_operations.py` asserts multiple API/outbox instance heartbeats, stale instance denial, tenant isolation and append-only audit.
+
+**Added Level 1 gate:** real PostGIS 15 / Postgres instance applies canonical migrations 0001–0011; tests instance heartbeats, tenant isolation, immutable operational audit and retained R05.3 concurrency contracts. The workflow creates a custom-format full database backup, restores into a fresh isolated database, verifies forced RLS on four sensitive tables in both copies, invokes the destructive down migration **only in the disposable restored database**, then confirms the original primary schema and tenant records are still intact. Exact SHA before/after; syntax check on both production protected encrypted backup/restore scripts. No global Foundry/Genesis/Docs/Integrated duplication.
+
+**Qualification result:** awaiting targeted exact-SHA CI result; unverified runs may not be counted PASS.
+
+**Explicit non-claims and outstanding integration:** a single CI PostgreSQL service with multiple simulated app heartbeats does **not** establish physical multi-instance deployment, automatic failover, durable encrypted-backup rotation, PITR/WAL continuity, production TLS identities, DNS/load-balancer rollout, fleet upgrades, rollback during regulated activity, live restore rehearsal, backup retention/deletion schedules or operational security approval. These remain testnet/operations release blockers including DOOBR-AUDIT-9/10. R05.10 is once-only Level 3 after main reconciliation; full Foundry belongs solely to Solidity Contracts. No live delivery or checkout enabled.
+
+**Next canonical step:** R05.7 Mobile/browser device security and accessibility.

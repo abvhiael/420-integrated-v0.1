@@ -3368,11 +3368,15 @@ def read_booking_orchestration(reservation_id:UUID,authorization:str|None=Header
             raise HTTPException(404,"NOT_FOUND")
         operations=c.execute("""SELECT kind,amount,state FROM bnb_pay_disbursement
             WHERE reservation_id=%s ORDER BY created_at,id""",(reservation_id,)).fetchall()
+        failures=c.execute("""SELECT failure_code FROM bnb_pay_failure_event
+            WHERE reservation_id=%s ORDER BY received_at, pay_attempt_id""",
+            (reservation_id,)).fetchall()
     split=(dict(zip(("captured","host","platform","developer","retained"),row[6:11]))
            if row[6] is not None else None)
     view=project_saga(reservation_state=row[2],hold_state=row[3],
                       intent_state=row[4],payment_id=row[5],split=split,
                       disbursements=[{"kind":k,"amount":amount,"state":state}
-                                     for k,amount,state in operations])
+                                     for k,amount,state in operations],
+                      pay_failures=[code for (code,) in failures])
     return {"reservation_id":str(reservation_id),**view,
             "provider_acceptance":"testnet_gated","payment_execution_available":False}

@@ -139,3 +139,15 @@ test('protected HTTP mutations require durable idempotency keys and reauthorize 
   revoked=true; assert.equal((await handler(request(true))).status,503);
   assert.ok(checks>=7);assert.equal((await store.history(id)).length,1);
 });
+test('event-write failure rolls back an already-written trip and same key can safely retry', async () => {
+  const id=nextId(),key=nextId();
+  const constraint=(await owner.query("SELECT format('ALTER TABLE liftd.events ADD CONSTRAINT liftd_test_event_failure CHECK (trip_id <> %L) NOT VALID',$1) AS sql",[id])).rows[0].sql;
+  await owner.query(constraint);
+  try {
+    await assert.rejects(() => create(id,key),e=>e.code==='INVALID_STORE_TRANSITION');
+    assert.equal(await store.get(id),undefined);
+    assert.equal((await pool.query('SELECT count(*)::int AS n FROM liftd.commands WHERE actor_id=$1 AND command_id=$2',[actor.subject,key])).rows[0].n,0);
+  } finally {await owner.query('ALTER TABLE liftd.events DROP CONSTRAINT liftd_test_event_failure');}
+  assert.equal((await create(id,key)).state,'REQUESTED');
+  assert.equal((await store.history(id)).length,1);
+});

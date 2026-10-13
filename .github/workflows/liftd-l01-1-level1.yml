@@ -39,7 +39,7 @@ jobs:
           node --check rideshare/scripts/verify-foundation.mjs
           node rideshare/scripts/verify-foundation.mjs
       - name: Trip lifecycle and denial-path tests
-        run: npm test --prefix rideshare
+        run: node --test rideshare/test/trip.test.mjs
       - name: Record scoped implementation evidence
         run: |
           mkdir -p liftd-evidence

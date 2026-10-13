@@ -25,7 +25,7 @@ Level 1 per implementation step; Level 2 only at the named milestones; one Level
 | Step | Deliverable | Current status |
 | --- | --- | --- |
 | L01.1 | Inventory, canonical scope, integration ownership, trip invariants, fail-closed domain kernel and scoped CI | Level 1 qualified; see evidence record |
-| L01.2 | Independently authenticated rider/driver/operator sessions, recovery/revocation, authorization tests | Pending — next |
+| L01.2 | Independently authenticated rider/driver/operator sessions, recovery/revocation, authorization tests | Implemented candidate; exact-SHA qualification pending |
 | L01.3 | Driver/vehicle registry projections and jurisdiction-scoped eligibility adapters | Pending |
 | L01.4 | Durable PostgreSQL trip/event store, uniqueness, transactional compare-and-swap, idempotency/replay and restart tests | Pending |
 | L01.5 | Location routing adapter, private pickup/drop-off storage, scoped access, precision and retention | Pending |
@@ -49,4 +49,4 @@ Define detailed steps after L02 integration qualification. Scope: disputes/revie
 
 `REQUESTED -> ASSIGNED -> ARRIVED -> IN_PROGRESS -> COMPLETED`. Rider or assigned driver can cancel before start. Terminal trips cannot reopen. Starting an active trip requires fresh admission bound to trip, driver, vehicle and route. Suspension blocks assignment/arrival/start while preserving pre-trip cancellation and recording an in-progress completion. Active-trip interruption must enter a future safety-resolution workflow, never masquerade as an ordinary cancellation/refund.
 
-The L01.1 kernel is an in-memory pure domain function. Caller principals and admission decisions are **trusted internal inputs**, not verified credentials. Optimistic revision checking rejects stale snapshots but does not serialize multiple processes. No HTTP server, real booking, location lookup, database, payment, regulatory approval or driver dispatch exists yet. Those are explicit later steps.
+The L01.1 kernel is an in-memory pure domain function. Caller principals and admission decisions are **trusted internal inputs**, not verified credentials. Optimistic revision checking rejects stale snapshots but does not serialize multiple processes. L01.2 supplies protected HTTP/service adapters and independent Identity/session verification; no deployed HTTP listener, real booking, location lookup, trip database, payment, regulatory approval or driver dispatch is enabled. Those are explicit later steps.

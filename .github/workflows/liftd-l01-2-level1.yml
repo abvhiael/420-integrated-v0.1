@@ -1,0 +1,59 @@
+name: LIFTd L01.2 Level 1
+on:
+  pull_request:
+    paths:
+      - 'rideshare/**'
+      - 'docs/rideshare/**'
+      - '.github/workflows/liftd-l01-2-level1.yml'
+  push:
+    branches: ['build/liftd-l01-2-foundation']
+    paths:
+      - 'rideshare/**'
+      - 'docs/rideshare/**'
+      - '.github/workflows/liftd-l01-2-level1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: liftd-l01-2-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  domain-foundation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact implementation checkout
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax and canonical foundation verification
+        run: |
+          node --check rideshare/src/trip.mjs
+          node --check rideshare/test/trip.test.mjs
+          node --check rideshare/scripts/verify-foundation.mjs
+          node rideshare/scripts/verify-foundation.mjs
+      - name: Authentication/service/HTTP syntax checks
+        run: |
+          node --check rideshare/src/auth.mjs
+          node --check rideshare/src/session-client.mjs
+          node --check rideshare/src/service.mjs
+          node --check rideshare/src/http.mjs
+          node --check rideshare/test/auth.test.mjs
+      - name: Retained foundation and authenticated session qualification
+        run: npm test --prefix rideshare
+      - name: Record scoped implementation evidence
+        run: |
+          mkdir -p liftd-evidence
+          git rev-parse HEAD > liftd-evidence/implementation-sha.txt
+          node --test --test-reporter=tap rideshare/test/*.test.mjs > liftd-evidence/trip-tests.tap
+      - uses: actions/upload-artifact@v4
+        with:
+          name: liftd-l01-2-${{ github.event.pull_request.head.sha || github.sha }}
+          path: liftd-evidence/
+          if-no-files-found: error

@@ -40,7 +40,7 @@ test('wallet verifier requires pinned canonical chain and rejects unauthenticate
   const pools=new Map([['420',{getChainId:async()=>421,verifyMessage:async()=>true}]]);
   const srv=createHighCountryWalletService420({authority,poolForPrincipal:async()=>({connect(){throw Error('not connected');}}),
     clientsByChain:pools,domain:'highcountry-production'});
-  await assert.rejects(()=>srv.issueChallenge('good',{wallet:w,chainId:'420',consentId:'c',policyHash:h}),/chain-mismatch/);
+  await assert.rejects(()=>srv.issueChallenge('good',{wallet:w,chainId:'420',consentId:'c',policyHash:h,consentAccepted:true}),/chain-mismatch/);
   await assert.rejects(()=>srv.issueChallenge('bad',{wallet:w,chainId:'420',consentId:'c',policyHash:h}),/chain-mismatch/);
   await assert.rejects(()=>srv.issueChallenge('good',{wallet:w,chainId:'420',consentId:'c',policyHash:h,admin:true}),/invalid-request/);
   assert.throws(()=>createHighCountryWalletService420({authority,clientsByChain:new Map(),domain:'bad host',poolForPrincipal:()=>{}}),/invalid-configuration/);

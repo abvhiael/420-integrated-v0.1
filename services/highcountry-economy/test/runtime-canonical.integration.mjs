@@ -15,7 +15,7 @@ async function receipt(hash){
   const r=await chain.request('eth_getTransactionReceipt',[hash]);if(r){
    if(r.status!=='0x1'){
     const trace=await chain.request('debug_traceTransaction',[hash,{disableStorage:true,disableMemory:true,disableStack:true}]);
-    console.log(JSON.stringify({deploymentFailure:trace.returnValue,gas:trace.gas,lastOps:trace.structLogs?.slice(-10).map(x=>({op:x.op,pc:x.pc,error:x.error}))}));
+    console.log(JSON.stringify({deploymentFailure:Object.fromEntries(Object.entries(trace).map(([k,v])=>[k,Array.isArray(v)?{length:v.length,last:v.slice(-3)}:v])),receipt:r}));
    }
    assert.equal(r.status,'0x1');return r;}
 

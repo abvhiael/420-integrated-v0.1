@@ -20,8 +20,10 @@ function bindRetainedR04Emergency(address target) {
     R04RetainedAuthorization root = R04RetainedAuthorization(c.r04AuthorizationRoot());
     MockCapabilityRegistry caps = root.testCapabilities();
     EmergencyState state = new EmergencyState(address(root));
+    address fixture;
+    assembly ("memory-safe") { fixture := address() }
     ICapabilityRegistry420.CapabilityGrant memory g = ICapabilityRegistry420.CapabilityGrant(
-        address(this), ModuleIds.EMERGENCY_STATE, c.R04_BIND_ACTION(), c.emergencyBindingScope(address(state)),
+        fixture, ModuleIds.EMERGENCY_STATE, c.R04_BIND_ACTION(), c.emergencyBindingScope(address(state)),
         0, 0, 0, 0, 0, false);
     caps.setGrant(keccak256(abi.encode(target)), g, 0);
     c.bindR04Emergency(address(state));

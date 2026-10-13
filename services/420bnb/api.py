@@ -945,10 +945,13 @@ def submit_abuse_report(payload:AbuseReportInput,authorization:str|None=Header(N
                     WHERE m.id=%s""",(payload.target_id,)).fetchone()
             if not target or actor not in (target[1],target[2]):
                 raise HTTPException(404,"NOT_FOUND")
-            prior=c.execute("""SELECT id FROM bnb_abuse_report WHERE reporter_subject=%s
+            prior=c.execute("""SELECT id,reason,detail FROM bnb_abuse_report WHERE reporter_subject=%s
                 AND target_type=%s AND target_id=%s""",
                 (actor,payload.target_type,payload.target_id)).fetchone()
-            if prior:return {"id":str(prior[0]),"state":"pending_or_reviewed","replayed":True}
+            if prior:
+                if prior[1]!=payload.reason or prior[2]!=payload.detail:
+                    raise HTTPException(409,"ABUSE_REPORT_REPLAY_CONFLICT")
+                return {"id":str(prior[0]),"state":"pending_or_reviewed","replayed":True}
             recent=c.execute("""SELECT count(*) FROM bnb_abuse_report
                 WHERE reporter_subject=%s AND created_at>now()-interval '24 hours'""",
                 (actor,)).fetchone()[0]

@@ -19,7 +19,7 @@ on:
       - 'scripts/build-compliance-public.py'
       - 'scripts/test-compliance-c06-2.py'
       - 'scripts/test-compliance-c06-3.cjs'
-      - 'scripts/test-compliance-c06-4.cjs'
+      - 'scripts/test-compliance-c06-4.cjs'\n      - 'scripts/test-compliance-c06-9-browser.cjs'
       - 'scripts/verify-compliance-c06-4.py'
       - 'docs/compliance/C06.4-*'
       - 'docs/compliance/C06.5-*'
@@ -294,9 +294,17 @@ jobs:
           node scripts/test-compliance-c06-8-browser.cjs
           go vet ./services/complianceauth
           go test -race ./services/complianceauth -run '^TestC068' -count=1 -v
+      - name: C06.9 website and client Level 2 accumulated integration
+        run: |
+          node --check scripts/test-compliance-c06-9-browser.cjs
+          node scripts/test-compliance-c06-9-browser.cjs
+          python3 scripts/verify-compliance-c06-8.py
+          node --test scripts/test-compliance-c06-3.cjs scripts/test-compliance-c06-4.cjs
+          go test -race ./services/complianceauth -run '^TestC06(4|5|6|7|8)' -count=1 -v
+          go vet ./services/complianceauth
       - name: Write current C06.5 exact-SHA Level 1 qualification result
         run: |
-          python3 -c 'import json,os; open("/tmp/compliance-c01-level1.json","w").write(json.dumps({"step":"C06.8","device_session_and_browser_structure":"PASS","retained_C06_7":"PASS","auditor_export":"PASS","retained_C06_6":"PASS","operator_controls":"PASS","retained_C06_5":"PASS","independent_review_console":"PASS","retained_C06_4":"PASS","private_author_workspace":"PASS","retained_C06_3":"PASS","informational_scenarios":"PASS","retained_C06_2":"PASS","public_browser":"PASS","retained_C06_1":"PASS","qualification_level":1,"implementation_sha":os.environ["EXPECTED_SHA"],"c03_8_publication_fence":"PASS","retained_C03_7":"PASS","retained_C03_6":"PASS","retained_C03_5":"PASS","retained_C03_4":"PASS","retained_C03_3":"PASS","retained_C03_2":"PASS","retained_C03_1":"PASS","retained_C02_10":"PASS","retained_C02_9":"PASS","retained_C02_8":"PASS","retained_C02_7":"PASS","retained_C02_6":"PASS","retained_C02_5":"PASS","retained_C02_4":"PASS","retained_C02_3":"PASS","retained_C02_2":"PASS","retained_C02_1":"PASS","retained_C01_8":"PASS","go_race":"PASS","retained_C01_7":"PASS","retained_C01_6":"PASS","retained_C01_5":"PASS","retained_C01_4":"PASS","retained_C01_3":"PASS","tests":"PASS"},indent=2)+"\n")'
+          python3 -c 'import json,os; open("/tmp/compliance-c01-level1.json","w").write(json.dumps({"step":"C06.9","qualification_level":2,"website_client_level2":"PASS","retained_C06_8":"PASS","device_session_and_browser_structure":"PASS","retained_C06_7":"PASS","auditor_export":"PASS","retained_C06_6":"PASS","operator_controls":"PASS","retained_C06_5":"PASS","independent_review_console":"PASS","retained_C06_4":"PASS","private_author_workspace":"PASS","retained_C06_3":"PASS","informational_scenarios":"PASS","retained_C06_2":"PASS","public_browser":"PASS","retained_C06_1":"PASS","qualification_level":1,"implementation_sha":os.environ["EXPECTED_SHA"],"c03_8_publication_fence":"PASS","retained_C03_7":"PASS","retained_C03_6":"PASS","retained_C03_5":"PASS","retained_C03_4":"PASS","retained_C03_3":"PASS","retained_C03_2":"PASS","retained_C03_1":"PASS","retained_C02_10":"PASS","retained_C02_9":"PASS","retained_C02_8":"PASS","retained_C02_7":"PASS","retained_C02_6":"PASS","retained_C02_5":"PASS","retained_C02_4":"PASS","retained_C02_3":"PASS","retained_C02_2":"PASS","retained_C02_1":"PASS","retained_C01_8":"PASS","go_race":"PASS","retained_C01_7":"PASS","retained_C01_6":"PASS","retained_C01_5":"PASS","retained_C01_4":"PASS","retained_C01_3":"PASS","tests":"PASS"},indent=2)+"\n")'
       - name: Retain exact-SHA qualification result
         uses: actions/upload-artifact@v4
         with:

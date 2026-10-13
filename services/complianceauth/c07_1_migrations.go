@@ -30,6 +30,8 @@ CREATE TABLE public.compliance_storage_usage (
 INSERT INTO public.compliance_storage_usage
  SELECT tenant,domain,jurisdiction,sum(bytes),sum(rows) FROM (
  SELECT tenant,domain,jurisdiction,sum(octet_length(to_jsonb(v)::text)) AS bytes,count(*) AS rows FROM public.compliance_author_versions v GROUP BY tenant,domain,jurisdiction
+ UNION ALL SELECT tenant,domain,jurisdiction,sum(octet_length(to_jsonb(v)::text)),count(*) FROM public.compliance_author_heads v GROUP BY tenant,domain,jurisdiction
+ UNION ALL SELECT tenant,domain,jurisdiction,sum(octet_length(to_jsonb(v)::text)),count(*) FROM public.compliance_review_heads v GROUP BY tenant,domain,jurisdiction
  UNION ALL SELECT tenant,domain,jurisdiction,sum(octet_length(to_jsonb(v)::text)),count(*) FROM public.compliance_review_versions v GROUP BY tenant,domain,jurisdiction
  UNION ALL SELECT tenant,domain,jurisdiction,sum(octet_length(to_jsonb(v)::text)),count(*) FROM public.compliance_auditor_access v GROUP BY tenant,domain,jurisdiction
  ) records GROUP BY tenant,domain,jurisdiction;
@@ -51,6 +53,12 @@ ALTER TABLE public.compliance_review_versions ADD CONSTRAINT c071_review_encrypt
  CHECK(record ? 'v' AND record->>'v'='1' AND record ? 'kid' AND record ? 'nonce' AND record ? 'ciphertext' AND octet_length(record::text)<=262144);
 ALTER TABLE public.compliance_auditor_access ADD CONSTRAINT c071_audit_encrypted
  CHECK(purpose::jsonb ? 'v' AND purpose::jsonb->>'v'='1' AND purpose::jsonb ? 'kid' AND purpose::jsonb ? 'nonce' AND purpose::jsonb ? 'ciphertext' AND octet_length(purpose)<=262144);
+ALTER TABLE public.compliance_author_heads ADD CONSTRAINT c071_author_head_keys CHECK(char_length(draft_id) BETWEEN 1 AND 128 AND char_length(author_id) BETWEEN 1 AND 128);
+ALTER TABLE public.compliance_author_versions ADD CONSTRAINT c071_author_version_keys CHECK(char_length(draft_id) BETWEEN 1 AND 128 AND char_length(author_id) BETWEEN 1 AND 128);
+ALTER TABLE public.compliance_review_heads ADD CONSTRAINT c071_review_head_keys CHECK(char_length(draft_id) BETWEEN 1 AND 128);
+ALTER TABLE public.compliance_review_versions ADD CONSTRAINT c071_review_version_keys CHECK(char_length(draft_id) BETWEEN 1 AND 128 AND char_length(reviewer_id) BETWEEN 1 AND 128 AND char_length(state) BETWEEN 1 AND 32);
+ALTER TABLE public.compliance_auditor_access ADD CONSTRAINT c071_audit_keys CHECK(char_length(case_id) BETWEEN 1 AND 128 AND char_length(actor_id) BETWEEN 1 AND 128 AND char_length(evidence_id) BETWEEN 1 AND 128 AND result='EXPORTED_REDACTED');
+ALTER TABLE public.compliance_publication_fences ADD CONSTRAINT c071_publication_key CHECK(char_length(scope) BETWEEN 1 AND 256);
 CREATE INDEX c071_author_owner_history ON public.compliance_author_versions(tenant,domain,jurisdiction,author_id,created_at,draft_id,revision);
 CREATE INDEX c071_review_queue ON public.compliance_review_versions(tenant,domain,jurisdiction,state,created_at,draft_id,review_revision);
 CREATE INDEX c071_publication_expiry ON public.compliance_publication_fences(expires_at,scope);
@@ -80,7 +88,7 @@ func MigrateC071Database(ctx context.Context,db *sql.DB,c *C071Cipher)error{
      "ALTER TABLE public."+q+" ADD CONSTRAINT c071_scope_limits CHECK(char_length(tenant) BETWEEN 1 AND 128 AND char_length(domain) BETWEEN 1 AND 128 AND char_length(jurisdiction) BETWEEN 1 AND 128)"}
     for _,stmt:=range statements{if _,err=tx.ExecContext(ctx,stmt);err!=nil{return ErrC071Storage}}
    }
-   for _,table:=range []string{"compliance_author_versions","compliance_review_versions","compliance_auditor_access"}{
+   for _,table:=range []string{"compliance_author_heads","compliance_author_versions","compliance_review_heads","compliance_review_versions","compliance_auditor_access"}{
     if _,err=tx.ExecContext(ctx,"CREATE TRIGGER c071_quota BEFORE INSERT ON public."+pq.QuoteIdentifier(table)+" FOR EACH ROW EXECUTE FUNCTION public.c071_account_storage()");err!=nil{return ErrC071Storage}
    }
    for _,stmt:=range []string{"ALTER TABLE public.compliance_publication_fences ENABLE ROW LEVEL SECURITY","ALTER TABLE public.compliance_publication_fences FORCE ROW LEVEL SECURITY",`CREATE POLICY c071_publication_scope ON public.compliance_publication_fences USING(EXISTS(SELECT 1 FROM public.compliance_database_bindings b WHERE b.role_name=current_user AND b.publication_scope=scope)) WITH CHECK(EXISTS(SELECT 1 FROM public.compliance_database_bindings b WHERE b.role_name=current_user AND b.publication_scope=scope))`}{if _,err=tx.ExecContext(ctx,stmt);err!=nil{return ErrC071Storage}}
@@ -93,8 +101,8 @@ func c071EncryptExisting(ctx context.Context,tx *sql.Tx,c *C071Cipher)error{
  for _,table:=range []string{"compliance_author_versions","compliance_review_versions"}{
   column,revision,kind:="document","revision","author";if table=="compliance_review_versions"{column,revision,kind="record","review_revision","review"}
   rows,err:=tx.QueryContext(ctx,"SELECT tenant,domain,jurisdiction,draft_id,"+revision+","+column+" FROM public."+table+" FOR UPDATE");if err!=nil{return ErrC071Storage}
-  type item struct{s C064AuthorScope;id string;rev uint64;raw []byte};var batch []item
-  for rows.Next(){var x item;if rows.Scan(&x.s.Tenant,&x.s.Domain,&x.s.Jurisdiction,&x.id,&x.rev,&x.raw)!=nil{rows.Close();return ErrC071Storage};batch=append(batch,x);if len(batch)>100000{rows.Close();return ErrC071Storage}}
+  type item struct{s C064AuthorScope;id string;rev uint64;raw []byte};var batch []item;totalBytes:=0
+  for rows.Next(){var x item;if rows.Scan(&x.s.Tenant,&x.s.Domain,&x.s.Jurisdiction,&x.id,&x.rev,&x.raw)!=nil{rows.Close();return ErrC071Storage};batch=append(batch,x);totalBytes+=len(x.raw);if len(batch)>100000||totalBytes>67108864{rows.Close();return ErrC071Storage}}
   err=rows.Err();rows.Close();if err!=nil{return ErrC071Storage}
   for _,x:=range batch{
    aad:=c071AAD(kind,x.s,x.id,x.rev);var e c071Envelope;_ = json.Unmarshal(x.raw,&e)
@@ -104,8 +112,8 @@ func c071EncryptExisting(ctx context.Context,tx *sql.Tx,c *C071Cipher)error{
   }
  }
  rows,err:=tx.QueryContext(ctx,"SELECT id,tenant,domain,jurisdiction,case_id,actor_id,evidence_id,purpose FROM public.compliance_auditor_access FOR UPDATE");if err!=nil{return ErrC071Storage}
- type access struct{id int64;s C064AuthorScope;caseID,actor,evidence,purpose string};var batch []access
- for rows.Next(){var x access;if rows.Scan(&x.id,&x.s.Tenant,&x.s.Domain,&x.s.Jurisdiction,&x.caseID,&x.actor,&x.evidence,&x.purpose)!=nil{rows.Close();return ErrC071Storage};batch=append(batch,x);if len(batch)>100000{rows.Close();return ErrC071Storage}}
+ type access struct{id int64;s C064AuthorScope;caseID,actor,evidence,purpose string};var batch []access;totalBytes:=0
+ for rows.Next(){var x access;if rows.Scan(&x.id,&x.s.Tenant,&x.s.Domain,&x.s.Jurisdiction,&x.caseID,&x.actor,&x.evidence,&x.purpose)!=nil{rows.Close();return ErrC071Storage};batch=append(batch,x);totalBytes+=len(x.purpose);if len(batch)>100000||totalBytes>67108864{rows.Close();return ErrC071Storage}}
  err=rows.Err();rows.Close();if err!=nil{return ErrC071Storage}
  for _,x:=range batch{
   aad:=c071AAD("audit",x.s,x.caseID+"|"+x.actor+"|"+x.evidence,0);var e c071Envelope;_ =json.Unmarshal([]byte(x.purpose),&e)

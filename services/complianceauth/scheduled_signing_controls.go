@@ -2,6 +2,7 @@ package complianceauth
 
 import (
  "context"
+ "encoding/base64"
  "crypto/ed25519"
  "errors"
  "sync"
@@ -30,7 +31,7 @@ type PublicationControl struct {
  halted map[string]bool
  epoch uint64
 }
-func controlScope(env,domain,jurisdiction string)string{return env+"\x00"+domain+"\x00"+jurisdiction}
+func controlScope(env,domain,jurisdiction string)string{return base64.RawURLEncoding.EncodeToString([]byte(env))+"."+base64.RawURLEncoding.EncodeToString([]byte(domain))+"."+base64.RawURLEncoding.EncodeToString([]byte(jurisdiction))}
 func NewPublicationControl()*PublicationControl{return &PublicationControl{keys:map[string]PublicationKeyState{},halted:map[string]bool{},epoch:1}}
 func(c *PublicationControl) RegisterKey(k PublicationKeyState)error{
  if c==nil||k.KeyID==""||k.Environment==""||k.Domain==""||k.Jurisdiction==""||k.Audience==""||len(k.PublicKey)!=ed25519.PublicKeySize||k.NotBefore.IsZero()||!k.NotBefore.Before(k.NotAfter){return ErrUnauthorized}

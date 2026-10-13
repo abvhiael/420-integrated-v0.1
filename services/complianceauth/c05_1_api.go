@@ -48,7 +48,8 @@ type C051Backend interface {
  PolicyStatuses(context.Context,string,int,int)(C051ListPage[C051PolicyStatus],error)
 }
 type C051Authenticator interface { AuthorizeEvaluation(context.Context,string,string)(context.Context,error) }
-type C051API struct{ Backend C051Backend; Auth C051Authenticator }
+type C076ServingGate interface { CanServe(context.Context,string,uint64)(bool,error) }
+type C051API struct{ Backend C051Backend; Auth C051Authenticator; RecoveryGate C076ServingGate; RecoveryScope string; RecoveryGeneration uint64 }
 func c051JSON(w http.ResponseWriter,code int,v any) {
  w.Header().Set("Content-Type","application/json")
  w.Header().Set("Cache-Control","no-store")
@@ -76,6 +77,16 @@ func (api C051API) ServeHTTP(w http.ResponseWriter,r *http.Request){
  switch r.URL.Path {
  case "/api/v1/evaluate":
   if r.Method!=http.MethodPost {w.Header().Set("Allow","POST");c051Fail(w,http.StatusMethodNotAllowed);return}
+  // A recovery-enabled API must consult the independent authority per
+  // evaluation. Production deployments must configure a gate and generation
+  // before enabling service, never infer recovery authorization from SQL.
+  if api.RecoveryScope!=""||api.RecoveryGate!=nil||api.RecoveryGeneration!=0 {
+   if api.RecoveryGate==nil||!c051Scope(api.RecoveryScope)||api.RecoveryGeneration==0 {
+    c051Fail(w,http.StatusServiceUnavailable);return
+   }
+   allowed,e:=api.RecoveryGate.CanServe(r.Context(),api.RecoveryScope,api.RecoveryGeneration)
+   if e!=nil||!allowed {c051Fail(w,http.StatusServiceUnavailable);return}
+  }
   if api.Auth==nil {c051Fail(w,http.StatusServiceUnavailable);return}
   auth:=r.Header.Get("Authorization")
   if !strings.HasPrefix(auth,"Bearer ")||len(auth)<=7||len(auth)>4096 {c051Fail(w,http.StatusUnauthorized);return}

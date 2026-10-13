@@ -69,3 +69,17 @@ Repository implementations now include a typed canonical land/plant gateway, dis
 **Pretestnet remaining:** Review actual organizational role/action/scope catalogues; wire an authenticated organization/treasury adapter to the canonical independently governed Treasury rather than relying on `OrganizationTreasuryPermissions.permitted` as evidence of money settlement; reconcile member identity/address proof; provide reviewed deploy/upgrade wiring and signer separation; register ABI, events, API/Indexer/RPC/Wallet integration where applicable; security review revocation, signers and obligation disputes.
 
 **Live testnet:** Verify deployed canonical Treasury code/address authority and independent approver, execute authorized/over-limit/replay/revoked/expired attempts against real asset balances, index membership/delegation/treasury events, observe reorg/recovery/failover and multisig rotation, perform incident drills and close operational/security approvals. None of these are silently credited as PASS from source-only Level 1.
+
+## R04 accumulated Level 2 — authority, competition and replacement acceptance
+
+This adds operational gates without changing the R04.1–R04.14 sequence. The source-level review is `R04-LEVEL2-INTEGRATION-REVIEW.md`; the accumulated milestone is **NOT COMPLETE** while its integration findings remain open. Green retained CI alone cannot close those findings.
+
+| Genuine deployment/testnet dependency | Canonical owner | Required independent evidence |
+|---|---|---|
+| R04.11 organization/cooperative authority | R07/R09 | Actual deployer handoff, member identities, executor binding, role revocation, finalized events and independently authorized Treasury/Identity consumers |
+| R04.12–13 competition/Cup operation | R07/R09 | Deployed canonical harvest/finality and optional entitlement adapters, real player signatures, revocation/dispute/reorg observations, semifinal/final provenance and exact scoped cross-game consumer acceptance; funded prize acceptance only if separately specified |
+| R04.14 emergency council | R07/R09 | Actual officer credentials and controller-address per-domain restrict/release grants; revoke bootstrap grants; operate real consumer ingress/recovery/veto/release under network faults and retain receipts |
+| R04.14 replacement rehearsal | R07.5/R09 | Code hashes, independent review, timelock, drain/snapshot/migration/config publication, explicit old-grant revocation, replay preservation, service rebinding and rollback/recovery; acceptance provenance is not an executed replacement |
+| Shared operational security | R07/R09 | Deployed signer/secret/TLS rotation, production-equivalent database backup/failover/permissions, monitoring and independent operator/security approval |
+
+**Engineering work is not deferred merely because no live testnet exists:** canonical harvest/finality and entitlement adapter implementation, missing R04 mutator emergency enforcement, authenticated reward/account/settlement composition and actual local cross-component integration remain open under the existing R04/R05 owners. Review findings INT-R04-01 through INT-R04-04 retain these boundaries. No production readiness, R05 start or R04 merge is authorized by this register.

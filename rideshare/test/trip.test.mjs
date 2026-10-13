@@ -74,3 +74,38 @@ test('malformed IDs, extra location fields, self-assignment and invalid snapshot
   rejects(() => move(arrived(), 'start', driver, {...context, paused: 'false'}), 'INVALID_CONTEXT');
   rejects(() => move(arrived(), 'start', driver, context, {driverId: 'other'}), 'INVALID_INPUT');
 });
+test('all state/action/actor combinations enforce the lifecycle and authority matrix', () => {
+  const snapshots = [fresh(), assigned(), arrived(), active(), move(active(), 'complete'), move(fresh(), 'cancel', rider)];
+  const actors = [rider, driver, dispatcher, {subject: 'stranger', role: 'rider'}, {subject: 'stranger', role: 'driver'}];
+  for (const trip of snapshots) for (const action of ['assign', 'arrive', 'start', 'complete', 'cancel']) for (const actor of actors) {
+    const permitted = (action === 'assign' && trip.state === 'REQUESTED' && actor === dispatcher) ||
+      (action === 'arrive' && trip.state === 'ASSIGNED' && actor === driver) ||
+      (action === 'start' && trip.state === 'ARRIVED' && actor === driver) ||
+      (action === 'complete' && trip.state === 'IN_PROGRESS' && actor === driver) ||
+      (action === 'cancel' && ['REQUESTED', 'ASSIGNED', 'ARRIVED'].includes(trip.state) &&
+        (actor === rider || (actor === driver && trip.driverId === driver.subject)));
+    const invoke = () => move(trip, action, actor, context, action === 'assign' ? {driverId: 'driver_1', vehicleId: 'vehicle_1'} : undefined);
+    if (permitted) assert.equal(invoke().revision, trip.revision + 1);
+    else assert.throws(invoke, {name: 'TripError'});
+  }
+});
+test('inherited claims, symbols and accessors cannot bypass the input schema', () => {
+  rejects(() => createTrip(Object.create({id: 'trip_1', routeRef: 'route_1'}), rider), 'INVALID_INPUT');
+  rejects(() => createTrip({id: 'trip_1', routeRef: 'route_1', [Symbol('private')]: 52}, rider), 'INVALID_INPUT');
+  let invoked = false;
+  const input = {id: 'trip_1', get routeRef() { invoked = true; return 'route_1'; }};
+  rejects(() => createTrip(input, rider), 'INVALID_INPUT');
+  assert.equal(invoked, false);
+});
+test('safe-integer boundaries and malformed admission fail closed', () => {
+  for (const revision of [-1, 0.5, NaN, Number.MAX_SAFE_INTEGER + 1]) {
+    rejects(() => publicView({...fresh(), revision}), 'INVALID_TRIP');
+  }
+  rejects(() => move({...assigned(), revision: Number.MAX_SAFE_INTEGER}, 'arrive'), 'REVISION_EXHAUSTED');
+  for (const expiresAt of [NaN, Infinity, '200', Number.MAX_SAFE_INTEGER + 1]) {
+    rejects(() => move(assigned(), 'arrive', driver, {...context, admission: {...admission, expiresAt}}), 'ADMISSION_REQUIRED');
+  }
+  const trip = assigned();
+  rejects(() => transitionTrip(trip, {action: 'arrive', expectedRevision: '1'}, driver, context), 'STALE_REVISION');
+  assert.equal(trip.state, 'ASSIGNED');
+});

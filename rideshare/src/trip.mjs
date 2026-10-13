@@ -8,7 +8,9 @@ const id = value => typeof value === 'string' && /^[a-zA-Z0-9_-]{1,128}$/.test(v
 const states = new Set(['REQUESTED', 'ASSIGNED', 'ARRIVED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED']);
 const keys = (object, allowed) => {
   if (!object || typeof object !== 'object' || Array.isArray(object) ||
-      Object.keys(object).some(key => !allowed.includes(key))) fail('INVALID_INPUT');
+      ![Object.prototype, null].includes(Object.getPrototypeOf(object)) ||
+      Reflect.ownKeys(object).some(key => !allowed.includes(key) ||
+        !Object.hasOwn(Object.getOwnPropertyDescriptor(object, key), 'value'))) fail('INVALID_INPUT');
 };
 const principal = actor => {
   keys(actor, ['subject', 'role']);

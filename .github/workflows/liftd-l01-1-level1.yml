@@ -9,6 +9,7 @@ on:
     branches: ['build/liftd-l01-1-foundation']
     paths:
       - 'rideshare/**'
+      - 'docs/rideshare/**'
       - '.github/workflows/liftd-l01-1-level1.yml'
   workflow_dispatch:
 permissions:
@@ -31,6 +32,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Syntax and canonical foundation verification
+        run: |
+          node --check rideshare/src/trip.mjs
+          node --check rideshare/test/trip.test.mjs
+          node --check rideshare/scripts/verify-foundation.mjs
+          node rideshare/scripts/verify-foundation.mjs
       - name: Trip lifecycle and denial-path tests
         run: npm test --prefix rideshare
       - name: Record scoped implementation evidence

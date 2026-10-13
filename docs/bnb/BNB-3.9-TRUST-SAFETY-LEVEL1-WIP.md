@@ -1,3 +1,5 @@
+> **Supersession notice (M3-B technical evidence):** This is a retained historical WIP snapshot. Later repo-side appeals, moderation separation, report-detail retention, crash-fault tests and the bounded app Level 2 qualification are recorded in [BNB-M3B-LEVEL2-QUALIFICATION.md](BNB-M3B-LEVEL2-QUALIFICATION.md), implementation SHA `0730e78eaac10dc18ca29e46eb6706cd75465cb6`. External/operator/legal/manual-testnet gates remain open; historical unresolved statements below describe their earlier snapshots, not the latest implementation state.
+
 # BNB-3.9 — Trust and safety Level 1 working qualification
 
 **Status: PARTIAL — NOT CERTIFIED.** Canonical BNB-3.9 requires approved review/moderation/reputation contract integration, abuse reporting, appeals, retention/redaction and protected communications; adversarial replay, injection, IDOR, withdrawal, issuer compromise, moderation separation and outages. Independent moderator/reputation acceptance remains `T-BNB-MEDIA-1` and `T-BNB-REPUTATION-211` on official testnet.

@@ -1566,3 +1566,53 @@ def test_bnb210_authorized_discovery_freshness_and_revocation(fixture_property,m
         with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
             c.execute("DELETE FROM bnb_travel_place_binding WHERE property_id=%s",(pid,))
             c.execute("DELETE FROM bnb_travel_jurisdiction_policy WHERE jurisdiction_id='CA_SK'")
+
+
+def test_bnb311_end_to_end_guest_host_privacy_unfunded_withdrawal(fixture_property):
+    """One integrated public->private->quote->hold->request->withdraw journey.
+
+    Synthetic signer/DB fixture is app qualification, NOT independent testnet acceptance.
+    """
+    pid,guest=fixture_property
+    listing=client.get(f"/v1/bnb/listings/{pid}")
+    assert listing.status_code==200
+    assert "host_subject" not in listing.json()
+    assert "address" not in listing.json()
+
+    assert client.get("/v1/bnb/account/saved-stays").status_code==401
+    assert client.put(f"/v1/bnb/account/saved-stays/{pid}",headers=guest).status_code==200
+    saved=client.get("/v1/bnb/account/saved-stays",headers=guest)
+    assert saved.status_code==200
+    assert any(stay["id"]==str(pid) for stay in saved.json())
+
+    hold=make_bnb25_hold(pid,guest,"bnb311-e2e-quote","bnb311-e2e-hold")
+    assert hold.status_code==201,hold.text
+    request=client.post("/v1/bnb/booking-requests",headers={
+        **guest,"idempotency-key":"bnb311-e2e-request"},
+        json={"hold_id":hold.json()["id"],"request_type":"request"})
+    assert request.status_code==201,request.text
+    rid=request.json()["id"]
+    assert request.json()["state"]=="requested"
+    assert not request.json().get("confirmed",False)
+    try:
+        assert client.get(f"/v1/bnb/booking-requests/{rid}").status_code==401
+        assert client.post(f"/v1/bnb/booking-requests/{rid}/accept",
+                           headers=guest).status_code==404
+        assert client.get(f"/v1/bnb/account/properties/{pid}/earnings",
+                          headers=guest).status_code in (403,404)
+        assert client.get("/v1/bnb/account/reservations",headers=guest).status_code==200
+        assert client.post(f"/v1/bnb/booking-requests/{rid}/withdraw",
+                           headers=guest).status_code==200
+        assert client.post(f"/v1/bnb/booking-requests/{rid}/withdraw",
+                           headers=guest).status_code==409
+        with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+            assert c.execute("SELECT status FROM bnb_hold WHERE id=%s",
+                             (hold.json()["id"],)).fetchone()[0]=="cancelled"
+            assert c.execute("SELECT COUNT(*) FROM bnb_reservation WHERE property_id=%s",
+                             (pid,)).fetchone()[0]==0
+    finally:
+        with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+            c.execute("DELETE FROM bnb_request_dedupe WHERE actor='guest-fixture'")
+            c.execute("DELETE FROM bnb_booking_request WHERE property_id=%s",(pid,))
+            c.execute("DELETE FROM bnb_audit WHERE resource_id=%s",(pid,))
+            c.execute("DELETE FROM bnb_guest_saved_stay WHERE property_id=%s",(pid,))

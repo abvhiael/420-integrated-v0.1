@@ -1,6 +1,6 @@
 # LIFTd — canonical 420Rideshare development roadmap
 
-Public working brand: **LIFTd**, following the owner's latest spelling. Earlier concept name: LIFTED. Technical application: 420Rideshare. This is a first-party passenger transportation application, separate from DOOBr delivery. First launch market: **Vancouver, British Columbia, Canada**, selected by the owner on 2026-10-13, matching DOOBr's initial market. This market decision does not grant passenger-transport authorization or automatically include all Metro Vancouver municipalities or YVR. Fare, platform percentage, development-compensation allocation and trademark clearance remain unresolved.
+Public working brand: **LIFTd**, following the owner's latest spelling. Earlier concept name: LIFTED. Technical application: 420Rideshare. This is a first-party passenger transportation application, separate from DOOBr delivery. First launch market: **Vancouver, British Columbia, Canada**, selected by the owner on 2026-10-13, matching DOOBr's initial market. This market decision does not grant passenger-transport authorization or automatically include all Metro Vancouver municipalities or YVR. Vancouver pilot fare, driver compensation, platform allocation and development allocation were adopted by the owner on 2026-10-13; see [economic policy v1](LIFTD-VANCOUVER-PILOT-ECONOMIC-POLICY.md). Trademark clearance, detailed cancellation/waiting policies and operating-cost validation remain pending.
 
 ## Repository baseline and ownership
 
@@ -24,14 +24,14 @@ Level 1 per implementation step; Level 2 only at the named milestones; one Level
 
 | Step | Deliverable | Current status |
 | --- | --- | --- |
-| L01.1 | Inventory, canonical scope, integration ownership, trip invariants, fail-closed domain kernel and scoped CI | Implemented candidate; see evidence record |
+| L01.1 | Inventory, canonical scope, integration ownership, trip invariants, fail-closed domain kernel and scoped CI | Level 1 qualified; see evidence record |
 | L01.2 | Independently authenticated rider/driver/operator sessions, recovery/revocation, authorization tests | Pending — next |
 | L01.3 | Driver/vehicle registry projections and jurisdiction-scoped eligibility adapters | Pending |
 | L01.4 | Durable PostgreSQL trip/event store, uniqueness, transactional compare-and-swap, idempotency/replay and restart tests | Pending |
 | L01.5 | Location routing adapter, private pickup/drop-off storage, scoped access, precision and retention | Pending |
 | M-L01-A | Level 2: identity + eligibility + durable trip + Location integration | Pending |
 | L01.6 | Driver availability, vehicle capacity, deterministic matching, assignment expiry and concurrent dispatch | Pending |
-| L01.7 | Immutable expiring fare quotes, currency/rounding, rider consent and explicit cancellation policy | Pending; economics undecided |
+| L01.7 | Immutable expiring fare quotes, currency/rounding, rider consent and explicit cancellation policy | Pending implementation; pilot economics adopted |
 | L01.8 | Scoped Pay/Wallet intents, receipts/finality, cancellation/refund and payout projections | Pending; live acceptance separately gated |
 | L01.9 | Safety incident workflow, active-trip resolution, pause/recovery, bounded operator permissions and privacy | Pending |
 | M-L01-B | Level 2: dispatch + economics + safety integration/adversarial checks | Pending |

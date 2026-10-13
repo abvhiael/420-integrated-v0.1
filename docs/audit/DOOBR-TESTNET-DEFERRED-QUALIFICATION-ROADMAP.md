@@ -99,3 +99,38 @@ DOOBR-AUDIT-10: TESTNET/RELEASE GATED — NOT COMPLETE.
 - [ ] Exercise offline reconnect, device revocation, location permission denial, private courier/retailer and operator workflows only against independently authenticated staging/testnet services; record negative denial paths and no identity, address or GPS disclosure. DOOBr remains non-operational while these services are absent.
 - [ ] Verify full production Playwright/browser matrix and privacy/a11y audit on approved staging deployment, plus 420Travel external handoff/actual cross-origin navigation when domain and signed presence issuer are available. No real regulated checkout may be enabled.
 - These acceptance checks carry the original **R03.11** identifier, and feed **R03.12** app-specific Level 2 and **R05.10** Level 3 at their defined milestones, without prematurely running broad global qualifications.
+
+
+## R05.10 and R06 — owner-directed transfer of all unfinished DOOBr work (2026-10-13)
+
+The product owner directed all unfinished DOOBr work to this testnet work roadmap on 2026-10-13. This section is the consolidated resumption queue. Preserve original step IDs and qualified implementation evidence. Transfer changes scheduling only: no unfinished requirement is waived, certified or counted as PASS. Repository-only prerequisites below do not inherently require blockchain testnet and must be resolved before certification or promotion. DOOBr development is paused pending resumption from this queue.
+
+### Verified implementation baseline
+
+Implementation SHA: `621f9ba8f1fc97e3c3e79b39f21e806df89b9146`; reconciliation base: `bc0faa5dafecda3de0620a9581f9953b89cd95fb`; candidate branch `qualification/doobr-r05-10-main-bc0faa5d`. Original PR #601 and qualification PR #630 remain OPEN / UNMERGED. Evidence-only commit `4c02f064a68e7eaf3b52c54da670d3c82fd2212f` does not create a new qualified executable implementation.
+
+Full Solidity Contracts run [38349910984](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38349910984) PASSED in 1h 24m 44s: all four shards, mandatory coverage, complete/unique inventory, Decision #10 fixture and aggregated coverage; six artifacts uploaded. Final validation job [115161435333](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38349910984/job/115161435333) PASSED. Independent Genesis Address Authority [38349768536](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38349768536), Integrated/global [38349628761](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38349628761), and existing Docs [38348284748](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38348284748) PASSED. The earlier gate evidence file recorded Solidity while in progress; this later observation supersedes only that pending-run status. It does not certify R05.10.
+
+### Repository closeout prerequisites carried into the testnet work queue — NOT COMPLETE
+
+- [ ] **R05.10 — Workflow failures:** resolve or formally justify applicability of Governance deployment audit invalid YAML line 155 ([38348251961](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38348251961)) and 420Hz GCA invalid YAML line 257 ([38348252647](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38348252647)). Both failed before jobs on the candidate; neither may be silently omitted or counted as passing.
+- [ ] **R05.10 — Deployment/configuration:** identify failed Cloudflare preview projects and inspect logs; resolve relevant deployment/configuration defects or document an approved scope disposition. Successful unrelated previews do not qualify DOOBr deployment.
+- [ ] **R05.10 — Retained evidence reconciliation:** complete individual job/step/artifact review for application, PostgreSQL, backend, mobile, browser, clients, Travel, security, deployment and affected Indexer/Search/RPC scope against the exact implementation SHA. Preserve the 50 successful retained PR-triggered workflow results without interpreting that count as comprehensive certification.
+- [ ] **R05.10 — Final review:** complete architecture, authority, documentation, configuration and repository security acceptance; record exact run/job URLs, required results, residual findings and disposition. No final security approval has been issued.
+- [ ] **R05.10 — Main reconciliation and certification:** inspect latest main, establish whether the candidate remains reconciled, resolve any new conflicts preserving both trees, and certify only the exact reviewed implementation. Any executable/configuration/workflow changes establish a new SHA requiring applicable requalification. Evidence-only updates inherit existing implementation evidence; do not duplicate expensive global inventories without a new qualification reason.
+- [ ] **R05.10 — Merge authorization:** keep #601/#630 unmerged until complete required qualification and explicit approval. Transfer to this queue is not merge authorization.
+
+### Live/testnet/external integration acceptance — NOT COMPLETE
+
+- [ ] **R06.1–R06.4 / DOOBR-AUDIT-9:** authentic Identity/Verify/Registry issuers, role/session/device revocation, service endpoints and managed credentials, signed Compliance/provider policy and licensing integrations; deny expired/revoked/unknown authority and outages.
+- [ ] **R04.4–R04.5 / R06.3–R06.4 / DOOBR-AUDIT-9:** real 420Pay merchant/prepaid settlement, Wallet consent, fund movement, finality/reorg/reversal/refund and Dev Compensation Vault conservation, signed callbacks and independent reconciliation.
+- [ ] **R03.7/R03.9 / R06.2 / DOOBR-AUDIT-9:** approved private HTTPS ingress, authenticated consoles/replay service, production-equivalent PostgreSQL privileges/RLS/migrations, real cross-tenant and concurrent end-to-end denial/failure journeys, reconnect and canonical external case effects.
+- [ ] **R05.6 / DOOBR-AUDIT-9:** multi-node deployment, emergency-stop propagation, outages/partitions/failover, encrypted backup/PITR/restore, audit durability, controlled migration/rollback, monitoring and operational recovery drills on the exact deployed SHA.
+- [ ] **R03.8–R03.11 / R05.7:** real iOS/Android attestation and secure keys, GPS permission/consent lifecycle, APNs/FCM and Notifications acceptance, signing/distribution, offline/revocation journeys, VoiceOver/TalkBack/NVDA and independent accessibility acceptance. Hardware, signing and approved staging checks can proceed before blockchain testnet where their dependencies permit.
+- [ ] **R05.8 / R06.9–R06.10 / DOOBR-AUDIT-10:** signed independent security/privacy assessment and retests; BC/Vancouver legal/regulatory, retailer/carrier, payment-provider, insurance and operational owner approvals; formal exact-deployment-SHA go/no-go and rollback authority. Legal and provider authorization can proceed before testnet; testnet grants no regulatory authority.
+
+### Resumption and operating disposition
+
+Resume from this consolidated queue with repository truth, current main and original R01–R06 owners. The detailed prior acceptance registers remain authoritative and are not replaced or renumbered by these summary items. No remaining local implementation gap may be excused as requiring testnet merely because it is scheduled here.
+
+**R05.10: DEFERRED CLOSEOUT / NOT CERTIFIED. DOOBR-AUDIT-9/10 and R06: NOT COMPLETE. DOOBr: NON-OPERATIONAL / NO-GO.** Checkout, regulated ordering/dispatch/settlement, private case execution lacking independent authority, and all seven frozen Genesis Travel transaction methods remain disabled. No merge, deployment activation or release approval follows from this transfer.

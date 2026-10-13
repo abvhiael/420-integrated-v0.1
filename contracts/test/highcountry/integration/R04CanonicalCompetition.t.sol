@@ -143,7 +143,10 @@ contract R04CanonicalCompetitionTest is PublicPlantCapacityFixture {
         vm.prank(player);harvest.acceptHarvest(plant);
         id=products.registerHarvestProduct(plant);
         uint256 b=products.registeredBlock(id);blocks.roll(b+1);bytes32 hash=keccak256(abi.encode("canonical-block",b));
-        blocks.setBlockhash(b,hash);evidence.confirm(id,hash);
+        blocks.setBlockhash(b,hash);
+        (bool forged,)=address(evidence).call(abi.encodeCall(evidence.confirm,(id,keccak256("forged-source-block"))));
+        require(!forged && evidence.confirmedProductHash(id)==bytes32(0),"forged source block confirmed");
+        evidence.confirm(id,hash);
         HarvestProductRegistry.Product memory p=products.getProduct(id);return(id,p.qualityBps,p.harvestAcceptedAt);
     }
     function _submit(uint64 plant,address player,bytes32 eventId) internal returns(bytes32 id) {
@@ -158,11 +161,19 @@ contract R04CanonicalCompetitionTest is PublicPlantCapacityFixture {
         vm.warp(finalOpen+200);competition.finalize(F);cup.finalize(CUP);cup.issueCrossGame(CUP);
     }
     function testCanonicalHarvestCupSharedAttestationAndRevocation() public {
-        _finalCup();bytes32 payload=consumer.payload(CUP,SCOPE);bytes32 id=keccak256("shared-cup-attestation");
+        _finalCup();
+        (bool refinalized,)=address(cup).call(abi.encodeCall(cup.finalize,(CUP)));
+        (bool reissued,)=address(cup).call(abi.encodeCall(cup.issueCrossGame,(CUP)));
+        require(!refinalized && !reissued,"canonical Cup replay");
+        bytes32 payload=consumer.payload(CUP,SCOPE);bytes32 id=keccak256("shared-cup-attestation");
         HighCountryCrossGame420 cross=HighCountryCrossGame420(address(consumer.crossGame()));
         sharedCross.issue(id,bridge.gameProfileIdOfGrower(myGrower),cross.global420CupSubject(),CUP,payload,0);
         require(consumer.eligible(myGrower,address(this),CUP,SCOPE,id),"canonical consumer denied");
         require(!consumer.eligible(myGrower,address(this),CUP,keccak256("wrong-scope"),id),"scope bypass");
+        require(!consumer.eligible(aliceGrower,address(this),CUP,SCOPE,id),"profile/account bypass");
+        bytes32 forgedId=keccak256("wrong-source-attestation");
+        sharedCross.issue(forgedId,bridge.gameProfileIdOfGrower(myGrower),cross.global420CupSubject(),keccak256("wrong-cup"),payload,0);
+        require(!consumer.eligible(myGrower,address(this),CUP,SCOPE,forgedId),"attestation source bypass");
         entitlements.revoke(MY_ENTITLEMENT);
         require(!cup.isIssued(CUP,address(this),SCOPE),"revoked entitlement still issued");
         require(!consumer.eligible(myGrower,address(this),CUP,SCOPE,id),"revocation bypass");

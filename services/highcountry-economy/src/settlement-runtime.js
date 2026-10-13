@@ -53,16 +53,35 @@ export function composeSettlementRuntime({store,identity,rpc,operator,issuer,mar
  };
  const authority={
   canonicalSettlementRequired:true,
+  preparedParties:async(id,buyer)=>{
+   const l=await listing(id),sellerWallet=await binding(l.seller),buyerWallet=await binding(buyer);
+   const snapshot=await store.transact(s=>({seller:s.runtimeWallets.get(l.seller),buyer:s.runtimeWallets.get(buyer),
+    sellerEpoch:s.runtimeEpochs.get(l.seller)||0,buyerEpoch:s.runtimeEpochs.get(buyer)||0}));
+   if(snapshot.seller?.wallet!==sellerWallet||snapshot.buyer?.wallet!==buyerWallet)throw new SettlementError('chain binding changed');
+   return {seller:l.seller,buyer,sellerWallet,buyerWallet,sellerProfile:snapshot.seller.profile,buyerProfile:snapshot.buyer.profile,
+    sellerEpoch:snapshot.sellerEpoch,buyerEpoch:snapshot.buyerEpoch,operationId:await reader.expectedTransferOperation(l.sourceReceiptId,buyerWallet)};
+  },
+  validatePreparedParties:(s,p,l,buyer,token)=>{
+   const c=identity.verifyToken(token);
+   if(!p||p.seller!==l.seller||p.buyer!==buyer||c.sub!==buyer||c.epoch!==p.buyerEpoch
+      ||s.runtimeWallets.get(l.seller)?.wallet!==p.sellerWallet||s.runtimeWallets.get(buyer)?.wallet!==p.buyerWallet
+      ||(s.runtimeEpochs.get(l.seller)||0)!==p.sellerEpoch||(s.runtimeEpochs.get(buyer)||0)!==p.buyerEpoch)
+    throw new SettlementError('chain binding or authority changed');
+  },
   registeredPrincipal:token=>identity.registeredPrincipal(token),
   expectedTransferOperation:async(id,buyer)=>reader.expectedTransferOperation((await listing(id)).sourceReceiptId,await binding(buyer)),
   confirmedListingClosure:async id=>reader.confirmedListingClosure((await listing(id)).sourceReceiptId),
   confirmedReservedTransfer:async op=>{
    const t=await store.transact(s=>s.transferIntents.get(op));if(!t)return null;
    const r=await reader.confirmedReservedTransfer(op);
-   if(!r||r.sourceReceiptId!==t.sourceReceiptId||r.from!==await binding(t.seller)||r.to!==await binding(t.buyer))return null;
+   if(!r||r.sourceReceiptId!==t.sourceReceiptId||r.from!==t.canonicalParties?.sellerWallet||r.to!==t.canonicalParties?.buyerWallet)return null;
    return {...r,from:t.seller,to:t.buyer};
   },
-  proveUnexecutedAndCancelled:async(op,id,buyer)=>reader.proveUnexecutedAndCancelled(op,(await listing(id)).sourceReceiptId,await binding(buyer)),
+  proveUnexecutedAndCancelled:async(op,id,buyer)=>{
+   const t=await store.transact(s=>s.transferIntents.get(op));
+   if(!t?.canonicalParties||t.listingId!==id||t.buyer!==buyer)return false;
+   return reader.proveUnexecutedAndCancelled(op,t.sourceReceiptId,t.canonicalParties.buyerWallet);
+  },
   requireSubmissionAllowed:async()=>{if(!await rpc.unrestricted(marketDomain))throw new SettlementError('market restricted');}
  };
  const settlement=new CanonicalMarketSettlement(store,authority,clock);
@@ -71,7 +90,14 @@ export function composeSettlementRuntime({store,identity,rpc,operator,issuer,mar
   // Re-read durable reservation immediately before asking the external operator wallet to sign.
   const current=await store.transact(s=>s.transferIntents.get(intent.transferOp));
   if(!current||current.status!=='prepared'||JSON.stringify(current)!==JSON.stringify(intent))throw new SettlementError('stale transfer intent');
+  const p=intent.canonicalParties;
+  if(!p)throw new SettlementError('missing immutable chain parties');
+  await store.transact(s=>{
+   if((s.runtimeEpochs.get(intent.buyer)||0)!==p.buyerEpoch||(s.runtimeEpochs.get(intent.seller)||0)!==p.sellerEpoch)
+    throw new SettlementError('submission authority revoked');
+  });
   const buyer=await binding(intent.buyer),seller=await binding(intent.seller);
+  if(buyer!==p.buyerWallet||seller!==p.sellerWallet)throw new SettlementError('submission binding changed');
   const l=await reader._listing(intent.sourceReceiptId);
   if(l.owner!==seller||l.asset!==intent.asset||l.quantity!==BigInt(intent.quantity)||Number(l.status)!==1
      ||await reader.expectedTransferOperation(intent.sourceReceiptId,buyer)!==intent.transferOp)throw new SettlementError('escrow intent mismatch');

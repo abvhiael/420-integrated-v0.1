@@ -13,10 +13,10 @@ export function runtimeState(s){
 }
 const fail=message=>{throw new SettlementError(message);};
 export class RuntimeAuthority {
- constructor({store,issuers,audience,gameId,chainId,origin,rpc,clock=()=>Date.now()}){
+ constructor({store,issuers,audience,gameId,chainId,origin,rpc,sourcePolicies={},clock=()=>Date.now()}){
   if(typeof store?.transact!=='function'||!issuers||!id(audience)||!/^0x[0-9a-f]{64}$/i.test(gameId)
      ||!Number.isSafeInteger(chainId)||!/^https?:\/\//.test(origin)||!rpc)fail('invalid runtime authority');
-  Object.assign(this,{store,issuers,audience,gameId,chainId,origin,rpc,clock});
+  Object.assign(this,{store,issuers,audience,gameId,chainId,origin,rpc,sourcePolicies,clock});
  }
  verifyToken(token){
   if(typeof token!=='string'||token.length>8192)fail('invalid session');
@@ -61,8 +61,8 @@ export class RuntimeAuthority {
  }
  async revokeSource(token,source){
   const c=this.verifyToken(token);await this.registeredPrincipal(token);
-  if(!this.issuers[c.iss]?.operators?.[c.sub]?.administrator||!id(source))fail('source revocation denied');
-  return this.store.transact(s=>{runtimeState(s);s.runtimeSourceEpochs.set(source,(s.runtimeSourceEpochs.get(source)||0)+1);});
+  if(!this.issuers[c.iss]?.operators?.[c.sub]?.administrator||!id(source)||!this.sourcePolicies[source])fail('source revocation denied');
+  return this.store.transact(s=>{runtimeState(s);s.runtimeSourceEpochs.set(source,Math.max(s.runtimeSourceEpochs.get(source)??0,this.sourcePolicies[source].epoch)+1);});
  }
  async linkChallenge(token,wallet){
   const principal=await this.registeredPrincipal(token);wallet=address(wallet);

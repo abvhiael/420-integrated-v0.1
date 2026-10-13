@@ -13,7 +13,7 @@ export async function createRuntime({pool,namespace,authority:authConfig,rpc:rpc
  if(!role||role.role!==namespace||role.rolsuper||role.rolbypassrls||!role.relrowsecurity||role.owner===role.role||!role.can_select||!role.can_update||role.elevated)throw new SettlementError('unsafe runtime database role');
  const store=new PostgresBudsStore(pool,namespace),rpc=new FinalizedRpc(rpcConfig);
  for(const [name,policy] of Object.entries(sources))if(address(rpc.contracts[name]?.address)!==address(policy.contract))throw new SettlementError('source contract mismatch');
- const identity=new RuntimeAuthority({...authConfig,store,rpc,clock});
+ const identity=new RuntimeAuthority({...authConfig,store,rpc,sourcePolicies:sources,clock});
  const rewards=new GameplayRewardRuntime({store,authority:identity,rpc,sources,clock});
  const chain=composeSettlementRuntime({store,identity,rpc,operator,issuer,marketDomain,signerRpc,clock});
  const marketAuthority={

@@ -99,6 +99,7 @@ try {
  await send(operator,addresses.emergency,calldata('setRestricted(bytes32,bool)',config.marketDomain,0));
  const submitted=await post('operator','/operator/reconcile',{transferOperation:op});assert.equal(submitted.status,'submitted');
  await receipt(submitted.txHash);await chain.request('anvil_mine',['0x40']);
+ await post('buyer','/wallet/unlink');await post('seller','/wallet/unlink');
  // A newly constructed worker/service instance reconciles the persisted intent and finalized canonical receipt.
  const restarted=await createRuntime(config);const settled=await restarted.worker.tick(op);assert.equal(settled.status,'finalized');
  const balances=await restarted.store.transact(s=>({buyer:s.balances.get('buyer'),seller:s.balances.get('seller'),intent:s.transferIntents.get(op),issued:s.issued}));

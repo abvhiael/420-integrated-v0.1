@@ -15,7 +15,7 @@ function fixture(){
   verifyWallet:async(_w,_m,s)=>consent&&s==='signed',unrestricted:async()=>open,
   missionReward:async(_s,w,_id,n)=>canonical&&w===wallet&&n===7};
  const authority=new RuntimeAuthority({store,issuers:{idp:{publicKey:sessionKeys.publicKey,operators:{alice:{administrator:true}}}},
-  audience:'hc',gameId:game,chainId:420,origin:'https://highcountry.example',rpc,clock:()=>now});
+  audience:'hc',gameId:game,chainId:420,origin:'https://highcountry.example',rpc,sourcePolicies:{mission:{epoch:0}},clock:()=>now});
  const token=(changes={})=>{const p=Buffer.from(JSON.stringify({iss:'idp',sub:'alice',sid:'session1',aud:'hc',game,nbf:0,exp:100000,epoch:0,...changes})).toString('base64url');
   return p+'.'+sign(null,Buffer.from(p),sessionKeys.privateKey).toString('base64url');};
  const proof=(changes={})=>{const payload=Buffer.from(JSON.stringify({domain:'HC.GAMEPLAY.REWARD.V1',game,chainId:420,
@@ -92,4 +92,13 @@ test('HTTP routes require signed bearer session, bound origin and deny unknown o
  assert.equal((await post('/accounts/register',{authorization:'Bearer '+f.token(),origin:'https://evil.example'})).status,403);
  assert.equal((await post('/operator/reconcile',{authorization:'Bearer '+f.token()})).status,403);
  assert.equal((await post('/unknown',{authorization:'Bearer '+f.token()})).status,403);
+});
+
+test('source revocation advances nonzero configured epochs without allowing old proofs',async()=>{
+ const f=fixture();await f.link();
+ f.authority.sourcePolicies.mission.epoch=5;f.rewards.sources.mission.epoch=5;
+ await f.authority.revokeSource(f.token(),'mission');
+ assert.equal(f.store.state.runtimeSourceEpochs.get('mission'),6);
+ await assert.rejects(f.rewards.claim(f.token(),'mission',f.proof({epoch:5})),/revoked/);
+ assert.equal(f.store.state.issued,0);
 });

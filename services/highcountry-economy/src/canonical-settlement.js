@@ -20,6 +20,8 @@ export class CanonicalMarketSettlement {
   const buyer=id(await this.authority.registeredPrincipal(session));id(listingId);id(transferOp);
   const canonicalOp=await this.authority.expectedTransferOperation(listingId,buyer);
   if(canonicalOp!==transferOp)throw new SettlementError('wrong deterministic transfer operation');
+  const canonicalParties=this.authority.preparedParties?await this.authority.preparedParties(listingId,buyer):null;
+  if(canonicalParties&&canonicalParties.operationId!==transferOp)throw new SettlementError('chain party changed');
   return this.buds.operate(op,s=>{
    if(s.transferIntents.has(transferOp))throw new SettlementError('duplicate transfer intent');
    const l=s.listings.get(listingId);
@@ -27,6 +29,7 @@ export class CanonicalMarketSettlement {
      throw new SettlementError('unavailable listing');
    if(this.authority.canonicalSettlementRequired===true&&!l.sourceReceiptId)
      throw new SettlementError('unavailable listing');
+   if(this.authority.validatePreparedParties)this.authority.validatePreparedParties(s,canonicalParties,l,buyer,session);
    const funds=this.buds.get(s,buyer);
    if(funds.available<l.price)throw new SettlementError('insufficient BUDS');
    const asset=s.assets.get(JSON.stringify([l.seller,l.asset]));
@@ -34,7 +37,7 @@ export class CanonicalMarketSettlement {
    funds.available-=l.price;funds.reserved+=l.price;
    l.status='settling';
    const intent={transferOp,listingId,buyer,seller:l.seller,asset:l.asset,
-    quantity:l.quantity,price:l.price,sourceReceiptId:l.sourceReceiptId||null,status:'prepared'};
+    quantity:l.quantity,price:l.price,sourceReceiptId:l.sourceReceiptId||null,canonicalParties,status:'prepared'};
    s.transferIntents.set(transferOp,intent);
    return {...intent};
   });

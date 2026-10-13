@@ -1,0 +1,104 @@
+{
+  "step": "R05.1 — Datastore and repositories",
+  "status": "COMPLETE",
+  "qualification_level": 1,
+  "implementation_sha": "fbfe9e10d5c22c3b81d6853621304d057fab3b8a",
+  "implementation_tree": "ba1cc8cf551455e9e491381b24919c0f6cd7d967",
+  "main_sha": "959288c8bd33b6da0325b6a5d060e00e7bcf0e48",
+  "base_sha": "3c670803143221613c657e15f6b955c029d6fc1c",
+  "branch": "audit/highcountry-r05-1-datastore-20261013",
+  "pr": 635,
+  "evidence_commit": "Resolve the commit introducing this certificate; evidence-only descendant of implementation_sha.",
+  "files_changed": [
+    ".github/workflows/gaming-player-profile-service.yml",
+    ".github/workflows/highcountry-r05-1.yml",
+    "docs/highcountry/R05.1-DATASTORE-AND-REPOSITORIES.md",
+    "services/420-gaming-player-profile/migrations/001_datastore.down.sql",
+    "services/420-gaming-player-profile/migrations/001_datastore.up.sql",
+    "services/420-gaming-player-profile/package-lock.json",
+    "services/420-gaming-player-profile/package.json",
+    "services/420-gaming-player-profile/scripts/migrate.mjs",
+    "services/420-gaming-player-profile/src/datastore-provisioning.js",
+    "services/420-gaming-player-profile/src/postgres-repository.js",
+    "services/420-gaming-player-profile/src/schema-migrations.js",
+    "services/420-gaming-player-profile/src/service.js",
+    "services/420-gaming-player-profile/test/datastore-validation.test.js",
+    "services/420-gaming-player-profile/test/postgres.integration.mjs"
+  ],
+  "required_runs": [
+    {
+      "id": 38477758381,
+      "name": "420 Gaming Player Profile Service",
+      "head_sha": "fbfe9e10d5c22c3b81d6853621304d057fab3b8a",
+      "conclusion": "success",
+      "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38477758381"
+    },
+    {
+      "id": 38477758280,
+      "name": "High Country R05.1 Level 1 Datastore",
+      "head_sha": "fbfe9e10d5c22c3b81d6853621304d057fab3b8a",
+      "conclusion": "success",
+      "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38477758280"
+    }
+  ],
+  "required_jobs": [
+    {
+      "id": 115572568297,
+      "conclusion": "success"
+    },
+    {
+      "id": 115572568870,
+      "conclusion": "success"
+    }
+  ],
+  "tests": {
+    "profile_fixture": 8,
+    "datastore_input": 4,
+    "postgres_acceptance_cases": 14,
+    "postgres_node_test_count_including_outer_wrapper": 15,
+    "affected_runtime": 35,
+    "failed": 0,
+    "skipped": 0
+  },
+  "postgres_acceptance": [
+    "advisory-locked migration applies once, reverses empty schema and detects checksum drift",
+    "registered profiles are durable and wallet-free, with separate account and game identities",
+    "RLS denies cross-account/game access, scope forgery, SET variables and role escalation",
+    "save reference and head commit atomically with exact schema, scope and revision",
+    "fresh process/pool reads the same persisted profile and original save reference",
+    "concurrent writers cannot overwrite or double-advance a revision",
+    "transaction failure rolls back all prior writes and escaped transaction handles close",
+    "wrong-purpose, expired and revoked consents deny new writes while old saves remain readable",
+    "database constraints reject fractional, overflowing, negative and cross-scope records",
+    "migration records persist exact uint64 intent and retry without alternate source effects",
+    "cancelled migration and revoked consent history cannot reactivate or claim completion",
+    "actual retained signed RuntimeAuthority resolves only authenticated DB scopes and revalidates expiry",
+    "populated downgrade and schema drift fail closed without deleting privacy/replay history",
+    "account disable/epoch revocation denies existing pools across games without affecting other accounts"
+  ],
+  "security": {
+    "npm_ci_reported_vulnerabilities": 0,
+    "rls": "FORCE RLS on seven privacy tables; login-role account/game mapping; extra role membership denied",
+    "privacy": "opaque references/commitments only; DTO extra fields and credential URLs rejected",
+    "authority": "actual signed retained RuntimeAuthority plus durable account issuer/epoch and role binding",
+    "transactionality": "SERIALIZABLE revision contention and rollback; durable original references and migration uniqueness",
+    "static": "Node syntax and whitespace passed in exact-SHA job; actionlint v1.7.7 passed locally"
+  },
+  "superseded_run": {
+    "run": 38477586249,
+    "sha": "b48ed3ab1c9dc395390d2bf08a0132d829b69699",
+    "failure": "CI checkout depth 1 omitted HEAD^ for whitespace check. All test steps passed; SHA not certified."
+  },
+  "level2": "Pending documented accumulated R05.3/R05.6/R05.9 app milestones",
+  "level3": "Deferred to complete R05 phase reconciliation; no broad inventory duplicated for R05.1",
+  "limitations": [
+    "Explicit deployment selection of durable factory and operator-provisioned isolated login roles/pools required.",
+    "TLS/secrets, production deployment, provider-side object verification, retention/deletion/backup remain deployment or later canonical acceptance.",
+    "Migration rows are intent metadata only. Save ownership, migration application/outbox/receipts are R05.3; real claims/grower binding R05.4.",
+    "Authenticated HTTP API/session and signed wallet-link integration remain R05.2.",
+    "Legacy Map tests are retained fixture coverage, not PostgreSQL production acceptance.",
+    "No R04 or R05 PR merged; recorded R04 closeout preserved."
+  ],
+  "blockers": [],
+  "next_canonical_step": "R05.2 — authenticated API/session/signed wallet linking"
+}

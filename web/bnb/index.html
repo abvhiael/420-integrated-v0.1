@@ -639,15 +639,24 @@ async function loadHostWorkspace(){
  ["/managers","Delegated managers","owner"]];
  const visible=candidates.filter(item=>item[2]==="owner"?property.owner:permitted(item[2]));
  const paths=visible.map(item=>item[0]);
- const results=await Promise.all(paths.map(path=>fetch(base+path,{
+ const results=await Promise.allSettled(paths.map(path=>fetch(base+path,{
  headers:hostHeaders(),credentials:"omit",cache:"no-store"})));
- if(results.some(res=>!res.ok))throw Error("Some operations require additional authorization or are unavailable.");
- const values=await Promise.all(results.map(res=>res.json()));
+ // One failed Pay/notification/calendar provider must not blank unrelated
+ // authorized host views; every operation still uses its server-side scope.
+ const values=await Promise.all(results.map(async result=>{
+  if(result.status!=="fulfilled"||!result.value.ok)return null;
+  try{return await result.value.json();}catch{return null;}
+ }));
  details.replaceChildren();
  const labels=visible.map(item=>item[1]);
  for(let i=0;i<paths.length;i++){
  const heading=document.createElement("h5");heading.textContent=labels[i];details.append(heading);
  const data=values[i];
+ if(data===null){
+  const error=document.createElement("p");error.setAttribute("role","status");
+  error.textContent="This section is unavailable or your access has been revoked. Refresh your verified session or retry.";
+  details.append(error);continue;
+ }
  const rows=Array.isArray(data)?data:(data.rows||[]);
  if(!rows.length){const empty=document.createElement("p");empty.textContent="No entries.";details.append(empty);}
  for(const item of rows){

@@ -43,3 +43,12 @@ Repository branch `audit/bnb-phase4-bnb-4-1-baseline-20261013`, draft unmerged P
 - Oracle `38475861500` SUCCESS, not substituted for BNB tests. Docs `38475861419` SKIPPED, not a Level 1 PASS. Other repository workflows failed; these are not silently credited.
 - CI demonstrates all executed tests passed, **not** that unimplemented lifecycle/dispute/reorg exit criteria are complete. The saga is still a read-only projection with unresolved independent dispute/refund transitions, competing lifecycle event reconciliation and source-finality recovery evidence. PostgreSQL-specific BNB-4.6 coverage currently includes IDOR and recovery-state tests, not all required concurrent event-order/adversarial scenarios.
 - **Entry decision for canonical BNB-4.7 M4-A: BLOCKED by BNB-4.6 functional exit criteria and missing unconditional Level 1 certificate.** Do not certify M4-A or proceed to BNB-4.8. No Level 2 global Foundry/Genesis/Integrated/Docs work is authorized. Preserve `travel.bnb_booking=false`, testnet work roadmap and all external acceptance deferrals.
+
+## Current BNB-4.6 implementation extension — evidence pending
+
+Latest executable SHA `913409760e1267fabd347fab59ba2c273e01af92`.
+- Reconciliation reads persisted, previously authenticated 420Pay failure codes and fails closed on canonical finality revocations or contradictory settlement state rather than trusting stale local confirmation.
+- Financial projection separates reserved versus finalized refund and payout accounting without permitting BnB custody or initiating refunds.
+- Tests expanded for revoked finality, failed settlement, reserved/finalized liability and PostgreSQL-backed tampered/stale booking state with Pay reorganization history.
+- Exact-SHA Runtime Slice [38478990542](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38478990542) was **PENDING** when recorded. Retained BNB checks were queued, not counted PASS. No Level 1 certificate.
+- Remaining unresolved provider-owned full dispute lifecycle/independent compensation and recovery decisions, additional competing-event-order integration tests, and exact-SHA terminal qualification. No change in testnet gates or authorization.

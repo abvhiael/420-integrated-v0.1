@@ -119,3 +119,40 @@ def test_revoked_reviewer_cannot_read_or_extend_privacy_hold(monkeypatch):
         api.independent_case_privacy_hold(rid,api.PrivacyHoldInput(
             duration_days=90,reason="legal_hold"),"signed-revoked")
     assert exc.value.status_code==403
+
+
+def test_manager_casework_requires_current_least_privilege_grant(case_fixture,monkeypatch):
+    rid=case_fixture
+    dsn=os.environ["BNB_DATABASE_URL"]
+    with psycopg.connect(dsn) as c:
+        pid=c.execute("SELECT property_id FROM bnb_reservation WHERE id=%s",(rid,)).fetchone()[0]
+        c.execute("""INSERT INTO bnb_account(subject) VALUES('m48-viewer')
+            ON CONFLICT DO NOTHING""")
+        c.execute("""INSERT INTO bnb_property_grant
+            (property_id,grantee_subject,capability,expires_at,granted_by)
+            VALUES (%s,'m48-viewer','view_reservations',
+                    now()+interval '1 hour','m48-host')""",(pid,))
+    monkeypatch.setattr(api,"active_subject",lambda *_:"m48-viewer")
+    try:
+        view=api.host_casework_view(rid,None)
+        assert view["cases"]==[]
+        assert view["pay_authority"] is False
+        with psycopg.connect(dsn) as c:
+            c.execute("""UPDATE bnb_property_grant SET revoked_at=now()
+                WHERE property_id=%s AND grantee_subject='m48-viewer'
+                  AND capability='view_reservations'""",(pid,))
+        with pytest.raises(HTTPException) as revoked:
+            api.host_casework_view(rid,None)
+        assert revoked.value.status_code==404
+        with psycopg.connect(dsn) as c:
+            c.execute("""UPDATE bnb_property_grant SET revoked_at=NULL,
+                expires_at=now()-interval '1 minute'
+                WHERE property_id=%s AND grantee_subject='m48-viewer'
+                  AND capability='view_reservations'""",(pid,))
+        with pytest.raises(HTTPException) as expired:
+            api.host_casework_view(rid,None)
+        assert expired.value.status_code==404
+    finally:
+        with psycopg.connect(dsn) as c:
+            c.execute("DELETE FROM bnb_property_grant WHERE property_id=%s",(pid,))
+            c.execute("DELETE FROM bnb_account WHERE subject='m48-viewer'")

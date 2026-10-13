@@ -60,6 +60,7 @@ on:
       - 'docs/audit/420MEDIA-PHASE-CLOSEOUT.md'
       - 'docs/audit/DOOBTUBE-PHASE-CLOSEOUT.md'
       - 'docs/audit/DOOBR-PHASE-CLOSEOUT.md'
+      - 'docs/bnb/BNB-3.12-PHASE3-LEVEL3-CLOSEOUT.md'
   pull_request:
     paths:
       - 'consensus/**'
@@ -108,6 +109,7 @@ on:
       - 'docs/audit/420MEDIA-PHASE-CLOSEOUT.md'
       - 'docs/audit/DOOBTUBE-PHASE-CLOSEOUT.md'
       - 'docs/audit/DOOBR-PHASE-CLOSEOUT.md'
+      - 'docs/bnb/BNB-3.12-PHASE3-LEVEL3-CLOSEOUT.md'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}

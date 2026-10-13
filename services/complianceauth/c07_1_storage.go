@@ -83,6 +83,12 @@ func c071RuntimeBinding(ctx context.Context,db *sql.DB,s C064AuthorScope,publica
  ('compliance_author_heads','compliance_author_versions','compliance_review_heads','compliance_review_versions','compliance_auditor_access','compliance_publication_fences')
  AND relrowsecurity AND relforcerowsecurity`).Scan(&n)
  if err!=nil||n!=6{return ErrC071Storage}
+ if db.QueryRowContext(ctx,"SELECT has_schema_privilege(current_user,'public','CREATE') OR has_table_privilege(current_user,'public.compliance_database_bindings','INSERT,UPDATE,DELETE') OR has_table_privilege(current_user,'public.compliance_schema_migrations','INSERT,UPDATE,DELETE')").Scan(&unsafe)!=nil||unsafe{return ErrC071Storage}
+ scripts:=[]string{PublicationSchemaSQL,C064AuthorSchemaSQL,C065ReviewSchemaSQL,C067AuditSchemaSQL,c071HardeningSQL}
+ for i,script:=range scripts{
+  var checksum string
+  if db.QueryRowContext(ctx,"SELECT checksum FROM public.compliance_schema_migrations WHERE version=$1",i+1).Scan(&checksum)!=nil||checksum!=Digest([]byte(script)){return ErrC071Storage}
+ }
  var version int
  if db.QueryRowContext(ctx,"SELECT max(version) FROM public.compliance_schema_migrations").Scan(&version)!=nil||version!=5{return ErrC071Storage}
  for _,table:=range []string{"compliance_author_versions","compliance_review_versions","compliance_auditor_access"}{
@@ -91,7 +97,7 @@ func c071RuntimeBinding(ctx context.Context,db *sql.DB,s C064AuthorScope,publica
  return nil
 }
 func OpenC071ProductionStores(ctx context.Context,dsn string,s C064AuthorScope,publicationScope string,c *C071Cipher)(*C071ProductionStores,error){
- if ctx==nil||ctx.Err()!=nil||c==nil||ValidProductionDSN(dsn)!=nil{return nil,ErrC071Storage}
+ if ctx==nil||ctx.Err()!=nil||c==nil||c.keys[c.active]==nil||ValidProductionDSN(dsn)!=nil{return nil,ErrC071Storage}
  p,err:=OpenPostgreSQLPublicationStore(dsn);if err!=nil{return nil,ErrC071Storage}
  probe,cancel:=context.WithTimeout(ctx,5*time.Second);defer cancel()
  if p.DB.PingContext(probe)!=nil||c071RuntimeBinding(probe,p.DB,s,publicationScope)!=nil {p.DB.Close();return nil,ErrC071Storage}

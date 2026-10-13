@@ -139,7 +139,7 @@ contract R04EquipmentEmergencyTest is PublicPlantCapacityFixture {
         denied(address(rights),abi.encodeCall(rights.registerAsset,(TYPE,address(this))),EmergencyDomains.RIGHTS);
         denied(address(licenses),abi.encodeCall(licenses.issue,(TYPE,TYPE,ALICE,uint32(1),uint64(1),uint64(100),uint256(0))),EmergencyDomains.LICENSE);
         denied(address(leases),abi.encodeCall(leases.create,(TYPE,TYPE,ALICE,uint64(1),uint64(100),uint256(1),uint256(0))),EmergencyDomains.LEASE);
-        denied(address(org),abi.encodeCall(org.create,(TYPE)),EmergencyDomains.ORGANIZATION_GOVERNANCE);
+        denied(address(org),abi.encodeCall(org.create,(TYPE,keccak256("metadata"))),EmergencyDomains.ORGANIZATION_GOVERNANCE);
         denied(address(authority),abi.encodeWithSignature("consume(bytes32,bytes32,bytes32)",TYPE,TYPE,TYPE),EmergencyDomains.ORGANIZATION_GOVERNANCE);
         denied(address(financial),abi.encodeCall(financial.propose,(TYPE,ALICE,TYPE,TYPE,uint64(100),uint256(1))),EmergencyDomains.ORGANIZATION_GOVERNANCE);
         denied(address(coops),abi.encodeWithSignature("enroll(bytes32)",TYPE),EmergencyDomains.COOPERATIVE_GOVERNANCE);

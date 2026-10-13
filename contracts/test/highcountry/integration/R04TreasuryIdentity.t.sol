@@ -57,7 +57,7 @@ contract R04TreasuryIdentityTest is PublicPlantCapacityFixture {
         TreasuryRouter420 router=new TreasuryRouter420(address(budget),address(disbursements));
         gateway=new CanonicalOrganizationTreasuryGateway(address(auth), address(router),address(identity),address(this));bind(gateway);
         OrganizationRegistry org=new OrganizationRegistry(address(auth));bind(org);
-        org.create(ORG);org.invite(ORG,ALICE);vm.prank(ALICE);org.join(ORG);
+        org.create(ORG,keccak256("metadata"));org.invite(ORG,ALICE,true);vm.prank(ALICE);org.join(ORG);
         permissions=new OrganizationTreasuryPermissions(address(auth), address(org),address(gateway),BOB);bind(permissions);
         gateway.bindPermissions(address(permissions));
         permission=permissions.propose(ORG,ALICE,keccak256("HC.ORG.TREASURY"),disbursement,uint64(block.timestamp+900),100);
@@ -73,7 +73,7 @@ contract R04TreasuryIdentityTest is PublicPlantCapacityFixture {
     function testRealTreasuryRequiresIndependentCapabilityAndRollsBackPermission() public {
         (bool failed,)=address(gateway).call(abi.encodeCall(gateway.execute,(disbursement,permission,keccak256("vault-receipt"))));
         require(!failed,"missing treasury grant bypass");
-        (,,,,,,,uint256 remaining,,)=permissions.permissions(permission);require(remaining==100,"permission not rolled back");
+        (,,,,,,uint256 remaining,,)=permissions.permissions(permission);require(remaining==100,"permission not rolled back");
         grantExecution();gateway.execute(disbursement,permission,keccak256("vault-receipt"));
         require(budget.budget(BUDGET).executed==100,"canonical budget not settled");
         require(disbursements.disbursement(disbursement).state==TreasuryDisbursementRegistry420.State.EXECUTED,"canonical receipt missing");
@@ -91,6 +91,6 @@ contract R04TreasuryIdentityTest is PublicPlantCapacityFixture {
         require(!denied,"emergency financial bypass");
         require(budget.budget(BUDGET).executed==0,"unauthorized budget spent");
         permissions.revoke(permission);
-        (,,,,,,,uint256 remaining,,)=permissions.permissions(permission);require(remaining==100,"revocation lost amount");
+        (,,,,,,uint256 remaining,,)=permissions.permissions(permission);require(remaining==100,"revocation lost amount");
     }
 }

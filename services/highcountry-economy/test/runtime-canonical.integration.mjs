@@ -8,6 +8,7 @@ import {keccak256} from '../src/keccak.js';
 import {createRuntime,runtimeHttpServer} from '../src/runtime-service.js';
 const admin=new pg.Pool({connectionString:process.env.HC_TEST_POSTGRES_URL});
 const rpcUrl=process.env.HC_TEST_RPC_URL||'http://127.0.0.1:8545';
+if(!['127.0.0.1','localhost','[::1]'].includes(new URL(rpcUrl).hostname))throw Error('disposable local RPC required');
 const chain=new FinalizedRpc({url:rpcUrl,chainId:420,contracts:{}});
 const accounts=await chain.request('eth_accounts',[]),operator=accounts[0].toLowerCase(),seller=accounts[1].toLowerCase(),buyer=accounts[2].toLowerCase();
 async function receipt(hash){
@@ -27,8 +28,10 @@ async function send(from,to,data){
  await chain.request('anvil_mine',['0x40']);return r;
 }
 const artifact=JSON.parse(await readFile(new URL('../../../contracts/out/R04RuntimeDeployment.sol/R04RuntimeDeployment.json',import.meta.url),'utf8'));
-const deployed=await send(operator,undefined,artifact.bytecode.object+word(operator));
-const fixture=deployed.contractAddress;
+// Only the disposable deployment harness bypasses creation-code limits. Every application child is actually CREATE-deployed.
+const fixture='0x'+keccak256(Buffer.from('HC.DISPOSABLE.RUNTIME.HARNESS')).slice(-40);
+await chain.request('anvil_setCode',[fixture,artifact.deployedBytecode.object]);
+await send(operator,fixture,calldata('initialize(address)',operator));
 async function readGetter(name){return chain.request('eth_call',[{to:fixture,data:calldata(name+'()')},'latest']);}
 const addresses={};
 for(const name of ['games','identity','mission','emergency','inventory','escrow'])addresses[name]='0x'+(await readGetter(name)).slice(-40);

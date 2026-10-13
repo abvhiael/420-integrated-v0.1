@@ -28,7 +28,7 @@ import {GameIdentity420} from "../../../src/gaming/GameIdentity420.sol";
 import {GamingAuthorization420} from "../../../src/gaming/GamingAuthorization420.sol";
 import {GamingIds420} from "../../../src/gaming/GamingIds420.sol";
 contract R04RuntimeDeployment {
-    address public immutable operator;
+    address public operator;
     bytes32 public constant GAME=keccak256("420/GAMING/GAME/HIGH_COUNTRY/V1");
     bytes32 public constant MISSION=keccak256("runtime-mission-fixture");
     bytes32 public constant RESOURCE=keccak256("runtime-resource-fixture");
@@ -40,7 +40,8 @@ contract R04RuntimeDeployment {
     CanonicalMarketEscrow public escrow;
     CapabilityRegistry420 private caps;
     uint256 private serial;
-    constructor(address operator_) {
+    function initialize(address operator_) external {
+        require(operator == address(0) && msg.sender == operator_, "fixture initialization");
         operator=operator_;caps=new CapabilityRegistry420();
         HighCountryAuthorization auth=new HighCountryAuthorization(address(caps));
         emergency=new EmergencyState(address(auth));

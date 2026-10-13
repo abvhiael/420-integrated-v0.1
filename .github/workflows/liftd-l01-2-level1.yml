@@ -6,7 +6,7 @@ on:
       - 'docs/rideshare/**'
       - '.github/workflows/liftd-l01-2-level1.yml'
   push:
-    branches: ['build/liftd-l01-2-foundation']
+    branches: ['build/liftd-l01-1-foundation']
     paths:
       - 'rideshare/**'
       - 'docs/rideshare/**'

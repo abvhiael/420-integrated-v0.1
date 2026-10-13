@@ -1,5 +1,5 @@
 package complianceauth
-import("context";"crypto/ed25519";"crypto/rand";"database/sql";"encoding/json";"errors";"net/url";"os";"strconv";"strings";"sync";"sync/atomic";"testing";"time";"github.com/lib/pq")
+import("context";"crypto/ed25519";"crypto/rand";"database/sql";"encoding/json";"net/url";"os";"strconv";"strings";"sync";"sync/atomic";"testing";"time";"github.com/lib/pq")
 type c072ApprovalProvider struct{key ed25519.PrivateKey;fail bool}
 func(p c072ApprovalProvider)Approval(_ context.Context,old,next PublicationFence)(PublicationApproval,error){
  if p.fail{return PublicationApproval{},ErrUnauthorized};a:=PublicationApproval{KeyID:"review",ReviewerID:"legal-reviewer",PublisherID:"publisher",Before:old,After:next,ValidUntil:time.Now().UTC().Add(time.Minute)};b,_:=publicationApprovalBytes(a);a.Signature=ed25519.Sign(p.key,b);return a,nil
@@ -43,6 +43,11 @@ func TestC072DurableJobsLeaseFencing(t *testing.T){
  if e:=s.Enqueue(ctx,"collect-1","COLLECTION",payload,due,2);e!=nil{t.Fatal(e)};if e:=s2.Enqueue(ctx,"collect-1","COLLECTION",payload,due,2);e!=nil{t.Fatal("idempotent enqueue",e)}
  if s.Enqueue(ctx,"collect-1","COLLECTION",map[string]string{"source":"changed"},due,2)==nil{t.Fatal("job id rebound")}
  if s.Enqueue(ctx,"huge","COLLECTION",strings.Repeat("x",C071MaxPrivateBytes+1),due,2)==nil{t.Fatal("oversize queued")}
+ var storedBytes,storedRows int64
+ if f.admin.QueryRowContext(ctx,"SELECT stored_bytes,stored_rows FROM compliance_storage_usage WHERE tenant='tenant-a'").Scan(&storedBytes,&storedRows)!=nil{t.Fatal("quota counter missing")}
+ if _,e:=f.admin.ExecContext(ctx,"UPDATE compliance_storage_usage SET stored_rows=100000 WHERE tenant='tenant-a'");e!=nil{t.Fatal(e)}
+ if s.Enqueue(ctx,"quota-denied","COLLECTION",payload,due,2)==nil{t.Fatal("durable quota bypass")}
+ if _,e:=f.admin.ExecContext(ctx,"UPDATE compliance_storage_usage SET stored_rows=$1 WHERE tenant='tenant-a'",storedRows);e!=nil{t.Fatal(e)}
  var job C072Job;wins.Store(0)
  for i:=0;i<16;i++{wg.Add(1);go func(){defer wg.Done();j,e:=s2.Claim(ctx,leader,"COLLECTION",time.Minute);if e==nil{wins.Add(1);mu.Lock();job=j;mu.Unlock()}}()};wg.Wait();if wins.Load()!=1{t.Fatal("multiple job claimants",wins.Load())}
  if s.RenewJob(ctx,leader,job,time.Minute)!=nil{t.Fatal("job heartbeat")}
@@ -109,6 +114,10 @@ func TestC072AtomicActivationOutboxAndHalt(t *testing.T){
  if o.PublishImpact(ctx,a.Event,a.Subscribers)==nil{t.Fatal("standalone event injected")}
  if f.other.Durable.DB.QueryRowContext(ctx,"SELECT count(*) FROM compliance_impact_outbox").Scan(&n)!=nil||n!=0{t.Fatal("outbox tenant leak")}
  if _,e=s.DB.ExecContext(ctx,"DELETE FROM compliance_activations");e==nil{t.Fatal("activation history deleted")}
+ // A separately queued stale activation cannot reuse the prior canonical fence.
+ stale:=f.activation(t,a.After,"stale-event");if e=s.Enqueue(ctx,"stale-job","ACTIVATION",stale,stale.ScheduledAt,2);e!=nil{t.Fatal(e)};staleJob,e:=s.Claim(ctx,leader,"ACTIVATION",time.Minute);if e!=nil{t.Fatal(e)}
+ if s.Activate(ctx,leader,staleJob,stale,f.authority,f.control,f.public)==nil{t.Fatal("competing old fence activated")}
+ if s.FinishJob(ctx,leader,staleJob,false)!=nil{t.Fatal("failed activation reschedule")}
  // Authenticated durable halt survives a different runtime and reconnect.
  if e=ops.Halt(ctx,token,"production");e!=nil{t.Fatal("durable halt",e)};if e=ops.Halt(ctx,token,"production");e!=nil{t.Fatal("idempotent halt",e)}
  if _,e=f.b.Current(ctx,second.After,time.Now());e==nil{t.Fatal("other process ignored halt")}
@@ -116,12 +125,15 @@ func TestC072AtomicActivationOutboxAndHalt(t *testing.T){
  if _,e=s.DB.ExecContext(ctx,"DELETE FROM compliance_durable_halts");e==nil{t.Fatal("runtime cleared halt")}
  unauthorized:=ops;session.Role="author";unauthorized.Sessions=c066SessionProvider{session:session};if unauthorized.Halt(ctx,token,"production")==nil{t.Fatal("author halted")}
  cancelled,cancel:=context.WithCancel(ctx);cancel();if _,e=f.b.Current(cancelled,second.After,time.Now());e==nil{t.Fatal("cancelled read")}
+ var accountedBytes,accountedRows,actualBytes,actualRows int64
+ if f.admin.QueryRowContext(ctx,"SELECT stored_bytes,stored_rows FROM compliance_storage_usage WHERE tenant='tenant-a'").Scan(&accountedBytes,&accountedRows)!=nil{t.Fatal("accounting row")}
+ query:="SELECT sum(bytes),sum(rows) FROM (";for i,table:=range []string{"compliance_job_leaders","compliance_durable_jobs","compliance_durable_halts","compliance_activations","compliance_impact_outbox"}{if i>0{query+=" UNION ALL "};query+="SELECT coalesce(sum(octet_length(to_jsonb(v)::text)),0) bytes,count(*) rows FROM public."+table+" v WHERE scope=$1"};query+=") actual"
+ if f.admin.QueryRowContext(ctx,query,s.PublicationScope).Scan(&actualBytes,&actualRows)!=nil||accountedBytes!=actualBytes||accountedRows!=actualRows{t.Fatal("durable accounting mismatch",accountedBytes,actualBytes,accountedRows,actualRows)}
  if e=f.b.Close();e!=nil{t.Fatal(e)};if _,e=f.b.Current(ctx,second.After,time.Now());e==nil{t.Fatal("database outage fallback")}
  t.Log("PASS: reviewer/signature/schedule denial, atomic rollback, 12-worker idempotent activation, stale-cache denial, per-subscriber order, lease recovery, retry/dead-letter, tenant isolation, authenticated durable halt, outage")
 }
 func TestC072Boundaries(t *testing.T){
- ctx:=context.Background();s:=&C072Store{};if _,e=s.AcquireLeader(ctx,"COLLECTION","worker",time.Minute);e==nil{t.Fatal("nil database accepted")}
+ ctx:=context.Background();s:=&C072Store{};if _,e:=s.AcquireLeader(ctx,"COLLECTION","worker",time.Minute);e==nil{t.Fatal("nil database accepted")}
  if c072Duration(0)||c072Duration(6*time.Minute){t.Fatal("unbounded lease")};if strings.ContainsRune(controlScope("production","delivery","BC"),0)||!c051Scope(controlScope("production","delivery","BC")){t.Fatal("invalid PostgreSQL scope")}
  if controlScope("a","b/c","d")==controlScope("a","b","c/d"){t.Fatal("scope collision")}
- if !errors.Is(ErrC072Unavailable,ErrC072Unavailable){t.Fatal("error identity")}
 }

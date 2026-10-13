@@ -151,3 +151,14 @@ test('event-write failure rolls back an already-written trip and same key can sa
   assert.equal((await create(id,key)).state,'REQUESTED');
   assert.equal((await store.history(id)).length,1);
 });
+test('complete durable trip lifecycle preserves contiguous history and releases assignment', async () => {
+  const id=nextId(); await create(id);
+  const assignment={driverId:nextId(),vehicleId:nextId()};
+  await mutate(id,nextId(),'assign',0,assignment);
+  await mutate(id,nextId(),'arrive',1);
+  await mutate(id,nextId(),'start',2);
+  await mutate(id,nextId(),'complete',3);
+  assert.deepEqual((await store.history(id)).map(e=>e.snapshot.state),['REQUESTED','ASSIGNED','ARRIVED','IN_PROGRESS','COMPLETED']);
+  await assert.rejects(() => mutate(id,nextId(),'cancel',4),e=>e.code==='TERMINAL_TRIP');
+  const other=nextId();await create(other);await mutate(other,nextId(),'assign',0,assignment);await mutate(other,nextId(),'cancel',1);
+});

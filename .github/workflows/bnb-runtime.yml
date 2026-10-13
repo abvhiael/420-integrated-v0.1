@@ -82,7 +82,7 @@ jobs:
           with psycopg.connect(original) as source, psycopg.connect(restored) as target:
               a=source.execute("SELECT version,filename,sha256 FROM bnb_schema_migration ORDER BY version").fetchall()
               b=target.execute("SELECT version,filename,sha256 FROM bnb_schema_migration ORDER BY version").fetchall()
-              assert len(a)==23 and a==b, "BACKUP_RESTORE_MIGRATION_MISMATCH"
+              assert len(a)==24 and a==b, "BACKUP_RESTORE_MIGRATION_MISMATCH"
               for table in ("bnb_property","bnb_hold","bnb_reservation","bnb_request_dedupe","bnb_outbox"):
                   src=source.execute(f"SELECT count(*) FROM {table}").fetchone()[0]
                   dst=target.execute(f"SELECT count(*) FROM {table}").fetchone()[0]

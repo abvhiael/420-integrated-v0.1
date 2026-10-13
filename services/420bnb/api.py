@@ -3333,3 +3333,31 @@ def submit_property_claim(property_id: str, authorization: str | None = Header(N
                   (property_id,subject,claim["iss"],claim["jti"],claim["exp"]))
     return {"status":"pending","published":False}
 
+
+
+@app.get("/v1/bnb/reservations/{reservation_id}/orchestration")
+def read_booking_orchestration(reservation_id:UUID,authorization:str|None=Header(None)):
+    """Read-only authenticated saga projection; Pay/Wallet remain execution owners."""
+    from booking_saga import project_saga
+    actor=active_subject(authorization)
+    with db() as c:
+        row=c.execute("""SELECT r.guest_subject,p.host_subject,r.status,h.status,
+            i.state,i.pay_payment_id,s.captured_amount,s.host_amount,
+            s.platform_amount,s.developer_amount,s.retained_amount
+            FROM bnb_reservation r JOIN bnb_property p ON p.id=r.property_id
+            JOIN bnb_hold h ON h.id=r.hold_id
+            LEFT JOIN bnb_pay_intent i ON i.reservation_id=r.id
+            LEFT JOIN bnb_settlement_split s ON s.reservation_id=r.id
+            WHERE r.id=%s""",(reservation_id,)).fetchone()
+        if not row or actor not in (row[0],row[1]):
+            raise HTTPException(404,"NOT_FOUND")
+        operations=c.execute("""SELECT kind,amount,state FROM bnb_pay_disbursement
+            WHERE reservation_id=%s ORDER BY created_at,id""",(reservation_id,)).fetchall()
+    split=(dict(zip(("captured","host","platform","developer","retained"),row[6:11]))
+           if row[6] is not None else None)
+    view=project_saga(reservation_state=row[2],hold_state=row[3],
+                      intent_state=row[4],payment_id=row[5],split=split,
+                      disbursements=[{"kind":k,"amount":amount,"state":state}
+                                     for k,amount,state in operations])
+    return {"reservation_id":str(reservation_id),**view,
+            "provider_acceptance":"testnet_gated","payment_execution_available":False}

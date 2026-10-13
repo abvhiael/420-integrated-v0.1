@@ -41,4 +41,10 @@ func TestC076ExternalPostgreSQLMonotonicJournal(t *testing.T){
  invoked:=false
  if e=b.WithCurrent(ctx,base.Checkpoint,func(context.Context)error{invoked=true;return nil});e==nil||invoked{t.Fatal("stale release callback executed")}
  if e=b.WithCurrent(ctx,next.Checkpoint,func(context.Context)error{invoked=true;return nil});e!=nil||!invoked{t.Fatal("current release denied",e)}
+ if ok,e:=b.CanServe(ctx,scope,3);e!=nil||!ok{t.Fatal("committed independent release gate denied",e)}
+ if ok,e:=b.CanServe(ctx,scope,2);e==nil||ok{t.Fatal("old generation served")}
+ third:=mk(3,3,3,1,newDigest)
+ if e=b.AdvanceSignedCheckpoint(ctx,next,third,nil);e!=nil{t.Fatal("revocation update",e)}
+ if ok,e:=b.CanServe(ctx,scope,3);e==nil||ok{t.Fatal("superseded generation served after revocation")}
+
 }

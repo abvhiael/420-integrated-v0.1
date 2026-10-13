@@ -26,7 +26,12 @@ CREATE TABLE IF NOT EXISTS public.c076_deletion_journal (
  kind TEXT NOT NULL CHECK(kind IN ('DRAFT','AUDIT','JOB')),
  ref TEXT NOT NULL, PRIMARY KEY(scope,ordinal), UNIQUE(scope,kind,ref)
 );
-REVOKE ALL ON public.c076_authority,public.c076_deletion_journal FROM PUBLIC;
+CREATE TABLE IF NOT EXISTS public.c076_release_permits (
+ scope TEXT PRIMARY KEY REFERENCES public.c076_authority(scope),
+ checkpoint_generation BIGINT NOT NULL CHECK(checkpoint_generation > 0),
+ serving_generation BIGINT NOT NULL CHECK(serving_generation > checkpoint_generation)
+);
+REVOKE ALL ON public.c076_authority,public.c076_deletion_journal,public.c076_release_permits FROM PUBLIC;
 `
 
 // C076ExternalPostgres is a concrete independently operated, strongly
@@ -63,6 +68,13 @@ func(b *C076ExternalPostgres) WithCurrent(ctx context.Context,expected C076Check
  if tx.QueryRowContext(ctx,`SELECT signed_checkpoint FROM public.c076_authority WHERE scope=$1 FOR UPDATE`,expected.Scope).Scan(&raw)!=nil{return ErrC076UnsafeRestore}
  var signed C076SignedCheckpoint
  if decodeC076Checkpoint(raw,&signed)!=nil||VerifyC076SignedCheckpoint(ctx,signed,b.IssuerKeys)!=nil||signed.Checkpoint!=expected{return ErrC076UnsafeRestore}
+ // The gate row and checkpoint comparison commit together. Serving MUST
+ // independently check the committed gate on every authorization.
+ if signed.Checkpoint.Generation>=9223372036854775806{return ErrC076UnsafeRestore}
+ _,e=tx.ExecContext(ctx,`INSERT INTO public.c076_release_permits(scope,checkpoint_generation,serving_generation) VALUES($1,$2,$3)
+ ON CONFLICT(scope) DO UPDATE SET checkpoint_generation=EXCLUDED.checkpoint_generation,serving_generation=EXCLUDED.serving_generation`,
+ expected.Scope,int64(expected.Generation),int64(expected.Generation+1))
+ if e!=nil{return ErrC076UnsafeRestore}
  if e=fn(ctx);e!=nil||ctx.Err()!=nil{return ErrC076UnsafeRestore}
  if e=tx.Commit();e!=nil{return ErrC076UnsafeRestore}
  return nil
@@ -123,3 +135,23 @@ func(b *C076ExternalPostgres) ReadWitness(ctx context.Context,scope string)(C076
 var _ C076MonotonicBackend=(*C076ExternalPostgres)(nil)
 func decodeC076Checkpoint(raw []byte,v *C076SignedCheckpoint)error{return json.Unmarshal(raw,v)}
 func encodeC076Checkpoint(v C076SignedCheckpoint)([]byte,error){return json.Marshal(v)}
+
+// CanServe is the fail-closed external release gate. Production authorization
+// paths MUST call this on the independent primary before returning any permit.
+// Checkpoint advances invalidate prior permits by generation mismatch.
+func(b *C076ExternalPostgres) CanServe(ctx context.Context,scope string,servingGeneration uint64)(bool,error){
+ if b==nil||b.DB==nil||ctx==nil||ctx.Err()!=nil||!c051Scope(scope)||servingGeneration==0||servingGeneration>9223372036854775807{return false,ErrC076UnsafeRestore}
+ var primary bool
+ if b.DB.QueryRowContext(ctx,`SELECT NOT pg_is_in_recovery()`).Scan(&primary)!=nil||!primary{return false,ErrC076UnsafeRestore}
+ var raw []byte
+ e:=b.DB.QueryRowContext(ctx,`SELECT a.signed_checkpoint
+ FROM public.c076_authority a JOIN public.c076_release_permits p ON p.scope=a.scope
+ WHERE a.scope=$1 AND p.serving_generation=$2
+ AND p.checkpoint_generation=a.generation`,scope,int64(servingGeneration)).Scan(&raw)
+ if e!=nil{return false,ErrC076UnsafeRestore}
+ var signed C076SignedCheckpoint
+ if decodeC076Checkpoint(raw,&signed)!=nil||signed.Checkpoint.Scope!=scope||
+  signed.Checkpoint.Generation+1!=servingGeneration||
+  VerifyC076SignedCheckpoint(ctx,signed,b.IssuerKeys)!=nil{return false,ErrC076UnsafeRestore}
+ return true,nil
+}

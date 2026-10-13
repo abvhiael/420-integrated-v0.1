@@ -152,6 +152,7 @@ func c071EncryptExisting(ctx context.Context,tx *sql.Tx,c *C071Cipher)error{
 func BindC071RuntimeRole(ctx context.Context,db *sql.DB,role string,s C064AuthorScope,publicationScope string)error{
  if ctx==nil||ctx.Err()!=nil||db==nil||!c064ID.MatchString(role)||!c051Scope(s.Tenant)||!c051Scope(s.Domain)||!c051Scope(s.Jurisdiction)||publicationScope==""||len(publicationScope)>256{return ErrC071Storage}
  tx,err:=db.BeginTx(ctx,nil);if err!=nil{return ErrC071Storage};defer tx.Rollback()
+ if _,err=tx.ExecContext(ctx,"SELECT pg_advisory_xact_lock(420071)");err!=nil{return ErrC071Storage}
  var unsafe bool
  if tx.QueryRowContext(ctx,"SELECT rolsuper OR rolbypassrls OR rolcreaterole OR rolcreatedb FROM pg_roles WHERE rolname=$1",role).Scan(&unsafe)!=nil||unsafe{return ErrC071Storage}
  _,err=tx.ExecContext(ctx,"INSERT INTO public.compliance_database_bindings(role_name,tenant,domain,jurisdiction,publication_scope) VALUES($1,$2,$3,$4,$5) ON CONFLICT(role_name) DO NOTHING",role,s.Tenant,s.Domain,s.Jurisdiction,publicationScope);if err!=nil{return ErrC071Storage}

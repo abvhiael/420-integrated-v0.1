@@ -49,7 +49,7 @@ def test_thread_role_scope_blocks_strangers_revoked_accounts_and_closed_threads(
                 return Result((property_id,"guest","host",self.state,"host","published"))
             if "SELECT state FROM bnb_account" in sql:
                 return Result((self.account_state,))
-            raise AssertionError("unexpected query")
+            if "SELECT host_subject,status FROM bnb_property" in sql:\n                return Result(("host","published"))\n            if "FROM bnb_property_grant g" in sql:\n                return Result(None)\n            raise AssertionError("unexpected query")
     c=Connection()
     assert api.message_thread_scope(c,request_id,"guest")[1]=="guest"
     assert api.message_thread_scope(c,request_id,"host")[2]=="host"

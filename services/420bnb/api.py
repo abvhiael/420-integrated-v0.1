@@ -3424,7 +3424,7 @@ class PayCaseEventInput(BaseModel):
     event_id: str=Field(min_length=3,max_length=200)
     revision: int=Field(gt=0,strict=True)
     state: str=Field(pattern="^(opened|refund_requested|resolved)$")
-    resolution: str|None=Field(default=None,pattern="^(upheld|refund_pending|refund_completed)$")
+    resolution: str|None=Field(default=None,pattern="^(upheld|refund_completed)$")
 
 
 @app.post("/v1/bnb/internal/pay/cases",status_code=202)
@@ -3487,8 +3487,7 @@ def ingest_pay_case_event(payload:PayCaseEventInput,
                     raise HTTPException(409,"PAY_CASE_TERMINAL_OR_DUPLICATE")
                 if payload.state=="refund_requested" and previous[1]!="opened":
                     raise HTTPException(409,"PAY_CASE_REFUND_ALREADY_REQUESTED")
-            if payload.state=="refund_requested" or payload.resolution in (
-                "refund_pending","refund_completed"):
+            if payload.state=="refund_requested" or payload.resolution=="refund_completed":
                 if (proof.get("original_payer_subject")!=record[4] or
                     proof.get("original_pay_invoice_id")!=record[2] or
                     proof.get("original_pay_payment_id")!=record[3] or
@@ -3498,7 +3497,7 @@ def ingest_pay_case_event(payload:PayCaseEventInput,
                 proof.get("refund_request_verified") is not True):
                 raise HTTPException(403,"PAY_CASE_REFUND_REQUEST_NOT_VERIFIED")
             if payload.state=="resolved":
-                if (payload.resolution in ("refund_pending","refund_completed") and
+                if (payload.resolution=="refund_completed" and
                     (not previous or previous[1]!="refund_requested")):
                     raise HTTPException(409,"PAY_CASE_REFUND_REQUEST_REQUIRED")
                 if proof.get("independent_dispute_resolution_verified") is not True or (

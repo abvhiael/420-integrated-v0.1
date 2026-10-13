@@ -117,10 +117,11 @@ test('R05.2 actual PostgreSQL atomic wallet authentication and replay acceptance
   });
   await t.test('expired challenge denies without consuming or replacing active ownership',async()=>{
     const c=await service.issueChallenge(a,input(W2,'expiry-consent'));
+    const longSession=mint('alpha',Date.now()+900000);
     const original=Date.now;
     try {
       Date.now=()=>original()+360000;
-      await assert.rejects(()=>service.completeLink(a,{challengeId:c.challengeId,signature:signMock(c,sig)}),/challenge-invalid-or-replayed/);
+      await assert.rejects(()=>service.completeLink(longSession,{challengeId:c.challengeId,signature:signMock(c,sig)}),/challenge-invalid-or-replayed/);
     } finally {Date.now=original;}
     assert.equal((await service.session(a)).wallet.wallet,W);
   });

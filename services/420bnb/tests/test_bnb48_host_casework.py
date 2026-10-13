@@ -96,8 +96,26 @@ def test_hold_rejects_self_minted_or_policy_shortening(monkeypatch):
     assert err.value.status_code==403
     monkeypatch.setattr(api,"verify_authority",lambda *_:{
         "iss":"fixture","jti":"nonce","sub":"reviewer","report_id":str(rid),
-        "hold_days":90,"reason":"legal_hold","legal_privacy_authority_verified":True})
+        "hold_days":90,"reason":"legal_hold","legal_privacy_authority_verified":True,
+        "current_reviewer_grant_verified":True,"reviewer_revoked":False})
     monkeypatch.setenv("BNB_REPORT_RETENTION_DAYS","180")
     with pytest.raises(HTTPException) as err:
         api.independent_case_privacy_hold(rid,payload,"signed-fixture")
     assert err.value.status_code==422
+
+
+def test_revoked_reviewer_cannot_read_or_extend_privacy_hold(monkeypatch):
+    rid=uuid4()
+    monkeypatch.setattr(api,"db",lambda:(_ for _ in ()).throw(AssertionError("revoked DB access")))
+    claims={"sub":"reviewer","report_id":str(rid),"casework_scope":"read",
+            "current_reviewer_grant_verified":True,"reviewer_revoked":True}
+    monkeypatch.setattr(api,"verify_authority",lambda *_:claims)
+    with pytest.raises(HTTPException) as exc:
+        api.independent_abuse_case_view(rid,"signed-revoked")
+    assert exc.value.status_code==403
+    claims.update({"hold_days":90,"reason":"legal_hold",
+                   "legal_privacy_authority_verified":True})
+    with pytest.raises(HTTPException) as exc:
+        api.independent_case_privacy_hold(rid,api.PrivacyHoldInput(
+            duration_days=90,reason="legal_hold"),"signed-revoked")
+    assert exc.value.status_code==403

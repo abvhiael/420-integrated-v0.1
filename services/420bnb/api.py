@@ -851,6 +851,9 @@ def send_guest_message(request_id:UUID,payload:GuestMessageInput,
             c.execute("""INSERT INTO bnb_guest_message
                 (id,booking_request_id,sender_subject,body,client_nonce)
                 VALUES (%s,%s,%s,%s,%s)""",(mid,request_id,actor,payload.body,payload.nonce))
+            c.execute("""INSERT INTO bnb_outbox(id,event_type,payload)
+                VALUES (%s,'bnb.message.created',%s::jsonb)""",
+                (uuid4(),json.dumps({"request_id":str(request_id),"message_id":str(mid)})))
     return {"id":str(mid),"replayed":False}
 
 

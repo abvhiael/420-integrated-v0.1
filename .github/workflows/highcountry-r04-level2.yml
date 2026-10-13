@@ -1,0 +1,38 @@
+name: High Country R04 Level 2 App Integration
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/highcountry-r04-level2.yml'
+      - 'contracts/src/highcountry/**'
+      - 'contracts/test/highcountry/**'
+      - 'docs/highcountry/R04-LEVEL2-*'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  retained-app:
+    runs-on: ubuntu-latest
+    timeout-minutes: 80
+    env:
+      FOUNDRY_SRC: src/highcountry
+      FOUNDRY_TEST: test/highcountry
+      FOUNDRY_SCRIPT: script/highcountry
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Exact candidate SHA
+        env:
+          SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$SHA"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: High Country app build and sizes
+        working-directory: contracts
+        run: forge build src/highcountry --sizes
+      - name: Retained R04 integration and adversarial coverage
+        working-directory: contracts
+        run: forge test --match-path 'test/highcountry/**/*.t.sol' -vv
+      - name: Canonical High Country verifier
+        run: python3 scripts/highcountry/verify-r01.py

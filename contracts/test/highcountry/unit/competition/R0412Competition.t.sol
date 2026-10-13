@@ -102,6 +102,26 @@ contract R0412CompetitionTest {
         engine.finalize(EVENT);
         require(engine.winners(EVENT)==address(0),"revoked finality result won");
     }
+    function testSeasonCancellationBlocksEvent() public {
+        seasons.cancel(SEASON);
+        vm.warp(opens);
+        (bool accepted,) = address(alice).call(abi.encodeCall(alice.enter,(engine,EVENT)));
+        require(!accepted,"cancelled season accepted entrant");
+    }
+    function testOptionalEntitlementRevokedAfterSubmissionDoesNotWin() public {
+        bytes32 ev=keccak256("revoked-event");
+        engine.create(ev,SEASON,OPTIONAL,opens,closes,challenge);
+        entitlement.permit(address(alice),SCOPE,true);
+        vm.warp(opens);
+        alice.enter(engine,ev);
+        bytes32 harvest=keccak256("valid");
+        evidence.approve(harvest,address(alice),9800,opens);
+        alice.submit(engine,ev,harvest,9800,opens);
+        entitlement.permit(address(alice),SCOPE,false);
+        vm.warp(challenge);
+        engine.finalize(ev);
+        require(engine.winners(ev)==address(0),"revoked optional entry won");
+    }
     function testLifecycleBoundaries() public {
         (bool early,)=address(alice).call(abi.encodeCall(alice.enter,(engine,EVENT)));
         require(!early,"early entry");

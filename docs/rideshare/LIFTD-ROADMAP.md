@@ -1,6 +1,6 @@
 # LIFTd — canonical 420Rideshare development roadmap
 
-Public working brand: **LIFTd**, following the owner's latest spelling. Earlier concept name: LIFTED. Technical application: 420Rideshare. This is a first-party passenger transportation application, separate from DOOBr delivery. No launch region, fare, platform percentage, development-compensation allocation or trademark clearance is approved by this roadmap.
+Public working brand: **LIFTd**, following the owner's latest spelling. Earlier concept name: LIFTED. Technical application: 420Rideshare. This is a first-party passenger transportation application, separate from DOOBr delivery. First launch market: **Vancouver, British Columbia, Canada**, selected by the owner on 2026-10-13, matching DOOBr's initial market. This market decision does not grant passenger-transport authorization or automatically include all Metro Vancouver municipalities or YVR. Fare, platform percentage, development-compensation allocation and trademark clearance remain unresolved.
 
 ## Repository baseline and ownership
 

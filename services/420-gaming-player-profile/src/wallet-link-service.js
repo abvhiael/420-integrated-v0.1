@@ -119,7 +119,7 @@ export function createHighCountryWalletHttp420(service) {
       send(200,{result:await op(body)});
     }catch(e){
       const clientError=['authentication-required','authentication-denied','invalid-request','invalid-chain',
-        'invalid-signature','challenge-invalid-or-replayed','recovery-denied','recovery-disabled',
+        'invalid-signature','challenge-invalid-or-replayed','recovery-denied','recovery-disabled','request-too-large',
         'chain-mismatch','chain-unavailable','wallet-link-conflict','consent-denied','profile-not-found',
         'invalid-input','scope-denied','account-revoked'].includes(e.code??e.message);
       send(clientError?403:503,{error:clientError?(e.code??e.message):'service-unavailable'});

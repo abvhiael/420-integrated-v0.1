@@ -75,3 +75,29 @@ def test_disputed_payout_must_not_be_assumed_settled():
     assert result["committed_amount"] == "75"
     assert result["remaining_amount"] == "25"
     assert result["confirmation_verified"] is True
+
+
+def test_finalized_and_reserved_refunds_never_double_count():
+    result = project(**dict(BASE, disbursements=[
+        dict(kind="refund", amount=20, state="reserved"),
+        dict(kind="refund", amount=10, state="finalized"),
+        dict(kind="host", amount=30, state="finalized")]))
+    assert result["refund_committed_amount"] == "30"
+    assert result["refund_finalized_amount"] == "10"
+    assert result["refund_reserved_amount"] == "20"
+    assert result["payout_finalized_amount"] == "30"
+    assert result["remaining_amount"] == "40"
+
+
+def test_signed_revocation_history_blocks_stale_confirmed_projection():
+    for code in ("reorg", "finality_revoked"):
+        result = project(**dict(BASE, pay_failures=[code]))
+        assert result["reason"] == "PAY_FINALITY_REVOKED"
+        assert result["confirmation_verified"] is False
+
+
+def test_ambiguous_settlement_evidence_never_claims_provider_dispute_resolution():
+    result = project(**dict(BASE, pay_failures=["settlement_failed"]))
+    assert result["reason"] == "PAY_SETTLEMENT_DISPUTED"
+    assert result["confirmation_verified"] is False
+    assert project(**dict(BASE, pay_failures=["arbitrary"]))["reason"] == "UNKNOWN_PAY_FAILURE"

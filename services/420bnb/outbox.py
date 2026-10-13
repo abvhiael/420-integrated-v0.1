@@ -12,7 +12,8 @@ from uuid import UUID
 MAX_ATTEMPTS=8
 EVENT_TYPES=frozenset({
     "bnb.pay.intent_bound","bnb.pay.finalized","bnb.pay.recovery_required",
-    "bnb.pay.failure_requires_reconciliation","bnb.booking.replacement_requested",
+    "bnb.pay.failure_requires_reconciliation","bnb.pay.case_reconciled",
+    "bnb.booking.replacement_requested",
     "bnb.hold.created","bnb.discovery.changed","bnb.message.created",
 })
 WORKER=re.compile(r"[a-zA-Z0-9_.:-]{1,80}\Z")

@@ -40,6 +40,13 @@ DECLARE bytes BIGINT;
 BEGIN
  bytes:=octet_length(to_jsonb(NEW)::text);
  IF bytes>262144 THEN RAISE EXCEPTION 'protected storage row limit exceeded'; END IF;
+ IF TG_OP='UPDATE' THEN
+  IF NEW.tenant<>OLD.tenant OR NEW.domain<>OLD.domain OR NEW.jurisdiction<>OLD.jurisdiction THEN RAISE EXCEPTION 'protected storage scope is immutable'; END IF;
+  bytes:=bytes-octet_length(to_jsonb(OLD)::text);
+  UPDATE public.compliance_storage_usage SET stored_bytes=stored_bytes+bytes WHERE tenant=NEW.tenant AND domain=NEW.domain AND jurisdiction=NEW.jurisdiction;
+  IF NOT FOUND THEN RAISE EXCEPTION 'protected storage accounting missing'; END IF;
+  RETURN NEW;
+ END IF;
  INSERT INTO public.compliance_storage_usage AS u(tenant,domain,jurisdiction,stored_bytes,stored_rows)
  VALUES(NEW.tenant,NEW.domain,NEW.jurisdiction,bytes,1)
  ON CONFLICT(tenant,domain,jurisdiction) DO UPDATE
@@ -90,6 +97,9 @@ func MigrateC071Database(ctx context.Context,db *sql.DB,c *C071Cipher)error{
    }
    for _,table:=range []string{"compliance_author_heads","compliance_author_versions","compliance_review_heads","compliance_review_versions","compliance_auditor_access"}{
     if _,err=tx.ExecContext(ctx,"CREATE TRIGGER c071_quota AFTER INSERT ON public."+pq.QuoteIdentifier(table)+" FOR EACH ROW EXECUTE FUNCTION public.c071_account_storage()");err!=nil{return ErrC071Storage}
+   }
+   for _,table:=range []string{"compliance_author_heads","compliance_review_heads"}{
+    if _,err=tx.ExecContext(ctx,"CREATE TRIGGER c071_head_quota AFTER UPDATE ON public."+pq.QuoteIdentifier(table)+" FOR EACH ROW EXECUTE FUNCTION public.c071_account_storage()");err!=nil{return ErrC071Storage}
    }
    for _,stmt:=range []string{"ALTER TABLE public.compliance_publication_fences ENABLE ROW LEVEL SECURITY","ALTER TABLE public.compliance_publication_fences FORCE ROW LEVEL SECURITY",`CREATE POLICY c071_publication_scope ON public.compliance_publication_fences USING(EXISTS(SELECT 1 FROM public.compliance_database_bindings b WHERE b.role_name=current_user AND b.publication_scope=scope)) WITH CHECK(EXISTS(SELECT 1 FROM public.compliance_database_bindings b WHERE b.role_name=current_user AND b.publication_scope=scope))`}{if _,err=tx.ExecContext(ctx,stmt);err!=nil{return ErrC071Storage}}
   }

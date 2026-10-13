@@ -28,7 +28,8 @@ contract R0414Actor {
 }
 contract R0414AuthorityTest {
     VmR0414 constant vm=VmR0414(address(uint160(uint256(keccak256("hevm cheat code")))));
-    bytes32 constant ID=keccak256("replacement"),DOMAIN=keccak256("allowed-domain");
+    bytes32 constant ID=keccak256("replacement");
+    bytes32 constant DOMAIN=keccak256("allowed-domain");
     UpgradeCoordinator coordinator;SecurityCouncilController council;R0414Emergency emergency;
     R0414Actor reviewer;R0414Actor restricter;R0414Actor releaser;
     R0414Module oldModule;R0414Module newModule;

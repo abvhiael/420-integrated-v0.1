@@ -56,6 +56,10 @@ func TestC071PostgreSQLProductionStorage(t *testing.T){
  if MigrateC071Database(ctx,admin.DB,c)==nil{t.Fatal("oversized legacy data migrated")}
  var exists bool;if admin.DB.QueryRowContext(ctx,"SELECT to_regclass('public.compliance_schema_migrations') IS NOT NULL").Scan(&exists)!=nil||exists{t.Fatal("failed migration left partial ledger")}
  if _,err=admin.DB.ExecContext(ctx,"UPDATE compliance_author_versions SET document=$1 WHERE tenant=$2",string(valid),scopeA.Tenant);err!=nil{t.Fatal(err)}
+ if _,err=admin.DB.ExecContext(ctx,"UPDATE compliance_author_versions SET document_digest=repeat('0',64) WHERE tenant=$1",scopeA.Tenant);err!=nil{t.Fatal(err)}
+ if MigrateC071Database(ctx,admin.DB,c)==nil{t.Fatal("corrupt legacy digest accepted")}
+ if admin.DB.QueryRowContext(ctx,"SELECT to_regclass('public.compliance_schema_migrations') IS NOT NULL").Scan(&exists)!=nil||exists{t.Fatal("corrupt-backfill rollback left ledger")}
+ if _,err=admin.DB.ExecContext(ctx,"UPDATE compliance_author_versions SET document_digest=$1 WHERE tenant=$2",legacy.DocumentDigest,scopeA.Tenant);err!=nil{t.Fatal(err)}
  var wg sync.WaitGroup;errs:=make(chan error,2)
  for i:=0;i<2;i++{wg.Add(1);go func(){defer wg.Done();errs<-MigrateC071Database(ctx,admin.DB,c)}()};wg.Wait();close(errs);for err=range errs{if err!=nil{t.Fatal("serialized migration",err)}}
  var count int;if admin.DB.QueryRowContext(ctx,"SELECT count(*) FROM compliance_schema_migrations").Scan(&count)!=nil||count!=5{t.Fatal("migration cardinality",count)}

@@ -22,9 +22,9 @@ def connected():
 
 def test_migration_repeatable_and_checksums(connected):
     with psycopg.connect(connected) as c:
-        assert apply(c)==22
+        assert apply(c)==23
         rows=c.execute("SELECT version,filename,sha256 FROM bnb_schema_migration ORDER BY version").fetchall()
-    assert len(rows)==22
+    assert len(rows)==23
     for i,(version,name,digest) in enumerate(rows,1):
         assert version==i
         assert hashlib.sha256((MIGRATIONS/name).read_bytes()).hexdigest()==digest
@@ -37,7 +37,7 @@ def test_multi_instance_migration_serialization(connected):
     with ThreadPoolExecutor(max_workers=4) as pool:
         assert list(pool.map(run,range(4)))==[22]*4
     with psycopg.connect(connected) as c:
-        assert c.execute("SELECT count(*) FROM bnb_schema_migration").fetchone()[0]==22
+        assert c.execute("SELECT count(*) FROM bnb_schema_migration").fetchone()[0]==23
 
 
 def test_tampered_migration_rejected_without_mutation(connected,tmp_path):
@@ -50,7 +50,7 @@ def test_tampered_migration_rejected_without_mutation(connected,tmp_path):
         with pytest.raises(RuntimeError,match="MIGRATION_DRIFT"):
             apply(c,directory=tmp_path)
     with psycopg.connect(connected) as c:
-        assert c.execute("SELECT count(*) FROM bnb_schema_migration").fetchone()[0]==22
+        assert c.execute("SELECT count(*) FROM bnb_schema_migration").fetchone()[0]==23
 
 
 def test_untracked_schema_not_silently_adopted(connected):
@@ -71,7 +71,7 @@ def test_readiness_schema_guard(connected):
     client=TestClient(api.app)
     healthy=client.get("/health/ready")
     assert healthy.status_code==200,healthy.text
-    assert healthy.json()["schema_version"]==22
+    assert healthy.json()["schema_version"]==23
     original=api.db
     class Cursor:
         def execute(self,sql,*_):

@@ -84,13 +84,13 @@ func c071RuntimeBinding(ctx context.Context,db *sql.DB,s C064AuthorScope,publica
  AND relrowsecurity AND relforcerowsecurity`).Scan(&n)
  if err!=nil||n!=6{return ErrC071Storage}
  if db.QueryRowContext(ctx,"SELECT has_schema_privilege(current_user,'public','CREATE') OR has_table_privilege(current_user,'public.compliance_database_bindings','INSERT,UPDATE,DELETE') OR has_table_privilege(current_user,'public.compliance_schema_migrations','INSERT,UPDATE,DELETE')").Scan(&unsafe)!=nil||unsafe{return ErrC071Storage}
- scripts:=[]string{PublicationSchemaSQL,C064AuthorSchemaSQL,C065ReviewSchemaSQL,C067AuditSchemaSQL,c071HardeningSQL}
+ scripts:=[]string{PublicationSchemaSQL,C064AuthorSchemaSQL,C065ReviewSchemaSQL,C067AuditSchemaSQL,c071HardeningSQL,c072DurableSQL}
  for i,script:=range scripts{
   var checksum string
   if db.QueryRowContext(ctx,"SELECT checksum FROM public.compliance_schema_migrations WHERE version=$1",i+1).Scan(&checksum)!=nil||checksum!=Digest([]byte(script)){return ErrC071Storage}
  }
  var version int
- if db.QueryRowContext(ctx,"SELECT max(version) FROM public.compliance_schema_migrations").Scan(&version)!=nil||version!=5{return ErrC071Storage}
+ if db.QueryRowContext(ctx,"SELECT max(version) FROM public.compliance_schema_migrations").Scan(&version)!=nil||version!=6{return ErrC071Storage}
  for _,table:=range []string{"compliance_author_versions","compliance_review_versions","compliance_auditor_access"}{
   if db.QueryRowContext(ctx,"SELECT has_table_privilege(current_user,$1,'UPDATE') OR has_table_privilege(current_user,$1,'DELETE') OR has_table_privilege(current_user,$1,'TRUNCATE')", "public."+table).Scan(&unsafe)!=nil||unsafe{return ErrC071Storage}
  }

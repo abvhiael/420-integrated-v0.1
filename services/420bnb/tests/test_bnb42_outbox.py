@@ -58,7 +58,9 @@ def test_retry_dead_letter_and_manual_replay(database):
             state=outbox.fail(c,eid,"retry-worker","provider_unavailable")
         assert state=="dead_letter"
         assert not outbox.claim(c,"retry-worker",limit=100)
-        with pytest.raises(outbox.DeliveryError,match="REPLAY_AUTHORITY_REQUIRED"):\n            outbox.replay(c,eid,"unverified-operator","documented incident recovery")\n        assert outbox.replay(c,eid,"approved-local-operator","documented incident recovery",authorize=lambda actor,reason: actor=="approved-local-operator" and reason=="documented incident recovery")
+        with pytest.raises(outbox.DeliveryError,match="REPLAY_AUTHORITY_REQUIRED"):
+            outbox.replay(c,eid,"unverified-operator","documented incident recovery")
+        assert outbox.replay(c,eid,"approved-local-operator","documented incident recovery",authorize=lambda actor,reason: actor=="approved-local-operator" and reason=="documented incident recovery")
         assert eid in [x["id"] for x in outbox.claim(c,"retry-worker",limit=100)]
         assert outbox.acknowledge(c,eid,"retry-worker","local","durable-receipt")
         with pytest.raises(outbox.DeliveryError,match="REPLAY_NOT_ELIGIBLE"):

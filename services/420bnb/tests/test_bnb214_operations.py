@@ -125,3 +125,36 @@ def test_readiness_database_outage_returns_bounded_503_without_dsn_leak(monkeypa
     assert response.json()=={"detail":"DATABASE_UNAVAILABLE"}
     assert "secret-pass" not in response.text
     assert response.headers["cache-control"]=="no-store"
+
+
+def test_bnb310_outbox_event_atomic_rollback_and_crash_safe_retry(connected):
+    """A failed transaction cannot leak an event or half-published decision."""
+    from uuid import uuid4
+    event_id=uuid4()
+    try:
+        with psycopg.connect(connected) as c:
+            with c.transaction():
+                c.execute("""INSERT INTO bnb_outbox(id,event_type,payload)
+                    VALUES (%s,'bnb.ops.synthetic_crash',%s::jsonb)""",
+                    (event_id,'{"fixture":true}'))
+                raise RuntimeError("simulated process crash before commit")
+    except RuntimeError:
+        pass
+    with psycopg.connect(connected) as c:
+        assert c.execute("SELECT COUNT(*) FROM bnb_outbox WHERE id=%s",
+                         (event_id,)).fetchone()[0]==0
+        c.execute("""INSERT INTO bnb_outbox(id,event_type,payload)
+            VALUES (%s,'bnb.ops.synthetic_crash',%s::jsonb)""",
+            (event_id,'{"fixture":true}'))
+    try:
+        with psycopg.connect(connected) as c:
+            assert c.execute("SELECT COUNT(*) FROM bnb_outbox WHERE id=%s",
+                             (event_id,)).fetchone()[0]==1
+            with pytest.raises(psycopg.errors.UniqueViolation):
+                with c.transaction():
+                    c.execute("""INSERT INTO bnb_outbox(id,event_type,payload)
+                        VALUES (%s,'bnb.ops.synthetic_crash',%s::jsonb)""",
+                        (event_id,'{"fixture":true}'))
+    finally:
+        with psycopg.connect(connected) as c:
+            c.execute("DELETE FROM bnb_outbox WHERE id=%s",(event_id,))

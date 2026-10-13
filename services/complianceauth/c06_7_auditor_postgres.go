@@ -24,7 +24,7 @@ func(s C067PostgreSQLAccessLog)AppendDurable(ctx context.Context,a C067AuditAcce
  }
  purpose:=a.Purpose
  if s.Cipher!=nil {
-  encrypted,err:=c071Encode(s.Cipher,a.Purpose,c071AAD("audit",C064AuthorScope{Tenant:a.Scope.Tenant,Domain:a.Scope.Domain,Jurisdiction:a.Scope.Jurisdiction},a.CaseID+"|"+a.Actor+"|"+a.EvidenceID,0))
+  encrypted,err:=c071EncodeContext(ctx,s.Cipher,a.Purpose,c071AAD("audit",C064AuthorScope{Tenant:a.Scope.Tenant,Domain:a.Scope.Domain,Jurisdiction:a.Scope.Jurisdiction},a.CaseID+"|"+a.Actor+"|"+a.EvidenceID,0))
   if err!=nil{return ErrUnavailable};purpose=string(encrypted)
  }
  tx,err:=s.DB.BeginTx(ctx,&sql.TxOptions{Isolation:sql.LevelReadCommitted})

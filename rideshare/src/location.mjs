@@ -130,6 +130,10 @@ export function createLocationService({authenticator,tripStore,privateStore,rout
       if(clock()>=result.expiresAt)fail('LOCATION_EXPIRED');
       return Object.freeze({...result.payload,expiresAt:result.expiresAt});
     },
+    async quoteRouteFor(routeRef) {
+      const stored=await privateStore.forRouting(routeRef);
+      return routingAdapter.resolve(routeRef,stored.riderId,stored.payload);
+    },
     async routeScopeFor(routeRef) {
       const stored=await privateStore.forRouting(routeRef);
       return (await routingAdapter.resolve(routeRef,stored.riderId,stored.payload)).scope;

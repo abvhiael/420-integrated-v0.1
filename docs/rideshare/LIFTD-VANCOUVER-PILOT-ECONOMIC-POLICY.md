@@ -1,6 +1,6 @@
 # LIFTd — adopted Vancouver pilot economic policy
 
-Status: adopted by the repository owner on 2026-10-13. This is a product policy decision; pricing, settlement and payroll implementation remain pending under L01.7/L01.8. Operating-cost validation and independent launch acceptance remain required. Policy version: v1.
+Status: adopted by the repository owner on 2026-10-13. This is a product policy decision; pricing/consent implementation is addressed in L01.7; settlement and payroll remain pending under L01.8. Operating-cost validation and independent launch acceptance remain required. Policy version: v1.
 
 ## Market and fare
 
@@ -51,3 +51,5 @@ Regulatory source references used when adopting this policy (reverify effective 
 - https://www2.gov.bc.ca/gov/content/employment-business/employment-standards-advice/employment-standards/forms-resources/igm/esr-part-7-2-section-45-29
 - https://www.ptboard.bc.ca/rule-17-tns-minimum-rates
 - https://www2.gov.bc.ca/gov/content/transportation/vehicle-safety-enforcement/services/passenger-transportation/guidance-resources/data-requirements
+
+L01.7 implementation rounding is half-up per distance/duration component in integer CAD cents; independently approved higher minimum fares remain enforced. Cancellation/waiting implementation version v1-free-pretrip charges riders zero for pre-trip cancellation, driver cancellation, assignment expiry, no-show and waiting; no automatic positive fee is enabled. Active-trip cancellation requires safety resolution. Earned driver obligations remain preserved and platform reconciliation is L01.8. See [quote and consent design](L01.7-FARE-QUOTES-AND-CONSENT.md).

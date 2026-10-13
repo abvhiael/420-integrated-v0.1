@@ -15,3 +15,5 @@ L01.4 PostgreSQL storage and required Idempotency-Key/commandId behavior are doc
 L01.5 adds the canonical Location consumer, signed routing, encrypted private endpoints and scoped coordinate access; see [Location/privacy contract](../docs/rideshare/L01.5-LOCATION-PRIVACY.md). Production requires approved Location/geo-scope authority, managed encryption keys, explicit retention policy and an installed ciphertext-erasure worker.
 
 L01.6 adds durable own-driver availability, server-selected deterministic matching and transactional assignment leases/expiry. Production assembly requires the Dispatch adapter and independently signed current driver-session verifier; see [dispatch design](../docs/rideshare/L01.6-DISPATCH-AND-AVAILABILITY.md). No live dispatch is deployed.
+
+L01.7 adds append-only CAD fare quotes, exact affirmative rider consent, protected historical reads, atomic quote-to-trip binding and explicit zero-fee pre-trip cancellation terms. Signed current fare/pickup/funding adapters enforce driver viability while preserving accepted prices; payment movement remains L01.8. See [fare design](../docs/rideshare/L01.7-FARE-QUOTES-AND-CONSENT.md).

@@ -71,7 +71,7 @@ export function createDispatchAdapter({pool,authenticator,eligibilityAdapter,ava
       }catch(error){if(client){try{await client.query('ROLLBACK');}catch{}}if(error instanceof AuthError)throw error;fail('DISPATCH_UNAVAILABLE',503);}
       finally{client?.release();}
     },
-    async select(client,trip,command) {
+    async select(client,trip,command,candidateCheck) {
       if(trip.state!=='REQUESTED')fail('INVALID_TRANSITION');
       if(command.expectedRevision!==trip.revision)fail('STALE_REVISION');
       if(isPaused())fail('SERVICE_PAUSED');await lock(client);
@@ -84,6 +84,7 @@ export function createDispatchAdapter({pool,authenticator,eligibilityAdapter,ava
         try{await verifyAvailability(row);projection=await eligibilityAdapter.project(trip,selected);}
         catch(error){if(error instanceof AuthError&&error.status===403)continue;throw error;}
         if(projection.driver.accountId!==row.account_id)continue;
+        if(candidateCheck){try{await candidateCheck(selected);}catch(error){if(error?.code==='PICKUP_NOT_VIABLE')continue;throw error;}}
         const now=time();if(Number(row.expires_at)<=now||projection.admission.expiresAt<=now)continue;
         return {command:selected,admission:projection.admission,accountId:row.account_id,
           availabilityRevision:Number(row.revision),expiresAt:now+assignmentSeconds};

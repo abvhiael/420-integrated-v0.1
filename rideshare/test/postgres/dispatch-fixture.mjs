@@ -31,14 +31,14 @@ export function fixture(pool,pairs,controls={now:100}) {
         {role,resource:`account:${r.subject}`,actions:['availability.set'],expiresAt:clock()+30,revoked:false},
         {role,resource:`trip:${r.sessionId}`,actions:['trip.read','trip.arrive','trip.start','trip.complete','trip.cancel'],expiresAt:clock()+30,revoked:false}]:role==='operator'?[
         {role,resource:`trip:${r.sessionId}`,actions:['trip.assign','trip.expire'],expiresAt:clock()+30,revoked:false}]:[
-        {role,resource:`account:${r.subject}`,actions:['trip.create','route.prepare'],expiresAt:clock()+30,revoked:false},
+        {role,resource:`account:${r.subject}`,actions:['trip.create','route.prepare',...(controls.quotes?['quote.create','quote.accept','quote.read']:[])],expiresAt:clock()+30,revoked:false},
         {role,resource:`trip:${r.sessionId}`,actions:['trip.read','trip.cancel'],expiresAt:clock()+30,revoked:false}]};
   });
   const authenticator=createAuthenticator({identity:roots[0],sessionAuthority:roots[1],resolveSession:session,clock});
   const tripStore=createPostgresTripStore(pool);
   const privateStore=createPrivateLocationStore(pool,{keys:{v1:Buffer.from(controls.encryptionKey??randomBytes(32).toString('base64'),'base64')},activeKey:'v1',retentionSeconds:1000,clock});
   const routingAdapter=createLocationRoutingAdapter({authority:roots[2],clock,resolveRoute:transport(2,'liftd_location_route',r=>({sub:r.riderId,nonce:r.nonce,routeRef:r.routeRef,pointsDigest:r.pointsDigest,
-    provider:'dispatch_provider',provenanceRef:'dispatch_scope',revision:1,distanceMeters:1800,durationSeconds:500,country:'CA',region:'BC',municipality:'Vancouver',service:'liftd-passenger',airport:false,crossBoundary:false,available:true,ambiguous:false}))});
+    provider:'dispatch_provider',provenanceRef:'dispatch_scope',revision:1,distanceMeters:controls.routeDistanceMeters??1800,durationSeconds:controls.routeDurationSeconds??500,country:'CA',region:'BC',municipality:'Vancouver',service:'liftd-passenger',airport:false,crossBoundary:false,available:true,ambiguous:false}))});
   const locationService=createLocationService({authenticator,tripStore,privateStore,routingAdapter,clock});
   const eligibilityAdapter=createEligibilityAdapter({driverRegistry:roots[3],vehicleRegistry:roots[4],transportAuthority:roots[5],clock,routeScopeFor:locationService.routeScopeFor,
     resolveDriver:transport(3,'liftd_driver_registry',r=>({...r,sub:r.driverId,accountId:`${r.driverId}_account`,recordRef:'dispatch_driver_record',revision:1,active:true,suspended:controls.suspendedDrivers?.includes(r.driverId)??false})),
@@ -59,5 +59,5 @@ export function fixture(pool,pairs,controls={now:100}) {
     return dispatchAdapter.setAvailability(token('driver',driver),{driverId:driver,vehicleId:vehicle,online,expectedRevision:row?Number(row.revision):0,commandId:cid()});
   };
   const transition=(role,subject,trip,action,revision,commandId=cid(),extra={})=>service.transition(token(role,subject,trip),trip,{action,expectedRevision:revision,commandId,...extra});
-  return {cid,token,tripStore,privateStore,locationService,dispatchAdapter,service,handler,create,online,transition};
+  return {authenticator,eligibilityAdapter,roots,jwt,transport,clock,cid,token,tripStore,privateStore,locationService,dispatchAdapter,service,handler,create,online,transition};
 }

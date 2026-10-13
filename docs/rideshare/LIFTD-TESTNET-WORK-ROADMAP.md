@@ -13,4 +13,4 @@ All entries remain pending. Deferral is not qualification or a waiver. Local imp
 | LT-07 | Managed deployment, TLS/keys, multi-instance fault/restart evidence, database recovery, monitoring and audit access | Service operations |
 | LT-08 | Actual Travel, Notifications, Reputation and Arbitration consuming-service acceptance | Respective canonical owners |
 
-Launch market, fares, fees, compensation allocations and commercial approvals are unresolved product/operator decisions. Do not infer them from DOOBr's BC/Vancouver delivery target. Nothing in this scaffold changes Genesis configuration, registers a predeploy or enables live rides.
+The owner explicitly selected Vancouver, BC and adopted pilot fares, fees and compensation allocations on 2026-10-13; see [economic policy v1](LIFTD-VANCOUVER-PILOT-ECONOMIC-POLICY.md). Economic implementation, operating-cost validation, detailed cancellation/waiting policy and commercial approvals remain pending. DOOBr delivery approval cannot authorize passenger transport. Nothing in this scaffold changes Genesis configuration, registers a predeploy or enables live rides.

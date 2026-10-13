@@ -2190,12 +2190,22 @@ def ingest_pay_intent(payload:PayIntentInput,x_pay_authority_proof:str|None=Head
                 raise HTTPException(403,"PAY_PRINCIPAL_MISMATCH")
             if proof.get("quoted_minor")!=row[5]["total_minor"] or proof.get("currency")!=row[6].strip():
                 raise HTTPException(409,"INVOICE_QUOTE_AMOUNT_MISMATCH")
-            existing=c.execute("""SELECT id,pay_invoice_id FROM bnb_pay_intent
-                WHERE reservation_id=%s""",(payload.reservation_id,)).fetchone()
+            existing=c.execute("""SELECT id,pay_invoice_id,quote_id,merchant_id,
+                payout_controller,chain_id,asset,asset_amount,pay_invoice_expires,
+                conversion_route_id,conversion_quote_id,conversion_expires,
+                minimum_received,payer_max,state
+                FROM bnb_pay_intent WHERE reservation_id=%s FOR UPDATE""",
+                (payload.reservation_id,)).fetchone()
             if existing:
-                if existing[1]!=payload.pay_invoice_id:
+                immutable=(payload.pay_invoice_id,payload.quote_id,payload.merchant_id,
+                    payload.payout_controller,payload.chain_id,payload.asset,
+                    payload.asset_amount,payload.pay_invoice_expires,
+                    payload.conversion_route_id,payload.conversion_quote_id,
+                    payload.conversion_expires,payload.minimum_received,payload.payer_max)
+                if tuple(existing[1:14])!=immutable:
                     raise HTTPException(409,"PAY_INTENT_ALREADY_BOUND")
-                return {"intent_id":str(existing[0]),"state":"pending","confirmed":False}
+                return {"intent_id":str(existing[0]),"state":existing[14],
+                        "confirmed":False}
             intent_id=uuid4()
             inserted=c.execute("""INSERT INTO bnb_pay_intent
               (id,reservation_id,quote_id,requester,merchant_id,payout_controller,

@@ -9,6 +9,7 @@ import {ResourceLedger} from "../../../src/highcountry/inventory/ResourceLedger.
 import {EquipmentRegistry} from "../../../src/highcountry/equipment/EquipmentRegistry.sol";
 import {EquipmentLifecycleEngine} from "../../../src/highcountry/equipment/EquipmentLifecycleEngine.sol";
 import {EquipmentCultivationBridge} from "../../../src/highcountry/equipment/EquipmentCultivationBridge.sol";
+import {ManufacturedEquipmentIssuer} from "../../../src/highcountry/equipment/ManufacturedEquipmentIssuer.sol";
 import {ManufacturingEngine} from "../../../src/highcountry/manufacturing/ManufacturingEngine.sol";
 import {CanonicalMarketEscrow} from "../../../src/highcountry/market/CanonicalMarketEscrow.sol";
 import {RightsRegistry} from "../../../src/highcountry/rights/RightsRegistry.sol";
@@ -40,6 +41,7 @@ contract R04ForgedEmergencyRoot {
 contract R04EquipmentEmergencyTest is PublicPlantCapacityFixture {
     InventoryRegistry inventory;
     ManufacturingEngine manufacturing;
+    ManufacturedEquipmentIssuer earnedIssuer;
     EquipmentRegistry equipment;
     EquipmentLifecycleEngine lifecycle;
     EquipmentCultivationBridge bridge;
@@ -49,7 +51,9 @@ contract R04EquipmentEmergencyTest is PublicPlantCapacityFixture {
     bytes32 constant REPAIR=keccak256("repair");
     bytes32 constant SCRAP=keccak256("scrap");
     bytes32 constant TYPE=keccak256("type");
-    bytes32 constant ITEM=keccak256("earned-item");
+    bytes32 ITEM;
+    bytes32 constant GEAR=keccak256("gear-output");
+    bytes32 constant GEAR_RECIPE=keccak256("gear-recipe");
     bytes32 constant RECIPE=keccak256("recipe");
     function bind(R04EmergencyConsumer c) internal {
         _grant(address(this),ModuleIds.EMERGENCY_STATE,c.R04_BIND_ACTION(),c.emergencyBindingScope(address(emergency)));
@@ -72,11 +76,11 @@ contract R04EquipmentEmergencyTest is PublicPlantCapacityFixture {
         HarvestEngine harvest=new HarvestEngine(address(auth),address(plants),address(cultivation));
         products=new HarvestProductRegistry(address(harvest));inventory=new InventoryRegistry(address(products));
         inventory.registerResource(RAW,InventoryRegistry.Unit.COUNT);inventory.registerResource(REPAIR,InventoryRegistry.Unit.COUNT);
+        inventory.registerResource(GEAR,InventoryRegistry.Unit.COUNT);
         inventory.registerResource(SCRAP,InventoryRegistry.Unit.COUNT);inventory.setIssuer(address(this),true);
         inventory.acquire(keccak256("earned-raw"),RAW,address(this),20);
         equipment=new EquipmentRegistry(address(auth), address(land));bind(equipment);
         int16[6] memory effects;effects[0]=50;equipment.registerType(TYPE,keccak256("catalogue"),1,effects);
-        equipment.setIssuer(address(this),true);equipment.issue(ITEM,TYPE,address(this),keccak256("earned-proof"));
         lifecycle=new EquipmentLifecycleEngine(address(auth), address(equipment),address(inventory));bind(lifecycle);
         equipment.bindLifecycleController(address(lifecycle));inventory.setIssuer(address(lifecycle),true);
         inventory.setInventoryOperator(address(lifecycle),true);
@@ -84,12 +88,19 @@ contract R04EquipmentEmergencyTest is PublicPlantCapacityFixture {
         bridge=new EquipmentCultivationBridge(address(auth), address(equipment),address(lifecycle),address(cultivation),address(plants));bind(bridge);
         lifecycle.setUseVerifier(address(bridge),true);
         _grant(address(bridge),ModuleIds.CULTIVATION_ENGINE,ActionIds.CULTIVATION_UPDATE,bytes32(uint256(1)));
-        equipment.place(ITEM,1);
         manufacturing=new ManufacturingEngine(address(auth), address(inventory),2);bind(manufacturing);
         inventory.setInventoryOperator(address(manufacturing),true);inventory.setIssuer(address(manufacturing),true);
         bytes32[2] memory ins;bytes32[2] memory outs;uint256[2] memory amounts;uint256[2] memory produced;
         ins[0]=RAW;amounts[0]=10;outs[0]=REPAIR;produced[0]=2;
         manufacturing.registerRecipe(RECIPE,keccak256("catalogue"),ins,amounts,outs,produced,1,0);
+        amounts[0]=4;outs[0]=GEAR;produced[0]=1;
+        manufacturing.registerRecipe(GEAR_RECIPE,keccak256("catalogue"),ins,amounts,outs,produced,1,0);
+        earnedIssuer=new ManufacturedEquipmentIssuer(address(auth),address(manufacturing),address(equipment));bind(earnedIssuer);
+        earnedIssuer.bindRecipe(GEAR_RECIPE,TYPE,GEAR,1);
+        equipment.setIssuer(address(earnedIssuer),true);inventory.setInventoryOperator(address(earnedIssuer),true);
+        bytes32 job=manufacturing.start(GEAR_RECIPE);vm.warp(block.timestamp+1);manufacturing.complete(job);
+        ITEM=earnedIssuer.issueFromManufacturing(job);equipment.place(ITEM,1);
+        require(inventory.ledger().balance(GEAR,address(this)).consumed==1,"gear not earned from actual output");
     }
     function environment() internal pure returns(CultivationEngine.EnvironmentSnapshot memory) {
         return CultivationEngine.EnvironmentSnapshot(2400,6000,7000,6000,6500,5000);
@@ -102,17 +113,41 @@ contract R04EquipmentEmergencyTest is PublicPlantCapacityFixture {
         require(equipment.disabled(ITEM)&&cultivation.getState(1).environment.temperature==2400,"broken effects survived");
         lifecycle.repair(ITEM);
         require(inventory.ledger().balance(REPAIR,address(this)).consumed==2,"repair bypassed manufacturing resource");
-        require(inventory.ledger().balance(RAW,address(this)).consumed==10,"raw input unconserved");
+        require(inventory.ledger().balance(RAW,address(this)).consumed==14,"raw input unconserved");
         lifecycle.retire(ITEM);lifecycle.recycle(ITEM);
         require(equipment.occupiedSlots(1)==0&&inventory.ledger().balance(SCRAP,address(this)).available==3,"recovery unconserved");
         (bool replay,)=address(lifecycle).call(abi.encodeCall(lifecycle.recycle,(ITEM)));require(!replay,"recycle replay");
     }
+    function testManufacturedEquipmentRequiresCompletedOwnerOutputConsentAndSingleUse() public {
+        bytes32 job=manufacturing.start(GEAR_RECIPE);
+        (bool early,)=address(earnedIssuer).call(abi.encodeCall(earnedIssuer.issueFromManufacturing,(job)));
+        require(!early,"unfinished manufacturing issued gear");
+        vm.warp(block.timestamp+1);manufacturing.complete(job);
+        vm.prank(ALICE);(bool forgedOwner,)=address(earnedIssuer).call(abi.encodeCall(earnedIssuer.issueFromManufacturing,(job)));
+        require(!forgedOwner,"manufacturing owner forged");
+        inventory.setInventoryOperator(address(earnedIssuer),false);
+        (bool deniedConsent,)=address(earnedIssuer).call(abi.encodeCall(earnedIssuer.issueFromManufacturing,(job)));
+        require(!deniedConsent && !earnedIssuer.issuedJob(job),"consent denial did not roll back");
+        inventory.setInventoryOperator(address(earnedIssuer),true);
+        equipment.setIssuer(address(earnedIssuer),false);
+        (bool deniedIssuer,)=address(earnedIssuer).call(abi.encodeCall(earnedIssuer.issueFromManufacturing,(job)));
+        require(!deniedIssuer && !earnedIssuer.issuedJob(job)
+            && inventory.ledger().balance(GEAR,address(this)).available==1,"issuer denial lost output");
+        equipment.setIssuer(address(earnedIssuer),true);
+        bytes32 item=earnedIssuer.issueFromManufacturing(job);
+        require(equipment.equipment(item).owner==address(this),"wrong manufactured owner");
+        (bool replay,)=address(earnedIssuer).call(abi.encodeCall(earnedIssuer.issueFromManufacturing,(job)));
+        require(!replay,"manufacturing earning replay");
+    }
     function testRestrictedManufacturingRefundAndEscrowCancellationRemainSafe() public {
         bytes32 job=manufacturing.start(RECIPE);restrict(EmergencyDomains.MANUFACTURING);
         (bool completed,)=address(manufacturing).call(abi.encodeCall(manufacturing.complete,(job)));
-        require(!completed,"restricted completion");manufacturing.cancel(job);
+        require(!completed,"restricted completion");
+        (bool issued,bytes memory reason)=address(earnedIssuer).call(abi.encodeCall(earnedIssuer.issueFromManufacturing,(job)));
+        require(!issued && bytes4(reason)==R04EmergencyConsumer.R04Restricted.selector,"restricted earning issuer");
+        manufacturing.cancel(job);
         ResourceLedger.Balance memory b=inventory.ledger().balance(RAW,address(this));
-        require(b.available==20&&b.reserved==0&&b.consumed==0,"cancel lost raw resources");
+        require(b.available==16&&b.reserved==0&&b.consumed==4,"cancel lost raw resources");
         lifecycle.retire(ITEM);lifecycle.recycle(ITEM);
         require(inventory.ledger().balance(SCRAP,address(this)).available==3,"restricted recovery lost");
         CanonicalMarketEscrow market=new CanonicalMarketEscrow(address(auth), address(inventory),address(this));bind(market);
@@ -120,7 +155,7 @@ contract R04EquipmentEmergencyTest is PublicPlantCapacityFixture {
         market.list(keccak256("listing"),RAW,5,uint64(block.timestamp+100));restrict(EmergencyDomains.MARKET);
         (bool sold,)=address(market).call(abi.encodeCall(market.settle,(keccak256("listing"),ALICE)));
         require(!sold,"restricted trade");market.cancel(keccak256("listing"));
-        b=inventory.ledger().balance(RAW,address(this));require(b.available==20&&b.reserved==0,"escrow cancel lost inventory");
+        b=inventory.ledger().balance(RAW,address(this));require(b.available==16&&b.reserved==0,"escrow cancel lost inventory");
     }
     function testRemainingR04FamiliesEnforceCanonicalDomainRestrictions() public {
         RightsRegistry rights=new RightsRegistry(address(auth));bind(rights);

@@ -25,7 +25,9 @@ type PublicationKeyState struct {
  NotAfter time.Time
  Compromised bool
 }
+type C073PublicationKeys interface{PublicationKey(context.Context,string)(PublicationKeyState,uint64,error)}
 type PublicationControl struct {
+ ExternalKeys C073PublicationKeys
  mu sync.RWMutex
  keys map[string]PublicationKeyState
  halted map[string]bool
@@ -56,13 +58,18 @@ func(c *PublicationControl) CompromiseKey(keyID string)error{
  k.Compromised=true;c.keys[keyID]=k;c.epoch++
  return nil
 }
+func(c *PublicationControl)state(id string)(PublicationKeyState,uint64,bool){
+ if c==nil{return PublicationKeyState{},0,false}
+ if c.ExternalKeys!=nil{ctx,cancel:=context.WithTimeout(context.Background(),5*time.Second);defer cancel();k,epoch,e:=c.ExternalKeys.PublicationKey(ctx,id);return k,epoch,e==nil}
+ c.mu.RLock();defer c.mu.RUnlock();k,ok:=c.keys[id];return k,c.epoch,ok
+}
 func(c *PublicationControl) AllowManifest(m Manifest,now time.Time)error{
  if c==nil||now.IsZero(){return ErrUnauthorized}
+ k,minimum,ok:=c.state(m.KeyID)
  c.mu.RLock();defer c.mu.RUnlock()
- k,ok:=c.keys[m.KeyID]
  if !ok||k.Compromised||c.halted[controlScope(m.Environment,m.Domain,m.Jurisdiction)]||
  k.Environment!=m.Environment||k.Domain!=m.Domain||k.Jurisdiction!=m.Jurisdiction||k.Audience!=m.Audience||
- now.Before(k.NotBefore)||!now.Before(k.NotAfter)||m.RevocationEpoch<c.epoch||
+ now.Before(k.NotBefore)||!now.Before(k.NotAfter)||m.RevocationEpoch<c.epoch||m.RevocationEpoch<minimum||
  m.EffectiveFrom.IsZero()||now.Before(m.EffectiveFrom)||!now.Before(m.EffectiveUntil)||!now.Before(m.ReviewExpiresAt){return ErrUnauthorized}
  return nil
 }
@@ -75,16 +82,16 @@ func(c *PublicationControl) SignScheduledManifest(ctx context.Context,signer Man
  sig,err:=signer.SignManifest(ctx,m.KeyID,bytes)
  if err!=nil{return SignedManifest{},errors.Join(ErrUnavailable,err)}
  if len(sig)!=ed25519.SignatureSize{return SignedManifest{},ErrUnauthorized}
+ k,minimum,ok:=c.state(m.KeyID)
  c.mu.RLock()
- k,ok:=c.keys[m.KeyID]
- valid:=ok&&!k.Compromised&&!c.halted[controlScope(m.Environment,m.Domain,m.Jurisdiction)]&&m.RevocationEpoch>=c.epoch&&ed25519.Verify(k.PublicKey,bytes,sig)
+ valid:=ok&&!k.Compromised&&!c.halted[controlScope(m.Environment,m.Domain,m.Jurisdiction)]&&m.RevocationEpoch>=c.epoch&&m.RevocationEpoch>=minimum&&now.Before(k.NotAfter)&&ed25519.Verify(k.PublicKey,bytes,sig)
  c.mu.RUnlock()
  if !valid||ctx.Err()!=nil{return SignedManifest{},ErrUnauthorized}
  return SignedManifest{Manifest:m,Signature:sig},nil
 }
 func(c *PublicationControl) VerifyScheduledManifest(s SignedManifest,now time.Time)error{
  if err:=c.AllowManifest(s.Manifest,now);err!=nil{return err}
- c.mu.RLock();k:=c.keys[s.Manifest.KeyID];c.mu.RUnlock()
- trust:=Trust{Keys:map[string]Key{s.Manifest.KeyID:{Public:k.PublicKey,Environment:k.Environment}},Environment:k.Environment,Audience:k.Audience,Domain:k.Domain,Jurisdiction:k.Jurisdiction,MinimumEpoch:s.Manifest.RevocationEpoch,MinimumSequence:1}
+ k,minimum,ok:=c.state(s.Manifest.KeyID);if !ok||k.Compromised{return ErrUnauthorized}
+ trust:=Trust{Keys:map[string]Key{s.Manifest.KeyID:{Public:k.PublicKey,Environment:k.Environment}},Environment:k.Environment,Audience:k.Audience,Domain:k.Domain,Jurisdiction:k.Jurisdiction,MinimumEpoch:minimum,MinimumSequence:1}
  return trust.Verify(s,now)
 }

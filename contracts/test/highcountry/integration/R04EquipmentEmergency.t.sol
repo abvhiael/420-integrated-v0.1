@@ -94,7 +94,7 @@ contract R04EquipmentEmergencyTest is PublicPlantCapacityFixture {
         ins[0]=RAW;amounts[0]=10;outs[0]=REPAIR;produced[0]=2;
         manufacturing.registerRecipe(RECIPE,keccak256("catalogue"),ins,amounts,outs,produced,1,0);
         amounts[0]=4;outs[0]=GEAR;produced[0]=1;
-        manufacturing.registerRecipe(GEAR_RECIPE,keccak256("catalogue"),ins,amounts,outs,produced,1,0);
+        manufacturing.registerRecipe(GEAR_RECIPE,keccak256("catalogue"),ins,amounts,outs,produced,1,2500);
         earnedIssuer=new ManufacturedEquipmentIssuer(address(auth),address(manufacturing),address(equipment));bind(earnedIssuer);
         earnedIssuer.bindRecipe(GEAR_RECIPE,TYPE,GEAR,1);
         equipment.setIssuer(address(earnedIssuer),true);inventory.setInventoryOperator(address(earnedIssuer),true);
@@ -145,7 +145,8 @@ contract R04EquipmentEmergencyTest is PublicPlantCapacityFixture {
         require(!completed,"restricted completion");
         (bool issued,bytes memory reason)=address(earnedIssuer).call(abi.encodeCall(earnedIssuer.issueFromManufacturing,(job)));
         require(!issued && bytes4(reason)==R04EmergencyConsumer.R04Restricted.selector,"restricted earning issuer");
-        manufacturing.cancel(job);
+        inventory.setResourceActive(RAW,false);manufacturing.cancel(job);
+        inventory.setResourceActive(RAW,true);
         ResourceLedger.Balance memory b=inventory.ledger().balance(RAW,address(this));
         require(b.available==16&&b.reserved==0&&b.consumed==4,"cancel lost raw resources");
         lifecycle.retire(ITEM);lifecycle.recycle(ITEM);
@@ -154,8 +155,20 @@ contract R04EquipmentEmergencyTest is PublicPlantCapacityFixture {
         inventory.setInventoryOperator(address(market),true);inventory.setMarketTransferOperator(address(market),true);
         market.list(keccak256("listing"),RAW,5,uint64(block.timestamp+100));restrict(EmergencyDomains.MARKET);
         (bool sold,)=address(market).call(abi.encodeCall(market.settle,(keccak256("listing"),ALICE)));
-        require(!sold,"restricted trade");market.cancel(keccak256("listing"));
+        require(!sold,"restricted trade");inventory.setResourceActive(RAW,false);market.cancel(keccak256("listing"));
         b=inventory.ledger().balance(RAW,address(this));require(b.available==16&&b.reserved==0,"escrow cancel lost inventory");
+    }
+    function testInactiveCataloguePreservesLossRefundAndOwnerRecoveryWithoutNewRisk() public {
+        bytes32 job=manufacturing.start(GEAR_RECIPE);
+        inventory.setResourceActive(RAW,false);restrict(EmergencyDomains.MANUFACTURING);
+        manufacturing.cancel(job);
+        ResourceLedger.Balance memory b=inventory.ledger().balance(RAW,address(this));
+        require(b.available==15 && b.reserved==0 && b.consumed==5,"inactive cancellation loss/refund unconserved");
+        (bool ingress,)=address(inventory).call(abi.encodeCall(inventory.reserve,(keccak256("new-risk"),RAW,uint256(1))));
+        require(!ingress,"inactive catalogue accepted new reservation");
+        inventory.setResourceActive(RAW,true);inventory.reserve(keccak256("owner-reserve"),RAW,2);
+        inventory.setResourceActive(RAW,false);inventory.release(keccak256("owner-recover"),RAW,2);
+        b=inventory.ledger().balance(RAW,address(this));require(b.available==15 && b.reserved==0,"owner recovery denied");
     }
     function testRemainingR04FamiliesEnforceCanonicalDomainRestrictions() public {
         RightsRegistry rights=new RightsRegistry(address(auth));bind(rights);

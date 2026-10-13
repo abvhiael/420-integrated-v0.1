@@ -24,7 +24,7 @@ Each new R04 consumer constructor pins the reviewed canonical authorization root
 | COMPETITION_ENTRY | competition create/enter/submit; Cup creation/issuance | independent adjudication and canonical result finalization |
 | MISSION_ACTIVATION | mission activate/attest/claim; progression proof ingestion and runtime reward issuance | failure/expiry/completion reads; no automatic BUDS forfeiture |
 
-All safe paths retain their original authorization, accounting and replay checks. R02 cultivation/breeding/randomness/module restrictions remain retained. Service-write checks do not substitute for on-chain enforcement. Actual council officers and per-domain controller restrict/release grants remain separate deployed acceptance.
+All safe paths retain their original authorization, accounting and replay checks. Inventory catalogue deactivation stops new reservation/issuance/transfer while existing reservation release and authorized reserved consumption remain available, preserving cancellation loss/refund and owner recovery without new supply. R02 cultivation/breeding/randomness/module restrictions remain retained. Service-write checks do not substitute for on-chain enforcement. Actual council officers and per-domain controller restrict/release grants remain separate deployed acceptance.
 
 ## Equipment, lifecycle, land and rights
 

@@ -28,7 +28,7 @@ Level 1 per implementation step; Level 2 only at the named milestones; one Level
 | L01.2 | Independently authenticated rider/driver/operator sessions, recovery/revocation, authorization tests | COMPLETE — Level 1 PASS; see L01.2 evidence |
 | L01.3 | Driver/vehicle registry projections and jurisdiction-scoped eligibility adapters | COMPLETE — Level 1 PASS; see L01.3 evidence |
 | L01.4 | Durable PostgreSQL trip/event store, uniqueness, transactional compare-and-swap, idempotency/replay and restart tests | COMPLETE — Level 1 PASS; see L01.4 evidence |
-| L01.5 | Location routing adapter, private pickup/drop-off storage, scoped access, precision and retention | Pending |
+| L01.5 | Location routing adapter, private pickup/drop-off storage, scoped access, precision and retention | Implemented candidate; Level 1 and M-L01-A pending |
 | M-L01-A | Level 2: identity + eligibility + durable trip + Location integration | Pending |
 | L01.6 | Driver availability, vehicle capacity, deterministic matching, assignment expiry and concurrent dispatch | Pending |
 | L01.7 | Immutable expiring fare quotes, currency/rounding, rider consent and explicit cancellation policy | Pending implementation; pilot economics adopted |

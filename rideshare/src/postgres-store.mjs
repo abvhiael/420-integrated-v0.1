@@ -6,11 +6,8 @@ import {publicView} from './trip.mjs';
 const {Pool} = pg;
 const id = value => typeof value === 'string' && /^[A-Za-z0-9_-]{1,128}$/.test(value);
 const fail = (code, status = 409) => {throw new AuthError(code, status);};
-export function canonical(value) {
-  if (value === null || typeof value !== 'object') return JSON.stringify(value);
-  if (Array.isArray(value)) return `[${value.map(canonical).join(',')}]`;
-  return `{${Object.keys(value).sort().map(key => `${JSON.stringify(key)}:${canonical(value[key])}`).join(',')}}`;
-}
+import {canonical} from './canonical.mjs';
+export {canonical} from './canonical.mjs';
 const hash = value => createHash('sha256').update(typeof value === 'string' ? value : canonical(value)).digest('hex');
 const emptyHash = '0'.repeat(64);
 const eventHash = event => hash({tripId: event.trip_id, revision: Number(event.revision), actorId: event.actor_id,
@@ -59,7 +56,7 @@ export function createPostgresTripStore(pool) {
       const snapshot = result.rows[0].snapshot; publicView(snapshot); return Object.freeze(snapshot);
     } catch (error) {if (error instanceof AuthError) throw error; fail('DATABASE_UNAVAILABLE', 503);}
   }
-  async function execute({actorId, commandId, tripId, action, request, guard}, produce) {
+  async function execute({actorId, commandId, tripId, action, request, guard, afterWrite}, produce) {
     if (![actorId, commandId, tripId].every(id) || !['create','assign','arrive','start','complete','cancel'].includes(action) ||
       typeof produce !== 'function' || typeof guard !== 'function') fail('INVALID_REQUEST', 400);
     const requestHash = hash({tripId, action, request});
@@ -91,6 +88,7 @@ export function createPostgresTripStore(pool) {
         const updated = await client.query('UPDATE liftd.trips SET snapshot=$1,revision=$2 WHERE trip_id=$3 AND revision=$4', [next, next.revision, tripId, old.revision]);
         if (updated.rowCount !== 1) fail('STALE_REVISION');
       } else await client.query('INSERT INTO liftd.trips(trip_id,revision,snapshot) VALUES($1,$2,$3)', [tripId, 0, next]);
+      if (afterWrite) await afterWrite(client, next);
       const previous = await client.query('SELECT event_hash FROM liftd.events WHERE trip_id=$1 ORDER BY revision DESC LIMIT 1', [tripId]);
       const event = {trip_id: tripId, revision: next.revision, actor_id: actorId, command_id: commandId,
         action, snapshot: next, previous_hash: previous.rows[0]?.event_hash ?? emptyHash};

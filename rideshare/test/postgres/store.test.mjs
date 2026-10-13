@@ -35,7 +35,7 @@ before(async () => {
 after(async () => {await pool?.end(); await owner.end();});
 test('ordered concurrent migrations are checksum-verified and runtime is a non-owner role', async () => {
   await migrate(owner);
-  assert.equal((await owner.query('SELECT count(*)::int AS n FROM liftd.migrations')).rows[0].n, 1);
+  assert.equal((await owner.query('SELECT count(*)::int AS n FROM liftd.migrations')).rows[0].n, 2);
   const role = await pool.query('SELECT current_user AS name,rolsuper FROM pg_roles WHERE rolname=current_user');
   assert.equal(role.rows[0].rolsuper, false); assert.equal(role.rows[0].name, 'liftd_runtime');
   await assert.rejects(() => pool.query("UPDATE liftd.migrations SET checksum='bad'"), e => e.code === '42501');
@@ -105,12 +105,12 @@ test('missing command key fails before database writes', async () => {
   assert.equal(await store.get(id),undefined);
 });
 test('migration tampering fails both migration and runtime readiness', async () => {
-  const original = (await owner.query('SELECT checksum FROM liftd.migrations')).rows[0].checksum;
+  const original = (await owner.query('SELECT version,checksum FROM liftd.migrations ORDER BY version')).rows;
   try {
     await owner.query("UPDATE liftd.migrations SET checksum='tampered'");
     await assert.rejects(() => migrate(owner),e => e.code === 'MIGRATION_CHECKSUM_MISMATCH');
     await assert.rejects(() => store.get(nextId()),e => e.code === 'MIGRATION_CHECKSUM_MISMATCH');
-  } finally {await owner.query('UPDATE liftd.migrations SET checksum=$1',[original]);}
+  } finally {for(const row of original)await owner.query('UPDATE liftd.migrations SET checksum=$1 WHERE version=$2',[row.checksum,row.version]);}
 });
 test('new application process recovers committed trip and verified history', async () => {
   const id = nextId(); await create(id); await mutate(id,nextId(),'cancel',0);

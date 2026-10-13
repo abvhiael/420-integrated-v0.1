@@ -3,7 +3,7 @@ import {createTrip, transitionTrip, participantView} from './trip.mjs';
 const id = value => typeof value === 'string' && /^[A-Za-z0-9_-]{1,128}$/.test(value);
 // Protected application boundary. Store must be server-owned; durable CAS is L01.4.
 export function createTripService({authenticator, store, clock = () => Math.floor(Date.now() / 1000),
-  isPaused = () => true, admissionFor = async () => undefined, eligibilityAdapter}) {
+  isPaused = () => true, admissionFor = async () => undefined, eligibilityAdapter, privateLocationStore}) {
   if (!authenticator || typeof authenticator.authorize !== 'function' || !store ||
     (typeof store.get !== 'function' || (typeof store.execute !== 'function' && ['create', 'compareAndSwap'].some(method => typeof store[method] !== 'function')))) throw new AuthError('SERVICE_UNAVAILABLE', 503);
   if (eligibilityAdapter !== undefined && typeof eligibilityAdapter?.admissionFor !== 'function') throw new AuthError('SERVICE_UNAVAILABLE', 503);
@@ -28,7 +28,8 @@ export function createTripService({authenticator, store, clock = () => Math.floo
           current(fresh);
         };
         return store.execute({actorId: principal.subject, commandId: input.commandId, tripId: trip.id, action: 'create',
-          request: {id: input.id, routeRef: input.routeRef, riderId: input.riderId}, guard}, async () => trip);
+          request: {id: input.id, routeRef: input.routeRef, riderId: input.riderId}, guard,
+          afterWrite: privateLocationStore ? (client, next) => privateLocationStore.bind(client, next, principal) : undefined}, async () => trip);
       }
       await store.create(trip); return trip;
     },

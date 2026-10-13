@@ -50,7 +50,7 @@ def project_saga(*, reservation_state: str, hold_state: str,
     valid={"opened","refund_requested","resolved"}
     if any(case.get("state") not in valid or (
         case.get("state")=="resolved" and case.get("resolution") not in
-        ("upheld","refund_pending","refund_completed")) for case in cases):
+        ("upheld","refund_completed")) for case in cases):
         return {"state": "reconciliation_required", "reason": "UNKNOWN_PAY_CASE",
                 "confirmation_verified": False, "bnb_custody": False}
     blocked_cases=[case for case in cases if not (

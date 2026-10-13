@@ -1,6 +1,6 @@
 # BNB-4.2 — Durable Notifications and Outbox Delivery / Level 1 audit record
 
-**Canonical roadmap:** [BNB-PHASE4-ROADMAP.md](BNB-PHASE4-ROADMAP.md), BNB-4.2. **Current state: IMPLEMENTED / LEVEL 1 PENDING TERMINAL CI.** This record is application-source audit evidence, not live provider/operator acceptance or a Phase 4 merge authorization.
+**Canonical roadmap:** [BNB-PHASE4-ROADMAP.md](BNB-PHASE4-ROADMAP.md), BNB-4.2. **Current state: REPOSITORY IMPLEMENTATION COMPLETE / LEVEL 1 PASS / EXTERNAL DELIVERY DEFERRED.** This record is application-source audit evidence, not live provider/operator acceptance or a Phase 4 merge authorization.
 
 ## Authority and baseline
 
@@ -23,7 +23,7 @@
 - Added `services/420bnb/tests/test_bnb42_outbox.py` to the retained app runtime suite. Exercises locked competing claims, stale-worker fencing and lease expiry, repeated failures/exponential backoff/dead-letter/replay, unauthenticated replay rejection, toxic/private payload isolation, unapproved consumer names, crash-after-durable-consumer-accept and recovery without duplicate acceptance.
 - Updated exact-schema regression assertions in `services/420bnb/tests/test_bnb214_operations.py`, `test_bnb32_infrastructure.py`, `test_bnb41_phase4_baseline.py`, `services/420bnb/api.py`, `production.py` and `.github/workflows/bnb-runtime.yml`. These are necessary schema-version changes, not weakened checks.
 - Diagnosed two previous app CI failures instead of rerunning unchanged deterministic defects: source count test in workflow still expected 21 after migration 022, and API/production readiness expected schema 21; a later build also identified a parallel-migration expected list and a test transaction that rolled back its own fixture. All were corrected on later source SHAs. Prior failing builds are superseded, **not** counted PASS.
-- **Exact Level 1 implementation candidate:** `7199b6ea32c3d64e04472a0dc1a255c1333a338b`. Required 420BnB Runtime Slice [run 38441362926](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38441362926) and retained applicable BNB workflows are **PENDING / IN PROGRESS** at this audit snapshot. Do not claim green until terminal exact-SHA tests, verified checkout and inspected failure-path evidence.
+- **Exact Level 1 implementation candidate:** `7199b6ea32c3d64e04472a0dc1a255c1333a338b`. Required 420BnB Runtime Slice [run 38441362926](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38441362926) and retained applicable BNB workflows are **TERMINAL SUCCESS** on exact tested evidence HEAD `d2ba9f204614d91505268e3460c2daf63c466c96`. The required Runtime Slice run `38441558434`, job `115449614790`, completed SUCCESS: **8 migration/ops tests PASS + 236 retained runtime/API/adversarial tests PASS = 244 tests PASS, zero failures**; browser smoke, restricted image/build, schema 022/production and backup/restore checks PASS. BNB-1.1 through BNB-1.9 all **9/9 SUCCESS**, run IDs: `38441558355`, `38441558523`, `38441558589`, `38441558334`, `38441558618`, `38441558271`, `38441558436`, `38441558313`, `38441558052`. Skipped Docs `38441558159` was not required/credited; Oracle `38441558378` was still in progress at this inspection and was not credited as PASS. Historical cancelled/replaced run `38441362926` was **not** counted as passing.
 - No complete Foundry/Genesis/Integrated/Geth/global Docs are required for this app-only ordinary step. M4-A at BNB-4.7, M4-B at BNB-4.11 and global Level 3 at BNB-4.12 remain mandated later.
 
 ## Final exit checklist
@@ -32,9 +32,11 @@
 - [x] Implement lease and crash/restart-safe recovery, bounded retries and dead letters; retain transactionally admitted outbox events.
 - [x] Implement consumer event ID deduplication, adapter non-activation, poison/forged privacy rejection, manual replay authorization and audit.
 - [x] Add source-bound adversarial tests and preserve historical migration integrity.
-- [ ] Qualify final changed source against terminal exact-SHA BNB Runtime Slice and applicable retained BNB workflows; record run IDs and job results.
-- [ ] Refresh main divergence and commit final evidence-only certificate; do not accidentally treat future M4-A or Level 3 as passed.
+- [x] Qualify final changed source against terminal exact-SHA BNB Runtime Slice **244 passing tests**, nine retained BNB workflows success and exact job IDs recorded above.
+- [x] Refresh main divergence: **latest main `959288c8bd33b6da0325b6a5d060e00e7bcf0e48`**, audit branch at evidence inspection **21 ahead / 408 behind**. The `main` advance since branch creation spans 264 reported changed files, **none under `services/420bnb/**`, `web/bnb/**`, or `.github/workflows/bnb-runtime.yml`** in the compare response. Integration against the newly advanced main is a future phase/merge operation, **not yet certified or performed**. This evidence-only closeout inherits the exact tested source SHA and does not rewrite or silently overwrite current main.
 
 **External dependencies intentionally deferred:** T-BNB-IDENTITY-1/2, PROPERTY-1, INTEGRATION-1, MEDIA-1, ACCESSIBILITY-1, CALENDAR-1, QUOTE-1, BOOKING-1, PAY-2, SETTLEMENT-3, TRAVEL-210/210A, REPUTATION-211, COMPLIANCE-212, SECURITY-213, OPS-214. Real external signing/provider approval, operational worker deployment/managed DB and SMS/email/push traffic remain independently blocked. `travel.bnb_booking=false`, no live booking/financial execution.
 
-**Next canonical roadmap step, only after Level 1 PASS:** **BNB-4.3 — Real-time availability and calendar projections**.
+**No Level 2 or Level 3 was run or falsely represented as passing.** Production providers/actual independent operations are blocked, but repository-side BNB-4.2 Level 1 is qualified. Preserve the draft PR and reconcile latest main before any eventual merger.
+
+**Next canonical roadmap step:** **BNB-4.3 — Real-time availability and calendar projections**.

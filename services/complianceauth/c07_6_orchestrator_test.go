@@ -8,11 +8,11 @@ import (
  "testing"
  "time"
 )
-type c076WitnessFixture struct { w C076Witness; current C076Checkpoint; err error }
+type c076WitnessFixture struct { w C076Witness; current C076Checkpoint; err error; changeAtRelease bool }
 func (a c076WitnessFixture) RecoverWitness(context.Context,string)(C076Witness,error){return a.w,a.err}
 func (a c076WitnessFixture) LatestCheckpoint(context.Context,string)(C076Checkpoint,error){return a.current,a.err}
 func (a c076WitnessFixture) ReleaseIfCurrent(ctx context.Context,expected C076Checkpoint,g uint64,p C076RecoveryPlatform)error{
- if a.err!=nil||a.current!=expected{return ErrC076UnsafeRestore}
+ if a.err!=nil||a.current!=expected||a.changeAtRelease{return ErrC076UnsafeRestore}
  return p.Release(ctx,expected.Scope,g)
 }
 type c076PlatformFixture struct {
@@ -47,6 +47,12 @@ func TestC076OrchestratorFailClosed(t *testing.T){
   if expectPass&&p.closed{t.Fatal("successful release remained closed")}
  }
  run("",witness,true)
+ t.Run("revocation_between_read_and_release",func(t *testing.T){
+  p:=&c076PlatformFixture{witness:witness}
+  a:=c076WitnessFixture{w:witness,current:witness.Checkpoint,changeAtRelease:true}
+  if C076Restore(context.Background(),plan,a,p,now)==nil||!p.closed{t.Fatalf("revocation race must retain isolation: %v",p.calls)}
+  for _,call:=range p.calls{if call=="release"{t.Fatal("release occurred despite changed authority")}}
+ })
  for _,point:=range []string{"quiesce","backup","replay","fence","leases","snapshot","release"}{t.Run(point,func(t *testing.T){run(point,witness,false)})}
  // A stale but internally well-formed witness MUST be denied against the
  // independent latest checkpoint, not compared only with itself.

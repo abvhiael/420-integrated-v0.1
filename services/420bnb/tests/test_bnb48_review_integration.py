@@ -86,7 +86,9 @@ def test_signed_moderation_appeal_and_read_exclude_all_conflicted_reviewers(repo
             api.independent_abuse_case_view(rid,actor+"-read")
         assert exc.value.status_code==403
     token_claims["reviewer-c-read"]={"sub":"reviewer-c","report_id":str(rid),
-                                    "casework_scope":"read"}
+                                    "casework_scope":"read",
+                                    "current_reviewer_grant_verified":True,
+                                    "reviewer_revoked":False}
     view=api.independent_abuse_case_view(rid,"reviewer-c-read")
     assert view["state"]=="dismissed"
     assert view["appeals"][0]["state"]=="upheld"

@@ -1080,6 +1080,39 @@ def decide_moderation_appeal(appeal_id:UUID,payload:ModerationAppealDecision,
     return {"id":str(appeal_id),"state":payload.decision,
             "content_republished":False}
 
+
+@app.post("/v1/bnb/internal/abuse-reports/{report_id}/redact")
+def redact_expired_abuse_detail(report_id:UUID,x_guest_review_proof:str|None=Header(None)):
+    """Redact only expired report narrative; preserve immutable audit and decisions."""
+    if not x_guest_review_proof:raise HTTPException(401,"RETENTION_AUTHORITY_REQUIRED")
+    proof=verify_authority(x_guest_review_proof,"BNB_GUEST_REVIEW","privacy-retention")
+    if proof.get("report_id")!=str(report_id) or proof.get("operation")!="redact":
+        raise HTTPException(403,"RETENTION_SCOPE_MISMATCH")
+    with db() as c:
+        with c.transaction():
+            row=c.execute("""SELECT property_id,status,detail,created_at
+                FROM bnb_abuse_report WHERE id=%s FOR UPDATE""",(report_id,)).fetchone()
+            if not row:raise HTTPException(404,"NOT_FOUND")
+            if row[1]=="pending" or row[3]>datetime.now(timezone.utc)-timedelta(days=90):
+                raise HTTPException(409,"RETENTION_NOT_EXPIRED")
+            blocked=c.execute("""SELECT 1 FROM bnb_privacy_retention_hold
+                WHERE report_id=%s AND until_at>now()""",(report_id,)).fetchone()
+            appeal=c.execute("""SELECT 1 FROM bnb_moderation_appeal
+                WHERE report_id=%s AND state='pending'""",(report_id,)).fetchone()
+            if blocked or appeal:raise HTTPException(409,"RETENTION_HOLD_ACTIVE")
+            if c.execute("""SELECT 1 FROM bnb_review_moderation_nonce
+                WHERE issuer=%s AND jti=%s""",(proof["iss"],proof["jti"])).fetchone():
+                raise HTTPException(409,"RETENTION_REPLAY")
+            c.execute("""INSERT INTO bnb_review_moderation_nonce
+                (issuer,jti,target_type,target_id,decision)
+                VALUES (%s,%s,'abuse_report',%s,'redacted')""",
+                (proof["iss"],proof["jti"],report_id))
+            c.execute("UPDATE bnb_abuse_report SET detail='' WHERE id=%s",(report_id,))
+            c.execute("""INSERT INTO bnb_audit(id,subject,action,resource_id)
+                VALUES (%s,%s,'bnb.privacy.report_redacted',%s)""",
+                (uuid4(),proof["sub"],row[0]))
+    return {"report_id":str(report_id),"detail_redacted":True}
+
 class ReviewModerationDecision(BaseModel):
     decision:str=Field(pattern="^(approved|rejected|withdrawn)$")
 

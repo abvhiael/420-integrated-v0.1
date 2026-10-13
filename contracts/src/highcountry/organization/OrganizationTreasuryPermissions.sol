@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
+import {R04EmergencyConsumer} from "../security/R04EmergencyConsumer.sol";
+import {EmergencyDomains} from "../constants/EmergencyDomains.sol";
 import { OrganizationRegistry } from "./OrganizationRegistry.sol";
 
 /// @notice R04.10 noncustodial treasury permission policy requiring independent approval.
 /// @dev No wallet signing, ERC20 allowance, transfer, payment or treasury execution is performed here.
-contract OrganizationTreasuryPermissions {
+contract OrganizationTreasuryPermissions is R04EmergencyConsumer {
     error Invalid();
     error Unauthorized();
 
@@ -29,11 +31,11 @@ contract OrganizationTreasuryPermissions {
     event Debited(bytes32 indexed id, uint256 amount, uint256 remaining);
     event Cancelled(bytes32 indexed id);
 
-    constructor(
+    constructor(address r04Authorization_, 
         address registry_,
         address treasury_,
         address approver_
-    ) {
+    ) R04EmergencyConsumer(r04Authorization_) {
         if (
             registry_.code.length == 0 || treasury_.code.length == 0 || approver_ == address(0)
                 || approver_ == treasury_
@@ -52,7 +54,7 @@ contract OrganizationTreasuryPermissions {
         bytes32 scope,
         uint64 expires,
         uint256 limit
-    ) external returns (bytes32 id) {
+    ) external r04Unrestricted(EmergencyDomains.ORGANIZATION_GOVERNANCE) returns (bytes32 id) {
         (address admin, bool active,) = registry.organizations(org);
         if (
             !active || msg.sender != admin || beneficiary == address(0) || action == bytes32(0) || scope == bytes32(0)
@@ -66,7 +68,7 @@ contract OrganizationTreasuryPermissions {
     /// @dev Independent financial approver is not organization administrator.
     function approve(
         bytes32 id
-    ) external {
+    ) external  r04Unrestricted(EmergencyDomains.ORGANIZATION_GOVERNANCE) {
         Permission storage p = permissions[id];
         (address admin, bool active,) = registry.organizations(p.organization);
         if (
@@ -84,6 +86,7 @@ contract OrganizationTreasuryPermissions {
         bytes32 scope,
         uint256 amount
     ) public view returns (bool) {
+        if (!r04DomainOpen(EmergencyDomains.ORGANIZATION_GOVERNANCE)) return false;
         Permission memory p = permissions[id];
         (address admin, bool active,) = registry.organizations(p.organization);
         return active && p.approved && !p.revoked && p.proposer == admin && p.beneficiary == beneficiary
@@ -99,7 +102,7 @@ contract OrganizationTreasuryPermissions {
         bytes32 action,
         bytes32 scope,
         uint256 amount
-    ) external {
+    ) external  r04Unrestricted(EmergencyDomains.ORGANIZATION_GOVERNANCE) {
         if (msg.sender != treasury || !permitted(id, beneficiary, action, scope, amount)) revert Unauthorized();
         Permission storage p = permissions[id];
         p.remainingAmount -= amount;
@@ -119,3 +122,4 @@ contract OrganizationTreasuryPermissions {
         emit Cancelled(id);
     }
 }
+

@@ -8,6 +8,8 @@ const mapEntries = value => {
 };
 function decode(raw) {
   if (!raw || raw.schema !== 1) throw new SettlementError('unknown economy schema');
+  const runtime={};
+  for(const key of ['runtimeAccounts','runtimeWallets','runtimeWalletOwners','runtimeNonces','runtimeEpochs','runtimeSourceEpochs'])runtime[key]=mapEntries(raw[key]??[]);
   const balances=mapEntries(raw.balances);
   const operations=new Set(raw.operations);
   const claims=new Set(raw.claims);
@@ -23,9 +25,9 @@ function decode(raw) {
   for(const b of balances.values())if(!safe(b.available)||!safe(b.reserved))throw new SettlementError('corrupt balance');
   for(const v of sourceIssued.values())if(!safe(v))throw new SettlementError('corrupt issuance');
   for(const b of assets.values())if(!safe(b.available)||!safe(b.reserved))throw new SettlementError('corrupt asset');
-  return {balances,operations,claims,sourceIssued,assets,assetSources,listings,transferIntents,settlementJobs,importedAssets,issued:raw.issued,burned:raw.burned};
+  return {...runtime,balances,operations,claims,sourceIssued,assets,assetSources,listings,transferIntents,settlementJobs,importedAssets,issued:raw.issued,burned:raw.burned};
 }
-const encode = s => JSON.stringify({schema:1,balances:[...s.balances],operations:[...s.operations],
+const encode = s => JSON.stringify({schema:1,...Object.fromEntries(['runtimeAccounts','runtimeWallets','runtimeWalletOwners','runtimeNonces','runtimeEpochs','runtimeSourceEpochs'].map(k=>[k,[...(s[k]??new Map())]])),balances:[...s.balances],operations:[...s.operations],
   claims:[...s.claims],sourceIssued:[...s.sourceIssued],assets:[...s.assets],assetSources:[...s.assetSources],listings:[...s.listings],transferIntents:[...s.transferIntents],settlementJobs:[...s.settlementJobs],importedAssets:[...s.importedAssets],issued:s.issued,burned:s.burned});
 export class PostgresBudsStore {
   constructor(pool, namespace) {
@@ -52,3 +54,4 @@ export class PostgresBudsStore {
     } finally {client.release();}
   }
 }
+

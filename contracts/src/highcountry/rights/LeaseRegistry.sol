@@ -1,11 +1,13 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
+import {R04EmergencyConsumer} from "../security/R04EmergencyConsumer.sol";
+import {EmergencyDomains} from "../constants/EmergencyDomains.sol";
 import { RightsRegistry } from "./RightsRegistry.sol";
 import { CanonicalLandPlantGate } from "./CanonicalLandPlantGate.sol";
 
 /// @notice R04.9 fixed term parcel lease, consented transfers and active-plant dispute boundary.
 /// @dev Settled lease rent/fees and off-chain plant relocation are NOT implied; deposit/payment external.
-contract LeaseRegistry {
+contract LeaseRegistry is R04EmergencyConsumer {
     error InvalidLease();
     error Unauthorized();
     enum State {
@@ -42,9 +44,9 @@ contract LeaseRegistry {
     event LeaseStatus(bytes32 indexed id, State state, bool exitPending);
     event LeaseTransferred(bytes32 indexed id, address indexed oldTenant, address indexed newTenant);
 
-    constructor(
+    constructor(address r04Authorization_, 
         address rights_
-    ) {
+    ) R04EmergencyConsumer(r04Authorization_) {
         if (rights_ == address(0) || rights_.code.length == 0) revert InvalidLease();
         rights = RightsRegistry(rights_);
         plantAuthority = msg.sender;
@@ -70,7 +72,7 @@ contract LeaseRegistry {
         uint64 ends,
         uint256 scopes,
         uint256 feeUnits
-    ) external {
+    ) external  r04Unrestricted(EmergencyDomains.LEASE) {
         if (address(canonicalGate) == address(0)) revert InvalidLease();
         bytes32 asset = canonicalGate.parcelAsset(parcelId);
         if (!canonicalGate.leaseAdmissible(parcelId, id, msg.sender, tenant)) revert InvalidLease();
@@ -86,7 +88,7 @@ contract LeaseRegistry {
         uint64 ends,
         uint256 scopes,
         uint256 feeUnits
-    ) private {
+    ) private  r04Unrestricted(EmergencyDomains.LEASE) {
         (address owner, bool exists, bool frozen) = rights.assets(asset);
         if (
             id == bytes32(0) || leases[id].state != State.None || !exists || frozen || msg.sender != owner
@@ -104,7 +106,7 @@ contract LeaseRegistry {
         uint64 ends,
         uint256 scopes,
         uint256 feeUnits
-    ) external {
+    ) external  r04Unrestricted(EmergencyDomains.LEASE) {
         // Once canonical land binding is active, arbitrary shadow leases cannot bypass R02 occupancy.
         if (address(canonicalGate) != address(0)) revert InvalidLease();
         (address owner, bool exists, bool frozen) = rights.assets(asset);
@@ -121,6 +123,7 @@ contract LeaseRegistry {
     function usable(
         bytes32 id
     ) public view returns (bool) {
+        if (!r04DomainOpen(EmergencyDomains.LEASE)) return false;
         Lease memory l = leases[id];
         (address owner, bool exists, bool frozen) = rights.assets(l.asset);
         uint64 parcelId = canonicalParcelOf[id];
@@ -182,7 +185,7 @@ contract LeaseRegistry {
     function transferTenant(
         bytes32 id,
         address to
-    ) external {
+    ) external  r04Unrestricted(EmergencyDomains.LEASE) {
         Lease storage l = leases[id];
         if (
             msg.sender != l.tenant || to == address(0) || to == l.tenant || !usable(id) || canonicalParcelOf[id] != 0
@@ -237,6 +240,7 @@ contract LeaseRegistry {
         bytes32 id,
         bool restore
     ) external {
+        if (restore && !r04DomainOpen(EmergencyDomains.LEASE)) revert R04Restricted(EmergencyDomains.LEASE);
         Lease storage l = leases[id];
         if (l.state != State.Disputed || msg.sender != l.lessor) revert Unauthorized();
         if (
@@ -253,3 +257,4 @@ contract LeaseRegistry {
         emit LeaseStatus(id, l.state, l.exitPending);
     }
 }
+

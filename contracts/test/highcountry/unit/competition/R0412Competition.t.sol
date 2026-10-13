@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
+import {bindRetainedR04Emergency,retainedR04AuthorizationRoot} from "../../mocks/R04EmergencyFixture.sol";
 import { SeasonRegistry } from "../../../../src/highcountry/competition/SeasonRegistry.sol";
 import { CompetitionTemplateRegistry } from "../../../../src/highcountry/competition/CompetitionTemplateRegistry.sol";
 import {
@@ -103,9 +104,10 @@ contract R0412CompetitionTest {
         templates = new CompetitionTemplateRegistry();
         evidence = new R0412Evidence();
         entitlement = new R0412Entitlement();
-        engine = new CompetitionEngine(
+        engine = new CompetitionEngine(retainedR04AuthorizationRoot(), 
             address(seasons), address(templates), address(evidence), address(entitlement), address(this)
         );
+        bindRetainedR04Emergency(address(engine));
         alice = new R0412Player();
         bob = new R0412Player();
         opens = uint64(block.timestamp + 100);
@@ -226,3 +228,4 @@ contract R0412CompetitionTest {
         require(!premature, "premature finalization");
     }
 }
+

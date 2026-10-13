@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
+import {bindRetainedR04Emergency,retainedR04AuthorizationRoot} from "../../mocks/R04EmergencyFixture.sol";
 
 import { InventoryRegistry } from "../../../../src/highcountry/inventory/InventoryRegistry.sol";
 import { ManufacturingEngine } from "../../../../src/highcountry/manufacturing/ManufacturingEngine.sol";
@@ -68,7 +69,8 @@ contract ManufacturingEngineR043Test {
         inventory.registerResource(FINISHED, InventoryRegistry.Unit.COUNT);
         alice = new R043Actor();
         bob = new R043Actor();
-        engine = new ManufacturingEngine(address(inventory), 1);
+        engine = new ManufacturingEngine(retainedR04AuthorizationRoot(), address(inventory), 1);
+        bindRetainedR04Emergency(address(engine));
         ledger = inventory.ledger();
         inventory.setIssuer(address(this), true);
         inventory.setIssuer(address(engine), true);
@@ -152,3 +154,4 @@ contract ManufacturingEngineR043Test {
         alice.complete(engine, id);
     }
 }
+

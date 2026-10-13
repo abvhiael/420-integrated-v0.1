@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
+import {R04EmergencyConsumer} from "../security/R04EmergencyConsumer.sol";
+import {EmergencyDomains} from "../constants/EmergencyDomains.sol";
 
 import { EquipmentRegistry } from "./EquipmentRegistry.sol";
 import { InventoryRegistry } from "../inventory/InventoryRegistry.sol";
@@ -7,7 +9,7 @@ import { HCInvalidState, HCZeroAddress } from "../errors/HighCountryErrors.sol";
 
 /// @notice R04.4 item-specific durability, breakage, recovery, recycling and final retirement.
 /// @dev R04.2 equipment identity/placement is canonical; R04.1 ledger conserves all material costs.
-contract EquipmentLifecycleEngine {
+contract EquipmentLifecycleEngine is R04EmergencyConsumer {
     enum State {
         NONE,
         FUNCTIONAL,
@@ -60,10 +62,10 @@ contract EquipmentLifecycleEngine {
         _;
     }
 
-    constructor(
+    constructor(address r04Authorization_, 
         address equipment_,
         address inventory_
-    ) {
+    ) R04EmergencyConsumer(r04Authorization_) {
         if (
             equipment_ == address(0) || inventory_ == address(0) || equipment_.code.length == 0
                 || inventory_.code.length == 0
@@ -151,7 +153,7 @@ contract EquipmentLifecycleEngine {
     /// @notice Only a trusted simulation verifier can prove a completed equipment use.
     function recordUse(
         bytes32 id
-    ) external guarded {
+    ) external guarded  r04Unrestricted(EmergencyDomains.MANUFACTURING) {
         if (!useVerifiers[msg.sender]) revert HCInvalidState();
         (EquipmentRegistry.Equipment memory item, Condition storage c, Policy storage p) = _load(id);
         if (c.state != State.FUNCTIONAL && c.state != State.DEGRADED) revert HCInvalidState();
@@ -168,7 +170,7 @@ contract EquipmentLifecycleEngine {
 
     function repair(
         bytes32 id
-    ) external guarded {
+    ) external guarded  r04Unrestricted(EmergencyDomains.MANUFACTURING) {
         (EquipmentRegistry.Equipment memory item, Condition storage c, Policy storage p) = _load(id);
         if (
             item.owner != msg.sender || c.state == State.RETIRED || c.state == State.RECYCLED
@@ -211,3 +213,4 @@ contract EquipmentLifecycleEngine {
         emit ConditionUpdated(id, State.RECYCLED, c.durability);
     }
 }
+

@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
+import {R04EmergencyConsumer} from "../security/R04EmergencyConsumer.sol";
+import {EmergencyDomains} from "../constants/EmergencyDomains.sol";
 
 import { InventoryRegistry } from "../inventory/InventoryRegistry.sol";
 import { HCInvalidState, HCZeroAddress } from "../errors/HighCountryErrors.sol";
@@ -7,7 +9,7 @@ import { HCInvalidState, HCZeroAddress } from "../errors/HighCountryErrors.sol";
 /// @notice R04.3 recipe-pinned, bounded manufacturing with atomic inventory reservations.
 /// @dev Operator grants in InventoryRegistry and issuer grants are independently revocable.
 ///      Processing uses block timestamps only, never caller-provided completion evidence.
-contract ManufacturingEngine {
+contract ManufacturingEngine is R04EmergencyConsumer {
     enum Status {
         NONE,
         ACTIVE,
@@ -64,10 +66,10 @@ contract ManufacturingEngine {
         _;
     }
 
-    constructor(
+    constructor(address r04Authorization_, 
         address inventory_,
         uint16 maxJobsPerOwner_
-    ) {
+    ) R04EmergencyConsumer(r04Authorization_) {
         if (inventory_ == address(0) || inventory_.code.length == 0) revert HCZeroAddress();
         if (maxJobsPerOwner_ == 0 || maxJobsPerOwner_ > 32) revert HCInvalidState();
         inventory = InventoryRegistry(inventory_);
@@ -142,7 +144,7 @@ contract ManufacturingEngine {
 
     function start(
         bytes32 recipeId
-    ) external guarded returns (bytes32 jobId) {
+    ) external guarded r04Unrestricted(EmergencyDomains.MANUFACTURING) returns (bytes32 jobId) {
         Recipe storage r = _recipes[recipeId];
         if (!r.exists || !r.active || activeJobs[msg.sender] >= maxJobsPerOwner) revert HCInvalidState();
         uint256 nonce = ++nonceOf[msg.sender];
@@ -162,7 +164,7 @@ contract ManufacturingEngine {
 
     function complete(
         bytes32 jobId
-    ) external guarded {
+    ) external guarded  r04Unrestricted(EmergencyDomains.MANUFACTURING) {
         Job storage j = _jobs[jobId];
         if (j.status != Status.ACTIVE || j.owner != msg.sender) revert HCInvalidState();
         Recipe storage r = _recipes[j.recipeId];
@@ -207,3 +209,4 @@ contract ManufacturingEngine {
         emit ManufacturingCancelled(jobId, msg.sender, r.cancelLossBps);
     }
 }
+

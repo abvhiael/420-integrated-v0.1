@@ -1,9 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
+import {R04EmergencyConsumer} from "../security/R04EmergencyConsumer.sol";
+import {EmergencyDomains} from "../constants/EmergencyDomains.sol";
 
 /// @notice R04.9 immutable parcel/asset rights authority: no wallet entitlement, treasury or token custody.
 /// @dev Licensed scopes are bitmasks; rights are bounded by term and owner consent.
-contract RightsRegistry {
+contract RightsRegistry is R04EmergencyConsumer {
     error Unauthorized();
     error Invalid();
     error Inactive();
@@ -34,14 +36,14 @@ contract RightsRegistry {
     event RightsRevoked(bytes32 indexed grantId);
     event AssetTransferred(bytes32 indexed asset, address indexed oldOwner, address indexed newOwner);
 
-    constructor() {
+    constructor(address r04Authorization_) R04EmergencyConsumer(r04Authorization_) {
         administrator = msg.sender;
     }
 
     function registerAsset(
         bytes32 asset,
         address owner
-    ) external {
+    ) external  r04Unrestricted(EmergencyDomains.RIGHTS) {
         if (msg.sender != administrator || asset == bytes32(0) || owner == address(0) || assets[asset].exists) {
             revert Invalid();
         }
@@ -53,6 +55,7 @@ contract RightsRegistry {
         bytes32 asset,
         bool frozen
     ) external {
+        if (!frozen && !r04DomainOpen(EmergencyDomains.RIGHTS)) revert R04Restricted(EmergencyDomains.RIGHTS);
         if (msg.sender != administrator || !assets[asset].exists) revert Unauthorized();
         assets[asset].frozen = frozen;
         emit AssetFrozen(asset, frozen);
@@ -61,7 +64,7 @@ contract RightsRegistry {
     function transferAsset(
         bytes32 asset,
         address to
-    ) external {
+    ) external  r04Unrestricted(EmergencyDomains.RIGHTS) {
         Asset storage a = assets[asset];
         if (!a.exists || a.frozen || a.owner != msg.sender || to == address(0) || to == msg.sender) {
             revert Unauthorized();
@@ -78,7 +81,7 @@ contract RightsRegistry {
         uint256 scopes,
         uint64 start,
         uint64 end
-    ) external {
+    ) external  r04Unrestricted(EmergencyDomains.RIGHTS) {
         Asset memory a = assets[asset];
         if (
             grantId == bytes32(0) || grants[grantId].holder != address(0) || !a.exists || a.frozen
@@ -103,9 +106,11 @@ contract RightsRegistry {
         address holder,
         uint256 scope
     ) external view returns (bool) {
+        if (!r04DomainOpen(EmergencyDomains.RIGHTS)) return false;
         Grant memory g = grants[grantId];
         Asset memory a = assets[g.asset];
         return a.exists && !a.frozen && a.owner == g.issuer && !g.revoked && g.holder == holder && scope != 0
             && (g.scopes & scope) == scope && block.timestamp >= g.start && block.timestamp < g.end;
     }
 }
+

@@ -1,9 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
+import {R04EmergencyConsumer} from "../security/R04EmergencyConsumer.sol";
+import {EmergencyDomains} from "../constants/EmergencyDomains.sol";
 
 /// @notice Shared immutable catalogue and proof-driven progression, without local-save authority.
 /// @dev Three separate registries inherit this contract and have independent namespaces and administrators.
-abstract contract ProgressionRegistryCore {
+abstract contract ProgressionRegistryCore is R04EmergencyConsumer {
     error InvalidProgression();
 
     struct Track {
@@ -31,7 +33,7 @@ abstract contract ProgressionRegistryCore {
     event ProgressRecorded(address indexed player, bytes32 indexed trackId, bytes32 indexed evidence, uint32 points);
     event TrackCompleted(address indexed player, bytes32 indexed trackId, uint32 rewardUnits);
 
-    constructor() {
+    constructor(address r04Authorization_) R04EmergencyConsumer(r04Authorization_) {
         administrator = msg.sender;
     }
 
@@ -84,7 +86,7 @@ abstract contract ProgressionRegistryCore {
         bytes32 id,
         bytes32 evidence,
         uint32 points
-    ) external {
+    ) external r04Unrestricted(EmergencyDomains.MISSION_ACTIVATION) {
         Track memory t = _tracks[id];
         if (
             !trustedVerifiers[msg.sender] || !t.exists || player == address(0) || evidence == bytes32(0)
@@ -105,10 +107,11 @@ abstract contract ProgressionRegistryCore {
 }
 
 /// @notice Skills: points/proofs become irreversible skill unlocks once complete.
-contract SkillRegistry is ProgressionRegistryCore { }
+contract SkillRegistry is ProgressionRegistryCore { constructor(address root) ProgressionRegistryCore(root) { } }
 
 /// @notice Research: independent verified evidence and prerequisite-bound technology unlocks.
-contract ResearchRegistry is ProgressionRegistryCore { }
+contract ResearchRegistry is ProgressionRegistryCore { constructor(address root) ProgressionRegistryCore(root) { } }
 
 /// @notice Discoveries: catalogue-bound unique discoveries, without imported local save claims.
-contract DiscoveryRegistry is ProgressionRegistryCore { }
+contract DiscoveryRegistry is ProgressionRegistryCore { constructor(address root) ProgressionRegistryCore(root) { } }
+

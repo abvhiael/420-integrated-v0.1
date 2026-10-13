@@ -16,9 +16,12 @@ export class CanonicalMarketSettlement {
  }
  // Atomic database reservation and listing lock. No chain call under SQL locks.
  async prepare(session,op,listingId,transferOp){
+  if(this.authority.requireSubmissionAllowed)await this.authority.requireSubmissionAllowed();
   const buyer=id(await this.authority.registeredPrincipal(session));id(listingId);id(transferOp);
   const canonicalOp=await this.authority.expectedTransferOperation(listingId,buyer);
   if(canonicalOp!==transferOp)throw new SettlementError('wrong deterministic transfer operation');
+  const canonicalParties=this.authority.preparedParties?await this.authority.preparedParties(listingId,buyer):null;
+  if(canonicalParties&&canonicalParties.operationId!==transferOp)throw new SettlementError('chain party changed');
   return this.buds.operate(op,s=>{
    if(s.transferIntents.has(transferOp))throw new SettlementError('duplicate transfer intent');
    const l=s.listings.get(listingId);
@@ -26,6 +29,7 @@ export class CanonicalMarketSettlement {
      throw new SettlementError('unavailable listing');
    if(this.authority.canonicalSettlementRequired===true&&!l.sourceReceiptId)
      throw new SettlementError('unavailable listing');
+   if(this.authority.validatePreparedParties)this.authority.validatePreparedParties(s,canonicalParties,l,buyer,session);
    const funds=this.buds.get(s,buyer);
    if(funds.available<l.price)throw new SettlementError('insufficient BUDS');
    const asset=s.assets.get(JSON.stringify([l.seller,l.asset]));
@@ -33,7 +37,7 @@ export class CanonicalMarketSettlement {
    funds.available-=l.price;funds.reserved+=l.price;
    l.status='settling';
    const intent={transferOp,listingId,buyer,seller:l.seller,asset:l.asset,
-    quantity:l.quantity,price:l.price,sourceReceiptId:l.sourceReceiptId||null,status:'prepared'};
+    quantity:l.quantity,price:l.price,sourceReceiptId:l.sourceReceiptId||null,canonicalParties,status:'prepared'};
    s.transferIntents.set(transferOp,intent);
    return {...intent};
   });
@@ -61,7 +65,10 @@ export class CanonicalMarketSettlement {
    const buyerKey=JSON.stringify([t.buyer,t.asset]),receiver=s.assets.get(buyerKey)||{available:0,reserved:0};
    if(receiver.available>Number.MAX_SAFE_INTEGER-t.quantity)throw new SettlementError('asset overflow');
    buyer.reserved-=t.price;seller.available+=t.price;
-   sender.reserved-=t.quantity;receiver.available+=t.quantity;s.assets.set(buyerKey,receiver);
+   sender.reserved-=t.quantity;
+   // Canonical delivery is already in the buyer's on-chain InventoryRegistry balance.
+   // Do not create a second spendable off-chain admission; resale requires a new independently verified escrow receipt.
+   if(this.authority.canonicalSettlementRequired!==true){receiver.available+=t.quantity;s.assets.set(buyerKey,receiver);}
    t.status='finalized';l.status='sold';l.buyer=t.buyer;
    return {...t};
   });
@@ -105,3 +112,4 @@ export class CanonicalMarketSettlement {
   });
  }
 }
+

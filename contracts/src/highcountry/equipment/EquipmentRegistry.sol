@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
+import {R04EmergencyConsumer} from "../security/R04EmergencyConsumer.sol";
+import {EmergencyDomains} from "../constants/EmergencyDomains.sol";
 
 import { HCInvalidId, HCInvalidState, HCZeroAddress } from "../errors/HighCountryErrors.sol";
 
@@ -15,7 +17,7 @@ interface IEquipmentLandAuthority {
 /// @notice R04.2 immutable, version-pinned earned equipment with land-authorized placement.
 /// @dev Effects are signed changes to HC's six simulation controls, never wallet/entitlement multipliers.
 ///      Existing CultivationEngine remains authoritative for applied environment snapshots.
-contract EquipmentRegistry {
+contract EquipmentRegistry is R04EmergencyConsumer {
     struct EquipmentType {
         bytes32 catalogueVersion;
         int16[6] effects;
@@ -62,9 +64,9 @@ contract EquipmentRegistry {
         _;
     }
 
-    constructor(
+    constructor(address r04Authorization_, 
         address land_
-    ) {
+    ) R04EmergencyConsumer(r04Authorization_) {
         if (land_ == address(0) || land_.code.length == 0) revert HCZeroAddress();
         administrator = msg.sender;
         land = IEquipmentLandAuthority(land_);
@@ -119,7 +121,7 @@ contract EquipmentRegistry {
         bytes32 typeId,
         address owner,
         bytes32 earningRef
-    ) external {
+    ) external  r04Unrestricted(EmergencyDomains.MANUFACTURING) {
         if (
             !issuers[msg.sender] || owner == address(0) || equipmentId == bytes32(0) || earningRef == bytes32(0)
                 || !_types[typeId].exists || _equipment[equipmentId].exists || usedEarningRef[earningRef]
@@ -180,7 +182,7 @@ contract EquipmentRegistry {
     function place(
         bytes32 equipmentId,
         uint64 parcelId
-    ) external {
+    ) external  r04Unrestricted(EmergencyDomains.MANUFACTURING) {
         Equipment storage item = _equipment[equipmentId];
         if (
             !item.exists || retired[equipmentId] || disabled[equipmentId] || item.owner != msg.sender
@@ -228,3 +230,4 @@ contract EquipmentRegistry {
         return _totals[parcelId];
     }
 }
+

@@ -49,6 +49,7 @@ export class CanonicalSettlementWorker {
    // Never automatically submit twice once txHash has been durably recorded.
    // A post-broadcast/pre-record crash relies on deterministic on-chain replay protection.
    if(claim.job.txHash){await release();return {status:'awaiting-finality',txHash:claim.job.txHash};}
+   if(typeof this.authority.requireSubmissionAllowed==='function')await this.authority.requireSubmissionAllowed(claim.intent);
    const submission=await this.submitCanonical({...claim.intent});
    if(!submission||!valid(submission.txHash))throw new SettlementError('invalid chain submission');
    await release(submission.txHash);
@@ -59,3 +60,4 @@ export class CanonicalSettlementWorker {
   }
  }
 }
+

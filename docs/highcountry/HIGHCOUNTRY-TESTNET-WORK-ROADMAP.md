@@ -69,3 +69,28 @@ Repository implementations now include a typed canonical land/plant gateway, dis
 **Pretestnet remaining:** Review actual organizational role/action/scope catalogues; wire an authenticated organization/treasury adapter to the canonical independently governed Treasury rather than relying on `OrganizationTreasuryPermissions.permitted` as evidence of money settlement; reconcile member identity/address proof; provide reviewed deploy/upgrade wiring and signer separation; register ABI, events, API/Indexer/RPC/Wallet integration where applicable; security review revocation, signers and obligation disputes.
 
 **Live testnet:** Verify deployed canonical Treasury code/address authority and independent approver, execute authorized/over-limit/replay/revoked/expired attempts against real asset balances, index membership/delegation/treasury events, observe reorg/recovery/failover and multisig rotation, perform incident drills and close operational/security approvals. None of these are silently credited as PASS from source-only Level 1.
+
+## R04 accumulated Level 2 — authority, competition and replacement acceptance
+
+This adds operational gates without changing the R04.1–R04.14 sequence. The source-level review is `R04-LEVEL2-INTEGRATION-REVIEW.md`; the accumulated milestone is **NOT COMPLETE** while its integration findings remain open. Green retained CI alone cannot close those findings.
+
+| Genuine deployment/testnet dependency | Canonical owner | Required independent evidence |
+|---|---|---|
+| R04.11 organization/cooperative authority | R07/R09 | Actual deployer handoff, member identities, executor binding, role revocation, finalized events and independently authorized Treasury/Identity consumers |
+| R04.12–13 competition/Cup operation | R07/R09 | Deployed canonical harvest/finality and optional entitlement adapters, real player signatures, revocation/dispute/reorg observations, semifinal/final provenance and exact scoped cross-game consumer acceptance; funded prize acceptance only if separately specified |
+| R04.14 emergency council | R07/R09 | Actual officer credentials and controller-address per-domain restrict/release grants; revoke bootstrap grants; operate real consumer ingress/recovery/veto/release under network faults and retain receipts |
+| R04.14 replacement rehearsal | R07.5/R09 | Code hashes, independent review, timelock, drain/snapshot/migration/config publication, explicit old-grant revocation, replay preservation, service rebinding and rollback/recovery; acceptance provenance is not an executed replacement |
+| Shared operational security | R07/R09 | Deployed signer/secret/TLS rotation, production-equivalent database backup/failover/permissions, monitoring and independent operator/security approval |
+
+**Engineering work is not deferred merely because no live testnet exists:** canonical harvest/finality and entitlement adapter implementation, missing R04 mutator emergency enforcement, authenticated reward/account/settlement composition and actual local cross-component integration remain open under the existing R04/R05 owners. Review findings INT-R04-01 through INT-R04-04 retain these boundaries. No production readiness, R05 start or R04 merge is authorized by this register.
+
+
+## R04 accumulated Level 2 engineering reconciliation — 2026-10-13
+
+Repository app Level 2 is **COMPLETE** at implementation `93655ca49f0e305f99cd0c13f53f88479b20b316`, [run #38358551332](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38358551332), with 304 Foundry tests, 35 Node tests, actual PostgreSQL and actual local-chain authenticated runtime integration; build/size and canonical verifier PASS. See [exact-SHA certificate](qualification/R04-LEVEL2-EXACT-SHA.md) and [accumulated review](R04-LEVEL2-INTEGRATION-REVIEW.md).
+
+This supersedes earlier OPEN/NOT COMPLETE engineering status only for the implemented INT-R04-01 through INT-R04-05 app milestone: canonical harvest/finality/entitlement/Cup adapters; R04 emergency consumer enforcement and safe refunds/exits; authenticated source/account/settlement composition; actual manufactured equipment/lifecycle/plant rights/Treasury/Identity/scoped cross-game integration; and exact-SHA qualification. These are implemented and locally qualified, rather than postponed because live credentials were absent. Old step-specific chronology remains intact.
+
+**This register's live operational qualification remains OPEN.** All independently deployed address/code/grant, catalogue/signer/session/operator, funded Treasury/vault, finality/quorum/reorg/network, TLS/secret/backup/failover/monitoring and security approval rows above remain mandatory. R07.5 replacement/migration/rollback rehearsal is not performed by UpgradeCoordinator provenance. No production readiness or R04 merge is authorized.
+
+Separate Level 3 must refresh/reconcile main and run its canonical complete exact-SHA gate. The complete R05 cloud-save/migration/provider/Indexer/SDK/client/abuse/privacy engineering scope retains its existing owners and is not certified here. R05.1 remains the next canonical phase step; scoped dependencies for this milestone do not renumber or automatically advance the phase.

@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
+import {R04EmergencyConsumer} from "../security/R04EmergencyConsumer.sol";
+import {EmergencyDomains} from "../constants/EmergencyDomains.sol";
 import { OrganizationRegistry } from "./OrganizationRegistry.sol";
 
 /// @notice R04.10 bounded organizational delegation, with no implicit custody or token approval.
 /// @dev Treasury execution MUST be separately authorized by the canonical treasury module.
-contract OrganizationAuthority {
+contract OrganizationAuthority is R04EmergencyConsumer {
     error Invalid();
     error Unauthorized();
 
@@ -34,9 +36,9 @@ contract OrganizationAuthority {
     bytes32 public constant WALLET_ACTION = keccak256("HC.ORG.WALLET");
     bytes32 public constant RIGHTS_ACTION = keccak256("HC.ORG.RIGHTS");
 
-    constructor(
+    constructor(address r04Authorization_, 
         address registry_
-    ) {
+    ) R04EmergencyConsumer(r04Authorization_) {
         if (registry_.code.length == 0) revert Invalid();
         registry = OrganizationRegistry(registry_);
     }
@@ -49,7 +51,7 @@ contract OrganizationAuthority {
         uint64 starts,
         uint64 expires,
         uint32 maxUses
-    ) external returns (bytes32 id) {
+    ) external r04Unrestricted(EmergencyDomains.ORGANIZATION_GOVERNANCE) returns (bytes32 id) {
         (address admin, bool active,) = registry.organizations(org);
         if (
             !active || msg.sender != admin || who == address(0) || who == admin || action == bytes32(0)
@@ -69,6 +71,7 @@ contract OrganizationAuthority {
         bytes32 action,
         bytes32 scope
     ) public view returns (bool) {
+        if (!r04DomainOpen(EmergencyDomains.ORGANIZATION_GOVERNANCE)) return false;
         Delegation memory d = delegations[id];
         (address admin, bool active,) = registry.organizations(d.organization);
         return active && !d.revoked && d.issuer == admin && d.delegate == who && d.action == action && d.scope == scope
@@ -81,7 +84,7 @@ contract OrganizationAuthority {
         bytes32 id,
         bytes32 action,
         bytes32 scope
-    ) external {
+    ) external  r04Unrestricted(EmergencyDomains.ORGANIZATION_GOVERNANCE) {
         if (!valid(id, msg.sender, action, scope)) revert Unauthorized();
         Delegation storage d = delegations[id];
         unchecked {
@@ -105,3 +108,4 @@ contract OrganizationAuthority {
         emit Revoked(id);
     }
 }
+

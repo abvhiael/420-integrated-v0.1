@@ -1,9 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
+import {R04EmergencyConsumer} from "../security/R04EmergencyConsumer.sol";
+import {EmergencyDomains} from "../constants/EmergencyDomains.sol";
 import { OrganizationRegistry } from "../organization/OrganizationRegistry.sol";
 
 /// @notice Immutable organization-backed cooperative identity and bounded voter roll.
-contract CooperativeRegistry {
+contract CooperativeRegistry is R04EmergencyConsumer {
     error Invalid();
     error Unauthorized();
 
@@ -21,9 +23,9 @@ contract CooperativeRegistry {
     event CooperativeCreated(bytes32 indexed id, bytes32 indexed organization);
     event MemberEnrolled(bytes32 indexed id, address indexed member, uint32 count);
 
-    constructor(
+    constructor(address r04Authorization_, 
         address organizations_
-    ) {
+    ) R04EmergencyConsumer(r04Authorization_) {
         if (organizations_.code.length == 0) revert Invalid();
         organizations = OrganizationRegistry(organizations_);
     }
@@ -31,7 +33,7 @@ contract CooperativeRegistry {
     function create(
         bytes32 id,
         bytes32 org
-    ) external {
+    ) external  r04Unrestricted(EmergencyDomains.COOPERATIVE_GOVERNANCE) {
         (address admin, bool active,) = organizations.organizations(org);
         if (id == bytes32(0) || !active || admin != msg.sender || cooperatives[id].active) revert Unauthorized();
         cooperatives[id] = Cooperative(org, msg.sender, 1, 0, true);
@@ -41,7 +43,7 @@ contract CooperativeRegistry {
     /// @dev Only members can consent to enrollment. Fixed cap bounds snapshot gas.
     function enroll(
         bytes32 id
-    ) external {
+    ) external  r04Unrestricted(EmergencyDomains.COOPERATIVE_GOVERNANCE) {
         Cooperative storage c = cooperatives[id];
         if (
             !c.active || enrolled[id][msg.sender] || c.memberCount >= 64
@@ -66,3 +68,4 @@ contract CooperativeRegistry {
         return roster[id].length;
     }
 }
+

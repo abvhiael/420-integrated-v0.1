@@ -39,7 +39,8 @@ emergency_bindings = {
     'BREEDING_BIND_EMERGENCY': 'HC.ACTION.BREEDING_ENGINE.BIND_EMERGENCY',
     'RANDOMNESS_BIND_EMERGENCY': 'HC.ACTION.RANDOMNESS_COORDINATOR.BIND_EMERGENCY',
 }
-require(len(actions) == 65, 'unexpected action catalogue size')
+require(len(actions) == 66, 'unexpected action catalogue size')
+require(actions.count(('R04_EMERGENCY_BIND', 'HC.ACTION.R04.EMERGENCY_BIND.V1')) == 1, 'missing or modified R04 consumer binding authority')
 canonical_rights_bindings = {
     'LAND_BIND_PLANTS': 'HC.ACTION.LAND_REGISTRY.BIND_PLANTS',
     'PLANT_BIND_RIGHTS': 'HC.ACTION.PLANT_REGISTRY.BIND_RIGHTS',
@@ -104,3 +105,4 @@ print(json.dumps({'status':'PASS', 'sha':subprocess.check_output(['git','rev-par
                   'enums':enum_count,'types':len(udvts),'actions':len(actions),'requirements':len(scope_rows),
                   'links':links,'harvestInputs':10001,'temperatureInputs':3001,'inputHashes':inputs,
                   'scope':'Source/specification consistency only; not runtime or full-game qualification.'},indent=2))
+

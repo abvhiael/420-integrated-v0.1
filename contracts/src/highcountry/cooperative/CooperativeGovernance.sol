@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
+import {R04EmergencyConsumer} from "../security/R04EmergencyConsumer.sol";
+import {EmergencyDomains} from "../constants/EmergencyDomains.sol";
 import { CooperativeRegistry } from "./CooperativeRegistry.sol";
 import { OrganizationRegistry } from "../organization/OrganizationRegistry.sol";
 
 /// @notice Fixed snapshot voting, one vote per enrolled member, no token delegation.
-contract CooperativeGovernance {
+contract CooperativeGovernance is R04EmergencyConsumer {
     error Unauthorized();
     error Invalid();
 
@@ -37,9 +39,9 @@ contract CooperativeGovernance {
     event MarkedExecuted(bytes32 indexed id);
     address public executor;
 
-    constructor(
+    constructor(address r04Authorization_, 
         address registry_
-    ) {
+    ) R04EmergencyConsumer(r04Authorization_) {
         if (registry_.code.length == 0) revert Invalid();
         registry = CooperativeRegistry(registry_);
     }
@@ -59,7 +61,7 @@ contract CooperativeGovernance {
         bytes32 action,
         bytes32 scope,
         bytes32 value
-    ) external returns (bytes32 id) {
+    ) external r04Unrestricted(EmergencyDomains.COOPERATIVE_GOVERNANCE) returns (bytes32 id) {
         (bytes32 org,, uint32 version,, bool active) = registry.cooperatives(cooperative);
         if (
             !active || version != 1 || action != ACTION_SET_POLICY || scope == bytes32(0)
@@ -101,7 +103,7 @@ contract CooperativeGovernance {
     function vote(
         bytes32 id,
         bool support
-    ) external {
+    ) external  r04Unrestricted(EmergencyDomains.COOPERATIVE_GOVERNANCE) {
         Proposal storage p = proposals[id];
         if (
             p.end == 0 || block.timestamp >= p.end || p.cancelled || p.executed || voted[id][msg.sender]
@@ -131,6 +133,7 @@ contract CooperativeGovernance {
     function executable(
         bytes32 id
     ) public view returns (bool) {
+        if (!r04DomainOpen(EmergencyDomains.COOPERATIVE_GOVERNANCE)) return false;
         Proposal memory p = proposals[id];
         if (
             p.end == 0 || p.cancelled || p.executed || block.timestamp < p.executableAfter || p.yesVotes < p.quorum
@@ -150,9 +153,10 @@ contract CooperativeGovernance {
 
     function markExecuted(
         bytes32 id
-    ) external {
+    ) external  r04Unrestricted(EmergencyDomains.COOPERATIVE_GOVERNANCE) {
         if (msg.sender != executor || !executable(id)) revert Unauthorized();
         proposals[id].executed = true;
         emit MarkedExecuted(id);
     }
 }
+

@@ -1,6 +1,6 @@
 # BNB-4.6 — Booking Orchestration and Economic Reconciliation — work in progress
 
-**Disposition: INCOMPLETE / Level 1 NOT YET QUALIFIED. Do not advance to BNB-4.7.**
+**Historical work-in-progress record — SUPERSEDED by the [BNB-4.6 Level 1 PASS certificate](BNB-4.6-BOOKING-ECONOMIC-LEVEL1.md) against exact executable SHA `21dd9667b2efc0449d4902421dc82d52fdb71c35`. Original observations below are preserved for audit history. BNB-4.7 is now the next canonical milestone, not certified by this document.**
 
 Canonical owner: `docs/bnb/BNB-PHASE4-ROADMAP.md` BNB-4.6.
 Repository branch `audit/bnb-phase4-bnb-4-1-baseline-20261013`, draft unmerged PR #631; current implementation candidate `5318553d9f25e60c3ddb69eff3b5fa4247825473`. Baseline `main` observed `959288c8bd33b6da0325b6a5d060e00e7bcf0e48`, existing divergence approximately 408 behind. Refresh before reconciliation.
@@ -52,3 +52,10 @@ Latest executable SHA `913409760e1267fabd347fab59ba2c273e01af92`.
 - Tests expanded for revoked finality, failed settlement, reserved/finalized liability and PostgreSQL-backed tampered/stale booking state with Pay reorganization history.
 - Exact-SHA Runtime Slice [38478990542](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38478990542) was **PENDING** when recorded. Retained BNB checks were queued, not counted PASS. No Level 1 certificate.
 - Remaining unresolved provider-owned full dispute lifecycle/independent compensation and recovery decisions, additional competing-event-order integration tests, and exact-SHA terminal qualification. No change in testnet gates or authorization.
+
+## Final reconciliation — repository Level 1 closed
+
+- **Certified BNB-4.6 exact source SHA:** `21dd9667b2efc0449d4902421dc82d52fdb71c35`. All previously listed repository implementation gaps have been addressed for Level 1: signed Pay case lifecycle, Pay/Wallet authority, reorg/late-receipt recovery, original-payer and split reconciliation, frozen payout/hold protections, and PostgreSQL adversarial cases. Live external source/provider and legal acceptance remain testnet gated.
+- **Certificate evidence commit:** `68a4c3355fe0c7be9bdb9326b10dfd20cee83e74`, [BNB-4.6 Level 1 certificate](BNB-4.6-BOOKING-ECONOMIC-LEVEL1.md). This reconciliation commit is also evidence-only; it does not change tested application artifacts.
+- **Terminal CI:** Runtime Slice `38480139334` job `115580756443` PASS, 275 tests; 9/9 retained BNB workflows PASS on same implementation SHA. Skipped global Docs, unrelated pipeline failures and superseded runs are not credited as app Level 1 PASS.
+- **Milestone:** BNB-4.6 repository **Level 1 COMPLETE**. Proceed next to **BNB-4.7 — M4-A Level 2 Integration** on an exact accumulated application SHA. Keep draft PR #631 open/unmerged, no Level 3 or testnet authorization.

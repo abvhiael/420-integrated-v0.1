@@ -22,6 +22,7 @@ type C076Witness struct {
 // C076WitnessAuthority must be independently authenticated, strongly
 // consistent, and non-rollbackable outside the failed storage domain.
 type C076WitnessAuthority interface {
+ C076IndependentAuthority // monotonic latest checkpoint maintained outside the restore domain
  RecoverWitness(context.Context,string)(C076Witness,error)
 }
 // C076RecoveryPlatform is the privileged restore control plane. All methods
@@ -46,6 +47,8 @@ func C076Restore(ctx context.Context,plan C076RestorePlan,authority C076WitnessA
   !digestValid(plan.BackupSHA256)||plan.CheckpointGeneration==0{return ErrC076UnsafeRestore}
  if err:=platform.Quiesce(ctx,plan.Scope);err!=nil{return ErrC076UnsafeRestore}
  witness,err:=authority.RecoverWitness(ctx,plan.Scope)
+ latest,latestErr:=authority.LatestCheckpoint(ctx,plan.Scope)
+ if latestErr!=nil||latest!=witness.Checkpoint{return ErrC076UnsafeRestore}
  if err!=nil||ctx.Err()!=nil||witness.Checkpoint.Scope!=plan.Scope||
   witness.Checkpoint.Generation!=plan.CheckpointGeneration||
   !ValidPublicationFence(witness.Checkpoint.Fence,now)||
@@ -82,6 +85,8 @@ func C076Restore(ctx context.Context,plan C076RestorePlan,authority C076WitnessA
  // Release requires an independent current-state compare-and-swap in the
  // platform. Another revocation between witness and release must deny.
  fresh,e:=authority.RecoverWitness(ctx,plan.Scope)
+ current,currentErr:=authority.LatestCheckpoint(ctx,plan.Scope)
+ if currentErr!=nil||current!=witness.Checkpoint{return ErrC076UnsafeRestore}
  if e!=nil||ctx.Err()!=nil||fresh.Checkpoint!=witness.Checkpoint||len(fresh.Deletions)!=len(witness.Deletions){return ErrC076UnsafeRestore}
  for i:=range fresh.Deletions{if fresh.Deletions[i]!=witness.Deletions[i]{return ErrC076UnsafeRestore}}
  if err=platform.Release(ctx,plan.Scope,nextGeneration);err!=nil{return ErrC076UnsafeRestore}

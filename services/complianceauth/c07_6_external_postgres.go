@@ -5,6 +5,7 @@ import (
  "crypto/ed25519"
  "database/sql"
  "encoding/json"
+ "time"
  "crypto/sha256"
  "encoding/hex"
 )
@@ -152,6 +153,6 @@ func(b *C076ExternalPostgres) CanServe(ctx context.Context,scope string,servingG
  var signed C076SignedCheckpoint
  if decodeC076Checkpoint(raw,&signed)!=nil||signed.Checkpoint.Scope!=scope||
   signed.Checkpoint.Generation+1!=servingGeneration||
-  VerifyC076SignedCheckpoint(ctx,signed,b.IssuerKeys)!=nil{return false,ErrC076UnsafeRestore}
+  VerifyC076SignedCheckpoint(ctx,signed,b.IssuerKeys)!=nil||!ValidPublicationFence(signed.Checkpoint.Fence,time.Now().UTC())||ctx.Err()!=nil{return false,ErrC076UnsafeRestore}
  return true,nil
 }

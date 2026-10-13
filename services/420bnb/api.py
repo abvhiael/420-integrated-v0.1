@@ -346,13 +346,13 @@ def ready():
             if current is None:
                 raise HTTPException(503,"SCHEMA_NOT_MIGRATED")
             records=c.execute("SELECT version FROM bnb_schema_migration ORDER BY version").fetchall()
-            if [row[0] for row in records]!=list(range(1,21)):
+            if [row[0] for row in records]!=list(range(1,22)):
                 raise HTTPException(503,"SCHEMA_VERSION_MISMATCH")
     except psycopg.Error:
         # A database outage or connection exhaustion is not a ready API.
         # Never leak DSNs, SQL statements, hostnames or credentials to probes.
         raise HTTPException(503,"DATABASE_UNAVAILABLE") from None
-    return {"status":"ready","transactions_enabled":False,"schema_version":20}
+    return {"status":"ready","transactions_enabled":False,"schema_version":21}
 
 
 class GuestMessageInput(BaseModel):
@@ -1014,6 +1014,71 @@ def moderate_abuse_report(report_id:UUID,payload:AbuseReportDecision,
                 (uuid4(),proof["sub"],"bnb.abuse_report."+payload.decision,report[0]))
     return {"report_id":str(report_id),"state":payload.decision}
 
+
+
+class ModerationAppealInput(BaseModel):
+    grounds:str=Field(min_length=10,max_length=1000)
+
+@app.post("/v1/bnb/abuse-reports/{report_id}/appeals",status_code=201)
+def file_moderation_appeal(report_id:UUID,payload:ModerationAppealInput,
+                           authorization:str|None=Header(None)):
+    actor=active_subject(authorization)
+    with db() as c:
+        with c.transaction():
+            report=c.execute("""SELECT reporter_subject,property_id,target_type,target_id,status
+                FROM bnb_abuse_report WHERE id=%s FOR UPDATE""",(report_id,)).fetchone()
+            if not report or actor!=report[0]:raise HTTPException(404,"NOT_FOUND")
+            if report[4] not in ("accepted","dismissed"):
+                raise HTTPException(409,"ABUSE_DECISION_NOT_FINAL")
+            previous=c.execute("""SELECT id,grounds FROM bnb_moderation_appeal
+                WHERE report_id=%s AND appellant_subject=%s""",(report_id,actor)).fetchone()
+            if previous:
+                if previous[1]!=payload.grounds:raise HTTPException(409,"APPEAL_REPLAY_CONFLICT")
+                return {"id":str(previous[0]),"state":"pending_or_decided","replayed":True}
+            appeal_id=uuid4()
+            c.execute("""INSERT INTO bnb_moderation_appeal
+                (id,report_id,appellant_subject,grounds)
+                VALUES (%s,%s,%s,%s)""",(appeal_id,report_id,actor,payload.grounds))
+            c.execute("""INSERT INTO bnb_privacy_retention_hold(report_id,until_at,reason_code)
+                VALUES (%s,now()+interval '90 days','appeal')
+                ON CONFLICT(report_id) DO UPDATE SET
+                until_at=GREATEST(bnb_privacy_retention_hold.until_at,excluded.until_at)""",
+                (report_id,))
+    return {"id":str(appeal_id),"state":"pending","replayed":False}
+
+
+class ModerationAppealDecision(BaseModel):
+    decision:str=Field(pattern="^(upheld|overturned)$")
+
+@app.post("/v1/bnb/internal/appeals/{appeal_id}/decision")
+def decide_moderation_appeal(appeal_id:UUID,payload:ModerationAppealDecision,
+                             x_guest_review_proof:str|None=Header(None)):
+    if not x_guest_review_proof:raise HTTPException(401,"APPEAL_AUTHORITY_REQUIRED")
+    proof=verify_authority(x_guest_review_proof,"BNB_GUEST_REVIEW","abuse-appeal")
+    if proof.get("appeal_id")!=str(appeal_id) or proof.get("decision")!=payload.decision:
+        raise HTTPException(403,"APPEAL_DECISION_SCOPE_MISMATCH")
+    with db() as c:
+        with c.transaction():
+            row=c.execute("""SELECT a.report_id,a.state,r.property_id,r.reporter_subject
+                FROM bnb_moderation_appeal a JOIN bnb_abuse_report r ON r.id=a.report_id
+                WHERE a.id=%s FOR UPDATE OF a""",(appeal_id,)).fetchone()
+            if not row:raise HTTPException(404,"NOT_FOUND")
+            if row[1]!="pending":raise HTTPException(409,"APPEAL_DECISION_ALREADY_FINAL")
+            if proof.get("sub")==row[3]:
+                raise HTTPException(403,"INDEPENDENT_APPEAL_REVIEWER_REQUIRED")
+            if c.execute("""SELECT 1 FROM bnb_moderation_appeal_decision_nonce
+                WHERE issuer=%s AND jti=%s""",(proof["iss"],proof["jti"])).fetchone():
+                raise HTTPException(409,"APPEAL_DECISION_REPLAY")
+            c.execute("""INSERT INTO bnb_moderation_appeal_decision_nonce
+                (issuer,jti,appeal_id,decision) VALUES(%s,%s,%s,%s)""",
+                (proof["iss"],proof["jti"],appeal_id,payload.decision))
+            c.execute("""UPDATE bnb_moderation_appeal SET state=%s,decided_at=now(),
+                decided_by=%s WHERE id=%s""",(payload.decision,proof["sub"],appeal_id))
+            c.execute("""INSERT INTO bnb_audit(id,subject,action,resource_id)
+                VALUES(%s,%s,%s,%s)""",
+                (uuid4(),proof["sub"],"bnb.moderation.appeal."+payload.decision,row[2]))
+    return {"id":str(appeal_id),"state":payload.decision,
+            "content_republished":False}
 
 class ReviewModerationDecision(BaseModel):
     decision:str=Field(pattern="^(approved|rejected|withdrawn)$")

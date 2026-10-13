@@ -56,8 +56,8 @@ def scenario(monkeypatch):
     finally:
         with psycopg.connect(dsn) as c:
             c.execute("DELETE FROM bnb_outbox WHERE payload->>'property_id'=%s",(str(pid),))
-            c.execute("DELETE FROM bnb_discovery_consumer_revision WHERE property_id=%s",(pid,))
-            c.execute("DELETE FROM bnb_discovery_sync WHERE property_id=%s",(pid,))
+            c.execute("DELETE FROM bnb_discovery_consumer WHERE property_id=%s",(pid,))
+            c.execute("DELETE FROM bnb_discovery_projection WHERE property_id=%s",(pid,))
             c.execute("DELETE FROM bnb_availability_projection WHERE property_id=%s",(pid,))
             c.execute("DELETE FROM bnb_reservation WHERE id=%s",(rid,))
             c.execute("DELETE FROM bnb_hold WHERE id=%s",(hid,))

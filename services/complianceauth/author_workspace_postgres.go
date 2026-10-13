@@ -58,7 +58,7 @@ func (s C064PostgreSQLDrafts) Save(ctx context.Context, scope C064AuthorScope, i
 	if current != expected { return C064DraftVersion{}, ErrAuthorConflict }
 	version := C064DraftVersion{Scope: scope, ID: id, AuthorID: author, Revision: current+1, CreatedAt: now.UTC().Truncate(time.Microsecond), Schema: schema, Citations: citations}
 	version.DocumentDigest = c064DocumentDigest(schema, citations)
-	doc, err := c071Encode(s.Cipher, version, c071AAD("author", scope, id, version.Revision))
+	doc, err := c071EncodeContext(ctx,s.Cipher, version, c071AAD("author", scope, id, version.Revision))
 	if err != nil { return C064DraftVersion{}, ErrAuthorInvalid }
 	_, err = tx.ExecContext(ctx, `INSERT INTO compliance_author_versions
 		(tenant,domain,jurisdiction,draft_id,revision,author_id,created_at,document_digest,document)
@@ -90,7 +90,7 @@ func (s C064PostgreSQLDrafts) Load(ctx context.Context, scope C064AuthorScope, i
 	if errors.Is(err, sql.ErrNoRows) { return C064DraftVersion{}, ErrAuthorDenied }
 	if err != nil { return C064DraftVersion{}, ErrUnavailable }
 	var version C064DraftVersion
-	if c071Decode(s.Cipher, doc, c071AAD("author", scope, id, rowRevision), &version) != nil || version.Scope != scope || version.ID != id || version.AuthorID != author ||
+	if c071DecodeContext(ctx,s.Cipher, doc, c071AAD("author", scope, id, rowRevision), &version) != nil || version.Scope != scope || version.ID != id || version.AuthorID != author ||
 		version.Revision != rowRevision || version.DocumentDigest != rowDigest || rowDigest != c064DocumentDigest(version.Schema, version.Citations) ||
 		!c064SchemaValid(version.Schema, id, scope) {
 		return C064DraftVersion{}, ErrUnavailable

@@ -37,5 +37,10 @@ test('availability verifier pins session signatures and current subject/account/
     return `${data}.${sign('RSA-SHA256',Buffer.from(data),pair.privateKey).toString('base64url')}`;
   }});
   const row={driver_id:'driver',account_id:'account',session_context:context};assert.equal(await verifier(row),130);
-  for(const patch of [{active:false},{deviceActive:false},{tokenActive:false},{recoveryEpoch:0},{nonce:'stale'},{accountId:'other'},{tokenDigest:'wrong'},{sessionId:'other'},{deviceId:'other'},{sub:'other'},{exp:100},{grants:[]}]){change=patch;await assert.rejects(()=>verifier(row));}
+  for(const patch of [{active:false},{deviceActive:false},{tokenActive:false},{recoveryEpoch:0},{nonce:'stale'},{accountId:'other'},{tokenDigest:'wrong'},{sessionId:'other'},{deviceId:'other'},{sub:'other'},{exp:100},{grants:[]},{grants:[null]},{grants:[{role:'driver',resource:'account:driver',actions:['availability.set','trip.assign'],expiresAt:130,revoked:false}]},{grants:[{role:'driver',resource:'account:*',actions:['availability.set'],expiresAt:130,revoked:false}]}]){change=patch;await assert.rejects(()=>verifier(row));}
+});
+test('clock overflow cannot produce an unsafe availability or assignment deadline',async()=>{
+  const adapter=createDispatchAdapter({pool:{},authenticator:{authorize:async()=>({role:'driver',subject:'driver_1',accountId:'account',expiresAt:Number.MAX_SAFE_INTEGER})},
+    eligibilityAdapter:{project(){}},verifyAvailability(){},availabilitySeconds:120,assignmentSeconds:30,clock:()=>Number.MAX_SAFE_INTEGER,isPaused:()=>false});
+  await assert.rejects(()=>adapter.setAvailability('test',input),e=>e.code==='CLOCK_UNAVAILABLE');
 });

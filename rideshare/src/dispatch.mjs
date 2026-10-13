@@ -1,5 +1,5 @@
 import {createHash,randomBytes} from 'node:crypto';
-import {AuthError,record,createAuthorityVerifier} from './auth.mjs';
+import {AuthError,record,createAuthorityVerifier,validateSessionGrants} from './auth.mjs';
 import {canonical} from './canonical.mjs';
 const id=v=>typeof v==='string'&&/^[A-Za-z0-9_-]{1,128}$/.test(v);
 const integer=v=>Number.isSafeInteger(v)&&v>=0;
@@ -26,7 +26,7 @@ export function createAvailabilityVerifier({sessionAuthority,resolveSession,cloc
     if(proof.sub!==row.driver_id||proof.accountId!==row.account_id||proof.nonce!==nonce||proof.tokenDigest!==context.tokenDigest||
       proof.sessionId!==context.sessionId||proof.deviceId!==context.deviceId||proof.recoveryEpoch!==context.recoveryEpoch||
       proof.active!==true||proof.deviceActive!==true||proof.tokenActive!==true)fail('DRIVER_SESSION_REVOKED',403);
-    if(!Array.isArray(proof.grants)||proof.grants.length>32)fail('INVALID_AVAILABILITY_PROOF',403);
+    validateSessionGrants(proof.grants);
     const matching=proof.grants.filter(g=>g.role==='driver'&&g.resource===`account:${row.driver_id}`&&g.revoked===false&&integer(g.expiresAt)&&g.expiresAt>now&&Array.isArray(g.actions)&&g.actions.includes('availability.set'));
     if(matching.length!==1)fail('DRIVER_AVAILABILITY_REVOKED',403);
     return Math.min(proof.exp,matching[0].expiresAt);
@@ -37,7 +37,7 @@ export function createDispatchAdapter({pool,authenticator,eligibilityAdapter,ava
   if(!pool||!authenticator||typeof eligibilityAdapter?.project!=='function'||typeof verifyAvailability!=='function'||
     !integer(availabilitySeconds)||availabilitySeconds<1||availabilitySeconds>300||
     !integer(assignmentSeconds)||assignmentSeconds<1||assignmentSeconds>300)fail('DISPATCH_CONFIGURATION_REQUIRED',503);
-  const time=()=>{const now=clock();if(!integer(now))fail('CLOCK_UNAVAILABLE',503);return now;};
+  const time=()=>{const now=clock();if(!integer(now)||now>Number.MAX_SAFE_INTEGER-300)fail('CLOCK_UNAVAILABLE',503);return now;};
   const lock=client=>client.query("SELECT pg_advisory_xact_lock(hashtextextended('liftd:dispatch:CA:BC:Vancouver',0))");
   const fresh=async(token,driverId,previous)=>{
     const p=await authenticator.authorize(token,{action:'availability.set',resource:`account:${driverId}`});

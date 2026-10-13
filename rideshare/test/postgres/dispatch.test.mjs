@@ -22,7 +22,7 @@ before(async()=>{
   pool=createDatabasePool({connectionString:url});app=fixture(pool,pairs,controls);
 });
 afterEach(async()=>{
-  controls.now=100;controls.paused=false;controls.revokedDrivers=[];controls.revokedSessions=[];controls.suspendedDrivers=[];controls.capacities={};controls.outage=undefined;
+  controls.now=100;controls.paused=false;controls.revokedDrivers=[];controls.revokedSessions=[];controls.suspendedDrivers=[];controls.capacities={};controls.outage=undefined;controls.afterTransport=undefined;
   for(const t of (await pool.query("SELECT snapshot FROM liftd.trips WHERE trip_id LIKE 'dispatch_%' AND state IN ('ASSIGNED','ARRIVED','IN_PROGRESS')")).rows.map(r=>r.snapshot)) {
     if(t.state==='IN_PROGRESS')await app.transition('driver',t.driverId,t.id,'complete',t.revision);else await cancel(t.id);
   }
@@ -131,3 +131,20 @@ test('availability races have one CAS winner; busy vehicle changes and direct le
   await cancel('dispatch_guard');
   await assert.rejects(()=>owner.query("UPDATE liftd.assignment_leases SET state='PENDING' WHERE trip_id='dispatch_guard'"),e=>e.code==='23514');
 });
+
+ test('driver-session revocation during eligibility lookup is denied again immediately before commit',async()=>{
+  await app.online('driver_late','vehicle_late');await app.create('dispatch_late');
+  controls.afterTransport=()=>{controls.revokedSessions=['driver_late'];};
+  await assert.rejects(()=>match('dispatch_late'),e=>e.code==='DRIVER_SESSION_REVOKED');
+  assert.equal((await app.tripStore.get('dispatch_late')).state,'REQUESTED');
+  assert.equal((await app.tripStore.history('dispatch_late')).length,1);
+  assert.equal((await pool.query("SELECT count(*)::int n FROM liftd.assignment_leases WHERE trip_id='dispatch_late'")).rows[0].n,0);
+ });
+ test('different available drivers sharing a vehicle cannot reserve it for concurrent trips',async()=>{
+  await app.online('driver_shared_a','vehicle_shared');await app.online('driver_shared_b','vehicle_shared');
+  await app.create('dispatch_shared_a');await app.create('dispatch_shared_b');
+  const results=await Promise.allSettled([match('dispatch_shared_a'),match('dispatch_shared_b')]);
+  assert.equal(results.filter(r=>r.status==='fulfilled').length,1);
+  assert.equal(results.find(r=>r.status==='rejected').reason.code,'NO_ELIGIBLE_DRIVER');
+  assert.equal((await pool.query("SELECT count(*)::int n FROM liftd.trips WHERE vehicle_id='vehicle_shared' AND state='ASSIGNED'")).rows[0].n,1);
+ });

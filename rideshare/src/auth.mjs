@@ -58,6 +58,17 @@ const capabilities = Object.freeze({
   driver: new Set(['trip.read', 'trip.arrive', 'trip.start', 'trip.complete', 'trip.cancel', 'availability.set']),
   operator: new Set(['trip.assign', 'trip.expire']),
 });
+export function validateSessionGrants(grants) {
+  if (!Array.isArray(grants) || grants.length > 32) deny('INVALID_PROOF');
+  for (const grant of grants) {
+        record(grant, ['role', 'actions', 'resource', 'expiresAt', 'revoked']);
+        if (!Object.hasOwn(capabilities, grant.role) || !Array.isArray(grant.actions) || grant.actions.length > 8 ||
+          grant.actions.some(a => !capabilities[grant.role].has(a)) || typeof grant.resource !== 'string' ||
+          !/^(account|trip):[A-Za-z0-9_-]{1,128}$/.test(grant.resource) || !integer(grant.expiresAt) ||
+          typeof grant.revoked !== 'boolean') deny('INVALID_PROOF');
+  }
+  return grants;
+}
 export function createAuthenticator({identity, sessionAuthority, resolveSession, clock = () => Math.floor(Date.now() / 1000)}) {
   const identityRoot = root(identity), sessionRoot = root(sessionAuthority);
   if (identityRoot.issuer === sessionRoot.issuer || [...identityRoot.keys.values()].some(a =>
@@ -86,14 +97,9 @@ export function createAuthenticator({identity, sessionAuthority, resolveSession,
         status.sessionId !== access.sessionId || status.deviceId !== access.deviceId || status.accountId !== access.accountId ||
         status.recoveryEpoch !== access.recoveryEpoch) deny('SESSION_BINDING_MISMATCH');
       if (status.active !== true || status.deviceActive !== true || status.tokenActive !== true) deny('SESSION_REVOKED');
-      if (!Array.isArray(status.grants) || status.grants.length > 32) deny('INVALID_PROOF');
+      validateSessionGrants(status.grants);
       const matches = [];
       for (const grant of status.grants) {
-        record(grant, ['role', 'actions', 'resource', 'expiresAt', 'revoked']);
-        if (!Object.hasOwn(capabilities, grant.role) || !Array.isArray(grant.actions) || grant.actions.length > 8 ||
-          grant.actions.some(a => !capabilities[grant.role].has(a)) || typeof grant.resource !== 'string' ||
-          !/^(account|trip):[A-Za-z0-9_-]{1,128}$/.test(grant.resource) || !integer(grant.expiresAt) ||
-          typeof grant.revoked !== 'boolean') deny('INVALID_PROOF');
         if (!grant.revoked && grant.expiresAt > checkedAt && grant.actions.includes(action) && grant.resource === resource) matches.push(grant);
       }
       if (matches.length !== 1) deny('PERMISSION_DENIED', 403);

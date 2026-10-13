@@ -79,7 +79,7 @@ func MigrateC071Database(ctx context.Context,db *sql.DB,c *C071Cipher)error{
  tx,err:=db.BeginTx(ctx,&sql.TxOptions{Isolation:sql.LevelReadCommitted});if err!=nil{return ErrC071Storage};defer tx.Rollback()
  if _,err=tx.ExecContext(ctx,"SELECT pg_advisory_xact_lock(420071)");err!=nil{return ErrC071Storage}
  if _,err=tx.ExecContext(ctx,`CREATE TABLE IF NOT EXISTS public.compliance_schema_migrations(version INTEGER PRIMARY KEY, checksum TEXT NOT NULL CHECK(char_length(checksum)=64), applied_at TIMESTAMPTZ NOT NULL DEFAULT clock_timestamp())`);err!=nil{return ErrC071Storage}
- scripts:=[]string{PublicationSchemaSQL,C064AuthorSchemaSQL,C065ReviewSchemaSQL,C067AuditSchemaSQL,c071HardeningSQL,c072DurableSQL,c074CapacitySQL,c075PrivacySQL}
+ scripts:=[]string{PublicationSchemaSQL,C064AuthorSchemaSQL,C065ReviewSchemaSQL,C067AuditSchemaSQL,c071HardeningSQL,c072DurableSQL,c074CapacitySQL,c075PrivacySQL,C077TelemetrySQL}
  var max int;if tx.QueryRowContext(ctx,"SELECT coalesce(max(version),0) FROM public.compliance_schema_migrations").Scan(&max)!=nil||max>len(scripts){return ErrC071Storage}
  for i,script:=range scripts{
   hash:=sha256.Sum256([]byte(script));digest:=hex.EncodeToString(hash[:]);var saved string

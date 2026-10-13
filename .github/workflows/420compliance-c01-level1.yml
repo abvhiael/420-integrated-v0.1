@@ -56,7 +56,7 @@ jobs:
           docker exec --user root "$PG_SERVICE" chown postgres:postgres /var/lib/postgresql/data/server.key /var/lib/postgresql/data/server.crt
           docker exec --user root "$PG_SERVICE" chmod 600 /var/lib/postgresql/data/server.key
           docker exec --user postgres "$PG_SERVICE" psql -U compliance_test -d compliance_test -c "ALTER SYSTEM SET ssl = 'on';"
-          docker exec --user postgres "$PG_SERVICE" pg_ctl -D /var/lib/postgresql/data -m fast -w restart
+          docker exec --user postgres "$PG_SERVICE" psql -U compliance_test -d compliance_test -c "SELECT pg_reload_conf();"
       - name: Static security and affected package compilation
         run: go vet ./services/complianceauth
       - name: C07.1 encryption migrations RLS quotas and retained database regressions

@@ -48,7 +48,7 @@ func(m C077Monitor) EvaluateC077(ctx context.Context,scope string)(C077Snapshot,
  if err!=nil||ctx.Err()!=nil||len(observations)>64{return C077Snapshot{},ErrC077Observation}
  got:=make(map[C077Metric]C077Observation,len(observations))
  for _,o:=range observations{
-  if o.Scope!=scope||!o.ObservedAt.Before(now.Add(time.Second))||o.ObservedAt.IsZero()||
+  if o.Scope!=scope||!c077Known(o.Metric)||!o.ObservedAt.Before(now.Add(time.Second))||o.ObservedAt.IsZero()||
    !c077Finite(o.Value)||o.Value<0||o.Failed>o.Samples||o.Samples==0{return C077Snapshot{},ErrC077Observation}
   if _,ok:=got[o.Metric];ok{return C077Snapshot{},ErrC077Observation}
   got[o.Metric]=o

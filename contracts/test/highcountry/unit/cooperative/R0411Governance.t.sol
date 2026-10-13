@@ -28,6 +28,7 @@ contract R0411GovernanceTest {
         o.create(ORG,keccak256("meta"));
         r=new CooperativeRegistry(address(o));
         r.create(COOP,ORG);
+        r.enroll(COOP);
         alice=new CoopMemberR0411();
         bob=new CoopMemberR0411();
         o.invite(ORG,address(alice),true);

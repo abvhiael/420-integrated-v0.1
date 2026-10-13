@@ -67,6 +67,12 @@ with sync_playwright() as p:
                 "title":"Accessible cabin","state":"payment_pending",
                 "checkin":"2027-02-10","checkout":"2027-02-12",
                 "confirmed":False,"request_id":"00000000-0000-0000-0000-000000000125"}])
+        elif "/v1/bnb/reservations/" in url and url.endswith("/payment"):
+            route.fulfill(json={"payment_state":"recovery_required","confirmed":False,
+                                "wallet_execution_available":False})
+        elif "/v1/bnb/reservations/" in url and url.endswith("/cancel"):
+            route.fulfill(json={"state":"cancelled","refund_status":"not_applicable",
+                                "confirmed":False})
         elif "/v1/bnb/reservations/" in url and url.endswith("/receipt"):
             route.fulfill(status=404,json={"detail":"NOT_FINALIZED"})
         elif "/v1/bnb/booking-requests/" in url and url.endswith("/messages"):
@@ -125,6 +131,8 @@ with sync_playwright() as p:
     session.get_by_role("button",name="Refresh saved stays & reservations").click()
     expect(session.locator("#saved-stays")).to_contain_text("Accessible cabin")
     expect(session.locator("#guest-reservations")).to_contain_text("payment_pending")
+    expect(session.locator("#guest-reservations")).to_contain_text("Payment reconciliation required.")
+    expect(session.locator("#guest-reservations").get_by_role("button",name="Cancel unpaid reservation")).to_be_visible()
     session.locator("#guest-reservations").get_by_role("button",name="View receipt").click()
     expect(session.locator("#guest-reservations")).to_contain_text("No independently authorized finalized Pay receipt available.")
     section.get_by_role("button",name="Request nonbinding itemized quote").click()

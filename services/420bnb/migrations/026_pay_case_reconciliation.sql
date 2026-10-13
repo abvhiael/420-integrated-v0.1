@@ -11,7 +11,7 @@ CREATE TABLE bnb_pay_case_event (
  pay_invoice_id text NOT NULL,
  pay_payment_id text NOT NULL,
  event_state text NOT NULL CHECK (event_state IN ('opened','refund_requested','resolved')),
- resolution text CHECK (resolution IN ('upheld','refund_pending','refund_completed')),
+ resolution text CHECK (resolution IN ('upheld','refund_completed')),
  payout_release_authorized boolean NOT NULL DEFAULT false,
  event_digest char(64) NOT NULL,
  recorded_at timestamptz NOT NULL DEFAULT now(),

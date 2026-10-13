@@ -112,6 +112,7 @@ func(s *C072Store)RenewLeader(ctx context.Context,l C072Leader,d time.Duration)e
 // Payloads are encrypted and immutable by API. Enqueue never activates a policy.
 func(s *C072Store)Enqueue(ctx context.Context,id,kind string,payload any,due time.Time,max int)error{
  if !s.ready(ctx)||s.Cipher==nil||!c051Scope(id)||(kind!="COLLECTION"&&kind!="ACTIVATION")||due.IsZero()||max<1||max>100{return ErrC072Unavailable}
+ due=due.UTC().Truncate(time.Microsecond) // Canonical PostgreSQL schedule precision; preserves durable replay identity.
  plain,e:=json.Marshal(payload);if e!=nil||len(plain)>C071MaxPrivateBytes{return ErrC072Unavailable};raw,e:=s.Cipher.sealContext(ctx,plain,c071AAD("job/"+kind,s.Scope,id,0));if e!=nil{return ErrC072Unavailable}
  tx,e:=s.begin(ctx);if e!=nil{return e};defer tx.Rollback()
  _,e=tx.ExecContext(ctx,"INSERT INTO public.compliance_durable_jobs(scope,id,kind,payload,fingerprint,state,max_attempts,scheduled_at,due_at) VALUES($1,$2,$3,$4,$5,'QUEUED',$6,$7,$7) ON CONFLICT(scope,id) DO NOTHING",s.PublicationScope,id,kind,string(raw),Digest(plain),max,due);if e!=nil{return ErrC072Unavailable}

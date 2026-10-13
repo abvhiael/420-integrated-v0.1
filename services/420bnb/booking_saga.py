@@ -8,7 +8,8 @@ from __future__ import annotations
 
 def project_saga(*, reservation_state: str, hold_state: str,
                  intent_state: str | None, payment_id: str | None,
-                 split: dict | None, disbursements: list[dict]) -> dict:
+                 split: dict | None, disbursements: list[dict],
+                 pay_failures: list[str] | None = None) -> dict:
     """Fail closed on inconsistent evidence, preserving immutable financial authority."""
     if reservation_state not in {
         "payment_pending", "confirmed", "expired", "cancelled", "recovery_required"
@@ -29,6 +30,19 @@ def project_saga(*, reservation_state: str, hold_state: str,
     if intent_state == "recovery_required" or reservation_state == "recovery_required":
         return {"state": "reconciliation_required", "reason": "PAY_RECOVERY_REQUIRED",
                 "confirmation_verified": False, "bnb_custody": False}
+    # Independently Pay-attested failure evidence supersedes cached finality.
+    failures = pay_failures or []
+    allowed = {"declined", "provider_unavailable", "settlement_failed",
+               "reorg", "finality_revoked"}
+    if any(code not in allowed for code in failures):
+        return {"state": "reconciliation_required", "reason": "UNKNOWN_PAY_FAILURE",
+                "confirmation_verified": False, "bnb_custody": False}
+    if "reorg" in failures or "finality_revoked" in failures:
+        return {"state": "reconciliation_required", "reason": "PAY_FINALITY_REVOKED",
+                "confirmation_verified": False, "bnb_custody": False}
+    if failures and (intent_state == "finalized" or reservation_state == "confirmed"):
+        return {"state": "reconciliation_required", "reason": "PAY_SETTLEMENT_DISPUTED",
+                "confirmation_verified": False, "bnb_custody": False}
     captured = None
     if split is not None:
         keys = ("captured", "host", "platform", "developer", "retained")
@@ -47,6 +61,9 @@ def project_saga(*, reservation_state: str, hold_state: str,
             return {"state": "reconciliation_required", "reason": "SPLIT_WITHOUT_FINALITY",
                     "confirmation_verified": False, "bnb_custody": False}
     total_committed = 0
+    finalized_total = 0
+    refund_finalized = 0
+    refund_reserved = 0
     totals = {"host": 0, "platform": 0, "developer": 0, "retained": 0, "refund": 0}
     for op in disbursements:
         kind, state = op.get("kind"), op.get("state")
@@ -63,6 +80,12 @@ def project_saga(*, reservation_state: str, hold_state: str,
         if state != "failed":
             totals[kind] += amount
             total_committed += amount
+            if state == "finalized":
+                finalized_total += amount
+                if kind == "refund":
+                    refund_finalized += amount
+            elif kind == "refund":
+                refund_reserved += amount
     if (total_committed and captured is None) or (
         captured is not None and (
             total_committed > captured or
@@ -81,6 +104,14 @@ def project_saga(*, reservation_state: str, hold_state: str,
         "committed_amount": str(total_committed),
         "remaining_amount": str(captured - total_committed) if captured is not None else None,
         "refund_committed_amount": str(totals["refund"]),
+        "refund_finalized_amount": str(refund_finalized),
+        "refund_reserved_amount": str(refund_reserved),
+        "payout_finalized_amount": str(finalized_total - refund_finalized),
+        "payout_reserved_amount": str(total_committed - finalized_total - refund_reserved),
+        "refund_status": ("finalized" if refund_finalized and not refund_reserved
+                          else "pending" if refund_reserved else "not_requested"),
+        "dispute_status": "provider_review_required" if failures else "none",
+        "pay_failure_count": len(failures),
         "pay_reconciliation_owner": "420Pay",
         "wallet_authorization_owner": "420Wallet",
         "bnb_custody": False,

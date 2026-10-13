@@ -3,6 +3,7 @@ CREATE TABLE gaming_datastore.wallet_link_schema (
   version integer PRIMARY KEY CHECK(version=2),
   digest text NOT NULL CHECK(digest ~ '^[0-9a-f]{64}$')
 );
+GRANT SELECT ON gaming_datastore.wallet_link_schema TO gaming_datastore_runtime;
 CREATE TABLE gaming_datastore.wallet_challenges (
   account_id gaming_datastore.opaque_id NOT NULL,
   game_id gaming_datastore.commitment NOT NULL,

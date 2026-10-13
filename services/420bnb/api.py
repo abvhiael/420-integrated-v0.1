@@ -16,6 +16,7 @@ from identity import verify_external_token
 from authority import verify_authority
 from calendar_engine import peak_used,strict_local_instant,local_stay_window
 from availability_projection import refresh as refresh_availability_projection
+from discovery_sync import synchronize as sync_discovery_projection
 from pricing import quote_breakdown
 from travel_location import resolve_public_place, TravelLocationUnavailable
 from fastapi import FastAPI, Header, HTTPException, Response
@@ -549,6 +550,27 @@ def ingest_travel_jurisdiction_policy(payload:TravelBindingProof):
               revision=excluded.revision,revoked_at=NULL""",
               (jurisdiction,decision,claims["iss"],claims["jti"],claims["nbf"],claims["exp"],revision))
     return {"accepted":True,"revision":revision}
+
+@app.get("/v1/bnb/internal/discovery/{consumer}/{property_id}")
+def internal_discovery_sync(consumer:str,property_id:UUID,
+                            x_discovery_proof:str|None=Header(None)):
+    """Pull-time revalidation: immutable revision or immediate retraction tombstone.
+
+    Internal consumers must present a signed external issuer capability. No public
+    browsing route or arbitrary key may trigger a provider publication.
+    """
+    if consumer not in ("search","travel"):
+        raise HTTPException(404,"CONSUMER_NOT_FOUND")
+    if not x_discovery_proof:raise HTTPException(401,"DISCOVERY_PROOF_REQUIRED")
+    claims=verify_authority(x_discovery_proof,"BNB_DISCOVERY_CONSUMER","discovery-read")
+    if claims.get("consumer")!=consumer or claims.get("property_id")!=str(property_id):
+        raise HTTPException(403,"DISCOVERY_SCOPE_MISMATCH")
+    with db() as c:
+        with c.transaction():
+            result=sync_discovery_projection(c,property_id)
+    return {"version":"bnb-discovery-sync/v1",**result,"consumer":consumer,
+            "nonbinding":True,"transaction_enabled":False}
+
 
 @app.get("/v1/bnb/travel/discovery")
 def travel_discovery(destination:str="",min_capacity:int=1,limit:int=20,offset:int=0,place_id:str=""):

@@ -175,8 +175,9 @@ contract R04CanonicalCompetitionTest is PublicPlantCapacityFixture {
         bytes32 mine = identity.createProfile(GAME, keccak256("registered-me"));
         vm.prank(ALICE);
         bytes32 alice = identity.createProfile(GAME, keccak256("registered-alice"));
-        bridge =
-            new HighCountryGamingBridge420(address(identity), address(claims), address(entitlements), address(profiles));
+        bridge = new HighCountryGamingBridge420(
+            address(identity), address(claims), address(entitlements), address(profiles)
+        );
         bridge.bindGrowerProfile(myGrower);
         vm.prank(ALICE);
         bridge.bindGrowerProfile(aliceGrower);

@@ -95,8 +95,7 @@ contract R04TreasuryIdentityTest is PublicPlantCapacityFixture {
         permissions = new OrganizationTreasuryPermissions(address(auth), address(org), address(gateway), BOB);
         bind(permissions);
         gateway.bindPermissions(address(permissions));
-        permission =
-            permissions.propose(
+        permission = permissions.propose(
             ORG, ALICE, keccak256("HC.ORG.TREASURY"), disbursement, uint64(block.timestamp + 900), 100
         );
         vm.prank(BOB);
@@ -122,9 +121,8 @@ contract R04TreasuryIdentityTest is PublicPlantCapacityFixture {
     }
 
     function testRealTreasuryRequiresIndependentCapabilityAndRollsBackPermission() public {
-        (bool failed,) =
-            address(gateway)
-                .call(abi.encodeCall(gateway.execute, (disbursement, permission, keccak256("vault-receipt"))));
+        (bool failed,) = address(gateway)
+            .call(abi.encodeCall(gateway.execute, (disbursement, permission, keccak256("vault-receipt"))));
         require(!failed, "missing treasury grant bypass");
         (,,,,,, uint256 remaining,,) = permissions.permissions(permission);
         require(remaining == 100, "permission not rolled back");
@@ -135,9 +133,8 @@ contract R04TreasuryIdentityTest is PublicPlantCapacityFixture {
             disbursements.disbursement(disbursement).state == TreasuryDisbursementRegistry420.State.EXECUTED,
             "canonical receipt missing"
         );
-        (bool replay,) =
-            address(gateway)
-                .call(abi.encodeCall(gateway.execute, (disbursement, permission, keccak256("vault-receipt"))));
+        (bool replay,) = address(gateway)
+            .call(abi.encodeCall(gateway.execute, (disbursement, permission, keccak256("vault-receipt"))));
         require(!replay, "treasury replay");
     }
 

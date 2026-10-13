@@ -70,9 +70,8 @@ contract ManufacturedEquipmentIssuer is R04EmergencyConsumer {
                 || r.typeId == bytes32(0)
         ) revert InvalidManufacturedEquipment();
         issuedJob[job] = true;
-        bytes32 earning = keccak256(
-            abi.encode("HC.MANUFACTURED.EARNING.V1", block.chainid, address(manufacturing), job)
-        );
+        bytes32 earning =
+            keccak256(abi.encode("HC.MANUFACTURED.EARNING.V1", block.chainid, address(manufacturing), job));
         item = keccak256(abi.encode("HC.MANUFACTURED.ITEM.V1", block.chainid, address(this), job));
         inventory.reserveFor(keccak256(abi.encode(earning, "RESERVE")), r.resource, j.owner, r.quantity);
         inventory.consumeReservedFor(keccak256(abi.encode(earning, "CONSUME")), r.resource, j.owner, r.quantity);

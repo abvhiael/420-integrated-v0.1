@@ -101,3 +101,39 @@ def test_ambiguous_settlement_evidence_never_claims_provider_dispute_resolution(
     assert result["reason"] == "PAY_SETTLEMENT_DISPUTED"
     assert result["confirmation_verified"] is False
     assert project(**dict(BASE, pay_failures=["arbitrary"]))["reason"] == "UNKNOWN_PAY_FAILURE"
+
+
+def test_pay_case_open_freezes_confirmation_without_reversing_pay_finality():
+    evidence=project(**dict(BASE,pay_cases=[
+        {"state":"opened","resolution":None,"payout_release_authorized":False}]))
+    assert evidence["state"]=="disputed"
+    assert evidence["reason"]=="PAY_CASE_PENDING"
+    assert evidence["confirmation_verified"] is False
+    assert evidence["payment_finalized"] is True
+
+
+def test_pay_case_resolved_upheld_requires_explicit_pay_payout_release():
+    blocked=project(**dict(BASE,pay_cases=[
+        {"state":"resolved","resolution":"upheld","payout_release_authorized":False}]))
+    assert blocked["confirmation_verified"] is False
+    assert blocked["reason"]=="PAYOUT_FROZEN_AFTER_REFUND"
+    released=project(**dict(BASE,pay_cases=[
+        {"state":"resolved","resolution":"upheld","payout_release_authorized":True}]))
+    assert released["state"]=="confirmed"
+    assert released["confirmation_verified"] is True
+
+
+def test_pay_finalized_partial_refund_remains_distinct_from_dispute_and_full_refund():
+    partial=project(**dict(BASE,disbursements=[
+        {"kind":"refund","state":"finalized","amount":20}],
+        pay_cases=[{"state":"resolved","resolution":"refund_completed",
+                    "payout_release_authorized":False}]))
+    assert partial["state"]=="partially_refunded"
+    assert partial["refund_finalized_amount"]=="20"
+    assert partial["reason"]=="PAYOUT_FROZEN_AFTER_REFUND"
+    full=project(**dict(BASE,disbursements=[
+        {"kind":"refund","state":"finalized","amount":100}],
+        pay_cases=[{"state":"resolved","resolution":"refund_completed",
+                    "payout_release_authorized":False}]))
+    assert full["state"]=="refunded"
+    assert full["remaining_amount"]=="0"

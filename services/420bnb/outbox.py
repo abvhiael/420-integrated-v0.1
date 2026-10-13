@@ -11,7 +11,7 @@ from uuid import UUID
 
 MAX_ATTEMPTS=8
 EVENT_TYPES=frozenset({
-    "bnb.pay.intent_bound","bnb.pay.confirmed","bnb.pay.recovery_required",
+    "bnb.pay.intent_bound","bnb.pay.finalized","bnb.pay.recovery_required",
     "bnb.pay.failure_requires_reconciliation","bnb.booking.replacement_requested",
     "bnb.hold.created",
 })
@@ -96,13 +96,15 @@ def fail(conn,event_id,worker,code):
        WHERE id=%s""",(code,seconds,MAX_ATTEMPTS,event_id))
     return "dead_letter" if attempts>=MAX_ATTEMPTS else "retry"
 
-def replay(conn,event_id,actor,reason):
+def replay(conn,event_id,actor,reason,*,authorize=None):
     """Manual redrive requires caller's independent operational authorization.
 
     This primitive does not expose an HTTP endpoint or grant that authorization.
     """
     _identity(actor,WORKER,"ACTOR_INVALID")
     if not isinstance(reason,str) or not 5<=len(reason)<=200: raise DeliveryError("REASON_INVALID")
+    if authorize is None or not callable(authorize) or authorize(actor,reason) is not True:
+        raise DeliveryError("REPLAY_AUTHORITY_REQUIRED")
     event_id=UUID(str(event_id))
     updated=conn.execute("""UPDATE bnb_outbox SET dead_lettered_at=NULL,attempts=0,
         available_at=now(),lease_owner=NULL,lease_expires_at=NULL,
@@ -112,23 +114,41 @@ def replay(conn,event_id,actor,reason):
     conn.execute("INSERT INTO bnb_audit(id,subject,action,resource_id) VALUES (gen_random_uuid(),%s,'bnb.outbox.manual_replay',%s)",(actor,event_id))
     return True
 
-def deliver(conn,worker,adapter,*,consumer="bnb-local-projection"):
-    """Caller wraps claim and each acknowledgement in committed DB transactions.
+def process_batch(connect, worker, adapter, *, consumer="bnb-local-projection", limit=10):
+    """Commit the claim before any adapter interaction, then fence each receipt.
 
-    Adapter must provide durable, idempotent accept(event_id, envelope) receipt.
-    Unapproved external transport is prohibited; no SMS/email/push integration.
+    `connect` yields fresh psycopg connections; caller controls approved database
+    credentials. `adapter.accept` must atomically deduplicate by event_id and
+    return an opaque durable receipt. No network provider is configured here.
     """
-    claimed=claim(conn,worker)
+    _identity(worker,WORKER,"WORKER_INVALID")
+    _identity(consumer,CONSUMER,"CONSUMER_INVALID")
+    with connect() as c:
+        claimed=claim(c,worker,limit=limit)
     results=[]
     for event in claimed:
         try:
             encoded=_event(event)
             receipt=adapter.accept(str(event["id"]),encoded)
-            acknowledge(conn,event["id"],worker,consumer,receipt)
+            with connect() as c:
+                acknowledge(c,event["id"],worker,consumer,receipt)
             results.append((str(event["id"]),"delivered"))
-        except DeliveryError:
-            raise
+        except DeliveryError as exc:
+            # Unknown/unsafe event types and malformed payloads are isolated
+            # rather than blocking the remainder of the outbox indefinitely.
+            if str(exc)=="LEASE_LOST":
+                results.append((str(event["id"]),"lease_lost"))
+                continue
+            with connect() as c:
+                fail(c,event["id"],worker,"invalid_event")
+            results.append((str(event["id"]),"retry_or_dead_letter"))
         except Exception:
-            fail(conn,event["id"],worker,"provider_unavailable")
+            # A crash after accept but before ack is at-least-once delivery;
+            # consumers must deduplicate the immutable event ID.
+            with connect() as c:
+                try:
+                    fail(c,event["id"],worker,"provider_unavailable")
+                except DeliveryError as exc:
+                    if str(exc)!="LEASE_LOST": raise
             results.append((str(event["id"]),"retry_or_dead_letter"))
     return results

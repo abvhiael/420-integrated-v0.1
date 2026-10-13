@@ -140,7 +140,7 @@ func OpenC075ManagedPrivacy(ctx context.Context,p *C073Client,authority C075Gran
  closeFail:=func()(*C075Store,error){db.DB.Close();return nil,ErrC075Denied}
  probe,cancel:=context.WithTimeout(ctx,2*time.Second);defer cancel();var tls bool;var scope,tenant,domain,jurisdiction string
  if db.DB.QueryRowContext(probe,"SELECT ssl FROM pg_stat_ssl WHERE pid=pg_backend_pid()").Scan(&tls)!=nil||!tls||db.DB.QueryRowContext(probe,"SELECT scope,tenant,domain,jurisdiction FROM public.c075_identity()").Scan(&scope,&tenant,&domain,&jurisdiction)!=nil||(C064AuthorScope{tenant,domain,jurisdiction})!=p.config.Scope||scope!=controlScope("production",domain,jurisdiction){return closeFail()}
- scripts:=[]string{PublicationSchemaSQL,C064AuthorSchemaSQL,C065ReviewSchemaSQL,C067AuditSchemaSQL,c071HardeningSQL,c072DurableSQL,c074CapacitySQL,c075PrivacySQL}
+ scripts:=[]string{PublicationSchemaSQL,C064AuthorSchemaSQL,C065ReviewSchemaSQL,C067AuditSchemaSQL,c071HardeningSQL,c072DurableSQL,c074CapacitySQL,c075PrivacySQL,C077TelemetrySQL}
  var count int;if db.DB.QueryRowContext(probe,"SELECT count(*) FROM public.compliance_schema_migrations").Scan(&count)!=nil||count!=len(scripts){return closeFail()}
  for i,script:=range scripts{var hash string;if db.DB.QueryRowContext(probe,"SELECT checksum FROM public.compliance_schema_migrations WHERE version=$1",i+1).Scan(&hash)!=nil||hash!=Digest([]byte(script)){return closeFail()}}
  return &C075Store{DB:db.DB,Scope:p.config.Scope,PublicationScope:scope,Authority:authority,Identity:p},nil

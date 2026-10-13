@@ -18,6 +18,18 @@ with sync_playwright() as p:
     assert page.get_by_label("Property title").count() == 1
     assert page.get_by_label("Public region (not street address)").count() == 1
     assert page.get_by_label("420Identity signed session token (held only in memory; never saved)").count() == 1
+    page.keyboard.press("Control+Home")
+    page.keyboard.press("Tab")
+    assert page.evaluate("document.activeElement.classList.contains('skip-link')")
+    page.keyboard.press("Enter")
+    assert page.evaluate("location.hash === '#main-content'")
+    page.get_by_role("button", name="Clear session").click()
+    assert page.evaluate("document.activeElement.id === 'host-token'")
+    for width in (320, 390, 768, 1366):
+        page.set_viewport_size({"width":width,"height":844})
+        assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth + 1"), width
+    page.emulate_media(reduced_motion="reduce")
+    assert page.evaluate("matchMedia('(prefers-reduced-motion: reduce)').matches")
     page.get_by_role("button", name="Clear session").click()
     assert "Not signed in." in page.locator("#host-status").inner_text()
     assert not errors, errors

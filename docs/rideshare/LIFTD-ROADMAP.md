@@ -26,7 +26,7 @@ Level 1 per implementation step; Level 2 only at the named milestones; one Level
 | --- | --- | --- |
 | L01.1 | Inventory, canonical scope, integration ownership, trip invariants, fail-closed domain kernel and scoped CI | Level 1 qualified; see evidence record |
 | L01.2 | Independently authenticated rider/driver/operator sessions, recovery/revocation, authorization tests | COMPLETE — Level 1 PASS; see L01.2 evidence |
-| L01.3 | Driver/vehicle registry projections and jurisdiction-scoped eligibility adapters | Implemented candidate; exact-SHA Level 1 pending |
+| L01.3 | Driver/vehicle registry projections and jurisdiction-scoped eligibility adapters | COMPLETE — Level 1 PASS; see L01.3 evidence |
 | L01.4 | Durable PostgreSQL trip/event store, uniqueness, transactional compare-and-swap, idempotency/replay and restart tests | Pending |
 | L01.5 | Location routing adapter, private pickup/drop-off storage, scoped access, precision and retention | Pending |
 | M-L01-A | Level 2: identity + eligibility + durable trip + Location integration | Pending |

@@ -98,7 +98,7 @@ func TestC074QueueBackpressureAndAtomicOutbox(t *testing.T){
  job,e:=s.Claim(ctx,leader,"ACTIVATION",time.Minute);if e!=nil{t.Fatal(e)}
  event:=c072JSON(activation.Event)
  if _,e:=f.admin.ExecContext(ctx,`INSERT INTO compliance_impact_outbox(scope,event_id,subscriber,sequence,event)
- SELECT $1,'backlog-'||n,'subscriber',1,$2::jsonb FROM generate_series(1,2048) n`,f.initial.Scope,string(event));e!=nil{t.Fatal(e)}
+ SELECT $1,'backlog-'||n,'subscriber-'||n,1,$2::jsonb FROM generate_series(1,2048) n`,f.initial.Scope,string(event));e!=nil{t.Fatal(e)}
  if s.Activate(ctx,leader,job,activation,f.authority,f.control,f.public)==nil{t.Fatal("outbox overload activated")}
  current,e:=s.Load(ctx,f.initial.Scope);if e!=nil||current!=f.initial{t.Fatal("overload changed canonical policy")}
  var receipts int;if f.admin.QueryRowContext(ctx,"SELECT count(*) FROM compliance_activations").Scan(&receipts)!=nil||receipts!=0{t.Fatal("partial overload receipt")}

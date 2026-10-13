@@ -145,6 +145,18 @@ export class DurableMigrationCoordinator420 {
   async lease({max=1}={}){
     if(!Number.isInteger(max)||max<1||max>20)error('migration-invalid-input');
     return this.#transaction(async c=>{
+      const expired=(await c.query(`UPDATE gaming_datastore.migration_outbox SET status='DEAD_LETTER',
+        lease_token=NULL,lease_until=NULL,changed_at=gaming_datastore.now_seconds()
+        WHERE attempts>=12 AND ((status='LEASED' AND lease_until<=gaming_datastore.now_seconds())
+          OR status IN ('PENDING','SUBMITTED')) RETURNING account_id,game_id,migration_id`)).rows;
+      for(const row of expired){
+        const values=[row.account_id,row.game_id,row.migration_id];
+        await c.query(`INSERT INTO gaming_datastore.migration_receipt_history
+          (account_id,game_id,migration_id,sequence,event)
+          SELECT $1,$2,$3,coalesce(max(sequence),0)+1,'DEAD_LETTER'
+          FROM gaming_datastore.migration_receipt_history
+          WHERE account_id=$1 AND game_id=$2 AND migration_id=$3`,values);
+      }
       const due=(await c.query(`SELECT o.* FROM gaming_datastore.migration_outbox o
         JOIN gaming_datastore.migration_applications a USING(account_id,game_id,migration_id)
         WHERE ((o.status IN ('PENDING','SUBMITTED') AND o.next_attempt_at<=${now}) OR
@@ -199,9 +211,9 @@ export class DurableMigrationCoordinator420 {
         error('migration-application-changed');
       const state=observed.state==='FINALIZED'?'RECONCILED':
         observed.state==='REORG'||observed.state==='MISMATCH'?'QUARANTINED':
-        observed.state==='PENDING'?'SUBMITTED':
-        lease.attempts>=12?'DEAD_LETTER':'PENDING';
-      const next=state==='PENDING'?
+        lease.attempts>=12?'DEAD_LETTER':
+        observed.state==='PENDING'?'SUBMITTED':'PENDING';
+      const next=['PENDING','SUBMITTED'].includes(state)?
         String(BigInt(lease.attempts)*BigInt(lease.attempts)*10n):'0';
       const row=(await c.query(`UPDATE gaming_datastore.migration_outbox
         SET status=$4,lease_token=NULL,lease_until=NULL,

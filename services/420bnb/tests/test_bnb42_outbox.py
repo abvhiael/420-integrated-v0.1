@@ -87,3 +87,44 @@ def test_wrong_worker_out_of_order_receipt_protection(database):
         c.rollback()
         assert eid in [x["id"] for x in outbox.claim(c,"fence-worker",limit=100)]
         assert outbox.acknowledge(c,eid,"fence-worker","local","receipt")
+
+def test_adapter_crash_after_durable_accept_then_idempotent_recovery(database):
+    with psycopg.connect(database) as c:
+        eid=enqueue(c)
+    class DurableLocalAdapter:
+        def __init__(self): self.accepted=set();self.calls=0
+        def accept(self,event_id,envelope):
+            assert event_id==str(eid)
+            assert '"type":"bnb.hold.created"' in envelope
+            self.calls+=1
+            self.accepted.add(event_id)
+            if self.calls==1: raise RuntimeError("crash after durable consumer commit")
+            return "local-accepted-"+event_id
+    adapter=DurableLocalAdapter()
+    assert (str(eid),"retry_or_dead_letter") in outbox.process_batch(
+        lambda:psycopg.connect(database),"crash-worker",adapter,limit=100)
+    with psycopg.connect(database) as c:
+        assert c.execute("SELECT attempts FROM bnb_outbox WHERE id=%s",(eid,)).fetchone()[0]==1
+        c.execute("UPDATE bnb_outbox SET available_at=now()-interval '1 second' WHERE id=%s",(eid,))
+    assert (str(eid),"delivered") in outbox.process_batch(
+        lambda:psycopg.connect(database),"crash-worker",adapter,limit=100)
+    with psycopg.connect(database) as c:
+        row=c.execute("SELECT delivered_at,delivered_by,attempts FROM bnb_outbox WHERE id=%s",(eid,)).fetchone()
+        assert row[0] is not None and row[1]=="bnb-local-projection" and row[2]==2
+        assert c.execute("SELECT count(*) FROM bnb_outbox_receipt WHERE event_id=%s",(eid,)).fetchone()[0]==1
+    assert adapter.accepted=={str(eid)}
+
+def test_unknown_or_unsafe_payload_does_not_block_safe_local_delivery(database):
+    with psycopg.connect(database) as c:
+        poison=enqueue(c,{"token":"exposed"})
+        legitimate=enqueue(c)
+    class SafeAdapter:
+        def accept(self,event_id,envelope):
+            assert "exposed" not in envelope
+            return "accepted"
+    result=outbox.process_batch(lambda:psycopg.connect(database),"filter-worker",SafeAdapter(),limit=100)
+    assert (str(poison),"retry_or_dead_letter") in result
+    assert (str(legitimate),"delivered") in result
+    with psycopg.connect(database) as c:
+        assert c.execute("SELECT delivered_at FROM bnb_outbox WHERE id=%s",(poison,)).fetchone()[0] is None
+        assert c.execute("SELECT delivered_at FROM bnb_outbox WHERE id=%s",(legitimate,)).fetchone()[0] is not None

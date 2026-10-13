@@ -67,3 +67,23 @@ def test_database_recovery_state_never_synthetic_confirmed(reservation_fixture,m
     assert response["state"]=="reconciliation_required"
     assert response["reason"]=="PAY_RECOVERY_REQUIRED"
     assert response["confirmation_verified"] is False
+
+
+def test_postgres_pay_reorg_history_overrides_stale_booking_state(reservation_fixture,monkeypatch):
+    dsn,_,_,reservation=reservation_fixture
+    attempt="reorg-"+str(uuid4())
+    with psycopg.connect(dsn) as c:
+        c.execute("""INSERT INTO bnb_pay_failure_event
+            (issuer,jti,pay_attempt_id,reservation_id,pay_invoice_id,failure_code,digest)
+            VALUES ('pay-test',%s,%s,%s,'invoice-test','reorg','fixture-hash')""",
+            (str(uuid4()),attempt,reservation))
+    try:
+        monkeypatch.setattr(api,"active_subject",lambda *_:"fixture-guest")
+        response=api.read_booking_orchestration(reservation,None)
+        assert response["state"]=="reconciliation_required"
+        assert response["reason"]=="PAY_FINALITY_REVOKED"
+        assert response["confirmation_verified"] is False
+        assert response["bnb_custody"] is False
+    finally:
+        with psycopg.connect(dsn) as c:
+            c.execute("DELETE FROM bnb_pay_failure_event WHERE pay_attempt_id=%s",(attempt,))

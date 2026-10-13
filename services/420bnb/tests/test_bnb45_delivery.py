@@ -34,3 +34,34 @@ def test_delivery_cursor_schema_and_no_public_provider():
     assert "CURSOR_REWIND" in source and "THREAD_CLOSED" in source
     assert "moderation_status='visible'" in source
     assert "BNB_ENV" in source
+
+def test_thread_role_scope_blocks_strangers_revoked_accounts_and_closed_threads(monkeypatch):
+    request_id=uuid4()
+    property_id=uuid4()
+    class Result:
+        def __init__(self,row): self.row=row
+        def fetchone(self): return self.row
+    class Connection:
+        account_state="active"
+        state="accepted"
+        def execute(self,sql,params):
+            if "FROM bnb_booking_request r JOIN bnb_property" in sql:
+                return Result((property_id,"guest","host",self.state,"host","published"))
+            if "SELECT state FROM bnb_account" in sql:
+                return Result((self.account_state,))
+            raise AssertionError("unexpected query")
+    c=Connection()
+    assert api.message_thread_scope(c,request_id,"guest")[1]=="guest"
+    assert api.message_thread_scope(c,request_id,"host")[2]=="host"
+    with pytest.raises(HTTPException) as e:
+        api.message_thread_scope(c,request_id,"stranger")
+    assert e.value.status_code==404
+    c.account_state="deleted"
+    with pytest.raises(HTTPException) as e:
+        api.message_thread_scope(c,request_id,"guest")
+    assert e.value.status_code==404
+    c.account_state="active"
+    c.state="cancelled"
+    with pytest.raises(HTTPException) as e:
+        api.message_thread_scope(c,request_id,"host")
+    assert e.value.status_code==409

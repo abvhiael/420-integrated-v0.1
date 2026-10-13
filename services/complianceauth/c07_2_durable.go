@@ -46,6 +46,8 @@ BEGIN
  IF NOT FOUND THEN RAISE EXCEPTION 'unbound durable scope'; END IF;
  IF TG_OP='UPDATE' THEN
   IF NEW.scope<>OLD.scope THEN RAISE EXCEPTION 'immutable scope'; END IF;
+  IF TG_TABLE_NAME='compliance_durable_jobs' AND (NEW.id<>OLD.id OR NEW.kind<>OLD.kind OR NEW.payload<>OLD.payload OR NEW.fingerprint<>OLD.fingerprint OR NEW.max_attempts<>OLD.max_attempts OR NEW.scheduled_at<>OLD.scheduled_at) THEN RAISE EXCEPTION 'immutable job'; END IF;
+  IF TG_TABLE_NAME='compliance_impact_outbox' AND (NEW.event_id<>OLD.event_id OR NEW.subscriber<>OLD.subscriber OR NEW.sequence<>OLD.sequence OR NEW.event<>OLD.event) THEN RAISE EXCEPTION 'immutable impact'; END IF;
   delta:=octet_length(to_jsonb(NEW)::text)-octet_length(to_jsonb(OLD)::text);
   UPDATE public.compliance_storage_usage SET stored_bytes=stored_bytes+delta WHERE tenant=b.tenant AND domain=b.domain AND jurisdiction=b.jurisdiction;
   IF NOT FOUND THEN RAISE EXCEPTION 'missing storage accounting'; END IF;
@@ -197,3 +199,24 @@ func(o C072Outbox)FinishImpact(ctx context.Context,item ComplianceOutboxItem,suc
 }
 func c072JSON(v any)[]byte{b,_:=json.Marshal(v);return b}
 var _ ComplianceOutboxStore = C072Outbox{}
+
+func OpenC072ProductionRuntime(ctx context.Context,dsn string,scope C064AuthorScope,publicationScope string,c *C071Cipher,authority IndependentPublicationAuthority)(*ProductionPublicationRuntime,error){
+ if authority==nil||!c051Scope(publicationScope){return nil,ErrC072Unavailable}
+ stores,e:=OpenC071ProductionStores(ctx,dsn,scope,publicationScope,c);if e!=nil{return nil,ErrC072Unavailable}
+ return &ProductionPublicationRuntime{Store:stores.Publication,Cache:&PublicationCache{},Publisher:authority,Durable:&C072Store{DB:stores.DB,Cipher:c,Scope:scope,PublicationScope:publicationScope}},nil
+}
+// Execute one collection job with a bounded handler. The collector persists its
+// own source snapshot using its canonical adapter; this worker grants no approval.
+func(s *C072Store)RunCollection(ctx context.Context,l C072Leader,handler func(context.Context,json.RawMessage)error)error{
+ if handler==nil{return ErrC072Unavailable};j,e:=s.Claim(ctx,l,"COLLECTION",time.Minute);if e!=nil{return e}
+ work,cancel:=context.WithTimeout(ctx,30*time.Second);defer cancel();e=handler(work,j.Payload)
+ if ctx.Err()!=nil{return ErrC072Unavailable};if s.FinishJob(ctx,l,j,e==nil&&work.Err()==nil)!=nil||e!=nil||work.Err()!=nil{return ErrC072Unavailable};return nil
+}
+// Queue binds an operator-authenticated activation intent. Execution still needs
+// fresh managed-manifest and independent reviewer authorization after leasing.
+func(o C066Operations)QueueActivation(ctx context.Context,token,id string,a C072Activation)error{
+ session,e:=o.authorize(ctx,token)
+ if e!=nil||o.Runtime==nil||o.Runtime.Durable==nil||o.Runtime.Durable.Scope!=session.Scope||a.Before.Scope!=o.Runtime.Durable.PublicationScope||a.After.Scope!=a.Before.Scope||a.Signed.Manifest.Environment!="production"||a.Signed.Manifest.Domain!=session.Scope.Domain||a.Signed.Manifest.Jurisdiction!=session.Scope.Jurisdiction{return ErrC066Denied}
+ fresh,e:=o.authorize(ctx,token);if e!=nil||fresh!=session{return ErrC066Denied}
+ if o.Runtime.Durable.Enqueue(ctx,id,"ACTIVATION",a,a.ScheduledAt,10)!=nil{return ErrC066Denied};return nil
+}

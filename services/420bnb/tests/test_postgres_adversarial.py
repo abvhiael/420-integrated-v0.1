@@ -1094,6 +1094,39 @@ def test_bnb27_pay_owned_split_partial_refunds_and_payout_conservation(fixture_p
                 "receipt_finalized":state=="finalized"}
             return client.post(route,json=body,headers=signed(api.PayDisbursementInput(**body),
                 "disbursement",extras))
+        # Pay-owned dispute saga: caller cannot self-open or self-release.
+        case_route="/v1/bnb/internal/pay/cases"
+        opened={"reservation_id":str(rid),"pay_invoice_id":"invoice-bnb27",
+            "pay_payment_id":"payment-bnb27","case_id":"case-bnb27",
+            "event_id":"case-bnb27-open","revision":1,"state":"opened","resolution":None}
+        def case_proof(item,extra):
+            claims={"pay_case_verified":True,"pay_case_id":item["case_id"],
+                "pay_event_id":item["event_id"],"pay_case_revision":item["revision"],
+                "pay_payment_id":item["pay_payment_id"],**extra}
+            return signed(api.PayCaseEventInput(**item),"case-event",claims)
+        assert client.post(case_route,json=opened).status_code==401
+        assert client.post(case_route,json=opened,headers=case_proof(
+            opened,{"pay_case_verified":False})).status_code==403
+        first_case=client.post(case_route,json=opened,headers=case_proof(opened,{}))
+        assert first_case.status_code==202,first_case.text
+        assert client.post(case_route,json=opened,headers=case_proof(
+            opened,{})).json()["replayed"] is True
+        assert event("platform",1,"platform-wallet","platform-while-disputed").status_code==409
+        premature={**opened,"revision":3,"event_id":"case-bnb27-skipped",
+            "state":"resolved","resolution":"upheld"}
+        assert client.post(case_route,json=premature,headers=case_proof(premature,{
+            "independent_dispute_resolution_verified":True,
+            "case_resolution":"upheld","payout_release_verified":True})).status_code==409
+        closed={**opened,"revision":2,"event_id":"case-bnb27-closed",
+            "state":"resolved","resolution":"upheld"}
+        signed_closed=case_proof(closed,{"independent_dispute_resolution_verified":True,
+            "case_resolution":"upheld","payout_release_verified":True})
+        closure=client.post(case_route,json=closed,headers=signed_closed)
+        assert closure.status_code==202,closure.text
+        assert closure.json()["payout_release_authorized"] is True
+        assert client.post(case_route,json=closed,headers=case_proof(
+            closed,{"independent_dispute_resolution_verified":True,
+            "case_resolution":"upheld","payout_release_verified":True})).json()["replayed"]
         # No host payout before fulfillment even with a valid Pay-signed assertion.
         with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
             c.execute("""UPDATE bnb_hold SET period=tstzrange(
@@ -1158,6 +1191,7 @@ def test_bnb27_pay_owned_split_partial_refunds_and_payout_conservation(fixture_p
     finally:
         with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
             c.execute("DELETE FROM bnb_pay_failure_event WHERE reservation_id=%s",(rid,))
+            c.execute("DELETE FROM bnb_pay_case_event WHERE reservation_id=%s",(rid,))
             c.execute("DELETE FROM bnb_pay_disbursement_event WHERE pay_operation_id LIKE 'refund-%' OR pay_operation_id LIKE 'host-%' OR pay_operation_id LIKE 'developer-%'")
             c.execute("DELETE FROM bnb_pay_disbursement WHERE reservation_id=%s",(rid,))
             c.execute("DELETE FROM bnb_settlement_split WHERE reservation_id=%s",(rid,))

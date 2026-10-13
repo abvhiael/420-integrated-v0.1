@@ -5,7 +5,7 @@ All entries remain pending. Deferral is not qualification or a waiver. Local imp
 | Gate | Acceptance needed | Owner |
 | --- | --- | --- |
 | LT-01 | Official network/deployment/Registry provenance and application permission evidence | Registry / network |
-| LT-02 | Real Identity issuer/session/recovery/revocation and rider/driver account binding | Identity / Wallet |
+| LT-02 | Real Identity issuer/session/recovery/revocation and rider/driver account binding (L01.2 repository verifier/transport/service tests passed; independent live acceptance still pending) | Identity / Wallet |
 | LT-03 | Explicit Wallet consent; real quote-bound Pay capture, finality, reorg recovery, refund/payout and split conservation | Wallet / Pay / Treasury |
 | LT-04 | Independently approved passenger-transport jurisdiction, operator/driver/vehicle/insurance eligibility, managed trust roots and revocation | Compliance / authorized transport operator |
 | LT-05 | Provider-authorized routing, private coordinates, operational device permissions, retention and reliable mobile sessions | Location / device operators |

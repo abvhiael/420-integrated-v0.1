@@ -1,17 +1,19 @@
 import {AuthError} from './auth.mjs';
 // Fetch-compatible protected handler; deployment/listeners are not enabled here.
-export function createHttpHandler(service, locationService) {
+export function createHttpHandler(service, locationService, dispatchAdapter) {
   return async request => {
     const reply = (status, value) => new Response(JSON.stringify(value), {status,
       headers: {'content-type': 'application/json', 'cache-control': 'no-store', 'x-content-type-options': 'nosniff'}});
     try {
       const url = new URL(request.url);
       if (url.search || url.hash) throw new AuthError('INVALID_REQUEST', 400);
+      const availability = url.pathname === '/v1/rideshare/availability';
       const locationPrepare = url.pathname === '/v1/rideshare/routes';
       const locationRead = /^\/v1\/rideshare\/trips\/([A-Za-z0-9_-]{1,128})\/coordinates$/.exec(url.pathname);
       const match = /^\/v1\/rideshare\/trips(?:\/([A-Za-z0-9_-]{1,128})(\/transitions)?)?$/.exec(url.pathname);
-      if (!match && !locationPrepare && !locationRead) return reply(404, {error: 'NOT_FOUND'});
+      if (!match && !locationPrepare && !locationRead && !availability) return reply(404, {error: 'NOT_FOUND'});
       if ((locationPrepare || locationRead) && !locationService) return reply(503, {error: 'LOCATION_UNAVAILABLE'});
+      if (availability && !dispatchAdapter) return reply(503,{error:'DISPATCH_UNAVAILABLE'});
       const authorization = request.headers.get('authorization');
       if (typeof authorization !== 'string' || authorization.length > 32775 ||
         !/^Bearer [A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/.test(authorization)) throw new AuthError('BEARER_REQUIRED');
@@ -39,6 +41,7 @@ export function createHttpHandler(service, locationService) {
           (body.commandId !== undefined && body.commandId !== commandId)) throw new AuthError('INVALID_REQUEST', 400);
         body.commandId = commandId;
       }
+      if (availability) return reply(200,await dispatchAdapter.setAvailability(token,body));
       if (locationPrepare) return reply(201,await locationService.prepare(token,body));
       return match[2] ? reply(200, await service.transition(token, match[1], body)) : reply(201, await service.create(token, body));
     } catch (error) {

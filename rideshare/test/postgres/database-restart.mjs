@@ -17,7 +17,10 @@ try {
   for(const {trip_id} of trips) history.push((await store.history(trip_id)).map(({created_at,...event})=>event));
   const commands=(await pool.query('SELECT actor_id,command_id,request_hash,trip_id,revision,result FROM liftd.commands ORDER BY actor_id,command_id')).rows;
   const locations=(await pool.query('SELECT route_ref,trip_id,expires_at,sealed,tombstoned FROM liftd.private_locations ORDER BY route_ref')).rows;
-  const digest=createHash('sha256').update(canonical({history,commands,locations})).digest('hex');
+  const availability=(await pool.query('SELECT * FROM liftd.driver_availability ORDER BY driver_id')).rows;
+  const leases=(await pool.query('SELECT * FROM liftd.assignment_leases ORDER BY trip_id')).rows;
+  const availabilityCommands=(await pool.query('SELECT * FROM liftd.availability_commands ORDER BY driver_id,command_id')).rows;
+  const digest=createHash('sha256').update(canonical({history,commands,locations,availability,leases,availabilityCommands})).digest('hex');
   const report={trips:trips.length,events:history.flat().length,commands:commands.length,digest};
   if(process.argv[2]==='before') {assert.ok(report.events>0);writeFileSync(process.argv[3],JSON.stringify(report));}
   else assert.deepEqual(report,JSON.parse(readFileSync(process.argv[3],'utf8')));

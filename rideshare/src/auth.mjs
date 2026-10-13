@@ -55,8 +55,8 @@ function proof(token, trust, purpose, now, maxAge, fields = null) {
 }
 const capabilities = Object.freeze({
   rider: new Set(['trip.create', 'trip.read', 'trip.cancel', 'route.prepare']),
-  driver: new Set(['trip.read', 'trip.arrive', 'trip.start', 'trip.complete', 'trip.cancel']),
-  operator: new Set(['trip.assign']),
+  driver: new Set(['trip.read', 'trip.arrive', 'trip.start', 'trip.complete', 'trip.cancel', 'availability.set']),
+  operator: new Set(['trip.assign', 'trip.expire']),
 });
 export function createAuthenticator({identity, sessionAuthority, resolveSession, clock = () => Math.floor(Date.now() / 1000)}) {
   const identityRoot = root(identity), sessionRoot = root(sessionAuthority);
@@ -97,7 +97,7 @@ export function createAuthenticator({identity, sessionAuthority, resolveSession,
         if (!grant.revoked && grant.expiresAt > checkedAt && grant.actions.includes(action) && grant.resource === resource) matches.push(grant);
       }
       if (matches.length !== 1) deny('PERMISSION_DENIED', 403);
-      if (['trip.create','route.prepare'].includes(action) && resource !== `account:${access.sub}`) deny('PERMISSION_DENIED', 403);
+      if (['trip.create','route.prepare','availability.set'].includes(action) && resource !== `account:${access.sub}`) deny('PERMISSION_DENIED', 403);
       return Object.freeze({subject: access.sub, accountId: access.accountId, sessionId: access.sessionId,
         deviceId: access.deviceId, recoveryEpoch: access.recoveryEpoch, role: matches[0].role,
         action, resource, expiresAt: Math.min(access.exp, status.exp, matches[0].expiresAt)});

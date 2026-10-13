@@ -57,7 +57,7 @@ export function createPostgresTripStore(pool) {
     } catch (error) {if (error instanceof AuthError) throw error; fail('DATABASE_UNAVAILABLE', 503);}
   }
   async function execute({actorId, commandId, tripId, action, request, guard, afterWrite}, produce) {
-    if (![actorId, commandId, tripId].every(id) || !['create','assign','arrive','start','complete','cancel'].includes(action) ||
+    if (![actorId, commandId, tripId].every(id) || !['create','assign','arrive','start','complete','cancel','expire'].includes(action) ||
       typeof produce !== 'function' || typeof guard !== 'function') fail('INVALID_REQUEST', 400);
     const requestHash = hash({tripId, action, request});
     let client, committed = false;
@@ -81,7 +81,7 @@ export function createPostgresTripStore(pool) {
       if (action === 'create' && old) fail('TRIP_ALREADY_EXISTS');
       if (action !== 'create' && !old) fail('TRIP_UNAVAILABLE', 404);
       await guard();
-      const next = await produce(old); publicView(next);
+      const next = await produce(old,client); publicView(next);
       if (next.id !== tripId || (old ? next.revision !== old.revision + 1 : next.revision !== 0 || next.state !== 'REQUESTED')) fail('INVALID_STORE_TRANSITION');
       await guard(); // Fresh auth/admission checks immediately before transactional mutation.
       if (old) {

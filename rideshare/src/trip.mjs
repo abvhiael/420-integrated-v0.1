@@ -44,7 +44,7 @@ function admitted(admission, trip, driverId, vehicleId, now) {
 export function transitionTrip(trip, command, actor, context = {}) {
   validate(trip); principal(actor);
   keys(command, ['action', 'expectedRevision', 'driverId', 'vehicleId']);
-  keys(context, ['now', 'paused', 'admission']);
+  keys(context, ['now', 'paused', 'admission', 'assignmentExpiresAt']);
   if (!Number.isSafeInteger(context.now) || context.now < 0 || typeof context.paused !== 'boolean') fail('INVALID_CONTEXT');
   if (command.expectedRevision !== trip.revision) fail('STALE_REVISION');
   if (trip.revision === Number.MAX_SAFE_INTEGER) fail('REVISION_EXHAUSTED');
@@ -71,6 +71,10 @@ export function transitionTrip(trip, command, actor, context = {}) {
     if (!assignedDriver) fail('UNAUTHORIZED');
     if (trip.state !== 'IN_PROGRESS') fail('INVALID_TRANSITION');
     state = 'COMPLETED'; // Completion records a trip outcome; never captures funds.
+  } else if (command.action === 'expire') {
+    if (actor.role !== 'dispatcher') fail('UNAUTHORIZED');
+    if (trip.state !== 'ASSIGNED' || !Number.isSafeInteger(context.assignmentExpiresAt) || context.assignmentExpiresAt < 0 || context.assignmentExpiresAt > context.now) fail('ASSIGNMENT_NOT_EXPIRED');
+    state = 'CANCELLED';
   } else if (command.action === 'cancel') {
     if (!(actor.role === 'rider' && actor.subject === trip.riderId) && !assignedDriver) fail('UNAUTHORIZED');
     if (trip.state === 'IN_PROGRESS') fail('ACTIVE_TRIP_REQUIRES_SAFETY_RESOLUTION');

@@ -155,6 +155,66 @@ class ScopedTransaction {
     return (await this.#query('SELECT * FROM gaming_datastore.migration_records WHERE account_id=$1 AND game_id=$2 AND migration_id=$3',
       [...this.#ids(),id])).rows[0] ?? null;
   }
+
+  async issueWalletChallenge(x) {
+    fields(x,['challengeId','wallet','chainId','domain','nonce','consentId','policyHash','contextHash','expiresAt']);
+    requireOpaque(x.challengeId,x.domain,x.consentId);
+    requireHashes(x.policyHash,x.contextHash);
+    decimal(x.chainId,64,true);decimal(x.expiresAt);
+    if(!wallet(x.wallet)||!/^([0-9a-f]{64})$/.test(x.nonce))fail('invalid-input');
+    const now=(await this.#query('SELECT gaming_datastore.now_seconds() AS now')).rows[0].now;
+    if(BigInt(x.expiresAt)<=BigInt(now)||BigInt(x.expiresAt)>BigInt(now)+600n)fail('challenge-expiry-invalid');
+    const profile=await this.profile();
+    if(!profile)fail('profile-not-found');
+    const nonceCommitment='0x'+createHash('sha256').update(x.nonce,'utf8').digest('hex');
+    await this.recordConsent({consentId:x.consentId,purpose:'WALLET_LINK',policyHash:x.policyHash,
+      contextHash:x.contextHash,nonceCommitment,expiresAt:x.expiresAt});
+    return (await this.#query(`INSERT INTO gaming_datastore.wallet_challenges
+      (account_id,game_id,challenge_id,wallet,chain_id,domain,nonce,consent_id,issued_at,expires_at)
+      VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING challenge_id,wallet,chain_id,domain,nonce,issued_at,expires_at`,
+      [...this.#ids(),x.challengeId,x.wallet,x.chainId,x.domain,x.nonce,x.consentId,now,x.expiresAt])).rows[0];
+  }
+  async walletChallenge(challengeId) {
+    requireOpaque(challengeId);
+    return (await this.#query(`SELECT challenge_id,wallet,chain_id,domain,nonce,issued_at,expires_at,used_at,consent_id
+      FROM gaming_datastore.wallet_challenges WHERE account_id=$1 AND game_id=$2 AND challenge_id=$3`,
+      [...this.#ids(),challengeId])).rows[0]??null;
+  }
+  async completeWalletChallenge(challengeId,contextHash,expected) {
+    requireOpaque(challengeId);requireHashes(contextHash);
+    const challenge=(await this.#query(`SELECT * FROM gaming_datastore.wallet_challenges
+      WHERE account_id=$1 AND game_id=$2 AND challenge_id=$3 FOR UPDATE`,[...this.#ids(),challengeId])).rows[0];
+    if(!challenge||challenge.used_at!==null||BigInt(challenge.expires_at)<=
+      BigInt((await this.#query('SELECT gaming_datastore.now_seconds() AS now')).rows[0].now))
+      fail('challenge-invalid-or-replayed');
+    if(challenge.wallet!==expected.wallet||challenge.domain!==expected.domain||
+      challenge.chain_id!==expected.chainId||challenge.nonce!==expected.nonce||
+      challenge.issued_at!==expected.issuedAt||challenge.expires_at!==expected.expiresAt)
+      fail('challenge-changed');
+    await this.#activeConsent(challenge.consent_id,'WALLET_LINK',contextHash);
+    const active=(await this.#query(`SELECT 1 FROM gaming_datastore.wallet_links
+      WHERE account_id=$1 AND game_id=$2 AND unlinked_at IS NULL FOR UPDATE`,this.#ids())).rows;
+    if(active.length)fail('wallet-link-conflict');
+    await this.#query(`UPDATE gaming_datastore.wallet_challenges SET used_at=gaming_datastore.now_seconds()
+      WHERE account_id=$1 AND game_id=$2 AND challenge_id=$3`,[...this.#ids(),challengeId]);
+    const row=(await this.#query(`INSERT INTO gaming_datastore.wallet_links
+      (account_id,game_id,chain_id,wallet,challenge_id,linked_at)
+      VALUES($1,$2,$3,$4,$5,gaming_datastore.now_seconds())
+      RETURNING chain_id,wallet,linked_at`,[...this.#ids(),challenge.chain_id,challenge.wallet,challengeId])).rows[0];
+    return row;
+  }
+  async unlinkWallet() {
+    const rows=(await this.#query(`UPDATE gaming_datastore.wallet_links
+      SET unlinked_at=gaming_datastore.now_seconds()
+      WHERE account_id=$1 AND game_id=$2 AND unlinked_at IS NULL
+      RETURNING chain_id,wallet,unlinked_at`,this.#ids())).rows;
+    return rows[0]??null;
+  }
+  async activeWallet() {
+    return (await this.#query(`SELECT chain_id,wallet,linked_at FROM gaming_datastore.wallet_links
+      WHERE account_id=$1 AND game_id=$2 AND unlinked_at IS NULL`,this.#ids())).rows[0]??null;
+  }
+
   async cancelMigration(id) {
     requireOpaque(id);
     const row = (await this.#query(`UPDATE gaming_datastore.migration_records SET status='CANCELLED',

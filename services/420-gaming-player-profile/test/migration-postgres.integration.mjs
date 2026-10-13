@@ -171,6 +171,48 @@ test('R05.3 real PostgreSQL durable save/outbox/receipt security',async t=>{
     assert.equal((await root.query(`SELECT count(*)::integer AS n FROM gaming_datastore.migration_applications
       WHERE migration_id='migrate-three'`)).rows[0].n,1);
   });
+  await t.test('duplicate canonical claim rolls back destination save and outbox atomically',async()=>{
+    const fourth={...intent,migrationId:'migrate-four',consentId:'migrate-consent-four',
+      sourceCommitment:h('b'),sourceRevision:'15',payloadHash:h('a')};
+    await repo.transaction(async tx=>{
+      await tx.recordConsent({consentId:fourth.consentId,purpose:'SAVE_MIGRATION',policyHash:P,
+        contextHash:migrationIntentDigest('alpha',G,fourth),nonceCommitment:nextNonce(),expiresAt:future});
+      await tx.prepareMigration(fourth);
+    });
+    const conflicting={...proof,migrationId:'migrate-four',claimId:'77',
+      sourceCommitment:fourth.sourceCommitment,sourceRevision:fourth.sourceRevision,
+      payloadHash:fourth.payloadHash,evidenceDigest:h('d')};
+    const duplicate=new DurableMigrationCoordinator420({operatorPool:root,
+      verifyBoundClaim:async()=>structuredClone(conflicting),verifyReceipt:async()=>{throw Error('unused');}});
+    await assert.rejects(()=>duplicate.apply({accountId:'alpha',gameId:G,
+      migrationId:'migrate-four',claimId:'77'}),/migration-conflict/);
+    assert.equal((await repo.transaction(tx=>tx.profile())).save_revision,'3');
+    assert.equal(await repo.transaction(tx=>tx.saveReference('4')),null);
+    assert.equal((await root.query(`SELECT count(*)::integer AS n FROM gaming_datastore.migration_outbox
+      WHERE migration_id='migrate-four'`)).rows[0].n,0);
+  });
+  await t.test('revoked consent and cancelled preparation deny source application',async()=>{
+    for(const [migrationId,sourceRevision,kind] of [['migrate-five','16','revoke'],['migrate-six','17','cancel']]){
+      const item={...intent,migrationId,consentId:'consent-'+migrationId,
+        sourceCommitment:sourceRevision==='16'?h('c'):h('d'),sourceRevision,
+        payloadHash:sourceRevision==='16'?h('e'):h('f')};
+      await repo.transaction(async tx=>{
+        await tx.recordConsent({consentId:item.consentId,purpose:'SAVE_MIGRATION',policyHash:P,
+          contextHash:migrationIntentDigest('alpha',G,item),nonceCommitment:nextNonce(),expiresAt:future});
+        await tx.prepareMigration(item);
+        if(kind==='revoke')await tx.revokeConsent(item.consentId);
+        else await tx.cancelMigration(item.migrationId);
+      });
+      const verified={...proof,migrationId,claimId:sourceRevision,
+        sourceCommitment:item.sourceCommitment,sourceRevision:item.sourceRevision,
+        payloadHash:item.payloadHash,evidenceDigest:h('a')};
+      const worker=new DurableMigrationCoordinator420({operatorPool:root,
+        verifyBoundClaim:async()=>structuredClone(verified),verifyReceipt:async()=>{throw Error('unused');}});
+      await assert.rejects(()=>worker.apply({accountId:'alpha',gameId:G,
+        migrationId,claimId:sourceRevision}),kind==='revoke'?/migration-consent-denied/:/migration-intent-mismatch/);
+    }
+    assert.equal((await repo.transaction(tx=>tx.profile())).save_revision,'3');
+  });
   await t.test('cancelled operation and forged verified claim cannot be applied',async()=>{
     await assert.rejects(()=>a.apply({accountId:'alpha',gameId:G,migrationId:'migrate-one',claimId:'78'}),
       /migration-binding-unavailable/);

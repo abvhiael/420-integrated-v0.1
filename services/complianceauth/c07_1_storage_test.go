@@ -104,6 +104,16 @@ func TestC071PostgreSQLProductionStorage(t *testing.T){
  for i:=0;i<12;i++{wg.Add(1);go func(){defer wg.Done();_,e:=a.Drafts.Save(ctx,scopeA,"draft1","author-a",1,schema,cited,now);casErrors<-e}()};wg.Wait();close(casErrors)
  for e:=range casErrors{if e==nil{casWins++}else if !errors.Is(e,ErrAuthorConflict){t.Fatal("encrypted CAS",e)}};if casWins!=1{t.Fatal("encrypted CAS winners",casWins)}
  var indexes int;if admin.DB.QueryRowContext(ctx,"SELECT count(*) FROM pg_indexes WHERE schemaname='public' AND indexname IN('c071_author_owner_history','c071_review_queue','c071_publication_expiry')").Scan(&indexes)!=nil||indexes!=3{t.Fatal("required indexes missing")}
+ var expectedBytes,expectedRows,actualBytes,actualRows int64
+ accountingSQL:=`SELECT coalesce(sum(bytes),0),coalesce(sum(rows),0) FROM (
+ SELECT sum(octet_length(to_jsonb(v)::text)) bytes,count(*) rows FROM compliance_author_heads v WHERE tenant=$1
+ UNION ALL SELECT sum(octet_length(to_jsonb(v)::text)),count(*) FROM compliance_author_versions v WHERE tenant=$1
+ UNION ALL SELECT sum(octet_length(to_jsonb(v)::text)),count(*) FROM compliance_review_heads v WHERE tenant=$1
+ UNION ALL SELECT sum(octet_length(to_jsonb(v)::text)),count(*) FROM compliance_review_versions v WHERE tenant=$1
+ UNION ALL SELECT sum(octet_length(to_jsonb(v)::text)),count(*) FROM compliance_auditor_access v WHERE tenant=$1
+ ) records`
+ if admin.DB.QueryRowContext(ctx,accountingSQL,scopeA.Tenant).Scan(&expectedBytes,&expectedRows)!=nil{t.Fatal("actual storage accounting query")}
+ if admin.DB.QueryRowContext(ctx,"SELECT stored_bytes,stored_rows FROM compliance_storage_usage WHERE tenant=$1",scopeA.Tenant).Scan(&actualBytes,&actualRows)!=nil||actualBytes!=expectedBytes||actualRows!=expectedRows{t.Fatalf("ON CONFLICT or CAS quota drift: actual %d/%d expected %d/%d",actualBytes,actualRows,expectedBytes,expectedRows)}
  // Quota admission is serialized in PostgreSQL even across concurrent sessions.
  if _,err=admin.DB.ExecContext(ctx,"UPDATE compliance_storage_usage SET stored_rows=99999 WHERE tenant=$1",scopeA.Tenant);err!=nil{t.Fatal(err)}
  var mu sync.Mutex;wins:=0

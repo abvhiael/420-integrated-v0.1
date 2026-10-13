@@ -62,6 +62,9 @@ def records(monkeypatch):
     with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
         c.execute("DELETE FROM bnb_review_moderation_nonce WHERE target_id IN (%s,%s)",(review,abuse))
         c.execute("DELETE FROM bnb_reputation_export WHERE review_id=%s",(review,))
+        c.execute("DELETE FROM bnb_moderation_appeal_decision_nonce WHERE appeal_id IN (SELECT id FROM bnb_moderation_appeal WHERE report_id=%s)",(abuse,))
+        c.execute("DELETE FROM bnb_moderation_appeal WHERE report_id=%s",(abuse,))
+        c.execute("DELETE FROM bnb_privacy_retention_hold WHERE report_id=%s",(abuse,))
         c.execute("DELETE FROM bnb_abuse_report WHERE id=%s",(abuse,))
         c.execute("DELETE FROM bnb_review_host_response WHERE review_id=%s",(review,))
         c.execute("DELETE FROM bnb_guest_review WHERE id=%s",(review,))
@@ -128,3 +131,45 @@ def test_reputation_withdrawn_state_and_receipt_replay(records):
     assert send(1,"rev-1").status_code==409
     with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
         assert c.execute("SELECT last_revision FROM bnb_reputation_export WHERE review_id=%s",(records["review"],)).fetchone()[0]==2
+
+
+def test_bnb39_appeal_replay_independent_decision_and_retention_hold(records,monkeypatch):
+    with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+        c.execute("UPDATE bnb_abuse_report SET status='accepted' WHERE id=%s",
+                  (records["abuse"],))
+    monkeypatch.setattr(api,"active_subject",lambda token:records["guest"])
+    route=f"/v1/bnb/abuse-reports/{records['abuse']}/appeals"
+    initial=client.post(route,headers={"authorization":"Bearer test-fixture"},
+                        json={"grounds":"I request independent review of this decision."})
+    assert initial.status_code==201,initial.text
+    appeal_id=initial.json()["id"]
+    repeat=client.post(route,headers={"authorization":"Bearer test-fixture"},
+                        json={"grounds":"I request independent review of this decision."})
+    assert repeat.status_code==201 and repeat.json()["replayed"] is True
+    changed=client.post(route,headers={"authorization":"Bearer test-fixture"},
+                        json={"grounds":"Different allegations, same appeal identifier."})
+    assert changed.status_code==409
+    with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+        assert c.execute("SELECT reason_code FROM bnb_privacy_retention_hold WHERE report_id=%s",
+                         (records["abuse"],)).fetchone()[0]=="appeal"
+    decision=f"/v1/bnb/internal/appeals/{appeal_id}/decision"
+    monkeypatch.setattr(api,"verify_authority",lambda token,prefix,purpose:{
+        "iss":"https://reviewer.example","sub":records["guest"] if token=="self" else "independent-reviewer",
+        "jti":token,"appeal_id":appeal_id,"decision":"upheld"})
+    rejected=client.post(decision,json={"decision":"upheld"},
+                         headers={"x-guest-review-proof":"self"})
+    assert rejected.status_code==403
+    resolved=client.post(decision,json={"decision":"upheld"},
+                         headers={"x-guest-review-proof":"independent"})
+    assert resolved.status_code==200,resolved.text
+    assert resolved.json()["content_republished"] is False
+    replay=client.post(decision,json={"decision":"upheld"},
+                       headers={"x-guest-review-proof":"independent"})
+    assert replay.status_code==409
+    monkeypatch.setattr(api,"verify_authority",lambda token,prefix,purpose:{
+        "iss":"https://reviewer.example","sub":"independent-reviewer",
+        "jti":"retention-fixture","report_id":str(records["abuse"]),"operation":"redact"})
+    redact=client.post(f"/v1/bnb/internal/abuse-reports/{records['abuse']}/redact",
+                       headers={"x-guest-review-proof":"retention"})
+    assert redact.status_code==409
+    assert redact.json()["detail"]=="RETENTION_NOT_EXPIRED"

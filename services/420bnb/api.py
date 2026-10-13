@@ -2765,8 +2765,16 @@ def ingest_pay_disbursement(payload:PayDisbursementInput,
                 dest={"host":split[5],"platform":split[6],"developer":split[7]}[payload.kind]
                 if payload.recipient!=dest:raise HTTPException(403,"PAYOUT_BENEFICIARY_MISMATCH")
             elif payload.kind=="refund":
-                if proof.get("original_payer_refund") is not True or (
-                   proof.get("refund_recipient")!=payload.recipient):
+                payer=c.execute("""SELECT i.requester,i.pay_invoice_id,i.pay_payment_id
+                    FROM bnb_pay_intent i WHERE i.reservation_id=%s FOR UPDATE""",
+                    (payload.reservation_id,)).fetchone()
+                if (not payer or not payer[2] or
+                    proof.get("original_payer_refund") is not True or
+                    proof.get("original_payer_subject")!=payer[0] or
+                    proof.get("original_pay_invoice_id")!=payer[1] or
+                    proof.get("original_pay_payment_id")!=payer[2] or
+                    proof.get("refund_recipient")!=payload.recipient or
+                    proof.get("original_payer_recipient_verified") is not True):
                     raise HTTPException(403,"ORIGINAL_PAYER_REFUND_REQUIRED")
             else:
                 if proof.get("retained_distribution_approved") is not True:

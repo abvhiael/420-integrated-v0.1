@@ -10,7 +10,7 @@ All entries remain pending. Deferral is not qualification or a waiver. Local imp
 | LT-04 | Independently approved passenger-transport jurisdiction, operator/driver/vehicle/insurance eligibility, managed trust roots and revocation (L01.3 repository projection/adapter checks passed; live passenger authority acceptance pending) | Compliance / authorized transport operator |
 | LT-05 | Provider-authorized routing, private coordinates, operational device permissions, retention and reliable mobile sessions | Location / device operators |
 | LT-06 | Independent emergency/support operation, incident recovery, staffing and accessibility/device acceptance | Safety / operations |
-| LT-07 | Managed deployment, TLS/keys, multi-instance fault/restart evidence, database recovery, monitoring and audit access | Service operations |
+| LT-07 | Managed deployment, TLS/keys, multi-instance fault/restart evidence, database recovery, monitoring and audit access (L01.4 repository PostgreSQL concurrency/application restart/database crash recovery passed; independent managed deployment/backup/failover acceptance pending) | Service operations |
 | LT-08 | Actual Travel, Notifications, Reputation and Arbitration consuming-service acceptance | Respective canonical owners |
 
 The owner explicitly selected Vancouver, BC and adopted pilot fares, fees and compensation allocations on 2026-10-13; see [economic policy v1](LIFTD-VANCOUVER-PILOT-ECONOMIC-POLICY.md). Economic implementation, operating-cost validation, detailed cancellation/waiting policy and commercial approvals remain pending. DOOBr delivery approval cannot authorize passenger transport. Nothing in this scaffold changes Genesis configuration, registers a predeploy or enables live rides.

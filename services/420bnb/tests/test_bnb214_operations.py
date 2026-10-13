@@ -22,9 +22,9 @@ def connected():
 
 def test_migration_repeatable_and_checksums(connected):
     with psycopg.connect(connected) as c:
-        assert apply(c)==20
+        assert apply(c)==21
         rows=c.execute("SELECT version,filename,sha256 FROM bnb_schema_migration ORDER BY version").fetchall()
-    assert len(rows)==20
+    assert len(rows)==21
     for i,(version,name,digest) in enumerate(rows,1):
         assert version==i
         assert hashlib.sha256((MIGRATIONS/name).read_bytes()).hexdigest()==digest
@@ -35,9 +35,9 @@ def test_multi_instance_migration_serialization(connected):
         with psycopg.connect(connected) as c:
             return apply(c)
     with ThreadPoolExecutor(max_workers=4) as pool:
-        assert list(pool.map(run,range(4)))==[20]*4
+        assert list(pool.map(run,range(4)))==[21]*4
     with psycopg.connect(connected) as c:
-        assert c.execute("SELECT count(*) FROM bnb_schema_migration").fetchone()[0]==20
+        assert c.execute("SELECT count(*) FROM bnb_schema_migration").fetchone()[0]==21
 
 
 def test_tampered_migration_rejected_without_mutation(connected,tmp_path):
@@ -50,7 +50,7 @@ def test_tampered_migration_rejected_without_mutation(connected,tmp_path):
         with pytest.raises(RuntimeError,match="MIGRATION_DRIFT"):
             apply(c,directory=tmp_path)
     with psycopg.connect(connected) as c:
-        assert c.execute("SELECT count(*) FROM bnb_schema_migration").fetchone()[0]==20
+        assert c.execute("SELECT count(*) FROM bnb_schema_migration").fetchone()[0]==21
 
 
 def test_untracked_schema_not_silently_adopted(connected):
@@ -71,7 +71,7 @@ def test_readiness_schema_guard(connected):
     client=TestClient(api.app)
     healthy=client.get("/health/ready")
     assert healthy.status_code==200,healthy.text
-    assert healthy.json()["schema_version"]==20
+    assert healthy.json()["schema_version"]==21
     original=api.db
     class Cursor:
         def execute(self,sql,*_):
@@ -106,3 +106,55 @@ def test_operational_logs_avoid_secret_and_path_identifiers(connected,caplog):
     assert entries[-1].route_template=="/v1/bnb/reservations/{reservation_id}"
     assert entries[-1].request_id==trace
     assert "11111111-1111" not in str(entries[-1].__dict__.get("route_template"))
+
+def test_readiness_database_outage_returns_bounded_503_without_dsn_leak(monkeypatch):
+    import importlib.util
+    from fastapi.testclient import TestClient
+    from pathlib import Path
+    import psycopg
+    spec=importlib.util.spec_from_file_location(
+        "bnb310_outage",Path(__file__).resolve().parents[1]/"api.py")
+    module=importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    secret="postgresql://secret-user:secret-pass@private-db.test.invalid/bnb"
+    def broken_db():
+        raise psycopg.OperationalError(secret)
+    monkeypatch.setattr(module,"db",broken_db)
+    response=TestClient(module.app).get("/health/ready")
+    assert response.status_code==503
+    assert response.json()=={"detail":"DATABASE_UNAVAILABLE"}
+    assert "secret-pass" not in response.text
+    assert response.headers["cache-control"]=="no-store"
+
+
+def test_bnb310_outbox_event_atomic_rollback_and_crash_safe_retry(connected):
+    """A failed transaction cannot leak an event or half-published decision."""
+    from uuid import uuid4
+    event_id=uuid4()
+    try:
+        with psycopg.connect(connected) as c:
+            with c.transaction():
+                c.execute("""INSERT INTO bnb_outbox(id,event_type,payload)
+                    VALUES (%s,'bnb.ops.synthetic_crash',%s::jsonb)""",
+                    (event_id,'{"fixture":true}'))
+                raise RuntimeError("simulated process crash before commit")
+    except RuntimeError:
+        pass
+    with psycopg.connect(connected) as c:
+        assert c.execute("SELECT COUNT(*) FROM bnb_outbox WHERE id=%s",
+                         (event_id,)).fetchone()[0]==0
+        c.execute("""INSERT INTO bnb_outbox(id,event_type,payload)
+            VALUES (%s,'bnb.ops.synthetic_crash',%s::jsonb)""",
+            (event_id,'{"fixture":true}'))
+    try:
+        with psycopg.connect(connected) as c:
+            assert c.execute("SELECT COUNT(*) FROM bnb_outbox WHERE id=%s",
+                             (event_id,)).fetchone()[0]==1
+            with pytest.raises(psycopg.errors.UniqueViolation):
+                with c.transaction():
+                    c.execute("""INSERT INTO bnb_outbox(id,event_type,payload)
+                        VALUES (%s,'bnb.ops.synthetic_crash',%s::jsonb)""",
+                        (event_id,'{"fixture":true}'))
+    finally:
+        with psycopg.connect(connected) as c:
+            c.execute("DELETE FROM bnb_outbox WHERE id=%s",(event_id,))

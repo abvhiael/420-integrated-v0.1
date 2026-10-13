@@ -525,6 +525,43 @@ async function loadGuestDashboard(){
  " · "+stay.checkin+" to "+stay.checkout+
  (stay.confirmed?" · Pay-finalized reservation":" · Not confirmed");
  card.append(summary);
+ // A Pay finality or recovery state is always read from BnB's authorized projection.
+ // Never equate an accepted booking request with a paid/confirmed stay.
+ const payStatus=document.createElement("p");payStatus.setAttribute("role","status");
+ payStatus.textContent="Checking Pay-reported status…";card.append(payStatus);
+ fetch("/v1/bnb/reservations/"+encodeURIComponent(stay.id)+"/payment",{
+  headers:hostHeaders(),credentials:"omit",cache:"no-store"})
+  .then(async response=>{if(!response.ok)throw Error("Payment state temporarily unavailable.");
+   return response.json();})
+  .then(payment=>{payStatus.textContent=payment.confirmed?
+   "Pay-reported confirmed. Check your canonical receipt.":
+   payment.payment_state==="recovery_required"||stay.state==="recovery_required"?
+   "Payment reconciliation required. Do not retry or send funds without independent 420Pay guidance.":
+   payment.payment_state==="pending"?
+   "Payment pending. No confirmed booking and no Wallet transaction available here.":
+   "No authorized payment is available for this reservation.";})
+  .catch(()=>{payStatus.textContent="Payment state unavailable. No payment confirmation can be assumed.";});
+ if(stay.state==="payment_pending"){
+  const cancel=document.createElement("button");cancel.type="button";
+  cancel.textContent="Cancel unpaid reservation";
+  const cancelStatus=document.createElement("p");cancelStatus.setAttribute("role","status");
+  cancel.addEventListener("click",async()=>{
+   if(!window.confirm("Cancel this unpaid reservation? This does not request or issue a Pay refund."))return;
+   cancel.disabled=true;cancelStatus.textContent="Checking cancellation status…";
+   try{
+    const response=await fetch("/v1/bnb/reservations/"+encodeURIComponent(stay.id)+"/cancel",{
+     method:"POST",headers:hostHeaders(),credentials:"omit",cache:"no-store"});
+    if(!response.ok)throw Error(response.status===409?
+     "Pay reconciliation required. Cancellation cannot bypass a payment event.":
+     "Cancellation unavailable ("+response.status+").");
+    const result=await response.json();
+    cancelStatus.textContent=result.state==="cancelled"?
+     "Unpaid reservation cancelled. No Pay refund was initiated.":
+     "Cancellation state requires independent verification.";
+    if(result.state==="cancelled")await loadGuestDashboard();
+   }catch(error){cancelStatus.textContent=error.message;cancel.disabled=false;}
+  });card.append(cancel,cancelStatus);
+ }
  const receipt=document.createElement("button");receipt.type="button";receipt.textContent="View receipt";
  const receiptText=document.createElement("p");receiptText.setAttribute("role","status");
  receipt.addEventListener("click",async()=>{
@@ -602,15 +639,24 @@ async function loadHostWorkspace(){
  ["/managers","Delegated managers","owner"]];
  const visible=candidates.filter(item=>item[2]==="owner"?property.owner:permitted(item[2]));
  const paths=visible.map(item=>item[0]);
- const results=await Promise.all(paths.map(path=>fetch(base+path,{
+ const results=await Promise.allSettled(paths.map(path=>fetch(base+path,{
  headers:hostHeaders(),credentials:"omit",cache:"no-store"})));
- if(results.some(res=>!res.ok))throw Error("Some operations require additional authorization or are unavailable.");
- const values=await Promise.all(results.map(res=>res.json()));
+ // One failed Pay/notification/calendar provider must not blank unrelated
+ // authorized host views; every operation still uses its server-side scope.
+ const values=await Promise.all(results.map(async result=>{
+  if(result.status!=="fulfilled"||!result.value.ok)return null;
+  try{return await result.value.json();}catch{return null;}
+ }));
  details.replaceChildren();
  const labels=visible.map(item=>item[1]);
  for(let i=0;i<paths.length;i++){
  const heading=document.createElement("h5");heading.textContent=labels[i];details.append(heading);
  const data=values[i];
+ if(data===null){
+  const error=document.createElement("p");error.setAttribute("role","status");
+  error.textContent="This section is unavailable or your access has been revoked. Refresh your verified session or retry.";
+  details.append(error);continue;
+ }
  const rows=Array.isArray(data)?data:(data.rows||[]);
  if(!rows.length){const empty=document.createElement("p");empty.textContent="No entries.";details.append(empty);}
  for(const item of rows){

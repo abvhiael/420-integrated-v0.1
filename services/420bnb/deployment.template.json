@@ -1,0 +1,102 @@
+{
+  "schema": "420.bnb.production.v1",
+  "release_sha": "REPLACE_WITH_EXACT_QUALIFIED_RELEASE_SHA",
+  "images": {
+    "api": "REPLACE_WITH_APPROVED_API_IMAGE_AND_MANIFEST_DIGEST",
+    "web": "REPLACE_WITH_APPROVED_WEB_IMAGE_AND_MANIFEST_DIGEST",
+    "ingress": "REPLACE_WITH_APPROVED_INGRESS_IMAGE_AND_MANIFEST_DIGEST"
+  },
+  "booking_enabled": false,
+  "financial_execution": false,
+  "origins": {
+    "api": "REPLACE_WITH_APPROVED_HTTPS_API_ORIGIN",
+    "web": "REPLACE_WITH_APPROVED_HTTPS_WEB_ORIGIN",
+    "travel": "REPLACE_WITH_APPROVED_HTTPS_TRAVEL_ORIGIN"
+  },
+  "issuers": {
+    "BNB_IDENTITY": {
+      "issuer": "REPLACE_WITH_APPROVED_HTTPS_ISSUER",
+      "audience": "REPLACE_WITH_SERVICE_AND_NETWORK_SCOPED_AUDIENCE",
+      "public_key_file": "/run/secrets/bnb_identity.pem",
+      "public_key_sha256": "REPLACE_WITH_APPROVED_PUBLIC_KEY_SHA256",
+      "approval_reference": "REPLACE_WITH_INDEPENDENT_APPROVAL_REFERENCE"
+    },
+    "BNB_RECOVERY": {
+      "issuer": "REPLACE_WITH_APPROVED_HTTPS_ISSUER",
+      "audience": "REPLACE_WITH_SERVICE_AND_NETWORK_SCOPED_AUDIENCE",
+      "public_key_file": "/run/secrets/bnb_recovery.pem",
+      "public_key_sha256": "REPLACE_WITH_APPROVED_PUBLIC_KEY_SHA256",
+      "approval_reference": "REPLACE_WITH_INDEPENDENT_APPROVAL_REFERENCE"
+    },
+    "BNB_PROPERTY": {
+      "issuer": "REPLACE_WITH_APPROVED_HTTPS_ISSUER",
+      "audience": "REPLACE_WITH_SERVICE_AND_NETWORK_SCOPED_AUDIENCE",
+      "public_key_file": "/run/secrets/bnb_property.pem",
+      "public_key_sha256": "REPLACE_WITH_APPROVED_PUBLIC_KEY_SHA256",
+      "approval_reference": "REPLACE_WITH_INDEPENDENT_APPROVAL_REFERENCE"
+    },
+    "BNB_MEDIA_REVIEW": {
+      "issuer": "REPLACE_WITH_APPROVED_HTTPS_ISSUER",
+      "audience": "REPLACE_WITH_SERVICE_AND_NETWORK_SCOPED_AUDIENCE",
+      "public_key_file": "/run/secrets/bnb_media_review.pem",
+      "public_key_sha256": "REPLACE_WITH_APPROVED_PUBLIC_KEY_SHA256",
+      "approval_reference": "REPLACE_WITH_INDEPENDENT_APPROVAL_REFERENCE"
+    },
+    "BNB_CALENDAR_SYNC": {
+      "issuer": "REPLACE_WITH_APPROVED_HTTPS_ISSUER",
+      "audience": "REPLACE_WITH_SERVICE_AND_NETWORK_SCOPED_AUDIENCE",
+      "public_key_file": "/run/secrets/bnb_calendar_sync.pem",
+      "public_key_sha256": "REPLACE_WITH_APPROVED_PUBLIC_KEY_SHA256",
+      "approval_reference": "REPLACE_WITH_INDEPENDENT_APPROVAL_REFERENCE"
+    },
+    "BNB_PAY": {
+      "issuer": "REPLACE_WITH_APPROVED_HTTPS_ISSUER",
+      "audience": "REPLACE_WITH_SERVICE_AND_NETWORK_SCOPED_AUDIENCE",
+      "public_key_file": "/run/secrets/bnb_pay.pem",
+      "public_key_sha256": "REPLACE_WITH_APPROVED_PUBLIC_KEY_SHA256",
+      "approval_reference": "REPLACE_WITH_INDEPENDENT_APPROVAL_REFERENCE"
+    },
+    "BNB_LOCATION_AUTHORITY": {
+      "issuer": "REPLACE_WITH_APPROVED_HTTPS_ISSUER",
+      "audience": "REPLACE_WITH_SERVICE_AND_NETWORK_SCOPED_AUDIENCE",
+      "public_key_file": "/run/secrets/bnb_location_authority.pem",
+      "public_key_sha256": "REPLACE_WITH_APPROVED_PUBLIC_KEY_SHA256",
+      "approval_reference": "REPLACE_WITH_INDEPENDENT_APPROVAL_REFERENCE"
+    },
+    "BNB_JURISDICTION_AUTHORITY": {
+      "issuer": "REPLACE_WITH_APPROVED_HTTPS_ISSUER",
+      "audience": "REPLACE_WITH_SERVICE_AND_NETWORK_SCOPED_AUDIENCE",
+      "public_key_file": "/run/secrets/bnb_jurisdiction_authority.pem",
+      "public_key_sha256": "REPLACE_WITH_APPROVED_PUBLIC_KEY_SHA256",
+      "approval_reference": "REPLACE_WITH_INDEPENDENT_APPROVAL_REFERENCE"
+    },
+    "BNB_COMPLIANCE_AUTHORITY": {
+      "issuer": "REPLACE_WITH_APPROVED_HTTPS_ISSUER",
+      "audience": "REPLACE_WITH_SERVICE_AND_NETWORK_SCOPED_AUDIENCE",
+      "public_key_file": "/run/secrets/bnb_compliance_authority.pem",
+      "public_key_sha256": "REPLACE_WITH_APPROVED_PUBLIC_KEY_SHA256",
+      "approval_reference": "REPLACE_WITH_INDEPENDENT_APPROVAL_REFERENCE"
+    },
+    "BNB_GUEST_ELIGIBILITY": {
+      "issuer": "REPLACE_WITH_APPROVED_HTTPS_ISSUER",
+      "audience": "REPLACE_WITH_SERVICE_AND_NETWORK_SCOPED_AUDIENCE",
+      "public_key_file": "/run/secrets/bnb_guest_eligibility.pem",
+      "public_key_sha256": "REPLACE_WITH_APPROVED_PUBLIC_KEY_SHA256",
+      "approval_reference": "REPLACE_WITH_INDEPENDENT_APPROVAL_REFERENCE"
+    },
+    "BNB_GUEST_REVIEW": {
+      "issuer": "REPLACE_WITH_APPROVED_HTTPS_ISSUER",
+      "audience": "REPLACE_WITH_SERVICE_AND_NETWORK_SCOPED_AUDIENCE",
+      "public_key_file": "/run/secrets/bnb_guest_review.pem",
+      "public_key_sha256": "REPLACE_WITH_APPROVED_PUBLIC_KEY_SHA256",
+      "approval_reference": "REPLACE_WITH_INDEPENDENT_APPROVAL_REFERENCE"
+    },
+    "BNB_REPUTATION": {
+      "issuer": "REPLACE_WITH_APPROVED_HTTPS_ISSUER",
+      "audience": "REPLACE_WITH_SERVICE_AND_NETWORK_SCOPED_AUDIENCE",
+      "public_key_file": "/run/secrets/bnb_reputation.pem",
+      "public_key_sha256": "REPLACE_WITH_APPROVED_PUBLIC_KEY_SHA256",
+      "approval_reference": "REPLACE_WITH_INDEPENDENT_APPROVAL_REFERENCE"
+    }
+  }
+}

@@ -80,9 +80,9 @@ func c071RuntimeBinding(ctx context.Context,db *sql.DB,s C064AuthorScope,publica
  AND tenant=$1 AND domain=$2 AND jurisdiction=$3 AND publication_scope=$4`,s.Tenant,s.Domain,s.Jurisdiction,publicationScope).Scan(&n)
  if err!=nil||n!=1{return ErrC071Storage}
  err=db.QueryRowContext(ctx,`SELECT count(*) FROM pg_class WHERE relnamespace='public'::regnamespace AND relname IN
- ('compliance_author_heads','compliance_author_versions','compliance_review_heads','compliance_review_versions','compliance_auditor_access','compliance_publication_fences')
+ ('compliance_author_heads','compliance_author_versions','compliance_review_heads','compliance_review_versions','compliance_auditor_access','compliance_publication_fences','compliance_job_leaders','compliance_durable_jobs','compliance_durable_halts','compliance_activations','compliance_impact_outbox')
  AND relrowsecurity AND relforcerowsecurity`).Scan(&n)
- if err!=nil||n!=6{return ErrC071Storage}
+ if err!=nil||n!=11{return ErrC071Storage}
  if db.QueryRowContext(ctx,"SELECT has_schema_privilege(current_user,'public','CREATE') OR has_table_privilege(current_user,'public.compliance_database_bindings','INSERT,UPDATE,DELETE') OR has_table_privilege(current_user,'public.compliance_schema_migrations','INSERT,UPDATE,DELETE')").Scan(&unsafe)!=nil||unsafe{return ErrC071Storage}
  scripts:=[]string{PublicationSchemaSQL,C064AuthorSchemaSQL,C065ReviewSchemaSQL,C067AuditSchemaSQL,c071HardeningSQL,c072DurableSQL}
  for i,script:=range scripts{
@@ -91,7 +91,7 @@ func c071RuntimeBinding(ctx context.Context,db *sql.DB,s C064AuthorScope,publica
  }
  var version int
  if db.QueryRowContext(ctx,"SELECT max(version) FROM public.compliance_schema_migrations").Scan(&version)!=nil||version!=6{return ErrC071Storage}
- for _,table:=range []string{"compliance_author_versions","compliance_review_versions","compliance_auditor_access"}{
+ for _,table:=range []string{"compliance_author_versions","compliance_review_versions","compliance_auditor_access","compliance_durable_halts","compliance_activations"}{
   if db.QueryRowContext(ctx,"SELECT has_table_privilege(current_user,$1,'UPDATE') OR has_table_privilege(current_user,$1,'DELETE') OR has_table_privilege(current_user,$1,'TRUNCATE')", "public."+table).Scan(&unsafe)!=nil||unsafe{return ErrC071Storage}
  }
  return nil

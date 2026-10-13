@@ -798,17 +798,28 @@ def guest_reservation_dashboard(authorization:str|None=Header(None)):
             "checkout":x[6].isoformat(),"confirmed":x[1]=="confirmed"} for x in rows]
 
 
+def message_thread_scope(c,request_id,actor):
+    """Current request participant or independent valid handle_requests grant."""
+    ref=c.execute("""SELECT r.property_id,r.guest_subject,r.host_subject,r.state,p.host_subject,p.status
+       FROM bnb_booking_request r JOIN bnb_property p ON p.id=r.property_id
+       WHERE r.id=%s""",(request_id,)).fetchone()
+    if not ref:raise HTTPException(404,"NOT_FOUND")
+    account=c.execute("SELECT state FROM bnb_account WHERE subject=%s",(actor,)).fetchone()
+    if not account or account[0]!="active":raise HTTPException(404,"NOT_FOUND")
+    owner=actor==ref[2]==ref[4] and ref[5]=="published"
+    if actor!=ref[1] and not owner:
+        if ref[5]!="published":raise HTTPException(404,"NOT_FOUND")
+        host_scope(c,ref[0],actor,"handle_requests")
+    if ref[3] in ("declined","withdrawn","expired","cancelled"):
+        raise HTTPException(409,"THREAD_CLOSED")
+    return ref
+
+
 @app.get("/v1/bnb/booking-requests/{request_id}/messages")
 def guest_messages(request_id:UUID,authorization:str|None=Header(None)):
     actor=active_subject(authorization)
     with db() as c:
-        row=c.execute("""SELECT r.guest_subject,r.host_subject,p.host_subject,p.status,r.state
-            FROM bnb_booking_request r JOIN bnb_property p ON p.id=r.property_id
-            WHERE r.id=%s""",(request_id,)).fetchone()
-        if not row or (actor!=row[0] and not (actor==row[1] and actor==row[2] and row[3]=="published")):
-            raise HTTPException(404,"NOT_FOUND")
-        if row[4] in ("declined","withdrawn","expired","cancelled"):
-            raise HTTPException(409,"THREAD_CLOSED")
+        message_thread_scope(c,request_id,actor)
         data=c.execute("""SELECT id,sender_subject,body,created_at FROM bnb_guest_message
             WHERE booking_request_id=%s AND moderation_status='visible' ORDER BY created_at,id LIMIT 100""",(request_id,)).fetchall()
     return [{"id":str(x[0]),"sender":("you" if x[1]==actor else "other"),
@@ -825,15 +836,7 @@ def send_guest_message(request_id:UUID,payload:GuestMessageInput,
         with c.transaction():
             account=c.execute("SELECT state FROM bnb_account WHERE subject=%s FOR UPDATE",(actor,)).fetchone()
             if not account or account[0]!="active":raise HTTPException(401,"ACCOUNT_REVOKED")
-            ref=c.execute("""SELECT r.property_id,r.guest_subject,r.host_subject,r.state
-                FROM bnb_booking_request r WHERE r.id=%s""",(request_id,)).fetchone()
-            if not ref:raise HTTPException(404,"NOT_FOUND")
-            property=c.execute("SELECT host_subject,status FROM bnb_property WHERE id=%s FOR UPDATE",
-                               (ref[0],)).fetchone()
-            if actor!=ref[1] and not (actor==ref[2] and actor==property[0] and property[1]=="published"):
-                raise HTTPException(404,"NOT_FOUND")
-            if ref[3] in ("declined","withdrawn","expired","cancelled"):
-                raise HTTPException(409,"THREAD_CLOSED")
+            message_thread_scope(c,request_id,actor)
             prior=c.execute("""SELECT id,body FROM bnb_guest_message
                 WHERE booking_request_id=%s AND sender_subject=%s AND client_nonce=%s""",
                 (request_id,actor,payload.nonce)).fetchone()
@@ -860,13 +863,7 @@ def message_delivery(request_id:UUID,device_id:str,limit:int=50,
     if not 8<=len(device_id)<=128 or limit<1 or limit>100:
         raise HTTPException(422,"DELIVERY_WINDOW_INVALID")
     with db() as c:
-        row=c.execute("""SELECT r.property_id,r.guest_subject,r.host_subject,r.state,p.host_subject,p.status
-           FROM bnb_booking_request r JOIN bnb_property p ON p.id=r.property_id WHERE r.id=%s""",
-            (request_id,)).fetchone()
-        if not row or (actor!=row[1] and not (actor==row[2]==row[4] and row[5]=="published")):
-            raise HTTPException(404,"NOT_FOUND")
-        if row[3] in ("declined","withdrawn","expired","cancelled"):
-            raise HTTPException(409,"THREAD_CLOSED")
+        message_thread_scope(c,request_id,actor)
         last=c.execute("""SELECT last_message_id FROM bnb_message_delivery_cursor
            WHERE request_id=%s AND subject=%s AND device_id=%s""",
            (request_id,actor,device_id)).fetchone()
@@ -892,13 +889,7 @@ def acknowledge_message_delivery(request_id:UUID,payload:MessageDeliveryAck,
     actor=active_subject(authorization)
     with db() as c:
         with c.transaction():
-            row=c.execute("""SELECT r.guest_subject,r.host_subject,r.state,p.host_subject,p.status
-              FROM bnb_booking_request r JOIN bnb_property p ON p.id=r.property_id
-              WHERE r.id=%s FOR UPDATE OF r""",(request_id,)).fetchone()
-            if not row or (actor!=row[0] and not (actor==row[1]==row[3] and row[4]=="published")):
-                raise HTTPException(404,"NOT_FOUND")
-            if row[2] in ("declined","withdrawn","expired","cancelled"):
-                raise HTTPException(409,"THREAD_CLOSED")
+            message_thread_scope(c,request_id,actor)
             target=c.execute("""SELECT created_at,id FROM bnb_guest_message
              WHERE id=%s AND booking_request_id=%s AND moderation_status='visible'""",
              (payload.message_id,request_id)).fetchone()

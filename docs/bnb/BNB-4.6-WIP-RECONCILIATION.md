@@ -33,3 +33,13 @@ Repository branch `audit/bnb-phase4-bnb-4-1-baseline-20261013`, draft unmerged P
 - Latest executable SHA: `d10c48da832974b3567207ab2fd11c87f49bc0ad`. Latest observed Runtime Slice: [38474917611](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38474917611) **PENDING** at inspection, not PASS. Nine retained app checks were queued. Intentionally skipped Docs and unrelated global failures are not BNB Level 1 pass evidence.
 - **Remaining before PASS:** verified full dispute/refund saga transitions and resolution, independent Pay reorganization recovery/compensation logic, database-backed concurrency/IDOR and signed-evidence integration tests, terminal exact-SHA workflow results and evidence certificate.
 - Maintain **INCOMPLETE**, no M4-A advancement, no deployment and no PR merge.
+
+## Verified predecessor evidence for BNB-4.7 entry review
+
+**Executable SHA** `b76f055627416b98a67580c91ee93c95ce901502`; **main** `959288c8bd33b6da0325b6a5d060e00e7bcf0e48`; branch **75 ahead / 408 behind** at review. PR #631 remains draft/open/unmerged.
+
+- [Runtime Slice 38475861481](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38475861481), job `115566256649`, terminal SUCCESS: **8 operations + 259 runtime/API/security tests = 267 PASS**, zero failures. This fixes the former 403/202 fixture mismatch by adding Pay-verified original-payer claims without relaxing the production refund guard.
+- Nine BNB retained workflows terminal SUCCESS on this executable SHA: `38475861143`, `38475861270`, `38475861205`, `38475861488`, `38475861176`, `38475861284`, `38475861430`, `38475861325`, `38475861188`.
+- Oracle `38475861500` SUCCESS, not substituted for BNB tests. Docs `38475861419` SKIPPED, not a Level 1 PASS. Other repository workflows failed; these are not silently credited.
+- CI demonstrates all executed tests passed, **not** that unimplemented lifecycle/dispute/reorg exit criteria are complete. The saga is still a read-only projection with unresolved independent dispute/refund transitions, competing lifecycle event reconciliation and source-finality recovery evidence. PostgreSQL-specific BNB-4.6 coverage currently includes IDOR and recovery-state tests, not all required concurrent event-order/adversarial scenarios.
+- **Entry decision for canonical BNB-4.7 M4-A: BLOCKED by BNB-4.6 functional exit criteria and missing unconditional Level 1 certificate.** Do not certify M4-A or proceed to BNB-4.8. No Level 2 global Foundry/Genesis/Integrated/Docs work is authorized. Preserve `travel.bnb_booking=false`, testnet work roadmap and all external acceptance deferrals.

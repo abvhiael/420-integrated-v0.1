@@ -1127,11 +1127,15 @@ def file_moderation_appeal(report_id:UUID,payload:ModerationAppealInput,
             c.execute("""INSERT INTO bnb_moderation_appeal
                 (id,report_id,appellant_subject,grounds)
                 VALUES (%s,%s,%s,%s)""",(appeal_id,report_id,actor,payload.grounds))
+            try:
+                interval=report_retention_interval()
+            except ValueError:
+                raise HTTPException(503,"RETENTION_POLICY_UNAVAILABLE") from None
             c.execute("""INSERT INTO bnb_privacy_retention_hold(report_id,until_at,reason_code)
-                VALUES (%s,now()+interval '90 days','appeal')
+                VALUES (%s,now()+(%s * interval '1 second'),'appeal')
                 ON CONFLICT(report_id) DO UPDATE SET
                 until_at=GREATEST(bnb_privacy_retention_hold.until_at,excluded.until_at)""",
-                (report_id,))
+                (report_id,int(interval.total_seconds())))
     return {"id":str(appeal_id),"state":"pending","replayed":False}
 
 
@@ -1183,7 +1187,11 @@ def redact_expired_abuse_detail(report_id:UUID,x_guest_review_proof:str|None=Hea
             row=c.execute("""SELECT property_id,status,detail,created_at
                 FROM bnb_abuse_report WHERE id=%s FOR UPDATE""",(report_id,)).fetchone()
             if not row:raise HTTPException(404,"NOT_FOUND")
-            if row[1]=="pending" or row[3]>datetime.now(timezone.utc)-timedelta(days=90):
+            try:
+                interval=report_retention_interval()
+            except ValueError:
+                raise HTTPException(503,"RETENTION_POLICY_UNAVAILABLE") from None
+            if row[1]=="pending" or row[3]>datetime.now(timezone.utc)-interval:
                 raise HTTPException(409,"RETENTION_NOT_EXPIRED")
             blocked=c.execute("""SELECT 1 FROM bnb_privacy_retention_hold
                 WHERE report_id=%s AND until_at>now()""",(report_id,)).fetchone()
@@ -3383,6 +3391,7 @@ def submit_property_claim(property_id: str, authorization: str | None = Header(N
 def read_booking_orchestration(reservation_id:UUID,authorization:str|None=Header(None)):
     """Read-only authenticated saga projection; Pay/Wallet remain execution owners."""
     from booking_saga import project_saga
+from casework_policy import report_retention_interval
     actor=active_subject(authorization)
     with db() as c:
         row=c.execute("""SELECT r.guest_subject,p.host_subject,r.status,h.status,

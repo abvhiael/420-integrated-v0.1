@@ -53,3 +53,25 @@ def test_unknown_state_and_operation_fail_closed():
     assert project(**dict(BASE, reservation_state="disputed"))["reason"] == "UNKNOWN_BOOKING_STATE"
     assert project(**dict(BASE, disbursements=[
         dict(kind="unknown", amount=1, state="reserved")]))["reason"] == "UNKNOWN_PAY_OPERATION"
+
+
+def test_reorg_does_not_release_financial_or_inventory_authority():
+    result = project(**dict(BASE, reservation_state="recovery_required",
+                            intent_state="recovery_required"))
+    assert result["reason"] == "PAY_RECOVERY_REQUIRED"
+    assert result["confirmation_verified"] is False
+    assert result["bnb_custody"] is False
+
+
+def test_refund_cannot_overdraw_captured_balance():
+    result = project(**dict(BASE, disbursements=[
+        dict(kind="refund", amount=101, state="reserved")]))
+    assert result["reason"] == "ECONOMIC_OVERALLOCATION"
+
+
+def test_disputed_payout_must_not_be_assumed_settled():
+    result = project(**dict(BASE, disbursements=[
+        dict(kind="host", amount=75, state="reserved")]))
+    assert result["committed_amount"] == "75"
+    assert result["remaining_amount"] == "25"
+    assert result["confirmation_verified"] is True

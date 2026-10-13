@@ -3466,7 +3466,8 @@ def ingest_pay_case_event(payload:PayCaseEventInput,
                 WHERE issuer=%s AND jti=%s""",
                 (proof["iss"],proof["jti"])).fetchone():
                 raise HTTPException(409,"PAY_CASE_PROOF_REUSED")
-            previous=c.execute("""SELECT revision,event_state,resolution
+            previous=c.execute("""SELECT revision,event_state,resolution,
+                reservation_id,pay_invoice_id,pay_payment_id
                 FROM bnb_pay_case_event WHERE case_id=%s
                 ORDER BY revision DESC LIMIT 1""",(payload.case_id,)).fetchone()
             if not previous:
@@ -3476,6 +3477,10 @@ def ingest_pay_case_event(payload:PayCaseEventInput,
                     ("confirmed","finalized"),("recovery_required","recovery_required")):
                     raise HTTPException(409,"PAY_CASE_NOT_ELIGIBLE")
             else:
+                if (previous[3]!=payload.reservation_id or
+                    previous[4]!=payload.pay_invoice_id or
+                    previous[5]!=payload.pay_payment_id):
+                    raise HTTPException(409,"PAY_CASE_CROSS_PAYMENT_REUSE")
                 if payload.revision!=previous[0]+1:
                     raise HTTPException(409,"PAY_CASE_REVISION_OUT_OF_ORDER")
                 if previous[1]=="resolved" or payload.state=="opened":
@@ -3493,6 +3498,9 @@ def ingest_pay_case_event(payload:PayCaseEventInput,
                 proof.get("refund_request_verified") is not True):
                 raise HTTPException(403,"PAY_CASE_REFUND_REQUEST_NOT_VERIFIED")
             if payload.state=="resolved":
+                if (payload.resolution in ("refund_pending","refund_completed") and
+                    (not previous or previous[1]!="refund_requested")):
+                    raise HTTPException(409,"PAY_CASE_REFUND_REQUEST_REQUIRED")
                 if proof.get("independent_dispute_resolution_verified") is not True or (
                     proof.get("case_resolution")!=payload.resolution):
                     raise HTTPException(403,"PAY_CASE_RESOLUTION_NOT_VERIFIED")

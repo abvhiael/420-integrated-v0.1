@@ -940,6 +940,12 @@ def test_bnb26_fail_closed_unprovisioned_pay_and_signed_finality(fixture_propert
         mismatch=client.post(endpoint,json=conflicting,headers={"x-pay-authority-proof":sign(
             api.PayIntentInput(**conflicting),"intent",trust)})
         assert mismatch.status_code==409
+        # Same invoice identifier with mutated immutable economic terms is not an idempotent replay.
+        revised={**body,"asset_amount":"2000000000000000000"}
+        revised_trust={**trust,"asset_amount":revised["asset_amount"]}
+        changed=client.post(endpoint,json=revised,headers={"x-pay-authority-proof":sign(
+            api.PayIntentInput(**revised),"intent",revised_trust)})
+        assert changed.status_code==409,changed.text
         identical=client.post(endpoint,json=body,headers={"x-pay-authority-proof":sign(
             model,"intent",trust)})
         assert identical.status_code==202 and identical.json()["intent_id"]==intent_id

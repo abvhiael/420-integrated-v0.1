@@ -17,6 +17,7 @@ from authority import verify_authority
 from calendar_engine import peak_used,strict_local_instant,local_stay_window
 from availability_projection import refresh as refresh_availability_projection
 from discovery_sync import synchronize as sync_discovery_projection
+from casework_policy import report_retention_interval
 from pricing import quote_breakdown
 from travel_location import resolve_public_place, TravelLocationUnavailable
 from fastapi import FastAPI, Header, HTTPException, Response
@@ -3391,7 +3392,6 @@ def submit_property_claim(property_id: str, authorization: str | None = Header(N
 def read_booking_orchestration(reservation_id:UUID,authorization:str|None=Header(None)):
     """Read-only authenticated saga projection; Pay/Wallet remain execution owners."""
     from booking_saga import project_saga
-from casework_policy import report_retention_interval
     actor=active_subject(authorization)
     with db() as c:
         row=c.execute("""SELECT r.guest_subject,p.host_subject,r.status,h.status,

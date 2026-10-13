@@ -15,7 +15,7 @@ contract GovernanceExecutor {
     }
     function execute(bytes32 id) external {
         if(!governance.executable(id)) revert Unauthorized();
-        (bytes32 coop,,bytes32 action,bytes32 scope,bytes32 value,,,,,,,) = governance.proposals(id);
+        (bytes32 coop,bytes32 action,bytes32 scope,bytes32 value) = governance.executionPayload(id);
         if(action!=governance.ACTION_SET_POLICY()||scope==bytes32(0)) revert Unauthorized();
         governance.markExecuted(id);
         policy[coop][scope]=value;

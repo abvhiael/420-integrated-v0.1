@@ -354,7 +354,7 @@ def ready():
         # A database outage or connection exhaustion is not a ready API.
         # Never leak DSNs, SQL statements, hostnames or credentials to probes.
         raise HTTPException(503,"DATABASE_UNAVAILABLE") from None
-    return {"status":"ready","transactions_enabled":False,"schema_version":25}
+    return {"status":"ready","transactions_enabled":False,"schema_version":26}
 
 
 class GuestMessageInput(BaseModel):
@@ -2770,6 +2770,16 @@ def ingest_pay_disbursement(payload:PayDisbursementInput,
                     raise HTTPException(409,"PAY_RECOVERY_PAYOUT_FROZEN")
                 if proof.get("pay_recovery_refund_approved") is not True:
                     raise HTTPException(403,"PAY_RECOVERY_REFUND_AUTHORITY_REQUIRED")
+            active_case=c.execute("""SELECT 1 FROM (
+                SELECT DISTINCT ON (case_id) case_id,event_state,resolution,
+                    payout_release_authorized
+                FROM bnb_pay_case_event WHERE reservation_id=%s
+                ORDER BY case_id,revision DESC
+                ) latest WHERE NOT (event_state='resolved'
+                       AND payout_release_authorized) LIMIT 1""",
+                (payload.reservation_id,)).fetchone()
+            if active_case and payload.kind!="refund":
+                raise HTTPException(409,"PAY_DISPUTE_PAYOUT_FROZEN")
             if (split[8]!=payload.chain_id or split[9]!=payload.asset or
                 split[10]!=payload.policy_version):
                 raise HTTPException(409,"DISBURSEMENT_ASSET_POLICY_MISMATCH")
@@ -3385,12 +3395,129 @@ def read_booking_orchestration(reservation_id:UUID,authorization:str|None=Header
         failures=c.execute("""SELECT failure_code FROM bnb_pay_failure_event
             WHERE reservation_id=%s ORDER BY received_at, pay_attempt_id""",
             (reservation_id,)).fetchall()
+        case_rows=c.execute("""SELECT event_state,resolution,payout_release_authorized
+            FROM (SELECT DISTINCT ON (case_id) case_id,event_state,resolution,
+                  payout_release_authorized
+                  FROM bnb_pay_case_event WHERE reservation_id=%s
+                  ORDER BY case_id,revision DESC) latest ORDER BY case_id""",
+            (reservation_id,)).fetchall()
     split=(dict(zip(("captured","host","platform","developer","retained"),row[6:11]))
            if row[6] is not None else None)
     view=project_saga(reservation_state=row[2],hold_state=row[3],
                       intent_state=row[4],payment_id=row[5],split=split,
                       disbursements=[{"kind":k,"amount":amount,"state":state}
                                      for k,amount,state in operations],
-                      pay_failures=[code for (code,) in failures])
+                      pay_failures=[code for (code,) in failures],
+                      pay_cases=[{"state":state,"resolution":resolution,
+                                  "payout_release_authorized":release}
+                                 for state,resolution,release in case_rows])
     return {"reservation_id":str(reservation_id),**view,
             "provider_acceptance":"testnet_gated","payment_execution_available":False}
+
+
+class PayCaseEventInput(BaseModel):
+    """Noncustodial, Pay-issued dispute/refund case transition."""
+    reservation_id: UUID
+    pay_invoice_id: str=Field(min_length=3,max_length=200)
+    pay_payment_id: str=Field(min_length=3,max_length=200)
+    case_id: str=Field(min_length=3,max_length=200)
+    event_id: str=Field(min_length=3,max_length=200)
+    revision: int=Field(gt=0,strict=True)
+    state: str=Field(pattern="^(opened|refund_requested|resolved)$")
+    resolution: str|None=Field(default=None,pattern="^(upheld|refund_pending|refund_completed)$")
+
+
+@app.post("/v1/bnb/internal/pay/cases",status_code=202)
+def ingest_pay_case_event(payload:PayCaseEventInput,
+                          x_pay_authority_proof:str|None=Header(None)):
+    """Only canonical Pay may attest economic case lifecycle; BnB cannot adjudicate."""
+    proof=financial_claim(payload,x_pay_authority_proof,"case-event")
+    if (proof.get("pay_case_verified") is not True or
+        proof.get("pay_case_id")!=payload.case_id or
+        proof.get("pay_event_id")!=payload.event_id or
+        proof.get("pay_case_revision")!=payload.revision or
+        proof.get("pay_payment_id")!=payload.pay_payment_id):
+        raise HTTPException(403,"PAY_CASE_AUTHORITY_MISMATCH")
+    if (payload.state=="resolved")!=(payload.resolution is not None):
+        raise HTTPException(422,"PAY_CASE_RESOLUTION_INVALID")
+    digest=hashlib.sha256(payload.model_dump_json().encode()).hexdigest()
+    with db() as c:
+        with c.transaction():
+            ref=c.execute("""SELECT property_id FROM bnb_reservation WHERE id=%s""",
+                          (payload.reservation_id,)).fetchone()
+            if not ref:raise HTTPException(404,"RESERVATION_NOT_FOUND")
+            c.execute("SELECT id FROM bnb_property WHERE id=%s FOR UPDATE",(ref[0],))
+            record=c.execute("""SELECT r.status,i.state,i.pay_invoice_id,
+                i.pay_payment_id,i.requester FROM bnb_reservation r
+                JOIN bnb_pay_intent i ON i.reservation_id=r.id
+                WHERE r.id=%s FOR UPDATE OF r,i""",
+                (payload.reservation_id,)).fetchone()
+            if (not record or record[2]!=payload.pay_invoice_id or
+                record[3]!=payload.pay_payment_id):
+                raise HTTPException(409,"CANONICAL_PAY_CASE_PAYMENT_MISMATCH")
+            previous_event=c.execute("""SELECT event_digest,case_id,revision
+                FROM bnb_pay_case_event WHERE event_id=%s""",
+                (payload.event_id,)).fetchone()
+            if previous_event:
+                if previous_event!=(digest,payload.case_id,payload.revision):
+                    raise HTTPException(409,"PAY_CASE_EVENT_REPLAY_CONFLICT")
+                return {"state":payload.state,"replayed":True,"custody":False}
+            if c.execute("""SELECT 1 FROM bnb_pay_case_event
+                WHERE issuer=%s AND jti=%s""",
+                (proof["iss"],proof["jti"])).fetchone():
+                raise HTTPException(409,"PAY_CASE_PROOF_REUSED")
+            previous=c.execute("""SELECT revision,event_state,resolution
+                FROM bnb_pay_case_event WHERE case_id=%s
+                ORDER BY revision DESC LIMIT 1""",(payload.case_id,)).fetchone()
+            if not previous:
+                if payload.revision!=1 or payload.state!="opened":
+                    raise HTTPException(409,"PAY_CASE_FIRST_EVENT_REQUIRED")
+                if (record[0],record[1]) not in (
+                    ("confirmed","finalized"),("recovery_required","recovery_required")):
+                    raise HTTPException(409,"PAY_CASE_NOT_ELIGIBLE")
+            else:
+                if payload.revision!=previous[0]+1:
+                    raise HTTPException(409,"PAY_CASE_REVISION_OUT_OF_ORDER")
+                if previous[1]=="resolved" or payload.state=="opened":
+                    raise HTTPException(409,"PAY_CASE_TERMINAL_OR_DUPLICATE")
+                if payload.state=="refund_requested" and previous[1]!="opened":
+                    raise HTTPException(409,"PAY_CASE_REFUND_ALREADY_REQUESTED")
+            if payload.state=="refund_requested" or payload.resolution in (
+                "refund_pending","refund_completed"):
+                if (proof.get("original_payer_subject")!=record[4] or
+                    proof.get("original_pay_invoice_id")!=record[2] or
+                    proof.get("original_pay_payment_id")!=record[3] or
+                    proof.get("original_payer_refund") is not True):
+                    raise HTTPException(403,"PAY_CASE_ORIGINAL_PAYER_REQUIRED")
+            if payload.state=="refund_requested" and (
+                proof.get("refund_request_verified") is not True):
+                raise HTTPException(403,"PAY_CASE_REFUND_REQUEST_NOT_VERIFIED")
+            if payload.state=="resolved":
+                if proof.get("independent_dispute_resolution_verified") is not True or (
+                    proof.get("case_resolution")!=payload.resolution):
+                    raise HTTPException(403,"PAY_CASE_RESOLUTION_NOT_VERIFIED")
+                if payload.resolution=="refund_completed":
+                    refunded=c.execute("""SELECT COALESCE(sum(amount),0)
+                        FROM bnb_pay_disbursement WHERE reservation_id=%s
+                        AND kind='refund' AND state='finalized'""",
+                        (payload.reservation_id,)).fetchone()[0]
+                    if not refunded or proof.get("refund_receipt_verified") is not True:
+                        raise HTTPException(409,"PAY_REFUND_NOT_FINALIZED")
+            release=(payload.state=="resolved" and payload.resolution=="upheld" and
+                     proof.get("payout_release_verified") is True)
+            if payload.state=="resolved" and payload.resolution=="upheld" and not release:
+                raise HTTPException(403,"PAY_CASE_PAYOUT_RELEASE_REQUIRED")
+            c.execute("""INSERT INTO bnb_pay_case_event
+                (issuer,jti,event_id,case_id,revision,reservation_id,pay_invoice_id,
+                 pay_payment_id,event_state,resolution,payout_release_authorized,event_digest)
+                VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
+                (proof["iss"],proof["jti"],payload.event_id,payload.case_id,
+                 payload.revision,payload.reservation_id,payload.pay_invoice_id,
+                 payload.pay_payment_id,payload.state,payload.resolution,release,digest))
+            c.execute("""INSERT INTO bnb_outbox(id,event_type,payload)
+                VALUES (%s,'bnb.pay.case_reconciled',%s::jsonb)""",
+                (uuid4(),json.dumps({"reservation_id":str(payload.reservation_id),
+                    "case_id":payload.case_id,"revision":payload.revision,
+                    "state":payload.state})))
+    return {"state":payload.state,"replayed":False,"custody":False,
+            "payout_release_authorized":release}

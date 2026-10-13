@@ -50,7 +50,8 @@ contract R0412CompetitionTest {
     function _enterBoth() internal {_start();alice.enter(engine,EVENT);bob.enter(engine,EVENT);}
     function testWalletFreeBaseEventVerifiedScoreAndTie() public {
         _enterBoth();
-        bytes32 a=keccak256("a"),b=keccak256("b");
+        bytes32 a=keccak256("a");
+        bytes32 b=keccak256("b");
         evidence.approve(a,address(alice),9000,opens);
         evidence.approve(b,address(bob),9000,opens+1);
         alice.submit(engine,EVENT,a,9000,opens);

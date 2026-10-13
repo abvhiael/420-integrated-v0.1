@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
+import {bindRetainedR04Emergency} from "../../mocks/R04EmergencyFixture.sol";
 import { MissionEngine } from "../../../../src/highcountry/missions/MissionEngine.sol";
 
 contract MissionR047Test {
@@ -9,6 +10,7 @@ contract MissionR047Test {
 
     function setUp() public {
         e = new MissionEngine();
+        bindRetainedR04Emergency(address(e));
         e.setVerifier(address(this), true);
         e.registerTemplate(ID, bytes32(uint256(1)), keccak256("objective"), bytes32(0), 1000, 2, 10);
         e.registerTemplate(NEXT, bytes32(uint256(1)), keccak256("next-objective"), ID, 1000, 1, 0);
@@ -61,3 +63,4 @@ contract MissionR047Test {
         require(!overwrite, "template overwritten");
     }
 }
+

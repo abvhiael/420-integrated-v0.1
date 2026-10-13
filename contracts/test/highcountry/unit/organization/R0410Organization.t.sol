@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
+import {bindRetainedR04Emergency} from "../../mocks/R04EmergencyFixture.sol";
 import { OrganizationRegistry } from "../../../../src/highcountry/organization/OrganizationRegistry.sol";
 import { OrganizationAuthority } from "../../../../src/highcountry/organization/OrganizationAuthority.sol";
 import {
@@ -98,7 +99,9 @@ contract R0410OrganizationTest {
 
     function setUp() public {
         r = new OrganizationRegistry();
+        bindRetainedR04Emergency(address(r));
         a = new OrganizationAuthority(address(r));
+        bindRetainedR04Emergency(address(a));
         alice = new R0410Actor();
         bob = new R0410Actor();
         r.create(ORG, keccak256("meta"));
@@ -214,6 +217,7 @@ contract R0410OrganizationTest {
         R0410Actor treasury = new R0410Actor();
         OrganizationTreasuryPermissions policy =
             new OrganizationTreasuryPermissions(address(r), address(treasury), address(bob));
+        bindRetainedR04Emergency(address(policy));
         bytes32 id = policy.propose(ORG, address(alice), ACTION, SCOPE, uint64(block.timestamp + 1 days), 500);
         require(!policy.permitted(id, address(alice), ACTION, SCOPE, 1), "admin alone authorized treasury");
         (bool preapproval,) = address(treasury)
@@ -240,6 +244,7 @@ contract R0410OrganizationTest {
         R0410Actor treasury = new R0410Actor();
         OrganizationTreasuryPermissions policy =
             new OrganizationTreasuryPermissions(address(r), address(treasury), address(bob));
+        bindRetainedR04Emergency(address(policy));
         bytes32 id = policy.propose(ORG, address(alice), ACTION, SCOPE, uint64(block.timestamp + 1 days), 100);
         bob.approveTreasury(policy, id);
         r.transferAdmin(ORG, address(alice));
@@ -266,3 +271,4 @@ contract R0410OrganizationTest {
         require(!r.isActiveMember(ORG, address(alice)), "removed member active");
     }
 }
+

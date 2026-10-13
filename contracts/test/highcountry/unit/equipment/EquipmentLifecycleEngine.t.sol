@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
+import {bindRetainedR04Emergency} from "../../mocks/R04EmergencyFixture.sol";
 
 import { EquipmentRegistry } from "../../../../src/highcountry/equipment/EquipmentRegistry.sol";
 import { EquipmentLifecycleEngine } from "../../../../src/highcountry/equipment/EquipmentLifecycleEngine.sol";
@@ -85,11 +86,13 @@ contract EquipmentLifecycleR044Test {
     function setUp() public {
         player = new R044Land();
         equipment = new EquipmentRegistry(address(player));
+        bindRetainedR04Emergency(address(equipment));
         inventory = new InventoryRegistry(address(new R044Product()));
         inventory.registerResource(REPAIR, InventoryRegistry.Unit.COUNT);
         inventory.registerResource(RECYCLE, InventoryRegistry.Unit.COUNT);
         inventory.setIssuer(address(this), true);
         lifecycle = new EquipmentLifecycleEngine(address(equipment), address(inventory));
+        bindRetainedR04Emergency(address(lifecycle));
         equipment.bindLifecycleController(address(lifecycle));
         inventory.setIssuer(address(lifecycle), true);
         player.approve(inventory, address(lifecycle));
@@ -167,3 +170,4 @@ contract EquipmentLifecycleR044Test {
         require(lifecycle.condition(ID).durability == 10, "default condition");
     }
 }
+

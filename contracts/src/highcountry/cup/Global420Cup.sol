@@ -1,12 +1,14 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
 
+import {R04EmergencyConsumer} from "../security/R04EmergencyConsumer.sol";
+import {EmergencyDomains} from "../constants/EmergencyDomains.sol";
 import { CompetitionEngine } from "../competition/CompetitionEngine.sol";
 
 /// @title Global420Cup
 /// @notice Fixed two-semifinal/one-final cup backed exclusively by finalized canonical competition results.
 /// @dev This contract cannot transfer assets, mint monetary prizes, or call another game's contracts.
-contract Global420Cup {
+contract Global420Cup is R04EmergencyConsumer {
     error Invalid();
     error Unauthorized();
 
@@ -49,7 +51,7 @@ contract Global420Cup {
         bytes32 rulesHash,
         bytes32 prizeRulesHash,
         bytes32 crossGameScope
-    ) external {
+    ) external r04Unrestricted(EmergencyDomains.COMPETITION_ENTRY) {
         if (
             id == bytes32(0) || rulesHash == bytes32(0) || prizeRulesHash == bytes32(0) || crossGameScope == bytes32(0)
                 || cups[id].organizer != address(0) || semiA == bytes32(0) || semiB == bytes32(0)
@@ -79,7 +81,7 @@ contract Global420Cup {
         bytes32 id
     ) external {
         Cup storage c = cups[id];
-        if (c.organizer == address(0) || c.finalized) revert Unauthorized();
+        if (c.organizer == address(0) || c.finalized || !resultsCurrent(id)) revert Unauthorized();
         (,, address organizerA,,,,, bool closedA, bool cancelledA) = engine.events(c.semiA);
         (,, address organizerB,,,,, bool closedB, bool cancelledB) = engine.events(c.semiB);
         (,, address organizerF,,,,, bool closedF, bool cancelledF) = engine.events(c.finalEvent);
@@ -133,11 +135,22 @@ contract Global420Cup {
     /// @dev No arbitrary external calls or uncollateralized funded reward promises.
     function issueCrossGame(
         bytes32 id
-    ) external {
+    ) external r04Unrestricted(EmergencyDomains.COMPETITION_ENTRY) {
         Cup memory c = cups[id];
-        if (!c.finalized || c.champion == address(0) || issued[id][c.champion]) revert Unauthorized();
+        if (!c.finalized || c.champion == address(0) || issued[id][c.champion] || !resultsCurrent(id)) revert Unauthorized();
         issued[id][c.champion] = true;
         emit CrossGameIssued(id, c.champion, c.crossGameScope, finalResultCommitment[id]);
+    }
+
+    function resultsCurrent(bytes32 id) public view returns (bool) {
+        Cup memory c = cups[id];
+        (,,,,,, uint32 count,,) = engine.events(c.finalEvent);
+        if (count != 2) return false;
+        return c.organizer != address(0)
+            && engine.resultIsCurrent(c.semiA, engine.winners(c.semiA))
+            && engine.resultIsCurrent(c.semiB, engine.winners(c.semiB))
+            && engine.resultIsCurrent(c.finalEvent, engine.entrantAt(c.finalEvent, 0))
+            && engine.resultIsCurrent(c.finalEvent, engine.entrantAt(c.finalEvent, 1));
     }
 
     function isIssued(
@@ -146,6 +159,7 @@ contract Global420Cup {
         bytes32 scope
     ) external view returns (bool) {
         Cup memory c = cups[id];
-        return c.finalized && c.champion == player && c.crossGameScope == scope && issued[id][player];
+        return resultsCurrent(id) && c.finalized && c.champion == player && c.crossGameScope == scope && issued[id][player];
     }
 }
+

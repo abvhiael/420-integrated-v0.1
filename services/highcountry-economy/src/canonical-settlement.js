@@ -16,6 +16,7 @@ export class CanonicalMarketSettlement {
  }
  // Atomic database reservation and listing lock. No chain call under SQL locks.
  async prepare(session,op,listingId,transferOp){
+  if(this.authority.requireSubmissionAllowed)await this.authority.requireSubmissionAllowed();
   const buyer=id(await this.authority.registeredPrincipal(session));id(listingId);id(transferOp);
   const canonicalOp=await this.authority.expectedTransferOperation(listingId,buyer);
   if(canonicalOp!==transferOp)throw new SettlementError('wrong deterministic transfer operation');
@@ -105,3 +106,4 @@ export class CanonicalMarketSettlement {
   });
  }
 }
+

@@ -1,9 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
+import {R04EmergencyConsumer} from "../security/R04EmergencyConsumer.sol";
+import {EmergencyDomains} from "../constants/EmergencyDomains.sol";
 
 /// @notice Shared immutable catalogue and proof-driven progression, without local-save authority.
 /// @dev Three separate registries inherit this contract and have independent namespaces and administrators.
-abstract contract ProgressionRegistryCore {
+abstract contract ProgressionRegistryCore is R04EmergencyConsumer {
     error InvalidProgression();
 
     struct Track {
@@ -84,7 +86,7 @@ abstract contract ProgressionRegistryCore {
         bytes32 id,
         bytes32 evidence,
         uint32 points
-    ) external {
+    ) external r04Unrestricted(EmergencyDomains.MISSION_ACTIVATION) {
         Track memory t = _tracks[id];
         if (
             !trustedVerifiers[msg.sender] || !t.exists || player == address(0) || evidence == bytes32(0)
@@ -112,3 +114,4 @@ contract ResearchRegistry is ProgressionRegistryCore { }
 
 /// @notice Discoveries: catalogue-bound unique discoveries, without imported local save claims.
 contract DiscoveryRegistry is ProgressionRegistryCore { }
+

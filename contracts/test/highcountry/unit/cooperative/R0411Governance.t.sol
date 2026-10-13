@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
+import {bindRetainedR04Emergency} from "../../mocks/R04EmergencyFixture.sol";
 import { OrganizationRegistry } from "../../../../src/highcountry/organization/OrganizationRegistry.sol";
 import { CooperativeRegistry } from "../../../../src/highcountry/cooperative/CooperativeRegistry.sol";
 import { CooperativeGovernance } from "../../../../src/highcountry/cooperative/CooperativeGovernance.sol";
@@ -56,8 +57,10 @@ contract R0411GovernanceTest {
 
     function setUp() public {
         o = new OrganizationRegistry();
+        bindRetainedR04Emergency(address(o));
         o.create(ORG, keccak256("meta"));
         r = new CooperativeRegistry(address(o));
+        bindRetainedR04Emergency(address(r));
         r.create(COOP, ORG);
         r.enroll(COOP);
         alice = new CoopMemberR0411();
@@ -69,7 +72,9 @@ contract R0411GovernanceTest {
         alice.enroll(r, COOP);
         bob.enroll(r, COOP);
         g = new CooperativeGovernance(address(r));
+        bindRetainedR04Emergency(address(g));
         e = new GovernanceExecutor(address(g));
+        bindRetainedR04Emergency(address(e));
         g.bindExecutor(address(e));
     }
 
@@ -139,3 +144,4 @@ contract R0411GovernanceTest {
         require(!rebind, "executor replaced");
     }
 }
+

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
+import {bindRetainedR04Emergency} from "../mocks/R04EmergencyFixture.sol";
 import { EmergencyState } from "../../../src/highcountry/security/EmergencyState.sol";
 
 import { CapabilityRegistry420 } from "../../../src/system/CapabilityRegistry420.sol";
@@ -447,7 +448,9 @@ contract PublicPlantCapacityTest is PublicPlantCapacityFixture {
         bytes32 leaseId = keccak256("lease");
         land.setOccupancy(1, BOB, LandRegistry.OccupancyKind.LEASE, leaseId);
         RightsRegistry rights = new RightsRegistry();
+        bindRetainedR04Emergency(address(rights));
         LeaseRegistry lease = new LeaseRegistry(address(rights));
+        bindRetainedR04Emergency(address(lease));
         CanonicalLandPlantGate gate = new CanonicalLandPlantGate(address(land), address(plants));
         lease.bindCanonicalGate(address(gate));
         rights.registerAsset(gate.parcelAsset(1), address(this));
@@ -565,7 +568,9 @@ contract CanonicalR049PlantAdmissionIntegrationTest is PublicPlantCapacityFixtur
 
     function testRevocationBlocksAdmissionAndLivePlantsPreventEviction() public {
         RightsRegistry rights = new RightsRegistry();
+        bindRetainedR04Emergency(address(rights));
         LeaseRegistry leases = new LeaseRegistry(address(rights));
+        bindRetainedR04Emergency(address(leases));
         CanonicalLandPlantGate gate = new CanonicalLandPlantGate(address(land), address(plants));
         leases.bindCanonicalGate(address(gate));
         rights.registerAsset(gate.parcelAsset(1), address(this));
@@ -610,7 +615,9 @@ contract CanonicalR049LicenseAdmissionIntegrationTest is PublicPlantCapacityFixt
 
     function testScopedLicenseAdmissionRevocationAndNonEviction() public {
         RightsRegistry rights = new RightsRegistry();
+        bindRetainedR04Emergency(address(rights));
         LicenseRegistry licenses = new LicenseRegistry(address(rights));
+        bindRetainedR04Emergency(address(licenses));
         CanonicalLandPlantGate gate = new CanonicalLandPlantGate(address(land), address(plants));
         licenses.bindCanonicalGate(address(gate));
         rights.registerAsset(gate.parcelAsset(1), address(this));
@@ -641,3 +648,4 @@ contract CanonicalR049LicenseAdmissionIntegrationTest is PublicPlantCapacityFixt
         require(land.effectiveOperator(1) == address(this), "licensed occupancy not released");
     }
 }
+

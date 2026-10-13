@@ -30,6 +30,7 @@ export class HighCountryMarket {
    });
  }
  async list(session,op,listingId,asset,quantity,price,expiresAt){
+   if(this.authority.requireMarketOpen)await this.authority.requireMarketOpen();
    const seller=id(await this.authority.registeredPrincipal(session));
    id(listingId);id(asset);amount(quantity);amount(price);
    if(!Number.isSafeInteger(expiresAt)||expiresAt<=this.clock())throw new SettlementError('expired listing');
@@ -69,6 +70,7 @@ export class HighCountryMarket {
    b.reserved-=l.quantity;b.available+=l.quantity;
  }
  async buy(session,op,listingId){
+   if(this.authority.requireMarketOpen)await this.authority.requireMarketOpen();
    if(this.authority.canonicalSettlementRequired===true)
      throw new SettlementError('canonical custody requires finality-gated settlement');
    const buyer=id(await this.authority.registeredPrincipal(session));
@@ -91,3 +93,4 @@ export class HighCountryMarket {
    });
  }
 }
+

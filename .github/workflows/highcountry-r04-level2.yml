@@ -92,3 +92,59 @@ jobs:
         env:
           HC_TEST_POSTGRES_URL: postgresql://postgres:hc_ci_only@127.0.0.1:5432/hc_economy
         run: node test/postgres-live.integration.mjs
+
+
+  runtime-canonical:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    env:
+      FOUNDRY_SRC: src/highcountry
+      FOUNDRY_TEST: test/highcountry
+      FOUNDRY_SCRIPT: script/highcountry
+      FOUNDRY_EVM_VERSION: paris
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: hc_ci_only
+          POSTGRES_DB: hc_runtime
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d hc_runtime"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Exact implementation SHA
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Build disposable real-contract runtime fixture
+        working-directory: contracts
+        run: forge build test/highcountry/integration/R04RuntimeDeployment.sol
+      - name: Install pinned PostgreSQL runtime driver
+        working-directory: services/highcountry-economy
+        run: npm install --ignore-scripts --no-audit --no-fund
+      - name: Actual local-chain PostgreSQL authenticated HTTP and worker integration
+        env:
+          HC_TEST_POSTGRES_URL: postgresql://postgres:hc_ci_only@127.0.0.1:5432/hc_runtime
+          HC_TEST_RPC_URL: http://127.0.0.1:8545
+        run: |
+          anvil --chain-id 420 --port 8545 --hardfork paris --code-size-limit 600000 --gas-limit 200000000 > "$RUNNER_TEMP/hc-anvil.log" 2>&1 &
+          HC_ANVIL_PID=$!
+          trap 'kill "$HC_ANVIL_PID" 2>/dev/null || true' EXIT
+          for attempt in $(seq 1 50); do
+            if cast chain-id --rpc-url http://127.0.0.1:8545 >/dev/null 2>&1; then break; fi
+            sleep 0.2
+          done
+          node services/highcountry-economy/test/runtime-canonical.integration.mjs

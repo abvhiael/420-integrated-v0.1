@@ -1,12 +1,14 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
+import {R04EmergencyConsumer} from "../security/R04EmergencyConsumer.sol";
+import {EmergencyDomains} from "../constants/EmergencyDomains.sol";
 
 import { InventoryRegistry } from "../inventory/InventoryRegistry.sol";
 import { HCInvalidState, HCZeroAddress } from "../errors/HighCountryErrors.sol";
 
 /// @notice R04.8 owner-authorized canonical inventory escrow. No BUDS or native $420 custody.
 /// @dev Production market operator MUST prove independently reserved BUDS before a transfer.
-contract CanonicalMarketEscrow {
+contract CanonicalMarketEscrow is R04EmergencyConsumer {
     enum Status {
         None,
         Active,
@@ -78,7 +80,7 @@ contract CanonicalMarketEscrow {
         bytes32 asset,
         uint256 quantity,
         uint64 expiresAt
-    ) external {
+    ) external  r04Unrestricted(EmergencyDomains.MARKET) {
         if (
             id == bytes32(0) || asset == bytes32(0) || quantity == 0 || expiresAt <= block.timestamp
                 || _listings[id].status != Status.None
@@ -93,7 +95,7 @@ contract CanonicalMarketEscrow {
     function settle(
         bytes32 id,
         address buyer
-    ) external returns (bytes32 op) {
+    ) external r04Unrestricted(EmergencyDomains.MARKET) returns (bytes32 op) {
         Listing storage l = _listings[id];
         if (
             msg.sender != marketOperator || l.status != Status.Active || block.timestamp >= l.expiresAt
@@ -138,3 +140,4 @@ contract CanonicalMarketEscrow {
         }
     }
 }
+

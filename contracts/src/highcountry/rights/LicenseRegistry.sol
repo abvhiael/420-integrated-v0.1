@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
+import {R04EmergencyConsumer} from "../security/R04EmergencyConsumer.sol";
+import {EmergencyDomains} from "../constants/EmergencyDomains.sol";
 import { RightsRegistry } from "./RightsRegistry.sol";
 import { CanonicalLandPlantGate } from "./CanonicalLandPlantGate.sol";
 
 /// @notice R04.9 bounded and revocable access licenses; no payment settlement or statutory licensing claims.
-contract LicenseRegistry {
+contract LicenseRegistry is R04EmergencyConsumer {
     error InvalidLicense();
 
     struct License {
@@ -61,7 +63,7 @@ contract LicenseRegistry {
         uint64 start,
         uint64 end,
         uint256 feeUnits
-    ) external {
+    ) external  r04Unrestricted(EmergencyDomains.LICENSE) {
         if (
             address(canonicalGate) == address(0) || !canonicalGate.licenseAdmissible(parcelId, id, msg.sender, licensee)
         ) revert InvalidLicense();
@@ -78,7 +80,7 @@ contract LicenseRegistry {
         uint64 start,
         uint64 end,
         uint256 feeUnits
-    ) external {
+    ) external  r04Unrestricted(EmergencyDomains.LICENSE) {
         // Canonical activation removes the client-controlled shadow license entry point.
         if (address(canonicalGate) != address(0)) revert InvalidLicense();
         _issue(id, asset, licensee, scopes, start, end, feeUnits);
@@ -107,6 +109,7 @@ contract LicenseRegistry {
         address who,
         uint256 required
     ) external view returns (bool) {
+        if (!r04DomainOpen(EmergencyDomains.LICENSE)) return false;
         License memory l = licenses[id];
         (address owner, bool exists, bool frozen) = rights.assets(l.asset);
         if (
@@ -130,7 +133,7 @@ contract LicenseRegistry {
     function transfer(
         bytes32 id,
         address to
-    ) external {
+    ) external  r04Unrestricted(EmergencyDomains.LICENSE) {
         License storage l = licenses[id];
         (address owner, bool exists, bool frozen) = rights.assets(l.asset);
         if (
@@ -142,3 +145,4 @@ contract LicenseRegistry {
         emit Transferred(id, from, to);
     }
 }
+

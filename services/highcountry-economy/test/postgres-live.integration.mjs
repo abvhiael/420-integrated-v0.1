@@ -5,6 +5,8 @@ import pg from 'pg';
 import {readFile} from 'node:fs/promises';
 import {PostgresBudsStore} from '../src/postgres-store.js';
 import {BudsLedger} from '../src/buds-ledger.js';
+import {generateKeyPairSync,sign} from 'node:crypto';
+import {RuntimeAuthority} from '../src/runtime-integration.js';
 import {HighCountryMarket} from '../src/market.js';
 const url=process.env.HC_TEST_POSTGRES_URL;
 if(!url)throw new Error('HC_TEST_POSTGRES_URL required (dedicated test database only)');
@@ -45,8 +47,38 @@ try {
  assert.equal(bob.reserved,70,'existing hold persists');
  assert.equal(row.issued,100);assert.equal(row.burned,0);
  assert.equal(row.listings.find(([id])=>id==='listing:1')?.[1].status,'sold');
+ const role='hc_runtime_'+process.pid;
+ await pool.query(await readFile(new URL('../migrations/002_runtime_namespace_rls.sql',import.meta.url),'utf8'));
+ await pool.query('CREATE ROLE '+role+" LOGIN PASSWORD 'hc_ci_runtime_only'");
+ await pool.query('GRANT USAGE ON SCHEMA public TO '+role);
+ await pool.query('GRANT SELECT, UPDATE ON highcountry_buds_state TO '+role);
+ await pool.query('INSERT INTO highcountry_buds_state(namespace,state) VALUES($1,$2::jsonb)',[role,JSON.stringify(empty)]);
+ const runtimeUrl=new URL(url);runtimeUrl.username=role;runtimeUrl.password='hc_ci_runtime_only';
+ const runtimePool=new pg.Pool({connectionString:runtimeUrl.toString(),max:4});
+ try {
+  const liveStore=new PostgresBudsStore(runtimePool,role),keys=generateKeyPairSync('ed25519'),game='0x'+'11'.repeat(32);
+  const payload=Buffer.from(JSON.stringify({iss:'idp',sub:'alice',sid:'ci',aud:'hc',game,nbf:0,exp:100000,epoch:0})).toString('base64url');
+  const token=payload+'.'+sign(null,Buffer.from(payload),keys.privateKey).toString('base64url');
+  const authority=new RuntimeAuthority({store:liveStore,issuers:{idp:{publicKey:keys.publicKey}},audience:'hc',gameId:game,
+   chainId:420,origin:'https://hc.example',rpc:{verifyWallet:async()=>true,playerProfile:async()=>game},clock:()=>1000});
+  await authority.register(token);
+  const challenge=await authority.linkChallenge(token,'0x'+'22'.repeat(20));
+  await authority.linkWallet(token,challenge.nonce,'signed-fixture');
+  const afterRestart=new RuntimeAuthority({...authority,store:new PostgresBudsStore(runtimePool,role)});
+  assert.equal(await afterRestart.walletOf(token),'0x'+'22'.repeat(20));
+  await assert.rejects(afterRestart.linkWallet(token,challenge.nonce,'signed-fixture'));
+  assert.equal((await runtimePool.query('SELECT * FROM highcountry_buds_state WHERE namespace=$1',[ns])).rows.length,0,'namespace isolation');
+  await assert.rejects(runtimePool.query('INSERT INTO highcountry_buds_state(namespace,state) VALUES($1,$2::jsonb)',[role+'other',JSON.stringify(empty)]));
+  await assert.rejects(runtimePool.query('ALTER TABLE highcountry_buds_state ADD COLUMN unsafe text'));
+  console.log('Postgres runtime session/wallet nonce restart persistence and least-privilege/RLS denial: PASS');
+ } finally {
+  await runtimePool.end();
+  await pool.query('DELETE FROM highcountry_buds_state WHERE namespace=$1',[role]);
+  await pool.query('DROP OWNED BY '+role);await pool.query('DROP ROLE '+role);
+ }
  console.log('Postgres SERIALIZABLE reservation, replay, market settlement and persistence: PASS');
 } finally {
  try {await pool.query('DELETE FROM highcountry_buds_state WHERE namespace=$1',[ns]);}catch{}
  await pool.end();
 }
+

@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
+import {R04EmergencyConsumer} from "../security/R04EmergencyConsumer.sol";
+import {EmergencyDomains} from "../constants/EmergencyDomains.sol";
 import { SeasonRegistry } from "./SeasonRegistry.sol";
 import { CompetitionTemplateRegistry } from "./CompetitionTemplateRegistry.sol";
 
@@ -21,7 +23,7 @@ interface ICompetitionEntitlementR0412 {
 }
 
 /// @notice One confirmed FLOWER harvest per participant, score=qualityBps; no token bonuses.
-contract CompetitionEngine {
+contract CompetitionEngine is R04EmergencyConsumer {
     error Invalid();
     error Unauthorized();
 
@@ -89,7 +91,7 @@ contract CompetitionEngine {
         uint64 opens,
         uint64 closes,
         uint64 challengeDeadline
-    ) external {
+    ) external  r04Unrestricted(EmergencyDomains.COMPETITION_ENTRY) {
         (uint64 starts, uint64 ends, address authority,, bool cancelled) = seasons.seasons(season);
         (,, uint32 version, bool exists) = templates.templates(templateId);
         if (
@@ -103,7 +105,7 @@ contract CompetitionEngine {
 
     function enter(
         bytes32 id
-    ) external {
+    ) external  r04Unrestricted(EmergencyDomains.COMPETITION_ENTRY) {
         EventData storage e = events[id];
         if (
             e.organizer == address(0) || e.cancelled || e.finalized || !_seasonNotCancelled(e.season)
@@ -135,7 +137,7 @@ contract CompetitionEngine {
         bytes32 harvestId,
         uint16 qualityBps,
         uint64 finalizedAt
-    ) external {
+    ) external  r04Unrestricted(EmergencyDomains.COMPETITION_ENTRY) {
         EventData memory e = events[id];
         if (
             !entered[id][msg.sender] || e.cancelled || !_seasonNotCancelled(e.season) || block.timestamp >= e.closes
@@ -203,6 +205,20 @@ contract CompetitionEngine {
         emit Finalized(id, best, score);
     }
 
+    function resultIsCurrent(bytes32 id, address player) public view returns (bool) {
+        EventData memory e = events[id];
+        Result memory r = results[id][player];
+        if (!e.finalized || e.cancelled || !r.exists || r.rejected || !_seasonNotCancelled(e.season)) return false;
+        (,, bytes32 scope) = _template(e.templateId);
+        if (scope != bytes32(0)) {
+            try entitlements.eligible(player, scope) returns (bool allowed) { if (!allowed) return false; }
+            catch { return false; }
+        }
+        try evidence.verifiedFlower(r.harvestId, player, r.qualityBps, r.finalizedAt) returns (bool valid) {
+            return valid;
+        } catch { return false; }
+    }
+
     function _seasonNotCancelled(
         bytes32 id
     ) internal view returns (bool) {
@@ -227,3 +243,4 @@ contract CompetitionEngine {
         return entrants[id][index];
     }
 }
+

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
+import {bindRetainedR04Emergency} from "../../mocks/R04EmergencyFixture.sol";
 import { RightsRegistry } from "../../../../src/highcountry/rights/RightsRegistry.sol";
 import { LeaseRegistry } from "../../../../src/highcountry/rights/LeaseRegistry.sol";
 import { LicenseRegistry } from "../../../../src/highcountry/rights/LicenseRegistry.sol";
@@ -118,8 +119,11 @@ contract R049RightsTest {
 
     function setUp() public {
         rights = new RightsRegistry();
+        bindRetainedR04Emergency(address(rights));
         leases = new LeaseRegistry(address(rights));
+        bindRetainedR04Emergency(address(leases));
         licenses = new LicenseRegistry(address(rights));
+        bindRetainedR04Emergency(address(licenses));
         owner = new R049Actor();
         tenant = new R049Actor();
         stranger = new R049Actor();
@@ -221,3 +225,4 @@ contract R049RightsTest {
         require(!duplicate, "operation replay");
     }
 }
+

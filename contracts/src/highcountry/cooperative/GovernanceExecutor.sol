@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
+import {R04EmergencyConsumer} from "../security/R04EmergencyConsumer.sol";
+import {EmergencyDomains} from "../constants/EmergencyDomains.sol";
 import { CooperativeGovernance } from "./CooperativeGovernance.sol";
 
 /// @notice Executor can only set inert, nonfinancial cooperative policy metadata.
 /// @dev No generic external calls, wallet signing, custody, treasury or rights mutation.
-contract GovernanceExecutor {
+contract GovernanceExecutor is R04EmergencyConsumer {
     error Unauthorized();
     CooperativeGovernance public immutable governance;
     mapping(bytes32 => mapping(bytes32 => bytes32)) public policy;
@@ -19,7 +21,7 @@ contract GovernanceExecutor {
 
     function execute(
         bytes32 id
-    ) external {
+    ) external  r04Unrestricted(EmergencyDomains.COOPERATIVE_GOVERNANCE) {
         if (!governance.executable(id)) revert Unauthorized();
         (bytes32 coop, bytes32 action, bytes32 scope, bytes32 value) = governance.executionPayload(id);
         if (action != governance.ACTION_SET_POLICY() || scope == bytes32(0)) revert Unauthorized();
@@ -28,3 +30,4 @@ contract GovernanceExecutor {
         emit PolicySet(coop, scope, value, id);
     }
 }
+

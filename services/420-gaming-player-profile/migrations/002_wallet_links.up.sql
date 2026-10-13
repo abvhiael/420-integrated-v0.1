@@ -13,6 +13,7 @@ CREATE TABLE gaming_datastore.wallet_challenges (
   domain gaming_datastore.opaque_id NOT NULL,
   nonce text NOT NULL CHECK(nonce ~ '^[0-9a-f]{64}$'),
   consent_id gaming_datastore.opaque_id NOT NULL,
+  recovery_authorized boolean NOT NULL DEFAULT false,
   issued_at gaming_datastore.uint64 NOT NULL,
   expires_at gaming_datastore.uint64 NOT NULL,
   used_at gaming_datastore.uint64,

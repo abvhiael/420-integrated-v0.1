@@ -12,7 +12,13 @@ const chain=new FinalizedRpc({url:rpcUrl,chainId:420,contracts:{}});
 const accounts=await chain.request('eth_accounts',[]),operator=accounts[0].toLowerCase(),seller=accounts[1].toLowerCase(),buyer=accounts[2].toLowerCase();
 async function receipt(hash){
  for(let i=0;i<100;i++){
-  const r=await chain.request('eth_getTransactionReceipt',[hash]);if(r){assert.equal(r.status,'0x1');return r;}
+  const r=await chain.request('eth_getTransactionReceipt',[hash]);if(r){
+   if(r.status!=='0x1'){
+    const trace=await chain.request('debug_traceTransaction',[hash,{disableStorage:true,disableMemory:true,disableStack:true}]);
+    console.log(JSON.stringify({deploymentFailure:trace.returnValue,gas:trace.gas,lastOps:trace.structLogs?.slice(-10).map(x=>({op:x.op,pc:x.pc,error:x.error}))}));
+   }
+   assert.equal(r.status,'0x1');return r;}
+
   await new Promise(r=>setTimeout(r,100));
  }throw Error('receipt timeout');
 }

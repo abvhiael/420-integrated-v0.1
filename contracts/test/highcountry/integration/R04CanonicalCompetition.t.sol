@@ -158,7 +158,7 @@ contract R04CanonicalCompetitionTest is PublicPlantCapacityFixture {
         vm.warp(finalOpen+200);competition.finalize(F);cup.finalize(CUP);cup.issueCrossGame(CUP);
     }
     function testCanonicalHarvestCupSharedAttestationAndRevocation() public {
-        _finalCup();bytes32 payload=consumer.payload(CUP,SCOPE),id=keccak256("shared-cup-attestation");
+        _finalCup();bytes32 payload=consumer.payload(CUP,SCOPE);bytes32 id=keccak256("shared-cup-attestation");
         HighCountryCrossGame420 cross=HighCountryCrossGame420(address(consumer.crossGame()));
         sharedCross.issue(id,bridge.gameProfileIdOfGrower(myGrower),cross.global420CupSubject(),CUP,payload,0);
         require(consumer.eligible(myGrower,address(this),CUP,SCOPE,id),"canonical consumer denied");

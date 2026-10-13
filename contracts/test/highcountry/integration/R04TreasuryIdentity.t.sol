@@ -51,7 +51,7 @@ contract R04TreasuryIdentityTest is PublicPlantCapacityFixture {
         budget.setController(address(disbursements));
         budget.createBudget(BUDGET,keccak256("vault"),keccak256("category"),address(0x420),1000,
             uint64(block.timestamp),uint64(block.timestamp+1000),CIVIC,keccak256("metadata"));
-        uint64 notBefore=uint64(block.timestamp+1),expires=uint64(block.timestamp+900);
+        uint64 notBefore=uint64(block.timestamp+1);uint64 expires=uint64(block.timestamp+900);
         disbursement=disbursements.canonicalId(BUDGET,ALICE,100,notBefore,expires,CIVIC,keccak256("purpose"));
         disbursements.schedule(disbursement,BUDGET,ALICE,100,notBefore,expires,CIVIC,keccak256("purpose"));
         TreasuryRouter420 router=new TreasuryRouter420(address(budget),address(disbursements));

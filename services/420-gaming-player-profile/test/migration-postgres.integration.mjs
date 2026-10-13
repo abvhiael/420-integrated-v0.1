@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { Pool } from 'pg';
+import { execFileSync } from 'node:child_process';
 import { bootstrapDatastoreRoles,migrateDatastore } from '../src/schema-migrations.js';
 import { migrateWalletLinks } from '../src/wallet-link-migrations.js';
 import { migrateMigrationRuntime } from '../src/migration-runtime-migrations.js';
@@ -132,10 +133,48 @@ test('R05.3 real PostgreSQL durable save/outbox/receipt security',async t=>{
     assert.equal((await root.query(`SELECT count(*)::integer AS n FROM gaming_datastore.migration_applications
       WHERE migration_id='migrate-two'`)).rows[0].n,1);
   });
+  await t.test('independent worker process crash and expired lease recovery do not duplicate saves',async()=>{
+    const third={...intent,migrationId:'migrate-three',consentId:'migrate-consent-three',
+      sourceCommitment:h('a'),sourceRevision:'14',payloadHash:h('b')};
+    await repo.transaction(async tx=>{
+      await tx.recordConsent({consentId:third.consentId,purpose:'SAVE_MIGRATION',policyHash:P,
+        contextHash:migrationIntentDigest('alpha',G,third),nonceCommitment:nextNonce(),expiresAt:future});
+      await tx.prepareMigration(third);
+    });
+    const nextProof={...proof,migrationId:'migrate-three',claimId:'79',
+      sourceCommitment:third.sourceCommitment,sourceRevision:third.sourceRevision,
+      payloadHash:third.payloadHash,evidenceDigest:h('c')};
+    const recovered=new DurableMigrationCoordinator420({
+      operatorPool:workerB,
+      verifyBoundClaim:async()=>structuredClone(nextProof),
+      verifyReceipt:async({expected})=>{
+        if(expected.claim_id!=='79')throw Error('wrong-claim');
+        return {state:'FINALIZED',txHash:h('d'),blockHash:h('e'),receiptDigest:h('f')};
+      }});
+    await recovered.apply({accountId:'alpha',gameId:G,migrationId:'migrate-three',claimId:'79'});
+    const child=JSON.parse(execFileSync(process.execPath,
+      ['test/migration-worker-child.mjs'],{cwd:new URL('../',import.meta.url),
+        env:process.env,encoding:'utf8',timeout:15000}));
+    assert.equal(child.migration_id,'migrate-three');
+    assert.equal((await a.lease()).length,0);
+    await root.query(`UPDATE gaming_datastore.migration_outbox
+      SET lease_until=gaming_datastore.now_seconds()-1
+      WHERE migration_id='migrate-three'`);
+    const [retry]=await recovered.lease();
+    assert.equal(retry.migration_id,'migrate-three');
+    assert.notEqual(retry.lease_token,child.lease_token);
+    await assert.rejects(()=>recovered.reconcile({accountId:'alpha',gameId:G,
+      migrationId:'migrate-three',leaseToken:child.lease_token}),/migration-lease-invalid/);
+    assert.equal((await recovered.reconcile({accountId:'alpha',gameId:G,
+      migrationId:'migrate-three',leaseToken:retry.lease_token})).status,'RECONCILED');
+    assert.equal((await repo.transaction(tx=>tx.profile())).save_revision,'3');
+    assert.equal((await root.query(`SELECT count(*)::integer AS n FROM gaming_datastore.migration_applications
+      WHERE migration_id='migrate-three'`)).rows[0].n,1);
+  });
   await t.test('cancelled operation and forged verified claim cannot be applied',async()=>{
     await assert.rejects(()=>a.apply({accountId:'alpha',gameId:G,migrationId:'migrate-one',claimId:'78'}),
       /migration-binding-unavailable/);
-    assert.equal((await repo.transaction(tx=>tx.profile())).save_revision,'2');
+    assert.equal((await repo.transaction(tx=>tx.profile())).save_revision,'3');
   });
  }finally{for(const pool of pools.reverse())await pool.end();}
 });

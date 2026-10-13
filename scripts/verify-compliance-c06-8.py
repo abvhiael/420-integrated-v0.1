@@ -15,8 +15,12 @@ for name in pages:
   if name.startswith("compliance/web/"):continue
   raise SystemExit(f"missing browser surface {p}")
  s=p.read_text()
- for pattern in (r'<html[^>]+lang=',r'<meta[^>]+viewport',r'<main\b',r'<h1\b',r'focus-visible|style.css'):
+ for pattern in (r'<html[^>]+lang=',r'<meta[^>]+viewport',r'<main\b',r'<h1\b',r'focus-visible|stylesheet|style.css'):
   if not re.search(pattern,s,re.I):raise SystemExit(f"missing accessible structure {name}: {pattern}")
+ if name=="compliance/web/index.html":
+  css=(p.parent/"styles.css")
+  if not css.is_file() or ":focus-visible" not in css.read_text():
+   raise SystemExit("public stylesheet missing visible keyboard focus")
  if "private/" in name:
   if 'href="#main"' not in s:raise SystemExit(f"missing skip navigation: {name}")
   if 'role="status"' not in s and 'aria-live=' not in s:raise SystemExit(f"missing live feedback: {name}")

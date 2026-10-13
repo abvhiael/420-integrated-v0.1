@@ -21,7 +21,7 @@ export function fixture(pool,pairs,controls={now:100}) {
   const token=(role,subject,trip='dispatch_account')=>jwt(0,{sub:subject,purpose:'liftd_access',accountId:`${subject}_account`,sessionId:trip,deviceId:'dispatch_device',recoveryEpoch:0,exp:clock()+300});
   const transport=(i,purpose,fn)=>createSessionClient({endpoint:`https://dispatch-authority-${i}.example/verify`,credential:'test-only',transport:async(_,options)=>{
     if(controls.outage===i)throw Error('authority unavailable');
-    const r=JSON.parse(options.body);if(i===5)controls.afterTransport?.(r);return new Response(jwt(i,{purpose,...fn(r)}),{headers:{'content-type':'application/jwt'}});
+    const r=JSON.parse(options.body);if(i===5)controls.afterTransport?.(r);if(i===6)controls.afterFareRules?.(r);return new Response(jwt(i,{purpose,...fn(r)}),{headers:{'content-type':'application/jwt'}});
   }});
   const session=transport(1,'liftd_session_status',r=>{
     const role=r.subject.startsWith('driver_')?'driver':r.subject.startsWith('operator_')?'operator':'rider';

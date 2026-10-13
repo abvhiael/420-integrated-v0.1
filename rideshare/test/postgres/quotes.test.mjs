@@ -131,3 +131,16 @@ test('deterministic dispatch skips an unfunded long-pickup candidate and selects
   assert.equal((await app.tripStore.get('fare_candidate')).driverId,'driver_z_short');
   assert.equal((await pool.query("SELECT payload FROM liftd.trip_viability WHERE trip_id='fare_candidate'")).rows[0].payload.requiredSubsidyCents,0);
 });
+
+test('new signed session for the same rider under another account cannot read or accept the original quote',async()=>{
+  const {quote}=await app.prepare('fare_account_change');
+  const credential=app.jwt(0,{sub:'rider_fare',purpose:'liftd_access',accountId:'other_account',sessionId:'fare_account_change',deviceId:'other_device',recoveryEpoch:0});
+  await assert.rejects(()=>app.quoteService.get(credential,quote.quoteId),e=>e.code==='QUOTE_SCOPE_DENIED');
+  await assert.rejects(()=>app.consent(credential,quote),e=>e.code==='QUOTE_SCOPE_DENIED');
+  assert.equal((await pool.query('SELECT count(*)::int n FROM liftd.quote_consents WHERE quote_id=$1',[quote.quoteId])).rows[0].n,0);
+});
+test('quote expiry during a fresh fare-rule lookup rolls back affirmative consent',async()=>{
+  const {token,quote}=await app.prepare('fare_late_consent');controls.afterFareRules=()=>{controls.now=130;};
+  await assert.rejects(()=>app.consent(token,quote),e=>e.code==='QUOTE_EXPIRED');
+  assert.equal((await pool.query('SELECT count(*)::int n FROM liftd.quote_consents WHERE quote_id=$1',[quote.quoteId])).rows[0].n,0);
+});

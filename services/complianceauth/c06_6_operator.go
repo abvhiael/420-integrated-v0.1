@@ -91,6 +91,7 @@ func(o C066Operations)Halt(ctx context.Context,token,environment string)error{
  if err!=nil||o.Control==nil||environment==""{return ErrC066Denied}
  fresh,e:=o.authorize(ctx,token)
  if e!=nil||fresh!=s{return ErrC066Denied}
+ if o.Runtime!=nil {if environment!="production"||o.Runtime.Durable==nil{return ErrC066Denied};if o.Runtime.Durable.Halt(ctx,s.Scope,s.SubjectID)!=nil{return ErrC066Denied}}
  return o.Control.EmergencyHalt(environment,s.Scope.Domain,s.Scope.Jurisdiction)
 }
 // PublishScheduled delegates actual authority to the preexisting independent

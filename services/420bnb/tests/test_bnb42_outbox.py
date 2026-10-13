@@ -80,6 +80,7 @@ def test_poison_payload_rejected_and_unapproved_consumer(database):
 def test_wrong_worker_out_of_order_receipt_protection(database):
     with psycopg.connect(database) as c:
         eid=enqueue(c)
+    with psycopg.connect(database) as c:
         assert eid in [x["id"] for x in outbox.claim(c,"fence-worker",limit=100)]
         with pytest.raises(outbox.DeliveryError,match="LEASE_LOST"):
             outbox.acknowledge(c,eid,"wrong-worker","local","receipt")

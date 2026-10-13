@@ -2598,8 +2598,11 @@ def ingest_pay_failure(payload:PayFailureInput,x_pay_authority_proof:str|None=He
                 (payload.reservation_id,)).fetchone()
             if not row or row[0]!=payload.pay_invoice_id:
                 raise HTTPException(404,"PAY_INVOICE_NOT_FOUND")
+            reversal=payload.failure_code in ("reorg","finality_revoked")
             if row[1]=="finalized" or row[2]=="confirmed":
-                raise HTTPException(409,"FINALIZED_PAYMENT_REQUIRES_PAY_RECOVERY")
+                if (not reversal or proof.get("canonical_finality_revocation_verified") is not True or
+                    proof.get("original_pay_invoice_id")!=payload.pay_invoice_id):
+                    raise HTTPException(409,"FINALIZED_PAYMENT_REQUIRES_PAY_RECOVERY")
             digest=hashlib.sha256(payload.model_dump_json().encode()).hexdigest()
             prior=c.execute("""SELECT reservation_id,pay_invoice_id,failure_code,digest
                 FROM bnb_pay_failure_event WHERE pay_attempt_id=%s""",
@@ -2620,7 +2623,11 @@ def ingest_pay_failure(payload:PayFailureInput,x_pay_authority_proof:str|None=He
             c.execute("""UPDATE bnb_pay_intent SET state='recovery_required'
                 WHERE reservation_id=%s""",(payload.reservation_id,))
             c.execute("""UPDATE bnb_reservation SET status='recovery_required'
-                WHERE id=%s AND status='payment_pending'""",(payload.reservation_id,))
+                WHERE id=%s AND status IN ('payment_pending','confirmed')""",
+                (payload.reservation_id,))
+            # Preserve the confirmed hold as an inventory fence until Pay and
+            # independent dispute/recovery authority reconcile the reorganization.
+            # Do not reopen availability on an unfinalized reversal.
             c.execute("""INSERT INTO bnb_outbox(id,event_type,payload)
                 VALUES (%s,'bnb.pay.failure_requires_reconciliation',%s::jsonb)""",
                 (uuid4(),json.dumps({"reservation_id":str(payload.reservation_id),

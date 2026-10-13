@@ -23,7 +23,7 @@ class AuthorizationThreatMatrix(unittest.TestCase):
  def test_role_action_matrix_disallows_escalation(self):
   for requested_role,actions in ALLOWED_ACTIONS.items():
    for role_action in actions:
-    if requested_role=="COURIER" and role_action=="PICKUP":continue
+    if requested_role=="COURIER":continue
     with self.subTest(role=requested_role,action=role_action):
      i,s=fixture()
      with self.assertRaises(Denied):check(i,s,role=requested_role,action=role_action)

@@ -28,6 +28,12 @@ export function createHttpHandler(service) {
       let body;
       try { body = JSON.parse(new TextDecoder('utf-8', {fatal: true}).decode(Buffer.concat(chunks))); }
       catch { throw new AuthError('INVALID_REQUEST', 400); }
+      const commandId = request.headers.get('idempotency-key');
+      if (commandId !== null) {
+        if (!/^[A-Za-z0-9_-]{1,128}$/.test(commandId) || !body || typeof body !== 'object' || Array.isArray(body) ||
+          (body.commandId !== undefined && body.commandId !== commandId)) throw new AuthError('INVALID_REQUEST', 400);
+        body.commandId = commandId;
+      }
       return match[2] ? reply(200, await service.transition(token, match[1], body)) : reply(201, await service.create(token, body));
     } catch (error) {
       if (error instanceof AuthError) return reply(error.status, {error: error.code});

@@ -24,3 +24,12 @@ Repository branch `audit/bnb-phase4-bnb-4-1-baseline-20261013`, draft unmerged P
 ## Invariants and gates
 
 `travel.bnb_booking=false`. All named T-BNB testnet gates unchanged. No BNB custody, self-issued payment/Wallet consent, provider finality, refund execution, outside messaging or live booking approval. Do not merge PR #631. BNB-4.7 Level 2 follows only a qualified BNB-4.6; BNB-4.12 Level 3 remains the sole full-repository qualification milestone.
+
+## Continuation — Pay authority and recovery hardening (2026-10-13)
+
+- The Pay disbursement refund pathway now additionally checks independently signed `original_payer_subject`, `original_pay_invoice_id`, `original_pay_payment_id`, and `original_payer_recipient_verified` against the persisted immutable Pay intent. Merely claiming `original_payer_refund=true` is insufficient.
+- Canonically verified 420Pay `reorg`/`finality_revoked` failure events may move an already-confirmed reservation and Pay intent to `recovery_required` only if the external authority independently attests finality revocation and the invoice matches. Inventory remains fenced by the previously confirmed hold, rather than being silently offered again.
+- App-local saga negative tests now cover recovery-required finality, refund overdraw and reserved (not finalized) payout liability.
+- Latest executable SHA: `d10c48da832974b3567207ab2fd11c87f49bc0ad`. Latest observed Runtime Slice: [38474917611](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38474917611) **PENDING** at inspection, not PASS. Nine retained app checks were queued. Intentionally skipped Docs and unrelated global failures are not BNB Level 1 pass evidence.
+- **Remaining before PASS:** verified full dispute/refund saga transitions and resolution, independent Pay reorganization recovery/compensation logic, database-backed concurrency/IDOR and signed-evidence integration tests, terminal exact-SHA workflow results and evidence certificate.
+- Maintain **INCOMPLETE**, no M4-A advancement, no deployment and no PR merge.

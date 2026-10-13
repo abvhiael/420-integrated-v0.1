@@ -3552,8 +3552,15 @@ def host_casework_view(reservation_id:UUID,authorization:str|None=Header(None)):
         row=c.execute("""SELECT p.host_subject,r.status,r.property_id
             FROM bnb_reservation r JOIN bnb_property p ON p.id=r.property_id
             WHERE r.id=%s""",(reservation_id,)).fetchone()
-        if not row or row[0]!=actor:
-            raise HTTPException(404,"NOT_FOUND")
+        if not row:raise HTTPException(404,"NOT_FOUND")
+        if actor!=row[0]:
+            manager=c.execute("""SELECT 1 FROM bnb_property_grant g
+                JOIN bnb_account a ON a.subject=g.grantee_subject
+                WHERE g.property_id=%s AND g.grantee_subject=%s
+                AND g.capability='view_reservations' AND g.revoked_at IS NULL
+                AND g.expires_at>now() AND a.state='active'""",
+                (row[2],actor)).fetchone()
+            if not manager:raise HTTPException(404,"NOT_FOUND")
         cases=c.execute("""SELECT case_id,revision,event_state,resolution,
             payout_release_authorized FROM (
                 SELECT DISTINCT ON (case_id) case_id,revision,event_state,

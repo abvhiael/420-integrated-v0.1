@@ -79,7 +79,9 @@ def test_signed_moderation_appeal_and_read_exclude_all_conflicted_reviewers(repo
     assert completed["state"]=="upheld"
     for actor in ("reviewer-a","reviewer-b","m48-review-host"):
         token_claims[actor+"-read"]={"sub":actor,"report_id":str(rid),
-                                   "casework_scope":"read"}
+                                   "casework_scope":"read",
+                                   "current_reviewer_grant_verified":True,
+                                   "reviewer_revoked":False}
         with pytest.raises(HTTPException) as exc:
             api.independent_abuse_case_view(rid,actor+"-read")
         assert exc.value.status_code==403

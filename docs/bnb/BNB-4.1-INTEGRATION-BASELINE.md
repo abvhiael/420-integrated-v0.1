@@ -58,10 +58,10 @@
 - [x] Inventory real API, source modules, PostgreSQL ledger (21 migrations), production components and app-scoped CI.
 - [x] Map every external authority/gate and preserve activation prohibitions, no new issuer permissions.
 - [x] Implement scoped repository-verifier `services/420bnb/tests/test_bnb41_phase4_baseline.py`.
-- [ ] **Exact-SHA Level 1 app CI** — require GitHub `420BnB Runtime Slice` SUCCESS on the final changed test SHA. Record run/job IDs and actual checkout before claiming BNB-4.1 Level 1 COMPLETE. If CI fails, diagnose; do not waive failing scope.
-- [ ] Refresh main comparison immediately before certificate closeout and record evidence-only HEAD.
-- [ ] Confirm required final source lines/routes in CI and correct any stale assertion rather than weakening protection.
+- [x] **Exact-SHA Level 1 app CI:** `420BnB Runtime Slice` terminal SUCCESS on the final verifier/evidence head; job/run IDs and 238 passing tests recorded below.
+- [x] Refresh main comparison immediately before certificate closeout: 3 ahead / 0 behind; evidence-only HEAD `65f7e74968b016eb1b6d4c8b1d963d9075fd81d0` before this document-only closeout commit.
+- [x] Confirm required source lines/routes, all 17 preserved testnet gate references and active application boundaries through successful CI-scoped verifier and complete retained app suite.
 
-**Current state: implementation and documentation prepared; Level 1 exact-SHA CI PENDING until terminal result.** BNB-4.1 must not be treated as fully qualified on preliminary evidence.
+**Final BNB-4.1 disposition: COMPLETE / repository Level 1 PASS.** Qualified verifier implementation SHA `a562181a1a0a3d6bb05df401c8182f7a1f768152`; scoped evidence/documentation SHA `65f7e74968b016eb1b6d4c8b1d963d9075fd81d0` inherited the exact executable SHA without changing tests, workflow, dependencies, config or requirements. **420BnB Runtime Slice run [38438330218](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38438330218), job `115438572350`: terminal SUCCESS on exact evidence head.** Logs confirmed 8 operations/migration tests PASSED and 230 runtime/API/security tests PASSED (**238 total; zero failures**), plus browser, package, backup/restore, restricted infra and runtime smoke checks. All 9/9 retained BNB app checks terminal SUCCESS on the exact evidence head (run IDs listed in PR #631). GitHub comparison of branch to `main` at closeout: **3 ahead, 0 behind**, only this scoped verifier and evidence file differ. Docs run `38438330005` SKIPPED and unrelated Oracle activity were not counted as required Level 1 passes. M4-A/M4-B and global Level 3 remain future milestone obligations. All real testnet/legal/operator approvals remain blocked/deferred; live booking and Pay disabled. Final certificate is evidence-only and may inherit the exact qualified code SHA.
 
 **Next canonical step after successful Level 1 certification:** **BNB-4.2 — Durable notifications and outbox delivery**.

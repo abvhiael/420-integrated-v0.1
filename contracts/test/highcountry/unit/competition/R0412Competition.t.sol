@@ -27,8 +27,11 @@ contract R0412Player {
 }
 contract R0412CompetitionTest {
     VmR0412 constant vm=VmR0412(address(uint160(uint256(keccak256("hevm cheat code")))));
-    bytes32 constant SEASON=keccak256("season"),BASE=keccak256("base"),OPTIONAL=keccak256("optional");
-    bytes32 constant EVENT=keccak256("event"),SCOPE=keccak256("optional-pass");
+    bytes32 constant SEASON=keccak256("season");
+    bytes32 constant BASE=keccak256("base");
+    bytes32 constant OPTIONAL=keccak256("optional");
+    bytes32 constant EVENT=keccak256("event");
+    bytes32 constant SCOPE=keccak256("optional-pass");
     SeasonRegistry seasons; CompetitionTemplateRegistry templates; CompetitionEngine engine;
     R0412Evidence evidence;R0412Entitlement entitlement;R0412Player alice;R0412Player bob;
     uint64 opens;uint64 closes;uint64 challenge;

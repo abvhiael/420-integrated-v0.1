@@ -37,12 +37,12 @@ export function createHighCountryWalletService420({authority,poolForPrincipal,cl
     return c;
   };
   async function issue(token,input,{recovery=false}={}) {
-    shape(input,recovery?['wallet','chainId','consentId','policyHash','recoveryProof']:
-      ['wallet','chainId','consentId','policyHash']);
-    if(!wallet(input.wallet)||!opaque(input.consentId)||!commitment(input.policyHash))err('invalid-request');
+    shape(input,recovery?['wallet','chainId','consentId','policyHash','recoveryProof','consentAccepted']:
+      ['wallet','chainId','consentId','policyHash','consentAccepted']);
+    if(!wallet(input.wallet)||!opaque(input.consentId)||!commitment(input.policyHash)||input.consentAccepted!==true)err('invalid-request');
     const id=chainId(input.chainId);
-    await client(id);
     const {service,accountId}=await scoped(token);
+    await client(id);
     if(recovery) {
       if(typeof verifyRecoveryProof!=='function')err('recovery-disabled');
       const proof=await verifyRecoveryProof({accountId,gameId:authority.gameId,token,proof:input.recoveryProof});
@@ -50,7 +50,7 @@ export function createHighCountryWalletService420({authority,poolForPrincipal,cl
     }
     const challenge={challengeId:randomUUID(),wallet:input.wallet.toLowerCase(),chainId:id,
       domain,nonce:randomBytes(32).toString('hex'),consentId:input.consentId,
-      policyHash:input.policyHash,issuedAt:String(Math.floor(Date.now()/1000)),expiresAt:String(Math.floor(Date.now()/1000)+300)};
+      policyHash:input.policyHash,recoveryAuthorized:recovery,issuedAt:String(Math.floor(Date.now()/1000)),expiresAt:String(Math.floor(Date.now()/1000)+300)};
     // Server-computed consent context commits to the actual issued challenge.
     const prepared={challenge_id:challenge.challengeId,wallet:challenge.wallet,chain_id:id,
       domain,nonce:challenge.nonce,issued_at:challenge.issuedAt,expires_at:challenge.expiresAt};

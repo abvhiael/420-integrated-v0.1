@@ -1066,8 +1066,11 @@ def moderate_abuse_report(report_id:UUID,payload:AbuseReportDecision,
         raise HTTPException(403,"ABUSE_DECISION_SCOPE_MISMATCH")
     with db() as c:
         with c.transaction():
-            report=c.execute("""SELECT property_id,status FROM bnb_abuse_report
-                WHERE id=%s""",(report_id,)).fetchone()
+            report=c.execute("""SELECT ar.property_id,ar.status,ar.reporter_subject,
+                p.host_subject FROM bnb_abuse_report ar JOIN bnb_property p
+                  ON p.id=ar.property_id WHERE ar.id=%s""",(report_id,)).fetchone()
+            if report and proof.get("sub") in (report[2],report[3]):
+                raise HTTPException(403,"INDEPENDENT_CASE_REVIEWER_REQUIRED")
             if not report:raise HTTPException(404,"NOT_FOUND")
             c.execute("SELECT id FROM bnb_property WHERE id=%s FOR UPDATE",(report[0],))
             status=c.execute("SELECT status FROM bnb_abuse_report WHERE id=%s FOR UPDATE",
@@ -1149,7 +1152,9 @@ def decide_moderation_appeal(appeal_id:UUID,payload:ModerationAppealDecision,
                 WHERE a.id=%s FOR UPDATE OF a""",(appeal_id,)).fetchone()
             if not row:raise HTTPException(404,"NOT_FOUND")
             if row[1]!="pending":raise HTTPException(409,"APPEAL_DECISION_ALREADY_FINAL")
-            if proof.get("sub") in (row[3],row[4]):
+            host=c.execute("SELECT host_subject FROM bnb_property WHERE id=%s",
+                           (row[2],)).fetchone()
+            if proof.get("sub") in (row[3],row[4],host[0] if host else None):
                 raise HTTPException(403,"INDEPENDENT_APPEAL_REVIEWER_REQUIRED")
             if c.execute("""SELECT 1 FROM bnb_moderation_appeal_decision_nonce
                 WHERE issuer=%s AND jti=%s""",(proof["iss"],proof["jti"])).fetchone():

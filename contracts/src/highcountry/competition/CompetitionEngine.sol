@@ -57,7 +57,7 @@ contract CompetitionEngine {
     }
     function enter(bytes32 id) external {
         EventData storage e=events[id];
-        if(e.organizer==address(0)||e.cancelled||e.finalized||block.timestamp<e.opens||block.timestamp>=e.closes
+        if(e.organizer==address(0)||e.cancelled||e.finalized||!_seasonNotCancelled(e.season)||block.timestamp<e.opens||block.timestamp>=e.closes
           ||entered[id][msg.sender]||entrants[id].length>=128) revert Unauthorized();
         (,,bytes32 scope)=_template(e.templateId);
         if(scope!=bytes32(0) && (address(entitlements).code.length==0||!entitlements.eligible(msg.sender,scope))) revert Unauthorized();
@@ -71,7 +71,7 @@ contract CompetitionEngine {
     /// @notice Attestation is queried from an independently wired canonical finality verifier.
     function submit(bytes32 id,bytes32 harvestId,uint16 qualityBps,uint64 finalizedAt) external {
         EventData memory e=events[id];
-        if(!entered[id][msg.sender]||e.cancelled||block.timestamp>=e.closes||block.timestamp<e.opens
+        if(!entered[id][msg.sender]||e.cancelled||!_seasonNotCancelled(e.season)||block.timestamp>=e.closes||block.timestamp<e.opens
           ||harvestId==bytes32(0)||qualityBps>10000||finalizedAt>block.timestamp
           ||results[id][msg.sender].exists||harvested[id][harvestId]) revert Unauthorized();
         (,,bytes32 scope)=_template(e.templateId);
@@ -90,11 +90,13 @@ contract CompetitionEngine {
     }
     function finalize(bytes32 id) external {
         EventData storage e=events[id];
-        if(e.organizer==address(0)||e.cancelled||e.finalized||block.timestamp<e.challengeDeadline) revert Unauthorized();
+        if(e.organizer==address(0)||e.cancelled||e.finalized||!_seasonNotCancelled(e.season)||block.timestamp<e.challengeDeadline) revert Unauthorized();
         address best;uint16 score;uint64 earliest=type(uint64).max;bytes32 bestHarvest=bytes32(type(uint256).max);
         for(uint256 i;i<entrants[id].length;i++){
             address player=entrants[id][i];Result memory r=results[id][player];
             if(!r.exists||r.rejected)continue;
+            (,,bytes32 scope)=_template(e.templateId);
+            if(scope!=bytes32(0)&&!entitlements.eligible(player,scope))continue;
             // Revalidation fails closed if canonicality has since been revoked.
             if(!evidence.verifiedFlower(r.harvestId,player,r.qualityBps,r.finalizedAt))continue;
             if(best==address(0)||r.qualityBps>score
@@ -104,6 +106,15 @@ contract CompetitionEngine {
             }
         }
         e.finalized=true;winners[id]=best;winnerScore[id]=score;emit Finalized(id,best,score);
+    }
+    function _seasonNotCancelled(bytes32 id) internal view returns(bool) {
+        (,,address authority,,bool cancelled)=seasons.seasons(id);
+        return authority!=address(0)&&!cancelled;
+    }
+    function cancel(bytes32 id) external {
+        EventData storage e=events[id];
+        if(e.organizer!=msg.sender||e.cancelled||e.finalized||block.timestamp>=e.opens) revert Unauthorized();
+        e.cancelled=true;
     }
     function entrantAt(bytes32 id,uint256 index) external view returns(address){return entrants[id][index];}
 }

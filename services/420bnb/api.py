@@ -2756,6 +2756,20 @@ def ingest_pay_disbursement(payload:PayDisbursementInput,
                 FROM bnb_settlement_split WHERE reservation_id=%s FOR UPDATE""",
                 (payload.reservation_id,)).fetchone()
             if not split:raise HTTPException(409,"SPLIT_NOT_AUTHORIZED")
+            # Pay-signed financial instructions remain authoritative, but BnB
+            # must not admit fresh non-refund liability while a booking's
+            # canonical Pay finality is under dispute/reorganization recovery.
+            financial_state=c.execute("""SELECT r.status,i.state
+                FROM bnb_reservation r JOIN bnb_pay_intent i
+                  ON i.reservation_id=r.id
+                WHERE r.id=%s FOR UPDATE OF r,i""",
+                (payload.reservation_id,)).fetchone()
+            if (not financial_state or
+                financial_state!=("confirmed","finalized")):
+                if payload.kind!="refund":
+                    raise HTTPException(409,"PAY_RECOVERY_PAYOUT_FROZEN")
+                if proof.get("pay_recovery_refund_approved") is not True:
+                    raise HTTPException(403,"PAY_RECOVERY_REFUND_AUTHORITY_REQUIRED")
             if (split[8]!=payload.chain_id or split[9]!=payload.asset or
                 split[10]!=payload.policy_version):
                 raise HTTPException(409,"DISBURSEMENT_ASSET_POLICY_MISMATCH")

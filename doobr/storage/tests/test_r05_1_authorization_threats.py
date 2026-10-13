@@ -40,7 +40,6 @@ class AuthorizationThreatMatrix(unittest.TestCase):
    i,s=fixture();i.verify.return_value=replace(i.verify.return_value,**updates)
    with self.subTest(name=name),self.assertRaises(Denied):check(i,s)
   for name,updates in [
-   ("actor_grant_stolen",{"actor_id":"stolen-actor"}),
    ("token_replay",{"token_id":"replayed"}),
    ("issuer_switch",{"issuer":"wrong"}),
    ("subject_switch",{"subject":"other"}),
@@ -48,10 +47,6 @@ class AuthorizationThreatMatrix(unittest.TestCase):
    ("revoked",{"revoked":True}),
    ("expired",{"expires_at":NOW})]:
    i,s=fixture();s.resolve.return_value=replace(s.resolve.return_value,**updates)
-   if name=="actor_grant_stolen":
-    # An untrusted store that returns grants for an actor does not prove actor ownership:
-    # the trusted store MUST establish actor/session binding.
-    continue
    with self.subTest(name=name),self.assertRaises(Denied):check(i,s)
  def test_cross_tenant_and_resource_horizontal_access(self):
   i,s=fixture()

@@ -135,7 +135,7 @@ def test_reputation_withdrawn_state_and_receipt_replay(records):
 
 def test_bnb39_appeal_replay_independent_decision_and_retention_hold(records,monkeypatch):
     with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
-        c.execute("UPDATE bnb_abuse_report SET status='accepted' WHERE id=%s",
+        c.execute("UPDATE bnb_abuse_report SET status='accepted',decided_by='original-moderator' WHERE id=%s",
                   (records["abuse"],))
     monkeypatch.setattr(api,"active_subject",lambda token:records["guest"])
     route=f"/v1/bnb/abuse-reports/{records['abuse']}/appeals"
@@ -154,11 +154,15 @@ def test_bnb39_appeal_replay_independent_decision_and_retention_hold(records,mon
                          (records["abuse"],)).fetchone()[0]=="appeal"
     decision=f"/v1/bnb/internal/appeals/{appeal_id}/decision"
     monkeypatch.setattr(api,"verify_authority",lambda token,prefix,purpose:{
-        "iss":"https://reviewer.example","sub":records["guest"] if token=="self" else "independent-reviewer",
+        "iss":"https://reviewer.example","sub":records["guest"] if token=="self" else
+        ("original-moderator" if token=="original" else "independent-reviewer"),
         "jti":token,"appeal_id":appeal_id,"decision":"upheld"})
     rejected=client.post(decision,json={"decision":"upheld"},
                          headers={"x-guest-review-proof":"self"})
     assert rejected.status_code==403
+    original=client.post(decision,json={"decision":"upheld"},
+                         headers={"x-guest-review-proof":"original"})
+    assert original.status_code==403
     resolved=client.post(decision,json={"decision":"upheld"},
                          headers={"x-guest-review-proof":"independent"})
     assert resolved.status_code==200,resolved.text

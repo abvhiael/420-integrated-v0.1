@@ -138,10 +138,10 @@ func c071EncryptExisting(ctx context.Context,tx *sql.Tx,c *C071Cipher)error{
  for _,x:=range batch{
   aad:=c071AAD("audit",x.s,x.caseID+"|"+x.actor+"|"+x.evidence,0);var e c071Envelope;_ =json.Unmarshal([]byte(x.purpose),&e)
   purpose:=x.purpose
-  if e.Version==1{plain,openErr:=c.open([]byte(x.purpose),aad);if openErr!=nil||json.Unmarshal(plain,&purpose)!=nil{return ErrC071Storage}}
+  if e.Version==1{plain,openErr:=c.openContext(ctx,[]byte(x.purpose),aad);if openErr!=nil||json.Unmarshal(plain,&purpose)!=nil{return ErrC071Storage}}
   if purpose!="LEGAL_AUDIT"&&purpose!="INCIDENT_REVIEW"&&purpose!="SOURCE_VERIFICATION"{return ErrC071Storage}
   if e.Version==1{continue}
-  encrypted,err:=c071Encode(c,purpose,aad);if err!=nil{return err}
+  encrypted,err:=c071EncodeContext(ctx,c,purpose,aad);if err!=nil{return err}
   if _,err=tx.ExecContext(ctx,"UPDATE public.compliance_auditor_access SET purpose=$1 WHERE id=$2",string(encrypted),x.id);err!=nil{return ErrC071Storage}
  }
  return nil

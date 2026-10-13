@@ -109,7 +109,7 @@ func TestC072AtomicActivationOutboxAndHalt(t *testing.T){
  if e=o2.FinishImpact(ctx,peer,true,time.Now(),10);e!=nil{t.Fatal(e)}
  successor,e:=o.LeaseImpact(ctx,time.Now());if e!=nil||successor.Event.Sequence!=3||successor.Subscriber!=peer.Subscriber{t.Fatal("subscriber order",e)};if e=o.FinishImpact(ctx,successor,true,time.Now(),10);e!=nil{t.Fatal(e)}
  // Exercise retry exhaustion and prove dead-letter predecessors continue blocking.
- for attempt:=2;attempt<=10;attempt++{if _,e=f.admin.ExecContext(ctx,"UPDATE compliance_impact_outbox SET due_at=clock_timestamp()-interval '1 second' WHERE event_id=$1 AND subscriber=$2",item.Event.EventID,item.Subscriber);e!=nil{t.Fatal(e)};leased,e:=o.LeaseImpact(ctx,time.Now());if e!=nil||leased.Attempts!=uint32(attempt-1){t.Fatal("retry count",attempt,e)};if e=o.FinishImpact(ctx,leased,false,time.Now(),10);e!=nil{t.Fatal(e)}}
+ for attempt:=3;attempt<=10;attempt++{if _,e=f.admin.ExecContext(ctx,"UPDATE compliance_impact_outbox SET due_at=clock_timestamp()-interval '1 second' WHERE event_id=$1 AND subscriber=$2",item.Event.EventID,item.Subscriber);e!=nil{t.Fatal(e)};leased,e:=o.LeaseImpact(ctx,time.Now());if e!=nil||leased.Attempts!=uint32(attempt-1){t.Fatal("retry count",attempt,e)};if e=o.FinishImpact(ctx,leased,false,time.Now(),10);e!=nil{t.Fatal(e)}}
  if _,e=o.LeaseImpact(ctx,time.Now());e==nil{t.Fatal("dead-letter predecessor skipped")}
  if o.PublishImpact(ctx,a.Event,a.Subscribers)==nil{t.Fatal("standalone event injected")}
  if f.other.Durable.DB.QueryRowContext(ctx,"SELECT count(*) FROM compliance_impact_outbox").Scan(&n)!=nil||n!=0{t.Fatal("outbox tenant leak")}

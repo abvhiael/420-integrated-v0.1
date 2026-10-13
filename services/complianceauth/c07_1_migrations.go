@@ -100,14 +100,24 @@ func MigrateC071Database(ctx context.Context,db *sql.DB,c *C071Cipher)error{
 func c071EncryptExisting(ctx context.Context,tx *sql.Tx,c *C071Cipher)error{
  for _,table:=range []string{"compliance_author_versions","compliance_review_versions"}{
   column,revision,kind:="document","revision","author";if table=="compliance_review_versions"{column,revision,kind="record","review_revision","review"}
-  rows,err:=tx.QueryContext(ctx,"SELECT tenant,domain,jurisdiction,draft_id,"+revision+","+column+" FROM public."+table+" FOR UPDATE");if err!=nil{return ErrC071Storage}
-  type item struct{s C064AuthorScope;id string;rev uint64;raw []byte};var batch []item;totalBytes:=0
-  for rows.Next(){var x item;if rows.Scan(&x.s.Tenant,&x.s.Domain,&x.s.Jurisdiction,&x.id,&x.rev,&x.raw)!=nil{rows.Close();return ErrC071Storage};batch=append(batch,x);totalBytes+=len(x.raw);if len(batch)>100000||totalBytes>67108864{rows.Close();return ErrC071Storage}}
+  draftRevision:=revision;if kind=="review"{draftRevision="draft_revision"}
+  rows,err:=tx.QueryContext(ctx,"SELECT tenant,domain,jurisdiction,draft_id,"+revision+",document_digest,"+draftRevision+","+column+" FROM public."+table+" FOR UPDATE");if err!=nil{return ErrC071Storage}
+  type item struct{s C064AuthorScope;id,digest string;rev,draftRev uint64;raw []byte};var batch []item;totalBytes:=0
+  for rows.Next(){var x item;if rows.Scan(&x.s.Tenant,&x.s.Domain,&x.s.Jurisdiction,&x.id,&x.rev,&x.digest,&x.draftRev,&x.raw)!=nil{rows.Close();return ErrC071Storage};batch=append(batch,x);totalBytes+=len(x.raw);if len(batch)>100000||totalBytes>67108864{rows.Close();return ErrC071Storage}}
   err=rows.Err();rows.Close();if err!=nil{return ErrC071Storage}
   for _,x:=range batch{
    aad:=c071AAD(kind,x.s,x.id,x.rev);var e c071Envelope;_ = json.Unmarshal(x.raw,&e)
-   if e.Version==1{if _,err=c.open(x.raw,aad);err!=nil{return err};continue}
-   encrypted,err:=c.seal(x.raw,aad);if err!=nil{return err}
+   plain:=x.raw
+   if e.Version==1{plain,err=c.open(x.raw,aad);if err!=nil{return err}}
+   if kind=="author"{
+    var doc C064DraftVersion
+    if json.Unmarshal(plain,&doc)!=nil||doc.Scope!=x.s||doc.ID!=x.id||doc.Revision!=x.rev||doc.DocumentDigest!=x.digest||doc.DocumentDigest!=c064DocumentDigest(doc.Schema,doc.Citations)||!c064SchemaValid(doc.Schema,x.id,x.s)||!c064ID.MatchString(doc.AuthorID){return ErrC071Storage}
+   }else{
+    var record C065ReviewRecord
+    if json.Unmarshal(plain,&record)!=nil||record.Scope!=x.s||record.DraftID!=x.id||record.Revision!=x.draftRev||record.DocumentDigest!=x.digest||!digestValid(record.DocumentDigest)||!digestValid(record.ImpactDigest)||!c064ID.MatchString(record.ReviewerID)||record.At.IsZero()||!c065FindingsValid(record.Findings,record.ConflictIDs,record.State){return ErrC071Storage}
+   }
+   if e.Version==1{continue}
+   encrypted,err:=c.seal(plain,aad);if err!=nil{return err}
    if _,err=tx.ExecContext(ctx,"UPDATE public."+table+" SET "+column+"=$1 WHERE tenant=$2 AND domain=$3 AND jurisdiction=$4 AND draft_id=$5 AND "+revision+"=$6",string(encrypted),x.s.Tenant,x.s.Domain,x.s.Jurisdiction,x.id,x.rev);err!=nil{return ErrC071Storage}
   }
  }
@@ -117,8 +127,11 @@ func c071EncryptExisting(ctx context.Context,tx *sql.Tx,c *C071Cipher)error{
  err=rows.Err();rows.Close();if err!=nil{return ErrC071Storage}
  for _,x:=range batch{
   aad:=c071AAD("audit",x.s,x.caseID+"|"+x.actor+"|"+x.evidence,0);var e c071Envelope;_ =json.Unmarshal([]byte(x.purpose),&e)
-  if e.Version==1{if _,err=c.open([]byte(x.purpose),aad);err!=nil{return err};continue}
-  encrypted,err:=c071Encode(c,x.purpose,aad);if err!=nil{return err}
+  purpose:=x.purpose
+  if e.Version==1{plain,openErr:=c.open([]byte(x.purpose),aad);if openErr!=nil||json.Unmarshal(plain,&purpose)!=nil{return ErrC071Storage}}
+  if purpose!="LEGAL_AUDIT"&&purpose!="INCIDENT_REVIEW"&&purpose!="SOURCE_VERIFICATION"{return ErrC071Storage}
+  if e.Version==1{continue}
+  encrypted,err:=c071Encode(c,purpose,aad);if err!=nil{return err}
   if _,err=tx.ExecContext(ctx,"UPDATE public.compliance_auditor_access SET purpose=$1 WHERE id=$2",string(encrypted),x.id);err!=nil{return ErrC071Storage}
  }
  return nil

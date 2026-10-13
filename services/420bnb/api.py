@@ -15,6 +15,7 @@ sys.path.insert(0,str(Path(__file__).resolve().parent))
 from identity import verify_external_token
 from authority import verify_authority
 from calendar_engine import peak_used,strict_local_instant,local_stay_window
+from availability_projection import refresh as refresh_availability_projection
 from pricing import quote_breakdown
 from travel_location import resolve_public_place, TravelLocationUnavailable
 from fastapi import FastAPI, Header, HTTPException, Response
@@ -1299,6 +1300,26 @@ def guest_availability(property_id:str,start:datetime,end:datetime):
             "units":result,"nonbinding":True,
             "as_of":datetime.now(timezone.utc).isoformat()}
 
+
+
+@app.get("/v1/bnb/availability/projected")
+def projected_availability(property_id:UUID,start:datetime,end:datetime):
+    """Nonbinding, revisioned live-source projection; refreshes under property lock.
+
+    The read model never grants calendar/provider authority or admits a booking.
+    """
+    validate_window(start,end)
+    with db() as c:
+        with c.transaction():
+            prop=c.execute("SELECT status,capacity FROM bnb_property WHERE id=%s",(property_id,)).fetchone()
+            if not prop or prop[0]!="published":raise HTTPException(404,"NOT_FOUND")
+            units=c.execute("SELECT id FROM bnb_unit WHERE property_id=%s ORDER BY id LIMIT 101",(property_id,)).fetchall()
+            if len(units)>100:raise HTTPException(422,"PROJECTION_UNIT_LIMIT")
+            current=[x[0] for x in units] if units else [None]
+            result=[refresh_availability_projection(c,property_id,uid,start,end,occupancy=occupancy_in_window)
+                    for uid in current]
+    return {"property_id":str(property_id),"units":result,"nonbinding":True,
+            "start":start.isoformat(),"end":end.isoformat()}
 
 @app.get("/v1/bnb/availability/local")
 def guest_local_availability(property_id:str,checkin:str,checkout:str):

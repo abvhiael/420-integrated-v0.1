@@ -22,9 +22,9 @@ def connected():
 
 def test_migration_repeatable_and_checksums(connected):
     with psycopg.connect(connected) as c:
-        assert apply(c)==20
+        assert apply(c)==21
         rows=c.execute("SELECT version,filename,sha256 FROM bnb_schema_migration ORDER BY version").fetchall()
-    assert len(rows)==20
+    assert len(rows)==21
     for i,(version,name,digest) in enumerate(rows,1):
         assert version==i
         assert hashlib.sha256((MIGRATIONS/name).read_bytes()).hexdigest()==digest
@@ -35,9 +35,9 @@ def test_multi_instance_migration_serialization(connected):
         with psycopg.connect(connected) as c:
             return apply(c)
     with ThreadPoolExecutor(max_workers=4) as pool:
-        assert list(pool.map(run,range(4)))==[20]*4
+        assert list(pool.map(run,range(4)))==[21]*4
     with psycopg.connect(connected) as c:
-        assert c.execute("SELECT count(*) FROM bnb_schema_migration").fetchone()[0]==20
+        assert c.execute("SELECT count(*) FROM bnb_schema_migration").fetchone()[0]==21
 
 
 def test_tampered_migration_rejected_without_mutation(connected,tmp_path):
@@ -50,7 +50,7 @@ def test_tampered_migration_rejected_without_mutation(connected,tmp_path):
         with pytest.raises(RuntimeError,match="MIGRATION_DRIFT"):
             apply(c,directory=tmp_path)
     with psycopg.connect(connected) as c:
-        assert c.execute("SELECT count(*) FROM bnb_schema_migration").fetchone()[0]==20
+        assert c.execute("SELECT count(*) FROM bnb_schema_migration").fetchone()[0]==21
 
 
 def test_untracked_schema_not_silently_adopted(connected):
@@ -70,8 +70,8 @@ def test_readiness_schema_guard(connected):
     spec.loader.exec_module(api)
     client=TestClient(api.app)
     healthy=client.get("/health/ready")
-    assert healthy.status_code==200,healthy.text
-    assert healthy.json()["schema_version"]==20
+    assert healthy.status_code==210,healthy.text
+    assert healthy.json()["schema_version"]==21
     original=api.db
     class Cursor:
         def execute(self,sql,*_):

@@ -6,6 +6,7 @@ import (
  "errors"
  "net/url"
  "os"
+ "strconv"
  "strings"
  "time"
 )
@@ -27,7 +28,16 @@ func ValidProductionDSN(raw string)error{
  password,ok:=u.User.Password()
  if !ok||password==""||u.Query().Get("sslmode")!="verify-full"||u.Query().Get("sslrootcert")==""||u.Query().Get("connect_timeout")==""||
  strings.ContainsAny(raw,"\n\r") {return ErrPublicationStale}
- if _,err:=os.Stat(u.Query().Get("sslrootcert"));err!=nil{return ErrPublicationStale}
+ if u.User.Username()==""||len(raw)>8192||len(password)>4096||strings.ContainsAny(password,"\x00\r\n")||strings.ContainsAny(u.Hostname(),",%\\"){return ErrPublicationStale}
+ query,err:=url.ParseQuery(u.RawQuery);if err!=nil{return ErrPublicationStale}
+ allowed:=map[string]bool{"sslmode":true,"sslrootcert":true,"connect_timeout":true,"application_name":true,"sslcert":true,"sslkey":true,"target_session_attrs":true}
+ for key,values:=range query{if !allowed[key]||len(values)!=1{return ErrPublicationStale}}
+ seconds,err:=strconv.Atoi(query.Get("connect_timeout"));if err!=nil||seconds<1||seconds>10{return ErrPublicationStale}
+ if mode:=query.Get("target_session_attrs");mode!=""&&mode!="read-write"{return ErrPublicationStale}
+ if name:=query.Get("application_name");name!=""&&!c051Scope(name){return ErrPublicationStale}
+ root,err:=os.Stat(query.Get("sslrootcert"));if err!=nil||!root.Mode().IsRegular(){return ErrPublicationStale}
+ if (query.Get("sslcert")=="")!=(query.Get("sslkey")==""){return ErrPublicationStale}
+ for _,name:=range []string{"sslcert","sslkey"}{if path:=query.Get(name);path!=""{f,e:=os.Stat(path);if e!=nil||!f.Mode().IsRegular()||(name=="sslkey"&&f.Mode().Perm()&0077!=0){return ErrPublicationStale}}}
  return nil
 }
 func OpenProductionPublicationRuntime(ctx context.Context,dsn string,authority IndependentPublicationAuthority)(*ProductionPublicationRuntime,error){

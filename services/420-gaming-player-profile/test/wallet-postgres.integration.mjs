@@ -5,6 +5,7 @@ import { generateKeyPairSync,sign,verify } from 'node:crypto';
 import { bootstrapDatastoreRoles,migrateDatastore } from '../src/schema-migrations.js';
 import { migrateWalletLinks } from '../src/wallet-link-migrations.js';
 import { GamingDatastoreProvisioner420 } from '../src/datastore-provisioning.js';
+import { PostgresGamingRepository420 } from '../src/postgres-repository.js';
 import { createHighCountryWalletService420 } from '../src/wallet-link-service.js';
 const uri=process.env.GAMING_WALLET_TEST_URL;
 if(!uri||!new URL(uri).pathname.endsWith('/r052_ci'))throw Error('isolated r052_ci PostgreSQL required');
@@ -45,6 +46,10 @@ test('R05.2 actual PostgreSQL atomic wallet authentication and replay acceptance
   for(const a of ['alpha','beta'])
     await provision.provisionAccount({accountId:a,issuerRef:'issuer1',credentialCommitment:h(a==='alpha'?'4':'5')});
   const scope={alpha:await role('r052_alpha','alpha'),beta:await role('r052_beta','beta')};
+  for(const [accountId,pool] of Object.entries(scope)) {
+    const repo=new PostgresGamingRepository420({pool,accountId,gameId:G,expectedEpoch:'0',expectedIssuerRef:'issuer1'});
+    await repo.transaction(tx=>tx.createProfile({profileId:'profile-'+accountId,rulesetId:R}));
+  }
   const verified=new Set();
   const client={getChainId:async()=>420,verifyMessage:async ({address,message,signature})=>
     verified.has(signature+'|'+address+'|'+message)};

@@ -1,0 +1,36 @@
+name: DOOBR R04.3 Delivery Commitment Level 1
+on:
+  push:
+    branches: [roadmap/doobr-bc-vancouver-infrastructure]
+    paths: ['doobr/delivery_commitment.py','doobr/storage/tests/test_delivery_commitment.py','.github/workflows/doobr-r04-3-level1.yml']
+  pull_request:
+    paths: ['doobr/delivery_commitment.py','doobr/storage/tests/test_delivery_commitment.py','.github/workflows/doobr-r04-3-level1.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  delivery-commitment:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact SHA before
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Minimal commitment tests and canonical reuse guards
+        run: |
+          python3 -m py_compile doobr/delivery_commitment.py
+          python3 -m unittest discover -s doobr/storage/tests -p test_delivery_commitment.py -v
+          python3 -m unittest discover -s doobr/storage/tests -p test_provider_registry_adapter.py -v
+          python3 scripts/verify-doobr-r04-1.py
+      - name: Verify exact SHA after
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"

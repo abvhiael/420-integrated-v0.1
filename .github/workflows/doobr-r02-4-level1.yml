@@ -1,0 +1,58 @@
+name: DOOBR R02.4 Courier Level 1
+on:
+  push:
+    branches: [roadmap/doobr-bc-vancouver-infrastructure]
+    paths: ['doobr/courier.py', 'doobr/storage/migrations/0004_courier.up.sql', 'doobr/storage/tests/test_courier.py', 'doobr/storage/tests/r02_4_rls.sql', 'docs/doobr/DOOBR-R02-4-*', '.github/workflows/doobr-r02-4-level1.yml']
+  pull_request:
+    paths: ['doobr/courier.py', 'doobr/storage/migrations/0004_courier.up.sql', 'doobr/storage/tests/test_courier.py', 'doobr/storage/tests/r02_4_rls.sql', 'docs/doobr/DOOBR-R02-4-*', '.github/workflows/doobr-r02-4-level1.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  courier:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgis/postgis:15-3.4
+        env:
+          POSTGRES_PASSWORD: ci-only-password
+          POSTGRES_USER: postgres
+          POSTGRES_DB: doobr_r02_4
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres -d doobr_r02_4"
+          --health-interval 10s --health-timeout 5s --health-retries 10
+    env:
+      PGHOST: localhost
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: ci-only-password
+      PGDATABASE: doobr_r02_4
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact SHA
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile and adversarial courier eligibility
+        run: |
+          python3 -m py_compile doobr/courier.py doobr/storage/tests/test_courier.py
+          python3 -m unittest discover -s doobr/storage/tests -p test_courier.py -v
+      - name: Apply existing and R02.4 Postgres migrations
+        run: |
+          psql -v ON_ERROR_STOP=1 -f doobr/storage/migrations/0001_initial.up.sql
+          psql -v ON_ERROR_STOP=1 -f doobr/storage/migrations/0002_identity.up.sql
+          psql -v ON_ERROR_STOP=1 -f doobr/storage/migrations/0003_retailer.up.sql
+          psql -v ON_ERROR_STOP=1 -f doobr/storage/migrations/0004_courier.up.sql
+      - name: Restricted courier RLS regression
+        run: psql -v ON_ERROR_STOP=1 -f doobr/storage/tests/r02_4_rls.sql
+      - name: Verify final SHA
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"

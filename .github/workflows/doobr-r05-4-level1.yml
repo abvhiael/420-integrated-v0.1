@@ -1,0 +1,38 @@
+name: DOOBR R05.4 Financial Finality Level 1
+on:
+  push:
+    branches: [roadmap/doobr-bc-vancouver-infrastructure]
+    paths: ['doobr/storage/tests/test_r05_4_financial_finality.py','.github/workflows/doobr-r05-4-level1.yml']
+  pull_request:
+    paths: ['doobr/storage/tests/test_r05_4_financial_finality.py','.github/workflows/doobr-r05-4-level1.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  financial-finality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify exact SHA before
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"
+      - name: External authority finality and conservation regressions
+        run: |
+          set -euo pipefail
+          python3 -m py_compile doobr/storage/tests/test_r05_4_financial_finality.py
+          for suite in test_r05_4_financial_finality.py test_payment_conservation.py test_pay_receipt_adapter.py test_r04_10_protocol_security.py test_wallet_consent.py; do
+            python3 -m unittest discover -s doobr/storage/tests -p "$suite" -v
+          done
+          python3 scripts/verify-doobr-r04-1.py
+      - name: Verify exact SHA after
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"

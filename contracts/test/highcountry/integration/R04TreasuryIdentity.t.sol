@@ -55,10 +55,10 @@ contract R04TreasuryIdentityTest is PublicPlantCapacityFixture {
         disbursement=disbursements.canonicalId(BUDGET,ALICE,100,notBefore,expires,CIVIC,keccak256("purpose"));
         disbursements.schedule(disbursement,BUDGET,ALICE,100,notBefore,expires,CIVIC,keccak256("purpose"));
         TreasuryRouter420 router=new TreasuryRouter420(address(budget),address(disbursements));
-        gateway=new CanonicalOrganizationTreasuryGateway(address(router),address(identity),address(this));bind(gateway);
-        OrganizationRegistry org=new OrganizationRegistry();bind(org);
+        gateway=new CanonicalOrganizationTreasuryGateway(address(auth), address(router),address(identity),address(this));bind(gateway);
+        OrganizationRegistry org=new OrganizationRegistry(address(auth));bind(org);
         org.create(ORG);org.invite(ORG,ALICE);vm.prank(ALICE);org.join(ORG);
-        permissions=new OrganizationTreasuryPermissions(address(org),address(gateway),BOB);bind(permissions);
+        permissions=new OrganizationTreasuryPermissions(address(auth), address(org),address(gateway),BOB);bind(permissions);
         gateway.bindPermissions(address(permissions));
         permission=permissions.propose(ORG,ALICE,keccak256("HC.ORG.TREASURY"),disbursement,uint64(block.timestamp+900),100);
         vm.prank(BOB);permissions.approve(permission);

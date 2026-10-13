@@ -62,7 +62,10 @@ export class CanonicalMarketSettlement {
    const buyerKey=JSON.stringify([t.buyer,t.asset]),receiver=s.assets.get(buyerKey)||{available:0,reserved:0};
    if(receiver.available>Number.MAX_SAFE_INTEGER-t.quantity)throw new SettlementError('asset overflow');
    buyer.reserved-=t.price;seller.available+=t.price;
-   sender.reserved-=t.quantity;receiver.available+=t.quantity;s.assets.set(buyerKey,receiver);
+   sender.reserved-=t.quantity;
+   // Canonical delivery is already in the buyer's on-chain InventoryRegistry balance.
+   // Do not create a second spendable off-chain admission; resale requires a new independently verified escrow receipt.
+   if(this.authority.canonicalSettlementRequired!==true){receiver.available+=t.quantity;s.assets.set(buyerKey,receiver);}
    t.status='finalized';l.status='sold';l.buyer=t.buyer;
    return {...t};
   });

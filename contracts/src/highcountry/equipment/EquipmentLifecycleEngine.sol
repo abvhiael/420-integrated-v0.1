@@ -62,10 +62,10 @@ contract EquipmentLifecycleEngine is R04EmergencyConsumer {
         _;
     }
 
-    constructor(
+    constructor(address r04Authorization_, 
         address equipment_,
         address inventory_
-    ) {
+    ) R04EmergencyConsumer(r04Authorization_) {
         if (
             equipment_ == address(0) || inventory_ == address(0) || equipment_.code.length == 0
                 || inventory_.code.length == 0

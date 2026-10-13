@@ -36,9 +36,9 @@ contract LicenseRegistry is R04EmergencyConsumer {
     event Revoked(bytes32 indexed id);
     event Transferred(bytes32 indexed id, address indexed from, address indexed to);
 
-    constructor(
+    constructor(address r04Authorization_, 
         address rights_
-    ) {
+    ) R04EmergencyConsumer(r04Authorization_) {
         if (rights_ == address(0) || rights_.code.length == 0) revert InvalidLicense();
         rights = RightsRegistry(rights_);
         bindingAuthority = msg.sender;

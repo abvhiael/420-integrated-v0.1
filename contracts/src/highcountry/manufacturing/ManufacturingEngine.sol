@@ -66,10 +66,10 @@ contract ManufacturingEngine is R04EmergencyConsumer {
         _;
     }
 
-    constructor(
+    constructor(address r04Authorization_, 
         address inventory_,
         uint16 maxJobsPerOwner_
-    ) {
+    ) R04EmergencyConsumer(r04Authorization_) {
         if (inventory_ == address(0) || inventory_.code.length == 0) revert HCZeroAddress();
         if (maxJobsPerOwner_ == 0 || maxJobsPerOwner_ > 32) revert HCInvalidState();
         inventory = InventoryRegistry(inventory_);

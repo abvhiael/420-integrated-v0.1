@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
-import {bindRetainedR04Emergency} from "../../mocks/R04EmergencyFixture.sol";
+import {bindRetainedR04Emergency,retainedR04AuthorizationRoot} from "../../mocks/R04EmergencyFixture.sol";
 import { InventoryRegistry } from "../../../../src/highcountry/inventory/InventoryRegistry.sol";
 import { ResourceLedger } from "../../../../src/highcountry/inventory/ResourceLedger.sol";
 import { CanonicalMarketEscrow } from "../../../../src/highcountry/market/CanonicalMarketEscrow.sol";
@@ -59,7 +59,7 @@ contract CanonicalMarketEscrowR048Test {
         inv.registerResource(ASSET, InventoryRegistry.Unit.COUNT);
         inv.setIssuer(address(this), true);
         seller = new MarketSeller();
-        market = new CanonicalMarketEscrow(address(inv), address(this));
+        market = new CanonicalMarketEscrow(retainedR04AuthorizationRoot(), address(inv), address(this));
         bindRetainedR04Emergency(address(market));
         seller.approve(inv, address(market), true);
         inv.acquire(bytes32(uint256(100)), ASSET, address(seller), 10);

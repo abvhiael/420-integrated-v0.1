@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
-import {bindRetainedR04Emergency} from "../../mocks/R04EmergencyFixture.sol";
+import {bindRetainedR04Emergency,retainedR04AuthorizationRoot} from "../../mocks/R04EmergencyFixture.sol";
 import { OrganizationRegistry } from "../../../../src/highcountry/organization/OrganizationRegistry.sol";
 import { OrganizationAuthority } from "../../../../src/highcountry/organization/OrganizationAuthority.sol";
 import {
@@ -98,9 +98,9 @@ contract R0410OrganizationTest {
     bytes32 constant SCOPE = keccak256("field-7");
 
     function setUp() public {
-        r = new OrganizationRegistry();
+        r = new OrganizationRegistry(retainedR04AuthorizationRoot());
         bindRetainedR04Emergency(address(r));
-        a = new OrganizationAuthority(address(r));
+        a = new OrganizationAuthority(retainedR04AuthorizationRoot(), address(r));
         bindRetainedR04Emergency(address(a));
         alice = new R0410Actor();
         bob = new R0410Actor();
@@ -216,7 +216,7 @@ contract R0410OrganizationTest {
     function testTreasuryRequiresIndependentConsentAndExactBoundedConsumption() public {
         R0410Actor treasury = new R0410Actor();
         OrganizationTreasuryPermissions policy =
-            new OrganizationTreasuryPermissions(address(r), address(treasury), address(bob));
+            new OrganizationTreasuryPermissions(retainedR04AuthorizationRoot(), address(r), address(treasury), address(bob));
         bindRetainedR04Emergency(address(policy));
         bytes32 id = policy.propose(ORG, address(alice), ACTION, SCOPE, uint64(block.timestamp + 1 days), 500);
         require(!policy.permitted(id, address(alice), ACTION, SCOPE, 1), "admin alone authorized treasury");
@@ -243,7 +243,7 @@ contract R0410OrganizationTest {
     function testTreasuryApprovalVoidsOnAdminRotation() public {
         R0410Actor treasury = new R0410Actor();
         OrganizationTreasuryPermissions policy =
-            new OrganizationTreasuryPermissions(address(r), address(treasury), address(bob));
+            new OrganizationTreasuryPermissions(retainedR04AuthorizationRoot(), address(r), address(treasury), address(bob));
         bindRetainedR04Emergency(address(policy));
         bytes32 id = policy.propose(ORG, address(alice), ACTION, SCOPE, uint64(block.timestamp + 1 days), 100);
         bob.approveTreasury(policy, id);

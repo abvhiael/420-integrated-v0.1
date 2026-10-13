@@ -36,7 +36,7 @@ contract RightsRegistry is R04EmergencyConsumer {
     event RightsRevoked(bytes32 indexed grantId);
     event AssetTransferred(bytes32 indexed asset, address indexed oldOwner, address indexed newOwner);
 
-    constructor() {
+    constructor(address r04Authorization_) R04EmergencyConsumer(r04Authorization_) {
         administrator = msg.sender;
     }
 

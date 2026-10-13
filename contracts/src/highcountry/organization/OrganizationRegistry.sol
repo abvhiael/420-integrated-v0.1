@@ -6,6 +6,7 @@ import {EmergencyDomains} from "../constants/EmergencyDomains.sol";
 /// @notice R04.10 organization identity and explicit, consented membership.
 /// @dev Organization admin powers have no implicit Wallet, RightsRegistry or treasury permissions.
 contract OrganizationRegistry is R04EmergencyConsumer {
+    constructor(address r04Authorization_) R04EmergencyConsumer(r04Authorization_) { }
     error Invalid();
     error Unauthorized();
     enum Status {

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
-import {bindRetainedR04Emergency} from "../../mocks/R04EmergencyFixture.sol";
+import {bindRetainedR04Emergency,retainedR04AuthorizationRoot} from "../../mocks/R04EmergencyFixture.sol";
 import { OrganizationRegistry } from "../../../../src/highcountry/organization/OrganizationRegistry.sol";
 import { CooperativeRegistry } from "../../../../src/highcountry/cooperative/CooperativeRegistry.sol";
 import { CooperativeGovernance } from "../../../../src/highcountry/cooperative/CooperativeGovernance.sol";
@@ -56,10 +56,10 @@ contract R0411GovernanceTest {
     CoopMemberR0411 bob;
 
     function setUp() public {
-        o = new OrganizationRegistry();
+        o = new OrganizationRegistry(retainedR04AuthorizationRoot());
         bindRetainedR04Emergency(address(o));
         o.create(ORG, keccak256("meta"));
-        r = new CooperativeRegistry(address(o));
+        r = new CooperativeRegistry(retainedR04AuthorizationRoot(), address(o));
         bindRetainedR04Emergency(address(r));
         r.create(COOP, ORG);
         r.enroll(COOP);
@@ -71,9 +71,9 @@ contract R0411GovernanceTest {
         bob.join(o, ORG);
         alice.enroll(r, COOP);
         bob.enroll(r, COOP);
-        g = new CooperativeGovernance(address(r));
+        g = new CooperativeGovernance(retainedR04AuthorizationRoot(), address(r));
         bindRetainedR04Emergency(address(g));
-        e = new GovernanceExecutor(address(g));
+        e = new GovernanceExecutor(retainedR04AuthorizationRoot(), address(g));
         bindRetainedR04Emergency(address(e));
         g.bindExecutor(address(e));
     }

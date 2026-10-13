@@ -8,11 +8,18 @@ import {MockCapabilityRegistry} from "./MockCapabilityRegistry.sol";
 import {ModuleIds} from "../../../src/highcountry/constants/ModuleIds.sol";
 
 /// @dev Retained focused fixtures get a real EmergencyState; new shared-root integrations use production registry grants.
+contract R04RetainedAuthorization is HighCountryAuthorization {
+    MockCapabilityRegistry public immutable testCapabilities;
+    constructor(MockCapabilityRegistry caps) HighCountryAuthorization(address(caps)) { testCapabilities = caps; }
+}
+function retainedR04AuthorizationRoot() returns (address) {
+    return address(new R04RetainedAuthorization(new MockCapabilityRegistry()));
+}
 function bindRetainedR04Emergency(address target) {
-    MockCapabilityRegistry caps = new MockCapabilityRegistry();
-    HighCountryAuthorization root = new HighCountryAuthorization(address(caps));
-    EmergencyState state = new EmergencyState(address(root));
     R04EmergencyConsumer c = R04EmergencyConsumer(target);
+    R04RetainedAuthorization root = R04RetainedAuthorization(c.r04AuthorizationRoot());
+    MockCapabilityRegistry caps = root.testCapabilities();
+    EmergencyState state = new EmergencyState(address(root));
     ICapabilityRegistry420.CapabilityGrant memory g = ICapabilityRegistry420.CapabilityGrant(
         address(this), ModuleIds.EMERGENCY_STATE, c.R04_BIND_ACTION(), c.emergencyBindingScope(address(state)),
         0, 0, 0, 0, 0, false);

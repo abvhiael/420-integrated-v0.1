@@ -78,3 +78,13 @@ test('finalized canonical cancellation removes stale local escrow entitlement',a
  assert.equal(t.store.state.assets.get(JSON.stringify(['alice','lot:1'])).reserved,0);
  await assert.rejects(t.settle.reconcileClosedListing('close-again','listing'));
 });
+
+
+test('canonical custody delivery never mints a second off-chain spendable admission',async()=>{
+ const t=setup();await listed(t);t.settle.authority.canonicalSettlementRequired=true;
+ await t.settle.prepare('buyer','prepare','listing','transfer:1');t.state.finalized=true;
+ await t.settle.finalize('finalize','transfer:1');
+ assert.equal(t.store.state.assets.has(JSON.stringify(['bob','lot:1'])),false);
+ assert.equal(t.store.state.transferIntents.get('transfer:1').status,'finalized');
+ assert.equal(t.store.state.balances.get('alice').available,60);
+});

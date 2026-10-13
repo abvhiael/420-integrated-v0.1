@@ -64,9 +64,9 @@ contract EquipmentRegistry is R04EmergencyConsumer {
         _;
     }
 
-    constructor(
+    constructor(address r04Authorization_, 
         address land_
-    ) {
+    ) R04EmergencyConsumer(r04Authorization_) {
         if (land_ == address(0) || land_.code.length == 0) revert HCZeroAddress();
         administrator = msg.sender;
         land = IEquipmentLandAuthority(land_);

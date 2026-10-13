@@ -33,7 +33,7 @@ abstract contract ProgressionRegistryCore is R04EmergencyConsumer {
     event ProgressRecorded(address indexed player, bytes32 indexed trackId, bytes32 indexed evidence, uint32 points);
     event TrackCompleted(address indexed player, bytes32 indexed trackId, uint32 rewardUnits);
 
-    constructor() {
+    constructor(address r04Authorization_) R04EmergencyConsumer(r04Authorization_) {
         administrator = msg.sender;
     }
 
@@ -107,11 +107,11 @@ abstract contract ProgressionRegistryCore is R04EmergencyConsumer {
 }
 
 /// @notice Skills: points/proofs become irreversible skill unlocks once complete.
-contract SkillRegistry is ProgressionRegistryCore { }
+contract SkillRegistry is ProgressionRegistryCore { constructor(address root) ProgressionRegistryCore(root) { } }
 
 /// @notice Research: independent verified evidence and prerequisite-bound technology unlocks.
-contract ResearchRegistry is ProgressionRegistryCore { }
+contract ResearchRegistry is ProgressionRegistryCore { constructor(address root) ProgressionRegistryCore(root) { } }
 
 /// @notice Discoveries: catalogue-bound unique discoveries, without imported local save claims.
-contract DiscoveryRegistry is ProgressionRegistryCore { }
+contract DiscoveryRegistry is ProgressionRegistryCore { constructor(address root) ProgressionRegistryCore(root) { } }
 

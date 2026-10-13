@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
-import {bindRetainedR04Emergency} from "../../mocks/R04EmergencyFixture.sol";
+import {bindRetainedR04Emergency,retainedR04AuthorizationRoot} from "../../mocks/R04EmergencyFixture.sol";
 
 import { EquipmentRegistry } from "../../../../src/highcountry/equipment/EquipmentRegistry.sol";
 
@@ -69,7 +69,7 @@ contract EquipmentRegistryR042Test {
 
     function setUp() public {
         land = new R042Land();
-        registry = new EquipmentRegistry(address(land));
+        registry = new EquipmentRegistry(retainedR04AuthorizationRoot(), address(land));
         bindRetainedR04Emergency(address(registry));
         alice = new R042Player();
         bob = new R042Player();

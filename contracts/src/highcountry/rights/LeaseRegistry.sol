@@ -44,9 +44,9 @@ contract LeaseRegistry is R04EmergencyConsumer {
     event LeaseStatus(bytes32 indexed id, State state, bool exitPending);
     event LeaseTransferred(bytes32 indexed id, address indexed oldTenant, address indexed newTenant);
 
-    constructor(
+    constructor(address r04Authorization_, 
         address rights_
-    ) {
+    ) R04EmergencyConsumer(r04Authorization_) {
         if (rights_ == address(0) || rights_.code.length == 0) revert InvalidLease();
         rights = RightsRegistry(rights_);
         plantAuthority = msg.sender;

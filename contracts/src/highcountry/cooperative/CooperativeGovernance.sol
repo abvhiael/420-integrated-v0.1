@@ -39,9 +39,9 @@ contract CooperativeGovernance is R04EmergencyConsumer {
     event MarkedExecuted(bytes32 indexed id);
     address public executor;
 
-    constructor(
+    constructor(address r04Authorization_, 
         address registry_
-    ) {
+    ) R04EmergencyConsumer(r04Authorization_) {
         if (registry_.code.length == 0) revert Invalid();
         registry = CooperativeRegistry(registry_);
     }

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
-import {bindRetainedR04Emergency} from "../mocks/R04EmergencyFixture.sol";
+import {bindRetainedR04Emergency,retainedR04AuthorizationRoot} from "../mocks/R04EmergencyFixture.sol";
 import { EmergencyState } from "../../../src/highcountry/security/EmergencyState.sol";
 
 import { CapabilityRegistry420 } from "../../../src/system/CapabilityRegistry420.sol";
@@ -447,9 +447,9 @@ contract PublicPlantCapacityTest is PublicPlantCapacityFixture {
         _grant(address(this), ModuleIds.LAND_REGISTRY, ActionIds.LAND_SET_OCCUPANCY, bytes32(uint256(1)));
         bytes32 leaseId = keccak256("lease");
         land.setOccupancy(1, BOB, LandRegistry.OccupancyKind.LEASE, leaseId);
-        RightsRegistry rights = new RightsRegistry();
+        RightsRegistry rights = new RightsRegistry(retainedR04AuthorizationRoot());
         bindRetainedR04Emergency(address(rights));
-        LeaseRegistry lease = new LeaseRegistry(address(rights));
+        LeaseRegistry lease = new LeaseRegistry(retainedR04AuthorizationRoot(), address(rights));
         bindRetainedR04Emergency(address(lease));
         CanonicalLandPlantGate gate = new CanonicalLandPlantGate(address(land), address(plants));
         lease.bindCanonicalGate(address(gate));
@@ -567,9 +567,9 @@ contract CanonicalR049PlantAdmissionIntegrationTest is PublicPlantCapacityFixtur
     bytes32 internal constant LEASE_ID_R049 = keccak256("HC.R04.9.TEST.CANONICAL.LEASE");
 
     function testRevocationBlocksAdmissionAndLivePlantsPreventEviction() public {
-        RightsRegistry rights = new RightsRegistry();
+        RightsRegistry rights = new RightsRegistry(retainedR04AuthorizationRoot());
         bindRetainedR04Emergency(address(rights));
-        LeaseRegistry leases = new LeaseRegistry(address(rights));
+        LeaseRegistry leases = new LeaseRegistry(retainedR04AuthorizationRoot(), address(rights));
         bindRetainedR04Emergency(address(leases));
         CanonicalLandPlantGate gate = new CanonicalLandPlantGate(address(land), address(plants));
         leases.bindCanonicalGate(address(gate));
@@ -614,9 +614,9 @@ contract CanonicalR049LicenseAdmissionIntegrationTest is PublicPlantCapacityFixt
     bytes32 internal constant LICENSE_ID_R049 = keccak256("HC.R04.9.TEST.CANONICAL.LICENSE");
 
     function testScopedLicenseAdmissionRevocationAndNonEviction() public {
-        RightsRegistry rights = new RightsRegistry();
+        RightsRegistry rights = new RightsRegistry(retainedR04AuthorizationRoot());
         bindRetainedR04Emergency(address(rights));
-        LicenseRegistry licenses = new LicenseRegistry(address(rights));
+        LicenseRegistry licenses = new LicenseRegistry(retainedR04AuthorizationRoot(), address(rights));
         bindRetainedR04Emergency(address(licenses));
         CanonicalLandPlantGate gate = new CanonicalLandPlantGate(address(land), address(plants));
         licenses.bindCanonicalGate(address(gate));

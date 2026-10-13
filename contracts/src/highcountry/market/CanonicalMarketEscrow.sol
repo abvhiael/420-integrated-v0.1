@@ -37,10 +37,10 @@ contract CanonicalMarketEscrow is R04EmergencyConsumer {
         bytes32 indexed listingId, address indexed owner, bytes32 indexed asset, uint256 quantity
     );
 
-    constructor(
+    constructor(address r04Authorization_, 
         address inventory_,
         address marketOperator_
-    ) {
+    ) R04EmergencyConsumer(r04Authorization_) {
         if (inventory_ == address(0) || inventory_.code.length == 0 || marketOperator_ == address(0)) {
             revert HCZeroAddress();
         }

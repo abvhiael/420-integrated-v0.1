@@ -30,6 +30,13 @@ import {R04EmergencyConsumer} from "../../../src/highcountry/security/R04Emergen
 import {EmergencyDomains} from "../../../src/highcountry/constants/EmergencyDomains.sol";
 import {ActionIds} from "../../../src/highcountry/constants/ActionIds.sol";
 import {ModuleIds} from "../../../src/highcountry/constants/ModuleIds.sol";
+import {AuthorizationRequest} from "../../../src/highcountry/types/HighCountryTypes.sol";
+contract R04ForgedEmergencyRoot {
+    function authorizationRoot() external view returns(address) { return address(this); }
+    function requireAuthorized(AuthorizationRequest calldata) external pure { }
+    function isAllowedDomain(bytes32) external pure returns(bool) { return true; }
+    function isRestricted(bytes32) external pure returns(bool) { return false; }
+}
 contract R04EquipmentEmergencyTest is PublicPlantCapacityFixture {
     InventoryRegistry inventory;
     ManufacturingEngine manufacturing;
@@ -67,18 +74,18 @@ contract R04EquipmentEmergencyTest is PublicPlantCapacityFixture {
         inventory.registerResource(RAW,InventoryRegistry.Unit.COUNT);inventory.registerResource(REPAIR,InventoryRegistry.Unit.COUNT);
         inventory.registerResource(SCRAP,InventoryRegistry.Unit.COUNT);inventory.setIssuer(address(this),true);
         inventory.acquire(keccak256("earned-raw"),RAW,address(this),20);
-        equipment=new EquipmentRegistry(address(land));bind(equipment);
+        equipment=new EquipmentRegistry(address(auth), address(land));bind(equipment);
         int16[6] memory effects;effects[0]=50;equipment.registerType(TYPE,keccak256("catalogue"),1,effects);
         equipment.setIssuer(address(this),true);equipment.issue(ITEM,TYPE,address(this),keccak256("earned-proof"));
-        lifecycle=new EquipmentLifecycleEngine(address(equipment),address(inventory));bind(lifecycle);
+        lifecycle=new EquipmentLifecycleEngine(address(auth), address(equipment),address(inventory));bind(lifecycle);
         equipment.bindLifecycleController(address(lifecycle));inventory.setIssuer(address(lifecycle),true);
         inventory.setInventoryOperator(address(lifecycle),true);
         lifecycle.registerPolicy(TYPE,keccak256("catalogue"),2,1,1,REPAIR,2,2,SCRAP,3);
-        bridge=new EquipmentCultivationBridge(address(equipment),address(lifecycle),address(cultivation),address(plants));bind(bridge);
+        bridge=new EquipmentCultivationBridge(address(auth), address(equipment),address(lifecycle),address(cultivation),address(plants));bind(bridge);
         lifecycle.setUseVerifier(address(bridge),true);
         _grant(address(bridge),ModuleIds.CULTIVATION_ENGINE,ActionIds.CULTIVATION_UPDATE,bytes32(uint256(1)));
         equipment.place(ITEM,1);
-        manufacturing=new ManufacturingEngine(address(inventory),2);bind(manufacturing);
+        manufacturing=new ManufacturingEngine(address(auth), address(inventory),2);bind(manufacturing);
         inventory.setInventoryOperator(address(manufacturing),true);inventory.setIssuer(address(manufacturing),true);
         bytes32[2] memory ins;bytes32[2] memory outs;uint256[2] memory amounts;uint256[2] memory produced;
         ins[0]=RAW;amounts[0]=10;outs[0]=REPAIR;produced[0]=2;
@@ -108,7 +115,7 @@ contract R04EquipmentEmergencyTest is PublicPlantCapacityFixture {
         require(b.available==20&&b.reserved==0&&b.consumed==0,"cancel lost raw resources");
         lifecycle.retire(ITEM);lifecycle.recycle(ITEM);
         require(inventory.ledger().balance(SCRAP,address(this)).available==3,"restricted recovery lost");
-        CanonicalMarketEscrow market=new CanonicalMarketEscrow(address(inventory),address(this));bind(market);
+        CanonicalMarketEscrow market=new CanonicalMarketEscrow(address(auth), address(inventory),address(this));bind(market);
         inventory.setInventoryOperator(address(market),true);inventory.setMarketTransferOperator(address(market),true);
         market.list(keccak256("listing"),RAW,5,uint64(block.timestamp+100));restrict(EmergencyDomains.MARKET);
         (bool sold,)=address(market).call(abi.encodeCall(market.settle,(keccak256("listing"),ALICE)));
@@ -116,19 +123,19 @@ contract R04EquipmentEmergencyTest is PublicPlantCapacityFixture {
         b=inventory.ledger().balance(RAW,address(this));require(b.available==20&&b.reserved==0,"escrow cancel lost inventory");
     }
     function testRemainingR04FamiliesEnforceCanonicalDomainRestrictions() public {
-        RightsRegistry rights=new RightsRegistry();bind(rights);
-        LeaseRegistry leases=new LeaseRegistry(address(rights));bind(leases);
-        LicenseRegistry licenses=new LicenseRegistry(address(rights));bind(licenses);
-        OrganizationRegistry org=new OrganizationRegistry();bind(org);
-        OrganizationAuthority authority=new OrganizationAuthority(address(org));bind(authority);
-        OrganizationTreasuryPermissions financial=new OrganizationTreasuryPermissions(address(org),address(this),ALICE);bind(financial);
-        CooperativeRegistry coops=new CooperativeRegistry(address(org));bind(coops);
-        CooperativeGovernance governance=new CooperativeGovernance(address(coops));bind(governance);
-        GovernanceExecutor executor=new GovernanceExecutor(address(governance));bind(executor);
-        MissionEngine missions=new MissionEngine();bind(missions);
+        RightsRegistry rights=new RightsRegistry(address(auth));bind(rights);
+        LeaseRegistry leases=new LeaseRegistry(address(auth), address(rights));bind(leases);
+        LicenseRegistry licenses=new LicenseRegistry(address(auth), address(rights));bind(licenses);
+        OrganizationRegistry org=new OrganizationRegistry(address(auth));bind(org);
+        OrganizationAuthority authority=new OrganizationAuthority(address(auth), address(org));bind(authority);
+        OrganizationTreasuryPermissions financial=new OrganizationTreasuryPermissions(address(auth), address(org),address(this),ALICE);bind(financial);
+        CooperativeRegistry coops=new CooperativeRegistry(address(auth), address(org));bind(coops);
+        CooperativeGovernance governance=new CooperativeGovernance(address(auth), address(coops));bind(governance);
+        GovernanceExecutor executor=new GovernanceExecutor(address(auth), address(governance));bind(executor);
+        MissionEngine missions=new MissionEngine(address(auth));bind(missions);
         CanonicalCompetitionEvidence evidence=new CanonicalCompetitionEvidence(address(products),address(this),address(this),1);
-        CompetitionEngine competition=new CompetitionEngine(address(new SeasonRegistry()),address(new CompetitionTemplateRegistry()),address(evidence),address(0),address(this));bind(competition);
-        Global420Cup cup=new Global420Cup(address(competition));bind(cup);
+        CompetitionEngine competition=new CompetitionEngine(address(auth), address(new SeasonRegistry()),address(new CompetitionTemplateRegistry()),address(evidence),address(0),address(this));bind(competition);
+        Global420Cup cup=new Global420Cup(address(auth), address(competition));bind(cup);
         denied(address(rights),abi.encodeCall(rights.registerAsset,(TYPE,address(this))),EmergencyDomains.RIGHTS);
         denied(address(licenses),abi.encodeCall(licenses.issue,(TYPE,TYPE,ALICE,uint32(1),uint64(1),uint64(100),uint256(0))),EmergencyDomains.LICENSE);
         denied(address(leases),abi.encodeCall(leases.create,(TYPE,TYPE,ALICE,uint64(1),uint64(100),uint256(1),uint256(0))),EmergencyDomains.LEASE);
@@ -143,9 +150,10 @@ contract R04EquipmentEmergencyTest is PublicPlantCapacityFixture {
         denied(address(cup),abi.encodeCall(cup.issueCrossGame,(TYPE)),EmergencyDomains.COMPETITION_ENTRY);
     }
     function testUnboundAndWrongBindingScopeFailClosedAndLandHandoffRevokesEffects() public {
-        MissionEngine m=new MissionEngine();
+        MissionEngine m=new MissionEngine(address(auth));
         (bool unbound,)=address(m).call(abi.encodeCall(m.activate,(TYPE)));require(!unbound,"unbound ingress");
         (bool noGrant,)=address(m).call(abi.encodeCall(m.bindR04Emergency,(address(emergency))));require(!noGrant,"unscoped binding");
+        (bool rogue,)=address(m).call(abi.encodeCall(m.bindR04Emergency,(address(new R04ForgedEmergencyRoot()))));require(!rogue,"forged authorization root accepted");
         bind(m);(bool rebind,)=address(m).call(abi.encodeCall(m.bindR04Emergency,(address(emergency))));require(!rebind,"replacement binding");
         _grant(address(this),ModuleIds.LAND_REGISTRY,ActionIds.LAND_TRANSFER,bytes32(uint256(1)));land.transferOwner(1,ALICE);
         (bool stale,)=address(bridge).call(abi.encodeCall(bridge.applyEnvironment,(uint64(1),ITEM,environment())));

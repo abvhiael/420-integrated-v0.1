@@ -12,7 +12,7 @@ contract EquipmentCultivationBridge is R04EmergencyConsumer {
     EquipmentLifecycleEngine public immutable lifecycle;
     CultivationEngine public immutable cultivation;
     PlantRegistry public immutable plants;
-    constructor(address equipment_, address lifecycle_, address cultivation_, address plants_) {
+    constructor(address r04Authorization_, address equipment_, address lifecycle_, address cultivation_, address plants_) R04EmergencyConsumer(r04Authorization_) {
         equipment = EquipmentRegistry(equipment_);
         lifecycle = EquipmentLifecycleEngine(lifecycle_);
         cultivation = CultivationEngine(cultivation_);

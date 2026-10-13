@@ -12,9 +12,9 @@ contract GovernanceExecutor is R04EmergencyConsumer {
     mapping(bytes32 => mapping(bytes32 => bytes32)) public policy;
     event PolicySet(bytes32 indexed cooperative, bytes32 indexed scope, bytes32 value, bytes32 proposal);
 
-    constructor(
+    constructor(address r04Authorization_, 
         address governance_
-    ) {
+    ) R04EmergencyConsumer(r04Authorization_) {
         if (governance_.code.length == 0) revert Unauthorized();
         governance = CooperativeGovernance(governance_);
     }

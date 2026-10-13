@@ -36,9 +36,9 @@ contract Global420Cup is R04EmergencyConsumer {
         bytes32 indexed cupId, address indexed champion, bytes32 indexed scope, bytes32 resultCommitment
     );
 
-    constructor(
+    constructor(address r04Authorization_, 
         address engine_
-    ) {
+    ) R04EmergencyConsumer(r04Authorization_) {
         if (engine_.code.length == 0) revert Invalid();
         engine = CompetitionEngine(engine_);
     }

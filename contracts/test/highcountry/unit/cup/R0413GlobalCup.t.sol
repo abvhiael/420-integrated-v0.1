@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
-import {bindRetainedR04Emergency} from "../../mocks/R04EmergencyFixture.sol";
+import {bindRetainedR04Emergency,retainedR04AuthorizationRoot} from "../../mocks/R04EmergencyFixture.sol";
 import { SeasonRegistry } from "../../../../src/highcountry/competition/SeasonRegistry.sol";
 import { CompetitionTemplateRegistry } from "../../../../src/highcountry/competition/CompetitionTemplateRegistry.sol";
 import {
@@ -93,11 +93,11 @@ contract R0413GlobalCupTest {
         seasons = new SeasonRegistry();
         templates = new CompetitionTemplateRegistry();
         evidence = new CupEvidence();
-        engine = new CompetitionEngine(
+        engine = new CompetitionEngine(retainedR04AuthorizationRoot(), 
             address(seasons), address(templates), address(evidence), address(new CupEligibility()), address(this)
         );
         bindRetainedR04Emergency(address(engine));
-        cup = new Global420Cup(address(engine));
+        cup = new Global420Cup(retainedR04AuthorizationRoot(), address(engine));
         bindRetainedR04Emergency(address(cup));
         a = new CupPlayer();
         b = new CupPlayer();

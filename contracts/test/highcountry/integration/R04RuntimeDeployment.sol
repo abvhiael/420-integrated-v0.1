@@ -50,7 +50,7 @@ contract R04RuntimeDeployment {
         grant(address(this),GamingIds420.COMPONENT_GAMING,GamingIds420.ACTION_REGISTER_GAME,gaming.scopeForGame(GAME));
         games=new GameRegistry420(address(gaming));games.registerGame(GAME,address(this),keccak256("local-ci-only"));
         identity=new GameIdentity420(address(games));
-        mission=new MissionEngine();bind(mission);
+        mission=new MissionEngine(address(auth));bind(mission);
         mission.registerTemplate(MISSION,keccak256("test-version"),keccak256("test-objective"),bytes32(0),1 days,1,100);
         mission.setVerifier(address(this),true);
         GenesisRegistry genesis=new GenesisRegistry(address(auth));
@@ -67,7 +67,7 @@ contract R04RuntimeDeployment {
         HarvestProductRegistry products=new HarvestProductRegistry(address(harvest));
         inventory=new InventoryRegistry(address(products));inventory.registerResource(RESOURCE,InventoryRegistry.Unit.COUNT);
         inventory.setIssuer(address(this),true);
-        escrow=new CanonicalMarketEscrow(address(inventory),operator_);bind(escrow);
+        escrow=new CanonicalMarketEscrow(address(auth), address(inventory),operator_);bind(escrow);
         grant(operator_,ModuleIds.EMERGENCY_STATE,ActionIds.EMERGENCY_RESTRICT,EmergencyDomains.MARKET);
         grant(operator_,ModuleIds.EMERGENCY_STATE,ActionIds.EMERGENCY_RELEASE,EmergencyDomains.MARKET);
     }

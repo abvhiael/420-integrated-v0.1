@@ -36,9 +36,9 @@ contract OrganizationAuthority is R04EmergencyConsumer {
     bytes32 public constant WALLET_ACTION = keccak256("HC.ORG.WALLET");
     bytes32 public constant RIGHTS_ACTION = keccak256("HC.ORG.RIGHTS");
 
-    constructor(
+    constructor(address r04Authorization_, 
         address registry_
-    ) {
+    ) R04EmergencyConsumer(r04Authorization_) {
         if (registry_.code.length == 0) revert Invalid();
         registry = OrganizationRegistry(registry_);
     }

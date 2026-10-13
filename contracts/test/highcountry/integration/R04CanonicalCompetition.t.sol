@@ -99,12 +99,12 @@ contract R04CanonicalCompetitionTest is PublicPlantCapacityFixture {
         _grant(address(this),ModuleIds.COMPETITION_ENGINE,ActionIds.OPTIONAL_COMPETITION_REGISTER,OPTIONAL);
         access.registerOptionalCompetition(OPTIONAL,MY_ENTITLEMENT,OPTIONAL);
         CanonicalCompetitionEntitlement gate = new CanonicalCompetitionEntitlement(address(profiles),address(access));
-        competition = new CompetitionEngine(address(seasons),address(templates),address(evidence),address(gate),address(this));
+        competition = new CompetitionEngine(address(auth), address(seasons),address(templates),address(evidence),address(gate),address(this));
         _bind(competition);
         competition.create(A,S,T,firstOpen,firstOpen+100,firstOpen+200);
         competition.create(B,S,T,firstOpen,firstOpen+100,firstOpen+200);
         competition.create(F,S,T,finalOpen,finalOpen+100,finalOpen+200);
-        cup = new Global420Cup(address(competition));_bind(cup);
+        cup = new Global420Cup(address(auth), address(competition));_bind(cup);
         cup.create(CUP,A,B,F,keccak256("bracket"),keccak256("no-money"),SCOPE);
         HighCountryCrossGame420 cross = new HighCountryCrossGame420(address(sharedCross),address(bridge));
         consumer = new CanonicalCupAttestationConsumer(address(cup),address(cross));

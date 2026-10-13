@@ -23,9 +23,9 @@ contract CooperativeRegistry is R04EmergencyConsumer {
     event CooperativeCreated(bytes32 indexed id, bytes32 indexed organization);
     event MemberEnrolled(bytes32 indexed id, address indexed member, uint32 count);
 
-    constructor(
+    constructor(address r04Authorization_, 
         address organizations_
-    ) {
+    ) R04EmergencyConsumer(r04Authorization_) {
         if (organizations_.code.length == 0) revert Invalid();
         organizations = OrganizationRegistry(organizations_);
     }

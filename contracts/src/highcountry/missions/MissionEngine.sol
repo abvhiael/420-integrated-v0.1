@@ -49,7 +49,7 @@ contract MissionEngine is R04EmergencyConsumer {
     event Progressed(address indexed player, bytes32 indexed id, bytes32 proof, uint32 amount);
     event Transition(address indexed player, bytes32 indexed id, State state);
 
-    constructor() {
+    constructor(address r04Authorization_) R04EmergencyConsumer(r04Authorization_) {
         administrator = msg.sender;
     }
 

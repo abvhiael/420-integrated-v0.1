@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
-import {bindRetainedR04Emergency} from "../../mocks/R04EmergencyFixture.sol";
+import {bindRetainedR04Emergency,retainedR04AuthorizationRoot} from "../../mocks/R04EmergencyFixture.sol";
 import {
     SkillRegistry,
     ResearchRegistry,
@@ -28,11 +28,11 @@ contract ProgressionR046Test {
     address constant PLAYER = address(0x1234);
 
     function setUp() public {
-        skill = new SkillRegistry();
+        skill = new SkillRegistry(retainedR04AuthorizationRoot());
         bindRetainedR04Emergency(address(skill));
-        research = new ResearchRegistry();
+        research = new ResearchRegistry(retainedR04AuthorizationRoot());
         bindRetainedR04Emergency(address(research));
-        discovery = new DiscoveryRegistry();
+        discovery = new DiscoveryRegistry(retainedR04AuthorizationRoot());
         bindRetainedR04Emergency(address(discovery));
         attacker = new R046Attacker();
         skill.registerTrack(FIRST, bytes32(uint256(1)), bytes32(0), 4, 2, 10);

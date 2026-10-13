@@ -31,11 +31,11 @@ contract OrganizationTreasuryPermissions is R04EmergencyConsumer {
     event Debited(bytes32 indexed id, uint256 amount, uint256 remaining);
     event Cancelled(bytes32 indexed id);
 
-    constructor(
+    constructor(address r04Authorization_, 
         address registry_,
         address treasury_,
         address approver_
-    ) {
+    ) R04EmergencyConsumer(r04Authorization_) {
         if (
             registry_.code.length == 0 || treasury_.code.length == 0 || approver_ == address(0)
                 || approver_ == treasury_

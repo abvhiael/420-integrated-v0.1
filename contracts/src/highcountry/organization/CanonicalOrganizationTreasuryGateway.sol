@@ -18,7 +18,7 @@ contract CanonicalOrganizationTreasuryGateway is R04EmergencyConsumer {
     OrganizationTreasuryPermissions public permissions;
     mapping(bytes32 => bool) public executed;
     event Reconciled(bytes32 indexed disbursement, bytes32 indexed permission, bytes32 releaseReceipt);
-    constructor(address router_, address identity_, address executor_) {
+    constructor(address r04Authorization_, address router_, address identity_, address executor_) R04EmergencyConsumer(r04Authorization_) {
         if (router_.code.length == 0 || identity_.code.length == 0 || executor_ == address(0)) revert InvalidIntegration();
         router = TreasuryRouter420(router_);
         identity = GameIdentity420(identity_);

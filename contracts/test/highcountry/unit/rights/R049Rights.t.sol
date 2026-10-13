@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
-import {bindRetainedR04Emergency} from "../../mocks/R04EmergencyFixture.sol";
+import {bindRetainedR04Emergency,retainedR04AuthorizationRoot} from "../../mocks/R04EmergencyFixture.sol";
 import { RightsRegistry } from "../../../../src/highcountry/rights/RightsRegistry.sol";
 import { LeaseRegistry } from "../../../../src/highcountry/rights/LeaseRegistry.sol";
 import { LicenseRegistry } from "../../../../src/highcountry/rights/LicenseRegistry.sol";
@@ -118,11 +118,11 @@ contract R049RightsTest {
     bytes32 constant LICENSE = keccak256("LICENSE");
 
     function setUp() public {
-        rights = new RightsRegistry();
+        rights = new RightsRegistry(retainedR04AuthorizationRoot());
         bindRetainedR04Emergency(address(rights));
-        leases = new LeaseRegistry(address(rights));
+        leases = new LeaseRegistry(retainedR04AuthorizationRoot(), address(rights));
         bindRetainedR04Emergency(address(leases));
-        licenses = new LicenseRegistry(address(rights));
+        licenses = new LicenseRegistry(retainedR04AuthorizationRoot(), address(rights));
         bindRetainedR04Emergency(address(licenses));
         owner = new R049Actor();
         tenant = new R049Actor();

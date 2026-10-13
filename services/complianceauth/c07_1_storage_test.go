@@ -46,6 +46,10 @@ func TestC071PostgreSQLProductionStorage(t *testing.T){
  scopeA:=C064AuthorScope{Tenant:"tenant-a",Domain:"delivery",Jurisdiction:"bc"};scopeB:=scopeA;scopeB.Tenant="tenant-b"
  now:=time.Now().UTC();req:=c064FixtureRequest();cited,digest,err:=c064Resolve(ctx,c064TestSource{},c064FixtureScope,req.Citations,now);if err!=nil{t.Fatal(err)};schema:=req.Schema;schema.SourceDigest=digest
  legacy,err:=(C064PostgreSQLDrafts{DB:admin.DB}).Save(ctx,scopeA,"draft1","author-a",0,schema,cited,now);if err!=nil{t.Fatal(err)}
+ legacyReview:=C065ReviewRecord{Scope:scopeA,DraftID:"draft1",Revision:1,DocumentDigest:legacy.DocumentDigest,ReviewerID:"reviewer-b",ImpactDigest:Digest([]byte("impact")),State:"FINDINGS_OPEN",At:now}
+ if _,err=(C065PostgreSQLReviews{DB:admin.DB}).AppendIfCurrent(ctx,legacyReview,1,0);err!=nil{t.Fatal("legacy review fixture",err)}
+ legacyAudit:=C067AuditAccess{Scope:scopeA,Actor:"auditor-a",CaseID:"case-a",EvidenceID:"evidence-a",Purpose:"LEGAL_AUDIT",Result:"EXPORTED_REDACTED",Time:now}
+ if err=(C067PostgreSQLAccessLog{DB:admin.DB}).AppendDurable(ctx,legacyAudit);err!=nil{t.Fatal("legacy audit fixture",err)}
  var valid []byte;if admin.DB.QueryRowContext(ctx,"SELECT document FROM compliance_author_versions WHERE tenant=$1",scopeA.Tenant).Scan(&valid)!=nil{t.Fatal("legacy row missing")}
  oversized:=`{"oversized":"`+strings.Repeat("x",C071MaxPrivateBytes+1)+`"}`
  if _,err=admin.DB.ExecContext(ctx,"UPDATE compliance_author_versions SET document=$1 WHERE tenant=$2",oversized,scopeA.Tenant);err!=nil{t.Fatal(err)}
@@ -77,8 +81,8 @@ func TestC071PostgreSQLProductionStorage(t *testing.T){
  for _,stmt:=range []string{"UPDATE compliance_author_versions SET document='{}'","DELETE FROM compliance_author_versions","TRUNCATE compliance_author_versions","CREATE TABLE public.bad_privilege(id int)","UPDATE compliance_schema_migrations SET version=99","UPDATE compliance_database_bindings SET tenant='tenant-b'"}{if _,err=a.DB.ExecContext(ctx,stmt);err==nil{t.Fatal("runtime privilege accepted",stmt)}}
  var ciphertext []byte;if admin.DB.QueryRowContext(ctx,"SELECT document FROM compliance_author_versions WHERE tenant=$1",scopeA.Tenant).Scan(&ciphertext)!=nil||bytes.Contains(ciphertext,[]byte("author-a")){t.Fatal("private plaintext persisted")}
  record:=C065ReviewRecord{Scope:scopeA,DraftID:"draft1",Revision:1,DocumentDigest:legacy.DocumentDigest,ReviewerID:"reviewer-b",ImpactDigest:Digest([]byte("impact")),State:"FINDINGS_OPEN",At:now}
- if _,err=a.Reviews.AppendIfCurrent(ctx,record,1,0);err!=nil{t.Fatal("encrypted review append",err)}
- if _,err=a.Reviews.AppendIfCurrent(ctx,record,1,1);err!=nil{t.Fatal("encrypted historical review read",err)}
+ if _,err=a.Reviews.AppendIfCurrent(ctx,record,1,1);err!=nil{t.Fatal("encrypted review append",err)}
+ if _,err=a.Reviews.AppendIfCurrent(ctx,record,1,2);err!=nil{t.Fatal("encrypted historical review read",err)}
  audit:=C067AuditAccess{Scope:scopeA,Actor:"auditor-a",CaseID:"case-a",EvidenceID:"evidence-a",Purpose:"LEGAL_AUDIT",Result:"EXPORTED_REDACTED",Time:now}
  if err=a.Audit.AppendDurable(ctx,audit);err!=nil{t.Fatal("encrypted audit append",err)}
  var purpose string;if admin.DB.QueryRowContext(ctx,"SELECT purpose FROM compliance_auditor_access WHERE tenant=$1",scopeA.Tenant).Scan(&purpose)!=nil||strings.Contains(purpose,"LEGAL_AUDIT"){t.Fatal("plaintext audit purpose")}
@@ -86,6 +90,15 @@ func TestC071PostgreSQLProductionStorage(t *testing.T){
  if ok,e:=a.Publication.Bootstrap(ctx,fence);e!=nil||!ok{t.Fatal("scoped publication bootstrap",e)}
  if _,err=b.Publication.Load(ctx,"publication-a");err==nil{t.Fatal("cross-scope publication read")}
  if _,err=b.Publication.Bootstrap(ctx,fence);err==nil{t.Fatal("cross-scope publication insert")}
+ published,err:=OpenProductionPublicationRuntime(ctx,roleDSN(roleA),refusingPublisher{});if err!=nil{t.Fatal("production publication restricted wiring",err)};published.Close()
+ if _,err=OpenProductionPublicationRuntime(ctx,adminDSN,refusingPublisher{});err==nil{t.Fatal("legacy production owner bypass")}
+ if _,err=admin.DB.ExecContext(ctx,"UPDATE compliance_schema_migrations SET checksum=repeat('0',64) WHERE version=5");err!=nil{t.Fatal(err)}
+ if _,err=OpenC071ProductionStores(ctx,roleDSN(roleA),scopeA,"publication-a",c);err==nil{t.Fatal("runtime checksum drift accepted")}
+ if _,err=admin.DB.ExecContext(ctx,"UPDATE compliance_schema_migrations SET checksum=$1 WHERE version=5",hash);err!=nil{t.Fatal(err)}
+ if _,err=a.DB.ExecContext(ctx,"INSERT INTO compliance_author_heads(tenant,domain,jurisdiction,draft_id,author_id,revision) VALUES($1,$2,$3,$4,'author-a',0)",scopeA.Tenant,scopeA.Domain,scopeA.Jurisdiction,strings.Repeat("x",129));err==nil{t.Fatal("unbounded indexed key accepted")}
+ schema.Hours.EndLocal="18:00";casErrors:=make(chan error,12);casWins:=0
+ for i:=0;i<12;i++{wg.Add(1);go func(){defer wg.Done();_,e:=a.Drafts.Save(ctx,scopeA,"draft1","author-a",1,schema,cited,now);casErrors<-e}()};wg.Wait();close(casErrors)
+ for e:=range casErrors{if e==nil{casWins++}else if !errors.Is(e,ErrAuthorConflict){t.Fatal("encrypted CAS",e)}};if casWins!=1{t.Fatal("encrypted CAS winners",casWins)}
  var indexes int;if admin.DB.QueryRowContext(ctx,"SELECT count(*) FROM pg_indexes WHERE schemaname='public' AND indexname IN('c071_author_owner_history','c071_review_queue','c071_publication_expiry')").Scan(&indexes)!=nil||indexes!=3{t.Fatal("required indexes missing")}
  // Quota admission is serialized in PostgreSQL even across concurrent sessions.
  if _,err=admin.DB.ExecContext(ctx,"UPDATE compliance_storage_usage SET stored_rows=99999 WHERE tenant=$1",scopeA.Tenant);err!=nil{t.Fatal(err)}

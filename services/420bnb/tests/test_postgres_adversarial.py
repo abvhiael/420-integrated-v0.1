@@ -1132,8 +1132,32 @@ def test_bnb27_pay_owned_split_partial_refunds_and_payout_conservation(fixture_p
         assert client.post("/v1/bnb/internal/pay/failures",json=failure,headers=signed(
             api.PayFailureInput(**failure),"failure",{
             "pay_attempt_id":"attempt-bnb27","failure_code":"settlement_failed"})).status_code==409
+        # Independently Pay-verified finalized-receipt reorg freezes payouts
+        # without reopening confirmed inventory or accepting guest callbacks.
+        reversal={**failure,"pay_attempt_id":"attempt-bnb27-reorg",
+                  "failure_code":"reorg"}
+        signed_reorg=signed(api.PayFailureInput(**reversal),"failure",{
+            "pay_attempt_id":"attempt-bnb27-reorg","failure_code":"reorg",
+            "original_pay_invoice_id":"invoice-bnb27",
+            "canonical_finality_revocation_verified":True})
+        accepted=client.post("/v1/bnb/internal/pay/failures",json=reversal,
+                             headers=signed_reorg)
+        assert accepted.status_code==202,accepted.text
+        assert client.post("/v1/bnb/internal/pay/failures",
+                           json=reversal,headers=signed(api.PayFailureInput(**reversal),
+                           "failure",{"pay_attempt_id":"attempt-bnb27-reorg",
+                           "failure_code":"reorg","original_pay_invoice_id":"invoice-bnb27",
+                           "canonical_finality_revocation_verified":True})).json()["replayed"]
+        with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+            record=c.execute("""SELECT r.status,h.status,i.state
+                FROM bnb_reservation r JOIN bnb_hold h ON h.id=r.hold_id
+                JOIN bnb_pay_intent i ON i.reservation_id=r.id WHERE r.id=%s""",
+                (rid,)).fetchone()
+            assert record==("recovery_required","confirmed","recovery_required")
+        assert event("platform",1,"platform-wallet","payout-during-reorg").status_code==409
     finally:
         with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+            c.execute("DELETE FROM bnb_pay_failure_event WHERE reservation_id=%s",(rid,))
             c.execute("DELETE FROM bnb_pay_disbursement_event WHERE pay_operation_id LIKE 'refund-%' OR pay_operation_id LIKE 'host-%' OR pay_operation_id LIKE 'developer-%'")
             c.execute("DELETE FROM bnb_pay_disbursement WHERE reservation_id=%s",(rid,))
             c.execute("DELETE FROM bnb_settlement_split WHERE reservation_id=%s",(rid,))

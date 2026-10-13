@@ -1,0 +1,17 @@
+import assert from 'node:assert/strict';
+import {validatePrivateAction,sendCaseAction} from './client.mjs';
+const caseId='00000000-0000-4000-8000-000000000102';
+const eventId='00000000-0000-4000-8000-000000000103';
+assert.equal(validatePrivateAction('reject',{case_id:caseId,event_id:eventId}),'/private/v1/cases/reject');
+assert.throws(()=>validatePrivateAction('overridePolicy',{case_id:caseId,event_id:eventId}));
+assert.throws(()=>validatePrivateAction('approve',{case_id:'x',event_id:eventId}));
+await assert.rejects(sendCaseAction({action:'approve',body:{case_id:caseId,event_id:eventId},csrf:''}));
+let captured;
+const send=async (url,opts)=>{captured={url,opts};return {ok:true,json:async()=>({status:'APPROVED'})}};
+assert.equal(await sendCaseAction({action:'approve',body:{case_id:caseId,event_id:eventId},csrf:'from-auth-server',send}),'APPROVED');
+assert.equal(captured.url,'/private/v1/cases/approve');
+assert.equal(captured.opts.credentials,'same-origin');
+assert.equal(captured.opts.headers['X-CSRF-Token'],'from-auth-server');
+await assert.rejects(sendCaseAction({action:'approve',body:{case_id:caseId,event_id:eventId},csrf:'token',send:async()=>({ok:false})}));
+await assert.rejects(sendCaseAction({action:'approve',body:{case_id:caseId,event_id:eventId},csrf:'token',send:async()=>({ok:true,json:async()=>({status:'DELIVERED'})})}));
+console.log('Private console client contract and denial PASS');

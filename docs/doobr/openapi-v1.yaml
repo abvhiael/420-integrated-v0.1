@@ -1,0 +1,110 @@
+openapi: 3.1.0
+info:
+  title: DOOBR proposed service API
+  version: 0.1.0-design
+  description: Design-only fail-closed contract. No regulated service or deployment authorized.
+servers:
+  - url: https://doobr.420integrated.org
+paths:
+  /v1/public/regions/{region_id}/presence:
+    get:
+      operationId: getRegionalPresence
+      security: []
+      parameters:
+        - name: region_id
+          in: path
+          required: true
+          schema: {type: string, pattern: '^[a-z0-9-]{2,64}$'}
+      responses:
+        '200':
+          description: Sanitized aggregate region presence only
+          headers:
+            Cache-Control:
+              schema: {type: string}
+              description: Cache no longer than response expires_at
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/PublicRegionPresence'}
+        '429': {$ref: '#/components/responses/Denied'}
+        '503': {$ref: '#/components/responses/Denied'}
+  /v1/orders:
+    post:
+      summary: Planned disabled-by-default regulated consumer request
+      operationId: createDeliveryRequest
+      security: [{BearerAuth: [ ]}]
+      parameters:
+        - {$ref: '#/components/parameters/IdempotencyKey'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/CreateDeliveryRequest'}
+      responses:
+        '202': {description: Authorized asynchronous request acceptance only, not dispatch or payment finality}
+        '401': {$ref: '#/components/responses/Denied'}
+        '403': {$ref: '#/components/responses/Denied'}
+        '409': {$ref: '#/components/responses/Denied'}
+        '422': {$ref: '#/components/responses/Denied'}
+        '503': {$ref: '#/components/responses/Denied'}
+  /v1/orders/{order_id}:
+    get:
+      operationId: getOwnDeliveryOrder
+      security: [{BearerAuth: []}]
+      parameters:
+        - name: order_id
+          in: path
+          required: true
+          schema: {type: string, minLength: 1}
+      responses:
+        '200':
+          description: Return only records authorized for this actor and tenant
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/DeliveryStatus'}
+        '401': {$ref: '#/components/responses/Denied'}
+        '403': {$ref: '#/components/responses/Denied'}
+        '404': {$ref: '#/components/responses/Denied'}
+        '503': {$ref: '#/components/responses/Denied'}
+components:
+  securitySchemes:
+    BearerAuth: {type: http, scheme: bearer, bearerFormat: '420Identity scoped session token'}
+  parameters:
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      schema: {type: string, minLength: 16, maxLength: 128}
+  responses:
+    Denied:
+      description: Fail closed; errors never expose tenant existence, PII or internal eligibility secrets
+  schemas:
+    PublicRegionPresence:
+      type: object
+      additionalProperties: false
+      required: [schema_version, region_id, status, observed_at, expires_at, jurisdiction_policy_ref, handoff_url]
+      properties:
+        schema_version: {type: string, const: 'doobr-presence/v1'}
+        region_id: {type: string}
+        status: {type: string, enum: [AVAILABLE, LIMITED, UNAVAILABLE, UNKNOWN]}
+        observed_at: {type: string, format: date-time}
+        expires_at: {type: string, format: date-time}
+        jurisdiction_policy_ref: {type: string}
+        handoff_url: {type: string, format: uri, description: 'Pin and validate approved DOOBR HTTPS host in implementation'}
+    CreateDeliveryRequest:
+      type: object
+      additionalProperties: false
+      required: [retailer_id, prepaid_retailer_order_ref, compliance_decision_ref]
+      properties:
+        retailer_id: {type: string}
+        prepaid_retailer_order_ref: {type: string}
+        compliance_decision_ref: {type: string}
+    DeliveryStatus:
+      type: object
+      additionalProperties: false
+      required: [order_id, state, version]
+      properties:
+        order_id: {type: string}
+        state:
+          type: string
+          enum: [DRAFT, ELIGIBILITY_PENDING, ELIGIBLE, RETAILER_READY, OFFERED, ASSIGNED, PICKED_UP, IN_TRANSIT, HANDOFF_PENDING, DELIVERED, CLOSED, DELIVERY_FAILED, RETURN_REQUIRED, RETURNED, RECONCILED, CANCELLED, EXPIRED, DISPUTED]
+        version: {type: integer, minimum: 0}

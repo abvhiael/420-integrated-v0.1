@@ -1,0 +1,36 @@
+name: DOOBR R04.7 Compliance Discovery Level 1
+on:
+  push:
+    branches: [roadmap/doobr-bc-vancouver-infrastructure]
+    paths: ['doobr/compliance_discovery_adapter.py','doobr/storage/tests/test_compliance_discovery_adapter.py','.github/workflows/doobr-r04-7-level1.yml']
+  pull_request:
+    paths: ['doobr/compliance_discovery_adapter.py','doobr/storage/tests/test_compliance_discovery_adapter.py','.github/workflows/doobr-r04-7-level1.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  compliance-discovery:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Exact SHA before
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compliance authority and privacy-safe Travel integration
+        run: |
+          python3 -m py_compile doobr/compliance_discovery_adapter.py
+          python3 -m unittest discover -s doobr/storage/tests -p test_compliance_discovery_adapter.py -v
+          python3 -m unittest discover -s doobr/storage/tests -p test_travel_card.py -v
+          python3 scripts/verify-doobr-r04-1.py
+      - name: Exact SHA after
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"

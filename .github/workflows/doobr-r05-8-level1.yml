@@ -1,0 +1,48 @@
+name: DOOBR R05.8 Security Intake Level 1
+on:
+  push:
+    branches: [roadmap/doobr-bc-vancouver-infrastructure]
+    paths: ['docs/doobr/DOOBR-R05-8-SECURITY-INTAKE-RUNBOOKS.md','.github/workflows/doobr-r05-8-level1.yml']
+  pull_request:
+    paths: ['docs/doobr/DOOBR-R05-8-SECURITY-INTAKE-RUNBOOKS.md','.github/workflows/doobr-r05-8-level1.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  intake-matrix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Exact SHA before
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"
+      - name: Check threat evidence paths and mandatory release gates
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          d=Path('docs/doobr/DOOBR-R05-8-SECURITY-INTAKE-RUNBOOKS.md').read_text()
+          evidence=['test_r05_1_authorization_threats.py','test_r05_2_privacy_retention.py',
+          'test_r05_3_chaos.py','test_r05_4_financial_finality.py',
+          'test_r05_5_transition_authority.py','test_pg_operations.py',
+          'doobr-r05-7.spec.mjs','scripts/verify-doobr-r04-1.py']
+          for name in evidence:
+           assert name in d, name
+           assert list(Path('.').rglob(name)), name
+          for gate in ('ACCEPT / REJECT / NEEDS_REMEDIATION','NON-OPERATIONAL',
+                       'independent','legal-hold','Level 3','R05.9','R05.10'):
+           assert gate in d, gate
+          for name in ('Compromised credentials','License lapse','Payment finality',
+                       'PII leak','Outbox outage','Accessibility'):
+           assert name in d, name
+          assert 'still OPEN' in d
+          PY
+          python3 scripts/verify-doobr-r04-1.py
+      - name: Exact SHA after
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"

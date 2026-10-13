@@ -1,0 +1,52 @@
+name: DOOBR R05.9 Release Handoff Level 1
+on:
+  push:
+    branches: [roadmap/doobr-bc-vancouver-infrastructure]
+    paths: ['docs/doobr/DOOBR-R05-9-RELEASE-HANDOFF.md','.github/workflows/doobr-r05-9-level1.yml']
+  pull_request:
+    paths: ['docs/doobr/DOOBR-R05-9-RELEASE-HANDOFF.md','.github/workflows/doobr-r05-9-level1.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  release-handoff:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Exact SHA before
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"
+      - name: Verify handoff references gates and distinct Level 3 ownership
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          body=Path('docs/doobr/DOOBR-R05-9-RELEASE-HANDOFF.md').read_text()
+          files=['docs/doobr/DOOBR-R01-R06-ROADMAP.md',
+           'docs/audit/DOOBR-TESTNET-DEFERRED-QUALIFICATION-ROADMAP.md',
+           'docs/doobr/DOOBR-R05-8-SECURITY-INTAKE-RUNBOOKS.md',
+           'config/genesis-applications.json','config/genesis-consumer-services.json',
+           'config/420travel-genesis.json','docs/genesis-services/GEN-SVC-3-TRAVEL.md',
+           'docs/doobr/openapi-v1.yaml','docs/doobr/events-v1.json',
+           'doobr/ops/backup_encrypted.sh','doobr/ops/restore_isolated.sh']
+          for filename in files:
+           assert Path(filename).is_file(),filename
+           assert filename in body,filename
+          for value in ['R05.9','R05.10','DOOBR-AUDIT-9','DOOBR-AUDIT-10',
+                        'NON-OPERATIONAL','NO-GO','R06.1','R06.4','R06.9',
+                        'Solidity Contracts','Genesis address-authority','without duplicate Foundry',
+                        '420 Integrated/global','Docs/global','VoiceOver','NVDA','TalkBack',
+                        'Checkout','R05.8']:
+           assert value.lower() in body.lower(),value
+          assert 'NOT COMPLETE' in body
+          PY
+          python3 scripts/verify-doobr-r04-1.py
+      - name: Exact SHA after
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"

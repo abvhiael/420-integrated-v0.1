@@ -1,0 +1,60 @@
+{
+  "schema_version": "doobr-events/v1",
+  "status": "DESIGN_ONLY",
+  "transport": "at_least_once_outbox_with_idempotent_consumers",
+  "envelope": {
+    "required": [
+      "event_id",
+      "event_type",
+      "schema_version",
+      "aggregate_type",
+      "aggregate_id",
+      "tenant_id",
+      "sequence",
+      "occurred_at",
+      "actor_reference",
+      "correlation_id",
+      "causation_id",
+      "idempotency_key",
+      "policy_decision_reference",
+      "data_classification"
+    ],
+    "sequence": "monotonic_per_aggregate",
+    "privacy": "No raw GPS, private address, ID image, signature or payment token in public buses"
+  },
+  "events": [
+    "delivery.requested.v1",
+    "delivery.eligibility_checked.v1",
+    "delivery.retailer_ready.v1",
+    "delivery.offer_created.v1",
+    "delivery.assigned.v1",
+    "delivery.picked_up.v1",
+    "delivery.handoff_failed.v1",
+    "delivery.delivered.v1",
+    "delivery.return_required.v1",
+    "delivery.returned.v1",
+    "delivery.cancelled.v1",
+    "delivery.disputed.v1",
+    "delivery.reconciled.v1",
+    "region.presence_updated.v1"
+  ],
+  "public_projection": {
+    "allow_event": "region.presence_updated.v1",
+    "status_values": [
+      "AVAILABLE",
+      "LIMITED",
+      "UNAVAILABLE",
+      "UNKNOWN"
+    ],
+    "deny_fields": [
+      "courier_id",
+      "address",
+      "phone",
+      "order_id",
+      "lat",
+      "long",
+      "customer_id",
+      "payment_token"
+    ]
+  }
+}

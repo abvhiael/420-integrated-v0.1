@@ -1,0 +1,38 @@
+name: DOOBR R05.3 Concurrency Chaos Level 1
+on:
+  push:
+    branches: [roadmap/doobr-bc-vancouver-infrastructure]
+    paths: ['doobr/storage/tests/test_r05_3_chaos.py','.github/workflows/doobr-r05-3-level1.yml']
+  pull_request:
+    paths: ['doobr/storage/tests/test_r05_3_chaos.py','.github/workflows/doobr-r05-3-level1.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  chaos:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Exact SHA before
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"
+      - name: Concurrency and retained replay/dispatch/outbox regressions
+        run: |
+          set -euo pipefail
+          python3 -m py_compile doobr/storage/tests/test_r05_3_chaos.py
+          for suite in test_r05_3_chaos.py test_dispatch.py test_mobile_replay_api.py test_mobile_offline.py test_outbox.py test_payment_conservation.py; do
+            python3 -m unittest discover -s doobr/storage/tests -p "$suite" -v
+          done
+          python3 scripts/verify-doobr-r04-1.py
+      - name: Exact SHA after
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"

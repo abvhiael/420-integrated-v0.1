@@ -1,3 +1,5 @@
+> **Supersession notice (M3-B technical evidence):** This is a retained historical WIP snapshot. Later repo-side appeals, moderation separation, report-detail retention, crash-fault tests and the bounded app Level 2 qualification are recorded in [BNB-M3B-LEVEL2-QUALIFICATION.md](BNB-M3B-LEVEL2-QUALIFICATION.md), implementation SHA `0730e78eaac10dc18ca29e46eb6706cd75465cb6`. External/operator/legal/manual-testnet gates remain open; historical unresolved statements below describe their earlier snapshots, not the latest implementation state.
+
 # BNB-3.11 — End-to-end qualification evidence and blocking reconciliation
 
 **Status: PARTIAL; NOT FULLY CERTIFIED.** Canonical definition: `docs/bnb/BNB-PHASE3-ROADMAP.md` BNB-3.11 — execute retained app-focused guest/host/provider journeys and negative/adversarial economic, privacy and lifecycle matrices on one release SHA. Reconcile evidence and external dependencies; independently witness live production-equivalent cases only when prerequisites exist. This document does not convert synthetic outcomes into independent acceptance.

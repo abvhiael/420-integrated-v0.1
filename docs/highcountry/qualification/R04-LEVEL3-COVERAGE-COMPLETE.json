@@ -1,0 +1,1409 @@
+{
+  "candidate_sha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706",
+  "result": "PASS",
+  "canonical_primary_units": 1115,
+  "source_records": 837,
+  "source_mapping": "approximate optimized IR; diagnostic percentages only",
+  "shards": [
+    {
+      "candidate_sha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706",
+      "shard": 0,
+      "count": 4,
+      "profile": "coverage",
+      "result": "PASS",
+      "primary_units": 279,
+      "assigned_test_sources": 114,
+      "source_records": 480,
+      "contexts": [
+        {
+          "candidate_sha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706",
+          "shard": 0,
+          "count": 64,
+          "profile": "coverage",
+          "result": "PASS",
+          "primary_units": 18,
+          "assigned_test_sources": 7,
+          "test_summaries": [
+            [
+              "45",
+              "0",
+              "0"
+            ]
+          ]
+        },
+        {
+          "candidate_sha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706",
+          "shard": 4,
+          "count": 64,
+          "profile": "coverage",
+          "result": "PASS",
+          "primary_units": 18,
+          "assigned_test_sources": 7,
+          "test_summaries": [
+            [
+              "38",
+              "0",
+              "0"
+            ]
+          ]
+        },
+        {
+          "candidate_sha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706",
+          "shard": 8,
+          "count": 64,
+          "profile": "coverage",
+          "result": "PASS",
+          "primary_units": 18,
+          "assigned_test_sources": 7,
+          "test_summaries": [
+            [
+              "55",
+              "0",
+              "0"
+            ]
+          ]
+        },
+        {
+          "candidate_sha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706",
+          "shard": 12,
+          "count": 64,
+          "profile": "coverage",
+          "result": "PASS",
+          "primary_units": 18,
+          "assigned_test_sources": 7,
+          "test_summaries": [
+            [
+              "46",
+              "0",
+              "0"
+            ]
+          ]
+        },
+        {
+          "candidate_sha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706",
+          "shard": 16,
+          "count": 64,
+          "profile": "coverage",
+          "result": "PASS",
+          "primary_units": 18,
+          "assigned_test_sources": 7,
+          "test_summaries": [
+            [
+              "35",
+              "0",
+              "0"
+            ]
+          ]
+        },
+        {
+          "candidate_sha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706",
+          "shard": 20,
+          "count": 64,
+          "profile": "coverage",
+          "result": "PASS",
+          "primary_units": 18,
+          "assigned_test_sources": 8,
+          "test_summaries": [
+            [
+              "47",
+              "0",
+              "0"
+            ]
+          ]
+        },
+        {
+          "candidate_sha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706",
+          "shard": 24,
+          "count": 64,
+          "profile": "coverage",
+          "result": "PASS",
+          "primary_units": 18,
+          "assigned_test_sources": 8,
+          "test_summaries": [
+            [
+              "41",
+              "0",
+              "0"
+            ]
+          ]
+        },
+        {
+          "candidate_sha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706",
+          "shard": 28,
+          "count": 64,
+          "profile": "coverage",
+          "result": "PASS",
+          "primary_units": 17,
+          "assigned_test_sources": 7,
+          "test_summaries": [
+            [
+              "67",
+              "0",
+              "0"
+            ]
+          ]
+        },
+        {
+          "candidate_sha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706",
+          "shard": 32,
+          "count": 64,
+          "profile": "coverage",
+          "result": "PASS",
+          "primary_units": 17,
+          "assigned_test_sources": 7,
+          "test_summaries": [
+            [
+              "45",
+              "0",
+              "0"
+            ]
+          ]
+        },
+        {
+          "candidate_sha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706",
+          "shard": 36,
+          "count": 64,
+          "profile": "coverage",
+          "result": "PASS",
+          "primary_units": 17,
+          "assigned_test_sources": 7,
+          "test_summaries": [
+            [
+              "45",
+              "0",
+              "0"
+            ]
+          ]
+        },
+        {
+          "candidate_sha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706",
+          "shard": 40,
+          "count": 64,
+          "profile": "coverage",
+          "result": "PASS",
+          "primary_units": 17,
+          "assigned_test_sources": 7,
+          "test_summaries": [
+            [
+              "45",
+              "0",
+              "0"
+            ]
+          ]
+        },
+        {
+          "candidate_sha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706",
+          "shard": 44,
+          "count": 64,
+          "profile": "coverage",
+          "result": "PASS",
+          "primary_units": 17,
+          "assigned_test_sources": 7,
+          "test_summaries": [
+            [
+              "38",
+              "0",
+              "0"
+            ]
+          ]
+        },
+        {
+          "candidate_sha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706",
+          "shard": 48,
+          "count": 64,
+          "profile": "coverage",
+          "result": "PASS",
+          "primary_units": 17,
+          "assigned_test_sources": 7,
+          "test_summaries": [
+            [
+              "31",
+              "0",
+              "0"
+            ]
+          ]
+        },
+        {
+          "candidate_sha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706",
+          "shard": 52,
+          "count": 64,
+          "profile": "coverage",
+          "result": "PASS",
+          "primary_units": 17,
+          "assigned_test_sources": 7,
+          "test_summaries": [
+            [
+              "51",
+              "0",
+              "0"
+            ]
+          ]
+        },
+        {
+          "candidate_sha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706",
+          "shard": 56,
+          "count": 64,
+          "profile": "coverage",
+          "result": "PASS",
+          "primary_units": 17,
+          "assigned_test_sources": 7,
+          "test_summaries": [
+            [
+              "39",
+              "0",
+              "0"
+            ]
+          ]
+        },
+        {
+          "candidate_sha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706",
+          "shard": 60,
+          "count": 64,
+          "profile": "coverage",
+          "result": "PASS",
+          "primary_units": 17,
+          "assigned_test_sources": 7,
+          "test_summaries": [
+            [
+              "46",
+              "0",
+              "0"
+            ]
+          ]
+        }
+      ],
+      "test_summaries": [
+        [
+          "45",
+          "0",
+          "0"
+        ],
+        [
+          "38",
+          "0",
+          "0"
+        ],
+        [
+          "55",
+          "0",
+          "0"
+        ],
+        [
+          "46",
+          "0",
+          "0"
+        ],
+        [
+          "35",
+          "0",
+          "0"
+        ],
+        [
+          "47",
+          "0",
+          "0"
+        ],
+        [
+          "41",
+          "0",
+          "0"
+        ],
+        [
+          "67",
+          "0",
+          "0"
+        ],
+        [
+          "45",
+          "0",
+          "0"
+        ],
+        [
+          "45",
+          "0",
+          "0"
+        ],
+        [
+          "45",
+          "0",
+          "0"
+        ],
+        [
+          "38",
+          "0",
+          "0"
+        ],
+        [
+          "31",
+          "0",
+          "0"
+        ],
+        [
+          "51",
+          "0",
+          "0"
+        ],
+        [
+          "39",
+          "0",
+          "0"
+        ],
+        [
+          "46",
+          "0",
+          "0"
+        ]
+      ]
+    },
+    {
+      "candidate_sha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706",
+      "shard": 1,
+      "count": 4,
+      "profile": "coverage",
+      "result": "PASS",
+      "primary_units": 279,
+      "assigned_test_sources": 115,
+      "source_records": 457,
+      "contexts": [
+        {
+          "candidate_sha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706",
+          "shard": 1,
+          "count": 64,
+          "profile": "coverage",
+          "result": "PASS",
+          "primary_units": 18,
+          "assigned_test_sources": 7,
+          "test_summaries": [
+            [
+              "41",
+              "0",
+              "0"
+            ]
+          ]
+        },
+        {
+          "candidate_sha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706",
+          "shard": 5,
+          "count": 64,
+          "profile": "coverage",
+          "result": "PASS",
+          "primary_units": 18,
+          "assigned_test_sources": 7,
+          "test_summaries": [
+            [
+              "28",
+              "0",
+              "0"
+            ]
+          ]
+        },
+        {
+          "candidate_sha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706",
+          "shard": 9,
+          "count": 64,
+          "profile": "coverage",
+          "result": "PASS",
+          "primary_units": 18,
+          "assigned_test_sources": 7,
+          "test_summaries": [
+            [
+              "43",
+              "0",
+              "0"
+            ]
+          ]
+        },
+        {
+          "candidate_sha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706",
+          "shard": 13,
+          "count": 64,
+          "profile": "coverage",
+          "result": "PASS",
+          "primary_units": 18,
+          "assigned_test_sources": 7,
+          "test_summaries": [
+            [
+              "30",
+              "0",
+              "0"
+            ]
+          ]
+        },
+        {
+          "candidate_sha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706",
+          "shard": 17,
+          "count": 64,
+          "profile": "coverage",
+          "result": "PASS",
+          "primary_units": 18,
+          "assigned_test_sources": 8,
+          "test_summaries": [
+            [
+              "47",
+              "0",
+              "0"
+            ]
+          ]
+        },
+        {
+          "candidate_sha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706",
+          "shard": 21,
+          "count": 64,
+          "profile": "coverage",
+          "result": "PASS",
+          "primary_units": 18,
+          "assigned_test_sources": 8,
+          "test_summaries": [
+            [
+              "30",
+              "0",
+              "0"
+            ]
+          ]
+        },
+        {
+          "candidate_sha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706",
+          "shard": 25,
+          "count": 64,
+          "profile": "coverage",
+          "result": "PASS",
+          "primary_units": 18,
+          "assigned_test_sources": 8,
+          "test_summaries": [
+            [
+              "47",
+              "0",
+              "0"
+            ]
+          ]
+        },
+        {
+          "candidate_sha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706",
+          "shard": 29,
+          "count": 64,
+          "profile": "coverage",
+          "result": "PASS",
+          "primary_units": 17,
+          "assigned_test_sources": 7,
+          "test_summaries": [
+            [
+              "44",
+              "0",
+              "0"
+            ]
+          ]
+        },
+        {
+          "candidate_sha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706",
+          "shard": 33,
+          "count": 64,
+          "profile": "coverage",
+          "result": "PASS",
+          "primary_units": 17,
+          "assigned_test_sources": 7,
+          "test_summaries": [
+            [
+              "51",
+              "0",
+              "0"
+            ]
+          ]
+        },
+        {
+          "candidate_sha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706",
+          "shard": 37,
+          "count": 64,
+          "profile": "coverage",
+          "result": "PASS",
+          "primary_units": 17,
+          "assigned_test_sources": 7,
+          "test_summaries": [
+            [
+              "29",
+              "0",
+              "0"
+            ]
+          ]
+        },
+        {
+          "candidate_sha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706",
+          "shard": 41,
+          "count": 64,
+          "profile": "coverage",
+          "result": "PASS",
+          "primary_units": 17,
+          "assigned_test_sources": 7,
+          "test_summaries": [
+            [
+              "26",
+              "0",
+              "0"
+            ]
+          ]
+        },
+        {
+          "candidate_sha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706",
+          "shard": 45,
+          "count": 64,
+          "profile": "coverage",
+          "result": "PASS",
+          "primary_units": 17,
+          "assigned_test_sources": 7,
+          "test_summaries": [
+            [
+              "40",
+              "0",
+              "0"
+            ]
+          ]
+        },
+        {
+          "candidate_sha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706",
+          "shard": 49,
+          "count": 64,
+          "profile": "coverage",
+          "result": "PASS",
+          "primary_units": 17,
+          "assigned_test_sources": 7,
+          "test_summaries": [
+            [
+              "18",
+              "0",
+              "0"
+            ]
+          ]
+        },
+        {
+          "candidate_sha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706",
+          "shard": 53,
+          "count": 64,
+          "profile": "coverage",
+          "result": "PASS",
+          "primary_units": 17,
+          "assigned_test_sources": 7,
+          "test_summaries": [
+            [
+              "56",
+              "0",
+              "0"
+            ]
+          ]
+        },
+        {
+          "candidate_sha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706",
+          "shard": 57,
+          "count": 64,
+          "profile": "coverage",
+          "result": "PASS",
+          "primary_units": 17,
+          "assigned_test_sources": 7,
+          "test_summaries": [
+            [
+              "38",
+              "0",
+              "0"
+            ]
+          ]
+        },
+        {
+          "candidate_sha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706",
+          "shard": 61,
+          "count": 64,
+          "profile": "coverage",
+          "result": "PASS",
+          "primary_units": 17,
+          "assigned_test_sources": 7,
+          "test_summaries": [
+            [
+              "74",
+              "0",
+              "0"
+            ]
+          ]
+        }
+      ],
+      "test_summaries": [
+        [
+          "41",
+          "0",
+          "0"
+        ],
+        [
+          "28",
+          "0",
+          "0"
+        ],
+        [
+          "43",
+          "0",
+          "0"
+        ],
+        [
+          "30",
+          "0",
+          "0"
+        ],
+        [
+          "47",
+          "0",
+          "0"
+        ],
+        [
+          "30",
+          "0",
+          "0"
+        ],
+        [
+          "47",
+          "0",
+          "0"
+        ],
+        [
+          "44",
+          "0",
+          "0"
+        ],
+        [
+          "51",
+          "0",
+          "0"
+        ],
+        [
+          "29",
+          "0",
+          "0"
+        ],
+        [
+          "26",
+          "0",
+          "0"
+        ],
+        [
+          "40",
+          "0",
+          "0"
+        ],
+        [
+          "18",
+          "0",
+          "0"
+        ],
+        [
+          "56",
+          "0",
+          "0"
+        ],
+        [
+          "38",
+          "0",
+          "0"
+        ],
+        [
+          "74",
+          "0",
+          "0"
+        ]
+      ]
+    },
+    {
+      "candidate_sha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706",
+      "shard": 2,
+      "count": 4,
+      "profile": "coverage",
+      "result": "PASS",
+      "primary_units": 279,
+      "assigned_test_sources": 115,
+      "source_records": 448,
+      "contexts": [
+        {
+          "candidate_sha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706",
+          "shard": 2,
+          "count": 64,
+          "profile": "coverage",
+          "result": "PASS",
+          "primary_units": 18,
+          "assigned_test_sources": 7,
+          "test_summaries": [
+            [
+              "40",
+              "0",
+              "0"
+            ]
+          ]
+        },
+        {
+          "candidate_sha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706",
+          "shard": 6,
+          "count": 64,
+          "profile": "coverage",
+          "result": "PASS",
+          "primary_units": 18,
+          "assigned_test_sources": 7,
+          "test_summaries": [
+            [
+              "45",
+              "0",
+              "0"
+            ]
+          ]
+        },
+        {
+          "candidate_sha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706",
+          "shard": 10,
+          "count": 64,
+          "profile": "coverage",
+          "result": "PASS",
+          "primary_units": 18,
+          "assigned_test_sources": 7,
+          "test_summaries": [
+            [
+              "48",
+              "0",
+              "0"
+            ]
+          ]
+        },
+        {
+          "candidate_sha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706",
+          "shard": 14,
+          "count": 64,
+          "profile": "coverage",
+          "result": "PASS",
+          "primary_units": 18,
+          "assigned_test_sources": 7,
+          "test_summaries": [
+            [
+              "51",
+              "0",
+              "0"
+            ]
+          ]
+        },
+        {
+          "candidate_sha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706",
+          "shard": 18,
+          "count": 64,
+          "profile": "coverage",
+          "result": "PASS",
+          "primary_units": 18,
+          "assigned_test_sources": 8,
+          "test_summaries": [
+            [
+              "46",
+              "0",
+              "0"
+            ]
+          ]
+        },
+        {
+          "candidate_sha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706",
+          "shard": 22,
+          "count": 64,
+          "profile": "coverage",
+          "result": "PASS",
+          "primary_units": 18,
+          "assigned_test_sources": 8,
+          "test_summaries": [
+            [
+              "39",
+              "0",
+              "0"
+            ]
+          ]
+        },
+        {
+          "candidate_sha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706",
+          "shard": 26,
+          "count": 64,
+          "profile": "coverage",
+          "result": "PASS",
+          "primary_units": 18,
+          "assigned_test_sources": 8,
+          "test_summaries": [
+            [
+              "62",
+              "0",
+              "0"
+            ]
+          ]
+        },
+        {
+          "candidate_sha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706",
+          "shard": 30,
+          "count": 64,
+          "profile": "coverage",
+          "result": "PASS",
+          "primary_units": 17,
+          "assigned_test_sources": 7,
+          "test_summaries": [
+            [
+              "43",
+              "0",
+              "0"
+            ]
+          ]
+        },
+        {
+          "candidate_sha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706",
+          "shard": 34,
+          "count": 64,
+          "profile": "coverage",
+          "result": "PASS",
+          "primary_units": 17,
+          "assigned_test_sources": 7,
+          "test_summaries": [
+            [
+              "33",
+              "0",
+              "0"
+            ]
+          ]
+        },
+        {
+          "candidate_sha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706",
+          "shard": 38,
+          "count": 64,
+          "profile": "coverage",
+          "result": "PASS",
+          "primary_units": 17,
+          "assigned_test_sources": 7,
+          "test_summaries": [
+            [
+              "29",
+              "0",
+              "0"
+            ]
+          ]
+        },
+        {
+          "candidate_sha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706",
+          "shard": 42,
+          "count": 64,
+          "profile": "coverage",
+          "result": "PASS",
+          "primary_units": 17,
+          "assigned_test_sources": 7,
+          "test_summaries": [
+            [
+              "29",
+              "0",
+              "0"
+            ]
+          ]
+        },
+        {
+          "candidate_sha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706",
+          "shard": 46,
+          "count": 64,
+          "profile": "coverage",
+          "result": "PASS",
+          "primary_units": 17,
+          "assigned_test_sources": 7,
+          "test_summaries": [
+            [
+              "39",
+              "0",
+              "0"
+            ]
+          ]
+        },
+        {
+          "candidate_sha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706",
+          "shard": 50,
+          "count": 64,
+          "profile": "coverage",
+          "result": "PASS",
+          "primary_units": 17,
+          "assigned_test_sources": 7,
+          "test_summaries": [
+            [
+              "46",
+              "0",
+              "0"
+            ]
+          ]
+        },
+        {
+          "candidate_sha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706",
+          "shard": 54,
+          "count": 64,
+          "profile": "coverage",
+          "result": "PASS",
+          "primary_units": 17,
+          "assigned_test_sources": 7,
+          "test_summaries": [
+            [
+              "31",
+              "0",
+              "0"
+            ]
+          ]
+        },
+        {
+          "candidate_sha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706",
+          "shard": 58,
+          "count": 64,
+          "profile": "coverage",
+          "result": "PASS",
+          "primary_units": 17,
+          "assigned_test_sources": 7,
+          "test_summaries": [
+            [
+              "48",
+              "0",
+              "0"
+            ]
+          ]
+        },
+        {
+          "candidate_sha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706",
+          "shard": 62,
+          "count": 64,
+          "profile": "coverage",
+          "result": "PASS",
+          "primary_units": 17,
+          "assigned_test_sources": 7,
+          "test_summaries": [
+            [
+              "39",
+              "0",
+              "0"
+            ]
+          ]
+        }
+      ],
+      "test_summaries": [
+        [
+          "40",
+          "0",
+          "0"
+        ],
+        [
+          "45",
+          "0",
+          "0"
+        ],
+        [
+          "48",
+          "0",
+          "0"
+        ],
+        [
+          "51",
+          "0",
+          "0"
+        ],
+        [
+          "46",
+          "0",
+          "0"
+        ],
+        [
+          "39",
+          "0",
+          "0"
+        ],
+        [
+          "62",
+          "0",
+          "0"
+        ],
+        [
+          "43",
+          "0",
+          "0"
+        ],
+        [
+          "33",
+          "0",
+          "0"
+        ],
+        [
+          "29",
+          "0",
+          "0"
+        ],
+        [
+          "29",
+          "0",
+          "0"
+        ],
+        [
+          "39",
+          "0",
+          "0"
+        ],
+        [
+          "46",
+          "0",
+          "0"
+        ],
+        [
+          "31",
+          "0",
+          "0"
+        ],
+        [
+          "48",
+          "0",
+          "0"
+        ],
+        [
+          "39",
+          "0",
+          "0"
+        ]
+      ]
+    },
+    {
+      "candidate_sha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706",
+      "shard": 3,
+      "count": 4,
+      "profile": "coverage",
+      "result": "PASS",
+      "primary_units": 278,
+      "assigned_test_sources": 114,
+      "source_records": 453,
+      "contexts": [
+        {
+          "candidate_sha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706",
+          "shard": 3,
+          "count": 64,
+          "profile": "coverage",
+          "result": "PASS",
+          "primary_units": 18,
+          "assigned_test_sources": 7,
+          "test_summaries": [
+            [
+              "56",
+              "0",
+              "0"
+            ]
+          ]
+        },
+        {
+          "candidate_sha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706",
+          "shard": 7,
+          "count": 64,
+          "profile": "coverage",
+          "result": "PASS",
+          "primary_units": 18,
+          "assigned_test_sources": 7,
+          "test_summaries": [
+            [
+              "40",
+              "0",
+              "0"
+            ]
+          ]
+        },
+        {
+          "candidate_sha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706",
+          "shard": 11,
+          "count": 64,
+          "profile": "coverage",
+          "result": "PASS",
+          "primary_units": 18,
+          "assigned_test_sources": 7,
+          "test_summaries": [
+            [
+              "45",
+              "0",
+              "0"
+            ]
+          ]
+        },
+        {
+          "candidate_sha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706",
+          "shard": 15,
+          "count": 64,
+          "profile": "coverage",
+          "result": "PASS",
+          "primary_units": 18,
+          "assigned_test_sources": 7,
+          "test_summaries": [
+            [
+              "45",
+              "0",
+              "0"
+            ]
+          ]
+        },
+        {
+          "candidate_sha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706",
+          "shard": 19,
+          "count": 64,
+          "profile": "coverage",
+          "result": "PASS",
+          "primary_units": 18,
+          "assigned_test_sources": 8,
+          "test_summaries": [
+            [
+              "36",
+              "0",
+              "0"
+            ]
+          ]
+        },
+        {
+          "candidate_sha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706",
+          "shard": 23,
+          "count": 64,
+          "profile": "coverage",
+          "result": "PASS",
+          "primary_units": 18,
+          "assigned_test_sources": 8,
+          "test_summaries": [
+            [
+              "61",
+              "0",
+              "0"
+            ]
+          ]
+        },
+        {
+          "candidate_sha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706",
+          "shard": 27,
+          "count": 64,
+          "profile": "coverage",
+          "result": "PASS",
+          "primary_units": 17,
+          "assigned_test_sources": 7,
+          "test_summaries": [
+            [
+              "67",
+              "0",
+              "0"
+            ]
+          ]
+        },
+        {
+          "candidate_sha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706",
+          "shard": 31,
+          "count": 64,
+          "profile": "coverage",
+          "result": "PASS",
+          "primary_units": 17,
+          "assigned_test_sources": 7,
+          "test_summaries": [
+            [
+              "42",
+              "0",
+              "0"
+            ]
+          ]
+        },
+        {
+          "candidate_sha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706",
+          "shard": 35,
+          "count": 64,
+          "profile": "coverage",
+          "result": "PASS",
+          "primary_units": 17,
+          "assigned_test_sources": 7,
+          "test_summaries": [
+            [
+              "41",
+              "0",
+              "0"
+            ]
+          ]
+        },
+        {
+          "candidate_sha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706",
+          "shard": 39,
+          "count": 64,
+          "profile": "coverage",
+          "result": "PASS",
+          "primary_units": 17,
+          "assigned_test_sources": 7,
+          "test_summaries": [
+            [
+              "32",
+              "0",
+              "0"
+            ]
+          ]
+        },
+        {
+          "candidate_sha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706",
+          "shard": 43,
+          "count": 64,
+          "profile": "coverage",
+          "result": "PASS",
+          "primary_units": 17,
+          "assigned_test_sources": 7,
+          "test_summaries": [
+            [
+              "34",
+              "0",
+              "0"
+            ]
+          ]
+        },
+        {
+          "candidate_sha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706",
+          "shard": 47,
+          "count": 64,
+          "profile": "coverage",
+          "result": "PASS",
+          "primary_units": 17,
+          "assigned_test_sources": 7,
+          "test_summaries": [
+            [
+              "33",
+              "0",
+              "0"
+            ]
+          ]
+        },
+        {
+          "candidate_sha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706",
+          "shard": 51,
+          "count": 64,
+          "profile": "coverage",
+          "result": "PASS",
+          "primary_units": 17,
+          "assigned_test_sources": 7,
+          "test_summaries": [
+            [
+              "39",
+              "0",
+              "0"
+            ]
+          ]
+        },
+        {
+          "candidate_sha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706",
+          "shard": 55,
+          "count": 64,
+          "profile": "coverage",
+          "result": "PASS",
+          "primary_units": 17,
+          "assigned_test_sources": 7,
+          "test_summaries": [
+            [
+              "44",
+              "0",
+              "0"
+            ]
+          ]
+        },
+        {
+          "candidate_sha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706",
+          "shard": 59,
+          "count": 64,
+          "profile": "coverage",
+          "result": "PASS",
+          "primary_units": 17,
+          "assigned_test_sources": 7,
+          "test_summaries": [
+            [
+              "39",
+              "0",
+              "0"
+            ]
+          ]
+        },
+        {
+          "candidate_sha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706",
+          "shard": 63,
+          "count": 64,
+          "profile": "coverage",
+          "result": "PASS",
+          "primary_units": 17,
+          "assigned_test_sources": 7,
+          "test_summaries": [
+            [
+              "43",
+              "0",
+              "0"
+            ]
+          ]
+        }
+      ],
+      "test_summaries": [
+        [
+          "56",
+          "0",
+          "0"
+        ],
+        [
+          "40",
+          "0",
+          "0"
+        ],
+        [
+          "45",
+          "0",
+          "0"
+        ],
+        [
+          "45",
+          "0",
+          "0"
+        ],
+        [
+          "36",
+          "0",
+          "0"
+        ],
+        [
+          "61",
+          "0",
+          "0"
+        ],
+        [
+          "67",
+          "0",
+          "0"
+        ],
+        [
+          "42",
+          "0",
+          "0"
+        ],
+        [
+          "41",
+          "0",
+          "0"
+        ],
+        [
+          "32",
+          "0",
+          "0"
+        ],
+        [
+          "34",
+          "0",
+          "0"
+        ],
+        [
+          "33",
+          "0",
+          "0"
+        ],
+        [
+          "39",
+          "0",
+          "0"
+        ],
+        [
+          "44",
+          "0",
+          "0"
+        ],
+        [
+          "39",
+          "0",
+          "0"
+        ],
+        [
+          "43",
+          "0",
+          "0"
+        ]
+      ]
+    }
+  ]
+}

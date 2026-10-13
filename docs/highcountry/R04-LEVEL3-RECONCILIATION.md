@@ -1,6 +1,6 @@
 # High Country R04 — Level 3 reconciliation
 
-**Disposition: PENDING.** No Level 3 PASS or merge authorization is asserted before all required exact-SHA jobs pass. R05 is not started.
+**Disposition: Level 3 PASS / COMPLETE for accumulated R04 repository phase qualification.** Exact implementation `f7a3da6f96b62d018f69aa5e98d3819b5ad32706`; all required canonical gates now PASS. No merge, R05 start or live readiness is asserted. See [final certificate](qualification/R04-LEVEL3-EXACT-SHA-CERTIFICATION.md).
 
 ## Reconciled candidate inputs
 
@@ -39,3 +39,9 @@ The unrelated Governance workflow had an unindented Python heredoc outside the Y
 For this exact High Country Level 3 branch only, ordinary High Country Level 1 and earlier milestone jobs are not duplicated: the canonical Solidity-owned complete inventory and retained R04 app/runtime/security gate execute their tests. All 32 ordinary workflow triggers/jobs retain their behavior outside this branch, including manual dispatch. This avoids dozens of redundant app test runs at a single phase boundary. Skipped step-level jobs are not mislabeled as a fresh Level 1 PASS or used as qualification evidence.
 
 The corrected candidate must qualify its new exact SHA independently. Required four-shard coverage/fixture, Genesis address authority, global, Docs and the five consolidated High Country jobs are unchanged. The two repaired unrelated workflows must now register successfully; Governance's app-specific PR guard may legitimately skip its job on an HC PR, while 420Hz retains its normal path-triggered qualification. R04 audit PRs remain open/unmerged and R05 remains untouched.
+
+## Final exact-SHA disposition — 2026-10-13
+
+All required gates PASS at `f7a3da6f96b62d018f69aa5e98d3819b5ad32706`: canonical four full Solidity CI shards, mandatory coverage and complete inventory/Decision #10 fixture; independent Genesis address authority; global; Docs; retained app/economic/PostgreSQL/authenticated local-chain runtime/security/client/config acceptance. Retained HC has 304 tests PASS; client/shared services 106 PASS; economy 35 PASS. Coverage verifies 1115 canonical primary units. Main re-read remains `959288c8bd33b6da0325b6a5d060e00e7bcf0e48`.
+
+[Final Level 3 certificate](qualification/R04-LEVEL3-EXACT-SHA-CERTIFICATION.md) supersedes historical PENDING snapshots. Evidence-only descendants preserve executed SHA identity. No new broad reruns, merges, R05 start or waiver of testnet/operational acceptance.

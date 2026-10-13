@@ -94,3 +94,9 @@ This supersedes earlier OPEN/NOT COMPLETE engineering status only for the implem
 **This register's live operational qualification remains OPEN.** All independently deployed address/code/grant, catalogue/signer/session/operator, funded Treasury/vault, finality/quorum/reorg/network, TLS/secret/backup/failover/monitoring and security approval rows above remain mandatory. R07.5 replacement/migration/rollback rehearsal is not performed by UpgradeCoordinator provenance. No production readiness or R04 merge is authorized.
 
 Separate Level 3 must refresh/reconcile main and run its canonical complete exact-SHA gate. The complete R05 cloud-save/migration/provider/Indexer/SDK/client/abuse/privacy engineering scope retains its existing owners and is not certified here. R05.1 remains the next canonical phase step; scoped dependencies for this milestone do not renumber or automatically advance the phase.
+
+## R04 repository Level 3 closeout — 2026-10-13
+
+Accumulated R04.1–R04.14 repository phase qualification is **PASS / COMPLETE** at exact implementation `f7a3da6f96b62d018f69aa5e98d3819b5ad32706`, reconciled with current main `959288c8bd33b6da0325b6a5d060e00e7bcf0e48`. Canonical Solidity-owned four-shard inventory/mandatory coverage/fixture, Genesis address/manifests, global, Docs and retained app/runtime/security/client/configuration all pass. See [final exact-SHA certificate](qualification/R04-LEVEL3-EXACT-SHA-CERTIFICATION.md).
+
+This closes repository phase qualification only. Every live deployed authority/credential/code/address/grant, consensus finality/reorg/quorum/network, funded Treasury/vault, infrastructure/operator/security approval and R07.5 migration/replacement/rollback requirement above remains OPEN. No full R05/R06/R07 qualification, R05 start, R04 merge or live release is claimed.

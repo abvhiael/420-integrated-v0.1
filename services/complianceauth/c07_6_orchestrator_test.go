@@ -8,8 +8,9 @@ import (
  "testing"
  "time"
 )
-type c076WitnessFixture struct { w C076Witness; err error }
+type c076WitnessFixture struct { w C076Witness; current C076Checkpoint; err error }
 func (a c076WitnessFixture) RecoverWitness(context.Context,string)(C076Witness,error){return a.w,a.err}
+func (a c076WitnessFixture) LatestCheckpoint(context.Context,string)(C076Checkpoint,error){return a.current,a.err}
 type c076PlatformFixture struct {
  fail string; calls []string; closed bool; state C076RestoredState; witness C076Witness
 }
@@ -36,14 +37,20 @@ func TestC076OrchestratorFailClosed(t *testing.T){
  plan:=C076RestorePlan{Scope:scope,BackupSHA256:Digest([]byte("backup")),CheckpointGeneration:7}
  run:=func(fail string,w C076Witness,expectPass bool){
   t.Helper();p:=&c076PlatformFixture{fail:fail,witness:w}
-  e:=C076Restore(context.Background(),plan,c076WitnessFixture{w:w},p,now)
+  e:=C076Restore(context.Background(),plan,c076WitnessFixture{w:w,current:witness.Checkpoint},p,now)
   if (e==nil)!=expectPass{t.Fatalf("failure %q pass=%v expected=%v calls=%v",fail,e==nil,expectPass,p.calls)}
   if !expectPass&&!p.closed{t.Fatalf("failed restore opened service: %v",p.calls)}
   if expectPass&&p.closed{t.Fatal("successful release remained closed")}
  }
  run("",witness,true)
  for _,point:=range []string{"quiesce","backup","replay","fence","leases","snapshot","release"}{t.Run(point,func(t *testing.T){run(point,witness,false)})}
+ // A stale but internally well-formed witness MUST be denied against the
+ // independent latest checkpoint, not compared only with itself.
  stale:=witness;stale.Checkpoint.Fence.Sequence--
+ run("",stale,false)
+ stale=witness;stale.Checkpoint.Fence.RevocationEpoch--
+ run("",stale,false)
+ stale=witness;stale.Checkpoint.Fence.PolicyDigest=Digest([]byte("previous-policy"))
  run("",stale,false)
  stale=witness;stale.Checkpoint.PrivacyReceiptsDigest=Digest([]byte("missing receipt"))
  run("",stale,false)

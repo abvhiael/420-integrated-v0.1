@@ -37,6 +37,9 @@ export class GamingDatastoreProvisioner420 {
         pg_has_role(rolname,'gaming_datastore_migrator','MEMBER') AS migrator,
         pg_has_role(rolname,'gaming_datastore_runtime','MEMBER') AS runtime FROM pg_roles WHERE rolname=$1`,[x.roleName])).rows[0];
       if(!r||r.rolsuper||r.rolbypassrls||r.rolcreaterole||r.rolcreatedb||r.migrator||!r.runtime)throw new DatastoreError('unsafe-runtime-role');
+      const extra=(await c.query(`SELECT 1 FROM pg_roles WHERE rolname NOT IN ($1,'gaming_datastore_runtime')
+        AND pg_has_role($1,oid,'MEMBER') LIMIT 1`,[x.roleName])).rows;
+      if(extra.length)throw new DatastoreError('unsafe-runtime-role');
       await c.query(`INSERT INTO gaming_datastore.runtime_scopes(role_name,account_id,game_id) VALUES($1,$2,$3)
         ON CONFLICT(role_name) DO NOTHING`,[x.roleName,x.accountId,x.gameId]);
       const s=(await c.query('SELECT * FROM gaming_datastore.runtime_scopes WHERE role_name=$1',[x.roleName])).rows[0];

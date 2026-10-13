@@ -16,6 +16,8 @@ export async function bootstrapDatastoreRoles(pool) {
         CREATE ROLE gaming_datastore_runtime NOLOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOBYPASSRLS;
       END IF;
     END $$`);
+    const roles=(await c.query("SELECT rolcanlogin,rolsuper,rolcreaterole,rolcreatedb,rolbypassrls FROM pg_roles WHERE rolname IN ('gaming_datastore_migrator','gaming_datastore_runtime')")).rows;
+    if (roles.length!==2 || roles.some(r=>Object.values(r).some(Boolean))) throw Error('unsafe-datastore-role');
     const who=(await c.query('SELECT current_user AS role')).rows[0].role;
     await c.query('GRANT gaming_datastore_migrator TO '+ '"'+who.replaceAll('"','""')+'"');
     const database=(await c.query('SELECT current_database() AS database')).rows[0].database;

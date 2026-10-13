@@ -30,6 +30,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ env.CANDIDATE_SHA }}
+          fetch-depth: 0
       - name: Verify exact implementation SHA
         run: test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
       - uses: actions/setup-node@v4
@@ -49,5 +50,5 @@ jobs:
         run: npm test
       - name: Syntax and whitespace
         run: |
-          find services/420-gaming-player-profile/src services/420-gaming-player-profile/scripts services/420-gaming-player-profile/test -type f \( -name '*.js' -o -name '*.mjs' \) -exec node --check {} \;
-          git diff --check HEAD^
+          while IFS= read -r -d '' file; do node --check "$file"; done < <(find services/420-gaming-player-profile/src services/420-gaming-player-profile/scripts services/420-gaming-player-profile/test -type f \( -name '*.js' -o -name '*.mjs' \) -print0)
+          git diff --check 3c670803143221613c657e15f6b955c029d6fc1c HEAD

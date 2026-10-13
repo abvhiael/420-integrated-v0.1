@@ -76,6 +76,11 @@ test('R05.1 actual PostgreSQL datastore adversarial acceptance',async t=>{
       }finally{c.release();}
       await assert.rejects(()=>a.query(`INSERT INTO gaming_datastore.game_profiles(account_id,game_id,profile_id,ruleset_id)
         VALUES($1,$2,'stolen',$3)`,[B,G,R]),e=>e.code==='42501');
+      await assert.rejects(()=>a.query('UPDATE gaming_datastore.accounts SET created_at=created_at'),e=>e.code==='42501');
+      await admin.query('GRANT r051_b_g TO r051_a_g');
+      await assert.rejects(()=>provision.bindRuntimeScope({roleName:'r051_a_g',accountId:A,gameId:G}),/unsafe-runtime-role/);
+      await assert.rejects(()=>ra.transaction(t=>t.profile()),/scope-denied/);
+      await admin.query('REVOKE r051_b_g FROM r051_a_g');
       await assert.rejects(()=>a.query('ALTER TABLE gaming_datastore.accounts ADD COLUMN unsafe text'),e=>e.code==='42501');
       await assert.rejects(()=>migrateDatastore(a),/migration-role-denied/);
       await assert.rejects(()=>new GamingDatastoreProvisioner420(a).disableAccount(B),/provisioning-denied/);

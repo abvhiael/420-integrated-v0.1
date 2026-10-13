@@ -185,6 +185,9 @@ export class PostgresGamingRepository420 {
         FROM gaming_datastore.runtime_scopes s JOIN pg_roles r ON r.rolname=current_user WHERE s.role_name=current_user`)).rows[0];
       if (!principal || principal.rolsuper || principal.rolbypassrls || principal.migrator || !principal.runtime
         || principal.account_id!==this.#scope.accountId || principal.game_id!==this.#scope.gameId) fail('scope-denied');
+      const extra=(await client.query(`SELECT 1 FROM pg_roles WHERE rolname NOT IN (current_user,'gaming_datastore_runtime')
+        AND pg_has_role(current_user,oid,'MEMBER') LIMIT 1`)).rows;
+      if(extra.length)fail('scope-denied');
       const schema=(await client.query('SELECT version,digest FROM gaming_datastore.schema_migrations ORDER BY version')).rows;
       if (schema.length!==1 || schema[0].version!==1 || schema[0].digest!==migrationDigest) fail('schema-mismatch');
       const tables=(await client.query(`SELECT c.relrowsecurity,c.relforcerowsecurity,pg_get_userbyid(c.relowner) AS owner

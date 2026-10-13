@@ -141,7 +141,7 @@ test('protected HTTP mutations require durable idempotency keys and reauthorize 
 });
 test('event-write failure rolls back an already-written trip and same key can safely retry', async () => {
   const id=nextId(),key=nextId();
-  const constraint=(await owner.query("SELECT format('ALTER TABLE liftd.events ADD CONSTRAINT liftd_test_event_failure CHECK (trip_id <> %L) NOT VALID',$1) AS sql",[id])).rows[0].sql;
+  const constraint=(await owner.query("SELECT format('ALTER TABLE liftd.events ADD CONSTRAINT liftd_test_event_failure CHECK (trip_id <> %L) NOT VALID',$1::text) AS sql",[id])).rows[0].sql;
   await owner.query(constraint);
   try {
     await assert.rejects(() => create(id,key),e=>e.code==='INVALID_STORE_TRANSITION');

@@ -25,6 +25,7 @@ type ComplianceImpactEvent struct {
  Signature []byte `json:"signature"`
 }
 type ComplianceOutboxItem struct {
+ LeaseToken uint64 // Database-issued ownership fence; memory fixtures leave zero.
  Event ComplianceImpactEvent
  Subscriber string
  Attempts uint32

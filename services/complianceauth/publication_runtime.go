@@ -15,6 +15,7 @@ import (
 type ProductionPublicationRuntime struct {
  Store *PostgreSQLPublicationStore
  Cache *PublicationCache
+ Durable *C072Store
  Publisher IndependentPublicationAuthority
 }
 type IndependentPublicationAuthority interface{
@@ -40,7 +41,7 @@ func OpenProductionPublicationRuntime(ctx context.Context,dsn string,authority I
  var scope C064AuthorScope
  var publicationScope string
  if store.DB.QueryRowContext(probe,"SELECT tenant,domain,jurisdiction,publication_scope FROM public.compliance_database_bindings WHERE role_name=current_user").Scan(&scope.Tenant,&scope.Domain,&scope.Jurisdiction,&publicationScope)!=nil || c071RuntimeBinding(probe,store.DB,scope,publicationScope)!=nil {store.DB.Close();return nil,ErrPublicationStale}
- return &ProductionPublicationRuntime{Store:store,Cache:&PublicationCache{},Publisher:authority},nil
+ return &ProductionPublicationRuntime{Store:store,Cache:&PublicationCache{},Publisher:authority,Durable:&C072Store{DB:store.DB,Scope:scope,PublicationScope:publicationScope}},nil
 }
 func(rt *ProductionPublicationRuntime) Close()error{
  if rt==nil||rt.Store==nil||rt.Store.DB==nil{return nil}
@@ -48,10 +49,12 @@ func(rt *ProductionPublicationRuntime) Close()error{
 }
 func(rt *ProductionPublicationRuntime) Current(ctx context.Context,expected PublicationFence,now time.Time)(PublicationFence,error){
  if rt==nil||rt.Store==nil||rt.Cache==nil{return PublicationFence{},ErrPublicationStale}
+ if rt.Durable!=nil{p,err:=rt.Durable.Load(ctx,expected.Scope);if err!=nil||p!=expected||!ValidPublicationFence(p,now){return PublicationFence{},ErrPublicationStale};return p,nil}
  return rt.Cache.ReadCurrent(ctx,rt.Store,expected,now)
 }
 func(rt *ProductionPublicationRuntime) Publish(ctx context.Context,old,next PublicationFence,now time.Time)error{
  if rt==nil||rt.Store==nil||rt.Publisher==nil||ctx==nil||ctx.Err()!=nil{return ErrPublicationStale}
+ if rt.Durable!=nil{return ErrPublicationStale} // Production uses durable activation/outbox; no legacy standalone publish.
  if err:=rt.Publisher.VerifyPublication(ctx,old,next);err!=nil{return errors.Join(ErrPublicationStale,err)}
  if err:=AdvancePublication(ctx,rt.Store,old,next,now);err!=nil{return err}
  rt.Cache.Invalidate(next.Scope)

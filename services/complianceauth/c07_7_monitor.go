@@ -3,6 +3,7 @@ package complianceauth
 import (
  "context"
  "errors"
+ "math"
  "sort"
  "time"
 )
@@ -39,6 +40,7 @@ type C077Monitor struct { Source C077Source; Limits map[C077Metric]C077Threshold
 // EvaluateC077 rejects untrusted/missing/stale/nonfinite and duplicate
 // observations. Targets must be separately approved by the operator; absent
 // targets are UNKNOWN, never success. No tenant, case or PII labels are emitted.
+func c077Finite(v float64)bool{return !math.IsNaN(v)&&!math.IsInf(v,0)}
 func(m C077Monitor) EvaluateC077(ctx context.Context,scope string)(C077Snapshot,error){
  if ctx==nil||ctx.Err()!=nil||m.Source==nil||!c051Scope(scope)||m.Now==nil{return C077Snapshot{},ErrC077Observation}
  now:=m.Now().UTC()

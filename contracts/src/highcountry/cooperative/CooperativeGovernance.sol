@@ -121,7 +121,9 @@ contract CooperativeGovernance {
         bytes32 id
     ) external {
         Proposal storage p = proposals[id];
-        if (p.end == 0 || p.executed || p.cancelled || msg.sender != p.proposer || block.timestamp >= p.end) revert Unauthorized();
+        if (p.end == 0 || p.executed || p.cancelled || msg.sender != p.proposer || block.timestamp >= p.end) {
+            revert Unauthorized();
+        }
         p.cancelled = true;
         emit Cancelled(id);
     }
@@ -135,9 +137,8 @@ contract CooperativeGovernance {
                 || p.yesVotes <= p.noVotes
         ) return false;
         (bytes32 org,, uint32 version,, bool active) = registry.cooperatives(p.cooperative);
-        return
-            active && version == 1
-                && OrganizationRegistry(address(registry.organizations())).isActiveMember(org, p.proposer);
+        return active && version == 1
+            && OrganizationRegistry(address(registry.organizations())).isActiveMember(org, p.proposer);
     }
 
     function executionPayload(

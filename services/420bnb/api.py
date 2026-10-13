@@ -3569,3 +3569,92 @@ def host_casework_view(reservation_id:UUID,authorization:str|None=Header(None)):
                      for case_id,revision,state,resolution,release in cases],
             "reviewer_authority":False,"pay_authority":False,
             "refund_execution_available":False,"bnb_custody":False}
+
+
+@app.get("/v1/bnb/internal/casework/abuse-reports/{report_id}")
+def independent_abuse_case_view(report_id:UUID,
+                               x_guest_review_proof:str|None=Header(None)):
+    """Case-scoped externally authorized reviewer; never financial disposition."""
+    if not x_guest_review_proof:
+        raise HTTPException(401,"CASE_REVIEW_AUTHORITY_REQUIRED")
+    proof=verify_authority(x_guest_review_proof,"BNB_GUEST_REVIEW","casework-read")
+    if (proof.get("report_id")!=str(report_id) or
+        proof.get("casework_scope")!="read" or not proof.get("sub")):
+        raise HTTPException(403,"CASE_REVIEW_SCOPE_MISMATCH")
+    with db() as c:
+        with c.transaction():
+            row=c.execute("""SELECT a.property_id,a.reporter_subject,a.target_type,
+                a.reason,a.status,a.decided_by,p.host_subject
+                FROM bnb_abuse_report a JOIN bnb_property p ON p.id=a.property_id
+                WHERE a.id=%s""",(report_id,)).fetchone()
+            if not row:raise HTTPException(404,"NOT_FOUND")
+            if proof["sub"] in (row[1],row[5],row[6]):
+                raise HTTPException(403,"INDEPENDENT_CASE_REVIEWER_REQUIRED")
+            appeals=c.execute("""SELECT a.id,a.state,a.decided_by
+                FROM bnb_moderation_appeal a WHERE a.report_id=%s
+                ORDER BY a.created_at""",(report_id,)).fetchall()
+            if any(proof["sub"]==a[2] for a in appeals):
+                raise HTTPException(403,"PRIOR_CASE_REVIEWER_REUSE")
+            hold=c.execute("""SELECT reason_code,until_at FROM bnb_privacy_retention_hold
+                WHERE report_id=%s AND until_at>now()""",(report_id,)).fetchone()
+            c.execute("""INSERT INTO bnb_audit(id,subject,action,resource_id)
+                VALUES (%s,%s,'bnb.casework.authorized_read',%s)""",
+                (uuid4(),proof["sub"],row[0]))
+    return {"report_id":str(report_id),"target_type":row[2],
+            "reason":row[3],"state":row[4],
+            "appeals":[{"id":str(a[0]),"state":a[1]} for a in appeals],
+            "retention_hold_active":bool(hold),
+            "financial_authority":False,"escrow_authority":False,
+            "republish_authorized":False}
+
+
+class PrivacyHoldInput(BaseModel):
+    duration_days:int=Field(ge=90,le=3650,strict=True)
+    reason:str=Field(pattern="^(legal_hold|appeal)$")
+
+
+@app.post("/v1/bnb/internal/casework/abuse-reports/{report_id}/hold",status_code=202)
+def independent_case_privacy_hold(report_id:UUID,payload:PrivacyHoldInput,
+                                  x_guest_review_proof:str|None=Header(None)):
+    if not x_guest_review_proof:
+        raise HTTPException(401,"CASE_HOLD_AUTHORITY_REQUIRED")
+    proof=verify_authority(x_guest_review_proof,"BNB_GUEST_REVIEW","privacy-hold")
+    if (proof.get("report_id")!=str(report_id) or
+        proof.get("hold_days")!=payload.duration_days or
+        proof.get("reason")!=payload.reason or
+        proof.get("legal_privacy_authority_verified") is not True):
+        raise HTTPException(403,"INDEPENDENT_HOLD_AUTHORITY_REQUIRED")
+    try:
+        min_days=report_retention_interval().days
+    except ValueError:
+        raise HTTPException(503,"RETENTION_POLICY_UNAVAILABLE") from None
+    if payload.duration_days<min_days:
+        raise HTTPException(422,"HOLD_SHORTER_THAN_POLICY")
+    with db() as c:
+        with c.transaction():
+            report=c.execute("""SELECT r.property_id,r.reporter_subject,p.host_subject
+                FROM bnb_abuse_report r JOIN bnb_property p ON p.id=r.property_id
+                WHERE r.id=%s FOR UPDATE OF r""",(report_id,)).fetchone()
+            if not report:raise HTTPException(404,"NOT_FOUND")
+            if proof.get("sub") in (report[1],report[2]):
+                raise HTTPException(403,"INDEPENDENT_CASE_REVIEWER_REQUIRED")
+            if c.execute("""SELECT 1 FROM bnb_review_moderation_nonce
+                WHERE issuer=%s AND jti=%s""",(proof["iss"],proof["jti"])).fetchone():
+                raise HTTPException(409,"CASE_HOLD_REPLAY")
+            c.execute("""INSERT INTO bnb_review_moderation_nonce
+                (issuer,jti,target_type,target_id,decision)
+                VALUES (%s,%s,'privacy_hold',%s,%s)""",
+                (proof["iss"],proof["jti"],report_id,payload.reason))
+            c.execute("""INSERT INTO bnb_privacy_retention_hold
+                (report_id,until_at,reason_code) VALUES
+                (%s,now()+(%s*interval '1 day'),%s)
+                ON CONFLICT(report_id) DO UPDATE
+                SET until_at=GREATEST(bnb_privacy_retention_hold.until_at,excluded.until_at),
+                    reason_code=CASE WHEN bnb_privacy_retention_hold.reason_code='legal_hold'
+                                   THEN 'legal_hold' ELSE excluded.reason_code END""",
+                (report_id,payload.duration_days,payload.reason))
+            c.execute("""INSERT INTO bnb_audit(id,subject,action,resource_id)
+                VALUES (%s,%s,'bnb.casework.privacy_hold',%s)""",
+                (uuid4(),proof["sub"],report[0]))
+    return {"report_id":str(report_id),"hold_applied":True,
+            "financial_authority":False,"legal_approval_minted":False}

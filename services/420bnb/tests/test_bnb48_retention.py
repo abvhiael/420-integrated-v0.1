@@ -22,3 +22,11 @@ def test_default_and_longer_policy_dont_weaken_qualified_floor(monkeypatch):
     monkeypatch.setenv("BNB_REPORT_RETENTION_DAYS","365")
     assert policy.report_retention_days()==365
     assert policy.report_retention_interval().days==365
+
+
+def test_packaged_production_image_contains_casework_and_saga_dependencies():
+    root=Path(__file__).resolve().parents[1]
+    docker=(root/"Dockerfile").read_text()
+    assert "COPY services/420bnb/casework_policy.py /app/casework_policy.py" in docker
+    assert "COPY services/420bnb/booking_saga.py /app/booking_saga.py" in docker
+    assert "USER bnb" in docker

@@ -3579,7 +3579,9 @@ def independent_abuse_case_view(report_id:UUID,
         raise HTTPException(401,"CASE_REVIEW_AUTHORITY_REQUIRED")
     proof=verify_authority(x_guest_review_proof,"BNB_GUEST_REVIEW","casework-read")
     if (proof.get("report_id")!=str(report_id) or
-        proof.get("casework_scope")!="read" or not proof.get("sub")):
+        proof.get("casework_scope")!="read" or not proof.get("sub") or
+        proof.get("current_reviewer_grant_verified") is not True or
+        proof.get("reviewer_revoked") is not False):
         raise HTTPException(403,"CASE_REVIEW_SCOPE_MISMATCH")
     with db() as c:
         with c.transaction():
@@ -3622,7 +3624,9 @@ def independent_case_privacy_hold(report_id:UUID,payload:PrivacyHoldInput,
     if (proof.get("report_id")!=str(report_id) or
         proof.get("hold_days")!=payload.duration_days or
         proof.get("reason")!=payload.reason or
-        proof.get("legal_privacy_authority_verified") is not True):
+        proof.get("legal_privacy_authority_verified") is not True or
+        proof.get("current_reviewer_grant_verified") is not True or
+        proof.get("reviewer_revoked") is not False):
         raise HTTPException(403,"INDEPENDENT_HOLD_AUTHORITY_REQUIRED")
     try:
         min_days=report_retention_interval().days

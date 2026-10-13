@@ -35,7 +35,7 @@ def test_multi_instance_migration_serialization(connected):
         with psycopg.connect(connected) as c:
             return apply(c)
     with ThreadPoolExecutor(max_workers=4) as pool:
-        assert list(pool.map(run,range(4)))==[22]*4
+        assert list(pool.map(run,range(4)))==[23]*4
     with psycopg.connect(connected) as c:
         assert c.execute("SELECT count(*) FROM bnb_schema_migration").fetchone()[0]==23
 

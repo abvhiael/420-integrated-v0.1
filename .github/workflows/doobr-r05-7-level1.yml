@@ -1,0 +1,46 @@
+name: DOOBR R05.7 Device Security Accessibility Level 1
+on:
+  push:
+    branches: [roadmap/doobr-bc-vancouver-infrastructure]
+    paths: ['tests/browser/doobr-r05-7.spec.mjs','.github/workflows/doobr-r05-7-level1.yml','web/doobr/**','doobr/mobile_*.py','mobile/doobr/**']
+  pull_request:
+    paths: ['tests/browser/doobr-r05-7.spec.mjs','.github/workflows/doobr-r05-7-level1.yml','web/doobr/**','doobr/mobile_*.py','mobile/doobr/**']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  browser-device:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Exact SHA before
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Mobile security and replay regressions
+        run: |
+          set -euo pipefail
+          for suite in test_mobile_security.py test_mobile_push.py test_mobile_offline.py test_mobile_replay_api.py test_mobile_staging.py test_travel_card.py; do
+            python3 -m unittest discover -s doobr/storage/tests -p "$suite" -v
+          done
+          python3 scripts/verify-doobr-r04-1.py
+      - name: Browser viewport keyboard and semantic accessibility
+        run: |
+          set -euo pipefail
+          npm install --no-save --no-package-lock @playwright/test@1.56.1
+          npx playwright install --with-deps chromium
+          npx playwright test tests/browser/doobr-r03-11.spec.mjs tests/browser/doobr-r05-7.spec.mjs --config=playwright.doobr.config.mjs --reporter=line
+      - name: Exact SHA after
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"

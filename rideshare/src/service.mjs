@@ -3,9 +3,11 @@ import {createTrip, transitionTrip, participantView} from './trip.mjs';
 const id = value => typeof value === 'string' && /^[A-Za-z0-9_-]{1,128}$/.test(value);
 // Protected application boundary. Store must be server-owned; durable CAS is L01.4.
 export function createTripService({authenticator, store, clock = () => Math.floor(Date.now() / 1000),
-  isPaused = () => true, admissionFor = async () => undefined}) {
+  isPaused = () => true, admissionFor = async () => undefined, eligibilityAdapter}) {
   if (!authenticator || typeof authenticator.authorize !== 'function' || !store ||
     ['create', 'get', 'compareAndSwap'].some(method => typeof store[method] !== 'function')) throw new AuthError('SERVICE_UNAVAILABLE', 503);
+  if (eligibilityAdapter !== undefined && typeof eligibilityAdapter?.admissionFor !== 'function') throw new AuthError('SERVICE_UNAVAILABLE', 503);
+  const resolveAdmission = eligibilityAdapter?.admissionFor ?? admissionFor;
   const current = principal => {
     const now = clock();
     if (!Number.isSafeInteger(now) || now < 0 || now >= principal.expiresAt) throw new AuthError('AUTHORIZATION_EXPIRED');
@@ -36,7 +38,7 @@ export function createTripService({authenticator, store, clock = () => Math.floo
       const principal = await authenticator.authorize(token, {action: `trip.${command.action}`, resource: `trip:${tripId}`});
       const trip = await store.get(tripId);
       if (!trip) throw new AuthError('TRIP_UNAVAILABLE', 404);
-      const admission = ['assign', 'arrive', 'start'].includes(command.action) ? await admissionFor(trip, command) : undefined;
+      const admission = ['assign', 'arrive', 'start'].includes(command.action) ? await resolveAdmission(trip, command, principal) : undefined;
       const now = current(principal);
       const next = transitionTrip(trip, command, actor(principal), {now, paused: isPaused(), admission});
       await store.compareAndSwap(trip.id, trip.revision, next);

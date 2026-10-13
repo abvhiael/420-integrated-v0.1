@@ -30,7 +30,7 @@ function decode(segment) {
   try { return JSON.parse(new TextDecoder('utf-8', {fatal: true}).decode(bytes)); }
   catch { deny('INVALID_PROOF'); }
 }
-function proof(token, trust, purpose, now, maxAge) {
+function proof(token, trust, purpose, now, maxAge, fields = null) {
   if (typeof token !== 'string' || token.length > 32768) deny('INVALID_PROOF');
   const parts = token.split('.');
   if (parts.length !== 3) deny('INVALID_PROOF');
@@ -40,14 +40,17 @@ function proof(token, trust, purpose, now, maxAge) {
   const sig = Buffer.from(parts[2], 'base64url');
   if (sig.toString('base64url') !== parts[2] || !verify('RSA-SHA256', Buffer.from(`${parts[0]}.${parts[1]}`), trust.keys.get(header.kid), sig)) deny('INVALID_PROOF');
   const claims = decode(parts[1]);
-  record(claims, ['iss', 'aud', 'sub', 'iat', 'nbf', 'exp', 'jti', 'purpose', 'sessionId', 'deviceId',
-    'accountId', 'recoveryEpoch', 'nonce', 'tokenDigest', 'active', 'deviceActive', 'tokenActive', 'grants']);
+  record(claims, fields === null ? ['iss', 'aud', 'sub', 'iat', 'nbf', 'exp', 'jti', 'purpose', 'sessionId', 'deviceId',
+    'accountId', 'recoveryEpoch', 'nonce', 'tokenDigest', 'active', 'deviceActive', 'tokenActive', 'grants'] :
+    ['iss', 'aud', 'sub', 'iat', 'nbf', 'exp', 'jti', 'purpose', ...fields]);
   if (claims.iss !== trust.issuer || claims.aud !== trust.audience || claims.purpose !== purpose ||
     !opaque(claims.sub) || !opaque(claims.jti) || ![claims.iat, claims.nbf, claims.exp].every(integer) ||
     claims.iat > now || claims.nbf < claims.iat || claims.nbf > now || claims.exp <= now ||
     claims.exp <= claims.nbf || claims.exp - claims.iat > maxAge || now - claims.iat > maxAge) deny('INVALID_PROOF');
-  for (const field of ['sessionId', 'deviceId', 'accountId']) if (!opaque(claims[field])) deny('INVALID_PROOF');
-  if (!integer(claims.recoveryEpoch)) deny('INVALID_PROOF');
+  if (fields === null) {
+    for (const field of ['sessionId', 'deviceId', 'accountId']) if (!opaque(claims[field])) deny('INVALID_PROOF');
+    if (!integer(claims.recoveryEpoch)) deny('INVALID_PROOF');
+  }
   return claims;
 }
 const capabilities = Object.freeze({
@@ -100,4 +103,16 @@ export function createAuthenticator({identity, sessionAuthority, resolveSession,
         action, resource, expiresAt: Math.min(access.exp, status.exp, matches[0].expiresAt)});
     },
   });
+}
+
+// Trusted server assembly only: fixed purpose/schema, same strict signed-proof verifier.
+export function createAuthorityVerifier(config, {purpose, fields, maxAge = 30}) {
+  const trust = root(config);
+  if (typeof purpose !== 'string' || !purpose.startsWith('liftd_') || !Array.isArray(fields) ||
+    !fields.every(field => typeof field === 'string') || !integer(maxAge) || maxAge < 1 || maxAge > 30) deny('AUTHORITY_UNAVAILABLE', 503);
+  const schema = Object.freeze([...fields]);
+  return (token, now) => {
+    if (!integer(now)) deny('AUTHORITY_UNAVAILABLE', 503);
+    return proof(token, trust, purpose, now, maxAge, schema);
+  };
 }

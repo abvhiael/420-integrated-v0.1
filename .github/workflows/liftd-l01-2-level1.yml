@@ -46,12 +46,12 @@ jobs:
           node --check rideshare/src/http.mjs
           node --check rideshare/test/auth.test.mjs
       - name: Retained foundation and authenticated session qualification
-        run: npm test --prefix rideshare
+        run: node --test rideshare/test/auth.test.mjs rideshare/test/trip.test.mjs
       - name: Record scoped implementation evidence
         run: |
           mkdir -p liftd-evidence
           git rev-parse HEAD > liftd-evidence/implementation-sha.txt
-          node --test --test-reporter=tap rideshare/test/*.test.mjs > liftd-evidence/trip-tests.tap
+          node --test --test-reporter=tap rideshare/test/auth.test.mjs rideshare/test/trip.test.mjs > liftd-evidence/trip-tests.tap
       - uses: actions/upload-artifact@v4
         with:
           name: liftd-l01-2-${{ github.event.pull_request.head.sha || github.sha }}

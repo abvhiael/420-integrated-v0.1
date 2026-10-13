@@ -157,13 +157,13 @@ class ScopedTransaction {
   }
 
   async issueWalletChallenge(x) {
-    fields(x,['challengeId','wallet','chainId','domain','nonce','consentId','policyHash','contextHash','expiresAt']);
+    fields(x,['challengeId','wallet','chainId','domain','nonce','consentId','policyHash','contextHash','issuedAt','expiresAt']);
     requireOpaque(x.challengeId,x.domain,x.consentId);
     requireHashes(x.policyHash,x.contextHash);
-    decimal(x.chainId,64,true);decimal(x.expiresAt);
+    decimal(x.chainId,64,true);decimal(x.issuedAt);decimal(x.expiresAt);
     if(!wallet(x.wallet)||!/^([0-9a-f]{64})$/.test(x.nonce))fail('invalid-input');
     const now=(await this.#query('SELECT gaming_datastore.now_seconds() AS now')).rows[0].now;
-    if(BigInt(x.expiresAt)<=BigInt(now)||BigInt(x.expiresAt)>BigInt(now)+600n)fail('challenge-expiry-invalid');
+    if(BigInt(x.issuedAt)>BigInt(now)+5n||BigInt(x.issuedAt)+5n<BigInt(now)||BigInt(x.expiresAt)<=BigInt(now)||BigInt(x.expiresAt)>BigInt(x.issuedAt)+600n)fail('challenge-expiry-invalid');
     const profile=await this.profile();
     if(!profile)fail('profile-not-found');
     const nonceCommitment='0x'+createHash('sha256').update(x.nonce,'utf8').digest('hex');
@@ -172,7 +172,7 @@ class ScopedTransaction {
     return (await this.#query(`INSERT INTO gaming_datastore.wallet_challenges
       (account_id,game_id,challenge_id,wallet,chain_id,domain,nonce,consent_id,issued_at,expires_at)
       VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING challenge_id,wallet,chain_id,domain,nonce,issued_at,expires_at`,
-      [...this.#ids(),x.challengeId,x.wallet,x.chainId,x.domain,x.nonce,x.consentId,now,x.expiresAt])).rows[0];
+      [...this.#ids(),x.challengeId,x.wallet,x.chainId,x.domain,x.nonce,x.consentId,x.issuedAt,x.expiresAt])).rows[0];
   }
   async walletChallenge(challengeId) {
     requireOpaque(challengeId);

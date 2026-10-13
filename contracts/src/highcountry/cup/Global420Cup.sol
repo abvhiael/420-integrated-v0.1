@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
 
-import {CompetitionEngine} from "../competition/CompetitionEngine.sol";
+import { CompetitionEngine } from "../competition/CompetitionEngine.sol";
 
 /// @title Global420Cup
 /// @notice Fixed two-semifinal/one-final cup backed exclusively by finalized canonical competition results.
@@ -30,9 +30,13 @@ contract Global420Cup {
 
     event CupCreated(bytes32 indexed cupId, bytes32 semiA, bytes32 semiB, bytes32 finalEvent);
     event CupFinalized(bytes32 indexed cupId, address indexed champion, bytes32 resultCommitment);
-    event CrossGameIssued(bytes32 indexed cupId, address indexed champion, bytes32 indexed scope, bytes32 resultCommitment);
+    event CrossGameIssued(
+        bytes32 indexed cupId, address indexed champion, bytes32 indexed scope, bytes32 resultCommitment
+    );
 
-    constructor(address engine_) {
+    constructor(
+        address engine_
+    ) {
         if (engine_.code.length == 0) revert Invalid();
         engine = CompetitionEngine(engine_);
     }
@@ -47,10 +51,9 @@ contract Global420Cup {
         bytes32 crossGameScope
     ) external {
         if (
-            id == bytes32(0) || rulesHash == bytes32(0) || prizeRulesHash == bytes32(0)
-                || crossGameScope == bytes32(0) || cups[id].organizer != address(0)
-                || semiA == bytes32(0) || semiB == bytes32(0) || finalEvent == bytes32(0)
-                || semiA == semiB || semiA == finalEvent || semiB == finalEvent
+            id == bytes32(0) || rulesHash == bytes32(0) || prizeRulesHash == bytes32(0) || crossGameScope == bytes32(0)
+                || cups[id].organizer != address(0) || semiA == bytes32(0) || semiB == bytes32(0)
+                || finalEvent == bytes32(0) || semiA == semiB || semiA == finalEvent || semiB == finalEvent
                 || claimedEvent[semiA] || claimedEvent[semiB] || claimedEvent[finalEvent]
         ) revert Invalid();
 
@@ -58,28 +61,31 @@ contract Global420Cup {
         (bytes32 seasonB,, address organizerB,,,,, bool closedB, bool cancelledB) = engine.events(semiB);
         (bytes32 seasonF,, address organizerF,,,,, bool closedF, bool cancelledF) = engine.events(finalEvent);
         if (
-            organizerA != msg.sender || organizerB != msg.sender || organizerF != msg.sender
-                || seasonA == bytes32(0) || seasonA != seasonB || seasonA != seasonF
-                || closedA || closedB || closedF || cancelledA || cancelledB || cancelledF
+            organizerA != msg.sender || organizerB != msg.sender || organizerF != msg.sender || seasonA == bytes32(0)
+                || seasonA != seasonB || seasonA != seasonF || closedA || closedB || closedF || cancelledA || cancelledB
+                || cancelledF
         ) revert Unauthorized();
 
         claimedEvent[semiA] = true;
         claimedEvent[semiB] = true;
         claimedEvent[finalEvent] = true;
-        cups[id] = Cup(msg.sender, semiA, semiB, finalEvent, rulesHash, prizeRulesHash, crossGameScope, false, address(0));
+        cups[id] =
+            Cup(msg.sender, semiA, semiB, finalEvent, rulesHash, prizeRulesHash, crossGameScope, false, address(0));
         emit CupCreated(id, semiA, semiB, finalEvent);
     }
 
     /// @dev Refuses nonqualifiers even if a compromised external organizer entered them in the final.
-    function finalize(bytes32 id) external {
+    function finalize(
+        bytes32 id
+    ) external {
         Cup storage c = cups[id];
         if (c.organizer == address(0) || c.finalized) revert Unauthorized();
         (,, address organizerA,,,,, bool closedA, bool cancelledA) = engine.events(c.semiA);
         (,, address organizerB,,,,, bool closedB, bool cancelledB) = engine.events(c.semiB);
         (,, address organizerF,,,,, bool closedF, bool cancelledF) = engine.events(c.finalEvent);
         if (
-            organizerA != c.organizer || organizerB != c.organizer || organizerF != c.organizer
-                || !closedA || !closedB || !closedF || cancelledA || cancelledB || cancelledF
+            organizerA != c.organizer || organizerB != c.organizer || organizerF != c.organizer || !closedA || !closedB
+                || !closedF || cancelledA || cancelledB || cancelledF
         ) revert Unauthorized();
 
         address first = engine.winners(c.semiA);
@@ -99,7 +105,23 @@ contract Global420Cup {
         ) revert Invalid();
 
         bytes32 commitment = keccak256(
-            abi.encode(block.chainid, address(this), id, c.rulesHash, c.prizeRulesHash, c.crossGameScope, c.semiA, c.semiB, c.finalEvent, first, second, champion, engine.winnerScore(c.semiA), engine.winnerScore(c.semiB), engine.winnerScore(c.finalEvent))
+            abi.encode(
+                block.chainid,
+                address(this),
+                id,
+                c.rulesHash,
+                c.prizeRulesHash,
+                c.crossGameScope,
+                c.semiA,
+                c.semiB,
+                c.finalEvent,
+                first,
+                second,
+                champion,
+                engine.winnerScore(c.semiA),
+                engine.winnerScore(c.semiB),
+                engine.winnerScore(c.finalEvent)
+            )
         );
         c.finalized = true;
         c.champion = champion;
@@ -109,14 +131,20 @@ contract Global420Cup {
 
     /// @notice A scoped, nonfinancial attestation. Consumers must validate chain, contract, cup and scope.
     /// @dev No arbitrary external calls or uncollateralized funded reward promises.
-    function issueCrossGame(bytes32 id) external {
+    function issueCrossGame(
+        bytes32 id
+    ) external {
         Cup memory c = cups[id];
         if (!c.finalized || c.champion == address(0) || issued[id][c.champion]) revert Unauthorized();
         issued[id][c.champion] = true;
         emit CrossGameIssued(id, c.champion, c.crossGameScope, finalResultCommitment[id]);
     }
 
-    function isIssued(bytes32 id, address player, bytes32 scope) external view returns (bool) {
+    function isIssued(
+        bytes32 id,
+        address player,
+        bytes32 scope
+    ) external view returns (bool) {
         Cup memory c = cups[id];
         return c.finalized && c.champion == player && c.crossGameScope == scope && issued[id][player];
     }

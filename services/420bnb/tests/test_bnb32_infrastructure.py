@@ -297,7 +297,7 @@ def test_concurrent_controlled_migrations(database):
         with psycopg.connect(**migrator) as connection:
             return p.controlled_migration(connection)
     with ThreadPoolExecutor(max_workers=2) as pool:
-        assert list(pool.map(run, range(2))) == [20, 20]
+        assert list(pool.map(run, range(2))) == [21, 21]
 
 
 @pytest.mark.parametrize("table,privilege", [

@@ -82,12 +82,13 @@ CREATE TRIGGER c072_quota AFTER INSERT OR UPDATE ON public.compliance_impact_out
 `
 
 var ErrC072Unavailable = errors.New("compliance durable work unavailable")
-type C072Store struct { DB *sql.DB; Cipher *C071Cipher; Scope C064AuthorScope; PublicationScope string }
+type C072ServiceIdentity interface{VerifyServiceIdentity(context.Context)error}
+type C072Store struct { Identity C072ServiceIdentity; DB *sql.DB; Cipher *C071Cipher; Scope C064AuthorScope; PublicationScope string }
 type C072Leader struct { Name, Owner string; Token uint64 }
 type C072Job struct { ID, Kind, Owner string; Token uint64; Attempts int; Payload json.RawMessage }
 type C072Activation struct { Before, After PublicationFence; Signed SignedManifest; ScheduledAt time.Time; Event ComplianceImpactEvent; Subscribers []string }
 func c072Duration(d time.Duration)bool{return d>=time.Second && d<=5*time.Minute}
-func(s *C072Store)ready(ctx context.Context)bool{return s!=nil&&s.DB!=nil&&ctx!=nil&&ctx.Err()==nil&&c051Scope(s.PublicationScope)}
+func(s *C072Store)ready(ctx context.Context)bool{return s!=nil&&s.DB!=nil&&ctx!=nil&&ctx.Err()==nil&&c051Scope(s.PublicationScope)&&(s.Identity==nil||s.Identity.VerifyServiceIdentity(ctx)==nil)}
 func(s *C072Store)begin(ctx context.Context)(*sql.Tx,error){
  if !s.ready(ctx){return nil,ErrC072Unavailable};tx,e:=s.DB.BeginTx(ctx,nil);if e!=nil{return nil,ErrC072Unavailable}
  var primary bool;if tx.QueryRowContext(ctx,"SELECT NOT pg_is_in_recovery()").Scan(&primary)!=nil||!primary{tx.Rollback();return nil,ErrC072Unavailable};return tx,nil
@@ -111,7 +112,7 @@ func(s *C072Store)RenewLeader(ctx context.Context,l C072Leader,d time.Duration)e
 // Payloads are encrypted and immutable by API. Enqueue never activates a policy.
 func(s *C072Store)Enqueue(ctx context.Context,id,kind string,payload any,due time.Time,max int)error{
  if !s.ready(ctx)||s.Cipher==nil||!c051Scope(id)||(kind!="COLLECTION"&&kind!="ACTIVATION")||due.IsZero()||max<1||max>100{return ErrC072Unavailable}
- plain,e:=json.Marshal(payload);if e!=nil||len(plain)>C071MaxPrivateBytes{return ErrC072Unavailable};raw,e:=s.Cipher.seal(plain,c071AAD("job/"+kind,s.Scope,id,0));if e!=nil{return ErrC072Unavailable}
+ plain,e:=json.Marshal(payload);if e!=nil||len(plain)>C071MaxPrivateBytes{return ErrC072Unavailable};raw,e:=s.Cipher.sealContext(ctx,plain,c071AAD("job/"+kind,s.Scope,id,0));if e!=nil{return ErrC072Unavailable}
  tx,e:=s.begin(ctx);if e!=nil{return e};defer tx.Rollback()
  _,e=tx.ExecContext(ctx,"INSERT INTO public.compliance_durable_jobs(scope,id,kind,payload,fingerprint,state,max_attempts,scheduled_at,due_at) VALUES($1,$2,$3,$4,$5,'QUEUED',$6,$7,$7) ON CONFLICT(scope,id) DO NOTHING",s.PublicationScope,id,kind,string(raw),Digest(plain),max,due);if e!=nil{return ErrC072Unavailable}
  var fp,k string;var m int;var scheduled time.Time
@@ -125,7 +126,7 @@ func(s *C072Store)Claim(ctx context.Context,l C072Leader,kind string,d time.Dura
  j:=C072Job{Kind:kind,Owner:l.Owner};var raw []byte;var fp string
  e=tx.QueryRowContext(ctx,
  "WITH candidate AS (SELECT id FROM public.compliance_durable_jobs WHERE scope=$1 AND kind=$2 AND attempts<max_attempts AND token<9223372036854775807 AND due_at<=clock_timestamp() AND (state='QUEUED' OR (state='LEASED' AND lease_until<=clock_timestamp())) ORDER BY due_at,id FOR UPDATE SKIP LOCKED LIMIT 1) UPDATE public.compliance_durable_jobs j SET state='LEASED',owner=$3,token=j.token+1,attempts=j.attempts+1,lease_until=clock_timestamp()+$4*interval '1 millisecond' FROM candidate c WHERE j.scope=$1 AND j.id=c.id RETURNING j.id,j.token,j.attempts,j.payload,j.fingerprint",s.PublicationScope,kind,l.Owner,d.Milliseconds()).Scan(&j.ID,&j.Token,&j.Attempts,&raw,&fp)
- if e!=nil{return C072Job{},ErrC072Unavailable};plain,e:=s.Cipher.open(raw,c071AAD("job/"+kind,s.Scope,j.ID,0));if e!=nil||Digest(plain)!=fp||tx.Commit()!=nil{return C072Job{},ErrC072Unavailable};j.Payload=plain;return j,nil
+ if e!=nil{return C072Job{},ErrC072Unavailable};plain,e:=s.Cipher.openContext(ctx,raw,c071AAD("job/"+kind,s.Scope,j.ID,0));if e!=nil||Digest(plain)!=fp||tx.Commit()!=nil{return C072Job{},ErrC072Unavailable};j.Payload=plain;return j,nil
 }
 func(s *C072Store)job(ctx context.Context,tx *sql.Tx,l C072Leader,j C072Job)error{
  if l.Name!=j.Kind||l.Owner!=j.Owner||!c051Scope(j.ID)||j.Token==0||j.Token>9223372036854775807||s.leader(ctx,tx,l)!=nil{return ErrC072Unavailable}

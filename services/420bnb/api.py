@@ -55,6 +55,18 @@ async def bounded_api_security_headers(request,call_next):
 
 
 DATABASE_URL = os.getenv("BNB_DATABASE_URL", "")
+if os.getenv("BNB_ENV") == "production":
+    # Mandatory even when an operator starts uvicorn directly rather than the wrapper.
+    try:
+        from production import load_contract, verify_database
+        from psycopg.conninfo import make_conninfo
+        _contract, _bindings, _database_values = load_contract()
+        with psycopg.connect(**_database_values) as _startup_connection:
+            verify_database(_startup_connection)
+        os.environ.update(_bindings)
+        DATABASE_URL = make_conninfo(**_database_values)
+    except Exception:
+        raise RuntimeError("PRODUCTION_START_FAILED") from None
 
 
 def db():
@@ -328,14 +340,19 @@ def live():
 @app.get("/health/ready")
 def ready():
     """Ready only when the expected schema is present; fail closed on drift."""
-    with db() as c:
-        current=c.execute("SELECT to_regclass('public.bnb_schema_migration')").fetchone()[0]
-        if current is None:
-            raise HTTPException(503,"SCHEMA_NOT_MIGRATED")
-        records=c.execute("SELECT version FROM bnb_schema_migration ORDER BY version").fetchall()
-        if [row[0] for row in records]!=list(range(1,21)):
-            raise HTTPException(503,"SCHEMA_VERSION_MISMATCH")
-    return {"status":"ready","transactions_enabled":False,"schema_version":20}
+    try:
+        with db() as c:
+            current=c.execute("SELECT to_regclass('public.bnb_schema_migration')").fetchone()[0]
+            if current is None:
+                raise HTTPException(503,"SCHEMA_NOT_MIGRATED")
+            records=c.execute("SELECT version FROM bnb_schema_migration ORDER BY version").fetchall()
+            if [row[0] for row in records]!=list(range(1,22)):
+                raise HTTPException(503,"SCHEMA_VERSION_MISMATCH")
+    except psycopg.Error:
+        # A database outage or connection exhaustion is not a ready API.
+        # Never leak DSNs, SQL statements, hostnames or credentials to probes.
+        raise HTTPException(503,"DATABASE_UNAVAILABLE") from None
+    return {"status":"ready","transactions_enabled":False,"schema_version":21}
 
 
 class GuestMessageInput(BaseModel):
@@ -448,17 +465,21 @@ def ingest_compliance_eligibility(payload:ComplianceProofInput):
         raise HTTPException(422,"INVALID_COMPLIANCE_CLAIMS")
     with db() as c:
         with c.transaction():
-            prop=c.execute("SELECT version FROM bnb_property WHERE id=%s FOR UPDATE",(property_id,)).fetchone()
+            prop=c.execute("SELECT version,host_subject FROM bnb_property WHERE id=%s FOR UPDATE",(property_id,)).fetchone()
             if not prop:raise HTTPException(404,"PROPERTY_NOT_FOUND")
+            if claims.get("controller_subject")!=prop[1]:
+                raise HTTPException(403,"COMPLIANCE_CONTROLLER_MISMATCH")
             if claims.get("property_version")!=prop[0]:
                 raise HTTPException(409,"PROPERTY_VERSION_CHANGED")
-            binding=c.execute("""SELECT jurisdiction_id FROM bnb_travel_place_binding
+            binding=c.execute("""SELECT jurisdiction_id,place_id FROM bnb_travel_place_binding
                 WHERE property_id=%s AND revoked_at IS NULL AND proof_expires_at>now()
                 AND property_version=%s""",(property_id,prop[0])).fetchone()
-            if not binding or binding[0]!=jurisdiction:
+            if not binding or binding[0]!=jurisdiction or claims.get("place_id")!=binding[1]:
                 raise HTTPException(403,"LOCATION_COMPLIANCE_SCOPE_MISMATCH")
-            prior=c.execute("""SELECT revision FROM bnb_compliance_eligibility
+            prior=c.execute("""SELECT revision,issuer FROM bnb_compliance_eligibility
                 WHERE property_id=%s FOR UPDATE""",(property_id,)).fetchone()
+            if prior and prior[1]!=claims["iss"]:
+                raise HTTPException(403,"COMPLIANCE_ISSUER_TRANSFER_REQUIRES_AUTHORIZATION")
             if prior and revision<=prior[0]:
                 raise HTTPException(409,"STALE_COMPLIANCE_REVISION")
             c.execute("""INSERT INTO bnb_compliance_eligibility
@@ -484,10 +505,21 @@ def revoke_compliance_eligibility(payload:ComplianceProofInput):
     with db() as c:
         with c.transaction():
             c.execute("SELECT id FROM bnb_property WHERE id=%s FOR UPDATE",(property_id,))
-            prior=c.execute("""SELECT issuer,revoked_at FROM bnb_compliance_eligibility
+            prior=c.execute("""SELECT issuer,revoked_at,jurisdiction_id,property_version,revision
+                FROM bnb_compliance_eligibility
                 WHERE property_id=%s FOR UPDATE""",(property_id,)).fetchone()
             if not prior:raise HTTPException(404,"COMPLIANCE_RECORD_NOT_FOUND")
             if prior[0]!=claims["iss"]:raise HTTPException(403,"COMPLIANCE_ISSUER_MISMATCH")
+            controller=c.execute("SELECT host_subject FROM bnb_property WHERE id=%s",(property_id,)).fetchone()
+            if not controller or claims.get("controller_subject")!=controller[0]:
+                raise HTTPException(403,"COMPLIANCE_CONTROLLER_MISMATCH")
+            # Withdrawal is scoped to the same property-place and policy revision.
+            # A stale/misrouted source event cannot revoke a different jurisdiction.
+            if (claims.get("jurisdiction_id")!=prior[2]
+                or claims.get("property_version")!=prior[3]
+                or type(claims.get("revision"))!=int
+                or claims["revision"]<prior[4]):
+                raise HTTPException(403,"COMPLIANCE_REVOKE_SCOPE_MISMATCH")
             if prior[1] is not None:raise HTTPException(409,"COMPLIANCE_ALREADY_REVOKED")
             c.execute("""UPDATE bnb_compliance_eligibility SET revoked_at=now()
                 WHERE property_id=%s""",(property_id,))
@@ -531,24 +563,36 @@ def travel_discovery(destination:str="",min_capacity:int=1,limit:int=20,offset:i
             raise HTTPException(422,"INVALID_PLACE_ID")
         except TravelLocationUnavailable:
             raise HTTPException(503,"TRAVEL_LOCATION_UNAVAILABLE")
-        # The public Travel projection does not prove a BnB property-place binding.
-        # Never silently turn a public destination name into an exact property position.
-        destination=resolved["region"]
-    listings=guest_search(region=destination,min_capacity=min_capacity,limit=limit,offset=offset)
+        # A place-specific request must never fall back to a region-wide search:
+        # neighboring places in the same region have different property authority.
+        if offset:
+            raise HTTPException(422,"PLACE_PAGINATION_UNSUPPORTED")
+        authorized=travel_authorized_listings(place_id,Response(),limit=limit)
+        if destination and destination.casefold() not in resolved["region"].casefold():
+            return {"version":"bnb-travel-discovery/v1","destination_place_id":place_id,
+                    "nonbinding":True,"transaction_enabled":False,
+                    "map_precision":"region_only","jurisdiction_authority":"independently_proved",
+                    "listings":[]}
+        listings=[{"id":entry["property_id"],"title":entry["title"],
+                   "public_region":entry["public_region"],"capacity":entry["capacity"],
+                   "nightly_minor":None,"currency":None,"map_marker":entry["map_marker"]}
+                  for entry in authorized["listings"] if entry["capacity"]>=min_capacity]
+    else:
+        listings=guest_search(region=destination,min_capacity=min_capacity,limit=limit,offset=offset)
     return {
         "version":"bnb-travel-discovery/v1",
         "destination_place_id":place_id or None,
         "nonbinding":True,
         "transaction_enabled":False,
         "map_precision":"region_only",
-        "jurisdiction_authority":"unverified",
+        "jurisdiction_authority":("independently_proved" if place_id else "unverified"),
         "listings":[{
             "property_id":entry["id"],
             "title":entry["title"],
             "public_region":entry["public_region"],
             "capacity":entry["capacity"],
             "price_preview":{"nightly_minor":entry["nightly_minor"],"currency":entry["currency"],"binding":False},
-            "map_marker":None,
+            "map_marker":entry.get("map_marker"),
             "booking_handoff":{"method":"GET","path":"/v1/bnb/listings/"+entry["id"],"side_effects":False},
             "legal_compliance_verified":False,
         } for entry in listings],
@@ -906,10 +950,13 @@ def submit_abuse_report(payload:AbuseReportInput,authorization:str|None=Header(N
                     WHERE m.id=%s""",(payload.target_id,)).fetchone()
             if not target or actor not in (target[1],target[2]):
                 raise HTTPException(404,"NOT_FOUND")
-            prior=c.execute("""SELECT id FROM bnb_abuse_report WHERE reporter_subject=%s
+            prior=c.execute("""SELECT id,reason,detail FROM bnb_abuse_report WHERE reporter_subject=%s
                 AND target_type=%s AND target_id=%s""",
                 (actor,payload.target_type,payload.target_id)).fetchone()
-            if prior:return {"id":str(prior[0]),"state":"pending_or_reviewed","replayed":True}
+            if prior:
+                if prior[1]!=payload.reason or prior[2]!=payload.detail:
+                    raise HTTPException(409,"ABUSE_REPORT_REPLAY_CONFLICT")
+                return {"id":str(prior[0]),"state":"pending_or_reviewed","replayed":True}
             recent=c.execute("""SELECT count(*) FROM bnb_abuse_report
                 WHERE reporter_subject=%s AND created_at>now()-interval '24 hours'""",
                 (actor,)).fetchone()[0]
@@ -960,13 +1007,111 @@ def moderate_abuse_report(report_id:UUID,payload:AbuseReportDecision,
                 elif target[0]=="host_response":
                     c.execute("UPDATE bnb_review_host_response SET status='withdrawn' WHERE review_id=%s AND status='approved'",
                               (target[1],))
-            c.execute("UPDATE bnb_abuse_report SET status=%s WHERE id=%s",
-                      (payload.decision,report_id))
+            c.execute("UPDATE bnb_abuse_report SET status=%s,decided_by=%s WHERE id=%s",
+                      (payload.decision,proof["sub"],report_id))
             c.execute("""INSERT INTO bnb_audit(id,subject,action,resource_id)
                 VALUES (%s,%s,%s,%s)""",
                 (uuid4(),proof["sub"],"bnb.abuse_report."+payload.decision,report[0]))
     return {"report_id":str(report_id),"state":payload.decision}
 
+
+
+class ModerationAppealInput(BaseModel):
+    grounds:str=Field(min_length=10,max_length=1000)
+
+@app.post("/v1/bnb/abuse-reports/{report_id}/appeals",status_code=201)
+def file_moderation_appeal(report_id:UUID,payload:ModerationAppealInput,
+                           authorization:str|None=Header(None)):
+    actor=active_subject(authorization)
+    with db() as c:
+        with c.transaction():
+            report=c.execute("""SELECT reporter_subject,property_id,target_type,target_id,status
+                FROM bnb_abuse_report WHERE id=%s FOR UPDATE""",(report_id,)).fetchone()
+            if not report or actor!=report[0]:raise HTTPException(404,"NOT_FOUND")
+            if report[4] not in ("accepted","dismissed"):
+                raise HTTPException(409,"ABUSE_DECISION_NOT_FINAL")
+            previous=c.execute("""SELECT id,grounds FROM bnb_moderation_appeal
+                WHERE report_id=%s AND appellant_subject=%s""",(report_id,actor)).fetchone()
+            if previous:
+                if previous[1]!=payload.grounds:raise HTTPException(409,"APPEAL_REPLAY_CONFLICT")
+                return {"id":str(previous[0]),"state":"pending_or_decided","replayed":True}
+            appeal_id=uuid4()
+            c.execute("""INSERT INTO bnb_moderation_appeal
+                (id,report_id,appellant_subject,grounds)
+                VALUES (%s,%s,%s,%s)""",(appeal_id,report_id,actor,payload.grounds))
+            c.execute("""INSERT INTO bnb_privacy_retention_hold(report_id,until_at,reason_code)
+                VALUES (%s,now()+interval '90 days','appeal')
+                ON CONFLICT(report_id) DO UPDATE SET
+                until_at=GREATEST(bnb_privacy_retention_hold.until_at,excluded.until_at)""",
+                (report_id,))
+    return {"id":str(appeal_id),"state":"pending","replayed":False}
+
+
+class ModerationAppealDecision(BaseModel):
+    decision:str=Field(pattern="^(upheld|overturned)$")
+
+@app.post("/v1/bnb/internal/appeals/{appeal_id}/decision")
+def decide_moderation_appeal(appeal_id:UUID,payload:ModerationAppealDecision,
+                             x_guest_review_proof:str|None=Header(None)):
+    if not x_guest_review_proof:raise HTTPException(401,"APPEAL_AUTHORITY_REQUIRED")
+    proof=verify_authority(x_guest_review_proof,"BNB_GUEST_REVIEW","abuse-appeal")
+    if proof.get("appeal_id")!=str(appeal_id) or proof.get("decision")!=payload.decision:
+        raise HTTPException(403,"APPEAL_DECISION_SCOPE_MISMATCH")
+    with db() as c:
+        with c.transaction():
+            row=c.execute("""SELECT a.report_id,a.state,r.property_id,r.reporter_subject,r.decided_by
+                FROM bnb_moderation_appeal a JOIN bnb_abuse_report r ON r.id=a.report_id
+                WHERE a.id=%s FOR UPDATE OF a""",(appeal_id,)).fetchone()
+            if not row:raise HTTPException(404,"NOT_FOUND")
+            if row[1]!="pending":raise HTTPException(409,"APPEAL_DECISION_ALREADY_FINAL")
+            if proof.get("sub") in (row[3],row[4]):
+                raise HTTPException(403,"INDEPENDENT_APPEAL_REVIEWER_REQUIRED")
+            if c.execute("""SELECT 1 FROM bnb_moderation_appeal_decision_nonce
+                WHERE issuer=%s AND jti=%s""",(proof["iss"],proof["jti"])).fetchone():
+                raise HTTPException(409,"APPEAL_DECISION_REPLAY")
+            c.execute("""INSERT INTO bnb_moderation_appeal_decision_nonce
+                (issuer,jti,appeal_id,decision) VALUES(%s,%s,%s,%s)""",
+                (proof["iss"],proof["jti"],appeal_id,payload.decision))
+            c.execute("""UPDATE bnb_moderation_appeal SET state=%s,decided_at=now(),
+                decided_by=%s WHERE id=%s""",(payload.decision,proof["sub"],appeal_id))
+            c.execute("""INSERT INTO bnb_audit(id,subject,action,resource_id)
+                VALUES(%s,%s,%s,%s)""",
+                (uuid4(),proof["sub"],"bnb.moderation.appeal."+payload.decision,row[2]))
+    return {"id":str(appeal_id),"state":payload.decision,
+            "content_republished":False}
+
+
+@app.post("/v1/bnb/internal/abuse-reports/{report_id}/redact")
+def redact_expired_abuse_detail(report_id:UUID,x_guest_review_proof:str|None=Header(None)):
+    """Redact only expired report narrative; preserve immutable audit and decisions."""
+    if not x_guest_review_proof:raise HTTPException(401,"RETENTION_AUTHORITY_REQUIRED")
+    proof=verify_authority(x_guest_review_proof,"BNB_GUEST_REVIEW","privacy-retention")
+    if proof.get("report_id")!=str(report_id) or proof.get("operation")!="redact":
+        raise HTTPException(403,"RETENTION_SCOPE_MISMATCH")
+    with db() as c:
+        with c.transaction():
+            row=c.execute("""SELECT property_id,status,detail,created_at
+                FROM bnb_abuse_report WHERE id=%s FOR UPDATE""",(report_id,)).fetchone()
+            if not row:raise HTTPException(404,"NOT_FOUND")
+            if row[1]=="pending" or row[3]>datetime.now(timezone.utc)-timedelta(days=90):
+                raise HTTPException(409,"RETENTION_NOT_EXPIRED")
+            blocked=c.execute("""SELECT 1 FROM bnb_privacy_retention_hold
+                WHERE report_id=%s AND until_at>now()""",(report_id,)).fetchone()
+            appeal=c.execute("""SELECT 1 FROM bnb_moderation_appeal
+                WHERE report_id=%s AND state='pending'""",(report_id,)).fetchone()
+            if blocked or appeal:raise HTTPException(409,"RETENTION_HOLD_ACTIVE")
+            if c.execute("""SELECT 1 FROM bnb_review_moderation_nonce
+                WHERE issuer=%s AND jti=%s""",(proof["iss"],proof["jti"])).fetchone():
+                raise HTTPException(409,"RETENTION_REPLAY")
+            c.execute("""INSERT INTO bnb_review_moderation_nonce
+                (issuer,jti,target_type,target_id,decision)
+                VALUES (%s,%s,'abuse_report',%s,'redacted')""",
+                (proof["iss"],proof["jti"],report_id))
+            c.execute("UPDATE bnb_abuse_report SET detail='' WHERE id=%s",(report_id,))
+            c.execute("""INSERT INTO bnb_audit(id,subject,action,resource_id)
+                VALUES (%s,%s,'bnb.privacy.report_redacted',%s)""",
+                (uuid4(),proof["sub"],row[0]))
+    return {"report_id":str(report_id),"detail_redacted":True}
 
 class ReviewModerationDecision(BaseModel):
     decision:str=Field(pattern="^(approved|rejected|withdrawn)$")
@@ -2099,6 +2244,13 @@ def ingest_pay_intent(payload:PayIntentInput,x_pay_authority_proof:str|None=Head
         payload.pay_invoice_expires<=now or
         payload.pay_invoice_expires>now+timedelta(hours=1)):
         raise HTTPException(422,"INVALID_PAY_INVOICE_EXPIRY")
+    # Wallet consent is witnessed by the independent Pay issuer, never by a guest
+    # header, an unsigned client callback or BnB's own authority.
+    if (proof.get("wallet_consent_verified") is not True or
+        proof.get("wallet_consent_invoice_id")!=payload.pay_invoice_id or
+        proof.get("wallet_consent_quote_id")!=str(payload.quote_id) or
+        proof.get("wallet_consent_reservation_id")!=str(payload.reservation_id)):
+        raise HTTPException(403,"PAY_WALLET_CONSENT_NOT_VERIFIED")
     if (proof.get("chain_id")!=payload.chain_id or
         proof.get("asset")!=payload.asset or
         proof.get("asset_amount")!=payload.asset_amount):
@@ -2151,12 +2303,22 @@ def ingest_pay_intent(payload:PayIntentInput,x_pay_authority_proof:str|None=Head
                 raise HTTPException(403,"PAY_PRINCIPAL_MISMATCH")
             if proof.get("quoted_minor")!=row[5]["total_minor"] or proof.get("currency")!=row[6].strip():
                 raise HTTPException(409,"INVOICE_QUOTE_AMOUNT_MISMATCH")
-            existing=c.execute("""SELECT id,pay_invoice_id FROM bnb_pay_intent
-                WHERE reservation_id=%s""",(payload.reservation_id,)).fetchone()
+            existing=c.execute("""SELECT id,pay_invoice_id,quote_id,merchant_id,
+                payout_controller,chain_id,asset,asset_amount,pay_invoice_expires,
+                conversion_route_id,conversion_quote_id,conversion_expires,
+                minimum_received,payer_max,state
+                FROM bnb_pay_intent WHERE reservation_id=%s FOR UPDATE""",
+                (payload.reservation_id,)).fetchone()
             if existing:
-                if existing[1]!=payload.pay_invoice_id:
+                immutable=(payload.pay_invoice_id,payload.quote_id,payload.merchant_id,
+                    payload.payout_controller,payload.chain_id,payload.asset,
+                    payload.asset_amount,payload.pay_invoice_expires,
+                    payload.conversion_route_id,payload.conversion_quote_id,
+                    payload.conversion_expires,payload.minimum_received,payload.payer_max)
+                if tuple(existing[1:14])!=immutable:
                     raise HTTPException(409,"PAY_INTENT_ALREADY_BOUND")
-                return {"intent_id":str(existing[0]),"state":"pending","confirmed":False}
+                return {"intent_id":str(existing[0]),"state":existing[14],
+                        "confirmed":False}
             intent_id=uuid4()
             inserted=c.execute("""INSERT INTO bnb_pay_intent
               (id,reservation_id,quote_id,requester,merchant_id,payout_controller,
@@ -3065,3 +3227,4 @@ def submit_property_claim(property_id: str, authorization: str | None = Header(N
                   VALUES (%s,%s,%s,%s,'pending',to_timestamp(%s))""",
                   (property_id,subject,claim["iss"],claim["jti"],claim["exp"]))
     return {"status":"pending","published":False}
+

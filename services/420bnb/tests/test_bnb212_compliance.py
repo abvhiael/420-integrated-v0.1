@@ -104,11 +104,11 @@ def test_compliance_revision_scope_replay_and_independent_revocation(fixture_pro
     import time
     property_id,_=fixture_property
     now=int(time.time())
-    claims={"iss":"fixture-compliance-issuer","jti":"policy-"+str(uuid4()),
+    claims={"iss":"synthetic-fixture","jti":"policy-"+str(uuid4()),
         "property_id":str(property_id),"jurisdiction_id":"FIXTURE_ONLY",
         "decision":"allowed","revision":2,"license_reference":"fixture-license-2",
         "minimum_guest_age":18,"identity_required":True,
-        "property_version":1,"nbf":now-1,"exp":now+180}
+        "property_version":1,"controller_subject":"verified-host","place_id":"fixture-place","nbf":now-1,"exp":now+180}
     monkeypatch.setattr(api,"verify_authority",lambda token,prefix,purpose:dict(claims))
     url="/v1/bnb/compliance/eligibility"
     body={"proof":"synthetic-proof-token"*3}
@@ -118,15 +118,36 @@ def test_compliance_revision_scope_replay_and_independent_revocation(fixture_pro
     claims["jurisdiction_id"]="OTHER_PROPERTY"
     assert client.post(url,json=body).status_code==403
     claims["jurisdiction_id"]="FIXTURE_ONLY"
+    claims["place_id"]="other-place"
+    assert client.post(url,json=body).status_code==403
+    claims["place_id"]="fixture-place"
     claims["property_version"]=2
     assert client.post(url,json=body).status_code==409
     claims["property_version"]=1
     claims["jti"]="revision-3-"+str(uuid4())
+    claims["controller_subject"]="foreign-controller"
+    assert client.post(url,json=body).status_code==403
+    claims["controller_subject"]="verified-host"
+    claims["iss"]="forged-new-compliance-issuer"
+    assert client.post(url,json=body).status_code==403
+    claims["iss"]="synthetic-fixture"
     assert client.post(url,json=body).status_code==200
     revoke="/v1/bnb/compliance/eligibility/revoke"
     claims["iss"]="wrong-issuer"
     assert client.post(revoke,json=body).status_code==403
-    claims["iss"]="fixture-compliance-issuer"
+    claims["iss"]="synthetic-fixture"
+    claims["jurisdiction_id"]="OTHER_PROPERTY"
+    assert client.post(revoke,json=body).status_code==403
+    claims["jurisdiction_id"]="FIXTURE_ONLY"
+    claims["property_version"]=2
+    assert client.post(revoke,json=body).status_code==403
+    claims["property_version"]=1
+    claims["revision"]=2
+    assert client.post(revoke,json=body).status_code==403
+    claims["revision"]=3
+    claims["controller_subject"]="foreign-controller"
+    assert client.post(revoke,json=body).status_code==403
+    claims["controller_subject"]="verified-host"
     assert client.post(revoke,json=body).status_code==200
     assert client.post(revoke,json=body).status_code==409
     assert all(str(property_id)!=item["id"] for item in client.get("/v1/bnb/listings").json())

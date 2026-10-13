@@ -8,6 +8,9 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+concurrency:
+  group: bnb-runtime-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 jobs:
   runtime:
     runs-on: ubuntu-latest
@@ -44,8 +47,12 @@ jobs:
           python - <<'PY'
           import os, psycopg
           with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
-              assert c.execute("SELECT count(*) FROM bnb_schema_migration").fetchone()[0] == 20
+              assert c.execute("SELECT count(*) FROM bnb_schema_migration").fetchone()[0] == 21
           PY
+      - name: BNB-3.2 isolated verified-TLS PostgreSQL fixture
+        env:
+          BNB32_POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+        run: python services/420bnb/tests/prepare_tls_fixture.py
       - name: Migration ledger and parallel deployment tests
         run: pytest -q services/420bnb/tests/test_bnb214_operations.py
       - name: Runtime security and API tests
@@ -75,7 +82,7 @@ jobs:
           with psycopg.connect(original) as source, psycopg.connect(restored) as target:
               a=source.execute("SELECT version,filename,sha256 FROM bnb_schema_migration ORDER BY version").fetchall()
               b=target.execute("SELECT version,filename,sha256 FROM bnb_schema_migration ORDER BY version").fetchall()
-              assert len(a)==20 and a==b, "BACKUP_RESTORE_MIGRATION_MISMATCH"
+              assert len(a)==21 and a==b, "BACKUP_RESTORE_MIGRATION_MISMATCH"
               for table in ("bnb_property","bnb_hold","bnb_reservation","bnb_request_dedupe","bnb_outbox"):
                   src=source.execute(f"SELECT count(*) FROM {table}").fetchone()[0]
                   dst=target.execute(f"SELECT count(*) FROM {table}").fetchone()[0]
@@ -83,8 +90,16 @@ jobs:
           PY
       - name: Compile runtime module
         run: python -m py_compile services/420bnb/api.py
-      - name: Build non-root BnB container
-        run: docker build -f services/420bnb/Dockerfile -t bnb-test:${{ github.sha }} .
+      - name: Build non-root BnB container from resolved immutable base
+        run: |
+          set -euo pipefail
+          docker pull python:3.12-slim
+          base=$(docker image inspect python:3.12-slim --format '{{index .RepoDigests 0}}')
+          test -n "$base"
+          echo "BNB32_PYTHON_BASE=$base" >> "$GITHUB_ENV"
+          docker build --build-arg "PYTHON_IMAGE=$base" --build-arg "BNB_BUILD_SHA=${{ github.event.pull_request.head.sha || github.sha }}" \
+            -f services/420bnb/Dockerfile -t bnb-test:${{ github.sha }} .
+          test "$(docker image inspect bnb-test:${{ github.sha }} --format '{{index .Config.Labels "org.opencontainers.image.revision"}}')" = "${{ github.event.pull_request.head.sha || github.sha }}"
       - name: Migrate from packaged non-root deploy image
         run: |
           docker run --rm --network host -e BNB_DATABASE_URL="$BNB_DATABASE_URL" \
@@ -128,3 +143,95 @@ jobs:
           python services/420bnb/tests/browser_accessibility.py
       - name: Verify front-end surfaces
         run: python -c "from pathlib import Path; s=Path('web/bnb/index.html').read_text(); assert 'aria-live' in s and 'Payments' not in s.split('<script>')[0] or 'disabled' in s"
+
+      - name: BNB-3.2 immutable web image and restricted static surface
+        run: |
+          set -euo pipefail
+          docker build --build-arg "PYTHON_IMAGE=$BNB32_PYTHON_BASE" -f services/420bnb/Dockerfile.web -t bnb-web:${{ github.sha }} .
+          docker run -d --name bnb-web-smoke --read-only --cap-drop ALL --security-opt no-new-privileges --tmpfs /tmp \
+            -p 127.0.0.1:18080:8080 bnb-web:${{ github.sha }}
+          trap 'docker rm -f bnb-web-smoke' EXIT
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:18080/ >/dev/null; then break; fi
+            sleep 1
+          done
+          curl --fail --silent --head http://127.0.0.1:18080/ | tee /tmp/bnb-web-headers
+          grep -Ei "content-security-policy:.*sha256-" /tmp/bnb-web-headers
+          test "$(curl --silent -o /dev/null -w '%{http_code}' http://127.0.0.1:18080/production.py)" = 404
+      - name: BNB-3.2 fail-closed packaged production command
+        run: |
+          set -euo pipefail
+          if docker run --rm bnb-test:${{ github.sha }} python production.py validate > /tmp/bnb-production-output 2>&1; then
+            echo 'Unconfigured production command must fail' >&2; exit 1
+          fi
+          grep -E '^PRODUCTION_MODE_REQUIRED$' /tmp/bnb-production-output
+          if docker run --rm -e BNB_ENV=production -e BNB_DATABASE_URL=DO-NOT-PRINT \
+            bnb-test:${{ github.sha }} python -c 'import api' > /tmp/bnb-direct-output 2>&1; then
+            echo 'Direct API production startup must not bypass the contract' >&2; exit 1
+          fi
+          grep -F 'PRODUCTION_START_FAILED' /tmp/bnb-direct-output
+          if grep -F 'DO-NOT-PRINT' /tmp/bnb-direct-output; then
+            echo 'Production startup leaked input' >&2; exit 1
+          fi
+      - name: BNB-3.2 deployment topology and TLS ingress syntax
+        env:
+          BNB_API_IMAGE: example/api@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          BNB_WEB_IMAGE: example/web@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          BNB_INGRESS_IMAGE: example/ingress@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          BNB_RUNTIME_BINDINGS_DIR: /tmp/bnb-runtime-fixture
+          BNB_MIGRATION_BINDINGS_DIR: /tmp/bnb-migrator-fixture
+          BNB_INGRESS_CONFIG: ${{ github.workspace }}/services/420bnb/Caddyfile.production
+          BNB_TLS_DIRECTORY: /tmp/bnb-tls-fixture
+          BNB_API_HOST: api.example.test
+          BNB_WEB_HOST: bnb.example.test
+        run: |
+          set -euo pipefail
+          docker compose -f services/420bnb/compose.production.yml --profile migration config --format json > /tmp/bnb-compose.json
+          python - <<'PY'
+          import json
+          c=json.load(open('/tmp/bnb-compose.json'))['services']
+          assert set(c)=={'api-a','api-b','web','ingress','migrate'}
+          for name in c:
+              assert '@sha256:' in c[name]['image']
+              assert c[name]['read_only'] and 'ALL' in c[name]['cap_drop']
+              assert 'no-new-privileges:true' in c[name]['security_opt']
+          assert all('ports' not in c[n] for n in ('api-a','api-b','web','migrate'))
+          assert c['api-a']['environment']['BNB_DATABASE_URL_FILE'].endswith('runtime.dsn')
+          assert c['migrate']['environment']['BNB_DATABASE_URL_FILE'].endswith('migrator.dsn')
+          assert c['api-a']['volumes'] != c['migrate']['volumes']
+          print('BNB32_COMPOSE_TOPOLOGY=PASS; configuration fixture only')
+          PY
+          docker pull caddy:2
+          ingress=$(docker image inspect caddy:2 --format '{{index .RepoDigests 0}}')
+          echo "BNB32_INGRESS_BASE=$ingress" >> "$GITHUB_ENV"
+          docker run --rm -e BNB_API_HOST -e BNB_WEB_HOST \
+            -v "$PWD/services/420bnb/Caddyfile.production:/etc/caddy/Caddyfile:ro" \
+            -v "$BNB32_TLS_FIXTURE_DIR/server.crt:/run/tls/fullchain.pem:ro" \
+            -v "$BNB32_TLS_FIXTURE_DIR/server.key:/run/tls/privatekey.pem:ro" \
+            "$ingress" caddy validate --config /etc/caddy/Caddyfile
+
+      - name: Retain exact-source infrastructure build evidence
+        env:
+          QUALIFIED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          mkdir -p artifacts/bnb32
+          python - <<'PY'
+          import json,os,subprocess
+          def image(name):
+              value=json.loads(subprocess.check_output(['docker','image','inspect',name]))[0]
+              return {'local_image_config_id':value['Id'],'user':value['Config']['User']}
+          result={'schema':'420.bnb.infrastructure.ci.v1','qualified_sha':os.environ['QUALIFIED_SHA'],
+                  'python_base_manifest':os.environ['BNB32_PYTHON_BASE'],
+                  'ingress_manifest':os.environ['BNB32_INGRESS_BASE'],
+                  'api':image('bnb-test:'+os.environ['GITHUB_SHA']),
+                  'web':image('bnb-web:'+os.environ['GITHUB_SHA']),
+                  'registry_publication_verified':False,'live_accepted':False}
+          with open('artifacts/bnb32/build-evidence.json','w') as f:json.dump(result,f,sort_keys=True,indent=2)
+          print(json.dumps(result,sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bnb32-infrastructure-${{ github.event.pull_request.head.sha || github.sha }}
+          path: artifacts/bnb32/build-evidence.json
+          retention-days: 7
+

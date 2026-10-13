@@ -1,0 +1,19 @@
+{
+  admin off
+  auto_https off
+}
+https://{$BNB_API_HOST}:8443 {
+  tls /run/tls/fullchain.pem /run/tls/privatekey.pem
+  header Strict-Transport-Security "max-age=31536000"
+  reverse_proxy api-a:8080 api-b:8080
+}
+https://{$BNB_WEB_HOST}:8443 {
+  tls /run/tls/fullchain.pem /run/tls/privatekey.pem
+  header Strict-Transport-Security "max-age=31536000"
+  handle /v1/bnb/* {
+    reverse_proxy api-a:8080 api-b:8080
+  }
+  handle {
+    reverse_proxy web:8080
+  }
+}

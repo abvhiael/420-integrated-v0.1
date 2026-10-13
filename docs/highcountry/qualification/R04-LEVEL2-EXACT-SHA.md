@@ -1,46 +1,45 @@
-# High Country R04 Level 2 — exact-SHA execution evidence
+# R04 accumulated Level 2 — exact-SHA qualification
 
-**Executed repository CI scope: PASS. Accumulated R04 integration milestone: NOT COMPLETE.**
+**Disposition: COMPLETE — repository app integration only.** INT-R04-01 through INT-R04-05 are resolved. No Level 3, complete R05 phase, deployed operation or production release is certified.
 
-## Exact candidate and ancestry
+- Implementation SHA: `93655ca49f0e305f99cd0c13f53f88479b20b316`.
+- Qualification branch: `qualification/highcountry-r04-level2-integration`; [draft PR #627](https://github.com/abvhiael/420-integrated-v0.1/pull/627), targeting the unmerged R04.14 audit branch.
+- [Dedicated workflow run #38358551332](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38358551332): completed SUCCESS. All four jobs check out/assert that exact implementation SHA.
+- Foundry 1.8.5, Solidity 0.8.24/Cancun, Node 22 and PostgreSQL 16. Runtime fixture explicitly disables dynamic test linking.
 
-- Executable/CI candidate: `700d52f771fe15d5f58f88e7d92bc444e6bcee54`.
-- Qualification branch: `qualification/highcountry-r04-level2-integration`; draft PR [#627](https://github.com/abvhiael/420-integrated-v0.1/pull/627), targeting `audit/highcountry-r04-14-upgrade-security`.
-- R04.14 implementation: `3503761ef5746064abfd7c3c1ed3cf9a6f6fe2e5`; evidence/base: `7cbd375079a6187aa03bea8b79c8d131762456de`; development PR #626 open/draft.
-- Main observed: `bc0faa5dafecda3de0620a9581f9953b89cd95fb`. Level 3 must refresh/reconcile main; no merge qualification claimed.
-- All R04 PR heads #609/#610/#611/#612/#613/#615/#617/#618/#619/#622/#623/#624/#625/#626 were compared to this candidate and confirmed ancestors, zero behind. All remain draft/open/unmerged.
-- Subsequent commits `ac30c4a2ec3a94e77f095e0a8c9f8533282f51bf`, `e3ebd13226562c9cfd956835e36a1930cb7d3653`, `773c4b655c622a7edffe1e859d6373b307d0eb0e` and this evidence commit change review/evidence/operational gate documentation only. They inherit the above executed implementation identity; no changed executable SHA is silently substituted.
+| Required job | GitHub evidence | Result |
+|---|---|---|
+| postgres-integration | [Job 115167032562](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38358551332/job/115167032562) | Actual SERIALIZABLE contention, replay, settlement/persistence; durable session/wallet nonce restart and least-privilege/RLS denial PASS |
+| retained-app | [Job 115167032817](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38358551332/job/115167032817) | Build/bytecode-size PASS; 304 tests in 65 suites, zero failures/skips; canonical verifier PASS |
+| economy-service | [Job 115167032865](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38358551332/job/115167032865) | 35 tests PASS, zero failures/skips |
+| runtime-canonical | [Job 115167032918](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38358551332/job/115167032918) | Actual local Anvil + PostgreSQL + authenticated HTTP + canonical Identity/claimed mission + BUDS + owner-authorized escrow + operator transaction + finalized receipt + restarted-worker reconciliation after unlink PASS |
 
-## Terminal workflow/job evidence
+All required qualification steps were inspected and passed. Tests contain actual production contract/adapter composition as well as retained mocked unit coverage. A local CI issuer/catalogue/release hash is a fixture, not an independently approved deployed credential, production reward number or funded vault receipt.
 
-[High Country R04 Level 2 App Integration run #38345072933](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38345072933), attempt 1, workflow ID 382785044, PR event, head SHA exactly `700d52f771fe15d5f58f88e7d92bc444e6bcee54`, terminal **SUCCESS**.
+## Resolved findings and security acceptance
 
-| Required job | ID | Terminal conclusion | Executed scope |
-|---|---|---|---|
-| retained-app | [115124467953](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38345072933/job/115124467953) | SUCCESS | Exact checkout assertion; High Country build/bytecode sizes; 293 tests across 62 suites, zero failures or skips; canonical High Country verifier |
-| economy-service | [115124468026](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38345072933/job/115124468026) | SUCCESS | Exact checkout assertion; all 26 retained BUDS/market/runtime denial, replay, rollback, receipt and persistence tests, zero failures |
-| postgres-integration | [115124467722](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38345072933/job/115124467722) | SUCCESS | Exact checkout assertion; actual PostgreSQL 16 SERIALIZABLE reservation, replay, market settlement and persistence integration |
+- **INT-R04-01:** actual immutable harvest provenance, recorded-block confirmation/finality policy, optional shared entitlement and canonical Cup/scoped cross-game consumers. Forged facts/source block, wrong scope/profile/source, revocation, disputes and confirmation/submission/finalization/issuance replay fail.
+- **INT-R04-02:** canonical root-pinned, one-time scoped emergency binding and risk-domain enforcement; manufacturing loss/refund, escrow cancellation, equipment recovery and actual lease/license/plant exit remain valid. Catalogue deactivation preserves existing reserved refunds/authorized losses while blocking new ingress.
+- **INT-R04-03:** authenticated sessions/source envelopes, durable EOA/ERC1271 wallet consent/nonces/epochs, actual canonical completion and bounded issuance, code/hash/finality validation, durable operator submission/receipt reconciliation and PostgreSQL role isolation. Durable chain parties allow final settlement/refund after unlink or revocation; new submission still requires current authority. Nonzero source-epoch revocation and duplicate off-chain custody admission defects are corrected.
+- **INT-R04-04:** completed manufacturing output is consumed before deterministic single-use equipment issuance; actual equipment/lifecycle/cultivation, shared-authority lease/license/plant, independently capability/policy/budget-gated Treasury/Identity and scoped shared Cup acceptance are retained.
+- **INT-R04-05:** current implementation is independently identified from historical Level 1/retained-only qualification and this evidence-only descendant.
 
-Every required step succeeded. Job logs were inspected; no skipped verifier or successful scope-classifier substituted for executed tests. Logs explicitly report `293 tests passed, 0 failed, 0 skipped`, economy `tests 26 / pass 26 / fail 0`, and PostgreSQL `SERIALIZABLE reservation, replay, market settlement and persistence: PASS`.
+Retained actual council tests include restricted ingress, denied/revoked/vetoed release, delayed recovery and replay. Upgrade tests retain codehash, independent review, timelock/cancellation and provenance without an implicit immutable-consumer replacement. This is regression/security acceptance within the app suite, not an external production security approval.
 
-## Corrected defect and additional meaningful coverage
+## SHA, ancestry and phase continuity
 
-Initial run #38342023181 at `541b1c0f44da294dd94bf08e484c0a1825acdf12`: build passed; 289 tests passed and one cultivation invariant setup failed; verifier skipped. Root cause was old land fixture missing R04.9 canonical occupancy ABI. Commit `3f4bd350253b8d69e2d577156000218636d095e5` replaced that land mock with actual LandRegistry registration/operator transfer. Follow-up run #38344886910 passed; final candidate also passed the retained cultivation invariants.
+All 14 R04 development PRs remain draft/open/unmerged. Each head was compared against `2dd0f75c994b1e475da65f607addf548a91ae5ff` (zero behind), followed by the two linear commits `ccc031f21578f9a88390b2050fee730402e28ea1` and this qualified implementation. Qualified R04.14 `3503761ef5746064abfd7c3c1ed3cf9a6f6fe2e5` and evidence parent `7cbd375079a6187aa03bea8b79c8d131762456de` remain ancestors. No audit PR was merged or retargeted.
 
-Commit `b72945f96a5a23e7178f8a8fc69b0263fb4ead51` added R04AuthorityIntegration using actual CapabilityRegistry420 → HighCountryAuthorization → SecurityCouncilController → EmergencyState → RandomnessCoordinator. It verifies exact controller principal/domain, restriction of new requests, recoverable pending requests, one-time consumption, early/vetoed/revoked release denial, failed-release schedule rollback, authorized delayed release and resumed admission. Actual UpgradeCoordinator acceptance records provenance while original consumer/controller bindings remain unchanged; rebinding is rejected.
+Main observed at `81c21541acdc1b900b9a15c6f6b75ff2d7c2b5d9`; its drift from `bc0faa5dafecda3de0620a9581f9953b89cd95fb` concerns BnB/global workflow wiring, not changed High Country/imported shared implementation. Main is **not reconciled** by this certificate. Separate Level 3 must use one reconciled merge-candidate SHA, canonical Solidity-owned complete Foundry inventory (approximately four balanced shards), independent Genesis address/namespace/manifests without duplicate full Foundry, and required global/Docs/app/security/client/service/deployment checks.
 
-Commit `700d52f771fe15d5f58f88e7d92bc444e6bcee54` added service and real PostgreSQL jobs to the previously contract-only milestone. No standalone repository-wide Foundry/Genesis/global/Docs dispatch was performed; existing PR filters automatically scheduled other workflows, whose results are not counted here.
+R04 ends at R04.14. R05.1 remains the next canonical phase step; scoped R05-owned runtime dependencies implemented for this milestone do not certify or automatically advance the complete R05 phase. No R04.15 exists.
 
-## Bounded security disposition and limitations
+## Limitations and independent gates
 
-The executed tests prove their specific accounting, authorization, failure, replay, conservation and recovery assertions. They are not independent production security review, deployed operator acceptance or a proof that every EmergencyState domain has an enforced consumer. Competition evidence/entitlement tests retain programmable fixtures; metadata-only governance, Treasury permissions, progression and mission records do not imply funds, asset grants or verified gameplay rewards.
+Live deployed address/code/grant manifests; real officers/source/session/operator/catalogue credentials; production finality/quorum/reorg/network drills; funded Treasury/vault movement and independent approvals; TLS/secrets/backup/failover/monitoring; operational/security release approval; and R07.5 drain/migration/replacement/replay/rollback rehearsal remain OPEN. The separate full R05 provider/cloud-save/migration/Indexer/SDK/client/abuse/privacy engineering scope also remains with its canonical owners. These are not waived or silently represented as testnet-only coding gaps.
 
-**Open required integration findings:** INT-R04-01 canonical competition/harvest/finality and entitlement adapters; INT-R04-02 missing R04 domain-specific mutator emergency enforcement with safe recovery; INT-R04-03 authenticated gameplay/reward/account/chain settlement composition; INT-R04-04 actual lifecycle/authority/Treasury/Identity/cross-game consumers. See the source-specific matrix in [R04 integration review](../R04-LEVEL2-INTEGRATION-REVIEW.md). None is waived as a live-testnet-only blocker.
+## Evidence identity
 
-Actual deployed addresses/code hashes/grants/officer credentials, funded operators, chain finality/reorg drills, external signed-user/identity/treasury acceptance, deployed database TLS/secrets/failover and R07.5 replacement/migration/rollback rehearsal remain genuine operational gates in [testnet work roadmap](../HIGHCOUNTRY-TESTNET-WORK-ROADMAP.md).
+This record and the review/testnet-status reconciliation change documentation only. The executed implementation remains `93655ca49f0e305f99cd0c13f53f88479b20b316`; evidence HEAD is not falsely claimed as a rerun implementation. Machine-readable [certificate](R04-LEVEL2-EXACT-SHA.json) includes job/step dispositions, original canonical verifier input hashes and retained PR heads. [Integration review](../R04-LEVEL2-INTEGRATION-REVIEW.md) and [canonical integration contract](../R04-LEVEL2-CANONICAL-INTEGRATION.md) distinguish actual production adapters, mocked retained units, CI fixtures and deployment dependencies.
 
-## Final milestone disposition
-
-**NOT COMPLETE / OPEN INTEGRATION FINDINGS.** The exact candidate passes the expanded retained repository CI, but accumulated milestone acceptance cannot be declared until required integration findings are resolved or formally dispositioned according to existing canonical owners without claiming missing work implemented. No R04 development PR merged, R05 started, R04.15 invented, or Level 3 declared.
-
-Level 3 remains separate: reconcile current main and qualify one exact merge-candidate through Solidity-owned complete Foundry inventory, approximately four balanced shards, independent Genesis addresses without duplicate Foundry, required global/Docs/app/client/service/security/deployment checks. Next canonical development step remains R05.1; it is not automatically begun by this record.
+Historical retained-only run #38345072933 at `700d52f771fe15d5f58f88e7d92bc444e6bcee54` passed 293 Foundry/26 Node/PostgreSQL checks while the milestone remained NOT COMPLETE. It is superseded for corrected app implementation by this four-job exact-SHA result; historical Level 1 records remain unchanged.

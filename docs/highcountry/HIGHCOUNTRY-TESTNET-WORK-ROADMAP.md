@@ -83,3 +83,14 @@ This adds operational gates without changing the R04.1–R04.14 sequence. The so
 | Shared operational security | R07/R09 | Deployed signer/secret/TLS rotation, production-equivalent database backup/failover/permissions, monitoring and independent operator/security approval |
 
 **Engineering work is not deferred merely because no live testnet exists:** canonical harvest/finality and entitlement adapter implementation, missing R04 mutator emergency enforcement, authenticated reward/account/settlement composition and actual local cross-component integration remain open under the existing R04/R05 owners. Review findings INT-R04-01 through INT-R04-04 retain these boundaries. No production readiness, R05 start or R04 merge is authorized by this register.
+
+
+## R04 accumulated Level 2 engineering reconciliation — 2026-10-13
+
+Repository app Level 2 is **COMPLETE** at implementation `93655ca49f0e305f99cd0c13f53f88479b20b316`, [run #38358551332](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38358551332), with 304 Foundry tests, 35 Node tests, actual PostgreSQL and actual local-chain authenticated runtime integration; build/size and canonical verifier PASS. See [exact-SHA certificate](qualification/R04-LEVEL2-EXACT-SHA.md) and [accumulated review](R04-LEVEL2-INTEGRATION-REVIEW.md).
+
+This supersedes earlier OPEN/NOT COMPLETE engineering status only for the implemented INT-R04-01 through INT-R04-05 app milestone: canonical harvest/finality/entitlement/Cup adapters; R04 emergency consumer enforcement and safe refunds/exits; authenticated source/account/settlement composition; actual manufactured equipment/lifecycle/plant rights/Treasury/Identity/scoped cross-game integration; and exact-SHA qualification. These are implemented and locally qualified, rather than postponed because live credentials were absent. Old step-specific chronology remains intact.
+
+**This register's live operational qualification remains OPEN.** All independently deployed address/code/grant, catalogue/signer/session/operator, funded Treasury/vault, finality/quorum/reorg/network, TLS/secret/backup/failover/monitoring and security approval rows above remain mandatory. R07.5 replacement/migration/rollback rehearsal is not performed by UpgradeCoordinator provenance. No production readiness or R04 merge is authorized.
+
+Separate Level 3 must refresh/reconcile main and run its canonical complete exact-SHA gate. The complete R05 cloud-save/migration/provider/Indexer/SDK/client/abuse/privacy engineering scope retains its existing owners and is not certified here. R05.1 remains the next canonical phase step; scoped dependencies for this milestone do not renumber or automatically advance the phase.

@@ -1,0 +1,469 @@
+{
+  "schema": 1,
+  "qualificationLevel": 2,
+  "scope": "Accumulated High Country R04.1–R04.14 repository app integration",
+  "disposition": "COMPLETE",
+  "implementationSha": "93655ca49f0e305f99cd0c13f53f88479b20b316",
+  "workflow": {
+    "path": ".github/workflows/highcountry-r04-level2.yml",
+    "id": 382785044,
+    "runId": 38358551332,
+    "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38358551332",
+    "conclusion": "success",
+    "headSha": "93655ca49f0e305f99cd0c13f53f88479b20b316",
+    "jobs": [
+      {
+        "name": "postgres-integration",
+        "id": 115167032562,
+        "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38358551332/job/115167032562",
+        "status": "completed",
+        "conclusion": "success",
+        "startedAt": "2026-10-13T06:48:48Z",
+        "completedAt": "2026-10-13T06:49:15Z",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Initialize containers",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Exact implementation SHA",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Install pinned PostgreSQL runtime driver",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Actual SERIALIZABLE contention, replay, persistence and settlement",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Stop containers",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success"
+          }
+        ]
+      },
+      {
+        "name": "retained-app",
+        "id": 115167032817,
+        "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38358551332/job/115167032817",
+        "status": "completed",
+        "conclusion": "success",
+        "startedAt": "2026-10-13T06:49:03Z",
+        "completedAt": "2026-10-13T06:53:57Z",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Exact candidate SHA",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Run foundry-rs/foundry-toolchain@v1",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "High Country app build and sizes",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Retained R04 integration and adversarial coverage",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Canonical High Country verifier",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Run foundry-rs/foundry-toolchain@v1",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success"
+          }
+        ]
+      },
+      {
+        "name": "economy-service",
+        "id": 115167032865,
+        "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38358551332/job/115167032865",
+        "status": "completed",
+        "conclusion": "success",
+        "startedAt": "2026-10-13T06:49:27Z",
+        "completedAt": "2026-10-13T06:49:34Z",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Exact implementation SHA",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Retained economic runtime security and settlement regressions",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success"
+          }
+        ]
+      },
+      {
+        "name": "runtime-canonical",
+        "id": 115167032918,
+        "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38358551332/job/115167032918",
+        "status": "completed",
+        "conclusion": "success",
+        "startedAt": "2026-10-13T06:49:18Z",
+        "completedAt": "2026-10-13T06:50:26Z",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Initialize containers",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Exact implementation SHA",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Run foundry-rs/foundry-toolchain@v1",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Build disposable real-contract runtime fixture",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Install pinned PostgreSQL runtime driver",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Actual local-chain PostgreSQL authenticated HTTP and worker integration",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Run foundry-rs/foundry-toolchain@v1",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Stop containers",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success"
+          }
+        ]
+      }
+    ]
+  },
+  "tests": {
+    "foundry": {
+      "suites": 65,
+      "passed": 304,
+      "failed": 0,
+      "skipped": 0
+    },
+    "node": {
+      "passed": 35,
+      "failed": 0,
+      "skipped": 0
+    },
+    "postgres": "PASS: SERIALIZABLE contention/replay/settlement/restart and runtime nonce/RLS/least-privilege checks",
+    "runtimeCanonical": "PASS: actual Anvil/PostgreSQL/authenticated HTTP/EOA consent/canonical mission/BUDS/operator transaction/receipt/restarted worker after unlink",
+    "bytecodeSize": "PASS",
+    "canonicalVerifier": {
+      "status": "PASS",
+      "sha": "93655ca49f0e305f99cd0c13f53f88479b20b316",
+      "enums": 20,
+      "types": 53,
+      "actions": 66,
+      "requirements": 65,
+      "links": 33,
+      "harvestInputs": 10001,
+      "temperatureInputs": 3001,
+      "inputHashes": {
+        "contracts/src/highcountry/types/HighCountryEnums.sol": "2bd75b5f96c4ce36de16b23392eec2d57db3bd24bfdf4b4ff329c1db097a229f",
+        "contracts/src/highcountry/cultivation/PlantRegistry.sol": "6f22ca5dde764b4aa7fbe1809d85628c3c190710f61582db7f507abcae65933c",
+        "contracts/src/gaming/access/ProgressiveGamingTypes.sol": "a3dac71c4ba80b58bece8ebf45c33381135ccd46b904c7c2e4b6198ee6bd3793",
+        "contracts/src/highcountry/types/HighCountryTypes.sol": "837f65c6b9ead9b46f8966565c399bfdf20b7000dac4caf129eff4ba21681357",
+        "contracts/src/highcountry/constants/ActionIds.sol": "337649c52e869e090175593e1542b39628be72b9f04b90ce8c65e96421bac56b",
+        "docs/highcountry/RELEASE-SCOPE.md": "1d3799652f3e10644bbc553bf3e6049593843e5d317e5d0d8c2d0d6e2304ed7f",
+        "docs/highcountry/ARCHITECTURE-AND-AUTHORITY.md": "f081bff739494360954bd3d4369be1e7b0727f9a7f67d5f2e16d66074c691a44",
+        "docs/highcountry/TYPES-AND-UNITS.md": "925ce10b59467220b5c353fded62d6395f83d97e65085770d905cfd6ba1e0b2c",
+        "docs/highcountry/MIGRATION-BOUNDARIES.md": "377aed8067e7e0a427a843185f1009bc233d56c5cd192f8281df9bc8a09c3ceb",
+        "docs/highcountry/DEPLOYMENT-AND-TRUST.md": "fa1811e9bff350be3685631228547f65e9855798aacf3d7de18eafe8af6557ba",
+        "docs/highcountry/GAMEPLAY-SPECIFICATION.md": "9b4f535a4d3502c939273fff825833a5fa90d32e4e9bb770122d3d3bd7e5e478"
+      },
+      "scope": "Source/specification consistency only; not runtime or full-game qualification."
+    }
+  },
+  "toolchain": {
+    "foundry": "1.8.5",
+    "solidity": "0.8.24",
+    "evm": "cancun",
+    "node": "22",
+    "postgres": "16",
+    "runtimeDynamicTestLinking": false
+  },
+  "findings": [
+    {
+      "id": "INT-R04-01",
+      "disposition": "CLOSED_REPOSITORY_APP_SCOPE"
+    },
+    {
+      "id": "INT-R04-02",
+      "disposition": "CLOSED_REPOSITORY_APP_SCOPE"
+    },
+    {
+      "id": "INT-R04-03",
+      "disposition": "CLOSED_REPOSITORY_APP_SCOPE"
+    },
+    {
+      "id": "INT-R04-04",
+      "disposition": "CLOSED_REPOSITORY_APP_SCOPE"
+    },
+    {
+      "id": "INT-R04-05",
+      "disposition": "CLOSED_REPOSITORY_APP_SCOPE"
+    }
+  ],
+  "ancestry": {
+    "qualifiedR0414Implementation": "3503761ef5746064abfd7c3c1ed3cf9a6f6fe2e5",
+    "r0414EvidenceParent": "7cbd375079a6187aa03bea8b79c8d131762456de",
+    "developmentPrHeads": [
+      {
+        "pr": 626,
+        "head": "7cbd375079a6187aa03bea8b79c8d131762456de",
+        "state": "open",
+        "draft": true,
+        "retainedAncestor": true
+      },
+      {
+        "pr": 625,
+        "head": "f91e9900262058130a48f180bb3a8d709c7e3d79",
+        "state": "open",
+        "draft": true,
+        "retainedAncestor": true
+      },
+      {
+        "pr": 624,
+        "head": "6813ff3109f0251dafeefab3ce0dac7b29c1278f",
+        "state": "open",
+        "draft": true,
+        "retainedAncestor": true
+      },
+      {
+        "pr": 623,
+        "head": "2b889f425e4576b536d212c257a0a4ac401c8e09",
+        "state": "open",
+        "draft": true,
+        "retainedAncestor": true
+      },
+      {
+        "pr": 622,
+        "head": "2ce093f2dd7df54b888cf6635e47b239e67050ce",
+        "state": "open",
+        "draft": true,
+        "retainedAncestor": true
+      },
+      {
+        "pr": 619,
+        "head": "9bab4c97d5c063a500e2bc4a72ace5e73a2ec8a8",
+        "state": "open",
+        "draft": true,
+        "retainedAncestor": true
+      },
+      {
+        "pr": 618,
+        "head": "54ba9ea5ce7abc60dea62b93e5dcf9bcc29958f3",
+        "state": "open",
+        "draft": true,
+        "retainedAncestor": true
+      },
+      {
+        "pr": 617,
+        "head": "36cc621a82e66dc79254dae4426822010c8d80dc",
+        "state": "open",
+        "draft": true,
+        "retainedAncestor": true
+      },
+      {
+        "pr": 615,
+        "head": "221437e59b9d0af7463d3093546ddbaae5a4e95e",
+        "state": "open",
+        "draft": true,
+        "retainedAncestor": true
+      },
+      {
+        "pr": 613,
+        "head": "dde04b463b02478730bcdd350dd5a5d50f9e6cc3",
+        "state": "open",
+        "draft": true,
+        "retainedAncestor": true
+      },
+      {
+        "pr": 612,
+        "head": "5f8bc642bf7b7e2d07b549ca48af7c4e34a1d4b2",
+        "state": "open",
+        "draft": true,
+        "retainedAncestor": true
+      },
+      {
+        "pr": 611,
+        "head": "d397dfcdf11f2da94849ee8557a779877f4df818",
+        "state": "open",
+        "draft": true,
+        "retainedAncestor": true
+      },
+      {
+        "pr": 610,
+        "head": "5f9152e20efdfdf4d04394b3f8e6072bd8bdaba6",
+        "state": "open",
+        "draft": true,
+        "retainedAncestor": true
+      },
+      {
+        "pr": 609,
+        "head": "c9a6dd8dd640b8a8db61cf32049c9703a3ec8f93",
+        "state": "open",
+        "draft": true,
+        "retainedAncestor": true
+      }
+    ],
+    "prComparisonAt": "2dd0f75c994b1e475da65f607addf548a91ae5ff",
+    "subsequentLinearCommits": [
+      "ccc031f21578f9a88390b2050fee730402e28ea1",
+      "93655ca49f0e305f99cd0c13f53f88479b20b316"
+    ]
+  },
+  "mainObserved": "81c21541acdc1b900b9a15c6f6b75ff2d7c2b5d9",
+  "mainReconciled": false,
+  "level3Qualified": false,
+  "productionQualified": false,
+  "evidenceOnly": true,
+  "operationalDeferrals": [
+    "Reviewed deployed addresses/code/grants and production catalogues/source/session/operator credentials",
+    "Consensus finality/quorum/reorg/network and operational recovery drills",
+    "Independent funded Treasury/vault, Identity/cross-game and security approval",
+    "TLS/secrets/backup/failover/monitoring and live acceptance",
+    "R07.5 drain/migration/replacement/replay/rollback rehearsal"
+  ],
+  "futurePhaseEngineering": "Full R05 schemas/cloud-save/migration/provider/Indexer/SDK/client/abuse/privacy acceptance retains canonical owners; not certified here."
+}

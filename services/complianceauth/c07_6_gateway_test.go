@@ -22,7 +22,9 @@ func TestC076DecisionGatewayRecoveryGate(t *testing.T){
   {"authority-open-but-unauthenticated",&c076GateFixture{allow:true},3,http.StatusServiceUnavailable,1},
  }{
   t.Run(tc.name,func(t *testing.T){
-   api:=C051API{Backend:c076NullBackend{},RecoveryGate:tc.gate,RecoveryScope:"production-bc-vancouver",RecoveryGeneration:tc.generation}
+   var gate C076ServingGate
+   if tc.gate!=nil{gate=tc.gate}
+   api:=C051API{Backend:c076NullBackend{},RecoveryGate:gate,RecoveryScope:"production-bc-vancouver",RecoveryGeneration:tc.generation}
    w:=httptest.NewRecorder();r:=httptest.NewRequest(http.MethodPost,"/api/v1/evaluate",nil)
    api.ServeHTTP(w,r)
    if w.Code!=tc.want{t.Fatalf("got HTTP %d want %d",w.Code,tc.want)}

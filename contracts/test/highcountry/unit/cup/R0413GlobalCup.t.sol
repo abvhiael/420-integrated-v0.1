@@ -188,9 +188,8 @@ contract R0413GlobalCupTest {
                 )
             );
         require(!again, "event replay across cups");
-        (bool noPrizeRules,) =
-            address(cup)
-                .call(abi.encodeCall(cup.create, (keccak256("empty"), A, B, F, keccak256("rules"), bytes32(0), SCOPE)));
+        (bool noPrizeRules,) = address(cup)
+            .call(abi.encodeCall(cup.create, (keccak256("empty"), A, B, F, keccak256("rules"), bytes32(0), SCOPE)));
         require(!noPrizeRules, "unpublished prize rules");
     }
 }

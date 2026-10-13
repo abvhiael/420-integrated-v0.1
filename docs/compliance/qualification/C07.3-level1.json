@@ -1,0 +1,334 @@
+{
+  "step": "C07.3",
+  "name": "Secret/signing-key management, TLS, service identity, rotation, supply-chain controls and dependency review",
+  "qualification_level": 1,
+  "status": "COMPLETE",
+  "acceptance_scope": "Repository app-audit software security/dependency gates; actual managed infrastructure and independent acceptance remain external",
+  "repository": "abvhiael/420-integrated-v0.1",
+  "branch": "audit/420compliance-c01-1-inventory-20261009",
+  "pull_request": 602,
+  "pull_request_disposition": "Draft, open and unmerged",
+  "implementation_sha": "03f7f212f485275dea3b781dc70156d6a1321d34",
+  "prior_C07_2_implementation_sha": "9d09f6e805da9702916b1f08d86fbda53acbe9d2",
+  "prior_evidence_head_sha": "40ddfe4987521f82b4cb5886edb7cd50fed9bab1",
+  "observed_main_sha": "bc0faa5dafecda3de0620a9581f9953b89cd95fb",
+  "audit_ancestry_base_sha": "c5a4f220d1fbda01f707d359aa9bb32921a138b1",
+  "recorded_local_date": "2026-10-12",
+  "timezone": "America/Regina",
+  "evidence_commit_policy": "This record is an evidence-only commit inheriting the exact qualified implementation. Its evidence SHA is the Git commit containing this file. No executable/test/workflow/dependency/configuration/deployment/substantive requirement change.",
+  "classification": "App-only implementation of existing independent managed authority contracts; no new legal approval actor, shared protocol, Solidity/Genesis/frozen-address or shared module change",
+  "files_changed": [
+    "services/complianceauth/c07_1_storage.go",
+    "services/complianceauth/scheduled_signing_controls.go",
+    "services/complianceauth/c07_2_durable.go",
+    "services/complianceauth/author_workspace_postgres.go",
+    "services/complianceauth/c06_5_review_postgres.go",
+    "services/complianceauth/c06_7_auditor_postgres.go",
+    "services/complianceauth/publication_runtime.go",
+    "services/complianceauth/c07_1_migrations.go",
+    "services/complianceauth/c07_3_managed_authority.go",
+    "services/complianceauth/c07_3_managed_authority_test.go",
+    "scripts/verify-compliance-c07-3.py",
+    ".github/workflows/420compliance-c01-level1.yml",
+    "docs/compliance/C07.3-MANAGED-AUTHORITY.md"
+  ],
+  "implementation_summary": [
+    "Concrete workload-bound mTLS secret/signing adapter with fresh nonce, issuer, purpose, audience, tenant/domain/jurisdiction, environment, short lifetime and monotonic generation checks",
+    "Provider-backed AES-GCM key refresh on every encryption/decryption; bounded active/historical key ring and no retained managed-cipher key cache",
+    "Managed canonical-manifest signing receives only public key metadata/signatures; broker state revalidated after signer return; external key/epoch status checked on sign/verify",
+    "Verified TLS 1.3, exact server URI/DNS identity, fresh externally supplied client certificate per request, no proxy/redirect/session-cache/keepalive fallback",
+    "Managed production composition uses broker-supplied verified-TLS database credentials and rechecks service identity for durable reads/writes; independent reviewer authority remains mandatory",
+    "Request cancellation propagated through draft/review/audit/job/backfill crypto; strict PostgreSQL option/timeout/key-file checks",
+    "Immutable Actions and fixture container pins, official checksum-verified Go toolchain, locked runtime module inventory/checksums, module verification, vulnerability scan and supply-chain adversarial gates",
+    "Fix retained C07.2 enqueue timestamp precision at the PostgreSQL boundary; preserve nanosecond caller input replay regression"
+  ],
+  "requirements": {
+    "secret_management": {
+      "status": "PASS",
+      "proof": "Fresh workload/scope/purpose/nonce/lifetime binding, revoked/outage/cancellation/header-injection/purpose-confusion/rollback denial; no positive secret cache"
+    },
+    "signing_key_management": {
+      "status": "PASS",
+      "proof": "Real managed Ed25519 signing, canonical manifest/scope binding, forged signature denial, rotated key/epoch, revocation during signer return and external key-state outage"
+    },
+    "TLS": {
+      "status": "PASS",
+      "proof": "Real mutual TLS with CA/DNS/URI verification, wrong identities/roots/plaintext denial, current/rotated/expired client certificate, revoked source and bounded timeout; database TLS override denials"
+    },
+    "service_identity": {
+      "status": "PASS",
+      "proof": "Fresh client certificate and workload-bound broker record; real mTLS plus restricted verified-TLS PostgreSQL production composition, identity outage read/write denial with live pool and recovery"
+    },
+    "rotation": {
+      "status": "PASS",
+      "proof": "Fresh active AES key on new ciphertext, controlled historical decrypt, removed-key denial, signing key/epoch rotation and no cached authority on outage"
+    },
+    "supply_chain_controls": {
+      "status": "PASS",
+      "proof": "Full Action commits, pinned PostgreSQL digest, checksum-verified official Go archive, exact scanner version, read-only permissions, no credential persistence/privileged trigger; seven adversarial policy mutations rejected"
+    },
+    "dependency_review": {
+      "status": "PASS",
+      "proof": "Locked pq v1.12.0 archive/module checksums, authenticated checksum database, all modules verified, app/test-scoped govulncheck and no unresolved findings"
+    }
+  },
+  "workflow": {
+    "path": ".github/workflows/420compliance-c01-level1.yml",
+    "name": "420Compliance C07.3 Level 1",
+    "run_number": 766,
+    "run_id": 38351107974,
+    "job_id": 115143503847,
+    "job_name": "managed-security-level1",
+    "event": "push",
+    "attempt": 1,
+    "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38351107974",
+    "job_url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38351107974/job/115143503847",
+    "conclusion": "success",
+    "duration": "1m 30s",
+    "steps": 14,
+    "success": 14,
+    "failed": 0,
+    "skipped": 0,
+    "cancelled": 0,
+    "permissions": "contents: read; checkout persist-credentials false",
+    "trigger_policy": "Exact github.sha audit-branch push; optional dispatch; evidence-only paths excluded; verifier changes included"
+  },
+  "artifact": {
+    "id": 11790828716,
+    "name": "compliance-c073-level1-03f7f212f485275dea3b781dc70156d6a1321d34",
+    "sha256": "bad3199d35c44e0ac88ca2d8b6295c49e213c3cb5f77327bad7c1f65c05c341a",
+    "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38351107974/artifacts/11790828716",
+    "files": [
+      "compliance-c073-level1.json",
+      "compliance-c073-tests.log",
+      "compliance-c073-supply-chain.json",
+      "compliance-c073-vulnerability.json",
+      "compliance-c073-modules.json",
+      "compliance-c073-module-verification.log",
+      "compliance-c073-toolchain.log"
+    ],
+    "source_manifest": "Runtime result records SHA-256 of Compliance Go/SQL, verifier, workflow, go.mod/go.sum; all inputs additionally pinned by Git implementation SHA"
+  },
+  "checks": [
+    {
+      "command": "Official Go 1.27.2 archive SHA-256 verification",
+      "result": "PASS"
+    },
+    {
+      "command": "python3 scripts/verify-compliance-c07-3.py --self-test",
+      "result": "PASS",
+      "adversarial_cases": 7
+    },
+    {
+      "command": "go mod verify",
+      "result": "PASS",
+      "observed_output": "all modules verified"
+    },
+    {
+      "command": "/tmp/c073-bin/govulncheck -json -test ./services/complianceauth",
+      "tool_version": "golang.org/x/vuln v1.9.0",
+      "result": "PASS",
+      "unresolved_findings": 0,
+      "report_policy": "Completed scanner configuration and zero findings required; raw database/scanner metadata retained in artifact"
+    },
+    {
+      "command": "go vet ./services/complianceauth",
+      "result": "PASS"
+    },
+    {
+      "command": "go test -race ./services/complianceauth -run '^(TestC073|TestC072|TestC071|TestC038|TestC048|TestC052|TestC059|TestC064|TestC065|TestC066|TestC067|TestC068)' -count=1 -v",
+      "result": "PASS",
+      "top_level_tests": 37,
+      "subtests": 30,
+      "required_skips": 0,
+      "passed_tests": [
+        "TestC038DatabaseOutageAndReconnect",
+        "TestC038IndependentSignatureAuthorization",
+        "TestC038PostgreSQLMultiInstance",
+        "TestC038ProductionRuntimeGates",
+        "TestC038PublicationAcrossInstances",
+        "TestC048ScheduledSigningRotationAndEmergency",
+        "TestC052ProviderBoundariesRevocationAndPrivacy",
+        "TestC059SignedOutboxInvalidationAndRecovery",
+        "TestC064AuthorArchiveCitationsIntegrity",
+        "TestC064AuthorSessionAndFailureGates",
+        "TestC064AuthorWorkspaceSecurityAndEditing",
+        "TestC064PostgreSQLDraftCASAndPersistence",
+        "TestC065Ed25519AndImpactProviderDeny",
+        "TestC065IndependentReviewNegativeBoundary",
+        "TestC065PostgreSQLConcurrentReviewAndStaleAuthorFencing",
+        "TestC065PostgreSQLReviewFailsClosedWithoutConnection",
+        "TestC065ReviewConsoleFailsClosed",
+        "TestC066HTTPUnconfiguredAndAnonymousDenied",
+        "TestC066OperatorDashboardHaltAndFailClosed",
+        "TestC067ArchiveEvidenceFailClosed",
+        "TestC067AuditorBoundedRedactedAccess",
+        "TestC067AuditorHTTPAuthorizationAndCSRF",
+        "TestC067AuditorHTTPAuthorizationAndCSRF/anonymous",
+        "TestC067AuditorHTTPAuthorizationAndCSRF/cross_origin",
+        "TestC067AuditorHTTPAuthorizationAndCSRF/noTLS",
+        "TestC067AuditorHTTPAuthorizationAndCSRF/wrong_csrf",
+        "TestC067PostgreSQLDurableAuditAccess",
+        "TestC068DOOBrTravelConsumerFailClosed",
+        "TestC068DOOBrTravelConsumerFailClosed/420Travel",
+        "TestC068DOOBrTravelConsumerFailClosed/DOOBr",
+        "TestC068ExternalRevocationAndConsumption",
+        "TestC068MobileDeviceSessionRevocationAndBoundary",
+        "TestC071AuthenticatedEncryptionBoundaries",
+        "TestC071PostgreSQLProductionStorage",
+        "TestC072AtomicActivationOutboxAndHalt",
+        "TestC072Boundaries",
+        "TestC072DurableJobsLeaseFencing",
+        "TestC073CertificateRotationAndTimeout",
+        "TestC073DatabaseTLSOverridesDenied",
+        "TestC073ManagedEncryptionRotation",
+        "TestC073ManagedProductionComposition",
+        "TestC073ManagedSignerRotationAndRevocation",
+        "TestC073SecretBindingFreshnessAndTLS",
+        "TestC073SecretBindingFreshnessAndTLS/HTTP",
+        "TestC073SecretBindingFreshnessAndTLS/audience",
+        "TestC073SecretBindingFreshnessAndTLS/client-identity",
+        "TestC073SecretBindingFreshnessAndTLS/domain",
+        "TestC073SecretBindingFreshnessAndTLS/environment",
+        "TestC073SecretBindingFreshnessAndTLS/expired",
+        "TestC073SecretBindingFreshnessAndTLS/future",
+        "TestC073SecretBindingFreshnessAndTLS/generation",
+        "TestC073SecretBindingFreshnessAndTLS/header_injection",
+        "TestC073SecretBindingFreshnessAndTLS/issuer",
+        "TestC073SecretBindingFreshnessAndTLS/jurisdiction",
+        "TestC073SecretBindingFreshnessAndTLS/nonce",
+        "TestC073SecretBindingFreshnessAndTLS/outage",
+        "TestC073SecretBindingFreshnessAndTLS/oversized",
+        "TestC073SecretBindingFreshnessAndTLS/purpose",
+        "TestC073SecretBindingFreshnessAndTLS/purpose_confusion",
+        "TestC073SecretBindingFreshnessAndTLS/redirect",
+        "TestC073SecretBindingFreshnessAndTLS/revoked",
+        "TestC073SecretBindingFreshnessAndTLS/server-identity",
+        "TestC073SecretBindingFreshnessAndTLS/tenant",
+        "TestC073SecretBindingFreshnessAndTLS/trailing",
+        "TestC073SecretBindingFreshnessAndTLS/unbounded",
+        "TestC073SecretBindingFreshnessAndTLS/untrusted-root",
+        "TestC073SecretBindingFreshnessAndTLS/workload"
+      ]
+    }
+  ],
+  "reviewed_inputs": {
+    "checkout": {
+      "version": "v7.0.1",
+      "commit": "3d3c42e5aac5ba805825da76410c181273ba90b1"
+    },
+    "upload_artifact": {
+      "version": "v7.0.2",
+      "commit": "cf430e030ddbb5b0abf93d22962f4752f3646cd9"
+    },
+    "postgres_fixture_digest": "sha256:ca0bd484cb98bf4b24eb1010e73fb3fcbd6714d240fbc1a10eea5b7dbecb641d",
+    "go": {
+      "version": "go1.27.2",
+      "archive_sha256": "ecbadb99091a3f46e31f5f934b068b1864eafa7995211b39eaddf76996045fe5",
+      "automatic_toolchain_fallback": false
+    },
+    "runtime_module": "github.com/lib/pq v1.12.0",
+    "shared_go_mod_sum_changed": false,
+    "govulncheck": "v1.9.0",
+    "upstream_review": "Official release/commit, archive/checksum and Go tooling references recorded in C07.3-MANAGED-AUTHORITY.md"
+  },
+  "security_acceptance": {
+    "status": "PASS for C07.3 repository software/dependency gates",
+    "independent_security_review_completed": false,
+    "live_production_authorized": false,
+    "tests_weakened": false,
+    "live_permissions_expanded": false,
+    "manifest_private_keys_available_to_runtime": false,
+    "known_unresolved_scanner_findings": 0,
+    "coverage": [
+      "mutual TLS and workload/scope identity",
+      "purpose-separated short-lived secrets",
+      "key/certificate rotation and revocation",
+      "generation/nonce replay denial",
+      "managed signature integrity and stale epoch denial",
+      "no outage/cache fallback",
+      "restricted encrypted production composition",
+      "immutable dependency/tool inputs and seven policy denial cases",
+      "retained authority/RLS/quota/concurrency/session/CSRF/outage regressions"
+    ]
+  },
+  "diagnosed_failures": [
+    {
+      "kind": "genuine retained implementation defect",
+      "run_id": 38349930300,
+      "step": 9,
+      "cause": "Durable enqueue compared PostgreSQL microsecond schedule with unnormalized nanosecond caller timestamp",
+      "repair": "Normalize schedule once at the PostgreSQL boundary; retain production-path nanosecond input and idempotent replay assertions"
+    },
+    {
+      "kind": "browser editing/CI harness defect",
+      "run_id": 38350830233,
+      "step": 7,
+      "cause": "Two browser edits appended obsolete file bodies; duplicated verifier attempted to read --self-test as a report path and duplicated Go test body was invalid",
+      "repair": "Clear editor explicitly, replace with exactly one complete file, verify saved contents byte-for-byte ignoring final newline; retain all assertions"
+    }
+  ],
+  "superseded_run_policy": "Failed, cancelled and earlier SHAs do not qualify the final implementation. Only run 38351107974 on 03f7f21 is authoritative.",
+  "retained_evidence": [
+    "docs/compliance/qualification/C07.2-level1.json",
+    "docs/compliance/qualification/C07.1-level1.json",
+    "docs/compliance/qualification/C06.9-level2.json"
+  ],
+  "retained_migration_history": "All six SQL migration constants/checksums unchanged; C07.1 hardening and C07.2 durable SQL directly compared unchanged; affected migration/production tests PASS",
+  "milestones": {
+    "C06_9": "Historical website/client Level 2 retained; affected backend/session security revalidated",
+    "C07_10": "Next canonical operational Level 2; not dispatched for this ordinary step",
+    "C08_5": "Single complete Level 3 after current-main reconciliation; intentionally deferred"
+  },
+  "broad_workflows_manually_dispatched": [],
+  "deferred_dependencies": [
+    {
+      "item": "Actual independent broker authorization, non-exportable manifest signer custody, approved encryption release policy, workload certificate issuance/revocation and distributed generation floor configuration",
+      "targets": [
+        "C09.4",
+        "C09.5",
+        "C09.7",
+        "C09.9",
+        "C10.3",
+        "C10.7"
+      ],
+      "status": "OPEN; software fixture does not provision or independently accept live authorities"
+    },
+    {
+      "item": "Real database/secret rotation, stale-connection termination, deployed multi-instance integration, host/process/network/image/OS isolation and patched production build inventory",
+      "targets": [
+        "C09.4",
+        "C09.7",
+        "C09.8",
+        "C09.9",
+        "C10.3",
+        "C10.7"
+      ],
+      "status": "OPEN; test fixture image/toolchain is not a deployment certificate"
+    },
+    {
+      "item": "Actual screen-reader, genuine DOOBr/Travel clients, issuer/device/session and legal/partner acceptance",
+      "ledger": "docs/compliance/C06.8-TESTNET-ACCEPTANCE-HANDOFF.md",
+      "status": "Retained OPEN at original C09/C10 boundaries; no production ALLOW implied"
+    }
+  ],
+  "limitations": [
+    "Storage keys exist transiently in process memory for AES-GCM; Go does not guarantee physical memory zeroization; broker/host/process policy remains external acceptance",
+    "Generation floors are monotonic in-process and constrained by externally configured minimum; deployed restart/distributed floor management must be accepted independently",
+    "Existing direct/static constructors remain explicit fixture/migration primitives; deployed path uses OpenC073ProductionRuntime",
+    "Vulnerability review is app/test scoped, dated and tied to this toolchain/input SHA; reassess current database at release boundaries",
+    "Intermediate browser commits auto-triggered superseded app runs; no broad qualification manually dispatched"
+  ],
+  "blockers_for_repository_step": [],
+  "completion": "Every original C07.3 criterion individually PASS at one exact implementation SHA; evidence-only certification; preserve draft/open/unmerged PR",
+  "next_canonical_step": {
+    "id": "C07.4",
+    "name": "Capacity and abuse controls; load, soak, backpressure, rate limits and overload fail-closed behaviour",
+    "started": false
+  },
+  "inputs": {
+    "policy_source_evaluator_geography": "No operational policy/source/evaluator/geography changes; repository inputs pinned by implementation SHA",
+    "database_schema": "Six unchanged ordered checksummed migrations",
+    "deployment": "Isolated generated fixture identities/keys plus verified-TLS PostgreSQL; no actual deployment/IAM/key provisioning performed"
+  }
+}

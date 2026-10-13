@@ -4,14 +4,13 @@ import (
  "context"
  "database/sql"
  _ "embed"
- "encoding/json"
  "errors"
 )
 
 //go:embed migrations/0003_independent_reviews.sql
 var C065ReviewSchemaSQL string
 
-type C065PostgreSQLReviews struct{ DB *sql.DB }
+type C065PostgreSQLReviews struct{ DB *sql.DB; Cipher *C071Cipher }
 
 func (s C065PostgreSQLReviews) Migrate(ctx context.Context) error {
  if s.DB==nil||ctx==nil||ctx.Err()!=nil{return ErrUnavailable}
@@ -73,7 +72,7 @@ func (s C065PostgreSQLReviews) AppendIfCurrent(ctx context.Context,r C065ReviewR
    r.Scope.Tenant,r.Scope.Domain,r.Scope.Jurisdiction,r.DraftID,reviewRevision).Scan(&previousState,&raw)
   if err!=nil{return fail()}
   var previous C065ReviewRecord
-  if json.Unmarshal(raw,&previous)!=nil||previous.DocumentDigest!=r.DocumentDigest{return fail()}
+  if c071Decode(s.Cipher,raw,c071AAD("review",r.Scope,r.DraftID,reviewRevision),&previous)!=nil||previous.DocumentDigest!=r.DocumentDigest{return fail()}
   previousConflicts=previous.ConflictIDs
   if r.State=="CONFLICT_RESOLVED" {
    if previousState!="CONFLICT_QUEUE"||len(previousConflicts)!=len(r.ConflictIDs){return C065ReviewRecord{},ErrC065Conflict}
@@ -84,7 +83,7 @@ func (s C065PostgreSQLReviews) AppendIfCurrent(ctx context.Context,r C065ReviewR
   if previousState=="CONFLICT_QUEUE"&&r.State!="CONFLICT_RESOLVED"{return C065ReviewRecord{},ErrC065Conflict}
  }
 
- document,err:=json.Marshal(r)
+ document,err:=c071Encode(s.Cipher,r,c071AAD("review",r.Scope,r.DraftID,expectedReview+1))
  if err!=nil{return fail()}
  _,err=tx.ExecContext(ctx,`INSERT INTO compliance_review_versions
  (tenant,domain,jurisdiction,draft_id,review_revision,draft_revision,document_digest,reviewer_id,state,record,created_at)

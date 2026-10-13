@@ -2138,6 +2138,13 @@ def ingest_pay_intent(payload:PayIntentInput,x_pay_authority_proof:str|None=Head
         payload.pay_invoice_expires<=now or
         payload.pay_invoice_expires>now+timedelta(hours=1)):
         raise HTTPException(422,"INVALID_PAY_INVOICE_EXPIRY")
+    # Wallet consent is witnessed by the independent Pay issuer, never by a guest
+    # header, an unsigned client callback or BnB's own authority.
+    if (proof.get("wallet_consent_verified") is not True or
+        proof.get("wallet_consent_invoice_id")!=payload.pay_invoice_id or
+        proof.get("wallet_consent_quote_id")!=str(payload.quote_id) or
+        proof.get("wallet_consent_reservation_id")!=str(payload.reservation_id)):
+        raise HTTPException(403,"PAY_WALLET_CONSENT_NOT_VERIFIED")
     if (proof.get("chain_id")!=payload.chain_id or
         proof.get("asset")!=payload.asset or
         proof.get("asset_amount")!=payload.asset_amount):

@@ -912,6 +912,9 @@ def test_bnb26_fail_closed_unprovisioned_pay_and_signed_finality(fixture_propert
     model=api.PayIntentInput(**body)
     trust={"merchant_id":body["merchant_id"],"payout_controller":body["payout_controller"],
            "merchant_activated":True,"guest_subject":guest,"host_subject":host,
+           "wallet_consent_verified":True,"wallet_consent_invoice_id":body["pay_invoice_id"],
+           "wallet_consent_quote_id":str(quote_id),
+           "wallet_consent_reservation_id":str(reservation_id),
            "quoted_minor":calc["total_minor"],"currency":currency,
            "chain_id":420,"asset":"native:$420","asset_amount":body["asset_amount"],
            "route_kind":"native_420","native_420_route_approved":True,
@@ -929,6 +932,12 @@ def test_bnb26_fail_closed_unprovisioned_pay_and_signed_finality(fixture_propert
         assert client.get(f"/v1/bnb/reservations/{reservation_id}/payment").status_code==401
         before=client.get(f"/v1/bnb/reservations/{reservation_id}/payment",headers=headers)
         assert before.status_code==200 and before.json()["payment_state"]=="unavailable"
+        missing_consent=client.post(endpoint,json=body,headers={"x-pay-authority-proof":sign(
+            model,"intent",{**trust,"wallet_consent_verified":False})})
+        assert missing_consent.status_code==403
+        wrong_consent=client.post(endpoint,json=body,headers={"x-pay-authority-proof":sign(
+            model,"intent",{**trust,"wallet_consent_invoice_id":"foreign-invoice"})})
+        assert wrong_consent.status_code==403
         intent=client.post(endpoint,json=body,headers={"x-pay-authority-proof":sign(model,"intent",trust)})
         assert intent.status_code==202,intent.text
         assert intent.json()["confirmed"] is False

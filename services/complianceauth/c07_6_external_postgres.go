@@ -5,6 +5,8 @@ import (
  "crypto/ed25519"
  "database/sql"
  "encoding/json"
+ "crypto/sha256"
+ "encoding/hex"
 )
 
 // C076ExternalAuthoritySQL must be installed on an independently operated
@@ -73,7 +75,7 @@ func(b *C076ExternalPostgres) AdvanceSignedCheckpoint(ctx context.Context,previo
  if b==nil||b.DB==nil||ctx==nil||ctx.Err()!=nil||previous.Checkpoint.Scope!=next.Checkpoint.Scope||
   VerifyC076SignedCheckpoint(ctx,next,b.IssuerKeys)!=nil||VerifyC076SignedCheckpoint(ctx,previous,b.IssuerKeys)!=nil{return ErrC076UnsafeRestore}
  p,n:=previous.Checkpoint,next.Checkpoint
- if n.Generation<=p.Generation||n.Fence.Sequence<p.Fence.Sequence||n.Fence.RevocationEpoch<p.Fence.RevocationEpoch||
+ if n.Generation<=p.Generation||n.Generation>9223372036854775807||n.Fence.Sequence>9223372036854775807||n.Fence.RevocationEpoch>9223372036854775807||n.PrivacyReceiptsCount>100000||n.Fence.Sequence<p.Fence.Sequence||n.Fence.RevocationEpoch<p.Fence.RevocationEpoch||
   n.PrivacyReceiptsCount<p.PrivacyReceiptsCount||n.PrivacyReceiptsCount-p.PrivacyReceiptsCount!=uint64(len(appendDeletions)){return ErrC076UnsafeRestore}
  tx,e:=b.DB.BeginTx(ctx,&sql.TxOptions{Isolation:sql.LevelSerializable});if e!=nil{return ErrC076UnsafeRestore}
  defer tx.Rollback()
@@ -85,6 +87,17 @@ func(b *C076ExternalPostgres) AdvanceSignedCheckpoint(ctx context.Context,previo
   if !c075Ref(C075Ref{Kind:d.Kind,ID:d.Ref},false){return ErrC076UnsafeRestore}
   if _,e=tx.ExecContext(ctx,`INSERT INTO public.c076_deletion_journal(scope,ordinal,kind,ref) VALUES($1,$2,$3,$4)`,p.Scope,int64(p.PrivacyReceiptsCount)+int64(i)+1,d.Kind,d.Ref);e!=nil{return ErrC076UnsafeRestore}
  }
+ // Derive the full tombstone commitment from the independent journal, not
+ // from caller-provided signed count/digest alone.
+ rows,e:=tx.QueryContext(ctx,`SELECT kind,ref FROM public.c076_deletion_journal WHERE scope=$1 ORDER BY ordinal`,p.Scope)
+ if e!=nil{return ErrC076UnsafeRestore}
+ hash:=sha256.New();count:=uint64(0)
+ for rows.Next(){var kind,ref string
+  if rows.Scan(&kind,&ref)!=nil||!c075Ref(C075Ref{Kind:kind,ID:ref},false){rows.Close();return ErrC076UnsafeRestore}
+  hash.Write([]byte(kind+":"+ref));hash.Write([]byte{0});count++
+ }
+ scanErr:=rows.Err();rows.Close()
+ if scanErr!=nil||count!=n.PrivacyReceiptsCount||hex.EncodeToString(hash.Sum(nil))!=n.PrivacyReceiptsDigest{return ErrC076UnsafeRestore}
  payload,e:=encodeC076Checkpoint(next);if e!=nil{return ErrC076UnsafeRestore}
  _,e=tx.ExecContext(ctx,`UPDATE public.c076_authority SET generation=$2,sequence=$3,revocation_epoch=$4,receipt_count=$5,signed_checkpoint=$6 WHERE scope=$1`,p.Scope,int64(n.Generation),int64(n.Fence.Sequence),int64(n.Fence.RevocationEpoch),int64(n.PrivacyReceiptsCount),payload)
  if e!=nil||tx.Commit()!=nil{return ErrC076UnsafeRestore};return nil

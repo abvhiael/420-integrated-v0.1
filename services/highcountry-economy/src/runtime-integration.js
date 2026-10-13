@@ -59,6 +59,11 @@ export class RuntimeAuthority {
   if(!this.issuers[c.iss]?.operators?.[c.sub]?.administrator||!id(principal))fail('revocation denied');
   return this.store.transact(s=>{runtimeState(s);s.runtimeEpochs.set(principal,(s.runtimeEpochs.get(principal)||0)+1);});
  }
+ async revokeSource(token,source){
+  const c=this.verifyToken(token);await this.registeredPrincipal(token);
+  if(!this.issuers[c.iss]?.operators?.[c.sub]?.administrator||!id(source))fail('source revocation denied');
+  return this.store.transact(s=>{runtimeState(s);s.runtimeSourceEpochs.set(source,(s.runtimeSourceEpochs.get(source)||0)+1);});
+ }
  async linkChallenge(token,wallet){
   const principal=await this.registeredPrincipal(token);wallet=address(wallet);
   const nonce=randomBytes(32).toString('hex'),expires=this.clock()+300000;

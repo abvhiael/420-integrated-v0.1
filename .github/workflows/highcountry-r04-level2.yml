@@ -140,11 +140,15 @@ jobs:
           HC_TEST_POSTGRES_URL: postgresql://postgres:hc_ci_only@127.0.0.1:5432/hc_runtime
           HC_TEST_RPC_URL: http://127.0.0.1:8545
         run: |
-          anvil --chain-id 420 --port 8545 --hardfork paris --code-size-limit 600000 --gas-limit 200000000 > "$RUNNER_TEMP/hc-anvil.log" 2>&1 &
+          anvil --chain-id 420 --port 8545 --hardfork london --code-size-limit 600000 --gas-limit 200000000 > "$RUNNER_TEMP/hc-anvil.log" 2>&1 &
           HC_ANVIL_PID=$!
           trap 'kill "$HC_ANVIL_PID" 2>/dev/null || true' EXIT
           for attempt in $(seq 1 50); do
             if cast chain-id --rpc-url http://127.0.0.1:8545 >/dev/null 2>&1; then break; fi
             sleep 0.2
           done
+          if ! cast chain-id --rpc-url http://127.0.0.1:8545 >/dev/null 2>&1; then
+            cat "$RUNNER_TEMP/hc-anvil.log"
+            exit 1
+          fi
           node services/highcountry-economy/test/runtime-canonical.integration.mjs

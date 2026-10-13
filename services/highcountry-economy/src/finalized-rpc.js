@@ -6,13 +6,13 @@ export const word=x=>typeof x==='string'&&x.startsWith('0x')?x.slice(2).padStart
 export const calldata=(sig,...args)=>'0x'+selector(sig)+args.map(word).join('');
 export const words=x=>{if(typeof x!=='string'||!/^0x([0-9a-fA-F]{64})+$/.test(x))throw new SettlementError('invalid canonical response');return x.slice(2).match(/.{64}/g);};
 export class FinalizedRpc {
- constructor({url,chainId,contracts,fetchImpl=fetch}) {
+ constructor({url,chainId,contracts,fetchImpl=fetch,headers={}}) {
   if(!/^https?:\/\//.test(url)||!Number.isSafeInteger(chainId)||chainId<=0||!contracts)throw new SettlementError('missing canonical RPC configuration');
-  this.url=url;this.chainId=chainId;this.contracts=contracts;this.fetch=fetchImpl;this.sequence=0;
+  this.url=url;this.chainId=chainId;this.contracts=contracts;this.fetch=fetchImpl;this.sequence=0;this.headers={...headers};
  }
  async request(method,params){
   const requestId=++this.sequence;
-  const response=await this.fetch(this.url,{method:'POST',headers:{'content-type':'application/json'},
+  const response=await this.fetch(this.url,{method:'POST',headers:{...this.headers,'content-type':'application/json'},
    body:JSON.stringify({jsonrpc:'2.0',id:requestId,method,params}),signal:AbortSignal.timeout(10000)});
   if(!response.ok)throw new SettlementError('canonical RPC unavailable');
   const r=await response.json();if(r.error||r.id!==requestId||r.result===undefined)throw new SettlementError('canonical RPC rejected');
@@ -35,6 +35,8 @@ export class FinalizedRpc {
   return {result,blockHash:h.hash,blockNumber:h.number};
  }
  async playerProfile(game,wallet){
+  const active=words((await this.call('games',calldata('isActive(bytes32)',game))).result);
+  if(BigInt('0x'+active[0])!==1n)throw new SettlementError('inactive canonical game');
   const a=words((await this.call('identity',calldata('profileIdOf(bytes32,address)',game,address(wallet)))).result)[0];
   if(BigInt('0x'+a)===0n)throw new SettlementError('canonical profile required');
   const p=words((await this.call('identity',calldata('profile(bytes32)','0x'+a))).result);

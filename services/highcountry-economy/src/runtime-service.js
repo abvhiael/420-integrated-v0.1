@@ -52,6 +52,8 @@ export function runtimeHttpServer(runtime,{origin}){
     case '/market/import':result=await market.importAsset(token,b.operation,b.receipt);break;
     case '/market/list':result=await market.list(token,b.operation,b.listing,b.asset,b.quantity,b.price,b.expiresAt);break;
     case '/market/prepare':result=await settlement.prepare(token,b.operation,b.listing,b.transferOperation);break;
+    case '/operator/revoke-account':result=await identity.revoke(token,b.principal);break;
+    case '/operator/revoke-source':result=await identity.revokeSource(token,b.source);break;
     case '/operator/reconcile':await identity.requireMarketOperator(token);result=await worker.tick(b.transferOperation);break;
     default:throw new SettlementError('unknown route');
    }

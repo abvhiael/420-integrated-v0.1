@@ -32,7 +32,7 @@ contract EquipmentCultivationBridge is R04EmergencyConsumer {
         uint16[6] memory input = [base.temperature,base.humidity,base.light,base.water,base.nutrients,base.airflow];
         for (uint256 i; i < 6; i++) {
             int256 n = int256(uint256(input[i])) + (equipment.disabled(itemId) ? int256(0) : int256(delta[i]));
-            if (n < 0 || n > type(uint16).max) revert InvalidEquipmentUse();
+            if (n < 0 || n > int256(uint256(type(uint16).max))) revert InvalidEquipmentUse();
             input[i] = uint16(uint256(n));
         }
         cultivation.updateEnvironment(plant, CultivationEngine.EnvironmentSnapshot(

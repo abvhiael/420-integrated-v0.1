@@ -19,7 +19,8 @@ on:
       - 'scripts/build-compliance-public.py'
       - 'scripts/test-compliance-c06-2.py'
       - 'scripts/test-compliance-c06-3.cjs'
-      - 'scripts/test-compliance-c06-4.cjs'\n      - 'scripts/test-compliance-c06-9-browser.cjs'
+      - 'scripts/test-compliance-c06-4.cjs'
+      - 'scripts/test-compliance-c06-9-browser.cjs'
       - 'scripts/verify-compliance-c06-4.py'
       - 'docs/compliance/C06.4-*'
       - 'docs/compliance/C06.5-*'
@@ -313,6 +314,3 @@ jobs:
           name: compliance-c01-level1-${{ env.EXPECTED_SHA }}
           path: /tmp/compliance-c01-level1.json
           if-no-files-found: error
-
-
-

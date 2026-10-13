@@ -11,6 +11,10 @@ import (
 type c076WitnessFixture struct { w C076Witness; current C076Checkpoint; err error }
 func (a c076WitnessFixture) RecoverWitness(context.Context,string)(C076Witness,error){return a.w,a.err}
 func (a c076WitnessFixture) LatestCheckpoint(context.Context,string)(C076Checkpoint,error){return a.current,a.err}
+func (a c076WitnessFixture) ReleaseIfCurrent(ctx context.Context,expected C076Checkpoint,g uint64,p C076RecoveryPlatform)error{
+ if a.err!=nil||a.current!=expected{return ErrC076UnsafeRestore}
+ return p.Release(ctx,expected.Scope,g)
+}
 type c076PlatformFixture struct {
  fail string; calls []string; closed bool; state C076RestoredState; witness C076Witness
 }

@@ -148,3 +148,11 @@ test('availability races have one CAS winner; busy vehicle changes and direct le
   assert.equal(results.find(r=>r.status==='rejected').reason.code,'NO_ELIGIBLE_DRIVER');
   assert.equal((await pool.query("SELECT count(*)::int n FROM liftd.trips WHERE vehicle_id='vehicle_shared' AND state='ASSIGNED'")).rows[0].n,1);
  });
+
+ test('availability writes verify the current migration ledger and reject checksum tampering',async()=>{
+  const ledger=(await owner.query('SELECT version,checksum FROM liftd.migrations ORDER BY version')).rows;
+  await owner.query("UPDATE liftd.migrations SET checksum=repeat('0',64)");
+  try{await assert.rejects(()=>app.online('driver_schema','vehicle_schema'),e=>e.code==='MIGRATION_CHECKSUM_MISMATCH');}
+  finally{for(const row of ledger)await owner.query('UPDATE liftd.migrations SET checksum=$1 WHERE version=$2',[row.checksum,row.version]);}
+  assert.equal((await pool.query("SELECT count(*)::int n FROM liftd.driver_availability WHERE driver_id='driver_schema'")).rows[0].n,0);
+ });

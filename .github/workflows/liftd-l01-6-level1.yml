@@ -98,6 +98,7 @@ jobs:
       - name: Dispatch syntax and security checks
         run: |
           node --check rideshare/src/dispatch.mjs
+          node --check rideshare/src/schema.mjs
           node --check rideshare/test/dispatch.test.mjs
           node --check rideshare/test/postgres/dispatch-fixture.mjs
           node --check rideshare/test/postgres/dispatch.test.mjs

@@ -1,6 +1,7 @@
 import {createHash,randomBytes} from 'node:crypto';
 import {AuthError,record,createAuthorityVerifier,validateSessionGrants} from './auth.mjs';
 import {canonical} from './canonical.mjs';
+import {checkSchema} from './schema.mjs';
 const id=v=>typeof v==='string'&&/^[A-Za-z0-9_-]{1,128}$/.test(v);
 const integer=v=>Number.isSafeInteger(v)&&v>=0;
 const fail=(code,status=409)=>{throw new AuthError(code,status);};
@@ -48,7 +49,7 @@ export function createDispatchAdapter({pool,authenticator,eligibilityAdapter,ava
     async setAvailability(token,input) {
       validateAvailability(input);const principal=await fresh(token,input.driverId);let client;
       try {
-        client=await pool.connect();await client.query('BEGIN');
+        client=await pool.connect();await client.query('BEGIN');await checkSchema(client);
         await client.query("SET LOCAL lock_timeout='3s'");await client.query("SET LOCAL statement_timeout='10s'");
         await lock(client);await fresh(token,input.driverId,principal);
         const prior=(await client.query('SELECT request,result FROM liftd.availability_commands WHERE driver_id=$1 AND command_id=$2',[input.driverId,input.commandId])).rows[0];

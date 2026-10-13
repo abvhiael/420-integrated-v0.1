@@ -2,6 +2,7 @@ import {createHash} from 'node:crypto';
 import {readFileSync, readdirSync} from 'node:fs';
 import pg from 'pg';
 import {AuthError} from './auth.mjs';
+import {checkSchema} from './schema.mjs';
 import {publicView} from './trip.mjs';
 const {Pool} = pg;
 const id = value => typeof value === 'string' && /^[A-Za-z0-9_-]{1,128}$/.test(value);
@@ -37,13 +38,6 @@ export async function migrate(pool) {
     await client.query('COMMIT');
   } catch (error) {await client.query('ROLLBACK'); throw error;}
   finally {client.release();}
-}
-async function checkSchema(client) {
-  const folder = new URL('../migrations/', import.meta.url);
-  const files = readdirSync(folder).filter(name => /^\d{3}_.+\.sql$/.test(name)).sort();
-  const result = await client.query('SELECT version,checksum FROM liftd.migrations ORDER BY version');
-  if (result.rows.length !== files.length || files.some((file, i) => result.rows[i].version !== file ||
-    result.rows[i].checksum !== hash(readFileSync(new URL(file, folder), 'utf8')))) fail('MIGRATION_CHECKSUM_MISMATCH', 503);
 }
 export function createPostgresTripStore(pool) {
   if (!pool || typeof pool.connect !== 'function') fail('DATABASE_UNAVAILABLE', 503);

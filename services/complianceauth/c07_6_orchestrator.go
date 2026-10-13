@@ -24,6 +24,9 @@ type C076Witness struct {
 type C076WitnessAuthority interface {
  C076IndependentAuthority // monotonic latest checkpoint maintained outside the restore domain
  RecoverWitness(context.Context,string)(C076Witness,error)
+ // ReleaseIfCurrent serializes the authority compare and platform release
+ // against EVERY checkpoint update; a failed compare must never call release.
+ ReleaseIfCurrent(context.Context,C076Checkpoint,uint64,C076RecoveryPlatform) error
 }
 // C076RecoveryPlatform is the privileged restore control plane. All methods
 // must fail closed; implementations must never expose restored state prior to
@@ -89,6 +92,6 @@ func C076Restore(ctx context.Context,plan C076RestorePlan,authority C076WitnessA
  if currentErr!=nil||current!=witness.Checkpoint{return ErrC076UnsafeRestore}
  if e!=nil||ctx.Err()!=nil||fresh.Checkpoint!=witness.Checkpoint||len(fresh.Deletions)!=len(witness.Deletions){return ErrC076UnsafeRestore}
  for i:=range fresh.Deletions{if fresh.Deletions[i]!=witness.Deletions[i]{return ErrC076UnsafeRestore}}
- if err=platform.Release(ctx,plan.Scope,nextGeneration);err!=nil{return ErrC076UnsafeRestore}
+ if err=authority.ReleaseIfCurrent(ctx,witness.Checkpoint,nextGeneration,platform);err!=nil{return ErrC076UnsafeRestore}
  return nil
 }

@@ -24,8 +24,9 @@ export function createHighCountryWalletService420({authority,poolForPrincipal,cl
     !(clientsByChain instanceof Map)||!opaque(domain))err('invalid-configuration');
   const scoped=async token=>{
     if(typeof token!=='string'||!token||token.length>4096)err('authentication-required');
-    const claims=authority.verifyToken(token);
-    const principal=await authority.registeredPrincipal(token);
+    let claims,principal;
+    try {claims=authority.verifyToken(token);principal=await authority.registeredPrincipal(token);}
+    catch {err('authentication-denied');}
     if(!claims||!opaque(claims.sub)||claims.sub!==principal||claims.game!==authority.gameId)err('authentication-denied');
     const service=await createPostgresGamingPlayerProfileService420({authority,token,poolForPrincipal});
     return {service,accountId:principal};
@@ -45,7 +46,9 @@ export function createHighCountryWalletService420({authority,poolForPrincipal,cl
     await client(id);
     if(recovery) {
       if(typeof verifyRecoveryProof!=='function')err('recovery-disabled');
-      const proof=await verifyRecoveryProof({accountId,gameId:authority.gameId,token,proof:input.recoveryProof});
+      let proof;
+      try {proof=await verifyRecoveryProof({accountId,gameId:authority.gameId,token,proof:input.recoveryProof});}
+      catch {err('recovery-denied');}
       if(proof!==true)err('recovery-denied');
     }
     const challenge={challengeId:randomUUID(),wallet:input.wallet.toLowerCase(),chainId:id,

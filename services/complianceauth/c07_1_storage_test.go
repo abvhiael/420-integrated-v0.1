@@ -114,6 +114,14 @@ func TestC071PostgreSQLProductionStorage(t *testing.T){
  ) records`
  if admin.DB.QueryRowContext(ctx,accountingSQL,scopeA.Tenant).Scan(&expectedBytes,&expectedRows)!=nil{t.Fatal("actual storage accounting query")}
  if admin.DB.QueryRowContext(ctx,"SELECT stored_bytes,stored_rows FROM compliance_storage_usage WHERE tenant=$1",scopeA.Tenant).Scan(&actualBytes,&actualRows)!=nil||actualBytes!=expectedBytes||actualRows!=expectedRows{t.Fatalf("ON CONFLICT or CAS quota drift: actual %d/%d expected %d/%d",actualBytes,actualRows,expectedBytes,expectedRows)}
+ // Mutable heads may grow in decimal revision width; quota tracks bytes, not extra rows.
+ headTx,e:=admin.DB.BeginTx(ctx,nil);if e!=nil{t.Fatal(e)}
+ if _,e=headTx.ExecContext(ctx,"UPDATE compliance_author_heads SET revision=1000000 WHERE tenant=$1",scopeA.Tenant);e!=nil{headTx.Rollback();t.Fatal(e)}
+ var grownBytes,grownRows int64
+ if headTx.QueryRowContext(ctx,"SELECT stored_bytes,stored_rows FROM compliance_storage_usage WHERE tenant=$1",scopeA.Tenant).Scan(&grownBytes,&grownRows)!=nil||grownBytes!=actualBytes+6||grownRows!=actualRows{headTx.Rollback();t.Fatal("head byte-growth accounting")}
+ if _,e=headTx.ExecContext(ctx,"UPDATE compliance_author_heads SET revision=2 WHERE tenant=$1",scopeA.Tenant);e!=nil{headTx.Rollback();t.Fatal(e)}
+ if headTx.QueryRowContext(ctx,"SELECT stored_bytes,stored_rows FROM compliance_storage_usage WHERE tenant=$1",scopeA.Tenant).Scan(&grownBytes,&grownRows)!=nil||grownBytes!=actualBytes||grownRows!=actualRows{headTx.Rollback();t.Fatal("head byte-shrink accounting")}
+ if e=headTx.Rollback();e!=nil{t.Fatal(e)}
  // Quota admission is serialized in PostgreSQL even across concurrent sessions.
  if _,err=admin.DB.ExecContext(ctx,"UPDATE compliance_storage_usage SET stored_rows=99999 WHERE tenant=$1",scopeA.Tenant);err!=nil{t.Fatal(err)}
  var mu sync.Mutex;wins:=0

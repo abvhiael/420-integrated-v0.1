@@ -17,7 +17,7 @@ CREATE TABLE public.compliance_monitoring (
  ('source_freshness','review_backlog','decision_latency','evaluator_errors',
   'coverage_gaps','activation_lag','revocation_propagation','consumer_acknowledgments')),
  observed_at TIMESTAMPTZ NOT NULL,
- value DOUBLE PRECISION NOT NULL CHECK (value>=0 AND value<1e15 AND isfinite(value)),
+ value DOUBLE PRECISION NOT NULL CHECK (value>=0 AND value<1e15),
  samples BIGINT NOT NULL CHECK (samples>0),
  failed BIGINT NOT NULL CHECK (failed>=0 AND failed<=samples),
  PRIMARY KEY(scope,metric)

@@ -47,7 +47,7 @@ jobs:
           python - <<'PY'
           import os, psycopg
           with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
-              assert c.execute("SELECT count(*) FROM bnb_schema_migration").fetchone()[0] == 23
+              assert c.execute("SELECT count(*) FROM bnb_schema_migration").fetchone()[0] == 24
           PY
       - name: BNB-3.2 isolated verified-TLS PostgreSQL fixture
         env:

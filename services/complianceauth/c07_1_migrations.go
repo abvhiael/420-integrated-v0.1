@@ -89,7 +89,7 @@ func MigrateC071Database(ctx context.Context,db *sql.DB,c *C071Cipher)error{
     for _,stmt:=range statements{if _,err=tx.ExecContext(ctx,stmt);err!=nil{return ErrC071Storage}}
    }
    for _,table:=range []string{"compliance_author_heads","compliance_author_versions","compliance_review_heads","compliance_review_versions","compliance_auditor_access"}{
-    if _,err=tx.ExecContext(ctx,"CREATE TRIGGER c071_quota BEFORE INSERT ON public."+pq.QuoteIdentifier(table)+" FOR EACH ROW EXECUTE FUNCTION public.c071_account_storage()");err!=nil{return ErrC071Storage}
+    if _,err=tx.ExecContext(ctx,"CREATE TRIGGER c071_quota AFTER INSERT ON public."+pq.QuoteIdentifier(table)+" FOR EACH ROW EXECUTE FUNCTION public.c071_account_storage()");err!=nil{return ErrC071Storage}
    }
    for _,stmt:=range []string{"ALTER TABLE public.compliance_publication_fences ENABLE ROW LEVEL SECURITY","ALTER TABLE public.compliance_publication_fences FORCE ROW LEVEL SECURITY",`CREATE POLICY c071_publication_scope ON public.compliance_publication_fences USING(EXISTS(SELECT 1 FROM public.compliance_database_bindings b WHERE b.role_name=current_user AND b.publication_scope=scope)) WITH CHECK(EXISTS(SELECT 1 FROM public.compliance_database_bindings b WHERE b.role_name=current_user AND b.publication_scope=scope))`}{if _,err=tx.ExecContext(ctx,stmt);err!=nil{return ErrC071Storage}}
   }

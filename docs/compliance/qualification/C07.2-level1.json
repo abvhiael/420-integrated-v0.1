@@ -1,0 +1,256 @@
+{
+  "step": "C07.2",
+  "name": "Multi-instance concurrency, durable jobs, leader/lease fencing, transactional outbox and idempotent activation",
+  "qualification_level": 1,
+  "status": "COMPLETE",
+  "acceptance_scope": "Repository app-audit software/database step; deployed operational and independent acceptance remain separate",
+  "repository": "abvhiael/420-integrated-v0.1",
+  "branch": "audit/420compliance-c01-1-inventory-20261009",
+  "pull_request": 602,
+  "pull_request_disposition": "Draft, open and unmerged",
+  "implementation_sha": "9d09f6e805da9702916b1f08d86fbda53acbe9d2",
+  "observed_main_sha": "bc0faa5dafecda3de0620a9581f9953b89cd95fb",
+  "audit_ancestry_base_sha": "c5a4f220d1fbda01f707d359aa9bb32921a138b1",
+  "recorded_local_date": "2026-10-12",
+  "timezone": "America/Regina",
+  "evidence_commit_policy": "The Git commit containing this evidence-only record inherits the exact qualified implementation; no executable/test/workflow/configuration/deployment/substantive requirement changes.",
+  "classification": "App-only Compliance store/runtime/operator/outbox/tests/workflow/runbook changes; no Solidity, Genesis, frozen-address or shared protocol mutation",
+  "files_changed": [
+    "services/complianceauth/c07_2_durable.go",
+    "services/complianceauth/c07_2_durable_test.go",
+    "services/complianceauth/c07_1_migrations.go",
+    "services/complianceauth/c07_1_storage.go",
+    "services/complianceauth/c07_1_storage_test.go",
+    "services/complianceauth/c05_9_notifications_outbox.go",
+    "services/complianceauth/scheduled_signing_controls.go",
+    "services/complianceauth/publication_runtime.go",
+    "services/complianceauth/c06_6_operator.go",
+    ".github/workflows/420compliance-c01-level1.yml",
+    "docs/compliance/C07.2-DURABLE-WORK.md"
+  ],
+  "implementation_summary": [
+    "Append checksummed migration six; preserve original five migration constants/checksums and qualified historical evidence",
+    "Encrypted immutable collection/activation jobs, bounded schedule/attempt state, database-issued leader/job fencing tokens and heartbeat/recovery APIs",
+    "Atomic canonical publication update, immutable activation receipt, subscriber invalidation fan-out and job completion under primary row locks",
+    "Independent managed manifest and reviewer approval required on every activation/replay; fence lifetime bounded by signed policy/review validity",
+    "Durable per-subscriber notification leases, database-clock retry, crash attempt accounting and dead-letter predecessor ordering",
+    "Authenticated durable restrictive halt serializes with activation; production readers check shared halt in the primary fence statement",
+    "Eleven FORCE-RLS tables, immutable scoped role bindings, quota accounting and protected activation/halt history",
+    "Collision-safe base64url scope encoding replaces an in-memory NUL key that cannot be stored as PostgreSQL TEXT"
+  ],
+  "requirements": {
+    "multi_instance_concurrency": {
+      "status": "PASS",
+      "proof": "Independent restricted-role primary connections, 16-worker leader/claim races, 12 concurrent activation retries, stale canonical read and competing old-fence denial"
+    },
+    "durable_jobs": {
+      "status": "PASS",
+      "proof": "Encrypted immutable payloads, idempotent enqueue/rebinding rejection, oversized/quota denial, collection handler execution, crash recovery, finite attempts and cancellation"
+    },
+    "leader_lease_fencing": {
+      "status": "PASS",
+      "proof": "Exactly one leader and claimant in each 16-worker race; monotonic takeover tokens, bounded DB-clock heartbeats, expired/stale leader and job denial"
+    },
+    "transactional_outbox": {
+      "status": "PASS",
+      "proof": "Forced fan-out insertion failure rolls back publication and activation receipt; final activation creates one receipt/two subscriber rows; per-subscriber order, retry, stale acknowledgement and dead-letter blocking"
+    },
+    "idempotent_activation": {
+      "status": "PASS",
+      "proof": "Twelve concurrent retries create one activation/fan-out; changed intent and stale competing publication rejected; independent review/signature/schedule gates preserved"
+    },
+    "distributed_halt": {
+      "status": "PASS for repository software",
+      "proof": "Authenticated halt persisted before local invalidation; independent runtime denies current fence; replay while halted denied; runtime cannot delete halt"
+    },
+    "retained_security_and_storage": {
+      "status": "PASS",
+      "proof": "All affected C07.1/C03.8/C04.8/C05.9/C06.4-C06.7 tests pass; eleven-table RLS opening, tenant isolation, immutable payload/receipt privileges, exact durable-byte/row equality and quota denial"
+    }
+  },
+  "workflow": {
+    "path": ".github/workflows/420compliance-c01-level1.yml",
+    "name": "420Compliance C07.2 Level 1",
+    "run_number": 747,
+    "run_id": 38347629947,
+    "job_id": 115132590434,
+    "job_name": "durable-work-level1",
+    "event": "push",
+    "attempt": 1,
+    "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38347629947",
+    "job_url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38347629947/job/115132590434",
+    "conclusion": "success",
+    "duration": "57s",
+    "steps": 14,
+    "success": 14,
+    "failed": 0,
+    "skipped": 0,
+    "cancelled": 0,
+    "permissions": "contents: read; checkout persist-credentials false",
+    "trigger_policy": "Audit-branch push and optional dispatch; exact github.sha checkout/assertion; evidence-only paths excluded"
+  },
+  "artifact": {
+    "id": 11789612762,
+    "name": "compliance-c072-level1-9d09f6e805da9702916b1f08d86fbda53acbe9d2",
+    "sha256": "f9bd27ab8a9c9f0e7e55dd7b72d7ba2794a4692f02bef1f421099c962fd3b176",
+    "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38347629947/artifacts/11789612762",
+    "files": [
+      "compliance-c072-level1.json",
+      "compliance-c072-tests.log"
+    ],
+    "source_manifest": "Runtime JSON records SHA-256 of Compliance Go sources, embedded SQL migrations and workflow; all source/configuration inputs additionally pinned by Git SHA"
+  },
+  "checks": [
+    {
+      "command": "go vet ./services/complianceauth",
+      "result": "PASS"
+    },
+    {
+      "command": "go test -race ./services/complianceauth -run '^(TestC072|TestC071|TestC038|TestC048|TestC059|TestC064|TestC065|TestC066|TestC067)' -count=1 -v",
+      "result": "PASS",
+      "top_level_tests": 27,
+      "subtests": 4,
+      "required_skips": 0,
+      "passed_tests": [
+        "TestC064PostgreSQLDraftCASAndPersistence",
+        "TestC064AuthorWorkspaceSecurityAndEditing",
+        "TestC064AuthorSessionAndFailureGates",
+        "TestC064AuthorArchiveCitationsIntegrity",
+        "TestC059SignedOutboxInvalidationAndRecovery",
+        "TestC065Ed25519AndImpactProviderDeny",
+        "TestC065ReviewConsoleFailsClosed",
+        "TestC065PostgreSQLConcurrentReviewAndStaleAuthorFencing",
+        "TestC065IndependentReviewNegativeBoundary",
+        "TestC065PostgreSQLReviewFailsClosedWithoutConnection",
+        "TestC066HTTPUnconfiguredAndAnonymousDenied",
+        "TestC066OperatorDashboardHaltAndFailClosed",
+        "TestC067AuditorHTTPAuthorizationAndCSRF",
+        "TestC067AuditorHTTPAuthorizationAndCSRF/anonymous",
+        "TestC067AuditorHTTPAuthorizationAndCSRF/noTLS",
+        "TestC067AuditorHTTPAuthorizationAndCSRF/cross_origin",
+        "TestC067AuditorHTTPAuthorizationAndCSRF/wrong_csrf",
+        "TestC067ArchiveEvidenceFailClosed",
+        "TestC067PostgreSQLDurableAuditAccess",
+        "TestC067AuditorBoundedRedactedAccess",
+        "TestC071AuthenticatedEncryptionBoundaries",
+        "TestC071PostgreSQLProductionStorage",
+        "TestC072DurableJobsLeaseFencing",
+        "TestC072AtomicActivationOutboxAndHalt",
+        "TestC072Boundaries",
+        "TestC038DatabaseOutageAndReconnect",
+        "TestC038PublicationAcrossInstances",
+        "TestC038IndependentSignatureAuthorization",
+        "TestC038PostgreSQLMultiInstance",
+        "TestC038ProductionRuntimeGates",
+        "TestC048ScheduledSigningRotationAndEmergency"
+      ]
+    }
+  ],
+  "security_acceptance": {
+    "status": "PASS for C07.2 repository software/database gates",
+    "independent_security_review_completed": false,
+    "live_production_authorized": false,
+    "tests_weakened": false,
+    "coverage": [
+      "role-bound RLS and cross-tenant denial",
+      "encrypted immutable jobs and quota invariants",
+      "leader/job/outbox ownership fences",
+      "managed signing and independently signed publication approval",
+      "atomic rollback and immutable idempotency receipts",
+      "ordered invalidation-only notification retries",
+      "shared restrictive halt and fail-closed outage/cancellation"
+    ]
+  },
+  "diagnosed_failures": [
+    {
+      "kind": "test compilation defect",
+      "run_id": 38347076050,
+      "step": 7,
+      "cause": "New boundary test used an undeclared error variable",
+      "repair": "Scoped declaration; preserve mandatory static and database qualification"
+    },
+    {
+      "kind": "test-harness attempt accounting defect",
+      "run_id": 38347291933,
+      "step": 8,
+      "cause": "Retry fixture omitted the attempt consumed by a crashed outbox claim",
+      "repair": "Count all database claims including the crashed delivery; preserve ten-attempt limit and dead-letter blocking"
+    }
+  ],
+  "superseded_run_policy": "All failed/cancelled/earlier SHAs excluded. Only run 38347629947 on 9d09f6e is authoritative.",
+  "retained_evidence": [
+    "docs/compliance/qualification/C07.1-level1.json",
+    "docs/compliance/qualification/C06.9-level2.json",
+    "docs/compliance/qualification/C06.1-level1.json",
+    "docs/compliance/qualification/C06.2-level1.json",
+    "docs/compliance/qualification/C06.3-level1.json",
+    "docs/compliance/qualification/C06.4-level1.json"
+  ],
+  "prior_gap_disposition": {
+    "gap": "C06.6 process-local operator halt retained in C06.8 external acceptance handoff",
+    "repository_software": "CLOSED by C07.2 durable halt/read/activation tests",
+    "deployed_acceptance": "OPEN at C09.4/C09.7; prior historical evidence is unchanged"
+  },
+  "milestones": {
+    "C06_9": "Historical Level 2 retained; affected backend security revalidated",
+    "C07_10": "Next canonical operational Level 2; not executed for this ordinary step",
+    "C08_5": "Single comprehensive Level 3 after main reconciliation; deliberately deferred"
+  },
+  "broad_workflows_manually_dispatched": [],
+  "deferred_dependencies": [
+    {
+      "item": "Deployed multi-instance workers, PostgreSQL failover/network isolation, real managed encryption/signing keys, issuer and service identity, actual DOOBr/Travel consumers, disaster recovery and operator exercises",
+      "targets": [
+        "C09.4",
+        "C09.5",
+        "C09.6",
+        "C09.7",
+        "C09.8",
+        "C09.9"
+      ],
+      "status": "OPEN; real PostgreSQL fixture PASS is not deployed acceptance"
+    },
+    {
+      "item": "Independent security/legal/partner/production operator go-no-go",
+      "targets": [
+        "C09.9",
+        "C10.1-C10.3",
+        "C10.7"
+      ],
+      "status": "OPEN; no production ALLOW authorized"
+    },
+    {
+      "item": "Actual NVDA/VoiceOver, real consuming clients and deployed issuer/session acceptance",
+      "ledger": "docs/compliance/C06.8-TESTNET-ACCEPTANCE-HANDOFF.md",
+      "status": "Retained OPEN; automated tests are not manual screen-reader acceptance"
+    },
+    {
+      "item": "Approved retention/dead-letter recovery/disaster recovery and complete secret/signing/dependency management",
+      "targets": [
+        "C07.3",
+        "C07.5",
+        "C07.6"
+      ],
+      "status": "Future canonical work, not falsely completed here"
+    }
+  ],
+  "limitations": [
+    "Outbox delivery is at least once with stable event IDs; consumers verify and re-read canonical policy; events never confer permission",
+    "Dead-letter predecessors block subsequent sequences; no implicit skip/recovery/unhalt or runtime deletion API",
+    "Collection callbacks must persist through canonical source adapters and keep external side effects idempotent",
+    "Base64url control scope is an internal production binding change; existing deployed scopes would require an explicit migration plan; no live deployment is claimed",
+    "Intermediate browser edits auto-triggered app-specific runs; they are superseded and do not qualify the final SHA"
+  ],
+  "blockers_for_repository_step": [],
+  "completion": "Every original C07.2 criterion individually PASS at the exact implementation SHA; durable evidence-only certification; PR remains unmerged",
+  "next_canonical_step": {
+    "id": "C07.3",
+    "name": "Secret/signing-key management, TLS, service identity, rotation, supply-chain controls and dependency review",
+    "started": false
+  },
+  "inputs": {
+    "policy_source_evaluator_geography": "No operational source/policy/evaluator/geography changes; repository inputs pinned by implementation SHA",
+    "database_schema": "Six ordered checksummed migrations; first five constants unchanged",
+    "deployment": "Fixture-only verified TLS and isolated runtime roles; actual deployed configuration remains external acceptance"
+  }
+}

@@ -79,7 +79,7 @@ func MigrateC071Database(ctx context.Context,db *sql.DB,c *C071Cipher)error{
  tx,err:=db.BeginTx(ctx,&sql.TxOptions{Isolation:sql.LevelReadCommitted});if err!=nil{return ErrC071Storage};defer tx.Rollback()
  if _,err=tx.ExecContext(ctx,"SELECT pg_advisory_xact_lock(420071)");err!=nil{return ErrC071Storage}
  if _,err=tx.ExecContext(ctx,`CREATE TABLE IF NOT EXISTS public.compliance_schema_migrations(version INTEGER PRIMARY KEY, checksum TEXT NOT NULL CHECK(char_length(checksum)=64), applied_at TIMESTAMPTZ NOT NULL DEFAULT clock_timestamp())`);err!=nil{return ErrC071Storage}
- scripts:=[]string{PublicationSchemaSQL,C064AuthorSchemaSQL,C065ReviewSchemaSQL,C067AuditSchemaSQL,c071HardeningSQL}
+ scripts:=[]string{PublicationSchemaSQL,C064AuthorSchemaSQL,C065ReviewSchemaSQL,C067AuditSchemaSQL,c071HardeningSQL,c072DurableSQL}
  var max int;if tx.QueryRowContext(ctx,"SELECT coalesce(max(version),0) FROM public.compliance_schema_migrations").Scan(&max)!=nil||max>len(scripts){return ErrC071Storage}
  for i,script:=range scripts{
   hash:=sha256.Sum256([]byte(script));digest:=hex.EncodeToString(hash[:]);var saved string
@@ -155,6 +155,7 @@ func BindC071RuntimeRole(ctx context.Context,db *sql.DB,role string,s C064Author
  var unsafe bool
  if tx.QueryRowContext(ctx,"SELECT rolsuper OR rolbypassrls OR rolcreaterole OR rolcreatedb FROM pg_roles WHERE rolname=$1",role).Scan(&unsafe)!=nil||unsafe{return ErrC071Storage}
  _,err=tx.ExecContext(ctx,"INSERT INTO public.compliance_database_bindings(role_name,tenant,domain,jurisdiction,publication_scope) VALUES($1,$2,$3,$4,$5) ON CONFLICT(role_name) DO NOTHING",role,s.Tenant,s.Domain,s.Jurisdiction,publicationScope);if err!=nil{return ErrC071Storage}
+ var conflicts int;if tx.QueryRowContext(ctx,"SELECT count(*) FROM public.compliance_database_bindings WHERE publication_scope=$1 AND (tenant<>$2 OR domain<>$3 OR jurisdiction<>$4)",publicationScope,s.Tenant,s.Domain,s.Jurisdiction).Scan(&conflicts)!=nil||conflicts!=0{return ErrC071Storage}
  var n int;if tx.QueryRowContext(ctx,"SELECT count(*) FROM public.compliance_database_bindings WHERE role_name=$1 AND tenant=$2 AND domain=$3 AND jurisdiction=$4 AND publication_scope=$5",role,s.Tenant,s.Domain,s.Jurisdiction,publicationScope).Scan(&n)!=nil||n!=1{return ErrC071Storage}
  q:=pq.QuoteIdentifier(role)
  for _,stmt:=range []string{
@@ -162,6 +163,8 @@ func BindC071RuntimeRole(ctx context.Context,db *sql.DB,role string,s C064Author
   "GRANT SELECT ON public.compliance_database_bindings,public.compliance_schema_migrations TO "+q,
   "GRANT SELECT,INSERT,UPDATE ON public.compliance_author_heads,public.compliance_review_heads,public.compliance_publication_fences TO "+q,
   "GRANT SELECT,INSERT ON public.compliance_author_versions,public.compliance_review_versions,public.compliance_auditor_access TO "+q,
+  "GRANT SELECT,INSERT,UPDATE ON public.compliance_job_leaders,public.compliance_durable_jobs,public.compliance_impact_outbox TO "+q,
+  "GRANT SELECT,INSERT ON public.compliance_durable_halts,public.compliance_activations TO "+q,
   "GRANT USAGE ON SEQUENCE public.compliance_auditor_access_id_seq TO "+q,
  }{if _,err=tx.ExecContext(ctx,stmt);err!=nil{return ErrC071Storage}}
  if err=tx.Commit();err!=nil{return ErrC071Storage};return nil

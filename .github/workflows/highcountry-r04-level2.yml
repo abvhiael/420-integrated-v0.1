@@ -35,7 +35,7 @@ jobs:
         run: forge build src/highcountry --sizes
       - name: Retained R04 integration and adversarial coverage
         working-directory: contracts
-        run: forge test --match-path 'test/highcountry/**/*.t.sol' -vv
+        run: forge test --match-path 'test/highcountry/**/*.t.sol' -vvv
       - name: Canonical High Country verifier
         run: python3 scripts/highcountry/verify-r01.py
 
@@ -101,7 +101,7 @@ jobs:
       FOUNDRY_SRC: src/highcountry
       FOUNDRY_TEST: test/highcountry
       FOUNDRY_SCRIPT: script/highcountry
-      FOUNDRY_EVM_VERSION: paris
+      FOUNDRY_EVM_VERSION: london
     services:
       postgres:
         image: postgres:16
@@ -131,7 +131,7 @@ jobs:
           version: stable
       - name: Build disposable real-contract runtime fixture
         working-directory: contracts
-        run: forge build test/highcountry/integration/R04RuntimeDeployment.sol
+        run: forge build --evm-version london test/highcountry/integration/R04RuntimeDeployment.sol
       - name: Install pinned PostgreSQL runtime driver
         working-directory: services/highcountry-economy
         run: npm install --ignore-scripts --no-audit --no-fund

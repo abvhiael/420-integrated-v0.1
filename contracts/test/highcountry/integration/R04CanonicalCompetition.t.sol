@@ -142,7 +142,7 @@ contract R04CanonicalCompetitionTest is PublicPlantCapacityFixture {
         _grant(player,ModuleIds.HARVEST_ENGINE,ActionIds.HARVEST_ACCEPT,bytes32(uint256(plant)));
         vm.prank(player);harvest.acceptHarvest(plant);
         id=products.registerHarvestProduct(plant);
-        uint256 b=block.number;blocks.roll(b+1);bytes32 hash=keccak256(abi.encode("canonical-block",b));
+        uint256 b=products.registeredBlock(id);blocks.roll(b+1);bytes32 hash=keccak256(abi.encode("canonical-block",b));
         blocks.setBlockhash(b,hash);evidence.confirm(id,hash);
         HarvestProductRegistry.Product memory p=products.getProduct(id);return(id,p.qualityBps,p.harvestAcceptedAt);
     }

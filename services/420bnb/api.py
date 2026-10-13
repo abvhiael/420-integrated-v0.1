@@ -340,13 +340,18 @@ def live():
 @app.get("/health/ready")
 def ready():
     """Ready only when the expected schema is present; fail closed on drift."""
-    with db() as c:
-        current=c.execute("SELECT to_regclass('public.bnb_schema_migration')").fetchone()[0]
-        if current is None:
-            raise HTTPException(503,"SCHEMA_NOT_MIGRATED")
-        records=c.execute("SELECT version FROM bnb_schema_migration ORDER BY version").fetchall()
-        if [row[0] for row in records]!=list(range(1,21)):
-            raise HTTPException(503,"SCHEMA_VERSION_MISMATCH")
+    try:
+        with db() as c:
+            current=c.execute("SELECT to_regclass('public.bnb_schema_migration')").fetchone()[0]
+            if current is None:
+                raise HTTPException(503,"SCHEMA_NOT_MIGRATED")
+            records=c.execute("SELECT version FROM bnb_schema_migration ORDER BY version").fetchall()
+            if [row[0] for row in records]!=list(range(1,21)):
+                raise HTTPException(503,"SCHEMA_VERSION_MISMATCH")
+    except psycopg.Error:
+        # A database outage or connection exhaustion is not a ready API.
+        # Never leak DSNs, SQL statements, hostnames or credentials to probes.
+        raise HTTPException(503,"DATABASE_UNAVAILABLE") from None
     return {"status":"ready","transactions_enabled":False,"schema_version":20}
 
 

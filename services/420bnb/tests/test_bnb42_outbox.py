@@ -128,3 +128,15 @@ def test_unknown_or_unsafe_payload_does_not_block_safe_local_delivery(database):
     with psycopg.connect(database) as c:
         assert c.execute("SELECT delivered_at FROM bnb_outbox WHERE id=%s",(poison,)).fetchone()[0] is None
         assert c.execute("SELECT delivered_at FROM bnb_outbox WHERE id=%s",(legitimate,)).fetchone()[0] is not None
+
+
+def test_pay_case_outbox_is_allowlisted_but_redacts_financial_source():
+    event={"id":uuid4(),"event_type":"bnb.pay.case_reconciled",
+           "payload":{"reservation_id":str(uuid4()),"case_id":"case-fixture-1",
+                      "revision":1,"state":"opened"}}
+    envelope=outbox._event(event)
+    assert '"type":"bnb.pay.case_reconciled"' in envelope
+    assert "case-fixture-1" in envelope
+    event["payload"]["authorization"]="forged-private-token"
+    with pytest.raises(outbox.DeliveryError,match="PRIVATE_PAYLOAD_FORBIDDEN"):
+        outbox._event(event)

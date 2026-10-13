@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto';
 import { migrationDigest } from './schema-migrations.js';
+import { walletSchemaDigest } from './wallet-link-migrations.js';
 
 export class DatastoreError extends Error {
   constructor(code) { super(code); this.name = 'DatastoreError'; this.code = code; }
@@ -156,7 +157,18 @@ class ScopedTransaction {
       [...this.#ids(),id])).rows[0] ?? null;
   }
 
+  async #walletGuard() {
+    const v=(await this.#query('SELECT version,digest FROM gaming_datastore.wallet_link_schema')).rows;
+    if(v.length!==1||v[0].version!==2||v[0].digest!==walletSchemaDigest)fail('wallet-schema-drift');
+    const t=(await this.#query(`SELECT c.relrowsecurity,c.relforcerowsecurity,pg_get_userbyid(c.relowner) AS owner
+      FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace
+      WHERE n.nspname='gaming_datastore' AND c.relname=ANY($1::text[])`,
+      [['wallet_challenges','wallet_links']])).rows;
+    if(t.length!==2||t.some(x=>!x.relrowsecurity||!x.relforcerowsecurity||x.owner!=='gaming_datastore_migrator'))
+      fail('unsafe-wallet-policy');
+  }
   async issueWalletChallenge(x) {
+    await this.#walletGuard();
     fields(x,['challengeId','wallet','chainId','domain','nonce','consentId','policyHash','contextHash','issuedAt','expiresAt']);
     requireOpaque(x.challengeId,x.domain,x.consentId);
     requireHashes(x.policyHash,x.contextHash);
@@ -175,12 +187,14 @@ class ScopedTransaction {
       [...this.#ids(),x.challengeId,x.wallet,x.chainId,x.domain,x.nonce,x.consentId,x.issuedAt,x.expiresAt])).rows[0];
   }
   async walletChallenge(challengeId) {
+    await this.#walletGuard();
     requireOpaque(challengeId);
     return (await this.#query(`SELECT challenge_id,wallet,chain_id,domain,nonce,issued_at,expires_at,used_at,consent_id
       FROM gaming_datastore.wallet_challenges WHERE account_id=$1 AND game_id=$2 AND challenge_id=$3`,
       [...this.#ids(),challengeId])).rows[0]??null;
   }
   async completeWalletChallenge(challengeId,contextHash,expected) {
+    await this.#walletGuard();
     requireOpaque(challengeId);requireHashes(contextHash);
     const challenge=(await this.#query(`SELECT * FROM gaming_datastore.wallet_challenges
       WHERE account_id=$1 AND game_id=$2 AND challenge_id=$3 FOR UPDATE`,[...this.#ids(),challengeId])).rows[0];
@@ -204,6 +218,7 @@ class ScopedTransaction {
     return row;
   }
   async unlinkWallet() {
+    await this.#walletGuard();
     const rows=(await this.#query(`UPDATE gaming_datastore.wallet_links
       SET unlinked_at=gaming_datastore.now_seconds()
       WHERE account_id=$1 AND game_id=$2 AND unlinked_at IS NULL
@@ -211,6 +226,7 @@ class ScopedTransaction {
     return rows[0]??null;
   }
   async activeWallet() {
+    await this.#walletGuard();
     return (await this.#query(`SELECT chain_id,wallet,linked_at FROM gaming_datastore.wallet_links
       WHERE account_id=$1 AND game_id=$2 AND unlinked_at IS NULL`,this.#ids())).rows[0]??null;
   }

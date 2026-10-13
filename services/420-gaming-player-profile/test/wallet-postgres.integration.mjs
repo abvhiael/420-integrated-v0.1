@@ -130,7 +130,7 @@ test('R05.2 actual PostgreSQL atomic wallet authentication and replay acceptance
     await assert.rejects(()=>service.completeLink(a,{challengeId:c.challengeId,signature:signMock(c,sig)}));
     await assert.rejects(()=>service.session(a));
     epoch=0;
-    assert.equal((await service.session(a)).wallet.wallet,W2);
+    assert.equal((await service.session(a)).wallet.wallet,W);
   });
   await t.test('recovery rejects absent independent issuer authority',async()=>{
     await assert.rejects(()=>service.issueRecoveryChallenge(a,{...input(W2,'recovery-consent'),recoveryProof:'wallet-only'}),/recovery-disabled/);

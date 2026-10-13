@@ -17,9 +17,11 @@ services:
       dockerfile: services/420bnb/Dockerfile
     environment:
       BNB_DATABASE_URL: postgresql://bnb:${BNB_LOCAL_DB_PASSWORD:?required}@postgres:5432/bnb
-      BNB_IDENTITY_ASSERTION_SECRET: ${BNB_IDENTITY_ASSERTION_SECRET:?required-minimum-32-chars}
+      BNB_ENV: local
+      # External RS256 issuer bindings are required for protected routes; none is fabricated here.
     depends_on:
       postgres: {condition: service_healthy}
     ports: ["127.0.0.1:8080:8080"]
 volumes:
   bnb_data:
+

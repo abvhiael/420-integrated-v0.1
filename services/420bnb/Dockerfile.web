@@ -1,0 +1,9 @@
+ARG PYTHON_IMAGE
+FROM ${PYTHON_IMAGE}
+WORKDIR /app
+RUN useradd -r -u 10001 bnb
+COPY web/bnb/index.html /app/index.html
+COPY services/420bnb/web_server.py /app/web_server.py
+USER 10001:10001
+EXPOSE 8080
+CMD ["python","web_server.py"]

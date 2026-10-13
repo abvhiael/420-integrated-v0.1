@@ -25,6 +25,7 @@ on:
       - 'docs/audit/420MEDIA-PHASE-CLOSEOUT.md'
       - 'docs/audit/DOOBTUBE-PHASE-CLOSEOUT.md'
       - 'docs/audit/DOOBR-PHASE-CLOSEOUT.md'
+      - 'docs/bnb/BNB-3.12-PHASE3-LEVEL3-CLOSEOUT.md'
   pull_request:
     paths:
       - 'contracts/config/**'
@@ -43,6 +44,7 @@ on:
       - 'docs/audit/420MEDIA-PHASE-CLOSEOUT.md'
       - 'docs/audit/DOOBTUBE-PHASE-CLOSEOUT.md'
       - 'docs/audit/DOOBR-PHASE-CLOSEOUT.md'
+      - 'docs/bnb/BNB-3.12-PHASE3-LEVEL3-CLOSEOUT.md'
   workflow_dispatch:
 permissions:
   contents: read

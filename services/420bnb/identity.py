@@ -22,7 +22,15 @@ def verify_external_token(token: str) -> dict:
         raise HTTPException(401,"INVALID_IDENTITY_PROOF")
     if not isinstance(claims.get("sub"),str) or not claims["sub"] or len(claims["sub"])>256:
         raise HTTPException(401,"INVALID_IDENTITY_PROOF")
-    if claims["exp"]-claims["iat"]>3600 or claims["iat"]>datetime.now(timezone.utc).timestamp()+5:
+    now=datetime.now(timezone.utc).timestamp()
+    # Do not accept malformed time claims, future-issued credentials, absent
+    # session identifiers or identity assertions valid before issuance.
+    if (any(type(claims.get(k)) not in (int,float) for k in ("iat","nbf","exp"))
+        or not isinstance(claims.get("jti"),str)
+        or not (1 <= len(claims["jti"]) <= 256)
+        or any(ord(c)<33 or ord(c)>126 for c in claims["jti"])
+        or claims["iat"]>now+5 or claims["nbf"]<claims["iat"]-5
+        or claims["exp"]<=claims["iat"] or claims["exp"]-claims["iat"]>3600):
         raise HTTPException(401,"INVALID_IDENTITY_PROOF")
     # Caller-controlled 'host', 'verified', or 'admin' claims are NOT authoritative.
     return {"subject":claims["sub"],"issuer":issuer,"issuer_session_id":claims["jti"],"expires_at":datetime.fromtimestamp(claims["exp"],tz=timezone.utc)}

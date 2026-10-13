@@ -38,8 +38,9 @@ def test_untrusted_or_stale_public_projection_fails_closed(data):
 def test_public_place_filter_still_has_no_map_marker(monkeypatch):
     spec=importlib.util.spec_from_file_location("bnb_travel_test_api",root/"api.py")
     api=importlib.util.module_from_spec(spec);spec.loader.exec_module(api)
-    monkeypatch.setattr(api,"resolve_public_place",lambda _:{"region":"Saskatchewan"})
-    monkeypatch.setattr(api,"guest_search",lambda **kw: [] if kw["region"]=="Saskatchewan" else (_ for _ in ()).throw(AssertionError()))
+    monkeypatch.setattr(api,"resolve_public_place",lambda _:{"region":"Saskatchewan","country":"CA"})
+    monkeypatch.setattr(api,"travel_authorized_listings",lambda place_id,response,limit: {"listings":[]})
+    monkeypatch.setattr(api,"guest_search",lambda **kw: (_ for _ in ()).throw(AssertionError("place discovery must not search region")))
     response=TestClient(api.app).get("/v1/bnb/travel/discovery?place_id=place_1")
     assert response.status_code==200
     assert response.json()["destination_place_id"]=="place_1"

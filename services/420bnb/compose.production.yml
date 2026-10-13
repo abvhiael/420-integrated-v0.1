@@ -1,0 +1,69 @@
+# Operator supplies immutable image digests and approved mounted bindings.
+# External managed PostgreSQL; no privileged DB credentials in API containers.
+x-api: &api
+  image: ${BNB_API_IMAGE:?digest-pinned-api-image-required}
+  user: "10001:10001"
+  read_only: true
+  cap_drop: [ALL]
+  security_opt: [no-new-privileges:true]
+  tmpfs: [/tmp]
+  environment:
+    BNB_ENV: production
+    BNB_RELEASE_IMAGE: ${BNB_API_IMAGE:?required}
+    BNB_WEB_IMAGE: ${BNB_WEB_IMAGE:?required}
+    BNB_INGRESS_IMAGE: ${BNB_INGRESS_IMAGE:?required}
+    BNB_DEPLOYMENT_FILE: /run/secrets/deployment.json
+    BNB_DATABASE_URL_FILE: /run/secrets/runtime.dsn
+  command: [python, production.py, serve]
+  volumes:
+    - ${BNB_RUNTIME_BINDINGS_DIR:?approved-bindings-required}:/run/secrets:ro
+  networks: [backend]
+  restart: unless-stopped
+  healthcheck:
+    test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/health/ready', timeout=3)"]
+    interval: 15s
+    timeout: 5s
+    retries: 3
+services:
+  api-a: *api
+  api-b: *api
+  web:
+    image: ${BNB_WEB_IMAGE:?digest-pinned-web-image-required}
+    user: "10001:10001"
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    tmpfs: [/tmp]
+    networks: [backend]
+  ingress:
+    image: ${BNB_INGRESS_IMAGE:?digest-pinned-ingress-image-required}
+    user: "10001:10001"
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    tmpfs: [/tmp]
+    ports: ["443:8443"]
+    environment:
+      BNB_API_HOST: ${BNB_API_HOST:?approved-api-host-required}
+      BNB_WEB_HOST: ${BNB_WEB_HOST:?approved-web-host-required}
+    volumes:
+      - ${BNB_INGRESS_CONFIG:?required}:/etc/caddy/Caddyfile:ro
+      - ${BNB_TLS_DIRECTORY:?verified-tls-material-required}:/run/tls:ro
+    networks: [backend]
+  migrate:
+    <<: *api
+    profiles: [migration]
+    restart: "no"
+    healthcheck: {disable: true}
+    command: [python, production.py, migrate]
+    environment:
+      BNB_ENV: production
+      BNB_RELEASE_IMAGE: ${BNB_API_IMAGE:?required}
+      BNB_WEB_IMAGE: ${BNB_WEB_IMAGE:?required}
+      BNB_INGRESS_IMAGE: ${BNB_INGRESS_IMAGE:?required}
+      BNB_DEPLOYMENT_FILE: /run/secrets/deployment.json
+      BNB_DATABASE_URL_FILE: /run/secrets/migrator.dsn
+    volumes:
+      - ${BNB_MIGRATION_BINDINGS_DIR:?separate-migration-bindings-required}:/run/secrets:ro
+networks:
+  backend: {}

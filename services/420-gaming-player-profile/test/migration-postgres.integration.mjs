@@ -51,13 +51,13 @@ test('R05.3 real PostgreSQL durable save/outbox/receipt security',async t=>{
       contextHash:saveScopeDigest('alpha',G,R),nonceCommitment:nextNonce(),expiresAt:future});
     await tx.prepareMigration(intent);
   });
-  const proof={accountId:'alpha',gameId:G,migrationId:intent.migrationId,claimId:'77',
+  let proof={accountId:'alpha',gameId:G,migrationId:intent.migrationId,claimId:'77',
     chainId:'420',registry:REG,sourceCommitment:intent.sourceCommitment,
     sourceRevision:intent.sourceRevision,payloadHash:intent.payloadHash,rulesetId:R,
     policyHash:P,targetWallet:W,targetGrower:'12',evidenceDigest:EVIDENCE,
     save:{schemaLabel:'highcountry-state-v1',stateHash:STATE,providerId:'trusted-guest-source',
       objectRef:'verified-opaque-backup',byteLength:'123'},saveConsentId:'save-consent'};
-  const receipt={state:'FINALIZED',txHash:h('a'),blockHash:h('b'),receiptDigest:h('c')};
+  let receipt={state:'FINALIZED',txHash:h('a'),blockHash:h('b'),receiptDigest:h('c')};
   const workerB=new Pool({connectionString:uri});pools.push(workerB);
   const make=(pool=root)=>new DurableMigrationCoordinator420({operatorPool:pool,
     verifyBoundClaim:async input=>{
@@ -98,10 +98,44 @@ test('R05.3 real PostgreSQL durable save/outbox/receipt security',async t=>{
       leaseToken:leased.lease_token}),/migration-lease-invalid/);
     assert.equal((await root.query('SELECT count(*)::integer AS n FROM gaming_datastore.migration_receipt_history')).rows[0].n,1);
   });
+  await t.test('finality reorganization quarantines canonical effects without reapplying save',async()=>{
+    const second={...intent,migrationId:'migrate-two',consentId:'migrate-consent-two',
+      sourceCommitment:h('d'),sourceRevision:'13',payloadHash:h('e')};
+    await repo.transaction(async tx=>{
+      await tx.recordConsent({consentId:second.consentId,purpose:'SAVE_MIGRATION',policyHash:P,
+        contextHash:migrationIntentDigest('alpha',G,second),
+        nonceCommitment:nextNonce(),expiresAt:future});
+      await tx.prepareMigration(second);
+    });
+    proof={...proof,migrationId:'migrate-two',claimId:'78',sourceCommitment:second.sourceCommitment,
+      sourceRevision:second.sourceRevision,payloadHash:second.payloadHash,evidenceDigest:h('f')};
+    // The canonical verifier fixture changes scope in lockstep with the second intent.
+    const reorg=new DurableMigrationCoordinator420({operatorPool:workerB,
+      verifyBoundClaim:async input=>{
+        if(input.migrationId!=='migrate-two'||input.claimId!=='78')throw Error('claim-denied');
+        return structuredClone(proof);
+      },
+      verifyReceipt:async ({expected})=>{
+        if(expected.claim_id!=='78'||expected.migration_id!=='migrate-two')throw Error('wrong-claim');
+        return {state:'REORG',txHash:h('a'),blockHash:h('b'),receiptDigest:h('c')};
+      }});
+    const outcome=await reorg.apply({accountId:'alpha',gameId:G,migrationId:'migrate-two',claimId:'78'});
+    assert.equal(outcome.revision,'2');
+    const [lease]=await reorg.lease();
+    assert.equal(lease.migration_id,'migrate-two');
+    const reconciled=await reorg.reconcile({accountId:'alpha',gameId:G,
+      migrationId:'migrate-two',leaseToken:lease.lease_token});
+    assert.equal(reconciled.status,'QUARANTINED');
+    assert.equal((await reorg.lease()).length,0);
+    assert.equal((await repo.transaction(tx=>tx.profile())).save_revision,'2');
+    assert.equal((await repo.transaction(tx=>tx.saveReference('1'))).state_hash,STATE);
+    assert.equal((await root.query(`SELECT count(*)::integer AS n FROM gaming_datastore.migration_applications
+      WHERE migration_id='migrate-two'`)).rows[0].n,1);
+  });
   await t.test('cancelled operation and forged verified claim cannot be applied',async()=>{
     await assert.rejects(()=>a.apply({accountId:'alpha',gameId:G,migrationId:'migrate-one',claimId:'78'}),
       /migration-binding-unavailable/);
-    assert.equal((await repo.transaction(tx=>tx.profile())).save_revision,'1');
+    assert.equal((await repo.transaction(tx=>tx.profile())).save_revision,'2');
   });
  }finally{for(const pool of pools.reverse())await pool.end();}
 });

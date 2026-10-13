@@ -1,0 +1,26 @@
+# BNB-4.6 — Booking Orchestration and Economic Reconciliation — work in progress
+
+**Disposition: INCOMPLETE / Level 1 NOT YET QUALIFIED. Do not advance to BNB-4.7.**
+
+Canonical owner: `docs/bnb/BNB-PHASE4-ROADMAP.md` BNB-4.6.
+Repository branch `audit/bnb-phase4-bnb-4-1-baseline-20261013`, draft unmerged PR #631; current implementation candidate `5318553d9f25e60c3ddb69eff3b5fa4247825473`. Baseline `main` observed `959288c8bd33b6da0325b6a5d060e00e7bcf0e48`, existing divergence approximately 408 behind. Refresh before reconciliation.
+
+## Work implemented
+
+- `services/420bnb/booking_saga.py`: deterministic noncustodial reconciliation projection; fail closed on unknown booking/Pay state, inconsistent confirmation, late Pay finality after cancellation/expiry, recovery-required source state, invalid settlement conservation, disbursement over-allocation, or invalid operation data.
+- `services/420bnb/tests/test_bnb46_saga.py`: unit/negative tests for over-allocation, late payment, state mismatch, duplicate failed disbursement accounting, missing Pay evidence and unexpected transitions.
+- `services/420bnb/api.py`: scoped GET `/v1/bnb/reservations/{reservation_id}/orchestration`; authenticated guest or property host only. Reads existing Pay-owned mirrors and returns nonbinding status. Neither confirms reservations nor transfers funds.
+- Existing Pay/Wallet proof checks, frozen invoices, captured splits, idempotent incoming Pay events, prepayment cancellation and expiry are retained without modification.
+
+## Required unfinished exit criteria
+
+1. Validate full lifecycle including booking pending/confirm/expire/cancel/dispute/refund as independent canonical transitions and idempotent replay; do not use unapproved self-issued dispute authority.
+2. Extend reconciliation for signed provider invoices, original payer, Pay disbursements and their reversal/reorg rules, and exact payout liabilities under concurrent/disputed events. Existing Pay-owned pathways must remain sole execution authority.
+3. Add database-backed adversarial route/integration tests for cross-tenant IDOR, competing event order, duplicate receipts, Pay finality revocation/reorganizations, concurrent cancellation and failed/late payout.
+4. Inspect all required exact-SHA BNB runtime and retained workflow terminal results. Required Runtime Slice run 38474192221 was pending at initial observation and is **not** counted as PASS.
+5. Resolve failures without suppressing tests, record test totals and job IDs, update exact implementation SHA if changed, and issue a Level 1 certificate **only after** original exit criteria pass.
+6. Keep external provider, legal and testnet approvals under `BNB-TESTNET-WORK-ROADMAP.md`; no live 420Pay/420Wallet/Identity/Compliance/Travel activation.
+
+## Invariants and gates
+
+`travel.bnb_booking=false`. All named T-BNB testnet gates unchanged. No BNB custody, self-issued payment/Wallet consent, provider finality, refund execution, outside messaging or live booking approval. Do not merge PR #631. BNB-4.7 Level 2 follows only a qualified BNB-4.6; BNB-4.12 Level 3 remains the sole full-repository qualification milestone.

@@ -37,6 +37,9 @@ func OpenProductionPublicationRuntime(ctx context.Context,dsn string,authority I
  if err=store.DB.PingContext(probe);err!=nil{store.DB.Close();return nil,ErrPublicationStale}
  var recovery bool
  if err=store.DB.QueryRowContext(probe,"SELECT NOT pg_is_in_recovery()").Scan(&recovery);err!=nil||!recovery{store.DB.Close();return nil,ErrPublicationStale}
+ var scope C064AuthorScope
+ var publicationScope string
+ if store.DB.QueryRowContext(probe,"SELECT tenant,domain,jurisdiction,publication_scope FROM public.compliance_database_bindings WHERE role_name=current_user").Scan(&scope.Tenant,&scope.Domain,&scope.Jurisdiction,&publicationScope)!=nil || c071RuntimeBinding(probe,store.DB,scope,publicationScope)!=nil {store.DB.Close();return nil,ErrPublicationStale}
  return &ProductionPublicationRuntime{Store:store,Cache:&PublicationCache{},Publisher:authority},nil
 }
 func(rt *ProductionPublicationRuntime) Close()error{

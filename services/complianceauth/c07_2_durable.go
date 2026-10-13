@@ -91,6 +91,7 @@ func c072Duration(d time.Duration)bool{return d>=time.Second && d<=5*time.Minute
 func(s *C072Store)ready(ctx context.Context)bool{return s!=nil&&s.DB!=nil&&ctx!=nil&&ctx.Err()==nil&&c051Scope(s.PublicationScope)&&(s.Identity==nil||s.Identity.VerifyServiceIdentity(ctx)==nil)}
 func(s *C072Store)begin(ctx context.Context)(*sql.Tx,error){
  if !s.ready(ctx){return nil,ErrC072Unavailable};tx,e:=s.DB.BeginTx(ctx,nil);if e!=nil{return nil,ErrC072Unavailable}
+ if _,e=tx.ExecContext(ctx,"SET LOCAL lock_timeout = '250ms'");e!=nil{tx.Rollback();return nil,ErrC072Unavailable}
  var primary bool;if tx.QueryRowContext(ctx,"SELECT NOT pg_is_in_recovery()").Scan(&primary)!=nil||!primary{tx.Rollback();return nil,ErrC072Unavailable};return tx,nil
 }
 func(s *C072Store)AcquireLeader(ctx context.Context,name,owner string,d time.Duration)(C072Leader,error){
@@ -115,6 +116,7 @@ func(s *C072Store)Enqueue(ctx context.Context,id,kind string,payload any,due tim
  due=due.UTC().Truncate(time.Microsecond) // Canonical PostgreSQL schedule precision; preserves durable replay identity.
  plain,e:=json.Marshal(payload);if e!=nil||len(plain)>C071MaxPrivateBytes{return ErrC072Unavailable};raw,e:=s.Cipher.sealContext(ctx,plain,c071AAD("job/"+kind,s.Scope,id,0));if e!=nil{return ErrC072Unavailable}
  tx,e:=s.begin(ctx);if e!=nil{return e};defer tx.Rollback()
+ if c074Queue(ctx,tx,s.PublicationScope,id,len(raw))!=nil{return ErrC072Unavailable}
  _,e=tx.ExecContext(ctx,"INSERT INTO public.compliance_durable_jobs(scope,id,kind,payload,fingerprint,state,max_attempts,scheduled_at,due_at) VALUES($1,$2,$3,$4,$5,'QUEUED',$6,$7,$7) ON CONFLICT(scope,id) DO NOTHING",s.PublicationScope,id,kind,string(raw),Digest(plain),max,due);if e!=nil{return ErrC072Unavailable}
  var fp,k string;var m int;var scheduled time.Time
  e=tx.QueryRowContext(ctx,"SELECT fingerprint,kind,max_attempts,scheduled_at FROM public.compliance_durable_jobs WHERE scope=$1 AND id=$2",s.PublicationScope,id).Scan(&fp,&k,&m,&scheduled)
@@ -179,6 +181,8 @@ func(s *C072Store)Activate(ctx context.Context,l C072Leader,j C072Job,a C072Acti
  if authority.VerifyPublication(ctx,old,next)!=nil||control.VerifyScheduledManifest(a.Signed,time.Now().UTC())!=nil{return ErrC072Unavailable}
  r,e:=tx.ExecContext(ctx,"UPDATE public.compliance_publication_fences SET sequence=$1,revocation_epoch=$2,policy_digest=$3,dependency_digest=$4,expires_at=$5 WHERE scope=$6 AND expires_at>clock_timestamp() AND $5>clock_timestamp()",next.Sequence,next.RevocationEpoch,next.PolicyDigest,next.DependencyDigest,next.ExpiresAt,next.Scope);if e!=nil{return ErrC072Unavailable};n,_:=r.RowsAffected();if n!=1{return ErrC072Unavailable}
  _,e=tx.ExecContext(ctx,"INSERT INTO public.compliance_activations(scope,id,fingerprint,sequence) VALUES($1,$2,$3,$4)",next.Scope,j.ID,fp,next.Sequence);if e!=nil{return ErrC072Unavailable}
+ var backlog int
+ if tx.QueryRowContext(ctx,"SELECT count(*) FROM public.compliance_impact_outbox WHERE scope=$1 AND NOT acknowledged",next.Scope).Scan(&backlog)!=nil||backlog+len(a.Subscribers)>2048{return ErrC072Unavailable}
  event,_:=json.Marshal(a.Event);for _,sub:=range a.Subscribers{if _,e=tx.ExecContext(ctx,"INSERT INTO public.compliance_impact_outbox(scope,event_id,subscriber,sequence,event) VALUES($1,$2,$3,$4,$5)",next.Scope,a.Event.EventID,sub,next.Sequence,string(event));e!=nil{return ErrC072Unavailable}}
  // Revalidate leases at final mutation: a paused worker cannot commit after expiry.
  r,e=tx.ExecContext(ctx,"UPDATE public.compliance_durable_jobs SET state='COMPLETE',owner='',lease_until='-infinity' WHERE scope=$1 AND id=$2 AND token=$3 AND owner=$4 AND state='LEASED' AND lease_until>clock_timestamp() AND EXISTS(SELECT 1 FROM public.compliance_job_leaders WHERE scope=$1 AND name=$5 AND owner=$4 AND token=$6 AND expires_at>clock_timestamp())",next.Scope,j.ID,j.Token,j.Owner,l.Name,l.Token)

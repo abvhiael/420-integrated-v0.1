@@ -1,4 +1,5 @@
 -- BNB-3.9: appeals and privacy lifecycle; immutable separate appeal decisions.
+ALTER TABLE bnb_abuse_report ADD COLUMN decided_by text;
 CREATE TABLE bnb_moderation_appeal (
  id uuid PRIMARY KEY,
  report_id uuid NOT NULL REFERENCES bnb_abuse_report(id),

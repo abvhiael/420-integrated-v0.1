@@ -53,6 +53,7 @@ def project_saga(*, reservation_state: str, hold_state: str,
         ("upheld","refund_completed")) for case in cases):
         return {"state": "reconciliation_required", "reason": "UNKNOWN_PAY_CASE",
                 "confirmation_verified": False, "bnb_custody": False}
+    open_cases=[case for case in cases if case["state"]!="resolved"]
     blocked_cases=[case for case in cases if not (
         case["state"]=="resolved" and
         case.get("resolution")=="upheld" and
@@ -109,9 +110,15 @@ def project_saga(*, reservation_state: str, hold_state: str,
     ):
         return {"state": "reconciliation_required", "reason": "ECONOMIC_OVERALLOCATION",
                 "confirmation_verified": False, "bnb_custody": False}
+    refund_phase=("refunded" if refund_finalized and
+                  captured is not None and refund_finalized==captured else
+                  "partially_refunded" if refund_finalized else
+                  "refund_pending" if refund_reserved else reservation_state)
+    saga_phase="disputed" if open_cases else refund_phase
     return {
-        "state": "disputed" if blocked_cases else reservation_state,
-        "reason": "PAY_CASE_PENDING" if blocked_cases else None,
+        "state": saga_phase,
+        "reason": ("PAY_CASE_PENDING" if open_cases else
+                   "PAYOUT_FROZEN_AFTER_REFUND" if blocked_cases else None),
         "confirmation_verified": reservation_state == "confirmed" and not blocked_cases,
         "payment_finalized": intent_state == "finalized" and bool(payment_id),
         "captured_amount": str(captured) if captured is not None else None,
@@ -123,14 +130,13 @@ def project_saga(*, reservation_state: str, hold_state: str,
         "payout_finalized_amount": str(finalized_total - refund_finalized),
         "payout_reserved_amount": str(total_committed - finalized_total - refund_reserved),
         "refund_status": ("finalized" if refund_finalized and not refund_reserved
+                          else "partial_and_pending" if refund_finalized and refund_reserved
                           else "pending" if refund_reserved else "not_requested"),
         "dispute_status": ("provider_review_required" if failures else
-                           "pay_case_pending" if blocked_cases else
+                           "pay_case_pending" if open_cases else
                            "pay_case_resolved" if cases else "none"),
         "pay_case_count": len(cases),
-        "saga_phase": ("disputed" if blocked_cases else
-                       "refunded" if refund_finalized and not refund_reserved else
-                       "refund_pending" if refund_reserved else reservation_state),
+        "saga_phase": saga_phase,
         "pay_failure_count": len(failures),
         "pay_reconciliation_owner": "420Pay",
         "wallet_authorization_owner": "420Wallet",

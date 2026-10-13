@@ -4,8 +4,7 @@ import (
  "context"
  "crypto/ed25519"
  "database/sql"
- "errors"
- "fmt"
+ "encoding/json"
 )
 
 // C076ExternalAuthoritySQL must be installed on an independently operated
@@ -109,5 +108,5 @@ func(b *C076ExternalPostgres) ReadWitness(ctx context.Context,scope string)(C076
 }
 
 var _ C076MonotonicBackend=(*C076ExternalPostgres)(nil)
-var _ = errors.Is
-var _ = fmt.Sprintf
+func decodeC076Checkpoint(raw []byte,v *C076SignedCheckpoint)error{return json.Unmarshal(raw,v)}
+func encodeC076Checkpoint(v C076SignedCheckpoint)([]byte,error){return json.Marshal(v)}

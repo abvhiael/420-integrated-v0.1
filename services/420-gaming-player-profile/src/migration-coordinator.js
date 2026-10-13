@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { migrationRuntimeDigest } from './migration-runtime-migrations.js';
+import { saveScopeDigest } from './postgres-repository.js';
 const error=code=>{const e=new Error(code);e.code=code;throw e;};
 const opaque=x=>typeof x==='string'&&/^[A-Za-z0-9:_-]{1,128}$/.test(x);
 const hash=x=>typeof x==='string'&&/^0x[0-9a-f]{64}$/.test(x)&&!/^0x0+$/.test(x);
@@ -107,6 +108,7 @@ export class DurableMigrationCoordinator420 {
         account_id=$1 AND game_id=$2 AND consent_id=$3 FOR SHARE`,
         [v.accountId,v.gameId,v.saveConsentId])).rows[0];
       if(!saveConsent||saveConsent.purpose!=='CLOUD_SAVE'||saveConsent.revoked_at!==null||
+        saveConsent.context_hash!==saveScopeDigest(v.accountId,v.gameId,v.rulesetId)||
         BigInt(saveConsent.expires_at)<=BigInt((await c.query('SELECT gaming_datastore.now_seconds() AS n')).rows[0].n))
         error('migration-save-consent-denied');
       const w=(await c.query(`SELECT wallet,chain_id FROM gaming_datastore.wallet_links
@@ -171,8 +173,11 @@ export class DurableMigrationCoordinator420 {
     if(!opaque(accountId)||!hash(gameId)||!opaque(migrationId)||!opaque(leaseToken))
       error('migration-invalid-input');
     const key={accountId,gameId,migrationId};
+    const expected=await this.#transaction(async c=>(await c.query(`SELECT * FROM gaming_datastore.migration_applications
+      WHERE account_id=$1 AND game_id=$2 AND migration_id=$3`,[accountId,gameId,migrationId])).rows[0]);
+    if(!expected)error('migration-application-missing');
     let observed;
-    try{observed=await this.#receipt(Object.freeze({...key}));}
+    try{observed=await this.#receipt(Object.freeze({...key,expected:Object.freeze({...expected})}));}
     catch{error('migration-receipt-unavailable');}
     exact(observed,['state','txHash','blockHash','receiptDigest']);
     if(!['PENDING','FINALIZED','REORG','MISMATCH','RETRY'].includes(observed.state)||
@@ -190,7 +195,8 @@ export class DurableMigrationCoordinator420 {
         error('migration-lease-invalid');
       const app=(await c.query(`SELECT * FROM gaming_datastore.migration_applications
         WHERE account_id=$1 AND game_id=$2 AND migration_id=$3`,vals)).rows[0];
-      if(!app)error('migration-application-missing');
+      if(!app||app.evidence_digest!==expected.evidence_digest||app.claim_id!==expected.claim_id)
+        error('migration-application-changed');
       const state=observed.state==='FINALIZED'?'RECONCILED':
         observed.state==='REORG'||observed.state==='MISMATCH'?'QUARANTINED':
         observed.state==='PENDING'?'SUBMITTED':

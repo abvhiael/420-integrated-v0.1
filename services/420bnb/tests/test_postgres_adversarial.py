@@ -1086,6 +1086,10 @@ def test_bnb27_pay_owned_split_partial_refunds_and_payout_conservation(fixture_p
                 "pay_beneficiary_verified":True,"fulfillment_verified":True,
                 "dispute_window_complete":True,"payout_controller_approved":True,
                 "original_payer_refund":True,
+                "original_payer_subject":"guest-fixture",
+                "original_pay_invoice_id":"invoice-bnb27",
+                "original_pay_payment_id":"payment-bnb27",
+                "original_payer_recipient_verified":True,
                 "refund_recipient":"guest-payer-wallet",
                 "receipt_finalized":state=="finalized"}
             return client.post(route,json=body,headers=signed(api.PayDisbursementInput(**body),

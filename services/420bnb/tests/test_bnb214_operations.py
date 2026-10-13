@@ -106,3 +106,22 @@ def test_operational_logs_avoid_secret_and_path_identifiers(connected,caplog):
     assert entries[-1].route_template=="/v1/bnb/reservations/{reservation_id}"
     assert entries[-1].request_id==trace
     assert "11111111-1111" not in str(entries[-1].__dict__.get("route_template"))
+
+def test_readiness_database_outage_returns_bounded_503_without_dsn_leak(monkeypatch):
+    import importlib.util
+    from fastapi.testclient import TestClient
+    from pathlib import Path
+    import psycopg
+    spec=importlib.util.spec_from_file_location(
+        "bnb310_outage",Path(__file__).resolve().parents[1]/"api.py")
+    module=importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    secret="postgresql://secret-user:secret-pass@private-db.test.invalid/bnb"
+    def broken_db():
+        raise psycopg.OperationalError(secret)
+    monkeypatch.setattr(module,"db",broken_db)
+    response=TestClient(module.app).get("/health/ready")
+    assert response.status_code==503
+    assert response.json()=={"detail":"DATABASE_UNAVAILABLE"}
+    assert "secret-pass" not in response.text
+    assert response.headers["cache-control"]=="no-store"

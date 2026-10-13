@@ -321,5 +321,12 @@
   "other_workflows": {
     "Docs": "Automatic run 38357503488 skipped; not PASS and not required for ordinary C07.4 Level 1. Global Docs belongs at C08.5.",
     "Governance_and_420Hz": "Automatic unchanged workflow YAML failures retained baseline; unrelated to C07.4. No unrelated workflow altered or broad qualification manually dispatched."
+  },
+  "durable_vulnerability_report_sha256": "aa4737e33f38be3fe8be7f72347ecca30daf47ff30ec627ec8fcfd3bbf27bf12",
+  "durable_vulnerability_report_bytes": 587203,
+  "evidence_repair": {
+    "superseded_evidence_sha": "cd29bead66beb1a29c75c8a77ea13920abb1bdba",
+    "cause": "Scanner report copy was truncated by an intermediate text output limit. Original successful artifact and qualification unchanged.",
+    "repair": "Complete UTF-8 scanner report restored from the verified ZIP; exact Git blob 58606f8ee9869905cfe1e74180ed3c9a27d70c39 and SHA-256 verified. Evidence-only repair; no executable or test change."
   }
 }

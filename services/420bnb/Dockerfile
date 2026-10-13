@@ -14,6 +14,8 @@ COPY services/420bnb/api.py /app/api.py
 COPY services/420bnb/identity.py /app/identity.py
 COPY services/420bnb/authority.py /app/authority.py
 COPY services/420bnb/calendar_engine.py /app/calendar_engine.py
+COPY services/420bnb/availability_projection.py /app/availability_projection.py
+COPY services/420bnb/outbox.py /app/outbox.py
 COPY services/420bnb/pricing.py /app/pricing.py
 COPY services/420bnb/travel_location.py /app/travel_location.py
 USER bnb

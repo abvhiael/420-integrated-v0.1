@@ -85,6 +85,45 @@ test('R05.2 actual PostgreSQL atomic wallet authentication and replay acceptance
     await service.completeLink(a,{challengeId:c.challengeId,signature:signMock(c,sig)});
     assert.equal((await service.session(a)).wallet.wallet,W2);
   });
+  await t.test('concurrent single-use challenge has at most one successful transaction',async()=>{
+    const c=await service.issueChallenge(b,input(W,'parallel-consent'));
+    const accepted=signMock(c,sig);
+    const results=await Promise.allSettled([
+      service.completeLink(b,{challengeId:c.challengeId,signature:accepted}),
+      service.completeLink(b,{challengeId:c.challengeId,signature:accepted})
+    ]);
+    // Alpha no longer owns W, and the same nonce may not succeed twice.
+    assert.equal(results.filter(x=>x.status==='fulfilled').length,1);
+    assert.equal(results.filter(x=>x.status==='rejected').length,1);
+    await service.unlink(b);
+  });
+  await t.test('issuer-approved recovery atomically replaces old binding after new signed proof',async()=>{
+    const withRecovery=createHighCountryWalletService420({
+      authority,poolForPrincipal:async({accountId})=>scope[accountId],
+      clientsByChain:new Map([['420',client]]),domain:'hc-example',
+      verifyRecoveryProof:async({accountId,proof})=>accountId==='alpha'&&proof==='independent-issuer-attestation'
+    });
+    await assert.rejects(()=>withRecovery.issueRecoveryChallenge(a,{
+      ...input(W,'recovery-denied-consent'),recoveryProof:'wallet-only'}),/recovery-denied/);
+    const prior=(await service.session(a)).wallet.wallet;
+    const c=await withRecovery.issueRecoveryChallenge(a,{
+      ...input(W,'recovery-approved-consent'),recoveryProof:'independent-issuer-attestation'});
+    assert.equal((await service.session(a)).wallet.wallet,prior);
+    await assert.rejects(()=>withRecovery.completeLink(a,{challengeId:c.challengeId,signature:'0x'+'22'.repeat(65)}),/invalid-signature/);
+    assert.equal((await service.session(a)).wallet.wallet,prior);
+    await withRecovery.completeLink(a,{challengeId:c.challengeId,signature:signMock(c,sig)});
+    assert.equal((await service.session(a)).wallet.wallet,W);
+    assert.equal((await service.session(a)).profileId,'profile-alpha');
+  });
+  await t.test('expired challenge denies without consuming or replacing active ownership',async()=>{
+    const c=await service.issueChallenge(a,input(W2,'expiry-consent'));
+    const original=Date.now;
+    try {
+      Date.now=()=>original()+360000;
+      await assert.rejects(()=>service.completeLink(a,{challengeId:c.challengeId,signature:signMock(c,sig)}),/challenge-invalid-or-replayed/);
+    } finally {Date.now=original;}
+    assert.equal((await service.session(a)).wallet.wallet,W);
+  });
   await t.test('revoked session fails closed without erasing saved account data',async()=>{
     const c=await service.issueChallenge(a,input(W2,'third-consent'));
     epoch=1;

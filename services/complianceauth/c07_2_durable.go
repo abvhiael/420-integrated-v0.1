@@ -46,8 +46,8 @@ BEGIN
  IF NOT FOUND THEN RAISE EXCEPTION 'unbound durable scope'; END IF;
  IF TG_OP='UPDATE' THEN
   IF NEW.scope<>OLD.scope THEN RAISE EXCEPTION 'immutable scope'; END IF;
-  IF TG_TABLE_NAME='compliance_durable_jobs' AND (NEW.id<>OLD.id OR NEW.kind<>OLD.kind OR NEW.payload<>OLD.payload OR NEW.fingerprint<>OLD.fingerprint OR NEW.max_attempts<>OLD.max_attempts OR NEW.scheduled_at<>OLD.scheduled_at) THEN RAISE EXCEPTION 'immutable job'; END IF;
-  IF TG_TABLE_NAME='compliance_impact_outbox' AND (NEW.event_id<>OLD.event_id OR NEW.subscriber<>OLD.subscriber OR NEW.sequence<>OLD.sequence OR NEW.event<>OLD.event) THEN RAISE EXCEPTION 'immutable impact'; END IF;
+  IF TG_TABLE_NAME='compliance_durable_jobs' THEN IF (NEW.id<>OLD.id OR NEW.kind<>OLD.kind OR NEW.payload<>OLD.payload OR NEW.fingerprint<>OLD.fingerprint OR NEW.max_attempts<>OLD.max_attempts OR NEW.scheduled_at<>OLD.scheduled_at) THEN RAISE EXCEPTION 'immutable job'; END IF; END IF;
+  IF TG_TABLE_NAME='compliance_impact_outbox' THEN IF (NEW.event_id<>OLD.event_id OR NEW.subscriber<>OLD.subscriber OR NEW.sequence<>OLD.sequence OR NEW.event<>OLD.event) THEN RAISE EXCEPTION 'immutable impact'; END IF; END IF;
   delta:=octet_length(to_jsonb(NEW)::text)-octet_length(to_jsonb(OLD)::text);
   UPDATE public.compliance_storage_usage SET stored_bytes=stored_bytes+delta WHERE tenant=b.tenant AND domain=b.domain AND jurisdiction=b.jurisdiction;
   IF NOT FOUND THEN RAISE EXCEPTION 'missing storage accounting'; END IF;

@@ -70,7 +70,7 @@ def test_readiness_schema_guard(connected):
     spec.loader.exec_module(api)
     client=TestClient(api.app)
     healthy=client.get("/health/ready")
-    assert healthy.status_code==210,healthy.text
+    assert healthy.status_code==200,healthy.text
     assert healthy.json()["schema_version"]==21
     original=api.db
     class Cursor:

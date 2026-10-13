@@ -3528,3 +3528,30 @@ def ingest_pay_case_event(payload:PayCaseEventInput,
                     "state":payload.state})))
     return {"state":payload.state,"replayed":False,"custody":False,
             "payout_release_authorized":release}
+
+
+@app.get("/v1/bnb/reservations/{reservation_id}/host-casework")
+def host_casework_view(reservation_id:UUID,authorization:str|None=Header(None)):
+    """Host-only minimized dispute status, never a reviewer or Pay authority."""
+    actor=active_subject(authorization)
+    with db() as c:
+        row=c.execute("""SELECT p.host_subject,r.status,r.property_id
+            FROM bnb_reservation r JOIN bnb_property p ON p.id=r.property_id
+            WHERE r.id=%s""",(reservation_id,)).fetchone()
+        if not row or row[0]!=actor:
+            raise HTTPException(404,"NOT_FOUND")
+        cases=c.execute("""SELECT case_id,revision,event_state,resolution,
+            payout_release_authorized FROM (
+                SELECT DISTINCT ON (case_id) case_id,revision,event_state,
+                    resolution,payout_release_authorized
+                FROM bnb_pay_case_event WHERE reservation_id=%s
+                ORDER BY case_id,revision DESC
+            ) latest ORDER BY case_id""",(reservation_id,)).fetchall()
+    # No guest subject, payer wallet, private address, invoice, receipt, or
+    # unredacted evidence is returned to the host operations interface.
+    return {"reservation_id":str(reservation_id),"booking_status":row[1],
+            "cases":[{"case_id":case_id,"revision":revision,"state":state,
+                      "resolution":resolution,"payout_release_authorized":release}
+                     for case_id,revision,state,resolution,release in cases],
+            "reviewer_authority":False,"pay_authority":False,
+            "refund_execution_available":False,"bnb_custody":False}

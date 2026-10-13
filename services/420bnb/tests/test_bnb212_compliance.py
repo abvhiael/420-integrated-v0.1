@@ -104,7 +104,7 @@ def test_compliance_revision_scope_replay_and_independent_revocation(fixture_pro
     import time
     property_id,_=fixture_property
     now=int(time.time())
-    claims={"iss":"fixture-compliance-issuer","jti":"policy-"+str(uuid4()),
+    claims={"iss":"synthetic-fixture","jti":"policy-"+str(uuid4()),
         "property_id":str(property_id),"jurisdiction_id":"FIXTURE_ONLY",
         "decision":"allowed","revision":2,"license_reference":"fixture-license-2",
         "minimum_guest_age":18,"identity_required":True,
@@ -130,12 +130,12 @@ def test_compliance_revision_scope_replay_and_independent_revocation(fixture_pro
     claims["controller_subject"]="verified-host"
     claims["iss"]="forged-new-compliance-issuer"
     assert client.post(url,json=body).status_code==403
-    claims["iss"]="fixture-compliance-issuer"
+    claims["iss"]="synthetic-fixture"
     assert client.post(url,json=body).status_code==200
     revoke="/v1/bnb/compliance/eligibility/revoke"
     claims["iss"]="wrong-issuer"
     assert client.post(revoke,json=body).status_code==403
-    claims["iss"]="fixture-compliance-issuer"
+    claims["iss"]="synthetic-fixture"
     claims["jurisdiction_id"]="OTHER_PROPERTY"
     assert client.post(revoke,json=body).status_code==403
     claims["jurisdiction_id"]="FIXTURE_ONLY"

@@ -1,0 +1,95 @@
+{
+  "step": "R05.3 — durable migration unique key, transactional save application and outbox/receipt reconciliation across processes",
+  "qualification_model": "Three-level: Level 1 targeted; Level 2 R05.3 app milestone; Level 3 R05 phase closeout",
+  "implementation_sha": "eada106d0dd5ba64c0abc88448caff74befcf39d",
+  "predecessor_evidence_sha": "d6f6bd282636a6c9c8ac3bf17198580840fee37f",
+  "main_sha": "959288c8bd33b6da0325b6a5d060e00e7bcf0e48",
+  "branch": "audit/highcountry-r05-3-durable-migration-20261013",
+  "pr": 637,
+  "implementation_files": [
+    "services/420-gaming-player-profile/migrations/003_migration_runtime.up.sql",
+    "services/420-gaming-player-profile/src/migration-runtime-migrations.js",
+    "services/420-gaming-player-profile/src/migration-coordinator.js",
+    "services/420-gaming-player-profile/test/migration-postgres.integration.mjs",
+    "services/420-gaming-player-profile/test/migration-worker-child.mjs",
+    ".github/workflows/highcountry-r05-3.yml",
+    ".github/workflows/highcountry-r05-3-level2.yml"
+  ],
+  "state": "LEVEL1_PASS_LEVEL2_PENDING",
+  "level1": {
+    "status": "PASS",
+    "run": 38485437449,
+    "job": 115597824075,
+    "sha": "eada106d0dd5ba64c0abc88448caff74befcf39d",
+    "tests": {
+      "unit": 15,
+      "r051_postgres": 15,
+      "r052_postgres": 10,
+      "r053_postgres": 9,
+      "economy": 35,
+      "fail": 0,
+      "skip": 0
+    },
+    "affected": [
+      {
+        "name": "R05.1 Datastore",
+        "run": 38485437450,
+        "job": 115597824129,
+        "conclusion": "success"
+      },
+      {
+        "name": "R05.2 Authenticated Wallet",
+        "run": 38485437560,
+        "job": 115597824740,
+        "conclusion": "success"
+      },
+      {
+        "name": "Gaming Player Profile Service",
+        "run": 38485437467,
+        "job": 115597824426,
+        "conclusion": "success"
+      }
+    ]
+  },
+  "level2": {
+    "status": "PENDING",
+    "run": 38485437693,
+    "jobs": [
+      {
+        "name": "affected-clients",
+        "id": 115597824980,
+        "conclusion": "success"
+      },
+      {
+        "name": "retained-highcountry",
+        "id": 115597825255,
+        "conclusion": "in_progress_as_last_checked"
+      }
+    ]
+  },
+  "security": {
+    "durable_claim_uniqueness": true,
+    "durable_source_revision_uniqueness": true,
+    "transactional_save_application": true,
+    "original_save_preserved": true,
+    "operator_only_mutation": true,
+    "force_rls": true,
+    "immutable_receipt_history": true,
+    "crash_restart_subprocess": true,
+    "concurrent_worker_claiming": true,
+    "expired_lease_recovery": true,
+    "reorg_quarantine": true,
+    "conflicting_claim_atomic_rollback": true,
+    "revoked_consent_denial": true,
+    "cancelled_migration_denial": true,
+    "receipt_verification": "trusted-injected-adapter-fixtures-only"
+  },
+  "level3": "DEFERRED until complete accumulated R05 phase",
+  "blocks": [
+    "Level2 retained High Country contract job must complete successfully before milestone closeout",
+    "Live GameClaims issuance/consumption and target grower binding R05.4",
+    "Independent canonical RPC/finality proof R05.7",
+    "Production credentials, TLS, operators, monitoring, key management and recovery R07/R10/testnet"
+  ],
+  "next_canonical_step": "R05.4 — real GameClaims issuance/read adapters, target-wallet consumption, grower binding and exact payload validation. Service never holds player private keys."
+}

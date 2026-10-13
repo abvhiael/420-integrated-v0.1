@@ -1,0 +1,56 @@
+name: High Country R05.3 Level 2 Runtime Integration Milestone
+on:
+  pull_request:
+    paths:
+      - 'services/420-gaming-player-profile/**'
+      - '.github/workflows/highcountry-r05-3-level2.yml'
+      - 'docs/highcountry/R05.3-*'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  retained-highcountry:
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    env:
+      FOUNDRY_SRC: src/highcountry
+      FOUNDRY_TEST: test/highcountry
+      FOUNDRY_SCRIPT: script/highcountry
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Exact app implementation SHA
+        env:
+          SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$SHA"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: High Country app compilation and bytecode checks
+        working-directory: contracts
+        run: forge build src/highcountry --sizes
+      - name: Retained app contract journeys and adversarial tests
+        working-directory: contracts
+        run: forge test --match-path 'test/highcountry/**/*.t.sol' -vvv
+      - name: Canonical High Country verifier
+        run: python3 scripts/highcountry/verify-r01.py
+  affected-clients:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Exact client implementation SHA
+        env:
+          SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Retained HC and shared Gaming client/SDK/service tests
+        run: |
+          node --test clients/highcountry-access-v1/test/*.test.js packages/420-gaming-sdk/test/*.test.js packages/420-gaming-client-hardening/test/*.test.js packages/420-gaming-cross-game-qualification/test/*.test.js services/420-gaming-query/test/*.test.js
+      - name: Deployment template verifier
+        run: node scripts/gaming/verify-runtime-manifest.mjs deployments/gaming/testnet.runtime.json

@@ -1,0 +1,37 @@
+name: LIFTd L02.6 Level 1
+on:
+  pull_request:
+    paths:
+      - 'rideshare/src/driver-onboarding.mjs'
+      - 'rideshare/test/driver-onboarding.test.mjs'
+      - 'rideshare/web/**'
+      - '.github/workflows/liftd-l02-6-level1.yml'
+  push:
+    branches: ['build/liftd-l02-6-driver-onboarding']
+    paths:
+      - 'rideshare/src/driver-onboarding.mjs'
+      - 'rideshare/test/driver-onboarding.test.mjs'
+      - 'rideshare/web/**'
+      - '.github/workflows/liftd-l02-6-level1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  onboarding:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Exact implementation SHA
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          node --check rideshare/src/driver-onboarding.mjs
+          node --test rideshare/test/driver-onboarding.test.mjs rideshare/test/auth.test.mjs
+          cd rideshare/web && npm run check

@@ -81,6 +81,18 @@ test('R05.5 actual PostgreSQL schema, scoped backup and deletion lifecycle',asyn
    assert.equal((await actor.query('SELECT deleted_at FROM gaming_datastore.save_backups')).rows[0].deleted_at!==null,true);
    assert.equal((await actor.query("SELECT status FROM gaming_datastore.save_deletion_jobs")).rows[0].status,'DONE');
   });
+  await t.test('expired independent backup creates durable deletion work and worker completes',async()=>{
+   await worker.backup({...scope,revision:'1',backupId:'backup-expired',
+    expiresAt:'18446744073709551615',authority:'signed-session'});
+   await root.query(`UPDATE gaming_datastore.save_backups SET
+      created_at=gaming_datastore.now_seconds()-600,expires_at=gaming_datastore.now_seconds()-1
+      WHERE backup_id='backup-expired'`);
+   assert.equal(await worker.expire(),1);
+   assert.equal((await repo.transaction(t=>t.saveReference('1'))).revision,'1');
+   const finished=await worker.drain();
+   assert.equal(finished.length,1);assert.equal(finished[0].status,'DONE');
+   assert.equal(objects.has('copy3'),false);
+  });
   await t.test('primary save deletion revokes provider locator and physically expires its unshared blob',async()=>{
    await assert.rejects(()=>worker.requestSaveDelete({...scope,revision:'1',authority:'forged'}),/save-authority-denied/);
    const before=await repo.transaction(tx=>tx.saveReference('1'));assert.equal(before.provider_id,'source');

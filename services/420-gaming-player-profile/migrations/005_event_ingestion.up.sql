@@ -46,6 +46,17 @@ CREATE TABLE gaming_datastore.event_logs (
  PRIMARY KEY(chain_id,contract,block_hash,log_index),
  CHECK(jsonb_typeof(payload)='object')
 );
+CREATE TABLE gaming_datastore.event_reorg_history (
+ chain_id gaming_datastore.uint64 NOT NULL CHECK(chain_id>0),
+ contract gaming_datastore.wallet NOT NULL,
+ recovery_id gaming_datastore.opaque_id NOT NULL,
+ old_next_block gaming_datastore.uint64 NOT NULL,
+ previous_anchor gaming_datastore.commitment NOT NULL,
+ ancestor_number gaming_datastore.uint64 NOT NULL,
+ ancestor_hash gaming_datastore.commitment NOT NULL,
+ recorded_at gaming_datastore.uint64 NOT NULL DEFAULT gaming_datastore.now_seconds(),
+ PRIMARY KEY(chain_id,contract,recovery_id)
+);
 CREATE TABLE gaming_datastore.event_scopes (
  chain_id gaming_datastore.uint64 NOT NULL CHECK(chain_id>0),
  contract gaming_datastore.wallet NOT NULL,
@@ -60,7 +71,7 @@ CREATE TABLE gaming_datastore.event_scopes (
 CREATE INDEX event_log_height ON gaming_datastore.event_logs(chain_id,contract,block_number,status);
 CREATE INDEX event_scope_view ON gaming_datastore.event_scopes(account_id,game_id,chain_id);
 DO $$ DECLARE t text; BEGIN
- FOREACH t IN ARRAY ARRAY['event_cursors','event_blocks','event_logs','event_scopes'] LOOP
+ FOREACH t IN ARRAY ARRAY['event_cursors','event_blocks','event_logs','event_scopes','event_reorg_history'] LOOP
   EXECUTE format('ALTER TABLE gaming_datastore.%I OWNER TO gaming_datastore_migrator',t);
   EXECUTE format('ALTER TABLE gaming_datastore.%I ENABLE ROW LEVEL SECURITY',t);
   EXECUTE format('ALTER TABLE gaming_datastore.%I FORCE ROW LEVEL SECURITY',t);
@@ -72,3 +83,9 @@ CREATE POLICY r056_scope_event_read ON gaming_datastore.event_scopes FOR SELECT 
  USING(gaming_datastore.scope_matches(account_id,game_id));
 GRANT SELECT ON gaming_datastore.event_scopes TO gaming_datastore_runtime;
 -- Event rows are readable only through the authorized scoped service's operator-controlled query.
+
+-- Reorg audit history is append-only, including if a previously orphaned fork reappears.
+CREATE FUNCTION gaming_datastore.reject_event_history_changes() RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN RAISE EXCEPTION 'event recovery audit immutable' USING ERRCODE='23514'; END $$;
+CREATE TRIGGER immutable_event_reorg_history BEFORE UPDATE OR DELETE ON gaming_datastore.event_reorg_history
+ FOR EACH ROW EXECUTE FUNCTION gaming_datastore.reject_event_history_changes();

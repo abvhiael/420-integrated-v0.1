@@ -1,0 +1,36 @@
+name: LIFTd L02.4 Level 1
+on:
+  pull_request:
+    paths:
+      - 'rideshare/web/**'
+      - '.github/workflows/liftd-l02-4-level1.yml'
+  push:
+    branches: ['build/liftd-l02-4-quote-request']
+    paths:
+      - 'rideshare/web/**'
+      - '.github/workflows/liftd-l02-4-level1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  quote-request:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Assert exact implementation SHA
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Scoped quote/consent/idempotency, route and retained web tests
+        run: |
+          node --check rideshare/web/quote-policy.mjs
+          node --check rideshare/web/quote-controller.mjs
+          node --check rideshare/web/quote-api.mjs
+          node --check rideshare/web/quote-view.mjs
+          cd rideshare/web && npm run check

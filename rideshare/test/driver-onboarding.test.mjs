@@ -22,7 +22,7 @@ test('submissions require bound signed session; private references cannot appear
  assert.equal(f.mutations,1);
 });
 test('expired, unknown, accessor-backed or duplicated documents rejected',()=>{
- for(const documents of [[{kind:'licence',privateRef:'p',expiresAt:1}],[{kind:'other',privateRef:'p',expiresAt:3000}],[
+ for(const documents of [[{kind:'other',privateRef:'p',expiresAt:3000}],[
  {kind:'licence',privateRef:'p',expiresAt:3000},{kind:'licence',privateRef:'q',expiresAt:3000}]])
  assert.throws(()=>validateOnboarding({...input,documents:documents.map(d=>({...d}))}));
  assert.throws(()=>validateOnboarding({...input,documents:[Object.defineProperty({},'kind',{get(){throw Error('getter')},enumerable:true})]}));
@@ -32,3 +32,5 @@ test('approval remains external: driver submissions cannot self-approve or revok
  await assert.rejects(f.service.submit('good',{...input,expectedRevision:1}),e=>e.code==='EXTERNAL_REVIEW_REQUIRED');
  await assert.rejects(f.service.submit('good',{...input,status:'APPROVED'}));
 });
+
+test('expired document cannot be submitted for review',async()=>{const f=fixture();await assert.rejects(f.service.submit('good',{...input,documents:[{kind:'licence',privateRef:'p',expiresAt:1}]}),e=>e.code==='DOCUMENT_EXPIRED');});

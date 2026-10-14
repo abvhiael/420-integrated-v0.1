@@ -1,8 +1,8 @@
-// SPDX-License-Identifier: GPL-3.0
-// R05.5 durable save lifecycle metadata. No raw cloud-save payloads are stored in PostgreSQL.
+-- SPDX-License-Identifier: GPL-3.0
+-- R05.5 durable save lifecycle metadata. No raw cloud-save payloads are stored in PostgreSQL.
 CREATE TABLE gaming_datastore.save_lifecycle_schema(version integer PRIMARY KEY CHECK(version=5),digest text NOT NULL);
 CREATE TABLE gaming_datastore.save_backups(
- account_id text NOT NULL,game_id text NOT NULL,backup_id text NOT NULL,
+ account_id gaming_datastore.opaque_id NOT NULL,game_id gaming_datastore.commitment NOT NULL,backup_id gaming_datastore.opaque_id NOT NULL,
  source_revision gaming_datastore.uint64 NOT NULL,
  provider_id text NOT NULL,object_ref text NOT NULL,
  state_hash text NOT NULL,byte_length gaming_datastore.uint64 NOT NULL,
@@ -19,7 +19,7 @@ CREATE TABLE gaming_datastore.save_backups(
  CHECK(expires_at>created_at)
 );
 CREATE TABLE gaming_datastore.save_deletion_jobs(
- account_id text NOT NULL,game_id text NOT NULL,job_id text NOT NULL,
+ account_id gaming_datastore.opaque_id NOT NULL,game_id gaming_datastore.commitment NOT NULL,job_id gaming_datastore.opaque_id NOT NULL,
  object_ref text NOT NULL,provider_id text NOT NULL,
  reason text NOT NULL CHECK(reason IN ('RETENTION','USER_DELETE','CONSENT_REVOKED')),
  status text NOT NULL DEFAULT 'PENDING' CHECK(status IN ('PENDING','LEASED','DONE','RETRY')),

@@ -71,6 +71,9 @@ export function transitionTrip(trip, command, actor, context = {}) {
     if (!assignedDriver) fail('UNAUTHORIZED');
     if (trip.state !== 'IN_PROGRESS') fail('INVALID_TRANSITION');
     state = 'COMPLETED'; // Completion records a trip outcome; never captures funds.
+  } else if (command.action === 'safety_resolve') {
+    if (actor.role !== 'dispatcher' || trip.state !== 'IN_PROGRESS') fail('SAFETY_RESOLUTION_DENIED');
+    state = 'CANCELLED'; // Safety resolution requires separate authenticated incident authority at service boundary.
   } else if (command.action === 'expire') {
     if (actor.role !== 'dispatcher') fail('UNAUTHORIZED');
     if (trip.state !== 'ASSIGNED' || !Number.isSafeInteger(context.assignmentExpiresAt) || context.assignmentExpiresAt < 0 || context.assignmentExpiresAt > context.now) fail('ASSIGNMENT_NOT_EXPIRED');

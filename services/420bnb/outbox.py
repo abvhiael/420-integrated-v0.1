@@ -33,7 +33,7 @@ def _event(event):
     payload=event["payload"]
     if not isinstance(payload,dict) or not payload or len(json.dumps(payload))>4096:
         raise DeliveryError("PAYLOAD_INVALID")
-    if any(k.lower() in ("password","secret","token","authorization","address","email","phone","private_key") for k in payload):
+    if any(k.lower() in ("password","secret","token","authorization","address","email","phone","private_key") or k.lower().endswith(("_address","_email","_phone","_token","_secret","_password","_private_key","_authorization")) for k in payload):
         raise DeliveryError("PRIVATE_PAYLOAD_FORBIDDEN")
     for k,v in payload.items():
         if not isinstance(k,str) or len(k)>80 or isinstance(v,(dict,list)) or len(str(v))>256:

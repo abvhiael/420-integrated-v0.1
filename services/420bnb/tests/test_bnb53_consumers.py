@@ -402,9 +402,9 @@ def test_actual_consumer_process_crash_after_accept_recovers_only_own_delivery(d
     import subprocess
     eid = enrolled(db)
     with db() as c:
-        dsn = c.info.dsn
+        schema = c.execute('SELECT current_schema()').fetchone()[0]
     code = '''import os,psycopg,worker
-connect=lambda:psycopg.connect(os.environ['BNB53_TEST_DSN'])
+connect=lambda:psycopg.connect(os.environ['BNB_DATABASE_URL'],options='-c search_path='+os.environ['BNB53_TEST_SCHEMA'],connect_timeout=3)
 class Crash(worker.LocalValidationSink):
  def accept(self,*args):
   super().accept(*args)
@@ -412,7 +412,7 @@ class Crash(worker.LocalValidationSink):
 worker.Supervisor(connect,Crash(connect),consumer='search-fixture').once()
 '''
     result = subprocess.run([sys.executable, '-c', code], cwd=ROOT,
-        env=dict(os.environ, BNB53_TEST_DSN=dsn), capture_output=True, timeout=8)
+        env=dict(os.environ, BNB53_TEST_SCHEMA=schema), capture_output=True, timeout=8)
     assert result.returncode == 23
     due(db, eid, 'search-fixture')
     assert worker.Supervisor(db, worker.LocalValidationSink(db), consumer='search-fixture').once() == 'delivered'

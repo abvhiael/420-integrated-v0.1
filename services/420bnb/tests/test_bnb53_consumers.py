@@ -440,3 +440,25 @@ def test_production_restart_never_reactivates_revoked_local_consumer(tls_databas
             signal.signal(sig, handler)
     with psycopg.connect(**values) as c:
         assert c.execute("SELECT active,revision FROM bnb_consumer_subscription WHERE consumer='bnb-local-validation'").fetchone() == (False, 1)
+
+
+@pytest.mark.parametrize('operation', ['configure','enroll','claim','renew','acknowledge','fail','replay'])
+def test_autocommit_cannot_create_partial_enrollment_or_receipt_state(db, operation):
+    eid = uuid4()
+    actions = {
+        'configure': lambda c: delivery.configure(c, 'fixture', [KIND], active=True,
+            expected_revision=0, actor='operator', authorize=lambda *_: True),
+        'enroll': lambda c: delivery.enroll(c),
+        'claim': lambda c: delivery.claim(c, 'owner', 'fixture'),
+        'renew': lambda c: delivery.renew(c, eid, 'owner', 'fixture'),
+        'acknowledge': lambda c: delivery.acknowledge(c, eid, 'owner', 'fixture', 'receipt'),
+        'fail': lambda c: delivery.fail(c, eid, 'owner', 'fixture', 'failure'),
+        'replay': lambda c: delivery.replay(c, eid, 'fixture', actor='operator',
+            reason='fixture replay', authorize=lambda *_: True),
+    }
+    with db() as c:
+        c.autocommit = True
+        with pytest.raises(outbox.DeliveryError, match='TRANSACTION_REQUIRED'):
+            actions[operation](c)
+        assert c.execute('SELECT count(*) FROM bnb_consumer_subscription').fetchone() == (0,)
+        assert c.execute('SELECT count(*) FROM bnb_consumer_delivery').fetchone() == (0,)

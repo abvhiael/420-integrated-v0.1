@@ -8,6 +8,12 @@ DeliveryError = outbox.DeliveryError
 MAX_CONSUMERS = 64
 
 
+def _transaction(conn):
+    # Multi-statement enrollment/receipt writes must never run piecemeal.
+    if conn.autocommit:
+        raise DeliveryError('TRANSACTION_REQUIRED')
+
+
 def _authorize(authorize, actor, action, consumer):
     outbox._identity(actor, outbox.WORKER, 'ACTOR_INVALID')
     outbox._identity(consumer, outbox.CONSUMER, 'CONSUMER_INVALID')
@@ -21,6 +27,7 @@ def configure(conn, consumer, event_types, *, active, expected_revision, actor, 
     No caller-supplied boolean approval. Caller must establish independent authority.
     CAS revision fences concurrent/replayed changes; identical current config is idempotent.
     """
+    _transaction(conn)
     _authorize(authorize, actor, 'configure', consumer)
     if (type(active) is not bool or type(expected_revision) is not int or expected_revision < 0
             or not isinstance(event_types, (list, tuple)) or not 1 <= len(event_types) <= 32
@@ -69,6 +76,7 @@ def enroll(conn, *, limit=100):
     No empty fanout, no historical acceptance/backfill, no automatic late-subscriber replay.
     Registry SHARE locks and event locks serialize against revocation and other enrollments.
     """
+    _transaction(conn)
     if type(limit) is not int or not 1 <= limit <= 100:
         raise DeliveryError('CLAIM_BOUNDS')
     conn.execute('SELECT pg_advisory_xact_lock_shared(420503)')
@@ -94,6 +102,7 @@ def enroll(conn, *, limit=100):
 
 
 def claim(conn, worker, consumer, *, limit=1, lease_seconds=30):
+    _transaction(conn)
     outbox._identity(worker, outbox.WORKER, 'WORKER_INVALID')
     if (type(limit) is not int or not 1 <= limit <= 100 or type(lease_seconds) is not int
             or not 10 <= lease_seconds <= 300):
@@ -142,6 +151,7 @@ def _locked(conn, event_id, consumer, worker, *, verify_envelope=True):
 
 
 def renew(conn, event_id, worker, consumer, *, lease_seconds=30):
+    _transaction(conn)
     if type(lease_seconds) is not int or not 10 <= lease_seconds <= 300:
         raise DeliveryError('CLAIM_BOUNDS')
     eid, _ = _locked(conn, event_id, consumer, worker)
@@ -156,6 +166,7 @@ def renew(conn, event_id, worker, consumer, *, lease_seconds=30):
 
 
 def acknowledge(conn, event_id, worker, consumer, receipt):
+    _transaction(conn)
     if not isinstance(receipt, str) or not 1 <= len(receipt) <= 256:
         raise DeliveryError('RECEIPT_INVALID')
     eid, row = _locked(conn, event_id, consumer, worker)
@@ -182,6 +193,7 @@ def acknowledge(conn, event_id, worker, consumer, receipt):
 
 
 def fail(conn, event_id, worker, consumer, code):
+    _transaction(conn)
     outbox._identity(code, outbox.CONSUMER, 'FAILURE_CODE_INVALID')
     eid, row = _locked(conn, event_id, consumer, worker, verify_envelope=False)
     delay = min(3600, 2**min(row[2], 12))
@@ -197,6 +209,7 @@ def fail(conn, event_id, worker, consumer, code):
 
 
 def replay(conn, event_id, consumer, *, actor, reason, authorize=None):
+    _transaction(conn)
     _authorize(authorize, actor, 'replay', consumer)
     if not isinstance(reason, str) or not 5 <= len(reason) <= 200:
         raise DeliveryError('REASON_INVALID')

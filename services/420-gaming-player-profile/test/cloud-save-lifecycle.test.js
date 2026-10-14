@@ -4,7 +4,7 @@ import {CloudSaveLifecycle420,parseLocalSave420} from '../src/cloud-save-lifecyc
 const R='0x'+'a'.repeat(64);
 const bytes=(state,version=7)=>new TextEncoder().encode(JSON.stringify({schemaVersion:version,rulesetId:R,state}));
 function fixture(){
- const objects=new Map(),revisions=new Map(),head={revision:'0'},calls=[];
+ const objects=new Map(),revisions=new Map(),backups=new Map(),head={revision:'0'},calls=[];
  const provider={
   put:async({bytes,integrity})=>{const ref='o'+(objects.size+1);objects.set(ref,Uint8Array.from(bytes));return {providerId:'localfixture',objectRef:ref};},
   get:async({objectRef})=>objects.get(objectRef),
@@ -20,9 +20,10 @@ function fixture(){
     state_hash:x.stateHash,byte_length:x.byteLength,ruleset_id:x.rulesetId};
    revisions.set(row.revision,row);return row;
   },
-  saveReference:async revision=>revisions.get(revision??head.revision)??null
+  saveReference:async revision=>revisions.get(revision??head.revision)??null,
+  backupReference:async id=>backups.get(id)??null
  })};
- return {save:new CloudSaveLifecycle420({repository:repo,provider,schemaVersion:7}),objects,revisions,head,calls};
+ return {save:new CloudSaveLifecycle420({repository:repo,provider,schemaVersion:7}),objects,revisions,backups,head,calls};
 }
 test('R05.5 explicit version, bounded size and local schema reject malformed saves',()=>{
  assert.equal(parseLocalSave420({bytes:bytes({room:1}),schemaVersion:7}).schemaVersion,7);
@@ -49,4 +50,21 @@ test('R05.5 restore creates new head and leaves historical backup immutable',asy
  assert.equal((await f.save.read()).local.state.home,1);
  assert.equal((await f.save.read('2')).local.state.home,2);
  await assert.rejects(()=>f.save.restore({backupRevision:'1',expectedHead:'2',consentId:'c1',schemaLabel:'hc-v7'}),/revision-conflict/);
+});
+
+test('R05.5 independent backup can restore after source object is lost or redacted',async()=>{
+ const f=fixture();
+ const initial=await f.save.publish({expectedRevision:'0',consentId:'c1',schemaLabel:'hc-v7',bytes:bytes({saved:1})});
+ const snapshot=f.objects.get(initial.objectRef);
+ f.objects.set('independent-backup',Uint8Array.from(snapshot));
+ f.backups.set('backup-safe',{backup_id:'backup-safe',source_revision:'1',
+  provider_id:'localfixture',object_ref:'independent-backup',
+  state_hash:initial.digest,byte_length:String(snapshot.length),schema_label:'hc-v7'});
+ f.objects.delete(initial.objectRef);
+ const restored=await f.save.restoreBackup({backupId:'backup-safe',expectedHead:'1',
+  consentId:'c1',schemaLabel:'hc-v7'});
+ assert.equal(restored.revision,'2');assert.equal(restored.sourceRevision,'1');
+ assert.equal((await f.save.read()).local.state.saved,1);
+ await assert.rejects(()=>f.save.restoreBackup({backupId:'unknown',expectedHead:'2',
+  consentId:'c1',schemaLabel:'hc-v7'}),/save-backup-unavailable/);
 });

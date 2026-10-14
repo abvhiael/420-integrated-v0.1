@@ -33,7 +33,6 @@ CREATE TABLE gaming_datastore.event_logs (
  status text NOT NULL DEFAULT 'PENDING' CHECK(status IN ('PENDING','FINALIZED','ORPHANED')),
  inserted_at gaming_datastore.uint64 NOT NULL DEFAULT gaming_datastore.now_seconds(),
  PRIMARY KEY(chain_id,contract,block_hash,log_index),
- UNIQUE(chain_id,contract,tx_hash,log_index),
  CHECK(jsonb_typeof(payload)='object')
 );
 CREATE TABLE gaming_datastore.event_scopes (

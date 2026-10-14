@@ -19,13 +19,13 @@ async function receipt(hash){
  throw Error('EVM transaction timeout');
 }
 async function send(from,to,data){
- const hash=await rpc.request('eth_sendTransaction',[{from,to,data,gas:'0x1dcd6500'}]);
+ const hash=await rpc.request('eth_sendTransaction',[{from,to,data,gas:'0x2faf080'}]);
  return receipt(hash);
 }
 async function deny(from,to,data){
  let rejected=false;
  try{
-  const hash=await rpc.request('eth_sendTransaction',[{from,to,data,gas:'0x1dcd6500'}]);
+  const hash=await rpc.request('eth_sendTransaction',[{from,to,data,gas:'0x2faf080'}]);
   const result=await receipt(hash);rejected=result.status!=='0x1';
  }catch{rejected=true;}
  assert.equal(rejected,true,'unauthorized transaction unexpectedly succeeded');

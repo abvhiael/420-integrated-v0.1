@@ -20,12 +20,15 @@ const logs=(blockHash)=>[{address:contract,blockHash,transactionHash:tx,
  transactionIndex:'0',logIndex:'0',
  topics:[GAMING_EVENT_TOPICS420.MigrationClaimConsumed,h('8'),profile],data:'0x'}];
 const chain={number:'1',hash:block1,parentHash:parent,logs:logs(block1)};
-let canonical=new Set([block1]),permission=true,callCount=0;
+let canonical=new Set([block1]),permission=true,callCount=0,onlyIssueScope=false;
 const canonicalByHeight=new Map([['1',{...chain}]]);
 const indexer=()=>new DurableGamingEventIndexer420({operatorPool:root,
  chainId:'420',gameId:G,contracts:C,
- fetchBlock:async ({number})=>{assert.ok(['1','2','3'].includes(number));callCount++;return {...(canonicalByHeight.get(number)??chain),number};},
- resolveEventScope:async ({kind})=>{assert.equal(kind,'MigrationClaimConsumed');return {accountId:'alice',gameId:G};},
+ fetchBlock:async ({number})=>{assert.ok(['1','2','3','4'].includes(number));callCount++;return {...(canonicalByHeight.get(number)??chain),number};},
+ resolveEventScope:async ({kind})=>{
+  if(!['MigrationClaimConsumed','MigrationClaimIssued'].includes(kind))throw Error('unexpected event');
+  return onlyIssueScope&&kind==='MigrationClaimConsumed'?null:{accountId:'alice',gameId:G};
+ },
  verifyCanonicalBlock:async ({blockHash})=>canonical.has(blockHash),
  authorizeQuery:async ({accountId,gameId,authority})=>permission&&accountId==='alice'&&gameId===G&&authority==='signed-session'
 });
@@ -141,6 +144,24 @@ test('R05.6 real durable PostgreSQL cursor/dedupe/reorg/finality and scoped quer
     await assert.rejects(()=>pool.query('INSERT INTO gaming_datastore.event_cursors(chain_id,contract,next_block) VALUES(420,$1,1)',[contract]),e=>e.code==='42501');
     assert.equal((await pool.query('SELECT * FROM gaming_datastore.event_scopes')).rowCount,2);
    }finally{await pool.end();}
+  });
+  await t.test('same-block claim issue and consume inherit only prior trusted owner scope',async()=>{
+   onlyIssueScope=true;
+   const newHash=h('e');chain.parentHash=h('d');chain.hash=newHash;
+   const claim=h('8'),accountTopic='0x'+wallet.slice(2).padStart(64,'0');
+   const issue={address:contract,blockHash:newHash,transactionHash:h('c'),
+    transactionIndex:'0',logIndex:'0',
+    topics:[GAMING_EVENT_TOPICS420.MigrationClaimIssued,claim,G,accountTopic],
+    data:'0x'+h('9').slice(2)+h('a').slice(2)+BigInt(3600).toString(16).padStart(64,'0')};
+   const consume={...logs(newHash)[0],transactionHash:h('c'),logIndex:'1'};
+   chain.logs=[issue,consume];canonicalByHeight.set('4',{...chain});canonical.add(newHash);
+   const done=await indexer().ingest({contract,startBlock:'4'});
+   assert.equal(done.ingested,2);
+   const count=(await root.query(`SELECT count(*)::integer AS n FROM gaming_datastore.event_scopes
+    WHERE block_hash=$1`,[newHash])).rows[0].n;
+   assert.equal(count,2,'consumed claim inherits previously verified same-block issuer owner');
+   assert.equal((await indexer().finalize({contract,blockNumber:'4',blockHash:newHash})).finalized,2);
+   onlyIssueScope=false;
   });
   await t.test('digest drift fails closed',async()=>{
    await root.query("UPDATE gaming_datastore.event_ingestion_schema SET digest=repeat('f',64)");

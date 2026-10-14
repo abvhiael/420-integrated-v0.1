@@ -30,7 +30,7 @@ export class CloudSaveLifecycle420 {
    fail('save-invalid-configuration');
   this.#repo=repository;this.#provider=provider;this.#schema=schemaVersion;
  }
- async publish({expectedRevision,consentId,schemaLabel,bytes}){
+ async publish({expectedRevision,consentId,schemaLabel,bytes,backupGuard=null}){
   if(!uint(expectedRevision)||!opaque(consentId)||!opaque(schemaLabel))fail('save-invalid-input');
   const local=parseLocalSave420({bytes,schemaVersion:this.#schema});
   // The provider must produce a durable immutable object before reference publication.
@@ -38,6 +38,11 @@ export class CloudSaveLifecycle420 {
   if(!stored||!opaque(stored.providerId)||!opaque(stored.objectRef))fail('save-provider-invalid');
   try{
    const row=await this.#repo.transaction(async tx=>{
+    if(backupGuard){
+     const active=await tx.backupReference(backupGuard.backupId);
+     if(!active||active.object_ref!==backupGuard.objectRef||active.state_hash!==local.digest)
+      fail('save-backup-revoked');
+    }
     const profile=await tx.profile();
     if(!profile||profile.ruleset_id!==local.rulesetId)fail('save-ruleset-conflict');
     return tx.publishSaveReference({expectedRevision,schemaLabel,rulesetId:local.rulesetId,
@@ -88,7 +93,8 @@ export class CloudSaveLifecycle420 {
   const parsed=parseLocalSave420({bytes,schemaVersion:this.#schema});
   // publish rechecks the authenticated profile ruleset and active cloud-save consent
   // in a serializable transaction. A stale head is never overwritten.
-  const saved=await this.publish({expectedRevision:expectedHead,consentId,schemaLabel,bytes});
+  const saved=await this.publish({expectedRevision:expectedHead,consentId,schemaLabel,bytes,
+   backupGuard:{backupId,objectRef:backup.object_ref}});
   return Object.freeze({...saved,restoredBackup:backupId,
    sourceRevision:String(backup.source_revision),schemaVersion:parsed.schemaVersion});
  }

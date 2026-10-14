@@ -159,3 +159,18 @@ R05.7 repository-side evidence verifies high-risk claim, consumed/bound migratio
 | HC-R05.7-T05 | Independent security, operating and audit review of dual-RPC independence, failover/alerts, timeouts/DoS budgets, predeploy replacement/upgrade codehash changes and consent/identity-revocation integration |
 
 **All gates OPEN / NOT RUN in the official testnet.** A local mock, disposable Anvil or an injectable callback returning true is not a real second-RPC witness. Level 1 may qualify the implementation and fail-closed adversarial tests without falsely certifying these live acceptance conditions. R05.8 owns deployed transports/network detection and R05.9 owns operational abuse/monitoring.
+
+
+## R05.8 — Gaming SDK deployed transport acceptance (OPEN / TESTNET-GATED)
+
+R05.8 repository implementation provides seven-contract configured manifest validation, same-chain wallet/provider checks, immutable exact-EVM selector bindings and blockHash-pinned runtime bytecode checks, bounded idempotent RPC read retries, and authenticated event-feed transport without client-provided account authority. These do not by themselves qualify an official deployment.
+
+| Gate | Official acceptance |
+|---|---|
+| HC-R05.8-T01 | Freeze approved official Genesis deployment addresses and runtime codehashes, seven-ABI manifest versioning and signed configuration provenance, official chain ID and distinct HTTPS primary/witness RPC operators |
+| HC-R05.8-T02 | Exercise deployed Wallet (including externally managed contract wallet), actual connected network changes/disconnects, selected game profile, code replacement, stale/forked RPC and consumer network recovery |
+| HC-R05.8-T03 | Production-equivalent authenticated SDK HTTP transport, revoked/expired session, cross-account privacy, mobile/desktop handling, preflight/CORS, pagination and bounded outage/rate-limit responses |
+| HC-R05.8-T04 | End-to-end generated ABI parity at production deployed bytecode and upgrade manifests; actual GameClaims/Gaming Identity/Entitlements/CrossGame/HighCountry client consumption and signed operator approvals |
+| HC-R05.8-T05 | Operational failure-budget, retry/backoff, circuit-breaker/metrics, network failover and security/privacy/device testing at deployment scale; R05.9 remains abuse/observability owner |
+
+**All T01–T05 OPEN / NOT RUN on official testnet.** Mock responses and local SDK tests are repository Level 1 evidence only. No browser wallet private key is stored or sent through the service.

@@ -15,6 +15,9 @@ sys.path.insert(0,str(Path(__file__).resolve().parent))
 from identity import verify_external_token
 from authority import verify_authority
 from calendar_engine import peak_used,strict_local_instant,local_stay_window
+from availability_projection import refresh as refresh_availability_projection
+from discovery_sync import synchronize as sync_discovery_projection
+from casework_policy import report_retention_interval
 from pricing import quote_breakdown
 from travel_location import resolve_public_place, TravelLocationUnavailable
 from fastapi import FastAPI, Header, HTTPException, Response
@@ -346,13 +349,13 @@ def ready():
             if current is None:
                 raise HTTPException(503,"SCHEMA_NOT_MIGRATED")
             records=c.execute("SELECT version FROM bnb_schema_migration ORDER BY version").fetchall()
-            if [row[0] for row in records]!=list(range(1,22)):
+            if [row[0] for row in records]!=list(range(1,27)):
                 raise HTTPException(503,"SCHEMA_VERSION_MISMATCH")
     except psycopg.Error:
         # A database outage or connection exhaustion is not a ready API.
         # Never leak DSNs, SQL statements, hostnames or credentials to probes.
         raise HTTPException(503,"DATABASE_UNAVAILABLE") from None
-    return {"status":"ready","transactions_enabled":False,"schema_version":21}
+    return {"status":"ready","transactions_enabled":False,"schema_version":26}
 
 
 class GuestMessageInput(BaseModel):
@@ -548,6 +551,27 @@ def ingest_travel_jurisdiction_policy(payload:TravelBindingProof):
               revision=excluded.revision,revoked_at=NULL""",
               (jurisdiction,decision,claims["iss"],claims["jti"],claims["nbf"],claims["exp"],revision))
     return {"accepted":True,"revision":revision}
+
+@app.get("/v1/bnb/internal/discovery/{consumer}/{property_id}")
+def internal_discovery_sync(consumer:str,property_id:UUID,
+                            x_discovery_proof:str|None=Header(None)):
+    """Pull-time revalidation: immutable revision or immediate retraction tombstone.
+
+    Internal consumers must present a signed external issuer capability. No public
+    browsing route or arbitrary key may trigger a provider publication.
+    """
+    if consumer not in ("search","travel"):
+        raise HTTPException(404,"CONSUMER_NOT_FOUND")
+    if not x_discovery_proof:raise HTTPException(401,"DISCOVERY_PROOF_REQUIRED")
+    claims=verify_authority(x_discovery_proof,"BNB_DISCOVERY_CONSUMER","discovery-read")
+    if claims.get("consumer")!=consumer or claims.get("property_id")!=str(property_id):
+        raise HTTPException(403,"DISCOVERY_SCOPE_MISMATCH")
+    with db() as c:
+        with c.transaction():
+            result=sync_discovery_projection(c,property_id)
+    return {"version":"bnb-discovery-sync/v1",**result,"consumer":consumer,
+            "nonbinding":True,"transaction_enabled":False}
+
 
 @app.get("/v1/bnb/travel/discovery")
 def travel_discovery(destination:str="",min_capacity:int=1,limit:int=20,offset:int=0,place_id:str=""):
@@ -775,15 +799,28 @@ def guest_reservation_dashboard(authorization:str|None=Header(None)):
             "checkout":x[6].isoformat(),"confirmed":x[1]=="confirmed"} for x in rows]
 
 
+def message_thread_scope(c,request_id,actor):
+    """Current request participant or independent valid handle_requests grant."""
+    ref=c.execute("""SELECT r.property_id,r.guest_subject,r.host_subject,r.state,p.host_subject,p.status
+       FROM bnb_booking_request r JOIN bnb_property p ON p.id=r.property_id
+       WHERE r.id=%s""",(request_id,)).fetchone()
+    if not ref:raise HTTPException(404,"NOT_FOUND")
+    account=c.execute("SELECT state FROM bnb_account WHERE subject=%s",(actor,)).fetchone()
+    if not account or account[0]!="active":raise HTTPException(404,"NOT_FOUND")
+    owner=actor==ref[2]==ref[4] and ref[5]=="published"
+    if actor!=ref[1] and not owner:
+        if ref[5]!="published":raise HTTPException(404,"NOT_FOUND")
+        host_scope(c,ref[0],actor,"handle_requests")
+    if ref[3] in ("declined","withdrawn","expired","cancelled"):
+        raise HTTPException(409,"THREAD_CLOSED")
+    return ref
+
+
 @app.get("/v1/bnb/booking-requests/{request_id}/messages")
 def guest_messages(request_id:UUID,authorization:str|None=Header(None)):
     actor=active_subject(authorization)
     with db() as c:
-        row=c.execute("""SELECT r.guest_subject,r.host_subject,p.host_subject,p.status
-            FROM bnb_booking_request r JOIN bnb_property p ON p.id=r.property_id
-            WHERE r.id=%s""",(request_id,)).fetchone()
-        if not row or (actor!=row[0] and not (actor==row[1] and actor==row[2] and row[3]=="published")):
-            raise HTTPException(404,"NOT_FOUND")
+        message_thread_scope(c,request_id,actor)
         data=c.execute("""SELECT id,sender_subject,body,created_at FROM bnb_guest_message
             WHERE booking_request_id=%s AND moderation_status='visible' ORDER BY created_at,id LIMIT 100""",(request_id,)).fetchall()
     return [{"id":str(x[0]),"sender":("you" if x[1]==actor else "other"),
@@ -795,18 +832,12 @@ def send_guest_message(request_id:UUID,payload:GuestMessageInput,
                        authorization:str|None=Header(None)):
     actor=active_subject(authorization)
     if not payload.body.strip():raise HTTPException(422,"EMPTY_MESSAGE")
+    if any(ord(ch)<32 and ch not in "\\n\\t" for ch in payload.body):raise HTTPException(422,"MESSAGE_CONTROL_CHARACTER")
     with db() as c:
         with c.transaction():
-            c.execute("SELECT subject FROM bnb_account WHERE subject=%s FOR UPDATE",(actor,))
-            ref=c.execute("""SELECT r.property_id,r.guest_subject,r.host_subject,r.state
-                FROM bnb_booking_request r WHERE r.id=%s""",(request_id,)).fetchone()
-            if not ref:raise HTTPException(404,"NOT_FOUND")
-            property=c.execute("SELECT host_subject,status FROM bnb_property WHERE id=%s FOR UPDATE",
-                               (ref[0],)).fetchone()
-            if actor!=ref[1] and not (actor==ref[2] and actor==property[0] and property[1]=="published"):
-                raise HTTPException(404,"NOT_FOUND")
-            if ref[3] in ("declined","withdrawn","expired"):
-                raise HTTPException(409,"THREAD_CLOSED")
+            account=c.execute("SELECT state FROM bnb_account WHERE subject=%s FOR UPDATE",(actor,)).fetchone()
+            if not account or account[0]!="active":raise HTTPException(401,"ACCOUNT_REVOKED")
+            message_thread_scope(c,request_id,actor)
             prior=c.execute("""SELECT id,body FROM bnb_guest_message
                 WHERE booking_request_id=%s AND sender_subject=%s AND client_nonce=%s""",
                 (request_id,actor,payload.nonce)).fetchone()
@@ -821,8 +852,63 @@ def send_guest_message(request_id:UUID,payload:GuestMessageInput,
             c.execute("""INSERT INTO bnb_guest_message
                 (id,booking_request_id,sender_subject,body,client_nonce)
                 VALUES (%s,%s,%s,%s,%s)""",(mid,request_id,actor,payload.body,payload.nonce))
+            c.execute("""INSERT INTO bnb_outbox(id,event_type,payload)
+                VALUES (%s,'bnb.message.created',%s::jsonb)""",
+                (uuid4(),json.dumps({"request_id":str(request_id),"message_id":str(mid)})))
     return {"id":str(mid),"replayed":False}
 
+
+
+@app.get("/v1/bnb/booking-requests/{request_id}/messages/delivery")
+def message_delivery(request_id:UUID,device_id:str,limit:int=50,
+                     authorization:str|None=Header(None)):
+    """Authenticated, read-only multi-device recovery without public delivery."""
+    actor=active_subject(authorization)
+    if not 8<=len(device_id)<=128 or limit<1 or limit>100:
+        raise HTTPException(422,"DELIVERY_WINDOW_INVALID")
+    with db() as c:
+        message_thread_scope(c,request_id,actor)
+        last=c.execute("""SELECT last_message_id FROM bnb_message_delivery_cursor
+           WHERE request_id=%s AND subject=%s AND device_id=%s""",
+           (request_id,actor,device_id)).fetchone()
+        data=c.execute("""SELECT id,sender_subject,body,created_at FROM bnb_guest_message
+           WHERE booking_request_id=%s AND moderation_status='visible'
+           AND (%s::uuid IS NULL OR (created_at,id)>(
+               SELECT created_at,id FROM bnb_guest_message WHERE id=%s::uuid))
+           ORDER BY created_at,id LIMIT %s""",
+           (request_id,last[0] if last else None,last[0] if last else None,limit)).fetchall()
+    return {"messages":[{"id":str(x[0]),"sender":"you" if x[1]==actor else "other",
+                           "body":x[2],"created_at":x[3].isoformat()} for x in data],
+            "nonbinding":True}
+
+
+class MessageDeliveryAck(BaseModel):
+    device_id:str=Field(min_length=8,max_length=128)
+    message_id:UUID
+
+
+@app.post("/v1/bnb/booking-requests/{request_id}/messages/delivery/ack")
+def acknowledge_message_delivery(request_id:UUID,payload:MessageDeliveryAck,
+                                 authorization:str|None=Header(None)):
+    actor=active_subject(authorization)
+    with db() as c:
+        with c.transaction():
+            message_thread_scope(c,request_id,actor)
+            target=c.execute("""SELECT created_at,id FROM bnb_guest_message
+             WHERE id=%s AND booking_request_id=%s AND moderation_status='visible'""",
+             (payload.message_id,request_id)).fetchone()
+            if not target:raise HTTPException(404,"MESSAGE_NOT_FOUND")
+            prior=c.execute("""SELECT last_message_id FROM bnb_message_delivery_cursor
+             WHERE request_id=%s AND subject=%s AND device_id=%s FOR UPDATE""",
+             (request_id,actor,payload.device_id)).fetchone()
+            if prior and prior[0]:
+                older=c.execute("SELECT created_at,id FROM bnb_guest_message WHERE id=%s",(prior[0],)).fetchone()
+                if older and target<older:raise HTTPException(409,"CURSOR_REWIND")
+            c.execute("""INSERT INTO bnb_message_delivery_cursor(request_id,subject,device_id,last_message_id)
+              VALUES(%s,%s,%s,%s) ON CONFLICT(request_id,subject,device_id)
+              DO UPDATE SET last_message_id=EXCLUDED.last_message_id,updated_at=now()""",
+              (request_id,actor,payload.device_id,payload.message_id))
+    return {"acknowledged":True,"message_id":str(payload.message_id)}
 
 @app.post("/v1/bnb/reservations/{reservation_id}/guest-review",status_code=201)
 def submit_guest_review(reservation_id:UUID,payload:GuestReviewInput,
@@ -981,8 +1067,11 @@ def moderate_abuse_report(report_id:UUID,payload:AbuseReportDecision,
         raise HTTPException(403,"ABUSE_DECISION_SCOPE_MISMATCH")
     with db() as c:
         with c.transaction():
-            report=c.execute("""SELECT property_id,status FROM bnb_abuse_report
-                WHERE id=%s""",(report_id,)).fetchone()
+            report=c.execute("""SELECT ar.property_id,ar.status,ar.reporter_subject,
+                p.host_subject FROM bnb_abuse_report ar JOIN bnb_property p
+                  ON p.id=ar.property_id WHERE ar.id=%s""",(report_id,)).fetchone()
+            if report and proof.get("sub") in (report[2],report[3]):
+                raise HTTPException(403,"INDEPENDENT_CASE_REVIEWER_REQUIRED")
             if not report:raise HTTPException(404,"NOT_FOUND")
             c.execute("SELECT id FROM bnb_property WHERE id=%s FOR UPDATE",(report[0],))
             status=c.execute("SELECT status FROM bnb_abuse_report WHERE id=%s FOR UPDATE",
@@ -1039,11 +1128,15 @@ def file_moderation_appeal(report_id:UUID,payload:ModerationAppealInput,
             c.execute("""INSERT INTO bnb_moderation_appeal
                 (id,report_id,appellant_subject,grounds)
                 VALUES (%s,%s,%s,%s)""",(appeal_id,report_id,actor,payload.grounds))
+            try:
+                interval=report_retention_interval()
+            except ValueError:
+                raise HTTPException(503,"RETENTION_POLICY_UNAVAILABLE") from None
             c.execute("""INSERT INTO bnb_privacy_retention_hold(report_id,until_at,reason_code)
-                VALUES (%s,now()+interval '90 days','appeal')
+                VALUES (%s,now()+(%s * interval '1 second'),'appeal')
                 ON CONFLICT(report_id) DO UPDATE SET
                 until_at=GREATEST(bnb_privacy_retention_hold.until_at,excluded.until_at)""",
-                (report_id,))
+                (report_id,int(interval.total_seconds())))
     return {"id":str(appeal_id),"state":"pending","replayed":False}
 
 
@@ -1064,7 +1157,9 @@ def decide_moderation_appeal(appeal_id:UUID,payload:ModerationAppealDecision,
                 WHERE a.id=%s FOR UPDATE OF a""",(appeal_id,)).fetchone()
             if not row:raise HTTPException(404,"NOT_FOUND")
             if row[1]!="pending":raise HTTPException(409,"APPEAL_DECISION_ALREADY_FINAL")
-            if proof.get("sub") in (row[3],row[4]):
+            host=c.execute("SELECT host_subject FROM bnb_property WHERE id=%s",
+                           (row[2],)).fetchone()
+            if proof.get("sub") in (row[3],row[4],host[0] if host else None):
                 raise HTTPException(403,"INDEPENDENT_APPEAL_REVIEWER_REQUIRED")
             if c.execute("""SELECT 1 FROM bnb_moderation_appeal_decision_nonce
                 WHERE issuer=%s AND jti=%s""",(proof["iss"],proof["jti"])).fetchone():
@@ -1093,7 +1188,11 @@ def redact_expired_abuse_detail(report_id:UUID,x_guest_review_proof:str|None=Hea
             row=c.execute("""SELECT property_id,status,detail,created_at
                 FROM bnb_abuse_report WHERE id=%s FOR UPDATE""",(report_id,)).fetchone()
             if not row:raise HTTPException(404,"NOT_FOUND")
-            if row[1]=="pending" or row[3]>datetime.now(timezone.utc)-timedelta(days=90):
+            try:
+                interval=report_retention_interval()
+            except ValueError:
+                raise HTTPException(503,"RETENTION_POLICY_UNAVAILABLE") from None
+            if row[1]=="pending" or row[3]>datetime.now(timezone.utc)-interval:
                 raise HTTPException(409,"RETENTION_NOT_EXPIRED")
             blocked=c.execute("""SELECT 1 FROM bnb_privacy_retention_hold
                 WHERE report_id=%s AND until_at>now()""",(report_id,)).fetchone()
@@ -1299,6 +1398,26 @@ def guest_availability(property_id:str,start:datetime,end:datetime):
             "units":result,"nonbinding":True,
             "as_of":datetime.now(timezone.utc).isoformat()}
 
+
+
+@app.get("/v1/bnb/availability/projected")
+def projected_availability(property_id:UUID,start:datetime,end:datetime):
+    """Nonbinding, revisioned live-source projection; refreshes under property lock.
+
+    The read model never grants calendar/provider authority or admits a booking.
+    """
+    validate_window(start,end)
+    with db() as c:
+        with c.transaction():
+            prop=c.execute("SELECT status,capacity FROM bnb_property WHERE id=%s",(property_id,)).fetchone()
+            if not prop or prop[0]!="published":raise HTTPException(404,"NOT_FOUND")
+            units=c.execute("SELECT id FROM bnb_unit WHERE property_id=%s ORDER BY id LIMIT 101",(property_id,)).fetchall()
+            if len(units)>100:raise HTTPException(422,"PROJECTION_UNIT_LIMIT")
+            current=[x[0] for x in units] if units else [None]
+            result=[refresh_availability_projection(c,property_id,uid,start,end,occupancy=occupancy_in_window)
+                    for uid in current]
+    return {"property_id":str(property_id),"units":result,"nonbinding":True,
+            "start":start.isoformat(),"end":end.isoformat()}
 
 @app.get("/v1/bnb/availability/local")
 def guest_local_availability(property_id:str,checkin:str,checkout:str):
@@ -2493,8 +2612,11 @@ def ingest_pay_failure(payload:PayFailureInput,x_pay_authority_proof:str|None=He
                 (payload.reservation_id,)).fetchone()
             if not row or row[0]!=payload.pay_invoice_id:
                 raise HTTPException(404,"PAY_INVOICE_NOT_FOUND")
+            reversal=payload.failure_code in ("reorg","finality_revoked")
             if row[1]=="finalized" or row[2]=="confirmed":
-                raise HTTPException(409,"FINALIZED_PAYMENT_REQUIRES_PAY_RECOVERY")
+                if (not reversal or proof.get("canonical_finality_revocation_verified") is not True or
+                    proof.get("original_pay_invoice_id")!=payload.pay_invoice_id):
+                    raise HTTPException(409,"FINALIZED_PAYMENT_REQUIRES_PAY_RECOVERY")
             digest=hashlib.sha256(payload.model_dump_json().encode()).hexdigest()
             prior=c.execute("""SELECT reservation_id,pay_invoice_id,failure_code,digest
                 FROM bnb_pay_failure_event WHERE pay_attempt_id=%s""",
@@ -2515,7 +2637,11 @@ def ingest_pay_failure(payload:PayFailureInput,x_pay_authority_proof:str|None=He
             c.execute("""UPDATE bnb_pay_intent SET state='recovery_required'
                 WHERE reservation_id=%s""",(payload.reservation_id,))
             c.execute("""UPDATE bnb_reservation SET status='recovery_required'
-                WHERE id=%s AND status='payment_pending'""",(payload.reservation_id,))
+                WHERE id=%s AND status IN ('payment_pending','confirmed')""",
+                (payload.reservation_id,))
+            # Preserve the confirmed hold as an inventory fence until Pay and
+            # independent dispute/recovery authority reconcile the reorganization.
+            # Do not reopen availability on an unfinalized reversal.
             c.execute("""INSERT INTO bnb_outbox(id,event_type,payload)
                 VALUES (%s,'bnb.pay.failure_requires_reconciliation',%s::jsonb)""",
                 (uuid4(),json.dumps({"reservation_id":str(payload.reservation_id),
@@ -2644,6 +2770,30 @@ def ingest_pay_disbursement(payload:PayDisbursementInput,
                 FROM bnb_settlement_split WHERE reservation_id=%s FOR UPDATE""",
                 (payload.reservation_id,)).fetchone()
             if not split:raise HTTPException(409,"SPLIT_NOT_AUTHORIZED")
+            # Pay-signed financial instructions remain authoritative, but BnB
+            # must not admit fresh non-refund liability while a booking's
+            # canonical Pay finality is under dispute/reorganization recovery.
+            financial_state=c.execute("""SELECT r.status,i.state
+                FROM bnb_reservation r JOIN bnb_pay_intent i
+                  ON i.reservation_id=r.id
+                WHERE r.id=%s FOR UPDATE OF r,i""",
+                (payload.reservation_id,)).fetchone()
+            if (not financial_state or
+                financial_state!=("confirmed","finalized")):
+                if payload.kind!="refund":
+                    raise HTTPException(409,"PAY_RECOVERY_PAYOUT_FROZEN")
+                if proof.get("pay_recovery_refund_approved") is not True:
+                    raise HTTPException(403,"PAY_RECOVERY_REFUND_AUTHORITY_REQUIRED")
+            active_case=c.execute("""SELECT 1 FROM (
+                SELECT DISTINCT ON (case_id) case_id,event_state,resolution,
+                    payout_release_authorized
+                FROM bnb_pay_case_event WHERE reservation_id=%s
+                ORDER BY case_id,revision DESC
+                ) latest WHERE NOT (event_state='resolved'
+                       AND payout_release_authorized) LIMIT 1""",
+                (payload.reservation_id,)).fetchone()
+            if active_case and payload.kind!="refund":
+                raise HTTPException(409,"PAY_DISPUTE_PAYOUT_FROZEN")
             if (split[8]!=payload.chain_id or split[9]!=payload.asset or
                 split[10]!=payload.policy_version):
                 raise HTTPException(409,"DISBURSEMENT_ASSET_POLICY_MISMATCH")
@@ -2660,8 +2810,16 @@ def ingest_pay_disbursement(payload:PayDisbursementInput,
                 dest={"host":split[5],"platform":split[6],"developer":split[7]}[payload.kind]
                 if payload.recipient!=dest:raise HTTPException(403,"PAYOUT_BENEFICIARY_MISMATCH")
             elif payload.kind=="refund":
-                if proof.get("original_payer_refund") is not True or (
-                   proof.get("refund_recipient")!=payload.recipient):
+                payer=c.execute("""SELECT i.requester,i.pay_invoice_id,i.pay_payment_id
+                    FROM bnb_pay_intent i WHERE i.reservation_id=%s FOR UPDATE""",
+                    (payload.reservation_id,)).fetchone()
+                if (not payer or not payer[2] or
+                    proof.get("original_payer_refund") is not True or
+                    proof.get("original_payer_subject")!=payer[0] or
+                    proof.get("original_pay_invoice_id")!=payer[1] or
+                    proof.get("original_pay_payment_id")!=payer[2] or
+                    proof.get("refund_recipient")!=payload.recipient or
+                    proof.get("original_payer_recipient_verified") is not True):
                     raise HTTPException(403,"ORIGINAL_PAYER_REFUND_REQUIRED")
             else:
                 if proof.get("retained_distribution_approved") is not True:
@@ -3228,3 +3386,286 @@ def submit_property_claim(property_id: str, authorization: str | None = Header(N
                   (property_id,subject,claim["iss"],claim["jti"],claim["exp"]))
     return {"status":"pending","published":False}
 
+
+
+@app.get("/v1/bnb/reservations/{reservation_id}/orchestration")
+def read_booking_orchestration(reservation_id:UUID,authorization:str|None=Header(None)):
+    """Read-only authenticated saga projection; Pay/Wallet remain execution owners."""
+    from booking_saga import project_saga
+    actor=active_subject(authorization)
+    with db() as c:
+        row=c.execute("""SELECT r.guest_subject,p.host_subject,r.status,h.status,
+            i.state,i.pay_payment_id,s.captured_amount,s.host_amount,
+            s.platform_amount,s.developer_amount,s.retained_amount
+            FROM bnb_reservation r JOIN bnb_property p ON p.id=r.property_id
+            JOIN bnb_hold h ON h.id=r.hold_id
+            LEFT JOIN bnb_pay_intent i ON i.reservation_id=r.id
+            LEFT JOIN bnb_settlement_split s ON s.reservation_id=r.id
+            WHERE r.id=%s""",(reservation_id,)).fetchone()
+        if not row or actor not in (row[0],row[1]):
+            raise HTTPException(404,"NOT_FOUND")
+        operations=c.execute("""SELECT kind,amount,state FROM bnb_pay_disbursement
+            WHERE reservation_id=%s ORDER BY created_at,id""",(reservation_id,)).fetchall()
+        failures=c.execute("""SELECT failure_code FROM bnb_pay_failure_event
+            WHERE reservation_id=%s ORDER BY received_at, pay_attempt_id""",
+            (reservation_id,)).fetchall()
+        case_rows=c.execute("""SELECT event_state,resolution,payout_release_authorized
+            FROM (SELECT DISTINCT ON (case_id) case_id,event_state,resolution,
+                  payout_release_authorized
+                  FROM bnb_pay_case_event WHERE reservation_id=%s
+                  ORDER BY case_id,revision DESC) latest ORDER BY case_id""",
+            (reservation_id,)).fetchall()
+    split=(dict(zip(("captured","host","platform","developer","retained"),row[6:11]))
+           if row[6] is not None else None)
+    view=project_saga(reservation_state=row[2],hold_state=row[3],
+                      intent_state=row[4],payment_id=row[5],split=split,
+                      disbursements=[{"kind":k,"amount":amount,"state":state}
+                                     for k,amount,state in operations],
+                      pay_failures=[code for (code,) in failures],
+                      pay_cases=[{"state":state,"resolution":resolution,
+                                  "payout_release_authorized":release}
+                                 for state,resolution,release in case_rows])
+    return {"reservation_id":str(reservation_id),**view,
+            "provider_acceptance":"testnet_gated","payment_execution_available":False}
+
+
+class PayCaseEventInput(BaseModel):
+    """Noncustodial, Pay-issued dispute/refund case transition."""
+    reservation_id: UUID
+    pay_invoice_id: str=Field(min_length=3,max_length=200)
+    pay_payment_id: str=Field(min_length=3,max_length=200)
+    case_id: str=Field(min_length=3,max_length=200)
+    event_id: str=Field(min_length=3,max_length=200)
+    revision: int=Field(gt=0,strict=True)
+    state: str=Field(pattern="^(opened|refund_requested|resolved)$")
+    resolution: str|None=Field(default=None,pattern="^(upheld|refund_completed)$")
+
+
+@app.post("/v1/bnb/internal/pay/cases",status_code=202)
+def ingest_pay_case_event(payload:PayCaseEventInput,
+                          x_pay_authority_proof:str|None=Header(None)):
+    """Only canonical Pay may attest economic case lifecycle; BnB cannot adjudicate."""
+    proof=financial_claim(payload,x_pay_authority_proof,"case-event")
+    if (proof.get("pay_case_verified") is not True or
+        proof.get("pay_case_id")!=payload.case_id or
+        proof.get("pay_event_id")!=payload.event_id or
+        proof.get("pay_case_revision")!=payload.revision or
+        proof.get("pay_payment_id")!=payload.pay_payment_id):
+        raise HTTPException(403,"PAY_CASE_AUTHORITY_MISMATCH")
+    if (payload.state=="resolved")!=(payload.resolution is not None):
+        raise HTTPException(422,"PAY_CASE_RESOLUTION_INVALID")
+    digest=hashlib.sha256(payload.model_dump_json().encode()).hexdigest()
+    with db() as c:
+        with c.transaction():
+            ref=c.execute("""SELECT property_id FROM bnb_reservation WHERE id=%s""",
+                          (payload.reservation_id,)).fetchone()
+            if not ref:raise HTTPException(404,"RESERVATION_NOT_FOUND")
+            c.execute("SELECT id FROM bnb_property WHERE id=%s FOR UPDATE",(ref[0],))
+            record=c.execute("""SELECT r.status,i.state,i.pay_invoice_id,
+                i.pay_payment_id,i.requester FROM bnb_reservation r
+                JOIN bnb_pay_intent i ON i.reservation_id=r.id
+                WHERE r.id=%s FOR UPDATE OF r,i""",
+                (payload.reservation_id,)).fetchone()
+            if (not record or record[2]!=payload.pay_invoice_id or
+                record[3]!=payload.pay_payment_id):
+                raise HTTPException(409,"CANONICAL_PAY_CASE_PAYMENT_MISMATCH")
+            previous_event=c.execute("""SELECT event_digest,case_id,revision
+                FROM bnb_pay_case_event WHERE event_id=%s""",
+                (payload.event_id,)).fetchone()
+            if previous_event:
+                if previous_event!=(digest,payload.case_id,payload.revision):
+                    raise HTTPException(409,"PAY_CASE_EVENT_REPLAY_CONFLICT")
+                return {"state":payload.state,"replayed":True,"custody":False}
+            if c.execute("""SELECT 1 FROM bnb_pay_case_event
+                WHERE issuer=%s AND jti=%s""",
+                (proof["iss"],proof["jti"])).fetchone():
+                raise HTTPException(409,"PAY_CASE_PROOF_REUSED")
+            previous=c.execute("""SELECT revision,event_state,resolution,
+                reservation_id,pay_invoice_id,pay_payment_id
+                FROM bnb_pay_case_event WHERE case_id=%s
+                ORDER BY revision DESC LIMIT 1""",(payload.case_id,)).fetchone()
+            if not previous:
+                if payload.revision!=1 or payload.state!="opened":
+                    raise HTTPException(409,"PAY_CASE_FIRST_EVENT_REQUIRED")
+                if (record[0],record[1]) not in (
+                    ("confirmed","finalized"),("recovery_required","recovery_required")):
+                    raise HTTPException(409,"PAY_CASE_NOT_ELIGIBLE")
+            else:
+                if (previous[3]!=payload.reservation_id or
+                    previous[4]!=payload.pay_invoice_id or
+                    previous[5]!=payload.pay_payment_id):
+                    raise HTTPException(409,"PAY_CASE_CROSS_PAYMENT_REUSE")
+                if payload.revision!=previous[0]+1:
+                    raise HTTPException(409,"PAY_CASE_REVISION_OUT_OF_ORDER")
+                if previous[1]=="resolved" or payload.state=="opened":
+                    raise HTTPException(409,"PAY_CASE_TERMINAL_OR_DUPLICATE")
+                if payload.state=="refund_requested" and previous[1]!="opened":
+                    raise HTTPException(409,"PAY_CASE_REFUND_ALREADY_REQUESTED")
+            if payload.state=="refund_requested" or payload.resolution=="refund_completed":
+                if (proof.get("original_payer_subject")!=record[4] or
+                    proof.get("original_pay_invoice_id")!=record[2] or
+                    proof.get("original_pay_payment_id")!=record[3] or
+                    proof.get("original_payer_refund") is not True):
+                    raise HTTPException(403,"PAY_CASE_ORIGINAL_PAYER_REQUIRED")
+            if payload.state=="refund_requested" and (
+                proof.get("refund_request_verified") is not True):
+                raise HTTPException(403,"PAY_CASE_REFUND_REQUEST_NOT_VERIFIED")
+            if payload.state=="resolved":
+                if (payload.resolution=="refund_completed" and
+                    (not previous or previous[1]!="refund_requested")):
+                    raise HTTPException(409,"PAY_CASE_REFUND_REQUEST_REQUIRED")
+                if proof.get("independent_dispute_resolution_verified") is not True or (
+                    proof.get("case_resolution")!=payload.resolution):
+                    raise HTTPException(403,"PAY_CASE_RESOLUTION_NOT_VERIFIED")
+                if payload.resolution=="refund_completed":
+                    refunded=c.execute("""SELECT COALESCE(sum(amount),0)
+                        FROM bnb_pay_disbursement WHERE reservation_id=%s
+                        AND kind='refund' AND state='finalized'""",
+                        (payload.reservation_id,)).fetchone()[0]
+                    if not refunded or proof.get("refund_receipt_verified") is not True:
+                        raise HTTPException(409,"PAY_REFUND_NOT_FINALIZED")
+            release=(payload.state=="resolved" and payload.resolution=="upheld" and
+                     proof.get("payout_release_verified") is True)
+            if payload.state=="resolved" and payload.resolution=="upheld" and not release:
+                raise HTTPException(403,"PAY_CASE_PAYOUT_RELEASE_REQUIRED")
+            c.execute("""INSERT INTO bnb_pay_case_event
+                (issuer,jti,event_id,case_id,revision,reservation_id,pay_invoice_id,
+                 pay_payment_id,event_state,resolution,payout_release_authorized,event_digest)
+                VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
+                (proof["iss"],proof["jti"],payload.event_id,payload.case_id,
+                 payload.revision,payload.reservation_id,payload.pay_invoice_id,
+                 payload.pay_payment_id,payload.state,payload.resolution,release,digest))
+            c.execute("""INSERT INTO bnb_outbox(id,event_type,payload)
+                VALUES (%s,'bnb.pay.case_reconciled',%s::jsonb)""",
+                (uuid4(),json.dumps({"reservation_id":str(payload.reservation_id),
+                    "case_id":payload.case_id,"revision":payload.revision,
+                    "state":payload.state})))
+    return {"state":payload.state,"replayed":False,"custody":False,
+            "payout_release_authorized":release}
+
+
+@app.get("/v1/bnb/reservations/{reservation_id}/host-casework")
+def host_casework_view(reservation_id:UUID,authorization:str|None=Header(None)):
+    """Host-only minimized dispute status, never a reviewer or Pay authority."""
+    actor=active_subject(authorization)
+    with db() as c:
+        row=c.execute("""SELECT p.host_subject,r.status,r.property_id
+            FROM bnb_reservation r JOIN bnb_property p ON p.id=r.property_id
+            WHERE r.id=%s""",(reservation_id,)).fetchone()
+        if not row:raise HTTPException(404,"NOT_FOUND")
+        if actor!=row[0]:
+            manager=c.execute("""SELECT 1 FROM bnb_property_grant g
+                JOIN bnb_account a ON a.subject=g.grantee_subject
+                WHERE g.property_id=%s AND g.grantee_subject=%s
+                AND g.capability='view_reservations' AND g.revoked_at IS NULL
+                AND g.expires_at>now() AND a.state='active'""",
+                (row[2],actor)).fetchone()
+            if not manager:raise HTTPException(404,"NOT_FOUND")
+        cases=c.execute("""SELECT case_id,revision,event_state,resolution,
+            payout_release_authorized FROM (
+                SELECT DISTINCT ON (case_id) case_id,revision,event_state,
+                    resolution,payout_release_authorized
+                FROM bnb_pay_case_event WHERE reservation_id=%s
+                ORDER BY case_id,revision DESC
+            ) latest ORDER BY case_id""",(reservation_id,)).fetchall()
+    # No guest subject, payer wallet, private address, invoice, receipt, or
+    # unredacted evidence is returned to the host operations interface.
+    return {"reservation_id":str(reservation_id),"booking_status":row[1],
+            "cases":[{"case_id":case_id,"revision":revision,"state":state,
+                      "resolution":resolution,"payout_release_authorized":release}
+                     for case_id,revision,state,resolution,release in cases],
+            "reviewer_authority":False,"pay_authority":False,
+            "refund_execution_available":False,"bnb_custody":False}
+
+
+@app.get("/v1/bnb/internal/casework/abuse-reports/{report_id}")
+def independent_abuse_case_view(report_id:UUID,
+                               x_guest_review_proof:str|None=Header(None)):
+    """Case-scoped externally authorized reviewer; never financial disposition."""
+    if not x_guest_review_proof:
+        raise HTTPException(401,"CASE_REVIEW_AUTHORITY_REQUIRED")
+    proof=verify_authority(x_guest_review_proof,"BNB_GUEST_REVIEW","casework-read")
+    if (proof.get("report_id")!=str(report_id) or
+        proof.get("casework_scope")!="read" or not proof.get("sub") or
+        proof.get("current_reviewer_grant_verified") is not True or
+        proof.get("reviewer_revoked") is not False):
+        raise HTTPException(403,"CASE_REVIEW_SCOPE_MISMATCH")
+    with db() as c:
+        with c.transaction():
+            row=c.execute("""SELECT a.property_id,a.reporter_subject,a.target_type,
+                a.reason,a.status,a.decided_by,p.host_subject
+                FROM bnb_abuse_report a JOIN bnb_property p ON p.id=a.property_id
+                WHERE a.id=%s""",(report_id,)).fetchone()
+            if not row:raise HTTPException(404,"NOT_FOUND")
+            if proof["sub"] in (row[1],row[5],row[6]):
+                raise HTTPException(403,"INDEPENDENT_CASE_REVIEWER_REQUIRED")
+            appeals=c.execute("""SELECT a.id,a.state,a.decided_by
+                FROM bnb_moderation_appeal a WHERE a.report_id=%s
+                ORDER BY a.created_at""",(report_id,)).fetchall()
+            if any(proof["sub"]==a[2] for a in appeals):
+                raise HTTPException(403,"PRIOR_CASE_REVIEWER_REUSE")
+            hold=c.execute("""SELECT reason_code,until_at FROM bnb_privacy_retention_hold
+                WHERE report_id=%s AND until_at>now()""",(report_id,)).fetchone()
+            c.execute("""INSERT INTO bnb_audit(id,subject,action,resource_id)
+                VALUES (%s,%s,'bnb.casework.authorized_read',%s)""",
+                (uuid4(),proof["sub"],row[0]))
+    return {"report_id":str(report_id),"target_type":row[2],
+            "reason":row[3],"state":row[4],
+            "appeals":[{"id":str(a[0]),"state":a[1]} for a in appeals],
+            "retention_hold_active":bool(hold),
+            "financial_authority":False,"escrow_authority":False,
+            "republish_authorized":False}
+
+
+class PrivacyHoldInput(BaseModel):
+    duration_days:int=Field(ge=90,le=3650,strict=True)
+    reason:str=Field(pattern="^(legal_hold|appeal)$")
+
+
+@app.post("/v1/bnb/internal/casework/abuse-reports/{report_id}/hold",status_code=202)
+def independent_case_privacy_hold(report_id:UUID,payload:PrivacyHoldInput,
+                                  x_guest_review_proof:str|None=Header(None)):
+    if not x_guest_review_proof:
+        raise HTTPException(401,"CASE_HOLD_AUTHORITY_REQUIRED")
+    proof=verify_authority(x_guest_review_proof,"BNB_GUEST_REVIEW","privacy-hold")
+    if (proof.get("report_id")!=str(report_id) or
+        proof.get("hold_days")!=payload.duration_days or
+        proof.get("reason")!=payload.reason or
+        proof.get("legal_privacy_authority_verified") is not True or
+        proof.get("current_reviewer_grant_verified") is not True or
+        proof.get("reviewer_revoked") is not False):
+        raise HTTPException(403,"INDEPENDENT_HOLD_AUTHORITY_REQUIRED")
+    try:
+        min_days=report_retention_interval().days
+    except ValueError:
+        raise HTTPException(503,"RETENTION_POLICY_UNAVAILABLE") from None
+    if payload.duration_days<min_days:
+        raise HTTPException(422,"HOLD_SHORTER_THAN_POLICY")
+    with db() as c:
+        with c.transaction():
+            report=c.execute("""SELECT r.property_id,r.reporter_subject,p.host_subject
+                FROM bnb_abuse_report r JOIN bnb_property p ON p.id=r.property_id
+                WHERE r.id=%s FOR UPDATE OF r""",(report_id,)).fetchone()
+            if not report:raise HTTPException(404,"NOT_FOUND")
+            if proof.get("sub") in (report[1],report[2]):
+                raise HTTPException(403,"INDEPENDENT_CASE_REVIEWER_REQUIRED")
+            if c.execute("""SELECT 1 FROM bnb_review_moderation_nonce
+                WHERE issuer=%s AND jti=%s""",(proof["iss"],proof["jti"])).fetchone():
+                raise HTTPException(409,"CASE_HOLD_REPLAY")
+            c.execute("""INSERT INTO bnb_review_moderation_nonce
+                (issuer,jti,target_type,target_id,decision)
+                VALUES (%s,%s,'privacy_hold',%s,%s)""",
+                (proof["iss"],proof["jti"],report_id,payload.reason))
+            c.execute("""INSERT INTO bnb_privacy_retention_hold
+                (report_id,until_at,reason_code) VALUES
+                (%s,now()+(%s*interval '1 day'),%s)
+                ON CONFLICT(report_id) DO UPDATE
+                SET until_at=GREATEST(bnb_privacy_retention_hold.until_at,excluded.until_at),
+                    reason_code=CASE WHEN bnb_privacy_retention_hold.reason_code='legal_hold'
+                                   THEN 'legal_hold' ELSE excluded.reason_code END""",
+                (report_id,payload.duration_days,payload.reason))
+            c.execute("""INSERT INTO bnb_audit(id,subject,action,resource_id)
+                VALUES (%s,%s,'bnb.casework.privacy_hold',%s)""",
+                (uuid4(),proof["sub"],report[0]))
+    return {"report_id":str(report_id),"hold_applied":True,
+            "financial_authority":False,"legal_approval_minted":False}

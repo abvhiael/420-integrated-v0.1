@@ -21,6 +21,7 @@ on:
   push:
     branches:
       - main
+      - 'audit/bnb-phase4-bnb-4-1-baseline-20261013'
     paths:
       - 'config/420indexer-v1.json'
       - 'testnet/public-services/indexer/readiness.json'

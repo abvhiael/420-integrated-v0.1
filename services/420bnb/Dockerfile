@@ -11,9 +11,14 @@ COPY services/420bnb/production.py /app/production.py
 COPY services/420bnb/migrate.py /app/migrate.py
 COPY services/420bnb/migrations/ /app/migrations/
 COPY services/420bnb/api.py /app/api.py
+COPY services/420bnb/booking_saga.py /app/booking_saga.py
+COPY services/420bnb/casework_policy.py /app/casework_policy.py
 COPY services/420bnb/identity.py /app/identity.py
 COPY services/420bnb/authority.py /app/authority.py
 COPY services/420bnb/calendar_engine.py /app/calendar_engine.py
+COPY services/420bnb/availability_projection.py /app/availability_projection.py
+COPY services/420bnb/discovery_sync.py /app/discovery_sync.py
+COPY services/420bnb/outbox.py /app/outbox.py
 COPY services/420bnb/pricing.py /app/pricing.py
 COPY services/420bnb/travel_location.py /app/travel_location.py
 USER bnb

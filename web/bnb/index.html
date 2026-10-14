@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>420BnB | Stay a little longer</title>
 <style>
-:root{color-scheme:dark;font-family:system-ui,sans-serif}body{background:#101a17;color:#f1f4ed;margin:0}header,main,footer{max-width:1060px;margin:auto;padding:24px}header{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #35483b}h1{font-size:clamp(2rem,5vw,4rem);margin-bottom:8px}.muted{color:#b8c7bb}button,input,select,textarea{font:inherit;border-radius:8px;padding:12px}button{background:#a1d18a;color:#132014;border:0;cursor:pointer}button:disabled{opacity:.5;cursor:not-allowed}input,select,textarea{background:#26392f;color:white;border:1px solid #829e87}section{margin:30px 0}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:18px}.card{padding:20px;border:1px solid #496050;border-radius:12px;background:#1c2c23}.card h3{margin-top:0}label{display:grid;gap:6px;margin:10px 0}.warning{border-left:4px solid #e9be6c;padding:12px;background:#313026}.hidden{display:none}a{color:#c3e7b1}:focus-visible{outline:3px solid #e9be6c;outline-offset:3px}
+:root{color-scheme:dark;font-family:system-ui,sans-serif}body{background:#101a17;color:#f1f4ed;margin:0}header,main,footer{max-width:1060px;margin:auto;padding:24px}header{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #35483b}h1{font-size:clamp(2rem,5vw,4rem);margin-bottom:8px}.muted{color:#b8c7bb}button,input,select,textarea{font:inherit;border-radius:8px;padding:12px}button{background:#a1d18a;color:#132014;border:0;cursor:pointer}button:disabled{opacity:.5;cursor:not-allowed}input,select,textarea{background:#26392f;color:white;border:1px solid #829e87}section{margin:30px 0}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:18px}.card{padding:20px;border:1px solid #496050;border-radius:12px;background:#1c2c23}.card h3{margin-top:0}label{display:grid;gap:6px;margin:10px 0}.warning{border-left:4px solid #e9be6c;padding:12px;background:#313026}.hidden{display:none}a{color:#c3e7b1}.skip-link{position:absolute;left:12px;top:-100px;background:#101a17;padding:12px;z-index:10}.skip-link:focus{top:8px}*{box-sizing:border-box}img,video,canvas{max-width:100%}button,input,select,textarea{max-width:100%} .card{min-width:0;overflow-wrap:anywhere} @media(max-width:600px){header{flex-wrap:wrap;gap:12px}header,main,footer{padding:16px}.grid{grid-template-columns:minmax(0,1fr)}} @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}} :focus-visible{outline:3px solid #e9be6c;outline-offset:3px}
 </style></head><body>
-<header><strong>420BnB</strong><nav aria-label="Main"><a href="#explore">Explore</a> · <a href="#hosting">Hosting</a></nav></header>
-<main><h1>Stay a little longer.</h1><p class="muted">Accommodation discovery for the 420 Integrated ecosystem.</p>
+<a href="#main-content" class="skip-link">Skip to main content</a><header><strong>420BnB</strong><nav aria-label="Main"><a href="#explore">Explore</a> · <a href="#hosting">Hosting</a></nav></header>
+<main id="main-content" tabindex="-1"><h1>Stay a little longer.</h1><p class="muted">Accommodation discovery for the 420 Integrated ecosystem.</p>
 <p class="warning" role="status">Preview service. Bookings and payments are not enabled. Listings shown below depend on your configured API; no reservation is confirmed here.</p>
 <section id="explore" aria-labelledby="explore-title"><h2 id="explore-title">Explore stays</h2><form id="stay-search"><label>Region<input name="region" maxlength="100" placeholder="Public region"></label><label>Stay name<input name="q" maxlength="100"></label><label>Guests<input name="min_capacity" type="number" min="1" max="1000" value="1"></label><button type="submit">Search stays</button></form>
 <button id="refresh">Refresh public listings</button><p id="results-status" role="status" aria-live="polite">Choose refresh to look for public listings.</p><div class="grid" id="listings"></div></section>
@@ -119,7 +119,7 @@ document.querySelector("#refresh").addEventListener("click",async()=>{
   const replyStatus=document.createElement("p");replyStatus.setAttribute("role","status");
   reply.addEventListener("click",async()=>{
    if(!hostProof){replyStatus.textContent="Verified host session required.";return;}
-   if(replyText.hidden){replyText.hidden=false;replyStatus.textContent="Write a response then select Respond as verified host again.";return;}
+   if(replyText.hidden){replyText.hidden=false;replyStatus.textContent="Write a response then select Respond as verified host again.";replyText.focus();return;}
    if(!replyText.value.trim()){replyStatus.textContent="Response cannot be empty.";return;}
    try{
     const response=await fetch("/v1/bnb/reviews/"+encodeURIComponent(review.review_id)+"/host-response",{
@@ -240,8 +240,9 @@ document.querySelector("#refresh").addEventListener("click",async()=>{
 let hostProof=null;
 const hostStatus=document.querySelector("#host-status");
 function hostHeaders(){return {"authorization":"Bearer "+hostProof,"content-type":"application/json"};}
+function restoreFocus(previous,fallback){const target=previous&&previous.isConnected&&!previous.disabled?previous:fallback;if(target&&target.isConnected&&typeof target.focus==="function")target.focus({preventScroll:true});}
 function resetHost(){hostProof=null;document.querySelector("#host-token").value="";document.querySelector("#save-draft").disabled=true;document.querySelector("#load-drafts").disabled=true;document.querySelector("#host-drafts").replaceChildren();document.querySelector("#saved-stays").replaceChildren();document.querySelector("#guest-reservations").replaceChildren();document.querySelector("#booking-inbox").replaceChildren();document.querySelector("#host-workspace").replaceChildren();hostStatus.textContent="Not signed in.";}
-document.querySelector("#sign-out").addEventListener("click",resetHost);
+document.querySelector("#sign-out").addEventListener("click",()=>{resetHost();restoreFocus(null,document.querySelector("#host-token"));});
 document.querySelector("#host-auth").addEventListener("submit",async event=>{
  event.preventDefault();
  const token=document.querySelector("#host-token").value.trim();resetHost();
@@ -647,7 +648,9 @@ async function loadHostWorkspace(){
   if(result.status!=="fulfilled"||!result.value.ok)return null;
   try{return await result.value.json();}catch{return null;}
  }));
+ const focusedBefore=document.activeElement;
  details.replaceChildren();
+ restoreFocus(focusedBefore,open);
  const labels=visible.map(item=>item[1]);
  for(let i=0;i<paths.length;i++){
  const heading=document.createElement("h5");heading.textContent=labels[i];details.append(heading);

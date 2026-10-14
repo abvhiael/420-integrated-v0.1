@@ -4,7 +4,7 @@ import {resolve,extname,sep} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {validateHighCountryRuntime} from './src/runtime.js';
 const here=fileURLToPath(new URL('.',import.meta.url));
-const root=resolve(here,'public');
+const root=resolve(here,'dist');
 export function createHighCountryServer({config,distRoot=root}={}){
  const runtime=validateHighCountryRuntime(config);
  return createServer(async(req,res)=>{

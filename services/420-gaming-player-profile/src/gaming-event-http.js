@@ -64,6 +64,6 @@ export function createGamingEventHttp420({indexer,authority,gameId,origin,abuseG
    res.writeHead(200,{'content-type':'application/json','cache-control':'no-store',
     'x-content-type-options':'nosniff'});
    return res.end(JSON.stringify({events}));
-  }catch{return reject(503,'service-unavailable');}
+  }catch(e){return e?.code?.startsWith('abuse-')?reject(503,'service-unavailable'):reject(403,'scope-denied');}
  });
 }

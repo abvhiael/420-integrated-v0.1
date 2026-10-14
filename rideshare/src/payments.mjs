@@ -107,7 +107,7 @@ export function createPaymentService({pool,authenticator,authority,clock=()=>Mat
     lock:async(client,tripId)=>client.query('SELECT pg_advisory_xact_lock(hashtextextended($1,0))',[`liftd:financial:${tripId}`]),
     async recordLifecycle(client,trip,action,now) {
       if(action==='create')await client.query('INSERT INTO liftd.trip_financial_timing(trip_id,requested_at) VALUES($1,$2)',[trip.id,now]);
-      else if(['assign','complete','cancel','expire'].includes(action)) {
+      else if(['assign','complete','cancel','expire','safety_resolve'].includes(action)) {
         const field=action==='assign'?'assigned_at':'ended_at';await client.query(`UPDATE liftd.trip_financial_timing SET ${field}=$1 WHERE trip_id=$2`,[now,trip.id]);
       }
     },

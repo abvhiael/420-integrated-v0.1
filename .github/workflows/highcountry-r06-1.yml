@@ -1,0 +1,46 @@
+name: High Country R06.1 Browser Shell Level 1
+on:
+  pull_request:
+    paths:
+      - 'apps/highcountry-web/**'
+      - '.github/workflows/highcountry-r06-1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  browser-shell:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify exact implementation SHA
+        run: test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+      - name: Test routes, config, RPC failures and HTTP safety
+        run: node --test apps/highcountry-web/test/*.test.mjs
+      - name: Build web application
+        run: node apps/highcountry-web/scripts/build.mjs
+      - name: Check build outputs and accessibility shell
+        run: |
+          test -s apps/highcountry-web/dist/index.html
+          test -s apps/highcountry-web/dist/src/main.js
+          test -s apps/highcountry-web/dist/src/runtime.js
+          grep -q 'href="#main"' apps/highcountry-web/dist/index.html
+          grep -q 'name="viewport"' apps/highcountry-web/dist/index.html
+          node --check apps/highcountry-web/server.mjs
+          node --check apps/highcountry-web/src/app.js
+          node --check apps/highcountry-web/src/runtime.js
+          node --check apps/highcountry-web/src/main.js
+      - name: Retained High Country access client and Gaming SDK
+        run: node --test clients/highcountry-access-v1/test/*.test.js packages/420-gaming-sdk/test/*.test.js
+      - name: No formatting errors or stale checkout
+        run: |
+          git diff --check eeaa4e593e8f5f16e2bc566b20ddbe04576589c1 HEAD
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"

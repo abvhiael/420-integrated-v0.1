@@ -14,7 +14,7 @@ def once(conn, *, occupancy, property_id=None, window_limit=50):
     pid = UUID(str(property_id)) if property_id is not None else None
     row = conn.execute("""SELECT p.id,p.status FROM bnb_property p
         JOIN bnb_projection_work w ON w.property_id=p.id
-        WHERE (w.requested_revision>w.completed_revision OR w.next_refresh_at<=clock_timestamp())
+        WHERE w.next_refresh_at<=clock_timestamp()
           AND (%s::uuid IS NULL OR p.id=%s)
         ORDER BY w.next_refresh_at,p.id LIMIT 1 FOR UPDATE OF p SKIP LOCKED""",
         (pid,pid)).fetchone()
@@ -32,6 +32,7 @@ def once(conn, *, occupancy, property_id=None, window_limit=50):
     windows = conn.execute("""SELECT unit_id,window_start,window_end FROM bnb_availability_projection
         WHERE property_id=%s AND invalidated_at IS NOT NULL
         ORDER BY window_start,window_end,unit_id LIMIT %s""",(pid,window_limit)).fetchall()
+    retry = False
     for uid,start,end in windows:
         try:
             # Savepoint keeps a stale calendar/suspended listing safely invalidated.
@@ -41,6 +42,10 @@ def once(conn, *, occupancy, property_id=None, window_limit=50):
         except HTTPException as error:
             if error.status_code not in (404,503):
                 raise
+            if error.status_code == 503:
+                # Retain the invalidated window for autonomous recovery; avoid a hot retry loop.
+                retry = True
+                continue
             # Terminal unavailable view is removed; no stale capacity is advertised.
             conn.execute("""DELETE FROM bnb_availability_projection WHERE property_id=%s
                 AND unit_id=%s AND window_start=%s AND window_end=%s""",(pid,uid,start,end))
@@ -50,5 +55,5 @@ def once(conn, *, occupancy, property_id=None, window_limit=50):
     conn.execute("""UPDATE bnb_projection_work SET completed_revision=CASE WHEN %s
         THEN completed_revision ELSE %s END,
         next_refresh_at=clock_timestamp()+(CASE WHEN %s THEN 0 ELSE 30 END)*interval '1 second'
-        WHERE property_id=%s""",(remaining,work[0],remaining,pid))
+        WHERE property_id=%s""",(remaining,work[0],remaining and not retry,pid))
     return True

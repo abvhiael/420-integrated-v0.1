@@ -25,7 +25,7 @@ def fixture():
     yield connect,pid,start,end
     with connect() as c:
         for table in ('bnb_availability_projection','bnb_projection_work','bnb_discovery_consumer',
-            'bnb_discovery_projection','bnb_reservation','bnb_hold','bnb_block','bnb_unit',
+            'bnb_discovery_projection','bnb_reservation','bnb_hold','bnb_block','bnb_calendar_sync_event','bnb_unit',
             'bnb_compliance_eligibility','bnb_travel_place_binding'):
             c.execute(f'DELETE FROM {table} WHERE property_id=%s',(pid,))
         c.execute("DELETE FROM bnb_outbox WHERE payload->>'property_id'=%s",(str(pid),))
@@ -303,3 +303,24 @@ def test_packaged_worker_entrypoint_runs_refresh_and_local_receipt_over_verified
         assert c.execute('SELECT available,invalidated_at FROM bnb_availability_projection WHERE property_id=%s',(pid,)).fetchone()==(2,None)
         assert c.execute('SELECT requested_revision=completed_revision FROM bnb_projection_work WHERE property_id=%s',(pid,)).fetchone()==(True,)
         assert c.execute('SELECT count(*) FROM bnb_consumer_delivery WHERE accepted_at IS NOT NULL').fetchone()==(1,)
+
+def test_stale_calendar_retains_refresh_window_and_recovers_after_source_update(fixture):
+    connect,pid,start,end=fixture
+    project(fixture);run(fixture)
+    event=uuid4()
+    with connect() as c:
+        c.execute("""INSERT INTO bnb_calendar_sync_event(id,property_id,external_issuer,source_id,
+            external_event_id,jti,period,quantity,source_updated_at,received_at)
+            VALUES(%s,%s,'fixture','fixture',%s,%s,tstzrange(%s,%s,'[)'),1,
+            clock_timestamp()-interval '25 hours',clock_timestamp()-interval '25 hours')""",
+            (event,pid,uuid4().hex,uuid4().hex,start,end))
+    assert run(fixture)
+    with connect() as c:
+        assert c.execute('SELECT invalidated_at IS NOT NULL FROM bnb_availability_projection WHERE property_id=%s',(pid,)).fetchone()==(True,)
+        assert c.execute('SELECT requested_revision>completed_revision,next_refresh_at>clock_timestamp() FROM bnb_projection_work WHERE property_id=%s',(pid,)).fetchone()==(True,True)
+    assert not run(fixture)
+    with connect() as c:
+        c.execute('UPDATE bnb_calendar_sync_event SET received_at=clock_timestamp(),source_updated_at=clock_timestamp() WHERE id=%s',(event,))
+    assert run(fixture)
+    with connect() as c:
+        assert c.execute('SELECT available,invalidated_at FROM bnb_availability_projection WHERE property_id=%s',(pid,)).fetchone()==(2,None)

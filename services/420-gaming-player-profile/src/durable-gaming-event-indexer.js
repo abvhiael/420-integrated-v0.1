@@ -16,7 +16,7 @@ export class DurableGamingEventIndexer420 {
     typeof resolveEventScope!=='function'||typeof verifyCanonicalBlock!=='function'||
     typeof authorizeQuery!=='function'||!u(chainId)||chainId==='0'||!h(gameId)||
     !contracts||!['games','identity','entitlements','crossGame','claims','bridge','migration'].every(k=>addr(contracts[k]))||
-    new Set(Object.values(contracts)).size!==3)fail('events-configuration');
+    new Set(Object.values(contracts)).size!==7)fail('events-configuration');
   this.#pool=operatorPool;this.#source=fetchBlock;this.#resolve=resolveEventScope;
   this.#verify=verifyCanonicalBlock;this.#authorize=authorizeQuery;
   this.#contracts=Object.freeze({...contracts});this.#chain=chainId;this.#game=gameId;

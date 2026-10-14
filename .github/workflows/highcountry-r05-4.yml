@@ -1,0 +1,105 @@
+name: High Country R05.4 Level 1 GameClaims
+on:
+  pull_request:
+    paths:
+      - 'services/420-gaming-player-profile/**'
+      - '.github/workflows/highcountry-r05-4.yml'
+      - 'docs/highcountry/R05.4-*'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  gameclaims:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - name: Exact SHA
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: R05.4 targeted SDK and adversarial tests
+        working-directory: services/420-gaming-player-profile
+        run: node --test test/gameclaims-adapter.test.js
+      - name: Retained profile service tests
+        working-directory: services/420-gaming-player-profile
+        run: npm test
+      - name: Affected Gaming clients
+        run: node --test packages/420-gaming-sdk/test/*.test.js clients/highcountry-access-v1/test/*.test.js
+      - name: Source and syntax integrity
+        run: |
+          node --check services/420-gaming-player-profile/src/gameclaims-adapter.js
+          node --check services/420-gaming-player-profile/src/gameclaims-coordinator-bridge.js
+          git diff --check d6f6bd282636a6c9c8ac3bf17198580840fee37f HEAD
+  contract-boundary:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    env:
+      FOUNDRY_SRC: src/highcountry
+      FOUNDRY_TEST: test/highcountry
+      FOUNDRY_SCRIPT: script/highcountry
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Exact SHA
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: GameClaims canonical operator/player consumption tests
+        working-directory: contracts
+        run: forge test --match-path test/GamingProtocol420.t.sol -vv
+      - name: High Country player-wallet grower and consumed-claim binding tests
+        working-directory: contracts
+        run: forge test --match-path test/highcountry/unit/player/HighCountryGamingBridge420.t.sol -vv
+      - name: High Country consumed/grower-bound migration receipt tests
+        working-directory: contracts
+        run: forge test --match-path test/highcountry/unit/player/HighCountryMigration420.t.sol -vv
+  local-chain-lifecycle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    env:
+      FOUNDRY_SRC: src/highcountry
+      FOUNDRY_TEST: test/highcountry
+      FOUNDRY_SCRIPT: script/highcountry
+      FOUNDRY_EVM_VERSION: cancun
+      FOUNDRY_DYNAMIC_TEST_LINKING: false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Exact SHA
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Compile actual R05.4 disposable GameClaims deployment harness
+        working-directory: contracts
+        run: forge build --no-dynamic-test-linking --evm-version cancun test/highcountry/integration/R05MigrationDeployment.sol
+      - name: Actual Anvil wallet consume, grower binding and receipt lifecycle
+        env:
+          HC_TEST_RPC_URL: http://127.0.0.1:8545
+        run: |
+          anvil --network ethereum --chain-id 420 --port 8545 --hardfork cancun --code-size-limit 600000 --gas-limit 200000000 > "$RUNNER_TEMP/r054-anvil.log" 2>&1 &
+          ANVIL_PID=$!
+          trap 'kill "$ANVIL_PID" 2>/dev/null || true' EXIT
+          for attempt in $(seq 1 50); do
+            if cast chain-id --rpc-url http://127.0.0.1:8545 >/dev/null 2>&1; then break; fi
+            sleep 0.2
+          done
+          test "$(cast chain-id --rpc-url http://127.0.0.1:8545)" = 420
+          node services/420-gaming-player-profile/test/gameclaims-anvil.integration.mjs

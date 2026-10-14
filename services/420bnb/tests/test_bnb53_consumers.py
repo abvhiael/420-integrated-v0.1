@@ -480,7 +480,10 @@ def test_configure_and_worker_claim_use_consistent_registry_lock_order(db):
         operator.execute('SELECT pg_advisory_xact_lock(420503)')
         future = pool.submit(run_worker)
         deadline = time.monotonic() + 4
-        while not operator.execute("SELECT EXISTS(SELECT 1 FROM pg_stat_activity WHERE application_name=%s AND wait_event='advisory')", (label,)).fetchone()[0]:
+        while True:
+            operator.execute('SELECT pg_stat_clear_snapshot()')
+            if operator.execute("SELECT EXISTS(SELECT 1 FROM pg_stat_activity WHERE application_name=%s AND wait_event='advisory')", (label,)).fetchone()[0]:
+                break
             assert time.monotonic() < deadline
             time.sleep(.02)
         # Worker must not hold the consumer row while it waits for the registry lock.

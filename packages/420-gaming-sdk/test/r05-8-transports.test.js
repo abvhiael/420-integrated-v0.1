@@ -50,9 +50,9 @@ test('R05.8 canonical SDK bindings use exact selector, bytecode hash and blockHa
  const client=createGamingContractBindings420({transport});
  const result=await client.read({contract:'games',method:'isActive',args:[game],blockHash:anchor});
  assert.equal(result.data,'0x'+('0'.repeat(63)+'1'));
+ assert.equal(calls[1].params[1].blockHash,anchor);
  assert.equal(calls[2].params[1].blockHash,anchor);
- assert.equal(calls[3].params[1].blockHash,anchor);
- assert.equal(calls[3].params[0].data,'0x'+keccak256(Buffer.from('isActive(bytes32)')).slice(2,10)+game.slice(2));
+ assert.equal(calls[2].params[0].data,'0x'+keccak256(Buffer.from('isActive(bytes32)')).slice(2,10)+game.slice(2));
  await assert.rejects(()=>client.read({contract:'games',method:'arbitrary',args:[game],blockHash:anchor}),
   /gaming-abi-method-denied/);
  await assert.rejects(()=>client.read({contract:'games',method:'isActive',args:[game]}),

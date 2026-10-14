@@ -114,6 +114,8 @@ test('R05.5 actual PostgreSQL schema, scoped backup and deletion lifecycle',asyn
    const complete=await worker.drain();assert.equal(complete.length,1);
    assert.equal(complete[0].status,'DONE');
    assert.equal((await actor.query('SELECT revision FROM gaming_datastore.save_redactions')).rows.length,1);
+   await assert.rejects(()=>worker.backup({...scope,revision:'1',backupId:'resurrect-forbidden',
+    expiresAt:'18446744073709551615',authority:'signed-session'}),/save-source-missing/);
   });
   await t.test('real encrypted provider + PostgreSQL survives source delete and independent backup restore',async()=>{
    const directory=await mkdtemp(join(tmpdir(),'r055-pg-provider-'));

@@ -101,39 +101,3 @@ jobs:
           path: |
             contracts/out/highcountry/**
           retention-days: 14
-
-
-  r05-level3-format-once:
-    if: github.event_name == 'pull_request' && github.head_ref == 'qualification/highcountry-r05-level3-main-20261014'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: qualification/highcountry-r05-level3-main-20261014
-          persist-credentials: true
-      - uses: foundry-rs/foundry-toolchain@v1
-        with:
-          version: stable
-      - name: Format only High Country Solidity
-        working-directory: contracts
-        run: |
-          forge fmt src/highcountry test/highcountry
-          forge fmt --check src/highcountry test/highcountry
-      - name: Assert scope and push formatter only
-        run: |
-          set -euo pipefail
-          git diff --check
-          git diff --name-only > /tmp/highcountry-format-files
-          if grep -Ev '^contracts/(src|test)/highcountry/.*\\.sol$' /tmp/highcountry-format-files; then
-            echo 'Formatter changed a file outside High Country Solidity' >&2
-            exit 1
-          fi
-          if [ -s /tmp/highcountry-format-files ]; then
-            git config user.name 'github-actions[bot]'
-            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-            git add contracts/src/highcountry contracts/test/highcountry
-            git commit -m 'style(highcountry): apply forge fmt to R05 Level 3 candidate [skip ci]'
-            git push origin HEAD:qualification/highcountry-r05-level3-main-20261014
-          fi

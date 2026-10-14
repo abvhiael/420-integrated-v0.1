@@ -214,7 +214,9 @@ test('R05.6 real durable PostgreSQL cursor/dedupe/reorg/finality and scoped quer
     logIndex:String(last.log_index),contract:last.contract};
    const next=await cross.query({accountId:'alice',gameId:G,authority:'signed-session',limit:1,before});
    assert.equal(next.length,1);
-   assert.notEqual(next[0].tx_hash+next[0].contract,first[0].tx_hash+first[0].contract);
+   assert.notDeepEqual([next[0].block_hash,next[0].tx_index,next[0].log_index,next[0].contract],
+    [first[0].block_hash,first[0].tx_index,first[0].log_index,first[0].contract],
+    'pagination must advance to a distinct canonical log, even when fixture transactions share a hash');
    await assert.rejects(()=>cross.query({accountId:'alice',gameId:G,authority:'signed-session',
     before:{...before,contract:'0x'+'f'.repeat(40)}}),/events-query-cursor-invalid/);
    await assert.rejects(()=>cross.query({accountId:'bob',gameId:G,authority:'signed-session'}),/events-query-denied/);

@@ -1,6 +1,6 @@
 # BNB-5.2 — Supervised background-worker runtime
 
-Status: IMPLEMENTED / LEVEL 1 QUALIFICATION PENDING. No completion claim before exact-head CI success.
+Status: COMPLETE / REPOSITORY LEVEL 1 PASS. [Durable certificate](BNB-5.2-LEVEL1-CERTIFICATE.md).
 
 ## Canonical scope and baseline
 
@@ -40,7 +40,7 @@ The retained BnB Runtime Slice also rechecks existing API/security, authorizatio
 
 ## Qualification and boundaries
 
-Exact implementation SHA/run/job and per-criterion disposition will be recorded after terminal CI. Syntax was checked locally; PostgreSQL/container acceptance requires the GitHub runtime owner. No broad Solidity, Genesis, Integrated or global Docs qualification is required or manually dispatched for this app-only ordinary step. Supplemental skipped/wrong-SHA/queued workflows are never counted as passing required evidence.
+Qualified implementation `fd2612e695337faed1d6bfba0ff2ab04dcc43c08`; Runtime Slice run `38606011412`, job `115996970065`: SUCCESS. 327 app tests (19 new worker cases), plus eight repeated dedicated operations executions; all browser/container/TLS/deployment steps successful. [Certificate](BNB-5.2-LEVEL1-CERTIFICATE.md) verifies each canonical exit criterion. Syntax checked locally; PostgreSQL/container acceptance executed successfully through the exact-head GitHub runtime owner. No broad Solidity, Genesis, Integrated or global Docs qualification is required or manually dispatched for this app-only ordinary step. Supplemental skipped/wrong-SHA/queued workflows are never counted as passing required evidence.
 
 Preserve all 17 existing external gates, particularly T-BNB-OPS-214 and T-BNB-SECURITY-213; live supervisor acceptance, independent operator authority, production restart/failover and actual consumer deployments remain external. Keep `travel.bnb_booking=false`, `booking_enabled=false`, `financial_execution=false`. All Identity, Pay, Wallet, Compliance, Travel, legal, human accessibility and production acceptances remain independent.
 

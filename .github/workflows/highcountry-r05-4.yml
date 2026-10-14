@@ -35,4 +35,29 @@ jobs:
       - name: Source and syntax integrity
         run: |
           node --check services/420-gaming-player-profile/src/gameclaims-adapter.js
+          node --check services/420-gaming-player-profile/src/gameclaims-coordinator-bridge.js
           git diff --check d6f6bd282636a6c9c8ac3bf17198580840fee37f HEAD
+  contract-boundary:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    env:
+      FOUNDRY_SRC: src/highcountry
+      FOUNDRY_TEST: test/highcountry
+      FOUNDRY_SCRIPT: script/highcountry
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Exact SHA
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: GameClaims canonical operator/player consumption tests
+        working-directory: contracts
+        run: forge test --match-path test/GamingProtocol420.t.sol -vv
+      - name: High Country consumed/grower-bound migration receipt tests
+        working-directory: contracts
+        run: forge test --match-path test/highcountry/unit/player/HighCountryMigration420.t.sol -vv

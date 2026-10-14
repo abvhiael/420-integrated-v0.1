@@ -168,15 +168,7 @@ export class CanonicalGamingFinality420 {
   return Object.freeze({accepted:true,kind:'PROGRESSION_REWARD',blockHash:a.hash,
    chainId:this.#chain,evidenceDigest:D({wallet,trackId,amount,progress,track,profile:p,blockHash:a.hash})});
  }
- async reward({name,signature,args,expectedWords}={}){
-  if(!['mission','progression','harvest'].includes(name)||!this.#contracts[name]||
-   !Array.isArray(this.#contracts[name].allowedReadSignatures)||
-   !this.#contracts[name].allowedReadSignatures.includes(signature)||typeof signature!=='string'||
-   !Array.isArray(args)||!Array.isArray(expectedWords)||!expectedWords.length||
-   !expectedWords.every(H))deny('r057-reward-request-invalid');
-  return this.#read({kind:'REWARD',name,signature,args,verify:r=>
-   r.length===expectedWords.length&&r.every((word,i)=>E(word)===expectedWords[i])});
- }
+
 }
 export function createR057CanonicalVerifier420({url,independentUrl,chainId,gameId,contracts,fetchImpl}={}){
  if(typeof url!=='string'||typeof independentUrl!=='string'||url===independentUrl||

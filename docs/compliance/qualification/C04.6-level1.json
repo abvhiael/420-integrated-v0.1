@@ -1,0 +1,50 @@
+{
+  "step": "C04.6",
+  "canonical": "Encode retailer-origin, prepayment, transport, eligible recipient, refusal, failed-delivery return and record duties; resolve classification-dependent differences through review.",
+  "qualification_level": 1,
+  "status": "COMPLETE_LEVEL1_PASS_EXTERNAL_ACCEPTANCE_DEFERRED",
+  "implementation_sha": "15f35f960499edaea36a71c4532e15998f8e1257",
+  "base_sha": "c5a4f220d1fbda01f707d359aa9bb32921a138b1",
+  "branch": "audit/420compliance-c01-1-inventory-20261009",
+  "pr": 602,
+  "files": [
+    "services/complianceauth/bc_delivery_journey.go",
+    "services/complianceauth/bc_delivery_journey_test.go",
+    ".github/workflows/420compliance-c01-level1.yml",
+    "docs/compliance/C04.6-BC-DELIVERY-JOURNEY.md",
+    "docs/compliance/C08.3-EXTERNAL-AUTHORITY-TESTNET-HANDOFF.md"
+  ],
+  "ci": {
+    "status": "PASS",
+    "run_id": 38113578038,
+    "job_id": 114393939617,
+    "conclusion": "success",
+    "successful_steps": 53,
+    "failed_steps": 0,
+    "exact_sha": true
+  },
+  "requirements": [
+    "retailer origin, prepaid dispatch and secure transport",
+    "age/identity/receipt and signed handover",
+    "refusal/failed-delivery return and carrier-specific same-day review",
+    "invoice and delivery record gates",
+    "C04.4 three-class separation, never operational ALLOW"
+  ],
+  "deferred_testnet": [
+    "C09.3 source revalidation",
+    "C09.5 real evidence and issuer adapters",
+    "C09.6 DOOBr refusal/return stage acceptance",
+    "C09.7 failure and revocation",
+    "C09.9 independent legal class-specific review"
+  ],
+  "deferred_production": [
+    "C10.1 legal advice",
+    "C10.2 verified actors",
+    "C10.6 production API integration",
+    "C10.7 final operational signoff"
+  ],
+  "level2": "No milestone due at C04.6",
+  "level3": "C08.5 deferred",
+  "next_canonical": "C04.7 — Travel policy pack for possession/transport/consumption and venue guidance within validated coverage; border crossings and unreviewed places remain explicit gaps.",
+  "external_acceptance": "Real DOOBr stage events, independent licences and class-specific legal review remain C09/C10 gates"
+}

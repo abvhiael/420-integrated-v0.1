@@ -1,0 +1,44 @@
+{
+  "step": "C04.1",
+  "canonical": "Draft/review/approve/schedule/activate/supersede/revoke lifecycle; enforce distinct author and independent reviewer identities.",
+  "status": "COMPLETE_LEVEL1_PASS",
+  "qualification_level": 1,
+  "implementation_sha": "694d34054bfc656998079fd62eeaa6668867a352",
+  "branch": "audit/420compliance-c01-1-inventory-20261009",
+  "pr": 602,
+  "main_observed": "e60c4c74ccd0c950817f98e3da6b67546afd9e24",
+  "files": [
+    "services/complianceauth/policy_lifecycle.go",
+    "services/complianceauth/policy_lifecycle_test.go",
+    "docs/compliance/C04.1-POLICY-LIFECYCLE.md",
+    ".github/workflows/420compliance-c01-level1.yml"
+  ],
+  "implemented": [
+    "state transitions across draft,reviewed,approved,scheduled,active,superseded,revoked",
+    "distinct author,reviewer,approver,publisher identities",
+    "policy digest binding,revision fencing,clock monotonicity and terminal-state rejection",
+    "negative,concurrency and scheduled activation tests"
+  ],
+  "ci": {
+    "status": "PASS",
+    "run_id": 38106410949,
+    "job_id": 114372795293,
+    "conclusion": "success",
+    "exact_sha": true,
+    "required": "C04.1 dedicated race test and retained Compliance Go security, PostgreSQL and race suite",
+    "passed_steps": 47,
+    "failed_steps": 0
+  },
+  "limitations": [
+    "Process-local lifecycle is not a durable production state machine",
+    "Independent identities and legal reviewer appointment not integrated with production authority",
+    "Scheduler and atomic publication/activation not yet integrated with PostgreSQL",
+    "Production carrier/regulator acceptance outstanding"
+  ],
+  "blockers": [
+    "Production durable lifecycle and independently authenticated legal review remain external acceptance requirements; not Level 1 software-test blockers"
+  ],
+  "level2": "C03.11 completed; no new milestone triggered by ordinary C04.1",
+  "level3": "C08.5 deferred",
+  "next_canonical": "C04.2 — Reviewer qualifications and delegation; MFA, least privilege, short-lived sessions and approval invalidation when reviewed content changes."
+}

@@ -1,0 +1,42 @@
+{
+  "step": "C05.7",
+  "canonical": "Distinguish policy coverage, legal eligibility and actual courier supply. Travel presence must combine qualified provider availability with applicable policy visibility, privacy thresholds and expiry.",
+  "qualification_level": 1,
+  "status": "COMPLETE_LEVEL1_PASS_EXTERNAL_ACCEPTANCE_DEFERRED",
+  "implementation_sha": "10a2363f76bcbafc2fc2c9f76a806acff8915e2b",
+  "base_sha": "c5a4f220d1fbda01f707d359aa9bb32921a138b1",
+  "branch": "audit/420compliance-c01-1-inventory-20261009",
+  "pr": 602,
+  "files": [
+    "services/complianceauth/c05_7_travel_presence.go",
+    "services/complianceauth/c05_7_travel_presence_test.go",
+    ".github/workflows/420compliance-c01-level1.yml",
+    "docs/compliance/C05.7-TRAVEL-COURIER-PRESENCE.md"
+  ],
+  "checks": [
+    "TestC057TravelPresencePrivacyExpiryAndSeparation -race",
+    "retained Compliance app-specific Go security/regressions"
+  ],
+  "requirements": [
+    "three independent states for policy/eligibility/supply",
+    "qualified, current, nonrevoked actual provider availability",
+    "privacy cohort threshold and redacted public response",
+    "expiry bounded by provider and reviewed policy; fail closed on provider or policy outage"
+  ],
+  "limitations": [
+    "Synthetic policy and supply adapters cannot prove production legal approval or live provider availability",
+    "Independently authorized Travel and DOOBr consumers deferred to C09/C10"
+  ],
+  "level2": "C05.12",
+  "level3": "C08.5",
+  "next_canonical": "C05.8 — Oracle integration suitability review and narrowly scoped adapter where required; preserve canonical runtime ABI and reporting-only authority. Off-chain source monitoring need not become an oracle feed.",
+  "ci": {
+    "status": "PASS",
+    "run_id": 38205014089,
+    "job_id": 114666474842,
+    "conclusion": "success",
+    "successful_steps": 66,
+    "failed_steps": 0,
+    "exact_sha": true
+  }
+}

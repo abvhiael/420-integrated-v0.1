@@ -1,10 +1,13 @@
 import { ROUTES, AVAILABILITY, routeDecision, sanitizeReturnPath } from "./route-policy.mjs";
+import { mountRiderAccount } from "./rider-account.mjs";
+import { createRiderPreferencesApi } from "./preferences-api.mjs";
 
 const root = document.getElementById("main");
 const menu = document.getElementById("menu-toggle");
 const nav = document.getElementById("site-nav");
 let session = null;
 let requestNumber = 0;
+let clearRiderAccount = null;
 
 // The host must provide an independently authenticated session adapter.
 // No localStorage, query-string identity, simulated principal or demo operator bypass.
@@ -25,6 +28,7 @@ function node(tag, text, className) {
   return el;
 }
 function renderDecision(decision) {
+  if (clearRiderAccount) { clearRiderAccount(); clearRiderAccount = null; }
   root.replaceChildren();
   root.setAttribute("aria-busy", "false");
   const panel = node("section", undefined, "panel");
@@ -51,6 +55,9 @@ function renderDecision(decision) {
     panel.append(node("p", "This page is not part of the LIFTd application."));
   }
   root.append(panel);
+  if (decision.kind === "protected" && decision.role === "rider") {
+    clearRiderAccount = mountRiderAccount(root, createRiderPreferencesApi(globalThis.LIFTdSessionAdapter), session);
+  }
   document.title = decision.title + " — LIFTd";
 }
 function markCurrent(path) {

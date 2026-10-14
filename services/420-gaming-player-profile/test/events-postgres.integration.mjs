@@ -23,7 +23,7 @@ const chain={number:'1',hash:block1,parentHash:parent,logs:logs(block1)};
 let canonical=new Set([block1]),permission=true,callCount=0;
 const indexer=()=>new DurableGamingEventIndexer420({operatorPool:root,
  chainId:'420',gameId:G,contracts:C,
- fetchBlock:async ({number})=>{assert.ok(['1','2'].includes(number));callCount++;return {...chain,number};},
+ fetchBlock:async ({number})=>{assert.ok(['1','2','3'].includes(number));callCount++;return {...chain,number};},
  resolveEventScope:async ({kind})=>{assert.equal(kind,'MigrationClaimConsumed');return {accountId:'alice',gameId:G};},
  verifyCanonicalBlock:async ({blockHash})=>canonical.has(blockHash),
  authorizeQuery:async ({accountId,gameId,authority})=>permission&&accountId==='alice'&&gameId===G&&authority==='signed-session'
@@ -100,6 +100,17 @@ test('R05.6 real durable PostgreSQL cursor/dedupe/reorg/finality and scoped quer
    assert.equal((await root.query("SELECT count(*)::integer AS n FROM gaming_datastore.event_logs")).rows[0].n,3);
    await indexer().finalize({contract,blockNumber:'2',blockHash:alternate});
    await assert.rejects(()=>worker.rollback({contract,ancestorNumber:'1',ancestorHash:block1}),/events-finalized-reorg-alert/);
+  });
+  await t.test('empty block has durable header, can finalize and cannot be silently rolled back',async()=>{
+   chain.hash=h('d');chain.parentHash=alternate;chain.logs=[];
+   canonical.add(chain.hash);
+   const x=await indexer().ingest({contract,startBlock:'3'});
+   assert.equal(x.ingested,0);
+   assert.equal((await root.query("SELECT count(*)::integer AS n FROM gaming_datastore.event_blocks")).rows[0].n,4);
+   const finalized=await indexer().finalize({contract,blockNumber:'3',blockHash:h('d')});
+   assert.equal(finalized.finalized,0);
+   await assert.rejects(()=>indexer().rollback({contract,ancestorNumber:'2',ancestorHash:alternate}),
+    /events-finalized-reorg-alert/);
   });
   await t.test('non-operator runtime cannot insert or access chain-wide event tables',async()=>{
    await root.query("CREATE ROLE r056_reader LOGIN PASSWORD 'r056_only' NOSUPERUSER NOCREATEDB NOCREATEROLE NOBYPASSRLS");

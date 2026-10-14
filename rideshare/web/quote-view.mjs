@@ -1,6 +1,6 @@
 import {createQuoteController} from './quote-controller.mjs';
 import {money} from './quote-policy.mjs';
-export function mountQuoteView(container,session,api){
+export function mountQuoteView(container,session,api,onTripRecorded){
  let active=true,controller=null;const panel=document.createElement('section');panel.className='panel';panel.setAttribute('aria-label','Ride quote and consent');
  const heading=document.createElement('h2');heading.textContent='Fare and ride request';
  const status=document.createElement('p');status.setAttribute('role','status');status.setAttribute('aria-live','polite');
@@ -27,7 +27,7 @@ export function mountQuoteView(container,session,api){
  request.addEventListener('click',async()=>{
   if(!active||!controller||!tick.checked)return;
   request.disabled=true;status.textContent='Submitting verified consent and ride request…';
-  try{const result=await controller.submit(tick.checked);if(active){status.textContent='Request recorded: '+result.tripId+'. Driver and payment status must be verified separately.';payment.textContent='Payment state: not confirmed. No payment has been captured.';}}
+  try{const result=await controller.submit(tick.checked);if(active){if(typeof onTripRecorded==='function')await onTripRecorded(result.tripId);status.textContent='Request recorded: '+result.tripId+'. Driver and payment status must be verified separately.';payment.textContent='Payment state: not confirmed. No payment has been captured.';}}
   catch{if(active)status.textContent='Request not confirmed. The same request identifier will be reused on retry; do not assume a new trip was created.';}
   finally{update();}
  });

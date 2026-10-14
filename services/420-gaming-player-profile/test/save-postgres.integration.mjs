@@ -69,6 +69,7 @@ test('R05.5 actual PostgreSQL schema, scoped backup and deletion lifecycle',asyn
    assert.equal(rows.length,1);assert.equal(rows[0].provider_id,'copy-provider');
    await assert.rejects(()=>worker.backup({...scope,revision:'1',backupId:'backup-1',
     expiresAt:'18446744073709551615',authority:'signed-session'}),/save-backup-replayed/);
+   assert.equal(objects.size,1,'replayed backup must not orphan a second provider copy');
   });
   await t.test('delete tombstones and physically removes only unshared backup copy',async()=>{
    const d=await worker.requestDelete({...scope,backupId:'backup-1',authority:'signed-session'});
@@ -92,7 +93,7 @@ test('R05.5 actual PostgreSQL schema, scoped backup and deletion lifecycle',asyn
    assert.equal((await repo.transaction(t=>t.saveReference('1'))).revision,'1');
    const finished=await worker.drain();
    assert.equal(finished.length,1);assert.equal(finished[0].status,'DONE');
-   assert.equal(objects.has('copy3'),false);
+   assert.equal(objects.has('copy2'),false);
   });
   await t.test('primary save deletion revokes provider locator and physically expires its unshared blob',async()=>{
    await assert.rejects(()=>worker.requestSaveDelete({...scope,revision:'1',authority:'forged'}),/save-authority-denied/);

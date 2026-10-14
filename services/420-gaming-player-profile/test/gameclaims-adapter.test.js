@@ -47,8 +47,11 @@ test('missing claim submits exact canonical ABI arguments using restricted opera
  };
  const res=await sdk.issue(issue);
  assert.equal(res.alreadyIssued,false);
- assert.deepEqual(write[0],{address:config.claims,functionName:'issue',
-  args:[id,config.gameId,wallet,guest,payload,'9999999999'],account:config.operator});
+ assert.equal(write[0].address,config.claims);
+ assert.equal(write[0].functionName,'issue');
+ assert.equal(write[0].account,config.operator);
+ assert.equal(write[0].abi.some(x=>x.name==='issue'),true);
+ assert.deepEqual(write[0].args,[id,config.gameId,wallet,guest,payload,9999999999n]);
 });
 test('wallet consumption and grower binding never use operator wallet',async()=>{
  const sdk=create();const consume=await sdk.targetWalletConsume({claimId:'77',targetWallet:wallet});

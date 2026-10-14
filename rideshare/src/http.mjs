@@ -1,12 +1,14 @@
 import {AuthError} from './auth.mjs';
 // Fetch-compatible protected handler; deployment/listeners are not enabled here.
-export function createHttpHandler(service, locationService, dispatchAdapter, quoteService, paymentService, safetyService, riderPreferencesService) {
+export function createHttpHandler(service, locationService, dispatchAdapter, quoteService, paymentService, safetyService, riderPreferencesService, onboardingService, onboardingReviewService) {
   return async request => {
     const reply = (status, value) => new Response(JSON.stringify(value), {status,
       headers: {'content-type': 'application/json', 'cache-control': 'no-store', 'x-content-type-options': 'nosniff'}});
     try {
       const url = new URL(request.url);
       if (url.search || url.hash) throw new AuthError('INVALID_REQUEST', 400);
+      const onboardingReview = /^\/v1\/rideshare\/drivers\/([A-Za-z0-9_-]{1,128})\/onboarding\/review$/.exec(url.pathname);
+      const onboarding = /^\/v1\/rideshare\/drivers\/([A-Za-z0-9_-]{1,128})\/onboarding$/.exec(url.pathname);
       const preferences = new RegExp('^/v1/rideshare/riders/([A-Za-z0-9_-]{1,128})/preferences' + String.fromCharCode(36)).exec(url.pathname);
       const safety=/^\/v1\/rideshare\/trips\/([A-Za-z0-9_-]{1,128})\/safety(?:\/(report|resolve|case))?$/.exec(url.pathname);
       const payment=/^\/v1\/rideshare\/trips\/([A-Za-z0-9_-]{1,128})\/payments(?:\/(prepare|consent|reconcile|plan|reserve|operation))?$/.exec(url.pathname);
@@ -18,17 +20,22 @@ export function createHttpHandler(service, locationService, dispatchAdapter, quo
       const locationPrepare = url.pathname === '/v1/rideshare/routes';
       const locationRead = /^\/v1\/rideshare\/trips\/([A-Za-z0-9_-]{1,128})\/coordinates$/.exec(url.pathname);
       const match = /^\/v1\/rideshare\/trips(?:\/([A-Za-z0-9_-]{1,128})(\/transitions)?)?$/.exec(url.pathname);
-      if (!match && !locationPrepare && !locationRead && !availability && !quoteIssue && !quoteConsent && !quoteRead && !payment && !statement && !safety && !preferences) return reply(404, {error: 'NOT_FOUND'});
+      if (!match && !locationPrepare && !locationRead && !availability && !quoteIssue && !quoteConsent && !quoteRead && !payment && !statement && !safety && !preferences && !onboarding && !onboardingReview) return reply(404, {error: 'NOT_FOUND'});
       if ((locationPrepare || locationRead) && !locationService) return reply(503, {error: 'LOCATION_UNAVAILABLE'});
       if (availability && !dispatchAdapter) return reply(503,{error:'DISPATCH_UNAVAILABLE'});
       if((quoteIssue||quoteConsent||quoteRead)&&!quoteService) return reply(503,{error:'QUOTE_UNAVAILABLE'});
       if(safety&&!safetyService)return reply(503,{error:'SAFETY_UNAVAILABLE'});
+      if(onboardingReview&&!onboardingReviewService)return reply(503,{error:'ONBOARDING_REVIEW_UNAVAILABLE'});
+      if(onboarding&&!onboardingService)return reply(503,{error:'ONBOARDING_UNAVAILABLE'});
       if(preferences&&!riderPreferencesService)return reply(503,{error:'PREFERENCES_UNAVAILABLE'});
       if((payment||statement)&&!paymentService)return reply(503,{error:'PAY_UNAVAILABLE'});
       const authorization = request.headers.get('authorization');
       if (typeof authorization !== 'string' || authorization.length > 32775 ||
         !/^Bearer [A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/.test(authorization)) throw new AuthError('BEARER_REQUIRED');
       const token = authorization.slice(7);
+      if(onboardingReview&&request.method!=='POST')return reply(405,{error:'METHOD_NOT_ALLOWED'});
+      if(onboarding&&request.method==='GET')return reply(200,await onboardingService.read(token,onboarding[1]));
+      if(onboarding&&request.method!=='POST')return reply(405,{error:'METHOD_NOT_ALLOWED'});
       if(preferences&&request.method==='GET')return reply(200,await riderPreferencesService.read(token,preferences[1]));
       if(preferences&&request.method==='DELETE')return reply(200,await riderPreferencesService.erase(token,preferences[1]));
       if(preferences&&!['PUT'].includes(request.method))return reply(405,{error:'METHOD_NOT_ALLOWED'});
@@ -61,6 +68,8 @@ export function createHttpHandler(service, locationService, dispatchAdapter, quo
           (body.commandId !== undefined && body.commandId !== commandId)) throw new AuthError('INVALID_REQUEST', 400);
         body.commandId = commandId;
       }
+      if(onboardingReview){if(body.driverId!==onboardingReview[1])throw new AuthError('REVIEW_SCOPE_DENIED',403);return reply(200,await onboardingReviewService.decide(token,body));}
+      if(onboarding){if(body.driverId!==onboarding[1])throw new AuthError('ONBOARDING_SCOPE_DENIED',403);return reply(200,await onboardingService.submit(token,body));}
       if(preferences)return reply(200,await riderPreferencesService.update(token,preferences[1],body));
       if(safety){if(request.method!=='POST'||!['report','resolve'].includes(safety[2]))return reply(405,{error:'METHOD_NOT_ALLOWED'});return reply(200,await safetyService[safety[2]](token,safety[1],body));}
       if(payment){const method=payment[2]==='operation'?'reconcileOperation':payment[2];return reply(200,await paymentService[method](token,payment[1],body));}

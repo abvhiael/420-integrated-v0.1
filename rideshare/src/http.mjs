@@ -7,7 +7,7 @@ export function createHttpHandler(service, locationService, dispatchAdapter, quo
     try {
       const url = new URL(request.url);
       if (url.search || url.hash) throw new AuthError('INVALID_REQUEST', 400);
-      const safety=/^\\/v1\\/rideshare\\/trips\\/([A-Za-z0-9_-]{1,128})\\/safety(?:\\/(report|resolve|case))?$/.exec(url.pathname);
+      const safety=/^\/v1\/rideshare\/trips\/([A-Za-z0-9_-]{1,128})\/safety(?:\/(report|resolve|case))?$/.exec(url.pathname);
       const payment=/^\/v1\/rideshare\/trips\/([A-Za-z0-9_-]{1,128})\/payments(?:\/(prepare|consent|reconcile|plan|reserve|operation))?$/.exec(url.pathname);
       const statement=/^\/v1\/rideshare\/drivers\/([A-Za-z0-9_-]{1,128})\/statements\/([A-Za-z0-9_-]{1,128})$/.exec(url.pathname);
       const quoteRead=/^\/v1\/rideshare\/quotes\/([A-Za-z0-9_-]{1,128})$/.exec(url.pathname);

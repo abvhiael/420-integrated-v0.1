@@ -47,6 +47,8 @@ test('reject unauthorized and malformed fields, consent, revisions and accessors
     {tripNotifications:true}, {__proto__:null,unknown:true},
     Object.defineProperty({},'largeText',{get(){throw Error('getter')},enumerable:true})
   ]) await assert.rejects(f.svc.update('valid','owner',{preferences,expectedRevision:0}),PreferenceError);
+  await assert.rejects(f.svc.update('valid','owner',{preferences:{},expectedRevision:0,unexpected:'value'}),e=>e.code==='INVALID_REQUEST');
+  await assert.rejects(f.svc.update('valid','owner',Object.defineProperty({},'preferences',{get(){throw Error('getter')},enumerable:true})),e=>e.code==='INVALID_REQUEST');
   for(const expectedRevision of [-1,1.5,NaN,'0'])await assert.rejects(f.svc.update('valid','owner',{preferences:{},expectedRevision}),PreferenceError);
   assert.equal(f.calls,0);
 });

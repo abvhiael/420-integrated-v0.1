@@ -25,6 +25,10 @@ const tip=Number(BigInt(await chain.request('eth_blockNumber',[])));
 const observed=new Set();
 for(let i=1;i<=tip;i++){
  for(const [owner,contract] of Object.entries(addresses)){
+  // A contract is not deployed in earlier blocks. The production backfill
+  // must begin at its verified deployment height, not block zero.
+  const atHeight=await chain.request('eth_getCode',[contract,'0x'+i.toString(16)]);
+  if(atHeight==='0x')continue;
   const block=await source.fetchBlock({chainId:'420',contract,number:String(i)});
   for(const log of block.logs){
    const decoded=decodeGamingEvent420(log);

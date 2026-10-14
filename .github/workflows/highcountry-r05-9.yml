@@ -1,0 +1,42 @@
+name: High Country R05.9 Level 1 Abuse Operations
+on:
+  pull_request:
+    paths:
+      - 'services/420-gaming-player-profile/**'
+      - '.github/workflows/highcountry-r05-9.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  abuse-operations:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify exact implementation SHA
+        run: test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+      - name: R05.9 adversarial security, rate and HTTP
+        run: node --test services/420-gaming-player-profile/test/r059-security-operations.test.js
+      - name: Retained R05.6 HTTP, R05.7 finality and R05.8 SDK
+        run: |
+          node --test services/420-gaming-player-profile/test/gaming-event-http.test.js
+          node --test services/420-gaming-player-profile/test/canonical-gaming-finality.test.js
+          node --test packages/420-gaming-sdk/test/*.test.js clients/highcountry-access-v1/test/*.test.js
+      - name: Retained Gaming service fast unit suite
+        working-directory: services/420-gaming-player-profile
+        run: npm test
+      - name: Source syntax and exact commit check
+        run: |
+          node --check services/420-gaming-player-profile/src/r059-security-operations.js
+          node --check services/420-gaming-player-profile/src/r059-schema-migrations.js
+          node --check services/420-gaming-player-profile/src/gaming-event-http.js
+          git diff --check 58538396fb7028d0cd449ef52d640d0fb55616f3 HEAD
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"

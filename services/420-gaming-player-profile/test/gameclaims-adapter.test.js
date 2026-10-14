@@ -13,7 +13,7 @@ const create=()=>{
   if(address===config.migration&&functionName==='guestStateCommitment')return guest;
   if(address===config.migration&&functionName==='migrationPayloadHash')return payload;
   if(address===config.claims&&functionName==='claim')return claim;
-  if(address===config.bridge&&functionName==='growerProfileIdOfMigrationClaim')return '12';
+  if(address===config.bridge&&functionName==='growerProfileIdOfMigrationClaim')return '0';
   if(address===config.migration&&functionName==='isReadyToApply')return true;
   if(address===config.migration&&functionName==='appliedMigration')return {exists:false};
   throw Error('unexpected read');
@@ -62,6 +62,8 @@ test('wallet consumption and grower binding never use operator wallet',async()=>
 });
 test('read verifies consumed, bound exact payload and never asserts finality',async()=>{
  const sdk=create();claim={...claim,consumed:true};
+ const original=read.readContract;
+ read.readContract=async x=>x.functionName==='growerProfileIdOfMigrationClaim'?'12':original(x);
  const proof=await sdk.verifyConsumedBound({claimId:'77',targetWallet:wallet,growerId:'12',
   guestStateCommitment:guest,payloadHash:payload});
  assert.equal(proof.canonicalFinality,'UNVERIFIED');

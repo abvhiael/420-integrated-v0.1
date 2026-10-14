@@ -26,7 +26,7 @@ jobs:
           set -euo pipefail
           current="$(gh api "repos/$REPOSITORY/git/ref/heads/audit/420compliance-c08-4-main-candidate-20261014" --jq '.object.sha')"
           test "$current" = "$EXPECTED_SHA"
-      - name: Dispatch five unmodified canonical qualification workflows
+      - name: Dispatch four default-registered canonical qualification workflows
         env:
           GH_TOKEN: ${{ github.token }}
           REPOSITORY: ${{ github.repository }}
@@ -38,9 +38,9 @@ jobs:
             contracts-foundry.yml \
             genesis-address-authority.yml \
             qualification.yml \
-            docs-qualify.yml \
-            420compliance-c08-5-level3.yml
+            docs-qualify.yml
           do
             gh workflow run "$workflow" --repo "$REPOSITORY" --ref "$ref"
             echo "Dispatched $workflow at $ref"
           done
+          echo 'Compliance retained-phase workflow runs via this same manifest push on the qualification branch.'

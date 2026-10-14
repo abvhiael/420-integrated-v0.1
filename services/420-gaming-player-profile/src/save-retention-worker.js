@@ -166,8 +166,24 @@ export class SaveRetentionWorker420 {
   });
   const results=[];
   for(const job of leased){
+   // Re-read all scopes immediately before irreversible provider deletion.
+   // A live save/backup always wins over queued retention or user deletion.
+   const protectedObject=await this.#tx(async c=>{
+    const refs=(await c.query(`SELECT 1 FROM gaming_datastore.save_references r
+     WHERE r.provider_id=$1 AND r.object_ref=$2
+     AND NOT EXISTS(SELECT 1 FROM gaming_datastore.save_redactions d WHERE
+       d.account_id=r.account_id AND d.game_id=r.game_id AND d.revision=r.revision)
+     LIMIT 1`,[job.provider_id,job.object_ref])).rows;
+    const backups=(await c.query(`SELECT 1 FROM gaming_datastore.save_backups
+     WHERE provider_id=$1 AND object_ref=$2 AND deleted_at IS NULL
+     AND expires_at>gaming_datastore.now_seconds() LIMIT 1`,
+     [job.provider_id,job.object_ref])).rows;
+    return refs.length>0||backups.length>0;
+   });
    let deleted=false;
-   try{await this.#storage.delete({providerId:job.provider_id,objectRef:job.object_ref});deleted=true;}catch{}
+   if(!protectedObject){
+    try{await this.#storage.delete({providerId:job.provider_id,objectRef:job.object_ref});deleted=true;}catch{}
+   }
    const outcome=await this.#tx(async c=>{
     const row=(await c.query(`UPDATE gaming_datastore.save_deletion_jobs
      SET status=$5,lease_token=NULL,lease_until=NULL,

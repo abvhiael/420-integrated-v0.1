@@ -58,3 +58,41 @@ jobs:
           node --check services/420-gaming-player-profile/src/event-ingestion-migrations.js
           git diff --check d494c52aa9c9a8e8031e3201197fb0c6afb98f87 HEAD
           test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+  actual-emitted-logs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    env:
+      CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      FOUNDRY_SRC: src/highcountry
+      FOUNDRY_TEST: test/highcountry
+      FOUNDRY_SCRIPT: script/highcountry
+      FOUNDRY_EVM_VERSION: cancun
+      FOUNDRY_DYNAMIC_TEST_LINKING: false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+      - name: Verify exact SHA
+        run: test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Build only R05.4 actual event fixture
+        working-directory: contracts
+        run: forge build --no-dynamic-test-linking --evm-version cancun test/highcountry/integration/R05MigrationDeployment.sol
+      - name: Run actual contract event log and pinned-source journey
+        env:
+          HC_TEST_RPC_URL: http://127.0.0.1:8545
+        run: |
+          anvil --network ethereum --chain-id 420 --port 8545 --hardfork cancun --code-size-limit 600000 --gas-limit 200000000 > "$RUNNER_TEMP/r056-anvil.log" 2>&1 &
+          ANVIL_PID=$!
+          trap 'kill "$ANVIL_PID" 2>/dev/null || true' EXIT
+          for i in $(seq 1 50); do
+            if cast chain-id --rpc-url http://127.0.0.1:8545 >/dev/null 2>&1; then break; fi
+            sleep 0.2
+          done
+          test "$(cast chain-id --rpc-url http://127.0.0.1:8545)" = 420
+          node services/420-gaming-player-profile/test/events-anvil.integration.mjs

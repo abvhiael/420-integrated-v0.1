@@ -1,5 +1,6 @@
 import { ROUTES, AVAILABILITY, routeDecision, sanitizeReturnPath } from "./route-policy.mjs";
 import { mountRiderAccount } from "./rider-account.mjs";
+import { createRiderPreferencesApi } from "./preferences-api.mjs";
 
 const root = document.getElementById("main");
 const menu = document.getElementById("menu-toggle");
@@ -55,7 +56,7 @@ function renderDecision(decision) {
   }
   root.append(panel);
   if (decision.kind === "protected" && decision.role === "rider") {
-    clearRiderAccount = mountRiderAccount(root, globalThis.LIFTdPreferencesAdapter, session);
+    clearRiderAccount = mountRiderAccount(root, createRiderPreferencesApi(globalThis.LIFTdSessionAdapter), session);
   }
   document.title = decision.title + " — LIFTd";
 }

@@ -5,12 +5,10 @@ const bytes32=x=>typeof x==='string'&&/^0x[0-9a-f]{64}$/.test(x);
 const wallet=x=>typeof x==='string'&&/^0x[0-9a-f]{40}$/.test(x);
 const uint64=x=>typeof x==='string'&&/^(0|[1-9][0-9]*)$/.test(x)&&BigInt(x)<(1n<<64n);
 const admin=new Set(['GameRegistered','GameUpdated','GameStatusChanged']);
-function numericClaim(x){
- if(!bytes32(x))fail('event-scope-claim-invalid');
- const n=BigInt(x);return n>0n&&n<(1n<<64n)?String(n):null;
-}
-export function createGamingEventScopeResolver420({pool,gameId,chainId}={}){
- if(typeof pool?.connect!=='function'||!bytes32(gameId)||!uint64(chainId)||chainId==='0')
+export function createGamingEventScopeResolver420({pool,gameId,chainId,contracts}={}){
+ if(typeof pool?.connect!=='function'||!bytes32(gameId)||!uint64(chainId)||chainId==='0'||
+  !contracts||!['games','identity','entitlements','crossGame','claims','bridge','migration'].every(k=>wallet(contracts[k]))||
+  new Set(Object.values(contracts)).size!==7)
   fail('event-scope-config');
  return async ({chainId:observedChain,kind,payload}={})=>{
   if(String(observedChain)!==chainId||typeof kind!=='string'||!payload||typeof payload!=='object')
@@ -27,46 +25,37 @@ export function createGamingEventScopeResolver420({pool,gameId,chainId}={}){
    if(!(await c.query("SELECT pg_has_role(current_user,'gaming_datastore_migrator','MEMBER') AS ok")).rows[0]?.ok)
     fail('event-scope-operator-denied');
    await c.query('SET LOCAL ROLE gaming_datastore_migrator');
-   const lookup=async(kind,key,value,column='payload')=>{
+   const lookup=async(kind,key,value,emitter)=>{
     if(typeof value!=='string')return null;
     const rows=(await c.query(`SELECT payload,target_wallet FROM gaming_datastore.event_logs
-      WHERE chain_id=$1 AND game_id=$2 AND event_kind=$3 AND ${column}->>$4=$5
-      AND status<>'ORPHANED' ORDER BY block_number DESC LIMIT 2`,
-      [chainId,gameId,kind,key,value])).rows;
+      WHERE chain_id=$1 AND game_id=$2 AND event_kind=$3 AND payload->>$4=$5
+      AND contract=$6 AND status<>'ORPHANED' ORDER BY block_number DESC LIMIT 2`,
+      [chainId,gameId,kind,key,value,emitter])).rows;
     if(rows.length>1&&JSON.stringify(rows[0].payload)!==JSON.stringify(rows[1].payload))
      fail('event-scope-conflicting-history');
     return rows[0]??null;
    };
    if(!target&&payload.claimId){
-    const id=numericClaim(payload.claimId);
-    if(id){
-     const apps=(await c.query(`SELECT target_wallet FROM gaming_datastore.migration_applications
-       WHERE chain_id=$1 AND game_id=$2 AND claim_id=$3 LIMIT 2`,
-       [chainId,gameId,id])).rows;
-     if(apps.length>1)fail('event-scope-conflict');
-     target=apps[0]?.target_wallet??null;
-    }
-    if(!target){
-     const row=await lookup('MigrationClaimIssued','claimId',payload.claimId);
-     target=row?.target_wallet??null;
-    }
+    if(!bytes32(payload.claimId))fail('event-scope-claim-invalid');
+    const row=await lookup('MigrationClaimIssued','claimId',payload.claimId,contracts.claims);
+    target=row?.target_wallet??null;
    }
    if(!profileId&&payload.entitlementId){
-    const row=await lookup('EntitlementIssued','entitlementId',payload.entitlementId);
+    const row=await lookup('EntitlementIssued','entitlementId',payload.entitlementId,contracts.entitlements);
     profileId=row?.payload?.profileId??null;
    }
    if(!profileId&&payload.attestationId){
-    const row=await lookup('AttestationIssued','attestationId',payload.attestationId);
+    const row=await lookup('AttestationIssued','attestationId',payload.attestationId,contracts.crossGame);
     profileId=row?.payload?.profileId??null;
    }
    if(!target&&profileId){
     if(!bytes32(profileId))fail('event-scope-invalid-profile');
-    const row=await lookup('GameProfileCreated','profileId',profileId);
+    const row=await lookup('GameProfileCreated','profileId',profileId,contracts.identity);
     target=row?.payload?.account??null;
    }
    if(!target&&payload.growerId){
     if(!uint64(payload.growerId))fail('event-scope-invalid-grower');
-    const row=await lookup('GrowerGamingProfileBound','growerId',payload.growerId);
+    const row=await lookup('GrowerGamingProfileBound','growerId',payload.growerId,contracts.bridge);
     target=row?.payload?.account??null;
    }
    if(!target){await c.query('COMMIT');return null;}

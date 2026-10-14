@@ -58,7 +58,7 @@ CREATE POLICY backup_scope ON gaming_datastore.save_backups
 CREATE POLICY backup_migrator_mutation ON gaming_datastore.save_backups FOR ALL
  USING (current_user='gaming_datastore_migrator') WITH CHECK(current_user='gaming_datastore_migrator');
 CREATE POLICY r055_hide_deleted_backups ON gaming_datastore.save_backups
- AS RESTRICTIVE FOR SELECT USING(current_user='gaming_datastore_migrator' OR deleted_at IS NULL);
+ AS RESTRICTIVE FOR SELECT USING(current_user='gaming_datastore_migrator' OR (deleted_at IS NULL AND expires_at>gaming_datastore.now_seconds()));
 CREATE POLICY deletion_scope ON gaming_datastore.save_deletion_jobs
  FOR SELECT USING (current_user='gaming_datastore_migrator' OR EXISTS(SELECT 1 FROM gaming_datastore.runtime_scopes s WHERE s.role_name=current_user
  AND s.account_id=save_deletion_jobs.account_id AND s.game_id=save_deletion_jobs.game_id));

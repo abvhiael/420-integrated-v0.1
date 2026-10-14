@@ -1,6 +1,6 @@
 # LIFTd — canonical 420Rideshare development roadmap
 
-Public working brand: **LIFTd**, following the owner's latest spelling. Earlier concept name: LIFTED. Technical application: 420Rideshare. This is a first-party passenger transportation application, separate from DOOBr delivery. First launch market: **Vancouver, British Columbia, Canada**, selected by the owner on 2026-10-13, matching DOOBr's initial market. This market decision does not grant passenger-transport authorization or automatically include all Metro Vancouver municipalities or YVR. Vancouver pilot fare, driver compensation, platform allocation and development allocation were adopted by the owner on 2026-10-13; see [economic policy v1](LIFTD-VANCOUVER-PILOT-ECONOMIC-POLICY.md). Trademark clearance, detailed cancellation/waiting policies and operating-cost validation remain pending.
+Public working brand: **LIFTd**, following the owner's latest spelling. Earlier concept name: LIFTED. Technical application: 420Rideshare. This is a first-party passenger transportation application, separate from DOOBr delivery. First launch market: **Vancouver, British Columbia, Canada**, selected by the owner on 2026-10-13, matching DOOBr's initial market. This market decision does not grant passenger-transport authorization or automatically include all Metro Vancouver municipalities or YVR. Vancouver pilot fare, driver compensation, platform allocation and development allocation were adopted by the owner on 2026-10-13; see [economic policy v2](LIFTD-VANCOUVER-PILOT-ECONOMIC-POLICY.md). Trademark clearance, detailed cancellation/waiting policies and operating-cost validation remain pending.
 
 ## Repository baseline and ownership
 
@@ -32,7 +32,7 @@ Level 1 per implementation step; Level 2 only at the named milestones; one Level
 | M-L01-A | Level 2: identity + eligibility + durable trip + Location integration | COMPLETE — Level 2 PASS; see milestone evidence |
 | L01.6 | Driver availability, vehicle capacity, deterministic matching, assignment expiry and concurrent dispatch | COMPLETE — Level 1 PASS; see L01.6 evidence |
 | L01.7 | Immutable expiring fare quotes, currency/rounding, rider consent and explicit cancellation policy | COMPLETE — Level 1 PASS; see L01.7 evidence |
-| L01.8 | Scoped Pay/Wallet intents, receipts/finality, cancellation/refund and payout projections | COMPLETE — Level 1 PASS; see L01.8 evidence; LC-01 development execution held |
+| L01.8 | Scoped Pay/Wallet intents, receipts/finality, cancellation/refund and payout projections | COMPLETE — Level 1 PASS; see L01.8 evidence; LC-01 policy conflict resolved at 10%; development execution awaits canonical settlement acceptance |
 | L01.9 | Safety incident workflow, active-trip resolution, pause/recovery, bounded operator permissions and privacy | Pending |
 | M-L01-B | Level 2: dispatch + economics + safety integration/adversarial checks | Pending |
 | L01.10 | Single Phase L01 Level 3 qualification, current-main reconciliation and retained deferrals | Pending |

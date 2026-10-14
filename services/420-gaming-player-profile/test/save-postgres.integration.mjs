@@ -78,8 +78,9 @@ test('R05.5 actual PostgreSQL schema, scoped backup and deletion lifecycle',asyn
    const results=await worker.drain();
    assert.equal(results.length,1);assert.equal(results[0].status,'DONE');
    assert.equal(objects.has('copy1'),false);
-   assert.equal((await actor.query('SELECT deleted_at FROM gaming_datastore.save_backups')).rows[0].deleted_at!==null,true);
-   assert.equal((await actor.query("SELECT status FROM gaming_datastore.save_deletion_jobs")).rows[0].status,'DONE');
+   assert.equal((await actor.query('SELECT backup_id FROM gaming_datastore.save_backups')).rowCount,0);
+   await assert.rejects(()=>actor.query('SELECT * FROM gaming_datastore.save_deletion_jobs'),e=>e.code==='42501');
+   assert.equal((await root.query("SELECT status FROM gaming_datastore.save_deletion_jobs")).rows[0].status,'DONE');
   });
   await t.test('expired independent backup creates durable deletion work and worker completes',async()=>{
    await worker.backup({...scope,revision:'1',backupId:'backup-expired',

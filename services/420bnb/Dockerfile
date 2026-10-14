@@ -20,6 +20,7 @@ COPY services/420bnb/availability_projection.py /app/availability_projection.py
 COPY services/420bnb/discovery_sync.py /app/discovery_sync.py
 COPY services/420bnb/outbox.py /app/outbox.py
 COPY services/420bnb/consumer_delivery.py /app/consumer_delivery.py
+COPY services/420bnb/projection_refresh.py /app/projection_refresh.py
 COPY services/420bnb/worker.py /app/worker.py
 COPY services/420bnb/pricing.py /app/pricing.py
 COPY services/420bnb/travel_location.py /app/travel_location.py

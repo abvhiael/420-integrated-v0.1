@@ -349,13 +349,13 @@ def ready():
             if current is None:
                 raise HTTPException(503,"SCHEMA_NOT_MIGRATED")
             records=c.execute("SELECT version FROM bnb_schema_migration ORDER BY version").fetchall()
-            if [row[0] for row in records]!=list(range(1,28)):
+            if [row[0] for row in records]!=list(range(1,29)):
                 raise HTTPException(503,"SCHEMA_VERSION_MISMATCH")
     except psycopg.Error:
         # A database outage or connection exhaustion is not a ready API.
         # Never leak DSNs, SQL statements, hostnames or credentials to probes.
         raise HTTPException(503,"DATABASE_UNAVAILABLE") from None
-    return {"status":"ready","transactions_enabled":False,"schema_version":27}
+    return {"status":"ready","transactions_enabled":False,"schema_version":28}
 
 
 class GuestMessageInput(BaseModel):

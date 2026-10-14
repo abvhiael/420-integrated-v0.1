@@ -15,7 +15,7 @@ class FakeCursor:
     def fetchone(self):return self.rows[0]
 
 class FakeConn:
-    def __init__(self,counts=(0,0,0),versions=tuple(range(1,28))):
+    def __init__(self,counts=(0,0,0),versions=tuple(range(1,29))):
         self.counts=counts;self.versions=versions
     def execute(self,sql):
         if "bnb_schema_migration" in sql:return FakeCursor([(v,) for v in self.versions])

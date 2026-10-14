@@ -18,11 +18,11 @@ class RecoveryAssessment:
     expired_leases: int
     dead_letters: int
 
-def assess(conn, *, action, expected_schema=27, live_booking=False,
+def assess(conn, *, action, expected_schema=28, live_booking=False,
            financial_execution=False, approved=False):
     if action not in ("restart","restore","rollback","replay"):
         raise RecoveryBlocked("RECOVERY_ACTION_INVALID")
-    if type(expected_schema) is not int or expected_schema!=27:
+    if type(expected_schema) is not int or expected_schema!=28:
         raise RecoveryBlocked("RECOVERY_SCHEMA_UNKNOWN")
     if not approved:
         raise RecoveryBlocked("INDEPENDENT_OPERATOR_AUTHORITY_REQUIRED")
@@ -30,7 +30,7 @@ def assess(conn, *, action, expected_schema=27, live_booking=False,
         raise RecoveryBlocked("LIVE_RECOVERY_APPROVAL_REQUIRED")
     rows=conn.execute("""SELECT version FROM bnb_schema_migration
         ORDER BY version""").fetchall()
-    if [r[0] for r in rows]!=list(range(1,28)):
+    if [r[0] for r in rows]!=list(range(1,29)):
         raise RecoveryBlocked("RECOVERY_SCHEMA_DRIFT")
     pending, expired, dead=conn.execute("""SELECT
         count(*) FILTER (WHERE delivered_at IS NULL AND dead_lettered_at IS NULL),

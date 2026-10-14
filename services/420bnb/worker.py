@@ -190,7 +190,18 @@ def main():
                 active=True, expected_revision=0, actor='local-worker-contract',
                 authorize=lambda actor, action, consumer: actor == 'local-worker-contract'
                     and action == 'configure' and consumer == 'bnb-local-validation')
-    supervisor = Supervisor(connect, LocalValidationSink(connect), stop=stop, consumer='bnb-local-validation')
+    # Refresh derived views independently of external event acceptance.
+    from projection_refresh import once as refresh_once
+    from api import occupancy_in_window
+    class ProjectionSupervisor(Supervisor):
+        def once(self):
+            if self.stop.is_set():
+                return 'stopped'
+            with self.connect() as c:
+                refreshed = refresh_once(c, occupancy=occupancy_in_window)
+            state = super().once()
+            return 'refreshed' if refreshed and state == 'idle' else state
+    supervisor = ProjectionSupervisor(connect, LocalValidationSink(connect), stop=stop, consumer='bnb-local-validation')
     return supervisor.run()
 
 

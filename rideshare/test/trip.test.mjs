@@ -109,3 +109,13 @@ test('safe-integer boundaries and malformed admission fail closed', () => {
   rejects(() => transitionTrip(trip, {action: 'arrive', expectedRevision: '1'}, driver, context), 'STALE_REVISION');
   assert.equal(trip.state, 'ASSIGNED');
 });
+
+test('active-trip safety termination cannot be ordinary cancellation or a driver override', () => {
+ const started=active();
+ rejects(()=>move(started,'cancel',rider),'ACTIVE_TRIP_REQUIRES_SAFETY_RESOLUTION');
+ rejects(()=>move(started,'safety_resolve',rider),'SAFETY_RESOLUTION_DENIED');
+ rejects(()=>move(started,'safety_resolve',driver),'SAFETY_RESOLUTION_DENIED');
+ const resolved=move(started,'safety_resolve',dispatcher);
+ assert.equal(resolved.state,'CANCELLED');
+ rejects(()=>move(resolved,'safety_resolve',dispatcher),'TERMINAL_TRIP');
+});

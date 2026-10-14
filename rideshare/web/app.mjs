@@ -2,6 +2,7 @@ import { ROUTES, AVAILABILITY, routeDecision, sanitizeReturnPath } from "./route
 import { mountRiderAccount } from "./rider-account.mjs";
 import { createRiderPreferencesApi } from "./preferences-api.mjs";
 import { mountPickupView } from "./pickup-view.mjs";
+import { createLocationProviders } from "./location-providers.mjs";
 
 const root = document.getElementById("main");
 const menu = document.getElementById("menu-toggle");
@@ -60,7 +61,7 @@ function renderDecision(decision) {
   root.append(panel);
   if (decision.kind === "protected" && decision.role === "rider") {
     clearRiderAccount = mountRiderAccount(root, createRiderPreferencesApi(globalThis.LIFTdSessionAdapter), session);
-    clearPickupView = mountPickupView(root, session, globalThis.LIFTdLocationProviders);
+    clearPickupView = mountPickupView(root, session, createLocationProviders(globalThis.LIFTdSessionAdapter, {search:globalThis.LIFTdPlaceSearchProvider,resolveAddress:globalThis.LIFTdAddressResolver}));
   }
   document.title = decision.title + " — LIFTd";
 }

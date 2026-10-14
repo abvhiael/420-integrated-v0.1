@@ -1,6 +1,6 @@
 # BNB-5.5 — Correct incremental discovery feeds
 
-Status: IMPLEMENTED / LEVEL 1 QUALIFICATION PENDING.
+Status: COMPLETE / REPOSITORY LEVEL 1 PASS. Exact implementation `a5f7ddb05f71dd9399f39f9e5e8ac0bb3e50bb29`, Runtime Slice run `38643989080`, job `116126204855` SUCCESS, 409 passing BnB tests. [Durable certificate](BNB-5.5-LEVEL1-CERTIFICATE.md).
 
 Canonical scope: stable cross-property change cursor plus per-property revisions, resumable pagination, tombstones, bounded catch-up and authorized resynchronization; equal timestamps, concurrent/interleaved updates and replay qualification. Ordinary Level 1. Level 2 remains BNB-5.7/5.13, Level 3 BNB-5.14.
 
@@ -18,12 +18,12 @@ Feed output revalidates current property/location/compliance/jurisdiction state 
 
 Signed internal HTTP feed/resync routes require the existing BNB_DISCOVERY_CONSUMER issuer adapter, exact consumer/request scope and independently verified active grant claims. There is no public feed/reset or approval boolean. Tests use actual RS256 fixture signatures. Production discovery-issuer credential binding and actual consumer transports remain BNB-5.6 and existing external acceptance gates; absent bindings fail closed. No issuer is minted or configured for live use here.
 
-Schema guards, controlled migration/TLS tests, restoration checks and packaging advance strictly to 29. Existing migrations 001–028 and historical baseline/certificates remain unchanged. The historical schema-26 consumer upgrade test explicitly removes newer 029/028 extensions before requalifying the full append-only upgrade. Local syntax and required exact-source Runtime Slice must pass before completion; cancelled/skipped/missing checks never count as green.
+Schema guards, controlled migration/TLS tests, restoration checks and packaging advance strictly to 29. Existing migrations 001–028 and historical baseline/certificates remain unchanged. The historical schema-26 consumer upgrade test explicitly removes newer 029/028 extensions before requalifying the full append-only upgrade. Local syntax and required exact-source Runtime Slice passed against the qualified implementation SHA; cancelled/skipped/missing checks were not counted as green.
 
 Required new PostgreSQL cases cover global cursor equality/revisions/timestamps, concurrent commit ordering, rollback/restart, high-watermark interleaving, tombstones and re-creation, bounds/future cursors/epoch/catch-up, resync paging/replay/post-snapshot catch-up, authority/scope/expiry, runtime privilege fences, schema-28 upgrade, stale-history redaction/private-field allowlist, autocommit and signed HTTP forgery/scope/revocation.
 
 Limits: transactional clock serializes append commits; production refresh remains one property per bounded transaction with existing lock/statement timeouts. No journal pruning is introduced. Retention, transport receipts and real provider acceptance remain independent. A restore or external consumer recovery must preserve journal continuity or independently rotate epoch/reset consumers; live recovery acceptance remains gated. Resync history queries use the property/cursor index and bounded output, not an unbounded exported document.
 
-Preserve all 17 external gates and travel.bnb_booking=false, booking_enabled=false, financial_execution=false. No deployment, public Search/Travel publication or funds movement. Exact-SHA run/job and individual exit criteria will be recorded after terminal qualification.
+Preserve all 17 external gates and travel.bnb_booking=false, booking_enabled=false, financial_execution=false. No deployment, public Search/Travel publication or funds movement. Exact-SHA run/job and individual exit criteria are recorded in the committed Level 1 certificate.
 
-Next only after BNB-5.5 qualifies: **BNB-5.6 — Search/Travel consumer transport contracts**.
+Next canonical step: **BNB-5.6 — Search/Travel consumer transport contracts**.

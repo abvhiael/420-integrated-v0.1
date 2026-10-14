@@ -122,6 +122,19 @@ jobs:
   offline-core:
     if: github.event_name != 'pull_request' || !(startsWith(github.head_ref, 'audit/') || contains(github.head_ref, '-audit-')) || github.head_ref == 'audit/exchange-pretestnet-phase-20260930' || github.head_ref == 'audit/420launchpad-remediation' || github.head_ref == 'audit/420verify-20261003' || github.head_ref == 'audit/420token-complete-20261004' || github.head_ref == 'audit/420town-complete-20261004' || github.head_ref == 'audit/420media-complete-20261006' || github.head_ref == 'audit/doobtube-baseline-20261006' || github.head_ref == 'audit/420commerce-com-2-upstream-adaptations' || github.head_ref == 'audit/doobr-audit-1-inventory-20261009'
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16@sha256:ca0bd484cb98bf4b24eb1010e73fb3fcbd6714d240fbc1a10eea5b7dbecb641d
+        env:
+          POSTGRES_USER: compliance_test
+          POSTGRES_PASSWORD: compliance_test
+          POSTGRES_DB: compliance_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U compliance_test -d compliance_test"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    env:
+      COMPLIANCE_POSTGRES_TEST_DSN: 'postgres://compliance_test:compliance_test@localhost:5432/compliance_test?sslmode=verify-full&sslrootcert=/tmp/integrated-compliance-ca.crt&connect_timeout=5'
     steps:
       - uses: actions/checkout@v4
         with:
@@ -133,6 +146,18 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: '1.23.x'
+      - name: Configure mandatory Compliance PostgreSQL fixture with verified TLS
+        env:
+          PG_SERVICE: ${{ job.services.postgres.id }}
+        run: |
+          openssl req -x509 -newkey rsa:2048 -nodes -keyout /tmp/integrated-server.key -out /tmp/integrated-server.crt -days 2 -subj '/CN=localhost' -addext 'subjectAltName=DNS:localhost,IP:127.0.0.1'
+          cp /tmp/integrated-server.crt /tmp/integrated-compliance-ca.crt
+          docker cp /tmp/integrated-server.key "$PG_SERVICE:/var/lib/postgresql/data/server.key"
+          docker cp /tmp/integrated-server.crt "$PG_SERVICE:/var/lib/postgresql/data/server.crt"
+          docker exec --user root "$PG_SERVICE" chown postgres:postgres /var/lib/postgresql/data/server.key /var/lib/postgresql/data/server.crt
+          docker exec --user root "$PG_SERVICE" chmod 600 /var/lib/postgresql/data/server.key
+          docker exec --user postgres "$PG_SERVICE" psql -U compliance_test -d compliance_test -c "ALTER SYSTEM SET ssl = 'on';"
+          docker exec --user postgres "$PG_SERVICE" psql -U compliance_test -d compliance_test -c "SELECT pg_reload_conf();"
       - run: go test ./...
       - run: go build ./consensus/cmd/fourtwentyd
       - run: go build ./execution/cmd/node420

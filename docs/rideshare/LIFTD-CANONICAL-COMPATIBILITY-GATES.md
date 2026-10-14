@@ -2,8 +2,6 @@
 
 | Gate | State | Canonical owner / condition |
 | --- | --- | --- |
-| LC-01 | OPEN — development execution blocked | Revenue / governance / DevelopmentCompensationVault420 owner must approve and implement a compatible policy/version/interface for the adopted 20% allocation. Current contracts/src/revenue/DevelopmentCompensationVault420.sol MAX_COMPENSATION_BPS is 1_000 (10%). |
+| LC-01 | POLICY CONFLICT RESOLVED — execution remains gated | Repository owner has approved aligning LIFTd to canonical DevelopmentCompensationVault420 MAX_COMPENSATION_BPS = 1_000 (10%). LIFTd projects 10% of positive adjusted collected platform commission, not 20%. Canonical operation execution remains disabled until Pay/Treasury/Vault integration, approved recipient/capability, exact-denominator compatibility, and live finality/settlement acceptance have been independently qualified. |
 
-L01.8 preserves adopted 20% of adjusted collected platform commission in conserved CAD projections and marks it HELD_CANONICAL_10_PERCENT_CEILING. Development operation reservation is denied. No reduced allocation, enlarged revenue base, duplicate contribution, alternate vault, invented address or shared-contract edit is used to hide the conflict.
-
-This gate needs canonical owner remediation and applicable qualification of any resulting shared change. It is not satisfied by live/testnet wiring, synthetic proofs, successful app CI or repository projection completion. It remains open through later milestones and phase closeout until authoritative compatible policy/code and exact-SHA evidence exist. Independent LT-03 payment acceptance remains a separate gate.
+This resolves the **percentage policy conflict**, not canonical fund movement. Neither projection evidence nor a matching percentage authorizes payment. Existing development operation reservation must still fail closed pending canonical integration verification. No contract/address/Genesis edits or duplicate contributions are authorized. Retain the independent LT-03 payment acceptance gate.

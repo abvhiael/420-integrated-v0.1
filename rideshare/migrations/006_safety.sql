@@ -29,21 +29,21 @@ CREATE OR REPLACE FUNCTION liftd.trip_lifecycle() RETURNS trigger LANGUAGE plpgs
 BEGIN
   IF TG_OP='DELETE' THEN RAISE EXCEPTION 'trip deletion denied' USING ERRCODE='23514'; END IF;
   IF TG_OP='INSERT' THEN
-    IF NEW.revision<>0 OR NEW.state<>'REQUESTED' OR NEW.driver_id IS NOT NULL THEN RAISE EXCEPTION 'invalid initial trip' USING ERRCODE='23514'; END IF;
+    IF NEW.revision<>0 OR (NEW.snapshot->>'state')<>'REQUESTED' OR (NEW.snapshot->>'driverId') IS NOT NULL THEN RAISE EXCEPTION 'invalid initial trip' USING ERRCODE='23514'; END IF;
     RETURN NEW;
   END IF;
   IF NEW.trip_id<>OLD.trip_id OR NEW.revision<>OLD.revision+1 OR
      NEW.snapshot->>'riderId' IS DISTINCT FROM OLD.snapshot->>'riderId' OR
      NEW.snapshot->>'routeRef' IS DISTINCT FROM OLD.snapshot->>'routeRef' OR
-     (OLD.state<>'REQUESTED' AND (NEW.driver_id IS DISTINCT FROM OLD.driver_id OR NEW.vehicle_id IS DISTINCT FROM OLD.vehicle_id)) OR
-     (OLD.state='REQUESTED' AND NEW.state='CANCELLED' AND NEW.driver_id IS NOT NULL) OR
-     NOT ((OLD.state='REQUESTED' AND NEW.state IN ('ASSIGNED','CANCELLED')) OR
-          (OLD.state='ASSIGNED' AND NEW.state IN ('ARRIVED','CANCELLED')) OR
-          (OLD.state='ARRIVED' AND NEW.state IN ('IN_PROGRESS','CANCELLED')) OR
-          (OLD.state='IN_PROGRESS' AND NEW.state IN ('COMPLETED','CANCELLED'))) THEN
+     (OLD.state<>'REQUESTED' AND ((NEW.snapshot->>'driverId') IS DISTINCT FROM OLD.driver_id OR (NEW.snapshot->>'vehicleId') IS DISTINCT FROM OLD.vehicle_id)) OR
+     (OLD.state='REQUESTED' AND (NEW.snapshot->>'state')='CANCELLED' AND (NEW.snapshot->>'driverId') IS NOT NULL) OR
+     NOT ((OLD.state='REQUESTED' AND (NEW.snapshot->>'state') IN ('ASSIGNED','CANCELLED')) OR
+          (OLD.state='ASSIGNED' AND (NEW.snapshot->>'state') IN ('ARRIVED','CANCELLED')) OR
+          (OLD.state='ARRIVED' AND (NEW.snapshot->>'state') IN ('IN_PROGRESS','CANCELLED')) OR
+          (OLD.state='IN_PROGRESS' AND (NEW.snapshot->>'state') IN ('COMPLETED','CANCELLED'))) THEN
     RAISE EXCEPTION 'invalid trip lifecycle' USING ERRCODE='23514';
   END IF;
-  IF OLD.state='IN_PROGRESS' AND NEW.state='CANCELLED' THEN
+  IF OLD.state='IN_PROGRESS' AND (NEW.snapshot->>'state')='CANCELLED' THEN
     IF NOT EXISTS (SELECT 1 FROM liftd.safety_resolutions WHERE trip_id=NEW.trip_id AND outcome_revision=NEW.revision) THEN
       RAISE EXCEPTION 'safety authority required' USING ERRCODE='23514';
     END IF;

@@ -27,6 +27,48 @@ const migrationABI=make({
  appliedMigration:'appliedMigration(bytes32)'
 });
 export const R054_CANONICAL_ABI=make({claims:claimsABI,bridge:bridgeABI,migration:migrationABI});
+const B32={name:'claimId',type:'bytes32'};
+const claimOut={name:'record',type:'tuple',components:[
+ {name:'claimId',type:'bytes32'},{name:'gameId',type:'bytes32'},{name:'targetAccount',type:'address'},
+ {name:'guestStateCommitment',type:'bytes32'},{name:'migrationPayloadHash',type:'bytes32'},
+ {name:'validUntil',type:'uint64'},{name:'consumed',type:'bool'},{name:'cancelled',type:'bool'},
+ {name:'exists',type:'bool'}]};
+const appliedOut={name:'record',type:'tuple',components:[
+ {name:'growerProfileId',type:'uint64'},{name:'guestStateCommitment',type:'bytes32'},
+ {name:'migrationPayloadHash',type:'bytes32'},{name:'appliedAt',type:'uint64'},
+ {name:'exists',type:'bool'}]};
+const fn=(name,inputs,outputs=[],stateMutability='view')=>({type:'function',name,inputs,outputs,stateMutability});
+const input=(name,type)=>({name,type});
+export const R054_ABI=Object.freeze({
+ claims:Object.freeze([
+  fn('claim',[B32],[claimOut]),
+  fn('issue',[B32,input('gameId','bytes32'),input('targetAccount','address'),
+   input('guestStateCommitment','bytes32'),input('migrationPayloadHash','bytes32'),
+   input('validUntil','uint64')],[],'nonpayable'),
+  fn('consume',[B32],[input('profileId','bytes32')],'nonpayable')
+ ]),
+ bridge:Object.freeze([
+  fn('growerProfileIdOfMigrationClaim',[B32],[input('growerId','uint64')]),
+  fn('gameProfileIdOfGrower',[input('growerId','uint64')],[input('profileId','bytes32')]),
+  fn('bindConsumedMigrationClaim',[B32,input('growerId','uint64'),input('expectedPayloadHash','bytes32')],[],'nonpayable')
+ ]),
+ migration:Object.freeze([
+  fn('guestStateCommitment',[input('guestAccountCommitment','bytes32'),input('saveRevision','uint64'),
+   input('stateHash','bytes32')],[input('commitment','bytes32')],'pure'),
+  fn('migrationPayloadHash',[input('guestStateCommitment','bytes32'),input('growerId','uint64'),
+   input('schemaVersion','uint32'),input('bodyHash','bytes32')],[input('payloadHash','bytes32')],'pure'),
+  fn('isReadyToApply',[B32,input('growerId','uint64'),input('guestStateCommitment','bytes32'),
+   input('payloadHash','bytes32')],[input('ready','bool')]),
+  fn('appliedMigration',[B32],[appliedOut]),
+  fn('markApplied',[B32,input('growerId','uint64'),input('guestStateCommitment','bytes32'),
+   input('payloadHash','bytes32')],[],'nonpayable')
+ ])
+});
+const toContractArgs=(functionName,args)=>args.map(x=>
+ typeof x==='string'&&/^(0|[1-9][0-9]*)$/.test(x)&&['issue','guestStateCommitment',
+ 'migrationPayloadHash','bindConsumedMigrationClaim','isReadyToApply','markApplied'].includes(functionName)?
+ BigInt(x):x);
+
 export function claimIdToBytes32(id){
  if(!uint(id,64)||id==='0')reject('r054-invalid-claim-id');
  return '0x'+BigInt(id).toString(16).padStart(64,'0');
@@ -53,7 +95,9 @@ export class HighCountryGameClaimsAdapter420 {
  }
  async #get(address,functionName,args=[]){
   await this.#chain();
-  return this.#read.readContract({address,functionName,args});
+  const abi=address===this.#config.claims?R054_ABI.claims:
+   address===this.#config.bridge?R054_ABI.bridge:R054_ABI.migration;
+  return this.#read.readContract({address,abi,functionName,args:toContractArgs(functionName,args)});
  }
  async #write(address,functionName,args){
   await this.#chain();
@@ -61,7 +105,9 @@ export class HighCountryGameClaimsAdapter420 {
    reject('r054-operator-chain-mismatch');
   if(typeof this.#operator.account!=='function'||(await this.#operator.account())!==this.#config.operator)
    reject('r054-not-game-operator');
-  return this.#operator.writeContract({address,functionName,args,account:this.#config.operator});
+  const abi=address===this.#config.claims?R054_ABI.claims:
+   address===this.#config.bridge?R054_ABI.bridge:R054_ABI.migration;
+  return this.#operator.writeContract({address,abi,functionName,args:toContractArgs(functionName,args),account:this.#config.operator});
  }
  // All identifiers and expected hashes are supplied by already-authenticated, reviewed policy,
  // never a player HTTP request. Issuance retries MUST read claim before any new submission.

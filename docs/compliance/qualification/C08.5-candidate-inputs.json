@@ -29,7 +29,7 @@
     ".github/workflows/contracts-foundry.yml": "fd6856651725fb4b752eadd6804cd6d2f4d4d890e4515d7216a2b8385b6ff7ab",
     ".github/workflows/docs-qualify.yml": "036ada9abecdc4352363b97321290f31896566b3f15f0757a95dc3dda81555fc",
     ".github/workflows/genesis-address-authority.yml": "deb4f4b6ed855518468a819364d0d304bd45cccd0669a8933bcc217534171c2d",
-    ".github/workflows/qualification.yml": "227be39f9cd04ec34d23f2831ae84d5beeada1b1a5c9f958a447aab535fc519d",
+    ".github/workflows/qualification.yml": "90e94cc6380db0e32c5f4ed6f23192449052ab9a993dcf5129d7923f18c34402",
     "compliance/public/catalogue.json": "c123d1f60fe998e07e65cb5d879d045e573e0bc88c4f2b576b770ff0a95a4bd2",
     "compliance/web/browser.html": "5b5db213b4cf728a58487c7d6b7e73478bc21abdc40095bfab5e474404917c99",
     "compliance/web/index.html": "b25ab4741a176a16a773cc9a981732d96a1fbadd98a86127d9db7f9d61acd957",

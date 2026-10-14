@@ -1,0 +1,912 @@
+{
+  "schema": "highcountry-r04-level3-reconciliation-v1",
+  "date": "2026-10-13",
+  "disposition": "RECONCILED_QUALIFICATION_PENDING",
+  "level3Qualified": false,
+  "implementationSha": "b5d183c06421a096cc568dc3a687b1f300f748cc",
+  "implementationTreeSha": "aa1fcb38305ee9f32f96565e210a42c7a5740c26",
+  "branch": "qualification/highcountry-r04-level3-main-20261013",
+  "pr": 634,
+  "reconciledMain": "959288c8bd33b6da0325b6a5d060e00e7bcf0e48",
+  "commonAncestor": "fe21ef07359d6915bf5daac37c4bf24a24fcf19b",
+  "twoParentMergeCommit": "fe09116d30b4508402cf88955d7f2d2e612d2974",
+  "level2Head": "1cd1a94eec5783e8cd59f3671efbc99d13c0560a",
+  "treeReview": {
+    "completeRecursiveTrees": true,
+    "mainEntries": 9393,
+    "r04Entries": 9053,
+    "baseEntries": 8900,
+    "r04Changes": 137,
+    "conflicts": 0,
+    "mainPreservationMismatches": 0
+  },
+  "ancestry": {
+    "status": "ahead",
+    "behindBy": 0,
+    "aheadBy": 315
+  },
+  "developmentPrs": [
+    {
+      "pr": 626,
+      "state": "open",
+      "draft": true,
+      "merged": false,
+      "head": "7cbd375079a6187aa03bea8b79c8d131762456de",
+      "expected": "7cbd375079a6187aa03bea8b79c8d131762456de",
+      "unchanged": true
+    },
+    {
+      "pr": 625,
+      "state": "open",
+      "draft": true,
+      "merged": false,
+      "head": "f91e9900262058130a48f180bb3a8d709c7e3d79",
+      "expected": "f91e9900262058130a48f180bb3a8d709c7e3d79",
+      "unchanged": true
+    },
+    {
+      "pr": 624,
+      "state": "open",
+      "draft": true,
+      "merged": false,
+      "head": "6813ff3109f0251dafeefab3ce0dac7b29c1278f",
+      "expected": "6813ff3109f0251dafeefab3ce0dac7b29c1278f",
+      "unchanged": true
+    },
+    {
+      "pr": 623,
+      "state": "open",
+      "draft": true,
+      "merged": false,
+      "head": "2b889f425e4576b536d212c257a0a4ac401c8e09",
+      "expected": "2b889f425e4576b536d212c257a0a4ac401c8e09",
+      "unchanged": true
+    },
+    {
+      "pr": 622,
+      "state": "open",
+      "draft": true,
+      "merged": false,
+      "head": "2ce093f2dd7df54b888cf6635e47b239e67050ce",
+      "expected": "2ce093f2dd7df54b888cf6635e47b239e67050ce",
+      "unchanged": true
+    },
+    {
+      "pr": 619,
+      "state": "open",
+      "draft": true,
+      "merged": false,
+      "head": "9bab4c97d5c063a500e2bc4a72ace5e73a2ec8a8",
+      "expected": "9bab4c97d5c063a500e2bc4a72ace5e73a2ec8a8",
+      "unchanged": true
+    },
+    {
+      "pr": 618,
+      "state": "open",
+      "draft": true,
+      "merged": false,
+      "head": "54ba9ea5ce7abc60dea62b93e5dcf9bcc29958f3",
+      "expected": "54ba9ea5ce7abc60dea62b93e5dcf9bcc29958f3",
+      "unchanged": true
+    },
+    {
+      "pr": 617,
+      "state": "open",
+      "draft": true,
+      "merged": false,
+      "head": "36cc621a82e66dc79254dae4426822010c8d80dc",
+      "expected": "36cc621a82e66dc79254dae4426822010c8d80dc",
+      "unchanged": true
+    },
+    {
+      "pr": 615,
+      "state": "open",
+      "draft": true,
+      "merged": false,
+      "head": "221437e59b9d0af7463d3093546ddbaae5a4e95e",
+      "expected": "221437e59b9d0af7463d3093546ddbaae5a4e95e",
+      "unchanged": true
+    },
+    {
+      "pr": 613,
+      "state": "open",
+      "draft": true,
+      "merged": false,
+      "head": "dde04b463b02478730bcdd350dd5a5d50f9e6cc3",
+      "expected": "dde04b463b02478730bcdd350dd5a5d50f9e6cc3",
+      "unchanged": true
+    },
+    {
+      "pr": 612,
+      "state": "open",
+      "draft": true,
+      "merged": false,
+      "head": "5f8bc642bf7b7e2d07b549ca48af7c4e34a1d4b2",
+      "expected": "5f8bc642bf7b7e2d07b549ca48af7c4e34a1d4b2",
+      "unchanged": true
+    },
+    {
+      "pr": 611,
+      "state": "open",
+      "draft": true,
+      "merged": false,
+      "head": "d397dfcdf11f2da94849ee8557a779877f4df818",
+      "expected": "d397dfcdf11f2da94849ee8557a779877f4df818",
+      "unchanged": true
+    },
+    {
+      "pr": 610,
+      "state": "open",
+      "draft": true,
+      "merged": false,
+      "head": "5f9152e20efdfdf4d04394b3f8e6072bd8bdaba6",
+      "expected": "5f9152e20efdfdf4d04394b3f8e6072bd8bdaba6",
+      "unchanged": true
+    },
+    {
+      "pr": 609,
+      "state": "open",
+      "draft": true,
+      "merged": false,
+      "head": "c9a6dd8dd640b8a8db61cf32049c9703a3ec8f93",
+      "expected": "c9a6dd8dd640b8a8db61cf32049c9703a3ec8f93",
+      "unchanged": true
+    }
+  ],
+  "requiredWorkflows": [
+    {
+      "runId": 38445112954,
+      "name": "High Country R04 Level 2 App Integration",
+      "status": "queued",
+      "conclusion": null,
+      "headSha": "b5d183c06421a096cc568dc3a687b1f300f748cc",
+      "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38445112954",
+      "jobs": [
+        {
+          "id": 115461346282,
+          "name": "economy-service",
+          "status": "queued",
+          "conclusion": null,
+          "run_id": 38445112954,
+          "logs_url": null,
+          "steps": null
+        },
+        {
+          "id": 115461346652,
+          "name": "security-client-config",
+          "status": "queued",
+          "conclusion": null,
+          "run_id": 38445112954,
+          "logs_url": null,
+          "steps": null
+        },
+        {
+          "id": 115461346782,
+          "name": "runtime-canonical",
+          "status": "queued",
+          "conclusion": null,
+          "run_id": 38445112954,
+          "logs_url": null,
+          "steps": null
+        },
+        {
+          "id": 115461346810,
+          "name": "retained-app",
+          "status": "queued",
+          "conclusion": null,
+          "run_id": 38445112954,
+          "logs_url": null,
+          "steps": null
+        },
+        {
+          "id": 115461346838,
+          "name": "postgres-integration",
+          "status": "queued",
+          "conclusion": null,
+          "run_id": 38445112954,
+          "logs_url": null,
+          "steps": null
+        }
+      ]
+    },
+    {
+      "runId": 38445113679,
+      "name": "Genesis Address Authority",
+      "status": "queued",
+      "conclusion": null,
+      "headSha": "b5d183c06421a096cc568dc3a687b1f300f748cc",
+      "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38445113679",
+      "jobs": [
+        {
+          "id": 115461449948,
+          "name": "cross-manifest-authority",
+          "status": "queued",
+          "conclusion": null,
+          "run_id": 38445113679,
+          "logs_url": null,
+          "steps": null
+        }
+      ]
+    },
+    {
+      "runId": 38445113398,
+      "name": "Solidity Contracts",
+      "status": "queued",
+      "conclusion": null,
+      "headSha": "b5d183c06421a096cc568dc3a687b1f300f748cc",
+      "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38445113398",
+      "jobs": [
+        {
+          "id": 115461354533,
+          "name": "level3-shards (0)",
+          "status": "in_progress",
+          "conclusion": null,
+          "run_id": 38445113398,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Checkout exact qualification head",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Verify exact qualification head",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run foundry-rs/foundry-toolchain@v1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Qualification harness boundary checks",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Compile assigned Solidity sources and run assigned tests",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 6
+            },
+            {
+              "name": "Mandatory coverage of the same canonical partition",
+              "status": "pending",
+              "conclusion": null,
+              "number": 7
+            },
+            {
+              "name": "Upload per-shard diagnostics",
+              "status": "pending",
+              "conclusion": null,
+              "number": 8
+            },
+            {
+              "name": "Post Run foundry-rs/foundry-toolchain@v1",
+              "status": "pending",
+              "conclusion": null,
+              "number": 15
+            },
+            {
+              "name": "Post Checkout exact qualification head",
+              "status": "pending",
+              "conclusion": null,
+              "number": 16
+            }
+          ]
+        },
+        {
+          "id": 115461354646,
+          "name": "level3-shards (2)",
+          "status": "queued",
+          "conclusion": null,
+          "run_id": 38445113398,
+          "logs_url": null,
+          "steps": null
+        },
+        {
+          "id": 115461354653,
+          "name": "level3-shards (3)",
+          "status": "in_progress",
+          "conclusion": null,
+          "run_id": 38445113398,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Checkout exact qualification head",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Verify exact qualification head",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run foundry-rs/foundry-toolchain@v1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Qualification harness boundary checks",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Compile assigned Solidity sources and run assigned tests",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 6
+            },
+            {
+              "name": "Mandatory coverage of the same canonical partition",
+              "status": "pending",
+              "conclusion": null,
+              "number": 7
+            },
+            {
+              "name": "Upload per-shard diagnostics",
+              "status": "pending",
+              "conclusion": null,
+              "number": 8
+            },
+            {
+              "name": "Post Run foundry-rs/foundry-toolchain@v1",
+              "status": "pending",
+              "conclusion": null,
+              "number": 15
+            },
+            {
+              "name": "Post Checkout exact qualification head",
+              "status": "pending",
+              "conclusion": null,
+              "number": 16
+            }
+          ]
+        },
+        {
+          "id": 115461354657,
+          "name": "level3-shards (1)",
+          "status": "queued",
+          "conclusion": null,
+          "run_id": 38445113398,
+          "logs_url": null,
+          "steps": null
+        },
+        {
+          "id": 115461354674,
+          "name": "classify-pr",
+          "status": "queued",
+          "conclusion": null,
+          "run_id": 38445113398,
+          "logs_url": null,
+          "steps": null
+        },
+        {
+          "id": 115461356206,
+          "name": "foundry",
+          "status": "completed",
+          "conclusion": "skipped",
+          "run_id": 38445113398,
+          "logs_url": null,
+          "steps": null
+        }
+      ]
+    },
+    {
+      "runId": 38445113645,
+      "name": "420 Integrated Qualification",
+      "status": "queued",
+      "conclusion": null,
+      "headSha": "b5d183c06421a096cc568dc3a687b1f300f748cc",
+      "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38445113645",
+      "jobs": [
+        {
+          "id": 115461809143,
+          "name": "fault-matrix",
+          "status": "queued",
+          "conclusion": null,
+          "run_id": 38445113645,
+          "logs_url": null,
+          "steps": null
+        },
+        {
+          "id": 115461809226,
+          "name": "production-dependencies",
+          "status": "queued",
+          "conclusion": null,
+          "run_id": 38445113645,
+          "logs_url": null,
+          "steps": null
+        },
+        {
+          "id": 115461809248,
+          "name": "offline-core",
+          "status": "queued",
+          "conclusion": null,
+          "run_id": 38445113645,
+          "logs_url": null,
+          "steps": null
+        },
+        {
+          "id": 115461809319,
+          "name": "geth-engine",
+          "status": "queued",
+          "conclusion": null,
+          "run_id": 38445113645,
+          "logs_url": null,
+          "steps": null
+        }
+      ]
+    },
+    {
+      "runId": 38445113554,
+      "name": "420Docs Qualification",
+      "status": "completed",
+      "conclusion": "success",
+      "headSha": "b5d183c06421a096cc568dc3a687b1f300f748cc",
+      "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38445113554",
+      "jobs": [
+        {
+          "id": 115461782855,
+          "name": "qualify",
+          "status": "completed",
+          "conclusion": "success",
+          "run_id": 38445113554,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Checkout exact qualification head",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Verify exact qualification head",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Setup Python",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Install documentation dependencies",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Run documentation qualification",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Verify CMP-1.3 invariant evidence matrix",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Verify CMP-1.3 historical deployment package readiness",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Verify CMP-1.3.15 release-candidate readiness",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9
+            },
+            {
+              "name": "Verify CMP-1.3 deferred closeout migration",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 10
+            },
+            {
+              "name": "Verify CMP-1.3.16 phase closeout reconciliation",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 11
+            },
+            {
+              "name": "Verify CMP-1.4.0 verifier architecture reconciliation",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 12
+            },
+            {
+              "name": "Verify CMP-1.4.4 signed verdict provenance",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 13
+            },
+            {
+              "name": "Verify CMP-1.4.12 verifier phase closeout",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 14
+            },
+            {
+              "name": "Verify CMP-1.5.13 ComputeStake phase closeout",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 15
+            },
+            {
+              "name": "Post Setup Python",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 29
+            },
+            {
+              "name": "Post Checkout exact qualification head",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 30
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 31
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "workflowSnapshot": [
+    {
+      "id": 38445114802,
+      "name": "High Country R02 Level 2 Integration Closeout",
+      "status": "in_progress",
+      "conclusion": null,
+      "headSha": "b5d183c06421a096cc568dc3a687b1f300f748cc"
+    },
+    {
+      "id": 38445112954,
+      "name": "High Country R04 Level 2 App Integration",
+      "status": "queued",
+      "conclusion": null,
+      "headSha": "b5d183c06421a096cc568dc3a687b1f300f748cc"
+    },
+    {
+      "id": 38445113284,
+      "name": "High Country R03.2 Level 1 Qualification",
+      "status": "queued",
+      "conclusion": null,
+      "headSha": "b5d183c06421a096cc568dc3a687b1f300f748cc"
+    },
+    {
+      "id": 38445113311,
+      "name": "High Country R04.5 Level 1 Qualification",
+      "status": "queued",
+      "conclusion": null,
+      "headSha": "b5d183c06421a096cc568dc3a687b1f300f748cc"
+    },
+    {
+      "id": 38445113420,
+      "name": "High Country R03.5 Level 1 Adversarial Qualification",
+      "status": "queued",
+      "conclusion": null,
+      "headSha": "b5d183c06421a096cc568dc3a687b1f300f748cc"
+    },
+    {
+      "id": 38445113628,
+      "name": "High Country R04.8 Level 1 Qualification",
+      "status": "queued",
+      "conclusion": null,
+      "headSha": "b5d183c06421a096cc568dc3a687b1f300f748cc"
+    },
+    {
+      "id": 38445113537,
+      "name": "High Country R04.11 Level 1 Qualification",
+      "status": "queued",
+      "conclusion": null,
+      "headSha": "b5d183c06421a096cc568dc3a687b1f300f748cc"
+    },
+    {
+      "id": 38445113610,
+      "name": "High Country R02.7 Targeted Qualification",
+      "status": "queued",
+      "conclusion": null,
+      "headSha": "b5d183c06421a096cc568dc3a687b1f300f748cc"
+    },
+    {
+      "id": 38445113679,
+      "name": "Genesis Address Authority",
+      "status": "queued",
+      "conclusion": null,
+      "headSha": "b5d183c06421a096cc568dc3a687b1f300f748cc"
+    },
+    {
+      "id": 38445113502,
+      "name": "420Indexer",
+      "status": "queued",
+      "conclusion": null,
+      "headSha": "b5d183c06421a096cc568dc3a687b1f300f748cc"
+    },
+    {
+      "id": 38445113398,
+      "name": "Solidity Contracts",
+      "status": "queued",
+      "conclusion": null,
+      "headSha": "b5d183c06421a096cc568dc3a687b1f300f748cc"
+    },
+    {
+      "id": 38445114529,
+      "name": "EXP-1.9 CI Qualification Automation",
+      "status": "queued",
+      "conclusion": null,
+      "headSha": "b5d183c06421a096cc568dc3a687b1f300f748cc"
+    },
+    {
+      "id": 38445113817,
+      "name": "420Oracle audit qualification",
+      "status": "queued",
+      "conclusion": null,
+      "headSha": "b5d183c06421a096cc568dc3a687b1f300f748cc"
+    },
+    {
+      "id": 38445113645,
+      "name": "420 Integrated Qualification",
+      "status": "queued",
+      "conclusion": null,
+      "headSha": "b5d183c06421a096cc568dc3a687b1f300f748cc"
+    },
+    {
+      "id": 38445112930,
+      "name": "High Country R02.8 Targeted Qualification",
+      "status": "in_progress",
+      "conclusion": null,
+      "headSha": "b5d183c06421a096cc568dc3a687b1f300f748cc"
+    },
+    {
+      "id": 38445113434,
+      "name": "High Country R04.2-R04.4 Level 2 Integration",
+      "status": "in_progress",
+      "conclusion": null,
+      "headSha": "b5d183c06421a096cc568dc3a687b1f300f748cc"
+    },
+    {
+      "id": 38445113007,
+      "name": "High Country R02.10 Targeted Qualification",
+      "status": "in_progress",
+      "conclusion": null,
+      "headSha": "b5d183c06421a096cc568dc3a687b1f300f748cc"
+    },
+    {
+      "id": 38445113379,
+      "name": "High Country R04.14 Level 1 Qualification",
+      "status": "completed",
+      "conclusion": "success",
+      "headSha": "b5d183c06421a096cc568dc3a687b1f300f748cc"
+    },
+    {
+      "id": 38445112880,
+      "name": "High Country R04.13 Level 1 Qualification",
+      "status": "completed",
+      "conclusion": "success",
+      "headSha": "b5d183c06421a096cc568dc3a687b1f300f748cc"
+    },
+    {
+      "id": 38445113371,
+      "name": "High Country R02.13 Targeted Qualification",
+      "status": "in_progress",
+      "conclusion": null,
+      "headSha": "b5d183c06421a096cc568dc3a687b1f300f748cc"
+    },
+    {
+      "id": 38445113810,
+      "name": "High Country R02.12 Targeted Qualification",
+      "status": "in_progress",
+      "conclusion": null,
+      "headSha": "b5d183c06421a096cc568dc3a687b1f300f748cc"
+    },
+    {
+      "id": 38445113377,
+      "name": "High Country R04.7 Level 1 Qualification",
+      "status": "completed",
+      "conclusion": "success",
+      "headSha": "b5d183c06421a096cc568dc3a687b1f300f748cc"
+    },
+    {
+      "id": 38445114454,
+      "name": "High Country R04.1 Level 1 Qualification",
+      "status": "completed",
+      "conclusion": "success",
+      "headSha": "b5d183c06421a096cc568dc3a687b1f300f748cc"
+    },
+    {
+      "id": 38445113128,
+      "name": "High Country R04.2 Level 1 Qualification",
+      "status": "completed",
+      "conclusion": "success",
+      "headSha": "b5d183c06421a096cc568dc3a687b1f300f748cc"
+    },
+    {
+      "id": 38445113424,
+      "name": "High Country R04.6 Level 1 Qualification",
+      "status": "completed",
+      "conclusion": "success",
+      "headSha": "b5d183c06421a096cc568dc3a687b1f300f748cc"
+    },
+    {
+      "id": 38445113554,
+      "name": "420Docs Qualification",
+      "status": "completed",
+      "conclusion": "success",
+      "headSha": "b5d183c06421a096cc568dc3a687b1f300f748cc"
+    },
+    {
+      "id": 38445113010,
+      "name": "High Country R03.3 Level 1 Qualification",
+      "status": "completed",
+      "conclusion": "success",
+      "headSha": "b5d183c06421a096cc568dc3a687b1f300f748cc"
+    },
+    {
+      "id": 38445112996,
+      "name": "High Country R04.5-R04.8 Level 2 Economic Integration",
+      "status": "in_progress",
+      "conclusion": null,
+      "headSha": "b5d183c06421a096cc568dc3a687b1f300f748cc"
+    },
+    {
+      "id": 38445113441,
+      "name": "High Country R02.6 Targeted Qualification",
+      "status": "in_progress",
+      "conclusion": null,
+      "headSha": "b5d183c06421a096cc568dc3a687b1f300f748cc"
+    },
+    {
+      "id": 38445113632,
+      "name": "High Country R03.1 Level 1 Qualification",
+      "status": "completed",
+      "conclusion": "success",
+      "headSha": "b5d183c06421a096cc568dc3a687b1f300f748cc"
+    },
+    {
+      "id": 38445113587,
+      "name": "High Country R02.11 Targeted Qualification",
+      "status": "in_progress",
+      "conclusion": null,
+      "headSha": "b5d183c06421a096cc568dc3a687b1f300f748cc"
+    },
+    {
+      "id": 38445113777,
+      "name": "High Country R04.9 Level 1 Qualification",
+      "status": "completed",
+      "conclusion": "success",
+      "headSha": "b5d183c06421a096cc568dc3a687b1f300f748cc"
+    },
+    {
+      "id": 38445113107,
+      "name": "High Country R04.4 Level 1 Qualification",
+      "status": "completed",
+      "conclusion": "success",
+      "headSha": "b5d183c06421a096cc568dc3a687b1f300f748cc"
+    },
+    {
+      "id": 38445113591,
+      "name": "High Country R02.5 Targeted Qualification",
+      "status": "in_progress",
+      "conclusion": null,
+      "headSha": "b5d183c06421a096cc568dc3a687b1f300f748cc"
+    },
+    {
+      "id": 38445113749,
+      "name": "High Country R04.12 Level 1 Qualification",
+      "status": "in_progress",
+      "conclusion": null,
+      "headSha": "b5d183c06421a096cc568dc3a687b1f300f748cc"
+    },
+    {
+      "id": 38445113717,
+      "name": "High Country R04.10 Level 1 Qualification",
+      "status": "completed",
+      "conclusion": "success",
+      "headSha": "b5d183c06421a096cc568dc3a687b1f300f748cc"
+    },
+    {
+      "id": 38445113297,
+      "name": "High Country R02.4 Targeted Qualification",
+      "status": "in_progress",
+      "conclusion": null,
+      "headSha": "b5d183c06421a096cc568dc3a687b1f300f748cc"
+    },
+    {
+      "id": 38445114088,
+      "name": "High Country R02.9 Targeted Qualification",
+      "status": "in_progress",
+      "conclusion": null,
+      "headSha": "b5d183c06421a096cc568dc3a687b1f300f748cc"
+    },
+    {
+      "id": 38445113381,
+      "name": "High Country R03.4 Level 1 Qualification",
+      "status": "in_progress",
+      "conclusion": null,
+      "headSha": "b5d183c06421a096cc568dc3a687b1f300f748cc"
+    },
+    {
+      "id": 38445113582,
+      "name": "High Country R04.3 Level 1 Qualification",
+      "status": "completed",
+      "conclusion": "success",
+      "headSha": "b5d183c06421a096cc568dc3a687b1f300f748cc"
+    },
+    {
+      "id": 38445113210,
+      "name": "EXP-1.10 Phase Closeout Qualification",
+      "status": "in_progress",
+      "conclusion": null,
+      "headSha": "b5d183c06421a096cc568dc3a687b1f300f748cc"
+    },
+    {
+      "id": 38445101370,
+      "name": ".github/workflows/governance-deployment-audit.yml",
+      "status": "completed",
+      "conclusion": "failure",
+      "headSha": "b5d183c06421a096cc568dc3a687b1f300f748cc"
+    },
+    {
+      "id": 38445099609,
+      "name": ".github/workflows/420hz-gca.yml",
+      "status": "completed",
+      "conclusion": "failure",
+      "headSha": "b5d183c06421a096cc568dc3a687b1f300f748cc"
+    }
+  ],
+  "supersededCandidate": {
+    "sha": "ee197ec4c4e2c03e2855434195956d14a1f59b32",
+    "reason": "Three formatting constructs required a second formatting pass; deterministic diffs corrected, not rerun unchanged."
+  },
+  "scope": "Repository R04 phase reconciliation. Full R05/R06/R07 and live/testnet/production acceptance remain separate.",
+  "sourceReview": {
+    "status": "REVIEWED_WITH_OPERATIONAL_GATES",
+    "scope": "Emergency binding and restricted ingress/recovery; immutable harvest/finality/revocation; inventory custody and explicit consent; bounded equipment issuance; Treasury/Identity authority; Cup provenance and scope; worker restart/revocation; codehash/review/timelock replacement provenance",
+    "limitations": [
+      "Static lint and consolidated security/client/config gate pending",
+      "No independent production penetration test or deployed security acceptance",
+      "Two unchanged unrelated workflow-definition runs fail before jobs: governance-deployment-audit.yml and 420hz-gca.yml. They are not PASS and require separate repository workflow repair."
+    ]
+  },
+  "evidenceOnly": true,
+  "merged": false,
+  "r05Started": false
+}

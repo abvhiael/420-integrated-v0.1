@@ -1,20 +1,25 @@
 name: 420 Gaming Player Profile Service
-
 on:
   pull_request:
     paths:
       - 'services/420-gaming-player-profile/**'
       - '.github/workflows/gaming-player-profile-service.yml'
   workflow_dispatch:
-
+permissions:
+  contents: read
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
+      - name: Install locked service dependencies
+        working-directory: services/420-gaming-player-profile
+        run: npm ci --ignore-scripts
       - name: Test player/profile service
         working-directory: services/420-gaming-player-profile
         run: npm test

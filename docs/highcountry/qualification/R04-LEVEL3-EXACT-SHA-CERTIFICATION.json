@@ -1,0 +1,1652 @@
+{
+  "schema": "highcountry-r04-level3-exact-sha-v1",
+  "qualificationLevel": 3,
+  "disposition": "PASS_REPOSITORY_PHASE_SCOPE",
+  "implementationSha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706",
+  "implementationTreeSha": "35e70a63f1d532df06faaf3d274b7193cc37249c",
+  "reconciledMain": "959288c8bd33b6da0325b6a5d060e00e7bcf0e48",
+  "evidenceParent": "6d78c50301df187bda3e62405de2ce6d234f1d2a",
+  "pr": 634,
+  "scope": "Accumulated R04.1–R04.14 repository phase closeout; not full-game, R05/R06/R07, testnet or production certification.",
+  "requiredWorkflows": [
+    {
+      "name": "Solidity Contracts",
+      "runId": 38452248238,
+      "jobs": [
+        {
+          "id": 115486517078,
+          "name": "classify-pr",
+          "status": "completed",
+          "conclusion": "success",
+          "run_id": 38452248238,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Classify pull-request scope",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            }
+          ]
+        },
+        {
+          "id": 115486517085,
+          "name": "level3-shards (1)",
+          "status": "completed",
+          "conclusion": "success",
+          "run_id": 38452248238,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Checkout exact qualification head",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Verify exact qualification head",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run foundry-rs/foundry-toolchain@v1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Qualification harness boundary checks",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Compile assigned Solidity sources and run assigned tests",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Mandatory coverage of the same canonical partition",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Upload per-shard diagnostics",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Post Run foundry-rs/foundry-toolchain@v1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 15
+            },
+            {
+              "name": "Post Checkout exact qualification head",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 16
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 17
+            }
+          ]
+        },
+        {
+          "id": 115486517173,
+          "name": "level3-shards (2)",
+          "status": "completed",
+          "conclusion": "success",
+          "run_id": 38452248238,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Checkout exact qualification head",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Verify exact qualification head",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run foundry-rs/foundry-toolchain@v1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Qualification harness boundary checks",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Compile assigned Solidity sources and run assigned tests",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Mandatory coverage of the same canonical partition",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Upload per-shard diagnostics",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Post Run foundry-rs/foundry-toolchain@v1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 15
+            },
+            {
+              "name": "Post Checkout exact qualification head",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 16
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 17
+            }
+          ]
+        },
+        {
+          "id": 115486517330,
+          "name": "level3-shards (3)",
+          "status": "completed",
+          "conclusion": "success",
+          "run_id": 38452248238,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Checkout exact qualification head",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Verify exact qualification head",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run foundry-rs/foundry-toolchain@v1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Qualification harness boundary checks",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Compile assigned Solidity sources and run assigned tests",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Mandatory coverage of the same canonical partition",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Upload per-shard diagnostics",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Post Run foundry-rs/foundry-toolchain@v1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 15
+            },
+            {
+              "name": "Post Checkout exact qualification head",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 16
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 17
+            }
+          ]
+        },
+        {
+          "id": 115486517364,
+          "name": "level3-shards (0)",
+          "status": "completed",
+          "conclusion": "success",
+          "run_id": 38452248238,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Checkout exact qualification head",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Verify exact qualification head",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run foundry-rs/foundry-toolchain@v1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Qualification harness boundary checks",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Compile assigned Solidity sources and run assigned tests",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Mandatory coverage of the same canonical partition",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Upload per-shard diagnostics",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Post Run foundry-rs/foundry-toolchain@v1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 15
+            },
+            {
+              "name": "Post Checkout exact qualification head",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 16
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 17
+            }
+          ]
+        },
+        {
+          "id": 115486518282,
+          "name": "foundry",
+          "status": "completed",
+          "conclusion": "skipped",
+          "run_id": 38452248238,
+          "logs_url": null,
+          "steps": null
+        },
+        {
+          "id": 115486791220,
+          "name": "pr-shards",
+          "status": "completed",
+          "conclusion": "skipped",
+          "run_id": 38452248238,
+          "logs_url": null,
+          "steps": null
+        },
+        {
+          "id": 115486792252,
+          "name": "compute-fast",
+          "status": "completed",
+          "conclusion": "skipped",
+          "run_id": 38452248238,
+          "logs_url": null,
+          "steps": null
+        },
+        {
+          "id": 115526228602,
+          "name": "level3-fixture",
+          "status": "completed",
+          "conclusion": "success",
+          "run_id": 38452248238,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Checkout exact qualification head",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Verify exact qualification head",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Download all four mandatory shard inventories",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Verify complete and unique primary inventory",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Run foundry-rs/foundry-toolchain@v1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Decision",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Upload Decision",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Verify and aggregate all four mandatory coverage partitions",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9
+            },
+            {
+              "name": "Retain mandatory coverage evidence",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 10
+            },
+            {
+              "name": "Post Run foundry-rs/foundry-toolchain@v1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 19
+            },
+            {
+              "name": "Post Checkout exact qualification head",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 20
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 21
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "High Country R04 App Integration",
+      "runId": 38452248369,
+      "jobs": [
+        {
+          "id": 115485838090,
+          "name": "runtime-canonical",
+          "status": "completed",
+          "conclusion": "success",
+          "run_id": 38452248369,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Initialize containers",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Exact implementation SHA",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Run actions/setup-node@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Run foundry-rs/foundry-toolchain@v1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Build disposable real-contract runtime fixture",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Install pinned PostgreSQL runtime driver",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Actual local-chain PostgreSQL authenticated HTTP and worker integration",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9
+            },
+            {
+              "name": "Post Run foundry-rs/foundry-toolchain@v1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 15
+            },
+            {
+              "name": "Post Run actions/setup-node@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 16
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 17
+            },
+            {
+              "name": "Stop containers",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 18
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 19
+            }
+          ]
+        },
+        {
+          "id": 115485838391,
+          "name": "retained-app",
+          "status": "completed",
+          "conclusion": "success",
+          "run_id": 38452248369,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Exact candidate SHA",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run foundry-rs/foundry-toolchain@v1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "High Country app build and sizes",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Retained R04 integration and adversarial coverage",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Canonical High Country verifier",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Post Run foundry-rs/foundry-toolchain@v1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 13
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 14
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 15
+            }
+          ]
+        },
+        {
+          "id": 115485838401,
+          "name": "economy-service",
+          "status": "completed",
+          "conclusion": "success",
+          "run_id": 38452248369,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Exact implementation SHA",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run actions/setup-node@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Retained economic runtime security and settlement regressions",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Post Run actions/setup-node@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 10
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 11
+            }
+          ]
+        },
+        {
+          "id": 115485838471,
+          "name": "postgres-integration",
+          "status": "completed",
+          "conclusion": "success",
+          "run_id": 38452248369,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Initialize containers",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Exact implementation SHA",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Run actions/setup-node@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Install pinned PostgreSQL runtime driver",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Actual SERIALIZABLE contention, replay, persistence and settlement",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Post Run actions/setup-node@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 12
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 13
+            },
+            {
+              "name": "Stop containers",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 14
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 15
+            }
+          ]
+        },
+        {
+          "id": 115485838686,
+          "name": "security-client-config",
+          "status": "completed",
+          "conclusion": "success",
+          "run_id": 38452248369,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Assert exact candidate and reconciled main ancestry",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run foundry-rs/foundry-toolchain@v1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Run actions/setup-node@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "High Country formatting",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "High Country static security lint",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Retained client SDK and shared service security acceptance",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Validate deployment configuration template",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9
+            },
+            {
+              "name": "Syntax check economic runtime and tests",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 10
+            },
+            {
+              "name": "Whitespace and clean source checkout",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 11
+            },
+            {
+              "name": "Post Run actions/setup-node@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 20
+            },
+            {
+              "name": "Post Run foundry-rs/foundry-toolchain@v1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 21
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 22
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 23
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "runId": 38452248754,
+      "jobs": [
+        {
+          "id": 115485841607,
+          "name": "cross-manifest-authority",
+          "status": "completed",
+          "conclusion": "success",
+          "run_id": 38452248754,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Checkout exact qualification head",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Verify exact qualification head",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run actions/setup-python@v5",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Check canonical frozen owners and proposed application claims",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "REG-AUDIT-4 complete namespace authority",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "REG-AUDIT-4 adversarial namespace regressions",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Active namespace collision audit",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Check physical predeploy/deployment parity and reject retired claims",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9
+            },
+            {
+              "name": "Validate actual current frozen namespace and unapproved candidates",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 10
+            },
+            {
+              "name": "W14.7.1 actual-authority namespace regression fixtures",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 11
+            },
+            {
+              "name": "W14.7.4 historical-claim regression tests",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 12
+            },
+            {
+              "name": "W14.7.4 source-consumer inventory (evidence, not active-address attestation)",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 13
+            },
+            {
+              "name": "Upload address-consumer inventory",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 14
+            },
+            {
+              "name": "Post Run actions/setup-python@v5",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 27
+            },
+            {
+              "name": "Post Checkout exact qualification head",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 28
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 29
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "runId": 38452247946,
+      "jobs": [
+        {
+          "id": 115485840102,
+          "name": "offline-core",
+          "status": "completed",
+          "conclusion": "success",
+          "run_id": 38452247946,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Verify exact qualification head",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run actions/setup-go@v5",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Run go test ./...",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Run go build ./consensus/cmd/fourtwentyd",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Run go build ./execution/cmd/node420",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Post Run actions/setup-go@v5",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 13
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 14
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 15
+            }
+          ]
+        },
+        {
+          "id": 115485840347,
+          "name": "production-dependencies",
+          "status": "completed",
+          "conclusion": "success",
+          "run_id": 38452247946,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Verify exact qualification head",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run actions/setup-go@v5",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Run bash ./scripts/install-production-deps.sh",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Post Run actions/setup-go@v5",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 10
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 11
+            }
+          ]
+        },
+        {
+          "id": 115485840402,
+          "name": "geth-engine",
+          "status": "completed",
+          "conclusion": "success",
+          "run_id": 38452247946,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Verify exact qualification head",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run actions/setup-go@v5",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Run make build",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Build pinned Geth",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Run go build -o bin/engine-live-smoke ./integration/cmd/engine-live-smoke",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Run bash ./scripts/live-engine-smoke.sh",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Post Run actions/setup-go@v5",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 15
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 16
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 17
+            }
+          ]
+        },
+        {
+          "id": 115485840713,
+          "name": "fault-matrix",
+          "status": "completed",
+          "conclusion": "success",
+          "run_id": 38452247946,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Verify exact qualification head",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run actions/setup-go@v5",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Run make build",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Run python3 scripts/run-fault-matrix.py",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Run python3 scripts/run-soak.py --slots 120 --slot-ms 35",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Post Run actions/setup-go@v5",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 13
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 14
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 15
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "runId": 38452248197,
+      "jobs": [
+        {
+          "id": 115485839240,
+          "name": "qualify",
+          "status": "completed",
+          "conclusion": "success",
+          "run_id": 38452248197,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Checkout exact qualification head",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Verify exact qualification head",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Setup Python",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Install documentation dependencies",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Run documentation qualification",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Verify CMP-1.3 invariant evidence matrix",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Verify CMP-1.3 historical deployment package readiness",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Verify CMP-1.3.15 release-candidate readiness",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9
+            },
+            {
+              "name": "Verify CMP-1.3 deferred closeout migration",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 10
+            },
+            {
+              "name": "Verify CMP-1.3.16 phase closeout reconciliation",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 11
+            },
+            {
+              "name": "Verify CMP-1.4.0 verifier architecture reconciliation",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 12
+            },
+            {
+              "name": "Verify CMP-1.4.4 signed verdict provenance",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 13
+            },
+            {
+              "name": "Verify CMP-1.4.12 verifier phase closeout",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 14
+            },
+            {
+              "name": "Verify CMP-1.5.13 ComputeStake phase closeout",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 15
+            },
+            {
+              "name": "Post Setup Python",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 29
+            },
+            {
+              "name": "Post Checkout exact qualification head",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 30
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 31
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "allRequiredJobsPassed": true,
+  "foundry": {
+    "ciShards": 4,
+    "canonicalPrimaryUnits": 1115,
+    "primaryUnitsByShard": [
+      279,
+      279,
+      279,
+      278
+    ],
+    "assignedTestSourcesByShard": [
+      114,
+      115,
+      115,
+      114
+    ],
+    "mandatoryPartitionedCoverage": "PASS",
+    "completeUniqueInventory": "PASS",
+    "decision10Fixture": "PASS",
+    "coverageSourceRecords": 837,
+    "sourceMapping": "approximate optimized IR; diagnostic percentages only, not proof of 100% branch coverage"
+  },
+  "appTests": {
+    "foundryPassed": 304,
+    "foundryFailed": 0,
+    "foundrySkipped": 0,
+    "foundrySuites": 65,
+    "economyNodePassed": 35,
+    "clientSharedServicePassed": 106,
+    "postgres": "PASS",
+    "actualAnvilPostgresAuthenticatedHttpSettlement": "PASS",
+    "formatLintSyntaxConfigWhitespaceCleanCheckout": "PASS"
+  },
+  "artifacts": [
+    {
+      "id": 11847793565,
+      "name": "foundry-coverage-f7a3da6f96b62d018f69aa5e98d3819b5ad32706",
+      "size_in_bytes": 222044,
+      "url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/artifacts/11847793565",
+      "archive_download_url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/artifacts/11847793565/zip",
+      "expired": false,
+      "created_at": "2026-10-13T20:43:22Z",
+      "expires_at": "2026-10-20T19:06:55Z",
+      "updated_at": "2026-10-13T20:43:22Z",
+      "digest": "sha256:d8fe145166ec6d591b4945d2d31cfef74d407c1696a0b98988254d3e4ca7da85",
+      "workflow_run": {
+        "id": 38452248238,
+        "repository_id": 1345598861,
+        "head_repository_id": 1345598861,
+        "head_branch": "qualification/highcountry-r04-level3-main-20261013",
+        "head_sha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706"
+      }
+    },
+    {
+      "id": 11847691117,
+      "name": "foundry-level3-shard-3-f7a3da6f96b62d018f69aa5e98d3819b5ad32706",
+      "size_in_bytes": 2147036,
+      "url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/artifacts/11847691117",
+      "archive_download_url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/artifacts/11847691117/zip",
+      "expired": false,
+      "created_at": "2026-10-13T20:30:08Z",
+      "expires_at": "2026-10-20T19:06:55Z",
+      "updated_at": "2026-10-13T20:30:08Z",
+      "digest": "sha256:5f40d08eca683d2c441e0c357c302967fc1a7f8e311a556839049b3dca51e9df",
+      "workflow_run": {
+        "id": 38452248238,
+        "repository_id": 1345598861,
+        "head_repository_id": 1345598861,
+        "head_branch": "qualification/highcountry-r04-level3-main-20261013",
+        "head_sha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706"
+      }
+    },
+    {
+      "id": 11847543722,
+      "name": "creative-kernel-v1-fixture",
+      "size_in_bytes": 1527,
+      "url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/artifacts/11847543722",
+      "archive_download_url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/artifacts/11847543722/zip",
+      "expired": false,
+      "created_at": "2026-10-13T20:43:21Z",
+      "expires_at": "2026-10-20T19:06:55Z",
+      "updated_at": "2026-10-13T20:43:21Z",
+      "digest": "sha256:1a9aa367b639e7bb74f60242b998e9e907d545e81960b4e25462948ab11d80ab",
+      "workflow_run": {
+        "id": 38452248238,
+        "repository_id": 1345598861,
+        "head_repository_id": 1345598861,
+        "head_branch": "qualification/highcountry-r04-level3-main-20261013",
+        "head_sha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706"
+      }
+    },
+    {
+      "id": 11847527303,
+      "name": "foundry-level3-shard-0-f7a3da6f96b62d018f69aa5e98d3819b5ad32706",
+      "size_in_bytes": 2363680,
+      "url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/artifacts/11847527303",
+      "archive_download_url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/artifacts/11847527303/zip",
+      "expired": false,
+      "created_at": "2026-10-13T20:35:28Z",
+      "expires_at": "2026-10-20T19:06:55Z",
+      "updated_at": "2026-10-13T20:35:28Z",
+      "digest": "sha256:7e32d917be22f36948720ad528827809970fa3a631ab19e7c8a258af51ae6e51",
+      "workflow_run": {
+        "id": 38452248238,
+        "repository_id": 1345598861,
+        "head_repository_id": 1345598861,
+        "head_branch": "qualification/highcountry-r04-level3-main-20261013",
+        "head_sha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706"
+      }
+    },
+    {
+      "id": 11846381729,
+      "name": "foundry-level3-shard-1-f7a3da6f96b62d018f69aa5e98d3819b5ad32706",
+      "size_in_bytes": 2398874,
+      "url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/artifacts/11846381729",
+      "archive_download_url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/artifacts/11846381729/zip",
+      "expired": false,
+      "created_at": "2026-10-13T20:27:19Z",
+      "expires_at": "2026-10-20T19:06:55Z",
+      "updated_at": "2026-10-13T20:27:19Z",
+      "digest": "sha256:21f2051c1208135d1a32a986bfffa1ba7323caa28d8efbbe9c6db0dc985a59f5",
+      "workflow_run": {
+        "id": 38452248238,
+        "repository_id": 1345598861,
+        "head_repository_id": 1345598861,
+        "head_branch": "qualification/highcountry-r04-level3-main-20261013",
+        "head_sha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706"
+      }
+    },
+    {
+      "id": 11846216321,
+      "name": "foundry-level3-shard-2-f7a3da6f96b62d018f69aa5e98d3819b5ad32706",
+      "size_in_bytes": 2214385,
+      "url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/artifacts/11846216321",
+      "archive_download_url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/artifacts/11846216321/zip",
+      "expired": false,
+      "created_at": "2026-10-13T20:18:35Z",
+      "expires_at": "2026-10-20T19:06:55Z",
+      "updated_at": "2026-10-13T20:18:35Z",
+      "digest": "sha256:a58f563efe23f915b07380a128647d3a0d7a7fdf56fd22901cc2a718cd58b3e9",
+      "workflow_run": {
+        "id": 38452248238,
+        "repository_id": 1345598861,
+        "head_repository_id": 1345598861,
+        "head_branch": "qualification/highcountry-r04-level3-main-20261013",
+        "head_sha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706"
+      }
+    }
+  ],
+  "archivedReports": [
+    "R04-LEVEL3-COVERAGE-COMPLETE.json",
+    "R04-LEVEL3-DECISION10-FIXTURE.json"
+  ],
+  "workflowResults": [
+    {
+      "name": "Genesis Address Authority",
+      "runId": 38452248754,
+      "status": "completed",
+      "conclusion": "success",
+      "headSha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706"
+    },
+    {
+      "name": "420Indexer",
+      "runId": 38452248654,
+      "status": "completed",
+      "conclusion": "success",
+      "headSha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706"
+    },
+    {
+      "name": "420Oracle audit qualification",
+      "runId": 38452248486,
+      "status": "completed",
+      "conclusion": "success",
+      "headSha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706"
+    },
+    {
+      "name": "Solidity Contracts",
+      "runId": 38452248238,
+      "status": "completed",
+      "conclusion": "success",
+      "headSha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706"
+    },
+    {
+      "name": "EXP-1.10 Phase Closeout Qualification",
+      "runId": 38452248047,
+      "status": "completed",
+      "conclusion": "success",
+      "headSha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706"
+    },
+    {
+      "name": "EXP-1.9 CI Qualification Automation",
+      "runId": 38452248180,
+      "status": "completed",
+      "conclusion": "success",
+      "headSha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706"
+    },
+    {
+      "name": "420Hz GCA Qualification",
+      "runId": 38452248264,
+      "status": "completed",
+      "conclusion": "success",
+      "headSha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706"
+    },
+    {
+      "name": "420Docs Qualification",
+      "runId": 38452248197,
+      "status": "completed",
+      "conclusion": "success",
+      "headSha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706"
+    },
+    {
+      "name": "420 Integrated Qualification",
+      "runId": 38452247946,
+      "status": "completed",
+      "conclusion": "success",
+      "headSha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706"
+    },
+    {
+      "name": "High Country R04 Level 2 App Integration",
+      "runId": 38452248369,
+      "status": "completed",
+      "conclusion": "success",
+      "headSha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706"
+    }
+  ],
+  "ancestry": {
+    "commonAncestor": "fe21ef07359d6915bf5daac37c4bf24a24fcf19b",
+    "twoParentMerge": "fe09116d30b4508402cf88955d7f2d2e612d2974",
+    "level2EvidenceHead": "1cd1a94eec5783e8cd59f3671efbc99d13c0560a",
+    "level2QualifiedImplementation": "93655ca49f0e305f99cd0c13f53f88479b20b316",
+    "mainReconciled": true,
+    "evidenceOnlyDescendant": true
+  },
+  "security": {
+    "repositoryReview": "ACCEPTED_WITH_EXPLICIT_DEPLOYMENT_TRUST_GATES",
+    "independentProductionSecurityApproval": false,
+    "findings": "INT-R04-01 through INT-R04-05 remain closed in repository app scope"
+  },
+  "operationalDeferrals": [
+    "Live addresses/code/grants/officers/source/session/operator/catalogue acceptance",
+    "Live consensus finality/quorum/reorg/network and independent multi-service operational drills",
+    "Funded Treasury/vault movement and independent approvals",
+    "TLS/secrets/backups/failover/monitoring/security/operator acceptance",
+    "R07.5 replacement/drain/migration/replay/rollback rehearsal"
+  ],
+  "futureEngineering": "Complete R05/R06/R07 retain canonical owners; scoped dependencies qualified here do not certify those whole phases.",
+  "merged": false,
+  "r05Started": false,
+  "testnetQualified": false,
+  "productionQualified": false,
+  "evidenceOnly": true
+}

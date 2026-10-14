@@ -10,6 +10,7 @@ import { ModuleIds } from "../../../../src/highcountry/constants/ModuleIds.sol";
 import { GenesisRegistry } from "../../../../src/highcountry/genesis/GenesisRegistry.sol";
 import { GenomeRegistry } from "../../../../src/highcountry/genetics/GenomeRegistry.sol";
 import { PublicCultivationAccess } from "../../../../src/highcountry/land/PublicCultivationAccess.sol";
+import { LandRegistry } from "../../../../src/highcountry/land/LandRegistry.sol";
 import { PlantRegistry } from "../../../../src/highcountry/cultivation/PlantRegistry.sol";
 import { RulesetRouter } from "../../../../src/highcountry/rules/RulesetRouter.sol";
 import { RulesetRegistry } from "../../../../src/highcountry/rules/RulesetRegistry.sol";
@@ -47,6 +48,19 @@ contract MockLandRegistryHC6 {
         uint16 regionId
     ) external {
         _parcels[parcelId] = Parcel(operator, capacity, regionId, true);
+    }
+
+    // Match the canonical R02 read interface used by R04.9 admission guards.
+    function getParcel(
+        uint64 parcelId
+    ) external view returns (LandRegistry.LandParcel memory p) {
+        Parcel memory mock = _parcels[parcelId];
+        require(mock.exists, "parcel missing");
+        p.id = parcelId;
+        p.owner = mock.operator;
+        p.growCapacity = mock.capacity;
+        p.regionId = mock.regionId;
+        p.exists = true;
     }
 
     function exists(

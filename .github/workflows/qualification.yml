@@ -61,6 +61,7 @@ on:
       - 'docs/audit/DOOBTUBE-PHASE-CLOSEOUT.md'
       - 'docs/audit/DOOBR-PHASE-CLOSEOUT.md'
       - 'docs/bnb/BNB-3.12-PHASE3-LEVEL3-CLOSEOUT.md'
+      - 'docs/highcountry/R04-LEVEL3-RECONCILIATION.md'
   pull_request:
     paths:
       - 'consensus/**'
@@ -110,6 +111,7 @@ on:
       - 'docs/audit/DOOBTUBE-PHASE-CLOSEOUT.md'
       - 'docs/audit/DOOBR-PHASE-CLOSEOUT.md'
       - 'docs/bnb/BNB-3.12-PHASE3-LEVEL3-CLOSEOUT.md'
+      - 'docs/highcountry/R04-LEVEL3-RECONCILIATION.md'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}

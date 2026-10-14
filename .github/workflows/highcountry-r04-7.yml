@@ -1,0 +1,45 @@
+name: High Country R04.7 Level 1 Qualification
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/highcountry/missions/**'
+      - 'contracts/test/highcountry/unit/missions/**'
+      - '.github/workflows/highcountry-r04-7.yml'
+      - 'docs/highcountry/R04.7-*'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  missions:
+    if: github.head_ref != 'qualification/highcountry-r04-level3-main-20261013'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      FOUNDRY_SRC: src/highcountry
+      FOUNDRY_TEST: test/highcountry
+      FOUNDRY_SCRIPT: script/highcountry
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Exact implementation SHA
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Build and size limits
+        working-directory: contracts
+        run: forge build src/highcountry --sizes
+      - name: Format
+        working-directory: contracts
+        run: forge fmt --check src/highcountry/missions test/highcountry/unit/missions
+      - name: Focused lint
+        working-directory: contracts
+        run: forge lint src/highcountry/missions --severity high med low
+      - name: Mission lifecycle adversarial qualification
+        working-directory: contracts
+        run: forge test --match-path 'test/highcountry/unit/missions/*.t.sol' -vv
+      - name: Canonical High Country verifier
+        run: python3 scripts/highcountry/verify-r01.py

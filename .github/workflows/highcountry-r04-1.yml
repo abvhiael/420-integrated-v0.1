@@ -1,0 +1,63 @@
+name: High Country R04.1 Level 1 Qualification
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/highcountry/inventory/**'
+      - 'contracts/test/highcountry/unit/inventory/**'
+      - '.github/workflows/highcountry-r04-1.yml'
+      - 'docs/highcountry/R04.1-*'
+      - 'docs/highcountry/qualification/R04.1-*'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  r04-1:
+    if: github.head_ref != 'qualification/highcountry-r04-level3-main-20261013'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      FOUNDRY_SRC: src/highcountry
+      FOUNDRY_TEST: test/highcountry
+      FOUNDRY_SCRIPT: script/highcountry
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Exact implementation SHA
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Affected build and production sizes
+        working-directory: contracts
+        run: forge build src/highcountry --sizes
+      - name: Formatting
+        working-directory: contracts
+        run: forge fmt --check src/highcountry/inventory test/highcountry/unit/inventory
+      - name: Security lint
+        working-directory: contracts
+        run: forge lint src/highcountry/inventory --severity high med low
+      - name: R04.1 unit, authorization, replay and conservation
+        working-directory: contracts
+        run: forge test --match-path 'test/highcountry/unit/inventory/*.t.sol' -vv
+      - name: Retained R03 harvest scoring
+        working-directory: contracts
+        run: forge test --match-path 'test/highcountry/unit/cultivation/HarvestScoring.t.sol' -vv
+      - name: Inventory and ledger ABI verification
+        working-directory: contracts
+        run: |
+          python3 - <<'PY'
+          import json,pathlib
+          for contract,names in {
+             'InventoryRegistry': {'importHarvest','lot','acquire','reserve','release','consume','transferAvailable','registerResource','setIssuer','ledger'},
+             'ResourceLedger': {'balance','issued','consumed','applied','inventoryRegistry'}
+          }.items():
+             matches=list(pathlib.Path('out').glob('**/'+contract+'.json'))
+             assert len(matches)==1,matches
+             have={entry.get('name') for entry in json.loads(matches[0].read_text())['abi'] if entry['type']=='function'}
+             assert names <= have,(contract,names-have)
+          PY
+      - name: Canonical High Country verifier
+        run: python3 scripts/highcountry/verify-r01.py

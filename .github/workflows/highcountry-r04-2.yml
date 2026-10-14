@@ -1,0 +1,58 @@
+name: High Country R04.2 Level 1 Qualification
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/highcountry/equipment/**'
+      - 'contracts/test/highcountry/unit/equipment/**'
+      - '.github/workflows/highcountry-r04-2.yml'
+      - 'docs/highcountry/R04.2-*'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  r04-2:
+    if: github.head_ref != 'qualification/highcountry-r04-level3-main-20261013'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      FOUNDRY_SRC: src/highcountry
+      FOUNDRY_TEST: test/highcountry
+      FOUNDRY_SCRIPT: script/highcountry
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Exact implementation SHA
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Build and size limits
+        working-directory: contracts
+        run: forge build src/highcountry --sizes
+      - name: Equipment formatting
+        working-directory: contracts
+        run: forge fmt --check src/highcountry/equipment test/highcountry/unit/equipment
+      - name: Equipment security lint
+        working-directory: contracts
+        run: forge lint src/highcountry/equipment --severity high med low
+      - name: R04.2 equipment authority and invariants
+        working-directory: contracts
+        run: forge test --match-path 'test/highcountry/unit/equipment/*.t.sol' -vv
+      - name: R04.1 inventory retained regression
+        working-directory: contracts
+        run: forge test --match-path 'test/highcountry/unit/inventory/*.t.sol' -vv
+      - name: Equipment ABI
+        working-directory: contracts
+        run: |
+          python3 - <<'PY'
+          import json,pathlib
+          matches=list(pathlib.Path('out').glob('**/EquipmentRegistry.json'))
+          assert len(matches)==1,matches
+          functions={x['name'] for x in json.loads(matches[0].read_text())['abi'] if x['type']=='function'}
+          assert {'registerType','equipmentType','equipment','issue','place','remove','effectiveEffects','occupiedSlots','setIssuer'} <= functions
+          PY
+      - name: Canonical High Country verifier
+        run: python3 scripts/highcountry/verify-r01.py

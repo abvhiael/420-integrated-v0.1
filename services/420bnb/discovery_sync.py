@@ -72,10 +72,10 @@ def consume(conn,property_id,consumer,revision,payload):
     # The property lock serializes this check with every source mutation/refresh.
     current=snapshot(conn,pid)
     source=conn.execute("SELECT revision,payload FROM bnb_discovery_projection WHERE property_id=%s",(pid,)).fetchone()
-    if payload!=current:
-        raise HTTPException(409,"SOURCE_AUTHORITY_STALE")
     if source is None or revision!=source[0] or payload!=source[1]:
         raise HTTPException(409,"SOURCE_REVISION_STALE")
+    if payload!=current:
+        raise HTTPException(409,"SOURCE_AUTHORITY_STALE")
     old=conn.execute("""SELECT revision FROM bnb_discovery_consumer
                        WHERE property_id=%s AND consumer=%s FOR UPDATE""",(pid,consumer)).fetchone()
     if old and revision<=old[0]:

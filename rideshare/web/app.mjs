@@ -3,6 +3,8 @@ import { mountRiderAccount } from "./rider-account.mjs";
 import { createRiderPreferencesApi } from "./preferences-api.mjs";
 import { mountPickupView } from "./pickup-view.mjs";
 import { createLocationProviders } from "./location-providers.mjs";
+import { mountQuoteView } from "./quote-view.mjs";
+import { createQuoteApi } from "./quote-api.mjs";
 
 const root = document.getElementById("main");
 const menu = document.getElementById("menu-toggle");
@@ -11,6 +13,7 @@ let session = null;
 let requestNumber = 0;
 let clearRiderAccount = null;
 let clearPickupView = null;
+let quotePanel = null;
 
 // The host must provide an independently authenticated session adapter.
 // No localStorage, query-string identity, simulated principal or demo operator bypass.
@@ -33,6 +36,7 @@ function node(tag, text, className) {
 function renderDecision(decision) {
   if (clearRiderAccount) { clearRiderAccount(); clearRiderAccount = null; }
   if (clearPickupView) { clearPickupView(); clearPickupView = null; }
+  if (quotePanel) { quotePanel.destroy(); quotePanel = null; }
   root.replaceChildren();
   root.setAttribute("aria-busy", "false");
   const panel = node("section", undefined, "panel");
@@ -61,7 +65,9 @@ function renderDecision(decision) {
   root.append(panel);
   if (decision.kind === "protected" && decision.role === "rider") {
     clearRiderAccount = mountRiderAccount(root, createRiderPreferencesApi(globalThis.LIFTdSessionAdapter), session);
-    clearPickupView = mountPickupView(root, session, createLocationProviders(globalThis.LIFTdSessionAdapter, {search:globalThis.LIFTdPlaceSearchProvider,resolveAddress:globalThis.LIFTdAddressResolver}));
+    const quoteApi = createQuoteApi(globalThis.LIFTdSessionAdapter);
+    quotePanel = mountQuoteView(root, session, quoteApi);
+    clearPickupView = mountPickupView(root, session, createLocationProviders(globalThis.LIFTdSessionAdapter, {search:globalThis.LIFTdPlaceSearchProvider,resolveAddress:globalThis.LIFTdAddressResolver}), route => quotePanel?.showRoute(route));
   }
   document.title = decision.title + " — LIFTd";
 }

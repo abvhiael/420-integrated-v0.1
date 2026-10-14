@@ -50,7 +50,7 @@ export function createPostgresTripStore(pool) {
       const snapshot = result.rows[0].snapshot; publicView(snapshot); return Object.freeze(snapshot);
     } catch (error) {if (error instanceof AuthError) throw error; fail('DATABASE_UNAVAILABLE', 503);}
   }
-  async function execute({actorId, commandId, tripId, action, request, guard, afterWrite}, produce) {
+  async function execute({actorId, commandId, tripId, action, request, guard, afterWrite, beforeLock}, produce) {
     if (![actorId, commandId, tripId].every(id) || !['create','assign','arrive','start','complete','cancel','expire'].includes(action) ||
       typeof produce !== 'function' || typeof guard !== 'function') fail('INVALID_REQUEST', 400);
     const requestHash = hash({tripId, action, request});
@@ -69,6 +69,7 @@ export function createPostgresTripStore(pool) {
         await client.query('COMMIT'); committed = true;
         return Object.freeze(prior.rows[0].result);
       }
+      if(beforeLock) await beforeLock(client,tripId);
       await client.query('SELECT pg_advisory_xact_lock(hashtextextended($1,0))', [`liftd:trip:${tripId}`]);
       const current = await client.query('SELECT snapshot FROM liftd.trips WHERE trip_id=$1 FOR UPDATE', [tripId]);
       const old = current.rows[0]?.snapshot;

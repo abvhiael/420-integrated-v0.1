@@ -54,9 +54,9 @@ function proof(token, trust, purpose, now, maxAge, fields = null) {
   return claims;
 }
 const capabilities = Object.freeze({
-  rider: new Set(['trip.create', 'trip.read', 'trip.cancel', 'route.prepare', 'quote.create', 'quote.accept', 'quote.read']),
-  driver: new Set(['trip.read', 'trip.arrive', 'trip.start', 'trip.complete', 'trip.cancel', 'availability.set']),
-  operator: new Set(['trip.assign', 'trip.expire']),
+  rider: new Set(['trip.create', 'trip.read', 'trip.cancel', 'route.prepare', 'quote.create', 'quote.accept', 'quote.read', 'pay.prepare', 'pay.consent', 'pay.reconcile', 'pay.read']),
+  driver: new Set(['trip.read', 'trip.arrive', 'trip.start', 'trip.complete', 'trip.cancel', 'availability.set', 'pay.read', 'pay.statement']),
+  operator: new Set(['trip.assign', 'trip.expire', 'pay.reconcile', 'pay.read']),
 });
 export function validateSessionGrants(grants) {
   if (!Array.isArray(grants) || grants.length > 32) deny('INVALID_PROOF');
@@ -103,7 +103,7 @@ export function createAuthenticator({identity, sessionAuthority, resolveSession,
         if (!grant.revoked && grant.expiresAt > checkedAt && grant.actions.includes(action) && grant.resource === resource) matches.push(grant);
       }
       if (matches.length !== 1) deny('PERMISSION_DENIED', 403);
-      if (['trip.create','route.prepare','availability.set','quote.create','quote.accept','quote.read'].includes(action) && resource !== `account:${access.sub}`) deny('PERMISSION_DENIED', 403);
+      if (['trip.create','route.prepare','availability.set','quote.create','quote.accept','quote.read','pay.statement'].includes(action) && resource !== `account:${access.sub}`) deny('PERMISSION_DENIED', 403);
       return Object.freeze({subject: access.sub, accountId: access.accountId, sessionId: access.sessionId,
         deviceId: access.deviceId, recoveryEpoch: access.recoveryEpoch, role: matches[0].role,
         action, resource, expiresAt: Math.min(access.exp, status.exp, matches[0].expiresAt)});

@@ -28,11 +28,11 @@ export function fixture(pool,pairs,controls={now:100}) {
     return {sub:r.subject,nonce:r.nonce,tokenDigest:r.tokenDigest,accountId:r.accountId,sessionId:r.sessionId,deviceId:r.deviceId,recoveryEpoch:0,
       active:!controls.revokedSessions?.includes(r.subject),deviceActive:true,tokenActive:true,
       grants:role==='driver'?[
-        {role,resource:`account:${r.subject}`,actions:['availability.set'],expiresAt:clock()+30,revoked:false},
-        {role,resource:`trip:${r.sessionId}`,actions:['trip.read','trip.arrive','trip.start','trip.complete','trip.cancel'],expiresAt:clock()+30,revoked:false}]:role==='operator'?[
-        {role,resource:`trip:${r.sessionId}`,actions:['trip.assign','trip.expire'],expiresAt:clock()+30,revoked:false}]:[
+        {role,resource:`account:${r.subject}`,actions:['availability.set',...(controls.pay?['pay.statement']:[])],expiresAt:clock()+30,revoked:false},
+        {role,resource:`trip:${r.sessionId}`,actions:['trip.read','trip.arrive','trip.start','trip.complete','trip.cancel',...(controls.pay?['pay.read']:[])],expiresAt:clock()+30,revoked:false}]:role==='operator'?[
+        {role,resource:`trip:${r.sessionId}`,actions:['trip.assign','trip.expire',...(controls.pay?['pay.reconcile','pay.read']:[])],expiresAt:clock()+30,revoked:false}]:[
         {role,resource:`account:${r.subject}`,actions:['trip.create','route.prepare',...(controls.quotes?['quote.create','quote.accept','quote.read']:[])],expiresAt:clock()+30,revoked:false},
-        {role,resource:`trip:${r.sessionId}`,actions:['trip.read','trip.cancel'],expiresAt:clock()+30,revoked:false}]};
+        {role,resource:`trip:${r.sessionId}`,actions:['trip.read','trip.cancel',...(controls.pay?['pay.prepare','pay.consent','pay.reconcile','pay.read']:[])],expiresAt:clock()+30,revoked:false}]};
   });
   const authenticator=createAuthenticator({identity:roots[0],sessionAuthority:roots[1],resolveSession:session,clock});
   const tripStore=createPostgresTripStore(pool);

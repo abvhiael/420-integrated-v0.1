@@ -3,11 +3,12 @@ import {createTrip, transitionTrip, participantView} from './trip.mjs';
 const id = value => typeof value === 'string' && /^[A-Za-z0-9_-]{1,128}$/.test(value);
 // Protected application boundary. Store must be server-owned; durable CAS is L01.4.
 export function createTripService({authenticator, store, clock = () => Math.floor(Date.now() / 1000),
-  isPaused = () => true, admissionFor = async () => undefined, eligibilityAdapter, privateLocationStore, dispatchAdapter, quoteService}) {
+  isPaused = () => true, admissionFor = async () => undefined, eligibilityAdapter, privateLocationStore, dispatchAdapter, quoteService, paymentService}) {
   if (!authenticator || typeof authenticator.authorize !== 'function' || !store ||
     (typeof store.get !== 'function' || (typeof store.execute !== 'function' && ['create', 'compareAndSwap'].some(method => typeof store[method] !== 'function')))) throw new AuthError('SERVICE_UNAVAILABLE', 503);
   if (eligibilityAdapter !== undefined && typeof eligibilityAdapter?.admissionFor !== 'function') throw new AuthError('SERVICE_UNAVAILABLE', 503);
   if (quoteService && (!store.execute || !dispatchAdapter || !eligibilityAdapter)) throw new AuthError('SERVICE_UNAVAILABLE',503);
+  if(paymentService && (!quoteService||!dispatchAdapter||!store.execute)) throw new AuthError('SERVICE_UNAVAILABLE',503);
   const resolveAdmission = eligibilityAdapter?.admissionFor ?? admissionFor;
   const current = principal => {
     const now = clock();
@@ -29,10 +30,11 @@ export function createTripService({authenticator, store, clock = () => Math.floo
           current(fresh);
         };
         return store.execute({actorId: principal.subject, commandId: input.commandId, tripId: trip.id, action: 'create',
-          request: {id: input.id, routeRef: input.routeRef, riderId: input.riderId, ...(input.quoteId !== undefined ? {quoteId:input.quoteId} : {})}, guard,
+          request: {id: input.id, routeRef: input.routeRef, riderId: input.riderId, ...(input.quoteId !== undefined ? {quoteId:input.quoteId} : {})}, guard, beforeLock:paymentService?.lock,
           afterWrite: async (client,next) => {
             if(privateLocationStore) await privateLocationStore.bind(client,next,principal);
             if(quoteService) await quoteService.bind(client,next,principal,input.quoteId);
+            if(paymentService) await paymentService.recordLifecycle(client,next,'create',current(principal));
           }}, async () => trip);
       }
       await store.create(trip); return trip;
@@ -79,10 +81,11 @@ export function createTripService({authenticator, store, clock = () => Math.floo
           if (lastAdmission && lastAdmission.expiresAt <= now) throw new AuthError('ADMISSION_REQUIRED', 403);
           if (['assign', 'arrive', 'start'].includes(action) && isPaused()) throw new AuthError('SERVICE_PAUSED', 409);
         };
-        next = await store.execute({actorId: principal.subject, commandId, tripId, action, request: originalCommand, guard,
+        next = await store.execute({actorId: principal.subject, commandId, tripId, action, request: originalCommand, guard, beforeLock:paymentService?.lock,
           afterWrite: async(client,result)=>{
             if(dispatchAdapter) await dispatchAdapter.apply(client,result,action,selection);
             if(quoteService) await quoteService.apply(client,result,action,viability);
+            if(paymentService) await paymentService.recordLifecycle(client,result,action,current(principal));
           }}, produce);
       } else {
         const trip = await store.get(tripId); next = await produce(trip);

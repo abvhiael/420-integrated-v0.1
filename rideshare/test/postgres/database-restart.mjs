@@ -21,7 +21,7 @@ try {
   const leases=(await pool.query('SELECT * FROM liftd.assignment_leases ORDER BY trip_id')).rows;
   const availabilityCommands=(await pool.query('SELECT * FROM liftd.availability_commands ORDER BY driver_id,command_id')).rows;
   const economics={};
-  for(const table of ['fare_quotes','quote_consents','quote_commands','trip_quotes','trip_viability','cancellation_assessments','subsidy_bindings']) economics[table]=(await pool.query(`SELECT * FROM liftd.${table} ORDER BY 1,2`)).rows;
+  for(const table of ['fare_quotes','quote_consents','quote_commands','trip_quotes','trip_viability','cancellation_assessments','subsidy_bindings','trip_financial_timing','payment_intents','wallet_consents','payment_events','financial_receipts','financial_commands','payout_projections','settlement_funding','pay_operations','operation_events']) economics[table]=(await pool.query(`SELECT * FROM liftd.${table} ORDER BY 1,2`)).rows;
   const digest=createHash('sha256').update(canonical({history,commands,locations,availability,leases,availabilityCommands,economics})).digest('hex');
   const report={trips:trips.length,events:history.flat().length,commands:commands.length,digest};
   if(process.argv[2]==='before') {assert.ok(report.events>0);writeFileSync(process.argv[3],JSON.stringify(report));}

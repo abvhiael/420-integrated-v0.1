@@ -6,6 +6,26 @@ const hex=x=>typeof x==='string'&&/^0x[0-9a-f]{64}$/.test(x);
 const address=x=>typeof x==='string'&&/^0x[0-9a-f]{40}$/.test(x);
 const uint=x=>typeof x==='string'&&/^(0|[1-9][0-9]*)$/.test(x)&&BigInt(x)<2n**64n;
 const defs=Object.freeze({
+ GameRegistered:{signature:'GameRegistered(bytes32,address,bytes32)',
+  indexed:['gameId','operator'],body:['metadataHash']},
+ GameUpdated:{signature:'GameUpdated(bytes32,address,bytes32)',
+  indexed:['gameId','operator'],body:['metadataHash']},
+ GameStatusChanged:{signature:'GameStatusChanged(bytes32,bool)',
+  indexed:['gameId'],body:['active']},
+ GameProfileCreated:{signature:'GameProfileCreated(bytes32,bytes32,address,bytes32)',
+  indexed:['profileId','gameId','account'],body:['externalProfileCommitment']},
+ EntitlementIssued:{signature:'EntitlementIssued(bytes32,bytes32,bytes32,bytes32,bytes32)',
+  indexed:['entitlementId','profileId','gameId'],body:['entitlementType','contentId']},
+ EntitlementRevoked:{signature:'EntitlementRevoked(bytes32)',
+  indexed:['entitlementId'],body:[]},
+ AttestationIssued:{signature:'AttestationIssued(bytes32,bytes32,bytes32,bytes32,bytes32,bytes32,uint64)',
+  indexed:['attestationId','sourceGameId','profileId'],
+  body:['subjectType','subjectId','payloadHash','validUntil']},
+ AttestationRevoked:{signature:'AttestationRevoked(bytes32)',
+  indexed:['attestationId'],body:[]},
+ PlayerEntitlementBound:{signature:'PlayerEntitlementBound(uint64,bytes32,bytes32,bytes32)',
+  indexed:['growerId','entitlementType','contentId'],body:['entitlementId']},
+
  MigrationClaimIssued:{signature:'MigrationClaimIssued(bytes32,bytes32,address,bytes32,bytes32,uint64)',
   indexed:['claimId','gameId','targetAccount'],body:['guestStateCommitment','migrationPayloadHash','validUntil']},
  MigrationClaimConsumed:{signature:'MigrationClaimConsumed(bytes32,bytes32)',indexed:['claimId','profileId'],body:[]},
@@ -21,7 +41,7 @@ const signatures=Object.freeze(Object.fromEntries(Object.entries(defs).map(([nam
  [keccak256(Buffer.from(spec.signature)),{name,...spec}])));
 const addrWord=x=>'0x'+x.slice(-40);
 function decodeWord(word,field){
- if(field==='targetAccount'||field==='account'){
+ if(field==='targetAccount'||field==='account'||field==='operator'){
   if(word.slice(2,26)!=='0'.repeat(24))fail('event-invalid-address-padding');
   const v=addrWord(word);if(!address(v)||v==='0x'+'0'.repeat(40))fail('event-zero-account');
   return v;
@@ -31,7 +51,14 @@ function decodeWord(word,field){
   if(n>2n**64n-1n||(field==='growerId'&&n===0n))fail('event-invalid-uint64');
   return String(n);
  }
- if(!hex(word)||word==='0x'+'0'.repeat(64))fail('event-invalid-hash');
+ if(field==='active'){
+  if(word!=='0x'+'0'.repeat(64)&&word!=='0x'+'0'.repeat(63)+'1')
+   fail('event-invalid-bool');
+  return word.endsWith('1');
+ }
+ const zeroAllowed=['externalProfileCommitment','metadataHash','payloadHash'];
+ if(!hex(word)||(!zeroAllowed.includes(field)&&word==='0x'+'0'.repeat(64)))
+  fail('event-invalid-hash');
  return word;
 }
 export function decodeGamingEvent420({topics,data}={}){
@@ -47,5 +74,10 @@ export function decodeGamingEvent420({topics,data}={}){
 }
 export const GAMING_EVENT_TOPICS420=Object.freeze(Object.fromEntries(Object.entries(defs).map(([name,v])=>
  [name,keccak256(Buffer.from(v.signature))])));
-export const gamingEventContract420=kind=>kind.startsWith('MigrationClaim')&&kind!=='MigrationClaimBound'?'claims':
+export const gamingEventContract420=kind=>
+ ['GameRegistered','GameUpdated','GameStatusChanged'].includes(kind)?'games':
+ kind==='GameProfileCreated'?'identity':
+ kind.startsWith('Entitlement')?'entitlements':
+ kind.startsWith('Attestation')?'crossGame':
+ kind.startsWith('MigrationClaim')&&kind!=='MigrationClaimBound'?'claims':
  kind==='MigrationApplied'?'migration':'bridge';

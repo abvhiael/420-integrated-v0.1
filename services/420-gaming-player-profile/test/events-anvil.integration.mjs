@@ -13,7 +13,8 @@ const get=async name=>{
  const data=await chain.request('eth_call',[{to:harness,data:calldata(name+'()')},'latest']);
  return '0x'+data.slice(-40);
 };
-const addresses={claims:await get('claims'),bridge:await get('bridge'),migration:await get('migration')};
+const addresses={games:await get('games'),identity:await get('identity'),
+ claims:await get('claims'),bridge:await get('bridge'),migration:await get('migration')};
 const specs={};
 for(const [kind,address] of Object.entries(addresses)){
  const code=await chain.request('eth_getCode',[address,'latest']);
@@ -37,7 +38,7 @@ for(let i=1;i<=tip;i++){
   }
  }
 }
-for(const kind of ['MigrationClaimIssued','MigrationClaimConsumed','GrowerGamingProfileBound',
+for(const kind of ['GameRegistered','GameProfileCreated','MigrationClaimIssued','MigrationClaimConsumed','GrowerGamingProfileBound',
  'MigrationClaimBound','MigrationApplied'])
  assert.ok(observed.has(kind),'missing actual emitted event '+kind);
 assert.equal(observed.has('MigrationClaimCancelled'),false,

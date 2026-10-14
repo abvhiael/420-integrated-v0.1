@@ -126,10 +126,24 @@ class ScopedTransaction {
   }
   async saveReference(revision = null) {
     if (revision !== null) decimal(revision,64,true);
+    // Preserve the qualified R05.1 datastore while R05.5's additive migration rolls out.
+    // Once deployed, a redacted revision is never returned as a provider locator.
+    const redaction=(await this.#query("SELECT to_regclass('gaming_datastore.save_redactions') AS present")).rows[0]?.present;
+    const exclusion=redaction?` AND NOT EXISTS(SELECT 1 FROM gaming_datastore.save_redactions d
+      WHERE d.account_id=r.account_id AND d.game_id=r.game_id AND d.revision=r.revision)`:'';
     return (await this.#query(`SELECT r.* FROM gaming_datastore.save_references r
       JOIN gaming_datastore.game_profiles p USING(account_id,game_id)
-      WHERE r.account_id=$1 AND r.game_id=$2 AND r.revision=coalesce($3::numeric,p.save_revision)`,
+      WHERE r.account_id=$1 AND r.game_id=$2 AND r.revision=coalesce($3::numeric,p.save_revision)`+exclusion,
       [...this.#ids(),revision])).rows[0] ?? null;
+  }
+  async backupReference(backupId) {
+    requireOpaque(backupId);
+    const available=(await this.#query("SELECT to_regclass('gaming_datastore.save_backups') AS present")).rows[0]?.present;
+    if(!available)fail('save-lifecycle-not-migrated');
+    return (await this.#query(`SELECT backup_id,source_revision,provider_id,object_ref,
+      state_hash,byte_length,schema_label,expires_at FROM gaming_datastore.save_backups
+      WHERE account_id=$1 AND game_id=$2 AND backup_id=$3 AND deleted_at IS NULL
+      AND expires_at>gaming_datastore.now_seconds()`,[...this.#ids(),backupId])).rows[0]??null;
   }
   async prepareMigration(x) {
     validateMigration(x); const context = migrationIntentDigest(...this.#ids(),x);

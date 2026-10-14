@@ -285,3 +285,32 @@ def test_packaged_entry_rejects_unapproved_sink_and_redacts(monkeypatch, capsys)
     monkeypatch.setattr(worker, 'main', lambda: (_ for _ in ()).throw(RuntimeError('secret=DO-NOT-PRINT')))
     assert worker.cli() == 1
     assert capsys.readouterr().err == 'WORKER_START_FAILED\n'
+
+
+# Reuse the existing isolated verified-TLS role/migration fixture without weakening it.
+from test_bnb32_infrastructure import database as tls_database
+
+
+def test_production_entry_wires_verified_tls_least_privilege_worker(tls_database, monkeypatch):
+    import production
+    _, _, runtime = tls_database
+    values = dict(runtime, options='-c search_path=public')
+    with psycopg.connect(**values) as c:
+        c.execute("INSERT INTO bnb_outbox(id,event_type,payload) VALUES (%s,'bnb.hold.created','{\"hold_id\":\"fixture\"}')", (uuid4(),))
+    # Contract validation itself is independently exercised by the retained infrastructure suite.
+    monkeypatch.setattr(production, 'load_contract', lambda: ({}, {}, values))
+    monkeypatch.setenv('BNB_WORKER_SINK', 'local-validation')
+    original = worker.Supervisor.run
+    def bounded(self):
+        return original(self, max_cycles=1)
+    monkeypatch.setattr(worker.Supervisor, 'run', bounded)
+    prior = {sig: signal.getsignal(sig) for sig in (signal.SIGTERM, signal.SIGINT)}
+    try:
+        assert worker.main() == 0
+    finally:
+        for sig, handler in prior.items():
+            signal.signal(sig, handler)
+    with psycopg.connect(**values) as c:
+        production.verify_database(c)
+        assert c.execute('SELECT count(*) FROM bnb_outbox WHERE delivered_at IS NOT NULL').fetchone() == (1,)
+        assert c.execute('SELECT count(*) FROM bnb_request_dedupe').fetchone() == (1,)

@@ -2,6 +2,10 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {Pool} from 'pg';
 import {bootstrapDatastoreRoles,migrateDatastore} from '../src/schema-migrations.js';
+import {migrateWalletLinks} from '../src/wallet-link-migrations.js';
+import {migrateMigrationRuntime} from '../src/migration-runtime-migrations.js';
+import {PostgresGamingRepository420} from '../src/postgres-repository.js';
+import {createGamingEventScopeResolver420} from '../src/gaming-event-scope-resolver.js';
 import {migrateEventIngestion,eventIngestionDigest} from '../src/event-ingestion-migrations.js';
 import {GamingDatastoreProvisioner420} from '../src/datastore-provisioning.js';
 import {DurableGamingEventIndexer420} from '../src/durable-gaming-event-indexer.js';
@@ -27,11 +31,39 @@ const indexer=()=>new DurableGamingEventIndexer420({operatorPool:root,
 test('R05.6 real durable PostgreSQL cursor/dedupe/reorg/finality and scoped queries',async t=>{
  try{
   await bootstrapDatastoreRoles(root);await migrateDatastore(root);
+  await migrateWalletLinks(root);await migrateMigrationRuntime(root);
   assert.equal((await migrateEventIngestion(root)).changed,true);
   assert.equal((await migrateEventIngestion(root)).changed,false);
   const provisioning=new GamingDatastoreProvisioner420(root);
   await provisioning.provisionAccount({accountId:'alice',issuerRef:'issuer1',credentialCommitment:h('9')});
   await provisioning.provisionAccount({accountId:'bob',issuerRef:'issuer1',credentialCommitment:h('a')});
+  await root.query("CREATE ROLE r056_owner LOGIN PASSWORD 'r056_only' NOSUPERUSER NOCREATEDB NOCREATEROLE NOBYPASSRLS");
+  await root.query('GRANT gaming_datastore_runtime TO r056_owner');
+  await provisioning.bindRuntimeScope({roleName:'r056_owner',accountId:'alice',gameId:G});
+  const ownerURL=new URL(uri);ownerURL.username='r056_owner';ownerURL.password='r056_only';
+  const ownerPool=new Pool({connectionString:ownerURL.toString()});
+  try{
+   const repo=new PostgresGamingRepository420({pool:ownerPool,accountId:'alice',gameId:G,
+    expectedEpoch:'0',expectedIssuerRef:'issuer1'});
+   await repo.transaction(t=>t.createProfile({profileId:'alice-game',rulesetId:h('e')}));
+   const issuedAt=String(Math.floor(Date.now()/1000)),expiresAt=String(BigInt(issuedAt)+300n);
+   await repo.transaction(async t=>{
+    const challenge=await t.issueWalletChallenge({challengeId:'event-link',wallet,chainId:'420',
+     domain:'event-example',nonce:'f'.repeat(64),consentId:'link-consent',policyHash:h('b'),
+     contextHash:h('c'),issuedAt,expiresAt,recoveryAuthorized:false});
+    await t.completeWalletChallenge('event-link',h('c'),{wallet,chainId:'420',domain:'event-example',
+     nonce:'f'.repeat(64),issuedAt:challenge.issued_at,expiresAt:challenge.expires_at});
+   });
+  }finally{await ownerPool.end();}
+  await t.test('durable wallet authority resolves only active source account scope',async()=>{
+   const resolver=createGamingEventScopeResolver420({pool:root,chainId:'420',gameId:G});
+   assert.deepEqual(await resolver({chainId:'420',kind:'MigrationClaimIssued',
+    payload:{targetAccount:wallet}}),{accountId:'alice',gameId:G});
+   assert.equal(await resolver({chainId:'420',kind:'MigrationClaimIssued',
+    payload:{targetAccount:'0x'+'f'.repeat(40)}}),null);
+   await assert.rejects(()=>resolver({chainId:'421',kind:'MigrationClaimIssued',
+    payload:{targetAccount:wallet}}),/event-scope-request-invalid/);
+  });
   const worker=indexer();
   await t.test('unauthenticated or wrong account cannot see event results',async()=>{
    await assert.rejects(()=>worker.query({accountId:'bob',gameId:G,authority:'signed-session'}),/events-query-denied/);

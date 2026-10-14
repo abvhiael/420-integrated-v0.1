@@ -45,7 +45,7 @@ Define detailed steps at L01 closeout using the actual service interfaces. Scope
 
 | Step | Deliverable | Current status |
 | --- | --- | --- |
-| L02.1 | Application shell and design system — responsive navigation, accessible components, loading/error states, authenticated routing and clear availability information | Implemented on dedicated L02 branch; Level 1 qualification pending exact-SHA result |
+| L02.1 | Application shell and design system — responsive navigation, accessible components, loading/error states, authenticated routing and clear availability information | **COMPLETE — Level 1 PASS**; see [L02.1 certificate](L02.1-LEVEL1-EVIDENCE.md), qualified implementation `cedd39c6e1c6350587bf920290439b6ab271da89` |
 
 Detailed subsequent steps remain to be reconciled with existing L01 service interfaces at the L01 phase-closeout boundary. This entry does not renumber, merge or silently replace future canonical steps.
 

@@ -232,10 +232,14 @@ export class DurableGamingEventIndexer420 {
    return Object.freeze({recovered:true,nextBlock:recovered.nextBlock});
   }
  }
- async query({accountId,gameId,authority,limit=50}){
+ async query({accountId,gameId,authority,limit=50,before=null}){
   if(typeof accountId!=='string'||!/^[A-Za-z0-9:_-]{1,128}$/.test(accountId)||
     gameId!==this.#game||!Number.isInteger(limit)||limit<1||limit>100)
     fail('events-query-invalid');
+  if(before!==null&&(!before||typeof before!=='object'||Array.isArray(before)||
+    Object.keys(before).length!==4||!u(before.blockNumber)||!u(before.txIndex,32)||
+    !u(before.logIndex,32)||!Object.values(this.#contracts).includes(before.contract)))
+    fail('events-query-cursor-invalid');
   if(await this.#authorize(Object.freeze({accountId,gameId,authority,purpose:'GAMING_EVENT_READ'}))!==true)
    fail('events-query-denied');
   return this.#tx(async c=>{
@@ -243,12 +247,17 @@ export class DurableGamingEventIndexer420 {
    const account=(await c.query('SELECT status FROM gaming_datastore.accounts WHERE account_id=$1 FOR SHARE',
     [accountId])).rows[0];
    if(account?.status!=='ACTIVE')fail('events-account-revoked');
-   const rows=(await c.query(`SELECT e.event_kind,e.block_number,e.block_hash,e.tx_hash,e.log_index,e.status,
-       e.payload FROM gaming_datastore.event_logs e
+   const rows=(await c.query(`SELECT e.event_kind,e.block_number,e.block_hash,e.tx_hash,
+       e.tx_index,e.log_index,e.contract,e.status,e.payload FROM gaming_datastore.event_logs e
      JOIN gaming_datastore.event_scopes s ON s.chain_id=e.chain_id AND s.contract=e.contract
       AND s.block_hash=e.block_hash AND s.log_index=e.log_index
      WHERE s.account_id=$1 AND s.game_id=$2 AND e.status='FINALIZED'
-     ORDER BY e.block_number DESC,e.log_index DESC LIMIT $3`,[accountId,gameId,limit])).rows;
+       AND ($4::numeric IS NULL OR (e.block_number,e.tx_index,e.log_index,e.contract) <
+         ($4::numeric,$5::numeric,$6::numeric,$7::text))
+     ORDER BY e.block_number DESC,e.tx_index DESC,e.log_index DESC,e.contract DESC
+     LIMIT $3`,[accountId,gameId,limit,
+      before?.blockNumber??null,before?.txIndex??null,
+      before?.logIndex??null,before?.contract??null])).rows;
    // Session may be revoked/expire while rows are being retrieved.
    // Repeat the independent R05.2 authority check before returning any feed.
    if(await this.#authorize(Object.freeze({accountId,gameId,authority,purpose:'GAMING_EVENT_READ'}))!==true)

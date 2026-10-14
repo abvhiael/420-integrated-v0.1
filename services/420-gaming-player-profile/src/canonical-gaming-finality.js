@@ -86,6 +86,53 @@ export class CanonicalGamingFinality420 {
   return Object.freeze({accepted:true,kind:'ATTESTATION',chainId:this.#chain,blockHash:a.hash,
    evidenceDigest:D({id:attestationId,profileId,blockHash:a.hash,r,active})});
  }
+ async migrationBinding({claimId,targetWallet,growerId,guestStateCommitment,payloadHash}={}){
+  if(!H(claimId)||!A(targetWallet)||!U(growerId)||growerId==='0'||
+    !H(guestStateCommitment)||!H(payloadHash))deny('r057-migration-invalid');
+  const a=await this.#anchor();
+  const claim=await this.#call(a,'claims','claim(bytes32)',[claimId]);
+  if(claim.length!==9||E(claim[0])!==claimId||E(claim[1])!==this.#game||
+    '0x'+claim[2].slice(24)!==targetWallet||E(claim[3])!==guestStateCommitment||
+    E(claim[4])!==payloadHash||!B(claim[6])||B(claim[7])||!B(claim[8]))
+    deny('r057-migration-claim-mismatch');
+  const bound=await this.#call(a,'bridge','growerProfileIdOfMigrationClaim(bytes32)',[claimId]);
+  if(bound.length!==1||N(bound[0])!==BigInt(growerId))deny('r057-migration-unbound');
+  const ready=await this.#call(a,'migration','isReadyToApply(bytes32,uint64,bytes32,bytes32)',
+   [claimId,growerId,guestStateCommitment,payloadHash]);
+  if(ready.length!==1||!B(ready[0]))deny('r057-migration-unready');
+  const profile=await this.#call(a,'identity','profileIdOf(bytes32,address)',[this.#game,targetWallet]);
+  if(profile.length!==1||N(profile[0])===0n)deny('r057-migration-no-owner');
+  return Object.freeze({accepted:true,chainId:this.#chain,claimId,targetWallet,growerId,
+   payloadHash,gameId:this.#game,blockHash:a.hash,blockNumber:String(BigInt(a.number)),
+   evidenceDigest:D({claimId,targetWallet,growerId,payloadHash,guestStateCommitment,profile,
+    blockHash:a.hash,claim,bound,ready})});
+ }
+ async migrationTransaction({txHash,claimId,growerId,guestStateCommitment,payloadHash}={}){
+  if(!H(txHash)||!H(claimId)||!U(growerId)||growerId==='0'||
+   !H(guestStateCommitment)||!H(payloadHash))deny('r057-transaction-invalid');
+  const a=await this.#anchor();
+  const receipt=await this.#rpc.request('eth_getTransactionReceipt',[txHash]);
+  if(!receipt||receipt.transactionHash!==txHash||receipt.status!=='0x1'||
+    !H(receipt.blockHash)||!/^0x(0|[1-9a-f][0-9a-f]*)$/.test(receipt.blockNumber??'')||
+    BigInt(receipt.blockNumber)>BigInt(a.number)||!Array.isArray(receipt.logs))
+    deny('r057-transaction-unfinalized');
+  const block=await this.#rpc.request('eth_getBlockByNumber',[receipt.blockNumber,false]);
+  if(block?.hash!==receipt.blockHash)deny('r057-transaction-reorg');
+  if(await this.#witness({chainId:this.#chain,blockHash:receipt.blockHash,
+   blockNumber:String(BigInt(receipt.blockNumber))})!==true)deny('r057-receipt-witness-denied');
+  const {keccak256}=await import('../../highcountry-economy/src/keccak.js');
+  const topic=keccak256(Buffer.from('MigrationApplied(bytes32,uint64,bytes32,bytes32)'));
+  const matched=receipt.logs.filter(log=>log?.address===this.#contracts.migration.address&&
+   Array.isArray(log.topics)&&log.topics.length===3&&log.topics[0]===topic&&
+   log.topics[1]===claimId&&BigInt(log.topics[2])===BigInt(growerId)&&
+   log.data==='0x'+guestStateCommitment.slice(2)+payloadHash.slice(2));
+  if(matched.length!==1)deny('r057-migration-receipt-log-invalid');
+  const confirmed=await this.receipt({claimId,growerId,guestStateCommitment,payloadHash});
+  if(!confirmed.accepted)deny('r057-transaction-state-mismatch');
+  return Object.freeze({accepted:true,state:'FINALIZED',txHash,blockHash:receipt.blockHash,
+   receiptDigest:D({txHash,blockHash:receipt.blockHash,claimId,growerId,
+    guestStateCommitment,payloadHash}),evidenceDigest:confirmed.evidenceDigest});
+ }
  async receipt({claimId,growerId,guestStateCommitment,payloadHash}={}){
   if(!H(claimId)||!U(growerId)||growerId==='0'||!H(guestStateCommitment)||!H(payloadHash))
    deny('r057-receipt-invalid');

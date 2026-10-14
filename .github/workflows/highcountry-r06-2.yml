@@ -1,0 +1,39 @@
+name: High Country R06.2 Guest Gameplay Level 1
+on:
+  pull_request:
+    paths:
+      - 'apps/highcountry-web/**'
+      - '.github/workflows/highcountry-r06-2.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  guest-gameplay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check exact SHA
+        run: test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+      - name: Browser gameplay, routing, persistence, adversarial tests
+        run: node --test apps/highcountry-web/test/*.test.mjs
+      - name: Build and parse browser sources
+        run: |
+          node apps/highcountry-web/scripts/build.mjs
+          for path in apps/highcountry-web/src/*.js apps/highcountry-web/server.mjs; do node --check "$path"; done
+          test -s apps/highcountry-web/dist/src/guest.js
+          test -s apps/highcountry-web/dist/src/app.js
+      - name: Retained access and Gaming SDK checks
+        run: node --test clients/highcountry-access-v1/test/*.test.js packages/420-gaming-sdk/test/*.test.js
+      - name: Diff integrity
+        run: |
+          git diff --check eeaa4e593e8f5f16e2bc566b20ddbe04576589c1 HEAD
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"

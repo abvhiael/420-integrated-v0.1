@@ -65,7 +65,7 @@ test('R05.6 real durable PostgreSQL cursor/dedupe/reorg/finality and scoped quer
    });
   }finally{await ownerPool.end();}
   await t.test('durable wallet authority resolves only active source account scope',async()=>{
-   const resolver=createGamingEventScopeResolver420({pool:root,chainId:'420',gameId:G});
+   const resolver=createGamingEventScopeResolver420({pool:root,chainId:'420',gameId:G,contracts:C});
    assert.deepEqual(await resolver({chainId:'420',kind:'MigrationClaimIssued',
     payload:{targetAccount:wallet}}),{accountId:'alice',gameId:G});
    assert.equal(await resolver({chainId:'420',kind:'MigrationClaimIssued',
@@ -173,7 +173,7 @@ test('R05.6 real durable PostgreSQL cursor/dedupe/reorg/finality and scoped quer
    onlyIssueScope=false;
   });
   await t.test('real wallet authority scopes Identity, Entitlement issue/revoke and CrossGame attestations',async()=>{
-   const resolver=createGamingEventScopeResolver420({pool:root,chainId:'420',gameId:G});
+   const resolver=createGamingEventScopeResolver420({pool:root,chainId:'420',gameId:G,contracts:C});
    const word=x=>x.slice(2).padStart(64,'0');
    const profileId=h('7'),entitlementId=h('9'),attestationId=h('b');
    const identityBlock={number:'1',hash:h('b'),parentHash:h('c'),logs:[{

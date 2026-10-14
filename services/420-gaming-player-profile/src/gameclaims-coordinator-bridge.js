@@ -35,9 +35,17 @@ export function createR054MigrationCoordinator420({operatorPool,claims,sourceFor
   return {...source,evidenceDigest:verified.evidenceDigest};
  };
  const verifyReceipt=async ({accountId,gameId,migrationId,expected})=>{
+  const source=await sourceForMigration(Object.freeze({accountId,gameId,migrationId,claimId:String(expected.claim_id)}));
+  if(!source||source.accountId!==accountId||source.gameId!==gameId||
+   source.migrationId!==migrationId||source.claimId!==String(expected.claim_id)||
+   source.sourceCommitment!==expected.source_commitment||
+   source.payloadHash!==expected.payload_hash||
+   source.targetGrower!==String(expected.target_grower)||
+   source.targetWallet!==expected.target_wallet||
+   !hex(source.guestStateCommitment))fail('r054-receipt-source-mismatch');
   const state=await claims.receiptState({
    claimId:String(expected.claim_id),growerId:String(expected.target_grower),
-   guestStateCommitment:expected.source_commitment,payloadHash:expected.payload_hash
+   guestStateCommitment:source.guestStateCommitment,payloadHash:expected.payload_hash
   });
   if(state.status==='NOT_APPLIED')return {state:'PENDING',txHash:null,blockHash:null,receiptDigest:null};
   if(state.status!=='APPLIED_UNFINALIZED')fail('r054-unrecognized-receipt');

@@ -10,7 +10,7 @@ export class SaveRetentionWorker420 {
  #pool;#auth;#storage;
  constructor({operatorPool,authorize,storage}={}){
   if(typeof operatorPool?.connect!=='function'||typeof authorize!=='function'||
-   typeof storage?.delete!=='function')fail('save-worker-invalid-configuration');
+   typeof storage?.delete!=='function'||typeof storage?.copy!=='function')fail('save-worker-invalid-configuration');
   this.#pool=operatorPool;this.#auth=authorize;this.#storage=storage;
  }
  async #tx(fn){
@@ -39,12 +39,16 @@ export class SaveRetentionWorker420 {
     WHERE account_id=$1 AND game_id=$2 AND deleted_at IS NULL AND expires_at>gaming_datastore.now_seconds()`,
     [accountId,gameId])).rows[0];
    if(active.n>=16)fail('save-backup-limit');
+   const copied=await this.#storage.copy({providerId:src.provider_id,objectRef:src.object_ref,integrity:src.state_hash});
+   if(!copied||!opaque(copied.providerId)||!opaque(copied.objectRef)||
+    copied.integrity!==src.state_hash||
+    (copied.providerId===src.provider_id&&copied.objectRef===src.object_ref))fail('save-backup-copy-invalid');
    const row=(await c.query(`INSERT INTO gaming_datastore.save_backups
     (account_id,game_id,backup_id,source_revision,provider_id,object_ref,
      state_hash,byte_length,schema_label,expires_at)
     VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
     ON CONFLICT(account_id,game_id,backup_id) DO NOTHING RETURNING *`,
-    [accountId,gameId,backupId,revision,src.provider_id,src.object_ref,src.state_hash,
+    [accountId,gameId,backupId,revision,copied.providerId,copied.objectRef,src.state_hash,
      src.byte_length,src.schema_label,expiresAt])).rows[0];
    if(!row)fail('save-backup-replayed');
    return {backupId,sourceRevision:revision,expiresAt};
@@ -94,4 +98,41 @@ export class SaveRetentionWorker420 {
    return due.length;
   });
  }
+ async drain({max=5}={}){
+  if(!Number.isInteger(max)||max<1||max>20)fail('save-invalid-limit');
+  const leased=await this.#tx(async c=>{
+   const rows=(await c.query(`SELECT * FROM gaming_datastore.save_deletion_jobs
+    WHERE status IN ('PENDING','RETRY') OR (status='LEASED' AND lease_until<=gaming_datastore.now_seconds())
+    ORDER BY created_at FOR UPDATE SKIP LOCKED LIMIT $1`,[max])).rows;
+   const selected=[];
+   for(const row of rows){
+    const token=randomUUID();
+    await c.query(`UPDATE gaming_datastore.save_deletion_jobs
+     SET status='LEASED',lease_token=$4,lease_until=gaming_datastore.now_seconds()+120,
+      attempts=attempts+1 WHERE account_id=$1 AND game_id=$2 AND job_id=$3`,
+     [row.account_id,row.game_id,row.job_id,token]);
+    selected.push({...row,token});
+   }
+   return selected;
+  });
+  const results=[];
+  for(const job of leased){
+   let deleted=false;
+   try{await this.#storage.delete({providerId:job.provider_id,objectRef:job.object_ref});deleted=true;}catch{}
+   const outcome=await this.#tx(async c=>{
+    const row=(await c.query(`UPDATE gaming_datastore.save_deletion_jobs
+     SET status=$5,lease_token=NULL,lease_until=NULL,
+      completed_at=CASE WHEN $5='DONE' THEN gaming_datastore.now_seconds() ELSE NULL END
+     WHERE account_id=$1 AND game_id=$2 AND job_id=$3 AND lease_token=$4
+     AND status='LEASED' RETURNING status`,
+     [job.account_id,job.game_id,job.job_id,job.token,
+      deleted?'DONE':job.attempts>=29?'RETRY':'RETRY'])).rows[0];
+    if(!row)fail('save-lease-lost');
+    return row.status;
+   });
+   results.push({jobId:job.job_id,status:outcome});
+  }
+  return results;
+ }
+
 }

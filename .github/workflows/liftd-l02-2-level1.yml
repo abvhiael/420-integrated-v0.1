@@ -3,6 +3,7 @@ on:
   pull_request:
     paths:
       - 'rideshare/src/auth.mjs'
+      - 'rideshare/web/**'
       - 'rideshare/src/rider-preferences.mjs'
       - 'rideshare/test/rider-preferences.test.mjs'
       - '.github/workflows/liftd-l02-2-level1.yml'
@@ -34,5 +35,6 @@ jobs:
       - name: Scoped rider preferences and retained web routing regressions
         run: |
           node --check rideshare/src/rider-preferences.mjs
+          node --check rideshare/src/auth.mjs
           node --test rideshare/test/rider-preferences.test.mjs rideshare/test/auth.test.mjs
           cd rideshare/web && npm run check

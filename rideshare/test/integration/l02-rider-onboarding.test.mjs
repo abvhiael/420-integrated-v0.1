@@ -38,7 +38,7 @@ test('trip assignment is server confirmed; forged and stale updates rejected',as
  const confirmed={id:'trip_a',riderId:'rider_a',driverId:null,vehicleId:null,routeRef:'route_a',state:'REQUESTED',revision:0};
  const controller=createTripExperienceController({session:rider,api:{read:async()=>confirmed}});
  assert.equal((await controller.load('trip_a')).state,'REQUESTED');
- await assert.rejects(controller.load('trip_other'),e=>e.code==='INVALID_OR_UNAUTHORIZED_TRIP');
+ await assert.rejects(controller.load('trip_other'),e=>e.code==='CROSS_TRIP_RESPONSE');
 });
 test('driver onboarding remains gated on independent vault and reviewer; revoked or expired proof rejects',async()=>{
  const row=new Map();const store={read:async id=>row.get(id),writeCAS:async(id,rev,key,v)=>{if((row.get(id)?.revision??0)!==rev)return false;row.set(id,v);return true;}};

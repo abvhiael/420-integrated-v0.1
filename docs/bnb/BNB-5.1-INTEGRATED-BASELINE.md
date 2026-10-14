@@ -1,6 +1,6 @@
 # BNB-5.1 — Integrated baseline and runtime ownership
 
-**Disposition: IMPLEMENTED / LEVEL 1 QUALIFICATION PENDING. No completion certificate yet.**
+**Disposition: REPOSITORY LEVEL 1 PASS. [Durable certificate](BNB-5.1-LEVEL1-CERTIFICATE.md).**
 
 Canonical requirement: Verify Phase 4 integration and certificate provenance. Inventory APIs, migrations, workers, consumers, feature flags and CI. Map each remaining repository task to its existing external acceptance gate.
 
@@ -84,8 +84,8 @@ Nine retained app workflows `bnb-1-1.yml` through `bnb-1-9.yml` were inventoried
 | Runtime/API/migration/worker/consumer/flags/CI inventory | IMPLEMENTED; verifier independently checks pinned objects/routes |
 | Remaining task/gate map | IMPLEMENTED, all mapped IDs exist and no gate removed |
 | New verifier syntax | PASS locally; syntax alone is not app acceptance |
-| Exact-SHA BnB Runtime Slice, including new verifier | PENDING / not PASS |
-| Durable final BNB-5.1 Level 1 certificate | PENDING terminal success |
+| Exact-SHA BnB Runtime Slice, including new verifier | PASS, run 38600578364 / job 115978476675; 308 app tests plus 8 repeated operations executions |
+| Durable final BNB-5.1 Level 1 certificate | [COMMITTED](BNB-5.1-LEVEL1-CERTIFICATE.md); exact implementation 7652862c9047f74df69fc1a8cb5d93a1339e1617 |
 
 Ordinary Level 1 only: Level 2 intentionally deferred to BNB-5.7/5.13; Level 3 to BNB-5.14. No full Solidity/Genesis/Integrated/Geth/global Docs inventory is required or intentionally dispatched for this baseline. Historical Phase 4 results are not presented as new tests.
 

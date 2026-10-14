@@ -1,7 +1,7 @@
 {
   "schema": "420.bnb.phase5.integrated-baseline.v1",
   "step": "BNB-5.1",
-  "status": "BASELINE_RECONCILED_LEVEL1_PENDING",
+  "status": "REPOSITORY_LEVEL1_PASS",
   "source_sha": "3f2cf64897e96c4f16213bcaf93564db72a174c9",
   "qualified_executable_sha": "7ccc76fe613ba4fdc162d459827f5ec95fae3385",
   "main_sha": "3f2cf64897e96c4f16213bcaf93564db72a174c9",
@@ -737,7 +737,7 @@
     "migration_number_sequence": "PASS",
     "all_mapped_gate_ids_exist": "PASS",
     "integrated_baseline": "PASS: merged PR #631; exact tree matches certified head",
-    "phase5_level1_ci": "PENDING; not PASS"
+    "phase5_level1_ci": "PASS"
   },
   "limitations": [
     "Route extraction is revalidated by AST in Level 1 CI",
@@ -748,5 +748,13 @@
   "phase4_merge_sha": "3f2cf64897e96c4f16213bcaf93564db72a174c9",
   "phase4_certificate_head": "3a7cdf175840e11c337e36d1321490929b5634f3",
   "phase4_previous_main": "959288c8bd33b6da0325b6a5d060e00e7bcf0e48",
-  "phase4_tree_equivalence": "GitHub compare 3a7cdf175840e11c337e36d1321490929b5634f3..3f2cf64897e96c4f16213bcaf93564db72a174c9: zero changed files"
+  "phase4_tree_equivalence": "GitHub compare 3a7cdf175840e11c337e36d1321490929b5634f3..3f2cf64897e96c4f16213bcaf93564db72a174c9: zero changed files",
+  "level1_evidence": {
+    "implementation_sha": "7652862c9047f74df69fc1a8cb5d93a1339e1617",
+    "run_id": 38600578364,
+    "job_id": 115978476675,
+    "app_tests_passed": 308,
+    "separate_operations_test_executions": 8,
+    "certificate": "docs/bnb/BNB-5.1-LEVEL1-CERTIFICATE.md"
+  }
 }

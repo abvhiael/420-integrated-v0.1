@@ -1,4 +1,5 @@
-import {decodeGamingEvent420,gamingEventContract420,GAMING_EVENT_TOPICS420} from './gaming-event-abi.js';
+import {randomUUID} from 'node:crypto';
+import {decodeGamingEvent420,gamingEventContract420} from './gaming-event-abi.js';
 import {eventIngestionDigest} from './event-ingestion-migrations.js';
 const fail=x=>{throw Object.assign(new Error(x),{code:x});};
 const h=x=>typeof x==='string'&&/^0x[0-9a-f]{64}$/.test(x)&&x!=='0x'+'0'.repeat(64);
@@ -74,7 +75,12 @@ export class DurableGamingEventIndexer420 {
    }
    const stored=(await c.query(`INSERT INTO gaming_datastore.event_blocks
      (chain_id,contract,block_number,block_hash,parent_hash)
-     VALUES($1,$2,$3,$4,$5) ON CONFLICT DO NOTHING RETURNING block_hash`,
+     VALUES($1,$2,$3,$4,$5)
+     ON CONFLICT(chain_id,contract,block_hash) DO UPDATE SET status='PENDING'
+     WHERE gaming_datastore.event_blocks.status='ORPHANED'
+       AND gaming_datastore.event_blocks.block_number=EXCLUDED.block_number
+       AND gaming_datastore.event_blocks.parent_hash=EXCLUDED.parent_hash
+     RETURNING block_hash`,
      [this.#chain,contract,startBlock,block.hash,block.parentHash])).rows[0];
    if(!stored)fail('events-block-replay-or-conflict');
    for(const {log,decoded,scope} of normalized){
@@ -87,7 +93,15 @@ export class DurableGamingEventIndexer420 {
      (chain_id,contract,block_number,block_hash,parent_hash,tx_hash,tx_index,log_index,topic0,event_kind,
       claim_id,game_id,grower_id,game_profile_id,target_wallet,payload)
      VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16::jsonb)
-     ON CONFLICT DO NOTHING RETURNING block_hash,log_index`,vals)).rows[0];
+     ON CONFLICT(chain_id,contract,block_hash,log_index) DO UPDATE SET status='PENDING'
+     WHERE gaming_datastore.event_logs.status='ORPHANED'
+       AND gaming_datastore.event_logs.tx_hash=EXCLUDED.tx_hash
+       AND gaming_datastore.event_logs.tx_index=EXCLUDED.tx_index
+       AND gaming_datastore.event_logs.topic0=EXCLUDED.topic0
+       AND gaming_datastore.event_logs.event_kind=EXCLUDED.event_kind
+       AND gaming_datastore.event_logs.payload=EXCLUDED.payload
+       AND gaming_datastore.event_logs.parent_hash=EXCLUDED.parent_hash
+     RETURNING block_hash,log_index`,vals)).rows[0];
     if(!row)fail('events-replay-or-conflict');
     if(scope)await c.query(`INSERT INTO gaming_datastore.event_scopes
       (chain_id,contract,block_hash,log_index,account_id,game_id)
@@ -128,6 +142,10 @@ export class DurableGamingEventIndexer420 {
    await c.query(`UPDATE gaming_datastore.event_blocks SET status='ORPHANED'
     WHERE chain_id=$1 AND contract=$2 AND block_number>$3 AND status='PENDING'`,
     [this.#chain,contract,ancestorNumber]);
+   await c.query(`INSERT INTO gaming_datastore.event_reorg_history
+     (chain_id,contract,recovery_id,old_next_block,previous_anchor,ancestor_number,ancestor_hash)
+     VALUES($1,$2,$3,$4,$5,$6,$7)`,
+     [this.#chain,contract,randomUUID(),cursor.next_block,cursor.anchor_hash,ancestorNumber,ancestorHash]);
    await c.query(`UPDATE gaming_datastore.event_cursors SET next_block=$3,anchor_hash=$4,
       updated_at=gaming_datastore.now_seconds() WHERE chain_id=$1 AND contract=$2`,
       [this.#chain,contract,String(BigInt(ancestorNumber)+1n),ancestorHash]);

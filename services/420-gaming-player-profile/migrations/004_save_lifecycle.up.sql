@@ -38,10 +38,14 @@ ALTER TABLE gaming_datastore.save_backups FORCE ROW LEVEL SECURITY;
 ALTER TABLE gaming_datastore.save_deletion_jobs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE gaming_datastore.save_deletion_jobs FORCE ROW LEVEL SECURITY;
 CREATE POLICY backup_scope ON gaming_datastore.save_backups
- USING (EXISTS(SELECT 1 FROM gaming_datastore.runtime_scopes s WHERE s.role_name=current_user
+ FOR SELECT USING (current_user='gaming_datastore_migrator' OR EXISTS(SELECT 1 FROM gaming_datastore.runtime_scopes s WHERE s.role_name=current_user
  AND s.account_id=save_backups.account_id AND s.game_id=save_backups.game_id));
+CREATE POLICY backup_migrator_mutation ON gaming_datastore.save_backups FOR ALL
+ USING (current_user='gaming_datastore_migrator') WITH CHECK(current_user='gaming_datastore_migrator');
 CREATE POLICY deletion_scope ON gaming_datastore.save_deletion_jobs
- USING (EXISTS(SELECT 1 FROM gaming_datastore.runtime_scopes s WHERE s.role_name=current_user
+ FOR SELECT USING (current_user='gaming_datastore_migrator' OR EXISTS(SELECT 1 FROM gaming_datastore.runtime_scopes s WHERE s.role_name=current_user
  AND s.account_id=save_deletion_jobs.account_id AND s.game_id=save_deletion_jobs.game_id));
+CREATE POLICY deletion_migrator_mutation ON gaming_datastore.save_deletion_jobs FOR ALL
+ USING (current_user='gaming_datastore_migrator') WITH CHECK(current_user='gaming_datastore_migrator');
 GRANT SELECT ON gaming_datastore.save_backups,gaming_datastore.save_deletion_jobs TO gaming_datastore_runtime;
 GRANT SELECT,INSERT,UPDATE ON gaming_datastore.save_backups,gaming_datastore.save_deletion_jobs TO gaming_datastore_migrator;

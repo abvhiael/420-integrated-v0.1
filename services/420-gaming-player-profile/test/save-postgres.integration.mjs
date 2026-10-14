@@ -1,6 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {Pool} from 'pg';
+import {mkdtemp,rm} from 'node:fs/promises';
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
+import {randomBytes} from 'node:crypto';
+import {CloudSaveLifecycle420} from '../src/cloud-save-lifecycle.js';
+import {EncryptedLocalSaveProvider420} from '../src/encrypted-local-save-provider.js';
 import {bootstrapDatastoreRoles,migrateDatastore} from '../src/schema-migrations.js';
 import {migrateWalletLinks} from '../src/wallet-link-migrations.js';
 import {migrateMigrationRuntime} from '../src/migration-runtime-migrations.js';
@@ -108,6 +114,30 @@ test('R05.5 actual PostgreSQL schema, scoped backup and deletion lifecycle',asyn
    const complete=await worker.drain();assert.equal(complete.length,1);
    assert.equal(complete[0].status,'DONE');
    assert.equal((await actor.query('SELECT revision FROM gaming_datastore.save_redactions')).rows.length,1);
+  });
+  await t.test('real encrypted provider + PostgreSQL survives source delete and independent backup restore',async()=>{
+   const directory=await mkdtemp(join(tmpdir(),'r055-pg-provider-'));
+   try{
+    const provider=new EncryptedLocalSaveProvider420({directory,encryptionKey:randomBytes(32)});
+    const cloud=new CloudSaveLifecycle420({repository:repo,provider,schemaVersion:7});
+    const local=new SaveRetentionWorker420({operatorPool:root,authorize:auth,storage:provider});
+    const bytes=new TextEncoder().encode(JSON.stringify({schemaVersion:7,rulesetId:R,state:{harvests:12}}));
+    const published=await cloud.publish({expectedRevision:'1',schemaLabel:'hc-schema-7',consentId:'save-consent',bytes});
+    assert.equal(published.revision,'2');
+    assert.equal((await cloud.read()).local.state.harvests,12);
+    await local.backup({...scope,revision:'2',backupId:'bk-independent',
+     expiresAt:'18446744073709551615',authority:'signed-session'});
+    const deletion=await local.requestSaveDelete({...scope,revision:'2',authority:'signed-session'});
+    assert.equal(deletion.physicalDelete,true);
+    assert.equal((await local.drain())[0].status,'DONE');
+    assert.equal(await repo.transaction(tx=>tx.saveReference('2')),null);
+    const restored=await cloud.restoreBackup({backupId:'bk-independent',expectedHead:'2',
+     schemaLabel:'hc-schema-7',consentId:'save-consent'});
+    assert.equal(restored.revision,'3');
+    assert.equal(restored.sourceRevision,'2');
+    assert.equal((await cloud.read()).local.state.harvests,12);
+    assert.equal(await repo.transaction(tx=>tx.saveReference('2')),null,'redacted source cannot reappear');
+   }finally{await rm(directory,{recursive:true,force:true});}
   });
   await t.test('digest drift aborts changes before mutable updates',async()=>{
    await root.query("UPDATE gaming_datastore.save_lifecycle_schema SET digest=repeat('0',64)");

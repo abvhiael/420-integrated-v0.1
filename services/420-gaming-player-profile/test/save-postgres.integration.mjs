@@ -21,7 +21,7 @@ const storage={
   return {providerId:'copy-provider',objectRef:name,integrity};
  },
  delete:async({providerId,objectRef})=>{
-  assert.equal(providerId,'copy-provider');objects.delete(objectRef);
+  assert.ok(providerId==='copy-provider'||providerId==='source');objects.delete(objectRef);
  }
 };
 test('R05.5 actual PostgreSQL schema, scoped backup and deletion lifecycle',async t=>{
@@ -80,6 +80,19 @@ test('R05.5 actual PostgreSQL schema, scoped backup and deletion lifecycle',asyn
    assert.equal(objects.has('copy1'),false);
    assert.equal((await actor.query('SELECT deleted_at FROM gaming_datastore.save_backups')).rows[0].deleted_at!==null,true);
    assert.equal((await actor.query("SELECT status FROM gaming_datastore.save_deletion_jobs")).rows[0].status,'DONE');
+  });
+  await t.test('primary save deletion revokes provider locator and physically expires its unshared blob',async()=>{
+   await assert.rejects(()=>worker.requestSaveDelete({...scope,revision:'1',authority:'forged'}),/save-authority-denied/);
+   const before=await repo.transaction(tx=>tx.saveReference('1'));assert.equal(before.provider_id,'source');
+   const deletion=await worker.requestSaveDelete({...scope,revision:'1',authority:'signed-session'});
+   assert.equal(deletion.physicalDelete,true);
+   assert.equal(await repo.transaction(tx=>tx.saveReference('1')),null);
+   assert.equal(await repo.transaction(tx=>tx.saveReference()),null);
+   const twice=await worker.requestSaveDelete({...scope,revision:'1',authority:'signed-session'});
+   assert.equal(twice.duplicate,true);
+   const complete=await worker.drain();assert.equal(complete.length,1);
+   assert.equal(complete[0].status,'DONE');
+   assert.equal((await actor.query('SELECT revision FROM gaming_datastore.save_redactions')).rows.length,1);
   });
   await t.test('digest drift aborts changes before mutable updates',async()=>{
    await root.query("UPDATE gaming_datastore.save_lifecycle_schema SET digest=repeat('0',64)");

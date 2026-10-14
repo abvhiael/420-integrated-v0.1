@@ -130,3 +130,17 @@ R05.5 repository-side saves must use authenticated account/game-scoped DB refere
 | HC-R05.5-T05 | Independent security/privacy/legal operator signoff, data-subject export/delete acceptance, monitoring, incident rollback and production-equivalent deployment gate |
 
 All T01–T05 remain OPEN. No local encrypted provider fixture or PostgreSQL simulation can stand in for live cloud provider acceptance. Full R05 Level 3 qualification and all other roadmap exit criteria remain separate; testnet transfer changes only *where* external evidence is collected.
+
+
+## R05.6 — deployed HC/Gaming event-stream acceptance (OPEN / TESTNET-GATED)
+
+Repository-side R05.6 owns exact emitted Solidity topic decoding, direct pinned RPC read semantics, durable PostgreSQL block headers and cursors, transactionally deduplicated events, bounded verified ancestor rollback, finality-gated projections and scoped authenticated query APIs. These do **not** themselves prove official-testnet chain finality or a deployment configuration. The following independent external acceptance remains OPEN:
+
+| Gate | Acceptance requirement | Evidence |
+|---|---|---|
+| HC-R05.6-T01 | Production-equivalent official chain, frozen Genesis addresses/bytecode hashes for GameClaims420, HighCountryGamingBridge420 and HighCountryMigration420; real finalized and historical RPC providers | Signed deployment manifest, codehash and provider-identity proofs, deploy transactions |
+| HC-R05.6-T02 | End-to-end actual deployed ISSUE / CONSUME / BIND / MARK-APPLIED and dependent entitlement events; indexer catch-up, contract replacement, handler limits and schema/topic checks against official chain | Actual signed wallet and operator tx/receipt/log hashes, contract ABIs, matched SQL cursor and projection records |
+| HC-R05.6-T03 | Independently witnessed short/deep reorg, empty-block rollback, stale/forked RPC, discrepant nodes, finalized conflict alarm, bounded failover/retry and restart under real chain traffic | Immutable incident trace, canonical chain header witnesses, safe rollback/quarantine, no wrong-account or duplicate user event |
+| HC-R05.6-T04 | Live identity revocation, multiple instances/least-privilege Postgres, rotation of RPC/operator credentials, account privacy and finality-gated consumer acceptance; audit/monitoring/signoff | Independent security and privacy approval, account/client contract conformance, operator release gate |
+
+**Status:** all T01–T04 NOT WITNESSED/NOT RUN. These are additive to R05.7's independently canonical high-risk state verification and R05.8's production SDK transport ownership. Never treat a PostgreSQL fixture, disposable Anvil, or an injected verifier returning `true` as these independent public-testnet acceptances.

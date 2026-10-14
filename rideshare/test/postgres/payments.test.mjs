@@ -114,3 +114,22 @@ test('operation finality reorganization holds its budget until independent recov
   controls.operationStatus='FINALIZED';controls.operationEventPatch={eventId:hex('recovered-operation'),receiptHash:hex('recovered-receipt')};await app.reconcileOperation('payment_op_reorg',op);
   await assert.rejects(()=>app.reserve('payment_op_reorg','driver',1),e=>e.code==='PAYOUT_EXCEEDS_ENTITLEMENT');
 });
+
+test('riders cannot request driver projections or reserve/reconcile non-refund outflows',async()=>{
+  await app.create('payment_scope');const i=await app.prepareIntent('payment_scope');await app.authorize('payment_scope',i);await app.complete('payment_scope');await app.capture('payment_scope');
+  await assert.rejects(()=>app.paymentService.plan(app.rider('payment_scope'),'payment_scope',{commandId:app.cid()}),e=>e.code==='PAY_SCOPE_DENIED');
+  await assert.rejects(()=>app.paymentService.reserve(app.rider('payment_scope'),'payment_scope',{commandId:app.cid(),kind:'driver',amountCents:1}),e=>e.code==='PAY_SCOPE_DENIED');
+  const op=await app.reserve('payment_scope','driver',1);
+  await assert.rejects(()=>app.paymentService.reconcileOperation(app.rider('payment_scope'),'payment_scope',{commandId:app.cid(),operationId:op.operationId}),e=>e.code==='PAY_SCOPE_DENIED');
+});
+test('refund after collected platform payout requires finalized replacement funding; refunded registry state remains canonical',async()=>{
+  await app.create('payment_paid_refund');const i=await app.prepareIntent('payment_paid_refund');await app.authorize('payment_paid_refund',i);await app.complete('payment_paid_refund');await app.capture('payment_paid_refund');const p=await app.plan('payment_paid_refund');
+  for(const [kind,amount] of [['driver',p.driverCents],['platform',p.platformCents]])await app.reconcileOperation('payment_paid_refund',await app.reserve('payment_paid_refund',kind,amount));
+  const refund=await app.reserve('payment_paid_refund','refund',100);assert.ok((await pool.query("SELECT 1 FROM liftd.settlement_funding WHERE trip_id='payment_paid_refund'")).rowCount);await app.reconcileOperation('payment_paid_refund',refund);
+  controls.payRevision=2;controls.eventPatch={type:'REFUND_STATE',paymentStatus:7,refundedUnits:refund.amountUnits};assert.equal((await app.capture('payment_paid_refund')).status,'CAPTURED');
+  controls.payRevision=3;controls.eventPatch.refundedUnits='1';await assert.rejects(()=>app.capture('payment_paid_refund'),e=>e.code==='REFUND_AUTHORITY_REQUIRED');
+});
+test('accepted actual meter cannot be silently revised by a fresh signed projection',async()=>{
+  await app.create('payment_meter_immutable');const i=await app.prepareIntent('payment_meter_immutable');await app.authorize('payment_meter_immutable',i);await app.complete('payment_meter_immutable');await app.capture('payment_meter_immutable');await app.plan('payment_meter_immutable');
+  controls.meterPatch={engagedMeters:1};await assert.rejects(()=>app.plan('payment_meter_immutable'),e=>e.code==='METER_EQUIVOCATION');
+});

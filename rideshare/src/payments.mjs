@@ -44,7 +44,7 @@ export function createPaymentService({pool,authenticator,authority,clock=()=>Mat
   const eventBinding=row=>({intentId:row.intent_id,intentHash:row.intent_hash,intent:row.payload});
   async function current(client,ctx,row,guard) {
     const e=await authority.event(ctx.trip.riderId,eventBinding(row));
-    record(e,['eventId','authorityRevision','type','receiptHash','blockHash','blockNumber','canonical','finality','paymentStatus','paymentId','invoiceId','payer','merchant','asset','amountUnits','tipUnits','registry','recoveryRef','submittedAt','chainId']);
+    record(e,['eventId','authorityRevision','type','receiptHash','blockHash','blockNumber','canonical','finality','paymentStatus','paymentId','invoiceId','payer','merchant','asset','amountUnits','tipUnits','registry','recoveryRef','submittedAt','chainId','refundedUnits']);
     bytes32(e.eventId);bytes32(e.receiptHash);bytes32(e.blockHash);
     const i=row.payload;
     if(e.chainId!==i.chainId||e.paymentId!==i.paymentId||e.invoiceId!==i.invoiceId||e.payer!==i.payer||e.merchant!==i.merchant||e.asset!==i.asset||e.amountUnits!==i.amountUnits||e.tipUnits!==i.tipUnits||e.registry!==authority.config.paymentRegistry||!Number.isSafeInteger(e.blockNumber)||e.blockNumber<0||!Number.isSafeInteger(e.authorityRevision)||e.authorityRevision<1)fail('PAY_RECEIPT_BINDING_MISMATCH',403);
@@ -55,8 +55,13 @@ export function createPaymentService({pool,authenticator,authority,clock=()=>Mat
     if(e.type==='REORG'||e.type==='FAILED') {
       if((e.type==='REORG'&&e.canonical!==false)||(e.type==='FAILED'&&(e.canonical!==true||e.paymentStatus!==PAYMENT_STATUSES.FAILED)))fail('INVALID_PAY_RECOVERY',403);
       status='RECOVERY_REQUIRED';
-    }else if(e.type==='CAPTURE') {
-      if(e.canonical!==true||!['FINALIZED','SETTLED'].includes(e.finality)||![PAYMENT_STATUSES.FINALIZED,PAYMENT_STATUSES.SETTLED].includes(e.paymentStatus))fail('PAY_FINALITY_REQUIRED',403);
+    }else if(e.type==='CAPTURE'||e.type==='REFUND_STATE') {
+      const refunded=uint(e.refundedUnits);
+      if(e.type==='REFUND_STATE'){
+        const confirmed=(await client.query("SELECT amount_units FROM liftd.pay_operations WHERE trip_id=$1 AND kind='refund' AND status='FINALIZED'",[ctx.trip.id])).rows.reduce((n,r)=>n+uint(r.amount_units),0n);
+        if(!row.captured||refunded===0n||refunded!==confirmed||refunded>uint(i.amountUnits)||e.paymentStatus!==(refunded===uint(i.amountUnits)?PAYMENT_STATUSES.REFUNDED:PAYMENT_STATUSES.PARTIALLY_REFUNDED))fail('REFUND_AUTHORITY_REQUIRED',403);
+      }else if(refunded!==0n)fail('REFUND_AUTHORITY_REQUIRED',403);
+      if(e.canonical!==true||!['FINALIZED','SETTLED'].includes(e.finality)||(e.type==='CAPTURE'&&![PAYMENT_STATUSES.FINALIZED,PAYMENT_STATUSES.SETTLED].includes(e.paymentStatus)))fail('PAY_FINALITY_REQUIRED',403);
       const consent=(await client.query('SELECT payload FROM liftd.wallet_consents WHERE intent_id=$1',[row.intent_id])).rows[0]?.payload;
       if(!consent)fail('WALLET_CONSENT_REQUIRED',403);
       if(!Number.isSafeInteger(e.submittedAt)||e.submittedAt<consent.acceptedAt||e.submittedAt>=Math.min(consent.expiresAt,i.expiresAt))fail('LATE_PAY_EXECUTION',403);
@@ -83,6 +88,9 @@ export function createPaymentService({pool,authenticator,authority,clock=()=>Mat
       const account=(await client.query('SELECT account_id FROM liftd.driver_availability WHERE driver_id=$1',[ctx.trip.driverId])).rows[0]?.account_id;
       if(meter.accountId!==account||meter.engagedSeconds!==ended-assigned||meter.onlineSeconds<meter.engagedSeconds||meter.periodStart>assigned||meter.periodEnd<ended||!id(meter.periodId)||!id(meter.actualRef))fail('INVALID_ENGAGEMENT',403);
     }
+    const meterDigest=digest(meter);
+    const first=(await client.query('SELECT payload FROM liftd.payout_projections WHERE trip_id=$1 ORDER BY id ASC LIMIT 1',[ctx.trip.id])).rows[0]?.payload;
+    if(first&&first.meterDigest!==meterDigest)fail('METER_EQUIVOCATION',403);
     const rules=await authority.rules(ctx.trip.riderId,{tripId:ctx.trip.id,quoteHash:ctx.quote.quoteHash,periodId:meter.periodId,assignedAt:assigned,endedAt:ended});
     const refunds={fare:0,taxes:0,passThrough:0,tips:0};
     for(const r of (await client.query("SELECT payload FROM liftd.pay_operations WHERE trip_id=$1 AND kind='refund' AND status IN ('FINALIZED','RECOVERY_REQUIRED')",[ctx.trip.id])).rows)for(const k of Object.keys(refunds))refunds[k]=money(BigInt(refunds[k])+BigInt(r.payload.refunds[k]));
@@ -90,7 +98,7 @@ export function createPaymentService({pool,authenticator,authority,clock=()=>Mat
     const q=ctx.quote.amounts;
     const sum=list=>money(list.reduce((n,l)=>n+BigInt(l.amountCents),0n));
     const plan=compensation({fareCents:q.transportationCents,taxesCents:sum(q.taxes),passThroughCents:sum(q.passThrough),tipCents:row.payload.tipCents,refunds,meter:{...meter,...rules},completed:ctx.trip.state==='COMPLETED',captured:row.captured});
-    const payload={...plan,tripId:ctx.trip.id,quoteHash:ctx.quote.quoteHash,intentId:row.intent_id,paymentId:row.payload.paymentId,authorityRevision:Number(row.authority_revision),driverId:ctx.trip.driverId,driverAccountId:meter.accountId,refunds};
+    const payload={...plan,meterDigest,tripId:ctx.trip.id,quoteHash:ctx.quote.quoteHash,intentId:row.intent_id,paymentId:row.payload.paymentId,authorityRevision:Number(row.authority_revision),driverId:ctx.trip.driverId,driverAccountId:meter.accountId,refunds};
     const planHash=digest(payload);await guard();
     await client.query('INSERT INTO liftd.payout_projections(plan_hash,trip_id,payload) VALUES($1,$2,$3) ON CONFLICT(plan_hash) DO NOTHING',[planHash,ctx.trip.id,payload]);
     return {...payload,planHash};
@@ -139,6 +147,7 @@ export function createPaymentService({pool,authenticator,authority,clock=()=>Mat
     },
     async plan(token,tripId,input) {
       record(input,['commandId']);return tx(token,tripId,input.commandId,'pay.reconcile',{purpose:'plan'},async(client,ctx,p,guard)=>{
+        if(p.role!=='operator')fail('PAY_SCOPE_DENIED',403);
         let row=await getIntent(client,tripId);if(row.status==='RECOVERY_REQUIRED')fail('PAY_RECOVERY_REQUIRED');
         row=await current(client,ctx,row,guard);if(row.status==='RECOVERY_REQUIRED')fail('PAY_RECOVERY_REQUIRED');return buildPlan(client,ctx,row,guard);
       });
@@ -147,6 +156,7 @@ export function createPaymentService({pool,authenticator,authority,clock=()=>Mat
       record(input,['commandId','kind','amountCents']);money(input.amountCents);
       if(!['refund','driver','platform','passThrough','development'].includes(input.kind)||input.amountCents===0)fail('INVALID_REQUEST',400);
       return tx(token,tripId,input.commandId,'pay.reconcile',{kind:input.kind,amountCents:input.amountCents},async(client,ctx,p,guard)=>{
+        if(input.kind!=='refund'&&p.role!=='operator')fail('PAY_SCOPE_DENIED',403);
         let row=await current(client,ctx,await getIntent(client,tripId),guard);if(row.status!=='CAPTURED')fail('PAY_FINALITY_REQUIRED');
         if((await client.query("SELECT 1 FROM liftd.pay_operations WHERE trip_id=$1 AND status='RECOVERY_REQUIRED'",[tripId])).rowCount)fail('PAY_RECOVERY_REQUIRED');
         if(input.kind==='development')fail('CANONICAL_DEVELOPMENT_POLICY_INCOMPATIBLE',403);
@@ -178,7 +188,7 @@ export function createPaymentService({pool,authenticator,authority,clock=()=>Mat
         const usedUnits=existing.reduce((n,o)=>n+uint(o.amount_units),0n);
         let budget=uint(row.payload.amountUnits);
         for(const f of (await client.query('SELECT payload FROM liftd.settlement_funding WHERE trip_id=$1',[tripId])).rows)budget+=uint(f.payload.amountUnits);
-        if(plan&&plan.platformFundingCents>0&&budget<usedUnits+uint(op.amountUnits)) {
+        if(plan&&budget<usedUnits+uint(op.amountUnits)) {
           const past=kind=>existing.filter(o=>o.kind===kind).reduce((n,o)=>n+BigInt(o.amount_cents),0n);
           const excess=(paid,owed)=>paid>BigInt(owed)?paid-BigInt(owed):0n;
           const requiredCents=money(BigInt(plan.platformFundingCents)+excess(past('platform'),plan.platformCents)+excess(past('passThrough'),plan.passThroughCents));
@@ -199,7 +209,7 @@ export function createPaymentService({pool,authenticator,authority,clock=()=>Mat
       record(input,['commandId','operationId']);if(!id(input.operationId))fail('INVALID_REQUEST',400);
       return tx(token,tripId,input.commandId,'pay.reconcile',{operationId:input.operationId},async(client,ctx,p,guard)=>{
         const row=await getIntent(client,tripId);if(row.status==='RECOVERY_REQUIRED')fail('PAY_RECOVERY_REQUIRED');
-        const old=(await client.query('SELECT * FROM liftd.pay_operations WHERE operation_id=$1 AND trip_id=$2 FOR UPDATE',[input.operationId,tripId])).rows[0];if(!old)fail('PAY_OPERATION_REQUIRED');
+        const old=(await client.query('SELECT * FROM liftd.pay_operations WHERE operation_id=$1 AND trip_id=$2 FOR UPDATE',[input.operationId,tripId])).rows[0];if(!old)fail('PAY_OPERATION_REQUIRED');if(old.kind!=='refund'&&p.role!=='operator')fail('PAY_SCOPE_DENIED',403);
         const event=await authority.operation(ctx.trip.riderId,{...eventBinding(row),reconcile:true,operation:old.payload});
         record(event,['eventId','receiptHash','payOperationId','kind','recipient','amountCents','amountUnits','status','canonical','finality','paymentStatus','asset','chainId','executor']);bytes32(event.eventId);bytes32(event.receiptHash);
         if(event.asset!==row.payload.asset||event.chainId!==row.payload.chainId||event.executor!==authority.config[old.kind==='refund'?'refundManager':'disbursementRegistry']||event.payOperationId!==old.pay_operation_id||event.kind!==old.kind||event.recipient!==old.recipient||event.amountCents!==Number(old.amount_cents)||event.amountUnits!==old.amount_units)fail('PAY_OPERATION_BINDING_MISMATCH',403);

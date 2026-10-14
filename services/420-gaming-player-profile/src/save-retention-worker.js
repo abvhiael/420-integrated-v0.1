@@ -84,6 +84,39 @@ export class SaveRetentionWorker420 {
    return {backupId,duplicate:false,physicalDelete:true};
   });
  }
+ async requestSaveDelete({accountId,gameId,revision,authority,reason='USER_DELETE'}){
+  if(!opaque(accountId)||!hash(gameId)||!uint(revision)||revision==='0'||
+    !['USER_DELETE','CONSENT_REVOKED'].includes(reason))fail('save-invalid-deletion');
+  if(await this.#auth({authority,accountId,gameId,purpose:'SAVE_DELETE'})!==true)
+    fail('save-authority-denied');
+  return this.#tx(async c=>{
+   const ref=(await c.query(`SELECT * FROM gaming_datastore.save_references
+     WHERE account_id=$1 AND game_id=$2 AND revision=$3 FOR SHARE`,
+     [accountId,gameId,revision])).rows[0];
+   if(!ref)fail('save-source-missing');
+   const redacted=(await c.query(`INSERT INTO gaming_datastore.save_redactions
+     (account_id,game_id,revision,reason) VALUES($1,$2,$3,$4)
+     ON CONFLICT(account_id,game_id,revision) DO NOTHING RETURNING revision`,
+     [accountId,gameId,revision,reason])).rows[0];
+   if(!redacted)return {revision,duplicate:true};
+   // A single backing blob may be referenced by other accounts/revisions/backups.
+   // Never physically delete any object that remains visible in a live reference.
+   const still=(await c.query(`SELECT 1 FROM gaming_datastore.save_references r
+      WHERE r.provider_id=$1 AND r.object_ref=$2 AND NOT EXISTS
+       (SELECT 1 FROM gaming_datastore.save_redactions d WHERE
+        d.account_id=r.account_id AND d.game_id=r.game_id AND d.revision=r.revision)
+      LIMIT 1`,[ref.provider_id,ref.object_ref])).rows;
+   const backups=(await c.query(`SELECT 1 FROM gaming_datastore.save_backups
+      WHERE provider_id=$1 AND object_ref=$2 AND deleted_at IS NULL LIMIT 1`,
+      [ref.provider_id,ref.object_ref])).rows;
+   if(!still.length&&!backups.length)
+    await c.query(`INSERT INTO gaming_datastore.save_deletion_jobs
+      (account_id,game_id,job_id,provider_id,object_ref,reason)
+      VALUES($1,$2,$3,$4,$5,$6) ON CONFLICT DO NOTHING`,
+      [accountId,gameId,randomUUID(),ref.provider_id,ref.object_ref,reason]);
+   return {revision,duplicate:false,physicalDelete:!still.length&&!backups.length};
+  });
+ }
  async expire({limit=10}={}){
   if(!Number.isInteger(limit)||limit<1||limit>100)fail('save-invalid-limit');
   return this.#tx(async c=>{

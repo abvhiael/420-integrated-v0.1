@@ -1,7 +1,7 @@
 // L02.2: authoritative, scoped rider preference service. Storage adapter must be durable.
 const FIELDS = Object.freeze(['largeText','reducedMotion','screenReaderHints','contactMethod','tripNotifications','marketingConsent','locationHistoryConsent']);
 const DEFAULTS = Object.freeze({largeText:false,reducedMotion:false,screenReaderHints:false,contactMethod:'none',tripNotifications:false,marketingConsent:false,locationHistoryConsent:false});
-export class PreferenceError extends Error { constructor(code,status=400){ super(code); this.code=code; this.status=status; } }
+export class PreferenceError extends Error { constructor(code,status=400){ super(code); this.name='PreferenceError'; this.code=code; this.status=status; } }
 const fail=(code,status)=>{throw new PreferenceError(code,status);};
 const validAccount=x=>typeof x==='string'&&/^[A-Za-z0-9_-]{1,128}$/.test(x);
 const isRecord=x=>x!==null&&typeof x==='object'&&[null,Object.prototype].includes(Object.getPrototypeOf(x));

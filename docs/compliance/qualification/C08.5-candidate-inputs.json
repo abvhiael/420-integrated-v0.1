@@ -4,7 +4,7 @@
   "status": "CANDIDATE_PENDING_EXACT_SHA_LEVEL3",
   "main_sha": "3f2cf64897e96c4f16213bcaf93564db72a174c9",
   "merge_base_sha": "3f2cf64897e96c4f16213bcaf93564db72a174c9",
-  "previous_candidate_sha": "b4a108e545fb76c7ea5127f12f1e7f9a84a32a9d",
+  "previous_candidate_sha": "02dad774ee4a76ea1e17c8d92b3c92bd4460d019",
   "release_enabled": false,
   "production_policy_approval": "NOT_GRANTED_PROVISIONAL_FIXTURES_ONLY",
   "historical_standalone_evidence": "NOT_VERIFIED",
@@ -25,7 +25,7 @@
   "source_sha256": {
     ".github/workflows/420compliance-c01-level1.yml": "d0e15bc74871574425125b0d31375ff632baec535e61fc227fc61f15b0e45f1a",
     ".github/workflows/420compliance-c07-10-level2.yml": "da020e19c806b945d8e1e0bc8d1644d439488ff927a197e31f13f6c2b4892666",
-    ".github/workflows/420compliance-c08-5-level3.yml": "d1b2c748560f7e3816b6c3cf97c8c4982337b05a9e9a9c4435f92ea92004afa0",
+    ".github/workflows/420compliance-c08-5-level3.yml": "5418720d202722a3e67c7064a6cb48a3a634ec2342f1db488b407302cba60f18",
     ".github/workflows/contracts-foundry.yml": "fd6856651725fb4b752eadd6804cd6d2f4d4d890e4515d7216a2b8385b6ff7ab",
     ".github/workflows/docs-qualify.yml": "036ada9abecdc4352363b97321290f31896566b3f15f0757a95dc3dda81555fc",
     ".github/workflows/genesis-address-authority.yml": "deb4f4b6ed855518468a819364d0d304bd45cccd0669a8933bcc217534171c2d",

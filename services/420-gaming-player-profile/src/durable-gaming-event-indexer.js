@@ -15,7 +15,7 @@ export class DurableGamingEventIndexer420 {
   if(typeof operatorPool?.connect!=='function'||typeof fetchBlock!=='function'||
     typeof resolveEventScope!=='function'||typeof verifyCanonicalBlock!=='function'||
     typeof authorizeQuery!=='function'||!u(chainId)||chainId==='0'||!h(gameId)||
-    !contracts||!['claims','bridge','migration'].every(k=>addr(contracts[k]))||
+    !contracts||!['games','identity','entitlements','crossGame','claims','bridge','migration'].every(k=>addr(contracts[k]))||
     new Set(Object.values(contracts)).size!==3)fail('events-configuration');
   this.#pool=operatorPool;this.#source=fetchBlock;this.#resolve=resolveEventScope;
   this.#verify=verifyCanonicalBlock;this.#authorize=authorizeQuery;
@@ -55,22 +55,27 @@ export class DurableGamingEventIndexer420 {
    const decoded=decodeGamingEvent420(log);
    if(this.#contracts[gamingEventContract420(decoded.kind)]!==contract)fail('events-emitter-mismatch');
    if(decoded.payload.gameId && decoded.payload.gameId!==this.#game)continue;
+   if(decoded.payload.sourceGameId && decoded.payload.sourceGameId!==this.#game)continue;
    let scope=await this.#resolve(Object.freeze({chainId:this.#chain,contract,blockHash:block.hash,
     txHash:log.transactionHash,kind:decoded.kind,payload:decoded.payload}));
    // ISSUE and CONSUME can occur within one block before the ISSUE index row commits.
    // Only inherit a scope already independently verified from an earlier log in
    // this exact authenticated block; never accept a user-provided owner claim.
-   const key=decoded.payload.claimId;
-   const earlier=key?inBlockOwners.get(key):null;
-   if(scope&&earlier&&
-     (scope.accountId!==earlier.accountId||scope.gameId!==earlier.gameId))
+   const p=decoded.payload;
+   const ownerKeys=[p.claimId&&'claim:'+p.claimId,p.profileId&&'profile:'+p.profileId,
+    p.entitlementId&&'entitlement:'+p.entitlementId,p.attestationId&&'attestation:'+p.attestationId,
+    p.growerId&&'grower:'+p.growerId].filter(Boolean);
+   const inherited=ownerKeys.map(k=>inBlockOwners.get(k)).filter(Boolean);
+   for(const prior of inherited){
+    if(scope&&(scope.accountId!==prior.accountId||scope.gameId!==prior.gameId))
      fail('events-claim-owner-conflict');
-   if(!scope&&earlier)scope=earlier;
+    if(!scope)scope=prior;
+   }
    // A missing verified account/game binding cannot appear in any user's event feed.
    if(scope!==null&&(!scope||typeof scope.accountId!=='string'||
     !/^[A-Za-z0-9:_-]{1,128}$/.test(scope.accountId)||scope.gameId!==this.#game))
     fail('events-invalid-account-scope');
-   if(decoded.kind==='MigrationClaimIssued'&&scope&&key)inBlockOwners.set(key,scope);
+   if(scope)for(const key of ownerKeys)inBlockOwners.set(key,scope);
    normalized.push({log,decoded,scope});
   }
   return this.#tx(async c=>{

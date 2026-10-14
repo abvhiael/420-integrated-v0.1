@@ -1,0 +1,54 @@
+name: High Country R05.1 Level 1 Datastore
+on:
+  pull_request:
+    paths:
+      - 'services/420-gaming-player-profile/**'
+      - '.github/workflows/highcountry-r05-1.yml'
+      - 'docs/highcountry/R05.1-*'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  datastore:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: hc_ci_only
+          POSTGRES_DB: r051_ci
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres -d r051_ci"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    env:
+      CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      GAMING_DATASTORE_TEST_URL: postgres://postgres:hc_ci_only@localhost:5432/r051_ci
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          fetch-depth: 0
+      - name: Verify exact implementation SHA
+        run: test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install locked datastore dependency
+        working-directory: services/420-gaming-player-profile
+        run: npm ci --ignore-scripts
+      - name: Retained and datastore validation tests
+        working-directory: services/420-gaming-player-profile
+        run: npm test
+      - name: Actual PostgreSQL integration and adversarial acceptance
+        working-directory: services/420-gaming-player-profile
+        run: npm run test:postgres
+      - name: Retained affected runtime authority tests
+        working-directory: services/highcountry-economy
+        run: npm test
+      - name: Syntax and whitespace
+        run: |
+          while IFS= read -r -d '' file; do node --check "$file"; done < <(find services/420-gaming-player-profile/src services/420-gaming-player-profile/scripts services/420-gaming-player-profile/test -type f \( -name '*.js' -o -name '*.mjs' \) -print0)
+          git diff --check 3c670803143221613c657e15f6b955c029d6fc1c HEAD

@@ -39,7 +39,15 @@ emergency_bindings = {
     'BREEDING_BIND_EMERGENCY': 'HC.ACTION.BREEDING_ENGINE.BIND_EMERGENCY',
     'RANDOMNESS_BIND_EMERGENCY': 'HC.ACTION.RANDOMNESS_COORDINATOR.BIND_EMERGENCY',
 }
-require(len(actions) == 62, 'unexpected action catalogue size')
+require(len(actions) == 66, 'unexpected action catalogue size')
+require(actions.count(('R04_EMERGENCY_BIND', 'HC.ACTION.R04.EMERGENCY_BIND.V1')) == 1, 'missing or modified R04 consumer binding authority')
+canonical_rights_bindings = {
+    'LAND_BIND_PLANTS': 'HC.ACTION.LAND_REGISTRY.BIND_PLANTS',
+    'PLANT_BIND_RIGHTS': 'HC.ACTION.PLANT_REGISTRY.BIND_RIGHTS',
+    'PLANT_BIND_LICENSES': 'HC.ACTION.PLANT_REGISTRY.BIND_LICENSES',
+}
+for name, domain in canonical_rights_bindings.items():
+    require(actions.count((name, domain)) == 1, 'missing or modified R04.9 authority binding: ' + name)
 require(actions.count(('HARVEST_ACCEPT', 'HC.ACTION.HARVEST_ENGINE.ACCEPT')) == 1, 'missing R03.1 harvest acceptance action')
 require(actions.count(('SESSION_POLICY_REVIEW_ROUTINE_CALL', 'HC.ACTION.GAMING_SESSION_POLICY.REVIEW_ROUTINE_CALL')) == 1, 'missing independent routine selector review')
 require(actions.count(('MODULE_APPROVE_ARTIFACT', 'HC.ACTION.MODULE_REGISTRY.APPROVE_ARTIFACT')) == 1, 'missing artifact approval authority')

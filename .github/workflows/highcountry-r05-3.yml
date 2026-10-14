@@ -1,0 +1,70 @@
+name: High Country R05.3 Level 1 Durable Migration
+on:
+  pull_request:
+    paths:
+      - 'services/420-gaming-player-profile/**'
+      - '.github/workflows/highcountry-r05-3.yml'
+      - 'docs/highcountry/R05.3-*'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  migration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: hc_ci_only
+          POSTGRES_DB: r051_ci
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres -d r051_ci"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    env:
+      CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      GAMING_DATASTORE_TEST_URL: postgres://postgres:hc_ci_only@localhost:5432/r051_ci
+      GAMING_WALLET_TEST_URL: postgres://postgres:hc_ci_only@localhost:5432/r052_ci
+      GAMING_MIGRATION_TEST_URL: postgres://postgres:hc_ci_only@localhost:5432/r053_ci
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          fetch-depth: 0
+      - name: Verify exact SHA
+        run: test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install locked PostgreSQL dependency
+        working-directory: services/420-gaming-player-profile
+        run: npm ci --ignore-scripts
+      - name: Create isolated R05.2 and R05.3 databases
+        env:
+          PGPASSWORD: hc_ci_only
+        run: |
+          psql -h localhost -U postgres -d r051_ci -v ON_ERROR_STOP=1 -c 'CREATE DATABASE r052_ci'
+          psql -h localhost -U postgres -d r051_ci -v ON_ERROR_STOP=1 -c 'CREATE DATABASE r053_ci'
+      - name: Unit and adversarial tests
+        working-directory: services/420-gaming-player-profile
+        run: npm test
+      - name: Retained R05.1 actual PostgreSQL qualification
+        working-directory: services/420-gaming-player-profile
+        run: npm run test:postgres
+      - name: Retained R05.2 actual PostgreSQL qualification
+        working-directory: services/420-gaming-player-profile
+        run: node --test test/wallet-postgres.integration.mjs
+      - name: R05.3 actual PostgreSQL migration and outbox
+        working-directory: services/420-gaming-player-profile
+        run: node --test test/migration-postgres.integration.mjs
+      - name: Affected High Country economy runtime
+        working-directory: services/highcountry-economy
+        run: npm test
+      - name: Syntax and whitespace
+        shell: bash
+        run: |
+          while IFS= read -r -d '' file; do node --check "$file"; done < <(find services/420-gaming-player-profile/src services/420-gaming-player-profile/test -type f \( -name '*.js' -o -name '*.mjs' \) -print0)
+          git diff --check d6f6bd282636a6c9c8ac3bf17198580840fee37f HEAD
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"

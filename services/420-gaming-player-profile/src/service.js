@@ -1,3 +1,5 @@
+// Retained process-local foundation/fixture API. Never use it as durable production storage.
+export { createPostgresGamingPlayerProfileService420, PostgresGamingRepository420 } from './postgres-repository.js';
 export function createGamingPlayerProfileService420({ clock = () => Date.now(), idFactory = crypto.randomUUID } = {}) {
   const accounts = new Map();
   const profiles = new Map();

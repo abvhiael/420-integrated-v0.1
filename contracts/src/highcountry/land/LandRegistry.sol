@@ -18,6 +18,13 @@ import { IGenesisRegistry } from "../interfaces/IGenesisRegistry.sol";
 import { IHighCountryAuthorization } from "../interfaces/IHighCountryAuthorization.sol";
 import { AuthorizationRequest, GenesisRoots } from "../types/HighCountryTypes.sol";
 
+interface ICanonicalPlantCountsLandR049 {
+    function landRegistry() external view returns (address);
+    function activePlantsByParcel(
+        uint64 parcelId
+    ) external view returns (uint32);
+}
+
 interface IRegionRegistryHC3 {
     function exists(
         uint16 regionId
@@ -48,6 +55,9 @@ contract LandRegistry {
     IHighCountryAuthorization public immutable authorization;
     IRegionRegistryHC3 public immutable regionRegistry;
     IGenesisRegistry public immutable genesisRegistry;
+    bytes32 public constant PLANTS_BIND_SCOPE = keccak256("HC.LAND_REGISTRY.BIND_CANONICAL_PLANTS.V1");
+    ICanonicalPlantCountsLandR049 public canonicalPlants;
+    event CanonicalPlantsBound(address indexed plantRegistry);
 
     mapping(uint64 => LandParcel) private _parcels;
     uint64 public parcelCount;
@@ -78,6 +88,25 @@ contract LandRegistry {
         authorization = IHighCountryAuthorization(authorization_);
         regionRegistry = IRegionRegistryHC3(regionRegistry_);
         genesisRegistry = IGenesisRegistry(genesisRegistry_);
+    }
+
+    /// @notice The unique canonical plant source must be bound before clearing occupied land.
+    function bindCanonicalPlants(
+        address candidate
+    ) external {
+        if (address(canonicalPlants) != address(0) || candidate.code.length == 0) revert HCInvalidState();
+        authorization.requireAuthorized(
+            AuthorizationRequest({
+                principal: msg.sender,
+                moduleId: ModuleIds.LAND_REGISTRY,
+                actionId: ActionIds.LAND_BIND_PLANTS,
+                scopeHash: PLANTS_BIND_SCOPE,
+                amount: 0
+            })
+        );
+        if (ICanonicalPlantCountsLandR049(candidate).landRegistry() != address(this)) revert HCInvalidState();
+        canonicalPlants = ICanonicalPlantCountsLandR049(candidate);
+        emit CanonicalPlantsBound(candidate);
     }
 
     function registerGenesisParcel(
@@ -151,7 +180,10 @@ contract LandRegistry {
     ) external {
         LandParcel storage parcel = _requireParcel(parcelId);
         if (parcel.occupant == address(0)) revert HCInvalidState();
-
+        // Never strand active plants by clearing the very occupancy they depend upon.
+        if (address(canonicalPlants) == address(0) || canonicalPlants.activePlantsByParcel(parcelId) != 0) {
+            revert HCInvalidState();
+        }
         _requireAuthorized(ActionIds.LAND_CLEAR_OCCUPANCY, parcelId, 0);
         address previousOccupant = parcel.occupant;
         bytes32 previousRef = parcel.occupancyRef;

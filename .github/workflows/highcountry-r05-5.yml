@@ -1,0 +1,59 @@
+name: High Country R05.5 Level 1 Save Lifecycle
+on:
+  pull_request:
+    paths:
+      - 'services/420-gaming-player-profile/**'
+      - '.github/workflows/highcountry-r05-5.yml'
+      - 'docs/highcountry/R05.5-*'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  lifecycle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: hc_ci_only
+          POSTGRES_DB: r055_ci
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres -d r055_ci"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    env:
+      GAMING_SAVE_TEST_URL: postgres://postgres:hc_ci_only@localhost:5432/r055_ci
+      CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          fetch-depth: 0
+      - name: Exact SHA
+        run: test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install locked PostgreSQL driver
+        working-directory: services/420-gaming-player-profile
+        run: npm ci --ignore-scripts
+      - name: R05.5 actual PostgreSQL backup/deletion and schema qualification
+        working-directory: services/420-gaming-player-profile
+        run: node --test test/save-postgres.integration.mjs
+      - name: R05.5 save version, corruption, conflict and restore adversarial tests
+        working-directory: services/420-gaming-player-profile
+        run: node --test test/cloud-save-lifecycle.test.js
+      - name: Retained profile unit suites
+        working-directory: services/420-gaming-player-profile
+        run: npm test
+      - name: Affected High Country Gaming clients
+        run: node --test packages/420-gaming-sdk/test/*.test.js clients/highcountry-access-v1/test/*.test.js
+      - name: R05.5 SQL and source integrity
+        run: |
+          node --check services/420-gaming-player-profile/src/cloud-save-lifecycle.js
+          node --check services/420-gaming-player-profile/src/save-lifecycle-migrations.js
+          node --check services/420-gaming-player-profile/src/save-retention-worker.js
+          git diff --check 1dbe72cfbb09debba188ff80e4be2e7c7674827d HEAD
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"

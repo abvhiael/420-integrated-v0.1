@@ -1,6 +1,6 @@
 # BNB-5.3 — Independent consumer delivery state
 
-Status: IMPLEMENTED / LEVEL 1 QUALIFICATION PENDING. No completion certificate before exact-head app CI succeeds.
+Status: COMPLETE / REPOSITORY LEVEL 1 PASS. [Durable certificate](BNB-5.3-LEVEL1-CERTIFICATE.md).
 
 ## Canonical requirement and repository baseline
 
@@ -42,6 +42,6 @@ The local validation adapter is not Search/Travel publication or an external con
 
 Preserve all 17 external gates, especially T-BNB-INTEGRATION-1, T-BNB-TRAVEL-210A and T-BNB-OPS-214. Identity, Pay, Wallet, Compliance/legal, Travel/Search, human accessibility and production operations remain independently gated. Keep `travel.bnb_booking=false`, `booking_enabled=false`, `financial_execution=false`. No live deployment, external delivery, funds movement or authority approval is claimed.
 
-Exact SHA, CI run/job and exit-criterion result will be committed after terminal qualification. Level 2 intentionally remains at BNB-5.7/5.13, Level 3 at BNB-5.14. No full Solidity, Genesis, Integrated or global Docs run is required or manually dispatched for this app-only step.
+Qualified implementation `1ef28f61238e61adc490fc1f60759aeece34a99c`; Runtime Slice run `38619541943`, job `116043162751`: SUCCESS, 360 directory tests passed plus eight repeated operations executions. All required packaging/browser/TLS/restore/deployment steps succeeded. [Certificate](BNB-5.3-LEVEL1-CERTIFICATE.md) records individual exit criteria and inspected exact-source evidence. Level 2 intentionally remains at BNB-5.7/5.13, Level 3 at BNB-5.14. No full Solidity, Genesis, Integrated or global Docs run is required or manually dispatched for this app-only step.
 
 Next canonical step after BNB-5.3 qualifies: **BNB-5.4 — Transactional projection invalidation and refresh**.

@@ -1,6 +1,6 @@
 # 420BnB — Phase 5 roadmap
 
-Status: BNB-5.4 COMPLETE / REPOSITORY LEVEL 1 PASS on 2026-10-14. Phase 4 integration prerequisite satisfied by explicitly authorized merge of PR #631. Phase 5 repository-side development only; no live booking/payment or external acceptance approval.
+Status: OWNER REQUESTED BNB-5.5 on 2026-10-14. Phase 4 integration prerequisite satisfied by explicitly authorized merge of PR #631. Phase 5 repository-side development only; no live booking/payment or external acceptance approval.
 
 ## Starting prerequisite
 
@@ -31,4 +31,4 @@ Level 1: directly affected app checks for ordinary steps, exact implementation S
 
 All existing testnet gates remain authoritative in [BNB-TESTNET-WORK-ROADMAP.md](BNB-TESTNET-WORK-ROADMAP.md), with unchanged criteria/status. BnB consumes Identity, lawful property, Pay/Wallet, Compliance, Travel/Location/Search and independent issuer authority; it cannot create it. Keep `travel.bnb_booking=false`, `booking_enabled=false`, `financial_execution=false`. No live deployment, real notifications, property publication, fund movement or independent accessibility/legal/production approval is authorized by this plan.
 
-Current step: **BNB-5.4 — Transactional projection invalidation and refresh**, COMPLETE / Level 1 PASS at `45774b43c77e53d4ce5fe4b000a4fea5de444f3f`. [Certificate](BNB-5.4-LEVEL1-CERTIFICATE.md). [Implementation](BNB-5.4-PROJECTION-REFRESH.md). BNB-5.1–5.3 remain qualified at their recorded implementations; [BNB-5.3 certificate](BNB-5.3-LEVEL1-CERTIFICATE.md). Next: **BNB-5.5 — Correct incremental discovery feeds**.
+Current step: **BNB-5.5 — Correct incremental discovery feeds**, implemented / Level 1 qualification pending. [Implementation](BNB-5.5-INCREMENTAL-DISCOVERY.md). BNB-5.1–5.4 retain recorded exact-source certificates. Next only after BNB-5.5 qualifies: **BNB-5.6 — Search/Travel consumer transport contracts**.

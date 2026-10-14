@@ -349,13 +349,13 @@ def ready():
             if current is None:
                 raise HTTPException(503,"SCHEMA_NOT_MIGRATED")
             records=c.execute("SELECT version FROM bnb_schema_migration ORDER BY version").fetchall()
-            if [row[0] for row in records]!=list(range(1,29)):
+            if [row[0] for row in records]!=list(range(1,30)):
                 raise HTTPException(503,"SCHEMA_VERSION_MISMATCH")
     except psycopg.Error:
         # A database outage or connection exhaustion is not a ready API.
         # Never leak DSNs, SQL statements, hostnames or credentials to probes.
         raise HTTPException(503,"DATABASE_UNAVAILABLE") from None
-    return {"status":"ready","transactions_enabled":False,"schema_version":28}
+    return {"status":"ready","transactions_enabled":False,"schema_version":29}
 
 
 class GuestMessageInput(BaseModel):
@@ -3669,3 +3669,44 @@ def independent_case_privacy_hold(report_id:UUID,payload:PrivacyHoldInput,
                 (uuid4(),proof["sub"],report[0]))
     return {"report_id":str(report_id),"hold_applied":True,
             "financial_authority":False,"legal_approval_minted":False}
+
+
+def discovery_feed_claim(proof,consumer,action,scope):
+    if consumer not in ("search","travel"):raise HTTPException(404,"CONSUMER_NOT_FOUND")
+    if not proof:raise HTTPException(401,"DISCOVERY_PROOF_REQUIRED")
+    claims=verify_authority(proof,"BNB_DISCOVERY_CONSUMER",action)
+    if (claims.get("consumer")!=consumer or not claims.get("sub")
+        or claims.get("current_consumer_grant_verified") is not True
+        or claims.get("consumer_revoked") is not False
+        or any(claims.get(key)!=value for key,value in scope.items())):
+        raise HTTPException(403,"DISCOVERY_SCOPE_MISMATCH")
+    return claims
+
+@app.get("/v1/bnb/internal/discovery-feeds/{consumer}")
+def internal_incremental_discovery(consumer:str,after:int=0,limit:int=50,
+        until:int|None=None,epoch:str|None=None,x_discovery_proof:str|None=Header(None)):
+    from discovery_feed import page
+    discovery_feed_claim(x_discovery_proof,consumer,"discovery-feed",
+        {"after":after,"limit":limit,"until":until,"epoch":epoch})
+    with db() as c:
+        return page(c,consumer,after=after,limit=limit,until=until,epoch=epoch)
+
+@app.post("/v1/bnb/internal/discovery-feeds/{consumer}/resync",status_code=201)
+def internal_discovery_resync(consumer:str,x_discovery_proof:str|None=Header(None)):
+    from discovery_feed import begin_resync
+    claims=discovery_feed_claim(x_discovery_proof,consumer,"discovery-resync",
+        {"resync_requested":True})
+    with db() as c:
+        return begin_resync(c,consumer,actor=claims["sub"],request_key=claims["jti"],
+            authorize=lambda actor,action,target:actor==claims["sub"] and target==consumer and action=="resync")
+
+@app.get("/v1/bnb/internal/discovery-feeds/{consumer}/resync/{resync_id}")
+def internal_discovery_resync_page(consumer:str,resync_id:UUID,
+        after_property:str|None=None,limit:int=50,x_discovery_proof:str|None=Header(None)):
+    from discovery_feed import resync_page
+    claims=discovery_feed_claim(x_discovery_proof,consumer,"discovery-resync-read",
+        {"resync_id":str(resync_id),"after_property":after_property,"limit":limit})
+    with db() as c:
+        return resync_page(c,consumer,resync_id,actor=claims["sub"],
+            after_property=after_property,limit=limit,
+            authorize=lambda actor,action,target:actor==claims["sub"] and target==consumer and action=="resync-read")

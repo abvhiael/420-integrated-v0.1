@@ -192,8 +192,13 @@ def verify_database(connection, purpose="runtime"):
         require(not connection.execute("""SELECT EXISTS(SELECT 1 FROM pg_tables
             WHERE schemaname='public' AND tablename ~ '^bnb_'
             AND tableowner <> 'bnb_owner')""").fetchone()[0], "DATABASE_TABLE_OWNER_INVALID")
-        require(connection.execute("SELECT count(*) FROM bnb_schema_migration").fetchone()[0] == 28,
+        require(connection.execute("SELECT count(*) FROM bnb_schema_migration").fetchone()[0] == 29,
                 "DATABASE_SCHEMA_VERSION_INVALID")
+        for journal_table in ("bnb_discovery_clock","bnb_discovery_change"):
+            journal=connection.execute("""SELECT has_table_privilege(current_user,%s,'SELECT'),
+                has_table_privilege(current_user,%s,'INSERT'),has_table_privilege(current_user,%s,'UPDATE'),
+                has_table_privilege(current_user,%s,'DELETE')""",(journal_table,)*4).fetchone()
+            require(journal[0] and not any(journal[1:]),"DATABASE_DISCOVERY_JOURNAL_WRITE_FORBIDDEN")
     else:
         require(connection.execute("SELECT pg_has_role(current_user,'bnb_owner','MEMBER')").fetchone()[0],
                 "DATABASE_MIGRATOR_OWNER_BINDING_REQUIRED")
@@ -208,7 +213,9 @@ def controlled_migration(connection):
         tables = connection.execute("""SELECT tablename FROM pg_tables WHERE schemaname='public'
             AND tablename ~ '^bnb_'""").fetchall()
         for (name,) in tables:
-            actions = sql.SQL("SELECT") if name == "bnb_schema_migration" else sql.SQL("SELECT, INSERT, UPDATE, DELETE")
+            actions = sql.SQL("SELECT") if name in ("bnb_schema_migration","bnb_discovery_clock","bnb_discovery_change") else sql.SQL("SELECT, INSERT, UPDATE, DELETE")
+            if name=="bnb_discovery_resync":
+                actions=sql.SQL("SELECT, INSERT")
             connection.execute(sql.SQL("REVOKE ALL ON TABLE public.{} FROM bnb_runtime").format(sql.Identifier(name)))
             connection.execute(sql.SQL("GRANT {} ON TABLE public.{} TO bnb_runtime").format(actions, sql.Identifier(name)))
         connection.execute("GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO bnb_runtime")

@@ -343,6 +343,9 @@ def test_append_only_migration_preserves_old_events_and_runtime_consumer_dml(tls
     old = uuid4()
     with psycopg.connect(**migrator) as c:
         c.execute('SET LOCAL ROLE bnb_owner')
+        c.execute('DROP FUNCTION bnb_append_discovery_change() CASCADE')
+        c.execute('DROP TABLE bnb_discovery_resync,bnb_discovery_change,bnb_discovery_clock')
+        c.execute('DELETE FROM bnb_schema_migration WHERE version=29')
         c.execute('DROP FUNCTION bnb_projection_source_changed() CASCADE')
         c.execute('DROP FUNCTION bnb_projection_jurisdiction_changed() CASCADE')
         c.execute('DROP FUNCTION bnb_request_projection_refresh(uuid) CASCADE')
@@ -354,7 +357,7 @@ def test_append_only_migration_preserves_old_events_and_runtime_consumer_dml(tls
         c.execute('DELETE FROM bnb_schema_migration WHERE version=27')
         c.execute("INSERT INTO bnb_outbox(id,event_type,payload,delivered_at) VALUES(%s,%s,'{}',now())", (old, KIND))
     with psycopg.connect(**migrator) as c:
-        assert production.controlled_migration(c) == 28
+        assert production.controlled_migration(c) == 29
     with psycopg.connect(**runtime) as c:
         production.verify_database(c)
         assert c.execute('SELECT delivered_at IS NOT NULL,consumer_managed FROM bnb_outbox WHERE id=%s', (old,)).fetchone() == (True,False)

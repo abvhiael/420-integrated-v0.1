@@ -41,6 +41,7 @@ def snapshot(conn,property_id):
             "nonbinding":True,"booking_enabled":False}
 
 def synchronize(conn,property_id):
+    if conn.autocommit:raise HTTPException(503,"TRANSACTION_REQUIRED")
     record=snapshot(conn,property_id)
     pid=UUID(record["property_id"])
     canonical=json.dumps(record,sort_keys=True,separators=(",",":"),ensure_ascii=True)
@@ -49,13 +50,14 @@ def synchronize(conn,property_id):
              WHERE property_id=%s FOR UPDATE""",(pid,)).fetchone()
     if prior and prior[1]==digest:
         return {"revision":prior[0],"changed":False,"payload":prior[2]}
+    previous=conn.execute("SELECT COALESCE(max(revision),0) FROM bnb_discovery_change WHERE property_id=%s",(pid,)).fetchone()[0]
     row=conn.execute("""INSERT INTO bnb_discovery_projection
         (property_id,revision,source_digest,payload)
-        VALUES(%s,1,%s,%s::jsonb)
+        VALUES(%s,%s,%s,%s::jsonb)
         ON CONFLICT(property_id) DO UPDATE
           SET revision=bnb_discovery_projection.revision+1,
               source_digest=EXCLUDED.source_digest,payload=EXCLUDED.payload,updated_at=now()
-        RETURNING revision""",(pid,digest,canonical)).fetchone()
+        RETURNING revision""",(pid,previous+1,digest,canonical)).fetchone()
     # Immutable redacted event; revisions are per-property strictly monotone.
     event=json.dumps({"property_id":str(pid),"revision":row[0],"visible":record["visible"],
                      "digest":digest},sort_keys=True)
@@ -87,10 +89,6 @@ def consume(conn,property_id,consumer,revision,payload):
     return {"accepted":True,"revision":revision,"visible":payload["visible"]}
 
 def safe_feed(conn,consumer,after=0,limit=50):
-    """Consumer-specific feed excludes stale or revoked projected objects."""
-    if consumer not in ("search","travel"):raise HTTPException(403,"CONSUMER_UNAUTHORIZED")
-    if type(after) is not int or after<0 or type(limit) is not int or not 1<=limit<=50:
-        raise HTTPException(422,"PAGE_INVALID")
-    rows=conn.execute("""SELECT property_id,revision,payload FROM bnb_discovery_projection
-             WHERE revision>%s ORDER BY updated_at,property_id LIMIT %s""",(after,limit)).fetchall()
-    return [{"property_id":str(x[0]),"revision":x[1],"payload":x[2]} for x in rows]
+    """Compatibility list; after is now a GLOBAL change cursor, never a property revision."""
+    from discovery_feed import page
+    return page(conn,consumer,after=after,limit=limit)['items']

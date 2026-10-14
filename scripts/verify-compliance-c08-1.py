@@ -13,7 +13,17 @@ for step in steps:
     historical=evidence/"qualification"/(step+("-level2.json" if step in milestones else "-level1.json"))
     later=sorted((evidence/"evidence").glob(step+"-LEVEL*-EXACT-SHA-*.md"))
     if not historical.is_file() and not later:missing.append(step)
-assert set(missing)=={"C06.5","C06.6","C06.7","C06.8","C07.6"},("unreconciled evidence gaps",missing)
+assert set(missing)=={"C06.5","C06.6","C06.7","C06.8","C07.6"},("unexpected absent standalone certificates",missing)
+for step in missing:
+    q=json.loads((evidence/"qualification"/(step+"-reconciliation.json")).read_text())
+    assert q["step"]==step and q["qualification_level"]==1
+    assert q["disposition"]=="HISTORICAL_STEP_EVIDENCE_INCOMPLETE"
+    assert q["standalone_exact_sha_level1_certificate"]=="NOT_VERIFIED"
+    assert q["retained_integration"]["milestone"]==("C07.10" if step=="C07.6" else "C06.9")
+    assert q["retained_integration"]["qualification_level"]==2
+    assert q["retained_integration"]["result"]=="PASS_FOR_RETAINED_INTEGRATION_SCOPE_ONLY"
+    assert q["open_findings"] and q["production_operational_acceptance"]=="NOT_CLAIMED"
+    assert (root/q["source_document"]).is_file()
 for p in ["C07.7","C07.8","C07.9","C07.10"]:
     matches=list((evidence/"evidence").glob(p+"-LEVEL*-EXACT-SHA-*.md"))
     assert len(matches)==1,(p,matches)
@@ -25,4 +35,4 @@ assert len(m["threats"])==16
 record=(evidence/"C08.1-RECONCILIATION.md").read_text()
 for term in ("C06.5–C06.8","C07.6","597","1597","c5a4f220d1fbda01f707d359aa9bb32921a138b1","C08.5","NOT APPROVED","TESTNET"):
     assert term in record,term
-print(f"C08.1 evidence inventory: {len(steps)} canonical C01-C07 steps; recorded exceptions: {missing}; T01-T16; main divergence explicitly OPEN")
+print(f"C08.1 evidence inventory: {len(steps)} canonical C01-C07 steps; provenance-reconciled historical exceptions: {missing}; T01-T16; main divergence explicitly OPEN")

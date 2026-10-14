@@ -27,7 +27,7 @@ export function createRiderPreferenceService({authorize,store}){
     let allowed;
     try { allowed=await authorize(token,{action:'account.preferences',resource:'account:'+accountId}); }
     catch{ fail('FORBIDDEN',403); }
-    if(allowed!==true)fail('FORBIDDEN',403);
+    if(!allowed || allowed.role!=='rider' || allowed.action!=='account.preferences' || allowed.resource!=='account:'+accountId || allowed.accountId!==accountId || allowed.subject!==accountId)fail('FORBIDDEN',403);
   }
   return Object.freeze({
     async read(token,accountId){

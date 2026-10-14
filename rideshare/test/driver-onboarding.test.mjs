@@ -3,7 +3,7 @@ import {createDriverOnboardingService,validateOnboarding} from '../src/driver-on
 const now=2000;const input={driverId:'driver_a',vehicleId:'vehicle_a',commandId:'cmd_a',expectedRevision:0,documents:[{kind:'licence',privateRef:'private_secret_ref',expiresAt:3000}]};
 function fixture(){
  const data=new Map(),commands=new Set();let mutations=0;
- const service=createDriverOnboardingService({clock:()=>now,authenticator:{authorize:async(t,{action,resource})=>{
+ const service=createDriverOnboardingService({clock:()=>now,verifyPrivateReceipt:async()=>true,authenticator:{authorize:async(t,{action,resource})=>{
   if(t!=='good'||action!=='onboarding.manage'||resource!=='account:driver_a')throw Error('unauthorized');
   return {role:'driver',subject:'driver_a',accountId:'account_a',expiresAt:3000};
  }},store:{read:async id=>data.get(id),writeCAS:async(id,rev,key,row)=>{

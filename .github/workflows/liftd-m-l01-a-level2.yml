@@ -1,0 +1,114 @@
+name: LIFTd M-L01-A Level 2
+on:
+  pull_request:
+    paths:
+      - 'rideshare/**'
+      - 'docs/rideshare/**'
+      - '.github/workflows/liftd-m-l01-a-level2.yml'
+  push:
+    branches: ['build/liftd-l01-1-foundation']
+    paths:
+      - 'rideshare/**'
+      - 'docs/rideshare/**'
+      - '.github/workflows/liftd-m-l01-a-level2.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: liftd-m-l01-a-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  domain-foundation:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: liftd_qualification
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres -d liftd_qualification"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      LIFTD_DATABASE_URL: postgres://postgres:postgres@127.0.0.1:5432/liftd_qualification
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact implementation checkout
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Canonical Location consumer and retained provider/privacy checks
+        run: go test ./rideshare/locationbridge ./location/providers ./location/privacy
+      - name: Location and privacy syntax checks
+        run: |
+          node --check rideshare/src/location.mjs
+          node --check rideshare/src/canonical.mjs
+          node --check rideshare/test/location.test.mjs
+          node --check rideshare/test/postgres/location.test.mjs
+          node --check rideshare/scripts/purge-locations.mjs
+      - name: Install locked PostgreSQL client
+        run: npm ci --prefix rideshare --ignore-scripts
+      - name: Syntax and canonical foundation verification
+        run: |
+          node --check rideshare/src/trip.mjs
+          node --check rideshare/test/trip.test.mjs
+          node --check rideshare/scripts/verify-foundation.mjs
+          node rideshare/scripts/verify-foundation.mjs
+      - name: Authentication/service/HTTP syntax checks
+        run: |
+          node --check rideshare/src/auth.mjs
+          node --check rideshare/src/session-client.mjs
+          node --check rideshare/src/service.mjs
+          node --check rideshare/src/http.mjs
+          node --check rideshare/test/auth.test.mjs
+      - name: Eligibility syntax checks
+        run: |
+          node --check rideshare/src/eligibility.mjs
+          node --check rideshare/test/eligibility.test.mjs
+      - name: Store and PostgreSQL suite syntax checks
+        run: |
+          node --check rideshare/src/postgres-store.mjs
+          node --check rideshare/test/postgres/store.test.mjs
+          node --check rideshare/test/postgres/restart-worker.mjs
+          node --check rideshare/test/postgres/database-restart.mjs
+      - name: Retained foundation, sessions and eligibility qualification
+        run: npm test --prefix rideshare
+      - name: Real PostgreSQL Location privacy integration
+        run: |
+          mkdir -p liftd-evidence
+          set -o pipefail
+          node --test --test-reporter=tap rideshare/test/postgres/location.test.mjs | tee liftd-evidence/location-tests.tap
+      - name: Checkpoint durable database history
+        run: |
+          mkdir -p liftd-evidence
+          node rideshare/test/postgres/database-restart.mjs before liftd-evidence/database-checkpoint.json
+      - name: Crash and restart disposable PostgreSQL service
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+        run: |
+          docker kill --signal=KILL "$POSTGRES_CONTAINER"
+          docker start "$POSTGRES_CONTAINER"
+      - name: Verify database crash recovery from a new process
+        run: node rideshare/test/postgres/database-restart.mjs after liftd-evidence/database-checkpoint.json
+      - name: Record scoped implementation evidence
+        run: |
+          mkdir -p liftd-evidence
+          git rev-parse HEAD > liftd-evidence/implementation-sha.txt
+          node --test --test-reporter=tap rideshare/test/*.test.mjs > liftd-evidence/trip-tests.tap
+      - uses: actions/upload-artifact@v4
+        with:
+          name: liftd-m-l01-a-${{ github.event.pull_request.head.sha || github.sha }}
+          path: liftd-evidence/
+          if-no-files-found: error

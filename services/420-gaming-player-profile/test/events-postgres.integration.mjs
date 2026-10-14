@@ -102,6 +102,19 @@ test('R05.6 real durable PostgreSQL cursor/dedupe/reorg/finality and scoped quer
    chain.hash=alternate;chain.logs=logs(alternate);canonical.add(alternate);
    await indexer().ingest({contract,startBlock:'2'});
    assert.equal((await root.query("SELECT count(*)::integer AS n FROM gaming_datastore.event_logs")).rows[0].n,3);
+   // Alternate fork disappears and a previously orphaned original block becomes
+   // canonical again. It must be reactivated only with the identical trusted payload.
+   await indexer().rollback({contract,ancestorNumber:'1',ancestorHash:block1});
+   canonicalByHeight.set('2',{...chain,hash:block2,logs:logs(block2)});
+   await indexer().ingest({contract,startBlock:'2'});
+   assert.equal((await root.query(`SELECT count(*)::integer AS n FROM gaming_datastore.event_logs
+     WHERE block_hash=$1 AND status='PENDING'`,[block2])).rows[0].n,1);
+   await indexer().rollback({contract,ancestorNumber:'1',ancestorHash:block1});
+   canonicalByHeight.set('2',{...chain,hash:alternate,logs:logs(alternate)});
+   await indexer().ingest({contract,startBlock:'2'});
+   assert.equal((await root.query(`SELECT count(*)::integer AS n FROM gaming_datastore.event_reorg_history`)).rows[0].n,3);
+   await assert.rejects(()=>root.query('UPDATE gaming_datastore.event_reorg_history SET ancestor_number=0'),
+     e=>e.code==='23514');
    await indexer().finalize({contract,blockNumber:'2',blockHash:alternate});
    await assert.rejects(()=>worker.rollback({contract,ancestorNumber:'1',ancestorHash:block1}),/events-finalized-reorg-alert/);
   });

@@ -1,6 +1,8 @@
 # BNB-4.12 — Phase 4 Level 3 closeout reconciliation and qualification ledger
 
-**Disposition: INCOMPLETE / LEVEL 3 BLOCKED. DO NOT MERGE PR #631 OR DECLARE PHASE 4 CLOSED.**
+**Final disposition (2026-10-14): repository Level 3 PASS.** See the [final BNB-4.12 certificate](BNB-4.12-PHASE4-LEVEL3-CLOSEOUT.md) for terminal results and preserved release gates. PR #631 remains draft/open/unmerged pending explicit authorization.
+
+**Historical WIP record below:** its incomplete/pending statements describe earlier reviews and are superseded by the final certificate. They are retained for provenance, not current status.
 
 ## Current qualification checkpoint — 2026-10-14 UTC
 

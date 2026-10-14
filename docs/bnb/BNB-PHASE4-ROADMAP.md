@@ -1,6 +1,6 @@
 # 420BnB — Canonical Phase 4 roadmap
 
-**Status: OWNER APPROVED — repository-side development only (2026-10-13).** Owner instructed completion of Phase 3 integration and approval of the next development roadmap. This Phase 4 scope extends the verified Phase 3 service, browser and provider seams; it does **not** approve deployment, real identity/property authority, custody, lawfulness, payments, live listing visibility or acceptance of any external T-BNB gate. Repository truth, frozen namespace and existing protocol/application owners prevail over this plan.
+**Status: PHASE 4 REPOSITORY LEVEL 3 QUALIFIED (2026-10-14); PR #631 integration and live release unapproved.** Final evidence: [BNB-4.12 certificate](BNB-4.12-PHASE4-LEVEL3-CLOSEOUT.md). Original owner approval: repository-side development only (2026-10-13). Owner instructed completion of Phase 3 integration and approval of the next development roadmap. This Phase 4 scope extends the verified Phase 3 service, browser and provider seams; it does **not** approve deployment, real identity/property authority, custody, lawfulness, payments, live listing visibility or acceptance of any external T-BNB gate. Repository truth, frozen namespace and existing protocol/application owners prevail over this plan.
 
 ## Approved predecessor and starting authority
 
@@ -40,4 +40,4 @@ Until independent witnesses satisfy the existing canonical testnet roadmap, keep
 
 No synthetic JWT, provider receipt, image build, browser axe scan or rollback fixture is independent production/testnet acceptance. Legal retention/appeals, reviewer authority, emergency shutdown, actual merchant/tax source, managed KMS/HSM and on-call security must be separately approved. This roadmap authorizes only repository-side work with disabled live activation.
 
-**Next step: BNB-4.1 — Phase 3 integration baseline and Phase 4 boundary map.**
+**Next action:** explicit owner merge authorization and pre-merge reconciliation/security/policy review of PR #631. BNB-4.1–BNB-4.12 repository qualification is recorded in the [final certificate](BNB-4.12-PHASE4-LEVEL3-CLOSEOUT.md); all independent testnet/production requirements remain gated. No Phase 5 work is authorized by this status update.

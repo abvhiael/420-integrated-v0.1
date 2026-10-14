@@ -32,8 +32,11 @@ export class SaveRetentionWorker420 {
   if(await this.#auth({authority,accountId,gameId,purpose:'SAVE_BACKUP'})!==true)
    fail('save-authority-denied');
   return this.#tx(async c=>{
-   const src=(await c.query(`SELECT * FROM gaming_datastore.save_references
-    WHERE account_id=$1 AND game_id=$2 AND revision=$3 FOR SHARE`,[accountId,gameId,revision])).rows[0];
+   const src=(await c.query(`SELECT r.* FROM gaming_datastore.save_references r
+    WHERE r.account_id=$1 AND r.game_id=$2 AND r.revision=$3
+    AND NOT EXISTS(SELECT 1 FROM gaming_datastore.save_redactions d
+      WHERE d.account_id=r.account_id AND d.game_id=r.game_id AND d.revision=r.revision)
+    FOR SHARE OF r`,[accountId,gameId,revision])).rows[0];
    if(!src)fail('save-source-missing');
    const prior=(await c.query(`SELECT 1 FROM gaming_datastore.save_backups
     WHERE account_id=$1 AND game_id=$2 AND backup_id=$3 FOR UPDATE`,

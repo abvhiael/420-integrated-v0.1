@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {CanonicalGamingFinality420} from '../src/canonical-gaming-finality.js';
 import {selector,keccak256} from '../../highcountry-economy/src/keccak.js';
 const h=x=>'0x'+x.repeat(64),w=x=>'0x'+x.repeat(40);
-const names=['games','identity','entitlements','crossGame','claims','bridge','migration'];
+const names=['games','identity','entitlements','crossGame','claims','bridge','migration','mission','progression'];
 const code='0x6001600055',hash=keccak256(Buffer.from(code.slice(2),'hex'));
 const contracts=Object.fromEntries(names.map((name,i)=>[name,{address:w((i+1).toString(16)),codeHash:hash}]));
 const claim=h('a'),game=h('b'),profile=h('c'),guest=h('d'),payload=h('e'),target=w('f'),block=h('1');
@@ -19,7 +19,10 @@ const rpc={request:async(method,args)=>{
  if(method==='eth_getBlockByNumber')return args?.[0]==='0x9'?{hash:h('2'),number:'0x9'}:{hash:liveHash,number:'0xa'};
  if(method==='eth_getCode')return badCode?'0x6002':code;
  if(method==='eth_getTransactionReceipt')return receipt;
- if(method==='eth_call')return addressResponses?.[args[0].to]??result;
+ if(method==='eth_call'){
+  const v=addressResponses?.[args[0].to];
+  return typeof v==='function'?v(args[0].data):v??result;
+ }
  throw Error('rpc unexpected '+method);
 },call:async()=>({result})};
 const finality=()=>new CanonicalGamingFinality420({rpc,chainId:'420',gameId:game,contracts,
@@ -81,4 +84,40 @@ test('R05.7 finalized transaction must emit precisely the matching MigrationAppl
  await assert.rejects(()=>finality().migrationTransaction({txHash,claimId:claim,growerId:'7',
   guestStateCommitment:guest,payloadHash:payload}),/r057-migration-receipt-log-invalid/);
  addressResponses=null;receipt=null;
+});
+
+test('R05.7 mission payout is only eligible from canonical finalized status, amount and ownership',async()=>{
+ liveHash=block;secondary=true;badCode=false;wrongChain=false;
+ const missionId=h('3'),profileId=profile;
+ const authorized=enc(['0x'+num(3),'0x'+num(0),'0x'+num(0),'0x'+num(0),
+  '0x'+num(1),'0x'+num(0),'0x'+num(0),'0x'+num(0),'0x'+num(42)]);
+ addressResponses={
+  [contracts.identity.address]:enc([profileId]),
+  [contracts.mission.address]:authorized
+ };
+ const v=await finality().missionReward({wallet:target,missionId,amount:'42'});
+ assert.equal(v.accepted,true);assert.equal(v.kind,'MISSION_REWARD');
+ addressResponses[contracts.mission.address]=enc(['0x'+num(2),...Array(7).fill('0x'+num(0)),'0x'+num(42)]);
+ await assert.rejects(()=>finality().missionReward({wallet:target,missionId,amount:'42'}),/r057-mission-unqualified/);
+ addressResponses[contracts.mission.address]=authorized;
+ addressResponses[contracts.identity.address]=enc(['0x'+num(0)]);
+ await assert.rejects(()=>finality().missionReward({wallet:target,missionId,amount:'42'}),/r057-reward-owner-missing/);
+ addressResponses=null;
+});
+test('R05.7 progression payout requires matching track amount and completed canonical progress',async()=>{
+ liveHash=block;secondary=true;badCode=false;wrongChain=false;
+ const trackId=h('4');
+ const progress=enc(['0x'+num(7),'0x'+num(1)]);
+ const track=enc(['0x'+num(1),'0x'+num(2),'0x'+num(3),'0x'+num(4),
+  '0x'+num(42),'0x'+num(6)]);
+ addressResponses={
+  [contracts.identity.address]:enc([profile]),
+  [contracts.progression.address]:data=>data.startsWith('0x'+selector('progress(address,bytes32)'))?progress:track
+ };
+ const v=await finality().progressionReward({wallet:target,trackId,amount:'42'});
+ assert.equal(v.kind,'PROGRESSION_REWARD');
+ addressResponses[contracts.progression.address]=data=>data.startsWith('0x'+selector('progress(address,bytes32)'))?
+  enc(['0x'+num(7),'0x'+num(0)]):track;
+ await assert.rejects(()=>finality().progressionReward({wallet:target,trackId,amount:'42'}),/r057-progression-unqualified/);
+ addressResponses=null;
 });

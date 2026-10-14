@@ -99,6 +99,7 @@ test('R05.5 actual PostgreSQL schema, scoped backup and deletion lifecycle',asyn
    const deletion=await worker.requestSaveDelete({...scope,revision:'1',authority:'signed-session'});
    assert.equal(deletion.physicalDelete,true);
    assert.equal(await repo.transaction(tx=>tx.saveReference('1')),null);
+   assert.equal((await actor.query('SELECT object_ref FROM gaming_datastore.save_references')).rowCount,0);
    assert.equal(await repo.transaction(tx=>tx.saveReference()),null);
    const twice=await worker.requestSaveDelete({...scope,revision:'1',authority:'signed-session'});
    assert.equal(twice.duplicate,true);

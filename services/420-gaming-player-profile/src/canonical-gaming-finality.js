@@ -1,6 +1,7 @@
 // R05.7: pinned, independently witnessed canonical RPC; never trust adapter 'finalized' flags.
 // This reads only known contracts at a single finalized hash. No wallet keys or writes.
 import {createHash} from 'node:crypto';
+import {createIndependentFinalityWitness420} from './independent-finality-witness.js';
 import {FinalizedRpc,calldata,words} from '../../highcountry-economy/src/finalized-rpc.js';
 const deny=code=>{throw Object.assign(new Error(code),{code});};
 const H=x=>typeof x==='string'&&/^0x[0-9a-f]{64}$/.test(x)&&x!=='0x'+'0'.repeat(64);
@@ -15,7 +16,9 @@ export class CanonicalGamingFinality420 {
  constructor({rpc,chainId,gameId,contracts,independentWitness}={}){
   if(typeof rpc?.request!=='function'||typeof rpc?.call!=='function'||!U(chainId)||chainId==='0'||
    !H(gameId)||!contracts||!['games','identity','entitlements','crossGame','claims','bridge','migration'].every(k=>A(contracts[k]?.address)&&H(contracts[k]?.codeHash))||
-   typeof independentWitness!=='function')deny('r057-config-invalid');
+   typeof independentWitness!=='function'||
+   new Set(Object.values(contracts).map(c=>c.address)).size!==Object.values(contracts).length)
+   deny('r057-config-invalid');
   this.#rpc=rpc;this.#chain=chainId;this.#game=gameId;
   this.#contracts=Object.freeze(structuredClone(contracts));this.#witness=independentWitness;
  }
@@ -143,14 +146,21 @@ export class CanonicalGamingFinality420 {
    blockHash:a.hash,evidenceDigest:D({claimId,growerId,guestStateCommitment,payloadHash,blockHash:a.hash,r})});
  }
  async reward({name,signature,args,expectedWords}={}){
-  if(!['mission','progression','harvest'].includes(name)||!this.#contracts[name]||typeof signature!=='string'||
+  if(!['mission','progression','harvest'].includes(name)||!this.#contracts[name]||
+   !Array.isArray(this.#contracts[name].allowedReadSignatures)||
+   !this.#contracts[name].allowedReadSignatures.includes(signature)||typeof signature!=='string'||
    !Array.isArray(args)||!Array.isArray(expectedWords)||!expectedWords.length||
    !expectedWords.every(H))deny('r057-reward-request-invalid');
   return this.#read({kind:'REWARD',name,signature,args,verify:r=>
    r.length===expectedWords.length&&r.every((word,i)=>E(word)===expectedWords[i])});
  }
 }
-export function createR057CanonicalVerifier420({url,chainId,gameId,contracts,independentWitness,fetchImpl}={}){
+export function createR057CanonicalVerifier420({url,independentUrl,chainId,gameId,contracts,fetchImpl}={}){
+ if(typeof url!=='string'||typeof independentUrl!=='string'||url===independentUrl||
+  !/^https:\/\//.test(url)||!/^https:\/\//.test(independentUrl))
+  deny('r057-independent-endpoint-required');
  const rpc=new FinalizedRpc({url,chainId:Number(chainId),contracts,fetchImpl});
+ const independentWitness=createIndependentFinalityWitness420({url:independentUrl,
+  chainId:Number(chainId),fetchImpl});
  return new CanonicalGamingFinality420({rpc,chainId,gameId,contracts,independentWitness});
 }

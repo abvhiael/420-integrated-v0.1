@@ -136,6 +136,15 @@ class ScopedTransaction {
       WHERE r.account_id=$1 AND r.game_id=$2 AND r.revision=coalesce($3::numeric,p.save_revision)`+exclusion,
       [...this.#ids(),revision])).rows[0] ?? null;
   }
+  async backupReference(backupId) {
+    requireOpaque(backupId);
+    const available=(await this.#query("SELECT to_regclass('gaming_datastore.save_backups') AS present")).rows[0]?.present;
+    if(!available)fail('save-lifecycle-not-migrated');
+    return (await this.#query(`SELECT backup_id,source_revision,provider_id,object_ref,
+      state_hash,byte_length,schema_label,expires_at FROM gaming_datastore.save_backups
+      WHERE account_id=$1 AND game_id=$2 AND backup_id=$3 AND deleted_at IS NULL
+      AND expires_at>gaming_datastore.now_seconds()`,[...this.#ids(),backupId])).rows[0]??null;
+  }
   async prepareMigration(x) {
     validateMigration(x); const context = migrationIntentDigest(...this.#ids(),x);
     const profile = await this.profile();

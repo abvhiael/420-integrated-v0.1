@@ -33,7 +33,9 @@ CREATE TABLE gaming_datastore.event_logs (
  log_index gaming_datastore.uint32 NOT NULL,
  topic0 gaming_datastore.commitment NOT NULL,
  event_kind text NOT NULL CHECK(event_kind IN (
- 'MigrationClaimIssued','MigrationClaimConsumed','MigrationClaimCancelled',
+ 'GameRegistered','GameUpdated','GameStatusChanged','GameProfileCreated',
+ 'EntitlementIssued','EntitlementRevoked','AttestationIssued','AttestationRevoked',
+ 'PlayerEntitlementBound','MigrationClaimIssued','MigrationClaimConsumed','MigrationClaimCancelled',
  'GrowerGamingProfileBound','MigrationClaimBound','MigrationApplied')),
  claim_id gaming_datastore.commitment,
  game_id gaming_datastore.commitment,
@@ -70,6 +72,14 @@ CREATE TABLE gaming_datastore.event_scopes (
 );
 CREATE INDEX event_log_height ON gaming_datastore.event_logs(chain_id,contract,block_number,status);
 CREATE INDEX event_scope_view ON gaming_datastore.event_scopes(account_id,game_id,chain_id);
+CREATE INDEX event_scope_profile_lookup ON gaming_datastore.event_logs
+ (chain_id,event_kind,(payload->>'profileId')) WHERE status<>'ORPHANED';
+CREATE INDEX event_scope_entitlement_lookup ON gaming_datastore.event_logs
+ (chain_id,event_kind,(payload->>'entitlementId')) WHERE status<>'ORPHANED';
+CREATE INDEX event_scope_attestation_lookup ON gaming_datastore.event_logs
+ (chain_id,event_kind,(payload->>'attestationId')) WHERE status<>'ORPHANED';
+CREATE INDEX event_scope_grower_lookup ON gaming_datastore.event_logs
+ (chain_id,event_kind,(payload->>'growerId')) WHERE status<>'ORPHANED';
 DO $$ DECLARE t text; BEGIN
  FOREACH t IN ARRAY ARRAY['event_cursors','event_blocks','event_logs','event_scopes','event_reorg_history'] LOOP
   EXECUTE format('ALTER TABLE gaming_datastore.%I OWNER TO gaming_datastore_migrator',t);

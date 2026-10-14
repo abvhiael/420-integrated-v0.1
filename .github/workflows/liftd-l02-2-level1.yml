@@ -3,13 +3,13 @@ on:
   pull_request:
     paths:
       - 'rideshare/src/auth.mjs'
-      - 'rideshare/src/auth.mjs'
       - 'rideshare/src/rider-preferences.mjs'
       - 'rideshare/test/rider-preferences.test.mjs'
       - '.github/workflows/liftd-l02-2-level1.yml'
   push:
     branches: ['build/liftd-l02-2-rider-account-preferences']
     paths:
+      - 'rideshare/src/auth.mjs'
       - 'rideshare/src/rider-preferences.mjs'
       - 'rideshare/test/rider-preferences.test.mjs'
       - '.github/workflows/liftd-l02-2-level1.yml'

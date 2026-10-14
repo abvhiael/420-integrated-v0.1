@@ -52,6 +52,8 @@ Define detailed steps at L01 closeout using the actual service interfaces. Scope
 | L02.5 | Rider trip experience — show assignment, driver/vehicle identification, arrival, trip progress and completion; scoped contact, cancellation and incident reporting; distinguish estimates and confirmed events | Implemented; Level 1 qualification pending; scoped contact integration remains gated; see [implementation](L02.5-IMPLEMENTATION.md) |
 | L02.6 | Driver onboarding — driver/vehicle submission, eligibility status, document lifecycle and remediation; protect sensitive material from public discovery | **COMPLETE — Level 1 PASS**; [exact-SHA certificate](L02.6-LEVEL1-EVIDENCE.md) `c70f2681f375bafcf35d2e78891075acdc810aa7`; live vault/reviewer and external eligibility acceptance remain gated |
 
+| M-L02-A | Level 2 milestone — rider booking journeys and driver onboarding with backend; expired sessions, revoked eligibility, inaccessible locations and quote changes | **IN PROGRESS — Level 2 qualification pending**; [workflow run #38654745422](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38654745422) on `4166c44cbced0be2abd6d53e19f074cf8f5ffa74`; no PASS certificate until all required checks succeed |
+
 Detailed subsequent steps remain to be reconciled with existing L01 service interfaces at the L01 phase-closeout boundary. This entry does not renumber, merge or silently replace future canonical steps.
 
 ## Phase L03 — service operations and release

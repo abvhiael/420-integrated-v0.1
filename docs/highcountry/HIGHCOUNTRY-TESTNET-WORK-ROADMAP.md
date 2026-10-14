@@ -100,3 +100,18 @@ Separate Level 3 must refresh/reconcile main and run its canonical complete exac
 Accumulated R04.1–R04.14 repository phase qualification is **PASS / COMPLETE** at exact implementation `f7a3da6f96b62d018f69aa5e98d3819b5ad32706`, reconciled with current main `959288c8bd33b6da0325b6a5d060e00e7bcf0e48`. Canonical Solidity-owned four-shard inventory/mandatory coverage/fixture, Genesis address/manifests, global, Docs and retained app/runtime/security/client/configuration all pass. See [final exact-SHA certificate](qualification/R04-LEVEL3-EXACT-SHA-CERTIFICATION.md).
 
 This closes repository phase qualification only. Every live deployed authority/credential/code/address/grant, consensus finality/reorg/quorum/network, funded Treasury/vault, infrastructure/operator/security approval and R07.5 migration/replacement/rollback requirement above remains OPEN. No full R05/R06/R07 qualification, R05 start, R04 merge or live release is claimed.
+
+
+## R05.4 — live GameClaims and wallet migration acceptance (OPEN / TESTNET-GATED)
+
+The following requirements remain with **canonical R05.4**, not reclassified as accomplished. Repository-local simulation and injected verifier fixtures are not independent deployed acceptance.
+
+| ID | Live-testnet requirement | Required witnessed evidence |
+|---|---|---|
+| HC-R05.4-T01 | Independently confirm official chain, frozen deployment addresses, GameRegistry operator/permissions, GameClaims/HC bridge/migration bytecode and ABI. | Signed manifest, chain IDs, RPC provenance, contract code hashes, unauthorized issuance denial |
+| HC-R05.4-T02 | Real conventional session, independently linked EOA and supported contract wallet, account GameIdentity profile and grower binding; operator issues exact reviewed commitments and bounded claim. Player wallet itself signs/broadcasts `consume` and `bindConsumedMigrationClaim`. | Player consent, issuer & wallet transaction hashes, signed receipts, wrong signer/expired/cancelled/duplicate/adversarial outcomes, no server player keys |
+| HC-R05.4-T03 | Complete issue → consume → bind → DB application → markApplied → finalized receipt under actual chain/RPC and independently proven canonical finality. | Finalized block hashes, immutable application/outbox/receipt sequence, real reorg and RPC disagreement recovery, no duplicate save or receipt |
+| HC-R05.4-T04 | External operator custody/HSM, RPC and identity credentials, rate limiting, live session revocation, TLS, key rotation, backups, observability and incident recovery. | Security/operator witness, deploy configuration, independent revocation and failover tests |
+| HC-R05.4-T05 | Independent signoff for replay, chain/contract authority, privacy, backup integrity, retry/dead-letter and controlled live operations. | Signed testnet acceptance docket and traceable exact-deployment SHA |
+
+**All T01–T05 remain UNRUN / OPEN.** R05.7 owns canonical-finality implementation and its independent acceptance. R05.5 owns durable save-provider integrity and backup/conflict policy. R05.4 local-contract/unit/integration tests must still run in GitHub before calling repository development complete. External deferral does not waive any local-testable requirement, R05.4 exact-SHA Level 1, or future Level 3 phase qualification.

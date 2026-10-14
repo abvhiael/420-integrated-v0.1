@@ -18,8 +18,11 @@ test('R05.9 telemetry is strictly allowlisted and never includes player fields',
 });
 test('R05.9 anticheat requires independent policy and canonical proof',async()=>{
  let allow=true;
- const guard=createGamingAntiCheatGate420({validateCommitment:async()=>allow,verifyCanonical:async()=>true});
+ let nonceUses=0;
+ const guard=createGamingAntiCheatGate420({validateCommitment:async()=>allow,
+  verifyCanonical:async()=>true,consumeNonce:async()=>{nonceUses++;return nonceUses===1;}});
  assert.equal((await guard.authorize({gameId:G,accountId:'bob',proof:H('b'),nonce:H('c')})).accepted,true);
+ await assert.rejects(()=>guard.authorize({gameId:G,accountId:'bob',proof:H('b'),nonce:H('c')}),/anti-cheat-replay-denied/);
  allow=false;
  await assert.rejects(()=>guard.authorize({gameId:G,accountId:'bob',proof:H('b'),nonce:H('c')}),/anti-cheat-commitment-rejected/);
 });

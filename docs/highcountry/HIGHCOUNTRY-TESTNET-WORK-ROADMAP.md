@@ -144,3 +144,18 @@ Repository-side R05.6 owns exact emitted Solidity topic decoding, direct pinned 
 | HC-R05.6-T04 | Live identity revocation, multiple instances/least-privilege Postgres, rotation of RPC/operator credentials, account privacy and finality-gated consumer acceptance; audit/monitoring/signoff | Independent security and privacy approval, account/client contract conformance, operator release gate |
 
 **Status:** all T01–T04 NOT WITNESSED/NOT RUN. These are additive to R05.7's independently canonical high-risk state verification and R05.8's production SDK transport ownership. Never treat a PostgreSQL fixture, disposable Anvil, or an injected verifier returning `true` as these independent public-testnet acceptances.
+
+
+## R05.7 — canonical high-risk read/finality acceptance (OPEN / TESTNET-GATED)
+
+R05.7 repository-side evidence verifies high-risk claim, consumed/bound migration, ownership, entitlement, attestation, submitted migration receipt and configured reward reads by EVM ABI calls pinned to a single `finalized` header; independently witnessed second-RPC chain/hash finality and deployed runtime bytecode hashes; verified receipt block/log and exact immutable source mapping. Never accept a caller, SDK or indexer `finalized:true` value as finality proof.
+
+| Gate | Real acceptance / external owner |
+|---|---|
+| HC-R05.7-T01 | Official deployed chain IDs, frozen Genesis contract addresses/codehashes, validated production manifest and two truly independent finalized-capable RPC operators with keys, rotations and safe deployment/start heights |
+| HC-R05.7-T02 | Real GameClaims consumed/wallet/grower binding, GameIdentity profile ownership, GameEntitlements issue/revoke/expiry and CrossGame attestation issue/revoke/expiry, witnessed against real wallet and contract-wallet sessions and exact canonical blocks |
+| HC-R05.7-T03 | Actual HighCountryMigration420 markApplied transaction and MigrationApplied log/receipt witness under production operator identity, chain forks, RPC disagreement, finalized-head lag, missing history, reorg across receipt, and outbox replay/partial failure |
+| HC-R05.7-T04 | Real reward/progression/harvest finality adapters tied to the separately approved canonical module ABI and payout/ledger policy; no unapproved selector, indexer projection or missing manifest may approve an economic action |
+| HC-R05.7-T05 | Independent security, operating and audit review of dual-RPC independence, failover/alerts, timeouts/DoS budgets, predeploy replacement/upgrade codehash changes and consent/identity-revocation integration |
+
+**All gates OPEN / NOT RUN in the official testnet.** A local mock, disposable Anvil or an injectable callback returning true is not a real second-RPC witness. Level 1 may qualify the implementation and fail-closed adversarial tests without falsely certifying these live acceptance conditions. R05.8 owns deployed transports/network detection and R05.9 owns operational abuse/monitoring.

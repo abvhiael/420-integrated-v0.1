@@ -1,4 +1,4 @@
-name: 420Compliance C08.2 documentation Level 1
+name: 420Compliance C08.3 testnet dependency register Level 1
 on:
   push:
     branches: ['audit/420compliance-*']
@@ -10,6 +10,9 @@ on:
       - 'docs/compliance/C07.10-*'
       - 'docs/compliance/C08.1-*'
       - 'docs/compliance/C08.2-*'
+      - 'docs/compliance/C08.3-*'
+      - 'docs/compliance/qualification/C08.3-*'
+      - 'scripts/verify-compliance-c08-3.py'
       - 'scripts/verify-compliance-c08-2.py'
       - 'scripts/verify-compliance-c08-1.py'
       - '.github/workflows/420compliance-c07-10-level2.yml'
@@ -23,7 +26,7 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: compliance-c082-${{ github.ref }}
+  group: compliance-c083-${{ github.ref }}
   cancel-in-progress: true
 jobs:
   privacy-retention-level1:
@@ -49,7 +52,7 @@ jobs:
       EXPECTED_SHA: ${{ github.sha }}
       COMPLIANCE_POSTGRES_TEST_DSN: 'postgres://compliance_test:compliance_test@localhost:5432/compliance_test?sslmode=verify-full&sslrootcert=/tmp/c076-ca.crt&connect_timeout=5'
     steps:
-      - name: Checkout exact C08.2 documentation candidate
+      - name: Checkout exact C08.3 testnet ledger candidate
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.sha }}
@@ -87,6 +90,8 @@ jobs:
           GOBIN=/tmp/c076-bin go install golang.org/x/vuln/cmd/govulncheck@v1.9.0
           /tmp/c076-bin/govulncheck -json -test ./services/complianceauth > /tmp/compliance-c076-vulnerability.json
           python3 scripts/verify-compliance-c07-3.py /tmp/compliance-c076-vulnerability.json
+      - name: Verify C08.3 external acceptance and original evidence boundaries
+        run: python3 scripts/verify-compliance-c08-3.py
       - name: Verify C08.2 API guides legal coverage and release manifest
         run: python3 scripts/verify-compliance-c08-2.py
       - name: Verify C08.1 canonical evidence inventory and declared exceptions
@@ -106,23 +111,23 @@ jobs:
           for test in ['TestC0512IntegrationLevel2Adversarial','TestC078IncidentDrills','TestC077AlertDeliveryAndUnavailable','TestC077InventoryFreshnessAndCoverage','TestC077OperationalCollectorPostgreSQL','TestC077CompleteMonitoringAndAdversarial','TestC077PostgreSQLMonotonicMonitoring','TestC077EvaluatorMonitoringFailureAndDenial','TestC076DecisionGatewayRecoveryGate','TestC076ExternalPostgreSQLMonotonicJournal','TestC076ExternalAuthoritySchemaAndFailClosed','TestC076AuthenticatedAuthoritySignatureAndAtomicRelease','TestC076OrchestratorFailClosed','TestC076RestoreRejectsStaleRevokedPolicyAndPrivacyReplay','TestC075SignedPolicyAndOwnershipBoundaries','TestC075PostgreSQLRetentionHoldsAndPurge','TestC075CaseLimitedEvidenceAndPostLogRevalidation','TestC075AtomicRollbackAndGrantRevocation','TestC075BoundedDeletionScheduler','TestC075ManagedProductionPrivacy','TestC074HTTPOverloadAndRecovery','TestC074BodyResponseTimeoutAndOutage','TestC074DistributedRateAndCapacity','TestC074QueueBackpressureAndAtomicOutbox','TestC074BoundedSoak','TestC074NetworkPostgreSQLSoak','TestC074ManagedProductionComposition','TestC073SecretBindingFreshnessAndTLS','TestC073ManagedEncryptionRotation','TestC073ManagedSignerRotationAndRevocation','TestC073CertificateRotationAndTimeout','TestC073ManagedProductionComposition','TestC073DatabaseTLSOverridesDenied','TestC072Boundaries','TestC072DurableJobsLeaseFencing','TestC072AtomicActivationOutboxAndHalt','TestC071AuthenticatedEncryptionBoundaries','TestC071PostgreSQLProductionStorage']:
               assert '--- PASS: '+test+' ' in log, 'required C07.6 acceptance absent: '+test
           PY
-      - name: Record C08.2 exact-SHA Level 1 result and source manifest
+      - name: Record C08.3 exact-SHA Level 1 result and source manifest
         run: |
           python3 - <<'PY'
           import hashlib,json,os,re
           from pathlib import Path
-          files=sorted(list(Path('services/complianceauth').glob('*.go'))+list(Path('services/complianceauth/migrations').glob('*.sql'))+[Path('.github/workflows/420compliance-c01-level1.yml'),Path('scripts/verify-compliance-c07-3.py'),Path('scripts/verify-compliance-c07-9.py'),Path('scripts/verify-compliance-c08-1.py'),Path('scripts/verify-compliance-c08-2.py'),Path('docs/compliance/C07.9-SECURITY-REVIEW-INTAKE.json'),Path('go.mod'),Path('go.sum')])
-          evidence={'step':'C08.2','qualification_level':1,'status':'DOCUMENTATION_LEVEL1_CANDIDATE','implementation_sha':os.environ['EXPECTED_SHA'],'run_id':os.environ['GITHUB_RUN_ID'],'run_attempt':os.environ['GITHUB_RUN_ATTEMPT'],'recovery_checkpoint_adversarial':'PASS','privacy_retention_deletion_holds_case_roles':'PASS','capacity_rate_backpressure_load_soak':'PASS','managed_secret_signing_identity_rotation':'PASS','supply_chain_and_dependency_scan':'PASS','durable_jobs_fencing_atomic_activation_outbox_halt':'PASS','private_storage':'PASS','production_tls':'PASS','migration_atomicity_and_checksums':'PASS','role_bound_tenant_isolation':'PASS','encryption_corruption_and_rotation':'PASS','storage_quota_concurrency':'PASS','retained_affected_database_regressions':'PASS','skipped_required_tests':0,'source_sha256':{str(p):hashlib.sha256(p.read_bytes()).hexdigest() for p in files},'c076_complete':False,'c077_metrics_required':8,'backup_restore_pipeline':'NOT_IMPLEMENTED','restore_traffic_fence':'NOT_IMPLEMENTED','real_PITR':'NOT_RUN','live_production_acceptance':'DEFERRED C09/C10'}
+          files=sorted(list(Path('services/complianceauth').glob('*.go'))+list(Path('services/complianceauth/migrations').glob('*.sql'))+[Path('.github/workflows/420compliance-c01-level1.yml'),Path('scripts/verify-compliance-c07-3.py'),Path('scripts/verify-compliance-c07-9.py'),Path('scripts/verify-compliance-c08-1.py'),Path('scripts/verify-compliance-c08-2.py'),Path('scripts/verify-compliance-c08-3.py'),Path('docs/compliance/C07.9-SECURITY-REVIEW-INTAKE.json'),Path('go.mod'),Path('go.sum')])
+          evidence={'step':'C08.3','qualification_level':1,'status':'TESTNET_DEPENDENCY_LEDGER_LEVEL1_CANDIDATE','implementation_sha':os.environ['EXPECTED_SHA'],'run_id':os.environ['GITHUB_RUN_ID'],'run_attempt':os.environ['GITHUB_RUN_ATTEMPT'],'recovery_checkpoint_adversarial':'PASS','privacy_retention_deletion_holds_case_roles':'PASS','capacity_rate_backpressure_load_soak':'PASS','managed_secret_signing_identity_rotation':'PASS','supply_chain_and_dependency_scan':'PASS','durable_jobs_fencing_atomic_activation_outbox_halt':'PASS','private_storage':'PASS','production_tls':'PASS','migration_atomicity_and_checksums':'PASS','role_bound_tenant_isolation':'PASS','encryption_corruption_and_rotation':'PASS','storage_quota_concurrency':'PASS','retained_affected_database_regressions':'PASS','skipped_required_tests':0,'source_sha256':{str(p):hashlib.sha256(p.read_bytes()).hexdigest() for p in files},'c076_complete':False,'c077_metrics_required':8,'backup_restore_pipeline':'NOT_IMPLEMENTED','restore_traffic_fence':'NOT_IMPLEMENTED','real_PITR':'NOT_RUN','live_production_acceptance':'DEFERRED C09/C10'}
           log=Path('/tmp/compliance-c076-tests.log').read_text()
           names=sorted(set(re.findall(r'--- PASS: (Test\S+)',log)))
           evidence['tests']={'top_level':sum('/' not in n for n in names),'subtests':sum('/' in n for n in names),'passed':names}
-          print(json.dumps({'step':'C08.2','status':'DOCUMENTATION_LEVEL1_CANDIDATE','tests':evidence['tests'],'supply_chain_adversarial_cases':7}))
+          print(json.dumps({'step':'C08.3','status':'TESTNET_DEPENDENCY_LEDGER_LEVEL1_CANDIDATE','tests':evidence['tests'],'supply_chain_adversarial_cases':7}))
           Path('/tmp/compliance-c076-level1.json').write_text(json.dumps(evidence,indent=2)+'\n')
           PY
-      - name: Retain C08.2 exact-SHA evidence
+      - name: Retain C08.3 exact-SHA evidence
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: compliance-c082-level1-${{ env.EXPECTED_SHA }}
+          name: compliance-c083-level1-${{ env.EXPECTED_SHA }}
           path: |
             /tmp/compliance-c076-level1.json
             /tmp/compliance-c076-tests.log

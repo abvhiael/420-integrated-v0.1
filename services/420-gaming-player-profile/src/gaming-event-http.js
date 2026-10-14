@@ -3,11 +3,13 @@
 import {createServer} from 'node:http';
 const fail=code=>{throw Object.assign(new Error(code),{code});};
 const dec=x=>typeof x==='string'&&/^(0|[1-9][0-9]*)$/.test(x);
-export function createGamingEventHttp420({indexer,authority,gameId,origin}={}){
+export function createGamingEventHttp420({indexer,authority,gameId,origin,abuseGuard,telemetry}={}){
  if(typeof indexer?.query!=='function'||typeof authority?.verifyToken!=='function'||
   typeof authority?.registeredPrincipal!=='function'||typeof gameId!=='string'||
   !/^0x[0-9a-f]{64}$/.test(gameId)||typeof origin!=='string'||!/^https?:\/\//.test(origin))
   fail('events-http-configuration');
+ if(abuseGuard!==undefined&&typeof abuseGuard?.consume!=='function')fail('events-abuse-guard-invalid');
+ if(telemetry!==undefined&&typeof telemetry?.record!=='function')fail('events-telemetry-invalid');
  return createServer(async(req,res)=>{
   const reject=(status,code)=>{
    res.writeHead(status,{'content-type':'application/json','cache-control':'no-store',
@@ -45,6 +47,15 @@ export function createGamingEventHttp420({indexer,authority,gameId,origin}={}){
    const accountId=await authority.registeredPrincipal(token);
    if(!accountId||accountId!==claims?.sub||claims.game!==gameId)
     return reject(403,'scope-denied');
+   if(abuseGuard){
+    try{await abuseGuard.consume({accountId,gameId,action:'events',cost:1});}
+    catch(e){
+     if(e?.code==='abuse-rate-limited'){
+      await telemetry?.record('rate_limited','blocked');return reject(429,'rate-limited');
+     }
+     throw e;
+    }
+   }
    const events=await indexer.query({accountId,gameId,authority:token,limit,before});
    const fresh=await authority.verifyToken(token);
    const principal=await authority.registeredPrincipal(token);
@@ -53,6 +64,6 @@ export function createGamingEventHttp420({indexer,authority,gameId,origin}={}){
    res.writeHead(200,{'content-type':'application/json','cache-control':'no-store',
     'x-content-type-options':'nosniff'});
    return res.end(JSON.stringify({events}));
-  }catch{return reject(403,'scope-denied');}
+  }catch{return reject(503,'service-unavailable');}
  });
 }

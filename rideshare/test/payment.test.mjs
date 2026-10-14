@@ -21,9 +21,9 @@ test('exact direct-token call rejects wrong target, recipient, payer, chain, amo
 });
 const meter={engagedMeters:12000,engagedSeconds:1500,onlineSeconds:3600,minimumDriverCentsPerHour:2500,minimumAllowanceCentsPerKm:45,periodId:'period'};
 const args={fareCents:3100,taxesCents:0,passThroughCents:0,tipCents:0,meter,completed:true,captured:true};
-test('adopted 80/20 and 20% development policy conserves the reference example without commission on allowance',()=>{
-  const p=compensation(args);assert.equal(p.allowanceCents,540);assert.equal(p.earningsCents,2048);assert.equal(p.commissionCents,512);assert.equal(p.driverCents,2588);assert.equal(p.developmentCents,102);assert.equal(p.platformCents,410);assert.equal(p.platformFundingCents,0);assert.equal(p.conserved,true);
-  assert.equal(p.developmentStatus,'HELD_CANONICAL_10_PERCENT_CEILING');
+test('adopted 80/20 and 10% development policy conserves the reference example without commission on allowance',()=>{
+  const p=compensation(args);assert.equal(p.allowanceCents,540);assert.equal(p.earningsCents,2048);assert.equal(p.commissionCents,512);assert.equal(p.driverCents,2588);assert.equal(p.developmentCents,51);assert.equal(p.platformCents,461);assert.equal(p.platformFundingCents,0);assert.equal(p.conserved,true);
+  assert.equal(p.developmentStatus,'PENDING_CANONICAL_SETTLEMENT_ACCEPTANCE');
   const source=readFileSync(new URL('../../contracts/src/revenue/DevelopmentCompensationVault420.sol',import.meta.url),'utf8');assert.match(source,/MAX_COMPENSATION_BPS\s*=\s*1_000/);
 });
 test('refunds preserve driver earned income, allowance and all collected tips; deficits remain platform obligations',()=>{

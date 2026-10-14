@@ -1,7 +1,7 @@
 // R05.7: pinned, independently witnessed canonical RPC; never trust adapter 'finalized' flags.
 // This reads only known contracts at a single finalized hash. No wallet keys or writes.
 import {createHash} from 'node:crypto';
-import {FinalizedRpc,calldata,words,address} from '../../highcountry-economy/src/finalized-rpc.js';
+import {FinalizedRpc,calldata,words} from '../../highcountry-economy/src/finalized-rpc.js';
 const deny=code=>{throw Object.assign(new Error(code),{code});};
 const H=x=>typeof x==='string'&&/^0x[0-9a-f]{64}$/.test(x)&&x!=='0x'+'0'.repeat(64);
 const A=x=>typeof x==='string'&&/^0x[0-9a-f]{40}$/.test(x)&&x!=='0x'+'0'.repeat(40);
@@ -79,7 +79,7 @@ export class CanonicalGamingFinality420 {
   const a=await this.#anchor();
   const r=await this.#call(a,'crossGame','attestation(bytes32)',[attestationId]);
   // Strictly require a real matching record and independently confirmed active state.
-  if(r.length<9||E(r[0])!==attestationId||E(r[2])!==profileId||E(r[1])!==this.#game||
+  if(r.length!==9||E(r[0])!==attestationId||E(r[2])!==profileId||E(r[1])!==this.#game||
    !B(r.at(-1))||B(r.at(-2)))deny('r057-attestation-mismatch');
   const active=await this.#call(a,'crossGame','isActive(bytes32)',[attestationId]);
   if(active.length!==1||!B(active[0]))deny('r057-attestation-inactive');
@@ -96,7 +96,7 @@ export class CanonicalGamingFinality420 {
    blockHash:a.hash,evidenceDigest:D({claimId,growerId,guestStateCommitment,payloadHash,blockHash:a.hash,r})});
  }
  async reward({name,signature,args,expectedWords}={}){
-  if(!['mission','progression','harvest'].includes(name)||typeof signature!=='string'||
+  if(!['mission','progression','harvest'].includes(name)||!this.#contracts[name]||typeof signature!=='string'||
    !Array.isArray(args)||!Array.isArray(expectedWords)||!expectedWords.length||
    !expectedWords.every(H))deny('r057-reward-request-invalid');
   return this.#read({kind:'REWARD',name,signature,args,verify:r=>

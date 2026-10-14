@@ -46,6 +46,7 @@ Define detailed steps at L01 closeout using the actual service interfaces. Scope
 | Step | Deliverable | Current status |
 | --- | --- | --- |
 | L02.1 | Application shell and design system — responsive navigation, accessible components, loading/error states, authenticated routing and clear availability information | **COMPLETE — Level 1 PASS**; see [L02.1 certificate](L02.1-LEVEL1-EVIDENCE.md), qualified implementation `cedd39c6e1c6350587bf920290439b6ab271da89` |
+| L02.2 | Rider account and preferences — account/session management, accessibility requirements, communication preferences and privacy controls | IMPLEMENTED IN PART — Level 1 pending; see [L02.2 implementation](L02.2-IMPLEMENTATION.md); durable preference persistence and independent deployed Identity integration pending |
 
 Detailed subsequent steps remain to be reconciled with existing L01 service interfaces at the L01 phase-closeout boundary. This entry does not renumber, merge or silently replace future canonical steps.
 

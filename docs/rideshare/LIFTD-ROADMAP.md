@@ -34,7 +34,7 @@ Level 1 per implementation step; Level 2 only at the named milestones; one Level
 | L01.7 | Immutable expiring fare quotes, currency/rounding, rider consent and explicit cancellation policy | COMPLETE — Level 1 PASS; see L01.7 evidence |
 | L01.8 | Scoped Pay/Wallet intents, receipts/finality, cancellation/refund and payout projections | COMPLETE — Level 1 PASS; see L01.8 evidence; LC-01 policy conflict resolved at 10%; development execution awaits canonical settlement acceptance |
 | L01.9 | Safety incident workflow, active-trip resolution, pause/recovery, bounded operator permissions and privacy | COMPLETE — Level 1 PASS; see L01.9 certificate |
-| M-L01-B | Level 2: dispatch + economics + safety integration/adversarial checks | IN PROGRESS — exact-SHA integration qualification required |
+| M-L01-B | Level 2: dispatch + economics + safety integration/adversarial checks | COMPLETE — Level 2 PASS; see M-L01-B certificate |
 | L01.10 | Single Phase L01 Level 3 qualification, current-main reconciliation and retained deferrals | Pending |
 
 ## Phase L02 — rider, driver and operator applications

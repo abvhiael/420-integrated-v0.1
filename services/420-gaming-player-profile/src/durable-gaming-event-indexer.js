@@ -244,6 +244,10 @@ export class DurableGamingEventIndexer420 {
       AND s.block_hash=e.block_hash AND s.log_index=e.log_index
      WHERE s.account_id=$1 AND s.game_id=$2 AND e.status='FINALIZED'
      ORDER BY e.block_number DESC,e.log_index DESC LIMIT $3`,[accountId,gameId,limit])).rows;
+   // Session may be revoked/expire while rows are being retrieved.
+   // Repeat the independent R05.2 authority check before returning any feed.
+   if(await this.#authorize(Object.freeze({accountId,gameId,authority,purpose:'GAMING_EVENT_READ'}))!==true)
+    fail('events-query-revoked');
    return rows.map(x=>Object.freeze(x));
   });
  }

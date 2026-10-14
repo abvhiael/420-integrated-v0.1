@@ -55,7 +55,7 @@ function proof(token, trust, purpose, now, maxAge, fields = null) {
 }
 const capabilities = Object.freeze({
   rider: new Set(['account.preferences', 'trip.create', 'trip.read', 'trip.cancel', 'route.prepare', 'quote.create', 'quote.accept', 'quote.read', 'pay.prepare', 'pay.consent', 'pay.reconcile', 'pay.read', 'safety.report']),
-  driver: new Set(['trip.read', 'trip.arrive', 'trip.start', 'trip.complete', 'trip.cancel', 'availability.set', 'pay.read', 'pay.statement', 'safety.report']),
+  driver: new Set(['onboarding.manage', 'trip.read', 'trip.arrive', 'trip.start', 'trip.complete', 'trip.cancel', 'availability.set', 'pay.read', 'pay.statement', 'safety.report']),
   operator: new Set(['trip.assign', 'trip.expire', 'pay.reconcile', 'pay.read', 'safety.resolve', 'safety.read']),
 });
 export function validateSessionGrants(grants) {

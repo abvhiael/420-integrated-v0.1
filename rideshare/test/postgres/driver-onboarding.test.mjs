@@ -10,7 +10,7 @@ before(async()=>{
  pool=createDatabasePool({connectionString:process.env.LIFTD_DATABASE_URL});
  assert.equal((await pool.query('SELECT current_database() AS db')).rows[0].db,'liftd_qualification');
  await migrate(pool);store=createPostgresDriverOnboardingStore(pool);
- service=createDriverOnboardingService({store,clock:()=>1000,authenticator:{authorize:async(token,{action,resource})=>{
+ service=createDriverOnboardingService({store,verifyPrivateReceipt:async()=>true,clock:()=>1000,authenticator:{authorize:async(token,{action,resource})=>{
   if(token!=='signed'||action!=='onboarding.manage'||resource!=='account:'+driver)throw Error('denied');
   return{role:'driver',subject:driver,accountId:'driver_account',expiresAt:2000};
  }}});

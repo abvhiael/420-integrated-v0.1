@@ -1,0 +1,39 @@
+name: High Country Level 3 One-Time Foundry Formatting
+on:
+  push:
+    branches: [qualification/highcountry-r05-level3-main-20261014]
+    paths: ['.github/workflows/highcountry-r05-level3-format.yml']
+permissions:
+  contents: write
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: qualification/highcountry-r05-level3-main-20261014
+          persist-credentials: true
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Format only High Country Solidity sources and tests
+        working-directory: contracts
+        run: |
+          forge fmt src/highcountry test/highcountry
+          forge fmt --check src/highcountry test/highcountry
+      - name: Verify files and commit formatter-only changes
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --check
+          git diff --name-only > /tmp/changed.txt
+          if grep -Ev '^contracts/(src|test)/highcountry/.*\.sol$' /tmp/changed.txt; then
+            echo 'unexpected changes from formatter' >&2; exit 1
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          if [ -s /tmp/changed.txt ]; then
+            git add contracts/src/highcountry contracts/test/highcountry
+            git commit -m 'style(highcountry): apply canonical forge fmt without semantic edits [skip ci]'
+            git push origin HEAD:qualification/highcountry-r05-level3-main-20261014
+          fi

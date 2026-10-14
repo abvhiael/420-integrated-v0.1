@@ -57,3 +57,38 @@ export function createR054MigrationCoordinator420({operatorPool,claims,sourceFor
  };
  return new DurableMigrationCoordinator420({operatorPool,verifyBoundClaim,verifyReceipt});
 }
+
+/**
+ * R05.4 operator outbox submission, called only with an R05.3 durable lease record.
+ * The caller must keep the lease and use coordinator.reconcile() after independent
+ * receipt finality. A submitted tx is NEVER reported as DB/chain COMPLETE here.
+ */
+export async function submitR054LeasedReceipt420({lease,claims,sourceForMigration}={}){
+ if(!lease||typeof claims?.operatorReceiptRequest!=='function'||
+  typeof sourceForMigration!=='function'||!lease.lease_token||
+  typeof lease.account_id!=='string'||!hex(lease.game_id)||
+  typeof lease.migration_id!=='string'||!uint(String(lease.claim_id))||
+  !uint(String(lease.chain_id))||!addr(lease.registry)||
+  !hex(lease.source_commitment)||!hex(lease.payload_hash)||
+  !addr(lease.target_wallet)||!uint(String(lease.target_grower))||
+  !hex(lease.evidence_digest))fail('r054-receipt-lease-invalid');
+ const key=Object.freeze({accountId:lease.account_id,gameId:lease.game_id,
+  migrationId:lease.migration_id,claimId:String(lease.claim_id)});
+ const source=await sourceForMigration(key);
+ if(!source||source.accountId!==key.accountId||source.gameId!==key.gameId||
+  source.migrationId!==key.migrationId||source.claimId!==key.claimId||
+  source.chainId!==String(lease.chain_id)||source.registry!==lease.registry||
+  source.sourceCommitment!==lease.source_commitment||
+  source.payloadHash!==lease.payload_hash||
+  source.targetWallet!==lease.target_wallet||
+  source.targetGrower!==String(lease.target_grower)||
+  !hex(source.guestStateCommitment))fail('r054-receipt-source-mismatch');
+ const receipt=await claims.operatorReceiptRequest({
+  claimId:key.claimId,growerId:String(lease.target_grower),
+  guestStateCommitment:source.guestStateCommitment,payloadHash:lease.payload_hash
+ });
+ if(!receipt||!['SUBMITTED_UNFINALIZED','APPLIED_UNFINALIZED'].includes(receipt.status))
+  fail('r054-receipt-unconfirmed');
+ return Object.freeze({status:receipt.status,tx:receipt.tx??null,
+  claimId:key.claimId,leaseToken:lease.lease_token,finalized:false});
+}

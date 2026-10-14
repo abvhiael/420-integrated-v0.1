@@ -87,13 +87,22 @@ export class SaveRetentionWorker420 {
  async expire({limit=10}={}){
   if(!Number.isInteger(limit)||limit<1||limit>100)fail('save-invalid-limit');
   return this.#tx(async c=>{
-   const due=(await c.query(`SELECT account_id,game_id,backup_id FROM gaming_datastore.save_backups
-    WHERE expires_at<=gaming_datastore.now_seconds() AND deleted_at IS NULL
-    ORDER BY expires_at FOR UPDATE SKIP LOCKED LIMIT $1`,[limit])).rows;
-   // Retention tombstones are durable and safe even when the provider is down.
+   const due=(await c.query(`SELECT account_id,game_id,backup_id,provider_id,object_ref
+    FROM gaming_datastore.save_backups WHERE expires_at<=gaming_datastore.now_seconds()
+    AND deleted_at IS NULL ORDER BY expires_at FOR UPDATE SKIP LOCKED LIMIT $1`,[limit])).rows;
    for(const a of due){
     await c.query(`UPDATE gaming_datastore.save_backups SET deleted_at=gaming_datastore.now_seconds()
-      WHERE account_id=$1 AND game_id=$2 AND backup_id=$3`,[a.account_id,a.game_id,a.backup_id]);
+     WHERE account_id=$1 AND game_id=$2 AND backup_id=$3`,[a.account_id,a.game_id,a.backup_id]);
+    const shared=(await c.query(`SELECT 1 FROM gaming_datastore.save_references
+      WHERE provider_id=$1 AND object_ref=$2 LIMIT 1`,[a.provider_id,a.object_ref])).rows;
+    const retained=(await c.query(`SELECT 1 FROM gaming_datastore.save_backups
+      WHERE provider_id=$1 AND object_ref=$2 AND deleted_at IS NULL LIMIT 1`,
+      [a.provider_id,a.object_ref])).rows;
+    if(!shared.length&&!retained.length)
+     await c.query(`INSERT INTO gaming_datastore.save_deletion_jobs
+       (account_id,game_id,job_id,provider_id,object_ref,reason)
+       VALUES($1,$2,$3,$4,$5,'RETENTION') ON CONFLICT DO NOTHING`,
+       [a.account_id,a.game_id,randomUUID(),a.provider_id,a.object_ref]);
    }
    return due.length;
   });

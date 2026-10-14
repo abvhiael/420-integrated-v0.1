@@ -145,6 +145,29 @@ export class CanonicalGamingFinality420 {
   return Object.freeze({accepted:true,kind:'MIGRATION_APPLIED',chainId:this.#chain,
    blockHash:a.hash,evidenceDigest:D({claimId,growerId,guestStateCommitment,payloadHash,blockHash:a.hash,r})});
  }
+ async missionReward({wallet,missionId,amount}={}){
+  if(!A(wallet)||!H(missionId)||!U(String(amount)))deny('r057-reward-invalid');
+  const anchor=await this.#anchor();
+  const p=await this.#call(anchor,'identity','profileIdOf(bytes32,address)',[this.#game,wallet]);
+  if(p.length!==1||N(p[0])===0n)deny('r057-reward-owner-missing');
+  const m=await this.#call(anchor,'mission','mission(address,bytes32)',[wallet,missionId]);
+  if(m.length!==9||N(m[0])!==3n||N(m[4])===0n||N(m[8])!==BigInt(amount))
+   deny('r057-mission-unqualified');
+  return Object.freeze({accepted:true,kind:'MISSION_REWARD',blockHash:anchor.hash,
+   chainId:this.#chain,evidenceDigest:D({wallet,missionId,amount,m,profile:p,blockHash:anchor.hash})});
+ }
+ async progressionReward({wallet,trackId,amount}={}){
+  if(!A(wallet)||!H(trackId)||!U(String(amount)))deny('r057-reward-invalid');
+  const a=await this.#anchor();
+  const p=await this.#call(a,'identity','profileIdOf(bytes32,address)',[this.#game,wallet]);
+  if(p.length!==1||N(p[0])===0n)deny('r057-reward-owner-missing');
+  const progress=await this.#call(a,'progression','progress(address,bytes32)',[wallet,trackId]);
+  const track=await this.#call(a,'progression','track(bytes32)',[trackId]);
+  if(progress.length!==2||track.length!==6||N(progress[1])!==1n||
+   N(track[4])!==BigInt(amount))deny('r057-progression-unqualified');
+  return Object.freeze({accepted:true,kind:'PROGRESSION_REWARD',blockHash:a.hash,
+   chainId:this.#chain,evidenceDigest:D({wallet,trackId,amount,progress,track,profile:p,blockHash:a.hash})});
+ }
  async reward({name,signature,args,expectedWords}={}){
   if(!['mission','progression','harvest'].includes(name)||!this.#contracts[name]||
    !Array.isArray(this.#contracts[name].allowedReadSignatures)||

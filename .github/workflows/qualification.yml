@@ -63,6 +63,7 @@ on:
       - 'docs/bnb/BNB-3.12-PHASE3-LEVEL3-CLOSEOUT.md'
   pull_request:
     paths:
+      - 'docs/rideshare/**'
       - 'consensus/**'
       - 'execution/**'
       - 'integration/**'

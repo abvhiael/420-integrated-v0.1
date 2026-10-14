@@ -1,0 +1,49 @@
+name: DOOBR R03.6 Retailer Client Level 1
+on:
+  push:
+    branches: [roadmap/doobr-bc-vancouver-infrastructure]
+    paths: ['doobr/retailer_queue.py','doobr/storage/tests/test_retailer_queue.py','web/doobr/**','.github/workflows/doobr-r03-6-level1.yml']
+  pull_request:
+    paths: ['doobr/retailer_queue.py','doobr/storage/tests/test_retailer_queue.py','web/doobr/**','.github/workflows/doobr-r03-6-level1.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  retailer:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Exact SHA before
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Retailer ownership, intake, dispatch and exception privacy
+        run: |
+          python3 -m py_compile doobr/retailer_queue.py
+          python3 -m unittest discover -s doobr/storage/tests -p test_retailer_queue.py -v
+          python3 -m unittest discover -s doobr/storage/tests -p test_courier_journey.py -v
+      - name: Retailer client and retained web checks
+        run: |
+          cd web/doobr
+          node scripts/test-retailer.mjs
+          node scripts/test-journey.mjs
+          node scripts/test-courier.mjs
+          node scripts/test-consumer.mjs
+          node scripts/test-coverage.mjs
+          npm run check
+          npm run build
+          test -f dist/retailer.mjs
+      - name: Exact SHA after
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"

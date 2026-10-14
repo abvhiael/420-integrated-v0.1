@@ -1,0 +1,38 @@
+name: DOOBR R03.2 Coverage Level 1
+on:
+  push:
+    branches: [roadmap/doobr-bc-vancouver-infrastructure]
+    paths: ['web/doobr/**','docs/doobr/DOOBR-R03-2-*','.github/workflows/doobr-r03-2-level1.yml']
+  pull_request:
+    paths: ['web/doobr/**','docs/doobr/DOOBR-R03-2-*','.github/workflows/doobr-r03-2-level1.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  public-coverage:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Exact SHA before
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build official site and retained R03.1 checks
+        run: |
+          cd web/doobr
+          npm run check
+          npm run build
+          node scripts/test-coverage.mjs
+          test -f dist/coverage.mjs
+          test -f dist/coverage-ui.mjs
+      - name: Exact SHA after
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"

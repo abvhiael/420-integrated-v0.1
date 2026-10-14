@@ -1,0 +1,95 @@
+name: DOOBR R03.12 Clients Travel Level 2
+on:
+  push:
+    branches: [roadmap/doobr-bc-vancouver-infrastructure]
+    paths: ['.github/workflows/doobr-r03-12-level2.yml','web/doobr/**','web/travel/**','mobile/doobr/**','doobr/mobile_*.py','doobr/travel_card.py','doobr/storage/tests/test_mobile_*.py','doobr/storage/tests/test_travel_card.py','tests/browser/doobr-r03-11.spec.mjs','tests/browser/doobr_static_server.py','playwright.doobr.config.mjs']
+  pull_request:
+    paths: ['.github/workflows/doobr-r03-12-level2.yml','web/doobr/**','web/travel/**','mobile/doobr/**','doobr/mobile_*.py','doobr/travel_card.py','doobr/storage/tests/test_mobile_*.py','doobr/storage/tests/test_travel_card.py','tests/browser/doobr-r03-11.spec.mjs','tests/browser/doobr_static_server.py','playwright.doobr.config.mjs']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  clients-travel:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact SHA before
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Retained mobile, client and Travel security regressions
+        run: |
+          set -euo pipefail
+          for pattern in test_mobile_security.py test_mobile_push.py test_mobile_offline.py test_mobile_replay_api.py test_mobile_staging.py test_staging_schema.py test_travel_card.py; do
+            python3 -m unittest discover -s doobr/storage/tests -p "$pattern" -v
+          done
+      - name: Public DOOBr site and Travel denial integration
+        run: |
+          node web/doobr/scripts/qualify.mjs
+          node web/doobr/scripts/build.mjs
+          python3 - <<'PY'
+          from pathlib import Path
+          site=Path('web/travel/index.html').read_text()
+          assert 'id="doobr-coarse-presence"' in site
+          assert 'DOOBr checkout · Unavailable</button>' in site
+          assert 'https://doobr.420integrated.org/coverage' in site
+          PY
+      - name: Browser and mobile emulation journey qualification
+        run: |
+          npm install --no-save --no-package-lock @playwright/test@1.56.1
+          npx playwright install --with-deps chromium
+          npx playwright test --config=playwright.doobr.config.mjs --reporter=line
+      - name: Verify exact SHA after
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"
+  android:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+      - name: Android SDK pinned build
+        run: |
+          SDK="${ANDROID_HOME:-$ANDROID_SDK_ROOT}"
+          MANAGER="$SDK/cmdline-tools/latest/bin/sdkmanager"
+          if [ ! -x "$MANAGER" ]; then MANAGER="$SDK/cmdline-tools/16.0/bin/sdkmanager"; fi
+          "$MANAGER" --install 'platforms;android-35' 'build-tools;35.0.0'
+          gradle -p mobile/doobr/android :app:assembleDebug :app:assembleRelease --no-daemon
+      - name: Exact SHA after
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"
+  ios:
+    runs-on: macos-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: iOS unsigned simulator build
+        run: xcodebuild -project mobile/doobr/ios/DOOBr.xcodeproj -scheme DOOBr -configuration Debug -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO build
+      - name: Exact SHA after
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"

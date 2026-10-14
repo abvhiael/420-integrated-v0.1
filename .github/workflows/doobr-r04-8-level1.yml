@@ -1,0 +1,36 @@
+name: DOOBR R04.8 Canonical Routing Level 1
+on:
+  push:
+    branches: [roadmap/doobr-bc-vancouver-infrastructure]
+    paths: ['doobr/canonical_routing.py','doobr/storage/tests/test_canonical_routing.py','.github/workflows/doobr-r04-8-level1.yml']
+  pull_request:
+    paths: ['doobr/canonical_routing.py','doobr/storage/tests/test_canonical_routing.py','.github/workflows/doobr-r04-8-level1.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  canonical-routing:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Exact SHA before
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Canonical routing and retained outbox regression
+        run: |
+          python3 -m py_compile doobr/canonical_routing.py
+          python3 -m unittest discover -s doobr/storage/tests -p test_canonical_routing.py -v
+          python3 -m unittest discover -s doobr/storage/tests -p test_outbox.py -v
+          python3 scripts/verify-doobr-r04-1.py
+      - name: Exact SHA after
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"

@@ -1,0 +1,44 @@
+name: DOOBR R03.3 Consumer Level 1
+on:
+  push:
+    branches: [roadmap/doobr-bc-vancouver-infrastructure]
+    paths: ['doobr/consumer_view.py','doobr/storage/tests/test_consumer_view.py','web/doobr/**','docs/doobr/DOOBR-R03-3-*','.github/workflows/doobr-r03-3-level1.yml']
+  pull_request:
+    paths: ['doobr/consumer_view.py','doobr/storage/tests/test_consumer_view.py','web/doobr/**','docs/doobr/DOOBR-R03-3-*','.github/workflows/doobr-r03-3-level1.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  consumer:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Exact SHA before
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Consumer ownership, denial, consent and receipt assertions
+        run: |
+          python3 -m py_compile doobr/consumer_view.py
+          python3 -m unittest discover -s doobr/storage/tests -p test_consumer_view.py -v
+      - name: Web consumer and retained site regressions
+        run: |
+          cd web/doobr
+          node scripts/test-consumer.mjs
+          npm run check
+          npm run build
+          node scripts/test-coverage.mjs
+      - name: Exact SHA after
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"

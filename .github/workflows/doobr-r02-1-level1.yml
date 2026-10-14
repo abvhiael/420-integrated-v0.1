@@ -1,0 +1,59 @@
+name: DOOBR R02.1 Persistence Level 1
+on:
+  push:
+    branches: [roadmap/doobr-bc-vancouver-infrastructure]
+    paths: ['doobr/storage/**', 'docs/doobr/DOOBR-R02-1-**', '.github/workflows/doobr-r02-1-level1.yml']
+  pull_request:
+    paths: ['doobr/storage/**', 'docs/doobr/DOOBR-R02-1-**', '.github/workflows/doobr-r02-1-level1.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  database:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgis/postgis:15-3.4
+        env:
+          POSTGRES_PASSWORD: ci-only-password
+          POSTGRES_USER: postgres
+          POSTGRES_DB: doobr_r02_1
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres -d doobr_r02_1"
+          --health-interval 10s --health-timeout 5s --health-retries 10
+    env:
+      PGHOST: localhost
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: ci-only-password
+      PGDATABASE: doobr_r02_1
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Assert exact qualification SHA
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install encryption library
+        run: python -m pip install 'cryptography==44.0.3'
+      - name: Cryptographic envelope unit and adversarial tests
+        run: python -m unittest discover -s doobr/storage/tests -p test_crypto.py -v
+      - name: Apply Postgres / PostGIS migration
+        run: psql -v ON_ERROR_STOP=1 -f doobr/storage/migrations/0001_initial.up.sql
+      - name: RLS and tenant boundary tests
+        run: psql -v ON_ERROR_STOP=1 -f doobr/storage/tests/r02_1_rls.sql
+      - name: Verify controlled migration rollback in isolated CI database
+        run: |
+          psql -v ON_ERROR_STOP=1 -f doobr/storage/migrations/0001_initial.down.sql
+          psql -Atc "SELECT count(*) FROM pg_namespace WHERE nspname='doobr_private'" | grep -x 0
+          psql -v ON_ERROR_STOP=1 -f doobr/storage/migrations/0001_initial.up.sql
+      - name: Revalidate exact SHA
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"

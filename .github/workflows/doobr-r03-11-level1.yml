@@ -1,0 +1,40 @@
+name: DOOBR R03.11 Browser And Device Emulation Level 1
+on:
+  push:
+    branches: [roadmap/doobr-bc-vancouver-infrastructure]
+    paths: ['tests/browser/doobr-r03-11.spec.mjs','tests/browser/doobr_static_server.py','playwright.doobr.config.mjs','web/doobr/**','web/travel/index.html','.github/workflows/doobr-r03-11-level1.yml']
+  pull_request:
+    paths: ['tests/browser/doobr-r03-11.spec.mjs','playwright.doobr.config.mjs','web/doobr/**','web/travel/index.html','.github/workflows/doobr-r03-11-level1.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact SHA
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned Playwright runner and Chromium
+        run: |
+          npm install --no-save --no-package-lock @playwright/test@1.56.1
+          npx playwright install --with-deps chromium
+      - name: DOOBr browser, mobile viewport and denial journeys
+        run: npx playwright test --config=playwright.doobr.config.mjs --reporter=line
+      - name: DOOBr shell integrity
+        run: |
+          node web/doobr/scripts/qualify.mjs
+          node web/doobr/scripts/build.mjs
+      - name: Verify exact SHA after
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"

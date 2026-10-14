@@ -1,0 +1,38 @@
+name: DOOBR R05.1 Authorization Threats Level 1
+on:
+  push:
+    branches: [roadmap/doobr-bc-vancouver-infrastructure]
+    paths: ['doobr/storage/tests/test_r05_1_authorization_threats.py','.github/workflows/doobr-r05-1-level1.yml']
+  pull_request:
+    paths: ['doobr/storage/tests/test_r05_1_authorization_threats.py','.github/workflows/doobr-r05-1-level1.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  authorization-threats:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Exact implementation SHA before
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Authorization adversarial and retained security qualification
+        run: |
+          set -euo pipefail
+          python3 -m py_compile doobr/auth.py doobr/storage/tests/test_r05_1_authorization_threats.py
+          for suite in test_r05_1_authorization_threats.py test_auth.py test_wallet_consent.py test_provenance_adapter.py test_provider_registry_adapter.py test_mobile_replay_api.py; do
+            python3 -m unittest discover -s doobr/storage/tests -p "$suite" -v
+          done
+          python3 scripts/verify-doobr-r04-1.py
+      - name: Exact implementation SHA after
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"

@@ -31,3 +31,35 @@ test('R05.6 forged topics, padded address, short data and zero grower fail close
  assert.throws(()=>decodeGamingEvent420({topics:[...topics.slice(0,3),h('f')],data}),/event-invalid-address-padding/);
  assert.throws(()=>decodeGamingEvent420({topics:[GAMING_EVENT_TOPICS420.MigrationClaimBound,claim,h('0'),h('a')],data:'0x'}),/event-invalid-uint64/);
 });
+
+test('R05.6 shared Gaming GameRegistry, Identity and Entitlement emitted ABI conformance',()=>{
+ const game=h('c'),profile=h('f'),metadata=h('d');
+ const status=decodeGamingEvent420({topics:[GAMING_EVENT_TOPICS420.GameStatusChanged,game],
+  data:'0x'+'0'.repeat(63)+'1'});
+ assert.equal(status.payload.active,true);assert.equal(gamingEventContract420(status.kind),'games');
+ assert.throws(()=>decodeGamingEvent420({topics:[GAMING_EVENT_TOPICS420.GameStatusChanged,game],
+  data:'0x'+'0'.repeat(63)+'2'}),/event-invalid-bool/);
+ const created=decodeGamingEvent420({topics:[GAMING_EVENT_TOPICS420.GameProfileCreated,profile,game,
+  '0x'+word(wallet)],data:'0x'+'0'.repeat(64)});
+ assert.equal(created.payload.externalProfileCommitment,'0x'+'0'.repeat(64));
+ assert.equal(created.payload.account,wallet);
+ const entitled=decodeGamingEvent420({topics:[GAMING_EVENT_TOPICS420.EntitlementIssued,h('9'),profile,game],
+  data:'0x'+word(h('a'))+word(h('b'))});
+ assert.equal(entitled.payload.profileId,profile);assert.equal(gamingEventContract420(entitled.kind),'entitlements');
+ const revoked=decodeGamingEvent420({topics:[GAMING_EVENT_TOPICS420.EntitlementRevoked,h('9')],data:'0x'});
+ assert.equal(revoked.payload.entitlementId,h('9'));
+ const registered=decodeGamingEvent420({topics:[GAMING_EVENT_TOPICS420.GameRegistered,game,
+  '0x'+word(wallet)],data:'0x'+word(metadata)});
+ assert.equal(registered.payload.operator,wallet);
+});
+test('R05.6 cross-game attestation and HC player entitlement signatures',()=>{
+ const game=h('c'),profile=h('f'),attestation=h('3'),grower='0x'+BigInt(12).toString(16).padStart(64,'0');
+ const a=decodeGamingEvent420({topics:[GAMING_EVENT_TOPICS420.AttestationIssued,attestation,game,profile],
+  data:'0x'+word(h('a'))+word(h('b'))+word(h('e'))+BigInt(100).toString(16).padStart(64,'0')});
+ assert.equal(a.payload.validUntil,'100');assert.equal(gamingEventContract420(a.kind),'crossGame');
+ const revoked=decodeGamingEvent420({topics:[GAMING_EVENT_TOPICS420.AttestationRevoked,attestation],data:'0x'});
+ assert.equal(revoked.payload.attestationId,attestation);
+ const bound=decodeGamingEvent420({topics:[GAMING_EVENT_TOPICS420.PlayerEntitlementBound,grower,h('a'),h('b')],
+  data:'0x'+word(h('9'))});
+ assert.equal(bound.payload.growerId,'12');assert.equal(gamingEventContract420(bound.kind),'bridge');
+});

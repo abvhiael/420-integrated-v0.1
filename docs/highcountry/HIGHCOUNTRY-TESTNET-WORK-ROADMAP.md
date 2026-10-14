@@ -189,3 +189,14 @@ Repository-side R05.9 adds shared DB-atomic per-account/game/action HMAC-based r
 | HC-R05.9-T05 | Live security review, threat modeling, adversarial concurrent sessions, denial-of-service/anti-bot abuse, HTTP boundaries and release approval |
 
 **All R05.9 official-testnet/operational gates remain OPEN.** Local PostgreSQL and mock policy-verifier tests cannot substitute for independent live production acceptance; these do not block isolated R05.9 repository Level 1 qualification.
+
+
+## R06.1 — real browser shell external acceptance (OPEN / TESTNET-GATED)
+
+Repository R06.1 delivers a real static web app package, accessible routed game shell, explicit offline/connected runtime, actual JSON-RPC chain detection and honest unavailable/wrong-chain states. The build/server never fill unresolved deployment addresses with placeholders. R06.1 **does not** claim playable cultivation; that belongs to R06.2 and later steps.
+
+- **HC-R06.1-T01 OPEN:** Approved and independently reviewed deployed address/chain/gameId manifest and actual HTTPS RPC/API deployment with verified provenance; deployment template currently contains unresolved/null claims.
+- **HC-R06.1-T02 OPEN:** Actual deployed browser cross-origin, CSP, HTTPS, accessibility/device, performance and offline/outage tests with qualified API and independent RPC operators.
+- **HC-R06.1-T03 OPEN:** Release deployment and operator/config rotation approval. No client secret, wallet key, raw save, or chain-wide wallet activity in public configuration.
+
+These external checks are not represented as local repository Level 1 results.

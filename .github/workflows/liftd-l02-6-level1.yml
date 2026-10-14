@@ -3,6 +3,8 @@ on:
   pull_request:
     paths:
       - 'rideshare/src/driver-onboarding.mjs'
+      - 'rideshare/src/driver-onboarding-review.mjs'
+      - 'rideshare/test/driver-onboarding-review.test.mjs'
       - 'rideshare/src/postgres-driver-onboarding.mjs'
       - 'rideshare/migrations/008_driver_onboarding.sql'
       - 'rideshare/test/postgres/driver-onboarding.test.mjs'
@@ -52,8 +54,9 @@ jobs:
       - run: npm ci --prefix rideshare --ignore-scripts
       - run: |
           node --check rideshare/src/driver-onboarding.mjs
+          node --check rideshare/src/driver-onboarding-review.mjs
           node --check rideshare/src/postgres-driver-onboarding.mjs
           node --check rideshare/src/http.mjs
-          node --test rideshare/test/driver-onboarding.test.mjs rideshare/test/auth.test.mjs
+          node --test rideshare/test/driver-onboarding.test.mjs rideshare/test/driver-onboarding-review.test.mjs rideshare/test/auth.test.mjs
           node --test rideshare/test/postgres/driver-onboarding.test.mjs
           cd rideshare/web && npm run check

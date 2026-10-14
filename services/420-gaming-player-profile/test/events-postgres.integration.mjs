@@ -172,6 +172,43 @@ test('R05.6 real durable PostgreSQL cursor/dedupe/reorg/finality and scoped quer
    assert.equal((await indexer().finalize({contract,blockNumber:'4',blockHash:newHash})).finalized,2);
    onlyIssueScope=false;
   });
+  await t.test('real wallet authority scopes Identity, Entitlement issue/revoke and CrossGame attestations',async()=>{
+   const resolver=createGamingEventScopeResolver420({pool:root,chainId:'420',gameId:G});
+   const word=x=>x.slice(2).padStart(64,'0');
+   const profileId=h('7'),entitlementId=h('9'),attestationId=h('b');
+   const identityBlock={number:'1',hash:h('b'),parentHash:h('c'),logs:[{
+    address:C.identity,blockHash:h('b'),transactionHash:h('d'),transactionIndex:'0',logIndex:'0',
+    topics:[GAMING_EVENT_TOPICS420.GameProfileCreated,profileId,G,'0x'+word(wallet)],
+    data:'0x'+'0'.repeat(64)}]};
+   let current=identityBlock;
+   const cross=new DurableGamingEventIndexer420({operatorPool:root,chainId:'420',gameId:G,contracts:C,
+    fetchBlock:async({number})=>({...current,number}),
+    resolveEventScope:resolver,verifyCanonicalBlock:async({blockHash})=>true,
+    authorizeQuery:async({accountId,gameId,authority})=>accountId==='alice'&&gameId===G&&authority==='signed-session'});
+   assert.equal((await cross.ingest({contract:C.identity,startBlock:'1'})).ingested,1);
+   await cross.finalize({contract:C.identity,blockNumber:'1',blockHash:h('b')});
+   current={number:'1',hash:h('c'),parentHash:h('d'),logs:[{
+    address:C.entitlements,blockHash:h('c'),transactionHash:h('e'),transactionIndex:'0',logIndex:'0',
+    topics:[GAMING_EVENT_TOPICS420.EntitlementIssued,entitlementId,profileId,G],
+    data:'0x'+word(h('4'))+word(h('5'))}]};
+   await cross.ingest({contract:C.entitlements,startBlock:'1'});
+   await cross.finalize({contract:C.entitlements,blockNumber:'1',blockHash:h('c')});
+   current={number:'2',hash:h('d'),parentHash:h('c'),logs:[{
+    address:C.entitlements,blockHash:h('d'),transactionHash:h('f'),transactionIndex:'0',logIndex:'0',
+    topics:[GAMING_EVENT_TOPICS420.EntitlementRevoked,entitlementId],data:'0x'}]};
+   await cross.ingest({contract:C.entitlements,startBlock:'2'});
+   await cross.finalize({contract:C.entitlements,blockNumber:'2',blockHash:h('d')});
+   current={number:'1',hash:h('e'),parentHash:h('f'),logs:[{
+    address:C.crossGame,blockHash:h('e'),transactionHash:h('a'),transactionIndex:'0',logIndex:'0',
+    topics:[GAMING_EVENT_TOPICS420.AttestationIssued,attestationId,G,profileId],
+    data:'0x'+word(h('4'))+word(h('5'))+word(h('6'))+BigInt(100).toString(16).padStart(64,'0')}]};
+   await cross.ingest({contract:C.crossGame,startBlock:'1'});
+   await cross.finalize({contract:C.crossGame,blockNumber:'1',blockHash:h('e')});
+   const result=await cross.query({accountId:'alice',gameId:G,authority:'signed-session'});
+   for(const type of ['GameProfileCreated','EntitlementIssued','EntitlementRevoked','AttestationIssued'])
+    assert.ok(result.some(e=>e.event_kind===type),'unscoped shared Gaming event '+type);
+   await assert.rejects(()=>cross.query({accountId:'bob',gameId:G,authority:'signed-session'}),/events-query-denied/);
+  });
   await t.test('digest drift fails closed',async()=>{
    await root.query("UPDATE gaming_datastore.event_ingestion_schema SET digest=repeat('f',64)");
    await assert.rejects(()=>indexer().query({accountId:'alice',gameId:G,authority:'signed-session'}),/events-schema-drift/);

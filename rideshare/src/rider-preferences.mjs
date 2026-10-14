@@ -35,8 +35,10 @@ export function createRiderPreferenceService({authorize,store}){
       const row=await store.read(accountId);
       return Object.freeze({preferences:validatePreferences(row?.preferences??{}),revision:row?.revision??0});
     },
-    async update(token,accountId,{preferences,expectedRevision}={}){
+    async update(token,accountId,request){
       await check(token,accountId);
+      if(!isRecord(request)||Reflect.ownKeys(request).some(k=>typeof k!=='string'||!['preferences','expectedRevision'].includes(k)||!Object.hasOwn(Object.getOwnPropertyDescriptor(request,k),'value')))fail('INVALID_REQUEST');
+      const {preferences,expectedRevision}=request;
       if(!Number.isSafeInteger(expectedRevision)||expectedRevision<0)fail('INVALID_REVISION');
       const valid=validatePreferences(preferences);
       const wrote=await store.compareAndSwap(accountId,expectedRevision,valid);

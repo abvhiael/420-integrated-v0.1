@@ -20,7 +20,7 @@ const logs=(blockHash)=>[{address:contract,blockHash,transactionHash:tx,
  transactionIndex:'0',logIndex:'0',
  topics:[GAMING_EVENT_TOPICS420.MigrationClaimConsumed,h('8'),profile],data:'0x'}];
 const chain={number:'1',hash:block1,parentHash:parent,logs:logs(block1)};
-let canonical=new Set([block1]),permission=true,callCount=0,onlyIssueScope=false;
+let canonical=new Set([block1]),permission=true,callCount=0,onlyIssueScope=false,revokeOnSecond=false,authChecks=0;
 const canonicalByHeight=new Map([['1',{...chain}]]);
 const indexer=()=>new DurableGamingEventIndexer420({operatorPool:root,
  chainId:'420',gameId:G,contracts:C,
@@ -30,7 +30,10 @@ const indexer=()=>new DurableGamingEventIndexer420({operatorPool:root,
   return onlyIssueScope&&kind==='MigrationClaimConsumed'?null:{accountId:'alice',gameId:G};
  },
  verifyCanonicalBlock:async ({blockHash})=>canonical.has(blockHash),
- authorizeQuery:async ({accountId,gameId,authority})=>permission&&accountId==='alice'&&gameId===G&&authority==='signed-session'
+ authorizeQuery:async ({accountId,gameId,authority})=>{
+  authChecks++;
+  return permission&&(!revokeOnSecond||authChecks===1)&&accountId==='alice'&&gameId===G&&authority==='signed-session';
+ }
 });
 test('R05.6 real durable PostgreSQL cursor/dedupe/reorg/finality and scoped queries',async t=>{
  try{
@@ -88,6 +91,10 @@ test('R05.6 real durable PostgreSQL cursor/dedupe/reorg/finality and scoped quer
    assert.equal((await worker.finalize({contract,blockNumber:'1',blockHash:block1})).finalized,1);
    const events=await indexer().query({accountId:'alice',gameId:G,authority:'signed-session'});
    assert.equal(events.length,1);assert.equal(events[0].event_kind,'MigrationClaimConsumed');
+   authChecks=0;revokeOnSecond=true;
+   await assert.rejects(()=>indexer().query({accountId:'alice',gameId:G,authority:'signed-session'}),
+    /events-query-revoked/);
+   revokeOnSecond=false;
    permission=false;
    await assert.rejects(()=>indexer().query({accountId:'alice',gameId:G,authority:'signed-session'}),/events-query-denied/);
    permission=true;

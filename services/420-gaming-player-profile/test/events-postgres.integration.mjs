@@ -207,6 +207,15 @@ test('R05.6 real durable PostgreSQL cursor/dedupe/reorg/finality and scoped quer
    const result=await cross.query({accountId:'alice',gameId:G,authority:'signed-session'});
    for(const type of ['GameProfileCreated','EntitlementIssued','EntitlementRevoked','AttestationIssued'])
     assert.ok(result.some(e=>e.event_kind===type),'unscoped shared Gaming event '+type);
+   const first=await cross.query({accountId:'alice',gameId:G,authority:'signed-session',limit:1});
+   assert.equal(first.length,1);
+   const last=first[0],before={blockNumber:String(last.block_number),txIndex:String(last.tx_index),
+    logIndex:String(last.log_index),contract:last.contract};
+   const next=await cross.query({accountId:'alice',gameId:G,authority:'signed-session',limit:1,before});
+   assert.equal(next.length,1);
+   assert.notEqual(next[0].tx_hash+next[0].contract,first[0].tx_hash+first[0].contract);
+   await assert.rejects(()=>cross.query({accountId:'alice',gameId:G,authority:'signed-session',
+    before:{...before,contract:'0x'+'f'.repeat(40)}}),/events-query-cursor-invalid/);
    await assert.rejects(()=>cross.query({accountId:'bob',gameId:G,authority:'signed-session'}),/events-query-denied/);
   });
   await t.test('digest drift fails closed',async()=>{

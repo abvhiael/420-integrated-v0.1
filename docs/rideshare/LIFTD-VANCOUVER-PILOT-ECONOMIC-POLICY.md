@@ -1,6 +1,6 @@
 # LIFTd — adopted Vancouver pilot economic policy
 
-Status: adopted by the repository owner on 2026-10-13. This is a product policy decision; pricing/consent implementation is addressed in L01.7; L01.8 scoped Pay/Wallet and actual compensation projections are repository-qualified; live settlement/payroll acceptance remains pending and LC-01 holds development execution. Operating-cost validation and independent launch acceptance remain required. Policy version: v1.
+Status: adopted by the repository owner on 2026-10-13. This is a product policy decision; pricing/consent implementation is addressed in L01.7; L01.8 scoped Pay/Wallet and actual compensation projections are repository-qualified; live settlement/payroll acceptance remains pending and canonical settlement acceptance holds development execution. Operating-cost validation and independent launch acceptance remain required. Policy version: v2 (owner-approved development allocation revision to 10%; all other adopted values unchanged).
 
 ## Market and fare
 
@@ -34,13 +34,13 @@ For nonnegative fare remainder, preliminary earnings = 0.80 × (F - A); prelimin
 
 ## Development compensation
 
-Allocate 20% of collected LIFTd platform commission revenue to the canonical Development Compensation Vault, after attributable refunds and mandatory driver top-ups, before discretionary operating expenses. Exclude taxes, tips, driver earnings, allowances and external pass-through charges. The remaining 80% supports insurance, processing, support, infrastructure, compliance and reserves.
+Allocate 10% of collected LIFTd platform commission revenue to the canonical Development Compensation Vault, after attributable refunds and mandatory driver top-ups, before discretionary operating expenses. Exclude taxes, tips, driver earnings, allowances and external pass-through charges. The remaining 90% supports insurance, processing, support, infrastructure, compliance and reserves.
 
 Development allocation cannot be negative or funded by withholding driver obligations. When adjusted platform revenue is nonpositive, development distribution is zero and the deficit remains LIFTd's responsibility. Vault recipient/controller addresses are not selected or fabricated by this policy. Settlement implementation must use canonical authority, integer arithmetic, explicit rounding and conservation; rounding residue remains accounted for.
 
 ## Reference example
 
-10 passenger km / 20 passenger minutes, plus 2 pickup km / 5 pickup minutes: F = CAD 31.00; A = CAD 5.40; remainder = CAD 25.60; driver earnings = CAD 20.48; driver total before tips = CAD 25.88; preliminary platform revenue = CAD 5.12. The CAD 25/hour guarantee for 25 engaged minutes is approximately CAD 10.42, so no top-up is required. Development allocation rounds to CAD 1.02; platform operating remainder CAD 4.10. Taxes and external charges omitted.
+10 passenger km / 20 passenger minutes, plus 2 pickup km / 5 pickup minutes: F = CAD 31.00; A = CAD 5.40; remainder = CAD 25.60; driver earnings = CAD 20.48; driver total before tips = CAD 25.88; preliminary platform revenue = CAD 5.12. The CAD 25/hour guarantee for 25 engaged minutes is approximately CAD 10.42, so no top-up is required. Development allocation rounds to CAD 0.51; platform operating remainder CAD 4.61. Taxes and external charges omitted.
 
 ## Implementation and qualification
 

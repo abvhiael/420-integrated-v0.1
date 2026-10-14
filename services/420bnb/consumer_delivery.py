@@ -57,6 +57,8 @@ def configure(conn, consumer, event_types, *, active, expected_revision, actor, 
 
 def _subscription(conn, consumer):
     outbox._identity(consumer, outbox.CONSUMER, 'CONSUMER_INVALID')
+    # Same registry-before-row order as configure/enroll; never invert these locks.
+    conn.execute('SELECT pg_advisory_xact_lock_shared(420503)')
     row = conn.execute('SELECT revision,active FROM bnb_consumer_subscription WHERE consumer=%s FOR SHARE', (consumer,)).fetchone()
     if not row or not row[1]:
         raise DeliveryError('CONSUMER_REVOKED')

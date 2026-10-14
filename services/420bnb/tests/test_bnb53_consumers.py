@@ -462,3 +462,29 @@ def test_autocommit_cannot_create_partial_enrollment_or_receipt_state(db, operat
             actions[operation](c)
         assert c.execute('SELECT count(*) FROM bnb_consumer_subscription').fetchone() == (0,)
         assert c.execute('SELECT count(*) FROM bnb_consumer_delivery').fetchone() == (0,)
+
+
+def test_configure_and_worker_claim_use_consistent_registry_lock_order(db):
+    import time
+    enrolled(db, ('only-fixture',))
+    label = 'bnb53-lock-' + uuid4().hex
+    def connect_worker():
+        c = db()
+        c.execute("SELECT set_config('application_name',%s,false)", (label,))
+        c.commit()
+        return c
+    def run_worker():
+        with pytest.raises(outbox.DeliveryError, match='CONSUMER_REVOKED'):
+            worker.Supervisor(connect_worker, worker.LocalValidationSink(connect_worker), consumer='only-fixture').once()
+    with db() as operator, ThreadPoolExecutor(max_workers=1) as pool:
+        operator.execute('SELECT pg_advisory_xact_lock(420503)')
+        future = pool.submit(run_worker)
+        deadline = time.monotonic() + 4
+        while not operator.execute("SELECT EXISTS(SELECT 1 FROM pg_stat_activity WHERE application_name=%s AND wait_event='advisory')", (label,)).fetchone()[0]:
+            assert time.monotonic() < deadline
+            time.sleep(.02)
+        # Worker must not hold the consumer row while it waits for the registry lock.
+        assert delivery.configure(operator, 'only-fixture', [KIND], active=False,
+            expected_revision=1, actor='operator', authorize=lambda *_: True) == 2
+        operator.commit()
+        future.result(timeout=5)

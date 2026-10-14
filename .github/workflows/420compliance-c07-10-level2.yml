@@ -1,0 +1,100 @@
+name: 420Compliance C07.10 Operational Level 2
+on:
+  push:
+    branches: ['audit/420compliance-*']
+    paths:
+      - 'services/complianceauth/**'
+      - 'docs/compliance/C07.10-*'
+      - 'scripts/verify-compliance-c07-9.py'
+      - '.github/workflows/420compliance-c07-10-level2.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: compliance-c0710-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  operational-level2:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:16@sha256:ca0bd484cb98bf4b24eb1010e73fb3fcbd6714d240fbc1a10eea5b7dbecb641d
+        env:
+          POSTGRES_USER: compliance_test
+          POSTGRES_PASSWORD: compliance_test
+          POSTGRES_DB: compliance_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U compliance_test -d compliance_test"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    env:
+      GOTOOLCHAIN: local
+      GOSUMDB: sum.golang.org
+      GOPROXY: https://proxy.golang.org
+      GOFLAGS: -mod=readonly
+      EXPECTED_SHA: ${{ github.sha }}
+      COMPLIANCE_POSTGRES_TEST_DSN: 'postgres://compliance_test:compliance_test@localhost:5432/compliance_test?sslmode=verify-full&sslrootcert=/tmp/c0710-ca.crt&connect_timeout=5'
+    steps:
+      - name: Checkout exact milestone candidate
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Assert exact SHA
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - name: Approved checksummed Go toolchain
+        run: |
+          curl --fail --location --silent --show-error https://go.dev/dl/go1.27.2.linux-amd64.tar.gz -o /tmp/go.tar.gz
+          printf '%s  %s\n' 'ecbadb99091a3f46e31f5f934b068b1864eafa7995211b39eaddf76996045fe5' '/tmp/go.tar.gz' | sha256sum -c -
+          mkdir /tmp/toolchain
+          tar -xzf /tmp/go.tar.gz -C /tmp/toolchain
+          echo /tmp/toolchain/go/bin >> "$GITHUB_PATH"
+      - name: Configure verified PostgreSQL TLS
+        env:
+          PG_SERVICE: ${{ job.services.postgres.id }}
+        run: |
+          openssl req -x509 -newkey rsa:2048 -nodes -keyout /tmp/server.key -out /tmp/server.crt -days 2 -subj '/CN=localhost' -addext 'subjectAltName=DNS:localhost,IP:127.0.0.1'
+          cp /tmp/server.crt /tmp/c0710-ca.crt
+          docker cp /tmp/server.key "$PG_SERVICE:/var/lib/postgresql/data/server.key"
+          docker cp /tmp/server.crt "$PG_SERVICE:/var/lib/postgresql/data/server.crt"
+          docker exec --user root "$PG_SERVICE" chown postgres:postgres /var/lib/postgresql/data/server.key /var/lib/postgresql/data/server.crt
+          docker exec --user root "$PG_SERVICE" chmod 600 /var/lib/postgresql/data/server.key
+          docker exec --user postgres "$PG_SERVICE" psql -U compliance_test -d compliance_test -c "ALTER SYSTEM SET ssl = 'on';"
+          docker exec --user postgres "$PG_SERVICE" psql -U compliance_test -d compliance_test -c "SELECT pg_reload_conf();"
+      - name: Threat-intake and module verification
+        run: |
+          python3 scripts/verify-compliance-c07-9.py
+          python3 scripts/verify-compliance-c07-3.py --self-test
+          go mod download
+          go mod verify
+          go vet ./services/complianceauth
+      - name: Full retained Compliance app-level race and integration tests
+        shell: bash
+        run: |
+          set -o pipefail
+          go test -race ./services/complianceauth -count=1 -v 2>&1 | tee /tmp/c0710-app-tests.log
+          python3 - <<'PY'
+          from pathlib import Path
+          log=Path('/tmp/c0710-app-tests.log').read_text()
+          assert '--- SKIP:' not in log, 'required integration test skipped'
+          for case in ['TestC078IncidentDrills','TestC077OperationalCollectorPostgreSQL','TestC076DecisionGatewayRecoveryGate','TestC076ExternalPostgreSQLMonotonicJournal','TestC075PostgreSQLRetentionHoldsAndPurge','TestC074NetworkPostgreSQLSoak','TestC073ManagedProductionComposition','TestC072DurableJobsLeaseFencing','TestC071PostgreSQLProductionStorage','TestC0512IntegrationLevel2Adversarial']:
+              assert '--- PASS: '+case+' ' in log, 'required retained milestone coverage missing: '+case
+          PY
+      - name: Build manifest and upload evidence
+        run: |
+          python3 - <<'PY'
+          import json,os,hashlib
+          from pathlib import Path
+          files=sorted(Path('services/complianceauth').rglob('*.go'))
+          data={'step':'C07.10','level':2,'status':'CI_CANDIDATE','sha':os.environ['EXPECTED_SHA'],'run':os.environ['GITHUB_RUN_ID'],'files':{str(f):hashlib.sha256(f.read_bytes()).hexdigest() for f in files},'external_pitr':'DEFERRED','independent_review':'NOT_PERFORMED'}
+          Path('/tmp/c0710-level2.json').write_text(json.dumps(data,indent=2)+'\n')
+          PY
+      - name: Retain milestone qualification artifacts
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: compliance-c0710-level2-${{ env.EXPECTED_SHA }}
+          path: |
+            /tmp/c0710-level2.json
+            /tmp/c0710-app-tests.log
+          if-no-files-found: error

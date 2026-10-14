@@ -10,9 +10,21 @@ permissions:
 jobs:
   abuse-operations:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: hc_r059_ci_only
+          POSTGRES_DB: r059_ci
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres -d r059_ci"
+          --health-interval 5s --health-timeout 5s --health-retries 12
     env:
       CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      GAMING_R059_TEST_URL: postgres://postgres:hc_r059_ci_only@localhost:5432/r059_ci
     steps:
       - uses: actions/checkout@v4
         with:
@@ -23,6 +35,12 @@ jobs:
           node-version: '22'
       - name: Verify exact implementation SHA
         run: test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+      - name: Install locked PG driver
+        working-directory: services/420-gaming-player-profile
+        run: npm ci --ignore-scripts
+      - name: Actual PostgreSQL multi-instance quota and RLS qualification
+        working-directory: services/420-gaming-player-profile
+        run: node --test test/r059-postgres.integration.mjs
       - name: R05.9 adversarial security, rate and HTTP
         run: node --test services/420-gaming-player-profile/test/r059-security-operations.test.js
       - name: Retained R05.6 HTTP, R05.7 finality and R05.8 SDK

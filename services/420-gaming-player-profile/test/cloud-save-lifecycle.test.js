@@ -23,7 +23,7 @@ function fixture(){
   saveReference:async revision=>revisions.get(revision??head.revision)??null,
   backupReference:async id=>backups.get(id)??null
  })};
- return {save:new CloudSaveLifecycle420({repository:repo,provider,schemaVersion:7}),objects,revisions,backups,head,calls};
+ return {save:new CloudSaveLifecycle420({repository:repo,provider,schemaVersion:7}),provider,objects,revisions,backups,head,calls};
 }
 test('R05.5 explicit version, bounded size and local schema reject malformed saves',()=>{
  assert.equal(parseLocalSave420({bytes:bytes({room:1}),schemaVersion:7}).schemaVersion,7);
@@ -67,4 +67,22 @@ test('R05.5 independent backup can restore after source object is lost or redact
  assert.equal((await f.save.read()).local.state.saved,1);
  await assert.rejects(()=>f.save.restoreBackup({backupId:'unknown',expectedHead:'2',
   consentId:'c1',schemaLabel:'hc-v7'}),/save-backup-unavailable/);
+});
+
+test('R05.5 backup revoked between provider read and save commit cannot resurrect',async()=>{
+ const f=fixture();
+ const original=await f.save.publish({expectedRevision:'0',consentId:'c1',schemaLabel:'hc-v7',bytes:bytes({saved:1})});
+ const copy=Uint8Array.from(f.objects.get(original.objectRef));
+ f.objects.set('copy-safe',copy);
+ f.backups.set('bk',{backup_id:'bk',source_revision:'1',provider_id:'localfixture',
+  object_ref:'copy-safe',state_hash:original.digest,byte_length:String(copy.length),schema_label:'hc-v7'});
+ const read=f.provider.get;
+ f.provider.get=async ref=>{
+  const blob=await read(ref);
+  if(ref.objectRef==='copy-safe')f.backups.delete('bk'); // concurrent user deletion
+  return blob;
+ };
+ await assert.rejects(()=>f.save.restoreBackup({backupId:'bk',expectedHead:'1',
+  consentId:'c1',schemaLabel:'hc-v7'}),/save-backup-revoked/);
+ assert.equal(f.head.revision,'1');
 });

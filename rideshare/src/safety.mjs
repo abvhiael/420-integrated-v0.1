@@ -49,7 +49,7 @@ export function createSafetyService({pool,store,authenticator,clock=()=>Math.flo
       if(p.role!=='operator')fail('SAFETY_SCOPE_DENIED',403);
       const guard=async()=>{const fresh=await permit(token,'safety.resolve',tripId);if(fresh.role!=='operator'||fresh.subject!==p.subject||fresh.accountId!==p.accountId||fresh.recoveryEpoch!==p.recoveryEpoch)fail('SAFETY_SCOPE_DENIED',403);};
       const result=await store.execute({actorId:p.subject,commandId:input.commandId,tripId,action:'safety_resolve',request:input,guard,beforeLock:paymentService?.lock,
-        afterWrite:async(client,trip)=>{if(paymentService)await paymentService.recordLifecycle(client,trip,'safety_resolve',time());}},async(trip,client)=>{
+        afterWrite:async(client,trip)=>{await client.query("UPDATE liftd.assignment_leases SET state='CLOSED' WHERE trip_id=$1 AND state IN ('PENDING','ACCEPTED')",[trip.id]);if(paymentService)await paymentService.recordLifecycle(client,trip,'safety_resolve',time());}},async(trip,client)=>{
           if(trip.state!=='IN_PROGRESS')fail('ACTIVE_TRIP_REQUIRED');
           const incident=(await client.query('SELECT * FROM liftd.safety_incidents WHERE incident_id=$1 AND trip_id=$2',[input.incidentId,tripId])).rows[0];
           if(!incident)fail('INCIDENT_REQUIRED',403);

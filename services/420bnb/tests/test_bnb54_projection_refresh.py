@@ -276,3 +276,30 @@ with psycopg.connect(os.environ['BNB_DATABASE_URL']) as c:
         assert c.execute('SELECT requested_revision>completed_revision FROM bnb_projection_work WHERE property_id=%s',(pid,)).fetchone()==(True,)
         assert c.execute('SELECT count(*) FROM bnb_discovery_projection WHERE property_id=%s',(pid,)).fetchone()==(0,)
     assert run(fixture)
+
+from test_bnb32_infrastructure import database as tls_database
+
+def test_packaged_worker_entrypoint_runs_refresh_and_local_receipt_over_verified_tls(tls_database,monkeypatch):
+    import production,worker,signal
+    _,_,runtime=tls_database
+    values=dict(runtime,options='-c search_path=public')
+    pid=uuid4()
+    start=datetime.now(timezone.utc)+timedelta(days=3);end=start+timedelta(days=1)
+    with psycopg.connect(**values) as c:
+        c.execute("""INSERT INTO bnb_property(id,host_subject,title,public_region,status,capacity,nightly_minor,currency)
+            VALUES(%s,'fixture','Fixture','Region','published',3,100,'CAD')""",(pid,))
+        availability.refresh(c,pid,None,start,end,occupancy=occupancy_in_window)
+        hold(c,pid,start,end)
+    monkeypatch.setattr(production,'load_contract',lambda:({}, {}, dict(values)))
+    monkeypatch.setenv('BNB_WORKER_SINK','local-validation')
+    original=worker.Supervisor.run
+    monkeypatch.setattr(worker.Supervisor,'run',lambda self:original(self,max_cycles=1))
+    prior={sig:signal.getsignal(sig) for sig in (signal.SIGTERM,signal.SIGINT)}
+    try:
+        assert worker.main()==0
+    finally:
+        for sig,handler in prior.items():signal.signal(sig,handler)
+    with psycopg.connect(**values) as c:
+        assert c.execute('SELECT available,invalidated_at FROM bnb_availability_projection WHERE property_id=%s',(pid,)).fetchone()==(2,None)
+        assert c.execute('SELECT requested_revision=completed_revision FROM bnb_projection_work WHERE property_id=%s',(pid,)).fetchone()==(True,)
+        assert c.execute('SELECT count(*) FROM bnb_consumer_delivery WHERE accepted_at IS NOT NULL').fetchone()==(1,)

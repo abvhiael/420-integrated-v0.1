@@ -174,3 +174,18 @@ R05.8 repository implementation provides seven-contract configured manifest vali
 | HC-R05.8-T05 | Operational failure-budget, retry/backoff, circuit-breaker/metrics, network failover and security/privacy/device testing at deployment scale; R05.9 remains abuse/observability owner |
 
 **All T01–T05 OPEN / NOT RUN on official testnet.** Mock responses and local SDK tests are repository Level 1 evidence only. No browser wallet private key is stored or sent through the service.
+
+
+## R05.9 — production abuse protection and security operations (OPEN / TESTNET-GATED)
+
+Repository-side R05.9 adds shared DB-atomic per-account/game/action HMAC-based rate buckets, least-privilege SQL ownership/RLS, authenticated player event rate checks, canonical and policy commitment anti-cheat gates, privacy-safe observability event categories and fail-closed server-only secret retrieval. No new wallet-wide transaction history API or raw save on-chain is authorized.
+
+| Gate | Production-equivalent acceptance |
+|---|---|
+| HC-R05.9-T01 | Live multi-instance quota and throttling under real gateway/proxy load, trusted upstream client identity, rate clock/window boundary contention, protection against distributed subject switching and availability attacks |
+| HC-R05.9-T02 | Independent integrity/anti-cheat validation of actual game action submissions/replays and finality with real registered profiles, authoritative gameplay state and economy-ledger services |
+| HC-R05.9-T03 | Real observability/alert routing, rate-limit and RPC/reorg dashboard, privacy and data-minimization audit, operator incident response and retention/erasure procedures |
+| HC-R05.9-T04 | Production secret manager/KMS integration, HMAC key rotation and cross-instance consistency, least-privilege runtime and operator roles, zero plaintext credentials in logs |
+| HC-R05.9-T05 | Live security review, threat modeling, adversarial concurrent sessions, denial-of-service/anti-bot abuse, HTTP boundaries and release approval |
+
+**All R05.9 official-testnet/operational gates remain OPEN.** Local PostgreSQL and mock policy-verifier tests cannot substitute for independent live production acceptance; these do not block isolated R05.9 repository Level 1 qualification.

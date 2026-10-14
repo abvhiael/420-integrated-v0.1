@@ -58,6 +58,9 @@ jobs:
       - name: GameClaims canonical operator/player consumption tests
         working-directory: contracts
         run: forge test --match-path test/GamingProtocol420.t.sol -vv
+      - name: High Country player-wallet grower and consumed-claim binding tests
+        working-directory: contracts
+        run: forge test --match-path test/highcountry/unit/player/HighCountryGamingBridge420.t.sol -vv
       - name: High Country consumed/grower-bound migration receipt tests
         working-directory: contracts
         run: forge test --match-path test/highcountry/unit/player/HighCountryMigration420.t.sol -vv

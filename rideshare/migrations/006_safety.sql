@@ -44,7 +44,7 @@ BEGIN
     RAISE EXCEPTION 'invalid trip lifecycle' USING ERRCODE='23514';
   END IF;
   IF OLD.state='IN_PROGRESS' AND NEW.state='CANCELLED' THEN
-    IF current_setting('liftd.safety_resolution',true) IS DISTINCT FROM NEW.trip_id THEN
+    IF NOT EXISTS (SELECT 1 FROM liftd.safety_resolutions WHERE trip_id=NEW.trip_id AND outcome_revision=NEW.revision) THEN
       RAISE EXCEPTION 'safety authority required' USING ERRCODE='23514';
     END IF;
   END IF;

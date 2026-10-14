@@ -1,6 +1,6 @@
 // R05.9 durable, multi-instance abuse controls. The operator pool is exclusively
 // server-side; auth identity is derived from previously authenticated session.
-import {createHmac,randomBytes} from 'node:crypto';
+import {createHmac} from 'node:crypto';
 const deny=x=>{throw Object.assign(new Error(x),{code:x});};
 const validId=x=>typeof x==='string'&&/^[A-Za-z0-9:_-]{1,128}$/.test(x);
 export function createGamingAbuseGuard420({pool,key,windowSeconds=60,maxRequests=30}={}){
@@ -43,8 +43,31 @@ export function createGamingSecurityTelemetry420({publish,clock=()=>Date.now()}=
   await publish(Object.freeze({service:'highcountry-gaming',kind,status,at:Math.floor(clock()/60000)*60}));
  }});
 }
-export function createGamingAntiCheatGate420({verifyCanonical,validateCommitment}={}){
- if(typeof verifyCanonical!=='function'||typeof validateCommitment!=='function')
+export function createGamingReplayGuard420({pool,key}={}){
+ if(typeof pool?.connect!=='function'||!Buffer.isBuffer(key)||key.length<32)
+  deny('anti-cheat-replay-config-invalid');
+ const digest=x=>createHmac('sha256',key).update(JSON.stringify(x)).digest('hex');
+ return Object.freeze({async consumeNonce({gameId,accountId,nonce}={}){
+  if(!/^0x[0-9a-f]{64}$/.test(gameId)||!validId(accountId)||
+   !/^0x[0-9a-f]{64}$/.test(nonce))deny('anti-cheat-nonce-invalid');
+  const c=await pool.connect();
+  try{
+   await c.query('BEGIN');
+   if(!(await c.query("SELECT pg_has_role(current_user,'gaming_datastore_migrator','MEMBER') AS ok")).rows[0]?.ok)
+    deny('anti-cheat-replay-role-denied');
+   await c.query('SET LOCAL ROLE gaming_datastore_migrator');
+   const count=(await c.query(`INSERT INTO gaming_datastore.gameplay_replay_guard
+    (scope_digest,nonce_digest) VALUES($1,$2)
+    ON CONFLICT DO NOTHING RETURNING scope_digest`,
+    [digest([gameId,accountId]),digest([gameId,accountId,nonce])])).rowCount;
+   await c.query('COMMIT');
+   if(count!==1)deny('anti-cheat-replay-denied');
+   return true;
+  }catch(e){try{await c.query('ROLLBACK');}catch{}throw e;}finally{c.release();}
+ }});
+}
+export function createGamingAntiCheatGate420({verifyCanonical,validateCommitment,consumeNonce}={}){
+ if(typeof verifyCanonical!=='function'||typeof validateCommitment!=='function'||typeof consumeNonce!=='function')
   deny('anti-cheat-config-invalid');
  const B=x=>typeof x==='string'&&/^0x[0-9a-f]{64}$/.test(x)&&!/^0x0+$/.test(x);
  return Object.freeze({async authorize({gameId,accountId,proof,nonce}={}){
@@ -54,6 +77,8 @@ export function createGamingAntiCheatGate420({verifyCanonical,validateCommitment
    deny('anti-cheat-commitment-rejected');
   if(await verifyCanonical(Object.freeze({gameId,accountId,proof,nonce}))!==true)
    deny('anti-cheat-canonicality-unverified');
+  if(await consumeNonce(Object.freeze({gameId,accountId,nonce}))!==true)
+   deny('anti-cheat-replay-denied');
   return Object.freeze({accepted:true});
  }});
 }

@@ -20,10 +20,18 @@ export function plant(s,now=Date.now()){const n=touch(s,now);if(n.plant)throw Er
 export function setEnvironment(s,changes,now=Date.now()){const n=touch(s,now);if(!n.plant)throw Error('plant-required');if(stage(n.plant,now)==='ready')throw Error('environment-sealed');if(!plain(changes)||!Object.keys(changes).length||Object.keys(changes).some(k=>!(k in BOUNDS)))throw Error('environment-change-invalid');const env={...n.plant.env,...changes};if(!validEnv(env))throw Error('environment-out-of-range');return {...n,plant:{...n.plant,env,environmentUpdatedAt:now}};}
 export function stage(p,now){checkClock(now);if(!p||now<p.plantedAt)throw Error('invalid-stage-time');let d=now-p.plantedAt;for(let i=0;i<DURATIONS.length;i++){if(d<DURATIONS[i])return STAGES[i];d-=DURATIONS[i];}return 'ready';}
 export function advance(s,now=Date.now()){return touch(s,now);} // Elapsed time is derived; no mutable tick counters or skipped transitions.
+// Mirrors CultivationEngine.deriveScores in local preview only; not authoritative.
+export function qualityFromEnvironment(env){
+ if(!validEnv(env))throw Error('environment-out-of-range');
+ const dimensions=[['temperature',2000,2800,1000,4000],['humidity',4500,7000,0,10000],['light',5000,9000,0,10000],['water',4000,7500,0,10000],['nutrients',4000,8000,0,10000],['airflow',2500,7500,0,10000]];
+ let stress=0;
+ for(const [key,low,high,min,max] of dimensions){const value=env[key];if(value<low)stress+=Math.floor((low-value)*10000/(low-min));else if(value>high)stress+=Math.floor((value-high)*10000/(max-high));}
+ return 10000-Math.floor(stress/6);
+}
 export function grade(q){if(!Number.isSafeInteger(q)||q<0||q>10000)throw Error('quality-out-of-range');return q>=9000?'S':q>=7500?'A':q>=5000?'B':q>=2500?'C':'D';}
 export function harvest(s,now=Date.now()){const n=touch(s,now);if(!n.plant||stage(n.plant,now)!=='ready')throw Error('plant-not-ready');if(n.harvests.length>=1000)throw Error('guest-harvest-limit');
- // The canonical checkpoint quality needs authoritative expression, so guest previews
- // use explicitly labeled neutral local quality, never invent a genome decoder.
- const qualityBps=10000;
+ // Local checkpoint preview uses the same bounded six-control stress calculation.
+ // It never claims sealed authoritative phenotype or transferable provenance.
+ const qualityBps=qualityFromEnvironment(n.plant.env);
  const receipt={id:uuid(),plantId:n.plant.id,at:now,qualityBps,grade:grade(qualityBps),massMg:Math.floor(100000*qualityBps/10000),localOnly:true};
  return {...n,plant:null,harvests:[...n.harvests,receipt],completed:n.completed+1};}

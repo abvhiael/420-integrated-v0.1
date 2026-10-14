@@ -115,3 +115,18 @@ The following requirements remain with **canonical R05.4**, not reclassified as 
 | HC-R05.4-T05 | Independent signoff for replay, chain/contract authority, privacy, backup integrity, retry/dead-letter and controlled live operations. | Signed testnet acceptance docket and traceable exact-deployment SHA |
 
 **All T01–T05 remain UNRUN / OPEN.** R05.7 owns canonical-finality implementation and its independent acceptance. R05.5 owns durable save-provider integrity and backup/conflict policy. R05.4 local-contract/unit/integration tests must still run in GitHub before calling repository development complete. External deferral does not waive any local-testable requirement, R05.4 exact-SHA Level 1, or future Level 3 phase qualification.
+
+
+## R05.5 — cloud-save provider and retention acceptance (OPEN / LIVE-TESTNET-GATED)
+
+R05.5 repository-side saves must use authenticated account/game-scoped DB references, exact local schema/version, immutable encrypted provider objects, revision CAS, independent copies, consent and deletion tombstones. The following require real provisioned live environments and **remain NOT WITNESSED**:
+
+| Gate | Real acceptance and owner |
+|---|---|
+| HC-R05.5-T01 | Official object-storage provider credentials, endpoint and bucket segregation, TLS/KMS encryption, audited least privilege, immutable-object semantics, secret/key rotation and regional residency/privacy review |
+| HC-R05.5-T02 | Real mobile/desktop local-save schema upgrades and compatibility with previous clients; signed sessions, consent/revocation across devices, concurrency conflict/restore UX and independent accessibility review |
+| HC-R05.5-T03 | Cross-region durable backup and restore, destructive provider outage, corruption/overwrite, high latency, concurrent instances, reconciliation after process crash and backup key rotation with real provider receipts |
+| HC-R05.5-T04 | Independent retention schedule, account right-to-delete, legal hold/required audit metadata policy, deletion-worker failure/retry/dead-letter, orphan sweep and provider-side physical deletion witness without deleting shared blobs |
+| HC-R05.5-T05 | Independent security/privacy/legal operator signoff, data-subject export/delete acceptance, monitoring, incident rollback and production-equivalent deployment gate |
+
+All T01–T05 remain OPEN. No local encrypted provider fixture or PostgreSQL simulation can stand in for live cloud provider acceptance. Full R05 Level 3 qualification and all other roadmap exit criteria remain separate; testnet transfer changes only *where* external evidence is collected.

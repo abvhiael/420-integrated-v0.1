@@ -14,14 +14,13 @@ export function createPostgresRiderPreferenceStore(pool) {
     },
     async compareAndSwap(accountId,expectedRevision,preferences) {
       const valid=validatePreferences(preferences);
-      const {rowCount}=await pool.query(
-        `INSERT INTO liftd.rider_preferences(account_id,revision,preferences)
-         SELECT $1,1,$3::jsonb WHERE $2::bigint=0
-         ON CONFLICT(account_id) DO UPDATE
-           SET revision=liftd.rider_preferences.revision+1,
-               preferences=EXCLUDED.preferences,updated_at=now()
-         WHERE liftd.rider_preferences.revision=$2::bigint`,
-        [accountId,expectedRevision,JSON.stringify(valid)]);
+      const {rowCount}=expectedRevision===0
+        ? await pool.query(
+          "INSERT INTO liftd.rider_preferences(account_id,revision,preferences) VALUES($1,1,$2::jsonb) ON CONFLICT(account_id) DO NOTHING",
+          [accountId,JSON.stringify(valid)])
+        : await pool.query(
+          "UPDATE liftd.rider_preferences SET revision=revision+1,preferences=$3::jsonb,updated_at=now() WHERE account_id=$1 AND revision=$2::bigint",
+          [accountId,expectedRevision,JSON.stringify(valid)]);
       return rowCount===1;
     },
     async delete(accountId){

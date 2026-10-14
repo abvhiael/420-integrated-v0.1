@@ -1,0 +1,37 @@
+name: High Country R05.4 Level 1 GameClaims
+on:
+  pull_request:
+    paths:
+      - 'services/420-gaming-player-profile/**'
+      - '.github/workflows/highcountry-r05-4.yml'
+      - 'docs/highcountry/R05.4-*'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  gameclaims:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Exact SHA
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: R05.4 targeted SDK and adversarial tests
+        working-directory: services/420-gaming-player-profile
+        run: node --test test/gameclaims-adapter.test.js
+      - name: Retained profile service tests
+        working-directory: services/420-gaming-player-profile
+        run: npm test
+      - name: Affected Gaming clients
+        run: node --test packages/420-gaming-sdk/test/*.test.js clients/highcountry-access-v1/test/*.test.js
+      - name: Source and syntax integrity
+        run: |
+          node --check services/420-gaming-player-profile/src/gameclaims-adapter.js
+          git diff --check d6f6bd282636a6c9c8ac3bf17198580840fee37f HEAD

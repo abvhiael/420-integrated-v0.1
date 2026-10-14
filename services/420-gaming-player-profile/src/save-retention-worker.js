@@ -144,7 +144,7 @@ export class SaveRetentionWorker420 {
   if(!Number.isInteger(max)||max<1||max>20)fail('save-invalid-limit');
   const leased=await this.#tx(async c=>{
    const rows=(await c.query(`SELECT * FROM gaming_datastore.save_deletion_jobs
-    WHERE status IN ('PENDING','RETRY') OR (status='LEASED' AND lease_until<=gaming_datastore.now_seconds())
+    WHERE attempts<30 AND (status IN ('PENDING','RETRY') OR (status='LEASED' AND lease_until<=gaming_datastore.now_seconds()))
     ORDER BY created_at FOR UPDATE SKIP LOCKED LIMIT $1`,[max])).rows;
    const selected=[];
    for(const row of rows){
@@ -168,7 +168,7 @@ export class SaveRetentionWorker420 {
      WHERE account_id=$1 AND game_id=$2 AND job_id=$3 AND lease_token=$4
      AND status='LEASED' RETURNING status`,
      [job.account_id,job.game_id,job.job_id,job.token,
-      deleted?'DONE':job.attempts>=29?'RETRY':'RETRY'])).rows[0];
+      deleted?'DONE':job.attempts>=29?'DEAD_LETTER':'RETRY'])).rows[0];
     if(!row)fail('save-lease-lost');
     return row.status;
    });

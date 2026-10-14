@@ -153,6 +153,51 @@ export class DurableGamingEventIndexer420 {
    return {finalized:count.rowCount};
   });
  }
+ async cursor(contract){
+  if(!Object.values(this.#contracts).includes(contract))fail('events-invalid-cursor');
+  return this.#tx(async c=>{
+   const row=(await c.query(`SELECT next_block,anchor_hash FROM gaming_datastore.event_cursors
+     WHERE chain_id=$1 AND contract=$2`,[this.#chain,contract])).rows[0];
+   return row?Object.freeze({nextBlock:String(row.next_block),anchorHash:row.anchor_hash}):null;
+  });
+ }
+ async recover({contract,maxDepth=64}={}){
+  if(!Object.values(this.#contracts).includes(contract)||!Number.isInteger(maxDepth)||
+   maxDepth<1||maxDepth>128)fail('events-invalid-recovery');
+  const candidates=await this.#tx(async c=>(await c.query(`SELECT block_number,block_hash
+     FROM gaming_datastore.event_blocks
+     WHERE chain_id=$1 AND contract=$2 AND status IN ('PENDING','FINALIZED')
+     ORDER BY block_number DESC LIMIT $3`,[this.#chain,contract,maxDepth])).rows);
+  if(candidates.length===0)fail('events-recovery-needs-bootstrap');
+  // Compare the stored chain to the currently pinned RPC. Never infer canonicality
+  // from a log's "removed" or "finalized" flag supplied by an indexer.
+  for(const candidate of candidates){
+   let observed;
+   try{observed=await this.#source(Object.freeze({chainId:this.#chain,contract,
+     number:String(candidate.block_number)}));}
+   catch{fail('events-recovery-rpc-unavailable');}
+   if(observed.hash===candidate.block_hash){
+    const verified=await this.#verify(Object.freeze({chainId:this.#chain,contract,
+     blockNumber:String(candidate.block_number),blockHash:candidate.block_hash}));
+    if(verified!==true)fail('events-recovery-unverified');
+    return this.rollback({contract,ancestorNumber:String(candidate.block_number),
+     ancestorHash:candidate.block_hash});
+   }
+  }
+  fail('events-reorg-depth-exceeded');
+ }
+ async syncNext({contract,initialBlock,maxRecoveryDepth=64}={}){
+  if(!Object.values(this.#contracts).includes(contract)||!u(initialBlock))
+   fail('events-invalid-sync');
+  const state=await this.cursor(contract);
+  const next=state?.nextBlock??initialBlock;
+  try{return await this.ingest({contract,startBlock:next});}
+  catch(e){
+   if(e?.code!=='events-parent-reorg')throw e;
+   const recovered=await this.recover({contract,maxDepth:maxRecoveryDepth});
+   return Object.freeze({recovered:true,nextBlock:recovered.nextBlock});
+  }
+ }
  async query({accountId,gameId,authority,limit=50}){
   if(typeof accountId!=='string'||!/^[A-Za-z0-9:_-]{1,128}$/.test(accountId)||
     gameId!==this.#game||!Number.isInteger(limit)||limit<1||limit>100)

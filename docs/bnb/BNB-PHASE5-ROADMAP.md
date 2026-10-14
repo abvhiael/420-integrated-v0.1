@@ -1,6 +1,6 @@
 # 420BnB — Phase 5 roadmap
 
-Status: OWNER REQUESTED BNB-5.1 on 2026-10-14. Phase 4 integration prerequisite satisfied by explicitly authorized merge of PR #631. Phase 5 repository-side development only; no live booking/payment or external acceptance approval.
+Status: OWNER REQUESTED BNB-5.2 on 2026-10-14. Phase 4 integration prerequisite satisfied by explicitly authorized merge of PR #631. Phase 5 repository-side development only; no live booking/payment or external acceptance approval.
 
 ## Starting prerequisite
 
@@ -31,4 +31,4 @@ Level 1: directly affected app checks for ordinary steps, exact implementation S
 
 All existing testnet gates remain authoritative in [BNB-TESTNET-WORK-ROADMAP.md](BNB-TESTNET-WORK-ROADMAP.md), with unchanged criteria/status. BnB consumes Identity, lawful property, Pay/Wallet, Compliance, Travel/Location/Search and independent issuer authority; it cannot create it. Keep `travel.bnb_booking=false`, `booking_enabled=false`, `financial_execution=false`. No live deployment, real notifications, property publication, fund movement or independent accessibility/legal/production approval is authorized by this plan.
 
-Current step: **BNB-5.1 — Integrated baseline and runtime ownership**, **Level 1 PASS** on implementation `7652862c9047f74df69fc1a8cb5d93a1339e1617`; [certificate](BNB-5.1-LEVEL1-CERTIFICATE.md). Preparation/evidence: [integrated baseline](BNB-5.1-INTEGRATED-BASELINE.md), [inventory](BNB-5.1-BASELINE-INVENTORY.json). Next canonical step after BNB-5.1 fully qualifies: **BNB-5.2 — Supervised background-worker runtime**.
+Current step: **BNB-5.2 — Supervised background-worker runtime**, implemented; exact-head Level 1 qualification pending. [Worker implementation and evidence](BNB-5.2-SUPERVISED-WORKER.md). BNB-5.1 remains [Level 1 PASS](BNB-5.1-LEVEL1-CERTIFICATE.md). Next after BNB-5.2 qualifies: **BNB-5.3 — Independent consumer delivery state**.

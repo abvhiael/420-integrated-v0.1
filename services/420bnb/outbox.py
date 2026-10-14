@@ -44,6 +44,11 @@ def claim(conn,worker,*,limit=10,lease_seconds=60):
     _identity(worker,WORKER,"WORKER_INVALID")
     if type(limit) is not int or not 1<=limit<=100 or type(lease_seconds) is not int or not 10<=lease_seconds<=300:
         raise DeliveryError("CLAIM_BOUNDS")
+    # Crash-only attempts are bounded too, even when no explicit fail reached the DB.
+    conn.execute("""UPDATE bnb_outbox SET dead_lettered_at=clock_timestamp(),
+      failure_code='attempts_exhausted',lease_owner=NULL,lease_expires_at=NULL
+      WHERE delivered_at IS NULL AND dead_lettered_at IS NULL AND attempts>=%s
+        AND (lease_expires_at IS NULL OR lease_expires_at<clock_timestamp())""",(MAX_ATTEMPTS,))
     rows=conn.execute("""
       WITH due AS (
         SELECT id FROM bnb_outbox
@@ -59,6 +64,20 @@ def claim(conn,worker,*,limit=10,lease_seconds=60):
     """,(limit,worker,lease_seconds)).fetchall()
     return [{"id":x[0],"event_type":x[1],"payload":x[2],"attempts":x[3]} for x in rows]
 
+def renew(conn,event_id,worker,*,lease_seconds=60):
+    """Extend only a live claim using database wall time; expired owners cannot revive."""
+    _identity(worker,WORKER,"WORKER_INVALID")
+    if type(lease_seconds) is not int or not 10<=lease_seconds<=300:
+        raise DeliveryError("CLAIM_BOUNDS")
+    row=conn.execute("""UPDATE bnb_outbox
+      SET lease_expires_at=clock_timestamp()+(%s*interval '1 second')
+      WHERE id=%s AND lease_owner=%s AND lease_expires_at>clock_timestamp()
+        AND delivered_at IS NULL AND dead_lettered_at IS NULL RETURNING id""",
+        (lease_seconds,UUID(str(event_id)),worker)).fetchone()
+    if row is None:
+        raise DeliveryError("LEASE_LOST")
+    return True
+
 def acknowledge(conn,event_id,worker,consumer,receipt):
     _identity(worker,WORKER,"WORKER_INVALID")
     _identity(consumer,CONSUMER,"CONSUMER_INVALID")
@@ -66,7 +85,7 @@ def acknowledge(conn,event_id,worker,consumer,receipt):
         raise DeliveryError("RECEIPT_INVALID")
     event_id=UUID(str(event_id))
     row=conn.execute("""SELECT event_type,payload FROM bnb_outbox
-      WHERE id=%s AND lease_owner=%s AND lease_expires_at>now()
+      WHERE id=%s AND lease_owner=%s AND lease_expires_at>clock_timestamp()
         AND delivered_at IS NULL AND dead_lettered_at IS NULL FOR UPDATE""",(event_id,worker)).fetchone()
     if row is None:
         raise DeliveryError("LEASE_LOST")
@@ -86,7 +105,7 @@ def fail(conn,event_id,worker,code):
     _identity(code,CONSUMER,"FAILURE_CODE_INVALID")
     event_id=UUID(str(event_id))
     row=conn.execute("""SELECT attempts FROM bnb_outbox WHERE id=%s AND lease_owner=%s
-      AND lease_expires_at>now() AND delivered_at IS NULL AND dead_lettered_at IS NULL
+      AND lease_expires_at>clock_timestamp() AND delivered_at IS NULL AND dead_lettered_at IS NULL
       FOR UPDATE""",(event_id,worker)).fetchone()
     if row is None: raise DeliveryError("LEASE_LOST")
     attempts=row[0]

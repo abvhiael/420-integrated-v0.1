@@ -105,6 +105,14 @@ jobs:
         run: |
           docker run --rm --network host -e BNB_DATABASE_URL="$BNB_DATABASE_URL" \
             bnb-test:${{ github.sha }} python migrate.py
+      - name: BNB-5.2 packaged worker rejects missing production bindings
+        run: |
+          set -euo pipefail
+          if docker run --rm -e BNB_WORKER_SINK=local-validation -e BNB_DATABASE_URL=DO-NOT-PRINT bnb-test:${{ github.sha }} python worker.py > /tmp/bnb-worker-output 2>&1; then
+            echo 'Unconfigured worker must fail'; exit 1
+          fi
+          grep -Fx WORKER_START_FAILED /tmp/bnb-worker-output
+          if grep -F DO-NOT-PRINT /tmp/bnb-worker-output; then exit 1; fi
       - name: Container staging smoke (isolated CI PostgreSQL)
         run: |
           set -euo pipefail
@@ -187,16 +195,16 @@ jobs:
           BNB_WEB_HOST: bnb.example.test
         run: |
           set -euo pipefail
-          docker compose -f services/420bnb/compose.production.yml --profile migration config --format json > /tmp/bnb-compose.json
+          docker compose -f services/420bnb/compose.production.yml --profile migration --profile worker config --format json > /tmp/bnb-compose.json
           python - <<'PY'
           import json
           c=json.load(open('/tmp/bnb-compose.json'))['services']
-          assert set(c)=={'api-a','api-b','web','ingress','migrate'}
+          assert set(c)=={'api-a','api-b','web','ingress','migrate','worker'}
           for name in c:
               assert '@sha256:' in c[name]['image']
               assert c[name]['read_only'] and 'ALL' in c[name]['cap_drop']
               assert 'no-new-privileges:true' in c[name]['security_opt']
-          assert all('ports' not in c[n] for n in ('api-a','api-b','web','migrate'))
+          assert all('ports' not in c[n] for n in ('api-a','api-b','web','migrate','worker'))
           assert c['api-a']['environment']['BNB_DATABASE_URL_FILE'].endswith('runtime.dsn')
           assert c['migrate']['environment']['BNB_DATABASE_URL_FILE'].endswith('migrator.dsn')
           assert c['api-a']['volumes'] != c['migrate']['volumes']
@@ -235,4 +243,3 @@ jobs:
           name: bnb32-infrastructure-${{ github.event.pull_request.head.sha || github.sha }}
           path: artifacts/bnb32/build-evidence.json
           retention-days: 7
-

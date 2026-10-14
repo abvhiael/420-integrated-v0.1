@@ -7,6 +7,7 @@ on:
       - 'rideshare/src/rider-preferences.mjs'
       - 'rideshare/test/**rider-preferences*.test.mjs'
       - 'rideshare/migrations/007_rider_preferences.sql'
+      - 'rideshare/test/postgres/rider-preferences.test.mjs'
       - 'rideshare/src/postgres-rider-preferences.mjs'
       - 'rideshare/src/http.mjs'
       - '.github/workflows/liftd-l02-2-level1.yml'
@@ -23,7 +24,20 @@ permissions:
 jobs:
   rider-preferences:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: liftd_qualification
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres -d liftd_qualification"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      LIFTD_DATABASE_URL: postgres://postgres:postgres@127.0.0.1:5432/liftd_qualification
     steps:
       - uses: actions/checkout@v4
         with:
@@ -35,6 +49,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Locked install for real PostgreSQL integration
+        run: npm ci --prefix rideshare --ignore-scripts
       - name: Scoped rider preferences and retained web routing regressions
         run: |
           node --check rideshare/src/rider-preferences.mjs
@@ -42,4 +58,5 @@ jobs:
           node --check rideshare/src/http.mjs
           node --check rideshare/src/postgres-rider-preferences.mjs
           node --test rideshare/test/rider-preferences.test.mjs rideshare/test/rider-preferences-http.test.mjs rideshare/test/postgres-rider-preferences.test.mjs rideshare/test/auth.test.mjs
+          node --test rideshare/test/postgres/rider-preferences.test.mjs
           cd rideshare/web && npm run check

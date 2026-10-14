@@ -21,9 +21,10 @@ const logs=(blockHash)=>[{address:contract,blockHash,transactionHash:tx,
  topics:[GAMING_EVENT_TOPICS420.MigrationClaimConsumed,h('8'),profile],data:'0x'}];
 const chain={number:'1',hash:block1,parentHash:parent,logs:logs(block1)};
 let canonical=new Set([block1]),permission=true,callCount=0;
+const canonicalByHeight=new Map([['1',{...chain}]]);
 const indexer=()=>new DurableGamingEventIndexer420({operatorPool:root,
  chainId:'420',gameId:G,contracts:C,
- fetchBlock:async ({number})=>{assert.ok(['1','2','3'].includes(number));callCount++;return {...chain,number};},
+ fetchBlock:async ({number})=>{assert.ok(['1','2','3'].includes(number));callCount++;return {...(canonicalByHeight.get(number)??chain),number};},
  resolveEventScope:async ({kind})=>{assert.equal(kind,'MigrationClaimConsumed');return {accountId:'alice',gameId:G};},
  verifyCanonicalBlock:async ({blockHash})=>canonical.has(blockHash),
  authorizeQuery:async ({accountId,gameId,authority})=>permission&&accountId==='alice'&&gameId===G&&authority==='signed-session'
@@ -90,9 +91,12 @@ test('R05.6 real durable PostgreSQL cursor/dedupe/reorg/finality and scoped quer
   });
   await t.test('new tentative block is quarantined and reorg rollback repairs durable cursor',async()=>{
    chain.number='2';chain.parentHash=block1;chain.hash=block2;chain.logs=logs(block2);
+   canonicalByHeight.set('2',{...chain});
    await worker.ingest({contract,startBlock:'2'});
    await assert.rejects(()=>worker.rollback({contract,ancestorNumber:'1',ancestorHash:h('f')}),/events-unverified-ancestor/);
-   await worker.rollback({contract,ancestorNumber:'1',ancestorHash:block1});
+   canonicalByHeight.set('2',{...chain,hash:alternate,logs:logs(alternate)});
+   const recovered=await indexer().recover({contract,maxDepth:2});
+   assert.equal(recovered.nextBlock,'2');
    assert.equal((await root.query("SELECT count(*)::integer AS n FROM gaming_datastore.event_logs WHERE status='ORPHANED'")).rows[0].n,1);
    assert.equal((await root.query("SELECT count(*)::integer AS n FROM gaming_datastore.event_scopes")).rows[0].n,1);
    chain.hash=alternate;chain.logs=logs(alternate);canonical.add(alternate);
@@ -103,6 +107,7 @@ test('R05.6 real durable PostgreSQL cursor/dedupe/reorg/finality and scoped quer
   });
   await t.test('empty block has durable header, can finalize and cannot be silently rolled back',async()=>{
    chain.hash=h('d');chain.parentHash=alternate;chain.logs=[];
+   canonicalByHeight.set('3',{...chain});
    canonical.add(chain.hash);
    const x=await indexer().ingest({contract,startBlock:'3'});
    assert.equal(x.ingested,0);

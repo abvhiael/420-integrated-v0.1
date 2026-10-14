@@ -47,6 +47,7 @@ Define detailed steps at L01 closeout using the actual service interfaces. Scope
 | --- | --- | --- |
 | L02.1 | Application shell and design system — responsive navigation, accessible components, loading/error states, authenticated routing and clear availability information | **COMPLETE — Level 1 PASS**; see [L02.1 certificate](L02.1-LEVEL1-EVIDENCE.md), qualified implementation `cedd39c6e1c6350587bf920290439b6ab271da89` |
 | L02.2 | Rider account and preferences — account/session management, accessibility requirements, communication preferences and privacy controls | **COMPLETE — Level 1 PASS**; [exact-SHA certificate](L02.2-LEVEL1-EVIDENCE.md) for `67b8dfa6f1a25d78d5b0e9fb3e50ecf9ff009e73`; independent deployed Identity, notification and accessibility acceptance retained for integration/testnet |
+| L02.3 | Pickup and destination entry — address/place search, explicit location permission, manual entry, pickup clarification, route preview and recoverable provider failures | Implemented; Level 1 exact-SHA qualification pending; see [L02.3 implementation](L02.3-IMPLEMENTATION.md) |
 
 Detailed subsequent steps remain to be reconciled with existing L01 service interfaces at the L01 phase-closeout boundary. This entry does not renumber, merge or silently replace future canonical steps.
 

@@ -29,7 +29,7 @@ CREATE TABLE gaming_datastore.save_deletion_jobs(
  account_id gaming_datastore.opaque_id NOT NULL,game_id gaming_datastore.commitment NOT NULL,job_id gaming_datastore.opaque_id NOT NULL,
  object_ref text NOT NULL,provider_id text NOT NULL,
  reason text NOT NULL CHECK(reason IN ('RETENTION','USER_DELETE','CONSENT_REVOKED')),
- status text NOT NULL DEFAULT 'PENDING' CHECK(status IN ('PENDING','LEASED','DONE','RETRY')),
+ status text NOT NULL DEFAULT 'PENDING' CHECK(status IN ('PENDING','LEASED','DONE','RETRY','DEAD_LETTER')),
  lease_token text,lease_until gaming_datastore.uint64,attempts integer NOT NULL DEFAULT 0 CHECK(attempts<=30),
  created_at gaming_datastore.uint64 NOT NULL DEFAULT gaming_datastore.now_seconds(),
  completed_at gaming_datastore.uint64,
@@ -57,12 +57,14 @@ CREATE POLICY backup_scope ON gaming_datastore.save_backups
  AND s.account_id=save_backups.account_id AND s.game_id=save_backups.game_id));
 CREATE POLICY backup_migrator_mutation ON gaming_datastore.save_backups FOR ALL
  USING (current_user='gaming_datastore_migrator') WITH CHECK(current_user='gaming_datastore_migrator');
+CREATE POLICY r055_hide_deleted_backups ON gaming_datastore.save_backups
+ AS RESTRICTIVE FOR SELECT USING(current_user='gaming_datastore_migrator' OR deleted_at IS NULL);
 CREATE POLICY deletion_scope ON gaming_datastore.save_deletion_jobs
  FOR SELECT USING (current_user='gaming_datastore_migrator' OR EXISTS(SELECT 1 FROM gaming_datastore.runtime_scopes s WHERE s.role_name=current_user
  AND s.account_id=save_deletion_jobs.account_id AND s.game_id=save_deletion_jobs.game_id));
 CREATE POLICY deletion_migrator_mutation ON gaming_datastore.save_deletion_jobs FOR ALL
  USING (current_user='gaming_datastore_migrator') WITH CHECK(current_user='gaming_datastore_migrator');
-GRANT SELECT ON gaming_datastore.save_backups,gaming_datastore.save_deletion_jobs,gaming_datastore.save_redactions TO gaming_datastore_runtime;
+GRANT SELECT ON gaming_datastore.save_backups,gaming_datastore.save_redactions TO gaming_datastore_runtime;
 GRANT SELECT,INSERT,UPDATE ON gaming_datastore.save_backups,gaming_datastore.save_deletion_jobs,gaming_datastore.save_redactions TO gaming_datastore_migrator;
 
 -- A restrictive policy intersects every existing R05.1 permissive scoped policy.

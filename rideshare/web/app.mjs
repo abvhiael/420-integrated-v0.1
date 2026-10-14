@@ -5,6 +5,8 @@ import { mountPickupView } from "./pickup-view.mjs";
 import { createLocationProviders } from "./location-providers.mjs";
 import { mountQuoteView } from "./quote-view.mjs";
 import { createQuoteApi } from "./quote-api.mjs";
+import { mountTripExperience } from "./trip-experience-view.mjs";
+import { createTripExperienceApi } from "./trip-experience-api.mjs";
 
 const root = document.getElementById("main");
 const menu = document.getElementById("menu-toggle");
@@ -14,6 +16,7 @@ let requestNumber = 0;
 let clearRiderAccount = null;
 let clearPickupView = null;
 let quotePanel = null;
+let tripPanel = null;
 
 // The host must provide an independently authenticated session adapter.
 // No localStorage, query-string identity, simulated principal or demo operator bypass.
@@ -37,6 +40,7 @@ function renderDecision(decision) {
   if (clearRiderAccount) { clearRiderAccount(); clearRiderAccount = null; }
   if (clearPickupView) { clearPickupView(); clearPickupView = null; }
   if (quotePanel) { quotePanel.destroy(); quotePanel = null; }
+  if (tripPanel) { tripPanel.destroy(); tripPanel = null; }
   root.replaceChildren();
   root.setAttribute("aria-busy", "false");
   const panel = node("section", undefined, "panel");
@@ -66,7 +70,8 @@ function renderDecision(decision) {
   if (decision.kind === "protected" && decision.role === "rider") {
     clearRiderAccount = mountRiderAccount(root, createRiderPreferencesApi(globalThis.LIFTdSessionAdapter), session);
     const quoteApi = createQuoteApi(globalThis.LIFTdSessionAdapter);
-    quotePanel = mountQuoteView(root, session, quoteApi);
+    tripPanel = mountTripExperience(root, session, createTripExperienceApi(globalThis.LIFTdSessionAdapter));
+    quotePanel = mountQuoteView(root, session, quoteApi, tripId => tripPanel?.load(tripId));
     clearPickupView = mountPickupView(root, session, createLocationProviders(globalThis.LIFTdSessionAdapter, {search:globalThis.LIFTdPlaceSearchProvider,resolveAddress:globalThis.LIFTdAddressResolver}), route => quotePanel?.showRoute(route));
   }
   document.title = decision.title + " — LIFTd";

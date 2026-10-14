@@ -1,0 +1,752 @@
+{
+  "schema": "420.bnb.phase5.integrated-baseline.v1",
+  "step": "BNB-5.1",
+  "status": "BASELINE_RECONCILED_LEVEL1_PENDING",
+  "source_sha": "3f2cf64897e96c4f16213bcaf93564db72a174c9",
+  "qualified_executable_sha": "7ccc76fe613ba4fdc162d459827f5ec95fae3385",
+  "main_sha": "3f2cf64897e96c4f16213bcaf93564db72a174c9",
+  "pr": 631,
+  "phase4_merged": true,
+  "routes": [
+    {
+      "method": "PUT",
+      "path": "/v1/bnb/account/properties/{property_id}/rate-plan"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/bnb/quotes"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/bnb/quotes/{quote_id}/revoke"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/bnb/quotes/{quote_id}"
+    },
+    {
+      "method": "GET",
+      "path": "/health/live"
+    },
+    {
+      "method": "GET",
+      "path": "/health/ready"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/bnb/search"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/bnb/travel/place-binding"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/bnb/compliance/eligibility"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/bnb/compliance/eligibility/revoke"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/bnb/travel/jurisdiction-policy"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/bnb/internal/discovery/{consumer}/{property_id}"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/bnb/travel/discovery"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/bnb/travel/place-binding/revoke"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/bnb/travel/jurisdiction-policy/revoke"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/bnb/travel/authorized"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/bnb/reputation/public/{property_id}"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/bnb/listings/{property_id}"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/bnb/account/saved-stays"
+    },
+    {
+      "method": "PUT",
+      "path": "/v1/bnb/account/saved-stays/{property_id}"
+    },
+    {
+      "method": "DELETE",
+      "path": "/v1/bnb/account/saved-stays/{property_id}"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/bnb/account/reservations"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/bnb/booking-requests/{request_id}/messages"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/bnb/booking-requests/{request_id}/messages"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/bnb/booking-requests/{request_id}/messages/delivery"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/bnb/booking-requests/{request_id}/messages/delivery/ack"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/bnb/reservations/{reservation_id}/guest-review"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/bnb/internal/reputation/verified-reviews/{property_id}"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/bnb/internal/reputation/export-receipt"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/bnb/reviews/{review_id}/host-response"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/bnb/abuse-reports"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/bnb/internal/abuse-reports/{report_id}/decision"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/bnb/abuse-reports/{report_id}/appeals"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/bnb/internal/appeals/{appeal_id}/decision"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/bnb/internal/abuse-reports/{report_id}/redact"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/bnb/internal/host-responses/{review_id}/decision"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/bnb/internal/guest-reviews/{review_id}/decision"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/bnb/listings"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/bnb/internal/calendar/import"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/bnb/availability"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/bnb/availability/projected"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/bnb/availability/local"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/bnb/properties"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/bnb/account/hosting"
+    },
+    {
+      "method": "PUT",
+      "path": "/v1/bnb/account/properties/{property_id}/presentation"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/bnb/account/properties/{property_id}/host-requests"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/bnb/account/properties/{property_id}/host-reservations"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/bnb/account/properties/{property_id}/earnings"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/bnb/account/properties/{property_id}/notifications"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/bnb/account/properties/{property_id}/managers"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/bnb/account/properties"
+    },
+    {
+      "method": "PUT",
+      "path": "/v1/bnb/account/properties/{property_id}"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/bnb/account/properties/{property_id}/managers"
+    },
+    {
+      "method": "DELETE",
+      "path": "/v1/bnb/account/properties/{property_id}/managers/{grantee_subject}/{capability}"
+    },
+    {
+      "method": "PUT",
+      "path": "/v1/bnb/account/properties/{property_id}/policy"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/bnb/account/properties/{property_id}/media"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/bnb/internal/media/{media_id}/decision"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/bnb/account/properties/{property_id}/units"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/bnb/account/properties/{property_id}/units"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/bnb/account/properties/{property_id}/calendar/blocks"
+    },
+    {
+      "method": "PUT",
+      "path": "/v1/bnb/account/properties/{property_id}/calendar/blocks/{block_id}"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/bnb/account/properties/{property_id}/calendar"
+    },
+    {
+      "method": "DELETE",
+      "path": "/v1/bnb/account/properties/{property_id}/calendar/blocks/{block_id}"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/bnb/account/properties/{property_id}/review"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/bnb/account/properties/{property_id}/reviews/{review_id}/withdraw"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/bnb/account/properties/{property_id}/reviews"
+    },
+    {
+      "method": "PUT",
+      "path": "/v1/bnb/account/properties/{property_id}/booking-policy"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/bnb/booking-requests"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/bnb/booking-requests/{request_id}/{decision}"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/bnb/account/booking-requests"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/bnb/booking-requests/{request_id}"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/bnb/internal/pay/intents"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/bnb/reservations/{reservation_id}/payment"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/bnb/reservations/{reservation_id}/receipt"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/bnb/internal/pay/finality"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/bnb/internal/pay/failures"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/bnb/internal/pay/settlement-splits"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/bnb/internal/pay/disbursements"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/bnb/reservations/{reservation_id}/settlement"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/bnb/reservations/{reservation_id}/expire"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/bnb/reservations/{reservation_id}/cancel"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/bnb/reservations/{reservation_id}/replace"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/bnb/reservations/{reservation_id}/modify"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/bnb/reservations/{reservation_id}"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/bnb/holds"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/bnb/holds/{hold_id}/release"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/bnb/holds/{hold_id}"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/bnb/payments/intents"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/bnb/account/session"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/bnb/account/sessions/{session_id}/revoke"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/bnb/account/property/{property_id}/access"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/bnb/account/recover"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/bnb/account/properties/{property_id}/claims"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/bnb/reservations/{reservation_id}/orchestration"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/bnb/internal/pay/cases"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/bnb/reservations/{reservation_id}/host-casework"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/bnb/internal/casework/abuse-reports/{report_id}"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/bnb/internal/casework/abuse-reports/{report_id}/hold"
+    }
+  ],
+  "migration_count": 26,
+  "files": [
+    {
+      "path": "services/420bnb/migrations/001_initial.sql",
+      "blob": "4657988fc6d8ff65dc8ac5843f36d4a33b95f4cb"
+    },
+    {
+      "path": "services/420bnb/migrations/002_identity_access.sql",
+      "blob": "bce0986b8256355e9dffed44665a63f11008b5a6"
+    },
+    {
+      "path": "services/420bnb/migrations/003_recovery_claims.sql",
+      "blob": "5044520275e048a3415146ba8419933652aeb302"
+    },
+    {
+      "path": "services/420bnb/migrations/004_authority_replay.sql",
+      "blob": "5bf4fc8fa4bdb9879a1753e7f2471b72bf23b3e9"
+    },
+    {
+      "path": "services/420bnb/migrations/005_host_management.sql",
+      "blob": "96df4c4211c042f76405b7e6f2d692346933065c"
+    },
+    {
+      "path": "services/420bnb/migrations/006_host_policy_media.sql",
+      "blob": "2f75d56083b02e26bc35a195e4045a824121e8fe"
+    },
+    {
+      "path": "services/420bnb/migrations/007_media_review_nonce.sql",
+      "blob": "719db32657b4fea9cd6e6883be0e946a2729c813"
+    },
+    {
+      "path": "services/420bnb/migrations/008_unit_hold_allocation.sql",
+      "blob": "972cf03f878ab5e3f0619ff9d0eadde118912c9c"
+    },
+    {
+      "path": "services/420bnb/migrations/009_availability_sync.sql",
+      "blob": "1667749c8905952f9557f6dd0cd741e3f5e3e8d6"
+    },
+    {
+      "path": "services/420bnb/migrations/010_minimum_stay_policy.sql",
+      "blob": "185e6237a64abb92c64e8144220ac18b97022e51"
+    },
+    {
+      "path": "services/420bnb/migrations/011_quote_pricing.sql",
+      "blob": "d05141222fda1f0f55840d8d99ca430f2f20ae3e"
+    },
+    {
+      "path": "services/420bnb/migrations/012_hold_quote_binding.sql",
+      "blob": "5b18135d2bbad4c808ff8a2891c00b21ec51c972"
+    },
+    {
+      "path": "services/420bnb/migrations/013_booking_requests.sql",
+      "blob": "19c5994496f6d28b7c4d7e5f7fb16032166addb3"
+    },
+    {
+      "path": "services/420bnb/migrations/014_pending_reservation_expiry.sql",
+      "blob": "f74746d787da7981560c81dc1c6d9213da4aea0e"
+    },
+    {
+      "path": "services/420bnb/migrations/015_pay_swap_intents.sql",
+      "blob": "b64c4abf2f51c3fab33e32a58efcd21de35d547f"
+    },
+    {
+      "path": "services/420bnb/migrations/016_settlement_refund_payout.sql",
+      "blob": "24ec841a9793cdf569118b72636df6f05994bafd"
+    },
+    {
+      "path": "services/420bnb/migrations/017_guest_experience.sql",
+      "blob": "07837ee81964f7124a887d0e819ad08f08468cc6"
+    },
+    {
+      "path": "services/420bnb/migrations/018_travel_authority.sql",
+      "blob": "a6df47e38858500b012b1e5bc20c01d78fc7ebb2"
+    },
+    {
+      "path": "services/420bnb/migrations/019_reviews_reputation_messaging.sql",
+      "blob": "ec2453d01b853b5ae026533cf2178696902fcce7"
+    },
+    {
+      "path": "services/420bnb/migrations/020_compliance_eligibility.sql",
+      "blob": "23eb4cf9daa9b5b64004f29ff9e927e0fa0e1583"
+    },
+    {
+      "path": "services/420bnb/migrations/021_appeals_retention.sql",
+      "blob": "802b20185aea4414b06aa29a246f31f8b003e6d4"
+    },
+    {
+      "path": "services/420bnb/migrations/022_durable_outbox.sql",
+      "blob": "8c95f32f37b729ab1adb4844f1aa30c8b43b1f72"
+    },
+    {
+      "path": "services/420bnb/migrations/023_availability_projection.sql",
+      "blob": "971b81c8a2f213942d4be352a42c13a40dd5637d"
+    },
+    {
+      "path": "services/420bnb/migrations/024_discovery_sync.sql",
+      "blob": "3d0b4d72ae0c999ae9b088fad808a18e515bbdab"
+    },
+    {
+      "path": "services/420bnb/migrations/025_message_delivery.sql",
+      "blob": "b23ad6ee2d1c8985cb3a28a78a9ac8433081f6f1"
+    },
+    {
+      "path": "services/420bnb/migrations/026_pay_case_reconciliation.sql",
+      "blob": "9bd500dbd9283632503851d207e69828aed290ab"
+    },
+    {
+      "path": "services/420bnb/identity.py",
+      "blob": "2e2585605fc3306b61f6d16dbf34d78d88aaa08b"
+    },
+    {
+      "path": "services/420bnb/authority.py",
+      "blob": "df5fd65453bfa40105cde39b33683f931668e62c"
+    },
+    {
+      "path": "services/420bnb/availability_projection.py",
+      "blob": "c73841b6f204ae4ef39664734e64847898bc7cb7"
+    },
+    {
+      "path": "services/420bnb/booking_saga.py",
+      "blob": "23e9f72b3bb2e683724e89f507701ab18df6f9ba"
+    },
+    {
+      "path": "services/420bnb/calendar_engine.py",
+      "blob": "ec77a9a106b7f03b1fb1a99f0a0a109d7da52c2f"
+    },
+    {
+      "path": "services/420bnb/casework_policy.py",
+      "blob": "7b2db1103fc14ac0808f559b89aa80eb65ef1012"
+    },
+    {
+      "path": "services/420bnb/discovery_sync.py",
+      "blob": "25ae6705fcc99e698e81ed330ffaf09210f14409"
+    },
+    {
+      "path": "services/420bnb/migrate.py",
+      "blob": "c9aabbea43e42b4888525192d0646f80f9704723"
+    },
+    {
+      "path": "services/420bnb/outbox.py",
+      "blob": "c3ef3057b0112f662b357d6ab7fbf1e9be4b7e9f"
+    },
+    {
+      "path": "services/420bnb/pricing.py",
+      "blob": "62af2f359501710a7ffe68eef578a13c8373978e"
+    },
+    {
+      "path": "services/420bnb/recovery_operations.py",
+      "blob": "cbc2d3f4091ef16ced141c3a2e1aeb8d4c63ef5d"
+    },
+    {
+      "path": "services/420bnb/travel_location.py",
+      "blob": "2e61c913a63383cc26ec45753dbd7528e20aacca"
+    },
+    {
+      "path": "services/420bnb/web_server.py",
+      "blob": "a279fd0fc0a3dcdd35e17b723f255e1be0d98474"
+    },
+    {
+      "path": "services/420bnb/deployment.template.json",
+      "blob": "861eac4d7b22040690d9f3cc6b5f69f59d3673f4"
+    },
+    {
+      "path": "services/420bnb/live_readiness.py",
+      "blob": "b617a18b113d8584301a9c30ad5bddc842689718"
+    },
+    {
+      "path": "services/420bnb/external_acceptance.py",
+      "blob": "08dcfbe1e4cb13d5c298f944082c83b9c8542004"
+    },
+    {
+      "path": "services/420bnb/bnb210_external_acceptance.py",
+      "blob": "1ce3093aea3369dfcba2137c595c114b737297e9"
+    },
+    {
+      "path": "services/420bnb/requirements.txt",
+      "blob": "657b390cb291d394ed597aebcf2f682b7b6d2f46"
+    },
+    {
+      "path": ".github/workflows/bnb-1-1.yml",
+      "blob": "c355500f331df6b7aa0305d5200f7f717b3adf59"
+    },
+    {
+      "path": ".github/workflows/bnb-1-2.yml",
+      "blob": "2caf5a430041d41a162fabe03a702236facf8816"
+    },
+    {
+      "path": ".github/workflows/bnb-1-3.yml",
+      "blob": "732ee6bf27bcfcabef78882524a3efed95717db1"
+    },
+    {
+      "path": ".github/workflows/bnb-1-4.yml",
+      "blob": "9d6cba95b63d2d3a64009edd17fe30a3177ec3f7"
+    },
+    {
+      "path": ".github/workflows/bnb-1-5.yml",
+      "blob": "1e5462fb222e400f6f7de50c60ef5c5e208e2c3b"
+    },
+    {
+      "path": ".github/workflows/bnb-1-6.yml",
+      "blob": "6d309230494e7effd4b430e7b6e9892f6de8418a"
+    },
+    {
+      "path": ".github/workflows/bnb-1-7.yml",
+      "blob": "ccb70376793f71459515cb92662cbc04a05818e4"
+    },
+    {
+      "path": ".github/workflows/bnb-1-8.yml",
+      "blob": "6b47271a1cb3a7e528c9ac27aa00a4cf47b6ccdb"
+    },
+    {
+      "path": ".github/workflows/bnb-1-9.yml",
+      "blob": "76d49f1662bb4a33dc99f1ffeda20359179d1c72"
+    },
+    {
+      "path": "services/420bnb/api.py",
+      "blob": "31fab6f42a80f97ec94fb74d45d8fdf7df7c8c83"
+    },
+    {
+      "path": "services/420bnb/production.py",
+      "blob": "db27af01837ab538c5f7eee15e6ba02f99dbeae4"
+    },
+    {
+      "path": "services/420bnb/Dockerfile",
+      "blob": "d39f59bcc40cb76ac3b8a2fb429c1edd720ae483"
+    },
+    {
+      "path": "services/420bnb/compose.production.yml",
+      "blob": "c01e5ddb4c4a1aea46cd5f9b1638038a0dd09019"
+    },
+    {
+      "path": ".github/workflows/bnb-runtime.yml",
+      "blob": "4f1d78eb7d512b22931051a714606050e1b4a27c"
+    },
+    {
+      "path": "docs/bnb/BNB-TESTNET-WORK-ROADMAP.md",
+      "blob": "d75fa85030d79ee77a93db55d2f8edcdc53fa34b"
+    }
+  ],
+  "gates": [
+    "T-BNB-IDENTITY-1",
+    "T-BNB-IDENTITY-2",
+    "T-BNB-PROPERTY-1",
+    "T-BNB-INTEGRATION-1",
+    "T-BNB-MEDIA-1",
+    "T-BNB-ACCESSIBILITY-1",
+    "T-BNB-CALENDAR-1",
+    "T-BNB-QUOTE-1",
+    "T-BNB-BOOKING-1",
+    "T-BNB-PAY-2",
+    "T-BNB-SETTLEMENT-3",
+    "T-BNB-TRAVEL-210",
+    "T-BNB-TRAVEL-210A",
+    "T-BNB-REPUTATION-211",
+    "T-BNB-COMPLIANCE-212",
+    "T-BNB-SECURITY-213",
+    "T-BNB-OPS-214"
+  ],
+  "remaining_phase5_task_gate_map": {
+    "BNB-5.1": [
+      "T-BNB-INTEGRATION-1",
+      "T-BNB-SECURITY-213"
+    ],
+    "BNB-5.2": [
+      "T-BNB-OPS-214",
+      "T-BNB-SECURITY-213"
+    ],
+    "BNB-5.3": [
+      "T-BNB-INTEGRATION-1",
+      "T-BNB-TRAVEL-210A",
+      "T-BNB-OPS-214"
+    ],
+    "BNB-5.4": [
+      "T-BNB-CALENDAR-1",
+      "T-BNB-BOOKING-1",
+      "T-BNB-COMPLIANCE-212",
+      "T-BNB-TRAVEL-210A"
+    ],
+    "BNB-5.5": [
+      "T-BNB-TRAVEL-210",
+      "T-BNB-TRAVEL-210A"
+    ],
+    "BNB-5.6": [
+      "T-BNB-TRAVEL-210",
+      "T-BNB-TRAVEL-210A",
+      "T-BNB-COMPLIANCE-212",
+      "T-BNB-IDENTITY-2"
+    ],
+    "BNB-5.7": [
+      "T-BNB-INTEGRATION-1",
+      "T-BNB-TRAVEL-210A"
+    ],
+    "BNB-5.8": [
+      "T-BNB-IDENTITY-2",
+      "T-BNB-MEDIA-1",
+      "T-BNB-SECURITY-213",
+      "T-BNB-OPS-214"
+    ],
+    "BNB-5.9": [
+      "T-BNB-IDENTITY-2",
+      "T-BNB-SECURITY-213",
+      "T-BNB-OPS-214"
+    ],
+    "BNB-5.10": [
+      "T-BNB-QUOTE-1",
+      "T-BNB-BOOKING-1",
+      "T-BNB-PAY-2",
+      "T-BNB-SETTLEMENT-3"
+    ],
+    "BNB-5.11": [
+      "T-BNB-TRAVEL-210A",
+      "T-BNB-COMPLIANCE-212",
+      "T-BNB-SECURITY-213",
+      "T-BNB-OPS-214"
+    ],
+    "BNB-5.12": [
+      "T-BNB-INTEGRATION-1",
+      "T-BNB-SECURITY-213",
+      "T-BNB-OPS-214"
+    ],
+    "BNB-5.13": [
+      "T-BNB-INTEGRATION-1",
+      "T-BNB-ACCESSIBILITY-1",
+      "T-BNB-SECURITY-213"
+    ],
+    "BNB-5.14": [
+      "T-BNB-INTEGRATION-1",
+      "T-BNB-SECURITY-213",
+      "T-BNB-OPS-214"
+    ]
+  },
+  "checks": {
+    "unique_route_pairs": "PASS",
+    "migration_number_sequence": "PASS",
+    "all_mapped_gate_ids_exist": "PASS",
+    "integrated_baseline": "PASS: merged PR #631; exact tree matches certified head",
+    "phase5_level1_ci": "PENDING; not PASS"
+  },
+  "limitations": [
+    "Route extraction is revalidated by AST in Level 1 CI",
+    "Baseline provenance uses full git history; pinned baseline inventories do not freeze later Phase 5 implementation",
+    "Historical Phase 4 CI is not substituted for Phase 5 Level 1 CI"
+  ],
+  "preparation_source_sha": "3a7cdf175840e11c337e36d1321490929b5634f3",
+  "phase4_merge_sha": "3f2cf64897e96c4f16213bcaf93564db72a174c9",
+  "phase4_certificate_head": "3a7cdf175840e11c337e36d1321490929b5634f3",
+  "phase4_previous_main": "959288c8bd33b6da0325b6a5d060e00e7bcf0e48",
+  "phase4_tree_equivalence": "GitHub compare 3a7cdf175840e11c337e36d1321490929b5634f3..3f2cf64897e96c4f16213bcaf93564db72a174c9: zero changed files"
+}

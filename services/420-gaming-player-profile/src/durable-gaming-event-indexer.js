@@ -72,6 +72,11 @@ export class DurableGamingEventIndexer420 {
     // Operator must explicitly investigate and reanchor at a trusted ancestor.
     fail('events-parent-reorg');
    }
+   const stored=(await c.query(`INSERT INTO gaming_datastore.event_blocks
+     (chain_id,contract,block_number,block_hash,parent_hash)
+     VALUES($1,$2,$3,$4,$5) ON CONFLICT DO NOTHING RETURNING block_hash`,
+     [this.#chain,contract,startBlock,block.hash,block.parentHash])).rows[0];
+   if(!stored)fail('events-block-replay-or-conflict');
    for(const {log,decoded,scope} of normalized){
     const p=decoded.payload;
     const vals=[this.#chain,contract,startBlock,block.hash,block.parentHash,log.transactionHash,
@@ -104,7 +109,12 @@ export class DurableGamingEventIndexer420 {
    const cursor=(await c.query(`SELECT * FROM gaming_datastore.event_cursors
      WHERE chain_id=$1 AND contract=$2 FOR UPDATE`,[this.#chain,contract])).rows[0];
    if(!cursor||BigInt(ancestorNumber)>=BigInt(cursor.next_block))fail('events-ancestor-outside-cursor');
-   const finalized=(await c.query(`SELECT 1 FROM gaming_datastore.event_logs
+   const known=(await c.query(`SELECT 1 FROM gaming_datastore.event_blocks
+     WHERE chain_id=$1 AND contract=$2 AND block_number=$3 AND block_hash=$4
+       AND status IN ('PENDING','FINALIZED') LIMIT 1`,
+     [this.#chain,contract,ancestorNumber,ancestorHash])).rows;
+   if(!known.length)fail('events-ancestor-not-retained');
+   const finalized=(await c.query(`SELECT 1 FROM gaming_datastore.event_blocks
      WHERE chain_id=$1 AND contract=$2 AND block_number>$3 AND status='FINALIZED' LIMIT 1`,
      [this.#chain,contract,ancestorNumber])).rows;
    if(finalized.length)fail('events-finalized-reorg-alert');
@@ -115,6 +125,9 @@ export class DurableGamingEventIndexer420 {
    await c.query(`UPDATE gaming_datastore.event_logs SET status='ORPHANED'
       WHERE chain_id=$1 AND contract=$2 AND block_number>$3 AND status='PENDING'`,
       [this.#chain,contract,ancestorNumber]);
+   await c.query(`UPDATE gaming_datastore.event_blocks SET status='ORPHANED'
+    WHERE chain_id=$1 AND contract=$2 AND block_number>$3 AND status='PENDING'`,
+    [this.#chain,contract,ancestorNumber]);
    await c.query(`UPDATE gaming_datastore.event_cursors SET next_block=$3,anchor_hash=$4,
       updated_at=gaming_datastore.now_seconds() WHERE chain_id=$1 AND contract=$2`,
       [this.#chain,contract,String(BigInt(ancestorNumber)+1n),ancestorHash]);
@@ -127,10 +140,13 @@ export class DurableGamingEventIndexer420 {
   if(await this.#verify(Object.freeze({chainId:this.#chain,contract,blockNumber,blockHash}))!==true)
    fail('events-not-canonically-finalized');
   return this.#tx(async c=>{
-   const rows=(await c.query(`SELECT DISTINCT block_hash FROM gaming_datastore.event_logs
+   const blocks=(await c.query(`SELECT block_hash FROM gaming_datastore.event_blocks
      WHERE chain_id=$1 AND contract=$2 AND block_number=$3 AND status='PENDING'`,
      [this.#chain,contract,blockNumber])).rows;
-   if(rows.some(r=>r.block_hash!==blockHash))fail('events-finality-conflict');
+   if(blocks.length!==1||blocks[0].block_hash!==blockHash)fail('events-finality-conflict');
+   await c.query(`UPDATE gaming_datastore.event_blocks SET status='FINALIZED'
+     WHERE chain_id=$1 AND contract=$2 AND block_number=$3 AND block_hash=$4 AND status='PENDING'`,
+     [this.#chain,contract,blockNumber,blockHash]);
    const count=await c.query(`UPDATE gaming_datastore.event_logs SET status='FINALIZED'
     WHERE chain_id=$1 AND contract=$2 AND block_number=$3 AND block_hash=$4 AND status='PENDING'`,
     [this.#chain,contract,blockNumber,blockHash]);

@@ -8,7 +8,7 @@ export function compensation({fareCents,taxesCents,passThroughCents,tipCents,ref
   const guarantee=ceil(BigInt(Math.max(2500,meter.minimumDriverCentsPerHour))*BigInt(meter.engagedSeconds),3600n),topUp=guarantee>earnings?guarantee-earnings:0n;
   const tips=BigInt(captured?(completed?tipCents:Math.max(0,tipCents-refunds.tips)):0);
   const adjusted=captured?commission-topUp-(A>F?A-F:0n)-BigInt(completed?refunds.fare:0):0n;
-  const development=adjusted>0n?20n*adjusted/100n:0n,operating=adjusted>0n?adjusted-development:0n;
+  const development=adjusted>0n?10n*adjusted/100n:0n,operating=adjusted>0n?adjusted-development:0n;
   const pass=BigInt(captured?Math.max(0,taxesCents-refunds.taxes)+Math.max(0,passThroughCents-refunds.passThrough):0);
   const driver=A+earnings+topUp+tips;
   const available=BigInt(captured?fareCents+taxesCents+passThroughCents+tipCents-refunds.fare-refunds.taxes-refunds.passThrough-refunds.tips:0);
@@ -17,7 +17,7 @@ export function compensation({fareCents,taxesCents,passThroughCents,tipCents,ref
   return Object.freeze({currency:'CAD',allowanceCents:money(A),earningsCents:money(earnings),guaranteeCents:money(guarantee),topUpCents:money(topUp),tipCents:money(tips),driverCents:money(driver),
     commissionCents:money(commission),developmentCents:money(development),platformCents:money(operating),passThroughCents:money(pass),platformFundingCents:money(platformFunding),
     netCollectedCents:money(available),engagedSeconds:meter.engagedSeconds,onlineSeconds:meter.onlineSeconds,periodId:meter.periodId,
-    rounding:'driver-ceil-development-floor-platform-residue',developmentStatus:development>0?'HELD_CANONICAL_10_PERCENT_CEILING':'ZERO',
+    rounding:'driver-ceil-development-floor-platform-residue',developmentStatus:development>0?'PENDING_CANONICAL_SETTLEMENT_ACCEPTANCE':'ZERO',
     conserved:available+platformFunding===needed});
 }
 export function periodStatement(plans) {

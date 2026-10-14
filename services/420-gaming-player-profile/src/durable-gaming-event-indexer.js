@@ -88,9 +88,9 @@ export class DurableGamingEventIndexer420 {
      (chain_id,contract,block_number,block_hash,parent_hash)
      VALUES($1,$2,$3,$4,$5)
      ON CONFLICT(chain_id,contract,block_hash) DO UPDATE SET status='PENDING'
-     WHERE gaming_datastore.event_blocks.status='ORPHANED'
-       AND gaming_datastore.event_blocks.block_number=EXCLUDED.block_number
-       AND gaming_datastore.event_blocks.parent_hash=EXCLUDED.parent_hash
+     WHERE event_blocks.status='ORPHANED'
+       AND event_blocks.block_number=EXCLUDED.block_number
+       AND event_blocks.parent_hash=EXCLUDED.parent_hash
      RETURNING block_hash`,
      [this.#chain,contract,startBlock,block.hash,block.parentHash])).rows[0];
    if(!stored)fail('events-block-replay-or-conflict');
@@ -105,13 +105,13 @@ export class DurableGamingEventIndexer420 {
       claim_id,game_id,grower_id,game_profile_id,target_wallet,payload)
      VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16::jsonb)
      ON CONFLICT(chain_id,contract,block_hash,log_index) DO UPDATE SET status='PENDING'
-     WHERE gaming_datastore.event_logs.status='ORPHANED'
-       AND gaming_datastore.event_logs.tx_hash=EXCLUDED.tx_hash
-       AND gaming_datastore.event_logs.tx_index=EXCLUDED.tx_index
-       AND gaming_datastore.event_logs.topic0=EXCLUDED.topic0
-       AND gaming_datastore.event_logs.event_kind=EXCLUDED.event_kind
-       AND gaming_datastore.event_logs.payload=EXCLUDED.payload
-       AND gaming_datastore.event_logs.parent_hash=EXCLUDED.parent_hash
+     WHERE event_logs.status='ORPHANED'
+       AND event_logs.tx_hash=EXCLUDED.tx_hash
+       AND event_logs.tx_index=EXCLUDED.tx_index
+       AND event_logs.topic0=EXCLUDED.topic0
+       AND event_logs.event_kind=EXCLUDED.event_kind
+       AND event_logs.payload=EXCLUDED.payload
+       AND event_logs.parent_hash=EXCLUDED.parent_hash
      RETURNING block_hash,log_index`,vals)).rows[0];
     if(!row)fail('events-replay-or-conflict');
     if(scope)await c.query(`INSERT INTO gaming_datastore.event_scopes

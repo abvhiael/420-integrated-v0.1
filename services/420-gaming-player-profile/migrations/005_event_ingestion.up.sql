@@ -11,6 +11,17 @@ CREATE TABLE gaming_datastore.event_cursors (
  updated_at gaming_datastore.uint64 NOT NULL DEFAULT gaming_datastore.now_seconds(),
  PRIMARY KEY(chain_id,contract)
 );
+CREATE TABLE gaming_datastore.event_blocks (
+ chain_id gaming_datastore.uint64 NOT NULL CHECK(chain_id>0),
+ contract gaming_datastore.wallet NOT NULL,
+ block_number gaming_datastore.uint64 NOT NULL,
+ block_hash gaming_datastore.commitment NOT NULL,
+ parent_hash gaming_datastore.commitment NOT NULL,
+ status text NOT NULL DEFAULT 'PENDING' CHECK(status IN ('PENDING','FINALIZED','ORPHANED')),
+ PRIMARY KEY(chain_id,contract,block_hash),
+ UNIQUE(chain_id,contract,block_number,block_hash)
+);
+CREATE INDEX event_blocks_height ON gaming_datastore.event_blocks(chain_id,contract,block_number,status);
 CREATE TABLE gaming_datastore.event_logs (
  chain_id gaming_datastore.uint64 NOT NULL CHECK(chain_id>0),
  contract gaming_datastore.wallet NOT NULL,
@@ -49,7 +60,7 @@ CREATE TABLE gaming_datastore.event_scopes (
 CREATE INDEX event_log_height ON gaming_datastore.event_logs(chain_id,contract,block_number,status);
 CREATE INDEX event_scope_view ON gaming_datastore.event_scopes(account_id,game_id,chain_id);
 DO $$ DECLARE t text; BEGIN
- FOREACH t IN ARRAY ARRAY['event_cursors','event_logs','event_scopes'] LOOP
+ FOREACH t IN ARRAY ARRAY['event_cursors','event_blocks','event_logs','event_scopes'] LOOP
   EXECUTE format('ALTER TABLE gaming_datastore.%I OWNER TO gaming_datastore_migrator',t);
   EXECUTE format('ALTER TABLE gaming_datastore.%I ENABLE ROW LEVEL SECURITY',t);
   EXECUTE format('ALTER TABLE gaming_datastore.%I FORCE ROW LEVEL SECURITY',t);

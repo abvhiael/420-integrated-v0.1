@@ -1,0 +1,47 @@
+// SPDX-License-Identifier: GPL-3.0
+// R05.5 durable save lifecycle metadata. No raw cloud-save payloads are stored in PostgreSQL.
+CREATE TABLE gaming_datastore.save_lifecycle_schema(version integer PRIMARY KEY CHECK(version=5),digest text NOT NULL);
+CREATE TABLE gaming_datastore.save_backups(
+ account_id text NOT NULL,game_id text NOT NULL,backup_id text NOT NULL,
+ source_revision gaming_datastore.uint64 NOT NULL,
+ provider_id text NOT NULL,object_ref text NOT NULL,
+ state_hash text NOT NULL,byte_length gaming_datastore.uint64 NOT NULL,
+ schema_label text NOT NULL,created_at gaming_datastore.uint64 NOT NULL DEFAULT gaming_datastore.now_seconds(),
+ expires_at gaming_datastore.uint64 NOT NULL,
+ deleted_at gaming_datastore.uint64,
+ PRIMARY KEY(account_id,game_id,backup_id),
+ FOREIGN KEY(account_id,game_id,source_revision) REFERENCES gaming_datastore.save_references(account_id,game_id,revision),
+ CHECK(backup_id ~ '^[A-Za-z0-9:_-]{1,128}$'),
+ CHECK(provider_id ~ '^[A-Za-z0-9:_-]{1,128}$'),
+ CHECK(object_ref ~ '^[A-Za-z0-9:_-]{1,128}$'),
+ CHECK(state_hash ~ '^0x[0-9a-f]{64}$'),
+ CHECK(byte_length<=67108864),
+ CHECK(expires_at>created_at)
+);
+CREATE TABLE gaming_datastore.save_deletion_jobs(
+ account_id text NOT NULL,game_id text NOT NULL,job_id text NOT NULL,
+ object_ref text NOT NULL,provider_id text NOT NULL,
+ reason text NOT NULL CHECK(reason IN ('RETENTION','USER_DELETE','CONSENT_REVOKED')),
+ status text NOT NULL DEFAULT 'PENDING' CHECK(status IN ('PENDING','LEASED','DONE','RETRY')),
+ lease_token text,lease_until gaming_datastore.uint64,attempts integer NOT NULL DEFAULT 0 CHECK(attempts<=30),
+ created_at gaming_datastore.uint64 NOT NULL DEFAULT gaming_datastore.now_seconds(),
+ completed_at gaming_datastore.uint64,
+ PRIMARY KEY(account_id,game_id,job_id),
+ UNIQUE(account_id,game_id,provider_id,object_ref),
+ CHECK(job_id ~ '^[A-Za-z0-9:_-]{1,128}$')
+);
+ALTER TABLE gaming_datastore.save_backups OWNER TO gaming_datastore_migrator;
+ALTER TABLE gaming_datastore.save_deletion_jobs OWNER TO gaming_datastore_migrator;
+ALTER TABLE gaming_datastore.save_lifecycle_schema OWNER TO gaming_datastore_migrator;
+ALTER TABLE gaming_datastore.save_backups ENABLE ROW LEVEL SECURITY;
+ALTER TABLE gaming_datastore.save_backups FORCE ROW LEVEL SECURITY;
+ALTER TABLE gaming_datastore.save_deletion_jobs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE gaming_datastore.save_deletion_jobs FORCE ROW LEVEL SECURITY;
+CREATE POLICY backup_scope ON gaming_datastore.save_backups
+ USING (EXISTS(SELECT 1 FROM gaming_datastore.runtime_scopes s WHERE s.role_name=current_user
+ AND s.account_id=save_backups.account_id AND s.game_id=save_backups.game_id));
+CREATE POLICY deletion_scope ON gaming_datastore.save_deletion_jobs
+ USING (EXISTS(SELECT 1 FROM gaming_datastore.runtime_scopes s WHERE s.role_name=current_user
+ AND s.account_id=save_deletion_jobs.account_id AND s.game_id=save_deletion_jobs.game_id));
+GRANT SELECT ON gaming_datastore.save_backups,gaming_datastore.save_deletion_jobs TO gaming_datastore_runtime;
+GRANT SELECT,INSERT,UPDATE ON gaming_datastore.save_backups,gaming_datastore.save_deletion_jobs TO gaming_datastore_migrator;

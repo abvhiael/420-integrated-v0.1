@@ -69,6 +69,8 @@ def renew(conn,event_id,worker,*,lease_seconds=60):
     _identity(worker,WORKER,"WORKER_INVALID")
     if type(lease_seconds) is not int or not 10<=lease_seconds<=300:
         raise DeliveryError("CLAIM_BOUNDS")
+    # Lock first, then evaluate wall time in a new statement after any lock wait.
+    conn.execute("SELECT id FROM bnb_outbox WHERE id=%s FOR UPDATE",(UUID(str(event_id)),)).fetchone()
     row=conn.execute("""UPDATE bnb_outbox
       SET lease_expires_at=clock_timestamp()+(%s*interval '1 second')
       WHERE id=%s AND lease_owner=%s AND lease_expires_at>clock_timestamp()
@@ -94,10 +96,15 @@ def acknowledge(conn,event_id,worker,consumer,receipt):
     prior=conn.execute("SELECT receipt_digest FROM bnb_outbox_receipt WHERE event_id=%s AND consumer=%s FOR UPDATE",(event_id,consumer)).fetchone()
     if prior and prior[0]!=digest:
         raise DeliveryError("RECEIPT_CONFLICT")
+    updated=conn.execute("""UPDATE bnb_outbox SET delivered_at=clock_timestamp(),delivered_by=%s,
+      lease_owner=NULL,lease_expires_at=NULL,failure_code=NULL
+      WHERE id=%s AND lease_owner=%s AND lease_expires_at>clock_timestamp()
+        AND delivered_at IS NULL AND dead_lettered_at IS NULL RETURNING id""",
+      (consumer,event_id,worker)).fetchone()
+    if updated is None:
+        raise DeliveryError("LEASE_LOST")
     conn.execute("""INSERT INTO bnb_outbox_receipt(event_id,consumer,receipt_digest)
       VALUES (%s,%s,%s) ON CONFLICT DO NOTHING""",(event_id,consumer,digest))
-    conn.execute("""UPDATE bnb_outbox SET delivered_at=now(),delivered_by=%s,
-      lease_owner=NULL,lease_expires_at=NULL,failure_code=NULL WHERE id=%s""",(consumer,event_id))
     return digest
 
 def fail(conn,event_id,worker,code):
@@ -110,10 +117,14 @@ def fail(conn,event_id,worker,code):
     if row is None: raise DeliveryError("LEASE_LOST")
     attempts=row[0]
     seconds=min(3600,2**min(attempts,12))
-    conn.execute("""UPDATE bnb_outbox SET lease_owner=NULL,lease_expires_at=NULL,
+    updated=conn.execute("""UPDATE bnb_outbox SET lease_owner=NULL,lease_expires_at=NULL,
        failure_code=%s, available_at=now()+(%s*interval '1 second'),
        dead_lettered_at=CASE WHEN attempts>=%s THEN now() ELSE NULL END
-       WHERE id=%s""",(code,seconds,MAX_ATTEMPTS,event_id))
+       WHERE id=%s AND lease_owner=%s AND lease_expires_at>clock_timestamp()
+         AND delivered_at IS NULL AND dead_lettered_at IS NULL RETURNING id""",
+       (code,seconds,MAX_ATTEMPTS,event_id,worker)).fetchone()
+    if updated is None:
+        raise DeliveryError("LEASE_LOST")
     return "dead_letter" if attempts>=MAX_ATTEMPTS else "retry"
 
 def replay(conn,event_id,actor,reason,*,authorize=None):

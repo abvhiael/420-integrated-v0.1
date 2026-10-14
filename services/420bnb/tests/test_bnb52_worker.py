@@ -314,3 +314,23 @@ def test_production_entry_wires_verified_tls_least_privilege_worker(tls_database
         production.verify_database(c)
         assert c.execute('SELECT count(*) FROM bnb_outbox WHERE delivered_at IS NOT NULL').fetchone() == (1,)
         assert c.execute('SELECT count(*) FROM bnb_request_dedupe').fetchone() == (1,)
+
+
+def test_lease_renewal_cannot_revive_after_waiting_for_row_lock(db):
+    connect, _, _ = db
+    eid = enqueue(connect)
+    with connect() as c:
+        outbox.claim(c, 'waiting')
+    from concurrent.futures import ThreadPoolExecutor
+    with connect() as holder, ThreadPoolExecutor(max_workers=1) as pool:
+        holder.execute("UPDATE bnb_outbox SET lease_expires_at=clock_timestamp()+interval '0.2s' WHERE id=%s", (eid,))
+        def renew():
+            with connect() as c:
+                with pytest.raises(outbox.DeliveryError, match='LEASE_LOST'):
+                    outbox.renew(c, eid, 'waiting')
+        future = pool.submit(renew)
+        time.sleep(.3)
+        holder.commit()
+        future.result(timeout=3)
+    with connect() as c:
+        assert outbox.claim(c, 'replacement')[0]['id'] == eid

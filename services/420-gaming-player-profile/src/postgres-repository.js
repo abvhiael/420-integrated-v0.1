@@ -126,9 +126,14 @@ class ScopedTransaction {
   }
   async saveReference(revision = null) {
     if (revision !== null) decimal(revision,64,true);
+    // Preserve the qualified R05.1 datastore while R05.5's additive migration rolls out.
+    // Once deployed, a redacted revision is never returned as a provider locator.
+    const redaction=(await this.#query("SELECT to_regclass('gaming_datastore.save_redactions') AS present")).rows[0]?.present;
+    const exclusion=redaction?` AND NOT EXISTS(SELECT 1 FROM gaming_datastore.save_redactions d
+      WHERE d.account_id=r.account_id AND d.game_id=r.game_id AND d.revision=r.revision)`:'';
     return (await this.#query(`SELECT r.* FROM gaming_datastore.save_references r
       JOIN gaming_datastore.game_profiles p USING(account_id,game_id)
-      WHERE r.account_id=$1 AND r.game_id=$2 AND r.revision=coalesce($3::numeric,p.save_revision)`,
+      WHERE r.account_id=$1 AND r.game_id=$2 AND r.revision=coalesce($3::numeric,p.save_revision)`+exclusion,
       [...this.#ids(),revision])).rows[0] ?? null;
   }
   async prepareMigration(x) {

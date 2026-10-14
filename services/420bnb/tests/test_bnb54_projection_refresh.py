@@ -81,10 +81,12 @@ def test_time_only_expiry_is_refreshed_without_changing_booking_state(fixture):
     with connect() as c: hid=hold(c,pid,start,end)
     project(fixture);run(fixture)
     with connect() as c:
-        c.execute("UPDATE bnb_hold SET expires_at=clock_timestamp()-interval '1 second' WHERE id=%s",(hid,))
+        c.execute("UPDATE bnb_hold SET expires_at=clock_timestamp()+interval '2 seconds' WHERE id=%s",(hid,))
     run(fixture)
     with connect() as c:
-        # Simulate periodic due work after a time-only change, without another source write.
+        assert c.execute('SELECT available FROM bnb_availability_projection WHERE property_id=%s',(pid,)).fetchone()==(2,)
+        c.execute('SELECT pg_sleep(2.1)')
+        # Make the durable periodic timer due after time-only expiry; no source write.
         c.execute("UPDATE bnb_projection_work SET next_refresh_at=clock_timestamp()-interval '1 second' WHERE property_id=%s",(pid,))
     assert run(fixture)
     with connect() as c:
@@ -255,3 +257,22 @@ def test_concurrent_writer_waiting_on_refresh_retains_new_revision(fixture):
     assert run(fixture)
     with connect() as c:
         assert c.execute('SELECT available FROM bnb_availability_projection WHERE property_id=%s',(pid,)).fetchone()==(2,)
+
+def test_actual_process_death_before_refresh_commit_recovers_pending_work(fixture):
+    import subprocess,sys
+    from pathlib import Path
+    connect,pid,_,_=fixture
+    project(fixture)
+    code="""import os,psycopg,projection_refresh
+from api import occupancy_in_window
+with psycopg.connect(os.environ['BNB_DATABASE_URL']) as c:
+ assert projection_refresh.once(c,property_id=os.environ['BNB54_PID'],occupancy=occupancy_in_window)
+ os._exit(23)
+"""
+    child=subprocess.run([sys.executable,'-c',code],cwd=Path(__file__).resolve().parents[1],
+        env=dict(os.environ,BNB54_PID=str(pid)),capture_output=True,timeout=8)
+    assert child.returncode==23
+    with connect() as c:
+        assert c.execute('SELECT requested_revision>completed_revision FROM bnb_projection_work WHERE property_id=%s',(pid,)).fetchone()==(True,)
+        assert c.execute('SELECT count(*) FROM bnb_discovery_projection WHERE property_id=%s',(pid,)).fetchone()==(0,)
+    assert run(fixture)

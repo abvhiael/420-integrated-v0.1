@@ -64,3 +64,15 @@ CREATE POLICY deletion_migrator_mutation ON gaming_datastore.save_deletion_jobs 
  USING (current_user='gaming_datastore_migrator') WITH CHECK(current_user='gaming_datastore_migrator');
 GRANT SELECT ON gaming_datastore.save_backups,gaming_datastore.save_deletion_jobs,gaming_datastore.save_redactions TO gaming_datastore_runtime;
 GRANT SELECT,INSERT,UPDATE ON gaming_datastore.save_backups,gaming_datastore.save_deletion_jobs,gaming_datastore.save_redactions TO gaming_datastore_migrator;
+
+-- A restrictive policy intersects every existing R05.1 permissive scoped policy.
+-- Runtime DB roles cannot recover a redacted provider locator through direct SQL.
+-- Trusted R05.3/R05.5 migrator retain immutable audit/reference access.
+CREATE POLICY r055_hide_redacted_save_references ON gaming_datastore.save_references
+ AS RESTRICTIVE FOR SELECT
+ USING (current_user='gaming_datastore_migrator' OR NOT EXISTS(
+   SELECT 1 FROM gaming_datastore.save_redactions d
+   WHERE d.account_id=save_references.account_id
+     AND d.game_id=save_references.game_id
+     AND d.revision=save_references.revision
+ ));

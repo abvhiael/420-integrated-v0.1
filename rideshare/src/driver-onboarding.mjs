@@ -15,8 +15,8 @@ export function validateOnboarding(input){
  });
  return Object.freeze({driverId:input.driverId,vehicleId:input.vehicleId,commandId:input.commandId,expectedRevision:input.expectedRevision,documents:Object.freeze(documents)});
 }
-export function createDriverOnboardingService({authenticator,store,clock=()=>Math.floor(Date.now()/1000)}){
- if(typeof authenticator?.authorize!=='function'||typeof store?.read!=='function'||typeof store?.writeCAS!=='function')deny('ONBOARDING_UNAVAILABLE',503);
+export function createDriverOnboardingService({authenticator,store,verifyPrivateReceipt,clock=()=>Math.floor(Date.now()/1000)}){
+ if(typeof authenticator?.authorize!=='function'||typeof store?.read!=='function'||typeof store?.writeCAS!=='function'||typeof verifyPrivateReceipt!=='function')deny('ONBOARDING_UNAVAILABLE',503);
  const authorize=async(token,driverId)=>{
   if(!id(driverId))deny('INVALID_DRIVER');
   const p=await authenticator.authorize(token,{action:'onboarding.manage',resource:'account:'+driverId});
@@ -38,9 +38,13 @@ export function createDriverOnboardingService({authenticator,store,clock=()=>Mat
    const data=validateOnboarding(input);
    const p=await authorize(token,data.driverId);
    if(data.documents.some(d=>d.expiresAt<=clock()))deny('DOCUMENT_EXPIRED');
+   for(const d of data.documents){let verified;try{verified=await verifyPrivateReceipt(d.privateRef,{driverId:data.driverId,accountId:p.accountId,vehicleId:data.vehicleId,kind:d.kind,expiresAt:d.expiresAt});}catch{deny('PRIVATE_RECEIPT_UNAVAILABLE',503);}
+    if(verified!==true)deny('INVALID_PRIVATE_RECEIPT',403);
+   }
    const prior=await store.read(data.driverId);
    if(prior&&['APPROVED','REVOKED'].includes(prior.status))deny('EXTERNAL_REVIEW_REQUIRED',403);
    const row={driverId:data.driverId,accountId:p.accountId,vehicleId:data.vehicleId,documents:data.documents,status:'REVIEW_REQUIRED',remediation:[],revision:data.expectedRevision+1};
+   await authorize(token,data.driverId); // fail closed if session revoked while verifying vault receipts
    const ok=await store.writeCAS(data.driverId,data.expectedRevision,data.commandId,row);
    if(!ok)deny('STALE_OR_DUPLICATE',409);
    return Object.freeze({driverId:data.driverId,revision:row.revision,status:row.status});

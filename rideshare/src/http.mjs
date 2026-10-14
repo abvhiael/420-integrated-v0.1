@@ -1,12 +1,13 @@
 import {AuthError} from './auth.mjs';
 // Fetch-compatible protected handler; deployment/listeners are not enabled here.
-export function createHttpHandler(service, locationService, dispatchAdapter, quoteService, paymentService) {
+export function createHttpHandler(service, locationService, dispatchAdapter, quoteService, paymentService, safetyService) {
   return async request => {
     const reply = (status, value) => new Response(JSON.stringify(value), {status,
       headers: {'content-type': 'application/json', 'cache-control': 'no-store', 'x-content-type-options': 'nosniff'}});
     try {
       const url = new URL(request.url);
       if (url.search || url.hash) throw new AuthError('INVALID_REQUEST', 400);
+      const safety=/^\\/v1\\/rideshare\\/trips\\/([A-Za-z0-9_-]{1,128})\\/safety(?:\\/(report|resolve|case))?$/.exec(url.pathname);
       const payment=/^\/v1\/rideshare\/trips\/([A-Za-z0-9_-]{1,128})\/payments(?:\/(prepare|consent|reconcile|plan|reserve|operation))?$/.exec(url.pathname);
       const statement=/^\/v1\/rideshare\/drivers\/([A-Za-z0-9_-]{1,128})\/statements\/([A-Za-z0-9_-]{1,128})$/.exec(url.pathname);
       const quoteRead=/^\/v1\/rideshare\/quotes\/([A-Za-z0-9_-]{1,128})$/.exec(url.pathname);
@@ -16,15 +17,17 @@ export function createHttpHandler(service, locationService, dispatchAdapter, quo
       const locationPrepare = url.pathname === '/v1/rideshare/routes';
       const locationRead = /^\/v1\/rideshare\/trips\/([A-Za-z0-9_-]{1,128})\/coordinates$/.exec(url.pathname);
       const match = /^\/v1\/rideshare\/trips(?:\/([A-Za-z0-9_-]{1,128})(\/transitions)?)?$/.exec(url.pathname);
-      if (!match && !locationPrepare && !locationRead && !availability && !quoteIssue && !quoteConsent && !quoteRead && !payment && !statement) return reply(404, {error: 'NOT_FOUND'});
+      if (!match && !locationPrepare && !locationRead && !availability && !quoteIssue && !quoteConsent && !quoteRead && !payment && !statement && !safety) return reply(404, {error: 'NOT_FOUND'});
       if ((locationPrepare || locationRead) && !locationService) return reply(503, {error: 'LOCATION_UNAVAILABLE'});
       if (availability && !dispatchAdapter) return reply(503,{error:'DISPATCH_UNAVAILABLE'});
       if((quoteIssue||quoteConsent||quoteRead)&&!quoteService) return reply(503,{error:'QUOTE_UNAVAILABLE'});
+      if(safety&&!safetyService)return reply(503,{error:'SAFETY_UNAVAILABLE'});
       if((payment||statement)&&!paymentService)return reply(503,{error:'PAY_UNAVAILABLE'});
       const authorization = request.headers.get('authorization');
       if (typeof authorization !== 'string' || authorization.length > 32775 ||
         !/^Bearer [A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/.test(authorization)) throw new AuthError('BEARER_REQUIRED');
       const token = authorization.slice(7);
+      if(safety&&request.method==='GET'&&(safety[2]==='case'))return reply(200,await safetyService.read(token,safety[1]));
       if(payment&&request.method==='GET'&&!payment[2])return reply(200,await paymentService.read(token,payment[1]));
       if(statement&&request.method==='GET')return reply(200,await paymentService.statement(token,statement[1],statement[2]));
       if(statement||(payment&&!payment[2]))return reply(405,{error:'METHOD_NOT_ALLOWED'});
@@ -53,6 +56,7 @@ export function createHttpHandler(service, locationService, dispatchAdapter, quo
           (body.commandId !== undefined && body.commandId !== commandId)) throw new AuthError('INVALID_REQUEST', 400);
         body.commandId = commandId;
       }
+      if(safety){if(request.method!=='POST'||!['report','resolve'].includes(safety[2]))return reply(405,{error:'METHOD_NOT_ALLOWED'});return reply(200,await safetyService[safety[2]](token,safety[1],body));}
       if(payment){const method=payment[2]==='operation'?'reconcileOperation':payment[2];return reply(200,await paymentService[method](token,payment[1],body));}
       if(quoteIssue) return reply(201,await quoteService.issue(token,body));
       if(quoteConsent) return reply(200,await quoteService.accept(token,quoteConsent[1],body));

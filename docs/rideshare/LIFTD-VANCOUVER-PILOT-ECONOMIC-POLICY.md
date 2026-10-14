@@ -1,6 +1,6 @@
 # LIFTd — adopted Vancouver pilot economic policy
 
-Status: adopted by the repository owner on 2026-10-13. This is a product policy decision; pricing/consent implementation is addressed in L01.7; settlement and payroll remain pending under L01.8. Operating-cost validation and independent launch acceptance remain required. Policy version: v1.
+Status: adopted by the repository owner on 2026-10-13. This is a product policy decision; pricing/consent implementation is addressed in L01.7; L01.8 scoped Pay/Wallet and actual compensation projections are repository-qualified; live settlement/payroll acceptance remains pending and LC-01 holds development execution. Operating-cost validation and independent launch acceptance remain required. Policy version: v1.
 
 ## Market and fare
 

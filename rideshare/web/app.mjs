@@ -1,6 +1,8 @@
 import { ROUTES, AVAILABILITY, routeDecision, sanitizeReturnPath } from "./route-policy.mjs";
 import { mountRiderAccount } from "./rider-account.mjs";
 import { createRiderPreferencesApi } from "./preferences-api.mjs";
+import { mountPickupView } from "./pickup-view.mjs";
+import { createLocationProviders } from "./location-providers.mjs";
 
 const root = document.getElementById("main");
 const menu = document.getElementById("menu-toggle");
@@ -8,6 +10,7 @@ const nav = document.getElementById("site-nav");
 let session = null;
 let requestNumber = 0;
 let clearRiderAccount = null;
+let clearPickupView = null;
 
 // The host must provide an independently authenticated session adapter.
 // No localStorage, query-string identity, simulated principal or demo operator bypass.
@@ -29,6 +32,7 @@ function node(tag, text, className) {
 }
 function renderDecision(decision) {
   if (clearRiderAccount) { clearRiderAccount(); clearRiderAccount = null; }
+  if (clearPickupView) { clearPickupView(); clearPickupView = null; }
   root.replaceChildren();
   root.setAttribute("aria-busy", "false");
   const panel = node("section", undefined, "panel");
@@ -57,6 +61,7 @@ function renderDecision(decision) {
   root.append(panel);
   if (decision.kind === "protected" && decision.role === "rider") {
     clearRiderAccount = mountRiderAccount(root, createRiderPreferencesApi(globalThis.LIFTdSessionAdapter), session);
+    clearPickupView = mountPickupView(root, session, createLocationProviders(globalThis.LIFTdSessionAdapter, {search:globalThis.LIFTdPlaceSearchProvider,resolveAddress:globalThis.LIFTdAddressResolver}));
   }
   document.title = decision.title + " — LIFTd";
 }

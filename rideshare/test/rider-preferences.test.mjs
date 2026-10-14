@@ -4,7 +4,7 @@ import {createRiderPreferenceService,validatePreferences,PreferenceError,default
 function fixture(){
   const map=new Map();let calls=0;
   const svc=createRiderPreferenceService({
-    authorize:async(token,{resource,action})=>token==='valid'&&resource==='account:owner'&&action==='account.preferences' ? {role:'rider',action,resource,accountId:'owner',subject:'owner'} : null,
+    authorize:async(token,{resource,action})=>token==='valid'&&resource==='account:owner'&&action==='account.preferences' ? {role:'rider',action,resource,accountId:'owner',subject:'rider_actor'} : null,
     store:{
       read:async id=>map.get(id),
       compareAndSwap:async(id,rev,preferences)=>{

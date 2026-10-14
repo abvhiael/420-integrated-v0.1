@@ -1,5 +1,5 @@
 import {createPickupController} from './pickup-controller.mjs';
-export function mountPickupView(container, session, providers={}){
+export function mountPickupView(container, session, providers={}, onRoutePreview=undefined){
  let active=true,sequence=0;
  const controller=createPickupController(providers), panel=document.createElement('section');
  panel.className='panel';panel.setAttribute('aria-label','Pickup and destination');
@@ -49,6 +49,7 @@ export function mountPickupView(container, session, providers={}){
    }
    const result=await controller.preview();if(!active)return;
    status.textContent='Route reference '+result.routeRef+': '+Math.round(result.distanceMeters/100)/10+' km, about '+Math.ceil(result.durationSeconds/60)+' minutes. This is not a booking or fare quote.';
+   if(typeof onRoutePreview==='function')await onRoutePreview(result);
   }catch{if(active)status.textContent='Route unavailable or pickup needs clarification. Check addresses, try another location or use manual entry.';}
   finally{if(active)preview.disabled=false;}
  });

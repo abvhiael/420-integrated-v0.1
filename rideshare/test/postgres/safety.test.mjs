@@ -51,6 +51,9 @@ test('safety resolution requires genuine incident, prevents arbitrary active-tri
  const forged={...t,state:'CANCELLED',revision:t.revision+1};
  await assert.rejects(()=>pool.query('UPDATE liftd.trips SET snapshot=$1,revision=$2 WHERE trip_id=$3',[forged,forged.revision,t.id]),e=>e.code==='23514');
  assert.equal((await store.get(t.id)).state,'IN_PROGRESS');
+ const complete={action:'complete',expectedRevision:t.revision};
+ await store.execute({actorId:'driver_1',commandId:key(),tripId:t.id,action:'complete',request:complete,guard:async()=>{}},
+  async old=>transitionTrip(old,complete,{subject:'driver_1',role:'driver'},{now:1000,paused:false}));
 });
 test('revoked session cannot report or resolve safety incident',async()=>{
  const t=await activeTrip(),report=await safety.report('driver',t.id,{commandId:key(),category:'vehicle'});

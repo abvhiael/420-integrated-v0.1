@@ -35,6 +35,10 @@ export class SaveRetentionWorker420 {
    const src=(await c.query(`SELECT * FROM gaming_datastore.save_references
     WHERE account_id=$1 AND game_id=$2 AND revision=$3 FOR SHARE`,[accountId,gameId,revision])).rows[0];
    if(!src)fail('save-source-missing');
+   const prior=(await c.query(`SELECT 1 FROM gaming_datastore.save_backups
+    WHERE account_id=$1 AND game_id=$2 AND backup_id=$3 FOR UPDATE`,
+    [accountId,gameId,backupId])).rows;
+   if(prior.length)fail('save-backup-replayed');
    const active=(await c.query(`SELECT count(*)::integer AS n FROM gaming_datastore.save_backups
     WHERE account_id=$1 AND game_id=$2 AND deleted_at IS NULL AND expires_at>gaming_datastore.now_seconds()`,
     [accountId,gameId])).rows[0];
@@ -50,7 +54,7 @@ export class SaveRetentionWorker420 {
     ON CONFLICT(account_id,game_id,backup_id) DO NOTHING RETURNING *`,
     [accountId,gameId,backupId,revision,copied.providerId,copied.objectRef,src.state_hash,
      src.byte_length,src.schema_label,expiresAt])).rows[0];
-   if(!row)fail('save-backup-replayed');
+   if(!row){try{await this.#storage.delete(copied);}catch{}fail('save-backup-replayed');}
    return {backupId,sourceRevision:revision,expiresAt};
   });
  }

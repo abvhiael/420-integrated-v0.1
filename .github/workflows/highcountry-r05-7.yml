@@ -24,7 +24,7 @@ jobs:
       - name: Exact SHA
         run: test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
       - name: R05.7 forged RPC/finality and high risk adversarial tests
-        run: node --test services/420-gaming-player-profile/test/canonical-gaming-finality.test.js
+        run: node --test services/420-gaming-player-profile/test/canonical-gaming-finality.test.js services/420-gaming-player-profile/test/independent-finality-witness.test.js services/420-gaming-player-profile/test/r057-migration-finality-hooks.test.js
       - name: Retained R05.4 GameClaims adapter and coordinator regression
         working-directory: services/420-gaming-player-profile
         run: node --test test/gameclaims-adapter.test.js test/gameclaims-coordinator-bridge.test.js
@@ -35,5 +35,7 @@ jobs:
       - name: Syntax and checked exact SHA
         run: |
           node --check services/420-gaming-player-profile/src/canonical-gaming-finality.js
+          node --check services/420-gaming-player-profile/src/independent-finality-witness.js
+          node --check services/420-gaming-player-profile/src/r057-migration-finality-hooks.js
           git diff --check f2dceb4fbcd3fb623e2fed6d051ae70af914c7ba HEAD
           test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"

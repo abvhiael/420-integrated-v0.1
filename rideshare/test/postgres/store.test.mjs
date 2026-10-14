@@ -35,7 +35,7 @@ before(async () => {
 after(async () => {await pool?.end(); await owner.end();});
 test('ordered concurrent migrations are checksum-verified and runtime is a non-owner role', async () => {
   await migrate(owner);
-  assert.equal((await owner.query('SELECT count(*)::int AS n FROM liftd.migrations')).rows[0].n, 5);
+  assert.equal((await owner.query('SELECT count(*)::int AS n FROM liftd.migrations')).rows[0].n, 6);
   const role = await pool.query('SELECT current_user AS name,rolsuper FROM pg_roles WHERE rolname=current_user');
   assert.equal(role.rows[0].rolsuper, false); assert.equal(role.rows[0].name, 'liftd_runtime');
   await assert.rejects(() => pool.query("UPDATE liftd.migrations SET checksum='bad'"), e => e.code === '42501');

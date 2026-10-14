@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {SAVE_KEY,newGuest,plant,stage,setEnvironment,advance,harvest,loadGuest,saveGuest,grade} from '../src/guest.js';
+import {SAVE_KEY,newGuest,plant,stage,setEnvironment,advance,harvest,loadGuest,saveGuest,grade,qualityFromEnvironment} from '../src/guest.js';
 const day=86400000;const store=()=>{const m=new Map();return {getItem:k=>m.has(k)?m.get(k):null,setItem:(k,v)=>m.set(k,v),m};};
 test('guest lifecycle, persistence and offline return without wallet or account',()=>{
  const st=store(),t=1000000000000;
@@ -29,4 +29,16 @@ test('save corruption/storage failures and grade boundary vectors',()=>{
  assert.throws(()=>loadGuest({getItem(){throw Error('denied');}}),/unavailable/);
  assert.throws(()=>saveGuest({setItem(){throw Error('quota');}},newGuest(10)),/write-failed/);
  for(const [q,g] of [[0,'D'],[2499,'D'],[2500,'C'],[4999,'C'],[5000,'B'],[7499,'B'],[7500,'A'],[8999,'A'],[9000,'S'],[10000,'S']])assert.equal(grade(q),g);
+});
+
+test('environment changes local checkpoint output without wallet modifiers',()=>{
+ const t=1000000000000,base=plant(newGuest(t),t);
+ assert.equal(qualityFromEnvironment(base.plant.env),10000);
+ const altered=setEnvironment(base,{temperature:1000,humidity:0,light:0,water:0,nutrients:0,airflow:0},t+100);
+ const q=qualityFromEnvironment(altered.plant.env);
+ assert.ok(q<10000 && q>=0);
+ const receipt=harvest(altered,t+18*86400000).harvests[0];
+ assert.equal(receipt.qualityBps,q);
+ assert.equal(receipt.massMg,Math.floor(100000*q/10000));
+ assert.equal(receipt.localOnly,true);
 });

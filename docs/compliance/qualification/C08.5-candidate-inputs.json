@@ -583,6 +583,17 @@
     "services/complianceauth/travel_policy_pack_test.go": "32fef3f905ffd687a2052706dd5da1396ae0620d78bc90c0b84cd37b78c538fa",
     "services/complianceauth/vancouver_business_matrix.go": "8332eae039904f0e60372584cc73f2e30c2160cc959b64b9d8a7fd6a943f2552",
     "services/complianceauth/vancouver_business_matrix_test.go": "070bade2bb684744cd68f856f63bf2e284b9ed24006d06d2cc8bb4ca058e7416",
-    ".github/workflows/420compliance-c08-5-dispatch.yml": "0ff7562c92f539f5f31eabaee6f95a1d9da3650cb579714e0b299d65fd25325e"
+    ".github/workflows/420compliance-c08-5-dispatch.yml": "6df886176f2962aeebc2c51b3b86db4aaf1190522c5ded1a7f71d48d32ecfdfd"
+  },
+  "qualification_dispatch_request": {
+    "purpose": "Run full C08.5 Level 3 canonical exact-head qualification via branch push (no Work credits)",
+    "workflows": [
+      "contracts-foundry.yml",
+      "genesis-address-authority.yml",
+      "qualification.yml",
+      "docs-qualify.yml",
+      "420compliance-c08-5-level3.yml"
+    ],
+    "status": "REQUESTED_NOT_CERTIFIED"
   }
 }

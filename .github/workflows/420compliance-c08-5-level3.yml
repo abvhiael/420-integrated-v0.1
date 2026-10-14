@@ -2,7 +2,7 @@ name: 420Compliance C08.5 retained phase qualification
 on:
   push:
     branches: ['audit/420compliance-*']
-    paths: ['.github/workflows/420compliance-c08-5-level3.yml']
+    paths: ['.github/workflows/420compliance-c08-5-level3.yml', 'docs/compliance/qualification/C08.5-candidate-inputs.json']
   workflow_dispatch:
 permissions:
   contents: read

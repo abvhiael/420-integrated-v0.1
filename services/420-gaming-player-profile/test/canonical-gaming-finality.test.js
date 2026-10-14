@@ -121,3 +121,28 @@ test('R05.7 progression payout requires matching track amount and completed cano
  await assert.rejects(()=>finality().progressionReward({wallet:target,trackId,amount:'42'}),/r057-progression-unqualified/);
  addressResponses=null;
 });
+
+test('R05.7 entitlements and cross-game attestations reject revoked or inactive records',async()=>{
+ liveHash=block;secondary=true;badCode=false;wrongChain=false;
+ const entitlementId=h('4'),attestationId=h('5'),entitlementType=h('6'),contentId=h('7');
+ const ent=enc([entitlementId,profile,game,entitlementType,contentId,
+  '0x'+num(0),'0x'+num(0),'0x'+num(0),'0x'+num(1)]);
+ const att=enc([attestationId,game,profile,h('9'),h('a'),h('b'),
+  '0x'+num(0),'0x'+num(0),'0x'+num(1)]);
+ addressResponses={
+  [contracts.entitlements.address]:data=>
+   data.startsWith('0x'+selector('entitlement(bytes32)'))?ent:enc(['0x'+num(1)]),
+  [contracts.crossGame.address]:data=>
+   data.startsWith('0x'+selector('attestation(bytes32)'))?att:enc(['0x'+num(1)])
+ };
+ const c=finality();
+ assert.equal((await c.entitlement({entitlementId,profileId:profile,entitlementType,contentId})).accepted,true);
+ assert.equal((await c.attestation({attestationId,profileId:profile})).accepted,true);
+ addressResponses[contracts.entitlements.address]=data=>
+  data.startsWith('0x'+selector('entitlement(bytes32)'))?ent:enc(['0x'+num(0)]);
+ await assert.rejects(()=>c.entitlement({entitlementId,profileId:profile,entitlementType,contentId}),/r057-entitlement-inactive/);
+ addressResponses[contracts.crossGame.address]=data=>
+  data.startsWith('0x'+selector('attestation(bytes32)'))?att:enc(['0x'+num(0)]);
+ await assert.rejects(()=>c.attestation({attestationId,profileId:profile}),/r057-attestation-inactive/);
+ addressResponses=null;
+});

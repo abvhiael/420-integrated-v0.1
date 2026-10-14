@@ -74,4 +74,23 @@ export class CloudSaveLifecycle420 {
   const published=await this.publish({expectedRevision:expectedHead,consentId,schemaLabel,bytes});
   return Object.freeze({...published,restoredFrom:backupRevision});
  }
+ async restoreBackup({backupId,expectedHead,consentId,schemaLabel}){
+  if(!opaque(backupId)||!uint(expectedHead)||!opaque(consentId)||!opaque(schemaLabel))
+   fail('save-invalid-restore');
+  const backup=await this.#repo.transaction(tx=>tx.backupReference(backupId));
+  if(!backup)fail('save-backup-unavailable');
+  if(backup.schema_label!==schemaLabel)fail('save-schema-conflict');
+  const bytes=await this.#provider.get({providerId:backup.provider_id,objectRef:backup.object_ref});
+  if(!(bytes instanceof Uint8Array)||bytes.length!==Number(backup.byte_length))
+   fail('save-provider-corruption');
+  if('0x'+createHash('sha256').update(bytes).digest('hex')!==backup.state_hash)
+   fail('save-integrity-mismatch');
+  const parsed=parseLocalSave420({bytes,schemaVersion:this.#schema});
+  // publish rechecks the authenticated profile ruleset and active cloud-save consent
+  // in a serializable transaction. A stale head is never overwritten.
+  const saved=await this.publish({expectedRevision:expectedHead,consentId,schemaLabel,bytes});
+  return Object.freeze({...saved,restoredBackup:backupId,
+   sourceRevision:String(backup.source_revision),schemaVersion:parsed.schemaVersion});
+ }
+
 }

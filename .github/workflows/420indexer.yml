@@ -191,6 +191,7 @@ on:
   push:
     branches:
       - main
+      - 'audit/bnb-phase4-bnb-4-1-baseline-20261013'
     paths:
       - 'indexer/**'
       - '420-indexer/**'

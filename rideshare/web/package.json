@@ -1,0 +1,10 @@
+{
+  "name": "@420integrated/liftd-web",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "check": "node --check app.mjs && node --check route-policy.mjs && npm test"
+  },
+  "engines": { "node": ">=22" }
+}

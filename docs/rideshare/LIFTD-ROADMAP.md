@@ -41,6 +41,14 @@ Level 1 per implementation step; Level 2 only at the named milestones; one Level
 
 Define detailed steps at L01 closeout using the actual service interfaces. Scope: accessible responsive rider request/quote/trip screens; driver onboarding/availability/assignment/navigation; operator dispatch and incident console; authenticated APIs/SDK; scoped messaging/notifications; Travel handoff; keyboard, mobile, screen-reader and consuming-app qualification. No demo may imply real vehicle availability or accepted payment.
 
+### L02 implementation steps
+
+| Step | Deliverable | Current status |
+| --- | --- | --- |
+| L02.1 | Application shell and design system — responsive navigation, accessible components, loading/error states, authenticated routing and clear availability information | **COMPLETE — Level 1 PASS**; see [L02.1 certificate](L02.1-LEVEL1-EVIDENCE.md), qualified implementation `cedd39c6e1c6350587bf920290439b6ab271da89` |
+
+Detailed subsequent steps remain to be reconciled with existing L01 service interfaces at the L01 phase-closeout boundary. This entry does not renumber, merge or silently replace future canonical steps.
+
 ## Phase L03 — service operations and release
 
 Define detailed steps after L02 integration qualification. Scope: disputes/reviews, abuse controls, observability/redacted telemetry, managed keys, multi-instance concurrency/failover, backups/restore, operational drills, independently approved launch-jurisdiction controls, official-testnet integration, release acceptance. Commercial launch requires independent transport, insurance and operational approval; coding progress cannot grant it.

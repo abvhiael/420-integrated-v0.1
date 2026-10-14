@@ -1,4 +1,4 @@
-import { validatePreferences, defaultRiderPreferences } from "../src/rider-preferences.mjs";
+import { checkRiderPreferences } from "./preference-policy.mjs";
 
 // Browser UI only; L01 authenticated service must enforce scoped authorization server-side.
 export function mountRiderAccount(container, adapter, session) {
@@ -42,7 +42,7 @@ export function mountRiderAccount(container, adapter, session) {
   let revision=null;
   const apply=(result)=>{
     if(!result||!Number.isSafeInteger(result.revision)||result.revision<0)throw Error("Invalid preference response");
-    const values=validatePreferences(result.preferences);
+    const values=checkRiderPreferences(result.preferences);
     for(const [key] of defs)fields[key].checked=values[key];
     contact.value=values.contactMethod;
     revision=result.revision;save.disabled=false;erase.disabled=false;
@@ -61,7 +61,7 @@ export function mountRiderAccount(container, adapter, session) {
     try{
       const values=Object.fromEntries(defs.map(([key])=>[key,fields[key].checked]));
       values.contactMethod=contact.value;
-      const prefs=validatePreferences(values);
+      const prefs=checkRiderPreferences(values);
       const result=await adapter.savePreferences({accountId:session.accountId,expectedRevision:revision,preferences:prefs});
       if(!active)return;
       apply(result);notice.textContent="Preferences saved.";

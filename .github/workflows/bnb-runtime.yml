@@ -48,7 +48,7 @@ jobs:
           python - <<'PY'
           import os, psycopg
           with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
-              assert c.execute("SELECT count(*) FROM bnb_schema_migration").fetchone()[0] == 26
+              assert c.execute("SELECT count(*) FROM bnb_schema_migration").fetchone()[0] == 27
           PY
       - name: BNB-3.2 isolated verified-TLS PostgreSQL fixture
         env:
@@ -83,8 +83,8 @@ jobs:
           with psycopg.connect(original) as source, psycopg.connect(restored) as target:
               a=source.execute("SELECT version,filename,sha256 FROM bnb_schema_migration ORDER BY version").fetchall()
               b=target.execute("SELECT version,filename,sha256 FROM bnb_schema_migration ORDER BY version").fetchall()
-              assert len(a)==26 and a==b, "BACKUP_RESTORE_MIGRATION_MISMATCH"
-              for table in ("bnb_property","bnb_hold","bnb_reservation","bnb_request_dedupe","bnb_outbox"):
+              assert len(a)==27 and a==b, "BACKUP_RESTORE_MIGRATION_MISMATCH"
+              for table in ("bnb_property","bnb_hold","bnb_reservation","bnb_request_dedupe","bnb_outbox","bnb_consumer_subscription","bnb_consumer_subscription_history","bnb_consumer_delivery"):
                   src=source.execute(f"SELECT count(*) FROM {table}").fetchone()[0]
                   dst=target.execute(f"SELECT count(*) FROM {table}").fetchone()[0]
                   assert src==dst,(table,src,dst)

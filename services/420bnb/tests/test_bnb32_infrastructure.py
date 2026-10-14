@@ -221,7 +221,7 @@ def database(tmp_path):
     migrator = dict(values, user="bnb_migrator", password="CI-only-migrator", channel_binding="require")
     runtime = dict(values, user="bnb_runtime", password="CI-only-runtime", channel_binding="require")
     with psycopg.connect(**migrator) as connection:
-        assert p.controlled_migration(connection) == 26
+        assert p.controlled_migration(connection) == 27
     yield values, migrator, runtime
     with psycopg.connect(**values, autocommit=True) as connection:
         connection.execute("SELECT 1")
@@ -244,7 +244,7 @@ def test_verified_tls_runtime_dml_and_denied_ddl_ledger(database):
 def test_controlled_migration_repeatability_and_runtime_role_rejection(database):
     _, migrator, runtime = database
     with psycopg.connect(**migrator) as connection:
-        assert p.controlled_migration(connection) == 26
+        assert p.controlled_migration(connection) == 27
     with psycopg.connect(**runtime) as connection:
         with pytest.raises(p.ConfigurationError, match="DATABASE_ROLE_ELEVATED"):
             p.controlled_migration(connection)
@@ -297,7 +297,7 @@ def test_concurrent_controlled_migrations(database):
         with psycopg.connect(**migrator) as connection:
             return p.controlled_migration(connection)
     with ThreadPoolExecutor(max_workers=2) as pool:
-        assert list(pool.map(run, range(2))) == [26, 26]
+        assert list(pool.map(run, range(2))) == [27, 27]
 
 
 @pytest.mark.parametrize("table,privilege", [

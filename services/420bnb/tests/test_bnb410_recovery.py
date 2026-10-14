@@ -15,7 +15,7 @@ class FakeCursor:
     def fetchone(self):return self.rows[0]
 
 class FakeConn:
-    def __init__(self,counts=(0,0,0),versions=tuple(range(1,27))):
+    def __init__(self,counts=(0,0,0),versions=tuple(range(1,28))):
         self.counts=counts;self.versions=versions
     def execute(self,sql):
         if "bnb_schema_migration" in sql:return FakeCursor([(v,) for v in self.versions])
@@ -33,7 +33,7 @@ def test_operator_authority_precedes_any_database_access(action):
 
 def test_recovery_blocks_schema_drift_and_automatic_rollback():
     with pytest.raises(ops.RecoveryBlocked,match="RECOVERY_SCHEMA_DRIFT"):
-        ops.assess(FakeConn(versions=range(1,26)),action="restart",approved=True)
+        ops.assess(FakeConn(versions=range(1,27)),action="restart",approved=True)
     outcome=ops.assess(FakeConn(),action="rollback",approved=True)
     assert not outcome.ready and outcome.reason=="DATABASE_ROLLBACK_FORBIDDEN"
 

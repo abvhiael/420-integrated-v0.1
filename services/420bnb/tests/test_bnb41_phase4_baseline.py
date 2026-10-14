@@ -44,5 +44,5 @@ def test_production_and_ci_boundaries_fail_closed():
         assert requirement in compose
     assert "Exact SHA" in workflow and "Runtime security and API tests" in workflow
     migrations=sorted((BNB/"migrations").glob("[0-9][0-9][0-9]_*.sql"))
-    assert len(migrations)==26
-    assert migrations[-1].name=="026_pay_case_reconciliation.sql"
+    assert len(migrations)==27
+    assert migrations[-1].name=="027_independent_consumers.sql"

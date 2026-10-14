@@ -28,7 +28,8 @@ def db():
     schema = 'worker_' + uuid4().hex
     with psycopg.connect(dsn) as c:
         c.execute(sql.SQL('CREATE SCHEMA {}').format(sql.Identifier(schema)))
-        for name in ('bnb_outbox', 'bnb_outbox_receipt', 'bnb_request_dedupe', 'bnb_audit'):
+        for name in ('bnb_outbox', 'bnb_outbox_receipt', 'bnb_request_dedupe', 'bnb_audit',
+                     'bnb_consumer_subscription', 'bnb_consumer_delivery'):
             c.execute(sql.SQL('CREATE TABLE {}.{} (LIKE public.{} INCLUDING ALL)').format(
                 sql.Identifier(schema), sql.Identifier(name), sql.Identifier(name)))
     def connect():

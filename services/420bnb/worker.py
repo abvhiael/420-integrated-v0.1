@@ -11,6 +11,7 @@ from uuid import uuid4
 
 import psycopg
 import outbox
+import consumer_delivery
 
 
 class LocalValidationSink:
@@ -39,7 +40,7 @@ class LocalValidationSink:
 
 class Supervisor:
     def __init__(self, connect, adapter, *, lease_seconds=30, poll_seconds=1,
-                 grace_seconds=5, delivery_seconds=20, stop=None):
+                 grace_seconds=5, delivery_seconds=20, stop=None, consumer=None):
         if any(type(x) not in (int, float) or not math.isfinite(x)
                for x in (poll_seconds, grace_seconds, delivery_seconds)):
             raise ValueError('WORKER_BOUNDS')
@@ -47,10 +48,35 @@ class Supervisor:
                 or not 0.05 <= poll_seconds <= 30 or not 0 <= grace_seconds <= 30
                 or not 0.05 <= delivery_seconds <= 60):
             raise ValueError('WORKER_BOUNDS')
+        if consumer is not None:
+            outbox._identity(consumer, outbox.CONSUMER, 'CONSUMER_INVALID')
+        self.consumer = consumer
         self.connect, self.adapter = connect, adapter
         self.lease_seconds, self.poll_seconds = lease_seconds, poll_seconds
         self.grace_seconds, self.delivery_seconds = grace_seconds, delivery_seconds
         self.stop = stop if stop is not None else threading.Event()
+
+    def _claim(self, c, owner):
+        if self.consumer is None:
+            return outbox.claim(c, owner, limit=1, lease_seconds=self.lease_seconds)
+        consumer_delivery._subscription(c, self.consumer)
+        consumer_delivery.enroll(c)
+        return consumer_delivery.claim(c, owner, self.consumer, lease_seconds=self.lease_seconds)
+
+    def _renew(self, c, eid, owner):
+        if self.consumer is None:
+            return outbox.renew(c, eid, owner, lease_seconds=self.lease_seconds)
+        return consumer_delivery.renew(c, eid, owner, self.consumer, lease_seconds=self.lease_seconds)
+
+    def _ack(self, c, eid, owner, receipt):
+        if self.consumer is None:
+            return outbox.acknowledge(c, eid, owner, 'bnb-local-validation', receipt)
+        return consumer_delivery.acknowledge(c, eid, owner, self.consumer, receipt)
+
+    def _fail(self, c, eid, owner, code):
+        if self.consumer is None:
+            return outbox.fail(c, eid, owner, code)
+        return consumer_delivery.fail(c, eid, owner, self.consumer, code)
 
     def once(self):
         if self.stop.is_set():
@@ -58,15 +84,17 @@ class Supervisor:
         # Unique for every claim, including retries in the same process: no ABA owner reuse.
         owner = 'bnb-' + uuid4().hex
         with self.connect() as c:
-            events = outbox.claim(c, owner, limit=1, lease_seconds=self.lease_seconds)
+            events = self._claim(c, owner)
         if not events:
             return 'idle'
         event = events[0]
         try:
             encoded = outbox._event(event)
+            if self.consumer is not None and consumer_delivery.envelope_digest(event) != event['envelope_digest']:
+                raise outbox.DeliveryError('EVENT_CHANGED')
         except outbox.DeliveryError:
             with self.connect() as c:
-                outbox.fail(c, event['id'], owner, 'invalid_event')
+                self._fail(c, event['id'], owner, 'invalid_event')
             return 'invalid_event'
         done = threading.Event()
         result = {}
@@ -96,16 +124,16 @@ class Supervisor:
             if now - renewed >= self.lease_seconds / 3:
                 try:
                     with self.connect() as c:
-                        outbox.renew(c, event['id'], owner, lease_seconds=self.lease_seconds)
+                        self._renew(c, event['id'], owner)
                 except (psycopg.Error, outbox.DeliveryError):
                     self.stop.set()
                     raise
                 renewed = now
         with self.connect() as c:
             if result.get('error'):
-                outbox.fail(c, event['id'], owner, 'provider_unavailable')
+                self._fail(c, event['id'], owner, 'provider_unavailable')
                 return 'retry'
-            outbox.acknowledge(c, event['id'], owner, 'bnb-local-validation', result['receipt'])
+            self._ack(c, event['id'], owner, result['receipt'])
         return 'delivered'
 
     def run(self, *, max_cycles=None):
@@ -151,7 +179,18 @@ def main():
     stop = threading.Event()
     for sig in (signal.SIGTERM, signal.SIGINT):
         signal.signal(sig, lambda *_: stop.set())
-    supervisor = Supervisor(connect, LocalValidationSink(connect), stop=stop)
+    # Only the explicitly selected, local rehearsal sink is configured here.
+    # Independent network consumers require their own approved configuration/transport.
+    with connect() as c:
+        row = c.execute("SELECT revision FROM bnb_consumer_subscription WHERE consumer='bnb-local-validation'").fetchone()
+        if row:
+            consumer_delivery._subscription(c, 'bnb-local-validation')
+        else:
+            consumer_delivery.configure(c, 'bnb-local-validation', sorted(outbox.EVENT_TYPES),
+                active=True, expected_revision=0, actor='local-worker-contract',
+                authorize=lambda actor, action, consumer: actor == 'local-worker-contract'
+                    and action == 'configure' and consumer == 'bnb-local-validation')
+    supervisor = Supervisor(connect, LocalValidationSink(connect), stop=stop, consumer='bnb-local-validation')
     return supervisor.run()
 
 

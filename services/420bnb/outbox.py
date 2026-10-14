@@ -40,19 +40,33 @@ def _event(event):
             raise DeliveryError("PAYLOAD_INVALID")
     return json.dumps({"id":str(event["id"]),"type":event["event_type"],"payload":payload},sort_keys=True,separators=(",",":"))
 
+def _legacy(conn,event_id):
+    # Retain historical API compatibility, never allow whole-event bypass of managed work.
+    conn.execute("SELECT pg_advisory_xact_lock_shared(420503)")
+    row=conn.execute("""SELECT consumer_managed FROM bnb_outbox
+      WHERE id=%s FOR UPDATE""",(UUID(str(event_id)),)).fetchone()
+    active=conn.execute("""SELECT EXISTS(SELECT 1 FROM bnb_consumer_subscription s
+      JOIN bnb_outbox b ON b.event_type=ANY(s.event_types)
+      WHERE b.id=%s AND s.active)""",(UUID(str(event_id)),)).fetchone()[0]
+    if row and (row[0] or active):
+        raise DeliveryError("CONSUMER_DELIVERY_REQUIRED")
+
 def claim(conn,worker,*,limit=10,lease_seconds=60):
     _identity(worker,WORKER,"WORKER_INVALID")
     if type(limit) is not int or not 1<=limit<=100 or type(lease_seconds) is not int or not 10<=lease_seconds<=300:
         raise DeliveryError("CLAIM_BOUNDS")
+    conn.execute("SELECT pg_advisory_xact_lock_shared(420503)")
     # Crash-only attempts are bounded too, even when no explicit fail reached the DB.
     conn.execute("""UPDATE bnb_outbox SET dead_lettered_at=clock_timestamp(),
       failure_code='attempts_exhausted',lease_owner=NULL,lease_expires_at=NULL
-      WHERE delivered_at IS NULL AND dead_lettered_at IS NULL AND attempts>=%s
+      WHERE NOT consumer_managed AND delivered_at IS NULL AND dead_lettered_at IS NULL AND attempts>=%s
         AND (lease_expires_at IS NULL OR lease_expires_at<clock_timestamp())""",(MAX_ATTEMPTS,))
     rows=conn.execute("""
       WITH due AS (
         SELECT id FROM bnb_outbox
-        WHERE delivered_at IS NULL AND dead_lettered_at IS NULL
+        WHERE NOT consumer_managed AND delivered_at IS NULL AND dead_lettered_at IS NULL
+          AND NOT EXISTS(SELECT 1 FROM bnb_consumer_subscription s
+            WHERE s.active AND bnb_outbox.event_type=ANY(s.event_types))
           AND available_at <= now()
           AND (lease_expires_at IS NULL OR lease_expires_at < now())
         ORDER BY available_at,created_at,id FOR UPDATE SKIP LOCKED LIMIT %s
@@ -69,6 +83,7 @@ def renew(conn,event_id,worker,*,lease_seconds=60):
     _identity(worker,WORKER,"WORKER_INVALID")
     if type(lease_seconds) is not int or not 10<=lease_seconds<=300:
         raise DeliveryError("CLAIM_BOUNDS")
+    _legacy(conn,event_id)
     # Lock first, then evaluate wall time in a new statement after any lock wait.
     conn.execute("SELECT id FROM bnb_outbox WHERE id=%s FOR UPDATE",(UUID(str(event_id)),)).fetchone()
     row=conn.execute("""UPDATE bnb_outbox
@@ -86,6 +101,7 @@ def acknowledge(conn,event_id,worker,consumer,receipt):
     if not isinstance(receipt,str) or not 1<=len(receipt)<=256:
         raise DeliveryError("RECEIPT_INVALID")
     event_id=UUID(str(event_id))
+    _legacy(conn,event_id)
     row=conn.execute("""SELECT event_type,payload FROM bnb_outbox
       WHERE id=%s AND lease_owner=%s AND lease_expires_at>clock_timestamp()
         AND delivered_at IS NULL AND dead_lettered_at IS NULL FOR UPDATE""",(event_id,worker)).fetchone()
@@ -111,6 +127,7 @@ def fail(conn,event_id,worker,code):
     _identity(worker,WORKER,"WORKER_INVALID")
     _identity(code,CONSUMER,"FAILURE_CODE_INVALID")
     event_id=UUID(str(event_id))
+    _legacy(conn,event_id)
     row=conn.execute("""SELECT attempts FROM bnb_outbox WHERE id=%s AND lease_owner=%s
       AND lease_expires_at>clock_timestamp() AND delivered_at IS NULL AND dead_lettered_at IS NULL
       FOR UPDATE""",(event_id,worker)).fetchone()
@@ -137,6 +154,7 @@ def replay(conn,event_id,actor,reason,*,authorize=None):
     if authorize is None or not callable(authorize) or authorize(actor,reason) is not True:
         raise DeliveryError("REPLAY_AUTHORITY_REQUIRED")
     event_id=UUID(str(event_id))
+    _legacy(conn,event_id)
     updated=conn.execute("""UPDATE bnb_outbox SET dead_lettered_at=NULL,attempts=0,
         available_at=now(),lease_owner=NULL,lease_expires_at=NULL,
         failure_code=NULL WHERE id=%s AND delivered_at IS NULL

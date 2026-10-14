@@ -36,7 +36,7 @@ test('R05.5 immutable revisions, integrity verified read and conflict rejects wi
  const row=await f.save.publish({expectedRevision:'0',consentId:'c1',schemaLabel:'hc-v7',bytes:content});
  assert.equal(row.revision,'1');
  assert.equal((await f.save.read()).revision,'1');
- await assert.rejects(()=>f.save.publish({expectedRevision:'0',consentId:'c1',schemaLabel:'hc-v7',bytes}),/revision-conflict/);
+ await assert.rejects(()=>f.save.publish({expectedRevision:'0',consentId:'c1',schemaLabel:'hc-v7',bytes:content}),/revision-conflict/);
  assert.equal(f.head.revision,'1');
  f.objects.set(row.objectRef,bytes({home:99}));
  await assert.rejects(()=>f.save.read(),/save-integrity-mismatch/);

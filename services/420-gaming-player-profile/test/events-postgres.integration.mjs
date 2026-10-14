@@ -17,6 +17,7 @@ const h=x=>'0x'+x.repeat(64),wallet='0x'+'a'.repeat(40),contract='0x'+'b'.repeat
 const G=h('1'),C={games:'0x'+'1'.repeat(40),identity:'0x'+'2'.repeat(40),
  entitlements:'0x'+'3'.repeat(40),crossGame:'0x'+'4'.repeat(40),
  claims:contract,bridge:'0x'+'c'.repeat(40),migration:'0x'+'d'.repeat(40)};
+assert.equal(Object.keys(C).length,7,'R05.6 fixture must configure all seven Gaming emitters');
 const block1=h('2'),block2=h('3'),alternate=h('4'),tx=h('5'),parent=h('6'),profile=h('7');
 const logs=(blockHash)=>[{address:contract,blockHash,transactionHash:tx,
  transactionIndex:'0',logIndex:'0',

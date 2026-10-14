@@ -5,7 +5,10 @@ on:
       - 'rideshare/src/auth.mjs'
       - 'rideshare/web/**'
       - 'rideshare/src/rider-preferences.mjs'
-      - 'rideshare/test/rider-preferences.test.mjs'
+      - 'rideshare/test/**rider-preferences*.test.mjs'
+      - 'rideshare/migrations/007_rider_preferences.sql'
+      - 'rideshare/src/postgres-rider-preferences.mjs'
+      - 'rideshare/src/http.mjs'
       - '.github/workflows/liftd-l02-2-level1.yml'
   push:
     branches: ['build/liftd-l02-2-rider-account-preferences']
@@ -36,5 +39,7 @@ jobs:
         run: |
           node --check rideshare/src/rider-preferences.mjs
           node --check rideshare/src/auth.mjs
-          node --test rideshare/test/rider-preferences.test.mjs rideshare/test/auth.test.mjs
+          node --check rideshare/src/http.mjs
+          node --check rideshare/src/postgres-rider-preferences.mjs
+          node --test rideshare/test/rider-preferences.test.mjs rideshare/test/rider-preferences-http.test.mjs rideshare/test/postgres-rider-preferences.test.mjs rideshare/test/auth.test.mjs
           cd rideshare/web && npm run check

@@ -68,7 +68,12 @@ def consume(conn,property_id,consumer,revision,payload):
     if consumer not in ("search","travel"):raise HTTPException(403,"CONSUMER_UNAUTHORIZED")
     if type(revision) is not int or revision<1:raise HTTPException(422,"REVISION_INVALID")
     pid=UUID(str(property_id))
+    # Admission must revalidate current authority even while durable refresh is pending.
+    # The property lock serializes this check with every source mutation/refresh.
+    current=snapshot(conn,pid)
     source=conn.execute("SELECT revision,payload FROM bnb_discovery_projection WHERE property_id=%s",(pid,)).fetchone()
+    if payload!=current:
+        raise HTTPException(409,"SOURCE_AUTHORITY_STALE")
     if source is None or revision!=source[0] or payload!=source[1]:
         raise HTTPException(409,"SOURCE_REVISION_STALE")
     old=conn.execute("""SELECT revision FROM bnb_discovery_consumer

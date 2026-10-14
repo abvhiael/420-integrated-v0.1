@@ -216,6 +216,12 @@ def test_authority_revocation_or_expiry_retracts_discovery(fixture,source):
             c.execute("UPDATE bnb_compliance_eligibility SET revoked_at=clock_timestamp() WHERE property_id=%s",(pid,))
         else:
             c.execute("UPDATE bnb_travel_place_binding SET proof_expires_at=clock_timestamp()-interval '1 second' WHERE property_id=%s",(pid,))
+    # A stale source revision cannot be accepted while its refresh waits.
+    import discovery_sync
+    with connect() as c:
+        old=c.execute('SELECT revision,payload FROM bnb_discovery_projection WHERE property_id=%s',(pid,)).fetchone()
+        with pytest.raises(HTTPException,match='SOURCE_AUTHORITY_STALE'):
+            discovery_sync.consume(c,pid,'search',old[0],old[1])
     assert run(fixture)
     with connect() as c:
         assert c.execute("SELECT payload->>'visible',revision FROM bnb_discovery_projection WHERE property_id=%s",(pid,)).fetchone()==('false',2)

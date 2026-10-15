@@ -48,3 +48,12 @@ For each track, record: track ID, provider/owner, environment and immutable netw
 - **PostgreSQL:** attempted a separate `liftd-isolated-testnet-postgres` free PostgreSQL 16 instance; Render rejected with `cannot have more than one active free tier database`. **NOT PROVISIONED**. The existing `420travel-staging-postgres` belongs to a different application and was not reused or changed. A separate paid database requires user authorization; no paid database was created.
 - **Existing ReeferReview web service:** not changed. Existing 420Travel staging database: not changed.
 - **Remaining critical dependencies:** separate PostgreSQL, operational backend and secret/config provisioning, independent Identity/session issuers, transport/Registry issuers and regulatory approvals, private vault, Messaging transport, independent accessibility test/signoffs. Every acceptance track remains **NOT ACCEPTED**. Readiness service does not unblock live functionality.
+
+## Connected Neon project — 2026-10-14 (America/Regina)
+
+- Neon connection authenticated and project confirmed: `liftd-testnet` / `nameless-recipe-33007888` in organization `org-flat-hill-15809588`.
+- Default `production` branch: `br-tiny-sound-b5cyblac`; AWS Ohio (`aws-us-east-2`); PostgreSQL **18.6**.
+- Created isolated database `liftd_testnet` and dedicated database-owning role `liftd_testnet_app`. Confirmed with real SQL: `current_database() = liftd_testnet`, `current_user = liftd_testnet_app`, version `18.6`.
+- No credentials or connection strings committed. This establishes **database provisioning and a successful SQL connection only**, not the application schema, secure runtime roles, deployed API connectivity, identity, transport or vault acceptance.
+- Render's existing `liftd-isolated-testnet-readiness` deployment `dep-db83b4ij9qps73bfv4gg` reports **live**; the readiness server deliberately exposes no operational API routes and does not yet have an application database connection. The existing ReeferReview/420Travel resources remain untouched.
+- **Next technical gate:** apply/check the repository's ordered, checksummed LIFTd SQL migrations on a carefully isolated test branch, create a least-privilege runtime credential, inject its secret into the eventual operational backend service, then run end-to-end Postgres transactions and targeted CI. Do not treat availability of a database as evidence of regulatory approval or production readiness.

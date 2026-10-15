@@ -42,24 +42,26 @@ def test_operation_bounding_and_redacted_replay():
 
 def test_replay_requires_unique_nonce_and_never_uses_provider(monkeypatch):
     event=uuid4()
+    proof={"jti":"123456789","event_id":str(event),"consumer":None}
     class DB:
         def execute(self,sql,params=None):
             if "INSERT INTO bnb_request_dedupe" in sql:return Cursor(("key",))
             raise AssertionError("unexpected SQL")
     called=[]
     monkeypatch.setattr(ops.outbox,"replay",lambda *args,**kwargs:called.append((args,kwargs)))
-    r=ops.manual_replay(DB(),"operator",{"jti":"123456789"},event,"approved operational review")
+    r=ops.manual_replay(DB(),"operator",proof,event,"approved operational review")
     assert r["execution"]=="queued-only" and len(called)==1
     class Duplicate(DB):
         def execute(self,sql,params=None):return Cursor(None)
     with pytest.raises(HTTPException,match="OPERATOR_NONCE_REPLAY"):
-        ops.manual_replay(Duplicate(),"operator",{"jti":"123456789"},event,"approved operational review")
+        ops.manual_replay(Duplicate(),"operator",proof,event,"approved operational review")
 
 def test_api_routes_retain_independent_operator_authority():
     from api import app
     routes={r.path for r in app.routes}
     for suffix in ("/health","/dead-letters","/reconciliation/{action}",
-                   "/dead-letters/{event_id}/replay"):
+                   "/dead-letters/{event_id}/replay",
+                   "/consumers/{consumer}/dead-letters/{event_id}/replay"):
         assert "/v1/bnb/internal/operations"+suffix in routes
 
 
@@ -77,3 +79,14 @@ def test_console_refuses_non_tls_and_unsafe_requests(tmp_path):
                     uuid4(),"short")
     with pytest.raises(cli.ConsoleError,match="CREDENTIAL_MOUNT_INVALID"):
         cli.request("https://localhost","/not-a-ca","relative/token.jwt","health")
+
+
+def test_replay_approval_binds_event_and_consumer():
+    event=uuid4()
+    proof={"jti":"123456789","event_id":str(uuid4()),"consumer":None}
+    with pytest.raises(HTTPException,match="REPLAY_SCOPE_INVALID"):
+        ops.manual_replay(Connection(),"operator",proof,event,"incident approval reason")
+    proof["event_id"]=str(event)
+    proof["consumer"]="search"
+    with pytest.raises(HTTPException,match="REPLAY_SCOPE_INVALID"):
+        ops.manual_replay(Connection(),"operator",proof,event,"incident approval reason")

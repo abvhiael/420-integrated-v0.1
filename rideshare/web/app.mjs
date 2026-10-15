@@ -9,6 +9,8 @@ import { mountTripExperience } from "./trip-experience-view.mjs";
 import { createTripExperienceApi } from "./trip-experience-api.mjs";
 import { mountDriverOnboarding } from "./driver-onboarding.mjs";
 import { createDriverOnboardingApi } from "./driver-onboarding-api.mjs";
+import { mountDriverAvailability } from "./driver-availability-view.mjs";
+import { createDriverAvailabilityApi } from "./driver-availability-api.mjs";
 
 const root = document.getElementById("main");
 const menu = document.getElementById("menu-toggle");
@@ -20,6 +22,7 @@ let clearPickupView = null;
 let quotePanel = null;
 let tripPanel = null;
 let clearDriverOnboarding = null;
+let clearDriverAvailability = null;
 
 // The host must provide an independently authenticated session adapter.
 // No localStorage, query-string identity, simulated principal or demo operator bypass.
@@ -45,6 +48,7 @@ function renderDecision(decision) {
   if (quotePanel) { quotePanel.destroy(); quotePanel = null; }
   if (tripPanel) { tripPanel.destroy(); tripPanel = null; }
   if (clearDriverOnboarding) { clearDriverOnboarding(); clearDriverOnboarding = null; }
+  if (clearDriverAvailability) { clearDriverAvailability(); clearDriverAvailability = null; }
   root.replaceChildren();
   root.setAttribute("aria-busy", "false");
   const panel = node("section", undefined, "panel");

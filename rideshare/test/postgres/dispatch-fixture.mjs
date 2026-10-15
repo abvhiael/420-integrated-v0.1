@@ -5,6 +5,7 @@ import {createSessionClient} from '../../src/session-client.mjs';
 import {createEligibilityAdapter} from '../../src/eligibility.mjs';
 import {createLocationRoutingAdapter,createPrivateLocationStore,createLocationService} from '../../src/location.mjs';
 import {createDispatchAdapter,createAvailabilityVerifier} from '../../src/dispatch.mjs';
+import {createDriverOfferService} from '../../src/driver-offers.mjs';
 import {createPostgresTripStore} from '../../src/postgres-store.mjs';
 import {createTripService} from '../../src/service.mjs';
 import {createHttpHandler} from '../../src/http.mjs';
@@ -28,8 +29,8 @@ export function fixture(pool,pairs,controls={now:100}) {
     return {sub:r.subject,nonce:r.nonce,tokenDigest:r.tokenDigest,accountId:r.accountId,sessionId:r.sessionId,deviceId:r.deviceId,recoveryEpoch:0,
       active:!controls.revokedSessions?.includes(r.subject),deviceActive:true,tokenActive:true,
       grants:role==='driver'?[
-        {role,resource:`account:${r.subject}`,actions:['availability.set',...(controls.pay?['pay.statement']:[])],expiresAt:clock()+30,revoked:false},
-        {role,resource:`trip:${r.sessionId}`,actions:['trip.read','trip.arrive','trip.start','trip.complete','trip.cancel',...(controls.pay?['pay.read']:[])],expiresAt:clock()+30,revoked:false}]:role==='operator'?[
+        {role,resource:`account:${r.subject}`,actions:['availability.set','offer.read','offer.respond',...(controls.pay?['pay.statement']:[])],expiresAt:clock()+30,revoked:false},
+        {role,resource:`trip:${r.sessionId}`,actions:['trip.read','offer.respond','trip.arrive','trip.start','trip.complete','trip.cancel',...(controls.pay?['pay.read']:[])],expiresAt:clock()+30,revoked:false}]:role==='operator'?[
         {role,resource:`trip:${r.sessionId}`,actions:['trip.assign','trip.expire',...(controls.pay?['pay.reconcile','pay.read']:[])],expiresAt:clock()+30,revoked:false}]:[
         {role,resource:`account:${r.subject}`,actions:['trip.create','route.prepare',...(controls.quotes?['quote.create','quote.accept','quote.read']:[])],expiresAt:clock()+30,revoked:false},
         {role,resource:`trip:${r.sessionId}`,actions:['trip.read','trip.cancel',...(controls.pay?['pay.prepare','pay.consent','pay.reconcile','pay.read']:[])],expiresAt:clock()+30,revoked:false}]};
@@ -47,7 +48,8 @@ export function fixture(pool,pairs,controls={now:100}) {
   const verifyAvailability=createAvailabilityVerifier({sessionAuthority:roots[1],resolveSession:session,clock});
   const dispatchAdapter=createDispatchAdapter({pool,authenticator,eligibilityAdapter,verifyAvailability,clock,isPaused:()=>controls.paused??false,availabilitySeconds:120,assignmentSeconds:30});
   const service=createTripService({authenticator,store:tripStore,privateLocationStore:privateStore,eligibilityAdapter,dispatchAdapter,isPaused:()=>controls.paused??false,clock});
-  const handler=createHttpHandler(service,locationService,dispatchAdapter);
+  const driverOfferService=createDriverOfferService({pool,authenticator,tripService:service,eligibilityAdapter,verifyAvailability,clock,isPaused:()=>controls.paused??false});
+  const handler=createHttpHandler(service,locationService,dispatchAdapter,undefined,undefined,undefined,undefined,undefined,undefined,driverOfferService);
   const rider='rider_dispatch';
   const create=async(trip,passengerCount=2)=>{
     const credential=token('rider',rider,trip);
@@ -59,5 +61,5 @@ export function fixture(pool,pairs,controls={now:100}) {
     return dispatchAdapter.setAvailability(token('driver',driver),{driverId:driver,vehicleId:vehicle,online,expectedRevision:row?Number(row.revision):0,commandId:cid()});
   };
   const transition=(role,subject,trip,action,revision,commandId=cid(),extra={})=>service.transition(token(role,subject,trip),trip,{action,expectedRevision:revision,commandId,...extra});
-  return {authenticator,eligibilityAdapter,roots,jwt,transport,clock,cid,token,tripStore,privateStore,locationService,dispatchAdapter,service,handler,create,online,transition};
+  return {authenticator,eligibilityAdapter,roots,jwt,transport,clock,cid,token,tripStore,privateStore,locationService,dispatchAdapter,driverOfferService,service,handler,create,online,transition};
 }

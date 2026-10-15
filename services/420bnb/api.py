@@ -3847,3 +3847,17 @@ def operations_consumer_replay(consumer:str,event_id:UUID,payload:OperationalRep
         with c.transaction():
             actor,proof=ops.operator(c,authorization,"replay")
             return ops.manual_replay(c,actor,proof,event_id,payload.reason,consumer=consumer)
+
+
+@app.get("/v1/bnb/internal/operations/synchronization")
+def operator_synchronization(stale_seconds:int=300,backlog_limit:int=100,
+                             authorization:str|None=Header(None)):
+    """Fail-closed operator-only monitoring; never asserts external provider health."""
+    import operational_controls as ops
+    import synchronization_monitor as monitor
+    with db() as c:
+        with c.transaction():
+            actor,_=ops.operator(c,authorization,"health")
+            result=monitor.snapshot(c,stale_seconds=stale_seconds,backlog_limit=backlog_limit)
+            ops.audit_read(c,actor,"health")
+            return result

@@ -92,3 +92,45 @@ def test_retraction_then_recovery_does_not_resurrect_old_revision(database):
         assert saved[0] == 2 and saved[1]["visible"] is False
         with pytest.raises(HTTPException):
             transport.accept_repository_consumer(restarted, "search", first, authorize=_allowed)
+
+
+def test_signed_http_consumer_ingress_commits_and_rejects_replay(database, monkeypatch):
+    from test_bnb55_discovery_feed import signed_http as signed_http_fixture
+    # Exercise the pre-existing RS256 fixture, including actor/consumer/grant
+    # proof verification, through FastAPI and verified-TLS PostgreSQL.
+    import api, jwt, time
+    from fastapi.testclient import TestClient
+    from cryptography.hazmat.primitives import serialization
+    from cryptography.hazmat.primitives.asymmetric import rsa
+    connect, _, _ = database
+    with connect() as conn:
+        pid = property_row(conn)
+        discovery_sync.synchronize(conn, pid)
+    with connect() as conn:
+        body = _source(conn, "search")
+    key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+    public = key.public_key().public_bytes(serialization.Encoding.PEM,
+        serialization.PublicFormat.SubjectPublicKeyInfo).decode()
+    monkeypatch.setenv("BNB_DISCOVERY_CONSUMER_ISSUER", "https://fixture.invalid")
+    monkeypatch.setenv("BNB_DISCOVERY_CONSUMER_AUDIENCE", "fixture-discovery")
+    monkeypatch.setenv("BNB_DISCOVERY_CONSUMER_PUBLIC_KEY_PEM", public)
+    monkeypatch.setattr(api, "db", connect)
+    now = int(time.time())
+    token = jwt.encode({"iss":"https://fixture.invalid","aud":"fixture-discovery",
+        "sub":"fixture","iat":now,"nbf":now,"exp":now+120,"jti":uuid4().hex,
+        "purpose":"discovery-accept","consumer":"search",
+        "current_consumer_grant_verified":True,"consumer_revoked":False,
+        **{k:body[k] for k in ("transport_digest","epoch","cursor",
+                            "property_id","revision")}}, key, algorithm="RS256")
+    route = "/v1/bnb/internal/discovery-consumers/search/accept"
+    client = TestClient(api.app)
+    assert client.post(route,json=body).status_code == 401
+    assert client.post(route,json=body,headers={"x-discovery-proof":"forged"}).status_code == 401
+    response = client.post(route,json=body,headers={"x-discovery-proof":token})
+    assert response.status_code == 201, response.text
+    assert response.json()["external_acceptance"] is False
+    with connect() as conn:
+        assert conn.execute("SELECT revision FROM bnb_discovery_consumer WHERE consumer='search'").fetchone()[0] == 1
+    assert client.post(route,json=body,headers={"x-discovery-proof":token}).status_code == 409
+    assert client.post(route.replace("search","travel"),json=body,
+        headers={"x-discovery-proof":token}).status_code in (403,404)

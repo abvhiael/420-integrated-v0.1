@@ -48,3 +48,24 @@ test('rejected and ambiguous signature are not silently retried',async()=>{
  assert.equal(c.status('a').state,'unavailable');
  assert.equal(f.req.filter(x=>x==='eth_chainId').length,2);
 });
+
+test('reorg after independently witnessed finalization clears finality and never authorizes payout',async()=>{
+ const f=fixture(),c=f.client;c.observe('a',tx);
+ f.setReceipt({transactionHash:tx,blockHash:block,blockNumber:'0x1',status:'0x1'});
+ assert.equal((await c.refresh('a')).state,'finalized');
+ f.setReceipt(null);assert.equal((await c.refresh('a')).state,'reorged');
+ assert.notEqual(c.status('a').state,'finalized');
+});
+test('independent witness absent never claims finalized even when RPC says finalized',async()=>{
+ let id=0;const c=createHighCountryTransactionLifecycle420({
+  rpcUrl:'https://rpc.example',chainId:1,
+  fetchImpl:async(url,opts)=>{const x=JSON.parse(opts.body);id++;
+   const result=x.method==='eth_chainId'?'0x1':x.method==='eth_getTransactionReceipt'?
+    {transactionHash:tx,blockHash:block,blockNumber:'0x1',status:'0x1'}:
+    {hash:block,number:'0x1'};
+   return {ok:true,json:async()=>({jsonrpc:'2.0',id:x.id,result})};
+  }});
+ c.observe('a',tx);
+ const value=await c.refresh('a');assert.equal(value.state,'pending');assert.equal(value.reason,'independent-witness-not-configured');
+ assert.ok(id>=4);
+});

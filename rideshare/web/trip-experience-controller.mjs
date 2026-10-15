@@ -2,7 +2,7 @@ import {validateTrip,tripPresentation,TripViewError} from './trip-experience-pol
 export function createTripExperienceController({api,session,idFactory=()=>globalThis.crypto?.randomUUID?.()}){
  let trip=null,busy=false,pending=null;
  const guard=()=>{if(!trip)throw new TripViewError('NO_CONFIRMED_TRIP');if(busy)throw new TripViewError('IN_PROGRESS');};
- const refresh=async id=>{if(!api?.read)throw new TripViewError('AUTHORITY_UNAVAILABLE');const snapshot=validateTrip(await api.read(id),session,trip);trip=snapshot;return tripPresentation(trip);};
+ const refresh=async id=>{if(!api?.read)throw new TripViewError('AUTHORITY_UNAVAILABLE');const snapshot=validateTrip(await api.read(id),session,trip);if(snapshot.id!==id)throw new TripViewError('CROSS_TRIP_RESPONSE');trip=snapshot;return tripPresentation(trip);};
  const action=async(type,category)=>{
   guard();const allowed=tripPresentation(trip);
   if(type==='cancel'&&!allowed.canCancel||type==='report'&&!allowed.canReport)throw new TripViewError('ACTION_NOT_PERMITTED');

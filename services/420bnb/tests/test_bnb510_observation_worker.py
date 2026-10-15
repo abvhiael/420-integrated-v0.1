@@ -58,3 +58,15 @@ def test_synthetic_source_gap_and_dedupe_is_fail_closed(database):
         worker.once(connect,stream,lambda *_:[item,item],
                     lambda *_:{"accepted":True})
     with connect() as c:assert worker.checkpoint(c,stream)==0
+
+def test_https_adapter_rejects_insecure_redirectable_or_untrusted_transport():
+    import pay_observation_https as https
+    for source,bnb in (
+        ("http://pay.invalid/observations","https://bnb.invalid"),
+        ("https://u:pass@pay.invalid","https://bnb.invalid"),
+        ("https://pay.invalid","http://bnb.invalid/internal"),
+    ):
+        with pytest.raises(worker.ReconciliationBlocked,match="HTTPS_DESTINATION_REQUIRED"):
+            https.SignedObservationHTTPS(source,bnb,ca_file="/not-used")
+    with pytest.raises(worker.ReconciliationBlocked,match="TLS_AUTHORITY_REQUIRED"):
+        https.SignedObservationHTTPS("https://pay.invalid","https://bnb.invalid",ca_file="")

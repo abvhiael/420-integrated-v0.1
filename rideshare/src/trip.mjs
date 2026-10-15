@@ -67,6 +67,10 @@ export function transitionTrip(trip, command, actor, context = {}) {
     if (context.paused) fail('SERVICE_PAUSED');
     admitted(context.admission, trip, driverId, vehicleId, context.now);
     state = command.action === 'arrive' ? 'ARRIVED' : 'IN_PROGRESS';
+  } else if (command.action === 'offer_reject') {
+    if (!assignedDriver || trip.state !== 'ASSIGNED' || context.paused) fail('OFFER_REJECTION_DENIED');
+    if (!Number.isSafeInteger(context.assignmentExpiresAt) || context.assignmentExpiresAt <= context.now) fail('ASSIGNMENT_EXPIRED');
+    state='CANCELLED'; // Canonical audited rider-visible end; no fabricated rematch or new trip.
   } else if (command.action === 'complete') {
     if (!assignedDriver) fail('UNAUTHORIZED');
     if (trip.state !== 'IN_PROGRESS') fail('INVALID_TRANSITION');

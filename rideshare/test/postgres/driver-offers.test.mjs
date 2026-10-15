@@ -88,3 +88,15 @@ test('protected HTTP offer read/response rejects absent credentials, cross-role,
  const cross=await app.handler(new Request(url,{headers:{authorization:'Bearer '+token('driver_other')}}));
  assert.equal(cross.status,403);
 });
+
+test('accepted but unarrived offers expire through canonical operator lifecycle',async()=>{
+ const t=await make('offer_case_unarrived','driver_offer_g');
+ const request={tripId:t.id,offerId:t.id,expectedRevision:1,decision:'accept',commandId:'accepted_unarrived'};
+ await app.driverOfferService.respondOffer(token('driver_offer_g',t.id),'driver_offer_g',t.id,request);
+ control.now=131;
+ await assert.rejects(app.transition('driver','driver_offer_g',t.id,'arrive',1),e=>e.code==='ASSIGNMENT_EXPIRED');
+ const ended=await app.transition('operator','operator_dispatch',t.id,'expire',1);
+ assert.equal(ended.state,'CANCELLED');
+ assert.equal((await owner.query('SELECT state FROM liftd.assignment_leases WHERE trip_id=$1',[t.id])).rows[0].state,'CLOSED');
+ control.now=100;
+});

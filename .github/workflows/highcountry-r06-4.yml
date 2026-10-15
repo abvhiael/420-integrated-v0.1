@@ -3,6 +3,9 @@ on:
   pull_request:
     paths:
       - 'apps/highcountry-web/**'
+      - 'services/420-gaming-player-profile/src/highcountry-r064-*'
+      - 'services/420-gaming-player-profile/src/wallet-link-service.js'
+      - 'services/420-gaming-player-profile/test/highcountry-r064-*'
       - '.github/workflows/highcountry-r06-4.yml'
   workflow_dispatch:
 permissions:

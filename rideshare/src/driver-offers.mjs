@@ -49,8 +49,8 @@ export function createDriverOfferService({pool,authenticator,tripService,eligibi
   let client;try{
     client=await pool.connect();await client.query('BEGIN');await checkSchema(client);
     await client.query("SET LOCAL lock_timeout='3s'");
-    await client.query("SELECT pg_advisory_xact_lock(hashtextextended('liftd:dispatch:CA:BC:Vancouver',0))");
     await client.query('SELECT pg_advisory_xact_lock(hashtextextended($1,0))',['liftd:trip:'+offerId]);
+    await client.query("SELECT pg_advisory_xact_lock(hashtextextended('liftd:dispatch:CA:BC:Vancouver',0))");
     await actor(token,driverId,'offer.respond');
     const prior=(await client.query('SELECT request,result FROM liftd.offer_commands WHERE driver_id=$1 AND command_id=$2',[driverId,body.commandId])).rows[0];
     if(prior){

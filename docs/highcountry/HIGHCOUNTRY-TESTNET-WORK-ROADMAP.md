@@ -229,3 +229,16 @@ Repository implementation candidate `6b20dcf4e60f0391a6e2775d27ba1c16dd986c91` a
 | HC-R06.4-T04 — user-facing operational acceptance | R06.7/R06.8/R07: approved browser/provider combinations, signature consent, no hidden wallet auto-connect or auto-payment, reconnect/unlink without loss of guest progress, mobile/accessibility and privacy/security/operator signoff |
 
 **Pre-testnet R06.4 gap remains OPEN:** the browser currently does not contain independently qualified authoritative entitlement, ownership, market, reward and cross-game consumers; the read-only events view cannot substitute. Implement these app adapters and negative tests locally before R06.4 repository completion; do not defer code solely because testnet credentials are absent. R06.5 remains the canonical owner of transaction lifecycle, and R06.6 owns routine sessions.
+
+
+## R06.5 — transaction lifecycle and recovery external acceptance (OPEN / TESTNET-GATED)
+
+R06.5 repository implementation tracks `awaiting-signature`, `submitted`, `pending`, `finalized`, `reverted`, `reorged`, `unavailable` and `empty`, plus explicit indexer `loading`, `empty` and `unavailable` reporting. It does **not** make market settlement final from a successful transaction receipt, and cannot grant on-chain economy permissions by itself.
+
+- **HC-R06.5-T01 — trusted signer and transaction policy:** supply and independently approve the `highCountryReviewedTransaction.submit({operation,gameId,chainId})` adapter, strictly allowlisted target and calldata, verified value and fee, explicit user signing and supported provider behavior; no general-purpose `eth_sendTransaction` activation.
+- **HC-R06.5-T02 — finalized RPC and independent witness:** configure approved chain, official HTTPS RPC and independently provisioned R05.7 witness function; confirm actual receipts, canonical block changes, independent finalized ancestry, RPC outages, reorgs, conflicting responses and stalled witness. Without independent witness the browser MUST leave successful receipts pending.
+- **HC-R06.5-T03 — deployed indexer and issuer:** production authenticated `/events` projection available with origin/session enforcement and honest stale/empty/unavailable states. Match its canonical reconciliation history to independent on-chain facts; never turn an event projection into proof of ownership, payment or finality.
+- **HC-R06.5-T04 — economy and operator recovery:** deployed R04 operator worker, independent canonical escrow receipt, BUDS reservation/payout/reversal proof, resilient reconciliation after interrupted or ambiguous submissions; never automatically resend an uncertain operation or refund while transfer outcome is unknown.
+- **HC-R06.5-T05 — device and operations:** supported desktop/mobile wallet provider consent and rejection, device/network switching, transaction replacement and disappearance, recovery after browser restart, security/privacy/operator signoff.
+
+All are **OPEN** pending live/testnet evidence. Local assertions, mocked RPC fixtures and browser state labels are not independent deployed acceptance.

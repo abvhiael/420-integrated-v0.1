@@ -24,6 +24,6 @@ jobs:
       - run: node --test apps/highcountry-web/test/*.test.mjs
       - run: node apps/highcountry-web/scripts/build.mjs && test -s apps/highcountry-web/dist/src/wallet.js
       - run: for f in apps/highcountry-web/src/*.js; do node --check "$f"; done
-      - run: node --test services/420-gaming-player-profile/test/wallet-link.test.js services/420-gaming-player-profile/test/highcountry-r064-wallet-http.test.js
-      - run: node --test clients/highcountry-access-v1/test/*.test.js packages/420-gaming-sdk/test/*.test.js
+      - run: node --test services/420-gaming-player-profile/test/wallet-link.test.js services/420-gaming-player-profile/test/highcountry-r064-wallet-http.test.js services/420-gaming-player-profile/test/highcountry-r064-feature-http.test.js
+      - run: node --test clients/highcountry-access-v1/test/*.test.js packages/420-gaming-sdk/test/*.test.js\n      - run: node --test services/420-gaming-player-profile/test/canonical-gaming-finality.test.js
       - run: test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"

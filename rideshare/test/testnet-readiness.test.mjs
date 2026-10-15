@@ -15,3 +15,11 @@ test('health is non-operational, readiness is 503 and all protected API paths re
  const r=await fetch(origin+route);assert.equal(r.status,404);}
  }finally{await new Promise(resolve=>server.close(resolve));}
 });
+
+test('database readiness validates exact isolated DB and mandatory schema without exposing credentials',async()=>{
+ const pool={query:async sql=>sql.includes('FROM liftd.migrations ORDER BY version')?{rows:[]}: {rows:[{db:'liftd_testnet',migrations:9}]}};
+ const server=buildReadinessServer({pool});await new Promise(ok=>server.listen(0,'127.0.0.1',ok));
+ try{const res=await fetch('http://127.0.0.1:'+server.address().port+'/database');
+ assert.equal(res.status,503);assert.equal(JSON.stringify(await res.json()).includes('postgres://'),false);
+ }finally{await new Promise(ok=>server.close(ok));}
+});

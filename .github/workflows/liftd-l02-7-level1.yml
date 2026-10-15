@@ -1,0 +1,35 @@
+name: LIFTd L02.7 Level 1
+on:
+  pull_request:
+    paths:
+      - 'rideshare/web/driver-availability-**'
+      - 'rideshare/web/app.mjs'
+      - '.github/workflows/liftd-l02-7-level1.yml'
+  push:
+    branches: ['build/liftd-l02-7-driver-availability-offers']
+    paths:
+      - 'rideshare/web/driver-availability-**'
+      - 'rideshare/web/app.mjs'
+      - '.github/workflows/liftd-l02-7-level1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  driver-offers:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Exact candidate SHA
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Driver availability, expiry, replay and retained browser tests
+        run: |
+          for f in rideshare/web/driver-availability-{policy,controller,api,view}.mjs; do node --check "$f"; done
+          cd rideshare/web && npm run check

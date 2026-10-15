@@ -14,6 +14,8 @@ before(async()=>{
 after(async()=>{await owner.end();});
 const token=(driver,trip='dispatch_account')=>app.token('driver',driver,trip);
 async function make(name,driver='driver_offer_a'){
+ const online=(await owner.query('SELECT driver_id,vehicle_id FROM liftd.driver_availability WHERE online')).rows;
+ for(const a of online)await app.online(a.driver_id,a.vehicle_id,false);
  await app.online(driver,'vehicle_'+driver);
  await app.create(name);
  await app.transition('operator','operator_dispatch',name,'match',0);

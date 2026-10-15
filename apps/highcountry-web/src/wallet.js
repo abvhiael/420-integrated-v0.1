@@ -54,9 +54,32 @@ export function createOptionalWallet420({provider,authenticate,apiUrl,gameId,cha
   if(!data||!Array.isArray(data.events)||data.events.length>limit)fail('wallet-activity-invalid');
   return data.events;
  }
+ async function canonicalProof(kind,params={}){
+  if(!selected)fail('wallet-not-connected');
+  await verifyChain();
+  const allowed={
+   ownership:['profileId'],
+   entitlement:['profileId','entitlementId','entitlementType','contentId'],
+   'cross-game':['profileId','attestationId'],
+   'mission-reward':['profileId','missionId','amount'],
+   'progression-reward':['profileId','trackId','amount']
+  };
+  const keys=allowed[kind];
+  if(!keys||!params||typeof params!=='object'||Array.isArray(params)||
+    Object.keys(params).length!==keys.length||!keys.every(k=>Object.hasOwn(params,k)&&(
+      k==='amount'?typeof params[k]==='string'&&/^[1-9][0-9]{0,19}$/.test(params[k]):
+      typeof params[k]==='string'&&/^0x[0-9a-f]{64}$/.test(params[k])&&!/^0x0+$/.test(params[k]))))
+    fail('wallet-feature-invalid');
+  const x=await call('/v1/features/'+kind,'POST',params);
+  if(x?.accepted!==true||x.kind!==kind||x.gameId!==gameId||
+   String(x.chainId)!==String(chainId)||typeof x.blockHash!=='string'||
+   !/^0x[0-9a-f]{64}$/.test(x.blockHash)||typeof x.evidenceDigest!=='string'||
+   !/^0x[0-9a-f]{64}$/.test(x.evidenceDigest))fail('wallet-feature-unverified');
+  return x;
+ }
  async function unlink(){await call('/v1/wallet/unlink','POST',{});linked=null;selected=null;return true;}
  function disconnect(){selected=null;linked=null;}
  const change=()=>disconnect();
  if(typeof provider.on==='function'){provider.on('accountsChanged',change);provider.on('chainChanged',change);provider.on('disconnect',change);}
- return Object.freeze({connect,link,session,scopedActivity,unlink,disconnect,getSelected:()=>selected,getLinked:()=>linked});
+ return Object.freeze({connect,link,session,scopedActivity,canonicalProof,unlink,disconnect,getSelected:()=>selected,getLinked:()=>linked});
 }

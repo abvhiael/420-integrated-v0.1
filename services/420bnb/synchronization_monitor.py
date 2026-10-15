@@ -81,9 +81,11 @@ def snapshot(conn,*,stale_seconds=300,backlog_limit=100):
           EXTRACT(EPOCH FROM(clock_timestamp()-%s::timestamptz))::bigint END""",
           (rowc[2],rowc[3],rowc[3])).fetchone()
         last_ack=acknowledgments.get(consumer)
-        fresh=bool(rowc[1]) and (int(clock[0])==0 or (
-            last_ack is not None and last_ack[0]>=projection_count and last_ack[1]==0)) and (
-            int(clock[0])==0 or (age[1] is not None and 0<=age[1]<=stale_seconds))
+        # A subscription record alone is NOT a heartbeat, even with an empty
+        # journal. Require an actual fresh delivery acknowledgment.
+        fresh=(bool(rowc[1]) and last_ack is not None
+            and last_ack[0]>=projection_count and last_ack[1]==0
+            and age[1] is not None and 0<=age[1]<=stale_seconds)
         status[consumer]={"configured":True,"active":bool(rowc[1]),"pending":int(rowc[4]),
             "dead_letters":int(rowc[5]),"ack_count":last_ack[0] if last_ack else 0,
             "lagging":last_ack[1] if last_ack else projection_count,

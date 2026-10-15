@@ -852,6 +852,8 @@ def send_guest_message(request_id:UUID,payload:GuestMessageInput,
             c.execute("""INSERT INTO bnb_guest_message
                 (id,booking_request_id,sender_subject,body,client_nonce)
                 VALUES (%s,%s,%s,%s,%s)""",(mid,request_id,actor,payload.body,payload.nonce))
+            import notification_delivery
+            notification_delivery.enqueue_message(c,request_id,mid,actor)
             c.execute("""INSERT INTO bnb_outbox(id,event_type,payload)
                 VALUES (%s,'bnb.message.created',%s::jsonb)""",
                 (uuid4(),json.dumps({"request_id":str(request_id),"message_id":str(mid)})))
@@ -868,6 +870,8 @@ def message_delivery(request_id:UUID,device_id:str,limit:int=50,
         raise HTTPException(422,"DELIVERY_WINDOW_INVALID")
     with db() as c:
         message_thread_scope(c,request_id,actor)
+        import notification_delivery
+        notification_delivery.active_device(c,actor,device_id)
         last=c.execute("""SELECT last_message_id FROM bnb_message_delivery_cursor
            WHERE request_id=%s AND subject=%s AND device_id=%s""",
            (request_id,actor,device_id)).fetchone()
@@ -894,6 +898,8 @@ def acknowledge_message_delivery(request_id:UUID,payload:MessageDeliveryAck,
     with db() as c:
         with c.transaction():
             message_thread_scope(c,request_id,actor)
+            import notification_delivery
+            notification_delivery.active_device(c,actor,payload.device_id,lock=True)
             target=c.execute("""SELECT created_at,id FROM bnb_guest_message
              WHERE id=%s AND booking_request_id=%s AND moderation_status='visible'""",
              (payload.message_id,request_id)).fetchone()
@@ -3737,3 +3743,56 @@ def internal_discovery_consumer_accept(consumer:str,payload:dict,
                 and claims["consumer"]==target)
     # No BnB-issued provider token, signing key, or claim of external acceptance.
     return outcome
+
+
+# BNB-5.8: authenticated local recovery. No push/provider activation.
+class DeviceRegistration(BaseModel):
+    device_id:str=Field(min_length=8,max_length=128)
+    expires_at:datetime
+
+class DevicePreference(BaseModel):
+    enabled:bool
+
+@app.post("/v1/bnb/account/notification-devices",status_code=201)
+def register_notification_device(payload:DeviceRegistration,authorization:str|None=Header(None)):
+    import notification_delivery as delivery
+    actor=active_subject(authorization)
+    with db() as conn:
+        with conn.transaction():
+            account=conn.execute("SELECT state FROM bnb_account WHERE subject=%s FOR UPDATE",(actor,)).fetchone()
+            if not account or account[0]!="active":raise HTTPException(403,"ACCOUNT_REVOKED")
+            return delivery.register(conn,actor,payload.device_id,payload.expires_at)
+
+@app.post("/v1/bnb/account/notification-devices/{device_id}/preferences")
+def set_notification_preferences(device_id:str,payload:DevicePreference,
+                                 authorization:str|None=Header(None)):
+    import notification_delivery as delivery
+    actor=active_subject(authorization)
+    with db() as conn:
+        with conn.transaction():
+            return delivery.preferences(conn,actor,device_id,payload.enabled)
+
+@app.delete("/v1/bnb/account/notification-devices/{device_id}")
+def revoke_notification_device(device_id:str,authorization:str|None=Header(None)):
+    import notification_delivery as delivery
+    actor=active_subject(authorization)
+    with db() as conn:
+        with conn.transaction():
+            return delivery.revoke(conn,actor,device_id)
+
+@app.get("/v1/bnb/account/notification-devices/{device_id}/notices")
+def pending_notification_notices(device_id:str,limit:int=50,
+                                  authorization:str|None=Header(None)):
+    import notification_delivery as delivery
+    actor=active_subject(authorization)
+    with db() as conn:
+        return delivery.pending(conn,actor,device_id,limit=limit)
+
+@app.post("/v1/bnb/account/notification-devices/{device_id}/notices/{notice_id}/ack")
+def ack_notification_notice(device_id:str,notice_id:UUID,
+                             authorization:str|None=Header(None)):
+    import notification_delivery as delivery
+    actor=active_subject(authorization)
+    with db() as conn:
+        with conn.transaction():
+            return delivery.ack(conn,actor,device_id,notice_id)

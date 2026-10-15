@@ -19,10 +19,10 @@ test('denies wrong network, invalid operation, forged reward and unavailable ser
   assertWalletNetwork:async()=>{throw Error('wallet-wrong-network');},
   fetchImpl:async()=>{sent++;return {ok:true};}});
  await assert.rejects(offline.prepare(value),/wallet-wrong-network/);assert.equal(sent,0);
- await assert.rejects(offline.prepare({...value,buyer:'victim'}),/wallet-wrong-network/);
+ assert.throws(()=>offline.prepare({...value,buyer:'victim'}),/market-input-invalid/);
  const c=createHighCountryMarketConsumer420({apiUrl:base,authenticate:async()=>'token',assertWalletNetwork:async()=>{},
   fetchImpl:async()=>({ok:false,status:503})});
- await assert.rejects(c.prepare({...value,listing:''}),/market-input-invalid/);
- await assert.rejects(c.claimReward({source:'source',proof:{payload:'x',signature:'s',owner:'victim'}}),/market-reward-proof-invalid/);
+ assert.throws(()=>c.prepare({...value,listing:''}),/market-input-invalid/);
+ assert.throws(()=>c.claimReward({source:'source',proof:{payload:'x',signature:'s',owner:'victim'}}),/market-reward-proof-invalid/);
  await assert.rejects(c.prepare(value),/market-service-unavailable/);
 });

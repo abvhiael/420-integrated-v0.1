@@ -61,3 +61,19 @@ def test_api_routes_retain_independent_operator_authority():
     for suffix in ("/health","/dead-letters","/reconciliation/{action}",
                    "/dead-letters/{event_id}/replay"):
         assert "/v1/bnb/internal/operations"+suffix in routes
+
+
+def test_console_refuses_non_tls_and_unsafe_requests(tmp_path):
+    import operator_console as cli
+    for origin in ("http://localhost:8443","https://u:p@localhost",
+                   "https://localhost/?key=abc","https://localhost/path"):
+        with pytest.raises(cli.ConsoleError,match="OPERATOR_ORIGIN_INVALID"):
+            cli.request(origin,"/not-a-ca","/not-a-token","health")
+    with pytest.raises(cli.ConsoleError,match="EVENT_INVALID"):
+        cli.request("https://localhost","/not-a-ca","/not-a-token","replay",
+                    "../not-an-id","legitimate incident review")
+    with pytest.raises(cli.ConsoleError,match="REASON_INVALID"):
+        cli.request("https://localhost","/not-a-ca","/not-a-token","replay",
+                    uuid4(),"short")
+    with pytest.raises(cli.ConsoleError,match="CREDENTIAL_MOUNT_INVALID"):
+        cli.request("https://localhost","/not-a-ca","relative/token.jwt","health")

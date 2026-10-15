@@ -55,7 +55,7 @@ export function createTripService({authenticator, store, clock = () => Math.floo
       if(action==='offer_reject'&&(!dispatchAdapter||!store.execute))throw new AuthError('DISPATCH_UNAVAILABLE',503);
       if ((command.action === 'match' || action === 'expire') && (!dispatchAdapter || !store.execute)) throw new AuthError('DISPATCH_UNAVAILABLE',503);
       if (dispatchAdapter && action === 'assign' && (command.action !== 'match' || 'driverId' in command || 'vehicleId' in command)) throw new AuthError('SERVER_MATCH_REQUIRED',400);
-      const principal = await authenticator.authorize(token, {action: `trip.${action}`, resource: `trip:${tripId}`});
+      const principal = await authenticator.authorize(token, {action: action==='offer_reject'?'offer.respond':`trip.${action}`, resource: `trip:${tripId}`});
       const {commandId, ...originalCommand} = command;
       let domainCommand = {...originalCommand,action};
       let lastAdmission, lockedTrip, selection, lease, transactionClient, viability;

@@ -43,9 +43,20 @@ export function createOptionalWallet420({provider,authenticate,apiUrl,gameId,cha
   linked=session;return session;
  }
  async function session(){const x=await call('/v1/session');if(x?.gameId!==gameId)fail('wallet-scope-invalid');linked=x.wallet??null;return x;}
+ async function scopedActivity({limit=25}={}){
+  if(!Number.isInteger(limit)||limit<1||limit>100)fail('wallet-activity-limit-invalid');
+  const auth=await token();let response;
+  try{const url=new URL('/events',apiUrl+'/');url.searchParams.set('limit',String(limit));
+   response=await fetchImpl(url.toString(),{method:'GET',credentials:'omit',cache:'no-store',
+     headers:{authorization:'Bearer '+auth}});}catch{fail('wallet-activity-unavailable');}
+  if(!response?.ok)fail(response?.status===401||response?.status===403?'wallet-auth-denied':'wallet-activity-unavailable');
+  let data;try{data=await response.json();}catch{fail('wallet-activity-invalid');}
+  if(!data||!Array.isArray(data.events)||data.events.length>limit)fail('wallet-activity-invalid');
+  return data.events;
+ }
  async function unlink(){await call('/v1/wallet/unlink','POST',{});linked=null;selected=null;return true;}
  function disconnect(){selected=null;linked=null;}
  const change=()=>disconnect();
  if(typeof provider.on==='function'){provider.on('accountsChanged',change);provider.on('chainChanged',change);provider.on('disconnect',change);}
- return Object.freeze({connect,link,session,unlink,disconnect,getSelected:()=>selected,getLinked:()=>linked});
+ return Object.freeze({connect,link,session,scopedActivity,unlink,disconnect,getSelected:()=>selected,getLinked:()=>linked});
 }

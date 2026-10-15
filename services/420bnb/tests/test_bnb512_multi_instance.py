@@ -90,3 +90,32 @@ def test_migration_ledger_compatible_with_new_instances(database):
                         return Result()
                     raise AssertionError("unexpected DB access")
             recovery.assess(Drift(),action="restart",approved=True)
+
+
+def test_two_api_instances_share_postgres_during_interrupted_rollout(database,monkeypatch):
+    from fastapi.testclient import TestClient
+    import api
+    import operational_controls as ops
+    connect,_,_=database
+    # External operator authorization is separately tested in BNB-5.9; this
+    # test specifically exercises TWO HTTP app clients against shared state.
+    monkeypatch.setattr(api,"db",connect)
+    monkeypatch.setattr(ops,"operator",lambda c,token,action:("fixture-operator",{}))
+    app_a=TestClient(api.app)
+    app_b=TestClient(api.app)
+    initial=app_a.get("/v1/bnb/internal/operations/health")
+    assert initial.status_code==200
+    eid=_queue(connect,1)[0]
+    after=app_b.get("/v1/bnb/internal/operations/health")
+    assert after.status_code==200
+    assert after.json()["pending"]>=initial.json()["pending"]+1
+    # Simulate instance A termination before its in-flight work completes.
+    app_a.close()
+    assert worker.Supervisor(connect,worker.LocalValidationSink(connect)).once()=="delivered"
+    recovered=app_b.get("/v1/bnb/internal/operations/health")
+    assert recovered.status_code==200
+    assert recovered.json()["pending"]==initial.json()["pending"]
+    with connect() as c:
+        assert c.execute("SELECT delivered_at IS NOT NULL FROM bnb_outbox WHERE id=%s",
+            (eid,)).fetchone()==(True,)
+    app_b.close()

@@ -26,7 +26,7 @@ export function highCountryRoutineHttpServer420(authority,{origin}={}){
     deny('r066-http-shape-invalid');
    const result=await authority.invoke({...body,token:req.headers.authorization.slice(7)});
    res.end(JSON.stringify({ok:true,result:result??null}));
-  }catch(e){res.statusCode=e?.code?.startsWith('r066-')?403:503;
+  }catch(e){res.statusCode=e?.code?.endsWith('-unavailable')?503:e?.code?.startsWith('r066-')?403:503;
    res.end(JSON.stringify({ok:false,error:res.statusCode===403?e.code:'routine-service-unavailable'}));}
  });
 }

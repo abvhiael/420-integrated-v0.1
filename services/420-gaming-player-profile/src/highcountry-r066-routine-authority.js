@@ -32,8 +32,9 @@ export function createHighCountryRoutineAuthority420({verifyIdentity,verifySessi
   pending.add(key);
   try{
    // A second authority check immediately before executing defeats in-flight revocation/expiry.
+   if(await verifyIdentity(token)!==principal)deny('r066-identity-revoked');
    const latest=await verifySession({principal,sessionId,action,operation,at:clock()});
-   if(!latest||latest.active!==true||latest.revoked===true||latest.expiresAt<=clock()||
+   if(!latest||latest.active!==true||latest.revoked===true||!Number.isSafeInteger(latest.expiresAt)||latest.expiresAt<=clock()||
     latest.principal!==principal||latest.sessionId!==sessionId||
     !Array.isArray(latest.actions)||!latest.actions.includes(action))
     deny('r066-session-revoked');

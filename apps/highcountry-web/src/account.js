@@ -1,5 +1,6 @@
 // R06.3 account panel: operator supplies an issuer-backed authenticator, never a wallet or guest account string.
 import {createCloudClient} from './cloud.js';
+import {createHighCountryTransactionLifecycle420} from './transaction.js';
 import {createHighCountryMarketConsumer420} from './market.js';
 import {createOptionalWallet420} from './wallet.js';
 import {loadGuest} from './guest.js';
@@ -121,6 +122,27 @@ export function mountAccountPanel({document,main,runtime,authenticate,storage=gl
    button('Submit independently signed reward proof',action(()=>marketConsumer.claimReward({
     source:source.value,proof:{payload:payload.value,signature:signature.value}})));
    paragraph('No instant market purchase, transfer submission, escrow finalize/refund or owner-supplied payout is available in this browser. Canonical operator worker and finalized receipts control settlement.');
+   // R06.5 observational tracking only. A transaction hash is not proof of a successful trade.
+   const txOperation=field('Transaction tracking operation ID');
+   const txHash=field('Submitted transaction hash (0x + 64 hexadecimal characters)');
+   const txStatus=paragraph('Transaction: empty. No transaction has been submitted by this tracking view.');
+   txStatus.setAttribute('aria-live','polite');
+   let txTracker;
+   try{txTracker=createHighCountryTransactionLifecycle420({rpcUrl:runtime.rpcUrl,
+    chainId:runtime.chainId,fetchImpl,witness:globalThis.highCountryIndependentFinalityWitness});}
+   catch(e){txStatus.textContent='Transaction tracking unavailable: '+e.message;}
+   if(txTracker){
+    const explain=x=>{txStatus.textContent='Transaction '+x.operation+': '+x.state+
+     (x.reason?' ('+x.reason+')':'')+
+     (x.blockHash?' at block '+x.blockHash:'')+
+     '. Inclusion alone does not confirm market settlement or asset delivery.';};
+    button('Track submitted transaction (read only)',()=>{try{explain(txTracker.observe(txOperation.value,txHash.value));}
+     catch(e){txStatus.textContent='Tracking denied: '+e.message;}});
+    button('Refresh transaction state',async()=>{try{txStatus.textContent='Transaction: loading RPC and independent finality…';
+      explain(await txTracker.refresh(txOperation.value));}
+     catch(e){txStatus.textContent='Transaction check unavailable: '+e.message;}});
+   }
+   paragraph('Transaction checks require independent finality to confirm inclusion. Unknown, reverted and reorged states cannot authorize payouts; operator reconciliation remains separately protected.');
    button('Unlink wallet',async()=>{try{await optional.unlink();walletStatus.textContent='Unlinked. Guest play preserved.';}catch(e){walletStatus.textContent=e.message;}});
    button('Disconnect wallet locally',()=>{optional.disconnect();walletStatus.textContent='Disconnected. Guest play preserved.';});
    paragraph('Entitlements, holdings, market, rewards and cross-game records require separately authenticated and finalized authoritative services; unavailable features are disabled, never simulated.');

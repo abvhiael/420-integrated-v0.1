@@ -1,0 +1,34 @@
+name: LIFTd Acceptance Prerequisites Level 1
+on:
+  pull_request:
+    paths:
+      - 'rideshare/src/scoped-messaging.mjs'
+      - 'rideshare/test/scoped-messaging.test.mjs'
+      - '.github/workflows/liftd-acceptance-prereqs-level1.yml'
+  push:
+    branches: ['build/liftd-deployed-acceptance-prerequisites-20261014']
+    paths:
+      - 'rideshare/src/scoped-messaging.mjs'
+      - 'rideshare/test/scoped-messaging.test.mjs'
+      - '.github/workflows/liftd-acceptance-prereqs-level1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  messaging-boundaries:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Exact candidate SHA
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          node --check rideshare/src/scoped-messaging.mjs
+          node --test rideshare/test/scoped-messaging.test.mjs

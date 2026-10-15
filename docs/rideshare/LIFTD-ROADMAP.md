@@ -57,7 +57,23 @@ Define detailed steps at L01 closeout using the actual service interfaces. Scope
 
 **Operational acceptance:** Production Identity, live transport eligibility, private document-vault/reviewer controls, participant-scoped messaging, and independent accessibility remain **NOT ACCEPTED**. All deployed/independent acceptance work is explicitly tracked in [LIFTd Testnet Roadmap](LIFTD-TESTNET-ROADMAP.md), linked to [Production Acceptance Register](L02-PRODUCTION-ACCEPTANCE-REGISTER.md). Only environment-independent L02 implementation/remediation stays in this phase; no testnet or regulator PASS is implied by repository CI.
 
-Detailed subsequent steps remain to be reconciled with existing L01 service interfaces at the L01 phase-closeout boundary. This entry does not renumber, merge or silently replace future canonical steps.
+### Remaining canonical Phase L02 steps — restored from owner-provided roadmap
+
+The following sequence was previously specified to the repository owner but was omitted from the repository roadmap. It is restored verbatim in scope and numbering. Its absence was a documentation omission, **not** authorization to invent a different numbering sequence. The prior L02.1–L02.7 and M-L02-A qualified records above remain authoritative evidence; this table defines outstanding work, not a claim of implementation or qualification.
+
+| Step | Canonical deliverable | Status |
+| --- | --- | --- |
+| L02.8 | **Driver trip controls** — Navigation handoff, arrival/start/completion controls, pickup confirmation and safety workflows. Offline actions must reconcile without fabricating authoritative trip state. | **NOT STARTED — Level 1 pending** |
+| L02.9 | **Communication and notifications** — Trip-scoped rider/driver communication and updates. Enforce membership expiry, delivery preferences and redaction of sensitive information. | **NOT STARTED — Level 1 pending** |
+| L02.10 | **Operator console** — Dispatch monitoring, eligibility status, incident triage and recovery tools with least-privilege access and audited actions. | **NOT STARTED — Level 1 pending** |
+| L02.11 | **APIs, SDK and Travel handoff** — Publish versioned interfaces and consuming-app tests. Travel handoffs carry bounded context and require LIFTd authorization and fresh consent. Preserve disabled Genesis transaction boundaries. | **NOT STARTED — Level 1 pending** |
+| L02.12 | **Accessibility and device qualification** — Test keyboard navigation, screen readers, responsive layouts, mobile permissions, reconnects and recoverable errors. Retain independent device/manual acceptance requirements where unavailable. | **NOT STARTED — Level 1 pending** |
+| M-L02-B | **Level 2 milestone** — Qualify complete rider/driver/operator journeys, communication, consuming-app integration and client security. | **PENDING — Level 2 milestone** |
+| L02.13 | **Phase closeout** — Single L02 Level 3 qualification, exact-SHA evidence, current-main reconciliation, security disposition and retained external deferrals. | **PENDING — Level 3 phase closeout** |
+
+**Execution order:** after current L02.1–L02.7/M-L02-A reconciliation qualifies, the next canonical implementation step is **L02.8**, followed by L02.9, L02.10, L02.11, L02.12, M-L02-B, and L02.13. Do not renumber, combine, or replace these steps. Testnet/independent acceptance continues to be governed separately by the retained testnet roadmap and production acceptance register.
+
+
 
 ## Phase L03 — service operations and release
 

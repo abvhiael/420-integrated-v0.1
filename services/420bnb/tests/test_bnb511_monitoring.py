@@ -55,3 +55,28 @@ def test_monitor_bounds_reject_invalid_parameters(kw):
 def test_operator_route_uses_explicit_signed_health_permission():
     from api import app
     assert "/v1/bnb/internal/operations/synchronization" in {r.path for r in app.routes}
+
+
+def test_readiness_route_exposes_true_http_failure_for_stale_consumer(monkeypatch):
+    import api
+    from fastapi.testclient import TestClient
+    import synchronization_monitor as monitor
+    import operational_controls as operations
+
+    class Transaction:
+        def __enter__(self):return self
+        def __exit__(self,*_):return False
+    class Database:
+        def __enter__(self):return self
+        def __exit__(self,*_):return False
+        def transaction(self):return Transaction()
+    monkeypatch.setattr(api,"db",lambda:Database())
+    monkeypatch.setattr(operations,"operator",lambda *_:("operator",{"capability":"health"}))
+    monkeypatch.setattr(operations,"audit_read",lambda *_:None)
+    monkeypatch.setattr(monitor,"snapshot",lambda *_:{"ready":False,"alerts":["SEARCH_CONSUMER_MISSING"]})
+    response=TestClient(api.app).get("/v1/bnb/internal/operations/synchronization/readiness")
+    assert response.status_code==503
+    assert response.json()=={"ready":False,"alerts":["SEARCH_CONSUMER_MISSING"]}
+    monkeypatch.setattr(monitor,"snapshot",lambda *_:{"ready":True,"alerts":[]})
+    success=TestClient(api.app).get("/v1/bnb/internal/operations/synchronization/readiness")
+    assert success.status_code==200 and success.json()=={"ready":True}

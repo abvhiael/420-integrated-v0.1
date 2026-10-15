@@ -200,3 +200,18 @@ Repository R06.1 delivers a real static web app package, accessible routed game 
 - **HC-R06.1-T03 OPEN:** Release deployment and operator/config rotation approval. No client secret, wallet key, raw save, or chain-wide wallet activity in public configuration.
 
 These external checks are not represented as local repository Level 1 results.
+
+
+## R06.3 — optional registered account, cloud-save and recovery: external acceptance register
+
+**Repository implementation:** `b49b1904c53c17792518569f0f81f9f92b21e1bd`; branch `audit/highcountry-r06-1-browser-shell-20261014`, draft PR #654. Targeted R06.3 browser client [run #38661245070](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38661245070) and authenticated cloud service [run #38661244932](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38661244932) are **SUCCESS** on that SHA; retained R05.3 Level 2 [run #38661245115](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38661245115) is **SUCCESS**. These results establish repository checks, **not actual deployed issuer/provider/browser acceptance**.
+
+| Gate | Status / owner | Independent live evidence required |
+|---|---|---|
+| HC-R06.3-T01 — verified external identity issuer and signup | OPEN — R05.2 / R07 operator and identity service | Approved identity issuer, verifiable issuer-to-datastore registration/onboarding, issuer-owned credential creation, expiry/epoch/revocation/recovery, compromised and wrong-game subject denial, trusted `highCountryAuth.getToken` handoff with no browser-stored long-term credential |
+| HC-R06.3-T02 — actual deployed service and cloud infrastructure | OPEN — R05.1/R05.5 / R07 | HTTPS frontend/API with origin/CORS/CSP review; least-privilege TLS PostgreSQL, provisioned encrypted immutable object storage, secret management, consent-policy/ruleset provenance and scoped credentials; recorded deployment manifest and operator approval |
+| HC-R06.3-T03 — real guest-to-account and cloud-save lifecycle | OPEN — R06.3 / R05.5 | Actual browser sign-in and optional profile registration; explicit approved CLOUD_SAVE consent; local preview upload/read on separate devices; revision CAS conflict across concurrent accounts/devices, session revocation, failed writes/provider corruption, data isolation; never elevate editable local saves into canonical assets, scores or currency |
+| HC-R06.3-T04 — recovery and privacy/retention acceptance | OPEN — R06.3 / R05.5 / R07 | Independently observed old-revision restore creating new head, interrupted provider writes/retries/outages, backup recovery, delete/export and consent revocation/retention procedures with object/provider receipts; no unnoticed overwrite of device save |
+| HC-R06.3-T05 — browser, device and independent security review | OPEN — R06.7/R06.8 / R07 | Real desktop/mobile browser accessibility (keyboard, focus, status errors, form labels), authenticated CORS/preflight, rate-limit/privacy/CSRF and session handling, multi-instance abuse, operator/security/privacy signoff and rollback drill |
+
+**Do not relabel live T01–T05 as passed because local CI is green.** Identity issuer provisioning and credential issuance are external/operational dependencies; the app's profile registration does not create a fresh issuer account. Real multi-device/browser/service/db/provider exercises require a deployment with authorized secrets. R06.3 completion at the *repository implementation* level may be assessed against its original exit criteria and exact-SHA tests independently of these operational gates; unresolved repository-testable browser/service behavior is not automatically excused by this list. Canonical R06.4–R06.8 numbering and R07 acceptance remain unchanged.

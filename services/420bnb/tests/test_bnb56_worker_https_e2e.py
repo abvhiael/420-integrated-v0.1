@@ -112,3 +112,40 @@ def test_two_independent_https_consumers_durable_worker_delivery(database,monkey
                 receipts=conn.execute("""SELECT consumer,count(*) FROM bnb_consumer_delivery
                     WHERE accepted_at IS NOT NULL GROUP BY consumer ORDER BY consumer""").fetchall()
                 assert receipts==[("search",2),("travel",2)]
+
+
+def test_tls_delivery_failure_then_recovery_preserves_durable_consumer_receipt(database,monkeypatch,tmp_path):
+    connect,_,_=database
+    key=rsa.generate_private_key(public_exponent=65537,key_size=2048)
+    public=key.public_key().public_bytes(serialization.Encoding.PEM,
+        serialization.PublicFormat.SubjectPublicKeyInfo).decode()
+    monkeypatch.setenv("BNB_DISCOVERY_CONSUMER_ISSUER","https://fixture.invalid")
+    monkeypatch.setenv("BNB_DISCOVERY_CONSUMER_AUDIENCE","bnb-isolated-ci")
+    monkeypatch.setenv("BNB_DISCOVERY_CONSUMER_PUBLIC_KEY_PEM",public)
+    def proof(consumer,body):
+        now=int(time.time())
+        return jwt.encode({"iss":"https://fixture.invalid","aud":"bnb-isolated-ci",
+            "sub":"isolated-worker","iat":now,"nbf":now,"exp":now+90,"jti":uuid4().hex,
+            "purpose":"discovery-accept","consumer":consumer,
+            "current_consumer_grant_verified":True,"consumer_revoked":False,
+            **{k:body[k] for k in ("transport_digest","epoch","cursor","property_id","revision")}},
+            key,algorithm="RS256")
+    with connect() as conn:
+        consumer_delivery.configure(conn,"search",["bnb.discovery.changed"],active=True,
+            expected_revision=0,actor="isolated-ci",
+            authorize=lambda actor,action,target:actor=="isolated-ci" and action=="configure" and target=="search")
+        pid=property_row(conn)
+        discovery_sync.synchronize(conn,pid)
+    with independent_server(discovery_consumer_service.create_consumer_app("search",connect),tmp_path,"recovery") as (url,trusted):
+        untrusted=ssl.create_default_context()
+        assert worker.isolated_discovery_worker(connect,"search",url,proof,
+            ssl_context=untrusted).once()=="retry"
+        with connect() as conn:
+            assert conn.execute("SELECT count(*) FROM bnb_discovery_consumer").fetchone()[0]==0
+            assert conn.execute("SELECT count(*) FROM bnb_consumer_delivery WHERE accepted_at IS NOT NULL").fetchone()[0]==0
+            conn.execute("UPDATE bnb_consumer_delivery SET available_at=clock_timestamp()-interval '1 second' WHERE consumer='search'")
+        assert worker.isolated_discovery_worker(connect,"search",url,proof,
+            ssl_context=trusted).once()=="delivered"
+        with connect() as conn:
+            assert conn.execute("SELECT count(*) FROM bnb_discovery_consumer WHERE consumer='search'").fetchone()[0]==1
+            assert conn.execute("SELECT attempts FROM bnb_consumer_delivery WHERE consumer='search'").fetchone()[0]==2

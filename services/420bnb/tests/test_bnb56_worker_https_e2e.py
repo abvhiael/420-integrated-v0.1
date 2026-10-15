@@ -97,3 +97,18 @@ def test_two_independent_https_consumers_durable_worker_delivery(database,monkey
                 assert all(row[2]["visible"] is False for row in recipients)
                 event=conn.execute("SELECT delivered_at FROM bnb_outbox WHERE event_type='bnb.discovery.changed' ORDER BY created_at DESC LIMIT 1").fetchone()
                 assert event[0] is not None
+            # Source revision changes must independently reach both consumers.
+            with connect() as conn:
+                conn.execute("UPDATE bnb_property SET version=version+1 WHERE id=%s",(pid,))
+                discovery_sync.synchronize(conn,pid)
+            for consumer,(url,ctx) in (("search",search),("travel",travel)):
+                supervisor=worker.isolated_discovery_worker(connect,consumer,url,proof,
+                    ssl_context=ctx)
+                assert supervisor.once()=="delivered"
+            with connect() as conn:
+                rows=conn.execute("SELECT consumer,revision,payload FROM bnb_discovery_consumer ORDER BY consumer").fetchall()
+                assert [x[1] for x in rows]==[2,2]
+                assert all(x[2]["visible"] is False for x in rows)
+                receipts=conn.execute("""SELECT consumer,count(*) FROM bnb_consumer_delivery
+                    WHERE accepted_at IS NOT NULL GROUP BY consumer ORDER BY consumer""").fetchall()
+                assert receipts==[("search",2),("travel",2)]

@@ -7,9 +7,9 @@ export function createHttpHandler(service, locationService, dispatchAdapter, quo
     try {
       const url = new URL(request.url);
       if (url.search || url.hash) throw new AuthError('INVALID_REQUEST', 400);
-      const offerRead=/^\\/v1\\/rideshare\\/drivers\\/([A-Za-z0-9_-]{1,128})\\/offers$/.exec(url.pathname);
-      const offerRespond=/^\\/v1\\/rideshare\\/drivers\\/([A-Za-z0-9_-]{1,128})\\/offers\\/([A-Za-z0-9_-]{1,128})\\/response$/.exec(url.pathname);
-      const availabilityRead=/^\\/v1\\/rideshare\\/drivers\\/([A-Za-z0-9_-]{1,128})\\/availability$/.exec(url.pathname);
+      const offerRead=new RegExp('^/v1/rideshare/drivers/([A-Za-z0-9_-]{1,128})/offers' + String.fromCharCode(36)).exec(url.pathname);
+      const offerRespond=new RegExp('^/v1/rideshare/drivers/([A-Za-z0-9_-]{1,128})/offers/([A-Za-z0-9_-]{1,128})/response' + String.fromCharCode(36)).exec(url.pathname);
+      const availabilityRead=new RegExp('^/v1/rideshare/drivers/([A-Za-z0-9_-]{1,128})/availability' + String.fromCharCode(36)).exec(url.pathname);
       const onboardingReview = /^\/v1\/rideshare\/drivers\/([A-Za-z0-9_-]{1,128})\/onboarding\/review$/.exec(url.pathname);
       const onboarding = /^\/v1\/rideshare\/drivers\/([A-Za-z0-9_-]{1,128})\/onboarding$/.exec(url.pathname);
       const preferences = new RegExp('^/v1/rideshare/riders/([A-Za-z0-9_-]{1,128})/preferences' + String.fromCharCode(36)).exec(url.pathname);

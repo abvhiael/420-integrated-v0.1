@@ -3861,3 +3861,18 @@ def operator_synchronization(stale_seconds:int=300,backlog_limit:int=100,
             result=monitor.snapshot(c,stale_seconds=stale_seconds,backlog_limit=backlog_limit)
             ops.audit_read(c,actor,"health")
             return result
+
+
+@app.get("/v1/bnb/internal/operations/synchronization/readiness")
+def operator_synchronization_readiness(authorization:str|None=Header(None)):
+    """Operator-only synchronization gate: unhealthy consumers never return 200."""
+    import operational_controls as ops
+    import synchronization_monitor as monitor
+    with db() as c:
+        with c.transaction():
+            actor,_=ops.operator(c,authorization,"health")
+            result=monitor.snapshot(c)
+            ops.audit_read(c,actor,"health")
+            if not result["ready"]:
+                raise HTTPException(503,{"ready":False,"alerts":result["alerts"]})
+            return {"ready":True}

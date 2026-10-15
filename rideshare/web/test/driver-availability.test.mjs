@@ -33,3 +33,18 @@ test('lost network and malformed provider responses fail closed',async()=>{
  await assert.rejects(ctrl.refresh());
  assert.equal(ctrl.snapshot().current,null);
 });
+
+test('new driver availability starts offline and can be initialized with explicit server-bound vehicle reference',async()=>{
+ let called=0;
+ const api={
+  readAvailability:async()=>({driverId:'driver_a',vehicleId:null,online:false,revision:0,expiresAt:0}),
+  readOffers:async()=>[],
+  setAvailability:async body=>{called++;assert.equal(body.vehicleId,'vehicle_first');assert.equal(body.expectedRevision,0);
+   return {driverId:'driver_a',vehicleId:'vehicle_first',online:true,revision:1,expiresAt:1060};}
+ };
+ const controller=createDriverAvailabilityController({api,session,clock:()=>1000,nonce:()=> 'init_command'});
+ const result=await controller.refresh();
+ assert.equal(result.current.online,false);
+ const online=await controller.setOnline(true,'vehicle_first',4);
+ assert.equal(online.active,true);assert.equal(called,1);
+});

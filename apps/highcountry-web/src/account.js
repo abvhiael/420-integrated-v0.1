@@ -148,7 +148,8 @@ export function mountAccountPanel({document,main,runtime,authenticate,storage=gl
      button('Request reviewed transaction signature',async()=>{
       try{
        const operation=txOperation.value;
-       txTracker.begin(operation);
+       if(txTracker.status(operation).state==='empty')txTracker.begin(operation);
+       if(txTracker.status(operation).state!=='awaiting-signature')throw Error('tx-operation-already-used');
        txStatus.textContent='Transaction '+operation+': awaiting-signature. A user approval is required.';
        const result=await txTracker.submit(operation,{requestSignature:()=>approvedTx.submit({operation,
         gameId:runtime.gameId,chainId:runtime.chainId})});

@@ -52,3 +52,21 @@ test('explicit signed challenge follows authenticated R05 link, then unlink; nev
  assert.deepEqual(api.map(x=>new URL(x.url).pathname),['/v1/wallet/challenge','/v1/wallet/complete','/v1/session','/v1/wallet/unlink']);
  assert.ok(api.every(x=>x.opts.headers.authorization==='Bearer short-session'&&x.opts.credentials==='omit'));
 });
+
+
+test('scoped read-only activity never accepts caller account identifiers or trusts bad server responses',async()=>{
+ let seen;
+ const w=createOptionalWallet420({provider:{request:async()=>{throw Error('not used');}},authenticate:async()=>'issuer-token',
+  apiUrl:'https://api.example',gameId:game,chainId:1,fetchImpl:async(url,opts)=>{
+   seen={url:String(url),opts};return {ok:true,json:async()=>({events:[{kind:'projection',gameId:game}]})};
+  }});
+ assert.equal((await w.scopedActivity({limit:1})).length,1);
+ assert.equal(new URL(seen.url).pathname,'/events');
+ assert.equal(new URL(seen.url).searchParams.get('limit'),'1');
+ assert.equal(new URL(seen.url).searchParams.has('accountId'),false);
+ assert.equal(seen.opts.headers.authorization,'Bearer issuer-token');
+ await assert.rejects(w.scopedActivity({limit:101}),/wallet-activity-limit-invalid/);
+ const forged=createOptionalWallet420({provider:{request:async()=>null},authenticate:async()=>'issuer-token',
+  apiUrl:'https://api.example',gameId:game,chainId:1,fetchImpl:async()=>({ok:true,json:async()=>({events:'forged'})})});
+ await assert.rejects(forged.scopedActivity({limit:10}),/wallet-activity-invalid/);
+});

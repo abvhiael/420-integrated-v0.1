@@ -14,7 +14,7 @@ before(async()=>{
 after(async()=>{await owner.end();});
 const token=(driver,trip='dispatch_account')=>app.token('driver',driver,trip);
 async function make(name,driver='driver_offer_a'){
- await app.online(driver,'vehicle_offer_a');
+ await app.online(driver,'vehicle_'+driver);
  await app.create(name);
  await app.transition('operator','operator_dispatch',name,'match',0);
  const snap=await app.tripStore.get(name);

@@ -1,0 +1,98 @@
+{
+  "schema": "420compliance-c01.8-architecture-level2/v1",
+  "step": "C01.8",
+  "canonical": "Architecture Level 2 milestone: source-to-requirement-to-test matrix, authority review, implementation sequence and baseline lock.",
+  "qualification_level": 2,
+  "status": "CANDIDATE_PENDING_EXACT_SHA",
+  "scope": "C01.1-C01.7 retained architecture, scoped Go signing and evaluator, DOOBr/Travel fail-closed dependencies",
+  "traceability": [
+    {
+      "id": "C01.1",
+      "source": "docs/compliance/C01.1-INVENTORY.json",
+      "test": "scripts/verify-compliance-c01-1.py",
+      "gate": "reuse inventory; no new Genesis authority"
+    },
+    {
+      "id": "C01.2",
+      "source": "docs/compliance/C01.2-PRODUCT-SCOPE.json",
+      "test": "scripts/verify-compliance-c01-2.py",
+      "gate": "bounded DOOBr/Travel journeys and excluded domains"
+    },
+    {
+      "id": "C01.3",
+      "source": "docs/compliance/C01.3-SOURCE-AUTHORITY.json",
+      "test": "scripts/test-compliance-c01-3.py",
+      "gate": "legal source and reviewer independence"
+    },
+    {
+      "id": "C01.4",
+      "source": "docs/compliance/C01.4-SHARED-AUTHORITY-AMENDMENT.md",
+      "test": "scripts/verify-compliance-c01-4.py",
+      "gate": "Compliance legal owner, DOOBr enforcement, Travel public presentation"
+    },
+    {
+      "id": "C01.5",
+      "source": "docs/compliance/C01.5-THREATS.json",
+      "test": "scripts/verify-compliance-c01-5.py",
+      "gate": "16 threat families and privacy"
+    },
+    {
+      "id": "C01.6",
+      "source": "docs/compliance/C01.6-CONTRACT.json",
+      "test": "scripts/verify-compliance-c01-6.py",
+      "gate": "APIs, events, freshness, outcomes and deployment"
+    },
+    {
+      "id": "C01.7",
+      "source": "docs/compliance/C01.7-DECISION.json",
+      "test": "scripts/verify-compliance-c01-7.py",
+      "gate": "scoped discovery, signature, Genesis nonmutation"
+    },
+    {
+      "id": "C01.7-RUNTIME",
+      "source": "services/complianceauth/evaluator.go",
+      "test": "services/complianceauth/evaluator_test.go",
+      "gate": "Go managed signer abstraction and verified evidence gate, production disabled"
+    },
+    {
+      "id": "C08.3-HANDOFF",
+      "source": "docs/compliance/C08.3-EXTERNAL-AUTHORITY-TESTNET-HANDOFF.md",
+      "test": "docs/compliance/qualification/EXTERNAL-AUTHORITY-ACCEPTANCE.json",
+      "gate": "external issuer/KMS/legal/partner acceptance deferred explicitly"
+    }
+  ],
+  "authority_review": {
+    "software_architecture": "PROPOSED_FOR_LEVEL2",
+    "qualified_legal_review": "NOT_RECEIVED",
+    "policy_approval": "NOT_RECEIVED",
+    "retailer_partner": "NOT_RECEIVED",
+    "carrier_partner": "NOT_RECEIVED",
+    "managed_prod_keys": "NOT_PROVISIONED",
+    "genesis_changes": "NONE",
+    "doobr_enforcement": "DOOBR_OWNED_NOT_RELEASED",
+    "travel_transaction_gateway": "DISABLED"
+  },
+  "implementation_sequence": [
+    "C02 source registry/collection and immutable provenance",
+    "C03 applicability and deterministic versioned policy rules",
+    "C04 separate author/reviewer/publisher lifecycle with independent legal authority",
+    "C05 signed scoped evaluator decisions and fail-closed DOOBr and informational Travel adapters",
+    "C06 public/private consoles and notifications",
+    "C07 persistent concurrency, KMS identity, security and incident recovery",
+    "C08 repository closeout/Level3, C09 deployed testnet, C10 external production approval"
+  ],
+  "baseline_lock": {
+    "architecture": "C01.1-C01.7 design artifacts and signed manifest interface",
+    "runtime_permission": false,
+    "lock_policy": "After exact-SHA Level 2 pass, changes to architecture/Go/CI require appropriate requalification",
+    "level3": "C08.5",
+    "testnet": "C09",
+    "production": "C10"
+  },
+  "risks": [
+    "proposed DOOBr separate PR not merged/independently accepted",
+    "real legal/retailer/carrier and identity issuer acceptance absent",
+    "managed non-exportable KMS keys unavailable",
+    "deployed cross-service/multi-instance tests testnet deferred"
+  ]
+}

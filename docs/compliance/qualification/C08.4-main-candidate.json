@@ -1,0 +1,17 @@
+{
+  "schema": "420compliance-c084-main-candidate/v1",
+  "status": "MAIN_BASED_CANDIDATE_PENDING_EXACT_SHA_CI",
+  "base_main": "3f2cf64897e96c4f16213bcaf93564db72a174c9",
+  "candidate_creation_sha": "755650df64d45f9790f5c51f607cf98c68109029",
+  "audit_source_sha": "c069e35dccc6c910a1c9339effd5572674de20c3",
+  "source_merge_base": "c5a4f220d1fbda01f707d359aa9bb32921a138b1",
+  "copied_compliance_files": 392,
+  "overlapping_destination_paths": 0,
+  "source_freeze_path": "docs/compliance/qualification/C08.4-branch-freeze.json",
+  "scope": "Compliance-scoped file graft onto fresh main; no audit PR merge or main changes",
+  "shared_dependencies": "GO_MOD_IDENTICAL; OTHER_SHARED_DEPENDENCY_INTEGRATION_NOT_YET_QUALIFIED",
+  "release_enabled": false,
+  "external_approvals_verified": false,
+  "level3": "NOT_EXECUTED",
+  "next": "C08.5 only after Level 1 and full candidate disposition"
+}

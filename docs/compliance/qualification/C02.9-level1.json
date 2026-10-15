@@ -1,0 +1,47 @@
+{
+  "step": "C02.9",
+  "canonical": "Evidence export and source retention controls; support permitted archival limits, publisher terms and reviewer-only access where needed.",
+  "qualification_level": 1,
+  "status": "COMPLETE_LEVEL1_PASS",
+  "implementation_sha": "900be0fbc50ea344be428eaf1568eff5d83045e6",
+  "main_sha_observed": "e60c4c74ccd0c950817f98e3da6b67546afd9e24",
+  "original_base_sha": "c5a4f220d1fbda01f707d359aa9bb32921a138b1",
+  "branch": "audit/420compliance-c01-1-inventory-20261009",
+  "pr": 602,
+  "files": [
+    "services/complianceauth/evidence_export.go",
+    "services/complianceauth/evidence_export_test.go",
+    "docs/compliance/C02.9-EVIDENCE-EXPORT.md",
+    ".github/workflows/420compliance-c01-level1.yml"
+  ],
+  "ci": {
+    "run": 38083967384,
+    "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38083967384",
+    "job_id": 114306468377,
+    "conclusion": "success",
+    "qualified_head": "cf11e0a11a627ee70f479fcab904005e941cd78f",
+    "exact_sha": true,
+    "go_race": "PASS",
+    "retained_compliance": "PASS",
+    "evidence_export": "PASS",
+    "artifact_upload": "PASS"
+  },
+  "requirements": [
+    "consent gates for archival and export",
+    "publisher terms reference and expiration",
+    "retention permission expiry",
+    "reviewer-only authenticated access",
+    "content size and hash integrity",
+    "no export of quarantined records",
+    "no legal policy activation"
+  ],
+  "limitations": [
+    "external authoritative grants not provisioned",
+    "storage deletion and multitenant lifecycle deferred to C07/C09",
+    "validated reviewer identity provider deferred"
+  ],
+  "level2": "C02.10",
+  "level3": "C08.5",
+  "blockers": [],
+  "next_canonical": "C02.10 — Evidence pipeline Level 2 milestone: replay fixture changes, amendments, poisoned documents, outages and duplicate intake; demonstrate no automatic approval."
+}

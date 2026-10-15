@@ -1,0 +1,332 @@
+{
+  "step": "C07.4",
+  "name": "Capacity and abuse controls; load, soak, backpressure, rate limits and overload fail-closed behaviour",
+  "qualification_level": 1,
+  "status": "COMPLETE",
+  "acceptance_scope": "Repository app-audit software capacity/abuse gates. Production-equivalent capacity and prolonged soak acceptance remain C09.8.",
+  "repository": "abvhiael/420-integrated-v0.1",
+  "branch": "audit/420compliance-c01-1-inventory-20261009",
+  "pull_request": 602,
+  "pull_request_disposition": "Draft, open and unmerged",
+  "implementation_sha": "9a76efca0e9affbacc7e13d5c17fb885bc830459",
+  "audit_ancestry_base_sha": "c5a4f220d1fbda01f707d359aa9bb32921a138b1",
+  "observed_main_sha": "81c21541acdc1b900b9a15c6f6b75ff2d7c2b5d9",
+  "recorded_local_date": "2026-10-13",
+  "timezone": "America/Regina",
+  "evidence_commit_policy": "Evidence-only commit inheriting the exact qualified implementation; evidence SHA is the Git commit containing this file. No executable/test/workflow/dependency/configuration/deployment/substantive requirement change.",
+  "classification": "Compliance package/database/HTTP and app qualification only; no shared Go module, protocol, Solidity, Genesis or frozen-address changes.",
+  "files_changed": [
+    "services/complianceauth/c07_1_migrations.go",
+    "services/complianceauth/c07_1_storage.go",
+    "services/complianceauth/c07_1_storage_test.go",
+    "services/complianceauth/c07_2_durable.go",
+    ".github/workflows/420compliance-c01-level1.yml",
+    "services/complianceauth/c07_4_capacity.go",
+    "services/complianceauth/c07_4_capacity_test.go",
+    "docs/compliance/C07.4-CAPACITY-ABUSE.md"
+  ],
+  "implementation_summary": [
+    "Role-bound database-clock shared rate admission and transaction-backed fleet concurrency slots",
+    "Fixed work/recovery reserves without dynamic IP/credential identity cardinality or local waiting queues",
+    "Bounded body/response buffering, cancellation/operation and transport deadlines; no late ALLOW or partial private response",
+    "Separate managed production admission pool so held slots do not exhaust admitted storage work",
+    "Serialized durable-job count/payload backpressure and database triggers; idempotent recovery retained",
+    "Atomic activation/outbox rollback on unacknowledged backlog exhaustion; halt and acknowledgment preserve existing authority",
+    "Add migration seven with RLS and restricted runtime grants; preserve original first-six migration checksums"
+  ],
+  "requirements": {
+    "capacity": {
+      "status": "PASS",
+      "proof": "16 shared work slots, two shared recovery slots, fixed bounded process queues and separate 20-connection admission versus 16-connection storage pools"
+    },
+    "abuse_controls": {
+      "status": "PASS",
+      "proof": "Fixed role-bound scope/lane counters; forwarded headers/client scope cannot choose identity; no counter insert/delete privilege; body/header/response/time limits"
+    },
+    "load": {
+      "status": "PASS",
+      "proof": "32,000 requests from 32 producers, bounded capacity and exact admit/reject/backend accounting"
+    },
+    "soak": {
+      "status": "PASS",
+      "proof": "30-second TLS/real PostgreSQL admission soak with measured counts/peak concurrency and fixed two-counter cardinality; actual production extended soak deferred C09.8"
+    },
+    "backpressure": {
+      "status": "PASS",
+      "proof": "1,024 active jobs/16 MiB payload and 2,048 unacknowledged outbox cap; SQL triggers, serialized admission, full-queue replay and rollback"
+    },
+    "rate_limits": {
+      "status": "PASS",
+      "proof": "120 work and 30 recovery admissions per DB-clock fixed one-second window; two-instance contention; no budget overshoot; recovery independence"
+    },
+    "overload_fail_closed": {
+      "status": "PASS",
+      "proof": "Overload/database/managed-identity/missing-state/deadline/response-cap denial; no backend on rejected admission, no late ALLOW, no partial activation/export; emergency halt remains callable"
+    }
+  },
+  "diagnosed_failures": [
+    {
+      "run_id": 38356951736,
+      "job_id": 115161962712,
+      "implementation_sha": "8b63ae9b27881af834e6e92207ac53a5cb082189",
+      "classification": "Test-harness fixture defect",
+      "cause": "Backlog fixture reused one scope/sequence/subscriber triple, violating the existing outbox uniqueness constraint before the capacity assertion",
+      "repair": "Use distinct fixture subscribers for the 2,048 valid rows; preserve uniqueness constraint, capacity assertion and original protocol semantics",
+      "conclusion": "failure; never qualified final implementation"
+    }
+  ],
+  "superseded_run_policy": "Only final exact-SHA successful run is authoritative. Failed/skipped/cancelled/missing earlier results never substitute for PASS.",
+  "milestones": {
+    "C07_10": "Canonical operational Level 2 deferred to milestone; not manually dispatched",
+    "C08_5": "Canonical exact-SHA Level 3 and current-main reconciliation deferred to phase closeout"
+  },
+  "retained_evidence": [
+    "docs/compliance/qualification/C07.3-level1.json",
+    "docs/compliance/qualification/C07.2-level1.json",
+    "docs/compliance/qualification/C07.1-level1.json",
+    "docs/compliance/qualification/C06.9-level2.json"
+  ],
+  "broad_workflows_manually_dispatched": [],
+  "deferred_dependencies": [
+    {
+      "item": "Approved production fleet/tenant connection budgets, ingress connection/handshake caps, managed-provider latency and prolonged production-equivalent load/soak measurements",
+      "targets": [
+        "C09.8"
+      ],
+      "status": "OPEN; repository synthetic test does not approve deployment targets"
+    },
+    {
+      "item": "Managed IAM/service identity, deployed multi-instance wiring, external reviewer/key/source/consumer and independent operational acceptance",
+      "targets": [
+        "C09",
+        "C10"
+      ],
+      "status": "OPEN; retained original external boundaries"
+    }
+  ],
+  "limitations": [
+    "Aggregate per-scope rate protection is not per-user fairness; a fixed-window boundary may allow two adjacent bursts",
+    "Recovery reserve itself can exhaust under attack and grants no availability or authorization guarantee",
+    "Handlers must honor request cancellation; a hung process needs operator termination; wrapper never emits a late response",
+    "Connection sizing across actual fleet/tenants and production SLAs require independent measurement/approval",
+    "Admission uses conservative 250-ms dependency budget and 2-second operation deadline; unapproved deployment latency never relaxes fail-closed checks",
+    "Existing raw handlers/runtime constructors remain primitives; production capacity entry is OpenC074Production plus NewC074Server and external TLS",
+    "Audit branch divergence remains for canonical C08.5 reconciliation, not a claim of merge readiness"
+  ],
+  "blockers_for_repository_step": [],
+  "next_canonical_step": {
+    "id": "C07.5",
+    "name": "Privacy retention/deletion schedules, legal holds and role-limited evidence access; required delivery records remain under the accountable retailer/app boundary",
+    "started": false
+  },
+  "completion": "Every original C07.4 criterion individually PASS at the exact implementation SHA. Evidence-only certification; no production capacity/soak/authorization certificate or merge readiness claim.",
+  "workflow": {
+    "path": ".github/workflows/420compliance-c01-level1.yml",
+    "name": "420Compliance C07.4 Level 1",
+    "run_id": 38357497923,
+    "run_number": 768,
+    "attempt": 1,
+    "job_id": 115163678920,
+    "job_name": "capacity-abuse-level1",
+    "event": "push",
+    "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38357497923",
+    "conclusion": "success",
+    "steps": 14,
+    "success": 14,
+    "failed": 0,
+    "skipped": 0,
+    "cancelled": 0
+  },
+  "checks": [
+    {
+      "command": "Official Go 1.27.2 archive SHA-256 verification",
+      "result": "PASS"
+    },
+    {
+      "command": "python3 scripts/verify-compliance-c07-3.py --self-test",
+      "result": "PASS",
+      "adversarial_cases": 7
+    },
+    {
+      "command": "go mod verify",
+      "result": "PASS"
+    },
+    {
+      "command": "govulncheck v1.9.0 -json -test ./services/complianceauth",
+      "result": "PASS",
+      "unresolved_findings": 0
+    },
+    {
+      "command": "go vet ./services/complianceauth",
+      "result": "PASS"
+    },
+    {
+      "command": "go test -race ./services/complianceauth -run '^(TestC074|TestC073|TestC072|TestC071|TestC051|TestC038|TestC048|TestC052|TestC059|TestC064|TestC065|TestC066|TestC067|TestC068)' -count=1 -v",
+      "result": "PASS",
+      "top_level_tests": 47,
+      "subtests": 30,
+      "required_skips": 0,
+      "passed_tests": [
+        "TestC038DatabaseOutageAndReconnect",
+        "TestC038IndependentSignatureAuthorization",
+        "TestC038PostgreSQLMultiInstance",
+        "TestC038ProductionRuntimeGates",
+        "TestC038PublicationAcrossInstances",
+        "TestC048ScheduledSigningRotationAndEmergency",
+        "TestC0510PayWalletBoundary",
+        "TestC0512IntegrationLevel2Adversarial",
+        "TestC051VersionedAPIAndSDKSecurity",
+        "TestC052ProviderBoundariesRevocationAndPrivacy",
+        "TestC059SignedOutboxInvalidationAndRecovery",
+        "TestC064AuthorArchiveCitationsIntegrity",
+        "TestC064AuthorSessionAndFailureGates",
+        "TestC064AuthorWorkspaceSecurityAndEditing",
+        "TestC064PostgreSQLDraftCASAndPersistence",
+        "TestC065Ed25519AndImpactProviderDeny",
+        "TestC065IndependentReviewNegativeBoundary",
+        "TestC065PostgreSQLConcurrentReviewAndStaleAuthorFencing",
+        "TestC065PostgreSQLReviewFailsClosedWithoutConnection",
+        "TestC065ReviewConsoleFailsClosed",
+        "TestC066HTTPUnconfiguredAndAnonymousDenied",
+        "TestC066OperatorDashboardHaltAndFailClosed",
+        "TestC067ArchiveEvidenceFailClosed",
+        "TestC067AuditorBoundedRedactedAccess",
+        "TestC067AuditorHTTPAuthorizationAndCSRF",
+        "TestC067AuditorHTTPAuthorizationAndCSRF/anonymous",
+        "TestC067AuditorHTTPAuthorizationAndCSRF/cross_origin",
+        "TestC067AuditorHTTPAuthorizationAndCSRF/noTLS",
+        "TestC067AuditorHTTPAuthorizationAndCSRF/wrong_csrf",
+        "TestC067PostgreSQLDurableAuditAccess",
+        "TestC068DOOBrTravelConsumerFailClosed",
+        "TestC068DOOBrTravelConsumerFailClosed/420Travel",
+        "TestC068DOOBrTravelConsumerFailClosed/DOOBr",
+        "TestC068ExternalRevocationAndConsumption",
+        "TestC068MobileDeviceSessionRevocationAndBoundary",
+        "TestC071AuthenticatedEncryptionBoundaries",
+        "TestC071PostgreSQLProductionStorage",
+        "TestC072AtomicActivationOutboxAndHalt",
+        "TestC072Boundaries",
+        "TestC072DurableJobsLeaseFencing",
+        "TestC073CertificateRotationAndTimeout",
+        "TestC073DatabaseTLSOverridesDenied",
+        "TestC073ManagedEncryptionRotation",
+        "TestC073ManagedProductionComposition",
+        "TestC073ManagedSignerRotationAndRevocation",
+        "TestC073SecretBindingFreshnessAndTLS",
+        "TestC073SecretBindingFreshnessAndTLS/HTTP",
+        "TestC073SecretBindingFreshnessAndTLS/audience",
+        "TestC073SecretBindingFreshnessAndTLS/client-identity",
+        "TestC073SecretBindingFreshnessAndTLS/domain",
+        "TestC073SecretBindingFreshnessAndTLS/environment",
+        "TestC073SecretBindingFreshnessAndTLS/expired",
+        "TestC073SecretBindingFreshnessAndTLS/future",
+        "TestC073SecretBindingFreshnessAndTLS/generation",
+        "TestC073SecretBindingFreshnessAndTLS/header_injection",
+        "TestC073SecretBindingFreshnessAndTLS/issuer",
+        "TestC073SecretBindingFreshnessAndTLS/jurisdiction",
+        "TestC073SecretBindingFreshnessAndTLS/nonce",
+        "TestC073SecretBindingFreshnessAndTLS/outage",
+        "TestC073SecretBindingFreshnessAndTLS/oversized",
+        "TestC073SecretBindingFreshnessAndTLS/purpose",
+        "TestC073SecretBindingFreshnessAndTLS/purpose_confusion",
+        "TestC073SecretBindingFreshnessAndTLS/redirect",
+        "TestC073SecretBindingFreshnessAndTLS/revoked",
+        "TestC073SecretBindingFreshnessAndTLS/server-identity",
+        "TestC073SecretBindingFreshnessAndTLS/tenant",
+        "TestC073SecretBindingFreshnessAndTLS/trailing",
+        "TestC073SecretBindingFreshnessAndTLS/unbounded",
+        "TestC073SecretBindingFreshnessAndTLS/untrusted-root",
+        "TestC073SecretBindingFreshnessAndTLS/workload",
+        "TestC074BodyResponseTimeoutAndOutage",
+        "TestC074BoundedSoak",
+        "TestC074DistributedRateAndCapacity",
+        "TestC074HTTPOverloadAndRecovery",
+        "TestC074ManagedProductionComposition",
+        "TestC074NetworkPostgreSQLSoak",
+        "TestC074QueueBackpressureAndAtomicOutbox"
+      ]
+    }
+  ],
+  "artifact": {
+    "id": 11793861699,
+    "name": "compliance-c074-level1-9a76efca0e9affbacc7e13d5c17fb885bc830459",
+    "size_in_bytes": 75296,
+    "url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/artifacts/11793861699",
+    "archive_download_url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/artifacts/11793861699/zip",
+    "expired": false,
+    "created_at": "2026-10-13T06:39:05Z",
+    "expires_at": "2026-10-20T06:34:47Z",
+    "updated_at": "2026-10-13T06:39:05Z",
+    "digest": "sha256:66d635a8bbf579188836752bc448e6e5cb9587255b1872af30cefbee88b9f863",
+    "workflow_run": {
+      "id": 38357497923,
+      "repository_id": 1345598861,
+      "head_repository_id": 1345598861,
+      "head_branch": "audit/420compliance-c01-1-inventory-20261009",
+      "head_sha": "9a76efca0e9affbacc7e13d5c17fb885bc830459"
+    }
+  },
+  "durable_runtime_result": "docs/compliance/qualification/C07.4-runtime-level1.json",
+  "durable_test_log": "docs/compliance/qualification/C07.4-tests.log",
+  "durable_supply_chain": "docs/compliance/qualification/C07.4-supply-chain.json",
+  "durable_vulnerability_report": "docs/compliance/qualification/C07.4-vulnerability.json",
+  "source_manifest": {
+    "file_count": 135,
+    "path": "docs/compliance/qualification/C07.4-runtime-level1.json",
+    "policy": "Exact original CI result retained, with SHA-256 manifest for all 135 scoped input files."
+  },
+  "measurements": {
+    "synthetic_load": {
+      "requests": 32000,
+      "producers": 32,
+      "admitted": 30963,
+      "rejected": 1037,
+      "duration_ms": 305.880051
+    },
+    "network_postgres_soak": {
+      "duration_seconds": 30.011729384,
+      "clients": 8,
+      "admitted_responses": 3608,
+      "rejected_responses": 7911,
+      "peak_backend_concurrency": 5,
+      "backend_calls": 3609,
+      "shutdown_cancellation": "One final backend call had no accepted response when the 30-second client context closed. No ALLOW issued; all handlers drained before final capacity checks."
+    },
+    "distributed_rate_race": {
+      "producers": 160,
+      "concurrent_admissions": 11,
+      "rate_budget_overshoot": 0,
+      "policy": "Remaining budget filled serially to prove exact 120-admission ceiling; fail-closed lock/pool contention counts as denial, not lost passing evidence."
+    }
+  },
+  "retained_migration_history": "Migration seven is appended; checksums/SQL for original migrations one through six are unchanged. All migration/RLS/quota/restricted-role/production tests pass at the final implementation.",
+  "security_acceptance": {
+    "status": "PASS for C07.4 repository software gates",
+    "tests_weakened": false,
+    "live_permissions_expanded": false,
+    "independent_security_review_completed": false,
+    "live_production_authorized": false,
+    "coverage": [
+      "cross-instance rate/capacity",
+      "role-bound RLS and fixed cardinality",
+      "oversize/deadline/outage denial",
+      "no late ALLOW/partial export",
+      "queue/full replay/atomic fan-out rollback",
+      "emergency recovery reserve without authority bypass",
+      "fresh managed identity and separate database pools",
+      "retained session/CSRF/revocation/signature/replay/storage/concurrency security"
+    ]
+  },
+  "implementation_doc_status": "C07.4-CAPACITY-ABUSE.md retains the historical implementation checkpoint (CI pending at 8b63ae9); this certificate and the roadmap's dated evidence ledger supersede that checkpoint without changing requirements.",
+  "other_workflows": {
+    "Docs": "Automatic run 38357503488 skipped; not PASS and not required for ordinary C07.4 Level 1. Global Docs belongs at C08.5.",
+    "Governance_and_420Hz": "Automatic unchanged workflow YAML failures retained baseline; unrelated to C07.4. No unrelated workflow altered or broad qualification manually dispatched."
+  },
+  "durable_vulnerability_report_sha256": "aa4737e33f38be3fe8be7f72347ecca30daf47ff30ec627ec8fcfd3bbf27bf12",
+  "durable_vulnerability_report_bytes": 587203,
+  "evidence_repair": {
+    "superseded_evidence_sha": "cd29bead66beb1a29c75c8a77ea13920abb1bdba",
+    "cause": "Scanner report copy was truncated by an intermediate text output limit. Original successful artifact and qualification unchanged.",
+    "repair": "Complete UTF-8 scanner report restored from the verified ZIP; exact Git blob 58606f8ee9869905cfe1e74180ed3c9a27d70c39 and SHA-256 verified. Evidence-only repair; no executable or test change."
+  }
+}

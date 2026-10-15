@@ -1,0 +1,58 @@
+{
+  "step": "C04.2",
+  "canonical": "Reviewer qualifications and delegation; MFA, least privilege, short-lived sessions and approval invalidation when reviewed content changes.",
+  "status": "COMPLETE_LEVEL1_PASS_EXTERNAL_TESTNET_ACCEPTANCE_DEFERRED",
+  "qualification_level": 1,
+  "implementation_sha": "28b46104c78d90adf128d7a61098d7da7fc057d9",
+  "branch": "audit/420compliance-c01-1-inventory-20261009",
+  "pr": 602,
+  "files": [
+    "services/complianceauth/reviewer_authorization.go",
+    "services/complianceauth/reviewer_authorization_test.go",
+    ".github/workflows/420compliance-c01-level1.yml",
+    "docs/compliance/C04.2-REVIEWER-AUTHORIZATION.md",
+    "services/complianceauth/reviewer_lifecycle_integration.go",
+    "services/complianceauth/reviewer_lifecycle_integration_test.go",
+    "docs/compliance/C08.3-EXTERNAL-AUTHORITY-TESTNET-HANDOFF.md"
+  ],
+  "checks": [
+    "Reviewer and approver scope / qualification",
+    "delegation anti-self and author segregation",
+    "authenticated short sessions and recent MFA",
+    "digest-bound content change invalidation",
+    "revocation and unavailable authority fail closed"
+  ],
+  "ci": {
+    "status": "PASS",
+    "run_id": 38107790106,
+    "job_id": 114376872954,
+    "conclusion": "success",
+    "exact_sha": true,
+    "successful_steps": 49,
+    "failed_steps": 0,
+    "reviewer_lifecycle_integration": "PASS",
+    "go_race": "PASS",
+    "postgres_retained": "PASS"
+  },
+  "limitations": [
+    "No independent reviewer or MFA provider connected",
+    "Existing PolicyLifecycle.Transition still relies on trusted actor identity and does not independently call AuthorizeReview",
+    "No production durable authorization or delegation persistence"
+  ],
+  "blockers": [],
+  "level2": "Not scheduled for C04.2",
+  "level3": "C08.5 deferred",
+  "next_canonical": "C04.3 — Federally applicable product, packaging, quantity-equivalency and promotion requirements; explicitly separate non-medical scope and payment-route legal review.",
+  "deferred_testnet": [
+    "C09.1: provision isolated MFA and issuer identities",
+    "C09.5: trusted external reviewer/qualification/delegation provider integration",
+    "C09.7: deployed revocation, MFA/session expiry, stale digest and outage negative acceptance"
+  ],
+  "deferred_production": [
+    "C10.1: independent legal reviewer qualification and latest-law acceptance",
+    "C10.3: production identity/MFA trust and credential revocation",
+    "C10.7: release authorization and operator signoff"
+  ],
+  "software_integration": "AuthorizedReviewTransition guarded review/approval with independently reverified grant/session/MFA/digest, tests and exact-SHA PASS",
+  "disposition": "C04.2 software step qualified. External reviewer/issuer/MFA provisioning and deployed acceptance remain explicit C09/C10 dependencies, not proof of production eligibility."
+}

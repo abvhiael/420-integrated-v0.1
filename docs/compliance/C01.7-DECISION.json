@@ -1,0 +1,101 @@
+{
+  "schema": "420compliance-c01.7-decision/v1",
+  "step": "C01.7",
+  "status": "APPROVED_DESIGN_ONLY",
+  "genesis": {
+    "new_application_id": false,
+    "new_address": false,
+    "new_namespace": false,
+    "frozen_catalog_changes": false,
+    "approval_requirement": "Any later on-chain application, address, predeploy, namespace, or change to frozen manifest requires separate canonical Genesis and governance approval; this step provides none."
+  },
+  "discovery": {
+    "pattern": "approved static environment-configured service endpoints plus versioned service registry metadata; no user-supplied upstream URLs",
+    "trust": "TLS with verified service identity and independently approved audience/issuer pins, service account binding and environment isolation",
+    "consumers": [
+      "DOOBr authenticated internal evaluation",
+      "420Travel public redacted guidance via its scoped adapter",
+      "420Location/Maps coarse projection"
+    ],
+    "availability": "failure to resolve, mismatch, expired registration or unavailable service => UNKNOWN and block regulated transaction",
+    "migration": "versioned contracts with dual-read only after compatibility review and separately approved migration; no unsecured fallback",
+    "endpoint_classes": [
+      "PUBLIC_REDACTED",
+      "AUTHENTICATED_PRIVATE",
+      "INDEPENDENT_REVIEWER",
+      "SEPARATE_PUBLISHER",
+      "SCOPED_EMERGENCY_OPERATOR"
+    ]
+  },
+  "publication": {
+    "strategy": "independent qualified reviewer approves immutable source-linked digest; distinct publisher schedules signed manifest",
+    "manifest_fields": [
+      "schema_version",
+      "policy_digest",
+      "source_digest_set",
+      "review_digest",
+      "domain",
+      "jurisdiction",
+      "actor_classes",
+      "effective_from",
+      "effective_until",
+      "review_expires_at",
+      "environment",
+      "sequence",
+      "revocation_epoch",
+      "key_id",
+      "signature"
+    ],
+    "signature": "asymmetric Ed25519 selected as off-chain design; canonical serialized bytes, approved key registry and independent signing authority; production keys not provisioned",
+    "key_management": "environment-scoped managed key/HSM, no private keys in repository, dedicated signer principal, dual control, auditable rotation, key compromise halt",
+    "validation": "signature/issuer/key status, reviewed exact digest, jurisdiction/domain/audience, environment, effective interval, review freshness, monotonic sequence and revocation epoch; block on mismatch",
+    "rollback": "only a currently valid independently approved policy; cannot resurrect revoked manifests or compromised keys",
+    "emergency": "authorized operator may halt region/domain; cannot mint ALLOW or approve a policy"
+  },
+  "chain_commitment": {
+    "decision": "DEFER_OPTIONAL",
+    "reason": "No demonstrated chain trust requirement that cannot be met by versioned signed off-chain proofs and canonical existing apps.",
+    "allowed_future_content": "only minimal nonpersonal digest and version reference after separate review",
+    "prohibited": [
+      "PII",
+      "raw evidence",
+      "addresses",
+      "recipient details",
+      "location tracking",
+      "low-entropy personal hashes"
+    ],
+    "must_reuse": [
+      "420Registry",
+      "420Verify",
+      "420Governance"
+    ],
+    "requires": "canonical change control, privacy threat review, ABI/address authority, testnet and independent release acceptance"
+  },
+  "threat_negative_cases": [
+    "untrusted endpoint",
+    "unverified TLS",
+    "wrong audience",
+    "wrong environment",
+    "bad signature",
+    "expired signing key",
+    "revoked key",
+    "changed policy digest",
+    "self-approved review",
+    "wrong domain",
+    "wrong jurisdiction",
+    "future effective date",
+    "expired review",
+    "replayed sequence",
+    "rollback to revoked policy",
+    "source unavailable",
+    "signer unavailable",
+    "public PII",
+    "travel transaction bypass",
+    "missing discovery record"
+  ],
+  "milestone": {
+    "level2": "C01.8",
+    "level3": "C08.5"
+  },
+  "runtime_authorized": false
+}

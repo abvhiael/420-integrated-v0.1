@@ -20,6 +20,7 @@ on:
       - "docs/bnb/BNB-3.12-PHASE3-LEVEL3-CLOSEOUT.md"
   pull_request:
     paths:
+      - 'docs/rideshare/**'
       - "contracts/**"
       - ".github/workflows/contracts-foundry.yml"
       - "docs/audit/420LAUNCHPAD-PHASE-CLOSEOUT.md"

@@ -29,6 +29,7 @@ on:
       - 'docs/highcountry/R04-LEVEL3-RECONCILIATION.md'
   pull_request:
     paths:
+      - 'docs/rideshare/**'
       - 'contracts/config/**'
       - 'config/**'
       - 'wallet/deployment-inventory.json'

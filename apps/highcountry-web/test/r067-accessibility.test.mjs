@@ -12,8 +12,8 @@ test('R06.7 official SVG brand, favicon and lifecycle artwork all exist',async()
  }
  const html=await load('public/index.html');assert.match(html,/highcountry-icon\.svg/);assert.match(html,/Skip to content/);
  const app=await load('src/app.js');
- assert.match(app,/highcountry-logo\.svg/);assert.match(app,/highcountry-growing\.svg/);
- assert.match(app,/highcountry-ready\.svg/);assert.match(app,/aria-current/);
+ assert.match(app,/highcountry-logo\.svg/);assert.match(app,/cultivationStageArt\(phase\)/);
+ assert.match(app,/illustration\.fallback/);assert.match(app,/aria-current/);
  assert.match(app,/role','status/);
 });
 test('responsive, keyboard focus, forced-colors and reduced-motion support exist',async()=>{

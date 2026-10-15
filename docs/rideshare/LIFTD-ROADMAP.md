@@ -54,7 +54,7 @@ Define detailed steps at L01 closeout using the actual service interfaces. Scope
 
 | M-L02-A | Level 2 milestone — rider booking journeys and driver onboarding with backend; expired sessions, revoked eligibility, inaccessible locations and quote changes | **COMPLETE — Level 2 PASS**; [M-L02-A certificate](M-L02-A-LEVEL2-EVIDENCE.md), exact implementation `596bcfc329555916e26f42a50702481b0f348193`; [successful run #38654899486](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38654899486); external acceptance retained |
 
-**Operational acceptance:** Production Identity, live transport eligibility, private document-vault/reviewer controls, participant-scoped messaging, and independent accessibility remain **NOT ACCEPTED**; see [Production Acceptance Register](L02-PRODUCTION-ACCEPTANCE-REGISTER.md). Repository CI PASS does not substitute for deployed service or independent approvals.
+**Operational acceptance:** Production Identity, live transport eligibility, private document-vault/reviewer controls, participant-scoped messaging, and independent accessibility remain **NOT ACCEPTED**. All deployed/independent acceptance work is explicitly tracked in [LIFTd Testnet Roadmap](LIFTD-TESTNET-ROADMAP.md), linked to [Production Acceptance Register](L02-PRODUCTION-ACCEPTANCE-REGISTER.md). Only environment-independent L02 implementation/remediation stays in this phase; no testnet or regulator PASS is implied by repository CI.
 
 Detailed subsequent steps remain to be reconciled with existing L01 service interfaces at the L01 phase-closeout boundary. This entry does not renumber, merge or silently replace future canonical steps.
 

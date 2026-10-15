@@ -1,5 +1,7 @@
 // R06.3 retained R05 cloud-save HTTP adapter. Identity and profile provisioning are issuer-owned.
 import {createServer} from 'node:http';
+import {randomUUID,randomBytes} from 'node:crypto';
+import {saveScopeDigest} from './postgres-repository.js';
 import {createPostgresGamingPlayerProfileService420} from './postgres-repository.js';
 import {CloudSaveLifecycle420} from './cloud-save-lifecycle.js';
 const fail=x=>{throw Object.assign(new Error(x),{code:x});};
@@ -12,9 +14,10 @@ export function createHighCountryCloudHttp420({authority,poolForPrincipal,provid
  !Number.isInteger(schemaVersion)||schemaVersion<1||typeof origin!=='string'||!/^https:\/\/[^/]+$/.test(origin))fail('cloud-http-config-invalid');
  return createServer(async(req,res)=>{
   const send=(code,value)=>{res.writeHead(code,{'content-type':'application/json','cache-control':'no-store',
-  'x-content-type-options':'nosniff','access-control-allow-origin':origin,'vary':'Origin'});res.end(JSON.stringify(value));};
+  'x-content-type-options':'nosniff','access-control-allow-origin':origin,'access-control-allow-headers':'authorization,content-type','access-control-allow-methods':'GET,POST,OPTIONS','vary':'Origin'});res.end(JSON.stringify(value));};
   try{
    if(req.headers.origin&&req.headers.origin!==origin)fail('origin-denied');
+   if(req.method==='OPTIONS'&&req.headers.origin===origin){res.writeHead(204,{'access-control-allow-origin':origin,'access-control-allow-methods':'GET,POST,OPTIONS','access-control-allow-headers':'authorization,content-type','vary':'Origin'});return res.end();}
    if(!['GET','POST'].includes(req.method))fail('method-denied');
    const token=/^Bearer ([^\s]{1,4096})$/.exec(req.headers.authorization||'')?.[1];
    if(!token)fail('authentication-required');
@@ -34,13 +37,22 @@ export function createHighCountryCloudHttp420({authority,poolForPrincipal,provid
    let result;
    if(req.method==='GET'&&url.pathname==='/highcountry/session'){
     const p=await scoped.transaction(tx=>tx.profile());
-    result={authenticated:true,registered:!!p,profileId:p?.profile_id??null,revision:String(p?.save_revision??'0')};
+    result={authenticated:true,registered:!!p,profileId:p?.profile_id??null,rulesetId:p?.ruleset_id??null,revision:String(p?.save_revision??'0')};
    }else if(req.method==='POST'&&url.pathname==='/highcountry/register'){
     if(!opaque(body.profileId)||!/^0x[0-9a-f]{64}$/.test(body.rulesetId)||Object.keys(body).length!==2)fail('invalid-request');
     // Account itself must exist in the approved issuer-backed database; never create a caller-supplied account.
     const p=await scoped.transaction(async tx=>{if(!await tx.account())fail('registration-unavailable');
       return tx.createProfile({profileId:body.profileId,rulesetId:body.rulesetId});});
     result={registered:true,profileId:p.profile_id,revision:String(p.save_revision??'0')};
+   }else if(req.method==='POST'&&url.pathname==='/highcountry/consent'){
+    if(body.accepted!==true||!/^0x[0-9a-f]{64}$/.test(body.policyHash)||Object.keys(body).length!==2)fail('invalid-request');
+    const p=await scoped.transaction(tx=>tx.profile());
+    if(!p)fail('profile-not-found');
+    const consentId=randomUUID(),nonceCommitment='0x'+randomBytes(32).toString('hex');
+    const expiresAt=String(Math.floor(Date.now()/1000)+3600);
+    await scoped.transaction(tx=>tx.recordConsent({consentId,purpose:'CLOUD_SAVE',policyHash:body.policyHash,
+      contextHash:saveScopeDigest(principal,authority.gameId,p.ruleset_id),nonceCommitment,expiresAt}));
+    result={consentId,expiresAt};
    }else if(req.method==='GET'&&url.pathname==='/highcountry/save'){
     const saved=await lifecycle.read();
     result=saved?{revision:saved.revision,save:saved.local}: {revision:'0',save:null};

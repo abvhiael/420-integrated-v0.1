@@ -73,7 +73,7 @@ export function createTripService({authenticator, store, clock = () => Math.floo
       let next;
       if (store.execute) {
         const guard = async () => {
-          const fresh = await authenticator.authorize(token, {action: `trip.${action}`, resource: `trip:${tripId}`});
+          const fresh = await authenticator.authorize(token, {action: action==='offer_reject'?'offer.respond':`trip.${action}`, resource: `trip:${tripId}`});
           if (fresh.subject !== principal.subject || fresh.accountId !== principal.accountId || fresh.role !== principal.role) throw new AuthError('SESSION_BINDING_MISMATCH');
           if (lastAdmission) lastAdmission = await resolveAdmission(lockedTrip, domainCommand, fresh);
           if (transactionClient && dispatchAdapter) await dispatchAdapter.check(transactionClient,lockedTrip,action,selection,lease);

@@ -136,9 +136,12 @@ export function mountAccountPanel({document,main,runtime,authenticate,storage=gl
    txStatus.setAttribute('aria-live','polite');
    let txTracker;
    try{txTracker=createHighCountryTransactionLifecycle420({rpcUrl:runtime.rpcUrl,
-    chainId:runtime.chainId,fetchImpl,witness:globalThis.highCountryIndependentFinalityWitness});}
+    chainId:runtime.chainId,fetchImpl,storage,witness:globalThis.highCountryIndependentFinalityWitness});}
    catch(e){txStatus.textContent='Transaction tracking unavailable: '+e.message;}
    if(txTracker){
+    const past=txTracker.recoveredOperations();
+    if(past.length)txStatus.textContent='Recovered '+past.length+
+      ' transaction hash(es) as unverified; select an operation and refresh before trusting status.';
     const explain=x=>{txStatus.textContent='Transaction '+x.operation+': '+x.state+
      (x.reason?' ('+x.reason+')':'')+
      (x.blockHash?' at block '+x.blockHash:'')+

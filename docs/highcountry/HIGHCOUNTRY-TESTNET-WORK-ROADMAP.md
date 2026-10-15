@@ -242,3 +242,12 @@ R06.5 repository implementation tracks `awaiting-signature`, `submitted`, `pendi
 - **HC-R06.5-T05 — device and operations:** supported desktop/mobile wallet provider consent and rejection, device/network switching, transaction replacement and disappearance, recovery after browser restart, security/privacy/operator signoff.
 
 All are **OPEN** pending live/testnet evidence. Local assertions, mocked RPC fixtures and browser state labels are not independent deployed acceptance.
+
+## R06.6 — Safe routine sessions and sensitive escalation (external gates OPEN)
+
+- **HC-R06.6-T01:** Approved zero-value action selectors, exact contract destinations, chain/game/frozen address policy and independent signoff. No arbitrary calldata, transfers or expanded signing sessions.
+- **HC-R06.6-T02:** Real issuer and independently revocable, expiring session grants, account/profile isolation; apply `007_highcountry_r066_routine.up.sql` through the restricted migrator and run PostgreSQL cross-instance replay tests with approved runtime credentials.
+- **HC-R06.6-T03:** Real wallet/passkey step-up attestation bound to principal/session/action/operation/expiry/nonce with one-use proof semantics; test revocation and device rejection. Sensitive actions are never authorized by a routine session alone.
+- **HC-R06.6-T04:** Deployed HTTPS `/v1/routine/execute` backed by the approved verifier/journal, configured Origin and API routing, mobile/desktop/browser acceptance, operator and security release approval.
+
+**All OPEN.** Until independent sources and deployment approvals exist, do not populate a default routine-action allowlist or activate production delegated signing. The repository tests prove the local enforcement implementation, not live credentials, hardware, blockchain permissions or external security signoff.

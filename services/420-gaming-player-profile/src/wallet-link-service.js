@@ -98,7 +98,7 @@ export function createHighCountryWalletHttp420(service,{origin=null}={}) {
   if(!service||typeof service.session!=='function'||(origin!==null&&(!/^https:\/\/[^/?#]+$/.test(origin))))err('invalid-configuration');
   return createServer(async(req,res)=>{
     const send=(status,payload)=>{res.writeHead(status,{'content-type':'application/json',
-      'cache-control':'no-store','x-content-type-options':'nosniff',...(origin?{'access-control-allow-origin':origin,'access-control-allow-methods':'GET,POST,OPTIONS','access-control-allow-headers':'authorization,content-type','vary':'Origin'}:{})});res.end(JSON.stringify(payload));};
+      'cache-control':'no-store','x-content-type-options':'nosniff',...(origin&&(!req.headers.origin||req.headers.origin===origin)?{'access-control-allow-origin':origin,'access-control-allow-methods':'GET,POST,OPTIONS','access-control-allow-headers':'authorization,content-type','vary':'Origin'}:{})});res.end(JSON.stringify(payload));};
     try {
       if(origin&&req.headers.origin&&req.headers.origin!==origin)err('origin-denied');
       if(origin&&req.method==='OPTIONS'&&req.headers.origin===origin){res.writeHead(204,{'access-control-allow-origin':origin,'access-control-allow-methods':'GET,POST,OPTIONS','access-control-allow-headers':'authorization,content-type','vary':'Origin'});return res.end();}

@@ -77,6 +77,25 @@ export function mountAccountPanel({document,main,runtime,authenticate,storage=gl
    button('Check scoped wallet link',async()=>{try{const result=await optional.session();
     walletStatus.textContent=result.wallet?'Linked wallet verified for this game profile.':'No linked wallet.';}catch(e){walletStatus.textContent=e.message;}});
    button('Read my scoped game activity',async()=>{try{const records=await optional.scopedActivity({limit:25});walletStatus.textContent='Authenticated game activity entries: '+records.length+'. Read-only events are not proof of current ownership, entitlements, rewards or market settlement.';}catch(e){walletStatus.textContent=e.message;}});
+   const proofProfile=field('Canonical on-chain profile ID (bytes32)');
+   const proofId=field('Entitlement, attestation, mission or progression ID (bytes32)');
+   const proofType=field('Entitlement type (bytes32)');
+   const proofContent=field('Entitlement content ID (bytes32)');
+   const proofAmount=field('Expected reward amount (integer; read-only verification)');
+   const proofs=[
+    ['ownership','Verify finalized ownership',()=>({profileId:proofProfile.value})],
+    ['entitlement','Verify finalized entitlement',()=>({profileId:proofProfile.value,entitlementId:proofId.value,
+      entitlementType:proofType.value,contentId:proofContent.value})],
+    ['cross-game','Verify finalized cross-game attestation',()=>({profileId:proofProfile.value,attestationId:proofId.value})],
+    ['mission-reward','Verify finalized mission reward evidence',()=>({profileId:proofProfile.value,missionId:proofId.value,amount:proofAmount.value})],
+    ['progression-reward','Verify finalized progression reward evidence',()=>({profileId:proofProfile.value,trackId:proofId.value,amount:proofAmount.value})]
+   ];
+   for(const [kind,label,args] of proofs)button(label,async()=>{
+    try{const verified=await optional.canonicalProof(kind,args());
+     walletStatus.textContent='Independent finalized '+kind+' proof verified at block '+verified.blockHash+'. No payment or claim submitted.';
+    }catch(e){walletStatus.textContent=e.message;}
+   });
+   paragraph('Canonical proof checks require the approved deployed R05.7 verifier, official code-hash manifests, and independent finalized RPC witness. Market listing/trading remains disabled until its separately authorized R04 settlement API is integrated; no local guest achievements can be promoted.');
    button('Unlink wallet',async()=>{try{await optional.unlink();walletStatus.textContent='Unlinked. Guest play preserved.';}catch(e){walletStatus.textContent=e.message;}});
    button('Disconnect wallet locally',()=>{optional.disconnect();walletStatus.textContent='Disconnected. Guest play preserved.';});
    paragraph('Entitlements, holdings, market, rewards and cross-game records require separately authenticated and finalized authoritative services; unavailable features are disabled, never simulated.');

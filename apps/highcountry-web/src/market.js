@@ -23,8 +23,9 @@ export function createHighCountryMarketConsumer420({apiUrl,authenticate,assertWa
     !Number.isSafeInteger(expiresAt)||expiresAt<=Date.now())fail('market-input-invalid');
    return submit('/market/list',{operation,listing,asset,quantity,price,expiresAt});
   },
-  prepare:({operation,listing,transferOperation}={})=>{
-   if(![operation,listing,transferOperation].every(opaque))fail('market-input-invalid');
+  prepare:(input={})=>{
+   const {operation,listing,transferOperation}=input;
+   if(Object.keys(input).sort().join(',')!=='listing,operation,transferOperation'||![operation,listing,transferOperation].every(opaque))fail('market-input-invalid');
    return submit('/market/prepare',{operation,listing,transferOperation});
   },
   claimReward:({source,proof}={})=>{

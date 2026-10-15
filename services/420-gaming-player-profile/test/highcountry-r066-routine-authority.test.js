@@ -6,7 +6,7 @@ function setup(){let valid=true,expiry=1000,now=20,steps=0,escalate=false;
   verifyIdentity:async t=>t==='t'?'user1':null,
   verifySession:async()=>({active:valid,revoked:!valid,principal:'user1',sessionId:'session1',expiresAt:expiry,actions:['routine1','sensitive1']}),
   verifyEscalation:async()=>escalate,clock:()=>now,
-  approvedActions:{routine1:{classification:'routine',value:0,execute:async()=>{steps++;return {accepted:true};}},
+  operationJournal:{claim:async()=>true},approvedActions:{routine1:{classification:'routine',value:0,execute:async()=>{steps++;return {accepted:true};}},
    sensitive1:{classification:'sensitive',value:1,execute:async()=>{steps++;return {accepted:true};}}}});
  return {authority,setValid:x=>valid=x,setExpiry:x=>expiry=x,setNow:x=>now=x,setEscalate:x=>escalate=x,steps:()=>steps};}
 test('approved zero-value routine action, rejected unreviewed action and session expiry',async()=>{

@@ -6,6 +6,8 @@ on:
       - 'apps/highcountry-web/test/r066-*'
       - 'services/420-gaming-player-profile/src/highcountry-r066-*'
       - 'services/420-gaming-player-profile/test/highcountry-r066-*'
+      - 'services/420-gaming-player-profile/migrations/007_highcountry_r066_routine.up.sql'
+      - 'services/420-gaming-player-profile/scripts/migrate-r066.mjs'
       - '.github/workflows/highcountry-r06-6.yml'
       - 'apps/highcountry-web/scripts/build.mjs'
       - 'apps/highcountry-web/src/account.js'
@@ -33,6 +35,38 @@ jobs:
       - name: Affected browser and retained auth regressions
         run: node --test apps/highcountry-web/test/*.test.mjs services/420-gaming-player-profile/test/wallet-link.test.js
       - name: Syntax and static build
-        run: for file in apps/highcountry-web/src/*.js services/420-gaming-player-profile/src/highcountry-r066-*.js; do node --check "$file"; done; node apps/highcountry-web/scripts/build.mjs
+        run: for file in apps/highcountry-web/src/*.js services/420-gaming-player-profile/src/highcountry-r066-*.js services/420-gaming-player-profile/scripts/migrate-r066.mjs; do node --check "$file"; done; node apps/highcountry-web/scripts/build.mjs
+      - name: Exact SHA close
+        run: test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+  routine-postgres:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: hc_r066_only
+          POSTGRES_DB: r066_ci
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres -d r066_ci"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    env:
+      HIGHCOUNTRY_R066_PG_URL: postgres://postgres:hc_r066_only@localhost:5432/r066_ci
+      CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Exact SHA
+        run: test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+      - working-directory: services/420-gaming-player-profile
+        run: npm ci --ignore-scripts
+      - working-directory: services/420-gaming-player-profile
+        run: node --test test/highcountry-r066-postgres.integration.mjs
       - name: Exact SHA close
         run: test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"

@@ -1,9 +1,9 @@
 // R06.6 server authority: sessions are never verified or issued by the browser.
 const deny=c=>{throw Object.assign(new Error(c),{code:c});};
 const id=x=>typeof x==='string'&&/^[A-Za-z0-9:_-]{1,128}$/.test(x);
-export function createHighCountryRoutineAuthority420({verifyIdentity,verifySession,verifyEscalation,approvedActions,clock=Date.now}={}){
+export function createHighCountryRoutineAuthority420({verifyIdentity,verifySession,verifyEscalation,approvedActions,operationJournal,clock=Date.now}={}){
  if(typeof verifyIdentity!=='function'||typeof verifySession!=='function'||typeof verifyEscalation!=='function'||
- !approvedActions||typeof approvedActions!=='object'||typeof clock!=='function')deny('r066-config-invalid');
+ !approvedActions||typeof approvedActions!=='object'||typeof operationJournal?.claim!=='function'||typeof clock!=='function')deny('r066-config-invalid');
  const map=new Map(Object.entries(approvedActions));
  for(const [name,policy] of map){
   if(!id(name)||!policy||typeof policy.execute!=='function'||
@@ -37,6 +37,8 @@ export function createHighCountryRoutineAuthority420({verifyIdentity,verifySessi
     latest.principal!==principal||latest.sessionId!==sessionId||
     !Array.isArray(latest.actions)||!latest.actions.includes(action))
     deny('r066-session-revoked');
+   const claimed=await operationJournal.claim({principal,sessionId,operation,action});
+   if(claimed!==true)deny('r066-replay-denied');
    return await policy.execute({principal,sessionId,operation,body,
     authorization:{classification:policy.classification,value:policy.value}});
   }finally{pending.delete(key);}

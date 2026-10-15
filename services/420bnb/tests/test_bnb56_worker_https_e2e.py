@@ -67,6 +67,22 @@ def test_two_independent_https_consumers_durable_worker_delivery(database,monkey
     monkeypatch.setenv("BNB_DISCOVERY_CONSUMER_ISSUER","https://fixture.invalid")
     monkeypatch.setenv("BNB_DISCOVERY_CONSUMER_AUDIENCE","bnb-isolated-ci")
     monkeypatch.setenv("BNB_DISCOVERY_CONSUMER_PUBLIC_KEY_PEM",public)
+    import discovery_transport as transport
+    for consumer in ("search","travel"):
+        prefix="BNB_DISCOVERY_RECEIPT_"+consumer.upper()
+        monkeypatch.setenv(prefix+"_ISSUER","https://receipt.fixture.invalid")
+        monkeypatch.setenv(prefix+"_AUDIENCE","bnb-receipt-isolated-ci")
+        monkeypatch.setenv(prefix+"_PUBLIC_KEY_PEM",public)
+    def receipt_signer(consumer,body):
+        now=int(time.time())
+        return jwt.encode({"iss":"https://receipt.fixture.invalid",
+            "aud":"bnb-receipt-isolated-ci","sub":consumer,
+            "iat":now,"nbf":now,"exp":now+90,"jti":uuid4().hex,
+            "purpose":"discovery-acceptance",
+            "receipt_version":transport.RECEIPT_VERSION,
+            "consumer":consumer,"durable_acceptance":True,"consumer_revoked":False,
+            **{k:body[k] for k in ("epoch","cursor","property_id","revision",
+                                   "transport_digest")}},key,algorithm="RS256")
     def proof(consumer,body):
         now=int(time.time())
         return jwt.encode({"iss":"https://fixture.invalid","aud":"bnb-isolated-ci",
@@ -83,8 +99,8 @@ def test_two_independent_https_consumers_durable_worker_delivery(database,monkey
                 active=True,expected_revision=0,actor="isolated-ci",authorize=authorize)
         pid=property_row(conn)
         discovery_sync.synchronize(conn,pid)
-    with independent_server(discovery_consumer_service.create_consumer_app("search",connect),tmp_path,"search") as search:
-        with independent_server(discovery_consumer_service.create_consumer_app("travel",connect),tmp_path,"travel") as travel:
+    with independent_server(discovery_consumer_service.create_consumer_app("search",connect,receipt_signer=receipt_signer),tmp_path,"search") as search:
+        with independent_server(discovery_consumer_service.create_consumer_app("travel",connect,receipt_signer=receipt_signer),tmp_path,"travel") as travel:
             for consumer,(url,ctx) in (("search",search),("travel",travel)):
                 supervisor=worker.isolated_discovery_worker(connect,consumer,url,proof,
                     ssl_context=ctx)
@@ -122,6 +138,22 @@ def test_tls_delivery_failure_then_recovery_preserves_durable_consumer_receipt(d
     monkeypatch.setenv("BNB_DISCOVERY_CONSUMER_ISSUER","https://fixture.invalid")
     monkeypatch.setenv("BNB_DISCOVERY_CONSUMER_AUDIENCE","bnb-isolated-ci")
     monkeypatch.setenv("BNB_DISCOVERY_CONSUMER_PUBLIC_KEY_PEM",public)
+    import discovery_transport as transport
+    for consumer in ("search","travel"):
+        prefix="BNB_DISCOVERY_RECEIPT_"+consumer.upper()
+        monkeypatch.setenv(prefix+"_ISSUER","https://receipt.fixture.invalid")
+        monkeypatch.setenv(prefix+"_AUDIENCE","bnb-receipt-isolated-ci")
+        monkeypatch.setenv(prefix+"_PUBLIC_KEY_PEM",public)
+    def receipt_signer(consumer,body):
+        now=int(time.time())
+        return jwt.encode({"iss":"https://receipt.fixture.invalid",
+            "aud":"bnb-receipt-isolated-ci","sub":consumer,
+            "iat":now,"nbf":now,"exp":now+90,"jti":uuid4().hex,
+            "purpose":"discovery-acceptance",
+            "receipt_version":transport.RECEIPT_VERSION,
+            "consumer":consumer,"durable_acceptance":True,"consumer_revoked":False,
+            **{k:body[k] for k in ("epoch","cursor","property_id","revision",
+                                   "transport_digest")}},key,algorithm="RS256")
     def proof(consumer,body):
         now=int(time.time())
         return jwt.encode({"iss":"https://fixture.invalid","aud":"bnb-isolated-ci",
@@ -136,7 +168,7 @@ def test_tls_delivery_failure_then_recovery_preserves_durable_consumer_receipt(d
             authorize=lambda actor,action,target:actor=="isolated-ci" and action=="configure" and target=="search")
         pid=property_row(conn)
         discovery_sync.synchronize(conn,pid)
-    with independent_server(discovery_consumer_service.create_consumer_app("search",connect),tmp_path,"recovery") as (url,trusted):
+    with independent_server(discovery_consumer_service.create_consumer_app("search",connect,receipt_signer=receipt_signer),tmp_path,"recovery") as (url,trusted):
         untrusted=ssl.create_default_context()
         assert worker.isolated_discovery_worker(connect,"search",url,proof,
             ssl_context=untrusted).once()=="retry"

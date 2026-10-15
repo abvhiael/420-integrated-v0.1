@@ -40,7 +40,7 @@ def test_independent_consumer_commits_before_http_acceptance(database,monkeypatc
         "consumer":"search","current_consumer_grant_verified":True,
         "consumer_revoked":False,
         **{k:body[k] for k in ("transport_digest","epoch","cursor","property_id","revision")}})
-    app=service.create_consumer_app("search",connect)
+    app=service.create_consumer_app("search",connect,receipt_signer=lambda *_:"fixture-receipt")
     client=TestClient(app)
     path="/v1/discovery/accept"
     headers={"x-discovery-proof":"fixture"}

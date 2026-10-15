@@ -5,6 +5,7 @@ on:
   pull_request:
     paths:
       - '.github/workflows/420bet-dice-level1.yml'
+      - 'clients/420bet-dice-v1/scripts/local-deploy-smoke.mjs'
       - 'contracts/src/bet/**'
       - 'contracts/test/BetDice*.t.sol'
       - 'contracts/test/BetWagerAcceptance420.t.sol'
@@ -15,6 +16,10 @@ on:
       - 'contracts/test/BetTerminalPathInvariant420.t.sol'
       - 'contracts/test/BetCasinoSettlementInvariant420.t.sol'
       - 'contracts/test/BetCasinoSolvencyConvergence420.t.sol'
+
+concurrency:
+  group: 420bet-dice-level1-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
 
 permissions:
   contents: read

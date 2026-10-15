@@ -1,8 +1,9 @@
+import {mountAccountPanel} from './account.js';
 import {validateHighCountryRuntime,detectHighCountryNetwork} from './runtime.js';
 import {newGuest,loadGuest,saveGuest,plant,setEnvironment,advance,stage,harvest} from './guest.js';
 const pages=Object.freeze({'/':'Home','/play':'Play','/account':'Account','/settings':'Settings','/about':'About'});
 export function resolveRoute(path){return Object.hasOwn(pages,path)?path:'/not-found';}
-export function createHighCountryApp({document,location,config,fetchImpl,storage=globalThis.localStorage}){
+export function createHighCountryApp({document,location,config,fetchImpl,storage=globalThis.localStorage,authenticate=globalThis.highCountryAuth?.getToken}){
  const runtime=validateHighCountryRuntime(config),root=document.getElementById('app');if(!root)throw Error('missing-game-root');
  let guest=null,error='';
  try{guest=loadGuest(storage);}catch(e){error=e.message;}
@@ -25,7 +26,7 @@ export function createHighCountryApp({document,location,config,fetchImpl,storage
    const refresh=el('button','Recheck elapsed time');refresh.type='button';refresh.addEventListener('click',()=>command(s=>advance(s)));main.append(refresh);
    }else if(!error){const b=el('button','Start guest game');b.type='button';b.addEventListener('click',()=>command(()=>newGuest()));main.append(b);}
    if(guest?.harvests.length){const ul=el('ul','');for(const h of guest.harvests.slice(-10)){ul.append(el('li','Local FLOWER preview: '+h.massMg+' mg, grade '+h.grade+' (nontransferable)'));}main.append(ul);}
-  }else main.append(el('p',path==='/account'?'Account and wallet remain optional and are not activated in R06.2.':path==='/settings'?'Connected endpoints require operator configuration. Guest saves remain local.':path==='/not-found'?'Page not found.':'Guest-first browser cultivation. Go to Play to start locally.'));
+  }else if(path==='/account'){mountAccountPanel({document,main,runtime,authenticate,storage,fetchImpl});}else main.append(el('p',path==='/account'?'Account and wallet remain optional and are not activated in R06.2.':path==='/settings'?'Connected endpoints require operator configuration. Guest saves remain local.':path==='/not-found'?'Page not found.':'Guest-first browser cultivation. Go to Play to start locally.'));
   const status=el('output',runtime.mode==='offline'?'Network: offline / not configured':'Network: checking');status.id='network-status';status.setAttribute('aria-live','polite');main.append(status);
   root.append(head,nav,main,el('footer','High Country — guest local gameplay (R06.2)'));
   if(runtime.mode==='connected')detectHighCountryNetwork(runtime,{fetchImpl}).then(v=>{status.textContent='Network: '+v.status;});

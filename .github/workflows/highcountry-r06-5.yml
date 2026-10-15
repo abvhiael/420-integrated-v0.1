@@ -25,6 +25,8 @@ jobs:
           node-version: '22'
       - name: Exact SHA
         run: test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+      - name: Preflight accumulated diff integrity
+        run: git diff --check eeaa4e593e8f5f16e2bc566b20ddbe04576589c1 HEAD
       - name: Targeted lifecycle, wallet, market and guest regression
         run: node --test apps/highcountry-web/test/*.test.mjs
       - name: Source syntax

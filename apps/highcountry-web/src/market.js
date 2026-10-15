@@ -18,8 +18,9 @@ export function createHighCountryMarketConsumer420({apiUrl,authenticate,assertWa
   return data.result;
  }
  return Object.freeze({
-  list:({operation,listing,asset,quantity,price,expiresAt}={})=>{
-   if(![operation,listing,asset].every(opaque)||!pos(quantity)||!pos(price)||
+  list:(input={})=>{
+   const {operation,listing,asset,quantity,price,expiresAt}=input;
+   if(Object.keys(input).sort().join(',')!=='asset,expiresAt,listing,operation,price,quantity'||![operation,listing,asset].every(opaque)||!pos(quantity)||!pos(price)||
     !Number.isSafeInteger(expiresAt)||expiresAt<=Date.now())fail('market-input-invalid');
    return submit('/market/list',{operation,listing,asset,quantity,price,expiresAt});
   },
@@ -28,8 +29,9 @@ export function createHighCountryMarketConsumer420({apiUrl,authenticate,assertWa
    if(Object.keys(input).sort().join(',')!=='listing,operation,transferOperation'||![operation,listing,transferOperation].every(opaque))fail('market-input-invalid');
    return submit('/market/prepare',{operation,listing,transferOperation});
   },
-  claimReward:({source,proof}={})=>{
-   if(!opaque(source)||!proof||typeof proof!=='object'||Array.isArray(proof)||
+  claimReward:(input={})=>{
+   const {source,proof}=input;
+   if(Object.keys(input).sort().join(',')!=='proof,source'||!opaque(source)||!proof||typeof proof!=='object'||Array.isArray(proof)||
      Object.keys(proof).sort().join(',')!=='payload,signature'||
      !['payload','signature'].every(k=>typeof proof[k]==='string'&&proof[k].length>0&&proof[k].length<=8192))
     fail('market-reward-proof-invalid');

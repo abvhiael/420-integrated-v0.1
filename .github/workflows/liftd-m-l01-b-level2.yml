@@ -1,0 +1,105 @@
+name: LIFTd M-L01-B Level 2
+on:
+  push:
+    branches: ['build/liftd-l01-1-foundation']
+    paths:
+      - 'rideshare/**'
+      - 'docs/rideshare/**'
+      - '.github/workflows/liftd-m-l01-b-level2.yml'
+  pull_request:
+    paths:
+      - 'rideshare/**'
+      - 'docs/rideshare/**'
+      - '.github/workflows/liftd-m-l01-b-level2.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: liftd-m-l01-b-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  integration:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: liftd_qualification
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres -d liftd_qualification"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      LIFTD_DATABASE_URL: postgres://postgres:postgres@127.0.0.1:5432/liftd_qualification
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Assert implementation SHA
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Locked install and syntax
+        run: |
+          npm ci --prefix rideshare --ignore-scripts
+          for file in rideshare/src/{trip,service,auth,safety,http,postgres-store,dispatch,quotes,compensation,payments,payment-protocol,pay-authority,location}.mjs; do node --check "$file"; done
+          node rideshare/scripts/verify-foundation.mjs
+          git diff --check
+      - name: Native Location bridge/provider/privacy consumers
+        run: go test ./rideshare/locationbridge ./location/providers ./location/privacy
+      - name: Retained domain and security tests
+        run: |
+          mkdir -p liftd-m-l01-b-evidence
+          set -o pipefail
+          npm test --prefix rideshare | tee liftd-m-l01-b-evidence/domain-tests.txt
+      - name: Independent PostgreSQL dispatch adversarial tests
+        run: |
+          set -o pipefail
+          node --test --test-reporter=tap rideshare/test/postgres/dispatch.test.mjs | tee liftd-m-l01-b-evidence/dispatch.tap
+      - name: Immutable quote/consent/viability and cancellation tests
+        run: |
+          set -o pipefail
+          node --test --test-reporter=tap rideshare/test/postgres/quotes.test.mjs | tee liftd-m-l01-b-evidence/quotes.tap
+      - name: Canonical Wallet SDK and scoped Pay consumer
+        run: |
+          npm ci --prefix packages/420-sdk --ignore-scripts
+          npm run build --prefix packages/420-sdk
+          set -o pipefail
+          node --test --test-reporter=tap packages/420-sdk/test/wallet-sdk.test.mjs rideshare/test/sdk/payment-wallet.test.mjs | tee liftd-m-l01-b-evidence/wallet.tap
+      - name: Actual compensation, finality, refunds, payout reservations
+        run: |
+          set -o pipefail
+          node --test --test-reporter=tap rideshare/test/postgres/payments.test.mjs | tee liftd-m-l01-b-evidence/payments.tap
+      - name: Safety incidents, scope, active-trip terminality and HTTP
+        run: |
+          set -o pipefail
+          node --test --test-reporter=tap rideshare/test/postgres/safety.test.mjs | tee liftd-m-l01-b-evidence/safety.tap
+      - name: Cross-component durable ledger checkpoint
+        run: node rideshare/test/postgres/database-restart.mjs before liftd-m-l01-b-evidence/database-checkpoint.json
+      - name: Kill and restart PostgreSQL for recovery
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+        run: |
+          docker kill --signal=KILL "$POSTGRES_CONTAINER"
+          docker start "$POSTGRES_CONTAINER"
+      - name: Verify independent-process ledger/history recovery
+        run: node rideshare/test/postgres/database-restart.mjs after liftd-m-l01-b-evidence/database-checkpoint.json
+      - name: Record exact-SHA milestone manifest
+        run: |
+          git rev-parse HEAD > liftd-m-l01-b-evidence/implementation-sha.txt
+          git diff --check
+      - uses: actions/upload-artifact@v4
+        with:
+          name: liftd-m-l01-b-${{ github.event.pull_request.head.sha || github.sha }}
+          path: liftd-m-l01-b-evidence/
+          if-no-files-found: error

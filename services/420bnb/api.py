@@ -355,7 +355,7 @@ def ready():
         # A database outage or connection exhaustion is not a ready API.
         # Never leak DSNs, SQL statements, hostnames or credentials to probes.
         raise HTTPException(503,"DATABASE_UNAVAILABLE") from None
-    return {"status":"ready","transactions_enabled":False,"schema_version":29}
+    return {"status":"ready","transactions_enabled":False,"schema_version":30}
 
 
 class GuestMessageInput(BaseModel):

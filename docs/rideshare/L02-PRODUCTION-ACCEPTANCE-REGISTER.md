@@ -55,3 +55,11 @@ Owner: independent accessibility QA with actual representative devices/assistive
 A future certificate must include: gate identifier; real environment and issuer/operator identity; deployed implementation/config digests; independent test results with dates, negative/security paths and evidence links; reviewer name/role and signed disposition; exceptions with owners and deadlines; explicit PASS/FAIL status; expiry/revalidation triggers; no passwords, tokens, raw ID documents or personal health/location details.
 
 **Operational release rule:** Neither a production claim nor driver dispatch, payment capture or a public booking experience may be enabled while any applicable gate remains unaccepted. M-L02-A code Level 2 and L02.5 Level 1 certification do not alter these statuses. External/testnet work remains subject to its canonical phase roadmap and the separately authorized owner signoffs.
+
+## Testnet work transfer (2026-10-14)
+
+The five external/deployed acceptance workstreams are now scheduled in the [LIFTd Testnet Roadmap](LIFTD-TESTNET-ROADMAP.md): **LIFTd-TN-ID**, **LIFTd-TN-ELIG**, **LIFTd-TN-VAULT**, **LIFTd-TN-MSG**, **LIFTd-TN-A11Y**. Transfer means **PENDING — DEPLOYED/INDEPENDENT EVIDENCE**, never PASS. Any prerequisite implementable without deployed services (trust and verification contracts, default-deny behavior, revision/attestation checks, static accessibility regressions) remains ordinary L02 implementation/remediation work. The independent live testnet exercises, external approvals, representative device testing and reviewer signatures move into the testnet execution queue.
+
+A testnet is not a licensing authority: the actual Vancouver passenger-transport operator, vehicle, driver and insurance approvals remain a distinct external production/legal gate even after technical LIFTd-TN-ELIG success. Independent accessibility acceptance requires a deployed representative UI and actual assistive technology; it need not depend on a blockchain testnet but is tracked here for coordinated release readiness.
+
+No release or availability status may transition to live based on this documentation transfer.

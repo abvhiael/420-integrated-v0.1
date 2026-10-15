@@ -10,7 +10,7 @@ from fastapi import FastAPI, Header, HTTPException
 import discovery_transport as transport
 from authority import verify_authority
 
-def create_consumer_app(consumer, connect):
+def create_consumer_app(consumer, connect, *, receipt_signer=None):
     if consumer not in transport.CONSUMERS or not callable(connect):
         raise ValueError("CONSUMER_RUNTIME_INVALID")
     app=FastAPI(title="420BnB "+consumer+" isolated consumer",version="1.0")
@@ -30,8 +30,14 @@ def create_consumer_app(consumer, connect):
         with connect() as conn:
             result=transport.accept_repository_consumer(conn,consumer,body,
                 authorize=lambda c,a:c==consumer and a=="discovery-accept")
-        # Response occurs only after context-manager commit.
-        return result
+        # A separately approved signer is required for network acceptance.
+        # Never sign until after the consumer transaction has committed.
+        if not callable(receipt_signer):
+            raise HTTPException(503,"CONSUMER_RECEIPT_SIGNER_UNAVAILABLE")
+        signed=receipt_signer(consumer,body)
+        if not isinstance(signed,str) or not signed or len(signed)>8192:
+            raise HTTPException(503,"CONSUMER_RECEIPT_SIGNING_FAILED")
+        return dict(result,receipt_proof=signed)
     return app
 
 def main():

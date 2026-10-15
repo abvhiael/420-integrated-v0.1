@@ -4,6 +4,10 @@ on:
     paths:
       - 'rideshare/web/driver-availability-**'
       - 'rideshare/web/app.mjs'
+      - 'rideshare/src/**'
+      - 'rideshare/test/postgres/driver-offers.test.mjs'
+      - 'rideshare/test/postgres/dispatch-fixture.mjs'
+      - 'rideshare/migrations/009_driver_offers.sql'
       - '.github/workflows/liftd-l02-7-level1.yml'
   push:
     branches: ['build/liftd-l02-7-driver-availability-offers']
@@ -17,7 +21,20 @@ permissions:
 jobs:
   driver-offers:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: liftd_qualification
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres -d liftd_qualification"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      LIFTD_DATABASE_URL: postgres://postgres:postgres@127.0.0.1:5432/liftd_qualification
     steps:
       - uses: actions/checkout@v4
         with:
@@ -29,7 +46,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Install locked app dependencies
+        run: npm ci --prefix rideshare --ignore-scripts
       - name: Driver availability, expiry, replay and retained browser tests
         run: |
           for f in rideshare/web/driver-availability-{policy,controller,api,view}.mjs; do node --check "$f"; done
-          cd rideshare/web && npm run check
+          for f in rideshare/src/{driver-offers,dispatch,auth,trip,service,http,postgres-store}.mjs; do node --check "$f"; done
+          npm run check --prefix rideshare/web
+          node --test rideshare/test/postgres/driver-offers.test.mjs

@@ -35,5 +35,18 @@ export function buildReadinessServer({pool}={}){
 if(process.argv[1]&&new URL(import.meta.url).pathname===process.argv[1]){
  const port=Number(process.env.PORT??10000);
  if(!Number.isInteger(port)||port<1||port>65535)throw Error('INVALID_PORT');
- buildReadinessServer().listen(port,'0.0.0.0');
+ if(!process.env.DATABASE_URL)throw Error('LIFTD_DATABASE_URL_REQUIRED');
+ const pool=createDatabasePool({connectionString:process.env.DATABASE_URL,ssl:{rejectUnauthorized:true}});
+ try{
+   await checkSchema(pool);
+   const verified=(await pool.query("SELECT current_database() AS database, count(*)::int AS migration_count FROM liftd.migrations")).rows[0];
+   if(verified?.database!=='liftd_testnet'||verified.migration_count!==9)throw Error('LIFTD_SCHEMA_INVALID');
+   console.info('LIFTD_NEON_SCHEMA_PASS migrations=9 db=liftd_testnet');
+ }catch{
+   console.error('LIFTD_NEON_SCHEMA_FAILED');
+   await pool.end();
+   process.exitCode=1;
+   throw Error('LIFTD_DATABASE_UNAVAILABLE');
+ }
+ buildReadinessServer({pool}).listen(port,'0.0.0.0');
 }

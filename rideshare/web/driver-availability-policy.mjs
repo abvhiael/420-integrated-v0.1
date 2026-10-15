@@ -3,7 +3,7 @@ export class DriverOfferError extends Error { constructor(code){super(code);this
 const fail=code=>{throw new DriverOfferError(code);};
 const id=x=>typeof x==='string'&&/^[A-Za-z0-9_-]{1,128}$/.test(x);
 export function availability(row,session,now){
- if(!row||!id(row.driverId)||!id(row.vehicleId)||!Number.isSafeInteger(row.revision)||row.revision<0||
+ if(!row||!id(row.driverId)||!(id(row.vehicleId)||(row.vehicleId===null&&row.revision===0&&row.online===false))||!Number.isSafeInteger(row.revision)||row.revision<0||
  typeof row.online!=='boolean'||!Number.isSafeInteger(row.expiresAt)||!session||
  session.status!=='authenticated'||!session.roles?.includes('driver')||row.driverId!==session.subject||
  !Number.isSafeInteger(now)||now<0)fail('INVALID_AVAILABILITY');

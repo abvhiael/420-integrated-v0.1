@@ -70,10 +70,10 @@ class NetworkDiscoveryDelivery:
                 receipt.get("transactional_acceptance") is not True or
                 receipt.get("external_acceptance") is not False):
                 raise ValueError()
-            # Repository-controlled fixture acknowledges post-commit; not an
-            # independently signed real provider receipt.
-            return transport._digest({"event_id":event_id,"consumer":self.consumer,
-                                     "transport_digest":body["transport_digest"]})
+            # Do not acknowledge the worker based on HTTP 201 or an unsigned body.
+            # The independent consumer signs only after its database commit.
+            return transport.verify_receipt(receipt.get("receipt_proof"),
+                                            self.consumer,body)
         except (ValueError,KeyError,TypeError,HTTPException,urllib.error.URLError,
                 OSError,TimeoutError,json.JSONDecodeError) as exc:
             raise TransportUnavailable("CONSUMER_DELIVERY_UNAVAILABLE") from None

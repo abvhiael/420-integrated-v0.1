@@ -98,7 +98,7 @@ export function createDispatchAdapter({pool,authenticator,eligibilityAdapter,ava
       if(action==='arrive'&&(!['PENDING','ACCEPTED'].includes(lease.state)||Number(lease.expires_at)<=time()))fail('ASSIGNMENT_EXPIRED');
       if(action==='offer_reject'&&(lease.state!=='PENDING'||Number(lease.expires_at)<=time()))fail('OFFER_NOT_PENDING');
       if(action==='start'&&lease.state!=='ACCEPTED')fail('ASSIGNMENT_REQUIRED');
-      if(action==='expire'&&(trip.state!=='ASSIGNED'||lease.state!=='PENDING'||Number(lease.expires_at)>time()))fail('ASSIGNMENT_NOT_EXPIRED');
+      if(action==='expire'&&(trip.state!=='ASSIGNED'||!['PENDING','ACCEPTED'].includes(lease.state)||Number(lease.expires_at)>time()))fail('ASSIGNMENT_NOT_EXPIRED');
       return lease;
     },
     async check(client,trip,action,selection,lease) {

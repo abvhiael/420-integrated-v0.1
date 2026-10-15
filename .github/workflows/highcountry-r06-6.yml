@@ -9,6 +9,7 @@ on:
       - 'services/420-gaming-player-profile/migrations/007_highcountry_r066_routine.up.sql'
       - 'services/420-gaming-player-profile/scripts/migrate-r066.mjs'
       - '.github/workflows/highcountry-r06-6.yml'
+      - 'docs/highcountry/qualification/R06.6-IN-PROGRESS.md'
       - 'apps/highcountry-web/scripts/build.mjs'
       - 'apps/highcountry-web/src/account.js'
   workflow_dispatch:

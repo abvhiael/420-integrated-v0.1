@@ -96,3 +96,11 @@ def manual_replay(conn,actor,proof,event_id,reason,*,consumer=None):
     except outbox.DeliveryError as exc:
         raise HTTPException(409,"REPLAY_NOT_ELIGIBLE") from None
     return {"replayed":True,"event_id":str(target),"consumer":consumer,"execution":"queued-only"}
+
+
+def audit_read(conn,actor,action):
+    if action not in ("health","dead_letters"):
+        raise HTTPException(403,"OPERATION_FORBIDDEN")
+    conn.execute("""INSERT INTO bnb_audit(id,subject,action,resource_id)
+        VALUES(gen_random_uuid(),%s,%s,NULL)""",
+        (actor,"bnb.ops.read."+action))

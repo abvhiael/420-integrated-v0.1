@@ -36,6 +36,13 @@ export function runtimeHttpServer(runtime,{origin}){
  return createServer(async(req,res)=>{
   res.setHeader('content-type','application/json');res.setHeader('cache-control','no-store');
   res.setHeader('x-content-type-options','nosniff');
+  if(req.headers.origin===origin){
+   res.setHeader('access-control-allow-origin',origin);
+   res.setHeader('access-control-allow-methods','POST,OPTIONS');
+   res.setHeader('access-control-allow-headers','authorization,content-type');
+   res.setHeader('vary','Origin');
+  }
+  if(req.method==='OPTIONS'&&req.headers.origin===origin){res.statusCode=204;return res.end();}
   try{
    if(req.method!=='POST'||(req.headers.origin&&req.headers.origin!==origin))throw new SettlementError('request denied');
    const token=req.headers.authorization?.match(/^Bearer (.+)$/)?.[1];

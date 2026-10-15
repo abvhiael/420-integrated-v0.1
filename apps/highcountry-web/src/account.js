@@ -1,5 +1,6 @@
 // R06.3 account panel: operator supplies an issuer-backed authenticator, never a wallet or guest account string.
 import {createCloudClient} from './cloud.js';
+import {createHighCountryMarketConsumer420} from './market.js';
 import {createOptionalWallet420} from './wallet.js';
 import {loadGuest} from './guest.js';
 export function mountAccountPanel({document,main,runtime,authenticate,storage=globalThis.localStorage,fetchImpl=fetch,localAuth=null,walletProvider=null}){
@@ -96,6 +97,30 @@ export function mountAccountPanel({document,main,runtime,authenticate,storage=gl
     }catch(e){walletStatus.textContent=e.message;}
    });
    paragraph('Canonical proof checks require the approved deployed R05.7 verifier, official code-hash manifests, and independent finalized RPC witness. Market listing/trading remains disabled until its separately authorized R04 settlement API is integrated; no local guest achievements can be promoted.');
+   // R04 operator-owned canonical settlement; these are user-authorized intents only.
+   const marketConsumer=createHighCountryMarketConsumer420({
+    apiUrl:runtime.apiUrl,authenticate,assertWalletNetwork:async()=>{if(!optional.getSelected())throw Error('wallet-not-connected');
+      const chain=await walletProvider.request({method:'eth_chainId'});
+      if(typeof chain!=='string'||BigInt(chain)!==BigInt(runtime.chainId))throw Error('wallet-wrong-network');},fetchImpl});
+   const op=field('Unique market operation ID'),listing=field('Approved canonical listing ID');
+   const asset=field('Canonical escrow asset ID'),qty=field('Quantity'),price=field('Price in BUDS');
+   const expiry=field('Listing expiry (epoch milliseconds)'),transfer=field('Exact canonical transfer operation ID');
+   const source=field('Approved reward source'),payload=field('Signed reward payload (base64url)'),signature=field('Signed reward signature (base64url)');
+   const marketResult=paragraph('Market intents require independently admitted canonical inventory and operator settlement. Pending is not finalized.');
+   marketResult.setAttribute('aria-live','polite');
+   let marketBusy=false;
+   const action=fn=>async()=>{if(marketBusy){marketResult.textContent='An action is already in progress.';return;}
+    marketBusy=true;try{marketResult.textContent='Submitting authenticated intent…';
+     const result=await fn();marketResult.textContent='Service accepted intent: '+(result?.status??'received')+
+      '. Do not assume finalized transfer or payout.';}catch(e){marketResult.textContent='Denied: '+e.message;}finally{marketBusy=false;}};
+   button('Create canonical escrow-backed listing',action(()=>marketConsumer.list({
+    operation:op.value,listing:listing.value,asset:asset.value,quantity:Number(qty.value),
+    price:Number(price.value),expiresAt:Number(expiry.value)})));
+   button('Prepare buyer settlement intent (reserves BUDS)',action(()=>marketConsumer.prepare({
+    operation:op.value,listing:listing.value,transferOperation:transfer.value})));
+   button('Submit independently signed reward proof',action(()=>marketConsumer.claimReward({
+    source:source.value,proof:{payload:payload.value,signature:signature.value}})));
+   paragraph('No instant market purchase, transfer submission, escrow finalize/refund or owner-supplied payout is available in this browser. Canonical operator worker and finalized receipts control settlement.');
    button('Unlink wallet',async()=>{try{await optional.unlink();walletStatus.textContent='Unlinked. Guest play preserved.';}catch(e){walletStatus.textContent=e.message;}});
    button('Disconnect wallet locally',()=>{optional.disconnect();walletStatus.textContent='Disconnected. Guest play preserved.';});
    paragraph('Entitlements, holdings, market, rewards and cross-game records require separately authenticated and finalized authoritative services; unavailable features are disabled, never simulated.');

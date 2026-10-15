@@ -1,0 +1,99 @@
+{
+  "step": "C01.2",
+  "status": "COMPLETE",
+  "qualification_level": 1,
+  "implementation_sha": "2fba2d7de9c2362fb9cba22de57ee97b0a48ef8b",
+  "base_sha": "c5a4f220d1fbda01f707d359aa9bb32921a138b1",
+  "parent_sha": "81955ad05e7c99e0e0fb4cf39a5960bd4a1dc553",
+  "requirements": {
+    "actors": 9,
+    "journeys": 24,
+    "excluded_domains": 14,
+    "initial_scope": "CA/BC/Vancouver candidate non-medical delivery and reviewed travel guidance",
+    "runtime_authorization": "NOT_IMPLEMENTED",
+    "release": "INFRASTRUCTURE_ONLY"
+  },
+  "level1": {
+    "result": "PASS",
+    "regression_tests": 31,
+    "local_result": {
+      "step": "C01.2",
+      "qualification_level": 1,
+      "implementation_sha": "2fba2d7de9c2362fb9cba22de57ee97b0a48ef8b",
+      "base_sha": "c5a4f220d1fbda01f707d359aa9bb32921a138b1",
+      "parent_sha": "81955ad05e7c99e0e0fb4cf39a5960bd4a1dc553",
+      "result": "PASS",
+      "actors": 9,
+      "journeys": 24,
+      "exclusions": 14,
+      "retained_C01.1": "UNCHANGED_QUALIFIED_EVIDENCE",
+      "runtime_qualification": "NOT_APPLICABLE_PRODUCT_SCOPE_STEP"
+    },
+    "runs": [
+      {
+        "id": 38024825647,
+        "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38024825647",
+        "event": "pull_request",
+        "conclusion": "success",
+        "head_sha": "2fba2d7de9c2362fb9cba22de57ee97b0a48ef8b",
+        "job_id": 114133335047
+      },
+      {
+        "id": 38024823058,
+        "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38024823058",
+        "event": "push",
+        "conclusion": "success",
+        "head_sha": "2fba2d7de9c2362fb9cba22de57ee97b0a48ef8b",
+        "job_id": 114133326737
+      }
+    ],
+    "artifact": {
+      "id": 11659277299,
+      "node_id": "MDg6QXJ0aWZhY3QxMTY1OTI3NzI5OQ==",
+      "name": "compliance-c01-level1-2fba2d7de9c2362fb9cba22de57ee97b0a48ef8b",
+      "size_in_bytes": 463,
+      "url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/artifacts/11659277299",
+      "archive_download_url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/artifacts/11659277299/zip",
+      "expired": false,
+      "digest": "sha256:03b0119ea9cb7a1a0f8d3cc41ab39a1c9fb35a345c354d59c91af671575706e7",
+      "created_at": "2026-10-10T04:39:35Z",
+      "updated_at": "2026-10-10T04:39:35Z",
+      "expires_at": "2026-10-17T04:39:27Z",
+      "workflow_run": {
+        "id": 38024825647,
+        "repository_id": 1345598861,
+        "head_repository_id": 1345598861,
+        "head_branch": "audit/420compliance-c01-1-inventory-20261009",
+        "head_sha": "2fba2d7de9c2362fb9cba22de57ee97b0a48ef8b"
+      }
+    }
+  },
+  "retained_previous_qualification": "C01.1 sources, inventory, tests and evidence unchanged; all 52 canonical source hashes verified",
+  "level2": {
+    "status": "NOT_DUE",
+    "milestone": "C01.8"
+  },
+  "level3": {
+    "status": "DEFERRED",
+    "phase_closeout": "C08.5"
+  },
+  "external_acceptance": "C09/C10 and DOOBr acceptance remain future gates; software qualification does not approve legal interpretation",
+  "unrelated_ci": {
+    "docs": "Skipped; not counted as pass",
+    "oracle": "Unfiltered baseline PR workflow auto-triggered; not required C01.2 evidence",
+    "baseline_yaml_failures": [
+      {
+        "run_id": 38024822289,
+        "path": ".github/workflows/governance-deployment-audit.yml"
+      },
+      {
+        "run_id": 38024821849,
+        "path": ".github/workflows/420hz-gca.yml"
+      }
+    ],
+    "baseline_bytes_unchanged": true
+  },
+  "evidence_commit_policy": "Only this record is appended after exact implementation-SHA qualification; it inherits qualification without a redundant suite",
+  "blockers": [],
+  "next_step": "C01.3 — Establish source/authority taxonomy, legal review ownership and BC/Vancouver questions requiring qualified interpretation. Separate legal approval from governance and software qualification."
+}

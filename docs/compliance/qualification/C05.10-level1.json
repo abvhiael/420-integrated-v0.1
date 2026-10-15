@@ -1,0 +1,40 @@
+{
+  "step": "C05.10",
+  "canonical": "Pay/Wallet integration boundary: decision references bind to permitted workflows; Compliance does not sign payments, grant custody or independently refund.",
+  "qualification_level": 1,
+  "status": "COMPLETE_LEVEL1_PASS_EXTERNAL_ACCEPTANCE_DEFERRED",
+  "implementation_sha": "6bcef0fec897204e9b332567eb584227c6c9c908",
+  "base_sha": "c5a4f220d1fbda01f707d359aa9bb32921a138b1",
+  "branch": "audit/420compliance-c01-1-inventory-20261009",
+  "pr": 602,
+  "files": [
+    "services/complianceauth/c05_10_pay_wallet_boundary.go",
+    "services/complianceauth/c05_10_pay_wallet_boundary_test.go",
+    ".github/workflows/420compliance-c01-level1.yml",
+    "docs/compliance/C05.10-PAY-WALLET-BOUNDARY.md"
+  ],
+  "checks": [
+    "TestC0510PayWalletBoundary -race",
+    "retained Compliance Level 1 checks"
+  ],
+  "limitations": [
+    "Injected authority not live Pay/Wallet provider",
+    "Durable cross-instance receipt consumption and actual Pay/Wallet executor integration require later testnet acceptance"
+  ],
+  "deferred": [
+    "C09/C10 real Pay and Wallet workflow authorization and consumer integration",
+    "C09/C10 independent refund and custody decisions"
+  ],
+  "level2": "C05.12",
+  "level3": "C08.5",
+  "next_canonical": "C05.11 — Optional on-chain publication/attestation adapter only after demonstrated need; reuse Registry/Verify/governance capabilities before considering new contracts.",
+  "ci": {
+    "status": "PASS",
+    "run_id": 38208903016,
+    "job_id": 114678447940,
+    "conclusion": "success",
+    "successful_steps": 69,
+    "failed_steps": 0,
+    "exact_sha": true
+  }
+}

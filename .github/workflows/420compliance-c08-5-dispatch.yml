@@ -1,0 +1,46 @@
+name: 420Compliance C08.5 exact-head canonical dispatch
+on:
+  push:
+    branches:
+      - audit/420compliance-c08-4-main-candidate-20261014
+    paths:
+      - docs/compliance/qualification/C08.5-candidate-inputs.json
+permissions:
+  contents: read
+  actions: write
+concurrency:
+  group: compliance-c085-dispatch-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  dispatch-canonical:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Assert frozen corrected branch is still at the triggering SHA
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EXPECTED_SHA: ${{ github.sha }}
+          REPOSITORY: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          current="$(gh api "repos/$REPOSITORY/git/ref/heads/audit/420compliance-c08-4-main-candidate-20261014" --jq '.object.sha')"
+          test "$current" = "$EXPECTED_SHA"
+      - name: Dispatch four default-registered canonical qualification workflows
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          ref='audit/420compliance-c08-4-main-candidate-20261014'
+          for workflow in \
+            contracts-foundry.yml \
+            genesis-address-authority.yml \
+            qualification.yml \
+            docs-qualify.yml
+          do
+            gh workflow run "$workflow" --repo "$REPOSITORY" --ref "$ref"
+            echo "Dispatched $workflow at $ref"
+          done
+          echo 'Compliance retained-phase workflow runs via this same manifest push on the qualification branch.'

@@ -1,0 +1,143 @@
+name: 420Compliance C08.4 branch freeze Level 1
+on:
+  push:
+    branches: ['audit/420compliance-*']
+    paths:
+      - 'services/complianceauth/**'
+      - 'docs/compliance/C07.6-*'
+      - 'docs/compliance/C07.7-*'
+      - 'docs/compliance/C07.9-*'
+      - 'docs/compliance/C07.10-*'
+      - 'docs/compliance/C08.1-*'
+      - 'docs/compliance/C08.2-*'
+      - 'docs/compliance/C08.3-*'
+      - 'docs/compliance/qualification/C08.4-*'
+      - 'scripts/verify-compliance-c08-4.py'
+      - 'docs/compliance/qualification/C08.3-*'
+      - 'scripts/verify-compliance-c08-3.py'
+      - 'scripts/verify-compliance-c08-2.py'
+      - 'scripts/verify-compliance-c08-1.py'
+      - '.github/workflows/420compliance-c07-10-level2.yml'
+      - 'scripts/verify-compliance-c07-9.py'
+      - 'docs/compliance/C08.3-*'
+      - '.github/workflows/420compliance-c01-level1.yml'
+      - 'go.mod'
+      - 'go.sum'
+      - 'scripts/verify-compliance-c07-3.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: compliance-c084-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  privacy-retention-level1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16@sha256:ca0bd484cb98bf4b24eb1010e73fb3fcbd6714d240fbc1a10eea5b7dbecb641d
+        env:
+          POSTGRES_USER: compliance_test
+          POSTGRES_PASSWORD: compliance_test
+          POSTGRES_DB: compliance_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U compliance_test -d compliance_test"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    env:
+      GOTOOLCHAIN: local
+      GOSUMDB: sum.golang.org
+      GOPROXY: https://proxy.golang.org
+      GOFLAGS: -mod=readonly
+      EXPECTED_SHA: ${{ github.sha }}
+      COMPLIANCE_POSTGRES_TEST_DSN: 'postgres://compliance_test:compliance_test@localhost:5432/compliance_test?sslmode=verify-full&sslrootcert=/tmp/c076-ca.crt&connect_timeout=5'
+    steps:
+      - name: Checkout exact C08.4 branch freeze candidate
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Assert exact implementation SHA
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - name: Install checksummed approved Go toolchain
+        run: |
+          curl --fail --location --silent --show-error https://go.dev/dl/go1.27.2.linux-amd64.tar.gz --output /tmp/c076-go.tar.gz
+          printf '%s  %s\n' 'ecbadb99091a3f46e31f5f934b068b1864eafa7995211b39eaddf76996045fe5' '/tmp/c076-go.tar.gz' | sha256sum -c -
+          mkdir /tmp/c076-toolchain
+          tar -xzf /tmp/c076-go.tar.gz -C /tmp/c076-toolchain
+          echo /tmp/c076-toolchain/go/bin >> "$GITHUB_PATH"
+      - name: Configure isolated PostgreSQL with verified TLS
+        env:
+          PG_SERVICE: ${{ job.services.postgres.id }}
+        run: |
+          openssl req -x509 -newkey rsa:2048 -nodes -keyout /tmp/c076-server.key -out /tmp/c076-server.crt -days 2 -subj '/CN=localhost' -addext 'subjectAltName=DNS:localhost,IP:127.0.0.1'
+          cp /tmp/c076-server.crt /tmp/c076-ca.crt
+          docker cp /tmp/c076-server.key "$PG_SERVICE:/var/lib/postgresql/data/server.key"
+          docker cp /tmp/c076-server.crt "$PG_SERVICE:/var/lib/postgresql/data/server.crt"
+          docker exec --user root "$PG_SERVICE" chown postgres:postgres /var/lib/postgresql/data/server.key /var/lib/postgresql/data/server.crt
+          docker exec --user root "$PG_SERVICE" chmod 600 /var/lib/postgresql/data/server.key
+          docker exec --user postgres "$PG_SERVICE" psql -U compliance_test -d compliance_test -c "ALTER SYSTEM SET ssl = 'on';"
+          docker exec --user postgres "$PG_SERVICE" psql -U compliance_test -d compliance_test -c "SELECT pg_reload_conf();"
+      - name: Immutable inputs module integrity and vulnerability review
+        shell: bash
+        run: |
+          go version | tee /tmp/compliance-c076-toolchain.log
+          test "$(go env GOVERSION)" = "go1.27.2"
+          python3 scripts/verify-compliance-c07-3.py --self-test
+          go mod download
+          go mod verify | tee /tmp/compliance-c076-module-verification.log
+          go list -m -json all > /tmp/compliance-c076-modules.json
+          GOBIN=/tmp/c076-bin go install golang.org/x/vuln/cmd/govulncheck@v1.9.0
+          /tmp/c076-bin/govulncheck -json -test ./services/complianceauth > /tmp/compliance-c076-vulnerability.json
+          python3 scripts/verify-compliance-c07-3.py /tmp/compliance-c076-vulnerability.json
+      - name: Verify C08.4 pinned code policy evaluator and configuration blobs
+        run: python3 scripts/verify-compliance-c08-4.py
+      - name: Verify C08.3 external acceptance and original evidence boundaries
+        run: python3 scripts/verify-compliance-c08-3.py
+      - name: Verify C08.2 API guides legal coverage and release manifest
+        run: python3 scripts/verify-compliance-c08-2.py
+      - name: Verify C08.1 canonical evidence inventory and declared exceptions
+        run: python3 scripts/verify-compliance-c08-1.py
+      - name: Verify canonical C07.9 threat/evidence intake and no false external review
+        run: python3 scripts/verify-compliance-c07-9.py
+      - name: Static security and affected package compilation
+        run: go vet ./services/complianceauth
+      - name: C07.10 full retained Compliance Level 2 integration and incident regressions
+        shell: bash
+        run: |
+          go test -race ./services/complianceauth -count=1 -v 2>&1 | tee /tmp/compliance-c076-tests.log
+          python3 - <<'PY'
+          from pathlib import Path
+          log=Path('/tmp/compliance-c076-tests.log').read_text()
+          assert '--- SKIP:' not in log, 'required database test skipped'
+          for test in ['TestC0512IntegrationLevel2Adversarial','TestC078IncidentDrills','TestC077AlertDeliveryAndUnavailable','TestC077InventoryFreshnessAndCoverage','TestC077OperationalCollectorPostgreSQL','TestC077CompleteMonitoringAndAdversarial','TestC077PostgreSQLMonotonicMonitoring','TestC077EvaluatorMonitoringFailureAndDenial','TestC076DecisionGatewayRecoveryGate','TestC076ExternalPostgreSQLMonotonicJournal','TestC076ExternalAuthoritySchemaAndFailClosed','TestC076AuthenticatedAuthoritySignatureAndAtomicRelease','TestC076OrchestratorFailClosed','TestC076RestoreRejectsStaleRevokedPolicyAndPrivacyReplay','TestC075SignedPolicyAndOwnershipBoundaries','TestC075PostgreSQLRetentionHoldsAndPurge','TestC075CaseLimitedEvidenceAndPostLogRevalidation','TestC075AtomicRollbackAndGrantRevocation','TestC075BoundedDeletionScheduler','TestC075ManagedProductionPrivacy','TestC074HTTPOverloadAndRecovery','TestC074BodyResponseTimeoutAndOutage','TestC074DistributedRateAndCapacity','TestC074QueueBackpressureAndAtomicOutbox','TestC074BoundedSoak','TestC074NetworkPostgreSQLSoak','TestC074ManagedProductionComposition','TestC073SecretBindingFreshnessAndTLS','TestC073ManagedEncryptionRotation','TestC073ManagedSignerRotationAndRevocation','TestC073CertificateRotationAndTimeout','TestC073ManagedProductionComposition','TestC073DatabaseTLSOverridesDenied','TestC072Boundaries','TestC072DurableJobsLeaseFencing','TestC072AtomicActivationOutboxAndHalt','TestC071AuthenticatedEncryptionBoundaries','TestC071PostgreSQLProductionStorage']:
+              assert '--- PASS: '+test+' ' in log, 'required C07.6 acceptance absent: '+test
+          PY
+      - name: Record C08.4 exact-SHA Level 1 result and source manifest
+        run: |
+          python3 - <<'PY'
+          import hashlib,json,os,re
+          from pathlib import Path
+          files=sorted(list(Path('services/complianceauth').glob('*.go'))+list(Path('services/complianceauth/migrations').glob('*.sql'))+[Path('.github/workflows/420compliance-c01-level1.yml'),Path('scripts/verify-compliance-c07-3.py'),Path('scripts/verify-compliance-c07-9.py'),Path('scripts/verify-compliance-c08-1.py'),Path('scripts/verify-compliance-c08-2.py'),Path('scripts/verify-compliance-c08-3.py'),Path('scripts/verify-compliance-c08-4.py'),Path('docs/compliance/C07.9-SECURITY-REVIEW-INTAKE.json'),Path('go.mod'),Path('go.sum')])
+          evidence={'step':'C08.4','qualification_level':1,'status':'BRANCH_FREEZE_LEVEL1_CANDIDATE','implementation_sha':os.environ['EXPECTED_SHA'],'run_id':os.environ['GITHUB_RUN_ID'],'run_attempt':os.environ['GITHUB_RUN_ATTEMPT'],'recovery_checkpoint_adversarial':'PASS','privacy_retention_deletion_holds_case_roles':'PASS','capacity_rate_backpressure_load_soak':'PASS','managed_secret_signing_identity_rotation':'PASS','supply_chain_and_dependency_scan':'PASS','durable_jobs_fencing_atomic_activation_outbox_halt':'PASS','private_storage':'PASS','production_tls':'PASS','migration_atomicity_and_checksums':'PASS','role_bound_tenant_isolation':'PASS','encryption_corruption_and_rotation':'PASS','storage_quota_concurrency':'PASS','retained_affected_database_regressions':'PASS','skipped_required_tests':0,'source_sha256':{str(p):hashlib.sha256(p.read_bytes()).hexdigest() for p in files},'c076_complete':False,'c077_metrics_required':8,'backup_restore_pipeline':'NOT_IMPLEMENTED','restore_traffic_fence':'NOT_IMPLEMENTED','real_PITR':'NOT_RUN','live_production_acceptance':'DEFERRED C09/C10'}
+          log=Path('/tmp/compliance-c076-tests.log').read_text()
+          names=sorted(set(re.findall(r'--- PASS: (Test\S+)',log)))
+          evidence['tests']={'top_level':sum('/' not in n for n in names),'subtests':sum('/' in n for n in names),'passed':names}
+          print(json.dumps({'step':'C08.4','status':'BRANCH_FREEZE_LEVEL1_CANDIDATE','tests':evidence['tests'],'supply_chain_adversarial_cases':7}))
+          Path('/tmp/compliance-c076-level1.json').write_text(json.dumps(evidence,indent=2)+'\n')
+          PY
+      - name: Retain C08.4 exact-SHA evidence
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: compliance-c084-level1-${{ env.EXPECTED_SHA }}
+          path: |
+            /tmp/compliance-c076-level1.json
+            /tmp/compliance-c076-tests.log
+            /tmp/compliance-c073-supply-chain.json
+            /tmp/compliance-c076-vulnerability.json
+            /tmp/compliance-c076-modules.json
+            /tmp/compliance-c076-module-verification.log
+            /tmp/compliance-c076-toolchain.log
+          if-no-files-found: error

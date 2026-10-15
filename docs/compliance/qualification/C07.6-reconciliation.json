@@ -1,0 +1,25 @@
+{
+  "schema": "420compliance-historical-evidence-reconciliation/v1",
+  "step": "C07.6",
+  "canonical_scope": "Disaster recovery with independently authoritative monotonic policy/revocation and privacy checkpoints",
+  "qualification_level": 1,
+  "disposition": "HISTORICAL_STEP_EVIDENCE_INCOMPLETE",
+  "standalone_exact_sha_level1_certificate": "NOT_VERIFIED",
+  "source_document": "docs/compliance/C07.6-DISASTER-RECOVERY.md",
+  "retained_integration": {
+    "milestone": "C07.10",
+    "qualification_level": 2,
+    "implementation_sha": "93d2bd886ae0c40a8fa78e992a908f1f09b9c34a",
+    "run_id": 38509769151,
+    "job_id": 115675566991,
+    "run_url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38509769151",
+    "result": "PASS_FOR_RETAINED_INTEGRATION_SCOPE_ONLY"
+  },
+  "open_findings": [
+    "Independently deployed immutable authority and external anchoring, multi-consumer fence, true WAL PITR, restore/crash races, measured RPO/RTO and standalone step certificate unresolved"
+  ],
+  "production_operational_acceptance": "NOT_CLAIMED",
+  "evidence_policy": "Do not convert retained milestone PASS into historical standalone exact-SHA Level 1 PASS; close only with verified original implementation SHA/run/job/artifact and canonical exit criteria.",
+  "current_phase": "C08.1",
+  "next_step": "C08.2"
+}

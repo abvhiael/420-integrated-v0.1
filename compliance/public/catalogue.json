@@ -1,0 +1,65 @@
+{
+  "schema": "420compliance-public-browser/v1",
+  "rules": [
+    {
+      "id": "federal-product",
+      "jurisdiction": "federal",
+      "topic": "product",
+      "sources": [
+        "FED-ACT",
+        "FED-REG"
+      ],
+      "publication": "NOT_PUBLISHED",
+      "effective_from": null,
+      "effective_until": null,
+      "last_reviewed": null,
+      "history": []
+    },
+    {
+      "id": "bc-delivery",
+      "jurisdiction": "british-columbia",
+      "topic": "delivery",
+      "sources": [
+        "BC-ACT",
+        "BC-LIC-REG",
+        "BC-CTL-REG",
+        "BC-STORE-HANDBOOK",
+        "BC-DELIVERY"
+      ],
+      "publication": "NOT_PUBLISHED",
+      "effective_from": null,
+      "effective_until": null,
+      "last_reviewed": null,
+      "history": []
+    },
+    {
+      "id": "vancouver-business",
+      "jurisdiction": "vancouver",
+      "topic": "business",
+      "sources": [
+        "VAN-LIC",
+        "VAN-APPLY",
+        "VAN-ZONING-AMEND"
+      ],
+      "publication": "NOT_PUBLISHED",
+      "effective_from": null,
+      "effective_until": null,
+      "last_reviewed": null,
+      "history": []
+    },
+    {
+      "id": "bc-travel",
+      "jurisdiction": "british-columbia",
+      "topic": "travel",
+      "sources": [
+        "BC-ACT",
+        "BC-CTL-REG"
+      ],
+      "publication": "NOT_PUBLISHED",
+      "effective_from": null,
+      "effective_until": null,
+      "last_reviewed": null,
+      "history": []
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+name: High Country R06.6 Safe Routine Sessions Level 1
+on:
+  pull_request:
+    paths:
+      - 'apps/highcountry-web/src/routine.js'
+      - 'apps/highcountry-web/test/r066-*'
+      - 'services/420-gaming-player-profile/src/highcountry-r066-*'
+      - 'services/420-gaming-player-profile/test/highcountry-r066-*'
+      - '.github/workflows/highcountry-r06-6.yml'
+      - 'apps/highcountry-web/scripts/build.mjs'
+      - 'apps/highcountry-web/src/account.js'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  routine-policy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Exact SHA and accumulated diff integrity
+        run: test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA" && git diff --check eeaa4e593e8f5f16e2bc566b20ddbe04576589c1 HEAD
+      - name: R06.6 authority and browser adversarial tests
+        run: node --test services/420-gaming-player-profile/test/highcountry-r066-*.test.js apps/highcountry-web/test/r066-*.test.mjs
+      - name: Affected browser and retained auth regressions
+        run: node --test apps/highcountry-web/test/*.test.mjs services/420-gaming-player-profile/test/wallet-link.test.js
+      - name: Syntax and static build
+        run: for file in apps/highcountry-web/src/*.js services/420-gaming-player-profile/src/highcountry-r066-*.js; do node --check "$file"; done; node apps/highcountry-web/scripts/build.mjs
+      - name: Exact SHA close
+        run: test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"

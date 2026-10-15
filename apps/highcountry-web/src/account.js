@@ -1,5 +1,6 @@
 // R06.3 account panel: operator supplies an issuer-backed authenticator, never a wallet or guest account string.
 import {createCloudClient} from './cloud.js';
+import {createHighCountryRoutineClient420} from './routine.js';
 import {createHighCountryTransactionLifecycle420} from './transaction.js';
 import {createHighCountryMarketConsumer420} from './market.js';
 import {createOptionalWallet420} from './wallet.js';
@@ -60,6 +61,42 @@ export function mountAccountPanel({document,main,runtime,authenticate,storage=gl
    status.textContent='Cloud revision restored as new revision '+result.revision+'. Device guest save remains unchanged.';
   }catch(e){report(e);}
  });
+ // Routine capability requires an approved server-issued session. No browser-generated session IDs.
+ const routine=globalThis.highCountryApprovedRoutineSession;
+ if(typeof routine?.current==='function'&&typeof routine?.approvedAction==='function'){
+  const routineStatus=paragraph('Routine session: inactive until independently authorized.');
+  routineStatus.setAttribute('role','status');routineStatus.setAttribute('aria-live','polite');
+  const routineClient=createHighCountryRoutineClient420({apiUrl:runtime.apiUrl,authenticate,fetchImpl,
+   escalate:typeof routine.escalate==='function'?(params)=>routine.escalate(params):undefined});
+  let inFlight=false;
+  button('Run reviewed routine action',async()=>{
+   if(inFlight)return;inFlight=true;routineStatus.textContent='Verifying routine session and request…';
+   try{
+    const grant=await routine.current();const action=await routine.approvedAction();
+    if(!grant||typeof grant.sessionId!=='string'||!action||
+     action.classification!=='routine'||action.value!==0)
+     throw Error('routine-capability-not-approved');
+    const result=await routineClient.invoke({sessionId:grant.sessionId,action:action.name,
+     operation:globalThis.crypto?.randomUUID?.().replaceAll('-','')??'',
+     body:action.body??{}});
+    routineStatus.textContent='Routine action accepted by server: '+String(result?.status??'received')+
+     '. No wallet payment or chain settlement inferred.';
+   }catch(e){routineStatus.textContent='Routine action unavailable or denied: '+e.message;}
+   finally{inFlight=false;}
+  });
+  button('Request reviewed sensitive action (wallet/passkey escalation)',async()=>{
+   if(inFlight)return;inFlight=true;routineStatus.textContent='Sensitive action: explicit escalation required…';
+   try{
+    const grant=await routine.current();const action=await routine.approvedAction({sensitive:true});
+    if(!grant||typeof grant.sessionId!=='string'||action?.classification!=='sensitive')throw Error('sensitive-action-not-approved');
+    const result=await routineClient.invoke({sessionId:grant.sessionId,action:action.name,
+     operation:globalThis.crypto?.randomUUID?.().replaceAll('-','')??'',
+     body:action.body??{},sensitive:true});
+    routineStatus.textContent='Sensitive action accepted by independent authority: '+String(result?.status??'received');
+   }catch(e){routineStatus.textContent='Sensitive action denied: '+e.message;}
+   finally{inFlight=false;}
+  });
+ }
  // Wallet is always optional; never request accounts until the player presses Connect.
  if(walletProvider&&runtime.mode==='connected'){
   const walletStatus=paragraph('Wallet disconnected. Core guest play remains available.');

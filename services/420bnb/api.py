@@ -3806,15 +3806,21 @@ class OperationalReplayRequest(BaseModel):
 def operations_health(authorization:str|None=Header(None)):
     import operational_controls as ops
     with db() as c:
-        actor,_=ops.operator(c,authorization,"health")
-        return ops.counts(c)
+        with c.transaction():
+            actor,_=ops.operator(c,authorization,"health")
+            result=ops.counts(c)
+            ops.audit_read(c,actor,"health")
+            return result
 
 @app.get("/v1/bnb/internal/operations/dead-letters")
 def operations_dead_letters(limit:int=25,authorization:str|None=Header(None)):
     import operational_controls as ops
     with db() as c:
-        ops.operator(c,authorization,"dead_letters")
-        return ops.dead_letters(c,limit=limit)
+        with c.transaction():
+            actor,_=ops.operator(c,authorization,"dead_letters")
+            result=ops.dead_letters(c,limit=limit)
+            ops.audit_read(c,actor,"dead_letters")
+            return result
 
 @app.get("/v1/bnb/internal/operations/reconciliation/{action}")
 def operations_reconciliation(action:str,authorization:str|None=Header(None)):

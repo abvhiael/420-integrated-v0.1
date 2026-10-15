@@ -85,7 +85,7 @@ export function createTripService({authenticator, store, clock = () => Math.floo
         next = await store.execute({actorId: principal.subject, commandId, tripId, action, request: originalCommand, guard, beforeLock:paymentService?.lock,
           afterWrite: async(client,result)=>{
             if(dispatchAdapter) await dispatchAdapter.apply(client,result,action,selection);
-            if(quoteService) await quoteService.apply(client,result,action,viability);
+            if(quoteService) await quoteService.apply(client,result,action==='offer_reject'?'cancel':action,viability);
             if(paymentService) await paymentService.recordLifecycle(client,result,action==='offer_reject'?'cancel':action,current(principal));
           }}, produce);
       } else {

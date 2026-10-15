@@ -16,7 +16,7 @@ export function createDriverAvailabilityController({api,session,clock=()=>Math.f
    }finally{busy=false;}
   },
   async setOnline(value,vehicleId,passengerCapacity){
-   check();if(typeof value!=='boolean'||typeof vehicleId!=='string'||!current||current.vehicleId!==vehicleId)throw new DriverOfferError('INVALID_AVAILABILITY');
+   check();if(typeof value!=='boolean'||typeof vehicleId!=='string'||!/^[A-Za-z0-9_-]{1,128}$/.test(vehicleId)||!current||(current.vehicleId!==null&&current.vehicleId!==vehicleId))throw new DriverOfferError('INVALID_AVAILABILITY');
    capacity(passengerCapacity);
    if(!mutating){const id=nonce();if(!id)throw new DriverOfferError('SECURE_ID_REQUIRED');mutating={type:'availability',commandId:id,value,revision:current.revision};}
    if(mutating.type!=='availability'||mutating.value!==value||mutating.revision!==current.revision)throw new DriverOfferError('RECONCILE_REQUIRED');

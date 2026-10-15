@@ -7,9 +7,11 @@ export function mountDriverAvailability(container,session,api){
  const refresh=document.createElement('button');refresh.type='button';refresh.textContent='Refresh verified status';
  const online=document.createElement('button');online.type='button';online.textContent='Go online';online.disabled=true;
  const offline=document.createElement('button');offline.type='button';offline.textContent='Go offline';offline.disabled=true;
+ const vehicleLabel=document.createElement('label');vehicleLabel.textContent='Verified vehicle reference ';
+ const vehicleInput=document.createElement('input');vehicleInput.type='text';vehicleInput.maxLength=128;vehicleInput.required=true;vehicleLabel.append(vehicleInput);
  const capLabel=document.createElement('label');capLabel.textContent='Vehicle passenger capacity ';
  const cap=document.createElement('input');cap.type='number';cap.min='1';cap.max='12';cap.step='1';cap.value='1';capLabel.append(cap);
- controls.append(capLabel,refresh,online,offline);root.append(heading,status,controls,offers);container.append(root);
+ controls.append(vehicleLabel,capLabel,refresh,online,offline);root.append(heading,status,controls,offers);container.append(root);
  let active=true,controller=null,ticker=null;
  if(!api||session?.status!=='authenticated'||!session.roles?.includes('driver')||!session.subject){
   status.textContent='Independently authenticated driver services are unavailable. No live offers or availability can be shown.';
@@ -19,6 +21,7 @@ export function mountDriverAvailability(container,session,api){
  const render=()=>{
   if(!active)return;
   const v=controller.snapshot();offers.replaceChildren();
+  if(v.current?.vehicleId)vehicleInput.value=v.current.vehicleId;
   online.disabled=v.busy||v.disconnected||!v.current||v.current.active;
   offline.disabled=v.busy||v.disconnected||!v.current||!v.current.active;
   if(!v.current){status.textContent='Authoritative availability unavailable. Remain offline until the server is reachable.';return;}
@@ -47,7 +50,7 @@ export function mountDriverAvailability(container,session,api){
   finally{refresh.disabled=false;}
  };
  const change=async value=>{const v=controller.snapshot().current;if(!v)return;
-  try{await controller.setOnline(value,v.vehicleId,Number(cap.value));render();}
+  try{await controller.setOnline(value,v.vehicleId??vehicleInput.value.trim(),Number(cap.value));render();}
   catch{status.textContent='Availability change unconfirmed. Refresh status; do not assume online or offline.';}
  };
  refresh.addEventListener('click',()=>{controller.reconnect();void load();});

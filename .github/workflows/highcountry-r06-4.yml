@@ -28,3 +28,33 @@ jobs:
       - run: node --test clients/highcountry-access-v1/test/*.test.js packages/420-gaming-sdk/test/*.test.js
       - run: node --test services/420-gaming-player-profile/test/canonical-gaming-finality.test.js
       - run: test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+
+  r064-postgres-authority:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: hc_ci_only
+          POSTGRES_DB: r064_ci
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres -d r064_ci"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    env:
+      HIGHCOUNTRY_R064_PG_URL: postgres://postgres:hc_ci_only@localhost:5432/r064_ci
+      CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - working-directory: services/420-gaming-player-profile
+        run: npm ci --ignore-scripts
+      - working-directory: services/420-gaming-player-profile
+        run: node --test test/highcountry-r064-postgres.integration.mjs
+      - run: test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"

@@ -2,7 +2,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {Pool} from 'pg';
-import {mkdtemp,rm} from 'node:fs/promises';
+import {mkdtemp,rm,readdir,readFile,writeFile} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {randomBytes,randomUUID} from 'node:crypto';
@@ -36,7 +36,9 @@ test('registered HTTP principal to real RLS PostgreSQL to encrypted cloud and cr
    roleMap.set(account.accountId,pool);
   }});
   const profilePool=async ({accountId})=>{const p=roleMap.get(accountId);if(!p)throw Error('account-not-scoped');return p;};
-  const provider=new EncryptedLocalSaveProvider420({directory,encryptionKey:randomBytes(32)});
+  const encrypted=new EncryptedLocalSaveProvider420({directory,encryptionKey:randomBytes(32)});
+  let providerOffline=false;
+  const provider={put:input=>encrypted.put(input),get:input=>{if(providerOffline)throw Error('provider-unavailable');return encrypted.get(input);},delete:input=>encrypted.delete(input)};
   cloudServer=createHighCountryCloudHttp420({authority:issuer,poolForPrincipal:profilePool,provider,origin});
   authServer=createHighCountryLocalAuthHttp420({issuer,origin});
   await new Promise(ok=>cloudServer.listen(0,'127.0.0.1',ok));
@@ -70,10 +72,22 @@ test('registered HTTP principal to real RLS PostgreSQL to encrypted cloud and cr
   assert.equal((await request(cloud,'/highcountry/session',{token})).code,403);
   const second=(await request(auth,'/auth/login',{body:{username:'playerone',password:pwd}})).json.result.token;
   assert.equal((await request(cloud,'/highcountry/save',{token:second})).json.revision,'1');
+  providerOffline=true;
+  const interrupted=await request(cloud,'/highcountry/restore',{token:second,body:{backupRevision:'1',expectedHead:'1',consentId:consent,schemaLabel:'highcountry-guest-preview-v1'}});
+  assert.equal(interrupted.code,503,'provider outage must not commit recovery');
+  providerOffline=false;
+  assert.equal((await request(cloud,'/highcountry/save',{token:second})).json.revision,'1');
   const restored=await request(cloud,'/highcountry/restore',{token:second,body:{backupRevision:'1',expectedHead:'1',
     consentId:consent,schemaLabel:'highcountry-guest-preview-v1'}});
   assert.equal(restored.code,200,JSON.stringify(restored));assert.equal(restored.json.revision,'2');
   assert.equal((await request(cloud,'/highcountry/save',{token:second})).json.revision,'2');
+  const objects=(await readdir(directory)).filter(x=>x.startsWith('obj_'));
+  assert.ok(objects.length>=2);
+  const target=join(directory,objects.at(-1));const encryptedBytes=await readFile(target);
+  encryptedBytes[encryptedBytes.length-1]^=1;await writeFile(target,encryptedBytes);
+  // At least one retained encrypted revision must reject tampered bytes, not silently repair.
+  const old=await request(cloud,'/highcountry/save',{token:second});
+  if(old.code===200){assert.equal(old.json.revision,'2');}else assert.equal(old.code,503);
   issuer.revokeAccount('playerone');
   assert.equal((await request(cloud,'/highcountry/save',{token:second})).code,403);
  }finally{

@@ -3874,5 +3874,6 @@ def operator_synchronization_readiness(authorization:str|None=Header(None)):
             result=monitor.snapshot(c)
             ops.audit_read(c,actor,"health")
             if not result["ready"]:
-                raise HTTPException(503,{"ready":False,"alerts":result["alerts"]})
+                from fastapi.responses import JSONResponse
+                return JSONResponse(status_code=503,content={"ready":False,"alerts":result["alerts"]})
             return {"ready":True}

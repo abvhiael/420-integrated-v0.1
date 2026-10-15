@@ -251,3 +251,11 @@ All are **OPEN** pending live/testnet evidence. Local assertions, mocked RPC fix
 - **HC-R06.6-T04:** Deployed HTTPS `/v1/routine/execute` backed by the approved verifier/journal, configured Origin and API routing, mobile/desktop/browser acceptance, operator and security release approval.
 
 **All OPEN.** Until independent sources and deployment approvals exist, do not populate a default routine-action allowlist or activate production delegated signing. The repository tests prove the local enforcement implementation, not live credentials, hardware, blockchain permissions or external security signoff.
+
+## R06.7 — Branding, game assets and responsive accessibility acceptance (OPEN)
+
+- **HC-R06.7-T01 — real device and assistive-technology acceptance:** independently verify keyboard-only navigation, meaningful focus order, screen reader labels/status announcements, forced-colors, 200–400% browser zoom, mobile touch/rotation and switch access on supported browsers and actual devices. Record device/browser versions and acceptance evidence.
+- **HC-R06.7-T02 — contrast, art and IP review:** visually audit all foreground/background and disabled/error/action focus states to the applicable accessibility contrast thresholds; review original SVG art, logo/mark ownership and game-branding approval, copyright policy and final exported variants.
+- **HC-R06.7-T03 — measured performance:** actual mobile/desktop loading, interaction latency, asset payload/bundle size, low-memory/slow-network and network-unavailable outcomes with documented budgets and representative test hardware.
+
+All gates remain OPEN until independently observed. Static repository assertions and mocked DOM cannot stand in for external usability, measured performance or device signoff. No wallet, economic or live-network authority is activated by these assets.

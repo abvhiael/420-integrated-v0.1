@@ -25,6 +25,7 @@ export function createCloudClient({apiUrl,authenticate,fetchImpl=fetch,gameId}={
  }
  return Object.freeze({
   session:()=>request('GET','/highcountry/session'),
+  register:({profileId,rulesetId})=>{if(!/^[A-Za-z0-9:_-]{1,128}$/.test(profileId)||!/^0x[0-9a-f]{64}$/.test(rulesetId))fail('cloud-request-invalid');return request('POST','/highcountry/register',{profileId,rulesetId});},
   read:()=>request('GET','/highcountry/save'),
   publish:({expectedRevision,consentId,schemaLabel,save})=>{
    if(!/^(0|[1-9][0-9]*)$/.test(expectedRevision)||typeof consentId!=='string'||!consentId||

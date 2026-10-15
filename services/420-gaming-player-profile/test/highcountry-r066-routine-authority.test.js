@@ -25,5 +25,5 @@ test('revocation fails closed and sensitive action requires verified escalation'
 });
 test('policy cannot authorize positive-value routine action',()=>{
  assert.throws(()=>createHighCountryRoutineAuthority420({verifyIdentity:async()=>{},verifySession:async()=>{},
- verifyEscalation:async()=>{},approvedActions:{a:{classification:'routine',value:1,execute:async()=>{}}}}),/r066-policy-invalid/);
+ verifyEscalation:async()=>{},operationJournal:{claim:async()=>true},approvedActions:{a:{classification:'routine',value:1,execute:async()=>{}}}}),/r066-policy-invalid/);
 });

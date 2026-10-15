@@ -1,0 +1,49 @@
+name: High Country R06.3 PostgreSQL End-to-End Level 1
+on:
+  pull_request:
+    paths:
+      - 'services/420-gaming-player-profile/**'
+      - 'apps/highcountry-web/**'
+      - '.github/workflows/highcountry-r06-3-postgres.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  r063-postgres:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: hc_ci_only
+          POSTGRES_DB: r063_ci
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres -d r063_ci"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    env:
+      HIGHCOUNTRY_R063_POSTGRES_TEST_URL: postgres://postgres:hc_ci_only@localhost:5432/r063_ci
+      CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install locked PostgreSQL driver
+        working-directory: services/420-gaming-player-profile
+        run: npm ci --ignore-scripts
+      - name: Actual PostgreSQL, registered HTTP identity, encrypted provider, restore and conflict
+        working-directory: services/420-gaming-player-profile
+        run: node --test test/highcountry-r063-postgres.integration.mjs
+      - name: Retained browser and identity regression tests
+        run: |
+          node --test apps/highcountry-web/test/*.test.mjs
+          node --test services/420-gaming-player-profile/test/highcountry-local-issuer.test.js services/420-gaming-player-profile/test/highcountry-local-auth-http.test.js services/420-gaming-player-profile/test/highcountry-cloud-http.test.js
+          node apps/highcountry-web/scripts/build.mjs
+      - name: Exact implementation SHA
+        run: test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"

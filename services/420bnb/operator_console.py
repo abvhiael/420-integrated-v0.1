@@ -29,7 +29,7 @@ def secure_file(name,*,secret=False):
         return p.read_text().strip()
     except OSError:raise ConsoleError("CREDENTIAL_MOUNT_UNAVAILABLE") from None
 
-def request(origin,ca_file,token_file,operation,event_id=None,reason=None):
+def request(origin,ca_file,token_file,operation,event_id=None,reason=None,*,consumer=None,assessment='restart'):
     u=urlsplit(origin)
     if (u.scheme!="https" or not u.hostname or u.username or u.password or
         u.query or u.fragment or u.path not in ("","/")):
@@ -39,12 +39,20 @@ def request(origin,ca_file,token_file,operation,event_id=None,reason=None):
             "replay":("POST","/dead-letters/{event_id}/replay")}
     if operation not in routes:raise ConsoleError("OPERATION_INVALID")
     verb,path=routes[operation]
+    if operation=="reconcile":
+        if assessment not in ("restart","restore","rollback","replay"):
+            raise ConsoleError("ASSESSMENT_INVALID")
+        path="/reconciliation/"+assessment
     if operation=="replay":
         try: event_id=str(UUID(str(event_id)))
         except(ValueError,TypeError):raise ConsoleError("EVENT_INVALID") from None
         if not isinstance(reason,str) or not 8<=len(reason)<=200:
             raise ConsoleError("REASON_INVALID")
         path=path.replace("{event_id}",event_id)
+        if consumer is not None:
+            if consumer not in ("search","travel"):
+                raise ConsoleError("CONSUMER_INVALID")
+            path="/consumers/"+consumer+path
     token=secure_file(token_file,secret=True)
     if len(token)>8192 or not token:raise ConsoleError("TOKEN_INVALID")
     secure_file(ca_file)
@@ -75,9 +83,12 @@ def main(argv=None):
     parser.add_argument("operation",choices=["health","dead-letters","reconcile","replay"])
     parser.add_argument("event_id",nargs="?")
     parser.add_argument("--reason")
+    parser.add_argument("--consumer",choices=["search","travel"])
+    parser.add_argument("--assessment",choices=["restart","restore","rollback","replay"],default="restart")
     args=parser.parse_args(argv)
     try:
-        result=request(args.origin,args.ca_file,args.token_file,args.operation,args.event_id,args.reason)
+        result=request(args.origin,args.ca_file,args.token_file,args.operation,args.event_id,args.reason,
+                       consumer=args.consumer,assessment=args.assessment)
         print(json.dumps(result,sort_keys=True))
         return 0
     except ConsoleError as exc:

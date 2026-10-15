@@ -70,3 +70,35 @@ test('scoped read-only activity never accepts caller account identifiers or trus
   apiUrl:'https://api.example',gameId:game,chainId:1,fetchImpl:async()=>({ok:true,json:async()=>({events:'forged'})})});
  await assert.rejects(forged.scopedActivity({limit:10}),/wallet-activity-invalid/);
 });
+
+
+test('finalized scoped feature proof is validated, requires deliberate connection and never authorizes spending',async()=>{
+ let chain='0x1',requested=[];
+ const provider={request:async ({method})=>{
+  requested.push(method);return method==='eth_chainId'?chain:[wallet];
+ }};
+ const h='0x'+'c'.repeat(64);
+ const service=createOptionalWallet420({provider,authenticate:async()=>'token',apiUrl:'https://api.example',gameId:game,chainId:1,
+  fetchImpl:async (url,opts)=>{
+   assert.ok(String(url).endsWith('/v1/features/entitlement'));
+   assert.equal(opts.method,'POST');assert.equal(opts.headers.authorization,'Bearer token');
+   assert.deepEqual(Object.keys(JSON.parse(opts.body)).sort(),['contentId','entitlementId','entitlementType','profileId']);
+   return {ok:true,json:async()=>({result:{accepted:true,kind:'entitlement',gameId:game,chainId:'1',
+    blockHash:h,evidenceDigest:h}})};
+  }});
+ const q={profileId:game,entitlementId:game,entitlementType:game,contentId:game};
+ await assert.rejects(service.canonicalProof('entitlement',q),/wallet-not-connected/);
+ await service.connect();
+ assert.equal((await service.canonicalProof('entitlement',q)).kind,'entitlement');
+ chain='0x2';await assert.rejects(service.canonicalProof('entitlement',q),/wallet-wrong-network/);
+ assert.deepEqual(requested,['eth_chainId','eth_requestAccounts','eth_chainId','eth_chainId','eth_chainId']);
+});
+test('wrong-game finalized feature response fails closed and disallows unsafe methods',async()=>{
+ const provider={request:async x=>x.method==='eth_chainId'?'0x1':[wallet]};
+ const s=createOptionalWallet420({provider,authenticate:async()=>'token',apiUrl:'https://api.example',gameId:game,chainId:1,
+  fetchImpl:async()=>({ok:true,json:async()=>({result:{accepted:true,kind:'ownership',gameId:'0x'+'b'.repeat(64),chainId:'1',
+   blockHash:game,evidenceDigest:game}})})});
+ await s.connect();
+ await assert.rejects(s.canonicalProof('ownership',{profileId:game}),/wallet-feature-unverified/);
+ await assert.rejects(s.canonicalProof('market',{profileId:game}),/wallet-feature-invalid/);
+});

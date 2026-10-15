@@ -3710,3 +3710,30 @@ def internal_discovery_resync_page(consumer:str,resync_id:UUID,
         return resync_page(c,consumer,resync_id,actor=claims["sub"],
             after_property=after_property,limit=limit,
             authorize=lambda actor,action,target:actor==claims["sub"] and target==consumer and action=="resync-read")
+
+
+@app.post("/v1/bnb/internal/discovery-consumers/{consumer}/accept",status_code=201)
+def internal_discovery_consumer_accept(consumer:str,payload:dict,
+        x_discovery_proof:str|None=Header(None)):
+    """Repository-controlled transactional consumer ingress, not external publication.
+
+    A signed, short-lived, exact-envelope consumer grant is mandatory. Database
+    context exit commits before FastAPI returns the acceptance response. Replays
+    are rejected by the canonical consumer checkpoint's monotone revision fence.
+    """
+    from discovery_transport import accept_repository_consumer
+    if consumer not in ("search","travel"):
+        raise HTTPException(404,"CONSUMER_NOT_FOUND")
+    digest=payload.get("transport_digest") if isinstance(payload,dict) else None
+    if not isinstance(digest,str) or len(digest)!=64:
+        raise HTTPException(422,"TRANSPORT_DIGEST_REQUIRED")
+    claims=discovery_feed_claim(x_discovery_proof,consumer,"discovery-accept",
+        {"transport_digest":digest,"epoch":payload.get("epoch"),
+         "cursor":payload.get("cursor"),"property_id":payload.get("property_id"),
+         "revision":payload.get("revision")})
+    with db() as c:
+        outcome=accept_repository_consumer(c,consumer,payload,
+            authorize=lambda target,action:target==consumer and action=="discovery-accept"
+                and claims["consumer"]==target)
+    # No BnB-issued provider token, signing key, or claim of external acceptance.
+    return outcome

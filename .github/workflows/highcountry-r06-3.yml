@@ -1,0 +1,28 @@
+name: High Country R06.3 Account and Cloud Client Level 1
+on:
+  pull_request:
+    paths:
+      - 'apps/highcountry-web/**'
+      - '.github/workflows/highcountry-r06-3.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  account-cloud-client:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+      - run: node --test apps/highcountry-web/test/*.test.mjs
+      - run: node apps/highcountry-web/scripts/build.mjs && test -s apps/highcountry-web/dist/src/cloud.js
+      - run: for p in apps/highcountry-web/src/*.js; do node --check "$p"; done
+      - run: node --test services/420-gaming-player-profile/test/cloud-save-lifecycle.test.js
+      - run: test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"

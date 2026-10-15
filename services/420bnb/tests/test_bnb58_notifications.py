@@ -47,8 +47,9 @@ def test_expired_device_and_delivery_bounds(database):
             with pytest.raises(HTTPException,match="DEVICE_AUTHORITY_EXPIRED_OR_REVOKED"):
                 action()
     for bad in ("short","../inject","untrusted/device","é"*10):
+        assert not delivery.device_id_ok(bad)
         with pytest.raises(HTTPException,match="DEVICE_INVALID"):
-            delivery.device_id_ok(bad) and delivery.register(None,"actor",bad,
+            delivery.register(None,"actor",bad,
                 datetime.now(timezone.utc)+timedelta(days=1))
 
 

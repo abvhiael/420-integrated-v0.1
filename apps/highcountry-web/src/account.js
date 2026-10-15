@@ -1,7 +1,7 @@
 // R06.3 account panel: operator supplies an issuer-backed authenticator, never a wallet or guest account string.
 import {createCloudClient} from './cloud.js';
 import {loadGuest} from './guest.js';
-export function mountAccountPanel({document,main,runtime,authenticate,storage=globalThis.localStorage,fetchImpl=fetch}){
+export function mountAccountPanel({document,main,runtime,authenticate,storage=globalThis.localStorage,fetchImpl=fetch,localAuth=null}){
  const paragraph=(t)=>{const p=document.createElement('p');p.textContent=t;main.append(p);return p;};
  const field=(caption,value='')=>{const label=document.createElement('label');label.textContent=caption+' ';
   const input=document.createElement('input');input.value=value;label.append(input);main.append(label);return input;};
@@ -11,6 +11,16 @@ export function mountAccountPanel({document,main,runtime,authenticate,storage=gl
  if(runtime.mode!=='connected'||typeof authenticate!=='function'){
   paragraph('Account sign-in unavailable until a verified identity issuer and connected service are configured.');
   return;
+ }
+ if(localAuth){
+  const username=field('Local development username'),password=field('Local development password');
+  password.type='password';password.autocomplete='current-password';
+  button('Create local test account',async()=>{try{await localAuth.register({username:username.value,password:password.value});
+   password.value='';status.textContent='Local test account provisioned; sign in to continue.';}catch(e){report(e);}});
+  button('Sign in locally',async()=>{try{await localAuth.login({username:username.value,password:password.value});
+   password.value='';await sessionAction();}catch(e){report(e);}});
+  button('Sign out',async()=>{try{await localAuth.logout();session=null;cloudRevision=null;
+   status.textContent='Signed out; local guest game remains available.';}catch(e){report(e);}});
  }
  const client=createCloudClient({apiUrl:runtime.apiUrl,gameId:runtime.gameId,authenticate,fetchImpl});
  let session=null,cloudRevision=null;

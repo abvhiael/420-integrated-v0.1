@@ -5,6 +5,7 @@ on:
       - 'apps/highcountry-web/**'
       - 'services/420-gaming-player-profile/src/highcountry-r064-*'
       - 'services/420-gaming-player-profile/src/wallet-link-service.js'
+      - 'services/highcountry-economy/src/runtime-service.js'
       - 'services/420-gaming-player-profile/test/highcountry-r064-*'
       - '.github/workflows/highcountry-r06-4.yml'
   workflow_dispatch:
@@ -25,6 +26,7 @@ jobs:
           node-version: '22'
       - run: test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
       - run: node --test apps/highcountry-web/test/*.test.mjs
+      - run: node --test services/highcountry-economy/test/*.test.js
       - run: node apps/highcountry-web/scripts/build.mjs && test -s apps/highcountry-web/dist/src/wallet.js
       - run: for f in apps/highcountry-web/src/*.js; do node --check "$f"; done
       - run: node --test services/420-gaming-player-profile/test/wallet-link.test.js services/420-gaming-player-profile/test/highcountry-r064-wallet-http.test.js services/420-gaming-player-profile/test/highcountry-r064-feature-http.test.js

@@ -76,6 +76,7 @@ export function mountAccountPanel({document,main,runtime,authenticate,storage=gl
     walletStatus.textContent='Link accepted by authenticated wallet service.';}catch(e){walletStatus.textContent=e.message;}});
    button('Check scoped wallet link',async()=>{try{const result=await optional.session();
     walletStatus.textContent=result.wallet?'Linked wallet verified for this game profile.':'No linked wallet.';}catch(e){walletStatus.textContent=e.message;}});
+   button('Read my scoped game activity',async()=>{try{const records=await optional.scopedActivity({limit:25});walletStatus.textContent='Authenticated game activity entries: '+records.length+'. Read-only events are not proof of current ownership, entitlements, rewards or market settlement.';}catch(e){walletStatus.textContent=e.message;}});
    button('Unlink wallet',async()=>{try{await optional.unlink();walletStatus.textContent='Unlinked. Guest play preserved.';}catch(e){walletStatus.textContent=e.message;}});
    button('Disconnect wallet locally',()=>{optional.disconnect();walletStatus.textContent='Disconnected. Guest play preserved.';});
    paragraph('Entitlements, holdings, market, rewards and cross-game records require separately authenticated and finalized authoritative services; unavailable features are disabled, never simulated.');

@@ -6,6 +6,9 @@ on:
       - 'rideshare/web/app.mjs'
       - 'rideshare/src/**'
       - 'rideshare/test/postgres/driver-offers.test.mjs'
+      - 'rideshare/test/postgres/dispatch.test.mjs'
+      - 'rideshare/test/postgres/quotes.test.mjs'
+      - 'rideshare/test/postgres/payments.test.mjs'
       - 'rideshare/test/postgres/dispatch-fixture.mjs'
       - 'rideshare/migrations/009_driver_offers.sql'
       - '.github/workflows/liftd-l02-7-level1.yml'
@@ -53,4 +56,8 @@ jobs:
           for f in rideshare/web/driver-availability-{policy,controller,api,view}.mjs; do node --check "$f"; done
           for f in rideshare/src/{driver-offers,dispatch,auth,trip,service,http,postgres-store}.mjs; do node --check "$f"; done
           npm run check --prefix rideshare/web
+          npm test --prefix rideshare
           node --test rideshare/test/postgres/driver-offers.test.mjs
+          node --test rideshare/test/postgres/dispatch.test.mjs
+          node --test rideshare/test/postgres/quotes.test.mjs
+          node --test rideshare/test/postgres/payments.test.mjs

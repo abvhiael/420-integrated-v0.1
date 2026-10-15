@@ -7,6 +7,8 @@ from fastapi import HTTPException
 import discovery_consumer_service as service
 import discovery_transport as transport
 import worker
+from test_bnb55_discovery_feed import database
+from test_bnb32_infrastructure import database as tls_database
 
 
 @pytest.mark.parametrize("consumer",["search","travel"])

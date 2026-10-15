@@ -34,10 +34,12 @@ def test_operator_current_session_revocation_is_database_authoritative(database,
 
 def test_replay_unrelated_dead_letter_cannot_be_forged(database):
     connect,_,_=database
+    target=uuid4()
     with connect() as c:
         with pytest.raises(HTTPException,match="REPLAY_NOT_ELIGIBLE"):
-            ops.manual_replay(c,"bnb59-operator",{"jti":uuid4().hex},
-                              uuid4(),"approved operator incident review")
+            ops.manual_replay(c,"bnb59-operator",
+                              {"jti":uuid4().hex,"event_id":str(target),"consumer":None},
+                              target,"approved operator incident review")
     with connect() as c:
         assert c.execute("""SELECT count(*) FROM bnb_audit
             WHERE action='bnb.outbox.manual_replay' AND subject='bnb59-operator'""").fetchone()[0]==0

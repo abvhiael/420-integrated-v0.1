@@ -143,6 +143,21 @@ export function mountAccountPanel({document,main,runtime,authenticate,storage=gl
      (x.reason?' ('+x.reason+')':'')+
      (x.blockHash?' at block '+x.blockHash:'')+
      '. Inclusion alone does not confirm market settlement or asset delivery.';};
+    const approvedTx=globalThis.highCountryReviewedTransaction;
+    if(typeof approvedTx?.submit==='function'){
+     button('Request reviewed transaction signature',async()=>{
+      try{
+       const operation=txOperation.value;
+       txTracker.begin(operation);
+       txStatus.textContent='Transaction '+operation+': awaiting-signature. A user approval is required.';
+       const result=await txTracker.submit(operation,{requestSignature:()=>approvedTx.submit({operation,
+        gameId:runtime.gameId,chainId:runtime.chainId})});
+       txStatus.textContent='Transaction '+operation+': '+result.state+
+        (result.txHash?' '+result.txHash:'')+'. Not yet finalized or settled.';
+      }catch(e){txStatus.textContent='Transaction signing denied or unknown: '+e.message+
+       '. Never automatically resend an ambiguous transaction; inspect a trusted hash first.';}
+     });
+    }
     button('Track submitted transaction (read only)',()=>{try{explain(txTracker.observe(txOperation.value,txHash.value));}
      catch(e){txStatus.textContent='Tracking denied: '+e.message;}});
     button('Refresh transaction state',async()=>{try{txStatus.textContent='Transaction: loading RPC and independent finality…';

@@ -40,7 +40,10 @@ def test_expired_device_and_delivery_bounds(database):
     with connect() as c:
         c.execute("INSERT INTO bnb_account(subject) VALUES(%s)",(a,))
         assert delivery.register(c,a,device,datetime.now(timezone.utc)+timedelta(days=1))
-        c.execute("UPDATE bnb_message_device SET authority_expires_at=clock_timestamp()-interval '1 second' WHERE subject=%s",(a,))
+        c.execute("""UPDATE bnb_message_device
+            SET registered_at=clock_timestamp()-interval '2 days',
+                authority_expires_at=clock_timestamp()-interval '1 second'
+            WHERE subject=%s""",(a,))
         for action in (lambda:delivery.active_device(c,a,device),
                        lambda:delivery.pending(c,a,device),
                        lambda:delivery.preferences(c,a,device,False)):

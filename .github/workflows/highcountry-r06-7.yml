@@ -1,0 +1,39 @@
+name: High Country R06.7 Visual Accessibility Level 1
+on:
+  pull_request:
+    paths:
+      - 'apps/highcountry-web/public/**'
+      - 'apps/highcountry-web/src/app.js'
+      - 'apps/highcountry-web/test/r067-*'
+      - '.github/workflows/highcountry-r06-7.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  accessible-assets:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Exact SHA and diff integrity
+        run: test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA" && git diff --check eeaa4e593e8f5f16e2bc566b20ddbe04576589c1 HEAD
+      - name: Asset, accessibility and retained browser tests
+        run: node --test apps/highcountry-web/test/*.test.mjs
+      - name: Syntax and production static build
+        run: node --check apps/highcountry-web/src/app.js && node apps/highcountry-web/scripts/build.mjs
+      - name: Built image presence and size
+        run: |
+          for file in highcountry-logo.svg highcountry-icon.svg highcountry-growing.svg highcountry-ready.svg; do
+            test -s "apps/highcountry-web/dist/assets/$file"
+            test "$(wc -c < "apps/highcountry-web/dist/assets/$file")" -lt 30000
+          done
+      - name: Exact SHA close
+        run: test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"

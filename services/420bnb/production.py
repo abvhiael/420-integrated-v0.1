@@ -192,7 +192,7 @@ def verify_database(connection, purpose="runtime"):
         require(not connection.execute("""SELECT EXISTS(SELECT 1 FROM pg_tables
             WHERE schemaname='public' AND tablename ~ '^bnb_'
             AND tableowner <> 'bnb_owner')""").fetchone()[0], "DATABASE_TABLE_OWNER_INVALID")
-        require(connection.execute("SELECT count(*) FROM bnb_schema_migration").fetchone()[0] == 29,
+        require(connection.execute("SELECT count(*) FROM bnb_schema_migration").fetchone()[0] == 30,
                 "DATABASE_SCHEMA_VERSION_INVALID")
         for journal_table in ("bnb_discovery_clock","bnb_discovery_change"):
             journal=connection.execute("""SELECT has_table_privilege(current_user,%s,'SELECT'),

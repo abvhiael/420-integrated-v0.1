@@ -117,5 +117,44 @@
       "status": "NOT_VERIFIED",
       "record": "docs/compliance/qualification/C07.6-reconciliation.json"
     }
-  ]
+  ],
+  "consolidated_testnet_roadmap": "docs/compliance/420COMPLIANCE-TESTNET-WORK-ROADMAP.md",
+  "phase_closeout_implementation_sha": "3f12c3b95db160b36f4bafb1491adea8dbd23ef1",
+  "phase_closeout_merge_sha": "612ada971b57084b8e7df8fb39f49384aa24d95c",
+  "canonical_testnet_steps": [
+    "C09.1",
+    "C09.2",
+    "C09.3",
+    "C09.4",
+    "C09.5",
+    "C09.6",
+    "C09.7",
+    "C09.8",
+    "C09.9",
+    "C09.10"
+  ],
+  "canonical_operational_steps": [
+    "C10.1",
+    "C10.2",
+    "C10.3",
+    "C10.4",
+    "C10.5",
+    "C10.6",
+    "C10.7",
+    "C10.8"
+  ],
+  "independent_security_review": {
+    "source_step": "C07.9",
+    "status": "NOT_PERFORMED",
+    "testnet_steps": [
+      "C09.7",
+      "C09.9"
+    ],
+    "production_steps": [
+      "C10.3",
+      "C10.7"
+    ],
+    "release_permission": false
+  },
+  "historical_evidence_recovery_ownership": "REPOSITORY_EVIDENCE_RECONCILIATION_NOT_TESTNET_DEPENDENT"
 }

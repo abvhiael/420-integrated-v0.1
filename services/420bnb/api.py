@@ -3796,3 +3796,39 @@ def ack_notification_notice(device_id:str,notice_id:UUID,
     with db() as conn:
         with conn.transaction():
             return delivery.ack(conn,actor,device_id,notice_id)
+
+
+# BNB-5.9: private operator surface; never uses caller supplied approval flags.
+class OperationalReplayRequest(BaseModel):
+    reason:str=Field(min_length=8,max_length=200)
+
+@app.get("/v1/bnb/internal/operations/health")
+def operations_health(authorization:str|None=Header(None)):
+    import operational_controls as ops
+    with db() as c:
+        actor,_=ops.operator(c,authorization,"health")
+        return ops.counts(c)
+
+@app.get("/v1/bnb/internal/operations/dead-letters")
+def operations_dead_letters(limit:int=25,authorization:str|None=Header(None)):
+    import operational_controls as ops
+    with db() as c:
+        ops.operator(c,authorization,"dead_letters")
+        return ops.dead_letters(c,limit=limit)
+
+@app.get("/v1/bnb/internal/operations/reconciliation/{action}")
+def operations_reconciliation(action:str,authorization:str|None=Header(None)):
+    import operational_controls as ops
+    with db() as c:
+        with c.transaction():
+            actor,_=ops.operator(c,authorization,"reconciliation")
+            return ops.assess(c,actor,action)
+
+@app.post("/v1/bnb/internal/operations/dead-letters/{event_id}/replay")
+def operations_replay(event_id:UUID,payload:OperationalReplayRequest,
+                      authorization:str|None=Header(None)):
+    import operational_controls as ops
+    with db() as c:
+        with c.transaction():
+            actor,proof=ops.operator(c,authorization,"replay")
+            return ops.manual_replay(c,actor,proof,event_id,payload.reason)

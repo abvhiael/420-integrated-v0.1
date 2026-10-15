@@ -9,7 +9,7 @@ import ssl
 import urllib.request
 import urllib.error
 from urllib.parse import urlsplit
-from . import pay_observation_worker as worker
+import pay_observation_worker as worker
 
 class NoRedirect(urllib.request.HTTPRedirectHandler):
     def redirect_request(self,*args,**kwargs):return None

@@ -3832,3 +3832,12 @@ def operations_replay(event_id:UUID,payload:OperationalReplayRequest,
         with c.transaction():
             actor,proof=ops.operator(c,authorization,"replay")
             return ops.manual_replay(c,actor,proof,event_id,payload.reason)
+
+@app.post("/v1/bnb/internal/operations/consumers/{consumer}/dead-letters/{event_id}/replay")
+def operations_consumer_replay(consumer:str,event_id:UUID,payload:OperationalReplayRequest,
+                               authorization:str|None=Header(None)):
+    import operational_controls as ops
+    with db() as c:
+        with c.transaction():
+            actor,proof=ops.operator(c,authorization,"replay")
+            return ops.manual_replay(c,actor,proof,event_id,payload.reason,consumer=consumer)

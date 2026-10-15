@@ -1,3 +1,4 @@
+import {cultivationStageArt} from './cultivation-art.js';
 import {mountAccountPanel} from './account.js';
 import {validateHighCountryRuntime,detectHighCountryNetwork} from './runtime.js';
 import {newGuest,loadGuest,saveGuest,plant,setEnvironment,advance,stage,harvest} from './guest.js';
@@ -18,7 +19,7 @@ export function createHighCountryApp({document,location,config,fetchImpl,storage
    main.append(el('p','Local guest play only. Saves remain on this device. No account, wallet, BUDS, or canonical assets are created.'));
    if(error){const p=el('p','Save error: '+error);p.setAttribute('role','alert');main.append(p);}
    if(guest){const stats=el('div','');stats.className='game-stats';stats.append(el('p','Completed local harvests: '+guest.completed));main.append(stats);if(guest.plant){
-    const p=guest.plant;const phase=stage(p,Math.max(guest.lastSeen,Date.now()));const panel=el('div','');panel.className='game-panel';const art=el('img','');art.src=phase==='ready'?'/assets/highcountry-ready.svg':'/assets/highcountry-growing.svg';art.alt=phase==='ready'?'Illustration of a ready-to-harvest local plant':'Illustration of a growing local plant';art.width=240;art.height=180;panel.append(art);const detail=el('div','');detail.append(el('h3','Current cultivation'),el('p','Plant stage: '+phase));panel.append(detail);main.append(panel);
+    const p=guest.plant;const phase=stage(p,Math.max(guest.lastSeen,Date.now()));const panel=el('div','');panel.className='game-panel';const art=el('img','');const illustration=cultivationStageArt(phase);art.src=illustration.src;art.alt=illustration.alt;art.addEventListener('error',()=>{if(!art.dataset.fallback){art.dataset.fallback='true';art.src=illustration.fallback;}});art.width=240;art.height=180;panel.append(art);const detail=el('div','');detail.append(el('h3','Current cultivation'),el('p','Plant stage: '+phase));panel.append(detail);main.append(panel);
     main.append(el('p','Local preview plant: '+p.id));
     const controls=el('div','');controls.className='controls';main.append(controls);for(const [key,value] of Object.entries(p.env)){const label=el('label',key+' ('+value+') ');const input=document.createElement('input');input.type='number';input.min=key==='temperature'?'1000':'0';input.max=key==='temperature'?'4000':'10000';input.step='1';input.value=String(value);input.setAttribute('aria-label',key);const btn=el('button','Set '+key);btn.type='button';btn.addEventListener('click',()=>command(s=>setEnvironment(s,{[key]:Number(input.value)})));label.append(input,btn);controls.append(label);}
     const ready=phase==='ready';const b=el('button','Harvest local preview');b.type='button';b.disabled=!ready;b.addEventListener('click',()=>command(s=>harvest(s)));main.append(b);

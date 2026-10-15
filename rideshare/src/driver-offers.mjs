@@ -42,6 +42,8 @@ export function createDriverOfferService({pool,authenticator,tripService,eligibi
     !Number.isSafeInteger(body.expectedRevision)||body.expectedRevision<0||!['accept','reject'].includes(body.decision))fail('INVALID_REQUEST',400);
   const principal=await actor(token,driverId,'offer.respond');
   if(body.decision==='reject'){
+    const existing=(await pool.query('SELECT request FROM liftd.offer_commands WHERE driver_id=$1 AND command_id=$2',[driverId,body.commandId])).rows[0];
+    if(existing)fail('IDEMPOTENCY_CONFLICT');
     // Canonical audited trip/Pay cancellation, never a hidden rematch or arrival.
     const result=await tripService.transition(token,offerId,{action:'offer_reject',expectedRevision:body.expectedRevision,commandId:body.commandId});
     return Object.freeze({offerId,tripId:offerId,status:'REJECTED',tripState:result.state,revision:result.revision});

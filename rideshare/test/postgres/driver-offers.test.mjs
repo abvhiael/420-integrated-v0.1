@@ -100,3 +100,26 @@ test('accepted but unarrived offers expire through canonical operator lifecycle'
  assert.equal((await owner.query('SELECT state FROM liftd.assignment_leases WHERE trip_id=$1',[t.id])).rows[0].state,'CLOSED');
  control.now=100;
 });
+
+test('revoked capacity after assignment rejects a pending offer acceptance',async()=>{
+ const t=await make('offer_case_capacity','driver_offer_h');
+ control.capacities={'vehicle_driver_offer_h':1};
+ try {
+   const request={tripId:t.id,offerId:t.id,expectedRevision:1,decision:'accept',commandId:'capacity_changed'};
+   await assert.rejects(app.driverOfferService.respondOffer(token('driver_offer_h',t.id),'driver_offer_h',t.id,request),e=>e.code==='VEHICLE_INELIGIBLE');
+   assert.equal((await app.tripStore.get(t.id)).state,'ASSIGNED');
+   assert.equal((await owner.query('SELECT state FROM liftd.assignment_leases WHERE trip_id=$1',[t.id])).rows[0].state,'PENDING');
+ }finally{control.capacities={};}
+});
+test('competing accept and reject on the same offer never both commit',async()=>{
+ const t=await make('offer_case_opposite','driver_offer_i');
+ const request=(decision,commandId)=>({tripId:t.id,offerId:t.id,expectedRevision:1,decision,commandId});
+ const settled=await Promise.allSettled([
+  app.driverOfferService.respondOffer(token('driver_offer_i',t.id),'driver_offer_i',t.id,request('accept','conflict_accept')),
+  app.driverOfferService.respondOffer(token('driver_offer_i',t.id),'driver_offer_i',t.id,request('reject','conflict_reject'))
+ ]);
+ assert.equal(settled.filter(x=>x.status==='fulfilled').length,1);
+ const state=(await app.tripStore.get(t.id)).state;
+ const lease=(await owner.query('SELECT state FROM liftd.assignment_leases WHERE trip_id=$1',[t.id])).rows[0].state;
+ assert.ok((state==='ASSIGNED'&&lease==='ACCEPTED')||(state==='CANCELLED'&&lease==='CLOSED'));
+});

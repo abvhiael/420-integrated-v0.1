@@ -3,6 +3,7 @@ from uuid import uuid4
 import pytest
 from fastapi import HTTPException
 from test_bnb55_discovery_feed import database, property_row
+from test_bnb32_infrastructure import database as tls_database
 import discovery_sync
 import discovery_feed
 import discovery_transport as transport

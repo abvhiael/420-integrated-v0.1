@@ -83,11 +83,13 @@ test('registered HTTP principal to real RLS PostgreSQL to encrypted cloud and cr
   assert.equal((await request(cloud,'/highcountry/save',{token:second})).json.revision,'2');
   const objects=(await readdir(directory)).filter(x=>x.startsWith('obj_'));
   assert.ok(objects.length>=2);
-  const target=join(directory,objects.at(-1));const encryptedBytes=await readFile(target);
+  const newest=(await root.query("SELECT object_ref FROM gaming_datastore.save_references WHERE revision=2")).rows[0]?.object_ref;
+  assert.ok(objects.includes(newest));
+  const target=join(directory,newest);const encryptedBytes=await readFile(target);
   encryptedBytes[encryptedBytes.length-1]^=1;await writeFile(target,encryptedBytes);
   // At least one retained encrypted revision must reject tampered bytes, not silently repair.
   const old=await request(cloud,'/highcountry/save',{token:second});
-  if(old.code===200){assert.equal(old.json.revision,'2');}else assert.equal(old.code,503);
+  assert.equal(old.code,503,'corrupt newest encrypted cloud object must fail closed');
   issuer.revokeAccount('playerone');
   assert.equal((await request(cloud,'/highcountry/save',{token:second})).code,403);
  }finally{

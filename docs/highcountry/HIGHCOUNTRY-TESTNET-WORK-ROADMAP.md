@@ -215,3 +215,17 @@ These external checks are not represented as local repository Level 1 results.
 | HC-R06.3-T05 — browser, device and independent security review | OPEN — R06.7/R06.8 / R07 | Real desktop/mobile browser accessibility (keyboard, focus, status errors, form labels), authenticated CORS/preflight, rate-limit/privacy/CSRF and session handling, multi-instance abuse, operator/security/privacy signoff and rollback drill |
 
 **Do not relabel live T01–T05 as passed because local CI is green.** Identity issuer provisioning and credential issuance are external/operational dependencies; the app's profile registration does not create a fresh issuer account. Real multi-device/browser/service/db/provider exercises require a deployment with authorized secrets. R06.3 completion at the *repository implementation* level may be assessed against its original exit criteria and exact-SHA tests independently of these operational gates; unresolved repository-testable browser/service behavior is not automatically excused by this list. Canonical R06.4–R06.8 numbering and R07 acceptance remain unchanged.
+
+
+## R06.4 — optional linked wallet deployed acceptance (OPEN / TESTNET-GATED)
+
+Repository implementation candidate `6b20dcf4e60f0391a6e2775d27ba1c16dd986c91` adds deliberately initiated, signed R05 wallet link/unlink, wrong-chain rejection, authenticated read-only activity and fail-closed feature disclosures in the R06 browser. This is **NOT independent deployed acceptance**, and the canonical R06.4 full feature consumers must still be implemented and locally qualified under R06.4 before step closeout.
+
+| Gate | External owner / actual acceptance |
+|---|---|
+| HC-R06.4-T01 — official chain and wallet issuer | R05.2/R05.8/R07: official Genesis address/codehash manifests, HTTPS RPC and separately verified chain, real EOA and supported contract-wallet signed challenge, valid consent, revocation/expiry/replay and cross-device link state |
+| HC-R06.4-T02 — deployed read authorities | R05.6/R05.7/R05.8: authenticated profile/game scope, independent canonical finality and codehash-pinned ownership/entitlement/cross-game evidence, honest empty/reorg/stale/error states |
+| HC-R06.4-T03 — authorized economy/market | R04/R05/R07: deployed market and reward issuers with reviewed numeric catalogue, scoped actual inventory/BUDS settlement and independent chain-vs-ledger reconciliation; untrusted local harvest must not mint, trade or earn money |
+| HC-R06.4-T04 — user-facing operational acceptance | R06.7/R06.8/R07: approved browser/provider combinations, signature consent, no hidden wallet auto-connect or auto-payment, reconnect/unlink without loss of guest progress, mobile/accessibility and privacy/security/operator signoff |
+
+**Pre-testnet R06.4 gap remains OPEN:** the browser currently does not contain independently qualified authoritative entitlement, ownership, market, reward and cross-game consumers; the read-only events view cannot substitute. Implement these app adapters and negative tests locally before R06.4 repository completion; do not defer code solely because testnet credentials are absent. R06.5 remains the canonical owner of transaction lifecycle, and R06.6 owns routine sessions.

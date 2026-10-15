@@ -69,3 +69,26 @@ test('independent witness absent never claims finalized even when RPC says final
  const value=await c.refresh('a');assert.equal(value.state,'pending');assert.equal(value.reason,'independent-witness-not-configured');
  assert.ok(id>=4);
 });
+
+test('restart recovery keeps only hash, never a cached finalized claim and requires new verification',async()=>{
+ const memory=new Map(),storage={getItem:key=>memory.get(key)??null,setItem:(key,value)=>memory.set(key,value)};
+ const initial=fixture(),first=createHighCountryTransactionLifecycle420({rpcUrl:'https://rpc.example',
+  chainId:1,storage,fetchImpl:async (url,options)=>{
+   const q=JSON.parse(options.body);const result=q.method==='eth_chainId'?'0x1':
+    q.method==='eth_getTransactionReceipt'?{transactionHash:tx,blockHash:block,blockNumber:'0x1',status:'0x1'}:
+    {hash:block,number:'0x1'};
+   return {ok:true,json:async()=>({jsonrpc:'2.0',id:q.id,result})};
+  },witness:async()=>true});
+ first.observe('operation',tx);assert.equal((await first.refresh('operation')).state,'finalized');
+ const later=createHighCountryTransactionLifecycle420({rpcUrl:'https://rpc.example',chainId:1,storage,
+   fetchImpl:async()=>{throw Error('network offline');}});
+ assert.equal(later.status('operation').state,'unavailable');
+ assert.equal(later.status('operation').reason,'recovered-unverified');
+ assert.deepEqual(later.recoveredOperations(),['operation']);
+ assert.equal((await later.refresh('operation')).state,'unavailable');
+ assert.ok([...memory.values()][0].includes(tx));
+ assert.equal([...memory.values()][0].includes('finalized'),false);
+ const corruptStorage={getItem:()=>'{bad json',setItem:()=>{}};
+ const corrupt=createHighCountryTransactionLifecycle420({rpcUrl:'https://rpc.example',chainId:1,storage:corruptStorage});
+ assert.deepEqual(corrupt.recoveredOperations(),[]);
+});

@@ -22,3 +22,33 @@ test('explicit disconnect retains local gameplay ownership, no RPC spending oper
  const w=createOptionalWallet420({provider,authenticate:async()=>'ok',apiUrl:'https://api.example',gameId:game,chainId:1});
  await w.connect();w.disconnect();assert.deepEqual(methods,['eth_chainId','eth_requestAccounts','eth_chainId']);
 });
+
+
+test('explicit signed challenge follows authenticated R05 link, then unlink; never requests transaction signing',async()=>{
+ const calls=[],api=[];
+ const signature='0x'+'ab'.repeat(65);
+ const provider={request:async ({method,params})=>{
+  calls.push(method);
+  if(method==='eth_chainId')return '0x1';
+  if(method==='eth_requestAccounts')return [wallet];
+  if(method==='personal_sign'){assert.ok(params[0].includes(game));assert.equal(params[1],wallet);return signature;}
+  throw Error('unreviewed method');
+ }};
+ const w=createOptionalWallet420({provider,authenticate:async()=>'short-session',apiUrl:'https://api.example',gameId:game,chainId:1,
+  fetchImpl:async (url,opts)=>{
+   api.push({url:String(url),opts});
+   if(String(url).endsWith('/v1/wallet/challenge'))return {ok:true,json:async()=>({result:{wallet,chainId:'1',challengeId:'id_one',message:'High Country '+game}})};
+   if(String(url).endsWith('/v1/wallet/complete'))return {ok:true,json:async()=>({result:{wallet_account:wallet}})};
+   if(String(url).endsWith('/v1/wallet/unlink'))return {ok:true,json:async()=>({result:{unlinked:true}})};
+   if(String(url).endsWith('/v1/session'))return {ok:true,json:async()=>({result:{gameId:game,wallet:wallet}})};
+   throw Error('unexpected route');
+  }});
+ await w.connect();
+ assert.ok(await w.link({consentAccepted:true,consentId:'approved_consent',policyHash:game}));
+ assert.equal((await w.session()).gameId,game);
+ assert.equal(await w.unlink(),true);
+ assert.equal(w.getSelected(),null);
+ assert.deepEqual(calls,['eth_chainId','eth_requestAccounts','eth_chainId','eth_chainId','personal_sign','eth_chainId']);
+ assert.deepEqual(api.map(x=>new URL(x.url).pathname),['/v1/wallet/challenge','/v1/wallet/complete','/v1/session','/v1/wallet/unlink']);
+ assert.ok(api.every(x=>x.opts.headers.authorization==='Bearer short-session'&&x.opts.credentials==='omit'));
+});

@@ -47,9 +47,12 @@ def snapshot(conn,*,stale_seconds=300,backlog_limit=100):
        FROM bnb_consumer_subscription s
        WHERE s.consumer=ANY(%s) ORDER BY s.consumer""",(list(REQUIRED),)).fetchall()
     by_name={r[0]:r for r in consumers}
-    ack=conn.execute("""SELECT consumer,max(cursor),count(*) FROM bnb_discovery_consumer
-      WHERE consumer=ANY(%s) GROUP BY consumer""",(list(REQUIRED),)).fetchall()
+    ack=conn.execute("""SELECT d.consumer,count(*),
+        count(*) FILTER(WHERE d.revision<p.revision) FROM bnb_discovery_consumer d
+        JOIN bnb_discovery_projection p ON p.property_id=d.property_id
+        WHERE d.consumer=ANY(%s) GROUP BY d.consumer""",(list(REQUIRED),)).fetchall()
     acknowledgments={r[0]:(int(r[1]),int(r[2])) for r in ack}
+    projection_count=conn.execute("SELECT count(*) FROM bnb_discovery_projection").fetchone()[0]
     alerts=[]
     status={}
     for consumer in REQUIRED:
@@ -57,7 +60,7 @@ def snapshot(conn,*,stale_seconds=300,backlog_limit=100):
         if rowc is None:
             alerts.append(consumer.upper()+"_CONSUMER_MISSING")
             status[consumer]={"configured":False,"active":False,"pending":None,
-                "dead_letters":None,"ack_cursor":None,"ack_count":0,"fresh":False}
+                "dead_letters":None,"ack_count":0,"lagging":None,"fresh":False}
             continue
         age=conn.execute("""SELECT
           EXTRACT(EPOCH FROM(clock_timestamp()-%s::timestamptz))::bigint,
@@ -66,11 +69,11 @@ def snapshot(conn,*,stale_seconds=300,backlog_limit=100):
           (rowc[2],rowc[3],rowc[3])).fetchone()
         last_ack=acknowledgments.get(consumer)
         fresh=bool(rowc[1]) and (int(clock[0])==0 or (
-            last_ack is not None and last_ack[0]>=int(clock[0]))) and (
+            last_ack is not None and last_ack[0]>=projection_count and last_ack[1]==0)) and (
             int(clock[0])==0 or (age[1] is not None and 0<=age[1]<=stale_seconds))
         status[consumer]={"configured":True,"active":bool(rowc[1]),"pending":int(rowc[4]),
-            "dead_letters":int(rowc[5]),"ack_cursor":last_ack[0] if last_ack else None,
-            "ack_count":last_ack[1] if last_ack else 0,
+            "dead_letters":int(rowc[5]),"ack_count":last_ack[0] if last_ack else 0,
+            "lagging":last_ack[1] if last_ack else projection_count,
             "last_accept_age_seconds":age[1],"fresh":fresh}
         if not rowc[1]:alerts.append(consumer.upper()+"_CONSUMER_INACTIVE")
         if int(rowc[5])>0:alerts.append(consumer.upper()+"_DEAD_LETTERS")

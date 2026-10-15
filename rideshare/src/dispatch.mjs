@@ -117,7 +117,8 @@ export function createDispatchAdapter({pool,authenticator,eligibilityAdapter,ava
         await client.query('INSERT INTO liftd.assignment_leases(trip_id,driver_id,vehicle_id,expires_at,state) VALUES($1,$2,$3,$4,$5)',
           [next.id,next.driverId,next.vehicleId,selection.expiresAt,'PENDING']);
       }else if(['arrive','complete','cancel','expire','offer_reject'].includes(action)&&next.driverId) {
-        await client.query('UPDATE liftd.assignment_leases SET state=$1 WHERE trip_id=$2',[action==='arrive'?'ACCEPTED':'CLOSED',next.id]);
+        if(action==='arrive')await client.query("UPDATE liftd.assignment_leases SET state='ACCEPTED' WHERE trip_id=$1 AND state='PENDING'",[next.id]);
+        else await client.query("UPDATE liftd.assignment_leases SET state='CLOSED' WHERE trip_id=$1 AND state<>'CLOSED'",[next.id]);
       }
     },
   });

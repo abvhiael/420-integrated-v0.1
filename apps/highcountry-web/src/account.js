@@ -78,7 +78,14 @@ export function mountAccountPanel({document,main,runtime,authenticate,storage=gl
     walletStatus.textContent='Link accepted by authenticated wallet service.';}catch(e){walletStatus.textContent=e.message;}});
    button('Check scoped wallet link',async()=>{try{const result=await optional.session();
     walletStatus.textContent=result.wallet?'Linked wallet verified for this game profile.':'No linked wallet.';}catch(e){walletStatus.textContent=e.message;}});
-   button('Read my scoped game activity',async()=>{try{const records=await optional.scopedActivity({limit:25});walletStatus.textContent='Authenticated game activity entries: '+records.length+'. Read-only events are not proof of current ownership, entitlements, rewards or market settlement.';}catch(e){walletStatus.textContent=e.message;}});
+   let activityBusy=false;
+   button('Read my scoped game activity',async()=>{if(activityBusy)return;activityBusy=true;
+    walletStatus.textContent='Indexer: loading authenticated scoped activity…';
+    try{const records=await optional.scopedActivity({limit:25});walletStatus.textContent=records.length?
+      'Indexer: '+records.length+' scoped activity entries. These are projections, not final settlement.':
+      'Indexer: empty. No scoped events were returned; this is not proof that no transaction exists.';
+    }catch(e){walletStatus.textContent='Indexer: unavailable or denied ('+e.message+'). No ownership/finality assertion made.';}
+    finally{activityBusy=false;}});
    const proofProfile=field('Canonical on-chain profile ID (bytes32)');
    const proofId=field('Entitlement, attestation, mission or progression ID (bytes32)');
    const proofType=field('Entitlement type (bytes32)');

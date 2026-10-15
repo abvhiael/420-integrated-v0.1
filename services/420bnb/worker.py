@@ -216,3 +216,17 @@ def cli():
 
 if __name__ == '__main__':
     sys.exit(cli())
+
+
+def isolated_discovery_worker(connect, consumer, endpoint, proof_provider, *, ssl_context,
+                              stop=None, lease_seconds=30):
+    """Construct an app-local supervised network consumer, not a production switch.
+
+    Caller explicitly supplies independently provisioned TLS trust and JWT grant
+    provider. Production CLI remains local-validation only and fail closed.
+    """
+    from discovery_network import NetworkDiscoveryDelivery
+    adapter=NetworkDiscoveryDelivery(connect,consumer,endpoint,proof_provider,
+                                     ssl_context=ssl_context)
+    return Supervisor(connect,adapter,consumer=consumer,stop=stop,
+                      lease_seconds=lease_seconds)

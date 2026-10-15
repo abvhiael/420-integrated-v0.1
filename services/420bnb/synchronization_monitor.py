@@ -53,8 +53,20 @@ def snapshot(conn,*,stale_seconds=300,backlog_limit=100):
         WHERE d.consumer=ANY(%s) GROUP BY d.consumer""",(list(REQUIRED),)).fetchall()
     acknowledgments={r[0]:(int(r[1]),int(r[2])) for r in ack}
     projection_count=conn.execute("SELECT count(*) FROM bnb_discovery_projection").fetchone()[0]
+    revoked=conn.execute("""SELECT
+      count(*) FILTER(WHERE revoked_at IS NOT NULL),
+      count(*) FILTER(WHERE revoked_at IS NULL
+        AND authority_expires_at<=clock_timestamp())
+      FROM bnb_message_device""").fetchone()
+    issuer_revoked=conn.execute("""SELECT count(*) FROM bnb_identity_session
+      WHERE revoked_at IS NOT NULL""").fetchone()[0]
+    projections=conn.execute("""SELECT
+      count(*) FILTER(WHERE invalidated_at IS NOT NULL),
+      coalesce(max(EXTRACT(EPOCH FROM(clock_timestamp()-updated_at))),0)::bigint
+      FROM bnb_discovery_projection""").fetchone()
     alerts=[]
     status={}
+    if int(projections[0])>0:alerts.append("PROJECTION_INVALIDATED")
     for consumer in REQUIRED:
         rowc=by_name.get(consumer)
         if rowc is None:
@@ -86,5 +98,9 @@ def snapshot(conn,*,stale_seconds=300,backlog_limit=100):
         "delivery":{"pending":int(row[0]),"leased":int(row[1]),
         "retrying":int(row[2]),"dead_letters":int(row[3]),
         "oldest_pending_age_seconds":max(0,int(row[4]))},
-        "discovery":{"head_cursor":int(clock[0]),"consumers":status},
+        "discovery":{"head_cursor":int(clock[0]),"consumers":status,
+         "invalidated_projections":int(projections[0]),
+         "oldest_projection_age_seconds":max(0,int(projections[1]))},
+        "revocations":{"devices":int(revoked[0]),"expired_devices":int(revoked[1]),
+          "identity_sessions":int(issuer_revoked)},
         "thresholds":{"stale_seconds":stale_seconds,"backlog_limit":backlog_limit}}

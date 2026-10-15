@@ -61,7 +61,8 @@ def snapshot(conn,*,stale_seconds=300,backlog_limit=100):
     issuer_revoked=conn.execute("""SELECT count(*) FROM bnb_identity_session
       WHERE revoked_at IS NOT NULL""").fetchone()[0]
     projections=conn.execute("""SELECT
-      count(*) FILTER(WHERE invalidated_at IS NOT NULL),
+      (SELECT count(*) FROM bnb_projection_work
+          WHERE requested_revision>completed_revision),
       coalesce(max(EXTRACT(EPOCH FROM(clock_timestamp()-updated_at))),0)::bigint
       FROM bnb_discovery_projection""").fetchone()
     alerts=[]

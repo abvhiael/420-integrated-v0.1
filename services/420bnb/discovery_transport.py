@@ -92,3 +92,51 @@ def verify_receipt(proof, consumer, body):
         raise HTTPException(403, "CONSUMER_RECEIPT_NOT_ACCEPTED")
     return _digest({"consumer": consumer, "jti": claims["jti"],
                     "transport_digest": body["transport_digest"]})
+
+
+def accept_repository_consumer(conn, consumer, body, *, authorize=None):
+    """Commit-scoped Search/Travel consumer admission for isolated repository runs.
+
+    The caller owns the PostgreSQL transaction. No signed receipt is emitted until
+    that transaction commits; a caller cannot treat this return value as external
+    provider acceptance or a network acknowledgment.
+    """
+    import discovery_sync
+    if getattr(conn, "autocommit", True):
+        raise HTTPException(503, "CONSUMER_TRANSACTION_REQUIRED")
+    if consumer not in CONSUMERS or not isinstance(body, dict):
+        raise HTTPException(403, "CONSUMER_UNAUTHORIZED")
+    if not callable(authorize) or authorize(consumer, "discovery-accept") is not True:
+        raise HTTPException(403, "CONSUMER_AUTHORITY_REQUIRED")
+    if body.get("version") != VERSION or body.get("consumer") != consumer:
+        raise HTTPException(403, "TRANSPORT_SCOPE_MISMATCH")
+    item = {"cursor": body.get("cursor"), "property_id": body.get("property_id"),
+            "revision": body.get("revision"), "payload": body.get("payload"),
+            "payload_digest": body.get("payload_digest")}
+    expected = envelope(consumer, item, body.get("epoch"))
+    if expected != body:
+        raise HTTPException(409, "TRANSPORT_DIGEST_MISMATCH")
+    clock = conn.execute("SELECT value,epoch FROM bnb_discovery_clock WHERE singleton").fetchone()
+    if not clock or str(clock[1]) != body["epoch"] or clock[0] < body["cursor"]:
+        raise HTTPException(409, "CONSUMER_EPOCH_OR_CURSOR_STALE")
+    journal = conn.execute("""SELECT property_id,revision,payload FROM bnb_discovery_change
+                               WHERE cursor=%s""", (body["cursor"],)).fetchone()
+    if not journal or str(journal[0]) != body["property_id"] or journal[1] != body["revision"]:
+        raise HTTPException(409, "CONSUMER_SOURCE_MISMATCH")
+    # Fetch a fresh privacy/authority-checked item. A historical visible payload
+    # that has since been revoked must not be accepted as visible.
+    import discovery_feed
+    current = discovery_feed._item(conn, (
+        body["cursor"], journal[0], journal[1],
+        _digest(journal[2]), journal[2]))
+    if current["payload"] != body["payload"]:
+        raise HTTPException(409, "CONSUMER_AUTHORITY_STALE")
+    # This canonical consumer writer locks the property and rejects any stale
+    # revision or mismatching source projection, including stale resurrection.
+    result = discovery_sync.consume(conn, body["property_id"], consumer,
+                                    body["revision"], body["payload"])
+    return {"consumer": consumer, "property_id": body["property_id"],
+            "revision": result["revision"], "visible": result["visible"],
+            "transport_digest": body["transport_digest"],
+            "transactional_acceptance": True,
+            "external_acceptance": False}

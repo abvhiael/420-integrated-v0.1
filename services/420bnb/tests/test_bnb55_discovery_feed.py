@@ -189,13 +189,15 @@ def test_append_only_upgrade_seeds_existing_revision_without_fabricating_history
     connect,_,migrator=database
     with psycopg.connect(**migrator) as c:
         c.execute('SET LOCAL ROLE bnb_owner')
+        c.execute('DROP TABLE bnb_message_notice,bnb_message_device')
+        c.execute('DELETE FROM bnb_schema_migration WHERE version=30')
         c.execute('DROP FUNCTION bnb_append_discovery_change() CASCADE')
         c.execute('DROP TABLE bnb_discovery_resync,bnb_discovery_change,bnb_discovery_clock')
         c.execute('DELETE FROM bnb_schema_migration WHERE version=29')
         pid=property_row(c)
         c.execute("""INSERT INTO bnb_discovery_projection(property_id,revision,source_digest,payload)
             VALUES(%s,7,'historical',%s::jsonb)""",(pid,json.dumps({'property_id':str(pid),'visible':False,'property_version':1})))
-    with psycopg.connect(**migrator) as c:assert production.controlled_migration(c)==29
+    with psycopg.connect(**migrator) as c:assert production.controlled_migration(c)==30
     with connect() as c:
         assert [(r['cursor'],r['revision']) for r in feed.page(c,'search')['items']]==[(1,7)]
         assert c.execute('SELECT count(*) FROM bnb_discovery_consumer').fetchone()==(0,)

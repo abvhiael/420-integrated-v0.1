@@ -1,0 +1,105 @@
+name: High Country R06 Phase Level 3 Retained
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/highcountry-r06-level3.yml'
+      - '.github/workflows/contracts-foundry.yml'
+      - 'apps/highcountry-web/**'
+      - 'services/420-gaming-player-profile/**'
+      - 'docs/highcountry/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: highcountry-r06-l3-${{ github.event.pull_request.head.sha || github.sha }}
+  cancel-in-progress: false
+jobs:
+  web-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install browser runner and Chromium
+        working-directory: apps/highcountry-web
+        run: |
+          npm install --no-save --ignore-scripts @playwright/test@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Real browser R06.1-R06.8 and asset delivery
+        run: |
+          node apps/highcountry-web/scripts/build.mjs
+          node --test apps/highcountry-web/test/*.test.mjs
+          cd apps/highcountry-web
+          npx playwright test e2e/r068-browser.spec.mjs --workers=1 --reporter=line
+      - name: Exact candidate head
+        run: test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+  issuer-cloud-postgres:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: hc_ci_only
+          POSTGRES_DB: r063_ci
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres -d r063_ci"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    env:
+      CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      HIGHCOUNTRY_R063_POSTGRES_TEST_URL: postgres://postgres:hc_ci_only@localhost:5432/r063_ci
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install locked PostgreSQL integration dependencies
+        working-directory: services/420-gaming-player-profile
+        run: npm ci --ignore-scripts
+      - name: Real issuer-backed PostgreSQL service, cloud-save and restore
+        working-directory: services/420-gaming-player-profile
+        run: node --test test/highcountry-r063-postgres.integration.mjs
+      - name: Retained cloud, auth, wallet and authority regressions
+        run: node --test services/420-gaming-player-profile/test/highcountry-*.test.js
+      - name: Exact candidate head
+        run: test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+  retained-contract-clients:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      FOUNDRY_SRC: src/highcountry
+      FOUNDRY_TEST: test/highcountry
+      FOUNDRY_SCRIPT: script/highcountry
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Retained High Country compilation and adversarial contract journeys
+        working-directory: contracts
+        run: |
+          forge build src/highcountry --sizes
+          forge test --match-path 'test/highcountry/**/*.t.sol' -vv
+      - name: Retained consumers, SDK, state and canonical verifier
+        run: |
+          node --test clients/highcountry-access-v1/test/*.test.js packages/420-gaming-sdk/test/*.test.js packages/420-gaming-client-hardening/test/*.test.js packages/420-gaming-cross-game-qualification/test/*.test.js services/420-gaming-query/test/*.test.js
+          node scripts/gaming/verify-runtime-manifest.mjs deployments/gaming/testnet.runtime.json
+          python3 scripts/highcountry/verify-r01.py
+      - name: Exact candidate head
+        run: test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"

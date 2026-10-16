@@ -36,7 +36,7 @@ jobs:
         run: |
           node --check services/420-gaming-player-profile/src/gameclaims-adapter.js
           node --check services/420-gaming-player-profile/src/gameclaims-coordinator-bridge.js
-          git diff --check d6f6bd282636a6c9c8ac3bf17198580840fee37f HEAD
+          git diff --check "$(git merge-base HEAD origin/main)" HEAD
   contract-boundary:
     runs-on: ubuntu-latest
     timeout-minutes: 50

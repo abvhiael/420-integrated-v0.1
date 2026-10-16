@@ -50,11 +50,12 @@ export function createTripService({authenticator, store, clock = () => Math.floo
     async transition(token, tripId, command) {
       if (!id(tripId)) throw new AuthError('INVALID_REQUEST', 400);
       record(command, ['action', 'expectedRevision', 'driverId', 'vehicleId', 'commandId']);
-      if (!['assign', 'match', 'arrive', 'start', 'complete', 'cancel', 'expire'].includes(command.action)) throw new AuthError('INVALID_REQUEST', 400);
+      if (!['assign', 'match', 'arrive', 'start', 'complete', 'cancel', 'expire', 'offer_reject'].includes(command.action)) throw new AuthError('INVALID_REQUEST', 400);
       const action = command.action === 'match' ? 'assign' : command.action;
+      if(action==='offer_reject'&&(!dispatchAdapter||!store.execute))throw new AuthError('DISPATCH_UNAVAILABLE',503);
       if ((command.action === 'match' || action === 'expire') && (!dispatchAdapter || !store.execute)) throw new AuthError('DISPATCH_UNAVAILABLE',503);
       if (dispatchAdapter && action === 'assign' && (command.action !== 'match' || 'driverId' in command || 'vehicleId' in command)) throw new AuthError('SERVER_MATCH_REQUIRED',400);
-      const principal = await authenticator.authorize(token, {action: `trip.${action}`, resource: `trip:${tripId}`});
+      const principal = await authenticator.authorize(token, {action: action==='offer_reject'?'offer.respond':`trip.${action}`, resource: `trip:${tripId}`});
       const {commandId, ...originalCommand} = command;
       let domainCommand = {...originalCommand,action};
       let lastAdmission, lockedTrip, selection, lease, transactionClient, viability;
@@ -67,12 +68,12 @@ export function createTripService({authenticator, store, clock = () => Math.floo
         lastAdmission = ['assign', 'arrive', 'start'].includes(action) ? await resolveAdmission(trip, domainCommand, principal) : undefined;
         if(quoteService && ['assign','arrive','start'].includes(action)) viability=await quoteService.assignment(client,trip,domainCommand);
         const now = current(principal);
-        return transitionTrip(trip, domainCommand, actor(principal), {now, paused: isPaused(), admission: lastAdmission, ...(action === 'expire' ? {assignmentExpiresAt:Number(lease?.expires_at)} : {})});
+        return transitionTrip(trip, domainCommand, actor(principal), {now, paused: isPaused(), admission: lastAdmission, ...(['expire','offer_reject'].includes(action) ? {assignmentExpiresAt:Number(lease?.expires_at)} : {})});
       };
       let next;
       if (store.execute) {
         const guard = async () => {
-          const fresh = await authenticator.authorize(token, {action: `trip.${action}`, resource: `trip:${tripId}`});
+          const fresh = await authenticator.authorize(token, {action: action==='offer_reject'?'offer.respond':`trip.${action}`, resource: `trip:${tripId}`});
           if (fresh.subject !== principal.subject || fresh.accountId !== principal.accountId || fresh.role !== principal.role) throw new AuthError('SESSION_BINDING_MISMATCH');
           if (lastAdmission) lastAdmission = await resolveAdmission(lockedTrip, domainCommand, fresh);
           if (transactionClient && dispatchAdapter) await dispatchAdapter.check(transactionClient,lockedTrip,action,selection,lease);
@@ -84,8 +85,8 @@ export function createTripService({authenticator, store, clock = () => Math.floo
         next = await store.execute({actorId: principal.subject, commandId, tripId, action, request: originalCommand, guard, beforeLock:paymentService?.lock,
           afterWrite: async(client,result)=>{
             if(dispatchAdapter) await dispatchAdapter.apply(client,result,action,selection);
-            if(quoteService) await quoteService.apply(client,result,action,viability);
-            if(paymentService) await paymentService.recordLifecycle(client,result,action,current(principal));
+            if(quoteService) await quoteService.apply(client,result,action==='offer_reject'?'cancel':action,viability);
+            if(paymentService) await paymentService.recordLifecycle(client,result,action==='offer_reject'?'cancel':action,current(principal));
           }}, produce);
       } else {
         const trip = await store.get(tripId); next = await produce(trip);

@@ -1,0 +1,58 @@
+name: LIFTd L02.10 Level 1
+on:
+  pull_request:
+    paths:
+      - 'rideshare/src/operator-console.mjs'
+      - 'rideshare/src/operator-monitors.mjs'
+      - 'rideshare/src/postgres-operator-audit.mjs'
+      - 'rideshare/src/auth.mjs'
+      - 'rideshare/src/http.mjs'
+      - 'rideshare/migrations/010_operator_audit.sql'
+      - 'rideshare/test/operator-console.test.mjs'
+      - 'rideshare/test/postgres/store.test.mjs'
+      - 'rideshare/web/operator-console.mjs'
+      - 'rideshare/web/app.mjs'
+      - '.github/workflows/liftd-l02-10-level1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  operator-console:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: liftd_qualification
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres -d liftd_qualification"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      LIFTD_DATABASE_URL: postgres://postgres:postgres@127.0.0.1:5432/liftd_qualification
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact SHA
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install locked dependencies
+        run: npm ci --prefix rideshare --ignore-scripts
+      - name: Targeted source and console syntax
+        run: |
+          for f in rideshare/src/{operator-console,operator-monitors,postgres-operator-audit,auth,http}.mjs rideshare/web/{operator-console,app}.mjs; do node --check "$f"; done
+      - name: Operator authorization, monitoring, safety and audit regressions
+        run: |
+          node --test rideshare/test/operator-console.test.mjs
+          npm test --prefix rideshare
+          npm run check --prefix rideshare/web
+      - name: PostgreSQL 16 migration and restricted role tests
+        run: node --test rideshare/test/postgres/store.test.mjs

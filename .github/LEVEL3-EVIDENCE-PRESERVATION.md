@@ -1,0 +1,20 @@
+# Repository-wide Level 3 qualification: evidence preservation and rerun prohibition
+
+**Scope:** Every app, audit and phase closeout in `abvhiael/420-integrated-v0.1`. This is repository-wide policy, not a LIFTd exception.
+
+## Mandatory qualification coordinator rules
+
+1. **Before dispatch:** reconcile current `main`; freeze one exact candidate; inspect the complete test inventory, source fixtures, manifests and permissions; validate each workflow is registered/triggerable; verify every evidence output directory/file matches the artifact upload path; ensure required services and gates are configured. Do not spend global runner time while these are unverified.
+2. **One expensive inventory per unchanged input tree.** Solidity Contracts alone owns the four complete Foundry shards, mandatory coverage and aggregate fixture. Genesis owns independent addresses. Integrated owns runtime/integration/Geth/faults. Docs owns documentation. The retained app suite owns app-level tests. Do not duplicate full Foundry inventory.
+3. **Preserve already passing jobs** with immutable run IDs, job IDs, original checked-out SHA, workflow revision, inputs and conclusion. A later evidence-only commit must not trigger requalification.
+4. **Narrow correction:** for defects in an app-specific CI evidence-output/upload step, verify the diff is limited to that owner and cannot affect shared executable inputs, tests, harnesses, permissions, dependencies or global workflows. Requalify only the affected owner. Preserve unaffected successful canonical global jobs. **Never rerun all global workflows solely to move an output file or fix an artifact path.**
+5. **No false same-SHA assertion:** original global runs qualify their original exact SHA; a later evidence commit is separately recorded. The certificate must include a checked comparison and explicit input-equivalence/assurance-impact rationale; inheritance is **not** allowed for meaningful changes to code, tests, fixtures, dependencies, frozen input, workflow job semantics or global documentation qualification inputs. If inputs genuinely changed, requalify only necessary affected owners according to canonical policy.
+6. **Failure handling:** identify the first failing step from GitHub run/job/logs; classify its root cause; fix that cause before re-running. Never blindly retry, cancel a slow but progressing shard, or invalidate completed independent jobs. If one shard fails, do not restart passing shards.
+7. **Phase certificate:** enumerate each canonical owner and mandatory job with actual pass status, exact original SHA, run/job links, changed-input equivalence, current-main divergence, unreleased external gates and merge disposition. Missing, cancelled, skipped *mandatory* jobs cannot be called PASS.
+8. **Post-freeze controls:** record changes as evidence-only only when verified. After the complete preflight gate, do not modify implementation/workflows until qualification finishes. A scoped exception requires an explicit impact matrix before modifying anything.
+
+These rules apply automatically to all future phase-closeout work, including 420BnB, High Country, Compute Market, Compliance, Wallet, LIFTd and every other app. They do not authorize bypass of security gates, tests, or branch protection.
+
+## Regression incident motivating policy (2026-10-16)
+
+LIFTd L02.13 Solidity run [38929675796](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38929675796) successfully performed the four Level 3 shards plus the fixture at original frozen SHA `833dc201f1cacca19eb23018c8a5f78da7d9b869`. Later LIFTd-only workflow commit `814013d7aa8c60ca354327a9801f3e2ec9210fdd` corrected only two mismatched evidence paths in `.github/workflows/liftd-l02-13-level3.yml`; no global inputs were changed. Therefore a fresh 100-minute Foundry run for that correction is prohibited. Corrected retained LIFTd run [38937973268](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38937973268) passed separately. Preserve all five run identities honestly rather than pretend all ran on a later evidence SHA.

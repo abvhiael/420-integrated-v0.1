@@ -1,0 +1,36 @@
+name: LIFTd L02.3 Level 1
+on:
+  pull_request:
+    paths:
+      - 'rideshare/web/**'
+      - '.github/workflows/liftd-l02-3-level1.yml'
+  push:
+    branches: ['build/liftd-l02-3-pickup-destination']
+    paths:
+      - 'rideshare/web/**'
+      - '.github/workflows/liftd-l02-3-level1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  pickup-entry:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Assert exact implementation head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: L02.3 policy, permission, provider failure, route preview and retained web regressions
+        run: |
+          node --check rideshare/web/pickup-policy.mjs
+          node --check rideshare/web/pickup-controller.mjs
+          node --check rideshare/web/pickup-view.mjs
+          cd rideshare/web
+          npm run check

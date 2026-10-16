@@ -58,7 +58,7 @@ jobs:
           node --check services/420-gaming-player-profile/src/gaming-event-scope-resolver.js
           node --check services/420-gaming-player-profile/src/gaming-event-http.js
           node --check services/420-gaming-player-profile/src/event-ingestion-migrations.js
-          git diff --check d494c52aa9c9a8e8031e3201197fb0c6afb98f87 HEAD
+          git diff --check "$(git merge-base HEAD origin/main)" HEAD
           test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
   actual-emitted-logs:
     runs-on: ubuntu-latest

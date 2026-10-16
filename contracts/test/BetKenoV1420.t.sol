@@ -194,4 +194,67 @@ contract BetKenoV1420Test {
         vm.expectRevert(KenoV1420.InvalidPayout.selector);
         s.keno.requiredMaxGrossPayout(100 ether, params);
     }
+    function testPickCountBoundariesAndCompleteCanonicalTail() public {
+        Suite memory s = _deploy();
+        KenoV1420.Params memory p = _params();
+        p.pickCount = 0;
+        vm.expectRevert(KenoV1420.InvalidParams.selector);
+        s.keno.hashParams(p);
+
+        p = _params();
+        p.pickCount = 11;
+        vm.expectRevert(KenoV1420.InvalidParams.selector);
+        s.keno.hashParams(p);
+
+        p = _params();
+        p.pickCount = 1;
+        // All entries beyond the declared selection must be empty.
+        vm.expectRevert(KenoV1420.InvalidParams.selector);
+        s.keno.hashParams(p);
+
+        p = _params();
+        p.pickCount = 1;
+        for (uint8 i = 1; i < 10; ++i) p.picks[i] = 0;
+        for (uint8 i = 2; i < 11; ++i) p.grossPayoutByHits[i] = 0;
+        require(s.keno.hashParams(p) != bytes32(0), "one pick rejected");
+
+        p = _params();
+        p.pickCount = 10;
+        for (uint8 i = 5; i < 10; ++i) p.picks[i] = i + 1;
+        require(s.keno.hashParams(p) != bytes32(0), "ten picks rejected");
+    }
+
+    function testPayoutScheduleMaximumZeroStakeAndSubStakeRejected() public {
+        Suite memory s = _deploy();
+        KenoV1420.Params memory p = _params();
+        require(s.keno.requiredMaxGrossPayout(100 ether, p) == 5_000 ether, "wrong maximum");
+
+        vm.expectRevert(KenoV1420.InvalidPayout.selector);
+        s.keno.requiredMaxGrossPayout(0, p);
+
+        for (uint8 i = 0; i <= p.pickCount; ++i) p.grossPayoutByHits[i] = 0;
+        vm.expectRevert(KenoV1420.InvalidPayout.selector);
+        s.keno.requiredMaxGrossPayout(100 ether, p);
+
+        p = _params();
+        p.grossPayoutByHits[5] = 99 ether;
+        vm.expectRevert(KenoV1420.InvalidPayout.selector);
+        s.keno.requiredMaxGrossPayout(100 ether, p);
+    }
+
+    function testEverySelectedNumberAndPayoutEntryIsCommitted() public {
+        Suite memory s = _deploy();
+        KenoV1420.Params memory p = _params();
+        bytes32 acceptedHash = s.keno.hashParams(p);
+        KenoV1420.Params memory altered = p;
+        altered.picks[4] = 79;
+        require(s.keno.hashParams(altered) != acceptedHash, "pick not committed");
+        altered = p;
+        altered.grossPayoutByHits[3] = 300 ether;
+        require(s.keno.hashParams(altered) != acceptedHash, "paytable not committed");
+        altered = p;
+        altered.picks[0] = 1;
+        require(s.keno.hashParams(altered) != acceptedHash, "first pick not committed");
+    }
+
 }

@@ -51,7 +51,7 @@ export function createPostgresTripStore(pool) {
     } catch (error) {if (error instanceof AuthError) throw error; fail('DATABASE_UNAVAILABLE', 503);}
   }
   async function execute({actorId, commandId, tripId, action, request, guard, afterWrite, beforeLock}, produce) {
-    if (![actorId, commandId, tripId].every(id) || !['create','assign','arrive','start','complete','cancel','expire','safety_resolve'].includes(action) ||
+    if (![actorId, commandId, tripId].every(id) || !['create','assign','arrive','start','complete','cancel','expire','safety_resolve','offer_reject'].includes(action) ||
       typeof produce !== 'function' || typeof guard !== 'function') fail('INVALID_REQUEST', 400);
     const requestHash = hash({tripId, action, request});
     let client, committed = false;

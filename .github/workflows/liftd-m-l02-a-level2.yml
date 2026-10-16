@@ -1,0 +1,82 @@
+name: LIFTd M-L02-A Level 2
+on:
+  pull_request:
+    paths:
+      - 'rideshare/**'
+      - '.github/workflows/liftd-m-l02-a-level2.yml'
+  push:
+    branches: ['qualification/liftd-m-l02-a-level2-20261014']
+    paths:
+      - 'rideshare/**'
+      - '.github/workflows/liftd-m-l02-a-level2.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: liftd_qualification
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres -d liftd_qualification"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      LIFTD_DATABASE_URL: postgres://postgres:postgres@127.0.0.1:5432/liftd_qualification
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Assert exact candidate SHA
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Locked dependencies and static checks
+        run: |
+          npm ci --prefix rideshare --ignore-scripts
+          node rideshare/scripts/verify-foundation.mjs
+          for f in rideshare/src/{auth,trip,service,http,quotes,location,eligibility,driver-onboarding,driver-onboarding-review,postgres-driver-onboarding,postgres-store}.mjs; do node --check "$f"; done
+          git diff --check
+      - name: Rider interface and retained browser tests
+        run: npm run check --prefix rideshare/web
+      - name: New cross-component rider and onboarding negative integration
+        run: node --test rideshare/test/integration/l02-rider-onboarding.test.mjs
+      - name: Retained L01 authentication and app domain suites
+        run: npm test --prefix rideshare
+      - name: Actual private PostgreSQL onboarding, rider preferences and dispatch
+        run: |
+          node --test rideshare/test/postgres/driver-onboarding.test.mjs
+          node --test rideshare/test/postgres/rider-preferences.test.mjs
+          node --test rideshare/test/postgres/dispatch.test.mjs
+      - name: Actual PostgreSQL quote consent and trip lifecycle
+        run: node --test rideshare/test/postgres/quotes.test.mjs
+      - name: Actual PostgreSQL payment and safety lifecycle
+        run: |
+          node --test rideshare/test/postgres/payments.test.mjs
+          node --test rideshare/test/postgres/safety.test.mjs
+      - name: Native Location provider and privacy
+        run: go test ./rideshare/locationbridge ./location/providers ./location/privacy
+      - name: Record exact-SHA evidence
+        run: |
+          mkdir -p liftd-m-l02-a-evidence
+          git rev-parse HEAD > liftd-m-l02-a-evidence/implementation-sha.txt
+          git diff --check
+      - uses: actions/upload-artifact@v4
+        with:
+          name: liftd-m-l02-a-${{ github.event.pull_request.head.sha || github.sha }}
+          path: liftd-m-l02-a-evidence/
+          if-no-files-found: error

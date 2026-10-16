@@ -1,6 +1,7 @@
 import {randomBytes} from 'node:crypto';
 import {AuthError,record} from './auth.mjs';
 import {checkSchema} from './schema.mjs';
+import {enforceFraudHold} from './fraud.mjs';
 import {money} from './fare.mjs';
 import {digest,uint,address,bytes32,PAYMENT_STATUSES} from './payment-protocol.mjs';
 import {compensation,periodStatement} from './compensation.mjs';
@@ -31,7 +32,7 @@ export function createPaymentService({pool,authenticator,authority,clock=()=>Mat
       client=await pool.connect();await client.query('BEGIN');await checkSchema(client);await client.query("SET LOCAL lock_timeout='3s'");await client.query("SET LOCAL idle_in_transaction_session_timeout='15s'");
       await client.query('SELECT pg_advisory_xact_lock(hashtextextended($1,0))',[`liftd:financial:${tripId}`]);
       const ctx=await context(client,tripId),p=await permit(token,action,ctx.trip,ctx.quote.accountId);
-      const guard=async()=>{const fresh=await permit(token,action,ctx.trip,ctx.quote.accountId);if(fresh.subject!==p.subject||fresh.accountId!==p.accountId||fresh.role!==p.role)fail('SESSION_BINDING_MISMATCH',403);if(newRisk&&isPaused())fail('SERVICE_PAUSED');};
+      const guard=async()=>{const fresh=await permit(token,action,ctx.trip,ctx.quote.accountId);if(fresh.subject!==p.subject||fresh.accountId!==p.accountId||fresh.role!==p.role)fail('SESSION_BINDING_MISMATCH',403);if(newRisk&&isPaused())fail('SERVICE_PAUSED');if(newRisk)await enforceFraudHold(client,tripId,time());};
       await guard();const old=(await client.query('SELECT action,request,result FROM liftd.financial_commands WHERE actor_id=$1 AND command_id=$2',[p.subject,commandId])).rows[0];
       const binding={tripId,...request,accountId:p.accountId};
       if(old){if(old.action!==action||digest(old.request)!==digest(binding))fail('IDEMPOTENCY_CONFLICT');await client.query('COMMIT');return old.result;}

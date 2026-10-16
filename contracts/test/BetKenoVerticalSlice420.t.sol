@@ -14,6 +14,7 @@ import "../src/bet/BetProfileRegistry420.sol";
 import "../src/bet/BetRegistry420.sol";
 import "../src/bet/BetTypes420.sol";
 import "../src/bet/KenoV1420.sol";
+import "../src/bet/KenoPaytableAuthority420.sol";
 import "../src/bet/RandomnessRouter420.sol";
 import "../src/bet/RiskManager420.sol";
 import "../src/bet/SettlementEngine420.sol";
@@ -23,6 +24,7 @@ import "../src/bet/WithdrawalQueue420.sol";
 
 interface VmBetKenoVerticalSlice420 {
     function prank(address) external;
+    function expectRevert(bytes4) external;
 }
 
 contract MockCapabilityRegistryBetKenoVerticalSlice420 is ICapabilityRegistry420 {
@@ -164,6 +166,23 @@ contract BetKenoVerticalSlice420Test {
         _seedProfiles(s);
         _seedAccess(s);
         _seedModuleGameOperator(s);
+        // Register an immutable, scoped Keno schedule before wager acceptance.
+        uint256[11][11] memory bps;
+        for (uint8 n=1;n<=10;++n) bps[n][n]=10_000;
+        bps[5][2]=10_000;
+        bps[5][3]=20_000;
+        bps[5][4]=100_000;
+        bps[5][5]=500_000;
+        KenoPaytableAuthority420 paytable = new KenoPaytableAuthority420(
+            address(s.auth), GAME_V1, RULESET, keccak256("keno/test-schedule/v1"),
+            keccak256("keno/test-schedule-manifest"), keccak256(abi.encode(bps)));
+        vm.prank(ADMIN);
+        paytable.activate(bps);
+        vm.prank(ADMIN);
+        s.wagerRouter.bindKenoPaytable(GAME_V1,address(s.keno),address(paytable));
+        vm.prank(ADMIN);
+        s.settlement.bindKenoResolver(GAME_V1,address(s.keno));
+
         _seedEconomics(s);
         _seedRisk(s);
         _seedRandomness(s);
@@ -321,7 +340,7 @@ contract BetKenoVerticalSlice420Test {
         });
 
         vm.prank(PLAYER);
-        (bytes32 wagerId, uint256 reservedLiability) = s.wagerRouter.placeWager(request);
+        (bytes32 wagerId, uint256 reservedLiability) = s.wagerRouter.placeKenoWager(request, params);
         require(wagerId != bytes32(0), "wager id");
         require(reservedLiability == 4_900 ether, "full liability not reserved");
         require(s.vault.wagerStakeEscrow(wagerId) == stake, "stake not escrowed");
@@ -356,9 +375,15 @@ contract BetKenoVerticalSlice420Test {
         }
 
         _allow(s, SETTLER, BetIds420.ACTION_SETTLE, s.auth.scopeForWager(wagerId));
+        vm.prank(SETTLER);
+        vm.expectRevert(SettlementEngine420.KenoCanonicalSettlementRequired.selector);
+        s.settlement.settle(wagerId, BetTypes420.TerminalOutcome.WIN, 5_000 ether);
+        require(s.accounting.getVault(VAULT).activeReservedLiability == reservedLiability,
+            "forged settlement released liability");
+        require(s.vault.wagerStakeEscrow(wagerId) == stake, "forged settlement consumed escrow");
         _allow(s, address(s.settlement), BetIds420.ACTION_WAGER_SETTLE_RECORD, s.auth.scopeForWager(wagerId));
         vm.prank(SETTLER);
-        s.settlement.settle(wagerId, result.outcome, result.grossPayout);
+        s.settlement.settleKeno(wagerId, params);
 
         BetTypes420.Settlement memory terminal = s.registry.getSettlement(wagerId);
         require(terminal.outcome == result.outcome, "terminal outcome mismatch");
@@ -376,4 +401,75 @@ contract BetKenoVerticalSlice420Test {
         require(replay.randomnessRoot == result.randomnessRoot, "replay root changed");
         for (uint8 i = 0; i < 20; ++i) require(replay.draw[i] == result.draw[i], "replay draw changed");
     }
+    function testUnapprovedPaytableNeverEscrowsOrReservesBankroll() public {
+        uint256 stake = 100 ether;
+        Suite memory s = _deploy();
+        KenoV1420.Params memory params = _params();
+        _allow(s, PLAYER, BetIds420.ACTION_PLACE, s.auth.scopeForGame(GAME, GAME_V1));
+        s.token.mint(PLAYER, stake);
+        vm.prank(PLAYER);
+        s.token.approve(address(s.vault), stake);
+
+        WagerRouter420.AcceptanceRequest memory req = WagerRouter420.AcceptanceRequest({
+            operatorId: OPERATOR, gameVersionId: GAME_V1, stake: stake,
+            maxGrossPayout: 5_000 ether, paramsHash: s.keno.hashParams(params),
+            correlationKey: keccak256("keno/forged"), deadline: uint64(block.timestamp + 1 hours)
+        });
+
+        // An old generic entrypoint must not bypass the versioned paytable gate.
+        vm.prank(PLAYER);
+        vm.expectRevert(WagerRouter420.KenoAuthorityRequired.selector);
+        s.wagerRouter.placeWager(req);
+
+        // Changing even one prize while matching the player's new hash and max still fails.
+        params.grossPayoutByHits[5] = 6_000 ether;
+        req.maxGrossPayout = 6_000 ether;
+        req.paramsHash = s.keno.hashParams(params);
+        vm.prank(PLAYER);
+        vm.expectRevert(KenoPaytableAuthority420.InvalidSchedule.selector);
+        s.wagerRouter.placeKenoWager(req, params);
+
+        // A stolen/old commitment with otherwise valid terms must also fail closed.
+        params = _params();
+        req.maxGrossPayout = 5_000 ether;
+        vm.prank(PLAYER);
+        vm.expectRevert(KenoPaytableAuthority420.InvalidSchedule.selector);
+        s.wagerRouter.placeKenoWager(req, params);
+
+        require(s.wagerRouter.nextNonce(PLAYER) == 0, "rejection consumed nonce");
+        require(s.token.balanceOf(PLAYER) == stake, "rejection consumed player balance");
+        require(s.vault.activeWagerStakeEscrow() == 0, "rejection escrowed stake");
+        require(s.risk.reservedByVault(VAULT) == 0, "rejection reserved liability");
+        require(s.accounting.getVault(VAULT).activeReservedLiability == 0, "accounting mutated");
+    }
+
+    function testGovernanceCannotActivateWrongScheduleOrReplaceApprovedVersion() public {
+        Suite memory s = _deploy();
+        uint256[11][11] memory bps;
+        for (uint8 n=1;n<=10;++n) bps[n][n]=10_000;
+        KenoPaytableAuthority420 pending = new KenoPaytableAuthority420(
+            address(s.auth), GAME_V1, RULESET, keccak256("keno/adversarial/v1"),
+            keccak256("keno/adversarial/manifest"), keccak256(abi.encode(bps)));
+
+        vm.prank(PLAYER);
+        vm.expectRevert(KenoPaytableAuthority420.Unauthorized.selector);
+        pending.activate(bps);
+
+        bps[5][5]=10_001;
+        vm.prank(ADMIN);
+        vm.expectRevert(KenoPaytableAuthority420.InvalidSchedule.selector);
+        pending.activate(bps);
+
+        bps[5][5]=10_000;
+        vm.prank(ADMIN);
+        pending.activate(bps);
+        vm.prank(ADMIN);
+        vm.expectRevert(KenoPaytableAuthority420.AlreadyActivated.selector);
+        pending.activate(bps);
+
+        vm.prank(ADMIN);
+        vm.expectRevert(WagerRouter420.KenoAuthorityAlreadyBound.selector);
+        s.wagerRouter.bindKenoPaytable(GAME_V1,address(s.keno),address(pending));
+    }
+
 }

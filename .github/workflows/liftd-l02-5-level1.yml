@@ -1,0 +1,33 @@
+name: LIFTd L02.5 Level 1
+on:
+  pull_request:
+    paths:
+      - 'rideshare/web/**'
+      - '.github/workflows/liftd-l02-5-level1.yml'
+  push:
+    branches: ['build/liftd-l02-5-rider-trip-experience']
+    paths:
+      - 'rideshare/web/**'
+      - '.github/workflows/liftd-l02-5-level1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  rider-trip:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Exact SHA
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Rider-trip scoped tests and retained L02 UI regression
+        run: |
+          for f in rideshare/web/trip-experience-{policy,controller,api,view}.mjs; do node --check "$f"; done
+          cd rideshare/web && npm run check

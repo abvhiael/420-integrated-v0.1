@@ -10,6 +10,10 @@ import "./BetIds420.sol";
 import "./BetRegistry420.sol";
 import "./BetTypes420.sol";
 import "./RiskManager420.sol";
+import "./KenoV1420.sol";
+import "./PlinkoV1420.sol";
+import "./ReferenceSlotV1420.sol";
+import "./RouletteV1420.sol";
 
 contract SettlementEngine420 is I420System {
     BetAuthorization420 public immutable authorization;
@@ -20,6 +24,14 @@ contract SettlementEngine420 is I420System {
     bytes32 public immutable vaultId;
     address public immutable asset;
     BetEmergencyState420 public emergencyState;
+    bytes32 private constant KENO_GAME_ID = keccak256("420BET.GAME.KENO");
+    mapping(bytes32 => address) public kenoResolver;
+    bytes32 private constant PLINKO_GAME_ID = keccak256("420BET.GAME.PLINKO");
+    mapping(bytes32 => address) public plinkoResolver;
+    bytes32 private constant SLOT_GAME_ID = keccak256("420BET.GAME.SLOT");
+    mapping(bytes32 => address) public slotResolver;
+    bytes32 private constant ROULETTE_GAME_ID = keccak256("420BET.GAME.ROULETTE");
+    mapping(bytes32 => address) public rouletteResolver;
 
     uint256 private _entered;
 
@@ -31,6 +43,14 @@ contract SettlementEngine420 is I420System {
     error InvalidOutcome();
     error InvalidPayout();
     error SettlementConflict();
+    error KenoCanonicalSettlementRequired();
+    error KenoResolverAlreadyBound();
+    error PlinkoCanonicalSettlementRequired();
+    error PlinkoResolverAlreadyBound();
+    error SlotCanonicalSettlementRequired();
+    error SlotResolverAlreadyBound();
+    error RouletteCanonicalSettlementRequired();
+    error RouletteResolverAlreadyBound();
     error Reentrancy();
     error EmergencyAlreadyBound();
     error WagerExpired();
@@ -80,12 +100,110 @@ contract SettlementEngine420 is I420System {
         emit EmergencyStateBound(emergencyState_);
     }
 
+    function bindKenoResolver(bytes32 gameVersionId, address resolver) external {
+        if (resolver == address(0) || gameVersionId == bytes32(0)) revert ZeroAddress();
+        if (kenoResolver[gameVersionId] != address(0)) revert KenoResolverAlreadyBound();
+        KenoV1420 k = KenoV1420(resolver);
+        if (k.gameId() != KENO_GAME_ID || k.gameVersionId() != gameVersionId ||
+            address(k.wagerRegistry()) != address(registry)) revert InvalidStatus();
+        if (!authorization.isAuthorized(msg.sender, BetIds420.ACTION_GAME_REGISTER,
+            authorization.scopeForGame(KENO_GAME_ID, gameVersionId), 0)) revert Unauthorized();
+        kenoResolver[gameVersionId] = resolver;
+    }
+
+    function settleKeno(bytes32 wagerId, KenoV1420.Params calldata params)
+        external nonReentrant returns (BetTypes420.Settlement memory settlement)
+    {
+        BetTypes420.Wager memory wager = registry.getWager(wagerId);
+        if (wager.gameId != KENO_GAME_ID) revert InvalidStatus();
+        address resolver = kenoResolver[wager.gameVersionId];
+        if (resolver == address(0) ||
+            KenoV1420(resolver).rulesetId() != wager.rulesetId) revert KenoCanonicalSettlementRequired();
+        KenoV1420.Result memory result = KenoV1420(resolver).resolve(wagerId, params);
+        settlement = _settle(wager, result.outcome, result.grossPayout, true);
+    }
+
+    function bindPlinkoResolver(bytes32 gameVersionId, address resolver) external {
+        if (resolver == address(0) || gameVersionId == bytes32(0)) revert ZeroAddress();
+        if (plinkoResolver[gameVersionId] != address(0)) revert PlinkoResolverAlreadyBound();
+        PlinkoV1420 p = PlinkoV1420(resolver);
+        if (p.gameId() != PLINKO_GAME_ID || p.gameVersionId() != gameVersionId ||
+            address(p.wagerRegistry()) != address(registry)) revert InvalidStatus();
+        if (!authorization.isAuthorized(msg.sender, BetIds420.ACTION_GAME_REGISTER,
+            authorization.scopeForGame(PLINKO_GAME_ID, gameVersionId), 0)) revert Unauthorized();
+        plinkoResolver[gameVersionId] = resolver;
+    }
+
+    function settlePlinko(bytes32 wagerId, PlinkoV1420.Params calldata params)
+        external nonReentrant returns (BetTypes420.Settlement memory settlement)
+    {
+        BetTypes420.Wager memory wager = registry.getWager(wagerId);
+        if (wager.gameId != PLINKO_GAME_ID) revert InvalidStatus();
+        address resolver = plinkoResolver[wager.gameVersionId];
+        if (resolver == address(0) ||
+            PlinkoV1420(resolver).rulesetId() != wager.rulesetId)
+            revert PlinkoCanonicalSettlementRequired();
+        PlinkoV1420.Result memory result = PlinkoV1420(resolver).resolve(wagerId, params);
+        settlement = _settle(wager, result.outcome, result.grossPayout, true);
+    }
+
+    function bindSlotResolver(bytes32 versionId, address resolver) external {
+        if (resolver == address(0) || versionId == bytes32(0)) revert ZeroAddress();
+        if (slotResolver[versionId] != address(0)) revert SlotResolverAlreadyBound();
+        ReferenceSlotV1420 s = ReferenceSlotV1420(resolver);
+        if (s.gameId() != SLOT_GAME_ID || s.gameVersionId() != versionId ||
+            address(s.wagerRegistry()) != address(registry)) revert InvalidStatus();
+        if (!authorization.isAuthorized(msg.sender, BetIds420.ACTION_GAME_REGISTER,
+            authorization.scopeForGame(SLOT_GAME_ID, versionId), 0)) revert Unauthorized();
+        slotResolver[versionId] = resolver;
+    }
+
+    function settleSlot(bytes32 wagerId, ReferenceSlotV1420.Params calldata params)
+        external nonReentrant returns (BetTypes420.Settlement memory settlement)
+    {
+        BetTypes420.Wager memory wager = registry.getWager(wagerId);
+        if (wager.gameId != SLOT_GAME_ID) revert InvalidStatus();
+        address resolver = slotResolver[wager.gameVersionId];
+        if (resolver == address(0) ||
+            ReferenceSlotV1420(resolver).rulesetId() != wager.rulesetId)
+            revert SlotCanonicalSettlementRequired();
+        ReferenceSlotV1420.Result memory result = ReferenceSlotV1420(resolver).resolve(wagerId, params);
+        settlement = _settle(wager, result.outcome, result.grossPayout, true);
+    }
+
+    function bindRouletteResolver(bytes32 versionId, address resolver) external {
+        if (versionId == bytes32(0) || resolver == address(0)) revert ZeroAddress();
+        if (rouletteResolver[versionId] != address(0)) revert RouletteResolverAlreadyBound();
+        RouletteV1420 r = RouletteV1420(resolver);
+        if (r.gameId() != ROULETTE_GAME_ID || r.gameVersionId() != versionId ||
+            address(r.wagerRegistry()) != address(registry)) revert InvalidStatus();
+        if (!authorization.isAuthorized(msg.sender, BetIds420.ACTION_GAME_REGISTER,
+            authorization.scopeForGame(ROULETTE_GAME_ID, versionId), 0)) revert Unauthorized();
+        rouletteResolver[versionId] = resolver;
+    }
+
+    function settleRoulette(bytes32 wagerId, RouletteV1420.Params calldata params)
+        external nonReentrant returns (BetTypes420.Settlement memory settlement)
+    {
+        BetTypes420.Wager memory w = registry.getWager(wagerId);
+        if (w.gameId != ROULETTE_GAME_ID) revert InvalidStatus();
+        address resolver = rouletteResolver[w.gameVersionId];
+        if (resolver == address(0) || RouletteV1420(resolver).rulesetId() != w.rulesetId)
+            revert RouletteCanonicalSettlementRequired();
+        RouletteV1420.Result memory result = RouletteV1420(resolver).resolve(wagerId, params);
+        settlement = _settle(w, result.outcome, result.grossPayout, true);
+    }
+
     function settle(bytes32 wagerId, BetTypes420.TerminalOutcome outcome, uint256 grossPayout)
         external
         nonReentrant
         returns (BetTypes420.Settlement memory settlement)
     {
         BetTypes420.Wager memory wager = registry.getWager(wagerId);
+        if (wager.gameId == KENO_GAME_ID) revert KenoCanonicalSettlementRequired();
+        if (wager.gameId == PLINKO_GAME_ID) revert PlinkoCanonicalSettlementRequired();
+        if (wager.gameId == SLOT_GAME_ID) revert SlotCanonicalSettlementRequired();
+        if (wager.gameId == ROULETTE_GAME_ID) revert RouletteCanonicalSettlementRequired();
         settlement = _settle(wager, outcome, grossPayout, true);
     }
 

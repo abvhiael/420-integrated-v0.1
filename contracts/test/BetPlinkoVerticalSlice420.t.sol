@@ -14,6 +14,7 @@ import "../src/bet/BetProfileRegistry420.sol";
 import "../src/bet/BetRegistry420.sol";
 import "../src/bet/BetTypes420.sol";
 import "../src/bet/PlinkoV1420.sol";
+import "../src/bet/PlinkoPaytableAuthority420.sol";
 import "../src/bet/RandomnessRouter420.sol";
 import "../src/bet/RiskManager420.sol";
 import "../src/bet/SettlementEngine420.sol";
@@ -23,6 +24,7 @@ import "../src/bet/WithdrawalQueue420.sol";
 
 interface VmBetPlinkoVerticalSlice420 {
     function prank(address) external;
+    function expectRevert(bytes4) external;
 }
 
 contract MockCapabilityRegistryBetPlinkoVerticalSlice420 is ICapabilityRegistry420 {
@@ -162,6 +164,25 @@ contract BetPlinkoVerticalSlice420Test {
         _seedProfiles(s);
         _seedAccess(s);
         _seedModuleGameOperator(s);
+        uint256[13] memory multipliers;
+        multipliers[0] = 100_000;
+        multipliers[1] = 50_000;
+        multipliers[2] = 20_000;
+        multipliers[3] = 10_000;
+        multipliers[9] = 10_000;
+        multipliers[10] = 20_000;
+        multipliers[11] = 50_000;
+        multipliers[12] = 100_000;
+        PlinkoPaytableAuthority420 paytable = new PlinkoPaytableAuthority420(
+            address(s.auth), GAME_V1, RULESET, keccak256("plinko/test/v1"),
+            keccak256("plinko/test/manifest"), keccak256(abi.encode(multipliers)));
+        vm.prank(ADMIN);
+        paytable.activate(multipliers);
+        vm.prank(ADMIN);
+        s.wagerRouter.bindPlinkoPaytable(GAME_V1, address(s.plinko), address(paytable));
+        vm.prank(ADMIN);
+        s.settlement.bindPlinkoResolver(GAME_V1, address(s.plinko));
+
         _seedEconomics(s);
         _seedRisk(s);
         _seedRandomness(s);
@@ -319,7 +340,7 @@ contract BetPlinkoVerticalSlice420Test {
         });
 
         vm.prank(PLAYER);
-        (bytes32 wagerId, uint256 reservedLiability) = s.wagerRouter.placeWager(request);
+        (bytes32 wagerId, uint256 reservedLiability) = s.wagerRouter.placePlinkoWager(request, params);
         require(wagerId != bytes32(0), "wager id");
         require(reservedLiability == 900 ether, "full liability not reserved");
         require(s.vault.wagerStakeEscrow(wagerId) == stake, "stake not escrowed");
@@ -357,7 +378,13 @@ contract BetPlinkoVerticalSlice420Test {
         _allow(s, SETTLER, BetIds420.ACTION_SETTLE, s.auth.scopeForWager(wagerId));
         _allow(s, address(s.settlement), BetIds420.ACTION_WAGER_SETTLE_RECORD, s.auth.scopeForWager(wagerId));
         vm.prank(SETTLER);
-        s.settlement.settle(wagerId, result.outcome, result.grossPayout);
+        vm.expectRevert(SettlementEngine420.PlinkoCanonicalSettlementRequired.selector);
+        s.settlement.settle(wagerId, BetTypes420.TerminalOutcome.WIN, maxGross);
+        require(s.accounting.getVault(VAULT).activeReservedLiability == reservedLiability,
+            "forged payout reduced reserve");
+        require(s.vault.wagerStakeEscrow(wagerId) == stake, "forged payout consumed escrow");
+        vm.prank(SETTLER);
+        s.settlement.settlePlinko(wagerId, params);
 
         BetTypes420.Settlement memory terminal = s.registry.getSettlement(wagerId);
         require(terminal.outcome == result.outcome, "terminal outcome mismatch");
@@ -376,4 +403,34 @@ contract BetPlinkoVerticalSlice420Test {
         require(replay.grossPayout == result.grossPayout, "replay payout changed");
         require(replay.randomnessRoot == result.randomnessRoot, "replay root changed");
     }
+    function testPlinkoUnapprovedPayoutsDoNotConsumeEscrowOrLiability() public {
+        Suite memory s = _deploy();
+        uint256 stake = 100 ether;
+        PlinkoV1420.Params memory params = _params();
+        _allow(s, PLAYER, BetIds420.ACTION_PLACE, s.auth.scopeForGame(GAME, GAME_V1));
+        s.token.mint(PLAYER, stake);
+        vm.prank(PLAYER);
+        s.token.approve(address(s.vault), stake);
+        WagerRouter420.AcceptanceRequest memory req = WagerRouter420.AcceptanceRequest({
+            operatorId: OPERATOR, gameVersionId: GAME_V1, stake: stake,
+            maxGrossPayout: 1000 ether, paramsHash: s.plinko.hashParams(params),
+            correlationKey: keccak256("plinko/adversarial"), deadline: uint64(block.timestamp + 1 hours)
+        });
+        vm.prank(PLAYER);
+        vm.expectRevert(WagerRouter420.PlinkoAuthorityRequired.selector);
+        s.wagerRouter.placeWager(req);
+
+        params.grossPayoutByBucket[12] = 2000 ether;
+        req.paramsHash = s.plinko.hashParams(params);
+        req.maxGrossPayout = 2000 ether;
+        vm.prank(PLAYER);
+        vm.expectRevert(PlinkoPaytableAuthority420.InvalidSchedule.selector);
+        s.wagerRouter.placePlinkoWager(req, params);
+        require(s.wagerRouter.nextNonce(PLAYER) == 0, "nonce consumed");
+        require(s.token.balanceOf(PLAYER) == stake, "player lost stake");
+        require(s.vault.activeWagerStakeEscrow() == 0, "escrow changed");
+        require(s.risk.reservedByVault(VAULT) == 0, "risk liability changed");
+        require(s.accounting.getVault(VAULT).activeReservedLiability == 0, "accounting reserve changed");
+    }
+
 }

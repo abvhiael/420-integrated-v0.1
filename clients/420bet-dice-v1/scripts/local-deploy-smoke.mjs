@@ -98,7 +98,10 @@ async function read(target, functionName, args = []) {
 
 let anvil;
 try {
-  run('forge', ['build'], { cwd: contractsDir });
+  // Build exactly the local Dice deployment inventory and its imported dependencies.
+  // A global forge build on every PR compiles >1,000 unrelated files and can exhaust CI runners.
+  const diceSources = ["src/bet/local/DiceLocalMocks420.sol","src/bet/BetAuthorization420.sol","src/bet/BetModuleRegistry420.sol","src/bet/BetProfileRegistry420.sol","src/bet/BetAccessPolicy420.sol","src/bet/BetOperatorRegistry420.sol","src/bet/BetGameRegistry420.sol","src/bet/VaultAccounting420.sol","src/bet/WithdrawalQueue420.sol","src/bet/BetEconomics420.sol","src/bet/BankrollVault420.sol","src/bet/RiskManager420.sol","src/bet/BetRegistry420.sol","src/bet/WagerRouter420.sol","src/bet/RandomnessRouter420.sol","src/bet/DiceV1420.sol","src/bet/SettlementEngine420.sol","src/bet/DiceV1View420.sol"];
+  run('forge', ['build', ...diceSources], { cwd: contractsDir });
   anvil = spawn('anvil', ['--port', port, '--chain-id', String(chainId), '--mnemonic', mnemonic, '--silent'], {
     cwd: repoRoot,
     stdio: keepAlive ? 'inherit' : 'ignore',

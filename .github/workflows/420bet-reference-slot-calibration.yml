@@ -1,0 +1,35 @@
+name: 420Bet Reference Slot Economic Candidate
+on:
+  pull_request:
+    paths:
+      - 'scripts/calibrate-420bet-reference-slot-rtp.py'
+      - 'scripts/audit-420bet-reference-slot-rtp.py'
+      - '.github/workflows/420bet-reference-slot-calibration.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  candidate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact head and evaluate independent calibration
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          python3 scripts/calibrate-420bet-reference-slot-rtp.py --samples 25000 --divisor 80 > "$RUNNER_TEMP/reference-slot-candidate.json"
+          python3 - "$RUNNER_TEMP/reference-slot-candidate.json" <<'PY'
+          import json,sys
+          d=json.load(open(sys.argv[1]))
+          assert d["status"]=="CANDIDATE_ONLY_NOT_APPROVED"
+          assert d["maxReservedLiability"]==4900
+          assert d["enforcedGrossCap"]==5000
+          assert d["approvalStatus"]=="MISSING_INDEPENDENT_ECONOMIC_AND_LIABILITY_APPROVAL"
+          assert d["candidateEstimatedRtpPercent"] > 0
+          print(json.dumps(d,indent=2,sort_keys=True))
+          PY

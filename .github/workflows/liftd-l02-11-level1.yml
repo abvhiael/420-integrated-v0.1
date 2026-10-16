@@ -1,0 +1,57 @@
+name: LIFTd L02.11 Level 1
+on:
+  pull_request:
+    paths:
+      - 'rideshare/src/auth.mjs'
+      - 'rideshare/src/http.mjs'
+      - 'rideshare/src/travel-handoff.mjs'
+      - 'rideshare/src/postgres-travel-consent.mjs'
+      - 'rideshare/migrations/011_travel_handoff.sql'
+      - 'rideshare/sdk/**'
+      - 'rideshare/consumers/**'
+      - 'rideshare/test/travel-handoff.test.mjs'
+      - 'rideshare/test/postgres/store.test.mjs'
+      - '.github/workflows/liftd-l02-11-level1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  travel-handoff:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: liftd_qualification
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres -d liftd_qualification"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      LIFTD_DATABASE_URL: postgres://postgres:postgres@127.0.0.1:5432/liftd_qualification
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact implementation SHA
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install locked dependencies
+        run: npm ci --prefix rideshare --ignore-scripts
+      - name: Static API, SDK, consumer and consent verification
+        run: |
+          for f in rideshare/src/{auth,http,travel-handoff,postgres-travel-consent}.mjs rideshare/sdk/*.mjs rideshare/consumers/*.mjs; do node --check "$f"; done
+      - name: Security, consent and consuming-app regression
+        run: |
+          node --test rideshare/test/travel-handoff.test.mjs
+          npm test --prefix rideshare
+          npm run check --prefix rideshare/web
+      - name: Real PostgreSQL migration, immutable consent and runtime authority
+        run: node --test rideshare/test/postgres/store.test.mjs

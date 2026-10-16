@@ -54,9 +54,9 @@ function proof(token, trust, purpose, now, maxAge, fields = null) {
   return claims;
 }
 const capabilities = Object.freeze({
-  rider: new Set(['trip.create', 'trip.read', 'trip.cancel', 'route.prepare', 'quote.create', 'quote.accept', 'quote.read', 'pay.prepare', 'pay.consent', 'pay.reconcile', 'pay.read', 'safety.report']),
-  driver: new Set(['trip.read', 'trip.arrive', 'trip.start', 'trip.complete', 'trip.cancel', 'availability.set', 'pay.read', 'pay.statement', 'safety.report']),
-  operator: new Set(['trip.assign', 'trip.expire', 'pay.reconcile', 'pay.read', 'safety.resolve', 'safety.read']),
+  rider: new Set(['account.preferences', 'trip.create', 'trip.read', 'trip.cancel', 'route.prepare', 'quote.create', 'quote.accept', 'quote.read', 'pay.prepare', 'pay.consent', 'pay.reconcile', 'pay.read', 'safety.report', 'trip.message.read', 'trip.message.send', 'travel.handoff', 'support.open', 'support.read', 'support.evidence', 'support.appeal', 'review.submit', 'review.read', 'review.reputation', 'fraud.report', 'fraud.read', 'fraud.appeal']),
+  driver: new Set(['onboarding.manage', 'trip.read', 'trip.arrive', 'trip.start', 'trip.complete', 'trip.cancel', 'availability.set', 'offer.respond', 'offer.read', 'pay.read', 'pay.statement', 'safety.report', 'trip.message.read', 'trip.message.send', 'support.open', 'support.read', 'support.evidence', 'support.appeal', 'review.submit', 'review.read', 'review.reputation', 'fraud.report', 'fraud.read', 'fraud.appeal']),
+  operator: new Set(['onboarding.review', 'trip.assign', 'trip.expire', 'pay.reconcile', 'pay.read', 'safety.resolve', 'safety.read', 'operator.monitor', 'support.read', 'support.evidence', 'support.escalate', 'support.decide', 'support.close', 'review.read', 'review.reputation', 'review.approve', 'review.hide', 'review.reject', 'fraud.report', 'fraud.read', 'fraud.hold', 'fraud.clear', 'fraud.release', 'fraud.close']),
 });
 export function validateSessionGrants(grants) {
   if (!Array.isArray(grants) || grants.length > 32) deny('INVALID_PROOF');
@@ -104,6 +104,7 @@ export function createAuthenticator({identity, sessionAuthority, resolveSession,
       }
       if (matches.length !== 1) deny('PERMISSION_DENIED', 403);
       if (['trip.create','route.prepare','availability.set','quote.create','quote.accept','quote.read','pay.statement'].includes(action) && resource !== `account:${access.sub}`) deny('PERMISSION_DENIED', 403);
+      if (action === 'account.preferences' && resource !== `account:${access.accountId}`) deny('PERMISSION_DENIED', 403);
       return Object.freeze({subject: access.sub, accountId: access.accountId, sessionId: access.sessionId,
         deviceId: access.deviceId, recoveryEpoch: access.recoveryEpoch, role: matches[0].role,
         action, resource, expiresAt: Math.min(access.exp, status.exp, matches[0].expiresAt)});

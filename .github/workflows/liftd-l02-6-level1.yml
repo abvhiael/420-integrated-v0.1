@@ -1,0 +1,62 @@
+name: LIFTd L02.6 Level 1
+on:
+  pull_request:
+    paths:
+      - 'rideshare/src/driver-onboarding.mjs'
+      - 'rideshare/src/driver-onboarding-review.mjs'
+      - 'rideshare/test/driver-onboarding-review.test.mjs'
+      - 'rideshare/src/postgres-driver-onboarding.mjs'
+      - 'rideshare/migrations/008_driver_onboarding.sql'
+      - 'rideshare/test/postgres/driver-onboarding.test.mjs'
+      - 'rideshare/src/http.mjs'
+      - 'rideshare/src/auth.mjs'
+      - 'rideshare/test/driver-onboarding.test.mjs'
+      - 'rideshare/web/**'
+      - '.github/workflows/liftd-l02-6-level1.yml'
+  push:
+    branches: ['build/liftd-l02-6-driver-onboarding']
+    paths:
+      - 'rideshare/src/driver-onboarding.mjs'
+      - 'rideshare/test/driver-onboarding.test.mjs'
+      - 'rideshare/web/**'
+      - '.github/workflows/liftd-l02-6-level1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  onboarding:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: liftd_qualification
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres -d liftd_qualification"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      LIFTD_DATABASE_URL: postgres://postgres:postgres@127.0.0.1:5432/liftd_qualification
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Exact implementation SHA
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci --prefix rideshare --ignore-scripts
+      - run: |
+          node --check rideshare/src/driver-onboarding.mjs
+          node --check rideshare/src/driver-onboarding-review.mjs
+          node --check rideshare/src/postgres-driver-onboarding.mjs
+          node --check rideshare/src/http.mjs
+          node --test rideshare/test/driver-onboarding.test.mjs rideshare/test/driver-onboarding-review.test.mjs rideshare/test/auth.test.mjs
+          node --test rideshare/test/postgres/driver-onboarding.test.mjs
+          cd rideshare/web && npm run check

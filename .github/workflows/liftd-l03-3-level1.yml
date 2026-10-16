@@ -1,0 +1,61 @@
+name: LIFTd L03.3 Level 1
+on:
+  pull_request:
+    paths:
+      - 'rideshare/src/fraud.mjs'
+      - 'rideshare/src/auth.mjs'
+      - 'rideshare/src/http.mjs'
+      - 'rideshare/src/reviews.mjs'
+      - 'rideshare/src/dispatch.mjs'
+      - 'rideshare/src/payments.mjs'
+      - 'rideshare/migrations/014_abuse_fraud.sql'
+      - 'rideshare/test/postgres/fraud.test.mjs'
+      - '.github/workflows/liftd-l03-3-level1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: liftd-l03-3-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+jobs:
+  abuse-fraud:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: liftd_qualification
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres -d liftd_qualification"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    env:
+      LIFTD_DATABASE_URL: postgres://postgres:postgres@127.0.0.1:5432/liftd_qualification
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Verify exact SHA
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install locked rideshare dependencies
+        run: npm ci --prefix rideshare --ignore-scripts
+      - name: Validate source, tests, and authorization syntax
+        run: |
+          for f in rideshare/src/{fraud,auth,http,reviews,dispatch,payments}.mjs rideshare/test/postgres/fraud.test.mjs; do node --check "$f"; done
+      - name: Retained rideshare domain security and HTTP regression
+        run: npm test --prefix rideshare
+      - name: Scoped real PostgreSQL fraud, review, dispatch, payment, location and support integration
+        run: |
+          for testfile in rideshare/test/postgres/{fraud,reviews,dispatch,payments,location,support-cases}.test.mjs; do
+            echo "Verifying $testfile"
+            node --test "$testfile"
+          done

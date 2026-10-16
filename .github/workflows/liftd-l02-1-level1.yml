@@ -1,0 +1,46 @@
+name: LIFTd L02.1 Level 1
+on:
+  pull_request:
+    paths:
+      - 'rideshare/web/**'
+      - '.github/workflows/liftd-l02-1-level1.yml'
+  push:
+    branches:
+      - 'build/liftd-l02-1-application-shell'
+    paths:
+      - 'rideshare/web/**'
+      - '.github/workflows/liftd-l02-1-level1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  liftd-web:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact implementation head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate web routes, static app and safe non-live status
+        working-directory: rideshare/web
+        run: npm run check
+      - name: Verify static artifact and accessibility basics
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          h=Path("rideshare/web/index.html").read_text()
+          c=Path("rideshare/web/styles.css").read_text()
+          for token in ['lang="en"', 'name="viewport"', 'href="#main"', 'aria-label="Primary navigation"', 'aria-expanded="false"', 'aria-live="polite"', 'aria-busy="true"']:
+              assert token in h, f"missing {token}"
+          assert '@media(max-width:650px)' in c
+          assert ':focus-visible' in c
+          assert 'prefers-reduced-motion' in c
+          assert 'Not available for bookings' in h
+          PY

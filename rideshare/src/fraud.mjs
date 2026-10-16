@@ -64,7 +64,7 @@ export function createFraudService({pool,authenticator,clock=()=>Math.floor(Date
     if(action==='hold'&&!['OPEN','APPEALED'].includes(row.status))fail('FRAUD_TRANSITION_DENIED');
     if(action==='clear'&&!['OPEN','APPEALED'].includes(row.status))fail('FRAUD_TRANSITION_DENIED');
     if(action==='release'&&row.status!=='HELD')fail('FRAUD_TRANSITION_DENIED');
-    if(action==='appeal'&&(row.reporter_id!==p.subject||p.role==='operator'||!['HELD','CLEARED'].includes(row.status)||row.appeal_count!==0))fail('FRAUD_APPEAL_DENIED',403);
+    if(action==='appeal'&&(p.role==='operator'||!['HELD','CLEARED'].includes(row.status)||row.appeal_count!==0))fail('FRAUD_APPEAL_DENIED',403);
     if(action==='close'&&!['CLEARED','APPEALED'].includes(row.status))fail('FRAUD_TRANSITION_DENIED');
     const until=action==='hold'?t+input.holdSeconds:null;
     const appeals=Number(row.appeal_count)+(action==='appeal'?1:0);
@@ -92,7 +92,7 @@ export function createFraudService({pool,authenticator,clock=()=>Math.floor(Date
     if(!row)fail('FRAUD_CASE_UNAVAILABLE',404);
     const p=await permit(token,row.trip_id,'fraud.read');
     await trip(c,row.trip_id,p);
-    if(p.role!=='operator'&&p.subject!==row.reporter_id)fail('FRAUD_SCOPE_DENIED',403);
+    // Both trip participants may inspect a redacted allegation for a meaningful appeal; no reporter identity or raw evidence escapes.
     await permit(token,row.trip_id,'fraud.read',p);
     return view(row)
    })

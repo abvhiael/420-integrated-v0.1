@@ -96,19 +96,27 @@
       },
       {
         "name": "Shit",
-        "state": "VERIFY_EXTERNAL_PROVENANCE"
+        "state": "DOCUMENTED_REVIEW_ELIGIBLE",
+        "source": "https://mrnice.com/product/shit/",
+        "evidenceScope": "documented name identity, not game-locus verification or genetic equivalence"
       },
       {
         "name": "Dirty Old Bastard",
-        "state": "VERIFY_EXTERNAL_PROVENANCE"
+        "state": "DOCUMENTED_REVIEW_ELIGIBLE",
+        "source": "https://www.leafly.com/strains/dirty-old-bastard",
+        "evidenceScope": "documented name identity, not game-locus verification or genetic equivalence"
       },
       {
         "name": "Bitch Fuel",
-        "state": "VERIFY_EXTERNAL_PROVENANCE"
+        "state": "DOCUMENTED_REVIEW_ELIGIBLE",
+        "source": "https://www.leafly.com/strains/bitch-fuel",
+        "evidenceScope": "documented name identity, not game-locus verification or genetic equivalence"
       },
       {
         "name": "Karma Bitch",
-        "state": "VERIFY_EXTERNAL_PROVENANCE"
+        "state": "DOCUMENTED_REVIEW_ELIGIBLE",
+        "source": "https://www.leafly.com/strains/karma-bitch",
+        "evidenceScope": "documented name identity, not game-locus verification or genetic equivalence"
       }
     ],
     "rules": "exact approved cultivar identities/aliases only; no user-generated lookalike or new obscene combinations; slurs, threats and harassment never auto-exempt; age and platform moderation remain applicable"

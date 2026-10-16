@@ -1,0 +1,85 @@
+{
+  "schema": "420.bnb.deployment.topology.v1",
+  "release_policy": {
+    "immutable_registry_digests": true,
+    "booking_enabled": false,
+    "travel_bnb_booking": false,
+    "financial_execution": false,
+    "operator_approval_verified": false,
+    "live_accepted": false
+  },
+  "api": {
+    "replicas": [
+      "api-a",
+      "api-b"
+    ],
+    "service_id": "bnb-api",
+    "health": "/health/ready",
+    "private_network": true
+  },
+  "worker": {
+    "service_id": "bnb-worker",
+    "sink": "local-validation",
+    "external_transport_approved": false
+  },
+  "migration": {
+    "service_id": "bnb-migrator",
+    "separate_credential_mount": true
+  },
+  "postgresql": {
+    "mode": "operator-managed-external",
+    "min_major": 16,
+    "sslmode": "verify-full",
+    "channel_binding": "require",
+    "credentials": "separate-mounted-runtime-and-migrator",
+    "local_production_database": false
+  },
+  "ingress": {
+    "public_ports": [
+      443
+    ],
+    "tls": "mounted-operator-approved",
+    "admin_api": false
+  },
+  "consumers": {
+    "search": {
+      "mode": "external-independent-deployment",
+      "approved": false,
+      "endpoint": "operator-supplied",
+      "receipt": "independent-signed-proof"
+    },
+    "travel": {
+      "mode": "external-independent-deployment",
+      "approved": false,
+      "endpoint": "operator-supplied",
+      "receipt": "independent-signed-proof"
+    }
+  },
+  "limits": {
+    "api": {
+      "cpu": "1.0",
+      "memory_mb": 768,
+      "pids": 128
+    },
+    "worker": {
+      "cpu": "0.75",
+      "memory_mb": 512,
+      "pids": 64
+    },
+    "migrator": {
+      "cpu": "0.75",
+      "memory_mb": 512,
+      "pids": 64
+    },
+    "web": {
+      "cpu": "0.5",
+      "memory_mb": 256,
+      "pids": 64
+    },
+    "ingress": {
+      "cpu": "0.5",
+      "memory_mb": 256,
+      "pids": 64
+    }
+  }
+}

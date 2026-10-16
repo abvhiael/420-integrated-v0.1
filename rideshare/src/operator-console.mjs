@@ -46,9 +46,9 @@ export function createOperatorConsoleService({authenticator,tripStore,dispatchMo
      eligibility:Object.freeze({status:eligibility.status}),liveService:false});
   },
   async incidents(token,tripId){
-   const {p,trip}=await scopedTrip(token,tripId,'operator.incident.read');
+   const {p,trip}=await scopedTrip(token,tripId,'safety.read');
    const result=await safetyService.read(token,tripId);
-   const fresh=await scopedTrip(token,tripId,'operator.incident.read',p);
+   const fresh=await scopedTrip(token,tripId,'safety.read',p);
    if(fresh.trip.revision!==trip.revision)fail('STALE_OPERATOR_VIEW',409);
    if(!result||result.tripId!==tripId||!Array.isArray(result.incidents)||result.incidents.length>100)fail('INVALID_INCIDENT_PROJECTION',503);
    await append(p,tripId,'incident.read','READ',undefined);
@@ -58,9 +58,9 @@ export function createOperatorConsoleService({authenticator,tripStore,dispatchMo
    record(command,['commandId','incidentId','expectedRevision','resolution']);
    if(!id(command.commandId)||!id(command.incidentId)||!Number.isSafeInteger(command.expectedRevision)||command.expectedRevision<0||
        !['safe_exit','interrupted'].includes(command.resolution))fail('INVALID_RECOVERY_REQUEST',400);
-   const {p,trip}=await scopedTrip(token,tripId,'operator.incident.resolve');
+   const {p,trip}=await scopedTrip(token,tripId,'safety.resolve');
    if(trip.state!=='IN_PROGRESS'||trip.revision!==command.expectedRevision)fail('INVALID_RECOVERY_STATE',409);
-   await authorize(token,tripId,'operator.incident.resolve',p);
+   await authorize(token,tripId,'safety.resolve',p);
    // Canonical safety authority performs atomic incident existence, CAS, replay and financial/safety hooks.
    const result=await safetyService.resolve(token,tripId,command);
    if(!result||result.tripId!==tripId||result.incidentId!==command.incidentId||

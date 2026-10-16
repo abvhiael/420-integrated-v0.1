@@ -55,6 +55,8 @@ test('ordered concurrent migrations are checksum-verified and runtime is a non-o
   const role = await pool.query('SELECT current_user AS name,rolsuper FROM pg_roles WHERE rolname=current_user');
   assert.equal(role.rows[0].rolsuper, false); assert.equal(role.rows[0].name, 'liftd_runtime');
   await assert.rejects(() => pool.query("UPDATE liftd.migrations SET checksum='bad'"), e => e.code === '42501');
+  await assert.rejects(() => pool.query("UPDATE liftd.operator_audit SET result='READ'"), e => e.code === '42501');
+  await assert.rejects(() => pool.query('DELETE FROM liftd.operator_audit'), e => e.code === '42501');
 });
 test('atomic create persists trip/event/command and exact retry returns original result', async () => {
   const id = nextId(), commandId = nextId();

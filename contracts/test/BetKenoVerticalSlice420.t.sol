@@ -167,15 +167,15 @@ contract BetKenoVerticalSlice420Test {
         _seedAccess(s);
         _seedModuleGameOperator(s);
         // Register an immutable, scoped Keno schedule before wager acceptance.
-        KenoPaytableAuthority420 paytable = new KenoPaytableAuthority420(
-            address(s.auth), GAME_V1, RULESET, keccak256("keno/test-schedule/v1"),
-            keccak256("keno/test-schedule-manifest"));
         uint256[11][11] memory bps;
         for (uint8 n=1;n<=10;++n) bps[n][n]=10_000;
         bps[5][2]=10_000;
         bps[5][3]=20_000;
         bps[5][4]=100_000;
         bps[5][5]=500_000;
+        KenoPaytableAuthority420 paytable = new KenoPaytableAuthority420(
+            address(s.auth), GAME_V1, RULESET, keccak256("keno/test-schedule/v1"),
+            keccak256("keno/test-schedule-manifest"), keccak256(abi.encode(bps)));
         vm.prank(ADMIN);
         paytable.activate(bps);
         vm.prank(ADMIN);

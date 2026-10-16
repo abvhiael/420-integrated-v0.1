@@ -1,12 +1,23 @@
 import {AuthError} from './auth.mjs';
+import {createHash} from 'node:crypto';
+import {canonical} from './canonical.mjs';
 import {checkSchema} from './schema.mjs';
 import {digest,uint} from './payment-protocol.mjs';
 import {quoteHash as calculateQuoteHash} from './fare.mjs';
 const fail=(c)=>{throw new AuthError(c,409)};
 const sum=(a,f)=>a.reduce((n,x)=>n+BigInt(x[f]),0n);
 const distinct=(rows,field)=>{if(new Set(rows.map(x=>x[field])).size!==rows.length)fail('ECONOMIC_REPLAY')};
-export function auditEconomicHistory({trip,quote,quoteHash,intents,operations,plans,funding,events,operationEvents,receipts,timing}){
+export function auditEconomicHistory({trip,tripEvents,quote,quoteHash,intents,operations,plans,funding,events,operationEvents,receipts,timing}){
  if(!trip||!['COMPLETED','CANCELLED'].includes(trip.state)||!timing?.ended_at)fail('ECONOMIC_TERMINAL_REQUIRED');
+ if(!Array.isArray(tripEvents)||!tripEvents.length)fail('ECONOMIC_TRIP_HISTORY_MISSING');
+ let prior='0'.repeat(64);
+ for(const [position,e] of tripEvents.entries()){
+  const payload={tripId:e.trip_id,revision:Number(e.revision),actorId:e.actor_id,commandId:e.command_id,action:e.action,snapshot:e.snapshot,previousHash:e.previous_hash};
+  const actual=createHash('sha256').update(canonical(payload)).digest('hex');
+  if(e.trip_id!==trip.id||Number(e.revision)!==position||e.previous_hash!==prior||actual!==e.event_hash)fail('ECONOMIC_TRIP_HISTORY_TAMPERED');
+  prior=e.event_hash;
+ }
+ if(canonical(tripEvents.at(-1).snapshot)!==canonical(trip))fail('ECONOMIC_TRIP_SNAPSHOT_MISMATCH');
  if(!quote||!intents?.length||!quoteHash)fail('ECONOMIC_QUOTE_REQUIRED');
  if(calculateQuoteHash(quote)!==quoteHash)fail('ECONOMIC_QUOTE_CORRUPT');
  for(const [rows,key] of [[intents,'intent_id'],[operations,'operation_id'],[operations,'pay_operation_id'],[events,'event_id'],[operationEvents,'event_id'],[plans,'plan_hash'],[funding,'funding_ref']])distinct(rows,key);
@@ -61,7 +72,7 @@ export function auditEconomicHistory({trip,quote,quoteHash,intents,operations,pl
  for(const e of events)if(digest(e.payload)!==e.digest||!intents.some(i=>i.intent_id===e.intent_id)||!receipts.some(r=>r.receipt_hash===e.receipt_hash&&r.owner_kind==='CAPTURE'&&r.owner_id===e.intent_id))fail('ECONOMIC_EVENT_TAMPERED');
  for(const e of operationEvents)if(digest(e.payload)!==e.digest||!operations.some(o=>o.operation_id===e.operation_id)||!receipts.some(r=>r.receipt_hash===e.receipt_hash&&r.owner_kind==='OPERATION'&&r.owner_id===e.operation_id))fail('ECONOMIC_EVENT_TAMPERED');
  for(const f of funding)if(!receipts.some(r=>r.receipt_hash===f.payload.receiptHash&&r.owner_kind==='FUNDING'&&r.owner_id===f.funding_ref))fail('ECONOMIC_FUNDING_UNVERIFIED');
- return Object.freeze({tripId:trip.id,status:'RECONCILED',historyDigest:digest({quoteHash,intents:intents.map(x=>x.intent_hash),operations:operations.map(x=>x.pay_operation_id),plans:plans.map(x=>x.plan_hash),events:events.map(x=>x.digest),operationEvents:operationEvents.map(x=>x.digest)}),grossCents:gross.toString(),refundCents:used.refund.toString(),driverCents:used.driver.toString(),platformCents:used.platform.toString(),passThroughCents:used.passThrough.toString(),assetConserved:true,developmentSettlement:'SEPARATE_CANONICAL_APPROVAL'});
+ return Object.freeze({tripId:trip.id,status:'RECONCILED',historyDigest:digest({tripHead:prior,quoteHash,intents:intents.map(x=>x.intent_hash),operations:operations.map(x=>x.pay_operation_id),plans:plans.map(x=>x.plan_hash),events:events.map(x=>x.digest),operationEvents:operationEvents.map(x=>x.digest)}),grossCents:gross.toString(),refundCents:used.refund.toString(),driverCents:used.driver.toString(),platformCents:used.platform.toString(),passThroughCents:used.passThrough.toString(),assetConserved:true,developmentSettlement:'SEPARATE_CANONICAL_APPROVAL'});
 }
 export function createEconomicReconciliationService({pool,authenticator,clock=()=>Math.floor(Date.now()/1000)}){
  return {async reconcile(token,tripId){
@@ -75,7 +86,7 @@ export function createEconomicReconciliationService({pool,authenticator,clock=()
    const before=await permit();if(before.role!=='operator'||before.expiresAt<=clock())fail('ECONOMIC_SCOPE_DENIED');
    const quote=(await c.query('SELECT q.payload,q.quote_hash FROM liftd.trip_quotes b JOIN liftd.fare_quotes q USING(quote_id) WHERE b.trip_id=$1',[tripId])).rows[0];
    const rows=async sql=>(await c.query(sql,[tripId])).rows;
-   const result=auditEconomicHistory({trip,quote:quote?.payload,quoteHash:quote?.quote_hash,
+   const result=auditEconomicHistory({trip,tripEvents:await rows('SELECT * FROM liftd.events WHERE trip_id=$1 ORDER BY revision'),quote:quote?.payload,quoteHash:quote?.quote_hash,
     intents:await rows('SELECT * FROM liftd.payment_intents WHERE trip_id=$1 ORDER BY intent_id'),
     operations:await rows('SELECT * FROM liftd.pay_operations WHERE trip_id=$1 ORDER BY operation_id'),
     plans:await rows('SELECT * FROM liftd.payout_projections WHERE trip_id=$1 ORDER BY id'),

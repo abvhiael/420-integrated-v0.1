@@ -77,7 +77,7 @@ test('L03.3 real PostgreSQL: five abuse types, expiry, adversarial decisions, re
    await conn.query('ROLLBACK');
   }finally{conn.release()}
   await fraud.release('operator','fraud_pending_case_'+suffix,{commandId:'pending_release',expectedRevision:1});
-  const handler=createHttpHandler({},null,null,null,null,null,null,null,null,null,null,null,null,fraud);
+  const handler=createHttpHandler({},null,null,null,null,null,null,null,null,null,null,null,null,null,null,fraud);
   const url='https://liftd.example/v1/rideshare/fraud/cases/'+target;
   assert.equal((await handler(new Request(url))).status,401);
   assert.equal((await handler(new Request(url,{method:'DELETE',headers:{authorization:'Bearer a.b.c'}}))).status,405);

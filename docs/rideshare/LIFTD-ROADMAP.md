@@ -81,7 +81,7 @@ The following sequence was previously specified to the repository owner but was 
 
 | Step | Original canonical deliverable | Status |
 | --- | --- | --- |
-| **L03.1 — Support and dispute cases** | Structured cases for cancellations, no-shows, fare complaints, lost property and incidents. Apply evidence access, retention, escalation and appeal rules. | **PLANNED — Level 1** |
+| **L03.1 — Support and dispute cases** | Structured cases for cancellations, no-shows, fare complaints, lost property and incidents. Apply evidence access, retention, escalation and appeal rules. | **COMPLETE — Level 1 PASS (repository scope)**; [L03.1 exact-SHA certificate](L03.1-LEVEL1-EVIDENCE.md), implementation `29bdb1f2a3acc4f91ac9bd16e67d45f2db7f04e8`; external/private evidence-vault and real transport acceptance remain NOT ACCEPTED |
 | **L03.2 — Reviews and reputation** | Permit reviews from qualified trip interactions; enforce domain scope, anti-replay and moderation. Ratings must not substitute for transport eligibility. | **PLANNED — Level 1** |
 | **L03.3 — Abuse and fraud controls** | Address account misuse, fabricated trips, location manipulation, coordinated reviews and economic replay. Provide auditable decisions and bounded remediation. | **PLANNED — Level 1** |
 | **L03.4 — Economic reconciliation** | Reconcile trip, quote, payment, refund and payout histories. Apply approved platform/driver/compensation splits and prove conservation and duplicate protection. | **PLANNED — Level 1** |

@@ -1,0 +1,40 @@
+name: High Country R07.1 Environment Authority Level 1
+on:
+  pull_request:
+    paths:
+      - 'deployments/highcountry/r07-1.testnet.json'
+      - 'scripts/highcountry/verify-r07-1.mjs'
+      - 'scripts/highcountry/verify-r07-1.test.mjs'
+      - '.github/workflows/highcountry-r07-1.yml'
+      - 'docs/highcountry/R07.1-ENVIRONMENT-AUTHORITY.md'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  authority-template:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Exact SHA and PR diff integrity
+        run: |
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+          git diff --check "$(git merge-base HEAD origin/main)" HEAD
+      - name: Manifest structural verification
+        run: node scripts/highcountry/verify-r07-1.mjs
+      - name: Authority adversarial and boundary tests
+        run: node --test scripts/highcountry/verify-r07-1.test.mjs
+      - name: Confirm live deployment is NOT authorized
+        run: |
+          if node scripts/highcountry/verify-r07-1.mjs --require-ready; then
+            echo "Unresolved manifest incorrectly authorized" >&2
+            exit 1
+          fi

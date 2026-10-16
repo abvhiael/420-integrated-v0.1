@@ -45,13 +45,13 @@ test('L03.3 real PostgreSQL: five abuse types, expiry, adversarial decisions, re
   const visible=await fraud.read('driver',target);
   assert.equal(visible.caseId,target);assert.equal('reporter_id' in visible,false);assert.equal('evidence_digest' in visible,false);
   const appealed=await fraud.appeal('driver',target,{commandId:'appeal_1',expectedRevision:1});
-  assert.equal(appealed.status,'APPEALED');assert.equal(appealed.holdUntil,null);
-  await enforceFraudHold(pool,tripId,now);
+  assert.equal(appealed.status,'APPEALED');assert.equal(appealed.holdUntil,1060);
+  await assert.rejects(()=>enforceFraudHold(pool,tripId,now),{code:'FRAUD_REVIEW_HOLD'});
   await assert.rejects(()=>fraud.appeal('driver',target,{commandId:'appeal_twice',expectedRevision:2}),{code:'FRAUD_APPEAL_DENIED'});
-  const reviewed=await reviews.submit('rider','fraud_review_'+suffix,{tripId,commandId:'rv_fraud',rating:5});
-  assert.equal(reviewed.moderation,'PENDING');
   const cleared=await fraud.clear('operator',target,{commandId:'clear_a',expectedRevision:2});
   assert.equal(cleared.status,'CLEARED');
+  const reviewed=await reviews.submit('rider','fraud_review_'+suffix,{tripId,commandId:'rv_fraud',rating:5});
+  assert.equal(reviewed.moderation,'PENDING');
   const closed=await fraud.close('operator',target,{commandId:'close_a',expectedRevision:3});
   assert.equal(closed.status,'CLOSED');
   await assert.rejects(()=>fraud.hold('operator',target,{commandId:'reopen',expectedRevision:4,holdSeconds:60}),{code:'FRAUD_TRANSITION_DENIED'});

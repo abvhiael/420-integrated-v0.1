@@ -1,6 +1,6 @@
 import {AuthError} from './auth.mjs';
 // Fetch-compatible protected handler; deployment/listeners are not enabled here.
-export function createHttpHandler(service, locationService, dispatchAdapter, quoteService, paymentService, safetyService, riderPreferencesService, onboardingService, onboardingReviewService, driverOfferService, communicationService, operatorConsoleService, travelHandoffService) {
+export function createHttpHandler(service, locationService, dispatchAdapter, quoteService, paymentService, safetyService, riderPreferencesService, onboardingService, onboardingReviewService, driverOfferService, communicationService, operatorConsoleService, travelHandoffService, supportCaseService) {
   return async request => {
     const reply = (status, value) => new Response(JSON.stringify(value), {status,
       headers: {'content-type': 'application/json', 'cache-control': 'no-store', 'x-content-type-options': 'nosniff'}});
@@ -16,6 +16,7 @@ export function createHttpHandler(service, locationService, dispatchAdapter, quo
       const travelHandoff=/^\/v1\/rideshare\/trips\/([A-Za-z0-9_-]{1,128})\/travel-handoff(?:\/([A-Za-z0-9_-]{1,128}))?$/.exec(url.pathname);
       const operator=/^\/v1\/rideshare\/operator\/trips\/([A-Za-z0-9_-]{1,128})(?:\/(incidents|resolve))?$/.exec(url.pathname);
       const messages=/^\/v1\/rideshare\/trips\/([A-Za-z0-9_-]{1,128})\/messages$/.exec(url.pathname);
+      const support=new RegExp('^/v1/rideshare/support/cases/([A-Za-z0-9_-]{1,128})(?:/(evidence|escalate|decide|appeal|close))?' + String.fromCharCode(36)).exec(url.pathname);
       const safety=/^\/v1\/rideshare\/trips\/([A-Za-z0-9_-]{1,128})\/safety(?:\/(report|resolve|case))?$/.exec(url.pathname);
       const payment=/^\/v1\/rideshare\/trips\/([A-Za-z0-9_-]{1,128})\/payments(?:\/(prepare|consent|reconcile|plan|reserve|operation))?$/.exec(url.pathname);
       const statement=/^\/v1\/rideshare\/drivers\/([A-Za-z0-9_-]{1,128})\/statements\/([A-Za-z0-9_-]{1,128})$/.exec(url.pathname);
@@ -26,11 +27,12 @@ export function createHttpHandler(service, locationService, dispatchAdapter, quo
       const locationPrepare = url.pathname === '/v1/rideshare/routes';
       const locationRead = /^\/v1\/rideshare\/trips\/([A-Za-z0-9_-]{1,128})\/coordinates$/.exec(url.pathname);
       const match = /^\/v1\/rideshare\/trips(?:\/([A-Za-z0-9_-]{1,128})(\/transitions)?)?$/.exec(url.pathname);
-      if (!match && !locationPrepare && !locationRead && !availability && !quoteIssue && !quoteConsent && !quoteRead && !payment && !statement && !safety && !preferences && !onboarding && !onboardingReview && !offerRead && !offerRespond && !availabilityRead && !messages && !operator && !travelHandoff) return reply(404, {error: 'NOT_FOUND'});
+      if (!match && !locationPrepare && !locationRead && !availability && !quoteIssue && !quoteConsent && !quoteRead && !payment && !statement && !safety && !preferences && !onboarding && !onboardingReview && !offerRead && !offerRespond && !availabilityRead && !messages && !operator && !travelHandoff && !support) return reply(404, {error: 'NOT_FOUND'});
       if ((locationPrepare || locationRead) && !locationService) return reply(503, {error: 'LOCATION_UNAVAILABLE'});
       if (availability && !dispatchAdapter) return reply(503,{error:'DISPATCH_UNAVAILABLE'});
       if((quoteIssue||quoteConsent||quoteRead)&&!quoteService) return reply(503,{error:'QUOTE_UNAVAILABLE'});
       if(travelHandoff&&!travelHandoffService)return reply(503,{error:'HANDOFF_UNAVAILABLE'});
+      if(support&&!supportCaseService)return reply(503,{error:'SUPPORT_UNAVAILABLE'});
       if(operator&&!operatorConsoleService)return reply(503,{error:'OPERATOR_UNAVAILABLE'});
       if(messages&&!communicationService)return reply(503,{error:'MESSAGING_UNAVAILABLE'});
       if(safety&&!safetyService)return reply(503,{error:'SAFETY_UNAVAILABLE'});
@@ -43,6 +45,8 @@ export function createHttpHandler(service, locationService, dispatchAdapter, quo
       if (typeof authorization !== 'string' || authorization.length > 32775 ||
         !/^Bearer [A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/.test(authorization)) throw new AuthError('BEARER_REQUIRED');
       const token = authorization.slice(7);
+      if(support&&request.method==='GET'&&!support[2])return reply(200,await supportCaseService.read(token,support[1]));
+      if(support&&request.method!=='POST')return reply(405,{error:'METHOD_NOT_ALLOWED'});
       if(travelHandoff&&request.method==='GET'&&travelHandoff[2])return reply(200,await travelHandoffService.verify(token,travelHandoff[1],travelHandoff[2]));
       if(travelHandoff&&(request.method!=='POST'||travelHandoff[2]))return reply(405,{error:'METHOD_NOT_ALLOWED'});
       if(operator&&request.method==='GET'&&operator[2]!=='resolve')return reply(200,await (operator[2]==='incidents'?operatorConsoleService.incidents(token,operator[1]):operatorConsoleService.snapshot(token,operator[1])));
@@ -88,6 +92,7 @@ export function createHttpHandler(service, locationService, dispatchAdapter, quo
           (body.commandId !== undefined && body.commandId !== commandId)) throw new AuthError('INVALID_REQUEST', 400);
         body.commandId = commandId;
       }
+      if(support)return reply(support[2]?200:201,await supportCaseService[support[2]||'open'](token,support[1],body));
       if(travelHandoff)return reply(201,await travelHandoffService.prepare(token,travelHandoff[1],body));
       if(operator)return reply(200,await operatorConsoleService.resolve(token,operator[1],body));
       if(messages)return reply(200,await communicationService.send(token,messages[1],body));

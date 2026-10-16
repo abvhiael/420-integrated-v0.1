@@ -9,7 +9,7 @@ test('L03.4 real PostgreSQL reconciliation of trip, quote, payment, payout and a
  const pool=createDatabasePool({connectionString:process.env.LIFTD_DATABASE_URL});
  try{
   await migrate(pool);
-  const controls={now:100,quotes:true,pay:true,encryptionKey:Buffer.alloc(32,12).toString('base64')};
+  const controls={now:100,quotes:true,pay:true,economics:true,encryptionKey:Buffer.alloc(32,12).toString('base64')};
   const app=paymentFixture(pool,[...generateRoots(),...generateRoots()],controls);
   const service=createEconomicReconciliationService({pool,authenticator:app.authenticator,clock:()=>controls.now});
   const tripId='eco_'+Date.now();

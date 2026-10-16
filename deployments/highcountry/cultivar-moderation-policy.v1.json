@@ -1,0 +1,60 @@
+{
+  "schema": "HC.CULTIVAR_NAMING_MODERATION.V1",
+  "status": "ADOPTED_DESIGN_NOT_PRODUCTION_DEPLOYED",
+  "founders": {
+    "count": 16,
+    "heritage": true,
+    "biologicallyNeutral": true
+  },
+  "paths": [
+    "developer-curated",
+    "player-crossbreeding",
+    "heritage-discovery"
+  ],
+  "nameModes": {
+    "automatic": {
+      "cost": "free",
+      "algorithm": "combine approved normalized parent display names; deterministic collision suffix",
+      "screen": true
+    },
+    "custom": {
+      "cost": "TBD_420_TOKEN_UNITS",
+      "requiresAuthenticatedAccount": true,
+      "screen": true,
+      "review": true
+    }
+  },
+  "notice": "Cultivar names must not contain identity-based slurs, hateful language, threats, harassment, explicit sexual content, vulgar or obscene language, disguised prohibited terms, impersonation, or attempts to bypass moderation. Violating names and associated cultivars may be blocked from use in High Country. Repeated violations may result in suspension or removal from the game. Legitimate genetic provenance remains recorded.",
+  "filterLayers": [
+    "normalized deterministic prohibited term checks including confusables and obfuscation",
+    "context-sensitive automated moderation with uncertainty quarantine",
+    "human appeal and review with evidence and independent audit"
+  ],
+  "publicationStates": [
+    "PENDING",
+    "PUBLISHED",
+    "HIDDEN",
+    "RETIRED"
+  ],
+  "neutralFallback": "Cultivar HC-{short safe identifier}",
+  "geneticsRemainsImmutable": true,
+  "unavailableWhenHiddenOrRetired": true,
+  "permissions": [
+    "genetic-provenance",
+    "owner",
+    "name-edit",
+    "publish-or-distribute"
+  ],
+  "reviewerCompensation": {
+    "asset": "native $420",
+    "payoutModel": "fixed amount per independently qualified completed review; same for approval and denial",
+    "rewardAmount": "PENDING_APPROVED_BUDGET",
+    "payer": "funded developer compensation vault",
+    "noSelfReview": true,
+    "noDuplicateReward": true,
+    "appealDoesNotPayRepeatedlyWithoutIndependentAuthorization": true,
+    "onlyAfterFinalizedDecision": true,
+    "capPerPeriod": "PENDING_APPROVED_BUDGET",
+    "noAutomaticTransferInThisModule": true
+  }
+}

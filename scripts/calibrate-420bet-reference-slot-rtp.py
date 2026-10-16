@@ -67,7 +67,7 @@ def calibrate(samples, divisor, seed):
 if __name__=='__main__':
     ap=argparse.ArgumentParser()
     ap.add_argument('--samples',type=int,default=25000)
-    ap.add_argument('--divisor',type=int,default=32)
+    ap.add_argument('--divisor',type=int,default=80)
     a=ap.parse_args()
     if a.samples<1000 or a.divisor<1: ap.error('invalid sampling parameters')
     print(json.dumps(calibrate(a.samples,a.divisor,4204401),indent=2,sort_keys=True))

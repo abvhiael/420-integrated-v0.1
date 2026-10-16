@@ -22,7 +22,7 @@ jobs:
         run: |
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
-          python3 scripts/calibrate-420bet-reference-slot-rtp.py --samples 25000 > "$RUNNER_TEMP/reference-slot-candidate.json"
+          python3 scripts/calibrate-420bet-reference-slot-rtp.py --samples 25000 --divisor 80 > "$RUNNER_TEMP/reference-slot-candidate.json"
           python3 - "$RUNNER_TEMP/reference-slot-candidate.json" <<'PY'
           import json,sys
           d=json.load(open(sys.argv[1]))

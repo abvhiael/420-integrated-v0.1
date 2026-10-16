@@ -30,7 +30,7 @@ before(async () => {
   await owner.query('GRANT SELECT ON liftd.migrations,liftd.trips,liftd.events,liftd.commands TO liftd_runtime');
   await owner.query('GRANT INSERT,UPDATE ON liftd.trips TO liftd_runtime');
   await owner.query('GRANT INSERT ON liftd.events,liftd.commands,liftd.operator_audit TO liftd_runtime');
-  await owner.query('GRANT SELECT ON liftd.operator_audit TO liftd_runtime');
+  await owner.query('GRANT SELECT ON liftd.operator_audit,liftd.assignment_leases TO liftd_runtime');
   const url = new URL(process.env.LIFTD_DATABASE_URL); url.username = 'liftd_runtime'; url.password = 'liftd_fixture';
   runtimeConnection = url.href;
   pool = createDatabasePool({connectionString: runtimeConnection}); store = createPostgresTripStore(pool);

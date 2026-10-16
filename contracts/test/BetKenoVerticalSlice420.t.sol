@@ -14,6 +14,7 @@ import "../src/bet/BetProfileRegistry420.sol";
 import "../src/bet/BetRegistry420.sol";
 import "../src/bet/BetTypes420.sol";
 import "../src/bet/KenoV1420.sol";
+import "../src/bet/KenoPaytableAuthority420.sol";
 import "../src/bet/RandomnessRouter420.sol";
 import "../src/bet/RiskManager420.sol";
 import "../src/bet/SettlementEngine420.sol";
@@ -164,6 +165,21 @@ contract BetKenoVerticalSlice420Test {
         _seedProfiles(s);
         _seedAccess(s);
         _seedModuleGameOperator(s);
+        // Register an immutable, scoped Keno schedule before wager acceptance.
+        KenoPaytableAuthority420 paytable = new KenoPaytableAuthority420(
+            address(s.auth), GAME_V1, RULESET, keccak256("keno/test-schedule/v1"),
+            keccak256("keno/test-schedule-manifest"));
+        uint256[11][11] memory bps;
+        for (uint8 n=1;n<=10;++n) bps[n][n]=10_000;
+        bps[5][2]=10_000;
+        bps[5][3]=20_000;
+        bps[5][4]=100_000;
+        bps[5][5]=500_000;
+        vm.prank(ADMIN);
+        paytable.activate(bps);
+        vm.prank(ADMIN);
+        s.wagerRouter.bindKenoPaytable(GAME_V1,address(s.keno),address(paytable));
+
         _seedEconomics(s);
         _seedRisk(s);
         _seedRandomness(s);
@@ -321,7 +337,7 @@ contract BetKenoVerticalSlice420Test {
         });
 
         vm.prank(PLAYER);
-        (bytes32 wagerId, uint256 reservedLiability) = s.wagerRouter.placeWager(request);
+        (bytes32 wagerId, uint256 reservedLiability) = s.wagerRouter.placeKenoWager(request, params);
         require(wagerId != bytes32(0), "wager id");
         require(reservedLiability == 4_900 ether, "full liability not reserved");
         require(s.vault.wagerStakeEscrow(wagerId) == stake, "stake not escrowed");

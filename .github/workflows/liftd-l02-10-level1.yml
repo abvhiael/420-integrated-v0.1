@@ -3,6 +3,7 @@ on:
   pull_request:
     paths:
       - 'rideshare/src/operator-console.mjs'
+      - 'rideshare/src/operator-monitors.mjs'
       - 'rideshare/src/postgres-operator-audit.mjs'
       - 'rideshare/src/auth.mjs'
       - 'rideshare/src/http.mjs'
@@ -47,7 +48,7 @@ jobs:
         run: npm ci --prefix rideshare --ignore-scripts
       - name: Targeted source and console syntax
         run: |
-          for f in rideshare/src/{operator-console,postgres-operator-audit,auth,http}.mjs rideshare/web/{operator-console,app}.mjs; do node --check "$f"; done
+          for f in rideshare/src/{operator-console,operator-monitors,postgres-operator-audit,auth,http}.mjs rideshare/web/{operator-console,app}.mjs; do node --check "$f"; done
       - name: Operator authorization, monitoring, safety and audit regressions
         run: |
           node --test rideshare/test/operator-console.test.mjs

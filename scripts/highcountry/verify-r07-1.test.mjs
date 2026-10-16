@@ -8,3 +8,7 @@ test('reject unsafe grant variants',()=>{const g={principal:'engine',component:'
 test('reject zero, negative and noninteger chain IDs',()=>{for(const chainId of [0,-1,1.5,'420']){const x=copy();x.chainId=chainId;assert.throws(()=>verify(x,s));}});
 
 test('constructor mapping rejects missing dependency',()=>{let x=copy();x.components[12].dependsOn=[];assert.throws(()=>verify(x,s),/constructor dependency mismatch/);});
+
+test('reject constructor source tampering',()=>{const x=copy();x.components[0].constructorParameters[0].name='fabricated_';assert.throws(()=>verify(x,s),/constructor schema diverges/);});
+test('reject unknown external dependency references',()=>{const x=copy();x.components[0].constructorParameters[0].sourceRef='InvalidAuthority';assert.throws(()=>verify(x,s),/unknown constructor reference/);});
+test('reject missing source',()=>{const x=copy();x.components[0].source='fake.sol';assert.throws(()=>verify(x,s),/missing verified source/);});

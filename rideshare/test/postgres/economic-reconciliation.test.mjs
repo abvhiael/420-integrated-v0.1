@@ -49,6 +49,13 @@ test('L03.4 real PostgreSQL reconciliation of trip, quote, payment, payout and a
   const payout=structuredClone(base);payout.plans[0].payload.driverCents+=1;
   assert.throws(()=>auditEconomicHistory(payout),{code:'ECONOMIC_PLAN_HASH_CORRUPT'});
   await assert.rejects(()=>service.reconcile(app.rider(tripId),tripId));
+  const pending='eco_pending_'+Date.now();
+  await app.create(pending);
+  const pendingIntent=await app.prepareIntent(pending);
+  await app.authorize(pending,pendingIntent);
+  await app.complete(pending);
+  await assert.rejects(()=>service.reconcile(app.operator(pending),pending),{code:'ECONOMIC_FINALITY_REQUIRED'});
+
   await assert.rejects(()=>pool.query('DELETE FROM liftd.operation_events WHERE operation_id=$1',[operation.operationId]),e=>e.code==='23514');
  }finally{await pool.end()}
 });

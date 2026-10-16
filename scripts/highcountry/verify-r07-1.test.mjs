@@ -6,3 +6,5 @@ test('reject wrong dependency order',()=>{const x=copy();x.components[0].depends
 test('reject unreviewed production routine policy',()=>{const x=copy();x.productionRoutineSelectors=['0x12345678'];assert.throws(()=>verify(x,s));});
 test('reject unsafe grant variants',()=>{const g={principal:'engine',component:'plant',action:'register',scope:'0x'+'1'.repeat(64),periodLimit:0,periodSeconds:0};for(const d of [{principal:'*'},{scope:'0x'+'0'.repeat(64)},{periodLimit:1},{periodSeconds:60}]){const x=copy();x.exactGrants=[{...g,...d}];assert.throws(()=>verify(x,s));}});
 test('reject zero, negative and noninteger chain IDs',()=>{for(const chainId of [0,-1,1.5,'420']){const x=copy();x.chainId=chainId;assert.throws(()=>verify(x,s));}});
+
+test('constructor mapping rejects missing dependency',()=>{let x=copy();x.components[12].dependsOn=[];assert.throws(()=>verify(x,s),/constructor dependency mismatch/);});

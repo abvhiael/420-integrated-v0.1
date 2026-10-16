@@ -11,10 +11,10 @@ assert.match(s,address);assert.notEqual(BigInt(s),0n,'zero address');
 if(local)assert.ok(BigInt(s)<start||BigInt(s)>end,'reserved address');}
 assert.ok(m.components.length>=20);
 m.components.forEach((c,i)=>{assert.equal(c.order,i+1);assert.ok(!names.has(c.name),'duplicate component');
-for(const dep of c.dependsOn)assert.ok(names.has(dep),'unsorted dependency');names.add(c.name);checkAddress(c.address,true);
+for(const dep of c.dependsOn)assert.ok(names.has(dep),'unsorted dependency');assert.ok(Array.isArray(c.constructorParameters)&&c.constructorParameters.length>0,'constructor schema missing');assert.deepEqual(c.dependsOn,c.constructorParameters.map(p=>p.sourceRef).filter(ref=>m.components.some(y=>y.name===ref)),'constructor dependency mismatch');for(const p of c.constructorParameters){assert.equal(p.type,'address');assert.ok(p.name&&p.sourceRef);if(p.value!==null)checkAddress(p.value);}names.add(c.name);checkAddress(c.address,true);
 if(c.address){assert.ok(!addresses.has(c.address.toLowerCase()),'duplicate address');addresses.add(c.address.toLowerCase());}
 if(c.codeHash!==null)assert.match(c.codeHash,hash);
-if(ready){assert.match(c.codeHash,hash);assert.ok(Array.isArray(c.constructorArgs),'constructor args');assert.ok(c.abiVersion&&c.deploymentReceipt,'missing deployment evidence');}
+if(ready){assert.match(c.codeHash,hash);assert.ok(c.constructorParameters.every(p=>p.value!==null),'unresolved constructor parameter');assert.ok(Array.isArray(c.constructorArgs)&&c.constructorArgs.length===c.constructorParameters.length,'constructor args');assert.ok(c.abiVersion&&c.deploymentReceipt,'missing deployment evidence');}
 });
 for(const c of m.externalContracts){checkAddress(c.address);if(ready)assert.match(c.codeHash,hash);}
 const roles=new Set();

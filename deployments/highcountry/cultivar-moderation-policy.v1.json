@@ -18,17 +18,22 @@
       "screen": true
     },
     "custom": {
-      "cost": "5 $420 initial (5 × 10^tokenDecimals base units; exact native token decimals from deployed asset)",
+      "cost": "USD 4.20 target, paid in native $420 using finalized seven-day reference average",
       "requiresAuthenticatedAccount": true,
       "screen": true,
       "review": true,
       "feePolicy": {
-        "version": "HC-CULTIVAR-NAME-FEE-V1",
-        "initialFeeTokens": "5",
-        "adjustment": "downward-only for V1; authorized fee schedule updates based on independently verified valuation, never untrusted spot price",
-        "effectiveOn": "new quotes only",
-        "quotedFeeFrozenAtSubmission": true,
-        "rounding": "base-unit exact; remainder to High Country competition vault"
+        "version": "HC-CULTIVAR-NAME-FEE-V2",
+        "targetUsd": "4.20",
+        "period": "seven complete UTC days",
+        "updateCadence": "once per calendar week, after period closes",
+        "oracle": "APPROVED_RELIABLE_USD_420_REFERENCE_REQUIRED",
+        "aggregation": "time-weighted mean over verified observations covering seven days, stale/outlier and minimum observation guards",
+        "calculation": "ceil(4.20 USD / reference USD per 420 token to token base units)",
+        "snapshot": "fee quote bound to oracle period, rule version, expiry and request ID",
+        "failure": "fail closed for new custom-name quotations on stale/missing/invalid oracle; free auto names continue",
+        "upperBound": "subject to approved affordability bounds and emergency pause; not activated yet",
+        "ownerControls": "scoped authorized emergency stop and future version updates, not retroactive repricing"
       }
     }
   },
@@ -66,14 +71,73 @@
     "noAutomaticTransferInThisModule": true
   },
   "customNameEconomics": {
-    "startingFeeTokens": "5",
+    "startingFeeTokens": "5 (superseded by V2 once oracle integration authorized)",
     "reviewerShareBps": 5000,
     "highCountryCompetitionVaultShareBps": 5000,
     "vaultUse": "Competition prize funding under separately approved competition policy",
     "settlement": "escrow upon accepted submission; release once per eligible final review; idempotent; no self review",
-    "feeChanges": "only authorized downward revisions in V1; configurable minimum pending approval; no floating automatic repricing",
+    "feeChanges": "weekly time-averaged USD 4.20 target; quote frozen at acceptance; fee may increase or decrease as USD value changes",
     "freeGeneratedNamesRemainFree": true,
     "feeRefunds": "explicit policy required before activation",
     "noPayPerDeletion": true
+  },
+  "nameExceptions": {
+    "type": "exact_verified_heritage_alias_only",
+    "exceptions": [
+      {
+        "name": "Alaskan Thunder Fuck",
+        "state": "DOCUMENTED_REVIEW_ELIGIBLE",
+        "source": "https://www.leafly.ca/news/strains-products/the-best-cannabis-strains-to-pair-with-beer-as-told-by-leafly-rev"
+      },
+      {
+        "name": "Fucking Incredible",
+        "state": "DOCUMENTED_REVIEW_ELIGIBLE",
+        "source": "https://www.leafly.ca/news/strains-products/the-best-cannabis-strains-to-pair-with-beer-as-told-by-leafly-rev"
+      },
+      {
+        "name": "Shit",
+        "state": "VERIFY_EXTERNAL_PROVENANCE"
+      },
+      {
+        "name": "Dirty Old Bastard",
+        "state": "VERIFY_EXTERNAL_PROVENANCE"
+      },
+      {
+        "name": "Bitch Fuel",
+        "state": "VERIFY_EXTERNAL_PROVENANCE"
+      },
+      {
+        "name": "Karma Bitch",
+        "state": "VERIFY_EXTERNAL_PROVENANCE"
+      }
+    ],
+    "rules": "exact approved cultivar identities/aliases only; no user-generated lookalike or new obscene combinations; slurs, threats and harassment never auto-exempt; age and platform moderation remain applicable"
+  },
+  "moderatorGovernance": {
+    "appointment": "owner nominates authenticated account, verifies identity and conflicts, assigns scoped time-limited capability via HighCountryAuthorization/CapabilityRegistry; require MFA and revocable roles",
+    "roles": [
+      "OWNER_POLICY_ADMIN",
+      "MODERATION_SUPERVISOR",
+      "NAME_REVIEWER",
+      "APPEALS_REVIEWER",
+      "READ_ONLY_AUDITOR"
+    ],
+    "panel": "High Country backend /admin/cultivars/moderation",
+    "functions": [
+      "queue",
+      "screening evidence",
+      "approve",
+      "reject",
+      "hide",
+      "retire",
+      "name heritage exception review",
+      "appeal",
+      "audit trail",
+      "conflict disclosures",
+      "payment eligibility"
+    ],
+    "separation": "reviewers cannot approve own name, review their own appeal, change payout terms, whitelist prohibited slurs, or unilaterally alter rulesets",
+    "discipline": "documented error review; non-punitive coaching for reasonable mistake; warnings and retraining for repeated negligence; suspended reviewing and unpaid future assignments for reckless or intentional violations; revoke capability/remove for deliberate abuse; clawback only upon proved fraud under separately approved rules; provide appeal and audit",
+    "pay": "only independently qualified completed cases, same payout approve/reject, one eligible payment per request/revision; no action-volume self-generation"
   }
 }

@@ -82,7 +82,7 @@ function renderDecision(decision) {
   if (decision.kind === "protected" && decision.role === "rider") {
     clearRiderAccount = mountRiderAccount(root, createRiderPreferencesApi(globalThis.LIFTdSessionAdapter), session);
     const quoteApi = createQuoteApi(globalThis.LIFTdSessionAdapter);
-    tripPanel = mountTripExperience(root, session, createTripExperienceApi(globalThis.LIFTdSessionAdapter));
+    tripPanel = mountTripExperience(root, session, createTripExperienceApi(globalThis.LIFTdSessionAdapter),globalThis.LIFTdSessionAdapter);
     quotePanel = mountQuoteView(root, session, quoteApi, tripId => tripPanel?.load(tripId));
     clearPickupView = mountPickupView(root, session, createLocationProviders(globalThis.LIFTdSessionAdapter, {search:globalThis.LIFTdPlaceSearchProvider,resolveAddress:globalThis.LIFTdAddressResolver}), route => quotePanel?.showRoute(route));
   }
@@ -90,6 +90,7 @@ function renderDecision(decision) {
     clearDriverAvailability = mountDriverAvailability(root, session, createDriverAvailabilityApi(globalThis.LIFTdSessionAdapter));
     const panel = mountDriverTrip(root, session, createDriverTripApi(globalThis.LIFTdSessionAdapter), {
       navigationCapability:globalThis.LIFTdNavigationCapability,
+      sessionProvider:globalThis.LIFTdSessionAdapter,
       openNavigation: url => window.open(url, "_blank", "noopener,noreferrer")
     });
     clearDriverTrip = () => panel.destroy();

@@ -57,6 +57,7 @@ contract MinesV1420 is I420System {
 
     mapping(bytes32 => mapping(uint8 => BoardCommitment)) private _boards;
     mapping(bytes32 => SessionState) private _sessions;
+    mapping(bytes32 => bool) public boardVerified;
 
     error ZeroAddress();
     error InvalidId();
@@ -84,12 +85,14 @@ contract MinesV1420 is I420System {
     error RandomnessNotReady();
     error InvalidCommitment();
     error InvalidProof();
+    error BoardVerificationFailed();
 
     event SeedCommitted(bytes32 indexed wagerId, RandomnessRouter420.Source indexed source, bytes32 indexed seedCommitment);
     event BoardBound(bytes32 indexed wagerId, RandomnessRouter420.Source indexed source, bytes32 indexed boardRoot, bytes32 randomnessRoot);
     event SessionStarted(bytes32 indexed wagerId, address indexed player, uint8 mineCount, uint256 reservedMaximumGrossPayout);
     event CellRevealed(bytes32 indexed wagerId, uint8 indexed cell, bool mine, uint8 safeReveals, uint32 revealedMask);
     event CashoutValueAdvanced(bytes32 indexed wagerId, uint8 safeReveals, uint256 grossPayout, uint256 reservedMaximumGrossPayout);
+    event CanonicalBoardVerified(bytes32 indexed wagerId, bytes32 boardRoot);
     event SessionTerminal(bytes32 indexed wagerId, bool mineHit, bool cashedOut, uint8 safeReveals, uint256 grossPayout);
 
     constructor(address wagerRegistry_, address randomnessRouter_, bytes32 gameId_, bytes32 gameVersionId_, bytes32 rulesetId_) {
@@ -230,6 +233,77 @@ contract MinesV1420 is I420System {
         session.cashedOut = true;
         session.cashoutGrossPayout = grossPayout;
         emit SessionTerminal(wagerId, false, true, session.safeReveals, grossPayout);
+    }
+
+    /// @notice Derive a 25-cell hidden mine mask from a seed fixed BEFORE the provider sees the VRF root.
+    /// @dev The disclosed seed is never accepted until the player has reached a terminal state.
+    function canonicalMineMask(bytes32 wagerId, bytes32 root, uint8 mineCount, bytes32 seed)
+        public view returns (uint32 mask)
+    {
+        if (mineCount < MIN_MINES || mineCount > MAX_MINES || seed == bytes32(0) || root == bytes32(0))
+            revert InvalidParams();
+        uint8[BOARD_CELLS] memory cells;
+        for (uint8 i = 0; i < BOARD_CELLS; ++i) cells[i] = i;
+        for (uint8 i = 0; i < mineCount; ++i) {
+            uint256 offset = uint256(keccak256(abi.encode(
+                PARAMS_DOMAIN, wagerId, gameVersionId, rulesetId, root, seed, i
+            ))) % uint256(BOARD_CELLS - i);
+            uint8 j = i + uint8(offset);
+            (cells[i], cells[j]) = (cells[j], cells[i]);
+            mask |= uint32(1) << cells[i];
+        }
+    }
+
+    function canonicalCellSalt(bytes32 wagerId, bytes32 root, uint8 cell, bytes32 seed)
+        public view returns (bytes32 salt)
+    {
+        if (cell >= BOARD_CELLS || seed == bytes32(0)) revert InvalidParams();
+        salt = keccak256(abi.encode(LEAF_DOMAIN, "SALT", wagerId, gameVersionId, rulesetId, root, cell, seed));
+    }
+
+    /// @notice Full deterministic Merkle commitment for a six-level 32-leaf padded tree.
+    /// @dev Merkle depth remains 5; this is 32 leaves and five pair-reduction rounds.
+    function canonicalBoardRoot(bytes32 wagerId, bytes32 root, uint8 mineCount, bytes32 seed)
+        public view returns (bytes32)
+    {
+        uint32 mask = canonicalMineMask(wagerId, root, mineCount, seed);
+        bytes32[32] memory nodes;
+        for (uint8 i = 0; i < BOARD_CELLS; ++i) {
+            nodes[i] = cellLeaf(wagerId, root, i, mask & (uint32(1) << i) != 0,
+                canonicalCellSalt(wagerId, root, i, seed));
+        }
+        for (uint8 i = BOARD_CELLS; i < 32; ++i) {
+            nodes[i] = keccak256(abi.encode(LEAF_DOMAIN, "PAD", wagerId, gameVersionId, rulesetId, root, i));
+        }
+        for (uint256 width = 32; width > 1; width /= 2) {
+            for (uint256 i = 0; i < width; i += 2) {
+                bytes32 a = nodes[i];
+                bytes32 b = nodes[i + 1];
+                nodes[i / 2] = a <= b
+                    ? keccak256(abi.encodePacked(a, b))
+                    : keccak256(abi.encodePacked(b, a));
+            }
+        }
+        return nodes[0];
+    }
+
+    /// @notice Reveal the provider's independently precommitted seed only after game completion.
+    /// @dev Verifies the exact declared mine count, deterministic placement and all Merkle leaf salts;
+    ///      without this step no custodied payout may be settled.
+    function verifyTerminalBoard(bytes32 wagerId, bytes32 seed) external {
+        SessionState storage session = _sessions[wagerId];
+        if (!session.exists || session.phase != Phase.TERMINAL) revert InvalidPhase();
+        if (boardVerified[wagerId]) revert BoardAlreadyBound();
+        RandomnessRouter420.RandomnessRequest memory request = randomnessRouter.getRequest(wagerId);
+        BoardCommitment storage board = _boards[wagerId][uint8(request.source)];
+        if (!request.fulfilled || !board.boardBound || board.randomnessRoot != request.root)
+            revert BoardNotReady();
+        if (seedCommitmentFor(wagerId, request.source, seed) != board.seedCommitment)
+            revert BoardVerificationFailed();
+        if (canonicalBoardRoot(wagerId, request.root, session.mineCount, seed) != board.boardRoot)
+            revert BoardVerificationFailed();
+        boardVerified[wagerId] = true;
+        emit CanonicalBoardVerified(wagerId, board.boardRoot);
     }
 
     function cellLeaf(bytes32 wagerId, bytes32 randomnessRoot, uint8 cell, bool mine, bytes32 salt) public view returns (bytes32) {

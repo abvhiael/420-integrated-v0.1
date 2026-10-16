@@ -52,7 +52,11 @@ jobs:
       - name: Rider and onboarding cross-component journeys
         run: node --test rideshare/test/integration/l02-rider-onboarding.test.mjs
       - name: PostgreSQL durable lifecycle, migration and adversarial suites
-        run: node --test rideshare/test/postgres/*.test.mjs
+        run: |
+          for testfile in rideshare/test/postgres/*.test.mjs; do
+            echo "Qualifying $testfile against isolated sequential PostgreSQL fixture ownership"
+            node --test "$testfile" || exit 1
+          done
       - name: Travel consumer SDK contract and security
         run: |
           node --check rideshare/sdk/travel-handoff-v1.mjs

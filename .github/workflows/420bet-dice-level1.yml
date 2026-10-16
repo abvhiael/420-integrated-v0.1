@@ -77,7 +77,7 @@ jobs:
           done
           # Compile once and execute once. Verify the actual JSON result keys,
           # rather than trusting a green command with empty test selection.
-          regex='test/(BetDiceV1420|BetDiceVerticalSlice420|BetDiceV1View420|BetDicePostSettlementVerification420|BetWagerAcceptance420|BetRandomness420|BetRandomnessTerminal420|BetSettlementEngine420|BetBankrollRisk420|BetTerminalPathInvariant420|BetCasinoSettlementInvariant420|BetCasinoSolvencyConvergence420)\\.t\\.sol'
+          regex='test/(BetDiceV1420|BetDiceVerticalSlice420|BetDiceV1View420|BetDicePostSettlementVerification420|BetWagerAcceptance420|BetRandomness420|BetRandomnessTerminal420|BetSettlementEngine420|BetBankrollRisk420|BetTerminalPathInvariant420|BetCasinoSettlementInvariant420|BetCasinoSolvencyConvergence420)\.t\.sol'
           forge test --match-path "$regex" --json > "$RUNNER_TEMP/dice-level1.json"
           python3 - "$RUNNER_TEMP/dice-level1.json" <<'PY'
           import json, sys

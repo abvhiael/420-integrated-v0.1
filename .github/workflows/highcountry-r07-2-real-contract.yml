@@ -1,0 +1,23 @@
+name: High Country R07.2 Real Contract Prefinalization
+on:
+  pull_request:
+    paths:
+      - 'contracts/test/highcountry/integration/R072RealContractPrefinalization.t.sol'
+      - '.github/workflows/highcountry-r07-2-real-contract.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  contract-rehearsal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: foundry-rs/foundry-toolchain@v1
+      - name: R07.2 actual contract prefinalization rehearsal only
+        working-directory: contracts
+        env:
+          FOUNDRY_PROFILE: pr
+        run: forge test --match-path 'test/highcountry/integration/R072RealContractPrefinalization.t.sol' -vv

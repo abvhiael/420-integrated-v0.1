@@ -10,7 +10,7 @@ try {
     await page.addInitScript(()=>{globalThis.LIFTdSessionAdapter={getSession:async()=>({status:'unauthenticated'})};});
     await page.goto(url,{waitUntil:'networkidle'});
     await page.locator('#main h1').waitFor();
-    assert.equal(await page.locator('[data-route="/rider"]').count(),1);
+    assert.equal(await page.locator('a[data-route][href="/rider"]').count(),1);
     if(viewport.width<650){
       await page.locator('#menu-toggle').focus();
       await page.keyboard.press('Enter');

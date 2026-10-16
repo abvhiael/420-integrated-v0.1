@@ -1,12 +1,14 @@
 import {AuthError} from './auth.mjs';
 import {checkSchema} from './schema.mjs';
 import {digest,uint} from './payment-protocol.mjs';
+import {quoteHash as calculateQuoteHash} from './fare.mjs';
 const fail=(c)=>{throw new AuthError(c,409)};
 const sum=(a,f)=>a.reduce((n,x)=>n+BigInt(x[f]),0n);
 const distinct=(rows,field)=>{if(new Set(rows.map(x=>x[field])).size!==rows.length)fail('ECONOMIC_REPLAY')};
 export function auditEconomicHistory({trip,quote,quoteHash,intents,operations,plans,funding,events,operationEvents,timing}){
  if(!trip||!['COMPLETED','CANCELLED'].includes(trip.state)||!timing?.ended_at)fail('ECONOMIC_TERMINAL_REQUIRED');
  if(!quote||!intents?.length||!quoteHash)fail('ECONOMIC_QUOTE_REQUIRED');
+ if(calculateQuoteHash(quote)!==quoteHash)fail('ECONOMIC_QUOTE_CORRUPT');
  for(const [rows,key] of [[intents,'intent_id'],[operations,'operation_id'],[operations,'pay_operation_id'],[events,'event_id'],[operationEvents,'event_id'],[plans,'plan_hash'],[funding,'funding_ref']])distinct(rows,key);
  const current=intents.filter(x=>x.status!=='SUPERSEDED');if(current.length!==1||!current[0].captured||current[0].status!=='CAPTURED')fail('ECONOMIC_FINALITY_REQUIRED');
  const intent=current[0],payload=intent.payload;
@@ -31,6 +33,9 @@ export function auditEconomicHistory({trip,quote,quoteHash,intents,operations,pl
  for(const plan of plans){
   if(plan.trip_id!==trip.id||plan.payload.tripId!==trip.id||plan.payload.quoteHash!==quoteHash||plan.payload.intentId!==intent.intent_id||plan.payload.conserved!==true)fail('ECONOMIC_PLAN_BINDING');
   const p=plan.payload;
+  if(digest(Object.fromEntries(Object.entries(p).filter(([key])=>key!=='planHash')))!==plan.plan_hash)fail('ECONOMIC_PLAN_HASH_CORRUPT');
+  if(BigInt(p.driverCents)!==BigInt(p.allowanceCents)+BigInt(p.earningsCents)+BigInt(p.topUpCents)+BigInt(p.tipCents))fail('ECONOMIC_DRIVER_SPLIT');
+  if(BigInt(p.developmentCents)>0n&&BigInt(p.platformCents)<0n)fail('ECONOMIC_COMPENSATION_SPLIT');
   if(BigInt(p.netCollectedCents)+BigInt(p.platformFundingCents)!==BigInt(p.driverCents)+BigInt(p.passThroughCents)+BigInt(p.developmentCents)+BigInt(p.platformCents))fail('ECONOMIC_NOT_CONSERVED');
   for(const k of ['driver','platform','passThrough'])if(used[k]>BigInt(p[k+'Cents']))fail('ECONOMIC_ENTITLEMENT_OVERFLOW');
  }

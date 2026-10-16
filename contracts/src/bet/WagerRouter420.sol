@@ -23,6 +23,7 @@ import "./ReferenceSlotV1420.sol";
 import "./ReferenceSlotTermsAuthority420.sol";
 import "./RouletteV1420.sol";
 import "./BlackjackV1420.sol";
+import "./MinesV1420.sol";
 
 contract WagerRouter420 is I420System {
     struct AcceptanceRequest {
@@ -61,6 +62,8 @@ contract WagerRouter420 is I420System {
     mapping(bytes32 => address) public rouletteResolver;
     bytes32 private constant BLACKJACK_GAME_ID = keccak256("420BET.GAME.BLACKJACK");
     mapping(bytes32 => address) public blackjackResolver;
+    bytes32 private constant MINES_GAME_ID = keccak256("420BET.GAME.MINES");
+    mapping(bytes32 => address) public minesResolver;
 
     mapping(address => uint256) public nextNonce;
     uint256 private _entered;
@@ -84,6 +87,8 @@ contract WagerRouter420 is I420System {
     error RouletteResolverAlreadyBound();
     error BlackjackCanonicalWagerRequired();
     error BlackjackResolverAlreadyBound();
+    error MinesCanonicalWagerRequired();
+    error MinesResolverAlreadyBound();
     error Reentrancy();
     error EmergencyAlreadyBound();
     error EmergencyHalted(BetTypes420.EmergencyDomain domain, bytes32 subject);
@@ -311,6 +316,35 @@ contract WagerRouter420 is I420System {
         return _placeWager(request);
     }
 
+    function bindMinesResolver(bytes32 versionId, address resolver) external {
+        if (versionId == bytes32(0) || resolver == address(0)) revert InvalidRequest();
+        if (minesResolver[versionId] != address(0)) revert MinesResolverAlreadyBound();
+        BetGameRegistry420.GameVersion memory g = games.getGame(versionId);
+        MinesV1420 m = MinesV1420(resolver);
+        if (g.gameId != MINES_GAME_ID ||
+            modules.getModule(g.moduleVersionId).implementation != resolver ||
+            m.gameId() != MINES_GAME_ID || m.gameVersionId() != versionId ||
+            m.rulesetId() != g.rulesetId || address(m.wagerRegistry()) != address(betRegistry))
+            revert InvalidRequest();
+        if (!authorization.isAuthorized(msg.sender, BetIds420.ACTION_GAME_REGISTER,
+            authorization.scopeForGame(g.gameId, versionId), 0)) revert Unauthorized();
+        minesResolver[versionId] = resolver;
+    }
+
+    function placeMinesWager(AcceptanceRequest calldata request, MinesV1420.Params calldata params)
+        external payable nonReentrant returns (bytes32 wagerId, uint256 reservedLiability)
+    {
+        BetGameRegistry420.GameVersion memory g = games.getGame(request.gameVersionId);
+        if (g.gameId != MINES_GAME_ID) revert InvalidRequest();
+        address resolver = minesResolver[request.gameVersionId];
+        if (resolver == address(0)) revert MinesCanonicalWagerRequired();
+        MinesV1420 m = MinesV1420(resolver);
+        if (m.hashParams(params) != request.paramsHash ||
+            m.requiredMaxGrossPayout(request.stake, params.mineCount) != request.maxGrossPayout)
+            revert InvalidRequest();
+        return _placeWager(request);
+    }
+
     function placeWager(AcceptanceRequest calldata request)
         external
         payable
@@ -323,6 +357,7 @@ contract WagerRouter420 is I420System {
         if (gameId == SLOT_GAME_ID) revert SlotAuthorityRequired();
         if (gameId == ROULETTE_GAME_ID) revert RouletteCanonicalWagerRequired();
         if (gameId == BLACKJACK_GAME_ID) revert BlackjackCanonicalWagerRequired();
+        if (gameId == MINES_GAME_ID) revert MinesCanonicalWagerRequired();
         return _placeWager(request);
     }
 

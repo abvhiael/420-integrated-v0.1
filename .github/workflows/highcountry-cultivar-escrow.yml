@@ -1,0 +1,22 @@
+name: High Country Cultivar Naming Escrow Level 1
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/highcountry/genetics/CultivarNamingEscrow.sol'
+      - 'contracts/test/highcountry/integration/R072NamingEscrow.t.sol'
+      - '.github/workflows/highcountry-cultivar-escrow.yml'
+permissions:
+  contents: read
+jobs:
+  escrow:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: foundry-rs/foundry-toolchain@v1
+      - name: Scoped naming escrow contracts
+        working-directory: contracts
+        env:
+          FOUNDRY_PROFILE: pr
+        run: forge test --match-path 'test/highcountry/integration/R072NamingEscrow.t.sol' -vv

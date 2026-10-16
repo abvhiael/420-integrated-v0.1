@@ -1,5 +1,6 @@
+import {mountTripMessaging} from './trip-messaging.mjs';
 import {createTripExperienceController} from './trip-experience-controller.mjs';
-export function mountTripExperience(container,session,api){
+export function mountTripExperience(container,session,api,sessionProvider){
  let active=true;const ctl=createTripExperienceController({api,session});
  const panel=document.createElement('section');panel.className='panel';panel.setAttribute('aria-label','Confirmed rider trip');
  const heading=document.createElement('h2');heading.textContent='Trip status';
@@ -12,6 +13,7 @@ export function mountTripExperience(container,session,api){
  const report=document.createElement('button');report.type='button';report.textContent='Report incident';report.disabled=true;
  const contact=document.createElement('p');contact.textContent='Contact: available only through a verified, scoped messaging service. No unverified phone number or external contact link is exposed.';
  actions.append(refresh,cancel,incident,report);panel.append(heading,status,details,actions,contact);container.append(panel);
+ const messaging=mountTripMessaging(container,session,()=>ctl.snapshot(),sessionProvider);
  let current=null,busy=false;
  function render(){
   const snapshot=ctl.snapshot();details.replaceChildren();
@@ -42,5 +44,5 @@ export function mountTripExperience(container,session,api){
  cancel.addEventListener('click',()=>void perform('cancel'));
  report.addEventListener('click',()=>void perform('report'));
  render();
- return Object.freeze({load,destroy(){active=false;ctl.clear();panel.remove();}});
+ return Object.freeze({load,destroy(){active=false;messaging.destroy();ctl.clear();panel.remove();}});
 }

@@ -1,0 +1,60 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {createDatabasePool,migrate} from '../../src/postgres-store.mjs';
+import {createReviewService} from '../../src/reviews.mjs';
+import {createHttpHandler} from '../../src/http.mjs';
+assert.ok(process.env.LIFTD_DATABASE_URL,'Isolated PostgreSQL required');
+test('L03.2 reviews: real completed trip, approval, scoped reputation, replay and moderation',async()=>{
+ const pool=createDatabasePool({connectionString:process.env.LIFTD_DATABASE_URL});
+ try {
+  await migrate(pool);
+  const suffix=String(Date.now()),tripId='rv_trip_'+suffix,driver='rv_driver_'+suffix,rider='rv_rider_'+suffix,vehicle='rv_vehicle_'+suffix;
+  const snapshot=(state,revision,assigned)=>({id:tripId,revision,state,riderId:rider,driverId:assigned?driver:null,vehicleId:assigned?vehicle:null,routeRef:'route_review'});
+  await pool.query('INSERT INTO liftd.trips(trip_id,revision,snapshot) VALUES($1,0,$2)',[tripId,snapshot('REQUESTED',0,false)]);
+  let revoked=false,time=1000;
+  const auth={authorize:async(token,{action,resource})=>{
+   if(revoked||resource!=='trip:'+tripId||!['rider','driver','operator'].includes(token))throw Error('DENIED');
+   const sub=token==='rider'?rider:token==='driver'?driver:'rv_operator';
+   return {subject:sub,accountId:sub+'_account',role:token,sessionId:'session_1',deviceId:'device_1',recoveryEpoch:0,expiresAt:100000,action,resource};
+  }};
+  const reviews=createReviewService({pool,authenticator:auth,clock:()=>time});
+  const input={tripId,commandId:'rv_open_1',rating:5};
+  await assert.rejects(()=>reviews.submit('rider','rv_review_1_'+suffix,input),{code:'REVIEW_TRIP_UNQUALIFIED'});
+  for(const [state,revision] of [['ASSIGNED',1],['ARRIVED',2],['IN_PROGRESS',3],['COMPLETED',4]])
+   await pool.query('UPDATE liftd.trips SET snapshot=$1,revision=$2 WHERE trip_id=$3',[snapshot(state,revision,true),revision,tripId]);
+  const id='rv_review_1_'+suffix;
+  const initial=await reviews.submit('rider',id,input);
+  assert.equal(initial.moderation,'PENDING');
+  assert.equal(initial.subjectId,driver);
+  assert.deepEqual(await reviews.submit('rider',id,input),initial);
+  await assert.rejects(()=>reviews.submit('rider','rv_different_'+suffix,input),{code:'REVIEW_REPLAY_CONFLICT'});
+  await assert.rejects(()=>reviews.submit('rider','rv_second_'+suffix,{tripId,commandId:'rv_open_2',rating:2}));
+  await assert.rejects(()=>reviews.approve('driver',id,{commandId:'rv_bad',expectedRevision:0}),{code:'REVIEW_MODERATION_DENIED'});
+  await assert.rejects(()=>reviews.read('driver',id),{code:'REVIEW_NOT_PUBLISHED'});
+  let rep=await reviews.reputation('rider',tripId,'driver',driver);
+  assert.equal(rep.approvedCount,0);assert.equal(rep.transportEligible,null);
+  await assert.rejects(()=>reviews.approve('operator',id,{commandId:'rv_stale',expectedRevision:2}),{code:'REVIEW_STALE_REVISION'});
+  const approved=await reviews.approve('operator',id,{commandId:'rv_approve',expectedRevision:0});
+  assert.equal(approved.moderation,'APPROVED');assert.equal(approved.revision,1);
+  assert.equal((await reviews.read('driver',id)).rating,5);
+  rep=await reviews.reputation('rider',tripId,'driver',driver);
+  assert.deepEqual([rep.approvedCount,rep.approvedRatingTotal,rep.transportEligible],[1,5,null]);
+  const hidden=await reviews.hide('operator',id,{commandId:'rv_hide',expectedRevision:1});
+  assert.equal(hidden.moderation,'HIDDEN');
+  assert.equal((await reviews.reputation('rider',tripId,'driver',driver)).approvedCount,0);
+  await assert.rejects(()=>reviews.read('driver',id),{code:'REVIEW_NOT_PUBLISHED'});
+  const rejected=await reviews.reject('operator',id,{commandId:'rv_reject',expectedRevision:2});
+  assert.equal(rejected.moderation,'REJECTED');
+  await assert.rejects(()=>reviews.approve('operator',id,{commandId:'rv_reopen',expectedRevision:3}),{code:'REVIEW_MODERATION_FINAL'});
+  const second=await reviews.submit('driver','rv_review_2_'+suffix,{tripId,commandId:'rv_driver_review',rating:4});
+  assert.equal(second.subjectId,rider);
+  await assert.rejects(()=>reviews.reputation('rider',tripId,'driver','other'),{code:'REVIEW_SCOPE_DENIED'});
+  await assert.rejects(()=>pool.query('DELETE FROM liftd.review_events WHERE review_id=$1',[id]),e=>e.code==='23514');
+  revoked=true;
+  await assert.rejects(()=>reviews.read('rider',id));
+  const handler=createHttpHandler({},null,null,null,null,null,null,null,null,null,null,null,null,null,reviews);
+  const url='https://liftd.example/v1/rideshare/reviews/'+id;
+  assert.equal((await handler(new Request(url))).status,401);
+  assert.equal((await handler(new Request(url,{method:'DELETE',headers:{authorization:'Bearer a.b.c'}}))).status,405);
+ }finally {await pool.end()}
+});

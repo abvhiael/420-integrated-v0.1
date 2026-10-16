@@ -76,10 +76,10 @@ jobs:
       - name: Preserve exact implementation evidence
         run: |
           mkdir -p liftd-l02-13-evidence
-          git rev-parse HEAD > liftd-m-l02-b-evidence/implementation-sha.txt
+          git rev-parse HEAD > liftd-l02-13-evidence/implementation-sha.txt
           git diff --check
       - uses: actions/upload-artifact@v4
         with:
           name: liftd-l02-13-${{ github.event.pull_request.head.sha || github.sha }}
-          path: liftd-m-l02-b-evidence/
+          path: liftd-l02-13-evidence/
           if-no-files-found: error

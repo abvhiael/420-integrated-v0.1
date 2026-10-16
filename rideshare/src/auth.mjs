@@ -56,7 +56,7 @@ function proof(token, trust, purpose, now, maxAge, fields = null) {
 const capabilities = Object.freeze({
   rider: new Set(['account.preferences', 'trip.create', 'trip.read', 'trip.cancel', 'route.prepare', 'quote.create', 'quote.accept', 'quote.read', 'pay.prepare', 'pay.consent', 'pay.reconcile', 'pay.read', 'safety.report', 'trip.message.read', 'trip.message.send']),
   driver: new Set(['onboarding.manage', 'trip.read', 'trip.arrive', 'trip.start', 'trip.complete', 'trip.cancel', 'availability.set', 'offer.respond', 'offer.read', 'pay.read', 'pay.statement', 'safety.report', 'trip.message.read', 'trip.message.send']),
-  operator: new Set(['onboarding.review', 'trip.assign', 'trip.expire', 'pay.reconcile', 'pay.read', 'safety.resolve', 'safety.read']),
+  operator: new Set(['onboarding.review', 'trip.assign', 'trip.expire', 'pay.reconcile', 'pay.read', 'safety.resolve', 'safety.read', 'operator.monitor']),
 });
 export function validateSessionGrants(grants) {
   if (!Array.isArray(grants) || grants.length > 32) deny('INVALID_PROOF');

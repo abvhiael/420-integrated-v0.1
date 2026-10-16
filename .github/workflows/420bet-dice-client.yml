@@ -1,6 +1,7 @@
 name: 420Bet Dice Client
 
 on:
+  workflow_dispatch:
   push:
     paths:
       - 'clients/420bet-dice-v1/**'

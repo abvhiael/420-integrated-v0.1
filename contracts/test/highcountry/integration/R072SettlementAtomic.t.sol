@@ -29,21 +29,21 @@ contract R072SettlementAtomicTest {
  }
  function testAtomicSuccessAndReplay() public {
   bytes32 op=keccak256("ok");
-  settlement.apply(op,1,42,address(this),1000,250,_snapshot());
+  settlement.applySettlement(op,1,42,address(this),1000,250,_snapshot());
   require(settlement.settled(op)&&e.applied()==42,"settlement not recorded");
   require(u.spent(keccak256(abi.encode(op,uint8(1))))&&u.spent(keccak256(abi.encode(op,uint8(2)))),"utilities not consumed");
-  (bool replay,)=address(settlement).call(abi.encodeCall(settlement.apply,(op,1,uint64(42),address(this),1000,250,_snapshot())));
+  (bool replay,)=address(settlement).call(abi.encodeCall(settlement.applySettlement,(op,1,uint64(42),address(this),1000,250,_snapshot())));
   require(!replay,"replay accepted");
  }
  function testEnvironmentFailureRollsBackBothBurns() public {
   e.setFail(true);bytes32 op=keccak256("rollback");
-  (bool ok,)=address(settlement).call(abi.encodeCall(settlement.apply,(op,1,uint64(42),address(this),1000,250,_snapshot())));
+  (bool ok,)=address(settlement).call(abi.encodeCall(settlement.applySettlement,(op,1,uint64(42),address(this),1000,250,_snapshot())));
   require(!ok&&!settlement.settled(op),"failed op committed");
   require(!u.spent(keccak256(abi.encode(op,uint8(1))))&&!u.spent(keccak256(abi.encode(op,uint8(2)))),"resource burn not reverted");
  }
  function testUtilityFailureRollsBack() public {
   u.setFail(true);bytes32 op=keccak256("burnfail");
-  (bool ok,)=address(settlement).call(abi.encodeCall(settlement.apply,(op,1,uint64(42),address(this),1000,250,_snapshot())));
+  (bool ok,)=address(settlement).call(abi.encodeCall(settlement.applySettlement,(op,1,uint64(42),address(this),1000,250,_snapshot())));
   require(!ok&&!settlement.settled(op)&&e.applied()==0,"failed burn committed");
  }
 }

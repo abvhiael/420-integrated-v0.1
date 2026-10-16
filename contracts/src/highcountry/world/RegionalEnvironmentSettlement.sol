@@ -21,7 +21,7 @@ contract RegionalEnvironmentSettlement {
   if(utilities_.code.length==0||engine_.code.length==0||coordinator_==address(0))revert InvalidSettlement();
   utilities=RegionalUtilities(utilities_);engine=IRegionalEnvironmentEngine(engine_);coordinator=coordinator_;
  }
- function apply(bytes32 op,uint16 region,uint64 plantId,address owner,uint256 waterMl,uint256 energyWh,
+ function applySettlement(bytes32 op,uint16 region,uint64 plantId,address owner,uint256 waterMl,uint256 energyWh,
    IRegionalEnvironmentEngine.EnvironmentSnapshot calldata next) external {
   if(msg.sender!=coordinator||op==0||settled[op]||region==0||plantId==0||owner==address(0)||
       (waterMl==0&&energyWh==0))revert InvalidSettlement();

@@ -44,6 +44,7 @@ export function createTravelHandoffService({authenticator,tripStore,consentStore
    if(fresh.trip.revision!==first.trip.revision||fresh.trip.state!==first.trip.state)fail('TRIP_CHANGED',409);
    const receipt=await consentStore.consume(request);
    if(!receipt||receipt.commandId!==input.commandId||receipt.tripId!==tripId||receipt.actorId!==first.p.subject||
+      receipt.accountId!==first.p.accountId||receipt.sessionId!==first.p.sessionId||
       receipt.tripRevision!==first.trip.revision||receipt.purpose!==input.purpose||
       !id(receipt.handoffId)||receipt.expiresAt>expiresAt||receipt.expiresAt<=now())fail('CONSENT_UNVERIFIED',503);
    await permitted(token,tripId,first.p);

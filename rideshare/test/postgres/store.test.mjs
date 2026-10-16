@@ -46,7 +46,7 @@ test('ordered concurrent migrations are checksum-verified and runtime is a non-o
   ];
   const applied = (await owner.query('SELECT version,checksum FROM liftd.migrations ORDER BY version')).rows;
   assert.deepEqual(applied.map(row => row.version), expectedVersions,
-    'All nine migrations must be applied once in canonical version order');
+    'All ten migrations must be applied once in canonical version order');
   for (const row of applied) {
     const source = readFileSync(new URL(`../../migrations/${row.version}`, import.meta.url), 'utf8');
     assert.equal(row.checksum, createHash('sha256').update(source).digest('hex'),
@@ -57,6 +57,15 @@ test('ordered concurrent migrations are checksum-verified and runtime is a non-o
   await assert.rejects(() => pool.query("UPDATE liftd.migrations SET checksum='bad'"), e => e.code === '42501');
   await assert.rejects(() => pool.query("UPDATE liftd.operator_audit SET result='READ'"), e => e.code === '42501');
   await assert.rejects(() => pool.query('DELETE FROM liftd.operator_audit'), e => e.code === '42501');
+});
+test('restricted operator audit inserts are durable, immutable and duplicate-safe', async () => {
+  const {createPostgresOperatorAudit} = await import('../../src/postgres-operator-audit.mjs');
+  const audit=createPostgresOperatorAudit(pool),tripId=nextId(),commandId=nextId();
+  const event={actorId:'operator_1',accountId:'account_1',tripId,action:'incident.resolve',result:'CANCELLED',commandId,at:100};
+  await audit.append(event);await audit.append(event);
+  assert.equal((await pool.query('SELECT count(*)::int AS n FROM liftd.operator_audit WHERE trip_id=$1',[tripId])).rows[0].n,1);
+  await assert.rejects(()=>audit.append({...event,result:'READ'}),e=>e.code==='AUDIT_IDEMPOTENCY_CONFLICT');
+  await assert.rejects(()=>pool.query('UPDATE liftd.operator_audit SET result=$1 WHERE trip_id=$2',['READ',tripId]),e=>e.code==='42501');
 });
 test('atomic create persists trip/event/command and exact retry returns original result', async () => {
   const id = nextId(), commandId = nextId();

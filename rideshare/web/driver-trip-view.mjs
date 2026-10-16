@@ -1,6 +1,7 @@
+import {mountTripMessaging} from './trip-messaging.mjs';
 import {createDriverTripController} from './driver-trip-controller.mjs';
 // Driver-only controls; never render a state change until an authenticated reread.
-export function mountDriverTrip(container,session,api,{navigationCapability,openNavigation=()=>{}}={}){
+export function mountDriverTrip(container,session,api,{navigationCapability,openNavigation=()=>{},sessionProvider}={}){
  let active=true,tripId=null;
  const ctl=createDriverTripController({api,session,navigationCapability});
  const panel=document.createElement('section');panel.className='panel';panel.setAttribute('aria-label','Verified driver trip controls');
@@ -21,6 +22,7 @@ export function mountDriverTrip(container,session,api,{navigationCapability,open
  const refresh=document.createElement('button');refresh.type='button';refresh.textContent='Reconcile confirmed trip';
  const offline=document.createElement('p');offline.textContent='Offline actions are disabled and never queued. Reconnect and verify authoritative state before retrying.';
  panel.append(title,input,load,status,details,pickupLabel,arrive,start,complete,nav,incident,report,refresh,offline);container.append(panel);
+ const messaging=mountTripMessaging(container,session,()=>ctl.snapshot().trip,sessionProvider);
  let busy=false,connected=true,verified=false;
  const buttons=[load,arrive,start,complete,nav,report,refresh];
  function render(message){
@@ -50,5 +52,5 @@ export function mountDriverTrip(container,session,api,{navigationCapability,open
  const up=()=>{connected=true;verified=false;ctl.reconnect();if(active)render('Reconnected. Verify the trip before any new action.');};
  window.addEventListener('offline',down);window.addEventListener('online',up);
  render();
- return Object.freeze({load:id=>{tripId=id;return execute(()=>ctl.load(id));},destroy(){active=false;ctl.clear();window.removeEventListener('offline',down);window.removeEventListener('online',up);panel.remove();}});
+ return Object.freeze({load:id=>{tripId=id;return execute(()=>ctl.load(id));},destroy(){active=false;messaging.destroy();ctl.clear();window.removeEventListener('offline',down);window.removeEventListener('online',up);panel.remove();}});
 }

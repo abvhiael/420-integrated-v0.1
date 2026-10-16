@@ -11,6 +11,8 @@ import { mountDriverOnboarding } from "./driver-onboarding.mjs";
 import { createDriverOnboardingApi } from "./driver-onboarding-api.mjs";
 import { mountDriverAvailability } from "./driver-availability-view.mjs";
 import { createDriverAvailabilityApi } from "./driver-availability-api.mjs";
+import { mountDriverTrip } from "./driver-trip-view.mjs";
+import { createDriverTripApi } from "./driver-trip-api.mjs";
 
 const root = document.getElementById("main");
 const menu = document.getElementById("menu-toggle");
@@ -23,6 +25,7 @@ let quotePanel = null;
 let tripPanel = null;
 let clearDriverOnboarding = null;
 let clearDriverAvailability = null;
+let clearDriverTrip = null;
 
 // The host must provide an independently authenticated session adapter.
 // No localStorage, query-string identity, simulated principal or demo operator bypass.
@@ -49,6 +52,7 @@ function renderDecision(decision) {
   if (tripPanel) { tripPanel.destroy(); tripPanel = null; }
   if (clearDriverOnboarding) { clearDriverOnboarding(); clearDriverOnboarding = null; }
   if (clearDriverAvailability) { clearDriverAvailability(); clearDriverAvailability = null; }
+  if (clearDriverTrip) { clearDriverTrip(); clearDriverTrip = null; }
   root.replaceChildren();
   root.setAttribute("aria-busy", "false");
   const panel = node("section", undefined, "panel");
@@ -81,6 +85,14 @@ function renderDecision(decision) {
     tripPanel = mountTripExperience(root, session, createTripExperienceApi(globalThis.LIFTdSessionAdapter));
     quotePanel = mountQuoteView(root, session, quoteApi, tripId => tripPanel?.load(tripId));
     clearPickupView = mountPickupView(root, session, createLocationProviders(globalThis.LIFTdSessionAdapter, {search:globalThis.LIFTdPlaceSearchProvider,resolveAddress:globalThis.LIFTdAddressResolver}), route => quotePanel?.showRoute(route));
+  }
+  if (decision.kind === "protected" && decision.role === "driver") {
+    clearDriverAvailability = mountDriverAvailability(root, session, createDriverAvailabilityApi(globalThis.LIFTdSessionAdapter));
+    const panel = mountDriverTrip(root, session, createDriverTripApi(globalThis.LIFTdSessionAdapter), {
+      navigationCapability:globalThis.LIFTdNavigationCapability,
+      openNavigation: url => window.open(url, "_blank", "noopener,noreferrer")
+    });
+    clearDriverTrip = () => panel.destroy();
   }
   document.title = decision.title + " — LIFTd";
 }

@@ -2,6 +2,7 @@ import {createHash} from 'node:crypto';
 import {AuthError,record} from './auth.mjs';
 import {canonical} from './canonical.mjs';
 import {checkSchema} from './schema.mjs';
+import {enforceFraudHold} from './fraud.mjs';
 
 const id=x=>typeof x==='string'&&/^[A-Za-z0-9_-]{1,128}$/.test(x);
 const fail=(code,status=409)=>{throw new AuthError(code,status)};
@@ -38,6 +39,7 @@ export function createReviewService({pool,authenticator,clock=()=>Math.floor(Dat
    if(!tripId)fail('REVIEW_UNAVAILABLE',404);
    const act='review.'+action,p=await permit(token,tripId,act);
    const trip=await tripRow(c,tripId,p);
+   if(action==='submit'||action==='approve')await enforceFraudHold(c,tripId,now());
    if(action==='submit'&&(p.role==='operator'||trip.state!=='COMPLETED'||!id(trip.driverId)||!id(trip.riderId)))fail('REVIEW_TRIP_UNQUALIFIED',403);
    if(action!=='submit'&&p.role!=='operator')fail('REVIEW_MODERATION_DENIED',403);
    await c.query('SELECT pg_advisory_xact_lock(hashtextextended($1,0))',['liftd:review-command:'+p.subject+':'+input.commandId]);
@@ -95,6 +97,7 @@ export function createReviewService({pool,authenticator,clock=()=>Math.floor(Dat
    return transaction(async c=>{
     const p=await permit(token,tripId,'review.reputation');
     const trip=await tripRow(c,tripId,p);
+    await enforceFraudHold(c,tripId,now());
     if(trip.state!=='COMPLETED'||subject(trip,role)!==targetId)fail('REVIEW_SCOPE_DENIED',403);
     const q=await c.query("SELECT count(*)::integer AS count,coalesce(sum(rating),0)::integer AS total FROM liftd.trip_reviews WHERE subject_role=$1 AND subject_id=$2 AND moderation='APPROVED'",[role,targetId]);
     await permit(token,tripId,'review.reputation',p);

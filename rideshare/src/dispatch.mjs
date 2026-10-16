@@ -1,6 +1,7 @@
 import {createHash,randomBytes} from 'node:crypto';
 import {AuthError,record,createAuthorityVerifier,validateSessionGrants} from './auth.mjs';
 import {canonical} from './canonical.mjs';
+import {enforceFraudHold} from './fraud.mjs';
 import {checkSchema} from './schema.mjs';
 const id=v=>typeof v==='string'&&/^[A-Za-z0-9_-]{1,128}$/.test(v);
 const integer=v=>Number.isSafeInteger(v)&&v>=0;
@@ -74,7 +75,7 @@ export function createDispatchAdapter({pool,authenticator,eligibilityAdapter,ava
     async select(client,trip,command,candidateCheck) {
       if(trip.state!=='REQUESTED')fail('INVALID_TRANSITION');
       if(command.expectedRevision!==trip.revision)fail('STALE_REVISION');
-      if(isPaused())fail('SERVICE_PAUSED');await lock(client);
+      if(isPaused())fail('SERVICE_PAUSED');await enforceFraudHold(client,trip.id,time());await lock(client);
       const rows=(await client.query(`SELECT a.* FROM liftd.driver_availability a WHERE online AND expires_at>$1
         AND NOT EXISTS(SELECT 1 FROM liftd.trips t WHERE t.state IN ('ASSIGNED','ARRIVED','IN_PROGRESS') AND (t.driver_id=a.driver_id OR t.vehicle_id=a.vehicle_id))`,[time()])).rows;
       for(const row of rankCandidates(rows)) {

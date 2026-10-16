@@ -31,6 +31,7 @@
 - **Private vault:** NOT ACCEPTED; LIFTd-TN-VAULT open.
 - **Scoped messaging:** NOT ACCEPTED; LIFTd-TN-MSG open and UI must remain unavailable.
 - **Independent accessibility:** NOT ACCEPTED; LIFTd-TN-A11Y open (requires real devices/deployed UI; a blockchain testnet per se is not required).
+- **L03.3 deployed abuse/fraud controls:** NOT ACCEPTED — production/testnet case-authority credentials, real independently verified abuse signals (account misuse, fabricated trips, location manipulation, coordinated reviews, economic replay), deployed bounded-hold propagation across independently operated dispatch/payment/review consumers, operational moderation staffing, appeals, retention and signed audit/recovery evidence require actual deployed/institutional acceptance. The L03.3 local PostgreSQL Level 1 certificate is engineering evidence only; it does not approve production action or create another canonical TN-0..TN-6 step.
 
 **No testnet deployed, live issuer, document-vault service, provider credential, regulator signoff or independent accessibility acceptance has been verified by the qualifying repository runs.** These items remain **PENDING — EXTERNAL/DEPLOYED EVIDENCE**. Do not move them to COMPLETE via fixtures, PR merge or markdown updates.
 

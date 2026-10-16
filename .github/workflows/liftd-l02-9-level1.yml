@@ -1,0 +1,42 @@
+name: LIFTd L02.9 Level 1
+on:
+  pull_request:
+    paths:
+      - 'rideshare/src/trip-communications.mjs'
+      - 'rideshare/src/auth.mjs'
+      - 'rideshare/src/http.mjs'
+      - 'rideshare/web/trip-messaging.mjs'
+      - 'rideshare/web/trip-experience-view.mjs'
+      - 'rideshare/web/driver-trip-view.mjs'
+      - 'rideshare/web/app.mjs'
+      - 'rideshare/test/trip-communications.test.mjs'
+      - '.github/workflows/liftd-l02-9-level1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  trip-communication:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact SHA
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install locked LIFTd dependencies
+        run: npm ci --prefix rideshare --ignore-scripts
+      - name: Static checks
+        run: |
+          for f in rideshare/src/{trip-communications,auth,http}.mjs rideshare/web/{trip-messaging,trip-experience-view,driver-trip-view,app}.mjs; do node --check "$f"; done
+      - name: Trip scoped communications negative and security suite
+        run: node --test rideshare/test/trip-communications.test.mjs
+      - name: Retained application and browser regressions
+        run: |
+          npm test --prefix rideshare
+          npm run check --prefix rideshare/web

@@ -68,8 +68,8 @@ export function createFraudService({pool,authenticator,clock=()=>Math.floor(Date
     if(action==='close'&&!['CLEARED','APPEALED'].includes(row.status))fail('FRAUD_TRANSITION_DENIED');
     const until=action==='hold'?t+input.holdSeconds:(action==='appeal'?row.hold_until:null);
     const appeals=Number(row.appeal_count)+(action==='appeal'?1:0);
-    await c.query('UPDATE liftd.fraud_cases SET status=$1,revision=revision+1,decision=$2,hold_until=$3,appeal_count=$4,updated_at=$5 WHERE case_id=$6',[next,action==='appeal'?row.decision:action,until,appeals,t,caseId]);
-    row={...row,status:next,revision:row.revision+1,decision:action==='appeal'?row.decision:action,hold_until:until,appeal_count:appeals,updated_at:t};
+    await c.query('UPDATE liftd.fraud_cases SET status=$1,revision=revision+1,decision=$2,hold_until=$3,appeal_count=$4,updated_at=$5 WHERE case_id=$6',[next,['appeal','close'].includes(action)?row.decision:action,until,appeals,t,caseId]);
+    row={...row,status:next,revision:row.revision+1,decision:['appeal','close'].includes(action)?row.decision:action,hold_until:until,appeal_count:appeals,updated_at:t};
    }
    await permit(token,tripId,'fraud.'+action,p);
    await c.query('INSERT INTO liftd.fraud_events(case_id,revision,action,actor_id,event_digest,recorded_at) VALUES($1,$2,$3,$4,$5,$6)',[caseId,row.revision,action,p.subject,digest({caseId,action,actor:p.subject,input}),t]);

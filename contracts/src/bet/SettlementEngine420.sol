@@ -249,6 +249,7 @@ contract SettlementEngine420 is I420System {
             revert MinesCanonicalSettlementRequired();
         MinesV1420.SessionState memory session = MinesV1420(resolver).getSession(wagerId);
         if (session.phase != MinesV1420.Phase.TERMINAL) revert MinesCanonicalSettlementRequired();
+        if (!MinesV1420(resolver).boardVerified(wagerId)) revert MinesCanonicalSettlementRequired();
         BetTypes420.TerminalOutcome outcome;
         uint256 gross;
         if (session.mineHit) {

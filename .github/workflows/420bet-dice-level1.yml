@@ -49,6 +49,28 @@ jobs:
         uses: foundry-rs/foundry-toolchain@v1
         with:
           version: stable
+      - name: Preflight mandatory Dice suite discovery (no compilation)
+        working-directory: contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          names = ('BetDiceV1420 BetDiceVerticalSlice420 BetDiceV1View420 BetDicePostSettlementVerification420 '
+                   'BetWagerAcceptance420 BetRandomness420 BetRandomnessTerminal420 BetSettlementEngine420 '
+                   'BetBankrollRisk420 BetTerminalPathInvariant420 BetCasinoSettlementInvariant420 '
+                   'BetCasinoSolvencyConvergence420').split()
+          assert len(names) == len(set(names)) == 12
+          for name in names:
+              path = Path('test') / f'{name}.t.sol'
+              assert path.is_file(), f'missing required suite: {path}'
+              content = path.read_text()
+              assert re.search(r'\\bcontract\\s+' + re.escape(name + 'Test') + r'\\s+is\\b', content), f'missing required test contract: {path}'
+              assert re.search(r'\\bfunction\\s+(?:test|invariant|statefulFuzz)\\w*\\s*\\(', content), f'no tests/invariants: {path}'
+              print(f'DISCOVERED: {path}::{name}Test')
+          print('Preflight PASS: all 12 required test contracts and test functions present')
+          PY
       - name: Run all required Dice and shared suites in one Foundry invocation
         working-directory: contracts
         shell: bash
@@ -77,7 +99,44 @@ jobs:
           done
           # Compile once and execute once. Verify the actual JSON result keys,
           # rather than trusting a green command with empty test selection.
-          regex='test/(BetDiceV1420|BetDiceVerticalSlice420|BetDiceV1View420|BetDicePostSettlementVerification420|BetWagerAcceptance420|BetRandomness420|BetRandomnessTerminal420|BetSettlementEngine420|BetBankrollRisk420|BetTerminalPathInvariant420|BetCasinoSettlementInvariant420|BetCasinoSolvencyConvergence420)\.t\.sol'
+          # Foundry --match-path is a glob, not a regex. Match exact verified
+          # test CONTRACT names with Foundry's regex-based --match-contract.
+          regex='^(BetDiceV1420|BetDiceVerticalSlice420|BetDiceV1View420|BetDicePostSettlementVerification420|BetWagerAcceptance420|BetRandomness420|BetRandomnessTerminal420|BetSettlementEngine420|BetBankrollRisk420|BetTerminalPathInvariant420|BetCasinoSettlementInvariant420|BetCasinoSolvencyConvergence420)Test          forge test --match-contract "$regex" --json > "$RUNNER_TEMP/dice-level1.json"
+          python3 - "$RUNNER_TEMP/dice-level1.json" <<'PY'
+          import json, sys
+          path=sys.argv[1]
+          expected=[
+              "BetDiceV1420", "BetDiceVerticalSlice420", "BetDiceV1View420",
+              "BetDicePostSettlementVerification420", "BetWagerAcceptance420",
+              "BetRandomness420", "BetRandomnessTerminal420",
+              "BetSettlementEngine420", "BetBankrollRisk420",
+              "BetTerminalPathInvariant420", "BetCasinoSettlementInvariant420",
+              "BetCasinoSolvencyConvergence420",
+          ]
+          data=json.load(open(path))
+          seen=set()
+          count=0
+          failures=[]
+          for key, val in data.items():
+              if not isinstance(val, dict) or not isinstance(val.get("test_results"), dict):
+                  continue
+              for name in expected:
+                  if f"test/{name}.t.sol:" in key:
+                      seen.add(name)
+              for test, outcome in val["test_results"].items():
+                  count += 1
+                  if outcome.get("status") != "Success":
+                      failures.append((key, test, outcome.get("status")))
+          missing=set(expected)-seen
+          print(f"Executed {count} tests across {len(seen)}/12 required suites")
+          for name in sorted(seen):
+              print(f"  PASS inventory: {name}")
+          if missing or failures or count < 12:
+              print("Missing required suites:", sorted(missing))
+              print("Non-success tests:", failures)
+              sys.exit(1)
+          PY
+
           forge test --match-path "$regex" --json > "$RUNNER_TEMP/dice-level1.json"
           python3 - "$RUNNER_TEMP/dice-level1.json" <<'PY'
           import json, sys

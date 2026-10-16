@@ -31,3 +31,24 @@ Canonical `docs/bnb/BNB-PHASE5-ROADMAP.md` explicitly requires BNB-5.14 **final 
 **Finding C — permitted scope:** Inherit passing BnB app results across the confirmed documentation-only HEAD diff. Reuse unaffected historical evidence for context and unchanged components where explicitly allowed, not as a substitute for mandatory current Phase-5 Level-3 evidence.
 
 **Final BNB-5.14 decision: NOT YET QUALIFIED.** No new global Foundry or other expensive workflow was dispatched in making this assessment; PR #644 remains draft/unmerged. Before any expensive run, inspect newer successful global evidence matching current main input blobs, then complete frozen-input preflight and obtain only the genuinely missing mandatory Level-3 checks, keeping Foundry unique to its canonical owner.
+
+## Addendum — newer global evidence eliminates duplicate expensive qualification
+
+This addendum supersedes **only** the earlier finding that no current global comparable evidence had been located. Phase-4 evidence is still **not** substituted for changed global inputs.
+
+A newer **common exact-SHA Level 3 evidence set** exists at implementation `f6989e22b55c7511466957f44d3fdfe7ffb3f496`:
+
+| Owner | Exact-SHA run | Mandatory jobs observed |
+| --- | --- | --- |
+| Solidity | [#38809310678](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38809310678) | All four `level3-shards (0–3)` **SUCCESS**, `level3-fixture` **SUCCESS**; unrelated alternative jobs skipped and not credited |
+| Genesis | [#38809360126](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38809360126) | `cross-manifest-authority` **SUCCESS** |
+| Integrated | [#38809400514](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38809400514) | `offline-core`, `production-dependencies`, `geth-engine`, `fault-matrix` all **SUCCESS** |
+| Docs (newer main) | [#38822763145](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38822763145) | `qualify` **SUCCESS** on `d3310d153e7ccc71f5ded95639aadfd7a6f6e682` |
+
+Verified complete, nontruncated Git trees from the common global qualified SHA `f6989e22...` to reconciled `main` `d3310d15...`: **exactly 12 newly changed blob paths**, comprising ten High Country cultivation artwork files, `apps/highcountry-web/public/assets/cultivation/readme.md`, and `docs/rideshare/L01.10-LEVEL3-CERTIFICATE.md`. **Zero changes** in `contracts/**`, `scripts/**`, `config/**`, `consensus/**`, `execution/**`, `integration/**`, `go.mod`, `go.sum`, the four canonical global workflow files, or BnB files. The main-to-BnB candidate delta is limited to `services/420bnb/**`, `.github/workflows/bnb-runtime.yml`, and `docs/bnb/**`, also leaving those three global owner inputs unchanged.
+
+**Result:** Existing passing evidence for Solidity, Genesis and Integrated is valid *input-identical coverage* for the global sources these owners qualify on the BNB-5.14 candidate, subject to explicit acceptance of input-equivalent reuse under canonical closeout policy. No repeated Foundry, Genesis or Integrated execution is justified by a changed owner input. Do not relabel historic run HEAD SHAs as the literal BnB candidate SHA.
+
+**Docs scope distinction:** The Docs PASS on reconciled main predates new BnB Phase-5 documentation and this addendum. Docs' source scope is therefore **not identical** on the BnB candidate. The Phase 5 roadmap explicitly requires full Docs at Level 3. This owner still needs admissible qualification for the changed BnB docs, or a repository-authorized, documented scoped evidence exception; neither is proven by the previous main PASS or audit-PR skipped runs.
+
+**Updated disposition:** expensive triple **reusable by input-identity argument**, current BnB Runtime Slice and guardrails **PASS**, global Docs candidate **unqualified**. Final Level 3 closeout is not yet authorized. No new expensive global qualification was launched for this determination.

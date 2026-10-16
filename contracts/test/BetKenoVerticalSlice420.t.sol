@@ -24,6 +24,7 @@ import "../src/bet/WithdrawalQueue420.sol";
 
 interface VmBetKenoVerticalSlice420 {
     function prank(address) external;
+    function expectRevert(bytes4) external;
 }
 
 contract MockCapabilityRegistryBetKenoVerticalSlice420 is ICapabilityRegistry420 {
@@ -392,4 +393,46 @@ contract BetKenoVerticalSlice420Test {
         require(replay.randomnessRoot == result.randomnessRoot, "replay root changed");
         for (uint8 i = 0; i < 20; ++i) require(replay.draw[i] == result.draw[i], "replay draw changed");
     }
+    function testUnapprovedPaytableNeverEscrowsOrReservesBankroll() public {
+        uint256 stake = 100 ether;
+        Suite memory s = _deploy();
+        KenoV1420.Params memory params = _params();
+        _allow(s, PLAYER, BetIds420.ACTION_PLACE, s.auth.scopeForGame(GAME, GAME_V1));
+        s.token.mint(PLAYER, stake);
+        vm.prank(PLAYER);
+        s.token.approve(address(s.vault), stake);
+
+        WagerRouter420.AcceptanceRequest memory req = WagerRouter420.AcceptanceRequest({
+            operatorId: OPERATOR, gameVersionId: GAME_V1, stake: stake,
+            maxGrossPayout: 5_000 ether, paramsHash: s.keno.hashParams(params),
+            correlationKey: keccak256("keno/forged"), deadline: uint64(block.timestamp + 1 hours)
+        });
+
+        // An old generic entrypoint must not bypass the versioned paytable gate.
+        vm.prank(PLAYER);
+        vm.expectRevert(WagerRouter420.KenoAuthorityRequired.selector);
+        s.wagerRouter.placeWager(req);
+
+        // Changing even one prize while matching the player's new hash and max still fails.
+        params.grossPayoutByHits[5] = 6_000 ether;
+        req.maxGrossPayout = 6_000 ether;
+        req.paramsHash = s.keno.hashParams(params);
+        vm.prank(PLAYER);
+        vm.expectRevert(KenoPaytableAuthority420.InvalidSchedule.selector);
+        s.wagerRouter.placeKenoWager(req, params);
+
+        // A stolen/old commitment with otherwise valid terms must also fail closed.
+        params = _params();
+        req.maxGrossPayout = 5_000 ether;
+        vm.prank(PLAYER);
+        vm.expectRevert(KenoPaytableAuthority420.InvalidSchedule.selector);
+        s.wagerRouter.placeKenoWager(req, params);
+
+        require(s.wagerRouter.nextNonce(PLAYER) == 0, "rejection consumed nonce");
+        require(s.token.balanceOf(PLAYER) == stake, "rejection consumed player balance");
+        require(s.vault.activeWagerStakeEscrow() == 0, "rejection escrowed stake");
+        require(s.risk.reservedByVault(VAULT) == 0, "rejection reserved liability");
+        require(s.accounting.getVault(VAULT).activeReservedLiability == 0, "accounting mutated");
+    }
+
 }

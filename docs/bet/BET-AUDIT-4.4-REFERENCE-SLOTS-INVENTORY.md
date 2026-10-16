@@ -26,3 +26,18 @@ The previously committed repository did not provide an independently approved, r
 The mathematical model must distinguish strip-index sampling, ways prizes, scatter occurrences versus scatter-paying reels, feature triggers/retriggers, feature 2x multiplier, the absolute-denomination paytable (whose RTP depends on the stake amount), and per-wager gross cap. The cap means an **uncapped expectation alone is not a valid RTP certificate**. Testnet/live review additionally requires real deployed code hashes, authorized principals and network receipts.
 
 **Current state:** security remediation under scoped Level 1 CI on PR #678. No Level 1 PASS or merge is claimed until its exact-SHA tests finish. Level 2 and Level 3 have not been requested.
+
+
+## Deterministic statistical audit — observed 2026-10-16
+
+Executable verifier: `scripts/audit-420bet-reference-slot-rtp.py`; CI [run 38938994888](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38938994888), **successful execution against implementation commit `4bbb21ca01c1f065db409623a29439cc5ad91dc2`**. The deterministic fixture hash is `6a67983232d177763ffb76ea25d509ec10e895fd3dee389b023bf89ddfbcfbfb` (SHA-256 of the normalized verifier fixture JSON, NOT a registered Ethereum on-chain artifact or independent approval).
+
+With seed `4204401`, 25,000 simulated wagers, a stake of 100 and an effective cap of 5,000, the independent uniform-stop model produced:
+- Estimated RTP: **3,086.7666%**, 99% distribution-free Hoeffding confidence interval **3,035.296622% to 3,138.236578%**.
+- Feature-triggered wagers: **14,847**; wagers whose uncapped payouts exceeded the cap: **14,837**.
+- Observed maximum gross payout **5,000**, maximum reserved liability **4,900**.
+- Conservative structural uncapped bound **3,212,500** units for one base spin and up to 12 feature spins including a 2× multiplier. The actual engine enforces the configured gross cap of 5,000.
+
+**Disposition: RTP economics FAIL release suitability review.** Test fixtures produce very high player returns under the stated independent uniform-stop model. This is a statistical analysis of an illustrative test fixture, not a certified exact RTP, byte-for-byte Ethereum RNG reproducibility proof, production-approved economic schedule, or a financially sensible payout approval. The cap and maximum reserved liability have independently reproducible upper bounds, but passing Level 1 code tests does not erase the RTP gap.
+
+**Required remediation for full BET-AUDIT-4.4 qualification:** define an independently authorized production-candidate reel/paytable, versioned exact real-stake denomination, explicitly selected RTP target/acceptance tolerance, reproducible exact or appropriately certified cap-aware expected-return calculation (including feature dynamics), candidate digest matching on-chain artifact registrations, approval of worst-case liability and capital/reserve constraints, and an independent authorization process. The only genuinely live-network requirements then belong on the testnet/production work ledger. Until resolved, this document is an evidence record **not** a Level 1 PASS certificate.

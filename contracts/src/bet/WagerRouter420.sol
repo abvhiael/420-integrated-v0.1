@@ -17,6 +17,8 @@ import "./BetTypes420.sol";
 import "./RiskManager420.sol";
 import "./KenoV1420.sol";
 import "./KenoPaytableAuthority420.sol";
+import "./PlinkoV1420.sol";
+import "./PlinkoPaytableAuthority420.sol";
 
 contract WagerRouter420 is I420System {
     struct AcceptanceRequest {
@@ -45,6 +47,9 @@ contract WagerRouter420 is I420System {
     bytes32 private constant KENO_GAME_ID = keccak256("420BET.GAME.KENO");
     mapping(bytes32 => address) public kenoAuthority;
     mapping(bytes32 => address) public kenoResolver;
+    bytes32 private constant PLINKO_GAME_ID = keccak256("420BET.GAME.PLINKO");
+    mapping(bytes32 => address) public plinkoAuthority;
+    mapping(bytes32 => address) public plinkoResolver;
 
     mapping(address => uint256) public nextNonce;
     uint256 private _entered;
@@ -60,6 +65,8 @@ contract WagerRouter420 is I420System {
     error InvalidLiability();
     error KenoAuthorityRequired();
     error KenoAuthorityAlreadyBound();
+    error PlinkoAuthorityRequired();
+    error PlinkoAuthorityAlreadyBound();
     error Reentrancy();
     error EmergencyAlreadyBound();
     error EmergencyHalted(BetTypes420.EmergencyDomain domain, bytes32 subject);
@@ -160,13 +167,48 @@ contract WagerRouter420 is I420System {
         return _placeWager(request);
     }
 
+    /// @notice Bind a single approved Plinko schedule to the registered game module.
+    function bindPlinkoPaytable(bytes32 gameVersionId, address resolver, address verifier) external {
+        if (gameVersionId == bytes32(0) || resolver == address(0) || verifier == address(0))
+            revert InvalidRequest();
+        if (plinkoAuthority[gameVersionId] != address(0)) revert PlinkoAuthorityAlreadyBound();
+        BetGameRegistry420.GameVersion memory g = games.getGame(gameVersionId);
+        if (g.gameId != PLINKO_GAME_ID ||
+            modules.getModule(g.moduleVersionId).implementation != resolver ||
+            PlinkoV1420(resolver).gameId() != PLINKO_GAME_ID ||
+            PlinkoV1420(resolver).gameVersionId() != gameVersionId ||
+            PlinkoV1420(resolver).rulesetId() != g.rulesetId ||
+            address(PlinkoV1420(resolver).wagerRegistry()) != address(betRegistry) ||
+            PlinkoPaytableAuthority420(verifier).gameVersionId() != gameVersionId ||
+            PlinkoPaytableAuthority420(verifier).rulesetId() != g.rulesetId)
+            revert InvalidRequest();
+        if (!authorization.isAuthorized(msg.sender, BetIds420.ACTION_GAME_REGISTER,
+            authorization.scopeForGame(g.gameId, gameVersionId), 0)) revert Unauthorized();
+        plinkoAuthority[gameVersionId] = verifier;
+        plinkoResolver[gameVersionId] = resolver;
+    }
+
+    function placePlinkoWager(AcceptanceRequest calldata request, PlinkoV1420.Params calldata params)
+        external payable nonReentrant returns (bytes32 wagerId, uint256 reservedLiability)
+    {
+        BetGameRegistry420.GameVersion memory g = games.getGame(request.gameVersionId);
+        if (g.gameId != PLINKO_GAME_ID) revert InvalidRequest();
+        address verifier = plinkoAuthority[request.gameVersionId];
+        if (verifier == address(0)) revert PlinkoAuthorityRequired();
+        PlinkoPaytableAuthority420(verifier).verify(request.stake, request.maxGrossPayout,
+            request.paramsHash, params, plinkoResolver[request.gameVersionId]);
+        return _placeWager(request);
+    }
+
     function placeWager(AcceptanceRequest calldata request)
         external
         payable
         nonReentrant
         returns (bytes32 wagerId, uint256 reservedLiability)
     {
-        if (games.getGame(request.gameVersionId).gameId == KENO_GAME_ID) revert KenoAuthorityRequired();
+        bytes32 gameId = games.getGame(request.gameVersionId).gameId;
+        if (gameId == KENO_GAME_ID) revert KenoAuthorityRequired();
+        if (gameId == PLINKO_GAME_ID) revert PlinkoAuthorityRequired();
         return _placeWager(request);
     }
 

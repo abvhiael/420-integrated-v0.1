@@ -11,6 +11,7 @@ import "./BetRegistry420.sol";
 import "./BetTypes420.sol";
 import "./RiskManager420.sol";
 import "./KenoV1420.sol";
+import "./PlinkoV1420.sol";
 
 contract SettlementEngine420 is I420System {
     BetAuthorization420 public immutable authorization;
@@ -23,6 +24,8 @@ contract SettlementEngine420 is I420System {
     BetEmergencyState420 public emergencyState;
     bytes32 private constant KENO_GAME_ID = keccak256("420BET.GAME.KENO");
     mapping(bytes32 => address) public kenoResolver;
+    bytes32 private constant PLINKO_GAME_ID = keccak256("420BET.GAME.PLINKO");
+    mapping(bytes32 => address) public plinkoResolver;
 
     uint256 private _entered;
 
@@ -36,6 +39,8 @@ contract SettlementEngine420 is I420System {
     error SettlementConflict();
     error KenoCanonicalSettlementRequired();
     error KenoResolverAlreadyBound();
+    error PlinkoCanonicalSettlementRequired();
+    error PlinkoResolverAlreadyBound();
     error Reentrancy();
     error EmergencyAlreadyBound();
     error WagerExpired();
@@ -108,6 +113,30 @@ contract SettlementEngine420 is I420System {
         settlement = _settle(wager, result.outcome, result.grossPayout, true);
     }
 
+    function bindPlinkoResolver(bytes32 gameVersionId, address resolver) external {
+        if (resolver == address(0) || gameVersionId == bytes32(0)) revert ZeroAddress();
+        if (plinkoResolver[gameVersionId] != address(0)) revert PlinkoResolverAlreadyBound();
+        PlinkoV1420 p = PlinkoV1420(resolver);
+        if (p.gameId() != PLINKO_GAME_ID || p.gameVersionId() != gameVersionId ||
+            address(p.wagerRegistry()) != address(registry)) revert InvalidStatus();
+        if (!authorization.isAuthorized(msg.sender, BetIds420.ACTION_GAME_REGISTER,
+            authorization.scopeForGame(PLINKO_GAME_ID, gameVersionId), 0)) revert Unauthorized();
+        plinkoResolver[gameVersionId] = resolver;
+    }
+
+    function settlePlinko(bytes32 wagerId, PlinkoV1420.Params calldata params)
+        external nonReentrant returns (BetTypes420.Settlement memory settlement)
+    {
+        BetTypes420.Wager memory wager = registry.getWager(wagerId);
+        if (wager.gameId != PLINKO_GAME_ID) revert InvalidStatus();
+        address resolver = plinkoResolver[wager.gameVersionId];
+        if (resolver == address(0) ||
+            PlinkoV1420(resolver).rulesetId() != wager.rulesetId)
+            revert PlinkoCanonicalSettlementRequired();
+        PlinkoV1420.Result memory result = PlinkoV1420(resolver).resolve(wagerId, params);
+        settlement = _settle(wager, result.outcome, result.grossPayout, true);
+    }
+
     function settle(bytes32 wagerId, BetTypes420.TerminalOutcome outcome, uint256 grossPayout)
         external
         nonReentrant
@@ -115,6 +144,7 @@ contract SettlementEngine420 is I420System {
     {
         BetTypes420.Wager memory wager = registry.getWager(wagerId);
         if (wager.gameId == KENO_GAME_ID) revert KenoCanonicalSettlementRequired();
+        if (wager.gameId == PLINKO_GAME_ID) revert PlinkoCanonicalSettlementRequired();
         settlement = _settle(wager, outcome, grossPayout, true);
     }
 

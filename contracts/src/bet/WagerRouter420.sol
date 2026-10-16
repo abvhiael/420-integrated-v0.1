@@ -21,6 +21,7 @@ import "./PlinkoV1420.sol";
 import "./PlinkoPaytableAuthority420.sol";
 import "./ReferenceSlotV1420.sol";
 import "./ReferenceSlotTermsAuthority420.sol";
+import "./RouletteV1420.sol";
 
 contract WagerRouter420 is I420System {
     struct AcceptanceRequest {
@@ -55,6 +56,8 @@ contract WagerRouter420 is I420System {
     bytes32 private constant SLOT_GAME_ID = keccak256("420BET.GAME.SLOT");
     mapping(bytes32 => address) public slotTermsAuthority;
     mapping(bytes32 => address) public slotResolver;
+    bytes32 private constant ROULETTE_GAME_ID = keccak256("420BET.GAME.ROULETTE");
+    mapping(bytes32 => address) public rouletteResolver;
 
     mapping(address => uint256) public nextNonce;
     uint256 private _entered;
@@ -74,6 +77,8 @@ contract WagerRouter420 is I420System {
     error PlinkoAuthorityAlreadyBound();
     error SlotAuthorityRequired();
     error SlotAuthorityAlreadyBound();
+    error RouletteCanonicalWagerRequired();
+    error RouletteResolverAlreadyBound();
     error Reentrancy();
     error EmergencyAlreadyBound();
     error EmergencyHalted(BetTypes420.EmergencyDomain domain, bytes32 subject);
@@ -239,6 +244,37 @@ contract WagerRouter420 is I420System {
         return _placeWager(request);
     }
 
+    /// @notice Governance-authorized, immutable game-version binding to the canonical roulette module.
+    function bindRouletteResolver(bytes32 versionId, address resolver) external {
+        if (versionId == bytes32(0) || resolver == address(0)) revert InvalidRequest();
+        if (rouletteResolver[versionId] != address(0)) revert RouletteResolverAlreadyBound();
+        BetGameRegistry420.GameVersion memory g = games.getGame(versionId);
+        RouletteV1420 r = RouletteV1420(resolver);
+        if (g.gameId != ROULETTE_GAME_ID ||
+            modules.getModule(g.moduleVersionId).implementation != resolver ||
+            r.gameId() != ROULETTE_GAME_ID || r.gameVersionId() != versionId ||
+            r.rulesetId() != g.rulesetId || address(r.wagerRegistry()) != address(betRegistry))
+            revert InvalidRequest();
+        if (!authorization.isAuthorized(msg.sender, BetIds420.ACTION_GAME_REGISTER,
+            authorization.scopeForGame(g.gameId, versionId), 0)) revert Unauthorized();
+        rouletteResolver[versionId] = resolver;
+    }
+
+    /// @notice Fail closed before nonce consumption, stake transfer or risk reservation.
+    function placeRouletteWager(AcceptanceRequest calldata request, RouletteV1420.Params calldata params)
+        external payable nonReentrant returns (bytes32 wagerId, uint256 reservedLiability)
+    {
+        BetGameRegistry420.GameVersion memory g = games.getGame(request.gameVersionId);
+        if (g.gameId != ROULETTE_GAME_ID) revert InvalidRequest();
+        address resolver = rouletteResolver[request.gameVersionId];
+        if (resolver == address(0)) revert RouletteCanonicalWagerRequired();
+        RouletteV1420 r = RouletteV1420(resolver);
+        if (r.hashParams(params) != request.paramsHash ||
+            r.requiredMaxGrossPayout(request.stake, params) != request.maxGrossPayout)
+            revert InvalidRequest();
+        return _placeWager(request);
+    }
+
     function placeWager(AcceptanceRequest calldata request)
         external
         payable
@@ -249,6 +285,7 @@ contract WagerRouter420 is I420System {
         if (gameId == KENO_GAME_ID) revert KenoAuthorityRequired();
         if (gameId == PLINKO_GAME_ID) revert PlinkoAuthorityRequired();
         if (gameId == SLOT_GAME_ID) revert SlotAuthorityRequired();
+        if (gameId == ROULETTE_GAME_ID) revert RouletteCanonicalWagerRequired();
         return _placeWager(request);
     }
 

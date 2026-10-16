@@ -74,14 +74,14 @@ For each wager:
 
 1. derive the parameter hash using the deployed RouletteV1 contract;
 2. derive `maxGrossPayout` from `requiredMaxGrossPayout` rather than from UI constants;
-3. submit through `WagerRouter420` before the deadline;
+3. submit through `WagerRouter420.placeRouletteWager(request, params)` before the deadline, after governance has immutably bound the approved resolver with `WagerRouter420.bindRouletteResolver`; never use generic `placeWager` for Roulette;
 4. record the transaction hash and canonical wager ID;
 5. confirm stake escrow and exact maximum liability are reserved before randomness exists;
 6. request randomness through the configured `RandomnessRouter420` path;
 7. confirm the UI/client does not invent or preview a pocket before fulfillment;
 8. allow the configured provider to fulfill one canonical root;
 9. resolve the pocket through `RouletteV1420`;
-10. settle through `SettlementEngine420` using the exact resolved outcome and gross payout;
+10. settle through `SettlementEngine420.settleRoulette(wagerId, params)` with the governance-bound Roulette resolver; never use generic caller-selected `settle` for Roulette;
 11. confirm stake escrow and risk liability clear exactly once;
 12. confirm economics finalization occurs exactly once;
 13. read the wager through `RouletteV1View420` and independently reproduce the same pocket, outcome, payout, params hash and randomness root.
@@ -131,3 +131,7 @@ The authoritative release path is:
 `wallet/smart account -> WagerRouter420 -> stake escrow + risk reservation -> RandomnessRouter420 -> RouletteV1420 -> SettlementEngine420 -> RouletteV1View420 -> independently reproducible transcript`
 
 Frontend animation, wheel graphics, client-selected multipliers, or locally generated pockets are never evidence of outcome correctness.
+
+## 6. BET-AUDIT-4.5 release-authorization boundary
+
+This runbook is a **testnet/production acceptance gate**, not evidence that a live environment has been deployed. `bindRouletteResolver` is version-scoped and single-use; the module registry implementation and wager registry must match the approved Roulette resolver before admission. Generic wager entry and generic economic settlement are prohibited for Roulette. The selected 37-pocket rules and 36x/3x/2x gross schedules are executable local rules; live funding, jurisdiction policy and operator/risk approval remain in `docs/420BET-TESTNET-WORK-ROADMAP.md`. The release verifier validates *manifest structure*, not live RPC state; successful local validation must never be substituted for deployed bytecode, on-chain governance bindings or funded wager receipts.

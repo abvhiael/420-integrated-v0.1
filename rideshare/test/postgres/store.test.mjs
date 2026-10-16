@@ -29,8 +29,8 @@ before(async () => {
   await owner.query('GRANT USAGE ON SCHEMA liftd TO liftd_runtime');
   await owner.query('GRANT SELECT ON liftd.migrations,liftd.trips,liftd.events,liftd.commands TO liftd_runtime');
   await owner.query('GRANT INSERT,UPDATE ON liftd.trips TO liftd_runtime');
-  await owner.query('GRANT INSERT ON liftd.events,liftd.commands,liftd.operator_audit TO liftd_runtime');
-  await owner.query('GRANT SELECT ON liftd.operator_audit,liftd.assignment_leases TO liftd_runtime');
+  await owner.query('GRANT INSERT ON liftd.events,liftd.commands,liftd.operator_audit,liftd.travel_handoffs TO liftd_runtime');
+  await owner.query('GRANT SELECT ON liftd.operator_audit,liftd.assignment_leases,liftd.travel_handoffs TO liftd_runtime');
   const url = new URL(process.env.LIFTD_DATABASE_URL); url.username = 'liftd_runtime'; url.password = 'liftd_fixture';
   runtimeConnection = url.href;
   pool = createDatabasePool({connectionString: runtimeConnection}); store = createPostgresTripStore(pool);
@@ -42,11 +42,11 @@ test('ordered concurrent migrations are checksum-verified and runtime is a non-o
     '001_trip_store.sql', '002_private_locations.sql', '003_dispatch.sql',
     '004_quotes.sql', '005_payments.sql', '006_safety.sql',
     '007_rider_preferences.sql', '008_driver_onboarding.sql', '009_driver_offers.sql',
-    '010_operator_audit.sql'
+    '010_operator_audit.sql', '011_travel_handoff.sql'
   ];
   const applied = (await owner.query('SELECT version,checksum FROM liftd.migrations ORDER BY version')).rows;
   assert.deepEqual(applied.map(row => row.version), expectedVersions,
-    'All ten migrations must be applied once in canonical version order');
+    'All eleven migrations must be applied once in canonical version order');
   for (const row of applied) {
     const source = readFileSync(new URL(`../../migrations/${row.version}`, import.meta.url), 'utf8');
     assert.equal(row.checksum, createHash('sha256').update(source).digest('hex'),
@@ -57,6 +57,8 @@ test('ordered concurrent migrations are checksum-verified and runtime is a non-o
   await assert.rejects(() => pool.query("UPDATE liftd.migrations SET checksum='bad'"), e => e.code === '42501');
   await assert.rejects(() => pool.query("UPDATE liftd.operator_audit SET result='READ'"), e => e.code === '42501');
   await assert.rejects(() => pool.query('DELETE FROM liftd.operator_audit'), e => e.code === '42501');
+  await assert.rejects(() => pool.query('DELETE FROM liftd.travel_handoffs'), e => e.code === '42501');
+  await assert.rejects(() => pool.query("UPDATE liftd.travel_handoffs SET purpose='travel_ground_connection'"), e => e.code === '42501');
 });
 test('restricted operator audit inserts are durable, immutable and duplicate-safe', async () => {
   const {createPostgresOperatorAudit} = await import('../../src/postgres-operator-audit.mjs');

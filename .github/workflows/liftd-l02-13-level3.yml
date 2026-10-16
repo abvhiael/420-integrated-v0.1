@@ -1,0 +1,85 @@
+name: LIFTd L02 Phase Level 3 Retained
+on:
+  pull_request:
+    paths:
+      - 'rideshare/**'
+      - '.github/workflows/liftd-l02-13-level3.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  retained-l02-phase:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: liftd_qualification
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres -d liftd_qualification"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      LIFTD_DATABASE_URL: postgres://postgres:postgres@127.0.0.1:5432/liftd_qualification
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Assert exact milestone SHA
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: App-only preflight and locked dependencies
+        run: |
+          npm ci --prefix rideshare --ignore-scripts
+          node rideshare/scripts/verify-foundation.mjs
+          git diff --check
+      - name: Rider driver operator client and accessibility regressions
+        run: npm run check --prefix rideshare/web
+      - name: Full retained rideshare domain and interface security inventory
+        run: npm test --prefix rideshare
+      - name: Rider and onboarding cross-component journeys
+        run: node --test rideshare/test/integration/l02-rider-onboarding.test.mjs
+      - name: PostgreSQL durable lifecycle, migration and adversarial suites
+        run: |
+          for testfile in rideshare/test/postgres/*.test.mjs; do
+            echo "Qualifying $testfile against isolated sequential PostgreSQL fixture ownership"
+            node --test "$testfile" || exit 1
+          done
+      - name: Travel consumer SDK contract and security
+        run: |
+          node --check rideshare/sdk/travel-handoff-v1.mjs
+          node --check rideshare/consumers/travel-handoff-v1.mjs
+          node --test rideshare/test/travel-handoff.test.mjs
+      - name: Location provider and privacy
+        run: go test ./rideshare/locationbridge ./location/providers ./location/privacy
+      - name: Browser dependency preflight
+        run: |
+          npm install --prefix rideshare/web --no-save --no-package-lock --ignore-scripts playwright@1.56.1 axe-core@4.10.3
+          npx --prefix rideshare/web playwright install --with-deps chromium
+      - name: Browser keyboard responsive reconnect and WCAG regression
+        run: |
+          python3 -m http.server 8032 --directory rideshare/web > /tmp/liftd-l02-13-http.log 2>&1 &
+          for i in $(seq 1 30); do if curl -fsS http://127.0.0.1:8032/ >/dev/null; then break; fi; sleep 1; done
+          node rideshare/web/e2e/accessibility-device.mjs
+      - name: Preserve exact implementation evidence
+        run: |
+          mkdir -p liftd-l02-13-evidence
+          git rev-parse HEAD > liftd-m-l02-b-evidence/implementation-sha.txt
+          git diff --check
+      - uses: actions/upload-artifact@v4
+        with:
+          name: liftd-l02-13-${{ github.event.pull_request.head.sha || github.sha }}
+          path: liftd-m-l02-b-evidence/
+          if-no-files-found: error

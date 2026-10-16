@@ -76,7 +76,7 @@ test('durable Travel consent is trip-version scoped, replay-safe and immutable f
  const request={actorId:actor.subject,accountId:'account_1',sessionId:'session_1',tripId,tripRevision:0,
   commandId:nextId(),purpose:'travel_ground_connection',consent:true,expiresAt:120};
  const first=await consent.consume(request);assert.equal((await consent.consume(request)).handoffId,first.handoffId);
- assert.equal((await consent.read({handoffId:first.handoffId,tripId,actorId:actor.subject})).tripRevision,0);
+ assert.equal((await consent.read({handoffId:first.handoffId,tripId,actorId:actor.subject,accountId:'account_1',sessionId:'session_1'})).tripRevision,0);
  await assert.rejects(()=>consent.consume({...request,purpose:'other'}),e=>e.code==='INVALID_CONSENT');
  await assert.rejects(()=>consent.consume({...request,tripRevision:1}),e=>e.code==='CONSENT_IDEMPOTENCY_CONFLICT');
  await assert.rejects(()=>pool.query('DELETE FROM liftd.travel_handoffs WHERE handoff_id=$1',[first.handoffId]),e=>e.code==='42501');

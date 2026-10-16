@@ -96,8 +96,10 @@ export function createSupportCaseService({pool,authenticator,clock=()=>Math.floo
     await trip(client,row.trip_id,p);
     if(row.retention_until<=now())fail('CASE_RETENTION_EXPIRED',410);
     if(p.role!=='operator'&&p.subject!==row.opener_id)fail('SUPPORT_SCOPE_DENIED',403);
+    const evidence=await client.query("SELECT revision,evidence_class,evidence_digest,recorded_at FROM liftd.support_events WHERE case_id=$1 AND action='evidence' ORDER BY revision LIMIT 101",[caseId]);
+    if(evidence.rows.length>100)fail('EVIDENCE_LIMIT_EXCEEDED',409);
     await authorized(token,row.trip_id,'support.read',p);
-    return view(row);
+    return Object.freeze({...view(row),evidence:evidence.rows.map(e=>Object.freeze({revision:Number(e.revision),evidenceClass:e.evidence_class,evidenceDigest:e.evidence_digest,recordedAt:Number(e.recorded_at)}))});
    })
   }
  });

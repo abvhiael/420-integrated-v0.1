@@ -265,7 +265,7 @@ contract BetReferenceSlotVerticalSlice420Test {
         for (uint8 i = 0; i < 5; ++i) require(result.baseStops[i] < 32, "stop out of range");
         for (uint8 i = 0; i < 20; ++i) require(result.baseGrid[i] < 7, "symbol out of range");
 
-        if (result.grossPayout == 0) require(result.outcome == BetTypes420.TerminalOutcome.LOSS, "loss mismatch");
+        if (result.grossPayout < stake) require(result.outcome == BetTypes420.TerminalOutcome.LOSS, "loss mismatch");
         else if (result.grossPayout == stake) require(result.outcome == BetTypes420.TerminalOutcome.PUSH, "push mismatch");
         else require(result.outcome == BetTypes420.TerminalOutcome.WIN, "win mismatch");
 

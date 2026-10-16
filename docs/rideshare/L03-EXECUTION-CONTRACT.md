@@ -1,42 +1,38 @@
-# LIFTd Phase L03 — canonical execution and qualification contract
+# LIFTd Phase L03 — execution and qualification contract (original roadmap)
 
-**Status: LOCKED PLAN, NO WORK STARTED.** Source of step numbering: [LIFTd canonical roadmap](LIFTD-ROADMAP.md), Phase L03. Approved roadmap in source control must precede L03.1 implementation. Do not treat this planning change as implementation qualification.
+**Authority:** [Canonical LIFTd roadmap](LIFTD-ROADMAP.md), Phase L03. The owner-supplied original roadmap is authoritative. PR #680's alternate order was unauthorized; this contract explicitly restores the original L03.1–L03.12 order, scope and milestone positions. **All steps PLANNED; L03.1 has not started.**
 
-## Scope and sequencing
+## Fixed execution sequence
 
-L03 carries the original roadmap's service operations and release scope: disputes/reviews, abuse, observability/redacted telemetry, managed keys, concurrency/failover, backups/recovery, drills, passenger-transport jurisdiction gates, official testnet readiness and release acceptance. The immutable planned order is **L03.1, L03.2, L03.3, M-L03-A, L03.4, L03.5, L03.6, L03.7, M-L03-B, L03.8, L03.9, L03.10, M-L03-C, L03.11**. No combining, renumbering or advancement beyond unfinished exit criteria. This ledger does not invent production or regulator authority.
+1. L03.1 — Support and dispute cases.
+2. L03.2 — Reviews and reputation.
+3. L03.3 — Abuse and fraud controls.
+4. L03.4 — Economic reconciliation.
+5. L03.5 — Privacy and retention operations.
+6. M-L03-A — Level 2 milestone for support, disputes, reputation, fraud, economics and privacy.
+7. L03.6 — Deployment and managed security.
+8. L03.7 — Reliability and capacity.
+9. L03.8 — Operational safety acceptance.
+10. L03.9 — Launch-jurisdiction acceptance.
+11. L03.10 — Official-testnet integration.
+12. M-L03-B — Level 2 milestone for deployment, reliability, **real official-testnet integration and accepted operational controls**.
+13. L03.11 — Controlled pilot with explicit independent authorization.
+14. L03.12 — Single Level 3 closeout and release decision.
 
-## Detailed qualification boundary
+The full owner-approved wording and scope of each step are in the canonical roadmap; this execution contract does not substitute or reinterpret any step.
 
-| Qualification boundary | Required test and evidence scope | Expensive global owner |
-| --- | --- | --- |
-| L03.1–L03.3 | Affected rideshare domain, PostgreSQL migrations/queries, application API/SDK and protected client, role/replay/dispute/safety/adversarial/race/privacy tests; exact-SHA Level 1 evidence | **None** |
-| M-L03-A | Integrated dispute+abuse+telemetry journeys with real local PostgreSQL and independent principals, failure/revocation, redaction/privacy; exact-SHA Level 2 certificate | **None** |
-| L03.4–L03.7 | Targeted configuration/key isolation, rotation/revoke, multi-process transaction/race/restart, queue isolation, restore, fault drill; local dependency equivalents and exact-SHA Level 1 | **None** |
-| M-L03-B | Integrated managed-keys, multi-instance failover, backup/restore and operational fault suite with PostgreSQL and security/safety invariants | **None** |
-| L03.8–L03.10 | Jurisdiction/authority matrices, predeploy checks, config signing and release gates; negative proofs for missing real authority; exact-SHA Level 1 | **None** |
-| M-L03-C | Combined release-candidate consumer integration, versioned packages, default-deny go/no-go and failure/adversarial matrix | **None** |
-| L03.11 | One main-reconciled frozen SHA with complete canonical Solidity Contracts inventory/coverage/aggregate, Genesis Address Authority, 420 Integrated Qualification, 420Docs Qualification, and retained LIFTd phase-specific suites | **Only once, after full preflight** |
+## Qualification and external acceptance
 
-**Inherited evidence:** Follow repository-wide [Level 3 evidence preservation policy](../../.github/LEVEL3-EVIDENCE-PRESERVATION.md). Note that this relative link is intended for repository readers; GitHub URL can be used if renderer rules require it. Record the **actual original run SHAs**, compare inputs, requalify only affected owner for narrow CI/evidence defects, never rerun costly unaffected Foundry shards. Solidity is the only owner of the full Foundry inventory. Before any Level 3 launch validate workflow registration, manifest checksums, artifact directory/output path consistency, dependencies and correct mandatory job selection.
+- **L03.1–L03.7:** Each ordinary implementation step receives targeted Level 1 coverage and an exact-SHA certificate. L03.4 must preserve approved platform/driver/development-compensation split conservation and duplicate protection. No global Foundry/Genesis/Integrated/Docs reruns at ordinary steps.
+- **M-L03-A:** One retained Level 2 suite for L03.1–L03.5, including real local PostgreSQL, disputes, trip-scoped reputation, anti-replay/fraud, economic reconciliation and privacy/adversarial cases.
+- **L03.8:** Independently accepted safety procedures and drills are required for full step acceptance; local tests alone cannot constitute independent approval.
+- **L03.9:** The real Vancouver passenger-transport operator, driver, vehicle, insurance and service-area approvals must be evidenced by the actual authorities; no code/testnet result substitutes for those permissions.
+- **L03.10:** Real deployed official-testnet Identity/Wallet/Pay/Registry integration, consent, finality, reorg/recovery, refunds, payouts, revocation and consumer evidence are mandatory. Mocks cannot satisfy it.
+- **M-L03-B:** Level 2 PASS requires deployment/reliability and real L03.8–L03.10 acceptance evidence. Do not declare PASS while independent gates remain open.
+- **L03.11:** A controlled live pilot is possible **only after** explicit real-world authorization, accepted participants/vehicles, service boundaries, live monitoring, support, halt and recovery criteria; never initiate pilot solely to clear a repo checklist.
+- **L03.12:** One final Level 3 phase qualification on the reconciled, frozen implementation SHA. Canonical owners: Solidity full Foundry+coverage+fixture once, Genesis namespace, 420 Integrated production dependencies/Geth/faults, 420Docs, and retained LIFTd app integration. Record independent release decision and accepted environments separately. **Do not repeat successful unrelated global suites after evidence-only changes** per [global preservation policy](../../.github/LEVEL3-EVIDENCE-PRESERVATION.md).
+- Actual operational and testnet acceptance remain tracked in [LIFTd Testnet Roadmap](LIFTD-TESTNET-ROADMAP.md) and [Production Acceptance Register](L02-PRODUCTION-ACCEPTANCE-REGISTER.md), all unchanged and NOT ACCEPTED until independently verified.
 
-## Required app invariants carried forward
+## Change control
 
-- Terminal trips never reopen; trip state changes require persisted version, valid fresh admission and authorized participant; independent transport eligibility failure blocks assign/arrive/start.
-- Disputes and reviews never create settlement/finality authority; Pay/Wallet and Treasury owners retain money movement; preserve consent and provable ledger conservation.
-- Rider/driver/vehicle/account/issuer bindings must resist forgery, replay and cross-jurisdiction authority confusion.
-- Safety incident authority never grants unlimited private-location access or cross-trip control; emergency operations retain independent audited approvals and bounded permissions.
-- Store private documents and exact locations off-chain with redaction; forbid secrets/credentials/PII in public Indexer, logs, analytics, test artifacts or notifications.
-- Messaging requires current assigned-participant scoped authorization; unavailable unless independent production Messaging gate is accepted.
-- Safe outage behavior must not fabricate matching, payment capture, dispatch, location or regulatory acceptance; fail closed at all externally dependent boundaries.
-
-## External handoff: never mark green by local mocks
-
-The existing [Testnet Roadmap](LIFTD-TESTNET-ROADMAP.md) retains TN-0…TN-6 and tracks **LIFTd-TN-ID, ELIG, VAULT, MSG and A11Y**; none has an accepted production gate. The [Production and Independent Acceptance Register](L02-PRODUCTION-ACCEPTANCE-REGISTER.md) retains separate real Vancouver transport licences/operator/driver/vehicle proofs, insurance, provider signoffs, authorized independent reviewers and production release approvals. L03.8–L03.10 implement repository-side **default-deny enforcement and acceptance wiring**, not deployed signoff. Real provider availability, deployed testnet end-to-end tests, physical-device screen reader review and release authorization remain external. Actual operations stay disabled.
-
-## Roadmap lock and change control
-
-- This planning-only change creates no new service interfaces or source behaviour; **no L03.1 has started**.
-- Only modify canonical step scope or numbering via a new explicitly approved roadmap amendment PR explaining reasons, changed dependencies, security/CI implications and updated testnet ledger references.
-- After completing each step, amend only that step's status with linked exact-SHA evidence. Do not invent completed testing or call globally expensive qualification for ordinary steps.
-- Close L03.11 only after its five canonical owners demonstrate all mandatory jobs and durable exact-SHA qualification certificates; merge only on separate authorization.
+Do not renumber, combine or reinterpret the original steps. Any proposed modification requires owner authorization, a separate roadmap amendment with original-vs-proposed diff, and an explicit reason. Update step statuses with verified qualification evidence only. A roadmap planning correction starts **no** L03 implementation or testing.

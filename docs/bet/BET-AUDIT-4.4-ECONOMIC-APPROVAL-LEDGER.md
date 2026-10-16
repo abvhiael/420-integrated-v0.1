@@ -32,3 +32,7 @@ At the test fixture stake of **100** and an approved gross cap of **5,000**, the
 | Bankroll/liability risk reviewer | **PENDING** | — | — | — |
 
 A passing CI job proves a calculation executed; it **cannot replace these independent approvals**. Do not activate or label BET-AUDIT-4.4 fully qualified until the required exact mathematical proof and authentic signatures exist.
+
+## Measured recalibration candidate — 2026-10-16
+
+The first 1/32-scale screening candidate produced **232.491969% estimated RTP** ([run 38942821242](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38942821242)); it was rejected as economically unsuitable. The revised **1/80-scale** candidate produced **92.996787% estimated RTP** over 25,000 seeded spins with zero capped payouts observed ([run 38942986984](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38942986984)). This is a simulation-only candidate using floating-point payouts and independent pseudo-random stops; it is **not** exact contract-denomination mathematical certification, not a user-authorized RTP target, and **not approved by any independent economic or risk reviewer**. The deterministic contract test maximum remains 5,000 gross and 4,900 net risk at stake 100. Do not use this candidate as a registered on-chain paytable or activate it until the independent mathematical, economic and liability approvals above are obtained.

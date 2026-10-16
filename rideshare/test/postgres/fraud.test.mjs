@@ -4,19 +4,20 @@ import {createDatabasePool,migrate} from '../../src/postgres-store.mjs';
 import {createFraudService,enforceFraudHold} from '../../src/fraud.mjs';
 import {createReviewService} from '../../src/reviews.mjs';
 import {createHttpHandler} from '../../src/http.mjs';
+import {createDispatchAdapter} from '../../src/dispatch.mjs';
 assert.ok(process.env.LIFTD_DATABASE_URL,'Real isolated PostgreSQL required; no skips');
 test('L03.3 real PostgreSQL: five abuse types, expiry, adversarial decisions, replay, appeal and review hold',async()=>{
  const pool=createDatabasePool({connectionString:process.env.LIFTD_DATABASE_URL});
  try{
   await migrate(pool);
-  const suffix=String(Date.now()),tripId='fraud_trip_'+suffix,rider='fraud_rider_'+suffix,driver='fraud_driver_'+suffix,vehicle='fraud_vehicle_'+suffix;
+  const suffix=String(Date.now()),tripId='fraud_trip_'+suffix,pendingId='fraud_pending_'+suffix,rider='fraud_rider_'+suffix,driver='fraud_driver_'+suffix,vehicle='fraud_vehicle_'+suffix;
   const snapshot=(state,revision,assigned)=>({id:tripId,revision,state,riderId:rider,driverId:assigned?driver:null,vehicleId:assigned?vehicle:null,routeRef:'route_fraud'});
   await pool.query('INSERT INTO liftd.trips(trip_id,revision,snapshot) VALUES($1,0,$2)',[tripId,snapshot('REQUESTED',0,false)]);
   for(const [state,revision] of [['ASSIGNED',1],['ARRIVED',2],['IN_PROGRESS',3],['COMPLETED',4]])
    await pool.query('UPDATE liftd.trips SET snapshot=$1,revision=$2 WHERE trip_id=$3',[snapshot(state,revision,true),revision,tripId]);
   let now=1000,revoked=false;
   const auth={authorize:async(token,{action,resource})=>{
-   if(revoked||resource!=='trip:'+tripId||!['rider','driver','operator'].includes(token))throw new Error('DENIED');
+   if(revoked||!['trip:'+tripId,'trip:'+pendingId].includes(resource)||!['rider','driver','operator'].includes(token))throw new Error('DENIED');
    const subject=token==='rider'?rider:token==='driver'?driver:'fraud_operator';
    return {role:token,subject,accountId:subject+'_account',sessionId:'s_1',deviceId:'d_1',recoveryEpoch:0,expiresAt:99999999,action,resource};
   }};
@@ -63,7 +64,20 @@ test('L03.3 real PostgreSQL: five abuse types, expiry, adversarial decisions, re
   await fraud.release('operator',second,{commandId:'release_second',expectedRevision:1});
   await assert.rejects(()=>pool.query('DELETE FROM liftd.fraud_events WHERE case_id=$1',[target]),e=>e.code==='23514');
   await assert.rejects(()=>pool.query('UPDATE liftd.fraud_commands SET request_hash=$1 WHERE actor_id=$2 AND command_id=$3',['0'.repeat(64),rider,'report_0']),e=>e.code==='23514');
-  const handler=createHttpHandler({},null,null,null,null,null,null,null,null,null,null,null,null,null,null,fraud);
+  // A genuine requested trip with an operator-adjudicated hold cannot enter assignment.
+  const pending={id:pendingId,revision:0,state:'REQUESTED',riderId:rider,driverId:null,vehicleId:null,routeRef:'route_fraud'};
+  await pool.query('INSERT INTO liftd.trips(trip_id,revision,snapshot) VALUES($1,0,$2)',[pendingId,pending]);
+  await fraud.report('operator','fraud_pending_case_'+suffix,{tripId:pendingId,commandId:'pending_report',category:'fabricated_trip',evidenceDigest:'b'.repeat(64)});
+  await fraud.hold('operator','fraud_pending_case_'+suffix,{commandId:'pending_hold',expectedRevision:0,holdSeconds:300});
+  const dispatch=createDispatchAdapter({pool,authenticator:auth,eligibilityAdapter:{project:async()=>({})},availabilitySeconds:60,assignmentSeconds:60,verifyAvailability:async()=>true,clock:()=>now,isPaused:()=>false});
+  const conn=await pool.connect();
+  try{
+   await conn.query('BEGIN');
+   await assert.rejects(()=>dispatch.select(conn,pending,{expectedRevision:0}),{code:'FRAUD_REVIEW_HOLD'});
+   await conn.query('ROLLBACK');
+  }finally{conn.release()}
+  await fraud.release('operator','fraud_pending_case_'+suffix,{commandId:'pending_release',expectedRevision:1});
+  const handler=createHttpHandler({},null,null,null,null,null,null,null,null,null,null,null,null,fraud);
   const url='https://liftd.example/v1/rideshare/fraud/cases/'+target;
   assert.equal((await handler(new Request(url))).status,401);
   assert.equal((await handler(new Request(url,{method:'DELETE',headers:{authorization:'Bearer a.b.c'}}))).status,405);

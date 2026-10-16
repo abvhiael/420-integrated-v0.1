@@ -78,7 +78,7 @@ def load_contract(environment=None, *, root=Path("/run/secrets"), purpose="runti
             "INLINE_ISSUER_KEY_FORBIDDEN")
     root = Path(root)
     require(root.is_absolute() and not root.is_symlink(), "MOUNT_ROOT_INVALID")
-    forbidden = "migrator.dsn" if purpose == "runtime" else "runtime.dsn"
+    forbidden = "migrator.dsn" if purpose in ("runtime", "worker") else "runtime.dsn"
     require(not (root / forbidden).exists(), "DATABASE_CREDENTIAL_SEPARATION_REQUIRED")
     try:
         contract = json.loads(read_mount(env.get("BNB_DEPLOYMENT_FILE", ""), root))

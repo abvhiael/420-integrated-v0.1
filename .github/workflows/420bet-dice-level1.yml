@@ -101,7 +101,8 @@ jobs:
           # rather than trusting a green command with empty test selection.
           # Foundry --match-path is a glob, not a regex. Match exact verified
           # test CONTRACT names with Foundry's regex-based --match-contract.
-          regex='^(BetDiceV1420|BetDiceVerticalSlice420|BetDiceV1View420|BetDicePostSettlementVerification420|BetWagerAcceptance420|BetRandomness420|BetRandomnessTerminal420|BetSettlementEngine420|BetBankrollRisk420|BetTerminalPathInvariant420|BetCasinoSettlementInvariant420|BetCasinoSolvencyConvergence420)Test          forge test --match-contract "$regex" --json > "$RUNNER_TEMP/dice-level1.json"
+          regex='^(BetDiceV1420|BetDiceVerticalSlice420|BetDiceV1View420|BetDicePostSettlementVerification420|BetWagerAcceptance420|BetRandomness420|BetRandomnessTerminal420|BetSettlementEngine420|BetBankrollRisk420|BetTerminalPathInvariant420|BetCasinoSettlementInvariant420|BetCasinoSolvencyConvergence420)Test$'
+          forge test --match-contract "$regex" --json > "$RUNNER_TEMP/dice-level1.json"
           python3 - "$RUNNER_TEMP/dice-level1.json" <<'PY'
           import json, sys
           path=sys.argv[1]

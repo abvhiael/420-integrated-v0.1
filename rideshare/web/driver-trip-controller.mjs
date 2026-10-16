@@ -35,7 +35,8 @@ export function createDriverTripController({api,session,nonce=()=>globalThis.cry
    guard();if(!lastTripId)throw new DriverTripError('NO_CONFIRMED_TRIP');
    busy=true;try{
     const old=trip,updated=await read(lastTripId);
-    if(pending&&(!old||updated.trip.revision!==old.revision||updated.trip.state!==old.state))pending=null;
+    if(pending&&((pending.expectedRevision!==undefined&&updated.trip.revision!==pending.expectedRevision)||
+      (old&&(updated.trip.revision!==old.revision||updated.trip.state!==old.state))))pending=null;
     return snapshot();
    }finally{busy=false}
   },

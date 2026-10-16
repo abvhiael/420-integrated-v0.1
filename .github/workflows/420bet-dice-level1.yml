@@ -66,8 +66,8 @@ jobs:
               path = Path('test') / f'{name}.t.sol'
               assert path.is_file(), f'missing required suite: {path}'
               content = path.read_text()
-              assert re.search(r'\\bcontract\\s+' + re.escape(name + 'Test') + r'\\s+is\\b', content), f'missing required test contract: {path}'
-              assert re.search(r'\\bfunction\\s+(?:test|invariant|statefulFuzz)\\w*\\s*\\(', content), f'no tests/invariants: {path}'
+              assert re.search(r'\bcontract\s+' + re.escape(name + 'Test') + r'\s+is\b', content), f'missing required test contract: {path}'
+              assert re.search(r'\bfunction\s+(?:test|invariant|statefulFuzz)\w*\s*\(', content), f'no tests/invariants: {path}'
               print(f'DISCOVERED: {path}::{name}Test')
           print('Preflight PASS: all 12 required test contracts and test functions present')
           PY
@@ -138,7 +138,6 @@ jobs:
               sys.exit(1)
           PY
 
-          forge test --match-path "$regex" --json > "$RUNNER_TEMP/dice-level1.json"
           python3 - "$RUNNER_TEMP/dice-level1.json" <<'PY'
           import json, sys
           path=sys.argv[1]

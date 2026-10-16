@@ -23,6 +23,7 @@ import "../src/bet/WithdrawalQueue420.sol";
 
 interface VmBetBlackjackVerticalSlice420 {
     function prank(address) external;
+    function expectRevert(bytes4) external;
 }
 
 contract MockCapabilityRegistryBetBlackjackVerticalSlice420 is ICapabilityRegistry420 {
@@ -151,6 +152,8 @@ contract BetBlackjackVerticalSlice420Test {
         _seedProfiles(s);
         _seedAccess(s);
         _seedModuleGameOperator(s);
+        vm.prank(ADMIN); s.wagerRouter.bindBlackjackResolver(GAME_V1, address(s.blackjack));
+        vm.prank(ADMIN); s.settlement.bindBlackjackResolver(GAME_V1, address(s.blackjack));
         _seedEconomics(s);
         _seedRisk(s);
         _seedRandomness(s);
@@ -316,7 +319,7 @@ contract BetBlackjackVerticalSlice420Test {
         });
 
         vm.prank(PLAYER);
-        (bytes32 wagerId, uint256 reservedLiability) = s.wagerRouter.placeWager(request);
+        (bytes32 wagerId, uint256 reservedLiability) = s.wagerRouter.placeBlackjackWager(request, params);
         require(wagerId != bytes32(0), "wager id");
         require(reservedLiability == 150 ether, "liability");
         require(s.vault.wagerStakeEscrow(wagerId) == stake, "stake not escrowed");
@@ -372,7 +375,13 @@ contract BetBlackjackVerticalSlice420Test {
         _allow(s, SETTLER, BetIds420.ACTION_SETTLE, s.auth.scopeForWager(wagerId));
         _allow(s, address(s.settlement), BetIds420.ACTION_WAGER_SETTLE_RECORD, s.auth.scopeForWager(wagerId));
         vm.prank(SETTLER);
-        s.settlement.settle(wagerId, hand.outcome, hand.grossPayout);
+        vm.expectRevert(SettlementEngine420.BlackjackCanonicalSettlementRequired.selector);
+        s.settlement.settle(wagerId, BetTypes420.TerminalOutcome.WIN, maxGross);
+        require(s.vault.wagerStakeEscrow(wagerId) == stake, "forged settlement escrow");
+        require(s.accounting.getVault(VAULT).activeReservedLiability == reservedLiability,
+            "forged settlement liability");
+        vm.prank(SETTLER);
+        s.settlement.settleBlackjack(wagerId);
 
         BetTypes420.Settlement memory terminal = s.registry.getSettlement(wagerId);
         require(terminal.outcome == hand.outcome, "terminal outcome mismatch");
@@ -391,4 +400,52 @@ contract BetBlackjackVerticalSlice420Test {
         BlackjackV1420.StreamCommitment memory stream = s.blackjack.getStream(wagerId, RandomnessRouter420.Source.PRIMARY);
         require(stream.revealed <= stream.maxDraws, "stream bound");
     }
+    function testForgedBlackjackAdmissionFailsWithoutCustodyOrNonceConsumption() public {
+        Suite memory s = _deploy();
+        uint256 stake = 100 ether;
+        BlackjackV1420.Params memory params = BlackjackV1420.Params({rulesVersion: 1});
+        _allow(s, PLAYER, BetIds420.ACTION_PLACE, s.auth.scopeForGame(GAME, GAME_V1));
+        s.token.mint(PLAYER, stake);
+        vm.prank(PLAYER); s.token.approve(address(s.vault), stake);
+        WagerRouter420.AcceptanceRequest memory request = WagerRouter420.AcceptanceRequest({
+            operatorId: OPERATOR, gameVersionId: GAME_V1, stake: stake,
+            maxGrossPayout: 250 ether, paramsHash: s.blackjack.hashParams(params),
+            correlationKey: keccak256("blackjack/admission/reject"), deadline: uint64(block.timestamp + 1 hours)
+        });
+        vm.prank(PLAYER);
+        vm.expectRevert(WagerRouter420.BlackjackCanonicalWagerRequired.selector);
+        s.wagerRouter.placeWager(request);
+        request.maxGrossPayout = 200 ether;
+        vm.prank(PLAYER);
+        vm.expectRevert(WagerRouter420.InvalidRequest.selector);
+        s.wagerRouter.placeBlackjackWager(request, params);
+        require(s.wagerRouter.nextNonce(PLAYER) == 0, "nonce consumed");
+        require(s.token.balanceOf(PLAYER) == stake, "stake consumed");
+        require(s.vault.activeWagerStakeEscrow() == 0, "escrow consumed");
+        require(s.accounting.getVault(VAULT).activeReservedLiability == 0, "liability consumed");
+    }
+
+    function testBlackjackCannotSettleBeforeTerminal() public {
+        Suite memory s = _deploy();
+        uint256 stake = 100 ether;
+        BlackjackV1420.Params memory params = BlackjackV1420.Params({rulesVersion: 1});
+        _allow(s, PLAYER, BetIds420.ACTION_PLACE, s.auth.scopeForGame(GAME, GAME_V1));
+        s.token.mint(PLAYER, stake);
+        vm.prank(PLAYER); s.token.approve(address(s.vault), stake);
+        WagerRouter420.AcceptanceRequest memory request = WagerRouter420.AcceptanceRequest({
+            operatorId: OPERATOR, gameVersionId: GAME_V1, stake: stake,
+            maxGrossPayout: s.blackjack.requiredMaxGrossPayout(stake),
+            paramsHash: s.blackjack.hashParams(params),
+            correlationKey: keccak256("blackjack/terminal/gate"), deadline: uint64(block.timestamp + 1 hours)
+        });
+        vm.prank(PLAYER);
+        (bytes32 wagerId, uint256 reserved) = s.wagerRouter.placeBlackjackWager(request, params);
+        _allow(s, SETTLER, BetIds420.ACTION_SETTLE, s.auth.scopeForWager(wagerId));
+        vm.prank(SETTLER);
+        vm.expectRevert(BlackjackV1420.InvalidPhase.selector);
+        s.settlement.settleBlackjack(wagerId);
+        require(s.vault.wagerStakeEscrow(wagerId) == stake, "premature settlement escrow");
+        require(s.accounting.getVault(VAULT).activeReservedLiability == reserved, "premature release");
+    }
+
 }

@@ -4,7 +4,7 @@ const id=x=>typeof x==='string'&&/^[A-Za-z0-9_-]{1,128}$/.test(x);
 const fail=(code,status=403)=>{throw new AuthError(code,status)};
 const states=new Set(['REQUESTED','ASSIGNED','ARRIVED','IN_PROGRESS','COMPLETED','CANCELLED']);
 export function redactedOperatorTrip(trip) {
- if(!trip||!id(trip.id)||!states.has(trip.state)||!Number.isSafeInteger(trip.revision))fail('INVALID_TRIP',503);
+ if(!trip||!id(trip.id)||!states.has(trip.state)||(!Number.isSafeInteger(trip.revision)||trip.revision<0))fail('INVALID_TRIP',503);
  return Object.freeze({tripId:trip.id,state:trip.state,revision:trip.revision,assigned:!!trip.driverId});
 }
 export function createOperatorConsoleService({authenticator,tripStore,dispatchMonitor,eligibilityMonitor,safetyService,audit,clock=()=>Math.floor(Date.now()/1000)}){

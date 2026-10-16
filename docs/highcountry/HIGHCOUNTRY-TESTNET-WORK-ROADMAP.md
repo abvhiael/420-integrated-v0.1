@@ -268,3 +268,20 @@ All gates remain OPEN until independently observed. Static repository assertions
 - **HC-R06.8-T04 — operational release handoff:** independent security/operations acceptance of the R06.8 player guide, hosting/recovery procedures, retention/privacy policies, customer support and deployment readiness; retain signed records identifying deployed versions, network, signatories and exact app SHA.
 
 **All OPEN until external evidence exists.** The R06.8 repository browser, retained service, and PostgreSQL suites verify executable local pathways but do not establish deployed testnet/production acceptance.
+
+## R07.1 — Environment and authority mapping: live testnet evidence (OPEN)
+
+These gates require an actual independently authorized live network/deployment. They are **deferred to R09 testnet acceptance**, not waived, and must not be reported as R07.1 local Level 1 PASS. Preserve the source-derived, locally testable R07.1 manifest and verifier requirements.
+
+| Gate | Required live evidence | Canonical execution owner |
+|---|---|---|
+| HC-R07.1-T01 — chain identity | Approved positive chain ID, canonical genesis hash, independently verified RPC/network agreement and signed/versioned deployment environment | R09.1 |
+| HC-R07.1-T02 — actual constructor values | Authorized dependency contract addresses, deployed exact constructor parameters, verified dependency order and deployment records; no invented High Country reserved addresses | R09.1–R09.2 |
+| HC-R07.1-T03 — independently approved principals | Actual addresses of bootstrap, registrar, gameplay, issuer, randomness, session, emergency and release authorities, authenticated custody/recovery owners, dual-review records and operator approval | R09.1–R09.2 |
+| HC-R07.1-T04 — exact grants and revocation | Independently reviewed principal/component/action/nonzero scope catalogue, approved nonperiodic limits, on-chain grant receipts, least privilege/negative authorization checks and temporary-grant revocation receipts after handoff | R09.2 |
+| HC-R07.1-T05 — runtime code hashes | Actual deployed runtime bytecode obtained from trusted chain RPC, hash comparison with the reviewed artifacts, verified contract interfaces/versions and addresses | R09.2 |
+| HC-R07.1-T06 — finalized deployment receipts | Transaction hashes, contract creation receipts, block identity/finality, constructor-input verification and independent witness/record retention | R09.2 |
+
+**Remaining R07.1 repository-side work (NOT deferred):** exact Solidity constructor type/name/source mapping for the full R07.1 scope; dependency DAG validation; canonical system-address/namespace non-collision; schema and configuration validation; fail-closed unresolved values; complete reviewed grant *catalogue/schema* without inventing approvals; adversarial checks for spoofed addresses, wrong chain, zero/wildcard scope, nonperiodic-policy violations, duplicate grants and role escalation; targeted Level 1 CI and exact-SHA certificate. Expected runtime build artifact hashes may be computed locally, but must not be represented as deployed `eth_getCode` proof. R07.2–R07.6 retain their original requirements.
+
+**Disposition:** OPEN / NOT LIVE-QUALIFIED. Unresolved manifest fields and absent independent signatures are explicit external gates, not grounds to claim locally executable verifiers passed. No production permission or routine-session allowlist is enabled by this register.

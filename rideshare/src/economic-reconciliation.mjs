@@ -34,12 +34,27 @@ export function auditEconomicHistory({trip,quote,quoteHash,intents,operations,pl
   if(plan.trip_id!==trip.id||plan.payload.tripId!==trip.id||plan.payload.quoteHash!==quoteHash||plan.payload.intentId!==intent.intent_id||plan.payload.conserved!==true)fail('ECONOMIC_PLAN_BINDING');
   const p=plan.payload;
   if(digest(Object.fromEntries(Object.entries(p).filter(([key])=>key!=='planHash')))!==plan.plan_hash)fail('ECONOMIC_PLAN_HASH_CORRUPT');
+  // Reproduce canonical compensation arithmetic without authorizing a payout.
+  const F=trip.state==='COMPLETED'?component.fare:0n,A=BigInt(p.allowanceCents);
+  const rest=F>A?F-A:0n,earn=(80n*rest+99n)/100n,commission=rest-earn;
+  const guarantee=BigInt(p.guaranteeCents),topUp=guarantee>earn?guarantee-earn:0n;
+  const rf=p.refunds,refundFare=BigInt(rf.fare),refundTax=BigInt(rf.taxes),refundPass=BigInt(rf.passThrough),refundTip=BigInt(rf.tips);
+  for(const [k,v] of Object.entries({fare:refundFare,taxes:refundTax,passThrough:refundPass,tips:refundTip}))if(v<0n||v>component[k])fail('ECONOMIC_REFUND_OVERFLOW');
+  const adjusted=commission-topUp-(A>F?A-F:0n)-(trip.state==='COMPLETED'?refundFare:0n);
+  const development=adjusted>0n?adjusted/10n:0n,platform=adjusted>0n?adjusted-development:0n;
+  const expectedTip=trip.state==='COMPLETED'?tip:tip>refundTip?tip-refundTip:0n;
+  const driver=A+earn+topUp+expectedTip,pass=component.taxes-refundTax+component.passThrough-refundPass;
+  const net=gross-refundFare-refundTax-refundPass-refundTip,needed=driver+pass+development+platform;
+  const neededFunding=needed>net?needed-net:0n;
+  const split={earningsCents:earn,commissionCents:commission,topUpCents:topUp,driverCents:driver,developmentCents:development,platformCents:platform,passThroughCents:pass,tipCents:expectedTip,netCollectedCents:net,platformFundingCents:neededFunding};
+  for(const [field,expected] of Object.entries(split))if(BigInt(p[field])!==expected)fail('ECONOMIC_COMPENSATION_SPLIT');
   if(BigInt(p.driverCents)!==BigInt(p.allowanceCents)+BigInt(p.earningsCents)+BigInt(p.topUpCents)+BigInt(p.tipCents))fail('ECONOMIC_DRIVER_SPLIT');
   if(BigInt(p.developmentCents)>0n&&BigInt(p.platformCents)<0n)fail('ECONOMIC_COMPENSATION_SPLIT');
   if(BigInt(p.netCollectedCents)+BigInt(p.platformFundingCents)!==BigInt(p.driverCents)+BigInt(p.passThroughCents)+BigInt(p.developmentCents)+BigInt(p.platformCents))fail('ECONOMIC_NOT_CONSERVED');
-  for(const k of ['driver','platform','passThrough'])if(used[k]>BigInt(p[k+'Cents']))fail('ECONOMIC_ENTITLEMENT_OVERFLOW');
+
  }
  if((used.driver||used.platform||used.passThrough)&&!plans.length)fail('ECONOMIC_PAYOUT_PLAN_MISSING');
+ for(const k of ['driver','platform','passThrough'])if(used[k]>(plans.reduce((best,plan)=>{const v=BigInt(plan.payload[k+'Cents']);return v>best?v:best},0n)))fail('ECONOMIC_ENTITLEMENT_OVERFLOW');
  const funded=funding.reduce((n,f)=>{if(f.trip_id!==trip.id)fail('ECONOMIC_FUNDING_BINDING');return n+uint(f.payload.amountUnits)},0n);
  if(assetUsed>uint(payload.amountUnits)+funded)fail('ECONOMIC_ASSET_OVERSPEND');
  distinct(receipts,'receipt_hash');

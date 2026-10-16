@@ -143,7 +143,7 @@ contract ReferenceSlotV1420 is I420System {
             r.capped = true;
         }
         r.grossPayout = total;
-        r.outcome = total == 0 ? BetTypes420.TerminalOutcome.LOSS : total == w.stake ? BetTypes420.TerminalOutcome.PUSH : BetTypes420.TerminalOutcome.WIN;
+        r.outcome = total < w.stake ? BetTypes420.TerminalOutcome.LOSS : total == w.stake ? BetTypes420.TerminalOutcome.PUSH : BetTypes420.TerminalOutcome.WIN;
     }
 
     function _evaluate(uint8[REEL_COUNT * ROW_COUNT] memory grid, uint256 stake, Params memory p) private pure returns (uint256 payout, uint8 scatterCount) {

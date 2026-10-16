@@ -44,7 +44,7 @@ jobs:
           import re
           from pathlib import Path
           names = ["BetKenoV1420","BetKenoV1View420","BetKenoVerticalSlice420","BetWagerAcceptance420","BetRandomness420","BetRandomnessTerminal420","BetSettlementEngine420","BetBankrollRisk420","BetTerminalPathInvariant420","BetCasinoSettlementInvariant420","BetCasinoSolvencyConvergence420"]
-          assert len(names) == len(set(names)) == 11
+          assert len(names) == len(set(names)) == 12
           for name in names:
               path = Path("test") / (name + ".t.sol")
               assert path.is_file(), f"missing {path}"
@@ -62,7 +62,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          regex='^(BetKenoV1420|BetKenoV1View420|BetKenoVerticalSlice420|BetWagerAcceptance420|BetRandomness420|BetRandomnessTerminal420|BetSettlementEngine420|BetBankrollRisk420|BetTerminalPathInvariant420|BetCasinoSettlementInvariant420|BetCasinoSolvencyConvergence420)Test$'
+          regex='^(BetKenoV1420|BetKenoV1View420|BetKenoVerticalSlice420|BetKenoHardening420|BetWagerAcceptance420|BetRandomness420|BetRandomnessTerminal420|BetSettlementEngine420|BetBankrollRisk420|BetTerminalPathInvariant420|BetCasinoSettlementInvariant420|BetCasinoSolvencyConvergence420)Test$'
           forge test --match-contract "$regex" --json > "$RUNNER_TEMP/keno-level1.json"
           python3 - "$RUNNER_TEMP/keno-level1.json" <<'PY'
           import json, sys
@@ -83,7 +83,7 @@ jobs:
                   if result.get("status") != "Success":
                       failures.append((key, test_name, result.get("status")))
           missing = sorted(set(names) - seen)
-          print(f"Executed {total} tests across {len(seen)}/11 mandatory suites")
+          print(f"Executed {total} tests across {len(seen)}/12 mandatory suites")
           for name in sorted(seen):
               print("PASS inventory:", name)
           if missing or failures or total < len(names):

@@ -16,7 +16,7 @@ export function createHttpHandler(service, locationService, dispatchAdapter, quo
       const travelHandoff=/^\/v1\/rideshare\/trips\/([A-Za-z0-9_-]{1,128})\/travel-handoff(?:\/([A-Za-z0-9_-]{1,128}))?$/.exec(url.pathname);
       const operator=/^\/v1\/rideshare\/operator\/trips\/([A-Za-z0-9_-]{1,128})(?:\/(incidents|resolve))?$/.exec(url.pathname);
       const messages=/^\/v1\/rideshare\/trips\/([A-Za-z0-9_-]{1,128})\/messages$/.exec(url.pathname);
-      const support=new RegExp('^/v1/rideshare/support/cases/([A-Za-z0-9_-]{1,128})(?:/(evidence|escalate|decide|appeal|close))?
+      const support=new RegExp('^/v1/rideshare/support/cases/([A-Za-z0-9_-]{1,128})(?:/(evidence|escalate|decide|appeal|close))?' + String.fromCharCode(36)).exec(url.pathname);
       const safety=/^\/v1\/rideshare\/trips\/([A-Za-z0-9_-]{1,128})\/safety(?:\/(report|resolve|case))?$/.exec(url.pathname);
       const payment=/^\/v1\/rideshare\/trips\/([A-Za-z0-9_-]{1,128})\/payments(?:\/(prepare|consent|reconcile|plan|reserve|operation))?$/.exec(url.pathname);
       const statement=/^\/v1\/rideshare\/drivers\/([A-Za-z0-9_-]{1,128})\/statements\/([A-Za-z0-9_-]{1,128})$/.exec(url.pathname);

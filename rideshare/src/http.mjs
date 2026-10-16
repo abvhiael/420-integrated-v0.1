@@ -1,6 +1,6 @@
 import {AuthError} from './auth.mjs';
 // Fetch-compatible protected handler; deployment/listeners are not enabled here.
-export function createHttpHandler(service, locationService, dispatchAdapter, quoteService, paymentService, safetyService, riderPreferencesService, onboardingService, onboardingReviewService, driverOfferService, communicationService, operatorConsoleService, travelHandoffService, supportCaseService) {
+export function createHttpHandler(service, locationService, dispatchAdapter, quoteService, paymentService, safetyService, riderPreferencesService, onboardingService, onboardingReviewService, driverOfferService, communicationService, operatorConsoleService, travelHandoffService, supportCaseService, reviewService) {
   return async request => {
     const reply = (status, value) => new Response(JSON.stringify(value), {status,
       headers: {'content-type': 'application/json', 'cache-control': 'no-store', 'x-content-type-options': 'nosniff'}});
@@ -16,6 +16,8 @@ export function createHttpHandler(service, locationService, dispatchAdapter, quo
       const travelHandoff=/^\/v1\/rideshare\/trips\/([A-Za-z0-9_-]{1,128})\/travel-handoff(?:\/([A-Za-z0-9_-]{1,128}))?$/.exec(url.pathname);
       const operator=/^\/v1\/rideshare\/operator\/trips\/([A-Za-z0-9_-]{1,128})(?:\/(incidents|resolve))?$/.exec(url.pathname);
       const messages=/^\/v1\/rideshare\/trips\/([A-Za-z0-9_-]{1,128})\/messages$/.exec(url.pathname);
+      const review=new RegExp('^/v1/rideshare/reviews/([A-Za-z0-9_-]{1,128})(?:/(approve|hide|reject))?' + String.fromCharCode(36)).exec(url.pathname);
+      const reputation=new RegExp('^/v1/rideshare/trips/([A-Za-z0-9_-]{1,128})/reputation/(rider|driver)/([A-Za-z0-9_-]{1,128})' + String.fromCharCode(36)).exec(url.pathname);
       const support=new RegExp('^/v1/rideshare/support/cases/([A-Za-z0-9_-]{1,128})(?:/(evidence|escalate|decide|appeal|close))?' + String.fromCharCode(36)).exec(url.pathname);
       const safety=/^\/v1\/rideshare\/trips\/([A-Za-z0-9_-]{1,128})\/safety(?:\/(report|resolve|case))?$/.exec(url.pathname);
       const payment=/^\/v1\/rideshare\/trips\/([A-Za-z0-9_-]{1,128})\/payments(?:\/(prepare|consent|reconcile|plan|reserve|operation))?$/.exec(url.pathname);
@@ -27,11 +29,12 @@ export function createHttpHandler(service, locationService, dispatchAdapter, quo
       const locationPrepare = url.pathname === '/v1/rideshare/routes';
       const locationRead = /^\/v1\/rideshare\/trips\/([A-Za-z0-9_-]{1,128})\/coordinates$/.exec(url.pathname);
       const match = /^\/v1\/rideshare\/trips(?:\/([A-Za-z0-9_-]{1,128})(\/transitions)?)?$/.exec(url.pathname);
-      if (!match && !locationPrepare && !locationRead && !availability && !quoteIssue && !quoteConsent && !quoteRead && !payment && !statement && !safety && !preferences && !onboarding && !onboardingReview && !offerRead && !offerRespond && !availabilityRead && !messages && !operator && !travelHandoff && !support) return reply(404, {error: 'NOT_FOUND'});
+      if (!match && !locationPrepare && !locationRead && !availability && !quoteIssue && !quoteConsent && !quoteRead && !payment && !statement && !safety && !preferences && !onboarding && !onboardingReview && !offerRead && !offerRespond && !availabilityRead && !messages && !operator && !travelHandoff && !support && !review && !reputation) return reply(404, {error: 'NOT_FOUND'});
       if ((locationPrepare || locationRead) && !locationService) return reply(503, {error: 'LOCATION_UNAVAILABLE'});
       if (availability && !dispatchAdapter) return reply(503,{error:'DISPATCH_UNAVAILABLE'});
       if((quoteIssue||quoteConsent||quoteRead)&&!quoteService) return reply(503,{error:'QUOTE_UNAVAILABLE'});
       if(travelHandoff&&!travelHandoffService)return reply(503,{error:'HANDOFF_UNAVAILABLE'});
+      if((review||reputation)&&!reviewService)return reply(503,{error:'REVIEWS_UNAVAILABLE'});
       if(support&&!supportCaseService)return reply(503,{error:'SUPPORT_UNAVAILABLE'});
       if(operator&&!operatorConsoleService)return reply(503,{error:'OPERATOR_UNAVAILABLE'});
       if(messages&&!communicationService)return reply(503,{error:'MESSAGING_UNAVAILABLE'});
@@ -45,6 +48,10 @@ export function createHttpHandler(service, locationService, dispatchAdapter, quo
       if (typeof authorization !== 'string' || authorization.length > 32775 ||
         !/^Bearer [A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/.test(authorization)) throw new AuthError('BEARER_REQUIRED');
       const token = authorization.slice(7);
+      if(reputation&&request.method==='GET')return reply(200,await reviewService.reputation(token,reputation[1],reputation[2],reputation[3]));
+      if(reputation)return reply(405,{error:'METHOD_NOT_ALLOWED'});
+      if(review&&request.method==='GET'&&!review[2])return reply(200,await reviewService.read(token,review[1]));
+      if(review&&request.method!=='POST')return reply(405,{error:'METHOD_NOT_ALLOWED'});
       if(support&&request.method==='GET'&&!support[2])return reply(200,await supportCaseService.read(token,support[1]));
       if(support&&request.method!=='POST')return reply(405,{error:'METHOD_NOT_ALLOWED'});
       if(travelHandoff&&request.method==='GET'&&travelHandoff[2])return reply(200,await travelHandoffService.verify(token,travelHandoff[1],travelHandoff[2]));
@@ -92,6 +99,7 @@ export function createHttpHandler(service, locationService, dispatchAdapter, quo
           (body.commandId !== undefined && body.commandId !== commandId)) throw new AuthError('INVALID_REQUEST', 400);
         body.commandId = commandId;
       }
+      if(review)return reply(review[2]?200:201,await reviewService[review[2]||'submit'](token,review[1],body));
       if(support)return reply(support[2]?200:201,await supportCaseService[support[2]||'open'](token,support[1],body));
       if(travelHandoff)return reply(201,await travelHandoffService.prepare(token,travelHandoff[1],body));
       if(operator)return reply(200,await operatorConsoleService.resolve(token,operator[1],body));

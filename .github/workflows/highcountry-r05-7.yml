@@ -37,5 +37,5 @@ jobs:
           node --check services/420-gaming-player-profile/src/canonical-gaming-finality.js
           node --check services/420-gaming-player-profile/src/independent-finality-witness.js
           node --check services/420-gaming-player-profile/src/r057-migration-finality-hooks.js
-          git diff --check f2dceb4fbcd3fb623e2fed6d051ae70af914c7ba HEAD
+          git diff --check "$(git merge-base HEAD origin/main)" HEAD
           test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"

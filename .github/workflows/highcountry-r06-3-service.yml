@@ -1,0 +1,30 @@
+name: High Country R06.3 Authenticated Cloud Service Level 1
+on:
+  pull_request:
+    paths:
+      - 'apps/highcountry-web/**'
+      - 'services/420-gaming-player-profile/src/highcountry-cloud-http.js'
+      - 'services/420-gaming-player-profile/test/highcountry-cloud-http.test.js'
+      - '.github/workflows/highcountry-r06-3-service.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  cloud-http:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+      - run: node --test services/420-gaming-player-profile/test/highcountry-cloud-http.test.js services/420-gaming-player-profile/test/cloud-save-lifecycle.test.js
+      - run: node --test apps/highcountry-web/test/*.test.mjs
+      - run: node apps/highcountry-web/scripts/build.mjs
+      - run: node --check services/420-gaming-player-profile/src/highcountry-cloud-http.js && node --check apps/highcountry-web/src/cloud.js
+      - run: test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"

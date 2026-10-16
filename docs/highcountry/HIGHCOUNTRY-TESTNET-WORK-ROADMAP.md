@@ -189,3 +189,82 @@ Repository-side R05.9 adds shared DB-atomic per-account/game/action HMAC-based r
 | HC-R05.9-T05 | Live security review, threat modeling, adversarial concurrent sessions, denial-of-service/anti-bot abuse, HTTP boundaries and release approval |
 
 **All R05.9 official-testnet/operational gates remain OPEN.** Local PostgreSQL and mock policy-verifier tests cannot substitute for independent live production acceptance; these do not block isolated R05.9 repository Level 1 qualification.
+
+
+## R06.1 — real browser shell external acceptance (OPEN / TESTNET-GATED)
+
+Repository R06.1 delivers a real static web app package, accessible routed game shell, explicit offline/connected runtime, actual JSON-RPC chain detection and honest unavailable/wrong-chain states. The build/server never fill unresolved deployment addresses with placeholders. R06.1 **does not** claim playable cultivation; that belongs to R06.2 and later steps.
+
+- **HC-R06.1-T01 OPEN:** Approved and independently reviewed deployed address/chain/gameId manifest and actual HTTPS RPC/API deployment with verified provenance; deployment template currently contains unresolved/null claims.
+- **HC-R06.1-T02 OPEN:** Actual deployed browser cross-origin, CSP, HTTPS, accessibility/device, performance and offline/outage tests with qualified API and independent RPC operators.
+- **HC-R06.1-T03 OPEN:** Release deployment and operator/config rotation approval. No client secret, wallet key, raw save, or chain-wide wallet activity in public configuration.
+
+These external checks are not represented as local repository Level 1 results.
+
+
+## R06.3 — optional registered account, cloud-save and recovery: external acceptance register
+
+**Repository implementation:** `b49b1904c53c17792518569f0f81f9f92b21e1bd`; branch `audit/highcountry-r06-1-browser-shell-20261014`, draft PR #654. Targeted R06.3 browser client [run #38661245070](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38661245070) and authenticated cloud service [run #38661244932](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38661244932) are **SUCCESS** on that SHA; retained R05.3 Level 2 [run #38661245115](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38661245115) is **SUCCESS**. These results establish repository checks, **not actual deployed issuer/provider/browser acceptance**.
+
+| Gate | Status / owner | Independent live evidence required |
+|---|---|---|
+| HC-R06.3-T01 — verified external identity issuer and signup | OPEN — R05.2 / R07 operator and identity service | Approved identity issuer, verifiable issuer-to-datastore registration/onboarding, issuer-owned credential creation, expiry/epoch/revocation/recovery, compromised and wrong-game subject denial, trusted `highCountryAuth.getToken` handoff with no browser-stored long-term credential |
+| HC-R06.3-T02 — actual deployed service and cloud infrastructure | OPEN — R05.1/R05.5 / R07 | HTTPS frontend/API with origin/CORS/CSP review; least-privilege TLS PostgreSQL, provisioned encrypted immutable object storage, secret management, consent-policy/ruleset provenance and scoped credentials; recorded deployment manifest and operator approval |
+| HC-R06.3-T03 — real guest-to-account and cloud-save lifecycle | OPEN — R06.3 / R05.5 | Actual browser sign-in and optional profile registration; explicit approved CLOUD_SAVE consent; local preview upload/read on separate devices; revision CAS conflict across concurrent accounts/devices, session revocation, failed writes/provider corruption, data isolation; never elevate editable local saves into canonical assets, scores or currency |
+| HC-R06.3-T04 — recovery and privacy/retention acceptance | OPEN — R06.3 / R05.5 / R07 | Independently observed old-revision restore creating new head, interrupted provider writes/retries/outages, backup recovery, delete/export and consent revocation/retention procedures with object/provider receipts; no unnoticed overwrite of device save |
+| HC-R06.3-T05 — browser, device and independent security review | OPEN — R06.7/R06.8 / R07 | Real desktop/mobile browser accessibility (keyboard, focus, status errors, form labels), authenticated CORS/preflight, rate-limit/privacy/CSRF and session handling, multi-instance abuse, operator/security/privacy signoff and rollback drill |
+
+**Do not relabel live T01–T05 as passed because local CI is green.** Identity issuer provisioning and credential issuance are external/operational dependencies; the app's profile registration does not create a fresh issuer account. Real multi-device/browser/service/db/provider exercises require a deployment with authorized secrets. R06.3 completion at the *repository implementation* level may be assessed against its original exit criteria and exact-SHA tests independently of these operational gates; unresolved repository-testable browser/service behavior is not automatically excused by this list. Canonical R06.4–R06.8 numbering and R07 acceptance remain unchanged.
+
+
+## R06.4 — optional linked wallet deployed acceptance (OPEN / TESTNET-GATED)
+
+Repository implementation candidate `6b20dcf4e60f0391a6e2775d27ba1c16dd986c91` adds deliberately initiated, signed R05 wallet link/unlink, wrong-chain rejection, authenticated read-only activity and fail-closed feature disclosures in the R06 browser. This is **NOT independent deployed acceptance**, and the canonical R06.4 full feature consumers must still be implemented and locally qualified under R06.4 before step closeout.
+
+| Gate | External owner / actual acceptance |
+|---|---|
+| HC-R06.4-T01 — official chain and wallet issuer | R05.2/R05.8/R07: official Genesis address/codehash manifests, HTTPS RPC and separately verified chain, real EOA and supported contract-wallet signed challenge, valid consent, revocation/expiry/replay and cross-device link state |
+| HC-R06.4-T02 — deployed read authorities | R05.6/R05.7/R05.8: authenticated profile/game scope, independent canonical finality and codehash-pinned ownership/entitlement/cross-game evidence, honest empty/reorg/stale/error states |
+| HC-R06.4-T03 — authorized economy/market | R04/R05/R07: deployed market and reward issuers with reviewed numeric catalogue, scoped actual inventory/BUDS settlement and independent chain-vs-ledger reconciliation; untrusted local harvest must not mint, trade or earn money |
+| HC-R06.4-T04 — user-facing operational acceptance | R06.7/R06.8/R07: approved browser/provider combinations, signature consent, no hidden wallet auto-connect or auto-payment, reconnect/unlink without loss of guest progress, mobile/accessibility and privacy/security/operator signoff |
+
+**Pre-testnet R06.4 gap remains OPEN:** the browser currently does not contain independently qualified authoritative entitlement, ownership, market, reward and cross-game consumers; the read-only events view cannot substitute. Implement these app adapters and negative tests locally before R06.4 repository completion; do not defer code solely because testnet credentials are absent. R06.5 remains the canonical owner of transaction lifecycle, and R06.6 owns routine sessions.
+
+
+## R06.5 — transaction lifecycle and recovery external acceptance (OPEN / TESTNET-GATED)
+
+R06.5 repository implementation tracks `awaiting-signature`, `submitted`, `pending`, `finalized`, `reverted`, `reorged`, `unavailable` and `empty`, plus explicit indexer `loading`, `empty` and `unavailable` reporting. It does **not** make market settlement final from a successful transaction receipt, and cannot grant on-chain economy permissions by itself.
+
+- **HC-R06.5-T01 — trusted signer and transaction policy:** supply and independently approve the `highCountryReviewedTransaction.submit({operation,gameId,chainId})` adapter, strictly allowlisted target and calldata, verified value and fee, explicit user signing and supported provider behavior; no general-purpose `eth_sendTransaction` activation.
+- **HC-R06.5-T02 — finalized RPC and independent witness:** configure approved chain, official HTTPS RPC and independently provisioned R05.7 witness function; confirm actual receipts, canonical block changes, independent finalized ancestry, RPC outages, reorgs, conflicting responses and stalled witness. Without independent witness the browser MUST leave successful receipts pending.
+- **HC-R06.5-T03 — deployed indexer and issuer:** production authenticated `/events` projection available with origin/session enforcement and honest stale/empty/unavailable states. Match its canonical reconciliation history to independent on-chain facts; never turn an event projection into proof of ownership, payment or finality.
+- **HC-R06.5-T04 — economy and operator recovery:** deployed R04 operator worker, independent canonical escrow receipt, BUDS reservation/payout/reversal proof, resilient reconciliation after interrupted or ambiguous submissions; never automatically resend an uncertain operation or refund while transfer outcome is unknown.
+- **HC-R06.5-T05 — device and operations:** supported desktop/mobile wallet provider consent and rejection, device/network switching, transaction replacement and disappearance, recovery after browser restart, security/privacy/operator signoff.
+
+All are **OPEN** pending live/testnet evidence. Local assertions, mocked RPC fixtures and browser state labels are not independent deployed acceptance.
+
+## R06.6 — Safe routine sessions and sensitive escalation (external gates OPEN)
+
+- **HC-R06.6-T01:** Approved zero-value action selectors, exact contract destinations, chain/game/frozen address policy and independent signoff. No arbitrary calldata, transfers or expanded signing sessions.
+- **HC-R06.6-T02:** Real issuer and independently revocable, expiring session grants, account/profile isolation; apply `007_highcountry_r066_routine.up.sql` through the restricted migrator and run PostgreSQL cross-instance replay tests with approved runtime credentials.
+- **HC-R06.6-T03:** Real wallet/passkey step-up attestation bound to principal/session/action/operation/expiry/nonce with one-use proof semantics; test revocation and device rejection. Sensitive actions are never authorized by a routine session alone.
+- **HC-R06.6-T04:** Deployed HTTPS `/v1/routine/execute` backed by the approved verifier/journal, configured Origin and API routing, mobile/desktop/browser acceptance, operator and security release approval.
+
+**All OPEN.** Until independent sources and deployment approvals exist, do not populate a default routine-action allowlist or activate production delegated signing. The repository tests prove the local enforcement implementation, not live credentials, hardware, blockchain permissions or external security signoff.
+
+## R06.7 — Branding, game assets and responsive accessibility acceptance (OPEN)
+
+- **HC-R06.7-T01 — real device and assistive-technology acceptance:** independently verify keyboard-only navigation, meaningful focus order, screen reader labels/status announcements, forced-colors, 200–400% browser zoom, mobile touch/rotation and switch access on supported browsers and actual devices. Record device/browser versions and acceptance evidence.
+- **HC-R06.7-T02 — contrast, art and IP review:** visually audit all foreground/background and disabled/error/action focus states to the applicable accessibility contrast thresholds; review original SVG art, logo/mark ownership and game-branding approval, copyright policy and final exported variants.
+- **HC-R06.7-T03 — measured performance:** actual mobile/desktop loading, interaction latency, asset payload/bundle size, low-memory/slow-network and network-unavailable outcomes with documented budgets and representative test hardware.
+
+All gates remain OPEN until independently observed. Static repository assertions and mocked DOM cannot stand in for external usability, measured performance or device signoff. No wallet, economic or live-network authority is activated by these assets.
+
+## R06.8 — Real-stack browser end-to-end and player guide external acceptance (OPEN)
+
+- **HC-R06.8-T01 — approved deployed end-to-end transport:** deploy the real High Country site over HTTPS with approved issuer, cloud-save API, PostgreSQL, authenticated game events/indexer, RPC and independently witnessed canonical contracts; verify frozen chain/game IDs, real contract addresses/codehashes, CORS, DNS/TLS, retry/conflict logic and sensitive API security with actual network traces. A headless browser connected to a local HTTP server and PostgreSQL CI fixtures is not this acceptance.
+- **HC-R06.8-T02 — actual device and accessibility acceptance:** test mobile and desktop browser versions, local-storage persistence after close/reopen, background/foreground transitions, no-network and slow-network scenarios, physical wallet/passkey providers, screen-reader and keyboard/switch access, zoom, performance and recovery against actual devices. Record screenshots, device matrix and measured evidence.
+- **HC-R06.8-T03 — externally approved economics and anti-pay-to-win:** verify R04 escrow, signed rewards and canonical independent chain finality in the operating testnet with approved market operator, R05.7 ownership/entitlement, revoked credentials, transaction reorgs and financially meaningful negative paths. Local-only guest FLOWER cannot become transferable or earn unreviewed benefits, including through cloud restore, purchased assets or wallet connections.
+- **HC-R06.8-T04 — operational release handoff:** independent security/operations acceptance of the R06.8 player guide, hosting/recovery procedures, retention/privacy policies, customer support and deployment readiness; retain signed records identifying deployed versions, network, signatories and exact app SHA.
+
+**All OPEN until external evidence exists.** The R06.8 repository browser, retained service, and PostgreSQL suites verify executable local pathways but do not establish deployed testnet/production acceptance.

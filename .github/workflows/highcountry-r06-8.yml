@@ -1,0 +1,44 @@
+name: High Country R06.8 Browser E2E Level 1
+on:
+  pull_request:
+    paths:
+      - 'apps/highcountry-web/**'
+      - 'docs/highcountry/R06.8-PLAYER-GUIDE.md'
+      - '.github/workflows/highcountry-r06-8.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  chromium-real-http:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Exact-SHA and diff-integrity preflight
+        run: test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA" && git diff --check "$(git merge-base HEAD origin/main)" HEAD
+      - name: Install pinned browser test runner
+        working-directory: apps/highcountry-web
+        run: npm install --no-save --ignore-scripts @playwright/test@1.56.1
+      - name: Install headless Chromium
+        working-directory: apps/highcountry-web
+        run: npx playwright install --with-deps chromium
+      - name: Compile real site and verify images
+        run: |
+          node apps/highcountry-web/scripts/build.mjs
+          test -s apps/highcountry-web/dist/assets/cultivation/hc-stage-flowering-pot.png
+          test -s apps/highcountry-web/dist/assets/highcountry-logo.svg
+      - name: Real Chromium browser, persistence, failures and fairness
+        working-directory: apps/highcountry-web
+        run: npx playwright test e2e/r068-browser.spec.mjs --workers=1 --reporter=line
+      - name: Guest, cloud, wallet and settlement client regressions
+        run: node --test apps/highcountry-web/test/*.test.mjs
+      - name: Exact implementation SHA close
+        run: test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"

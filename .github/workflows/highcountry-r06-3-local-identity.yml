@@ -1,0 +1,30 @@
+name: High Country R06.3 Local Identity Integration Level 1
+on:
+  pull_request:
+    paths:
+      - 'services/420-gaming-player-profile/src/highcountry-local-*.js'
+      - 'services/420-gaming-player-profile/test/highcountry-local-*.test.js'
+      - '.github/workflows/highcountry-r06-3-local-identity.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  local-identity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+      - run: node --test services/420-gaming-player-profile/test/highcountry-local-issuer.test.js services/420-gaming-player-profile/test/highcountry-local-auth-http.test.js
+      - run: node --test services/420-gaming-player-profile/test/highcountry-cloud-http.test.js services/420-gaming-player-profile/test/cloud-save-lifecycle.test.js
+      - run: node --test apps/highcountry-web/test/*.test.mjs
+      - run: node apps/highcountry-web/scripts/build.mjs
+      - run: node --check services/420-gaming-player-profile/src/highcountry-local-issuer.js && node --check services/420-gaming-player-profile/src/highcountry-local-auth-http.js
+      - run: test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"

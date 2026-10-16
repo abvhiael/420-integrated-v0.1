@@ -56,5 +56,5 @@ jobs:
           node --check services/420-gaming-player-profile/src/r059-security-operations.js
           node --check services/420-gaming-player-profile/src/r059-schema-migrations.js
           node --check services/420-gaming-player-profile/src/gaming-event-http.js
-          git diff --check 58538396fb7028d0cd449ef52d640d0fb55616f3 HEAD
+          git diff --check "$(git merge-base HEAD origin/main)" HEAD
           test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"

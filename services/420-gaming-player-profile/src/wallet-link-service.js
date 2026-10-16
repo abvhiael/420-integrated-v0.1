@@ -94,12 +94,14 @@ export function createHighCountryWalletService420({authority,poolForPrincipal,cl
     issueRecoveryChallenge:(token,x)=>issue(token,x,{recovery:true}),
   });
 }
-export function createHighCountryWalletHttp420(service) {
-  if(!service||typeof service.session!=='function')err('invalid-configuration');
+export function createHighCountryWalletHttp420(service,{origin=null}={}) {
+  if(!service||typeof service.session!=='function'||(origin!==null&&(!/^https:\/\/[^/?#]+$/.test(origin))))err('invalid-configuration');
   return createServer(async(req,res)=>{
     const send=(status,payload)=>{res.writeHead(status,{'content-type':'application/json',
-      'cache-control':'no-store','x-content-type-options':'nosniff'});res.end(JSON.stringify(payload));};
+      'cache-control':'no-store','x-content-type-options':'nosniff',...(origin&&(!req.headers.origin||req.headers.origin===origin)?{'access-control-allow-origin':origin,'access-control-allow-methods':'GET,POST,OPTIONS','access-control-allow-headers':'authorization,content-type','vary':'Origin'}:{})});res.end(JSON.stringify(payload));};
     try {
+      if(origin&&req.headers.origin&&req.headers.origin!==origin)err('origin-denied');
+      if(origin&&req.method==='OPTIONS'&&req.headers.origin===origin){res.writeHead(204,{'access-control-allow-origin':origin,'access-control-allow-methods':'GET,POST,OPTIONS','access-control-allow-headers':'authorization,content-type','vary':'Origin'});return res.end();}
       const authorization=req.headers.authorization;
       if(typeof authorization!=='string'||!/^Bearer [^\s]{1,4096}$/.test(authorization))err('authentication-required');
       const token=authorization.slice(7);
@@ -120,7 +122,7 @@ export function createHighCountryWalletHttp420(service) {
     }catch(e){
       const clientError=['authentication-required','authentication-denied','invalid-request','invalid-chain',
         'invalid-signature','challenge-invalid-or-replayed','recovery-denied','recovery-disabled','request-too-large',
-        'chain-mismatch','chain-unavailable','wallet-link-conflict','consent-denied','profile-not-found',
+        'chain-mismatch','chain-unavailable','origin-denied','wallet-link-conflict','consent-denied','profile-not-found',
         'invalid-input','scope-denied','account-revoked'].includes(e.code??e.message);
       send(clientError?403:503,{error:clientError?(e.code??e.message):'service-unavailable'});
     }

@@ -1,0 +1,40 @@
+name: High Country R06.5 Transaction Lifecycle Level 1
+on:
+  pull_request:
+    paths:
+      - 'apps/highcountry-web/src/transaction.js'
+      - 'apps/highcountry-web/src/account.js'
+      - 'apps/highcountry-web/scripts/build.mjs'
+      - 'apps/highcountry-web/test/r065-*'
+      - '.github/workflows/highcountry-r06-5.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  transaction-lifecycle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Exact SHA
+        run: test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+      - name: Preflight accumulated diff integrity
+        run: git diff --check "$(git merge-base HEAD origin/main)" HEAD
+      - name: Targeted lifecycle, wallet, market and guest regression
+        run: node --test apps/highcountry-web/test/*.test.mjs
+      - name: Source syntax
+        run: for file in apps/highcountry-web/src/*.js; do node --check "$file"; done
+      - name: Browser build
+        run: node apps/highcountry-web/scripts/build.mjs && test -s apps/highcountry-web/dist/src/transaction.js
+      - name: Existing independently witnessed finality
+        run: node --test services/420-gaming-player-profile/test/canonical-gaming-finality.test.js
+      - name: Exact SHA close
+        run: test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"

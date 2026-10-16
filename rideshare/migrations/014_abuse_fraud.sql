@@ -13,7 +13,8 @@ CREATE TABLE liftd.fraud_cases (
  appeal_count smallint NOT NULL DEFAULT 0 CHECK(appeal_count BETWEEN 0 AND 1),
  created_at bigint NOT NULL CHECK(created_at>=0),
  updated_at bigint NOT NULL CHECK(updated_at>=created_at),
- CHECK ((status='HELD')=(hold_until IS NOT NULL)),
+ CHECK (status<>'HELD' OR hold_until IS NOT NULL),
+ CHECK (hold_until IS NULL OR status IN ('HELD','APPEALED')),
  CHECK (hold_until IS NULL OR hold_until>created_at)
 );
 CREATE INDEX fraud_cases_trip_status ON liftd.fraud_cases(trip_id,status,hold_until);

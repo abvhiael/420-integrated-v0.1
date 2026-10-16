@@ -1,6 +1,6 @@
 import {DriverTripError,verifiedDriverTrip,driverTripPresentation,validId,validateNavigationHandoff} from './driver-trip-policy.mjs';
 export function createDriverTripController({api,session,nonce=()=>globalThis.crypto?.randomUUID?.(),navigationCapability}){
- let trip=null,pending=null,busy=false,disconnected=false,pickupConfirmed=false;
+ let trip=null,pending=null,busy=false,disconnected=false,pickupConfirmed=false,lastTripId=null;
  const guard=()=>{if(disconnected)throw new DriverTripError('OFFLINE');if(busy)throw new DriverTripError('IN_PROGRESS');if(!api?.read)throw new DriverTripError('AUTHORITY_UNAVAILABLE');};
  const snapshot=()=>Object.freeze({trip,presentation:driverTripPresentation(trip),busy,disconnected,pickupConfirmed,pending:pending?.action??null});
  async function read(id){
@@ -14,7 +14,7 @@ export function createDriverTripController({api,session,nonce=()=>globalThis.cry
   snapshot,
   async load(id){
    guard();if(!validId(id))throw new DriverTripError('INVALID_TRIP_ID');
-   if(trip?.id!==id){trip=null;pending=null;pickupConfirmed=false;}
+   if(lastTripId!==id){trip=null;pending=null;pickupConfirmed=false;}lastTripId=id;
    busy=true;try{return await read(id)}finally{busy=false}
   },
   confirmPickup(value){guard();if(!trip||trip.state!=='ARRIVED')throw new DriverTripError('ARRIVAL_REQUIRED');pickupConfirmed=value===true;return snapshot();},
@@ -32,10 +32,10 @@ export function createDriverTripController({api,session,nonce=()=>globalThis.cry
    }finally{busy=false}
   },
   async reconcile(){
-   guard();if(!trip)throw new DriverTripError('NO_CONFIRMED_TRIP');
+   guard();if(!lastTripId)throw new DriverTripError('NO_CONFIRMED_TRIP');
    busy=true;try{
-    const old=trip,updated=await read(trip.id);
-    if(pending&&(updated.trip.revision!==old.revision||updated.trip.state!==old.state))pending=null;
+    const old=trip,updated=await read(lastTripId);
+    if(pending&&(!old||updated.trip.revision!==old.revision||updated.trip.state!==old.state))pending=null;
     return snapshot();
    }finally{busy=false}
   },
@@ -57,6 +57,6 @@ export function createDriverTripController({api,session,nonce=()=>globalThis.cry
   },
   disconnect(){disconnected=true;trip=null;pickupConfirmed=false;/* retain pending command until explicit reconciliation */},
   reconnect(){disconnected=false;trip=null;pickupConfirmed=false;/* never replay queued offline actions */},
-  clear(){trip=null;pending=null;busy=false;pickupConfirmed=false;disconnected=true}
+  clear(){trip=null;pending=null;lastTripId=null;busy=false;pickupConfirmed=false;disconnected=true}
  });
 }

@@ -1,0 +1,1 @@
+budtender "hotspot" assets

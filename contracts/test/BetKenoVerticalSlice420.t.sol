@@ -180,6 +180,8 @@ contract BetKenoVerticalSlice420Test {
         paytable.activate(bps);
         vm.prank(ADMIN);
         s.wagerRouter.bindKenoPaytable(GAME_V1,address(s.keno),address(paytable));
+        vm.prank(ADMIN);
+        s.settlement.bindKenoResolver(GAME_V1,address(s.keno));
 
         _seedEconomics(s);
         _seedRisk(s);
@@ -373,9 +375,15 @@ contract BetKenoVerticalSlice420Test {
         }
 
         _allow(s, SETTLER, BetIds420.ACTION_SETTLE, s.auth.scopeForWager(wagerId));
+        vm.prank(SETTLER);
+        vm.expectRevert(SettlementEngine420.KenoCanonicalSettlementRequired.selector);
+        s.settlement.settle(wagerId, BetTypes420.TerminalOutcome.WIN, 5_000 ether);
+        require(s.accounting.getVault(VAULT).activeReservedLiability == reservedLiability,
+            "forged settlement released liability");
+        require(s.vault.wagerStakeEscrow(wagerId) == stake, "forged settlement consumed escrow");
         _allow(s, address(s.settlement), BetIds420.ACTION_WAGER_SETTLE_RECORD, s.auth.scopeForWager(wagerId));
         vm.prank(SETTLER);
-        s.settlement.settle(wagerId, result.outcome, result.grossPayout);
+        s.settlement.settleKeno(wagerId, params);
 
         BetTypes420.Settlement memory terminal = s.registry.getSettlement(wagerId);
         require(terminal.outcome == result.outcome, "terminal outcome mismatch");

@@ -18,10 +18,18 @@
       "screen": true
     },
     "custom": {
-      "cost": "TBD_420_TOKEN_UNITS",
+      "cost": "5 $420 initial (5 × 10^tokenDecimals base units; exact native token decimals from deployed asset)",
       "requiresAuthenticatedAccount": true,
       "screen": true,
-      "review": true
+      "review": true,
+      "feePolicy": {
+        "version": "HC-CULTIVAR-NAME-FEE-V1",
+        "initialFeeTokens": "5",
+        "adjustment": "downward-only for V1; authorized fee schedule updates based on independently verified valuation, never untrusted spot price",
+        "effectiveOn": "new quotes only",
+        "quotedFeeFrozenAtSubmission": true,
+        "rounding": "base-unit exact; remainder to High Country competition vault"
+      }
     }
   },
   "notice": "Cultivar names must not contain identity-based slurs, hateful language, threats, harassment, explicit sexual content, vulgar or obscene language, disguised prohibited terms, impersonation, or attempts to bypass moderation. Violating names and associated cultivars may be blocked from use in High Country. Repeated violations may result in suspension or removal from the game. Legitimate genetic provenance remains recorded.",
@@ -48,13 +56,24 @@
   "reviewerCompensation": {
     "asset": "native $420",
     "payoutModel": "fixed amount per independently qualified completed review; same for approval and denial",
-    "rewardAmount": "PENDING_APPROVED_BUDGET",
-    "payer": "funded developer compensation vault",
+    "rewardAmount": "50% of accepted custom naming fee, initially 2.5 $420",
+    "payer": "funded custom naming escrow, paid on qualified final review independently of approve/reject decision",
     "noSelfReview": true,
     "noDuplicateReward": true,
     "appealDoesNotPayRepeatedlyWithoutIndependentAuthorization": true,
     "onlyAfterFinalizedDecision": true,
-    "capPerPeriod": "PENDING_APPROVED_BUDGET",
+    "capPerPeriod": "Governance-controlled payout and throughput cap; operational values pending",
     "noAutomaticTransferInThisModule": true
+  },
+  "customNameEconomics": {
+    "startingFeeTokens": "5",
+    "reviewerShareBps": 5000,
+    "highCountryCompetitionVaultShareBps": 5000,
+    "vaultUse": "Competition prize funding under separately approved competition policy",
+    "settlement": "escrow upon accepted submission; release once per eligible final review; idempotent; no self review",
+    "feeChanges": "only authorized downward revisions in V1; configurable minimum pending approval; no floating automatic repricing",
+    "freeGeneratedNamesRemainFree": true,
+    "feeRefunds": "explicit policy required before activation",
+    "noPayPerDeletion": true
   }
 }

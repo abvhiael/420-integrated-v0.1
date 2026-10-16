@@ -22,6 +22,7 @@ import "../src/bet/WagerRouter420.sol";
 import "../src/bet/WithdrawalQueue420.sol";
 
 interface VmBetRouletteVerticalSlice420 {
+    function expectRevert(bytes4) external;
     function prank(address) external;
 }
 
@@ -151,6 +152,8 @@ contract BetRouletteVerticalSlice420Test {
         _seedProfiles(s);
         _seedAccess(s);
         _seedModuleGameOperator(s);
+        vm.prank(ADMIN); s.wagerRouter.bindRouletteResolver(GAME_V1, address(s.roulette));
+        vm.prank(ADMIN); s.settlement.bindRouletteResolver(GAME_V1, address(s.roulette));
         _seedEconomics(s);
         _seedRisk(s);
         _seedRandomness(s);
@@ -307,7 +310,7 @@ contract BetRouletteVerticalSlice420Test {
         });
 
         vm.prank(PLAYER);
-        (bytes32 wagerId, uint256 reservedLiability) = s.wagerRouter.placeWager(request);
+        (bytes32 wagerId, uint256 reservedLiability) = s.wagerRouter.placeRouletteWager(request, params);
         require(wagerId != bytes32(0), "wager id");
         require(reservedLiability == 100 ether, "liability");
         require(s.vault.wagerStakeEscrow(wagerId) == stake, "stake not escrowed");
@@ -336,7 +339,7 @@ contract BetRouletteVerticalSlice420Test {
         _allow(s, SETTLER, BetIds420.ACTION_SETTLE, s.auth.scopeForWager(wagerId));
         _allow(s, address(s.settlement), BetIds420.ACTION_WAGER_SETTLE_RECORD, s.auth.scopeForWager(wagerId));
         vm.prank(SETTLER);
-        s.settlement.settle(wagerId, result.outcome, result.grossPayout);
+        s.settlement.settleRoulette(wagerId, params);
 
         BetTypes420.Settlement memory terminal = s.registry.getSettlement(wagerId);
         require(terminal.outcome == result.outcome, "terminal outcome mismatch");
@@ -353,4 +356,30 @@ contract BetRouletteVerticalSlice420Test {
         require(replay.grossPayout == result.grossPayout, "replay payout changed");
         require(replay.randomnessRoot == result.randomnessRoot, "replay root changed");
     }
+    function testForgedRoulettePayoutAndGenericEntryFailBeforeCustody() public {
+        Suite memory s = _deploy();
+        uint256 stake = 100 ether;
+        RouletteV1420.Params memory params =
+            RouletteV1420.Params({kind: RouletteV1420.BetKind.RED, selection: 0});
+        _allow(s, PLAYER, BetIds420.ACTION_PLACE, s.auth.scopeForGame(GAME, GAME_V1));
+        s.token.mint(PLAYER, stake);
+        vm.prank(PLAYER); s.token.approve(address(s.vault), stake);
+        WagerRouter420.AcceptanceRequest memory request = WagerRouter420.AcceptanceRequest({
+            operatorId: OPERATOR, gameVersionId: GAME_V1, stake: stake,
+            maxGrossPayout: 200 ether, paramsHash: s.roulette.hashParams(params),
+            correlationKey: keccak256("roulette/security"), deadline: uint64(block.timestamp + 1 hours)
+        });
+        vm.prank(PLAYER);
+        vm.expectRevert(WagerRouter420.RouletteCanonicalWagerRequired.selector);
+        s.wagerRouter.placeWager(request);
+        request.maxGrossPayout = 300 ether;
+        vm.prank(PLAYER);
+        vm.expectRevert(WagerRouter420.InvalidRequest.selector);
+        s.wagerRouter.placeRouletteWager(request, params);
+        require(s.wagerRouter.nextNonce(PLAYER) == 0, "nonce consumed");
+        require(s.token.balanceOf(PLAYER) == stake, "stake moved");
+        require(s.vault.activeWagerStakeEscrow() == 0, "escrow consumed");
+        require(s.accounting.getVault(VAULT).activeReservedLiability == 0, "risk reserved");
+    }
+
 }

@@ -37,6 +37,7 @@ test('L03.4 real PostgreSQL reconciliation of trip, quote, payment, payout and a
    funding:await query('SELECT * FROM liftd.settlement_funding WHERE trip_id=$1'),
    events:await query('SELECT e.* FROM liftd.payment_events e JOIN liftd.payment_intents i ON i.intent_id=e.intent_id WHERE i.trip_id=$1'),
    operationEvents:await query('SELECT e.* FROM liftd.operation_events e JOIN liftd.pay_operations o ON o.operation_id=e.operation_id WHERE o.trip_id=$1'),
+   receipts:(await pool.query('SELECT * FROM liftd.financial_receipts')).rows,
    timing:(await query('SELECT * FROM liftd.trip_financial_timing WHERE trip_id=$1'))[0]};
   assert.equal(auditEconomicHistory(base).status,'RECONCILED');
   const altered=structuredClone(base);altered.quote.amounts.transportationCents+=1;

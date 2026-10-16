@@ -339,6 +339,12 @@ contract BetRouletteVerticalSlice420Test {
         _allow(s, SETTLER, BetIds420.ACTION_SETTLE, s.auth.scopeForWager(wagerId));
         _allow(s, address(s.settlement), BetIds420.ACTION_WAGER_SETTLE_RECORD, s.auth.scopeForWager(wagerId));
         vm.prank(SETTLER);
+        vm.expectRevert(SettlementEngine420.RouletteCanonicalSettlementRequired.selector);
+        s.settlement.settle(wagerId, BetTypes420.TerminalOutcome.WIN, maxGross);
+        require(s.accounting.getVault(VAULT).activeReservedLiability == reservedLiability,
+            "forged settlement affected reserve");
+        require(s.vault.wagerStakeEscrow(wagerId) == stake, "forged settlement affected escrow");
+        vm.prank(SETTLER);
         s.settlement.settleRoulette(wagerId, params);
 
         BetTypes420.Settlement memory terminal = s.registry.getSettlement(wagerId);

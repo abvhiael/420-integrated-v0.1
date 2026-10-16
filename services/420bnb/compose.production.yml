@@ -27,6 +27,20 @@ x-api: &api
 services:
   api-a: *api
   api-b: *api
+  worker:
+    <<: *api
+    profiles: [worker]
+    command: [python, worker.py]
+    stop_grace_period: 15s
+    healthcheck: {disable: true}
+    environment:
+      BNB_ENV: production
+      BNB_RELEASE_IMAGE: ${BNB_API_IMAGE:?required}
+      BNB_WEB_IMAGE: ${BNB_WEB_IMAGE:?required}
+      BNB_INGRESS_IMAGE: ${BNB_INGRESS_IMAGE:?required}
+      BNB_DEPLOYMENT_FILE: /run/secrets/deployment.json
+      BNB_DATABASE_URL_FILE: /run/secrets/runtime.dsn
+      BNB_WORKER_SINK: local-validation
   web:
     image: ${BNB_WEB_IMAGE:?digest-pinned-web-image-required}
     user: "10001:10001"

@@ -1,0 +1,53 @@
+{
+  "schema": "420bet-capitalization-and-profit-waterfall-v1",
+  "status": "POLICY_ADOPTED_IMPLEMENTATION_AND_GOVERNANCE_ACTIVATION_PENDING",
+  "gameEconomicsScope": "420Bet casino-wide; does not alter BET-AUDIT-4.2 Keno paytable authority",
+  "funding": {
+    "sourceAllocationId": "protocol-reserve",
+    "sourceGenesisAmount420": "8600000",
+    "earmarkAmount420": "1000000",
+    "remainderAvailableForOtherProtocolReservePurposes420": "7600000",
+    "token": "native-$420",
+    "genesisTotalUnchanged420": "42000000",
+    "fundingMechanism": "EARMARK_WITHIN_EXISTING_PROTOCOL_RESERVE_NO_UNAUTHORIZED_DIRECT_GENESIS_TRANSFER",
+    "transferActivation": "GOVERNED_420TREASURY_420VAULT_RELEASE_AND_420BET_VAULT_DEPOSIT_REQUIRED",
+    "noFounderValidatorCommunityRewardOrDevelopmentBootstrapDiversion": true
+  },
+  "repayment": {
+    "principalCap420": "1000000",
+    "priority": "AFTER_VALID_WAGER_LIABILITIES_SAFETY_RESERVES_LP_OBLIGATIONS_AND_PROTECTED_REVENUE",
+    "destinationKind": "GOVERNED_COMMUNITY_TREASURY_VAULT",
+    "destinationVaultId": null,
+    "destinationAuthorization": "CIVIC_GOVERNANCE_TREASURY_POLICY_AND_CAPABILITY_REGISTRY_REQUIRED",
+    "destinationResolution": "BLOCK_UNTIL_EXPLICITLY_GOVERNED_AND_VERIFIED",
+    "disallowTokenCreationFeeVaultSubstitution": true,
+    "restrictRepaymentToRealizedExcessSurplus": true,
+    "neverUseCustomerEscrowOrLPPrincipal": true,
+    "cumulativeRepaymentCap420": "1000000"
+  },
+  "developerCompensation": {
+    "governingPolicyId": "420/REVENUE/POLICY/APPLICATION_REVENUE/V1",
+    "beneficiaryId": "420/REVENUE/BENEFICIARY/420_INTEGRATED_LABS/V1",
+    "eligibleBasis": "FINALIZED_REALIZED_POSITIVE_NET_PROTOCOL_REVENUE_AFTER_CASINO_RISK_AND_NON_REVENUE_OBLIGATIONS",
+    "developerBps": 1000,
+    "epochRule": "RESERVE_AT_NEXT_EPOCH_START_FROM_PREVIOUS_FINALIZED_EPOCH_ELIGIBLE_NET_PROTOCOL_REVENUE",
+    "noForecastPrefunding": true,
+    "doNotDeductFromPrincipalOrEscrow": true,
+    "sourceMustBeApprovedAndCapabilityScoped": true,
+    "applyCanonicalFullSplitBps": {
+      "protocolTreasury": 3000,
+      "developmentFund": 2500,
+      "communityFund": 2000,
+      "applicationGrowthAndLiquidity": 1500,
+      "leadDeveloperCompensation": 1000
+    },
+    "zeroEligibleRevenueMeansZeroCompensation": true,
+    "avoidDoubleCountingStakeAndPrincipalRepayment": true
+  },
+  "enforcement": {
+    "status": "REQUIRES_ON_CHAIN_INTEGRATION_AND_TESTS_BEFORE_FUNDS_MOVE",
+    "risk": "EXISTING_BET_RISK_MANAGER_VAULT_ACCOUNTING_NOT_A_SUBSTITUTE_FOR_PROFIT_WATERFALL",
+    "noTransfersOrPublicWagerAcceptanceUntilReconciliation": true,
+    "failureMode": "FAIL_CLOSED_IF_DESTINATION_AUTHORITY_EPOCH_ACCOUNTING_OR_SOLVENCY_PROOFS_MISSING"
+  }
+}

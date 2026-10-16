@@ -1,0 +1,35 @@
+name: 420Bet Reference Slot RTP Audit
+on:
+  pull_request:
+    paths:
+      - 'scripts/audit-420bet-reference-slot-rtp.py'
+      - '.github/workflows/420bet-reference-slot-rtp.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  slot-rtp:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact source SHA
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - name: Verify reproducible slot RTP and liability fixture
+        run: |
+          python3 scripts/audit-420bet-reference-slot-rtp.py --samples 25000 --output "$RUNNER_TEMP/slot-rtp.json"
+          python3 - "$RUNNER_TEMP/slot-rtp.json" <<'PY'
+          import json,sys
+          r=json.load(open(sys.argv[1]))
+          assert r['samples']==25000
+          assert r['enforcedMaximumGross']==5000
+          assert r['maxReservedLiability']==4900
+          assert r['uncappedStructuralUpperGross']==3212500
+          assert r['observedMaximumGross']<=5000
+          assert r['rtp99HoeffdingLowerPercent']<=r['estimatedRtpPercent']<=r['rtp99HoeffdingUpperPercent']
+          print("Independent fixture math qualified:",r['fixtureSha256'])
+          PY

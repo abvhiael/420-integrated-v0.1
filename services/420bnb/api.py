@@ -349,13 +349,13 @@ def ready():
             if current is None:
                 raise HTTPException(503,"SCHEMA_NOT_MIGRATED")
             records=c.execute("SELECT version FROM bnb_schema_migration ORDER BY version").fetchall()
-            if [row[0] for row in records]!=list(range(1,27)):
+            if [row[0] for row in records]!=list(range(1,31)):
                 raise HTTPException(503,"SCHEMA_VERSION_MISMATCH")
     except psycopg.Error:
         # A database outage or connection exhaustion is not a ready API.
         # Never leak DSNs, SQL statements, hostnames or credentials to probes.
         raise HTTPException(503,"DATABASE_UNAVAILABLE") from None
-    return {"status":"ready","transactions_enabled":False,"schema_version":26}
+    return {"status":"ready","transactions_enabled":False,"schema_version":30}
 
 
 class GuestMessageInput(BaseModel):
@@ -852,6 +852,8 @@ def send_guest_message(request_id:UUID,payload:GuestMessageInput,
             c.execute("""INSERT INTO bnb_guest_message
                 (id,booking_request_id,sender_subject,body,client_nonce)
                 VALUES (%s,%s,%s,%s,%s)""",(mid,request_id,actor,payload.body,payload.nonce))
+            import notification_delivery
+            notification_delivery.enqueue_message(c,request_id,mid,actor)
             c.execute("""INSERT INTO bnb_outbox(id,event_type,payload)
                 VALUES (%s,'bnb.message.created',%s::jsonb)""",
                 (uuid4(),json.dumps({"request_id":str(request_id),"message_id":str(mid)})))
@@ -868,6 +870,8 @@ def message_delivery(request_id:UUID,device_id:str,limit:int=50,
         raise HTTPException(422,"DELIVERY_WINDOW_INVALID")
     with db() as c:
         message_thread_scope(c,request_id,actor)
+        import notification_delivery
+        notification_delivery.active_device(c,actor,device_id)
         last=c.execute("""SELECT last_message_id FROM bnb_message_delivery_cursor
            WHERE request_id=%s AND subject=%s AND device_id=%s""",
            (request_id,actor,device_id)).fetchone()
@@ -894,6 +898,8 @@ def acknowledge_message_delivery(request_id:UUID,payload:MessageDeliveryAck,
     with db() as c:
         with c.transaction():
             message_thread_scope(c,request_id,actor)
+            import notification_delivery
+            notification_delivery.active_device(c,actor,payload.device_id,lock=True)
             target=c.execute("""SELECT created_at,id FROM bnb_guest_message
              WHERE id=%s AND booking_request_id=%s AND moderation_status='visible'""",
              (payload.message_id,request_id)).fetchone()
@@ -3669,3 +3675,205 @@ def independent_case_privacy_hold(report_id:UUID,payload:PrivacyHoldInput,
                 (uuid4(),proof["sub"],report[0]))
     return {"report_id":str(report_id),"hold_applied":True,
             "financial_authority":False,"legal_approval_minted":False}
+
+
+def discovery_feed_claim(proof,consumer,action,scope):
+    if consumer not in ("search","travel"):raise HTTPException(404,"CONSUMER_NOT_FOUND")
+    if not proof:raise HTTPException(401,"DISCOVERY_PROOF_REQUIRED")
+    claims=verify_authority(proof,"BNB_DISCOVERY_CONSUMER",action)
+    if (claims.get("consumer")!=consumer or not claims.get("sub")
+        or claims.get("current_consumer_grant_verified") is not True
+        or claims.get("consumer_revoked") is not False
+        or any(claims.get(key)!=value for key,value in scope.items())):
+        raise HTTPException(403,"DISCOVERY_SCOPE_MISMATCH")
+    return claims
+
+@app.get("/v1/bnb/internal/discovery-feeds/{consumer}")
+def internal_incremental_discovery(consumer:str,after:int=0,limit:int=50,
+        until:int|None=None,epoch:str|None=None,x_discovery_proof:str|None=Header(None)):
+    from discovery_feed import page
+    discovery_feed_claim(x_discovery_proof,consumer,"discovery-feed",
+        {"after":after,"limit":limit,"until":until,"epoch":epoch})
+    with db() as c:
+        return page(c,consumer,after=after,limit=limit,until=until,epoch=epoch)
+
+@app.post("/v1/bnb/internal/discovery-feeds/{consumer}/resync",status_code=201)
+def internal_discovery_resync(consumer:str,x_discovery_proof:str|None=Header(None)):
+    from discovery_feed import begin_resync
+    claims=discovery_feed_claim(x_discovery_proof,consumer,"discovery-resync",
+        {"resync_requested":True})
+    with db() as c:
+        return begin_resync(c,consumer,actor=claims["sub"],request_key=claims["jti"],
+            authorize=lambda actor,action,target:actor==claims["sub"] and target==consumer and action=="resync")
+
+@app.get("/v1/bnb/internal/discovery-feeds/{consumer}/resync/{resync_id}")
+def internal_discovery_resync_page(consumer:str,resync_id:UUID,
+        after_property:str|None=None,limit:int=50,x_discovery_proof:str|None=Header(None)):
+    from discovery_feed import resync_page
+    claims=discovery_feed_claim(x_discovery_proof,consumer,"discovery-resync-read",
+        {"resync_id":str(resync_id),"after_property":after_property,"limit":limit})
+    with db() as c:
+        return resync_page(c,consumer,resync_id,actor=claims["sub"],
+            after_property=after_property,limit=limit,
+            authorize=lambda actor,action,target:actor==claims["sub"] and target==consumer and action=="resync-read")
+
+
+@app.post("/v1/bnb/internal/discovery-consumers/{consumer}/accept",status_code=201)
+def internal_discovery_consumer_accept(consumer:str,payload:dict,
+        x_discovery_proof:str|None=Header(None)):
+    """Repository-controlled transactional consumer ingress, not external publication.
+
+    A signed, short-lived, exact-envelope consumer grant is mandatory. Database
+    context exit commits before FastAPI returns the acceptance response. Replays
+    are rejected by the canonical consumer checkpoint's monotone revision fence.
+    """
+    from discovery_transport import accept_repository_consumer
+    if consumer not in ("search","travel"):
+        raise HTTPException(404,"CONSUMER_NOT_FOUND")
+    digest=payload.get("transport_digest") if isinstance(payload,dict) else None
+    if not isinstance(digest,str) or len(digest)!=64:
+        raise HTTPException(422,"TRANSPORT_DIGEST_REQUIRED")
+    claims=discovery_feed_claim(x_discovery_proof,consumer,"discovery-accept",
+        {"transport_digest":digest,"epoch":payload.get("epoch"),
+         "cursor":payload.get("cursor"),"property_id":payload.get("property_id"),
+         "revision":payload.get("revision")})
+    with db() as c:
+        outcome=accept_repository_consumer(c,consumer,payload,
+            authorize=lambda target,action:target==consumer and action=="discovery-accept"
+                and claims["consumer"]==target)
+    # No BnB-issued provider token, signing key, or claim of external acceptance.
+    return outcome
+
+
+# BNB-5.8: authenticated local recovery. No push/provider activation.
+class DeviceRegistration(BaseModel):
+    device_id:str=Field(min_length=8,max_length=128)
+    expires_at:datetime
+
+class DevicePreference(BaseModel):
+    enabled:bool
+
+@app.post("/v1/bnb/account/notification-devices",status_code=201)
+def register_notification_device(payload:DeviceRegistration,authorization:str|None=Header(None)):
+    import notification_delivery as delivery
+    actor=active_subject(authorization)
+    with db() as conn:
+        with conn.transaction():
+            account=conn.execute("SELECT state FROM bnb_account WHERE subject=%s FOR UPDATE",(actor,)).fetchone()
+            if not account or account[0]!="active":raise HTTPException(403,"ACCOUNT_REVOKED")
+            return delivery.register(conn,actor,payload.device_id,payload.expires_at)
+
+@app.post("/v1/bnb/account/notification-devices/{device_id}/preferences")
+def set_notification_preferences(device_id:str,payload:DevicePreference,
+                                 authorization:str|None=Header(None)):
+    import notification_delivery as delivery
+    actor=active_subject(authorization)
+    with db() as conn:
+        with conn.transaction():
+            return delivery.preferences(conn,actor,device_id,payload.enabled)
+
+@app.delete("/v1/bnb/account/notification-devices/{device_id}")
+def revoke_notification_device(device_id:str,authorization:str|None=Header(None)):
+    import notification_delivery as delivery
+    actor=active_subject(authorization)
+    with db() as conn:
+        with conn.transaction():
+            return delivery.revoke(conn,actor,device_id)
+
+@app.get("/v1/bnb/account/notification-devices/{device_id}/notices")
+def pending_notification_notices(device_id:str,limit:int=50,
+                                  authorization:str|None=Header(None)):
+    import notification_delivery as delivery
+    actor=active_subject(authorization)
+    with db() as conn:
+        return delivery.pending(conn,actor,device_id,limit=limit)
+
+@app.post("/v1/bnb/account/notification-devices/{device_id}/notices/{notice_id}/ack")
+def ack_notification_notice(device_id:str,notice_id:UUID,
+                             authorization:str|None=Header(None)):
+    import notification_delivery as delivery
+    actor=active_subject(authorization)
+    with db() as conn:
+        with conn.transaction():
+            return delivery.ack(conn,actor,device_id,notice_id)
+
+
+# BNB-5.9: private operator surface; never uses caller supplied approval flags.
+class OperationalReplayRequest(BaseModel):
+    reason:str=Field(min_length=8,max_length=200)
+
+@app.get("/v1/bnb/internal/operations/health")
+def operations_health(authorization:str|None=Header(None)):
+    import operational_controls as ops
+    with db() as c:
+        with c.transaction():
+            actor,_=ops.operator(c,authorization,"health")
+            result=ops.counts(c)
+            ops.audit_read(c,actor,"health")
+            return result
+
+@app.get("/v1/bnb/internal/operations/dead-letters")
+def operations_dead_letters(limit:int=25,authorization:str|None=Header(None)):
+    import operational_controls as ops
+    with db() as c:
+        with c.transaction():
+            actor,_=ops.operator(c,authorization,"dead_letters")
+            result=ops.dead_letters(c,limit=limit)
+            ops.audit_read(c,actor,"dead_letters")
+            return result
+
+@app.get("/v1/bnb/internal/operations/reconciliation/{action}")
+def operations_reconciliation(action:str,authorization:str|None=Header(None)):
+    import operational_controls as ops
+    with db() as c:
+        with c.transaction():
+            actor,_=ops.operator(c,authorization,"reconciliation")
+            return ops.assess(c,actor,action)
+
+@app.post("/v1/bnb/internal/operations/dead-letters/{event_id}/replay")
+def operations_replay(event_id:UUID,payload:OperationalReplayRequest,
+                      authorization:str|None=Header(None)):
+    import operational_controls as ops
+    with db() as c:
+        with c.transaction():
+            actor,proof=ops.operator(c,authorization,"replay")
+            return ops.manual_replay(c,actor,proof,event_id,payload.reason)
+
+@app.post("/v1/bnb/internal/operations/consumers/{consumer}/dead-letters/{event_id}/replay")
+def operations_consumer_replay(consumer:str,event_id:UUID,payload:OperationalReplayRequest,
+                               authorization:str|None=Header(None)):
+    import operational_controls as ops
+    with db() as c:
+        with c.transaction():
+            actor,proof=ops.operator(c,authorization,"replay")
+            return ops.manual_replay(c,actor,proof,event_id,payload.reason,consumer=consumer)
+
+
+@app.get("/v1/bnb/internal/operations/synchronization")
+def operator_synchronization(stale_seconds:int=300,backlog_limit:int=100,
+                             authorization:str|None=Header(None)):
+    """Fail-closed operator-only monitoring; never asserts external provider health."""
+    import operational_controls as ops
+    import synchronization_monitor as monitor
+    with db() as c:
+        with c.transaction():
+            actor,_=ops.operator(c,authorization,"health")
+            result=monitor.snapshot(c,stale_seconds=stale_seconds,backlog_limit=backlog_limit)
+            ops.audit_read(c,actor,"health")
+            return result
+
+
+@app.get("/v1/bnb/internal/operations/synchronization/readiness")
+def operator_synchronization_readiness(authorization:str|None=Header(None)):
+    """Operator-only synchronization gate: unhealthy consumers never return 200."""
+    import operational_controls as ops
+    import synchronization_monitor as monitor
+    with db() as c:
+        with c.transaction():
+            actor,_=ops.operator(c,authorization,"health")
+            result=monitor.snapshot(c)
+            ops.audit_read(c,actor,"health")
+            if not result["ready"]:
+                from fastapi.responses import JSONResponse
+                return JSONResponse(status_code=503,content={"ready":False,"alerts":result["alerts"]})
+            return {"ready":True}

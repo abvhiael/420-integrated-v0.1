@@ -55,3 +55,11 @@ test('v1 handoff API fail closed when service absent, bearer invalid and verbs u
  const absent=createHttpHandler({},null,null,null,null,null,null,null,null,null,null,null);
  assert.equal((await absent(new Request(url))).status,503);
 });
+
+test('consent lookup rejects wrong account/session even for same trip and actor',async()=>{
+ const fixture=createInMemoryTravelConsentFixture({clock:()=>100});
+ const original={commandId:'key_a',tripId:'trip_a',tripRevision:1,actorId:'rider_a',accountId:'account_a',sessionId:'session_a',purpose:'travel_ground_connection',expiresAt:120,consent:true};
+ const receipt=await fixture.consume(original);
+ assert.equal(await fixture.read({handoffId:receipt.handoffId,tripId:'trip_a',actorId:'rider_a',accountId:'account_a',sessionId:'session_b'}),null);
+ assert.equal(await fixture.read({handoffId:receipt.handoffId,tripId:'trip_a',actorId:'rider_a',accountId:'account_b',sessionId:'session_a'}),null);
+});

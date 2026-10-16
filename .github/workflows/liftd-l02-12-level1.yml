@@ -38,3 +38,13 @@ jobs:
           for token in [':focus-visible','prefers-reduced-motion','@media(max-width:650px)']:
               assert token in c,token
           PY
+      - name: Browser dependency and Chromium preflight
+        run: |
+          npm install --prefix rideshare/web --no-save --no-package-lock --ignore-scripts playwright@1.56.1 axe-core@4.10.3
+          npx --prefix rideshare/web playwright install --with-deps chromium
+      - name: Real browser accessibility, keyboard, responsive and reconnect checks
+        run: |
+          python3 -m http.server 8032 --directory rideshare/web > /tmp/liftd-l02-12-http.log 2>&1 &
+          echo $! > /tmp/liftd-l02-12-http.pid
+          for i in $(seq 1 30); do if curl -fsS http://127.0.0.1:8032/ > /dev/null; then break; fi; sleep 1; done
+          node rideshare/web/e2e/accessibility-device.mjs

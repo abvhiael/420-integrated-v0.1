@@ -285,3 +285,18 @@ These gates require an actual independently authorized live network/deployment. 
 **Remaining R07.1 repository-side work (NOT deferred):** exact Solidity constructor type/name/source mapping for the full R07.1 scope; dependency DAG validation; canonical system-address/namespace non-collision; schema and configuration validation; fail-closed unresolved values; complete reviewed grant *catalogue/schema* without inventing approvals; adversarial checks for spoofed addresses, wrong chain, zero/wildcard scope, nonperiodic-policy violations, duplicate grants and role escalation; targeted Level 1 CI and exact-SHA certificate. Expected runtime build artifact hashes may be computed locally, but must not be represented as deployed `eth_getCode` proof. R07.2–R07.6 retain their original requirements.
 
 **Disposition:** OPEN / NOT LIVE-QUALIFIED. Unresolved manifest fields and absent independent signatures are explicit external gates, not grounds to claim locally executable verifiers passed. No production permission or routine-session allowlist is enabled by this register.
+
+## Cultivar naming — live-testnet acceptance gates (2026-10-16)
+
+**Scope:** PR #677. These entries are ONLY for externally deployed chain/network conditions, **not** permission to defer repository-side work.
+
+| Gate | On-testnet evidence required |
+|---|---|
+| Native $420 escrow | Confirm actual chain ID, native token base units, deposit/withdrawal gas, contract deployment/code hash, real finalized transfers, refund/review idempotency and vault balances |
+| Oracle feeds and publisher | Independent approved external $420/USD sources, live seven-day authenticated coverage, signer and oracle source provenance, manipulation/freshness/failover monitoring, price publisher compromise drills |
+| Chain reviewer grants | Production-equivalent CapabilityRegistry operator keys, exact scope grants, MFA-backed delegated backend account mapping, revocation/rotation on deployed contracts |
+| Moderation and distribution consumers | Actual deployed breeding, profile, marketplace, search, land, trade and rights clients enforce blocked cultivar use; chain finality and stale indexer/reorg recovery |
+| Vault operations | Authorized prize vault account and funding authority, real $420 50/50 ledger reconciliation, locked/surplus funds, payout/withdrawal receipts, monitoring and emergency pause |
+| Production operations | Real secret-managed TLS database, deployed multi-instance recovery, signed release approval, security review and rollback/incident response rehearsal |
+
+**Pre-testnet (must not be deferred):** finish real authenticated API routes, durable Postgres migrations/outbox/queues, actual moderation providers and blocklists, heritage exception admin screen, appointment grant adapters, wallet/browser integration, equipment/market use gates, consumer authorization wiring, local Anvil full journey and scoped Level 1/2 certificate. Repository modules are foundations until these end-to-end paths are exercised. No production settlement/paid name release may be implied from local mocks.

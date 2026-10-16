@@ -46,14 +46,16 @@ export function createTravelHandoffService({authenticator,tripStore,consentStore
    if(!receipt||receipt.commandId!==input.commandId||receipt.tripId!==tripId||receipt.actorId!==first.p.subject||
       receipt.tripRevision!==first.trip.revision||receipt.purpose!==input.purpose||
       !id(receipt.handoffId)||receipt.expiresAt>expiresAt||receipt.expiresAt<=now())fail('CONSENT_UNVERIFIED',503);
+   await permitted(token,tripId,first.p);
    return Object.freeze({version:TRAVEL_HANDOFF_VERSION,handoffId:receipt.handoffId,
       tripId,tripRevision:first.trip.revision,expiresAt:receipt.expiresAt,context:boundedTravelContext(first.trip)});
   },
   async verify(token,tripId,handoffId){
    if(!id(handoffId))fail('INVALID_HANDOFF',400);
    const first=await permitted(token,tripId);
-   const receipt=await consentStore.read({handoffId,tripId,actorId:first.p.subject});
+   const receipt=await consentStore.read({handoffId,tripId,actorId:first.p.subject,accountId:first.p.accountId,sessionId:first.p.sessionId});
    if(!receipt||receipt.handoffId!==handoffId||receipt.tripId!==tripId||receipt.actorId!==first.p.subject||
+      receipt.accountId!==first.p.accountId||receipt.sessionId!==first.p.sessionId||
       receipt.tripRevision!==first.trip.revision||receipt.purpose!=='travel_ground_connection'||
       !Number.isSafeInteger(receipt.expiresAt)||receipt.expiresAt<=now())fail('CONSENT_EXPIRED');
    const fresh=await permitted(token,tripId,first.p);

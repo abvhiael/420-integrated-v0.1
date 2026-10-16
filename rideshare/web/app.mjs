@@ -78,6 +78,7 @@ function renderDecision(decision) {
     panel.append(node("p", connectivityAvailable ? "Verification failed. Access remains blocked; retry when session services are available." : "Connection unavailable. Access remains blocked until reconnection and fresh verification."));
     const retry = node("button", "Retry verification");
     retry.type = "button";
+    retry.disabled = !connectivityAvailable;
     retry.addEventListener("click", () => void refresh());
     panel.append(retry);
   } else {
@@ -124,7 +125,7 @@ async function refresh() {
   markCurrent(path);
   if (!connectivityAvailable || pending.kind === "public" || pending.kind === "not-found") return renderDecision(pending);
   const candidate = await loadSession();
-  if (token !== requestNumber) return; // stale session completion must not overwrite new navigation
+  if (token !== requestNumber || !connectivityAvailable) return; // stale session completion cannot grant access after disconnect
   session = candidate;
   renderDecision(routeDecision(path, session));
 }
@@ -133,8 +134,8 @@ function navigate(path) {
   if (location.pathname !== next) history.pushState({}, "", next);
   nav.classList.remove("open");
   menu.setAttribute("aria-expanded", "false");
-  void refresh();
   focusAfterNavigation = true;
+  void refresh();
 }
 document.addEventListener("click", event => {
   const anchor = event.target.closest?.("a[data-route]");

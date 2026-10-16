@@ -45,7 +45,7 @@ test('deny invalid audit authority/projections, payload injection, stale authori
  x.setState({...trip(),state:'COMPLETED'});await assert.rejects(()=>x.service.resolve('operator_a','trip_a',{commandId:'key',incidentId:'incident_a',expectedRevision:4,resolution:'safe_exit'}));
  const bad=createOperatorConsoleService({authenticator:x.auth,tripStore:{get:async()=>trip()},
   dispatchMonitor:{read:async()=>({status:'UNKNOWN_PRIVILEGED'})},eligibilityMonitor:{read:async()=>({status:'ELIGIBLE'})},
-  safetyService:x.safety,audit:{append:async()=>{}}});
+  safetyService:x.safety,audit:{append:async()=>{}},clock:()=>100});
  await assert.rejects(()=>bad.snapshot('operator_a','trip_a'),{code:'INVALID_PROJECTION'});
 });
 test('HTTP requires bearer and denies unsupported operator verbs and unbound deployments',async()=>{

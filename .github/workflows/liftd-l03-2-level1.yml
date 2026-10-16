@@ -1,0 +1,57 @@
+name: LIFTd L03.2 Level 1
+on:
+  pull_request:
+    paths:
+      - 'rideshare/src/reviews.mjs'
+      - 'rideshare/src/auth.mjs'
+      - 'rideshare/src/http.mjs'
+      - 'rideshare/migrations/013_trip_reviews.sql'
+      - 'rideshare/test/postgres/reviews.test.mjs'
+      - '.github/workflows/liftd-l03-2-level1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: liftd-l03-2-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+jobs:
+  reviews-reputation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: liftd_qualification
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres -d liftd_qualification"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    env:
+      LIFTD_DATABASE_URL: postgres://postgres:postgres@127.0.0.1:5432/liftd_qualification
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Verify exact implementation SHA
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install locked dependencies
+        run: npm ci --prefix rideshare --ignore-scripts
+      - name: Syntax and authorization contracts
+        run: |
+          node --check rideshare/src/reviews.mjs
+          node --check rideshare/src/auth.mjs
+          node --check rideshare/src/http.mjs
+          node --check rideshare/test/postgres/reviews.test.mjs
+      - name: Retained rideshare domain security tests
+        run: npm test --prefix rideshare
+      - name: Real PostgreSQL review moderation and replay suite
+        run: node --test rideshare/test/postgres/reviews.test.mjs

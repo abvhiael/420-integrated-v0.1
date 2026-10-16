@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createDatabasePool,migrate} from '../src/postgres-store.mjs';
-import {createSupportCaseService} from '../src/support-cases.mjs';
+import {createDatabasePool,migrate} from '../../src/postgres-store.mjs';
+import {createSupportCaseService} from '../../src/support-cases.mjs';
 const db=process.env.LIFTD_DATABASE_URL;
 test('L03.1 PostgreSQL case lifecycle: all classes, replay, appeal and access', {skip:!db}, async()=>{
  const pool=createDatabasePool({connectionString:db});

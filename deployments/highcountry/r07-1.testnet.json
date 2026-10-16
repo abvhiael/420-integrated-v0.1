@@ -1,0 +1,409 @@
+{
+  "schema": "hc-r07-1-v1",
+  "state": "UNRESOLVED_NOT_DEPLOYED",
+  "environment": "testnet",
+  "chainId": null,
+  "systemAddressAuthority": "contracts/config/system-addresses.json",
+  "genesisAddressAuthority": "contracts/config/genesis-address-namespace.json",
+  "gamingRuntime": "deployments/gaming/testnet.runtime.json",
+  "genesisScopeDomain": "HC.GENESIS.ADMIN.V1",
+  "productionRoutineSelectors": [],
+  "components": [
+    {
+      "name": "HighCountryAuthorization",
+      "order": 1,
+      "dependsOn": [],
+      "address": null,
+      "codeHash": null,
+      "abiVersion": null,
+      "constructorArgs": null,
+      "deploymentReceipt": null
+    },
+    {
+      "name": "GenesisRegistry",
+      "order": 2,
+      "dependsOn": [
+        "HighCountryAuthorization"
+      ],
+      "address": null,
+      "codeHash": null,
+      "abiVersion": null,
+      "constructorArgs": null,
+      "deploymentReceipt": null
+    },
+    {
+      "name": "RulesetRegistry",
+      "order": 3,
+      "dependsOn": [
+        "HighCountryAuthorization"
+      ],
+      "address": null,
+      "codeHash": null,
+      "abiVersion": null,
+      "constructorArgs": null,
+      "deploymentReceipt": null
+    },
+    {
+      "name": "RulesetRouter",
+      "order": 4,
+      "dependsOn": [
+        "HighCountryAuthorization",
+        "RulesetRegistry"
+      ],
+      "address": null,
+      "codeHash": null,
+      "abiVersion": null,
+      "constructorArgs": null,
+      "deploymentReceipt": null
+    },
+    {
+      "name": "ModuleRegistry",
+      "order": 5,
+      "dependsOn": [
+        "HighCountryAuthorization"
+      ],
+      "address": null,
+      "codeHash": null,
+      "abiVersion": null,
+      "constructorArgs": null,
+      "deploymentReceipt": null
+    },
+    {
+      "name": "EmergencyState",
+      "order": 6,
+      "dependsOn": [
+        "HighCountryAuthorization"
+      ],
+      "address": null,
+      "codeHash": null,
+      "abiVersion": null,
+      "constructorArgs": null,
+      "deploymentReceipt": null
+    },
+    {
+      "name": "RegionRegistry",
+      "order": 7,
+      "dependsOn": [
+        "HighCountryAuthorization",
+        "GenesisRegistry"
+      ],
+      "address": null,
+      "codeHash": null,
+      "abiVersion": null,
+      "constructorArgs": null,
+      "deploymentReceipt": null
+    },
+    {
+      "name": "GrowerProfileRegistry",
+      "order": 8,
+      "dependsOn": [
+        "HighCountryAuthorization",
+        "GenesisRegistry",
+        "RegionRegistry"
+      ],
+      "address": null,
+      "codeHash": null,
+      "abiVersion": null,
+      "constructorArgs": null,
+      "deploymentReceipt": null
+    },
+    {
+      "name": "WorldGenesisReadiness",
+      "order": 9,
+      "dependsOn": [
+        "GenesisRegistry",
+        "RegionRegistry"
+      ],
+      "address": null,
+      "codeHash": null,
+      "abiVersion": null,
+      "constructorArgs": null,
+      "deploymentReceipt": null
+    },
+    {
+      "name": "LandRegistry",
+      "order": 10,
+      "dependsOn": [
+        "HighCountryAuthorization",
+        "GenesisRegistry",
+        "RegionRegistry"
+      ],
+      "address": null,
+      "codeHash": null,
+      "abiVersion": null,
+      "constructorArgs": null,
+      "deploymentReceipt": null
+    },
+    {
+      "name": "PublicCultivationAccess",
+      "order": 11,
+      "dependsOn": [
+        "HighCountryAuthorization",
+        "LandRegistry"
+      ],
+      "address": null,
+      "codeHash": null,
+      "abiVersion": null,
+      "constructorArgs": null,
+      "deploymentReceipt": null
+    },
+    {
+      "name": "GenomeRegistry",
+      "order": 12,
+      "dependsOn": [
+        "HighCountryAuthorization",
+        "GenesisRegistry"
+      ],
+      "address": null,
+      "codeHash": null,
+      "abiVersion": null,
+      "constructorArgs": null,
+      "deploymentReceipt": null
+    },
+    {
+      "name": "SeedRegistry",
+      "order": 13,
+      "dependsOn": [
+        "HighCountryAuthorization"
+      ],
+      "address": null,
+      "codeHash": null,
+      "abiVersion": null,
+      "constructorArgs": null,
+      "deploymentReceipt": null
+    },
+    {
+      "name": "MotherRegistry",
+      "order": 14,
+      "dependsOn": [
+        "HighCountryAuthorization"
+      ],
+      "address": null,
+      "codeHash": null,
+      "abiVersion": null,
+      "constructorArgs": null,
+      "deploymentReceipt": null
+    },
+    {
+      "name": "CloneRegistry",
+      "order": 15,
+      "dependsOn": [
+        "HighCountryAuthorization"
+      ],
+      "address": null,
+      "codeHash": null,
+      "abiVersion": null,
+      "constructorArgs": null,
+      "deploymentReceipt": null
+    },
+    {
+      "name": "PhenotypeRegistry",
+      "order": 16,
+      "dependsOn": [
+        "HighCountryAuthorization"
+      ],
+      "address": null,
+      "codeHash": null,
+      "abiVersion": null,
+      "constructorArgs": null,
+      "deploymentReceipt": null
+    },
+    {
+      "name": "RandomnessCoordinator",
+      "order": 17,
+      "dependsOn": [
+        "HighCountryAuthorization"
+      ],
+      "address": null,
+      "codeHash": null,
+      "abiVersion": null,
+      "constructorArgs": null,
+      "deploymentReceipt": null
+    },
+    {
+      "name": "BreedingEngine",
+      "order": 18,
+      "dependsOn": [
+        "HighCountryAuthorization",
+        "RandomnessCoordinator",
+        "GenomeRegistry"
+      ],
+      "address": null,
+      "codeHash": null,
+      "abiVersion": null,
+      "constructorArgs": null,
+      "deploymentReceipt": null
+    },
+    {
+      "name": "PlantRegistry",
+      "order": 19,
+      "dependsOn": [
+        "HighCountryAuthorization",
+        "GenomeRegistry",
+        "LandRegistry",
+        "PublicCultivationAccess",
+        "SeedRegistry",
+        "CloneRegistry"
+      ],
+      "address": null,
+      "codeHash": null,
+      "abiVersion": null,
+      "constructorArgs": null,
+      "deploymentReceipt": null
+    },
+    {
+      "name": "CultivationEngine",
+      "order": 20,
+      "dependsOn": [
+        "HighCountryAuthorization",
+        "PlantRegistry"
+      ],
+      "address": null,
+      "codeHash": null,
+      "abiVersion": null,
+      "constructorArgs": null,
+      "deploymentReceipt": null
+    }
+  ],
+  "externalContracts": [
+    {
+      "name": "CapabilityRegistry420",
+      "address": null,
+      "codeHash": null
+    },
+    {
+      "name": "GamingAuthorization420",
+      "address": null,
+      "codeHash": null
+    },
+    {
+      "name": "GameRegistry420",
+      "address": null,
+      "codeHash": null
+    },
+    {
+      "name": "GameIdentity420",
+      "address": null,
+      "codeHash": null
+    },
+    {
+      "name": "GameEntitlements420",
+      "address": null,
+      "codeHash": null
+    },
+    {
+      "name": "GameClaims420",
+      "address": null,
+      "codeHash": null
+    },
+    {
+      "name": "CrossGameRegistry420",
+      "address": null,
+      "codeHash": null
+    },
+    {
+      "name": "WalletFactory420",
+      "address": null,
+      "codeHash": null
+    },
+    {
+      "name": "EntryPoint420",
+      "address": null,
+      "codeHash": null
+    },
+    {
+      "name": "RandomnessProvider420",
+      "address": null,
+      "codeHash": null
+    }
+  ],
+  "authorities": [
+    {
+      "role": "bootstrap",
+      "principal": null,
+      "custodian": null,
+      "recoveryOwner": null,
+      "independentReviewer": null
+    },
+    {
+      "role": "registrar",
+      "principal": null,
+      "custodian": null,
+      "recoveryOwner": null,
+      "independentReviewer": null
+    },
+    {
+      "role": "runtimeGameplay",
+      "principal": null,
+      "custodian": null,
+      "recoveryOwner": null,
+      "independentReviewer": null
+    },
+    {
+      "role": "sharedGameOperator",
+      "principal": null,
+      "custodian": null,
+      "recoveryOwner": null,
+      "independentReviewer": null
+    },
+    {
+      "role": "issuer",
+      "principal": null,
+      "custodian": null,
+      "recoveryOwner": null,
+      "independentReviewer": null
+    },
+    {
+      "role": "randomnessProvider",
+      "principal": null,
+      "custodian": null,
+      "recoveryOwner": null,
+      "independentReviewer": null
+    },
+    {
+      "role": "sessionPolicy",
+      "principal": null,
+      "custodian": null,
+      "recoveryOwner": null,
+      "independentReviewer": null
+    },
+    {
+      "role": "emergencyRestrict",
+      "principal": null,
+      "custodian": null,
+      "recoveryOwner": null,
+      "independentReviewer": null
+    },
+    {
+      "role": "emergencyRelease",
+      "principal": null,
+      "custodian": null,
+      "recoveryOwner": null,
+      "independentReviewer": null
+    },
+    {
+      "role": "releaseApproval",
+      "principal": null,
+      "custodian": null,
+      "recoveryOwner": null,
+      "independentReviewer": null
+    }
+  ],
+  "exactGrants": [],
+  "grantPolicy": {
+    "wildcardsForbidden": true,
+    "zeroScopeForbidden": true,
+    "periodLimit": 0,
+    "periodSeconds": 0,
+    "temporaryGrantRevocationRequired": true,
+    "enginePrincipalSeparateFromUser": true
+  },
+  "requiredBindings": [
+    "PublicCultivationAccess:PlantRegistry",
+    "SeedRegistry:PlantRegistry",
+    "CloneRegistry:PlantRegistry",
+    "BreedingEngine:RandomnessCoordinator",
+    "BreedingEngine:GenomeRegistry"
+  ],
+  "releaseAuthority": "NOT_GRANTED"
+}

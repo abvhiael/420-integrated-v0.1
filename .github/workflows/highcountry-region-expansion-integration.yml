@@ -9,6 +9,7 @@ on:
       - 'deployments/highcountry/expansion-region-catalogue.v1.json'
       - 'scripts/highcountry/expansion-region-catalogue.test.mjs'
       - 'contracts/test/highcountry/integration/R072ExpansionUtilityIntegration.t.sol'
+      - 'contracts/test/highcountry/integration/R072SettlementAtomic.t.sol'
       - '.github/workflows/highcountry-region-expansion-integration.yml'
   workflow_dispatch:
 permissions:
@@ -30,4 +31,6 @@ jobs:
         working-directory: contracts
         env:
           FOUNDRY_PROFILE: pr
-        run: forge test --match-path 'test/highcountry/integration/R072ExpansionUtilityIntegration.t.sol' -vv
+        run: |
+          forge test --match-path 'test/highcountry/integration/R072ExpansionUtilityIntegration.t.sol' -vv
+          forge test --match-path 'test/highcountry/integration/R072SettlementAtomic.t.sol' -vv

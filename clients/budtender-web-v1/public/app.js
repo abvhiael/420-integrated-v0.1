@@ -194,7 +194,7 @@ if (sceneStatus) {
     .then(async ({ count, assets }) => {
       const required = [...document.querySelectorAll(".shop-stage img")];
       const registered = new Set(assets.map((asset) => asset.url));
-      if (count !== 368 || required.some((img) => !registered.has(new URL(img.src).pathname))) {
+      if (count !== 432 || required.some((img) => !registered.has(new URL(img.src).pathname))) {
         throw new Error("starter-shop asset registration incomplete");
       }
       await Promise.all(required.map((img) => img.decode()));

@@ -14,14 +14,14 @@ async function withServer(run: (origin: string) => Promise<void>) {
 }
 
 describe("Budtender committed artwork integration", () => {
-  it("publishes exactly the canonical 368-path registry", async () => withServer(async base => {
+  it("publishes exactly the canonical 432-path registry", async () => withServer(async base => {
     const response = await fetch(base + "/assets/budtender/registry.json");
     assert.equal(response.status, 200);
     const registry = await response.json();
-    assert.equal(registry.count, 368);
-    assert.equal(registry.assets.length, 368);
-    assert.equal(new Set(registry.assets.map((a: {url: string}) => a.url)).size, 368);
-    assert.ok(registry.assets.every((a: {url:string}) => /^\/assets\/budtender\/phase-3\.(?:[1-9]|1[0-4])\/[a-z0-9_]+\.png$/.test(a.url)));
+    assert.equal(registry.count, 432);
+    assert.equal(registry.assets.length, 432);
+    assert.equal(new Set(registry.assets.map((a: {url: string}) => a.url)).size, 432);
+    assert.ok(registry.assets.every((a: {url:string}) => /^\/assets\/budtender\/phase-3\.(?:[1-9]|1[0-5])\/[a-z0-9_]+\.png$/.test(a.url)));
   }));
 
   it("serves registered PNG bytes, including transparent cutout and scenery", async () => withServer(async base => {
@@ -30,6 +30,8 @@ describe("Budtender committed artwork integration", () => {
       "/assets/budtender/phase-3.2/counter_main_body.png",
       "/assets/budtender/phase-3.14/exterior_view_street.png",
       "/assets/budtender/phase-3.14/window_fx_rain_light.png",
+      "/assets/budtender/phase-3.15/expansion_wall_connector_t_junction.png",
+      "/assets/budtender/phase-3.15/expansion_wayfinding_garden_route.png",
     ]) {
       const response = await fetch(base + path);
       assert.equal(response.status, 200, path);

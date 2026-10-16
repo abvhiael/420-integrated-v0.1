@@ -1,0 +1,199 @@
+{
+  "phase": "3.15",
+  "asset_count": 64,
+  "source_commit": "bc0faa5dafecda3de0620a9581f9953b89cd95fb",
+  "assets": [
+    {
+      "path": "assets/budtender/phase-3.15/ceiling_seam_access_panel.png"
+    },
+    {
+      "path": "assets/budtender/phase-3.15/ceiling_seam_corner.png"
+    },
+    {
+      "path": "assets/budtender/phase-3.15/ceiling_seam_t_junction.png"
+    },
+    {
+      "path": "assets/budtender/phase-3.15/corridor_transition_gallery_hall.png"
+    },
+    {
+      "path": "assets/budtender/phase-3.15/corridor_transition_narrow_hall.png"
+    },
+    {
+      "path": "assets/budtender/phase-3.15/corridor_transition_security_gate.png"
+    },
+    {
+      "path": "assets/budtender/phase-3.15/corridor_transition_service_hall_cart.png"
+    },
+    {
+      "path": "assets/budtender/phase-3.15/doorway_kit_double_entry_open.png"
+    },
+    {
+      "path": "assets/budtender/phase-3.15/doorway_kit_single_entry_closed.png"
+    },
+    {
+      "path": "assets/budtender/phase-3.15/doorway_kit_single_entry_open.png"
+    },
+    {
+      "path": "assets/budtender/phase-3.15/doorway_kit_staff_door_closed.png"
+    },
+    {
+      "path": "assets/budtender/phase-3.15/expansion_construction_boarded.png"
+    },
+    {
+      "path": "assets/budtender/phase-3.15/expansion_construction_drywall_patch.png"
+    },
+    {
+      "path": "assets/budtender/phase-3.15/expansion_construction_finished_arch.png"
+    },
+    {
+      "path": "assets/budtender/phase-3.15/expansion_construction_framed_open.png"
+    },
+    {
+      "path": "assets/budtender/phase-3.15/expansion_exterior_connector_alley_service.png"
+    },
+    {
+      "path": "assets/budtender/phase-3.15/expansion_exterior_connector_delivery_bay.png"
+    },
+    {
+      "path": "assets/budtender/phase-3.15/expansion_exterior_connector_garden_edge.png"
+    },
+    {
+      "path": "assets/budtender/phase-3.15/expansion_exterior_connector_parking_edge.png"
+    },
+    {
+      "path": "assets/budtender/phase-3.15/expansion_exterior_connector_sidewalk_entry.png"
+    },
+    {
+      "path": "assets/budtender/phase-3.15/expansion_exterior_connector_street_corner.png"
+    },
+    {
+      "path": "assets/budtender/phase-3.15/expansion_floor_rug_inset.png"
+    },
+    {
+      "path": "assets/budtender/phase-3.15/expansion_lighting_awning_transition.png"
+    },
+    {
+      "path": "assets/budtender/phase-3.15/expansion_lighting_sconce_junction.png"
+    },
+    {
+      "path": "assets/budtender/phase-3.15/expansion_lighting_transition_recessed_track.png"
+    },
+    {
+      "path": "assets/budtender/phase-3.15/expansion_lighting_transition_track_pendant.png"
+    },
+    {
+      "path": "assets/budtender/phase-3.15/expansion_placeholder_room_breakroom.png"
+    },
+    {
+      "path": "assets/budtender/phase-3.15/expansion_placeholder_room_corridor_stub.png"
+    },
+    {
+      "path": "assets/budtender/phase-3.15/expansion_placeholder_room_empty_shell.png"
+    },
+    {
+      "path": "assets/budtender/phase-3.15/expansion_placeholder_room_mechanical.png"
+    },
+    {
+      "path": "assets/budtender/phase-3.15/expansion_placeholder_room_office.png"
+    },
+    {
+      "path": "assets/budtender/phase-3.15/expansion_placeholder_room_stock.png"
+    },
+    {
+      "path": "assets/budtender/phase-3.15/expansion_signage_connector_counter_marker.png"
+    },
+    {
+      "path": "assets/budtender/phase-3.15/expansion_signage_connector_hanging_bracket.png"
+    },
+    {
+      "path": "assets/budtender/phase-3.15/expansion_signage_connector_post_base.png"
+    },
+    {
+      "path": "assets/budtender/phase-3.15/expansion_signage_connector_wall_plaque.png"
+    },
+    {
+      "path": "assets/budtender/phase-3.15/expansion_wall_connector_corner_inner.png"
+    },
+    {
+      "path": "assets/budtender/phase-3.15/expansion_wall_connector_corner_outer.png"
+    },
+    {
+      "path": "assets/budtender/phase-3.15/expansion_wall_connector_straight.png"
+    },
+    {
+      "path": "assets/budtender/phase-3.15/expansion_wall_connector_t_junction.png"
+    },
+    {
+      "path": "assets/budtender/phase-3.15/expansion_wayfinding_checkout.png"
+    },
+    {
+      "path": "assets/budtender/phase-3.15/expansion_wayfinding_construction_notice.png"
+    },
+    {
+      "path": "assets/budtender/phase-3.15/expansion_wayfinding_delivery.png"
+    },
+    {
+      "path": "assets/budtender/phase-3.15/expansion_wayfinding_exit.png"
+    },
+    {
+      "path": "assets/budtender/phase-3.15/expansion_wayfinding_exterior_entry.png"
+    },
+    {
+      "path": "assets/budtender/phase-3.15/expansion_wayfinding_garden_route.png"
+    },
+    {
+      "path": "assets/budtender/phase-3.15/expansion_wayfinding_information.png"
+    },
+    {
+      "path": "assets/budtender/phase-3.15/expansion_wayfinding_lounge.png"
+    },
+    {
+      "path": "assets/budtender/phase-3.15/expansion_wayfinding_pickup.png"
+    },
+    {
+      "path": "assets/budtender/phase-3.15/expansion_wayfinding_placeholder_room.png"
+    },
+    {
+      "path": "assets/budtender/phase-3.15/expansion_wayfinding_queue_end.png"
+    },
+    {
+      "path": "assets/budtender/phase-3.15/expansion_wayfinding_queue_start.png"
+    },
+    {
+      "path": "assets/budtender/phase-3.15/expansion_wayfinding_restroom.png"
+    },
+    {
+      "path": "assets/budtender/phase-3.15/expansion_wayfinding_staff_only.png"
+    },
+    {
+      "path": "assets/budtender/phase-3.15/expansion_wayfinding_storage.png"
+    },
+    {
+      "path": "assets/budtender/phase-3.15/exterior_extension_arch_niche_planters.png"
+    },
+    {
+      "path": "assets/budtender/phase-3.15/exterior_extension_blank_wall_vines.png"
+    },
+    {
+      "path": "assets/budtender/phase-3.15/exterior_extension_window_box_arch.png"
+    },
+    {
+      "path": "assets/budtender/phase-3.15/exterior_extension_window_box_square.png"
+    },
+    {
+      "path": "assets/budtender/phase-3.15/flooring_transition_tile_to_wood_brass.png"
+    },
+    {
+      "path": "assets/budtender/phase-3.15/flooring_transition_wood_to_wood_brass.png"
+    },
+    {
+      "path": "assets/budtender/phase-3.15/lighting_transition_gooseneck_sconce.png"
+    },
+    {
+      "path": "assets/budtender/phase-3.15/lighting_transition_ribbed_wall_sconce.png"
+    },
+    {
+      "path": "assets/budtender/phase-3.15/wall_connector_inside_corner.png"
+    }
+  ]
+}

@@ -5,7 +5,7 @@ import {quoteHash as calculateQuoteHash} from './fare.mjs';
 const fail=(c)=>{throw new AuthError(c,409)};
 const sum=(a,f)=>a.reduce((n,x)=>n+BigInt(x[f]),0n);
 const distinct=(rows,field)=>{if(new Set(rows.map(x=>x[field])).size!==rows.length)fail('ECONOMIC_REPLAY')};
-export function auditEconomicHistory({trip,quote,quoteHash,intents,operations,plans,funding,events,operationEvents,timing}){
+export function auditEconomicHistory({trip,quote,quoteHash,intents,operations,plans,funding,events,operationEvents,receipts,timing}){
  if(!trip||!['COMPLETED','CANCELLED'].includes(trip.state)||!timing?.ended_at)fail('ECONOMIC_TERMINAL_REQUIRED');
  if(!quote||!intents?.length||!quoteHash)fail('ECONOMIC_QUOTE_REQUIRED');
  if(calculateQuoteHash(quote)!==quoteHash)fail('ECONOMIC_QUOTE_CORRUPT');
@@ -42,8 +42,10 @@ export function auditEconomicHistory({trip,quote,quoteHash,intents,operations,pl
  if((used.driver||used.platform||used.passThrough)&&!plans.length)fail('ECONOMIC_PAYOUT_PLAN_MISSING');
  const funded=funding.reduce((n,f)=>{if(f.trip_id!==trip.id)fail('ECONOMIC_FUNDING_BINDING');return n+uint(f.payload.amountUnits)},0n);
  if(assetUsed>uint(payload.amountUnits)+funded)fail('ECONOMIC_ASSET_OVERSPEND');
- for(const e of events)if(digest(e.payload)!==e.digest||!intents.some(i=>i.intent_id===e.intent_id))fail('ECONOMIC_EVENT_TAMPERED');
- for(const e of operationEvents)if(digest(e.payload)!==e.digest||!operations.some(o=>o.operation_id===e.operation_id))fail('ECONOMIC_EVENT_TAMPERED');
+ distinct(receipts,'receipt_hash');
+ for(const e of events)if(digest(e.payload)!==e.digest||!intents.some(i=>i.intent_id===e.intent_id)||!receipts.some(r=>r.receipt_hash===e.receipt_hash&&r.owner_kind==='CAPTURE'&&r.owner_id===e.intent_id))fail('ECONOMIC_EVENT_TAMPERED');
+ for(const e of operationEvents)if(digest(e.payload)!==e.digest||!operations.some(o=>o.operation_id===e.operation_id)||!receipts.some(r=>r.receipt_hash===e.receipt_hash&&r.owner_kind==='OPERATION'&&r.owner_id===e.operation_id))fail('ECONOMIC_EVENT_TAMPERED');
+ for(const f of funding)if(!receipts.some(r=>r.receipt_hash===f.payload.receiptHash&&r.owner_kind==='FUNDING'&&r.owner_id===f.funding_ref))fail('ECONOMIC_FUNDING_UNVERIFIED');
  return Object.freeze({tripId:trip.id,status:'RECONCILED',historyDigest:digest({quoteHash,intents:intents.map(x=>x.intent_hash),operations:operations.map(x=>x.pay_operation_id),plans:plans.map(x=>x.plan_hash),events:events.map(x=>x.digest),operationEvents:operationEvents.map(x=>x.digest)}),grossCents:gross.toString(),refundCents:used.refund.toString(),driverCents:used.driver.toString(),platformCents:used.platform.toString(),passThroughCents:used.passThrough.toString(),assetConserved:true,developmentSettlement:'SEPARATE_CANONICAL_APPROVAL'});
 }
 export function createEconomicReconciliationService({pool,authenticator,clock=()=>Math.floor(Date.now()/1000)}){
@@ -65,6 +67,7 @@ export function createEconomicReconciliationService({pool,authenticator,clock=()
     funding:await rows('SELECT * FROM liftd.settlement_funding WHERE trip_id=$1 ORDER BY funding_ref'),
     events:await rows('SELECT e.* FROM liftd.payment_events e JOIN liftd.payment_intents i ON i.intent_id=e.intent_id WHERE i.trip_id=$1 ORDER BY e.event_id'),
     operationEvents:await rows('SELECT e.* FROM liftd.operation_events e JOIN liftd.pay_operations o ON o.operation_id=e.operation_id WHERE o.trip_id=$1 ORDER BY e.event_id'),
+    receipts:await rows("SELECT r.* FROM liftd.financial_receipts r WHERE EXISTS (SELECT 1 FROM liftd.payment_events e JOIN liftd.payment_intents i ON i.intent_id=e.intent_id WHERE i.trip_id=$1 AND e.receipt_hash=r.receipt_hash) OR EXISTS(SELECT 1 FROM liftd.operation_events e JOIN liftd.pay_operations o ON o.operation_id=e.operation_id WHERE o.trip_id=$1 AND e.receipt_hash=r.receipt_hash) OR EXISTS(SELECT 1 FROM liftd.settlement_funding f WHERE f.trip_id=$1 AND f.payload->>'receiptHash'=r.receipt_hash)"),
     timing:(await rows('SELECT * FROM liftd.trip_financial_timing WHERE trip_id=$1'))[0]});
    const after=await permit();if(after.role!=='operator'||after.expiresAt<=clock()||before.subject!==after.subject||before.accountId!==after.accountId||before.sessionId!==after.sessionId||before.recoveryEpoch!==after.recoveryEpoch)fail('ECONOMIC_SCOPE_DENIED');
    await c.query('COMMIT');return result;

@@ -154,4 +154,134 @@ contract BetReferenceSlotV1420Test {
         vm.expectRevert(ReferenceSlotV1420.InvalidParams.selector);
         s.slot.hashParams(bad);
     }
+    /// @notice Independent integer evaluator of a base-screen award. The test
+    ///         constructs its own 5x4 grid from canonical reel stops.
+    function _independentBaseAward(Suite memory suite, bytes32 root)
+        private view returns (uint256 expected, uint8 visibleScatters)
+    {
+        uint8[20] memory grid;
+        uint8[5] memory scatterReels;
+        for (uint8 reel = 0; reel < 5; ++reel) {
+            uint16 stop = suite.stream.reelStop(root, WAGER, GAME_V1, RULESET,
+                suite.stream.BASE_PHASE(), 0, reel, 32);
+            for (uint8 row = 0; row < 4; ++row) {
+                uint8 symbol = suite.params.baseReels[(uint256(stop) + row) % 32][reel];
+                grid[uint256(reel) * 4 + row] = symbol;
+                if (symbol == 6) {
+                    visibleScatters++;
+                    scatterReels[reel] = 1;
+                }
+            }
+        }
+        uint8 scatterReelCount;
+        for (uint8 r = 0; r < 5; ++r) scatterReelCount += scatterReels[r];
+        if (scatterReelCount == 3) expected += suite.params.scatter3;
+        else if (scatterReelCount == 4) expected += suite.params.scatter4;
+        else if (scatterReelCount == 5) expected += suite.params.scatter5;
+        for (uint8 symbol = 0; symbol < 5; ++symbol) {
+            uint256 ways = 1;
+            uint8 consecutive;
+            for (uint8 reel = 0; reel < 5; ++reel) {
+                uint8 matching;
+                for (uint8 row = 0; row < 4; ++row) {
+                    uint8 found = grid[uint256(reel) * 4 + row];
+                    if (found == symbol || found == 5) matching++;
+                }
+                if (matching == 0) break;
+                ways *= matching;
+                consecutive++;
+            }
+            if (consecutive >= 3) expected += ways * suite.params.payoutPerWay[symbol];
+        }
+    }
+
+    function _independentFeatureAward(Suite memory suite, bytes32 root)
+        private view returns (uint256 amount, uint8 spinsPlayed, uint8 retriggers)
+    {
+        uint8 remaining = 6;
+        while (remaining > 0) {
+            uint8[20] memory grid;
+            uint8[5] memory scatterReels;
+            uint8 scatters;
+            for (uint8 reel = 0; reel < 5; ++reel) {
+                uint16 stop = suite.stream.reelStop(root, WAGER, GAME_V1, RULESET,
+                    suite.stream.FEATURE_PHASE(), spinsPlayed, reel, 32);
+                for (uint8 row = 0; row < 4; ++row) {
+                    uint8 symbol = suite.params.featureReels[(uint256(stop) + row) % 32][reel];
+                    grid[uint256(reel) * 4 + row] = symbol;
+                    if (symbol == 6) { scatters++; scatterReels[reel] = 1; }
+                }
+            }
+            uint8 scatterReelCount;
+            for (uint8 reel = 0; reel < 5; ++reel) scatterReelCount += scatterReels[reel];
+            uint256 spinPayout;
+            if (scatterReelCount == 3) spinPayout = suite.params.scatter3;
+            else if (scatterReelCount == 4) spinPayout = suite.params.scatter4;
+            else if (scatterReelCount == 5) spinPayout = suite.params.scatter5;
+            for (uint8 symbol = 0; symbol < 5; ++symbol) {
+                uint256 ways = 1;
+                uint8 matched;
+                for (uint8 reel = 0; reel < 5; ++reel) {
+                    uint8 count;
+                    for (uint8 row = 0; row < 4; ++row) {
+                        uint8 cell = grid[uint256(reel) * 4 + row];
+                        if (cell == symbol || cell == 5) count++;
+                    }
+                    if (count == 0) break;
+                    ways *= count;
+                    matched++;
+                }
+                if (matched >= 3) spinPayout += ways * suite.params.payoutPerWay[symbol];
+            }
+            amount += spinPayout * 2;
+            spinsPlayed++;
+            remaining--;
+            if (scatters >= 3 && retriggers < 2) {
+                retriggers++;
+                remaining += 3;
+            }
+        }
+    }
+
+    function testIndependentIntegerBaseEvaluatorMatchesCanonicalEngine() public {
+        Suite memory suite = _deploy();
+        uint256 noFeatureCount;
+        uint256 featureCount;
+        for (uint256 seed = 0; seed < 48; ++seed) {
+            bytes32 root = keccak256(abi.encode("reference-slot/equivalence", seed));
+            suite.randomness.setRoot(root);
+            ReferenceSlotV1420.Result memory result = suite.slot.resolve(WAGER, suite.params);
+            (uint256 independent, uint8 scatters) = _independentBaseAward(suite, root);
+            require(result.basePayout == independent, "base payout differs");
+            if (scatters < 3) {
+                noFeatureCount++;
+                require(result.featurePayout == 0, "unexpected feature");
+                require(result.freeSpinsPlayed == 0, "unexpected free spins");
+                uint256 expectedGross = independent > suite.params.maxGrossPayout
+                    ? suite.params.maxGrossPayout : independent;
+                require(result.grossPayout == expectedGross, "gross cap differs");
+                BetTypes420.TerminalOutcome expectedOutcome = expectedGross < STAKE
+                    ? BetTypes420.TerminalOutcome.LOSS
+                    : expectedGross == STAKE
+                        ? BetTypes420.TerminalOutcome.PUSH
+                        : BetTypes420.TerminalOutcome.WIN;
+                require(result.outcome == expectedOutcome, "terminal classification differs");
+            } else {
+                featureCount++;
+                (uint256 featurePay, uint8 freeSpins, uint8 retriggers) =
+                    _independentFeatureAward(suite, root);
+                require(result.featurePayout == featurePay, "feature payout differs");
+                require(result.freeSpinsPlayed == freeSpins, "feature spins differ");
+                require(result.retriggers == retriggers, "feature retriggers differ");
+                uint256 gross = independent + featurePay;
+                if (gross > suite.params.maxGrossPayout) gross = suite.params.maxGrossPayout;
+                require(result.grossPayout == gross, "feature gross cap differs");
+                require(result.freeSpinsPlayed >= 6 && result.freeSpinsPlayed <= 12, "feature bounds");
+                require(result.grossPayout <= suite.params.maxGrossPayout, "gross cap escaped");
+            }
+        }
+        require(noFeatureCount > 0, "no base-only paths exercised");
+        require(featureCount > 0, "no feature paths exercised");
+    }
+
 }

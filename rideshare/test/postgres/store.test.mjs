@@ -1,6 +1,8 @@
 import test, {before, after} from 'node:test';
 import assert from 'node:assert/strict';
 import {spawn} from 'node:child_process';
+import {createHash} from 'node:crypto';
+import {readFileSync} from 'node:fs';
 import {createDatabasePool, createPostgresTripStore, migrate} from '../../src/postgres-store.mjs';
 import {createTrip, transitionTrip} from '../../src/trip.mjs';
 import {createTripService} from '../../src/service.mjs';
@@ -35,7 +37,19 @@ before(async () => {
 after(async () => {await pool?.end(); await owner.end();});
 test('ordered concurrent migrations are checksum-verified and runtime is a non-owner role', async () => {
   await migrate(owner);
-  assert.equal((await owner.query('SELECT count(*)::int AS n FROM liftd.migrations')).rows[0].n, 6);
+  const expectedVersions = [
+    '001_trip_store.sql', '002_private_locations.sql', '003_dispatch.sql',
+    '004_quotes.sql', '005_payments.sql', '006_safety.sql',
+    '007_rider_preferences.sql', '008_driver_onboarding.sql', '009_driver_offers.sql'
+  ];
+  const applied = (await owner.query('SELECT version,checksum FROM liftd.migrations ORDER BY version')).rows;
+  assert.deepEqual(applied.map(row => row.version), expectedVersions,
+    'All nine migrations must be applied once in canonical version order');
+  for (const row of applied) {
+    const source = readFileSync(new URL(`../../migrations/${row.version}`, import.meta.url), 'utf8');
+    assert.equal(row.checksum, createHash('sha256').update(source).digest('hex'),
+      `Migration checksum must match committed SQL: ${row.version}`);
+  }
   const role = await pool.query('SELECT current_user AS name,rolsuper FROM pg_roles WHERE rolname=current_user');
   assert.equal(role.rows[0].rolsuper, false); assert.equal(role.rows[0].name, 'liftd_runtime');
   await assert.rejects(() => pool.query("UPDATE liftd.migrations SET checksum='bad'"), e => e.code === '42501');

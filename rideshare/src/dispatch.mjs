@@ -95,9 +95,10 @@ export function createDispatchAdapter({pool,authenticator,eligibilityAdapter,ava
       await lock(client);
       const lease=(await client.query('SELECT * FROM liftd.assignment_leases WHERE trip_id=$1 FOR UPDATE',[trip.id])).rows[0];
       if(!lease||lease.driver_id!==trip.driverId||lease.vehicle_id!==trip.vehicleId)fail('ASSIGNMENT_REQUIRED');
-      if(action==='arrive'&&(lease.state!=='PENDING'||Number(lease.expires_at)<=time()))fail('ASSIGNMENT_EXPIRED');
+      if(action==='arrive'&&(!['PENDING','ACCEPTED'].includes(lease.state)||Number(lease.expires_at)<=time()))fail('ASSIGNMENT_EXPIRED');
+      if(action==='offer_reject'&&(lease.state!=='PENDING'||Number(lease.expires_at)<=time()))fail('OFFER_NOT_PENDING');
       if(action==='start'&&lease.state!=='ACCEPTED')fail('ASSIGNMENT_REQUIRED');
-      if(action==='expire'&&(trip.state!=='ASSIGNED'||lease.state!=='PENDING'||Number(lease.expires_at)>time()))fail('ASSIGNMENT_NOT_EXPIRED');
+      if(action==='expire'&&(trip.state!=='ASSIGNED'||!['PENDING','ACCEPTED'].includes(lease.state)||Number(lease.expires_at)>time()))fail('ASSIGNMENT_NOT_EXPIRED');
       return lease;
     },
     async check(client,trip,action,selection,lease) {
@@ -108,15 +109,16 @@ export function createDispatchAdapter({pool,authenticator,eligibilityAdapter,ava
         const projection=await eligibilityAdapter.project(trip,selection.command);
         if(projection.driver.accountId!==row.account_id||projection.admission.expiresAt<=time())fail('DRIVER_ACCOUNT_MISMATCH',403);
         if(Number(row.expires_at)<=time()||selection.expiresAt<=time())fail('AVAILABILITY_EXPIRED');
-      }else if(lease&&action==='arrive'&&Number(lease.expires_at)<=time())fail('ASSIGNMENT_EXPIRED');
+      }else if(lease&&['arrive','offer_reject'].includes(action)&&Number(lease.expires_at)<=time())fail('ASSIGNMENT_EXPIRED');
       else if(lease&&action==='expire'&&Number(lease.expires_at)>time())fail('ASSIGNMENT_NOT_EXPIRED');
     },
     async apply(client,next,action,selection) {
       if(action==='assign') {
         await client.query('INSERT INTO liftd.assignment_leases(trip_id,driver_id,vehicle_id,expires_at,state) VALUES($1,$2,$3,$4,$5)',
           [next.id,next.driverId,next.vehicleId,selection.expiresAt,'PENDING']);
-      }else if(['arrive','complete','cancel','expire'].includes(action)&&next.driverId) {
-        await client.query('UPDATE liftd.assignment_leases SET state=$1 WHERE trip_id=$2',[action==='arrive'?'ACCEPTED':'CLOSED',next.id]);
+      }else if(['arrive','complete','cancel','expire','offer_reject'].includes(action)&&next.driverId) {
+        if(action==='arrive')await client.query("UPDATE liftd.assignment_leases SET state='ACCEPTED' WHERE trip_id=$1 AND state='PENDING'",[next.id]);
+        else await client.query("UPDATE liftd.assignment_leases SET state='CLOSED' WHERE trip_id=$1 AND state<>'CLOSED'",[next.id]);
       }
     },
   });

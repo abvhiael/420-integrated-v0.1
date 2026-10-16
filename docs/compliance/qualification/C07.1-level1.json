@@ -1,0 +1,245 @@
+{
+  "step": "C07.1",
+  "name": "Production database schema, migrations, encryption, tenant isolation, indexing and storage limits",
+  "qualification_level": 1,
+  "status": "COMPLETE",
+  "acceptance_scope": "Repository app-audit step; actual deployed production acceptance remains separate",
+  "repository": "abvhiael/420-integrated-v0.1",
+  "branch": "audit/420compliance-c01-1-inventory-20261009",
+  "pull_request": 602,
+  "pull_request_disposition": "Draft, open, unmerged; preserve canonical phase closeout",
+  "implementation_sha": "db2f945307052ece2d156ce602fa7daee62933e5",
+  "prior_qualified_C06_9_implementation_sha": "3af28b9de534938fb0a128e474db80cf91bfaaf1",
+  "prior_evidence_head_sha": "4d18e03e850c3ee785f54d5855019c592c4e6aa0",
+  "observed_main_sha": "bc0faa5dafecda3de0620a9581f9953b89cd95fb",
+  "audit_ancestry_base_sha": "c5a4f220d1fbda01f707d359aa9bb32921a138b1",
+  "recorded_local_date": "2026-10-12",
+  "timezone": "America/Regina",
+  "evidence_commit_policy": "This evidence-only commit inherits the exact qualified implementation; its SHA is the Git commit containing this record. No executable/config/policy/requirement changes.",
+  "classification": "App-only changes to Compliance stores, tests, workflow and acceptance/runbook; no shared protocol/Genesis/frozen-address mutation",
+  "files_changed": [
+    "services/complianceauth/c07_1_storage.go",
+    "services/complianceauth/c07_1_migrations.go",
+    "services/complianceauth/c07_1_storage_test.go",
+    "services/complianceauth/author_workspace_postgres.go",
+    "services/complianceauth/c06_5_review_postgres.go",
+    "services/complianceauth/c06_7_auditor_postgres.go",
+    "services/complianceauth/publication_runtime.go",
+    ".github/workflows/420compliance-c01-level1.yml",
+    "docs/compliance/C07.1-PROTECTED-DATABASE.md"
+  ],
+  "implementation_summary": [
+    "AES-256-GCM versioned private payload encryption with random nonces, externally supplied keys and row/scope/revision authenticated binding",
+    "Five checksummed atomic migrations under a PostgreSQL advisory lock; verify/backfill all legacy private record types and reject corrupt/oversized records",
+    "Database-role-bound FORCE RLS on all six canonical tables; immutable role scope and restricted history/migration privileges",
+    "Preserve primary-only publication and draft/review CAS behavior; require restricted TLS/migrated/encrypted private production wiring",
+    "Scoped author-history, review-queue and publication-expiry indexes with bounded identifiers",
+    "Atomic 128 KiB plaintext/256 KiB whole-row bounds and 64 MiB/100000-row per-scope quotas; actual-insert accounting and mutable-head byte deltas"
+  ],
+  "requirements": {
+    "production_schema": {
+      "status": "PASS",
+      "proof": "Preserved six canonical tables, revision/FK semantics; added migration/binding/accounting schemas and production constraints; actual PostgreSQL acceptance"
+    },
+    "migrations": {
+      "status": "PASS",
+      "proof": "Repeated/concurrent serialized migration, five-version ledger, checksum drift rejection, oversized/corrupt backfill rollback and author/review/audit encrypted conversion"
+    },
+    "encryption": {
+      "status": "PASS",
+      "proof": "Confidentiality, nonce randomization, AAD cross-tenant/kind/ID/revision denial, tampering, missing/historical rotation keys, no plaintext production fallback"
+    },
+    "tenant_isolation": {
+      "status": "PASS",
+      "proof": "Two separately authenticated restricted PostgreSQL roles; unfiltered cross-tenant read denial, cross-scope insert/publication denial, binding/schema/history privilege negatives"
+    },
+    "indexing": {
+      "status": "PASS",
+      "proof": "Three added indexes observed in PostgreSQL catalogue; indexed key size rejection"
+    },
+    "storage_limits": {
+      "status": "PASS",
+      "proof": "Payload/row/key limits, exact persisted-byte/row equality, head growth/shrink, 12-writer quota race/exactly one winner, byte-quota denial and rollback accounting"
+    },
+    "production_opening": {
+      "status": "PASS",
+      "proof": "Verified fixture TLS and active server TLS, primary, exact migration checksums, role binding and non-owner/non-bypass role; negative insecure TLS/cipher/scope/owner/drift tests"
+    }
+  },
+  "workflow": {
+    "path": ".github/workflows/420compliance-c01-level1.yml",
+    "name": "420Compliance C07.1 Level 1",
+    "run_number": 729,
+    "run_id": 38343656011,
+    "job_id": 115120027614,
+    "job_name": "protected-storage-level1",
+    "event": "push",
+    "attempt": 1,
+    "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38343656011",
+    "job_url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38343656011/job/115120027614",
+    "conclusion": "success",
+    "duration": "54s",
+    "steps": 14,
+    "success": 14,
+    "failed": 0,
+    "skipped": 0,
+    "cancelled": 0,
+    "tests_step": 8,
+    "static_step": 7,
+    "permissions": "contents: read; checkout persist-credentials false",
+    "trigger_policy": "Single exact-SHA audit-branch push run; optional workflow_dispatch. Evidence-only paths excluded; no redundant push/PR duplication."
+  },
+  "artifact": {
+    "id": 11787409773,
+    "name": "compliance-c071-level1-db2f945307052ece2d156ce602fa7daee62933e5",
+    "sha256": "e981eb3810b988c5b74f5d781422de06434574e9a39f4280b64be403ab7c6337",
+    "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38343656011/artifacts/11787409773",
+    "files": [
+      "compliance-c071-level1.json",
+      "compliance-c071-tests.log"
+    ],
+    "source_manifest": "Runtime result records SHA-256 hashes of Compliance Go sources, embedded SQL migrations and workflow; all inputs are additionally pinned by exact Git implementation SHA"
+  },
+  "checks": [
+    {
+      "command": "go vet ./services/complianceauth",
+      "result": "PASS"
+    },
+    {
+      "command": "go test -race ./services/complianceauth -run '^(TestC071|TestC038|TestC064|TestC065|TestC067)' -count=1 -v",
+      "result": "PASS",
+      "top_level_tests": 20,
+      "subtests": 4,
+      "required_skips": 0,
+      "passed_tests": [
+        "TestC064PostgreSQLDraftCASAndPersistence",
+        "TestC064AuthorWorkspaceSecurityAndEditing",
+        "TestC064AuthorSessionAndFailureGates",
+        "TestC064AuthorArchiveCitationsIntegrity",
+        "TestC065Ed25519AndImpactProviderDeny",
+        "TestC065ReviewConsoleFailsClosed",
+        "TestC065PostgreSQLConcurrentReviewAndStaleAuthorFencing",
+        "TestC065IndependentReviewNegativeBoundary",
+        "TestC065PostgreSQLReviewFailsClosedWithoutConnection",
+        "TestC067AuditorHTTPAuthorizationAndCSRF",
+        "TestC067AuditorHTTPAuthorizationAndCSRF/anonymous",
+        "TestC067AuditorHTTPAuthorizationAndCSRF/noTLS",
+        "TestC067AuditorHTTPAuthorizationAndCSRF/cross_origin",
+        "TestC067AuditorHTTPAuthorizationAndCSRF/wrong_csrf",
+        "TestC067ArchiveEvidenceFailClosed",
+        "TestC067PostgreSQLDurableAuditAccess",
+        "TestC067AuditorBoundedRedactedAccess",
+        "TestC071AuthenticatedEncryptionBoundaries",
+        "TestC071PostgreSQLProductionStorage",
+        "TestC038DatabaseOutageAndReconnect",
+        "TestC038PublicationAcrossInstances",
+        "TestC038IndependentSignatureAuthorization",
+        "TestC038PostgreSQLMultiInstance",
+        "TestC038ProductionRuntimeGates"
+      ]
+    }
+  ],
+  "security_acceptance": {
+    "status": "PASS for C07.1 repository software/database gates",
+    "coverage": [
+      "restricted role RLS",
+      "credential/TLS opening denial",
+      "authenticated encrypted payloads",
+      "corrupt/transplanted/missing-key denial",
+      "migration rollback/checksum drift",
+      "encrypted CAS",
+      "atomic quota boundaries/concurrency",
+      "outage/cancellation",
+      "retained independent review and auditor HTTP/CSRF authorization"
+    ],
+    "independent_review_completed": false,
+    "live_production_authorized": false,
+    "tests_weakened": false
+  },
+  "diagnosed_and_fixed": [
+    {
+      "kind": "CI harness",
+      "run_id": 38342373594,
+      "failed_step": 6,
+      "problem": "pg_ctl restart terminated the PostgreSQL Docker service main process; exit 137 before tests",
+      "repair": "Reload TLS configuration with pg_reload_conf; retain verify-full and active-TLS assertions"
+    },
+    {
+      "kind": "implementation",
+      "problem": "BEFORE INSERT quota accounting could charge ON CONFLICT DO NOTHING non-inserts",
+      "repair": "AFTER INSERT admission; exact persisted-byte/row invariant regression"
+    },
+    {
+      "kind": "implementation",
+      "problem": "Mutable head revision/metadata size changes were absent from byte accounting",
+      "repair": "Transactional AFTER UPDATE head byte delta accounting; growth/shrink regressions"
+    }
+  ],
+  "superseded_run_policy": "Cancelled, failed or earlier successful SHAs are excluded from final qualification. Only run 38343656011 on db2f945 is authoritative.",
+  "retained_evidence": [
+    "docs/compliance/qualification/C06.9-level2.json",
+    "docs/compliance/qualification/C06.1-level1.json",
+    "docs/compliance/qualification/C06.2-level1.json",
+    "docs/compliance/qualification/C06.3-level1.json",
+    "docs/compliance/qualification/C06.4-level1.json"
+  ],
+  "milestones": {
+    "C06_9": "Qualified historical Level 2 retained; affected database regressions revalidated at C07.1",
+    "C07_10": "Next canonical operational Level 2; not required or executed for this ordinary step",
+    "C08_5": "Single comprehensive Level 3 after main reconciliation; deliberately deferred"
+  },
+  "broad_workflows_manually_dispatched": [],
+  "deferred_dependencies": [
+    {
+      "item": "Provisioned production/testnet primary, restricted credentials, live data migration, real external keys, host-volume and backup encryption, network policy",
+      "targets": [
+        "C09.1",
+        "C09.4",
+        "C09.5",
+        "C09.8",
+        "C10.3"
+      ],
+      "status": "OPEN; fixture database PASS does not certify deployed infrastructure"
+    },
+    {
+      "item": "Independent security/operator acceptance and live legal/partner authority",
+      "targets": [
+        "C09.9",
+        "C10.7"
+      ],
+      "status": "OPEN"
+    },
+    {
+      "item": "Existing screen-reader, actual DOOBr/Travel clients, deployed issuer/session revocation acceptance",
+      "ledger": "docs/compliance/C06.8-TESTNET-ACCEPTANCE-HANDOFF.md",
+      "status": "Retained OPEN at existing C09/C10 boundaries"
+    },
+    {
+      "item": "Durable multi-instance halt, workers/leases/outbox, retention and disaster recovery",
+      "targets": [
+        "C07.2",
+        "C07.5",
+        "C07.6"
+      ],
+      "status": "Future canonical work; not falsely completed by C07.1"
+    }
+  ],
+  "limitations": [
+    "Private indexed metadata remains in the protected database; sensitive document/review/purpose payloads are encrypted",
+    "Legacy nil-cipher constructors are development/test/migration primitives; supported private production wiring requires OpenC071ProductionStores",
+    "Backfill is bounded to 100000 rows/64 MiB input per private table and fails explicitly for larger archives",
+    "Runtime history cannot be deleted or quotas silently reclaimed; approved retention/recovery remains future work"
+  ],
+  "blockers_for_repository_step": [],
+  "completion": "Every original C07.1 criterion individually PASS at one exact SHA; durable evidence-only certification; no live permission implied",
+  "next_canonical_step": {
+    "id": "C07.2",
+    "name": "Multi-instance concurrency, durable jobs, leader/lease fencing, transactional outbox and idempotent activation",
+    "started": false
+  },
+  "inputs": {
+    "policy_source_snapshot_evaluator_schema_geography": "No operational policy/source/geography/evaluator changes; all repository inputs pinned by implementation SHA",
+    "database_schema": "Five ordered SHA-256-pinned migrations including C07.1 hardening; checked at migration and runtime opening",
+    "deployment_config": "Fixture-only verified-TLS PostgreSQL and isolated runtime roles; real deployed configuration remains external acceptance"
+  }
+}

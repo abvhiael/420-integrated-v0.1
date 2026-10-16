@@ -1,0 +1,1728 @@
+{
+  "schema": "highcountry-r04-level3-corrected-sha-v1",
+  "implementationSha": "f7a3da6f96b62d018f69aa5e98d3819b5ad32706",
+  "implementationTreeSha": "35e70a63f1d532df06faaf3d274b7193cc37249c",
+  "pr": 634,
+  "branch": "qualification/highcountry-r04-level3-main-20261013",
+  "reconciledMain": "959288c8bd33b6da0325b6a5d060e00e7bcf0e48",
+  "mainBehindBy": 0,
+  "disposition": "CORRECTIONS_VERIFIED_LEVEL3_PENDING",
+  "level3Qualified": false,
+  "fixes": {
+    "eofFiles": 8,
+    "governance": "Correct YAML literal-block indentation of Python heredoc; shell heredoc delimiter preserved.",
+    "hz": "Remove corrupt duplicate Level 2 section and stray shell fragment; retain complete original Level 1 and final Level 2 inventories.",
+    "qualificationCadence": "32 ordinary HC workflow jobs excluded only for this Level 3 branch; complete canonical four-shard inventory and retained R04 five-job qualification remain required."
+  },
+  "localValidation": {
+    "uniqueKeyYaml": "PASS: 34 workflows",
+    "bashSyntax": "PASS: all changed workflow run scripts",
+    "actionlint": "PASS: 34 workflows, v1.7.7 (shellcheck/pyflakes disabled; shell syntax separately checked)",
+    "whitespace": "PASS: changed files"
+  },
+  "ciValidation": {
+    "securityClientConfig": {
+      "jobId": 115485838686,
+      "disposition": "PASS",
+      "clientSharedServiceTests": {
+        "passed": 106,
+        "failed": 0
+      },
+      "format": "PASS",
+      "staticLint": "PASS",
+      "configurationTemplate": "PASS",
+      "runtimeSyntax": "PASS",
+      "gitDiffCheck": "PASS",
+      "cleanCheckout": "PASS"
+    },
+    "workflowSnapshot": [
+      {
+        "name": "Genesis Address Authority",
+        "id": 38452248754,
+        "status": "completed",
+        "conclusion": "success",
+        "jobs": [
+          {
+            "id": 115485841607,
+            "name": "cross-manifest-authority",
+            "status": "completed",
+            "conclusion": "success",
+            "run_id": 38452248754,
+            "logs_url": null,
+            "steps": [
+              {
+                "name": "Set up job",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 1
+              },
+              {
+                "name": "Checkout exact qualification head",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 2
+              },
+              {
+                "name": "Verify exact qualification head",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 3
+              },
+              {
+                "name": "Run actions/setup-python@v5",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 4
+              },
+              {
+                "name": "Check canonical frozen owners and proposed application claims",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 5
+              },
+              {
+                "name": "REG-AUDIT-4 complete namespace authority",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 6
+              },
+              {
+                "name": "REG-AUDIT-4 adversarial namespace regressions",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 7
+              },
+              {
+                "name": "Active namespace collision audit",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 8
+              },
+              {
+                "name": "Check physical predeploy/deployment parity and reject retired claims",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 9
+              },
+              {
+                "name": "Validate actual current frozen namespace and unapproved candidates",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 10
+              },
+              {
+                "name": "W14.7.1 actual-authority namespace regression fixtures",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 11
+              },
+              {
+                "name": "W14.7.4 historical-claim regression tests",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 12
+              },
+              {
+                "name": "W14.7.4 source-consumer inventory (evidence, not active-address attestation)",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 13
+              },
+              {
+                "name": "Upload address-consumer inventory",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 14
+              },
+              {
+                "name": "Post Run actions/setup-python@v5",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 27
+              },
+              {
+                "name": "Post Checkout exact qualification head",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 28
+              },
+              {
+                "name": "Complete job",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 29
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "High Country R04 Level 2 App Integration",
+        "id": 38452248369,
+        "status": "in_progress",
+        "conclusion": null,
+        "jobs": [
+          {
+            "id": 115485838090,
+            "name": "runtime-canonical",
+            "status": "completed",
+            "conclusion": "success",
+            "run_id": 38452248369,
+            "logs_url": null,
+            "steps": [
+              {
+                "name": "Set up job",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 1
+              },
+              {
+                "name": "Initialize containers",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 2
+              },
+              {
+                "name": "Run actions/checkout@v4",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 3
+              },
+              {
+                "name": "Exact implementation SHA",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 4
+              },
+              {
+                "name": "Run actions/setup-node@v4",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 5
+              },
+              {
+                "name": "Run foundry-rs/foundry-toolchain@v1",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 6
+              },
+              {
+                "name": "Build disposable real-contract runtime fixture",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 7
+              },
+              {
+                "name": "Install pinned PostgreSQL runtime driver",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 8
+              },
+              {
+                "name": "Actual local-chain PostgreSQL authenticated HTTP and worker integration",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 9
+              },
+              {
+                "name": "Post Run foundry-rs/foundry-toolchain@v1",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 15
+              },
+              {
+                "name": "Post Run actions/setup-node@v4",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 16
+              },
+              {
+                "name": "Post Run actions/checkout@v4",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 17
+              },
+              {
+                "name": "Stop containers",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 18
+              },
+              {
+                "name": "Complete job",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 19
+              }
+            ]
+          },
+          {
+            "id": 115485838391,
+            "name": "retained-app",
+            "status": "in_progress",
+            "conclusion": null,
+            "run_id": 38452248369,
+            "logs_url": null,
+            "steps": [
+              {
+                "name": "Set up job",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 1
+              },
+              {
+                "name": "Run actions/checkout@v4",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 2
+              },
+              {
+                "name": "Exact candidate SHA",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 3
+              },
+              {
+                "name": "Run foundry-rs/foundry-toolchain@v1",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 4
+              },
+              {
+                "name": "High Country app build and sizes",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 5
+              },
+              {
+                "name": "Retained R04 integration and adversarial coverage",
+                "status": "in_progress",
+                "conclusion": null,
+                "number": 6
+              },
+              {
+                "name": "Canonical High Country verifier",
+                "status": "pending",
+                "conclusion": null,
+                "number": 7
+              },
+              {
+                "name": "Post Run foundry-rs/foundry-toolchain@v1",
+                "status": "pending",
+                "conclusion": null,
+                "number": 13
+              },
+              {
+                "name": "Post Run actions/checkout@v4",
+                "status": "pending",
+                "conclusion": null,
+                "number": 14
+              }
+            ]
+          },
+          {
+            "id": 115485838401,
+            "name": "economy-service",
+            "status": "completed",
+            "conclusion": "success",
+            "run_id": 38452248369,
+            "logs_url": null,
+            "steps": [
+              {
+                "name": "Set up job",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 1
+              },
+              {
+                "name": "Run actions/checkout@v4",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 2
+              },
+              {
+                "name": "Exact implementation SHA",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 3
+              },
+              {
+                "name": "Run actions/setup-node@v4",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 4
+              },
+              {
+                "name": "Retained economic runtime security and settlement regressions",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 5
+              },
+              {
+                "name": "Post Run actions/setup-node@v4",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 9
+              },
+              {
+                "name": "Post Run actions/checkout@v4",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 10
+              },
+              {
+                "name": "Complete job",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 11
+              }
+            ]
+          },
+          {
+            "id": 115485838471,
+            "name": "postgres-integration",
+            "status": "completed",
+            "conclusion": "success",
+            "run_id": 38452248369,
+            "logs_url": null,
+            "steps": [
+              {
+                "name": "Set up job",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 1
+              },
+              {
+                "name": "Initialize containers",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 2
+              },
+              {
+                "name": "Run actions/checkout@v4",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 3
+              },
+              {
+                "name": "Exact implementation SHA",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 4
+              },
+              {
+                "name": "Run actions/setup-node@v4",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 5
+              },
+              {
+                "name": "Install pinned PostgreSQL runtime driver",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 6
+              },
+              {
+                "name": "Actual SERIALIZABLE contention, replay, persistence and settlement",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 7
+              },
+              {
+                "name": "Post Run actions/setup-node@v4",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 12
+              },
+              {
+                "name": "Post Run actions/checkout@v4",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 13
+              },
+              {
+                "name": "Stop containers",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 14
+              },
+              {
+                "name": "Complete job",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 15
+              }
+            ]
+          },
+          {
+            "id": 115485838686,
+            "name": "security-client-config",
+            "status": "completed",
+            "conclusion": "success",
+            "run_id": 38452248369,
+            "logs_url": null,
+            "steps": [
+              {
+                "name": "Set up job",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 1
+              },
+              {
+                "name": "Run actions/checkout@v4",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 2
+              },
+              {
+                "name": "Assert exact candidate and reconciled main ancestry",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 3
+              },
+              {
+                "name": "Run foundry-rs/foundry-toolchain@v1",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 4
+              },
+              {
+                "name": "Run actions/setup-node@v4",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 5
+              },
+              {
+                "name": "High Country formatting",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 6
+              },
+              {
+                "name": "High Country static security lint",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 7
+              },
+              {
+                "name": "Retained client SDK and shared service security acceptance",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 8
+              },
+              {
+                "name": "Validate deployment configuration template",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 9
+              },
+              {
+                "name": "Syntax check economic runtime and tests",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 10
+              },
+              {
+                "name": "Whitespace and clean source checkout",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 11
+              },
+              {
+                "name": "Post Run actions/setup-node@v4",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 20
+              },
+              {
+                "name": "Post Run foundry-rs/foundry-toolchain@v1",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 21
+              },
+              {
+                "name": "Post Run actions/checkout@v4",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 22
+              },
+              {
+                "name": "Complete job",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 23
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "420Governance GOV-AUDIT-6",
+        "id": 38452248007,
+        "status": "completed",
+        "conclusion": "skipped",
+        "jobs": [
+          {
+            "id": 115485840917,
+            "name": "qualify",
+            "status": "completed",
+            "conclusion": "skipped",
+            "run_id": 38452248007,
+            "logs_url": null,
+            "steps": null
+          }
+        ]
+      },
+      {
+        "name": "420 Integrated Qualification",
+        "id": 38452247946,
+        "status": "in_progress",
+        "conclusion": null,
+        "jobs": [
+          {
+            "id": 115485840102,
+            "name": "offline-core",
+            "status": "completed",
+            "conclusion": "success",
+            "run_id": 38452247946,
+            "logs_url": null,
+            "steps": [
+              {
+                "name": "Set up job",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 1
+              },
+              {
+                "name": "Run actions/checkout@v4",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 2
+              },
+              {
+                "name": "Verify exact qualification head",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 3
+              },
+              {
+                "name": "Run actions/setup-go@v5",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 4
+              },
+              {
+                "name": "Run go test ./...",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 5
+              },
+              {
+                "name": "Run go build ./consensus/cmd/fourtwentyd",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 6
+              },
+              {
+                "name": "Run go build ./execution/cmd/node420",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 7
+              },
+              {
+                "name": "Post Run actions/setup-go@v5",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 13
+              },
+              {
+                "name": "Post Run actions/checkout@v4",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 14
+              },
+              {
+                "name": "Complete job",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 15
+              }
+            ]
+          },
+          {
+            "id": 115485840347,
+            "name": "production-dependencies",
+            "status": "completed",
+            "conclusion": "success",
+            "run_id": 38452247946,
+            "logs_url": null,
+            "steps": [
+              {
+                "name": "Set up job",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 1
+              },
+              {
+                "name": "Run actions/checkout@v4",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 2
+              },
+              {
+                "name": "Verify exact qualification head",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 3
+              },
+              {
+                "name": "Run actions/setup-go@v5",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 4
+              },
+              {
+                "name": "Run bash ./scripts/install-production-deps.sh",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 5
+              },
+              {
+                "name": "Post Run actions/setup-go@v5",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 9
+              },
+              {
+                "name": "Post Run actions/checkout@v4",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 10
+              },
+              {
+                "name": "Complete job",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 11
+              }
+            ]
+          },
+          {
+            "id": 115485840402,
+            "name": "geth-engine",
+            "status": "in_progress",
+            "conclusion": null,
+            "run_id": 38452247946,
+            "logs_url": null,
+            "steps": [
+              {
+                "name": "Set up job",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 1
+              },
+              {
+                "name": "Run actions/checkout@v4",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 2
+              },
+              {
+                "name": "Verify exact qualification head",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 3
+              },
+              {
+                "name": "Run actions/setup-go@v5",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 4
+              },
+              {
+                "name": "Run make build",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 5
+              },
+              {
+                "name": "Build pinned Geth",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 6
+              },
+              {
+                "name": "Run go build -o bin/engine-live-smoke ./integration/cmd/engine-live-smoke",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 7
+              },
+              {
+                "name": "Run bash ./scripts/live-engine-smoke.sh",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 8
+              },
+              {
+                "name": "Post Run actions/setup-go@v5",
+                "status": "in_progress",
+                "conclusion": null,
+                "number": 15
+              },
+              {
+                "name": "Post Run actions/checkout@v4",
+                "status": "pending",
+                "conclusion": null,
+                "number": 16
+              }
+            ]
+          },
+          {
+            "id": 115485840713,
+            "name": "fault-matrix",
+            "status": "completed",
+            "conclusion": "success",
+            "run_id": 38452247946,
+            "logs_url": null,
+            "steps": [
+              {
+                "name": "Set up job",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 1
+              },
+              {
+                "name": "Run actions/checkout@v4",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 2
+              },
+              {
+                "name": "Verify exact qualification head",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 3
+              },
+              {
+                "name": "Run actions/setup-go@v5",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 4
+              },
+              {
+                "name": "Run make build",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 5
+              },
+              {
+                "name": "Run python3 scripts/run-fault-matrix.py",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 6
+              },
+              {
+                "name": "Run python3 scripts/run-soak.py --slots 120 --slot-ms 35",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 7
+              },
+              {
+                "name": "Post Run actions/setup-go@v5",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 13
+              },
+              {
+                "name": "Post Run actions/checkout@v4",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 14
+              },
+              {
+                "name": "Complete job",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 15
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "420Hz GCA Qualification",
+        "id": 38452248264,
+        "status": "completed",
+        "conclusion": "success",
+        "jobs": [
+          {
+            "id": 115485838491,
+            "name": "HZ-GCA Level 2",
+            "status": "completed",
+            "conclusion": "success",
+            "run_id": 38452248264,
+            "logs_url": null,
+            "steps": [
+              {
+                "name": "Set up job",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 1
+              },
+              {
+                "name": "Checkout exact qualification head",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 2
+              },
+              {
+                "name": "Detect HZ-GCA-1.20 milestone change",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 3
+              },
+              {
+                "name": "Verify exact qualification head",
+                "status": "completed",
+                "conclusion": "skipped",
+                "number": 4
+              },
+              {
+                "name": "Verify reconciled current main ancestry",
+                "status": "completed",
+                "conclusion": "skipped",
+                "number": 5
+              },
+              {
+                "name": "Start Level-2 PostgreSQL",
+                "status": "completed",
+                "conclusion": "skipped",
+                "number": 6
+              },
+              {
+                "name": "Validate all GCA manifests",
+                "status": "completed",
+                "conclusion": "skipped",
+                "number": 7
+              },
+              {
+                "name": "Retain complete HZ-GCA-1 verifier inventory",
+                "status": "completed",
+                "conclusion": "skipped",
+                "number": 8
+              },
+              {
+                "name": "Verify HZ-GCA-1.20 milestone integration",
+                "status": "completed",
+                "conclusion": "skipped",
+                "number": 9
+              },
+              {
+                "name": "Retain 420Hz web qualification",
+                "status": "completed",
+                "conclusion": "skipped",
+                "number": 10
+              },
+              {
+                "name": "Retain 420AI Compute integration boundaries",
+                "status": "completed",
+                "conclusion": "skipped",
+                "number": 11
+              },
+              {
+                "name": "Run actions/setup-node@v4",
+                "status": "completed",
+                "conclusion": "skipped",
+                "number": 12
+              },
+              {
+                "name": "Retain 420AI provider runtime",
+                "status": "completed",
+                "conclusion": "skipped",
+                "number": 13
+              },
+              {
+                "name": "Verify 420AI provider runtime boundaries",
+                "status": "completed",
+                "conclusion": "skipped",
+                "number": 14
+              },
+              {
+                "name": "Retain reconciled Compute SDK suite",
+                "status": "completed",
+                "conclusion": "skipped",
+                "number": 15
+              },
+              {
+                "name": "Build reconciled Compute SDK for API",
+                "status": "completed",
+                "conclusion": "skipped",
+                "number": 16
+              },
+              {
+                "name": "Retain reconciled Compute API suite",
+                "status": "completed",
+                "conclusion": "skipped",
+                "number": 17
+              },
+              {
+                "name": "Retain reconciled Compute Indexer suite",
+                "status": "completed",
+                "conclusion": "skipped",
+                "number": 18
+              },
+              {
+                "name": "Post Checkout exact qualification head",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 36
+              },
+              {
+                "name": "Complete job",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 37
+              }
+            ]
+          },
+          {
+            "id": 115485838843,
+            "name": "HZ-GCA Level 1",
+            "status": "completed",
+            "conclusion": "success",
+            "run_id": 38452248264,
+            "logs_url": null,
+            "steps": [
+              {
+                "name": "Set up job",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 1
+              },
+              {
+                "name": "Checkout exact qualification head",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 2
+              },
+              {
+                "name": "Verify exact pull-request head",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 3
+              },
+              {
+                "name": "Validate GCA JSON manifests",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 4
+              },
+              {
+                "name": "Run actions/setup-node@v4",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 5
+              },
+              {
+                "name": "Qualify HZ-GCA-2 generation provider abstraction",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 6
+              },
+              {
+                "name": "Verify HZ-GCA-2 generation provider abstraction",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 7
+              },
+              {
+                "name": "Verify HZ-GCA-3 Compute execution adapter",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 8
+              },
+              {
+                "name": "Verify HZ-GCA-4 provenance consent AI rights",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 9
+              },
+              {
+                "name": "Verify HZ-GCA-5 project workspace storage",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 10
+              },
+              {
+                "name": "Verify HZ-GCA-6 Generate Studio UX",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 11
+              },
+              {
+                "name": "Retain 420AI Compute integration boundaries for HZ-GCA-3",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 12
+              },
+              {
+                "name": "Retain 420AI provider runtime for HZ-GCA-3",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 13
+              },
+              {
+                "name": "Verify 420AI provider runtime boundaries for HZ-GCA-3",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 14
+              },
+              {
+                "name": "Retain Compute SDK compatibility for HZ-GCA-3",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 15
+              },
+              {
+                "name": "Build Compute SDK for HZ-GCA-3 API compatibility",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 16
+              },
+              {
+                "name": "Retain Compute API compatibility for HZ-GCA-3",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 17
+              },
+              {
+                "name": "Verify HZ-GCA-1.1 product boundaries",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 18
+              },
+              {
+                "name": "Verify HZ-GCA-1.2 canonical object model",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 19
+              },
+              {
+                "name": "Verify HZ-GCA-1.3 Generate lifecycle",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 20
+              },
+              {
+                "name": "Verify HZ-GCA-1.4 AI disclosure",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 21
+              },
+              {
+                "name": "Verify HZ-GCA-1.5 provenance model",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 22
+              },
+              {
+                "name": "Verify HZ-GCA-1.6 rights consent boundaries",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 23
+              },
+              {
+                "name": "Verify HZ-GCA-1.7 privacy model",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 24
+              },
+              {
+                "name": "Verify HZ-GCA-1.8 storage retention",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 25
+              },
+              {
+                "name": "Verify HZ-GCA-1.9 generation economics",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 26
+              },
+              {
+                "name": "Verify HZ-GCA-1.10 Community authority model",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 27
+              },
+              {
+                "name": "Verify HZ-GCA-1.11 Charts rules",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 28
+              },
+              {
+                "name": "Verify HZ-GCA-1.12 Awards architecture",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 29
+              },
+              {
+                "name": "Verify HZ-GCA-1.13 nomination voting policy",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 30
+              },
+              {
+                "name": "Verify HZ-GCA-1.14 moderation dispute boundaries",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 31
+              },
+              {
+                "name": "Verify HZ-GCA-1.15 threat model",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 32
+              },
+              {
+                "name": "Verify HZ-GCA-1.16 API event interface contracts",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 33
+              },
+              {
+                "name": "Verify HZ-GCA-1.17 failure recovery semantics",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 34
+              },
+              {
+                "name": "Verify HZ-GCA-1.18 architecture documentation consolidation",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 35
+              },
+              {
+                "name": "Verify HZ-GCA-1.19 Phase-1 adversarial review",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 36
+              },
+              {
+                "name": "Post Run actions/setup-node@v4",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 71
+              },
+              {
+                "name": "Post Checkout exact qualification head",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 72
+              },
+              {
+                "name": "Complete job",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 73
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "420Docs Qualification",
+        "id": 38452248197,
+        "status": "completed",
+        "conclusion": "success",
+        "jobs": [
+          {
+            "id": 115485839240,
+            "name": "qualify",
+            "status": "completed",
+            "conclusion": "success",
+            "run_id": 38452248197,
+            "logs_url": null,
+            "steps": [
+              {
+                "name": "Set up job",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 1
+              },
+              {
+                "name": "Checkout exact qualification head",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 2
+              },
+              {
+                "name": "Verify exact qualification head",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 3
+              },
+              {
+                "name": "Setup Python",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 4
+              },
+              {
+                "name": "Install documentation dependencies",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 5
+              },
+              {
+                "name": "Run documentation qualification",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 6
+              },
+              {
+                "name": "Verify CMP-1.3 invariant evidence matrix",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 7
+              },
+              {
+                "name": "Verify CMP-1.3 historical deployment package readiness",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 8
+              },
+              {
+                "name": "Verify CMP-1.3.15 release-candidate readiness",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 9
+              },
+              {
+                "name": "Verify CMP-1.3 deferred closeout migration",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 10
+              },
+              {
+                "name": "Verify CMP-1.3.16 phase closeout reconciliation",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 11
+              },
+              {
+                "name": "Verify CMP-1.4.0 verifier architecture reconciliation",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 12
+              },
+              {
+                "name": "Verify CMP-1.4.4 signed verdict provenance",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 13
+              },
+              {
+                "name": "Verify CMP-1.4.12 verifier phase closeout",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 14
+              },
+              {
+                "name": "Verify CMP-1.5.13 ComputeStake phase closeout",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 15
+              },
+              {
+                "name": "Post Setup Python",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 29
+              },
+              {
+                "name": "Post Checkout exact qualification head",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 30
+              },
+              {
+                "name": "Complete job",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 31
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Solidity Contracts",
+        "id": 38452248238,
+        "status": "in_progress",
+        "conclusion": null,
+        "jobs": [
+          {
+            "id": 115486517078,
+            "name": "classify-pr",
+            "status": "completed",
+            "conclusion": "success",
+            "run_id": 38452248238,
+            "logs_url": null,
+            "steps": [
+              {
+                "name": "Set up job",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 1
+              },
+              {
+                "name": "Run actions/checkout@v4",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 2
+              },
+              {
+                "name": "Classify pull-request scope",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 3
+              },
+              {
+                "name": "Post Run actions/checkout@v4",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 6
+              },
+              {
+                "name": "Complete job",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 7
+              }
+            ]
+          },
+          {
+            "id": 115486517085,
+            "name": "level3-shards (1)",
+            "status": "in_progress",
+            "conclusion": null,
+            "run_id": 38452248238,
+            "logs_url": null,
+            "steps": [
+              {
+                "name": "Set up job",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 1
+              },
+              {
+                "name": "Checkout exact qualification head",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 2
+              },
+              {
+                "name": "Verify exact qualification head",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 3
+              },
+              {
+                "name": "Run foundry-rs/foundry-toolchain@v1",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 4
+              },
+              {
+                "name": "Qualification harness boundary checks",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 5
+              },
+              {
+                "name": "Compile assigned Solidity sources and run assigned tests",
+                "status": "in_progress",
+                "conclusion": null,
+                "number": 6
+              },
+              {
+                "name": "Mandatory coverage of the same canonical partition",
+                "status": "pending",
+                "conclusion": null,
+                "number": 7
+              },
+              {
+                "name": "Upload per-shard diagnostics",
+                "status": "pending",
+                "conclusion": null,
+                "number": 8
+              },
+              {
+                "name": "Post Run foundry-rs/foundry-toolchain@v1",
+                "status": "pending",
+                "conclusion": null,
+                "number": 15
+              },
+              {
+                "name": "Post Checkout exact qualification head",
+                "status": "pending",
+                "conclusion": null,
+                "number": 16
+              }
+            ]
+          },
+          {
+            "id": 115486517173,
+            "name": "level3-shards (2)",
+            "status": "in_progress",
+            "conclusion": null,
+            "run_id": 38452248238,
+            "logs_url": null,
+            "steps": [
+              {
+                "name": "Set up job",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 1
+              },
+              {
+                "name": "Checkout exact qualification head",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 2
+              },
+              {
+                "name": "Verify exact qualification head",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 3
+              },
+              {
+                "name": "Run foundry-rs/foundry-toolchain@v1",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 4
+              },
+              {
+                "name": "Qualification harness boundary checks",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 5
+              },
+              {
+                "name": "Compile assigned Solidity sources and run assigned tests",
+                "status": "in_progress",
+                "conclusion": null,
+                "number": 6
+              },
+              {
+                "name": "Mandatory coverage of the same canonical partition",
+                "status": "pending",
+                "conclusion": null,
+                "number": 7
+              },
+              {
+                "name": "Upload per-shard diagnostics",
+                "status": "pending",
+                "conclusion": null,
+                "number": 8
+              },
+              {
+                "name": "Post Run foundry-rs/foundry-toolchain@v1",
+                "status": "pending",
+                "conclusion": null,
+                "number": 15
+              },
+              {
+                "name": "Post Checkout exact qualification head",
+                "status": "pending",
+                "conclusion": null,
+                "number": 16
+              }
+            ]
+          },
+          {
+            "id": 115486517330,
+            "name": "level3-shards (3)",
+            "status": "in_progress",
+            "conclusion": null,
+            "run_id": 38452248238,
+            "logs_url": null,
+            "steps": [
+              {
+                "name": "Set up job",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 1
+              },
+              {
+                "name": "Checkout exact qualification head",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 2
+              },
+              {
+                "name": "Verify exact qualification head",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 3
+              },
+              {
+                "name": "Run foundry-rs/foundry-toolchain@v1",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 4
+              },
+              {
+                "name": "Qualification harness boundary checks",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 5
+              },
+              {
+                "name": "Compile assigned Solidity sources and run assigned tests",
+                "status": "in_progress",
+                "conclusion": null,
+                "number": 6
+              },
+              {
+                "name": "Mandatory coverage of the same canonical partition",
+                "status": "pending",
+                "conclusion": null,
+                "number": 7
+              },
+              {
+                "name": "Upload per-shard diagnostics",
+                "status": "pending",
+                "conclusion": null,
+                "number": 8
+              },
+              {
+                "name": "Post Run foundry-rs/foundry-toolchain@v1",
+                "status": "pending",
+                "conclusion": null,
+                "number": 15
+              },
+              {
+                "name": "Post Checkout exact qualification head",
+                "status": "pending",
+                "conclusion": null,
+                "number": 16
+              }
+            ]
+          },
+          {
+            "id": 115486517364,
+            "name": "level3-shards (0)",
+            "status": "in_progress",
+            "conclusion": null,
+            "run_id": 38452248238,
+            "logs_url": null,
+            "steps": [
+              {
+                "name": "Set up job",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 1
+              },
+              {
+                "name": "Checkout exact qualification head",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 2
+              },
+              {
+                "name": "Verify exact qualification head",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 3
+              },
+              {
+                "name": "Run foundry-rs/foundry-toolchain@v1",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 4
+              },
+              {
+                "name": "Qualification harness boundary checks",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 5
+              },
+              {
+                "name": "Compile assigned Solidity sources and run assigned tests",
+                "status": "in_progress",
+                "conclusion": null,
+                "number": 6
+              },
+              {
+                "name": "Mandatory coverage of the same canonical partition",
+                "status": "pending",
+                "conclusion": null,
+                "number": 7
+              },
+              {
+                "name": "Upload per-shard diagnostics",
+                "status": "pending",
+                "conclusion": null,
+                "number": 8
+              },
+              {
+                "name": "Post Run foundry-rs/foundry-toolchain@v1",
+                "status": "pending",
+                "conclusion": null,
+                "number": 15
+              },
+              {
+                "name": "Post Checkout exact qualification head",
+                "status": "pending",
+                "conclusion": null,
+                "number": 16
+              }
+            ]
+          },
+          {
+            "id": 115486518282,
+            "name": "foundry",
+            "status": "completed",
+            "conclusion": "skipped",
+            "run_id": 38452248238,
+            "logs_url": null,
+            "steps": null
+          },
+          {
+            "id": 115486791220,
+            "name": "pr-shards",
+            "status": "completed",
+            "conclusion": "skipped",
+            "run_id": 38452248238,
+            "logs_url": null,
+            "steps": null
+          },
+          {
+            "id": 115486792252,
+            "name": "compute-fast",
+            "status": "completed",
+            "conclusion": "skipped",
+            "run_id": 38452248238,
+            "logs_url": null,
+            "steps": null
+          }
+        ]
+      }
+    ]
+  },
+  "historicalFailedCandidate": "b5d183c06421a096cc568dc3a687b1f300f748cc",
+  "pending": [
+    "Retained HC Foundry suite/verifier completion",
+    "Four full Solidity CI shards with mandatory coverage plus complete inventory/Decision #10/coverage fixture",
+    "Pinned Geth/engine global qualification completion",
+    "Final job/log/artifact review and Level 3 certificate"
+  ],
+  "evidenceOnly": true,
+  "merged": false,
+  "r05Started": false,
+  "operationalDeferralsPreserved": true
+}

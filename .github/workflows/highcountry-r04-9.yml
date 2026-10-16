@@ -1,0 +1,57 @@
+name: High Country R04.9 Level 1 Qualification
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/highcountry/rights/**'
+      - 'contracts/src/highcountry/land/LandRegistry.sol'
+      - 'contracts/src/highcountry/cultivation/PlantRegistry.sol'
+      - 'contracts/src/highcountry/constants/ActionIds.sol'
+      - 'contracts/test/highcountry/unit/land/**'
+      - 'contracts/test/highcountry/unit/cultivation/**'
+      - 'contracts/test/highcountry/integration/PublicPlantCapacity.t.sol'
+      - 'contracts/test/highcountry/unit/rights/**'
+      - '.github/workflows/highcountry-r04-9.yml'
+      - 'docs/highcountry/R04.9-*'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  rights:
+    if: github.head_ref != 'qualification/highcountry-r04-level3-main-20261013'
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      FOUNDRY_SRC: src/highcountry
+      FOUNDRY_TEST: test/highcountry
+      FOUNDRY_SCRIPT: script/highcountry
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Exact source SHA
+        env:
+          SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$SHA"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Build and bytecode limits
+        working-directory: contracts
+        run: forge build src/highcountry --sizes
+      - name: Rights formatting
+        working-directory: contracts
+        run: forge fmt --check src/highcountry/rights test/highcountry/unit/rights src/highcountry/land/LandRegistry.sol src/highcountry/cultivation/PlantRegistry.sol src/highcountry/constants/ActionIds.sol
+      - name: Focused rights lint
+        working-directory: contracts
+        run: forge lint src/highcountry/rights src/highcountry/land/LandRegistry.sol src/highcountry/cultivation/PlantRegistry.sol --severity high med low
+      - name: Lease license rights lifecycle and adversarial tests
+        working-directory: contracts
+        run: forge test --match-path 'test/highcountry/unit/rights/*.t.sol' -vv
+      - name: Affected canonical land and cultivation regressions
+        working-directory: contracts
+        run: |
+          forge test --match-path 'test/highcountry/unit/land/*.t.sol' -vv
+          forge test --match-path 'test/highcountry/unit/cultivation/*.t.sol' -vv
+          forge test --match-path 'test/highcountry/integration/PublicPlantCapacity.t.sol' -vv
+      - name: Canonical High Country verifier
+        run: python3 scripts/highcountry/verify-r01.py

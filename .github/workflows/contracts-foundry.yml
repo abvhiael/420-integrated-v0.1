@@ -114,7 +114,7 @@ jobs:
   # Non-Compute or mixed Solidity PRs still qualify the complete inventory.
   pr-shards:
     needs: classify-pr
-    if: github.event_name == 'pull_request' && github.head_ref != 'qualification/bnb-phase3-level3-20261013' && needs.classify-pr.outputs.compute_only != 'true' && (!(startsWith(github.head_ref, 'audit/') || contains(github.head_ref, '-audit-')) || github.head_ref == 'audit/420launchpad-remediation' || github.head_ref == 'audit/420verify-20261003' || github.head_ref == 'audit/420token-complete-20261004' || github.head_ref == 'audit/420town-complete-20261004' || github.head_ref == 'audit/420media-complete-20261006' || github.head_ref == 'audit/doobtube-baseline-20261006')
+    if: github.event_name == 'pull_request' && github.head_ref != 'qualification/bnb-phase3-level3-20261013' && github.head_ref != 'qualification/highcountry-r04-level3-main-20261013' && needs.classify-pr.outputs.compute_only != 'true' && (!(startsWith(github.head_ref, 'audit/') || contains(github.head_ref, '-audit-')) || github.head_ref == 'audit/420launchpad-remediation' || github.head_ref == 'audit/420verify-20261003' || github.head_ref == 'audit/420token-complete-20261004' || github.head_ref == 'audit/420town-complete-20261004' || github.head_ref == 'audit/420media-complete-20261006' || github.head_ref == 'audit/doobtube-baseline-20261006')
     runs-on: ubuntu-latest
     timeout-minutes: 60
     strategy:
@@ -163,7 +163,7 @@ jobs:
   # with the full CI fuzz/invariant settings. The fixture runs only after all
   # shards succeed and their combined inventory matches the repository exactly.
   level3-shards:
-    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && (github.head_ref == 'audit/420commerce-com-2-upstream-adaptations' || github.head_ref == 'audit/doobr-audit-1-inventory-20261009' || github.head_ref == 'review/high-country-complete-audit-20261009' || github.head_ref == 'qualification/highcountry-r03-main-merge-20261010' || github.head_ref == 'qualification/bnb-phase3-level3-20261013'))
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && (github.head_ref == 'audit/420commerce-com-2-upstream-adaptations' || github.head_ref == 'audit/doobr-audit-1-inventory-20261009' || github.head_ref == 'review/high-country-complete-audit-20261009' || github.head_ref == 'qualification/highcountry-r03-main-merge-20261010' || github.head_ref == 'qualification/bnb-phase3-level3-20261013' || github.head_ref == 'qualification/highcountry-r04-level3-main-20261013'))
     runs-on: ubuntu-latest
     timeout-minutes: 120
     strategy:
@@ -225,7 +225,7 @@ jobs:
           retention-days: 30
 
   level3-fixture:
-    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && (github.head_ref == 'audit/420commerce-com-2-upstream-adaptations' || github.head_ref == 'audit/doobr-audit-1-inventory-20261009' || github.head_ref == 'review/high-country-complete-audit-20261009' || github.head_ref == 'qualification/highcountry-r03-main-merge-20261010' || github.head_ref == 'qualification/bnb-phase3-level3-20261013'))
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && (github.head_ref == 'audit/420commerce-com-2-upstream-adaptations' || github.head_ref == 'audit/doobr-audit-1-inventory-20261009' || github.head_ref == 'review/high-country-complete-audit-20261009' || github.head_ref == 'qualification/highcountry-r03-main-merge-20261010' || github.head_ref == 'qualification/bnb-phase3-level3-20261013' || github.head_ref == 'qualification/highcountry-r04-level3-main-20261013'))
     needs: level3-shards
     runs-on: ubuntu-latest
     timeout-minutes: 90

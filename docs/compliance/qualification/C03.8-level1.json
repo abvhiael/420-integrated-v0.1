@@ -1,0 +1,62 @@
+{
+  "step": "C03.8",
+  "qualification_level": 1,
+  "status": "POSTGRESQL_ADAPTER_IMPLEMENTED_LEVEL1_PASS",
+  "implementation_sha": "efeff3fb12e518a596f8b70a4566ff66b828ccc5",
+  "ci_run": 38090613936,
+  "ci_job": 114326099843,
+  "ci_result": "success",
+  "limitations": [
+    "No durable shared multi-instance store is implemented; only the backend interface and two-instance test fixture are qualified."
+  ],
+  "next_step": "C03.9",
+  "durable_adapter": {
+    "implementation_sha": "7f42a4e25f29e64e8c78d4bd705f47bbf3081b16",
+    "run_id": 38092637730,
+    "job_id": 114332036381,
+    "conclusion": "success",
+    "database": "PostgreSQL 16 CI service",
+    "test": "TestC038PostgreSQLMultiInstance",
+    "covered": [
+      "two independently opened database pools",
+      "atomic conditional CAS competing writers",
+      "exactly one winner under concurrency",
+      "durable row read across connections",
+      "revocation/dependency stale cache rejection"
+    ],
+    "files": [
+      "services/complianceauth/publication_postgres.go",
+      "services/complianceauth/publication_postgres_test.go",
+      ".github/workflows/420compliance-c01-level1.yml",
+      "docs/compliance/C03.8-POSTGRESQL-DURABLE-STORE.md"
+    ],
+    "operational_requirements": [
+      "wire into deployed services",
+      "production TLS and least privilege credentials",
+      "migration change management",
+      "failover backup monitoring production acceptance",
+      "independent legal publisher authorization"
+    ]
+  },
+  "production_hardening": {
+    "status": "LEVEL1_PASS",
+    "qualified_implementation_sha": "2416ee645e204492ca617e92bae11a387e5ac63f",
+    "ci_run_id": 38093302258,
+    "ci_job_id": 114333976031,
+    "ci_conclusion": "success",
+    "implemented": [
+      "production wiring via OpenProductionPublicationRuntime and primary-only reads",
+      "verify-full TLS enforced on production DSN with trusted CA file",
+      "controlled PostgreSQL migration SQL and least-privilege reader/publisher role grants",
+      "database disconnect fail-closed and reconnect durability integration checks",
+      "external reviewer signature approval via ed25519 trusted public-key allowlist and signed publication state"
+    ],
+    "remaining_external_acceptance": [
+      "actual regulator/legal reviewer credentials and independently accepted signing keys",
+      "real production database secrets, CA certificates and role provisioning",
+      "deployment into a serving application and real primary failover or split-brain exercises"
+    ],
+    "level2": "C03 milestone",
+    "level3": "C08.5"
+  }
+}

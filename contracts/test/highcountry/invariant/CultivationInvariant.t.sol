@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
+import { LandRegistry } from "../../../src/highcountry/land/LandRegistry.sol";
 import { EmergencyState } from "../../../src/highcountry/security/EmergencyState.sol";
 
 import { ICapabilityRegistry420 } from "../../../src/interfaces/genesis/ICapabilityRegistry420.sol";
@@ -26,46 +27,11 @@ interface VmHC6Invariant {
     ) external;
 }
 
-contract MockLandRegistryHC6Invariant {
-    struct Parcel {
-        address operator;
-        uint32 capacity;
-        uint16 regionId;
-        bool exists;
-    }
-    mapping(uint64 => Parcel) private _parcels;
-
-    function configure(
-        uint64 parcelId,
-        address operator,
-        uint32 capacity,
-        uint16 regionId
-    ) external {
-        _parcels[parcelId] = Parcel(operator, capacity, regionId, true);
-    }
-
+contract RegionSourceHC6Invariant {
     function exists(
-        uint64 parcelId
-    ) external view returns (bool) {
-        return _parcels[parcelId].exists;
-    }
-
-    function effectiveOperator(
-        uint64 parcelId
-    ) external view returns (address) {
-        return _parcels[parcelId].operator;
-    }
-
-    function growCapacityOf(
-        uint64 parcelId
-    ) external view returns (uint32) {
-        return _parcels[parcelId].capacity;
-    }
-
-    function regionIdOf(
-        uint64 parcelId
-    ) external view returns (uint16) {
-        return _parcels[parcelId].regionId;
+        uint16 regionId
+    ) external pure returns (bool) {
+        return regionId == 2;
     }
 }
 
@@ -126,7 +92,7 @@ contract CultivationInvariantTest is InvariantTarget420, PlantSourcesFixture {
     HighCountryAuthorization private auth;
     GenesisRegistry private genesis;
     GenomeRegistry private genomes;
-    MockLandRegistryHC6Invariant private land;
+    LandRegistry private land;
     PlantRegistry private plants;
     CultivationEngine private cultivation;
     bytes32 private genomeId = keccak256("hc6:inv:genome");
@@ -141,8 +107,7 @@ contract CultivationInvariantTest is InvariantTarget420, PlantSourcesFixture {
         auth = new HighCountryAuthorization(address(caps));
         genesis = new GenesisRegistry(address(auth));
         genomes = new GenomeRegistry(address(auth), address(genesis));
-        land = new MockLandRegistryHC6Invariant();
-        land.configure(21, address(this), 2, 2);
+        land = new LandRegistry(address(auth), address(new RegionSourceHC6Invariant()), address(genesis));
         PublicCultivationAccess access = new PublicCultivationAccess(address(auth), address(land));
         _createPlantSources(address(auth), address(genomes));
         plants = new PlantRegistry(
@@ -220,6 +185,8 @@ contract CultivationInvariantTest is InvariantTarget420, PlantSourcesFixture {
         );
         genesis.setRoots(_roots());
         genesis.finalizeGenesis();
+        _sourceGrant(caps, address(this), ModuleIds.LAND_REGISTRY, ActionIds.LAND_REGISTER, bytes32(uint256(21)), 2);
+        land.registerParcel(21, 2, address(this), 2, keccak256("cultivation"), keccak256("parcel"));
         _grant(
             address(this),
             ModuleIds.GENOME_REGISTRY,
@@ -297,7 +264,14 @@ contract CultivationInvariantTest is InvariantTarget420, PlantSourcesFixture {
             new CultivationInvariantHandler(cultivation, plants, genomeId, sourceSeeds);
         _sourceGrant(caps, address(this), ModuleIds.SEED_REGISTRY, ActionIds.SEED_REGISTER, bytes32(uint256(3)), 1);
         sourceSeeds.registerSeedLot(3, genomeId, 0, address(handler), 1, keccak256("capacity-probe"));
-        land.configure(21, address(handler), 2, 2);
+        _grant(
+            address(this),
+            ModuleIds.LAND_REGISTRY,
+            ActionIds.LAND_TRANSFER,
+            bytes32(uint256(21)),
+            keccak256("handler-land")
+        );
+        land.transferOwner(21, address(handler));
         targetContract(address(handler));
     }
 

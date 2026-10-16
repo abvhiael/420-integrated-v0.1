@@ -1,0 +1,346 @@
+{
+  "step": "C07.5",
+  "name": "Privacy retention/deletion schedules, legal holds and role-limited evidence access; required delivery records remain under the accountable retailer/app boundary.",
+  "qualification_level": 1,
+  "status": "COMPLETE",
+  "acceptance_scope": "Repository app-audit privacy software gates; actual retention-law approval, deployed issuer/case/IAM, backup and accountable retailer/app acceptance remain external.",
+  "repository": "abvhiael/420-integrated-v0.1",
+  "branch": "audit/420compliance-c01-1-inventory-20261009",
+  "pull_request": 602,
+  "pull_request_disposition": "Draft, open and unmerged",
+  "implementation_sha": "880ec8a21932d54d547af237818b053d6104444d",
+  "prior_C07_4_evidence_head": "48ae62ad35f7643ca996a6864a2ad208e679ea1e",
+  "observed_main_sha": "959288c8bd33b6da0325b6a5d060e00e7bcf0e48",
+  "main_at_start_sha": "81c21541acdc1b900b9a15c6f6b75ff2d7c2b5d9",
+  "audit_ancestry_base_sha": "c5a4f220d1fbda01f707d359aa9bb32921a138b1",
+  "recorded_local_date": "2026-10-13",
+  "timezone": "America/Regina",
+  "evidence_commit_policy": "Evidence-only commit inheriting the exact qualified implementation. Its evidence SHA is the Git commit containing this file. No executable, test, workflow, dependency, configuration, deployment, runtime binary or substantive requirement change.",
+  "classification": "Compliance private storage, app auditor interface, isolated privacy-role software and app workflow only. No shared module, Solidity, Genesis, frozen address, economic authority or live permission change.",
+  "files_changed": [
+    "services/complianceauth/c07_1_migrations.go",
+    "services/complianceauth/c07_1_storage.go",
+    "services/complianceauth/c07_1_storage_test.go",
+    "services/complianceauth/c06_7_auditor.go",
+    "services/complianceauth/c06_7_auditor_postgres.go",
+    ".github/workflows/420compliance-c01-level1.yml",
+    "services/complianceauth/c07_5_privacy.go",
+    "services/complianceauth/c07_5_privacy_sql.go",
+    "services/complianceauth/c07_5_privacy_test.go",
+    "docs/compliance/C07.5-PRIVACY-RETENTION.md"
+  ],
+  "implementation_summary": [
+    "Append migration eight with scoped RLS privacy policy, hold, retirement, receipt, terminal-clock and role tables; preserve the seven existing migration SQL/checksums",
+    "Require exact independently owner/reviewer-signed retention configuration; no legal duration default; latest revocation/expiry blocks purge and policy updates cannot shorten previous duration",
+    "Server-clock retention enrollment/finalization, terminal-owner grant, locked inactive publication fence and immutable draft retirement; pending/active/unknown records cannot be deleted",
+    "Separate scoped hold/release/retirement/purge capabilities; independent hold release and case/revision checks; ordinary app roles retain append-only restrictions",
+    "Primary encrypted-row removal, quota decrement and minimal private receipt in one transaction; hold serialization, idempotent recovery, durable rollback and no reference reuse",
+    "Bounded 32-reference scheduler with separate inventory and fresh per-record mutation grants; resumable committed-count/error semantics",
+    "Production auditor privacy/case/purpose checks around reads and after durable logging; encrypted production logging rejects ungated repositories",
+    "Managed identity plus restricted verified-TLS privacy-role composition; default missing provider/configuration denies, and delivery/custody records remain with the accountable retailer/app"
+  ],
+  "requirements": {
+    "retention_schedules": {
+      "status": "PASS",
+      "proof": "Exact scope/class/version/expiry/revocation and two independent signatures; configured day interval only, no legal duration default; server clocks and non-shortening updates; latest-revoked policy never falls back"
+    },
+    "deletion_schedules": {
+      "status": "PASS",
+      "proof": "Bounded/resumable Due/RunRetention; fresh exact-reference finality grants; actual owned draft/review/audit/job row deletion, one receipt, quota conservation and no reuse"
+    },
+    "legal_holds": {
+      "status": "PASS",
+      "proof": "Durable record/scope holds without auto-expiry, separate release capability/principal, exact case/revision, stale/self/replay denial and 12-way held deletion denials"
+    },
+    "role_limited_evidence_access": {
+      "status": "PASS",
+      "proof": "Independent auditor/case role, original scoped metadata repository, current retention policy, existence/deletion/hold case/purpose before/after reads and after logging; foreign case, wrong purpose, author and ungated production repository denied"
+    },
+    "accountable_retailer_app_boundary": {
+      "status": "PASS",
+      "proof": "Only DRAFT/AUDIT/JOB Compliance classes; DELIVERY/ORDER/PAY/WALLET/IDENTITY_IMAGE rejected; no migration/function/export to another app's actual required delivery/custody records"
+    }
+  },
+  "workflow": {
+    "path": ".github/workflows/420compliance-c01-level1.yml",
+    "name": "420Compliance C07.5 Level 1",
+    "run_id": 38441676602,
+    "run_number": 769,
+    "job_id": 115449562448,
+    "job_name": "privacy-retention-level1",
+    "event": "push",
+    "attempt": 1,
+    "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38441676602",
+    "conclusion": "success",
+    "steps": 14,
+    "success": 14,
+    "failed": 0,
+    "skipped": 0,
+    "cancelled": 0
+  },
+  "checks": [
+    {
+      "command": "Pinned Actions/PostgreSQL image and official Go 1.27.2 archive SHA-256 verification",
+      "result": "PASS"
+    },
+    {
+      "command": "python3 scripts/verify-compliance-c07-3.py --self-test",
+      "result": "PASS",
+      "supply_chain_adversarial_cases": 7
+    },
+    {
+      "command": "go mod verify",
+      "result": "PASS"
+    },
+    {
+      "command": "govulncheck v1.9.0 -json -test ./services/complianceauth",
+      "result": "PASS",
+      "unresolved_findings": 0
+    },
+    {
+      "command": "go vet ./services/complianceauth",
+      "result": "PASS"
+    },
+    {
+      "command": "go test -race ./services/complianceauth -run '^(TestC075|TestC074|TestC073|TestC072|TestC071|TestC051|TestC038|TestC048|TestC052|TestC059|TestC064|TestC065|TestC066|TestC067|TestC068)' -count=1 -v",
+      "result": "PASS",
+      "top_level_tests": 53,
+      "subtests": 30,
+      "required_skips": 0,
+      "passed_tests": [
+        "TestC038DatabaseOutageAndReconnect",
+        "TestC038IndependentSignatureAuthorization",
+        "TestC038PostgreSQLMultiInstance",
+        "TestC038ProductionRuntimeGates",
+        "TestC038PublicationAcrossInstances",
+        "TestC048ScheduledSigningRotationAndEmergency",
+        "TestC0510PayWalletBoundary",
+        "TestC0512IntegrationLevel2Adversarial",
+        "TestC051VersionedAPIAndSDKSecurity",
+        "TestC052ProviderBoundariesRevocationAndPrivacy",
+        "TestC059SignedOutboxInvalidationAndRecovery",
+        "TestC064AuthorArchiveCitationsIntegrity",
+        "TestC064AuthorSessionAndFailureGates",
+        "TestC064AuthorWorkspaceSecurityAndEditing",
+        "TestC064PostgreSQLDraftCASAndPersistence",
+        "TestC065Ed25519AndImpactProviderDeny",
+        "TestC065IndependentReviewNegativeBoundary",
+        "TestC065PostgreSQLConcurrentReviewAndStaleAuthorFencing",
+        "TestC065PostgreSQLReviewFailsClosedWithoutConnection",
+        "TestC065ReviewConsoleFailsClosed",
+        "TestC066HTTPUnconfiguredAndAnonymousDenied",
+        "TestC066OperatorDashboardHaltAndFailClosed",
+        "TestC067ArchiveEvidenceFailClosed",
+        "TestC067AuditorBoundedRedactedAccess",
+        "TestC067AuditorHTTPAuthorizationAndCSRF",
+        "TestC067AuditorHTTPAuthorizationAndCSRF/anonymous",
+        "TestC067AuditorHTTPAuthorizationAndCSRF/cross_origin",
+        "TestC067AuditorHTTPAuthorizationAndCSRF/noTLS",
+        "TestC067AuditorHTTPAuthorizationAndCSRF/wrong_csrf",
+        "TestC067PostgreSQLDurableAuditAccess",
+        "TestC068DOOBrTravelConsumerFailClosed",
+        "TestC068DOOBrTravelConsumerFailClosed/420Travel",
+        "TestC068DOOBrTravelConsumerFailClosed/DOOBr",
+        "TestC068ExternalRevocationAndConsumption",
+        "TestC068MobileDeviceSessionRevocationAndBoundary",
+        "TestC071AuthenticatedEncryptionBoundaries",
+        "TestC071PostgreSQLProductionStorage",
+        "TestC072AtomicActivationOutboxAndHalt",
+        "TestC072Boundaries",
+        "TestC072DurableJobsLeaseFencing",
+        "TestC073CertificateRotationAndTimeout",
+        "TestC073DatabaseTLSOverridesDenied",
+        "TestC073ManagedEncryptionRotation",
+        "TestC073ManagedProductionComposition",
+        "TestC073ManagedSignerRotationAndRevocation",
+        "TestC073SecretBindingFreshnessAndTLS",
+        "TestC073SecretBindingFreshnessAndTLS/HTTP",
+        "TestC073SecretBindingFreshnessAndTLS/audience",
+        "TestC073SecretBindingFreshnessAndTLS/client-identity",
+        "TestC073SecretBindingFreshnessAndTLS/domain",
+        "TestC073SecretBindingFreshnessAndTLS/environment",
+        "TestC073SecretBindingFreshnessAndTLS/expired",
+        "TestC073SecretBindingFreshnessAndTLS/future",
+        "TestC073SecretBindingFreshnessAndTLS/generation",
+        "TestC073SecretBindingFreshnessAndTLS/header_injection",
+        "TestC073SecretBindingFreshnessAndTLS/issuer",
+        "TestC073SecretBindingFreshnessAndTLS/jurisdiction",
+        "TestC073SecretBindingFreshnessAndTLS/nonce",
+        "TestC073SecretBindingFreshnessAndTLS/outage",
+        "TestC073SecretBindingFreshnessAndTLS/oversized",
+        "TestC073SecretBindingFreshnessAndTLS/purpose",
+        "TestC073SecretBindingFreshnessAndTLS/purpose_confusion",
+        "TestC073SecretBindingFreshnessAndTLS/redirect",
+        "TestC073SecretBindingFreshnessAndTLS/revoked",
+        "TestC073SecretBindingFreshnessAndTLS/server-identity",
+        "TestC073SecretBindingFreshnessAndTLS/tenant",
+        "TestC073SecretBindingFreshnessAndTLS/trailing",
+        "TestC073SecretBindingFreshnessAndTLS/unbounded",
+        "TestC073SecretBindingFreshnessAndTLS/untrusted-root",
+        "TestC073SecretBindingFreshnessAndTLS/workload",
+        "TestC074BodyResponseTimeoutAndOutage",
+        "TestC074BoundedSoak",
+        "TestC074DistributedRateAndCapacity",
+        "TestC074HTTPOverloadAndRecovery",
+        "TestC074ManagedProductionComposition",
+        "TestC074NetworkPostgreSQLSoak",
+        "TestC074QueueBackpressureAndAtomicOutbox",
+        "TestC075AtomicRollbackAndGrantRevocation",
+        "TestC075BoundedDeletionScheduler",
+        "TestC075CaseLimitedEvidenceAndPostLogRevalidation",
+        "TestC075ManagedProductionPrivacy",
+        "TestC075PostgreSQLRetentionHoldsAndPurge",
+        "TestC075SignedPolicyAndOwnershipBoundaries"
+      ]
+    }
+  ],
+  "security_acceptance": {
+    "status": "PASS for repository C07.5 software gates",
+    "tests_weakened": false,
+    "live_permissions_expanded": false,
+    "independent_security_review_completed": false,
+    "legal_retention_periods_adopted": false,
+    "live_production_authorized": false,
+    "coverage": [
+      "independent exact-policy signatures",
+      "owner/capability/tenant/case/revision binding",
+      "hold serialization and self-release denial",
+      "current publication/owner-finality/retirement and no reuse",
+      "actual row removal and exact quota conservation",
+      "12-worker held denial and 12-worker idempotent deletion/one receipt",
+      "revocation after mutation and receipt failure rollback",
+      "latest policy revocation without fallback",
+      "bounded retention worker and trusted database clocks",
+      "post-log case-hold race denial",
+      "managed identity/DB outage and recovery",
+      "retained TLS/signature/session/CSRF/API/replay/RLS/queue/backpressure security"
+    ]
+  },
+  "artifact": {
+    "id": 11835547531,
+    "name": "compliance-c075-level1-880ec8a21932d54d547af237818b053d6104444d",
+    "size_in_bytes": 75837,
+    "url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/artifacts/11835547531",
+    "archive_download_url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/artifacts/11835547531/zip",
+    "expired": false,
+    "created_at": "2026-10-13T17:50:54Z",
+    "expires_at": "2026-10-20T17:48:49Z",
+    "updated_at": "2026-10-13T17:50:54Z",
+    "digest": "sha256:282bfddfaacf3956fede1c348a936dbb66f929ddc33e74d821b72a6f7ca7bc5c",
+    "workflow_run": {
+      "id": 38441676602,
+      "repository_id": 1345598861,
+      "head_repository_id": 1345598861,
+      "head_branch": "audit/420compliance-c01-1-inventory-20261009",
+      "head_sha": "880ec8a21932d54d547af237818b053d6104444d"
+    }
+  },
+  "durable_bundle": {
+    "path": "docs/compliance/qualification/C07.5-evidence.zip",
+    "sha256": "282bfddfaacf3956fede1c348a936dbb66f929ddc33e74d821b72a6f7ca7bc5c",
+    "git_blob": "59352e6d2517c31fdd3089547d231decd38234f7",
+    "bytes": 75837,
+    "members": {
+      "compliance-c075-level1.json": {
+        "bytes": 22058,
+        "sha256": "7e922c6de5d090c86809c906ecbf8f6d820d6fb066676b7ecca7c82571b339b4"
+      },
+      "compliance-c073-supply-chain.json": {
+        "bytes": 1186,
+        "sha256": "74a4a01b96ea9d86dabb4311706e64b4b62be7f797aa9a7261fe8354d9aed427"
+      },
+      "compliance-c075-tests.log": {
+        "bytes": 11447,
+        "sha256": "59d6615263d0a8501ab1d98b89e6d42fc03419f75f124967e01614a50f04f204"
+      },
+      "compliance-c075-vulnerability.json": {
+        "bytes": 587203,
+        "sha256": "aa4737e33f38be3fe8be7f72347ecca30daf47ff30ec627ec8fcfd3bbf27bf12"
+      },
+      "compliance-c075-modules.json": {
+        "bytes": 619,
+        "sha256": "eb72e39929d8c34ee8b116e840c8f6778ceab05fecf1c52b87d00ffda18c3241"
+      },
+      "compliance-c075-module-verification.log": {
+        "bytes": 21,
+        "sha256": "b4537ed75f533f993f371954de47e42a793b8e5b0587577de7e27fb3e50696bd"
+      },
+      "compliance-c075-toolchain.log": {
+        "bytes": 32,
+        "sha256": "ed4307d760c597256afdc696a61d47d13e832615d7741ead11c64966a440b376"
+      }
+    },
+    "policy": "Original ZIP retained byte-for-byte after SHA-256 verification; all seven complete original reports/logs retained independent of GitHub artifact expiry."
+  },
+  "durable_runtime_result": "docs/compliance/qualification/C07.5-runtime-level1.json",
+  "durable_test_log": "docs/compliance/qualification/C07.5-tests.log",
+  "durable_supply_chain": "docs/compliance/qualification/C07.5-supply-chain.json",
+  "source_manifest": {
+    "files": 138,
+    "path": "docs/compliance/qualification/C07.5-runtime-level1.json"
+  },
+  "retained_evidence": [
+    "docs/compliance/qualification/C07.4-level1.json",
+    "docs/compliance/qualification/C07.3-level1.json",
+    "docs/compliance/qualification/C07.2-level1.json",
+    "docs/compliance/qualification/C07.1-level1.json",
+    "docs/compliance/qualification/C06.9-level2.json"
+  ],
+  "retained_migration_history": "All seven previous migration constants/checksums unchanged; new migration eight and affected migration/role/RLS/storage/concurrency suites PASS at this implementation.",
+  "milestones": {
+    "C07_10": "Canonical operational Level 2 not dispatched for this ordinary step; affected retained app tests PASS within Level 1",
+    "C08_5": "Full current-main reconciliation and exact-SHA Level 3 intentionally deferred to phase closeout"
+  },
+  "broad_workflows_manually_dispatched": [],
+  "other_workflows": {
+    "Docs": "Automatic run 38441693480 skipped. Not PASS; repository-wide Docs is not an ordinary C07.5 requirement.",
+    "Governance_and_420Hz": "Automatic unchanged workflow YAML baseline failures; no unrelated workflow changed or broad qualification manually dispatched."
+  },
+  "deferred_dependencies": [
+    {
+      "item": "Actual legal retention/source review, independently approved owner/reviewer keys and periods, real issuer/case/owner-finality mandates and isolated IAM/credential/function-owner provisioning",
+      "targets": [
+        "C09",
+        "C10"
+      ],
+      "status": "OPEN; software fixtures are not legal/deployment acceptance"
+    },
+    {
+      "item": "Production retention scheduler, verified database/media/replica/cache deletion, encrypted backup expiry and restore reconciliation with privacy receipts",
+      "targets": [
+        "C07.6",
+        "C09.8",
+        "C09",
+        "C10"
+      ],
+      "status": "OPEN at canonical boundaries; primary SQL deletion does not certify physical-media or backup erasure"
+    },
+    {
+      "item": "Accountable retailer/app required delivery/custody retention and genuine DOOBr/Travel consuming-app/legal/partner acceptance",
+      "targets": [
+        "C09",
+        "C10"
+      ],
+      "status": "Retained outside Compliance ownership; no new regulated permission"
+    }
+  ],
+  "limitations": [
+    "Configuration duration bound is 1–3650 24-hour periods; fixture uses one day and establishes no legal minimum/maximum",
+    "Data and migration/function administrator is trusted and requires narrowly managed cross-RLS function execution ownership; runtime/worker credentials do not grant that authority",
+    "Direct static constructors and fake grant issuers remain fixtures/primitives; deployed path requires managed factory, real live issuer/case mandate and gated auditor constructor",
+    "Private minimal hold/retirement/receipt metadata is not anonymous and requires its own accepted journal/archival operational policy; journals/inventory cap at 100000 rows per scope and exhaustion fails closed",
+    "Unretired drafts, unknown/active publication, missing policy or uncertain finality block deletion; no attempt to guess an owner/legal mandate",
+    "Primary PostgreSQL row deletion is not physical disk/WAL/replica/cache/backup erasure; restore must replay current privacy dispositions before re-exposing data",
+    "No live role or retention policy was provisioned; all changed privileges and purge data in qualification belong to disposable CI fixtures",
+    "Current main advanced during the step; audit branch remains unreconciled until C08.5 and this is not merge readiness"
+  ],
+  "implementation_doc_status": "C07.5-PRIVACY-RETENTION.md explicitly identifies its CI-pending implementation checkpoint and delegates final status to this certificate.",
+  "diagnosed_failures": [],
+  "blockers_for_repository_step": [],
+  "completion": "Every original C07.5 criterion individually PASS within the repository software audit scope at one exact implementation SHA. Durable evidence-only certification; preserve draft/open/unmerged PR.",
+  "next_canonical_step": {
+    "id": "C07.6",
+    "name": "Backup/restore and disaster recovery with policy/publication consistency; stale backup must not reactivate a revoked policy.",
+    "started": false
+  }
+}

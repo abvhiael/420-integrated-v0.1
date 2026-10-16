@@ -1,0 +1,1588 @@
+{
+  "schema": "420compliance-c084-branch-freeze/v1",
+  "status": "BRANCH_SNAPSHOT_ONLY_NOT_MAIN_RECONCILED",
+  "candidate_source_sha": "1d3e10c804cb51055f97b48fda9088be743844a8",
+  "main_observed_sha": "3f2cf64897e96c4f16213bcaf93564db72a174c9",
+  "merge_base": "c5a4f220d1fbda01f707d359aa9bb32921a138b1",
+  "git_object_hash": "sha1",
+  "release_enabled": false,
+  "scope": {
+    "code": [
+      {
+        "path": "services/complianceauth/activation_impact.go",
+        "git_blob_sha": "4bd54cbdae8faf264ea1fb6776642f896e258a25"
+      },
+      {
+        "path": "services/complianceauth/activation_impact_test.go",
+        "git_blob_sha": "194d1a911cf4ded9b04f560d9f52ae2ef30b691d"
+      },
+      {
+        "path": "services/complianceauth/ai_proposal.go",
+        "git_blob_sha": "b2db37b49d5741a8c22af40b46893103fd5bea5c"
+      },
+      {
+        "path": "services/complianceauth/ai_proposal_test.go",
+        "git_blob_sha": "f1e6f866fb3b7eeb5c6b7cbcfc20051dc386f327"
+      },
+      {
+        "path": "services/complianceauth/auth.go",
+        "git_blob_sha": "6d16df0c4759caad7b5837e5e7ebd43ef4581e08"
+      },
+      {
+        "path": "services/complianceauth/auth_test.go",
+        "git_blob_sha": "4bf27406d01376c57719c10fe0726e1d7a3414b0"
+      },
+      {
+        "path": "services/complianceauth/author_workspace.go",
+        "git_blob_sha": "72a2983b0654aaf55b5367ce61dc1336c873040a"
+      },
+      {
+        "path": "services/complianceauth/author_workspace_postgres.go",
+        "git_blob_sha": "1e629a935ce1097dd8c36574f312c016174c6fe4"
+      },
+      {
+        "path": "services/complianceauth/author_workspace_postgres_test.go",
+        "git_blob_sha": "8c51d51acf04fec95b5aeb8c2e4b1283727a1b0e"
+      },
+      {
+        "path": "services/complianceauth/author_workspace_test.go",
+        "git_blob_sha": "be54f9354a7c091e46b31c383bc46689a75de7e0"
+      },
+      {
+        "path": "services/complianceauth/authority_graph.go",
+        "git_blob_sha": "c6ce3d53c3e5dbef2d20c3bfdb264ad53b2292f5"
+      },
+      {
+        "path": "services/complianceauth/authority_graph_test.go",
+        "git_blob_sha": "016e52022789bcfe2088a17f227af8d73e25f052"
+      },
+      {
+        "path": "services/complianceauth/bc_delivery_journey.go",
+        "git_blob_sha": "55b312c8c5813a36d172fd32cb7b230c4d404cdf"
+      },
+      {
+        "path": "services/complianceauth/bc_delivery_journey_test.go",
+        "git_blob_sha": "6810b5e8880f0d348eb76bd774a35095c41d71bd"
+      },
+      {
+        "path": "services/complianceauth/bc_delivery_matrix.go",
+        "git_blob_sha": "80e20f16394a87cd331850fe6be4031b351210b4"
+      },
+      {
+        "path": "services/complianceauth/bc_delivery_matrix_test.go",
+        "git_blob_sha": "c9b52d5a854e59b87cb2ef2ac7d8233f68afb8c5"
+      },
+      {
+        "path": "services/complianceauth/c02_10_integration_test.go",
+        "git_blob_sha": "98d76f6a49b7a2911533b55aeb060789622d2880"
+      },
+      {
+        "path": "services/complianceauth/c03_10_adversarial_test.go",
+        "git_blob_sha": "416e3893cfba3e3f7fbf159ae400ca15d7298675"
+      },
+      {
+        "path": "services/complianceauth/c03_11_engine_integration_test.go",
+        "git_blob_sha": "b1ad56c57b448b9daf0178c842fb677fafabc5b0"
+      },
+      {
+        "path": "services/complianceauth/c04_11_milestone_test.go",
+        "git_blob_sha": "b2ebe9c2995a4e857dee2b727db849aab6fdd609"
+      },
+      {
+        "path": "services/complianceauth/c05_10_pay_wallet_boundary.go",
+        "git_blob_sha": "5f73bca1d62ac95aaecd59173aad32395b6fa15d"
+      },
+      {
+        "path": "services/complianceauth/c05_10_pay_wallet_boundary_test.go",
+        "git_blob_sha": "36904fde57287545597e638bbc939d5c5eabac7d"
+      },
+      {
+        "path": "services/complianceauth/c05_12_integration_level2_test.go",
+        "git_blob_sha": "cbaa6dc95495a40148ce112646fa51b6f9081595"
+      },
+      {
+        "path": "services/complianceauth/c05_1_api.go",
+        "git_blob_sha": "60d2e29a1f79306b9cf04352bb380dd3ee160a02"
+      },
+      {
+        "path": "services/complianceauth/c05_1_api_test.go",
+        "git_blob_sha": "013b6b931faa598a560b53957e33622818b28720"
+      },
+      {
+        "path": "services/complianceauth/c05_2_provider_adapters.go",
+        "git_blob_sha": "44324f7add0aa5a5b94728b08f0a631d6548dfd7"
+      },
+      {
+        "path": "services/complianceauth/c05_2_provider_adapters_test.go",
+        "git_blob_sha": "2d30c51c071e3a8b14913e5c0afb3d708a19544a"
+      },
+      {
+        "path": "services/complianceauth/c05_3_location_adapter.go",
+        "git_blob_sha": "f18b7051475d23424718c4f2d04b176180a0a2d2"
+      },
+      {
+        "path": "services/complianceauth/c05_3_location_adapter_test.go",
+        "git_blob_sha": "63081b87d5fc2805bb842573cc8e2e14295543c9"
+      },
+      {
+        "path": "services/complianceauth/c05_4_doobr_stage_gate.go",
+        "git_blob_sha": "2f77b3037c79c3f74860cbc1d538931fc7533fad"
+      },
+      {
+        "path": "services/complianceauth/c05_4_doobr_stage_gate_test.go",
+        "git_blob_sha": "552682d5211c32386251838e6713c40df86e97ea"
+      },
+      {
+        "path": "services/complianceauth/c05_5_doobr_recovery.go",
+        "git_blob_sha": "b3b45e12070197c17440020f3e20d95e3ee14562"
+      },
+      {
+        "path": "services/complianceauth/c05_5_doobr_recovery_test.go",
+        "git_blob_sha": "e814ceab498be45ed74e7ea56ce27de88a3f3c6b"
+      },
+      {
+        "path": "services/complianceauth/c05_6_travel_guidance.go",
+        "git_blob_sha": "504063d1b258931a1e4142e6da8d4114afcf9bad"
+      },
+      {
+        "path": "services/complianceauth/c05_6_travel_guidance_test.go",
+        "git_blob_sha": "7afcfae1ac1e59925c0741bea9d4215ab92a545e"
+      },
+      {
+        "path": "services/complianceauth/c05_7_travel_presence.go",
+        "git_blob_sha": "46e0529a32cfe10169c55386d04b678e56581b69"
+      },
+      {
+        "path": "services/complianceauth/c05_7_travel_presence_test.go",
+        "git_blob_sha": "499c5cd55987e39188400c8321e799b6de0c6f60"
+      },
+      {
+        "path": "services/complianceauth/c05_9_notifications_outbox.go",
+        "git_blob_sha": "8835036d1b2d7c36bd9aa0f8b4225ba0b1fe0bf4"
+      },
+      {
+        "path": "services/complianceauth/c05_9_notifications_outbox_test.go",
+        "git_blob_sha": "adf654a695d5cae128a12005222a608a2d03ac07"
+      },
+      {
+        "path": "services/complianceauth/c06_5_adapters.go",
+        "git_blob_sha": "3e6d207abe0473c5d370410a9b21a12d6409a33e"
+      },
+      {
+        "path": "services/complianceauth/c06_5_adapters_test.go",
+        "git_blob_sha": "6cb4fe201950575e87dad05d4fee2b2f3824f481"
+      },
+      {
+        "path": "services/complianceauth/c06_5_review.go",
+        "git_blob_sha": "20b6b0290711a537d6ed9b802ee1c13cf1fccebe"
+      },
+      {
+        "path": "services/complianceauth/c06_5_review_http.go",
+        "git_blob_sha": "49df4803efc101fb11281a2753e5b96dbfa08d59"
+      },
+      {
+        "path": "services/complianceauth/c06_5_review_postgres.go",
+        "git_blob_sha": "6c8bcd1fe6d6d2751b4e2d1c6599bf3ec63952fd"
+      },
+      {
+        "path": "services/complianceauth/c06_5_review_postgres_test.go",
+        "git_blob_sha": "51260c9e0cdf3284d9c1a04d2a9f60d6ed63aedc"
+      },
+      {
+        "path": "services/complianceauth/c06_5_review_test.go",
+        "git_blob_sha": "f1ab07c7aa1b8249854095d03561f5edb984eb7f"
+      },
+      {
+        "path": "services/complianceauth/c06_6_operator.go",
+        "git_blob_sha": "6c034182ea5b9be36666033af9a520853392889c"
+      },
+      {
+        "path": "services/complianceauth/c06_6_operator_http.go",
+        "git_blob_sha": "6d4d0556af56f2f506f2bc4502a68a4d3bbda73e"
+      },
+      {
+        "path": "services/complianceauth/c06_6_operator_http_test.go",
+        "git_blob_sha": "728ccbeea3626681fcd7ef42ce329b7a517191a2"
+      },
+      {
+        "path": "services/complianceauth/c06_6_operator_test.go",
+        "git_blob_sha": "6a589a8f54642e6d321e0ed40b1a6972e5361391"
+      },
+      {
+        "path": "services/complianceauth/c06_7_auditor.go",
+        "git_blob_sha": "be0ef9b236d8cf7b826f7f7faa3ae4865947e78a"
+      },
+      {
+        "path": "services/complianceauth/c06_7_auditor_archive.go",
+        "git_blob_sha": "0deceb01c995abdc02fa6f8505db1913206af00e"
+      },
+      {
+        "path": "services/complianceauth/c06_7_auditor_http.go",
+        "git_blob_sha": "1f1f0e260562883d2fa0739620830886d6bf39ce"
+      },
+      {
+        "path": "services/complianceauth/c06_7_auditor_http_test.go",
+        "git_blob_sha": "46e3c53dacfd8afbd061a52ac59e8325bfab80af"
+      },
+      {
+        "path": "services/complianceauth/c06_7_auditor_postgres.go",
+        "git_blob_sha": "8c2a78363aae5917198718446b95269fbbb637ac"
+      },
+      {
+        "path": "services/complianceauth/c06_7_auditor_postgres_test.go",
+        "git_blob_sha": "2222c783b15085d852f3fbd73de9eb95d4bd1e58"
+      },
+      {
+        "path": "services/complianceauth/c06_7_auditor_test.go",
+        "git_blob_sha": "17161dff69391a8854cfa25774afd54d06a29d77"
+      },
+      {
+        "path": "services/complianceauth/c06_8_consumer_gateway.go",
+        "git_blob_sha": "f255cd6dbaac519a4ae8032974efbc3990754806"
+      },
+      {
+        "path": "services/complianceauth/c06_8_consumer_gateway_test.go",
+        "git_blob_sha": "59b6e6506153386284f0c747966ebc666c007f66"
+      },
+      {
+        "path": "services/complianceauth/c06_8_device.go",
+        "git_blob_sha": "7c92ee76ef08ed82a4653f25b0df15bea74c556f"
+      },
+      {
+        "path": "services/complianceauth/c06_8_device_test.go",
+        "git_blob_sha": "a1d762723476ef38c9e0293aff1d4e2001305446"
+      },
+      {
+        "path": "services/complianceauth/c06_8_remote_identity.go",
+        "git_blob_sha": "f5d73de6ddd589ae1bcf42a486eda539d5a7810a"
+      },
+      {
+        "path": "services/complianceauth/c06_8_remote_identity_test.go",
+        "git_blob_sha": "1b94477ab5826f2a7a4a8a69551f1b9afd6c0519"
+      },
+      {
+        "path": "services/complianceauth/c07_1_migrations.go",
+        "git_blob_sha": "8f3c0bca8f7a89984356f3e6c87e161f41c22d9a"
+      },
+      {
+        "path": "services/complianceauth/c07_1_storage.go",
+        "git_blob_sha": "0e6242c02941bdd319378ba45fb2be575d41bca8"
+      },
+      {
+        "path": "services/complianceauth/c07_1_storage_test.go",
+        "git_blob_sha": "e67474c4b1b103b9907f026f64805abe183f22be"
+      },
+      {
+        "path": "services/complianceauth/c07_2_durable.go",
+        "git_blob_sha": "e1fa2d656de7a8bc8cb1cca0f34911706242f886"
+      },
+      {
+        "path": "services/complianceauth/c07_2_durable_test.go",
+        "git_blob_sha": "aec4022e639934880deabfc877e02db6c6ad3ab2"
+      },
+      {
+        "path": "services/complianceauth/c07_3_managed_authority.go",
+        "git_blob_sha": "e92d77ef14ffc13024dba537c29abbc65ff4d006"
+      },
+      {
+        "path": "services/complianceauth/c07_3_managed_authority_test.go",
+        "git_blob_sha": "fae1fb1718bc5e2ca638c2cd8432c10c2f4720ba"
+      },
+      {
+        "path": "services/complianceauth/c07_4_capacity.go",
+        "git_blob_sha": "7e494b2cf62d28cd52506319c3f039a6ce577a00"
+      },
+      {
+        "path": "services/complianceauth/c07_4_capacity_test.go",
+        "git_blob_sha": "e808dba27fe284fc8a177d8ace9f860982b73868"
+      },
+      {
+        "path": "services/complianceauth/c07_5_privacy.go",
+        "git_blob_sha": "9c640a68977beefc5b70af82f32282ec1611ce47"
+      },
+      {
+        "path": "services/complianceauth/c07_5_privacy_sql.go",
+        "git_blob_sha": "86e60f8985146eff747041c0dd94ec2100bc0767"
+      },
+      {
+        "path": "services/complianceauth/c07_5_privacy_test.go",
+        "git_blob_sha": "ed6bfaf4da745786a91f8dbc77692850864cf4ba"
+      },
+      {
+        "path": "services/complianceauth/c07_6_authority.go",
+        "git_blob_sha": "23a26a692945196e4cdc871404a1b56ec378450d"
+      },
+      {
+        "path": "services/complianceauth/c07_6_authority_test.go",
+        "git_blob_sha": "f6e084c50a0690eed83a0eb7feeb8c14eafb0756"
+      },
+      {
+        "path": "services/complianceauth/c07_6_external_postgres.go",
+        "git_blob_sha": "7d6291a7f67275a3447057364f3b7ccba7bb0f24"
+      },
+      {
+        "path": "services/complianceauth/c07_6_external_postgres_integration_test.go",
+        "git_blob_sha": "51093f5f49143cb76365f90eb139b12e40f9cbc7"
+      },
+      {
+        "path": "services/complianceauth/c07_6_external_postgres_test.go",
+        "git_blob_sha": "ca88ae1a4cf7db5fe5508a5b063a111f762de743"
+      },
+      {
+        "path": "services/complianceauth/c07_6_gateway_test.go",
+        "git_blob_sha": "f8c9500194724a009b20246ae213631ac64f1cf1"
+      },
+      {
+        "path": "services/complianceauth/c07_6_orchestrator.go",
+        "git_blob_sha": "86f7443a5bb781f81f3d02d4bc58872d55ec01d1"
+      },
+      {
+        "path": "services/complianceauth/c07_6_orchestrator_test.go",
+        "git_blob_sha": "29c97ea0b785888a61c009f95021f17fdd6b6326"
+      },
+      {
+        "path": "services/complianceauth/c07_6_recovery.go",
+        "git_blob_sha": "be5694df5ceb2dd812ee4e149638a9ac123ce719"
+      },
+      {
+        "path": "services/complianceauth/c07_6_recovery_test.go",
+        "git_blob_sha": "a89d1578c52dca0bc8b2d2ded89b25961dd60d02"
+      },
+      {
+        "path": "services/complianceauth/c07_7_alerts.go",
+        "git_blob_sha": "92e745fd1b9cb70ee8862839c5b3d8c64238a275"
+      },
+      {
+        "path": "services/complianceauth/c07_7_alerts_test.go",
+        "git_blob_sha": "41167e695936292260f198e548b2f6f53efb133f"
+      },
+      {
+        "path": "services/complianceauth/c07_7_evaluator.go",
+        "git_blob_sha": "937973a62f01d3b6c53fc1504a027600eb41c4b4"
+      },
+      {
+        "path": "services/complianceauth/c07_7_evaluator_test.go",
+        "git_blob_sha": "697103dc54eab8a7398cfc171c5ce8409aa03662"
+      },
+      {
+        "path": "services/complianceauth/c07_7_inventory.go",
+        "git_blob_sha": "33333fa57eabf1c0256de6ad9ee84451d50077f1"
+      },
+      {
+        "path": "services/complianceauth/c07_7_inventory_test.go",
+        "git_blob_sha": "1f810b0c9ccc7c4b341ac6f4180f78ec3c61880e"
+      },
+      {
+        "path": "services/complianceauth/c07_7_monitor.go",
+        "git_blob_sha": "83d4624dd457cde3fd012665578f17ead9962224"
+      },
+      {
+        "path": "services/complianceauth/c07_7_monitor_test.go",
+        "git_blob_sha": "e5b5ad319ba49cca555659d211ab5a98f466f5c8"
+      },
+      {
+        "path": "services/complianceauth/c07_7_operational.go",
+        "git_blob_sha": "e3a31ab13a4b781fa100e1806ae0ebbed022a943"
+      },
+      {
+        "path": "services/complianceauth/c07_7_operational_test.go",
+        "git_blob_sha": "e7631e540877a3de90e5068f1ca2e5a6aec600b2"
+      },
+      {
+        "path": "services/complianceauth/c07_7_sql.go",
+        "git_blob_sha": "b74bf75ae30a3bfe03b66d1ecb88ebe31edc4ccf"
+      },
+      {
+        "path": "services/complianceauth/c07_7_sql_test.go",
+        "git_blob_sha": "5a3f26796fe930c8a49e6a91ed4eb442edc85711"
+      },
+      {
+        "path": "services/complianceauth/c07_8_incident_drills_test.go",
+        "git_blob_sha": "faca2b8c35f1c88387b77ff528715f4d0e44b394"
+      },
+      {
+        "path": "services/complianceauth/change_intake.go",
+        "git_blob_sha": "ff9beeba795d99c3de7b7fec80072370bdf4dd8d"
+      },
+      {
+        "path": "services/complianceauth/change_intake_test.go",
+        "git_blob_sha": "1fcb25bf8e3d4f3846ea8324c1e4380b5b85feb8"
+      },
+      {
+        "path": "services/complianceauth/credential_reference.go",
+        "git_blob_sha": "c6f7780d43aabc72fefb4690ccb368378749fd3c"
+      },
+      {
+        "path": "services/complianceauth/credential_reference_test.go",
+        "git_blob_sha": "e55bb5817d611fd29a7c1cbe0b185c40dc18ab52"
+      },
+      {
+        "path": "services/complianceauth/decision_receipt.go",
+        "git_blob_sha": "3c024c89a1962bd0b067a74d2153ac0229510584"
+      },
+      {
+        "path": "services/complianceauth/decision_receipt_test.go",
+        "git_blob_sha": "1ccf81faa62b02937a7a0a3a0caafb5fda8c0225"
+      },
+      {
+        "path": "services/complianceauth/evaluator.go",
+        "git_blob_sha": "66af66eae1731ee006f7acd83aa935bbb0325ba9"
+      },
+      {
+        "path": "services/complianceauth/evaluator_test.go",
+        "git_blob_sha": "6f92172428015682869303b25574f56640a0ba9d"
+      },
+      {
+        "path": "services/complianceauth/evidence_export.go",
+        "git_blob_sha": "800916725c1b74f081c34f5ba6938636150f8b80"
+      },
+      {
+        "path": "services/complianceauth/evidence_export_test.go",
+        "git_blob_sha": "cbb04becdaefaccea35e8f2c923e50ef6e6c597a"
+      },
+      {
+        "path": "services/complianceauth/federal_product_candidate.go",
+        "git_blob_sha": "fc1099e3523721d4aa1731204de9ba302895fac5"
+      },
+      {
+        "path": "services/complianceauth/federal_product_candidate_test.go",
+        "git_blob_sha": "8448ee143114e890c621b72c9921580235641980"
+      },
+      {
+        "path": "services/complianceauth/ingest.go",
+        "git_blob_sha": "12deba88356933ac76c5f83d80535d4f2a59b9d0"
+      },
+      {
+        "path": "services/complianceauth/ingest_test.go",
+        "git_blob_sha": "0e64925c26051bc324d048ac20a69ce5347cabc6"
+      },
+      {
+        "path": "services/complianceauth/policy_compiler.go",
+        "git_blob_sha": "c129b9ed2b3fff765e9c4745dd58881cfc5b3c62"
+      },
+      {
+        "path": "services/complianceauth/policy_compiler_test.go",
+        "git_blob_sha": "1df0c78b2e1cf5e9640f81ddeaec32defc5b8146"
+      },
+      {
+        "path": "services/complianceauth/policy_composition.go",
+        "git_blob_sha": "f35bda562f4d3581c499b821a7d8cbd03999bafa"
+      },
+      {
+        "path": "services/complianceauth/policy_composition_test.go",
+        "git_blob_sha": "2604f6c9740c136f1918eb4d44950b4ef963c01a"
+      },
+      {
+        "path": "services/complianceauth/policy_correction.go",
+        "git_blob_sha": "1f2183986ce0f021633de3fdc5fdc4980a953de9"
+      },
+      {
+        "path": "services/complianceauth/policy_correction_test.go",
+        "git_blob_sha": "9a48e1a51bdafdbe563bb101df5fb7602b5c4a67"
+      },
+      {
+        "path": "services/complianceauth/policy_impact.go",
+        "git_blob_sha": "cd199c02985e514dc3e22ff7b9a1c55de3f7b039"
+      },
+      {
+        "path": "services/complianceauth/policy_impact_test.go",
+        "git_blob_sha": "a82ab502b2065175e8b42db44e518d5b294ae11d"
+      },
+      {
+        "path": "services/complianceauth/policy_lifecycle.go",
+        "git_blob_sha": "185a4407d571869ba5b2540b75ff343ecdd38878"
+      },
+      {
+        "path": "services/complianceauth/policy_lifecycle_test.go",
+        "git_blob_sha": "f4af413d95e7706f3d18106b9561627cbda43e34"
+      },
+      {
+        "path": "services/complianceauth/policy_schema.go",
+        "git_blob_sha": "d2b23e41b672b9a3ebc18e0158a6b6fa8ae45e53"
+      },
+      {
+        "path": "services/complianceauth/policy_schema_test.go",
+        "git_blob_sha": "650e9aafa55db20e34eee139c84b8623dda264b9"
+      },
+      {
+        "path": "services/complianceauth/provision.go",
+        "git_blob_sha": "570579c70cb7a0074d83ea7b0be750defafbe627"
+      },
+      {
+        "path": "services/complianceauth/provision_test.go",
+        "git_blob_sha": "8f748ec98ca8f7267eb91b0e4861f35d6db39fd3"
+      },
+      {
+        "path": "services/complianceauth/publication_failover_test.go",
+        "git_blob_sha": "768cf0ae15d890fdecfeaa20274f1e117a8ee5f9"
+      },
+      {
+        "path": "services/complianceauth/publication_fence.go",
+        "git_blob_sha": "d97838134c903feaa374db00026f71ae293cc49c"
+      },
+      {
+        "path": "services/complianceauth/publication_fence_test.go",
+        "git_blob_sha": "b1c2c689136c15261fc1a5541193cf07c26416bc"
+      },
+      {
+        "path": "services/complianceauth/publication_independent_authority.go",
+        "git_blob_sha": "0cdaedd7dfe67a4e700cce54d30a144751c3463e"
+      },
+      {
+        "path": "services/complianceauth/publication_independent_authority_test.go",
+        "git_blob_sha": "6c983ad00f450a0285c896179582374c267b4483"
+      },
+      {
+        "path": "services/complianceauth/publication_postgres.go",
+        "git_blob_sha": "76bcfe019d599f5d5ece6c75f4fd446f1e6e7be5"
+      },
+      {
+        "path": "services/complianceauth/publication_postgres_test.go",
+        "git_blob_sha": "515311d56d1d7f1e69a3d027b39bdefac5e599e3"
+      },
+      {
+        "path": "services/complianceauth/publication_runtime.go",
+        "git_blob_sha": "1940241c1dafffd647ebc72756c719a6a9f9cc05"
+      },
+      {
+        "path": "services/complianceauth/publication_runtime_test.go",
+        "git_blob_sha": "3c0189e237b8fe45f3b35a33bb8717883a514c73"
+      },
+      {
+        "path": "services/complianceauth/reviewer_authorization.go",
+        "git_blob_sha": "aa672b9e3a1d515e77c1afb3ce9e3cce258a833a"
+      },
+      {
+        "path": "services/complianceauth/reviewer_authorization_test.go",
+        "git_blob_sha": "9ed7db0f3a86193c7526a054ae4606a837e109ea"
+      },
+      {
+        "path": "services/complianceauth/reviewer_lifecycle_integration.go",
+        "git_blob_sha": "b186aebb0d27a85191b803f3d09c2f0ae37e142a"
+      },
+      {
+        "path": "services/complianceauth/reviewer_lifecycle_integration_test.go",
+        "git_blob_sha": "d39b632d358ea518d0bdee2f48dc489544cfc08b"
+      },
+      {
+        "path": "services/complianceauth/scheduled_signing_controls.go",
+        "git_blob_sha": "5ddaff87816f05abea06a0940f7ced33a3d47a8a"
+      },
+      {
+        "path": "services/complianceauth/scheduled_signing_controls_test.go",
+        "git_blob_sha": "0b76ead6b4c313dcf1db32669cc6dfa43a7fc904"
+      },
+      {
+        "path": "services/complianceauth/snapshot.go",
+        "git_blob_sha": "94d94c12bb5e00d1081a30cfdb4220fe11ad72ca"
+      },
+      {
+        "path": "services/complianceauth/snapshot_test.go",
+        "git_blob_sha": "59c7f38b9968aae41517caae7ea52a01a4774cf5"
+      },
+      {
+        "path": "services/complianceauth/source_change.go",
+        "git_blob_sha": "136d5d1ab7887e96eff6ffe669c6a92673af12d1"
+      },
+      {
+        "path": "services/complianceauth/source_change_test.go",
+        "git_blob_sha": "0a8ccc8816fb5f97b32ef2c6d727de9b50327403"
+      },
+      {
+        "path": "services/complianceauth/source_health.go",
+        "git_blob_sha": "75e3d286761af9e3a3dc30dbb5c1edf869660a29"
+      },
+      {
+        "path": "services/complianceauth/source_health_test.go",
+        "git_blob_sha": "977c968ca611a430c4d6472e3d7813eb4e81794b"
+      },
+      {
+        "path": "services/complianceauth/temporal_policy.go",
+        "git_blob_sha": "1d40b9210dc8d0da6d804d0edc9e48a6ebe55584"
+      },
+      {
+        "path": "services/complianceauth/temporal_policy_test.go",
+        "git_blob_sha": "76838bcb09c3bdf616c8b518c23294e948271d3c"
+      },
+      {
+        "path": "services/complianceauth/travel_policy_pack.go",
+        "git_blob_sha": "46f5bc28c11bc291bc27e267f884b494bc078222"
+      },
+      {
+        "path": "services/complianceauth/travel_policy_pack_test.go",
+        "git_blob_sha": "ea89387ef2d8095aa16336e39381369c86b27d84"
+      },
+      {
+        "path": "services/complianceauth/vancouver_business_matrix.go",
+        "git_blob_sha": "86d6d8b4cda383fe3572d0e0f3dedc17038e6f51"
+      },
+      {
+        "path": "services/complianceauth/vancouver_business_matrix_test.go",
+        "git_blob_sha": "745c6eb0ed4bbc93e2c27b31ca370b117396753f"
+      }
+    ],
+    "policy_pack": [
+      {
+        "path": "compliance/public/catalogue.json",
+        "git_blob_sha": "bb34b824bf2e68dcb60f2516ed6c85986a1115c8"
+      },
+      {
+        "path": "compliance/web/browser.html",
+        "git_blob_sha": "c3e1b266955cecf8755ec2b148cdc3755a359ed4"
+      },
+      {
+        "path": "compliance/web/index.html",
+        "git_blob_sha": "7f554b74247715ba5f369f89bed4d16405f5a58e"
+      },
+      {
+        "path": "compliance/web/jurisdiction-british-columbia.html",
+        "git_blob_sha": "a62a906b06035ae76c43a0d67de263d0c02e4cea"
+      },
+      {
+        "path": "compliance/web/jurisdiction-federal.html",
+        "git_blob_sha": "5c813f388c8f9675c8607b92d96d9158e14f5047"
+      },
+      {
+        "path": "compliance/web/jurisdiction-vancouver.html",
+        "git_blob_sha": "3ba139d56e3e577775281eba6ee33834e24d099c"
+      },
+      {
+        "path": "compliance/web/rule-bc-delivery.html",
+        "git_blob_sha": "ec55342e716191da52ffd7c1c30697e3ab8ba1d0"
+      },
+      {
+        "path": "compliance/web/rule-bc-travel.html",
+        "git_blob_sha": "0dc8f64157f527ed5d2320bb9c908549630cf80e"
+      },
+      {
+        "path": "compliance/web/rule-federal-product.html",
+        "git_blob_sha": "4bc0d251ac0cd5a0a2631e8833b46d002b1e659a"
+      },
+      {
+        "path": "compliance/web/rule-vancouver-business.html",
+        "git_blob_sha": "e23ec2eb7d3fc3edc8e3e910495899b1a5bc367a"
+      },
+      {
+        "path": "compliance/web/scenarios-ui.js",
+        "git_blob_sha": "61c50f3908dd9007729238cbf65234ad75f006e7"
+      },
+      {
+        "path": "compliance/web/scenarios.html",
+        "git_blob_sha": "af18b9f6be6a28be3eb39a0a5fb7f03436c0c58c"
+      },
+      {
+        "path": "compliance/web/scenarios.js",
+        "git_blob_sha": "cd0e51e42c977dfaf28895975c15635cefc67cd5"
+      },
+      {
+        "path": "compliance/web/styles.css",
+        "git_blob_sha": "33a474919c4bb5859de5d82655840c567952dfc8"
+      },
+      {
+        "path": "compliance/web/topic-business.html",
+        "git_blob_sha": "80d481f3d9b3193b06915057c24174decc7ba746"
+      },
+      {
+        "path": "compliance/web/topic-delivery.html",
+        "git_blob_sha": "673629ecc128571db11ffd2477ca7a3f694ea2be"
+      },
+      {
+        "path": "compliance/web/topic-product.html",
+        "git_blob_sha": "91544b941f1d02d7a1264a359a46de9484276fb7"
+      },
+      {
+        "path": "compliance/web/topic-travel.html",
+        "git_blob_sha": "ddce6b2ea1a852f187177c4ec76d637a7e4718d7"
+      },
+      {
+        "path": "services/complianceauth/authority_graph.go",
+        "git_blob_sha": "c6ce3d53c3e5dbef2d20c3bfdb264ad53b2292f5"
+      },
+      {
+        "path": "services/complianceauth/authority_graph_test.go",
+        "git_blob_sha": "016e52022789bcfe2088a17f227af8d73e25f052"
+      },
+      {
+        "path": "services/complianceauth/c07_3_managed_authority.go",
+        "git_blob_sha": "e92d77ef14ffc13024dba537c29abbc65ff4d006"
+      },
+      {
+        "path": "services/complianceauth/c07_3_managed_authority_test.go",
+        "git_blob_sha": "fae1fb1718bc5e2ca638c2cd8432c10c2f4720ba"
+      },
+      {
+        "path": "services/complianceauth/c07_6_authority.go",
+        "git_blob_sha": "23a26a692945196e4cdc871404a1b56ec378450d"
+      },
+      {
+        "path": "services/complianceauth/c07_6_authority_test.go",
+        "git_blob_sha": "f6e084c50a0690eed83a0eb7feeb8c14eafb0756"
+      },
+      {
+        "path": "services/complianceauth/policy_compiler.go",
+        "git_blob_sha": "c129b9ed2b3fff765e9c4745dd58881cfc5b3c62"
+      },
+      {
+        "path": "services/complianceauth/policy_compiler_test.go",
+        "git_blob_sha": "1df0c78b2e1cf5e9640f81ddeaec32defc5b8146"
+      },
+      {
+        "path": "services/complianceauth/policy_composition.go",
+        "git_blob_sha": "f35bda562f4d3581c499b821a7d8cbd03999bafa"
+      },
+      {
+        "path": "services/complianceauth/policy_composition_test.go",
+        "git_blob_sha": "2604f6c9740c136f1918eb4d44950b4ef963c01a"
+      },
+      {
+        "path": "services/complianceauth/policy_correction.go",
+        "git_blob_sha": "1f2183986ce0f021633de3fdc5fdc4980a953de9"
+      },
+      {
+        "path": "services/complianceauth/policy_correction_test.go",
+        "git_blob_sha": "9a48e1a51bdafdbe563bb101df5fb7602b5c4a67"
+      },
+      {
+        "path": "services/complianceauth/policy_impact.go",
+        "git_blob_sha": "cd199c02985e514dc3e22ff7b9a1c55de3f7b039"
+      },
+      {
+        "path": "services/complianceauth/policy_impact_test.go",
+        "git_blob_sha": "a82ab502b2065175e8b42db44e518d5b294ae11d"
+      },
+      {
+        "path": "services/complianceauth/policy_lifecycle.go",
+        "git_blob_sha": "185a4407d571869ba5b2540b75ff343ecdd38878"
+      },
+      {
+        "path": "services/complianceauth/policy_lifecycle_test.go",
+        "git_blob_sha": "f4af413d95e7706f3d18106b9561627cbda43e34"
+      },
+      {
+        "path": "services/complianceauth/policy_schema.go",
+        "git_blob_sha": "d2b23e41b672b9a3ebc18e0158a6b6fa8ae45e53"
+      },
+      {
+        "path": "services/complianceauth/policy_schema_test.go",
+        "git_blob_sha": "650e9aafa55db20e34eee139c84b8623dda264b9"
+      },
+      {
+        "path": "services/complianceauth/publication_independent_authority.go",
+        "git_blob_sha": "0cdaedd7dfe67a4e700cce54d30a144751c3463e"
+      },
+      {
+        "path": "services/complianceauth/publication_independent_authority_test.go",
+        "git_blob_sha": "6c983ad00f450a0285c896179582374c267b4483"
+      },
+      {
+        "path": "services/complianceauth/source_change.go",
+        "git_blob_sha": "136d5d1ab7887e96eff6ffe669c6a92673af12d1"
+      },
+      {
+        "path": "services/complianceauth/source_change_test.go",
+        "git_blob_sha": "0a8ccc8816fb5f97b32ef2c6d727de9b50327403"
+      },
+      {
+        "path": "services/complianceauth/source_health.go",
+        "git_blob_sha": "75e3d286761af9e3a3dc30dbb5c1edf869660a29"
+      },
+      {
+        "path": "services/complianceauth/source_health_test.go",
+        "git_blob_sha": "977c968ca611a430c4d6472e3d7813eb4e81794b"
+      },
+      {
+        "path": "services/complianceauth/temporal_policy.go",
+        "git_blob_sha": "1d40b9210dc8d0da6d804d0edc9e48a6ebe55584"
+      },
+      {
+        "path": "services/complianceauth/temporal_policy_test.go",
+        "git_blob_sha": "76838bcb09c3bdf616c8b518c23294e948271d3c"
+      },
+      {
+        "path": "services/complianceauth/travel_policy_pack.go",
+        "git_blob_sha": "46f5bc28c11bc291bc27e267f884b494bc078222"
+      },
+      {
+        "path": "services/complianceauth/travel_policy_pack_test.go",
+        "git_blob_sha": "ea89387ef2d8095aa16336e39381369c86b27d84"
+      }
+    ],
+    "evaluator": [
+      {
+        "path": "services/complianceauth/c07_7_evaluator.go",
+        "git_blob_sha": "937973a62f01d3b6c53fc1504a027600eb41c4b4"
+      },
+      {
+        "path": "services/complianceauth/c07_7_evaluator_test.go",
+        "git_blob_sha": "697103dc54eab8a7398cfc171c5ce8409aa03662"
+      },
+      {
+        "path": "services/complianceauth/evaluator.go",
+        "git_blob_sha": "66af66eae1731ee006f7acd83aa935bbb0325ba9"
+      },
+      {
+        "path": "services/complianceauth/evaluator_test.go",
+        "git_blob_sha": "6f92172428015682869303b25574f56640a0ba9d"
+      },
+      {
+        "path": "services/complianceauth/policy_compiler.go",
+        "git_blob_sha": "c129b9ed2b3fff765e9c4745dd58881cfc5b3c62"
+      },
+      {
+        "path": "services/complianceauth/policy_compiler_test.go",
+        "git_blob_sha": "1df0c78b2e1cf5e9640f81ddeaec32defc5b8146"
+      },
+      {
+        "path": "services/complianceauth/policy_composition.go",
+        "git_blob_sha": "f35bda562f4d3581c499b821a7d8cbd03999bafa"
+      },
+      {
+        "path": "services/complianceauth/policy_composition_test.go",
+        "git_blob_sha": "2604f6c9740c136f1918eb4d44950b4ef963c01a"
+      }
+    ],
+    "configuration": [
+      {
+        "path": ".github/workflows/420compliance-c01-level1.yml",
+        "git_blob_sha": "a1e3786b1871ea9536610f5f6b12b7fb4b9a0511"
+      },
+      {
+        "path": ".github/workflows/420compliance-c07-10-level2.yml",
+        "git_blob_sha": "b9ea6c22cf3a6a30a913d709b4d90edb03672605"
+      },
+      {
+        "path": "compliance/public/catalogue.json",
+        "git_blob_sha": "bb34b824bf2e68dcb60f2516ed6c85986a1115c8"
+      },
+      {
+        "path": "services/complianceauth/migrations/0001_publication_fences.sql",
+        "git_blob_sha": "e82a4783edabcb4bff6b2055b1328f08a550dd89"
+      },
+      {
+        "path": "services/complianceauth/migrations/0002_author_drafts.sql",
+        "git_blob_sha": "8743fd4178f14359f0281b28efd47ff8b1e6b069"
+      },
+      {
+        "path": "services/complianceauth/migrations/0003_independent_reviews.sql",
+        "git_blob_sha": "39018f52a8753b9594560b1846ffea1c8704297c"
+      },
+      {
+        "path": "services/complianceauth/migrations/0004_auditor_access.sql",
+        "git_blob_sha": "390b16eb48e1415dfb89c204c741a7018ad0fd4f"
+      }
+    ],
+    "documentation": [
+      {
+        "path": "docs/compliance/420COMPLIANCE-ROADMAP.md",
+        "git_blob_sha": "c7926c51c13468748c3e25874e956ea3f1b03cd2"
+      },
+      {
+        "path": "docs/compliance/C01.1-INVENTORY-REUSE-GAPS.md",
+        "git_blob_sha": "143eaa21d84b3fd5822adcdf815477627f8e1c71"
+      },
+      {
+        "path": "docs/compliance/C01.1-INVENTORY.json",
+        "git_blob_sha": "b485f61d351f6704f441ab2b387cfebef5d3340b"
+      },
+      {
+        "path": "docs/compliance/C01.2-PRODUCT-SCOPE-AND-JOURNEYS.md",
+        "git_blob_sha": "aadcf4105be4c14bf3571c7a4ce8dcc6f1db4e46"
+      },
+      {
+        "path": "docs/compliance/C01.2-PRODUCT-SCOPE.json",
+        "git_blob_sha": "acb381ad2d8a5b7ccce6bf748503ae0b526d8179"
+      },
+      {
+        "path": "docs/compliance/C01.3-RETAINED-PINS.json",
+        "git_blob_sha": "0cc4245c706ed7532ad55af7fde9a4fe11274900"
+      },
+      {
+        "path": "docs/compliance/C01.3-SOURCE-AUTHORITY-AND-REVIEW.md",
+        "git_blob_sha": "76b4343c23e45fdde462f32e0c981f929cd1b387"
+      },
+      {
+        "path": "docs/compliance/C01.3-SOURCE-AUTHORITY.json",
+        "git_blob_sha": "f6010d7b2ab26b125f7c3000c6136f061de1a9f0"
+      },
+      {
+        "path": "docs/compliance/C01.4-SHARED-AUTHORITY-AMENDMENT.md",
+        "git_blob_sha": "ebbb5dfb68b84cf3f37ce1ae4bb9048cae351d79"
+      },
+      {
+        "path": "docs/compliance/C01.5-THREAT-PRIVACY-MODEL.md",
+        "git_blob_sha": "2439d93fd62bb4b1328d566969a8fc929303590d"
+      },
+      {
+        "path": "docs/compliance/C01.5-THREATS.json",
+        "git_blob_sha": "d51958f9aeda3784a5e270c0466381dcc69e25d4"
+      },
+      {
+        "path": "docs/compliance/C01.6-ARCHITECTURE.md",
+        "git_blob_sha": "04f4dd3e81abb9587d1e6620da9302e5227e4a33"
+      },
+      {
+        "path": "docs/compliance/C01.6-CONTRACT.json",
+        "git_blob_sha": "c07bfd8c1304fda54a65cffcef1b43d28ded85f2"
+      },
+      {
+        "path": "docs/compliance/C01.7-DECISION.json",
+        "git_blob_sha": "0d6b0a2173a79ecc6eff2760a87c03bc54487e1a"
+      },
+      {
+        "path": "docs/compliance/C01.7-PUBLICATION-AND-DISCOVERY.md",
+        "git_blob_sha": "8efd321aafa4a3536eefc7284d8750984d099add"
+      },
+      {
+        "path": "docs/compliance/C01.8-ARCHITECTURE-BASELINE.json",
+        "git_blob_sha": "98790c8603e62d379c6bf91bf5c9754bb7b3d293"
+      },
+      {
+        "path": "docs/compliance/C02.1-OFFICIAL-SOURCES.json",
+        "git_blob_sha": "3fb001b2c6e7596211f5bfd96b6e7dbef8948232"
+      },
+      {
+        "path": "docs/compliance/C02.10-LEVEL2-REPLAY.md",
+        "git_blob_sha": "18174053b6c85339f71a6d3e9e3b8c5d45e2eb9a"
+      },
+      {
+        "path": "docs/compliance/C02.3-SNAPSHOT-ARCHIVE.md",
+        "git_blob_sha": "17870cc410cd41b18e3d9e858ab0c8aa078c1633"
+      },
+      {
+        "path": "docs/compliance/C02.4-NORMALIZATION.md",
+        "git_blob_sha": "e891ed1169a76592c40ebb6f2db88ac7a897bdcf"
+      },
+      {
+        "path": "docs/compliance/C02.5-CHANGE-DETECTION.md",
+        "git_blob_sha": "a84f6911959838368e7631ee82aa36bc96feccd6"
+      },
+      {
+        "path": "docs/compliance/C02.6-AI-PROPOSAL-BOUNDARY.md",
+        "git_blob_sha": "5519bd125385c19ce1f0c82e5cc345e444b01fcb"
+      },
+      {
+        "path": "docs/compliance/C02.7-CHANGE-INTAKE.md",
+        "git_blob_sha": "dfc660fc9a200c91ec9e8ca9265192ca497456d5"
+      },
+      {
+        "path": "docs/compliance/C02.8-SOURCE-HEALTH.md",
+        "git_blob_sha": "525e09d52823910bdcfacb80796bf49a68a93941"
+      },
+      {
+        "path": "docs/compliance/C02.9-EVIDENCE-EXPORT.md",
+        "git_blob_sha": "484ee53a954491b281637c0934a9178ff3e98b0d"
+      },
+      {
+        "path": "docs/compliance/C03.1-AUTHORITY-GRAPH.md",
+        "git_blob_sha": "6fa7149afe6acabc146c43a30a3dfaad7269b174"
+      },
+      {
+        "path": "docs/compliance/C03.10-ADVERSARIAL-ENGINE.md",
+        "git_blob_sha": "b7ccaf16a2e4b45333d8923d1fe7c554f8fb763c"
+      },
+      {
+        "path": "docs/compliance/C03.11-ENGINE-LEVEL2.md",
+        "git_blob_sha": "f943c1257dd86094dd94d69d2da1cff622d5f60a"
+      },
+      {
+        "path": "docs/compliance/C03.2-POLICY-SCHEMA.md",
+        "git_blob_sha": "e8406f6ee2cbf3d60c4def923b91ec5f93cb9319"
+      },
+      {
+        "path": "docs/compliance/C03.3-TEMPORAL-ENGINE.md",
+        "git_blob_sha": "98bd463848f510b1025f1bdb32ba60d8a58bfe60"
+      },
+      {
+        "path": "docs/compliance/C03.4-POLICY-COMPOSITION.md",
+        "git_blob_sha": "f39eb9a355991934b9f0b4f03c160a1b996d0145"
+      },
+      {
+        "path": "docs/compliance/C03.5-BOUNDED-COMPILER.md",
+        "git_blob_sha": "88203f6d58a028ce3620f6015174ae1ba6a37a7c"
+      },
+      {
+        "path": "docs/compliance/C03.6-CREDENTIAL-REFERENCES.md",
+        "git_blob_sha": "bd314129e86b5a8b69bf6c930d0530aefb88d9f2"
+      },
+      {
+        "path": "docs/compliance/C03.7-BOUND-DECISION-RECEIPTS.md",
+        "git_blob_sha": "51e3f21138d5a9c78ad0c17b90a7a6bf618f9f6c"
+      },
+      {
+        "path": "docs/compliance/C03.8-POSTGRESQL-DURABLE-STORE.md",
+        "git_blob_sha": "891c8aae682e3c1dba1317ab979b837011259418"
+      },
+      {
+        "path": "docs/compliance/C03.8-PRODUCTION-WIRING.md",
+        "git_blob_sha": "88bdc2c608e18114502abd48f9d35cb588b55796"
+      },
+      {
+        "path": "docs/compliance/C03.8-PUBLICATION-FENCING.md",
+        "git_blob_sha": "fbc1fb5ffe9b6a3cd763d59692a3a4ee67cd73ac"
+      },
+      {
+        "path": "docs/compliance/C03.9-POLICY-IMPACT.md",
+        "git_blob_sha": "2953e2ee5c3cfdd5a89e0fe83d93f983fd06edb1"
+      },
+      {
+        "path": "docs/compliance/C04.1-POLICY-LIFECYCLE.md",
+        "git_blob_sha": "30b82ce42517190e0cbc2149bf0e07e9fad870fd"
+      },
+      {
+        "path": "docs/compliance/C04.10-POLICY-CORRECTION.md",
+        "git_blob_sha": "3b2f9e0eb5975da86c3564f759d9752d43222498"
+      },
+      {
+        "path": "docs/compliance/C04.11-BC-VANCOUVER-LEVEL2.md",
+        "git_blob_sha": "d154d418403cff42e9c505a2efacfc8f8ead2d13"
+      },
+      {
+        "path": "docs/compliance/C04.2-REVIEWER-AUTHORIZATION.md",
+        "git_blob_sha": "bb031b7ad13e0806cfcb37a37cffa481f09363dc"
+      },
+      {
+        "path": "docs/compliance/C04.3-FEDERAL-PRODUCT-REVIEW.md",
+        "git_blob_sha": "1c0445d08cd753336922d9f92ab40059a38aa862"
+      },
+      {
+        "path": "docs/compliance/C04.4-BC-DELIVERY-CLASSIFICATION.md",
+        "git_blob_sha": "bba79df87f866515dbe9357c600def10dcc8c59d"
+      },
+      {
+        "path": "docs/compliance/C04.5-VANCOUVER-BUSINESS-PERMISSIONS.md",
+        "git_blob_sha": "5b3c7bd2370a70e5b46bab85764d4f1002886ce0"
+      },
+      {
+        "path": "docs/compliance/C04.6-BC-DELIVERY-JOURNEY.md",
+        "git_blob_sha": "8d8c56af51830572023fdeab799d61538d4a822e"
+      },
+      {
+        "path": "docs/compliance/C04.7-TRAVEL-POLICY-PACK.md",
+        "git_blob_sha": "34631c8204cac64a2d5cb59e22778b5d4097c2a4"
+      },
+      {
+        "path": "docs/compliance/C04.8-MANAGED-SIGNING-AND-EMERGENCY.md",
+        "git_blob_sha": "1a346ef6e17c390cf9431f464afd9e1cf6e72904"
+      },
+      {
+        "path": "docs/compliance/C04.9-ACTIVATION-IMPACT.md",
+        "git_blob_sha": "7c744176a5168b4352cc746e4a0ba3b787b40a90"
+      },
+      {
+        "path": "docs/compliance/C05.1-VERSIONED-API-SDK.md",
+        "git_blob_sha": "a4397daff7133f8152bb917eea28920e2c1263db"
+      },
+      {
+        "path": "docs/compliance/C05.10-PAY-WALLET-BOUNDARY.md",
+        "git_blob_sha": "01f0729f1a79229a7878903fdc0dbad6da8b5dae"
+      },
+      {
+        "path": "docs/compliance/C05.11-ONCHAIN-ATTESTATION-SUITABILITY.md",
+        "git_blob_sha": "d85d050fae184d3f19ef4b014dbf3020ba0660e8"
+      },
+      {
+        "path": "docs/compliance/C05.12-LEVEL2-INTEGRATION.md",
+        "git_blob_sha": "a79f11db681f440cde90a5e8e4f3c31c6c794b44"
+      },
+      {
+        "path": "docs/compliance/C05.2-PROVIDER-BOUNDARIES.md",
+        "git_blob_sha": "ea3b3e49e9e850d296057ae0d9a528f242957d33"
+      },
+      {
+        "path": "docs/compliance/C05.3-LOCATION-MAPS-APPLICABILITY.md",
+        "git_blob_sha": "3b77814cdea433664bad4c305deeee36d815c2a4"
+      },
+      {
+        "path": "docs/compliance/C05.4-DOOBR-STAGE-GATE.md",
+        "git_blob_sha": "fed3342b4b360fbddea7cce6b09afa9bf11b5543"
+      },
+      {
+        "path": "docs/compliance/C05.5-DOOBR-REFUSAL-RETURN-RECOVERY.md",
+        "git_blob_sha": "fb079cea910fb2092c2a86ebbba7eab86ccf37e1"
+      },
+      {
+        "path": "docs/compliance/C05.6-TRAVEL-PUBLIC-GUIDANCE.md",
+        "git_blob_sha": "54687704aca30d23c54aaaf003da522fcbc6ec5d"
+      },
+      {
+        "path": "docs/compliance/C05.7-TRAVEL-COURIER-PRESENCE.md",
+        "git_blob_sha": "d263625fc56a9f6389f36b94d7797325ca59a818"
+      },
+      {
+        "path": "docs/compliance/C05.8-ORACLE-SUITABILITY.md",
+        "git_blob_sha": "6b0fd6d5729ef68ef33931d175387aa94764fa64"
+      },
+      {
+        "path": "docs/compliance/C05.9-NOTIFICATIONS-OUTBOX.md",
+        "git_blob_sha": "ff4416c30183ffb39d956fccf33a0e06324a04bd"
+      },
+      {
+        "path": "docs/compliance/C06.1-ACCESSIBLE-WEBSITE.md",
+        "git_blob_sha": "15de26ab1719178f5423d9b142d807b1fcb9347d"
+      },
+      {
+        "path": "docs/compliance/C06.2-PUBLIC-BROWSER.md",
+        "git_blob_sha": "79a7e7cbff9d5934783e536320c637c380855dc8"
+      },
+      {
+        "path": "docs/compliance/C06.3-INFORMATIONAL-SCENARIOS.md",
+        "git_blob_sha": "35eae3b7390dbbf72a89e4e4a2e66a782510060b"
+      },
+      {
+        "path": "docs/compliance/C06.4-PRIVATE-AUTHOR-WORKSPACE.md",
+        "git_blob_sha": "ab8dd4dd8debbb52b2c5d0e7bd6d3bd3e716026a"
+      },
+      {
+        "path": "docs/compliance/C06.5-INDEPENDENT-REVIEW.md",
+        "git_blob_sha": "f42c2cc53e77cbeceb83fd21f251c60594b3ff8d"
+      },
+      {
+        "path": "docs/compliance/C06.6-PUBLISHER-OPERATOR-CONTROLS.md",
+        "git_blob_sha": "2fd7b6f86284e4d7c7891bc4b0386d8b83a4dae2"
+      },
+      {
+        "path": "docs/compliance/C06.7-AUDITOR-EXPORT.md",
+        "git_blob_sha": "b023c1b5fbb67cc62f8d40a299bc63a8ad94ae89"
+      },
+      {
+        "path": "docs/compliance/C06.8-MOBILE-ACCESSIBILITY.md",
+        "git_blob_sha": "9fb4cfb64b260cf976313bcce4e4a8eb7db36244"
+      },
+      {
+        "path": "docs/compliance/C06.8-TESTNET-ACCEPTANCE-HANDOFF.md",
+        "git_blob_sha": "116646bf4743b7bdcd6c639f438c46343f7bff15"
+      },
+      {
+        "path": "docs/compliance/C06.9-WEBSITE-CLIENT-LEVEL2.md",
+        "git_blob_sha": "eea9844ad448c53178bfacd92777464d69b0e52f"
+      },
+      {
+        "path": "docs/compliance/C07.1-PROTECTED-DATABASE.md",
+        "git_blob_sha": "7cfb72762a9db854456cebc96360aeafc969c2f4"
+      },
+      {
+        "path": "docs/compliance/C07.10-OPERATIONAL-LEVEL2.md",
+        "git_blob_sha": "36efba252ffd8991647217b205c1054ed3d336d5"
+      },
+      {
+        "path": "docs/compliance/C07.2-DURABLE-WORK.md",
+        "git_blob_sha": "a6760306305abe0ef17940b5123c1c4cde40592d"
+      },
+      {
+        "path": "docs/compliance/C07.3-MANAGED-AUTHORITY.md",
+        "git_blob_sha": "23ac68d5431defd29a36aad21024369484eefb0f"
+      },
+      {
+        "path": "docs/compliance/C07.4-CAPACITY-ABUSE.md",
+        "git_blob_sha": "67bb549fe3c608558ebbef36a0d81e8aaa82f58a"
+      },
+      {
+        "path": "docs/compliance/C07.5-PRIVACY-RETENTION.md",
+        "git_blob_sha": "712af20e10e7ae5aaf1d73ccd52c150b4c119cf0"
+      },
+      {
+        "path": "docs/compliance/C07.6-DISASTER-RECOVERY.md",
+        "git_blob_sha": "82cff10faa69ec2f129985b037ad8181fb4bbd90"
+      },
+      {
+        "path": "docs/compliance/C07.7-MONITORING.md",
+        "git_blob_sha": "e622ee0cf2ec4995c4e134bc9c3f4a5800789388"
+      },
+      {
+        "path": "docs/compliance/C07.8-INCIDENT-DRILLS.md",
+        "git_blob_sha": "69fd761b40bd2e893a01328ddeb29a53286b55cd"
+      },
+      {
+        "path": "docs/compliance/C07.9-INDEPENDENT-SECURITY-REVIEW.md",
+        "git_blob_sha": "d9909fa9f82dbf21fe55de3c87d488b539d4908d"
+      },
+      {
+        "path": "docs/compliance/C07.9-SECURITY-REVIEW-INTAKE.json",
+        "git_blob_sha": "3d3d12c084998d000f5fb8247a7d79c67a218af9"
+      },
+      {
+        "path": "docs/compliance/C08.1-RECONCILIATION.md",
+        "git_blob_sha": "436f347300806996ff627e7e1e569c29e2569ed7"
+      },
+      {
+        "path": "docs/compliance/C08.2-API-SDK-SCHEMAS.md",
+        "git_blob_sha": "c3a667e5d1a8b9963e0e01561f8fa14ed395c56c"
+      },
+      {
+        "path": "docs/compliance/C08.2-CONSUMER-GUIDE.md",
+        "git_blob_sha": "b5f55309136ae7865b3330493a50e36008aace01"
+      },
+      {
+        "path": "docs/compliance/C08.2-DEPLOYMENT-MANIFEST-TEMPLATE.md",
+        "git_blob_sha": "cdd29bfe338e524fc24881004e402e7dca961ca9"
+      },
+      {
+        "path": "docs/compliance/C08.2-LEGAL-SOURCE-MATRIX.md",
+        "git_blob_sha": "300e6b8dec8b767782a39def99328f3330361500"
+      },
+      {
+        "path": "docs/compliance/C08.2-OPERATOR-RUNBOOK.md",
+        "git_blob_sha": "a90ba25af1017c25e63d787e39a2e5ffbcfca31b"
+      },
+      {
+        "path": "docs/compliance/C08.2-REVIEWER-HANDBOOK.md",
+        "git_blob_sha": "e058f689ec585ee26e2db2969b762674700e4d1d"
+      },
+      {
+        "path": "docs/compliance/C08.3-EXTERNAL-AUTHORITY-TESTNET-HANDOFF.md",
+        "git_blob_sha": "30fa589c9a97cea8d7ea8b4368da0daeff9d17f4"
+      },
+      {
+        "path": "docs/compliance/PRODUCTION-SIGNING-EVALUATOR-ACCEPTANCE.md",
+        "git_blob_sha": "0bd6adcb57141f1d8cf7c3606c2cdac2464742e1"
+      },
+      {
+        "path": "docs/compliance/evidence/C07.10-LEVEL2-EXACT-SHA-20261013.md",
+        "git_blob_sha": "4be1f11dc3430400d54d3164f5136f77e09c155b"
+      },
+      {
+        "path": "docs/compliance/evidence/C07.7-LEVEL1-EXACT-SHA-20261013.md",
+        "git_blob_sha": "f55daecc517f078e1050ed13ddde9ab3693aea29"
+      },
+      {
+        "path": "docs/compliance/evidence/C07.8-LEVEL1-EXACT-SHA-20261013.md",
+        "git_blob_sha": "825b6e63a2464f6774ee17d1c016b2c1f02190dc"
+      },
+      {
+        "path": "docs/compliance/evidence/C07.9-LEVEL1-EXACT-SHA-20261013.md",
+        "git_blob_sha": "c92f6d457b395cd2ab07cb163f13e08015c115c1"
+      },
+      {
+        "path": "docs/compliance/evidence/C08.1-HISTORICAL-EVIDENCE-REPAIR-20261014.md",
+        "git_blob_sha": "7891d30be93ea3cfda93497f63d7306e230bd36e"
+      },
+      {
+        "path": "docs/compliance/evidence/C08.1-LEVEL1-EXACT-SHA-20261014.md",
+        "git_blob_sha": "5208a6396b4436aec3c03677ed577ce149ac09ad"
+      },
+      {
+        "path": "docs/compliance/evidence/C08.2-LEVEL1-EXACT-SHA-20261014.md",
+        "git_blob_sha": "3428a78d30df1823e2002a1b52f595768c958d90"
+      },
+      {
+        "path": "docs/compliance/evidence/C08.3-LEVEL1-EXACT-SHA-20261014.md",
+        "git_blob_sha": "33477a1c1eb8b6771912ab0dace9d6ce1c0dc029"
+      },
+      {
+        "path": "docs/compliance/qualification/C01.1-level1.json",
+        "git_blob_sha": "a0c982c1de5b2243801cfb227979738c45256264"
+      },
+      {
+        "path": "docs/compliance/qualification/C01.2-level1.json",
+        "git_blob_sha": "2a9b0b6a04e0e293118a7cd96c22e38992f17d43"
+      },
+      {
+        "path": "docs/compliance/qualification/C01.3-level1.json",
+        "git_blob_sha": "4c4e1e023804aa8c4516eadc3a49c70d6cc66b96"
+      },
+      {
+        "path": "docs/compliance/qualification/C01.4-level1.json",
+        "git_blob_sha": "ac74f22e667d4fc9b816ede70547337d04fb1ae6"
+      },
+      {
+        "path": "docs/compliance/qualification/C01.5-level1.json",
+        "git_blob_sha": "b7eeb59786587ef74bfcb70e68eb9aeb682731a5"
+      },
+      {
+        "path": "docs/compliance/qualification/C01.6-level1.json",
+        "git_blob_sha": "cdf5672f8792d860262e0ac25a8b96889cc4a661"
+      },
+      {
+        "path": "docs/compliance/qualification/C01.7-level1.json",
+        "git_blob_sha": "5d3b0834199309cdeeeeac35371b4df9657b34ba"
+      },
+      {
+        "path": "docs/compliance/qualification/C01.8-level2.json",
+        "git_blob_sha": "d673f14fa6c7a2e69750bea742611275ab0ac45d"
+      },
+      {
+        "path": "docs/compliance/qualification/C02.1-level1.json",
+        "git_blob_sha": "1c3269d9b0788c23d6d263bb85114f96e2565350"
+      },
+      {
+        "path": "docs/compliance/qualification/C02.10-level2.json",
+        "git_blob_sha": "74135aa6fecb271ee09d324556b3ea6b67c7116d"
+      },
+      {
+        "path": "docs/compliance/qualification/C02.2-level1.json",
+        "git_blob_sha": "0de273408fdb720dc8ffd50b0af6253e96663afd"
+      },
+      {
+        "path": "docs/compliance/qualification/C02.3-level1.json",
+        "git_blob_sha": "c8466e768ce53ae9df898e5550a91bae9d5c5927"
+      },
+      {
+        "path": "docs/compliance/qualification/C02.4-level1.json",
+        "git_blob_sha": "31195a5ee5ebdeb36168b17674f724f508456406"
+      },
+      {
+        "path": "docs/compliance/qualification/C02.5-level1.json",
+        "git_blob_sha": "28435d48998288c680b8405e429a4c1fd84112e9"
+      },
+      {
+        "path": "docs/compliance/qualification/C02.6-level1.json",
+        "git_blob_sha": "c0871afa6b66959ace225fecf1240ce7a396f0a5"
+      },
+      {
+        "path": "docs/compliance/qualification/C02.7-level1.json",
+        "git_blob_sha": "268eafafeb9ac51a921d59c24838e24de5d50a13"
+      },
+      {
+        "path": "docs/compliance/qualification/C02.8-level1.json",
+        "git_blob_sha": "7afeb57d7806136a31a6c8ce2c1b674d51083b82"
+      },
+      {
+        "path": "docs/compliance/qualification/C02.9-level1.json",
+        "git_blob_sha": "50a1f5f3633326105a7edd84a667e932e2c885a7"
+      },
+      {
+        "path": "docs/compliance/qualification/C03.1-level1.json",
+        "git_blob_sha": "0e8c17083c6372f63cfa51687c9506932a522d5c"
+      },
+      {
+        "path": "docs/compliance/qualification/C03.10-level1.json",
+        "git_blob_sha": "ecef3b30477fb8e5e3c288376ab122003f6eeecb"
+      },
+      {
+        "path": "docs/compliance/qualification/C03.11-level2.json",
+        "git_blob_sha": "7117f3b8f82ff4ea63872021910b7f63f01415fa"
+      },
+      {
+        "path": "docs/compliance/qualification/C03.2-level1.json",
+        "git_blob_sha": "ae40081498d1b6602092cd1f463a6ff83b0ada1f"
+      },
+      {
+        "path": "docs/compliance/qualification/C03.3-level1.json",
+        "git_blob_sha": "8f920a507dae658f0c69e49e1abc6461a3661bd5"
+      },
+      {
+        "path": "docs/compliance/qualification/C03.4-level1.json",
+        "git_blob_sha": "2cd33afddda0bae181de2343aaf49e0d185ab2d3"
+      },
+      {
+        "path": "docs/compliance/qualification/C03.5-level1.json",
+        "git_blob_sha": "36e25f728588670af06d77fc8c291f33d805dece"
+      },
+      {
+        "path": "docs/compliance/qualification/C03.6-level1.json",
+        "git_blob_sha": "32fd3981dd755079cf351e94c660a72d70e14911"
+      },
+      {
+        "path": "docs/compliance/qualification/C03.7-level1.json",
+        "git_blob_sha": "9f84915c77ac9d063f7ef5341ca33e42acad11b5"
+      },
+      {
+        "path": "docs/compliance/qualification/C03.8-level1.json",
+        "git_blob_sha": "695a2671b0517204e7b1d802b09901ce4e63c6c6"
+      },
+      {
+        "path": "docs/compliance/qualification/C03.9-level1.json",
+        "git_blob_sha": "5ffb25f02618f356c72a2fe4484bdd2ed282449c"
+      },
+      {
+        "path": "docs/compliance/qualification/C04.1-level1.json",
+        "git_blob_sha": "9495a0e68883b36b74f1ccb9d21720e323921b51"
+      },
+      {
+        "path": "docs/compliance/qualification/C04.10-level1.json",
+        "git_blob_sha": "8fcce3eda640ac4bb03fd2ed5ba7c0f90c0f13dc"
+      },
+      {
+        "path": "docs/compliance/qualification/C04.11-level2.json",
+        "git_blob_sha": "d243df2166a1a652367d0a3b1b86c4d9b97f86c7"
+      },
+      {
+        "path": "docs/compliance/qualification/C04.2-level1.json",
+        "git_blob_sha": "ed5c3794c18fcad2e7b3be26e894f7ea27a94ef2"
+      },
+      {
+        "path": "docs/compliance/qualification/C04.3-level1.json",
+        "git_blob_sha": "d04e60013e5ba80b1276f0c0f5fffd7488b86773"
+      },
+      {
+        "path": "docs/compliance/qualification/C04.4-level1.json",
+        "git_blob_sha": "2d1a2d031c640ae443e45b4bc5e75031cf269a74"
+      },
+      {
+        "path": "docs/compliance/qualification/C04.5-level1.json",
+        "git_blob_sha": "33ee2e5bed77c63bcc03e4a158737676956793ca"
+      },
+      {
+        "path": "docs/compliance/qualification/C04.6-level1.json",
+        "git_blob_sha": "9dcc1d4506ecc9eaf6cef048ff046c74fa476cb1"
+      },
+      {
+        "path": "docs/compliance/qualification/C04.7-level1.json",
+        "git_blob_sha": "1913aad4b5c9222003e0dc0f3758839263d24c1b"
+      },
+      {
+        "path": "docs/compliance/qualification/C04.8-level1.json",
+        "git_blob_sha": "f138a7490b8544b0e5c8317f60bc3c2d23e10210"
+      },
+      {
+        "path": "docs/compliance/qualification/C04.9-level1.json",
+        "git_blob_sha": "73bf07bc6db6472a1184a29ba91caf3878e93177"
+      },
+      {
+        "path": "docs/compliance/qualification/C05.1-level1.json",
+        "git_blob_sha": "ae73e829c789a054e57717fd9ccd2aacc5226c9e"
+      },
+      {
+        "path": "docs/compliance/qualification/C05.10-level1.json",
+        "git_blob_sha": "6d99ef91147ec201ce757f3efcc99465f11d3b26"
+      },
+      {
+        "path": "docs/compliance/qualification/C05.11-level1.json",
+        "git_blob_sha": "abf4d302cb32ceab4d20c0be5ffdf7bc136d0a81"
+      },
+      {
+        "path": "docs/compliance/qualification/C05.12-level2.json",
+        "git_blob_sha": "f68b38f2776fa56d06db54620fe2222815e7aa90"
+      },
+      {
+        "path": "docs/compliance/qualification/C05.2-level1.json",
+        "git_blob_sha": "33fc1e4da8a8da009261160bcba9f88ab0594140"
+      },
+      {
+        "path": "docs/compliance/qualification/C05.3-level1.json",
+        "git_blob_sha": "f48e7b7a5abefc73f80e85253ad245bffcde117b"
+      },
+      {
+        "path": "docs/compliance/qualification/C05.4-level1.json",
+        "git_blob_sha": "0b5a9782e2aecdb659aafb85d17f8b9faa2cde9a"
+      },
+      {
+        "path": "docs/compliance/qualification/C05.5-level1.json",
+        "git_blob_sha": "6d751e906da3d06cb05ce0b9a81c62c5d24e8e21"
+      },
+      {
+        "path": "docs/compliance/qualification/C05.6-level1.json",
+        "git_blob_sha": "93562114d4bd4fccac4d1c94fad7abac89b5d0a0"
+      },
+      {
+        "path": "docs/compliance/qualification/C05.7-level1.json",
+        "git_blob_sha": "dff36987fedf46f163d9e153d194d203ff788ffb"
+      },
+      {
+        "path": "docs/compliance/qualification/C05.8-level1.json",
+        "git_blob_sha": "99c9309da9f3283d4a5dcbccbb0bac57b15d3fec"
+      },
+      {
+        "path": "docs/compliance/qualification/C05.9-level1.json",
+        "git_blob_sha": "07e6d0814ec2c36296cde91a667a330326fcd16c"
+      },
+      {
+        "path": "docs/compliance/qualification/C06.1-level1.json",
+        "git_blob_sha": "4fa5dfffdb90d3c5a7b55ad6f102e9c964acebef"
+      },
+      {
+        "path": "docs/compliance/qualification/C06.2-level1.json",
+        "git_blob_sha": "015a0e35d536cf0a4193f953edd720b169dd9cba"
+      },
+      {
+        "path": "docs/compliance/qualification/C06.3-level1.json",
+        "git_blob_sha": "3dc9b1ff1a72fd79596a4e9cf9e5dcc5986cab34"
+      },
+      {
+        "path": "docs/compliance/qualification/C06.4-level1.json",
+        "git_blob_sha": "e619b7a2f11283b87eca4360a2e533a12c661679"
+      },
+      {
+        "path": "docs/compliance/qualification/C06.5-reconciliation.json",
+        "git_blob_sha": "2bfa3a41dbe1a80c508520032a58a7417333953e"
+      },
+      {
+        "path": "docs/compliance/qualification/C06.6-reconciliation.json",
+        "git_blob_sha": "cb85835d4d78276031bb388458f4994feb259af4"
+      },
+      {
+        "path": "docs/compliance/qualification/C06.7-reconciliation.json",
+        "git_blob_sha": "97e3d56d24aedfbe52cbb13b7d95ed17d3c8b3c7"
+      },
+      {
+        "path": "docs/compliance/qualification/C06.8-reconciliation.json",
+        "git_blob_sha": "6107bbe866888f03c27574b7b37fcdca97e393f4"
+      },
+      {
+        "path": "docs/compliance/qualification/C06.9-level2.json",
+        "git_blob_sha": "958676862f3d3064cba5803c282e259795afd044"
+      },
+      {
+        "path": "docs/compliance/qualification/C07.1-level1.json",
+        "git_blob_sha": "778c4b08d34f7a2c132680dec9f939ccbdc37568"
+      },
+      {
+        "path": "docs/compliance/qualification/C07.2-level1.json",
+        "git_blob_sha": "23c394f2918cee9e2977e4bc2999335573f7309e"
+      },
+      {
+        "path": "docs/compliance/qualification/C07.3-level1.json",
+        "git_blob_sha": "4b1c9dd2cc7b5c0fea236338dc1bf4d9c6603f0d"
+      },
+      {
+        "path": "docs/compliance/qualification/C07.4-level1.json",
+        "git_blob_sha": "7802d4dbebd2c7c8fc6bedfb49fcbee3a148712e"
+      },
+      {
+        "path": "docs/compliance/qualification/C07.4-runtime-level1.json",
+        "git_blob_sha": "78b0f30f096757f0a91ad294a564f98f3b38ac26"
+      },
+      {
+        "path": "docs/compliance/qualification/C07.4-supply-chain.json",
+        "git_blob_sha": "4498e316f3eb8c2ac30377f17d1c37ec3f19d38a"
+      },
+      {
+        "path": "docs/compliance/qualification/C07.4-tests.log",
+        "git_blob_sha": "15bdf262a327fdc320fde88c0aaa1751c2193770"
+      },
+      {
+        "path": "docs/compliance/qualification/C07.4-vulnerability.json",
+        "git_blob_sha": "58606f8ee9869905cfe1e74180ed3c9a27d70c39"
+      },
+      {
+        "path": "docs/compliance/qualification/C07.5-evidence.zip",
+        "git_blob_sha": "59352e6d2517c31fdd3089547d231decd38234f7"
+      },
+      {
+        "path": "docs/compliance/qualification/C07.5-level1.json",
+        "git_blob_sha": "c033874340906868c83f610b7067deef94078783"
+      },
+      {
+        "path": "docs/compliance/qualification/C07.5-runtime-level1.json",
+        "git_blob_sha": "d46a83abcb7cfa87ed9d84c06951b847eaf85f31"
+      },
+      {
+        "path": "docs/compliance/qualification/C07.5-supply-chain.json",
+        "git_blob_sha": "4498e316f3eb8c2ac30377f17d1c37ec3f19d38a"
+      },
+      {
+        "path": "docs/compliance/qualification/C07.5-tests.log",
+        "git_blob_sha": "7215b43f7b8367b7875d4c0853cde3937ffc8911"
+      },
+      {
+        "path": "docs/compliance/qualification/C07.6-reconciliation.json",
+        "git_blob_sha": "d364f856f4cdb6b6aa13babc9fdd0a1b8cb64b78"
+      },
+      {
+        "path": "docs/compliance/qualification/C08.3-testnet-work-ledger.json",
+        "git_blob_sha": "5a96dfde53a6a74420c298dbcbd9b579136e5070"
+      },
+      {
+        "path": "docs/compliance/qualification/EXTERNAL-AUTHORITY-ACCEPTANCE.json",
+        "git_blob_sha": "d368a575bfb99e38f78b6db44009ef51ceb7fb6f"
+      },
+      {
+        "path": "docs/compliance/qualification/PRODUCTION-SIGNING-READINESS.json",
+        "git_blob_sha": "81df37d93d4bdad0dd60414be03fd8074b698a46"
+      }
+    ]
+  },
+  "qualification": "PENDING_C08.4_EXACT_SHA",
+  "main_integration": "UNQUALIFIED",
+  "testnet_approval": "NOT_GRANTED"
+}

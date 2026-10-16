@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Private author workspace | 420Compliance</title><link rel="stylesheet" href="/private/author/style.css"><script defer src="/private/author/editor.js"></script></head>
+<body><a class="skip" href="#main">Skip to author workspace</a><header><strong>420Compliance / Private author workspace</strong><button id="logout" type="button" disabled>End author session</button></header>
+<main id="main" tabindex="-1"><h1>Prepare a cited policy draft.</h1>
+<p>This workspace saves author proposals only. Drafts remain <strong>DRAFT_REVIEW_REQUIRED</strong>. Saving or comparing a version does not review, approve, publish or activate a policy.</p>
+<p id="session-status" role="status">Checking the independently authenticated author session…</p>
+<p id="message" role="status" aria-live="polite"></p>
+<fieldset id="editor-fields" disabled><legend>Structured draft</legend>
+<label for="draft-id">Draft / policy ID<input id="draft-id" maxlength="80" autocomplete="off" pattern="[A-Za-z0-9][A-Za-z0-9_-]{0,79}"></label>
+<div class="actions"><button id="load" type="button">Load latest version</button><button id="save" type="button">Save a new draft revision</button></div>
+<p id="revision">No draft loaded. A new ID starts at revision 1.</p>
+<p>Tenant, domain and jurisdiction come from your author session. Draft ownership and scope cannot be chosen in this editor.</p>
+<label for="graph">Authority graph version<input id="graph" maxlength="128" autocomplete="off"></label>
+<label for="effective-from">Proposed effective-from instant (RFC3339)<input id="effective-from" placeholder="YYYY-MM-DDTHH:MM:SSZ" autocomplete="off"></label>
+<label for="effective-until">Proposed effective-until instant (RFC3339; optional)<input id="effective-until" placeholder="YYYY-MM-DDTHH:MM:SSZ" autocomplete="off"></label>
+<label for="timezone">IANA time zone<input id="timezone" placeholder="America/Vancouver" autocomplete="off"></label>
+<label for="start">Proposed local start<input id="start" type="time"></label><label for="end">Proposed local end<input id="end" type="time"></label><label class="check" for="overnight"><input id="overnight" type="checkbox">Proposed hours cross midnight</label>
+<label for="actors">Actor records (JSON array)<textarea id="actors" spellcheck="false" aria-describedby="actors-help">[]</textarea></label><p id="actors-help">Each record: Role and IssuerID. These are proposed requirements, not verified credentials.</p>
+<label for="products">Product records (JSON array)<textarea id="products" spellcheck="false" aria-describedby="products-help">[]</textarea></label><p id="products-help">Each record: Class, Unit, EquivalencyNumerator and EquivalencyDenominator. Exact positive integer ratios only.</p>
+<label for="stages">Workflow-stage records (JSON array)<textarea id="stages" spellcheck="false" aria-describedby="stages-help">[]</textarea></label><p id="stages-help">Each record: Name, RequiredCredentials, RecipientVerification, PaymentPrerequisite, ReturnDuty and RecordObligation. Requirements cannot be omitted.</p>
+<label for="records">Required record names (JSON string array)<textarea id="records" spellcheck="false">[]</textarea></label>
+<label for="citations">Pinned citation references (JSON array)<textarea id="citations" spellcheck="false" aria-describedby="citations-help">[]</textarea></label><p id="citations-help">Each reference: source_id, digest (64 lowercase hex characters), locator. Excerpts come from the authorized integrity-checked snapshot archive, not author-supplied text.</p>
+<button id="preview" type="button">Read pinned source text</button>
+<div class="compare"><h2>Compare immutable versions</h2><label for="from">Earlier revision<input id="from" type="number" min="1" step="1"></label><label for="to">Later revision<input id="to" type="number" min="1" step="1"></label><button id="compare" type="button">Compare selected versions</button></div>
+</fieldset>
+<section aria-labelledby="source-title"><h2 id="source-title">Cited source text</h2><div id="source-text"><p>No authenticated source text loaded.</p></div></section>
+<section aria-labelledby="changes-title"><h2 id="changes-title">Version differences</h2><pre id="changes">No comparison loaded.</pre></section>
+<noscript><p>JavaScript is required for the private editor. No private records are loaded and no save can be submitted without it.</p></noscript>
+</main><footer>Private draft data is never part of the public jurisdiction catalogue.</footer></body></html>

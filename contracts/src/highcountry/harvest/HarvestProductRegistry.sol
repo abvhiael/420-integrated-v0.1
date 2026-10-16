@@ -29,6 +29,7 @@ contract HarvestProductRegistry {
 
     HarvestEngine public immutable harvestEngine;
     mapping(uint64 => bytes32) public productOfPlant;
+    mapping(bytes32 => uint256) public registeredBlock;
     mapping(bytes32 => Product) private _products;
     mapping(address => uint256) public issuedGramsByGrower;
     uint256 public totalIssuedGrams;
@@ -88,6 +89,7 @@ contract HarvestProductRegistry {
             registered: true
         });
         productOfPlant[plantId] = productId;
+        registeredBlock[productId] = block.number;
         issuedGramsByGrower[h.grower] += score.yieldGrams;
         totalIssuedGrams += score.yieldGrams;
         totalRegisteredProducts += 1;

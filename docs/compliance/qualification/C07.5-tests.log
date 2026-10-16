@@ -1,0 +1,181 @@
+=== RUN   TestC064PostgreSQLDraftCASAndPersistence
+--- PASS: TestC064PostgreSQLDraftCASAndPersistence (0.29s)
+=== RUN   TestC064AuthorWorkspaceSecurityAndEditing
+--- PASS: TestC064AuthorWorkspaceSecurityAndEditing (0.02s)
+=== RUN   TestC064AuthorSessionAndFailureGates
+--- PASS: TestC064AuthorSessionAndFailureGates (0.00s)
+=== RUN   TestC064AuthorArchiveCitationsIntegrity
+--- PASS: TestC064AuthorArchiveCitationsIntegrity (0.00s)
+=== RUN   TestC0510PayWalletBoundary
+--- PASS: TestC0510PayWalletBoundary (0.00s)
+=== RUN   TestC0512IntegrationLevel2Adversarial
+--- PASS: TestC0512IntegrationLevel2Adversarial (0.01s)
+=== RUN   TestC051VersionedAPIAndSDKSecurity
+--- PASS: TestC051VersionedAPIAndSDKSecurity (0.01s)
+=== RUN   TestC052ProviderBoundariesRevocationAndPrivacy
+--- PASS: TestC052ProviderBoundariesRevocationAndPrivacy (0.01s)
+=== RUN   TestC059SignedOutboxInvalidationAndRecovery
+--- PASS: TestC059SignedOutboxInvalidationAndRecovery (0.01s)
+=== RUN   TestC065Ed25519AndImpactProviderDeny
+--- PASS: TestC065Ed25519AndImpactProviderDeny (0.00s)
+=== RUN   TestC065ReviewConsoleFailsClosed
+--- PASS: TestC065ReviewConsoleFailsClosed (0.00s)
+=== RUN   TestC065PostgreSQLConcurrentReviewAndStaleAuthorFencing
+--- PASS: TestC065PostgreSQLConcurrentReviewAndStaleAuthorFencing (0.30s)
+=== RUN   TestC065IndependentReviewNegativeBoundary
+--- PASS: TestC065IndependentReviewNegativeBoundary (0.00s)
+=== RUN   TestC065PostgreSQLReviewFailsClosedWithoutConnection
+--- PASS: TestC065PostgreSQLReviewFailsClosedWithoutConnection (0.00s)
+=== RUN   TestC066HTTPUnconfiguredAndAnonymousDenied
+--- PASS: TestC066HTTPUnconfiguredAndAnonymousDenied (0.00s)
+=== RUN   TestC066OperatorDashboardHaltAndFailClosed
+--- PASS: TestC066OperatorDashboardHaltAndFailClosed (0.00s)
+=== RUN   TestC067AuditorHTTPAuthorizationAndCSRF
+=== RUN   TestC067AuditorHTTPAuthorizationAndCSRF/anonymous
+=== RUN   TestC067AuditorHTTPAuthorizationAndCSRF/noTLS
+=== RUN   TestC067AuditorHTTPAuthorizationAndCSRF/cross_origin
+=== RUN   TestC067AuditorHTTPAuthorizationAndCSRF/wrong_csrf
+--- PASS: TestC067AuditorHTTPAuthorizationAndCSRF (0.00s)
+    --- PASS: TestC067AuditorHTTPAuthorizationAndCSRF/anonymous (0.00s)
+    --- PASS: TestC067AuditorHTTPAuthorizationAndCSRF/noTLS (0.00s)
+    --- PASS: TestC067AuditorHTTPAuthorizationAndCSRF/cross_origin (0.00s)
+    --- PASS: TestC067AuditorHTTPAuthorizationAndCSRF/wrong_csrf (0.00s)
+=== RUN   TestC067ArchiveEvidenceFailClosed
+--- PASS: TestC067ArchiveEvidenceFailClosed (0.00s)
+=== RUN   TestC067PostgreSQLDurableAuditAccess
+--- PASS: TestC067PostgreSQLDurableAuditAccess (0.05s)
+=== RUN   TestC067AuditorBoundedRedactedAccess
+--- PASS: TestC067AuditorBoundedRedactedAccess (0.00s)
+=== RUN   TestC068DOOBrTravelConsumerFailClosed
+=== RUN   TestC068DOOBrTravelConsumerFailClosed/DOOBr
+=== RUN   TestC068DOOBrTravelConsumerFailClosed/420Travel
+--- PASS: TestC068DOOBrTravelConsumerFailClosed (0.00s)
+    --- PASS: TestC068DOOBrTravelConsumerFailClosed/DOOBr (0.00s)
+    --- PASS: TestC068DOOBrTravelConsumerFailClosed/420Travel (0.00s)
+=== RUN   TestC068MobileDeviceSessionRevocationAndBoundary
+--- PASS: TestC068MobileDeviceSessionRevocationAndBoundary (0.00s)
+=== RUN   TestC068ExternalRevocationAndConsumption
+--- PASS: TestC068ExternalRevocationAndConsumption (0.00s)
+=== RUN   TestC071AuthenticatedEncryptionBoundaries
+--- PASS: TestC071AuthenticatedEncryptionBoundaries (0.00s)
+=== RUN   TestC071PostgreSQLProductionStorage
+--- PASS: TestC071PostgreSQLProductionStorage (0.80s)
+=== RUN   TestC072DurableJobsLeaseFencing
+    c07_2_durable_test.go:73: PASS: 16-worker leader and claim races, encryption, immutable payload, tenant denial, heartbeats, crash takeover, stale fences, finite attempts, collection execution, cancellation
+--- PASS: TestC072DurableJobsLeaseFencing (0.81s)
+=== RUN   TestC072AtomicActivationOutboxAndHalt
+    c07_2_durable_test.go:133: PASS: reviewer/signature/schedule denial, atomic rollback, 12-worker idempotent activation, stale-cache denial, per-subscriber order, lease recovery, retry/dead-letter, tenant isolation, authenticated durable halt, outage
+--- PASS: TestC072AtomicActivationOutboxAndHalt (0.75s)
+=== RUN   TestC072Boundaries
+--- PASS: TestC072Boundaries (0.00s)
+=== RUN   TestC073SecretBindingFreshnessAndTLS
+=== RUN   TestC073SecretBindingFreshnessAndTLS/workload
+=== RUN   TestC073SecretBindingFreshnessAndTLS/expired
+=== RUN   TestC073SecretBindingFreshnessAndTLS/unbounded
+=== RUN   TestC073SecretBindingFreshnessAndTLS/generation
+=== RUN   TestC073SecretBindingFreshnessAndTLS/purpose_confusion
+=== RUN   TestC073SecretBindingFreshnessAndTLS/issuer
+=== RUN   TestC073SecretBindingFreshnessAndTLS/jurisdiction
+=== RUN   TestC073SecretBindingFreshnessAndTLS/environment
+=== RUN   TestC073SecretBindingFreshnessAndTLS/purpose
+=== RUN   TestC073SecretBindingFreshnessAndTLS/future
+=== RUN   TestC073SecretBindingFreshnessAndTLS/revoked
+=== RUN   TestC073SecretBindingFreshnessAndTLS/nonce
+=== RUN   TestC073SecretBindingFreshnessAndTLS/audience
+=== RUN   TestC073SecretBindingFreshnessAndTLS/header_injection
+=== RUN   TestC073SecretBindingFreshnessAndTLS/tenant
+=== RUN   TestC073SecretBindingFreshnessAndTLS/domain
+=== RUN   TestC073SecretBindingFreshnessAndTLS/outage
+=== RUN   TestC073SecretBindingFreshnessAndTLS/redirect
+=== RUN   TestC073SecretBindingFreshnessAndTLS/oversized
+=== RUN   TestC073SecretBindingFreshnessAndTLS/trailing
+=== RUN   TestC073SecretBindingFreshnessAndTLS/server-identity
+2026/10/13 17:50:10 http: TLS handshake error from 127.0.0.1:35600: remote error: tls: bad certificate
+=== RUN   TestC073SecretBindingFreshnessAndTLS/client-identity
+2026/10/13 17:50:10 http: TLS handshake error from 127.0.0.1:35608: EOF
+=== RUN   TestC073SecretBindingFreshnessAndTLS/untrusted-root
+2026/10/13 17:50:10 http: TLS handshake error from 127.0.0.1:35620: remote error: tls: bad certificate
+=== RUN   TestC073SecretBindingFreshnessAndTLS/HTTP
+2026/10/13 17:50:10 http: TLS handshake error from 127.0.0.1:35644: EOF
+--- PASS: TestC073SecretBindingFreshnessAndTLS (0.21s)
+    --- PASS: TestC073SecretBindingFreshnessAndTLS/workload (0.01s)
+    --- PASS: TestC073SecretBindingFreshnessAndTLS/expired (0.01s)
+    --- PASS: TestC073SecretBindingFreshnessAndTLS/unbounded (0.01s)
+    --- PASS: TestC073SecretBindingFreshnessAndTLS/generation (0.01s)
+    --- PASS: TestC073SecretBindingFreshnessAndTLS/purpose_confusion (0.01s)
+    --- PASS: TestC073SecretBindingFreshnessAndTLS/issuer (0.01s)
+    --- PASS: TestC073SecretBindingFreshnessAndTLS/jurisdiction (0.01s)
+    --- PASS: TestC073SecretBindingFreshnessAndTLS/environment (0.01s)
+    --- PASS: TestC073SecretBindingFreshnessAndTLS/purpose (0.01s)
+    --- PASS: TestC073SecretBindingFreshnessAndTLS/future (0.01s)
+    --- PASS: TestC073SecretBindingFreshnessAndTLS/revoked (0.01s)
+    --- PASS: TestC073SecretBindingFreshnessAndTLS/nonce (0.01s)
+    --- PASS: TestC073SecretBindingFreshnessAndTLS/audience (0.01s)
+    --- PASS: TestC073SecretBindingFreshnessAndTLS/header_injection (0.01s)
+    --- PASS: TestC073SecretBindingFreshnessAndTLS/tenant (0.01s)
+    --- PASS: TestC073SecretBindingFreshnessAndTLS/domain (0.01s)
+    --- PASS: TestC073SecretBindingFreshnessAndTLS/outage (0.01s)
+    --- PASS: TestC073SecretBindingFreshnessAndTLS/redirect (0.01s)
+    --- PASS: TestC073SecretBindingFreshnessAndTLS/oversized (0.01s)
+    --- PASS: TestC073SecretBindingFreshnessAndTLS/trailing (0.01s)
+    --- PASS: TestC073SecretBindingFreshnessAndTLS/server-identity (0.01s)
+    --- PASS: TestC073SecretBindingFreshnessAndTLS/client-identity (0.01s)
+    --- PASS: TestC073SecretBindingFreshnessAndTLS/untrusted-root (0.00s)
+    --- PASS: TestC073SecretBindingFreshnessAndTLS/HTTP (0.00s)
+=== RUN   TestC073ManagedEncryptionRotation
+--- PASS: TestC073ManagedEncryptionRotation (0.07s)
+=== RUN   TestC073ManagedSignerRotationAndRevocation
+--- PASS: TestC073ManagedSignerRotationAndRevocation (0.17s)
+=== RUN   TestC073CertificateRotationAndTimeout
+2026/10/13 17:50:11 http: TLS handshake error from 127.0.0.1:37728: EOF
+--- PASS: TestC073CertificateRotationAndTimeout (0.09s)
+=== RUN   TestC073ManagedProductionComposition
+    c07_3_managed_authority_test.go:86: PASS: real mTLS broker + restricted verified-TLS PostgreSQL, managed encryption/signing composition, fresh identity read/write denial and recovery
+--- PASS: TestC073ManagedProductionComposition (0.47s)
+=== RUN   TestC073DatabaseTLSOverridesDenied
+--- PASS: TestC073DatabaseTLSOverridesDenied (0.00s)
+=== RUN   TestC074HTTPOverloadAndRecovery
+--- PASS: TestC074HTTPOverloadAndRecovery (0.00s)
+=== RUN   TestC074BodyResponseTimeoutAndOutage
+--- PASS: TestC074BodyResponseTimeoutAndOutage (2.01s)
+=== RUN   TestC074DistributedRateAndCapacity
+    c07_4_capacity_test.go:85: distributed rate race: 6 admissions, zero budget overshoot; 16 shared work slots and independent recovery reserve
+--- PASS: TestC074DistributedRateAndCapacity (1.51s)
+=== RUN   TestC074QueueBackpressureAndAtomicOutbox
+--- PASS: TestC074QueueBackpressureAndAtomicOutbox (1.87s)
+=== RUN   TestC074BoundedSoak
+    c07_4_capacity_test.go:114: bounded synthetic soak: 32000 requests, 32 producers, 30081 admitted, 1919 rejected, 302.745066ms; no production SLA claim
+--- PASS: TestC074BoundedSoak (0.30s)
+=== RUN   TestC074NetworkPostgreSQLSoak
+    c07_4_capacity_test.go:143: 30-second TLS/PostgreSQL bounded soak: 3611 responses admitted, 7912 rejected, peak backend concurrency 5, backend calls 3612, duration 30.010884685s; production capacity acceptance remains C09.8
+--- PASS: TestC074NetworkPostgreSQLSoak (30.41s)
+=== RUN   TestC074ManagedProductionComposition
+--- PASS: TestC074ManagedProductionComposition (0.47s)
+=== RUN   TestC075SignedPolicyAndOwnershipBoundaries
+--- PASS: TestC075SignedPolicyAndOwnershipBoundaries (0.00s)
+=== RUN   TestC075PostgreSQLRetentionHoldsAndPurge
+    c07_5_privacy_test.go:94: PASS: independent signed retention, active/stale/timing denial, 12 held deletion denials, separate release, 12 idempotent purges/one receipt, actual ciphertext deletion, quota conservation, tenant isolation and no identity reuse
+--- PASS: TestC075PostgreSQLRetentionHoldsAndPurge (0.93s)
+=== RUN   TestC075CaseLimitedEvidenceAndPostLogRevalidation
+    c07_5_privacy_test.go:118: PASS: case/purpose/tenant-bound redacted export, held case positive, foreign case and role denial, durable logging and post-log hold revalidation
+--- PASS: TestC075CaseLimitedEvidenceAndPostLogRevalidation (0.65s)
+=== RUN   TestC075AtomicRollbackAndGrantRevocation
+--- PASS: TestC075AtomicRollbackAndGrantRevocation (0.65s)
+=== RUN   TestC075BoundedDeletionScheduler
+--- PASS: TestC075BoundedDeletionScheduler (0.54s)
+=== RUN   TestC075ManagedProductionPrivacy
+--- PASS: TestC075ManagedProductionPrivacy (0.64s)
+=== RUN   TestC038DatabaseOutageAndReconnect
+--- PASS: TestC038DatabaseOutageAndReconnect (0.06s)
+=== RUN   TestC038PublicationAcrossInstances
+--- PASS: TestC038PublicationAcrossInstances (0.00s)
+=== RUN   TestC038IndependentSignatureAuthorization
+--- PASS: TestC038IndependentSignatureAuthorization (0.00s)
+=== RUN   TestC038PostgreSQLMultiInstance
+--- PASS: TestC038PostgreSQLMultiInstance (0.28s)
+=== RUN   TestC038ProductionRuntimeGates
+--- PASS: TestC038ProductionRuntimeGates (0.00s)
+=== RUN   TestC048ScheduledSigningRotationAndEmergency
+--- PASS: TestC048ScheduledSigningRotationAndEmergency (0.01s)
+PASS
+ok  	github.com/420integrated/420-integrated/services/complianceauth	45.449s

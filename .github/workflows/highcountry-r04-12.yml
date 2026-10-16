@@ -1,0 +1,45 @@
+name: High Country R04.12 Level 1 Qualification
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/highcountry/competition/**'
+      - 'contracts/test/highcountry/unit/competition/**'
+      - '.github/workflows/highcountry-r04-12.yml'
+      - 'docs/highcountry/R04.12-*'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  competition:
+    if: github.head_ref != 'qualification/highcountry-r04-level3-main-20261013'
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      FOUNDRY_SRC: src/highcountry
+      FOUNDRY_TEST: test/highcountry
+      FOUNDRY_SCRIPT: script/highcountry
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Exact implementation SHA
+        env:
+          SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$SHA"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Affected build and bytecode limits
+        working-directory: contracts
+        run: forge build src/highcountry --sizes
+      - name: Competition formatting
+        working-directory: contracts
+        run: forge fmt --check src/highcountry/competition test/highcountry/unit/competition
+      - name: Competition static security lint
+        working-directory: contracts
+        run: forge lint src/highcountry/competition --severity high med low
+      - name: Season templates competition unit and adversarial tests
+        working-directory: contracts
+        run: forge test --match-path 'test/highcountry/unit/competition/*.t.sol' -vv
+      - name: Canonical High Country verifier
+        run: python3 scripts/highcountry/verify-r01.py

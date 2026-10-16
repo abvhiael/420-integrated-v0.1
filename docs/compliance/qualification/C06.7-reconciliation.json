@@ -1,0 +1,25 @@
+{
+  "schema": "420compliance-historical-evidence-reconciliation/v1",
+  "step": "C06.7",
+  "canonical_scope": "Auditor metadata-only export, redaction, authorization and durable access logging",
+  "qualification_level": 1,
+  "disposition": "HISTORICAL_STEP_EVIDENCE_INCOMPLETE",
+  "standalone_exact_sha_level1_certificate": "NOT_VERIFIED",
+  "source_document": "docs/compliance/C06.7-AUDITOR-EXPORT.md",
+  "retained_integration": {
+    "milestone": "C06.9",
+    "qualification_level": 2,
+    "implementation_sha": "3af28b9de534938fb0a128e474db80cf91bfaaf1",
+    "run_id": 38339670328,
+    "job_id": 115107589314,
+    "run_url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38339670328",
+    "result": "PASS_FOR_RETAINED_INTEGRATION_SCOPE_ONLY"
+  },
+  "open_findings": [
+    "Production issuer/case grants, append-only privileges, real archived-source integrity, legal retention acceptance and standalone step certificate unresolved"
+  ],
+  "production_operational_acceptance": "NOT_CLAIMED",
+  "evidence_policy": "Do not convert retained milestone PASS into historical standalone exact-SHA Level 1 PASS; close only with verified original implementation SHA/run/job/artifact and canonical exit criteria.",
+  "current_phase": "C08.1",
+  "next_step": "C08.2"
+}

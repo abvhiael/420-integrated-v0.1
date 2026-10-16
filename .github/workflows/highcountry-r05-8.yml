@@ -1,0 +1,39 @@
+name: High Country R05.8 Level 1 SDK Transports
+on:
+  pull_request:
+    paths:
+      - 'packages/420-gaming-sdk/**'
+      - 'clients/highcountry-access-v1/**'
+      - '.github/workflows/highcountry-r05-8.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  sdk-transports:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Exact SHA
+        run: test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+      - name: SDK transport and ABI adversarial tests
+        run: node --test packages/420-gaming-sdk/test/r05-8-transports.test.js
+      - name: Retained gaming SDK and High Country client suites
+        run: node --test packages/420-gaming-sdk/test/*.test.js clients/highcountry-access-v1/test/*.test.js
+      - name: R05.7 retained canonical interface regressions
+        run: node --test services/420-gaming-player-profile/test/canonical-gaming-finality.test.js services/420-gaming-player-profile/test/independent-finality-witness.test.js
+      - name: Static and integrity checks
+        run: |
+          node --check packages/420-gaming-sdk/src/transports.js
+          node --check packages/420-gaming-sdk/src/abi-bindings.js
+          node --check packages/420-gaming-sdk/src/index.js
+          git diff --check 5cc1f58bc3f9c9935bfe661be4e21cc960906cd7 HEAD
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"

@@ -1,0 +1,105 @@
+{
+  "schema": "420compliance-c08.6-phase-closeout/v1",
+  "step": "C08.6",
+  "canonical": "Record exact-SHA evidence, formal repository phase closeout, merge through established repository policy and publish testnet handoff.",
+  "phase_level": 3,
+  "qualification": "PASS",
+  "implementation_sha": "3f12c3b95db160b36f4bafb1491adea8dbd23ef1",
+  "pre_certificate_evidence_sha": "0874417839503be961843ee06516a5372709fb02",
+  "reconciliation_main_base_sha": "eeaa4e593e8f5f16e2bc566b20ddbe04576589c1",
+  "reconciliation_merge_sha": "3f12c3b95db160b36f4bafb1491adea8dbd23ef1",
+  "merge_target": "main",
+  "merge_pr": 660,
+  "status": "QUALIFIED_AWAITING_GITHUB_MERGE",
+  "tested_runs": [
+    {
+      "name": "Solidity Contracts",
+      "id": 38670854849,
+      "sha": "3f12c3b95db160b36f4bafb1491adea8dbd23ef1",
+      "jobs": [
+        "level3-shards (0)",
+        "level3-shards (1)",
+        "level3-shards (2)",
+        "level3-shards (3)",
+        "level3-fixture"
+      ],
+      "result": "success"
+    },
+    {
+      "name": "Genesis Address Authority",
+      "id": 38670888434,
+      "sha": "3f12c3b95db160b36f4bafb1491adea8dbd23ef1",
+      "jobs": [
+        "cross-manifest-authority"
+      ],
+      "result": "success"
+    },
+    {
+      "name": "420 Integrated Qualification",
+      "id": 38670921684,
+      "sha": "3f12c3b95db160b36f4bafb1491adea8dbd23ef1",
+      "jobs": [
+        "offline-core",
+        "fault-matrix",
+        "production-dependencies",
+        "geth-engine"
+      ],
+      "result": "success"
+    },
+    {
+      "name": "420Docs Qualification",
+      "id": 38670947295,
+      "sha": "3f12c3b95db160b36f4bafb1491adea8dbd23ef1",
+      "jobs": [
+        "qualify"
+      ],
+      "result": "success"
+    },
+    {
+      "name": "420Compliance retained phase",
+      "id": 38683935347,
+      "sha": "0874417839503be961843ee06516a5372709fb02",
+      "jobs": [
+        "retained-phase"
+      ],
+      "result": "success",
+      "reason": "Corrected three stale workflow source_sha256 pins after main reconciliation; exact diff from implementation contained only docs/compliance/qualification/C08.5-candidate-inputs.json; all four independent full-suite results retained by evidence-only policy."
+    }
+  ],
+  "manifest_check": {
+    "file": "docs/compliance/qualification/C08.5-candidate-inputs.json",
+    "pin_count": 561,
+    "changed_pins": [
+      ".github/workflows/contracts-foundry.yml",
+      ".github/workflows/genesis-address-authority.yml",
+      ".github/workflows/qualification.yml"
+    ],
+    "result": "PASS from retained workflow 38683935347"
+  },
+  "negative_tests": "Retained C07.10 full integration and incident regressions succeeded; canonical Solidity security/invariants, Genesis adversarial namespace checks and Integrated fault matrix passed.",
+  "deployment": "not authorized for production",
+  "external_acceptance": {
+    "C09": "deployed testnet qualification remains outstanding",
+    "C10": "independent legal, credentials, operator, issuer, retailer/carrier and release acceptance remain outstanding",
+    "historical": [
+      "C06.5",
+      "C06.6",
+      "C06.7",
+      "C06.8",
+      "C07.6"
+    ],
+    "security": "C07.9 independent external assessment NOT PERFORMED"
+  },
+  "testnet_handoff": {
+    "entry": "C09.1",
+    "canonical": "docs/compliance/420COMPLIANCE-ROADMAP.md",
+    "handoff": "docs/compliance/C08.3-EXTERNAL-AUTHORITY-TESTNET-HANDOFF.md",
+    "ledger": "docs/compliance/qualification/C08.3-testnet-work-ledger.json",
+    "release_permission": false
+  },
+  "notes": [
+    "Existing historical draft PR #602 is not the reconciled merge; successor is #660.",
+    "No full Solidity, Genesis, Integrated, or Docs reruns were required for the evidence-only checksum correction.",
+    "GitHub merge must be verified on main before declaring C08.6 fully merged."
+  ]
+}

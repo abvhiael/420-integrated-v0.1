@@ -1,0 +1,84 @@
+{
+  "schema": "420compliance-external-authority-acceptance/v1",
+  "status": "AWAITING_INDEPENDENT_AUTHORITIES",
+  "production_enabled": false,
+  "domains": [
+    "BC",
+    "Vancouver"
+  ],
+  "legal": {
+    "status": "NOT_APPROVED",
+    "required": [
+      "named licensed or otherwise appropriately qualified legal reviewer with verified engagement and jurisdictional competence",
+      "specific operative federal/provincial/municipal and applicable Indigenous/partner instruments and effective dates",
+      "signed exact policy digest legal opinion, conflict-of-interest and reviewer mandate, independent publisher"
+    ],
+    "evidence_references": []
+  },
+  "retailer": {
+    "status": "NOT_APPROVED",
+    "required": [
+      "verified licensed retailer legal identity and licence registry source",
+      "licence class, premises, applicable scope, conditions, suspension and expiry checked with authority",
+      "retailer acceptance of actual DOOBr workflow"
+    ],
+    "evidence_references": []
+  },
+  "carrier": {
+    "status": "NOT_APPROVED",
+    "required": [
+      "carrier entity and jurisdiction-specific legal authority",
+      "operational insurance/permit/vehicle and worker eligibility where applicable",
+      "authorized carrier acceptance, active revocation monitoring"
+    ],
+    "evidence_references": []
+  },
+  "credentials": {
+    "status": "NOT_INTEGRATED",
+    "required": [
+      "approved 420Identity issuer or independently accepted credential source",
+      "issuer public keys, entity/tenant/audience binding, current revocation and rotation",
+      "provider outage and compromised key fail-closed tests"
+    ],
+    "evidence_references": []
+  },
+  "managed_signing": {
+    "status": "NOT_PROVISIONED",
+    "required": [
+      "authorized managed HSM/KMS supporting non-exportable Ed25519 signing with workload identity",
+      "verified production key handle and attested public key, rotation and revoke procedures",
+      "independent publisher approval, audit logs and key-compromise rehearsal"
+    ],
+    "evidence_references": []
+  },
+  "deployed_acceptance": {
+    "status": "NOT_PERFORMED",
+    "required": [
+      "deployed identity-bound Compliance service and HA datastore",
+      "multi-instance transaction and negative tests with DOOBr",
+      "independent security/privacy/legal/partner sign-offs"
+    ],
+    "evidence_references": []
+  },
+  "safety": "Do not turn missing evidence into approval, generate simulated production licences or place signing keys in GitHub. No production ALLOW on incomplete authority.",
+  "next_action": "Obtain actual independent authority artifacts using approved off-repository channels, then verify and record hashes/metadata in evidence registry; keep sensitive full documents private.",
+  "disposition": "DEFERRED_TO_TESTNET_AND_PRODUCTION_ACCEPTANCE",
+  "testnet_handoff": "docs/compliance/C08.3-EXTERNAL-AUTHORITY-TESTNET-HANDOFF.md",
+  "canonical_milestones": [
+    "C08.3",
+    "C09.1",
+    "C09.3",
+    "C09.4",
+    "C09.5",
+    "C09.6",
+    "C09.7",
+    "C09.8",
+    "C09.9",
+    "C09.10",
+    "C10.1",
+    "C10.2",
+    "C10.3",
+    "C10.7"
+  ],
+  "legal_review_can_start_pre_testnet": true
+}

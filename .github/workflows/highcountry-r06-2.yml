@@ -35,5 +35,5 @@ jobs:
         run: node --test clients/highcountry-access-v1/test/*.test.js packages/420-gaming-sdk/test/*.test.js
       - name: Diff integrity
         run: |
-          git diff --check eeaa4e593e8f5f16e2bc566b20ddbe04576589c1 HEAD
+          git diff --check "$(git merge-base HEAD origin/main)" HEAD
           test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"

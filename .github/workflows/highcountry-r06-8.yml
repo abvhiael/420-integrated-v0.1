@@ -23,7 +23,7 @@ jobs:
         with:
           node-version: '22'
       - name: Exact-SHA and diff-integrity preflight
-        run: test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA" && git diff --check eeaa4e593e8f5f16e2bc566b20ddbe04576589c1 HEAD
+        run: test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA" && git diff --check "$(git merge-base HEAD origin/main)" HEAD
       - name: Install pinned browser test runner
         working-directory: apps/highcountry-web
         run: npm install --no-save --ignore-scripts @playwright/test@1.56.1

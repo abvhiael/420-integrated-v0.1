@@ -51,4 +51,4 @@ jobs:
       - name: Syntax and whitespace
         run: |
           while IFS= read -r -d '' file; do node --check "$file"; done < <(find services/420-gaming-player-profile/src services/420-gaming-player-profile/scripts services/420-gaming-player-profile/test -type f \( -name '*.js' -o -name '*.mjs' \) -print0)
-          git diff --check 3c670803143221613c657e15f6b955c029d6fc1c HEAD
+          git diff --check "$(git merge-base HEAD origin/main)" HEAD

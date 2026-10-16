@@ -30,7 +30,7 @@ jobs:
         with:
           node-version: '22'
       - name: Exact SHA and accumulated diff integrity
-        run: test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA" && git diff --check eeaa4e593e8f5f16e2bc566b20ddbe04576589c1 HEAD
+        run: test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA" && git diff --check "$(git merge-base HEAD origin/main)" HEAD
       - name: R06.6 authority and browser adversarial tests
         run: node --test services/420-gaming-player-profile/test/highcountry-r066-*.test.js apps/highcountry-web/test/r066-*.test.mjs
       - name: Affected browser and retained auth regressions

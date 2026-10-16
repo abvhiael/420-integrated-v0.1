@@ -24,7 +24,7 @@ jobs:
         with:
           node-version: '22'
       - name: Exact SHA and diff integrity
-        run: test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA" && git diff --check eeaa4e593e8f5f16e2bc566b20ddbe04576589c1 HEAD
+        run: test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA" && git diff --check "$(git merge-base HEAD origin/main)" HEAD
       - name: Asset, accessibility and retained browser tests
         run: node --test apps/highcountry-web/test/*.test.mjs
       - name: Syntax and production static build

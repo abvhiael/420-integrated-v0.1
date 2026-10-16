@@ -66,5 +66,5 @@ jobs:
         shell: bash
         run: |
           while IFS= read -r -d '' file; do node --check "$file"; done < <(find services/420-gaming-player-profile/src services/420-gaming-player-profile/test -type f \( -name '*.js' -o -name '*.mjs' \) -print0)
-          git diff --check d6f6bd282636a6c9c8ac3bf17198580840fee37f HEAD
+          git diff --check "$(git merge-base HEAD origin/main)" HEAD
           test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"

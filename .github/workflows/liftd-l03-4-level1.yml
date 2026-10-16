@@ -54,6 +54,6 @@ jobs:
         run: npm test --prefix rideshare
       - name: Real PostgreSQL economics, payments, quotes and trips
         run: |
-          for file in rideshare/test/postgres/{economic-reconciliation,payments,quotes,store}.test.mjs; do
+          for file in rideshare/test/postgres/{payments,quotes,store,economic-reconciliation}.test.mjs; do
             node --test "$file"
           done

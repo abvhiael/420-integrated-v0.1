@@ -1,0 +1,133 @@
+{
+  "schema": "HC.REGIONAL.RESOURCE_POLICY.V1",
+  "status": "ADOPTED_ARCHITECTURE_NUMERIC_RATES_UNAPPROVED",
+  "units": {
+    "water": "millilitre",
+    "energy": "watt-hour",
+    "nonNegative": true,
+    "conserveResources": true
+  },
+  "controls": [
+    "temperature",
+    "humidity",
+    "light",
+    "water",
+    "nutrients",
+    "airflow"
+  ],
+  "existingIdeal": [
+    [
+      2000,
+      2800
+    ],
+    [
+      4500,
+      7000
+    ],
+    [
+      5000,
+      9000
+    ],
+    [
+      4000,
+      7500
+    ],
+    [
+      4000,
+      8000
+    ],
+    [
+      2500,
+      7500
+    ]
+  ],
+  "regions": [
+    {
+      "id": 1,
+      "name": "Emerald Coast",
+      "climate": "HC-CLIMATE-EMERALD-V1",
+      "ruleset": "HC-REGION-EMERALD-V1",
+      "summer": [
+        2100,
+        8200,
+        5500,
+        8000,
+        6000,
+        3500
+      ],
+      "water": [
+        "rain-capture",
+        "storage"
+      ],
+      "energy": [
+        "hydroelectric",
+        "grid"
+      ],
+      "devices": [
+        "drainage",
+        "dehumidifier",
+        "grow-lights"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Golden Prairie",
+      "climate": "HC-CLIMATE-PRAIRIE-V1",
+      "ruleset": "HC-REGION-PRAIRIE-V1",
+      "summer": [
+        2700,
+        5000,
+        8500,
+        5000,
+        6000,
+        8000
+      ],
+      "water": [
+        "well",
+        "reservoir"
+      ],
+      "energy": [
+        "wind",
+        "solar",
+        "grid"
+      ],
+      "devices": [
+        "irrigation-pump",
+        "insulation",
+        "windbreak"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Red Mesa",
+      "climate": "HC-CLIMATE-MESA-V1",
+      "ruleset": "HC-REGION-MESA-V1",
+      "summer": [
+        3400,
+        2500,
+        9500,
+        2500,
+        6000,
+        5000
+      ],
+      "water": [
+        "reclaimed",
+        "stored"
+      ],
+      "energy": [
+        "solar",
+        "grid"
+      ],
+      "devices": [
+        "cooler",
+        "water-recovery",
+        "shade"
+      ]
+    }
+  ],
+  "conversionRates": null,
+  "weatherTransitions": null,
+  "equipmentCosts": null,
+  "derivedCanonicalRulesetIds": null,
+  "foundingGenesisUnchanged": true
+}

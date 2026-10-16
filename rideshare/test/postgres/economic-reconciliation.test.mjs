@@ -30,7 +30,7 @@ test('L03.4 real PostgreSQL reconciliation of trip, quote, payment, payout and a
   assert.notEqual(after.historyDigest,before.historyDigest);
   const query=async sql=>(await pool.query(sql,[tripId])).rows;
   const q=(await pool.query('SELECT q.payload,q.quote_hash FROM liftd.trip_quotes b JOIN liftd.fare_quotes q USING(quote_id) WHERE b.trip_id=$1',[tripId])).rows[0];
-  const base={trip:(await query('SELECT snapshot FROM liftd.trips WHERE trip_id=$1'))[0].snapshot,quote:q.payload,quoteHash:q.quote_hash,
+  const base={tripEvents:await query('SELECT * FROM liftd.events WHERE trip_id=$1 ORDER BY revision'),trip:(await query('SELECT snapshot FROM liftd.trips WHERE trip_id=$1'))[0].snapshot,quote:q.payload,quoteHash:q.quote_hash,
    intents:await query('SELECT * FROM liftd.payment_intents WHERE trip_id=$1'),
    operations:await query('SELECT * FROM liftd.pay_operations WHERE trip_id=$1'),
    plans:await query('SELECT * FROM liftd.payout_projections WHERE trip_id=$1'),

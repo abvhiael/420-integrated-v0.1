@@ -435,4 +435,33 @@ contract BetKenoVerticalSlice420Test {
         require(s.accounting.getVault(VAULT).activeReservedLiability == 0, "accounting mutated");
     }
 
+    function testGovernanceCannotActivateWrongScheduleOrReplaceApprovedVersion() public {
+        Suite memory s = _deploy();
+        uint256[11][11] memory bps;
+        for (uint8 n=1;n<=10;++n) bps[n][n]=10_000;
+        KenoPaytableAuthority420 pending = new KenoPaytableAuthority420(
+            address(s.auth), GAME_V1, RULESET, keccak256("keno/adversarial/v1"),
+            keccak256("keno/adversarial/manifest"), keccak256(abi.encode(bps)));
+
+        vm.prank(PLAYER);
+        vm.expectRevert(KenoPaytableAuthority420.Unauthorized.selector);
+        pending.activate(bps);
+
+        bps[5][5]=10_001;
+        vm.prank(ADMIN);
+        vm.expectRevert(KenoPaytableAuthority420.InvalidSchedule.selector);
+        pending.activate(bps);
+
+        bps[5][5]=10_000;
+        vm.prank(ADMIN);
+        pending.activate(bps);
+        vm.prank(ADMIN);
+        vm.expectRevert(KenoPaytableAuthority420.AlreadyActivated.selector);
+        pending.activate(bps);
+
+        vm.prank(ADMIN);
+        vm.expectRevert(WagerRouter420.KenoAuthorityAlreadyBound.selector);
+        s.wagerRouter.bindKenoPaytable(GAME_V1,address(s.keno),address(pending));
+    }
+
 }

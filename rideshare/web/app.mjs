@@ -1,3 +1,4 @@
+import {mountOperatorConsole} from './operator-console.mjs';
 import { ROUTES, AVAILABILITY, routeDecision, sanitizeReturnPath } from "./route-policy.mjs";
 import { mountRiderAccount } from "./rider-account.mjs";
 import { createRiderPreferencesApi } from "./preferences-api.mjs";
@@ -26,6 +27,7 @@ let tripPanel = null;
 let clearDriverOnboarding = null;
 let clearDriverAvailability = null;
 let clearDriverTrip = null;
+let clearOperatorConsole = null;
 
 // The host must provide an independently authenticated session adapter.
 // No localStorage, query-string identity, simulated principal or demo operator bypass.
@@ -53,6 +55,7 @@ function renderDecision(decision) {
   if (clearDriverOnboarding) { clearDriverOnboarding(); clearDriverOnboarding = null; }
   if (clearDriverAvailability) { clearDriverAvailability(); clearDriverAvailability = null; }
   if (clearDriverTrip) { clearDriverTrip(); clearDriverTrip = null; }
+  if(clearOperatorConsole){clearOperatorConsole();clearOperatorConsole=null;}
   root.replaceChildren();
   root.setAttribute("aria-busy", "false");
   const panel = node("section", undefined, "panel");
@@ -94,6 +97,9 @@ function renderDecision(decision) {
       openNavigation: url => window.open(url, "_blank", "noopener,noreferrer")
     });
     clearDriverTrip = () => panel.destroy();
+  }
+  if(decision.kind==="protected"&&decision.role==="operator"){
+    clearOperatorConsole=mountOperatorConsole(root,session,globalThis.LIFTdSessionAdapter);
   }
   document.title = decision.title + " — LIFTd";
 }

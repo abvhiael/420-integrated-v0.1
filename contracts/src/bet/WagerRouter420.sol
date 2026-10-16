@@ -135,6 +135,7 @@ contract WagerRouter420 is I420System {
         if (kenoAuthority[gameVersionId] != address(0)) revert KenoAuthorityAlreadyBound();
         BetGameRegistry420.GameVersion memory g = games.getGame(gameVersionId);
         if (g.gameId != KENO_GAME_ID ||
+            modules.getModule(g.moduleVersionId).implementation != resolver ||
             KenoV1420(resolver).gameVersionId() != gameVersionId ||
             KenoV1420(resolver).rulesetId() != g.rulesetId ||
             KenoPaytableAuthority420(verifier).gameVersionId() != gameVersionId ||

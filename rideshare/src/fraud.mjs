@@ -9,7 +9,7 @@ const digest=value=>createHash('sha256').update(canonical(value)).digest('hex');
 const classes=new Set(['account_misuse','fabricated_trip','location_manipulation','coordinated_reviews','economic_replay']);
 const view=r=>Object.freeze({caseId:r.case_id,tripId:r.trip_id,category:r.category,status:r.status,revision:Number(r.revision),decision:r.decision,holdUntil:r.hold_until===null?null:Number(r.hold_until),createdAt:Number(r.created_at)});
 const activeHold=async(client,tripId,now)=> {
- const q=await client.query("SELECT 1 FROM liftd.fraud_cases WHERE trip_id=$1 AND status='HELD' AND hold_until>$2 LIMIT 1",[tripId,now]);
+ const q=await client.query("SELECT 1 FROM liftd.fraud_cases WHERE trip_id=$1 AND status IN ('HELD','APPEALED') AND hold_until>$2 LIMIT 1",[tripId,now]);
  return q.rowCount>0;
 };
 export async function enforceFraudHold(client,tripId,now) {
@@ -66,7 +66,7 @@ export function createFraudService({pool,authenticator,clock=()=>Math.floor(Date
     if(action==='release'&&row.status!=='HELD')fail('FRAUD_TRANSITION_DENIED');
     if(action==='appeal'&&(p.role==='operator'||!['HELD','CLEARED'].includes(row.status)||row.appeal_count!==0))fail('FRAUD_APPEAL_DENIED',403);
     if(action==='close'&&!['CLEARED','APPEALED'].includes(row.status))fail('FRAUD_TRANSITION_DENIED');
-    const until=action==='hold'?t+input.holdSeconds:null;
+    const until=action==='hold'?t+input.holdSeconds:(action==='appeal'?row.hold_until:null);
     const appeals=Number(row.appeal_count)+(action==='appeal'?1:0);
     await c.query('UPDATE liftd.fraud_cases SET status=$1,revision=revision+1,decision=$2,hold_until=$3,appeal_count=$4,updated_at=$5 WHERE case_id=$6',[next,action==='appeal'?row.decision:action,until,appeals,t,caseId]);
     row={...row,status:next,revision:row.revision+1,decision:action==='appeal'?row.decision:action,hold_until:until,appeal_count:appeals,updated_at:t};

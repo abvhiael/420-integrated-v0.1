@@ -23,6 +23,10 @@ test('L03.1 PostgreSQL case lifecycle: all classes, replay, appeal and access', 
    await assert.rejects(()=>service.escalate('rider',caseId,{commandId:'escalate_'+category,expectedRevision:0}),{code:'SUPPORT_SCOPE_DENIED'});
    const evidence=await service.evidence('rider',caseId,{commandId:'evidence_'+category,expectedRevision:0,evidenceDigest:'a'.repeat(64),evidenceClass:'statement'});
    assert.equal(evidence.revision,1);
+   const scoped=await service.read('rider',caseId);
+   assert.deepEqual(scoped.evidence.map(e=>e.evidenceDigest),['a'.repeat(64)]);
+   assert.equal('opener_id' in scoped,false);
+   assert.equal(JSON.stringify(scoped).includes('route_1'),false);
    await assert.rejects(()=>service.decide('operator',caseId,{commandId:'stale_'+category,expectedRevision:0,decision:'denied'}),{code:'CASE_STALE_REVISION'});
    await service.escalate('operator',caseId,{commandId:'escalate_'+category,expectedRevision:1});
    await service.decide('operator',caseId,{commandId:'decide_'+category,expectedRevision:2,decision:'denied'});

@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {createOperatorConsoleService,redactedOperatorTrip} from '../src/operator-console.mjs';
 import {createHttpHandler} from '../src/http.mjs';
 import {AuthError} from '../src/auth.mjs';
+import {createOperatorMonitors} from '../src/operator-monitors.mjs';
 const trip=()=>({id:'trip_a',riderId:'rider_a',driverId:'driver_a',vehicleId:'vehicle_a',routeRef:'secret_route',state:'IN_PROGRESS',revision:4});
 function fixture(){
  let state=trip(),revoked=false,time=100,processed=false,audits=[];
@@ -55,4 +56,21 @@ test('HTTP requires bearer and denies unsupported operator verbs and unbound dep
  assert.equal((await handler(new Request(url,{method:'DELETE',headers:{authorization:'Bearer a.b.c'}}))).status,405);
  const absent=createHttpHandler({},null,null,null,null,null,null,null,null,null,null);
  assert.equal((await absent(new Request(url))).status,503);
+});
+
+test('concrete monitors use private PostgreSQL lease and independently reverified eligibility, never location',async()=>{
+ const state=trip();let lease={state:'ACCEPTED',expires_at:150},legal=true;
+ const adapters=createOperatorMonitors({
+  pool:{query:async(sql,params)=>{assert.match(sql,/liftd.assignment_leases/);assert.deepEqual(params,['trip_a']);return {rows:[lease]};}},
+  tripStore:{get:async()=>state},
+  eligibilityAdapter:{project:async(t,command)=>{assert.equal(t.id,'trip_a');assert.equal(command.action,'start');
+    if(!legal)throw new AuthError('TRANSPORT_INELIGIBLE',403);
+    return {admission:{allowed:true,tripId:'trip_a',driverId:'driver_a',vehicleId:'vehicle_a',expiresAt:150}};}},
+  clock:()=>100
+ });
+ assert.deepEqual(await adapters.dispatch.read('trip_a'),{status:'ACCEPTED'});
+ assert.deepEqual(await adapters.eligibility.read('trip_a'),{status:'ELIGIBLE'});
+ legal=false;assert.deepEqual(await adapters.eligibility.read('trip_a'),{status:'REVOKED'});
+ lease={state:'CLOSED',expires_at:150};assert.deepEqual(await adapters.dispatch.read('trip_a'),{status:'CLOSED'});
+ await assert.rejects(()=>adapters.dispatch.read('different'),{code:'TRIP_UNAVAILABLE'});
 });

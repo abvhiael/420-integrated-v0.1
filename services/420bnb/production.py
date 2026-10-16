@@ -70,7 +70,7 @@ def https_origin(value):
 def load_contract(environment=None, *, root=Path("/run/secrets"), purpose="runtime"):
     env = dict(os.environ if environment is None else environment)
     require(os.geteuid() != 0, "NONROOT_PRODUCTION_REQUIRED")
-    require(purpose in ("runtime", "migration"), "PURPOSE_INVALID")
+    require(purpose in ("runtime", "worker", "migration"), "PURPOSE_INVALID")
     require(env.get("BNB_ENV") == "production", "PRODUCTION_MODE_REQUIRED")
     require(not env.get("BNB_DATABASE_URL") and not env.get("BNB_IDENTITY_ASSERTION_SECRET"),
             "INLINE_SECRET_FORBIDDEN")
@@ -98,6 +98,22 @@ def load_contract(environment=None, *, root=Path("/run/secrets"), purpose="runti
             and images["ingress"] == env.get("BNB_INGRESS_IMAGE"), "TOPOLOGY_IMAGE_MISMATCH")
     require(contract.get("booking_enabled") is False and contract.get("financial_execution") is False,
             "ACTIVATION_FORBIDDEN")
+    environment_contract = contract.get("environment_contract")
+    require(isinstance(environment_contract, dict)
+            and set(environment_contract) == {"schema", "services", "secret_root"},
+            "ENVIRONMENT_CONTRACT_REQUIRED")
+    require(environment_contract["schema"] == "420.bnb.environment.v1"
+            and env.get("BNB_ENV_SCHEMA") == environment_contract["schema"],
+            "ENVIRONMENT_SCHEMA_INVALID")
+    require(environment_contract["secret_root"] == str(root), "SECRET_ROOT_MISMATCH")
+    services = environment_contract["services"]
+    require(isinstance(services, dict) and services == {
+        "runtime": "bnb-api", "worker": "bnb-worker", "migration": "bnb-migrator"
+    }, "SERVICE_IDENTITY_CONTRACT_INVALID")
+    require(env.get("BNB_SERVICE_ID") == services[purpose], "SERVICE_IDENTITY_MISMATCH")
+    require(contract.get("travel") == {"bnb_booking": False}, "TRAVEL_BOOKING_FORBIDDEN")
+    for name in ("BNB_BOOKING_ENABLED", "BNB_TRAVEL_BNB_BOOKING", "BNB_FINANCIAL_EXECUTION"):
+        require(env.get(name) == "false", "RELEASE_FLAG_FORBIDDEN")
     origins = contract.get("origins", {})
     require(isinstance(origins, dict) and set(origins) == {"api", "web", "travel"}, "ORIGINS_REQUIRED")
     for origin in origins.values():
@@ -132,7 +148,7 @@ def load_contract(environment=None, *, root=Path("/run/secrets"), purpose="runti
         values = conninfo_to_dict(dsn)
     except (psycopg.Error, UnicodeError):
         raise ConfigurationError("DATABASE_DSN_INVALID") from None
-    expected_user = "bnb_runtime" if purpose == "runtime" else "bnb_migrator"
+    expected_user = "bnb_runtime" if purpose in ("runtime", "worker") else "bnb_migrator"
     require(values.get("user") == expected_user and values.get("password"), "DATABASE_ROLE_INVALID")
     require(values.get("host") and values.get("dbname") and not values.get("hostaddr"), "DATABASE_HOST_REQUIRED")
     require(values.get("sslmode") == "verify-full", "DATABASE_TLS_REQUIRED")

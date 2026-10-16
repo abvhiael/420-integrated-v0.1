@@ -163,7 +163,7 @@ def main():
     # Direct worker startup gets the same mount/role/TLS/image/disabled-flag validation as API.
     if os.environ.get('BNB_WORKER_SINK') != 'local-validation':
         raise ValueError('WORKER_SINK_NOT_APPROVED')
-    _, _, values = load_contract()
+    _, _, values = load_contract(purpose="worker")
     values['options'] += ' -c statement_timeout=5000 -c lock_timeout=2000'
     def connect():
         c = psycopg.connect(**values)

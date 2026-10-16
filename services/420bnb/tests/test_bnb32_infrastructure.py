@@ -39,13 +39,18 @@ def bindings(tmp_path):
     images = {n: f"example/{n}@sha256:" + "a" * 64 for n in ("api", "web", "ingress")}
     contract = {"schema": "420.bnb.production.v1", "release_sha": "b" * 40,
                 "images": images, "booking_enabled": False, "financial_execution": False,
+                "environment_contract": {"schema": "420.bnb.environment.v1", "secret_root": str(root),
+                    "services": {"runtime": "bnb-api", "worker": "bnb-worker", "migration": "bnb-migrator"}},
+                "travel": {"bnb_booking": False},
                 "origins": {"api": "https://api.example.test", "web": "https://bnb.example.test", "travel": "https://travel.example.test"},
                 "issuers": {prefix: {"issuer": "https://issuer.example.test", "audience": "urn:420:bnb:testnet",
                     "public_key_file": str(root / "issuer.pem"), "public_key_sha256": hashlib.sha256(pem).hexdigest(),
                     "approval_reference": "CI-FIXTURE-NOT-INDEPENDENT-APPROVAL"} for prefix in p.PREFIXES}}
     path = root / "deployment.json"
     path.write_text(json.dumps(contract))
-    env = {"BNB_ENV": "production", "BNB_DEPLOYMENT_FILE": str(path), "BNB_DATABASE_URL_FILE": str(dsn),
+    env = {"BNB_ENV": "production", "BNB_ENV_SCHEMA": "420.bnb.environment.v1",
+           "BNB_SERVICE_ID": "bnb-api", "BNB_BOOKING_ENABLED": "false",
+           "BNB_TRAVEL_BNB_BOOKING": "false", "BNB_FINANCIAL_EXECUTION": "false", "BNB_DEPLOYMENT_FILE": str(path), "BNB_DATABASE_URL_FILE": str(dsn),
            "BNB_BUILD_SHA": contract["release_sha"], "BNB_RELEASE_IMAGE": images["api"],
            "BNB_WEB_IMAGE": images["web"], "BNB_INGRESS_IMAGE": images["ingress"]}
     return root, path, contract, env
@@ -320,3 +325,50 @@ def test_extra_table_privilege_drift_rejected(database, table, privilege):
     finally:
         with psycopg.connect(**admin) as connection:
             connection.execute(f"REVOKE {privilege} ON TABLE {table} FROM bnb_runtime")
+
+
+@pytest.mark.parametrize("field,value,code", [
+    ("environment_contract", None, "ENVIRONMENT_CONTRACT_REQUIRED"),
+    ("environment_contract", {"schema": "420.bnb.environment.v2"}, "ENVIRONMENT_CONTRACT_REQUIRED"),
+    ("travel", {"bnb_booking": True}, "TRAVEL_BOOKING_FORBIDDEN"),
+    ("travel", {}, "TRAVEL_BOOKING_FORBIDDEN"),
+])
+def test_release_contract_negative_inputs(bindings, field, value, code):
+    root, path, contract, env = bindings
+    contract[field] = value
+    path.write_text(json.dumps(contract))
+    with pytest.raises(p.ConfigurationError, match=code):
+        p.load_contract(env, root=root)
+
+
+@pytest.mark.parametrize("field,value,code", [
+    ("BNB_ENV_SCHEMA", "420.bnb.environment.v2", "ENVIRONMENT_SCHEMA_INVALID"),
+    ("BNB_SERVICE_ID", "bnb-migrator", "SERVICE_IDENTITY_MISMATCH"),
+    ("BNB_BOOKING_ENABLED", "true", "RELEASE_FLAG_FORBIDDEN"),
+    ("BNB_TRAVEL_BNB_BOOKING", "true", "RELEASE_FLAG_FORBIDDEN"),
+    ("BNB_FINANCIAL_EXECUTION", "true", "RELEASE_FLAG_FORBIDDEN"),
+])
+def test_release_environment_negative_inputs(bindings, field, value, code):
+    root, _, _, env = bindings
+    env[field] = value
+    with pytest.raises(p.ConfigurationError, match=code):
+        p.load_contract(env, root=root)
+
+
+def test_release_service_identity_and_secret_root(bindings):
+    root, path, contract, env = bindings
+    env["BNB_SERVICE_ID"] = "bnb-worker"
+    _, _, worker_dsn = p.load_contract(env, root=root, purpose="worker")
+    assert worker_dsn["user"] == "bnb_runtime"
+    env["BNB_SERVICE_ID"] = "bnb-migrator"
+    dsn_file = root / "runtime.dsn"
+    dsn_file.rename(root / "migrator.dsn")
+    env["BNB_DATABASE_URL_FILE"] = str(root / "migrator.dsn")
+    (root / "migrator.dsn").write_text((root / "migrator.dsn").read_text().replace("user=bnb_runtime", "user=bnb_migrator"))
+    (root / "migrator.dsn").chmod(0o600)
+    _, _, migrator_dsn = p.load_contract(env, root=root, purpose="migration")
+    assert migrator_dsn["user"] == "bnb_migrator"
+    contract["environment_contract"]["secret_root"] = "/other"
+    path.write_text(json.dumps(contract))
+    with pytest.raises(p.ConfigurationError, match="SECRET_ROOT_MISMATCH"):
+        p.load_contract(env, root=root, purpose="migration")

@@ -9,6 +9,11 @@ x-api: &api
   tmpfs: [/tmp]
   environment:
     BNB_ENV: production
+    BNB_ENV_SCHEMA: 420.bnb.environment.v1
+    BNB_SERVICE_ID: bnb-api
+    BNB_BOOKING_ENABLED: "false"
+    BNB_TRAVEL_BNB_BOOKING: "false"
+    BNB_FINANCIAL_EXECUTION: "false"
     BNB_RELEASE_IMAGE: ${BNB_API_IMAGE:?required}
     BNB_WEB_IMAGE: ${BNB_WEB_IMAGE:?required}
     BNB_INGRESS_IMAGE: ${BNB_INGRESS_IMAGE:?required}

@@ -77,9 +77,9 @@ export function createInMemoryTravelConsentFixture({clock=()=>Math.floor(Date.no
     return previous.receipt;
    }
    const receipt=Object.freeze({commandId:request.commandId,handoffId:randomBytes(18).toString('base64url'),
-    tripId:request.tripId,actorId:request.actorId,tripRevision:request.tripRevision,purpose:request.purpose,expiresAt:request.expiresAt});
+    tripId:request.tripId,actorId:request.actorId,accountId:request.accountId,sessionId:request.sessionId,tripRevision:request.tripRevision,purpose:request.purpose,expiresAt:request.expiresAt});
    commands.set(key,{hash:digest(JSON.stringify(request)),receipt});rows.set(receipt.handoffId,receipt);return receipt;
   },
-  async read({handoffId,tripId,actorId}){const r=rows.get(handoffId);return r&&r.tripId===tripId&&r.actorId===actorId&&r.expiresAt>clock()?r:null}
+  async read({handoffId,tripId,actorId,accountId,sessionId}){const r=rows.get(handoffId);return r&&r.tripId===tripId&&r.actorId===actorId&&r.accountId===accountId&&r.sessionId===sessionId&&r.expiresAt>clock()?r:null}
  });
 }

@@ -25,6 +25,7 @@ def verify(file):
         raise ValueError("stake invalid")
     if candidate.get("maxNetBankrollLiabilitySmallestUnits")!=candidate.get("grossCapSmallestUnits",0)-candidate["stakeSmallestUnits"]:
         raise ValueError("liability cap mismatch")
+    trust=json.loads(Path(doc["trustedReviewerRegistryPath"]).read_text())
     approvals=doc["approvals"]
     seen=set()
     if set(approvals)!=set(ROLES): raise ValueError("all three approvals mandatory")
@@ -34,6 +35,9 @@ def verify(file):
         identity=a["reviewerId"]
         if identity in seen or identity==doc["implementationAuthorId"]:
             raise ValueError("reviewers must be independent and distinct")
+        allowed=trust.get(role,{}).get(identity)
+        if not allowed or allowed!=a["publicKeyPem"]:
+            raise ValueError(role+" reviewer is not pinned in the trusted authority registry")
         seen.add(identity)
         signed={"role":role,"reviewerId":identity,"decision":"APPROVED","candidate":candidate}
         with tempfile.TemporaryDirectory() as tmp:

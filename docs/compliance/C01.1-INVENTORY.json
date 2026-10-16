@@ -1,0 +1,3692 @@
+{
+  "schema": "420compliance-c01.1-inventory/v1",
+  "step": "C01.1",
+  "qualification_level": 1,
+  "base_sha": "c5a4f220d1fbda01f707d359aa9bb32921a138b1",
+  "tree_sha": "fe398a6d95f701f0db86115005c60b5adc6b4706",
+  "tree_entry_count": 7207,
+  "tree_listing_sha256": "68bb19e5a0c4490e3fcec17d44cbaeb5d758c6ceb6531f1d0d450e0d862871f9",
+  "agents_paths": [],
+  "dedicated_path_matches": [],
+  "exact_content_matches": [],
+  "related_content_matches": [
+    "420-indexer/descriptors/rights420-v1.json",
+    "compute/web/app.js",
+    "compute/web/core/handoff.js",
+    "compute/web/index.html",
+    "compute/web/test/handoff.test.js",
+    "config/420travel-genesis.json",
+    "contracts/config/420rights-genesis.json",
+    "contracts/config/bridge/cadc.json",
+    "contracts/config/bridge/eurc-ethereum-v12.5.21.json",
+    "contracts/config/bridge/eurc-solana-v12.5.22.json",
+    "contracts/config/bridge/qcad-ethereum-v12.5.20.json",
+    "contracts/config/compute-market/cmp-2.1-worker-offers.json",
+    "contracts/config/compute-market/cmp-2.2-compute-requests.json",
+    "contracts/config/compute-market/cmp-2.3-replaceable-matching.json",
+    "contracts/src/compute/ComputeJobWorkerSnapshotEvidence420.sol",
+    "contracts/src/compute/ComputeMatch420.sol",
+    "contracts/src/compute/ComputeOfferRegistry420.sol",
+    "contracts/src/compute/ComputeRequestRegistry420.sol",
+    "contracts/src/compute/ComputeWorkerConflictingResultSlashEvidence420.sol",
+    "contracts/src/compute/ComputeWorkerRegistry420.sol",
+    "contracts/src/pay/AccountingCommitment420.sol",
+    "contracts/src/rights/RightsClaimRegistry420.sol",
+    "contracts/test/BetAccessPolicy420.t.sol",
+    "contracts/test/ComputeCapacityAwareAssignment420.t.sol",
+    "contracts/test/ComputeMatchingEngine420.t.sol",
+    "contracts/test/ComputeRequests420.t.sol",
+    "contracts/test/ComputeWorkerAuthorization420.t.sol",
+    "contracts/test/ComputeWorkerConflictingResultSlashEvidence420.t.sol",
+    "contracts/test/ComputeWorkerOffers420.t.sol",
+    "contracts/test/ComputeWorkerRegistry420.t.sol",
+    "contracts/test/RightsDeploymentBinding420.t.sol",
+    "contracts/test/RightsGenesis420.t.sol",
+    "docs/BONG-GOGGLES-BG-19-13.md",
+    "docs/GEN-SVC-2-368-2-VANCOUVER-PARKS-UPLOADED-EXPORT-RECONCILIATION.md",
+    "docs/GEN-SVC-2-368-2-VANCOUVER-RAW-EXPORT-ACQUISITION-GATE.md",
+    "docs/ROADMAP.md",
+    "docs/apps/identity/architecture.md",
+    "docs/apps/identity/deployment-operations.md",
+    "docs/architecture/protocols/rights-verify.md",
+    "docs/audit/420GROW-GROW-01-PRODUCT-DEFINITION.md",
+    "docs/audit/420GROW-V2-01-EXPANDED-PRODUCT-DECISION.md",
+    "docs/audit/420GROW-V2-02-ARCHITECTURE-TENANCY-SECURITY.md",
+    "docs/audit/420GROW-V2-02-LEVEL-1-QUALIFICATION.md",
+    "docs/audit/420GROW-V2-05-PLANT-LIFECYCLE-GENETICS.md",
+    "docs/audit/420GROW-V2-09-HARVEST-ANALYTICS.md",
+    "docs/audit/420GROW-V2-09-LEVEL-1-QUALIFICATION.md",
+    "docs/audit/420GROW-V2-10-INVENTORY-TRACEABILITY-EXPORTS.md",
+    "docs/audit/420GROW-V2-10-LEVEL-1-AND-2-QUALIFICATION.md",
+    "docs/audit/420GROW-V2-11-AI-ASSISTANCE.md",
+    "docs/audit/420GROW-V2-12-LEVEL-1-QUALIFICATION.md",
+    "docs/audit/420GROW-V2-14-LEVEL-1-QUALIFICATION.md",
+    "docs/audit/420GROW-V2-15-LEVEL-3-GATE-AND-RECONCILIATION.md",
+    "docs/audit/420GROW-V2-ROADMAP.md",
+    "docs/audit/420NAMES-COMPLETE-AUDIT-20260930.md",
+    "docs/audit/DOOBR-PHASE-CLOSEOUT.md",
+    "docs/audit/DOOBR-TESTNET-DEFERRED-QUALIFICATION-ROADMAP.md",
+    "docs/audit/HZ-GCA-1.8-QUALIFICATION.md",
+    "docs/audit/HZ-GCA-13-QUALIFICATION.md",
+    "docs/audit/ID-AUDIT-1-AUTHORITATIVE-IDENTITY-API-DECISION.md",
+    "docs/audits/doobr/DOOBR-AUDIT-2-ARCHITECTURE.md",
+    "docs/audits/doobr/DOOBR-AUDIT-3-COMPATIBILITY.md",
+    "docs/audits/doobr/DOOBR-AUDIT-5-INTEGRATION-BOUNDARIES.md",
+    "docs/audits/doobr/DOOBR-AUDIT-6-CODE-DISPOSITION.md",
+    "docs/audits/doobr/DOOBR-AUDIT-7-SECURITY.md",
+    "docs/audits/doobr/DOOBR-AUDIT-8-OPERATIONS-USER-GUIDE.md",
+    "docs/ci/coverage-audit.md",
+    "docs/commerce/COM-1-ARCHITECTURE-AND-ROADMAP.md",
+    "docs/compute-market/CMP-0.5-PROVIDER-NODE-RESOURCE-IDENTITY.md",
+    "docs/compute-market/CMP-1-IMPLEMENTATION-ROADMAP.md",
+    "docs/compute-market/CMP-1.3-ROADMAP-RECOVERY-MAPPING.md",
+    "docs/compute-market/CMP-1.3.0-WORKER-REGISTRY-BASELINE-AND-INTEGRATION-DESIGN.md",
+    "docs/compute-market/CMP-1.3.12-ACCEPTED-ATTEMPT-LIFECYCLE-QUALIFICATION.md",
+    "docs/compute-market/CMP-1.3.6-WORKER-SNAPSHOT-QUALIFICATION.md",
+    "docs/compute-market/CMP-2.1-WORKER-OFFERS.md",
+    "docs/compute-market/CMP-2.2-COMPUTE-REQUESTS.md",
+    "docs/compute-market/CMP-2.2-QUALIFICATION-EVIDENCE.md",
+    "docs/compute-market/CMP-2.3-REPLACEABLE-MATCHING.md",
+    "docs/compute-market/CMP-4.3-RESEARCHER-INSTITUTION-IDENTITY.md",
+    "docs/compute-market/CMP-4.8-PUBLICATION-RETENTION-POLICY.md",
+    "docs/compute-market/CMP-4.8-QUALIFICATION-EVIDENCE.md",
+    "docs/compute-market/COMPUTE-MARKET-POST-CMP1-ROADMAP.md",
+    "docs/genesis-services/GEN-SVC-3-TRAVEL.md",
+    "docs/genesis-services/THREAT-MODEL.md",
+    "docs/puffbuddies/PB-0.10-SAFETY-MODERATION-PRINCIPLES.md",
+    "docs/puffbuddies/PB-0.11-DATA-LIFECYCLE-DELETION.md",
+    "docs/puffbuddies/PB-0.14-CANNABIS-TAXONOMY.md",
+    "docs/puffbuddies/PB-0.14-QUALIFICATION.md",
+    "docs/puffbuddies/PB-0.16-NON-GOALS-RECONCILIATION.md",
+    "docs/puffbuddies/PB-0.2-MVP-SCOPE.md",
+    "docs/puffbuddies/PB-0.3-BLOCKCHAIN-OFFCHAIN-BOUNDARY.md",
+    "docs/puffbuddies/PB-0.6-ADULT-ELIGIBILITY-POLICY.md",
+    "docs/puffbuddies/PB-0.6-QUALIFICATION.md",
+    "docs/puffbuddies/PB-2.2-ADULT-ELIGIBILITY-STATE-MODEL.md",
+    "docs/puffbuddies/PB-2.2-QUALIFICATION.md",
+    "docs/puffbuddies/PB-2.3-QUALIFICATION.md",
+    "docs/puffbuddies/PUFFBUDDIES-ROADMAP.md",
+    "genesis/svc3/travelapp/ATTRIBUTES.md",
+    "genesis/svc3/travelapp/COMPATIBILITY.md",
+    "genesis/svc3/travelapp/attributes.go",
+    "genesis/svc3/travelapp/handler.go",
+    "grow/cultivation/qualify.sql",
+    "grow/dashboard/actions.go",
+    "grow/dashboard/integration_test.go",
+    "grow/equipment/qualify.sql",
+    "grow/facility/qualify.sql",
+    "grow/inventory/service.go",
+    "grow/plants/qualify.sql",
+    "grow/storage/migrations/0001_initial.up.sql",
+    "grow/storage/test/negative.sql",
+    "grow/storage/test/qualify.sh",
+    "grow/telemetry/qualify.sql",
+    "grow/web/README.md",
+    "grow/web/workspace.html",
+    "grow/web/workspace.js",
+    "hz/generate/src/award-prizes.js",
+    "hz/generate/test/award-prizes.test.js",
+    "packages/420-sdk/src/compute.ts",
+    "packages/420-sdk/test/compute-sdk.test.mjs",
+    "packages/420-sdk/test/fixtures/compute-request-vector.json",
+    "reefer-review/web/cannabis-policy-update.html",
+    "release/rc/0.1.0-rc1/docs/ROADMAP.md",
+    "scripts/verify-cmp-2-1-worker-offers.py",
+    "scripts/verify-cmp-2-3-replaceable-matching.py",
+    "scripts/verify-doobr-audit-5.py",
+    "scripts/verify-grow-v2-01.py",
+    "scripts/verify-puffbuddies-pb0.py",
+    "services/compute-api/src/job-api.ts",
+    "wallet/mobile/W12.4-RELEASE-BUNDLE.md"
+  ],
+  "sources": [
+    {
+      "path": "config/genesis-applications.json",
+      "blob_sha": "c8d3697a02dbc7b4fbd6e3713f5ac4a0e6611806",
+      "sha256": "49478be7863edb80987f39f05bd15cc0f9627573b69c128fb8e194af86b84aec"
+    },
+    {
+      "path": "config/genesis-consumer-services.json",
+      "blob_sha": "c7a2041908e8acf11ea63f80169ae44aef50b45b",
+      "sha256": "0f0cb9604280bca3e0dfffb710e6eb49ad30ea57c6a56f4cb251964ccca4db29"
+    },
+    {
+      "path": "config/420travel-genesis.json",
+      "blob_sha": "54725a1d32c5d0fc3b898f4864a0c30665fd598f",
+      "sha256": "9c9dd434dbb2b56f3b26b7c42f9f25c4b06f658aace52a85abd2aa03152ca6e1"
+    },
+    {
+      "path": "config/420location-events-genesis.json",
+      "blob_sha": "8c66284d0dd9172462efea0ab27c4a0d404bbde0",
+      "sha256": "d20bd32d3a07bd553f4338472a0ca9e6129d7bd17a98df696f24f52cb571c28b"
+    },
+    {
+      "path": "contracts/config/genesis-dapp-contract-map.json",
+      "blob_sha": "097c90c34d77c70464f2b6cb7f695d26a6566cb3",
+      "sha256": "eb4b1483475c177010deed951d270213e420d69b8327917b58c1d39b668ad488"
+    },
+    {
+      "path": "contracts/config/genesis-address-namespace.json",
+      "blob_sha": "d9c40056db30513c0445f0c341d261b63dc6a1a5",
+      "sha256": "bf1ef4782a59fb9cee7c479e1b9a940ec8816093cfe0106242c2d068a3355c6a"
+    },
+    {
+      "path": "contracts/src/libraries/ServiceIds420.sol",
+      "blob_sha": "dd00c073fe17f7095a0bccb5db2678ff9cc8e8bd",
+      "sha256": "7f53fb5effa3c3b4371cec1f3cd331e584c6564fd1cbf66a858950b4937890b0"
+    },
+    {
+      "path": "contracts/src/apps/Identity420.sol",
+      "blob_sha": "9d6bbfecf6cbb406312138acc735c5390513cd5a",
+      "sha256": "f47526bce8b55d10c64fb3d8d320fc1e4dc6d43945db064e86d373adec7e0152"
+    },
+    {
+      "path": "contracts/src/interfaces/genesis/IIdentityCredential420.sol",
+      "blob_sha": "a7ce3526f15a70727800ab3f43dda7f0160ea37d",
+      "sha256": "74f96b43758ee97d3124e112d669e9ba9bccf9ce63be1e6c7dee8e1948f4f978"
+    },
+    {
+      "path": "contracts/config/interfaces/identity-dependency-reconciliation.json",
+      "blob_sha": "0a640f6f090af8a9ea4a217f47053269456c9861",
+      "sha256": "6093166fbedba1b41058da7e10ddf54aa4ef5bbf7e7608b1e30fe5e8e66dfd7c"
+    },
+    {
+      "path": "contracts/src/apps/ProtocolRegistry.sol",
+      "blob_sha": "9ab3d53a68b6533978f41e0202e5268f1d615c19",
+      "sha256": "22eef7a584eb2054adcbfbd625b50560a9f3ca31b50c30b43ecdee9aa993b7fb"
+    },
+    {
+      "path": "docs/apps/identity/architecture.md",
+      "blob_sha": "40185538bc0bbeec1ef69fc01c3953210aa3b7a7",
+      "sha256": "f4e49439d4d394b6e42310dfbaddd7386d0d30e88b22f44c56e06282649a68da"
+    },
+    {
+      "path": "docs/apps/registry/architecture.md",
+      "blob_sha": "ab5e8c3431bbbc3f13feabfe2d773db0ae92ddcb",
+      "sha256": "9e191643782e386b3cdbbc1d74709d63495ed73f16ee51941a583c4c6603885e"
+    },
+    {
+      "path": "docs/apps/verify/architecture.md",
+      "blob_sha": "8baa91e4edf7890804d227b7d919773dcc64d766",
+      "sha256": "df915a0ea15ef638c2063dc0c9adcf488f87a15f7329eb4527e75bbffb6479d3"
+    },
+    {
+      "path": "docs/apps/oracle/index.md",
+      "blob_sha": "0bd359f74ff2e1a60e91ed3efb9de7228b3803ac",
+      "sha256": "9968eac4ecf701c015e9d43a9b4140209afddc08ee422b732b1ad994065a7316"
+    },
+    {
+      "path": "contracts/src/interfaces/IOracle420.sol",
+      "blob_sha": "f1b9ff8593336471b3ce9b2fb97e3c437a101764",
+      "sha256": "2b68ecfb6c818f53f2853467035edbc34e0ebdbe1581c0ebaff48c6c8d9a38a3"
+    },
+    {
+      "path": "contracts/src/interfaces/genesis/IOracle420.sol",
+      "blob_sha": "8450a0801f10ba754ba59cf8a7ae1fe4a75fdced",
+      "sha256": "6481973769744a415832786cc35f1f886aebff8b1899cc1271d0b36be4f80d4b"
+    },
+    {
+      "path": "location/model/place.go",
+      "blob_sha": "62a44e90abf624026bb80e7ac5953f70a4a55fd9",
+      "sha256": "5cf86742abcfcc379e3ac0fb5b7ca8e05128f49ae7418f01a28355642be85354"
+    },
+    {
+      "path": "location/geo/index.go",
+      "blob_sha": "f15944dbd78903f560c953773c5939e22bacd4d4",
+      "sha256": "3b539b58d471c37d36a676cba9b2ffd482ff8ccdcc939b042e3c82bb1e4b3e3d"
+    },
+    {
+      "path": "location/privacy/policy.go",
+      "blob_sha": "1e776158b04ef71d34c5574b1f3dffe4e7d3c0ba",
+      "sha256": "dfe3223dc003c7fc7216ff8f28838fa1938347a22a3b095a5eff315327ea9592"
+    },
+    {
+      "path": "location/service/publication_read.go",
+      "blob_sha": "51cddde8d2a2fc1b3f468536fa028597f8ff44de",
+      "sha256": "5d6677cb2a643aa4ca116c0c643618a56dd18e04c35d44915f51dc09acbfc808"
+    },
+    {
+      "path": "location/service/publication_write.go",
+      "blob_sha": "f2b937aff6203420de53b61463f518ad56ce12ca",
+      "sha256": "cf950e0b63b08835c69f32468b1e50315a18b82ad776c49a2fb7c1329abc1d56"
+    },
+    {
+      "path": "location/verify/adapter.go",
+      "blob_sha": "e1b3a4efdbef906e0afe84812aecf188f470513c",
+      "sha256": "ba92bf76aa8bf6438129509bd22e79493566386288542d8af6912136268dcdc9"
+    },
+    {
+      "path": "location/registry/adapter.go",
+      "blob_sha": "7632fa58e7b0c71f1416a47dbc100441e5ef7382",
+      "sha256": "a1e19b474e68fbf6a0e6338466928e9a7b4f259c9aaa46ff652766994d6ef501"
+    },
+    {
+      "path": "location/uikit/map.go",
+      "blob_sha": "0658e80f3131820ed733ac43c1b4714fad359cc0",
+      "sha256": "33cb1068f5795ff2f82b929f88545dd2e4f6ec7cf4da0e5aca6d30954aa0b8fc"
+    },
+    {
+      "path": "genesis/svc3/travelapp/ATTRIBUTES.md",
+      "blob_sha": "b51eff72843291821738f1c0efe38bb1b3c6694b",
+      "sha256": "b8c8dd06bb538eb5991e25f501fdff9ad4b870df689d9d5efecf38d416de4535"
+    },
+    {
+      "path": "genesis/svc3/travelapp/COMPATIBILITY.md",
+      "blob_sha": "40449b8ec042f7f5e32c97204b52b7d26c785027",
+      "sha256": "bbf22a1d3fbff05a325ea23746852723bf40eeaea11a2dbad96bd4afbcd0a683"
+    },
+    {
+      "path": "genesis/svc3/travelapp/compatibility.go",
+      "blob_sha": "73781e1c035b1ccc475959f8305229ca796cf55a",
+      "sha256": "adac0597b9fe7c5b0bc87910b35167df8008d0a7680f695ea29f20abae6a6e1c"
+    },
+    {
+      "path": "genesis/svc3/travelapp/claims.go",
+      "blob_sha": "9c7a58a361d119bbb7f1180dfd12dbc146f7d55b",
+      "sha256": "16afb67a3606e1ebdba330349655bb5d361a436bddec9dc07b9e73fa15b541d8"
+    },
+    {
+      "path": "genesis/svc3/travelapp/claim_workflows.go",
+      "blob_sha": "74dbb41c2eedfea0bc3acaa5831bd8dcc6b09912",
+      "sha256": "a479461d9be256fd00575b7a55f6ca78be2823c10195417a430021921b2a150f"
+    },
+    {
+      "path": "docs/genesis-services/GEN-SVC-3-TRAVEL.md",
+      "blob_sha": "5d7f65959791d5fc82cc045a6a748304369600b0",
+      "sha256": "7c8826985d07a018039dc106c1bcd61a543caa7b38e69f015de8ec9d73828615"
+    },
+    {
+      "path": "docs/audit/DOOBR-PHASE-CLOSEOUT.md",
+      "blob_sha": "b4a83829454ff423a9634ee1525e3314d198013a",
+      "sha256": "8eba4dad07d7eb7e034028b84093c0e93cef08f0ebcd05b5d45b22d4fc8a87de"
+    },
+    {
+      "path": "docs/audit/DOOBR-TESTNET-DEFERRED-QUALIFICATION-ROADMAP.md",
+      "blob_sha": "ee4f60da6a25c19e0ae2056f1be7f54e2b317266",
+      "sha256": "066e50847f59f065edeaf4c3dbdf831f8e125f177056a34549a2937da4a7e314"
+    },
+    {
+      "path": "docs/audit/420TRAVEL-TESTNET-DEFERRED-QUALIFICATION-ROADMAP.md",
+      "blob_sha": "d421e966915810beaf43319dfb8772762341171c",
+      "sha256": "d8a70b2f0db8a4a6f7904a6a43e222c072fd70fe2c2143a0b01c324acded446c"
+    },
+    {
+      "path": "docs/audits/doobr/DOOBR-AUDIT-5-INTEGRATION-BOUNDARIES.md",
+      "blob_sha": "ae2b43a5f4237fac8c642982e2b25ecc3cb89fa6",
+      "sha256": "ecb0385b6720ad9c2b5d25a59c3b2b5dde549b6b9ddd44a0371d84499d12b4a3"
+    },
+    {
+      "path": "docs/audits/doobr/DOOBR-AUDIT-7-SECURITY.md",
+      "blob_sha": "878693983357a4cb6029dbf3dec4de60275dfee0",
+      "sha256": "b4b86cf9bd495c4f9af034b322f42ff536e6b087232841d4c7c225ac3ac7755c"
+    },
+    {
+      "path": "puffbuddies/domain/eligibility_state.py",
+      "blob_sha": "fc17699ef258cb2c283485c390942280b4c48487",
+      "sha256": "bb6607669faeb7fe90ced9725b2ef45f9c47734c33c63143eb96f723d454f546"
+    },
+    {
+      "path": "docs/puffbuddies/PB-2.2-ADULT-ELIGIBILITY-STATE-MODEL.md",
+      "blob_sha": "57bb3cf53c5c32811e7accad61319bdc7cb42e46",
+      "sha256": "156af48c25c9423f6b2adf099a997362f02318f3587237cc1c191a7b144c7a21"
+    },
+    {
+      "path": "grow/inventory/service.go",
+      "blob_sha": "74de36f8075f3109cdba1f35e642018568378fb3",
+      "sha256": "3429a592314fdd58cd74382034ce17803d679897394b372c2131f264f25352b7"
+    },
+    {
+      "path": "contracts/src/rights/RightsClaimRegistry420.sol",
+      "blob_sha": "2f0f6d5b1b6cc8576e034b6434c4a3d2fc1d0d8d",
+      "sha256": "c7db6d35bbf7730f6ed6e58bd9cc6b418aa20bbdb93e91298b991bf1d4d4d0b4"
+    },
+    {
+      "path": "contracts/src/pay/AccountingCommitment420.sol",
+      "blob_sha": "ab2bb021e4f45ced9c21e9ab1f6bd82ac3e63be9",
+      "sha256": "498f18fcf6a9faf16a72d21bbb0dfe6bab479586a38d06cecadb3bc5613e759a"
+    },
+    {
+      "path": "contracts/src/revenue/DevelopmentCompensationVault420.sol",
+      "blob_sha": "46d156e901db13eca1ee6bebcb78ae4cecd67595",
+      "sha256": "4f28e6fbcd71e78632ce8decee2aac2967c7117d41e7574f67f8c95ec32a3e8b"
+    },
+    {
+      "path": "docs/audit/DEVCOMP-COMPLETE-AUDIT-20261004.md",
+      "blob_sha": "b2b92fd070127b6c24ca5c97711ddbd4afdcf422",
+      "sha256": "b136f27ac1aef4086f5ced690888c3ce358da2130452d66bbe0f33398bae5adb"
+    },
+    {
+      "path": "docs/apps/notifications/architecture.md",
+      "blob_sha": "2c3e1cec2e646b5d9b0a8221d4eac8f5c10585aa",
+      "sha256": "ecf51b50b17e720cdeae0a632564c85d5ad2ac5e5a2cd7b1c72942c43c014db2"
+    },
+    {
+      "path": "notifications/delivery/queue.go",
+      "blob_sha": "23ed4221ef8beee10e44d5bb3e2453ff0c3fece6",
+      "sha256": "cd6875b374ad067af5538a789985aaa1208cfda04d8c2f9fdb524d45c1bea1cc"
+    },
+    {
+      "path": ".github/workflows/doobr-audit-1-level1.yml",
+      "blob_sha": "4e0684535fbb07f0fb14aea71acccb3ddf82b133",
+      "sha256": "5dcc2ee0f20a814b70a9dfe5951ed69939d2251fc7dc756da3dbeb3163e3609e"
+    },
+    {
+      "path": ".github/workflows/gen-svc-3.yml",
+      "blob_sha": "f6b0508c92fa05c50b487a7e18008b1e58f7698a",
+      "sha256": "f2980e3088107cc0609e1d95b223302c663e4613c941f6c2811074805ab1f7dd"
+    },
+    {
+      "path": ".github/workflows/420travel-web-qualification.yml",
+      "blob_sha": "2664bcf1968ccbadc1baaabd4100408e9cf97685",
+      "sha256": "93a0700ede1a71104870bd41ab00f251be72f7c897ff24937c8187355be8eb98"
+    },
+    {
+      "path": ".github/workflows/docs-qualify.yml",
+      "blob_sha": "43ecc541469e5a9226bdf0db6ea939b7367aac98",
+      "sha256": "fbc99114da2111507a7da59fe6343420d227b5287ffb7598591a5c5aba7aebeb"
+    },
+    {
+      "path": ".github/workflows/contracts-foundry.yml",
+      "blob_sha": "f011ea6f3495997167a01fdec1e257632fe63a3c",
+      "sha256": "51a05ac71699c00c38b76ca8cfd55fa9103ce989437d2f841b8dd2e0b5629851"
+    },
+    {
+      "path": ".github/workflows/genesis-address-authority.yml",
+      "blob_sha": "e756fee00f2d8b4c6e993bf54b0343ffa672c4cc",
+      "sha256": "863e8576f9d0e9d16110c83372760a45fb3facd7997c4744adbd8d6c8a72395e"
+    },
+    {
+      "path": ".github/workflows/qualification.yml",
+      "blob_sha": "db9844f49ede85d1ed01c54453887e63d1e87ef1",
+      "sha256": "3a1667810557b4c47085a50aa4e0f58796460302fc132009bfcabee000134c71"
+    }
+  ],
+  "branch_count": 637,
+  "branches": [
+    {
+      "branch": "420ai-branding-logo-20261004",
+      "sha": "873733895dda0ef2c6662fc6fa7ca25a2b837a99"
+    },
+    {
+      "branch": "420mail-audit-remediation-20261005",
+      "sha": "3305593a9b245358f8c7555abb5326e3ec566893"
+    },
+    {
+      "branch": "origin",
+      "sha": "c5a4f220d1fbda01f707d359aa9bb32921a138b1"
+    },
+    {
+      "branch": "__invalid_tmp__",
+      "sha": "4be7fee67a7739bbb3076122c451335d215dbe33"
+    },
+    {
+      "branch": "ai-compute-recovery-v1",
+      "sha": "ffeee5e7b59993d5c113b817547524750afc3b17"
+    },
+    {
+      "branch": "ai-recovery-main-reconciliation-20260920",
+      "sha": "adc456fbf72a13d57cb4a9213237a75683873650"
+    },
+    {
+      "branch": "analytics-audit-20261003",
+      "sha": "b1343dd372230bfa79598b3ebbcf78e17141ec39"
+    },
+    {
+      "branch": "analytics-cloudflare-site-20261003",
+      "sha": "125a31cc2fd83817a9f20637357d76d09698a1f6"
+    },
+    {
+      "branch": "appstore-remediation-20261004",
+      "sha": "8eb6c0c77bd5974104deb8c011ec089086e00e31"
+    },
+    {
+      "branch": "audit/420ai-complete-20261002",
+      "sha": "6477d7e2cf559c9fe56ae99a253f9fe710d1643a"
+    },
+    {
+      "branch": "audit/420ai-post-genesis-address-reconcile-20260920",
+      "sha": "277395931f5419af0728f3ea801800401a8bb336"
+    },
+    {
+      "branch": "audit/420arbitration-complete-20261004",
+      "sha": "d32dd95770eed7e2e2d1f58b6117d2b72f2e17c7"
+    },
+    {
+      "branch": "audit/420attention-complete-20261006",
+      "sha": "635bb16fc361da345e56c73401f91cdece45e923"
+    },
+    {
+      "branch": "audit/420bnb-bnb-1-1-source-reconciliation-20261009",
+      "sha": "0bc67ae60a64a2829ab8773134d7a4d9618bfa19"
+    },
+    {
+      "branch": "audit/420bridge-complete-20261001",
+      "sha": "a1bac7e7ec8f497cd493f14e116ebc01c17b5acf"
+    },
+    {
+      "branch": "audit/420commerce-com-2-upstream-adaptations",
+      "sha": "d2cfdd00778d642e4cef4d9a2aecfac0ae2b3f22"
+    },
+    {
+      "branch": "audit/420governance-complete-20261001",
+      "sha": "d22222169e0d24bd6583ab6a4c81e584a2cca89e"
+    },
+    {
+      "branch": "audit/420grow-canonical-gap-inventory",
+      "sha": "507bfa16dba3d03e311db54010002ba79be1c9de"
+    },
+    {
+      "branch": "audit/420grow-v2-01-product-decision-20261008",
+      "sha": "6b891e01fb7033bf84d4980053c64781edde2ce9"
+    },
+    {
+      "branch": "audit/420grow-v2-15-level3-d949475",
+      "sha": "d949475124c6fa07f11ec47ac8b5604e99cbab56"
+    },
+    {
+      "branch": "audit/420hz-reconciliation-20261006",
+      "sha": "1b4b3a3a2498c597bc1117ea7eb5aa137cf08780"
+    },
+    {
+      "branch": "audit/420is-complete-20261004",
+      "sha": "df2365bf16f0f94ec67e772984ef25e918ebf9a1"
+    },
+    {
+      "branch": "audit/420launchpad-remediation",
+      "sha": "39ebdea1da3e84118842cb505a7a859f5c815f02"
+    },
+    {
+      "branch": "audit/420media-complete-20261006",
+      "sha": "50fc9090cb75f0c8e86b6f5a88e0edac3e8cb7c9"
+    },
+    {
+      "branch": "audit/420names-complete-20260930",
+      "sha": "106ac628dc123e6e0ced830bef99fff29189f8db"
+    },
+    {
+      "branch": "audit/420pay-complete-20261001",
+      "sha": "f2b6b1e5f4eab6eeb0f33f419a36bd7a78a32376"
+    },
+    {
+      "branch": "audit/420pay-complete-20261001-r2",
+      "sha": "3f3327259705106a23605dd155f9e08870757f71"
+    },
+    {
+      "branch": "audit/420pay-complete-20261001-r3",
+      "sha": "0a7579760733e9445df83e59a3183d659793510a"
+    },
+    {
+      "branch": "audit/420randomness-audit-5-qualification",
+      "sha": "c867398cfe640064f09e0fac65f83f4551ab59de"
+    },
+    {
+      "branch": "audit/420randomness-remediation",
+      "sha": "1bf46666c8ea86ce52de47148ae71f40ef1fae7b"
+    },
+    {
+      "branch": "audit/420registry-complete-20260928",
+      "sha": "a63023f47c992661b22b344e051455a330722e97"
+    },
+    {
+      "branch": "audit/420registry-reg-audit-2-final",
+      "sha": "2d9cf4f9f164d34b7280518870150a3ea71922ad"
+    },
+    {
+      "branch": "audit/420registry-reg-audit-2-reconciled",
+      "sha": "7982c3656eb9b88dd0098229df24c9e8d21fa658"
+    },
+    {
+      "branch": "audit/420registry-reg-audit-3-20260928",
+      "sha": "8abd718598de76e9edf3bb57c7da80c1e38bda5f"
+    },
+    {
+      "branch": "audit/420registry-reg-audit-3-reconciled-20260929",
+      "sha": "17fde85958a398bbb927a177304eaba442a4ad5e"
+    },
+    {
+      "branch": "audit/420registry-reg-audit-4-20260929",
+      "sha": "be83b4c52d1f43ed1929482efdea80378cfa09e0"
+    },
+    {
+      "branch": "audit/420registry-reg-audit-4-final-reconciled-20260929",
+      "sha": "be83b4c52d1f43ed1929482efdea80378cfa09e0"
+    },
+    {
+      "branch": "audit/420registry-reg-audit-4-reconciled-20260929",
+      "sha": "8690c785ffc0993c0d4cef6f60b3da3c3c5a0623"
+    },
+    {
+      "branch": "audit/420registry-reg-audit-4-reconciled-20260929b",
+      "sha": "9baaa5c6e89cf08bf152d36c83477890a41ae727"
+    },
+    {
+      "branch": "audit/420registry-reg-audit-5-20260929",
+      "sha": "f795e0dd62b744cb9cb9dfed9eeb7ab347ff12bc"
+    },
+    {
+      "branch": "audit/420registry-reg-audit-6-20260930",
+      "sha": "4650148fd3ce1431bd7d413beb81dffd20f02f94"
+    },
+    {
+      "branch": "audit/420registry-reg-audit-7-20260930",
+      "sha": "bf9213df98d9443c2758b29313a612f56d5343cd"
+    },
+    {
+      "branch": "audit/420registry-reg-audit-8-20260930",
+      "sha": "5eb8b8d572a2f14bf82b3c176da2ddc89ccc592d"
+    },
+    {
+      "branch": "audit/420registry-reg-audit-8-reconciled-20260930",
+      "sha": "077446484ad07b0dd9bbc150dadb246f51d225be"
+    },
+    {
+      "branch": "audit/420rights-complete-20261003",
+      "sha": "af8382bb2bc44850c8578c34d087acd52e30212d"
+    },
+    {
+      "branch": "audit/420search-complete-20261004",
+      "sha": "eb8adc89d6cf2c4fd066d7911f5516bb0bd9ae7b"
+    },
+    {
+      "branch": "audit/420stake-complete-20260930",
+      "sha": "3c34149d5fc117c3fb2519c3a8f6d9d3ac565bc3"
+    },
+    {
+      "branch": "audit/420status-complete-20261001",
+      "sha": "96704cf9694bea716a77c0b8d7a72663f93736fa"
+    },
+    {
+      "branch": "audit/420swap-complete-20261001",
+      "sha": "ac2a047a0165d8c8eab2a5444d1c971668365dc6"
+    },
+    {
+      "branch": "audit/420token-complete-20261004",
+      "sha": "7f84cfce40456ecf988efff13edecf1fd530c8a2"
+    },
+    {
+      "branch": "audit/420town-complete-20261004",
+      "sha": "577554f3c8884174196f48f856fd9436f7ec1f54"
+    },
+    {
+      "branch": "audit/420treasury-complete-20261001",
+      "sha": "eaa16c9a6d4f1ef57076e362a6cd16d289f693de"
+    },
+    {
+      "branch": "audit/420verify-20261003",
+      "sha": "ff2a27ba76b3802bb9940c4fa3c0d82248e87b2c"
+    },
+    {
+      "branch": "audit/budtender-complete-20261007",
+      "sha": "6228f05e04bdef4240fb042843b09e131cb46d06"
+    },
+    {
+      "branch": "audit/cmp-1.3.8-1.3.16-roadmap-20260928",
+      "sha": "54be6fce65d2ca14a9d9a2a0acf09c4b6a053b85"
+    },
+    {
+      "branch": "audit/dev-compensation-vault-20261004",
+      "sha": "07ab15248d6eff39ef4d73a32f818dec45ca9782"
+    },
+    {
+      "branch": "audit/doobr-audit-1-inventory-20261009",
+      "sha": "426bca3fc8218744a5f868cdae96e22d146cbb80"
+    },
+    {
+      "branch": "audit/doobtube-baseline-20261006",
+      "sha": "a91910d9290cf74ba018a43d76af4e96c75a80c0"
+    },
+    {
+      "branch": "audit/exchange-pretestnet-phase-20260930",
+      "sha": "f5e960301157b0fbfe7c58fc129041608bdf2c02"
+    },
+    {
+      "branch": "audit/exp-0-1-1-complete-inventory",
+      "sha": "95a83a961286701b6e8c064de1deccad10f41fd7"
+    },
+    {
+      "branch": "audit/exp-0-1-1-complete-inventory-20260924",
+      "sha": "30ea2f5bfe434e92ec36c0f1dbfda60b2ec425f7"
+    },
+    {
+      "branch": "audit/exp-0-2-1-genesis-capability-matrix-20260924",
+      "sha": "3dc6e048e2e919eb18fae2f6983cc390a7a94112"
+    },
+    {
+      "branch": "audit/exp-0-3-1-authoritative-genesis-requirements-20260926",
+      "sha": "3bc8e7656ea0a23afe0e5e3aa6e360b63cfbf508"
+    },
+    {
+      "branch": "audit/exp-0-4-1-ci-qualification-inventory-20260926",
+      "sha": "6fd861be8640399945218ed5deb81444ec5f8ae8"
+    },
+    {
+      "branch": "audit/exp-1-1-runtime-authority-20260927",
+      "sha": "bdd442ecf673da984cb2a884946f1d946e3b19d2"
+    },
+    {
+      "branch": "audit/exp-1-5-consensus-provider-20260927",
+      "sha": "c901f557f720948639819a044521a47a6995386c"
+    },
+    {
+      "branch": "audit/exp-1-6-historical-producer-20260927",
+      "sha": "721eca2bcffe001bb6b8c547fac49b032fac4f11"
+    },
+    {
+      "branch": "audit/exp-2-1-transaction-fees-20260927",
+      "sha": "26a06117c7662c0f8986a2f7b505d5180d3121ea"
+    },
+    {
+      "branch": "audit/exp-2r-post-merge-reconciliation-20260928",
+      "sha": "37e36cf9f28a4f5edf9aa8302825a0f9022eaf78"
+    },
+    {
+      "branch": "audit/exp-next-1-registry-descriptor-provenance-20260928",
+      "sha": "d267a5efacaee20f5900298075aa4731ef10f0c7"
+    },
+    {
+      "branch": "audit/exp-next-2-fee-raw-event-ui-20260928",
+      "sha": "f660db960b46a47215ed11bcbd0a8d79b6be8e98"
+    },
+    {
+      "branch": "audit/exp-next-3-cross-resource-ui-20260928",
+      "sha": "987bdfcab512b313afebf999295c68d64cb2eddc"
+    },
+    {
+      "branch": "audit/exp-next-4-live-deployment-recovery-20260928",
+      "sha": "0b2ad24ed493013b699e9c498c4d6daf2e7a3f2e"
+    },
+    {
+      "branch": "audit/exp-next-5-final-genesis-closeout-20260928",
+      "sha": "a256c27120c998e0333d1dd6b4b0d1d29e440bf1"
+    },
+    {
+      "branch": "audit/grow-v2-16-secure-testnet-20261009",
+      "sha": "90e02139e5b0fb9a57d94090ce55af9247b860f8"
+    },
+    {
+      "branch": "audit/oracle-interface-layer-remediation-20261002",
+      "sha": "8723dd006327f0532f04c26d06132a868ee3f1bf"
+    },
+    {
+      "branch": "audit/reefer-review-baseline-20261007",
+      "sha": "918c17fda79b8c72d0229c4f9eabd1abe3752ea5"
+    },
+    {
+      "branch": "audit/resource-protocol-remediation-20261002",
+      "sha": "5ff6db7346f53a373599319a3a8069c297a93f6b"
+    },
+    {
+      "branch": "audit/travel-gen-svc-3-11-10-1-20261009",
+      "sha": "f0a1fa9935b24d6b263d19cad48d72e90042e57b"
+    },
+    {
+      "branch": "audit/travel-gen-svc-3-11-10-2-20261009",
+      "sha": "eaec7f0bd38b26f9d14e7eac6efe6b60ec93cb32"
+    },
+    {
+      "branch": "aut-11-security-hardening",
+      "sha": "859147b52119b3dc080cf19cc5ae704d9d8c8762"
+    },
+    {
+      "branch": "aut-12-testnet-closeout",
+      "sha": "1c127776632c79210d6c153984663a5d5ae0e842"
+    },
+    {
+      "branch": "backup/420search-logo-assets-pre-reconcile",
+      "sha": "4dc3a419acb780c1e98fcedde41bb6498c20ee1c"
+    },
+    {
+      "branch": "backup/ai-recovery-pre-main-reconcile-20260920",
+      "sha": "ffeee5e7b59993d5c113b817547524750afc3b17"
+    },
+    {
+      "branch": "backup/main-genesis-address-before-policy-20260920",
+      "sha": "1fea2ae8a68c6f4eb1b7aec9a0ffd1bb4e4f745e"
+    },
+    {
+      "branch": "backup/main-pre-ai-reconcile-20260920",
+      "sha": "1fea2ae8a68c6f4eb1b7aec9a0ffd1bb4e4f745e"
+    },
+    {
+      "branch": "backup/pr-358-pre-main-reconciliation-62be86c",
+      "sha": "62be86c17fc9611f6ce25a48398971bf3f8f2ec1"
+    },
+    {
+      "branch": "backup/search-audit-pre-rebase-20261004",
+      "sha": "1250571b75df2a00072eea8f26719a3b0fb5dd1f"
+    },
+    {
+      "branch": "backup/search-audit-pre-rebase-20261005",
+      "sha": "1250571b75df2a00072eea8f26719a3b0fb5dd1f"
+    },
+    {
+      "branch": "brand/420grow-logo-11-site-20261009",
+      "sha": "c0edf09a96fbeeeb3ec3c8e60575da2f5bcccead"
+    },
+    {
+      "branch": "build/high-country-foundations",
+      "sha": "46bd584b67e46f9ab897cf83a45c9f4c66da16f9"
+    },
+    {
+      "branch": "ci/compute-market-fast-qualification-20260930",
+      "sha": "ac90d3c36b4c31dcddaf8aad66f68c9184422c34"
+    },
+    {
+      "branch": "cmp-1.3.10-final-reconciled-20260928",
+      "sha": "4b658648f651fec296777b8e4bec6e464dae33ed"
+    },
+    {
+      "branch": "cmp-1.3.10-reconciled-main-20260928",
+      "sha": "8447127fd1aae2d8076a65253f4ffed56f2b8aca"
+    },
+    {
+      "branch": "cmp-1.3.10-worker-capacity-20260928",
+      "sha": "1fa31d2355a71afe6169d3c8e82226865343a807"
+    },
+    {
+      "branch": "cmp-1.3.11-exact-head-qualification-20260929",
+      "sha": "32ac525e6dcbfe0ce7c90a92b536b93e44f56576"
+    },
+    {
+      "branch": "cmp-1.3.11-provenance-hardening-20260929",
+      "sha": "18502b712bc31d556087418ca4604cff1f6d3e76"
+    },
+    {
+      "branch": "cmp-1.3.12-attempt-lifecycle-20260929",
+      "sha": "88fc34a825507d0c6abe5e331ced0376192c47e6"
+    },
+    {
+      "branch": "cmp-1.3.12-final-qualification-20260929",
+      "sha": "979b3544c48a27c5ed5e3a4a7477353ad12d0f3c"
+    },
+    {
+      "branch": "cmp-1.3.12-qualification-20260929",
+      "sha": "844e5141e7763e92c68aa7b459f466bc887f4fd8"
+    },
+    {
+      "branch": "cmp-1.3.13-canonical-read-model-20260929",
+      "sha": "031f50b23896fa5072d4111a2e8ce16a5d5d877b"
+    },
+    {
+      "branch": "cmp-1.3.14-cross-component-invariants-20260929",
+      "sha": "e7cf87c520bb946c3190b7a454e0333a99d8e35b"
+    },
+    {
+      "branch": "cmp-1.3.15-release-candidate-wiring-20260929",
+      "sha": "8653e105661c15ef66ad2236c467d0e63994cd1c"
+    },
+    {
+      "branch": "cmp-1.3.16-worker-registry-closeout-20260929",
+      "sha": "51cb41423708dd474370d445cef635bea00d7b7d"
+    },
+    {
+      "branch": "cmp-1.3.8-worker-capability-authorization-20260928",
+      "sha": "25321f2af15b02d2940704225b854c5d33984111"
+    },
+    {
+      "branch": "cmp-1.3.9-execution-key-signing-20260928",
+      "sha": "53bb8f0871482a87a024eb68fcbc3b946bb9c2ff"
+    },
+    {
+      "branch": "cmp-1.3.9-reconciled-main-20260928",
+      "sha": "3aabe9a570855614f6d237ef6c237faf770f8c1b"
+    },
+    {
+      "branch": "cmp-1.4.0-verifier-architecture-reconciliation-20260930",
+      "sha": "2e3c4893e81a466eab759014831809a4b47bb498"
+    },
+    {
+      "branch": "cmp-1.4.1-verifier-identity-lifecycle-20260930",
+      "sha": "467ff41ffc43e67b5398f64a3517402bc27e4441"
+    },
+    {
+      "branch": "cmp-1.4.10-cross-verifier-adversarial-qualification-20261001",
+      "sha": "06f3a658072cb2c51ad28575af605a4f86838bfd"
+    },
+    {
+      "branch": "cmp-1.4.11-verifier-deployment-readiness-20261001",
+      "sha": "34d841ba3631a7317d440a03406beb7ebeb8cd59"
+    },
+    {
+      "branch": "cmp-1.4.12-phase-closeout-20261001",
+      "sha": "41e4e682f910e7cce8e86e94f37c3df2fae127a5"
+    },
+    {
+      "branch": "cmp-1.4.2-verifier-classes-capabilities-20260930",
+      "sha": "0e8fef98c8ca77a514b5d112cbc5c75d7af71442"
+    },
+    {
+      "branch": "cmp-1.4.3-verification-policy-registry-20260930",
+      "sha": "a219845e17b7847908c812f52af157c01d6466eb"
+    },
+    {
+      "branch": "cmp-1.4.5-independent-verifier-selection-20260930",
+      "sha": "531d75980b5f9954f6c235e7972d70613807674b"
+    },
+    {
+      "branch": "cmp-1.4.6-replicated-verification-20260930",
+      "sha": "8c4cd5025ab62e9ae06c041effc6d84de31f3502"
+    },
+    {
+      "branch": "cmp-1.4.7-deterministic-verification-adapters-20260930",
+      "sha": "802a665400fc091b84b8876b91537f1cf5ace18e"
+    },
+    {
+      "branch": "cmp-1.4.8-scientific-probabilistic-verification-20260930",
+      "sha": "1790332ea71f83a80fc601aff6de28b28e4aa63d"
+    },
+    {
+      "branch": "cmp-1.4.9-challenge-appeal-hooks-20260930",
+      "sha": "47a010d8d32386661e12caa1b2cd9de815ead8d3"
+    },
+    {
+      "branch": "cmp-1.5.0-stake-architecture-20261001",
+      "sha": "9a487ebeb24c28ceebfe2f0d794463939956ad9e"
+    },
+    {
+      "branch": "cmp-1.5.1-worker-collateral-20261001",
+      "sha": "a5157eb48a1e30b70ade3fb1e5810aa9097270dc"
+    },
+    {
+      "branch": "cmp-1.5.10-computeescrow-slash-redistribution-20261002",
+      "sha": "e4b70ae9c7800ed681e261cee74d1aa9548c9c12"
+    },
+    {
+      "branch": "cmp-1.5.11-hostile-economic-qualification-20261002",
+      "sha": "239198af9cf0ea24ab65c32bbc854dc0f8e04ead"
+    },
+    {
+      "branch": "cmp-1.5.12-release-candidate-20261002",
+      "sha": "4e01c818000001e7ed4d64d8357cb1fa3ee5266f"
+    },
+    {
+      "branch": "cmp-1.5.13-phase-closeout-20261002",
+      "sha": "6fe687ad1b81f4648c2b8ac4b0468ca3011fdeac"
+    },
+    {
+      "branch": "cmp-1.5.2-verifier-collateral-20261001",
+      "sha": "3773f00e067ccef50b40ff35a9f11449e403476f"
+    },
+    {
+      "branch": "cmp-1.5.3-policy-minimum-collateral-20261001",
+      "sha": "52568690f89d3bda3bff5b31b5edb5d6ec840baa"
+    },
+    {
+      "branch": "cmp-1.5.4-exit-queue-withdrawal-delay-20261001",
+      "sha": "bc814aee0e314ce306addab48507586077829c22"
+    },
+    {
+      "branch": "cmp-1.5.5-objective-slash-authorization-20261001",
+      "sha": "a62bffc91350ddae6dacb7a4ae953b9c9b5dd7ed"
+    },
+    {
+      "branch": "cmp-1.5.6-slash-distribution-20261001",
+      "sha": "8e4a15594fff7d4d3834a2c7856ba401462478f8"
+    },
+    {
+      "branch": "cmp-1.5.7-reward-accounting-20261001",
+      "sha": "7fd48bcdf2ecbc618d110b34d5b081d2f3cca874"
+    },
+    {
+      "branch": "cmp-1.5.8-dispute-stake-integration-20261002",
+      "sha": "01c7673a1b44ecdd8e2495a1ee58a82734d78b19"
+    },
+    {
+      "branch": "cmp-1.5.9-workerregistry-stake-source-integration-20261002",
+      "sha": "0c567ddacd88f187168f54714d9a80c5a6ca993b"
+    },
+    {
+      "branch": "cmp-10-security-adversarial-20261008",
+      "sha": "c75cc81064ab9d700ca47c20159122375c8ebf46"
+    },
+    {
+      "branch": "cmp-2.1-worker-offers-20261002",
+      "sha": "1f1b624de9e5dd26e577c28e853ec6169611e32f"
+    },
+    {
+      "branch": "cmp-3.1-worker-daemon-20261004",
+      "sha": "ddcfaff729051ef9918a51002e67b8ac43391b71"
+    },
+    {
+      "branch": "cmp-4.1-scientific-work-unit-20261005",
+      "sha": "79f11e0456cd4b2fe60a43b3dab69195bd946209"
+    },
+    {
+      "branch": "cmp-5.1-folding-at-home-adapter-20261006",
+      "sha": "592faaf07c81278b182f3df7576ec9402f35472d"
+    },
+    {
+      "branch": "cmp-6.1-funding-sources-20261007",
+      "sha": "a35b4882b48087170bb7026f4b5d11608f637cc9"
+    },
+    {
+      "branch": "cmp-7-closeout-staging-20261008",
+      "sha": "a8990ee799f2c89ac56604dab11aafb93da23401"
+    },
+    {
+      "branch": "cmp-7-sdk-api-cli-indexer-20261008",
+      "sha": "cbb88bf4a200e4f543ac39f615243311fa948871"
+    },
+    {
+      "branch": "cmp-7-staging-20261008",
+      "sha": "bccc0d848cce65675a55d3dde57c8df7b9528143"
+    },
+    {
+      "branch": "cmp-8-420compute-application-20261008",
+      "sha": "447378ce312b97c1243a7e4422c807fc210ddc57"
+    },
+    {
+      "branch": "cmp-9-13-scientific-demonstration-20261008",
+      "sha": "508e68fb049d9dbf9f3b0f12fdaf80a48cdd86b5"
+    },
+    {
+      "branch": "cmp-9-14-soak-readiness-20261008",
+      "sha": "613271eea281b0cdb0ec1962fd60a165c7d96ed1"
+    },
+    {
+      "branch": "cmp-9-15-cmp0-closeout-20261008",
+      "sha": "b243a3ab10f581413ed1a80fcd5d7cf2dc4f7b74"
+    },
+    {
+      "branch": "cmp-g01-gridcoin-feasibility-20261008",
+      "sha": "b596d4a9e865b1d689a14f412b9acb8214def158"
+    },
+    {
+      "branch": "cmp-s01-provider-source-qualification-20261008",
+      "sha": "08bca1873d5b58db5c51f3398dc8d3c71e20c24a"
+    },
+    {
+      "branch": "cmp-s02-readonly-ingestion-20261008",
+      "sha": "595e3cef719a82fe7344183d90e127fad250ed2e"
+    },
+    {
+      "branch": "cmp-s03-source-evidence-20261008",
+      "sha": "16be4be6c8bc56c3cbd50632e71e323e939fe50e"
+    },
+    {
+      "branch": "cmp-s04-participant-identity-consent-20261008",
+      "sha": "6b4fb257f89e5b8bcbf3b30d2f935fb3490fa8b9"
+    },
+    {
+      "branch": "cmp-s05-canonical-dedup-20261008",
+      "sha": "89979790d536a7a643e82c4f3df143f039069ac1"
+    },
+    {
+      "branch": "cmp-s06-science-readmodel-20261008",
+      "sha": "e1256d18e3def216be33ec9034c255d4806f9398"
+    },
+    {
+      "branch": "cmp-s07-economic-policy-20261008",
+      "sha": "05854d097e9b57e7b64ea796cdc485d9692086ba"
+    },
+    {
+      "branch": "cmp-s08-funded-settlement-20261008",
+      "sha": "d3eb5c311d5abc5cfa36e9bfeb8ccfbf8fe77c6f"
+    },
+    {
+      "branch": "cmp-s09-two-provider-testnet-gates-20261008",
+      "sha": "106809d9bb9aab2c52b1bf99bdcdbbf18b8d98f6"
+    },
+    {
+      "branch": "cmp-s10-operations-handoff-20261008",
+      "sha": "6545539249a9b03409d7a497e11f6a9b26df2323"
+    },
+    {
+      "branch": "cmp-science-indexer-read-endpoint-20261008",
+      "sha": "8c54099e5a081221b5aad40e458eddb8b7b64d16"
+    },
+    {
+      "branch": "cmp-science-main-reconciliation-20261008",
+      "sha": "ef2b70252ef79dfe89cdf79db36947008c9d61bb"
+    },
+    {
+      "branch": "commerce/com-1-architecture-reconciliation",
+      "sha": "d32c1eeacc2ba4f13d3a6fcd1afb84a5abb0aa3c"
+    },
+    {
+      "branch": "compute-market-roadmap-post-cmp1-20260930",
+      "sha": "94d0efe397345f54b60444aa372f1fdb3cbcaf98"
+    },
+    {
+      "branch": "creative-kernel-v1",
+      "sha": "ff03b9931aa2c97f27cb3697fb3c4faeb6daea26"
+    },
+    {
+      "branch": "docs/420store-roadmap-sr43",
+      "sha": "5e76861fe71510ac9bd298bc58875b599522b929"
+    },
+    {
+      "branch": "docs/add-gen11-testnet-roadmap-20260930",
+      "sha": "c36d79286ab2b6ee8e01feeaa32d72f883f67a82"
+    },
+    {
+      "branch": "docs/ai-audit-testnet-handoff-20261004",
+      "sha": "a4ee5e42b69c3b0179ff243956703e76d9234b96"
+    },
+    {
+      "branch": "docs/correct-testnet-roadmap-names-not-swap",
+      "sha": "d009b2d802e4482e4dd6999386273d09e4946a31"
+    },
+    {
+      "branch": "docs/devhub-roadmap-closeout",
+      "sha": "872ee995633dc9cb0a8d7c8f1c58777e3332d837"
+    },
+    {
+      "branch": "docs/doc-0-foundation",
+      "sha": "e7498e4a1f46c24953d9c350b71e57c70378533f"
+    },
+    {
+      "branch": "docs/doc-1.1-mkdocs-foundation",
+      "sha": "0fec0d4604f04664646c1ac19acf7499df5964c3"
+    },
+    {
+      "branch": "docs/doc-1.2-pages-deployment",
+      "sha": "19e87270337d21e69b68f5b9495dd285b1873200"
+    },
+    {
+      "branch": "docs/doc-1.3-audience-navigation",
+      "sha": "f60311cd9bd2a3dd6d7bcb14d62be2c1abaf5be9"
+    },
+    {
+      "branch": "docs/doc-1.4-readme-integration",
+      "sha": "6d56adcc5ee1752b130ffef4e73c9870f2a9bb0a"
+    },
+    {
+      "branch": "docs/doc-1.5-search-navigation-qualification",
+      "sha": "53d8a840ce0b85199206f1059339dc122011d814"
+    },
+    {
+      "branch": "docs/doc-10-generated-reference",
+      "sha": "6f454637a0f476afccbdf795a135d8b7e39f4122"
+    },
+    {
+      "branch": "docs/doc-11-troubleshooting-error-registry",
+      "sha": "dbfe820dc451eb13f5eda6f933a37db73bf63033"
+    },
+    {
+      "branch": "docs/doc-12-documentation-ci",
+      "sha": "7081cf5040faa8ef5ca28e28477b350b0fe0b153"
+    },
+    {
+      "branch": "docs/doc-13-versioning",
+      "sha": "d7d50498b6346d4cf275a4b4cff5e08da02198ea"
+    },
+    {
+      "branch": "docs/doc-14-contextual-documentation",
+      "sha": "b4479ce9393f6f9be278284e87e5476a0c730807"
+    },
+    {
+      "branch": "docs/doc-14-contextual-documentation-backup",
+      "sha": "99624bbac6d2c2d39a7a52283aa3463c9999bae7"
+    },
+    {
+      "branch": "docs/doc-15-ask-420",
+      "sha": "6144013d0ab4a5d49346e519b0e5bb6a5b5aa21b"
+    },
+    {
+      "branch": "docs/doc-15-ask-420-placeholder",
+      "sha": "c8a9c44a7afadaba3d897f2a32ae806074c427fc"
+    },
+    {
+      "branch": "docs/doc-16-genesis-audit",
+      "sha": "14156e4c9316ab3940f08b232b474a676e8e278b"
+    },
+    {
+      "branch": "docs/doc-17-genesis-publication",
+      "sha": "9b3a7cbaf7420815e668617a3109f79fa959795c"
+    },
+    {
+      "branch": "docs/doc-18-genesis-contract-inventory",
+      "sha": "b1759662aca59b062d054bbc334517fc00de5a08"
+    },
+    {
+      "branch": "docs/doc-2.1-system-overview",
+      "sha": "36d041366e1b422707145626477298166a45d0fa"
+    },
+    {
+      "branch": "docs/doc-3-chain-documentation",
+      "sha": "b3cc6bac67493a66d2b86f22f6c57ef20ed576a0"
+    },
+    {
+      "branch": "docs/doc-4-consensus-documentation",
+      "sha": "bf2bc9e8bd8cd78f4221983ca854662942e465c8"
+    },
+    {
+      "branch": "docs/doc-5-infrastructure-documentation",
+      "sha": "34042e8986957cee08f1381f09d6fbbe0f62ee4c"
+    },
+    {
+      "branch": "docs/doc-6-wallet-user-onboarding",
+      "sha": "69c92684f7926f3b28c28d38607529ba26d62a79"
+    },
+    {
+      "branch": "docs/doc-7-core-protocol-documentation",
+      "sha": "ba3de752a4dc3a10c58c2183e9d3df24cb57f351"
+    },
+    {
+      "branch": "docs/doc-8-genesis-application-manuals",
+      "sha": "825b2be5ca1a2f85e2586f5167cf6da0c81510ca"
+    },
+    {
+      "branch": "docs/doc-9-developer-documentation",
+      "sha": "9ff2978cd9d084af956757aa0e03841f70a1650d"
+    },
+    {
+      "branch": "docs/exchange-pretestnet-roadmap-refresh-20260930",
+      "sha": "9213f0b84fa9c638e895aa68db11898ef3b5b459"
+    },
+    {
+      "branch": "docs/gen11-20-exact-head-qualification-evidence",
+      "sha": "d9d80d0f8a9730292557093a667fa83db661b315"
+    },
+    {
+      "branch": "docs/reconcile-gen10-status-20260930",
+      "sha": "c9aaef9cdfd135857bbbf10f081de11850825072"
+    },
+    {
+      "branch": "docs/sr-suite-closeout",
+      "sha": "fe63428f850813c044322c3460a358eb5bb9a73d"
+    },
+    {
+      "branch": "docs/storage-resource-closeout",
+      "sha": "c2b63e2036cbba3978165b1cab2fab3a05c1d5dc"
+    },
+    {
+      "branch": "docs/testnet-roadmap-swap-stake-identity",
+      "sha": "184c6d4f00be858d558dd301eb9d51f29f704af2"
+    },
+    {
+      "branch": "feat/explorer-cloudflare-branded-ui-20260928",
+      "sha": "ff046852238081eddb3ce6dbf6bba5cb60476ab2"
+    },
+    {
+      "branch": "feat/explorer-selected-logo-20260928",
+      "sha": "d2f656c0f4d6c14da0017e9d4b9584fec581c535"
+    },
+    {
+      "branch": "feature/420-ai-v1-architecture",
+      "sha": "8564b9cc2951dc1a9b6965ad5dc40cc573468d58"
+    },
+    {
+      "branch": "feature/420-bet-slot-registry-v1",
+      "sha": "9d8e666d2761c01cb1f6325340ebf31ebb7683ec"
+    },
+    {
+      "branch": "feature/420-civic-v1",
+      "sha": "6ed7953c1aa94f98e341ff20a8e86e35eab77380"
+    },
+    {
+      "branch": "feature/420-commons-v1",
+      "sha": "b939a968baa05da795e11b8932fedd4213fdcc10"
+    },
+    {
+      "branch": "feature/420-gaming-budtender",
+      "sha": "edce68b1d3e4bd5664448774c117b2eb2485443c"
+    },
+    {
+      "branch": "feature/420-gaming-cross-game-qualification",
+      "sha": "5b6371014d283e018b2b03ef860fab1ae5ef49e9"
+    },
+    {
+      "branch": "feature/420-gaming-gp16-2-authority-isolation",
+      "sha": "37bd0ee403231ff39a2c54020456d293f50fc543"
+    },
+    {
+      "branch": "feature/420-gaming-gp16-3-query-privacy",
+      "sha": "8db21fa0e25471a5ea531058daa145d5fa95eea2"
+    },
+    {
+      "branch": "feature/420-gaming-gp16-4-client-hostile-states",
+      "sha": "9640ef3dca91a74e0d14b076174e425ccec2fec1"
+    },
+    {
+      "branch": "feature/420-gaming-gp16-4-client-hostile-states-2",
+      "sha": "37fdff485afb39804a3298569c4dc7d738cab8f0"
+    },
+    {
+      "branch": "feature/420-gaming-gp16-4-migration-closeout",
+      "sha": "bda053a4fb57106be94e751f69c72726a2ab166a"
+    },
+    {
+      "branch": "feature/420-gaming-gp16-5-finality-reorg",
+      "sha": "0998b5ac77a66cec050e12652231da090265c5ac"
+    },
+    {
+      "branch": "feature/420-gaming-gp16-6-four-game-e2e",
+      "sha": "d501969babb7d0d9dd4418f358a1f27a8288c92e"
+    },
+    {
+      "branch": "feature/420-gaming-gp16-security-hardening",
+      "sha": "593dac091c17bff5de427c3edc6f86153d5c61a9"
+    },
+    {
+      "branch": "feature/420-gaming-gp17-1-onboarding-foundation",
+      "sha": "49138c8309d61f215d5be1bacdf6a9d0d3bb4ba0"
+    },
+    {
+      "branch": "feature/420-gaming-gp17-10-developer-ux-docs-closeout",
+      "sha": "50cff9e5fede37b17c9e5e7ac3a877077bdc5073"
+    },
+    {
+      "branch": "feature/420-gaming-gp17-2-registration-capabilities",
+      "sha": "1fe77d97063e782777d01a4118b8d52bfa271f0c"
+    },
+    {
+      "branch": "feature/420-gaming-gp17-3-sdk-generator",
+      "sha": "1979cc4b9840cf6f20f53c0d6745257909f83695"
+    },
+    {
+      "branch": "feature/420-gaming-gp17-4-progressive-access-qualification",
+      "sha": "634f2086b5d5b3aedf866b58f1b3e2035b4b50d2"
+    },
+    {
+      "branch": "feature/420-gaming-gp17-5-high-risk-onboarding",
+      "sha": "8dc5a1c108ed4c843f4792ad6b9a412a1405d4e7"
+    },
+    {
+      "branch": "feature/420-gaming-gp17-6-migration-wallet-link",
+      "sha": "cee1b79e65a3100fd866e954c1f1d069b2d28b20"
+    },
+    {
+      "branch": "feature/420-gaming-gp17-7-smartaccount-capability-onboarding",
+      "sha": "2448a77e76a5d3cdff09d8e14acbf130c0d1bb99"
+    },
+    {
+      "branch": "feature/420-gaming-gp17-8-local-devnet-rehearsal",
+      "sha": "eb6fff935c812c1e18c47d4d14a344b9b385bdef"
+    },
+    {
+      "branch": "feature/420-gaming-gp17-9-testnet-onboarding-qualification",
+      "sha": "b68d18f186cf3111a52770c67b337497e0c34e0d"
+    },
+    {
+      "branch": "feature/420-gaming-green-road",
+      "sha": "1e54061a4b1eba7cac4157efb66b3951e524d08d"
+    },
+    {
+      "branch": "feature/420-gaming-live-journeys-gp15",
+      "sha": "7f6be89b1d99701446d80d2bee780ca8e41ade0b"
+    },
+    {
+      "branch": "feature/420-gaming-live-testnet-qualification",
+      "sha": "b86b88949889e4c6bcc95e48c71fa5feec2d39a7"
+    },
+    {
+      "branch": "feature/420-gaming-player-profile-service",
+      "sha": "f7a7f749da866b321d87e3255e24984bcc54ee50"
+    },
+    {
+      "branch": "feature/420-gaming-query-layer",
+      "sha": "a3c3ea9be5c00de075b4841e271e9de2831ad4f6"
+    },
+    {
+      "branch": "feature/420-gaming-runtime-wiring",
+      "sha": "19964e1e5f10c927ecf01e4619ffbf571f203910"
+    },
+    {
+      "branch": "feature/420-gaming-sdk-v1",
+      "sha": "622cb1f33d8695771f001823698d6f72466e4200"
+    },
+    {
+      "branch": "feature/420-gaming-smoke-chrome",
+      "sha": "9caf07e22c47ddd49df41f9e0d566500628c9983"
+    },
+    {
+      "branch": "feature/420-market-v1",
+      "sha": "3415cf27d396d9e90625f30e7aed20b9fc4a15b8"
+    },
+    {
+      "branch": "feature/420-model-registry-training-rights",
+      "sha": "50a348c55d85312bca22e8f8cd217be7bc732c34"
+    },
+    {
+      "branch": "feature/420-oracle-v1",
+      "sha": "741bc3fffd7d0a133ea0e1d8227ec480c0717e1f"
+    },
+    {
+      "branch": "feature/420-pulse-v1",
+      "sha": "be9b5b577d2e8ba23fc91d3ef371af6aaf66aee5"
+    },
+    {
+      "branch": "feature/420-randomness-protocol-v1",
+      "sha": "dfef3839d088a2f008f2a96f8968c7af02c90d64"
+    },
+    {
+      "branch": "feature/420-registry-identity-names-v1",
+      "sha": "1e7d7f48b8b614aae51e3ba816ae24b0671d7235"
+    },
+    {
+      "branch": "feature/420-smart-accounts-v1",
+      "sha": "b94805224f8c62bc4787cf0b56b78719d67a7c4f"
+    },
+    {
+      "branch": "feature/420-stake-validator-v1",
+      "sha": "e0ab60366acd21684171f7f0c3ac3b8f0b089571"
+    },
+    {
+      "branch": "feature/420-trust-v1",
+      "sha": "6d1c23a63cfa6a27ece94dfe0b8c39a187de6803"
+    },
+    {
+      "branch": "feature/420-vault-v1",
+      "sha": "10fd973c7d574ba94653bd27940e64aedc250cd6"
+    },
+    {
+      "branch": "feature/420-vpn-v1",
+      "sha": "851fa59eefe8914b2283010689892c6f1fa297bd"
+    },
+    {
+      "branch": "feature/420ai-rewards-integration-v1",
+      "sha": "a2913cd748a9f72bf50960674a87e00c7a2d578c"
+    },
+    {
+      "branch": "feature/420analytics-genesis-v1",
+      "sha": "686a03f44208c58911b4f7e78a59f2ea1b615bd9"
+    },
+    {
+      "branch": "feature/420appstore-genesis-v1",
+      "sha": "f7d6e36e8faba1d8eeec5efc2770a209a9ccdc9d"
+    },
+    {
+      "branch": "feature/420arbitration-genesis-v1",
+      "sha": "d20eb1affd6886b47ebb86d7e496e25c9dd036a8"
+    },
+    {
+      "branch": "feature/420attention-cannaseur-v1",
+      "sha": "13ed805818239f72effc5bf19539e7f69563cc01"
+    },
+    {
+      "branch": "feature/420automation-aut0-foundation-v1",
+      "sha": "302e1d613dff16155e8e01321bf97f1f76d25451"
+    },
+    {
+      "branch": "feature/420automation-aut1-job-registry-v1",
+      "sha": "7fecb3d4cdfb37a19b55b498b4ad33d422c8de79"
+    },
+    {
+      "branch": "feature/420automation-aut10-observability-readiness-v1",
+      "sha": "a2317d81070fb2aa62514853914b7bcfbb00e63e"
+    },
+    {
+      "branch": "feature/420automation-aut2-trigger-normalization-v1",
+      "sha": "56c4a77c3021f3b6c4becb2e47627106213b99f8"
+    },
+    {
+      "branch": "feature/420automation-aut3-scheduler-v1",
+      "sha": "f09f8d3d8edd470f331bcbb02acc310043d8f153"
+    },
+    {
+      "branch": "feature/420automation-aut4-execution-coordination-v1",
+      "sha": "9d0ad18edfbdd906e2524bed5caea98906dd2be3"
+    },
+    {
+      "branch": "feature/420automation-aut5-funding-budgets-v1",
+      "sha": "585706950e201ae23add8f24b26c2475535675eb"
+    },
+    {
+      "branch": "feature/420automation-aut6-retries-replay-v1",
+      "sha": "8b1d8b7252951140de52534735d55928a55c8ba8"
+    },
+    {
+      "branch": "feature/420automation-aut7-workers-leases-v1",
+      "sha": "4a99b5ac14f1a691132765d0d5bab499c168ff05"
+    },
+    {
+      "branch": "feature/420automation-aut7-workers-leases-v1-copy",
+      "sha": "494f07a513ad6d8a4581869a4bcdd06975d7ea5a"
+    },
+    {
+      "branch": "feature/420automation-aut7-workers-leases-v1-final",
+      "sha": "1c47cf8e54659553b8e53901ec296b93b341791d"
+    },
+    {
+      "branch": "feature/420automation-aut8-oracle-integration-v1",
+      "sha": "dd31fcb1893e2760510b5a62f549e16326be0215"
+    },
+    {
+      "branch": "feature/420automation-aut9-api-auth-devhub-v1",
+      "sha": "036a0f42f626e7780e0604fa1454ecbbe09bbd8b"
+    },
+    {
+      "branch": "feature/420bet-casino-convergence-v1",
+      "sha": "abb71e986625a5288ada5d0af77dd646eaf3298f"
+    },
+    {
+      "branch": "feature/420bet-core-foundation-v1",
+      "sha": "7e226c6a3e6a35f562fb7f873998577ffee93a24"
+    },
+    {
+      "branch": "feature/420bet-crash-v1",
+      "sha": "895ec1b39dfba657910ff2ffa12628149fc56f2c"
+    },
+    {
+      "branch": "feature/420bet-mines-v1",
+      "sha": "fabee17e22903f60a6f607a245e2b3b7a232c74d"
+    },
+    {
+      "branch": "feature/420bet-video-poker-v1",
+      "sha": "74e8e91d9028678e9cb61c2b1faede4061fa2f7a"
+    },
+    {
+      "branch": "feature/420exchange-aave-asset-v12.5.18",
+      "sha": "716973ee710a145e33003cc7ac50a5279b7b2f19"
+    },
+    {
+      "branch": "feature/420exchange-atomic-routing-v6",
+      "sha": "5ac3bcdb3e32c0efb56cd56b8de2dc97cc2103b6"
+    },
+    {
+      "branch": "feature/420exchange-audio-adapter-v12.5.8",
+      "sha": "7740d8ffe5081aec12380434754af7ad38a6a551"
+    },
+    {
+      "branch": "feature/420exchange-bitcoin-adapter-v12.5.14",
+      "sha": "d5aabb7625a8f862912020b02576c9c2835c896e"
+    },
+    {
+      "branch": "feature/420exchange-bnb-adapter-v12.5.3",
+      "sha": "4d07b5fd51cb5bb84cfa629e34b6018bed0fe25b"
+    },
+    {
+      "branch": "feature/420exchange-bridge-adapters-v11",
+      "sha": "8ce0eadf458f47f9bdcdddacddcfa0e0949904d7"
+    },
+    {
+      "branch": "feature/420exchange-canonical-chain-registry-v12.5.1",
+      "sha": "a0ec01ac0334e318908ec4706f201b10c65e7ae1"
+    },
+    {
+      "branch": "feature/420exchange-cross-adapter-hardening-v12.6.1",
+      "sha": "5266e9deb098c84748bf3dd97d6bebecb1fce7b7"
+    },
+    {
+      "branch": "feature/420exchange-curecoin-adapter-v12.5.11",
+      "sha": "7b00bc8733bc25245b5f2efd2062bc0c36709cf7"
+    },
+    {
+      "branch": "feature/420exchange-dobbscoin-adapter-v12.5.10",
+      "sha": "602a51be105308ed3cefbff00c781878eb881645"
+    },
+    {
+      "branch": "feature/420exchange-dogecoin-adapter-v12.5.5",
+      "sha": "48a9bdf1156adadcab5aaaf02189f60cf03e4984"
+    },
+    {
+      "branch": "feature/420exchange-ethereum-verifier-v12.5.4",
+      "sha": "e8891e4153a2c57d8c88b9e69479e44e57cf358f"
+    },
+    {
+      "branch": "feature/420exchange-eurc-ethereum-asset-v12.5.21",
+      "sha": "88e2764caede3c18b909e3dbe292dd9049da686e"
+    },
+    {
+      "branch": "feature/420exchange-eurc-solana-asset-v12.5.22",
+      "sha": "fb506c6cf89c59daeec19d48aebec643b32db38a"
+    },
+    {
+      "branch": "feature/420exchange-fee-routing-v9",
+      "sha": "89fd822ae04c958eee99bfb97f01fabd408e1306"
+    },
+    {
+      "branch": "feature/420exchange-foundation-v1",
+      "sha": "1b423087f5e5ab1b7a97431917e37ad7d5a91746"
+    },
+    {
+      "branch": "feature/420exchange-foundation-v2",
+      "sha": "98c8be29c8bab1151a83c932e0421a7ea4add1f0"
+    },
+    {
+      "branch": "feature/420exchange-foundation-v3",
+      "sha": "c4765cf210eb65ace3e1b53f6d20964f5e52ca92"
+    },
+    {
+      "branch": "feature/420exchange-foundation-v4",
+      "sha": "8023fd5fdca97c9c5bb15d95fef1d97be8fe670a"
+    },
+    {
+      "branch": "feature/420exchange-hardening-v12",
+      "sha": "d053cec89c1f793f83f2822ffff7dcf139b99a38"
+    },
+    {
+      "branch": "feature/420exchange-link-asset-v12.5.17",
+      "sha": "27bc5c67fce41194d2132a1081a8df3680c34ed1"
+    },
+    {
+      "branch": "feature/420exchange-litecoin-adapter-v12.5.13",
+      "sha": "e37e37c2254b820182a9df16f2392ac8cc327190"
+    },
+    {
+      "branch": "feature/420exchange-native-value-v8",
+      "sha": "ee69d088135d9261473bcea2ad84c8d888a35083"
+    },
+    {
+      "branch": "feature/420exchange-normalized-oracle-v7",
+      "sha": "f65916dfeed71fcbc93d6b1528bde77a5c85bd8e"
+    },
+    {
+      "branch": "feature/420exchange-piratechain-adapter-v12.5.12",
+      "sha": "78b2d9b909389fdb8637e3410f534bc71e1fa19f"
+    },
+    {
+      "branch": "feature/420exchange-potcoin-adapter-v12.5.9",
+      "sha": "3f78ad7b3a2e7228822168bd8c3a3af44d46708d"
+    },
+    {
+      "branch": "feature/420exchange-qcad-asset-v12.5.20",
+      "sha": "c8cea89e4b608e73a375a15a1aee3b1001e1e09e"
+    },
+    {
+      "branch": "feature/420exchange-ray-solana-asset-v12.5.23",
+      "sha": "3ff29e421ab2069bcebe7a0ab235519d3d0d553a"
+    },
+    {
+      "branch": "feature/420exchange-routing-oracle-v5",
+      "sha": "66ae2e8aa9796b0dc34e19eb4cb20b23cdc00e36"
+    },
+    {
+      "branch": "feature/420exchange-signed-orders-v10",
+      "sha": "8ccc246bfc2728f3d2202d86e33e7a0180acbf2c"
+    },
+    {
+      "branch": "feature/420exchange-solana-adapter-v12.5.2",
+      "sha": "f6ebc6e50148c220d32c1cf5145e3c27fd7617e2"
+    },
+    {
+      "branch": "feature/420exchange-tron-adapter-v12.5.7",
+      "sha": "3739ab94c01d9d79ee5e26d0f1ea6ed3dcb34b19"
+    },
+    {
+      "branch": "feature/420exchange-uni-asset-v12.5.16",
+      "sha": "5b7c9d4b4f6964bb4c2bc9e1fae7618d1b605f12"
+    },
+    {
+      "branch": "feature/420exchange-usdt-asset-v12.5.19",
+      "sha": "9c710e62d8aff0c3a90eac02d4471dfe2b244f1a"
+    },
+    {
+      "branch": "feature/420exchange-v13-api-indexing-market-data",
+      "sha": "6a8bf40982b3d86ab4a89e29e6277747c25643e8"
+    },
+    {
+      "branch": "feature/420exchange-v14-web-ui",
+      "sha": "989d477fe1a8cb71f0048bc2b3702f68e7132c28"
+    },
+    {
+      "branch": "feature/420exchange-v15.1-testnet-binding",
+      "sha": "c0b3506533b90764682ce8b834ac0ae2d067994f"
+    },
+    {
+      "branch": "feature/420exchange-xrp-adapter-v12.5.15",
+      "sha": "3d3fa7d914a0bf61fab5104e73ae4e97943938ae"
+    },
+    {
+      "branch": "feature/420exchange-xrp-adapter-v12.5.6",
+      "sha": "3e36ef83769cd7822e8090cd72e20ef6b68556a9"
+    },
+    {
+      "branch": "feature/420explorer-genesis-v1",
+      "sha": "03eb8ec28c23072b8b1f2baf03c98659491fc29c"
+    },
+    {
+      "branch": "feature/420gaming-protocol-genesis",
+      "sha": "75f676fb6913786dbfa4783813df8996e52b0b3a"
+    },
+    {
+      "branch": "feature/420grants-audit-remediation",
+      "sha": "a488e15555bb446e416e776353f467110ca960e7"
+    },
+    {
+      "branch": "feature/420grants-audit-remediation-v2",
+      "sha": "e31945694042dc96e29dc2018d5b1a4ad3f1ac5f"
+    },
+    {
+      "branch": "feature/420grants-genesis-v1",
+      "sha": "dbcae0b97eae6fb40afe23249c3da0e3bd55cdc4"
+    },
+    {
+      "branch": "feature/420hz-generate-community-awards-roadmap",
+      "sha": "afb34ae4417a3f527e0c6e69dbdde474ebd41f86"
+    },
+    {
+      "branch": "feature/420hz-hz2-creator-catalog-v1",
+      "sha": "0fc6eb666810a3e3a4416470fe6365df55225ea5"
+    },
+    {
+      "branch": "feature/420hz-hz3-media-manifests-v1",
+      "sha": "98c36c9978553e7917efc4a430c7fb601073f152"
+    },
+    {
+      "branch": "feature/420hz-hz3-media-playback-v1",
+      "sha": "1587a9bfc020577b2a103fbd5d90657658776ec1"
+    },
+    {
+      "branch": "feature/420hz-hz4-settlement-v1",
+      "sha": "33058b61a8633d69f1eceb466245339362c4c794"
+    },
+    {
+      "branch": "feature/420hz-reconciliation-20261006",
+      "sha": "71521f8ef189b9391aa6056302c79e80e78ddf2e"
+    },
+    {
+      "branch": "feature/420hz-remediation-20261006",
+      "sha": "9043d2e71e939cd8e80dc20d897245df1e6335d1"
+    },
+    {
+      "branch": "feature/420hz-web-20261007",
+      "sha": "e81901d8671a28a9c92050326b9ba4ade000daf9"
+    },
+    {
+      "branch": "feature/420indexer-idx0-foundation-v1",
+      "sha": "65e8e2b20f8f11c09e5fa832fcce995706f2db07"
+    },
+    {
+      "branch": "feature/420indexer-idx1-ingestion-v1",
+      "sha": "ef2b35f96350b63c79ff659100a59aac06a5b3a9"
+    },
+    {
+      "branch": "feature/420indexer-idx10-testnet-qualification-v1",
+      "sha": "cb57218ffd1554a272b6637ca02a0b299bc90f26"
+    },
+    {
+      "branch": "feature/420indexer-idx2-reorg-finality-v1",
+      "sha": "0c8567fa293213171e14bc0e07b961673b9cfce5"
+    },
+    {
+      "branch": "feature/420indexer-idx3-core-projections-v1",
+      "sha": "d437354cc20a62e14bc5d72ed1ac415aae70f5c6"
+    },
+    {
+      "branch": "feature/420indexer-idx4-assets-v1",
+      "sha": "67cf9f6867a01c90b9a83674493e87855207ca37"
+    },
+    {
+      "branch": "feature/420indexer-idx5-abi-materialized-v1",
+      "sha": "cde73d4bf4fa859cca467ca150591fca57c26c09"
+    },
+    {
+      "branch": "feature/420indexer-idx5-genesis-projections-v1",
+      "sha": "d0d7d2f605f90c8d531354ac9f25efa2fb5c555a"
+    },
+    {
+      "branch": "feature/420indexer-idx5-lifecycle-reducers-v1",
+      "sha": "911ed1c9e9356f92674f8e0c76189508ebfa8793"
+    },
+    {
+      "branch": "feature/420indexer-idx5-state-views-v1",
+      "sha": "2a56af50cb1c38dda051ab5c797ff3b0a910c533"
+    },
+    {
+      "branch": "feature/420indexer-idx6-closeout-v1",
+      "sha": "e0339e561cdfde6fc2f3642a04b0f75bcfdaa022"
+    },
+    {
+      "branch": "feature/420indexer-idx6-query-layer-v1",
+      "sha": "6a4d06063b6a9e2642e1b3c6256a39437d63b0e3"
+    },
+    {
+      "branch": "feature/420indexer-idx6-query-service-v1",
+      "sha": "224b2f3667e565a3480c9451b61474ef44acd2d3"
+    },
+    {
+      "branch": "feature/420indexer-idx7-4-public-api-closeout-v1",
+      "sha": "6f76df213f51eac78f137dff301addb60fc22f8f"
+    },
+    {
+      "branch": "feature/420indexer-idx7-api-surface-v1",
+      "sha": "319808a91994ae068e003fab0a2196647580d141"
+    },
+    {
+      "branch": "feature/420indexer-idx7-direct-resources-v1",
+      "sha": "6cf2bd66ceb34b9a489eaf6a0db0b02339652eae"
+    },
+    {
+      "branch": "feature/420indexer-idx7-http-v1",
+      "sha": "b264c287ae6ba217cf7ede8da5fdd57aea57991f"
+    },
+    {
+      "branch": "feature/420indexer-idx8-1-event-stream-v1",
+      "sha": "1d20fb06e2a174c8569a00f177bb0bf28e6a7bfb"
+    },
+    {
+      "branch": "feature/420indexer-idx9-1-operational-readiness-v1",
+      "sha": "7b9bda101d5de6727bd0fabf5b8ec2b3dec13e7b"
+    },
+    {
+      "branch": "feature/420is-genesis-v1",
+      "sha": "bcd977bf4c56882c76e50811de69cd85da912563"
+    },
+    {
+      "branch": "feature/420launchpad-genesis-v1",
+      "sha": "70b961af7c8090cb11bf23b8c6c2aa0823342dda"
+    },
+    {
+      "branch": "feature/420media-phase1-protocol",
+      "sha": "2b50f130de78b9c999f05ec06d7ae9b050db609f"
+    },
+    {
+      "branch": "feature/420media-phase2-node-foundation",
+      "sha": "0a3232c4fb29281eb723a4af5fc9c19e999fc508"
+    },
+    {
+      "branch": "feature/420media-phase3-operator-discovery-v1",
+      "sha": "a1a1f7d58619e4c93eb4ebc6d89765ee8f55d9d7"
+    },
+    {
+      "branch": "feature/420messenger-genesis-v1",
+      "sha": "0a4c2c57a80b2dad56d2e35a2e2742a365f43b04"
+    },
+    {
+      "branch": "feature/420notifications-genesis-v1",
+      "sha": "8e7766a70024ef36164f4da6769a9cfb767025c6"
+    },
+    {
+      "branch": "feature/420pay-hardening-v1",
+      "sha": "90ad99bccc1d07237c9c3856bc30f0d0722bdf39"
+    },
+    {
+      "branch": "feature/420registry-genesis-v1",
+      "sha": "94255bebd8b639c4cb4edaf8caa8a976e170bf85"
+    },
+    {
+      "branch": "feature/420resource-protocol-genesis-v1",
+      "sha": "fec93e5f31c64b8c9ca53f886b499330a6add6a1"
+    },
+    {
+      "branch": "feature/420review-rewards-integration-v1",
+      "sha": "92cb42cd9bfe85b7967ac44a8148d2d9366c3911"
+    },
+    {
+      "branch": "feature/420rewards-core-v1",
+      "sha": "88d1a8898b797f892d52a5e125ec90c64ba28f19"
+    },
+    {
+      "branch": "feature/420rewards-cross-dapp-hardening-v1",
+      "sha": "184f5241785102266496da50267c54485a37e84d"
+    },
+    {
+      "branch": "feature/420rights-genesis-v1",
+      "sha": "70603c796399124a8082beedc90cbd1f5c7f92be"
+    },
+    {
+      "branch": "feature/420rpc-rpc0-foundation-v1",
+      "sha": "7f0648a43130251788892dd0097306e4531ead45"
+    },
+    {
+      "branch": "feature/420rpc-rpc1-upstreams-v1",
+      "sha": "7af6a48db11b2f1b85ca83cfaa4f77e695182bc8"
+    },
+    {
+      "branch": "feature/420rpc-rpc10-observability-v1",
+      "sha": "5b040198665c14a39a7f7a528766c486f5782e17"
+    },
+    {
+      "branch": "feature/420rpc-rpc11-hostile-security-v1",
+      "sha": "64a5c53a271a43f262fc7ce6c6efa54e12787493"
+    },
+    {
+      "branch": "feature/420rpc-rpc12-testnet-closeout-v1",
+      "sha": "9d323179852172e8715a19743b818212d83af664"
+    },
+    {
+      "branch": "feature/420rpc-rpc2-method-profiles-v1",
+      "sha": "dc6fb6e42374e2d64f5203aac0ff92d0beb04699"
+    },
+    {
+      "branch": "feature/420rpc-rpc3-routing-failover-v1",
+      "sha": "4bbeb2b14228a89217ffa8d3100e12fb387e0d04"
+    },
+    {
+      "branch": "feature/420rpc-rpc4-chain-finality-safety-v1",
+      "sha": "9efa041b9d1b7417749e92ca62e3e139da04be5d"
+    },
+    {
+      "branch": "feature/420rpc-rpc5-request-policy-v1",
+      "sha": "4025b808003778aaf1b4d1236dce5a4002aecb1a"
+    },
+    {
+      "branch": "feature/420rpc-rpc6-resource-controls-v1",
+      "sha": "4139c9822e235b96935bc83ae8300dadce16f30b"
+    },
+    {
+      "branch": "feature/420rpc-rpc7-websocket-v1",
+      "sha": "5599ea7b0c9b30e9691eb9d05ab933f232725a67"
+    },
+    {
+      "branch": "feature/420rpc-rpc8-indexer-reads-v1",
+      "sha": "c4dcd4b39b1ee80e50ea3f0b325397418c2215c6"
+    },
+    {
+      "branch": "feature/420rpc-rpc9-auth-devhub-v1",
+      "sha": "3c4b632b4a817c1d8186a416d72c6136342f8017"
+    },
+    {
+      "branch": "feature/420search-genesis-v1",
+      "sha": "c02138f9268bd9b5e58f1888b622247e0dd9b82d"
+    },
+    {
+      "branch": "feature/420search-logo-branding",
+      "sha": "ce702db3dc030bfb15b43ed2859c767f97923449"
+    },
+    {
+      "branch": "feature/420stake-audit-remediation",
+      "sha": "0ad8ff7f017c8f8784703203cd46eb2c27adbcd8"
+    },
+    {
+      "branch": "feature/420token-genesis-v1",
+      "sha": "a6333426f27efdadb26a3e479e9983d54c4d69e0"
+    },
+    {
+      "branch": "feature/420town-rewards-integration-v1",
+      "sha": "b2663be7514d48ed381c4a28cf6c68880454aa4c"
+    },
+    {
+      "branch": "feature/420treasury-genesis-v1",
+      "sha": "3cef15363583c05032e687aa37021cab7c19fff3"
+    },
+    {
+      "branch": "feature/420verify-genesis-v1",
+      "sha": "f38a10621c5d37fb565cbac6ee499709775822f5"
+    },
+    {
+      "branch": "feature/420wallet-batch-execution-v1",
+      "sha": "cb38284ef8a60bdd0f858d189686cc05798cc2b9"
+    },
+    {
+      "branch": "feature/420wallet-browser-extension-w8",
+      "sha": "cd66af44908b1a6ba24124614018131d65f9707d"
+    },
+    {
+      "branch": "feature/420wallet-mobile-w9",
+      "sha": "94b7bf4f48324c2b7d1ef482b08a5b46dbd25a7c"
+    },
+    {
+      "branch": "feature/420wallet-mobile-w9-dapp-native",
+      "sha": "14449e60e04733c855b4c8e4b150fbac53c37d3c"
+    },
+    {
+      "branch": "feature/420wallet-passkeys-v1",
+      "sha": "a072cc973c5ab75d0dd477fda7ef68fb36fe5703"
+    },
+    {
+      "branch": "feature/420wallet-recovery-session-execution-v1",
+      "sha": "7d194ee57775466f75b9d0cfc25c6ab87de30e99"
+    },
+    {
+      "branch": "feature/420wallet-recovery-session-execution-v1-foundation",
+      "sha": "ba288fba56f13ea27c25d3b0fc7867615ff7e392"
+    },
+    {
+      "branch": "feature/420wallet-w10-extension-authority-closure",
+      "sha": "baaa88064f279f65283d055e17d9d870114d283b"
+    },
+    {
+      "branch": "feature/420wallet-w10-extension-local-authority",
+      "sha": "9be03f4f7752862239aece424279a79cae0c83eb"
+    },
+    {
+      "branch": "feature/420wallet-w11-native-projects",
+      "sha": "ffebc7076abc7f9ccab86674219bd012f97fdc42"
+    },
+    {
+      "branch": "feature/420wallet-w12-release-packaging",
+      "sha": "0e72d29cb9fd48ce97ef6d6c0cb7b9b1ec4b6ee9"
+    },
+    {
+      "branch": "feature/420wallet-w13-design-system",
+      "sha": "c922eec4e1e686e63a55e0b5cf2db6586b68bcfd"
+    },
+    {
+      "branch": "feature/420wallet-web-core-genesis-v1",
+      "sha": "b87283fb439549f2cfee1d6b1a45caf0feb75f08"
+    },
+    {
+      "branch": "feature/420wallet-web-implementation-v1",
+      "sha": "8bf64b1c6498f32121b781fdcdc1ca621f4f7db0"
+    },
+    {
+      "branch": "feature/420wallet-web-ui-v1",
+      "sha": "93a21caf9927452c1358108aee8b35768f51adbe"
+    },
+    {
+      "branch": "feature/420wallet-webauthn-passkeys-v1",
+      "sha": "47fd0bd4ed36c7c90c2191ce23eae35d60ffa245"
+    },
+    {
+      "branch": "feature/bg-web-2-1-home-navigation",
+      "sha": "0bcde46daea3bb97d7dc42e30e09960d25315706"
+    },
+    {
+      "branch": "feature/bg-web-2-2-social-feed",
+      "sha": "6986a873c8a2a9f415d29d567579de07ca5314d0"
+    },
+    {
+      "branch": "feature/bong-goggles-bg12-2-materialized-views",
+      "sha": "21bbdc8a3baa0d2de2a00d1cd17ef46d12226c2c"
+    },
+    {
+      "branch": "feature/bong-goggles-bg12-indexer-foundation",
+      "sha": "5f2f660740c08d5abe34a7877f7b6769a23515f8"
+    },
+    {
+      "branch": "feature/bong-goggles-bg13-media-storage",
+      "sha": "bf22515e8b6cf06463f580b0b526f5ace4ee7202"
+    },
+    {
+      "branch": "feature/bong-goggles-bg14-private-messaging",
+      "sha": "bcff2e0c665de83ec9299321d4c5ae64b2edf722"
+    },
+    {
+      "branch": "feature/bong-goggles-bg15-social-games",
+      "sha": "2b38551a6d648cc3c645bf0f5ef61153d84be1c3"
+    },
+    {
+      "branch": "feature/bong-goggles-bg16-notifications",
+      "sha": "bbc0472aebe38b11cb824b4fb6ec0d3cefaeed7f"
+    },
+    {
+      "branch": "feature/bong-goggles-bg17-moderation-ops",
+      "sha": "9c678349fd2c1b1eeb0941289ca11fc9d32042d0"
+    },
+    {
+      "branch": "feature/bong-goggles-bg18-rewards-config",
+      "sha": "12800cf20c8b7b240b9d6787efcf605751e123c2"
+    },
+    {
+      "branch": "feature/bong-goggles-bg19-web-app",
+      "sha": "36d09c10ef7f5ddedb048c5b488c0e42d3114252"
+    },
+    {
+      "branch": "feature/bong-goggles-casual-games-v1",
+      "sha": "e11dd3341578992fef4a79aaa6e8210d728db57d"
+    },
+    {
+      "branch": "feature/bong-goggles-core-social-foundation-v1",
+      "sha": "e03e8912604c2fbc3c0b321a230402ba501db285"
+    },
+    {
+      "branch": "feature/bong-goggles-discovery-reviews-v1",
+      "sha": "6496849325eff9ebb44ec2129c69f366fa1c0e3b"
+    },
+    {
+      "branch": "feature/bong-goggles-feed-indexer-surface-v1",
+      "sha": "d3d662032abf535d276455bf6718b94d1cf4e05a"
+    },
+    {
+      "branch": "feature/bong-goggles-indexing-search-v1",
+      "sha": "da87efddb0d9ba3ab628ae732c14ec05fa7a815c"
+    },
+    {
+      "branch": "feature/bong-goggles-official-branding",
+      "sha": "05105c047c2591a096f427cb0e30edfe3dc35a16"
+    },
+    {
+      "branch": "feature/bong-goggles-pages-groups-events-v1",
+      "sha": "ea08a1b1ea0c731c9eec78adcc1d91acb461971b"
+    },
+    {
+      "branch": "feature/bong-goggles-phase-a-hardening-v1",
+      "sha": "247fdabee2e7f247f63af12e7431db630cc8385a"
+    },
+    {
+      "branch": "feature/bong-goggles-phase11c-passkey-session-ux",
+      "sha": "cb8b2fd1b1c82e88194c8de11b075dd9472c87c4"
+    },
+    {
+      "branch": "feature/bong-goggles-phase12-monolithic",
+      "sha": "993fcae69516f0a283728d0a7232907c80bb5ee4"
+    },
+    {
+      "branch": "feature/bong-goggles-private-messaging-v1",
+      "sha": "f902f6074d064daddec2eedf4be2bc369273b880"
+    },
+    {
+      "branch": "feature/bong-goggles-publishing-media-v1",
+      "sha": "7b57b013786d3621dd73a1c4c83be59e49f35cd8"
+    },
+    {
+      "branch": "feature/bong-goggles-publishing-policy-hardening-v1",
+      "sha": "62baeddb2998d87963cd346a991316db8407f347"
+    },
+    {
+      "branch": "feature/bong-goggles-reaction-audience-hardening-v1",
+      "sha": "80589d88a7b0738f51b6e9dc66ba0c7673398f09"
+    },
+    {
+      "branch": "feature/bong-goggles-rewards-integration-v1",
+      "sha": "5fd3b09b1c26ae46b3103abdc76fd5a865e3b3dd"
+    },
+    {
+      "branch": "feature/bong-goggles-share-repost-provenance-v1",
+      "sha": "cbb5c70abb5d75d4a6da432f8a0327a4a4aa8587"
+    },
+    {
+      "branch": "feature/bong-goggles-tags-mentions-v1",
+      "sha": "5ef18af87450cbbff4d58be0c889274757b3ff87"
+    },
+    {
+      "branch": "feature/bong-goggles-trust-safety-v1",
+      "sha": "cad10f7a3111d59ee4e9cf479b4fe7a8e29cd624"
+    },
+    {
+      "branch": "feature/bong-goggles-wallet-session-ux-v1",
+      "sha": "b52ff783fe618f4e61aa57502d6f15085d56a209"
+    },
+    {
+      "branch": "feature/budtender-bud-1",
+      "sha": "4802540621039565e511321280a7731329c2924e"
+    },
+    {
+      "branch": "feature/budtender-bud-2",
+      "sha": "67a03a044d68b3d1f37015be3994c31b875d8ec9"
+    },
+    {
+      "branch": "feature/budtender-bud-3",
+      "sha": "e7d34671850516d7077f97fa4df7b06396998a2e"
+    },
+    {
+      "branch": "feature/budtender-bud-4",
+      "sha": "72d912a7c67ba0e7922f6470ff81d66561e37cdc"
+    },
+    {
+      "branch": "feature/cmp-0-protocol-specification",
+      "sha": "c4f9591682fdfe4122d0e39d40afdd5ec36fc5ca"
+    },
+    {
+      "branch": "feature/cmp-1-1-original-job-registry",
+      "sha": "fcb4258e3ea55385102839ac2cac1a8d3dff2628"
+    },
+    {
+      "branch": "feature/cmp-1-2-3-verified-entitlement",
+      "sha": "51237387a477c7a218104865e3dc612a0cab34c1"
+    },
+    {
+      "branch": "feature/cmp-1-2-vault-settlement",
+      "sha": "492c95f064e2b6639c2b9503fa86d4508c0bea88"
+    },
+    {
+      "branch": "feature/cmp-1-3-worker-registry",
+      "sha": "5711286bd152d5332587f4e8154a441cfd372949"
+    },
+    {
+      "branch": "feature/cmp-1-identity-authorization-foundations",
+      "sha": "e235eee0a70bcefa09c851ab54af9bf04fb9e250"
+    },
+    {
+      "branch": "feature/development-compensation-vault-v1",
+      "sha": "a6b486cafd0f8096e37a45eaec41427a864b0464"
+    },
+    {
+      "branch": "feature/devhub-0-architecture-foundation",
+      "sha": "78112689f50cbc2051dc033265369000e2107b06"
+    },
+    {
+      "branch": "feature/devhub-1-network-discovery",
+      "sha": "0395ae9c0c9a7636ba98cca90dacbeb6a29f667b"
+    },
+    {
+      "branch": "feature/devhub-10-verification-orchestration",
+      "sha": "2fb8f15cdbbd1d39bfd8246f9d0a67418a897a0f"
+    },
+    {
+      "branch": "feature/devhub-11-indexer-api",
+      "sha": "025f737efd423a717925db549cec3758b4461dee"
+    },
+    {
+      "branch": "feature/devhub-12-protocol-guides",
+      "sha": "f7baed8c801d0e9c9c8b21d140dd25da69ca3126"
+    },
+    {
+      "branch": "feature/devhub-13-app-publishing",
+      "sha": "d952fcb32223914b38c06358ac1cddd178457abf"
+    },
+    {
+      "branch": "feature/devhub-14-dashboard",
+      "sha": "0066500bff53702f37ff26a1981792d53ce011fb"
+    },
+    {
+      "branch": "feature/devhub-15-debugging",
+      "sha": "694375aeb3a4c7a38634004af3ddc1e96f72dbfd"
+    },
+    {
+      "branch": "feature/devhub-16-service-identity",
+      "sha": "d197e744ca243edf860981afb96eecdeefe97850"
+    },
+    {
+      "branch": "feature/devhub-17-status-health",
+      "sha": "294badf6f8f459e02139137c9c5e6dcf89fa5209"
+    },
+    {
+      "branch": "feature/devhub-18-security-qualification",
+      "sha": "18f8cdc7e48ceaa6d9aa2c3d8c77b67748e76592"
+    },
+    {
+      "branch": "feature/devhub-19-production-readiness",
+      "sha": "16e9581e008f4db688593c6f42114c8fbda873e7"
+    },
+    {
+      "branch": "feature/devhub-2-contract-catalogue",
+      "sha": "7fb2934a745fa4dedb3af099aaf77e0e45540f2d"
+    },
+    {
+      "branch": "feature/devhub-3-typescript-sdk",
+      "sha": "4158ecaeed8d9ba2e16954b42429f1d1adb0fcc5"
+    },
+    {
+      "branch": "feature/devhub-4-wallet-smart-account-sdk",
+      "sha": "0f662c930ab81db5426e17871e60226f08a9941a"
+    },
+    {
+      "branch": "feature/devhub-5-local-devnet",
+      "sha": "10e89d45d214d1d9d979f80679a262f63fd12343"
+    },
+    {
+      "branch": "feature/devhub-6-cli",
+      "sha": "5d27c4738e6aaecbc1e6d79180bdf5fbab1a791a"
+    },
+    {
+      "branch": "feature/devhub-7-templates",
+      "sha": "53892f3fd8491ee10e25eeb6f7d46b5ac4917890"
+    },
+    {
+      "branch": "feature/devhub-8-testnet-faucet",
+      "sha": "c8e43cef4a066fdb55ea4748062bf4a88bc588b4"
+    },
+    {
+      "branch": "feature/devhub-9-deployment-control",
+      "sha": "35cb729d644b6a9172f18cd064bb7c5bc36c2f2c"
+    },
+    {
+      "branch": "feature/gen-svc-0-architecture-reconciliation",
+      "sha": "332537b6ec00b7f9e8ce63e1857a020e5b27f8b0"
+    },
+    {
+      "branch": "feature/gen-svc-1-reputation",
+      "sha": "9a341b0c363436e6762d68fe8d109a54ad6526a3"
+    },
+    {
+      "branch": "feature/gen-svc-1-reputation-implementation",
+      "sha": "f6532f5cad4bc1700f63232a1abccf2cb96cd5cb"
+    },
+    {
+      "branch": "feature/gen-svc-2-location-events",
+      "sha": "9e3bb93c4be658b799948c8f545bd4e148914371"
+    },
+    {
+      "branch": "feature/gen-svc-2-location-events-implementation",
+      "sha": "051ed15173ce0be011461059447c965bd1e865b6"
+    },
+    {
+      "branch": "feature/gen-svc-2-public-deployment",
+      "sha": "ec4dfeb48ab7a6a14476ffede3ea2a9184210000"
+    },
+    {
+      "branch": "feature/gen-svc-3-travel",
+      "sha": "cf3fae33c966c2c8ad09c5a08da3b5c9a637d106"
+    },
+    {
+      "branch": "feature/gen-svc-3-travel-implementation",
+      "sha": "c8968304c08b44e7e156ea32515135b224472080"
+    },
+    {
+      "branch": "feature/gen-svc-4-classifieds",
+      "sha": "7237ccc503b9f1f7de8a0458cafd31dcd69af132"
+    },
+    {
+      "branch": "feature/gen10-2-explorer-service-v1",
+      "sha": "f43959284981096f333ce4e53bca88cdb717a7b3"
+    },
+    {
+      "branch": "feature/gen10-3-420search-v1",
+      "sha": "c714fd989503bd813cd595842a883147fc838ece"
+    },
+    {
+      "branch": "feature/gen10-4-420analytics-v1",
+      "sha": "e7ae5a229d32570cda91f8782e58c8985800f77a"
+    },
+    {
+      "branch": "feature/gen10-5-420verify-v1",
+      "sha": "e723037ca7cd09e530035577d7eb41319f387e75"
+    },
+    {
+      "branch": "feature/gen10-6-420appstore-v1",
+      "sha": "8add29ba71f54eb8429b4b0897e906c2a1ca1d58"
+    },
+    {
+      "branch": "feature/gen10-7-420notifications-v1",
+      "sha": "619cc18f7edd111b84982eef9df031d19c9fab85"
+    },
+    {
+      "branch": "feature/gen10-8-420status-v1",
+      "sha": "f3fdc952df3e3721530735867e502fb0bb2d23b2"
+    },
+    {
+      "branch": "feature/gen11-0-bundler-network-v1",
+      "sha": "eb8d5400ed04aae4017371252acd64a3363dd7f9"
+    },
+    {
+      "branch": "feature/gen11-1-420indexer-v1",
+      "sha": "8c0fc343adfc3ed52f0c9a802fb908fe11bd4c10"
+    },
+    {
+      "branch": "feature/green-road-tgr-0-architecture",
+      "sha": "084f6303c2be602f16b63a09fa144245b9125ee4"
+    },
+    {
+      "branch": "feature/green-road-tgr-1-1-scene-engine",
+      "sha": "a43eb3d56735a35c95e709ac163bb526851957cc"
+    },
+    {
+      "branch": "feature/high-country-hc2-player-world-genesis",
+      "sha": "1b8e19ac8370e847727675065f2fbe6f3d82346d"
+    },
+    {
+      "branch": "feature/high-country-hc3-land-cultivation-access",
+      "sha": "1da6360a6776d0a42e47b64bcdc8b312a50817d5"
+    },
+    {
+      "branch": "feature/high-country-hc4-genetics-foundation",
+      "sha": "76451f9ef4e9669d5eb67fad362cdc8ef55afd68"
+    },
+    {
+      "branch": "feature/high-country-hc5-breeding-randomness",
+      "sha": "4f0c5ba9c7f23a478973dfa76f951cd6309baae5"
+    },
+    {
+      "branch": "feature/high-country-hc6-cultivation-simulation",
+      "sha": "66321b697c17383628ca744ba6e2e43f150b5772"
+    },
+    {
+      "branch": "feature/high-country-hcpa-progressive-access",
+      "sha": "e38c7ed256661b1b427193a1beca294c1a0bc337"
+    },
+    {
+      "branch": "feature/highcountry-bonus-region-access",
+      "sha": "27c8caf7f41232b36fa3dec875b652fa58f99a23"
+    },
+    {
+      "branch": "feature/highcountry-client-access-state",
+      "sha": "a021c17fd467dbb422638659f0f9be01c51808aa"
+    },
+    {
+      "branch": "feature/highcountry-competition-entitlement-access",
+      "sha": "c59b739dfa3719d341c70c733c7c6347e69ceaf5"
+    },
+    {
+      "branch": "feature/highcountry-cross-game-attestations",
+      "sha": "fe8403e9a3b68d92389c0bc7dff385b8cc184942"
+    },
+    {
+      "branch": "feature/highcountry-e2e-qualification",
+      "sha": "25ce0b2e3dbeb5af45cdae0f096ff377fcfb1a66"
+    },
+    {
+      "branch": "feature/highcountry-gaming-entitlement-gates",
+      "sha": "93981a2c0f9af1fe4f9105565f03c0d1c3731edd"
+    },
+    {
+      "branch": "feature/highcountry-gaming-protocol-reference",
+      "sha": "7893f5316378462e6558fada29fa667112ba3047"
+    },
+    {
+      "branch": "feature/highcountry-guest-migration-boundary",
+      "sha": "7e3f5a00ddff12b0d80ff497367c6026608eff85"
+    },
+    {
+      "branch": "feature/highcountry-session-capability-bridge",
+      "sha": "a5aaeeb8ac18a6f302d74ce6c9e8a3ffd768bd39"
+    },
+    {
+      "branch": "feature/sr-10.1-production-topology",
+      "sha": "ca46e0c238eb3a7aef806fd2bb4204e64e2eed0f"
+    },
+    {
+      "branch": "feature/sr-3-420store-core",
+      "sha": "60dd44b1be712245f81f6b0d75b021c526d5b039"
+    },
+    {
+      "branch": "feature/sr-4.3-closeout",
+      "sha": "9bc3238400fc98c017faa9d2222f3c4c17bb3c2c"
+    },
+    {
+      "branch": "feature/sr-4.3-proof-submitter",
+      "sha": "c5ac17077b6692f735888142b97b05fbf853f3b7"
+    },
+    {
+      "branch": "feature/sr-4.3-streaming-runtime",
+      "sha": "e957e349fd1927fd2f2fa8fe8fc8fd7895078be9"
+    },
+    {
+      "branch": "feature/sr-4.4-reconciliation",
+      "sha": "2fd201aeb8f0451ed4e5b0c8b3027f0414574526"
+    },
+    {
+      "branch": "feature/sr-5-repair-planner",
+      "sha": "60d26b5ba22bdaac5b9fc59327ade467c8f2228e"
+    },
+    {
+      "branch": "feature/sr-5.2-canonical-repair-reader",
+      "sha": "9a137fa7ebfee086d56e2fa81abc2111624dd717"
+    },
+    {
+      "branch": "feature/sr-5.3-reconstruction",
+      "sha": "e13eaeb8e92219a952ae8d1fddf62696cfb28772"
+    },
+    {
+      "branch": "feature/sr-5.4-provider-selection",
+      "sha": "b74174812c6a58738c6e208f1b77dc3ece09fa2d"
+    },
+    {
+      "branch": "feature/sr-5.5-placement-repair-transition",
+      "sha": "33511c25428a135f9ee614c086aeb8e3a75f988b"
+    },
+    {
+      "branch": "feature/sr-5.6-repair-orchestration",
+      "sha": "350ecc64338ef1bdbcb143fad3e6ddbeef021135"
+    },
+    {
+      "branch": "feature/sr-5.7-rpc-repair-writer",
+      "sha": "2bbb4f814e4a0363d366ee5ce64105eb165abf2e"
+    },
+    {
+      "branch": "feature/sr-5.8-repair-job-journal",
+      "sha": "028f94c926e99abc5cedf9825bb3a6ffc620c658"
+    },
+    {
+      "branch": "feature/sr-6.1-cache-admission",
+      "sha": "f9dd735fa2faf52c3145dff136ce9be37679fb3b"
+    },
+    {
+      "branch": "feature/sr-6.2-cache-runtime",
+      "sha": "4b231fe21f0d9d00a5ab47600517a7cb31bfc03e"
+    },
+    {
+      "branch": "feature/sr-6.3-cache-persistence",
+      "sha": "0d44fd84cdd8d39594336d4c45a4aa4db84ba9c5"
+    },
+    {
+      "branch": "feature/sr-6.4-cache-revalidation",
+      "sha": "95a97dcd0ba7e16b82d6cb217c673e5da25d3ea7"
+    },
+    {
+      "branch": "feature/sr-6.5-cache-reconcile-service",
+      "sha": "454b7f6b0a127415ab401b566c62ba250487b318"
+    },
+    {
+      "branch": "feature/sr-6.6-cache-node420-runtime",
+      "sha": "93d2387c0b37624aa217a67bb5dc8cd227aadc9f"
+    },
+    {
+      "branch": "feature/sr-6.7-cache-transport",
+      "sha": "35393262b8234da5731d006fd49027a175ef7dc1"
+    },
+    {
+      "branch": "feature/sr-6.8-cache-transport-hardening",
+      "sha": "3626c1d73a79a7ede81b5d479cc028b4e3d50acb"
+    },
+    {
+      "branch": "feature/sr-7.1-gateway-routing",
+      "sha": "ce145568b49f1ec10f5b76379936d2053182c89f"
+    },
+    {
+      "branch": "feature/sr-8.1-resource-runtime",
+      "sha": "5ad8b581f338b603f76afe157eae7c6fc65332ce"
+    },
+    {
+      "branch": "feature/sr-9.1-developer-api",
+      "sha": "604c26500478d6e75565ce394ba034a774245cf2"
+    },
+    {
+      "branch": "feature/status-cloudflare-launch",
+      "sha": "cfea89f7d3d24f6d43c1632207c95aa97502903f"
+    },
+    {
+      "branch": "feature/status-logo-branding",
+      "sha": "3b31ae705798c47b01f7731b864c0e1191b52bf8"
+    },
+    {
+      "branch": "feature/storage-proof-protocol-v1",
+      "sha": "fafc814c9c4ceb361eb74df4087fa8c73b6878f5"
+    },
+    {
+      "branch": "fix-mail-exact-logo-20261005",
+      "sha": "ecbb618ca285ab99259e6caec1ceaac33c7912c9"
+    },
+    {
+      "branch": "fix-mail-logo-assets-20261005",
+      "sha": "6c3a8f208484ed2efb5cf818cd0f0d8453546650"
+    },
+    {
+      "branch": "fix-mail-logo-fidelity-20261005",
+      "sha": "87ac6d25f1ad6fc25b37b63aac659e1e8fa09cd7"
+    },
+    {
+      "branch": "fix/420bet-slot-artifact-reconciliation",
+      "sha": "b7705f7bc5dd8442aca1911489bf4e6be98197b0"
+    },
+    {
+      "branch": "fix/420exchange-pr53-main-reconciliation",
+      "sha": "6e06c4da208ef70b40c65d8f303421a599d43d09"
+    },
+    {
+      "branch": "fix/420pay-post-merge-remediation",
+      "sha": "da7b25dfdfabf176c0821778eb5382105728740a"
+    },
+    {
+      "branch": "fix/420search-logo-assets",
+      "sha": "34e1836e2cc33e6cf0bef1cd2dcd9ec5fbe21c95"
+    },
+    {
+      "branch": "fix/audit-branch-workflow-detection-20261001",
+      "sha": "8ae1fb1daf3973a9f157f88bda34ddb020be070e"
+    },
+    {
+      "branch": "fix/cmp-3.14-closeout-verifier-20261005",
+      "sha": "983500adf57dea3ce2526e22ebf35f97fd850a83"
+    },
+    {
+      "branch": "fix/explorer-logo-centering-20260928",
+      "sha": "636fd51aadd7348e551c59bccdba94e613c0651d"
+    },
+    {
+      "branch": "fix/explorer-logo-fit-20260928",
+      "sha": "4972d2739e13bc068bf2eea66725c65f6959f646"
+    },
+    {
+      "branch": "fix/genesis-address-authority-main-20260920",
+      "sha": "fc4ffb8a4bcdc208ca313b08fb161dfbf6851304"
+    },
+    {
+      "branch": "fix/storage-proof-main-reconciliation",
+      "sha": "6062e220a866f861151e65b8dd0ec413e5535a78"
+    },
+    {
+      "branch": "fix/wallet-w14-5-yul-stack-isolation",
+      "sha": "80e2d3c26c83816d98f76109ef4fe7b0c6ef85cc"
+    },
+    {
+      "branch": "fix/wallet-w14-5-yul-stack-isolation-10",
+      "sha": "80e2d3c26c83816d98f76109ef4fe7b0c6ef85cc"
+    },
+    {
+      "branch": "fix/wallet-w14-5-yul-stack-isolation-11",
+      "sha": "80e2d3c26c83816d98f76109ef4fe7b0c6ef85cc"
+    },
+    {
+      "branch": "fix/wallet-w14-5-yul-stack-isolation-12",
+      "sha": "80e2d3c26c83816d98f76109ef4fe7b0c6ef85cc"
+    },
+    {
+      "branch": "fix/wallet-w14-5-yul-stack-isolation-13",
+      "sha": "80e2d3c26c83816d98f76109ef4fe7b0c6ef85cc"
+    },
+    {
+      "branch": "fix/wallet-w14-5-yul-stack-isolation-2",
+      "sha": "80e2d3c26c83816d98f76109ef4fe7b0c6ef85cc"
+    },
+    {
+      "branch": "fix/wallet-w14-5-yul-stack-isolation-3",
+      "sha": "80e2d3c26c83816d98f76109ef4fe7b0c6ef85cc"
+    },
+    {
+      "branch": "fix/wallet-w14-5-yul-stack-isolation-4",
+      "sha": "80e2d3c26c83816d98f76109ef4fe7b0c6ef85cc"
+    },
+    {
+      "branch": "fix/wallet-w14-5-yul-stack-isolation-5",
+      "sha": "80e2d3c26c83816d98f76109ef4fe7b0c6ef85cc"
+    },
+    {
+      "branch": "fix/wallet-w14-5-yul-stack-isolation-6",
+      "sha": "80e2d3c26c83816d98f76109ef4fe7b0c6ef85cc"
+    },
+    {
+      "branch": "fix/wallet-w14-5-yul-stack-isolation-7",
+      "sha": "80e2d3c26c83816d98f76109ef4fe7b0c6ef85cc"
+    },
+    {
+      "branch": "fix/wallet-w14-5-yul-stack-isolation-8",
+      "sha": "80e2d3c26c83816d98f76109ef4fe7b0c6ef85cc"
+    },
+    {
+      "branch": "fix/wallet-w14-5-yul-stack-isolation-9",
+      "sha": "80e2d3c26c83816d98f76109ef4fe7b0c6ef85cc"
+    },
+    {
+      "branch": "gas-0-foundation",
+      "sha": "b0b2516e721de06815e007e7f0f419d4fbb91887"
+    },
+    {
+      "branch": "gas-1-interface-encoding",
+      "sha": "037a80d9c17ef9baf2c62a2a644ee3daeaffc1bf"
+    },
+    {
+      "branch": "gas-10-observability-readiness-recovery",
+      "sha": "89f019920761421a68b65b93a70509dc216425ae"
+    },
+    {
+      "branch": "gas-11-hostile-state-security-hardening",
+      "sha": "05d6dc99a1c5a81d4dd6c4e4a31c6d687c72c20c"
+    },
+    {
+      "branch": "gas-2-entrypoint-validation",
+      "sha": "f332ddc966faf577643cc916d32f393b7ff5faa6"
+    },
+    {
+      "branch": "gas-3-deposits-reservations",
+      "sha": "8a8c8502a9a255310d810410faa62835d28fe2bf"
+    },
+    {
+      "branch": "gas-4-postop-settlement",
+      "sha": "ee90b4e785a8085358cd92df9dfb0f7f5aa3750d"
+    },
+    {
+      "branch": "gas-5-policy-engine",
+      "sha": "07ab50f9e54c540e5ab245a6343af32fb62bfcef"
+    },
+    {
+      "branch": "gas-6-quote-service-api",
+      "sha": "2cabf5ec1129a9b3bc3df0d16ccac23f62bdd551"
+    },
+    {
+      "branch": "gas-7-wallet-smart-account-integration",
+      "sha": "6fb9e0c969512814cfdca50ac8f95f81d84785b3"
+    },
+    {
+      "branch": "gas-8-automation-integration",
+      "sha": "cdf4d80769d5ca6ff87dcc3ad4bd08b8d087b1fc"
+    },
+    {
+      "branch": "gas-9-budgets-quotas-abuse-resistance",
+      "sha": "c4ac74a41620607fd0b266c5983b485b527d1fdb"
+    },
+    {
+      "branch": "governance-level3-closeout-20261001",
+      "sha": "330388bbd0c819e2ac331f060da856de5bf12e80"
+    },
+    {
+      "branch": "grants-audit8-reconcile-20261002",
+      "sha": "0e9ae4d97b457697eebe387e5cb0b03009b469fd"
+    },
+    {
+      "branch": "grants-level3-closeout-20261002",
+      "sha": "e31945694042dc96e29dc2018d5b1a4ad3f1ac5f"
+    },
+    {
+      "branch": "identity-audit-20260930",
+      "sha": "2479691d65e700f75b4998f8bd4cac840e3a0e3b"
+    },
+    {
+      "branch": "identity-id-audit-7-qualification-20261001",
+      "sha": "12af0c2759e71e60c20824046a956835a8645452"
+    },
+    {
+      "branch": "identity-id-audit-8-qualification-20261001",
+      "sha": "d804b23ed8d2f67cdb4aec52f26ef0d943e3ff04"
+    },
+    {
+      "branch": "identity-id-audit-9-qualification-20261001",
+      "sha": "2e6c177cdbdf85b73bf1cbf71a77896aba0d111a"
+    },
+    {
+      "branch": "mail-2-1-mailbox-state-model-20261005",
+      "sha": "5c49c93d1aeaa19b41c37a541570b2110f8ab14b"
+    },
+    {
+      "branch": "mail-2-11-email-wallet-onboarding-20261006",
+      "sha": "2dca4a7868ab500e60ab07904ed0e2b0e8920759"
+    },
+    {
+      "branch": "mail-logo-website-20261005",
+      "sha": "fbefa8fb51e7fc8bf17e4194237f6093ec00afda"
+    },
+    {
+      "branch": "main",
+      "sha": "c5a4f220d1fbda01f707d359aa9bb32921a138b1"
+    },
+    {
+      "branch": "messenger-remediation-20261004",
+      "sha": "075831241bb9d2cced733180c6e8b5235174e365"
+    },
+    {
+      "branch": "notifications-audit-20261004",
+      "sha": "4b68b4f07cb8570d5f0e313d1993413710f45999"
+    },
+    {
+      "branch": "puffbuddies-pb0-foundation-20261004",
+      "sha": "34c42fe027d34d4ff6f5663f56b45e68ffc6f9ad"
+    },
+    {
+      "branch": "puffbuddies-pb1-domain-20261006",
+      "sha": "627f6aa01400263d82f2e89a014c8c2e21140265"
+    },
+    {
+      "branch": "puffbuddies-pb10-payments-premium-20261006",
+      "sha": "c2d440f94fa53329597976025f85381902f2a7a6"
+    },
+    {
+      "branch": "puffbuddies-pb11-web-application-20261006",
+      "sha": "6431dd1e173361e334b4610dd138726b62705da3"
+    },
+    {
+      "branch": "puffbuddies-pb12-mobile-applications-20261006",
+      "sha": "7734cd2dcdda43d2780f9d4f7fa5ad207c1cd777"
+    },
+    {
+      "branch": "puffbuddies-pb13-cross-app-integration-20261006",
+      "sha": "f9cc887f46ae17971023d66b3d4b2b9d2168e210"
+    },
+    {
+      "branch": "puffbuddies-pb14-backend-api-hardening-20261006",
+      "sha": "26810971e8bed3381268236a8a15be85e7ed7710"
+    },
+    {
+      "branch": "puffbuddies-pb15-qualification-20261006",
+      "sha": "b3932d1537f5903179ba03a1a0166b1b8a782681"
+    },
+    {
+      "branch": "puffbuddies-pb16-security-privacy-audit-20261006",
+      "sha": "b56ad47f05395a678ec030ab540dd6fb8ba1a504"
+    },
+    {
+      "branch": "puffbuddies-pb2-eligibility-20261006",
+      "sha": "d68905ac11fc25b948375c66a795a1d325f9bda9"
+    },
+    {
+      "branch": "puffbuddies-pb3-profiles-20261006",
+      "sha": "0b2654678b504e338871d153039f13a22296f156"
+    },
+    {
+      "branch": "puffbuddies-pb4-discovery-20261006",
+      "sha": "7b90b4ff4f343a478bd9840ca9f5fe2d1a00cb36"
+    },
+    {
+      "branch": "puffbuddies-pb5-likes-matching-20261006",
+      "sha": "95e644aa3ba2140cf3786bce47c3536c96235817"
+    },
+    {
+      "branch": "puffbuddies-pb6-messenger-integration-20261006",
+      "sha": "7b5de5a9b580067f67d7af144dd98f48c7ac9544"
+    },
+    {
+      "branch": "puffbuddies-pb7-notifications-integration-20261006",
+      "sha": "f92afc4aa8229b070e4f4644b89e3e5869aeda61"
+    },
+    {
+      "branch": "puffbuddies-pb8-safety-moderation-20261006",
+      "sha": "6ad13242b5d21458422301866856a5750664a32b"
+    },
+    {
+      "branch": "puffbuddies-pb9-verification-reputation-20261006",
+      "sha": "a2f288b6a23c4f37a12047d1a5ef784cb4276c80"
+    },
+    {
+      "branch": "qualification/420grow-l3-f920b9f-20261008",
+      "sha": "f920b9f459c12ec7a2fc6badd918d76e5f8e1208"
+    },
+    {
+      "branch": "qualification/bridge-a1-20261001",
+      "sha": "45ed77f472c476116f63379f83da8514656852e3"
+    },
+    {
+      "branch": "qualification/bridge-a2-20261002",
+      "sha": "fdb6c49217b0e9626c2de1f0664a20be2b90767a"
+    },
+    {
+      "branch": "qualification/bridge-a3-20261002",
+      "sha": "42060ec5c0ea5efde0c527b38333381c44fb5f59"
+    },
+    {
+      "branch": "qualification/bridge-a4-20261002",
+      "sha": "52f5aadbe89b52697df7bb91bd461f2008ce03e2"
+    },
+    {
+      "branch": "qualification/bridge-a6-20261002",
+      "sha": "7a50712a27f1ff847e75157580f8dbd331f47fa3"
+    },
+    {
+      "branch": "qualification/bridge-a7-20261002",
+      "sha": "114ea9956430d18ccfa85acaaba0cc3cf055e7e6"
+    },
+    {
+      "branch": "qualification/bridge-a7-finality-20261002",
+      "sha": "33f5a376d17478cea68cdafd04144498b6f4fe4b"
+    },
+    {
+      "branch": "qualification/bridge-a8-level2-20261002",
+      "sha": "a1bac7e7ec8f497cd493f14e116ebc01c17b5acf"
+    },
+    {
+      "branch": "qualification/bridge-audit-1-e9c4bf75",
+      "sha": "3256be7675b419166c329f530b2289dc894d18b5"
+    },
+    {
+      "branch": "qualification/bridge-audit-7-20261002",
+      "sha": "114ea9956430d18ccfa85acaaba0cc3cf055e7e6"
+    },
+    {
+      "branch": "qualification/gen-11-21-b83ad2b",
+      "sha": "b83ad2b6b3d07d667306bf207eb2064861ab0831"
+    },
+    {
+      "branch": "qualification/reg-audit-5-14ceb1f",
+      "sha": "14ceb1f034ec04a785447fc3b24d43a7102a3774"
+    },
+    {
+      "branch": "qualification/reg-audit-5-f795e0d",
+      "sha": "f795e0dd62b744cb9cb9dfed9eeb7ab347ff12bc"
+    },
+    {
+      "branch": "qualification/reg-audit-6-1e7d591",
+      "sha": "1e7d591b00f54e9827fefc680c53bf6f971f3de3"
+    },
+    {
+      "branch": "qualification/reg-audit-6-final-4650148",
+      "sha": "4650148fd3ce1431bd7d413beb81dffd20f02f94"
+    },
+    {
+      "branch": "qualification/reg-audit-8-readiness-96f1ae3",
+      "sha": "96f1ae3fbae6d7bd1fd2e90b0a7533e381b2ebac"
+    },
+    {
+      "branch": "qualify/ai-audit-8-20261003",
+      "sha": "b49543dc5c5227ed5d9eff3d0d4383af3f1ec1ad"
+    },
+    {
+      "branch": "qualify/ai-audit-8-reconciled-20261003",
+      "sha": "ad848e1ca22637454a8076171700e6b057255d29"
+    },
+    {
+      "branch": "reconcile/420-gaming-live-testnet-qualification",
+      "sha": "d0920ec769099850f7f05526d4afe78be38e1a2e"
+    },
+    {
+      "branch": "reconcile/420bet-mines-v1",
+      "sha": "56492fb4c4d364a23ed5bdb95fcfe9410c809cc8"
+    },
+    {
+      "branch": "reconcile/pr-106-v12.5.3",
+      "sha": "1776914e27de8f2b5843f3a1610682512b52ecd4"
+    },
+    {
+      "branch": "reconcile/pr101-main-20260905",
+      "sha": "4f13d3620a94ab685847b49cac909057f169a23a"
+    },
+    {
+      "branch": "reconcile/pr87-main-20260905",
+      "sha": "249cf985e03221384842c11a14d44fa0b4dd4d0a"
+    },
+    {
+      "branch": "reconcile/reg-audit-8-main-bd00e64",
+      "sha": "bd00e64e29e74c96b4d89b1254254547767a6851"
+    },
+    {
+      "branch": "reconcile/resource-audit-498-20261003",
+      "sha": "1d7d703e68cc044331bf544d7de845266bf42b9f"
+    },
+    {
+      "branch": "reconcile2/420-gaming-live-testnet-qualification",
+      "sha": "74b7dc096f4c697d3fce04e47cb2df9d151c4c28"
+    },
+    {
+      "branch": "reconcile4/420-gaming-live-testnet-qualification",
+      "sha": "edfaeff39e64aa863a682dd6642729f9586b546e"
+    },
+    {
+      "branch": "reefer-review-official-logo-20261007",
+      "sha": "f11b1278e5237b5d76bef111586a0f81c20f91e6"
+    },
+    {
+      "branch": "reefer-review-rr1-newsfeed-20261007",
+      "sha": "c01859430ac145f474387354c913fc70bd327423"
+    },
+    {
+      "branch": "reefer-review-rr11-standalone-rss-20261008",
+      "sha": "f6b8dac98393676ef1ed5e210e51da88b2c14064"
+    },
+    {
+      "branch": "reeferreview/cloudflare-rss-proxy",
+      "sha": "2fdee74dcb15f3b0f6f189d0e656d27545bfb20a"
+    },
+    {
+      "branch": "reeferreview/rss-shared-process-repair",
+      "sha": "8d7f91272e7269d9be2d1bbb8eebb7676ee4a30b"
+    },
+    {
+      "branch": "reeferreview/rss-xml-latest-fallback-20261008",
+      "sha": "06f100acc57ae879cb5bcdd1f3496223131c0d2b"
+    },
+    {
+      "branch": "resource-phase-closeout-498-20261003",
+      "sha": "5ff6db7346f53a373599319a3a8069c297a93f6b"
+    },
+    {
+      "branch": "review/high-country-complete-audit-20261009",
+      "sha": "2fcd4032e4143d1df60bd71a75c912895ed5bfcd"
+    },
+    {
+      "branch": "roadmap/doobr-bc-vancouver-infrastructure",
+      "sha": "18009040cb6c76f1f96c0da744171d0d9e4b0c16"
+    },
+    {
+      "branch": "tmp-ignore",
+      "sha": "c79833f5fb5699e4008484464ae78fbac8db9978"
+    },
+    {
+      "branch": "tmp-ignore-2",
+      "sha": "c79833f5fb5699e4008484464ae78fbac8db9978"
+    },
+    {
+      "branch": "tmp-noop",
+      "sha": "3d7a4ba3dcf252118a2d66eedd2d176c5615f17c"
+    },
+    {
+      "branch": "tmp-unused-gas10-reconcile-check",
+      "sha": "c79833f5fb5699e4008484464ae78fbac8db9978"
+    },
+    {
+      "branch": "tmp/pr53-current-main-base",
+      "sha": "58c72251eab47bcbd8932e768770ce6236eb3a61"
+    },
+    {
+      "branch": "tmp/pr54-current-main-base",
+      "sha": "638ed1c3c18718424172b61cb9828494916831b8"
+    },
+    {
+      "branch": "tmp/pr74-current-main-base",
+      "sha": "641498cea0754b85695d6884ceef5236fd9abbbe"
+    },
+    {
+      "branch": "tmp/pr79-qualified-backup",
+      "sha": "284515ada8d863322b46333f4af9f255c6d9c52d"
+    },
+    {
+      "branch": "tmp/pr79-reconcile-base",
+      "sha": "cb38284ef8a60bdd0f858d189686cc05798cc2b9"
+    },
+    {
+      "branch": "tmp/sr-3-reconcile",
+      "sha": "903fcfd0c90d0ba8155d1ee862d303b7b70b2187"
+    },
+    {
+      "branch": "town-branding-20261006",
+      "sha": "c32e5aeb0b0e79643dfdffbbee50096b5fbba1a7"
+    },
+    {
+      "branch": "town-branding-logo-20261005",
+      "sha": "f5fe16414893a1e4bd4f3db22eb36b685a2030f5"
+    },
+    {
+      "branch": "wallet-w14-1-deployment-inventory",
+      "sha": "9a1fa0bc5e636ed5a6995b32c9de5d5ff48ec187"
+    },
+    {
+      "branch": "wallet-w14-2-runtime-config-generator",
+      "sha": "6912d555f5565f8a19a8bc67b601b7f9b9b495a8"
+    },
+    {
+      "branch": "wallet-w14-3-live-testnet-qualification",
+      "sha": "b4c5c943f05d3a27dfd369a95cd8ad7901c79656"
+    },
+    {
+      "branch": "wallet-w14-4-extension-live-dapp-qualification",
+      "sha": "97e094d71dcfaaad4a8a58e01af6b11ad7ad5b60"
+    },
+    {
+      "branch": "wallet-w14-5-app-catalog-reconciliation",
+      "sha": "7cadc4fbe445883ce2809b9315976985482d2fcc"
+    },
+    {
+      "branch": "wallet-w14-6-names-send-integration",
+      "sha": "c70e856b7e0c4a38d771bf927ea4e8bf7223a624"
+    },
+    {
+      "branch": "wallet-w14-6-names-send-resolution",
+      "sha": "7813c8fa5884fdbdf58b454a20d8514c95dc52ad"
+    },
+    {
+      "branch": "web/analytics-brand-20261003",
+      "sha": "a56a5ecdc9df21184bc05df458bac04b30b0ed64"
+    },
+    {
+      "branch": "zz-test",
+      "sha": "494f07a513ad6d8a4581869a4bcdd06975d7ea5a"
+    }
+  ],
+  "open_pr_count": 67,
+  "open_prs": [
+    {
+      "number": 601,
+      "title": "docs(doobr): BC Vancouver-first infrastructure roadmap R01\u2013R06",
+      "head": "18009040cb6c76f1f96c0da744171d0d9e4b0c16",
+      "branch": "roadmap/doobr-bc-vancouver-infrastructure",
+      "base": "c5a4f220d1fbda01f707d359aa9bb32921a138b1",
+      "draft": true,
+      "updated_at": "2026-10-10T02:32:37Z"
+    },
+    {
+      "number": 600,
+      "title": "BNB-1.1 \u2014 canonical source reconciliation and scoped Level 1 verification",
+      "head": "0bc67ae60a64a2829ab8773134d7a4d9618bfa19",
+      "branch": "audit/420bnb-bnb-1-1-source-reconciliation-20261009",
+      "base": "f8bbb62e1cdfe68cff25261fd4a036db1840a15c",
+      "draft": true,
+      "updated_at": "2026-10-10T01:59:30Z"
+    },
+    {
+      "number": 594,
+      "title": "420Commerce COM-7 security acceptance and exact-SHA Level 3 qualification",
+      "head": "d2cfdd00778d642e4cef4d9a2aecfac0ae2b3f22",
+      "branch": "audit/420commerce-com-2-upstream-adaptations",
+      "base": "f8bbb62e1cdfe68cff25261fd4a036db1840a15c",
+      "draft": true,
+      "updated_at": "2026-10-10T01:21:06Z"
+    },
+    {
+      "number": 593,
+      "title": "High Country: repository audit and foundation authorization/provenance repairs",
+      "head": "2fcd4032e4143d1df60bd71a75c912895ed5bfcd",
+      "branch": "review/high-country-complete-audit-20261009",
+      "base": "3de7a0d87600fa30ec6090c1351a11d36ba59de9",
+      "draft": true,
+      "updated_at": "2026-10-10T02:33:11Z"
+    },
+    {
+      "number": 591,
+      "title": "420Compute: external science 420Indexer read endpoint and unavailable UI",
+      "head": "8c54099e5a081221b5aad40e458eddb8b7b64d16",
+      "branch": "cmp-science-indexer-read-endpoint-20261008",
+      "base": "c75cc81064ab9d700ca47c20159122375c8ebf46",
+      "draft": false,
+      "updated_at": "2026-10-09T01:22:23Z"
+    },
+    {
+      "number": 590,
+      "title": "G-01: Gridcoin chain and bridge feasibility \u2014 conditional NO-GO",
+      "head": "b596d4a9e865b1d689a14f412b9acb8214def158",
+      "branch": "cmp-g01-gridcoin-feasibility-20261008",
+      "base": "c75cc81064ab9d700ca47c20159122375c8ebf46",
+      "draft": false,
+      "updated_at": "2026-10-09T00:50:45Z"
+    },
+    {
+      "number": 589,
+      "title": "CMP-10 security and adversarial qualification readiness",
+      "head": "c75cc81064ab9d700ca47c20159122375c8ebf46",
+      "branch": "cmp-10-security-adversarial-20261008",
+      "base": "b243a3ab10f581413ed1a80fcd5d7cf2dc4f7b74",
+      "draft": false,
+      "updated_at": "2026-10-09T01:11:06Z"
+    },
+    {
+      "number": 587,
+      "title": "CMP-9.15: CMP-0 operational closeout NO-GO and exact-SHA preflight",
+      "head": "b243a3ab10f581413ed1a80fcd5d7cf2dc4f7b74",
+      "branch": "cmp-9-15-cmp0-closeout-20261008",
+      "base": "613271eea281b0cdb0ec1962fd60a165c7d96ed1",
+      "draft": false,
+      "updated_at": "2026-10-09T00:23:36Z"
+    },
+    {
+      "number": 586,
+      "title": "CMP-9.14: long-duration soak readiness and testnet operational gates",
+      "head": "613271eea281b0cdb0ec1962fd60a165c7d96ed1",
+      "branch": "cmp-9-14-soak-readiness-20261008",
+      "base": "508e68fb049d9dbf9f3b0f12fdaf80a48cdd86b5",
+      "draft": false,
+      "updated_at": "2026-10-09T00:19:53Z"
+    },
+    {
+      "number": 585,
+      "title": "CMP-9.13 scientific workload demonstration preflight and evidence gate",
+      "head": "508e68fb049d9dbf9f3b0f12fdaf80a48cdd86b5",
+      "branch": "cmp-9-13-scientific-demonstration-20261008",
+      "base": "6545539249a9b03409d7a497e11f6a9b26df2323",
+      "draft": false,
+      "updated_at": "2026-10-09T00:12:19Z"
+    },
+    {
+      "number": 584,
+      "title": "CMP S-10: operational soak, CMP-9 and CMP-10 testnet handoff",
+      "head": "6545539249a9b03409d7a497e11f6a9b26df2323",
+      "branch": "cmp-s10-operations-handoff-20261008",
+      "base": "106809d9bb9aab2c52b1bf99bdcdbbf18b8d98f6",
+      "draft": false,
+      "updated_at": "2026-10-09T00:09:04Z"
+    },
+    {
+      "number": 583,
+      "title": "CMP S-09: two-provider funded testnet milestone gates",
+      "head": "106809d9bb9aab2c52b1bf99bdcdbbf18b8d98f6",
+      "branch": "cmp-s09-two-provider-testnet-gates-20261008",
+      "base": "d3eb5c311d5abc5cfa36e9bfeb8ccfbf8fe77c6f",
+      "draft": false,
+      "updated_at": "2026-10-09T00:01:35Z"
+    },
+    {
+      "number": 581,
+      "title": "CMP S-08: funded entitlement and Wallet settlement evidence",
+      "head": "d3eb5c311d5abc5cfa36e9bfeb8ccfbf8fe77c6f",
+      "branch": "cmp-s08-funded-settlement-20261008",
+      "base": "05854d097e9b57e7b64ea796cdc485d9692086ba",
+      "draft": false,
+      "updated_at": "2026-10-08T21:41:05Z"
+    },
+    {
+      "number": 580,
+      "title": "CMP S-07: economic eligibility and policy approval gates",
+      "head": "05854d097e9b57e7b64ea796cdc485d9692086ba",
+      "branch": "cmp-s07-economic-policy-20261008",
+      "base": "e1256d18e3def216be33ec9034c255d4806f9398",
+      "draft": false,
+      "updated_at": "2026-10-08T21:27:45Z"
+    },
+    {
+      "number": 579,
+      "title": "CMP S-06: scientific contribution read model and 420Compute integration",
+      "head": "e1256d18e3def216be33ec9034c255d4806f9398",
+      "branch": "cmp-s06-science-readmodel-20261008",
+      "base": "89979790d536a7a643e82c4f3df143f039069ac1",
+      "draft": false,
+      "updated_at": "2026-10-08T21:24:22Z"
+    },
+    {
+      "number": 578,
+      "title": "CMP S-05: canonical record binding and deduplication",
+      "head": "89979790d536a7a643e82c4f3df143f039069ac1",
+      "branch": "cmp-s05-canonical-dedup-20261008",
+      "base": "6b4fb257f89e5b8bcbf3b30d2f935fb3490fa8b9",
+      "draft": false,
+      "updated_at": "2026-10-08T21:21:13Z"
+    },
+    {
+      "number": 577,
+      "title": "CMP S-04: participant identity and consent",
+      "head": "6b4fb257f89e5b8bcbf3b30d2f935fb3490fa8b9",
+      "branch": "cmp-s04-participant-identity-consent-20261008",
+      "base": "16be4be6c8bc56c3cbd50632e71e323e939fe50e",
+      "draft": false,
+      "updated_at": "2026-10-08T21:16:17Z"
+    },
+    {
+      "number": 576,
+      "title": "CMP S-03: trusted source-evidence verification boundary",
+      "head": "16be4be6c8bc56c3cbd50632e71e323e939fe50e",
+      "branch": "cmp-s03-source-evidence-20261008",
+      "base": "595e3cef719a82fe7344183d90e127fad250ed2e",
+      "draft": false,
+      "updated_at": "2026-10-08T21:01:07Z"
+    },
+    {
+      "number": 575,
+      "title": "CMP S-02: read-only external science ingestion clients",
+      "head": "595e3cef719a82fe7344183d90e127fad250ed2e",
+      "branch": "cmp-s02-readonly-ingestion-20261008",
+      "base": "08bca1873d5b58db5c51f3398dc8d3c71e20c24a",
+      "draft": false,
+      "updated_at": "2026-10-08T20:57:42Z"
+    },
+    {
+      "number": 561,
+      "title": "audit(budtender): repository-grounded qualification and remediation",
+      "head": "6228f05e04bdef4240fb042843b09e131cb46d06",
+      "branch": "audit/budtender-complete-20261007",
+      "base": "c8e8b58d818611276f7a9bb2b8d2241004450d97",
+      "draft": false,
+      "updated_at": "2026-10-07T22:47:59Z"
+    },
+    {
+      "number": 556,
+      "title": "420Hz audit remediation: recover HZ-4 on current main",
+      "head": "9043d2e71e939cd8e80dc20d897245df1e6335d1",
+      "branch": "feature/420hz-remediation-20261006",
+      "base": "c8e8b58d818611276f7a9bb2b8d2241004450d97",
+      "draft": false,
+      "updated_at": "2026-10-07T20:16:45Z"
+    },
+    {
+      "number": 555,
+      "title": "420Hz complete audit reconciliation and HZ-4 recovery",
+      "head": "71521f8ef189b9391aa6056302c79e80e78ddf2e",
+      "branch": "feature/420hz-reconciliation-20261006",
+      "base": "ff4440bfd7b69c0712ee3dd7c4b417cb049ae76d",
+      "draft": true,
+      "updated_at": "2026-10-07T01:47:51Z"
+    },
+    {
+      "number": 552,
+      "title": "test(puffbuddies): complete PB-15 Qualification milestone",
+      "head": "b3932d1537f5903179ba03a1a0166b1b8a782681",
+      "branch": "puffbuddies-pb15-qualification-20261006",
+      "base": "26810971e8bed3381268236a8a15be85e7ed7710",
+      "draft": false,
+      "updated_at": "2026-10-07T01:23:39Z"
+    },
+    {
+      "number": 551,
+      "title": "feat(puffbuddies): complete PB-14 Backend/API hardening",
+      "head": "26810971e8bed3381268236a8a15be85e7ed7710",
+      "branch": "puffbuddies-pb14-backend-api-hardening-20261006",
+      "base": "f9cc887f46ae17971023d66b3d4b2b9d2168e210",
+      "draft": false,
+      "updated_at": "2026-10-07T00:48:43Z"
+    },
+    {
+      "number": 550,
+      "title": "feat(puffbuddies): complete PB-13 420Integrated cross-app integration",
+      "head": "f9cc887f46ae17971023d66b3d4b2b9d2168e210",
+      "branch": "puffbuddies-pb13-cross-app-integration-20261006",
+      "base": "7734cd2dcdda43d2780f9d4f7fa5ad207c1cd777",
+      "draft": false,
+      "updated_at": "2026-10-07T00:28:52Z"
+    },
+    {
+      "number": 549,
+      "title": "feat(puffbuddies): complete PB-12 Mobile applications",
+      "head": "7734cd2dcdda43d2780f9d4f7fa5ad207c1cd777",
+      "branch": "puffbuddies-pb12-mobile-applications-20261006",
+      "base": "6431dd1e173361e334b4610dd138726b62705da3",
+      "draft": false,
+      "updated_at": "2026-10-06T23:46:15Z"
+    },
+    {
+      "number": 504,
+      "title": "AI-AUDIT-7/8 qualification: exact frozen head",
+      "head": "b49543dc5c5227ed5d9eff3d0d4383af3f1ec1ad",
+      "branch": "qualify/ai-audit-8-20261003",
+      "base": "6716f475850f6dbcbb0ca1287a02bf3f8771966b",
+      "draft": false,
+      "updated_at": "2026-10-04T02:57:38Z"
+    },
+    {
+      "number": 500,
+      "title": "audit(analytics): exact-head qualification and complete audit record",
+      "head": "b1343dd372230bfa79598b3ebbcf78e17141ec39",
+      "branch": "analytics-audit-20261003",
+      "base": "d37d751dfa232b20c8158d55c20c13cc1d7a10ef",
+      "draft": false,
+      "updated_at": "2026-10-03T15:51:35Z"
+    },
+    {
+      "number": 491,
+      "title": "AI-AUDIT-1/2: repository audit and Genesis compatibility qualification",
+      "head": "6477d7e2cf559c9fe56ae99a253f9fe710d1643a",
+      "branch": "audit/420ai-complete-20261002",
+      "base": "d37d751dfa232b20c8158d55c20c13cc1d7a10ef",
+      "draft": false,
+      "updated_at": "2026-10-03T06:44:28Z"
+    },
+    {
+      "number": 485,
+      "title": "CMP-1.5.12: release candidate",
+      "head": "4e01c818000001e7ed4d64d8357cb1fa3ee5266f",
+      "branch": "cmp-1.5.12-release-candidate-20261002",
+      "base": "239198af9cf0ea24ab65c32bbc854dc0f8e04ead",
+      "draft": false,
+      "updated_at": "2026-10-02T21:01:59Z"
+    },
+    {
+      "number": 483,
+      "title": "CMP-1.5.11: hostile economic qualification",
+      "head": "239198af9cf0ea24ab65c32bbc854dc0f8e04ead",
+      "branch": "cmp-1.5.11-hostile-economic-qualification-20261002",
+      "base": "e4b70ae9c7800ed681e261cee74d1aa9548c9c12",
+      "draft": false,
+      "updated_at": "2026-10-02T19:50:50Z"
+    },
+    {
+      "number": 482,
+      "title": "CMP-1.5.10: integrate ComputeEscrow with collateral slash redistribution",
+      "head": "e4b70ae9c7800ed681e261cee74d1aa9548c9c12",
+      "branch": "cmp-1.5.10-computeescrow-slash-redistribution-20261002",
+      "base": "0c567ddacd88f187168f54714d9a80c5a6ca993b",
+      "draft": false,
+      "updated_at": "2026-10-02T19:18:43Z"
+    },
+    {
+      "number": 481,
+      "title": "qualification(bridge): BRIDGE-A7 strengthened exact-head Level 1",
+      "head": "33f5a376d17478cea68cdafd04144498b6f4fe4b",
+      "branch": "qualification/bridge-a7-finality-20261002",
+      "base": "27ae1873edcca8fb05dec9f4e70af9832b5dafe2",
+      "draft": false,
+      "updated_at": "2026-10-02T20:08:01Z"
+    },
+    {
+      "number": 478,
+      "title": "CMP-1.5.9: integrate WorkerRegistry with canonical ComputeStake source",
+      "head": "0c567ddacd88f187168f54714d9a80c5a6ca993b",
+      "branch": "cmp-1.5.9-workerregistry-stake-source-integration-20261002",
+      "base": "01c7673a1b44ecdd8e2495a1ee58a82734d78b19",
+      "draft": false,
+      "updated_at": "2026-10-02T19:10:13Z"
+    },
+    {
+      "number": 477,
+      "title": "CMP-1.5.8: integrate disputes with verifier stake holds",
+      "head": "01c7673a1b44ecdd8e2495a1ee58a82734d78b19",
+      "branch": "cmp-1.5.8-dispute-stake-integration-20261002",
+      "base": "7fd48bcdf2ecbc618d110b34d5b081d2f3cca874",
+      "draft": false,
+      "updated_at": "2026-10-02T16:58:25Z"
+    },
+    {
+      "number": 476,
+      "title": "Qualification only: BRIDGE-AUDIT-6 exact-head CI",
+      "head": "7a50712a27f1ff847e75157580f8dbd331f47fa3",
+      "branch": "qualification/bridge-a6-20261002",
+      "base": "27ae1873edcca8fb05dec9f4e70af9832b5dafe2",
+      "draft": true,
+      "updated_at": "2026-10-02T06:21:01Z"
+    },
+    {
+      "number": 475,
+      "title": "CMP-1.5.7: implement Vault-backed reward accounting",
+      "head": "7fd48bcdf2ecbc618d110b34d5b081d2f3cca874",
+      "branch": "cmp-1.5.7-reward-accounting-20261001",
+      "base": "8e4a15594fff7d4d3834a2c7856ba401462478f8",
+      "draft": false,
+      "updated_at": "2026-10-02T06:21:34Z"
+    },
+    {
+      "number": 472,
+      "title": "qualification(bridge): BRIDGE-AUDIT-4 exact-head Level 1",
+      "head": "52f5aadbe89b52697df7bb91bd461f2008ce03e2",
+      "branch": "qualification/bridge-a4-20261002",
+      "base": "d30c81cfbea7847817654b39491694a23c8701e4",
+      "draft": true,
+      "updated_at": "2026-10-02T04:11:51Z"
+    },
+    {
+      "number": 471,
+      "title": "CMP-1.5.6: implement policy-bound slash distribution",
+      "head": "8e4a15594fff7d4d3834a2c7856ba401462478f8",
+      "branch": "cmp-1.5.6-slash-distribution-20261001",
+      "base": "a62bffc91350ddae6dacb7a4ae953b9c9b5dd7ed",
+      "draft": false,
+      "updated_at": "2026-10-02T05:21:35Z"
+    },
+    {
+      "number": 470,
+      "title": "qualification(bridge): BRIDGE-AUDIT-3 exact-head Level 1",
+      "head": "42060ec5c0ea5efde0c527b38333381c44fb5f59",
+      "branch": "qualification/bridge-a3-20261002",
+      "base": "98e545225d54379086f0c520afcb84b4d4d97288",
+      "draft": true,
+      "updated_at": "2026-10-02T03:20:31Z"
+    },
+    {
+      "number": 469,
+      "title": "CMP-1.5.5: implement objective slash authorization",
+      "head": "a62bffc91350ddae6dacb7a4ae953b9c9b5dd7ed",
+      "branch": "cmp-1.5.5-objective-slash-authorization-20261001",
+      "base": "bc814aee0e314ce306addab48507586077829c22",
+      "draft": false,
+      "updated_at": "2026-10-02T03:37:30Z"
+    },
+    {
+      "number": 467,
+      "title": "qualification(bridge): BRIDGE-AUDIT-2 exact-head Level 1",
+      "head": "fdb6c49217b0e9626c2de1f0664a20be2b90767a",
+      "branch": "qualification/bridge-a2-20261002",
+      "base": "98e545225d54379086f0c520afcb84b4d4d97288",
+      "draft": true,
+      "updated_at": "2026-10-02T02:10:16Z"
+    },
+    {
+      "number": 465,
+      "title": "qualify(420bridge): exact-head Bridge A1",
+      "head": "45ed77f472c476116f63379f83da8514656852e3",
+      "branch": "qualification/bridge-a1-20261001",
+      "base": "98e545225d54379086f0c520afcb84b4d4d97288",
+      "draft": true,
+      "updated_at": "2026-10-02T00:05:28Z"
+    },
+    {
+      "number": 463,
+      "title": "audit(420bridge): complete repository audit and harden route authority",
+      "head": "a1bac7e7ec8f497cd493f14e116ebc01c17b5acf",
+      "branch": "audit/420bridge-complete-20261001",
+      "base": "01c70a721e3931807fc43b05a63582035ccbf30d",
+      "draft": false,
+      "updated_at": "2026-10-02T23:35:50Z"
+    },
+    {
+      "number": 462,
+      "title": "CMP-1.5.4: implement exit queue and withdrawal delay",
+      "head": "bc814aee0e314ce306addab48507586077829c22",
+      "branch": "cmp-1.5.4-exit-queue-withdrawal-delay-20261001",
+      "base": "52568690f89d3bda3bff5b31b5edb5d6ec840baa",
+      "draft": false,
+      "updated_at": "2026-10-02T01:56:58Z"
+    },
+    {
+      "number": 461,
+      "title": "CMP-1.5.3: implement policy-specific minimum collateral",
+      "head": "52568690f89d3bda3bff5b31b5edb5d6ec840baa",
+      "branch": "cmp-1.5.3-policy-minimum-collateral-20261001",
+      "base": "3773f00e067ccef50b40ff35a9f11449e403476f",
+      "draft": false,
+      "updated_at": "2026-10-01T23:54:48Z"
+    },
+    {
+      "number": 460,
+      "title": "CMP-1.5.2: implement verifier collateral",
+      "head": "3773f00e067ccef50b40ff35a9f11449e403476f",
+      "branch": "cmp-1.5.2-verifier-collateral-20261001",
+      "base": "a5157eb48a1e30b70ade3fb1e5810aa9097270dc",
+      "draft": false,
+      "updated_at": "2026-10-03T22:30:52Z"
+    },
+    {
+      "number": 454,
+      "title": "CMP-1.5.1: implement worker collateral",
+      "head": "a5157eb48a1e30b70ade3fb1e5810aa9097270dc",
+      "branch": "cmp-1.5.1-worker-collateral-20261001",
+      "base": "9a487ebeb24c28ceebfe2f0d794463939956ad9e",
+      "draft": false,
+      "updated_at": "2026-10-01T22:31:22Z"
+    },
+    {
+      "number": 448,
+      "title": "ID-AUDIT-9 exact-head testnet harness qualification",
+      "head": "2e6c177cdbdf85b73bf1cbf71a77896aba0d111a",
+      "branch": "identity-id-audit-9-qualification-20261001",
+      "base": "61265cc81aab15d232848fa4daff430685ea1a29",
+      "draft": false,
+      "updated_at": "2026-10-01T15:23:30Z"
+    },
+    {
+      "number": 446,
+      "title": "ID-AUDIT-8 exact-head operator readiness qualification",
+      "head": "d804b23ed8d2f67cdb4aec52f26ef0d943e3ff04",
+      "branch": "identity-id-audit-8-qualification-20261001",
+      "base": "b544c7eed2c931ed460d10faa6806366285694b1",
+      "draft": false,
+      "updated_at": "2026-10-01T15:04:47Z"
+    },
+    {
+      "number": 428,
+      "title": "docs(testnet): add GEN-11 live qualification work queue",
+      "head": "c36d79286ab2b6ee8e01feeaa32d72f883f67a82",
+      "branch": "docs/add-gen11-testnet-roadmap-20260930",
+      "base": "76bcee74a03c7f8a8d93ea119f999875043b9dc3",
+      "draft": false,
+      "updated_at": "2026-09-30T20:02:29Z"
+    },
+    {
+      "number": 425,
+      "title": "audit(registry): update REG-AUDIT-8 live-testnet hold condition",
+      "head": "5eb8b8d572a2f14bf82b3c176da2ddc89ccc592d",
+      "branch": "audit/420registry-reg-audit-8-20260930",
+      "base": "bd00e64e29e74c96b4d89b1254254547767a6851",
+      "draft": false,
+      "updated_at": "2026-09-30T18:30:43Z"
+    },
+    {
+      "number": 401,
+      "title": "CMP-1.3.11: exact-head provenance qualification",
+      "head": "32ac525e6dcbfe0ce7c90a92b536b93e44f56576",
+      "branch": "cmp-1.3.11-exact-head-qualification-20260929",
+      "base": "3758148416e394ad3da0572ef3b39861764a9141",
+      "draft": false,
+      "updated_at": "2026-09-29T17:04:24Z"
+    },
+    {
+      "number": 395,
+      "title": "CMP-1.3.10: worker capacity reservation and concurrency semantics",
+      "head": "8447127fd1aae2d8076a65253f4ffed56f2b8aca",
+      "branch": "cmp-1.3.10-reconciled-main-20260928",
+      "base": "d99f8a9c5b10d0007a5729ea46802bb58f5b0d56",
+      "draft": false,
+      "updated_at": "2026-09-29T02:51:58Z"
+    },
+    {
+      "number": 392,
+      "title": "CMP-1.3.9: reconcile qualified execution-key signing with current main",
+      "head": "3aabe9a570855614f6d237ef6c237faf770f8c1b",
+      "branch": "cmp-1.3.9-reconciled-main-20260928",
+      "base": "ac1b9c5a5d7e1b031ea63c210b8c38ac3abee6df",
+      "draft": false,
+      "updated_at": "2026-09-29T01:53:26Z"
+    },
+    {
+      "number": 389,
+      "title": "CMP-1.3.9: independent execution-key signing and replay safety",
+      "head": "53bb8f0871482a87a024eb68fcbc3b946bb9c2ff",
+      "branch": "cmp-1.3.9-execution-key-signing-20260928",
+      "base": "25321f2af15b02d2940704225b854c5d33984111",
+      "draft": false,
+      "updated_at": "2026-09-28T21:45:11Z"
+    },
+    {
+      "number": 386,
+      "title": "CMP-1.3.8: capability-scope WorkerRegistry mutations",
+      "head": "25321f2af15b02d2940704225b854c5d33984111",
+      "branch": "cmp-1.3.8-worker-capability-authorization-20260928",
+      "base": "f437378664059a51f854d45bf48594930f070f6f",
+      "draft": false,
+      "updated_at": "2026-09-28T20:15:29Z"
+    },
+    {
+      "number": 383,
+      "title": "CMP-1.3: audit remaining WorkerRegistry gaps and define 1.3.8\u20131.3.16",
+      "head": "54be6fce65d2ca14a9d9a2a0acf09c4b6a053b85",
+      "branch": "audit/cmp-1.3.8-1.3.16-roadmap-20260928",
+      "base": "eb417aea38f454c2c01b672e0d566e0da17a87bd",
+      "draft": false,
+      "updated_at": "2026-09-28T18:43:25Z"
+    },
+    {
+      "number": 354,
+      "title": "420Wallet W14.4: extension live dApp qualification",
+      "head": "97e094d71dcfaaad4a8a58e01af6b11ad7ad5b60",
+      "branch": "wallet-w14-4-extension-live-dapp-qualification",
+      "base": "b4c5c943f05d3a27dfd369a95cd8ad7901c79656",
+      "draft": false,
+      "updated_at": "2026-09-20T01:07:30Z"
+    },
+    {
+      "number": 353,
+      "title": "420Wallet W14.3: live testnet qualification",
+      "head": "b4c5c943f05d3a27dfd369a95cd8ad7901c79656",
+      "branch": "wallet-w14-3-live-testnet-qualification",
+      "base": "6912d555f5565f8a19a8bc67b601b7f9b9b495a8",
+      "draft": false,
+      "updated_at": "2026-09-19T04:24:17Z"
+    },
+    {
+      "number": 351,
+      "title": "420Wallet W14.2: deterministic runtime config generator",
+      "head": "6912d555f5565f8a19a8bc67b601b7f9b9b495a8",
+      "branch": "wallet-w14-2-runtime-config-generator",
+      "base": "9a1fa0bc5e636ed5a6995b32c9de5d5ff48ec187",
+      "draft": false,
+      "updated_at": "2026-09-19T04:07:19Z"
+    },
+    {
+      "number": 342,
+      "title": "feat(gen-svc-4): add 420Classifieds Genesis MVP",
+      "head": "7237ccc503b9f1f7de8a0458cafd31dcd69af132",
+      "branch": "feature/gen-svc-4-classifieds",
+      "base": "815519d991c4f79dfa17d2166cf568dc9a0bde66",
+      "draft": false,
+      "updated_at": "2026-09-18T01:35:55Z"
+    },
+    {
+      "number": 151,
+      "title": "feat(green-road): begin TGR-1.1 reusable scene engine",
+      "head": "a43eb3d56735a35c95e709ac163bb526851957cc",
+      "branch": "feature/green-road-tgr-1-1-scene-engine",
+      "base": "0131d30ada583a793d2c5adbe0be1e3bae3e85c6",
+      "draft": false,
+      "updated_at": "2026-09-10T03:23:02Z"
+    },
+    {
+      "number": 148,
+      "title": "feat(420bet): begin Video Poker V1",
+      "head": "74e8e91d9028678e9cb61c2b1faede4061fa2f7a",
+      "branch": "feature/420bet-video-poker-v1",
+      "base": "62e440ec5fabcae742e26b85410ec9c2d8090419",
+      "draft": false,
+      "updated_at": "2026-09-09T22:46:28Z"
+    },
+    {
+      "number": 105,
+      "title": "420Hz HZ-4: streaming settlement, allocation & royalty routing",
+      "head": "33058b61a8633d69f1eceb466245339362c4c794",
+      "branch": "feature/420hz-hz4-settlement-v1",
+      "base": "74b7dc096f4c697d3fce04e47cb2df9d151c4c28",
+      "draft": false,
+      "updated_at": "2026-09-09T21:25:01Z"
+    },
+    {
+      "number": 97,
+      "title": "feat(420wallet): implement W12 WebAuthn passkey authority",
+      "head": "47fd0bd4ed36c7c90c2191ce23eae35d60ffa245",
+      "branch": "feature/420wallet-webauthn-passkeys-v1",
+      "base": "4c79ae00a72713112567561bb2dc2409389c096c",
+      "draft": false,
+      "updated_at": "2026-09-06T16:24:09Z"
+    },
+    {
+      "number": 86,
+      "title": "feat(420media): add Phase 3 operator discovery foundation",
+      "head": "a1a1f7d58619e4c93eb4ebc6d89765ee8f55d9d7",
+      "branch": "feature/420media-phase3-operator-discovery-v1",
+      "base": "357e35344ac2ab8dcf5390e8b8d125eeb77b0fce",
+      "draft": false,
+      "updated_at": "2026-09-09T22:39:16Z"
+    }
+  ],
+  "active_dependency_prs": [
+    {
+      "number": 601,
+      "title": "docs(doobr): BC Vancouver-first infrastructure roadmap R01\u2013R06",
+      "head": "18009040cb6c76f1f96c0da744171d0d9e4b0c16",
+      "branch": "roadmap/doobr-bc-vancouver-infrastructure",
+      "base": "c5a4f220d1fbda01f707d359aa9bb32921a138b1",
+      "draft": true,
+      "updated_at": "2026-10-10T02:32:37Z",
+      "behind_main": 0,
+      "ahead_main": 2
+    },
+    {
+      "number": 600,
+      "title": "BNB-1.1 \u2014 canonical source reconciliation and scoped Level 1 verification",
+      "head": "0bc67ae60a64a2829ab8773134d7a4d9618bfa19",
+      "branch": "audit/420bnb-bnb-1-1-source-reconciliation-20261009",
+      "base": "f8bbb62e1cdfe68cff25261fd4a036db1840a15c",
+      "draft": true,
+      "updated_at": "2026-10-10T01:59:30Z",
+      "behind_main": 50,
+      "ahead_main": 51
+    },
+    {
+      "number": 577,
+      "title": "CMP S-04: participant identity and consent",
+      "head": "6b4fb257f89e5b8bcbf3b30d2f935fb3490fa8b9",
+      "branch": "cmp-s04-participant-identity-consent-20261008",
+      "base": "16be4be6c8bc56c3cbd50632e71e323e939fe50e",
+      "draft": false,
+      "updated_at": "2026-10-08T21:16:17Z",
+      "behind_main": 948,
+      "ahead_main": 0
+    },
+    {
+      "number": 478,
+      "title": "CMP-1.5.9: integrate WorkerRegistry with canonical ComputeStake source",
+      "head": "0c567ddacd88f187168f54714d9a80c5a6ca993b",
+      "branch": "cmp-1.5.9-workerregistry-stake-source-integration-20261002",
+      "base": "01c7673a1b44ecdd8e2495a1ee58a82734d78b19",
+      "draft": false,
+      "updated_at": "2026-10-02T19:10:13Z",
+      "behind_main": 5422,
+      "ahead_main": 0
+    },
+    {
+      "number": 448,
+      "title": "ID-AUDIT-9 exact-head testnet harness qualification",
+      "head": "2e6c177cdbdf85b73bf1cbf71a77896aba0d111a",
+      "branch": "identity-id-audit-9-qualification-20261001",
+      "base": "61265cc81aab15d232848fa4daff430685ea1a29",
+      "draft": false,
+      "updated_at": "2026-10-01T15:23:30Z",
+      "behind_main": 6187,
+      "ahead_main": 3
+    },
+    {
+      "number": 446,
+      "title": "ID-AUDIT-8 exact-head operator readiness qualification",
+      "head": "d804b23ed8d2f67cdb4aec52f26ef0d943e3ff04",
+      "branch": "identity-id-audit-8-qualification-20261001",
+      "base": "b544c7eed2c931ed460d10faa6806366285694b1",
+      "draft": false,
+      "updated_at": "2026-10-01T15:04:47Z",
+      "behind_main": 6202,
+      "ahead_main": 5
+    },
+    {
+      "number": 425,
+      "title": "audit(registry): update REG-AUDIT-8 live-testnet hold condition",
+      "head": "5eb8b8d572a2f14bf82b3c176da2ddc89ccc592d",
+      "branch": "audit/420registry-reg-audit-8-20260930",
+      "base": "bd00e64e29e74c96b4d89b1254254547767a6851",
+      "draft": false,
+      "updated_at": "2026-09-30T18:30:43Z",
+      "behind_main": 6376,
+      "ahead_main": 15
+    },
+    {
+      "number": 386,
+      "title": "CMP-1.3.8: capability-scope WorkerRegistry mutations",
+      "head": "25321f2af15b02d2940704225b854c5d33984111",
+      "branch": "cmp-1.3.8-worker-capability-authorization-20260928",
+      "base": "f437378664059a51f854d45bf48594930f070f6f",
+      "draft": false,
+      "updated_at": "2026-09-28T20:15:29Z",
+      "behind_main": 6679,
+      "ahead_main": 20
+    },
+    {
+      "number": 383,
+      "title": "CMP-1.3: audit remaining WorkerRegistry gaps and define 1.3.8\u20131.3.16",
+      "head": "54be6fce65d2ca14a9d9a2a0acf09c4b6a053b85",
+      "branch": "audit/cmp-1.3.8-1.3.16-roadmap-20260928",
+      "base": "eb417aea38f454c2c01b672e0d566e0da17a87bd",
+      "draft": false,
+      "updated_at": "2026-09-28T18:43:25Z",
+      "behind_main": 6694,
+      "ahead_main": 4
+    },
+    {
+      "number": 105,
+      "title": "420Hz HZ-4: streaming settlement, allocation & royalty routing",
+      "head": "33058b61a8633d69f1eceb466245339362c4c794",
+      "branch": "feature/420hz-hz4-settlement-v1",
+      "base": "74b7dc096f4c697d3fce04e47cb2df9d151c4c28",
+      "draft": false,
+      "updated_at": "2026-09-09T21:25:01Z",
+      "behind_main": 11637,
+      "ahead_main": 15
+    }
+  ],
+  "scope": "tracked main tree and tracked text, excluding binary file contents; active PR heads are separate from main",
+  "snapshot_timestamp": "2026-10-10T04:02:28Z",
+  "snapshot_timestamp_note": "request timestamp; API/git inventory collected during this task, not an assertion of atomic cross-service capture",
+  "branches_sha256": "9110d02b5b4956d5a17f8194b1e0533bc1c245f4a0a6183dad50fee40a7d57ca",
+  "open_prs_sha256": "909dcc9d13e79f44ce273e71eb73373c105441bd8a68d83d4c81739a55cfcc12",
+  "branch_artifacts": [
+    {
+      "ref": "18009040cb6c76f1f96c0da744171d0d9e4b0c16",
+      "path": "docs/doobr/DOOBR-R01-R06-ROADMAP.md",
+      "blob_sha": "584f38a95718f9ddec2724ab2adf8fd0c84da7f0",
+      "sha256": "b08dcc188b0d59a5178d418fd92d13d2e96c4f57c4fab7a41ceba30c131562fb"
+    },
+    {
+      "ref": "0bc67ae60a64a2829ab8773134d7a4d9618bfa19",
+      "path": "docs/bnb/BNB-1.4-PROTOCOL-AUTHORITY-AND-INTEGRATION-BOUNDARIES.md",
+      "blob_sha": "ba4d66255f59dd5e82eb961a2905879b98ca7cab",
+      "sha256": "4118256e4255ce3d1339da854cde28c7d3d28e1eae3bdeb794bfffce19545b57"
+    }
+  ]
+}

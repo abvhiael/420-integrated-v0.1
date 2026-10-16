@@ -1,0 +1,73 @@
+name: LIFTd L01.9 Level 1
+on:
+  push:
+    branches: ['build/liftd-l01-1-foundation']
+    paths:
+      - 'rideshare/**'
+      - 'docs/rideshare/**'
+      - '.github/workflows/liftd-l01-9-level1.yml'
+  pull_request:
+    paths:
+      - 'rideshare/**'
+      - 'docs/rideshare/**'
+      - '.github/workflows/liftd-l01-9-level1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: liftd-l01-9-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  safety:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: liftd_qualification
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres -d liftd_qualification"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      LIFTD_DATABASE_URL: postgres://postgres:postgres@127.0.0.1:5432/liftd_qualification
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact implementation SHA
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Locked dependencies and safety syntax
+        run: |
+          npm ci --prefix rideshare --ignore-scripts
+          node --check rideshare/src/safety.mjs
+          node --check rideshare/src/trip.mjs
+          node --check rideshare/src/postgres-store.mjs
+          node --check rideshare/src/auth.mjs
+          node --check rideshare/src/http.mjs
+          node --check rideshare/src/payments.mjs
+          node --check rideshare/test/postgres/safety.test.mjs
+          node rideshare/scripts/verify-foundation.mjs
+          git diff --check
+      - name: Retained domain, auth and financial invariants
+        run: npm test --prefix rideshare
+      - name: Real PostgreSQL safety incident lifecycle
+        run: |
+          mkdir -p liftd-safety-evidence
+          set -o pipefail
+          node --test --test-reporter=tap rideshare/test/postgres/safety.test.mjs | tee liftd-safety-evidence/safety-tests.tap
+      - name: Scoped implementation identity
+        run: git rev-parse HEAD > liftd-safety-evidence/implementation-sha.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: liftd-l01-9-${{ github.event.pull_request.head.sha || github.sha }}
+          path: liftd-safety-evidence/
+          if-no-files-found: error

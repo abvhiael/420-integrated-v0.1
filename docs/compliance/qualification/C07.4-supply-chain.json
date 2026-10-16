@@ -1,0 +1,34 @@
+{
+  "step": "C07.3",
+  "immutable_actions": [
+    "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+    "actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9"
+  ],
+  "postgres_fixture_digest": "ca0bd484cb98bf4b24eb1010e73fb3fcbd6714d240fbc1a10eea5b7dbecb641d",
+  "go_version": "go1.27.2",
+  "go_archive_sha256": "ecbadb99091a3f46e31f5f934b068b1864eafa7995211b39eaddf76996045fe5",
+  "govulncheck_version": "v1.9.0",
+  "reviewed_runtime_dependency": "github.com/lib/pq v1.12.0",
+  "reviewed_checksums": [
+    "github.com/lib/pq v1.12.0 h1:mC1zeiNamwKBecjHarAr26c/+d8V5w/u4J0I/yASbJo=",
+    "github.com/lib/pq v1.12.0/go.mod h1:/p+8NSbOcwzAEI7wiMXFlgydTwcgTr3OSKMsD2BitpA="
+  ],
+  "permissions": "contents:read",
+  "source_secret_boundary": "PASS",
+  "vulnerability_scan": {
+    "status": "PASS",
+    "findings": 0,
+    "configuration": [
+      {
+        "protocol_version": "v1.0.0",
+        "scanner_name": "govulncheck",
+        "scanner_version": "v1.9.0",
+        "db": "https://vuln.go.dev",
+        "db_last_modified": "2026-10-08T22:31:09Z",
+        "go_version": "go1.27.2",
+        "scan_level": "symbol",
+        "scan_mode": "source"
+      }
+    ]
+  }
+}

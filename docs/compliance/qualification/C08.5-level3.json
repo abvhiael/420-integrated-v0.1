@@ -1,0 +1,180 @@
+{
+  "schema": "420compliance-c08.5-level3-certificate/v1",
+  "step": "C08.5",
+  "qualification_level": 3,
+  "status": "COMPLETE_REPOSITORY_LEVEL3",
+  "tested_implementation_sha": "871e1365a578c4d5bb0410f60aff62987e9c87fa",
+  "qualification_branch": "audit/420compliance-c08-4-main-candidate-20261014",
+  "implementation_frozen": true,
+  "production_enabled": false,
+  "pr_602": "DRAFT_OPEN_UNMERGED",
+  "freeze_manifest": "docs/compliance/qualification/C08.5-candidate-inputs.json",
+  "frozen_input_count": 561,
+  "required_workflows": [
+    {
+      "name": "Solidity Contracts",
+      "run_id": 38658890063,
+      "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38658890063",
+      "event": "workflow_dispatch",
+      "head_sha": "871e1365a578c4d5bb0410f60aff62987e9c87fa",
+      "status": "success",
+      "jobs": [
+        {
+          "name": "level3-shards (0)",
+          "id": 116175162210
+        },
+        {
+          "name": "level3-shards (1)",
+          "id": 116175162689
+        },
+        {
+          "name": "level3-shards (2)",
+          "id": 116175162743
+        },
+        {
+          "name": "level3-shards (3)",
+          "id": 116175162605
+        },
+        {
+          "name": "level3-fixture",
+          "id": 116201306605
+        }
+      ],
+      "artifacts": [
+        {
+          "id": 11943150052,
+          "name": "foundry-level3-shard-2-871e1365a578c4d5bb0410f60aff62987e9c87fa"
+        },
+        {
+          "id": 11942996433,
+          "name": "foundry-coverage-871e1365a578c4d5bb0410f60aff62987e9c87fa"
+        },
+        {
+          "id": 11940762015,
+          "name": "foundry-level3-shard-3-871e1365a578c4d5bb0410f60aff62987e9c87fa"
+        },
+        {
+          "id": 11940293451,
+          "name": "foundry-level3-shard-0-871e1365a578c4d5bb0410f60aff62987e9c87fa"
+        },
+        {
+          "id": 11939517979,
+          "name": "foundry-level3-shard-1-871e1365a578c4d5bb0410f60aff62987e9c87fa"
+        }
+      ],
+      "optional_skips": [
+        "classify-pr",
+        "compute-fast",
+        "pr-shards",
+        "foundry"
+      ]
+    },
+    {
+      "name": "Genesis Address Authority",
+      "run_id": 38658941629,
+      "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38658941629",
+      "event": "workflow_dispatch",
+      "head_sha": "871e1365a578c4d5bb0410f60aff62987e9c87fa",
+      "status": "success",
+      "jobs": [
+        {
+          "name": "cross-manifest-authority",
+          "id": 116175329258
+        }
+      ],
+      "artifacts": [
+        {
+          "id": 11937832243,
+          "name": "address-consumers-871e1365a578c4d5bb0410f60aff62987e9c87fa"
+        }
+      ]
+    },
+    {
+      "name": "420 Integrated Qualification",
+      "run_id": 38658983827,
+      "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38658983827",
+      "event": "workflow_dispatch",
+      "head_sha": "871e1365a578c4d5bb0410f60aff62987e9c87fa",
+      "status": "success",
+      "jobs": [
+        {
+          "name": "production-dependencies",
+          "id": 116175458412
+        },
+        {
+          "name": "offline-core",
+          "id": 116175458565
+        },
+        {
+          "name": "fault-matrix",
+          "id": 116175458599
+        },
+        {
+          "name": "geth-engine",
+          "id": 116175458717
+        }
+      ],
+      "fix": "Mandatory PostgreSQL 16 verified-TLS fixture established for tagged production-dependencies full Go inventory"
+    },
+    {
+      "name": "420Docs Qualification",
+      "run_id": 38659017797,
+      "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38659017797",
+      "event": "workflow_dispatch",
+      "head_sha": "871e1365a578c4d5bb0410f60aff62987e9c87fa",
+      "status": "success",
+      "jobs": [
+        {
+          "name": "qualify",
+          "id": 116175567010
+        }
+      ]
+    },
+    {
+      "name": "420Compliance C08.5 retained phase qualification",
+      "run_id": 38647604599,
+      "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38647604599",
+      "event": "push",
+      "head_sha": "871e1365a578c4d5bb0410f60aff62987e9c87fa",
+      "status": "success",
+      "jobs": [
+        {
+          "name": "retained-phase",
+          "id": 116138238975
+        }
+      ],
+      "artifacts": [
+        {
+          "id": 11932894300,
+          "name": "compliance-c085-level1-871e1365a578c4d5bb0410f60aff62987e9c87fa"
+        }
+      ]
+    }
+  ],
+  "disposition": {
+    "qualification": "PASS: all five canonical exact-SHA workflows and all mandatory jobs succeeded",
+    "artifact_integrity": "GitHub artifact IDs and immutable workflow-associated SHA names recorded. Individual ZIP byte SHA-256 checksums not independently recomputed in this certificate; retain original workflow evidence and freeze manifest for further archival verification.",
+    "excluded_unrelated_workflows": [
+      {
+        "run_id": 38647603044,
+        "name": "governance-deployment-audit",
+        "conclusion": "failure",
+        "classification": "separate preexisting unrelated workflow; not an assertion of pass"
+      },
+      {
+        "run_id": 38647601644,
+        "name": "420hz-gca",
+        "conclusion": "failure",
+        "classification": "separate preexisting unrelated workflow; not an assertion of pass"
+      }
+    ],
+    "external_acceptance": "NOT_GRANTED",
+    "testnet": "C09 evidence and deployment acceptance outstanding",
+    "production": "C10 independent legal/identity/operator/partner acceptance outstanding",
+    "historical_standalone": "C06.5/C06.6/C06.7/C06.8/C07.6 evidence gaps remain NOT_VERIFIED",
+    "security": "C07.9 independent assessment NOT_PERFORMED",
+    "release_permission": false,
+    "merge_authorized": false,
+    "next_roadmap_step": "C08.6 — Record exact-SHA evidence, formal repository phase closeout, merge through established policy and publish testnet handoff; NOT STARTED"
+  }
+}

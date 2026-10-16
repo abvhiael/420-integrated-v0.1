@@ -1,0 +1,289 @@
+{
+  "schema": "420compliance-independent-security-intake/v1",
+  "step": "C07.9",
+  "intake_status": "READY_FOR_INDEPENDENT_REVIEW",
+  "independent_review_status": "NOT_PERFORMED",
+  "independent_reviewer": null,
+  "external_report": null,
+  "scope": "420Compliance C01-C07 repository code; C07.10/C08.3/C09/C10 deployed acceptance excluded",
+  "baseline": "docs/compliance/C01.5-THREATS.json",
+  "threats": [
+    {
+      "id": "T01",
+      "boundary": "collector/source registry",
+      "abuse": "Spoof publisher, redirect, forged licence notice",
+      "expected_negative": "quarantine; UNKNOWN; block regulated evaluation",
+      "downstream_requirements": [
+        "C02.1",
+        "C02.2",
+        "C04.1"
+      ],
+      "evidence_candidates": [
+        "services/complianceauth/source_health_test.go"
+      ],
+      "validation_status": "REVIEW_REQUIRED",
+      "finding_status": "UNASSESSED",
+      "remediation_owner": "Compliance security owner",
+      "external_disposition": null
+    },
+    {
+      "id": "T02",
+      "boundary": "snapshot/parser",
+      "abuse": "Alter PDF sections, remove repeal or effective date",
+      "expected_negative": "reject or quarantine; no approval",
+      "downstream_requirements": [
+        "C02.3",
+        "C02.4",
+        "C04.1"
+      ],
+      "evidence_candidates": [
+        "services/complianceauth/snapshot_test.go"
+      ],
+      "validation_status": "REVIEW_REQUIRED",
+      "finding_status": "UNASSESSED",
+      "remediation_owner": "Compliance security owner",
+      "external_disposition": null
+    },
+    {
+      "id": "T03",
+      "boundary": "collector to analysis proposal",
+      "abuse": "Document embeds instructions to self-approve, exfiltrate or call tools",
+      "expected_negative": "proposal-only, reject commands",
+      "downstream_requirements": [
+        "C02.6",
+        "C04.1"
+      ],
+      "evidence_candidates": [
+        "services/complianceauth/ai_proposal_test.go"
+      ],
+      "validation_status": "REVIEW_REQUIRED",
+      "finding_status": "UNASSESSED",
+      "remediation_owner": "Compliance security owner",
+      "external_disposition": null
+    },
+    {
+      "id": "T04",
+      "boundary": "author/reviewer/publisher",
+      "abuse": "Self-approve, reuse signature on changed bytes, publish without review",
+      "expected_negative": "reject activation and audit attempt",
+      "downstream_requirements": [
+        "C04.1",
+        "C04.2",
+        "C04.8"
+      ],
+      "evidence_candidates": [
+        "services/complianceauth/reviewer_authorization_test.go"
+      ],
+      "validation_status": "REVIEW_REQUIRED",
+      "finding_status": "UNASSESSED",
+      "remediation_owner": "Compliance security owner",
+      "external_disposition": null
+    },
+    {
+      "id": "T05",
+      "boundary": "decision API/export",
+      "abuse": "Swap tenant or subject, enumerate references",
+      "expected_negative": "deny with no foreign detail",
+      "downstream_requirements": [
+        "C05.1",
+        "C07.2"
+      ],
+      "evidence_candidates": [
+        "services/complianceauth/auth_test.go"
+      ],
+      "validation_status": "REVIEW_REQUIRED",
+      "finding_status": "UNASSESSED",
+      "remediation_owner": "Compliance security owner",
+      "external_disposition": null
+    },
+    {
+      "id": "T06",
+      "boundary": "DOOBr dispatch/handover",
+      "abuse": "Reuse old ALLOW after revocation, order change or expiry",
+      "expected_negative": "DENY/UNKNOWN blocks sale stage; preserve lawful recovery",
+      "downstream_requirements": [
+        "C03.7",
+        "C03.8",
+        "C05.4",
+        "C05.5"
+      ],
+      "evidence_candidates": [
+        "services/complianceauth/decision_receipt_test.go"
+      ],
+      "validation_status": "REVIEW_REQUIRED",
+      "finding_status": "UNASSESSED",
+      "remediation_owner": "Compliance security owner",
+      "external_disposition": null
+    },
+    {
+      "id": "T07",
+      "boundary": "review and operations console",
+      "abuse": "Force approval, intimidate reviewer, emergency operator ALLOW",
+      "expected_negative": "quarantine, halt, incident review",
+      "downstream_requirements": [
+        "C04.2",
+        "C04.8",
+        "C07.1"
+      ],
+      "evidence_candidates": [
+        "services/complianceauth/reviewer_authorization_test.go"
+      ],
+      "validation_status": "REVIEW_REQUIRED",
+      "finding_status": "UNASSESSED",
+      "remediation_owner": "Compliance security owner",
+      "external_disposition": null
+    },
+    {
+      "id": "T08",
+      "boundary": "commitment/indexer/public guidance",
+      "abuse": "Publish identity/address/order/signature or guessable personal hashes",
+      "expected_negative": "reject public output and incident containment",
+      "downstream_requirements": [
+        "C05.11",
+        "C07.3"
+      ],
+      "evidence_candidates": [
+        "services/complianceauth/c07_5_privacy_test.go"
+      ],
+      "validation_status": "REVIEW_REQUIRED",
+      "finding_status": "UNASSESSED",
+      "remediation_owner": "Compliance security owner",
+      "external_disposition": null
+    },
+    {
+      "id": "T09",
+      "boundary": "collector/evaluator/public API",
+      "abuse": "Flood requests, source outage, downstream backpressure",
+      "expected_negative": "UNKNOWN / no new regulated permission",
+      "downstream_requirements": [
+        "C02.8",
+        "C06.4",
+        "C07.5"
+      ],
+      "evidence_candidates": [
+        "services/complianceauth/c07_4_capacity_test.go"
+      ],
+      "validation_status": "REVIEW_REQUIRED",
+      "finding_status": "UNASSESSED",
+      "remediation_owner": "Compliance security owner",
+      "external_disposition": null
+    },
+    {
+      "id": "T10",
+      "boundary": "location and applicability",
+      "abuse": "Boundary spoofing, GPS-only jurisdiction claim",
+      "expected_negative": "REVIEW_REQUIRED, block transactions",
+      "downstream_requirements": [
+        "C03.1",
+        "C05.3"
+      ],
+      "evidence_candidates": [
+        "services/complianceauth/c05_3_location_adapter_test.go"
+      ],
+      "validation_status": "REVIEW_REQUIRED",
+      "finding_status": "UNASSESSED",
+      "remediation_owner": "Compliance security owner",
+      "external_disposition": null
+    },
+    {
+      "id": "T11",
+      "boundary": "identity/verify/registry adapter",
+      "abuse": "Self-declared retailer/courier status, replay revoked proof",
+      "expected_negative": "deny operations and audit",
+      "downstream_requirements": [
+        "C03.6",
+        "C05.2"
+      ],
+      "evidence_candidates": [
+        "services/complianceauth/credential_reference_test.go"
+      ],
+      "validation_status": "REVIEW_REQUIRED",
+      "finding_status": "UNASSESSED",
+      "remediation_owner": "Compliance security owner",
+      "external_disposition": null
+    },
+    {
+      "id": "T12",
+      "boundary": "Travel/Maps projection",
+      "abuse": "Combine sparse courier counts and time-series regions to identify driver",
+      "expected_negative": "suppress rather than disclose",
+      "downstream_requirements": [
+        "C05.6",
+        "C05.7"
+      ],
+      "evidence_candidates": [
+        "services/complianceauth/c05_7_travel_presence_test.go"
+      ],
+      "validation_status": "REVIEW_REQUIRED",
+      "finding_status": "UNASSESSED",
+      "remediation_owner": "Compliance security owner",
+      "external_disposition": null
+    },
+    {
+      "id": "T13",
+      "boundary": "multi-instance policy publication",
+      "abuse": "Replay superseded policy or stale cache across instances",
+      "expected_negative": "fail closed and scoped halt",
+      "downstream_requirements": [
+        "C03.8",
+        "C04.10"
+      ],
+      "evidence_candidates": [
+        "services/complianceauth/publication_fence_test.go"
+      ],
+      "validation_status": "REVIEW_REQUIRED",
+      "finding_status": "UNASSESSED",
+      "remediation_owner": "Compliance security owner",
+      "external_disposition": null
+    },
+    {
+      "id": "T14",
+      "boundary": "review/audit export and backups",
+      "abuse": "Overbroad export, logs or backups reveal identifiers",
+      "expected_negative": "deny/export quarantine and incident",
+      "downstream_requirements": [
+        "C07.2",
+        "C07.3"
+      ],
+      "evidence_candidates": [
+        "services/complianceauth/c06_7_auditor_test.go"
+      ],
+      "validation_status": "REVIEW_REQUIRED",
+      "finding_status": "UNASSESSED",
+      "remediation_owner": "Compliance security owner",
+      "external_disposition": null
+    },
+    {
+      "id": "T15",
+      "boundary": "Pay/Wallet and policy API",
+      "abuse": "Treat ALLOW receipt as payment/custody permission",
+      "expected_negative": "deny and require canonical payment path",
+      "downstream_requirements": [
+        "C05.10"
+      ],
+      "evidence_candidates": [
+        "services/complianceauth/c05_10_pay_wallet_boundary_test.go"
+      ],
+      "validation_status": "REVIEW_REQUIRED",
+      "finding_status": "UNASSESSED",
+      "remediation_owner": "Compliance security owner",
+      "external_disposition": null
+    },
+    {
+      "id": "T16",
+      "boundary": "DOOBr refusal/return",
+      "abuse": "Stop operation and abandon item or reuse dispatch ALLOW",
+      "expected_negative": "block new sale while preserve safe lawful recovery",
+      "downstream_requirements": [
+        "C05.5"
+      ],
+      "evidence_candidates": [
+        "services/complianceauth/c05_5_doobr_recovery_test.go"
+      ],
+      "validation_status": "REVIEW_REQUIRED",
+      "finding_status": "UNASSESSED",
+      "remediation_owner": "Compliance security owner",
+      "external_disposition": null
+    }
+  ]
+}

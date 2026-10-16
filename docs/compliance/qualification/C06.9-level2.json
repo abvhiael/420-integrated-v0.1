@@ -1,0 +1,129 @@
+{
+  "step": "C06.9",
+  "qualification_level": 2,
+  "status": "PASS",
+  "milestone_completed": true,
+  "qualification_scope": "Repository website/client Level 2; external operational acceptance remains gated",
+  "repository": "abvhiael/420-integrated-v0.1",
+  "branch": "audit/420compliance-c01-1-inventory-20261009",
+  "pull_request": 602,
+  "pull_request_disposition": "Keep draft, open and unmerged until canonical phase closeout",
+  "implementation_sha": "3af28b9de534938fb0a128e474db80cf91bfaaf1",
+  "previous_implementation_sha": "65df1722ba5c94d8fb3749c49d8a8ef93b885135",
+  "observed_main_sha": "bc0faa5dafecda3de0620a9581f9953b89cd95fb",
+  "audit_base_sha": "c5a4f220d1fbda01f707d359aa9bb32921a138b1",
+  "recorded_at": "2026-10-13",
+  "evidence_only_commit_inherits_implementation_sha": true,
+  "root_cause": {
+    "failed_run_id": 38335337007,
+    "annotation": "Invalid workflow file; YAML syntax error on line 5; no jobs executed",
+    "defect": "Literal backslash-n joined two entries in the push paths sequence",
+    "repair": "Replace literal backslash-n with an actual newline; preserve all test commands, branch filters, checkout pinning and contents:read permissions",
+    "registration": "Existing canonical workflow registered and both push and pull_request executions started after syntax repair",
+    "dispatch": "Automatic push matched audit/420compliance-* and changed workflow path; pull_request synchronize also executed. No manual dispatch or default-branch merge required.",
+    "security_permissions": "contents: read; checkout persist-credentials: false; no expanded permissions"
+  },
+  "workflow": {
+    "path": ".github/workflows/420compliance-c01-level1.yml",
+    "display_name": "420Compliance C01 Level 1",
+    "note": "Historical workflow/job/artifact labels retained; C06.9 gate and generated result explicitly record qualification_level 2",
+    "primary_run_id": 38339670328,
+    "primary_job_id": 115107589314,
+    "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38339670328",
+    "event": "push",
+    "conclusion": "success",
+    "duration": "3m 20s",
+    "steps": 82,
+    "success": 82,
+    "failed": 0,
+    "skipped": 0,
+    "cancelled": 0,
+    "milestone_step_number": 75,
+    "milestone_step_conclusion": "success",
+    "companion_run_id": 38339677426,
+    "companion_job_id": 115107610510,
+    "companion_event": "pull_request",
+    "companion_conclusion": "success",
+    "companion_url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38339677426"
+  },
+  "artifact": {
+    "id": 11785982406,
+    "name": "compliance-c01-level1-3af28b9de534938fb0a128e474db80cf91bfaaf1",
+    "sha256": "67d8e588cca5977129d59103b66da2bb4c0dcd42221e42ec89b77a8db99fc105",
+    "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38339670328/artifacts/11785982406"
+  },
+  "exit_criteria": {
+    "public_private_browser_journeys": "PASS: real Chromium three public and three private pages at 320,375,768,1280px",
+    "accessible_failure_states": "PASS: main/heading accessibility semantics, named keyboard entry, no horizontal overflow, unauthenticated forms disabled initially and after asynchronous restoration attempt, unauthorized halt unavailable",
+    "denial_path_security": "PASS: retained C06.4-C06.8 race suites, independent reviewer authorization, operator denial, auditor redaction/access logging, session revocation/outage and DOOBr/Travel fail-closed boundaries",
+    "retained_C06_1_through_C06_8": "PASS: all required current-SHA steps 66,67,69,70,71,72,73,74; historical evidence preserved",
+    "milestone_integration": "PASS: step 75 combines browser, accessibility verifier, scenario/author JS suites, C06 service race tests and Go vet"
+  },
+  "commands": [
+    "python3 scripts/verify-compliance-c06-1.py",
+    "python3 scripts/build-compliance-public.py --check",
+    "python3 scripts/test-compliance-c06-2.py -v",
+    "node scripts/test-compliance-c06-8-browser.cjs",
+    "node scripts/test-compliance-c06-9-browser.cjs",
+    "python3 scripts/verify-compliance-c06-8.py",
+    "node --test scripts/test-compliance-c06-3.cjs scripts/test-compliance-c06-4.cjs",
+    "go test -race ./services/complianceauth -run '^TestC06(4|5|6|7|8)' -count=1 -v",
+    "go vet ./services/complianceauth"
+  ],
+  "retained_evidence": [
+    "docs/compliance/qualification/C06.1-level1.json",
+    "docs/compliance/qualification/C06.2-level1.json",
+    "docs/compliance/qualification/C06.3-level1.json",
+    "docs/compliance/qualification/C06.4-level1.json"
+  ],
+  "security_acceptance": {
+    "status": "PASS for repository app-specific software gates",
+    "tests_weakened": false,
+    "permissions_expanded": false,
+    "production_ALLOW_authorized": false,
+    "independent_security_review": "Deferred; software CI is not independent review"
+  },
+  "inputs": {
+    "source_policy_config_evaluator_schema_geography": "All repository inputs pinned by exact implementation SHA; no policy, source snapshot, geography, schema, evaluator or production configuration changed by syntax repair",
+    "deployed_digests": "Not applicable: no deployment or operational approval performed"
+  },
+  "deferred_dependencies": [
+    {
+      "item": "Actual NVDA/VoiceOver sessions and deployed dynamic announcements/session-expiry accessibility",
+      "target": "C09.6/C09.8",
+      "status": "OPEN; automated accessibility semantics are not manual screen-reader acceptance; local human sessions may occur before testnet"
+    },
+    {
+      "item": "Actual DOOBr/Travel SDK and mobile testnet clients",
+      "target": "C09.6",
+      "status": "OPEN; repository fixtures do not prove actual app deployment"
+    },
+    {
+      "item": "Trusted issuer credentials, TLS introspection, multi-instance device revocation/rotation/outage",
+      "target": "C09.5/C09.7",
+      "status": "OPEN"
+    },
+    {
+      "item": "Independent production identity, legal, partner and security acceptance",
+      "target": "C09.9/C10.1-C10.3/C10.7",
+      "status": "OPEN"
+    },
+    {
+      "item": "C06.6 durable multi-instance halt gap",
+      "target": "C07.2 and deployed C09.4/C09.7",
+      "status": "OPEN; this milestone does not close distributed halt acceptance"
+    }
+  ],
+  "deferred_ledger": "docs/compliance/C06.8-TESTNET-ACCEPTANCE-HANDOFF.md",
+  "qualification_model": {
+    "level1": "Ordinary step qualification retained",
+    "level2": "C06.9 website/client milestone completed",
+    "level3": "Single canonical C08.5 qualification after main reconciliation; not executed here",
+    "repository_wide_workflows_manually_dispatched": []
+  },
+  "next_step": {
+    "id": "C07.1",
+    "work": "Production database schema, migrations, encryption, tenant isolation, indexing and storage limits",
+    "started": false
+  }
+}

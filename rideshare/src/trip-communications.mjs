@@ -57,7 +57,8 @@ export function createTripCommunicationService({authenticator,store,messenger,no
    // Messenger receipts are private; no off-chain plain text is copied into notifications.
    for(const row of result.messages)if(!row||row.tripId!==tripId||!id(row.sender)||![trip.riderId,trip.driverId].includes(row.sender)||!safeText(row.text))
      fail('MESSENGER_INVALID_RESPONSE',503);
-   await scoped(token,tripId,'trip.message.read');
+   const fresh=await scoped(token,tripId,'trip.message.read');
+   if(fresh.trip.revision!==trip.revision||fresh.trip.driverId!==trip.driverId||fresh.trip.state!==trip.state)fail('MEMBERSHIP_CHANGED');
    return Object.freeze({messages:result.messages.map(row=>Object.freeze({id:row.id,sender:row.sender,text:row.text})),
      nextCursor:typeof result.nextCursor==='string'?result.nextCursor:null});
   },
@@ -67,7 +68,8 @@ export function createTripCommunicationService({authenticator,store,messenger,no
    const {grant:g,subject}=await grant(token,tripId,'trip.message.send');
    // Reauthorize immediately before external side-effect; Messenger must enforce expiry,
    // recipient membership, idempotency and authoritative revocation at delivery.
-   await scoped(token,tripId,'trip.message.send');
+   const fresh=await scoped(token,tripId,'trip.message.send');
+   if(fresh.trip.revision!==g.tripRevision||fresh.trip.driverId!==g.recipient&&fresh.trip.riderId!==g.recipient)fail('MEMBERSHIP_CHANGED');
    const response=await messenger.send(Object.freeze({capability:g.capability,tripId,commandId:input.commandId,sender:subject,text:input.text}));
    if(!response||response.tripId!==tripId||!id(response.messageId)||!['ACCEPTED','DELIVERED'].includes(response.status))
      fail('MESSENGER_INVALID_RESPONSE',503);

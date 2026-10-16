@@ -1,0 +1,40 @@
+name: LIFTd L02.12 Level 1
+on:
+  pull_request:
+    paths:
+      - 'rideshare/web/**'
+      - '.github/workflows/liftd-l02-12-level1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  accessibility-device:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact implementation SHA
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax, keyboard, mobile permission and reconnect regressions
+        run: |
+          node --check rideshare/web/app.mjs
+          node --test rideshare/web/test/accessibility-device.test.mjs rideshare/web/test/pickup-policy.test.mjs
+          npm run check --prefix rideshare/web
+      - name: Verify static accessible shell and disabled live operations
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          h=Path('rideshare/web/index.html').read_text()
+          c=Path('rideshare/web/styles.css').read_text()
+          for token in ['lang="en"','href="#main"','aria-label="Primary navigation"','aria-expanded="false"','aria-live="polite"','tabindex="-1"','Not available for bookings','Payments are not enabled']:
+              assert token in h,token
+          for token in [':focus-visible','prefers-reduced-motion','@media(max-width:650px)']:
+              assert token in c,token
+          PY

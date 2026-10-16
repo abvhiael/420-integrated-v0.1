@@ -35,3 +35,24 @@ Date: 2026-10-15. This document is a repository-state checkpoint, **not** a pref
 - Level 2 `BNB-5.13-LEVEL2-CERTIFICATE.md` remains prior exact-SHA app evidence, not a substitute for Level 3.
 - Genuine external Identity/operator, live Search/Travel and Pay/Wallet, multi-host recovery, accessibility assistive technology and legal/compliance acceptance remain separately recorded in `BNB-TESTNET-WORK-ROADMAP.md`.
 - **BNB-5.14 status: BLOCKED AT PREFLIGHT; no expensive Level 3 qualification dispatched.** PR #644 must remain draft/unmerged until all original exit criteria and approvals are satisfied.
+
+## Update — actual main reconciliation completed (2026-10-15)
+
+- Latest observed `main` before reconciliation: `d3310d153e7ccc71f5ded95639aadfd7a6f6e682`, tree `ad25baf1b213f10c47870e88a2a5f876f9610bb8`.
+- Phase 5 source/evidence HEAD: `9f7ef20036ab6597e0d61137bc659c20fc09e46d`, tree `c88aa4f85ce7ead8107a1eca3da710de818bc52b`.
+- Used **complete, non-truncated recursive Git trees** for the merge base (tree `6f5acc71cf3f54dec3b1378232d88c669c25dd96`), current main and audit. Verified **71 BnB Phase 5 changed blob paths**, **zero path-level concurrent modifications**, no deleted Phase 5 files, and verified `main` unchanged immediately before composing.
+- Created merged Git tree `db6323822abe4798b2352c984da60aac3a47be67` by applying exactly these 71 Phase 5 blobs onto main's complete tree. Commit `7bed67de5833778a070b60e8d87aafc637a75a05` has both Phase 5 and main parents.
+- Updated Phase 5 audit branch by expected-SHA fast-forward. GitHub verified PR #644 **draft, open, unmerged**, merge-base now `d3310d153e7ccc71f5ded95639aadfd7a6f6e682`, **zero commits behind main**, 109 commits ahead.
+- **Candidate SHA: `7bed67de5833778a070b60e8d87aafc637a75a05`**. This is a reconciled **unqualified** implementation. The reconciliation preserves all 71 Phase 5 blob identities and the complete main tree outside those paths.
+
+## Workflow readiness findings and still-open hard gates
+
+- Solidity `.github/workflows/contracts-foundry.yml`: declared `workflow_dispatch`; canonical `level3-shards` and `level3-fixture` including coverage. A default audit-branch PR does not automatically engage its canonical Level 3 jobs.
+- Genesis `.github/workflows/genesis-address-authority.yml`: declared `workflow_dispatch`, `cross-manifest-authority` job. Audit branch PR is excluded by its PR job condition; explicit dispatch needed.
+- Integrated `.github/workflows/qualification.yml`: declared `workflow_dispatch`, `offline-core`, `production-dependencies`, `geth-engine`, `fault-matrix` jobs. Audit branch PR excluded by current job conditions; explicit dispatch needed.
+- Docs `.github/workflows/docs-qualify.yml`: declared `workflow_dispatch`, `qualify` job. Audit branch PR job skipped; cannot count as a PASS.
+- BnB `.github/workflows/bnb-runtime.yml`: declared `workflow_dispatch`, `runtime` job; retained nine BnB guardrails auto-triggered and passed on reconciled SHA; Runtime Slice run [#38830494034](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38830494034) auto-triggered (status must be inspected separately).
+- Available GitHub connector operations in this session permit Git object/ref writing and reading Actions results but expose **no general workflow dispatch** endpoint. No Level 3 workflow dispatch is claimed.
+- Canonical BNB-5.14-specific freeze inventory/digest verification is **not yet complete**; full SHA-256 manifest verification has not been represented as a PASS. Do not launch global Level 3 until this requirement is met and all mandatory trigger/dependency checks are established.
+
+**Reconciliation complete; Level 3 preflight remains BLOCKED. Do not issue a final Level 3 certificate or merge until every required workflow completes successfully against the final candidate.**

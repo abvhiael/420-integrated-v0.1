@@ -15,6 +15,8 @@ import "../src/bet/BetRegistry420.sol";
 import "../src/bet/BetTypes420.sol";
 import "../src/bet/RandomnessRouter420.sol";
 import "../src/bet/ReferenceSlotV1420.sol";
+import "../src/bet/ReferenceSlotTermsAuthority420.sol";
+import "../src/bet/BetSlotArtifactRegistry420.sol";
 import "../src/bet/RiskManager420.sol";
 import "../src/bet/SettlementEngine420.sol";
 import "../src/bet/SlotRandomStream420.sol";
@@ -22,7 +24,7 @@ import "../src/bet/VaultAccounting420.sol";
 import "../src/bet/WagerRouter420.sol";
 import "../src/bet/WithdrawalQueue420.sol";
 
-interface VmBetReferenceSlotVerticalSlice420 { function prank(address) external; }
+interface VmBetReferenceSlotVerticalSlice420 { function prank(address) external; function expectRevert(bytes4) external; }
 
 contract MockCapabilityRegistryBetReferenceSlotVerticalSlice420 is ICapabilityRegistry420 {
     mapping(bytes32 => CapabilityGrant) private _grants;
@@ -149,7 +151,7 @@ contract BetReferenceSlotVerticalSlice420Test {
         _allow(s, address(s.risk), BetIds420.ACTION_VAULT_RESERVE_LIABILITY, s.auth.scopeForVault(VAULT));
         _allow(s, address(s.risk), BetIds420.ACTION_VAULT_RELEASE_LIABILITY, s.auth.scopeForVault(VAULT));
 
-        _seedProfiles(s); _seedAccess(s); _seedModuleGameOperator(s); _seedEconomics(s); _seedRisk(s); _seedRandomness(s); _seedLiquidity(s, 20_000 ether);
+        _seedProfiles(s); _seedAccess(s); _seedModuleGameOperator(s); _bindSlotTerms(s); _seedEconomics(s); _seedRisk(s); _seedRandomness(s); _seedLiquidity(s, 20_000 ether);
 
         _allow(s, address(s.wagerRouter), BetIds420.ACTION_ACCESS_RECORD, s.auth.scopeForProfile(ACCESS));
         _allow(s, address(s.wagerRouter), BetIds420.ACTION_ECONOMICS_BIND, s.auth.scopeForGameVersion(GAME_V1));
@@ -159,6 +161,23 @@ contract BetReferenceSlotVerticalSlice420Test {
         _allow(s, address(s.settlement), BetIds420.ACTION_RISK_RELEASE, s.auth.scopeForVault(VAULT));
         _allow(s, address(s.settlement), BetIds420.ACTION_VAULT_SETTLE_WAGER, s.auth.scopeForVault(VAULT));
         _allow(s, address(s.settlement), BetIds420.ACTION_ECONOMICS_FINALIZE, s.auth.scopeForGameVersion(GAME_V1));
+    }
+
+    function _bindSlotTerms(Suite memory s) private {
+        BetSlotArtifactRegistry420 artifacts = new BetSlotArtifactRegistry420(address(s.auth), address(s.games));
+        _allow(s, ADMIN, BetIds420.ACTION_SLOT_ARTIFACT_REGISTER, s.auth.scopeForGame(GAME, GAME_V1));
+        vm.prank(ADMIN);
+        artifacts.registerSlotArtifacts(GAME_V1, keccak256("slot/test/reels"),
+            keccak256("slot/test/paytable"), keccak256("slot/test/rtp"),
+            keccak256("slot/test/liability"), 500_000);
+        ReferenceSlotTermsAuthority420 terms = new ReferenceSlotTermsAuthority420(
+            address(s.auth), address(artifacts), GAME_V1, RULESET,
+            s.slot.hashParams(_params()), keccak256("slot/test/reels"),
+            keccak256("slot/test/paytable"), keccak256("slot/test/rtp"),
+            keccak256("slot/test/liability"), 500_000);
+        vm.prank(ADMIN); terms.activate();
+        vm.prank(ADMIN); s.wagerRouter.bindSlotTerms(GAME_V1, address(s.slot), address(terms));
+        vm.prank(ADMIN); s.settlement.bindSlotResolver(GAME_V1, address(s.slot));
     }
 
     function _registerProfile(Suite memory s, bytes32 id, bytes32 profileType) private {
@@ -226,7 +245,7 @@ contract BetReferenceSlotVerticalSlice420Test {
         s.token.mint(PLAYER, stake); vm.prank(PLAYER); s.token.approve(address(s.vault), stake);
 
         WagerRouter420.AcceptanceRequest memory request = WagerRouter420.AcceptanceRequest({operatorId:OPERATOR,gameVersionId:GAME_V1,stake:stake,maxGrossPayout:maxGross,paramsHash:s.slot.hashParams(params),correlationKey:keccak256("slot/e2e/reference-v1"),deadline:uint64(block.timestamp + 1 hours)});
-        vm.prank(PLAYER); (bytes32 wagerId, uint256 reservedLiability) = s.wagerRouter.placeWager(request);
+        vm.prank(PLAYER); (bytes32 wagerId, uint256 reservedLiability) = s.wagerRouter.placeSlotWager(request, params);
         require(wagerId != bytes32(0), "wager id");
         require(reservedLiability == 4_900 ether, "full liability not reserved");
         require(s.vault.wagerStakeEscrow(wagerId) == stake, "stake not escrowed");
@@ -252,7 +271,11 @@ contract BetReferenceSlotVerticalSlice420Test {
 
         _allow(s, SETTLER, BetIds420.ACTION_SETTLE, s.auth.scopeForWager(wagerId));
         _allow(s, address(s.settlement), BetIds420.ACTION_WAGER_SETTLE_RECORD, s.auth.scopeForWager(wagerId));
-        vm.prank(SETTLER); s.settlement.settle(wagerId, result.outcome, result.grossPayout);
+        vm.prank(SETTLER);
+        vm.expectRevert(SettlementEngine420.SlotCanonicalSettlementRequired.selector);
+        s.settlement.settle(wagerId, BetTypes420.TerminalOutcome.WIN, maxGross);
+        require(s.accounting.getVault(VAULT).activeReservedLiability == reservedLiability, "forged settlement released liability");
+        vm.prank(SETTLER); s.settlement.settleSlot(wagerId, params);
 
         BetTypes420.Settlement memory terminal = s.registry.getSettlement(wagerId);
         require(terminal.outcome == result.outcome, "terminal outcome mismatch");
@@ -275,4 +298,28 @@ contract BetReferenceSlotVerticalSlice420Test {
         for (uint8 i = 0; i < 5; ++i) require(replay.baseStops[i] == result.baseStops[i], "replay stop changed");
         for (uint8 i = 0; i < 20; ++i) require(replay.baseGrid[i] == result.baseGrid[i], "replay grid changed");
     }
+    function testUnapprovedSlotTermsCannotConsumeStakeOrLiability() public {
+        Suite memory s = _deploy();
+        uint256 stake = 100 ether;
+        ReferenceSlotV1420.Params memory params = _params();
+        _allow(s, PLAYER, BetIds420.ACTION_PLACE, s.auth.scopeForGame(GAME, GAME_V1));
+        s.token.mint(PLAYER, stake);
+        vm.prank(PLAYER); s.token.approve(address(s.vault), stake);
+        WagerRouter420.AcceptanceRequest memory request = WagerRouter420.AcceptanceRequest({
+            operatorId:OPERATOR, gameVersionId:GAME_V1, stake:stake,
+            maxGrossPayout:5_000 ether, paramsHash:s.slot.hashParams(params),
+            correlationKey:keccak256("slot/security"), deadline:uint64(block.timestamp+1 hours)
+        });
+        vm.prank(PLAYER); vm.expectRevert(WagerRouter420.SlotAuthorityRequired.selector);
+        s.wagerRouter.placeWager(request);
+        params.payoutPerWay[0] += 1 ether;
+        request.paramsHash = s.slot.hashParams(params);
+        vm.prank(PLAYER); vm.expectRevert(ReferenceSlotTermsAuthority420.InvalidTerms.selector);
+        s.wagerRouter.placeSlotWager(request, params);
+        require(s.wagerRouter.nextNonce(PLAYER) == 0, "nonce consumed");
+        require(s.token.balanceOf(PLAYER) == stake, "stake consumed");
+        require(s.vault.activeWagerStakeEscrow() == 0, "escrow consumed");
+        require(s.accounting.getVault(VAULT).activeReservedLiability == 0, "liability reserved");
+    }
+
 }

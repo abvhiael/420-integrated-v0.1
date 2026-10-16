@@ -8,7 +8,8 @@ test('L03.1 PostgreSQL case lifecycle: all classes, replay, appeal and access', 
  try{
   await migrate(pool);
   const tripId='trip_l031_'+Date.now(),now=1000;
-  await pool.query('INSERT INTO liftd.trips(trip_id,revision,snapshot) VALUES($1,0,$2)',[tripId,{id:tripId,revision:0,state:'COMPLETED',riderId:'rider_1',driverId:'driver_1',vehicleId:'vehicle_1',routeRef:'route_1'}]);
+  await pool.query('INSERT INTO liftd.trips(trip_id,revision,snapshot) VALUES($1,0,$2)',[tripId,{id:tripId,revision:0,state:'REQUESTED',riderId:'rider_1',driverId:null,vehicleId:null,routeRef:'route_1'}]);
+  await pool.query('UPDATE liftd.trips SET snapshot=$1,revision=1 WHERE trip_id=$2',[{id:tripId,revision:1,state:'CANCELLED',riderId:'rider_1',driverId:null,vehicleId:null,routeRef:'route_1'},tripId]);
   let blocked=false;
   const auth={authorize:async(token,{action,resource})=>{if(blocked||resource!=='trip:'+tripId)throw Error('DENIED');return {role:token,subject:token+'_1',accountId:token+'_account',sessionId:'session_1',deviceId:'device_1',recoveryEpoch:0,expiresAt:5000,action,resource}}};
   const service=createSupportCaseService({pool,authenticator:auth,clock:()=>now,retentionSeconds:86400,appealSeconds:86400});

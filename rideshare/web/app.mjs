@@ -28,6 +28,8 @@ let clearDriverOnboarding = null;
 let clearDriverAvailability = null;
 let clearDriverTrip = null;
 let clearOperatorConsole = null;
+let focusAfterNavigation = false;
+let connectivityAvailable = globalThis.navigator?.onLine !== false;
 
 // The host must provide an independently authenticated session adapter.
 // No localStorage, query-string identity, simulated principal or demo operator bypass.
@@ -73,7 +75,7 @@ function renderDecision(decision) {
   } else if (decision.kind === "forbidden") {
     panel.append(node("p", "Your verified session does not have permission to access this workspace."));
   } else if (decision.kind === "error") {
-    panel.append(node("p", "Verification failed. Access remains blocked; retry when session services are available."));
+    panel.append(node("p", connectivityAvailable ? "Verification failed. Access remains blocked; retry when session services are available." : "Connection unavailable. Access remains blocked until reconnection and fresh verification."));
     const retry = node("button", "Retry verification");
     retry.type = "button";
     retry.addEventListener("click", () => void refresh());
@@ -82,6 +84,10 @@ function renderDecision(decision) {
     panel.append(node("p", "This page is not part of the LIFTd application."));
   }
   root.append(panel);
+  if (focusAfterNavigation) {
+    focusAfterNavigation = false;
+    root.focus();
+  }
   if (decision.kind === "protected" && decision.role === "rider") {
     clearRiderAccount = mountRiderAccount(root, createRiderPreferencesApi(globalThis.LIFTdSessionAdapter), session);
     const quoteApi = createQuoteApi(globalThis.LIFTdSessionAdapter);
@@ -113,10 +119,10 @@ async function refresh() {
   const token = ++requestNumber;
   const path = sanitizeReturnPath(location.pathname);
   session = null;
-  const pending = routeDecision(path, { status: "loading" });
+  const pending = !connectivityAvailable ? {kind:"error",title:"Connection unavailable"} : routeDecision(path, { status: "loading" });
   renderDecision(pending);
   markCurrent(path);
-  if (pending.kind === "public" || pending.kind === "not-found") return renderDecision(pending);
+  if (!connectivityAvailable || pending.kind === "public" || pending.kind === "not-found") return renderDecision(pending);
   const candidate = await loadSession();
   if (token !== requestNumber) return; // stale session completion must not overwrite new navigation
   session = candidate;
@@ -128,7 +134,7 @@ function navigate(path) {
   nav.classList.remove("open");
   menu.setAttribute("aria-expanded", "false");
   void refresh();
-  root.focus();
+  focusAfterNavigation = true;
 }
 document.addEventListener("click", event => {
   const anchor = event.target.closest?.("a[data-route]");
@@ -136,11 +142,34 @@ document.addEventListener("click", event => {
   event.preventDefault();
   navigate(anchor.getAttribute("href"));
 });
+menu.addEventListener("keydown", event => {
+  if (event.key !== "Escape") return;
+  if (menu.getAttribute("aria-expanded") === "true") {
+    nav.classList.remove("open");
+    menu.setAttribute("aria-expanded", "false");
+    menu.focus();
+  }
+});
+nav.addEventListener("keydown", event => {
+  if (event.key !== "Escape") return;
+  nav.classList.remove("open");
+  menu.setAttribute("aria-expanded", "false");
+  menu.focus();
+});
 menu.addEventListener("click", () => {
   const expanded = menu.getAttribute("aria-expanded") === "true";
   menu.setAttribute("aria-expanded", String(!expanded));
   nav.classList.toggle("open", !expanded);
 });
-window.addEventListener("popstate", () => void refresh());
+window.addEventListener("popstate", () => { focusAfterNavigation = true; void refresh(); });
+window.addEventListener("offline", () => {
+  connectivityAvailable = false;
+  requestNumber++;
+  session = null;
+  renderDecision({kind:"error",title:"Connection unavailable"});
+});
+window.addEventListener("online", () => {
+  if (!connectivityAvailable) { connectivityAvailable = true; void refresh(); }
+});
 window.addEventListener("liftd:session-changed", () => void refresh());
 void refresh();

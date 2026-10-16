@@ -1,0 +1,25 @@
+name: 420Bet Keno Paytable Math Level 1
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/420bet-keno-paytable-math.yml'
+      - 'contracts/config/420bet-keno-v1-paytable-candidate.json'
+      - 'scripts/verify-420bet-keno-paytable-candidate.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  exact-odds:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact candidate SHA and exact Keno odds
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          python3 scripts/verify-420bet-keno-paytable-candidate.py

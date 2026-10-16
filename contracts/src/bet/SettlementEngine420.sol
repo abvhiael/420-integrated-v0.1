@@ -10,6 +10,7 @@ import "./BetIds420.sol";
 import "./BetRegistry420.sol";
 import "./BetTypes420.sol";
 import "./RiskManager420.sol";
+import "./KenoV1420.sol";
 
 contract SettlementEngine420 is I420System {
     BetAuthorization420 public immutable authorization;
@@ -20,6 +21,8 @@ contract SettlementEngine420 is I420System {
     bytes32 public immutable vaultId;
     address public immutable asset;
     BetEmergencyState420 public emergencyState;
+    bytes32 private constant KENO_GAME_ID = keccak256("420BET.GAME.KENO");
+    mapping(bytes32 => address) public kenoResolver;
 
     uint256 private _entered;
 
@@ -31,6 +34,8 @@ contract SettlementEngine420 is I420System {
     error InvalidOutcome();
     error InvalidPayout();
     error SettlementConflict();
+    error KenoCanonicalSettlementRequired();
+    error KenoResolverAlreadyBound();
     error Reentrancy();
     error EmergencyAlreadyBound();
     error WagerExpired();
@@ -80,12 +85,36 @@ contract SettlementEngine420 is I420System {
         emit EmergencyStateBound(emergencyState_);
     }
 
+    function bindKenoResolver(bytes32 gameVersionId, address resolver) external {
+        if (resolver == address(0) || gameVersionId == bytes32(0)) revert ZeroAddress();
+        if (kenoResolver[gameVersionId] != address(0)) revert KenoResolverAlreadyBound();
+        KenoV1420 k = KenoV1420(resolver);
+        if (k.gameId() != KENO_GAME_ID || k.gameVersionId() != gameVersionId ||
+            address(k.wagerRegistry()) != address(registry)) revert InvalidStatus();
+        if (!authorization.isAuthorized(msg.sender, BetIds420.ACTION_GAME_REGISTER,
+            authorization.scopeForGame(KENO_GAME_ID, gameVersionId), 0)) revert Unauthorized();
+        kenoResolver[gameVersionId] = resolver;
+    }
+
+    function settleKeno(bytes32 wagerId, KenoV1420.Params calldata params)
+        external nonReentrant returns (BetTypes420.Settlement memory settlement)
+    {
+        BetTypes420.Wager memory wager = registry.getWager(wagerId);
+        if (wager.gameId != KENO_GAME_ID) revert InvalidStatus();
+        address resolver = kenoResolver[wager.gameVersionId];
+        if (resolver == address(0) ||
+            KenoV1420(resolver).rulesetId() != wager.rulesetId) revert KenoCanonicalSettlementRequired();
+        KenoV1420.Result memory result = KenoV1420(resolver).resolve(wagerId, params);
+        settlement = _settle(wager, result.outcome, result.grossPayout, true);
+    }
+
     function settle(bytes32 wagerId, BetTypes420.TerminalOutcome outcome, uint256 grossPayout)
         external
         nonReentrant
         returns (BetTypes420.Settlement memory settlement)
     {
         BetTypes420.Wager memory wager = registry.getWager(wagerId);
+        if (wager.gameId == KENO_GAME_ID) revert KenoCanonicalSettlementRequired();
         settlement = _settle(wager, outcome, grossPayout, true);
     }
 

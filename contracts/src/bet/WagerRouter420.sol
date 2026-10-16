@@ -15,6 +15,8 @@ import "./BetProfileRegistry420.sol";
 import "./BetRegistry420.sol";
 import "./BetTypes420.sol";
 import "./RiskManager420.sol";
+import "./KenoV1420.sol";
+import "./KenoPaytableAuthority420.sol";
 
 contract WagerRouter420 is I420System {
     struct AcceptanceRequest {
@@ -40,6 +42,9 @@ contract WagerRouter420 is I420System {
     bytes32 public immutable vaultId;
     address public immutable asset;
     BetEmergencyState420 public emergencyState;
+    bytes32 private constant KENO_GAME_ID = keccak256("420BET.GAME.KENO");
+    mapping(bytes32 => address) public kenoAuthority;
+    mapping(bytes32 => address) public kenoResolver;
 
     mapping(address => uint256) public nextNonce;
     uint256 private _entered;
@@ -53,6 +58,8 @@ contract WagerRouter420 is I420System {
     error InactiveProfile();
     error WrongValue();
     error InvalidLiability();
+    error KenoAuthorityRequired();
+    error KenoAuthorityAlreadyBound();
     error Reentrancy();
     error EmergencyAlreadyBound();
     error EmergencyHalted(BetTypes420.EmergencyDomain domain, bytes32 subject);
@@ -121,10 +128,49 @@ contract WagerRouter420 is I420System {
         emit EmergencyStateBound(emergencyState_);
     }
 
+    /// @notice Governance binds an immutable verifier for a Keno game version.
+    function bindKenoPaytable(bytes32 gameVersionId, address resolver, address verifier) external {
+        if (resolver == address(0) || verifier == address(0) || gameVersionId == bytes32(0))
+            revert InvalidRequest();
+        if (kenoAuthority[gameVersionId] != address(0)) revert KenoAuthorityAlreadyBound();
+        BetGameRegistry420.GameVersion memory g = games.getGame(gameVersionId);
+        if (g.gameId != KENO_GAME_ID ||
+            modules.getModule(g.moduleVersionId).implementation != resolver ||
+            KenoV1420(resolver).gameVersionId() != gameVersionId ||
+            KenoV1420(resolver).rulesetId() != g.rulesetId ||
+            KenoPaytableAuthority420(verifier).gameVersionId() != gameVersionId ||
+            KenoPaytableAuthority420(verifier).rulesetId() != g.rulesetId)
+            revert InvalidRequest();
+        if (!authorization.isAuthorized(msg.sender, BetIds420.ACTION_GAME_REGISTER,
+            authorization.scopeForGame(g.gameId, gameVersionId), 0)) revert Unauthorized();
+        kenoAuthority[gameVersionId] = verifier;
+        kenoResolver[gameVersionId] = resolver;
+    }
+
+    function placeKenoWager(AcceptanceRequest calldata request, KenoV1420.Params calldata params)
+        external payable nonReentrant returns (bytes32 wagerId, uint256 reservedLiability)
+    {
+        BetGameRegistry420.GameVersion memory g=games.getGame(request.gameVersionId);
+        if (g.gameId != KENO_GAME_ID) revert InvalidRequest();
+        address verifier = kenoAuthority[request.gameVersionId];
+        if (verifier == address(0)) revert KenoAuthorityRequired();
+        KenoPaytableAuthority420(verifier).verify(
+            request.stake, request.maxGrossPayout, request.paramsHash, params,
+            kenoResolver[request.gameVersionId]);
+        return _placeWager(request);
+    }
+
     function placeWager(AcceptanceRequest calldata request)
         external
         payable
         nonReentrant
+        returns (bytes32 wagerId, uint256 reservedLiability)
+    {
+        if (games.getGame(request.gameVersionId).gameId == KENO_GAME_ID) revert KenoAuthorityRequired();
+        return _placeWager(request);
+    }
+
+    function _placeWager(AcceptanceRequest calldata request) private
         returns (bytes32 wagerId, uint256 reservedLiability)
     {
         if (

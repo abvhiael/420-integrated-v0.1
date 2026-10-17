@@ -1,0 +1,42 @@
+name: 420Bet Video Poker 5.2 Level 1
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/bet/VideoPokerDealV1420.sol'
+      - 'contracts/test/BetVideoPokerDeck420.t.sol'
+      - '.github/workflows/420bet-video-poker-5-2-level1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: 420bet-video-poker-5-2-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+jobs:
+  video-poker-deck-level1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      FOUNDRY_PROFILE: pr
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Exact SHA and inventory preflight
+        working-directory: contracts
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          test -f src/bet/VideoPokerDealV1420.sol
+          test -f test/BetVideoPokerDeck420.t.sol
+          test -f test/BetVideoPokerV1420.t.sol
+          echo "Qualified input SHA: $EXPECTED_SHA"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Qualify foundation and 52-card initial dealing
+        working-directory: contracts
+        run: |
+          set -euo pipefail
+          forge test --match-contract '^(BetVideoPokerV1420|BetVideoPokerDeck420)Test$' -vv

@@ -16,6 +16,7 @@ import "./ReferenceSlotV1420.sol";
 import "./RouletteV1420.sol";
 import "./BlackjackV1420.sol";
 import "./MinesV1420.sol";
+import "./CrashV1420.sol";
 
 contract SettlementEngine420 is I420System {
     BetAuthorization420 public immutable authorization;
@@ -38,6 +39,8 @@ contract SettlementEngine420 is I420System {
     mapping(bytes32 => address) public blackjackResolver;
     bytes32 private constant MINES_GAME_ID = keccak256("420BET.GAME.MINES");
     mapping(bytes32 => address) public minesResolver;
+    bytes32 private constant CRASH_GAME_ID = keccak256("420BET.GAME.CRASH");
+    mapping(bytes32 => address) public crashResolver;
 
     uint256 private _entered;
 
@@ -61,6 +64,8 @@ contract SettlementEngine420 is I420System {
     error BlackjackResolverAlreadyBound();
     error MinesCanonicalSettlementRequired();
     error MinesResolverAlreadyBound();
+    error CrashCanonicalSettlementRequired();
+    error CrashResolverAlreadyBound();
     error Reentrancy();
     error EmergencyAlreadyBound();
     error WagerExpired();
@@ -265,6 +270,46 @@ contract SettlementEngine420 is I420System {
         settlement = _settle(w, outcome, gross, true);
     }
 
+    function bindCrashResolver(bytes32 versionId, address resolver) external {
+        if (versionId == bytes32(0) || resolver == address(0)) revert ZeroAddress();
+        if (crashResolver[versionId] != address(0)) revert CrashResolverAlreadyBound();
+        CrashV1420 r = CrashV1420(resolver);
+        if (r.gameId() != CRASH_GAME_ID || r.gameVersionId() != versionId ||
+            address(r.wagerRegistry()) != address(registry)) revert InvalidStatus();
+        if (!authorization.isAuthorized(msg.sender, BetIds420.ACTION_GAME_REGISTER,
+            authorization.scopeForGame(CRASH_GAME_ID, versionId), 0)) revert Unauthorized();
+        crashResolver[versionId] = resolver;
+    }
+
+    function settleCrash(bytes32 wagerId)
+        external nonReentrant returns (BetTypes420.Settlement memory settlement)
+    {
+        BetTypes420.Wager memory w = registry.getWager(wagerId);
+        if (w.gameId != CRASH_GAME_ID) revert InvalidStatus();
+        address resolver = crashResolver[w.gameVersionId];
+        if (resolver == address(0) || CrashV1420(resolver).rulesetId() != w.rulesetId)
+            revert CrashCanonicalSettlementRequired();
+        CrashV1420 r = CrashV1420(resolver);
+        CrashV1420.SessionState memory session = r.getSession(wagerId);
+        if (session.phase != CrashV1420.Phase.TERMINAL) revert CrashCanonicalSettlementRequired();
+        BetTypes420.TerminalOutcome outcome;
+        uint256 gross;
+        if (session.terminalReason == CrashV1420.TerminalReason.CRASHED) {
+            if (session.cashoutMultiplierBps != 0) revert CrashCanonicalSettlementRequired();
+            outcome = BetTypes420.TerminalOutcome.LOSS;
+        } else if (session.terminalReason == CrashV1420.TerminalReason.AUTO_CASHOUT) {
+            if (session.cashoutMultiplierBps <= r.BPS() ||
+                session.cashoutMultiplierBps != session.autoCashoutBps ||
+                session.cashoutMultiplierBps >= session.crashPointBps ||
+                uint256(session.cashoutMultiplierBps) > type(uint256).max / w.stake)
+                revert CrashCanonicalSettlementRequired();
+            gross = (w.stake * uint256(session.cashoutMultiplierBps)) / uint256(r.BPS());
+            if (gross <= w.stake || gross > w.maxGrossPayout) revert CrashCanonicalSettlementRequired();
+            outcome = BetTypes420.TerminalOutcome.WIN;
+        } else revert CrashCanonicalSettlementRequired();
+        settlement = _settle(w, outcome, gross, true);
+    }
+
     function settle(bytes32 wagerId, BetTypes420.TerminalOutcome outcome, uint256 grossPayout)
         external
         nonReentrant
@@ -277,6 +322,7 @@ contract SettlementEngine420 is I420System {
         if (wager.gameId == ROULETTE_GAME_ID) revert RouletteCanonicalSettlementRequired();
         if (wager.gameId == BLACKJACK_GAME_ID) revert BlackjackCanonicalSettlementRequired();
         if (wager.gameId == MINES_GAME_ID) revert MinesCanonicalSettlementRequired();
+        if (wager.gameId == CRASH_GAME_ID) revert CrashCanonicalSettlementRequired();
         settlement = _settle(wager, outcome, grossPayout, true);
     }
 

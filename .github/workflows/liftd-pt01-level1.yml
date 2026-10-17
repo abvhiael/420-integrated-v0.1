@@ -3,6 +3,8 @@ on:
   pull_request:
     paths:
       - 'rideshare/src/identity-consent-guard.mjs'
+      - 'rideshare/src/trip-communications.mjs'
+      - 'rideshare/test/trip-communications.test.mjs'
       - 'rideshare/test/identity-consent-guard.test.mjs'
       - '.github/workflows/liftd-pt01-level1.yml'
   workflow_dispatch:
@@ -26,5 +28,6 @@ jobs:
         run: |
           test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
           node --check rideshare/src/identity-consent-guard.mjs
+          node --check rideshare/src/trip-communications.mjs
           npm ci --prefix rideshare --ignore-scripts
           npm test --prefix rideshare

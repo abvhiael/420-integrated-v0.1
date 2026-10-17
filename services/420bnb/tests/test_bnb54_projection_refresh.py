@@ -290,7 +290,7 @@ def test_packaged_worker_entrypoint_runs_refresh_and_local_receipt_over_verified
             VALUES(%s,'fixture','Fixture','Region','published',3,100,'CAD')""",(pid,))
         availability.refresh(c,pid,None,start,end,occupancy=occupancy_in_window)
         hold(c,pid,start,end)
-    monkeypatch.setattr(production,'load_contract',lambda:({}, {}, dict(values)))
+    monkeypatch.setattr(production,'load_contract',lambda *,purpose:({}, {}, dict(values)) if purpose == 'worker' else (_ for _ in ()).throw(AssertionError('wrong purpose')))
     monkeypatch.setenv('BNB_WORKER_SINK','local-validation')
     original=worker.Supervisor.run
     monkeypatch.setattr(worker.Supervisor,'run',lambda self:original(self,max_cycles=1))

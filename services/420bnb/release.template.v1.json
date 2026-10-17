@@ -1,0 +1,25 @@
+{
+  "schema": "420.bnb.release.v1",
+  "release_sha": "REPLACE_WITH_EXACT_RELEASE_SHA",
+  "images": {
+    "api": "APPROVED_IMAGE_DIGEST_REQUIRED",
+    "web": "APPROVED_IMAGE_DIGEST_REQUIRED",
+    "ingress": "APPROVED_IMAGE_DIGEST_REQUIRED",
+    "worker": "APPROVED_IMAGE_DIGEST_REQUIRED"
+  },
+  "migration_version": 30,
+  "flags": {
+    "booking_enabled": false,
+    "financial_execution": false,
+    "travel_bnb_booking": false
+  },
+  "rollback_policy": {
+    "automatic_database_down_migration": false,
+    "restore_requires_verified_backup": true,
+    "previous_binary_requires_compatibility_proof": true
+  },
+  "approval": {
+    "independent_operator_verified": false,
+    "live_accepted": false
+  }
+}

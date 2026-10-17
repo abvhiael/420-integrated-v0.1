@@ -438,7 +438,7 @@ def test_production_restart_never_reactivates_revoked_local_consumer(tls_databas
     with psycopg.connect(**values) as c:
         delivery.configure(c, 'bnb-local-validation', sorted(outbox.EVENT_TYPES), active=False,
             expected_revision=0, actor='operator', authorize=lambda *_: True)
-    monkeypatch.setattr(production, 'load_contract', lambda: ({}, {}, values))
+    monkeypatch.setattr(production, 'load_contract', lambda *, purpose: ({}, {}, values) if purpose == 'worker' else (_ for _ in ()).throw(AssertionError('wrong purpose')))
     monkeypatch.setenv('BNB_WORKER_SINK', 'local-validation')
     import signal
     prior = {s: signal.getsignal(s) for s in (signal.SIGTERM, signal.SIGINT)}

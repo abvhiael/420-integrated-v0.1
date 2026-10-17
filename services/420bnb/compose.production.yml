@@ -7,8 +7,16 @@ x-api: &api
   cap_drop: [ALL]
   security_opt: [no-new-privileges:true]
   tmpfs: [/tmp]
+  pids_limit: 128
+  mem_limit: 768m
+  cpus: '1.0'
   environment:
     BNB_ENV: production
+    BNB_ENV_SCHEMA: 420.bnb.environment.v1
+    BNB_SERVICE_ID: bnb-api
+    BNB_BOOKING_ENABLED: "false"
+    BNB_TRAVEL_BNB_BOOKING: "false"
+    BNB_FINANCIAL_EXECUTION: "false"
     BNB_RELEASE_IMAGE: ${BNB_API_IMAGE:?required}
     BNB_WEB_IMAGE: ${BNB_WEB_IMAGE:?required}
     BNB_INGRESS_IMAGE: ${BNB_INGRESS_IMAGE:?required}
@@ -33,8 +41,16 @@ services:
     command: [python, worker.py]
     stop_grace_period: 15s
     healthcheck: {disable: true}
+    pids_limit: 64
+    mem_limit: 512m
+    cpus: '0.75'
     environment:
       BNB_ENV: production
+      BNB_ENV_SCHEMA: 420.bnb.environment.v1
+      BNB_SERVICE_ID: bnb-worker
+      BNB_BOOKING_ENABLED: 'false'
+      BNB_TRAVEL_BNB_BOOKING: 'false'
+      BNB_FINANCIAL_EXECUTION: 'false'
       BNB_RELEASE_IMAGE: ${BNB_API_IMAGE:?required}
       BNB_WEB_IMAGE: ${BNB_WEB_IMAGE:?required}
       BNB_INGRESS_IMAGE: ${BNB_INGRESS_IMAGE:?required}
@@ -49,6 +65,14 @@ services:
     security_opt: [no-new-privileges:true]
     tmpfs: [/tmp]
     networks: [backend]
+    pids_limit: 64
+    mem_limit: 256m
+    cpus: '0.5'
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/',timeout=3)"]
+      interval: 20s
+      timeout: 5s
+      retries: 3
   ingress:
     image: ${BNB_INGRESS_IMAGE:?digest-pinned-ingress-image-required}
     user: "10001:10001"
@@ -56,7 +80,10 @@ services:
     cap_drop: [ALL]
     security_opt: [no-new-privileges:true]
     tmpfs: [/tmp]
-    ports: ["443:8443"]
+    ports: ['443:8443']
+    pids_limit: 64
+    mem_limit: 256m
+    cpus: '0.5'
     environment:
       BNB_API_HOST: ${BNB_API_HOST:?approved-api-host-required}
       BNB_WEB_HOST: ${BNB_WEB_HOST:?approved-web-host-required}
@@ -64,14 +91,27 @@ services:
       - ${BNB_INGRESS_CONFIG:?required}:/etc/caddy/Caddyfile:ro
       - ${BNB_TLS_DIRECTORY:?verified-tls-material-required}:/run/tls:ro
     networks: [backend]
+    healthcheck:
+      test: [CMD, caddy, validate, --config, /etc/caddy/Caddyfile]
+      interval: 30s
+      timeout: 8s
+      retries: 3
   migrate:
     <<: *api
     profiles: [migration]
-    restart: "no"
+    restart: 'no'
+    pids_limit: 64
+    mem_limit: 512m
+    cpus: '0.75'
     healthcheck: {disable: true}
     command: [python, production.py, migrate]
     environment:
       BNB_ENV: production
+      BNB_ENV_SCHEMA: 420.bnb.environment.v1
+      BNB_SERVICE_ID: bnb-migrator
+      BNB_BOOKING_ENABLED: 'false'
+      BNB_TRAVEL_BNB_BOOKING: 'false'
+      BNB_FINANCIAL_EXECUTION: 'false'
       BNB_RELEASE_IMAGE: ${BNB_API_IMAGE:?required}
       BNB_WEB_IMAGE: ${BNB_WEB_IMAGE:?required}
       BNB_INGRESS_IMAGE: ${BNB_INGRESS_IMAGE:?required}

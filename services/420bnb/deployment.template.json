@@ -6,6 +6,8 @@
     "web": "REPLACE_WITH_APPROVED_WEB_IMAGE_AND_MANIFEST_DIGEST",
     "ingress": "REPLACE_WITH_APPROVED_INGRESS_IMAGE_AND_MANIFEST_DIGEST"
   },
+  "environment_contract": {"schema": "420.bnb.environment.v1", "services": {"runtime": "bnb-api", "worker": "bnb-worker", "migration": "bnb-migrator"}, "secret_root": "/run/secrets"},
+  "travel": {"bnb_booking": false},
   "booking_enabled": false,
   "financial_execution": false,
   "origins": {

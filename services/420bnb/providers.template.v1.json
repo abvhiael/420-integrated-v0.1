@@ -1,0 +1,103 @@
+{
+  "schema": "420.bnb.providers.v1",
+  "production_acceptance_verified": false,
+  "activation": {
+    "booking": false,
+    "payment_execution": false,
+    "travel_booking": false,
+    "notifications_delivery": false
+  },
+  "providers": {
+    "identity": {
+      "service_identity": "bnb-provider-identity",
+      "origin": "OPERATOR_APPROVED_HTTPS_ORIGIN_REQUIRED",
+      "trust_root": "OPERATOR_APPROVED_PUBLIC_KEY_MOUNT_REQUIRED",
+      "issuer": "BNB_IDENTITY",
+      "audience": "OPERATOR_APPROVED_SERVICE_SCOPED_AUDIENCE_REQUIRED",
+      "status": "blocked_external_approval",
+      "timeout_seconds": 5,
+      "retries": 0,
+      "redirects": false,
+      "credential_mode": "mounted_external_secret",
+      "live_enabled": false
+    },
+    "pay_wallet": {
+      "service_identity": "bnb-provider-pay-wallet",
+      "origin": "OPERATOR_APPROVED_HTTPS_ORIGIN_REQUIRED",
+      "trust_root": "OPERATOR_APPROVED_PUBLIC_KEY_MOUNT_REQUIRED",
+      "issuer": "BNB_PAY",
+      "audience": "OPERATOR_APPROVED_SERVICE_SCOPED_AUDIENCE_REQUIRED",
+      "status": "blocked_external_approval",
+      "timeout_seconds": 5,
+      "retries": 0,
+      "redirects": false,
+      "credential_mode": "mounted_external_secret",
+      "live_enabled": false
+    },
+    "compliance": {
+      "service_identity": "bnb-provider-compliance",
+      "origin": "OPERATOR_APPROVED_HTTPS_ORIGIN_REQUIRED",
+      "trust_root": "OPERATOR_APPROVED_PUBLIC_KEY_MOUNT_REQUIRED",
+      "issuer": "BNB_COMPLIANCE_AUTHORITY",
+      "audience": "OPERATOR_APPROVED_SERVICE_SCOPED_AUDIENCE_REQUIRED",
+      "status": "blocked_external_approval",
+      "timeout_seconds": 5,
+      "retries": 0,
+      "redirects": false,
+      "credential_mode": "mounted_external_secret",
+      "live_enabled": false
+    },
+    "search": {
+      "service_identity": "bnb-provider-search",
+      "origin": "OPERATOR_APPROVED_HTTPS_ORIGIN_REQUIRED",
+      "trust_root": "OPERATOR_APPROVED_PUBLIC_KEY_MOUNT_REQUIRED",
+      "issuer": "BNB_DISCOVERY_CONSUMER",
+      "audience": "OPERATOR_APPROVED_SERVICE_SCOPED_AUDIENCE_REQUIRED",
+      "status": "blocked_external_approval",
+      "timeout_seconds": 5,
+      "retries": 0,
+      "redirects": false,
+      "credential_mode": "mounted_external_secret",
+      "live_enabled": false
+    },
+    "travel": {
+      "service_identity": "bnb-provider-travel",
+      "origin": "OPERATOR_APPROVED_HTTPS_ORIGIN_REQUIRED",
+      "trust_root": "OPERATOR_APPROVED_PUBLIC_KEY_MOUNT_REQUIRED",
+      "issuer": "BNB_DISCOVERY_CONSUMER",
+      "audience": "OPERATOR_APPROVED_SERVICE_SCOPED_AUDIENCE_REQUIRED",
+      "status": "blocked_external_approval",
+      "timeout_seconds": 5,
+      "retries": 0,
+      "redirects": false,
+      "credential_mode": "mounted_external_secret",
+      "live_enabled": false
+    },
+    "location": {
+      "service_identity": "bnb-provider-location",
+      "origin": "OPERATOR_APPROVED_HTTPS_ORIGIN_REQUIRED",
+      "trust_root": "OPERATOR_APPROVED_PUBLIC_KEY_MOUNT_REQUIRED",
+      "issuer": "BNB_LOCATION_AUTHORITY",
+      "audience": "OPERATOR_APPROVED_SERVICE_SCOPED_AUDIENCE_REQUIRED",
+      "status": "blocked_external_approval",
+      "timeout_seconds": 5,
+      "retries": 0,
+      "redirects": false,
+      "credential_mode": "mounted_external_secret",
+      "live_enabled": false
+    },
+    "notifications": {
+      "service_identity": "bnb-provider-notifications",
+      "origin": "OPERATOR_APPROVED_HTTPS_ORIGIN_REQUIRED",
+      "trust_root": "OPERATOR_APPROVED_PUBLIC_KEY_MOUNT_REQUIRED",
+      "issuer": "BNB_NOTIFICATION",
+      "audience": "OPERATOR_APPROVED_SERVICE_SCOPED_AUDIENCE_REQUIRED",
+      "status": "blocked_external_approval",
+      "timeout_seconds": 5,
+      "retries": 0,
+      "redirects": false,
+      "credential_mode": "mounted_external_secret",
+      "live_enabled": false
+    }
+  }
+}

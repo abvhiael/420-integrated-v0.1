@@ -299,7 +299,7 @@ def test_production_entry_wires_verified_tls_least_privilege_worker(tls_database
     with psycopg.connect(**values) as c:
         c.execute("INSERT INTO bnb_outbox(id,event_type,payload) VALUES (%s,'bnb.hold.created','{\"hold_id\":\"fixture\"}')", (uuid4(),))
     # Contract validation itself is independently exercised by the retained infrastructure suite.
-    monkeypatch.setattr(production, 'load_contract', lambda: ({}, {}, values))
+    monkeypatch.setattr(production, 'load_contract', lambda *, purpose: ({}, {}, values) if purpose == 'worker' else (_ for _ in ()).throw(AssertionError('wrong purpose')))
     monkeypatch.setenv('BNB_WORKER_SINK', 'local-validation')
     original = worker.Supervisor.run
     def bounded(self):

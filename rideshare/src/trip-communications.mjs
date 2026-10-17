@@ -85,7 +85,8 @@ export function createTripCommunicationService({authenticator,store,messenger,no
    const event=safeTripUpdate(trip);let delivered=0;
    for(const recipient of [trip.riderId,trip.driverId].filter(id)){
     // The sender's authenticated account can authorize only its own consent. 
-    // A driver actor cannot impersonate a rider to read their consent.\n    if(recipient===trip.riderId){
+    // A driver actor cannot impersonate a rider to read their consent.
+    if(recipient===trip.riderId){
      if(p.role!=='rider'||p.subject!==recipient)continue;
      const candidate=await preferencesFor(recipient);
      if(!allowedNotification(candidate?.preferences??candidate))continue;

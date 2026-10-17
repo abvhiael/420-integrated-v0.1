@@ -40,9 +40,11 @@ test('L03.5 scoped privacy lifecycle, immutable decisions, evidence holds, redac
   await pool.query('INSERT INTO liftd.safety_incidents(incident_id,trip_id,reporter_id,reporter_role,category,created_at,trip_revision) VALUES($1,$2,$3,$4,$5,$6,$7)',['privacy_incident_'+Date.now(),tripId,rider,'rider','threat',time,0]);
   await assert.rejects(()=>service.fulfill('operator',deletion,{commandId:'cmd_erase',expectedRevision:0}),{code:'PRIVACY_PROTECTED_RECORD'});
   time=2000;
+  await pool.query('INSERT INTO liftd.private_locations(route_ref,rider_id,account_id,command_id,trip_id,expires_at,sealed,descriptor) VALUES($1,$2,$3,$4,$5,$6,$7,$8)', ['privacy_held_route_'+Date.now(),rider,rider+'_account','held_route_command',tripId,1500,{ciphertext:'encrypted'},{routeRef:'held'}]);
   const firstSweep=await runPrivacyRetentionSweep({pool,clock:()=>time});
-  assert.equal(firstSweep.expiredLocations,0,'held trip must not have its location erased');
-  assert.equal((await pool.query('SELECT tombstoned FROM liftd.private_locations WHERE route_ref=$1',['clean_route'])).rows[0].tombstoned,false);
+  assert.equal(firstSweep.expiredLocations,1,'only unheld expired locations may be erased');
+  assert.equal((await pool.query('SELECT tombstoned FROM liftd.private_locations WHERE trip_id=$1',[tripId])).rows[0].tombstoned,false);
+  assert.equal((await pool.query('SELECT tombstoned FROM liftd.private_locations WHERE route_ref=$1',['clean_route'])).rows[0].tombstoned,true);
   const held=await service.hold('operator',deletion,{commandId:'cmd_hold',expectedRevision:0});assert.equal(held.status,'BLOCKED_HOLD');
   assert.equal(held.reason,'retained_incident');
   const safeId='privacy_safe_'+Date.now();

@@ -1,5 +1,8 @@
+import { applySceneLayerOrder } from "./scene-layers.js";
 const $ = (selector) => document.querySelector(selector);
 const cash = $("#cash");
+// Visual ordering is fixed independently of game-state mutations.
+applySceneLayerOrder(document.querySelector(".shop-stage"));
 const inventory = $("#inventory");
 const queue = $("#queue");
 const upgrades = $("#upgrades");

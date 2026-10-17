@@ -79,3 +79,40 @@ describe("Phase 3.17 Level 1 artwork integration",()=>{
   assert.deepEqual(await (await fetch(base+"/api/state")).json(),before);
  }));
 });
+
+import { STORE_LAYERS, getLayerRank, orderSceneEntries, applySceneLayerOrder } from "../public/scene-layers.js";
+
+describe("Phase 3.18 canonical layer hierarchy", () => {
+ const names=["00_BACKGROUND","01_WALLS_AND_WINDOWS","02_FLOOR","03_ARCHITECTURE","04_FIXED_SHELVING","05_FIXED_COUNTERS","06_PRODUCT_DISPLAYS","07_PROPS","08_PLANTS","09_CUSTOMERS","10_STAFF","11_INTERACTION_EFFECTS","12_LIGHTING","13_FOREGROUND","14_UI"];
+ it("locks all 15 specified layers without omissions or reorderings",()=>{
+  assert.deepEqual([...STORE_LAYERS],names);
+  assert.equal(new Set(STORE_LAYERS).size,15);
+  for(let i=0;i<15;i++) assert.equal(getLayerRank(names[i]),i);
+  assert.throws(()=>getLayerRank("15_UNKNOWN"),/unrecognized/);
+  assert.throws(()=>getLayerRank("__proto__"),/unrecognized/);
+ });
+ it("sorts by occlusion rank with stable ties, without mutating input",()=>{
+  const items=[{layer:names[5],id:"counter"},{layer:names[1],id:"wall-first"},{layer:names[1],id:"wall-second"},{layer:names[2],id:"floor"}];
+  assert.deepEqual(orderSceneEntries(items).map(x=>x.id),["wall-first","wall-second","floor","counter"]);
+  assert.equal(items[0].id,"counter");
+  assert.throws(()=>orderSceneEntries([...items,{layer:"INVALID"}]),/unrecognized/);
+ });
+ it("rejects invalid scene atomically without partial z-index writes",()=>{
+  const node={style:{zIndex:""},getAttribute:()=>names[2]};
+  const bad={style:{zIndex:""},getAttribute:()=>"invalid"};
+  const stage={querySelectorAll:()=>[node,bad]};
+  assert.throws(()=>applySceneLayerOrder(stage),/unrecognized/);
+  assert.equal(node.style.zIndex,"");
+  assert.equal(bad.style.zIndex,"");
+ });
+ it("layers the production scene and keeps game state unchanged",async()=>withServer(async base=>{
+  const before=await (await fetch(base+"/api/state")).json();
+  const html=await (await fetch(base+"/")).text();
+  for(const layer of [names[1],names[2],names[5]]) assert.match(html,new RegExp('data-scene-layer="'+layer+'"'));
+  assert.equal((html.match(/data-scene-layer=/g)||[]).length,6);
+  const js=await fetch(base+"/scene-layers.js");
+  assert.equal(js.status,200);
+  assert.match(js.headers.get("content-type")??"",/javascript/);
+  assert.deepEqual(await (await fetch(base+"/api/state")).json(),before);
+ }));
+});

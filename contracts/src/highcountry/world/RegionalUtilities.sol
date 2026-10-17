@@ -59,7 +59,9 @@ contract RegionalUtilities {
         uint8 asset,
         uint256 amount
     ) private {
-        if (op == 0 || !regions.exists(region) || (asset != WATER && asset != ENERGY) || amount == 0) revert InvalidInput();
+        if (op == 0 || !regions.exists(region) || (asset != WATER && asset != ENERGY) || amount == 0) {
+            revert InvalidInput();
+        }
         if (applied[op]) revert DuplicateOperation();
         applied[op] = true;
     }

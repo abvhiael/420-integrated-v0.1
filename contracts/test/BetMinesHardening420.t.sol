@@ -262,4 +262,62 @@ contract BetMinesHardening420Test {
         vm.expectRevert(MinesV1420.BoardAlreadyBound.selector);
         s.mines.bindBoard(WAGER, root);
     }
+    function testCanonicalBoardRevealsOnlyAfterTerminalAndVerifiesExactMineDistribution() public {
+        Suite memory s = _deploy(5);
+        bytes32 committed = s.mines.seedCommitmentFor(WAGER, RandomnessRouter420.Source.PRIMARY, SEED);
+        vm.prank(PRIMARY);
+        s.mines.commitSeed(WAGER, RandomnessRouter420.Source.PRIMARY, committed);
+        _setRequest(s, true, RandomnessRouter420.Source.PRIMARY, ROOT);
+        bytes32 root = s.mines.canonicalBoardRoot(WAGER, ROOT, 5, SEED);
+        uint32 minesMask = s.mines.canonicalMineMask(WAGER, ROOT, 5, SEED);
+        uint8 count;
+        bytes32[32] memory leaves;
+        uint8 safeCell = 25;
+        for (uint8 i = 0; i < 25; ++i) {
+            bool mine = minesMask & (uint32(1) << i) != 0;
+            if (mine) count++;
+            else if (safeCell == 25) safeCell = i;
+            leaves[i] = s.mines.cellLeaf(WAGER, ROOT, i, mine,
+                s.mines.canonicalCellSalt(WAGER, ROOT, i, SEED));
+        }
+        require(count == 5 && safeCell < 25, "exact five mines");
+        for (uint8 i = 25; i < 32; ++i) {
+            leaves[i] = keccak256(abi.encode(s.mines.LEAF_DOMAIN(), "PAD", WAGER, VERSION, RULESET, ROOT, i));
+        }
+        require(_root(leaves) == root, "canonical tree reproduces");
+        vm.prank(PRIMARY);
+        s.mines.bindBoard(WAGER, root);
+        vm.prank(PLAYER);
+        s.mines.startSession(WAGER, s.params);
+        vm.expectRevert(MinesV1420.InvalidPhase.selector);
+        s.mines.verifyTerminalBoard(WAGER, SEED);
+        // Compute external-view arguments before prank: otherwise the salt lookup
+        // consumes the one-call impersonation and revealCell sees the test contract.
+        bytes32 safeSalt = s.mines.canonicalCellSalt(WAGER, ROOT, safeCell, SEED);
+        bytes32[] memory safeProof = _proof(leaves, safeCell);
+        vm.prank(PLAYER);
+        s.mines.revealCell(WAGER, safeCell, false, safeSalt, safeProof);
+        vm.prank(PLAYER);
+        s.mines.cashOut(WAGER);
+        vm.expectRevert(MinesV1420.BoardVerificationFailed.selector);
+        s.mines.verifyTerminalBoard(WAGER, keccak256("wrong seed"));
+        require(!s.mines.boardVerified(WAGER), "invalid seed certified");
+        s.mines.verifyTerminalBoard(WAGER, SEED);
+        require(s.mines.boardVerified(WAGER), "canonical board not certified");
+        vm.expectRevert(MinesV1420.BoardAlreadyBound.selector);
+        s.mines.verifyTerminalBoard(WAGER, SEED);
+    }
+
+    function testArbitraryMerkleBoardCannotPassCanonicalTerminalCertification() public {
+        Suite memory s = _deploy(5);
+        bytes32[32] memory leaves = _prepare(s);
+        vm.prank(PLAYER);
+        s.mines.revealCell(WAGER, 7, false, _salt(7), _proof(leaves, 7));
+        vm.prank(PLAYER);
+        s.mines.cashOut(WAGER);
+        vm.expectRevert(MinesV1420.BoardVerificationFailed.selector);
+        s.mines.verifyTerminalBoard(WAGER, SEED);
+        require(!s.mines.boardVerified(WAGER), "uncanonical board certified");
+    }
+
 }

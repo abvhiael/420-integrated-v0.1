@@ -15,6 +15,7 @@ import "./PlinkoV1420.sol";
 import "./ReferenceSlotV1420.sol";
 import "./RouletteV1420.sol";
 import "./BlackjackV1420.sol";
+import "./MinesV1420.sol";
 
 contract SettlementEngine420 is I420System {
     BetAuthorization420 public immutable authorization;
@@ -35,6 +36,8 @@ contract SettlementEngine420 is I420System {
     mapping(bytes32 => address) public rouletteResolver;
     bytes32 private constant BLACKJACK_GAME_ID = keccak256("420BET.GAME.BLACKJACK");
     mapping(bytes32 => address) public blackjackResolver;
+    bytes32 private constant MINES_GAME_ID = keccak256("420BET.GAME.MINES");
+    mapping(bytes32 => address) public minesResolver;
 
     uint256 private _entered;
 
@@ -56,6 +59,8 @@ contract SettlementEngine420 is I420System {
     error RouletteResolverAlreadyBound();
     error BlackjackCanonicalSettlementRequired();
     error BlackjackResolverAlreadyBound();
+    error MinesCanonicalSettlementRequired();
+    error MinesResolverAlreadyBound();
     error Reentrancy();
     error EmergencyAlreadyBound();
     error WagerExpired();
@@ -223,6 +228,43 @@ contract SettlementEngine420 is I420System {
         settlement = _settle(w, hand.outcome, hand.grossPayout, true);
     }
 
+    function bindMinesResolver(bytes32 versionId, address resolver) external {
+        if (versionId == bytes32(0) || resolver == address(0)) revert ZeroAddress();
+        if (minesResolver[versionId] != address(0)) revert MinesResolverAlreadyBound();
+        MinesV1420 m = MinesV1420(resolver);
+        if (m.gameId() != MINES_GAME_ID || m.gameVersionId() != versionId ||
+            address(m.wagerRegistry()) != address(registry)) revert InvalidStatus();
+        if (!authorization.isAuthorized(msg.sender, BetIds420.ACTION_GAME_REGISTER,
+            authorization.scopeForGame(MINES_GAME_ID, versionId), 0)) revert Unauthorized();
+        minesResolver[versionId] = resolver;
+    }
+
+    function settleMines(bytes32 wagerId)
+        external nonReentrant returns (BetTypes420.Settlement memory settlement)
+    {
+        BetTypes420.Wager memory w = registry.getWager(wagerId);
+        if (w.gameId != MINES_GAME_ID) revert InvalidStatus();
+        address resolver = minesResolver[w.gameVersionId];
+        if (resolver == address(0) || MinesV1420(resolver).rulesetId() != w.rulesetId)
+            revert MinesCanonicalSettlementRequired();
+        MinesV1420.SessionState memory session = MinesV1420(resolver).getSession(wagerId);
+        if (session.phase != MinesV1420.Phase.TERMINAL) revert MinesCanonicalSettlementRequired();
+        if (!MinesV1420(resolver).boardVerified(wagerId)) revert MinesCanonicalSettlementRequired();
+        BetTypes420.TerminalOutcome outcome;
+        uint256 gross;
+        if (session.mineHit) {
+            if (session.cashedOut || session.cashoutGrossPayout != 0 ||
+                session.currentGrossPayout != 0) revert MinesCanonicalSettlementRequired();
+            outcome = BetTypes420.TerminalOutcome.LOSS;
+        } else {
+            if (!session.cashedOut || session.cashoutGrossPayout < w.stake ||
+                session.cashoutGrossPayout > w.maxGrossPayout) revert MinesCanonicalSettlementRequired();
+            gross = session.cashoutGrossPayout;
+            outcome = gross == w.stake ? BetTypes420.TerminalOutcome.PUSH : BetTypes420.TerminalOutcome.WIN;
+        }
+        settlement = _settle(w, outcome, gross, true);
+    }
+
     function settle(bytes32 wagerId, BetTypes420.TerminalOutcome outcome, uint256 grossPayout)
         external
         nonReentrant
@@ -234,6 +276,7 @@ contract SettlementEngine420 is I420System {
         if (wager.gameId == SLOT_GAME_ID) revert SlotCanonicalSettlementRequired();
         if (wager.gameId == ROULETTE_GAME_ID) revert RouletteCanonicalSettlementRequired();
         if (wager.gameId == BLACKJACK_GAME_ID) revert BlackjackCanonicalSettlementRequired();
+        if (wager.gameId == MINES_GAME_ID) revert MinesCanonicalSettlementRequired();
         settlement = _settle(wager, outcome, grossPayout, true);
     }
 

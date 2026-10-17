@@ -72,7 +72,7 @@ contract MinesSettlementAdapter420 is I420System {
     ///      custody, registry settlement, fee finalization, expiry and emergency semantics.
     function settle(bytes32 wagerId) external returns (BetTypes420.Settlement memory settlement) {
         (BetTypes420.TerminalOutcome outcome, uint256 grossPayout) = terminalResult(wagerId);
-        settlement = settlementEngine.settle(wagerId, outcome, grossPayout);
+        settlement = settlementEngine.settleMines(wagerId);
         emit MinesSettlementSubmitted(wagerId, outcome, grossPayout);
     }
 }

@@ -34,23 +34,30 @@ contract MockMinesSettlementSource420 {
 }
 
 contract MockMinesSettlementEngine420 {
+    MockMinesSettlementSource420 public immutable mines;
     bytes32 public lastWagerId;
     BetTypes420.TerminalOutcome public lastOutcome;
     uint256 public lastGrossPayout;
     address public lastCaller;
 
-    function settle(bytes32 wagerId, BetTypes420.TerminalOutcome outcome, uint256 grossPayout)
-        external
-        returns (BetTypes420.Settlement memory settlement)
+    constructor(address mines_) { mines = MockMinesSettlementSource420(mines_); }
+
+    function settleMines(bytes32 wagerId)
+        external returns (BetTypes420.Settlement memory settlement)
     {
+        MinesV1420.SessionState memory session = mines.getSession(wagerId);
+        require(session.phase == MinesV1420.Phase.TERMINAL, "not terminal");
+        BetTypes420.TerminalOutcome outcome = session.mineHit
+            ? BetTypes420.TerminalOutcome.LOSS
+            : session.cashoutGrossPayout == 100 ether
+                ? BetTypes420.TerminalOutcome.PUSH : BetTypes420.TerminalOutcome.WIN;
+        uint256 grossPayout = session.mineHit ? 0 : session.cashoutGrossPayout;
         lastWagerId = wagerId;
         lastOutcome = outcome;
         lastGrossPayout = grossPayout;
         lastCaller = msg.sender;
         settlement = BetTypes420.Settlement({
-            wagerId: wagerId,
-            outcome: outcome,
-            grossPayout: grossPayout,
+            wagerId: wagerId, outcome: outcome, grossPayout: grossPayout,
             settledAt: uint64(block.timestamp)
         });
     }
@@ -77,7 +84,7 @@ contract BetMinesSettlementAdapter420Test {
     function _deploy() private returns (Suite memory s) {
         s.registry = new MockMinesSettlementRegistry420();
         s.mines = new MockMinesSettlementSource420(address(s.registry), GAME_V1);
-        s.engine = new MockMinesSettlementEngine420();
+        s.engine = new MockMinesSettlementEngine420(address(s.mines));
         s.adapter = new MinesSettlementAdapter420(address(s.mines), address(s.engine));
         s.registry.setWager(BetTypes420.Wager({
             wagerId: WAGER,

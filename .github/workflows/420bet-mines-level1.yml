@@ -1,0 +1,115 @@
+name: 420Bet Mines Level 1
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/420bet-mines-level1.yml'
+      - 'contracts/src/bet/**'
+      - 'contracts/test/BetMines*.t.sol'
+      - 'contracts/test/BetWagerAcceptance420.t.sol'
+      - 'contracts/test/BetRandomness420.t.sol'
+      - 'contracts/test/BetRandomnessTerminal420.t.sol'
+      - 'contracts/test/BetSettlementEngine420.t.sol'
+      - 'contracts/test/BetBankrollRisk420.t.sol'
+      - 'contracts/test/BetTerminalPathInvariant420.t.sol'
+      - 'contracts/test/BetCasinoSettlementInvariant420.t.sol'
+      - 'contracts/test/BetCasinoSolvencyConvergence420.t.sol'
+concurrency:
+  group: 420bet-mines-level1-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+permissions:
+  contents: read
+jobs:
+  mines-level1:
+    name: Mines targeted Foundry qualification
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      FOUNDRY_PROFILE: pr
+    steps:
+      - name: Checkout exact PR implementation
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact SHA and preflight all test contracts without compiling
+        shell: bash
+        working-directory: contracts
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          printf 'Qualified input SHA: %s\n' "$EXPECTED_SHA"
+          python3 - <<'PY'
+          import re
+          from pathlib import Path
+          names = ["BetMinesV1420","BetMinesViewAdapter420","BetMinesSettlementAdapter420","BetMinesHardening420","BetWagerAcceptance420","BetRandomness420","BetRandomnessTerminal420","BetSettlementEngine420","BetBankrollRisk420","BetTerminalPathInvariant420","BetCasinoSettlementInvariant420","BetCasinoSolvencyConvergence420"]
+          assert len(names) == len(set(names)) == 12
+          for name in names:
+              path = Path("test") / (name + ".t.sol")
+              assert path.is_file(), f"missing {path}"
+              code = path.read_text()
+              assert re.search(r"\bcontract\s+" + re.escape(name + "Test") + r"\s*(?:is\b[^\{]*|\{)", code), f"missing test contract: {path}"
+              assert re.search(r"\bfunction\s+(?:test|invariant|statefulFuzz)\w*\s*\(", code), f"no tests: {path}"
+              print("DISCOVERED", path)
+          PY
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Run and verify all mandatory Mines and shared suites
+        working-directory: contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          regex='^(BetMinesV1420|BetMinesViewAdapter420|BetMinesSettlementAdapter420|BetMinesHardening420|BetWagerAcceptance420|BetRandomness420|BetRandomnessTerminal420|BetSettlementEngine420|BetBankrollRisk420|BetTerminalPathInvariant420|BetCasinoSettlementInvariant420|BetCasinoSolvencyConvergence420)Test$'
+          set +e
+          forge test --match-contract "$regex" --json > "$RUNNER_TEMP/mines-level1.json" 2> "$RUNNER_TEMP/mines-level1.stderr"
+          forge_status=$?
+          set -e
+          if [ "$forge_status" -ne 0 ]; then
+            echo "::error::Foundry returned exit status $forge_status; emitting failed test details"
+            python3 - "$RUNNER_TEMP/mines-level1.json" <<'PYFAIL'
+          import json,sys
+          try:
+              data=json.load(open(sys.argv[1]))
+              for suite_name,suite in data.items():
+                  if not isinstance(suite,dict):continue
+                  for test_name,result in suite.get("test_results",{}).items():
+                      if result.get("status") != "Success":
+                          print("FAILED SUITE:",suite_name)
+                          print("FAILED TEST:",test_name)
+                          print("RESULT:",json.dumps(result,indent=2)[:18000])
+          except Exception as ex:
+              print("Unable to decode Foundry JSON:",repr(ex))
+          PYFAIL
+            cat "$RUNNER_TEMP/mines-level1.stderr"
+            exit "$forge_status"
+          fi
+          python3 - "$RUNNER_TEMP/mines-level1.json" <<'PY'
+          import json, sys
+          names = ["BetMinesV1420","BetMinesViewAdapter420","BetMinesSettlementAdapter420","BetMinesHardening420","BetWagerAcceptance420","BetRandomness420","BetRandomnessTerminal420","BetSettlementEngine420","BetBankrollRisk420","BetTerminalPathInvariant420","BetCasinoSettlementInvariant420","BetCasinoSolvencyConvergence420"]
+          results = json.load(open(sys.argv[1]))
+          seen, failures, total = set(), [], 0
+          for key, suite in results.items():
+              if not isinstance(suite, dict) or not isinstance(suite.get("test_results"), dict):
+                  continue
+              tests = suite["test_results"]
+              if not tests:
+                  continue
+              for name in names:
+                  if f"test/{name}.t.sol:" in key:
+                      seen.add(name)
+              for test_name, result in tests.items():
+                  total += 1
+                  if result.get("status") != "Success":
+                      failures.append((key, test_name, result.get("status")))
+          missing = sorted(set(names) - seen)
+          print(f"Executed {total} tests across {len(seen)}/12 mandatory suites")
+          for name in sorted(seen):
+              print("PASS inventory:", name)
+          if missing or failures or total < len(names):
+              print("Missing suites:", missing)
+              print("Non-success tests:", failures)
+              sys.exit(1)
+          PY

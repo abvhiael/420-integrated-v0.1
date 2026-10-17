@@ -51,7 +51,9 @@ jobs:
       - name: PostgreSQL milestone convergence (ordered migrations and all six domains)
         run: |
           set -euo pipefail
-          for file in rideshare/test/postgres/{store,support-cases,reviews,fraud,economic-reconciliation,privacy-retention,payments,quotes,location}.test.mjs; do
-            echo "M-L03-A retained PostgreSQL inventory: $file"
-            node --test "$file"
+          for suite in store support-cases reviews fraud economic-reconciliation privacy-retention payments quotes location; do
+            db="liftd_milestone_${suite//-/_}"
+            echo "M-L03-A isolated PostgreSQL inventory: $suite ($db)"
+            PGPASSWORD=postgres psql -h 127.0.0.1 -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE $db"
+            LIFTD_DATABASE_URL="postgres://postgres:postgres@127.0.0.1:5432/$db" node --test "rideshare/test/postgres/$suite.test.mjs"
           done

@@ -33,9 +33,20 @@
 | 420Docs Qualification | `.github/workflows/docs-qualify.yml` | Must confirm exact-sha executable dispatch and required jobs |
 | Retained Phase 4 BET | `.github/workflows/420bet-phase4-level2.yml` | `workflow_dispatch` present; 21-suite app inventory |
 
+## Frozen-file checksum and manifest schema verification — completed scoped inspection
+
+**Verified at branch SHA `842874a9522e135993e7008cb6525427b882a53f` before this evidence-only commit:**
+
+- Enumerated every line of repository-root `GENESIS-INTERFACE-V1-FREEZE-SHA256SUMS.txt`: **10 entries**, 10/10 files fetched from the exact branch, 10/10 raw UTF-8 SHA-256 matches.
+- Enumerated every line of `historical/manifests/SHA256SUMS.txt`: **5 entries**, 5/5 files fetched from the exact branch, 5/5 raw UTF-8 SHA-256 matches.
+- **Total 15/15, no missing files, no mismatches.** The SHA-256 calculation was self-tested with `abc` => `ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad`.
+- Parsed `contracts/config/interfaces/genesis-interface-layer.json`, `interface-layer-v1-freeze.json` and `asset-semantics.json` as JSON without error.
+- Structural checks: expected schema identifiers `420-genesis-contract-interface-layer-v1`, `420-genesis-interface-layer-freeze-v1`, `420-asset-semantics-v1`; `FROZEN_V1_0` / `FROZEN` statuses and version `1.0.0`; freeze shared-interface declared count **25**, actual **25**, matching layer **25** with identical ordered lists; **7/7** required named security interfaces present; frozen policy entries **5**; native token precision **18** and zero-address representation validated.
+- These are an independently calculated checksum and structural/schema-field verification, **not** an assertion that `scripts/verify-genesis-interface-v1-freeze.py` or all other freeze verifier scripts have executed against the candidate. GitHub connector offers file reads but not arbitrary code execution within the private repo.
+
 ## PRE-FLIGHT BLOCKERS — STOP before Level 3
 
-1. **Frozen-input integrity not yet verified.** No comprehensive enumeration of every referenced frozen-input file and actual SHA-256 digest, expected input count, manifest schema, and verifier results has been demonstrated against the final candidate. Must validate full manifest in one pass and remediate every mismatch.
+1. **Other repository frozen inputs and executable verifier ownership:** Both identified root/historical SHA256SUMS inventories are now 15/15 PASS and interface JSON structural checks PASS as detailed above. A complete repository-wide frozen-input manifest inventory and execution of independent freeze verifiers has not been established. Do not extrapolate these 15 checks to any unexamined configuration, policy, evaluator or generated hashes.
 2. **Five-owner exact-SHA dispatch and job matrix not yet proven.** No required Level 3 run IDs and job/coverage evidence exist against the final candidate. GitHub connector in this session exposes run inspection but no direct `workflow_dispatch` action; do not assert dispatch.
 3. **Canonical per-criterion closeout verification incomplete.** Before certification, individually reconcile 4.1–4.11 evidence and any changed inputs, interface/configuration and deployment verification, security invariants and testnet ledger.
 4. **Documentation-source authority:** Legacy BET completion roadmap is absent from main; keep this 4.12 closeout limited to Phase 4 and explicitly record the difference, never claim missing wider products are implemented.

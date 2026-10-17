@@ -1,6 +1,6 @@
 import {AuthError} from './auth.mjs';
 // Fetch-compatible protected handler; deployment/listeners are not enabled here.
-export function createHttpHandler(service, locationService, dispatchAdapter, quoteService, paymentService, safetyService, riderPreferencesService, onboardingService, onboardingReviewService, driverOfferService, communicationService, operatorConsoleService, travelHandoffService, supportCaseService, reviewService, fraudService, economicService) {
+export function createHttpHandler(service, locationService, dispatchAdapter, quoteService, paymentService, safetyService, riderPreferencesService, onboardingService, onboardingReviewService, driverOfferService, communicationService, operatorConsoleService, travelHandoffService, supportCaseService, reviewService, fraudService, economicService, privacyService) {
   return async request => {
     const reply = (status, value) => new Response(JSON.stringify(value), {status,
       headers: {'content-type': 'application/json', 'cache-control': 'no-store', 'x-content-type-options': 'nosniff'}});
@@ -16,6 +16,7 @@ export function createHttpHandler(service, locationService, dispatchAdapter, quo
       const travelHandoff=/^\/v1\/rideshare\/trips\/([A-Za-z0-9_-]{1,128})\/travel-handoff(?:\/([A-Za-z0-9_-]{1,128}))?$/.exec(url.pathname);
       const operator=/^\/v1\/rideshare\/operator\/trips\/([A-Za-z0-9_-]{1,128})(?:\/(incidents|resolve))?$/.exec(url.pathname);
       const messages=/^\/v1\/rideshare\/trips\/([A-Za-z0-9_-]{1,128})\/messages$/.exec(url.pathname);
+      const privacy=new RegExp('^/v1/rideshare/privacy/requests/([A-Za-z0-9_-]{1,128})(?:/(fulfill|hold|deny|export))?' + String.fromCharCode(36)).exec(url.pathname);
       const economic=new RegExp('^/v1/rideshare/trips/([A-Za-z0-9_-]{1,128})/economics/reconcile' + String.fromCharCode(36)).exec(url.pathname);
       const fraud=new RegExp('^/v1/rideshare/fraud/cases/([A-Za-z0-9_-]{1,128})(?:/(hold|clear|release|appeal|close))?' + String.fromCharCode(36)).exec(url.pathname);
       const review=new RegExp('^/v1/rideshare/reviews/([A-Za-z0-9_-]{1,128})(?:/(approve|hide|reject))?' + String.fromCharCode(36)).exec(url.pathname);
@@ -31,11 +32,12 @@ export function createHttpHandler(service, locationService, dispatchAdapter, quo
       const locationPrepare = url.pathname === '/v1/rideshare/routes';
       const locationRead = /^\/v1\/rideshare\/trips\/([A-Za-z0-9_-]{1,128})\/coordinates$/.exec(url.pathname);
       const match = /^\/v1\/rideshare\/trips(?:\/([A-Za-z0-9_-]{1,128})(\/transitions)?)?$/.exec(url.pathname);
-      if (!match && !locationPrepare && !locationRead && !availability && !quoteIssue && !quoteConsent && !quoteRead && !payment && !statement && !safety && !preferences && !onboarding && !onboardingReview && !offerRead && !offerRespond && !availabilityRead && !messages && !operator && !travelHandoff && !support && !review && !reputation && !fraud && !economic) return reply(404, {error: 'NOT_FOUND'});
+      if (!match && !locationPrepare && !locationRead && !availability && !quoteIssue && !quoteConsent && !quoteRead && !payment && !statement && !safety && !preferences && !onboarding && !onboardingReview && !offerRead && !offerRespond && !availabilityRead && !messages && !operator && !travelHandoff && !support && !review && !reputation && !fraud && !economic && !privacy) return reply(404, {error: 'NOT_FOUND'});
       if ((locationPrepare || locationRead) && !locationService) return reply(503, {error: 'LOCATION_UNAVAILABLE'});
       if (availability && !dispatchAdapter) return reply(503,{error:'DISPATCH_UNAVAILABLE'});
       if((quoteIssue||quoteConsent||quoteRead)&&!quoteService) return reply(503,{error:'QUOTE_UNAVAILABLE'});
       if(travelHandoff&&!travelHandoffService)return reply(503,{error:'HANDOFF_UNAVAILABLE'});
+      if(privacy&&!privacyService)return reply(503,{error:'PRIVACY_UNAVAILABLE'});
       if(economic&&!economicService)return reply(503,{error:'ECONOMIC_UNAVAILABLE'});
       if(fraud&&!fraudService)return reply(503,{error:'FRAUD_UNAVAILABLE'});
       if((review||reputation)&&!reviewService)return reply(503,{error:'REVIEWS_UNAVAILABLE'});
@@ -52,6 +54,9 @@ export function createHttpHandler(service, locationService, dispatchAdapter, quo
       if (typeof authorization !== 'string' || authorization.length > 32775 ||
         !/^Bearer [A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/.test(authorization)) throw new AuthError('BEARER_REQUIRED');
       const token = authorization.slice(7);
+      if(privacy&&request.method==='GET'&&!privacy[2])return reply(200,await privacyService.read(token,privacy[1]));
+      if(privacy&&request.method==='GET'&&privacy[2]==='export')return reply(200,await privacyService.export(token,privacy[1]));
+      if(privacy&&request.method!=='POST')return reply(405,{error:'METHOD_NOT_ALLOWED'});
       if(economic&&request.method==='GET')return reply(200,await economicService.reconcile(token,economic[1]));
       if(economic)return reply(405,{error:'METHOD_NOT_ALLOWED'});
       if(fraud&&request.method==='GET'&&!fraud[2])return reply(200,await fraudService.read(token,fraud[1]));
@@ -107,6 +112,7 @@ export function createHttpHandler(service, locationService, dispatchAdapter, quo
           (body.commandId !== undefined && body.commandId !== commandId)) throw new AuthError('INVALID_REQUEST', 400);
         body.commandId = commandId;
       }
+      if(privacy)return reply(privacy[2]?200:201,await privacyService[privacy[2]||'request'](token,privacy[1],body));
       if(fraud)return reply(fraud[2]?200:201,await fraudService[fraud[2]||'report'](token,fraud[1],body));
       if(review)return reply(review[2]?200:201,await reviewService[review[2]||'submit'](token,review[1],body));
       if(support)return reply(support[2]?200:201,await supportCaseService[support[2]||'open'](token,support[1],body));

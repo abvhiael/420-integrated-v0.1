@@ -5,8 +5,8 @@ set -euo pipefail
 : "${LIFTD_ROLLBACK_PREVIOUS_IMAGE:?previous digest pinned image required}"
 : "${LIFTD_ROLLBACK_CANDIDATE_IMAGE:?candidate digest pinned image required}"
 : "${LIFTD_ROLLBACK_CONFIG:?runtime config path required}"
-if [[ ! "${LIFTD_ROLLBACK_PREVIOUS_IMAGE}" =~ ^[A-Za-z0-9._/-]+@sha256:[a-f0-9]{64}$ ]] ||
-   [[ ! "${LIFTD_ROLLBACK_CANDIDATE_IMAGE}" =~ ^[A-Za-z0-9._/-]+@sha256:[a-f0-9]{64}$ ]]; then
+if [[ ! "${LIFTD_ROLLBACK_PREVIOUS_IMAGE}" =~ ^[A-Za-z0-9._:/-]+@sha256:[a-f0-9]{64}$ ]] ||
+   [[ ! "${LIFTD_ROLLBACK_CANDIDATE_IMAGE}" =~ ^[A-Za-z0-9._:/-]+@sha256:[a-f0-9]{64}$ ]]; then
   echo 'ROLLBACK_IMAGE_DIGEST_REQUIRED' >&2; exit 2
 fi
 if [[ ! "${LIFTD_ROLLBACK_CONFIG}" == /run/secrets/* ]]; then

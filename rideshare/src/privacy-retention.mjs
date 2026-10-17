@@ -56,6 +56,11 @@ export function createPrivacyService({pool,authenticator,clock=()=>Math.floor(Da
     const evidence=(await c.query("SELECT 1 FROM liftd.safety_incidents WHERE trip_id=$1 UNION SELECT 1 FROM liftd.support_cases WHERE trip_id=$1 AND (category='incident' OR status<>'CLOSED') UNION SELECT 1 FROM liftd.fraud_cases WHERE trip_id=$1 LIMIT 1",[tripId])).rowCount>0;
     const financial=(await c.query('SELECT 1 FROM liftd.payment_intents WHERE trip_id=$1 LIMIT 1',[tripId])).rowCount>0;
     if(action==='fulfill'&&row.request_type==='deletion'&&(evidence||financial))fail('PRIVACY_PROTECTED_RECORD',403);
+    if(action==='fulfill'&&row.request_type==='deletion'&&row.subject_role!=='rider')fail('PRIVACY_LOCATION_NOT_OWNED',403);
+    if(action==='fulfill'&&row.request_type==='deletion'){
+     const locations=(await c.query('SELECT rider_id FROM liftd.private_locations WHERE trip_id=$1 AND NOT tombstoned FOR UPDATE',[tripId])).rows;
+     if(locations.some(location=>location.rider_id!==row.subject_id))fail('PRIVACY_LOCATION_NOT_OWNED',403);
+    }
     const state=action==='hold'?'BLOCKED_HOLD':action==='deny'?'DENIED':'FULFILLED';
     const reason=action==='hold'?(evidence?'retained_incident':financial?'financial_record':'subject_mismatch'):action==='deny'?'subject_mismatch':'completed';
     if(action==='fulfill'&&row.request_type==='deletion'){
@@ -93,8 +98,11 @@ export function createPrivacyService({pool,authenticator,clock=()=>Math.floor(Da
     const p=await permit(token,row.trip_id,'privacy.export');await trip(c,row.trip_id,p);
     if(p.role==='operator'||p.subject!==row.subject_id)fail('PRIVACY_EXPORT_DENIED',403);
     const incidents=(await c.query('SELECT count(*)::int AS count FROM liftd.safety_incidents WHERE trip_id=$1',[row.trip_id])).rows[0].count;
+    const snapshot=(await c.query('SELECT snapshot FROM liftd.trips WHERE trip_id=$1',[row.trip_id])).rows[0]?.snapshot;
+    if(!snapshot)fail('TRIP_UNAVAILABLE',404);
+    const ownRequests=(await c.query('SELECT request_id,request_type,status,requested_at,due_at,resolved_at FROM liftd.privacy_requests WHERE trip_id=$1 AND subject_id=$2 ORDER BY requested_at,request_id',[row.trip_id,p.subject])).rows.map(r=>Object.freeze({requestId:r.request_id,type:r.request_type,status:r.status,requestedAt:Number(r.requested_at),dueAt:Number(r.due_at),resolvedAt:r.resolved_at===null?null:Number(r.resolved_at)}));
     await permit(token,row.trip_id,'privacy.export',p);
-    return Object.freeze({requestId,subjectId:p.subject,tripId:row.trip_id,privacyRequest:view(row),incidentEvidence:{restricted:true,count:incidents},financialRecords:{restricted:true},coordinates:'REDACTED',otherPartyIdentity:'REDACTED'});
+    return Object.freeze({requestId,subjectId:p.subject,tripId:row.trip_id,privacyRequest:view(row),subjectRecords:Object.freeze({role:p.role,tripState:snapshot.state,tripRevision:snapshot.revision,privacyRequests:Object.freeze(ownRequests)}),incidentEvidence:{restricted:true,count:incidents},financialRecords:{restricted:true},coordinates:'REDACTED',otherPartyIdentity:'REDACTED'});
    })
   }
  });

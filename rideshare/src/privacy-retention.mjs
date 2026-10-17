@@ -53,7 +53,7 @@ export function createPrivacyService({pool,authenticator,clock=()=>Math.floor(Da
     await c.query('INSERT INTO liftd.privacy_requests(request_id,trip_id,subject_id,subject_role,request_type,status,requested_at,due_at) VALUES($1,$2,$3,$4,$5,$6,$7,$8)',[requestId,tripId,p.subject,p.role,input.type,'OPEN',time,due]);
    }else{
     if(!row||row.revision!==input.expectedRevision||!['OPEN','BLOCKED_HOLD'].includes(row.status))fail('PRIVACY_STALE_OR_TERMINAL');
-    const evidence=(await c.query("SELECT 1 FROM liftd.safety_incidents WHERE trip_id=$1 UNION SELECT 1 FROM liftd.support_cases WHERE trip_id=$1 AND category='incident' UNION SELECT 1 FROM liftd.fraud_cases WHERE trip_id=$1 LIMIT 1",[tripId])).rowCount>0;
+    const evidence=(await c.query("SELECT 1 FROM liftd.safety_incidents WHERE trip_id=$1 UNION SELECT 1 FROM liftd.support_cases WHERE trip_id=$1 AND (category='incident' OR status<>'CLOSED') UNION SELECT 1 FROM liftd.fraud_cases WHERE trip_id=$1 LIMIT 1",[tripId])).rowCount>0;
     const financial=(await c.query('SELECT 1 FROM liftd.payment_intents WHERE trip_id=$1 LIMIT 1',[tripId])).rowCount>0;
     if(action==='fulfill'&&row.request_type==='deletion'&&(evidence||financial))fail('PRIVACY_PROTECTED_RECORD',403);
     const state=action==='hold'?'BLOCKED_HOLD':action==='deny'?'DENIED':'FULFILLED';
@@ -89,7 +89,7 @@ export function createPrivacyService({pool,authenticator,clock=()=>Math.floor(Da
   },
   export:async(token,requestId)=>{
    if(!id(requestId))fail('INVALID_PRIVACY_REQUEST',400);
-   return run(async c=>{const row=(await c.query('SELECT * FROM liftd.privacy_requests WHERE request_id=$1',[requestId])).rows[0];if(!row||row.request_type!=='export'||row.status!=='FULFILLED')fail('PRIVACY_EXPORT_NOT_READY',403);
+   return run(async c=>{const row=(await c.query('SELECT * FROM liftd.privacy_requests WHERE request_id=$1',[requestId])).rows[0];if(!row||!['access','export'].includes(row.request_type)||row.status!=='FULFILLED')fail('PRIVACY_EXPORT_NOT_READY',403);
     const p=await permit(token,row.trip_id,'privacy.export');await trip(c,row.trip_id,p);
     if(p.role==='operator'||p.subject!==row.subject_id)fail('PRIVACY_EXPORT_DENIED',403);
     const incidents=(await c.query('SELECT count(*)::int AS count FROM liftd.safety_incidents WHERE trip_id=$1',[row.trip_id])).rows[0].count;

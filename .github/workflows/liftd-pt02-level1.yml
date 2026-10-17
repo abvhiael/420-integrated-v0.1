@@ -1,0 +1,33 @@
+name: LIFTd PT-02 Wallet Level 1
+on:
+  pull_request:
+    paths:
+      - 'rideshare/src/payment-protocol.mjs'
+      - 'rideshare/test/sdk/payment-wallet.test.mjs'
+      - '.github/workflows/liftd-pt02-level1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  wallet:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Exact SHA, retained rideshare tests and real SDK wallet consumer
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          npm ci --prefix rideshare --ignore-scripts
+          npm ci --prefix packages/420-sdk --ignore-scripts
+          npm run build --prefix packages/420-sdk
+          node --check rideshare/src/payment-protocol.mjs
+          npm test --prefix rideshare
+          node --test rideshare/test/sdk/payment-wallet.test.mjs

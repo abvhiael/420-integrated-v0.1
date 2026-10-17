@@ -1,0 +1,35 @@
+name: LIFTd L03.8 Repository Safeguards Level 1
+on:
+  pull_request:
+    paths:
+      - 'rideshare/src/operational-safety.mjs'
+      - 'rideshare/test/operational-safety.test.mjs'
+      - '.github/workflows/liftd-l03-8-level1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: liftd-l03-8-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+jobs:
+  safety-safeguards:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Verify qualified SHA
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify syntax and retained security suite
+        run: |
+          node --check rideshare/src/operational-safety.mjs
+          node --check rideshare/test/operational-safety.test.mjs
+          npm ci --prefix rideshare --ignore-scripts
+          npm test --prefix rideshare

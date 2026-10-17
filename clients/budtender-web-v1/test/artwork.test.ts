@@ -109,7 +109,7 @@ describe("Phase 3.18 canonical layer hierarchy", () => {
   const before=await (await fetch(base+"/api/state")).json();
   const html=await (await fetch(base+"/")).text();
   for(const layer of [names[1],names[2],names[5]]) assert.match(html,new RegExp('data-scene-layer="'+layer+'"'));
-  assert.equal((html.match(/data-scene-layer=/g)||[]).length,6);
+  assert.equal((html.match(/data-scene-layer=/g)||[]).length,30);
   const js=await fetch(base+"/scene-layers.js");
   assert.equal(js.status,200);
   assert.match(js.headers.get("content-type")??"",/javascript/);
@@ -129,7 +129,7 @@ describe("Phase 3.20 Tier 1 playable visual upgrade",()=>{
   assert.equal(data.tiers[1].items.length,7);
   assert.equal(data.tiers[2].items.length,6);
   assert.equal(data.tiers[0].status,"implemented-with-existing-assets");
-  assert.ok(data.tiers.slice(1).every((x:{status:string})=>x.status==="deferred"));
+  assert.ok(data.tiers.slice(1).every((x:{status:string})=>x.status==="integrated"));
   const registry=JSON.parse(await readFile(resolve(process.cwd(),"../../assets/budtender/asset_inventory.json"),"utf8"));
   const approved=new Set(registry.assets.map((x:{path:string})=>x.path));
   for(const tier of data.tiers)for(const item of tier.items)for(const source of item.sources)assert.ok(approved.has(source),source);
@@ -138,7 +138,30 @@ describe("Phase 3.20 Tier 1 playable visual upgrade",()=>{
   const before=await(await fetch(base+"/api/state")).json();
   const page=await(await fetch(base+"/")).text();
   for(const filename of ["display_shelf_full_height","product_flower_jar_medium","prop_pos_register","queue_stanchion_brass","nook_armchair_sage","plant_monstera","sign_menu_main","sign_store_welcome","light_fx_ambient_warm"]){assert.ok(page.includes(filename+".png"),filename);}
-  assert.equal((page.match(/data-scene-layer=/g)||[]).length,16);
+  assert.equal((page.match(/data-scene-layer=/g)||[]).length,30);
+  assert.deepEqual(await(await fetch(base+"/api/state")).json(),before);
+ }));
+});
+
+import {projectSceneVisuals,applySceneVisuals} from "../public/scene-variants.js";
+describe("Phase 3.20 progression and polish",()=>{
+ it("derives visual stock/progression states without mutating input",()=>{
+  const s={store:{products:{a:{stock:0,capacity:10}}},upgrades:{},expansions:{tinyShop:true}};
+  const before=structuredClone(s);assert.deepEqual(projectSceneVisuals(s),{stock:"empty",upgrade:"base",expansion:"starter",polish:"off"});
+  s.store.products.a.stock=9;s.upgrades.counterSpeed={level:1};s.expansions.largerRetailFloor={unlocked:true};
+  assert.deepEqual(projectSceneVisuals(s,true),{stock:"full",upgrade:"premium",expansion:"expanded",polish:"on"});
+  assert.equal(before.store.products.a.stock,0);
+ });
+ it("maps valid variants and rejects malformed metadata before mutation",()=>{
+  const node=(kind,value)=>({hidden:true,getAttribute:(key)=>key==="data-variant-kind"?kind:value});
+  const a=node("stock","empty"),b=node("polish","on");const stage={querySelectorAll:()=>[a,b]};
+  applySceneVisuals(stage,{stock:"empty",polish:"off"});assert.equal(a.hidden,false);assert.equal(b.hidden,true);
+  const invalid=node("stock","forged");assert.throws(()=>applySceneVisuals({querySelectorAll:()=>[a,invalid]},{stock:"full"}));assert.equal(a.hidden,false);
+ });
+ it("serves all tier two and three artwork from allowlisted production assets",async()=>withServer(async base=>{
+  const before=await(await fetch(base+"/api/state")).json();
+  const page=await(await fetch(base+"/")).text();
+  for(const name of ["display_state_empty","display_state_full_stock","display_shelf_corner","merch_upgrade_pedestal","decor_framed_leaf","plant_fern","merch_tower_premium","floor_seam_expansion","prop_clipboard","sign_promo_weekly_deals","light_state_evening","nook_magazines_stack","decor_botanical_wall_print","product_flower_tin_premium"])assert.ok(page.includes(name+".png"));
   assert.deepEqual(await(await fetch(base+"/api/state")).json(),before);
  }));
 });

@@ -86,7 +86,7 @@
     {
       "tier": 2,
       "label": "progression support",
-      "status": "deferred",
+      "status": "integrated",
       "items": [
         {
           "name": "shelf stocking variants",
@@ -136,7 +136,7 @@
     {
       "tier": 3,
       "label": "polish",
-      "status": "deferred",
+      "status": "integrated",
       "items": [
         {
           "name": "secondary props",

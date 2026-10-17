@@ -1,3 +1,4 @@
+import { projectSceneVisuals, applySceneVisuals } from "./scene-variants.js";
 import { applySceneLayerOrder } from "./scene-layers.js";
 const $ = (selector) => document.querySelector(selector);
 const cash = $("#cash");
@@ -152,6 +153,7 @@ const render = () => {
   const traffic = state.customers.demandProfile === "fourTwentyRush" ? "4:20 rush" : "normal traffic";
   $("#status-line").textContent = state.customers.queue.length + " waiting · " + traffic;
   demandProfile.value = state.customers.demandProfile;
+  applySceneVisuals(document.querySelector('.shop-stage'), projectSceneVisuals(state, Boolean($('#scene-polish')?.checked)));
   renderInventory();
   renderQueue();
   renderUpgrades();
@@ -159,6 +161,7 @@ const render = () => {
   renderExpansions();
 };
 
+$("#scene-polish").addEventListener("change",()=>{if(state)applySceneVisuals(document.querySelector(".shop-stage"),projectSceneVisuals(state,Boolean($("#scene-polish").checked)));});
 $("#tick").addEventListener("click", () => mutate(() => request("/api/tick", { method: "POST", body: "{}" })));
 $("#add-customer").addEventListener("click", () => { customerForm.hidden = !customerForm.hidden; });
 customerForm.addEventListener("submit", (event) => {

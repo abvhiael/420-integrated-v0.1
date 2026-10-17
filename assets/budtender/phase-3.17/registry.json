@@ -1,0 +1,342 @@
+{
+  "phase": "3.17",
+  "expected_count": 48,
+  "assets": [
+    {
+      "group": "A",
+      "name": "budtender_store_open.png",
+      "source": "assets/budtender/phase-3.17/budtender_store_open.png",
+      "bytes": 2293967,
+      "git_blob_sha": "69dd33c4b1d0f95189c9bb8c0ff56daa350a3698"
+    },
+    {
+      "group": "A",
+      "name": "budtender_store_closed.png",
+      "source": "assets/budtender/phase-3.17/budtender_store_closed.png",
+      "bytes": 1746501,
+      "git_blob_sha": "bd2161c39433034320ff2d4feff415b116efe377"
+    },
+    {
+      "group": "A",
+      "name": "budtender_store_opening.png",
+      "source": "assets/budtender/phase-3.17/budtender_store_opening.png",
+      "bytes": 1707238,
+      "git_blob_sha": "9da8f4819ba67566a17d0cc68c0b9801c814293c"
+    },
+    {
+      "group": "A",
+      "name": "budtender_store_closing.png",
+      "source": "assets/budtender/phase-3.17/budtender_store_closing.png",
+      "bytes": 1952058,
+      "git_blob_sha": "ce2ff76416745a1139332345a4634145939efaec"
+    },
+    {
+      "group": "A",
+      "name": "budtender_store_empty.png",
+      "source": "assets/budtender/phase-3.17/budtender_store_empty.png",
+      "bytes": 1831971,
+      "git_blob_sha": "5a3be0e69145be99aba64bdbce0c75026c5d193c"
+    },
+    {
+      "group": "A",
+      "name": "budtender_store_quiet.png",
+      "source": "assets/budtender/phase-3.17/budtender_store_quiet.png",
+      "bytes": 1741221,
+      "git_blob_sha": "4177544f0a559dbea109a9fec68853fd6c8d93b0"
+    },
+    {
+      "group": "A",
+      "name": "budtender_store_normal_traffic.png",
+      "source": "assets/budtender/phase-3.17/budtender_store_normal_traffic.png",
+      "bytes": 1695712,
+      "git_blob_sha": "ad9cb03959e8d34f91fa9706b225133da4c7baef"
+    },
+    {
+      "group": "A",
+      "name": "budtender_store_busy.png",
+      "source": "assets/budtender/phase-3.17/budtender_store_busy.png",
+      "bytes": 1927812,
+      "git_blob_sha": "727edb228eede2aaf02777a2095f051f876bab2c"
+    },
+    {
+      "group": "A",
+      "name": "budtender_store_rush_hour.png",
+      "source": "assets/budtender/phase-3.17/budtender_store_rush_hour.png",
+      "bytes": 1651832,
+      "git_blob_sha": "86b087261282882a0d5a004c07b5bb65e99c5b4d"
+    },
+    {
+      "group": "A",
+      "name": "budtender_store_queue_overflow.png",
+      "source": "assets/budtender/phase-3.17/budtender_store_queue_overflow.png",
+      "bytes": 1765652,
+      "git_blob_sha": "e3cf9c7a75917b13b4efe71ab04a1a052faa4cbf"
+    },
+    {
+      "group": "A",
+      "name": "budtender_store_restocking.png",
+      "source": "assets/budtender/phase-3.17/budtender_store_restocking.png",
+      "bytes": 132881,
+      "git_blob_sha": "1007c89a0a5bd69555fb0ee6c3345283ea64dc74"
+    },
+    {
+      "group": "A",
+      "name": "budtender_store_low_stock.png",
+      "source": "assets/budtender/phase-3.17/budtender_store_low_stock.png",
+      "bytes": 128527,
+      "git_blob_sha": "06a04d0af7e0899d666766d9aec520c902a4caff"
+    },
+    {
+      "group": "A",
+      "name": "budtender_store_fully_stocked.png",
+      "source": "assets/budtender/phase-3.17/budtender_store_fully_stocked.png",
+      "bytes": 150121,
+      "git_blob_sha": "3d716f1cd3c44e58e45c8c33d1f76fd98f59d7d9"
+    },
+    {
+      "group": "A",
+      "name": "budtender_store_sold_out.png",
+      "source": "assets/budtender/phase-3.17/budtender_store_sold_out.png",
+      "bytes": 138049,
+      "git_blob_sha": "3025333ec29a11027214e80f706b0359a817db6a"
+    },
+    {
+      "group": "A",
+      "name": "budtender_store_premium_merchandising.png",
+      "source": "assets/budtender/phase-3.17/budtender_store_premium_merchandising.png",
+      "bytes": 148940,
+      "git_blob_sha": "d50824b7705e3980662e16c36e21f14f0d78e714"
+    },
+    {
+      "group": "A",
+      "name": "budtender_store_maintenance.png",
+      "source": "assets/budtender/phase-3.17/budtender_store_maintenance.png",
+      "bytes": 146464,
+      "git_blob_sha": "d4318eacc218ee585babfbe97c9c93833c55ce94"
+    },
+    {
+      "group": "B",
+      "name": "budtender_store_morning.png",
+      "source": "assets/budtender/phase-3.17/budtender_store_morning.png",
+      "bytes": 119712,
+      "git_blob_sha": "06025126d0e075b60928d95b21e5fdd3fd1a9437"
+    },
+    {
+      "group": "B",
+      "name": "budtender_store_midday.png",
+      "source": "assets/budtender/phase-3.17/budtender_store_midday.png",
+      "bytes": 121805,
+      "git_blob_sha": "9310ec9d36f8bfccef48949930bb45cf82d36f62"
+    },
+    {
+      "group": "B",
+      "name": "budtender_store_afternoon.png",
+      "source": "assets/budtender/phase-3.17/budtender_store_afternoon.png",
+      "bytes": 119522,
+      "git_blob_sha": "23dc9e40161224de98427db55830f3cb6e9dd749"
+    },
+    {
+      "group": "B",
+      "name": "budtender_store_golden_hour.png",
+      "source": "assets/budtender/phase-3.17/budtender_store_golden_hour.png",
+      "bytes": 118179,
+      "git_blob_sha": "c480fb717affd0ab0f71b09714482e3ce0bbc6e8"
+    },
+    {
+      "group": "B",
+      "name": "budtender_store_evening.png",
+      "source": "assets/budtender/phase-3.17/budtender_store_evening.png",
+      "bytes": 119978,
+      "git_blob_sha": "3da93ca20feda541e2ed0ec4726265d3ca324b94"
+    },
+    {
+      "group": "B",
+      "name": "budtender_store_nighttime.png",
+      "source": "assets/budtender/phase-3.17/budtender_store_nighttime.png",
+      "bytes": 116120,
+      "git_blob_sha": "1becb2842f8ee1bbee26deee45b01d49ceefaa01"
+    },
+    {
+      "group": "B",
+      "name": "budtender_store_lights_off.png",
+      "source": "assets/budtender/phase-3.17/budtender_store_lights_off.png",
+      "bytes": 89118,
+      "git_blob_sha": "3e9cae2344e168b62dcaa5f6d847167ee649827d"
+    },
+    {
+      "group": "B",
+      "name": "budtender_store_display_lighting.png",
+      "source": "assets/budtender/phase-3.17/budtender_store_display_lighting.png",
+      "bytes": 119477,
+      "git_blob_sha": "d68dce4db5afac4840d34a178ac816610d9de2ec"
+    },
+    {
+      "group": "B",
+      "name": "budtender_store_soft_ambient.png",
+      "source": "assets/budtender/phase-3.17/budtender_store_soft_ambient.png",
+      "bytes": 119509,
+      "git_blob_sha": "74bcdfa1cb1c747f3c5795c76998ec43142a52a2"
+    },
+    {
+      "group": "B",
+      "name": "budtender_store_bright_retail.png",
+      "source": "assets/budtender/phase-3.17/budtender_store_bright_retail.png",
+      "bytes": 125036,
+      "git_blob_sha": "0df9944895acfa2c289c92fc2197ed26fe915329"
+    },
+    {
+      "group": "B",
+      "name": "budtender_store_overcast.png",
+      "source": "assets/budtender/phase-3.17/budtender_store_overcast.png",
+      "bytes": 119598,
+      "git_blob_sha": "62bd3faf9375ebbcddf117e7f2fc59997ca65ff1"
+    },
+    {
+      "group": "B",
+      "name": "budtender_store_rain.png",
+      "source": "assets/budtender/phase-3.17/budtender_store_rain.png",
+      "bytes": 118301,
+      "git_blob_sha": "c81fbac0abc26304a599e61f4dd39c73ec24358b"
+    },
+    {
+      "group": "B",
+      "name": "budtender_store_snow.png",
+      "source": "assets/budtender/phase-3.17/budtender_store_snow.png",
+      "bytes": 128093,
+      "git_blob_sha": "ee85d6a99ff5ca2fe07967d4b53f07b767b7c1f5"
+    },
+    {
+      "group": "B",
+      "name": "budtender_store_autumn.png",
+      "source": "assets/budtender/phase-3.17/budtender_store_autumn.png",
+      "bytes": 126032,
+      "git_blob_sha": "99a84215790d99366e14245ac5606495a1a1fdc1"
+    },
+    {
+      "group": "B",
+      "name": "budtender_store_winter_warmth.png",
+      "source": "assets/budtender/phase-3.17/budtender_store_winter_warmth.png",
+      "bytes": 128106,
+      "git_blob_sha": "e5ff2f811b4d4333e58055e8d8f13da2aa4ed20e"
+    },
+    {
+      "group": "B",
+      "name": "budtender_store_special_event_illumination.png",
+      "source": "assets/budtender/phase-3.17/budtender_store_special_event_illumination.png",
+      "bytes": 132975,
+      "git_blob_sha": "9d39f2b2ae53d4f3c150549222dbbcd7254f2328"
+    },
+    {
+      "group": "C",
+      "name": "budtender_store_spotless.png",
+      "source": "assets/budtender/phase-3.17/budtender_store_spotless.png",
+      "bytes": 133649,
+      "git_blob_sha": "7fdc29c97644a50e7d269952a665da2097f73217"
+    },
+    {
+      "group": "C",
+      "name": "budtender_store_normal_wear.png",
+      "source": "assets/budtender/phase-3.17/budtender_store_normal_wear.png",
+      "bytes": 135041,
+      "git_blob_sha": "36e1d34cd1ff73fe3dfd0bc139aede5496373fdf"
+    },
+    {
+      "group": "C",
+      "name": "budtender_store_dirty_floor.png",
+      "source": "assets/budtender/phase-3.17/budtender_store_dirty_floor.png",
+      "bytes": 142852,
+      "git_blob_sha": "8b50de9f0facfdddb540c007c6cf96caf26dd4b1"
+    },
+    {
+      "group": "C",
+      "name": "budtender_store_overflowing_bins.png",
+      "source": "assets/budtender/phase-3.17/budtender_store_overflowing_bins.png",
+      "bytes": 135474,
+      "git_blob_sha": "a244ea644e7505b82ab46aa0a92a57bf42318673"
+    },
+    {
+      "group": "C",
+      "name": "budtender_store_damaged_furniture.png",
+      "source": "assets/budtender/phase-3.17/budtender_store_damaged_furniture.png",
+      "bytes": 134447,
+      "git_blob_sha": "504fb3ad7437bd1db83ada276a5221f2a1045023"
+    },
+    {
+      "group": "C",
+      "name": "budtender_store_equipment_fault.png",
+      "source": "assets/budtender/phase-3.17/budtender_store_equipment_fault.png",
+      "bytes": 137333,
+      "git_blob_sha": "9d32745b499b914da8f2aee570dda777fb41a9e9"
+    },
+    {
+      "group": "C",
+      "name": "budtender_store_security_alert.png",
+      "source": "assets/budtender/phase-3.17/budtender_store_security_alert.png",
+      "bytes": 133638,
+      "git_blob_sha": "81d29139af55eaa33a6a3fb8523110bb72f2871c"
+    },
+    {
+      "group": "C",
+      "name": "budtender_store_repair_in_progress.png",
+      "source": "assets/budtender/phase-3.17/budtender_store_repair_in_progress.png",
+      "bytes": 141343,
+      "git_blob_sha": "8881c7160472e73050484976b9aaaf7cf42e7fd9"
+    },
+    {
+      "group": "C",
+      "name": "budtender_store_restored_equipment.png",
+      "source": "assets/budtender/phase-3.17/budtender_store_restored_equipment.png",
+      "bytes": 137423,
+      "git_blob_sha": "f59891f949395d49b73c096be575326303ba4a12"
+    },
+    {
+      "group": "C",
+      "name": "budtender_store_renovation.png",
+      "source": "assets/budtender/phase-3.17/budtender_store_renovation.png",
+      "bytes": 133922,
+      "git_blob_sha": "3982eb8ba9b4a9946d222054c3826faff779042d"
+    },
+    {
+      "group": "C",
+      "name": "budtender_store_construction_barriers.png",
+      "source": "assets/budtender/phase-3.17/budtender_store_construction_barriers.png",
+      "bytes": 134752,
+      "git_blob_sha": "cd5b0e03a5e14722b9a800596ca7be37381ad4ec"
+    },
+    {
+      "group": "C",
+      "name": "budtender_store_newly_unlocked_room.png",
+      "source": "assets/budtender/phase-3.17/budtender_store_newly_unlocked_room.png",
+      "bytes": 128924,
+      "git_blob_sha": "a12e7a9ded40b5b2fae6fc1ca6fad58e7a23fd0c"
+    },
+    {
+      "group": "C",
+      "name": "budtender_store_premium_upgrade.png",
+      "source": "assets/budtender/phase-3.17/budtender_store_premium_upgrade.png",
+      "bytes": 148933,
+      "git_blob_sha": "bfac305e2a7f9507767951ba2dd4c121655959c1"
+    },
+    {
+      "group": "C",
+      "name": "budtender_store_seasonal_decoration.png",
+      "source": "assets/budtender/phase-3.17/budtender_store_seasonal_decoration.png",
+      "bytes": 151128,
+      "git_blob_sha": "1b3a1646cc20a20f6d5933dbe459fb65d6999ca4"
+    },
+    {
+      "group": "C",
+      "name": "budtender_store_inspection_ready.png",
+      "source": "assets/budtender/phase-3.17/budtender_store_inspection_ready.png",
+      "bytes": 138870,
+      "git_blob_sha": "60113dc90d258f0515645919c6199b603d80f1ec"
+    },
+    {
+      "group": "C",
+      "name": "budtender_store_post_rush_cleanup.png",
+      "source": "assets/budtender/phase-3.17/budtender_store_post_rush_cleanup.png",
+      "bytes": 136907,
+      "git_blob_sha": "19421b786052116779936192eb2069d3413148d6"
+    }
+  ]
+}

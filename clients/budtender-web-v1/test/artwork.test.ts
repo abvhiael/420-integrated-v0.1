@@ -18,10 +18,10 @@ describe("Budtender committed artwork integration", () => {
     const response = await fetch(base + "/assets/budtender/registry.json");
     assert.equal(response.status, 200);
     const registry = await response.json();
-    assert.equal(registry.count, 368);
-    assert.equal(registry.assets.length, 368);
-    assert.equal(new Set(registry.assets.map((a: {url: string}) => a.url)).size, 368);
-    assert.ok(registry.assets.every((a: {url:string}) => /^\/assets\/budtender\/phase-3\.(?:[1-9]|1[0-4])\/[a-z0-9_]+\.png$/.test(a.url)));
+    assert.equal(registry.count, 416);
+    assert.equal(registry.assets.length, 416);
+    assert.equal(new Set(registry.assets.map((a: {url: string}) => a.url)).size, 416);
+    assert.ok(registry.assets.every((a: {url:string}) => /^\/assets\/budtender\/phase-3\.(?:[1-9]|1[0-4]|17)\/[a-z0-9_]+\.png$/.test(a.url)));
   }));
 
   it("serves registered PNG bytes, including transparent cutout and scenery", async () => withServer(async base => {
@@ -54,4 +54,28 @@ describe("Budtender committed artwork integration", () => {
     const after = await (await fetch(base + "/api/state")).json();
     assert.deepEqual(after, before);
   }));
+});
+
+describe("Phase 3.17 Level 1 artwork integration",()=>{
+ it("serves 48 registered assets without gameplay mutations", async()=>withServer(async base=>{
+  const before=await (await fetch(base+"/api/state")).json();
+  const response=await fetch(base+"/assets/budtender/registry.json");
+  assert.equal(response.status,200);
+  const registry=await response.json();
+  assert.equal(registry.count,416);
+  const items=registry.assets.filter((a:{url:string})=>a.url.startsWith("/assets/budtender/phase-3.17/"));
+  assert.equal(items.length,48);
+  assert.equal(new Set(items.map((a:{url:string})=>a.url)).size,48);
+  for(const a of items){
+   assert.match(a.url,/^\/assets\/budtender\/phase-3\.17\/budtender_store_[a-z0-9_]+\.png$/);
+   assert.match(a.git_blob_sha,/^[0-9a-f]{40}$/);
+   const result=await fetch(base+a.url);
+   assert.equal(result.status,200,a.url);
+   assert.match(result.headers.get("content-type")??"",/^image\/png/);
+   assert.equal((await result.arrayBuffer()).byteLength,a.bytes);
+  }
+  assert.equal((await fetch(base+"/assets/budtender/phase-3.17/not_registered.png")).status,404);
+  assert.equal((await fetch(base+items[0].url,{method:"POST"})).status,405);
+  assert.deepEqual(await (await fetch(base+"/api/state")).json(),before);
+ }));
 });

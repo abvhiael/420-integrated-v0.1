@@ -40,3 +40,21 @@ for(const item of hotspots.assets){
 }
 
 console.log("Phase 3.16: PASS 48 uploaded production files, 6 owner-deleted variants recorded; doorway art identity pending review");
+
+const phase317=JSON.parse(await readFile(resolve(root,"assets/budtender/phase-3.17/registry.json"),"utf8"));
+const expected317={"A":"open closed opening closing empty quiet normal_traffic busy rush_hour queue_overflow restocking low_stock fully_stocked sold_out premium_merchandising maintenance","B":"morning midday afternoon golden_hour evening nighttime lights_off display_lighting soft_ambient bright_retail overcast rain snow autumn winter_warmth special_event_illumination","C":"spotless normal_wear dirty_floor overflowing_bins damaged_furniture equipment_fault security_alert repair_in_progress restored_equipment renovation construction_barriers newly_unlocked_room premium_upgrade seasonal_decoration inspection_ready post_rush_cleanup"};
+if(phase317.expected_count!==48 || phase317.assets?.length!==48) throw Error("3.17 inventory count");
+const seen317=new Set();
+for(const [group,names] of Object.entries(expected317)) {
+ const actual=phase317.assets.filter(a=>a.group===group).map(a=>a.name);
+ if(JSON.stringify(actual)!==JSON.stringify(names.split(" ").map(s=>"budtender_store_"+s+".png"))) throw Error("3.17 sheet mismatch "+group);
+}
+for(const a of phase317.assets){
+ if(!/^budtender_store_[a-z0-9_]+\.png$/.test(a.name) || a.source!=="assets/budtender/phase-3.17/"+a.name || seen317.has(a.name)) throw Error("3.17 unsafe name");
+ seen317.add(a.name);
+ const b=await readFile(resolve(root,a.source));
+ if(b.length!==a.bytes || !b.subarray(0,8).equals(Buffer.from([137,80,78,71,13,10,26,10]))) throw Error("3.17 invalid PNG "+a.name);
+ if(createHash("sha1").update("blob "+b.length+"\0").update(b).digest("hex")!==a.git_blob_sha) throw Error("3.17 blob mismatch "+a.name);
+ if(b.readUInt8(25)!==6 || b.readUInt32BE(16)<256 || b.readUInt32BE(20)<256) throw Error("3.17 RGBA/resolution qualification "+a.name);
+}
+console.log("Phase 3.17: PASS 48 distinct file identities, RGBA PNG validation, and 3 sheets");

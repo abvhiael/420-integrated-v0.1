@@ -1,0 +1,45 @@
+name: LIFTd L03.6 Level 1
+on:
+  pull_request:
+    paths:
+      - 'rideshare/src/deployment-security.mjs'
+      - 'rideshare/test/deployment-security.test.mjs'
+      - 'rideshare/Dockerfile'
+      - '.github/workflows/liftd-l03-6-level1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: liftd-l03-6-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+jobs:
+  deployment-security:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Verify exact implementation SHA
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Locked LIFTd dependencies
+        run: npm ci --prefix rideshare --ignore-scripts
+      - name: Syntax, admission, and retained domain security
+        run: |
+          node --check rideshare/src/deployment-security.mjs
+          node --check rideshare/test/deployment-security.test.mjs
+          npm test --prefix rideshare
+      - name: Package non-root image
+        run: docker build --pull -f rideshare/Dockerfile -t liftd-qualification rideshare
+      - name: Verify fail-closed unadmitted entry point
+        run: |
+          if docker run --rm --network none --read-only --cap-drop ALL --security-opt no-new-privileges liftd-qualification; then
+            echo 'Unadmitted production entry point unexpectedly ran'
+            exit 1
+          fi

@@ -21,7 +21,11 @@ export function createEligibilityAdapter({driverRegistry, vehicleRegistry, trans
       'driverRecordRef', 'driverRevision', 'vehicleRecordRef', 'vehicleRevision', 'driverAccountId',
       'operatorRef', 'approved', 'revoked', 'validUntil']});
   const publicKeys = config => Object.values(config.keys).map(key => createPublicKey(key).export({type: 'spki', format: 'der'}));
-  if (publicKeys(transportAuthority).some(key => [...publicKeys(driverRegistry), ...publicKeys(vehicleRegistry)].some(registryKey => key.equals(registryKey)))) throw new AuthError('SEPARATE_TRANSPORT_AUTHORITY_REQUIRED', 503);
+  const driverKeys = publicKeys(driverRegistry), vehicleKeys = publicKeys(vehicleRegistry), transportKeys = publicKeys(transportAuthority);
+  if (transportKeys.some(key => [...driverKeys, ...vehicleKeys].some(other => key.equals(other)))) throw new AuthError('SEPARATE_TRANSPORT_AUTHORITY_REQUIRED', 503);
+  // Driver and vehicle registry records must be independently issued; sharing the
+  // same signing key defeats distinct vehicle/driver revocation authority.
+  if (driverKeys.some(key => vehicleKeys.some(other => key.equals(other)))) throw new AuthError('SEPARATE_REGISTRY_AUTHORITIES_REQUIRED', 503);
   if ([resolveDriver, resolveVehicle, resolveTransport, routeScopeFor].some(fn => typeof fn !== 'function')) throw new AuthError('ELIGIBILITY_AUTHORITY_UNAVAILABLE', 503);
   const adapter = {
     async project(trip, command) {

@@ -80,11 +80,7 @@
         "count": 3
       },
       {
-        "kind": "founder_badge_template",
-        "count": 1
-      },
-      {
-        "kind": "archive_edition_stamp",
+        "kind": "founder_badge_and_archive_stamp_master",
         "count": 1
       }
     ]
@@ -103,5 +99,26 @@
     "render founder seal as transparent layered artwork",
     "use four actual story-specific discoveries per founder"
   ],
-  "roadmap": "docs/highcountry/ORIGINAL-SIXTEEN-221-ASSET-PRODUCTION-ROADMAP.md"
+  "roadmap": "docs/highcountry/ORIGINAL-SIXTEEN-221-ASSET-PRODUCTION-ROADMAP.md",
+  "a01": {
+    "status": "ASSETS_PRODUCED_UNQUALIFIED",
+    "sourceFormat": "SVG",
+    "files": [
+      "assets/highcountry/original-sixteen/a01/seed-packet-master.svg",
+      "assets/highcountry/original-sixteen/a01/region-style-emerald.svg",
+      "assets/highcountry/original-sixteen/a01/region-style-prairie.svg",
+      "assets/highcountry/original-sixteen/a01/region-style-mesa.svg",
+      "assets/highcountry/original-sixteen/a01/archive-screen-background.svg",
+      "assets/highcountry/original-sixteen/a01/fragment-card-template.svg",
+      "assets/highcountry/original-sixteen/a01/discovery-locked-overlay.svg",
+      "assets/highcountry/original-sixteen/a01/discovery-unlocked-overlay.svg",
+      "assets/highcountry/original-sixteen/a01/founder-master-set-display.svg",
+      "assets/highcountry/original-sixteen/a01/collection-case-emerald.svg",
+      "assets/highcountry/original-sixteen/a01/collection-case-prairie.svg",
+      "assets/highcountry/original-sixteen/a01/collection-case-mesa.svg",
+      "assets/highcountry/original-sixteen/a01/founder-badge-and-archive-stamp-master.svg"
+    ],
+    "count": 13,
+    "export": "SVG master; rasterize to PNG/WebP as needed; transparent derived layers where applicable"
+  }
 }

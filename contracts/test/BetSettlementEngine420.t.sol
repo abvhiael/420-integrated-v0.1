@@ -18,6 +18,7 @@ import "../src/bet/WithdrawalQueue420.sol";
 interface VmBetSettlement420 {
     function prank(address) external;
     function expectRevert(bytes4) external;
+    function warp(uint256) external;
 }
 
 contract MockCapabilityRegistryBetSettlement420 is ICapabilityRegistry420 {
@@ -208,6 +209,60 @@ contract BetSettlementEngine420Test {
         s.registry.recordAccepted(wager);
         _allow(s, SETTLER, BetIds420.ACTION_SETTLE, s.auth.scopeForWager(wagerId));
         _allow(s, address(s.engine), BetIds420.ACTION_WAGER_SETTLE_RECORD, s.auth.scopeForWager(wagerId));
+    }
+
+    // Funded Video Poker expiry path: real vault, registry, risk and fee adapters.
+    function testVideoPokerFundedExpiryRefundAndConservation() public {
+        Suite memory s = _deploy();
+        bytes32 wagerId = keccak256("video-poker/funded-expiry");
+        uint256 stake = 0.1 ether;
+        uint256 maxGross = 80 ether;
+        bytes32 game = keccak256("420BET.GAME.VIDEO_POKER");
+        bytes32 version = keccak256("420BET.GAME.VIDEO_POKER.V1");
+        bytes32 rules = keccak256("420BET.RULESET.VIDEO_POKER.V1");
+        bytes32 paytable = keccak256("420BET.PAYTABLE.VIDEO_POKER.JACKS_OR_BETTER.V1");
+        bytes32 paramsHash = keccak256(abi.encode(keccak256("420.BET.VIDEO_POKER.V1.PARAMS"), version, rules, paytable, uint8(5)));
+        _allow(s, address(this), BetIds420.ACTION_ECONOMICS_BIND, s.auth.scopeForGameVersion(version));
+        _allow(s, address(s.engine), BetIds420.ACTION_ECONOMICS_FINALIZE, s.auth.scopeForGameVersion(version));
+        _allow(s, ADMIN, BetIds420.ACTION_ECONOMICS_CONFIGURE, s.auth.scopeForGameVersion(version));
+        vm.prank(ADMIN);
+        s.economics.configureFeeSchedule(BetEconomics420.FeeSchedule({
+            scheduleId: keccak256("video-poker/fees"), gameVersionId: version,
+            protocolFeeBps: 0, operatorFeeBps: 0, protocolRecipient: address(0),
+            manifestHash: keccak256("video-poker/fees-manifest"), exists: false
+        }));
+        s.token.mint(PLAYER, stake);
+        vm.prank(PLAYER);
+        s.token.approve(address(s.vault), stake);
+        s.economics.bindWager(wagerId, version, OPERATOR, stake);
+        s.vault.escrowWagerStakeToken(wagerId, PLAYER, stake);
+        s.risk.reserveExposure(wagerId, VAULT, GAME_V1, RISK, stake, maxGross, keccak256("video-poker"));
+        uint64 deadline = uint64(block.timestamp + 1 hours);
+        s.registry.recordAccepted(BetTypes420.Wager({
+            wagerId: wagerId, player: PLAYER, operatorId: OPERATOR, gameId: game,
+            gameVersionId: version, asset: address(s.token), stake: stake,
+            maxGrossPayout: maxGross, paramsHash: paramsHash, vaultId: VAULT,
+            randomnessProfileId: RANDOMNESS, riskProfileId: RISK,
+            settlementProfileId: SETTLEMENT, accessPolicyId: ACCESS, rulesetId: rules,
+            acceptedAt: uint64(block.timestamp), deadline: deadline, status: BetTypes420.WagerStatus.NONE
+        }));
+        _allow(s, address(s.engine), BetIds420.ACTION_WAGER_SETTLE_RECORD, s.auth.scopeForWager(wagerId));
+        require(s.vault.wagerStakeEscrow(wagerId) == stake, "escrow not funded");
+        require(s.accounting.getVault(VAULT).activeReservedLiability == maxGross - stake, "reserve absent");
+        vm.expectRevert(SettlementEngine420.WagerNotExpired.selector);
+        s.engine.voidExpired(wagerId);
+        vm.warp(deadline);
+        s.engine.voidExpired(wagerId);
+        require(s.token.balanceOf(PLAYER) == stake, "stake not refunded");
+        require(s.token.balanceOf(address(s.vault)) == 1_000 ether, "vault custody changed");
+        require(s.accounting.getVault(VAULT).totalAssets == 1_000 ether, "bankroll equity changed");
+        require(s.accounting.getVault(VAULT).activeReservedLiability == 0, "reserve not released");
+        require(s.vault.wagerStakeEscrow(wagerId) == 0, "escrow remains");
+        require(s.registry.getWager(wagerId).status == BetTypes420.WagerStatus.VOID, "not void");
+        require(s.economics.getWagerFee(wagerId).finalized, "fee not finalized");
+        require(!s.economics.getWagerFee(wagerId).charged, "refund charged fees");
+        s.engine.voidExpired(wagerId);
+        require(s.token.balanceOf(PLAYER) == stake, "double refund");
     }
 
     function testSettlementDefaultDenyPreservesAcceptedWager() public {

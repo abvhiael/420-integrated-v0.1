@@ -31,7 +31,7 @@ export function fixture(pool,pairs,controls={now:100}) {
       grants:role==='driver'?[
         {role,resource:`account:${r.subject}`,actions:['availability.set','offer.read','offer.respond',...(controls.pay?['pay.statement']:[])],expiresAt:clock()+30,revoked:false},
         {role,resource:`trip:${r.sessionId}`,actions:['trip.read','offer.respond','trip.arrive','trip.start','trip.complete','trip.cancel',...(controls.pay?['pay.read']:[])],expiresAt:clock()+30,revoked:false}]:role==='operator'?[
-        {role,resource:`trip:${r.sessionId}`,actions:['trip.assign','trip.expire',...(controls.pay?['pay.reconcile','pay.read']:[])],expiresAt:clock()+30,revoked:false}]:[
+        {role,resource:`trip:${r.sessionId}`,actions:['trip.assign','trip.expire',...(controls.pay?['pay.reconcile','pay.read']:[]),...(controls.economics?['economics.reconcile']:[])],expiresAt:clock()+30,revoked:false}]:[
         {role,resource:`account:${r.subject}`,actions:['trip.create','route.prepare',...(controls.quotes?['quote.create','quote.accept','quote.read']:[])],expiresAt:clock()+30,revoked:false},
         {role,resource:`trip:${r.sessionId}`,actions:['trip.read','trip.cancel',...(controls.pay?['pay.prepare','pay.consent','pay.reconcile','pay.read']:[])],expiresAt:clock()+30,revoked:false}]};
   });

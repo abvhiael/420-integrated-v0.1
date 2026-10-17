@@ -1,0 +1,3264 @@
+{
+  "schema_version": 1,
+  "phase": "3.19",
+  "asset_count": 464,
+  "prefixes": {
+    "env": "env_",
+    "fixture": "fixture_",
+    "prop": "prop_",
+    "plant": "plant_",
+    "sign": "sign_",
+    "light": "light_",
+    "decal": "decal_"
+  },
+  "assets": [
+    {
+      "source": "assets/budtender/phase-3.1/env_starter_back_door.png",
+      "source_sha256": "0a43f6aa16318292a4db8cf8fe72a61c3e21c56c63e51fbd341ad24081662d0b",
+      "bytes": 18438,
+      "category": "env",
+      "export_name": "env_starter_back_door.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.1/env_starter_ceiling_trim.png",
+      "source_sha256": "29cca9c02c23fc2884d34dc48a101c99830ab9654427e128cc9cf02f133e9e50",
+      "bytes": 16571,
+      "category": "env",
+      "export_name": "env_starter_ceiling_trim.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.1/env_starter_floor.png",
+      "source_sha256": "85877b559c71ba993d8cb7119a62515a84847b7e6cd0589ecef7f6725d050a3d",
+      "bytes": 23088,
+      "category": "env",
+      "export_name": "env_starter_floor.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.1/env_starter_storefront_arch_window.png",
+      "source_sha256": "5745f22622351d1d7c63aedc6e1f7180a1f317163f03abe9bdbe15222a299cb4",
+      "bytes": 33979,
+      "category": "env",
+      "export_name": "env_starter_storefront_arch_window.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.1/env_starter_wall_left.png",
+      "source_sha256": "0e5de20178b1a97c1f1f6b0b203d191a63fdaabc7c4aaa797781ae5451a7f62c",
+      "bytes": 25927,
+      "category": "env",
+      "export_name": "env_starter_wall_left.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.1/env_starter_wall_rear.png",
+      "source_sha256": "ead6ec5c9036cc825a79b7ba244b9ad6a9fa5fff8068752a7f8c02a7ec0426a6",
+      "bytes": 43509,
+      "category": "env",
+      "export_name": "env_starter_wall_rear.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.1/env_starter_wall_right.png",
+      "source_sha256": "30641b77ba390efc23a99558a8ffb393e6ad39d89feb5fbe1891567bb71a7a4a",
+      "bytes": 26714,
+      "category": "env",
+      "export_name": "env_starter_wall_right.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.2/counter_bagging_area.png",
+      "source_sha256": "ab6a4e427559201fe08db1d8c699021a60d91f289b2b596aca8b6586ca2c6455",
+      "bytes": 18847,
+      "category": "fixture",
+      "export_name": "fixture_counter_bagging_area.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.2/counter_glass_display_front.png",
+      "source_sha256": "b00948eb4085cd634349ec9e24e7e842d6cab9de903f4a31acf27db9a7753c9f",
+      "bytes": 28513,
+      "category": "fixture",
+      "export_name": "fixture_counter_glass_display_front.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.2/counter_left_end_cap.png",
+      "source_sha256": "c127c67df693bc868b801deac5115b8119069a96faa1560de7256e010aa3e011",
+      "bytes": 18809,
+      "category": "fixture",
+      "export_name": "fixture_counter_left_end_cap.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.2/counter_lower_storage_cabinets.png",
+      "source_sha256": "561721834fc211d5a28cc37fa8ae7cc31f1f9e2f0655bf38e9c73b8803293a64",
+      "bytes": 26025,
+      "category": "fixture",
+      "export_name": "fixture_counter_lower_storage_cabinets.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.2/counter_main_body.png",
+      "source_sha256": "50a179de0ec136b35fddf638307318648a3ba45e6678b05e32954f56303197cc",
+      "bytes": 20876,
+      "category": "fixture",
+      "export_name": "fixture_counter_main_body.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.2/counter_register_module.png",
+      "source_sha256": "998aac98d60424ea3f96d1ecaa5c02e72f9c5c9f233f68954cfca9b13665dfca",
+      "bytes": 18930,
+      "category": "fixture",
+      "export_name": "fixture_counter_register_module.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.2/counter_right_end_cap.png",
+      "source_sha256": "04fe5227ab9327cb8c681fba78051777c4ad8bf747fef3ab7844c5b8caed8cc7",
+      "bytes": 25474,
+      "category": "fixture",
+      "export_name": "fixture_counter_right_end_cap.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.2/prop_branded_bag.png",
+      "source_sha256": "96b40391f6292f0d7560917ce16bdc380e85f13cd7aeb27ed4aea70cc3a48bb0",
+      "bytes": 10729,
+      "category": "prop",
+      "export_name": "prop_branded_bag.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.2/prop_clipboard.png",
+      "source_sha256": "6a2762e7c52b7ffdc537a01c4ccdf986f83d0785df44a04da2070c7e1fdb1093",
+      "bytes": 10649,
+      "category": "prop",
+      "export_name": "prop_clipboard.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.2/prop_display_jar.png",
+      "source_sha256": "f8c6e4f4b700881a248381f7f353b3bd712f98d4ebc1256fe1f0af15bf30a898",
+      "bytes": 9826,
+      "category": "prop",
+      "export_name": "prop_display_jar.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.2/prop_pos_register.png",
+      "source_sha256": "db5123a9c037e62b54551660e1d71b75f9f264decfbe04dc84d3115fb793d559",
+      "bytes": 13587,
+      "category": "prop",
+      "export_name": "prop_pos_register.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.2/prop_product_cards.png",
+      "source_sha256": "1ae5b917d98373ff3df4dab04416b1ddf68f683c0cf313bf29784dbe7742c8bd",
+      "bytes": 10136,
+      "category": "prop",
+      "export_name": "prop_product_cards.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.2/prop_receipt_printer.png",
+      "source_sha256": "8d43afd93e21b24fb5865662319976166fb1183d6ee093d891343eae22ff44aa",
+      "bytes": 6736,
+      "category": "prop",
+      "export_name": "prop_receipt_printer.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.2/prop_sample_tray.png",
+      "source_sha256": "b8a1487270b5418427177695981c5a07ee88976948322c7c372b04217312d74d",
+      "bytes": 12548,
+      "category": "prop",
+      "export_name": "prop_sample_tray.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.2/prop_staff_stool.png",
+      "source_sha256": "7be89a3dd24d1d0faa27147d3461debf880916d3c341a2e72ceb4051f3ad9ca9",
+      "bytes": 9250,
+      "category": "prop",
+      "export_name": "prop_staff_stool.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.2/prop_stock_box.png",
+      "source_sha256": "9db0d4f69956fcf464e4dc42507fc464cab746afdbc881c5fa164b52541b90a9",
+      "bytes": 10071,
+      "category": "prop",
+      "export_name": "prop_stock_box.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.2/prop_tip_jar.png",
+      "source_sha256": "17b5d0a9960544b32f643a47e9618185145cf4ab322696d89890d9b385edf61f",
+      "bytes": 5630,
+      "category": "prop",
+      "export_name": "prop_tip_jar.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.3/display_category_concentrates.png",
+      "source_sha256": "75f5d3a5f16e88b1e4f7224452e030fe6ab13a43b5308c9d247aed6bc8781a46",
+      "bytes": 22495,
+      "category": "fixture",
+      "export_name": "fixture_display_category_concentrates.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.3/display_category_edibles.png",
+      "source_sha256": "05828c0da192a64aa266bf48b63b6e7f852da42d99edea2bf34c36d4b97a2083",
+      "bytes": 20965,
+      "category": "fixture",
+      "export_name": "fixture_display_category_edibles.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.3/display_category_flower.png",
+      "source_sha256": "bc90f473047873f01cda30d26824bc50a70fbce091670400706d2efd8744b820",
+      "bytes": 22595,
+      "category": "fixture",
+      "export_name": "fixture_display_category_flower.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.3/display_category_prerolls.png",
+      "source_sha256": "8a1b1391a6a17475944b69429d157bc0646fd68b1e9d965eae4c6b46a7731341",
+      "bytes": 19098,
+      "category": "fixture",
+      "export_name": "fixture_display_category_prerolls.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.3/display_category_tinctures.png",
+      "source_sha256": "277d3de8ad605f5a1c702e2915c4f2bc0d620872a2e95fb11c9dc96271a8b68b",
+      "bytes": 23411,
+      "category": "fixture",
+      "export_name": "fixture_display_category_tinctures.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.3/display_category_vapes.png",
+      "source_sha256": "277d3de8ad605f5a1c702e2915c4f2bc0d620872a2e95fb11c9dc96271a8b68b",
+      "bytes": 23411,
+      "category": "fixture",
+      "export_name": "fixture_display_category_vapes.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.3/display_shelf_corner.png",
+      "source_sha256": "f2473c0ede56850c4f7aafe5f31adb834bc4a693112753bad739c4645496af2f",
+      "bytes": 23942,
+      "category": "fixture",
+      "export_name": "fixture_display_shelf_corner.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.3/display_shelf_countertop.png",
+      "source_sha256": "3c049fb77645f1c9e9efb726ad07b2e0cb4ebdaa716206880fbb06fb4ced6660",
+      "bytes": 29548,
+      "category": "fixture",
+      "export_name": "fixture_display_shelf_countertop.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.3/display_shelf_double.png",
+      "source_sha256": "d89c4832b73a41f4326099bfb1e1955c6e9a6e3b8067398549a6843fe36ff6b0",
+      "bytes": 23910,
+      "category": "fixture",
+      "export_name": "fixture_display_shelf_double.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.3/display_shelf_full_height.png",
+      "source_sha256": "80dff72fc39194d3fec3496e6ee7bfa3365d3fa9d4387f4a868cb9b8b190438e",
+      "bytes": 27180,
+      "category": "fixture",
+      "export_name": "fixture_display_shelf_full_height.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.3/display_shelf_single.png",
+      "source_sha256": "22078de73be91605f4b11ef3860fdce8a07d77279f7bbf2391d7c94ba6d79b99",
+      "bytes": 17795,
+      "category": "fixture",
+      "export_name": "fixture_display_shelf_single.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.3/display_state_empty.png",
+      "source_sha256": "a9965e5d26f50285fe4bbd1d958adcbcdc0080fcf1df306bfa4cec5e90e39529",
+      "bytes": 14771,
+      "category": "fixture",
+      "export_name": "fixture_display_state_empty.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.3/display_state_full_stock.png",
+      "source_sha256": "3467b495834802ff5364de1e9c1e974e9241c3118b1a03cf41c5873fb27c6b6c",
+      "bytes": 25743,
+      "category": "fixture",
+      "export_name": "fixture_display_state_full_stock.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.3/display_state_light_stock.png",
+      "source_sha256": "aa7077d1498fdd4abb25c3c22cd6f5bf4774e087818da1e2f2b075347792fdbd",
+      "bytes": 19218,
+      "category": "fixture",
+      "export_name": "fixture_display_state_light_stock.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.3/display_state_medium_stock.png",
+      "source_sha256": "68c434a92d2b413d573c870e619347019a49301d0213eb4696734d5c9652f1a4",
+      "bytes": 22414,
+      "category": "fixture",
+      "export_name": "fixture_display_state_medium_stock.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.3/display_state_premium.png",
+      "source_sha256": "3467b495834802ff5364de1e9c1e974e9241c3118b1a03cf41c5873fb27c6b6c",
+      "bytes": 25743,
+      "category": "fixture",
+      "export_name": "fixture_display_state_premium.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.4/product_accessory_grinder.png",
+      "source_sha256": "67585d311b85e9fecbbe35ce398cefb08eb6da1536c11dcce73696ec60afa6ad",
+      "bytes": 49505,
+      "category": "prop",
+      "export_name": "prop_product_accessory_grinder.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.4/product_accessory_lighter.png",
+      "source_sha256": "fd84d27b820d56f6ebab46c5c56115503a8e10a3ab95e0c3b46b0e2f9ab99a11",
+      "bytes": 20511,
+      "category": "prop",
+      "export_name": "prop_product_accessory_lighter.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.4/product_accessory_merch.png",
+      "source_sha256": "23e5d44b8fe7cadba3a6e4ae5aab69a1a8fb146011d4fcc900aa779f4a4be74d",
+      "bytes": 51778,
+      "category": "prop",
+      "export_name": "prop_product_accessory_merch.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.4/product_accessory_papers.png",
+      "source_sha256": "9c40772fe073eed83aab9710f5d6b2889b712506b8086dda21a94ce45892a739",
+      "bytes": 47179,
+      "category": "prop",
+      "export_name": "prop_product_accessory_papers.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.4/product_accessory_rolling_tray.png",
+      "source_sha256": "cc1b19a75402a2ce00a8df06156bf48b51141c8a2c98deee7a428fc3dee75c17",
+      "bytes": 86980,
+      "category": "prop",
+      "export_name": "prop_product_accessory_rolling_tray.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.4/product_accessory_storage_jar.png",
+      "source_sha256": "562e2923f3ca38e1e6f011712591fc7e7fd4bb3e46bff734fe3532c797ce8e85",
+      "bytes": 35285,
+      "category": "prop",
+      "export_name": "prop_product_accessory_storage_jar.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.4/product_concentrate_box.png",
+      "source_sha256": "b97efa257039ca888460c3e322ac5a40f2b61702ca4e09317af4673bebec2957",
+      "bytes": 61576,
+      "category": "prop",
+      "export_name": "prop_product_concentrate_box.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.4/product_concentrate_jar.png",
+      "source_sha256": "c9aab37da157aadebbc1da067be5643b8367de3b58fddeb1eb28286b5da536de",
+      "bytes": 38996,
+      "category": "prop",
+      "export_name": "prop_product_concentrate_jar.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.4/product_concentrate_premium.png",
+      "source_sha256": "fd849280f4894e37fadb4f7d0970902b5b2b686309ed97b6df6f69b8a42ecda9",
+      "bytes": 47880,
+      "category": "prop",
+      "export_name": "prop_product_concentrate_premium.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.4/product_edible_baked_goods.png",
+      "source_sha256": "43fcebd7cba9247256e3d19879d5423fb19b95c1d723fea773a3e40932cffa2f",
+      "bytes": 85779,
+      "category": "prop",
+      "export_name": "prop_product_edible_baked_goods.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.4/product_edible_beverage_bottle.png",
+      "source_sha256": "7c83d6960efd8b679709977ab3fb235a54b942c942b2e9ed937b0a13f1cbb35f",
+      "bytes": 37527,
+      "category": "prop",
+      "export_name": "prop_product_edible_beverage_bottle.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.4/product_edible_beverage_can.png",
+      "source_sha256": "67f07987b2ed1c6790616a112b75ef5d663f5cd66d281d334a11376b38cadc1c",
+      "bytes": 40709,
+      "category": "prop",
+      "export_name": "prop_product_edible_beverage_can.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.4/product_edible_chocolate_bar.png",
+      "source_sha256": "d79e814aa44cacb42da3fa0b28fe9578cb611a3cf4f7f57565ecaabfaf906c6d",
+      "bytes": 53393,
+      "category": "prop",
+      "export_name": "prop_product_edible_chocolate_bar.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.4/product_edible_gummies_jar.png",
+      "source_sha256": "062b5a4d54ceabdd9df5f5a86eaac926daaa986c3bf4f2827d0e390ff018f65a",
+      "bytes": 60977,
+      "category": "prop",
+      "export_name": "prop_product_edible_gummies_jar.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.4/product_edible_gummies_pouch.png",
+      "source_sha256": "cd9b31096ef2eca5fedd7b7e461c877eb7c17f69dea16ed7c19ce0d1d2d4d67b",
+      "bytes": 62709,
+      "category": "prop",
+      "export_name": "prop_product_edible_gummies_pouch.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.4/product_flower_jar_large.png",
+      "source_sha256": "2f0d1988273936ece88e22c14d2505293f040662e704dcf156275ae855d4aad5",
+      "bytes": 70440,
+      "category": "prop",
+      "export_name": "prop_product_flower_jar_large.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.4/product_flower_jar_medium.png",
+      "source_sha256": "8b5c6b564440f8b5e6e457db6f3f8fa153269d5947d107b9ef8c2aad8011ba20",
+      "bytes": 47738,
+      "category": "prop",
+      "export_name": "prop_product_flower_jar_medium.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.4/product_flower_jar_small.png",
+      "source_sha256": "446f4df7382cbd317dad3ccae2a0474fde938dadf03125851bbad354babc3e59",
+      "bytes": 29054,
+      "category": "prop",
+      "export_name": "prop_product_flower_jar_small.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.4/product_flower_pouch.png",
+      "source_sha256": "11632152df60efa1c3d28c4d201ace6d869f77fb2c0bdca2bbd10e47ce9c2397",
+      "bytes": 56657,
+      "category": "prop",
+      "export_name": "prop_product_flower_pouch.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.4/product_flower_sample.png",
+      "source_sha256": "1390348faad1852fe2f0bc58f6b3fd9f26c43e50713553d4727658b2e7063d6f",
+      "bytes": 30718,
+      "category": "prop",
+      "export_name": "prop_product_flower_sample.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.4/product_flower_tin_premium.png",
+      "source_sha256": "1662de302389ad6f84ae07e6bcdbbc51106c32453dd167f6f760ba9044edc26b",
+      "bytes": 55072,
+      "category": "prop",
+      "export_name": "prop_product_flower_tin_premium.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.4/product_preroll_carton.png",
+      "source_sha256": "e3516f9ebfe8f5fb6da067b963805379874a7cd5343415985ce7ca11aa29dc4d",
+      "bytes": 48957,
+      "category": "prop",
+      "export_name": "prop_product_preroll_carton.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.4/product_preroll_case_premium.png",
+      "source_sha256": "6e97c526c20b91b491fb5170af5fa0ed13f5f5ae9722fbd127e35c2858ac7c9e",
+      "bytes": 79522,
+      "category": "prop",
+      "export_name": "prop_product_preroll_case_premium.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.4/product_preroll_display_pack.png",
+      "source_sha256": "ce56d4496186d4ee8db44952619354e7d934779dc22d40015b302380535a14ae",
+      "bytes": 90012,
+      "category": "prop",
+      "export_name": "prop_product_preroll_display_pack.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.4/product_preroll_multipack.png",
+      "source_sha256": "2bf45cf5357678a045cc8cd590449c7cbe8431a34c368b4e19da3cc6ce02b1c3",
+      "bytes": 62135,
+      "category": "prop",
+      "export_name": "prop_product_preroll_multipack.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.4/product_preroll_tube_single.png",
+      "source_sha256": "2d1e144d984420a4a94b939370d797ce199e234e9c0689304536752628439af2",
+      "bytes": 29116,
+      "category": "prop",
+      "export_name": "prop_product_preroll_tube_single.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.4/product_tincture_carton.png",
+      "source_sha256": "1c3f1f4b70b21092918959b49ccfa6f6363b019beeb83dacbb20fce4817f34c8",
+      "bytes": 39601,
+      "category": "prop",
+      "export_name": "prop_product_tincture_carton.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.4/product_tincture_dropper.png",
+      "source_sha256": "a4a5a44fbe295eb76287fcc41b85e0cd23db103304f1901714f2695a796b7370",
+      "bytes": 26872,
+      "category": "prop",
+      "export_name": "prop_product_tincture_dropper.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.4/product_tincture_gift_set.png",
+      "source_sha256": "c7e7e26d9035a7d622aa01621ec677c60796537ab25ab0009fd6e2a656fdc895",
+      "bytes": 81452,
+      "category": "prop",
+      "export_name": "prop_product_tincture_gift_set.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.4/product_vape_carton.png",
+      "source_sha256": "bb410ce7a25e248ce4e1f25bd5e16fdb06ceef26b4a2092a89aadf30e6aba31a",
+      "bytes": 41992,
+      "category": "prop",
+      "export_name": "prop_product_vape_carton.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.4/product_vape_cartridge.png",
+      "source_sha256": "86e3cb03826f2d2e0e90192dded84529099c130bea8ae58937d1197cc3199022",
+      "bytes": 22035,
+      "category": "prop",
+      "export_name": "prop_product_vape_cartridge.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.4/product_vape_disposable.png",
+      "source_sha256": "a839fd6f63c67b53bc92261f2bd01fb4e93f83f4fbdc65e89e7a58ee3d4e923a",
+      "bytes": 20778,
+      "category": "prop",
+      "export_name": "prop_product_vape_disposable.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.4/product_vape_kit_premium.png",
+      "source_sha256": "ee8398cd123aec58a9c3c04d7ae17e33c633dd058a2e7f1bbfb1db1910ebf0a1",
+      "bytes": 69243,
+      "category": "prop",
+      "export_name": "prop_product_vape_kit_premium.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.4/product_vape_pen.png",
+      "source_sha256": "608575868912c5994a22ad6c67942e78778e497374d551c356296ff9c4069993",
+      "bytes": 17907,
+      "category": "prop",
+      "export_name": "prop_product_vape_pen.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.5/sign_info_age_verification.png",
+      "source_sha256": "ef963f0230477adf7d838d6e7d902b3e27e885753f59863fc8bdee7331ab8f37",
+      "bytes": 83751,
+      "category": "sign",
+      "export_name": "sign_info_age_verification.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.5/sign_info_responsible_use.png",
+      "source_sha256": "b03aed7b239d0df4ebe552846e91d9b6a3a29f24d734963c4335b8af153b7ccd",
+      "bytes": 83903,
+      "category": "sign",
+      "export_name": "sign_info_responsible_use.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.5/sign_info_store_hours.png",
+      "source_sha256": "8de4e90d99dffd93efe3baf23676b14038d72b9e384ba3844261093584609a86",
+      "bytes": 80883,
+      "category": "sign",
+      "export_name": "sign_info_store_hours.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.5/sign_menu_concentrates.png",
+      "source_sha256": "e0c2540cf22ef9f702395529cc9ea7d92721fa599d63f282141c135bf3a5a5b6",
+      "bytes": 92362,
+      "category": "sign",
+      "export_name": "sign_menu_concentrates.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.5/sign_menu_edibles.png",
+      "source_sha256": "5d992db97b79d317168cc37134eb7b16922842537a3740407a2804247a7b939e",
+      "bytes": 89703,
+      "category": "sign",
+      "export_name": "sign_menu_edibles.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.5/sign_menu_flower.png",
+      "source_sha256": "486214abf16a3a2c8e8c2971a839822e3ae8c9046861a39a90f22fbb5e4946df",
+      "bytes": 94787,
+      "category": "sign",
+      "export_name": "sign_menu_flower.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.5/sign_menu_main.png",
+      "source_sha256": "f17b6f1060f76eb048712146e327fa08ace3d9419587614f497eb4b3aa60375c",
+      "bytes": 165746,
+      "category": "sign",
+      "export_name": "sign_menu_main.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.5/sign_menu_prerolls.png",
+      "source_sha256": "3897f52af9f6359647668a4f0aa52b72b5f5d5e686a54d588de867e5146d240d",
+      "bytes": 91208,
+      "category": "sign",
+      "export_name": "sign_menu_prerolls.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.5/sign_menu_vapes.png",
+      "source_sha256": "bbeb0139cd830397f75b44036999bc26247a8be699c3bb0c714b16ed080a5971",
+      "bytes": 92303,
+      "category": "sign",
+      "export_name": "sign_menu_vapes.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.5/sign_product_category.png",
+      "source_sha256": "0a254f4b0982e9700d5e0fa00e48b1ecc179fd54942870242bd3f3916e9e9c3b",
+      "bytes": 55199,
+      "category": "sign",
+      "export_name": "sign_product_category.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.5/sign_product_new_arrival.png",
+      "source_sha256": "ebb6458eff57594157bbb66c2361f53ec552ec6c90f4c16269b8aada235a7b6a",
+      "bytes": 75240,
+      "category": "sign",
+      "export_name": "sign_product_new_arrival.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.5/sign_product_premium.png",
+      "source_sha256": "2a46b6fb3547bdc9e35de7b53cf2c9316e5b06d2beeab7b80086847b1a550215",
+      "bytes": 68731,
+      "category": "sign",
+      "export_name": "sign_product_premium.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.5/sign_product_price.png",
+      "source_sha256": "f7084094cd7694f668d16fa69eb12bcc6c38e7d74b5e08a8f7bd07ace2c497ae",
+      "bytes": 55968,
+      "category": "sign",
+      "export_name": "sign_product_price.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.5/sign_product_sale.png",
+      "source_sha256": "4126e034b8ce117f6e4a117605351d7126810eb3420604978da63392db857675",
+      "bytes": 75243,
+      "category": "sign",
+      "export_name": "sign_product_sale.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.5/sign_product_sold_out.png",
+      "source_sha256": "db63cc4a07819963c51ad6b9bab04d0179539e203411854bebd3320908dcc1b6",
+      "bytes": 61466,
+      "category": "sign",
+      "export_name": "sign_product_sold_out.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.5/sign_product_staff_pick.png",
+      "source_sha256": "2d9a0df7209007b17db31d7e07b7fc2da88c6fade3c66a81d82d634b3c1442a0",
+      "bytes": 78585,
+      "category": "sign",
+      "export_name": "sign_product_staff_pick.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.5/sign_promo_daily_specials.png",
+      "source_sha256": "f42e18f1deaa28e83bce3b07e1978036f67299a52e1574448d881d4ed7f1f558",
+      "bytes": 93269,
+      "category": "sign",
+      "export_name": "sign_promo_daily_specials.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.5/sign_promo_loyalty.png",
+      "source_sha256": "f4b7dffc13c3eaad4f286a803f71ea6dca46bc08819d719f18f91c5b60cecf82",
+      "bytes": 81827,
+      "category": "sign",
+      "export_name": "sign_promo_loyalty.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.5/sign_promo_weekly_deals.png",
+      "source_sha256": "93d37ef18dcc1069cc2a8b4a980ad67f3a8008359785ca3e24946c55fe7e7dcf",
+      "bytes": 84025,
+      "category": "sign",
+      "export_name": "sign_promo_weekly_deals.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.5/sign_store_checkout.png",
+      "source_sha256": "6c244987e83e27a858433d71c5f3b1e4e0288b4f7f10f70a1759898c43a74602",
+      "bytes": 73493,
+      "category": "sign",
+      "export_name": "sign_store_checkout.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.5/sign_store_open_closed.png",
+      "source_sha256": "9a3b42e36f7f6460ea76f83a0ff141e0567733f2e52dce6d80aec4c311f99956",
+      "bytes": 61489,
+      "category": "sign",
+      "export_name": "sign_store_open_closed.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.5/sign_store_pickup.png",
+      "source_sha256": "2a0c7aaaa065b1ddc37adccf03f3248f1db28e524e2460a09e7e7aa0397e935e",
+      "bytes": 72296,
+      "category": "sign",
+      "export_name": "sign_store_pickup.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.5/sign_store_queue.png",
+      "source_sha256": "3f8d5507d51688fd46eabe3e19e027996514afebf1eca85c789736b2c3a65019",
+      "bytes": 50595,
+      "category": "sign",
+      "export_name": "sign_store_queue.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.5/sign_store_staff_only.png",
+      "source_sha256": "2c581e351bcbc125cf9a4d99c060f7cec91b2bfd38a3edbc956f9ae9a7e2668c",
+      "bytes": 43538,
+      "category": "sign",
+      "export_name": "sign_store_staff_only.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.5/sign_store_storage.png",
+      "source_sha256": "82d8e5a89546fff4e7820a6fe960d8ba9ad2a62c82620d966b62029690b2f8bb",
+      "bytes": 45793,
+      "category": "sign",
+      "export_name": "sign_store_storage.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.5/sign_store_welcome.png",
+      "source_sha256": "0241b36d38d1450fdea35d7aaa12176f44663e5e3b2f3e94c6e66a26c4771690",
+      "bytes": 78592,
+      "category": "sign",
+      "export_name": "sign_store_welcome.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.6/light_ceiling_recessed.png",
+      "source_sha256": "19c706edfafcdca7730cdf8f8834596ae6c05a7a127729afaa71518fddc1acc8",
+      "bytes": 95488,
+      "category": "light",
+      "export_name": "light_ceiling_recessed.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.6/light_ceiling_track.png",
+      "source_sha256": "8e679c0a1207d7f8b6c288729c5137541bb920bd2aac8f79f9452484c9b2cb9c",
+      "bytes": 182009,
+      "category": "light",
+      "export_name": "light_ceiling_track.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.6/light_counter_task.png",
+      "source_sha256": "927a2a61b3063a3b3e5e38d4491f323a7cc0e0c3ef9a834db8fc85c1e293a8c8",
+      "bytes": 148000,
+      "category": "light",
+      "export_name": "light_counter_task.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.6/light_fx_ambient_warm.png",
+      "source_sha256": "997e12aa19ae48c5b3ad2ad0b3dfd510a81b7cac142b81fcfbda0b49e4aefe5f",
+      "bytes": 177989,
+      "category": "light",
+      "export_name": "light_fx_ambient_warm.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.6/light_fx_ceiling_pool.png",
+      "source_sha256": "a01139b3600a8545a0837ed043b5542e507c41397e59ae2a176a7970d4dbea94",
+      "bytes": 217680,
+      "category": "light",
+      "export_name": "light_fx_ceiling_pool.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.6/light_fx_contact_shadow.png",
+      "source_sha256": "1cbaa90cad8540799a00cd4bdbfae02f80d02b4408c6cb03a1bdda6c13d8d360",
+      "bytes": 136120,
+      "category": "light",
+      "export_name": "light_fx_contact_shadow.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.6/light_fx_corner_shadow.png",
+      "source_sha256": "2fa31b491c68d70f0a8939d908473c0c3ee47eb7e93d8581f888382f2fa8d2ff",
+      "bytes": 151158,
+      "category": "light",
+      "export_name": "light_fx_corner_shadow.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.6/light_fx_counter_pool.png",
+      "source_sha256": "891826fa6df7811f1f1afd9abe3efed1d101d755929858048e02caffbe97a8ba",
+      "bytes": 163568,
+      "category": "light",
+      "export_name": "light_fx_counter_pool.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.6/light_fx_exterior_evening.png",
+      "source_sha256": "0c3928c705043147b635303e89b87e8f7a53af861c4c5b570d9227562f659e6d",
+      "bytes": 223361,
+      "category": "light",
+      "export_name": "light_fx_exterior_evening.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.6/light_fx_pendant_glow.png",
+      "source_sha256": "8881609915afd5e2aab40d43ccd97e3c149cc55717bd0b84d29c532587f5ec3c",
+      "bytes": 156022,
+      "category": "light",
+      "export_name": "light_fx_pendant_glow.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.6/light_fx_sconce_glow.png",
+      "source_sha256": "950ad0f65d7daf9ef6743bebeed877d120eb857e74abfbd0e1ee645ad236bc34",
+      "bytes": 177895,
+      "category": "light",
+      "export_name": "light_fx_sconce_glow.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.6/light_fx_shelf_wash.png",
+      "source_sha256": "b74fab7e5cb79762217f06ee4365195e1d522756ef53ab71ac1523c55d9b0e46",
+      "bytes": 191431,
+      "category": "light",
+      "export_name": "light_fx_shelf_wash.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.6/light_fx_window_sunbeam.png",
+      "source_sha256": "886c311aa193aaf44e9a940b159de1266b0d2ac2b8431051652b820d3c3969fd",
+      "bytes": 207902,
+      "category": "light",
+      "export_name": "light_fx_window_sunbeam.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.6/light_pendant_brass.png",
+      "source_sha256": "aacb755e3eea970e09adefe3a7b94b501676816eb6e155e902ab4aa2db6fe37f",
+      "bytes": 172580,
+      "category": "light",
+      "export_name": "light_pendant_brass.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.6/light_pendant_green.png",
+      "source_sha256": "8fc54a6574c4cad88122f6a28329e42c8e8bd39ff51b623594291213bc381db6",
+      "bytes": 150692,
+      "category": "light",
+      "export_name": "light_pendant_green.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.6/light_shelf_accent.png",
+      "source_sha256": "b2b17d05f3fd7b36dca1e4212d1b0c2f1b5a73fae70852f8c8e9f045cf6aee09",
+      "bytes": 102184,
+      "category": "light",
+      "export_name": "light_shelf_accent.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.6/light_state_closing.png",
+      "source_sha256": "a246221645dfbe8af6ebae1b5de3d016ccd4e93368b979dff569d101ea2ca271",
+      "bytes": 167860,
+      "category": "light",
+      "export_name": "light_state_closing.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.6/light_state_daylight.png",
+      "source_sha256": "337596bc3a36c0511f398e4de2eb5b7ec41defeed1b827a6636f2e46d9d2b548",
+      "bytes": 187593,
+      "category": "light",
+      "export_name": "light_state_daylight.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.6/light_state_evening.png",
+      "source_sha256": "f755afbdca54330b69dd55a62139ef0725c60f71c83465fc8c1a5790c549533d",
+      "bytes": 179155,
+      "category": "light",
+      "export_name": "light_state_evening.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.6/light_state_golden_hour.png",
+      "source_sha256": "4fd660ebd757ba06eebf8bf2cc24ae6d3930fa7c2461f093ddc942d60c40e467",
+      "bytes": 190183,
+      "category": "light",
+      "export_name": "light_state_golden_hour.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.6/light_state_lights_off.png",
+      "source_sha256": "8affdac74d8795171d4139c4fd01030abc1859dba6709ea7328ba565df63991c",
+      "bytes": 147135,
+      "category": "light",
+      "export_name": "light_state_lights_off.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.6/light_state_premium_upgrade.png",
+      "source_sha256": "d84342305db781a89780da3f19f8f3f3f441a9f989f1d81caf0e6ad020f6d594",
+      "bytes": 192310,
+      "category": "light",
+      "export_name": "light_state_premium_upgrade.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.6/light_storefront_exterior.png",
+      "source_sha256": "7c57d80c34ac63d48f7f147458edd28039190dcb6a48da717506cdadd6ac048b",
+      "bytes": 213218,
+      "category": "light",
+      "export_name": "light_storefront_exterior.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.6/light_wall_sconce.png",
+      "source_sha256": "f4e8e9ff049e85a6c3eade1c8e3be7a3939d2e1f04f72eadd657f60fdc519833",
+      "bytes": 125299,
+      "category": "light",
+      "export_name": "light_wall_sconce.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.7/decor_botanical_corner.png",
+      "source_sha256": "c94341d01af9a7e817eb719f894b898d3ee9a662b173d5a2942dfef432cb3d69",
+      "bytes": 65054,
+      "category": "plant",
+      "export_name": "plant_decor_botanical_corner.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.7/decor_botanical_wall_print.png",
+      "source_sha256": "fe6a1c4e07f4721268841c0ea255ea7eb800c97a2bd7f9822c688a358604b641",
+      "bytes": 38311,
+      "category": "prop",
+      "export_name": "prop_decor_botanical_wall_print.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.7/decor_counter_plant.png",
+      "source_sha256": "b170c95fd0eefbc11d58ad4d7ae119bfb8a6c892d3466b9fc7457aa278daf9a4",
+      "bytes": 71385,
+      "category": "plant",
+      "export_name": "plant_decor_counter_plant.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.7/decor_dried_flower.png",
+      "source_sha256": "c93bf532447913558cd84097764d9455ffaa5fa5b3676e4827fd997e65472514",
+      "bytes": 54552,
+      "category": "plant",
+      "export_name": "plant_decor_dried_flower.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.7/decor_framed_leaf.png",
+      "source_sha256": "8d268e4a09d1e6e0a2dae27023a915178a052a0b9ce348b2ac09c144ff6d4066",
+      "bytes": 44567,
+      "category": "prop",
+      "export_name": "prop_decor_framed_leaf.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.7/decor_pressed_botanical.png",
+      "source_sha256": "68e9443eac22a1d5ddec8e42c338ddd9e48d9986941b5285786a3fe6c879052e",
+      "bytes": 41217,
+      "category": "prop",
+      "export_name": "prop_decor_pressed_botanical.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.7/decor_shelf_greenery.png",
+      "source_sha256": "1c5d1f41b48fc8e1d87c49df42d303b38338314044f98f96a959359bdd182c1e",
+      "bytes": 84986,
+      "category": "plant",
+      "export_name": "plant_decor_shelf_greenery.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.7/decor_window_plants.png",
+      "source_sha256": "4ca39db8d012166049a37b6d8d1684688c0b6cbc9bd8a961eb9e78ce8010ac32",
+      "bytes": 81688,
+      "category": "plant",
+      "export_name": "plant_decor_window_plants.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.7/plant_botanical_garland.png",
+      "source_sha256": "ff42411b0a71bd5dc9d27e8245041c640badf6a746f845f3bd8dd3d91813ff49",
+      "bytes": 96086,
+      "category": "plant",
+      "export_name": "plant_botanical_garland.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.7/plant_climbing_vine.png",
+      "source_sha256": "14d854fc7035939c4e2d03bcc01149c0122f32e73fe5d759dd0bf55acebe4152",
+      "bytes": 82313,
+      "category": "plant",
+      "export_name": "plant_climbing_vine.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.7/plant_fern.png",
+      "source_sha256": "64a03b0975ac525a675a153776044ef8e6c8212cbf54472ff14d7c9c88c5d085",
+      "bytes": 100849,
+      "category": "plant",
+      "export_name": "plant_fern.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.7/plant_fiddle_leaf_fig.png",
+      "source_sha256": "9d37e9759f097a11c086f121eea5986b93a53dd18a9ef9b80470c1ec7828cc46",
+      "bytes": 77612,
+      "category": "plant",
+      "export_name": "plant_fiddle_leaf_fig.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.7/plant_hanging_fern.png",
+      "source_sha256": "21554a396d8d6f75e447471ca1f7d7267f3ff2adf27eca1c46cac3cc69aacf56",
+      "bytes": 102218,
+      "category": "plant",
+      "export_name": "plant_hanging_fern.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.7/plant_hanging_pothos.png",
+      "source_sha256": "56977d8d8d6884fc0a3ad5ce68b580c855927c43e2ebe70408d7679de97b8242",
+      "bytes": 87706,
+      "category": "plant",
+      "export_name": "plant_hanging_pothos.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.7/plant_monstera.png",
+      "source_sha256": "802e5d93c3cd589abdafa31e08bb114800a49cfca849e88548b95f44dc90e011",
+      "bytes": 113325,
+      "category": "plant",
+      "export_name": "plant_monstera.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.7/plant_peace_lily.png",
+      "source_sha256": "5a167485313f5158e124bc25d619a8b12f038d2dabf64b878cbb0e48aadb49af",
+      "bytes": 84061,
+      "category": "plant",
+      "export_name": "plant_peace_lily.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.7/plant_pothos_large.png",
+      "source_sha256": "356412a1f333e36baac76b186f71e10662ee6e71f6095067cd8a3b5727987b1d",
+      "bytes": 92094,
+      "category": "plant",
+      "export_name": "plant_pothos_large.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.7/plant_pothos_small.png",
+      "source_sha256": "3de56cbfe76e46eb60618941211f350d0c420a064e42c44aaa8a282fa8e163f4",
+      "bytes": 71752,
+      "category": "plant",
+      "export_name": "plant_pothos_small.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.7/plant_rubber.png",
+      "source_sha256": "08f13450bd778e3e4728e6b5eafcb4fcc8aa595713f9a102a755deedc9a60f9e",
+      "bytes": 79350,
+      "category": "plant",
+      "export_name": "plant_rubber.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.7/plant_snake.png",
+      "source_sha256": "da7b38cc99141e3f92d6ff5c42b8d36ad7f705daf203e03affc954c4c16ae015",
+      "bytes": 59653,
+      "category": "plant",
+      "export_name": "plant_snake.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.7/plant_succulent.png",
+      "source_sha256": "53820b26bdee1a82b60d37a79171496106ad1ccedcc2084b8a9447b47d5b51d3",
+      "bytes": 45599,
+      "category": "plant",
+      "export_name": "plant_succulent.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.7/plant_trailing_ivy.png",
+      "source_sha256": "1addc3b2e367e99db33ef455861f1b69bbc9dfc1bcc622f98f810cdc8124cfb0",
+      "bytes": 81804,
+      "category": "plant",
+      "export_name": "plant_trailing_ivy.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.7/plant_wall_planter.png",
+      "source_sha256": "68a5598ad60916856a76ebb9887aae342c0678ad7598fa41081442e6f086ca6a",
+      "bytes": 83955,
+      "category": "plant",
+      "export_name": "plant_wall_planter.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.7/plant_zz.png",
+      "source_sha256": "24dcc4d3a827b7bd4943a0a8d54e97ffcb375d57ea122e67f4592773a3591eb9",
+      "bytes": 63307,
+      "category": "plant",
+      "export_name": "plant_zz.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.7/planter_brass.png",
+      "source_sha256": "8157261757fe350f5ae59d9e3824711fe14d309a979e07e1390001ea9742a23b",
+      "bytes": 36401,
+      "category": "plant",
+      "export_name": "plant_planter_brass.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.7/planter_ceramic_cream.png",
+      "source_sha256": "67e2cd2bd54c2899ed81e8a3e6e2a9680b3a64c6e725b46a49434deb2a916ea6",
+      "bytes": 45080,
+      "category": "plant",
+      "export_name": "plant_planter_ceramic_cream.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.7/planter_ceramic_green.png",
+      "source_sha256": "5c97630eef39fa76ac525b146605d7847022954a72151660cdb98697e454c046",
+      "bytes": 39289,
+      "category": "plant",
+      "export_name": "plant_planter_ceramic_green.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.7/planter_floor_stand.png",
+      "source_sha256": "21c123029dc17b78bb7aa4a8ea3d6c0cf6b8d57375f92918023d661836befa24",
+      "bytes": 38480,
+      "category": "plant",
+      "export_name": "plant_planter_floor_stand.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.7/planter_hanging_basket.png",
+      "source_sha256": "7d513203316d8211ead89931ff4d88ba49bd71f74524290549c33fe8619354da",
+      "bytes": 54292,
+      "category": "plant",
+      "export_name": "plant_planter_hanging_basket.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.7/planter_terracotta_large.png",
+      "source_sha256": "9ddb5ef48c3badcfdacaeecfa7a544eadba73d0384a0b3fdf6cdb19b330bf39d",
+      "bytes": 48051,
+      "category": "plant",
+      "export_name": "plant_planter_terracotta_large.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.7/planter_terracotta_small.png",
+      "source_sha256": "e1cadeb12be85e1be6f1535fed1d2598c9d831b2a744f7c8f97a37e0390424f9",
+      "bytes": 31571,
+      "category": "plant",
+      "export_name": "plant_planter_terracotta_small.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.7/planter_walnut_box.png",
+      "source_sha256": "6bf5272015810b7792f4311ebdcb63722c318b6e3a6b6e10a58cf729806482e7",
+      "bytes": 58368,
+      "category": "plant",
+      "export_name": "plant_planter_walnut_box.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.8/nook_armchair_sage.png",
+      "source_sha256": "5bfcfaa5b494abb542fc88ece71d469e1b0217a852fcea52a1c9d0fa260a69dd",
+      "bytes": 76952,
+      "category": "fixture",
+      "export_name": "fixture_nook_armchair_sage.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.8/nook_blanket_folded.png",
+      "source_sha256": "0bfd6abcff5940493f895251b380b03d8de9e042270b9305ef3453ffee41eaaa",
+      "bytes": 81462,
+      "category": "prop",
+      "export_name": "prop_nook_blanket_folded.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.8/nook_blanket_rolled.png",
+      "source_sha256": "eea8e9ebe7f7010d1e41541bfef9fec04d993e5934ff78d838bf086832a3e4e6",
+      "bytes": 70456,
+      "category": "prop",
+      "export_name": "prop_nook_blanket_rolled.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.8/nook_brochure_holder.png",
+      "source_sha256": "e1d832f4a7fb51a8c7f823896a412af91310785abfb68734ba8fb5afb9b40c99",
+      "bytes": 52690,
+      "category": "prop",
+      "export_name": "prop_nook_brochure_holder.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.8/nook_brochure_single.png",
+      "source_sha256": "1248c2f976903fe4e77ee244c86137e4f08704b60459a8ee842aebb7ab188b06",
+      "bytes": 42862,
+      "category": "prop",
+      "export_name": "prop_nook_brochure_single.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.8/nook_chair_terracotta.png",
+      "source_sha256": "c0d606ea0a094bbc520dc3b48b8ce03d1a49f6b8747c73634fcf5294079cd49b",
+      "bytes": 80781,
+      "category": "fixture",
+      "export_name": "fixture_nook_chair_terracotta.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.8/nook_chair_walnut.png",
+      "source_sha256": "41973a6f085dc43b602f5c2fa83b7acbe7f1fe2b8b08a65cf0b8d281e60695a7",
+      "bytes": 81697,
+      "category": "fixture",
+      "export_name": "fixture_nook_chair_walnut.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.8/nook_charging_station.png",
+      "source_sha256": "c60b183c28bb3dfc8493100b3f2264e4efa5eef1d26f2078f0f0bc19dfa56b52",
+      "bytes": 98088,
+      "category": "fixture",
+      "export_name": "fixture_nook_charging_station.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.8/nook_floor_lamp.png",
+      "source_sha256": "f093493ba1581dde95d81b45bcd7476bea6dcf5ea748e9e3a7c9180990c4cd7a",
+      "bytes": 39297,
+      "category": "light",
+      "export_name": "light_nook_floor_lamp.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.8/nook_framed_art.png",
+      "source_sha256": "378df5c8c15b6dd9c1307242d8a973a281f39774e2e1900b52dddffb62ebc97e",
+      "bytes": 61325,
+      "category": "prop",
+      "export_name": "prop_nook_framed_art.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.8/nook_magazine_open.png",
+      "source_sha256": "85af659f0cc3d18d9cf13d63a5a4ee2b5db37f2e48438136137c7b895c2fc92f",
+      "bytes": 84932,
+      "category": "prop",
+      "export_name": "prop_nook_magazine_open.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.8/nook_magazine_rack.png",
+      "source_sha256": "78dd285ed1ec781fe5aaee496f37d41b3f637a099dcdf95598f5b4842cfa1c35",
+      "bytes": 61112,
+      "category": "fixture",
+      "export_name": "fixture_nook_magazine_rack.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.8/nook_magazines_stack.png",
+      "source_sha256": "43bf23ec19d89dce639d92018c319c3465145f6fca06659a63eb0cd49d66aa73",
+      "bytes": 76972,
+      "category": "prop",
+      "export_name": "prop_nook_magazines_stack.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.8/nook_ottoman.png",
+      "source_sha256": "9768ed1bd1f88dd5630518d140a2e20934e49b9759fa50d1bce632f4a3286907",
+      "bytes": 45851,
+      "category": "fixture",
+      "export_name": "fixture_nook_ottoman.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.8/nook_pillow_botanical.png",
+      "source_sha256": "c7bf27ed3b72179a75de496d9c0577a62deb3a6bcf4e9ef01aa311b0930a911a",
+      "bytes": 60313,
+      "category": "prop",
+      "export_name": "prop_nook_pillow_botanical.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.8/nook_pillow_cream.png",
+      "source_sha256": "db346582e8212a740c7b49454cc8064ab4c6270cd86189f186314f266802d41c",
+      "bytes": 61241,
+      "category": "prop",
+      "export_name": "prop_nook_pillow_cream.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.8/nook_rug_botanical.png",
+      "source_sha256": "4132f0ff169218fd4a200cd8a9d50a9e6b7018a541186c9233f8d96e2df8c1ff",
+      "bytes": 172795,
+      "category": "prop",
+      "export_name": "prop_nook_rug_botanical.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.8/nook_rug_textured.png",
+      "source_sha256": "ffd5c81b93ba875980b03526a3e26c889c2c90c16882ada68396b93dc48ccd8c",
+      "bytes": 161505,
+      "category": "prop",
+      "export_name": "prop_nook_rug_textured.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.8/nook_seat_status_marker.png",
+      "source_sha256": "f7f2b6ce1e6c7ad054fc96540a7fd4ab6a0b3c18855ca700b89b25802e444f85",
+      "bytes": 23051,
+      "category": "decal",
+      "export_name": "decal_nook_seat_status_marker.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.8/nook_sofa_green.png",
+      "source_sha256": "1672f41a3334730208f2d63d5b1002210cc40cff04feb53e26334ec775bb5915",
+      "bytes": 180916,
+      "category": "fixture",
+      "export_name": "fixture_nook_sofa_green.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.8/nook_table_arrangement.png",
+      "source_sha256": "5092fabaa91d05642297b9a9777b267f5c6464c6ca1384c6560225749b4076c8",
+      "bytes": 101880,
+      "category": "fixture",
+      "export_name": "fixture_nook_table_arrangement.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.8/nook_table_coffee_round.png",
+      "source_sha256": "00c687117508284408a5991263234ea79aca0b7f8816337e84a566c8dbaa1977",
+      "bytes": 79144,
+      "category": "fixture",
+      "export_name": "fixture_nook_table_coffee_round.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.8/nook_table_side_brass.png",
+      "source_sha256": "4933155a495bc4243e8cb9eedb927ba243068e416ea3090861e359874a384122",
+      "bytes": 36792,
+      "category": "fixture",
+      "export_name": "fixture_nook_table_side_brass.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.8/nook_waiting_marker.png",
+      "source_sha256": "c6a04c584c3f02e7e6798a5c75494dc4514dd371c618cc17f1b9f05600ec61a2",
+      "bytes": 22981,
+      "category": "decal",
+      "export_name": "decal_nook_waiting_marker.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.8/nook_wall_clock.png",
+      "source_sha256": "ed46765db7dd354c47640b3b40ab33939b1b9cc3cb728fb9377c0f894c74b6c0",
+      "bytes": 55932,
+      "category": "prop",
+      "export_name": "prop_nook_wall_clock.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.8/nook_wastebasket.png",
+      "source_sha256": "978b0174f05e1f49537463d5b8109fdc2fed0e1d6b28ddd6cbd60cc1b7b84118",
+      "bytes": 33670,
+      "category": "prop",
+      "export_name": "prop_nook_wastebasket.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.8/nook_water_dispenser.png",
+      "source_sha256": "18d85dc562bedaad07dab82a0ca2e87e442cb43625c64bf460b4b6a0dda82fe1",
+      "bytes": 70287,
+      "category": "fixture",
+      "export_name": "fixture_nook_water_dispenser.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.8/nook_water_glass.png",
+      "source_sha256": "3968322288a064618407256cefea33e7f13140780efd7d712d96a64d12a0773e",
+      "bytes": 39125,
+      "category": "prop",
+      "export_name": "prop_nook_water_glass.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.9/queue_barrier_closed.png",
+      "source_sha256": "6c09a48e09628c84302254fdb66b4ab93d9877b064892b1524627afeb69123f6",
+      "bytes": 159459,
+      "category": "fixture",
+      "export_name": "fixture_queue_barrier_closed.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.9/queue_barrier_corner.png",
+      "source_sha256": "76994aca3c3ff2e4cb2bd9b9eb24e74b461bd86ecf3fafbdb08e6358695b219f",
+      "bytes": 120649,
+      "category": "fixture",
+      "export_name": "fixture_queue_barrier_corner.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.9/queue_barrier_straight.png",
+      "source_sha256": "f4f60d5d5c6b2e64c17697358d1e79a0b0dbb604f245b69a5152963a1e567b66",
+      "bytes": 116481,
+      "category": "fixture",
+      "export_name": "fixture_queue_barrier_straight.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.9/queue_belt_retractable.png",
+      "source_sha256": "aa97eaba64e3722277cd76d57d031a5716a050df95fed312088e2b530e2c66a9",
+      "bytes": 80395,
+      "category": "fixture",
+      "export_name": "fixture_queue_belt_retractable.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.9/queue_chain_brass.png",
+      "source_sha256": "a2c5582214c763a2620435006e67962fe50b79a6367929edc3d04626dc3bbb1a",
+      "bytes": 84188,
+      "category": "fixture",
+      "export_name": "fixture_queue_chain_brass.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.9/queue_control_stand.png",
+      "source_sha256": "203930d44f8d93cac81f3b932d25dd89e9a2477ddce1dea6be2c77ec04bf382d",
+      "bytes": 126455,
+      "category": "fixture",
+      "export_name": "fixture_queue_control_stand.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.9/queue_divider_planter.png",
+      "source_sha256": "8d9371ad01f67c6bfafce106520f80d35d58724c4a0b39a569fd62ef25b9b457",
+      "bytes": 260002,
+      "category": "plant",
+      "export_name": "plant_queue_divider_planter.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.9/queue_entrance_gateway.png",
+      "source_sha256": "c595e9a7a732688272f92e10f3c9fea8bc565c4d31ed06f7bfb8f13e9b20ab6c",
+      "bytes": 253690,
+      "category": "fixture",
+      "export_name": "fixture_queue_entrance_gateway.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.9/queue_floor_accessible.png",
+      "source_sha256": "d83db55b9b698b5fd33e9ff63d1b88098c3047b3216b528c38031890ebaa6e70",
+      "bytes": 71236,
+      "category": "decal",
+      "export_name": "decal_queue_floor_accessible.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.9/queue_floor_arrow.png",
+      "source_sha256": "a1570487307617c435b0c992eb8892aa94971651f3e1d8b554ba269ba8f64130",
+      "bytes": 73499,
+      "category": "decal",
+      "export_name": "decal_queue_floor_arrow.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.9/queue_floor_end.png",
+      "source_sha256": "51200ac54c05814227a44c816509093a6c9c62a7274add272c634b5dbe4a2ee4",
+      "bytes": 72600,
+      "category": "decal",
+      "export_name": "decal_queue_floor_end.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.9/queue_floor_position.png",
+      "source_sha256": "66e00d260092b0d17f526f53b65724f138675b8fc6fcf8fa7a22e353cd655365",
+      "bytes": 74478,
+      "category": "decal",
+      "export_name": "decal_queue_floor_position.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.9/queue_floor_runner.png",
+      "source_sha256": "d6557007773d6d4afa83d3dbb0370a6f4b97f942763b44c478a246afa1159a17",
+      "bytes": 536583,
+      "category": "decal",
+      "export_name": "decal_queue_floor_runner.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.9/queue_floor_start.png",
+      "source_sha256": "c78730332e7529e43b780ca7ae9b9a3e750b1b66db8c272df81743d97d23c8ff",
+      "bytes": 73583,
+      "category": "decal",
+      "export_name": "decal_queue_floor_start.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.9/queue_floor_wait.png",
+      "source_sha256": "12dd34cd0e3dc28ed5dfc7e9bc80183466cd1136911660625abd9a29169af0e3",
+      "bytes": 74097,
+      "category": "decal",
+      "export_name": "decal_queue_floor_wait.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.9/queue_flow_counter.png",
+      "source_sha256": "35a90678d0e260ee28305f9cb0f6719c4d54af6a7bce209306f755b42b63a0a4",
+      "bytes": 113181,
+      "category": "prop",
+      "export_name": "prop_queue_flow_counter.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.9/queue_number_display.png",
+      "source_sha256": "7afd67e43f1827e8dee9eb1d0352e3c93fa36468ca17a11ae372a0977c9e381b",
+      "bytes": 112556,
+      "category": "prop",
+      "export_name": "prop_queue_number_display.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.9/queue_rope_green.png",
+      "source_sha256": "b767712f37aa3249af3b3c1a11f411924f43dde7430731857d253e070337de11",
+      "bytes": 77666,
+      "category": "fixture",
+      "export_name": "fixture_queue_rope_green.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.9/queue_sign_accessible.png",
+      "source_sha256": "e4b04c6fb185e56254e90518e8d5b70709db4a6d306fdc59561dbfb0f2d7f32b",
+      "bytes": 122363,
+      "category": "sign",
+      "export_name": "sign_queue_sign_accessible.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.9/queue_sign_express.png",
+      "source_sha256": "9f2316d604d651e32fffd21220ea589c6b256037074de2b9e6f26eefcab3b870",
+      "bytes": 132977,
+      "category": "sign",
+      "export_name": "sign_queue_sign_express.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.9/queue_sign_information.png",
+      "source_sha256": "515c1d85916f1b596958d78e134cdd530499b5fd0a8c57e00dbdc2b3de61adb1",
+      "bytes": 144170,
+      "category": "sign",
+      "export_name": "sign_queue_sign_information.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.9/queue_sign_next.png",
+      "source_sha256": "31abc6c14beeb939d79bbffc7515cd7e57e9d7d50bb863937b4d8db3d10e21cb",
+      "bytes": 106465,
+      "category": "sign",
+      "export_name": "sign_queue_sign_next.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.9/queue_sign_start.png",
+      "source_sha256": "51476a5fe2a8cc46f485b219c6d33ad0f42621a7e94298f0c26bfa0fa21f15b7",
+      "bytes": 133534,
+      "category": "sign",
+      "export_name": "sign_queue_sign_start.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.9/queue_sign_wait.png",
+      "source_sha256": "a8aa3c7ee0e02c7b4a67c0987c1f0858f9a32c7a2220b7dfb7e38b4b02b46aa0",
+      "bytes": 128850,
+      "category": "sign",
+      "export_name": "sign_queue_sign_wait.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.9/queue_sign_wait_time.png",
+      "source_sha256": "b63b9933f37278f674149d98ccf857903d180a83b7d982b6b5428436f91c1e32",
+      "bytes": 160419,
+      "category": "sign",
+      "export_name": "sign_queue_sign_wait_time.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.9/queue_stanchion_brass.png",
+      "source_sha256": "98b44c3e992f94230452c13ef619f3d18e916944a999ee5d93866b37d9e6a8e3",
+      "bytes": 54212,
+      "category": "fixture",
+      "export_name": "fixture_queue_stanchion_brass.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.9/queue_stanchion_walnut.png",
+      "source_sha256": "916eb43f31f71b60baa6f6687a8f71e3e507344dfd2cff27f8679aa1129aef8f",
+      "bytes": 49517,
+      "category": "fixture",
+      "export_name": "fixture_queue_stanchion_walnut.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.9/queue_ticket_dispenser.png",
+      "source_sha256": "24f51c0a1c772969d5d59ddbf3dd5e87a0d24ad4a1dd337cf220be4653e0fa38",
+      "bytes": 132018,
+      "category": "fixture",
+      "export_name": "fixture_queue_ticket_dispenser.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.10/staff_barcode_scanner.png",
+      "source_sha256": "0391c949e18f679024ab96d94ea75bc203197accd1369cc2c9a49973330ed637",
+      "bytes": 37344,
+      "category": "prop",
+      "export_name": "prop_staff_barcode_scanner.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.10/staff_coat_hooks.png",
+      "source_sha256": "60a2b593b4da2bcd7668072de33e07462f598a3bf523607c800bb7c66fcfe599",
+      "bytes": 51159,
+      "category": "prop",
+      "export_name": "prop_staff_coat_hooks.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.10/staff_counting_tray.png",
+      "source_sha256": "b0f4995903dba04ae6fb664bee094d4c6137de7249ffa6eb13eb5f20ee7c373a",
+      "bytes": 52334,
+      "category": "prop",
+      "export_name": "prop_staff_counting_tray.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.10/staff_desk_lamp.png",
+      "source_sha256": "4868f1b940d89059125386306ef482943a1c2c8977708376ee8470d2fe2724d9",
+      "bytes": 38474,
+      "category": "light",
+      "export_name": "light_staff_desk_lamp.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.10/staff_digital_scale.png",
+      "source_sha256": "df42b9e84db6297ad00d98b46320ddd5ece12874a18dba2865aa280187e85c37",
+      "bytes": 57123,
+      "category": "prop",
+      "export_name": "prop_staff_digital_scale.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.10/staff_drawer_unit.png",
+      "source_sha256": "689229cf446ec3b1cbf945c7eba0bc3c171adcf928692240e6e048e1b1bc5cf3",
+      "bytes": 60071,
+      "category": "fixture",
+      "export_name": "fixture_staff_drawer_unit.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.10/staff_empty_jars.png",
+      "source_sha256": "4cbc70351f4ab65555d780e7950707a7f0ed1c4f224b69c1c670d939ffd57c18",
+      "bytes": 49108,
+      "category": "prop",
+      "export_name": "prop_staff_empty_jars.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.10/staff_inventory_cabinet.png",
+      "source_sha256": "3b41229c69a42d8ed7bb077d9cc5653858225f9f976e70daa8ba091559d9c1be",
+      "bytes": 52912,
+      "category": "fixture",
+      "export_name": "fixture_staff_inventory_cabinet.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.10/staff_inventory_tablet.png",
+      "source_sha256": "db98b2dd7199897f8e95b8358ccf29bec3ab5984eb670cca93caefc4ba87909f",
+      "bytes": 63310,
+      "category": "prop",
+      "export_name": "prop_staff_inventory_tablet.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.10/staff_inventory_totes.png",
+      "source_sha256": "52a0ff0d6166327fb40c00af2e707578e0a48d2f6f9010a69dca927a074f8c51",
+      "bytes": 50683,
+      "category": "prop",
+      "export_name": "prop_staff_inventory_totes.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.10/staff_label_printer.png",
+      "source_sha256": "e2f1c3307887191c62363099468b52ddf6ea9a79cd0933ee162a9491a81aaddf",
+      "bytes": 55766,
+      "category": "prop",
+      "export_name": "prop_staff_label_printer.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.10/staff_label_roll.png",
+      "source_sha256": "7c4c473a83150f25e4535cc6177b798eeeb837fe5de2329d92c8cb6c396426bc",
+      "bytes": 45985,
+      "category": "prop",
+      "export_name": "prop_staff_label_roll.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.10/staff_locker.png",
+      "source_sha256": "0de6575d725fcc8b09ce0ee6b51980d345364ed8988c4790aecd3e9f1f6b198a",
+      "bytes": 52309,
+      "category": "fixture",
+      "export_name": "fixture_staff_locker.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.10/staff_noticeboard.png",
+      "source_sha256": "a3e55658d9ba2c0fea9803acce82d8af0f1a781c433895e61dd222ff87018469",
+      "bytes": 78219,
+      "category": "prop",
+      "export_name": "prop_staff_noticeboard.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.10/staff_packaging_organizer.png",
+      "source_sha256": "7bdca65a10f58e7e7c93ff9c3ae204801ea33fb846e6fac5f343750423cbf50c",
+      "bytes": 64831,
+      "category": "prop",
+      "export_name": "prop_staff_packaging_organizer.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.10/staff_packaging_pouches.png",
+      "source_sha256": "d277e799d1f318664d9d15a366b49ebca9420f203a6051652d0c6a76c12d8815",
+      "bytes": 68783,
+      "category": "prop",
+      "export_name": "prop_staff_packaging_pouches.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.10/staff_packing_materials.png",
+      "source_sha256": "d96a8f9e0a26f54e44b4f262a424a385fbb9e90ca5822ebd9aa10b866c640684",
+      "bytes": 93347,
+      "category": "prop",
+      "export_name": "prop_staff_packing_materials.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.10/staff_packing_station.png",
+      "source_sha256": "103564dcdb2957b703c243ce8998031177fe7401767eae6bce20247c52b0c3d2",
+      "bytes": 62887,
+      "category": "fixture",
+      "export_name": "fixture_staff_packing_station.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.10/staff_processing_marker.png",
+      "source_sha256": "5263fa15ffeb105da97293f10db9d2a4d4c5068f739dec32ebaff07b1d449944",
+      "bytes": 48617,
+      "category": "prop",
+      "export_name": "prop_staff_processing_marker.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.10/staff_receiving_clipboard.png",
+      "source_sha256": "4321de0452455b48d66456ebb768f4e7fdc35eb7f72f6473766646624bbd6237",
+      "bytes": 60762,
+      "category": "prop",
+      "export_name": "prop_staff_receiving_clipboard.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.10/staff_recycling_bins.png",
+      "source_sha256": "e12fc1f96e0119479a8ab9577411b0d6336cb0aa941b0787aff8232110ffafff",
+      "bytes": 52581,
+      "category": "prop",
+      "export_name": "prop_staff_recycling_bins.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.10/staff_restricted_sign.png",
+      "source_sha256": "5aa181a5d70a5b39773f53ae05334fb9cf02bbb429168535554defce1f8d5c0b",
+      "bytes": 25846,
+      "category": "sign",
+      "export_name": "sign_staff_restricted_sign.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.10/staff_sanitizer_station.png",
+      "source_sha256": "0e5d60799d35c0eb14ec98441aa66753f69907f53c56aaca6f8851669a5bf5a9",
+      "bytes": 20741,
+      "category": "prop",
+      "export_name": "prop_staff_sanitizer_station.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.10/staff_security_lockbox.png",
+      "source_sha256": "4c0b0521a25f0634d1586b976377136c7dc484cbb676bbaa708015f4d4023cad",
+      "bytes": 42672,
+      "category": "prop",
+      "export_name": "prop_staff_security_lockbox.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.10/staff_shift_schedule.png",
+      "source_sha256": "fbac01b19f9eba54a58a6ae60704a8de82150ea4f01d9a79a6122fbe378ec613",
+      "bytes": 53537,
+      "category": "prop",
+      "export_name": "prop_staff_shift_schedule.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.10/staff_stock_carton.png",
+      "source_sha256": "ebd8b075fddfecb31e3ad7afdb1c0dfcae531c706a8b9240245246d14cbf8f43",
+      "bytes": 62110,
+      "category": "prop",
+      "export_name": "prop_staff_stock_carton.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.10/staff_stock_carton_open.png",
+      "source_sha256": "45c4a129ae492b6978fb071125f1a1d1e1141ecf734caab557d341773db9908a",
+      "bytes": 62845,
+      "category": "prop",
+      "export_name": "prop_staff_stock_carton_open.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.10/staff_storage_cabinet.png",
+      "source_sha256": "8de0656aaa8b4e15881eb339d6896d7b6f44eeb8789965753c2cd17de4bd006e",
+      "bytes": 54607,
+      "category": "fixture",
+      "export_name": "fixture_staff_storage_cabinet.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.10/staff_supply_shelves.png",
+      "source_sha256": "e71d042fa09d68590e462b15830692befa114c55a7c5d23d9daac3c4de58fd81",
+      "bytes": 51169,
+      "category": "fixture",
+      "export_name": "fixture_staff_supply_shelves.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.10/staff_task_stool.png",
+      "source_sha256": "813831710e4652df12ef80f104644c6ea3d4126a9a4742d9587e104cdb8c6e50",
+      "bytes": 46187,
+      "category": "prop",
+      "export_name": "prop_staff_task_stool.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.10/staff_tool_organizer.png",
+      "source_sha256": "9b5a071219a3baf2ed57da22ae2d552a809dece8edb89cb2a9f8347be10294a0",
+      "bytes": 80152,
+      "category": "prop",
+      "export_name": "prop_staff_tool_organizer.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.10/staff_workbench.png",
+      "source_sha256": "9152a9d3914aca063049d24606dc8041025c54a1a3cdc7354a7c655b2a79ac79",
+      "bytes": 85759,
+      "category": "fixture",
+      "export_name": "fixture_staff_workbench.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.11/merch_accessory_bundle.png",
+      "source_sha256": "7237d2a7e3fd44019393cf191bc2666e6d931283557952cfe127138f6d3348b3",
+      "bytes": 127986,
+      "category": "prop",
+      "export_name": "prop_merch_accessory_bundle.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.11/merch_apparel_hoodie.png",
+      "source_sha256": "1d299df4ab38539f59ea4b77ddebaeafd1abf538c75b7135a24afeb6c597ad20",
+      "bytes": 102998,
+      "category": "prop",
+      "export_name": "prop_merch_apparel_hoodie.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.11/merch_apparel_stack.png",
+      "source_sha256": "1a104a719b775007e8d10c58b3246d00bbf23a36297baca6df7fe54ae03e78d5",
+      "bytes": 114074,
+      "category": "prop",
+      "export_name": "prop_merch_apparel_stack.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.11/merch_apparel_tshirt.png",
+      "source_sha256": "64202037be71a24bfeb932cafbeb6e912f6da0dd22fb83ebcd844bd123bd33b7",
+      "bytes": 103284,
+      "category": "prop",
+      "export_name": "prop_merch_apparel_tshirt.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.11/merch_bag_canvas.png",
+      "source_sha256": "b2aae091edfebe38ef9445f006b32315978c06ad1a4e1ec2d326fc67cab2d55a",
+      "bytes": 66884,
+      "category": "prop",
+      "export_name": "prop_merch_bag_canvas.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.11/merch_cabinet_green.png",
+      "source_sha256": "43064da7921b3b0c4f19da3798ddcddaef112a1f9cee0b074afb41ff373f084e",
+      "bytes": 86937,
+      "category": "fixture",
+      "export_name": "fixture_merch_cabinet_green.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.11/merch_display_case_glass.png",
+      "source_sha256": "5df0ceab9203b4c21b7ec009c3a2f917cc196ac203bab5d0c3a5cd54981ce262",
+      "bytes": 137934,
+      "category": "fixture",
+      "export_name": "fixture_merch_display_case_glass.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.11/merch_display_tiered.png",
+      "source_sha256": "70abf99fc58a96e8e7f18ff81733b943688e6bd1af8119a88e4f222160502f8f",
+      "bytes": 84082,
+      "category": "fixture",
+      "export_name": "fixture_merch_display_tiered.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.11/merch_gift_box.png",
+      "source_sha256": "16bda5de7edf037fb7963890469d61cc823954badd828c45028fa37ef46ed9e5",
+      "bytes": 121060,
+      "category": "prop",
+      "export_name": "prop_merch_gift_box.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.11/merch_gift_wrap_station.png",
+      "source_sha256": "93afcb49f889ba5baa2c66d716baaf304734b2ca2060f8b22d11a37b092cbc6f",
+      "bytes": 152326,
+      "category": "prop",
+      "export_name": "prop_merch_gift_wrap_station.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.11/merch_glassware_set.png",
+      "source_sha256": "9823bca7a667335ff287d583a1bbc9ddc649bfcf490a11dbb08a325304bec690",
+      "bytes": 103982,
+      "category": "prop",
+      "export_name": "prop_merch_glassware_set.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.11/merch_gondola_freestanding.png",
+      "source_sha256": "00125094c9e016274f2af88c996ffcff35d4b53534ce1da4afe31514bab0b067",
+      "bytes": 163630,
+      "category": "fixture",
+      "export_name": "fixture_merch_gondola_freestanding.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.11/merch_inventory_basket.png",
+      "source_sha256": "32f0ecf8909a606c01c0a876e3502ddec85ccae2f6265fd29fdb0894fa002a35",
+      "bytes": 149896,
+      "category": "prop",
+      "export_name": "prop_merch_inventory_basket.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.11/merch_keychain_display.png",
+      "source_sha256": "2d73311fa12653496597be1dd1c6285f5182078739bc11fc2dd875edb43b4c4f",
+      "bytes": 93249,
+      "category": "prop",
+      "export_name": "prop_merch_keychain_display.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.11/merch_mug_ceramic.png",
+      "source_sha256": "047df2a8a6a71b38733ff0be8a8006d4ef04867768a8f72d7393a5a394eafab3",
+      "bytes": 55723,
+      "category": "prop",
+      "export_name": "prop_merch_mug_ceramic.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.11/merch_pegboard_walnut.png",
+      "source_sha256": "b51699134f44a6b97d533ad37cec37533fa06c7a07de5576022c66ecf5308a3d",
+      "bytes": 131596,
+      "category": "fixture",
+      "export_name": "fixture_merch_pegboard_walnut.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.11/merch_price_holder.png",
+      "source_sha256": "0fa2f2125afa4051c7a6152b803ac5bb78d8d88b7def72d1b3e34d70e04c464e",
+      "bytes": 94172,
+      "category": "prop",
+      "export_name": "prop_merch_price_holder.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.11/merch_restock_cart.png",
+      "source_sha256": "449151ce96f1f8312647b6dd3aaab818726dd7215e92fe8612ac1fa81e1ce735",
+      "bytes": 129600,
+      "category": "prop",
+      "export_name": "prop_merch_restock_cart.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.11/merch_shelf_talker.png",
+      "source_sha256": "7772aba5caa2a89abe464dc25bf82813b9a1f83e309134913e37a4dcc86f4afb",
+      "bytes": 101739,
+      "category": "fixture",
+      "export_name": "fixture_merch_shelf_talker.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.11/merch_shelf_walnut_narrow.png",
+      "source_sha256": "8d2e325bfd7fa1cdf014f36e1d3184d1df7a1dd23166a2e3109fea1ddf9c7a5f",
+      "bytes": 64280,
+      "category": "fixture",
+      "export_name": "fixture_merch_shelf_walnut_narrow.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.11/merch_sign_limited.png",
+      "source_sha256": "b9ae0e0c8bde01ace35edac773847f88f52b9746c280f57a24adb19de861e049",
+      "bytes": 94151,
+      "category": "sign",
+      "export_name": "sign_merch_sign_limited.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.11/merch_sign_new.png",
+      "source_sha256": "0b269752e09e46da06025b52946f209206848ef334cef3a412279c9753f3fbee",
+      "bytes": 91759,
+      "category": "sign",
+      "export_name": "sign_merch_sign_new.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.11/merch_stand_countertop.png",
+      "source_sha256": "a6e97def19555ff0a7475658f6975b6d8241f674f377c612654f763c45be91d1",
+      "bytes": 93697,
+      "category": "fixture",
+      "export_name": "fixture_merch_stand_countertop.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.11/merch_tower_premium.png",
+      "source_sha256": "5e69ed4bfcb023dd91c6cb1ecb6d2c88307a88f583b7d65f90f74427827da091",
+      "bytes": 65628,
+      "category": "fixture",
+      "export_name": "fixture_merch_tower_premium.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.11/merch_upgrade_backboard.png",
+      "source_sha256": "b4b909d1a24082d55979d68e7dba45807065ad2665c6680d03e07db4323c4a65",
+      "bytes": 118090,
+      "category": "fixture",
+      "export_name": "fixture_merch_upgrade_backboard.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.11/merch_upgrade_botanical_accent.png",
+      "source_sha256": "e4695a5d0cfefa2db4c66704644a6b15fe3b12c08fc08708321ade2b52343ea4",
+      "bytes": 116130,
+      "category": "prop",
+      "export_name": "prop_merch_upgrade_botanical_accent.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.11/merch_upgrade_brass_trim.png",
+      "source_sha256": "ba7a86906f5fdce9a3ab24393f1bc3bfcbd38f6350334afcd96251236aafeb74",
+      "bytes": 65212,
+      "category": "prop",
+      "export_name": "prop_merch_upgrade_brass_trim.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.11/merch_upgrade_glass_dome.png",
+      "source_sha256": "16a9416afad1a8e28e539cad8eef38d9ababcd0acd4fa790dd11f51f2922043d",
+      "bytes": 67518,
+      "category": "prop",
+      "export_name": "prop_merch_upgrade_glass_dome.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.11/merch_upgrade_pedestal.png",
+      "source_sha256": "ceb656166db35b483ff77d63928e68da52064cfb28a39c7285679cd6023cd759",
+      "bytes": 106867,
+      "category": "fixture",
+      "export_name": "fixture_merch_upgrade_pedestal.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.11/merch_upgrade_presentation_stand.png",
+      "source_sha256": "3a06745a85d18fc06f5dd3841bd36eeb6cdb41d2698391b15e1f5aa7f48b098e",
+      "bytes": 102747,
+      "category": "fixture",
+      "export_name": "fixture_merch_upgrade_presentation_stand.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.11/merch_upgrade_riser.png",
+      "source_sha256": "6e1749e5d4da2d0fc0153df8716e0543c3f8a4ecab87c8a895b1f725da1973de",
+      "bytes": 91274,
+      "category": "fixture",
+      "export_name": "fixture_merch_upgrade_riser.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.11/merch_upgrade_shelf_header.png",
+      "source_sha256": "30484417d0f6f0a091fa4c3374ad625f087ab76cc61e8ad386195a763e2a1281",
+      "bytes": 83648,
+      "category": "prop",
+      "export_name": "prop_merch_upgrade_shelf_header.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.12/floor_access_cover.png",
+      "source_sha256": "ae89a3e3de92fc5a696567dba20e63c8d57bb30b9ae90f937ce7fb4de10a1add",
+      "bytes": 60449,
+      "category": "env",
+      "export_name": "env_floor_access_cover.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.12/floor_mat_branded.png",
+      "source_sha256": "9c47fb9cca6c0fb971e3edd551aa4686feec0cbd814e4e84b73675fc30d1fa72",
+      "bytes": 145743,
+      "category": "env",
+      "export_name": "env_floor_mat_branded.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.12/floor_mat_entrance.png",
+      "source_sha256": "bee533860388f3d7811f2525676ad935819c832f53515e4c131383a38d284a9d",
+      "bytes": 129941,
+      "category": "env",
+      "export_name": "env_floor_mat_entrance.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.12/floor_mat_staff.png",
+      "source_sha256": "86cc7e85c5215ff847ebcf49465e4b1de454b1574838a78157d93ba27ef188c1",
+      "bytes": 137332,
+      "category": "env",
+      "export_name": "env_floor_mat_staff.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.12/floor_mat_utility.png",
+      "source_sha256": "ccc582a34921d3def9ea187ba624d5d50b8f2f009d1d3541e70b61482d3276a0",
+      "bytes": 142490,
+      "category": "env",
+      "export_name": "env_floor_mat_utility.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.12/floor_seam_expansion.png",
+      "source_sha256": "1a5958f0cce4fb8e073da43fec1538b42cd141931c1883c779b43ace79147a67",
+      "bytes": 104076,
+      "category": "decal",
+      "export_name": "decal_floor_seam_expansion.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.12/floor_threshold_doorway.png",
+      "source_sha256": "4b45f4eeeccf00b543fff536c7d6e10f9614bc455a964a78989358eeedde04f8",
+      "bytes": 108998,
+      "category": "env",
+      "export_name": "env_floor_threshold_doorway.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.12/floor_tile_ceramic_sage.png",
+      "source_sha256": "08d4a2c611e893cb88fa7303cc1ff5a43a7f6a424e06ecc759bd9cf978a86320",
+      "bytes": 135814,
+      "category": "env",
+      "export_name": "env_floor_tile_ceramic_sage.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.12/floor_tile_geometric_premium.png",
+      "source_sha256": "97e981b125de1e40ddff77b2d4e10dd9ba5980030c4567d2b825caa04a1e84ae",
+      "bytes": 152779,
+      "category": "env",
+      "export_name": "env_floor_tile_geometric_premium.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.12/floor_tile_herringbone.png",
+      "source_sha256": "d7f3ba7ef77f4c01e2d9de83c3478fdceba8e16fafaece61d63a0cc0bcae2697",
+      "bytes": 120651,
+      "category": "env",
+      "export_name": "env_floor_tile_herringbone.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.12/floor_tile_oak_light.png",
+      "source_sha256": "2b4f15723f0f06e140082210cc37130d83f76be0fe2d58a2f37f4cad39cad78d",
+      "bytes": 137620,
+      "category": "env",
+      "export_name": "env_floor_tile_oak_light.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.12/floor_tile_stone_cream.png",
+      "source_sha256": "5e85c2fa7a1c82d283504932bab5ed7f63fce9ba30ee4847ea20b38565877f80",
+      "bytes": 126444,
+      "category": "env",
+      "export_name": "env_floor_tile_stone_cream.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.12/floor_tile_terracotta.png",
+      "source_sha256": "7d58bcc8643ba9705e0723eca07cc1f2ec34c0c1e711e58d38af5f1ecb593b35",
+      "bytes": 139290,
+      "category": "env",
+      "export_name": "env_floor_tile_terracotta.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.12/floor_tile_walnut.png",
+      "source_sha256": "92b54d53020dd79d41a6c5c06f407b2cfcb1c2cebba18747a922a7a861c309c7",
+      "bytes": 136480,
+      "category": "env",
+      "export_name": "env_floor_tile_walnut.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.12/floor_tile_walnut_dark.png",
+      "source_sha256": "3fa00d2d9884a0c997f609fbaa60bffed3b593340168f199d7f4cb311bb6a050",
+      "bytes": 131538,
+      "category": "env",
+      "export_name": "env_floor_tile_walnut_dark.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.12/floor_transition_brass.png",
+      "source_sha256": "718f6f74583a7d7b589ca39151fda1471891bf4e883a5aac50d11ccbebc7c17a",
+      "bytes": 81239,
+      "category": "decal",
+      "export_name": "decal_floor_transition_brass.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.12/floor_transition_wood_stone.png",
+      "source_sha256": "ac1f845d9d7585de6877eac2f309a95dfbc6bb44bcf7180a15e8df7a32098f48",
+      "bytes": 94877,
+      "category": "decal",
+      "export_name": "decal_floor_transition_wood_stone.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.12/floor_trim_corner.png",
+      "source_sha256": "0a21f7cba88c4edd6427d94980c7d5cd15ba789d8c31370ddb92cd8b32eedcce",
+      "bytes": 85419,
+      "category": "decal",
+      "export_name": "decal_floor_trim_corner.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.12/floor_trim_walnut.png",
+      "source_sha256": "005f028e7c497d02bf2b292aacd2914e3be31dd6af5bdcec1c10e47ccada1946",
+      "bytes": 69990,
+      "category": "decal",
+      "export_name": "decal_floor_trim_walnut.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.12/floor_vent_grille.png",
+      "source_sha256": "de39ff1b28dd3bdebd446f58493593f829875255abb61be44224d577de867dc1",
+      "bytes": 54652,
+      "category": "env",
+      "export_name": "env_floor_vent_grille.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.12/rug_botanical_large.png",
+      "source_sha256": "14d0ad6f643206745139f8d62c501ad4452d60a4931f7588884b4e86138d2f04",
+      "bytes": 256557,
+      "category": "env",
+      "export_name": "env_rug_botanical_large.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.12/rug_botanical_small.png",
+      "source_sha256": "2c2e29685299be53d6d246055b07b1c2c9baaa13333bc60efce6c2516dd76a75",
+      "bytes": 134113,
+      "category": "env",
+      "export_name": "env_rug_botanical_small.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.12/rug_geometric_sage.png",
+      "source_sha256": "2461a9e5c88924d599d7afd2bea6a10846c2f0305457c21d088f0e010e6d2bb1",
+      "bytes": 167666,
+      "category": "env",
+      "export_name": "env_rug_geometric_sage.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.12/rug_lounge_premium.png",
+      "source_sha256": "465b3fb408b98fe89c21746c71902e8ab480b10ff34f76161d2f7bc7508c650b",
+      "bytes": 164709,
+      "category": "env",
+      "export_name": "env_rug_lounge_premium.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.12/rug_runner_botanical.png",
+      "source_sha256": "9a3ac9cae770c4f7daf7ee60942d9728ee742ad653474724c85fad1488bfb217",
+      "bytes": 168489,
+      "category": "env",
+      "export_name": "env_rug_runner_botanical.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.12/rug_terracotta_pattern.png",
+      "source_sha256": "9bcedba862a2a3d4f47a720c823b508854a1a0ec0d4e7cd51013a740fa584684",
+      "bytes": 186713,
+      "category": "env",
+      "export_name": "env_rug_terracotta_pattern.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.12/rug_vintage_green.png",
+      "source_sha256": "b2a2ba27dfa2729f08728445e3a14b9e735539347a8c39c74a9b9250925e528a",
+      "bytes": 206370,
+      "category": "env",
+      "export_name": "env_rug_vintage_green.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.12/rug_woven_cream.png",
+      "source_sha256": "d69747479245792c9db1ea950433f90f7d6433af15181aaf2b3692fceac9c442",
+      "bytes": 197197,
+      "category": "env",
+      "export_name": "env_rug_woven_cream.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.13/wall_art_abstract.png",
+      "source_sha256": "0bc598799b93fa973f25558770054f2a93dc68f26edd949eaa7ce3a8841b0675",
+      "bytes": 43372,
+      "category": "prop",
+      "export_name": "prop_wall_art_abstract.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.13/wall_art_botanical_cannabis.png",
+      "source_sha256": "acbf946f8ea54db5426ee439ece0e8a32d1146273378e53597b1de0f8c255735",
+      "bytes": 76318,
+      "category": "prop",
+      "export_name": "prop_wall_art_botanical_cannabis.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.13/wall_art_landscape.png",
+      "source_sha256": "eacce34f3a806ae3467f3a520469f577bdb0acf0b0bd1e26bf076cd72f3f74f6",
+      "bytes": 70190,
+      "category": "prop",
+      "export_name": "prop_wall_art_landscape.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.13/wall_art_monstera.png",
+      "source_sha256": "a17abf97b7906ccfb6e02af8950f3e09dff46d7401fdb505f0edb1b8e90e2850",
+      "bytes": 57928,
+      "category": "prop",
+      "export_name": "prop_wall_art_monstera.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.13/wall_art_premium_gold.png",
+      "source_sha256": "2385147a81ff68ce6c7dbe4c43d80c1baa427c0d4f71225c248f8908a2526140",
+      "bytes": 51989,
+      "category": "prop",
+      "export_name": "prop_wall_art_premium_gold.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.13/wall_art_pressed_herbs.png",
+      "source_sha256": "029d6e64e6d1a0e2e544edd6f5e66124423f1e68a8b16c7da0a087f9cfd1d87c",
+      "bytes": 57081,
+      "category": "prop",
+      "export_name": "prop_wall_art_pressed_herbs.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.13/wall_art_triptych.png",
+      "source_sha256": "09d97921dd7fe833f45fd30a9fc7a8d3b280a5c6d5ec133e797b647760d26f39",
+      "bytes": 88806,
+      "category": "prop",
+      "export_name": "prop_wall_art_triptych.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.13/wall_art_vintage_ad.png",
+      "source_sha256": "e2dd3899368789cfa0034da7c3111ef597d3cbed2a208b90d58d1ca9d6b8c17e",
+      "bytes": 67714,
+      "category": "prop",
+      "export_name": "prop_wall_art_vintage_ad.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.13/wall_corner_molding.png",
+      "source_sha256": "84cf2f7796253c1517acf65267314413d51ceac7211e3d69774798ce73ecf042",
+      "bytes": 26337,
+      "category": "env",
+      "export_name": "env_wall_corner_molding.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.13/wall_decor_backlit_sign.png",
+      "source_sha256": "663c47f49d0779480cbeb3731ee0b2da6ef8308d9e884fd7b2d261814039ff99",
+      "bytes": 46242,
+      "category": "sign",
+      "export_name": "sign_wall_decor_backlit_sign.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.13/wall_decor_clock_vintage.png",
+      "source_sha256": "c5d42f86943fe3b76ccd57fac4c6ef9e04b35222c9b9f1baf3c1a148c73a6288",
+      "bytes": 59066,
+      "category": "prop",
+      "export_name": "prop_wall_decor_clock_vintage.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.13/wall_decor_community_board.png",
+      "source_sha256": "345937a7d12c26de30995a989a924347818ea832bd3c1de98fbee0ffe8fac722",
+      "bytes": 63899,
+      "category": "prop",
+      "export_name": "prop_wall_decor_community_board.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.13/wall_decor_emblem_brass.png",
+      "source_sha256": "91357ddc48cf298b9e650f81cf1d468088e38dc58c1e5b45f647f053d4bfef9e",
+      "bytes": 37401,
+      "category": "prop",
+      "export_name": "prop_wall_decor_emblem_brass.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.13/wall_decor_feature_premium.png",
+      "source_sha256": "41fcf6fa5a298da5d633a9694a68cde51a5f3cdca8aae891c56e94e80feadf08",
+      "bytes": 63690,
+      "category": "prop",
+      "export_name": "prop_wall_decor_feature_premium.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.13/wall_decor_floating_ledge.png",
+      "source_sha256": "e2060b5dfe8d9d5cc52b5293fac1e6f939fb961ac1852dfe31517acf9343daf4",
+      "bytes": 102982,
+      "category": "prop",
+      "export_name": "prop_wall_decor_floating_ledge.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.13/wall_decor_garland.png",
+      "source_sha256": "2dddf539dd073a8fff6e37af89dd572e3b2ba39509fedc62f1c8cac88a580950",
+      "bytes": 86085,
+      "category": "prop",
+      "export_name": "prop_wall_decor_garland.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.13/wall_decor_hanging_basket.png",
+      "source_sha256": "7b806a99b4b239a8626a527ad11b0405a52fd874977315e271cfbd7d5d721909",
+      "bytes": 55701,
+      "category": "plant",
+      "export_name": "plant_wall_decor_hanging_basket.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.13/wall_decor_herb_display.png",
+      "source_sha256": "2cb868e28b29f5914a2a879a203bc6378bbbe5d0949150b4729c80c1145c6ea3",
+      "bytes": 57085,
+      "category": "prop",
+      "export_name": "prop_wall_decor_herb_display.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.13/wall_decor_heritage_plaque.png",
+      "source_sha256": "2eab814ae884d9fa02b9e766f678e1eacecae0cfb438b8e1d98c4dfe098fab17",
+      "bytes": 47726,
+      "category": "prop",
+      "export_name": "prop_wall_decor_heritage_plaque.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.13/wall_decor_leaf_relief.png",
+      "source_sha256": "30a8b1e6516f4afda87f02e20c13fc2b535655f888f0dd6267289489556dd0f5",
+      "bytes": 49154,
+      "category": "prop",
+      "export_name": "prop_wall_decor_leaf_relief.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.13/wall_decor_living_wall.png",
+      "source_sha256": "db0c4d7f2f5cfffcee0d57e5682ba834a5036d7302959afceadb173569114031",
+      "bytes": 77147,
+      "category": "plant",
+      "export_name": "plant_wall_decor_living_wall.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.13/wall_decor_mirror_brass.png",
+      "source_sha256": "c756587a0b5a6b1d9c928d340dcdf1e08535b8b9e1485c8bc58a94f694012f6e",
+      "bytes": 53415,
+      "category": "prop",
+      "export_name": "prop_wall_decor_mirror_brass.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.13/wall_decor_moss_frame.png",
+      "source_sha256": "49f6d7076569e8a831e568061527d2249c76b4446f0640e6cd85164fdba07b1d",
+      "bytes": 59780,
+      "category": "prop",
+      "export_name": "prop_wall_decor_moss_frame.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.13/wall_decor_plant_shelf.png",
+      "source_sha256": "5bb243e80141d48ccd013e11af3116baf91b566a1020608465fd6572061613a9",
+      "bytes": 70222,
+      "category": "plant",
+      "export_name": "plant_wall_decor_plant_shelf.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.13/wall_decor_planter_brass.png",
+      "source_sha256": "bef9ef7d172ee21c7237f0284bf94786a1135cc3332195261c316e10a0636a72",
+      "bytes": 75318,
+      "category": "plant",
+      "export_name": "plant_wall_decor_planter_brass.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.13/wall_panel_botanical_wallpaper.png",
+      "source_sha256": "4cdfa615794054d62d16b9c539b4deca6892b0b53e0f8d8b1a9879fd5d86e680",
+      "bytes": 74793,
+      "category": "decal",
+      "export_name": "decal_wall_panel_botanical_wallpaper.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.13/wall_panel_fluted.png",
+      "source_sha256": "1207dd9417d73ac557d7c725c7e01a04dc01ec723a55bb04a14159af51ec3b7b",
+      "bytes": 37230,
+      "category": "env",
+      "export_name": "env_wall_panel_fluted.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.13/wall_panel_plaster.png",
+      "source_sha256": "0d1b6a7f6a5afb439bf371eb3611011343000ab431c8bb581d95582e8efb2f3c",
+      "bytes": 61123,
+      "category": "env",
+      "export_name": "env_wall_panel_plaster.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.13/wall_panel_wainscoting.png",
+      "source_sha256": "541f9b1b5465333bcce1390d40163b9751bad5ccdb1d2de009aa82b8860c34f7",
+      "bytes": 46847,
+      "category": "env",
+      "export_name": "env_wall_panel_wainscoting.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.13/wall_panel_walnut.png",
+      "source_sha256": "1c4c7871361bd6fcb966be15cc67bc8ce074e2704b22669d9d0c8d45ee207378",
+      "bytes": 56715,
+      "category": "env",
+      "export_name": "env_wall_panel_walnut.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.13/wall_picture_rail.png",
+      "source_sha256": "48bf1e9508cf3daaf169290ff180d7d45a312ed52590c9fb2d923fb8c8eceb1d",
+      "bytes": 46274,
+      "category": "env",
+      "export_name": "env_wall_picture_rail.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.13/wall_trim_brass.png",
+      "source_sha256": "eded9d41d5a5cf5596edb6a47be1da9d169d6c2630c7333aeb3bfcc35d4d0979",
+      "bytes": 31361,
+      "category": "env",
+      "export_name": "env_wall_trim_brass.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.14/exterior_prop_aframe_sign.png",
+      "source_sha256": "7bd0a607f107c69961deb1741a9aeb718974954117968be6d4bee6d1d2da3b7d",
+      "bytes": 72452,
+      "category": "sign",
+      "export_name": "sign_exterior_prop_aframe_sign.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.14/exterior_prop_bench.png",
+      "source_sha256": "5d6d24429f103af294f312e2c49408a44eb8f97480a7e821161b6f26888a5958",
+      "bytes": 84076,
+      "category": "prop",
+      "export_name": "prop_exterior_prop_bench.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.14/exterior_prop_bicycle.png",
+      "source_sha256": "a7e1c5689f62a622defe04c2ac1d6c8c94a81bb0314eb627e37b617b50dde305",
+      "bytes": 85727,
+      "category": "prop",
+      "export_name": "prop_exterior_prop_bicycle.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.14/exterior_prop_bike_rack.png",
+      "source_sha256": "8880dbdb5b0a1abce9ad41ecabb7cf0685ebfa560c3758326f693adaf7849f3d",
+      "bytes": 42521,
+      "category": "prop",
+      "export_name": "prop_exterior_prop_bike_rack.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.14/exterior_prop_planter.png",
+      "source_sha256": "224e68d625ba1910f736fb3f151238a8c5959252f040044f78c2487397421117",
+      "bytes": 88657,
+      "category": "plant",
+      "export_name": "plant_exterior_prop_planter.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.14/exterior_prop_signpost.png",
+      "source_sha256": "d353d87e035f2500efa60f7c94ac8e26a3ad7138eb15ac1eb0b75322434a8de9",
+      "bytes": 40185,
+      "category": "sign",
+      "export_name": "sign_exterior_prop_signpost.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.14/exterior_prop_street_tree.png",
+      "source_sha256": "fc30f319ef29f67614c2c2422e3b284bd9699df41faf62831341c0deb0a4a080",
+      "bytes": 84383,
+      "category": "plant",
+      "export_name": "plant_exterior_prop_street_tree.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.14/exterior_prop_streetlamp.png",
+      "source_sha256": "1f8b6bf1885f311880c5d8d5c5233710acdb781cd583a2aa1d93e0b826f8aedd",
+      "bytes": 47550,
+      "category": "light",
+      "export_name": "light_exterior_prop_streetlamp.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.14/exterior_view_evening_street.png",
+      "source_sha256": "546a5e35f794bdb334693149f6b8e6c78d9315506e6c664fa82ce7d4f75ba1ee",
+      "bytes": 65580,
+      "category": "env",
+      "export_name": "env_exterior_view_evening_street.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.14/exterior_view_park.png",
+      "source_sha256": "38a3953379797d227fae43361ac0888e1290c7efb76705029efb754622d85598",
+      "bytes": 71103,
+      "category": "env",
+      "export_name": "env_exterior_view_park.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.14/exterior_view_residential.png",
+      "source_sha256": "ceb5e308d8f0eaaf995a608b82d1c606e5b9327fd9a3a70b13e605296cbb3349",
+      "bytes": 70585,
+      "category": "env",
+      "export_name": "env_exterior_view_residential.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.14/exterior_view_shopfront.png",
+      "source_sha256": "349e3d6bc386bbf547925640d7489625d3f3977582fb5f7a85a2c2ebdf4629c1",
+      "bytes": 71361,
+      "category": "env",
+      "export_name": "env_exterior_view_shopfront.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.14/exterior_view_sidewalk.png",
+      "source_sha256": "49f428e821aee78b7bb00c50fa0b34f7e852a48e49386e98bbdb07a88a89abfd",
+      "bytes": 66672,
+      "category": "env",
+      "export_name": "env_exterior_view_sidewalk.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.14/exterior_view_skyline.png",
+      "source_sha256": "9478984aa99ec28c24aa6c60c539b917b31e6e12a8e5a16291af7644affc3d7a",
+      "bytes": 55015,
+      "category": "env",
+      "export_name": "env_exterior_view_skyline.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.14/exterior_view_street.png",
+      "source_sha256": "af0b9717536bd209b96830620686d7c9137ef86943d677c60f3035ff4f139339",
+      "bytes": 64150,
+      "category": "env",
+      "export_name": "env_exterior_view_street.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.14/exterior_view_trees.png",
+      "source_sha256": "da24d3844ee39ab3e7c40aa4815b4a0280c15b9d5df31be6ffd6e2117b16096b",
+      "bytes": 74362,
+      "category": "env",
+      "export_name": "env_exterior_view_trees.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.14/window_fx_condensation.png",
+      "source_sha256": "c6e615859520250c2d54e3e592697752af989b1dbc7c94760429653e17fc70ce",
+      "bytes": 6921,
+      "category": "decal",
+      "export_name": "decal_window_fx_condensation.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.14/window_fx_interior_glow.png",
+      "source_sha256": "3e956c3eb4203cc5368253ffd0369bedff70183c3d2a8def7c1c5563cf2a488d",
+      "bytes": 31722,
+      "category": "light",
+      "export_name": "light_window_fx_interior_glow.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.14/window_fx_night_overlay.png",
+      "source_sha256": "2b339e5da0d7fa498ae7f8b6e691ca81a9c4daf522f7a00c25a66bbbe007a5ac",
+      "bytes": 24001,
+      "category": "light",
+      "export_name": "light_window_fx_night_overlay.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.14/window_fx_rain_heavy.png",
+      "source_sha256": "0169de4253869c29ba3fd5f34626d59987b6cbe493b6cc78c3fe98abcd8d40e4",
+      "bytes": 14124,
+      "category": "decal",
+      "export_name": "decal_window_fx_rain_heavy.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.14/window_fx_rain_light.png",
+      "source_sha256": "437b2e17cc948b96c0ef351e0f1e1ea119e0fe6f260046acfdb2a6e343ac0407",
+      "bytes": 5271,
+      "category": "decal",
+      "export_name": "decal_window_fx_rain_light.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.14/window_fx_reflection_clear.png",
+      "source_sha256": "ba463af03bbb9a493f297cc4cc9490cda513994a862bca0dc41075f7f7f4ae91",
+      "bytes": 24068,
+      "category": "decal",
+      "export_name": "decal_window_fx_reflection_clear.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.14/window_fx_reflection_evening.png",
+      "source_sha256": "c0518da6388ee0ec82b8047fa249128deaa368c5dcc30c01d207e3d793c4a8ff",
+      "bytes": 24068,
+      "category": "decal",
+      "export_name": "decal_window_fx_reflection_evening.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.14/window_fx_reflection_golden.png",
+      "source_sha256": "7d0faf15f144611a1deb5aee3d0cdabf356bd007b21db54d95d3974cbe88fcb3",
+      "bytes": 24066,
+      "category": "decal",
+      "export_name": "decal_window_fx_reflection_golden.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.14/window_hardware_brass.png",
+      "source_sha256": "54220e1ded52bbe40bad21f41dd8f3282159e65c0103e7dcede156432ced9a60",
+      "bytes": 15748,
+      "category": "env",
+      "export_name": "env_window_hardware_brass.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.14/window_ledge_interior.png",
+      "source_sha256": "2f2af1ed7942a0f038655b32199c1f73c1233c79b2f55c4cba8b5d4bf828b77f",
+      "bytes": 47323,
+      "category": "env",
+      "export_name": "env_window_ledge_interior.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.14/window_mullion_divider.png",
+      "source_sha256": "ab0c21a389b7054b8db67f811f1bf7a22b1d6414d79b105d04f301383c1cbeee",
+      "bytes": 55603,
+      "category": "env",
+      "export_name": "env_window_mullion_divider.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.14/window_side_glass.png",
+      "source_sha256": "7c15270f2bc3169ae629aea2f855d6e50213042230bef0c349b787ae7fec6702",
+      "bytes": 62004,
+      "category": "env",
+      "export_name": "env_window_side_glass.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.14/window_sill_walnut.png",
+      "source_sha256": "cde4c0859aa1021e4265cbfe0f766ce2689af034b2b70b5b7e57505632c533ec",
+      "bytes": 41973,
+      "category": "env",
+      "export_name": "env_window_sill_walnut.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.14/window_storefront_arch_glass.png",
+      "source_sha256": "241df813896697457a02a851f6a80c90c44f648a11b8dac43a3fd05def8d1e34",
+      "bytes": 66323,
+      "category": "env",
+      "export_name": "env_window_storefront_arch_glass.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.14/window_trim_green.png",
+      "source_sha256": "c45c326e07a171f8df97b750bda4ab56d9a834f71d2b75c80a69862ba31931b1",
+      "bytes": 63644,
+      "category": "env",
+      "export_name": "env_window_trim_green.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.14/window_valance_decorative.png",
+      "source_sha256": "ed716e618aa14206004d6ee81050e98ff312abf85a4fa42b0c0ec096b91763d6",
+      "bytes": 72130,
+      "category": "env",
+      "export_name": "env_window_valance_decorative.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.17/budtender_store_open.png",
+      "git_blob_sha": "69dd33c4b1d0f95189c9bb8c0ff56daa350a3698",
+      "bytes": 2293967,
+      "category": "env",
+      "export_name": "env_budtender_store_open.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.17/budtender_store_closed.png",
+      "git_blob_sha": "bd2161c39433034320ff2d4feff415b116efe377",
+      "bytes": 1746501,
+      "category": "env",
+      "export_name": "env_budtender_store_closed.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.17/budtender_store_opening.png",
+      "git_blob_sha": "9da8f4819ba67566a17d0cc68c0b9801c814293c",
+      "bytes": 1707238,
+      "category": "env",
+      "export_name": "env_budtender_store_opening.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.17/budtender_store_closing.png",
+      "git_blob_sha": "ce2ff76416745a1139332345a4634145939efaec",
+      "bytes": 1952058,
+      "category": "env",
+      "export_name": "env_budtender_store_closing.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.17/budtender_store_empty.png",
+      "git_blob_sha": "5a3be0e69145be99aba64bdbce0c75026c5d193c",
+      "bytes": 1831971,
+      "category": "env",
+      "export_name": "env_budtender_store_empty.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.17/budtender_store_quiet.png",
+      "git_blob_sha": "4177544f0a559dbea109a9fec68853fd6c8d93b0",
+      "bytes": 1741221,
+      "category": "env",
+      "export_name": "env_budtender_store_quiet.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.17/budtender_store_normal_traffic.png",
+      "git_blob_sha": "ad9cb03959e8d34f91fa9706b225133da4c7baef",
+      "bytes": 1695712,
+      "category": "env",
+      "export_name": "env_budtender_store_normal_traffic.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.17/budtender_store_busy.png",
+      "git_blob_sha": "727edb228eede2aaf02777a2095f051f876bab2c",
+      "bytes": 1927812,
+      "category": "env",
+      "export_name": "env_budtender_store_busy.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.17/budtender_store_rush_hour.png",
+      "git_blob_sha": "86b087261282882a0d5a004c07b5bb65e99c5b4d",
+      "bytes": 1651832,
+      "category": "env",
+      "export_name": "env_budtender_store_rush_hour.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.17/budtender_store_queue_overflow.png",
+      "git_blob_sha": "e3cf9c7a75917b13b4efe71ab04a1a052faa4cbf",
+      "bytes": 1765652,
+      "category": "env",
+      "export_name": "env_budtender_store_queue_overflow.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.17/budtender_store_restocking.png",
+      "git_blob_sha": "a560265e79f0c345eec3e91fa4b569b56096c611",
+      "bytes": 215068,
+      "category": "env",
+      "export_name": "env_budtender_store_restocking.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.17/budtender_store_low_stock.png",
+      "git_blob_sha": "9a15487b50f6525be33764c3a505e6ce7fbf8ec2",
+      "bytes": 205522,
+      "category": "env",
+      "export_name": "env_budtender_store_low_stock.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.17/budtender_store_fully_stocked.png",
+      "git_blob_sha": "e270c51e281b1c6ed766f7fb275afe84a39e2d04",
+      "bytes": 218228,
+      "category": "env",
+      "export_name": "env_budtender_store_fully_stocked.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.17/budtender_store_sold_out.png",
+      "git_blob_sha": "7872320f47ce9df88b43ab043c8dce94105a08ee",
+      "bytes": 197610,
+      "category": "env",
+      "export_name": "env_budtender_store_sold_out.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.17/budtender_store_premium_merchandising.png",
+      "git_blob_sha": "c0619a4b27c6dff98bb95044113b3ed42393fd9b",
+      "bytes": 215909,
+      "category": "env",
+      "export_name": "env_budtender_store_premium_merchandising.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.17/budtender_store_maintenance.png",
+      "git_blob_sha": "5737756c85f7c60e9c03ac74627be64ccfef08d5",
+      "bytes": 212836,
+      "category": "env",
+      "export_name": "env_budtender_store_maintenance.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.17/budtender_store_morning.png",
+      "git_blob_sha": "108218368e519d7da4a6451aa44302595d59512e",
+      "bytes": 223488,
+      "category": "env",
+      "export_name": "env_budtender_store_morning.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.17/budtender_store_midday.png",
+      "git_blob_sha": "0ee84911c3dbc0cbb327fd688a532c451e2b5e9f",
+      "bytes": 226660,
+      "category": "env",
+      "export_name": "env_budtender_store_midday.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.17/budtender_store_afternoon.png",
+      "git_blob_sha": "1cbed39dae7515df43e7299fd55427765207ee2f",
+      "bytes": 222183,
+      "category": "env",
+      "export_name": "env_budtender_store_afternoon.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.17/budtender_store_golden_hour.png",
+      "git_blob_sha": "9dad99ef3fbb299c2b191ab8f9ea96bb0e25ea56",
+      "bytes": 217736,
+      "category": "env",
+      "export_name": "env_budtender_store_golden_hour.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.17/budtender_store_evening.png",
+      "git_blob_sha": "1edaa7419bc008920c6c7cbf3ebe90bdfaeafc5a",
+      "bytes": 199172,
+      "category": "env",
+      "export_name": "env_budtender_store_evening.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.17/budtender_store_nighttime.png",
+      "git_blob_sha": "e99e701dc1258539c27c0377b931b471eec21869",
+      "bytes": 190843,
+      "category": "env",
+      "export_name": "env_budtender_store_nighttime.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.17/budtender_store_lights_off.png",
+      "git_blob_sha": "62af3337bb0ef31779cce13cfd84c5a518ac9ce8",
+      "bytes": 145439,
+      "category": "env",
+      "export_name": "env_budtender_store_lights_off.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.17/budtender_store_display_lighting.png",
+      "git_blob_sha": "28f9eaa0e186a017ba15cb4ef748c76e1099eaa5",
+      "bytes": 198326,
+      "category": "env",
+      "export_name": "env_budtender_store_display_lighting.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.17/budtender_store_soft_ambient.png",
+      "git_blob_sha": "292a8c14fa169b9858ec48af9ec81892afc71f9a",
+      "bytes": 192303,
+      "category": "env",
+      "export_name": "env_budtender_store_soft_ambient.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.17/budtender_store_bright_retail.png",
+      "git_blob_sha": "aeeecc6b2b64d5592b9b97d15d965e162a5782da",
+      "bytes": 203719,
+      "category": "env",
+      "export_name": "env_budtender_store_bright_retail.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.17/budtender_store_overcast.png",
+      "git_blob_sha": "ee814e2faf1ff722ab4074352f31c7f70d51bee0",
+      "bytes": 201192,
+      "category": "env",
+      "export_name": "env_budtender_store_overcast.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.17/budtender_store_rain.png",
+      "git_blob_sha": "03d85e0080aecee20c0b1e30df9aeb729da69fe1",
+      "bytes": 195926,
+      "category": "env",
+      "export_name": "env_budtender_store_rain.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.17/budtender_store_snow.png",
+      "git_blob_sha": "ff2bffae4b524fce3ee2d30f5a789aaf94048b82",
+      "bytes": 215632,
+      "category": "env",
+      "export_name": "env_budtender_store_snow.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.17/budtender_store_autumn.png",
+      "git_blob_sha": "9f37d9440658a26fd5d1a685c17deedfc56586db",
+      "bytes": 209508,
+      "category": "env",
+      "export_name": "env_budtender_store_autumn.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.17/budtender_store_winter_warmth.png",
+      "git_blob_sha": "a1ddd00bcc31b3f311d2c8e6d16dc038b0bb19b4",
+      "bytes": 213058,
+      "category": "env",
+      "export_name": "env_budtender_store_winter_warmth.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.17/budtender_store_special_event_illumination.png",
+      "git_blob_sha": "c4206bd0f5b6193547b0646d2fd52ebb28b112cc",
+      "bytes": 224161,
+      "category": "env",
+      "export_name": "env_budtender_store_special_event_illumination.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.17/budtender_store_spotless.png",
+      "git_blob_sha": "270989cfd254afcdc7a82d02fd1e2bd15459762a",
+      "bytes": 236858,
+      "category": "env",
+      "export_name": "env_budtender_store_spotless.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.17/budtender_store_normal_wear.png",
+      "git_blob_sha": "b055a6cb7255b869f0fa83c19b0b480eef1c60cd",
+      "bytes": 240599,
+      "category": "env",
+      "export_name": "env_budtender_store_normal_wear.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.17/budtender_store_dirty_floor.png",
+      "git_blob_sha": "0cf9e6b1f22282cd1c5b5027d1638a76491cc606",
+      "bytes": 259100,
+      "category": "env",
+      "export_name": "env_budtender_store_dirty_floor.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.17/budtender_store_overflowing_bins.png",
+      "git_blob_sha": "f3e055ab25b18ec7934fd892e327550b23bfede5",
+      "bytes": 241679,
+      "category": "env",
+      "export_name": "env_budtender_store_overflowing_bins.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.17/budtender_store_damaged_furniture.png",
+      "git_blob_sha": "5acbff138499afc018f7c90d22a9d7b7e418b7cb",
+      "bytes": 239330,
+      "category": "env",
+      "export_name": "env_budtender_store_damaged_furniture.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.17/budtender_store_equipment_fault.png",
+      "git_blob_sha": "d52fa2c08324f77dfdf3ee28a57bfbe67ae3f1c7",
+      "bytes": 244414,
+      "category": "env",
+      "export_name": "env_budtender_store_equipment_fault.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.17/budtender_store_security_alert.png",
+      "git_blob_sha": "b3b9a3d9da742d31de5470289e6c6699ba4c336c",
+      "bytes": 234056,
+      "category": "env",
+      "export_name": "env_budtender_store_security_alert.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.17/budtender_store_repair_in_progress.png",
+      "git_blob_sha": "9257fb2c757ba0c6a6a2b408863ccb99c9d2a5f6",
+      "bytes": 253818,
+      "category": "env",
+      "export_name": "env_budtender_store_repair_in_progress.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.17/budtender_store_restored_equipment.png",
+      "git_blob_sha": "ecb88b1dfd2aa9e9e5ab3004c971625a2485db84",
+      "bytes": 234655,
+      "category": "env",
+      "export_name": "env_budtender_store_restored_equipment.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.17/budtender_store_renovation.png",
+      "git_blob_sha": "c5e040ae01f457eedea804d4f1396af4be5b3682",
+      "bytes": 229849,
+      "category": "env",
+      "export_name": "env_budtender_store_renovation.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.17/budtender_store_construction_barriers.png",
+      "git_blob_sha": "0755ce86d8c70b4b57705f6bac790b72a753efa1",
+      "bytes": 231354,
+      "category": "env",
+      "export_name": "env_budtender_store_construction_barriers.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.17/budtender_store_newly_unlocked_room.png",
+      "git_blob_sha": "517829ce06cf26ba91659904c127ecfa1533e825",
+      "bytes": 219140,
+      "category": "env",
+      "export_name": "env_budtender_store_newly_unlocked_room.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.17/budtender_store_premium_upgrade.png",
+      "git_blob_sha": "26acfecd56c38d9f8b9799472e52447b84772dc5",
+      "bytes": 256754,
+      "category": "env",
+      "export_name": "env_budtender_store_premium_upgrade.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.17/budtender_store_seasonal_decoration.png",
+      "git_blob_sha": "f6d78df3ddfc5e7de0f095d4af68390d9a536d5d",
+      "bytes": 259006,
+      "category": "env",
+      "export_name": "env_budtender_store_seasonal_decoration.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.17/budtender_store_inspection_ready.png",
+      "git_blob_sha": "a4b606b7ea2703f96db0bb77ce371e6b93261af8",
+      "bytes": 238554,
+      "category": "env",
+      "export_name": "env_budtender_store_inspection_ready.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.17/budtender_store_post_rush_cleanup.png",
+      "git_blob_sha": "23e170c78ee49cf7f487b98d0993ee53e41c723e",
+      "bytes": 236275,
+      "category": "env",
+      "export_name": "env_budtender_store_post_rush_cleanup.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_active.png",
+      "git_blob_sha": "2544fbd08f6069999f5ca789949fd39874a3a053",
+      "bytes": 87286,
+      "category": "decal",
+      "export_name": "decal_hotspot_active.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_anchor.png",
+      "git_blob_sha": "13ae03783274b6cab5fbc5239cba22e041261c24",
+      "bytes": 51284,
+      "category": "decal",
+      "export_name": "decal_hotspot_anchor.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_attention.png",
+      "git_blob_sha": "3ff286608cbd79f186a2d66cb69fdcda5d580d9a",
+      "bytes": 105649,
+      "category": "decal",
+      "export_name": "decal_hotspot_attention.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_available.png",
+      "git_blob_sha": "a268cab7f818552d0cee40669cad206eb66e9f00",
+      "bytes": 78993,
+      "category": "decal",
+      "export_name": "decal_hotspot_available.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_cancel.png",
+      "git_blob_sha": "e85276539a6cfe3c4c8ab3f8f19595880514153c",
+      "bytes": 80203,
+      "category": "decal",
+      "export_name": "decal_hotspot_cancel.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_cash_register.png",
+      "git_blob_sha": "5c00a729eeac95db415c850ffb14a4a2c14fb63a",
+      "bytes": 80428,
+      "category": "decal",
+      "export_name": "decal_hotspot_cash_register.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_cleaning.png",
+      "git_blob_sha": "e6a418311d2a59126f8b7579b0261cb3a363985d",
+      "bytes": 103598,
+      "category": "decal",
+      "export_name": "decal_hotspot_cleaning.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_completed.png",
+      "git_blob_sha": "c1f0ed78a05699f93912c74ee3819f06056d2103",
+      "bytes": 75497,
+      "category": "decal",
+      "export_name": "decal_hotspot_completed.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_confirm.png",
+      "git_blob_sha": "e167cb959e59766c94aaf7d93ec4d6dcdf4a775a",
+      "bytes": 81969,
+      "category": "decal",
+      "export_name": "decal_hotspot_confirm.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_cooldown.png",
+      "git_blob_sha": "df9d8e7951e406ca1a4e2cf5ffb6d6980f8f105f",
+      "bytes": 76096,
+      "category": "decal",
+      "export_name": "decal_hotspot_cooldown.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_cost_marker.png",
+      "git_blob_sha": "6eed3844db8ac869a26f4e318f21db26b9e66031",
+      "bytes": 62447,
+      "category": "decal",
+      "export_name": "decal_hotspot_cost_marker.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_customer.png",
+      "git_blob_sha": "cb674fdf212c2fa2359abe90602e93d33b2fd081",
+      "bytes": 114078,
+      "category": "decal",
+      "export_name": "decal_hotspot_customer.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_deliveries.png",
+      "git_blob_sha": "32a1afdddc325e6785699ba6375ec20017892899",
+      "bytes": 95736,
+      "category": "decal",
+      "export_name": "decal_hotspot_deliveries.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_direction_arrow.png",
+      "git_blob_sha": "53b31453cebdf34d5960d0d3e9f1a495e8507648",
+      "bytes": 121974,
+      "category": "decal",
+      "export_name": "decal_hotspot_direction_arrow.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_error.png",
+      "git_blob_sha": "a85f2c0952b73141f13f4b2206e7a6024fb4bed1",
+      "bytes": 46439,
+      "category": "decal",
+      "export_name": "decal_hotspot_error.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_expansion_doorway.png",
+      "git_blob_sha": "4d383303f3e460acf8b8a5cf0ced3b19f1df7f2b",
+      "bytes": 125138,
+      "category": "decal",
+      "export_name": "decal_hotspot_expansion_doorway.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_frame_circle.png",
+      "git_blob_sha": "8253ca8715f64624fc457cca4706a0aa4633a3d5",
+      "bytes": 1038327,
+      "category": "decal",
+      "export_name": "decal_hotspot_frame_circle.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_frame_disabled.png",
+      "git_blob_sha": "daba50e56448af728dfadb74fbfb70acbf10ad5c",
+      "bytes": 833100,
+      "category": "decal",
+      "export_name": "decal_hotspot_frame_disabled.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_frame_rounded.png",
+      "git_blob_sha": "8d2dd3b65816b1ee6768eee3cd0912ac8dc92614",
+      "bytes": 771161,
+      "category": "decal",
+      "export_name": "decal_hotspot_frame_rounded.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_frame_selected.png",
+      "git_blob_sha": "81a4dfc4e93addff20462b944f0d2f924dbd3fe4",
+      "bytes": 1081467,
+      "category": "decal",
+      "export_name": "decal_hotspot_frame_selected.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_frame_square.png",
+      "git_blob_sha": "1882e3364429acd35c400f9f0c64fc30096a07a1",
+      "bytes": 1195780,
+      "category": "decal",
+      "export_name": "decal_hotspot_frame_square.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_halo.png",
+      "git_blob_sha": "1c04f27b5174c1b365faddd21a4532b7283eda40",
+      "bytes": 337806,
+      "category": "decal",
+      "export_name": "decal_hotspot_halo.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_hover.png",
+      "git_blob_sha": "8f72acf7f80ffff8ab085a702b693f52fa8b2de4",
+      "bytes": 83818,
+      "category": "decal",
+      "export_name": "decal_hotspot_hover.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_info_popup.png",
+      "git_blob_sha": "c80cefb6fe1794eed843f1abaef4f02252ff30a1",
+      "bytes": 397093,
+      "category": "decal",
+      "export_name": "decal_hotspot_info_popup.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_information.png",
+      "git_blob_sha": "50b5a7b40ceba1d0aa6a4997104616b786ed8b99",
+      "bytes": 89531,
+      "category": "decal",
+      "export_name": "decal_hotspot_information.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_interact_prompt.png",
+      "git_blob_sha": "666ec5436dce371660abba443f2b49371608dac7",
+      "bytes": 93551,
+      "category": "decal",
+      "export_name": "decal_hotspot_interact_prompt.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_inventory_storage.png",
+      "git_blob_sha": "81758d068c3afb35938aff69fd3202c315b92cc1",
+      "bytes": 99476,
+      "category": "decal",
+      "export_name": "decal_hotspot_inventory_storage.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_locked.png",
+      "git_blob_sha": "a7907ff2b3804e70088656761c1b29579368cf84",
+      "bytes": 65977,
+      "category": "decal",
+      "export_name": "decal_hotspot_locked.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_new.png",
+      "git_blob_sha": "546d3254abc46c8b3944251b4ea1c01fd4a42f74",
+      "bytes": 78025,
+      "category": "decal",
+      "export_name": "decal_hotspot_new.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_notification.png",
+      "git_blob_sha": "fc34b3d7dfcc7eee3533781df9742ed2ef664a82",
+      "bytes": 70159,
+      "category": "decal",
+      "export_name": "decal_hotspot_notification.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_product_display.png",
+      "git_blob_sha": "9d51bf0edf4b5bb7e2a62b77d5bf47fb490c6a3b",
+      "bytes": 135976,
+      "category": "decal",
+      "export_name": "decal_hotspot_product_display.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_progress_ring.png",
+      "git_blob_sha": "0f9d0ff3582cd3beffb800f2713449b6237a08c3",
+      "bytes": 145846,
+      "category": "decal",
+      "export_name": "decal_hotspot_progress_ring.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_queue_management.png",
+      "git_blob_sha": "dfe95c79da2eb8e985e9f8a255f2c1ef28a5e2c1",
+      "bytes": 92237,
+      "category": "decal",
+      "export_name": "decal_hotspot_queue_management.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_restock.png",
+      "git_blob_sha": "d4667728019e0b851a3333757511ca914cfc9031",
+      "bytes": 98937,
+      "category": "decal",
+      "export_name": "decal_hotspot_restock.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_security.png",
+      "git_blob_sha": "c5723816971228644c1ea4c0f37261e173caf57f",
+      "bytes": 75684,
+      "category": "decal",
+      "export_name": "decal_hotspot_security.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_selected.png",
+      "git_blob_sha": "a46344c7c5af5930f3b5d5e8e2ba764539ccbc5b",
+      "bytes": 83513,
+      "category": "decal",
+      "export_name": "decal_hotspot_selected.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_service_counter.png",
+      "git_blob_sha": "e01608e36df7a8bde99f9daa25d79361fa93aa2d",
+      "bytes": 122213,
+      "category": "decal",
+      "export_name": "decal_hotspot_service_counter.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_settings.png",
+      "git_blob_sha": "b43668d26aefa3e8e103d33c6815f1ba72cb1750",
+      "bytes": 93686,
+      "category": "decal",
+      "export_name": "decal_hotspot_settings.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_staff_management.png",
+      "git_blob_sha": "fe86cfb3184b9cd8425ed3c3d644589e5eb45ff4",
+      "bytes": 106128,
+      "category": "decal",
+      "export_name": "decal_hotspot_staff_management.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_store_upgrade.png",
+      "git_blob_sha": "cd456fa78d4d9bb65e583e37eba2339d504dbc0d",
+      "bytes": 109121,
+      "category": "decal",
+      "export_name": "decal_hotspot_store_upgrade.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_success.png",
+      "git_blob_sha": "d8d318da186d21dca4ccbd93c836067fcc394e22",
+      "bytes": 48010,
+      "category": "decal",
+      "export_name": "decal_hotspot_success.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_tap_indicator.png",
+      "git_blob_sha": "c832a4a0a4b6bcdb73268abb1b69e051d7933d38",
+      "bytes": 70682,
+      "category": "decal",
+      "export_name": "decal_hotspot_tap_indicator.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_timer.png",
+      "git_blob_sha": "c8029ccec8a82c2c8e06a4c145e57dc86598ccbf",
+      "bytes": 44044,
+      "category": "decal",
+      "export_name": "decal_hotspot_timer.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_tooltip.png",
+      "git_blob_sha": "a82a65c00ecf1ba9337cbda4efc6f4db66e19529",
+      "bytes": 200459,
+      "category": "decal",
+      "export_name": "decal_hotspot_tooltip.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_unavailable.png",
+      "git_blob_sha": "ed9d0db2b1bf81542b8adf5442cee41690387f88",
+      "bytes": 76519,
+      "category": "decal",
+      "export_name": "decal_hotspot_unavailable.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_unlock_available.png",
+      "git_blob_sha": "5e4fd048fb7ac52b99e564aa672ec16da5fa7637",
+      "bytes": 77917,
+      "category": "decal",
+      "export_name": "decal_hotspot_unlock_available.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_upgrade_available.png",
+      "git_blob_sha": "02a4073c795cf37b61a768a7e9a1d29f5e166c90",
+      "bytes": 100338,
+      "category": "decal",
+      "export_name": "decal_hotspot_upgrade_available.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_waiting_area.png",
+      "git_blob_sha": "f9507a5d4310814c0b05d3bd2aceb09d6a372c08",
+      "bytes": 136156,
+      "category": "decal",
+      "export_name": "decal_hotspot_waiting_area.png"
+    }
+  ]
+}

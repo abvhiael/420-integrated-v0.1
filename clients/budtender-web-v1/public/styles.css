@@ -12,3 +12,12 @@
 .scene-counter{width:64%;height:35%;bottom:11%;left:18%;z-index:5}
 .scene-note{font-size:.75rem;color:#d4c8a6;margin-bottom:0}
 @media(max-width:540px){.shop-stage{aspect-ratio:1/1}.scene-rear{width:82%;left:9%}.scene-counter{width:82%;left:9%}}
+
+.hotspot-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.75rem;margin:1rem 0}
+.hotspot{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.35rem;min-height:100px;padding:.5rem;background:#254333;color:#f8ead1;border:2px solid #a88f55;border-radius:1rem}
+.hotspot img{width:56px;height:56px;object-fit:contain}
+.hotspot:hover:not(:disabled),.hotspot.is-selected{border-color:#f0cb74;box-shadow:0 0 0 3px rgba(240,203,116,.28)}
+.hotspot:focus-visible{outline:3px solid #ffe3a2;outline-offset:3px}
+.hotspot:disabled{opacity:.5;filter:grayscale(.65);cursor:not-allowed}
+@media(max-width:560px){.hotspot-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.hotspot{min-height:92px}}
+@media(prefers-reduced-motion:reduce){.hotspot,.hotspot *{scroll-behavior:auto!important;animation:none!important}}

@@ -24,6 +24,19 @@ const loadArtwork = async (): Promise<ArtEntry[]> => {
   }
   return raw.assets;
 };
+
+type HotspotEntry = { name: string; source: string };
+const loadHotspots = async (): Promise<HotspotEntry[]> => {
+  const registry = JSON.parse(await readFile(join(REPO_ROOT, "assets", "budtender", "phase-3.16", "registry.json"), "utf8")) as { assets?: HotspotEntry[] };
+  if (!Array.isArray(registry.assets) || registry.assets.length !== 48) throw new Error("invalid hotspot registry");
+  const names = new Set<string>();
+  for (const entry of registry.assets) {
+    if (!/^hotspot_[a-z0-9_]+\.png$/.test(entry.name) || names.has(entry.name)) throw new Error("invalid hotspot name");
+    if (!/^assets\/budtender\/phase-3\.16\/hotspot_[a-z0-9_]+\.png$/.test(entry.source)) throw new Error("invalid hotspot source");
+    names.add(entry.name);
+  }
+  return registry.assets;
+};
 const MAX_BODY_BYTES = 16 * 1024;
 
 type Json = Record<string, unknown>;
@@ -213,6 +226,23 @@ export const createBudtenderWebServer = (
       return json(res, 200, { version: 1, count: assets.length, assets: assets.map(({ path, sha256, bytes }) => ({ url: "/" + path, sha256, bytes })) });
     }
 
+    if (method === "GET" && url.pathname === "/assets/budtender/hotspots.json") {
+      const assets = await loadHotspots();
+      return json(res, 200, { count: assets.length, expected: 48, incomplete: false, missing: [], assets: assets.map(({ name }) => ({ name, url: "/assets/budtender/phase-3.16/" + name })) });
+    }
+    if (url.pathname.startsWith("/assets/budtender/phase-3.16/")) {
+      if (method !== "GET") return json(res, 405, { error: "method not allowed" });
+      const assets = await loadHotspots();
+      const entry = assets.find(({ name }) => url.pathname === "/assets/budtender/phase-3.16/" + name);
+      if (!entry) return json(res, 404, { error: "unknown hotspot" });
+      try {
+        const image = await readFile(join(REPO_ROOT, entry.source));
+        res.writeHead(200, responseHeaders({ "content-type": "image/png", "content-length": image.length, "cache-control": "public, max-age=3600" }));
+        return res.end(image);
+      } catch {
+        return json(res, 404, { error: "hotspot asset missing" });
+      }
+    }
     if (url.pathname.startsWith("/assets/budtender/")) {
       if (method !== "GET") return json(res, 405, { error: "method not allowed" });
       const relative = url.pathname.slice(1);

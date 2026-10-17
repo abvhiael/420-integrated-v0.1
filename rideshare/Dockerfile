@@ -13,4 +13,4 @@ USER node
 EXPOSE 8080
 # No public listener, credentials, sample key, or transport permissions are enabled by this image.
 # The external deployment authority supplies a separately admitted, TLS-protected runtime entry point.
-CMD ["node", "--input-type=module", "-e", "throw Error('DEPLOYMENT_ENTRYPOINT_NOT_ADMITTED')"]
+CMD ["node", "src/runtime-entrypoint.mjs"]

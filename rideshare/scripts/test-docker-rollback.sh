@@ -32,6 +32,7 @@ cat > "$dir/ready.sh" <<'EOF'
 #!/usr/bin/env bash
 set -euo pipefail
 test "$(docker inspect "$LIFTD_CONTAINER_NAME" --format '{{.State.Running}}')" = "true"
+test "$(docker inspect "$LIFTD_CONTAINER_NAME" --format '{{.Config.Image}}')" = "$LIFTD_ROLLBACK_PREVIOUS_IMAGE"
 EOF
 export LIFTD_CONTAINER_NAME="$name"
 export LIFTD_DOCKER_NETWORK="$network"

@@ -17,6 +17,7 @@ import "./RouletteV1420.sol";
 import "./BlackjackV1420.sol";
 import "./MinesV1420.sol";
 import "./CrashV1420.sol";
+import "./VideoPokerResolverV1420.sol";
 
 contract SettlementEngine420 is I420System {
     BetAuthorization420 public immutable authorization;
@@ -41,6 +42,8 @@ contract SettlementEngine420 is I420System {
     mapping(bytes32 => address) public minesResolver;
     bytes32 private constant CRASH_GAME_ID = keccak256("420BET.GAME.CRASH");
     mapping(bytes32 => address) public crashResolver;
+    bytes32 private constant VIDEO_POKER_GAME_ID = keccak256("420BET.GAME.VIDEO_POKER");
+    mapping(bytes32 => address) public videoPokerResolver;
 
     uint256 private _entered;
 
@@ -66,6 +69,8 @@ contract SettlementEngine420 is I420System {
     error MinesResolverAlreadyBound();
     error CrashCanonicalSettlementRequired();
     error CrashResolverAlreadyBound();
+    error VideoPokerCanonicalSettlementRequired();
+    error VideoPokerResolverAlreadyBound();
     error Reentrancy();
     error EmergencyAlreadyBound();
     error WagerExpired();
@@ -310,6 +315,32 @@ contract SettlementEngine420 is I420System {
         settlement = _settle(w, outcome, gross, true);
     }
 
+
+    /// @notice Version-pinned Video Poker settlement adapter; cannot accept arbitrary claimed hand payouts.
+    function bindVideoPokerResolver(bytes32 versionId, address resolver) external {
+        if (versionId == bytes32(0) || resolver == address(0)) revert ZeroAddress();
+        if (videoPokerResolver[versionId] != address(0)) revert VideoPokerResolverAlreadyBound();
+        VideoPokerResolverV1420 r = VideoPokerResolverV1420(resolver);
+        if (r.gameId() != VIDEO_POKER_GAME_ID || r.gameVersionId() != versionId ||
+            address(r.wagerRegistry()) != address(registry)) revert InvalidStatus();
+        if (!authorization.isAuthorized(msg.sender, BetIds420.ACTION_GAME_REGISTER,
+            authorization.scopeForGame(VIDEO_POKER_GAME_ID, versionId), 0)) revert Unauthorized();
+        videoPokerResolver[versionId] = resolver;
+    }
+
+    function settleVideoPoker(bytes32 wagerId, VideoPokerV1420.Params calldata params)
+        external nonReentrant returns (BetTypes420.Settlement memory settlement)
+    {
+        BetTypes420.Wager memory wager = registry.getWager(wagerId);
+        if (wager.gameId != VIDEO_POKER_GAME_ID) revert InvalidStatus();
+        address resolver = videoPokerResolver[wager.gameVersionId];
+        if (resolver == address(0) || VideoPokerResolverV1420(resolver).rulesetId() != wager.rulesetId)
+            revert VideoPokerCanonicalSettlementRequired();
+        (BetTypes420.TerminalOutcome outcome, uint256 gross) =
+            VideoPokerResolverV1420(resolver).resolve(wagerId, params);
+        settlement = _settle(wager, outcome, gross, true);
+    }
+
     function settle(bytes32 wagerId, BetTypes420.TerminalOutcome outcome, uint256 grossPayout)
         external
         nonReentrant
@@ -323,6 +354,7 @@ contract SettlementEngine420 is I420System {
         if (wager.gameId == BLACKJACK_GAME_ID) revert BlackjackCanonicalSettlementRequired();
         if (wager.gameId == MINES_GAME_ID) revert MinesCanonicalSettlementRequired();
         if (wager.gameId == CRASH_GAME_ID) revert CrashCanonicalSettlementRequired();
+        if (wager.gameId == VIDEO_POKER_GAME_ID) revert VideoPokerCanonicalSettlementRequired();
         settlement = _settle(wager, outcome, grossPayout, true);
     }
 

@@ -103,12 +103,23 @@ contract MockTerminalVault420 {
 contract MockTerminalEconomics420 {
     bool public finalized;
     bool public shouldRevert;
+    address public reentryTarget;
+    bool public attemptedReentry;
     BetTypes420.TerminalOutcome public outcome;
+    function configureReentry(address target) external { reentryTarget = target; }
 
     function setShouldRevert(bool value) external { shouldRevert = value; }
 
     function finalizeWagerFees(bytes32, BetTypes420.TerminalOutcome outcome_) external {
         if (shouldRevert) revert("economics");
+        if (reentryTarget != address(0)) {
+            attemptedReentry = true;
+            (bool success, bytes memory data) = reentryTarget.call(
+                abi.encodeWithSelector(SettlementEngine420.voidExpired.selector, bytes32(0))
+            );
+            require(!success && data.length >= 4 && bytes4(data) == SettlementEngine420.Reentrancy.selector,
+                "reentrant terminal mutation succeeded");
+        }
         require(!finalized, "finalized");
         finalized = true;
         outcome = outcome_;
@@ -194,6 +205,49 @@ contract BetTerminalPathInvariant420Test {
         );
         vm.prank(ADMIN);
         s.emergency.setEmergency(BetTypes420.EmergencyDomain.SETTLEMENT_HOLD, SETTLEMENT_PROFILE, true);
+    }
+
+    function testEconomicsCallbackCannotReenterTerminalSettlement() public {
+        Suite memory s = _deploy();
+        s.economics.configureReentry(address(s.engine));
+        vm.prank(SETTLER);
+        s.engine.settle(WAGER, BetTypes420.TerminalOutcome.WIN, 500 ether);
+        require(s.economics.attemptedReentry(), "callback not exercised");
+        require(s.registry.getSettlement(WAGER).grossPayout == 500 ether, "payout corrupted");
+        require(s.risk.released() && s.vault.resolved() && s.economics.finalized(), "unwind incomplete");
+    }
+
+    function testUnauthorizedOutcomeInjectionFailsBeforeAnyEconomicMutation() public {
+        Suite memory s = _deploy();
+        vm.prank(RESCUER);
+        vm.expectRevert(SettlementEngine420.Unauthorized.selector);
+        s.engine.settle(WAGER, BetTypes420.TerminalOutcome.WIN, 500 ether);
+        require(!s.registry.settlementExists(WAGER), "unauthorized settlement");
+        require(!s.risk.released(), "unauthorized risk release");
+        require(!s.vault.resolved(), "unauthorized vault resolution");
+        require(!s.economics.finalized(), "unauthorized fees");
+        vm.prank(SETTLER);
+        s.engine.settle(WAGER, BetTypes420.TerminalOutcome.LOSS, 0);
+        require(s.vault.payout() == 0, "legitimate settlement blocked");
+    }
+
+    function testDownstreamDenialOfServiceCanRecoverWithoutPartialUnwindOrReplay() public {
+        Suite memory s = _deploy();
+        s.economics.setShouldRevert(true);
+        vm.warp(s.deadline);
+        vm.prank(RESCUER);
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "economics"));
+        s.engine.voidExpired(WAGER);
+        require(!s.registry.settlementExists(WAGER), "partial terminal commit");
+        require(!s.risk.released() && !s.vault.resolved() && !s.economics.finalized(), "partial unwind");
+        s.economics.setShouldRevert(false);
+        vm.prank(RESCUER);
+        s.engine.voidExpired(WAGER);
+        require(s.registry.getSettlement(WAGER).outcome == BetTypes420.TerminalOutcome.VOID, "not recovered");
+        require(s.risk.released() && s.vault.resolved() && s.economics.finalized(), "recovery incomplete");
+        vm.prank(RESCUER);
+        s.engine.voidExpired(WAGER);
+        require(s.vault.payout() == 100 ether, "replayed escrow");
     }
 
     function testAuthorizedTerminalSettlementBeforeDeadline() public {

@@ -1,0 +1,43 @@
+name: 420Bet Video Poker 5.1 Level 1
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/420bet-video-poker-5-1-level1.yml'
+      - 'contracts/src/bet/VideoPokerV1420.sol'
+      - 'contracts/test/BetVideoPokerV1420.t.sol'
+concurrency:
+  group: 420bet-video-poker-5-1-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+permissions:
+  contents: read
+jobs:
+  video-poker-level1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      FOUNDRY_PROFILE: pr
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Exact-SHA and fixture preflight
+        working-directory: contracts
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          test -f src/bet/VideoPokerV1420.sol
+          test -f test/BetVideoPokerV1420.t.sol
+          grep -q 'contract BetVideoPokerV1420Test' test/BetVideoPokerV1420.t.sol
+          echo "Qualified input SHA: $EXPECTED_SHA"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Verify scoped Video Poker foundation
+        working-directory: contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          forge test --match-contract '^BetVideoPokerV1420Test$' -vv

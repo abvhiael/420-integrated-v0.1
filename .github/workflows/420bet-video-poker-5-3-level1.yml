@@ -1,0 +1,46 @@
+name: 420Bet Video Poker Secure Draw and Economics Level 1
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/420bet-video-poker-5-3-level1.yml'
+      - 'contracts/src/bet/VideoPokerDrawV1420.sol'
+      - 'contracts/src/bet/VideoPokerJacksOrBetter420.sol'
+      - 'contracts/src/bet/VideoPokerResolverV1420.sol'
+      - 'contracts/src/bet/SettlementEngine420.sol'
+      - 'contracts/test/BetVideoPokerSecureDraw.t.sol'
+permissions:
+  contents: read
+concurrency:
+  group: 420bet-video-poker-5-3-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+jobs:
+  video-poker-secure-draw-and-economics:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    env:
+      FOUNDRY_PROFILE: pr
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Exact-SHA and fixture preflight
+        working-directory: contracts
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          test -f src/bet/VideoPokerDrawV1420.sol
+          test -f src/bet/VideoPokerJacksOrBetter420.sol
+          test -f src/bet/VideoPokerResolverV1420.sol
+          test -f test/BetVideoPokerSecureDraw.t.sol
+          echo "Qualified input SHA: $EXPECTED_SHA"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Run only Video Poker foundation, deck, draw and economics tests
+        working-directory: contracts
+        run: |
+          set -euo pipefail
+          forge test --match-contract '^BetVideoPoker.*Test$' -vv

@@ -12,7 +12,7 @@ case "${1:-}" in
    ;;
  deploy)
    image="${2:-}"
-   [[ "$image" =~ ^[A-Za-z0-9._/-]+@sha256:[a-f0-9]{64}$ ]] || exit 2
+   [[ "$image" =~ ^[A-Za-z0-9._:/-]+@sha256:[a-f0-9]{64}$ ]] || exit 2
    docker image inspect "$image" >/dev/null
    docker run -d --name "${LIFTD_CONTAINER_NAME}" --network "${LIFTD_DOCKER_NETWORK}" \
       --read-only --cap-drop ALL --security-opt no-new-privileges --pids-limit 128 \

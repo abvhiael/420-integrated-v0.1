@@ -70,3 +70,7 @@ Preserve the unchanged **TN-0 through TN-6** operational sequence; this is an ex
 - **TN-6:** Repeat on production-equivalent environment with independently signed rollback, RTO/RPO and backup owner acceptance; no testnet PASS alone grants production or regulated passenger-transport authorization.
 
 **Status: NOT ACCEPTED.** [L03.7 repository certificate](L03.7-LEVEL1-EVIDENCE.md) provides isolated CI evidence (137 tests and real qualification-database restoration), not live installed worker service, deployed multi-instance evidence, independently authorized provider tests, or production recovery signoff.
+
+## L03.8 — independent operational safety acceptance (NOT ACCEPTED)
+
+The original L03.8 requirement is **independent verification** of incident procedures, support responsibilities, escalation, operator access, and emergency/recovery drills. [Required scenario and evidence packet](L03.8-OPERATIONAL-SAFETY-ACCEPTANCE.md) defines five gates: SAFE-INCIDENT, SAFE-SUPPORT, SAFE-ESCALATION, SAFE-OPERATOR, SAFE-DRILL. All five are **NOT ACCEPTED** pending independently executed, deployment-bound, signed evidence. This remains in the unchanged TN-0 through TN-6 sequence: owners/frozen deployment TN-0; provision TN-1; authorization and vault TN-2; provider/route/safety response TN-3; independently executed drills TN-4; signed review TN-5; separate production approval TN-6. Locally authored documents, mock exercises and successful CI must not count as independent acceptance. Passenger operations remain disabled.

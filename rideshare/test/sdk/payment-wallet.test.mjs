@@ -24,17 +24,21 @@ test('canonical SDK consumer rejects wrong chain/controller/account, implicit co
 
 test('PT-02 refuses chain/account switching during wallet preparation and elapsed consent',async()=>{
  const x=setup();let connects=0;
- const moved=new Proxy(x.wallet,{get(target,prop,receiver){
-  if(prop==='connect')return async()=>{const result=await target.connect();return ++connects===2?{...result,chainId:421n}:result};
-  return Reflect.get(target,prop,receiver);
- }});
+ const moved={
+  sdk:x.wallet.sdk,
+  connect:async()=>{const result=await x.wallet.connect();return ++connects===2?{...result,chainId:421n}:result},
+  discoverSmartAccount:()=>x.wallet.discoverSmartAccount(),
+  prepareSession:(...args)=>x.wallet.prepareSession(...args)
+ };
  await assert.rejects(()=>prepareWalletPayment({wallet:moved,intent:x.intent,sessionKey:a(2),consent:true,expectedIntentHash:digest(x.intent),clock:()=>100}),{code:'INVALID_PAY_BINDING'});
  assert.equal(x.counts().sent,0);
  const y=setup();let now=100;
- const slow=new Proxy(y.wallet,{get(target,prop,receiver){
-  if(prop==='prepareSession')return async(...args)=>{const result=await target.prepareSession(...args);now=131;return result};
-  return Reflect.get(target,prop,receiver);
- }});
+ const slow={
+  sdk:y.wallet.sdk,
+  connect:()=>y.wallet.connect(),
+  discoverSmartAccount:()=>y.wallet.discoverSmartAccount(),
+  prepareSession:async(...args)=>{const result=await y.wallet.prepareSession(...args);now=131;return result}
+ };
  await assert.rejects(()=>prepareWalletPayment({wallet:slow,intent:y.intent,sessionKey:a(2),consent:true,expectedIntentHash:digest(y.intent),clock:()=>now}),{code:'INVALID_PAY_BINDING'});
  assert.equal(y.counts().sent,0);
 });

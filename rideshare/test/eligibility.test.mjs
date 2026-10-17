@@ -128,3 +128,13 @@ test('driver session account must match registry binding and transport cannot re
     resolveDriver: resolvers[0], resolveVehicle: resolvers[1], resolveTransport: resolvers[2], routeScopeFor: async () => scope()}),
     error => error.code === 'SEPARATE_TRANSPORT_AUTHORITY_REQUIRED');
 });
+
+test('PT-04 driver and vehicle Registry signing keys must be independent', async () => {
+  const driverRegistry = roots[0], vehicleRegistry = {...roots[1], keys: roots[0].keys};
+  assert.throws(() => createEligibilityAdapter({driverRegistry, vehicleRegistry,
+    transportAuthority: roots[2], resolveDriver: async () => '', resolveVehicle: async () => '',
+    resolveTransport: async () => '', routeScopeFor: async () => scope()}),
+    {code: 'SEPARATE_REGISTRY_AUTHORITIES_REQUIRED'});
+  // Previously qualified distinct issuer projections remain admissible.
+  assert.equal((await setup().adapter.admissionFor(trip, command)).allowed, true);
+});

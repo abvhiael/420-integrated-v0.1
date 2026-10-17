@@ -84,7 +84,15 @@ export function createTripCommunicationService({authenticator,store,messenger,no
      (p.role==='rider'?p.subject!==trip.riderId:p.subject!==trip.driverId))fail('EVENT_AUTHORITY_DENIED');
    const event=safeTripUpdate(trip);let delivered=0;
    for(const recipient of [trip.riderId,trip.driverId].filter(id)){
-    // Rider notifications require fresh Identity and durable opt-in before delivery.\n    // A driver actor cannot impersonate a rider to read their consent.\n    if(recipient===trip.riderId){\n     if(p.role!=='rider'||p.subject!==recipient)continue;\n     const verified=await consentGuard.require({token:actorToken,accountId:p.accountId,purpose:'trip_notifications'});\n     if(verified?.subject!==recipient||verified?.accountId!==p.accountId)fail('EVENT_CONSENT_DENIED');\n    }\n    const pref=await preferencesFor(recipient);
+    // The sender's authenticated account can authorize only its own consent. 
+    // A driver actor cannot impersonate a rider to read their consent.\n    if(recipient===trip.riderId){
+     if(p.role!=='rider'||p.subject!==recipient)continue;
+     const candidate=await preferencesFor(recipient);
+     if(!allowedNotification(candidate?.preferences??candidate))continue;
+     const verified=await consentGuard.require({token:actorToken,accountId:p.accountId,purpose:'trip_notifications'});
+     if(verified?.subject!==recipient||verified?.accountId!==p.accountId)fail('EVENT_CONSENT_DENIED');
+    }
+    const pref=await preferencesFor(recipient);
     const channel=allowedNotification(pref?.preferences??pref);
     if(!channel)continue;
     // No names, addresses, coordinates, private messages, device tokens, or payment state in payload.

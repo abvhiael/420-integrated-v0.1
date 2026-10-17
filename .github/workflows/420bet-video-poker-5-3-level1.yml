@@ -9,6 +9,7 @@ on:
       - 'contracts/src/bet/VideoPokerResolverV1420.sol'
       - 'contracts/src/bet/SettlementEngine420.sol'
       - 'contracts/test/BetVideoPokerSecureDraw.t.sol'
+      - 'contracts/test/BetSettlementEngine420.t.sol'
 permissions:
   contents: read
 concurrency:
@@ -44,4 +45,8 @@ jobs:
         run: |
           set -euo pipefail
           python3 ../scripts/verify-420bet-video-poker-standpat-rtp.py
-          forge test --match-contract '^BetVideoPoker.*Test$' -vv
+          forge test --match-contract '^BetVideoPoker.*Test
+ -vv
+          forge test --match-contract '^BetSettlementEngine420Test
+ --match-test '^testVideoPokerFundedExpiryRefundAndConservation
+ -vv

@@ -19,6 +19,10 @@ export function createRecoveryQueue(pool,{leaseSeconds=30,maxAttempts=5}={}){
   async claim(workerId){
    if(!ident(workerId))fail('QUEUE_WORKER_INVALID');
    return transaction(async c=>{
+    // A worker that repeatedly crashes cannot retain a leased job forever.
+    await c.query(`UPDATE liftd.recovery_jobs SET state='dead', lease_until=NULL,
+      lease_owner=NULL, lease_token=NULL, last_error='MAX_CRASH_RETRIES'
+      WHERE state='leased' AND lease_until<=now() AND attempts >= $1`,[maxAttempts]);
     const token=randomBytes(24).toString('base64url');
     const row=await c.query(`WITH eligible AS (
       SELECT job_id FROM liftd.recovery_jobs
@@ -60,4 +64,24 @@ export function createProviderGuard(operation,{timeoutMs=2000,failures=3,cooldow
   }catch(e){if(++count>=failures)blockedUntil=clock()+cooldownMs;throw e}
   finally{clearTimeout(timer)}
  };
+}
+
+/** Authorized process worker: no public route, no dynamic handlers from queue payload. */
+export function createRecoveryWorker(queue,{workerId,handlers}){
+ if(!ident(workerId)||!queue||typeof queue.claim!=='function'||typeof queue.finish!=='function'||!handlers||typeof handlers!=='object'||
+   [...types].some(kind=>typeof handlers[kind]!=='function'))fail('RECOVERY_WORKER_CONFIGURATION_INVALID');
+ return Object.freeze({
+  async runOnce(){
+   const job=await queue.claim(workerId);
+   if(!job)return null;
+   try{
+    await handlers[job.kind]({subjectId:job.subject_id,payload:job.payload,jobId:job.job_id});
+    return Object.freeze({jobId:job.job_id,state:await queue.finish({jobId:job.job_id,workerId,token:job.lease_token,ok:true})});
+   }catch(error){
+    // A stale worker must not publish success or overwrite a recovered lease.
+    const errorCode=ident(error?.code)?error.code:'WORKER_OPERATION_FAILED';
+    return Object.freeze({jobId:job.job_id,state:await queue.finish({jobId:job.job_id,workerId,token:job.lease_token,ok:false,errorCode})});
+   }
+  }
+ });
 }

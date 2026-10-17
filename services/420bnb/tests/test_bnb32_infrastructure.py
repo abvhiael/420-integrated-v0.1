@@ -198,7 +198,7 @@ def test_static_web_does_not_serve_files_or_log_private_paths():
             assert "'sha256-" in response.headers["Content-Security-Policy"]
             assert response.headers["X-Frame-Options"] == "DENY"
             assert response.headers["Cache-Control"] == "no-store"
-        for path in ("/production.py", "/../runtime.dsn", "/run/secrets/deployment.json"):
+        for path in ("/production.py", "/../runtime.dsn", "/run/secrets/deployment.json", "/assets/../index.html", "/assets/readme.md"):
             with pytest.raises(urllib.error.HTTPError) as error:
                 urllib.request.urlopen(origin + path)
             assert error.value.code == 404

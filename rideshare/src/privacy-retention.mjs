@@ -107,3 +107,40 @@ export function createPrivacyService({pool,authenticator,clock=()=>Math.floor(Da
   }
  });
 }
+
+/**
+ * Trusted server-side retention job entry point. Scheduler and deployment credentials
+ * belong to operational acceptance; do not expose this method over HTTP.
+ * A failed hold check fails closed; financial, incident, fraud and open support evidence
+ * prevent automatic location erasure. Every mutation is atomic with its hold checks.
+ */
+export async function runPrivacyRetentionSweep({pool,clock=()=>Math.floor(Date.now()/1000)}) {
+ if(typeof pool?.connect!=='function')fail('PRIVACY_UNAVAILABLE',503);
+ const now=clock();
+ if(!Number.isSafeInteger(now)||now<0)fail('CLOCK_UNAVAILABLE',503);
+ const c=await pool.connect();
+ try {
+  await c.query('BEGIN');
+  await c.query("SET LOCAL lock_timeout='3s'");
+  await c.query("SET LOCAL statement_timeout='10s'");
+  await checkSchema(c);
+  const overdue=(await c.query("SELECT count(*)::int AS count FROM liftd.privacy_requests WHERE status IN ('OPEN','BLOCKED_HOLD') AND due_at<=$1",[now])).rows[0].count;
+  const expired=(await c.query(`
+   UPDATE liftd.private_locations AS l SET sealed=NULL,tombstoned=true
+   WHERE NOT l.tombstoned AND l.expires_at<=$1
+   AND (l.trip_id IS NULL OR (
+     NOT EXISTS (SELECT 1 FROM liftd.safety_incidents i WHERE i.trip_id=l.trip_id)
+     AND NOT EXISTS (SELECT 1 FROM liftd.fraud_cases f WHERE f.trip_id=l.trip_id)
+     AND NOT EXISTS (SELECT 1 FROM liftd.support_cases s WHERE s.trip_id=l.trip_id AND (s.category='incident' OR s.status<>'CLOSED'))
+     AND NOT EXISTS (SELECT 1 FROM liftd.payment_intents p WHERE p.trip_id=l.trip_id)
+   ))
+   RETURNING l.route_ref
+  `,[now])).rowCount;
+  await c.query('COMMIT');
+  return Object.freeze({expiredLocations:expired,overdueRequests:overdue});
+ } catch(e){
+  try{await c.query('ROLLBACK')}catch{}
+  if(e instanceof AuthError)throw e;
+  fail('PRIVACY_UNAVAILABLE',503);
+ }finally{c.release()}
+}

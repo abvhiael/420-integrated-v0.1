@@ -33,6 +33,37 @@ contract BetCasinoSolvencyConvergence420Test {
     function _versions() private pure returns (bytes32[8] memory versions) { versions = [DICE_V1,KENO_V1,PLINKO_V1,SLOT_V1,ROULETTE_V1,BLACKJACK_V1,MINES_V1,CRASH_V1]; }
     function _reserve(Suite memory s, bytes32 gameVersionId, uint256 nonce, uint256 liability) private returns (bytes32 wagerId) { wagerId = keccak256(abi.encode("casino/convergence/solvency-wager",gameVersionId,nonce)); uint256 stake = 100 ether; uint256 reserved = s.risk.reserveExposure(wagerId,VAULT,gameVersionId,RISK_PROFILE,stake,stake+liability,bytes32(0)); require(reserved == liability,"wrong liability"); }
 
+    function testTwoCasinoVaultsRemainFinanciallyIsolatedAcrossGameReservations() public {
+        Suite memory s = _deploy();
+        bytes32 otherVault = keccak256("casino/convergence/independent-vault");
+        bytes32 otherScope = s.auth.scopeForVault(otherVault);
+        _allow(s,address(this),BetIds420.ACTION_VAULT_REGISTER,otherScope);
+        _allow(s,address(this),BetIds420.ACTION_VAULT_RECORD_DEPOSIT,otherScope);
+        _allow(s,address(this),BetIds420.ACTION_VAULT_SET_SAFETY_RESERVE,otherScope);
+        _allow(s,address(this),BetIds420.ACTION_VAULT_SETTLE_WAGER,otherScope);
+        _allow(s,address(this),BetIds420.ACTION_RISK_RESERVE,otherScope);
+        _allow(s,address(this),BetIds420.ACTION_RISK_RELEASE,otherScope);
+        _allow(s,address(s.risk),BetIds420.ACTION_VAULT_RESERVE_LIABILITY,otherScope);
+        _allow(s,address(s.risk),BetIds420.ACTION_VAULT_RELEASE_LIABILITY,otherScope);
+        s.accounting.registerVault(otherVault,address(0));
+        s.accounting.recordDeposit(otherVault,500 ether);
+        s.accounting.setSafetyReserve(otherVault,100 ether);
+        bytes32[8] memory versions = _versions();
+        for (uint256 i=0; i<8; ++i) _reserve(s, versions[i],i+700,100 ether);
+        bytes32 separateWager = keccak256("cross-game/separate-vault/wager");
+        uint256 liability = s.risk.reserveExposure(separateWager,otherVault,CRASH_V1,RISK_PROFILE,100 ether,300 ether,bytes32(0));
+        require(liability==200 ether,"separate reservation");
+        require(s.accounting.getVault(VAULT).activeReservedLiability==800 ether,"primary vault contaminated");
+        require(s.accounting.getVault(otherVault).activeReservedLiability==200 ether,"other vault liability");
+        require(s.risk.reservedByVault(VAULT)==800 ether,"primary risk changed");
+        require(s.risk.reservedByVault(otherVault)==200 ether,"other risk");
+        s.risk.releaseExposure(separateWager);
+        require(s.accounting.getVault(otherVault).activeReservedLiability==0,"other vault release");
+        require(s.accounting.getVault(VAULT).activeReservedLiability==800 ether,"unrelated game release");
+        require(s.accounting.getVault(VAULT).totalAssets==1_000 ether,"primary assets");
+        require(s.accounting.getVault(otherVault).totalAssets==500 ether,"other assets");
+    }
+
     function testEightCasinoGamesShareOneSolventLiabilityPool() public {
         Suite memory s = _deploy(); bytes32[8] memory versions = _versions();
         for (uint256 i=0;i<versions.length;++i) _reserve(s,versions[i],i,100 ether);

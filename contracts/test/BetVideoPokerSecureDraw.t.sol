@@ -28,6 +28,7 @@ contract MockVideoPokerSecureRandomness {
     }
     function setRequest(bytes32 id, RandomnessRouter420.RandomnessRequest calldata request) external { requests[id] = request; }
     function getRequest(bytes32 id) external view returns (RandomnessRouter420.RandomnessRequest memory) { return requests[id]; }
+    function setFulfilled(bytes32 id, bool fulfilled) external { requests[id].fulfilled = fulfilled; }
     function getProfile(bytes32) external view returns (RandomnessRouter420.RandomnessProfile memory) { return profile; }
 }
 
@@ -71,7 +72,7 @@ contract BetVideoPokerSecureDrawTest {
             contextHash: keccak256("context"), requestedAt: uint64(block.timestamp),
             fallbackAt: uint64(block.timestamp + 120), root: keccak256("original public root"),
             proofHash: keccak256("proof"), entropyHash: keccak256("entropy"),
-            source: RandomnessRouter420.Source.PRIMARY, fulfilled: true
+            source: RandomnessRouter420.Source.PRIMARY, fulfilled: false
         }));
     }
 
@@ -84,6 +85,7 @@ contract BetVideoPokerSecureDrawTest {
         bytes32 commitment = draw.seedCommitmentFor(WAGER, SEED);
         vm.prank(PROVIDER);
         draw.commitReplacement(WAGER, commitment, _params());
+        router.setFulfilled(WAGER, true);
         vm.prank(PLAYER);
         dealer.startInitialDeal(WAGER, _params());
     }
@@ -155,6 +157,14 @@ contract BetVideoPokerSecureDrawTest {
         vm.expectRevert(VideoPokerDrawV1420.AlreadyHeld.selector);
         vm.prank(PLAYER);
         draw.commitHold(WAGER, 31);
+    }
+
+    function testCannotCommitAfterInitialEntropyFulfilled() public {
+        router.setFulfilled(WAGER, true);
+        bytes32 commitment = draw.seedCommitmentFor(WAGER, SEED);
+        vm.expectRevert(VideoPokerDrawV1420.InitialEntropyAlreadyFulfilled.selector);
+        vm.prank(PROVIDER);
+        draw.commitReplacement(WAGER, commitment, _params());
     }
 
     function testNewProviderCannotCommitOnceInitialDealExists() public {

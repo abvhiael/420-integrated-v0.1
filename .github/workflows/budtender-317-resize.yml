@@ -4,6 +4,7 @@ on:
     branches: [budtender/phase-3.17-assets-level1]
     paths:
       - .github/workflows/budtender-317-resize.yml
+      - clients/budtender-web-v1/scripts/resize-phase-317.py
   workflow_dispatch:
 permissions:
   contents: write

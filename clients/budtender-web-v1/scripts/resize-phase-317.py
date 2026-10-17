@@ -24,7 +24,7 @@ for entry in registry["assets"]:
     path = base / name
     raw = path.read_bytes()
     assert len(raw) == entry["bytes"]
-    assert hashlib.sha1(f"blob {len(raw)}\\0".encode() + raw).hexdigest() == entry["git_blob_sha"]
+    assert hashlib.sha1(f"blob {len(raw)}\0".encode() + raw).hexdigest() == entry["git_blob_sha"]
     with Image.open(io.BytesIO(raw)) as image:
         image.load()
         assert image.format == "PNG" and image.mode == "RGBA", name
@@ -39,10 +39,10 @@ for entry in registry["assets"]:
     with Image.open(io.BytesIO(new_raw)) as check:
         check.verify()
     entry["bytes"] = len(new_raw)
-    entry["git_blob_sha"] = hashlib.sha1(f"blob {len(new_raw)}\\0".encode() + new_raw).hexdigest()
+    entry["git_blob_sha"] = hashlib.sha1(f"blob {len(new_raw)}\0".encode() + new_raw).hexdigest()
     with Image.open(path) as check:
         assert check.mode == "RGBA" and check.height >= 256, name
-registry_file.write_text(json.dumps(registry, indent=2) + "\\n")
+registry_file.write_text(json.dumps(registry, indent=2) + "\n")
 print("Phase 3.17 resized", len(resized), "of 48 images")
 for row in resized:
     print(*row)

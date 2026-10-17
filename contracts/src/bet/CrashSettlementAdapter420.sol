@@ -60,7 +60,7 @@ contract CrashSettlementAdapter420 is I420System {
 
     function settle(bytes32 wagerId) external returns (BetTypes420.Settlement memory settlement) {
         (BetTypes420.TerminalOutcome outcome, uint256 grossPayout) = terminalResult(wagerId);
-        settlement = settlementEngine.settle(wagerId, outcome, grossPayout);
+        settlement = settlementEngine.settleCrash(wagerId);
         emit CrashSettlementSubmitted(wagerId, outcome, grossPayout);
     }
 }

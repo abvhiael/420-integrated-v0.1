@@ -84,8 +84,9 @@ contract VideoPokerDrawV1420 {
         if (!profile.exists || replacementProvider == profile.primaryProvider ||
             replacementProvider == profile.fallbackProvider) revert ProviderNotIndependent();
         // Fail closed when a dealing session already exists: seed must be committed before the deal.
-        try dealer.initialDeal(wagerId) returns (VideoPokerDealV1420.InitialDeal memory) {
-            revert AlreadyHeld();
+        bool alreadyDealt;
+        try dealer.initialDeal(wagerId) returns (VideoPokerDealV1420.InitialDeal memory existingDeal) {
+            alreadyDealt = existingDeal.exists;
         } catch (bytes memory reason) {
             bytes4 selector;
             if (reason.length >= 4) {
@@ -96,6 +97,7 @@ contract VideoPokerDrawV1420 {
                 revert WrongDeal();
             }
         }
+        if (alreadyDealt) revert AlreadyHeld();
         s.seedCommitment = commitment;
         s.committed = true;
         emit ReplacementSeedCommitted(wagerId, commitment);

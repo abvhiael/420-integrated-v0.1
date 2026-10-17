@@ -2,10 +2,11 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {mkdtempSync,writeFileSync,readFileSync,rmSync} from 'node:fs';
 import {tmpdir} from 'node:os';
-import {join,resolve} from 'node:path';
+import {join} from 'node:path';
+import {fileURLToPath} from 'node:url';
 import {spawnSync} from 'node:child_process';
 const sha=x=>x.repeat(64);
-const script=resolve('rideshare/scripts/rollback-qualification.sh');
+const script=fileURLToPath(new URL('../scripts/rollback-qualification.sh',import.meta.url));
 test('failed candidate rolls back to pinned prior image, rechecks readiness and avoids schema down-migration',()=>{
  const dir=mkdtempSync(join(tmpdir(),'liftd-rollback-'));
  try{

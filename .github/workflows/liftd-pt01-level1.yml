@@ -1,0 +1,30 @@
+name: LIFTd PT-01 Identity Consent Level 1
+on:
+  pull_request:
+    paths:
+      - 'rideshare/src/identity-consent-guard.mjs'
+      - 'rideshare/test/identity-consent-guard.test.mjs'
+      - '.github/workflows/liftd-pt01-level1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  identity-consent:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify exact checkout and retained rideshare tests
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          node --check rideshare/src/identity-consent-guard.mjs
+          npm ci --prefix rideshare --ignore-scripts
+          npm test --prefix rideshare

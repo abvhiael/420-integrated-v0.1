@@ -101,7 +101,7 @@
   ],
   "roadmap": "docs/highcountry/ORIGINAL-SIXTEEN-221-ASSET-PRODUCTION-ROADMAP.md",
   "a01": {
-    "status": "ASSETS_PRODUCED_UNQUALIFIED",
+    "status": "OWNER_APPROVED_VISUAL_BASELINE_TECHNICAL_QUALIFICATION_PENDING",
     "sourceFormat": "SVG",
     "files": [
       "assets/highcountry/original-sixteen/a01/seed-packet-master.svg",
@@ -119,6 +119,13 @@
       "assets/highcountry/original-sixteen/a01/founder-badge-and-archive-stamp-master.svg"
     ],
     "count": 13,
-    "export": "SVG master; rasterize to PNG/WebP as needed; transparent derived layers where applicable"
+    "export": "SVG master; rasterize to PNG/WebP as needed; transparent derived layers where applicable",
+    "approval": {
+      "decision": "APPROVED_AND_LOCKED",
+      "scope": "13 SVG visual masters, regional palettes, typographic hierarchy and export direction",
+      "baselineSha": "fc15c7d3ab9eb1aef90dce532ff7e41dd7bde28d",
+      "requiresChangeControl": true,
+      "qualifications": "Pending scoped Level 1 render/technical verification; no certificate implied"
+    }
   }
 }

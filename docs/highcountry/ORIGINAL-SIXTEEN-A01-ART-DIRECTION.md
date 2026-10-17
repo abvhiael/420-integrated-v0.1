@@ -16,3 +16,9 @@
 - Every downstream founder asset references HC-FNN, provenance metadata and the approved region palette.
 
 **A01 qualification:** asset count 13; all valid XML/SVG; unique paths; no active scripts/external references; text render and contrast/a11y reviews; screenshots from actual client still outstanding. No Level 1 certificate claimed by creation of this document.
+
+## Owner visual approval / locked baseline (2026-10-16)
+
+**Approved and locked:** the A01 illustrated heritage visual direction and all thirteen SVG shared masters as committed at `fc15c7d3ab9eb1aef90dce532ff7e41dd7bde28d`. Preserve these exact art identities, Emerald Coast / Golden Prairie / Red Mesa palettes, antique letterpress and botanical archive approach, typography hierarchy, packet / discovery / collection templates and export standards across A02–A06. Any subsequent aesthetic deviation must be explicitly approved and recorded; implementation corrections necessary for accessibility or file integrity should preserve approved design intent.
+
+**Not yet technically qualified:** owner visual approval is not evidence of successful renderer tests, accessibility validation, PNG/WebP export integrity or Level 1 CI. Do not rerun global qualification for this documentary lock.

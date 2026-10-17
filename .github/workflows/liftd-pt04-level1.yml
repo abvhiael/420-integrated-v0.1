@@ -1,0 +1,30 @@
+name: LIFTd PT-04 Registry Chain State Level 1
+on:
+  pull_request:
+    paths:
+      - 'rideshare/src/eligibility.mjs'
+      - 'rideshare/test/eligibility.test.mjs'
+      - '.github/workflows/liftd-pt04-level1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  registry-chain:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Exact-SHA Registry and chain-state consumer Level 1
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          npm ci --prefix rideshare --ignore-scripts
+          node --check rideshare/src/eligibility.mjs
+          npm test --prefix rideshare

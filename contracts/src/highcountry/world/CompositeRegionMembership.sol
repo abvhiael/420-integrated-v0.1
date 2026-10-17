@@ -24,7 +24,9 @@ contract CompositeRegionMembership {
         address founding_,
         address expansion_
     ) {
-        if (founding_.code.length == 0 || expansion_.code.length == 0 || founding_ == expansion_) revert InvalidRegistry();
+        if (founding_.code.length == 0 || expansion_.code.length == 0 || founding_ == expansion_) {
+            revert InvalidRegistry();
+        }
         founding = IFoundingMembership(founding_);
         expansion = IExpansionMembership(expansion_);
     }

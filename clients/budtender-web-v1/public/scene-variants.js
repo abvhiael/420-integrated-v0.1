@@ -4,10 +4,10 @@ export function projectSceneVisuals(state,polish=false){
  const sum=products.reduce((n,p)=>n+(Number.isFinite(p?.stock)?Math.max(0,p.stock):0),0);
  const capacity=products.reduce((n,p)=>n+(Number.isFinite(p?.capacity)?Math.max(0,p.capacity):0),0);
  const stock=sum===0?"empty":capacity>0&&sum/capacity>=0.65?"full":"partial";
- const upgrades=state?.upgrades??{};
- const expansions=state?.expansions??{};
+ const upgrades=state?.progression?.upgrades??{};
+ const expansions=state?.progression?.unlockedExpansions??[];
  const premium=Object.values(upgrades).some(v=>typeof v==="number"?v>0:typeof v==="object"&&v!==null&&Number(v.level)>0);
- const expanded=Object.entries(expansions).some(([name,value])=>name!=="tinyShop"&&(value===true||typeof value==="object"&&value!==null&&(value.unlocked===true||value.owned===true)));
+ const expanded=Array.isArray(expansions)&&expansions.some(name=>typeof name==="string"&&name!=="tinyShop");
  return {stock,upgrade:premium?"premium":"base",expansion:expanded?"expanded":"starter",polish:polish?"on":"off"};
 }
 export function applySceneVisuals(stage,projection){

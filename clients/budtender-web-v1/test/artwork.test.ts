@@ -146,9 +146,9 @@ describe("Phase 3.20 Tier 1 playable visual upgrade",()=>{
 import {projectSceneVisuals,applySceneVisuals} from "../public/scene-variants.js";
 describe("Phase 3.20 progression and polish",()=>{
  it("derives visual stock/progression states without mutating input",()=>{
-  const s={store:{products:{a:{stock:0,capacity:10}}},upgrades:{},expansions:{tinyShop:true}};
+  const s={store:{products:{a:{stock:0,capacity:10}}},progression:{upgrades:{},unlockedExpansions:["tinyShop"]}};
   const before=structuredClone(s);assert.deepEqual(projectSceneVisuals(s),{stock:"empty",upgrade:"base",expansion:"starter",polish:"off"});
-  s.store.products.a.stock=9;s.upgrades.counterSpeed={level:1};s.expansions.largerRetailFloor={unlocked:true};
+  s.store.products.a.stock=9;s.progression.upgrades.counterSpeed=1;s.progression.unlockedExpansions.push("largerRetailFloor");
   assert.deepEqual(projectSceneVisuals(s,true),{stock:"full",upgrade:"premium",expansion:"expanded",polish:"on"});
   assert.equal(before.store.products.a.stock,0);
  });

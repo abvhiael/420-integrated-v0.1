@@ -9,6 +9,8 @@ on:
       - 'rideshare/src/runtime-entrypoint.mjs'
       - 'rideshare/test/admitted-runtime.test.mjs'
       - 'rideshare/test/postgres/deployment-security.test.mjs'
+      - 'rideshare/test/rollback-qualification.test.mjs'
+      - 'rideshare/scripts/rollback-qualification.sh'
       - '.github/workflows/liftd-l03-6-level1.yml'
   workflow_dispatch:
 permissions:
@@ -59,6 +61,8 @@ jobs:
         run: node --test rideshare/test/admitted-runtime.test.mjs
       - name: Real PostgreSQL migration, privilege, readiness and rollback integration
         run: node --test rideshare/test/postgres/deployment-security.test.mjs
+      - name: Digest-pinned stop, rollback and recovery behavior
+        run: node --test rideshare/test/rollback-qualification.test.mjs
       - name: Package non-root image
         run: docker build --pull -f rideshare/Dockerfile -t liftd-qualification rideshare
       - name: Verify fail-closed unadmitted entry point

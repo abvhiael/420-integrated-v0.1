@@ -11,6 +11,8 @@ on:
       - 'rideshare/test/postgres/deployment-security.test.mjs'
       - 'rideshare/test/rollback-qualification.test.mjs'
       - 'rideshare/scripts/rollback-qualification.sh'
+      - 'rideshare/scripts/docker-rollback-controller.sh'
+      - 'rideshare/scripts/test-docker-rollback.sh'
       - '.github/workflows/liftd-l03-6-level1.yml'
   workflow_dispatch:
 permissions:
@@ -65,6 +67,8 @@ jobs:
         run: node --test rideshare/test/rollback-qualification.test.mjs
       - name: Package non-root image
         run: docker build --pull -f rideshare/Dockerfile -t liftd-qualification rideshare
+      - name: Real Docker immutable-digest rollback and recovery drill
+        run: bash rideshare/scripts/test-docker-rollback.sh
       - name: Verify fail-closed unadmitted entry point
         run: |
           if docker run --rm --network none --read-only --cap-drop ALL --security-opt no-new-privileges liftd-qualification; then

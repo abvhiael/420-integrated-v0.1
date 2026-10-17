@@ -291,9 +291,12 @@ contract BetMinesHardening420Test {
         s.mines.startSession(WAGER, s.params);
         vm.expectRevert(MinesV1420.InvalidPhase.selector);
         s.mines.verifyTerminalBoard(WAGER, SEED);
+        // Compute external-view arguments before prank: otherwise the salt lookup
+        // consumes the one-call impersonation and revealCell sees the test contract.
+        bytes32 safeSalt = s.mines.canonicalCellSalt(WAGER, ROOT, safeCell, SEED);
+        bytes32[] memory safeProof = _proof(leaves, safeCell);
         vm.prank(PLAYER);
-        s.mines.revealCell(WAGER, safeCell, false,
-            s.mines.canonicalCellSalt(WAGER, ROOT, safeCell, SEED), _proof(leaves, safeCell));
+        s.mines.revealCell(WAGER, safeCell, false, safeSalt, safeProof);
         vm.prank(PLAYER);
         s.mines.cashOut(WAGER);
         vm.expectRevert(MinesV1420.BoardVerificationFailed.selector);

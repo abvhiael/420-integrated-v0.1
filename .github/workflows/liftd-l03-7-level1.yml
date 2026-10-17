@@ -1,0 +1,70 @@
+name: LIFTd L03.7 Level 1
+on:
+  pull_request:
+    paths:
+      - 'rideshare/migrations/016_recovery_jobs.sql'
+      - 'rideshare/src/reliability.mjs'
+      - 'rideshare/test/reliability.test.mjs'
+      - 'rideshare/test/postgres/reliability.test.mjs'
+      - 'rideshare/test/postgres/store.test.mjs'
+      - 'rideshare/scripts/test-backup-restore.sh'
+      - '.github/workflows/liftd-l03-7-level1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: liftd-l03-7-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+jobs:
+  reliability-capacity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: liftd_qualification
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres -d liftd_qualification"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    env:
+      LIFTD_DATABASE_URL: postgres://postgres:postgres@127.0.0.1:5432/liftd_qualification
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Exact implementation SHA
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Locked LIFTd dependencies
+        run: npm ci --prefix rideshare --ignore-scripts
+      - name: Syntax and retained LIFTd domain security
+        run: |
+          node --check rideshare/src/reliability.mjs
+          node --check rideshare/test/reliability.test.mjs
+          node --check rideshare/test/postgres/reliability.test.mjs
+          bash -n rideshare/scripts/test-backup-restore.sh
+          npm test --prefix rideshare
+      - name: Isolated PostgreSQL multi-instance, stale availability, worker recovery and load
+        shell: bash
+        run: |
+          set -euo pipefail
+          for suite in store dispatch reliability; do
+            PGPASSWORD=postgres psql -h 127.0.0.1 -U postgres -d postgres -v ON_ERROR_STOP=1 -c "DROP DATABASE IF EXISTS liftd_qualification WITH (FORCE)"
+            PGPASSWORD=postgres psql -h 127.0.0.1 -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE liftd_qualification"
+            node --test "rideshare/test/postgres/$suite.test.mjs"
+          done
+      - name: Actual PostgreSQL backup and restore recovery
+        shell: bash
+        run: |
+          PGPASSWORD=postgres psql -h 127.0.0.1 -U postgres -d postgres -v ON_ERROR_STOP=1 -c "DROP DATABASE IF EXISTS liftd_qualification WITH (FORCE)"
+          PGPASSWORD=postgres psql -h 127.0.0.1 -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE liftd_qualification"
+          bash rideshare/scripts/test-backup-restore.sh

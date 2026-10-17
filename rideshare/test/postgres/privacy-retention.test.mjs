@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createDatabasePool,migrate} from '../../src/postgres-store.mjs';
-import {createPrivacyService,redactedPrivacyTelemetry,privacyRetentionPolicy} from '../../src/privacy-retention.mjs';
+import {createPrivacyService,redactedPrivacyTelemetry,privacyRetentionPolicy,runPrivacyRetentionSweep} from '../../src/privacy-retention.mjs';
 assert.ok(process.env.LIFTD_DATABASE_URL,'Real PostgreSQL database required');
 test('L03.5 scoped privacy lifecycle, immutable decisions, evidence holds, redacted export and replay',async()=>{
  const pool=createDatabasePool({connectionString:process.env.LIFTD_DATABASE_URL});
@@ -39,10 +39,17 @@ test('L03.5 scoped privacy lifecycle, immutable decisions, evidence holds, redac
   await service.request('rider',deletion,{tripId,type:'deletion',commandId:'cmd_delete'});
   await pool.query('INSERT INTO liftd.safety_incidents(incident_id,trip_id,reporter_id,reporter_role,category,created_at,trip_revision) VALUES($1,$2,$3,$4,$5,$6,$7)',['privacy_incident_'+Date.now(),tripId,rider,'rider','threat',time,0]);
   await assert.rejects(()=>service.fulfill('operator',deletion,{commandId:'cmd_erase',expectedRevision:0}),{code:'PRIVACY_PROTECTED_RECORD'});
+  time=2000;
+  const firstSweep=await runPrivacyRetentionSweep({pool,clock:()=>time});
+  assert.equal(firstSweep.expiredLocations,0,'held trip must not have its location erased');
+  assert.equal((await pool.query('SELECT tombstoned FROM liftd.private_locations WHERE route_ref=$1',['clean_route'])).rows[0].tombstoned,false);
   const held=await service.hold('operator',deletion,{commandId:'cmd_hold',expectedRevision:0});assert.equal(held.status,'BLOCKED_HOLD');
   assert.equal(held.reason,'retained_incident');
   const safeId='privacy_safe_'+Date.now();
   await service.request('rider',safeId,{tripId:cleanTrip,type:'deletion',commandId:'cmd_safe_open'});
+  const overdue=await runPrivacyRetentionSweep({pool,clock:()=>time+privacyRetentionPolicy.privacyRequestSeconds+1});
+  assert.ok(overdue.overdueRequests>=1,'open due requests must be escalatable, not automatically resolved');
+  assert.equal((await service.read('rider',safeId)).status,'OPEN');
   const erased=await service.fulfill('operator',safeId,{commandId:'cmd_safe_erase',expectedRevision:0});
   assert.equal(erased.status,'FULFILLED');
   const sealed=(await pool.query('SELECT sealed,tombstoned FROM liftd.private_locations WHERE route_ref=$1',['clean_route'])).rows[0];

@@ -8,6 +8,7 @@ on:
       - 'rideshare/src/admitted-runtime.mjs'
       - 'rideshare/src/runtime-entrypoint.mjs'
       - 'rideshare/test/admitted-runtime.test.mjs'
+      - 'rideshare/test/postgres/deployment-security.test.mjs'
       - '.github/workflows/liftd-l03-6-level1.yml'
   workflow_dispatch:
 permissions:
@@ -18,7 +19,20 @@ concurrency:
 jobs:
   deployment-security:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: liftd_qualification
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres -d liftd_qualification"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    env:
+      LIFTD_DATABASE_URL: postgres://postgres:postgres@127.0.0.1:5432/liftd_qualification
     steps:
       - uses: actions/checkout@v4
         with:
@@ -43,6 +57,8 @@ jobs:
           npm test --prefix rideshare
       - name: Admitted runtime and readiness boundary
         run: node --test rideshare/test/admitted-runtime.test.mjs
+      - name: Real PostgreSQL migration, privilege, readiness and rollback integration
+        run: node --test rideshare/test/postgres/deployment-security.test.mjs
       - name: Package non-root image
         run: docker build --pull -f rideshare/Dockerfile -t liftd-qualification rideshare
       - name: Verify fail-closed unadmitted entry point

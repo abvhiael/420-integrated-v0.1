@@ -1,0 +1,180 @@
+{
+  "schema_version": 1,
+  "phase": "3.20",
+  "tiers": [
+    {
+      "tier": 1,
+      "label": "absolutely required for playable visual upgrade",
+      "status": "implemented-with-existing-assets",
+      "items": [
+        {
+          "name": "starter-shop background shell",
+          "sources": [
+            "assets/budtender/phase-3.1/env_starter_wall_rear.png",
+            "assets/budtender/phase-3.1/env_starter_wall_left.png",
+            "assets/budtender/phase-3.1/env_starter_wall_right.png",
+            "assets/budtender/phase-3.1/env_starter_floor.png",
+            "assets/budtender/phase-3.1/env_starter_storefront_arch_window.png"
+          ]
+        },
+        {
+          "name": "primary counter",
+          "sources": [
+            "assets/budtender/phase-3.2/counter_main_body.png"
+          ]
+        },
+        {
+          "name": "rear shelving",
+          "sources": [
+            "assets/budtender/phase-3.3/display_shelf_full_height.png"
+          ]
+        },
+        {
+          "name": "product jars/packages",
+          "sources": [
+            "assets/budtender/phase-3.4/product_flower_jar_medium.png",
+            "assets/budtender/phase-3.4/product_edible_gummies_jar.png",
+            "assets/budtender/phase-3.4/product_preroll_tube_single.png"
+          ]
+        },
+        {
+          "name": "POS register",
+          "sources": [
+            "assets/budtender/phase-3.2/prop_pos_register.png"
+          ]
+        },
+        {
+          "name": "queue posts",
+          "sources": [
+            "assets/budtender/phase-3.9/queue_stanchion_brass.png"
+          ]
+        },
+        {
+          "name": "waiting nook",
+          "sources": [
+            "assets/budtender/phase-3.8/nook_armchair_sage.png",
+            "assets/budtender/phase-3.8/nook_table_coffee_round.png"
+          ]
+        },
+        {
+          "name": "core plants",
+          "sources": [
+            "assets/budtender/phase-3.7/plant_monstera.png",
+            "assets/budtender/phase-3.7/plant_snake.png"
+          ]
+        },
+        {
+          "name": "primary menu board",
+          "sources": [
+            "assets/budtender/phase-3.5/sign_menu_main.png"
+          ]
+        },
+        {
+          "name": "logo/signage",
+          "sources": [
+            "assets/budtender/phase-3.5/sign_store_welcome.png"
+          ]
+        },
+        {
+          "name": "canonical lighting overlay",
+          "sources": [
+            "assets/budtender/phase-3.6/light_fx_ambient_warm.png"
+          ]
+        }
+      ]
+    },
+    {
+      "tier": 2,
+      "label": "progression support",
+      "status": "integrated",
+      "items": [
+        {
+          "name": "shelf stocking variants",
+          "sources": [
+            "assets/budtender/phase-3.3/display_state_empty.png",
+            "assets/budtender/phase-3.3/display_state_full_stock.png"
+          ]
+        },
+        {
+          "name": "side-display modules",
+          "sources": [
+            "assets/budtender/phase-3.3/display_shelf_corner.png"
+          ]
+        },
+        {
+          "name": "upgrade visual states",
+          "sources": [
+            "assets/budtender/phase-3.11/merch_upgrade_pedestal.png"
+          ]
+        },
+        {
+          "name": "alternate décor",
+          "sources": [
+            "assets/budtender/phase-3.7/decor_framed_leaf.png"
+          ]
+        },
+        {
+          "name": "more plants",
+          "sources": [
+            "assets/budtender/phase-3.7/plant_fern.png"
+          ]
+        },
+        {
+          "name": "premium fixtures",
+          "sources": [
+            "assets/budtender/phase-3.11/merch_tower_premium.png"
+          ]
+        },
+        {
+          "name": "expansion seam states",
+          "sources": [
+            "assets/budtender/phase-3.12/floor_seam_expansion.png"
+          ]
+        }
+      ]
+    },
+    {
+      "tier": 3,
+      "label": "polish",
+      "status": "integrated",
+      "items": [
+        {
+          "name": "secondary props",
+          "sources": [
+            "assets/budtender/phase-3.2/prop_clipboard.png"
+          ]
+        },
+        {
+          "name": "alternate signs",
+          "sources": [
+            "assets/budtender/phase-3.5/sign_promo_weekly_deals.png"
+          ]
+        },
+        {
+          "name": "time-of-day variants",
+          "sources": [
+            "assets/budtender/phase-3.6/light_state_evening.png"
+          ]
+        },
+        {
+          "name": "minor clutter",
+          "sources": [
+            "assets/budtender/phase-3.8/nook_magazines_stack.png"
+          ]
+        },
+        {
+          "name": "decorative posters",
+          "sources": [
+            "assets/budtender/phase-3.7/decor_botanical_wall_print.png"
+          ]
+        },
+        {
+          "name": "more product variations",
+          "sources": [
+            "assets/budtender/phase-3.4/product_flower_tin_premium.png"
+          ]
+        }
+      ]
+    }
+  ]
+}

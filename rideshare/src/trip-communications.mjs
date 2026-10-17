@@ -16,10 +16,10 @@ export function allowedNotification(preferences){
 }
 // Only canonical Messenger can issue a transport-capable entitlement.
 // No client or LIFTd self-signed grant is interpreted as delivery authorization.
-export function createTripCommunicationService({authenticator,store,messenger,notifications,preferencesFor,clock=()=>Math.floor(Date.now()/1000),maxMembershipSeconds=120}){
+export function createTripCommunicationService({authenticator,store,messenger,notifications,preferencesFor,consentGuard,clock=()=>Math.floor(Date.now()/1000),maxMembershipSeconds=120}){
  if(typeof authenticator?.authorize!=='function'||typeof store?.get!=='function'||
    typeof messenger?.authorizeTrip!=='function'||typeof messenger?.send!=='function'||typeof messenger?.read!=='function'||
-   typeof preferencesFor!=='function'||typeof notifications?.publish!=='function'||
+   typeof preferencesFor!=='function'||typeof consentGuard?.require!=='function'||typeof notifications?.publish!=='function'||
    !Number.isSafeInteger(maxMembershipSeconds)||maxMembershipSeconds<1||maxMembershipSeconds>300)fail('COMMUNICATION_UNAVAILABLE',503);
  function now(){const n=clock();if(!Number.isSafeInteger(n)||n<0)fail('CLOCK_UNAVAILABLE',503);return n}
  async function scoped(token,tripId,action){
@@ -84,6 +84,15 @@ export function createTripCommunicationService({authenticator,store,messenger,no
      (p.role==='rider'?p.subject!==trip.riderId:p.subject!==trip.driverId))fail('EVENT_AUTHORITY_DENIED');
    const event=safeTripUpdate(trip);let delivered=0;
    for(const recipient of [trip.riderId,trip.driverId].filter(id)){
+    // The sender's authenticated account can authorize only its own consent. 
+    // A driver actor cannot impersonate a rider to read their consent.
+    if(recipient===trip.riderId){
+     if(p.role!=='rider'||p.subject!==recipient)continue;
+     const candidate=await preferencesFor(recipient);
+     if(!allowedNotification(candidate?.preferences??candidate))continue;
+     const verified=await consentGuard.require({token:actorToken,accountId:p.accountId,purpose:'trip_notifications'});
+     if(verified?.subject!==recipient||verified?.accountId!==p.accountId)fail('EVENT_CONSENT_DENIED');
+    }
     const pref=await preferencesFor(recipient);
     const channel=allowedNotification(pref?.preferences??pref);
     if(!channel)continue;

@@ -4,7 +4,7 @@ import {createTripCommunicationService,safeTripUpdate,allowedNotification} from 
 import {createHttpHandler} from '../src/http.mjs';
 const trip=()=>({id:'trip_1',riderId:'rider_1',driverId:'driver_1',vehicleId:'vehicle_1',routeRef:'route_1',state:'ASSIGNED',revision:1});
 function setup(){
- let state=trip(), time=100,stop=false,called=[],sent=0,published=[],prefs={rider_1:{tripNotifications:true,contactMethod:'email'},driver_1:{tripNotifications:false,contactMethod:'sms'}};
+ let state=trip(), time=100,stop=false,consentEnabled=true,called=[],sent=0,published=[],prefs={rider_1:{tripNotifications:true,contactMethod:'email'},driver_1:{tripNotifications:false,contactMethod:'sms'}};
  const auth={authorize:async(token,{action,resource})=>{
   if(stop||!['rider_1','driver_1'].includes(token)||!['trip.message.read','trip.message.send','trip.read'].includes(action)||resource!=='trip:trip_1')throw Error('DENIED');
   return {role:token.startsWith('rider')?'rider':'driver',subject:token,accountId:'account_'+token,action,resource,expiresAt:time+40};
@@ -13,8 +13,9 @@ function setup(){
  send:async x=>{sent++;return {tripId:x.tripId,messageId:'message_1',status:'ACCEPTED'};},
  read:async x=>({messages:[{id:'message_1',tripId:x.tripId,sender:'driver_1',text:'Here'}],nextCursor:null})};
  const notifications={publish:async x=>{published.push(x);}};
- const service=createTripCommunicationService({authenticator:auth,store:{get:async()=>state},messenger,notifications,preferencesFor:async id=>prefs[id],clock:()=>time});
- return {service,called,published,messenger,auth,setTrip:x=>{state=x},setTime:x=>{time=x},revoke:()=>{stop=true},getSends:()=>sent,setPreferences:x=>{prefs=x}};
+ const consentGuard={require:async({token,accountId,purpose})=>{if(stop||!consentEnabled||token!=='rider_1'||accountId!=='account_rider_1'||purpose!=='trip_notifications')throw Error('CONSENT_DENIED');return {subject:'rider_1',accountId};}};
+ const service=createTripCommunicationService({authenticator:auth,consentGuard,store:{get:async()=>state},messenger,notifications,preferencesFor:async id=>prefs[id],clock:()=>time});
+ return {service,called,published,messenger,auth,setTrip:x=>{state=x},setTime:x=>{time=x},revoke:()=>{stop=true},getSends:()=>sent,setPreferences:x=>{prefs=x},revokeConsent:()=>{consentEnabled=false}};
 }
 test('owner-issued grants enforce trip, session, revision, expiry and recipient binding',async()=>{
  const x=setup();const r=await x.service.send('rider_1','trip_1',{commandId:'cmd_1',text:'At pickup'});
@@ -62,4 +63,8 @@ test('communications HTTP never exposes endpoints without service and checks bea
  const method=await handler(new Request(url,{method:'DELETE',headers:{authorization:'Bearer a.b.c'}}));assert.equal(method.status,405);
  const closed=createHttpHandler({},null,null,null,null,null,null,null,null,null);
  assert.equal((await closed(new Request(url))).status,503);
+});
+
+test('PT-01 consumer denies revoked consent and unavailable consent authority before notification',async()=>{
+ const x=setup();x.revokeConsent();await assert.rejects(()=>x.service.notifyTripEvent({tripId:'trip_1',revision:1,actorToken:'rider_1'}));assert.equal(x.published.length,0);
 });

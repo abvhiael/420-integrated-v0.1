@@ -156,6 +156,14 @@ contract BetVideoPokerSecureDrawTest {
         draw.commitHold(WAGER, 31);
     }
 
+    function testNewProviderCannotCommitOnceInitialDealExists() public {
+        _prepare();
+        VideoPokerDrawV1420 lateDraw = new VideoPokerDrawV1420(address(dealer), PROVIDER);
+        vm.expectRevert(VideoPokerDrawV1420.AlreadyHeld.selector);
+        vm.prank(PROVIDER);
+        lateDraw.commitReplacement(WAGER, lateDraw.seedCommitmentFor(WAGER, SEED), _params());
+    }
+
     function testSeedCannotBeRecommittedAfterDealOrHold() public {
         _prepare();
         vm.expectRevert(VideoPokerDrawV1420.AlreadyCommitted.selector);

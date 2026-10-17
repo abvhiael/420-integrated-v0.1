@@ -47,3 +47,14 @@ test('bounded parallel claim load has no duplicate admission',async()=>{
  await Promise.all(admitted.map(async (x,i)=>queue.finish({jobId:x.job_id,workerId:'load_worker_'+claims.indexOf(x),token:x.lease_token,ok:true})));
  assert.equal((await owner.query("SELECT count(*)::int n FROM liftd.recovery_jobs WHERE state='complete' AND job_id LIKE 'load_%'")).rows[0].n,30);
 });
+
+test('repeated worker crashes reach dead-letter without a third lease',async()=>{
+ await queue.enqueue({jobId:'recovery_dead_crash',kind:'provider_recheck',subjectId:'driver_dead'});
+ const first=await queue.claim('worker_dead1');assert.equal(first.attempts,1);
+ await owner.query("UPDATE liftd.recovery_jobs SET lease_until=now()-interval '1 second' WHERE job_id='recovery_dead_crash'");
+ const second=await queue.claim('worker_dead2');assert.equal(second.attempts,2);
+ await owner.query("UPDATE liftd.recovery_jobs SET lease_until=now()-interval '1 second' WHERE job_id='recovery_dead_crash'");
+ assert.equal(await queue.claim('worker_dead3'),null);
+ const state=(await owner.query("SELECT state,lease_token,attempts FROM liftd.recovery_jobs WHERE job_id='recovery_dead_crash'")).rows[0];
+ assert.equal(state.state,'dead');assert.equal(state.lease_token,null);assert.equal(state.attempts,2);
+});

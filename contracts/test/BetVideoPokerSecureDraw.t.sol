@@ -82,7 +82,7 @@ contract BetVideoPokerSecureDrawTest {
     }
     function _prepare() private {
         vm.prank(PROVIDER);
-        draw.commitReplacement(WAGER, draw.seedCommitmentFor(WAGER, SEED));
+        draw.commitReplacement(WAGER, draw.seedCommitmentFor(WAGER, SEED), _params());
         vm.prank(PLAYER);
         dealer.startInitialDeal(WAGER, _params());
     }
@@ -160,7 +160,7 @@ contract BetVideoPokerSecureDrawTest {
         _prepare();
         vm.expectRevert(VideoPokerDrawV1420.AlreadyCommitted.selector);
         vm.prank(PROVIDER);
-        draw.commitReplacement(WAGER, draw.seedCommitmentFor(WAGER, keccak256("other")));
+        draw.commitReplacement(WAGER, draw.seedCommitmentFor(WAGER, keccak256("other")), _params());
     }
 
     function testProviderCannotFrontRunHold() public {

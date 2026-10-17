@@ -41,6 +41,8 @@ contract VideoPokerDrawV1420 {
     error WrongDeal();
     error InvalidReveal();
     error ProviderNotIndependent();
+    error UnapprovedPaytable();
+    error InsufficientLiability();
     error SessionNotExpired();
 
     event ReplacementSeedCommitted(bytes32 indexed wagerId, bytes32 indexed commitment);
@@ -63,12 +65,17 @@ contract VideoPokerDrawV1420 {
 
     /// @dev The provider must not be the player or the primary/fallback randomness provider.
     ///      Independent operational/key control remains an external authorization gate.
-    function commitReplacement(bytes32 wagerId, bytes32 commitment) external {
+    function commitReplacement(bytes32 wagerId, bytes32 commitment, VideoPokerV1420.Params calldata params) external {
         if (msg.sender != replacementProvider) revert Unauthorized();
         if (commitment == bytes32(0)) revert InvalidCommitment();
         Session storage s = _sessions[wagerId];
         if (s.committed) revert AlreadyCommitted();
-        BetTypes420.Wager memory wager = poker.wagerRegistry().getWager(wagerId);
+        BetTypes420.Wager memory wager = poker.validateWager(wagerId, params);
+        if (params.paytableId != VideoPokerJacksOrBetter420.PAYTABLE_ID) revert UnapprovedPaytable();
+        if (wager.maxGrossPayout < VideoPokerJacksOrBetter420.maximumGross(wager.stake, params.credits))
+            revert InsufficientLiability();
+        if (wager.status != BetTypes420.WagerStatus.ACCEPTED &&
+            wager.status != BetTypes420.WagerStatus.OUTCOME_READY) revert WrongDeal();
         if (wager.gameVersionId != poker.gameVersionId() || wager.rulesetId != poker.rulesetId() ||
             wager.gameId != poker.gameId()) revert WrongDeal();
         if (block.timestamp >= wager.deadline) revert WagerExpired();
@@ -80,7 +87,11 @@ contract VideoPokerDrawV1420 {
         try dealer.initialDeal(wagerId) returns (VideoPokerDealV1420.InitialDeal memory) {
             revert AlreadyHeld();
         } catch (bytes memory reason) {
-            if (reason.length != 4 || bytes4(reason) != VideoPokerDealV1420.DealMissing.selector) {
+            bytes4 selector;
+            if (reason.length >= 4) {
+                assembly { selector := mload(add(reason, 32)) }
+            }
+            if (selector != VideoPokerDealV1420.DealMissing.selector) {
                 // Solidity custom errors can ABI-encode a selector in 4 bytes.
                 revert WrongDeal();
             }

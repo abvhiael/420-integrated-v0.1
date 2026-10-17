@@ -1,5 +1,6 @@
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { readFile } from "node:fs/promises";
+import { createHash } from "node:crypto";
 import { fileURLToPath } from "node:url";
 import { dirname, extname, join, normalize } from "node:path";
 import { BudtenderApplicationService } from "../../../src/budtender/BudtenderApplicationService.ts";
@@ -13,7 +14,7 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "public");
 const REPO_ROOT = join(ROOT, "..", "..", "..");
 const ART_INVENTORY = join(REPO_ROOT, "assets", "budtender", "asset_inventory.json");
 
-type ArtEntry = { path: string; sha256: string; bytes: number };
+type ArtEntry = { path: string; sha256?: string; git_blob_sha?: string; bytes: number };
 const loadArtwork = async (): Promise<ArtEntry[]> => {
   const raw = JSON.parse(await readFile(ART_INVENTORY, "utf8")) as { assets?: ArtEntry[] };
   if (!Array.isArray(raw.assets)) throw new Error("invalid artwork inventory");
@@ -21,6 +22,14 @@ const loadArtwork = async (): Promise<ArtEntry[]> => {
   for (const entry of raw.assets) {
     if (!/^assets\/budtender\/phase-3\.(?:[1-9]|1[0-4])\/[a-z0-9_]+\.png$/.test(entry.path) || paths.has(entry.path)) throw new Error("invalid artwork path");
     paths.add(entry.path);
+  }
+  const registry = JSON.parse(await readFile(join(REPO_ROOT, "assets/budtender/phase-3.17/registry.json"), "utf8")) as {assets?: {source:string;bytes:number;git_blob_sha:string}[]};
+  if (!Array.isArray(registry.assets) || registry.assets.length !== 48) throw new Error("invalid 3.17 registry");
+  for (const item of registry.assets) {
+    if (!/^assets\/budtender\/phase-3\.17\/budtender_store_[a-z0-9_]+\.png$/.test(item.source) || paths.has(item.source)) throw new Error("invalid 3.17 path");
+    if (!Number.isSafeInteger(item.bytes) || item.bytes < 100 || !/^[a-f0-9]{40}$/.test(item.git_blob_sha)) throw new Error("invalid 3.17 identity");
+    paths.add(item.source);
+    raw.assets.push({path:item.source,bytes:item.bytes,git_blob_sha:item.git_blob_sha});
   }
   return raw.assets;
 };
@@ -223,7 +232,7 @@ export const createBudtenderWebServer = (
 
     if (method === "GET" && url.pathname === "/assets/budtender/registry.json") {
       const assets = await loadArtwork();
-      return json(res, 200, { version: 1, count: assets.length, assets: assets.map(({ path, sha256, bytes }) => ({ url: "/" + path, sha256, bytes })) });
+      return json(res, 200, { version: 1, count: assets.length, assets: assets.map(({ path, sha256, git_blob_sha, bytes }) => ({ url: "/" + path, ...(sha256 ? {sha256} : {git_blob_sha}), bytes })) });
     }
 
     if (method === "GET" && url.pathname === "/assets/budtender/hotspots.json") {
@@ -251,6 +260,7 @@ export const createBudtenderWebServer = (
       if (!entry) return json(res, 404, { error: "asset not registered" });
       try {
         const content = await readFile(join(REPO_ROOT, relative));
+        if (entry.git_blob_sha && (content.length !== entry.bytes || createHash("sha1").update(`blob ${content.length}\0`).update(content).digest("hex") !== entry.git_blob_sha)) return json(res, 503, {error:"artwork integrity mismatch"});
         res.writeHead(200, responseHeaders({ "content-type": "image/png", "content-length": content.length, "cache-control": "public, max-age=3600" }));
         return res.end(content);
       } catch {

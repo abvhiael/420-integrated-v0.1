@@ -1,0 +1,1555 @@
+{
+  "schema": "HC.ARCHIVE.DISCOVERY.JOURNEYS.V1",
+  "status": "OWNER_APPROVED_DISCOVERY_REQUIREMENTS",
+  "permanent": true,
+  "free": true,
+  "noTokenCharge": true,
+  "founderCount": 16,
+  "fragmentCount": 64,
+  "finalRevelations": 16,
+  "eventSources": "server-side trusted issuers only",
+  "masterRewards": {
+    "title": "Keeper of the Original Sixteen",
+    "seal": "MASTER_FOUNDER_SEAL",
+    "exhibition": "ORIGINAL_SIXTEEN_MUSEUM_EXHIBITION",
+    "nonTransferable": true
+  },
+  "journeys": [
+    {
+      "founderId": "HC-F01",
+      "founderName": "Emerald Ghost",
+      "region": "Emerald Coast",
+      "opening": {
+        "type": "founder_acquired",
+        "qualifier": "verified founder-acquisition event, optional for clues but never premium-paid"
+      },
+      "fragments": [
+        {
+          "fragmentId": "HC-F01-H1",
+          "title": "The Bell Journal, 1964",
+          "trigger": {
+            "type": "archive.landmark_inspected",
+            "site": "Bell homestead marker",
+            "objectiveId": "hc-archive-01-1",
+            "verifiedBy": "High Country trusted world/archive authority"
+          },
+          "alternate": {
+            "type": "archive.accessible_research",
+            "objectiveId": "hc-archive-01-1-alt",
+            "site": "Emerald Coast public archive",
+            "verifiedBy": "High Country trusted archive authority"
+          },
+          "reward": "one permanent nontradeable fragment unlock"
+        },
+        {
+          "fragmentId": "HC-F01-H2",
+          "title": "Alder River Flood Register, 1968",
+          "trigger": {
+            "type": "archive.record_researched",
+            "site": "Alder River county archive",
+            "objectiveId": "hc-archive-01-2",
+            "verifiedBy": "High Country trusted world/archive authority"
+          },
+          "alternate": {
+            "type": "archive.accessible_research",
+            "objectiveId": "hc-archive-01-2-alt",
+            "site": "Emerald Coast public archive",
+            "verifiedBy": "High Country trusted archive authority"
+          },
+          "reward": "one permanent nontradeable fragment unlock"
+        },
+        {
+          "fragmentId": "HC-F01-H3",
+          "title": "Port Alder Warehouse Inventory, 1999",
+          "trigger": {
+            "type": "archive.preservation_milestone",
+            "site": "Port Alder warehouse restoration",
+            "objectiveId": "hc-archive-01-3",
+            "verifiedBy": "High Country cultivation/preservation or approved restoration service"
+          },
+          "alternate": {
+            "type": "archive.accessible_research",
+            "objectiveId": "hc-archive-01-3-alt",
+            "site": "Emerald Coast public archive",
+            "verifiedBy": "High Country trusted archive authority"
+          },
+          "reward": "one permanent nontradeable fragment unlock"
+        },
+        {
+          "fragmentId": "HC-F01-H4",
+          "title": "The Unsigned Note",
+          "trigger": {
+            "type": "archive.evidence_reconstructed",
+            "site": "Bell family photographic collection",
+            "objectiveId": "hc-archive-01-4",
+            "verifiedBy": "High Country trusted world/archive authority"
+          },
+          "alternate": {
+            "type": "archive.accessible_research",
+            "objectiveId": "hc-archive-01-4-alt",
+            "site": "Emerald Coast public archive",
+            "verifiedBy": "High Country trusted archive authority"
+          },
+          "reward": "one permanent nontradeable fragment unlock"
+        }
+      ],
+      "final": {
+        "id": "HC-F01-REVELATION",
+        "title": "The Keeper's Promise",
+        "summary": "Mara Bell and eleven households safeguarded the line communally; the archival chest was rediscovered in 1999.",
+        "requiresAllFragmentIds": [
+          "HC-F01-H1",
+          "HC-F01-H2",
+          "HC-F01-H3",
+          "HC-F01-H4"
+        ],
+        "rewards": [
+          "full history",
+          "Archive Edition cosmetic",
+          "founder heritage seal",
+          "museum exhibit entry"
+        ]
+      }
+    },
+    {
+      "founderId": "HC-F02",
+      "founderName": "Blackwater Haze",
+      "region": "Emerald Coast",
+      "opening": {
+        "type": "founder_acquired",
+        "qualifier": "verified founder-acquisition event, optional for clues but never premium-paid"
+      },
+      "fragments": [
+        {
+          "fragmentId": "HC-F02-H1",
+          "title": "The Molly Anne Cargo Book",
+          "trigger": {
+            "type": "archive.landmark_inspected",
+            "site": "Moss Landing vessel archive",
+            "objectiveId": "hc-archive-02-1",
+            "verifiedBy": "High Country trusted world/archive authority"
+          },
+          "alternate": {
+            "type": "archive.accessible_research",
+            "objectiveId": "hc-archive-02-1-alt",
+            "site": "Emerald Coast public archive",
+            "verifiedBy": "High Country trusted archive authority"
+          },
+          "reward": "one permanent nontradeable fragment unlock"
+        },
+        {
+          "fragmentId": "HC-F02-H2",
+          "title": "Greyhaven Exchange Receipt",
+          "trigger": {
+            "type": "archive.record_researched",
+            "site": "Greyhaven cooperative exchange",
+            "objectiveId": "hc-archive-02-2",
+            "verifiedBy": "High Country trusted world/archive authority"
+          },
+          "alternate": {
+            "type": "archive.accessible_research",
+            "objectiveId": "hc-archive-02-2-alt",
+            "site": "Emerald Coast public archive",
+            "verifiedBy": "High Country trusted archive authority"
+          },
+          "reward": "one permanent nontradeable fragment unlock"
+        },
+        {
+          "fragmentId": "HC-F02-H3",
+          "title": "Captain Rook's Weather Notes",
+          "trigger": {
+            "type": "archive.preservation_milestone",
+            "site": "Blackwater river navigation record",
+            "objectiveId": "hc-archive-02-3",
+            "verifiedBy": "High Country cultivation/preservation or approved restoration service"
+          },
+          "alternate": {
+            "type": "archive.accessible_research",
+            "objectiveId": "hc-archive-02-3-alt",
+            "site": "Emerald Coast public archive",
+            "verifiedBy": "High Country trusted archive authority"
+          },
+          "reward": "one permanent nontradeable fragment unlock"
+        },
+        {
+          "fragmentId": "HC-F02-H4",
+          "title": "The Silver-Pencil Ledger",
+          "trigger": {
+            "type": "archive.evidence_reconstructed",
+            "site": "Captain Rook family archive",
+            "objectiveId": "hc-archive-02-4",
+            "verifiedBy": "High Country trusted world/archive authority"
+          },
+          "alternate": {
+            "type": "archive.accessible_research",
+            "objectiveId": "hc-archive-02-4-alt",
+            "site": "Emerald Coast public archive",
+            "verifiedBy": "High Country trusted archive authority"
+          },
+          "reward": "one permanent nontradeable fragment unlock"
+        }
+      ],
+      "final": {
+        "id": "HC-F02-REVELATION",
+        "title": "Passage Paid",
+        "summary": "Captain Elias Rook moved agricultural collections along river routes; the last shipment aided a household after a fire.",
+        "requiresAllFragmentIds": [
+          "HC-F02-H1",
+          "HC-F02-H2",
+          "HC-F02-H3",
+          "HC-F02-H4"
+        ],
+        "rewards": [
+          "full history",
+          "Archive Edition cosmetic",
+          "founder heritage seal",
+          "museum exhibit entry"
+        ]
+      }
+    },
+    {
+      "founderId": "HC-F03",
+      "founderName": "Cedar Widow",
+      "region": "Emerald Coast",
+      "opening": {
+        "type": "founder_acquired",
+        "qualifier": "verified founder-acquisition event, optional for clues but never premium-paid"
+      },
+      "fragments": [
+        {
+          "fragmentId": "HC-F03-H1",
+          "title": "The Wren Marriage Certificate",
+          "trigger": {
+            "type": "archive.landmark_inspected",
+            "site": "Cedar Hollow public register",
+            "objectiveId": "hc-archive-03-1",
+            "verifiedBy": "High Country trusted world/archive authority"
+          },
+          "alternate": {
+            "type": "archive.accessible_research",
+            "objectiveId": "hc-archive-03-1-alt",
+            "site": "Emerald Coast public archive",
+            "verifiedBy": "High Country trusted archive authority"
+          },
+          "reward": "one permanent nontradeable fragment unlock"
+        },
+        {
+          "fragmentId": "HC-F03-H2",
+          "title": "Cedar Hollow Bridge Records",
+          "trigger": {
+            "type": "archive.record_researched",
+            "site": "Cedar Hollow bridge memorial",
+            "objectiveId": "hc-archive-03-2",
+            "verifiedBy": "High Country trusted world/archive authority"
+          },
+          "alternate": {
+            "type": "archive.accessible_research",
+            "objectiveId": "hc-archive-03-2-alt",
+            "site": "Emerald Coast public archive",
+            "verifiedBy": "High Country trusted archive authority"
+          },
+          "reward": "one permanent nontradeable fragment unlock"
+        },
+        {
+          "fragmentId": "HC-F03-H3",
+          "title": "Eleanor's Garden Notebook",
+          "trigger": {
+            "type": "archive.preservation_milestone",
+            "site": "Wren homestead preservation",
+            "objectiveId": "hc-archive-03-3",
+            "verifiedBy": "High Country cultivation/preservation or approved restoration service"
+          },
+          "alternate": {
+            "type": "archive.accessible_research",
+            "objectiveId": "hc-archive-03-3-alt",
+            "site": "Emerald Coast public archive",
+            "verifiedBy": "High Country trusted archive authority"
+          },
+          "reward": "one permanent nontradeable fragment unlock"
+        },
+        {
+          "fragmentId": "HC-F03-H4",
+          "title": "Sixteen Wooden Markers",
+          "trigger": {
+            "type": "archive.evidence_reconstructed",
+            "site": "Cedar Widow garden memorial",
+            "objectiveId": "hc-archive-03-4",
+            "verifiedBy": "High Country trusted world/archive authority"
+          },
+          "alternate": {
+            "type": "archive.accessible_research",
+            "objectiveId": "hc-archive-03-4-alt",
+            "site": "Emerald Coast public archive",
+            "verifiedBy": "High Country trusted archive authority"
+          },
+          "reward": "one permanent nontradeable fragment unlock"
+        }
+      ],
+      "final": {
+        "id": "HC-F03-REVELATION",
+        "title": "Sixteen Visitors",
+        "summary": "Eleanor Wren's sixteen markers commemorated the children she sheltered; their families preserved her collection.",
+        "requiresAllFragmentIds": [
+          "HC-F03-H1",
+          "HC-F03-H2",
+          "HC-F03-H3",
+          "HC-F03-H4"
+        ],
+        "rewards": [
+          "full history",
+          "Archive Edition cosmetic",
+          "founder heritage seal",
+          "museum exhibit entry"
+        ]
+      }
+    },
+    {
+      "founderId": "HC-F04",
+      "founderName": "Harbour Lights",
+      "region": "Emerald Coast",
+      "opening": {
+        "type": "founder_acquired",
+        "qualifier": "verified founder-acquisition event, optional for clues but never premium-paid"
+      },
+      "fragments": [
+        {
+          "fragmentId": "HC-F04-H1",
+          "title": "Eastern Dockworkers Membership Card",
+          "trigger": {
+            "type": "archive.landmark_inspected",
+            "site": "Eastern Port Alder dock museum",
+            "objectiveId": "hc-archive-04-1",
+            "verifiedBy": "High Country trusted world/archive authority"
+          },
+          "alternate": {
+            "type": "archive.accessible_research",
+            "objectiveId": "hc-archive-04-1-alt",
+            "site": "Emerald Coast public archive",
+            "verifiedBy": "High Country trusted archive authority"
+          },
+          "reward": "one permanent nontradeable fragment unlock"
+        },
+        {
+          "fragmentId": "HC-F04-H2",
+          "title": "Warehouse Demolition Notice, 1983",
+          "trigger": {
+            "type": "archive.record_researched",
+            "site": "Port Alder municipal archives",
+            "objectiveId": "hc-archive-04-2",
+            "verifiedBy": "High Country trusted world/archive authority"
+          },
+          "alternate": {
+            "type": "archive.accessible_research",
+            "objectiveId": "hc-archive-04-2-alt",
+            "site": "Emerald Coast public archive",
+            "verifiedBy": "High Country trusted archive authority"
+          },
+          "reward": "one permanent nontradeable fragment unlock"
+        },
+        {
+          "fragmentId": "HC-F04-H3",
+          "title": "Night Shift Photograph",
+          "trigger": {
+            "type": "archive.preservation_milestone",
+            "site": "Dockworkers co-op restoration",
+            "objectiveId": "hc-archive-04-3",
+            "verifiedBy": "High Country cultivation/preservation or approved restoration service"
+          },
+          "alternate": {
+            "type": "archive.accessible_research",
+            "objectiveId": "hc-archive-04-3-alt",
+            "site": "Emerald Coast public archive",
+            "verifiedBy": "High Country trusted archive authority"
+          },
+          "reward": "one permanent nontradeable fragment unlock"
+        },
+        {
+          "fragmentId": "HC-F04-H4",
+          "title": "The Harbour Lights Festival Flyer",
+          "trigger": {
+            "type": "archive.evidence_reconstructed",
+            "site": "Port Alder waterfront heritage fair",
+            "objectiveId": "hc-archive-04-4",
+            "verifiedBy": "High Country trusted world/archive authority"
+          },
+          "alternate": {
+            "type": "archive.accessible_research",
+            "objectiveId": "hc-archive-04-4-alt",
+            "site": "Emerald Coast public archive",
+            "verifiedBy": "High Country trusted archive authority"
+          },
+          "reward": "one permanent nontradeable fragment unlock"
+        }
+      ],
+      "final": {
+        "id": "HC-F04-REVELATION",
+        "title": "Danny's Truck",
+        "summary": "Dockworkers relocated the archive to an unused municipal greenhouse before their warehouse's demolition.",
+        "requiresAllFragmentIds": [
+          "HC-F04-H1",
+          "HC-F04-H2",
+          "HC-F04-H3",
+          "HC-F04-H4"
+        ],
+        "rewards": [
+          "full history",
+          "Archive Edition cosmetic",
+          "founder heritage seal",
+          "museum exhibit entry"
+        ]
+      }
+    },
+    {
+      "founderId": "HC-F05",
+      "founderName": "Bracken Gold",
+      "region": "Emerald Coast",
+      "opening": {
+        "type": "founder_acquired",
+        "qualifier": "verified founder-acquisition event, optional for clues but never premium-paid"
+      },
+      "fragments": [
+        {
+          "fragmentId": "HC-F05-H1",
+          "title": "The Green Ledger",
+          "trigger": {
+            "type": "archive.landmark_inspected",
+            "site": "Bracken Falls co-op archive",
+            "objectiveId": "hc-archive-05-1",
+            "verifiedBy": "High Country trusted world/archive authority"
+          },
+          "alternate": {
+            "type": "archive.accessible_research",
+            "objectiveId": "hc-archive-05-1-alt",
+            "site": "Emerald Coast public archive",
+            "verifiedBy": "High Country trusted archive authority"
+          },
+          "reward": "one permanent nontradeable fragment unlock"
+        },
+        {
+          "fragmentId": "HC-F05-H2",
+          "title": "Bracken Falls Preservation Fair Poster",
+          "trigger": {
+            "type": "archive.record_researched",
+            "site": "Bracken Falls preservation fair",
+            "objectiveId": "hc-archive-05-2",
+            "verifiedBy": "High Country trusted world/archive authority"
+          },
+          "alternate": {
+            "type": "archive.accessible_research",
+            "objectiveId": "hc-archive-05-2-alt",
+            "site": "Emerald Coast public archive",
+            "verifiedBy": "High Country trusted archive authority"
+          },
+          "reward": "one permanent nontradeable fragment unlock"
+        },
+        {
+          "fragmentId": "HC-F05-H3",
+          "title": "The 1974 Meeting Minutes",
+          "trigger": {
+            "type": "archive.preservation_milestone",
+            "site": "Valley cooperative records room",
+            "objectiveId": "hc-archive-05-3",
+            "verifiedBy": "High Country cultivation/preservation or approved restoration service"
+          },
+          "alternate": {
+            "type": "archive.accessible_research",
+            "objectiveId": "hc-archive-05-3-alt",
+            "site": "Emerald Coast public archive",
+            "verifiedBy": "High Country trusted archive authority"
+          },
+          "reward": "one permanent nontradeable fragment unlock"
+        },
+        {
+          "fragmentId": "HC-F05-H4",
+          "title": "A Brass-Cornered Seed Tin",
+          "trigger": {
+            "type": "archive.evidence_reconstructed",
+            "site": "Bracken Falls seed collection",
+            "objectiveId": "hc-archive-05-4",
+            "verifiedBy": "High Country trusted world/archive authority"
+          },
+          "alternate": {
+            "type": "archive.accessible_research",
+            "objectiveId": "hc-archive-05-4-alt",
+            "site": "Emerald Coast public archive",
+            "verifiedBy": "High Country trusted archive authority"
+          },
+          "reward": "one permanent nontradeable fragment unlock"
+        }
+      ],
+      "final": {
+        "id": "HC-F05-REVELATION",
+        "title": "Forty-Three Against Two",
+        "summary": "A cooperative vote rejected selling the collection, and a former supporter of the sale became its archivist.",
+        "requiresAllFragmentIds": [
+          "HC-F05-H1",
+          "HC-F05-H2",
+          "HC-F05-H3",
+          "HC-F05-H4"
+        ],
+        "rewards": [
+          "full history",
+          "Archive Edition cosmetic",
+          "founder heritage seal",
+          "museum exhibit entry"
+        ]
+      }
+    },
+    {
+      "founderId": "HC-F06",
+      "founderName": "Rainmaker",
+      "region": "Emerald Coast",
+      "opening": {
+        "type": "founder_acquired",
+        "qualifier": "verified founder-acquisition event, optional for clues but never premium-paid"
+      },
+      "fragments": [
+        {
+          "fragmentId": "HC-F06-H1",
+          "title": "Greyhaven Rainfall Chart, 1962",
+          "trigger": {
+            "type": "archive.landmark_inspected",
+            "site": "Greyhaven weather museum",
+            "objectiveId": "hc-archive-06-1",
+            "verifiedBy": "High Country trusted world/archive authority"
+          },
+          "alternate": {
+            "type": "archive.accessible_research",
+            "objectiveId": "hc-archive-06-1-alt",
+            "site": "Emerald Coast public archive",
+            "verifiedBy": "High Country trusted archive authority"
+          },
+          "reward": "one permanent nontradeable fragment unlock"
+        },
+        {
+          "fragmentId": "HC-F06-H2",
+          "title": "Weather Room Equipment Register",
+          "trigger": {
+            "type": "archive.record_researched",
+            "site": "Weather Room restoration",
+            "objectiveId": "hc-archive-06-2",
+            "verifiedBy": "High Country trusted world/archive authority"
+          },
+          "alternate": {
+            "type": "archive.accessible_research",
+            "objectiveId": "hc-archive-06-2-alt",
+            "site": "Emerald Coast public archive",
+            "verifiedBy": "High Country trusted archive authority"
+          },
+          "reward": "one permanent nontradeable fragment unlock"
+        },
+        {
+          "fragmentId": "HC-F06-H3",
+          "title": "Storm Relief Correspondence",
+          "trigger": {
+            "type": "archive.preservation_milestone",
+            "site": "Greyhaven storm-relief archive",
+            "objectiveId": "hc-archive-06-3",
+            "verifiedBy": "High Country cultivation/preservation or approved restoration service"
+          },
+          "alternate": {
+            "type": "archive.accessible_research",
+            "objectiveId": "hc-archive-06-3-alt",
+            "site": "Emerald Coast public archive",
+            "verifiedBy": "High Country trusted archive authority"
+          },
+          "reward": "one permanent nontradeable fragment unlock"
+        },
+        {
+          "fragmentId": "HC-F06-H4",
+          "title": "Miriam's Final Annual Report",
+          "trigger": {
+            "type": "archive.evidence_reconstructed",
+            "site": "Miriam Sato classroom archive",
+            "objectiveId": "hc-archive-06-4",
+            "verifiedBy": "High Country trusted world/archive authority"
+          },
+          "alternate": {
+            "type": "archive.accessible_research",
+            "objectiveId": "hc-archive-06-4-alt",
+            "site": "Emerald Coast public archive",
+            "verifiedBy": "High Country trusted archive authority"
+          },
+          "reward": "one permanent nontradeable fragment unlock"
+        }
+      ],
+      "final": {
+        "id": "HC-F06-REVELATION",
+        "title": "The Classroom Window",
+        "summary": "Miriam Sato's classroom observation project grew into a regional weather and agricultural archive.",
+        "requiresAllFragmentIds": [
+          "HC-F06-H1",
+          "HC-F06-H2",
+          "HC-F06-H3",
+          "HC-F06-H4"
+        ],
+        "rewards": [
+          "full history",
+          "Archive Edition cosmetic",
+          "founder heritage seal",
+          "museum exhibit entry"
+        ]
+      }
+    },
+    {
+      "founderId": "HC-F07",
+      "founderName": "Prairie Thunder",
+      "region": "Golden Prairie",
+      "opening": {
+        "type": "founder_acquired",
+        "qualifier": "verified founder-acquisition event, optional for clues but never premium-paid"
+      },
+      "fragments": [
+        {
+          "fragmentId": "HC-F07-H1",
+          "title": "Storm Damage Map, 1977",
+          "trigger": {
+            "type": "archive.landmark_inspected",
+            "site": "Harvest Junction storm memorial",
+            "objectiveId": "hc-archive-07-1",
+            "verifiedBy": "High Country trusted world/archive authority"
+          },
+          "alternate": {
+            "type": "archive.accessible_research",
+            "objectiveId": "hc-archive-07-1-alt",
+            "site": "Golden Prairie public archive",
+            "verifiedBy": "High Country trusted archive authority"
+          },
+          "reward": "one permanent nontradeable fragment unlock"
+        },
+        {
+          "fragmentId": "HC-F07-H2",
+          "title": "Harvest Junction Railway Depot Ledger",
+          "trigger": {
+            "type": "archive.record_researched",
+            "site": "Rail depot restoration",
+            "objectiveId": "hc-archive-07-2",
+            "verifiedBy": "High Country trusted world/archive authority"
+          },
+          "alternate": {
+            "type": "archive.accessible_research",
+            "objectiveId": "hc-archive-07-2-alt",
+            "site": "Golden Prairie public archive",
+            "verifiedBy": "High Country trusted archive authority"
+          },
+          "reward": "one permanent nontradeable fragment unlock"
+        },
+        {
+          "fragmentId": "HC-F07-H3",
+          "title": "Samuel Dyer's Radio Recording",
+          "trigger": {
+            "type": "archive.preservation_milestone",
+            "site": "Harvest Junction radio archive",
+            "objectiveId": "hc-archive-07-3",
+            "verifiedBy": "High Country cultivation/preservation or approved restoration service"
+          },
+          "alternate": {
+            "type": "archive.accessible_research",
+            "objectiveId": "hc-archive-07-3-alt",
+            "site": "Golden Prairie public archive",
+            "verifiedBy": "High Country trusted archive authority"
+          },
+          "reward": "one permanent nontradeable fragment unlock"
+        },
+        {
+          "fragmentId": "HC-F07-H4",
+          "title": "The Thunder Seal",
+          "trigger": {
+            "type": "archive.evidence_reconstructed",
+            "site": "Golden Prairie volunteers exhibit",
+            "objectiveId": "hc-archive-07-4",
+            "verifiedBy": "High Country trusted world/archive authority"
+          },
+          "alternate": {
+            "type": "archive.accessible_research",
+            "objectiveId": "hc-archive-07-4-alt",
+            "site": "Golden Prairie public archive",
+            "verifiedBy": "High Country trusted archive authority"
+          },
+          "reward": "one permanent nontradeable fragment unlock"
+        }
+      ],
+      "final": {
+        "id": "HC-F07-REVELATION",
+        "title": "The Unnamed Volunteers",
+        "summary": "More than two hundred volunteers organized regional relief after the storms of 1977.",
+        "requiresAllFragmentIds": [
+          "HC-F07-H1",
+          "HC-F07-H2",
+          "HC-F07-H3",
+          "HC-F07-H4"
+        ],
+        "rewards": [
+          "full history",
+          "Archive Edition cosmetic",
+          "founder heritage seal",
+          "museum exhibit entry"
+        ]
+      }
+    },
+    {
+      "founderId": "HC-F08",
+      "founderName": "Dust Devil",
+      "region": "Golden Prairie",
+      "opening": {
+        "type": "founder_acquired",
+        "qualifier": "verified founder-acquisition event, optional for clues but never premium-paid"
+      },
+      "fragments": [
+        {
+          "fragmentId": "HC-F08-H1",
+          "title": "Mercer Station Receipt Book",
+          "trigger": {
+            "type": "archive.landmark_inspected",
+            "site": "Dry Gulch roadside museum",
+            "objectiveId": "hc-archive-08-1",
+            "verifiedBy": "High Country trusted world/archive authority"
+          },
+          "alternate": {
+            "type": "archive.accessible_research",
+            "objectiveId": "hc-archive-08-1-alt",
+            "site": "Golden Prairie public archive",
+            "verifiedBy": "High Country trusted archive authority"
+          },
+          "reward": "one permanent nontradeable fragment unlock"
+        },
+        {
+          "fragmentId": "HC-F08-H2",
+          "title": "Old Western Road Map",
+          "trigger": {
+            "type": "archive.record_researched",
+            "site": "Western Road historical marker",
+            "objectiveId": "hc-archive-08-2",
+            "verifiedBy": "High Country trusted world/archive authority"
+          },
+          "alternate": {
+            "type": "archive.accessible_research",
+            "objectiveId": "hc-archive-08-2-alt",
+            "site": "Golden Prairie public archive",
+            "verifiedBy": "High Country trusted archive authority"
+          },
+          "reward": "one permanent nontradeable fragment unlock"
+        },
+        {
+          "fragmentId": "HC-F08-H3",
+          "title": "A Photograph of the Exchange Box",
+          "trigger": {
+            "type": "archive.preservation_milestone",
+            "site": "Mercer station restoration",
+            "objectiveId": "hc-archive-08-3",
+            "verifiedBy": "High Country cultivation/preservation or approved restoration service"
+          },
+          "alternate": {
+            "type": "archive.accessible_research",
+            "objectiveId": "hc-archive-08-3-alt",
+            "site": "Golden Prairie public archive",
+            "verifiedBy": "High Country trusted archive authority"
+          },
+          "reward": "one permanent nontradeable fragment unlock"
+        },
+        {
+          "fragmentId": "HC-F08-H4",
+          "title": "Dry Gulch Oral History Recording",
+          "trigger": {
+            "type": "archive.evidence_reconstructed",
+            "site": "Dry Gulch oral-history archive",
+            "objectiveId": "hc-archive-08-4",
+            "verifiedBy": "High Country trusted world/archive authority"
+          },
+          "alternate": {
+            "type": "archive.accessible_research",
+            "objectiveId": "hc-archive-08-4-alt",
+            "site": "Golden Prairie public archive",
+            "verifiedBy": "High Country trusted archive authority"
+          },
+          "reward": "one permanent nontradeable fragment unlock"
+        }
+      ],
+      "final": {
+        "id": "HC-F08-REVELATION",
+        "title": "The Second Box",
+        "summary": "The Mercer family's take-what-you-need roadside exchange inspired similar boxes across the plains.",
+        "requiresAllFragmentIds": [
+          "HC-F08-H1",
+          "HC-F08-H2",
+          "HC-F08-H3",
+          "HC-F08-H4"
+        ],
+        "rewards": [
+          "full history",
+          "Archive Edition cosmetic",
+          "founder heritage seal",
+          "museum exhibit entry"
+        ]
+      }
+    },
+    {
+      "founderId": "HC-F09",
+      "founderName": "Harvest Moon",
+      "region": "Golden Prairie",
+      "opening": {
+        "type": "founder_acquired",
+        "qualifier": "verified founder-acquisition event, optional for clues but never premium-paid"
+      },
+      "fragments": [
+        {
+          "fragmentId": "HC-F09-H1",
+          "title": "The First Harvest Gathering Program",
+          "trigger": {
+            "type": "archive.landmark_inspected",
+            "site": "Willow Creek community hall",
+            "objectiveId": "hc-archive-09-1",
+            "verifiedBy": "High Country trusted world/archive authority"
+          },
+          "alternate": {
+            "type": "archive.accessible_research",
+            "objectiveId": "hc-archive-09-1-alt",
+            "site": "Golden Prairie public archive",
+            "verifiedBy": "High Country trusted archive authority"
+          },
+          "reward": "one permanent nontradeable fragment unlock"
+        },
+        {
+          "fragmentId": "HC-F09-H2",
+          "title": "Willow Creek Cooperative Exchange Token",
+          "trigger": {
+            "type": "archive.record_researched",
+            "site": "Willow Creek preservation fair",
+            "objectiveId": "hc-archive-09-2",
+            "verifiedBy": "High Country trusted world/archive authority"
+          },
+          "alternate": {
+            "type": "archive.accessible_research",
+            "objectiveId": "hc-archive-09-2-alt",
+            "site": "Golden Prairie public archive",
+            "verifiedBy": "High Country trusted archive authority"
+          },
+          "reward": "one permanent nontradeable fragment unlock"
+        },
+        {
+          "fragmentId": "HC-F09-H3",
+          "title": "The 1981 Outdoor Festival Photograph",
+          "trigger": {
+            "type": "archive.preservation_milestone",
+            "site": "Willow Creek municipal archive",
+            "objectiveId": "hc-archive-09-3",
+            "verifiedBy": "High Country cultivation/preservation or approved restoration service"
+          },
+          "alternate": {
+            "type": "archive.accessible_research",
+            "objectiveId": "hc-archive-09-3-alt",
+            "site": "Golden Prairie public archive",
+            "verifiedBy": "High Country trusted archive authority"
+          },
+          "reward": "one permanent nontradeable fragment unlock"
+        },
+        {
+          "fragmentId": "HC-F09-H4",
+          "title": "A Handwritten Recipe and Seed List",
+          "trigger": {
+            "type": "archive.evidence_reconstructed",
+            "site": "Willow Creek family scrapbook",
+            "objectiveId": "hc-archive-09-4",
+            "verifiedBy": "High Country trusted world/archive authority"
+          },
+          "alternate": {
+            "type": "archive.accessible_research",
+            "objectiveId": "hc-archive-09-4-alt",
+            "site": "Golden Prairie public archive",
+            "verifiedBy": "High Country trusted archive authority"
+          },
+          "reward": "one permanent nontradeable fragment unlock"
+        }
+      ],
+      "final": {
+        "id": "HC-F09-REVELATION",
+        "title": "The Empty Chair",
+        "summary": "The annual gathering always kept a chair for anyone arriving alone.",
+        "requiresAllFragmentIds": [
+          "HC-F09-H1",
+          "HC-F09-H2",
+          "HC-F09-H3",
+          "HC-F09-H4"
+        ],
+        "rewards": [
+          "full history",
+          "Archive Edition cosmetic",
+          "founder heritage seal",
+          "museum exhibit entry"
+        ]
+      }
+    },
+    {
+      "founderId": "HC-F10",
+      "founderName": "Midnight Elevator",
+      "region": "Golden Prairie",
+      "opening": {
+        "type": "founder_acquired",
+        "qualifier": "verified founder-acquisition event, optional for clues but never premium-paid"
+      },
+      "fragments": [
+        {
+          "fragmentId": "HC-F10-H1",
+          "title": "Stonebridge Railway Timetable",
+          "trigger": {
+            "type": "archive.landmark_inspected",
+            "site": "Stonebridge railway museum",
+            "objectiveId": "hc-archive-10-1",
+            "verifiedBy": "High Country trusted world/archive authority"
+          },
+          "alternate": {
+            "type": "archive.accessible_research",
+            "objectiveId": "hc-archive-10-1-alt",
+            "site": "Golden Prairie public archive",
+            "verifiedBy": "High Country trusted archive authority"
+          },
+          "reward": "one permanent nontradeable fragment unlock"
+        },
+        {
+          "fragmentId": "HC-F10-H2",
+          "title": "Last Grain Train Photograph",
+          "trigger": {
+            "type": "archive.record_researched",
+            "site": "Stonebridge abandoned platform",
+            "objectiveId": "hc-archive-10-2",
+            "verifiedBy": "High Country trusted world/archive authority"
+          },
+          "alternate": {
+            "type": "archive.accessible_research",
+            "objectiveId": "hc-archive-10-2-alt",
+            "site": "Golden Prairie public archive",
+            "verifiedBy": "High Country trusted archive authority"
+          },
+          "reward": "one permanent nontradeable fragment unlock"
+        },
+        {
+          "fragmentId": "HC-F10-H3",
+          "title": "Joseph Vale's Maintenance Ledger",
+          "trigger": {
+            "type": "archive.preservation_milestone",
+            "site": "Vale heritage archive",
+            "objectiveId": "hc-archive-10-3",
+            "verifiedBy": "High Country cultivation/preservation or approved restoration service"
+          },
+          "alternate": {
+            "type": "archive.accessible_research",
+            "objectiveId": "hc-archive-10-3-alt",
+            "site": "Golden Prairie public archive",
+            "verifiedBy": "High Country trusted archive authority"
+          },
+          "reward": "one permanent nontradeable fragment unlock"
+        },
+        {
+          "fragmentId": "HC-F10-H4",
+          "title": "The Red Signal Lamp",
+          "trigger": {
+            "type": "archive.evidence_reconstructed",
+            "site": "Stonebridge grain elevator preservation",
+            "objectiveId": "hc-archive-10-4",
+            "verifiedBy": "High Country trusted world/archive authority"
+          },
+          "alternate": {
+            "type": "archive.accessible_research",
+            "objectiveId": "hc-archive-10-4-alt",
+            "site": "Golden Prairie public archive",
+            "verifiedBy": "High Country trusted archive authority"
+          },
+          "reward": "one permanent nontradeable fragment unlock"
+        }
+      ],
+      "final": {
+        "id": "HC-F10-REVELATION",
+        "title": "The Light in the Window",
+        "summary": "Joseph Vale illuminated the abandoned elevator to keep Stonebridge's memory alive.",
+        "requiresAllFragmentIds": [
+          "HC-F10-H1",
+          "HC-F10-H2",
+          "HC-F10-H3",
+          "HC-F10-H4"
+        ],
+        "rewards": [
+          "full history",
+          "Archive Edition cosmetic",
+          "founder heritage seal",
+          "museum exhibit entry"
+        ]
+      }
+    },
+    {
+      "founderId": "HC-F11",
+      "founderName": "Golden Hour",
+      "region": "Golden Prairie",
+      "opening": {
+        "type": "founder_acquired",
+        "qualifier": "verified founder-acquisition event, optional for clues but never premium-paid"
+      },
+      "fragments": [
+        {
+          "fragmentId": "HC-F11-H1",
+          "title": "The First Blue Notebook",
+          "trigger": {
+            "type": "archive.landmark_inspected",
+            "site": "Prairie Crossing family collection",
+            "objectiveId": "hc-archive-11-1",
+            "verifiedBy": "High Country trusted world/archive authority"
+          },
+          "alternate": {
+            "type": "archive.accessible_research",
+            "objectiveId": "hc-archive-11-1-alt",
+            "site": "Golden Prairie public archive",
+            "verifiedBy": "High Country trusted archive authority"
+          },
+          "reward": "one permanent nontradeable fragment unlock"
+        },
+        {
+          "fragmentId": "HC-F11-H2",
+          "title": "A Photograph of the Ellison Farmhouse",
+          "trigger": {
+            "type": "archive.record_researched",
+            "site": "Ellison homestead restoration",
+            "objectiveId": "hc-archive-11-2",
+            "verifiedBy": "High Country trusted world/archive authority"
+          },
+          "alternate": {
+            "type": "archive.accessible_research",
+            "objectiveId": "hc-archive-11-2-alt",
+            "site": "Golden Prairie public archive",
+            "verifiedBy": "High Country trusted archive authority"
+          },
+          "reward": "one permanent nontradeable fragment unlock"
+        },
+        {
+          "fragmentId": "HC-F11-H3",
+          "title": "The Golden Hour Archive Tag",
+          "trigger": {
+            "type": "archive.preservation_milestone",
+            "site": "Prairie Crossing archive",
+            "objectiveId": "hc-archive-11-3",
+            "verifiedBy": "High Country cultivation/preservation or approved restoration service"
+          },
+          "alternate": {
+            "type": "archive.accessible_research",
+            "objectiveId": "hc-archive-11-3-alt",
+            "site": "Golden Prairie public archive",
+            "verifiedBy": "High Country trusted archive authority"
+          },
+          "reward": "one permanent nontradeable fragment unlock"
+        },
+        {
+          "fragmentId": "HC-F11-H4",
+          "title": "The Final Notebook",
+          "trigger": {
+            "type": "archive.evidence_reconstructed",
+            "site": "Ruth Ellison journal exhibit",
+            "objectiveId": "hc-archive-11-4",
+            "verifiedBy": "High Country trusted world/archive authority"
+          },
+          "alternate": {
+            "type": "archive.accessible_research",
+            "objectiveId": "hc-archive-11-4-alt",
+            "site": "Golden Prairie public archive",
+            "verifiedBy": "High Country trusted archive authority"
+          },
+          "reward": "one permanent nontradeable fragment unlock"
+        }
+      ],
+      "final": {
+        "id": "HC-F11-REVELATION",
+        "title": "The Last Evening",
+        "summary": "Ruth Ellison's final sunset was also photographed from a neighbouring farm.",
+        "requiresAllFragmentIds": [
+          "HC-F11-H1",
+          "HC-F11-H2",
+          "HC-F11-H3",
+          "HC-F11-H4"
+        ],
+        "rewards": [
+          "full history",
+          "Archive Edition cosmetic",
+          "founder heritage seal",
+          "museum exhibit entry"
+        ]
+      }
+    },
+    {
+      "founderId": "HC-F12",
+      "founderName": "Redline",
+      "region": "Red Mesa",
+      "opening": {
+        "type": "founder_acquired",
+        "qualifier": "verified founder-acquisition event, optional for clues but never premium-paid"
+      },
+      "fragments": [
+        {
+          "fragmentId": "HC-F12-H1",
+          "title": "Elena's Road Atlas",
+          "trigger": {
+            "type": "archive.landmark_inspected",
+            "site": "Cinder Springs trade museum",
+            "objectiveId": "hc-archive-12-1",
+            "verifiedBy": "High Country trusted world/archive authority"
+          },
+          "alternate": {
+            "type": "archive.accessible_research",
+            "objectiveId": "hc-archive-12-1-alt",
+            "site": "Red Mesa public archive",
+            "verifiedBy": "High Country trusted archive authority"
+          },
+          "reward": "one permanent nontradeable fragment unlock"
+        },
+        {
+          "fragmentId": "HC-F12-H2",
+          "title": "Delivery Ledger, 1964",
+          "trigger": {
+            "type": "archive.record_researched",
+            "site": "Redline transport co-op",
+            "objectiveId": "hc-archive-12-2",
+            "verifiedBy": "High Country trusted world/archive authority"
+          },
+          "alternate": {
+            "type": "archive.accessible_research",
+            "objectiveId": "hc-archive-12-2-alt",
+            "site": "Red Mesa public archive",
+            "verifiedBy": "High Country trusted archive authority"
+          },
+          "reward": "one permanent nontradeable fragment unlock"
+        },
+        {
+          "fragmentId": "HC-F12-H3",
+          "title": "Bridge Closure Notice",
+          "trigger": {
+            "type": "archive.preservation_milestone",
+            "site": "Cinder Springs bridge memorial",
+            "objectiveId": "hc-archive-12-3",
+            "verifiedBy": "High Country cultivation/preservation or approved restoration service"
+          },
+          "alternate": {
+            "type": "archive.accessible_research",
+            "objectiveId": "hc-archive-12-3-alt",
+            "site": "Red Mesa public archive",
+            "verifiedBy": "High Country trusted archive authority"
+          },
+          "reward": "one permanent nontradeable fragment unlock"
+        },
+        {
+          "fragmentId": "HC-F12-H4",
+          "title": "A Photograph of the Redline Truck",
+          "trigger": {
+            "type": "archive.evidence_reconstructed",
+            "site": "Cruz family delivery archive",
+            "objectiveId": "hc-archive-12-4",
+            "verifiedBy": "High Country trusted world/archive authority"
+          },
+          "alternate": {
+            "type": "archive.accessible_research",
+            "objectiveId": "hc-archive-12-4-alt",
+            "site": "Red Mesa public archive",
+            "verifiedBy": "High Country trusted archive authority"
+          },
+          "reward": "one permanent nontradeable fragment unlock"
+        }
+      ],
+      "final": {
+        "id": "HC-F12-REVELATION",
+        "title": "The Last Delivery",
+        "summary": "Transport operator Elena Cruz's final documented delivery was to her own mother.",
+        "requiresAllFragmentIds": [
+          "HC-F12-H1",
+          "HC-F12-H2",
+          "HC-F12-H3",
+          "HC-F12-H4"
+        ],
+        "rewards": [
+          "full history",
+          "Archive Edition cosmetic",
+          "founder heritage seal",
+          "museum exhibit entry"
+        ]
+      }
+    },
+    {
+      "founderId": "HC-F13",
+      "founderName": "Copperhead",
+      "region": "Red Mesa",
+      "opening": {
+        "type": "founder_acquired",
+        "qualifier": "verified founder-acquisition event, optional for clues but never premium-paid"
+      },
+      "fragments": [
+        {
+          "fragmentId": "HC-F13-H1",
+          "title": "Copper Ridge Mining Register",
+          "trigger": {
+            "type": "archive.landmark_inspected",
+            "site": "Copper Ridge mining museum",
+            "objectiveId": "hc-archive-13-1",
+            "verifiedBy": "High Country trusted world/archive authority"
+          },
+          "alternate": {
+            "type": "archive.accessible_research",
+            "objectiveId": "hc-archive-13-1-alt",
+            "site": "Red Mesa public archive",
+            "verifiedBy": "High Country trusted archive authority"
+          },
+          "reward": "one permanent nontradeable fragment unlock"
+        },
+        {
+          "fragmentId": "HC-F13-H2",
+          "title": "Exchange Membership Ledger",
+          "trigger": {
+            "type": "archive.record_researched",
+            "site": "Copper Ridge relief cooperative",
+            "objectiveId": "hc-archive-13-2",
+            "verifiedBy": "High Country trusted world/archive authority"
+          },
+          "alternate": {
+            "type": "archive.accessible_research",
+            "objectiveId": "hc-archive-13-2-alt",
+            "site": "Red Mesa public archive",
+            "verifiedBy": "High Country trusted archive authority"
+          },
+          "reward": "one permanent nontradeable fragment unlock"
+        },
+        {
+          "fragmentId": "HC-F13-H3",
+          "title": "The Mine Closure Notice",
+          "trigger": {
+            "type": "archive.preservation_milestone",
+            "site": "Copper Ridge municipal archive",
+            "objectiveId": "hc-archive-13-3",
+            "verifiedBy": "High Country cultivation/preservation or approved restoration service"
+          },
+          "alternate": {
+            "type": "archive.accessible_research",
+            "objectiveId": "hc-archive-13-3-alt",
+            "site": "Red Mesa public archive",
+            "verifiedBy": "High Country trusted archive authority"
+          },
+          "reward": "one permanent nontradeable fragment unlock"
+        },
+        {
+          "fragmentId": "HC-F13-H4",
+          "title": "Copperhead Archival Seal",
+          "trigger": {
+            "type": "archive.evidence_reconstructed",
+            "site": "Copper Ridge exchange collection",
+            "objectiveId": "hc-archive-13-4",
+            "verifiedBy": "High Country trusted world/archive authority"
+          },
+          "alternate": {
+            "type": "archive.accessible_research",
+            "objectiveId": "hc-archive-13-4-alt",
+            "site": "Red Mesa public archive",
+            "verifiedBy": "High Country trusted archive authority"
+          },
+          "reward": "one permanent nontradeable fragment unlock"
+        }
+      ],
+      "final": {
+        "id": "HC-F13-REVELATION",
+        "title": "The Miners' Names",
+        "summary": "Workers donated their last wages to sustain the local exchange after the mine closed.",
+        "requiresAllFragmentIds": [
+          "HC-F13-H1",
+          "HC-F13-H2",
+          "HC-F13-H3",
+          "HC-F13-H4"
+        ],
+        "rewards": [
+          "full history",
+          "Archive Edition cosmetic",
+          "founder heritage seal",
+          "museum exhibit entry"
+        ]
+      }
+    },
+    {
+      "founderId": "HC-F14",
+      "founderName": "Desert Saint",
+      "region": "Red Mesa",
+      "opening": {
+        "type": "founder_acquired",
+        "qualifier": "verified founder-acquisition event, optional for clues but never premium-paid"
+      },
+      "fragments": [
+        {
+          "fragmentId": "HC-F14-H1",
+          "title": "Solstice Wells Route Map",
+          "trigger": {
+            "type": "archive.landmark_inspected",
+            "site": "Solstice Wells route museum",
+            "objectiveId": "hc-archive-14-1",
+            "verifiedBy": "High Country trusted world/archive authority"
+          },
+          "alternate": {
+            "type": "archive.accessible_research",
+            "objectiveId": "hc-archive-14-1-alt",
+            "site": "Red Mesa public archive",
+            "verifiedBy": "High Country trusted archive authority"
+          },
+          "reward": "one permanent nontradeable fragment unlock"
+        },
+        {
+          "fragmentId": "HC-F14-H2",
+          "title": "Isabel Moreno's Supply Ledger",
+          "trigger": {
+            "type": "archive.record_researched",
+            "site": "Isabel Moreno supply shelter",
+            "objectiveId": "hc-archive-14-2",
+            "verifiedBy": "High Country trusted world/archive authority"
+          },
+          "alternate": {
+            "type": "archive.accessible_research",
+            "objectiveId": "hc-archive-14-2-alt",
+            "site": "Red Mesa public archive",
+            "verifiedBy": "High Country trusted archive authority"
+          },
+          "reward": "one permanent nontradeable fragment unlock"
+        },
+        {
+          "fragmentId": "HC-F14-H3",
+          "title": "The Caretaker's Letter",
+          "trigger": {
+            "type": "archive.preservation_milestone",
+            "site": "Solstice Wells community archive",
+            "objectiveId": "hc-archive-14-3",
+            "verifiedBy": "High Country cultivation/preservation or approved restoration service"
+          },
+          "alternate": {
+            "type": "archive.accessible_research",
+            "objectiveId": "hc-archive-14-3-alt",
+            "site": "Red Mesa public archive",
+            "verifiedBy": "High Country trusted archive authority"
+          },
+          "reward": "one permanent nontradeable fragment unlock"
+        },
+        {
+          "fragmentId": "HC-F14-H4",
+          "title": "A Photograph of the Desert Shelter",
+          "trigger": {
+            "type": "archive.evidence_reconstructed",
+            "site": "Desert Saint caretaker memorial",
+            "objectiveId": "hc-archive-14-4",
+            "verifiedBy": "High Country trusted world/archive authority"
+          },
+          "alternate": {
+            "type": "archive.accessible_research",
+            "objectiveId": "hc-archive-14-4-alt",
+            "site": "Red Mesa public archive",
+            "verifiedBy": "High Country trusted archive authority"
+          },
+          "reward": "one permanent nontradeable fragment unlock"
+        }
+      ],
+      "final": {
+        "id": "HC-F14-REVELATION",
+        "title": "The People Who Returned",
+        "summary": "Travellers repeatedly rebuilt Isabel Moreno's desert shelter in gratitude for her aid.",
+        "requiresAllFragmentIds": [
+          "HC-F14-H1",
+          "HC-F14-H2",
+          "HC-F14-H3",
+          "HC-F14-H4"
+        ],
+        "rewards": [
+          "full history",
+          "Archive Edition cosmetic",
+          "founder heritage seal",
+          "museum exhibit entry"
+        ]
+      }
+    },
+    {
+      "founderId": "HC-F15",
+      "founderName": "Solstice Fire",
+      "region": "Red Mesa",
+      "opening": {
+        "type": "founder_acquired",
+        "qualifier": "verified founder-acquisition event, optional for clues but never premium-paid"
+      },
+      "fragments": [
+        {
+          "fragmentId": "HC-F15-H1",
+          "title": "Solstice Wells Festival Program, 1951",
+          "trigger": {
+            "type": "archive.landmark_inspected",
+            "site": "Solstice Wells festival hall",
+            "objectiveId": "hc-archive-15-1",
+            "verifiedBy": "High Country trusted world/archive authority"
+          },
+          "alternate": {
+            "type": "archive.accessible_research",
+            "objectiveId": "hc-archive-15-1-alt",
+            "site": "Red Mesa public archive",
+            "verifiedBy": "High Country trusted archive authority"
+          },
+          "reward": "one permanent nontradeable fragment unlock"
+        },
+        {
+          "fragmentId": "HC-F15-H2",
+          "title": "The Lantern Circle Photograph",
+          "trigger": {
+            "type": "archive.record_researched",
+            "site": "Solstice Wells lantern ceremony",
+            "objectiveId": "hc-archive-15-2",
+            "verifiedBy": "High Country trusted world/archive authority"
+          },
+          "alternate": {
+            "type": "archive.accessible_research",
+            "objectiveId": "hc-archive-15-2-alt",
+            "site": "Red Mesa public archive",
+            "verifiedBy": "High Country trusted archive authority"
+          },
+          "reward": "one permanent nontradeable fragment unlock"
+        },
+        {
+          "fragmentId": "HC-F15-H3",
+          "title": "Drought Relief Ledger, 1966",
+          "trigger": {
+            "type": "archive.preservation_milestone",
+            "site": "Red Mesa drought-relief archive",
+            "objectiveId": "hc-archive-15-3",
+            "verifiedBy": "High Country cultivation/preservation or approved restoration service"
+          },
+          "alternate": {
+            "type": "archive.accessible_research",
+            "objectiveId": "hc-archive-15-3-alt",
+            "site": "Red Mesa public archive",
+            "verifiedBy": "High Country trusted archive authority"
+          },
+          "reward": "one permanent nontradeable fragment unlock"
+        },
+        {
+          "fragmentId": "HC-F15-H4",
+          "title": "Solstice Fire Exhibition Ribbon",
+          "trigger": {
+            "type": "archive.evidence_reconstructed",
+            "site": "Solstice Fire festival exhibition",
+            "objectiveId": "hc-archive-15-4",
+            "verifiedBy": "High Country trusted world/archive authority"
+          },
+          "alternate": {
+            "type": "archive.accessible_research",
+            "objectiveId": "hc-archive-15-4-alt",
+            "site": "Red Mesa public archive",
+            "verifiedBy": "High Country trusted archive authority"
+          },
+          "reward": "one permanent nontradeable fragment unlock"
+        }
+      ],
+      "final": {
+        "id": "HC-F15-REVELATION",
+        "title": "The Lanterns After Midnight",
+        "summary": "Festival lanterns remained lit to welcome late travellers.",
+        "requiresAllFragmentIds": [
+          "HC-F15-H1",
+          "HC-F15-H2",
+          "HC-F15-H3",
+          "HC-F15-H4"
+        ],
+        "rewards": [
+          "full history",
+          "Archive Edition cosmetic",
+          "founder heritage seal",
+          "museum exhibit entry"
+        ]
+      }
+    },
+    {
+      "founderId": "HC-F16",
+      "founderName": "Crimson Ghost",
+      "region": "Red Mesa",
+      "opening": {
+        "type": "founder_acquired",
+        "qualifier": "verified founder-acquisition event, optional for clues but never premium-paid"
+      },
+      "fragments": [
+        {
+          "fragmentId": "HC-F16-H1",
+          "title": "Nathaniel Price's 1938 Catalogue",
+          "trigger": {
+            "type": "archive.landmark_inspected",
+            "site": "Dusthaven archive catalogue",
+            "objectiveId": "hc-archive-16-1",
+            "verifiedBy": "High Country trusted world/archive authority"
+          },
+          "alternate": {
+            "type": "archive.accessible_research",
+            "objectiveId": "hc-archive-16-1-alt",
+            "site": "Red Mesa public archive",
+            "verifiedBy": "High Country trusted archive authority"
+          },
+          "reward": "one permanent nontradeable fragment unlock"
+        },
+        {
+          "fragmentId": "HC-F16-H2",
+          "title": "Dusthaven Municipal Closure Register",
+          "trigger": {
+            "type": "archive.record_researched",
+            "site": "Dusthaven municipal storehouse",
+            "objectiveId": "hc-archive-16-2",
+            "verifiedBy": "High Country trusted world/archive authority"
+          },
+          "alternate": {
+            "type": "archive.accessible_research",
+            "objectiveId": "hc-archive-16-2-alt",
+            "site": "Red Mesa public archive",
+            "verifiedBy": "High Country trusted archive authority"
+          },
+          "reward": "one permanent nontradeable fragment unlock"
+        },
+        {
+          "fragmentId": "HC-F16-H3",
+          "title": "The Damaged Canyon Map",
+          "trigger": {
+            "type": "archive.preservation_milestone",
+            "site": "Red Mesa map restoration",
+            "objectiveId": "hc-archive-16-3",
+            "verifiedBy": "High Country cultivation/preservation or approved restoration service"
+          },
+          "alternate": {
+            "type": "archive.accessible_research",
+            "objectiveId": "hc-archive-16-3-alt",
+            "site": "Red Mesa public archive",
+            "verifiedBy": "High Country trusted archive authority"
+          },
+          "reward": "one permanent nontradeable fragment unlock"
+        },
+        {
+          "fragmentId": "HC-F16-H4",
+          "title": "The Crimson-Sealed Envelope",
+          "trigger": {
+            "type": "archive.evidence_reconstructed",
+            "site": "Dusthaven family provenance archive",
+            "objectiveId": "hc-archive-16-4",
+            "verifiedBy": "High Country trusted world/archive authority"
+          },
+          "alternate": {
+            "type": "archive.accessible_research",
+            "objectiveId": "hc-archive-16-4-alt",
+            "site": "Red Mesa public archive",
+            "verifiedBy": "High Country trusted archive authority"
+          },
+          "reward": "one permanent nontradeable fragment unlock"
+        }
+      ],
+      "final": {
+        "id": "HC-F16-REVELATION",
+        "title": "The Sixteenth Entry",
+        "summary": "Archivist Nathaniel Price withheld the collection's location to respect the safeguarding household's privacy.",
+        "requiresAllFragmentIds": [
+          "HC-F16-H1",
+          "HC-F16-H2",
+          "HC-F16-H3",
+          "HC-F16-H4"
+        ],
+        "rewards": [
+          "full history",
+          "Archive Edition cosmetic",
+          "founder heritage seal",
+          "museum exhibit entry"
+        ]
+      }
+    }
+  ]
+}

@@ -4,12 +4,12 @@
 .scene-copy{display:flex;flex-direction:column;gap:.15rem}
 .shop-stage{position:relative;isolation:isolate;width:100%;aspect-ratio:4/3;max-height:650px;margin:.8rem auto;overflow:hidden;background:linear-gradient(150deg,#e2d3b6,#254334 82%);border:1px solid #766b4d;border-radius:1rem}
 .scene-layer{position:absolute;display:block;object-fit:contain;max-width:none;pointer-events:none;user-select:none}
-.scene-floor{width:94%;height:55%;bottom:0;left:3%;z-index:1}
-.scene-rear{width:66%;height:70%;top:0;left:17%;z-index:2}
-.scene-left{width:34%;height:75%;top:0;left:0;z-index:3}
-.scene-right{width:34%;height:75%;top:0;right:0;z-index:3}
-.scene-window{width:33%;height:45%;top:15%;right:11%;z-index:4}
-.scene-counter{width:64%;height:35%;bottom:11%;left:18%;z-index:5}
+.scene-floor{width:94%;height:55%;bottom:0;left:3%}
+.scene-rear{width:66%;height:70%;top:0;left:17%}
+.scene-left{width:34%;height:75%;top:0;left:0}
+.scene-right{width:34%;height:75%;top:0;right:0}
+.scene-window{width:33%;height:45%;top:15%;right:11%}
+.scene-counter{width:64%;height:35%;bottom:11%;left:18%}
 .scene-note{font-size:.75rem;color:#d4c8a6;margin-bottom:0}
 @media(max-width:540px){.shop-stage{aspect-ratio:1/1}.scene-rear{width:82%;left:9%}.scene-counter{width:82%;left:9%}}
 

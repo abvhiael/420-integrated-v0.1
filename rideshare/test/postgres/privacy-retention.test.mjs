@@ -29,6 +29,10 @@ test('L03.5 scoped privacy lifecycle, immutable decisions, evidence holds, redac
   assert.equal(done.status,'FULFILLED');
   const extracted=await service.export('rider',requestId);
   assert.equal(extracted.coordinates,'REDACTED');assert.equal(extracted.otherPartyIdentity,'REDACTED');
+  assert.equal(extracted.subjectRecords.role,'rider');
+  assert.equal(extracted.subjectRecords.tripState,'REQUESTED');
+  assert.ok(extracted.subjectRecords.privacyRequests.some(x=>x.requestId===requestId&&x.status==='FULFILLED'));
+  assert.equal(JSON.stringify(extracted).includes(driver),false);
   await assert.rejects(()=>service.export('operator',requestId),{code:'PRIVACY_EXPORT_DENIED'});
   assert.equal((await service.read('rider',requestId)).status,'FULFILLED');
   const deletion='privacy_delete_'+Date.now();

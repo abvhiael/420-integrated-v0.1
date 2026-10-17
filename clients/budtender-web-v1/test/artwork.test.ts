@@ -116,3 +116,29 @@ describe("Phase 3.18 canonical layer hierarchy", () => {
   assert.deepEqual(await (await fetch(base+"/api/state")).json(),before);
  }));
 });
+
+
+describe("Phase 3.20 Tier 1 playable visual upgrade",()=>{
+ it("registers each required first-tier visual group and defers tiers 2 and 3",async()=>{
+  const {readFile}=await import("node:fs/promises");
+  const {resolve}=await import("node:path");
+  const path=resolve(process.cwd(),"../../assets/budtender/phase-3.20/priority_tiers.json");
+  const data=JSON.parse(await readFile(path,"utf8"));
+  assert.deepEqual(data.tiers.map((x:{tier:number})=>x.tier),[1,2,3]);
+  assert.equal(data.tiers[0].items.length,11);
+  assert.equal(data.tiers[1].items.length,7);
+  assert.equal(data.tiers[2].items.length,6);
+  assert.equal(data.tiers[0].status,"implemented-with-existing-assets");
+  assert.ok(data.tiers.slice(1).every((x:{status:string})=>x.status==="deferred"));
+  const registry=JSON.parse(await readFile(resolve(process.cwd(),"../../assets/budtender/asset_inventory.json"),"utf8"));
+  const approved=new Set(registry.assets.map((x:{path:string})=>x.path));
+  for(const tier of data.tiers)for(const item of tier.items)for(const source of item.sources)assert.ok(approved.has(source),source);
+ });
+ it("renders approved Tier 1 scene pieces, with no gameplay state mutation",async()=>withServer(async base=>{
+  const before=await(await fetch(base+"/api/state")).json();
+  const page=await(await fetch(base+"/")).text();
+  for(const filename of ["display_shelf_full_height","product_flower_jar_medium","prop_pos_register","queue_stanchion_brass","nook_armchair_sage","plant_monstera","sign_menu_main","sign_store_welcome","light_fx_ambient_warm"]){assert.ok(page.includes(filename+".png"),filename);}
+  assert.equal((page.match(/data-scene-layer=/g)||[]).length,16);
+  assert.deepEqual(await(await fetch(base+"/api/state")).json(),before);
+ }));
+});

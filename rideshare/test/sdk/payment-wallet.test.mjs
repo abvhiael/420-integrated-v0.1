@@ -21,3 +21,24 @@ test('canonical SDK consumer rejects wrong chain/controller/account, implicit co
  for(const patch of [{chain:'0x1a5'},{controller:a(3)},{account:a(4)}]){const x=setup(patch);await assert.rejects(()=>prepareWalletPayment({...x,sessionKey:a(2),consent:true,expectedIntentHash:digest(x.intent),clock:()=>100}));assert.equal(x.counts().sent,0);}
  const x=setup();for(const options of [{consent:false},{expectedIntentHash:'bad'},{clock:()=>130},{intent:{...x.intent,calldata:'0xdeadbeef'}}])await assert.rejects(()=>prepareWalletPayment({...x,sessionKey:a(2),consent:true,expectedIntentHash:digest(x.intent),clock:()=>100,...options}));
 });
+
+test('PT-02 refuses chain/account switching during wallet preparation and elapsed consent',async()=>{
+ const x=setup();let connects=0;
+ const moved={
+  sdk:x.wallet.sdk,
+  connect:async()=>{const result=await x.wallet.connect();return ++connects===2?{...result,chainId:421n}:result},
+  discoverSmartAccount:()=>x.wallet.discoverSmartAccount(),
+  prepareSession:(...args)=>x.wallet.prepareSession(...args)
+ };
+ await assert.rejects(()=>prepareWalletPayment({wallet:moved,intent:x.intent,sessionKey:a(2),consent:true,expectedIntentHash:digest(x.intent),clock:()=>100}),{code:'INVALID_PAY_BINDING'});
+ assert.equal(x.counts().sent,0);
+ const y=setup();let now=100;
+ const slow={
+  sdk:y.wallet.sdk,
+  connect:()=>y.wallet.connect(),
+  discoverSmartAccount:()=>y.wallet.discoverSmartAccount(),
+  prepareSession:async(...args)=>{const result=await y.wallet.prepareSession(...args);now=131;return result}
+ };
+ await assert.rejects(()=>prepareWalletPayment({wallet:slow,intent:y.intent,sessionKey:a(2),consent:true,expectedIntentHash:digest(y.intent),clock:()=>now}),{code:'INVALID_PAY_BINDING'});
+ assert.equal(y.counts().sent,0);
+});

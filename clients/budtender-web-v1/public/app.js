@@ -204,7 +204,7 @@ if (sceneStatus) {
       if (count !== 416 || required.some((img) => !registered.has(new URL(img.src).pathname))) {
         throw new Error("starter-shop asset registration incomplete");
       }
-      await Promise.all(required.map((img) => img.decode()));
+      await Promise.all(required.filter((img) => !img.hidden).map((img) => img.decode()));
       sceneStatus.textContent = "artwork library connected · " + count + " assets";
     })
     .catch(() => { sceneStatus.textContent = "artwork unavailable — shop management remains playable"; });

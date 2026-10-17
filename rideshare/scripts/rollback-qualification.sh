@@ -19,17 +19,17 @@ fi
 # independently approved deployment controller; this script validates its actions.
 : "${LIFTD_ROLLBACK_CONTROLLER:?verified deployment controller required}"
 : "${LIFTD_ROLLBACK_READINESS:?readiness verifier required}"
-"${LIFTD_ROLLBACK_CONTROLLER}" stop
-"${LIFTD_ROLLBACK_CONTROLLER}" deploy "${LIFTD_ROLLBACK_CANDIDATE_IMAGE}"
-if "${LIFTD_ROLLBACK_READINESS}" ; then
+bash "${LIFTD_ROLLBACK_CONTROLLER}" stop
+bash "${LIFTD_ROLLBACK_CONTROLLER}" deploy "${LIFTD_ROLLBACK_CANDIDATE_IMAGE}"
+if bash "${LIFTD_ROLLBACK_READINESS}" ; then
   echo 'CANDIDATE_READY'
   exit 0
 fi
 echo 'CANDIDATE_UNREADY_ROLLING_BACK' >&2
-"${LIFTD_ROLLBACK_CONTROLLER}" stop
-"${LIFTD_ROLLBACK_CONTROLLER}" deploy "${LIFTD_ROLLBACK_PREVIOUS_IMAGE}"
-if ! "${LIFTD_ROLLBACK_READINESS}"; then
-  "${LIFTD_ROLLBACK_CONTROLLER}" stop
+bash "${LIFTD_ROLLBACK_CONTROLLER}" stop
+bash "${LIFTD_ROLLBACK_CONTROLLER}" deploy "${LIFTD_ROLLBACK_PREVIOUS_IMAGE}"
+if ! bash "${LIFTD_ROLLBACK_READINESS}"; then
+  bash "${LIFTD_ROLLBACK_CONTROLLER}" stop
   echo 'ROLLBACK_UNREADY_TRAFFIC_DISABLED' >&2
   exit 1
 fi

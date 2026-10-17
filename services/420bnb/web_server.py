@@ -6,6 +6,9 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import urlsplit
 
+ASSET_TYPES = {".webp": "image/webp", ".png": "image/png"}
+APPROVED_ASSETS = ["420bnb-header.webp","420bnb-hero-lockup.webp","420bnb-emblem.webp","420bnb-official-original.webp","favicon-32.png","favicon-180.png"]
+
 
 def policy(html):
     scripts = re.findall(rb"<script(?:\s[^>]*)?>(.*?)</script>", html, re.S)
@@ -21,12 +24,15 @@ class UI(BaseHTTPRequestHandler):
     csp = ""
 
     def respond(self, head=False):
-        valid = urlsplit(self.path).path in ("/", "/index.html")
-        body = self.html if valid else b"Not found"
-        self.send_response(200 if valid else 404)
-        self.send_header("Content-Type", "text/html; charset=utf-8" if valid else "text/plain")
+        path = urlsplit(self.path).path
+        valid = path in ("/", "/index.html")
+        asset_name = path.removeprefix("/assets/") if path.startswith("/assets/") else ""
+        asset_ok = asset_name in APPROVED_ASSETS
+        body = self.html if valid else (Path("assets", asset_name).read_bytes() if asset_ok else b"Not found")
+        self.send_response(200 if valid or asset_ok else 404)
+        self.send_header("Content-Type", "text/html; charset=utf-8" if valid else (ASSET_TYPES[Path(asset_name).suffix] if asset_ok else "text/plain"))
         self.send_header("Content-Length", str(len(body)))
-        self.send_header("Cache-Control", "no-store")
+        self.send_header("Cache-Control", "no-store" if valid else "public, max-age=3600" if asset_ok else "no-store")
         self.send_header("Content-Security-Policy", self.csp)
         self.send_header("X-Content-Type-Options", "nosniff")
         self.send_header("X-Frame-Options", "DENY")

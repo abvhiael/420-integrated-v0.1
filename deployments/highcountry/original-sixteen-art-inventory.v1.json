@@ -26,6 +26,24 @@
       {
         "kind": "final_revelation_artifact",
         "count": 1
+      },
+      {
+        "kind": "archive_edition_front",
+        "count": 1
+      },
+      {
+        "kind": "archive_edition_back",
+        "count": 1
+      },
+      {
+        "kind": "bud_illustration",
+        "count": 1,
+        "notes": "fictional illustrative bud, no inferred phenotype"
+      },
+      {
+        "kind": "botanical_heritage_plate",
+        "count": 1,
+        "notes": "calligraphic name plus heritage metadata, no biological trait claims"
       }
     ],
     "shared": [
@@ -72,9 +90,9 @@
     ]
   },
   "deliverables": {
-    "individualFounderVisuals": 144,
+    "individualFounderVisuals": 208,
     "sharedVisuals": 13,
-    "total": 157
+    "total": 221
   },
   "namingPattern": "assets/highcountry/original-sixteen/hc-fNN-{asset-type}[-hN].png",
   "constraints": [
@@ -84,5 +102,6 @@
     "separate scalable typography from transparent illustrated art",
     "render founder seal as transparent layered artwork",
     "use four actual story-specific discoveries per founder"
-  ]
+  ],
+  "roadmap": "docs/highcountry/ORIGINAL-SIXTEEN-221-ASSET-PRODUCTION-ROADMAP.md"
 }

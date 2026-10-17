@@ -1,0 +1,88 @@
+{
+  "schema": "HC.ORIGINAL_SIXTEEN.VISUAL_ASSETS.V1",
+  "founders": 16,
+  "required": {
+    "perFounder": [
+      {
+        "kind": "seed_pack_front",
+        "count": 1
+      },
+      {
+        "kind": "seed_pack_back",
+        "count": 1
+      },
+      {
+        "kind": "founder_seal",
+        "count": 1
+      },
+      {
+        "kind": "archive_portrait_key_art",
+        "count": 1
+      },
+      {
+        "kind": "history_fragment_card",
+        "count": 4
+      },
+      {
+        "kind": "final_revelation_artifact",
+        "count": 1
+      }
+    ],
+    "shared": [
+      {
+        "kind": "seed_packet_master_template",
+        "count": 1
+      },
+      {
+        "kind": "region_style_system",
+        "count": 3
+      },
+      {
+        "kind": "archive_screen_background",
+        "count": 1
+      },
+      {
+        "kind": "fragment_card_template",
+        "count": 1
+      },
+      {
+        "kind": "discovery_locked_overlay",
+        "count": 1
+      },
+      {
+        "kind": "discovery_unlocked_overlay",
+        "count": 1
+      },
+      {
+        "kind": "founder_master_set_display",
+        "count": 1
+      },
+      {
+        "kind": "region_collection_case",
+        "count": 3
+      },
+      {
+        "kind": "founder_badge_template",
+        "count": 1
+      },
+      {
+        "kind": "archive_edition_stamp",
+        "count": 1
+      }
+    ]
+  },
+  "deliverables": {
+    "individualFounderVisuals": 144,
+    "sharedVisuals": 13,
+    "total": 157
+  },
+  "namingPattern": "assets/highcountry/original-sixteen/hc-fNN-{asset-type}[-hN].png",
+  "constraints": [
+    "founding genome IDs and loci unchanged",
+    "lore-only cosmetics, no performance advantage",
+    "preserve legibility on mobile and color-blind contrast",
+    "separate scalable typography from transparent illustrated art",
+    "render founder seal as transparent layered artwork",
+    "use four actual story-specific discoveries per founder"
+  ]
+}

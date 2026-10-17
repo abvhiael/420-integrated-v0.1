@@ -41,6 +41,7 @@ contract VideoPokerDrawV1420 {
     error WrongDeal();
     error InvalidReveal();
     error ProviderNotIndependent();
+    error InitialEntropyAlreadyFulfilled();
     error UnapprovedPaytable();
     error InsufficientLiability();
     error SessionNotExpired();
@@ -80,6 +81,11 @@ contract VideoPokerDrawV1420 {
             wager.gameId != poker.gameId()) revert WrongDeal();
         if (block.timestamp >= wager.deadline) revert WagerExpired();
         if (replacementProvider == wager.player) revert ProviderNotIndependent();
+        // Commitment must precede fulfillment of the publicly observable initial randomness.
+        // This eliminates on-chain initial-root-based seed selection; off-chain secrecy
+        // and common-control independence still require separate external proof.
+        if (dealer.randomnessRouter().getRequest(wagerId).fulfilled)
+            revert InitialEntropyAlreadyFulfilled();
         RandomnessRouter420.RandomnessProfile memory profile = dealer.randomnessRouter().getProfile(wager.randomnessProfileId);
         if (!profile.exists || replacementProvider == profile.primaryProvider ||
             replacementProvider == profile.fallbackProvider) revert ProviderNotIndependent();

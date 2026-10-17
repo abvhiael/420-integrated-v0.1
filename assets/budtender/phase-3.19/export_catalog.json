@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "phase": "3.19",
-  "asset_count": 416,
+  "asset_count": 464,
   "prefixes": {
     "env": "env_",
     "fixture": "fixture_",
@@ -2923,6 +2923,342 @@
       "bytes": 236275,
       "category": "env",
       "export_name": "env_budtender_store_post_rush_cleanup.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_active.png",
+      "git_blob_sha": "2544fbd08f6069999f5ca789949fd39874a3a053",
+      "bytes": 87286,
+      "category": "decal",
+      "export_name": "decal_hotspot_active.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_anchor.png",
+      "git_blob_sha": "13ae03783274b6cab5fbc5239cba22e041261c24",
+      "bytes": 51284,
+      "category": "decal",
+      "export_name": "decal_hotspot_anchor.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_attention.png",
+      "git_blob_sha": "3ff286608cbd79f186a2d66cb69fdcda5d580d9a",
+      "bytes": 105649,
+      "category": "decal",
+      "export_name": "decal_hotspot_attention.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_available.png",
+      "git_blob_sha": "a268cab7f818552d0cee40669cad206eb66e9f00",
+      "bytes": 78993,
+      "category": "decal",
+      "export_name": "decal_hotspot_available.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_cancel.png",
+      "git_blob_sha": "e85276539a6cfe3c4c8ab3f8f19595880514153c",
+      "bytes": 80203,
+      "category": "decal",
+      "export_name": "decal_hotspot_cancel.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_cash_register.png",
+      "git_blob_sha": "5c00a729eeac95db415c850ffb14a4a2c14fb63a",
+      "bytes": 80428,
+      "category": "decal",
+      "export_name": "decal_hotspot_cash_register.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_cleaning.png",
+      "git_blob_sha": "e6a418311d2a59126f8b7579b0261cb3a363985d",
+      "bytes": 103598,
+      "category": "decal",
+      "export_name": "decal_hotspot_cleaning.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_completed.png",
+      "git_blob_sha": "c1f0ed78a05699f93912c74ee3819f06056d2103",
+      "bytes": 75497,
+      "category": "decal",
+      "export_name": "decal_hotspot_completed.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_confirm.png",
+      "git_blob_sha": "e167cb959e59766c94aaf7d93ec4d6dcdf4a775a",
+      "bytes": 81969,
+      "category": "decal",
+      "export_name": "decal_hotspot_confirm.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_cooldown.png",
+      "git_blob_sha": "df9d8e7951e406ca1a4e2cf5ffb6d6980f8f105f",
+      "bytes": 76096,
+      "category": "decal",
+      "export_name": "decal_hotspot_cooldown.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_cost_marker.png",
+      "git_blob_sha": "6eed3844db8ac869a26f4e318f21db26b9e66031",
+      "bytes": 62447,
+      "category": "decal",
+      "export_name": "decal_hotspot_cost_marker.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_customer.png",
+      "git_blob_sha": "cb674fdf212c2fa2359abe90602e93d33b2fd081",
+      "bytes": 114078,
+      "category": "decal",
+      "export_name": "decal_hotspot_customer.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_deliveries.png",
+      "git_blob_sha": "32a1afdddc325e6785699ba6375ec20017892899",
+      "bytes": 95736,
+      "category": "decal",
+      "export_name": "decal_hotspot_deliveries.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_direction_arrow.png",
+      "git_blob_sha": "53b31453cebdf34d5960d0d3e9f1a495e8507648",
+      "bytes": 121974,
+      "category": "decal",
+      "export_name": "decal_hotspot_direction_arrow.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_error.png",
+      "git_blob_sha": "a85f2c0952b73141f13f4b2206e7a6024fb4bed1",
+      "bytes": 46439,
+      "category": "decal",
+      "export_name": "decal_hotspot_error.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_expansion_doorway.png",
+      "git_blob_sha": "4d383303f3e460acf8b8a5cf0ced3b19f1df7f2b",
+      "bytes": 125138,
+      "category": "decal",
+      "export_name": "decal_hotspot_expansion_doorway.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_frame_circle.png",
+      "git_blob_sha": "8253ca8715f64624fc457cca4706a0aa4633a3d5",
+      "bytes": 1038327,
+      "category": "decal",
+      "export_name": "decal_hotspot_frame_circle.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_frame_disabled.png",
+      "git_blob_sha": "daba50e56448af728dfadb74fbfb70acbf10ad5c",
+      "bytes": 833100,
+      "category": "decal",
+      "export_name": "decal_hotspot_frame_disabled.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_frame_rounded.png",
+      "git_blob_sha": "8d2dd3b65816b1ee6768eee3cd0912ac8dc92614",
+      "bytes": 771161,
+      "category": "decal",
+      "export_name": "decal_hotspot_frame_rounded.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_frame_selected.png",
+      "git_blob_sha": "81a4dfc4e93addff20462b944f0d2f924dbd3fe4",
+      "bytes": 1081467,
+      "category": "decal",
+      "export_name": "decal_hotspot_frame_selected.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_frame_square.png",
+      "git_blob_sha": "1882e3364429acd35c400f9f0c64fc30096a07a1",
+      "bytes": 1195780,
+      "category": "decal",
+      "export_name": "decal_hotspot_frame_square.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_halo.png",
+      "git_blob_sha": "1c04f27b5174c1b365faddd21a4532b7283eda40",
+      "bytes": 337806,
+      "category": "decal",
+      "export_name": "decal_hotspot_halo.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_hover.png",
+      "git_blob_sha": "8f72acf7f80ffff8ab085a702b693f52fa8b2de4",
+      "bytes": 83818,
+      "category": "decal",
+      "export_name": "decal_hotspot_hover.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_info_popup.png",
+      "git_blob_sha": "c80cefb6fe1794eed843f1abaef4f02252ff30a1",
+      "bytes": 397093,
+      "category": "decal",
+      "export_name": "decal_hotspot_info_popup.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_information.png",
+      "git_blob_sha": "50b5a7b40ceba1d0aa6a4997104616b786ed8b99",
+      "bytes": 89531,
+      "category": "decal",
+      "export_name": "decal_hotspot_information.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_interact_prompt.png",
+      "git_blob_sha": "666ec5436dce371660abba443f2b49371608dac7",
+      "bytes": 93551,
+      "category": "decal",
+      "export_name": "decal_hotspot_interact_prompt.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_inventory_storage.png",
+      "git_blob_sha": "81758d068c3afb35938aff69fd3202c315b92cc1",
+      "bytes": 99476,
+      "category": "decal",
+      "export_name": "decal_hotspot_inventory_storage.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_locked.png",
+      "git_blob_sha": "a7907ff2b3804e70088656761c1b29579368cf84",
+      "bytes": 65977,
+      "category": "decal",
+      "export_name": "decal_hotspot_locked.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_new.png",
+      "git_blob_sha": "546d3254abc46c8b3944251b4ea1c01fd4a42f74",
+      "bytes": 78025,
+      "category": "decal",
+      "export_name": "decal_hotspot_new.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_notification.png",
+      "git_blob_sha": "fc34b3d7dfcc7eee3533781df9742ed2ef664a82",
+      "bytes": 70159,
+      "category": "decal",
+      "export_name": "decal_hotspot_notification.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_product_display.png",
+      "git_blob_sha": "9d51bf0edf4b5bb7e2a62b77d5bf47fb490c6a3b",
+      "bytes": 135976,
+      "category": "decal",
+      "export_name": "decal_hotspot_product_display.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_progress_ring.png",
+      "git_blob_sha": "0f9d0ff3582cd3beffb800f2713449b6237a08c3",
+      "bytes": 145846,
+      "category": "decal",
+      "export_name": "decal_hotspot_progress_ring.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_queue_management.png",
+      "git_blob_sha": "dfe95c79da2eb8e985e9f8a255f2c1ef28a5e2c1",
+      "bytes": 92237,
+      "category": "decal",
+      "export_name": "decal_hotspot_queue_management.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_restock.png",
+      "git_blob_sha": "d4667728019e0b851a3333757511ca914cfc9031",
+      "bytes": 98937,
+      "category": "decal",
+      "export_name": "decal_hotspot_restock.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_security.png",
+      "git_blob_sha": "c5723816971228644c1ea4c0f37261e173caf57f",
+      "bytes": 75684,
+      "category": "decal",
+      "export_name": "decal_hotspot_security.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_selected.png",
+      "git_blob_sha": "a46344c7c5af5930f3b5d5e8e2ba764539ccbc5b",
+      "bytes": 83513,
+      "category": "decal",
+      "export_name": "decal_hotspot_selected.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_service_counter.png",
+      "git_blob_sha": "e01608e36df7a8bde99f9daa25d79361fa93aa2d",
+      "bytes": 122213,
+      "category": "decal",
+      "export_name": "decal_hotspot_service_counter.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_settings.png",
+      "git_blob_sha": "b43668d26aefa3e8e103d33c6815f1ba72cb1750",
+      "bytes": 93686,
+      "category": "decal",
+      "export_name": "decal_hotspot_settings.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_staff_management.png",
+      "git_blob_sha": "fe86cfb3184b9cd8425ed3c3d644589e5eb45ff4",
+      "bytes": 106128,
+      "category": "decal",
+      "export_name": "decal_hotspot_staff_management.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_store_upgrade.png",
+      "git_blob_sha": "cd456fa78d4d9bb65e583e37eba2339d504dbc0d",
+      "bytes": 109121,
+      "category": "decal",
+      "export_name": "decal_hotspot_store_upgrade.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_success.png",
+      "git_blob_sha": "d8d318da186d21dca4ccbd93c836067fcc394e22",
+      "bytes": 48010,
+      "category": "decal",
+      "export_name": "decal_hotspot_success.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_tap_indicator.png",
+      "git_blob_sha": "c832a4a0a4b6bcdb73268abb1b69e051d7933d38",
+      "bytes": 70682,
+      "category": "decal",
+      "export_name": "decal_hotspot_tap_indicator.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_timer.png",
+      "git_blob_sha": "c8029ccec8a82c2c8e06a4c145e57dc86598ccbf",
+      "bytes": 44044,
+      "category": "decal",
+      "export_name": "decal_hotspot_timer.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_tooltip.png",
+      "git_blob_sha": "a82a65c00ecf1ba9337cbda4efc6f4db66e19529",
+      "bytes": 200459,
+      "category": "decal",
+      "export_name": "decal_hotspot_tooltip.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_unavailable.png",
+      "git_blob_sha": "ed9d0db2b1bf81542b8adf5442cee41690387f88",
+      "bytes": 76519,
+      "category": "decal",
+      "export_name": "decal_hotspot_unavailable.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_unlock_available.png",
+      "git_blob_sha": "5e4fd048fb7ac52b99e564aa672ec16da5fa7637",
+      "bytes": 77917,
+      "category": "decal",
+      "export_name": "decal_hotspot_unlock_available.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_upgrade_available.png",
+      "git_blob_sha": "02a4073c795cf37b61a768a7e9a1d29f5e166c90",
+      "bytes": 100338,
+      "category": "decal",
+      "export_name": "decal_hotspot_upgrade_available.png"
+    },
+    {
+      "source": "assets/budtender/phase-3.16/hotspot_waiting_area.png",
+      "git_blob_sha": "f9507a5d4310814c0b05d3bd2aceb09d6a372c08",
+      "bytes": 136156,
+      "category": "decal",
+      "export_name": "decal_hotspot_waiting_area.png"
     }
   ]
 }

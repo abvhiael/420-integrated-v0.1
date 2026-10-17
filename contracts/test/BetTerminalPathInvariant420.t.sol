@@ -196,6 +196,39 @@ contract BetTerminalPathInvariant420Test {
         s.emergency.setEmergency(BetTypes420.EmergencyDomain.SETTLEMENT_HOLD, SETTLEMENT_PROFILE, true);
     }
 
+    function testUnauthorizedOutcomeInjectionFailsBeforeAnyEconomicMutation() public {
+        Suite memory s = _deploy();
+        vm.prank(RESCUER);
+        vm.expectRevert(SettlementEngine420.Unauthorized.selector);
+        s.engine.settle(WAGER, BetTypes420.TerminalOutcome.WIN, 500 ether);
+        require(!s.registry.settlementExists(WAGER), "unauthorized settlement");
+        require(!s.risk.released(), "unauthorized risk release");
+        require(!s.vault.resolved(), "unauthorized vault resolution");
+        require(!s.economics.finalized(), "unauthorized fees");
+        vm.prank(SETTLER);
+        s.engine.settle(WAGER, BetTypes420.TerminalOutcome.LOSS, 0);
+        require(s.vault.payout() == 0, "legitimate settlement blocked");
+    }
+
+    function testDownstreamDenialOfServiceCanRecoverWithoutPartialUnwindOrReplay() public {
+        Suite memory s = _deploy();
+        s.economics.setShouldRevert(true);
+        vm.warp(s.deadline);
+        vm.prank(RESCUER);
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "economics"));
+        s.engine.voidExpired(WAGER);
+        require(!s.registry.settlementExists(WAGER), "partial terminal commit");
+        require(!s.risk.released() && !s.vault.resolved() && !s.economics.finalized(), "partial unwind");
+        s.economics.setShouldRevert(false);
+        vm.prank(RESCUER);
+        s.engine.voidExpired(WAGER);
+        require(s.registry.getSettlement(WAGER).outcome == BetTypes420.TerminalOutcome.VOID, "not recovered");
+        require(s.risk.released() && s.vault.resolved() && s.economics.finalized(), "recovery incomplete");
+        vm.prank(RESCUER);
+        s.engine.voidExpired(WAGER);
+        require(s.vault.payout() == 100 ether, "replayed escrow");
+    }
+
     function testAuthorizedTerminalSettlementBeforeDeadline() public {
         Suite memory s = _deploy();
         vm.prank(SETTLER);

@@ -1,0 +1,61 @@
+name: LIFTd L03.5 Level 1
+on:
+  pull_request:
+    paths:
+      - 'rideshare/src/privacy-retention.mjs'
+      - 'rideshare/src/auth.mjs'
+      - 'rideshare/src/http.mjs'
+      - 'rideshare/migrations/015_privacy_retention.sql'
+      - 'rideshare/test/postgres/privacy-retention.test.mjs'
+      - 'rideshare/test/postgres/store.test.mjs'
+      - '.github/workflows/liftd-l03-5-level1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: liftd-l03-5-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+jobs:
+  privacy-retention:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: liftd_qualification
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres -d liftd_qualification"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    env:
+      LIFTD_DATABASE_URL: postgres://postgres:postgres@127.0.0.1:5432/liftd_qualification
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Verify exact SHA
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Locked LIFTd deps
+        run: npm ci --prefix rideshare --ignore-scripts
+      - name: Syntax and grant checks
+        run: |
+          node --check rideshare/src/privacy-retention.mjs
+          node --check rideshare/src/auth.mjs
+          node --check rideshare/src/http.mjs
+          node --check rideshare/test/postgres/privacy-retention.test.mjs
+      - name: Retained rideshare domain security
+        run: npm test --prefix rideshare
+      - name: Scoped real PostgreSQL privacy and retained owners
+        run: |
+          for file in rideshare/test/postgres/{store,support-cases,fraud,reviews,location,privacy-retention}.test.mjs; do
+            node --test "$file"
+          done

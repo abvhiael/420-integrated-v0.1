@@ -43,11 +43,11 @@ test('ordered concurrent migrations are checksum-verified and runtime is a non-o
     '004_quotes.sql', '005_payments.sql', '006_safety.sql',
     '007_rider_preferences.sql', '008_driver_onboarding.sql', '009_driver_offers.sql',
     '010_operator_audit.sql', '011_travel_handoff.sql',
-    '012_support_cases.sql', '013_trip_reviews.sql', '014_abuse_fraud.sql'
+    '012_support_cases.sql', '013_trip_reviews.sql', '014_abuse_fraud.sql', '015_privacy_retention.sql'
   ];
   const applied = (await owner.query('SELECT version,checksum FROM liftd.migrations ORDER BY version')).rows;
   assert.deepEqual(applied.map(row => row.version), expectedVersions,
-    'All fourteen migrations must be applied once in canonical version order');
+    'All fifteen migrations must be applied once in canonical version order');
   for (const row of applied) {
     const source = readFileSync(new URL(`../../migrations/${row.version}`, import.meta.url), 'utf8');
     assert.equal(row.checksum, createHash('sha256').update(source).digest('hex'),

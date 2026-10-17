@@ -104,7 +104,14 @@ export function createPrivateLocationStore(pool,{keys,activeKey,retentionSeconds
     },
     async purgeExpired() {
       const now=clock();if(!integer(now))fail('PRIVACY_CONFIGURATION_REQUIRED',503);
-      return (await pool.query('UPDATE liftd.private_locations SET sealed=NULL,tombstoned=true WHERE NOT tombstoned AND expires_at<=$1',[now])).rowCount;
+      return (await pool.query(`UPDATE liftd.private_locations AS l SET sealed=NULL,tombstoned=true
+       WHERE NOT l.tombstoned AND l.expires_at<=$1
+       AND (l.trip_id IS NULL OR (
+        NOT EXISTS (SELECT 1 FROM liftd.safety_incidents i WHERE i.trip_id=l.trip_id)
+        AND NOT EXISTS (SELECT 1 FROM liftd.fraud_cases f WHERE f.trip_id=l.trip_id)
+        AND NOT EXISTS (SELECT 1 FROM liftd.support_cases s WHERE s.trip_id=l.trip_id AND (s.category='incident' OR s.status<>'CLOSED'))
+        AND NOT EXISTS (SELECT 1 FROM liftd.payment_intents p WHERE p.trip_id=l.trip_id)
+       ))`,[now])).rowCount;
     },
   });
 }

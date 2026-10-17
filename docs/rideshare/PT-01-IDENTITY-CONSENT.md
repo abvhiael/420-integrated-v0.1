@@ -23,3 +23,11 @@
 ## Qualification boundary
 
 Use only dedicated `LIFTd PT-01 Identity Consent Level 1` workflow with retained `rideshare` suite. No phase-level or global workflows are required for this ordinary pre-testnet package. Verify exact SHA and only record successful workflow/run/job evidence after GitHub confirmation.
+
+## PT-01 consumer discovery and wiring (2026-10-17)
+
+Repository search of `rideshare/src` for `marketingConsent`, `locationHistoryConsent`, `tripNotifications`, and explicit preference reads finds the preference owner `rider-preferences.mjs` and active event-notification consumer `trip-communications.mjs`. Marketing and location-history flags have no additional LIFTd source consumer identified; neither is authorized to produce an unguarded side effect. Travel consent remains separately purpose-bound in `postgres-travel-consent.mjs`; wallet signing consent is separately bound by `payment-protocol.mjs`.
+
+`createTripCommunicationService` now **requires** an injected `consentGuard.require` dependency (unconfigured service fails closed), checks a rider's authenticated own-account opt-in before notification, and refuses to use an initiating driver's token to impersonate the rider. For riders with notifications opted out, no message is published. A second preference read at publication resolves the selected delivery channel. Existing driver notification preference behavior remains separately scoped to the driver. The guard is not a replacement for the transport-authoritative notification service's own delivery-time consent/revocation and idempotency checks.
+
+**Deployment boundary:** There is no concrete non-test `createTripCommunicationService` call site in the current `rideshare` source search. Therefore no live consumer assembly was modified or certified; actual deployed dependency injection and end-to-end receipt verification remain a deployed integration responsibility. The current repository service factory refuses to start without the guard, preventing accidental ungated assembly.

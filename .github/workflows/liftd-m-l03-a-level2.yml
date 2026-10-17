@@ -52,8 +52,8 @@ jobs:
         run: |
           set -euo pipefail
           for suite in store support-cases reviews fraud economic-reconciliation privacy-retention payments quotes location; do
-            db="liftd_milestone_${suite//-/_}"
-            echo "M-L03-A isolated PostgreSQL inventory: $suite ($db)"
-            PGPASSWORD=postgres psql -h 127.0.0.1 -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE $db"
-            LIFTD_DATABASE_URL="postgres://postgres:postgres@127.0.0.1:5432/$db" node --test "rideshare/test/postgres/$suite.test.mjs"
+            echo "M-L03-A isolated PostgreSQL inventory: $suite (liftd_qualification)"
+            PGPASSWORD=postgres psql -h 127.0.0.1 -U postgres -d postgres -v ON_ERROR_STOP=1 -c "DROP DATABASE IF EXISTS liftd_qualification WITH (FORCE)"
+            PGPASSWORD=postgres psql -h 127.0.0.1 -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE liftd_qualification"
+            node --test "rideshare/test/postgres/$suite.test.mjs"
           done

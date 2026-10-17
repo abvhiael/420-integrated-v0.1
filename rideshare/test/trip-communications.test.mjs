@@ -7,7 +7,7 @@ function setup(){
  let state=trip(), time=100,stop=false,consentEnabled=true,called=[],sent=0,published=[],prefs={rider_1:{tripNotifications:true,contactMethod:'email'},driver_1:{tripNotifications:false,contactMethod:'sms'}};
  const auth={authorize:async(token,{action,resource})=>{
   if(stop||!['rider_1','driver_1'].includes(token)||!['trip.message.read','trip.message.send','trip.read'].includes(action)||resource!=='trip:trip_1')throw Error('DENIED');
-  return {role:token.startsWith('rider')?'rider':'driver',subject:token,accountId:'account_'+token,action,resource,expiresAt:time+40};
+  return {role:token.startsWith('rider')?'rider':'driver',subject:token,accountId:'account_'+token,sessionId:'session_'+token,deviceId:'device_'+token,recoveryEpoch:1,action,resource,expiresAt:time+40};
  }};
  const messenger={authorizeTrip:async x=>{called.push(x);return {...x,capability:'owner_signed_grant'};},
  send:async x=>{sent++;return {tripId:x.tripId,messageId:'message_1',status:'ACCEPTED'};},
@@ -67,4 +67,22 @@ test('communications HTTP never exposes endpoints without service and checks bea
 
 test('PT-01 consumer denies revoked consent and unavailable consent authority before notification',async()=>{
  const x=setup();x.revokeConsent();await assert.rejects(()=>x.service.notifyTripEvent({tripId:'trip_1',revision:1,actorToken:'rider_1'}));assert.equal(x.published.length,0);
+});
+
+test('PT-05 denies a driver message after silent reassignment even when rider recipient is unchanged',async()=>{
+ const x=setup();let calls=0;const old=x.messenger.authorizeTrip;
+ x.messenger.authorizeTrip=async request=>{const g=await old(request);x.setTrip({...trip(),driverId:'driver_2'});calls++;return g};
+ await assert.rejects(()=>x.service.send('driver_1','trip_1',{commandId:'reassign',text:'hello'}),{code:'MEMBERSHIP_DENIED'});
+ assert.equal(calls,1);assert.equal(x.getSends(),0);
+});
+test('PT-05 denies notification if trip revision changes before delivery',async()=>{
+ const x=setup();x.setPreferences({rider_1:{tripNotifications:true,contactMethod:'email'},driver_1:{tripNotifications:true,contactMethod:'sms'}});
+ const old=x.auth.authorize;let checks=0;x.auth.authorize=async(...args)=>{checks++;if(checks===2)x.setTrip({...trip(),revision:2});return old(...args)};
+ await assert.rejects(()=>x.service.notifyTripEvent({tripId:'trip_1',revision:1,actorToken:'rider_1'}),{code:'EVENT_AUTHORITY_CHANGED'});
+ assert.equal(x.published.length,0);
+});
+test('PT-05 driver cannot publish rider notification without rider-specific session consent',async()=>{
+ const x=setup();x.setPreferences({rider_1:{tripNotifications:true,contactMethod:'email'},driver_1:{tripNotifications:true,contactMethod:'sms'}});
+ const result=await x.service.notifyTripEvent({tripId:'trip_1',revision:1,actorToken:'driver_1'});
+ assert.equal(result.accepted,0);assert.equal(x.published.length,0);
 });

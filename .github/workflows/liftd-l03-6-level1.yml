@@ -5,6 +5,9 @@ on:
       - 'rideshare/src/deployment-security.mjs'
       - 'rideshare/test/deployment-security.test.mjs'
       - 'rideshare/Dockerfile'
+      - 'rideshare/src/admitted-runtime.mjs'
+      - 'rideshare/src/runtime-entrypoint.mjs'
+      - 'rideshare/test/admitted-runtime.test.mjs'
       - '.github/workflows/liftd-l03-6-level1.yml'
   workflow_dispatch:
 permissions:
@@ -34,7 +37,12 @@ jobs:
         run: |
           node --check rideshare/src/deployment-security.mjs
           node --check rideshare/test/deployment-security.test.mjs
+          node --check rideshare/src/admitted-runtime.mjs
+          node --check rideshare/src/runtime-entrypoint.mjs
+          node --check rideshare/test/admitted-runtime.test.mjs
           npm test --prefix rideshare
+      - name: Admitted runtime and readiness boundary
+        run: node --test rideshare/test/admitted-runtime.test.mjs
       - name: Package non-root image
         run: docker build --pull -f rideshare/Dockerfile -t liftd-qualification rideshare
       - name: Verify fail-closed unadmitted entry point

@@ -14,7 +14,14 @@ export function createPayAuthority({config,authorities,resolvers,clock=()=>Math.
     verifiers[method]=createAuthorityVerifier(authorities?.[method],{purpose:purposes[method],fields:['nonce','binding',...fields]});
   }
   const keys=a=>Object.values(a.keys).map(k=>createPublicKey(k).export({type:'spki',format:'der'}));
-  if(keys(authorities.wallet).some(a=>keys(authorities.prepare).some(b=>a.equals(b))))fail('SEPARATE_WALLET_AUTHORITY_REQUIRED',503);
+  // The wallet consent signer may also own beneficiary-account binding, but must never
+  // sign payment preparation, settlement observations, operations, meters, rules or funding.
+  // Otherwise compromise of a financial projection authority could fabricate rider consent.
+  const walletKeys=keys(authorities.wallet);
+  for(const name of ['prepare','event','operation','meter','rules','funding']){
+    const issuerKeys=keys(authorities[name]);
+    if(walletKeys.some(a=>issuerKeys.some(b=>a.equals(b))))fail('SEPARATE_WALLET_AUTHORITY_REQUIRED',503);
+  }
   const invoke=async(method,subject,binding)=>{
     const nonce=randomBytes(24).toString('base64url'),before=clock();let signed;
     try{signed=await resolvers[method]({nonce,subject,binding});}catch{fail('PAY_AUTHORITY_UNAVAILABLE',503);}

@@ -1,0 +1,151 @@
+{
+  "schema": "HC.CULTIVAR_NAMING_MODERATION.V1",
+  "status": "ADOPTED_DESIGN_NOT_PRODUCTION_DEPLOYED",
+  "founders": {
+    "count": 16,
+    "heritage": true,
+    "biologicallyNeutral": true
+  },
+  "paths": [
+    "developer-curated",
+    "player-crossbreeding",
+    "heritage-discovery"
+  ],
+  "nameModes": {
+    "automatic": {
+      "cost": "free",
+      "algorithm": "combine approved normalized parent display names; deterministic collision suffix",
+      "screen": true
+    },
+    "custom": {
+      "cost": "USD 4.20 target, paid in native $420 using finalized seven-day reference average",
+      "requiresAuthenticatedAccount": true,
+      "screen": true,
+      "review": true,
+      "feePolicy": {
+        "version": "HC-CULTIVAR-NAME-FEE-V2",
+        "targetUsd": "4.20",
+        "period": "seven complete UTC days",
+        "updateCadence": "once per calendar week, after period closes",
+        "oracle": "APPROVED_RELIABLE_USD_420_REFERENCE_REQUIRED",
+        "aggregation": "time-weighted mean over verified observations covering seven days, stale/outlier and minimum observation guards",
+        "calculation": "ceil(4.20 USD / reference USD per 420 token to token base units)",
+        "snapshot": "fee quote bound to oracle period, rule version, expiry and request ID",
+        "failure": "fail closed for new custom-name quotations on stale/missing/invalid oracle; free auto names continue",
+        "upperBound": "subject to approved affordability bounds and emergency pause; not activated yet",
+        "ownerControls": "scoped authorized emergency stop and future version updates, not retroactive repricing"
+      }
+    }
+  },
+  "notice": "Cultivar names must not contain identity-based slurs, hateful language, threats, harassment, explicit sexual content, vulgar or obscene language, disguised prohibited terms, impersonation, or attempts to bypass moderation. Violating names and associated cultivars may be blocked from use in High Country. Repeated violations may result in suspension or removal from the game. Legitimate genetic provenance remains recorded.",
+  "filterLayers": [
+    "normalized deterministic prohibited term checks including confusables and obfuscation",
+    "context-sensitive automated moderation with uncertainty quarantine",
+    "human appeal and review with evidence and independent audit"
+  ],
+  "publicationStates": [
+    "PENDING",
+    "PUBLISHED",
+    "HIDDEN",
+    "RETIRED"
+  ],
+  "neutralFallback": "Cultivar HC-{short safe identifier}",
+  "geneticsRemainsImmutable": true,
+  "unavailableWhenHiddenOrRetired": true,
+  "permissions": [
+    "genetic-provenance",
+    "owner",
+    "name-edit",
+    "publish-or-distribute"
+  ],
+  "reviewerCompensation": {
+    "asset": "native $420",
+    "payoutModel": "fixed amount per independently qualified completed review; same for approval and denial",
+    "rewardAmount": "50% of accepted custom naming fee, initially 2.5 $420",
+    "payer": "funded custom naming escrow, paid on qualified final review independently of approve/reject decision",
+    "noSelfReview": true,
+    "noDuplicateReward": true,
+    "appealDoesNotPayRepeatedlyWithoutIndependentAuthorization": true,
+    "onlyAfterFinalizedDecision": true,
+    "capPerPeriod": "Governance-controlled payout and throughput cap; operational values pending",
+    "noAutomaticTransferInThisModule": true
+  },
+  "customNameEconomics": {
+    "startingFeeTokens": "5 (superseded by V2 once oracle integration authorized)",
+    "reviewerShareBps": 5000,
+    "highCountryCompetitionVaultShareBps": 5000,
+    "vaultUse": "Competition prize funding under separately approved competition policy",
+    "settlement": "escrow upon accepted submission; release once per eligible final review; idempotent; no self review",
+    "feeChanges": "weekly time-averaged USD 4.20 target; quote frozen at acceptance; fee may increase or decrease as USD value changes",
+    "freeGeneratedNamesRemainFree": true,
+    "feeRefunds": "explicit policy required before activation",
+    "noPayPerDeletion": true
+  },
+  "nameExceptions": {
+    "type": "exact_verified_heritage_alias_only",
+    "exceptions": [
+      {
+        "name": "Alaskan Thunder Fuck",
+        "state": "DOCUMENTED_REVIEW_ELIGIBLE",
+        "source": "https://www.leafly.ca/news/strains-products/the-best-cannabis-strains-to-pair-with-beer-as-told-by-leafly-rev"
+      },
+      {
+        "name": "Fucking Incredible",
+        "state": "DOCUMENTED_REVIEW_ELIGIBLE",
+        "source": "https://www.leafly.ca/news/strains-products/the-best-cannabis-strains-to-pair-with-beer-as-told-by-leafly-rev"
+      },
+      {
+        "name": "Shit",
+        "state": "DOCUMENTED_REVIEW_ELIGIBLE",
+        "source": "https://mrnice.com/product/shit/",
+        "evidenceScope": "documented name identity, not game-locus verification or genetic equivalence"
+      },
+      {
+        "name": "Dirty Old Bastard",
+        "state": "DOCUMENTED_REVIEW_ELIGIBLE",
+        "source": "https://www.leafly.com/strains/dirty-old-bastard",
+        "evidenceScope": "documented name identity, not game-locus verification or genetic equivalence"
+      },
+      {
+        "name": "Bitch Fuel",
+        "state": "DOCUMENTED_REVIEW_ELIGIBLE",
+        "source": "https://www.leafly.com/strains/bitch-fuel",
+        "evidenceScope": "documented name identity, not game-locus verification or genetic equivalence"
+      },
+      {
+        "name": "Karma Bitch",
+        "state": "DOCUMENTED_REVIEW_ELIGIBLE",
+        "source": "https://www.leafly.com/strains/karma-bitch",
+        "evidenceScope": "documented name identity, not game-locus verification or genetic equivalence"
+      }
+    ],
+    "rules": "exact approved cultivar identities/aliases only; no user-generated lookalike or new obscene combinations; slurs, threats and harassment never auto-exempt; age and platform moderation remain applicable"
+  },
+  "moderatorGovernance": {
+    "appointment": "owner nominates authenticated account, verifies identity and conflicts, assigns scoped time-limited capability via HighCountryAuthorization/CapabilityRegistry; require MFA and revocable roles",
+    "roles": [
+      "OWNER_POLICY_ADMIN",
+      "MODERATION_SUPERVISOR",
+      "NAME_REVIEWER",
+      "APPEALS_REVIEWER",
+      "READ_ONLY_AUDITOR"
+    ],
+    "panel": "High Country backend /admin/cultivars/moderation",
+    "functions": [
+      "queue",
+      "screening evidence",
+      "approve",
+      "reject",
+      "hide",
+      "retire",
+      "name heritage exception review",
+      "appeal",
+      "audit trail",
+      "conflict disclosures",
+      "payment eligibility"
+    ],
+    "separation": "reviewers cannot approve own name, review their own appeal, change payout terms, whitelist prohibited slurs, or unilaterally alter rulesets",
+    "discipline": "documented error review; non-punitive coaching for reasonable mistake; warnings and retraining for repeated negligence; suspended reviewing and unpaid future assignments for reckless or intentional violations; revoke capability/remove for deliberate abuse; clawback only upon proved fraud under separately approved rules; provide appeal and audit",
+    "pay": "only independently qualified completed cases, same payout approve/reject, one eligible payment per request/revision; no action-volume self-generation"
+  }
+}

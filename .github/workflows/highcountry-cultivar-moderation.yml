@@ -1,0 +1,30 @@
+name: High Country Cultivar Moderation Level 1
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/highcountry/genetics/CultivarModerationRegistry.sol'
+      - 'deployments/highcountry/cultivar-moderation-policy.v1.json'
+      - 'scripts/highcountry/cultivar-moderation-policy.test.mjs'
+      - 'contracts/test/highcountry/integration/R072CultivarModeration.t.sol'
+      - '.github/workflows/highcountry-cultivar-moderation.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  scoped:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test scripts/highcountry/cultivar-moderation-policy.test.mjs
+      - uses: foundry-rs/foundry-toolchain@v1
+      - name: Cultivar moderation contract integration only
+        working-directory: contracts
+        env:
+          FOUNDRY_PROFILE: pr
+        run: forge test --match-path 'test/highcountry/integration/R072CultivarModeration.t.sol' -vv

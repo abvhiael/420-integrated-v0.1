@@ -1,0 +1,617 @@
+{
+  "schema": "HC.ORIGINAL_SIXTEEN.ARCHIVE.V1",
+  "status": "OWNER_APPROVED_NARRATIVE_CANON",
+  "storyMedium": "fictional in-world archive",
+  "immutableGeneticIdentityUnchanged": true,
+  "counts": {
+    "founders": 16,
+    "regions": 3,
+    "discoveryFragments": 64,
+    "finalRevelations": 16
+  },
+  "discoveryLevels": [
+    "PUBLIC",
+    "ACQUIRED",
+    "FOUR_FRAGMENTS",
+    "FINAL_REVELATION_ARCHIVE_EDITION"
+  ],
+  "regionSets": {
+    "Emerald Coast": 6,
+    "Golden Prairie": 5,
+    "Red Mesa": 5
+  },
+  "founders": [
+    {
+      "id": "HC-F01",
+      "index": 1,
+      "name": "Emerald Ghost",
+      "region": "Emerald Coast",
+      "origin": "Port Alder",
+      "heritageClassification": "Rainforest Homestead",
+      "archiveDesignation": "The Keeper's Line",
+      "founderSeal": "Silver cedar against deep green",
+      "archiveInscription": "not everything lost is gone.",
+      "discoverableFragments": [
+        {
+          "id": "HC-F01-H1",
+          "title": "The Bell Journal, 1964"
+        },
+        {
+          "id": "HC-F01-H2",
+          "title": "Alder River Flood Register, 1968"
+        },
+        {
+          "id": "HC-F01-H3",
+          "title": "Port Alder Warehouse Inventory, 1999"
+        },
+        {
+          "id": "HC-F01-H4",
+          "title": "The Unsigned Note"
+        }
+      ],
+      "finalRevelation": {
+        "title": "The Keeper's Promise",
+        "summary": "Mara Bell and eleven households safeguarded the line communally; the archival chest was rediscovered in 1999."
+      },
+      "collectibility": "Founder Core",
+      "lociCount": 28,
+      "geneticSemantics": "opaque; no biological claims",
+      "publicCopyStatus": "canonical lore synopsis"
+    },
+    {
+      "id": "HC-F02",
+      "index": 2,
+      "name": "Blackwater Haze",
+      "region": "Emerald Coast",
+      "origin": "Moss Landing",
+      "heritageClassification": "River Trade",
+      "archiveDesignation": "The River Ledger",
+      "founderSeal": "Silver river bend on black",
+      "archiveInscription": "the river remembers what the road forgot.",
+      "discoverableFragments": [
+        {
+          "id": "HC-F02-H1",
+          "title": "The Molly Anne Cargo Book"
+        },
+        {
+          "id": "HC-F02-H2",
+          "title": "Greyhaven Exchange Receipt"
+        },
+        {
+          "id": "HC-F02-H3",
+          "title": "Captain Rook's Weather Notes"
+        },
+        {
+          "id": "HC-F02-H4",
+          "title": "The Silver-Pencil Ledger"
+        }
+      ],
+      "finalRevelation": {
+        "title": "Passage Paid",
+        "summary": "Captain Elias Rook moved agricultural collections along river routes; the last shipment aided a household after a fire."
+      },
+      "collectibility": "Founder Core",
+      "lociCount": 28,
+      "geneticSemantics": "opaque; no biological claims",
+      "publicCopyStatus": "canonical lore synopsis"
+    },
+    {
+      "id": "HC-F03",
+      "index": 3,
+      "name": "Cedar Widow",
+      "region": "Emerald Coast",
+      "origin": "Cedar Hollow",
+      "heritageClassification": "Mountain Homestead",
+      "archiveDesignation": "The Widow's Garden",
+      "founderSeal": "Red cedar and ivory filigree",
+      "archiveInscription": "grief is a kind of garden. some things grow whether you want them to or not.",
+      "discoverableFragments": [
+        {
+          "id": "HC-F03-H1",
+          "title": "The Wren Marriage Certificate"
+        },
+        {
+          "id": "HC-F03-H2",
+          "title": "Cedar Hollow Bridge Records"
+        },
+        {
+          "id": "HC-F03-H3",
+          "title": "Eleanor's Garden Notebook"
+        },
+        {
+          "id": "HC-F03-H4",
+          "title": "Sixteen Wooden Markers"
+        }
+      ],
+      "finalRevelation": {
+        "title": "Sixteen Visitors",
+        "summary": "Eleanor Wren's sixteen markers commemorated the children she sheltered; their families preserved her collection."
+      },
+      "collectibility": "Founder Core",
+      "lociCount": 28,
+      "geneticSemantics": "opaque; no biological claims",
+      "publicCopyStatus": "canonical lore synopsis"
+    },
+    {
+      "id": "HC-F04",
+      "index": 4,
+      "name": "Harbour Lights",
+      "region": "Emerald Coast",
+      "origin": "Port Alder",
+      "heritageClassification": "Dockside Cooperative",
+      "archiveDesignation": "The Night Shift",
+      "founderSeal": "Gold harbour lamps on midnight blue",
+      "archiveInscription": "the lights stayed on because somebody stayed behind.",
+      "discoverableFragments": [
+        {
+          "id": "HC-F04-H1",
+          "title": "Eastern Dockworkers Membership Card"
+        },
+        {
+          "id": "HC-F04-H2",
+          "title": "Warehouse Demolition Notice, 1983"
+        },
+        {
+          "id": "HC-F04-H3",
+          "title": "Night Shift Photograph"
+        },
+        {
+          "id": "HC-F04-H4",
+          "title": "The Harbour Lights Festival Flyer"
+        }
+      ],
+      "finalRevelation": {
+        "title": "Danny's Truck",
+        "summary": "Dockworkers relocated the archive to an unused municipal greenhouse before their warehouse's demolition."
+      },
+      "collectibility": "Founder Core",
+      "lociCount": 28,
+      "geneticSemantics": "opaque; no biological claims",
+      "publicCopyStatus": "canonical lore synopsis"
+    },
+    {
+      "id": "HC-F05",
+      "index": 5,
+      "name": "Bracken Gold",
+      "region": "Emerald Coast",
+      "origin": "Bracken Falls",
+      "heritageClassification": "Valley Cooperative",
+      "archiveDesignation": "The Shared Harvest",
+      "founderSeal": "Golden fern on moss green",
+      "archiveInscription": "what we keep together belongs to tomorrow.",
+      "discoverableFragments": [
+        {
+          "id": "HC-F05-H1",
+          "title": "The Green Ledger"
+        },
+        {
+          "id": "HC-F05-H2",
+          "title": "Bracken Falls Preservation Fair Poster"
+        },
+        {
+          "id": "HC-F05-H3",
+          "title": "The 1974 Meeting Minutes"
+        },
+        {
+          "id": "HC-F05-H4",
+          "title": "A Brass-Cornered Seed Tin"
+        }
+      ],
+      "finalRevelation": {
+        "title": "Forty-Three Against Two",
+        "summary": "A cooperative vote rejected selling the collection, and a former supporter of the sale became its archivist."
+      },
+      "collectibility": "Founder Core",
+      "lociCount": 28,
+      "geneticSemantics": "opaque; no biological claims",
+      "publicCopyStatus": "canonical lore synopsis"
+    },
+    {
+      "id": "HC-F06",
+      "index": 6,
+      "name": "Rainmaker",
+      "region": "Emerald Coast",
+      "origin": "Greyhaven",
+      "heritageClassification": "Agricultural Innovation",
+      "archiveDesignation": "The Weather Room",
+      "founderSeal": "Silver rainfall over sea-glass teal",
+      "archiveInscription": "pay attention. the world has been talking all along.",
+      "discoverableFragments": [
+        {
+          "id": "HC-F06-H1",
+          "title": "Greyhaven Rainfall Chart, 1962"
+        },
+        {
+          "id": "HC-F06-H2",
+          "title": "Weather Room Equipment Register"
+        },
+        {
+          "id": "HC-F06-H3",
+          "title": "Storm Relief Correspondence"
+        },
+        {
+          "id": "HC-F06-H4",
+          "title": "Miriam's Final Annual Report"
+        }
+      ],
+      "finalRevelation": {
+        "title": "The Classroom Window",
+        "summary": "Miriam Sato's classroom observation project grew into a regional weather and agricultural archive."
+      },
+      "collectibility": "Founder Core",
+      "lociCount": 28,
+      "geneticSemantics": "opaque; no biological claims",
+      "publicCopyStatus": "canonical lore synopsis"
+    },
+    {
+      "id": "HC-F07",
+      "index": 7,
+      "name": "Prairie Thunder",
+      "region": "Golden Prairie",
+      "origin": "Harvest Junction",
+      "heritageClassification": "Plains Agricultural Heritage",
+      "archiveDesignation": "The Storm Years",
+      "founderSeal": "Blue lightning through golden wheat",
+      "archiveInscription": "the storm was loud. the people were louder.",
+      "discoverableFragments": [
+        {
+          "id": "HC-F07-H1",
+          "title": "Storm Damage Map, 1977"
+        },
+        {
+          "id": "HC-F07-H2",
+          "title": "Harvest Junction Railway Depot Ledger"
+        },
+        {
+          "id": "HC-F07-H3",
+          "title": "Samuel Dyer's Radio Recording"
+        },
+        {
+          "id": "HC-F07-H4",
+          "title": "The Thunder Seal"
+        }
+      ],
+      "finalRevelation": {
+        "title": "The Unnamed Volunteers",
+        "summary": "More than two hundred volunteers organized regional relief after the storms of 1977."
+      },
+      "collectibility": "Founder Core",
+      "lociCount": 28,
+      "geneticSemantics": "opaque; no biological claims",
+      "publicCopyStatus": "canonical lore synopsis"
+    },
+    {
+      "id": "HC-F08",
+      "index": 8,
+      "name": "Dust Devil",
+      "region": "Golden Prairie",
+      "origin": "Dry Gulch",
+      "heritageClassification": "Dryland Settlement",
+      "archiveDesignation": "The Roadside Exchange",
+      "founderSeal": "Rust-coloured dust spiral",
+      "archiveInscription": "leave something for the next person.",
+      "discoverableFragments": [
+        {
+          "id": "HC-F08-H1",
+          "title": "Mercer Station Receipt Book"
+        },
+        {
+          "id": "HC-F08-H2",
+          "title": "Old Western Road Map"
+        },
+        {
+          "id": "HC-F08-H3",
+          "title": "A Photograph of the Exchange Box"
+        },
+        {
+          "id": "HC-F08-H4",
+          "title": "Dry Gulch Oral History Recording"
+        }
+      ],
+      "finalRevelation": {
+        "title": "The Second Box",
+        "summary": "The Mercer family's take-what-you-need roadside exchange inspired similar boxes across the plains."
+      },
+      "collectibility": "Founder Core",
+      "lociCount": 28,
+      "geneticSemantics": "opaque; no biological claims",
+      "publicCopyStatus": "canonical lore synopsis"
+    },
+    {
+      "id": "HC-F09",
+      "index": 9,
+      "name": "Harvest Moon",
+      "region": "Golden Prairie",
+      "origin": "Willow Creek",
+      "heritageClassification": "Cooperative Heirloom",
+      "archiveDesignation": "The Autumn Gathering",
+      "founderSeal": "Ivory moon above amber fields",
+      "archiveInscription": "theres always room for one more.",
+      "discoverableFragments": [
+        {
+          "id": "HC-F09-H1",
+          "title": "The First Harvest Gathering Program"
+        },
+        {
+          "id": "HC-F09-H2",
+          "title": "Willow Creek Cooperative Exchange Token"
+        },
+        {
+          "id": "HC-F09-H3",
+          "title": "The 1981 Outdoor Festival Photograph"
+        },
+        {
+          "id": "HC-F09-H4",
+          "title": "A Handwritten Recipe and Seed List"
+        }
+      ],
+      "finalRevelation": {
+        "title": "The Empty Chair",
+        "summary": "The annual gathering always kept a chair for anyone arriving alone."
+      },
+      "collectibility": "Founder Core",
+      "lociCount": 28,
+      "geneticSemantics": "opaque; no biological claims",
+      "publicCopyStatus": "canonical lore synopsis"
+    },
+    {
+      "id": "HC-F10",
+      "index": 10,
+      "name": "Midnight Elevator",
+      "region": "Golden Prairie",
+      "origin": "Stonebridge",
+      "heritageClassification": "Railway Settlement",
+      "archiveDesignation": "The Last Grain Train",
+      "founderSeal": "Black grain elevator and signal-red lamp",
+      "archiveInscription": "somebody had to leave a light on.",
+      "discoverableFragments": [
+        {
+          "id": "HC-F10-H1",
+          "title": "Stonebridge Railway Timetable"
+        },
+        {
+          "id": "HC-F10-H2",
+          "title": "Last Grain Train Photograph"
+        },
+        {
+          "id": "HC-F10-H3",
+          "title": "Joseph Vale's Maintenance Ledger"
+        },
+        {
+          "id": "HC-F10-H4",
+          "title": "The Red Signal Lamp"
+        }
+      ],
+      "finalRevelation": {
+        "title": "The Light in the Window",
+        "summary": "Joseph Vale illuminated the abandoned elevator to keep Stonebridge's memory alive."
+      },
+      "collectibility": "Founder Core",
+      "lociCount": 28,
+      "geneticSemantics": "opaque; no biological claims",
+      "publicCopyStatus": "canonical lore synopsis"
+    },
+    {
+      "id": "HC-F11",
+      "index": 11,
+      "name": "Golden Hour",
+      "region": "Golden Prairie",
+      "origin": "Prairie Crossing",
+      "heritageClassification": "Family Agricultural Tradition",
+      "archiveDesignation": "The Evening Journal",
+      "founderSeal": "Golden horizon and setting sun",
+      "archiveInscription": "somewhere, somebody saw the same sunset.",
+      "discoverableFragments": [
+        {
+          "id": "HC-F11-H1",
+          "title": "The First Blue Notebook"
+        },
+        {
+          "id": "HC-F11-H2",
+          "title": "A Photograph of the Ellison Farmhouse"
+        },
+        {
+          "id": "HC-F11-H3",
+          "title": "The Golden Hour Archive Tag"
+        },
+        {
+          "id": "HC-F11-H4",
+          "title": "The Final Notebook"
+        }
+      ],
+      "finalRevelation": {
+        "title": "The Last Evening",
+        "summary": "Ruth Ellison's final sunset was also photographed from a neighbouring farm."
+      },
+      "collectibility": "Founder Core",
+      "lociCount": 28,
+      "geneticSemantics": "opaque; no biological claims",
+      "publicCopyStatus": "canonical lore synopsis"
+    },
+    {
+      "id": "HC-F12",
+      "index": 12,
+      "name": "Redline",
+      "region": "Red Mesa",
+      "origin": "Cinder Springs",
+      "heritageClassification": "Desert Trade Route",
+      "archiveDesignation": "The Long Road",
+      "founderSeal": "Copper highway lines on oxide red",
+      "archiveInscription": "every road is somebody's way home.",
+      "discoverableFragments": [
+        {
+          "id": "HC-F12-H1",
+          "title": "Elena's Road Atlas"
+        },
+        {
+          "id": "HC-F12-H2",
+          "title": "Delivery Ledger, 1964"
+        },
+        {
+          "id": "HC-F12-H3",
+          "title": "Bridge Closure Notice"
+        },
+        {
+          "id": "HC-F12-H4",
+          "title": "A Photograph of the Redline Truck"
+        }
+      ],
+      "finalRevelation": {
+        "title": "The Last Delivery",
+        "summary": "Transport operator Elena Cruz's final documented delivery was to her own mother."
+      },
+      "collectibility": "Founder Core",
+      "lociCount": 28,
+      "geneticSemantics": "opaque; no biological claims",
+      "publicCopyStatus": "canonical lore synopsis"
+    },
+    {
+      "id": "HC-F13",
+      "index": 13,
+      "name": "Copperhead",
+      "region": "Red Mesa",
+      "origin": "Copper Ridge",
+      "heritageClassification": "Mining Settlement",
+      "archiveDesignation": "The Miners' Exchange",
+      "founderSeal": "Copper minehead with geometric scale pattern",
+      "archiveInscription": "a town is not the hole it leaves in the ground.",
+      "discoverableFragments": [
+        {
+          "id": "HC-F13-H1",
+          "title": "Copper Ridge Mining Register"
+        },
+        {
+          "id": "HC-F13-H2",
+          "title": "Exchange Membership Ledger"
+        },
+        {
+          "id": "HC-F13-H3",
+          "title": "The Mine Closure Notice"
+        },
+        {
+          "id": "HC-F13-H4",
+          "title": "Copperhead Archival Seal"
+        }
+      ],
+      "finalRevelation": {
+        "title": "The Miners' Names",
+        "summary": "Workers donated their last wages to sustain the local exchange after the mine closed."
+      },
+      "collectibility": "Founder Core",
+      "lociCount": 28,
+      "geneticSemantics": "opaque; no biological claims",
+      "publicCopyStatus": "canonical lore synopsis"
+    },
+    {
+      "id": "HC-F14",
+      "index": 14,
+      "name": "Desert Saint",
+      "region": "Red Mesa",
+      "origin": "Solstice Wells",
+      "heritageClassification": "Isolated Settlement",
+      "archiveDesignation": "The Caretaker's Garden",
+      "founderSeal": "Pale halo over indigo desert mountains",
+      "archiveInscription": "you dont have to be a saint to leave something good behind.",
+      "discoverableFragments": [
+        {
+          "id": "HC-F14-H1",
+          "title": "Solstice Wells Route Map"
+        },
+        {
+          "id": "HC-F14-H2",
+          "title": "Isabel Moreno's Supply Ledger"
+        },
+        {
+          "id": "HC-F14-H3",
+          "title": "The Caretaker's Letter"
+        },
+        {
+          "id": "HC-F14-H4",
+          "title": "A Photograph of the Desert Shelter"
+        }
+      ],
+      "finalRevelation": {
+        "title": "The People Who Returned",
+        "summary": "Travellers repeatedly rebuilt Isabel Moreno's desert shelter in gratitude for her aid."
+      },
+      "collectibility": "Founder Core",
+      "lociCount": 28,
+      "geneticSemantics": "opaque; no biological claims",
+      "publicCopyStatus": "canonical lore synopsis"
+    },
+    {
+      "id": "HC-F15",
+      "index": 15,
+      "name": "Solstice Fire",
+      "region": "Red Mesa",
+      "origin": "Solstice Wells",
+      "heritageClassification": "Seasonal Cooperative",
+      "archiveDesignation": "The Longest Day",
+      "founderSeal": "Radiant copper sunburst",
+      "archiveInscription": "even the longest day has room for somebody arriving after dark.",
+      "discoverableFragments": [
+        {
+          "id": "HC-F15-H1",
+          "title": "Solstice Wells Festival Program, 1951"
+        },
+        {
+          "id": "HC-F15-H2",
+          "title": "The Lantern Circle Photograph"
+        },
+        {
+          "id": "HC-F15-H3",
+          "title": "Drought Relief Ledger, 1966"
+        },
+        {
+          "id": "HC-F15-H4",
+          "title": "Solstice Fire Exhibition Ribbon"
+        }
+      ],
+      "finalRevelation": {
+        "title": "The Lanterns After Midnight",
+        "summary": "Festival lanterns remained lit to welcome late travellers."
+      },
+      "collectibility": "Founder Core",
+      "lociCount": 28,
+      "geneticSemantics": "opaque; no biological claims",
+      "publicCopyStatus": "canonical lore synopsis"
+    },
+    {
+      "id": "HC-F16",
+      "index": 16,
+      "name": "Crimson Ghost",
+      "region": "Red Mesa",
+      "origin": "Dusthaven",
+      "heritageClassification": "Lost Desert Collection",
+      "archiveDesignation": "The Missing Entry",
+      "founderSeal": "Chalk-white spectral mark on crimson black",
+      "archiveInscription": "sometimes the kindest thing history can do is leave a name alone.",
+      "discoverableFragments": [
+        {
+          "id": "HC-F16-H1",
+          "title": "Nathaniel Price's 1938 Catalogue"
+        },
+        {
+          "id": "HC-F16-H2",
+          "title": "Dusthaven Municipal Closure Register"
+        },
+        {
+          "id": "HC-F16-H3",
+          "title": "The Damaged Canyon Map"
+        },
+        {
+          "id": "HC-F16-H4",
+          "title": "The Crimson-Sealed Envelope"
+        }
+      ],
+      "finalRevelation": {
+        "title": "The Sixteenth Entry",
+        "summary": "Archivist Nathaniel Price withheld the collection's location to respect the safeguarding household's privacy."
+      },
+      "collectibility": "Founder Core",
+      "lociCount": 28,
+      "geneticSemantics": "opaque; no biological claims",
+      "publicCopyStatus": "canonical lore synopsis"
+    }
+  ]
+}

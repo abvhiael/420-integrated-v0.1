@@ -1,0 +1,26 @@
+name: High Country R07 Expansion Utilities Level 1
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/highcountry/world/CompositeRegionMembership.sol'
+      - 'contracts/src/highcountry/world/RegionalUtilities.sol'
+      - 'contracts/src/highcountry/world/RegionalClimatePolicy.sol'
+      - 'contracts/test/highcountry/integration/R072ExpansionUtilityIntegration.t.sol'
+      - '.github/workflows/highcountry-r07-expansion-utilities.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  targeted:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: foundry-rs/foundry-toolchain@v1
+      - name: Scoped R07 consumer and utility integration
+        working-directory: contracts
+        env:
+          FOUNDRY_PROFILE: pr
+        run: forge test --match-path 'test/highcountry/integration/R072ExpansionUtilityIntegration.t.sol' -vv

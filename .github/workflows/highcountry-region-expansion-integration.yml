@@ -1,0 +1,36 @@
+name: High Country Region Expansion Integration Level 1
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/highcountry/world/RegionalUtilities.sol'
+      - 'contracts/src/highcountry/world/RegionalEnvironmentSettlement.sol'
+      - 'contracts/src/highcountry/world/CompositeRegionMembership.sol'
+      - 'contracts/src/highcountry/world/RegionExpansionRegistry.sol'
+      - 'deployments/highcountry/expansion-region-catalogue.v1.json'
+      - 'scripts/highcountry/expansion-region-catalogue.test.mjs'
+      - 'contracts/test/highcountry/integration/R072ExpansionUtilityIntegration.t.sol'
+      - 'contracts/test/highcountry/integration/R072SettlementAtomic.t.sol'
+      - '.github/workflows/highcountry-region-expansion-integration.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  region-and-ledger:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test scripts/highcountry/expansion-region-catalogue.test.mjs scripts/highcountry/region-resource-policy.test.mjs
+      - uses: foundry-rs/foundry-toolchain@v1
+      - name: Affected contract integration only
+        working-directory: contracts
+        env:
+          FOUNDRY_PROFILE: pr
+        run: |
+          forge test --match-path 'test/highcountry/integration/R072ExpansionUtilityIntegration.t.sol' -vv
+          forge test --match-path 'test/highcountry/integration/R072SettlementAtomic.t.sol' -vv

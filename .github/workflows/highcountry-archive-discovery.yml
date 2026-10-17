@@ -1,0 +1,20 @@
+name: High Country Archive Discovery Level 1
+on:
+  pull_request:
+    paths:
+      - 'services/highcountry-archive/**'
+      - 'deployments/highcountry/original-sixteen-discovery-journeys.v1.json'
+      - '.github/workflows/highcountry-archive-discovery.yml'
+permissions:
+  contents: read
+jobs:
+  archive-discovery:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test services/highcountry-archive/test/*.test.mjs

@@ -1,0 +1,19 @@
+name: High Country Cultivar Governance Service Level 1
+on:
+  pull_request:
+    paths:
+      - 'services/highcountry-cultivar-governance/**'
+      - '.github/workflows/highcountry-cultivar-governance-service.yml'
+permissions:
+  contents: read
+jobs:
+  governance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test services/highcountry-cultivar-governance/test/*.test.mjs

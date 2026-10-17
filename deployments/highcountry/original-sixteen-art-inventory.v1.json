@@ -1,0 +1,131 @@
+{
+  "schema": "HC.ORIGINAL_SIXTEEN.VISUAL_ASSETS.V1",
+  "founders": 16,
+  "required": {
+    "perFounder": [
+      {
+        "kind": "seed_pack_front",
+        "count": 1
+      },
+      {
+        "kind": "seed_pack_back",
+        "count": 1
+      },
+      {
+        "kind": "founder_seal",
+        "count": 1
+      },
+      {
+        "kind": "archive_portrait_key_art",
+        "count": 1
+      },
+      {
+        "kind": "history_fragment_card",
+        "count": 4
+      },
+      {
+        "kind": "final_revelation_artifact",
+        "count": 1
+      },
+      {
+        "kind": "archive_edition_front",
+        "count": 1
+      },
+      {
+        "kind": "archive_edition_back",
+        "count": 1
+      },
+      {
+        "kind": "bud_illustration",
+        "count": 1,
+        "notes": "fictional illustrative bud, no inferred phenotype"
+      },
+      {
+        "kind": "botanical_heritage_plate",
+        "count": 1,
+        "notes": "calligraphic name plus heritage metadata, no biological trait claims"
+      }
+    ],
+    "shared": [
+      {
+        "kind": "seed_packet_master_template",
+        "count": 1
+      },
+      {
+        "kind": "region_style_system",
+        "count": 3
+      },
+      {
+        "kind": "archive_screen_background",
+        "count": 1
+      },
+      {
+        "kind": "fragment_card_template",
+        "count": 1
+      },
+      {
+        "kind": "discovery_locked_overlay",
+        "count": 1
+      },
+      {
+        "kind": "discovery_unlocked_overlay",
+        "count": 1
+      },
+      {
+        "kind": "founder_master_set_display",
+        "count": 1
+      },
+      {
+        "kind": "region_collection_case",
+        "count": 3
+      },
+      {
+        "kind": "founder_badge_and_archive_stamp_master",
+        "count": 1
+      }
+    ]
+  },
+  "deliverables": {
+    "individualFounderVisuals": 208,
+    "sharedVisuals": 13,
+    "total": 221
+  },
+  "namingPattern": "assets/highcountry/original-sixteen/hc-fNN-{asset-type}[-hN].png",
+  "constraints": [
+    "founding genome IDs and loci unchanged",
+    "lore-only cosmetics, no performance advantage",
+    "preserve legibility on mobile and color-blind contrast",
+    "separate scalable typography from transparent illustrated art",
+    "render founder seal as transparent layered artwork",
+    "use four actual story-specific discoveries per founder"
+  ],
+  "roadmap": "docs/highcountry/ORIGINAL-SIXTEEN-221-ASSET-PRODUCTION-ROADMAP.md",
+  "a01": {
+    "status": "OWNER_APPROVED_VISUAL_BASELINE_TECHNICAL_QUALIFICATION_PENDING",
+    "sourceFormat": "SVG",
+    "files": [
+      "assets/highcountry/original-sixteen/a01/seed-packet-master.svg",
+      "assets/highcountry/original-sixteen/a01/region-style-emerald.svg",
+      "assets/highcountry/original-sixteen/a01/region-style-prairie.svg",
+      "assets/highcountry/original-sixteen/a01/region-style-mesa.svg",
+      "assets/highcountry/original-sixteen/a01/archive-screen-background.svg",
+      "assets/highcountry/original-sixteen/a01/fragment-card-template.svg",
+      "assets/highcountry/original-sixteen/a01/discovery-locked-overlay.svg",
+      "assets/highcountry/original-sixteen/a01/discovery-unlocked-overlay.svg",
+      "assets/highcountry/original-sixteen/a01/founder-master-set-display.svg",
+      "assets/highcountry/original-sixteen/a01/collection-case-emerald.svg",
+      "assets/highcountry/original-sixteen/a01/collection-case-prairie.svg",
+      "assets/highcountry/original-sixteen/a01/collection-case-mesa.svg",
+      "assets/highcountry/original-sixteen/a01/founder-badge-and-archive-stamp-master.svg"
+    ],
+    "count": 13,
+    "export": "SVG master; rasterize to PNG/WebP as needed; transparent derived layers where applicable",
+    "approval": {
+      "decision": "APPROVED_AND_LOCKED",
+      "scope": "13 SVG visual masters, regional palettes, typographic hierarchy and export direction",
+      "baselineSha": "fc15c7d3ab9eb1aef90dce532ff7e41dd7bde28d",
+      "requiresChangeControl": true,
+      "qualifications": "Pending scoped Level 1 render/technical verification; no certificate implied"
+    }
+  }
+}

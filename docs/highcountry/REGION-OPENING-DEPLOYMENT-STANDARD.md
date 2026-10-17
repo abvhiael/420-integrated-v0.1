@@ -1,0 +1,21 @@
+# High Country — Standard Operating Procedure: Opening a New Region
+
+Status: **deployment template, not an authorization to release**. Does not change founding Genesis.
+
+## Precondition
+1. Use the existing immutable founding RegionRegistry for IDs 1–3; choose an unused uint16 ID >=4 from an approved map (draft nine candidate names have no reserved canonical IDs).
+2. Approve geographic atlas, seasonal weather and authoritative climate/ruleset content hashes, land policy, issuance limits, operational custodians and independent game/security release signoffs. Define actual water/energy source mint policy separately.
+3. Finalize and confirm Genesis. Deploy RegionExpansionRegistry tied to the correct HighCountryAuthorization and immutable GenesisRegistry; register its authorization component and grant only exact per-region stage/open scopes. Do not grant production roles to generic operators.
+4. Calculate content commitment using Solidity `keccak256(abi.encode("HC.EXPANSION.RELEASE.V1", block.chainid, expansionRegistryAddress, regionId, metadataHash, climateProfileId, rulesetId, landPolicyHash))`. The address and chain ID make commitments environment-specific. Verify hash independently and archive signed source metadata.
+5. Call `stage(regionId, metadataHash, climateProfileId, rulesetId, landPolicyHash, commitment)`; verify stored record equals proposed input, status STAGED and the region is not open. Stage exactly once; modifications need a new region release/version strategy.
+6. Deploy fresh LandRegistry and GrowerProfileRegistry **only as part of an approved migration** using `CompositeRegionMembership(foundingRegistry, expansionRegistry)` as their regionRegistry dependency. Existing deployed consumers are immutable; their state and rights cannot be silently migrated. Complete explicit PlantRegistry/rights/land migration rehearsal and backfill canonical state before any opening. Ensure every affected consumer resolves region IDs with an authorized composite membership; old consumers must not silently treat the new region as eligible.
+7. Deploy scoped RegionalUtilities with the composite registry and approved source-provisioning authority. Stage water and energy balances only under documented source/custodian controls; verify source issuance limit and complete conservation. Versioned irrigation rate: **1,000 mL for 100 environmental water-control points**; versioned climate electrical rate: **250 Wh for 100 control points**. Both are V1 *proposed operational defaults*, not a validated production-equipment catalogue. Enforce atomic ledger debit and environment update in authoritative game service; no uncoupled claim of protected quality change.
+8. Complete end-to-end tests of staging, unauthorized opening, insufficient resources, duplicate operations, weather calculation, rights/parcel preservation, mixed founding/expansion users, service idempotency and rollback; register content identity through actual RulesetRegistry hashing, not identifier strings.
+9. Obtain independent release authorization, call `open(id)`; confirm emitted commitment and `isOpen(id)` from finalized chain and verify unaffected founding regions, land, gameplay and storage.
+10. Archive verified network ID, contract/code hashes, exact grants, tx receipts, post-opening consumer acceptance, rollback/migration plan and operator handoff in the testnet roadmap. Do not claim operational availability from an isolated contract opening.
+
+## Accounting
+Water balance measured in integer mL; energy in integer Wh. Per-region per-asset issued minus spent equals total outstanding balances; transfers conserve. Operation IDs are unique globally. Only scoped authorized provisioners may issue utility balances and authorized consumers may burn them. Rate usage must be coupled to equipment action by the trusted service; the prototype RegionalUtilities does **not** enforce source-backed issuance limits or atomic environment updates. Closing or revoking a future region must never strand users' canonical rights without a reviewed transition.
+
+## Deployment disposition
+This is a standard playbook and contract prototype. It is **not a one-click live deployment**. An operational deployment must solve immutable consumer migration, atomic service transaction coupling, per-source issuance controls, and external approval gates first.

@@ -1,0 +1,30 @@
+name: High Country R07.2 Genesis Seed Level 1
+on:
+  pull_request:
+    paths:
+      - 'deployments/highcountry/r07-2.genesis.json'
+      - 'scripts/highcountry/verify-r07-2.mjs'
+      - 'scripts/highcountry/verify-r07-2.test.mjs'
+      - '.github/workflows/highcountry-r07-2.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  genesis-template:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node scripts/highcountry/verify-r07-2.mjs
+      - run: node --test scripts/highcountry/verify-r07-2.test.mjs
+      - name: Reject incomplete Genesis finalization
+        run: |
+          if node scripts/highcountry/verify-r07-2.mjs --require-complete; then
+            echo "unapproved Genesis unexpectedly qualified" >&2
+            exit 1
+          fi

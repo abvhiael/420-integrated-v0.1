@@ -1,0 +1,4 @@
+import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';
+const c=JSON.parse(fs.readFileSync('deployments/highcountry/expansion-region-catalogue.v1.json','utf8'));
+test('nine complete geographically independent locked proposals',()=>{assert.equal(c.candidateRegions.length,9);assert.deepEqual(c.foundingRegionIds,[1,2,3]);let names=new Set();for(const r of c.candidateRegions){assert.ok(!names.has(r.name));names.add(r.name);assert.equal(r.supportSettlements.length,4);assert.equal(r.agriculturalDistricts.length,4);assert.equal(r.landmarks.length,3);assert.equal(Object.keys(r.seasons).length,4);assert.equal(r.landCreationAllowed,false);assert.equal(r.genesisIncluded,false);assert.equal(r.releaseStatus,'CONCEPT_ONLY_LOCKED');}});
+test('no region release authorization implied',()=>assert.equal(c.anyRegionOpen,false));

@@ -1,0 +1,459 @@
+{
+  "schema": "highcountry-region-expansion-catalogue-v1",
+  "authority": "PROPOSED_DESIGN_NOT_SIGNED_RELEASE",
+  "foundingRegionIds": [
+    1,
+    2,
+    3
+  ],
+  "candidateRegions": [
+    {
+      "candidateSlot": 4,
+      "name": "Boreal Reach",
+      "principalSettlement": "Ironwood Landing",
+      "supportSettlements": [
+        "Blackpine",
+        "Frostmere",
+        "Stillwater",
+        "Birchline"
+      ],
+      "agriculturalDistricts": [
+        "Shield Lakes",
+        "Spruce Uplands",
+        "Frost Marsh",
+        "Ironwood Valley"
+      ],
+      "landmarks": [
+        "Wolfstone Cliffs",
+        "Midnight Lake",
+        "North Rail Trestle"
+      ],
+      "identity": "Subarctic boreal",
+      "geography": "cold, isolated lakes and forests",
+      "seasons": {
+        "winter": {
+          "temperatureCentiC": -1800,
+          "humidityBps": 6500
+        },
+        "spring": {
+          "temperatureCentiC": -1200,
+          "humidityBps": 6000
+        },
+        "summer": {
+          "temperatureCentiC": 100,
+          "humidityBps": 6500
+        },
+        "autumn": {
+          "temperatureCentiC": 500,
+          "humidityBps": 6200
+        }
+      },
+      "principalChallenge": "heating and short daylight",
+      "rulesetVersion": "HC-REGION-4-V1",
+      "climateVersion": "HC-CLIMATE-4-V1",
+      "releaseStatus": "CONCEPT_ONLY_LOCKED",
+      "landCreationAllowed": false,
+      "genesisIncluded": false
+    },
+    {
+      "candidateSlot": 5,
+      "name": "Silver Peaks",
+      "principalSettlement": "Summit Falls",
+      "supportSettlements": [
+        "Pinecrest",
+        "Glacier Bend",
+        "Stonepass",
+        "Echo Ridge"
+      ],
+      "agriculturalDistricts": [
+        "Summit Basin",
+        "Snowline Terrace",
+        "Glacier Vale",
+        "West Ridge"
+      ],
+      "landmarks": [
+        "Glasspeak",
+        "Cloudfall Pass",
+        "Old Mountain Tram"
+      ],
+      "identity": "Alpine",
+      "geography": "elevation and mountain snow",
+      "seasons": {
+        "winter": {
+          "temperatureCentiC": -1400,
+          "humidityBps": 6500
+        },
+        "spring": {
+          "temperatureCentiC": -900,
+          "humidityBps": 6000
+        },
+        "summer": {
+          "temperatureCentiC": 700,
+          "humidityBps": 4700
+        },
+        "autumn": {
+          "temperatureCentiC": 800,
+          "humidityBps": 6200
+        }
+      },
+      "principalChallenge": "heating and steep transport",
+      "rulesetVersion": "HC-REGION-5-V1",
+      "climateVersion": "HC-CLIMATE-5-V1",
+      "releaseStatus": "CONCEPT_ONLY_LOCKED",
+      "landCreationAllowed": false,
+      "genesisIncluded": false
+    },
+    {
+      "candidateSlot": 6,
+      "name": "Atlantic Shore",
+      "principalSettlement": "Breakwater Bay",
+      "supportSettlements": [
+        "Saltwick",
+        "Gull Harbor",
+        "Northcove",
+        "Fernport"
+      ],
+      "agriculturalDistricts": [
+        "Harbour Belt",
+        "Cliffside Fields",
+        "Windward Head",
+        "Tidewater Flats"
+      ],
+      "landmarks": [
+        "Stormwatch Light",
+        "Greycap Cliffs",
+        "Old Shipyard"
+      ],
+      "identity": "Maritime",
+      "geography": "wind, salt, rain",
+      "seasons": {
+        "winter": {
+          "temperatureCentiC": 0,
+          "humidityBps": 6500
+        },
+        "spring": {
+          "temperatureCentiC": 700,
+          "humidityBps": 6000
+        },
+        "summer": {
+          "temperatureCentiC": 1200,
+          "humidityBps": 8200
+        },
+        "autumn": {
+          "temperatureCentiC": 1200,
+          "humidityBps": 6200
+        }
+      },
+      "principalChallenge": "wind and storm shelter",
+      "rulesetVersion": "HC-REGION-6-V1",
+      "climateVersion": "HC-CLIMATE-6-V1",
+      "releaseStatus": "CONCEPT_ONLY_LOCKED",
+      "landCreationAllowed": false,
+      "genesisIncluded": false
+    },
+    {
+      "candidateSlot": 7,
+      "name": "Greatwater Lakes",
+      "principalSettlement": "Lakehaven",
+      "supportSettlements": [
+        "Maple Point",
+        "Eastbank",
+        "Cattail Bay",
+        "Millport"
+      ],
+      "agriculturalDistricts": [
+        "Lakeshore Plain",
+        "Maple Ridge",
+        "Eastbank Fields",
+        "Riverbend"
+      ],
+      "landmarks": [
+        "Five Waters Bridge",
+        "Old Steelworks",
+        "Bluewater Point"
+      ],
+      "identity": "Humid continental",
+      "geography": "lakes and fresh water",
+      "seasons": {
+        "winter": {
+          "temperatureCentiC": -900,
+          "humidityBps": 6500
+        },
+        "spring": {
+          "temperatureCentiC": 600,
+          "humidityBps": 6000
+        },
+        "summer": {
+          "temperatureCentiC": 1800,
+          "humidityBps": 6500
+        },
+        "autumn": {
+          "temperatureCentiC": 2000,
+          "humidityBps": 6200
+        }
+      },
+      "principalChallenge": "moisture and seasonal temperature",
+      "rulesetVersion": "HC-REGION-7-V1",
+      "climateVersion": "HC-CLIMATE-7-V1",
+      "releaseStatus": "CONCEPT_ONLY_LOCKED",
+      "landCreationAllowed": false,
+      "genesisIncluded": false
+    },
+    {
+      "candidateSlot": 8,
+      "name": "Aurora Frontier",
+      "principalSettlement": "Northlight Station",
+      "supportSettlements": [
+        "Icewater",
+        "Aurora Gate",
+        "Polar Point",
+        "Whitewind"
+      ],
+      "agriculturalDistricts": [
+        "Polar Dome",
+        "Frostfield",
+        "Northlight Shelf",
+        "Aurora Valley"
+      ],
+      "landmarks": [
+        "Skyfire Ridge",
+        "Midwinter Observatory",
+        "Iceglass Lake"
+      ],
+      "identity": "Arctic and tundra",
+      "geography": "polar darkness and permafrost",
+      "seasons": {
+        "winter": {
+          "temperatureCentiC": -2800,
+          "humidityBps": 5000
+        },
+        "spring": {
+          "temperatureCentiC": -1800,
+          "humidityBps": 6000
+        },
+        "summer": {
+          "temperatureCentiC": -100,
+          "humidityBps": 4500
+        },
+        "autumn": {
+          "temperatureCentiC": -100,
+          "humidityBps": 6200
+        }
+      },
+      "principalChallenge": "insulation and winter energy",
+      "rulesetVersion": "HC-REGION-8-V1",
+      "climateVersion": "HC-CLIMATE-8-V1",
+      "releaseStatus": "CONCEPT_ONLY_LOCKED",
+      "landCreationAllowed": false,
+      "genesisIncluded": false
+    },
+    {
+      "candidateSlot": 9,
+      "name": "Sunvale Coast",
+      "principalSettlement": "Goldenhaven",
+      "supportSettlements": [
+        "Oakridge",
+        "Terrace Cove",
+        "Vinebank",
+        "Dry Creek"
+      ],
+      "agriculturalDistricts": [
+        "Sunvale Orchards",
+        "Oak Foothills",
+        "Coastal Fog Belt",
+        "Dry Creek Basin"
+      ],
+      "landmarks": [
+        "Golden Bluffs",
+        "Old Aqueduct",
+        "Coastline Gardens"
+      ],
+      "identity": "Mediterranean",
+      "geography": "dry summers and mild winters",
+      "seasons": {
+        "winter": {
+          "temperatureCentiC": 700,
+          "humidityBps": 6500
+        },
+        "spring": {
+          "temperatureCentiC": 1500,
+          "humidityBps": 6000
+        },
+        "summer": {
+          "temperatureCentiC": 2200,
+          "humidityBps": 4200
+        },
+        "autumn": {
+          "temperatureCentiC": 2400,
+          "humidityBps": 6200
+        }
+      },
+      "principalChallenge": "reservoir and wildfire resilience",
+      "rulesetVersion": "HC-REGION-9-V1",
+      "climateVersion": "HC-CLIMATE-9-V1",
+      "releaseStatus": "CONCEPT_ONLY_LOCKED",
+      "landCreationAllowed": false,
+      "genesisIncluded": false
+    },
+    {
+      "candidateSlot": 10,
+      "name": "Appalachian Hollow",
+      "principalSettlement": "Hollow Creek",
+      "supportSettlements": [
+        "Ashford",
+        "Miller's Gap",
+        "Laurel Town",
+        "Coalbridge"
+      ],
+      "agriculturalDistricts": [
+        "Laurel Ridges",
+        "Hollow Farms",
+        "Riverside Terraces",
+        "East Slope"
+      ],
+      "landmarks": [
+        "Laurel Overlook",
+        "Old Coal Tunnels",
+        "Twisting River"
+      ],
+      "identity": "Temperate uplands",
+      "geography": "forested valleys and rain",
+      "seasons": {
+        "winter": {
+          "temperatureCentiC": -200,
+          "humidityBps": 6500
+        },
+        "spring": {
+          "temperatureCentiC": 1000,
+          "humidityBps": 6000
+        },
+        "summer": {
+          "temperatureCentiC": 1900,
+          "humidityBps": 7500
+        },
+        "autumn": {
+          "temperatureCentiC": 1900,
+          "humidityBps": 6200
+        }
+      },
+      "principalChallenge": "drainage and slope erosion",
+      "rulesetVersion": "HC-REGION-10-V1",
+      "climateVersion": "HC-CLIMATE-10-V1",
+      "releaseStatus": "CONCEPT_ONLY_LOCKED",
+      "landCreationAllowed": false,
+      "genesisIncluded": false
+    },
+    {
+      "candidateSlot": 11,
+      "name": "Cypress Delta",
+      "principalSettlement": "Bayou Crossing",
+      "supportSettlements": [
+        "Cedar Bend",
+        "Marshfield",
+        "Delta Port",
+        "Cypress Ferry"
+      ],
+      "agriculturalDistricts": [
+        "North Levees",
+        "Bayou Farms",
+        "Estuary Edge",
+        "Raised Fields"
+      ],
+      "landmarks": [
+        "Cypress Cathedral",
+        "Old Floodgate",
+        "Heron Estuary"
+      ],
+      "identity": "Humid subtropical",
+      "geography": "flood plains and wetland",
+      "seasons": {
+        "winter": {
+          "temperatureCentiC": 900,
+          "humidityBps": 6500
+        },
+        "spring": {
+          "temperatureCentiC": 1700,
+          "humidityBps": 6000
+        },
+        "summer": {
+          "temperatureCentiC": 2600,
+          "humidityBps": 8600
+        },
+        "autumn": {
+          "temperatureCentiC": 2600,
+          "humidityBps": 6200
+        }
+      },
+      "principalChallenge": "flooding and humidity",
+      "rulesetVersion": "HC-REGION-11-V1",
+      "climateVersion": "HC-CLIMATE-11-V1",
+      "releaseStatus": "CONCEPT_ONLY_LOCKED",
+      "landCreationAllowed": false,
+      "genesisIncluded": false
+    },
+    {
+      "candidateSlot": 12,
+      "name": "Solstice Basin",
+      "principalSettlement": "Solstice Springs",
+      "supportSettlements": [
+        "Saguaro Wells",
+        "Copper Flats",
+        "Oasis Point",
+        "West Arroyo"
+      ],
+      "agriculturalDistricts": [
+        "Oasis Belt",
+        "High Mesa",
+        "Dry Wash",
+        "Sunstone Floor"
+      ],
+      "landmarks": [
+        "Sunspire Butte",
+        "Old Waterway",
+        "Painted Basin"
+      ],
+      "identity": "Hot desert",
+      "geography": "oasis and stone deserts",
+      "seasons": {
+        "winter": {
+          "temperatureCentiC": 1100,
+          "humidityBps": 6500
+        },
+        "spring": {
+          "temperatureCentiC": 2100,
+          "humidityBps": 6000
+        },
+        "summer": {
+          "temperatureCentiC": 3200,
+          "humidityBps": 2400
+        },
+        "autumn": {
+          "temperatureCentiC": 3000,
+          "humidityBps": 6200
+        }
+      },
+      "principalChallenge": "heat and water recovery",
+      "rulesetVersion": "HC-REGION-12-V1",
+      "climateVersion": "HC-CLIMATE-12-V1",
+      "releaseStatus": "CONCEPT_ONLY_LOCKED",
+      "landCreationAllowed": false,
+      "genesisIncluded": false
+    }
+  ],
+  "controlsContractBounds": {
+    "temperatureCentiC": [
+      1000,
+      4000
+    ],
+    "other": [
+      0,
+      10000
+    ]
+  },
+  "conversionV1": {
+    "waterMillilitresPer100ControlPoints": 1000,
+    "energyWattHoursPer100ControlPoints": 250
+  },
+  "climateNotes": "Outdoor temperatures may be below the indoor cultivation contract minimum; all indoor snapshots must be clamped by approved weather/equipment controller. Seasonal examples are game design, not weather forecasts.",
+  "anyRegionOpen": false
+}

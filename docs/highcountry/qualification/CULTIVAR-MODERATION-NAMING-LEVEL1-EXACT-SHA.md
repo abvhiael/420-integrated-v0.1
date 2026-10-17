@@ -4,7 +4,7 @@
 
 ## Immutable evidence identities
 
-**Corrected implementation SHA:** `cc1bf36749fd06514ac64044530a5a8a0cbe4f87`  
+**Corrected implementation SHA:** `cc1bf36749fd06514ac64044530a5a8a0cbe4f87`
 **Original escrow-tested implementation SHA:** `44e7b2e7d750876b10ba9f31afe21336bab97eec`
 
 | Exact-SHA CI workflow | Run | Conclusion | Tested SHA |

@@ -1,8 +1,8 @@
 # High Country — Regional Expansion & Utilities Level 1 qualification
 
-**Result:** PASS — scoped Level 1 implementation qualification  
-**PR:** [#677](https://github.com/abvhiael/420-integrated-v0.1/pull/677) (draft; unmerged at certificate preparation)  
-**Exact implementation SHA:** `0a761b582d766fbc1418529ca9b1c58f680b1a2d`  
+**Result:** PASS — scoped Level 1 implementation qualification
+**PR:** [#677](https://github.com/abvhiael/420-integrated-v0.1/pull/677) (draft; unmerged at certificate preparation)
+**Exact implementation SHA:** `0a761b582d766fbc1418529ca9b1c58f680b1a2d`
 **Evidence-only certificate:** This document does not modify implementation inputs. Its commit SHA must not be substituted for the tested implementation SHA.
 
 ## GitHub Actions evidence — all completed success on the same SHA

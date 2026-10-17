@@ -32,14 +32,31 @@ export function validateIntent(p,config) {
   return p;
 }
 export async function prepareWalletPayment({wallet,intent,sessionKey,consent,expectedIntentHash,clock=()=>Math.floor(Date.now()/1000)}) {
-  if(digest(intent)!==expectedIntentHash||!Number.isSafeInteger(intent.expiresAt)||intent.expiresAt<=clock())fail();
-  if(derivePaymentId(intent)!==intent.paymentId)fail();
-  if(consent!==true)throw new AuthError('WALLET_CONSENT_REQUIRED',403);
-  const connected=await wallet.connect();
-  const pay=wallet.sdk.contract('PaymentRouter420');
-  if(!pay||pay.verified!==true||connected.chainId!==BigInt(intent.chainId)||connected.controller!==intent.controller||pay.address.toLowerCase()!==intent.target||directSettlementCall(intent)!==intent.calldata)fail();
-  const account=await wallet.discoverSmartAccount();
-  if(account.controller.toLowerCase()!==intent.controller||account.smartAccount.toLowerCase()!==intent.payer)fail();
-  // Preparing is not sending or granting an unlimited token/session authorization.
-  return wallet.prepareSession(account,sessionKey,{target:intent.target,value:'0',data:intent.calldata});
+ const t=clock();
+ if(!Number.isSafeInteger(t)||t<0||!intent||digest(intent)!==expectedIntentHash||
+    !Number.isSafeInteger(intent.expiresAt)||intent.expiresAt<=t)fail();
+ if(derivePaymentId(intent)!==intent.paymentId||directSettlementCall(intent)!==intent.calldata)fail();
+ if(consent!==true)throw new AuthError('WALLET_CONSENT_REQUIRED',403);
+ if(!wallet||typeof wallet.connect!=='function'||typeof wallet.discoverSmartAccount!=='function'||
+    typeof wallet.prepareSession!=='function'||typeof wallet.sdk?.contract!=='function')fail();
+ // Reconnect before committing the locally prepared (not broadcast) operation.
+ const connected=await wallet.connect();
+ const pay=wallet.sdk.contract('PaymentRouter420');
+ if(!pay||pay.verified!==true||connected.chainId!==BigInt(intent.chainId)||
+    connected.controller!==intent.controller||pay.address?.toLowerCase()!==intent.target)fail();
+ const account=await wallet.discoverSmartAccount();
+ if(account?.controller?.toLowerCase()!==intent.controller||account?.smartAccount?.toLowerCase()!==intent.payer)fail();
+ const prepared=await wallet.prepareSession(account,sessionKey,{target:intent.target,value:'0',data:intent.calldata});
+ const after=clock();
+ if(!Number.isSafeInteger(after)||after<t||after>=intent.expiresAt||
+    digest(intent)!==expectedIntentHash)fail();
+ // Account/chain changes during async wallet preparation are not authorized.
+ const fresh=await wallet.connect();
+ const freshAccount=await wallet.discoverSmartAccount();
+ if(fresh.chainId!==connected.chainId||fresh.controller!==connected.controller||
+    freshAccount?.controller?.toLowerCase()!==intent.controller||
+    freshAccount?.smartAccount?.toLowerCase()!==intent.payer||
+    wallet.sdk.contract('PaymentRouter420')?.address?.toLowerCase()!==intent.target||
+    clock()>=intent.expiresAt)fail();
+ return prepared;
 }

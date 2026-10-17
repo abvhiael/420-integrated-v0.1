@@ -31,6 +31,24 @@
 | Sportsbook | Once implemented: pricing/odds provenance, maximum exposures, market halt controls, licensed operators, official outcome oracle/challenge/finality and live book settlement |
 | Prediction markets | Once implemented: market/oracle governance, collateral/reserve accounting, invalid resolution/appeals, reorg resistance, trading/redemption and live liquidation/recovery |
 
+## Video Poker — production-equivalent draw, economics and settlement acceptance
+
+**Status: BLOCKED pending official testnet and independent authorities.** No simulated tests, fixed test seeds, local deployment, or self-signed policy record substitutes for the following external proofs. The local source implementation is not proof of eligibility to accept real wagers.
+
+| Gate | External dependency and required durable evidence |
+| --- | --- |
+| Independent replacement entropy | Approved, independently controlled replacement RNG provider and key custody; signed operator/provider identity, non-collusion attestation, separate primary/fallback authority, commitment transaction executed **before initial deal and player hold**, verified hold event and immutable revealed randomness after hold, withdrawal/withholding protections and evidence of delayed entropy timing on the designated official testnet |
+| Runtime randomness proofs | Chain ID and predeploy identity, canonical RandomnessRouter profile/manifest, accepted wager and initial-root proof, approved randomness source and signed proofHash/entropyHash, independently verified provider-origin receipt, canonical draw and event receipts, no duplicate/replayed/cross-wager entropy, per-reorg restart and finality evidence |
+| Withheld seed / expiry / recovery | Proof of forced timeout and permissionless `SettlementEngine420.voidExpired` stake refund, including unauthorized/late reveal, provider outage, chain reorg, double submission, settlement rollback, dispute evidence retention, operator escalation and customer support |
+| Math approvals | Signed exact ruleset, immutable 9/6 Jacks-or-Better five-credit royal bonus paytable and economic policy, independent rigorous full game-strategy RTP/house-edge distribution over every legal hold/draw outcome and rounding rule, documented methodology/digests and adverse-example tests; source code's **stand-pat-only combinatorial baseline is not sufficient** for production RTP approval |
+| Liability/funding | Independent approval of maximum gross exposure up to 800x stake at five credits, reserve/risk limit and correlated-exposure model, division/overflow boundaries, bankroll and fee conservation; actual funded escrow/vault transaction and settlement/void receipt on official testnet |
+| Governance and activation | Certified role-separated authorization for game/module/resolver registration, static code/runtime hashes, approved versioned paytable and immutable config manifest, chain/deployment manifest signatures, no operator ability to bypass math or randomness approvals, independently signed go/no-go and scoped capability issuance |
+| Eligibility | Applicable licensing/regulatory/jurisdiction, legal age/identity and geofence qualification; player restrictions, responsible-play/cooloff/limits, audit records and revocation outcomes; independent legal/privacy/security sign-offs |
+| Operational approval | Production-equivalent monitors, key availability, source outage/fallback and timeout drills, billing/chargeback policy, incident pause/recovery/reorg runbooks, dispute and reconciliation records, supervisor authorization, controlled deployment/promotion and post-release checks |
+| Safety boundary | KEEP PRODUCTION WAGERING DISABLED until **every** independent and live gate has recorded PASS; an unbound resolver and mock profiles are not production authorization |
+
+**Repository-side work remains distinct:** compilation, scoped adversarial tests, resolver authorization, mathematical formula correctness, complete full-strategy RTP verifier, fail-closed fixture/deployment manifests and integration assertions must be qualified before these external gates can be attempted. Never defer locally executable repairs solely because an official testnet is not available.
+
 ## Reference Slots V1 — explicit evidence and handoff
 
 **Local audit PR:** [#678](https://github.com/abvhiael/420-integrated-v0.1/pull/678). Original code test evidence: 58/58 tests across 13/13 mandatory suites at SHA `7402312984efae34da66ad51f5327967f02f1c17`, [run 38930031457](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38930031457). Subsequent executable modifications require scoped evidence against their own exact SHA; do not transpose successful results.

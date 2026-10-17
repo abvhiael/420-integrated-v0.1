@@ -1,4 +1,3 @@
-import {readFileSync} from 'node:fs';
 import {createHash} from 'node:crypto';
 import {checkSchema} from './schema.mjs';
 
@@ -37,6 +36,14 @@ export async function assessReadiness(pool,{minimumMigrations=15}={}) {
   await checkSchema(client);
   const role=(await client.query("SELECT current_user AS role, rolsuper, rolcreatedb, rolcreaterole FROM pg_roles WHERE rolname=current_user")).rows[0];
   if(!role||role.rolsuper||role.rolcreatedb||role.rolcreaterole||!/^liftd_[a-z0-9_]+$/.test(role.role))fail('DEPLOY_DATABASE_PRIVILEGE_DENIED');
+  const permissions=(await client.query(`SELECT
+   has_schema_privilege(current_user,'liftd','USAGE') AS schema_use,
+   has_schema_privilege(current_user,'liftd','CREATE') AS schema_create,
+   has_table_privilege(current_user,'liftd.trips','SELECT') AS can_read,
+   has_table_privilege(current_user,'liftd.trips','TRUNCATE') AS can_truncate,
+   has_table_privilege(current_user,'liftd.migrations','INSERT') AS can_mutate_migrations
+  `)).rows[0];
+  if(!permissions||!permissions.schema_use||permissions.schema_create||!permissions.can_read||permissions.can_truncate||permissions.can_mutate_migrations)fail('DEPLOY_DATABASE_PRIVILEGE_DENIED');
   const result=await client.query('SELECT count(*)::int AS count FROM liftd.migrations');
   if(Number(result.rows[0]?.count)<minimumMigrations)fail('DEPLOY_MIGRATIONS_INCOMPLETE');
   await client.query('COMMIT');

@@ -1,0 +1,77 @@
+name: LIFTd L03.6 Level 1
+on:
+  pull_request:
+    paths:
+      - 'rideshare/src/deployment-security.mjs'
+      - 'rideshare/test/deployment-security.test.mjs'
+      - 'rideshare/Dockerfile'
+      - 'rideshare/src/admitted-runtime.mjs'
+      - 'rideshare/src/runtime-entrypoint.mjs'
+      - 'rideshare/test/admitted-runtime.test.mjs'
+      - 'rideshare/test/postgres/deployment-security.test.mjs'
+      - 'rideshare/test/rollback-qualification.test.mjs'
+      - 'rideshare/scripts/rollback-qualification.sh'
+      - 'rideshare/scripts/docker-rollback-controller.sh'
+      - 'rideshare/scripts/test-docker-rollback.sh'
+      - '.github/workflows/liftd-l03-6-level1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: liftd-l03-6-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+jobs:
+  deployment-security:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: liftd_qualification
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres -d liftd_qualification"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    env:
+      LIFTD_DATABASE_URL: postgres://postgres:postgres@127.0.0.1:5432/liftd_qualification
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Verify exact implementation SHA
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Locked LIFTd dependencies
+        run: npm ci --prefix rideshare --ignore-scripts
+      - name: Syntax, admission, and retained domain security
+        run: |
+          node --check rideshare/src/deployment-security.mjs
+          node --check rideshare/test/deployment-security.test.mjs
+          node --check rideshare/src/admitted-runtime.mjs
+          node --check rideshare/src/runtime-entrypoint.mjs
+          node --check rideshare/test/admitted-runtime.test.mjs
+          npm test --prefix rideshare
+      - name: Admitted runtime and readiness boundary
+        run: node --test rideshare/test/admitted-runtime.test.mjs
+      - name: Real PostgreSQL migration, privilege, readiness and rollback integration
+        run: node --test rideshare/test/postgres/deployment-security.test.mjs
+      - name: Digest-pinned stop, rollback and recovery behavior
+        run: node --test rideshare/test/rollback-qualification.test.mjs
+      - name: Package non-root image
+        run: docker build --pull -f rideshare/Dockerfile -t liftd-qualification rideshare
+      - name: Real Docker immutable-digest rollback and recovery drill
+        run: bash rideshare/scripts/test-docker-rollback.sh
+      - name: Verify fail-closed unadmitted entry point
+        run: |
+          if docker run --rm --network none --read-only --cap-drop ALL --security-opt no-new-privileges liftd-qualification; then
+            echo 'Unadmitted production entry point unexpectedly ran'
+            exit 1
+          fi

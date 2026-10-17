@@ -40,7 +40,9 @@ contract RegionalEnvironmentSettlement {
         address engine_,
         address coordinator_
     ) {
-        if (utilities_.code.length == 0 || engine_.code.length == 0 || coordinator_ == address(0)) revert InvalidSettlement();
+        if (utilities_.code.length == 0 || engine_.code.length == 0 || coordinator_ == address(0)) {
+            revert InvalidSettlement();
+        }
         utilities = RegionalUtilities(utilities_);
         engine = IRegionalEnvironmentEngine(engine_);
         coordinator = coordinator_;

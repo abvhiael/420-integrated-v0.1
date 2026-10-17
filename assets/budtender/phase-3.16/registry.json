@@ -1,0 +1,238 @@
+{
+  "phase": "3.16",
+  "status": "COMPLETE_48_FILES_ARTWORK_DISTINCT",
+  "registered_count": 48,
+  "expected_count": 48,
+  "missing": [],
+  "assets": [
+    {
+      "name": "hotspot_active.png",
+      "source": "assets/budtender/phase-3.16/hotspot_active.png"
+    },
+    {
+      "name": "hotspot_anchor.png",
+      "source": "assets/budtender/phase-3.16/hotspot_anchor.png"
+    },
+    {
+      "name": "hotspot_attention.png",
+      "source": "assets/budtender/phase-3.16/hotspot_attention.png"
+    },
+    {
+      "name": "hotspot_available.png",
+      "source": "assets/budtender/phase-3.16/hotspot_available.png"
+    },
+    {
+      "name": "hotspot_cancel.png",
+      "source": "assets/budtender/phase-3.16/hotspot_cancel.png"
+    },
+    {
+      "name": "hotspot_cash_register.png",
+      "source": "assets/budtender/phase-3.16/hotspot_cash_register.png"
+    },
+    {
+      "name": "hotspot_cleaning.png",
+      "source": "assets/budtender/phase-3.16/hotspot_cleaning.png"
+    },
+    {
+      "name": "hotspot_completed.png",
+      "source": "assets/budtender/phase-3.16/hotspot_completed.png"
+    },
+    {
+      "name": "hotspot_confirm.png",
+      "source": "assets/budtender/phase-3.16/hotspot_confirm.png"
+    },
+    {
+      "name": "hotspot_cooldown.png",
+      "source": "assets/budtender/phase-3.16/hotspot_cooldown.png"
+    },
+    {
+      "name": "hotspot_cost_marker.png",
+      "source": "assets/budtender/phase-3.16/hotspot_cost_marker.png"
+    },
+    {
+      "name": "hotspot_customer.png",
+      "source": "assets/budtender/phase-3.16/hotspot_customer.png"
+    },
+    {
+      "name": "hotspot_deliveries.png",
+      "source": "assets/budtender/phase-3.16/hotspot_deliveries.png"
+    },
+    {
+      "name": "hotspot_direction_arrow.png",
+      "source": "assets/budtender/phase-3.16/hotspot_direction_arrow.png"
+    },
+    {
+      "name": "hotspot_error.png",
+      "source": "assets/budtender/phase-3.16/hotspot_error.png"
+    },
+    {
+      "name": "hotspot_expansion_doorway.png",
+      "source": "assets/budtender/phase-3.16/hotspot_expansion_doorway.png"
+    },
+    {
+      "name": "hotspot_frame_circle.png",
+      "source": "assets/budtender/phase-3.16/hotspot_frame_circle.png"
+    },
+    {
+      "name": "hotspot_frame_disabled.png",
+      "source": "assets/budtender/phase-3.16/hotspot_frame_disabled.png"
+    },
+    {
+      "name": "hotspot_frame_rounded.png",
+      "source": "assets/budtender/phase-3.16/hotspot_frame_rounded.png"
+    },
+    {
+      "name": "hotspot_frame_selected.png",
+      "source": "assets/budtender/phase-3.16/hotspot_frame_selected.png"
+    },
+    {
+      "name": "hotspot_frame_square.png",
+      "source": "assets/budtender/phase-3.16/hotspot_frame_square.png"
+    },
+    {
+      "name": "hotspot_halo.png",
+      "source": "assets/budtender/phase-3.16/hotspot_halo.png"
+    },
+    {
+      "name": "hotspot_hover.png",
+      "source": "assets/budtender/phase-3.16/hotspot_hover.png"
+    },
+    {
+      "name": "hotspot_info_popup.png",
+      "source": "assets/budtender/phase-3.16/hotspot_info_popup.png"
+    },
+    {
+      "name": "hotspot_information.png",
+      "source": "assets/budtender/phase-3.16/hotspot_information.png"
+    },
+    {
+      "name": "hotspot_interact_prompt.png",
+      "source": "assets/budtender/phase-3.16/hotspot_interact_prompt.png"
+    },
+    {
+      "name": "hotspot_inventory_storage.png",
+      "source": "assets/budtender/phase-3.16/hotspot_inventory_storage.png"
+    },
+    {
+      "name": "hotspot_locked.png",
+      "source": "assets/budtender/phase-3.16/hotspot_locked.png"
+    },
+    {
+      "name": "hotspot_new.png",
+      "source": "assets/budtender/phase-3.16/hotspot_new.png"
+    },
+    {
+      "name": "hotspot_notification.png",
+      "source": "assets/budtender/phase-3.16/hotspot_notification.png"
+    },
+    {
+      "name": "hotspot_product_display.png",
+      "source": "assets/budtender/phase-3.16/hotspot_product_display.png"
+    },
+    {
+      "name": "hotspot_progress_ring.png",
+      "source": "assets/budtender/phase-3.16/hotspot_progress_ring.png"
+    },
+    {
+      "name": "hotspot_queue_management.png",
+      "source": "assets/budtender/phase-3.16/hotspot_queue_management.png"
+    },
+    {
+      "name": "hotspot_restock.png",
+      "source": "assets/budtender/phase-3.16/hotspot_restock.png"
+    },
+    {
+      "name": "hotspot_security.png",
+      "source": "assets/budtender/phase-3.16/hotspot_security.png"
+    },
+    {
+      "name": "hotspot_selected.png",
+      "source": "assets/budtender/phase-3.16/hotspot_selected.png"
+    },
+    {
+      "name": "hotspot_service_counter.png",
+      "source": "assets/budtender/phase-3.16/hotspot_service_counter.png"
+    },
+    {
+      "name": "hotspot_settings.png",
+      "source": "assets/budtender/phase-3.16/hotspot_settings.png"
+    },
+    {
+      "name": "hotspot_staff_management.png",
+      "source": "assets/budtender/phase-3.16/hotspot_staff_management.png"
+    },
+    {
+      "name": "hotspot_store_upgrade.png",
+      "source": "assets/budtender/phase-3.16/hotspot_store_upgrade.png"
+    },
+    {
+      "name": "hotspot_success.png",
+      "source": "assets/budtender/phase-3.16/hotspot_success.png"
+    },
+    {
+      "name": "hotspot_tap_indicator.png",
+      "source": "assets/budtender/phase-3.16/hotspot_tap_indicator.png"
+    },
+    {
+      "name": "hotspot_timer.png",
+      "source": "assets/budtender/phase-3.16/hotspot_timer.png"
+    },
+    {
+      "name": "hotspot_tooltip.png",
+      "source": "assets/budtender/phase-3.16/hotspot_tooltip.png"
+    },
+    {
+      "name": "hotspot_unavailable.png",
+      "source": "assets/budtender/phase-3.16/hotspot_unavailable.png"
+    },
+    {
+      "name": "hotspot_unlock_available.png",
+      "source": "assets/budtender/phase-3.16/hotspot_unlock_available.png"
+    },
+    {
+      "name": "hotspot_upgrade_available.png",
+      "source": "assets/budtender/phase-3.16/hotspot_upgrade_available.png"
+    },
+    {
+      "name": "hotspot_waiting_area.png",
+      "source": "assets/budtender/phase-3.16/hotspot_waiting_area.png"
+    }
+  ],
+  "deleted_duplicate_variants": [
+    {
+      "canonical": "hotspot_completed.png",
+      "original_path": "assets/budtender/phase-3.16/hotspot_completed.png (1).png",
+      "removed_by_owner": true
+    },
+    {
+      "canonical": "hotspot_hover.png",
+      "original_path": "assets/budtender/phase-3.16/hotspot_hover.png (1).png",
+      "removed_by_owner": true
+    },
+    {
+      "canonical": "hotspot_new.png",
+      "original_path": "assets/budtender/phase-3.16/hotspot_new.png (1).png",
+      "removed_by_owner": true
+    },
+    {
+      "canonical": "hotspot_selected.png",
+      "original_path": "assets/budtender/phase-3.16/hotspot_selected.png (1).png",
+      "removed_by_owner": true
+    },
+    {
+      "canonical": "hotspot_store_upgrade.png",
+      "original_path": "assets/budtender/phase-3.16/hotspot_store_upgrade.png (1).png",
+      "removed_by_owner": true
+    },
+    {
+      "canonical": "hotspot_upgrade_available.png",
+      "original_path": "assets/budtender/phase-3.16/hotspot_upgrade_available.png (1).png",
+      "removed_by_owner": true
+    }
+  ],
+  "artwork_validation": {
+    "store_upgrade_blob": "cd456fa78d4d9bb65e583e37eba2339d504dbc0d",
+    "expansion_doorway_blob": "4d383303f3e460acf8b8a5cf0ced3b19f1df7f2b",
+    "distinct": true
+  }
+}

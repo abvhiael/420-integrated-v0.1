@@ -32,6 +32,18 @@
       </div>
       <p class="scene-note" id="scene-asset-status" role="status">checking artwork library…</p>
     </section>
+    <section class="panel" id="hotspot-panel" aria-label="Store interaction hotspots">
+      <p class="eyebrow">interaction hotspots</p>
+      <h2>shop controls</h2>
+      <p class="subtitle">select an available hotspot to navigate to its management controls</p>
+      <div class="hotspot-grid" id="hotspot-grid" role="group" aria-label="Accessible shop interactions">
+        <button type="button" class="hotspot" data-hotspot="stock" data-target="inventory" aria-label="Open stock management" title="Open stock management"><img src="/assets/budtender/phase-3.16/hotspot_inventory_storage.png" alt=""><span>stock</span></button>
+        <button type="button" class="hotspot" data-hotspot="queue" data-target="queue" aria-label="Open customer queue" title="Open customer queue"><img src="/assets/budtender/phase-3.16/hotspot_queue_management.png" alt=""><span>queue</span></button>
+        <button type="button" class="hotspot" data-hotspot="upgrades" data-target="upgrades" aria-label="Open store upgrades" title="Open store upgrades"><img src="/assets/budtender/phase-3.16/hotspot_store_upgrade.png" alt=""><span>upgrades</span></button>
+        <button type="button" class="hotspot" data-hotspot="expansions" data-target="expansions" aria-label="Open expansion management" title="Open expansion management"><img src="/assets/budtender/phase-3.16/hotspot_locked.png" alt=""><span>expansion</span></button>
+      </div>
+      <p id="hotspot-status" role="status" class="subtitle">hotspots ready</p>
+    </section>
     <section class="panel hero-panel">
       <div><p class="eyebrow">store floor</p><h2>today's counter</h2><p id="status-line">loading store state…</p></div>
       <button id="tick" class="secondary">advance queue</button>

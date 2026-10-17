@@ -22,3 +22,21 @@ if(JSON.stringify(phases)!==JSON.stringify(expected)) {
  for(const [phase,count] of Object.entries(expected)) if(phases[phase]!==count) throw Error("bad phase count: "+phase);
 }
 console.log("Budtender artwork inventory: PASS (368 distinct PNGs, lengths and SHA-256 checked)");
+
+const hotspots = JSON.parse(await readFile(resolve(root,"assets/budtender/phase-3.16/registry.json"),"utf8"));
+if(hotspots.expected_count!==48 || hotspots.registered_count!==48 || hotspots.assets.length!==48 || hotspots.deleted_duplicate_variants.length!==6) throw Error("incomplete or inconsistent hotspot registration");
+if(JSON.stringify(hotspots.missing)!==JSON.stringify([])) throw Error("unapproved hotspot gap");
+const hotspotNames = new Set();
+const digests = new Map();
+for(const item of hotspots.assets){
+  if(!/^assets\/budtender\/phase-3\.16\/hotspot_[a-z0-9_]+\.png$/.test(item.source)) throw Error("unsafe hotspot path");
+  const data=await readFile(resolve(root,item.source));
+  if(data.length<100 || !data.subarray(0,8).equals(Buffer.from([137,80,78,71,13,10,26,10]))) throw Error("invalid PNG: "+item.source);
+  digests.set(item.source,createHash("sha256").update(data).digest("hex"));
+}
+for(const item of hotspots.assets){
+ if(!/^hotspot_[a-z0-9_]+\.png$/.test(item.name) || hotspotNames.has(item.name)) throw Error("invalid or repeated canonical hotspot");
+ hotspotNames.add(item.name);
+}
+
+console.log("Phase 3.16: PASS 48 uploaded production files, 6 owner-deleted variants recorded; doorway art identity pending review");

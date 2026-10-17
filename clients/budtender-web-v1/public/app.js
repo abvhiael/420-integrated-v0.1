@@ -152,6 +152,7 @@ const render = () => {
   renderInventory();
   renderQueue();
   renderUpgrades();
+  document.dispatchEvent(new Event('budtender-state-rendered'));
   renderExpansions();
 };
 
@@ -201,4 +202,33 @@ if (sceneStatus) {
       sceneStatus.textContent = "artwork library connected · " + count + " assets";
     })
     .catch(() => { sceneStatus.textContent = "artwork unavailable — shop management remains playable"; });
+}
+
+
+// Presentation-only hotspot navigation. No mutation API is invoked by these controls.
+const hotspotGrid = document.querySelector("#hotspot-grid");
+const hotspotStatus = document.querySelector("#hotspot-status");
+const syncHotspots = () => {
+  if (!hotspotGrid) return;
+  for (const button of hotspotGrid.querySelectorAll("button[data-hotspot]")) {
+    const expansion = button.dataset.hotspot === "expansions";
+    const eligible = !!state && (!expansion || (state.progression?.unlockedExpansions?.length ?? 0) > 0);
+    button.disabled = !eligible;
+    button.setAttribute("aria-disabled", String(!eligible));
+    button.title = !state ? "Waiting for store state" : !eligible ? "Unlock a room before entering expansion hotspots" : "Open " + button.dataset.hotspot;
+    const img = button.querySelector("img");
+    if (img && expansion) img.src = "/assets/budtender/phase-3.16/" + (eligible ? "hotspot_available.png" : "hotspot_locked.png");
+  }
+};
+if (hotspotGrid) {
+  hotspotGrid.addEventListener("click", (event) => {
+    const button = event.target.closest("button[data-hotspot]");
+    if (!button || button.disabled) return;
+    const target = document.getElementById(button.dataset.target);
+    if (target) { target.scrollIntoView({ behavior: "smooth", block: "start" }); target.setAttribute("tabindex", "-1"); target.focus({ preventScroll: true }); }
+    for (const item of hotspotGrid.querySelectorAll("button")) item.classList.toggle("is-selected", item === button);
+    if (hotspotStatus) hotspotStatus.textContent = button.dataset.hotspot + " controls selected";
+  });
+  document.addEventListener("budtender-state-rendered", syncHotspots);
+  syncHotspots();
 }

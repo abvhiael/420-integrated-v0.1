@@ -1,0 +1,57 @@
+name: LIFTd M-L03-A Level 2
+on:
+  pull_request:
+    paths:
+      - 'rideshare/**'
+      - '.github/workflows/liftd-m-l03-a-level2.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: liftd-m-l03-a-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+jobs:
+  service-operations-integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: liftd_qualification
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres -d liftd_qualification"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    env:
+      LIFTD_DATABASE_URL: postgres://postgres:postgres@127.0.0.1:5432/liftd_qualification
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Verify exact SHA
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install locked LIFTd dependencies
+        run: npm ci --prefix rideshare --ignore-scripts
+      - name: Syntax and static service boundaries
+        run: |
+          for file in rideshare/src/{support-cases,reviews,fraud,economic-reconciliation,privacy-retention,location,auth,http,postgres-store}.mjs; do
+            node --check "$file"
+          done
+      - name: Retained domain security and session regression
+        run: npm test --prefix rideshare
+      - name: PostgreSQL milestone convergence (ordered migrations and all six domains)
+        run: |
+          set -euo pipefail
+          for file in rideshare/test/postgres/{store,support-cases,reviews,fraud,economic-reconciliation,privacy-retention,payments,quotes,location}.test.mjs; do
+            echo "M-L03-A retained PostgreSQL inventory: $file"
+            node --test "$file"
+          done

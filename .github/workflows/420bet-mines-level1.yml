@@ -63,7 +63,29 @@ jobs:
         run: |
           set -euo pipefail
           regex='^(BetMinesV1420|BetMinesViewAdapter420|BetMinesSettlementAdapter420|BetMinesHardening420|BetWagerAcceptance420|BetRandomness420|BetRandomnessTerminal420|BetSettlementEngine420|BetBankrollRisk420|BetTerminalPathInvariant420|BetCasinoSettlementInvariant420|BetCasinoSolvencyConvergence420)Test$'
-          forge test --match-contract "$regex" --json > "$RUNNER_TEMP/mines-level1.json"
+          set +e
+          forge test --match-contract "$regex" --json > "$RUNNER_TEMP/mines-level1.json" 2> "$RUNNER_TEMP/mines-level1.stderr"
+          forge_status=$?
+          set -e
+          if [ "$forge_status" -ne 0 ]; then
+            echo "::error::Foundry returned exit status $forge_status; emitting failed test details"
+            python3 - "$RUNNER_TEMP/mines-level1.json" <<'PYFAIL'
+          import json,sys
+          try:
+              data=json.load(open(sys.argv[1]))
+              for suite_name,suite in data.items():
+                  if not isinstance(suite,dict):continue
+                  for test_name,result in suite.get("test_results",{}).items():
+                      if result.get("status") != "Success":
+                          print("FAILED SUITE:",suite_name)
+                          print("FAILED TEST:",test_name)
+                          print("RESULT:",json.dumps(result,indent=2)[:18000])
+          except Exception as ex:
+              print("Unable to decode Foundry JSON:",repr(ex))
+          PYFAIL
+            cat "$RUNNER_TEMP/mines-level1.stderr"
+            exit "$forge_status"
+          fi
           python3 - "$RUNNER_TEMP/mines-level1.json" <<'PY'
           import json, sys
           names = ["BetMinesV1420","BetMinesViewAdapter420","BetMinesSettlementAdapter420","BetMinesHardening420","BetWagerAcceptance420","BetRandomness420","BetRandomnessTerminal420","BetSettlementEngine420","BetBankrollRisk420","BetTerminalPathInvariant420","BetCasinoSettlementInvariant420","BetCasinoSolvencyConvergence420"]

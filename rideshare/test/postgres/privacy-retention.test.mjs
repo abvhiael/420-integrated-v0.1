@@ -6,9 +6,9 @@ assert.ok(process.env.LIFTD_DATABASE_URL,'Real PostgreSQL database required');
 test('L03.5 scoped privacy lifecycle, immutable decisions, evidence holds, redacted export and replay',async()=>{
  const pool=createDatabasePool({connectionString:process.env.LIFTD_DATABASE_URL});
  let time=1000,revoked=false;
- const tripId='privacy_trip_'+Date.now(),rider='privacy_rider_'+Date.now(),driver='privacy_driver_'+Date.now();
+ const tripId='privacy_trip_'+Date.now(),cleanTrip='privacy_clean_'+Date.now(),rider='privacy_rider_'+Date.now(),driver='privacy_driver_'+Date.now();
  const auth={authorize:async(token,{action,resource})=>{
-  if(revoked||resource!=='trip:'+tripId||!['rider','driver','operator'].includes(token))throw new Error('DENIED');
+  if(revoked||!['trip:'+tripId,'trip:'+cleanTrip].includes(resource)||!['rider','driver','operator'].includes(token))throw new Error('DENIED');
   const role=token,subject=role==='rider'?rider:role==='driver'?driver:'privacy_operator';
   return {role,subject,accountId:subject+'_account',sessionId:'session_1',deviceId:'device_1',recoveryEpoch:0,expiresAt:9999999,action};
  }};
@@ -16,6 +16,8 @@ test('L03.5 scoped privacy lifecycle, immutable decisions, evidence holds, redac
   await migrate(pool);
   const service=createPrivacyService({pool,authenticator:auth,clock:()=>time});
   await pool.query('INSERT INTO liftd.trips(trip_id,revision,snapshot) VALUES($1,0,$2)',[tripId,{id:tripId,state:'REQUESTED',revision:0,riderId:rider,driverId:null,vehicleId:null,routeRef:'privacy_route'}]);
+  await pool.query('INSERT INTO liftd.trips(trip_id,revision,snapshot) VALUES($1,0,$2)',[cleanTrip,{id:cleanTrip,state:'REQUESTED',revision:0,riderId:rider,driverId:null,vehicleId:null,routeRef:'clean_route'}]);
+  await pool.query('INSERT INTO liftd.private_locations(route_ref,rider_id,account_id,command_id,trip_id,expires_at,sealed,descriptor) VALUES($1,$2,$3,$4,$5,$6,$7,$8)', ['clean_route',rider,rider+'_account','clean_route_command',cleanTrip,1500,{ciphertext:'encrypted'}, {routeRef:'clean_route'}]);
   const requestId='privacy_req_'+Date.now(),body={tripId,type:'export',commandId:'cmd_create'};
   const created=await service.request('rider',requestId,body);
   assert.equal(created.status,'OPEN');assert.equal(created.dueAt,time+privacyRetentionPolicy.privacyRequestSeconds);
@@ -35,6 +37,17 @@ test('L03.5 scoped privacy lifecycle, immutable decisions, evidence holds, redac
   await assert.rejects(()=>service.fulfill('operator',deletion,{commandId:'cmd_erase',expectedRevision:0}),{code:'PRIVACY_PROTECTED_RECORD'});
   const held=await service.hold('operator',deletion,{commandId:'cmd_hold',expectedRevision:0});assert.equal(held.status,'BLOCKED_HOLD');
   assert.equal(held.reason,'retained_incident');
+  const safeId='privacy_safe_'+Date.now();
+  await service.request('rider',safeId,{tripId:cleanTrip,type:'deletion',commandId:'cmd_safe_open'});
+  const erased=await service.fulfill('operator',safeId,{commandId:'cmd_safe_erase',expectedRevision:0});
+  assert.equal(erased.status,'FULFILLED');
+  const sealed=(await pool.query('SELECT sealed,tombstoned FROM liftd.private_locations WHERE route_ref=$1',['clean_route'])).rows[0];
+  assert.equal(sealed.sealed,null);assert.equal(sealed.tombstoned,true);
+  await assert.rejects(()=>service.fulfill('operator',safeId,{commandId:'cmd_repeat',expectedRevision:1}),{code:'PRIVACY_STALE_OR_TERMINAL'});
+  const accessId='privacy_access_'+Date.now();
+  await service.request('rider',accessId,{tripId:cleanTrip,type:'access',commandId:'cmd_access_open'});
+  await service.fulfill('operator',accessId,{commandId:'cmd_access_fulfill',expectedRevision:0});
+  assert.equal((await service.export('rider',accessId)).coordinates,'REDACTED');
   const bad=()=>redactedPrivacyTelemetry({event:'export',domain:'privacy',status:'allowed',count:1,elapsedMs:5,tripId});
   assert.throws(bad,{code:'INVALID_REQUEST'});
   assert.equal(redactedPrivacyTelemetry({event:'export',domain:'privacy',status:'allowed',count:1,elapsedMs:5}).event,'export');

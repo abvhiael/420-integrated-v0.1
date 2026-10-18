@@ -55,3 +55,15 @@ Never mark gates B/C/D complete merely because this proposal is committed or CI 
 **Qualification:** Level 1 for scoped reconciliation evidence, and no Level 2 or Level 3 globally. A green CI run qualifies only the stated limited scope. Preserve exact-SHA runs and jobs before issuing a durable certificate that describes any outstanding governance blocker accurately.
 
 **Next only after authorization:** apply the formally approved Genesis decision and reconcile affected canonical references under owning verifiers; otherwise the next action remains procurement/recording of authorization for ARC-0.3 itself.
+
+## 6. Authorized owner amendment (2026-10-18)
+
+**Decision:** The repository owner explicitly authorized amendment of the frozen public Genesis application catalog to include **420Arcade** in the ARC-0.3 continuation. This is an affirmative catalog-scope authorization, not a release approval or blockchain governance execution receipt. No other candidate application is authorized by this particular amendment.
+
+**Applied catalog change:** preserve original 21 application entries; add 420Arcade as `GENESIS_USER_APP`, `contracts_required=false`, preceding the testnet-only Faucet. The twenty-two entries retain original order, with a new explicit wallet-free/no-pay-to-win policy rule. `docs/GENESIS-DAPPS.md` is updated in parallel. Frozen network addresses, consensus, economic policy, Solidity contract map and operator powers are unaffected; the decision ID and schema remain unchanged because this is a catalog inclusion under a specifically authorized exception, not a contract upgrade.
+
+**Decision boundaries:** the eleven proposed games remain content candidates requiring their own implementation and test results; there is no claim that they are shipping now. No automatic Genesis promotion occurs for other consumer-service registry entries or later candidate apps. Arcade guest access cannot be gated on wallet or blockchain availability. Gaming Protocol authority remains exclusively in existing canonical contracts and SDK boundaries.
+
+**Requalification required:** replacing the proposal-only fail-closed verifier with a scoped amendment verifier that checks all 22 unique catalog entries and exact preservation of the original 21, proper classification, policy safeguards, linked documentation, parent certificates, and zero new contracts. Only the changed owner suite is required at Level 1; prior ARC-0.1 and ARC-0.2 successful exact-SHA runs remain valid. The earlier proposal-only PASS must not be presented as validating the actual catalog amendment.
+
+**Release/testnet still pending:** real deployed contracts, namespace registration, live operator bindings, independent risk approvals and applications' functional acceptance must follow their existing canonical gates. Separately evaluate other proposed Genesis apps instead of silently enlarging this authorization.

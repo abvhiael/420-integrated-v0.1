@@ -4,13 +4,20 @@ import {generateKeyPairSync,sign} from 'node:crypto';
 import {canonical} from '../src/canonical.mjs';
 import {verifyErasureReceipts,verifyVaultCustody,assertRetentionPolicy,privacyOperationalEvent,assertPrivacyGovernance,createRetentionScheduler} from '../src/privacy-operations-controls.mjs';
 const h='a'.repeat(64),now=1000;
-test('erasure requires separately accounted backups replicas and provider receipts and holds remain unaccepted',()=>{
+test('erasure requires independently signed complete provider inventory and holds remain outstanding',()=>{
+ const identities=['backup','replica','provider'].map(kind=>({...generateKeyPairSync('ed25519'),kind}));
+ const requiredProviders=identities.map(x=>({kind:x.kind,providerId:x.kind}));
+ const providerKeys=Object.fromEntries(identities.map(x=>[x.kind,x.publicKey]));
  const base={subjectRef:'user_1',requestRef:'request_1',digest:h,verifiedAt:900,disposition:'ERASED'};
- const receipts=['backup','replica','provider'].map(kind=>({...base,kind,providerId:kind,receiptId:'receipt_'+kind}));
- assert.equal(verifyErasureReceipts({subjectRef:'user_1',requestRef:'request_1',receipts,now}).allErased,true);
- assert.throws(()=>verifyErasureReceipts({subjectRef:'user_1',requestRef:'request_1',receipts:receipts.slice(1),now}),{code:'ERASURE_COVERAGE_INCOMPLETE'});
- assert.throws(()=>verifyErasureReceipts({subjectRef:'user_1',requestRef:'request_1',receipts:[...receipts,receipts[0]],now}),{code:'ERASURE_DUPLICATE'});
- assert.equal(verifyErasureReceipts({subjectRef:'user_1',requestRef:'request_1',receipts:[{...receipts[0],disposition:'HELD',holdRef:'legal_hold',reviewDueAt:1100},...receipts.slice(1)],now}).allErased,false);
+ const signed=(obj,key)=>({...obj,signature:sign(null,Buffer.from(canonical(obj)),key).toString('base64')});
+ const receipts=identities.map(x=>signed({...base,kind:x.kind,providerId:x.kind,receiptId:'receipt_'+x.kind},x.privateKey));
+ const args={subjectRef:'user_1',requestRef:'request_1',receipts,requiredProviders,providerKeys,now};
+ assert.equal(verifyErasureReceipts(args).allErased,true);
+ assert.throws(()=>verifyErasureReceipts({...args,receipts:receipts.slice(1)}),{code:'ERASURE_COVERAGE_INCOMPLETE'});
+ assert.throws(()=>verifyErasureReceipts({...args,receipts:[...receipts,receipts[0]]}),{code:'ERASURE_DUPLICATE'});
+ assert.throws(()=>verifyErasureReceipts({...args,receipts:[{...receipts[0],digest:'b'.repeat(64)},...receipts.slice(1)]}),{code:'ERASURE_SIGNATURE_INVALID'});
+ const hold=signed({...base,kind:'backup',providerId:'backup',receiptId:'receipt_backup',disposition:'HELD',holdRef:'legal_hold',reviewDueAt:1100},identities[0].privateKey);
+ assert.equal(verifyErasureReceipts({...args,receipts:[hold,...receipts.slice(1)]}).allErased,false);
 });
 test('vault receipt requires independent cryptographic signer and exact custody binding',()=>{
  const {publicKey,privateKey}=generateKeyPairSync('ed25519');

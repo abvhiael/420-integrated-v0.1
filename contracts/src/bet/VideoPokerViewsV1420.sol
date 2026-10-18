@@ -120,8 +120,12 @@ contract VideoPokerViewsV1420 {
         BetTypes420.Wager memory wager = poker.validateWager(wagerId, params);
         VideoPokerDrawV1420.Session memory s = draw.getSession(wagerId);
         if (!s.revealed || s.timedOut) revert NotDrawn();
-        (expectedOutcome, expectedGross) = resolver.resolve(wagerId, params);
-        (category, ) = VideoPokerJacksOrBetter420.grossPayout(s.finalCards, wager.stake, params.credits);
+        if (wager.maxGrossPayout < VideoPokerJacksOrBetter420.maximumGross(wager.stake, params.credits))
+            revert InconsistentState();
+        (category, expectedGross) = VideoPokerJacksOrBetter420.grossPayout(s.finalCards, wager.stake, params.credits);
+        expectedOutcome = expectedGross == 0 ? BetTypes420.TerminalOutcome.LOSS :
+            expectedGross == wager.stake ? BetTypes420.TerminalOutcome.PUSH :
+            expectedGross > wager.stake ? BetTypes420.TerminalOutcome.WIN : BetTypes420.TerminalOutcome.LOSS;
         if (registry.settlementExists(wagerId)) {
             BetTypes420.Settlement memory settlement = registry.getSettlement(wagerId);
             settlementMatches = settlement.outcome == expectedOutcome && settlement.grossPayout == expectedGross;

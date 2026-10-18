@@ -11,6 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 PUBLIC = ROOT / "config/genesis-applications.json"
 CONTRACT_MAP = ROOT / "contracts/config/genesis-dapp-contract-map.json"
 INVENTORY = ROOT / "docs/audit/genesis-contract-documentation-inventory.json"
+EXPANSION = ROOT / "config/genesis-application-decision-2.json"
 
 ALLOWED = {
     "public-genesis-app",
@@ -33,6 +34,7 @@ def main() -> int:
         public = load(PUBLIC)
         contract_map = load(CONTRACT_MAP)
         inventory = load(INVENTORY)
+        expansion = load(EXPANSION)
     except Exception as exc:
         print(f"Genesis documentation inventory FAILED: {exc}", file=sys.stderr)
         return 1
@@ -77,6 +79,9 @@ def main() -> int:
             if not isinstance(alias, str) or alias not in public_names:
                 errors.append(f"{name}: implementation alias must target a frozen public Genesis application")
 
+    approved_expansion={e.get("name"):e for e in expansion.get("entries", [])}
+    if expansion.get("decision_id") != "GENESIS_APPLICATION_DECISION_2" or len(approved_expansion)!=29:
+        errors.append("invalid or missing authorized Genesis Decision #2 expansion inventory")
     represented_public: set[str] = set()
     for name in public_names:
         if name in by_name:
@@ -84,6 +89,10 @@ def main() -> int:
             continue
         if any(item.get("alias_of") == name for item in surfaces):
             represented_public.add(name)
+            continue
+        amendment=approved_expansion.get(name)
+        if amendment is not None and amendment.get("release_enabled") is False and amendment.get("existing_authority") and (ROOT/"docs/GENESIS-DAPPS.md").is_file():
+            represented_public.add(name)  # catalog-only documentation ownership, not a contract-map/implementation claim
             continue
         errors.append(f"public Genesis application {name!r} has no inventory ownership or implementation alias")
 
@@ -102,7 +111,7 @@ def main() -> int:
 
     print(
         "Genesis documentation inventory PASS: "
-        f"{len(contract_names)} contract-map surfaces, {len(public_names)} frozen public surfaces, zero documentation gaps"
+        f"{len(contract_names)} contract-map surfaces, {len(public_names)} frozen public surfaces, Decision #2 catalog-only entries independently release-gated"
     )
     return 0
 

@@ -338,6 +338,16 @@ contract SettlementEngine420 is I420System {
             revert VideoPokerCanonicalSettlementRequired();
         (BetTypes420.TerminalOutcome outcome, uint256 gross) =
             VideoPokerResolverV1420(resolver).resolve(wagerId, params);
+        // Require the exact committed maximum liability to remain actively reserved
+        // before the canonical vault/risk/registry/fee settlement transition.
+        RiskManager420.ExposureReservation memory reservation = riskManager.getReservation(wagerId);
+        uint256 expectedGross = VideoPokerResolverV1420(resolver).requiredGrossReserve(wager.stake, params.credits);
+        if (!reservation.active || reservation.wagerId != wagerId ||
+            reservation.vaultId != wager.vaultId || reservation.gameVersionId != wager.gameVersionId ||
+            reservation.riskProfileId != wager.riskProfileId || reservation.stake != wager.stake ||
+            reservation.grossPayout != expectedGross || wager.maxGrossPayout != expectedGross ||
+            reservation.reservedLiability != expectedGross - wager.stake)
+            revert VideoPokerCanonicalSettlementRequired();
         settlement = _settle(wager, outcome, gross, true);
     }
 

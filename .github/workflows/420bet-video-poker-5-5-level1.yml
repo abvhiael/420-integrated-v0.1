@@ -1,0 +1,50 @@
+name: 420Bet Video Poker Liability and Settlement Level 1
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/420bet-video-poker-5-5-level1.yml'
+      - 'contracts/src/bet/WagerRouter420.sol'
+      - 'contracts/src/bet/SettlementEngine420.sol'
+      - 'contracts/src/bet/VideoPokerResolverV1420.sol'
+      - 'contracts/src/bet/VideoPokerJacksOrBetter420.sol'
+      - 'contracts/test/BetWagerAcceptance420.t.sol'
+      - 'contracts/test/BetSettlementEngine420.t.sol'
+      - 'contracts/test/BetVideoPokerPaytable54.t.sol'
+permissions:
+  contents: read
+concurrency:
+  group: 420bet-video-poker-5-5-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+jobs:
+  level1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      FOUNDRY_PROFILE: pr
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify frozen head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          echo "QUALIFIED_SHA=$EXPECTED_SHA"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Scoped funded acceptance, escrow and liability regressions
+        working-directory: contracts
+        run: forge test --match-contract BetWagerAcceptance420Test -vv
+      - name: Scoped canonical settlement, refunds and replay regressions
+        working-directory: contracts
+        run: forge test --match-contract BetSettlementEngine420Test -vv
+      - name: Retained Video Poker draw, paytable and economics regressions
+        working-directory: contracts
+        run: |
+          forge test --match-contract BetVideoPokerSecureDrawTest -vv
+          forge test --match-contract BetVideoPokerEconomicsTest -vv
+          forge test --match-contract BetVideoPokerPaytable54Test -vv

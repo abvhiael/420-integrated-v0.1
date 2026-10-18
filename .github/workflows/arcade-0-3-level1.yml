@@ -3,6 +3,8 @@ on:
   pull_request:
     paths:
       - "docs/arcade/ARC-0.3-GENESIS-INCLUSION-RECONCILIATION.md"
+      - "config/genesis-applications.json"
+      - "docs/GENESIS-DAPPS.md"
       - "scripts/arcade/verify-arc-0-3.mjs"
       - ".github/workflows/arcade-0-3-level1.yml"
   workflow_dispatch:
@@ -14,5 +16,5 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Verify proposal integrity and frozen Genesis boundary
+      - name: Verify authorized Arcade Genesis amendment and frozen original catalog
         run: node scripts/arcade/verify-arc-0-3.mjs

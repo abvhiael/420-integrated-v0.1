@@ -5,12 +5,12 @@ import {createPrivacyService,redactedPrivacyTelemetry,privacyRetentionPolicy,run
 assert.ok(process.env.LIFTD_DATABASE_URL,'Real PostgreSQL database required');
 test('L03.5 scoped privacy lifecycle, immutable decisions, evidence holds, redacted export and replay',async()=>{
  const pool=createDatabasePool({connectionString:process.env.LIFTD_DATABASE_URL});
- let time=1000,revoked=false;
+ let time=1000,revoked=false,wrongAction=false,wrongResource=false,invalidExpiry=false;
  const tripId='privacy_trip_'+Date.now(),cleanTrip='privacy_clean_'+Date.now(),rider='privacy_rider_'+Date.now(),driver='privacy_driver_'+Date.now();
  const auth={authorize:async(token,{action,resource})=>{
   if(revoked||!['trip:'+tripId,'trip:'+cleanTrip].includes(resource)||!['rider','driver','operator'].includes(token))throw new Error('DENIED');
   const role=token,subject=role==='rider'?rider:role==='driver'?driver:'privacy_operator';
-  return {role,subject,accountId:subject+'_account',sessionId:'session_1',deviceId:'device_1',recoveryEpoch:0,expiresAt:9999999,action};
+  return {role,subject,accountId:subject+'_account',sessionId:'session_1',deviceId:'device_1',recoveryEpoch:0,expiresAt:invalidExpiry?'invalid':9999999,action:wrongAction?'privacy.other':action,resource:wrongResource?'trip:other':resource};
  }};
  try{
   await migrate(pool);
@@ -19,6 +19,13 @@ test('L03.5 scoped privacy lifecycle, immutable decisions, evidence holds, redac
   await pool.query('INSERT INTO liftd.trips(trip_id,revision,snapshot) VALUES($1,0,$2)',[cleanTrip,{id:cleanTrip,state:'REQUESTED',revision:0,riderId:rider,driverId:null,vehicleId:null,routeRef:'clean_route'}]);
   await pool.query('INSERT INTO liftd.private_locations(route_ref,rider_id,account_id,command_id,trip_id,expires_at,sealed,descriptor) VALUES($1,$2,$3,$4,$5,$6,$7,$8)', ['clean_route',rider,rider+'_account','clean_route_command',cleanTrip,1500,{ciphertext:'encrypted'}, {routeRef:'clean_route'}]);
   const requestId='privacy_req_'+Date.now(),body={tripId,type:'export',commandId:'cmd_create'};
+  wrongAction=true;
+  await assert.rejects(()=>service.request('rider',requestId,body),{code:'PRIVACY_SCOPE_DENIED'});
+  wrongAction=false;wrongResource=true;
+  await assert.rejects(()=>service.request('rider',requestId,body),{code:'PRIVACY_SCOPE_DENIED'});
+  wrongResource=false;invalidExpiry=true;
+  await assert.rejects(()=>service.request('rider',requestId,body),{code:'PRIVACY_SCOPE_DENIED'});
+  invalidExpiry=false;
   const created=await service.request('rider',requestId,body);
   assert.equal(created.status,'OPEN');assert.equal(created.dueAt,time+privacyRetentionPolicy.privacyRequestSeconds);
   assert.deepEqual(await service.request('rider',requestId,body),created);

@@ -99,6 +99,10 @@ contract VideoPokerEconomics420 {
     function evaluate(uint8[5] memory hand) external pure returns (VideoPokerJacksOrBetter420.Category) {
         return VideoPokerJacksOrBetter420.evaluate(hand);
     }
+    function payoutCreditsRaw(uint8 category, uint8 credits) external pure returns (uint256) {
+        if (category > uint8(VideoPokerJacksOrBetter420.Category.ROYAL_FLUSH)) revert VideoPokerJacksOrBetter420.InvalidCategory();
+        return VideoPokerJacksOrBetter420.payoutCredits(VideoPokerJacksOrBetter420.Category(category), credits);
+    }
     function payoutCredits(VideoPokerJacksOrBetter420.Category category, uint8 credits) external pure returns (uint256) {
         return VideoPokerJacksOrBetter420.payoutCredits(category, credits);
     }

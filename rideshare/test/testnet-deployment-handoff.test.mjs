@@ -3,9 +3,12 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {validateTestnetDeployment,captureTestnetHandoffEvidence} from '../src/testnet-deployment-handoff.mjs';
 const template=JSON.parse(readFileSync(new URL('../deployment/testnet-manifest.template.json',import.meta.url),'utf8'));
-const obj=()=>structuredClone(template);
+const obj=()=>({...structuredClone(template),releaseSha:'1234567890abcdef1234567890abcdef12345678',image:'registry.example.org/liftd@sha256:'+'0123456789abcdef'.repeat(4),configDigest:'9876543210fedcba'.repeat(4),observability:{...template.observability,policyDigest:'abcdef0123456789'.repeat(4)}});
 test('template remains nonproduction, fully disabled, with digest-pinned image and named managed secrets',()=>{
+ assert.throws(()=>validateTestnetDeployment(template),{code:'TESTNET_PLACEHOLDER_UNSAFE'});
+ assert.equal(validateTestnetDeployment(template,{allowTemplate:true}).deployable,false);
  const p=validateTestnetDeployment(obj());
+ assert.equal(p.deployable,true);
  assert.equal(p.trafficEnabled,false);
  assert.equal(p.secretRefCount,7);
 });

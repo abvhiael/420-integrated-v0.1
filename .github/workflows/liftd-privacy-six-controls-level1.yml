@@ -1,0 +1,30 @@
+name: LIFTd Privacy Six Controls Level 1
+on:
+  pull_request:
+    paths:
+      - 'rideshare/src/privacy-operations-controls.mjs'
+      - 'rideshare/test/privacy-operations-controls.test.mjs'
+      - '.github/workflows/liftd-privacy-six-controls-level1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  privacy-six:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Exact-SHA Level 1 privacy controls and retained app checks
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          npm ci --prefix rideshare --ignore-scripts
+          node --check rideshare/src/privacy-operations-controls.mjs
+          npm test --prefix rideshare

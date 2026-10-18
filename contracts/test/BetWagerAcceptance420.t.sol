@@ -423,11 +423,13 @@ contract BetWagerAcceptance420Test {
         vm.prank(PLAYER);
         vm.expectRevert(WagerRouter420.InvalidRequest.selector);
         s.router.placeVideoPokerWager(wrong,params);
+        req.maxGrossPayout=maxGross; // memory structs alias; restore before next negative case
         wrong=req;
         wrong.maxGrossPayout=maxGross+stake;
         vm.prank(PLAYER);
         vm.expectRevert(WagerRouter420.InvalidRequest.selector);
         s.router.placeVideoPokerWager(wrong,params);
+        req.maxGrossPayout=maxGross;
         wrong=req;
         wrong.paramsHash=keccak256("uncommitted/hold");
         vm.prank(PLAYER);
@@ -439,6 +441,7 @@ contract BetWagerAcceptance420Test {
         vm.prank(PLAYER);
         vm.expectRevert(WagerRouter420.InvalidRequest.selector);
         s.router.placeVideoPokerWager(req,wrongTable);
+        req.paramsHash=poker.hashParams(params); // restore canonical request after negative alias
         require(s.router.nextNonce(PLAYER)==0,"invalid wagers consumed nonce");
         require(s.vault.activeWagerStakeEscrow()==0,"invalid wagers escrowed stake");
         require(s.accounting.getVault(VAULT).activeReservedLiability==0,"invalid wagers reserved funds");

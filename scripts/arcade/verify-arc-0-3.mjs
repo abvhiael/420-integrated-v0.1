@@ -8,10 +8,13 @@ const original=["420 Wallet","420 Explorer","420 Search","420 Analytics","420 Ap
 assert.equal(catalog.decision_id,"GENESIS_APPLICATION_DECISION_1");
 assert.equal(catalog.schema,"420-genesis-application-decision-v9");
 assert.equal(catalog.status,"FROZEN");
-assert.equal(catalog.apps.length,22,"Must preserve all 21 original entries and one approved Arcade");
+const expansion=JSON.parse(read("config/genesis-application-decision-2.json"));
+assert.equal(catalog.apps.length,22+expansion.entries.length,"Decision #2 expansion must preserve ARC-0.3 baseline");
 const names=catalog.apps.map(a=>a.name);
-assert.equal(new Set(names).size,22,"Duplicate Genesis name");
-assert.deepEqual(names.filter(n=>n!=="420Arcade"),original,"Original frozen catalog changed or reordered");
+assert.equal(new Set(names).size,catalog.apps.length,"Duplicate Genesis name");
+assert.deepEqual(names.filter(n=>n!=="420Arcade"&&!expansion.entries.some(e=>e.name===n)),original,"Original frozen catalog changed or reordered");
+assert.equal(expansion.entries.filter(e=>e.name==="420Arcade").length,0);
+assert.ok(expansion.entries.every(e=>e.release_enabled===false),"Expansion release gate bypassed");
 const arcade=catalog.apps.find(a=>a.name==="420Arcade");
 assert.deepEqual([arcade.class,arcade.contracts_required],["GENESIS_USER_APP",false]);
 assert.match(arcade.purpose,/wallet-free/);
@@ -19,7 +22,7 @@ assert.match(arcade.purpose,/without registration, wallet linkage or blockchain 
 assert.ok(catalog.rules.some(rule=>/420Arcade.*wallet-free.*pay-to-win/.test(rule)),"Missing Arcade-specific no-pay-to-win rule");
 assert.equal(catalog.apps.find(a=>a.name==="420 Faucet").class,"TESTNET_ONLY");
 assert.equal(catalog.apps.find(a=>a.name==="420 Gaming Protocol").class,"GENESIS_PROTOCOL");
-assert.ok(doc.includes("21. 420Arcade")&&doc.includes("22. 420 Faucet"),"Published catalog out of sync");
+assert.ok(doc.includes("21. 420Arcade")&&doc.includes(`${catalog.apps.length}. 420 Faucet`),"Published catalog out of sync");
 assert.match(doc,/explicitly authorized by the repository owner/);
 assert.match(decision,/Authorized owner amendment/);
 assert.match(decision,/No other candidate application is authorized/);

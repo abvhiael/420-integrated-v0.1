@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "environment": "testnet",
+  "releaseSha": "0000000000000000000000000000000000000000",
+  "image": "registry.invalid/liftd@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "configDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "namespace": "liftd-isolated-testnet",
+  "replicas": 1,
+  "runAsNonRoot": true,
+  "readOnlyRootFilesystem": true,
+  "allowPrivilegeEscalation": false,
+  "automountServiceAccountToken": false,
+  "hostNetwork": false,
+  "publicIngress": false,
+  "publicRoutesEnabled": false,
+  "passengerTrafficEnabled": false,
+  "dispatchEnabled": false,
+  "paymentsEnabled": false,
+  "secretRefs": {
+    "runtimeConfig": "/run/secrets/liftd-runtime-config",
+    "identityTrust": "/run/secrets/liftd-identity-trust",
+    "registryTrust": "/run/secrets/liftd-registry-trust",
+    "transportTrust": "/run/secrets/liftd-transport-trust",
+    "dbCa": "/run/secrets/liftd-db-ca",
+    "auditSink": "/run/secrets/liftd-audit-sink",
+    "telemetrySink": "/run/secrets/liftd-telemetry-sink"
+  },
+  "health": {
+    "liveness": "/internal/live",
+    "readiness": "/internal/ready",
+    "visibility": "loopback",
+    "port": 8080
+  },
+  "observability": {
+    "enabled": true,
+    "redaction": "strict",
+    "privateOnly": true,
+    "policyDigest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+  }
+}

@@ -18,7 +18,11 @@ export function createPrivacyService({pool,authenticator,clock=()=>Math.floor(Da
  const now=()=>{const t=clock();if(!Number.isSafeInteger(t)||t<0)fail('CLOCK_UNAVAILABLE',503);return t};
  async function permit(token,tripId,action,prior){
   const p=await authenticator.authorize(token,{action,resource:'trip:'+tripId});
-  if(!id(p?.subject)||!id(p.accountId)||p.expiresAt<=now()||!['rider','driver','operator'].includes(p.role))fail('PRIVACY_SCOPE_DENIED',403);
+  if(!id(p?.subject)||!id(p.accountId)||!id(p.sessionId)||!id(p.deviceId)||
+     !Number.isSafeInteger(p.recoveryEpoch)||p.recoveryEpoch<0||
+     !Number.isSafeInteger(p.expiresAt)||p.expiresAt<=now()||
+     p.action!==action||p.resource!=='trip:'+tripId||
+     !['rider','driver','operator'].includes(p.role))fail('PRIVACY_SCOPE_DENIED',403);
   if(prior&&['subject','accountId','role','sessionId','deviceId','recoveryEpoch'].some(k=>p[k]!==prior[k]))fail('PRIVACY_SESSION_CHANGED',403);
   return p;
  }

@@ -11,6 +11,7 @@ library VideoPokerJacksOrBetter420 {
     error InvalidCard();
     error DuplicateCard();
     error InvalidCredits();
+    error InvalidCategory();
     error InvalidStake();
 
     /// @dev Card i: suit = i/13; rank = i%13 (0 ace, 1 deuce, ..., 12 king).
@@ -59,9 +60,17 @@ library VideoPokerJacksOrBetter420 {
         return Category.NOTHING;
     }
 
+    /// @notice Immutable economic terms bound to this versioned paytable ID.
+    /// @dev Commits every category payout, the credit range, and royal bonus.
+    function paytableCommitment() internal pure returns (bytes32) {
+        uint16[10] memory oneCredit = [uint16(0), 1, 2, 3, 4, 6, 9, 25, 50, 250];
+        return keccak256(abi.encode(PAYTABLE_ID, uint8(1), uint8(5), oneCredit, uint16(4000)));
+    }
+
     /// @notice Total returned credits, not profit; 5-credit royal pays 4000 credits.
     function payoutCredits(Category category, uint8 credits) internal pure returns (uint256) {
         if (credits < 1 || credits > 5) revert InvalidCredits();
+        if (uint8(category) > uint8(Category.ROYAL_FLUSH)) revert InvalidCategory();
         if (category == Category.ROYAL_FLUSH) return credits == 5 ? 4000 : uint256(credits) * 250;
         uint256[9] memory factors = [uint256(0), 1, 2, 3, 4, 6, 9, 25, 50];
         return uint256(credits) * factors[uint8(category)];
@@ -85,8 +94,14 @@ library VideoPokerJacksOrBetter420 {
 
 /// @notice Game-specific external pure selectors for qualification and live integration.
 contract VideoPokerEconomics420 {
+    function paytableId() external pure returns (bytes32) { return VideoPokerJacksOrBetter420.PAYTABLE_ID; }
+    function paytableCommitment() external pure returns (bytes32) { return VideoPokerJacksOrBetter420.paytableCommitment(); }
     function evaluate(uint8[5] memory hand) external pure returns (VideoPokerJacksOrBetter420.Category) {
         return VideoPokerJacksOrBetter420.evaluate(hand);
+    }
+    function payoutCreditsRaw(uint8 category, uint8 credits) external pure returns (uint256) {
+        if (category > uint8(VideoPokerJacksOrBetter420.Category.ROYAL_FLUSH)) revert VideoPokerJacksOrBetter420.InvalidCategory();
+        return VideoPokerJacksOrBetter420.payoutCredits(VideoPokerJacksOrBetter420.Category(category), credits);
     }
     function payoutCredits(VideoPokerJacksOrBetter420.Category category, uint8 credits) external pure returns (uint256) {
         return VideoPokerJacksOrBetter420.payoutCredits(category, credits);

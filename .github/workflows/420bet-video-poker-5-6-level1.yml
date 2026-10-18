@@ -6,6 +6,7 @@ on:
       - '.github/workflows/420bet-video-poker-5-6-level1.yml'
       - 'contracts/src/bet/VideoPokerViewsV1420.sol'
       - 'contracts/test/BetVideoPokerViews56.t.sol'
+      - 'contracts/test/BetVideoPokerSecureDraw.t.sol'
 permissions:
   contents: read
 concurrency:

@@ -406,8 +406,18 @@ contract BetWagerAcceptance420Test {
         vm.expectRevert(WagerRouter420.VideoPokerCanonicalWagerRequired.selector);
         s.router.placeVideoPokerWager(req,params);
 
+        BetGameRegistry420.GameVersion memory registered = s.games.getGame(version);
+        require(registered.gameId == game && registered.moduleVersionId == moduleVersion &&
+            registered.rulesetId == rules, "5.5 game/version setup mismatch");
+        require(s.modules.getModule(moduleVersion).implementation == address(poker),
+            "5.5 registered module mismatch");
+        require(poker.gameId() == game && poker.gameVersionId() == version &&
+            poker.rulesetId() == rules && address(poker.wagerRegistry()) == address(s.registry),
+            "5.5 poker interface mismatch");
         vm.prank(ADMIN);
-        s.router.bindVideoPokerModule(version,address(poker));
+        try s.router.bindVideoPokerModule(version,address(poker)) {} catch {
+            revert("5.5 module binding rejected");
+        }
         WagerRouter420.AcceptanceRequest memory wrong=req;
         wrong.maxGrossPayout=maxGross-stake;
         vm.prank(PLAYER);
@@ -433,6 +443,10 @@ contract BetWagerAcceptance420Test {
         require(s.vault.activeWagerStakeEscrow()==0,"invalid wagers escrowed stake");
         require(s.accounting.getVault(VAULT).activeReservedLiability==0,"invalid wagers reserved funds");
 
+        require(s.router.videoPokerModule(version) == address(poker),"5.5 missing module binding");
+        require(poker.hashParams(params) == req.paramsHash, "5.5 wager digest mismatch");
+        require(VideoPokerJacksOrBetter420.maximumGross(req.stake,params.credits) == req.maxGrossPayout,
+            "5.5 gross calculation mismatch");
         vm.prank(PLAYER);
         (bytes32 wagerId,uint256 reserve)=s.router.placeVideoPokerWager(req,params);
         require(reserve==799*stake,"incorrect Video Poker net reserve");

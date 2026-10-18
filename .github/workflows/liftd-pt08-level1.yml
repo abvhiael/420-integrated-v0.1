@@ -1,0 +1,47 @@
+name: LIFTd PT-08 Operational Recovery Level 1
+on:
+  pull_request:
+    paths:
+      - 'rideshare/src/operational-recovery.mjs'
+      - 'rideshare/test/operational-recovery.test.mjs'
+      - 'rideshare/scripts/test-backup-restore.sh'
+      - '.github/workflows/liftd-pt08-level1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  operational-recovery:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: liftd_qualification
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres -d liftd_qualification"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      LIFTD_DATABASE_URL: postgres://postgres:postgres@127.0.0.1:5432/liftd_qualification
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Qualified implementation SHA, full retained app and recovery regressions
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          npm ci --prefix rideshare --ignore-scripts
+          node --check rideshare/src/operational-recovery.mjs
+          npm test --prefix rideshare
+          node --test rideshare/test/postgres/reliability.test.mjs
+      - name: Actual isolated database backup and restore
+        run: bash rideshare/scripts/test-backup-restore.sh

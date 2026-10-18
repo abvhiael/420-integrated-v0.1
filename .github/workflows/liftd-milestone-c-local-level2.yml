@@ -1,0 +1,47 @@
+name: LIFTd Milestone C Local Level 2
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/liftd-milestone-c-local-level2.yml'
+      - 'docs/rideshare/MILESTONE-C-LOCAL-EXIT.md'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  local-security-permission-integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: liftd_qualification
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres -d liftd_qualification"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      LIFTD_DATABASE_URL: postgres://postgres:postgres@127.0.0.1:5432/liftd_qualification
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Exact implementation SHA and app security
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          npm ci --prefix rideshare --ignore-scripts
+          npm test --prefix rideshare
+          node --test rideshare/test/postgres/reliability.test.mjs
+          node --test rideshare/test/postgres/privacy-retention.test.mjs
+      - name: Web security, keyboard and accessibility regression
+        run: |
+          npm run check --prefix rideshare/web
+          node --test rideshare/web/test/accessibility-device.test.mjs

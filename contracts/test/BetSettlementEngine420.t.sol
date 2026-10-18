@@ -376,7 +376,7 @@ contract BetSettlementEngine420Test {
         require(s.vault.wagerStakeEscrow(wagerId)==0,"stake escrow retained");
         require(s.registry.getWager(wagerId).status==BetTypes420.WagerStatus.SETTLED,"settlement not recorded");
         require(s.economics.getWagerFee(wagerId).finalized,"fees not finalized");
-        require(!s.economics.getWagerFee(wagerId).charged,"zero fee schedule charged");
+        require(s.economics.getWagerFee(wagerId).charged,"winning settlement missing fee accounting disposition");
         vm.expectRevert(VideoPokerResolverV1420.InvalidWagerStatus.selector);
         vm.prank(SETTLER);
         s.engine.settleVideoPoker(wagerId,params);

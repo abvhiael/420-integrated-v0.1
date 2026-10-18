@@ -38,7 +38,7 @@ audit = need("docs/DOOBTUBE-AUDIT.md", [
     "repository-qualified DoobTube V1 application/client through DOOBTUBE-10",
     "DOOBTUBE-0 through DOOBTUBE-10 are complete",
     "SECURITY QUALIFIED: **YES for current app repository scope**",
-    "CODE COMPLETE: **NO**",
+    "CODE COMPLETE: **YES for repository scope**",
     "PRODUCTION READY: **NO**",
     "420/service/media/v1",
 ])

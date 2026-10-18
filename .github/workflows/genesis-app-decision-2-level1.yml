@@ -1,0 +1,20 @@
+name: Genesis Application Decision 2 Catalog Level 1
+on:
+  pull_request:
+    paths:
+      - "config/genesis-applications.json"
+      - "config/genesis-application-decision-2.json"
+      - "docs/GENESIS-DAPPS.md"
+      - "scripts/verify-genesis-application-decision-2.mjs"
+      - ".github/workflows/genesis-app-decision-2-level1.yml"
+  workflow_dispatch:
+jobs:
+  catalog-integrity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify immutable baseline, expanded catalog and release gates
+        run: node scripts/verify-genesis-application-decision-2.mjs

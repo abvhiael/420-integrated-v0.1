@@ -98,6 +98,34 @@ contract VideoPokerHardening57Test is BetVideoPokerViews56Test {
             require(versions[i] != versions[j], "cross-game version collision");
     }
 
+    function testVoidReadPreservesBindingsAndActiveGameplayRejection() public {
+        BetTypes420.Wager memory wager = registry.getWager(WAGER);
+        wager.status = BetTypes420.WagerStatus.VOID;
+        registry.setWager(wager);
+        registry.setSettlement(WAGER, BetTypes420.TerminalOutcome.VOID, wager.stake);
+        require(uint8(inspector.inspect(WAGER, _params57()).stage)
+            == uint8(VideoPokerViewsV1420.Stage.VOID), "canonical refund unreadable");
+
+        // The active gameplay validator remains closed to terminal VOID wagers.
+        vm.expectRevert(VideoPokerV1420.InvalidWagerStatus.selector);
+        poker.validateWager(WAGER, _params57());
+
+        VideoPokerV1420.Params memory incorrect = _params57();
+        incorrect.credits = 4;
+        vm.expectRevert(VideoPokerV1420.ParamsMismatch.selector);
+        inspector.inspect(WAGER, incorrect);
+
+        wager.gameVersionId = keccak256("foreign video poker version");
+        registry.setWager(wager);
+        vm.expectRevert(VideoPokerV1420.WrongGame.selector);
+        inspector.inspect(WAGER, _params57());
+        wager.gameVersionId = VERSION;
+        wager.rulesetId = keccak256("foreign video poker ruleset");
+        registry.setWager(wager);
+        vm.expectRevert(VideoPokerV1420.WrongRuleset.selector);
+        inspector.inspect(WAGER, _params57());
+    }
+
     function testUnrevealedResultCannotBeAuthenticatedAsSettled() public {
         BetTypes420.Wager memory wager = registry.getWager(WAGER);
         wager.status = BetTypes420.WagerStatus.SETTLED;

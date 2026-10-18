@@ -69,10 +69,10 @@ Discovery method: inspect complete non-truncated GitHub Git Trees for the two na
 
 ## Source references
 
-- [Genesis application decision](../../config/genesis-applications.json)
+- [Genesis application decision](https://github.com/abvhiael/420-integrated-v0.1/blob/main/config/genesis-applications.json)
 - [Gaming Protocol integration](../developers/gaming-protocol-integration.md)
 - [Game onboarding](../developers/gaming-onboarding.md)
-- [Shared SDK](../../packages/420-gaming-sdk/README.md)
+- [Shared SDK](https://github.com/abvhiael/420-integrated-v0.1/blob/main/packages/420-gaming-sdk/README.md)
 - [GP-17](../gaming/420GP-17-DEVELOPER-PORTAL-GAME-ONBOARDING.md)
 - [GP-15](../gaming/420GP-15-LIVE-TESTNET.md)
 - [Mad Buds character bible](https://github.com/abvhiael/420-integrated/blob/main/mad-buds/Docs/CHARACTER_BIBLE.md)

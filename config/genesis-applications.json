@@ -127,7 +127,7 @@
       "name": "420Arcade",
       "class": "GENESIS_USER_APP",
       "contracts_required": false,
-      "purpose": "Eleven guest-first, wallet-free arcade games using the existing 420 Gaming Protocol only for optional scoped identity, entitlements and cross-game attestations; ordinary gameplay requires no registration, wallet linkage or blockchain connectivity"
+      "purpose": "Eleven guest-first, wallet-free arcade games using the existing 420 Gaming Protocol only for optional scoped identity, entitlements and cross-game attestations; ordinary core gameplay is available without registration, wallet linkage or blockchain connectivity"
     },
     {
       "name": "420 Faucet",

@@ -4,14 +4,14 @@ import {validateTestnetDeployment,captureTestnetHandoffEvidence} from '../src/te
 // Never parse or print secrets. Accept only a redacted, already verified health result.
 // No remote URL is fetched by this script; actual deployment must be independently operated.
 const [mode,manifestFile,evidenceFile]=process.argv.slice(2);
-if(!['verify','capture'].includes(mode)||!manifestFile||(mode==='capture'&&!evidenceFile)){
- console.error('USAGE: node rideshare/scripts/testnet-handoff.mjs verify|capture <manifest> [redacted-health-json]');
+if(!['template','verify','capture'].includes(mode)||!manifestFile||(mode==='capture'&&!evidenceFile)){
+ console.error('USAGE: node rideshare/scripts/testnet-handoff.mjs template|verify|capture <manifest> [redacted-health-json]');
  process.exitCode=2;
 }else{
  try{
   const manifest=JSON.parse(readFileSync(manifestFile,'utf8'));
-  const projection=validateTestnetDeployment(manifest);
-  if(mode==='verify')process.stdout.write(JSON.stringify({verified:true,manifestDigest:projection.manifestDigest,trafficEnabled:false,independentAcceptance:'NOT_ACCEPTED'})+'\n');
+  const projection=validateTestnetDeployment(manifest,{allowTemplate:mode==='template'});
+  if(mode==='verify'||mode==='template')process.stdout.write(JSON.stringify({verified:true,deployable:projection.deployable&&mode==='verify',manifestDigest:projection.manifestDigest,trafficEnabled:false,independentAcceptance:'NOT_ACCEPTED'})+'\n');
   else{
    const input=JSON.parse(readFileSync(evidenceFile,'utf8'));
    const report=captureTestnetHandoffEvidence({manifest,readiness:input.readiness,observation:input.observation,now:input.now});

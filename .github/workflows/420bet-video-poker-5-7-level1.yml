@@ -1,0 +1,45 @@
+name: 420Bet Video Poker Adversarial Convergence Level 1
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/420bet-video-poker-5-7-level1.yml'
+      - 'contracts/src/bet/VideoPokerViewsV1420.sol'
+      - 'contracts/test/VideoPokerHardening57.t.sol'
+permissions:
+  contents: read
+concurrency:
+  group: 420bet-video-poker-5-7-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+jobs:
+  adversarial-convergence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      FOUNDRY_PROFILE: pr
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact implementation SHA
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          echo "BET-AUDIT-5.7 candidate: $EXPECTED_SHA"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Video Poker adversarial and inherited lifecycle
+        working-directory: contracts
+        run: forge test --match-contract '^VideoPokerHardening57Test$' -vv
+      - name: Funded canonical settlement and accounting
+        working-directory: contracts
+        run: forge test --match-contract '^BetSettlementEngine420Test$' --match-test '^testVideoPoker' -vv
+      - name: Paytable classification retained
+        working-directory: contracts
+        run: forge test --match-contract '^BetVideoPokerPaytable54Test$' -vv
+      - name: Casino version binding convergence
+        working-directory: contracts
+        run: forge test --match-contract '^BetCasinoConvergence420Test$' -vv

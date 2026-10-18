@@ -18,7 +18,9 @@ export function mountDriverOnboarding(container,session,adapter){
  const o=document.createElement('option');o.value=kind;o.textContent=kind;documentKind.append(o);}
  panel.append(documentKind);
  const privateRef=field('privateRef','Private upload receipt reference (never document content)');
- const expiry=field('expiry','Document expiry (Unix seconds)');
+ const expiry=field('expiry','Document expiry (Unix seconds)');expiry.type='number';expiry.min='1';expiry.step='1';expiry.setAttribute('inputmode','numeric');
+ for(const input of [vehicle,privateRef]){input.pattern='[A-Za-z0-9_-]{1,128}';input.addEventListener('input',()=>input.removeAttribute('aria-invalid'));}
+ expiry.addEventListener('input',()=>expiry.removeAttribute('aria-invalid'));
  const submit=document.createElement('button');submit.type='button';submit.textContent='Submit for independent review';
  const reload=document.createElement('button');reload.type='button';reload.textContent='Refresh eligibility status';panel.append(submit,reload);
  let revision=null,busy=false;
@@ -32,7 +34,13 @@ export function mountDriverOnboarding(container,session,adapter){
  submit.addEventListener('click',async()=>{if(busy||revision===null)return;busy=true;submit.disabled=true;
  status.textContent='Submitting private receipt metadata for review…';
  try{
- const exp=Number(expiry.value);if(!Number.isSafeInteger(exp)||exp<=0)throw Error('Invalid expiry');
+ const validId=x=>/^[A-Za-z0-9_-]{1,128}$/.test(x);
+ const exp=Number(expiry.value);
+ for(const field of [vehicle,privateRef,expiry])field.removeAttribute('aria-invalid');
+ if(!validId(vehicle.value)||!validId(privateRef.value)||!Number.isSafeInteger(exp)||exp<=0){
+  const invalid=!validId(vehicle.value)?vehicle:!validId(privateRef.value)?privateRef:expiry;
+  invalid.setAttribute('aria-invalid','true');invalid.focus();throw Error('INVALID_DOCUMENT_INPUT');
+ }
  await adapter.submit(session.subject,{driverId:session.subject,vehicleId:vehicle.value,documents:[{kind:documentKind.value,privateRef:privateRef.value,expiresAt:exp}],expectedRevision:revision,commandId:globalThis.crypto.randomUUID()});
  status.textContent='Submission received; independent review required.';revision=null;
  }catch{if(active)status.textContent='Submission not confirmed. Refresh status before retrying; do not assume approval.';}

@@ -2,12 +2,12 @@
 export function mountOperatorConsole(container,session,sessionProvider,{origin=globalThis.location?.origin,fetchImpl=globalThis.fetch,nonce=()=>globalThis.crypto?.randomUUID?.()}={}){
  const root=document.createElement('section');root.className='panel';root.setAttribute('aria-label','Operator dispatch and safety console');
  const heading=document.createElement('h2');heading.textContent='Operator dispatch, eligibility and incidents';
- const input=document.createElement('input');input.setAttribute('aria-label','Trip ID to inspect');input.placeholder='Trip reference';
+ const input=document.createElement('input');input.setAttribute('aria-label','Trip ID to inspect');input.placeholder='Trip reference';input.maxLength=128;input.required=true;input.pattern='[A-Za-z0-9_-]{1,128}';
  const load=document.createElement('button');load.type='button';load.textContent='Verify dispatch and eligibility';
  const incidents=document.createElement('button');incidents.type='button';incidents.textContent='Review incident cases';
  const status=document.createElement('p');status.setAttribute('role','status');status.setAttribute('aria-live','polite');
  const summary=document.createElement('p');const incidentsList=document.createElement('ul');
- const caseInput=document.createElement('input');caseInput.setAttribute('aria-label','Incident ID to resolve');caseInput.placeholder='Verified incident ID';
+ const caseInput=document.createElement('input');caseInput.setAttribute('aria-label','Incident ID to resolve');caseInput.placeholder='Verified incident ID';caseInput.maxLength=128;caseInput.required=true;caseInput.pattern='[A-Za-z0-9_-]{1,128}';
  const resolution=document.createElement('select');resolution.setAttribute('aria-label','Safety recovery decision');
  for(const key of ['safe_exit','interrupted']){const o=document.createElement('option');o.value=key;o.textContent=key;resolution.append(o);}
  const recover=document.createElement('button');recover.type='button';recover.textContent='Resolve verified active-trip incident';
@@ -17,6 +17,8 @@ export function mountOperatorConsole(container,session,sessionProvider,{origin=g
  const id=x=>typeof x==='string'&&/^[A-Za-z0-9_-]{1,128}$/.test(x);
  const operator=()=>session?.status==='authenticated'&&session.roles?.includes('operator')&&id(session.subject);
  const controls=()=>{load.disabled=busy||!operator();incidents.disabled=busy||!current;recover.disabled=busy||!current||current.state!=='IN_PROGRESS'||!caseIds.has(caseInput.value.trim());};
+ input.addEventListener('input',()=>input.removeAttribute('aria-invalid'));
+ caseInput.addEventListener('input',()=>caseInput.removeAttribute('aria-invalid'));
  const reset=()=>{current=null;pending=null;caseIds.clear();summary.textContent='';incidentsList.replaceChildren();controls();};
  async function call(tripId,tail='',body){
   if(!operator()||!id(tripId)||!origin||typeof fetchImpl!=='function'||typeof sessionProvider?.getAccessToken!=='function')throw Error('OPERATOR_UNAVAILABLE');
@@ -35,7 +37,7 @@ export function mountOperatorConsole(container,session,sessionProvider,{origin=g
   finally{busy=false;if(active)controls();}
  }
  load.addEventListener('click',()=>void run(async()=>{
-  const idValue=input.value.trim();reset();
+  const idValue=input.value.trim();if(!id(idValue)){input.setAttribute('aria-invalid','true');input.focus();throw Error('INVALID_TRIP_ID');}reset();
   const result=await call(idValue);
   if(result?.trip?.tripId!==idValue||!Number.isSafeInteger(result.trip.revision)||!['REQUESTED','ASSIGNED','ARRIVED','IN_PROGRESS','COMPLETED','CANCELLED'].includes(result.trip.state)||
     !['PENDING','ACCEPTED','ARRIVED','CLOSED','NONE'].includes(result.dispatch?.status)||
@@ -51,6 +53,7 @@ export function mountOperatorConsole(container,session,sessionProvider,{origin=g
    caseIds.add(row.incidentId);const li=document.createElement('li');li.textContent='Incident '+row.incidentId+' ('+row.category+')';incidentsList.append(li);}
  }));
  recover.addEventListener('click',()=>void run(async()=>{
+  if(!id(caseInput.value.trim())){caseInput.setAttribute('aria-invalid','true');caseInput.focus();throw Error('INVALID_INCIDENT_ID');}
   if(!current||current.state!=='IN_PROGRESS'||!caseIds.has(caseInput.value.trim()))throw Error('RECOVERY_DENIED');
   const incidentId=caseInput.value.trim(),choice=resolution.value;
   if(!pending){const commandId=nonce();if(!id(commandId))throw Error('NO_SECURE_NONCE');pending={commandId,incidentId,expectedRevision:current.revision,resolution:choice};}

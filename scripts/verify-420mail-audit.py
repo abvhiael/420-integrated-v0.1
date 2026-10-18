@@ -26,7 +26,11 @@ if registry_path.is_file():
 if frozen_path.is_file():
     frozen=json.loads(frozen_path.read_text())
     if frozen.get("status")!="FROZEN": errors.append("Genesis application catalog is not FROZEN")
-    if any(x.get("name")=="420Mail" for x in frozen.get("apps",[])): errors.append("420Mail unexpectedly promoted without explicit audit decision")
+    if any(x.get("name")=="420Mail" for x in frozen.get("apps",[])):
+        decision_path=ROOT/"config/genesis-application-decision-2.json"
+        decision=json.loads(decision_path.read_text()) if decision_path.is_file() else {}
+        approval=next((x for x in decision.get("entries",[]) if x.get("name")=="420Mail"),None)
+        if not approval or approval.get("release_enabled") is not False or approval.get("existing_authority")!="420Messenger / 420Storage / 420Identity": errors.append("420Mail promotion missing authorized Decision #2 release-disabled scope")
 if profile_path.is_file():
     profile=json.loads(profile_path.read_text())
     if profile.get("serviceId")!="420/service/mail/v1": errors.append("Mail serviceId drifted")
@@ -580,7 +584,7 @@ print("Service: 420/service/mail/v1")
 print("Contracts required: false")
 print("External SMTP default: false")
 print("Live testnet evidence: false")
-print("Genesis catalog promoted: false")
+print("Genesis catalog inclusion: owner-authorized Decision #2; operational release disabled")
 print("MAIL-2.1 mailbox state model: qualified by app-scoped checks")
 print("MAIL-2.2 durable mail storage: qualified by app-scoped checks")
 print("MAIL-2.3 labels and custom folders: qualified by app-scoped checks")

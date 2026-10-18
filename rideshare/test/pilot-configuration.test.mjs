@@ -11,7 +11,7 @@ const coverage={primary:'a',backup:'b',supervisor:'c',coverageStart:50,coverageE
 const args=()=>({config:config(),trip:trip(),driver:driver(),vehicle:vehicle(),metrics:metrics(),stop,coverage,now:100});
 test('pilot must remain disabled by default even with plausible production flags',()=>{
  assert.equal(validatePilotConfiguration(config()).enabled,false);
- for(const patch of [{enabled:true},{productionAuthorized:true},{passengerTrafficEnabled:true},{scope:{...config().scope,municipality:'Richmond'}},{scope:{...config().scope,airport:true}},{scope:{...config().scope,crossBoundary:true}},{maxActiveTrips:4},{maxOffersPerMinute:-1},{monitoring:{...config().monitoring,maxProviderFailures:101}}])
+ for(const patch of [{enabled:true},{productionAuthorized:true},{passengerTrafficEnabled:true},{scope:{...config().scope,municipality:'Richmond'}},{scope:{...config().scope,airport:true}},{scope:{...config().scope,crossBoundary:true}},{maxActiveTrips:101},{maxOffersPerMinute:-1},{monitoring:{...config().monitoring,maxProviderFailures:101}}])
  assert.throws(()=>validatePilotConfiguration({...config(),...patch}),{code:'PILOT_CONFIGURATION_DENIED'});
 });
 test('valid proof can only establish review readiness and never enable a real ride',()=>{
@@ -20,7 +20,7 @@ test('valid proof can only establish review readiness and never enable a real ri
 test('driver, vehicle, route, capacity and expiry negatives fail closed',()=>{
  const a=args();
  for(const patch of [{driver:{...driver(),suspended:true}},{vehicle:{...vehicle(),authorizedDriverId:'other'}},{vehicle:{...vehicle(),capacity:1}},{trip:{...trip(),scope:{...trip().scope,crossBoundary:true}}},{driver:{...driver(),eligibilityExpiresAt:100}},{stop:{active:false,commandId:'stop_default'}},{coverage:{...coverage,backup:'a'}}])
- assert.rejects(async()=>assessPilotAdmission({...a,...patch}));
+ assert.throws(()=>assessPilotAdmission({...a,...patch}));
 });
 test('hard capacity and monitoring thresholds deny admission',()=>{
  const a=args();

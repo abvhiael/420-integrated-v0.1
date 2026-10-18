@@ -248,11 +248,36 @@ contract BetSettlementEngine420Test {
             acceptedAt: uint64(block.timestamp), deadline: deadline, status: BetTypes420.WagerStatus.NONE
         }));
         _allow(s, address(s.engine), BetIds420.ACTION_WAGER_SETTLE_RECORD, s.auth.scopeForWager(wagerId));
+        // Exercise the genuine draw contract lifecycle against the funded canonical wager:
+        // commitment -> primary entropy -> deal -> hold -> withholding -> atomic refund.
+        VideoPokerV1420.Params memory vp = VideoPokerV1420.Params({paytableId: paytable, credits: 5});
+        VideoPokerV1420 poker = new VideoPokerV1420(address(s.registry), game, version, rules);
+        MockVideoPokerSecureRandomness randomness = new MockVideoPokerSecureRandomness();
+        VideoPokerDealV1420 dealer = new VideoPokerDealV1420(address(poker), address(randomness));
+        address provider = address(0xBABA);
+        VideoPokerDrawV1420 draw = new VideoPokerDrawV1420(address(dealer), provider);
+        bytes32 seed = keccak256("withheld entropy");
+        bytes32 commitment = draw.seedCommitmentFor(wagerId, seed);
+        vm.prank(provider);
+        draw.commitReplacement(wagerId, commitment, vp);
+        randomness.setRequest(wagerId, RandomnessRouter420.RandomnessRequest({
+            wagerId: wagerId, profileId: RANDOMNESS, gameVersionId: version, paramsHash: poker.hashParams(vp),
+            contextHash: keccak256("expiry-context"), requestedAt: uint64(block.timestamp),
+            fallbackAt: uint64(block.timestamp+120), root: keccak256("expiry-initial-root"),
+            proofHash: keccak256("expiry-proof"), entropyHash: keccak256("expiry-entropy"),
+            source: RandomnessRouter420.Source.PRIMARY, fulfilled: true
+        }));
+        vm.prank(PLAYER);
+        dealer.startInitialDeal(wagerId,vp);
+        vm.prank(PLAYER);
+        draw.commitHold(wagerId,7);
         require(s.vault.wagerStakeEscrow(wagerId) == stake, "escrow not funded");
         require(s.accounting.getVault(VAULT).activeReservedLiability == maxGross - stake, "reserve absent");
         vm.expectRevert(SettlementEngine420.WagerNotExpired.selector);
         s.engine.voidExpired(wagerId);
         vm.warp(deadline);
+        draw.recordWithheldEntropy(wagerId);
+        require(draw.getSession(wagerId).timedOut, "withheld entropy not recorded");
         s.engine.voidExpired(wagerId);
         require(s.token.balanceOf(PLAYER) == stake, "stake not refunded");
         require(s.token.balanceOf(address(s.vault)) == 1_000 ether, "vault custody changed");

@@ -80,7 +80,11 @@ contract VideoPokerViewsV1420 {
             v.initialCards = d.cards;
             if (s.held && d.deckCommitment != s.dealCommitment) revert InconsistentState();
         } catch (bytes memory reason) {
-            if (reason.length != 4 || bytes4(reason) != VideoPokerDealV1420.DealMissing.selector)
+            bytes4 selector;
+            if (reason.length >= 4) {
+                assembly { selector := mload(add(reason, 32)) }
+            }
+            if (reason.length != 4 || selector != VideoPokerDealV1420.DealMissing.selector)
                 revert InconsistentState();
         }
         v.hasFinalHand = s.revealed;

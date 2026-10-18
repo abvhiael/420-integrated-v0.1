@@ -4,6 +4,7 @@ Application: **DoobTube** (the application originally requested as `420Video`)
 Original audit base: `main` @ `43a3690422e934dcd1fe9da595df4a9dfed37a75`
 Audit branch: `audit/doobtube-baseline-20261006`
 Current remediation state: **DOOBTUBE-0 through DOOBTUBE-11 complete; repository phase COMPLETE**
+Historical milestone: Current remediation state: **DOOBTUBE-0 through DOOBTUBE-10 complete** (superseded by the qualified DOOBTUBE-11 repository closeout).
 Date: 2026-10-07
 
 ## Executive determination

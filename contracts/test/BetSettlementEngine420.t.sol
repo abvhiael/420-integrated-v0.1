@@ -237,7 +237,7 @@ contract BetSettlementEngine420Test {
         s.token.approve(address(s.vault), stake);
         s.economics.bindWager(wagerId, version, OPERATOR, stake);
         s.vault.escrowWagerStakeToken(wagerId, PLAYER, stake);
-        s.risk.reserveExposure(wagerId, VAULT, GAME_V1, RISK, stake, maxGross, keccak256("video-poker"));
+        s.risk.reserveExposure(wagerId, VAULT, version, RISK, stake, maxGross, keccak256("video-poker"));
         uint64 deadline = uint64(block.timestamp + 1 hours);
         s.registry.recordAccepted(BetTypes420.Wager({
             wagerId: wagerId, player: PLAYER, operatorId: OPERATOR, gameId: game,

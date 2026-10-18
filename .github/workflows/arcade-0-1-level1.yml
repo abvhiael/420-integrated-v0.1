@@ -1,0 +1,18 @@
+name: 420Arcade ARC-0.1 Level 1 inventory
+on:
+  pull_request:
+    paths:
+      - "docs/arcade/ARC-0.1-CANONICAL-REPOSITORY-AND-ASSET-AUDIT.md"
+      - "scripts/arcade/verify-arc-0-1.mjs"
+      - ".github/workflows/arcade-0-1-level1.yml"
+  workflow_dispatch:
+jobs:
+  inventory:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check ARC-0.1 documented inventory and canonical boundary
+        run: node scripts/arcade/verify-arc-0-1.mjs

@@ -1,6 +1,6 @@
 # ARC-0.3 — Genesis inclusion reconciliation and authorization gate
 
-**Disposition:** RECONCILIATION PREPARED / FORMAL GENESIS AMENDMENT NOT AUTHORIZED. This is not a declaration that 420Arcade is in the frozen Genesis application decision.
+**Disposition:** RECONCILIATION PREPARED / FORMAL GENESIS AMENDMENT NOT AUTHORIZED. This proposal is not an authorization to amend the frozen Genesis decision. This is not a declaration that 420Arcade is in the frozen Genesis application decision.
 
 **Depends on:** ARC-0.1 exact-SHA Level 1 `c060503d168d044848e6957862966dcbe983072c` (evidence `0c05db1ab31ac86239a1045682bd6a5051dddd85`, PR #727) and ARC-0.2 exact-SHA Level 1 `9af076fe18e86bd4e88a920032ef9c23245e2e37` (evidence `10e4783c99c5ae3f0dced23c1f9fdc0fc0e7d3eb`, PR #731). Both PRs are still open and stacked at discovery time. This branch descends from #731's evidence commit. Do not represent these as merged to main.
 

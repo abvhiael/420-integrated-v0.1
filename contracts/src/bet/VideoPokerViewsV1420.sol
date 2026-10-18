@@ -56,7 +56,17 @@ contract VideoPokerViewsV1420 {
 
     function inspect(bytes32 wagerId, VideoPokerV1420.Params calldata params) external view returns (View memory v) {
         if (params.paytableId != VideoPokerJacksOrBetter420.PAYTABLE_ID) revert WrongPaytable();
-        BetTypes420.Wager memory wager = poker.validateWager(wagerId, params);
+        // Terminal VOID refunds are inspectable, but never eligible for active gameplay.
+        // Validate the immutable identity/params explicitly only in this read-only path.
+        BetTypes420.Wager memory wager = registry.getWager(wagerId);
+        if (wager.status == BetTypes420.WagerStatus.VOID) {
+            if (wager.gameId != poker.gameId() || wager.gameVersionId != poker.gameVersionId())
+                revert VideoPokerV1420.WrongGame();
+            if (wager.rulesetId != poker.rulesetId()) revert VideoPokerV1420.WrongRuleset();
+            if (poker.hashParams(params) != wager.paramsHash) revert VideoPokerV1420.ParamsMismatch();
+        } else {
+            wager = poker.validateWager(wagerId, params);
+        }
         v.wagerId = wagerId;
         v.player = wager.player;
         v.gameVersionId = wager.gameVersionId;

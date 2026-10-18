@@ -11,7 +11,13 @@ for(const f of required) assert.ok(fs.statSync(path.join(root,f)).isFile(),`Miss
 const genesis=JSON.parse(read("config/genesis-applications.json"));
 assert.equal(genesis.status,"FROZEN");
 assert.ok(genesis.apps.some(x=>x.name==="420 Gaming Protocol"));
-assert.ok(!genesis.apps.some(x=>/420\s*Arcade/i.test(x.name)), "Genesis registry amended without authorization");
+const decision=JSON.parse(read("config/genesis-application-decision-2.json"));
+assert.equal(decision.decision_id,"GENESIS_APPLICATION_DECISION_2");
+assert.ok(!decision.entries.some(x=>x.name==="420Arcade"),"ARC-0.3 approved Arcade before Decision #2, must not duplicate");
+assert.ok(genesis.apps.some(x=>x.name==="420Arcade"&&x.class==="GENESIS_USER_APP"&&x.contracts_required===false),"Approved ARC-0.3 inclusion must preserve no-contract boundary");
+assert.equal(new Set(genesis.apps.map(x=>x.name)).size,genesis.apps.length,"Genesis catalog name collision");
+assert.equal(genesis.apps.length,22+decision.entries.length,"Unapproved catalog addition/removal");
+assert.ok(decision.entries.every(x=>x.release_enabled===false),"Decision #2 may not activate products");
 assert.match(read("packages/420-gaming-sdk/src/client.js"),/createGamingClient420/);
 assert.match(read("docs/gaming/420GP-15-LIVE-TESTNET.md"),/UNRESOLVED_UNTIL_DEPLOYMENT/);
 for(const m of audit.matchAll(/\]\((\.\.\/[^)]+)\)/g)){

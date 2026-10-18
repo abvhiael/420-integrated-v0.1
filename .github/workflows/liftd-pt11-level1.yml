@@ -4,8 +4,11 @@ on:
     paths:
       - 'rideshare/src/testnet-deployment-handoff.mjs'
       - 'rideshare/test/testnet-deployment-handoff.test.mjs'
+      - 'rideshare/test/testnet-deployment-files.test.mjs'
       - 'rideshare/deployment/**'
       - 'rideshare/scripts/testnet-handoff.mjs'
+      - 'rideshare/scripts/start-admitted-runtime.mjs'
+      - 'rideshare/scripts/probe-admitted-runtime.mjs'
       - '.github/workflows/liftd-pt11-level1.yml'
   workflow_dispatch:
 permissions:
@@ -30,6 +33,8 @@ jobs:
           npm ci --prefix rideshare --ignore-scripts
           node --check rideshare/src/testnet-deployment-handoff.mjs
           node --check rideshare/scripts/testnet-handoff.mjs
+          node --check rideshare/scripts/start-admitted-runtime.mjs
+          node --check rideshare/scripts/probe-admitted-runtime.mjs
           node rideshare/scripts/testnet-handoff.mjs verify rideshare/deployment/testnet-manifest.template.json
-          node --test rideshare/test/testnet-deployment-handoff.test.mjs rideshare/test/deployment-security.test.mjs rideshare/test/admitted-runtime.test.mjs
+          node --test rideshare/test/testnet-deployment-handoff.test.mjs rideshare/test/testnet-deployment-files.test.mjs rideshare/test/deployment-security.test.mjs rideshare/test/admitted-runtime.test.mjs
           npm test --prefix rideshare

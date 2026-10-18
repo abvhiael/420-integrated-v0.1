@@ -1,0 +1,64 @@
+{
+  "schema_version": 1,
+  "step": "BUD-CHAR-01.1",
+  "status": "draft-awaiting-visual-approval",
+  "canvas": {
+    "width": 256,
+    "height": 384,
+    "channels": "RGBA",
+    "format": "png",
+    "baseline_anchor": {
+      "x": 128,
+      "y": 368
+    },
+    "padding_px": 16
+  },
+  "customer_age": "adult",
+  "required_directions": [
+    "front",
+    "left",
+    "right"
+  ],
+  "expressions": [
+    "neutral",
+    "curious",
+    "happy",
+    "impatient",
+    "disappointed"
+  ],
+  "outfits_per_archetype": 2,
+  "scene_layers": {
+    "customer": "09_CUSTOMERS",
+    "staff": "10_STAFF"
+  },
+  "animation_defaults": {
+    "idle": {
+      "frames": 4,
+      "duration_ms": 500,
+      "loop": true
+    },
+    "walk": {
+      "frames": 8,
+      "duration_ms": 640,
+      "loop": true
+    },
+    "waiting": {
+      "frames": 4,
+      "duration_ms": 800,
+      "loop": true
+    },
+    "browse": {
+      "frames": 6,
+      "duration_ms": 900,
+      "loop": true
+    }
+  },
+  "approval": {
+    "style_sheet": false,
+    "scale_test": false,
+    "perspective_test": false,
+    "expression_test": false,
+    "outfit_test": false,
+    "motion_sample": false
+  }
+}

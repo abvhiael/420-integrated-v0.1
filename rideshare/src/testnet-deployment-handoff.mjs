@@ -26,7 +26,7 @@ export function validateTestnetDeployment(manifest,{runtimeConfig,allowTemplate=
  manifest.observability.privateOnly!==true||!digest(manifest.observability.policyDigest))
  fail('TESTNET_MANIFEST_DENIED');
  const placeholder=manifest.releaseSha==='0'.repeat(40)||manifest.image.startsWith('registry.invalid/')||
-  [manifest.configDigest,manifest.observability.policyDigest].some(x=>/^([a-f0-9])\\1{63}$/.test(x));
+  [manifest.configDigest,manifest.observability.policyDigest].some(x=>[...x].every(ch=>ch===x[0]));
  if(placeholder&&!allowTemplate)fail('TESTNET_PLACEHOLDER_UNSAFE');
  if(runtimeConfig!==undefined){
   const attestation=validateDeploymentConfig(runtimeConfig);

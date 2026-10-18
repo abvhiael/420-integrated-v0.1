@@ -8,7 +8,7 @@ version: current
 
 # 420 Integrated Genesis applications — Frozen Decision
 
-Genesis Application Decision #1 is frozen. The authoritative public application catalog is `config/genesis-applications.json` (`420-genesis-application-decision-v9`).
+Genesis Application Decision #1 is frozen with an explicit owner-authorized 420Arcade inclusion amendment. The authoritative public application catalog is `config/genesis-applications.json` (`420-genesis-application-decision-v9`).
 
 ## Frozen Genesis catalog
 
@@ -32,9 +32,12 @@ Genesis Application Decision #1 is frozen. The authoritative public application 
 18. 420 Attention
 19. 420 Token
 20. 420 Status
-21. 420 Faucet — testnet only
+21. 420Arcade — eleven guest-first, wallet-free games; optional 420 Gaming Protocol integration
+22. 420 Faucet — testnet only
 
 420 Governance is the public Genesis application name. Its canonical production implementation family is 420 Civic. The retired `Governance420` surface is compatibility-only and is not an alternate governance authority.
+
+The 420Arcade inclusion was explicitly authorized by the repository owner in the ARC-0.3 working request on 2026-10-18. It adds a contract-free public user application only; it does not amend Genesis contracts, addresses, game namespaces, or grant runtime/operator privileges. The original frozen twenty-one entries remain intact. The separately maintained expansion-candidate roster is not promoted by this amendment.
 
 ## GEN-10 delivery roadmap
 

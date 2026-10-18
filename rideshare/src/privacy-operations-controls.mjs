@@ -6,6 +6,7 @@ const digest=x=>createHash('sha256').update(canonical(x)).digest('hex');
 const sha=x=>typeof x==='string'&&/^[a-f0-9]{64}$/.test(x);
 const iso=x=>typeof x==='string'&&!Number.isNaN(Date.parse(x));
 const required=['backup','replica','provider'];
+const publicKey=x=>x?.type==='public'&&x?.asymmetricKeyType?x:createPublicKey(x);
 const scrub=x=>{
  if(x===null||['string','number','boolean'].includes(typeof x))return typeof x==='string'?'<REDACTED>':x;
  if(Array.isArray(x))return x.map(scrub);
@@ -46,7 +47,7 @@ export function verifyErasureReceipts({subjectRef,requestRef,receipts,requiredPr
   let good=false;
   try{
    const {signature,...payload}=x;
-   good=verify(null,Buffer.from(canonical(payload)),createPublicKey(providerKeys[x.providerId]),Buffer.from(signature,'base64'));
+   good=verify(null,Buffer.from(canonical(payload)),publicKey(providerKeys[x.providerId]),Buffer.from(signature,'base64'));
   }catch{}
   if(!good)fail('ERASURE_SIGNATURE_INVALID');
   results.push(Object.freeze({kind:x.kind,providerId:x.providerId,receiptId:x.receiptId,disposition:x.disposition,digest:x.digest}));
@@ -63,7 +64,7 @@ export function verifyVaultCustody({receipt,publicKey,expected,now}){
  receipt.status!=='APPROVED'||!id(expected.reviewerId)||receipt.reviewerId!==expected.reviewerId||
  typeof receipt.signature!=='string'||!publicKey)fail('VAULT_CUSTODY_DENIED');
  let good=false;
- try{const {signature,...payload}=receipt;good=verify(null,Buffer.from(canonical(payload)),createPublicKey(publicKey),Buffer.from(signature,'base64'));}catch{}
+ try{const {signature,...payload}=receipt;good=verify(null,Buffer.from(canonical(payload)),(publicKey?.type==='public'&&publicKey?.asymmetricKeyType?publicKey:createPublicKey(publicKey)),Buffer.from(signature,'base64'));}catch{}
  if(!good)fail('VAULT_SIGNATURE_INVALID');
  return Object.freeze({documentRef:receipt.documentRef,custodyRef:receipt.custodyRef,auditDigest:receipt.auditDigest});
 }

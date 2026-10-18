@@ -51,6 +51,7 @@ try {
       };
     },role);
     await page.goto(url,{waitUntil:'networkidle'});
+    await page.locator('#menu-toggle').click();
     await page.locator('a[data-route][href="/'+role+'"]').click();
     await page.waitForURL('**/'+role);
     await page.getByRole('heading',{level:1}).waitFor();

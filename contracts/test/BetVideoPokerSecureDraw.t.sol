@@ -10,6 +10,16 @@ interface VmBetDrawV1420 {
 
 contract MockVideoPokerSecureRegistry {
     mapping(bytes32 => BetTypes420.Wager) internal wagers;
+    mapping(bytes32 => BetTypes420.Settlement) internal settlements;
+    function setSettlement(bytes32 wagerId, BetTypes420.TerminalOutcome outcome, uint256 gross) external {
+        require(wagers[wagerId].wagerId != bytes32(0), "unknown wager");
+        settlements[wagerId] = BetTypes420.Settlement(wagerId, outcome, gross, uint64(block.timestamp));
+    }
+    function settlementExists(bytes32 wagerId) external view returns (bool) { return settlements[wagerId].wagerId != bytes32(0); }
+    function getSettlement(bytes32 wagerId) external view returns (BetTypes420.Settlement memory) {
+        require(settlements[wagerId].wagerId != bytes32(0), "not settled");
+        return settlements[wagerId];
+    }
     function setWager(BetTypes420.Wager calldata wager) external { wagers[wager.wagerId] = wager; }
     function getWager(bytes32 wagerId) external view returns (BetTypes420.Wager memory) {
         require(wagers[wagerId].wagerId != bytes32(0), "unknown");

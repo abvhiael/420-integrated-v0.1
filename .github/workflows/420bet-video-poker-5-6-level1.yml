@@ -1,0 +1,40 @@
+name: 420Bet Video Poker Read-Only Verification Level 1
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/420bet-video-poker-5-6-level1.yml'
+      - 'contracts/src/bet/VideoPokerViewsV1420.sol'
+      - 'contracts/test/BetVideoPokerViews56.t.sol'
+      - 'contracts/test/BetVideoPokerSecureDraw.t.sol'
+permissions:
+  contents: read
+concurrency:
+  group: 420bet-5-6-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+jobs:
+  read-only-verification:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      FOUNDRY_PROFILE: pr
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact SHA
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Scoped read-only lifecycle, math and adversarial verification
+        working-directory: contracts
+        run: |
+          set -euo pipefail
+          forge test --match-contract 'BetVideoPokerViews56Test' -vv
+          forge test --match-contract 'BetVideoPokerSecureDrawTest' -vv
+          forge test --match-contract 'BetVideoPokerPaytable54Test' -vv

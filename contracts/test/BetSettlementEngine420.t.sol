@@ -14,6 +14,7 @@ import "../src/bet/RiskManager420.sol";
 import "../src/bet/SettlementEngine420.sol";
 import "../src/bet/VaultAccounting420.sol";
 import "../src/bet/WithdrawalQueue420.sol";
+import "./BetVideoPokerSecureDraw.t.sol";
 
 interface VmBetSettlement420 {
     function prank(address) external;
@@ -263,6 +264,99 @@ contract BetSettlementEngine420Test {
         require(!s.economics.getWagerFee(wagerId).charged, "refund charged fees");
         s.engine.voidExpired(wagerId);
         require(s.token.balanceOf(PLAYER) == stake, "double refund");
+    }
+
+    function testVideoPokerRealResolverFundedWinConservation() public {
+        Suite memory s = _deploy();
+        bytes32 wagerId = keccak256("video-poker/funded-win");
+        bytes32 game = keccak256("420BET.GAME.VIDEO_POKER");
+        bytes32 version = keccak256("420BET.GAME.VIDEO_POKER.V1");
+        bytes32 rules = keccak256("420BET.RULESET.VIDEO_POKER.V1");
+        uint256 stake = 0.1 ether;
+        uint256 maxGross = 80 ether;
+        bytes32 profile = keccak256("profile");
+        VideoPokerV1420.Params memory params = VideoPokerV1420.Params({
+            paytableId: keccak256("420BET.PAYTABLE.VIDEO_POKER.JACKS_OR_BETTER.V1"), credits: 5
+        });
+        VideoPokerV1420 poker = new VideoPokerV1420(address(s.registry), game, version, rules);
+        MockVideoPokerSecureRandomness randomness = new MockVideoPokerSecureRandomness();
+        VideoPokerDealV1420 dealer = new VideoPokerDealV1420(address(poker), address(randomness));
+        address provider = address(0xBABA);
+        VideoPokerDrawV1420 draw = new VideoPokerDrawV1420(address(dealer), provider);
+        VideoPokerResolverV1420 resolver = new VideoPokerResolverV1420(address(draw));
+        VideoPokerEconomics420 handEvaluator = new VideoPokerEconomics420();
+        _allow(s, address(this), BetIds420.ACTION_ECONOMICS_BIND, s.auth.scopeForGameVersion(version));
+        _allow(s, address(s.engine), BetIds420.ACTION_ECONOMICS_FINALIZE, s.auth.scopeForGameVersion(version));
+        _allow(s, ADMIN, BetIds420.ACTION_ECONOMICS_CONFIGURE, s.auth.scopeForGameVersion(version));
+        vm.prank(ADMIN);
+        s.economics.configureFeeSchedule(BetEconomics420.FeeSchedule({
+            scheduleId: keccak256("video-poker/win-fees"), gameVersionId: version,
+            protocolFeeBps: 0, operatorFeeBps: 0, protocolRecipient: address(0),
+            manifestHash: keccak256("video-poker/win-fees-manifest"), exists: false
+        }));
+        s.token.mint(PLAYER, stake);
+        vm.prank(PLAYER);
+        s.token.approve(address(s.vault), stake);
+        s.economics.bindWager(wagerId, version, OPERATOR, stake);
+        s.vault.escrowWagerStakeToken(wagerId, PLAYER, stake);
+        s.risk.reserveExposure(wagerId, VAULT, version, RISK, stake, maxGross, keccak256("video-poker/funded-win"));
+        s.registry.recordAccepted(BetTypes420.Wager({
+            wagerId: wagerId, player: PLAYER, operatorId: OPERATOR, gameId: game,
+            gameVersionId: version, asset: address(s.token), stake: stake,
+            maxGrossPayout: maxGross, paramsHash: poker.hashParams(params), vaultId: VAULT,
+            randomnessProfileId: profile, riskProfileId: RISK,
+            settlementProfileId: SETTLEMENT, accessPolicyId: ACCESS, rulesetId: rules,
+            acceptedAt: uint64(block.timestamp), deadline: uint64(block.timestamp+1 hours),
+            status: BetTypes420.WagerStatus.NONE
+        }));
+        _allow(s, address(s.engine), BetIds420.ACTION_WAGER_SETTLE_RECORD, s.auth.scopeForWager(wagerId));
+        _allow(s, SETTLER, BetIds420.ACTION_SETTLE, s.auth.scopeForWager(wagerId));
+        _allow(s, ADMIN, BetIds420.ACTION_GAME_REGISTER, s.auth.scopeForGame(game, version));
+        vm.prank(ADMIN);
+        s.engine.bindVideoPokerResolver(version, address(resolver));
+        bytes32 chosenRoot;
+        uint8[5] memory cards;
+        for(uint256 attempt=1;attempt<=500;++attempt){
+            bytes32 root = keccak256(abi.encodePacked("funded-video-poker-win",attempt));
+            uint8[52] memory permutation = dealer.deriveDeck(wagerId,root,RandomnessRouter420.Source.PRIMARY);
+            for(uint256 i;i<5;++i)cards[i]=permutation[i];
+            if(handEvaluator.evaluate(cards)==VideoPokerJacksOrBetter420.Category.TWO_PAIR){
+                chosenRoot=root;break;
+            }
+        }
+        require(chosenRoot!=bytes32(0),"failed deterministic two-pair fixture");
+        bytes32 replacementSeed=keccak256("funded win replacement entropy");
+        bytes32 commitment=draw.seedCommitmentFor(wagerId,replacementSeed);
+        vm.prank(provider);
+        draw.commitReplacement(wagerId,commitment,params);
+        randomness.setRequest(wagerId,RandomnessRouter420.RandomnessRequest({
+            wagerId:wagerId,profileId:profile,gameVersionId:version,paramsHash:poker.hashParams(params),
+            contextHash:keccak256("funded-context"),requestedAt:uint64(block.timestamp),
+            fallbackAt:uint64(block.timestamp+120),root:chosenRoot,proofHash:keccak256("funded-proof"),
+            entropyHash:keccak256("funded-entropy"),source:RandomnessRouter420.Source.PRIMARY,fulfilled:true
+        }));
+        vm.prank(PLAYER);
+        dealer.startInitialDeal(wagerId,params);
+        vm.prank(PLAYER);
+        draw.commitHold(wagerId,31);
+        vm.prank(provider);
+        draw.revealAndDraw(wagerId,replacementSeed);
+        uint256 gross=stake*2;
+        vm.prank(SETTLER);
+        s.engine.settleVideoPoker(wagerId,params);
+        require(s.token.balanceOf(PLAYER)==gross,"canonical winner payout wrong");
+        require(s.token.balanceOf(address(s.vault))==1000 ether-(gross-stake),"funded vault not conserved");
+        require(s.accounting.getVault(VAULT).totalAssets==1000 ether-(gross-stake),"book assets not conserved");
+        require(s.accounting.getVault(VAULT).activeReservedLiability==0,"reserve retained");
+        require(s.vault.wagerStakeEscrow(wagerId)==0,"stake escrow retained");
+        require(s.registry.getWager(wagerId).status==BetTypes420.WagerStatus.SETTLED,"settlement not recorded");
+        require(s.economics.getWagerFee(wagerId).finalized,"fees not finalized");
+        require(!s.economics.getWagerFee(wagerId).charged,"zero fee schedule charged");
+        vm.prank(SETTLER);
+        s.engine.settleVideoPoker(wagerId,params);
+        require(s.token.balanceOf(PLAYER)==gross,"duplicate settlement payment");
+        vm.expectRevert(SettlementEngine420.VideoPokerCanonicalSettlementRequired.selector);
+        s.engine.settle(wagerId,BetTypes420.TerminalOutcome.WIN,gross);
     }
 
     function testSettlementDefaultDenyPreservesAcceptedWager() public {

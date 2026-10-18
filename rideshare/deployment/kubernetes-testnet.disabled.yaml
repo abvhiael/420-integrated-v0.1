@@ -1,0 +1,100 @@
+# PT-11 isolated, intentionally inert deployment example.
+# All image and provider identifiers are placeholders. Replicas MUST remain 0
+# until independent TN-0/TN-1 provisioning and configuration verification.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: liftd-isolated-testnet
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: liftd-readonly
+  namespace: liftd-isolated-testnet
+automountServiceAccountToken: false
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: liftd-internal-health
+  namespace: liftd-isolated-testnet
+spec:
+  replicas: 0
+  selector:
+    matchLabels:
+      app: liftd-internal-health
+  template:
+    metadata:
+      labels:
+        app: liftd-internal-health
+    spec:
+      serviceAccountName: liftd-readonly
+      automountServiceAccountToken: false
+      hostNetwork: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: liftd-internal-health
+          image: registry.invalid/liftd@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          imagePullPolicy: IfNotPresent
+          command: ["node", "rideshare/scripts/start-admitted-runtime.mjs"]
+          env:
+            - name: LIFTD_RUNTIME_CONFIG_FILE
+              value: /run/secrets/liftd-runtime-config
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          ports:
+            - name: loopback-health
+              containerPort: 8080
+          # Exec probes are essential: the runtime binds ONLY to 127.0.0.1,
+          # therefore kubelet HTTP probes to the pod IP must NOT be used.
+          livenessProbe:
+            exec:
+              command: ["node", "rideshare/scripts/probe-admitted-runtime.mjs", "live"]
+            initialDelaySeconds: 10
+            periodSeconds: 15
+          readinessProbe:
+            exec:
+              command: ["node", "rideshare/scripts/probe-admitted-runtime.mjs", "ready"]
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          volumeMounts:
+            - name: managed-provider-secrets
+              mountPath: /run/secrets
+              readOnly: true
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+      volumes:
+        - name: managed-provider-secrets
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: liftd-testnet-managed-provider
+---
+# Deny all pod ingress and egress unless an independently approved
+# network policy, scoped to real named service destinations, is installed.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: liftd-deny-all
+  namespace: liftd-isolated-testnet
+spec:
+  podSelector:
+    matchLabels:
+      app: liftd-internal-health
+  policyTypes: ["Ingress", "Egress"]
+  ingress: []
+  egress: []

@@ -50,7 +50,9 @@ try {
         getSession:async()=>({status:'authenticated',subject:role+'_1',accountId:'account_1',roles:[role]})
       };
     },role);
-    await page.goto(url+role,{waitUntil:'networkidle'});
+    await page.goto(url,{waitUntil:'networkidle'});
+    await page.locator('a[data-route][href="/'+role+'"]').click();
+    await page.waitForURL('**/'+role);
     await page.getByRole('heading',{level:1}).waitFor();
     assert.match(await page.locator('#main').innerText(),new RegExp(role,'i'));
     assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth),true,'mobile horizontal overflow: '+role);

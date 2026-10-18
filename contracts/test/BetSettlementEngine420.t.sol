@@ -352,6 +352,7 @@ contract BetSettlementEngine420Test {
         require(s.registry.getWager(wagerId).status==BetTypes420.WagerStatus.SETTLED,"settlement not recorded");
         require(s.economics.getWagerFee(wagerId).finalized,"fees not finalized");
         require(!s.economics.getWagerFee(wagerId).charged,"zero fee schedule charged");
+        vm.expectRevert(VideoPokerResolverV1420.InvalidWagerStatus.selector);
         vm.prank(SETTLER);
         s.engine.settleVideoPoker(wagerId,params);
         require(s.token.balanceOf(PLAYER)==gross,"duplicate settlement payment");

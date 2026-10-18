@@ -73,9 +73,11 @@ assert all(x.get("name") not in {"DoobTube", "420Video"} for x in svc["services"
 assert all(x.get("id") not in {"420/service/doobtube/v1", "420/service/video/v1"} for x in svc["services"])
 
 apps = json.loads(need("config/genesis-applications.json"))
-assert all(x["name"] not in {"DoobTube", "420Video"} for x in apps["apps"]), (
-    "DoobTube/420Video was added to the frozen Genesis catalog without an explicit later catalog decision"
-)
+expansion=json.loads(need("config/genesis-application-decision-2.json"))
+doobtube_approval=next((e for e in expansion["entries"] if e["name"]=="DoobTube"),None)
+assert doobtube_approval and doobtube_approval["release_enabled"] is False and doobtube_approval["readiness"]=="release_gated" and doobtube_approval["existing_authority"]=="420Media", "DoobTube listing lacks explicit disabled Genesis Decision #2 approval"
+assert any(x["name"]=="DoobTube" and x["class"]=="GENESIS_USER_APP" and x["contracts_required"] is False for x in apps["apps"]), "DoobTube catalog identity must not imply protocol authority"
+assert all(x["name"]!="420Video" for x in apps["apps"]), "420Video alternate name must not be independently registered"
 
 # DOOBTUBE-4 authorizes only the bounded adapter/test package; backend/web/runtime remain later steps.
 allowed_doobtube_files = {

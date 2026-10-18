@@ -17,10 +17,10 @@ test('PT-01 defaults fail-closed on missing consent and rejects unsupported purp
  await assert.rejects(()=>create().require({...input,purpose:'payment_approval'}),e=>e.code==='CONSENT_REQUEST_INVALID');
 });
 test('PT-01 rejects session/account/role/device/recovery changes and expiry',async()=>{
- for(const altered of [{...base,accountId:'other'},{...base,role:'operator'},{...base,expiresAt:900}]){
+ for(const altered of [{...base,accountId:'other'},{...base,role:'operator'},{...base,expiresAt:900},{...base,deviceId:null},{...base,recoveryEpoch:-1}]){
   await assert.rejects(()=>create({actor:altered}).require(input),e=>e.code==='CONSENT_IDENTITY_DENIED');
  }
- for(const altered of [{...base,sessionId:'hijacked'},{...base,deviceId:'other'},{...base,recoveryEpoch:2},{...base,expiresAt:900}]){
+ for(const altered of [{...base,sessionId:'hijacked'},{...base,deviceId:'other'},{...base,recoveryEpoch:2},{...base,expiresAt:900},{...base,action:'operator.override'},{...base,resource:'account:other'}]){
   await assert.rejects(()=>create({second:altered}).require(input),e=>e.code==='CONSENT_SESSION_CHANGED');
  }
 });

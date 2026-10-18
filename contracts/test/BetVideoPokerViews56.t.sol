@@ -14,8 +14,11 @@ contract BetVideoPokerViews56Test is BetVideoPokerSecureDrawTest {
         });
     }
     function _prepareView() private {
+        // A prank applies to the next external call. Compute the commitment first,
+        // otherwise seedCommitmentFor consumes the provider prank.
+        bytes32 commitment = draw.seedCommitmentFor(WAGER, SEED);
         vm.prank(PROVIDER);
-        draw.commitReplacement(WAGER, draw.seedCommitmentFor(WAGER, SEED), _parameters());
+        draw.commitReplacement(WAGER, commitment, _parameters());
         router.setFulfilled(WAGER, true);
         vm.prank(PLAYER);
         dealer.startInitialDeal(WAGER, _parameters());
@@ -24,8 +27,11 @@ contract BetVideoPokerViews56Test is BetVideoPokerSecureDrawTest {
         VideoPokerViewsV1420.View memory v = views.inspect(WAGER, _parameters());
         require(uint8(v.stage) == uint8(VideoPokerViewsV1420.Stage.UNCOMMITTED), "initial stage");
         require(!v.hasInitialDeal && !v.hasFinalHand && !v.hasSettlement, "premature hand");
+        // A prank applies to the next external call. Compute the commitment first,
+        // otherwise seedCommitmentFor consumes the provider prank.
+        bytes32 commitment = draw.seedCommitmentFor(WAGER, SEED);
         vm.prank(PROVIDER);
-        draw.commitReplacement(WAGER, draw.seedCommitmentFor(WAGER, SEED), _parameters());
+        draw.commitReplacement(WAGER, commitment, _parameters());
         v = views.inspect(WAGER, _parameters());
         require(uint8(v.stage) == uint8(VideoPokerViewsV1420.Stage.COMMITTED), "commit stage");
         require(!v.hasInitialDeal && !v.hasFinalHand, "leaked unrevealed cards");

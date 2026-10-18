@@ -7,7 +7,7 @@ const digest=s=>typeof s==='string'&&/^[a-f0-9]{64}$/.test(s);
 const integer=n=>Number.isSafeInteger(n)&&n>=0;
 /** Verify restored data, migrations, private records and held evidence before any resume. */
 export function verifyRecoveryProof({source,restored,expectedSha,now}){
- if(!digest(expectedSha)||!integer(now)||!source||!restored)fail('RECOVERY_PROOF_INVALID');
+ if(!(/^[a-f0-9]{40}$/.test(expectedSha))||!integer(now)||!source||!restored)fail('RECOVERY_PROOF_INVALID');
  for(const x of [source,restored]){
   if(!digest(x.imageDigest)||!digest(x.migrationDigest)||!digest(x.dataDigest)||
      !digest(x.auditDigest)||!digest(x.holdDigest)||!integer(x.recordCount)||

@@ -16,13 +16,13 @@ contract BetVideoPokerPaytable54Test {
         _check(_c(10,23,1,3,5),VideoPokerJacksOrBetter420.Category.JACKS_OR_BETTER);
         _check(_c(0,13,1,14,5),VideoPokerJacksOrBetter420.Category.TWO_PAIR);
         _check(_c(1,14,27,5,9),VideoPokerJacksOrBetter420.Category.THREE_OF_A_KIND);
-        _check(_c(0,14,28,42,1),VideoPokerJacksOrBetter420.Category.STRAIGHT);
+        _check(_c(0,14,28,42,4),VideoPokerJacksOrBetter420.Category.STRAIGHT);
         _check(_c(0,2,5,8,12),VideoPokerJacksOrBetter420.Category.FLUSH);
         _check(_c(1,14,27,3,16),VideoPokerJacksOrBetter420.Category.FULL_HOUSE);
         _check(_c(1,14,27,40,5),VideoPokerJacksOrBetter420.Category.FOUR_OF_A_KIND);
         _check(_c(0,1,2,3,4),VideoPokerJacksOrBetter420.Category.STRAIGHT_FLUSH);
         _check(_c(0,9,10,11,12),VideoPokerJacksOrBetter420.Category.ROYAL_FLUSH);
-        _check(_c(0,14,28,42,1),VideoPokerJacksOrBetter420.Category.STRAIGHT);
+        _check(_c(0,14,28,42,4),VideoPokerJacksOrBetter420.Category.STRAIGHT);
         _check(_c(9,10,11,12,13),VideoPokerJacksOrBetter420.Category.STRAIGHT);
         _check(_c(9,22,1,3,5),VideoPokerJacksOrBetter420.Category.NOTHING);
         _check(_c(11,24,1,3,5),VideoPokerJacksOrBetter420.Category.JACKS_OR_BETTER);
@@ -69,12 +69,12 @@ contract BetVideoPokerPaytable54Test {
         vm.expectRevert(VideoPokerJacksOrBetter420.InvalidCredits.selector);
         economics.payoutCredits(VideoPokerJacksOrBetter420.Category.ROYAL_FLUSH,6);
         (bool accepted, bytes memory response) = address(economics).call(
-            abi.encodeWithSelector(VideoPokerEconomics420.payoutCredits.selector, uint8(10), uint8(5))
+            abi.encodeWithSelector(VideoPokerEconomics420.payoutCreditsRaw.selector, uint8(10), uint8(5))
         );
         require(!accepted && response.length >= 4, "invalid ABI enum accepted");
         bytes4 selector;
         assembly { selector := mload(add(response, 32)) }
-        require(selector == bytes4(0x4e487b71), "invalid enum must fail closed");
+        require(selector == VideoPokerJacksOrBetter420.InvalidCategory.selector, "invalid category must fail closed");
         vm.expectRevert(VideoPokerJacksOrBetter420.InvalidStake.selector);
         economics.maximumGross(0,5);
         vm.expectRevert(VideoPokerJacksOrBetter420.InvalidStake.selector);

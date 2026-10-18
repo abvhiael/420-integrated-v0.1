@@ -32,37 +32,37 @@ Genesis Application Decision #1 is frozen with an explicit owner-authorized 420A
 18. 420 Attention
 19. 420 Token
 20. 420 Status
-21. 420Arcade — eleven guest-first, wallet-free games; optional 420 Gaming Protocol integration
-22. 420 Faucet — testnet only
-23. 420Exchange — release qualification pending
-24. BongGoggles — release qualification pending
-25. 420Launchpad — release qualification pending
-26. 420Mail — external acceptance pending
-27. TownSquare — release qualification pending
-28. 420Media — external acceptance pending
-29. PuffBuddies — release qualification pending
-30. ReeferReview — external acceptance pending
-31. DoobTube — release qualification pending
-32. 420Hz — release qualification pending
-33. 420Grow — release qualification pending
-34. HighStreetMarket — external acceptance pending
-35. 420BnB — release qualification pending
-36. 420Travel — external acceptance pending
-37. 420Events — release qualification pending
-38. 420Calendar — release qualification pending
-39. 420Classifieds — release qualification pending
-40. 420Learn — release qualification pending
-41. 420University — release qualification pending
-42. 420Freelance — release qualification pending
-43. 420Reputation — release qualification pending
-44. 420Location — release qualification pending
-45. 420Pay — release qualification pending
-46. 420Rights — release qualification pending
-47. 420Treasury — release qualification pending
-48. 420Grants — release qualification pending
-49. DOOBr — regulated release gate
-50. LIFTd — regulated release gate
-51. 420Bet — regulated release gate
+21. 420Arcade
+22. 420Exchange
+23. BongGoggles
+24. 420Launchpad
+25. 420Mail
+26. TownSquare
+27. 420Media
+28. PuffBuddies
+29. ReeferReview
+30. DoobTube
+31. 420Hz
+32. 420Grow
+33. HighStreetMarket
+34. 420BnB
+35. 420Travel
+36. 420Events
+37. 420Calendar
+38. 420Classifieds
+39. 420Learn
+40. 420University
+41. 420Freelance
+42. 420Reputation
+43. 420Location
+44. 420Pay
+45. 420Rights
+46. 420Treasury
+47. 420Grants
+48. DOOBr
+49. LIFTd
+50. 420Bet
+51. 420 Faucet — testnet only
 
 420 Governance is the public Genesis application name. Its canonical production implementation family is 420 Civic. The retired `Governance420` surface is compatibility-only and is not an alternate governance authority.
 

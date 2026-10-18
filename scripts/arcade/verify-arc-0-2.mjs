@@ -1,0 +1,16 @@
+import assert from "node:assert/strict";
+import fs from "node:fs";
+const read=p=>fs.readFileSync(p,"utf8");
+const adr=read("docs/arcade/ARC-0.2-ARCHITECTURE-DECISIONS.md");
+const parent=read("docs/arcade/ARC-0.1-LEVEL1-QUALIFICATION.md");
+const genesis=JSON.parse(read("config/genesis-applications.json"));
+assert.equal(genesis.status,"FROZEN");
+assert.ok(genesis.apps.some(a=>a.name==="420 Gaming Protocol"));
+assert.ok(!genesis.apps.some(a=>/arcade/i.test(a.name)),"Unapproved Genesis modification");
+assert.match(parent,/c060503d168d044848e6957862966dcbe983072c/);
+const games=["Kush Crush","420Colouring Book","420Buddy","Bong Breaker","Baked Invaders","Puff-Man","Grasshopper","Roach Run","High Climb","Where's Dave?","Mad Bud Delivery"];
+for(const g of games) assert.ok(adr.includes("| "+g+" |"),"Missing game runtime contract: "+g);
+for(let i=1;i<=11;i++) assert.ok(adr.includes("ADR-ARC-"+String(i).padStart(3,"0")),"Missing ADR "+i);
+for(const t of ["ArcadeGameManifest","ArcadeGameAdapter","ArcadeGameContext","ArcadeProgressStore","ArcadeScoreVerifier","MadBudAssetManifest","wallet-free","cross-game","Level 1","ARC-0.3","ARC-TN","sourceCommit","rulesetVersion","writeIfRevision","accepted|rejected","No signing keys","guest"]) assert.ok(adr.toLowerCase().includes(t.toLowerCase()),"Missing boundary "+t);
+for(const p of ["packages/420-gaming-sdk/src/client.js","docs/developers/gaming-onboarding.md","docs/gaming/420GP-15-LIVE-TESTNET.md","docs/arcade/ARC-0.1-CANONICAL-REPOSITORY-AND-ASSET-AUDIT.md"])assert.ok(fs.statSync(p).isFile(),"Missing canonical file "+p);
+console.log("ARC-0.2 scoped architecture check PASS: 11 games, 11 decisions, trust boundaries, interfaces, frozen Genesis and inherited ARC-0.1 evidence");

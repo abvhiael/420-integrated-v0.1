@@ -1,0 +1,18 @@
+name: 420Arcade ARC-0.2 Level 1 architecture
+on:
+  pull_request:
+    paths:
+      - "docs/arcade/ARC-0.2-ARCHITECTURE-DECISIONS.md"
+      - "scripts/arcade/verify-arc-0-2.mjs"
+      - ".github/workflows/arcade-0-2-level1.yml"
+  workflow_dispatch:
+jobs:
+  architecture:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify ARC-0.2 decisions and authority boundaries
+        run: node scripts/arcade/verify-arc-0-2.mjs

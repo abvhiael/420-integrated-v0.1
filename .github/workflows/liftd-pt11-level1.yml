@@ -1,0 +1,35 @@
+name: LIFTd PT-11 Level 1 Deployment Handoff
+on:
+  pull_request:
+    paths:
+      - 'rideshare/src/testnet-deployment-handoff.mjs'
+      - 'rideshare/test/testnet-deployment-handoff.test.mjs'
+      - 'rideshare/deployment/**'
+      - 'rideshare/scripts/testnet-handoff.mjs'
+      - '.github/workflows/liftd-pt11-level1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  pt11-local:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Exact SHA, handoff and retained deployment security
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          npm ci --prefix rideshare --ignore-scripts
+          node --check rideshare/src/testnet-deployment-handoff.mjs
+          node --check rideshare/scripts/testnet-handoff.mjs
+          node rideshare/scripts/testnet-handoff.mjs verify rideshare/deployment/testnet-manifest.template.json
+          node --test rideshare/test/testnet-deployment-handoff.test.mjs rideshare/test/deployment-security.test.mjs rideshare/test/admitted-runtime.test.mjs
+          npm test --prefix rideshare

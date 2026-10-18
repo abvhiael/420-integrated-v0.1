@@ -1,0 +1,33 @@
+name: 420Bet Capitalization Policy Level 1
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/420bet-capitalization-policy-level1.yml'
+      - 'contracts/config/420bet-capitalization-profit-waterfall-v1.json'
+      - 'contracts/config/application-revenue-policy-v1.json'
+      - 'config/genesis-allocations.json'
+      - 'scripts/verify-420bet-capitalization-policy.py'
+      - 'docs/bet/420BET-GENESIS-CAPITAL-REPAYMENT-AND-EPOCH-REVENUE.md'
+permissions:
+  contents: read
+concurrency:
+  group: 420bet-capitalization-level1-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+jobs:
+  policy-preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout exact policy candidate SHA
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify implementation SHA and policy conservation
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          python3 scripts/verify-420bet-capitalization-policy.py

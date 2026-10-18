@@ -14,7 +14,8 @@ export function createIdentityConsentGuard({authenticator,preferences,clock=()=>
    try{actor=await authenticator.authorize(token,{action,resource:'account:'+accountId})}
    catch{deny('CONSENT_IDENTITY_DENIED')}
    if(actor?.role!=='rider'||actor.accountId!==accountId||actor.action!==action||
-      actor.resource!=='account:'+accountId||!id(actor.subject)||!id(actor.sessionId)||
+      actor.resource!=='account:'+accountId||!id(actor.subject)||!id(actor.sessionId)||!id(actor.deviceId)||
+      !Number.isSafeInteger(actor.recoveryEpoch)||actor.recoveryEpoch<0||
       !Number.isSafeInteger(actor.expiresAt)||actor.expiresAt<=now)deny('CONSENT_IDENTITY_DENIED');
    let entry;
    try{entry=await preferences.read(token,accountId)}catch{deny('CONSENT_STORE_UNAVAILABLE',503)}
@@ -27,7 +28,8 @@ export function createIdentityConsentGuard({authenticator,preferences,clock=()=>
    if(!Number.isSafeInteger(after)||after<now||current?.subject!==actor.subject||
       current?.accountId!==actor.accountId||current?.sessionId!==actor.sessionId||
       current?.deviceId!==actor.deviceId||current?.recoveryEpoch!==actor.recoveryEpoch||
-      current?.role!==actor.role||!Number.isSafeInteger(current.expiresAt)||
+      current?.role!==actor.role||current?.action!==action||
+      current?.resource!=='account:'+accountId||!Number.isSafeInteger(current.expiresAt)||
       current.expiresAt<=after)deny('CONSENT_SESSION_CHANGED');
    return Object.freeze({accountId,subject:current.subject,purpose,consentRevision:entry.revision,expiresAt:current.expiresAt});
   }

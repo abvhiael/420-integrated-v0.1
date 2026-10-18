@@ -12,7 +12,10 @@ source = read("genesis/svc3/travelapp/compatibility.go")
 travel_spec = read("docs/genesis-services/GEN-SVC-3-TRAVEL.md")
 assert frozen["schema"] == "420-genesis-application-decision-v9"
 assert frozen["status"] == "FROZEN"
-assert not any("doobr" in a.get("name", "").casefold() for a in frozen["apps"])
+decision = json.loads(read("config/genesis-application-decision-2.json"))
+approval=next((e for e in decision["entries"] if e["name"]=="DOOBr"),None)
+assert approval and approval["readiness"]=="regulated" and approval["release_enabled"] is False
+assert any(a.get("name")=="DOOBr" and a.get("class")=="GENESIS_USER_APP" for a in frozen["apps"])
 assert consumer["schema"] == "420-genesis-consumer-services-v1"
 assert not any("doobr" in s.get("name","").casefold() or "doobr" in s.get("id","").casefold() for s in consumer["services"])
 assert any(s["id"] == "420/service/travel/v1" for s in consumer["services"])

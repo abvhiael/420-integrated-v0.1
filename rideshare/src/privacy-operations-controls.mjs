@@ -21,19 +21,37 @@ export function privacyOperationalEvent(x){
  return Object.freeze({...x});
 }
 export function redactedFailure(){return Object.freeze({status:'failed',reason:'REDACTED'});}
-export function verifyErasureReceipts({subjectRef,requestRef,receipts,now}){
- if(!id(subjectRef)||!id(requestRef)||!Number.isSafeInteger(now)||now<0||!Array.isArray(receipts))fail('ERASURE_INVALID');
- const covered=new Set();const results=[];
+/** Reject unsigned/provider-forged receipts and incomplete declared processor inventory. */
+export function verifyErasureReceipts({subjectRef,requestRef,receipts,requiredProviders,providerKeys,now}){
+ if(!id(subjectRef)||!id(requestRef)||!Number.isSafeInteger(now)||now<0||
+ !Array.isArray(receipts)||!Array.isArray(requiredProviders)||!requiredProviders.length||
+ !providerKeys||typeof providerKeys!=='object')fail('ERASURE_INVALID');
+ const expected=new Set();
+ for(const p of requiredProviders){
+  if(!p||!required.includes(p.kind)||!id(p.providerId)||!providerKeys[p.providerId])fail('ERASURE_INVENTORY_INVALID');
+  const key=p.kind+':'+p.providerId;if(expected.has(key))fail('ERASURE_INVENTORY_INVALID');
+  expected.add(key);
+ }
+ if(required.some(kind=>!requiredProviders.some(p=>p.kind===kind)))fail('ERASURE_COVERAGE_INCOMPLETE');
+ const covered=new Set(),results=[];
  for(const x of receipts){
   if(!x||!required.includes(x.kind)||!id(x.providerId)||!id(x.receiptId)||!sha(x.digest)||
    x.subjectRef!==subjectRef||x.requestRef!==requestRef||!Number.isSafeInteger(x.verifiedAt)||x.verifiedAt>now||
    x.verifiedAt<0||!['ERASED','HELD'].includes(x.disposition)||
-   x.disposition==='HELD'&&(!id(x.holdRef)||!Number.isSafeInteger(x.reviewDueAt)||x.reviewDueAt<=now))fail('ERASURE_RECEIPT_INVALID');
+   x.disposition==='HELD'&&(!id(x.holdRef)||!Number.isSafeInteger(x.reviewDueAt)||x.reviewDueAt<=now)||
+   typeof x.signature!=='string'||!x.signature)fail('ERASURE_RECEIPT_INVALID');
   const key=x.kind+':'+x.providerId;
+  if(!expected.has(key))fail('ERASURE_UNKNOWN_PROVIDER');
   if(covered.has(key))fail('ERASURE_DUPLICATE');covered.add(key);
+  let good=false;
+  try{
+   const {signature,...payload}=x;
+   good=verify(null,Buffer.from(canonical(payload)),createPublicKey(providerKeys[x.providerId]),Buffer.from(signature,'base64'));
+  }catch{}
+  if(!good)fail('ERASURE_SIGNATURE_INVALID');
   results.push(Object.freeze({kind:x.kind,providerId:x.providerId,receiptId:x.receiptId,disposition:x.disposition,digest:x.digest}));
  }
- for(const kind of required)if(!results.some(x=>x.kind===kind))fail('ERASURE_COVERAGE_INCOMPLETE');
+ if(covered.size!==expected.size)fail('ERASURE_COVERAGE_INCOMPLETE');
  return Object.freeze({subjectRef,requestRef,allErased:results.every(x=>x.disposition==='ERASED'),receipts:Object.freeze(results)});
 }
 /** Signature is verified against an independently provisioned vault reviewer key, never a local self-attestation. */

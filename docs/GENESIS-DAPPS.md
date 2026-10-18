@@ -142,7 +142,7 @@ This document describes both the frozen application decision and the current GEN
 
 ## Genesis Application Decision #2 — authorized expansion and release-readiness reconciliation
 
-**Owner authorization:** 2026-10-18. **Catalog only:** inclusion does not mean deployed, production-safe, legally approved, or launch-enabled. Existing 22 entries are retained unchanged. The full machine-readable authority map and individual launch gates are in [config/genesis-application-decision-2.json](../config/genesis-application-decision-2.json). The expanded catalog contains **51 distinct entries**, including testnet-only Faucet.
+**Owner authorization:** 2026-10-18. **Catalog only:** inclusion does not mean deployed, production-safe, legally approved, or launch-enabled. Existing 22 entries are retained unchanged. The full machine-readable authority map and individual launch gates are in [config/genesis-application-decision-2.json](https://github.com/abvhiael/420-integrated-v0.1/blob/main/config/genesis-application-decision-2.json). The expanded catalog contains **51 distinct entries**, including testnet-only Faucet.
 
 ### Core authority and shared services
 

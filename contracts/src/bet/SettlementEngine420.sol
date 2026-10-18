@@ -71,6 +71,7 @@ contract SettlementEngine420 is I420System {
     error CrashResolverAlreadyBound();
     error VideoPokerCanonicalSettlementRequired();
     error VideoPokerResolverAlreadyBound();
+    error VideoPokerReservationMismatch();
     error Reentrancy();
     error EmergencyAlreadyBound();
     error WagerExpired();
@@ -404,6 +405,22 @@ contract SettlementEngine420 is I420System {
                     grossPayout
                 )
         ) revert Unauthorized();
+
+        // A registry payout ceiling alone is not proof that bankroll risk was reserved.
+        // Fail closed before any custody/accounting mutation if the actual reservation
+        // differs from the immutable accepted Video Poker wager.
+        if (wager.gameId == VIDEO_POKER_GAME_ID) {
+            RiskManager420.ExposureReservation memory reservation = riskManager.getReservation(wagerId);
+            uint256 expectedLiability =
+                wager.maxGrossPayout > wager.stake ? wager.maxGrossPayout - wager.stake : 0;
+            if (
+                !reservation.active || reservation.wagerId != wagerId || reservation.vaultId != wager.vaultId
+                    || reservation.gameVersionId != wager.gameVersionId
+                    || reservation.riskProfileId != wager.riskProfileId
+                    || reservation.stake != wager.stake || reservation.grossPayout < wager.maxGrossPayout
+                    || reservation.reservedLiability < expectedLiability
+            ) revert VideoPokerReservationMismatch();
+        }
 
         uint256 releasedLiability = riskManager.releaseExposure(wagerId);
         vault.resolveWager(wagerId, grossPayout);

@@ -42,4 +42,26 @@ try {
   await page.getByText(/independently verified, active session is required/i).waitFor();
   assert.doesNotMatch(await page.locator('#main').innerText(),/driver workspace — preview only/i);
   await page.close();
+  // PT-10: exercise the actual protected rider, driver and operator DOM, not merely sign-in views.
+  for (const role of ['rider','driver','operator']) {
+    const page=await browser.newPage({viewport:{width:390,height:844},reducedMotion:'reduce'});
+    await page.addInitScript(role=>{
+      globalThis.LIFTdSessionAdapter={
+        getSession:async()=>({status:'authenticated',subject:role+'_1',accountId:'account_1',roles:[role]})
+      };
+    },role);
+    await page.goto(url,{waitUntil:'networkidle'});
+    await page.locator('#menu-toggle').click();
+    await page.locator('a[data-route][href="/'+role+'"]').click();
+    await page.waitForURL('**/'+role);
+    await page.getByRole('heading',{level:1}).waitFor();
+    assert.match(await page.locator('#main').innerText(),new RegExp(role,'i'));
+    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth),true,'mobile horizontal overflow: '+role);
+    const violations=await page.evaluate(async script=>{
+      (0,eval)(script);
+      return (await globalThis.axe.run(document,{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa','wcag22aa']}})).violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.map(n=>n.target)}));
+    },axe.source);
+    assert.deepEqual(violations,[],'authenticated '+role+' axe violations: '+JSON.stringify(violations));
+    await page.close();
+  }
 } finally {await browser.close();}

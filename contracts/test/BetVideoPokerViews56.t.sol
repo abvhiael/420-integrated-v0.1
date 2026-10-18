@@ -95,4 +95,26 @@ contract BetVideoPokerViews56Test is BetVideoPokerSecureDrawTest {
         VideoPokerDrawV1420.Session memory afterCall = draw.getSession(WAGER);
         require(keccak256(abi.encode(prior))==keccak256(abi.encode(afterCall)), "mutated session");
     }
+    function testRecordedSettlementVerifiesAndTamperRejected() public {
+        _prepareView();
+        vm.prank(PLAYER);
+        draw.commitHold(WAGER,31);
+        vm.prank(PROVIDER);
+        draw.revealAndDraw(WAGER,SEED);
+        (, BetTypes420.TerminalOutcome outcome, uint256 gross,) =
+            views.verifyResult(WAGER,_parameters());
+        BetTypes420.Wager memory wager = registry.getWager(WAGER);
+        wager.status = BetTypes420.WagerStatus.SETTLED;
+        registry.setWager(wager);
+        registry.setSettlement(WAGER,outcome,gross);
+        VideoPokerViewsV1420.View memory v = views.inspect(WAGER,_parameters());
+        require(uint8(v.stage)==uint8(VideoPokerViewsV1420.Stage.SETTLED), "not settled");
+        require(v.hasSettlement && v.recordedOutcome==outcome && v.recordedGross==gross, "settlement view");
+        (,,uint256 verifiedGross,bool matching) = views.verifyResult(WAGER,_parameters());
+        require(matching && verifiedGross==gross,"settlement verification mismatch");
+        registry.setSettlement(WAGER,outcome,gross+1);
+        vm.expectRevert(VideoPokerViewsV1420.ResultMismatch.selector);
+        views.verifyResult(WAGER,_parameters());
+    }
+
 }

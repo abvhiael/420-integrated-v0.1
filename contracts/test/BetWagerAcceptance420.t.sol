@@ -16,6 +16,8 @@ import "../src/bet/BetTypes420.sol";
 import "../src/bet/RiskManager420.sol";
 import "../src/bet/VaultAccounting420.sol";
 import "../src/bet/WagerRouter420.sol";
+import "../src/bet/VideoPokerV1420.sol";
+import "../src/bet/VideoPokerJacksOrBetter420.sol";
 import "../src/bet/WithdrawalQueue420.sol";
 
 interface VmBetWagerAcceptance420 {
@@ -343,5 +345,104 @@ contract BetWagerAcceptance420Test {
         vm.expectRevert(WagerRouter420.InactiveProfile.selector);
         s.router.placeWager(_request(100 ether, 500 ether));
         require(s.token.balanceOf(PLAYER) == 100 ether, "inactive policy moved stake");
+    }
+
+    /// @notice Full canonical Video Poker acceptance: wrong commitment or reserve never escrows funds.
+    function testVideoPokerCanonicalLiabilityAndWagerAcceptance() public {
+        Suite memory s = _deploy();
+        bytes32 game = keccak256("420BET.GAME.VIDEO_POKER");
+        bytes32 version = keccak256("420BET.GAME.VIDEO_POKER.V1");
+        bytes32 moduleId = keccak256("420BET.MODULE.VIDEO_POKER");
+        bytes32 moduleVersion = keccak256("420BET.MODULE.VIDEO_POKER.V1");
+        bytes32 rules = keccak256("ruleset/video-poker/v1");
+        VideoPokerV1420 poker = new VideoPokerV1420(address(s.registry),game,version,rules);
+        bytes32 moduleScope = s.auth.scopeForModule(moduleId,moduleVersion);
+        _allow(s,ADMIN,BetIds420.ACTION_MODULE_REGISTER,moduleScope);
+        _allow(s,ADMIN,BetIds420.ACTION_MODULE_APPROVE,moduleScope);
+        vm.prank(ADMIN);
+        s.modules.registerModule(moduleId,moduleVersion,address(poker),keccak256("video-poker/module"),keccak256("video-poker/code"));
+        vm.prank(ADMIN);
+        s.modules.approve(moduleVersion);
+        bytes32 gameScope=s.auth.scopeForGame(game,version);
+        _allow(s,ADMIN,BetIds420.ACTION_GAME_REGISTER,gameScope);
+        _allow(s,ADMIN,BetIds420.ACTION_GAME_ACTIVATE,gameScope);
+        vm.prank(ADMIN);
+        s.games.registerGame(BetGameRegistry420.GameVersion({
+            gameId:game,gameVersionId:version,moduleVersionId:moduleVersion,rulesetId:rules,
+            randomnessProfileId:RANDOMNESS,riskProfileId:RISK,settlementProfileId:SETTLEMENT,accessPolicyId:ACCESS,
+            manifestHash:keccak256("video-poker/game"),productClass:BetTypes420.ProductClass.CASINO,
+            gameMode:BetTypes420.GameMode.INSTANT,registeredAt:0,status:BetGameRegistry420.GameStatus.NONE,exists:false
+        }));
+        vm.prank(ADMIN);
+        s.games.activate(version);
+        _allow(s,ADMIN,BetIds420.ACTION_ECONOMICS_CONFIGURE,s.auth.scopeForGameVersion(version));
+        vm.prank(ADMIN);
+        s.economics.configureFeeSchedule(BetEconomics420.FeeSchedule({
+            scheduleId:keccak256("video-poker/fees"),gameVersionId:version,
+            protocolFeeBps:0,operatorFeeBps:0,protocolRecipient:address(0),
+            manifestHash:keccak256("video-poker/fees-manifest"),exists:false
+        }));
+        _allow(s,address(s.router),BetIds420.ACTION_ECONOMICS_BIND,s.auth.scopeForGameVersion(version));
+        _allow(s,PLAYER,BetIds420.ACTION_PLACE,gameScope);
+        s.token.mint(PLAYER, 2 ether);
+        vm.prank(PLAYER);
+        s.token.approve(address(s.vault), 2 ether);
+
+        uint256 stake = 0.001 ether;
+        uint256 maxGross = stake*800;
+        VideoPokerV1420.Params memory params=VideoPokerV1420.Params({
+            paytableId:VideoPokerJacksOrBetter420.PAYTABLE_ID,credits:5
+        });
+        WagerRouter420.AcceptanceRequest memory req=WagerRouter420.AcceptanceRequest({
+            operatorId:OPERATOR,gameVersionId:version,stake:stake,maxGrossPayout:maxGross,
+            paramsHash:poker.hashParams(params),correlationKey:keccak256("video-poker/risk"),
+            deadline:uint64(block.timestamp+1 hours)
+        });
+
+        vm.prank(PLAYER);
+        vm.expectRevert(WagerRouter420.VideoPokerCanonicalWagerRequired.selector);
+        s.router.placeWager(req);
+        vm.prank(PLAYER);
+        vm.expectRevert(WagerRouter420.VideoPokerCanonicalWagerRequired.selector);
+        s.router.placeVideoPokerWager(req,params);
+
+        vm.prank(ADMIN);
+        s.router.bindVideoPokerModule(version,address(poker));
+        WagerRouter420.AcceptanceRequest memory wrong=req;
+        wrong.maxGrossPayout=maxGross-stake;
+        vm.prank(PLAYER);
+        vm.expectRevert(WagerRouter420.InvalidRequest.selector);
+        s.router.placeVideoPokerWager(wrong,params);
+        wrong=req;
+        wrong.maxGrossPayout=maxGross+stake;
+        vm.prank(PLAYER);
+        vm.expectRevert(WagerRouter420.InvalidRequest.selector);
+        s.router.placeVideoPokerWager(wrong,params);
+        wrong=req;
+        wrong.paramsHash=keccak256("uncommitted/hold");
+        vm.prank(PLAYER);
+        vm.expectRevert(WagerRouter420.InvalidRequest.selector);
+        s.router.placeVideoPokerWager(wrong,params);
+        VideoPokerV1420.Params memory wrongTable = VideoPokerV1420.Params({
+            paytableId:keccak256("wrong/paytable"),credits:5
+        });
+        vm.prank(PLAYER);
+        vm.expectRevert(WagerRouter420.InvalidRequest.selector);
+        s.router.placeVideoPokerWager(req,wrongTable);
+        require(s.router.nextNonce(PLAYER)==0,"invalid wagers consumed nonce");
+        require(s.vault.activeWagerStakeEscrow()==0,"invalid wagers escrowed stake");
+        require(s.accounting.getVault(VAULT).activeReservedLiability==0,"invalid wagers reserved funds");
+
+        vm.prank(PLAYER);
+        (bytes32 wagerId,uint256 reserve)=s.router.placeVideoPokerWager(req,params);
+        require(reserve==799*stake,"incorrect Video Poker net reserve");
+        require(s.vault.wagerStakeEscrow(wagerId)==stake,"stake escrow mismatch");
+        require(s.accounting.getVault(VAULT).activeReservedLiability==reserve,"wrong protected liability");
+        require(s.router.nextNonce(PLAYER)==1,"accepted nonce");
+        BetTypes420.Wager memory accepted = s.registry.getWager(wagerId);
+        require(accepted.paramsHash==req.paramsHash && accepted.maxGrossPayout==maxGross,
+            "uncommitted params or gross");
+        require(accepted.gameId==game && accepted.gameVersionId==version,"wrong version");
+        require(s.risk.getReservation(wagerId).reservedLiability==reserve,"risk proof");
     }
 }

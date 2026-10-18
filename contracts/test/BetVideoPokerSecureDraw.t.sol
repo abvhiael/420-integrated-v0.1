@@ -136,6 +136,53 @@ contract BetVideoPokerSecureDrawTest {
         }
     }
 
+    function testProviderControlRoleCollisionRejected() public {
+        VideoPokerDrawV1420 conflicted = new VideoPokerDrawV1420(address(dealer), address(0xAA1));
+        bytes32 commitment = conflicted.seedCommitmentFor(WAGER, SEED);
+        vm.expectRevert(VideoPokerDrawV1420.ProviderNotIndependent.selector);
+        vm.prank(address(0xAA1));
+        conflicted.commitReplacement(WAGER, commitment, _params());
+        VideoPokerDrawV1420 playerControlled = new VideoPokerDrawV1420(address(dealer), PLAYER);
+        commitment = playerControlled.seedCommitmentFor(WAGER, SEED);
+        vm.expectRevert(VideoPokerDrawV1420.ProviderNotIndependent.selector);
+        vm.prank(PLAYER);
+        playerControlled.commitReplacement(WAGER, commitment, _params());
+    }
+
+    function testUnauthorizedReplacementCommitRejected() public {
+        bytes32 commitment = draw.seedCommitmentFor(WAGER, SEED);
+        vm.expectRevert(VideoPokerDrawV1420.Unauthorized.selector);
+        vm.prank(PLAYER);
+        draw.commitReplacement(WAGER, commitment, _params());
+    }
+
+    function testCannotHoldBeforeInitialDeal() public {
+        bytes32 commitment = draw.seedCommitmentFor(WAGER, SEED);
+        vm.prank(PROVIDER);
+        draw.commitReplacement(WAGER, commitment, _params());
+        vm.expectRevert(VideoPokerDealV1420.DealMissing.selector);
+        vm.prank(PLAYER);
+        draw.commitHold(WAGER, 1);
+    }
+
+    function testExpiredHoldRejected() public {
+        _prepare();
+        vm.warp(block.timestamp+3600);
+        vm.expectRevert(VideoPokerDrawV1420.WagerExpired.selector);
+        vm.prank(PLAYER);
+        draw.commitHold(WAGER, 1);
+    }
+
+    function testExpiredRevealRejectedWithoutStateChange() public {
+        _prepare();
+        _hold(0);
+        vm.warp(block.timestamp+3600);
+        vm.expectRevert(VideoPokerDrawV1420.WagerExpired.selector);
+        vm.prank(PROVIDER);
+        draw.revealAndDraw(WAGER, SEED);
+        require(!draw.getSession(WAGER).revealed, "expired reveal changed state");
+    }
+
     function testRevealBeforeHoldRejected() public {
         _prepare();
         vm.expectRevert(VideoPokerDrawV1420.NotHeld.selector);

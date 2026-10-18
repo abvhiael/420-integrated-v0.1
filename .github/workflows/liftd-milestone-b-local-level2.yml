@@ -1,0 +1,45 @@
+name: LIFTd Milestone B Local Level 2
+on:
+  pull_request:
+    paths:
+      - 'rideshare/test/milestone-b-local-exit.test.mjs'
+      - '.github/workflows/liftd-milestone-b-local-level2.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  local-milestone:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: liftd_qualification
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres -d liftd_qualification"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      LIFTD_DATABASE_URL: postgres://postgres:postgres@127.0.0.1:5432/liftd_qualification
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Exact-SHA retained LIFTd operational and pilot Level 2 integration
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          npm ci --prefix rideshare --ignore-scripts
+          npm test --prefix rideshare
+          node --test rideshare/test/postgres/reliability.test.mjs
+          node --test rideshare/test/postgres/privacy-retention.test.mjs
+      - name: Local backup restore preservation drill
+        run: bash rideshare/scripts/test-backup-restore.sh

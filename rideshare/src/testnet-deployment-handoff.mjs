@@ -9,7 +9,7 @@ const image=x=>typeof x==='string'&&/^[a-z0-9][a-z0-9._:/-]{0,180}@sha256:[a-f0-
 const allowed=['liftd-internal-health','liftd-internal-recovery'];
 const canonical=x=>JSON.stringify(x,Object.keys(x).sort());
 /** No credentials, public traffic, privilege elevation, or floating image tags. */
-export function validateTestnetDeployment(manifest,{runtimeConfig}={}){
+export function validateTestnetDeployment(manifest,{runtimeConfig,allowTemplate=false}={}){
  if(!manifest||typeof manifest!=='object'||Array.isArray(manifest)||manifest.version!==1||
  manifest.environment!=='testnet'||!sha(manifest.releaseSha)||!image(manifest.image)||
  !digest(manifest.configDigest)||manifest.namespace!=='liftd-isolated-testnet'||
@@ -25,6 +25,9 @@ export function validateTestnetDeployment(manifest,{runtimeConfig}={}){
  !manifest.observability||manifest.observability.enabled!==true||manifest.observability.redaction!=='strict'||
  manifest.observability.privateOnly!==true||!digest(manifest.observability.policyDigest))
  fail('TESTNET_MANIFEST_DENIED');
+ const placeholder=manifest.releaseSha==='0'.repeat(40)||manifest.image.startsWith('registry.invalid/')||
+  [manifest.configDigest,manifest.observability.policyDigest].some(x=>/^([a-f0-9])\\1{63}$/.test(x));
+ if(placeholder&&!allowTemplate)fail('TESTNET_PLACEHOLDER_UNSAFE');
  if(runtimeConfig!==undefined){
   const attestation=validateDeploymentConfig(runtimeConfig);
   if(attestation.environment!=='testnet'||attestation.releaseSha!==manifest.releaseSha||
@@ -32,7 +35,7 @@ export function validateTestnetDeployment(manifest,{runtimeConfig}={}){
  }
  const projection={version:1,environment:manifest.environment,releaseSha:manifest.releaseSha,image:manifest.image,
   configDigest:manifest.configDigest,namespace:manifest.namespace,secretRefCount:keys.length,
-  observabilityPolicyDigest:manifest.observability.policyDigest,trafficEnabled:false};
+  observabilityPolicyDigest:manifest.observability.policyDigest,trafficEnabled:false,deployable:!placeholder};
  return Object.freeze({...projection,manifestDigest:createHash('sha256').update(canonical(projection)).digest('hex')});
 }
 const severity=new Set(['healthy','unready','unavailable']);

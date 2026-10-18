@@ -68,8 +68,13 @@ contract BetVideoPokerPaytable54Test {
         economics.payoutCredits(VideoPokerJacksOrBetter420.Category.ROYAL_FLUSH,0);
         vm.expectRevert(VideoPokerJacksOrBetter420.InvalidCredits.selector);
         economics.payoutCredits(VideoPokerJacksOrBetter420.Category.ROYAL_FLUSH,6);
-        vm.expectRevert(bytes4(0x4e487b71));
-        economics.payoutCredits(VideoPokerJacksOrBetter420.Category(uint8(10)),5);
+        (bool accepted, bytes memory response) = address(economics).call(
+            abi.encodeWithSelector(VideoPokerEconomics420.payoutCredits.selector, uint8(10), uint8(5))
+        );
+        require(!accepted && response.length >= 4, "invalid ABI enum accepted");
+        bytes4 selector;
+        assembly { selector := mload(add(response, 32)) }
+        require(selector == bytes4(0x4e487b71), "invalid enum must fail closed");
         vm.expectRevert(VideoPokerJacksOrBetter420.InvalidStake.selector);
         economics.maximumGross(0,5);
         vm.expectRevert(VideoPokerJacksOrBetter420.InvalidStake.selector);

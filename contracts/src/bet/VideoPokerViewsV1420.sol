@@ -97,6 +97,21 @@ contract VideoPokerViewsV1420 {
             v.recordedOutcome = settlement.outcome;
             v.recordedGross = settlement.grossPayout;
             v.settledAt = settlement.settledAt;
+            // Read-only clients must never present an inconsistent recorded result as verified.
+            if (settlement.outcome == BetTypes420.TerminalOutcome.VOID) {
+                if (settlement.grossPayout != wager.stake) revert ResultMismatch();
+            } else {
+                if (!s.revealed || s.timedOut) revert InconsistentState();
+                (, uint256 computedGross) =
+                    VideoPokerJacksOrBetter420.grossPayout(s.finalCards, wager.stake, params.credits);
+                BetTypes420.TerminalOutcome computedOutcome =
+                    computedGross == 0 ? BetTypes420.TerminalOutcome.LOSS :
+                    computedGross == wager.stake ? BetTypes420.TerminalOutcome.PUSH :
+                    computedGross > wager.stake ? BetTypes420.TerminalOutcome.WIN :
+                    BetTypes420.TerminalOutcome.LOSS;
+                if (settlement.grossPayout != computedGross || settlement.outcome != computedOutcome)
+                    revert ResultMismatch();
+            }
         }
         if (wager.status == BetTypes420.WagerStatus.VOID) {
             if (!v.hasSettlement || v.recordedOutcome != BetTypes420.TerminalOutcome.VOID) revert InconsistentState();

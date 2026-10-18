@@ -213,6 +213,52 @@ contract BetSettlementEngine420Test {
     }
 
     // Funded Video Poker expiry path: real vault, registry, risk and fee adapters.
+
+    function testVideoPokerRejectsMismatchedFundedRiskReservationWithoutSideEffects() public {
+        Suite memory s = _deploy();
+        bytes32 wagerId = keccak256("video-poker/5-5-reserve-mismatch");
+        bytes32 version = keccak256("420BET.GAME.VIDEO_POKER.V1");
+        uint256 stake = 0.1 ether;
+        uint256 cap = 80 ether;
+        s.token.mint(PLAYER, stake);
+        vm.prank(PLAYER);
+        s.token.approve(address(s.vault), stake);
+        _allow(s, address(this), BetIds420.ACTION_ECONOMICS_BIND, s.auth.scopeForGameVersion(version));
+        _allow(s, ADMIN, BetIds420.ACTION_ECONOMICS_CONFIGURE, s.auth.scopeForGameVersion(version));
+        vm.prank(ADMIN);
+        s.economics.configureFeeSchedule(BetEconomics420.FeeSchedule({
+            scheduleId: keccak256("fees/vp/mismatch"), gameVersionId: version,
+            protocolFeeBps: 0, operatorFeeBps: 0, protocolRecipient: address(0),
+            manifestHash: keccak256("fees/vp/mismatch/manifest"), exists: false
+        }));
+        s.economics.bindWager(wagerId, version, OPERATOR, stake);
+        s.vault.escrowWagerStakeToken(wagerId, PLAYER, stake);
+        // A matching amount in a wrong-version reserve must not qualify.
+        s.risk.reserveExposure(wagerId, VAULT, GAME_V1, RISK, stake, cap, keccak256("vp/mismatch"));
+        uint64 deadline = uint64(block.timestamp + 1 hours);
+        s.registry.recordAccepted(BetTypes420.Wager({
+            wagerId: wagerId, player: PLAYER, operatorId: OPERATOR,
+            gameId: keccak256("420BET.GAME.VIDEO_POKER"), gameVersionId: version,
+            asset: address(s.token), stake: stake, maxGrossPayout: cap,
+            paramsHash: keccak256("vp/mismatch/params"), vaultId: VAULT,
+            randomnessProfileId: RANDOMNESS, riskProfileId: RISK,
+            settlementProfileId: SETTLEMENT, accessPolicyId: ACCESS,
+            rulesetId: keccak256("420BET.RULESET.VIDEO_POKER.V1"),
+            acceptedAt: uint64(block.timestamp), deadline: deadline, status: BetTypes420.WagerStatus.NONE
+        }));
+        _allow(s, address(s.engine), BetIds420.ACTION_WAGER_SETTLE_RECORD, s.auth.scopeForWager(wagerId));
+        _allow(s, address(s.engine), BetIds420.ACTION_RISK_RELEASE, s.auth.scopeForVault(VAULT));
+        _allow(s, address(s.engine), BetIds420.ACTION_VAULT_SETTLE_WAGER, s.auth.scopeForVault(VAULT));
+        _allow(s, address(s.engine), BetIds420.ACTION_ECONOMICS_FINALIZE, s.auth.scopeForGameVersion(version));
+        vm.warp(deadline);
+        vm.expectRevert(SettlementEngine420.VideoPokerReservationMismatch.selector);
+        s.engine.voidExpired(wagerId);
+        require(s.vault.wagerStakeEscrow(wagerId) == stake, "escrow released on denial");
+        require(s.accounting.getVault(VAULT).activeReservedLiability == cap-stake, "risk changed on denial");
+        require(!s.registry.settlementExists(wagerId), "settled mismatched reserve");
+        require(!s.economics.getWagerFee(wagerId).finalized, "fees finalized on denial");
+    }
+
     function testVideoPokerFundedExpiryRefundAndConservation() public {
         Suite memory s = _deploy();
         bytes32 wagerId = keccak256("video-poker/funded-expiry");
@@ -237,7 +283,7 @@ contract BetSettlementEngine420Test {
         s.token.approve(address(s.vault), stake);
         s.economics.bindWager(wagerId, version, OPERATOR, stake);
         s.vault.escrowWagerStakeToken(wagerId, PLAYER, stake);
-        s.risk.reserveExposure(wagerId, VAULT, GAME_V1, RISK, stake, maxGross, keccak256("video-poker"));
+        s.risk.reserveExposure(wagerId, VAULT, version, RISK, stake, maxGross, keccak256("video-poker"));
         uint64 deadline = uint64(block.timestamp + 1 hours);
         s.registry.recordAccepted(BetTypes420.Wager({
             wagerId: wagerId, player: PLAYER, operatorId: OPERATOR, gameId: game,

@@ -1,0 +1,40 @@
+name: 420Bet Video Poker Liability and Settlement Level 1
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/420bet-video-poker-5-5-level1.yml'
+      - 'contracts/src/bet/SettlementEngine420.sol'
+      - 'contracts/test/BetSettlementEngine420.t.sol'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: 420bet-video-poker-5-5-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+jobs:
+  liability-settlement:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      FOUNDRY_PROFILE: pr
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify frozen implementation identity
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          echo "Level 1 implementation SHA: $EXPECTED_SHA"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Video Poker funded liability and canonical settlement
+        working-directory: contracts
+        run: |
+          set -euo pipefail
+          forge test --match-path 'test/BetSettlementEngine420.t.sol' --match-test 'testVideoPoker*' -vv
+          forge test --match-contract 'BetVideoPokerSecureDrawTest' -vv
+          forge test --match-contract 'BetVideoPokerPaytable54Test' -vv

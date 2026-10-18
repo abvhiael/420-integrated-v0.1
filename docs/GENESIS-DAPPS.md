@@ -34,6 +34,35 @@ Genesis Application Decision #1 is frozen with an explicit owner-authorized 420A
 20. 420 Status
 21. 420Arcade — eleven guest-first, wallet-free games; optional 420 Gaming Protocol integration
 22. 420 Faucet — testnet only
+23. 420Exchange — release qualification pending
+24. BongGoggles — release qualification pending
+25. 420Launchpad — release qualification pending
+26. 420Mail — external acceptance pending
+27. TownSquare — release qualification pending
+28. 420Media — external acceptance pending
+29. PuffBuddies — release qualification pending
+30. ReeferReview — external acceptance pending
+31. DoobTube — release qualification pending
+32. 420Hz — release qualification pending
+33. 420Grow — release qualification pending
+34. HighStreetMarket — external acceptance pending
+35. 420BnB — release qualification pending
+36. 420Travel — external acceptance pending
+37. 420Events — release qualification pending
+38. 420Calendar — release qualification pending
+39. 420Classifieds — release qualification pending
+40. 420Learn — release qualification pending
+41. 420University — release qualification pending
+42. 420Freelance — release qualification pending
+43. 420Reputation — release qualification pending
+44. 420Location — release qualification pending
+45. 420Pay — release qualification pending
+46. 420Rights — release qualification pending
+47. 420Treasury — release qualification pending
+48. 420Grants — release qualification pending
+49. DOOBr — regulated release gate
+50. LIFTd — regulated release gate
+51. 420Bet — regulated release gate
 
 420 Governance is the public Genesis application name. Its canonical production implementation family is 420 Civic. The retired `Governance420` surface is compatibility-only and is not an alternate governance authority.
 
@@ -109,3 +138,50 @@ This document describes both the frozen application decision and the current GEN
 - `contracts/config/genesis-dapp-contract-map.json` — broader Genesis implementation/contract inventory.
 - `docs/audit/genesis-contract-documentation-inventory.json` — documentation ownership reconciliation across the broader contract inventory.
 - `docs/ROADMAP.md` — top-level build sequence and current shared-service/application milestone.
+
+
+## Genesis Application Decision #2 — authorized expansion and release-readiness reconciliation
+
+**Owner authorization:** 2026-10-18. **Catalog only:** inclusion does not mean deployed, production-safe, legally approved, or launch-enabled. Existing 22 entries are retained unchanged. The full machine-readable authority map and individual launch gates are in [config/genesis-application-decision-2.json](../config/genesis-application-decision-2.json). The expanded catalog contains **51 distinct entries**, including testnet-only Faucet.
+
+### Core authority and shared services
+
+- 420Media
+- 420Mail
+- 420Reputation
+- 420Location
+- 420Pay
+- 420Rights
+- 420Treasury
+- 420Grants
+
+### Public Genesis applications
+
+- 420Exchange
+- BongGoggles
+- 420Launchpad
+- TownSquare
+- PuffBuddies
+- ReeferReview
+- DoobTube
+- 420Hz
+- 420Grow
+- HighStreetMarket
+- 420BnB
+- 420Travel
+- 420Events
+- 420Calendar
+- 420Classifieds
+- 420Learn
+- 420University
+- 420Freelance
+
+### Genesis-listed applications with regulated execution disabled
+
+- DOOBr — no regulated operations until independently approved
+- LIFTd — no regulated operations until independently approved
+- 420Bet — no regulated operations until independently approved
+
+**Already present:** 420 Search and 420 AppStore were part of Decision #1, and are not added twice. **No parallel authority:** 420Exchange remains a frontend over Swap; HighStreetMarket/420Commerce remains a frontend over 420 Market; DoobTube uses 420Media; TownSquare reuses 420Town. 420Pay, Rights, Treasury and Grants are approved as public protocol interfaces, not new contract identities. 420Randomness, 420Oracle, 420Storage/ResourceProtocol, 420ComputeMarket and 420Messenger remain canonical dependencies without automatically separate consumer application entries.
+
+**Readiness is tracked separately:** Every added app is initialized `release_enabled=false` in Decision #2 and classified by its actual acceptance status. The post-Genesis consumer-service implementation role does not by itself constitute launch readiness: 420Freelance is now a catalog candidate but still needs direct product qualification. Existing audit certifications are preserved; no unrelated app suites are rerun just to publish this registry. Live deployments, commercial transactions, paid gaming, transport, delivery and bookings remain gated by their own required checks.

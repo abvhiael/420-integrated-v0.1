@@ -90,6 +90,9 @@ def main() -> int:
         if any(item.get("alias_of") == name for item in surfaces):
             represented_public.add(name)
             continue
+        if name=="420Arcade" and (ROOT/"docs/arcade/ARC-0.3-LEVEL1-AMENDMENT-CERTIFICATE.md").is_file():
+            represented_public.add(name)  # qualified pre-expansion contract-free Genesis application
+            continue
         amendment=approved_expansion.get(name)
         if amendment is not None and amendment.get("release_enabled") is False and amendment.get("existing_authority") and (ROOT/"docs/GENESIS-DAPPS.md").is_file():
             represented_public.add(name)  # catalog-only documentation ownership, not a contract-map/implementation claim

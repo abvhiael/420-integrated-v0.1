@@ -34,9 +34,11 @@ func initialDeckRelation(api frontend.API,cards []ElGamalCipher,scope,pkX,pkY fr
  generator:=twistededwards.Point{X:curve.Params().Base[0],Y:curve.Params().Base[1]}
  pk:=twistededwards.Point{X:pkX,Y:pkY}
  curve.AssertIsOnCurve(pk)
+ api.AssertIsDifferent(pk.X,0) // excludes identity and low-order x=0 keys
  for i:=range cards {
   api.AssertIsDifferent(randomness[i],0)
   randomG:=curve.ScalarMul(generator,randomness[i])
+  api.AssertIsDifferent(randomG.X,0) // zero nonce modulo subgroup would expose plaintext
   randomPK:=curve.ScalarMul(pk,randomness[i])
   cardPoint:=curve.ScalarMul(generator,i+1)
   expected2:=curve.Add(cardPoint,randomPK)

@@ -48,8 +48,30 @@ test('L03.5 scoped privacy lifecycle, immutable decisions, evidence holds, redac
   await assert.rejects(()=>service.fulfill('operator',deletion,{commandId:'cmd_erase',expectedRevision:0}),{code:'PRIVACY_PROTECTED_RECORD'});
   time=2000;
   await pool.query('INSERT INTO liftd.private_locations(route_ref,rider_id,account_id,command_id,trip_id,expires_at,sealed,descriptor) VALUES($1,$2,$3,$4,$5,$6,$7,$8)', ['privacy_held_route_'+Date.now(),rider,rider+'_account','held_route_command',tripId,1500,{ciphertext:'encrypted'},{routeRef:'held'}]);
+  // The retention sweep is intentionally global. Prior sequential qualification owners
+  // leave other eligible expired locations in this shared database; do not assert
+  // that only this test's location exists. Instead record the exact pre-sweep
+  // eligible set and verify the sweep erased all and only that set.
+  const eligibleBefore=(await pool.query(`
+    SELECT l.route_ref FROM liftd.private_locations AS l
+    WHERE NOT l.tombstoned AND l.expires_at<=$1
+      AND (l.trip_id IS NULL OR (
+        NOT EXISTS (SELECT 1 FROM liftd.safety_incidents i WHERE i.trip_id=l.trip_id)
+        AND NOT EXISTS (SELECT 1 FROM liftd.fraud_cases f WHERE f.trip_id=l.trip_id)
+        AND NOT EXISTS (SELECT 1 FROM liftd.support_cases s WHERE s.trip_id=l.trip_id
+                        AND (s.category='incident' OR s.status<>'CLOSED'))
+        AND NOT EXISTS (SELECT 1 FROM liftd.payment_intents p WHERE p.trip_id=l.trip_id)
+      ))
+    ORDER BY l.route_ref
+  `,[time])).rows.map(r=>r.route_ref);
+  assert.ok(eligibleBefore.includes('clean_route'),'the fixture unheld location must be eligible');
   const firstSweep=await runPrivacyRetentionSweep({pool,clock:()=>time});
-  assert.equal(firstSweep.expiredLocations,1,'only unheld expired locations may be erased');
+  assert.equal(firstSweep.expiredLocations,eligibleBefore.length,'only eligible unheld expired locations may be erased');
+  const erasedAfter=(await pool.query(
+    'SELECT route_ref FROM liftd.private_locations WHERE route_ref=ANY($1::text[]) AND tombstoned AND sealed IS NULL ORDER BY route_ref',
+    [eligibleBefore]
+  )).rows.map(r=>r.route_ref);
+  assert.deepEqual(erasedAfter,eligibleBefore,'every eligible location must have its sealed data removed');
   assert.equal((await pool.query('SELECT tombstoned FROM liftd.private_locations WHERE trip_id=$1',[tripId])).rows[0].tombstoned,false);
   assert.equal((await pool.query('SELECT tombstoned FROM liftd.private_locations WHERE route_ref=$1',['clean_route'])).rows[0].tombstoned,true);
   const held=await service.hold('operator',deletion,{commandId:'cmd_hold',expectedRevision:0});assert.equal(held.status,'BLOCKED_HOLD');

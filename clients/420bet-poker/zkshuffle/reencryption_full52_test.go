@@ -3,6 +3,8 @@ package shuffle
 import (
  "math/big"
  "testing"
+ "os"
+ "path/filepath"
  "github.com/consensys/gnark-crypto/ecc"
  native "github.com/consensys/gnark-crypto/ecc/bn254/twistededwards"
  "github.com/consensys/gnark/backend/groth16"
@@ -50,6 +52,29 @@ func TestFull52RealEncryptedShuffleProof(t *testing.T) {
  if err!=nil {t.Fatal(err)}
  if err=groth16.Verify(proof,verifyingKey,public);err!=nil {
   t.Fatalf("full 52-card proof rejected: %v",err)
+ }
+ // Export the exact source-correlated generated Solidity verifier and key
+ // artifacts, never claiming this test-generated SRS is production trusted.
+ if dir:=os.Getenv("POKER_ZK_ARTIFACT_DIR");dir!=""{
+  if err:=os.MkdirAll(dir,0755);err!=nil{t.Fatal(err)}
+  write:=func(filename string,produce func(*os.File)error){
+   t.Helper()
+   file,err:=os.Create(filepath.Join(dir,filename));if err!=nil{t.Fatal(err)}
+   if err=produce(file);err!=nil{file.Close();t.Fatal(err)}
+   if err=file.Close();err!=nil{t.Fatal(err)}
+  }
+  write("EXPERIMENTAL-Reencrypt52Verifier.sol",func(f *os.File)error{
+   return verifyingKey.ExportSolidity(f)
+  })
+  write("EXPERIMENTAL-Reencrypt52VerifyingKey.bin",func(f *os.File)error{
+   _,err:=verifyingKey.WriteTo(f);return err
+  })
+  write("EXPERIMENTAL-Reencrypt52Proof.bin",func(f *os.File)error{
+   _,err:=proof.WriteTo(f);return err
+  })
+  write("EXPERIMENTAL-Reencrypt52PublicWitness.bin",func(f *os.File)error{
+   _,err:=public.WriteTo(f);return err
+  })
  }
  // Sound verifier rejects a changed public deck output AND replay into another hand.
  wrongDeck:=*witness

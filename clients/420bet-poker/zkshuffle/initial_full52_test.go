@@ -20,7 +20,11 @@ func TestFullInitial52RealProof(t *testing.T) {
  base:=curve.Base
  thresholdPK:=new(native.PointAffine).ScalarMultiplication(&base,big.NewInt(1729))
  pkX,pkY:=coordinates(thresholdPK)
- w:=&InitialDeck52{HandScope:420,PublicKeyX:pkX,PublicKeyY:pkY}
+ inverse8:=new(big.Int).ModInverse(big.NewInt(8),&curve.Order)
+ if inverse8==nil{t.Fatal("cofactor not invertible in subgroup")}
+ subgroupQ:=new(native.PointAffine).ScalarMultiplication(thresholdPK,inverse8)
+ qx,qy:=coordinates(subgroupQ)
+ w:=&InitialDeck52{HandScope:420,PublicKeyX:pkX,PublicKeyY:pkY,SubgroupPreimageX:qx,SubgroupPreimageY:qy}
  for i:=0;i<52;i++ {
   randomness:=int64(i+100)
   c1,c2:=cipherOf(int64(i+1),randomness,&base,thresholdPK)
@@ -39,6 +43,10 @@ func TestFullInitial52RealProof(t *testing.T) {
  if err:=groth16.Verify(proof,vk,public);err!=nil{t.Fatalf("valid initial deck rejected: %v",err)}
  exportTestGroth16Solidity(t,"InitialDeck52",vk,proof,
   w.DeckRoot,w.HandScope,w.PublicKeyX,w.PublicKeyY)
+ badSubgroup:=*w
+ badSubgroup.SubgroupPreimageX=big.NewInt(42)
+ badSubgroupWitness,err:=frontend.NewWitness(&badSubgroup,ecc.BN254.ScalarField());if err!=nil{t.Fatal(err)}
+ if _,err:=groth16.Prove(cs,pk,badSubgroupWitness);err==nil{t.Fatal("invalid subgroup preimage accepted")}
  tampered:=*w;tampered.DeckRoot=big.NewInt(123)
  badWitness,err:=frontend.NewWitness(&tampered,ecc.BN254.ScalarField());if err!=nil{t.Fatal(err)}
  badPublic,err:=badWitness.Public();if err!=nil{t.Fatal(err)}

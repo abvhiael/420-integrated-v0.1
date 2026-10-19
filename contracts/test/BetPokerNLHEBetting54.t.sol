@@ -144,4 +144,23 @@ contract PokerNLHEBetting54Test is PokerPrivateShuffleGate54Test {
         engine.cancelWithheldDeal(id);
     }
 
+    function testUnacknowledgedHoleDeliveryCannotStartOrMoveEscrow() public {
+        bytes32 id=_hand54();
+        bytes32 input=initialDeck.rootOf(id);
+        bytes32 first=keccak256("phase one");
+        bytes32 second=bytes32(uint256(1000));
+        verifier.allow(gate.statement(id,1,input,first));
+        cheat54.prank(PROVIDER_A);gate.proveStage(id,1,input,first,hex"010203");
+        verifier.allow(gate.statement(id,2,first,second));
+        cheat54.prank(PROVIDER_B);gate.proveStage(id,2,first,second,hex"010203");
+        cheat54.prank(ADMIN);ledger.bindSettlement(TABLE,address(engine),address(0x500BEEF));
+        cheat54.prank(PLAYER);engine.reserve(id);
+        cheat54.expectRevert(PokerNLHEBetting420.InvalidState.selector);
+        engine.start(id,0,60);
+        require(ledger.reservedInHand(TABLE)==800,"escrow never moved");
+        _acknowledgedPrivateDelivery(id);
+        engine.start(id,0,60);
+        require(engine.gameOf(id).initialized,"recipient consent required");
+    }
+
 }

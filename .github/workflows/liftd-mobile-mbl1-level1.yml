@@ -1,0 +1,91 @@
+name: LIFTd MBL-1 Android iOS Level 1
+on:
+  pull_request:
+    paths:
+      - 'rideshare/mobile/**'
+      - '.github/workflows/liftd-mobile-mbl1-level1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  mobile-contracts:
+    name: mobile-contracts
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install scoped mobile dependencies
+        working-directory: rideshare/mobile
+        run: npm install --ignore-scripts --no-audit --no-fund
+      - name: MBL-1 route security, configuration, typecheck
+        working-directory: rideshare/mobile
+        run: npm run check
+  android-debug:
+    name: android-debug
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    needs: mobile-contracts
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+      - name: Install dependency and generate Android debug project
+        working-directory: rideshare/mobile
+        run: |
+          npm install --ignore-scripts --no-audit --no-fund
+          npx expo prebuild --platform android --non-interactive --no-install
+      - name: Compile unsigned nonproduction Android debug APK
+        working-directory: rideshare/mobile/android
+        run: ./gradlew :app:assembleDebug --no-daemon
+      - name: Upload nonproduction APK and exact source SHA
+        run: |
+          mkdir -p liftd-mobile-evidence
+          git rev-parse HEAD > liftd-mobile-evidence/implementation-sha.txt
+          cp rideshare/mobile/android/app/build/outputs/apk/debug/app-debug.apk liftd-mobile-evidence/liftd-mbl1-debug.apk
+          sha256sum liftd-mobile-evidence/liftd-mbl1-debug.apk > liftd-mobile-evidence/android-sha256.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: liftd-mbl1-android-${{ github.event.pull_request.head.sha || github.sha }}
+          path: liftd-mobile-evidence/
+          if-no-files-found: error
+  ios-simulator:
+    name: ios-simulator
+    runs-on: macos-15
+    timeout-minutes: 45
+    needs: mobile-contracts
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install dependency and generate iOS simulator project
+        working-directory: rideshare/mobile
+        run: |
+          npm install --ignore-scripts --no-audit --no-fund
+          npx expo prebuild --platform ios --non-interactive --no-install
+      - name: Install iOS native dependencies
+        working-directory: rideshare/mobile/ios
+        run: pod install
+      - name: Compile unsigned/nonproduction iOS simulator app
+        working-directory: rideshare/mobile
+        run: |
+          set -o pipefail
+          workspace=$(find ios -maxdepth 1 -name '*.xcworkspace' -print -quit)
+          test -n "$workspace"
+          xcodebuild -workspace "$workspace" -scheme "$(basename "$workspace" .xcworkspace)" -configuration Debug -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO build > ios-build.log 2>&1 || { tail -n 120 ios-build.log; exit 1; }
+          git rev-parse HEAD

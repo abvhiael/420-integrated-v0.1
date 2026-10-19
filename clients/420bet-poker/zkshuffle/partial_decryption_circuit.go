@@ -44,7 +44,9 @@ func(c *PartialDecryptCircuit)Define(api frontend.API)error{
  c1:=twistededwards.Point{X:c.CipherC1X,Y:c.CipherC1Y}
  share:=twistededwards.Point{X:c.ShareDX,Y:c.ShareDY}
  curve.AssertIsOnCurve(pk)
+ api.AssertIsDifferent(pk.X,0)
  curve.AssertIsOnCurve(c1)
+ api.AssertIsDifferent(c1.X,0)
  curve.AssertIsOnCurve(share)
  if err:=verifyCiphertextMembership(api,c.HandScope,c.Position,c.DeckRoot,
     ElGamalCipher{C1X:c.CipherC1X,C1Y:c.CipherC1Y,C2X:c.CipherC2X,C2Y:c.CipherC2Y},c.MerklePath);err!=nil{return err}

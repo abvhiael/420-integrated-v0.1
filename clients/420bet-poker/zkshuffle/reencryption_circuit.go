@@ -42,6 +42,7 @@ func proveReencryption(api frontend.API, input,output []ElGamalCipher,
  if err!=nil{return err}
  publicKey:=twistededwards.Point{X:keyX,Y:keyY}
  curve.AssertIsOnCurve(publicKey)
+ api.AssertIsDifferent(publicKey.X,0)
  generator:=twistededwards.Point{X:curve.Params().Base[0],Y:curve.Params().Base[1]}
  n:=len(indices)
  for i:=0;i<n;i++ {
@@ -64,10 +65,12 @@ func proveReencryption(api frontend.API, input,output []ElGamalCipher,
   sourceC1:=twistededwards.Point{X:chosenX1,Y:chosenY1}
   sourceC2:=twistededwards.Point{X:chosenX2,Y:chosenY2}
   curve.AssertIsOnCurve(sourceC1)
+  api.AssertIsDifferent(sourceC1.X,0)
   curve.AssertIsOnCurve(sourceC2)
   randomG:=curve.ScalarMul(generator,nonces[i])
   randomK:=curve.ScalarMul(publicKey,nonces[i])
   outC1:=curve.Add(sourceC1,randomG)
+  api.AssertIsDifferent(outC1.X,0)
   outC2:=curve.Add(sourceC2,randomK)
   api.AssertIsEqual(outC1.X,output[i].C1X)
   api.AssertIsEqual(outC1.Y,output[i].C1Y)

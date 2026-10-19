@@ -1,0 +1,9 @@
+# ARC-1.6 — Keyboard, touch and gamepad input abstraction
+
+Scope: a **game-scoped, non-authoritative input adapter** at `packages/arcade-input/src/index.mjs`. It exposes normalized `up/down/left/right/primary/secondary/pause` actions to both Phaser and React game adapters via `snapshot()` and `poll()`. Host application code must provide a real game root, document and optional navigator; keyboard listeners bind only to the game root. Input is disabled until explicitly enabled and must be disposed on game exit.
+
+Keyboard supports arrows, WASD, Space/Enter, Shift and Escape/P; editable fields, key repeats, modifier chords and focus outside the game root are ignored. Pointer Events support multiple simultaneously held touch/controller buttons via `data-arcade-action`, pointer capture, cancellation and loss of capture. Each accessible touch button must be provided by its eventual game UI and be at least 44 CSS pixels; input actions never substitute for WCAG game-specific controls.
+
+Gamepad polling selects an available connected gamepad, uses standard face/D-pad buttons and axes with a bounded deadzone, and releases inputs on disconnect, inactivity or game disposal. Unsupported browsers/no attached controller gracefully produce no gamepad actions. Focus exit, document hidden, pause/disable and terminal disposal clear held states; callbacks contain action names and a frozen canonical game scope, never wallet/score authority.
+
+**Qualification:** deterministic Node EventTarget tests for keyboard/blur/visibility, touch multi-pointer/cancel, gamepad axes/deadzone/disconnect, unauthorized actions/identity and disposal. Retain launcher lint/typecheck/tests/build and ARC-1.4/1.5 adapter regressions where relevant. This is an input abstraction: actual gameplay mappings, controller UX and device WCAG acceptance remain later game-specific requirements. No testnet activity required.

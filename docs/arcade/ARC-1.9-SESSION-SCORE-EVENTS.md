@@ -1,0 +1,7 @@
+# ARC-1.9 — Shared session, score, and achievement event interfaces
+
+Game-scoped event stream in `packages/arcade-score/` uses a 128-bit opaque session ID (hex encoding), frozen canonical gameId/rulesetVersion/contentVersion, seed provenance, startedAt, monotonic sequence, event timestamps, bounded events and payloads, and a SHA-256 local result digest. Events are `input`, `score`, `achievement`, and `complete`. Score deltas must be nonnegative safe integers; achievements have scoped IDs and reject duplicates. Explicit terminal completion checks the accumulated score.
+
+All browser-created scores, achievements, event history and checksums remain `LOCAL_UNVERIFIED`. Neither this stream nor its digest is proof of fair play, trusted randomness, identity, economic payout or entitlement. `validateSubmittedEventStream` checks scope, ordering, arithmetic and consistency for *local display only* and returns `verified:false`; a future separately authorized server verifier must independently check replays/challenges and maintain duplicate session protection before any published competitive leaderboard. No wallet, signing key, on-chain writes or Registry operator powers are added.
+
+ARC-1.9 Level 1 covers unit, replay, overflow, forged authority, unknown games, duplicate achievements, completion and integrity tests plus retained save/input/audio/runtime adapters and launcher production build. Live network and independent verifier release acceptance remain later canonical gates.

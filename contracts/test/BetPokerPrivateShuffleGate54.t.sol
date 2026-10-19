@@ -49,10 +49,11 @@ contract PokerPrivateShuffleGate54Test is PokerConfidentialDeal54Test {
     }
     function testProofGateStagesAndTranscriptBinding() public {
         bytes32 id=_hand54();
+        bytes32 certifiedRoot=initialDeck.rootOf(id);
         PokerConfidentialDeal420.Hand memory h=deal.getHand(id);
         bytes32 outA=keccak256("re-encrypted A"); bytes32 outB=keccak256("re-encrypted B");
-        verifier.allow(gate.statement(id,1,initialDeck.rootOf(id),outA));
-        cheat54.prank(PROVIDER_A);gate.proveStage(id,1,initialDeck.rootOf(id),outA,hex"010203");
+        verifier.allow(gate.statement(id,1,certifiedRoot,outA));
+        cheat54.prank(PROVIDER_A);gate.proveStage(id,1,certifiedRoot,outA,hex"010203");
         require(!gate.isProofComplete(id),"premature");
         verifier.allow(gate.statement(id,2,outA,outB));
         cheat54.prank(PROVIDER_B);gate.proveStage(id,2,outA,outB,hex"010203");
@@ -60,29 +61,32 @@ contract PokerPrivateShuffleGate54Test is PokerConfidentialDeal54Test {
     }
     function testCannotSkipStageOrSwapProvider() public {
         bytes32 id=_hand54();
+        bytes32 certifiedRoot=initialDeck.rootOf(id);
         PokerConfidentialDeal420.Hand memory h=deal.getHand(id);
         bytes32 output=keccak256("output");
         cheat54.expectRevert(PokerPrivateShuffleGate420.WrongStage.selector);
-        cheat54.prank(PROVIDER_B);gate.proveStage(id,2,initialDeck.rootOf(id),output,hex"010203");
+        cheat54.prank(PROVIDER_B);gate.proveStage(id,2,certifiedRoot,output,hex"010203");
         cheat54.expectRevert(PokerPrivateShuffleGate420.Unauthorized.selector);
-        cheat54.prank(PROVIDER_B);gate.proveStage(id,1,initialDeck.rootOf(id),output,hex"010203");
+        cheat54.prank(PROVIDER_B);gate.proveStage(id,1,certifiedRoot,output,hex"010203");
     }
     function testInvalidProofAndWrongRootRejected() public {
         bytes32 id=_hand54();
+        bytes32 certifiedRoot=initialDeck.rootOf(id);
         PokerConfidentialDeal420.Hand memory h=deal.getHand(id);
         bytes32 output=keccak256("output");
         cheat54.expectRevert(PokerPrivateShuffleGate420.InvalidProof.selector);
         cheat54.prank(PROVIDER_A);gate.proveStage(id,1,keccak256("fork"),output,hex"010203");
         cheat54.expectRevert(PokerPrivateShuffleGate420.InvalidProof.selector);
-        cheat54.prank(PROVIDER_A);gate.proveStage(id,1,initialDeck.rootOf(id),output,hex"010203");
+        cheat54.prank(PROVIDER_A);gate.proveStage(id,1,certifiedRoot,output,hex"010203");
     }
     function testRevokedProviderCannotSubmitEvenAValidProof() public {
         bytes32 id=_hand54();
+        bytes32 certifiedRoot=initialDeck.rootOf(id);
         PokerConfidentialDeal420.Hand memory h=deal.getHand(id);
         bytes32 output=keccak256("output");
-        verifier.allow(gate.statement(id,1,initialDeck.rootOf(id),output));
+        verifier.allow(gate.statement(id,1,certifiedRoot,output));
         cap.grant(PROVIDER_A,deal.ACTION_PROVIDER_COMMIT(),auth.scopeForTable(TABLE),false);
         cheat54.expectRevert(PokerPrivateShuffleGate420.Unauthorized.selector);
-        cheat54.prank(PROVIDER_A);gate.proveStage(id,1,initialDeck.rootOf(id),output,hex"010203");
+        cheat54.prank(PROVIDER_A);gate.proveStage(id,1,certifiedRoot,output,hex"010203");
     }
 }

@@ -6,6 +6,7 @@ on:
       - 'contracts/src/bet/PokerConfidentialDeal420.sol'
       - 'contracts/test/BetPokerConfidentialDeal54.t.sol'
       - 'contracts/src/bet/PokerDeckDisclosure420.sol'
+      - 'contracts/src/bet/PokerRecipientKeys420.sol'
       - 'contracts/test/BetPokerDeckDisclosure54.t.sol'
       - 'clients/420bet-poker/crypto/**'
       - '.github/workflows/420bet-poker-5a-4-level1.yml'

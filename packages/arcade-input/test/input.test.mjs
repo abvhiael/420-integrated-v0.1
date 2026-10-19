@@ -1,7 +1,7 @@
 import test from 'node:test';import assert from 'node:assert/strict';import {ArcadeInput,InputBoundaryError,INPUT_ACTIONS} from '../src/index.mjs';
 const id='420/GAMING/GAME/ARCADE_BONG_BREAKER/V1';
 class Host extends EventTarget{constructor(){super();this.activeElement=null;this.hidden=false;}contains(node){return node===this||node?.parent===this;}}
-const fire=(host,type,props={})=>{const e=new Event(type,{cancelable:true});Object.assign(e,props);host.dispatchEvent(e);return e;};
+const fire=(host,type,props={})=>{const e=new Event(type,{cancelable:true});const {target,...rest}=props;Object.assign(e,rest);if(target!==undefined)Object.defineProperty(e,'target',{value:target,configurable:true});host.dispatchEvent(e);return e;};
 function make(){const root=new Host(),doc=new Host(),navigator={getGamepads:()=>[]};doc.activeElement=root;const changes=[];const input=new ArcadeInput({gameId:id,root,document:doc,navigator,onChange:s=>changes.push(s)});input.enable();return {root,doc,navigator,input,changes};}
 test('keyboard scope, focus gating, modifiers, editable fields and key release',()=>{
  const {root,doc,input}=make();

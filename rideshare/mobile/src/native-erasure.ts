@@ -1,5 +1,4 @@
 import * as SecureStore from 'expo-secure-store';
-import {createNativeLifecycle} from './native-lifecycle';
 
 // Device-local private data erasure is independent of backend retention obligations.
 // Fail closed on any keystore or keychain error: never claim completed erasure.

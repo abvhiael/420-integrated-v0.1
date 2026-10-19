@@ -23,6 +23,7 @@ contract PokerActionDisputeClock420 {
         bool finalized;
     }
     mapping(bytes32=>Resolution) public resolutions;
+    function resolutionOf(bytes32 handId) external view returns(Resolution memory){return resolutions[handId];}
     mapping(bytes32=>address) public resolverForTable;
     error InvalidInput(); error Unauthorized(); error InvalidState(); error Premature();
     event ClockStarted(bytes32 indexed handId,uint8 seat,uint64 nonce,uint64 deadline,bytes32 stateHash);

@@ -100,6 +100,7 @@ contract PokerConfidentialDeal420 {
             || snapshotFor(h.tableId,handSeatMask[handId]) != h.seatSnapshotHash) revert ParticipantsChanged();
         if (msg.sender == providerA) {
             if (h.rootA != bytes32(0)) revert Duplicate();
+            if (commitment == h.rootB) revert InvalidInput();
             h.rootA=commitment;
         } else {
             if (h.rootB != bytes32(0)) revert Duplicate();

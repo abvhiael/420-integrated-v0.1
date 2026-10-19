@@ -104,22 +104,6 @@ jobs:
           run-id: 39315000314
           github-token: ${{ secrets.GITHUB_TOKEN }}
           path: artifacts/420bet-5a-4
-      - name: Validate real starting-deck and selective card proofs in generated Solidity
-        working-directory: contracts
-        run: |
-          set -e
-          for kind in InitialDeck52 PartialShare CardUnmask; do
-            cp "../artifacts/420bet-5a-4/EXPERIMENTAL-${kind}Verifier.sol" "src/bet/generated/Experimental${kind}Verifier.sol"
-          done
-          python3 ../clients/420bet-poker/zkshuffle/make_groth16_forge_test.py src/bet/generated/ExperimentalInitialDeck52Verifier.sol ../artifacts/420bet-5a-4/EXPERIMENTAL-InitialDeck52SolidityFixture.json test/PokerGeneratedInitialProof.t.sol PokerInitial52GeneratedVerifierAcceptanceTest 1 0
-          forge test --match-contract PokerInitial52GeneratedVerifierAcceptanceTest -vv
-          rm test/PokerGeneratedInitialProof.t.sol
-          python3 ../clients/420bet-poker/zkshuffle/make_groth16_forge_test.py src/bet/generated/ExperimentalPartialShareVerifier.sol ../artifacts/420bet-5a-4/EXPERIMENTAL-PartialShareSolidityFixture.json test/PokerGeneratedShareProof.t.sol PokerShareGeneratedVerifierAcceptanceTest 0 1
-          forge test --match-contract PokerShareGeneratedVerifierAcceptanceTest -vv
-          rm test/PokerGeneratedShareProof.t.sol
-          python3 ../clients/420bet-poker/zkshuffle/make_groth16_forge_test.py src/bet/generated/ExperimentalCardUnmaskVerifier.sol ../artifacts/420bet-5a-4/EXPERIMENTAL-CardUnmaskSolidityFixture.json test/PokerGeneratedUnmaskProof.t.sol PokerUnmaskGeneratedVerifierAcceptanceTest 0 1
-          forge test --match-contract PokerUnmaskGeneratedVerifierAcceptanceTest -vv
-          rm test/PokerGeneratedUnmaskProof.t.sol
       - name: Record exact-SHA cryptographic provenance
         if: steps.cryptoscope.outputs.changed == 'true'
         run: |
@@ -157,6 +141,22 @@ jobs:
             test/PokerGeneratedProofAcceptance.t.sol
           forge test --match-contract PokerGeneratedProofAcceptanceTest -vv
           rm test/PokerGeneratedProofAcceptance.t.sol
+      - name: Validate real starting-deck and selective card proofs in generated Solidity
+        working-directory: contracts
+        run: |
+          set -e
+          for kind in InitialDeck52 PartialShare CardUnmask; do
+            cp "../artifacts/420bet-5a-4/EXPERIMENTAL-${kind}Verifier.sol" "src/bet/generated/Experimental${kind}Verifier.sol"
+          done
+          python3 ../clients/420bet-poker/zkshuffle/make_groth16_forge_test.py src/bet/generated/ExperimentalInitialDeck52Verifier.sol ../artifacts/420bet-5a-4/EXPERIMENTAL-InitialDeck52SolidityFixture.json test/PokerGeneratedInitialProof.t.sol PokerInitial52GeneratedVerifierAcceptanceTest 1 0
+          forge test --match-contract PokerInitial52GeneratedVerifierAcceptanceTest -vv
+          rm test/PokerGeneratedInitialProof.t.sol
+          python3 ../clients/420bet-poker/zkshuffle/make_groth16_forge_test.py src/bet/generated/ExperimentalPartialShareVerifier.sol ../artifacts/420bet-5a-4/EXPERIMENTAL-PartialShareSolidityFixture.json test/PokerGeneratedShareProof.t.sol PokerShareGeneratedVerifierAcceptanceTest 0 1
+          forge test --match-contract PokerShareGeneratedVerifierAcceptanceTest -vv
+          rm test/PokerGeneratedShareProof.t.sol
+          python3 ../clients/420bet-poker/zkshuffle/make_groth16_forge_test.py src/bet/generated/ExperimentalCardUnmaskVerifier.sol ../artifacts/420bet-5a-4/EXPERIMENTAL-CardUnmaskSolidityFixture.json test/PokerGeneratedUnmaskProof.t.sol PokerUnmaskGeneratedVerifierAcceptanceTest 0 1
+          forge test --match-contract PokerUnmaskGeneratedVerifierAcceptanceTest -vv
+          rm test/PokerGeneratedUnmaskProof.t.sol
       - name: Record inherited exact-SHA cryptographic qualification
         if: steps.cryptoscope.outputs.changed == 'false'
         run: |

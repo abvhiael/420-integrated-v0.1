@@ -78,5 +78,5 @@ func(c *Reencrypt2)Define(api frontend.API)error{
  return proveReencryption(api,c.Input[:],c.Output[:],c.PublicKeyX,c.PublicKeyY,c.HandScope,c.Indices[:],c.Nonces[:])
 }
 func(c *Reencrypt52)Define(api frontend.API)error{
- return proveReencryption(api,c.Input[:],c.Output[:],c.PublicKeyX,c.PublicKeyY,c.Indices[:],c.Nonces[:])
+ return proveReencryption(api,c.Input[:],c.Output[:],c.PublicKeyX,c.PublicKeyY,c.HandScope,c.Indices[:],c.Nonces[:])
 }

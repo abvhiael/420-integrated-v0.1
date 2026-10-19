@@ -19,7 +19,7 @@ test('commands stay inside same origin, include bearer, deny redirects and cache
 });
 test('forged trip ID is rejected before a request leaves device',async()=>{
  let calls=0;const api=createRiderApi({origin:'https://liftd.example/',accessToken:async()=>tok,fetchImpl:async()=>{calls++;}});
- await assert.rejects(api.readTrip({},'../admin'),/INVALID_IDENTIFIER/);assert.equal(calls,0);
+ assert.throws(()=>api.readTrip({},'../admin'),/INVALID_IDENTIFIER/);assert.equal(calls,0);
 });
 test('oversized server responses fail closed',async()=>{
  const api=createRiderApi({origin:'https://liftd.example/',accessToken:async()=>tok,fetchImpl:async()=>({ok:true,headers:{get:()=> 'application/json'},text:async()=> 'x'.repeat(70000)})});

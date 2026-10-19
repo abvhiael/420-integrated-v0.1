@@ -81,4 +81,17 @@ contract PokerCanonicalEvidence54Test is PokerPrivateShuffleGate54Test {
         _submit(id,rakeHash);
         require(!canonical.acceptedOf(id).accepted,"must fail closed");
     }
+    function testUnregisteredOrSubstitutedVerifyingKeyCannotBecomeCanonical() public {
+        cheat54.expectRevert(PokerCanonicalEvidence420.InvalidDependency.selector);
+        new PokerCanonicalEvidence420(address(deal),address(gate),address(rules),
+            address(verifierVersions),keccak256("UNREGISTERED VERSION"),
+            keccak256("TEST RULES CIRCUIT"),keccak256("TEST VERIFICATION KEY"),
+            keccak256("TEST PUBLIC INPUT SCHEMA"));
+        cheat54.expectRevert(PokerCanonicalEvidence420.InvalidDependency.selector);
+        new PokerCanonicalEvidence420(address(deal),address(gate),address(rules),
+            address(verifierVersions),keccak256("TEST VERSION"),
+            keccak256("TEST RULES CIRCUIT"),keccak256("ATTACKER KEY"),
+            keccak256("TEST PUBLIC INPUT SCHEMA"));
+    }
+
 }

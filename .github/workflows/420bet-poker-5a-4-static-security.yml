@@ -44,15 +44,24 @@ jobs:
         run: |
           mkdir -p ../artifacts/420bet-5a-4-security
           set +e
-          slither . --json ../artifacts/420bet-5a-4-security/slither.json > ../artifacts/420bet-5a-4-security/output.log 2>&1
-          code=$?
+          # Compile only the two affected canonical source graphs, not all
+          # Solidity contracts or the unrelated Genesis application suite.
+          slither src/bet/PokerNativeOutcome420.sol --json ../artifacts/420bet-5a-4-security/native.json > ../artifacts/420bet-5a-4-security/native.log 2>&1
+          native_exit=$?
+          slither src/bet/PokerCanonicalSettlement420.sol --json ../artifacts/420bet-5a-4-security/settlement.json > ../artifacts/420bet-5a-4-security/settlement.log 2>&1
+          settlement_exit=$?
           set -e
-          echo "$code" > ../artifacts/420bet-5a-4-security/slither-exit.txt
-          test -s ../artifacts/420bet-5a-4-security/slither.json || {
-            tail -100 ../artifacts/420bet-5a-4-security/output.log
-            exit 1
-          }
-          python3 ../clients/420bet-poker/zkshuffle/triage_slither_poker.py ../artifacts/420bet-5a-4-security/slither.json ../artifacts/420bet-5a-4-security/poker-security-findings.json
+          printf 'native=%s\\nsettlement=%s\\n' "$native_exit" "$settlement_exit" > ../artifacts/420bet-5a-4-security/slither-exit.txt
+          for name in native settlement; do
+            test -s "../artifacts/420bet-5a-4-security/$name.json" || {
+              tail -100 "../artifacts/420bet-5a-4-security/$name.log"
+              exit 1
+            }
+          done
+          python3 ../clients/420bet-poker/zkshuffle/triage_slither_poker.py \\
+            ../artifacts/420bet-5a-4-security/native.json \\
+            ../artifacts/420bet-5a-4-security/settlement.json \\
+            ../artifacts/420bet-5a-4-security/poker-security-findings.json
       - name: Attach reproducible security evidence
         if: always()
         uses: actions/upload-artifact@v4

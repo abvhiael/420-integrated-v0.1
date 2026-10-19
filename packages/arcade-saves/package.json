@@ -1,0 +1,10 @@
+{
+  "name": "@420/arcade-saves",
+  "type": "module",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "check": "node --check src/index.mjs"
+  }
+}

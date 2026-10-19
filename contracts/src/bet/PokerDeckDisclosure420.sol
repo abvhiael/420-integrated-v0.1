@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
 import "./PokerConfidentialDeal420.sol";
+import "./PokerRecipientKeys420.sol";
 
 /// @notice Verification-only delivery commitments. Never receives ciphertext plaintext or private keys.
 /// @dev Cryptographic confidentiality depends on off-chain authenticated encryption and recipient-controlled keys.
@@ -10,6 +11,7 @@ contract PokerDeckDisclosure420 {
     bytes32 public constant DOMAIN = keccak256("420.BET.POKER.DECK.DISCLOSURE.V1");
     PokerConfidentialDeal420 public immutable deals;
     BetAuthorization420 public immutable authorization;
+    PokerRecipientKeys420 public immutable keys;
 
     struct Deck {
         bytes32 commitment;
@@ -22,6 +24,7 @@ contract PokerDeckDisclosure420 {
     mapping(bytes32 => Deck) public decks;
     mapping(bytes32 => mapping(uint8 => bytes32)) public recipientEnvelopeHash;
     mapping(bytes32 => mapping(uint8 => bytes32)) public receiptHash;
+    mapping(bytes32 => mapping(uint8 => bytes32)) public recipientKeyFingerprint;
 
     error Unauthorized(); error InvalidState(); error InvalidValue(); error Duplicate();
     error InvalidDeck(); error NotRecipient();
@@ -30,10 +33,12 @@ contract PokerDeckDisclosure420 {
     event EnvelopeAcknowledged(bytes32 indexed handId,uint8 indexed seat,bytes32 receipt);
     event DeckDisclosed(bytes32 indexed handId,bytes32 verificationHash);
 
-    constructor(address deals_) {
-        if (deals_==address(0)) revert InvalidValue();
+    constructor(address deals_,address keys_) {
+        if (deals_==address(0) || keys_==address(0)) revert InvalidValue();
         deals=PokerConfidentialDeal420(deals_);
         authorization=deals.authorization();
+        keys=PokerRecipientKeys420(keys_);
+        if(address(keys.ledger())!=address(deals.ledger())) revert InvalidValue();
     }
     function hashDeck(bytes32 handId,uint8[52] calldata order,bytes32 salt)
         public view returns(bytes32) {
@@ -52,7 +57,7 @@ contract PokerDeckDisclosure420 {
         decks[handId].published=true;
         emit DeckPublished(handId,commitment,encryptedManifestHash);
     }
-    function bindEnvelope(bytes32 handId,uint8 seat,bytes32 envelopeHash) external {
+    function bindEnvelope(bytes32 handId,uint8 seat,bytes32 envelopeHash,bytes32 fingerprint) external {
         PokerConfidentialDeal420.Hand memory h=deals.getHand(handId);
         Deck storage d=decks[handId];
         if (h.state!=PokerConfidentialDeal420.State.COMMITTED || !d.published || d.disclosed)
@@ -62,10 +67,12 @@ contract PokerDeckDisclosure420 {
         if (msg.sender!=deals.providerA() && msg.sender!=deals.providerB()) revert Unauthorized();
         if (!authorization.isAuthorized(msg.sender,deals.ACTION_PROVIDER_COMMIT(),
                 authorization.scopeForTable(h.tableId),0)) revert Unauthorized();
-        if (envelopeHash==bytes32(0)) revert InvalidValue();
+        if (envelopeHash==bytes32(0) || fingerprint==bytes32(0)) revert InvalidValue();
+        if (keys.fingerprintOf(h.tableId,seat) != fingerprint) revert NotRecipient();
         if ((d.deliveryMask&seatBit)!=0) revert Duplicate();
         d.deliveryMask|=seatBit;
         recipientEnvelopeHash[handId][seat]=envelopeHash;
+        recipientKeyFingerprint[handId][seat]=fingerprint;
         emit EnvelopeBound(handId,seat,envelopeHash);
     }
     function acknowledge(bytes32 handId,uint8 seat,bytes32 receipt) external {
@@ -77,7 +84,8 @@ contract PokerDeckDisclosure420 {
         PokerSeatLedger420.Seat memory s=deals.ledger().seatOf(h.tableId,seat);
         if (msg.sender!=s.player || s.player==address(0)) revert NotRecipient();
         if (receipt==bytes32(0) || (d.receiptMask&seatBit)!=0) revert InvalidValue();
-        if (deals.ledger().seatingEpoch(h.tableId)!=h.epoch) revert InvalidState();
+        if (deals.ledger().seatingEpoch(h.tableId)!=h.epoch ||
+            keys.fingerprintOf(h.tableId,seat)!=recipientKeyFingerprint[handId][seat]) revert InvalidState();
         d.receiptMask|=seatBit;
         receiptHash[handId][seat]=receipt;
         emit EnvelopeAcknowledged(handId,seat,receipt);

@@ -1,0 +1,28 @@
+name: 420Arcade ARC-1.9 Level 1 session score events
+on:
+  pull_request:
+    paths:
+      - 'packages/arcade-score/**'
+      - '.github/workflows/arcade-1-9-level1.yml'
+  workflow_dispatch:
+jobs:
+  arcade-score-events:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: apps/arcade-web/package-lock.json
+      - name: Session score and achievement adversarial tests
+        run: node --check packages/arcade-score/src/index.mjs && node --test packages/arcade-score/test/*.test.mjs
+      - name: Retained local saves and Arcade adapters
+        run: node --test packages/arcade-saves/test/*.test.mjs packages/arcade-input/test/*.test.mjs packages/arcade-core/test/*.test.mjs packages/arcade-phaser/test/*.test.mjs packages/arcade-audio/test/*.test.mjs
+      - name: Retained launcher compatibility
+        run: |
+          npm ci --prefix apps/arcade-web --ignore-scripts --no-audit --no-fund
+          npm run lint --prefix apps/arcade-web
+          npm run typecheck --prefix apps/arcade-web
+          npm run test --prefix apps/arcade-web
+          npm run build --prefix apps/arcade-web

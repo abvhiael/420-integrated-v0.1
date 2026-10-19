@@ -26,8 +26,9 @@ contract PokerDeckDisclosure54Test is PokerConfidentialDeal54Test {
         cheat54.prank(PLAYER); disclosure.acknowledge(id,0,keccak256("authenticated receipt 0"));
         cheat54.prank(PLAYER_B); disclosure.acknowledge(id,1,keccak256("authenticated receipt 1"));
         require(disclosure.allAcknowledged(id),"all private receipts");
-        cheat54.prank(PROVIDER_A); disclosure.disclose(id,cards,keccak256("salt"));
-        require(disclosure.decks(id).disclosed,"deck verified");
+        require(disclosure.verifyOpenedDeck(id,cards,keccak256("salt")),"deck verified");
+        cheat54.expectRevert(PokerDeckDisclosure420.InvalidState.selector);
+        disclosure.verifyOpenedDeck(id,cards,keccak256("salt"));
     }
     function testWrongPlayerAndMissingReceiptRejected() public {
         bytes32 id=_ready();
@@ -59,6 +60,6 @@ contract PokerDeckDisclosure54Test is PokerConfidentialDeal54Test {
         cheat54.prank(PROVIDER_A);
         disclosure.publish(id,disclosure.hashDeck(id,cards,keccak256("salt")),keccak256("manifest"));
         cheat54.expectRevert(PokerDeckDisclosure420.InvalidDeck.selector);
-        cheat54.prank(PROVIDER_A); disclosure.disclose(id,cards,keccak256("other"));
+        disclosure.verifyOpenedDeck(id,cards,keccak256("other"));
     }
 }

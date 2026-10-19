@@ -29,7 +29,7 @@ contract PokerConfidentialDeal54Test is PokerSeatLedger53Test {
     function _begin(uint64 nonce) internal returns (bytes32 id) {
         cheat54.prank(ADMIN);
         id=deal.begin(TABLE,nonce,uint64(block.timestamp+120),keccak256("prior"),
-            keccak256("seat snapshot"),3);
+            deal.snapshotFor(TABLE,3),3);
     }
     function testTwoProviderCommitNoPlaintextCards() public {
         _prepared();
@@ -57,6 +57,13 @@ contract PokerConfidentialDeal54Test is PokerSeatLedger53Test {
         cap.grant(PROVIDER_A,deal.ACTION_PROVIDER_COMMIT(),auth.scopeForTable(TABLE),false);
         cheat54.expectRevert(PokerConfidentialDeal420.Unauthorized.selector);
         cheat54.prank(PROVIDER_A); deal.commit(id,keccak256("a"));
+    }
+    function testForgedSnapshotRejected() public {
+        _prepared();
+        cheat54.expectRevert(PokerConfidentialDeal420.ParticipantsChanged.selector);
+        cheat54.prank(ADMIN);
+        deal.begin(TABLE,1,uint64(block.timestamp+120),keccak256("prior"),
+            keccak256("forged snapshot"),3);
     }
     function testNoReplayOrNonceSkip() public {
         _prepared(); _begin(1);

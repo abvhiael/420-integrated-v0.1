@@ -7,7 +7,7 @@ import "../src/bet/PokerPrivateShuffleGate420.sol";
 contract ShuffleVerifierFixture54 is IPokerShuffleProofVerifier420 {
     bytes32 public expected;
     function allow(bytes32 digest) external {expected=digest;}
-    function verifyShuffleProof(bytes32 digest,bytes calldata proof) external view returns(bool){
+    function verifyShuffleProof(bytes32 digest,bytes32,bytes32,bytes32,bytes32,bytes calldata proof) external view returns(bool){
         return digest==expected && keccak256(proof)==keccak256(hex"010203");
     }
 }
@@ -15,7 +15,7 @@ contract ShuffleVerifierFixture54 is IPokerShuffleProofVerifier420 {
 contract InitialDeckProofFixture54 is IPokerInitialDeckProof420 {
     bytes32 public expected;
     function allow(bytes32 digest) external {expected=digest;}
-    function verifyInitialDeck(bytes32 digest,bytes calldata proof) external view returns(bool){
+    function verifyInitialDeck(bytes32 digest,bytes32,bytes32,bytes32,bytes calldata proof) external view returns(bool){
         return digest==expected && keccak256(proof)==keccak256(hex"f00d");
     }
 }

@@ -10,11 +10,11 @@ import pathlib
 import re
 import sys
 
-if len(sys.argv) != 3:
-    raise SystemExit("usage: triage_slither_poker.py slither.json output.json")
-report = json.loads(pathlib.Path(sys.argv[1]).read_text())
-if report.get("success") is not True:
-    raise SystemExit("slither analyzer reported unsuccessful execution")
+if len(sys.argv) < 3:
+    raise SystemExit("usage: triage_slither_poker.py slither-a.json [slither-b.json] output.json")
+reports = [json.loads(pathlib.Path(path).read_text()) for path in sys.argv[1:-1]]
+if any(report.get("success") is not True for report in reports):
+    raise SystemExit("one or more scoped Slither analyzers reported unsuccessful execution")
 focus = re.compile(
     r"(?:^|/)src/bet/(?:PokerNLHEBetting420|PokerNativeOutcome420|"
     r"PokerLiveCardReveals420|PokerCanonicalSettlement420|PokerSeatLedger420|"
@@ -23,7 +23,7 @@ focus = re.compile(
     r"PokerVerifierVersions420)\.sol$"
 )
 records = []
-for item in report.get("results", {}).get("detectors", []):
+for item in (item for report in reports for item in report.get("results", {}).get("detectors", [])):
     sources = []
     for el in item.get("elements", []):
         loc = el.get("source_mapping", {})
@@ -40,7 +40,16 @@ for item in report.get("results", {}).get("detectors", []):
         "files": sorted(set(sources)),
     })
 records.sort(key=lambda r: (r["severity"], r["check"], r["files"]))
-pathlib.Path(sys.argv[2]).write_text(json.dumps({
+# Imported contracts can be analyzed from both entrypoints; do not double-count.
+seen = set()
+unique = []
+for finding in records:
+    key = (finding["severity"],finding["check"],finding["description"],tuple(finding["files"]))
+    if key not in seen:
+        seen.add(key)
+        unique.append(finding)
+records = unique
+pathlib.Path(sys.argv[-1]).write_text(json.dumps({
     "tool": "Slither 0.11.6",
     "scope": "420Bet poker canonical execution and proof contracts",
     "total": len(records),

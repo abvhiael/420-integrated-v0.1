@@ -135,7 +135,10 @@ jobs:
           mkdir -p artifacts/420bet-5a-4
           test -s artifacts/420bet-5a-4/EXPERIMENTAL-Reencrypt52Proof.bin
           test -s artifacts/420bet-5a-4/EXPERIMENTAL-Reencrypt52Verifier.sol
-          printf 'inherited_qualified_sha=97d02e06d8cb4faddb33c320f122a7ce02f0f338\noriginal_run=39315000314\noriginal_job=118276392276\ncurrent_solidity_sha=%s\n' "$(git rev-parse HEAD)" > artifacts/420bet-5a-4/inheritance.txt
+          echo 'inherited_qualified_sha=97d02e06d8cb4faddb33c320f122a7ce02f0f338' > artifacts/420bet-5a-4/inheritance.txt
+          echo 'original_run=39315000314' >> artifacts/420bet-5a-4/inheritance.txt
+          echo 'original_job=118276392276' >> artifacts/420bet-5a-4/inheritance.txt
+          echo "current_solidity_sha=$(git rev-parse HEAD)" >> artifacts/420bet-5a-4/inheritance.txt
       - name: Scope commitment adversarial + inherited seating/table regression
         working-directory: contracts
         run: forge test --match-contract '^(PokerNativeOutcome54Test|PokerHandRank54Test|PokerLiveCardReveals54Test|PokerNLHEBetting54Test|PokerGnarkElGamalAdapters54Test|PokerCanonicalSettlement54Test|PokerVerifierVersions54Test|PokerCanonicalEvidence54Test|PokerCanonicalRake54Test|PokerActionDisputeClock54Test|PokerFinalCardOpenings54Test|PokerActionKeys54Test|PokerPrivateShuffleGate54Test|PokerVerifiedTerminalGate54Test|PokerHandAccountingProof54Test|PokerHandFinality54Test|PokerDeckDisclosure54Test|PokerConfidentialDeal54Test|PokerSeatLedger53Test|BetPokerTableRegistry52Test)$' -vv

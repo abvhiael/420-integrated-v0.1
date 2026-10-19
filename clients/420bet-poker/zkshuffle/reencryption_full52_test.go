@@ -34,6 +34,9 @@ func TestFull52RealEncryptedShuffleProof(t *testing.T) {
   witness.Indices[i]=pos
   witness.Nonces[i]=r
  }
+ inputRoot,_:=nativeCipherRootAndPath(420,witness.Input[:],0)
+ outputRoot,_:=nativeCipherRootAndPath(420,witness.Output[:],0)
+ witness.InputRoot=inputRoot;witness.OutputRoot=outputRoot
  cs,err:=frontend.Compile(ecc.BN254.ScalarField(),r1cs.NewBuilder,&Reencrypt52{})
  if err!=nil {t.Fatalf("compile full 52-card relation: %v",err)}
  t.Logf("full 52-card constraints: %d",cs.GetNbConstraints())
@@ -50,7 +53,7 @@ func TestFull52RealEncryptedShuffleProof(t *testing.T) {
  }
  // Sound verifier rejects a changed public deck output AND replay into another hand.
  wrongDeck:=*witness
- wrongDeck.Output[0].C1X=big.NewInt(42)
+ wrongDeck.OutputRoot=big.NewInt(42)
  changedWitness,err:=frontend.NewWitness(&wrongDeck,ecc.BN254.ScalarField())
  if err!=nil {t.Fatal(err)}
  changedPublic,err:=changedWitness.Public();if err!=nil {t.Fatal(err)}

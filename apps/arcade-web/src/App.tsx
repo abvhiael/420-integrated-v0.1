@@ -42,7 +42,7 @@ export function Launcher({initialRoute}:{initialRoute?:Route}={}) {
     <a href="#/about" aria-current={route.kind==='about'?'page':undefined}>About</a>
     <a href="#/accessibility" aria-current={route.kind==='accessibility'?'page':undefined}>Accessibility</a>
    </nav>
-   <span className="status" aria-live="polite">Launcher preview · No games enabled</span>
+   <span className="status" aria-live="polite">Launcher preview · No games installed</span>
   </header>
   <main id="main" tabIndex={-1} className="site-main">
    <h1 tabIndex={-1} ref={heading}>{pageTitle}</h1>

@@ -1,0 +1,20 @@
+name: Arcade authoritative score readiness Level 1
+on:
+  pull_request:
+    paths:
+      - 'services/arcade-ranking/**'
+      - '.github/workflows/arcade-ranking-level1.yml'
+  workflow_dispatch:
+jobs:
+  arcade-ranking:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Score authority and replay safety
+        run: |
+          node --check services/arcade-ranking/src/authority.mjs
+          node --test services/arcade-ranking/test/*.test.mjs
+          node --test packages/arcade-score/test/*.test.mjs

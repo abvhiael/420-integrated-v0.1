@@ -69,6 +69,8 @@ jobs:
           go-version: '1.24'
           cache: false
       - name: Real Groth16 52-card permutation circuit qualification
+        env:
+          POKER_ZK_ARTIFACT_DIR: ../../../artifacts/420bet-5a-4
         working-directory: clients/420bet-poker/zkshuffle
         run: go test -mod=mod -timeout 15m ./...
       - name: Record exact-SHA cryptographic provenance
@@ -79,6 +81,7 @@ jobs:
           cd clients/420bet-poker/zkshuffle
           go list -mod=mod -m all > ../../../artifacts/420bet-5a-4/go-module-versions.txt
           cp go.sum ../../../artifacts/420bet-5a-4/go.sum
+          sha256sum ../../../artifacts/420bet-5a-4/EXPERIMENTAL-Reencrypt52Verifier.sol ../../../artifacts/420bet-5a-4/EXPERIMENTAL-Reencrypt52VerifyingKey.bin ../../../artifacts/420bet-5a-4/EXPERIMENTAL-Reencrypt52Proof.bin > ../../../artifacts/420bet-5a-4/generated-proof-sha256.txt
           sha256sum go.sum >> ../../../artifacts/420bet-5a-4/cryptographic-source-sha256.txt
       - name: Upload exact-SHA proof provenance
         uses: actions/upload-artifact@v4

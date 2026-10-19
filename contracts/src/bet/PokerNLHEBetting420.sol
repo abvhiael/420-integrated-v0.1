@@ -4,7 +4,12 @@ pragma solidity ^0.8.24;
 import "./PokerActionKeys420.sol";
 import "./PokerPrivateShuffleGate420.sol";
 import "./PokerActionDisputeClock420.sol";
+import "./PokerCanonicalRake420.sol";
 
+interface IPokerNativeOutcome420 {
+    function calculate(bytes32 handId,PokerCanonicalRake420.Policy calldata policy)
+        external view returns(uint256[9] memory finalChips,uint256 fee);
+}
 interface IPokerAuthenticatedStreet420 {
     function isStageComplete(bytes32 handId,uint8 street) external view returns(bool);
 }
@@ -17,6 +22,7 @@ interface IPokerAuthenticatedStreet420 {
 contract PokerNLHEBetting420 {
     bytes32 public constant ACTION_DOMAIN=keccak256("420.BET.POKER.NLHE.AUTHENTICATED.ACTION.V1");
     bytes32 public constant STATE_DOMAIN=keccak256("420.BET.POKER.NLHE.STATE.V1");
+    bytes32 public constant ACTION_BIND_OUTCOME=keccak256("BET_POKER_BIND_CANONICAL_OUTCOME.V1");
     bytes32 public constant ACTION_BIND_REVEALS=keccak256("BET_POKER_BIND_REVEAL_ENGINE.V1");
 
     enum Phase {NONE,PREFLOP,AWAIT_FLOP,FLOP,AWAIT_TURN,TURN,AWAIT_RIVER,RIVER,SHOWDOWN,UNCONTESTED}
@@ -60,6 +66,11 @@ contract PokerNLHEBetting420 {
     mapping(bytes32=>mapping(uint8=>Player)) private players;
     mapping(bytes32=>uint8) public lastButton;
     mapping(bytes32=>bool) public hasButton;
+    mapping(bytes32=>bool) public flopOpened;
+    mapping(bytes32=>bool) public handSettled;
+    mapping(bytes32=>address) public outcomeForTable;
+    event OutcomeBound(bytes32 indexed tableId,address outcome);
+    event NativeHandSettled(bytes32 indexed handId,bytes32 indexed tableId,uint256 rake);
 
     error InvalidConfiguration();error InvalidState();error WrongTurn();
     error Unauthorized();error InvalidAction();error Expired();error WaitingForReveal();
@@ -90,6 +101,32 @@ contract PokerNLHEBetting420 {
             authorization.scopeForTable(tableId),0))revert Unauthorized();
         streetReveals=IPokerAuthenticatedStreet420(gate);
         emit RevealsBound(gate);
+    }
+    /// @notice One-time table-governance approval of canonical native payout calculator.
+    /// @dev No address may provide arbitrarily chosen settlement amounts after binding.
+    function bindOutcome(bytes32 tableId,address calculator) external {
+        if(outcomeForTable[tableId]!=address(0)||calculator==address(0)||
+           calculator.code.length==0)revert InvalidConfiguration();
+        if(!authorization.isAuthorized(msg.sender,ACTION_BIND_OUTCOME,
+            authorization.scopeForTable(tableId),0))revert Unauthorized();
+        outcomeForTable[tableId]=calculator;
+        emit OutcomeBound(tableId,calculator);
+    }
+    /// @notice A permissionless, all-or-nothing on-chain escrow settlement.
+    /// @dev Uses the FULL actual betting transcript, revealed board/hole cards,
+    ///      exact immutable rake policy and native 5-of-7/side-pot recomputation.
+    function settle(bytes32 handId,PokerCanonicalRake420.Policy calldata policy) external {
+        Game storage g=games[handId];
+        if(!g.initialized||handSettled[handId]||
+           (g.phase!=Phase.SHOWDOWN&&g.phase!=Phase.UNCONTESTED)||
+           disputes.isFrozen(handId)||outcomeForTable[g.tableId]==address(0)||
+           ledger.activeHand(g.tableId)!=handId)revert InvalidState();
+        if(address(streetReveals)==address(0))revert InvalidState();
+        (uint256[9] memory balances,uint256 fee)=
+            IPokerNativeOutcome420(outcomeForTable[g.tableId]).calculate(handId,policy);
+        handSettled[handId]=true;
+        ledger.settleReservedHand(g.tableId,handId,balances,fee);
+        emit NativeHandSettled(handId,g.tableId,fee);
     }
     function gameOf(bytes32 handId) external view returns(Game memory){return games[handId];}
     function playerOf(bytes32 handId,uint8 seat) external view returns(Player memory){return players[handId][seat];}
@@ -308,6 +345,7 @@ contract PokerNLHEBetting420 {
         if(!this.canRevealStreet(handId,street)||
            !streetReveals.isStageComplete(handId,street))revert WaitingForReveal();
         g.phase=street==1?Phase.FLOP:street==2?Phase.TURN:Phase.RIVER;
+        if(street==1)flopOpened[handId]=true;
         for(uint8 i=0;i<9;i++)if(_participates(g.seatsMask,i)){
             Player storage p=players[handId][i];p.bet=0;p.acted=false;p.lastFacing=0;
         }

@@ -1,0 +1,28 @@
+name: 420Arcade ARC-1.2 Level 1 navigation and responsive shell
+on:
+  pull_request:
+    paths:
+      - 'apps/arcade-web/**'
+      - '.github/workflows/arcade-1-2-level1.yml'
+      - 'docs/arcade/ARC-1.2-NAVIGATION-SHELL.md'
+  workflow_dispatch:
+jobs:
+  arcade-shell:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: apps/arcade-web/package-lock.json
+      - name: Install frozen dependencies
+        run: npm ci --prefix apps/arcade-web --ignore-scripts --no-audit --no-fund
+      - name: App lint and typecheck
+        run: npm run check --prefix apps/arcade-web && npm run lint --prefix apps/arcade-web && npm run typecheck --prefix apps/arcade-web
+      - name: ARC-1.1 regression and ARC-1.2 shell tests
+        run: npm run test --prefix apps/arcade-web
+      - name: Production build and output qualification
+        run: |
+          npm run build --prefix apps/arcade-web
+          node --input-type=module -e "import fs from 'node:fs';const p='apps/arcade-web/dist/';if(!fs.existsSync(p+'index.html')||!fs.readdirSync(p+'assets').some(x=>x.endsWith('.js')))throw Error('missing build');"

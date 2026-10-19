@@ -67,7 +67,7 @@ contract PokerActionDisputeClock420 {
         if(evidence==bytes32(0))revert InvalidInput();
         PokerConfidentialDeal420.Hand memory h=deals.getHand(handId);
         Clock storage c=clocks[handId];
-        if(c.nonce==0||c.disputed)revert InvalidState();
+        if(c.nonce==0||c.disputed||resolutions[handId].finalized)revert InvalidState();
         bool authorized=false;
         for(uint8 i=0;i<9;i++)if((deals.handSeatMask(handId)&(uint16(1)<<i))!=0 &&
            deals.ledger().seatOf(h.tableId,i).player==msg.sender)authorized=true;

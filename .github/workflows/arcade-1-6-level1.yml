@@ -1,0 +1,33 @@
+name: 420Arcade ARC-1.6 Level 1 input abstraction
+on:
+  pull_request:
+    paths:
+      - 'packages/arcade-input/**'
+      - 'packages/arcade-core/**'
+      - 'packages/arcade-phaser/**'
+      - 'apps/arcade-web/**'
+      - '.github/workflows/arcade-1-6-level1.yml'
+  workflow_dispatch:
+jobs:
+  arcade-input:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: apps/arcade-web/package-lock.json
+      - name: Input adapter syntax and adversarial tests
+        run: node --check packages/arcade-input/src/index.mjs && node --test packages/arcade-input/test/*.test.mjs
+      - name: Retained adapter regressions
+        run: node --test packages/arcade-phaser/test/*.test.mjs packages/arcade-core/test/*.test.mjs
+      - name: Install frozen launcher dependencies
+        run: npm ci --prefix apps/arcade-web --ignore-scripts --no-audit --no-fund
+      - name: Arcade browser application tests and build
+        run: |
+          npm run check --prefix apps/arcade-web
+          npm run lint --prefix apps/arcade-web
+          npm run typecheck --prefix apps/arcade-web
+          npm run test --prefix apps/arcade-web
+          npm run build --prefix apps/arcade-web

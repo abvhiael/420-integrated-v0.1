@@ -3,6 +3,7 @@ pragma solidity ^0.8.24;
 
 import "./BetAuthorization420.sol";
 import "./BetOperatorRegistry420.sol";
+import "./BetEmergencyState420.sol";
 
 /// @notice Non-custodial cash-game table definitions and lifecycle authority.
 /// @dev OPEN is a configuration state, NOT permission to seat, fund, deal, or play hands.
@@ -42,6 +43,7 @@ contract PokerTableRegistry420 {
 
     BetAuthorization420 public immutable authorization;
     BetOperatorRegistry420 public immutable operators;
+    BetEmergencyState420 public immutable emergency;
     mapping(bytes32 => Table) private _tables;
 
     error ZeroAddress();
@@ -51,14 +53,16 @@ contract PokerTableRegistry420 {
     error Unauthorized();
     error InvalidTransition();
     error OperatorInactive();
+    error EmergencyHalt();
 
     event TableRegistered(bytes32 indexed tableId, bytes32 indexed gameVersionId, bytes32 indexed configHash, address controller);
     event TableStatusChanged(bytes32 indexed tableId, Status fromStatus, Status toStatus);
 
-    constructor(address authorization_, address operators_) {
-        if (authorization_ == address(0) || operators_ == address(0)) revert ZeroAddress();
+    constructor(address authorization_, address operators_, address emergency_) {
+        if (authorization_ == address(0) || operators_ == address(0) || emergency_ == address(0)) revert ZeroAddress();
         authorization = BetAuthorization420(authorization_);
         operators = BetOperatorRegistry420(operators_);
+        emergency = BetEmergencyState420(emergency_);
     }
 
     function systemName() external pure returns (string memory) { return "PokerTableRegistry420"; }
@@ -78,6 +82,7 @@ contract PokerTableRegistry420 {
             || c.minBuyIn < c.bigBlind || c.maxBuyIn < c.minBuyIn || c.maxRakeBps > 10000)
             revert InvalidConfiguration();
         _require(ACTION_CREATE, c.tableId);
+        if (emergency.isHalted(BetTypes420.EmergencyDomain.POKER_NEW_TABLES, c.gameVersionId)) revert EmergencyHalt();
         if (!operators.isActive(c.operatorId)) revert OperatorInactive();
         bytes32 digest = hashConfiguration(c);
         _tables[c.tableId] = Table(c, digest, controller, Status.REGISTERED, uint64(block.timestamp), true);
@@ -111,6 +116,7 @@ contract PokerTableRegistry420 {
         if (t.status != expected) revert InvalidTransition();
         _require(action, id);
         if (!operators.isActive(t.config.operatorId)) revert OperatorInactive();
+        if (next == Status.OPEN && emergency.isHalted(BetTypes420.EmergencyDomain.POKER_NEW_TABLES, t.config.gameVersionId)) revert EmergencyHalt();
         t.status = next;
         emit TableStatusChanged(id, expected, next);
     }

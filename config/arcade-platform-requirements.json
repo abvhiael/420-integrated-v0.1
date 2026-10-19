@@ -1,0 +1,222 @@
+{
+  "schemaVersion": "1.0.0",
+  "application": "420Arcade",
+  "requirementStep": "ARC-0.5",
+  "status": "REQUIREMENTS_FROZEN_NOT_IMPLEMENTATION_CERTIFIED",
+  "browserSupport": {
+    "desktop": [
+      "chromium-current-and-previous",
+      "firefox-current-and-previous",
+      "safari-current-and-previous"
+    ],
+    "mobile": [
+      "ios-safari-current-and-previous",
+      "android-chrome-current-and-previous"
+    ],
+    "featureDetectionRequired": true,
+    "unsupportedBrowserMessageRequired": true,
+    "secureContextForServiceWorker": true
+  },
+  "desktop": {
+    "minimumViewportCssPx": {
+      "width": 320,
+      "height": 568
+    },
+    "supportedInputs": [
+      "keyboard",
+      "pointer"
+    ],
+    "responsiveLayout": true,
+    "zoom200PercentNoLoss": true
+  },
+  "mobile": {
+    "minimumViewportCssPx": {
+      "width": 320,
+      "height": 568
+    },
+    "supportedInputs": [
+      "touch",
+      "external-keyboard"
+    ],
+    "orientationRecovery": true,
+    "noHoverOnlyFunctions": true,
+    "touchTargetMinimumCssPx": 44
+  },
+  "accessibility": {
+    "standard": "WCAG-2.2-AA",
+    "keyboardComplete": true,
+    "visibleFocus": true,
+    "screenReaderLabels": true,
+    "colorIndependentSignals": true,
+    "reducedMotion": true,
+    "pausingAvailable": true,
+    "scalableText": true,
+    "contrastTextMinimum": 4.5,
+    "contrastLargeTextMinimum": 3,
+    "highContrastMode": true,
+    "nonAudioEquivalent": true
+  },
+  "offline": {
+    "guestCoreNeverRequiresWallet": true,
+    "offlineGuestSavesRequired": true,
+    "assetsVersionPinned": true,
+    "cacheBudgetMiB": 100,
+    "cacheEviction": "per-game-lru",
+    "noExecutableRemoteCodeCaching": true,
+    "privateDrawingsNeverCachedInServiceWorker": true,
+    "serviceWorkerOptInInstall": true,
+    "networkUncertaintyDisablesOnlyOnlineFeatures": true,
+    "verifiedScoresAndEconomicsOffline": false
+  },
+  "performance": {
+    "loadGamesLazily": true,
+    "perGameErrorIsolation": true,
+    "abortLoadOnUnmount": true,
+    "assetIntegrityRequired": true
+  },
+  "games": [
+    {
+      "slug": "kush-crush",
+      "platforms": [
+        "desktop-browser",
+        "mobile-browser"
+      ],
+      "offlineCore": "REQUIRED",
+      "offlineOptionalProtocol": "UNAVAILABLE",
+      "offlineCompetitiveVerification": "UNVERIFIED_LOCAL_ONLY",
+      "accessibilityStatus": "IMPLEMENTATION_PENDING",
+      "offlineStatus": "IMPLEMENTATION_PENDING",
+      "specialCase": "keyboard-touch-and-pause"
+    },
+    {
+      "slug": "420colouring-book",
+      "platforms": [
+        "desktop-browser",
+        "mobile-browser"
+      ],
+      "offlineCore": "REQUIRED",
+      "offlineOptionalProtocol": "UNAVAILABLE",
+      "offlineCompetitiveVerification": "UNVERIFIED_LOCAL_ONLY",
+      "accessibilityStatus": "IMPLEMENTATION_PENDING",
+      "offlineStatus": "IMPLEMENTATION_PENDING",
+      "specialCase": "private-exports-consent-and-bounded-memory"
+    },
+    {
+      "slug": "420buddy",
+      "platforms": [
+        "desktop-browser",
+        "mobile-browser"
+      ],
+      "offlineCore": "REQUIRED",
+      "offlineOptionalProtocol": "UNAVAILABLE",
+      "offlineCompetitiveVerification": "UNVERIFIED_LOCAL_ONLY",
+      "accessibilityStatus": "IMPLEMENTATION_PENDING",
+      "offlineStatus": "IMPLEMENTATION_PENDING",
+      "specialCase": "bounded-clock-and-no-punitive-absence"
+    },
+    {
+      "slug": "bong-breaker",
+      "platforms": [
+        "desktop-browser",
+        "mobile-browser"
+      ],
+      "offlineCore": "REQUIRED",
+      "offlineOptionalProtocol": "UNAVAILABLE",
+      "offlineCompetitiveVerification": "UNVERIFIED_LOCAL_ONLY",
+      "accessibilityStatus": "IMPLEMENTATION_PENDING",
+      "offlineStatus": "IMPLEMENTATION_PENDING",
+      "specialCase": "keyboard-touch-and-pause"
+    },
+    {
+      "slug": "baked-invaders",
+      "platforms": [
+        "desktop-browser",
+        "mobile-browser"
+      ],
+      "offlineCore": "REQUIRED",
+      "offlineOptionalProtocol": "UNAVAILABLE",
+      "offlineCompetitiveVerification": "UNVERIFIED_LOCAL_ONLY",
+      "accessibilityStatus": "IMPLEMENTATION_PENDING",
+      "offlineStatus": "IMPLEMENTATION_PENDING",
+      "specialCase": "keyboard-touch-and-pause"
+    },
+    {
+      "slug": "puff-man",
+      "platforms": [
+        "desktop-browser",
+        "mobile-browser"
+      ],
+      "offlineCore": "REQUIRED",
+      "offlineOptionalProtocol": "UNAVAILABLE",
+      "offlineCompetitiveVerification": "UNVERIFIED_LOCAL_ONLY",
+      "accessibilityStatus": "IMPLEMENTATION_PENDING",
+      "offlineStatus": "IMPLEMENTATION_PENDING",
+      "specialCase": "keyboard-touch-and-pause"
+    },
+    {
+      "slug": "grasshopper",
+      "platforms": [
+        "desktop-browser",
+        "mobile-browser"
+      ],
+      "offlineCore": "REQUIRED",
+      "offlineOptionalProtocol": "UNAVAILABLE",
+      "offlineCompetitiveVerification": "UNVERIFIED_LOCAL_ONLY",
+      "accessibilityStatus": "IMPLEMENTATION_PENDING",
+      "offlineStatus": "IMPLEMENTATION_PENDING",
+      "specialCase": "keyboard-touch-and-pause"
+    },
+    {
+      "slug": "roach-run",
+      "platforms": [
+        "desktop-browser",
+        "mobile-browser"
+      ],
+      "offlineCore": "REQUIRED",
+      "offlineOptionalProtocol": "UNAVAILABLE",
+      "offlineCompetitiveVerification": "UNVERIFIED_LOCAL_ONLY",
+      "accessibilityStatus": "IMPLEMENTATION_PENDING",
+      "offlineStatus": "IMPLEMENTATION_PENDING",
+      "specialCase": "keyboard-touch-and-pause"
+    },
+    {
+      "slug": "high-climb",
+      "platforms": [
+        "desktop-browser",
+        "mobile-browser"
+      ],
+      "offlineCore": "REQUIRED",
+      "offlineOptionalProtocol": "UNAVAILABLE",
+      "offlineCompetitiveVerification": "UNVERIFIED_LOCAL_ONLY",
+      "accessibilityStatus": "IMPLEMENTATION_PENDING",
+      "offlineStatus": "IMPLEMENTATION_PENDING",
+      "specialCase": "keyboard-touch-and-pause"
+    },
+    {
+      "slug": "wheres-dave",
+      "platforms": [
+        "desktop-browser",
+        "mobile-browser"
+      ],
+      "offlineCore": "REQUIRED",
+      "offlineOptionalProtocol": "UNAVAILABLE",
+      "offlineCompetitiveVerification": "UNVERIFIED_LOCAL_ONLY",
+      "accessibilityStatus": "IMPLEMENTATION_PENDING",
+      "offlineStatus": "IMPLEMENTATION_PENDING",
+      "specialCase": "accessible-zoom-pan-and-target-alternative"
+    },
+    {
+      "slug": "mad-bud-delivery",
+      "platforms": [
+        "desktop-browser",
+        "mobile-browser"
+      ],
+      "offlineCore": "REQUIRED",
+      "offlineOptionalProtocol": "UNAVAILABLE",
+      "offlineCompetitiveVerification": "UNVERIFIED_LOCAL_ONLY",
+      "accessibilityStatus": "IMPLEMENTATION_PENDING",
+      "offlineStatus": "IMPLEMENTATION_PENDING",
+      "specialCase": "keyboard-touch-and-pause"
+    }
+  ]
+}

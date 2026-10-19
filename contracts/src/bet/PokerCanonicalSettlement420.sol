@@ -21,6 +21,7 @@ contract PokerCanonicalSettlement420 {
     PokerActionDisputeClock420 public immutable disputes;
 
     mapping(bytes32=>uint64) public reservedAt;
+    mapping(bytes32=>bool) public reservationExists;
     mapping(bytes32=>bool) public cancelled;
     mapping(bytes32=>bool) public completed;
 
@@ -50,7 +51,7 @@ contract PokerCanonicalSettlement420 {
         PokerConfidentialDeal420.Hand memory h=deals.getHand(handId);
         if(h.state!=PokerConfidentialDeal420.State.AWAITING &&
            h.state!=PokerConfidentialDeal420.State.COMMITTED)revert InvalidHand();
-        if(reservedAt[handId]!=0||cancelled[handId]||completed[handId])
+        if(reservationExists[handId]||cancelled[handId]||completed[handId])
             revert InvalidHand();
         PokerTableRegistry420.Table memory table=deals.tables().getTable(h.tableId);
         if(msg.sender!=table.controller){
@@ -67,8 +68,12 @@ contract PokerCanonicalSettlement420 {
             revert InvalidHand();
         if(ledger.settlementCoordinator(h.tableId)!=address(this))
             revert InvalidDependency();
-        ledger.reserveHand(h.tableId,handId,mask,h.epoch);
+        // Effects before interaction: a failed reservation atomically rolls back.
+        reservationExists[handId]=true;
         reservedAt[handId]=uint64(block.timestamp);
+        bytes32 actualSnapshot=ledger.reserveHand(h.tableId,handId,mask,h.epoch);
+        if(actualSnapshot==bytes32(0)||actualSnapshot!=ledger.lockedSnapshot(h.tableId))
+            revert InvalidHand();
         emit HandReservedForSettlement(handId,h.tableId,uint64(block.timestamp));
     }
 
@@ -77,13 +82,13 @@ contract PokerCanonicalSettlement420 {
     ///      Cannot cancel a completed encrypted shuffle or accepted terminal proof.
     function cancelWithheldShuffle(bytes32 handId) external {
         PokerConfidentialDeal420.Hand memory h=deals.getHand(handId);
-        if(reservedAt[handId]==0||cancelled[handId]||completed[handId])
+        if(!reservationExists[handId]||cancelled[handId]||completed[handId])
             revert InvalidHand();
         if(block.timestamp<h.deadline+1 hours)revert TooEarly();
         if(canonical.shuffle().isProofComplete(handId))revert InvalidProof();
         if(canonical.acceptedOf(handId).accepted)revert InvalidProof();
-        ledger.cancelReservedHand(h.tableId,handId);
         cancelled[handId]=true;
+        ledger.cancelReservedHand(h.tableId,handId);
         emit HandCancelledForWithheldShuffle(handId,h.tableId);
     }
 
@@ -108,7 +113,7 @@ contract PokerCanonicalSettlement420 {
         PokerCanonicalRake420.Policy calldata policy,uint256 grossPot,
         bool flopSeen,bool uncontested) external {
         PokerConfidentialDeal420.Hand memory h=deals.getHand(handId);
-        if(reservedAt[handId]==0||cancelled[handId]||completed[handId])
+        if(!reservationExists[handId]||cancelled[handId]||completed[handId])
             revert InvalidSettlement();
         if(disputes.isFrozen(handId))revert Disputed();
         PokerCanonicalEvidence420.Accepted memory accepted=canonical.acceptedOf(handId);

@@ -14,7 +14,7 @@ export function renderRiderLanding() {
    <div class="rider-hero-content">
     <h1 id="rider-hero-title">PEOPLE<br>PLACES<br>CANNABIS<br><span>TOGETHER</span></h1>
     <p class="rider-subtitle">A CANNABIS FRIENDLY RIDESHARE</p>
-    <a class="rider-cta" href="/rider" data-route>RIDER PORTAL PREVIEW <span aria-hidden="true">→</span></a>
+    <a class="rider-cta" href="/rider">RIDER PORTAL PREVIEW <span aria-hidden="true">→</span></a>
    </div>
    <ul class="rider-promises" aria-label="LIFTd values">
     <li><span aria-hidden="true">✳</span><strong>Cannabis Friendly</strong><small>Ride your way.</small></li>
@@ -27,7 +27,7 @@ export function renderRiderLanding() {
     <p class="rider-kicker">MORE THAN A RIDE</p>
     <h2 id="rider-more-title">A HIGHER WAY<br>TO GET THERE</h2>
     <p>LIFTd is building a cannabis-friendly rideshare experience that connects people and places with safety, consent and responsible transportation at its core.</p>
-    <a class="rider-cta rider-cta-small" href="/rider" data-route>VIEW RIDER PORTAL <span aria-hidden="true">→</span></a>
+    <a class="rider-cta rider-cta-small" href="/rider">VIEW RIDER PORTAL <span aria-hidden="true">→</span></a>
     <p class="rider-launch-notice">Vancouver pilot in preparation. Booking, payments and live dispatch are not yet available. Drivers must remain unimpaired.</p>
    </div>
    <div class="rider-card-grid">${features.map(f=>`<article class="rider-feature"><img src="./assets/${f.image}" alt="${f.alt}" loading="lazy"><div class="rider-feature-body"><h3>${f.heading}</h3><p>${f.description}</p></div></article>`).join('')}</div>

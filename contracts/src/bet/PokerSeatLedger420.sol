@@ -65,7 +65,7 @@ contract PokerSeatLedger420 {
 
     /// @notice Governance-authorized, immutable table-local settlement consumer binding.
     /// @dev A table cannot change executors or rake destination after binding.
-    function bindSettlement(bytes32 id,address consumer,address rakeRecipient) external {
+    function bindSettlement(bytes32 id,address consumer,address rakeRecipient) external nonReentrant {
         _table(id);
         if(consumer==address(0)||consumer.code.length==0||rakeRecipient==address(0))
             revert SettlementInvalid();
@@ -193,7 +193,7 @@ contract PokerSeatLedger420 {
         emit TopUp(id, plusOne - 1, amount, s.chips);
     }
 
-    function sitOut(bytes32 id, bool value) external {
+    function sitOut(bytes32 id, bool value) external nonReentrant {
         _table(id);
         uint8 plusOne = playerSeatPlusOne[id][msg.sender];
         if (plusOne == 0) revert NotSeated();

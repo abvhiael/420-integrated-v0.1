@@ -119,14 +119,39 @@ contract PokerNLHEBetting420 {
         Game storage g=games[handId];
         if(!g.initialized||handSettled[handId]||
            (g.phase!=Phase.SHOWDOWN&&g.phase!=Phase.UNCONTESTED)||
-           disputes.isFrozen(handId)||outcomeForTable[g.tableId]==address(0)||
+           outcomeForTable[g.tableId]==address(0)||
            ledger.activeHand(g.tableId)!=handId)revert InvalidState();
         if(address(revealForTable[g.tableId])==address(0))revert InvalidState();
         (uint256[9] memory balances,uint256 fee)=
             IPokerNativeOutcome420(outcomeForTable[g.tableId]).calculate(handId,policy);
+        if(disputes.isFrozen(handId))
+            disputes.finalizeVerifiedOutcome(handId,_nativeResolutionHash(handId,g.stateRoot,balances,fee));
         handSettled[handId]=true;
         ledger.settleReservedHand(g.tableId,handId,balances,fee);
         emit NativeHandSettled(handId,g.tableId,fee);
+    }
+    bytes32 public constant RESOLUTION_DOMAIN=keccak256("420.BET.POKER.NATIVE.RESOLUTION.V1");
+    function _nativeResolutionHash(bytes32 handId,bytes32 stateRoot,
+        uint256[9] memory balances,uint256 fee)private view returns(bytes32){
+        PokerConfidentialDeal420.Hand memory h=deals.getHand(handId);
+        return keccak256(abi.encode(RESOLUTION_DOMAIN,block.chainid,address(this),
+            handId,stateRoot,h.seatSnapshotHash,ledger.lockedSnapshot(h.tableId),
+            balances,fee));
+    }
+    /// @notice Anyone may propose a native terminal outcome for transparent
+    /// time-bounded resolution; the dispute contract accepts proposals only from
+    /// its one-time governance-bound native engine, not an outside adjudicator.
+    function proposeDisputeResolution(bytes32 handId,
+        PokerCanonicalRake420.Policy calldata policy) external {
+        Game storage g=games[handId];
+        if(!g.initialized||handSettled[handId]||
+           (g.phase!=Phase.SHOWDOWN&&g.phase!=Phase.UNCONTESTED)||
+           !disputes.isFrozen(handId)||outcomeForTable[g.tableId]==address(0)||
+           ledger.activeHand(g.tableId)!=handId)revert InvalidState();
+        (uint256[9] memory balances,uint256 fee)=
+            IPokerNativeOutcome420(outcomeForTable[g.tableId]).calculate(handId,policy);
+        disputes.proposeVerifiedOutcome(handId,
+            _nativeResolutionHash(handId,g.stateRoot,balances,fee));
     }
     function gameOf(bytes32 handId) external view returns(Game memory){return games[handId];}
     function playerOf(bytes32 handId,uint8 seat) external view returns(Player memory){return players[handId][seat];}
@@ -192,7 +217,7 @@ contract PokerNLHEBetting420 {
            !shuffle.isProofComplete(handId)||timeoutSecs<30||timeoutSecs>3600||ante!=0)
             revert InvalidState();
         Game storage g=games[handId];
-        if(disputes.isFrozen(handId)||g.initialized||ledger.activeHand(h.tableId)!=handId||
+        if(g.initialized||ledger.activeHand(h.tableId)!=handId||
            ledger.seatingEpoch(h.tableId)!=h.epoch||
            h.seatSnapshotHash!=deals.snapshotFor(h.tableId,deals.handSeatMask(handId)))
             revert InvalidState();
@@ -237,7 +262,7 @@ contract PokerNLHEBetting420 {
     function action(bytes32 handId,uint8 seat,Move move,uint256 chips,
         uint64 expiry,bytes32 expectedRoot,bytes calldata signature) external {
         Game storage g=games[handId];
-        if(!g.initialized || !_isBetting(g.phase)||disputes.isFrozen(handId))revert InvalidState();
+        if(!g.initialized || !_isBetting(g.phase))revert InvalidState();
         if(block.timestamp>g.deadline)revert Expired();
         if(seat!=g.toAct||(g.pendingMask&_mask(seat))==0)revert WrongTurn();
         if(expectedRoot!=g.stateRoot)revert InvalidAction();
@@ -248,7 +273,7 @@ contract PokerNLHEBetting420 {
     }
     function timeout(bytes32 handId) external {
         Game storage g=games[handId];
-        if(!g.initialized||!_isBetting(g.phase)||g.pendingMask==0||disputes.isFrozen(handId))
+        if(!g.initialized||!_isBetting(g.phase)||g.pendingMask==0)
             revert InvalidState();
         if(block.timestamp<=g.deadline)revert TooEarly();
         uint8 seat=g.toAct;
@@ -341,7 +366,6 @@ contract PokerNLHEBetting420 {
     function advanceRevealedStreet(bytes32 handId,uint8 street)external {
         Game storage g=games[handId];
         if(msg.sender!=address(revealForTable[g.tableId])||msg.sender==address(0))revert Unauthorized();
-        if(disputes.isFrozen(handId))revert InvalidState();
         if(!this.canRevealStreet(handId,street)||
            !revealForTable[g.tableId].isStageComplete(handId,street))revert WaitingForReveal();
         g.phase=street==1?Phase.FLOP:street==2?Phase.TURN:Phase.RIVER;

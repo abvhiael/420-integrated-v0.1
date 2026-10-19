@@ -6,7 +6,7 @@ test('native integration assembly uses official Travel SDK and approved origin',
 test('rider and driver include bounded integrated trip services without enabling preview payments',()=>{
  for(const p of ['RiderScreen.tsx','DriverScreen.tsx']){
   const src=readFileSync(new URL('../src/'+p,import.meta.url),'utf8');
-  assert.match(src,/TripIntegrations trip=\{snapshot\?\.trip\}/);
+  assert.match(src,/TripIntegrations trip=\{snapshot\?\.trip\} consumer=\{integrations\}/);
  }
  const integrated=readFileSync(new URL('../src/TripIntegrations.tsx',import.meta.url),'utf8');
  assert.match(integrated,/NONPRODUCTION/);assert.match(integrated,/accessibilityState=\{\{disabled:!enabled\}\}/);

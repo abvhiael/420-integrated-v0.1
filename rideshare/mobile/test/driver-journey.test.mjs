@@ -43,7 +43,7 @@ test('revoked driver credentials clear in-memory offers, trip and eligibility',a
  await assert.rejects(j.respondOffer('offer1',true),/OFFER_EXPIRED_OR_UNAVAILABLE/);
 });
 test('navigation requires active verified trip; never mint guessed directions',async()=>{
- const j=make({readTrip:async()=>trip('ASSIGNED',1),navigation:async()=>({tripId:'trip1',routeRef:'route1',expiresAt:300,url:'https://navigation.example/route/1'})});
+ const j=make({readTrip:async()=>trip('ASSIGNED',1),navigation:async()=>({tripId:'trip1',routeRef:'route1',expiresAt:Math.floor(Date.now()/1000)+3600,url:'https://navigation.example/route/1'})});
  await assert.rejects(j.navigation(),/TRIP_UNAVAILABLE/);await j.readTrip('trip1');
  assert.equal(await j.navigation(),'https://navigation.example/route/1');
 });

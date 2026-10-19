@@ -38,7 +38,7 @@ contract PokerNativeOutcome420 {
     /// for multiway, and repeats identically for second hole-card pass.
     function _holeCards(bytes32 handId,PokerNLHEBetting420.Game memory g,uint8 seat)
         private view returns(uint8 firstCard,uint8 secondCard){
-        uint8 n;
+        uint8 n = 0;
         for(uint8 i=0;i<9;i++)if(_active(g.seatsMask,i))n++;
         uint8 cursor=n==2?g.button:_nextSeat(g.seatsMask,g.button);
         uint8 slot=0;
@@ -57,7 +57,7 @@ contract PokerNativeOutcome420 {
         if(!reveals.isStageComplete(handId,1)||!reveals.isStageComplete(handId,2)||
            !reveals.isStageComplete(handId,3)||!reveals.isStageComplete(handId,4))
             revert InvalidState();
-        uint8 n;
+        uint8 n = 0;
         for(uint8 i=0;i<9;i++)if(_active(g.seatsMask,i))n++;
         uint8 start=2*n;
         uint8[5] memory board;
@@ -85,13 +85,13 @@ contract PokerNativeOutcome420 {
         if(address(engine.revealForTable(g.tableId))!=address(reveals))revert InvalidState();
         uint256[9] memory deposits;
         bool[9] memory folded;
-        uint8 alive;
-        uint8 lone;
-        uint256 originalPot;
-        uint256 maxContribution;
-        uint256 secondContribution;
-        uint8 top;
-        uint8 topCount;
+        uint8 alive = 0;
+        uint8 lone = 0;
+        uint256 originalPot = 0;
+        uint256 maxContribution = 0;
+        uint256 secondContribution = 0;
+        uint8 top = 0;
+        uint8 topCount = 0;
         for(uint8 seat=0;seat<9;seat++){
             PokerNLHEBetting420.Player memory p=engine.playerOf(handId,seat);
             PokerSeatLedger420.Seat memory s=engine.ledger().seatOf(g.tableId,seat);
@@ -112,7 +112,7 @@ contract PokerNativeOutcome420 {
             revert InvalidPot();
         if((contested&&alive<2)||(!contested&&alive!=1))revert InvalidState();
         // Uncalled excess belongs to its originating seat, never a contested side pot.
-        uint256 refund;
+        uint256 refund = 0;
         if(topCount==1&&maxContribution>secondContribution) {
             refund=maxContribution-secondContribution;
             deposits[top]-=refund;finalChips[top]+=refund;
@@ -127,7 +127,7 @@ contract PokerNativeOutcome420 {
             uint256[9] memory scores=_ranks(handId,g);
             _awardPots(deposits,folded,scores,g.button,fee,gross,finalChips);
         }
-        uint256 afterTotal;
+        uint256 afterTotal = 0;
         for(uint8 i=0;i<9;i++)if(_active(g.seatsMask,i))afterTotal+=finalChips[i];
         if(afterTotal+fee!=g.initialChips)revert InvalidPot();
     }
@@ -137,24 +137,27 @@ contract PokerNativeOutcome420 {
     function _awardPots(uint256[9] memory deposits,bool[9] memory folded,
         uint256[9] memory scores,uint8 button,uint256 rake,uint256 gross,
         uint256[9] memory finalChips)private pure {
-        uint256 previous;
+        uint256 previous = 0;
         uint256 remainingRake=rake;
         for(uint8 stage=0;stage<9;stage++){
             uint256 tier=type(uint256).max;
-            uint8 supporters;
+            uint8 supporters = 0;
             for(uint8 i=0;i<9;i++)if(deposits[i]>previous&&deposits[i]<tier)
                 tier=deposits[i];
             if(tier==type(uint256).max)break;
             for(uint8 i=0;i<9;i++)if(deposits[i]>=tier)supporters++;
             uint256 pot=(tier-previous)*supporters;
-            uint256 cut;
+            uint256 cut = 0;
             bool last=true;
             for(uint8 i=0;i<9;i++)if(deposits[i]>tier)last=false;
             if(last)cut=remainingRake;
-            else cut=(rake/gross)*pot+((rake%gross)*pot)/gross;
+            else {
+                if(gross==0||rake>type(uint256).max/pot)revert InvalidPot();
+                cut=(rake*pot)/gross;
+            }
             if(cut>pot||cut>remainingRake)revert InvalidPot();
             remainingRake-=cut;
-            uint256 best;uint16 winners;uint8 count;
+            uint256 best=0;uint16 winners=0;uint8 count=0;
             for(uint8 i=0;i<9;i++)if(deposits[i]>=tier&&!folded[i]){
                 if(winners==0||scores[i]>best){best=scores[i];winners=uint16(1)<<i;count=1;}
                 else if(scores[i]==best){winners|=uint16(1)<<i;count++;}

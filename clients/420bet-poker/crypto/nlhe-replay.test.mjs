@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {rank5,rank7,compareRank,settlePots,replayNLHE} from './nlhe-replay.mjs';
 test('ranking straight flush, quads and ace-low wheel',()=>{
   assert.deepEqual(rank5([12,11,10,9,8]),[8,14]);
-  assert.deepEqual(rank5([12,0,13,26,39]),[7,14,2]);
+  assert.deepEqual(rank5([12,0,13,26,39]),[7,2,14]);
   assert.deepEqual(rank5([12,0,1,2,3]),[4,5]);
   assert.ok(compareRank(rank5([12,11,10,9,8]),rank5([12,0,13,26,39]))>0);
 });
@@ -14,7 +14,7 @@ test('seven-card best hand evaluates independently of card order',()=>{
   assert.throws(()=>rank7([1,1,2,3,4,5,6]),/invalid/);
 });
 test('side pot eligibility and chip conservation',()=>{
-  const ranks=[[1,14,13,12,9],[2,8,7,5],[3,4,3],[4,5]];
+  const ranks=[[4,14],[3,8,7,5],[2,10,3],[1,5]];
   const {payouts,pots}=settlePots([100,200,300,300],[false,false,false,true],ranks,0);
   assert.deepEqual(pots.map(x=>x.amount),[400,300,200]);
   assert.deepEqual(payouts,[400,300,200,0]);

@@ -1,0 +1,245 @@
+{
+  "schemaVersion": "1.0.0",
+  "step": "ARC-0.6",
+  "application": "420Arcade",
+  "status": "STRUCTURE_CONTRACT_DEFINED",
+  "sourceIdentityManifest": "config/arcade-game-identities.json",
+  "sourcePlatformRequirements": "config/arcade-platform-requirements.json",
+  "architectureOwner": "docs/arcade/ARC-0.2-ARCHITECTURE-DECISIONS.md",
+  "packages": [
+    {
+      "id": "arcade-web",
+      "path": "apps/arcade-web",
+      "role": "launcher",
+      "dependencies": [
+        "arcade-core",
+        "arcade-saves",
+        "arcade-score",
+        "arcade-art",
+        "arcade-character-sdk",
+        "arcade-phaser"
+      ],
+      "implemented": false
+    },
+    {
+      "id": "arcade-core",
+      "path": "packages/arcade-core",
+      "role": "pure-domain",
+      "dependencies": [],
+      "implemented": false
+    },
+    {
+      "id": "arcade-phaser",
+      "path": "packages/arcade-phaser",
+      "role": "runtime-adapter",
+      "dependencies": [
+        "arcade-core"
+      ],
+      "implemented": false
+    },
+    {
+      "id": "arcade-character-sdk",
+      "path": "packages/arcade-character-sdk",
+      "role": "approved-assets",
+      "dependencies": [
+        "arcade-core"
+      ],
+      "implemented": false
+    },
+    {
+      "id": "arcade-saves",
+      "path": "packages/arcade-saves",
+      "role": "local-persistence",
+      "dependencies": [
+        "arcade-core"
+      ],
+      "implemented": false
+    },
+    {
+      "id": "arcade-score",
+      "path": "packages/arcade-score",
+      "role": "unverified-result-adapter",
+      "dependencies": [
+        "arcade-core"
+      ],
+      "implemented": false
+    },
+    {
+      "id": "arcade-art",
+      "path": "packages/arcade-art",
+      "role": "private-vector-art",
+      "dependencies": [
+        "arcade-core"
+      ],
+      "implemented": false
+    },
+    {
+      "id": "arcade-testing",
+      "path": "packages/arcade-testing",
+      "role": "test-only",
+      "dependencies": [
+        "arcade-core"
+      ],
+      "implemented": false
+    }
+  ],
+  "gameBundles": [
+    {
+      "slug": "kush-crush",
+      "path": "apps/arcade-web/src/games/kush-crush",
+      "dependsOn": [
+        "arcade-core"
+      ],
+      "independentlyBundled": true,
+      "implemented": false
+    },
+    {
+      "slug": "420colouring-book",
+      "path": "apps/arcade-web/src/games/420colouring-book",
+      "dependsOn": [
+        "arcade-core"
+      ],
+      "independentlyBundled": true,
+      "implemented": false
+    },
+    {
+      "slug": "420buddy",
+      "path": "apps/arcade-web/src/games/420buddy",
+      "dependsOn": [
+        "arcade-core"
+      ],
+      "independentlyBundled": true,
+      "implemented": false
+    },
+    {
+      "slug": "bong-breaker",
+      "path": "apps/arcade-web/src/games/bong-breaker",
+      "dependsOn": [
+        "arcade-core"
+      ],
+      "independentlyBundled": true,
+      "implemented": false
+    },
+    {
+      "slug": "baked-invaders",
+      "path": "apps/arcade-web/src/games/baked-invaders",
+      "dependsOn": [
+        "arcade-core"
+      ],
+      "independentlyBundled": true,
+      "implemented": false
+    },
+    {
+      "slug": "puff-man",
+      "path": "apps/arcade-web/src/games/puff-man",
+      "dependsOn": [
+        "arcade-core"
+      ],
+      "independentlyBundled": true,
+      "implemented": false
+    },
+    {
+      "slug": "grasshopper",
+      "path": "apps/arcade-web/src/games/grasshopper",
+      "dependsOn": [
+        "arcade-core"
+      ],
+      "independentlyBundled": true,
+      "implemented": false
+    },
+    {
+      "slug": "roach-run",
+      "path": "apps/arcade-web/src/games/roach-run",
+      "dependsOn": [
+        "arcade-core"
+      ],
+      "independentlyBundled": true,
+      "implemented": false
+    },
+    {
+      "slug": "high-climb",
+      "path": "apps/arcade-web/src/games/high-climb",
+      "dependsOn": [
+        "arcade-core"
+      ],
+      "independentlyBundled": true,
+      "implemented": false
+    },
+    {
+      "slug": "wheres-dave",
+      "path": "apps/arcade-web/src/games/wheres-dave",
+      "dependsOn": [
+        "arcade-core"
+      ],
+      "independentlyBundled": true,
+      "implemented": false
+    },
+    {
+      "slug": "mad-bud-delivery",
+      "path": "apps/arcade-web/src/games/mad-bud-delivery",
+      "dependsOn": [
+        "arcade-core"
+      ],
+      "independentlyBundled": true,
+      "implemented": false
+    }
+  ],
+  "externalDependencies": [
+    {
+      "name": "420-gaming-sdk",
+      "path": "packages/420-gaming-sdk",
+      "role": "optional-scoped-protocol",
+      "optional": true
+    },
+    {
+      "name": "phaser",
+      "role": "action-game-runtime-only",
+      "optional": true,
+      "installation": "NOT_PINNED_NOT_INSTALLED"
+    },
+    {
+      "name": "react",
+      "role": "launcher-ui",
+      "optional": false,
+      "installation": "NOT_PINNED_NOT_INSTALLED"
+    },
+    {
+      "name": "typescript",
+      "role": "compile-and-type-check",
+      "optional": false,
+      "installation": "NOT_PINNED_NOT_INSTALLED"
+    }
+  ],
+  "boundaries": {
+    "guestCoreRequiresWallet": false,
+    "allowCrossGameProtectedSaveWrite": false,
+    "allowClientSigningKeyCustody": false,
+    "allowClientVerifiedScoreAuthority": false,
+    "allowDirectGameToRegistryWrite": false,
+    "allowPrivateContentOnChain": false,
+    "serverAuthorityOnlyThroughExistingGamingProtocol": true,
+    "scopedSdkOnly": true,
+    "assetRightsApprovalBeforePublish": true,
+    "lazyFaultIsolatedBundles": true
+  },
+  "versions": {
+    "identity": "IMMUTABLE_V1_GAME_ID",
+    "manifest": "semver",
+    "api": "semver",
+    "ruleset": "exact-semver",
+    "content": "exact-semver",
+    "saveSchema": "positive-integer-migrations",
+    "assets": "content-hash-and-approval",
+    "compatibility": "explicit-replay-and-save-migration",
+    "breaking": "major-bump-and-explicit-migration",
+    "patch": "no-change-to-published-rules-semantics",
+    "lockfile": "required-before-runtime-install",
+    "packageChanges": "scoped-tests-and-migration-review"
+  },
+  "release": {
+    "registeredGames": 0,
+    "liveAuthority": false,
+    "platformCertified": false,
+    "gameBundlesImplemented": 0
+  }
+}

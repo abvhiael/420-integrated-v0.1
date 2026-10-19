@@ -53,7 +53,7 @@ test('two cumulative short all-ins reopen only at full raise increment',()=>{
   a(4,0,2,'raise',30),
   a(5,0,0,'raise',50)
  ]});
- assert.equal(result.contributed[0],75);
+ assert.equal(result.committed[0],75);
  assert.equal(result.nonce,5);
 });
 test('one short all-in does not reopen previously acting player',()=>{

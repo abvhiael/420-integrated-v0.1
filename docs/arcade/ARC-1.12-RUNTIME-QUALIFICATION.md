@@ -1,0 +1,9 @@
+# ARC-1.12 — Shared automated testing and runtime qualification
+
+Defines one retained Arcade test inventory at `packages/arcade-testing/scripts/qualify.mjs`, built from the owners previously qualified through ARC-1.11, plus runtime-contract assertions. Mandatory groups: Phaser, React casual, input, audio, saves, score events, universal controls, integrity assets and the cross-module testing contract. The runner refuses missing test owners, duplicate owners, changed canonical 11-game ordering, or unapproved claims that game bundles were built. It invokes each Node owner exactly once with explicit exit-code checking and reports the exact Git HEAD, group statuses, local qualification and release limits. It does not invoke Foundry, Genesis, Docs, Geth, other app suites or economic/operator acceptance.
+
+The browser launcher retains its established TypeScript, lint, security, test and production build checks as a separate CI step. The shared qualification is suitable for later app Level 2 retained milestone ownership, but this ARC-1.12 implementation receives ordinary Level 1 qualification; no Level 3 closeout occurs now.
+
+**Expected Arcade experience and constraints:** a responsive, keyboard-usable 11-title discovery preview with intentionally disabled game launches; shared runtime lifecycle safety, input/audio, versioned guest saves, score non-authority, controls and integrity-verified assets. None of the eleven independently playable game bundles has yet shipped; no real-device browser compatibility, offline service worker or actual verified competitive scoring is certified. Later per-game implementation and acceptance must supply those proofs instead of promoting this harness's structural assertions to production acceptance.
+
+The immutable ARC-0.7 freeze remains unchanged. Test outputs must distinguish implementation SHA from later evidence-only certificate SHA; live GP-17 and production approval remain independently gated.

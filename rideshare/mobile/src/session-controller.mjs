@@ -12,7 +12,7 @@ export function validateStatus(status,{now,expectedNonce,expectedAccount,expecte
  if(status.nonce!==expectedNonce||status.accountId!==expectedAccount||status.deviceId!==expectedDevice)deny('SESSION_BINDING_MISMATCH');
  return Object.freeze({...status});
 }
-export function createMobileSession({store,authority,clock=()=>Math.floor(Date.now()/1000),nonce=()=>undefined}){
+export function createMobileSession({store,authority,clock=()=>Math.floor(Date.now()/1000),nonce=/** @returns {string} */ (()=>'')}){
  if(!store||typeof store.read!=='function'||typeof store.write!=='function'||typeof store.clear!=='function'||typeof authority!=='function'||typeof clock!=='function'||typeof nonce!=='function')deny('INVALID_CONFIGURATION');
  let generation=0,current=null;
  const drop=async()=>{generation++;current=null;await store.clear();};

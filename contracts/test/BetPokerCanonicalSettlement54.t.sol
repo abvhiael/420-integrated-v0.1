@@ -40,11 +40,14 @@ contract PokerCanonicalSettlement54Test is PokerCanonicalEvidence54Test {
         cheat54.prank(PROVIDER_B);deal.commit(id,keccak256("b"));
     }
     function _completeShuffle(bytes32 id) internal {
+        bytes32 initialRoot=keccak256("certified encrypted starting deck");
+        initialVerifier.allow(initialDeck.statement(id,initialRoot));
+        initialDeck.submit(id,initialRoot,hex"f00d");
         PokerConfidentialDeal420.Hand memory h=deal.getHand(id);
         bytes32 first=keccak256("encrypted A");
         bytes32 second=keccak256("encrypted B");
-        verifier.allow(gate.statement(id,1,h.transcriptCommitment,first));
-        cheat54.prank(PROVIDER_A);gate.proveStage(id,1,h.transcriptCommitment,first,hex"010203");
+        verifier.allow(gate.statement(id,1,initialDeck.rootOf(id),first));
+        cheat54.prank(PROVIDER_A);gate.proveStage(id,1,initialDeck.rootOf(id),first,hex"010203");
         verifier.allow(gate.statement(id,2,first,second));
         cheat54.prank(PROVIDER_B);gate.proveStage(id,2,first,second,hex"010203");
     }

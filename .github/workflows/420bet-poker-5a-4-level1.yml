@@ -7,6 +7,7 @@ on:
       - 'contracts/test/BetPokerConfidentialDeal54.t.sol'
       - 'contracts/src/bet/PokerDeckDisclosure420.sol'
       - 'contracts/test/BetPokerDeckDisclosure54.t.sol'
+      - 'clients/420bet-poker/crypto/**'
       - '.github/workflows/420bet-poker-5a-4-level1.yml'
 permissions:
   contents: read
@@ -30,6 +31,11 @@ jobs:
       - uses: foundry-rs/foundry-toolchain@v1
         with:
           version: stable
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify confidential shuffle and encrypted seat delivery
+        run: node --test clients/420bet-poker/crypto/confidential-deal.test.mjs
       - name: Scope commitment adversarial + inherited seating/table regression
         working-directory: contracts
         run: forge test --match-contract '^(PokerDeckDisclosure54Test|PokerConfidentialDeal54Test|PokerSeatLedger53Test|BetPokerTableRegistry52Test)$' -vv

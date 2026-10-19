@@ -78,6 +78,12 @@ jobs:
           POKER_ZK_ARTIFACT_DIR: ../../../artifacts/420bet-5a-4
         working-directory: clients/420bet-poker/zkshuffle
         run: go test -mod=mod -timeout 15m ./...
+      - name: Compile exact generated 52-card Solidity verifier
+        working-directory: contracts
+        run: |
+          mkdir -p src/bet/generated
+          cp ../artifacts/420bet-5a-4/EXPERIMENTAL-Reencrypt52Verifier.sol src/bet/generated/ExperimentalReencrypt52Verifier.sol
+          forge build src/bet/generated/ExperimentalReencrypt52Verifier.sol
       - name: Record exact-SHA cryptographic provenance
         run: |
           mkdir -p artifacts/420bet-5a-4

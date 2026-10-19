@@ -1,0 +1,33 @@
+name: 420Bet Poker Confidential Deal 5A.4 Scoped Level 1
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'contracts/src/bet/PokerConfidentialDeal420.sol'
+      - 'contracts/test/BetPokerConfidentialDeal54.t.sol'
+      - '.github/workflows/420bet-poker-5a-4-level1.yml'
+permissions:
+  contents: read
+concurrency:
+  group: 420bet-poker-5a-4-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+jobs:
+  commitment-envelope:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      FOUNDRY_PROFILE: pr
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Bind tested SHA
+        env:
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$HEAD_SHA"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Scope commitment adversarial + inherited seating/table regression
+        working-directory: contracts
+        run: forge test --match-contract '^(PokerConfidentialDeal54Test|PokerSeatLedger53Test|BetPokerTableRegistry52Test)$' -vv

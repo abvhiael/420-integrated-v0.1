@@ -45,6 +45,32 @@ contract PokerActionKeys420 {
             h.tableId,h.configHash,h.rulesetId,h.versionId,h.epoch,h.seatSnapshotHash,
             seat,s.player,s.epoch,bound.serial,nonce,expectedState,moveHash,expiry));
     }
+    /// @notice Pure on-chain signature validation without consuming a nonce.
+    /// @dev A canonical hand engine tracks and consumes its own ordered action
+    ///      sequence atomically, preventing standalone signature front-running.
+    function checkSignature(bytes32 handId,uint8 seat,uint64 nonce,bytes32 expectedState,
+        bytes32 moveHash,uint64 expiry,bytes calldata signature)
+        external view returns(bytes32 digest){
+        PokerConfidentialDeal420.Hand memory h=deals.getHand(handId);
+        if(expiry<block.timestamp||deals.ledger().seatingEpoch(h.tableId)!=h.epoch ||
+            deals.snapshotFor(h.tableId,deals.handSeatMask(handId))!=h.seatSnapshotHash)
+            revert InvalidHand();
+        digest=actionDigest(handId,seat,nonce,expectedState,moveHash,expiry);
+        if(signature.length!=65)revert InvalidSignature();
+        bytes32 rr;bytes32 ss;uint8 vv;
+        assembly {
+            rr := calldataload(signature.offset)
+            ss := calldataload(add(signature.offset,32))
+            vv := byte(0,calldataload(add(signature.offset,64)))
+        }
+        if(uint256(ss)==0||uint256(ss)>HALF_ORDER||uint256(rr)==0||
+            (vv!=27&&vv!=28))revert InvalidSignature();
+        address recovered=ecrecover(digest,vv,rr,ss);
+        PokerSeatLedger420.Seat memory s=deals.ledger().seatOf(h.tableId,seat);
+        if(recovered==address(0)||recovered!=keys[h.tableId][s.player].signer)
+            revert InvalidSignature();
+    }
+
     function verifyAndConsume(bytes32 handId,uint8 seat,uint64 nonce,bytes32 expectedState,
         bytes32 moveHash,uint64 expiry,bytes calldata signature) external returns(bytes32 digest) {
         PokerConfidentialDeal420.Hand memory h=deals.getHand(handId);

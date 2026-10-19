@@ -12,7 +12,7 @@ test('React renders all eleven canonical games as disabled preview cards',async(
  try {
   const {Launcher,validateCatalog}=await vite.ssrLoadModule('/src/App.tsx');
   const html=renderToStaticMarkup(React.createElement(Launcher));
-  const names=JSON.parse(read('../../../../config/arcade-game-identities.json')).games;
+  const names=JSON.parse(read('../../../config/arcade-game-identities.json')).games;
   assert.equal((html.match(/In development · Not yet playable/g)||[]).length,11);
   for(const game of names)assert.ok(html.includes(game.displayName),game.displayName);
   assert.match(html,/aria-live="polite"/);assert.match(html,/id="main"/);assert.match(html,/No games installed/);

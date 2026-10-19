@@ -1,0 +1,117 @@
+{
+  "schema": "mad-buds-animation-manifest-v1",
+  "schemaVersion": "1.0",
+  "characterId": "kush_krusher",
+  "animationId": "kk_anim_01_idle_annoyed",
+  "animationName": "idle_annoyed",
+  "frameCount": 10,
+  "frameWidth": 1024,
+  "frameHeight": 1024,
+  "fps": 10,
+  "durationMs": 1000,
+  "loop": true,
+  "direction": "front",
+  "pivotNormalized": [
+    0.5,
+    0.934
+  ],
+  "sourceArt": "kush_krusher_anim_01_idle_annoyed_frame_02.png",
+  "sourceSHA256": "5450b6d4a794f760d6300788a7ea1b27aa289f7df9231f5c16e6ca4d4709a6ef",
+  "masterSheet": "kush_krusher_master_character_sheet.png",
+  "method": "single-source deterministic localized torso/shoulder/eye displacement with exact shoe lock",
+  "repositoryDestination": "assets/arcade/mad-buds/kush-krusher/animations/kk_anim_01_idle_annoyed/ (proposed, not repository-verified)",
+  "visualApproval": "PENDING",
+  "qualification": "PENDING OWNER VISUAL MOTION APPROVAL",
+  "frames": [
+    {
+      "index": 1,
+      "filename": "kush_krusher_anim_01_idle_annoyed_frame_01.png",
+      "durationMs": 100,
+      "sha256": "b227d496c5bc684139762c4f487a2838b38199a4497d104f449daa4a5a3dc00b",
+      "breath": 0.0,
+      "shoulder": 0,
+      "glance": 0
+    },
+    {
+      "index": 2,
+      "filename": "kush_krusher_anim_01_idle_annoyed_frame_02.png",
+      "durationMs": 100,
+      "sha256": "ad2889d109f221975c77341b1b83c7e2464c8f36ef2f997b3a8091ed713fc46b",
+      "breath": 0.38,
+      "shoulder": 0.3,
+      "glance": 0
+    },
+    {
+      "index": 3,
+      "filename": "kush_krusher_anim_01_idle_annoyed_frame_03.png",
+      "durationMs": 100,
+      "sha256": "e2e8744214b99f7a0d304264431bbe67ab2b1afa667ae5f8b3215ce8d135c951",
+      "breath": 0.72,
+      "shoulder": 0.7,
+      "glance": 0
+    },
+    {
+      "index": 4,
+      "filename": "kush_krusher_anim_01_idle_annoyed_frame_04.png",
+      "durationMs": 100,
+      "sha256": "4879262d72664c4f1ee5227b7b1e15a5039af308412ba70ac53b542a9b288935",
+      "breath": 1.0,
+      "shoulder": 1,
+      "glance": 0
+    },
+    {
+      "index": 5,
+      "filename": "kush_krusher_anim_01_idle_annoyed_frame_05.png",
+      "durationMs": 100,
+      "sha256": "5c6bc6d280e13b982c2018828499fd6edb4cf8beea765dcdb44051ca3be6a503",
+      "breath": 0.86,
+      "shoulder": 0.7,
+      "glance": 0
+    },
+    {
+      "index": 6,
+      "filename": "kush_krusher_anim_01_idle_annoyed_frame_06.png",
+      "durationMs": 100,
+      "sha256": "cd3e1a7fcf9d8c6fb25fa0592bc79187e2b398e49185f6aefcc3708c07592bdb",
+      "breath": 0.45,
+      "shoulder": 0.2,
+      "glance": 0
+    },
+    {
+      "index": 7,
+      "filename": "kush_krusher_anim_01_idle_annoyed_frame_07.png",
+      "durationMs": 100,
+      "sha256": "91554983b8b747f00fd02822bf96a6a2e50aa3de275f13e86ea4c5a5eac1cfc5",
+      "breath": -0.05,
+      "shoulder": -0.3,
+      "glance": 1.5
+    },
+    {
+      "index": 8,
+      "filename": "kush_krusher_anim_01_idle_annoyed_frame_08.png",
+      "durationMs": 100,
+      "sha256": "43aa25614b8a88d72af350d841e8baf32a56c2283fe10b6be6dc02d5f028e2f4",
+      "breath": -0.32,
+      "shoulder": -0.5,
+      "glance": 3
+    },
+    {
+      "index": 9,
+      "filename": "kush_krusher_anim_01_idle_annoyed_frame_09.png",
+      "durationMs": 100,
+      "sha256": "8f42537a83662c2042c7e231e8340b4973bfb30ddf462ed9ae9b536548ee67dd",
+      "breath": -0.22,
+      "shoulder": -0.3,
+      "glance": 1.5
+    },
+    {
+      "index": 10,
+      "filename": "kush_krusher_anim_01_idle_annoyed_frame_10.png",
+      "durationMs": 100,
+      "sha256": "9d045af6210cc135e0cc7c6c3d17bb7ee1dc86ec1ac7243ee58f39c075ba6d27",
+      "breath": -0.08,
+      "shoulder": -0.1,
+      "glance": 0
+    }
+  ]
+}

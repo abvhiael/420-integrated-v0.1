@@ -34,7 +34,7 @@ type PartialDecryptCircuit struct {
 func(c *PartialDecryptCircuit)Define(api frontend.API)error{
  api.AssertIsDifferent(c.HandScope,0)
  api.AssertIsLessOrEqual(c.Position,51)
- api.AssertIsLessOrEqual(c.Street,3)
+ api.AssertIsLessOrEqual(c.Street,4)
  api.AssertIsLessOrEqual(c.ProviderIndex,1)
  api.AssertIsDifferent(c.SecretShare,0)
  curve,err:=twistededwards.NewEdCurve(api,ecccurve.BN254)

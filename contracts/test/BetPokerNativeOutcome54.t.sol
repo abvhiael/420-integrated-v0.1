@@ -110,10 +110,10 @@ contract PokerNativeOutcome54Test is PokerLiveCardReveals54Test {
     }
 
     function testGovernanceCannotBindForeignEngineOrRevealCalculator() public {
-        bytes32 id=_fundedAndProved();
+        bytes32 id=_readyLive();
         require(id!=bytes32(0),"real hand");
-        // Existing accepted binding stays immutable, so direct second-binding
-        // attempts must fail even for the authorized admin.
+        // No calculator is currently bound, so this verifies the actual
+        // foreign-engine/reveal rejection, not just immutability on rebinding.
         WrongEngineOutcome54 attacker=new WrongEngineOutcome54();
         cheat54.expectRevert(PokerNLHEBetting420.InvalidConfiguration.selector);
         cheat54.prank(ADMIN);engine.bindOutcome(TABLE,address(attacker));

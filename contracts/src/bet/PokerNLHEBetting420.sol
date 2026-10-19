@@ -3,6 +3,7 @@ pragma solidity ^0.8.24;
 
 import "./PokerActionKeys420.sol";
 import "./PokerPrivateShuffleGate420.sol";
+import "./PokerActionDisputeClock420.sol";
 
 interface IPokerAuthenticatedStreet420 {
     function isStageComplete(bytes32 handId,uint8 street) external view returns(bool);
@@ -52,6 +53,7 @@ contract PokerNLHEBetting420 {
     PokerSeatLedger420 public immutable ledger;
     PokerPrivateShuffleGate420 public immutable shuffle;
     PokerActionKeys420 public immutable keys;
+    PokerActionDisputeClock420 public immutable disputes;
     BetAuthorization420 public immutable authorization;
     IPokerAuthenticatedStreet420 public streetReveals;
     mapping(bytes32=>Game) private games;
@@ -67,15 +69,17 @@ contract PokerNLHEBetting420 {
     event StreetOpened(bytes32 indexed handId,uint8 street);
     event RevealsBound(address indexed gate);
 
-    constructor(address deals_,address shuffle_,address keys_) {
-        if(deals_==address(0)||shuffle_==address(0)||keys_==address(0))
+    constructor(address deals_,address shuffle_,address keys_,address disputes_) {
+        if(deals_==address(0)||shuffle_==address(0)||keys_==address(0)||disputes_==address(0))
             revert InvalidConfiguration();
         deals=PokerConfidentialDeal420(deals_);
         ledger=deals.ledger();
         shuffle=PokerPrivateShuffleGate420(shuffle_);
         keys=PokerActionKeys420(keys_);
+        disputes=PokerActionDisputeClock420(disputes_);
         authorization=deals.authorization();
-        if(address(shuffle.deals())!=deals_||address(keys.deals())!=deals_)
+        if(address(shuffle.deals())!=deals_||address(keys.deals())!=deals_||
+           address(disputes.deals())!=deals_)
             revert InvalidConfiguration();
     }
 
@@ -151,7 +155,7 @@ contract PokerNLHEBetting420 {
            !shuffle.isProofComplete(handId)||timeoutSecs<30||timeoutSecs>3600||ante!=0)
             revert InvalidState();
         Game storage g=games[handId];
-        if(g.initialized||ledger.activeHand(h.tableId)!=handId||
+        if(disputes.isFrozen(handId)||g.initialized||ledger.activeHand(h.tableId)!=handId||
            ledger.seatingEpoch(h.tableId)!=h.epoch||
            h.seatSnapshotHash!=deals.snapshotFor(h.tableId,deals.handSeatMask(handId)))
             revert InvalidState();
@@ -196,7 +200,7 @@ contract PokerNLHEBetting420 {
     function action(bytes32 handId,uint8 seat,Move move,uint256 chips,
         uint64 expiry,bytes32 expectedRoot,bytes calldata signature) external {
         Game storage g=games[handId];
-        if(!g.initialized || !_isBetting(g.phase))revert InvalidState();
+        if(!g.initialized || !_isBetting(g.phase)||disputes.isFrozen(handId))revert InvalidState();
         if(block.timestamp>g.deadline)revert Expired();
         if(seat!=g.toAct||(g.pendingMask&_mask(seat))==0)revert WrongTurn();
         if(expectedRoot!=g.stateRoot)revert InvalidAction();
@@ -207,7 +211,7 @@ contract PokerNLHEBetting420 {
     }
     function timeout(bytes32 handId) external {
         Game storage g=games[handId];
-        if(!g.initialized||!_isBetting(g.phase)||g.pendingMask==0)
+        if(!g.initialized||!_isBetting(g.phase)||g.pendingMask==0||disputes.isFrozen(handId))
             revert InvalidState();
         if(block.timestamp<=g.deadline)revert TooEarly();
         uint8 seat=g.toAct;
@@ -300,6 +304,7 @@ contract PokerNLHEBetting420 {
     function advanceRevealedStreet(bytes32 handId,uint8 street)external {
         Game storage g=games[handId];
         if(msg.sender!=address(streetReveals)||msg.sender==address(0))revert Unauthorized();
+        if(disputes.isFrozen(handId))revert InvalidState();
         if(!this.canRevealStreet(handId,street)||
            !streetReveals.isStageComplete(handId,street))revert WaitingForReveal();
         g.phase=street==1?Phase.FLOP:street==2?Phase.TURN:Phase.RIVER;

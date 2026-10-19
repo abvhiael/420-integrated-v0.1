@@ -23,7 +23,9 @@ export function replayBetting({stacks,button,smallBlind,bigBlind,actions,ante=0}
   let toAct=n===2?(active(sb)?sb:next(sb)):next(bb);
   // Pending action set tracks each player's right to respond to the current bet.
   let pending=new Set(remaining.map((_,i)=>active(i)?i:null).filter(x=>x!==null));
-  let actedSinceFullRaise=new Set();
+  // Track the bet amount each seat last acted against. Multiple short all-ins
+  // cumulatively reopen betting only once the player faces a full-raise increment.
+  let lastActedAgainst=Array(n).fill(null);
   const transcript=[];
   for(const a of actions){
     if(liveCount()<2)throw Error('hand already won by fold');
@@ -39,19 +41,21 @@ export function replayBetting({stacks,button,smallBlind,bigBlind,actions,ante=0}
       debit(i,v);pending.delete(i);
     } else if(a.type==='raise'){
       if(v<=owed||v>remaining[i])throw Error('illegal raise size');
-      if(actedSinceFullRaise.has(i))throw Error('betting not reopened');
+      if(lastActedAgainst[i]!==null &&
+         currentBet-lastActedAgainst[i]<minRaise)throw Error('betting not reopened');
       const size=streetPut[i]+v-currentBet;
       const full=size>=minRaise;
       if(!full&&v!==remaining[i])throw Error('short raise requires all-in');
       debit(i,v);currentBet=streetPut[i];
-      if(full){minRaise=size;actedSinceFullRaise=new Set([i]);
+      if(full){minRaise=size;lastActedAgainst.fill(null);
         pending=new Set(remaining.map((_,j)=>active(j)&&j!==i?j:null).filter(x=>x!==null));}
       else{
         pending.delete(i);
         for(let j=0;j<n;j++)if(active(j)&&j!==i&&streetPut[j]<currentBet)pending.add(j);
       }
     } else throw Error('unknown action');
-    if(a.type!=='raise'||currentBet===previousBet)actedSinceFullRaise.add(i);
+    // The acting seat has now exercised its opportunity at this bet level.
+    lastActedAgainst[i]=currentBet;
     pending.delete(i);
     nonce++;
     transcript.push({nonce,street,seat:i,type:a.type,amount:v,committed:[...committed]});
@@ -61,7 +65,7 @@ export function replayBetting({stacks,button,smallBlind,bigBlind,actions,ante=0}
       if(street===3)break;
       street++;
       streetPut.fill(0);currentBet=0;minRaise=bigBlind;
-      actedSinceFullRaise.clear();
+      lastActedAgainst.fill(null);
       pending=new Set(remaining.map((_,j)=>active(j)?j:null).filter(x=>x!==null));
       if(pending.size<=1 && remaining.filter((_,j)=>!folded[j]&&!allIn[j]).length<=1){
         // No strategic action can occur without a live opponent. Board runout still required.

@@ -2,12 +2,16 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { routeDecision, normalizePath, sanitizeReturnPath, ROUTES, AVAILABILITY } from "../route-policy.mjs";
 test("all canonical routes are explicit and non-live", () => {
-  assert.deepEqual(Object.keys(ROUTES), ["/", "/rider", "/driver", "/operator"]);
+  assert.deepEqual(Object.keys(ROUTES), ["/", "/drive", "/rider", "/driver", "/operator"]);
   assert.equal(AVAILABILITY.state, "not_live");
   assert.equal(AVAILABILITY.payments, "Payments are not enabled");
 });
 test("public status remains readable without credentials", () => {
   assert.equal(routeDecision("/", null).kind, "public");
+  assert.equal(routeDecision("/drive", null).kind, "public");
+  assert.equal(routeDecision("/drive", {status:"unauthenticated"}).kind, "public");
+  assert.equal(routeDecision("/drive", {status:"error"}).kind, "public");
+  assert.equal(routeDecision("/driver", {status:"unauthenticated"}).kind, "sign-in");
 });
 for (const role of ["rider", "driver", "operator"]) {
   const path = "/" + role;

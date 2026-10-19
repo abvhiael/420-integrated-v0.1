@@ -10,7 +10,8 @@ import "./PokerInitialEncryptedDeck420.sol";
 ///      for live use. No card plaintext or secret shuffle permutation enters calldata.
 interface IPokerShuffleProofVerifier420 {
     function verifyShuffleProof(
-        bytes32 statementHash, bytes calldata proof
+        bytes32 statementHash,bytes32 handId,bytes32 inputRoot,bytes32 outputRoot,
+        bytes32 keyCommitment,bytes calldata proof
     ) external view returns (bool);
 }
 
@@ -73,7 +74,7 @@ contract PokerPrivateShuffleGate420 {
             if(inputRoot!=initialDeck.rootOf(handId)) revert InvalidProof();
         } else if(inputRoot!=rec.firstDeckRoot) revert InvalidProof();
         bytes32 digest=statement(handId,stage,inputRoot,outputRoot);
-        if(!verifier.verifyShuffleProof(digest,proof)) revert InvalidProof();
+        if(!verifier.verifyShuffleProof(digest,handId,inputRoot,outputRoot,thresholdKeyCommitment,proof)) revert InvalidProof();
         if(stage==1) {rec.initialDeckRoot=inputRoot;rec.firstDeckRoot=outputRoot;}
         else rec.finalDeckRoot=outputRoot;
         rec.stage=stage;

@@ -42,10 +42,19 @@ contract PokerStreetProof420 {
         if(states[handId].initialized)revert Duplicate();
         if(initialStateRoot==bytes32(0)||initialTranscriptRoot==bytes32(0)||
            !shuffle.isProofComplete(handId))revert InvalidState();
-        // This initialization MUST be bound to an independently proved, locked
-        // canonical seat snapshot. Until that proof exists, this component is
-        // NOT safe for production street authorization.
-        revert InvalidProof();
+        PokerConfidentialDeal420.Hand memory h=shuffle.deals().getHand(handId);
+        if(h.state!=PokerConfidentialDeal420.State.COMMITTED ||
+           shuffle.deals().ledger().activeHand(h.tableId)!=handId ||
+           shuffle.deals().ledger().seatingEpoch(h.tableId)!=h.epoch)
+            revert InvalidState();
+        bytes32 locked=shuffle.deals().ledger().lockedSnapshot(h.tableId);
+        if(locked==bytes32(0))revert InvalidState();
+        bytes32 expected=keccak256(abi.encode(DOMAIN,block.chainid,address(this),
+            handId,h.tableId,h.configHash,h.rulesetId,h.seatSnapshotHash,
+            locked,shuffle.deals().ledger().lockedTotal(h.tableId)));
+        if(initialStateRoot!=expected ||
+           initialTranscriptRoot!=h.transcriptCommitment)revert InvalidState();
+        states[handId]=State(0,initialStateRoot,initialTranscriptRoot,true);
     }
     function submitStreet(bytes32 handId,uint8 street,bytes32 nextStateRoot,
         bytes32 nextTranscriptRoot,bytes calldata proof) external {

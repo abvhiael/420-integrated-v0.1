@@ -1,0 +1,33 @@
+{
+  "expo": {
+    "name": "LIFTd Preview",
+    "slug": "liftd-mobile",
+    "scheme": "liftd-preview",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "bundleIdentifier": "org.integrated420.liftd.preview",
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSAppTransportSecurity": {
+          "NSAllowsArbitraryLoads": false
+        }
+      }
+    },
+    "android": {
+      "package": "org.integrated420.liftd.preview",
+      "permissions": [],
+      "usesCleartextTraffic": false
+    },
+    "plugins": [],
+    "extra": {
+      "liftdMode": "nonproduction-preview",
+      "apiEnabled": false
+    },
+    "updates": {
+      "enabled": false
+    }
+  }
+}

@@ -18,6 +18,7 @@ type ElGamalCipher struct {
 type Reencrypt2 struct {
  Input [2]ElGamalCipher `gnark:",public"`
  Output [2]ElGamalCipher `gnark:",public"`
+ HandScope frontend.Variable `gnark:",public"`
  PublicKeyX frontend.Variable `gnark:",public"`
  PublicKeyY frontend.Variable `gnark:",public"`
  Indices [2]frontend.Variable
@@ -26,13 +27,15 @@ type Reencrypt2 struct {
 type Reencrypt52 struct {
  Input [52]ElGamalCipher `gnark:",public"`
  Output [52]ElGamalCipher `gnark:",public"`
+ HandScope frontend.Variable `gnark:",public"`
  PublicKeyX frontend.Variable `gnark:",public"`
  PublicKeyY frontend.Variable `gnark:",public"`
  Indices [52]frontend.Variable
  Nonces [52]frontend.Variable
 }
 func proveReencryption(api frontend.API, input,output []ElGamalCipher,
-   keyX,keyY frontend.Variable,indices,nonces []frontend.Variable) error {
+   keyX,keyY,scope frontend.Variable,indices,nonces []frontend.Variable) error {
+ api.AssertIsDifferent(scope,0)
  curve,err:=twistededwards.NewEdCurve(api,ecccurve.BN254)
  if err!=nil{return err}
  publicKey:=twistededwards.Point{X:keyX,Y:keyY}
@@ -72,7 +75,7 @@ func proveReencryption(api frontend.API, input,output []ElGamalCipher,
  return nil
 }
 func(c *Reencrypt2)Define(api frontend.API)error{
- return proveReencryption(api,c.Input[:],c.Output[:],c.PublicKeyX,c.PublicKeyY,c.Indices[:],c.Nonces[:])
+ return proveReencryption(api,c.Input[:],c.Output[:],c.PublicKeyX,c.PublicKeyY,c.HandScope,c.Indices[:],c.Nonces[:])
 }
 func(c *Reencrypt52)Define(api frontend.API)error{
  return proveReencryption(api,c.Input[:],c.Output[:],c.PublicKeyX,c.PublicKeyY,c.Indices[:],c.Nonces[:])

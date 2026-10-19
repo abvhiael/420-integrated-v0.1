@@ -18,6 +18,11 @@ contract MockTableOperators52 {
     function setActive(bytes32 id, bool value) external { active[id]=value; }
     function isActive(bytes32 id) external view returns (bool) { return active[id]; }
 }
+contract MockTableEmergency52 {
+    bool public halted;
+    function setHalted(bool value) external { halted = value; }
+    function isHalted(BetTypes420.EmergencyDomain, bytes32) external view returns (bool) { return halted; }
+}
 contract BetPokerTableRegistry52Test {
     VmTable52 constant vm = VmTable52(address(uint160(uint256(keccak256("hevm cheat code")))));
     bytes32 constant TABLE = keccak256("poker table 52");
@@ -26,13 +31,15 @@ contract BetPokerTableRegistry52Test {
     address constant OTHER = address(0xBAD);
     MockTableCapability52 cap;
     MockTableOperators52 ops;
+    MockTableEmergency52 emergency;
     BetAuthorization420 auth;
     PokerTableRegistry420 registry;
     constructor() {
         cap = new MockTableCapability52();
         ops = new MockTableOperators52();
+        emergency = new MockTableEmergency52();
         auth = new BetAuthorization420(address(cap));
-        registry = new PokerTableRegistry420(address(auth),address(ops));
+        registry = new PokerTableRegistry420(address(auth),address(ops),address(emergency));
         ops.setActive(OP,true);
         _grant(registry.ACTION_CREATE(),true);
         _grant(registry.ACTION_APPROVE(),true);
@@ -89,6 +96,17 @@ contract BetPokerTableRegistry52Test {
         _grant(registry.ACTION_APPROVE(),false);
         vm.expectRevert(PokerTableRegistry420.Unauthorized.selector);
         vm.prank(ADMIN); registry.approve(TABLE);
+    }
+    function testEmergencyBlocksNewTablesAndReopeningButAllowsClose() public {
+        emergency.setHalted(true);
+        vm.expectRevert(PokerTableRegistry420.EmergencyHalt.selector);
+        vm.prank(ADMIN); registry.register(_config(),ADMIN);
+        emergency.setHalted(false);
+        _approve();
+        emergency.setHalted(true);
+        vm.expectRevert(PokerTableRegistry420.EmergencyHalt.selector);
+        vm.prank(ADMIN); registry.open(TABLE);
+        vm.prank(ADMIN); registry.close(TABLE);
     }
     function testOperatorSuspendFailsClosed() public {
         _approve(); ops.setActive(OP,false);

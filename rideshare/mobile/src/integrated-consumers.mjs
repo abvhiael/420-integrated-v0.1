@@ -36,7 +36,9 @@ export function createMobileIntegratedConsumers({session,api,travelSdk,permissio
  const nonce=()=>{const n=commandId();if(!id(n))fail('SECURE_COMMAND_REQUIRED');return n;};
  const fresh=async(trip,action)=>{
   const started=epoch;
-  const result=await session.withFreshRole(trip.riderId===session.getStatus()?.subject?'rider':'driver',async verified=>{
+  const role=session.getStatus()?.role;
+  if(!['rider','driver'].includes(role))fail('TRIP_SCOPE_DENIED');
+  const result=await session.withFreshRole(role,async verified=>{
    const s={role:verified.role,subject:verified.subject,accountId:verified.accountId,sessionId:verified.sessionId};
    if(!authorized(s,trip))fail('TRIP_SCOPE_DENIED');
    const value=await action(s);

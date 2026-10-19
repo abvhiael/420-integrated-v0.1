@@ -14,11 +14,20 @@ export function safePushEnvelope(raw){
  return Object.freeze({type:raw.type,tripId:raw.tripId,state:raw.state,revision:raw.revision});
 }
 export function validatePaymentProjection(raw,trip,previous=null){
- if(!raw||typeof raw!=='object'||Array.isArray(raw)||raw.tripId!==trip.id||!id(raw.intentId)||
- !Number.isSafeInteger(raw.revision)||raw.revision<0||!['NONE','SUBMITTED','INCLUDED','CERTIFIED','FINALIZED','SETTLED','REFUNDED','PARTIALLY_REFUNDED','FAILED','REORGED'].includes(raw.status)||
- !Number.isSafeInteger(raw.refundedCents)||raw.refundedCents<0||!Number.isSafeInteger(raw.totalCents)||raw.totalCents<0||raw.refundedCents>raw.totalCents)fail('PAYMENT_PROJECTION_INVALID');
- if(previous&&(raw.intentId!==previous.intentId||raw.revision<previous.revision||
- (raw.revision===previous.revision&&JSON.stringify(raw)!==JSON.stringify(previous))))fail('PAYMENT_PROJECTION_STALE');
+ if(!raw||typeof raw!=='object'||Array.isArray(raw))fail('PAYMENT_PROJECTION_INVALID');
+ if(raw.tripId!==undefined&&raw.tripId!==trip.id)fail('PAYMENT_PROJECTION_INVALID');
+ if(raw.status==='NO_INTENT'||raw.status==='AWAITING_PROJECTION'){
+  if(raw.tripId!==trip.id)fail('PAYMENT_PROJECTION_INVALID');
+  return Object.freeze({...raw});
+ }
+ if(raw.currency!=='CAD')fail('PAYMENT_PROJECTION_INVALID');
+ if(raw.intentId!==undefined){
+  if(!id(raw.intentId)||typeof raw.status!=='string'||!Number.isSafeInteger(raw.revision)||raw.revision<0||!Number.isSafeInteger(raw.totalCents)||raw.totalCents<0)fail('PAYMENT_PROJECTION_INVALID');
+  if(previous?.intentId===raw.intentId&&(raw.revision<previous.revision||(raw.revision===previous.revision&&JSON.stringify(raw)!==JSON.stringify(previous))))fail('PAYMENT_PROJECTION_STALE');
+  return Object.freeze({...raw});
+ }
+ for(const k of ['earningsCents','allowanceCents','tipCents','topUpCents','engagedSeconds','onlineSeconds'])if(!Number.isSafeInteger(raw[k])||raw[k]<0)fail('PAYMENT_PROJECTION_INVALID');
+ if(!id(raw.periodId))fail('PAYMENT_PROJECTION_INVALID');
  return Object.freeze({...raw});
 }
 export function createMobileIntegratedConsumers({session,api,travelSdk,permission,clock=()=>Math.floor(Date.now()/1000),commandId}){

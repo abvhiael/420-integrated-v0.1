@@ -41,6 +41,11 @@ func TestRealThresholdShareProofValidTamperedAndReplay(t *testing.T){
  proof,err:=groth16.Prove(cs,pk,witness);if err!=nil{t.Fatalf("valid share proof: %v",err)}
  public,err:=witness.Public();if err!=nil{t.Fatal(err)}
  if err:=groth16.Verify(proof,vk,public);err!=nil{t.Fatalf("valid share rejected: %v",err)}
+ exportTestGroth16Solidity(t,"PartialShare",vk,proof,
+  assignment.HandScope,assignment.DeckRoot,assignment.CipherC2X,assignment.CipherC2Y,
+  assignment.Position,assignment.Street,assignment.ProviderIndex,
+  assignment.CipherC1X,assignment.CipherC1Y,assignment.ProviderPKX,assignment.ProviderPKY,
+  assignment.ShareDX,assignment.ShareDY)
  changedHand:=*assignment
  changedHand.HandScope=421
  badWitness,err:=frontend.NewWitness(&changedHand,ecc.BN254.ScalarField());if err!=nil{t.Fatal(err)}

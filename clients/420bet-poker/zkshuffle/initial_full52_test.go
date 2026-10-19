@@ -37,6 +37,8 @@ func TestFullInitial52RealProof(t *testing.T) {
  proof,err:=groth16.Prove(cs,pk,witness);if err!=nil{t.Fatalf("full encrypted initial deck: %v",err)}
  public,err:=witness.Public();if err!=nil{t.Fatal(err)}
  if err:=groth16.Verify(proof,vk,public);err!=nil{t.Fatalf("valid initial deck rejected: %v",err)}
+ exportTestGroth16Solidity(t,"InitialDeck52",vk,proof,
+  w.DeckRoot,w.HandScope,w.PublicKeyX,w.PublicKeyY)
  tampered:=*w;tampered.DeckRoot=big.NewInt(123)
  badWitness,err:=frontend.NewWitness(&tampered,ecc.BN254.ScalarField());if err!=nil{t.Fatal(err)}
  badPublic,err:=badWitness.Public();if err!=nil{t.Fatal(err)}

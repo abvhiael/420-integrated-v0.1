@@ -34,6 +34,11 @@ func TestRealThresholdUnmaskProofValidInvalidAndReplay(t *testing.T){
  proof,err:=groth16.Prove(cs,pk,w);if err!=nil{t.Fatalf("valid threshold unmask: %v",err)}
  public,err:=w.Public();if err!=nil{t.Fatal(err)}
  if err:=groth16.Verify(proof,vk,public);err!=nil{t.Fatal(err)}
+ exportTestGroth16Solidity(t,"CardUnmask",vk,proof,
+  valid.HandScope,valid.DeckRoot,valid.Position,valid.Street,valid.CardIndex,
+  valid.CipherC2X,valid.CipherC2Y,valid.ShareAX,valid.ShareAY,
+  valid.ShareBX,valid.ShareBY,valid.ProviderAX,valid.ProviderAY,
+  valid.ProviderBX,valid.ProviderBY,valid.AggregatePKX,valid.AggregatePKY)
  forged:=*valid
  forged.CardIndex=19
  badWitness,err:=frontend.NewWitness(&forged,ecc.BN254.ScalarField());if err!=nil{t.Fatal(err)}

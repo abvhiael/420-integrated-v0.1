@@ -1,3 +1,4 @@
+import TripIntegrations from './TripIntegrations';
 import React,{useState} from 'react';
 import {View,Text,TextInput,Pressable,StyleSheet} from 'react-native';
 import {theme} from './theme';
@@ -44,6 +45,7 @@ export default function RiderScreen({journey}:{journey?:Journey}){
   <Action label="Send safety report" enabled={available&&!!snapshot?.trip&&['ASSIGNED','ARRIVED','IN_PROGRESS'].includes(snapshot.trip.state)&&details.trim().length>=3} onPress={()=>run(()=>journey!.reportSafety(details))}/>
   <Text accessibilityRole="header" style={styles.section}>Account preferences</Text>
   <Action label={largeText?'Disable large text preference':'Enable large text preference'} enabled={available} onPress={()=>run(async()=>{await journey!.preferences({largeText:!largeText});setLargeText(!largeText);})}/>
+  <TripIntegrations trip={snapshot?.trip}/>
   <Text accessibilityLiveRegion="polite" style={styles.status}>{status}</Text>
  </View>;
 }

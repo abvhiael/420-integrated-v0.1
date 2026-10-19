@@ -3,6 +3,7 @@ pragma solidity ^0.8.24;
 
 import "./PokerConfidentialDeal420.sol";
 import "./PokerPrivateShuffleGate420.sol";
+import "./PokerVerifierVersions420.sol";
 
 /// @notice Independent on-chain acceptance of terminal rules proof.
 /// @dev The proof verifier MUST verify the entire NLHE rules transition relation,
@@ -20,6 +21,9 @@ contract PokerCanonicalEvidence420 {
     bytes32 public constant EVIDENCE_DOMAIN = keccak256("420.BET.POKER.CANONICAL.EVIDENCE.V1");
     PokerConfidentialDeal420 public immutable deals;
     PokerPrivateShuffleGate420 public immutable shuffle;
+    PokerVerifierVersions420 public immutable versions;
+    bytes32 public immutable verifierVersionId;
+    bytes32 public immutable publicInputSchemaHash;
     IPokerTerminalRulesProof420 public immutable rulesVerifier;
     bytes32 public immutable rulesCircuitId;
     bytes32 public immutable rulesVerifyingKeyHash;
@@ -41,14 +45,20 @@ contract PokerCanonicalEvidence420 {
     );
 
     constructor(
-        address deals_,address shuffle_,address rulesVerifier_,
-        bytes32 circuitId_,bytes32 verifyingKeyHash_
+        address deals_,address shuffle_,address rulesVerifier_,address versions_,
+        bytes32 versionId_,bytes32 circuitId_,bytes32 verifyingKeyHash_,bytes32 schemaHash_
     ) {
         if (deals_==address(0)||shuffle_==address(0)||rulesVerifier_==address(0)||
+            versions_==address(0)||versionId_==bytes32(0)||schemaHash_==bytes32(0)||
             rulesVerifier_.code.length==0||circuitId_==bytes32(0)||verifyingKeyHash_==bytes32(0))
             revert InvalidDependency();
         deals=PokerConfidentialDeal420(deals_);
         shuffle=PokerPrivateShuffleGate420(shuffle_);
+        versions=PokerVerifierVersions420(versions_);
+        verifierVersionId=versionId_;
+        publicInputSchemaHash=schemaHash_;
+        if(!versions.matches(versionId_,rulesVerifier_,verifyingKeyHash_,circuitId_,schemaHash_))
+            revert InvalidDependency();
         rulesVerifier=IPokerTerminalRulesProof420(rulesVerifier_);
         rulesCircuitId=circuitId_;
         rulesVerifyingKeyHash=verifyingKeyHash_;
@@ -72,7 +82,7 @@ contract PokerCanonicalEvidence420 {
             revert InvalidHand();
         return keccak256(abi.encode(
             EVIDENCE_DOMAIN,block.chainid,address(this),address(rulesVerifier),
-            rulesCircuitId,rulesVerifyingKeyHash,handId,
+            rulesCircuitId,rulesVerifyingKeyHash,verifierVersionId,publicInputSchemaHash,handId,
             hand.tableId,hand.configHash,hand.rulesetId,hand.versionId,
             hand.seatSnapshotHash,hand.epoch,hand.nonce,hand.transcriptCommitment,
             record.finalDeckRoot,actionRoot,boardRoot,payoutHash,rakePolicyHash,finalStateRoot

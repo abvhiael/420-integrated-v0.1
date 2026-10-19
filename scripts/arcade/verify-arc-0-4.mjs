@@ -3,7 +3,7 @@ import fs from 'node:fs';
 const root = new URL('../../', import.meta.url);
 const read = p => fs.readFileSync(new URL(p,root),'utf8');
 const gameIds = ['ARCADE_KUSH_CRUSH','ARCADE_420_COLOURING_BOOK','ARCADE_420_BUDDY','ARCADE_BONG_BREAKER','ARCADE_BAKED_INVADERS','ARCADE_PUFF_MAN','ARCADE_GRASSHOPPER','ARCADE_ROACH_RUN','ARCADE_HIGH_CLIMB','ARCADE_WHERES_DAVE','ARCADE_MAD_BUD_DELIVERY'];
-const slugs = ['kush-crush','420colouring-book','420buddy','bong-breaker','baked-invaders','puff-man','grasshopper','roach-run','high-climb','wheres-dave','mad-bud-delivery'];
+const frozenSlugs = ['kush-crush','420colouring-book','420buddy','bong-breaker','baked-invaders','puff-man','grasshopper','roach-run','high-climb','wheres-dave','mad-bud-delivery'];
 const runtimes=['react-puzzle','canvas','react-simulation','phaser','phaser','phaser','phaser','phaser','phaser','scene-renderer','phaser'];
 const names = ['Kush Crush','420Colouring Book','420Buddy','Bong Breaker','Baked Invaders','Puff-Man','Grasshopper','Roach Run','High Climb',"Where's Dave?",'Mad Bud Delivery'];
 export function validate(input) {
@@ -16,7 +16,7 @@ export function validate(input) {
   for (const [i,g] of input.games.entries()) {
     assert.equal(g.gameId,'420/GAMING/GAME/'+gameIds[i]+'/V1');
     assert.equal(g.displayName,names[i]);
-    assert.equal(g.slug,slugs[i]);
+    assert.equal(g.slug,frozenSlugs[i]);
     assert.match(g.slug,/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
     assert.ok(!ids.has(g.gameId) && !slugs.has(g.slug),'duplicate game identity/slug');
     ids.add(g.gameId);slugs.add(g.slug);

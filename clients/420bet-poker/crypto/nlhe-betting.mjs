@@ -15,7 +15,7 @@ export function replayBetting({stacks,button,smallBlind,bigBlind,actions,ante=0}
   function active(i){return !folded[i]&&!allIn[i];}
   function next(i){for(let k=1;k<=n;k++){const j=(i+k)%n;if(active(j))return j;}return null;}
   function liveCount(){return folded.filter(x=>!x).length;}
-  for(let i=0;i<n;i++)debit(i,Math.min(ante,remaining[i]));
+  for(let i=0;i<n;i++){debit(i,Math.min(ante,remaining[i]));streetPut[i]=0;}
   // Heads-up: dealer is small blind, other seat is big blind.
   const sb=n===2?button:(button+1)%n,bb=(sb+1)%n;
   debit(sb,Math.min(smallBlind,remaining[sb]));debit(bb,Math.min(bigBlind,remaining[bb]));

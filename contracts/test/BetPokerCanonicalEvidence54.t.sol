@@ -22,7 +22,7 @@ contract PokerCanonicalEvidence54Test is PokerPrivateShuffleGate54Test {
     function _shuffle() internal returns(bytes32 id) {
         id=_hand54();
         PokerConfidentialDeal420.Hand memory h=deal.getHand(id);
-        bytes32 first=keccak256("stage A"),last=keccak256("stage B");
+        bytes32 first=keccak256("stage A"); bytes32 last=keccak256("stage B");
         verifier.allow(gate.statement(id,1,h.transcriptCommitment,first));
         cheat54.prank(PROVIDER_A);gate.proveStage(id,1,h.transcriptCommitment,first,hex"010203");
         verifier.allow(gate.statement(id,2,first,last));

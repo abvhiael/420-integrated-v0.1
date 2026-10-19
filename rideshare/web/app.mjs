@@ -63,6 +63,14 @@ function renderDecision(decision) {
   const panel = node("section", undefined, "panel");
   panel.append(node("h1", decision.title));
   if (decision.kind === "public") {
+    /* Official LIFTd public logo */
+    const officialLogo = document.createElement("img");
+    officialLogo.className = "main-logo";
+    officialLogo.src = "./assets/liftd-official-logo.png";
+    officialLogo.alt = "LIFTd — arrive higher";
+    officialLogo.width = 1536;
+    officialLogo.height = 1024;
+    panel.insertBefore(officialLogo, panel.firstChild);
     panel.append(node("p", AVAILABILITY.market + " pilot — " + AVAILABILITY.label + ".", "status"));
     panel.append(node("p", AVAILABILITY.payments + ". Driver offers and vehicle availability are not live.", "muted"));
   } else if (decision.kind === "protected") {

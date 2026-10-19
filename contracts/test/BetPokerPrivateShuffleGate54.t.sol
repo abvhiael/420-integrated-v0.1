@@ -35,9 +35,9 @@ contract PokerPrivateShuffleGate54Test is PokerConfidentialDeal54Test {
         initialDeck=new PokerInitialEncryptedDeck420(address(deal),address(initialVersions),
             address(initialVerifier),keccak256("TEST INITIAL VERSION"),
             keccak256("TEST INITIAL CIRCUIT"),keccak256("TEST INITIAL KEY"),
-            keccak256("TEST INITIAL SCHEMA"),keccak256("THRESHOLD KEY MUST BE CERTIFIED"));
+            keccak256("TEST INITIAL SCHEMA"),keccak256(abi.encode(uint256(19),uint256(20))));
         gate=new PokerPrivateShuffleGate420(address(deal),address(initialDeck),address(verifier),
-            keccak256("ZK CIRCUIT MUST BE AUDITED BEFORE DEPLOY"),keccak256("THRESHOLD KEY MUST BE CERTIFIED"));
+            keccak256("ZK CIRCUIT MUST BE AUDITED BEFORE DEPLOY"),keccak256(abi.encode(uint256(19),uint256(20))));
     }
     function _hand54() internal returns(bytes32 id){
         _prepared();id=_begin(1);

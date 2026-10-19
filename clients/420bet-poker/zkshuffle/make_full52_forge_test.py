@@ -15,7 +15,7 @@ source = pathlib.Path(sys.argv[1])
 fixture = pathlib.Path(sys.argv[2])
 destination = pathlib.Path(sys.argv[3])
 contents = source.read_text()
-names = re.findall(r"\bcontract\s+([A-Za-z_][A-Za-z0-9_]*)", contents)
+names = re.findall(r"^\\s*contract\\s+([A-Za-z_][A-Za-z0-9_]*)\\b", contents, re.MULTILINE)
 if len(names) != 1:
     raise SystemExit(f"expected one generated Groth16 contract, found {names}")
 data = json.loads(fixture.read_text())

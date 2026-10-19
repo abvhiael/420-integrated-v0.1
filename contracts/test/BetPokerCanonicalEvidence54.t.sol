@@ -30,8 +30,8 @@ contract PokerCanonicalEvidence54Test is PokerPrivateShuffleGate54Test {
         id=_hand54();
         PokerConfidentialDeal420.Hand memory h=deal.getHand(id);
         bytes32 first=keccak256("stage A"); bytes32 last=keccak256("stage B");
-        verifier.allow(gate.statement(id,1,h.transcriptCommitment,first));
-        cheat54.prank(PROVIDER_A);gate.proveStage(id,1,h.transcriptCommitment,first,hex"010203");
+        verifier.allow(gate.statement(id,1,initialDeck.rootOf(id),first));
+        cheat54.prank(PROVIDER_A);gate.proveStage(id,1,initialDeck.rootOf(id),first,hex"010203");
         verifier.allow(gate.statement(id,2,first,last));
         cheat54.prank(PROVIDER_B);gate.proveStage(id,2,first,last,hex"010203");
     }
@@ -66,10 +66,13 @@ contract PokerCanonicalEvidence54Test is PokerPrivateShuffleGate54Test {
         bytes32 id=deal.begin(TABLE,2,uint64(block.timestamp+120),keccak256("next"),snap,3);
         cheat54.prank(PROVIDER_A);deal.commit(id,keccak256("different a"));
         cheat54.prank(PROVIDER_B);deal.commit(id,keccak256("different b"));
+        bytes32 initialRoot=keccak256("canonical encrypted deck second hand");
+        initialVerifier.allow(initialDeck.statement(id,initialRoot));
+        initialDeck.submit(id,initialRoot,hex"f00d");
         PokerConfidentialDeal420.Hand memory h=deal.getHand(id);
         bytes32 first=keccak256("new first"); bytes32 second=keccak256("new second");
-        verifier.allow(gate.statement(id,1,h.transcriptCommitment,first));
-        cheat54.prank(PROVIDER_A);gate.proveStage(id,1,h.transcriptCommitment,first,hex"010203");
+        verifier.allow(gate.statement(id,1,initialDeck.rootOf(id),first));
+        cheat54.prank(PROVIDER_A);gate.proveStage(id,1,initialDeck.rootOf(id),first,hex"010203");
         verifier.allow(gate.statement(id,2,first,second));
         cheat54.prank(PROVIDER_B);gate.proveStage(id,2,first,second,hex"010203");
         return id;

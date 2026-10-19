@@ -1,0 +1,9 @@
+{
+  "name": "@420/arcade-testing",
+  "private": true,
+  "type": "module",
+  "version": "0.1.0",
+  "scripts": {
+    "test": "node scripts/qualify.mjs"
+  }
+}

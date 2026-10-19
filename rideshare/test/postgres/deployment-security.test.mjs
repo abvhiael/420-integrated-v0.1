@@ -8,11 +8,13 @@ test('migration ownership, positive least privilege, readiness, and fail-closed 
  const owner=createDatabasePool({connectionString:process.env.LIFTD_DATABASE_URL});
  let appPool,app;
  let migrationChecksumFixture;
+ let runtimeRoleCreated=false;
  try{
   const db=await owner.query('SELECT current_database() AS name');
   assert.equal(db.rows[0].name,'liftd_qualification');
   await migrate(owner);
   await owner.query("CREATE ROLE liftd_runtime LOGIN PASSWORD 'liftd_fixture' NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION");
+  runtimeRoleCreated=true;
   await owner.query('GRANT USAGE ON SCHEMA liftd TO liftd_runtime');
   await owner.query('GRANT SELECT ON liftd.migrations,liftd.trips TO liftd_runtime');
   const url=new URL(process.env.LIFTD_DATABASE_URL);url.username='liftd_runtime';url.password='liftd_fixture';
@@ -45,6 +47,15 @@ test('migration ownership, positive least privilege, readiness, and fail-closed 
   try {
    if (migrationChecksumFixture) await owner.query('UPDATE liftd.migrations SET checksum=$1 WHERE version=$2 AND checksum=$3',[
     migrationChecksumFixture.checksum,migrationChecksumFixture.version,'0']);
-  } finally {await app?.stop();await appPool?.end();await owner.end()}
+  } finally {
+   await app?.stop();await appPool?.end();
+   // This fixture owns the role it created; release it before subsequent
+   // PostgreSQL test owners establish their independent runtime grants.
+   if (runtimeRoleCreated) {
+    await owner.query('DROP OWNED BY liftd_runtime');
+    await owner.query('DROP ROLE liftd_runtime');
+   }
+   await owner.end();
+  }
  }
 });

@@ -29,6 +29,8 @@ on:
       - 'contracts/test/BetPokerVerifierVersions54.t.sol'
       - 'contracts/src/bet/PokerInitialEncryptedDeck420.sol'
       - 'contracts/src/bet/PokerSelectiveReveal420.sol'
+      - 'contracts/src/bet/PokerStreetProof420.sol'
+      - 'contracts/test/BetPokerSelectiveReveal54.t.sol'
       - 'contracts/src/bet/PokerGnarkElGamalAdapters420.sol'
       - 'contracts/src/bet/PokerNLHEBetting420.sol'
       - 'contracts/src/bet/PokerGnarkCardRevealAdapters420.sol'

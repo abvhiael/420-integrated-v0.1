@@ -1,0 +1,31 @@
+name: 420Arcade ARC-1.7 Level 1 audio accessibility
+on:
+  pull_request:
+    paths:
+      - 'packages/arcade-audio/**'
+      - 'apps/arcade-web/**'
+      - '.github/workflows/arcade-1-7-level1.yml'
+  workflow_dispatch:
+jobs:
+  arcade-audio:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: apps/arcade-web/package-lock.json
+      - name: Audio boundary tests
+        run: node --check packages/arcade-audio/src/index.mjs && node --test packages/arcade-audio/test/*.test.mjs
+      - name: Retained Arcade adapter regression
+        run: node --test packages/arcade-input/test/*.test.mjs packages/arcade-core/test/*.test.mjs packages/arcade-phaser/test/*.test.mjs
+      - name: Frozen dependencies
+        run: npm ci --prefix apps/arcade-web --ignore-scripts --no-audit --no-fund
+      - name: App lint TypeScript regression and production build
+        run: |
+          npm run check --prefix apps/arcade-web
+          npm run lint --prefix apps/arcade-web
+          npm run typecheck --prefix apps/arcade-web
+          npm run test --prefix apps/arcade-web
+          npm run build --prefix apps/arcade-web

@@ -1,4 +1,5 @@
 import React, {useEffect, useRef, useState} from 'react';
+import {AudioAccessibilityControls} from './AudioAccessibilityControls';
 import catalog from '../../../config/arcade-game-identities.json';
 import scope from '../../../config/arcade-0-7-scope-freeze.json';
 
@@ -99,7 +100,7 @@ export function Launcher({initialRoute}:{initialRoute?:Route}={}) {
     <a href="#/games">Back to games</a>
    </section>}
    {route.kind==='about'&&<section><p>420Arcade is an eleven-game project. The launcher is an early preview, not a public release.</p><p>Guest-first gameplay and optional Gaming Protocol integration are planned; no live gaming authority is enabled.</p><a href="#/games">Explore games</a></section>}
-   {route.kind==='accessibility'&&<section><p>The interface offers keyboard-operable navigation, a skip link, scalable text and reduced-motion styling.</p><p>Game accessibility, offline play and device support are requirements still awaiting implementation and testing.</p><a href="#/games">Return to games</a></section>}
+   {route.kind==='accessibility'&&<section><p>The interface offers keyboard-operable navigation, a skip link, scalable text and reduced-motion styling.</p><p>Game accessibility, offline play and device support are requirements still awaiting implementation and testing.</p><AudioAccessibilityControls/><a href="#/games">Return to games</a></section>}
    {route.kind==='not-found'&&<section role="status"><p>This address does not match an approved Arcade page or game.</p><a href="#/games">Return to the game catalog</a></section>}
   </main>
   <footer className="site-footer"><p>420Arcade · Development preview. No playable games, online rewards or production authorization.</p>

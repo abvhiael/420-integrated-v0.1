@@ -68,9 +68,11 @@ contract PokerNLHEBetting420 {
     mapping(bytes32=>bool) public hasButton;
     mapping(bytes32=>bool) public flopOpened;
     mapping(bytes32=>bool) public handSettled;
+    mapping(bytes32=>bool) public handAborted;
     mapping(bytes32=>address) public outcomeForTable;
     event OutcomeBound(bytes32 indexed tableId,address outcome);
     event NativeHandSettled(bytes32 indexed handId,bytes32 indexed tableId,uint256 rake);
+    event UnprovedDealAborted(bytes32 indexed handId,bytes32 indexed tableId);
 
     error InvalidConfiguration();error InvalidState();error WrongTurn();
     error Unauthorized();error InvalidAction();error Expired();error WaitingForReveal();
@@ -210,6 +212,20 @@ contract PokerNLHEBetting420 {
            h.seatSnapshotHash!=deals.snapshotFor(h.tableId,mask))
             revert Unauthorized();
         ledger.reserveHand(h.tableId,handId,mask,h.epoch);
+    }
+    /// @notice Permissionless refund if providers fail to complete their proof
+    /// before a strictly enforced deadline, provided no hand has begun.
+    /// No player outcome exists yet, so original escrow balances are restored.
+    function cancelWithheldDeal(bytes32 handId) external {
+        PokerConfidentialDeal420.Hand memory h=deals.getHand(handId);
+        Game storage g=games[handId];
+        if(g.initialized||handAborted[handId]||handSettled[handId]||
+           ledger.activeHand(h.tableId)!=handId||
+           shuffle.isProofComplete(handId))revert InvalidState();
+        if(block.timestamp<uint256(h.deadline)+1 hours)revert TooEarly();
+        ledger.cancelReservedHand(h.tableId,handId);
+        handAborted[handId]=true;
+        emit UnprovedDealAborted(handId,h.tableId);
     }
     function start(bytes32 handId,uint256 ante,uint32 timeoutSecs) external {
         PokerConfidentialDeal420.Hand memory h=deals.getHand(handId);

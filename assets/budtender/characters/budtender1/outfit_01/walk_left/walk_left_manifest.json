@@ -1,0 +1,90 @@
+{
+  "character_id": "budtender1",
+  "outfit_id": "outfit_01",
+  "animation_id": "walk_left",
+  "frame_count": 8,
+  "canvas": {
+    "width": 256,
+    "height": 384
+  },
+  "anchor": {
+    "x": 128,
+    "y": 368
+  },
+  "frame_duration_ms": 125,
+  "loop": true,
+  "source": {
+    "file": "140a8933-8261-5b30-8881-85928902c38f.png",
+    "dimensions": {
+      "width": 2048,
+      "height": 682
+    },
+    "mode": "RGBA",
+    "separation_inspection": {
+      "practical_alpha_threshold": 5,
+      "separable_pose_count": 8,
+      "split_boundaries_px": [
+        0,
+        262,
+        494,
+        762,
+        1035,
+        1277,
+        1513,
+        1798,
+        2047
+      ],
+      "uniform_scale_factor": 0.568659127625202
+    }
+  },
+  "frames": [
+    {
+      "index": 1,
+      "file": "frame_01.png",
+      "sha256": "0faf118db8286b063b485e82c0654ac244dd854dc13b35f90d1bd70e36684f26"
+    },
+    {
+      "index": 2,
+      "file": "frame_02.png",
+      "sha256": "b0bf000e89059d06cf4eadad542220b9e59012c44425ad3df432636ddc756fb7"
+    },
+    {
+      "index": 3,
+      "file": "frame_03.png",
+      "sha256": "e6a9e85e5c4e031a00c4d2c6e39edbaf16a7c461a690c2679a54c1386c17d600"
+    },
+    {
+      "index": 4,
+      "file": "frame_04.png",
+      "sha256": "5bf123504f31d85e7748d587a6af714c7df2150fc676bef0f6a82f98a9e04e45"
+    },
+    {
+      "index": 5,
+      "file": "frame_05.png",
+      "sha256": "836fe7d3388f082025267d52038d3e7f5c0a2db7420a34fe3ac589c2cb4ebd35"
+    },
+    {
+      "index": 6,
+      "file": "frame_06.png",
+      "sha256": "0090f52812e91cb30a5ec778504605b24b6baca09f9a5c5f42da5e3142e70f96"
+    },
+    {
+      "index": 7,
+      "file": "frame_07.png",
+      "sha256": "6ada82f207b64f796818eb251ac8a39130416dea1130d25dbc95bc759416c750"
+    },
+    {
+      "index": 8,
+      "file": "frame_08.png",
+      "sha256": "4ecc0e1e30dc97816cefe9e55df33d0878264650d663fb231962f7b7570e278c"
+    }
+  ],
+  "validation": {
+    "file_integrity": "pass",
+    "transparency": "pass",
+    "alignment": "pass",
+    "visual_continuity": "reviewed",
+    "animation_playback": "pass",
+    "production_approval": "not_established"
+  }
+}

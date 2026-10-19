@@ -44,7 +44,7 @@ jobs:
         with:
           node-version: 22
       - name: Verify confidential shuffle and encrypted seat delivery
-        run: node --test clients/420bet-poker/crypto/confidential-deal.test.mjs clients/420bet-poker/crypto/nlhe-replay.test.mjs
+        run: node --test clients/420bet-poker/crypto/confidential-deal.test.mjs clients/420bet-poker/crypto/nlhe-replay.test.mjs clients/420bet-poker/crypto/nlhe-betting.test.mjs
       - name: Scope commitment adversarial + inherited seating/table regression
         working-directory: contracts
         run: forge test --match-contract '^(PokerPrivateShuffleGate54Test|PokerVerifiedTerminalGate54Test|PokerHandAccountingProof54Test|PokerHandFinality54Test|PokerDeckDisclosure54Test|PokerConfidentialDeal54Test|PokerSeatLedger53Test|BetPokerTableRegistry52Test)$' -vv

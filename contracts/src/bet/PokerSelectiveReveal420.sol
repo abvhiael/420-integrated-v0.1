@@ -37,12 +37,10 @@ contract PokerSelectiveReveal420 {
         bool completed;
     }
     mapping(bytes32=>mapping(uint8=>Opening)) private openings;
-    mapping(bytes32=>uint8) public currentStreet;
 
     error InvalidConfiguration();error InvalidState();error Unauthorized();error Duplicate();error InvalidProof();
     event ShareAccepted(bytes32 indexed handId,uint8 indexed position,address indexed provider,bytes32 share);
     event PositionSharesComplete(bytes32 indexed handId,uint8 indexed position,bytes32 commitment);
-    event StreetAdvanced(bytes32 indexed handId,uint8 street);
 
     constructor(address shuffle_,address streets_,address versions_,address verifier_,bytes32 version_,
         bytes32 circuit_,bytes32 keyHash_,bytes32 schema_) {
@@ -78,6 +76,7 @@ contract PokerSelectiveReveal420 {
     function submitShare(bytes32 handId,uint8 position,uint8 street,
         bytes32 ciphertextCommitment,bytes32 shareCommitment,bytes calldata proof) external {
         if(position>=52||street==0||street>3||!streets.canReveal(handId,street)||
+            !_legalBoardPosition(handId,position,street)||
             ciphertextCommitment==bytes32(0)||shareCommitment==bytes32(0)||proof.length==0)
             revert InvalidState();
         address a=shuffle.deals().providerA();
@@ -102,4 +101,17 @@ contract PokerSelectiveReveal420 {
             emit PositionSharesComplete(handId,position,ciphertextCommitment);
         }
     }
+    /// @notice Canonical Hold'em deck offsets: 2 cards per occupied seat,
+    /// then burn, flop-3, burn, turn, burn, river.
+    function _legalBoardPosition(bytes32 handId,uint8 position,uint8 street) internal view returns(bool){
+        uint16 mask=shuffle.deals().handSeatMask(handId);
+        uint8 count=0;
+        for(uint8 i=0;i<9;i++)if((mask&(uint16(1)<<i))!=0)count++;
+        if(count<2||count>9)return false;
+        uint8 boardStart=2*count;
+        if(street==1)return position>=boardStart+1&&position<=boardStart+3;
+        if(street==2)return position==boardStart+5;
+        return position==boardStart+7;
+    }
+
 }

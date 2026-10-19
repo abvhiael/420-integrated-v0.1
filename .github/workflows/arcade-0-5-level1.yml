@@ -1,0 +1,20 @@
+name: 420Arcade ARC-0.5 Level 1 platform requirements
+on:
+  pull_request:
+    paths:
+      - "config/arcade-platform-requirements.json"
+      - "config/arcade-game-identities.json"
+      - "docs/arcade/ARC-0.5-PLATFORM-ACCESSIBILITY-OFFLINE-REQUIREMENTS.md"
+      - "scripts/arcade/verify-arc-0-5.mjs"
+      - ".github/workflows/arcade-0-5-level1.yml"
+  workflow_dispatch:
+jobs:
+  arcade-platform-requirements:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify platform accessibility and offline requirements
+        run: node scripts/arcade/verify-arc-0-5.mjs

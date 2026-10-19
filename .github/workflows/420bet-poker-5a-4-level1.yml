@@ -15,6 +15,8 @@ on:
       - 'contracts/test/BetPokerVerifiedTerminalGate54.t.sol'
       - 'contracts/src/bet/PokerPrivateShuffleGate420.sol'
       - 'contracts/test/BetPokerPrivateShuffleGate54.t.sol'
+      - 'contracts/src/bet/PokerActionKeys420.sol'
+      - 'contracts/test/BetPokerActionKeys54.t.sol'
       - 'contracts/test/BetPokerDeckDisclosure54.t.sol'
       - 'clients/420bet-poker/crypto/**'
       - 'clients/420bet-poker/zkshuffle/**'
@@ -45,14 +47,14 @@ jobs:
         with:
           node-version: 22
       - name: Verify confidential shuffle and encrypted seat delivery
-        run: node --test clients/420bet-poker/crypto/confidential-deal.test.mjs clients/420bet-poker/crypto/nlhe-replay.test.mjs clients/420bet-poker/crypto/nlhe-betting.test.mjs clients/420bet-poker/crypto/nlhe-verify-hand.test.mjs
+        run: node --test clients/420bet-poker/crypto/confidential-deal.test.mjs clients/420bet-poker/crypto/nlhe-replay.test.mjs clients/420bet-poker/crypto/nlhe-betting.test.mjs clients/420bet-poker/crypto/nlhe-verify-hand.test.mjs clients/420bet-poker/crypto/nlhe-economics.test.mjs
       - uses: actions/setup-go@v5
         with:
           go-version: '1.24'
           cache: false
       - name: Real Groth16 52-card permutation circuit qualification
         working-directory: clients/420bet-poker/zkshuffle
-        run: go test -timeout 15m ./...
+        run: go test -mod=mod -timeout 15m ./...
       - name: Scope commitment adversarial + inherited seating/table regression
         working-directory: contracts
-        run: forge test --match-contract '^(PokerPrivateShuffleGate54Test|PokerVerifiedTerminalGate54Test|PokerHandAccountingProof54Test|PokerHandFinality54Test|PokerDeckDisclosure54Test|PokerConfidentialDeal54Test|PokerSeatLedger53Test|BetPokerTableRegistry52Test)$' -vv
+        run: forge test --match-contract '^(PokerActionKeys54Test|PokerPrivateShuffleGate54Test|PokerVerifiedTerminalGate54Test|PokerHandAccountingProof54Test|PokerHandFinality54Test|PokerDeckDisclosure54Test|PokerConfidentialDeal54Test|PokerSeatLedger53Test|BetPokerTableRegistry52Test)$' -vv

@@ -58,9 +58,9 @@ jobs:
               exit 1
             }
           done
-          python3 ../clients/420bet-poker/zkshuffle/triage_slither_poker.py \\
-            ../artifacts/420bet-5a-4-security/native.json \\
-            ../artifacts/420bet-5a-4-security/settlement.json \\
+          python3 ../clients/420bet-poker/zkshuffle/triage_slither_poker.py \
+            ../artifacts/420bet-5a-4-security/native.json \
+            ../artifacts/420bet-5a-4-security/settlement.json \
             ../artifacts/420bet-5a-4-security/poker-security-findings.json
       - name: Attach reproducible security evidence
         if: always()

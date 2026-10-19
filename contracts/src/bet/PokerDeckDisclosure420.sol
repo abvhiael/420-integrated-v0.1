@@ -82,6 +82,7 @@ contract PokerDeckDisclosure420 {
         receiptHash[handId][seat]=receipt;
         emit EnvelopeAcknowledged(handId,seat,receipt);
     }
+    function getDeck(bytes32 handId) external view returns (Deck memory) { return decks[handId]; }
     function allAcknowledged(bytes32 handId) external view returns(bool) {
         uint16 mask=deals.handSeatMask(handId);
         return decks[handId].published && mask!=0 && (decks[handId].receiptMask & mask)==mask;
@@ -93,6 +94,9 @@ contract PokerDeckDisclosure420 {
         PokerConfidentialDeal420.Hand memory h=deals.getHand(handId);
         Deck storage d=decks[handId];
         if (!d.published || d.disclosed || h.state!=PokerConfidentialDeal420.State.COMMITTED) revert InvalidState();
+        // No current hand-engine finality oracle exists. Prohibit public full-deck reveal
+        // rather than expose hole cards while the game could still be active.
+        revert InvalidState();
         if (msg.sender!=deals.providerA() && msg.sender!=deals.providerB()) revert Unauthorized();
         if (!authorization.isAuthorized(msg.sender,deals.ACTION_PROVIDER_COMMIT(),
                 authorization.scopeForTable(h.tableId),0)) revert Unauthorized();

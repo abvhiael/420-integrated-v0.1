@@ -51,7 +51,7 @@ jobs:
           slither src/bet/PokerCanonicalSettlement420.sol --json ../artifacts/420bet-5a-4-security/settlement.json > ../artifacts/420bet-5a-4-security/settlement.log 2>&1
           settlement_exit=$?
           set -e
-          printf 'native=%s\\nsettlement=%s\\n' "$native_exit" "$settlement_exit" > ../artifacts/420bet-5a-4-security/slither-exit.txt
+          printf 'native=%s\nsettlement=%s\n' "$native_exit" "$settlement_exit" > ../artifacts/420bet-5a-4-security/slither-exit.txt
           for name in native settlement; do
             test -s "../artifacts/420bet-5a-4-security/$name.json" || {
               tail -100 "../artifacts/420bet-5a-4-security/$name.log"

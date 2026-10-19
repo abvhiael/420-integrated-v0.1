@@ -17,13 +17,13 @@ test('mount, pause, resume, serialize, restore and terminal destruction',async()
 test('both approved React casual games valid, all other games fail',()=>{
  for(const game of games){const f=()=>({render(){},unmount(){}});if(['kush-crush','420buddy'].includes(game.slug))assert.doesNotThrow(()=>create(f,game));else assert.throws(()=>create(f,game),CasualLifecycleError);}
 });
-test('foreign, unsafe, version mismatch and malformed manifests fail closed',()=>{
+test('foreign, unsafe, version mismatch and malformed manifests fail closed',async()=>{
  const f=()=>({render(){},unmount(){}});
  for(const mutate of [m=>m.gameId='foreign',m=>m.slug='../../admin',m=>m.runtime='phaser',m=>m.registration='REGISTERED',m=>m.walletRequiredForCore=true,m=>m.rulesetVersion='9.0.0',m=>m.saveSchemaVersion=99]){
   const m={...canonical};mutate(m);assert.throws(()=>validateCasualManifest(m,canonical),CasualLifecycleError);
  }
  for(const context of [{gameId:'foreign'},{provider:null},{wallet:null},{signingKey:'x'},{verifiedScore:false},{registry:{}}]){
-  let calls=0;const a=create(()=>{calls++;return f()});assert.rejects(a.mount(dom,context));assert.equal(calls,0);
+  let calls=0;const a=create(()=>{calls++;return f()});await assert.rejects(a.mount(dom,context));assert.equal(calls,0);
  }
 });
 test('stale async mount cannot resurrect disposed React root',async()=>{

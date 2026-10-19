@@ -1,0 +1,61 @@
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity ^0.8.24;
+import "./PokerConfidentialDeal420.sol";
+
+/// @notice Fail-closed hand-specific deadline and dispute holds.
+/// @dev No callback into chip custody; a completed timeout is NOT payout authority.
+///      Caller-supplied turn authority requires independent deterministic hand-engine
+///      verification prior to any operational use.
+contract PokerActionDisputeClock420 {
+    PokerConfidentialDeal420 public immutable deals;
+    bytes32 public constant ACTION_START_CLOCK=keccak256("BET_POKER_START_ACTION_CLOCK");
+    struct Clock { uint64 deadline; uint64 nonce; uint8 seat; bytes32 stateHash; bool active; bool disputed; }
+    mapping(bytes32=>Clock) public clocks;
+    mapping(bytes32=>bytes32) public evidenceHash;
+    error InvalidInput(); error Unauthorized(); error InvalidState(); error Premature();
+    event ClockStarted(bytes32 indexed handId,uint8 seat,uint64 nonce,uint64 deadline,bytes32 stateHash);
+    event ClockExpired(bytes32 indexed handId,uint8 seat,uint64 nonce);
+    event Disputed(bytes32 indexed handId,address challenger,bytes32 evidence);
+    constructor(address deals_) {
+        if(deals_==address(0))revert InvalidInput();
+        deals=PokerConfidentialDeal420(deals_);
+    }
+    function start(bytes32 handId,uint8 seat,uint64 nonce,uint64 deadline,bytes32 stateHash) external {
+        PokerConfidentialDeal420.Hand memory h=deals.getHand(handId);
+        if(h.state!=PokerConfidentialDeal420.State.COMMITTED||seat>=9||
+           (deals.handSeatMask(handId)&(uint16(1)<<seat))==0||
+           nonce==0||stateHash==bytes32(0)||deadline<=block.timestamp||
+           deadline>block.timestamp+1 hours)revert InvalidInput();
+        if(!deals.authorization().isAuthorized(msg.sender,ACTION_START_CLOCK,
+             deals.authorization().scopeForTable(h.tableId),0))revert Unauthorized();
+        Clock storage c=clocks[handId];
+        if(c.disputed||(c.active && block.timestamp<c.deadline)||nonce!=c.nonce+1)
+            revert InvalidState();
+        if(deals.ledger().seatingEpoch(h.tableId)!=h.epoch ||
+           deals.snapshotFor(h.tableId,deals.handSeatMask(handId))!=h.seatSnapshotHash)
+            revert InvalidState();
+        clocks[handId]=Clock(deadline,nonce,seat,stateHash,true,false);
+        emit ClockStarted(handId,seat,nonce,deadline,stateHash);
+    }
+    function expire(bytes32 handId) external {
+        Clock storage c=clocks[handId];
+        if(!c.active||c.disputed)revert InvalidState();
+        if(block.timestamp<c.deadline)revert Premature();
+        c.active=false;
+        emit ClockExpired(handId,c.seat,c.nonce);
+    }
+    function dispute(bytes32 handId,bytes32 evidence) external {
+        if(evidence==bytes32(0))revert InvalidInput();
+        PokerConfidentialDeal420.Hand memory h=deals.getHand(handId);
+        Clock storage c=clocks[handId];
+        if(c.nonce==0||c.disputed)revert InvalidState();
+        bool authorized=false;
+        for(uint8 i=0;i<9;i++)if((deals.handSeatMask(handId)&(uint16(1)<<i))!=0 &&
+           deals.ledger().seatOf(h.tableId,i).player==msg.sender)authorized=true;
+        if(!authorized)revert Unauthorized();
+        c.active=false;c.disputed=true;
+        evidenceHash[handId]=evidence;
+        emit Disputed(handId,msg.sender,evidence);
+    }
+    function isFrozen(bytes32 handId) external view returns(bool){return clocks[handId].disputed;}
+}

@@ -1,6 +1,6 @@
 // L02.1: pure, fail-closed UI routing policy. Backend authorization remains mandatory.
 export const ROUTES = Object.freeze({
-  "/": { title: "Service status", role: null },
+  "/": { title: "LIFTd — arrive higher", role: null },
   "/rider": { title: "Rider", role: "rider" },
   "/driver": { title: "Driver", role: "driver" },
   "/operator": { title: "Operator", role: "operator" }

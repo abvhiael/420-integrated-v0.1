@@ -40,6 +40,8 @@ jobs:
           node rideshare/scripts/verify-foundation.mjs
       - name: Trip lifecycle and denial-path tests
         run: node --test rideshare/test/trip.test.mjs
+      - name: Install scoped LIFTd dependencies for full foundation evidence
+        run: npm ci --prefix rideshare
       - name: Record scoped implementation evidence
         run: |
           mkdir -p liftd-evidence

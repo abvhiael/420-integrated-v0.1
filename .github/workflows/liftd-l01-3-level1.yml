@@ -49,6 +49,8 @@ jobs:
         run: |
           node --check rideshare/src/eligibility.mjs
           node --check rideshare/test/eligibility.test.mjs
+      - name: Install scoped LIFTd dependencies for foundation tests and evidence
+        run: npm ci --prefix rideshare --ignore-scripts
       - name: Retained foundation, sessions and eligibility qualification
         run: npm test --prefix rideshare
       - name: Record scoped implementation evidence

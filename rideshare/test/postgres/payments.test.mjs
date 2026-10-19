@@ -38,12 +38,15 @@ test('wrong account, forged Pay bindings, weak finality and late submission cann
   const foreign=app.token('rider','rider_other','payment_bad');await assert.rejects(()=>app.paymentService.read(foreign,'payment_bad'),e=>e.code==='PAY_SCOPE_DENIED');
 });
 test('completion has no capture side effect; finalized capture yields conserved separate actual driver and development projections',async()=>{
+  // Isolate this statement assertion from other sequential PostgreSQL fixture trips.
+  // Keep strict trip count and conserved monetary projections unchanged.
+  controls.periodId='payment_plan_qualification';
   await app.create('payment_plan');const intent=await app.prepareIntent('payment_plan',200);await app.authorize('payment_plan',intent);await app.complete('payment_plan');
   assert.equal((await app.paymentService.read(app.rider('payment_plan'),'payment_plan')).status,'AUTHORIZED');
   await app.capture('payment_plan');const p=await app.plan('payment_plan');assert.equal(p.conserved,true);assert.equal(p.tipCents,200);assert.equal(p.allowanceCents,104);assert.equal(p.earningsCents,796);assert.equal(p.developmentCents,19);assert.equal(p.platformCents,180);
   await assert.rejects(()=>app.reserve('payment_plan','development',p.developmentCents),e=>e.code==='CANONICAL_DEVELOPMENT_POLICY_INCOMPATIBLE');
   const statement=await app.paymentService.read(app.token('driver','driver_pay','payment_plan'),'payment_plan');assert.equal(statement.allowanceCents,104);assert.equal(statement.tipCents,200);
-  const period=await app.paymentService.statement(app.token('driver','driver_pay'),'driver_pay','period_1');assert.equal(period.trips,1);assert.equal(period.earningsCents,796);assert.equal(period.onlineTimeGuarantee,false);
+  const period=await app.paymentService.statement(app.token('driver','driver_pay'),'driver_pay',controls.periodId);assert.equal(period.trips,1);assert.equal(period.earningsCents,796);assert.equal(period.onlineTimeGuarantee,false);
 });
 test('two instances racing reserve one driver entitlement; immutable finalized payout does not free its budget',async()=>{
   await app.create('payment_race');const i=await app.prepareIntent('payment_race');await app.authorize('payment_race',i);await app.complete('payment_race');await app.capture('payment_race');const p=await app.plan('payment_race');

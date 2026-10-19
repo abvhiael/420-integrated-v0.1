@@ -7,11 +7,14 @@ assert.ok(process.env.LIFTD_DATABASE_URL,'L03.6 requires isolated real PostgreSQ
 test('migration ownership, positive least privilege, readiness, and fail-closed rollback',async()=>{
  const owner=createDatabasePool({connectionString:process.env.LIFTD_DATABASE_URL});
  let appPool,app;
+ let migrationChecksumFixture;
+ let runtimeRoleCreated=false;
  try{
   const db=await owner.query('SELECT current_database() AS name');
   assert.equal(db.rows[0].name,'liftd_qualification');
   await migrate(owner);
   await owner.query("CREATE ROLE liftd_runtime LOGIN PASSWORD 'liftd_fixture' NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION");
+  runtimeRoleCreated=true;
   await owner.query('GRANT USAGE ON SCHEMA liftd TO liftd_runtime');
   await owner.query('GRANT SELECT ON liftd.migrations,liftd.trips TO liftd_runtime');
   const url=new URL(process.env.LIFTD_DATABASE_URL);url.username='liftd_runtime';url.password='liftd_fixture';
@@ -31,8 +34,28 @@ test('migration ownership, positive least privilege, readiness, and fail-closed 
   await assert.rejects(()=>assessReadiness(appPool),e=>e.code==='DEPLOY_DATABASE_PRIVILEGE_DENIED');
   await owner.query('GRANT SELECT ON liftd.trips TO liftd_runtime');
   assert.equal((await assessReadiness(appPool)).ready,true);
-  await owner.query("UPDATE liftd.migrations SET checksum='0' WHERE version=(SELECT min(version) FROM liftd.migrations)");
+  // This negative test must leave the shared sequential qualification fixture pristine.
+  // Save the actual immutable ledger value; never infer or rewrite a migration checksum.
+  const priorMigration=(await owner.query('SELECT version,checksum FROM liftd.migrations ORDER BY version LIMIT 1')).rows[0];
+  assert.ok(priorMigration?.version && /^[a-f0-9]{64}$/.test(priorMigration.checksum));
+  migrationChecksumFixture=priorMigration;
+  await owner.query("UPDATE liftd.migrations SET checksum='0' WHERE version=$1",[priorMigration.version]);
   await assert.rejects(()=>assessReadiness(appPool),e=>e.code==='MIGRATION_CHECKSUM_MISMATCH');
-  // Roll back only the image/credentials; invalid schema must remain unready, never auto-downgraded.
- }finally{await app?.stop();await appPool?.end();await owner.end()}
+  // During the negative test the tampered schema must remain unready; fixture cleanup
+  // below is qualification-only and cannot be used for production schema repair.
+ }finally{
+  try {
+   if (migrationChecksumFixture) await owner.query('UPDATE liftd.migrations SET checksum=$1 WHERE version=$2 AND checksum=$3',[
+    migrationChecksumFixture.checksum,migrationChecksumFixture.version,'0']);
+  } finally {
+   await app?.stop();await appPool?.end();
+   // This fixture owns the role it created; release it before subsequent
+   // PostgreSQL test owners establish their independent runtime grants.
+   if (runtimeRoleCreated) {
+    await owner.query('DROP OWNED BY liftd_runtime');
+    await owner.query('DROP ROLE liftd_runtime');
+   }
+   await owner.end();
+  }
+ }
 });

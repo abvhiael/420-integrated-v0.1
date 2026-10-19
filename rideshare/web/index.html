@@ -5,23 +5,25 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light dark">
   <title>LIFTd — service preview</title>
+  <link rel="icon" href="./assets/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" href="./assets/liftd-official-logo.png">
   <link rel="stylesheet" href="./styles.css">
   <script type="module" src="./app.mjs"></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to main content</a>
   <header class="site-header">
-    <div class="brand"><a href="/" data-route aria-label="LIFTd home">LIFTd</a><span class="preview">Service preview</span></div>
+    <div class="brand"><a href="/" data-route aria-label="LIFTd home"><img class="brand-logo" src="./assets/liftd-official-logo.png" alt="LIFTd — arrive higher" width="1536" height="1024"></a><span class="preview">Service preview</span></div>
     <button id="menu-toggle" type="button" aria-expanded="false" aria-controls="site-nav">Menu</button>
     <nav id="site-nav" aria-label="Primary navigation">
       <a href="/" data-route>Service status</a>
-      <a href="/rider" data-route>Rider</a>
+      <a href="/rider" data-route>Rider portal</a>
       <a href="/driver" data-route>Driver</a>
       <a href="/operator" data-route>Operator</a>
     </nav>
   </header>
   <div class="availability" role="status" aria-live="polite">Vancouver, BC pilot — Not available for bookings. Payments are not enabled.</div>
   <main id="main" tabindex="-1" aria-live="polite" aria-busy="true"><h1>Loading service preview</h1><p>Checking application status.</p></main>
-  <footer>Accessibility or safety concerns? Contact the operator through an approved channel. This preview cannot request a ride.</footer>
+  <footer><img class="footer-logo" src="./assets/liftd-official-logo.png" alt="LIFTd — arrive higher" width="1536" height="1024">Accessibility or safety concerns? Contact the operator through an approved channel. This preview cannot request a ride.</footer>
 </body>
 </html>

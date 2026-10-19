@@ -1,3 +1,4 @@
+import {renderRiderLanding} from './rider-landing.mjs';
 import {mountOperatorConsole} from './operator-console.mjs';
 import { ROUTES, AVAILABILITY, routeDecision, sanitizeReturnPath } from "./route-policy.mjs";
 import { mountRiderAccount } from "./rider-account.mjs";
@@ -60,6 +61,14 @@ function renderDecision(decision) {
   if(clearOperatorConsole){clearOperatorConsole();clearOperatorConsole=null;}
   root.replaceChildren();
   root.setAttribute("aria-busy", "false");
+  if (decision.kind === "public" && decision.path === "/") {
+    root.classList.add("rider-landing-root");
+    root.append(renderRiderLanding());
+    document.title = "LIFTd — arrive higher";
+    if (focusAfterNavigation) { focusAfterNavigation = false; root.focus(); }
+    return;
+  }
+  root.classList.remove("rider-landing-root");
   const panel = node("section", undefined, "panel");
   panel.append(node("h1", decision.title));
   if (decision.kind === "public") {

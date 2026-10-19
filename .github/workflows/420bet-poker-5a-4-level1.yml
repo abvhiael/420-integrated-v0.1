@@ -19,6 +19,8 @@ on:
       - 'contracts/test/BetPokerActionKeys54.t.sol'
       - 'contracts/src/bet/PokerFinalCardOpenings420.sol'
       - 'contracts/test/BetPokerFinalCardOpenings54.t.sol'
+      - 'contracts/src/bet/PokerActionDisputeClock420.sol'
+      - 'contracts/test/BetPokerActionDisputeClock54.t.sol'
       - 'contracts/test/BetPokerDeckDisclosure54.t.sol'
       - 'clients/420bet-poker/crypto/**'
       - 'clients/420bet-poker/zkshuffle/**'
@@ -49,7 +51,7 @@ jobs:
         with:
           node-version: 22
       - name: Verify confidential shuffle and encrypted seat delivery
-        run: node --test clients/420bet-poker/crypto/confidential-deal.test.mjs clients/420bet-poker/crypto/nlhe-replay.test.mjs clients/420bet-poker/crypto/nlhe-betting.test.mjs clients/420bet-poker/crypto/nlhe-verify-hand.test.mjs clients/420bet-poker/crypto/nlhe-economics.test.mjs
+        run: node --test clients/420bet-poker/crypto/confidential-deal.test.mjs clients/420bet-poker/crypto/nlhe-replay.test.mjs clients/420bet-poker/crypto/nlhe-betting.test.mjs clients/420bet-poker/crypto/nlhe-verify-hand.test.mjs clients/420bet-poker/crypto/nlhe-economics.test.mjs clients/420bet-poker/crypto/nlhe-differential.test.mjs
       - uses: actions/setup-go@v5
         with:
           go-version: '1.24'
@@ -59,4 +61,4 @@ jobs:
         run: go test -mod=mod -timeout 15m ./...
       - name: Scope commitment adversarial + inherited seating/table regression
         working-directory: contracts
-        run: forge test --match-contract '^(PokerFinalCardOpenings54Test|PokerActionKeys54Test|PokerPrivateShuffleGate54Test|PokerVerifiedTerminalGate54Test|PokerHandAccountingProof54Test|PokerHandFinality54Test|PokerDeckDisclosure54Test|PokerConfidentialDeal54Test|PokerSeatLedger53Test|BetPokerTableRegistry52Test)$' -vv
+        run: forge test --match-contract '^(PokerActionDisputeClock54Test|PokerFinalCardOpenings54Test|PokerActionKeys54Test|PokerPrivateShuffleGate54Test|PokerVerifiedTerminalGate54Test|PokerHandAccountingProof54Test|PokerHandFinality54Test|PokerDeckDisclosure54Test|PokerConfidentialDeal54Test|PokerSeatLedger53Test|BetPokerTableRegistry52Test)$' -vv

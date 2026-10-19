@@ -1,0 +1,46 @@
+{
+  "character_id": "budtender1",
+  "outfit_id": "outfit_01",
+  "animation_id": "idle_left",
+  "frame_count": 4,
+  "canvas": {
+    "width": 256,
+    "height": 384
+  },
+  "anchor": {
+    "x": 128,
+    "y": 368
+  },
+  "frame_duration_ms": 125,
+  "loop": true,
+  "frames": [
+    {
+      "index": 1,
+      "file": "frame_01.png",
+      "sha256": "9467f282201216935ad91c7a707d8f7c27928450e0376dfee634e8da214da6d9"
+    },
+    {
+      "index": 2,
+      "file": "frame_02.png",
+      "sha256": "73eaf3192107797b1975a2713c82a033383af152083e25d2f8ef7a135a3e6ef4"
+    },
+    {
+      "index": 3,
+      "file": "frame_03.png",
+      "sha256": "e90ca79b6139d3c98c5bade97271f2b99d27a5666681128ffbc24892f08cb83f"
+    },
+    {
+      "index": 4,
+      "file": "frame_04.png",
+      "sha256": "848d7665834455046b188c95c814699314a78d51cea9f67a5d02640f70731224"
+    }
+  ],
+  "validation": {
+    "file_integrity": "pass",
+    "transparency": "pass",
+    "alignment": "estimated_root_check_pending_visual_review",
+    "visual_continuity": "pending_visual_approval",
+    "animation_playback": "inspector_provided_not_browser_executed",
+    "production_approval": "pending"
+  }
+}

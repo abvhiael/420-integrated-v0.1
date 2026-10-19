@@ -56,7 +56,17 @@ contract VideoPokerViewsV1420 {
 
     function inspect(bytes32 wagerId, VideoPokerV1420.Params calldata params) external view returns (View memory v) {
         if (params.paytableId != VideoPokerJacksOrBetter420.PAYTABLE_ID) revert WrongPaytable();
-        BetTypes420.Wager memory wager = poker.validateWager(wagerId, params);
+        // Terminal VOID refunds are inspectable, but never eligible for active gameplay.
+        // Validate the immutable identity/params explicitly only in this read-only path.
+        BetTypes420.Wager memory wager = registry.getWager(wagerId);
+        if (wager.status == BetTypes420.WagerStatus.VOID) {
+            if (wager.gameId != poker.gameId() || wager.gameVersionId != poker.gameVersionId())
+                revert VideoPokerV1420.WrongGame();
+            if (wager.rulesetId != poker.rulesetId()) revert VideoPokerV1420.WrongRuleset();
+            if (poker.hashParams(params) != wager.paramsHash) revert VideoPokerV1420.ParamsMismatch();
+        } else {
+            wager = poker.validateWager(wagerId, params);
+        }
         v.wagerId = wagerId;
         v.player = wager.player;
         v.gameVersionId = wager.gameVersionId;
@@ -97,6 +107,21 @@ contract VideoPokerViewsV1420 {
             v.recordedOutcome = settlement.outcome;
             v.recordedGross = settlement.grossPayout;
             v.settledAt = settlement.settledAt;
+            // Read-only clients must never present an inconsistent recorded result as verified.
+            if (settlement.outcome == BetTypes420.TerminalOutcome.VOID) {
+                if (settlement.grossPayout != wager.stake) revert ResultMismatch();
+            } else {
+                if (!s.revealed || s.timedOut) revert InconsistentState();
+                (, uint256 computedGross) =
+                    VideoPokerJacksOrBetter420.grossPayout(s.finalCards, wager.stake, params.credits);
+                BetTypes420.TerminalOutcome computedOutcome =
+                    computedGross == 0 ? BetTypes420.TerminalOutcome.LOSS :
+                    computedGross == wager.stake ? BetTypes420.TerminalOutcome.PUSH :
+                    computedGross > wager.stake ? BetTypes420.TerminalOutcome.WIN :
+                    BetTypes420.TerminalOutcome.LOSS;
+                if (settlement.grossPayout != computedGross || settlement.outcome != computedOutcome)
+                    revert ResultMismatch();
+            }
         }
         if (wager.status == BetTypes420.WagerStatus.VOID) {
             if (!v.hasSettlement || v.recordedOutcome != BetTypes420.TerminalOutcome.VOID) revert InconsistentState();

@@ -98,12 +98,6 @@ contract PokerNLHEBetting420 {
         }
         revert InvalidState();
     }
-    function _active(Game storage g,uint8 i)private view returns(bool){
-        Player storage p=players[_handId(g)][i];
-        return _participates(g.seatsMask,i)&&!p.folded&&!p.allIn;
-    }
-    // Structs do not carry hand ID; callers use the explicit storage-keyed helpers below.
-    function _handId(Game storage)private pure returns(bytes32){return bytes32(0);}
     function _pendingFor(bytes32 handId,uint16 mask)private view returns(uint16 pending) {
         for(uint8 i=0;i<9;i++)if(_participates(mask,i)){
             Player storage p=players[handId][i];
@@ -154,7 +148,7 @@ contract PokerNLHEBetting420 {
     function start(bytes32 handId,uint256 ante,uint32 timeoutSecs) external {
         PokerConfidentialDeal420.Hand memory h=deals.getHand(handId);
         if(h.state!=PokerConfidentialDeal420.State.COMMITTED||
-           !shuffle.isProofComplete(handId)||timeoutSecs<30||timeoutSecs>3600)
+           !shuffle.isProofComplete(handId)||timeoutSecs<30||timeoutSecs>3600||ante!=0)
             revert InvalidState();
         Game storage g=games[handId];
         if(g.initialized||ledger.activeHand(h.tableId)!=handId||
@@ -186,8 +180,9 @@ contract PokerNLHEBetting420 {
             t.config.smallBlind:players[handId][sb].stack,true);
         _debit(handId,g,bb,t.config.bigBlind<players[handId][bb].stack?
             t.config.bigBlind:players[handId][bb].stack,true);
-        g.currentBet=players[handId][sb].bet>players[handId][bb].bet?
-            players[handId][sb].bet:players[handId][bb].bet;
+        // The nominal big blind remains the minimum live preflop amount
+        // even when the big-blind seat posts less because they are all-in.
+        g.currentBet=t.config.bigBlind;
         g.pendingMask=_pendingFor(handId,mask);
         g.toAct=n==2 && (g.pendingMask&_mask(sb))!=0?sb:
             _nextToAct(handId,mask,bb);
@@ -240,6 +235,7 @@ contract PokerNLHEBetting420 {
             if(owed==0||chips!=required)revert InvalidAction();
             _debit(handId,g,seat,chips,true);
         }else if(move==Move.RAISE){
+            if(_liveToAct(handId,g.seatsMask)<2)revert InvalidAction();
             if(chips<=owed||chips>p.stack)revert InvalidAction();
             if(p.acted && g.currentBet-p.lastFacing<g.minRaise)
                 revert InvalidAction();

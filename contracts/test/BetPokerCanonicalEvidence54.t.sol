@@ -14,10 +14,17 @@ contract RulesProofFixture54 is IPokerTerminalRulesProof420 {
 contract PokerCanonicalEvidence54Test is PokerPrivateShuffleGate54Test {
     PokerCanonicalEvidence420 canonical;
     RulesProofFixture54 rules;
+    PokerVerifierVersions420 verifierVersions;
     constructor(){
         rules=new RulesProofFixture54();
+        verifierVersions=new PokerVerifierVersions420(address(this));
+        verifierVersions.register(keccak256("TEST VERSION"),address(rules),
+            keccak256("TEST VERIFICATION KEY"),keccak256("TEST RULES CIRCUIT"),
+            keccak256("TEST PUBLIC INPUT SCHEMA"));
         canonical=new PokerCanonicalEvidence420(address(deal),address(gate),address(rules),
-            keccak256("TEST RULES CIRCUIT"),keccak256("TEST VERIFICATION KEY"));
+            address(verifierVersions),keccak256("TEST VERSION"),
+            keccak256("TEST RULES CIRCUIT"),keccak256("TEST VERIFICATION KEY"),
+            keccak256("TEST PUBLIC INPUT SCHEMA"));
     }
     function _shuffle() internal returns(bytes32 id) {
         id=_hand54();

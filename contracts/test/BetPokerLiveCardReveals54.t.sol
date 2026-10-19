@@ -17,6 +17,10 @@ contract FakeUnmaskGroth16Verifier54 {
         return accept;
     }
 }
+contract MismatchedReveal54 {
+    function engine() external pure returns(address) {return address(0xDEAD);}
+    function isStageComplete(bytes32,uint8) external pure returns(bool){return true;}
+}
 contract PokerLiveCardReveals54Test is PokerNLHEBetting54Test {
     uint256 internal constant FR=
         21888242871839275222246405745257275088696311157297823662689037894645226208583;
@@ -133,4 +137,12 @@ contract PokerLiveCardReveals54Test is PokerNLHEBetting54Test {
         cheat54.expectRevert(PokerLiveCardReveals420.WrongStreet.selector);
         live.submitShare(id,4,0,0,p,_shareProof(id,0,0,p));
     }
+    function testCannotBindForeignEngineAsCanonicalLiveReveal() public {
+        bytes32 id=_readyBetting();
+        require(id!=bytes32(0),"prepared");
+        MismatchedReveal54 malicious=new MismatchedReveal54();
+        cheat54.expectRevert(PokerNLHEBetting420.InvalidConfiguration.selector);
+        cheat54.prank(ADMIN);engine.bindReveals(TABLE,address(malicious));
+    }
+
 }

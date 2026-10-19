@@ -48,9 +48,10 @@ export function createMobileIntegratedConsumers({session,api,travelSdk,permissio
   return result;
  };
  return Object.freeze({
-  async requestWalletIntent(trip,consented){
+  async requestWalletIntent(trip,consented,tipCents=0){
+   if(!Number.isSafeInteger(tipCents)||tipCents<0)fail('INVALID_TIP');
    if(consented!==true)fail('EXPLICIT_WALLET_CONSENT_REQUIRED');
-   return fresh(trip,async s=>{if(s.role!=='rider'||typeof api.preparePayment!=='function')fail('WALLET_DENIED');return api.preparePayment(s,trip.id,{commandId:nonce()});});
+   return fresh(trip,async s=>{if(s.role!=='rider'||typeof api.preparePayment!=='function')fail('WALLET_DENIED');return api.preparePayment(s,trip.id,{commandId:nonce(),tipCents});});
   },
   async readPayment(trip){
    return fresh(trip,async s=>{if(typeof api.readPayment!=='function')fail('PAY_UNAVAILABLE');payment=validatePaymentProjection(await api.readPayment(s,trip.id),trip,payment);return payment;});

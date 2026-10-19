@@ -61,7 +61,7 @@ contract PokerNLHEBetting420 {
     PokerActionKeys420 public immutable keys;
     PokerActionDisputeClock420 public immutable disputes;
     BetAuthorization420 public immutable authorization;
-    IPokerAuthenticatedStreet420 public streetReveals;
+    mapping(bytes32=>IPokerAuthenticatedStreet420) public revealForTable;
     mapping(bytes32=>Game) private games;
     mapping(bytes32=>mapping(uint8=>Player)) private players;
     mapping(bytes32=>uint8) public lastButton;
@@ -95,11 +95,11 @@ contract PokerNLHEBetting420 {
     }
 
     function bindReveals(bytes32 tableId,address gate) external {
-        if(address(streetReveals)!=address(0)||gate==address(0)||gate.code.length==0)
+        if(address(revealForTable[tableId])!=address(0)||gate==address(0)||gate.code.length==0)
             revert InvalidConfiguration();
         if(!authorization.isAuthorized(msg.sender,ACTION_BIND_REVEALS,
             authorization.scopeForTable(tableId),0))revert Unauthorized();
-        streetReveals=IPokerAuthenticatedStreet420(gate);
+        revealForTable[tableId]=IPokerAuthenticatedStreet420(gate);
         emit RevealsBound(gate);
     }
     /// @notice One-time table-governance approval of canonical native payout calculator.
@@ -121,7 +121,7 @@ contract PokerNLHEBetting420 {
            (g.phase!=Phase.SHOWDOWN&&g.phase!=Phase.UNCONTESTED)||
            disputes.isFrozen(handId)||outcomeForTable[g.tableId]==address(0)||
            ledger.activeHand(g.tableId)!=handId)revert InvalidState();
-        if(address(streetReveals)==address(0))revert InvalidState();
+        if(address(revealForTable[g.tableId])==address(0))revert InvalidState();
         (uint256[9] memory balances,uint256 fee)=
             IPokerNativeOutcome420(outcomeForTable[g.tableId]).calculate(handId,policy);
         handSettled[handId]=true;
@@ -340,10 +340,10 @@ contract PokerNLHEBetting420 {
     ///      ciphertext membership, partial shares and canonical card proofs.
     function advanceRevealedStreet(bytes32 handId,uint8 street)external {
         Game storage g=games[handId];
-        if(msg.sender!=address(streetReveals)||msg.sender==address(0))revert Unauthorized();
+        if(msg.sender!=address(revealForTable[g.tableId])||msg.sender==address(0))revert Unauthorized();
         if(disputes.isFrozen(handId))revert InvalidState();
         if(!this.canRevealStreet(handId,street)||
-           !streetReveals.isStageComplete(handId,street))revert WaitingForReveal();
+           !revealForTable[g.tableId].isStageComplete(handId,street))revert WaitingForReveal();
         g.phase=street==1?Phase.FLOP:street==2?Phase.TURN:Phase.RIVER;
         if(street==1)flopOpened[handId]=true;
         for(uint8 i=0;i<9;i++)if(_participates(g.seatsMask,i)){

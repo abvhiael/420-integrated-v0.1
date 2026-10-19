@@ -29,6 +29,8 @@ on:
       - 'contracts/test/BetPokerVerifierVersions54.t.sol'
       - 'contracts/src/bet/PokerInitialEncryptedDeck420.sol'
       - 'contracts/src/bet/PokerGnarkElGamalAdapters420.sol'
+      - 'contracts/src/bet/PokerNLHEBetting420.sol'
+      - 'contracts/test/BetPokerNLHEBetting54.t.sol'
       - 'contracts/test/BetPokerGnarkElGamalAdapters54.t.sol'
       - 'contracts/src/bet/PokerCanonicalSettlement420.sol'
       - 'contracts/test/BetPokerCanonicalSettlement54.t.sol'
@@ -77,7 +79,7 @@ jobs:
         run: |
           mkdir -p artifacts/420bet-5a-4
           git rev-parse HEAD > artifacts/420bet-5a-4/qualified-sha.txt
-          sha256sum clients/420bet-poker/zkshuffle/circuit.go clients/420bet-poker/zkshuffle/reencryption_circuit.go clients/420bet-poker/zkshuffle/circuit_test.go clients/420bet-poker/zkshuffle/reencryption_circuit_test.go clients/420bet-poker/zkshuffle/reencryption_full52_test.go clients/420bet-poker/zkshuffle/initial_deck_circuit.go clients/420bet-poker/zkshuffle/initial_deck_circuit_test.go clients/420bet-poker/zkshuffle/partial_decryption_circuit.go clients/420bet-poker/zkshuffle/partial_decryption_circuit_test.go clients/420bet-poker/zkshuffle/ciphertext_merkle.go clients/420bet-poker/zkshuffle/ciphertext_merkle_test.go clients/420bet-poker/zkshuffle/go.mod > artifacts/420bet-5a-4/cryptographic-source-sha256.txt
+          sha256sum clients/420bet-poker/zkshuffle/circuit.go clients/420bet-poker/zkshuffle/reencryption_circuit.go clients/420bet-poker/zkshuffle/circuit_test.go clients/420bet-poker/zkshuffle/reencryption_circuit_test.go clients/420bet-poker/zkshuffle/reencryption_full52_test.go clients/420bet-poker/zkshuffle/initial_deck_circuit.go clients/420bet-poker/zkshuffle/initial_deck_circuit_test.go clients/420bet-poker/zkshuffle/partial_decryption_circuit.go clients/420bet-poker/zkshuffle/partial_decryption_circuit_test.go clients/420bet-poker/zkshuffle/ciphertext_merkle.go clients/420bet-poker/zkshuffle/ciphertext_merkle_test.go clients/420bet-poker/zkshuffle/card_unmask_circuit.go clients/420bet-poker/zkshuffle/card_unmask_circuit_test.go clients/420bet-poker/zkshuffle/go.mod > artifacts/420bet-5a-4/cryptographic-source-sha256.txt
           cd clients/420bet-poker/zkshuffle
           go list -mod=mod -m all > ../../../artifacts/420bet-5a-4/go-module-versions.txt
           cp go.sum ../../../artifacts/420bet-5a-4/go.sum
@@ -92,4 +94,4 @@ jobs:
           if-no-files-found: error
       - name: Scope commitment adversarial + inherited seating/table regression
         working-directory: contracts
-        run: forge test --match-contract '^(PokerGnarkElGamalAdapters54Test|PokerCanonicalSettlement54Test|PokerVerifierVersions54Test|PokerCanonicalEvidence54Test|PokerCanonicalRake54Test|PokerActionDisputeClock54Test|PokerFinalCardOpenings54Test|PokerActionKeys54Test|PokerPrivateShuffleGate54Test|PokerVerifiedTerminalGate54Test|PokerHandAccountingProof54Test|PokerHandFinality54Test|PokerDeckDisclosure54Test|PokerConfidentialDeal54Test|PokerSeatLedger53Test|BetPokerTableRegistry52Test)$' -vv
+        run: forge test --match-contract '^(PokerNLHEBetting54Test|PokerGnarkElGamalAdapters54Test|PokerCanonicalSettlement54Test|PokerVerifierVersions54Test|PokerCanonicalEvidence54Test|PokerCanonicalRake54Test|PokerActionDisputeClock54Test|PokerFinalCardOpenings54Test|PokerActionKeys54Test|PokerPrivateShuffleGate54Test|PokerVerifiedTerminalGate54Test|PokerHandAccountingProof54Test|PokerHandFinality54Test|PokerDeckDisclosure54Test|PokerConfidentialDeal54Test|PokerSeatLedger53Test|BetPokerTableRegistry52Test)$' -vv

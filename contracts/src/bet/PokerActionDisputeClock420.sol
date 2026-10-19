@@ -21,6 +21,8 @@ contract PokerActionDisputeClock420 {
         deals=PokerConfidentialDeal420(deals_);
     }
     function start(bytes32 handId,uint8 seat,uint64 nonce,uint64 deadline,bytes32 stateHash) external {
+        Clock storage existing=clocks[handId];
+        if(existing.disputed) revert InvalidState();
         PokerConfidentialDeal420.Hand memory h=deals.getHand(handId);
         if(h.state!=PokerConfidentialDeal420.State.COMMITTED||seat>=9||
            (deals.handSeatMask(handId)&(uint16(1)<<seat))==0||

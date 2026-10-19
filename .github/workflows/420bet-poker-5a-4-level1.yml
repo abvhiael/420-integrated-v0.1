@@ -69,9 +69,11 @@ jobs:
         run: |
           mkdir -p artifacts/420bet-5a-4
           git rev-parse HEAD > artifacts/420bet-5a-4/qualified-sha.txt
-          sha256sum clients/420bet-poker/zkshuffle/circuit.go clients/420bet-poker/zkshuffle/reencryption_circuit.go clients/420bet-poker/zkshuffle/circuit_test.go clients/420bet-poker/zkshuffle/reencryption_circuit_test.go clients/420bet-poker/zkshuffle/go.mod > artifacts/420bet-5a-4/cryptographic-source-sha256.txt
+          sha256sum clients/420bet-poker/zkshuffle/circuit.go clients/420bet-poker/zkshuffle/reencryption_circuit.go clients/420bet-poker/zkshuffle/circuit_test.go clients/420bet-poker/zkshuffle/reencryption_circuit_test.go clients/420bet-poker/zkshuffle/reencryption_full52_test.go clients/420bet-poker/zkshuffle/go.mod > artifacts/420bet-5a-4/cryptographic-source-sha256.txt
           cd clients/420bet-poker/zkshuffle
           go list -mod=mod -m all > ../../../artifacts/420bet-5a-4/go-module-versions.txt
+          cp go.sum ../../../artifacts/420bet-5a-4/go.sum
+          sha256sum go.sum >> ../../../artifacts/420bet-5a-4/cryptographic-source-sha256.txt
       - name: Upload exact-SHA proof provenance
         uses: actions/upload-artifact@v4
         with:

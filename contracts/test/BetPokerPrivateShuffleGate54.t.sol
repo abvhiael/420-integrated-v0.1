@@ -27,7 +27,7 @@ contract PokerPrivateShuffleGate54Test is PokerConfidentialDeal54Test {
     function testProofGateStagesAndTranscriptBinding() public {
         bytes32 id=_hand54();
         PokerConfidentialDeal420.Hand memory h=deal.getHand(id);
-        bytes32 outA=keccak256("re-encrypted A"),outB=keccak256("re-encrypted B");
+        bytes32 outA=keccak256("re-encrypted A"); bytes32 outB=keccak256("re-encrypted B");
         verifier.allow(gate.statement(id,1,h.transcriptCommitment,outA));
         cheat54.prank(PROVIDER_A);gate.proveStage(id,1,h.transcriptCommitment,outA,hex"010203");
         require(!gate.isProofComplete(id),"premature");

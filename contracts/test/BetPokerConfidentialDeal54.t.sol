@@ -52,6 +52,12 @@ contract PokerConfidentialDeal54Test is PokerSeatLedger53Test {
         cheat54.expectRevert(PokerConfidentialDeal420.Duplicate.selector);
         cheat54.prank(PROVIDER_A); deal.commit(id,keccak256("again"));
     }
+    function testIdenticalCommitmentsRejectedInEitherArrivalOrder() public {
+        _prepared(); bytes32 id=_begin(1);
+        cheat54.prank(PROVIDER_B); deal.commit(id,keccak256("same"));
+        cheat54.expectRevert(PokerConfidentialDeal420.InvalidInput.selector);
+        cheat54.prank(PROVIDER_A); deal.commit(id,keccak256("same"));
+    }
     function testRevokedProviderDenied() public {
         _prepared(); bytes32 id=_begin(1);
         cap.grant(PROVIDER_A,deal.ACTION_PROVIDER_COMMIT(),auth.scopeForTable(TABLE),false);

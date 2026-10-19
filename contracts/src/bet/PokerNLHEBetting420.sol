@@ -8,6 +8,9 @@ import "./PokerCanonicalRake420.sol";
 import "./PokerDeckDisclosure420.sol";
 
 interface IPokerNativeOutcome420 {
+    function engine() external view returns(address);
+    function reveals() external view returns(address);
+    function rakeEngine() external view returns(address);
     function calculate(bytes32 handId,PokerCanonicalRake420.Policy calldata policy)
         external view returns(uint256[9] memory finalChips,uint256 fee);
 }
@@ -127,6 +130,13 @@ contract PokerNLHEBetting420 {
            calculator.code.length==0)revert InvalidConfiguration();
         if(!authorization.isAuthorized(msg.sender,ACTION_BIND_OUTCOME,
             authorization.scopeForTable(tableId),0))revert Unauthorized();
+        // Refuse a calculator bound to a different engine or a different
+        // authenticated revelation channel, even if table governance submits it.
+        if(address(revealForTable[tableId])==address(0) ||
+           IPokerNativeOutcome420(calculator).engine()!=address(this) ||
+           IPokerNativeOutcome420(calculator).reveals()!=address(revealForTable[tableId]) ||
+           IPokerNativeOutcome420(calculator).rakeEngine()==address(0))
+            revert InvalidConfiguration();
         outcomeForTable[tableId]=calculator;
         emit OutcomeBound(tableId,calculator);
     }

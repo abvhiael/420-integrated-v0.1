@@ -33,7 +33,7 @@ func(c *CardUnmaskCircuit)Define(api frontend.API)error{
  api.AssertIsDifferent(c.HandScope,0)
  api.AssertIsDifferent(c.DeckRoot,0)
  api.AssertIsLessOrEqual(c.Position,51)
- api.AssertIsLessOrEqual(c.Street,3)
+ api.AssertIsLessOrEqual(c.Street,4)
  api.AssertIsLessOrEqual(c.CardIndex,51)
  curve,err:=twistededwards.NewEdCurve(api,ecccurve.BN254)
  if err!=nil{return err}

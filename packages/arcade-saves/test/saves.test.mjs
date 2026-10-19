@@ -30,7 +30,6 @@ test('migrations preserve old backup, run pure versioned functions, refuse missi
  const custom=games.map(g=>({...g,saveSchemaVersion:g.gameId===one?2:g.saveSchemaVersion}));
  const {store,values}=setup({games:custom,migrations:{[one]:{1:p=>({...p,level:(p.level??0)+1})}}});
  // Simulate an approved schema-1 record by writing with the historical approved roster.
- const original=setup({storage:undefined}); // independent preparation only
  await store.writeIfRevision(one,0,{level:1});
  const key=[...values.keys()][0];const raw=JSON.parse(values.get(key));
  // Re-encode a schema-1 snapshot using the public cryptographic canonical contract.

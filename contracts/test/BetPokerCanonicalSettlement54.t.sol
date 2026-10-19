@@ -44,10 +44,11 @@ contract PokerCanonicalSettlement54Test is PokerCanonicalEvidence54Test {
         initialVerifier.allow(initialDeck.statement(id,initialRoot));
         initialDeck.submit(id,initialRoot,hex"f00d");
         PokerConfidentialDeal420.Hand memory h=deal.getHand(id);
+        bytes32 certifiedRoot=initialDeck.rootOf(id);
         bytes32 first=keccak256("encrypted A");
         bytes32 second=keccak256("encrypted B");
-        verifier.allow(gate.statement(id,1,initialDeck.rootOf(id),first));
-        cheat54.prank(PROVIDER_A);gate.proveStage(id,1,initialDeck.rootOf(id),first,hex"010203");
+        verifier.allow(gate.statement(id,1,certifiedRoot,first));
+        cheat54.prank(PROVIDER_A);gate.proveStage(id,1,certifiedRoot,first,hex"010203");
         verifier.allow(gate.statement(id,2,first,second));
         cheat54.prank(PROVIDER_B);gate.proveStage(id,2,first,second,hex"010203");
     }

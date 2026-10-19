@@ -25,8 +25,10 @@ type Reencrypt2 struct {
  Nonces [2]frontend.Variable
 }
 type Reencrypt52 struct {
- Input [52]ElGamalCipher `gnark:",public"`
- Output [52]ElGamalCipher `gnark:",public"`
+ InputRoot frontend.Variable `gnark:",public"`
+ OutputRoot frontend.Variable `gnark:",public"`
+ Input [52]ElGamalCipher
+ Output [52]ElGamalCipher
  HandScope frontend.Variable `gnark:",public"`
  PublicKeyX frontend.Variable `gnark:",public"`
  PublicKeyY frontend.Variable `gnark:",public"`
@@ -78,5 +80,10 @@ func(c *Reencrypt2)Define(api frontend.API)error{
  return proveReencryption(api,c.Input[:],c.Output[:],c.PublicKeyX,c.PublicKeyY,c.HandScope,c.Indices[:],c.Nonces[:])
 }
 func(c *Reencrypt52)Define(api frontend.API)error{
- return proveReencryption(api,c.Input[:],c.Output[:],c.PublicKeyX,c.PublicKeyY,c.HandScope,c.Indices[:],c.Nonces[:])
+ if err:=proveReencryption(api,c.Input[:],c.Output[:],c.PublicKeyX,c.PublicKeyY,c.HandScope,c.Indices[:],c.Nonces[:]);err!=nil{return err}
+ inputRoot,err:=ciphertextMerkleRoot(api,c.HandScope,c.Input[:]);if err!=nil{return err}
+ outputRoot,err:=ciphertextMerkleRoot(api,c.HandScope,c.Output[:]);if err!=nil{return err}
+ api.AssertIsEqual(inputRoot,c.InputRoot)
+ api.AssertIsEqual(outputRoot,c.OutputRoot)
+ return nil
 }

@@ -50,16 +50,16 @@ contract PokerNLHEBetting54Test is PokerPrivateShuffleGate54Test {
     function testSignedHeadsUpPreflopClosesOnlyAfterBothAct() public {
         bytes32 id=_readyBetting();
         PokerNLHEBetting420.Game memory g=engine.gameOf(id);
-        require(g.toAct==0&&g.pot==15&&g.currentBet==10,"heads-up blind/button");
+        require(g.toAct==0&&g.pot==30&&g.currentBet==20,"heads-up blind/button");
         require(!engine.canRevealStreet(id,1),"flop cannot be exposed prematurely");
-        _signedAction(id,0,PokerNLHEBetting420.Move.CALL,5,PLAYER_KEY);
+        _signedAction(id,0,PokerNLHEBetting420.Move.CALL,10,PLAYER_KEY);
         g=engine.gameOf(id);
-        require(g.toAct==1 && g.pot==20,"next actor");
+        require(g.toAct==1 && g.pot==40,"next actor");
         _signedAction(id,1,PokerNLHEBetting420.Move.CHECK,0,OPPONENT_KEY);
         g=engine.gameOf(id);
         require(g.phase==PokerNLHEBetting420.Phase.AWAIT_FLOP,"waiting for verified board");
         require(engine.canRevealStreet(id,1),"authorized flop");
-        require(g.pot==20 && g.nonce==2,"conserved signed actions");
+        require(g.pot==40 && g.nonce==2,"conserved signed actions");
         require(ledger.reservedInHand(TABLE)==800,"funds locked through betting");
     }
     function testTimeoutFoldsOnlyPlayerFacingLiveBet() public {
@@ -69,7 +69,7 @@ contract PokerNLHEBetting54Test is PokerPrivateShuffleGate54Test {
         PokerNLHEBetting420.Game memory g=engine.gameOf(id);
         require(g.phase==PokerNLHEBetting420.Phase.UNCONTESTED,"fold terminal");
         require(engine.playerOf(id,0).folded,"auto-fold on owed bet");
-        require(g.pot==15 && g.nonce==1,"timeout cannot alter chips");
+        require(g.pot==30 && g.nonce==1,"timeout cannot alter chips");
     }
     function testInvalidSignedCallAndWrongTurnCannotMutateTranscript() public {
         bytes32 id=_readyBetting();
@@ -93,13 +93,13 @@ contract PokerNLHEBetting54Test is PokerPrivateShuffleGate54Test {
         PokerNLHEBetting420.Game memory g=engine.gameOf(id);
         uint64 expiry=uint64(block.timestamp+50);
         bytes32 moveHash=keccak256(abi.encode(engine.ACTION_DOMAIN(),id,
-            uint8(g.phase),uint8(0),uint8(PokerNLHEBetting420.Move.CALL),uint256(5)));
+            uint8(g.phase),uint8(0),uint8(PokerNLHEBetting420.Move.CALL),uint256(10)));
         bytes32 digest=signing.actionDigest(id,0,1,g.stateRoot,moveHash,expiry);
         (uint8 v,bytes32 rr,bytes32 ss)=signedVm.sign(PLAYER_KEY,digest);
         bytes memory signature=abi.encodePacked(rr,ss,v);
         signing.checkSignature(id,0,1,g.stateRoot,moveHash,expiry,signature);
         require(signing.lastActionNonce(id,0)==0,"signature remains unconsumed");
-        engine.action(id,0,PokerNLHEBetting420.Move.CALL,5,expiry,g.stateRoot,signature);
+        engine.action(id,0,PokerNLHEBetting420.Move.CALL,10,expiry,g.stateRoot,signature);
         require(engine.gameOf(id).nonce==1,"engine atomically consumes");
     }
 }

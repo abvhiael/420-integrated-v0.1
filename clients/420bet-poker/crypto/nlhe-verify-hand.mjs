@@ -2,7 +2,8 @@
 // it requires the entire opened deck. The controller's own payouts are not trusted.
 import {createHash,verify as verifySignature,createPublicKey} from 'node:crypto';
 import {replayBetting} from './nlhe-betting.mjs';
-import {rank7,settlePots} from './nlhe-replay.mjs';
+import {rank7} from './nlhe-replay.mjs';
+import {settleWithRake} from './nlhe-economics.mjs';
 import {verifyShuffle} from './confidential-deal.mjs';
 const digest=x=>createHash('sha256').update(JSON.stringify(x)).digest('hex');
 const validHex=x=>typeof x==='string'&&/^[a-f0-9]{88,512}$/i.test(x);
@@ -26,7 +27,8 @@ export function verifySignedTranscript(context,seatPublicKeys,signedActions) {
   });
 }
 export function independentlyVerifyOpenHand({context,commitments,seedA,seedB,openedDeck,
-  stacks,button,smallBlind,bigBlind,ante=0,seatKeys,actions,claimedPayouts}){
+  stacks,button,smallBlind,bigBlind,ante=0,seatKeys,actions,claimedPayouts,
+  rakePolicy={rakeBps:0,rakeCap:0,noFlopNoDrop:true}}){
   if(!verifyShuffle(context,commitments,seedA,seedB,openedDeck))throw Error('invalid deck proof');
   const verified=verifySignedTranscript(context,seatKeys,actions);
   const hand=replayBetting({stacks,button,smallBlind,bigBlind,ante,actions:verified});
@@ -44,12 +46,15 @@ export function independentlyVerifyOpenHand({context,commitments,seedA,seedB,ope
   if(cursor>52)throw Error('overdraw');
   const board=[...flop,turn,river];
   const ranks=hole.map((cards,i)=>hand.folded[i]?null:rank7([...cards,...board]));
-  const {payouts,pots}=settlePots(hand.committed,hand.folded,ranks,button);
+  const {payouts,pots,rake,refunds}=settleWithRake({contributions:hand.committed,
+    folded:hand.folded,ranks,button,flopSeen:hand.street>0,
+    rakeBps:rakePolicy.rakeBps,rakeCap:rakePolicy.rakeCap,
+    noFlopNoDrop:rakePolicy.noFlopNoDrop});
   if(payouts.length!==claimedPayouts?.length||payouts.some((x,i)=>x!==claimedPayouts[i]))
     throw Error('payout does not match independent hand reconstruction');
   const finalStacks=hand.remaining.map((value,i)=>value+payouts[i]);
-  if(finalStacks.reduce((a,b)=>a+b,0)!==stacks.reduce((a,b)=>a+b,0))
+  if(finalStacks.reduce((a,b)=>a+b,0)+rake!==stacks.reduce((a,b)=>a+b,0))
     throw Error('economic conservation');
-  return {finalStacks,contributed:hand.committed,payouts,pots,board,
+  return {finalStacks,contributed:hand.committed,payouts,pots,rake,refunds,board,
     transcriptHash:digest(verified),resultHash:digest({finalStacks,payouts,pots,board})};
 }

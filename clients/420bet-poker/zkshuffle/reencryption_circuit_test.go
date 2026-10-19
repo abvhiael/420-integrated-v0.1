@@ -28,7 +28,7 @@ func buildTwoCardWitness() *Reencrypt2 {
  base:=curve.Base
  pub:=new(native.PointAffine).ScalarMultiplication(&base,big.NewInt(13))
  pkx,pky:=coordinates(pub)
- v:=&Reencrypt2{PublicKeyX:pkx,PublicKeyY:pky}
+ v:=&Reencrypt2{HandScope:777,PublicKeyX:pkx,PublicKeyY:pky}
  for i:=0;i<2;i++{
   c1,c2:=cipherOf(int64(i+3),int64(i+17),&base,pub)
   v.Input[i]=reencryptInput(c1,c2)
@@ -61,6 +61,11 @@ func TestRealEncryptedReencryptionGroth16(t *testing.T){
  altered,err:=frontend.NewWitness(bad,ecc.BN254.ScalarField());if err!=nil{t.Fatal(err)}
  alteredPublic,err:=altered.Public();if err!=nil{t.Fatal(err)}
  if err:=groth16.Verify(proof,verifyingKey,alteredPublic);err==nil{t.Fatal("tampered ciphertext wrongly accepted")}
+ alteredScope:=buildTwoCardWitness()
+ alteredScope.HandScope=888
+ wrongScope,err:=frontend.NewWitness(alteredScope,ecc.BN254.ScalarField());if err!=nil{t.Fatal(err)}
+ wrongScopePublic,err:=wrongScope.Public();if err!=nil{t.Fatal(err)}
+ if err:=groth16.Verify(proof,verifyingKey,wrongScopePublic);err==nil{t.Fatal("reused proof accepted for different hand scope")}
  duplicate:=buildTwoCardWitness()
  duplicate.Indices[1]=duplicate.Indices[0]
  badWitness,err:=frontend.NewWitness(duplicate,ecc.BN254.ScalarField());if err!=nil{t.Fatal(err)}

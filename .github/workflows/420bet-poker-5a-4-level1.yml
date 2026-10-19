@@ -95,7 +95,7 @@ jobs:
         env:
           POKER_ZK_ARTIFACT_DIR: ../../../artifacts/420bet-5a-4
         working-directory: clients/420bet-poker/zkshuffle
-        run: go test -mod=mod -timeout 15m ./...
+        run: go test -mod=mod -timeout 35m ./...
       - name: Retrieve proven original exact-SHA cryptographic artifacts
         if: steps.cryptoscope.outputs.changed == 'false'
         uses: actions/download-artifact@v4
@@ -109,11 +109,11 @@ jobs:
         run: |
           mkdir -p artifacts/420bet-5a-4
           git rev-parse HEAD > artifacts/420bet-5a-4/qualified-sha.txt
-          sha256sum clients/420bet-poker/zkshuffle/circuit.go clients/420bet-poker/zkshuffle/reencryption_circuit.go clients/420bet-poker/zkshuffle/circuit_test.go clients/420bet-poker/zkshuffle/reencryption_circuit_test.go clients/420bet-poker/zkshuffle/reencryption_full52_test.go clients/420bet-poker/zkshuffle/initial_deck_circuit.go clients/420bet-poker/zkshuffle/initial_deck_circuit_test.go clients/420bet-poker/zkshuffle/partial_decryption_circuit.go clients/420bet-poker/zkshuffle/partial_decryption_circuit_test.go clients/420bet-poker/zkshuffle/ciphertext_merkle.go clients/420bet-poker/zkshuffle/ciphertext_merkle_test.go clients/420bet-poker/zkshuffle/card_unmask_circuit.go clients/420bet-poker/zkshuffle/card_unmask_circuit_test.go clients/420bet-poker/zkshuffle/go.mod > artifacts/420bet-5a-4/cryptographic-source-sha256.txt
+          sha256sum clients/420bet-poker/zkshuffle/circuit.go clients/420bet-poker/zkshuffle/reencryption_circuit.go clients/420bet-poker/zkshuffle/circuit_test.go clients/420bet-poker/zkshuffle/reencryption_circuit_test.go clients/420bet-poker/zkshuffle/reencryption_full52_test.go clients/420bet-poker/zkshuffle/initial_deck_circuit.go clients/420bet-poker/zkshuffle/initial_deck_circuit_test.go clients/420bet-poker/zkshuffle/initial_full52_test.go clients/420bet-poker/zkshuffle/partial_decryption_circuit.go clients/420bet-poker/zkshuffle/partial_decryption_circuit_test.go clients/420bet-poker/zkshuffle/ciphertext_merkle.go clients/420bet-poker/zkshuffle/ciphertext_merkle_test.go clients/420bet-poker/zkshuffle/card_unmask_circuit.go clients/420bet-poker/zkshuffle/card_unmask_circuit_test.go clients/420bet-poker/zkshuffle/go.mod > artifacts/420bet-5a-4/cryptographic-source-sha256.txt
           cd clients/420bet-poker/zkshuffle
           go list -mod=mod -m all > ../../../artifacts/420bet-5a-4/go-module-versions.txt
           cp go.sum ../../../artifacts/420bet-5a-4/go.sum
-          sha256sum ../../../artifacts/420bet-5a-4/EXPERIMENTAL-Reencrypt52Verifier.sol ../../../artifacts/420bet-5a-4/EXPERIMENTAL-Reencrypt52VerifyingKey.bin ../../../artifacts/420bet-5a-4/EXPERIMENTAL-Reencrypt52Proof.bin ../../../artifacts/420bet-5a-4/EXPERIMENTAL-Reencrypt52SolidityFixture.json > ../../../artifacts/420bet-5a-4/generated-proof-sha256.txt
+          sha256sum ../../../artifacts/420bet-5a-4/EXPERIMENTAL-Reencrypt52Verifier.sol ../../../artifacts/420bet-5a-4/EXPERIMENTAL-Reencrypt52VerifyingKey.bin ../../../artifacts/420bet-5a-4/EXPERIMENTAL-Reencrypt52Proof.bin ../../../artifacts/420bet-5a-4/EXPERIMENTAL-Reencrypt52SolidityFixture.json ../../../artifacts/420bet-5a-4/EXPERIMENTAL-InitialDeck52Verifier.sol ../../../artifacts/420bet-5a-4/EXPERIMENTAL-InitialDeck52VK.bin ../../../artifacts/420bet-5a-4/EXPERIMENTAL-InitialDeck52Proof.bin > ../../../artifacts/420bet-5a-4/generated-proof-sha256.txt
           sha256sum go.sum >> ../../../artifacts/420bet-5a-4/cryptographic-source-sha256.txt
       - name: Upload exact-SHA proof provenance
         if: steps.cryptoscope.outputs.changed == 'true'
@@ -129,6 +129,8 @@ jobs:
           mkdir -p src/bet/generated
           cp ../artifacts/420bet-5a-4/EXPERIMENTAL-Reencrypt52Verifier.sol src/bet/generated/ExperimentalReencrypt52Verifier.sol
           forge build src/bet/generated/ExperimentalReencrypt52Verifier.sol
+          cp ../artifacts/420bet-5a-4/EXPERIMENTAL-InitialDeck52Verifier.sol src/bet/generated/ExperimentalInitialDeck52Verifier.sol
+          forge build src/bet/generated/ExperimentalInitialDeck52Verifier.sol
       - name: Verify genuine 52-card proof against generated Solidity verifier
         working-directory: contracts
         run: |
@@ -143,6 +145,7 @@ jobs:
         run: |
           mkdir -p artifacts/420bet-5a-4
           test -s artifacts/420bet-5a-4/EXPERIMENTAL-Reencrypt52Proof.bin
+          test -s artifacts/420bet-5a-4/EXPERIMENTAL-InitialDeck52Verifier.sol
           test -s artifacts/420bet-5a-4/EXPERIMENTAL-Reencrypt52SolidityFixture.json
           test -s artifacts/420bet-5a-4/EXPERIMENTAL-Reencrypt52Verifier.sol
           echo 'inherited_qualified_sha=97d02e06d8cb4faddb33c320f122a7ce02f0f338' > artifacts/420bet-5a-4/inheritance.txt

@@ -5,6 +5,11 @@ import "../src/bet/PokerNativeOutcome420.sol";
 import "../src/bet/PokerHandRank420.sol";
 import "../src/bet/PokerCanonicalRake420.sol";
 
+contract WrongEngineOutcome54 {
+    function engine() external pure returns(address) { return address(0xDEAD); }
+    function reveals() external pure returns(address) { return address(0xBEEF); }
+    function rakeEngine() external pure returns(address) { return address(0xFEE); }
+}
 contract PokerNativeOutcome54Test is PokerLiveCardReveals54Test {
     PokerCanonicalRake420 actualRake;
     PokerHandRank420 actualRanker;
@@ -102,6 +107,16 @@ contract PokerNativeOutcome54Test is PokerLiveCardReveals54Test {
         require(ledger.seatOf(TABLE,0).chips==390&&ledger.seatOf(TABLE,1).chips==410,
             "verified terminal payouts cannot be overridden");
         require(ledger.handConsumed(id),"exactly once");
+    }
+
+    function testGovernanceCannotBindForeignEngineOrRevealCalculator() public {
+        bytes32 id=_fundedAndProved();
+        require(id!=bytes32(0),"real hand");
+        // Existing accepted binding stays immutable, so direct second-binding
+        // attempts must fail even for the authorized admin.
+        WrongEngineOutcome54 attacker=new WrongEngineOutcome54();
+        cheat54.expectRevert(PokerNLHEBetting420.InvalidConfiguration.selector);
+        cheat54.prank(ADMIN);engine.bindOutcome(TABLE,address(attacker));
     }
 
 }

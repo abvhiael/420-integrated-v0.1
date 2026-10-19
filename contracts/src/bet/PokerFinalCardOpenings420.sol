@@ -32,7 +32,7 @@ contract PokerFinalCardOpenings420 {
         Root memory rec=roots[handId];
         if(rec.treeRoot==bytes32(0) || !terminalGate.isVerifiedTerminal(handId))revert NotFinal();
         if(position>=52||card>=52||salt==bytes32(0)) revert InvalidOpening();
-        uint256 p=uint256(1)<<position,q=uint256(1)<<card;
+        uint256 p=uint256(1)<<position; uint256 q=uint256(1)<<card;
         if((revealedPositions[handId]&p)!=0||(revealedCards[handId]&q)!=0)revert Duplicate();
         bytes32 node=leaf(handId,position,card,salt);
         uint256 index=position;

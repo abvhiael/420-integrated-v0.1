@@ -7,7 +7,8 @@ import "./PokerVerifierVersions420.sol";
 /// list encrypts the canonical 52-card deck exactly once under the specified
 /// jointly controlled threshold key, including hashing that list to deckRoot.
 interface IPokerInitialDeckProof420 {
-    function verifyInitialDeck(bytes32 statement,bytes calldata proof) external view returns(bool);
+    function verifyInitialDeck(bytes32 statement,bytes32 handId,bytes32 deckRoot,
+        bytes32 keyCommitment,bytes calldata proof) external view returns(bool);
 }
 
 /// @notice Permissionless, proof-gated publication of the original encrypted deck.
@@ -58,7 +59,7 @@ contract PokerInitialEncryptedDeck420 {
         if(rootOf[handId]!=bytes32(0))revert Duplicate();
         if(proof.length==0||encryptedDeckRoot==bytes32(0))revert InvalidProof();
         bytes32 digest=statement(handId,encryptedDeckRoot);
-        if(!verifier.verifyInitialDeck(digest,proof))revert InvalidProof();
+        if(!verifier.verifyInitialDeck(digest,handId,encryptedDeckRoot,thresholdKeyCommitment,proof))revert InvalidProof();
         rootOf[handId]=encryptedDeckRoot;
         proofHashOf[handId]=keccak256(proof);
         emit InitialDeckVerified(handId,encryptedDeckRoot,keccak256(proof));

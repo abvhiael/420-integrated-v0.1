@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 const root=new URL('../',import.meta.url);
 const read=p=>fs.readFileSync(new URL(p,root),'utf8');
-const ids=JSON.parse(fs.readFileSync(new URL('../../../config/arcade-game-identities.json',root),'utf8'));
+const ids=JSON.parse(fs.readFileSync(new URL('../../config/arcade-game-identities.json',root),'utf8'));
 const freeze=JSON.parse(fs.readFileSync(new URL('../../../config/arcade-0-7-scope-freeze.json',root),'utf8'));
 if(ids.games.length!==11||freeze.scope.genesisGames.length!==11||!ids.games.every((g,i)=>g.slug===freeze.scope.genesisGames[i]))throw new Error('Canonical game scope drift');
 if(!ids.games.every(g=>g.walletRequiredForCore===false&&g.registration==='UNREGISTERED'))throw new Error('Unauthorized game permission');

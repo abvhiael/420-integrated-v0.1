@@ -1,0 +1,57 @@
+{
+  "character_id": "budtender1",
+  "outfit_id": "outfit_01",
+  "animation_id": "purchase_complete",
+  "frame_count": 6,
+  "canvas": {
+    "width": 256,
+    "height": 384
+  },
+  "anchor": {
+    "x": 128,
+    "y": 368
+  },
+  "frame_duration_ms": 125,
+  "loop": true,
+  "frames": [
+    {
+      "index": 1,
+      "file": "frame_01.png",
+      "sha256": "d91b60ff104174a6edabe4799f82fdf44a45b69418588df3136ae3697d18450e"
+    },
+    {
+      "index": 2,
+      "file": "frame_02.png",
+      "sha256": "e38d2c136b557b8dbc9cd0637602d0d6c178846c31e143074649c9eae26d4f14"
+    },
+    {
+      "index": 3,
+      "file": "frame_03.png",
+      "sha256": "78dc6d896ecf47a8ab969c8d91341a9778c7a46ccae1a5aa9f0b5d6c532d74e2"
+    },
+    {
+      "index": 4,
+      "file": "frame_04.png",
+      "sha256": "414de8728d033d5b35507e504ff9dc3bbb0470aca1f7ef53e6f646e90b7729ec"
+    },
+    {
+      "index": 5,
+      "file": "frame_05.png",
+      "sha256": "ee77e9f1a6e1d9d86b449412f71713b3a63f26fe4e541abe1a420c9d88053bc8"
+    },
+    {
+      "index": 6,
+      "file": "frame_06.png",
+      "sha256": "9e47bcbc128f489fa18c619cfeadc75eac9fec18e891a17a32b744bdbd37edcc"
+    }
+  ],
+  "validation": {
+    "file_integrity": "pass",
+    "transparency": "pass",
+    "alignment": "measured",
+    "visual_continuity": "pending_review",
+    "animation_playback": "inspector_created_not_browser_tested",
+    "production_approval": "pending"
+  },
+  "notes": "Playback loop=true reflects authoritative task parameter. Animation-specific section says once; conflicting instruction requires resolution before production acceptance."
+}

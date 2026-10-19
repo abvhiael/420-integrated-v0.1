@@ -159,9 +159,11 @@ contract PokerNLHEBetting420 {
         if(address(revealForTable[g.tableId])==address(0))revert InvalidState();
         (uint256[9] memory balances,uint256 fee)=
             IPokerNativeOutcome420(outcomeForTable[g.tableId]).calculate(handId,policy);
+        // Mark the hand consumed before any external dispute/ledger call.
+        // Reverts atomically restore this flag if either dependency fails.
+        handSettled[handId]=true;
         if(disputes.isFrozen(handId))
             disputes.finalizeVerifiedOutcome(handId,_nativeResolutionHash(handId,g.stateRoot,balances,fee));
-        handSettled[handId]=true;
         ledger.settleReservedHand(g.tableId,handId,balances,fee);
         emit NativeHandSettled(handId,g.tableId,fee);
     }
@@ -244,7 +246,9 @@ contract PokerNLHEBetting420 {
         if(!permitted||ledger.settlementCoordinator(h.tableId)!=address(this)||
            h.seatSnapshotHash!=deals.snapshotFor(h.tableId,mask))
             revert Unauthorized();
-        ledger.reserveHand(h.tableId,handId,mask,h.epoch);
+        bytes32 reservedSnapshot=ledger.reserveHand(h.tableId,handId,mask,h.epoch);
+        if(reservedSnapshot==bytes32(0) ||
+           reservedSnapshot!=ledger.lockedSnapshot(h.tableId))revert InvalidState();
     }
     /// @notice Permissionless refund if providers fail to complete their proof
     /// before a strictly enforced deadline, provided no hand has begun.
@@ -256,8 +260,8 @@ contract PokerNLHEBetting420 {
            ledger.activeHand(h.tableId)!=handId||
            shuffle.isProofComplete(handId))revert InvalidState();
         if(block.timestamp<uint256(h.deadline)+1 hours)revert TooEarly();
-        ledger.cancelReservedHand(h.tableId,handId);
         handAborted[handId]=true;
+        ledger.cancelReservedHand(h.tableId,handId);
         emit UnprovedDealAborted(handId,h.tableId);
     }
     function start(bytes32 handId,uint256 ante,uint32 timeoutSecs) external {
@@ -319,7 +323,8 @@ contract PokerNLHEBetting420 {
         if(expectedRoot!=g.stateRoot)revert InvalidAction();
         bytes32 moveHash=keccak256(abi.encode(ACTION_DOMAIN,handId,uint8(g.phase),
             seat,uint8(move),chips));
-        keys.checkSignature(handId,seat,g.nonce+1,expectedRoot,moveHash,expiry,signature);
+        bytes32 digest=keys.checkSignature(handId,seat,g.nonce+1,expectedRoot,moveHash,expiry,signature);
+        if(digest==bytes32(0))revert InvalidAction();
         _apply(handId,g,seat,move,chips);
     }
     function timeout(bytes32 handId) external {

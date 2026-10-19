@@ -104,21 +104,6 @@ jobs:
           run-id: 39315000314
           github-token: ${{ secrets.GITHUB_TOKEN }}
           path: artifacts/420bet-5a-4
-      - name: Compile exact generated 52-card Solidity verifier
-        working-directory: contracts
-        run: |
-          mkdir -p src/bet/generated
-          cp ../artifacts/420bet-5a-4/EXPERIMENTAL-Reencrypt52Verifier.sol src/bet/generated/ExperimentalReencrypt52Verifier.sol
-          forge build src/bet/generated/ExperimentalReencrypt52Verifier.sol
-      - name: Verify genuine 52-card proof against generated Solidity verifier
-        working-directory: contracts
-        run: |
-          python3 ../clients/420bet-poker/zkshuffle/make_full52_forge_test.py \
-            src/bet/generated/ExperimentalReencrypt52Verifier.sol \
-            ../artifacts/420bet-5a-4/EXPERIMENTAL-Reencrypt52SolidityFixture.json \
-            test/PokerGeneratedProofAcceptance.t.sol
-          forge test --match-contract PokerGeneratedProofAcceptanceTest -vv
-          rm test/PokerGeneratedProofAcceptance.t.sol
       - name: Record exact-SHA cryptographic provenance
         if: steps.cryptoscope.outputs.changed == 'true'
         run: |
@@ -138,6 +123,21 @@ jobs:
           path: artifacts/420bet-5a-4/
           retention-days: 90
           if-no-files-found: error
+      - name: Compile exact generated 52-card Solidity verifier
+        working-directory: contracts
+        run: |
+          mkdir -p src/bet/generated
+          cp ../artifacts/420bet-5a-4/EXPERIMENTAL-Reencrypt52Verifier.sol src/bet/generated/ExperimentalReencrypt52Verifier.sol
+          forge build src/bet/generated/ExperimentalReencrypt52Verifier.sol
+      - name: Verify genuine 52-card proof against generated Solidity verifier
+        working-directory: contracts
+        run: |
+          python3 ../clients/420bet-poker/zkshuffle/make_full52_forge_test.py \
+            src/bet/generated/ExperimentalReencrypt52Verifier.sol \
+            ../artifacts/420bet-5a-4/EXPERIMENTAL-Reencrypt52SolidityFixture.json \
+            test/PokerGeneratedProofAcceptance.t.sol
+          forge test --match-contract PokerGeneratedProofAcceptanceTest -vv
+          rm test/PokerGeneratedProofAcceptance.t.sol
       - name: Record inherited exact-SHA cryptographic qualification
         if: steps.cryptoscope.outputs.changed == 'false'
         run: |

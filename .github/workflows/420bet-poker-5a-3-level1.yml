@@ -1,0 +1,33 @@
+name: 420Bet Poker Seating 5A.3 Level 1
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'contracts/src/bet/PokerSeatLedger420.sol'
+      - 'contracts/test/BetPokerSeatLedger53.t.sol'
+      - '.github/workflows/420bet-poker-5a-3-level1.yml'
+permissions:
+  contents: read
+concurrency:
+  group: poker-5a-3-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+jobs:
+  poker-seating:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      FOUNDRY_PROFILE: pr
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact SHA
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Qualify seating accounting and 5A.2 regression
+        working-directory: contracts
+        run: forge test --match-contract '^(PokerSeatLedger53Test|BetPokerTableRegistry52Test)$' -vv

@@ -17,7 +17,7 @@ export function validate(m){
  for(let i=0;i<8;i++){const p=m.packages[i];assert.equal(p.id,expected[i]);assert.equal(p.role,roles[i]);
  assert.equal(p.path,(i===0?'apps/':'packages/')+p.id);assert.equal(p.implemented,false);
  assert.ok(!names.has(p.id));names.add(p.id);
- const deps=i===0?expected.filter(x=>x!=='arcade-web'&&x!=='arcade-testing'):i===1?[]:['arcade-core'];
+ const deps=i===0?['arcade-core','arcade-saves','arcade-score','arcade-art','arcade-character-sdk','arcade-phaser']:i===1?[]:['arcade-core'];
  assert.deepEqual(p.dependencies,deps);
  }
  function visit(id,trail=new Set()){assert.ok(!trail.has(id),'dependency cycle');const p=m.packages.find(x=>x.id===id);assert.ok(p,'foreign dependency');const next=new Set(trail);next.add(id);for(const dep of p.dependencies)visit(dep,next);}

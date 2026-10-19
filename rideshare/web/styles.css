@@ -10,3 +10,29 @@ button,nav a{min-height:2.75rem;min-width:2.75rem}
 .panel{min-width:0;overflow-wrap:anywhere}.panel label{display:block;max-width:100%}
 [aria-invalid=true]{border-color:#b32b2b;outline-color:#b32b2b}
 @media(max-width:650px){.panel{width:100%;padding:1rem}.panel button{max-width:100%;white-space:normal}}
+
+/* LIFTd approved driver marketing composition; does not alter operational UI. */
+.brand-logo{display:block;width:clamp(7rem,13vw,11rem);height:auto;object-fit:contain}.footer-logo{display:block;margin:0 auto .75rem;width:9rem;height:auto;object-fit:contain}
+main.driver-landing-root{max-width:none;padding:0;min-height:0}
+.driver-landing{--driver-neon:#78f36f;--driver-ink:#001a18;color:#081b1c;background:#fffcf3}
+.driver-hero{display:grid;grid-template-columns:1.05fr 1fr;background:#001a18;color:#fff;min-height:560px}
+.driver-hero-photo{min-height:500px;overflow:hidden}.driver-hero-photo img{display:block;width:100%;height:100%;object-fit:cover;object-position:center}
+.driver-hero-copy{padding:clamp(1.6rem,3.8vw,4rem);align-self:center}
+.driver-eyebrow{font-size:.87rem;letter-spacing:.2em;color:#2a8940;font-weight:800;margin:0 0 1rem}.driver-hero-copy .driver-eyebrow{color:var(--driver-neon)}
+.driver-hero h1,.driver-lower h2{font-weight:900;letter-spacing:-.055em;line-height:1.03;margin:0 0 1rem;font-size:clamp(2.35rem,4.1vw,5.1rem)}
+.driver-hero h1 span{color:var(--driver-neon)}
+.driver-lead{font-size:clamp(1rem,1.3vw,1.24rem);max-width:42rem;line-height:1.5}
+.driver-benefits{list-style:none;margin:1.4rem 0;padding:0;display:grid;gap:.9rem}
+.driver-benefits li{display:flex;align-items:center;gap:1rem}.driver-benefit-icon{display:grid;place-items:center;border-radius:50%;background:var(--driver-neon);color:#001a18;min-width:2.7rem;height:2.7rem;font-size:1.35rem;font-weight:850}
+.driver-benefits strong,.driver-benefits small{display:block}.driver-benefits strong{font-size:1.1rem}.driver-benefits small{line-height:1.4;color:#e0eeee;font-size:.9rem}
+.driver-cta{display:inline-flex;justify-content:center;align-items:center;gap:1.2rem;text-align:center;text-decoration:none;color:#041b14!important;background:var(--driver-neon);padding:.9rem 2rem;border-radius:999px;font-weight:850;min-height:3.2rem}
+.driver-cta:hover{background:#a1ffa1}.driver-hold{font-size:.84rem;color:#cbe2d5;max-width:34rem}
+.driver-lower{padding:clamp(1.5rem,4vw,4rem) max(1rem,calc((100vw - 90rem)/2));display:grid;grid-template-columns:minmax(240px,.8fr) minmax(0,1.7fr);gap:2.2rem;align-items:start}
+.driver-lower h2{font-size:clamp(2rem,3vw,3.7rem)}.driver-lower-intro p:not(.driver-eyebrow){max-width:32rem;line-height:1.5}.driver-cta-small{margin-top:1rem}
+.driver-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.7rem}
+.driver-feature-card{position:relative;border-radius:1rem;min-height:340px;overflow:hidden;color:white;background:#001a18}
+.driver-feature-card img{position:absolute;width:100%;height:100%;object-fit:cover;inset:0}
+.driver-feature-card:after{content:"";position:absolute;inset:35% 0 0;background:linear-gradient(transparent,rgba(0,15,15,.96))}
+.driver-card-content{position:absolute;bottom:0;left:0;right:0;z-index:1;padding:1rem;text-align:center}.driver-card-icon{display:grid;place-items:center;width:3.1rem;height:3.1rem;margin:0 auto .7rem;border-radius:100%;border:2px solid var(--driver-neon);background:#001a18;color:var(--driver-neon);font-size:1.5rem;font-weight:800}.driver-card-content h3{font-size:1rem;margin:.3rem 0}.driver-card-content p{font-size:.85rem;line-height:1.4;margin:.3rem 0}
+@media(max-width:900px){.driver-hero{grid-template-columns:1fr}.driver-hero-photo{height:420px;min-height:0}.driver-lower{grid-template-columns:1fr}.driver-cards{max-width:100%}}
+@media(max-width:560px){.driver-hero-photo{height:320px}.driver-hero-copy{padding:1.35rem}.driver-cards{grid-template-columns:1fr}.driver-feature-card{min-height:300px}.driver-lower{padding:1.5rem 1rem}.driver-hero h1{font-size:clamp(2rem,9vw,3rem)}}

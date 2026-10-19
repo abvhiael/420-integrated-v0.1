@@ -17,3 +17,17 @@ Source of application inclusion: `config/genesis-applications.json` on the activ
 **Scoped owner:** `.github/workflows/arcade-0-4-level1.yml` executes only `scripts/arcade/verify-arc-0-4.mjs`. Prior ARC and global suites are not replayed. Record exact workflow/job results before claiming Level 1 PASS. Level 2/3 are not triggered.
 
 **Testnet ledger requirement:** real selected-network collision and hash proof; Registry game registration; operator bindings; chain/finality; exact capability authorization; GP-17.9 live onboarding evidence and separate release decision. None are locally certified here.
+
+## Requirements-to-evidence reconciliation — protocol-owned inventory
+
+- GP-17.1 canonical ID grammar: enforced per frozen ID using `developer-hub/src/gaming-onboarding.mjs` plus negative fixtures.
+- Existing namespace collision inventory: `deployments/gaming/testnet.runtime.json`, four reference domains `HIGH_COUNTRY`, `THE_GREEN_ROAD`, `BUDTENDER`, `SMOKE_AND_CHROME`; all are distinct and none overlaps the eleven `ARCADE_*` candidate domains. This committed runtime file is explicitly `UNRESOLVED_UNTIL_DEPLOYMENT`, **not** live-network proof.
+- Exact slug, display name, runtime, game ID and roster/order freeze: verifier compares each title against the approved eleven-title matrix, and rejects substituted valid slugs or plausible runtime swaps.
+- Genesis decision separation: owner-approved Arcade entry on main; unmerged Genesis Decision #2 PR #734 is not imported or reconstructed.
+- Protocol authority: `contracts/src/gaming/GameRegistry420.sol` requires scoped registrar authority and rejects duplicate IDs; Arcade candidates are `UNREGISTERED` and cannot claim grant/registration/verification.
+- Per-game save isolation: manifest exposes unique immutable identifiers/schema versions; executable progress persistence and migration enforcement remains later ARC implementation, not falsely claimed in ARC-0.4.
+- Metadata/hash collision on an actual selected chain, operator binding, finality and live game registration: external ARC-TN/GP-17.9 evidence only; testnet acceptance is blocked, not a local Level 1 failure.
+- No independent step-specific ARC roadmap file was found in the committed `docs/arcade` directory; the authoritative ARC-0.2 architectural ADR, owner-selected roster and GP-17 controls form the verified scope, without renumbering.
+- Security adversarial suite: replaced canonical game ID, altered slug/runtime, duplicate slug/ID, unauthorized registration state, wallet requirement and schema/version failures must be rejected. No global workflow is owned by ARC-0.4.
+
+**Qualification history:** implementation `e4e5b96cec8a43ea66519d5c35116d4ea904aa85` passed job `117849418924`; strengthened verifier at `0959a38592520f773b6bbebb51c9edd66e4adf57` changes qualified inputs and therefore requires one new Arcade-owned Level 1 run. The earlier PASS remains historically valid only for its exact original SHA.

@@ -85,7 +85,7 @@ contract PokerLiveCardReveals54Test is PokerNLHEBetting54Test {
         live.reveal(handId,1,pos,card,keys,abi.encode(proof,pub));
     }
     function _completePreflop(bytes32 id) internal {
-        _signedAction(id,0,PokerNLHEBetting420.Move.CALL,5,PLAYER_KEY);
+        _signedAction(id,0,PokerNLHEBetting420.Move.CALL,10,PLAYER_KEY);
         _signedAction(id,1,PokerNLHEBetting420.Move.CHECK,0,OPPONENT_KEY);
     }
     function testNoPrematureDisclosureAndActualStageProgression() public {

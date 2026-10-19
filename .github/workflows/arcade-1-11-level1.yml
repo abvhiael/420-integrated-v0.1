@@ -1,0 +1,30 @@
+name: 420Arcade ARC-1.11 Level 1 assets and recovery
+on:
+  pull_request:
+    paths:
+      - 'packages/arcade-assets/**'
+      - 'apps/arcade-web/**'
+      - '.github/workflows/arcade-1-11-level1.yml'
+  workflow_dispatch:
+jobs:
+  arcade-assets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: apps/arcade-web/package-lock.json
+      - name: Asset security and failure-path tests
+        run: node --check packages/arcade-assets/src/index.mjs && node --test packages/arcade-assets/test/*.test.mjs
+      - name: Retained Arcade regressions
+        run: node --test packages/arcade-controls/test/*.test.mjs packages/arcade-phaser/test/*.test.mjs packages/arcade-core/test/*.test.mjs packages/arcade-input/test/*.test.mjs packages/arcade-audio/test/*.test.mjs packages/arcade-saves/test/*.test.mjs packages/arcade-score/test/*.test.mjs
+      - name: Frontend lint typecheck integration and production bundle
+        run: |
+          npm ci --prefix apps/arcade-web --ignore-scripts --no-audit --no-fund
+          npm run check --prefix apps/arcade-web
+          npm run lint --prefix apps/arcade-web
+          npm run typecheck --prefix apps/arcade-web
+          npm run test --prefix apps/arcade-web
+          npm run build --prefix apps/arcade-web

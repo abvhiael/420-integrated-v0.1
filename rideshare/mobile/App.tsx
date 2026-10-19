@@ -4,6 +4,7 @@ import {StatusBar} from 'expo-status-bar';
 import {previewState} from './src/route-policy.mjs';
 import {theme} from './src/theme';
 import RiderScreen from './src/RiderScreen';
+import DriverScreen from './src/DriverScreen';
 
 type Role='rider'|'driver'|null;
 export default function App() {
@@ -27,7 +28,7 @@ export default function App() {
      <Pressable accessibilityRole="button" accessibilityLabel="Open rider preview" onPress={()=>choose('rider')} style={styles.button}><Text style={styles.buttonLabel}>Rider preview</Text></Pressable>
      <Pressable accessibilityRole="button" accessibilityLabel="Open driver preview" onPress={()=>choose('driver')} style={styles.button}><Text style={styles.buttonLabel}>Driver preview</Text></Pressable>
    </>:<>
-     {state.route==='rider'?<RiderScreen/>:<Text style={[styles.copy,{color:dark?theme.white:theme.ink}]}>Eligibility, availability and offers are not connected.</Text>}
+     {state.route==='rider'?<RiderScreen/>:<DriverScreen/>}
      <View accessibilityRole="summary" style={styles.disabledCard}><Text style={styles.disabledText}>Service unavailable — testnet integration pending</Text></View>
      <Pressable accessibilityRole="button" accessibilityLabel="Return to role selection" onPress={exit} style={styles.button}><Text style={styles.buttonLabel}>Back to selection</Text></Pressable>
    </>}

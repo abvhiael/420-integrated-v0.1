@@ -3,7 +3,7 @@ import React,{useState,useEffect} from 'react';
 import {View,Text,TextInput,Pressable,StyleSheet,Linking,AppState} from 'react-native';
 import {theme} from './theme';
 type Driver={state:()=>any;readOnboarding:()=>Promise<any>;submitDocuments:(v:any)=>Promise<any>;readAvailability:()=>Promise<any>;setAvailability:(v:any)=>Promise<any>;readOffers:()=>Promise<any>;respondOffer:(id:string,yes:boolean)=>Promise<any>;readTrip:(id:string)=>Promise<any>;transition:(a:string)=>Promise<any>;navigation:()=>Promise<any>;reportSafety:(category:string)=>Promise<any>;suspend:()=>void};
-export default function DriverScreen({journey}:{journey?:Driver}){
+export default function DriverScreen({journey,integrations}:{journey?:Driver;integrations?:any}){
  const [vehicle,setVehicle]=useState(''),[receipt,setReceipt]=useState(''),[expiry,setExpiry]=useState(''),[kind,setKind]=useState('licence'),[seats,setSeats]=useState('4'),[tripId,setTripId]=useState(''),[category,setCategory]=useState('other');
  const [notice,setNotice]=useState('Driver services are not configured.'),[busy,setBusy]=useState(false),[,update]=useState(0);
  useEffect(()=>{const sub=AppState.addEventListener('change',state=>{if(state!=='active'){journey?.suspend();update(x=>x+1);}});return ()=>{sub.remove();journey?.suspend();};},[journey]);
@@ -40,7 +40,7 @@ export default function DriverScreen({journey}:{journey?:Driver}){
   <Button label="Request approved navigation handoff" enabled={available&&!!snapshot?.trip} onPress={()=>run(async()=>{const url=await journey!.navigation();if(typeof url!=='string'||!url.startsWith('https://'))throw Error('NAVIGATION_DENIED');await Linking.openURL(url);})}/>
   <TextInput style={styles.field} accessibilityLabel="Incident category" placeholder="medical, collision, threat, vehicle, other" value={category} onChangeText={setCategory}/>
   <Button label="Report safety incident" enabled={available&&!!snapshot?.trip&&['ASSIGNED','ARRIVED','IN_PROGRESS'].includes(snapshot.trip.state)} onPress={()=>run(()=>journey!.reportSafety(category))}/>
-  <TripIntegrations trip={snapshot?.trip}/>
+  <TripIntegrations trip={snapshot?.trip} consumer={integrations}/>
   <Text accessibilityLiveRegion="polite" style={styles.notice}>{notice}</Text>
  </View>;
 }

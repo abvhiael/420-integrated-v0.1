@@ -171,11 +171,13 @@ contract PokerSeatLedger420 {
         if (playerSeatPlusOne[id][msg.sender] != 0) revert AlreadySeated();
         if (amount < t.config.minBuyIn || amount > t.config.maxBuyIn) revert BuyInLimit();
         _authorize(id, BetIds420.ACTION_POKER_BUY_IN, amount);
-        _deposit(t.config.asset, amount);
         uint64 epoch = ++seatingEpoch[id];
         seats[id][seat] = Seat(msg.sender, amount, false, epoch);
         playerSeatPlusOne[id][msg.sender] = seat + 1;
         totalChips[id] += amount;
+        // All escrow accounting effects precede token interaction; any
+        // failed or fee-on-transfer token move reverts the entire transaction.
+        _deposit(t.config.asset, amount);
         emit Seated(id, seat, msg.sender, amount, epoch);
     }
 
@@ -187,9 +189,9 @@ contract PokerSeatLedger420 {
         Seat storage s = seats[id][plusOne - 1];
         if (amount == 0 || s.chips + amount > t.config.maxBuyIn) revert BuyInLimit();
         _authorize(id, BetIds420.ACTION_POKER_TOP_UP, amount);
-        _deposit(t.config.asset, amount);
         s.chips += amount;
         totalChips[id] += amount;
+        _deposit(t.config.asset, amount);
         emit TopUp(id, plusOne - 1, amount, s.chips);
     }
 

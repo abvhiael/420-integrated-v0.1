@@ -16,6 +16,9 @@ import (
 // but their semantic enforcement belongs to the blockchain protocol contract.
 type PartialDecryptCircuit struct {
  HandScope frontend.Variable `gnark:",public"`
+ DeckRoot frontend.Variable `gnark:",public"`
+ CipherC2X frontend.Variable `gnark:",public"`
+ CipherC2Y frontend.Variable `gnark:",public"`
  Position frontend.Variable `gnark:",public"`
  Street frontend.Variable `gnark:",public"`
  ProviderIndex frontend.Variable `gnark:",public"`
@@ -25,6 +28,7 @@ type PartialDecryptCircuit struct {
  ProviderPKY frontend.Variable `gnark:",public"`
  ShareDX frontend.Variable `gnark:",public"`
  ShareDY frontend.Variable `gnark:",public"`
+ MerklePath [6]frontend.Variable
  SecretShare frontend.Variable
 }
 func(c *PartialDecryptCircuit)Define(api frontend.API)error{
@@ -42,6 +46,8 @@ func(c *PartialDecryptCircuit)Define(api frontend.API)error{
  curve.AssertIsOnCurve(pk)
  curve.AssertIsOnCurve(c1)
  curve.AssertIsOnCurve(share)
+ if err:=verifyCiphertextMembership(api,c.HandScope,c.Position,c.DeckRoot,
+    ElGamalCipher{C1X:c.CipherC1X,C1Y:c.CipherC1Y,C2X:c.CipherC2X,C2Y:c.CipherC2Y},c.MerklePath);err!=nil{return err}
  actualPK:=curve.ScalarMul(generator,c.SecretShare)
  actualShare:=curve.ScalarMul(c1,c.SecretShare)
  api.AssertIsEqual(pk.X,actualPK.X)

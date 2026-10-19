@@ -47,7 +47,7 @@ contract PokerNLHEBetting420 {
         bytes32 stateRoot;
         uint16 seatsMask;
         uint16 pendingMask;
-        uint8 button;
+        uint8 button=0;
         uint8 smallBlindSeat;
         uint8 bigBlindSeat;
         uint8 toAct;
@@ -279,7 +279,7 @@ contract PokerNLHEBetting420 {
             button=_nextSeat(mask,8);hasButton[h.tableId]=true;
         } else button=_nextSeat(mask,lastButton[h.tableId]);
         lastButton[h.tableId]=button;
-        uint8 n;
+        uint8 n=0;
         for(uint8 i=0;i<9;i++)if(_participates(mask,i))n++;
         uint8 sb=n==2?button:_nextSeat(mask,button);
         uint8 bb=_nextSeat(mask,sb);

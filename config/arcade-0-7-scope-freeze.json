@@ -1,0 +1,137 @@
+{
+  "schemaVersion": "1.0.0",
+  "step": "ARC-0.7",
+  "application": "420Arcade",
+  "status": "DEFINITION_FREEZE_ONLY",
+  "authority": "LOCAL_REQUIREMENTS_NOT_RELEASE",
+  "sourceBlobs": {
+    "config/arcade-game-identities.json": "6a29a566b37ce22f33944f20eba3a358cbde5cb8",
+    "config/arcade-platform-requirements.json": "b31c13974ddbc9b4f5ae16948a7c0b4ac64e7c1e",
+    "config/arcade-module-architecture.json": "91a5aaf685b432befcf5a4c770da7b6ae4a45a0c",
+    "docs/arcade/ARC-0.2-ARCHITECTURE-DECISIONS.md": "8a29e23a6b2bc4eed75ee31ab8e64a4d3484ee3b",
+    "packages/420-gaming-sdk/src/client.js": "24a0d9a2bd54f0e9d900caacaceafa00f53074c8"
+  },
+  "scope": {
+    "genesisGames": [
+      "kush-crush",
+      "420colouring-book",
+      "420buddy",
+      "bong-breaker",
+      "baked-invaders",
+      "puff-man",
+      "grasshopper",
+      "roach-run",
+      "high-climb",
+      "wheres-dave",
+      "mad-bud-delivery"
+    ],
+    "excluded": [
+      "bud-match",
+      "weedle",
+      "420-trivia"
+    ],
+    "runtimeBuildsCompleted": 0,
+    "networkRegistrations": 0,
+    "applicationGamesApproved": 11,
+    "addingGamesRequires": "EXPLICIT_SCOPE_APPROVAL_AND_NEW_FREEZE"
+  },
+  "acceptance": {
+    "requirements": [
+      "canonical-roster-and-exclusions",
+      "identity-namespace-and-nonregistration",
+      "platform-desktop-mobile-accessibility-offline",
+      "module-graph-and-release-versioning",
+      "independent-game-bundles-and-guest-core",
+      "score-replay-and-unverified-results",
+      "privacy-assets-and-rights",
+      "optional-gaming-sdk-authority",
+      "per-step-level1-exact-sha",
+      "milestone-level2-only-when-required",
+      "phase-level3-once-at-final-arcade-closeout",
+      "live-testnet-acceptance-separately-gated"
+    ],
+    "allGamesMustMeet": [
+      "responsive-desktop-mobile",
+      "keyboard-touch-and-pause",
+      "wcag-2.2-aa-target",
+      "guest-offline-after-assets-installed",
+      "versioned-saves-with-isolation",
+      "content-integrity-and-rights",
+      "adversarial-negative-tests",
+      "wallet-free-core"
+    ],
+    "noClientVerifiedClaims": true,
+    "noEconomicsWithoutExternalApproval": true,
+    "noFakeBrowserCompatibilityProof": true,
+    "phaseNotComplete": true
+  },
+  "qualification": {
+    "ordinary": "LEVEL1_EXACT_IMPLEMENTATION_SHA",
+    "integration": "LEVEL2_APP_ONLY_WHEN_REQUIRED",
+    "phaseCloseout": "LEVEL3_ONCE_AFTER_FREEZE_AND_RECONCILIATION",
+    "owners": [
+      "ARC_STEP_SCOPED",
+      "ARC_INTEGRATION_APP",
+      "SOLIDITY",
+      "GENESIS_ADDRESS_AUTHORITY",
+      "INTEGRATED",
+      "DOCS"
+    ],
+    "preservePriorEvidence": true,
+    "globalSuitesAtOrdinarySteps": false,
+    "latestQualifiedStep": "ARC-0.6",
+    "previousStages": [
+      {
+        "step": "ARC-0.1",
+        "status": "QUALIFIED_PREVIOUSLY",
+        "requalify": false
+      },
+      {
+        "step": "ARC-0.2",
+        "status": "QUALIFIED_PREVIOUSLY",
+        "requalify": false
+      },
+      {
+        "step": "ARC-0.3",
+        "status": "QUALIFIED_PREVIOUSLY",
+        "requalify": false
+      },
+      {
+        "step": "ARC-0.4",
+        "status": "QUALIFIED_PREVIOUSLY",
+        "requalify": false
+      },
+      {
+        "step": "ARC-0.5",
+        "status": "QUALIFIED_PREVIOUSLY",
+        "requalify": false
+      },
+      {
+        "step": "ARC-0.6",
+        "status": "QUALIFIED_PREVIOUSLY",
+        "requalify": false
+      }
+    ]
+  },
+  "dependencies": {
+    "moduleContract": "config/arcade-module-architecture.json",
+    "platformContract": "config/arcade-platform-requirements.json",
+    "identities": "config/arcade-game-identities.json",
+    "madBudArt": "INDEPENDENT_LICENSE_AND_APPROVED_EXPORT_REQUIRED",
+    "runtimeDependencies": "PIN_AND_LOCK_BEFORE_INSTALL",
+    "sdk": "EXISTING_SCOPED_GAMING_SDK_ONLY",
+    "canonicalRegistration": "TESTNET_NOT_COMPLETED",
+    "scoringServer": "REQUIRES_TRUSTED_VERIFIER",
+    "productionApproval": "NOT_GRANTED"
+  },
+  "testnet": {
+    "status": "PENDING_EXTERNAL_PROOF",
+    "requirements": [
+      "selected-chain-gameregistry-registrations",
+      "operator-capability-grants",
+      "finality-and-rpc-fault-evidence",
+      "GP-17.9-live-onboarding",
+      "independent-security-risk-and-release-approval"
+    ]
+  }
+}

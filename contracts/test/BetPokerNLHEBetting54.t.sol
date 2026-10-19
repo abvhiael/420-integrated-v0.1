@@ -78,8 +78,14 @@ contract PokerNLHEBetting54Test is PokerPrivateShuffleGate54Test {
         engine.action(id,1,PokerNLHEBetting420.Move.CHECK,0,uint64(block.timestamp+30),
             g.stateRoot,hex"dead");
         bytes32 expected=g.stateRoot;
+        uint64 expiry=uint64(block.timestamp+50);
+        bytes32 moveHash=keccak256(abi.encode(engine.ACTION_DOMAIN(),id,
+            uint8(g.phase),uint8(0),uint8(PokerNLHEBetting420.Move.CALL),uint256(4)));
+        bytes32 digest=signing.actionDigest(id,0,1,g.stateRoot,moveHash,expiry);
+        (uint8 v,bytes32 rr,bytes32 ss)=signedVm.sign(PLAYER_KEY,digest);
+        bytes memory signature=abi.encodePacked(rr,ss,v);
         cheat54.expectRevert(PokerNLHEBetting420.InvalidAction.selector);
-        _signedAction(id,0,PokerNLHEBetting420.Move.CALL,4,PLAYER_KEY);
+        engine.action(id,0,PokerNLHEBetting420.Move.CALL,4,expiry,g.stateRoot,signature);
         require(engine.gameOf(id).stateRoot==expected,"invalid action cannot advance");
     }
     function testReadOnlySignatureCheckCannotFrontRunCanonicalAction() public {

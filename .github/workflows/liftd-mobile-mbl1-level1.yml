@@ -41,7 +41,11 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-      - uses: android-actions/setup-android@v3
+      - name: Verify runner Android SDK availability
+        run: |
+          test -n "$ANDROID_HOME"
+          test -d "$ANDROID_HOME/platforms"
+          test -d "$ANDROID_HOME/build-tools"
       - name: Install dependency and generate Android debug project
         working-directory: rideshare/mobile
         run: |

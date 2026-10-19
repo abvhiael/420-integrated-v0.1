@@ -16,6 +16,8 @@ contract PokerNativeOutcome54Test is PokerLiveCardReveals54Test {
         result=new PokerNativeOutcome420(address(engine),address(live),
             address(actualRake),address(actualRanker));
         cap.grant(ADMIN,engine.ACTION_BIND_OUTCOME(),auth.scopeForTable(TABLE),true);
+        cap.grant(ADMIN,dispute.ACTION_BIND_RESOLVER(),auth.scopeForTable(TABLE),true);
+        cap.grant(ADMIN,dispute.ACTION_START_CLOCK(),auth.scopeForTable(TABLE),true);
     }
     function _fundedAndProved() internal returns(bytes32 id){
         PokerTableRegistry420.Configuration memory cfg=_config();
@@ -46,6 +48,7 @@ contract PokerNativeOutcome54Test is PokerLiveCardReveals54Test {
         engine.start(id,0,60);
         cheat54.prank(ADMIN);engine.bindReveals(TABLE,address(live));
         cheat54.prank(ADMIN);engine.bindOutcome(TABLE,address(result));
+        cheat54.prank(ADMIN);dispute.bindResolver(TABLE,address(engine));
     }
     function testOnChainUncontestedOutcomeSettlesExactEscrowOnce() public {
         bytes32 id=_fundedAndProved();
@@ -73,4 +76,31 @@ contract PokerNativeOutcome54Test is PokerLiveCardReveals54Test {
         engine.settle(id,forged);
         require(ledger.reservedInHand(TABLE)==800,"escrow remains reserved");
     }
+    function testDisputedHandAppealDoesNotOverrideVerifiedNativeOutcome() public {
+        bytes32 id=_fundedAndProved();
+        PokerCanonicalRake420.Policy memory policy=PokerCanonicalRake420.Policy(500,20,true,true);
+        cheat54.prank(ADMIN);dispute.start(id,0,1,uint64(block.timestamp+90),keccak256("state"));
+        cheat54.prank(PLAYER_B);dispute.dispute(id,keccak256("challenge evidence"));
+        require(dispute.isFrozen(id),"settlement temporarily frozen");
+        // Objective native gameplay continues despite a claim with no verified
+        // contradictory proof. The escrow remains immutable.
+        _signedAction(id,0,PokerNLHEBetting420.Move.FOLD,0,PLAYER_KEY);
+        cheat54.expectRevert(PokerActionDisputeClock420.InvalidState.selector);
+        engine.settle(id,policy);
+        cheat54.prank(OTHER);engine.proposeDisputeResolution(id,policy);
+        cheat54.expectRevert(PokerActionDisputeClock420.Premature.selector);
+        engine.settle(id,policy);
+        cheat54.prank(PLAYER);dispute.appeal(id,keccak256("one documented appeal"));
+        cheat54.warp(block.timestamp+1 days+1);
+        cheat54.expectRevert(PokerActionDisputeClock420.Premature.selector);
+        engine.settle(id,policy);
+        cheat54.warp(block.timestamp+1 days+1);
+        cheat54.prank(OTHER);engine.settle(id,policy);
+        require(!dispute.isFrozen(id) && dispute.resolutions(id).finalized,
+            "one-appeal objective resolution");
+        require(ledger.seatOf(TABLE,0).chips==390&&ledger.seatOf(TABLE,1).chips==410,
+            "verified terminal payouts cannot be overridden");
+        require(ledger.handConsumed(id),"exactly once");
+    }
+
 }

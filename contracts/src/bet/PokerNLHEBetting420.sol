@@ -5,6 +5,7 @@ import "./PokerActionKeys420.sol";
 import "./PokerPrivateShuffleGate420.sol";
 import "./PokerActionDisputeClock420.sol";
 import "./PokerCanonicalRake420.sol";
+import "./PokerDeckDisclosure420.sol";
 
 interface IPokerNativeOutcome420 {
     function calculate(bytes32 handId,PokerCanonicalRake420.Policy calldata policy)
@@ -22,6 +23,7 @@ interface IPokerAuthenticatedStreet420 {
 contract PokerNLHEBetting420 {
     bytes32 public constant ACTION_DOMAIN=keccak256("420.BET.POKER.NLHE.AUTHENTICATED.ACTION.V1");
     bytes32 public constant STATE_DOMAIN=keccak256("420.BET.POKER.NLHE.STATE.V1");
+    bytes32 public constant ACTION_BIND_DELIVERY=keccak256("BET_POKER_BIND_PRIVATE_DELIVERY.V1");
     bytes32 public constant ACTION_BIND_OUTCOME=keccak256("BET_POKER_BIND_CANONICAL_OUTCOME.V1");
     bytes32 public constant ACTION_BIND_REVEALS=keccak256("BET_POKER_BIND_REVEAL_ENGINE.V1");
 
@@ -70,6 +72,8 @@ contract PokerNLHEBetting420 {
     mapping(bytes32=>bool) public handSettled;
     mapping(bytes32=>bool) public handAborted;
     mapping(bytes32=>address) public outcomeForTable;
+    mapping(bytes32=>PokerDeckDisclosure420) public deliveryForTable;
+    event DeliveryBound(bytes32 indexed tableId,address gate);
     event OutcomeBound(bytes32 indexed tableId,address outcome);
     event NativeHandSettled(bytes32 indexed handId,bytes32 indexed tableId,uint256 rake);
     event UnprovedDealAborted(bytes32 indexed handId,bytes32 indexed tableId);
@@ -106,6 +110,18 @@ contract PokerNLHEBetting420 {
     }
     /// @notice One-time table-governance approval of canonical native payout calculator.
     /// @dev No address may provide arbitrarily chosen settlement amounts after binding.
+    /// @notice One-time per-table governance approval of player-owned
+    /// encrypted delivery + signed receipt authority.
+    function bindDelivery(bytes32 tableId,address gate) external {
+        if(address(deliveryForTable[tableId])!=address(0)||gate==address(0)||
+           gate.code.length==0)revert InvalidConfiguration();
+        if(!authorization.isAuthorized(msg.sender,ACTION_BIND_DELIVERY,
+            authorization.scopeForTable(tableId),0))revert Unauthorized();
+        PokerDeckDisclosure420 delivery=PokerDeckDisclosure420(gate);
+        if(address(delivery.deals())!=address(deals))revert InvalidConfiguration();
+        deliveryForTable[tableId]=delivery;
+        emit DeliveryBound(tableId,gate);
+    }
     function bindOutcome(bytes32 tableId,address calculator) external {
         if(outcomeForTable[tableId]!=address(0)||calculator==address(0)||
            calculator.code.length==0)revert InvalidConfiguration();
@@ -232,6 +248,8 @@ contract PokerNLHEBetting420 {
         if(h.state!=PokerConfidentialDeal420.State.COMMITTED||
            !shuffle.isProofComplete(handId)||timeoutSecs<30||timeoutSecs>3600||ante!=0)
             revert InvalidState();
+        if(address(deliveryForTable[h.tableId])==address(0)||
+           !deliveryForTable[h.tableId].allAcknowledged(handId))revert InvalidState();
         Game storage g=games[handId];
         if(g.initialized||ledger.activeHand(h.tableId)!=handId||
            ledger.seatingEpoch(h.tableId)!=h.epoch||

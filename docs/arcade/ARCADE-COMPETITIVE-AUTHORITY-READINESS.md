@@ -1,0 +1,13 @@
+# Arcade competitive verification and live Gaming Protocol registration
+
+**Status: Server implementation candidate; production/live acceptance is BLOCKED.**
+
+The `ArcadeRankingAuthority` implements server-issued random challenges, a database-enforced single-use session ledger, replay-resistant score storage, and public ranking reads containing **only** rows written after an independently approved ruleset replay verification. Database uniqueness and `SELECT FOR UPDATE` serialize competing submissions across replicas. Scores are untrusted until a server-owned verifier replays gameplay and verifies game-specific legal actions; an unconfigured, missing or unapproved verifier blocks challenge issuance. The caller must provide actual SQL-backed PostgreSQL access; in-memory test fixtures are not deployment proof. Only opaque pseudonymous player references are stored or displayed.
+
+**No qualified real-game verifier is present yet.** Game engine/level content is not implemented for the eleven Arcade candidates, so no claim of real authoritative scoring for those games can be made by merely plugging in a stub. The injected verifier's approval, digest and replay implementation must undergo a later independent game-specific security qualification. Published rankings remain disabled until then, and must not expose unverified client scores.
+
+**Live Gaming Protocol registration:** the repository's `deployments/gaming/testnet.runtime.json` has `status: UNRESOLVED_UNTIL_DEPLOYMENT`, `chainId: null`, null protocol contract addresses and null operator authority. GP-17 implementation and testnet onboarding harness do not prove live Registry entries. Authorized live registration requires deployed `GameRegistry420`, actual chain ID, registered game IDs, finalized active entries, operator binding, RPC/receipt/finality evidence and accountable operator signing outside the repo. Do not simulate a Registry success in production. The authority takes an injected finalized Registry resolver and refuses challenges/leaderboards unless it can confirm authorization.
+
+**Operational outstanding:** deploy PostgreSQL with migration, implement independent replay verifiers and fraud controls for each actual playable title; deploy authenticated service with player ownership proof, request throttling and audit logs; bind finalized GP-17.9 testnet registration before public rankings. No signing secrets in repo and no changes to frozen Genesis addresses or contracts.
+
+**Level 1:** local deterministic verification of fail-closed limits, replay, challenge identity, transaction atomicity and ranking result filtering. **Level 2/3 and live qualification:** not claimed.

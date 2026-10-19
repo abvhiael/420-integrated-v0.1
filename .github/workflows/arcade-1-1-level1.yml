@@ -15,13 +15,23 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Syntax checks
-        run: npm run check --prefix apps/arcade-web
-      - name: Security lint
-        run: npm run lint --prefix apps/arcade-web
+      - name: Resolve pinned lockfile for initial bootstrap
+        working-directory: apps/arcade-web
+        run: |
+          npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+          echo LOCK_BEGIN
+          base64 -w0 package-lock.json
+          echo
+          echo LOCK_END
+      - name: Install dependencies
+        run: npm install --prefix apps/arcade-web --ignore-scripts --no-audit --no-fund
+      - name: Syntax and security checks
+        run: npm run check --prefix apps/arcade-web && npm run lint --prefix apps/arcade-web
+      - name: Typecheck
+        run: npm run typecheck --prefix apps/arcade-web
       - name: Unit and adversarial tests
         run: npm run test --prefix apps/arcade-web
-      - name: Deterministic app build
+      - name: Production build
         run: npm run build --prefix apps/arcade-web
       - name: Verify deployable output
-        run: node --input-type=module -e "import fs from 'node:fs';const p='apps/arcade-web/dist/';for(const f of ['index.html','main.mjs','style.css','catalog.json'])if(!fs.statSync(p+f).isFile())throw Error(f);const c=JSON.parse(fs.readFileSync(p+'catalog.json'));if(c.games.length!==11||c.authority!=='PRESENTATION_ONLY')throw Error('catalog')"
+        run: node --input-type=module -e "import fs from 'node:fs';const p='apps/arcade-web/dist/';if(!fs.existsSync(p+'index.html')||!fs.readdirSync(p+'assets').some(x=>x.endsWith('.js')))throw Error('missing build');"

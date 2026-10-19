@@ -1,3 +1,4 @@
+import TripIntegrations from './TripIntegrations';
 import React,{useState,useEffect} from 'react';
 import {View,Text,TextInput,Pressable,StyleSheet,Linking,AppState} from 'react-native';
 import {theme} from './theme';
@@ -39,6 +40,7 @@ export default function DriverScreen({journey}:{journey?:Driver}){
   <Button label="Request approved navigation handoff" enabled={available&&!!snapshot?.trip} onPress={()=>run(async()=>{const url=await journey!.navigation();if(typeof url!=='string'||!url.startsWith('https://'))throw Error('NAVIGATION_DENIED');await Linking.openURL(url);})}/>
   <TextInput style={styles.field} accessibilityLabel="Incident category" placeholder="medical, collision, threat, vehicle, other" value={category} onChangeText={setCategory}/>
   <Button label="Report safety incident" enabled={available&&!!snapshot?.trip&&['ASSIGNED','ARRIVED','IN_PROGRESS'].includes(snapshot.trip.state)} onPress={()=>run(()=>journey!.reportSafety(category))}/>
+  <TripIntegrations trip={snapshot?.trip}/>
   <Text accessibilityLiveRegion="polite" style={styles.notice}>{notice}</Text>
  </View>;
 }

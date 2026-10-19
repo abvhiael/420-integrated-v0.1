@@ -48,6 +48,17 @@ func TestRealThresholdUnmaskProofValidInvalidAndReplay(t *testing.T){
  wrongAggregate.AggregatePKY=big.NewInt(1)
  aggWitness,err:=frontend.NewWitness(&wrongAggregate,ecc.BN254.ScalarField());if err!=nil{t.Fatal(err)}
  if _,err:=groth16.Prove(cs,pk,aggWitness);err==nil{t.Fatal("wrong threshold aggregate accepted")}
+
+ showdown:=*valid
+ showdown.Street=4
+ showdownWitness,err:=frontend.NewWitness(&showdown,ecc.BN254.ScalarField());if err!=nil{t.Fatal(err)}
+ showdownProof,err:=groth16.Prove(cs,pk,showdownWitness);if err!=nil{t.Fatalf("showdown card proof rejected: %v",err)}
+ showdownPublic,err:=showdownWitness.Public();if err!=nil{t.Fatal(err)}
+ if err:=groth16.Verify(showdownProof,vk,showdownPublic);err!=nil{t.Fatalf("valid showdown card proof rejected: %v",err)}
+ illegalStreet:=*valid
+ illegalStreet.Street=5
+ illegalWitness,err:=frontend.NewWitness(&illegalStreet,ecc.BN254.ScalarField());if err!=nil{t.Fatal(err)}
+ if _,err:=groth16.Prove(cs,pk,illegalWitness);err==nil{t.Fatal("street 5 card unmask proved")}
  replay:=*valid
  replay.HandScope=421
  other,err:=frontend.NewWitness(&replay,ecc.BN254.ScalarField());if err!=nil{t.Fatal(err)}

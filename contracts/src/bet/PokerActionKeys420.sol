@@ -36,6 +36,7 @@ contract PokerActionKeys420 {
         PokerConfidentialDeal420.Hand memory h=deals.getHand(handId);
         if(h.state!=PokerConfidentialDeal420.State.COMMITTED || nonce==0 ||
            expectedState==bytes32(0) || moveHash==bytes32(0)) revert InvalidHand();
+        if(seat>=9 || (deals.handSeatMask(handId)&(uint16(1)<<seat))==0) revert InvalidSeat();
         PokerSeatLedger420.Seat memory s=deals.ledger().seatOf(h.tableId,seat);
         Binding memory bound=keys[h.tableId][s.player];
         if(s.player==address(0) || bound.signer==address(0) || bound.seatEpoch!=s.epoch)

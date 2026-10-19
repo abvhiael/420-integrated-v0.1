@@ -26,7 +26,7 @@ contract PokerNLHEBetting54Test is PokerPrivateShuffleGate54Test {
         PokerConfidentialDeal420.Hand memory h=deal.getHand(id);
         bytes32 input=initialDeck.rootOf(id);
         bytes32 first=keccak256("encrypted shuffle A");
-        bytes32 second=keccak256("encrypted shuffle B");
+        bytes32 second=bytes32(uint256(1000));
         verifier.allow(gate.statement(id,1,input,first));
         cheat54.prank(PROVIDER_A);gate.proveStage(id,1,input,first,hex"010203");
         verifier.allow(gate.statement(id,2,first,second));

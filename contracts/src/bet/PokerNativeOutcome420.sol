@@ -83,8 +83,8 @@ contract PokerNativeOutcome420 {
             revert InvalidState();
         if(engine.ledger().activeHand(g.tableId)!=handId)revert InvalidState();
         if(address(engine.revealForTable(g.tableId))!=address(reveals))revert InvalidState();
-        uint256[9] memory deposits;
-        bool[9] memory folded;
+        uint256[9] memory deposits = [uint256(0),0,0,0,0,0,0,0,0];
+        bool[9] memory folded = [false,false,false,false,false,false,false,false,false];
         uint8 alive = 0;
         uint8 lone = 0;
         uint256 originalPot = 0;

@@ -1,0 +1,9 @@
+# ARC-1.11 — Asset loading, caching, error isolation and recovery
+
+Implements per-game manifest-validated immutable static media fetching with explicit asset ID, canonical game ID, pinned semantic version, SHA-256, byte length, MIME, approval status and accessible labels. Fetch is same-origin only, refuses redirects, opaque responses, executable MIME, traversal and credential sharing; downloaded bytes are authenticated **before** storage or consumption. No unapproved external scripts, remote execution, wallet authority or playable game bundles are enabled.
+
+A 100 MiB hard-cap in-memory per-game LRU stores only byte-verified assets. Reads return defensive copies; expired/unneeded resources are cleared by dispose, which aborts pending fetches. Browser CacheStorage, durable offline service-worker installation and cross-game global eviction are NOT implemented or claimed here; per-game offline availability requires a separately qualified opt-in service-worker design, approved game assets and deployment/browser acceptance. The source platform requirement specifies opt-in SW and per-game LRU; this asset adapter stays within those restrictions and does not cache drawings/guest progress.
+
+`ArcadeGameErrorBoundary` contains rendering faults within the supplied game subtree and provides accessible retry and catalog navigation. Game host must mount the boundary around each game only, and dispose prior resources when leaving/retrying; it does not change the launcher into a playable-game claim. Existing async runtime abort protection continues to apply.
+
+**Qualification:** dedicated ARC-1.11 Level 1 with malicious path/MIME/digest/length/redirect, cache budget, abort/disposal, React fault fallback, retained runtime/state/security suites and frontend build. Actual game art, browser integration and production asset manifest approval remain future game-specific acceptance gates; no GP-17 live testnet assumptions.

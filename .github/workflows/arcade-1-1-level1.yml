@@ -1,0 +1,27 @@
+name: 420Arcade ARC-1.1 Level 1 application bootstrap
+on:
+  pull_request:
+    paths:
+      - 'apps/arcade-web/**'
+      - '.github/workflows/arcade-1-1-level1.yml'
+      - 'config/arcade-game-identities.json'
+      - 'config/arcade-0-7-scope-freeze.json'
+  workflow_dispatch:
+jobs:
+  arcade-bootstrap:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax checks
+        run: npm run check --prefix apps/arcade-web
+      - name: Security lint
+        run: npm run lint --prefix apps/arcade-web
+      - name: Unit and adversarial tests
+        run: npm run test --prefix apps/arcade-web
+      - name: Deterministic app build
+        run: npm run build --prefix apps/arcade-web
+      - name: Verify deployable output
+        run: node --input-type=module -e "import fs from 'node:fs';const p='apps/arcade-web/dist/';for(const f of ['index.html','main.mjs','style.css','catalog.json'])if(!fs.statSync(p+f).isFile())throw Error(f);const c=JSON.parse(fs.readFileSync(p+'catalog.json'));if(c.games.length!==11||c.authority!=='PRESENTATION_ONLY')throw Error('catalog')"

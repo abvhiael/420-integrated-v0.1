@@ -1,0 +1,15 @@
+{
+  "name": "@420/arcade-web",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "check": "node --check src/main.mjs && node --check scripts/build.mjs",
+    "test": "node --test test/*.test.mjs",
+    "lint": "node scripts/lint.mjs"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

@@ -35,6 +35,7 @@ contract PokerConfidentialDeal420 {
     address public immutable providerA;
     address public immutable providerB;
     mapping(bytes32 => uint64) public lastNonce;
+    mapping(bytes32 => uint16) public handSeatMask;
     mapping(bytes32 => Hand) private hands;
 
     error InvalidInput(); error Unauthorized(); error InvalidState();
@@ -73,6 +74,7 @@ contract PokerConfidentialDeal420 {
             revert Unauthorized();
         if (msg.sender == providerA || msg.sender == providerB) revert Unauthorized();
         if (_verifySeats(tableId,t.config.seats,seatsMask) < 2) revert InvalidInput();
+        if (seatSnapshotHash != snapshotFor(tableId,seatsMask)) revert ParticipantsChanged();
         uint64 epoch = ledger.seatingEpoch(tableId);
         handId = keccak256(abi.encode(DOMAIN,block.chainid,address(this),tableId,t.configHash,
             t.config.gameVersionId,t.config.rulesetId,nonce,epoch,priorStateHash,seatSnapshotHash,seatsMask));
@@ -80,6 +82,7 @@ contract PokerConfidentialDeal420 {
         hands[handId] = Hand(tableId,t.configHash,t.config.rulesetId,t.config.gameVersionId,
             priorStateHash,seatSnapshotHash,epoch,nonce,deadline,bytes32(0),bytes32(0),bytes32(0),State.AWAITING);
         lastNonce[tableId]=nonce;
+        handSeatMask[handId]=seatsMask;
         emit DealRequested(handId,tableId,nonce,deadline);
     }
 
@@ -93,7 +96,8 @@ contract PokerConfidentialDeal420 {
             authorization.scopeForTable(h.tableId),0)) revert Unauthorized();
         PokerTableRegistry420.Table memory t = tables.getTable(h.tableId);
         if (t.status != PokerTableRegistry420.Status.OPEN || !tables.operators().isActive(t.config.operatorId)) revert NotOpen();
-        if (ledger.seatingEpoch(h.tableId) != h.epoch || t.configHash != h.configHash) revert ParticipantsChanged();
+        if (ledger.seatingEpoch(h.tableId) != h.epoch || t.configHash != h.configHash
+            || snapshotFor(h.tableId,handSeatMask[handId]) != h.seatSnapshotHash) revert ParticipantsChanged();
         if (msg.sender == providerA) {
             if (h.rootA != bytes32(0)) revert Duplicate();
             h.rootA=commitment;
@@ -119,6 +123,20 @@ contract PokerConfidentialDeal420 {
     }
 
     function getHand(bytes32 handId) external view returns (Hand memory) { return hands[handId]; }
+
+    /// @notice Canonical snapshot committed from actual public seating, not caller-supplied metadata.
+    function snapshotFor(bytes32 id, uint16 mask) public view returns (bytes32 digest) {
+        PokerTableRegistry420.Table memory t=tables.getTable(id);
+        if ((uint256(mask) >> t.config.seats) != 0) revert InvalidInput();
+        digest=keccak256(abi.encode(DOMAIN,block.chainid,address(this),id,
+            t.configHash,ledger.seatingEpoch(id),mask));
+        for (uint8 i=0; i<t.config.seats; ++i) {
+            if ((mask & (uint16(1)<<i)) != 0) {
+                PokerSeatLedger420.Seat memory s=ledger.seatOf(id,i);
+                digest=keccak256(abi.encode(digest,i,s.player,s.chips,s.sittingOut,s.epoch));
+            }
+        }
+    }
 
     function _verifySeats(bytes32 id,uint8 maxSeats,uint16 mask) private view returns(uint256 occupied) {
         if ((uint256(mask) >> maxSeats) != 0) revert InvalidInput();

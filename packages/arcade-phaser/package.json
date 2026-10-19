@@ -1,0 +1,19 @@
+{
+  "name": "@420/arcade-phaser",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "main": "./src/index.mjs",
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "check": "node --check src/index.mjs"
+  },
+  "peerDependencies": {
+    "phaser": "^3.90.0"
+  },
+  "peerDependenciesMeta": {
+    "phaser": {
+      "optional": true
+    }
+  }
+}

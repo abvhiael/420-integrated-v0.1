@@ -42,6 +42,7 @@ on:
       - 'contracts/src/bet/PokerCanonicalSettlement420.sol'
       - 'contracts/test/BetPokerCanonicalSettlement54.t.sol'
       - 'contracts/src/bet/PokerSeatLedger420.sol'
+      - 'contracts/test/BetPokerLedgerReentrancy54.t.sol'
       - 'contracts/test/BetPokerDeckDisclosure54.t.sol'
       - 'clients/420bet-poker/crypto/**'
       - 'clients/420bet-poker/zkshuffle/**'

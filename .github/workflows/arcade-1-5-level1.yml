@@ -1,0 +1,29 @@
+name: 420Arcade ARC-1.5 Level 1 React casual adapter
+on:
+  pull_request:
+    paths:
+      - 'packages/arcade-core/**'
+      - 'apps/arcade-web/**'
+      - '.github/workflows/arcade-1-5-level1.yml'
+  workflow_dispatch:
+jobs:
+  arcade-react-casual:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: apps/arcade-web/package-lock.json
+      - name: Core adapter security and adversarial lifecycle tests
+        run: node --check packages/arcade-core/src/react-casual.mjs && node --test packages/arcade-core/test/*.test.mjs
+      - name: Install retained launcher dependencies
+        run: npm ci --prefix apps/arcade-web --ignore-scripts --no-audit --no-fund
+      - name: Qualified React bridge and retained Arcade regression
+        run: |
+          npm run check --prefix apps/arcade-web
+          npm run lint --prefix apps/arcade-web
+          npm run typecheck --prefix apps/arcade-web
+          npm run test --prefix apps/arcade-web
+          npm run build --prefix apps/arcade-web

@@ -31,8 +31,7 @@ func exportTestGroth16Solidity(t *testing.T, label string,
  ps,ok:=proof.(interface{MarshalSolidity()[]byte});if !ok{t.Fatal("no BN254 Solidity proof encoder")}
  var inputs []string
  for _,field:=range public {
-  if n,ok:=field.(*big.Int);ok {inputs=append(inputs,n.String())}
-  else {inputs=append(inputs,fmt.Sprint(field))}
+  if n,ok:=field.(*big.Int);ok {inputs=append(inputs,n.String())} else {inputs=append(inputs,fmt.Sprint(field))}
  }
  data,err:=json.Marshal(struct{Proof string `json:"proof"`;Public []string `json:"public"`}{
   Proof:fmt.Sprintf("0x%x",ps.MarshalSolidity()),Public:inputs,

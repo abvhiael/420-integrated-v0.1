@@ -3,7 +3,7 @@ import React,{useState} from 'react';
 import {View,Text,TextInput,Pressable,StyleSheet} from 'react-native';
 import {theme} from './theme';
 type Journey={setPickup:(v:unknown)=>unknown;setDestination:(v:unknown)=>unknown;prepareRoute:()=>Promise<unknown>;requestQuote:()=>Promise<unknown>;consentAndRequest:()=>Promise<unknown>;refreshTrip:()=>Promise<unknown>;cancelTrip:()=>Promise<unknown>;reportSafety:(v:string)=>Promise<unknown>;preferences:(v:unknown)=>Promise<unknown>;state:()=>{route:any;quote:any;trip:any}};
-export default function RiderScreen({journey}:{journey?:Journey}){
+export default function RiderScreen({journey,integrations}:{journey?:Journey;integrations?:any}){
  const [pickup,setPickup]=useState(''),[destination,setDestination]=useState('');
  const [pickupLat,setPickupLat]=useState(''),[pickupLon,setPickupLon]=useState('');
  const [destLat,setDestLat]=useState(''),[destLon,setDestLon]=useState('');
@@ -45,7 +45,7 @@ export default function RiderScreen({journey}:{journey?:Journey}){
   <Action label="Send safety report" enabled={available&&!!snapshot?.trip&&['ASSIGNED','ARRIVED','IN_PROGRESS'].includes(snapshot.trip.state)&&details.trim().length>=3} onPress={()=>run(()=>journey!.reportSafety(details))}/>
   <Text accessibilityRole="header" style={styles.section}>Account preferences</Text>
   <Action label={largeText?'Disable large text preference':'Enable large text preference'} enabled={available} onPress={()=>run(async()=>{await journey!.preferences({largeText:!largeText});setLargeText(!largeText);})}/>
-  <TripIntegrations trip={snapshot?.trip}/>
+  <TripIntegrations trip={snapshot?.trip} consumer={integrations}/>
   <Text accessibilityLiveRegion="polite" style={styles.status}>{status}</Text>
  </View>;
 }

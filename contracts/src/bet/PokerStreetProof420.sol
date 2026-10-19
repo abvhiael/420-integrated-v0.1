@@ -74,6 +74,6 @@ contract PokerStreetProof420 {
     }
     function canReveal(bytes32 handId,uint8 street) external view returns(bool){
         return states[handId].initialized && street!=0 && street<=3 &&
-            states[handId].nextStreet>=street+1;
+            states[handId].nextStreet>=street;
     }
 }

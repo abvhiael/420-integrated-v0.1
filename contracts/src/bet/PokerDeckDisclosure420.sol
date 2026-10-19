@@ -88,19 +88,11 @@ contract PokerDeckDisclosure420 {
         return decks[handId].published && mask!=0 && (decks[handId].receiptMask & mask)==mask;
     }
 
-    /// @dev Only after hand completion, when exposing ALL cards is independently authorized.
-    ///      This is a post-game commitment opening, NOT a privacy-preserving ZK shuffle proof.
-    function disclose(bytes32 handId,uint8[52] calldata order,bytes32 salt) external {
-        PokerConfidentialDeal420.Hand memory h=deals.getHand(handId);
+    /// @notice Public verifier is suitable ONLY for already-released/post-game cards.
+    /// @dev Clients must not call with a secret deck before independently certified hand finality.
+    function verifyOpenedDeck(bytes32 handId,uint8[52] calldata order,bytes32 salt) external view returns(bool) {
         Deck storage d=decks[handId];
-        if (!d.published || d.disclosed || h.state!=PokerConfidentialDeal420.State.COMMITTED) revert InvalidState();
-        // No current hand-engine finality oracle exists. Prohibit public full-deck reveal
-        // rather than expose hole cards while the game could still be active.
-        revert InvalidState();
-        if (msg.sender!=deals.providerA() && msg.sender!=deals.providerB()) revert Unauthorized();
-        if (!authorization.isAuthorized(msg.sender,deals.ACTION_PROVIDER_COMMIT(),
-                authorization.scopeForTable(h.tableId),0)) revert Unauthorized();
-        if (salt==bytes32(0) || hashDeck(handId,order,salt)!=d.commitment) revert InvalidDeck();
+        if (!d.published || salt==bytes32(0) || hashDeck(handId,order,salt)!=d.commitment) revert InvalidDeck();
         uint256 bitmap;
         for(uint256 i=0;i<52;++i) {
             if(order[i]>=52) revert InvalidDeck();
@@ -108,7 +100,10 @@ contract PokerDeckDisclosure420 {
             if((bitmap&flag)!=0) revert InvalidDeck();
             bitmap|=flag;
         }
-        d.disclosed=true;
-        emit DeckDisclosed(handId,d.commitment);
+        return true;
+    }
+    /// @notice Explicitly unavailable until a separately qualified hand-finality oracle exists.
+    function disclose(bytes32,uint8[52] calldata,bytes32) external pure {
+        revert InvalidState();
     }
 }

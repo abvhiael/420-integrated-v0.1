@@ -82,6 +82,7 @@ contract PokerNativeOutcome420 {
         if(!g.initialized||(!contested&&g.phase!=PokerNLHEBetting420.Phase.UNCONTESTED)||
            engine.disputes().isFrozen(handId))revert InvalidState();
         if(engine.ledger().activeHand(g.tableId)!=handId)revert InvalidState();
+        if(address(engine.revealForTable(g.tableId))!=address(reveals))revert InvalidState();
         uint256[9] memory deposits;
         bool[9] memory folded;
         uint8 alive;

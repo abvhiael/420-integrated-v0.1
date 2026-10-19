@@ -2,6 +2,7 @@ package shuffle
 
 import (
  "math/big"
+ "fmt"
  "testing"
  "os"
  "path/filepath"
@@ -74,6 +75,17 @@ func TestFull52RealEncryptedShuffleProof(t *testing.T) {
   })
   write("EXPERIMENTAL-Reencrypt52PublicWitness.bin",func(f *os.File)error{
    _,err:=public.WriteTo(f);return err
+  })
+  // The Solidity verifier receives the precise gnark BN254 8-word proof and
+  // five public circuit inputs. This fixture is generated in the SAME run as
+  // the proof and VK, never copied from a mock or an unrelated test setup.
+  rawProof,ok:=proof.(interface{MarshalSolidity() []byte})
+  if !ok {t.Fatal("BN254 proof does not support Solidity serialization")}
+  write("EXPERIMENTAL-Reencrypt52SolidityFixture.json",func(f *os.File)error{
+   _,err:=fmt.Fprintf(f,`{"proof":"0x%x","public":["%s","%s","420","%s","%s"]}`,
+     rawProof.MarshalSolidity(),inputRoot.String(),outputRoot.String(),
+     pkX.(*big.Int).String(),pkY.(*big.Int).String())
+   return err
   })
  }
  // Sound verifier rejects a changed public deck output AND replay into another hand.

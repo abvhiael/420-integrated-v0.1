@@ -118,5 +118,5 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: liftd-ios-simulator-${{ github.event.pull_request.head.sha || github.sha }}
-          path: liftd-ios-evidence/
+          path: rideshare/mobile/liftd-ios-evidence/
           if-no-files-found: error

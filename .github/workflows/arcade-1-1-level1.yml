@@ -15,21 +15,15 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Resolve pinned lockfile for initial bootstrap
-        working-directory: apps/arcade-web
-        run: |
-          npm install --package-lock-only --ignore-scripts --no-audit --no-fund
-          echo LOCK_BEGIN
-          base64 -w0 package-lock.json
-          echo
-          echo LOCK_END
-      - name: Install dependencies
-        run: npm install --prefix apps/arcade-web --ignore-scripts --no-audit --no-fund
+          cache: 'npm'
+          cache-dependency-path: 'apps/arcade-web/package-lock.json'
+      - name: Install frozen dependencies
+        run: npm ci --prefix apps/arcade-web --ignore-scripts --no-audit --no-fund
       - name: Syntax and security checks
         run: npm run check --prefix apps/arcade-web && npm run lint --prefix apps/arcade-web
       - name: Typecheck
         run: npm run typecheck --prefix apps/arcade-web
-      - name: Unit and adversarial tests
+      - name: React render and adversarial tests
         run: npm run test --prefix apps/arcade-web
       - name: Production build
         run: npm run build --prefix apps/arcade-web

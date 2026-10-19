@@ -11,7 +11,7 @@ contract PokerHandRank54Test {
         uint8[5] memory wheel=[uint8(12),13,27,41,3];
         require(ranker.rank5(royal)>ranker.rank5(quads),"SF beats quads");
         require(ranker.rank5(quads)>ranker.rank5(wheel),"quads beats wheel");
-        uint8[5] memory sixHigh=[uint8(12),0,1,2,4];
+        uint8[5] memory sixHigh=[uint8(0),14,28,42,4];
         require(ranker.rank5(sixHigh)>ranker.rank5(wheel),"six high straight > five high");
     }
     function testSevenCardRankIndependentOfOrdering() public view {

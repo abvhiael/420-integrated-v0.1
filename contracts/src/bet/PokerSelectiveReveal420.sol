@@ -3,6 +3,7 @@ pragma solidity ^0.8.24;
 
 import "./PokerPrivateShuffleGate420.sol";
 import "./PokerVerifierVersions420.sol";
+import "./PokerStreetProof420.sol";
 
 /// @notice Each submitted proof must certify one provider's partial decryption
 /// D=s*C1 for an exact ciphertext in the proven final deck, with public key s*G.
@@ -21,6 +22,7 @@ interface IPokerSelectiveShareProof420 {
 contract PokerSelectiveReveal420 {
     bytes32 public constant DOMAIN=keccak256("420.BET.POKER.SELECTIVE.SHARE.V1");
     PokerPrivateShuffleGate420 public immutable shuffle;
+    PokerStreetProof420 public immutable streets;
     PokerVerifierVersions420 public immutable versions;
     IPokerSelectiveShareProof420 public immutable verifier;
     bytes32 public immutable verifierVersion;
@@ -42,12 +44,14 @@ contract PokerSelectiveReveal420 {
     event PositionSharesComplete(bytes32 indexed handId,uint8 indexed position,bytes32 commitment);
     event StreetAdvanced(bytes32 indexed handId,uint8 street);
 
-    constructor(address shuffle_,address versions_,address verifier_,bytes32 version_,
+    constructor(address shuffle_,address streets_,address versions_,address verifier_,bytes32 version_,
         bytes32 circuit_,bytes32 keyHash_,bytes32 schema_) {
-        if(shuffle_==address(0)||versions_==address(0)||verifier_==address(0)||
+        if(shuffle_==address(0)||streets_==address(0)||versions_==address(0)||verifier_==address(0)||
             verifier_.code.length==0||version_==bytes32(0)||circuit_==bytes32(0)||
             keyHash_==bytes32(0)||schema_==bytes32(0))revert InvalidConfiguration();
         shuffle=PokerPrivateShuffleGate420(shuffle_);
+        streets=PokerStreetProof420(streets_);
+        if(address(streets.shuffle())!=shuffle_)revert InvalidConfiguration();
         versions=PokerVerifierVersions420(versions_);
         verifier=IPokerSelectiveShareProof420(verifier_);
         verifierVersion=version_;circuitHash=circuit_;verifyingKeyHash=keyHash_;schemaHash=schema_;
@@ -73,7 +77,7 @@ contract PokerSelectiveReveal420 {
     /// This contract deliberately does not infer the street from an operator hash.
     function submitShare(bytes32 handId,uint8 position,uint8 street,
         bytes32 ciphertextCommitment,bytes32 shareCommitment,bytes calldata proof) external {
-        if(position>=52||street>3||street!=currentStreet[handId]||
+        if(position>=52||street==0||street>3||!streets.canReveal(handId,street)||
             ciphertextCommitment==bytes32(0)||shareCommitment==bytes32(0)||proof.length==0)
             revert InvalidState();
         address a=shuffle.deals().providerA();

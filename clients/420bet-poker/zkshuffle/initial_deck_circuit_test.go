@@ -13,7 +13,11 @@ func initialTwoWitness() *InitialDeck2 {
  base:=native.GetEdwardsCurve().Base
  pub:=new(native.PointAffine).ScalarMultiplication(&base,big.NewInt(17))
  pkx,pky:=coordinates(pub)
- assignment:=&InitialDeck2{HandScope:420,PublicKeyX:pkx,PublicKeyY:pky}
+  params:=native.GetEdwardsCurve()
+  inverse8:=new(big.Int).ModInverse(big.NewInt(8),&params.Order)
+  subgroupQ:=new(native.PointAffine).ScalarMultiplication(pub,inverse8)
+  qx,qy:=coordinates(subgroupQ)
+ assignment:=&InitialDeck2{HandScope:420,PublicKeyX:pkx,PublicKeyY:pky,SubgroupPreimageX:qx,SubgroupPreimageY:qy}
  for i:=0;i<2;i++ {
   c1,c2:=cipherOf(int64(i+1),int64(i+100),&base,pub)
   assignment.Cards[i]=reencryptInput(c1,c2)

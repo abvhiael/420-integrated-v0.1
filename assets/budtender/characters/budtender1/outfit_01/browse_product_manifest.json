@@ -1,0 +1,56 @@
+{
+  "character_id": "budtender1",
+  "outfit_id": "outfit_01",
+  "animation_id": "browse_product",
+  "frame_count": 6,
+  "canvas": {
+    "width": 256,
+    "height": 384
+  },
+  "anchor": {
+    "x": 128,
+    "y": 368
+  },
+  "frame_duration_ms": 125,
+  "loop": true,
+  "frames": [
+    {
+      "index": 1,
+      "file": "frame_01.png",
+      "sha256": "8830509f802ed8dbfc0090b27c615037cb85d4b290cf47094cd89de2963371cd"
+    },
+    {
+      "index": 2,
+      "file": "frame_02.png",
+      "sha256": "ef464724cbfce881f58bc5ec9e4e07607a7723a39020591233dc4751c980519f"
+    },
+    {
+      "index": 3,
+      "file": "frame_03.png",
+      "sha256": "14a9b0f84f0a17adfbe4ab431c20a065c847e9808095c6ab0c6612b911786cb4"
+    },
+    {
+      "index": 4,
+      "file": "frame_04.png",
+      "sha256": "4e19138d386d4bf487ea9ef828f54ad5bb149e289ce190afe3e8579604e3023f"
+    },
+    {
+      "index": 5,
+      "file": "frame_05.png",
+      "sha256": "1516cced0a65c3007e4c6574bdd5aa645acdccc9e1090fd793e74393afe6dce7"
+    },
+    {
+      "index": 6,
+      "file": "frame_06.png",
+      "sha256": "946d63ebea8932cca7484e9270a238e8c2cf4c99bb7dd887f85bc482fd4e4c4e"
+    }
+  ],
+  "validation": {
+    "file_integrity": "pass",
+    "transparency": "pass",
+    "alignment": "approximate_root_estimate_needs_review",
+    "visual_continuity": "pending_visual_review",
+    "animation_playback": "inspector_provided_not_browser_qualified",
+    "production_approval": "pending"
+  }
+}

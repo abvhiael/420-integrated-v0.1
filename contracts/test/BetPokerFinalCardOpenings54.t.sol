@@ -24,7 +24,7 @@ contract PokerFinalCardOpenings54Test is PokerVerifiedTerminalGate54Test {
         bytes32 id=_terminalHand();
         bytes32[64] memory tree=_tree(id);
         bytes32[6] memory path;
-        uint256 idx=0,width=64;
+        uint256 idx=0; uint256 width=64;
         for(uint256 depth=0;depth<6;depth++){
             path[depth]=tree[idx^1];
             for(uint256 i=0;i<width/2;i++)

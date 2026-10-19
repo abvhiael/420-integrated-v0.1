@@ -9,7 +9,7 @@ test('independent per-chip pot oracle agrees across 1000 no-rake scenarios',()=>
   const n=2+rnd(5),button=rnd(n);
   const contributions=Array.from({length:n},()=>1+rnd(40));
   const folded=Array.from({length:n},()=>rnd(3)===0);
-  if(folded.every(Boolean))folded[0]=false;
+  // Retain a live top contributor; an unmatched folded top stack is not\n  // a reachable, contested terminal poker pot.\n  folded[contributions.indexOf(Math.max(...contributions))]=false;
   // Some arbitrary but consistently ranked showdown hands.
   const ranks=Array.from({length:n},()=>[rnd(8),rnd(15),rnd(15)]);
   const data={contributions,folded,ranks,button};

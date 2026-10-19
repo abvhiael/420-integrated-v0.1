@@ -19,6 +19,8 @@ contract PokerConfidentialDeal54Test is PokerSeatLedger53Test {
         cap.grant(PROVIDER_B,deal.ACTION_PROVIDER_COMMIT(),auth.scopeForTable(TABLE),true);
         cap.grant(PLAYER_B,BetIds420.ACTION_POKER_BUY_IN,auth.scopeForTable(TABLE),true);
         coin.mint(PLAYER_B,2000);
+        cap.grant(PLAYER_B,BetIds420.ACTION_POKER_LEAVE,auth.scopeForTable(TABLE),true);
+        cap.grant(PLAYER_B,BetIds420.ACTION_POKER_WITHDRAW,auth.scopeForTable(TABLE),true);
         cheat54.prank(PLAYER_B); coin.approve(address(ledger),2000);
     }
     function _prepared() internal {
@@ -27,9 +29,9 @@ contract PokerConfidentialDeal54Test is PokerSeatLedger53Test {
         cheat54.prank(PLAYER_B); ledger.buyIn(TABLE,1,400);
     }
     function _begin(uint64 nonce) internal returns (bytes32 id) {
+        bytes32 snapshot = deal.snapshotFor(TABLE,3);
         cheat54.prank(ADMIN);
-        id=deal.begin(TABLE,nonce,uint64(block.timestamp+120),keccak256("prior"),
-            deal.snapshotFor(TABLE,3),3);
+        id=deal.begin(TABLE,nonce,uint64(block.timestamp+120),keccak256("prior"),snapshot,3);
     }
     function testTwoProviderCommitNoPlaintextCards() public {
         _prepared();
@@ -87,8 +89,10 @@ contract PokerConfidentialDeal54Test is PokerSeatLedger53Test {
     function testEmergencyBlocksBegin() public {
         _prepared(); emergency.setHalted(true);
         // Fixture emergency mock gates both new-table and new-hand for this test.
+        bytes32 snapshot = deal.snapshotFor(TABLE,3);
         cheat54.expectRevert(PokerConfidentialDeal420.EmergencyHalt.selector);
-        _begin(1);
+        cheat54.prank(ADMIN);
+        deal.begin(TABLE,1,uint64(block.timestamp+120),keccak256("prior"),snapshot,3);
     }
     function testWithheldCommitExpiresWithoutSettlingFunds() public {
         _prepared(); bytes32 id=_begin(1);
@@ -103,7 +107,9 @@ contract PokerConfidentialDeal54Test is PokerSeatLedger53Test {
     }
     function testInvalidSeatsAndNoOnePlayerHands() public {
         _open(); _buy();
+        bytes32 snapshot = deal.snapshotFor(TABLE,3);
         cheat54.expectRevert(PokerConfidentialDeal420.InvalidInput.selector);
-        _begin(1);
+        cheat54.prank(ADMIN);
+        deal.begin(TABLE,1,uint64(block.timestamp+120),keccak256("prior"),snapshot,3);
     }
 }

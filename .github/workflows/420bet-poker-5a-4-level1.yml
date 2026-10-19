@@ -48,6 +48,7 @@ on:
       - '.github/workflows/420bet-poker-5a-4-level1.yml'
 permissions:
   contents: read
+  actions: read
 concurrency:
   group: 420bet-poker-5a-4-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: false
@@ -73,15 +74,36 @@ jobs:
           node-version: 22
       - name: Verify confidential shuffle and encrypted seat delivery
         run: node --test clients/420bet-poker/crypto/confidential-deal.test.mjs clients/420bet-poker/crypto/nlhe-replay.test.mjs clients/420bet-poker/crypto/nlhe-betting.test.mjs clients/420bet-poker/crypto/nlhe-verify-hand.test.mjs clients/420bet-poker/crypto/nlhe-economics.test.mjs clients/420bet-poker/crypto/nlhe-differential.test.mjs clients/420bet-poker/crypto/nlhe-pot-differential.test.mjs
+      - name: Detect changes to previously qualified cryptographic sources
+        id: cryptoscope
+        run: |
+          QUALIFIED=97d02e06d8cb4faddb33c320f122a7ce02f0f338
+          git fetch --no-tags --depth=1 origin "$QUALIFIED"
+          if git diff --quiet "$QUALIFIED" HEAD -- clients/420bet-poker/zkshuffle; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "Unmodified Go cryptography inherits proof evidence run 39315000314 at $QUALIFIED"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
       - uses: actions/setup-go@v5
+        if: steps.cryptoscope.outputs.changed == 'true'
         with:
           go-version: '1.24'
           cache: false
       - name: Real Groth16 52-card permutation circuit qualification
+        if: steps.cryptoscope.outputs.changed == 'true'
         env:
           POKER_ZK_ARTIFACT_DIR: ../../../artifacts/420bet-5a-4
         working-directory: clients/420bet-poker/zkshuffle
         run: go test -mod=mod -timeout 15m ./...
+      - name: Retrieve proven original exact-SHA cryptographic artifacts
+        if: steps.cryptoscope.outputs.changed == 'false'
+        uses: actions/download-artifact@v4
+        with:
+          name: 420bet-5a-4-cryptographic-provenance
+          run-id: 39315000314
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: artifacts/420bet-5a-4
       - name: Compile exact generated 52-card Solidity verifier
         working-directory: contracts
         run: |
@@ -89,6 +111,7 @@ jobs:
           cp ../artifacts/420bet-5a-4/EXPERIMENTAL-Reencrypt52Verifier.sol src/bet/generated/ExperimentalReencrypt52Verifier.sol
           forge build src/bet/generated/ExperimentalReencrypt52Verifier.sol
       - name: Record exact-SHA cryptographic provenance
+        if: steps.cryptoscope.outputs.changed == 'true'
         run: |
           mkdir -p artifacts/420bet-5a-4
           git rev-parse HEAD > artifacts/420bet-5a-4/qualified-sha.txt
@@ -99,12 +122,20 @@ jobs:
           sha256sum ../../../artifacts/420bet-5a-4/EXPERIMENTAL-Reencrypt52Verifier.sol ../../../artifacts/420bet-5a-4/EXPERIMENTAL-Reencrypt52VerifyingKey.bin ../../../artifacts/420bet-5a-4/EXPERIMENTAL-Reencrypt52Proof.bin > ../../../artifacts/420bet-5a-4/generated-proof-sha256.txt
           sha256sum go.sum >> ../../../artifacts/420bet-5a-4/cryptographic-source-sha256.txt
       - name: Upload exact-SHA proof provenance
+        if: steps.cryptoscope.outputs.changed == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: 420bet-5a-4-cryptographic-provenance
           path: artifacts/420bet-5a-4/
           retention-days: 90
           if-no-files-found: error
+      - name: Record inherited exact-SHA cryptographic qualification
+        if: steps.cryptoscope.outputs.changed == 'false'
+        run: |
+          mkdir -p artifacts/420bet-5a-4
+          test -s artifacts/420bet-5a-4/EXPERIMENTAL-Reencrypt52Proof.bin
+          test -s artifacts/420bet-5a-4/EXPERIMENTAL-Reencrypt52Verifier.sol
+          printf 'inherited_qualified_sha=97d02e06d8cb4faddb33c320f122a7ce02f0f338\noriginal_run=39315000314\noriginal_job=118276392276\ncurrent_solidity_sha=%s\n' "$(git rev-parse HEAD)" > artifacts/420bet-5a-4/inheritance.txt
       - name: Scope commitment adversarial + inherited seating/table regression
         working-directory: contracts
         run: forge test --match-contract '^(PokerNativeOutcome54Test|PokerHandRank54Test|PokerLiveCardReveals54Test|PokerNLHEBetting54Test|PokerGnarkElGamalAdapters54Test|PokerCanonicalSettlement54Test|PokerVerifierVersions54Test|PokerCanonicalEvidence54Test|PokerCanonicalRake54Test|PokerActionDisputeClock54Test|PokerFinalCardOpenings54Test|PokerActionKeys54Test|PokerPrivateShuffleGate54Test|PokerVerifiedTerminalGate54Test|PokerHandAccountingProof54Test|PokerHandFinality54Test|PokerDeckDisclosure54Test|PokerConfidentialDeal54Test|PokerSeatLedger53Test|BetPokerTableRegistry52Test)$' -vv

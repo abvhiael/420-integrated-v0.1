@@ -1,0 +1,66 @@
+{
+  "character_id": "budtender1",
+  "outfit_id": "outfit_01",
+  "animation_id": "walk_right",
+  "frame_count": 8,
+  "canvas": {
+    "width": 256,
+    "height": 384
+  },
+  "anchor": {
+    "x": 128,
+    "y": 368
+  },
+  "frame_duration_ms": 125,
+  "loop": true,
+  "frames": [
+    {
+      "index": 1,
+      "file": "frame_01.png",
+      "sha256": "1f599d2746039b22d67b5565a4a516287795cfc825b8f954317f57717c98e017"
+    },
+    {
+      "index": 2,
+      "file": "frame_02.png",
+      "sha256": "40993cb10568efc5f109f7609bf6e2d5abd938c814e3b9dccd1c23b6b9534f24"
+    },
+    {
+      "index": 3,
+      "file": "frame_03.png",
+      "sha256": "9d9c72cbb064d75daaf06bbaa7cb0603e29547982ca7ebe8bb0b777ea1da9869"
+    },
+    {
+      "index": 4,
+      "file": "frame_04.png",
+      "sha256": "22f8f155ee9c8d0a4673cb9755b805a1e777d9d2f827e851f9fd8f1feddf37b5"
+    },
+    {
+      "index": 5,
+      "file": "frame_05.png",
+      "sha256": "9a090861e76d370da2583ad767ae0e7b5e1b247dc04ec93a060d9b57f665c67b"
+    },
+    {
+      "index": 6,
+      "file": "frame_06.png",
+      "sha256": "086ca25b1ba3455c2804aa6c706bd91f76d49444477ee5d35168736f3e9ec590"
+    },
+    {
+      "index": 7,
+      "file": "frame_07.png",
+      "sha256": "83b4a84f339131eb0e3cf8d21b5b376ecacc5de227670fe6ab21cff9178665ec"
+    },
+    {
+      "index": 8,
+      "file": "frame_08.png",
+      "sha256": "2a6ef6f14559322516eceb3950b6fa9de33d968aa2594d03d9d3f739bca89ae5"
+    }
+  ],
+  "validation": {
+    "file_integrity": "pass",
+    "transparency": "pass",
+    "alignment": "computed; anatomical anchor requires review",
+    "visual_continuity": "review_required",
+    "animation_playback": "inspector_provided; not human-approved",
+    "production_approval": "pending"
+  }
+}

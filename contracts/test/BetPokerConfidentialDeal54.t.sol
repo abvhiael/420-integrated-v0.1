@@ -82,7 +82,8 @@ contract PokerConfidentialDeal54Test is PokerSeatLedger53Test {
         cheat54.prank(PROVIDER_A); deal.commit(id,keccak256("a"));
         cheat54.warp(block.timestamp+121);
         deal.expire(id);
-        require(deal.getHand(id).state==PokerConfidentialDeal420.State.EXPIRED,"expiry");
+        PokerConfidentialDeal420.Hand memory expired = deal.getHand(id);
+        require(expired.state==PokerConfidentialDeal420.State.EXPIRED,"expiry");
         cheat54.expectRevert(PokerConfidentialDeal420.InvalidState.selector);
         cheat54.prank(PROVIDER_B); deal.commit(id,keccak256("late"));
         require(ledger.totalChips(TABLE)==800 && coin.balanceOf(address(ledger))==800,"no funds changed");

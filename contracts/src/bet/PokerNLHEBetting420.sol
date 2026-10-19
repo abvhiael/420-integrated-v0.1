@@ -15,7 +15,7 @@ interface IPokerNativeOutcome420 {
         external view returns(uint256[9] memory finalChips,uint256 fee);
 }
 interface IPokerAuthenticatedStreet420 {
-    function engine() external view returns(address);
+    function engine() external view returns(PokerNLHEBetting420);
     function isStageComplete(bytes32 handId,uint8 street) external view returns(bool);
 }
 
@@ -111,7 +111,7 @@ contract PokerNLHEBetting420 {
             authorization.scopeForTable(tableId),0))revert Unauthorized();
         // A public reveal contract must be associated with this exact on-chain
         // betting engine, not merely expose a compatible method selector.
-        if(IPokerAuthenticatedStreet420(gate).engine()!=address(this))
+        if(address(IPokerAuthenticatedStreet420(gate).engine())!=address(this))
             revert InvalidConfiguration();
         revealForTable[tableId]=IPokerAuthenticatedStreet420(gate);
         emit RevealsBound(gate);

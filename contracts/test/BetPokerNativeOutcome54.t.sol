@@ -96,7 +96,7 @@ contract PokerNativeOutcome54Test is PokerLiveCardReveals54Test {
         engine.settle(id,policy);
         cheat54.warp(block.timestamp+1 days+1);
         cheat54.prank(OTHER);engine.settle(id,policy);
-        require(!dispute.isFrozen(id) && dispute.resolutions(id).finalized,
+        require(!dispute.isFrozen(id) && dispute.resolutionOf(id).finalized,
             "one-appeal objective resolution");
         require(ledger.seatOf(TABLE,0).chips==390&&ledger.seatOf(TABLE,1).chips==410,
             "verified terminal payouts cannot be overridden");

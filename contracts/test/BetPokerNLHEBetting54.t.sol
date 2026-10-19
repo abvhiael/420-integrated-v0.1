@@ -102,4 +102,23 @@ contract PokerNLHEBetting54Test is PokerPrivateShuffleGate54Test {
         engine.action(id,0,PokerNLHEBetting420.Move.CALL,10,expiry,g.stateRoot,signature);
         require(engine.gameOf(id).nonce==1,"engine atomically consumes");
     }
+    function testWithheldPreplayShuffleRefundsLockedBalancesWithoutOperatorConsent() public {
+        _prepared();
+        bytes32 id=_begin(1);
+        cheat54.prank(ADMIN);ledger.bindSettlement(TABLE,address(engine),address(0x500BEEF));
+        cheat54.prank(PLAYER);engine.reserve(id);
+        require(ledger.reservedInHand(TABLE)==800,"funded escrow locked");
+        cheat54.expectRevert(PokerNLHEBetting420.TooEarly.selector);
+        cheat54.prank(OTHER);engine.cancelWithheldDeal(id);
+        cheat54.warp(block.timestamp+1 hours+121);
+        cheat54.prank(OTHER);engine.cancelWithheldDeal(id);
+        require(engine.handAborted(id)&&ledger.handConsumed(id),"one time void");
+        require(ledger.activeHand(TABLE)==bytes32(0)&&ledger.reservedInHand(TABLE)==0,
+            "no locks after safe original-balance refund");
+        require(ledger.seatOf(TABLE,0).chips==400&&ledger.seatOf(TABLE,1).chips==400,
+            "dealer never transfers chips");
+        cheat54.expectRevert(PokerNLHEBetting420.InvalidState.selector);
+        engine.cancelWithheldDeal(id);
+    }
+
 }

@@ -1,0 +1,110 @@
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity ^0.8.24;
+import "./PokerConfidentialDeal420.sol";
+
+/// @notice Verification-only delivery commitments. Never receives ciphertext plaintext or private keys.
+/// @dev Cryptographic confidentiality depends on off-chain authenticated encryption and recipient-controlled keys.
+///      This verifier proves commitments and a collision-free 52-card plaintext opening at the end of a hand.
+///      It CANNOT prove ciphertext matches hidden cards before opening or guarantee a fair secret shuffle.
+contract PokerDeckDisclosure420 {
+    bytes32 public constant DOMAIN = keccak256("420.BET.POKER.DECK.DISCLOSURE.V1");
+    PokerConfidentialDeal420 public immutable deals;
+    BetAuthorization420 public immutable authorization;
+
+    struct Deck {
+        bytes32 commitment;
+        bytes32 encryptedManifestHash;
+        uint16 deliveryMask;
+        uint16 receiptMask;
+        bool published;
+        bool disclosed;
+    }
+    mapping(bytes32 => Deck) public decks;
+    mapping(bytes32 => mapping(uint8 => bytes32)) public recipientEnvelopeHash;
+    mapping(bytes32 => mapping(uint8 => bytes32)) public receiptHash;
+
+    error Unauthorized(); error InvalidState(); error InvalidValue(); error Duplicate();
+    error InvalidDeck(); error NotRecipient();
+    event DeckPublished(bytes32 indexed handId,bytes32 indexed deckCommitment,bytes32 encryptedManifestHash);
+    event EnvelopeBound(bytes32 indexed handId,uint8 indexed seat,bytes32 envelopeHash);
+    event EnvelopeAcknowledged(bytes32 indexed handId,uint8 indexed seat,bytes32 receipt);
+    event DeckDisclosed(bytes32 indexed handId,bytes32 verificationHash);
+
+    constructor(address deals_) {
+        if (deals_==address(0)) revert InvalidValue();
+        deals=PokerConfidentialDeal420(deals_);
+        authorization=deals.authorization();
+    }
+    function hashDeck(bytes32 handId,uint8[52] calldata order,bytes32 salt)
+        public view returns(bytes32) {
+        return keccak256(abi.encode(DOMAIN,block.chainid,address(this),handId,order,salt));
+    }
+    function publish(bytes32 handId,bytes32 commitment,bytes32 encryptedManifestHash) external {
+        PokerConfidentialDeal420.Hand memory h=deals.getHand(handId);
+        if (h.state!=PokerConfidentialDeal420.State.COMMITTED) revert InvalidState();
+        if (msg.sender!=deals.providerA() && msg.sender!=deals.providerB()) revert Unauthorized();
+        if (!authorization.isAuthorized(msg.sender,deals.ACTION_PROVIDER_COMMIT(),
+                authorization.scopeForTable(h.tableId),0)) revert Unauthorized();
+        if (commitment==bytes32(0)||encryptedManifestHash==bytes32(0)) revert InvalidValue();
+        if (decks[handId].published) revert Duplicate();
+        decks[handId].commitment=commitment;
+        decks[handId].encryptedManifestHash=encryptedManifestHash;
+        decks[handId].published=true;
+        emit DeckPublished(handId,commitment,encryptedManifestHash);
+    }
+    function bindEnvelope(bytes32 handId,uint8 seat,bytes32 envelopeHash) external {
+        PokerConfidentialDeal420.Hand memory h=deals.getHand(handId);
+        Deck storage d=decks[handId];
+        if (h.state!=PokerConfidentialDeal420.State.COMMITTED || !d.published || d.disclosed)
+            revert InvalidState();
+        uint16 seatBit=uint16(1)<<seat;
+        if (seat>=9 || (deals.handSeatMask(handId)&seatBit)==0) revert NotRecipient();
+        if (msg.sender!=deals.providerA() && msg.sender!=deals.providerB()) revert Unauthorized();
+        if (!authorization.isAuthorized(msg.sender,deals.ACTION_PROVIDER_COMMIT(),
+                authorization.scopeForTable(h.tableId),0)) revert Unauthorized();
+        if (envelopeHash==bytes32(0)) revert InvalidValue();
+        if ((d.deliveryMask&seatBit)!=0) revert Duplicate();
+        d.deliveryMask|=seatBit;
+        recipientEnvelopeHash[handId][seat]=envelopeHash;
+        emit EnvelopeBound(handId,seat,envelopeHash);
+    }
+    function acknowledge(bytes32 handId,uint8 seat,bytes32 receipt) external {
+        Deck storage d=decks[handId];
+        uint16 seatBit=uint16(1)<<seat;
+        if (seat>=9 || (d.deliveryMask&seatBit)==0 || d.disclosed) revert InvalidState();
+        PokerConfidentialDeal420.Hand memory h=deals.getHand(handId);
+        if (h.state!=PokerConfidentialDeal420.State.COMMITTED) revert InvalidState();
+        PokerSeatLedger420.Seat memory s=deals.ledger().seatOf(h.tableId,seat);
+        if (msg.sender!=s.player || s.player==address(0)) revert NotRecipient();
+        if (receipt==bytes32(0) || (d.receiptMask&seatBit)!=0) revert InvalidValue();
+        if (deals.ledger().seatingEpoch(h.tableId)!=h.epoch) revert InvalidState();
+        d.receiptMask|=seatBit;
+        receiptHash[handId][seat]=receipt;
+        emit EnvelopeAcknowledged(handId,seat,receipt);
+    }
+    function allAcknowledged(bytes32 handId) external view returns(bool) {
+        uint16 mask=deals.handSeatMask(handId);
+        return decks[handId].published && mask!=0 && (decks[handId].receiptMask & mask)==mask;
+    }
+
+    /// @dev Only after hand completion, when exposing ALL cards is independently authorized.
+    ///      This is a post-game commitment opening, NOT a privacy-preserving ZK shuffle proof.
+    function disclose(bytes32 handId,uint8[52] calldata order,bytes32 salt) external {
+        PokerConfidentialDeal420.Hand memory h=deals.getHand(handId);
+        Deck storage d=decks[handId];
+        if (!d.published || d.disclosed || h.state!=PokerConfidentialDeal420.State.COMMITTED) revert InvalidState();
+        if (msg.sender!=deals.providerA() && msg.sender!=deals.providerB()) revert Unauthorized();
+        if (!authorization.isAuthorized(msg.sender,deals.ACTION_PROVIDER_COMMIT(),
+                authorization.scopeForTable(h.tableId),0)) revert Unauthorized();
+        if (salt==bytes32(0) || hashDeck(handId,order,salt)!=d.commitment) revert InvalidDeck();
+        uint256 bitmap;
+        for(uint256 i=0;i<52;++i) {
+            if(order[i]>=52) revert InvalidDeck();
+            uint256 flag=uint256(1)<<order[i];
+            if((bitmap&flag)!=0) revert InvalidDeck();
+            bitmap|=flag;
+        }
+        d.disclosed=true;
+        emit DeckDisclosed(handId,d.commitment);
+    }
+}

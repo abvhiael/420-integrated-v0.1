@@ -41,17 +41,19 @@ contract PokerDeckDisclosure54Test is PokerConfidentialDeal54Test {
     function testWrongPlayerAndMissingReceiptRejected() public {
         bytes32 id=_ready();
         uint8[52] memory cards=_cards();
+        bytes32 deckHash=disclosure.hashDeck(id,cards,keccak256("salt"));
         cheat54.prank(PROVIDER_A);
-        disclosure.publish(id,disclosure.hashDeck(id,cards,keccak256("salt")),keccak256("encrypted manifest"));
-        cheat54.prank(PROVIDER_A); disclosure.bindEnvelope(id,0,keccak256("encrypted seat 0"));
+        disclosure.publish(id,deckHash,keccak256("encrypted manifest"));
+        cheat54.prank(PROVIDER_A); disclosure.bindEnvelope(id,0,keccak256("encrypted seat 0"),KEY_A);
         cheat54.expectRevert(PokerDeckDisclosure420.NotRecipient.selector);
         cheat54.prank(OTHER); disclosure.acknowledge(id,0,keccak256("forgery"));
         require(!disclosure.allAcknowledged(id),"incomplete");
     }
     function testWrongOrMissingKeyBindingRejected() public {
         bytes32 id=_ready(); uint8[52] memory cards=_cards();
+        bytes32 deckHash=disclosure.hashDeck(id,cards,keccak256("salt"));
         cheat54.prank(PROVIDER_A);
-        disclosure.publish(id,disclosure.hashDeck(id,cards,keccak256("salt")),keccak256("manifest"));
+        disclosure.publish(id,deckHash,keccak256("manifest"));
         cheat54.expectRevert(PokerDeckDisclosure420.NotRecipient.selector);
         cheat54.prank(PROVIDER_A);
         disclosure.bindEnvelope(id,0,keccak256("envelope"),KEY_B);
@@ -65,16 +67,18 @@ contract PokerDeckDisclosure54Test is PokerConfidentialDeal54Test {
     }
     function testTamperedDeckRejected() public {
         bytes32 id=_ready(); uint8[52] memory cards=_cards();
+        bytes32 deckHash=disclosure.hashDeck(id,cards,keccak256("salt"));
         cheat54.prank(PROVIDER_A);
-        disclosure.publish(id,disclosure.hashDeck(id,cards,keccak256("salt")),keccak256("manifest"));
+        disclosure.publish(id,deckHash,keccak256("manifest"));
         cards[2]=cards[1];
         cheat54.expectRevert(PokerDeckDisclosure420.InvalidDeck.selector);
         disclosure.verifyOpenedDeck(id,cards,keccak256("salt"));
     }
     function testWrongSaltRejected() public {
         bytes32 id=_ready(); uint8[52] memory cards=_cards();
+        bytes32 deckHash=disclosure.hashDeck(id,cards,keccak256("salt"));
         cheat54.prank(PROVIDER_A);
-        disclosure.publish(id,disclosure.hashDeck(id,cards,keccak256("salt")),keccak256("manifest"));
+        disclosure.publish(id,deckHash,keccak256("manifest"));
         cheat54.expectRevert(PokerDeckDisclosure420.InvalidDeck.selector);
         disclosure.verifyOpenedDeck(id,cards,keccak256("other"));
     }

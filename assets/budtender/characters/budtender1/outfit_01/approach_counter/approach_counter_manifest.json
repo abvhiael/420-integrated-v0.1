@@ -1,0 +1,56 @@
+{
+  "character_id": "budtender1",
+  "outfit_id": "outfit_01",
+  "animation_id": "approach_counter",
+  "frame_count": 6,
+  "canvas": {
+    "width": 256,
+    "height": 384
+  },
+  "anchor": {
+    "x": 128,
+    "y": 368
+  },
+  "frame_duration_ms": 125,
+  "loop": false,
+  "frames": [
+    {
+      "index": 1,
+      "file": "frame_01.png",
+      "sha256": "4af760fd8a25d7f725266cc91c619677f5bb4cf37078986fc18246fcca9cbc95"
+    },
+    {
+      "index": 2,
+      "file": "frame_02.png",
+      "sha256": "8c532b01ac05b196944c757fc1a9246703024a64377e044739170b8d1d4a0eb9"
+    },
+    {
+      "index": 3,
+      "file": "frame_03.png",
+      "sha256": "125e3e6f434b615b726a372c6d9d1dc02bd6f11013c0bda858c4bc78a32157d8"
+    },
+    {
+      "index": 4,
+      "file": "frame_04.png",
+      "sha256": "3413490b0ae1f68fbaae0b38102f6a289e7624eb11ca685212497ca66cc34bfe"
+    },
+    {
+      "index": 5,
+      "file": "frame_05.png",
+      "sha256": "d4050b89f91280dd88969520a8dad19ea1fb81f485d859ca4f5ecce8010b1d5b"
+    },
+    {
+      "index": 6,
+      "file": "frame_06.png",
+      "sha256": "89478ecaf97541d6a06a571c581180d5204f644df61bdad77a8a2006384c496c"
+    }
+  ],
+  "validation": {
+    "file_integrity": "pass",
+    "transparency": "pass",
+    "alignment": "provisional \u2014 anatomical anchor estimated",
+    "visual_continuity": "pending human review",
+    "animation_playback": "pending interactive review",
+    "production_approval": "pending"
+  }
+}

@@ -1,0 +1,77 @@
+{
+  "character_id": "budtender1",
+  "outfit_id": "outfit_01",
+  "animation_id": "exit",
+  "frame_count": 9,
+  "canvas": {
+    "width": 256,
+    "height": 384
+  },
+  "anchor": {
+    "x": 128,
+    "y": 368
+  },
+  "frame_duration_ms": 125,
+  "loop": true,
+  "frames": [
+    {
+      "index": 1,
+      "file": "frame_01.png",
+      "sha256": "29d5b64866bad9638461341d768fe4bfe53506a30031d61e79f2a7c1b9ef6fd2"
+    },
+    {
+      "index": 2,
+      "file": "frame_02.png",
+      "sha256": "78778184f990246d2c1e1024b77ddfc1fd72d52f56374609bc9670e3c42aac58"
+    },
+    {
+      "index": 3,
+      "file": "frame_03.png",
+      "sha256": "6a544b6c70697eb1b5a800a9a950665ea8670053a2fa99d435eb39a26b9b5204"
+    },
+    {
+      "index": 4,
+      "file": "frame_04.png",
+      "sha256": "ceba12afbbe8b2b7da35be03371c52ae858f8eaead983e613683e10424e2a260"
+    },
+    {
+      "index": 5,
+      "file": "frame_05.png",
+      "sha256": "9b85c2414711e3ccda5ff99bde3878de1e3e63ecd0a750b96187018b61cdfe22"
+    },
+    {
+      "index": 6,
+      "file": "frame_06.png",
+      "sha256": "8e0ea69f3105b80e1f2897e16176f29a5959ab0eaadd0e6a7038d3f8bc3b2458"
+    },
+    {
+      "index": 7,
+      "file": "frame_07.png",
+      "sha256": "f41f416cb40908d159b72c76dc6b90e45a06a2bbb5cb5a60efa0d82cb7b43003"
+    },
+    {
+      "index": 8,
+      "file": "frame_08.png",
+      "sha256": "111c1b42ece1a6c6ba3d491b7570af50447510063368e03c10048fd45c8f7bde"
+    },
+    {
+      "index": 9,
+      "file": "frame_09.png",
+      "sha256": "766cc06c84deaf1a550d2a1e2336bf874cd51124cf9ca5f4998685775112fcb4"
+    }
+  ],
+  "validation": {
+    "file_integrity": "pass",
+    "transparency": "pass",
+    "alignment": "measured_root_estimate",
+    "visual_continuity": "pending_visual_approval",
+    "animation_playback": "inspector_provided_not_browser_tested",
+    "production_approval": "pending"
+  },
+  "playback_conflict": {
+    "explicit_production_parameter": "loop",
+    "animation_specific_guidance": "once",
+    "manifest_choice": "loop_as_explicit_production_parameter",
+    "recommended_review": "confirm whether exit should be once before production approval"
+  }
+}

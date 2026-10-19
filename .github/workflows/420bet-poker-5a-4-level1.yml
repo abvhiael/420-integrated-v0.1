@@ -9,6 +9,10 @@ on:
       - 'contracts/src/bet/PokerRecipientKeys420.sol'
       - 'contracts/src/bet/PokerHandFinality420.sol'
       - 'contracts/test/BetPokerHandFinality54.t.sol'
+      - 'contracts/src/bet/PokerHandAccountingProof420.sol'
+      - 'contracts/test/BetPokerHandAccountingProof54.t.sol'
+      - 'contracts/src/bet/PokerVerifiedTerminalGate420.sol'
+      - 'contracts/test/BetPokerVerifiedTerminalGate54.t.sol'
       - 'contracts/test/BetPokerDeckDisclosure54.t.sol'
       - 'clients/420bet-poker/crypto/**'
       - '.github/workflows/420bet-poker-5a-4-level1.yml'
@@ -41,4 +45,4 @@ jobs:
         run: node --test clients/420bet-poker/crypto/confidential-deal.test.mjs
       - name: Scope commitment adversarial + inherited seating/table regression
         working-directory: contracts
-        run: forge test --match-contract '^(PokerHandFinality54Test|PokerDeckDisclosure54Test|PokerConfidentialDeal54Test|PokerSeatLedger53Test|BetPokerTableRegistry52Test)$' -vv
+        run: forge test --match-contract '^(PokerVerifiedTerminalGate54Test|PokerHandAccountingProof54Test|PokerHandFinality54Test|PokerDeckDisclosure54Test|PokerConfidentialDeal54Test|PokerSeatLedger53Test|BetPokerTableRegistry52Test)$' -vv

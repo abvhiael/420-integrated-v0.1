@@ -1,0 +1,125 @@
+{
+  "schema_version": 1,
+  "character_id": "budtender1",
+  "role": "staff",
+  "outfit_id": "outfit_01",
+  "animation_id": "idle_front",
+  "asset_directory": "assets/budtender/characters/budtender1/outfit_01/idle_front/",
+  "frame_count": 4,
+  "canvas": {
+    "width": 256,
+    "height": 384,
+    "format": "PNG",
+    "mode": "RGBA",
+    "bits_per_channel": 8
+  },
+  "anchor": {
+    "x": 128,
+    "y": 368
+  },
+  "frame_duration_ms": 125,
+  "loop": true,
+  "playback_order": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "frames": [
+    {
+      "index": 1,
+      "file": "frame_01.png",
+      "source_filename": "staff_budtender1_outfit01_idle_front_frame01.png",
+      "sha256": "72ed89d52ea806762d100a29eb0aa183d37991914b8b7a19cbb22fb35dfa9a61",
+      "bytes": 73659,
+      "dimensions": {
+        "width": 256,
+        "height": 384
+      },
+      "alpha_bounds_xyxy": [
+        69,
+        16,
+        187,
+        368
+      ],
+      "visible_height_px": 352,
+      "visible_center_x_px": 128.0,
+      "visible_bottom_y_px": 368
+    },
+    {
+      "index": 2,
+      "file": "frame_02.png",
+      "source_filename": "staff_budtender1_outfit01_idle_front_frame02.png",
+      "sha256": "98daa46a12c540e86c4a09631228a13bd71ebefde68c1525091fc1e2ceba1684",
+      "bytes": 72701,
+      "dimensions": {
+        "width": 256,
+        "height": 384
+      },
+      "alpha_bounds_xyxy": [
+        68,
+        17,
+        188,
+        368
+      ],
+      "visible_height_px": 351,
+      "visible_center_x_px": 128.0,
+      "visible_bottom_y_px": 368
+    },
+    {
+      "index": 3,
+      "file": "frame_03.png",
+      "source_filename": "staff_budtender1_outfit01_idle_front_frame03.png",
+      "sha256": "1a6506ef50c6ec03be266cd6f2a18a625379ed534eb935b092b1035651b48050",
+      "bytes": 72087,
+      "dimensions": {
+        "width": 256,
+        "height": 384
+      },
+      "alpha_bounds_xyxy": [
+        70,
+        18,
+        187,
+        368
+      ],
+      "visible_height_px": 350,
+      "visible_center_x_px": 128.5,
+      "visible_bottom_y_px": 368
+    },
+    {
+      "index": 4,
+      "file": "frame_04.png",
+      "source_filename": "staff_budtender1_outfit01_idle_front_frame04.png",
+      "sha256": "0f1dbeecf5d9d64c14c63964af268ca2365390e787987e61a3a0d0e154174c66",
+      "bytes": 73161,
+      "dimensions": {
+        "width": 256,
+        "height": 384
+      },
+      "alpha_bounds_xyxy": [
+        67,
+        16,
+        190,
+        368
+      ],
+      "visible_height_px": 352,
+      "visible_center_x_px": 128.5,
+      "visible_bottom_y_px": 368
+    }
+  ],
+  "validation": {
+    "file_integrity": "verified",
+    "rgba_transparency": "verified",
+    "canvas_dimensions": "verified",
+    "ground_baseline": "verified",
+    "visual_continuity": "pending_manual_review",
+    "loop_playback": "pending_manual_approval",
+    "production_approval": "pending",
+    "repository_qualification": "not_performed"
+  },
+  "notes": [
+    "Frame checksums and geometry were measured from the existing four original PNG files.",
+    "The asset_directory is the intended repository layout; these files have not been committed to the repository by this manifest.",
+    "Visual and playback approvals are not inferred from geometry checks."
+  ]
+}

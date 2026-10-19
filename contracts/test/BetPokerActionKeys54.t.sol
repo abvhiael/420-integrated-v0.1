@@ -21,7 +21,7 @@ contract PokerActionKeys54Test is PokerConfidentialDeal54Test {
         address addressOfSigner=sig.addr(KEY);
         cheat54.prank(PLAYER);signerRegistry.bindSigner(TABLE,addressOfSigner);
         uint64 deadline=uint64(block.timestamp+90);
-        bytes32 move=keccak256("call ten"),state=keccak256("previous state");
+        bytes32 move=keccak256("call ten"); bytes32 state=keccak256("previous state");
         bytes32 d=signerRegistry.actionDigest(id,0,1,state,move,deadline);
         (uint8 v,bytes32 rr,bytes32 ss)=sig.sign(KEY,d);
         bytes memory proof=abi.encodePacked(rr,ss,v);
@@ -34,7 +34,7 @@ contract PokerActionKeys54Test is PokerConfidentialDeal54Test {
         bytes32 id=_committed();
         cheat54.prank(PLAYER);signerRegistry.bindSigner(TABLE,sig.addr(KEY));
         uint64 deadline=uint64(block.timestamp+90);
-        bytes32 state=keccak256("state"),move=keccak256("raise");
+        bytes32 state=keccak256("state"); bytes32 move=keccak256("raise");
         bytes32 d=signerRegistry.actionDigest(id,0,1,state,move,deadline);
         (uint8 v,bytes32 rr,bytes32 ss)=sig.sign(KEY,d);
         cheat54.prank(PLAYER);signerRegistry.bindSigner(TABLE,address(0x4000));

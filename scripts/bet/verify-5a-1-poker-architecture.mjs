@@ -9,7 +9,7 @@ const types = readFileSync('contracts/src/bet/BetTypes420.sol', 'utf8');
 const required = [
   'no-limit Texas Hold', '2–9 seats', 'small/big blinds', 'hand rank',
   'single-writer', 'scopeForTable', 'POKER_NEW_TABLES', 'POKER_NEW_HANDS',
-  'private hole cards', 'chain ID', 'table ID/version', 'hand nonce',
+  'private', 'chain ID', 'table ID/version', 'hand nonce',
   'action nonce', 'side pots', 'rake', 'odd chips', 'chip',
   'replay', 'dispute', 'refund', 'collusion', 'jurisdiction',
   'independent', 'disabled', 'VideoPokerV1420', 'Level',

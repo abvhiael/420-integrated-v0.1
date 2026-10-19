@@ -12,7 +12,8 @@ import (
 // The public ciphertext list, PK and hand scope must be bound to an immutable
 // deck commitment by the on-chain verifier adapter before live deployment.
 type InitialDeck52 struct {
- Cards [52]ElGamalCipher `gnark:",public"`
+ DeckRoot frontend.Variable `gnark:",public"`
+ Cards [52]ElGamalCipher
  HandScope frontend.Variable `gnark:",public"`
  PublicKeyX frontend.Variable `gnark:",public"`
  PublicKeyY frontend.Variable `gnark:",public"`
@@ -47,7 +48,10 @@ func initialDeckRelation(api frontend.API,cards []ElGamalCipher,scope,pkX,pkY fr
  return nil
 }
 func(c *InitialDeck52)Define(api frontend.API)error {
- return initialDeckRelation(api,c.Cards[:],c.HandScope,c.PublicKeyX,c.PublicKeyY,c.Randomness[:])
+ if err:=initialDeckRelation(api,c.Cards[:],c.HandScope,c.PublicKeyX,c.PublicKeyY,c.Randomness[:]);err!=nil{return err}
+ root,err:=ciphertextMerkleRoot(api,c.HandScope,c.Cards[:]);if err!=nil{return err}
+ api.AssertIsEqual(root,c.DeckRoot)
+ return nil
 }
 func(c *InitialDeck2)Define(api frontend.API)error {
  return initialDeckRelation(api,c.Cards[:],c.HandScope,c.PublicKeyX,c.PublicKeyY,c.Randomness[:])

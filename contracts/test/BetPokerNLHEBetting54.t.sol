@@ -4,6 +4,8 @@ import "./BetPokerPrivateShuffleGate54.t.sol";
 import "../src/bet/PokerNLHEBetting420.sol";
 import "../src/bet/PokerActionKeys420.sol";
 import "../src/bet/PokerActionDisputeClock420.sol";
+import "../src/bet/PokerRecipientKeys420.sol";
+import "../src/bet/PokerDeckDisclosure420.sol";
 interface VmPokerNativeSign54 {
     function addr(uint256 privateKey)external returns(address);
     function sign(uint256 privateKey,bytes32 digest)external returns(uint8,bytes32,bytes32);
@@ -12,6 +14,8 @@ contract PokerNLHEBetting54Test is PokerPrivateShuffleGate54Test {
     PokerActionKeys420 signing;
     PokerActionDisputeClock420 dispute;
     PokerNLHEBetting420 engine;
+    PokerRecipientKeys420 recipient;
+    PokerDeckDisclosure420 delivery;
     VmPokerNativeSign54 constant signedVm=VmPokerNativeSign54(address(uint160(uint256(keccak256("hevm cheat code")))));
     uint256 constant PLAYER_KEY=0x420001;
     uint256 constant OPPONENT_KEY=0x420002;
@@ -19,7 +23,25 @@ contract PokerNLHEBetting54Test is PokerPrivateShuffleGate54Test {
         signing=new PokerActionKeys420(address(deal));
         dispute=new PokerActionDisputeClock420(address(deal));
         engine=new PokerNLHEBetting420(address(deal),address(gate),address(signing),address(dispute));
+        recipient=new PokerRecipientKeys420(address(ledger));
+        delivery=new PokerDeckDisclosure420(address(deal),address(recipient));
+        cap.grant(ADMIN,engine.ACTION_BIND_DELIVERY(),auth.scopeForTable(TABLE),true);
         cap.grant(ADMIN,ledger.ACTION_BIND_SETTLEMENT(),auth.scopeForTable(TABLE),true);
+    }
+    function _acknowledgedPrivateDelivery(bytes32 handId) internal {
+        bytes32 keyA=keccak256("player owned private key A");
+        bytes32 keyB=keccak256("player owned private key B");
+        cheat54.prank(PLAYER);recipient.bindKey(TABLE,keyA);
+        cheat54.prank(PLAYER_B);recipient.bindKey(TABLE,keyB);
+        cheat54.prank(PROVIDER_A);
+        delivery.publish(handId,keccak256("private deck commitment"),keccak256("encrypted manifest"));
+        cheat54.prank(PROVIDER_A);
+        delivery.bindEnvelope(handId,0,keccak256("envelope A"),keyA);
+        cheat54.prank(PROVIDER_B);
+        delivery.bindEnvelope(handId,1,keccak256("envelope B"),keyB);
+        cheat54.prank(PLAYER);delivery.acknowledge(handId,0,keccak256("receipt A"));
+        cheat54.prank(PLAYER_B);delivery.acknowledge(handId,1,keccak256("receipt B"));
+        cheat54.prank(ADMIN);engine.bindDelivery(TABLE,address(delivery));
     }
     function _readyBetting() internal returns(bytes32 id){
         id=_hand54();
@@ -35,6 +57,7 @@ contract PokerNLHEBetting54Test is PokerPrivateShuffleGate54Test {
         cheat54.prank(PLAYER);engine.reserve(id);
         cheat54.prank(PLAYER);signing.bindSigner(TABLE,signedVm.addr(PLAYER_KEY));
         cheat54.prank(PLAYER_B);signing.bindSigner(TABLE,signedVm.addr(OPPONENT_KEY));
+        _acknowledgedPrivateDelivery(id);
         engine.start(id,0,60);
     }
     function _signedAction(bytes32 id,uint8 seat,PokerNLHEBetting420.Move move,

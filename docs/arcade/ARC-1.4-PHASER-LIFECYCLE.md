@@ -1,0 +1,9 @@
+# ARC-1.4 — Phaser adapter and lifecycle manager
+
+**Implementation:** `packages/arcade-phaser/src/index.mjs` contains an actual Phaser 3-compatible adapter and strict state machine. Canonical game identity, frozen runtime class, version, registration status and guest-first boundaries are checked before any engine construction. The adapter accepts an explicit Phaser engine factory; `createPhaser3Factory(Phaser)` builds the real Phaser 3 `Game` with scoped DOM parent and scene when a Phaser 3 implementation and approved game bundle are supplied.
+
+Transitions: `created → loading → ready → running ↔ paused → disposed`. Mount is once only. Pause/resume invoke Phaser scene methods, serialized progress is defensive-copied and game/version bound, and all terminal exits destroy game resources. Abort signals and generation tokens prevent late async asset loads from resurrecting a disposed game. Invalid transitions, foreign game ids, privileged wallet/provider/score context, malformed engines, and failing loads fail closed.
+
+The launcher retains disabled game buttons: no actual Phaser game scenes/asset packs were implemented or approved by ARC-1.4. This is an engine adapter and lifecycle step, not game content, browser-device acceptance, native SDK delivery, or live testnet approval. The Phaser dependency is intentionally *injected* rather than a global launcher dependency: real action-game bundle owners must install and pin a compatible Phaser 3 release and qualify their rendering/device behavior at the relevant later step.
+
+Scoped tests: `packages/arcade-phaser/test/lifecycle.test.mjs` covers state transitions, destruction, stale load, adversarial manifests/context, save isolation, and real Phaser 3 API compatibility shape; retained ARC-1.1–1.3 npm lint/type/test/build remains the CI owner. No global qualification required.

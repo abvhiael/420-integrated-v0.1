@@ -1,0 +1,29 @@
+name: 420Arcade ARC-1.4 Level 1 Phaser lifecycle
+on:
+  pull_request:
+    paths:
+      - 'packages/arcade-phaser/**'
+      - 'apps/arcade-web/**'
+      - '.github/workflows/arcade-1-4-level1.yml'
+  workflow_dispatch:
+jobs:
+  arcade-phaser-lifecycle:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: apps/arcade-web/package-lock.json
+      - name: Phaser adapter syntax and security tests
+        run: node --check packages/arcade-phaser/src/index.mjs && node --test packages/arcade-phaser/test/*.test.mjs
+      - name: Install frozen launcher dependencies
+        run: npm ci --prefix apps/arcade-web --ignore-scripts --no-audit --no-fund
+      - name: Retained Arcade launcher qualification
+        run: |
+          npm run check --prefix apps/arcade-web
+          npm run lint --prefix apps/arcade-web
+          npm run typecheck --prefix apps/arcade-web
+          npm run test --prefix apps/arcade-web
+          npm run build --prefix apps/arcade-web

@@ -87,12 +87,12 @@ contract PokerSeatLedger420 {
         PokerTableRegistry420.Table memory t=_openTable(id);
         if(epoch!=seatingEpoch[id] || (uint256(mask)>>t.config.seats)!=0)
             revert SettlementInvalid();
-        uint256 sum;
+        uint256 sum = 0;
         snapshot=keccak256(abi.encode(
             keccak256("420.BET.POKER.ESCROW.SNAPSHOT.V1"),block.chainid,address(this),
             id,handId,mask,epoch
         ));
-        uint256 count;
+        uint256 count = 0;
         for(uint8 i=0;i<t.config.seats;i++){
             if((mask&(uint16(1)<<i))==0)continue;
             Seat memory s=seats[id][i];
@@ -121,7 +121,7 @@ contract PokerSeatLedger420 {
         _assertUnchanged(id,handId);
         PokerTableRegistry420.Table memory t=_table(id);
         uint16 mask=lockedMask[id];
-        uint256 total;
+        uint256 total = 0;
         for(uint8 i=0;i<t.config.seats;i++){
             if((mask&(uint16(1)<<i))!=0) total+=finalChips[i];
             else if(finalChips[i]!=seats[id][i].chips)revert SettlementInvalid();

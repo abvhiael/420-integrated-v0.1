@@ -15,6 +15,7 @@ interface IPokerNativeOutcome420 {
         external view returns(uint256[9] memory finalChips,uint256 fee);
 }
 interface IPokerAuthenticatedStreet420 {
+    function engine() external view returns(address);
     function isStageComplete(bytes32 handId,uint8 street) external view returns(bool);
 }
 
@@ -108,6 +109,10 @@ contract PokerNLHEBetting420 {
             revert InvalidConfiguration();
         if(!authorization.isAuthorized(msg.sender,ACTION_BIND_REVEALS,
             authorization.scopeForTable(tableId),0))revert Unauthorized();
+        // A public reveal contract must be associated with this exact on-chain
+        // betting engine, not merely expose a compatible method selector.
+        if(IPokerAuthenticatedStreet420(gate).engine()!=address(this))
+            revert InvalidConfiguration();
         revealForTable[tableId]=IPokerAuthenticatedStreet420(gate);
         emit RevealsBound(gate);
     }
@@ -135,7 +140,9 @@ contract PokerNLHEBetting420 {
         if(address(revealForTable[tableId])==address(0) ||
            IPokerNativeOutcome420(calculator).engine()!=address(this) ||
            IPokerNativeOutcome420(calculator).reveals()!=address(revealForTable[tableId]) ||
-           IPokerNativeOutcome420(calculator).rakeEngine()==address(0))
+           IPokerNativeOutcome420(calculator).rakeEngine()==address(0) ||
+           address(PokerCanonicalRake420(IPokerNativeOutcome420(calculator).rakeEngine()).tables())
+               !=address(deals.tables()))
             revert InvalidConfiguration();
         outcomeForTable[tableId]=calculator;
         emit OutcomeBound(tableId,calculator);

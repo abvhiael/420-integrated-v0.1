@@ -1,0 +1,21 @@
+name: 420Arcade ARC-0.6 Level 1 module architecture
+on:
+  pull_request:
+    paths:
+      - "config/arcade-module-architecture.json"
+      - "config/arcade-game-identities.json"
+      - "config/arcade-platform-requirements.json"
+      - "docs/arcade/ARC-0.6-PROJECT-STRUCTURE-MODULE-BOUNDARIES.md"
+      - "scripts/arcade/verify-arc-0-6.mjs"
+      - ".github/workflows/arcade-0-6-level1.yml"
+  workflow_dispatch:
+jobs:
+  arcade-module-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify modules dependencies versions and boundary adversarial checks
+        run: node scripts/arcade/verify-arc-0-6.mjs

@@ -1,10 +1,11 @@
-import React,{useState} from 'react';
-import {View,Text,TextInput,Pressable,StyleSheet} from 'react-native';
+import React,{useState,useEffect} from 'react';
+import {View,Text,TextInput,Pressable,StyleSheet,Linking,AppState} from 'react-native';
 import {theme} from './theme';
-type Driver={state:()=>any;readOnboarding:()=>Promise<any>;submitDocuments:(v:any)=>Promise<any>;readAvailability:()=>Promise<any>;setAvailability:(v:any)=>Promise<any>;readOffers:()=>Promise<any>;respondOffer:(id:string,yes:boolean)=>Promise<any>;readTrip:(id:string)=>Promise<any>;transition:(a:string)=>Promise<any>;navigation:()=>Promise<any>;reportSafety:(category:string)=>Promise<any>};
+type Driver={state:()=>any;readOnboarding:()=>Promise<any>;submitDocuments:(v:any)=>Promise<any>;readAvailability:()=>Promise<any>;setAvailability:(v:any)=>Promise<any>;readOffers:()=>Promise<any>;respondOffer:(id:string,yes:boolean)=>Promise<any>;readTrip:(id:string)=>Promise<any>;transition:(a:string)=>Promise<any>;navigation:()=>Promise<any>;reportSafety:(category:string)=>Promise<any>;suspend:()=>void};
 export default function DriverScreen({journey}:{journey?:Driver}){
  const [vehicle,setVehicle]=useState(''),[receipt,setReceipt]=useState(''),[expiry,setExpiry]=useState(''),[kind,setKind]=useState('licence'),[seats,setSeats]=useState('4'),[tripId,setTripId]=useState(''),[category,setCategory]=useState('other');
  const [notice,setNotice]=useState('Driver services are not configured.'),[busy,setBusy]=useState(false),[,update]=useState(0);
+ useEffect(()=>{const sub=AppState.addEventListener('change',state=>{if(state!=='active'){journey?.suspend();update(x=>x+1);}});return ()=>{sub.remove();journey?.suspend();};},[journey]);
  const snapshot=journey?.state(),available=!!journey&&!busy;
  const run=async(fn:()=>Promise<unknown>)=>{if(!available)return;setBusy(true);try{await fn();setNotice('Authoritative response received; review current status.');update(x=>x+1);}catch{setNotice('Request denied or offline. No availability, offer or trip change is confirmed.');}finally{setBusy(false);}};
  return <View style={styles.root}>
@@ -35,7 +36,7 @@ export default function DriverScreen({journey}:{journey?:Driver}){
   <Button label="Request arrival transition" enabled={available&&snapshot?.trip?.state==='ASSIGNED'} onPress={()=>run(()=>journey!.transition('arrive'))}/>
   <Button label="Request trip start" enabled={available&&snapshot?.trip?.state==='ARRIVED'} onPress={()=>run(()=>journey!.transition('start'))}/>
   <Button label="Request trip completion" enabled={available&&snapshot?.trip?.state==='IN_PROGRESS'} onPress={()=>run(()=>journey!.transition('complete'))}/>
-  <Button label="Request approved navigation handoff" enabled={available&&!!snapshot?.trip} onPress={()=>run(()=>journey!.navigation())}/>
+  <Button label="Request approved navigation handoff" enabled={available&&!!snapshot?.trip} onPress={()=>run(async()=>{const url=await journey!.navigation();if(typeof url!=='string'||!url.startsWith('https://'))throw Error('NAVIGATION_DENIED');await Linking.openURL(url);})}/>
   <TextInput style={styles.field} accessibilityLabel="Incident category" placeholder="medical, collision, threat, vehicle, other" value={category} onChangeText={setCategory}/>
   <Button label="Report safety incident" enabled={available&&!!snapshot?.trip&&['ASSIGNED','ARRIVED','IN_PROGRESS'].includes(snapshot.trip.state)} onPress={()=>run(()=>journey!.reportSafety(category))}/>
   <Text accessibilityLiveRegion="polite" style={styles.notice}>{notice}</Text>

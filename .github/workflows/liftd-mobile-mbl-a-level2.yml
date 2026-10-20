@@ -102,6 +102,8 @@ jobs:
           xcrun simctl terminate "$id" org.integrated420.liftd.preview
           xcrun simctl launch "$id" org.integrated420.liftd.preview
           mkdir -p mbl-a-ios-evidence
+          workspace=$(find rideshare/mobile/ios -maxdepth 1 -name "*.xcworkspace" -print -quit)
+          test -n "$workspace"
           xcodebuild -workspace "$workspace" -scheme "$(basename "$workspace" .xcworkspace)" -configuration Debug -destination "platform=iOS Simulator,id=$id" -only-testing:LIFTdPreviewUITests/LIFTdPreviewUITests -resultBundlePath "$PWD/mbl-a-ios-evidence/ui-tests.xcresult" CODE_SIGNING_ALLOWED=NO test > ios-interactive.log 2>&1 || { tail -n 180 ios-interactive.log; exit 1; }
           git rev-parse HEAD > mbl-a-ios-evidence/implementation-sha.txt
           /usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$app/Info.plist" | grep -Fx org.integrated420.liftd.preview

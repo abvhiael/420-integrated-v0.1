@@ -31,6 +31,17 @@ jobs:
       - name: Build nonproduction Android APK
         working-directory: rideshare/mobile/android
         run: ./gradlew :app:assembleDebug --no-daemon
+      - name: Start scoped Metro bundle server for emulator UI
+        working-directory: rideshare/mobile
+        run: |
+          CI=1 npx expo start --localhost --port 8081 > metro-android.log 2>&1 &
+          echo $! > metro-android.pid
+          for i in $(seq 1 45); do
+            if curl -fsS http://127.0.0.1:8081/status | grep -q 'packager-status:running'; then exit 0; fi
+            sleep 2
+          done
+          tail -n 80 metro-android.log
+          exit 1
       - name: Install and launch on actual Android emulator
         uses: reactivecircus/android-emulator-runner@v2
         with:
@@ -39,6 +50,7 @@ jobs:
           profile: pixel_6
           script: |
             set -eu
+            adb reverse tcp:8081 tcp:8081
             adb install -r rideshare/mobile/android/app/build/outputs/apk/debug/app-debug.apk
             adb shell pm path org.integrated420.liftd.preview
             adb shell monkey -p org.integrated420.liftd.preview -c android.intent.category.LAUNCHER 1
@@ -89,6 +101,17 @@ jobs:
           workspace=$(find ios -maxdepth 1 -name '*.xcworkspace' -print -quit)
           test -n "$workspace"
           xcodebuild -workspace "$workspace" -scheme "$(basename "$workspace" .xcworkspace)" -configuration Debug -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO build > ios-build.log 2>&1 || { tail -n 120 ios-build.log; exit 1; }
+      - name: Start scoped Metro bundle server for simulator UI
+        working-directory: rideshare/mobile
+        run: |
+          CI=1 npx expo start --localhost --port 8081 > metro-ios.log 2>&1 &
+          echo $! > metro-ios.pid
+          for i in $(seq 1 45); do
+            if curl -fsS http://127.0.0.1:8081/status | grep -q 'packager-status:running'; then exit 0; fi
+            sleep 2
+          done
+          tail -n 80 metro-ios.log
+          exit 1
       - name: Install and launch on actual iOS simulator
         run: |
           set -eu

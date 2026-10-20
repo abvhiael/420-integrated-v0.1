@@ -9,8 +9,6 @@ permissions:
   contents: read
 jobs:
   mobile-contracts:
-    permissions:
-      contents: write
     name: mobile-contracts
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -23,36 +21,7 @@ jobs:
           node-version: '22'
       - name: Install scoped mobile dependencies
         working-directory: rideshare/mobile
-        run: npm install --ignore-scripts --no-audit --no-fund
-      - name: Export deterministic dependency lockfile
-        working-directory: rideshare/mobile
-        run: |
-          test -f package-lock.json
-          npm ci --ignore-scripts --no-audit --no-fund
-          node -e "const l=require('./package-lock.json');if(l.lockfileVersion<3)process.exit(1)"
-      - uses: actions/upload-artifact@v4
-        with:
-          name: liftd-mbl6-npm-lock-${{ github.event.pull_request.head.sha || github.sha }}
-          path: rideshare/mobile/package-lock.json
-          if-no-files-found: error
-      - name: Commit validated lockfile to scoped PR branch
-        if: github.event_name == 'pull_request' && github.event.pull_request.number == 766
-        env:
-          TARGET_BRANCH: ${{ github.event.pull_request.head.ref }}
-          TARGET_SHA: ${{ github.event.pull_request.head.sha }}
-        run: |
-          set -eu
-          test "$TARGET_BRANCH" = 'feat/liftd-mbl6-mobile-hardening-20261019'
-          test "$(git rev-parse HEAD)" = "$TARGET_SHA"
-          if git cat-file -e HEAD:rideshare/mobile/package-lock.json 2>/dev/null; then
-            echo 'Lockfile already committed at checked-out SHA'
-            exit 0
-          fi
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add rideshare/mobile/package-lock.json
-          git commit -m 'MBL-6: pin verified mobile npm dependency lockfile'
-          git push origin "HEAD:refs/heads/$TARGET_BRANCH"
+        run: npm ci --ignore-scripts --no-audit --no-fund
       - name: MBL-1 route security, configuration, typecheck
         working-directory: rideshare/mobile
         run: npm run check
@@ -80,7 +49,7 @@ jobs:
       - name: Install dependency and generate Android debug project
         working-directory: rideshare/mobile
         run: |
-          npm install --ignore-scripts --no-audit --no-fund
+          npm ci --ignore-scripts --no-audit --no-fund
           npx expo prebuild --platform android --non-interactive --no-install
       - name: Compile unsigned nonproduction Android debug APK
         working-directory: rideshare/mobile/android
@@ -125,7 +94,7 @@ jobs:
       - name: Install dependency and generate iOS simulator project
         working-directory: rideshare/mobile
         run: |
-          npm install --ignore-scripts --no-audit --no-fund
+          npm ci --ignore-scripts --no-audit --no-fund
           npx expo prebuild --platform ios --non-interactive --no-install
       - name: Install iOS native dependencies
         working-directory: rideshare/mobile/ios

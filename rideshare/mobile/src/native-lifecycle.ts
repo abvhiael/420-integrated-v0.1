@@ -7,7 +7,7 @@ import {eraseNativePrivateState} from './native-erasure';
 
 const vaultKey='liftd.preview.identity.tokens.v1';
 const vault={
- async read(){const value=await SecureStore.getItemAsync(vaultKey,{keychainService:vaultKey});return value?JSON.parse(value):null;},
+ async read(){const value=await SecureStore.getItemAsync(vaultKey,{keychainService:vaultKey});if(!value)return null;try{return JSON.parse(value);}catch{await SecureStore.deleteItemAsync(vaultKey,{keychainService:vaultKey});throw Error('IDENTITY_STORE_CORRUPT');}},
  async write(value:unknown){await SecureStore.setItemAsync(vaultKey,JSON.stringify(value),{keychainService:vaultKey,keychainAccessible:SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY});},
  async clear(){await SecureStore.deleteItemAsync(vaultKey,{keychainService:vaultKey});}
 };

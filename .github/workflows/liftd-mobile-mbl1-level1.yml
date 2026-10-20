@@ -22,6 +22,17 @@ jobs:
       - name: Install scoped mobile dependencies
         working-directory: rideshare/mobile
         run: npm install --ignore-scripts --no-audit --no-fund
+      - name: Export deterministic dependency lockfile
+        working-directory: rideshare/mobile
+        run: |
+          test -f package-lock.json
+          npm ci --ignore-scripts --no-audit --no-fund
+          node -e "const l=require('./package-lock.json');if(l.lockfileVersion<3)process.exit(1)"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: liftd-mbl6-npm-lock-${{ github.event.pull_request.head.sha || github.sha }}
+          path: rideshare/mobile/package-lock.json
+          if-no-files-found: error
       - name: MBL-1 route security, configuration, typecheck
         working-directory: rideshare/mobile
         run: npm run check

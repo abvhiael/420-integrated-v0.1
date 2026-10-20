@@ -78,6 +78,10 @@ contract PokerLiveCardReveals54Test is PokerNLHEBetting54Test {
         live.submitShare(handId,1,position,holder,points,_shareProof(handId,position,holder,points));
     }
     function _open(bytes32 handId,uint8 pos,uint8 card) internal {
+        _openWithExpectedRevert(handId,pos,card,false);
+    }
+    function _openWithExpectedRevert(bytes32 handId,uint8 pos,uint8 card,bool incomplete)
+        internal {
         PokerLiveCardReveals420.Slot memory s=live.slotOf(handId,pos);
         uint256[6] memory keys=[uint256(7),uint256(8),uint256(11),uint256(12),uint256(19),uint256(20)];
         uint256[17] memory pub;
@@ -87,6 +91,9 @@ contract PokerLiveCardReveals54Test is PokerNLHEBetting54Test {
         pub[11]=keys[0];pub[12]=keys[1];pub[13]=keys[2];pub[14]=keys[3];
         pub[15]=keys[4];pub[16]=keys[5];
         uint256[8] memory proof;
+        // Any revert expectation must be armed immediately before reveal().
+        // slotOf() above is an external view call and must not consume it.
+        if(incomplete)cheat54.expectRevert(PokerLiveCardReveals420.Incomplete.selector);
         live.reveal(handId,1,pos,card,keys,abi.encode(proof,pub));
     }
     function _completePreflop(bytes32 id) internal {
@@ -128,8 +135,7 @@ contract PokerLiveCardReveals54Test is PokerNLHEBetting54Test {
         live.submitShare(id,1,5,1,bad,_shareProof(id,5,1,bad));
         partialFixture.setAccept(true);
         require(!live.slotOf(id,5).shareB,"rejected share must not persist");
-        cheat54.expectRevert(PokerLiveCardReveals420.Incomplete.selector);
-        _open(id,5,10);
+        _openWithExpectedRevert(id,5,10,true);
     }
     function testHoleCardsNeverPubliclyRevealedBeforeShowdown() public {
         bytes32 id=_readyLive();_completePreflop(id);

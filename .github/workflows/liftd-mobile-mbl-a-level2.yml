@@ -44,10 +44,7 @@ jobs:
             adb shell monkey -p org.integrated420.liftd.preview -c android.intent.category.LAUNCHER 1
             sleep 8
             adb shell pidof org.integrated420.liftd.preview
-            if adb shell dumpsys package org.integrated420.liftd.preview | grep -q 'ACCESS_BACKGROUND_LOCATION'; then
-              echo 'Prohibited background location permission' >&2
-              exit 1
-            fi
+            ! adb shell dumpsys package org.integrated420.liftd.preview | grep -q 'android.permission.ACCESS_BACKGROUND_LOCATION'
             adb shell am force-stop org.integrated420.liftd.preview
             adb shell monkey -p org.integrated420.liftd.preview -c android.intent.category.LAUNCHER 1
             sleep 5

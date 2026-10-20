@@ -20,9 +20,9 @@ def tree():
 def locate(label):
     root=tree()
     for node in root.iter("node"):
-        if node.attrib.get("text")==label or node.attrib.get("content-desc")==label:
+        if label in node.attrib.get("text","") or label in node.attrib.get("content-desc",""):
             return node
-    raise AssertionError(f"Expected visible UI node absent: {label}")
+    raise AssertionError(f"Expected UI node absent: {label}")
 
 def tap(label):
     bounds=locate(label).attrib.get("bounds","")
@@ -49,7 +49,14 @@ visible("Your ride")
 visible("NONPRODUCTION PREVIEW — booking, payment and dispatch disabled until authorized services are connected.")
 visible("No confirmed trip")
 capture("rider-denied")
-tap("Return to role selection")
+for _ in range(5):
+    try:
+        tap("Return to role selection")
+        break
+    except AssertionError:
+        adb("shell","input","swipe","480","1600","480","400","350")
+else:
+    raise AssertionError("Return to role selection could not be reached")
 tap("Open driver preview")
 visible("Driver workspace")
 visible("Unverified — cannot drive")

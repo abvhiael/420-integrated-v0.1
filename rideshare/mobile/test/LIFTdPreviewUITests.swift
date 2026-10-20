@@ -17,6 +17,8 @@ final class LIFTdPreviewUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["No confirmed trip"].exists)
         XCTAssertFalse(app.buttons["Request fare quote"].isEnabled, "No backend means no authorized quote")
         XCTAssertFalse(app.buttons["Accept fare terms and request ride"].isEnabled, "No backend means no dispatch")
+        XCTAssertFalse(app.buttons["Request payment intent with explicit consent"].isEnabled, "No trip and Wallet provider means no financial intent")
+        XCTAssertFalse(app.buttons["Refresh authoritative payment status"].isEnabled, "No approved provider means no financial status")
         let back = app.buttons["Return to role selection"]
         for _ in 0..<8 where !back.isHittable { app.swipeUp() }
         XCTAssertTrue(back.waitForExistence(timeout: 10))

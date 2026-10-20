@@ -84,6 +84,22 @@ contract PokerLedgerReentrancy54Test is PokerSeatLedger53Test {
         require(reentrantToken.balanceOf(address(ledger))==400,"real escrow transfer");
         require(ledger.totalChips(TABLE)==400,"no ghost collateral");
     }
+    function testAdversarialTokenCannotReenterDuringTopUp() public {
+        _openReentrantToken();
+        vm.prank(PLAYER);ledger.buyIn(TABLE,0,400);
+        bytes memory callback=abi.encodeWithSelector(ledger.bindSettlement.selector,
+            TABLE,address(consumer),address(0xFEED));
+        reentrantToken.prepareCallback(address(ledger),callback);
+        vm.prank(PLAYER);ledger.topUp(TABLE,100);
+        require(reentrantToken.callbackAttempted()&&!reentrantToken.callbackSucceeded(),
+            "top-up callback denied");
+        require(reentrantToken.callbackRevertSelector()==PokerSeatLedger420.Reentrancy.selector,
+            "top-up guarded");
+        require(ledger.seatOf(TABLE,0).chips==500,"correct top-up chips");
+        require(ledger.totalChips(TABLE)==500,"correct top-up accounting");
+        require(reentrantToken.balanceOf(address(ledger))==500,"correct top-up escrow");
+        require(ledger.settlementCoordinator(TABLE)==address(0),"no injected authority");
+    }
     function testAdversarialTokenCannotReenterDuringExactWithdrawal() public {
         _openReentrantToken();
         vm.prank(PLAYER);ledger.buyIn(TABLE,0,400);

@@ -48,6 +48,17 @@ tap("Open rider preview")
 visible("Your ride")
 visible("NONPRODUCTION PREVIEW — booking, payment and dispatch disabled until authorized services are connected.")
 visible("No confirmed trip")
+for _ in range(4):
+    try:
+        payment_node=locate("Request payment intent with explicit consent")
+        assert payment_node.attrib.get("enabled")=="false", "Payment intent unexpectedly enabled without an authorized trip"
+        visible("No verified payment status")
+        break
+    except AssertionError as e:
+        if "unexpectedly enabled" in str(e): raise
+        adb("shell","input","swipe","480","1600","480","420","300")
+else:
+    raise AssertionError("Financial denial UI not found")
 capture("rider-denied")
 for _ in range(5):
     try:

@@ -2,7 +2,14 @@
 pragma solidity ^0.8.24;
 import "./BetPokerSeatLedger53.t.sol";
 
-contract PokerReentryConsumer54 {}
+contract PokerReentryConsumer54 {
+    function reserve(PokerSeatLedger420 ledger,bytes32 id,bytes32 hand,uint16 mask,uint64 epoch)
+        external returns(bytes32) {return ledger.reserveHand(id,hand,mask,epoch);}
+    function settle(PokerSeatLedger420 ledger,bytes32 id,bytes32 hand,
+        uint256[9] calldata chips,uint256 rake) external {
+        ledger.settleReservedHand(id,hand,chips,rake);
+    }
+}
 
 /// @dev Simulates an adversarial but exactly-accounted ERC20, including a
 ///      callback to a governance-authorized ledger mutation while transferring.
@@ -99,6 +106,33 @@ contract PokerLedgerReentrancy54Test is PokerSeatLedger53Test {
         require(ledger.totalChips(TABLE)==500,"correct top-up accounting");
         require(reentrantToken.balanceOf(address(ledger))==500,"correct top-up escrow");
         require(ledger.settlementCoordinator(TABLE)==address(0),"no injected authority");
+    }
+    function testAdversarialTokenCannotReenterDuringRakeTransfer() public {
+        _openReentrantToken();
+        address second=address(0x5678);
+        reentrantToken.mint(second,400);
+        cap.grant(second,BetIds420.ACTION_POKER_BUY_IN,auth.scopeForTable(TABLE),true);
+        vm.prank(second);reentrantToken.approve(address(ledger),400);
+        vm.prank(PLAYER);ledger.buyIn(TABLE,0,400);
+        vm.prank(second);ledger.buyIn(TABLE,1,400);
+        cap.grant(ADMIN,ledger.ACTION_BIND_SETTLEMENT(),auth.scopeForTable(TABLE),true);
+        vm.prank(ADMIN);ledger.bindSettlement(TABLE,address(consumer),address(0xFEED));
+        bytes32 hand=keccak256("rake-reentrancy-hand");
+        consumer.reserve(ledger,TABLE,hand,3,ledger.seatingEpoch(TABLE));
+        bytes memory callback=abi.encodeWithSelector(ledger.topUp.selector,TABLE,uint256(100));
+        reentrantToken.prepareCallback(address(ledger),callback);
+        uint256[9] memory result;
+        result[0]=400;result[1]=390;
+        consumer.settle(ledger,TABLE,hand,result,10);
+        require(reentrantToken.callbackAttempted()&&!reentrantToken.callbackSucceeded(),
+            "rake transfer callback denied");
+        require(reentrantToken.callbackRevertSelector()==PokerSeatLedger420.Reentrancy.selector,
+            "rake transfer guarded");
+        require(ledger.handConsumed(hand)&&ledger.activeHand(TABLE)==bytes32(0),
+            "hand consumed exactly once");
+        require(ledger.totalChips(TABLE)==790,"escrow liability conserved");
+        require(reentrantToken.balanceOf(address(ledger))==790,"vault collateral conserved");
+        require(reentrantToken.balanceOf(address(0xFEED))==10,"rake transferred exactly");
     }
     function testAdversarialTokenCannotReenterDuringExactWithdrawal() public {
         _openReentrantToken();

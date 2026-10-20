@@ -49,6 +49,7 @@ jobs:
             adb shell monkey -p org.integrated420.liftd.preview -c android.intent.category.LAUNCHER 1
             sleep 5
             adb shell pidof org.integrated420.liftd.preview
+            python3 rideshare/mobile/test/android-interactive-preview.py
       - name: Bind emulator evidence to exact implementation SHA
         run: |
           mkdir -p mbl-a-android-evidence

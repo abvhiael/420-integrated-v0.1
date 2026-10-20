@@ -23,3 +23,17 @@ test('native preview keeps cleartext and background location disabled',()=>{
  assert.equal(app.updates.enabled,false);
  assert.equal(app.ios.infoPlist.NSAppTransportSecurity.NSAllowsArbitraryLoads,false);
 });
+
+test('native credential stores delete malformed JSON rather than restoring corrupted credentials',()=>{
+ for(const path of ['../src/native-session.ts','../src/native-lifecycle.ts']){
+  const source=read(path);
+  assert.match(source,/JSON\.parse\(value\)/);
+  assert.match(source,/catch\{await SecureStore\.deleteItemAsync/);
+  assert.match(source,/STORE_CORRUPT/);
+ }
+});
+test('native OAuth browser validates restricted callback policy before code extraction',()=>{
+ const source=read('../src/native-identity.ts');
+ assert.match(source,/parseExternalLink\(result\.url\)/);
+ assert.match(source,/AUTHORIZATION_DENIED/);
+});

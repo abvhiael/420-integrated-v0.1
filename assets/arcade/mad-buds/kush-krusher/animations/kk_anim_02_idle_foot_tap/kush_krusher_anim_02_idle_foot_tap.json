@@ -1,0 +1,86 @@
+{
+  "schema": "mad-buds-animation-manifest-v1",
+  "characterId": "kush_krusher",
+  "animationId": "kk_anim_02_idle_foot_tap",
+  "animationName": "idle_foot_tap",
+  "animationNumber": "02",
+  "frameCount": 10,
+  "frameWidth": 1024,
+  "frameHeight": 1024,
+  "fps": 10,
+  "durationMs": 1000,
+  "loop": true,
+  "direction": "front",
+  "pivot": [
+    512,
+    896
+  ],
+  "sourceFile": "kush-krusher.png",
+  "sourceSHA256": "de9d6c95bfaaa68bb80c13c37e0f715503b789d5b67a60ba4d73f7cba21683f3",
+  "productionMethod": "single-source shoe segmentation, premultiplied-alpha affine toe lift, planted heel anchor",
+  "repositoryDestination": "assets/arcade/mad-buds/kush-krusher/animations/kk_anim_02_idle_foot_tap/",
+  "visualApproval": "pending owner review",
+  "qualificationStatus": "PENDING OWNER APPROVAL \u2014 source-derived heel-edge softness",
+  "frames": [
+    {
+      "index": 1,
+      "filename": "kush_krusher_anim_02_idle_foot_tap_frame_01.png",
+      "durationMs": 100,
+      "sha256": "36243f78bb5a02841ac7c554c5c8a4366ade0c4257c915fca3b7fa0fcb1eb610"
+    },
+    {
+      "index": 2,
+      "filename": "kush_krusher_anim_02_idle_foot_tap_frame_02.png",
+      "durationMs": 100,
+      "sha256": "2d6b9598eaf46a84e5a0718cca4d0e3f2eb5d382f603eef1a9efa9bf4af71f36"
+    },
+    {
+      "index": 3,
+      "filename": "kush_krusher_anim_02_idle_foot_tap_frame_03.png",
+      "durationMs": 100,
+      "sha256": "dacddad5cd84db16b964cd710417204365a9c5d26eeeeb2a28f85bd947450a85"
+    },
+    {
+      "index": 4,
+      "filename": "kush_krusher_anim_02_idle_foot_tap_frame_04.png",
+      "durationMs": 100,
+      "sha256": "f06690f1a086c4e83cd402b9c079dc0007ad137ec3378a9c57f70851996e5a61"
+    },
+    {
+      "index": 5,
+      "filename": "kush_krusher_anim_02_idle_foot_tap_frame_05.png",
+      "durationMs": 100,
+      "sha256": "cce19bb8271e30db592378611a02c6bea3c24c6445c052a551e6313d7a828e5d"
+    },
+    {
+      "index": 6,
+      "filename": "kush_krusher_anim_02_idle_foot_tap_frame_06.png",
+      "durationMs": 100,
+      "sha256": "fd3dc0822c3bafbb8e4c49aa26dcde5bdda4b6cca2c5d10dc85c7013dfe2e676"
+    },
+    {
+      "index": 7,
+      "filename": "kush_krusher_anim_02_idle_foot_tap_frame_07.png",
+      "durationMs": 100,
+      "sha256": "1571638afb3d0101f739402e72e9c0c6c736485c6a40321066dab5c417afb52d"
+    },
+    {
+      "index": 8,
+      "filename": "kush_krusher_anim_02_idle_foot_tap_frame_08.png",
+      "durationMs": 100,
+      "sha256": "7d418b45962e3f06dfaff6bd16beb4bc11153abd3cff07f8208f8032d828a4df"
+    },
+    {
+      "index": 9,
+      "filename": "kush_krusher_anim_02_idle_foot_tap_frame_09.png",
+      "durationMs": 100,
+      "sha256": "62e2c15ce6ec6645353e4953f9907346d678b98ef86bea149b10c280f50cfcfc"
+    },
+    {
+      "index": 10,
+      "filename": "kush_krusher_anim_02_idle_foot_tap_frame_10.png",
+      "durationMs": 100,
+      "sha256": "787c4714ebc995bac9918bac303c4c7d9043c8c4cd3bc70c2f34ee2113dca592"
+    }
+  ]
+}

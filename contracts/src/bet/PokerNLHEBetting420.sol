@@ -319,7 +319,7 @@ contract PokerNLHEBetting420 {
         if(block.timestamp<uint256(h.deadline)+1 hours)revert TooEarly();
         handAborted[handId]=true;
         PokerPrivateShuffleGate420.Record memory record=shuffle.recordOf(handId);
-        uint8 missing;
+        uint8 missing=0;
         if(record.stage==1)missing=2; // provider B failed its authenticated second stage
         else if(record.stage==0&&shuffle.initialDeck().rootOf(handId)!=bytes32(0))
             missing=1; // provider A failed after a proven initial deck
@@ -394,11 +394,9 @@ contract PokerNLHEBetting420 {
         handAborted[handId]=true;
         evidenceRecovery[handId].active=false;
         if(disputes.isFrozen(handId))disputes.finalizeUnprovableVoid(handId);
-        uint8 blame;
+        uint8 blame=0;
         if(address(revealForTable[g.tableId])!=address(0)){
-            uint8 street=r.failedPhase==Phase.AWAIT_FLOP?1:
-                r.failedPhase==Phase.AWAIT_TURN?2:
-                r.failedPhase==Phase.AWAIT_RIVER?3:4;
+            uint8 street=uint8(r.failedPhase)/2; // the four canonical missing-evidence phases are 2,4,6,8
             blame=IPokerMissingShareEvidence420(address(revealForTable[g.tableId]))
                 .missingProviders(handId,street);
         }

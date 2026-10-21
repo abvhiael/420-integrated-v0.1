@@ -52,7 +52,7 @@ for i,name in enumerate(NAMES,1):
                     if entry.get("sha256") in (None,""):row["errors"].append(f"frame {n} missing SHA256")
                     duration=entry.get("durationMs",entry.get("duration_ms"))
                     if duration is not None and duration!=100:row["warnings"].append(f"frame {n} duration {duration}ms")
-                if m.get("fps") is not None and m["fps"]!=10:row["warnings"].append("FPS !=10")
+                if m.get("fps") is not None and m["fps"]!=10:row["errors"].append("FPS !=10")
                 status=str(m.get("qualificationStatus",m.get("qualification",""))).lower()
                 if status and "pass" not in status and "qualified" not in status:row["warnings"].append("manifest qualification not PASS: "+status[:70])
             except Exception as e:row["errors"].append("manifest parse error: "+str(e))

@@ -1,0 +1,74 @@
+{
+  "schema": "mad-buds.animation_manifest",
+  "version": "1.0",
+  "characterId": "kush_krusher",
+  "animationId": "kk_anim_07_heavy_flight",
+  "animationName": "heavy_flight",
+  "animationNumber": "07",
+  "frameCount": 10,
+  "frameWidth": 1024,
+  "frameHeight": 1024,
+  "fps": 10,
+  "durationMs": 1000,
+  "loop": true,
+  "direction": "front_right_diagonal",
+  "frames": [
+    {
+      "filename": "kush_krusher_anim_07_heavy_flight_frame_01.png",
+      "sha256": "7c8518a8575bd2118c161c54a3bc82eb1f38218ad5f26a0a7e3cb9cbb0de29a7",
+      "durationMs": 100
+    },
+    {
+      "filename": "kush_krusher_anim_07_heavy_flight_frame_02.png",
+      "sha256": "8380e2a6604d9e824e2ce5b1431a682a3211c0a5ea9d0bd5e10e4d3b58e63659",
+      "durationMs": 100
+    },
+    {
+      "filename": "kush_krusher_anim_07_heavy_flight_frame_03.png",
+      "sha256": "7d9fe44c325d5ef11cd50738b87558cda7c453c127385e721b6a65a9ef8d954d",
+      "durationMs": 100
+    },
+    {
+      "filename": "kush_krusher_anim_07_heavy_flight_frame_04.png",
+      "sha256": "677e173a9e4fecea212a32622875607224d0e9090f0edb55df992c0dcfa7d43a",
+      "durationMs": 100
+    },
+    {
+      "filename": "kush_krusher_anim_07_heavy_flight_frame_05.png",
+      "sha256": "44eff64275b1598a7ee9dc0d134a7010f2830104b292d929901afc1932788c42",
+      "durationMs": 100
+    },
+    {
+      "filename": "kush_krusher_anim_07_heavy_flight_frame_06.png",
+      "sha256": "ae41e6652a3c7aa9cc1027b69ff729b8326c82301f65fac7547d1ae74c5dc61b",
+      "durationMs": 100
+    },
+    {
+      "filename": "kush_krusher_anim_07_heavy_flight_frame_07.png",
+      "sha256": "c4a03ea4310c084e8ad101496cd9bf6d7f9f636f3854a6b583ebc95573ae19fc",
+      "durationMs": 100
+    },
+    {
+      "filename": "kush_krusher_anim_07_heavy_flight_frame_08.png",
+      "sha256": "977ab3d13c39a2e37c9cecef95e73729d8a3f0abb8a1b904aa6b35097578e747",
+      "durationMs": 100
+    },
+    {
+      "filename": "kush_krusher_anim_07_heavy_flight_frame_09.png",
+      "sha256": "67983ed72bfc933ec36919b045ea6a375bc53b51ffb45819c4837ec60c1f1272",
+      "durationMs": 100
+    },
+    {
+      "filename": "kush_krusher_anim_07_heavy_flight_frame_10.png",
+      "sha256": "cced7555c46c3ab8d120eb37b3f213ba8b403ebea4ef57f7c4599706a60cbb22",
+      "durationMs": 100
+    }
+  ],
+  "source": {
+    "storyboardFile": "kush_krusher_heavy_flight_storyboard.png",
+    "storyboardPath": "/mnt/data/kush_krusher_heavy_flight_storyboard.png",
+    "storyboardSha256": "68373cc179da76a2ac383d54129d27d36b593324fe3746cfb3c98f1d33644342",
+    "approvedCharacterSource": "/mnt/data/user-VK44vqXXh1sTPp9HbD4vlNlY/2cad7577b0f44db996e1c7751c5695dc/mnt/data/kush-krusher.png"
+  },
+  "notes": "Standalone transparent frames extracted/recreated from the heavy flight storyboard."
+}

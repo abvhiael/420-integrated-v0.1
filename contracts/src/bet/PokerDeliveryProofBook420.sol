@@ -181,7 +181,11 @@ contract PokerDeliveryProofBook420 is IPokerDeliveryProofBook420 {
         uint32 required=(uint32(1)<<(2*n))-1;
         if((proofBits[handId][0]&required)!=required||
            (proofBits[handId][1]&required)!=required)revert InvalidState();
-        (,,bytes32 fingerprint)=keys.encryptionKeyOf(h.tableId,seat);
+        (uint256 x,uint256 y,bytes32 fingerprint)=keys.encryptionKeyOf(h.tableId,seat);
+        // The two returned public coordinates are security-relevant, not
+        // ignorable metadata: only registered, canonical nonidentity keys
+        // may bind the encrypted shares for this seat.
+        if(x==0||x>=FR||y>=FR)revert InvalidState();
         digest=keccak256(abi.encode(ENVELOPE_DOMAIN,block.chainid,address(this),
             handId,seat,fingerprint,h.epoch,_root(handId)));
         uint8 assigned=0;

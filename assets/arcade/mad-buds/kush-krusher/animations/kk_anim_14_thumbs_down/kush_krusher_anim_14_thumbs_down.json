@@ -1,0 +1,84 @@
+{
+  "schema": "420integrated.animation-manifest",
+  "version": "1.0",
+  "characterId": "kush_krusher",
+  "animationId": "kk_anim_14_thumbs_down",
+  "animationName": "thumbs_down",
+  "animationNumber": "14",
+  "frameCount": 10,
+  "frameWidth": 1024,
+  "frameHeight": 1024,
+  "fps": 10,
+  "durationMs": 1000,
+  "loop": true,
+  "direction": "front",
+  "background": "transparent",
+  "sourceArt": {
+    "image": "kush_krusher_thumbs_down_animation_sheet.png",
+    "sha256": "38d69c7c0e286cb1a8883c9863894a268bd903bc6e37e65c6d1221291390e9bb",
+    "derivation": "Frames extracted from the provided 10-panel thumbs down animation sheet and isolated onto transparent 1024x1024 canvases."
+  },
+  "repositoryDestination": "assets/arcade/mad-buds/kush-krusher/animations/kk_anim_14_thumbs_down/",
+  "frames": [
+    {
+      "index": 1,
+      "filename": "kush_krusher_anim_14_thumbs_down_frame_01.png",
+      "durationMs": 100,
+      "sha256": "7b1a20b8ba66162d4320cbb5496714a6fa202ceab67ceac92a6775a1adcd576e"
+    },
+    {
+      "index": 2,
+      "filename": "kush_krusher_anim_14_thumbs_down_frame_02.png",
+      "durationMs": 100,
+      "sha256": "f4b8ba3b01c85e6df27577336c0da2fd7c687b9e180aa6098b99fc36a4983aa8"
+    },
+    {
+      "index": 3,
+      "filename": "kush_krusher_anim_14_thumbs_down_frame_03.png",
+      "durationMs": 100,
+      "sha256": "f54203901c58f79fb08ad700071dc9213151eea168faa19949b5b4c0536d9e3f"
+    },
+    {
+      "index": 4,
+      "filename": "kush_krusher_anim_14_thumbs_down_frame_04.png",
+      "durationMs": 100,
+      "sha256": "6343bfeac26fddb8bb4ebedadee509dc61a9f15767c0d3a72464c4e48d69c246"
+    },
+    {
+      "index": 5,
+      "filename": "kush_krusher_anim_14_thumbs_down_frame_05.png",
+      "durationMs": 100,
+      "sha256": "a00dcdd0728d3772a45175fad5477b038cea9704a5c5b7a7a5de62f5a11693e4"
+    },
+    {
+      "index": 6,
+      "filename": "kush_krusher_anim_14_thumbs_down_frame_06.png",
+      "durationMs": 100,
+      "sha256": "0de732196e1149fbce81726c3a647d71bd99b75c5fdc5bc4049c108d8d103e12"
+    },
+    {
+      "index": 7,
+      "filename": "kush_krusher_anim_14_thumbs_down_frame_07.png",
+      "durationMs": 100,
+      "sha256": "01ecddd18bcd713919424da31eca2f503d1e342c0b3524815989a57cc7903a7e"
+    },
+    {
+      "index": 8,
+      "filename": "kush_krusher_anim_14_thumbs_down_frame_08.png",
+      "durationMs": 100,
+      "sha256": "9ed5aeff19dbae552e1454033661e3a97c25352c23d8017550f86f7ab431b03f"
+    },
+    {
+      "index": 9,
+      "filename": "kush_krusher_anim_14_thumbs_down_frame_09.png",
+      "durationMs": 100,
+      "sha256": "36cf3d4c579ad84c7c3150f2d07bfb15f9e942761f581892cbd941196669cf66"
+    },
+    {
+      "index": 10,
+      "filename": "kush_krusher_anim_14_thumbs_down_frame_10.png",
+      "durationMs": 100,
+      "sha256": "7665cab55ea218f0bc9e7715bcf39ff5feb6eab60fb4978aa029977511e4ff35"
+    }
+  ]
+}

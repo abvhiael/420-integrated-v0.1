@@ -1,0 +1,140 @@
+{
+  "schema": "420arcade.animation-manifest",
+  "version": "1.0",
+  "characterId": "kush_krusher",
+  "animationId": "kk_anim_08_impact_squash",
+  "animationName": "impact_squash",
+  "animationNumber": "08",
+  "frameCount": 10,
+  "frameWidth": 1024,
+  "frameHeight": 1024,
+  "fps": 10,
+  "durationMs": 1000,
+  "loop": false,
+  "background": "transparent",
+  "sourceStrip": "kush_krusher_heavy_impact_animation.png",
+  "sourceStripSha256": "7293ea933a4258c36f076c3d4bd700a7ec88f793baffe458ab2f7dbade31bc84",
+  "productionMethod": "deterministic extraction from approved 10-frame strip with panel cropping, edge-based background removal, transparent RGBA export, and 1024x1024 centered canvases",
+  "frames": [
+    {
+      "index": 1,
+      "filename": "kush_krusher_anim_08_impact_squash_frame_01.png",
+      "durationMs": 100,
+      "sha256": "5a68cf40fc1ade6251b5cff4672af1a7142532dcfe796d0fd90663dd85b75956",
+      "contentBBox": [
+        102,
+        103,
+        922,
+        921
+      ]
+    },
+    {
+      "index": 2,
+      "filename": "kush_krusher_anim_08_impact_squash_frame_02.png",
+      "durationMs": 100,
+      "sha256": "054c96fe850ca400de18d9ee47941ee275df0445cc1deb693b36af60af64d73c",
+      "contentBBox": [
+        102,
+        160,
+        922,
+        863
+      ]
+    },
+    {
+      "index": 3,
+      "filename": "kush_krusher_anim_08_impact_squash_frame_03.png",
+      "durationMs": 100,
+      "sha256": "ccd069c69a70c10a20bdd22b601a0b61d2a4eb06114ade85dba651f522f15227",
+      "contentBBox": [
+        102,
+        175,
+        922,
+        848
+      ]
+    },
+    {
+      "index": 4,
+      "filename": "kush_krusher_anim_08_impact_squash_frame_04.png",
+      "durationMs": 100,
+      "sha256": "7bbe6f3825d944dd984f83dd55a3647e32657745cdcfa2b40167cc59bdc19663",
+      "contentBBox": [
+        102,
+        201,
+        922,
+        823
+      ]
+    },
+    {
+      "index": 5,
+      "filename": "kush_krusher_anim_08_impact_squash_frame_05.png",
+      "durationMs": 100,
+      "sha256": "aea4b0567d3eeb906c469bf1379638ae5140ca105cca5139ebeaac554e2394f1",
+      "contentBBox": [
+        102,
+        226,
+        922,
+        798
+      ]
+    },
+    {
+      "index": 6,
+      "filename": "kush_krusher_anim_08_impact_squash_frame_06.png",
+      "durationMs": 100,
+      "sha256": "7c8efaf2026cb30d1f79389b83b79e827f1efd73090be502fab9ecfab816d80b",
+      "contentBBox": [
+        102,
+        227,
+        922,
+        796
+      ]
+    },
+    {
+      "index": 7,
+      "filename": "kush_krusher_anim_08_impact_squash_frame_07.png",
+      "durationMs": 100,
+      "sha256": "62831316f91e9e8f286fd0e926bc99335a87a5e2931ef32f473338c821dd954a",
+      "contentBBox": [
+        102,
+        210,
+        922,
+        814
+      ]
+    },
+    {
+      "index": 8,
+      "filename": "kush_krusher_anim_08_impact_squash_frame_08.png",
+      "durationMs": 100,
+      "sha256": "a850b25a07d3292b6d3e21ada9c12aed426d6269afde7ac9c2b79e6cd25b493d",
+      "contentBBox": [
+        116,
+        102,
+        907,
+        922
+      ]
+    },
+    {
+      "index": 9,
+      "filename": "kush_krusher_anim_08_impact_squash_frame_09.png",
+      "durationMs": 100,
+      "sha256": "7169d2d856e7229cf81cf96672def7c3efd8e1ee4530492c6fd525e000abeadd",
+      "contentBBox": [
+        102,
+        163,
+        922,
+        860
+      ]
+    },
+    {
+      "index": 10,
+      "filename": "kush_krusher_anim_08_impact_squash_frame_10.png",
+      "durationMs": 100,
+      "sha256": "1ce6ede052b3caf616ff7085209edb79b89633747cefbf1cefe782567783a059",
+      "contentBBox": [
+        102,
+        105,
+        922,
+        918
+      ]
+    }
+  ]
+}

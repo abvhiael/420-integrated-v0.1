@@ -7,19 +7,11 @@ import "../src/bet/PokerActionDisputeClock420.sol";
 import "../src/bet/PokerRecipientKeys420.sol";
 import "../src/bet/PokerDeckDisclosure420.sol";
 import "../src/bet/PokerDeliveryProofBook420.sol";
-/// @dev Integration-only proof seam. Cryptographic soundness is separately
-/// verified against the real gnark-generated Solidity verifier, never here.
-contract TestRecipientPoP54 is IPokerRecipientKeyPoP420 {
-    function verifyKeyPossession(uint256 scope,uint256 x,uint256 y,bytes calldata proof)
-        external pure returns(bool){return scope!=0 && x!=0 && y!=0 && proof.length!=0;}
-}
-contract TestEncryptedShareVerifier54 is IPokerEncryptedShareDelivery420 {
-    function verifyDelivery(bytes32 handId,bytes32 root,uint8 pos,uint8 seat,uint8 provider,
-        uint256 context,uint256[12] calldata points,bytes calldata proof)
-        external pure returns(bool){
-        return handId!=bytes32(0)&&root!=bytes32(0)&&pos<52&&seat<9&&provider<2&&
-            context!=0&&points[6]!=0&&points[7]!=0&&proof.length!=0;
-    }
+/// @dev TEST-ONLY generated-verifier API fixture. The actual Groth16
+/// acceptance owner uses genuine gnark output in the scoped proof workflow.
+contract TestNativeGnarkBackend54 {
+    function verifyProof(uint256[8] calldata,uint256[18] calldata)external pure returns(bool){return true;}
+    function verifyProof(uint256[8] calldata,uint256[3] calldata)external pure returns(bool){return true;}
 }
 interface VmPokerNativeSign54 {
     function addr(uint256 privateKey)external returns(address);
@@ -32,7 +24,9 @@ contract PokerNLHEBetting54Test is PokerPrivateShuffleGate54Test {
     PokerRecipientKeys420 recipient;
     PokerDeckDisclosure420 delivery;
     PokerDeliveryProofBook420 proofBook;
-    TestRecipientPoP54 popVerifier;
+    PokerGnarkRecipientKeyPoPAdapter420 popVerifier;
+    TestNativeGnarkBackend54 backend;
+    PokerVerifierVersions420 versionRegistry;
     VmPokerNativeSign54 constant signedVm=VmPokerNativeSign54(address(uint160(uint256(keccak256("hevm cheat code")))));
     uint256 constant PLAYER_KEY=0x420001;
     uint256 constant OPPONENT_KEY=0x420002;
@@ -42,9 +36,25 @@ contract PokerNLHEBetting54Test is PokerPrivateShuffleGate54Test {
         engine=new PokerNLHEBetting420(address(deal),address(gate),address(signing),address(dispute));
         recipient=new PokerRecipientKeys420(address(ledger));
         delivery=new PokerDeckDisclosure420(address(deal),address(recipient));
-        popVerifier=new TestRecipientPoP54();
-        TestEncryptedShareVerifier54 proverA=new TestEncryptedShareVerifier54();
-        TestEncryptedShareVerifier54 proverB=new TestEncryptedShareVerifier54();
+        backend=new TestNativeGnarkBackend54();
+        versionRegistry=new PokerVerifierVersions420(address(this));
+        bytes32 version=keccak256("test-only delivery verifier");
+        bytes32 keyHash=keccak256("test-only VK");
+        bytes32 circuitHash=keccak256("test-only delivery circuit");
+        bytes32 schemaHash=keccak256("test-only delivery schema");
+        versionRegistry.register(version,address(backend),keyHash,circuitHash,schemaHash);
+        PokerGnarkEncryptedShareDeliveryAdapter420 proverA=
+            new PokerGnarkEncryptedShareDeliveryAdapter420(address(backend),address(versionRegistry),
+                version,circuitHash,keyHash,schemaHash,keccak256(abi.encode(uint256(100),uint256(200))));
+        PokerGnarkEncryptedShareDeliveryAdapter420 proverB=
+            new PokerGnarkEncryptedShareDeliveryAdapter420(address(backend),address(versionRegistry),
+                version,circuitHash,keyHash,schemaHash,keccak256(abi.encode(uint256(101),uint256(201))));
+        bytes32 popVersion=keccak256("test-only recipient key possession");
+        bytes32 popCircuit=keccak256("test-only recipient point circuit");
+        bytes32 popSchema=keccak256("test-only key-possession schema");
+        versionRegistry.register(popVersion,address(backend),keyHash,popCircuit,popSchema);
+        popVerifier=new PokerGnarkRecipientKeyPoPAdapter420(address(backend),
+            address(versionRegistry),popVersion,keyHash,popCircuit,popSchema);
         proofBook=new PokerDeliveryProofBook420(address(deal),address(delivery),
             address(gate),address(engine),address(proverA),address(proverB));
         cap.grant(ADMIN,recipient.ACTION_BIND_KEY_POP(),auth.scopeForTable(bytes32(0)),true);
@@ -57,8 +67,13 @@ contract PokerNLHEBetting54Test is PokerPrivateShuffleGate54Test {
     function _acknowledgedPrivateDelivery(bytes32 handId) internal {
         // NOTE: these are integration-only verifier stubs. Real Groth16 is
         // qualified separately by generated Solidity proof acceptance.
-        cheat54.prank(PLAYER);recipient.bindVerifiedKey(TABLE,111,222,hex"aa");
-        cheat54.prank(PLAYER_B);recipient.bindVerifiedKey(TABLE,333,444,hex"bb");
+        uint256[8] memory keyProof;
+        uint256[3] memory pkeyA=[recipient.scopeForKey(TABLE,PLAYER,ledger.seatOf(TABLE,0).epoch),
+            uint256(111),uint256(222)];
+        uint256[3] memory pkeyB=[recipient.scopeForKey(TABLE,PLAYER_B,ledger.seatOf(TABLE,1).epoch),
+            uint256(333),uint256(444)];
+        cheat54.prank(PLAYER);recipient.bindVerifiedKey(TABLE,111,222,abi.encode(keyProof,pkeyA));
+        cheat54.prank(PLAYER_B);recipient.bindVerifiedKey(TABLE,333,444,abi.encode(keyProof,pkeyB));
         cheat54.prank(PROVIDER_A);
         delivery.publish(handId,keccak256("private deck commitment"),keccak256("encrypted manifest"));
         for(uint8 pos=0;pos<4;pos++){
@@ -72,7 +87,16 @@ contract PokerNLHEBetting54Test is PokerPrivateShuffleGate54Test {
                 points[6]=x;points[7]=y;
                 points[8]=1000+pos;points[9]=2000+provider;
                 points[10]=3000+pos;points[11]=4000+provider;
-                proofBook.proveEncryptedShare(handId,pos,provider,points,hex"0123");
+                uint256[18] memory inputs;
+                PokerPrivateShuffleGate420.Record memory deck=gate.recordOf(handId);
+                inputs[0]=uint256(handId)%21888242871839275222246405745257275088696311157297823662689037894645226208583;
+                inputs[1]=uint256(deck.finalDeckRoot);
+                inputs[2]=pos;inputs[3]=seat;inputs[4]=provider;
+                inputs[5]=proofBook.context(handId,pos,seat,provider,deck.finalDeckRoot,
+                    recipient.fingerprintOf(TABLE,seat),ledger.seatingEpoch(TABLE),points);
+                for(uint256 k=0;k<12;k++)inputs[k+6]=points[k];
+                uint256[8] memory proof;
+                proofBook.proveEncryptedShare(handId,pos,provider,points,abi.encode(proof,inputs));
             }
         }
         bytes32 keyA=recipient.fingerprintOf(TABLE,0);

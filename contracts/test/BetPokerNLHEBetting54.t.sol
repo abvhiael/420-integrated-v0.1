@@ -188,6 +188,53 @@ contract PokerNLHEBetting54Test is PokerPrivateShuffleGate54Test {
         engine.cancelWithheldDeal(id);
     }
 
+    function testPostBettingMissingFlopProofRecoversOriginalEscrowExactlyOnce() public {
+        bytes32 id=_readyBetting();
+        _signedAction(id,0,PokerNLHEBetting420.Move.CALL,10,PLAYER_KEY);
+        _signedAction(id,1,PokerNLHEBetting420.Move.CHECK,0,OPPONENT_KEY);
+        require(engine.gameOf(id).phase==PokerNLHEBetting420.Phase.AWAIT_FLOP,
+            "actual committed flop reveal awaited");
+        cheat54.expectRevert(PokerNLHEBetting420.InvalidState.selector);
+        engine.beginMissingEvidenceRecovery(id);
+        cheat54.warp(uint256(engine.evidenceDueAt(id))+1);
+        engine.beginMissingEvidenceRecovery(id);
+        cheat54.expectRevert(PokerNLHEBetting420.TooEarly.selector);
+        engine.finalizeMissingEvidenceRecovery(id);
+        (,uint64 afterAt,,,) = engine.evidenceRecovery(id);
+        cheat54.warp(afterAt);
+        engine.finalizeMissingEvidenceRecovery(id);
+        require(engine.handAborted(id)&&ledger.handConsumed(id),"hand consumed exactly once");
+        require(ledger.activeHand(TABLE)==bytes32(0)&&ledger.reservedInHand(TABLE)==0,
+            "funds unlocked at terminal void");
+        require(ledger.seatOf(TABLE,0).chips==400&&ledger.seatOf(TABLE,1).chips==400,
+            "wagers cannot be fabricated into refunds");
+        require(ledger.totalChips(TABLE)==800,"no fictitious winnings or rake");
+        cheat54.expectRevert(PokerNLHEBetting420.InvalidState.selector);
+        engine.finalizeMissingEvidenceRecovery(id);
+    }
+    function testCompletedShuffleButMissingProvedDeliveryVoidsPreBetting() public {
+        bytes32 id=_hand54();
+        bytes32 input=initialDeck.rootOf(id);
+        bytes32 first=keccak256("withheld delivery first stage");
+        bytes32 last=bytes32(uint256(1000));
+        verifier.allow(gate.statement(id,1,input,first));
+        cheat54.prank(PROVIDER_A);gate.proveStage(id,1,input,first,hex"010203");
+        verifier.allow(gate.statement(id,2,first,last));
+        cheat54.prank(PROVIDER_B);gate.proveStage(id,2,first,last,hex"010203");
+        cheat54.prank(ADMIN);ledger.bindSettlement(TABLE,address(engine),address(0x500BEEF));
+        cheat54.prank(PLAYER);engine.reserve(id);
+        engine.prepareDealAssignment(id);
+        cheat54.expectRevert(PokerNLHEBetting420.TooEarly.selector);
+        engine.cancelWithheldDelivery(id);
+        PokerConfidentialDeal420.Hand memory h=deal.getHand(id);
+        cheat54.warp(uint256(h.deadline)+1 hours+1);
+        engine.cancelWithheldDelivery(id);
+        require(engine.handAborted(id)&&ledger.handConsumed(id),"prebet void consumed");
+        require(ledger.seatOf(TABLE,0).chips==400&&ledger.seatOf(TABLE,1).chips==400,
+            "no private-card withholding can take escrow");
+        cheat54.expectRevert(PokerNLHEBetting420.InvalidState.selector);
+        engine.cancelWithheldDelivery(id);
+    }
     function testUnacknowledgedHoleDeliveryCannotStartOrMoveEscrow() public {
         bytes32 id=_hand54();
         bytes32 input=initialDeck.rootOf(id);

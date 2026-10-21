@@ -45,6 +45,12 @@ def locate(label):
             if label in node.attrib.get("text","") or label in node.attrib.get("content-desc",""):
                 return node
         time.sleep(2)
+    print("UI_HIERARCHY_DIAGNOSTIC", (OUT/"screen.xml").read_text(errors="replace")[:12000], flush=True)
+    try:
+        (OUT/"android-logcat.txt").write_text(adb("logcat","-d","-t","600","ReactNativeJS:V","ReactNative:V","Expo:V","AndroidRuntime:E","*:S"))
+    except Exception as exc:
+        (OUT/"logcat-error.txt").write_text(str(exc))
+    capture("missing-"+re.sub(r"[^a-z0-9]+","-",label.lower())[:50])
     raise AssertionError(f"Expected UI node absent after UI readiness window: {label}")
 
 def tap(label):

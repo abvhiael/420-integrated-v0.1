@@ -85,12 +85,12 @@ jobs:
       - name: Detect changes to previously qualified cryptographic sources
         id: cryptoscope
         run: |
-          QUALIFIED=97d02e06d8cb4faddb33c320f122a7ce02f0f338
+          QUALIFIED=50f662efe92537b807f138f40a3871b01b0e84eb
           git fetch --no-tags --depth=1 origin "$QUALIFIED"
           changed_files=$(git diff --name-only "$QUALIFIED" HEAD -- clients/420bet-poker/zkshuffle | grep -Ev '(encrypted_share_delivery_circuit|recipient_key_possession_circuit|threshold_key_aggregate_circuit|make_private_delivery_adapter_forge_test)' || true)
           if test -z "$changed_files"; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
-            echo "Unmodified Go cryptography inherits proof evidence run 39315000314 at $QUALIFIED"
+            echo "Unmodified Go cryptography inherits proof evidence run 39351176585 at $QUALIFIED"
           else
             echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
@@ -109,7 +109,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: 420bet-5a-4-cryptographic-provenance
-          run-id: 39315000314
+          run-id: 39351176585
           github-token: ${{ secrets.GITHUB_TOKEN }}
           path: artifacts/420bet-5a-4
       - name: Qualify new recipient Groth16 proof families
@@ -216,9 +216,9 @@ jobs:
           test -s artifacts/420bet-5a-4/EXPERIMENTAL-InitialDeck52Verifier.sol
           test -s artifacts/420bet-5a-4/EXPERIMENTAL-Reencrypt52SolidityFixture.json
           test -s artifacts/420bet-5a-4/EXPERIMENTAL-Reencrypt52Verifier.sol
-          echo 'inherited_qualified_sha=97d02e06d8cb4faddb33c320f122a7ce02f0f338' > artifacts/420bet-5a-4/inheritance.txt
-          echo 'original_run=39315000314' >> artifacts/420bet-5a-4/inheritance.txt
-          echo 'original_job=118276392276' >> artifacts/420bet-5a-4/inheritance.txt
+          echo 'inherited_qualified_sha=50f662efe92537b807f138f40a3871b01b0e84eb' > artifacts/420bet-5a-4/inheritance.txt
+          echo 'original_run=39351176585' >> artifacts/420bet-5a-4/inheritance.txt
+          echo 'original_job=118395440926' >> artifacts/420bet-5a-4/inheritance.txt
           echo "current_solidity_sha=$(git rev-parse HEAD)" >> artifacts/420bet-5a-4/inheritance.txt
       - name: Scope commitment adversarial + inherited seating/table regression
         working-directory: contracts

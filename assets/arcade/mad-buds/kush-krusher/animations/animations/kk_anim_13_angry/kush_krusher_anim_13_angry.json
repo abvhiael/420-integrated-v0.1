@@ -1,0 +1,82 @@
+{
+  "schema": "420arcade.animation-manifest",
+  "version": "1.0",
+  "characterId": "kush_krusher",
+  "animationId": "kk_anim_13_angry",
+  "animationName": "angry",
+  "animationNumber": "13",
+  "frameCount": 10,
+  "frameWidth": 1024,
+  "frameHeight": 1024,
+  "fps": 10,
+  "durationMs": 1000,
+  "loop": false,
+  "direction": "front",
+  "productionMethod": "Ten panel extractions; mask-based removal of paper background; square transparent canvases",
+  "sourceStrip": "angry_kush_mascot_animation_sheet.png",
+  "sourceStripSha256": "ba7d682077810b60acae66dadb0a0bf1a023a31b1d0a51d7889bcd34e6ecbeda",
+  "repositoryDestination": "assets/arcade/mad-buds/kush-krusher/animations/kk_anim_13_angry/",
+  "qualificationStatus": "PENDING_VISUAL_APPROVAL",
+  "frames": [
+    {
+      "index": 1,
+      "filename": "kush_krusher_anim_13_angry_frame_01.png",
+      "durationMs": 100,
+      "sha256": "c2a4252a8e090608fb1df723d01c06d980c47aeccfc7101191b47a1b0230ce61"
+    },
+    {
+      "index": 2,
+      "filename": "kush_krusher_anim_13_angry_frame_02.png",
+      "durationMs": 100,
+      "sha256": "5e6bea3ea4e2bd9823cac67829301960f987df1074cd4c412ab2762efe0edc5e"
+    },
+    {
+      "index": 3,
+      "filename": "kush_krusher_anim_13_angry_frame_03.png",
+      "durationMs": 100,
+      "sha256": "c5445443cae4a4fd9e21e7ef1c5345921b976c6cd4afd08ac18f1d628453e9fa"
+    },
+    {
+      "index": 4,
+      "filename": "kush_krusher_anim_13_angry_frame_04.png",
+      "durationMs": 100,
+      "sha256": "1c68c7b36e99728f08f513ddfa325bfdb5838337bb4834935513ba6cf651393e"
+    },
+    {
+      "index": 5,
+      "filename": "kush_krusher_anim_13_angry_frame_05.png",
+      "durationMs": 100,
+      "sha256": "e0ae2ef3e98ea9596000165e104a7802c8504bfa931e15a5e808d769a3708608"
+    },
+    {
+      "index": 6,
+      "filename": "kush_krusher_anim_13_angry_frame_06.png",
+      "durationMs": 100,
+      "sha256": "22f30e27b604a814603d44747776ec6ae02116c409741e8fc4048ea468546ac4"
+    },
+    {
+      "index": 7,
+      "filename": "kush_krusher_anim_13_angry_frame_07.png",
+      "durationMs": 100,
+      "sha256": "9f8ee3db526bf60ef4e65bbd8f954973d8ccd53bfa7c24612bb4b3facbd3533f"
+    },
+    {
+      "index": 8,
+      "filename": "kush_krusher_anim_13_angry_frame_08.png",
+      "durationMs": 100,
+      "sha256": "3d948d7adcbb85f9a8a205677bb33ce3ffb23c90922fa31d905959362ec74a56"
+    },
+    {
+      "index": 9,
+      "filename": "kush_krusher_anim_13_angry_frame_09.png",
+      "durationMs": 100,
+      "sha256": "dc4e7b0428814f6e00954d5fa698b468fcdc0b1d91613febd4c43d4a5296479a"
+    },
+    {
+      "index": 10,
+      "filename": "kush_krusher_anim_13_angry_frame_10.png",
+      "durationMs": 100,
+      "sha256": "18da8dbb918f2d88741118976cad076b47d2d4abbc1974780823a611e749fe65"
+    }
+  ]
+}

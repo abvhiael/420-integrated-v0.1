@@ -12,6 +12,7 @@ import "../src/bet/PokerDeliveryProofBook420.sol";
 contract TestNativeGnarkBackend54 {
     function verifyProof(uint256[8] calldata,uint256[18] calldata)external pure returns(bool){return true;}
     function verifyProof(uint256[8] calldata,uint256[3] calldata)external pure returns(bool){return true;}
+    function verifyProof(uint256[8] calldata,uint256[7] calldata)external pure returns(bool){return true;}
 }
 interface VmPokerNativeSign54 {
     function addr(uint256 privateKey)external returns(address);
@@ -55,8 +56,17 @@ contract PokerNLHEBetting54Test is PokerPrivateShuffleGate54Test {
         versionRegistry.register(popVersion,address(backend),keyHash,popCircuit,popSchema);
         popVerifier=new PokerGnarkRecipientKeyPoPAdapter420(address(backend),
             address(versionRegistry),popVersion,keyHash,popCircuit,popSchema);
+        bytes32 aggregateVersion=keccak256("test-only aggregate key");
+        bytes32 aggregateCircuit=keccak256("test-only aggregate curve relation");
+        bytes32 aggregateSchema=keccak256("test-only aggregate schema");
+        versionRegistry.register(aggregateVersion,address(backend),keyHash,
+            aggregateCircuit,aggregateSchema);
+        PokerGnarkThresholdKeyAggregateAdapter420 aggregate=
+            new PokerGnarkThresholdKeyAggregateAdapter420(address(backend),
+                address(versionRegistry),aggregateVersion,aggregateCircuit,keyHash,
+                aggregateSchema,gate.thresholdKeyCommitment());
         proofBook=new PokerDeliveryProofBook420(address(deal),address(delivery),
-            address(gate),address(engine),address(proverA),address(proverB));
+            address(gate),address(engine),address(proverA),address(proverB),address(aggregate));
         cap.grant(ADMIN,recipient.ACTION_BIND_KEY_POP(),auth.scopeForTable(bytes32(0)),true);
         cap.grant(ADMIN,delivery.ACTION_BIND_PROOF_BOOK(),auth.scopeForTable(TABLE),true);
         cheat54.prank(ADMIN);recipient.bindProofVerifier(address(popVerifier));
@@ -74,6 +84,13 @@ contract PokerNLHEBetting54Test is PokerPrivateShuffleGate54Test {
             uint256(333),uint256(444)];
         cheat54.prank(PLAYER);recipient.bindVerifiedKey(TABLE,111,222,abi.encode(keyProof,pkeyA));
         cheat54.prank(PLAYER_B);recipient.bindVerifiedKey(TABLE,333,444,abi.encode(keyProof,pkeyB));
+        uint256[6] memory aggregateKeys=[
+            uint256(100),uint256(200),uint256(101),uint256(201),uint256(19),uint256(20)];
+        uint256[7] memory aggregatePublic=[
+            proofBook.aggregateScope(aggregateKeys),uint256(100),uint256(200),
+            uint256(101),uint256(201),uint256(19),uint256(20)];
+        uint256[8] memory aggregateProof;
+        proofBook.proveAggregateKey(aggregateKeys,abi.encode(aggregateProof,aggregatePublic));
         cheat54.prank(PROVIDER_A);
         delivery.publish(handId,keccak256("private deck commitment"),keccak256("encrypted manifest"));
         for(uint8 pos=0;pos<4;pos++){

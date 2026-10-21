@@ -1,0 +1,82 @@
+{
+  "schema": "mad-buds.animation-manifest",
+  "version": "1.0",
+  "characterId": "kush_krusher",
+  "animationId": "kk_anim_12_laughing",
+  "animationName": "laughing",
+  "animationNumber": "12",
+  "frameCount": 10,
+  "frameWidth": 1024,
+  "frameHeight": 1024,
+  "fps": 10,
+  "durationMs": 1000,
+  "loop": false,
+  "direction": "front",
+  "sourceStrip": "ten_panel_laughing_bud_animation.png",
+  "sourceStripSha256": "cb9eb3875277e055c6779d7de5466e2fba25c5696cbe6f3c3ffd72fbc5875ada",
+  "productionMethod": "panel extraction and foreground mask segmentation from 5x2 source image; centered 1024x1024 RGBA exports",
+  "qualificationStatus": "pending owner visual review; mask edge quality not production-qualified",
+  "repositoryDestination": "assets/arcade/mad-buds/kush-krusher/animations/kk_anim_12_laughing/",
+  "frames": [
+    {
+      "index": 1,
+      "filename": "kush_krusher_anim_12_laughing_frame_01.png",
+      "durationMs": 100,
+      "sha256": "95e3fdab862c95ef5d6c05e490ce8f8163ea812d586555c40ccaa815ea4118ee"
+    },
+    {
+      "index": 2,
+      "filename": "kush_krusher_anim_12_laughing_frame_02.png",
+      "durationMs": 100,
+      "sha256": "1666129cd7ee78b31e95a73ab5449800f9c370e4fe231007e27e7f9bab541df9"
+    },
+    {
+      "index": 3,
+      "filename": "kush_krusher_anim_12_laughing_frame_03.png",
+      "durationMs": 100,
+      "sha256": "cbc0a89f0f0eb557e1e4579e9f8be0a38ebffbdbe2832c6678fff85a186d0b2f"
+    },
+    {
+      "index": 4,
+      "filename": "kush_krusher_anim_12_laughing_frame_04.png",
+      "durationMs": 100,
+      "sha256": "e217f576640fe1dd99ceb954357228b7ac382dde91cd39cc69e298482307e9b6"
+    },
+    {
+      "index": 5,
+      "filename": "kush_krusher_anim_12_laughing_frame_05.png",
+      "durationMs": 100,
+      "sha256": "08a39ac29fe63157a31c92e8e1e0ca4aeb795cdc718ab6ff1a82da5ee39bacbe"
+    },
+    {
+      "index": 6,
+      "filename": "kush_krusher_anim_12_laughing_frame_06.png",
+      "durationMs": 100,
+      "sha256": "c093cf7d8408c75bca25b506ab2417ad9cabff40b367cd5f4ed6c0d7db66f74d"
+    },
+    {
+      "index": 7,
+      "filename": "kush_krusher_anim_12_laughing_frame_07.png",
+      "durationMs": 100,
+      "sha256": "7207503d2948c24dc5c50ed830cbf6172eb5a4e107689d9fa35ff21b95f923f4"
+    },
+    {
+      "index": 8,
+      "filename": "kush_krusher_anim_12_laughing_frame_08.png",
+      "durationMs": 100,
+      "sha256": "ce5fb6aba05f18eda42201072b0a5f56336d54d15caa4a9fa16822f23d8221a5"
+    },
+    {
+      "index": 9,
+      "filename": "kush_krusher_anim_12_laughing_frame_09.png",
+      "durationMs": 100,
+      "sha256": "722e959f678116b5a2118f46037b4a6f0a628c8a894b73faa9258468b6ad5fd5"
+    },
+    {
+      "index": 10,
+      "filename": "kush_krusher_anim_12_laughing_frame_10.png",
+      "durationMs": 100,
+      "sha256": "3c8b1047a9fa3d7d8e1e609b6fac50c7319f5952872e75586d94838d0174dc65"
+    }
+  ]
+}

@@ -21,7 +21,7 @@ focus = re.compile(
     r"PokerGnarkElGamalAdapters420|PokerGnarkCardRevealAdapters420|"
     r"PokerPrivateShuffleGate420|PokerInitialEncryptedDeck420|"
     r"PokerVerifierVersions420|PokerRecipientKeys420|PokerDeckDisclosure420|"
-    r"PokerDeliveryProofBook420|PokerGnarkRecipientKeyPoPAdapter420|"
+    r"PokerDeliveryProofBook420|PokerProviderAccountability420|PokerGnarkRecipientKeyPoPAdapter420|"
     r"PokerGnarkEncryptedShareDeliveryAdapter420|PokerGnarkThresholdKeyAggregateAdapter420)\.sol$"
 )
 records = []

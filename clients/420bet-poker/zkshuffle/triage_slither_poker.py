@@ -20,7 +20,9 @@ focus = re.compile(
     r"PokerLiveCardReveals420|PokerCanonicalSettlement420|PokerSeatLedger420|"
     r"PokerGnarkElGamalAdapters420|PokerGnarkCardRevealAdapters420|"
     r"PokerPrivateShuffleGate420|PokerInitialEncryptedDeck420|"
-    r"PokerVerifierVersions420)\.sol$"
+    r"PokerVerifierVersions420|PokerRecipientKeys420|PokerDeckDisclosure420|"
+    r"PokerDeliveryProofBook420|PokerGnarkRecipientKeyPoPAdapter420|"
+    r"PokerGnarkEncryptedShareDeliveryAdapter420)\.sol$"
 )
 records = []
 for item in (item for report in reports for item in report.get("results", {}).get("detectors", [])):

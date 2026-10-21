@@ -397,3 +397,7 @@ contract PokerNLHEBetting54Case10Test is PokerNLHEBetting54Fixture {
         require(engine.gameOf(id).initialized,"recipient consent required");
     }
 }
+
+// Compatibility fixture for inherited 5A.4 suites; the actual NLHE assertions
+// remain in the independently compiled PokerNLHEBetting54Case*Test classes.
+contract PokerNLHEBetting54Test is PokerNLHEBetting54Fixture {}

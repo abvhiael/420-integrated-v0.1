@@ -237,6 +237,12 @@ contract PokerSeatLedger420 {
         if (!authorization.isAuthorized(msg.sender, action, authorization.scopeForTable(id), amount))
             revert Unauthorized();
     }
+    // Scoped Slither detector disposition: exact-balance custody assertion
+    // surrounds an ERC20 external call BY DESIGN. Every reachable mutating
+    // entry point is nonReentrant, and token callback/escrow regressions are
+    // required at the exact-SHA security gate. Removing either snapshot
+    // would admit fee-on-transfer / balance-changing tokens.
+    // slither-disable-start reentrancy-balance
     function _deposit(address asset, uint256 amount) private {
         IPokerToken420 token = IPokerToken420(asset);
         uint256 beforeBalance = token.balanceOf(address(this));
@@ -254,4 +260,5 @@ contract PokerSeatLedger420 {
         if (beforeVault < afterVault || beforeVault - afterVault != amount
             || afterPlayer < beforePlayer || afterPlayer - beforePlayer != amount) revert TokenDelta();
     }
+    // slither-disable-end reentrancy-balance
 }

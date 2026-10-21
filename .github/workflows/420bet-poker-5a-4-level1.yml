@@ -106,6 +106,21 @@ jobs:
             echo "::endgroup::"
           done
           exit 0
+      - name: Isolate failing inherited poker test compilation unit
+        working-directory: contracts
+        run: |
+          set -u
+          export FOUNDRY_SRC=src/bet
+          export FOUNDRY_TEST=test/poker-l1
+          for unit in test/poker-l1/BetPokerConfidentialDeal54.t.sol test/poker-l1/BetPokerPrivateShuffleGate54.t.sol test/poker-l1/BetPokerNLHEBetting54.t.sol; do
+            echo "::group::Scoped test diagnostic $unit"
+            forge build "$unit" >/tmp/isolated-test.log 2>&1
+            rc=$?
+            tail -n 9 /tmp/isolated-test.log
+            echo "TEST_DIAGNOSTIC path=$unit exit=$rc"
+            echo "::endgroup::"
+          done
+          exit 0
       - name: Qualify funded native hand and provider collateral integration
         working-directory: contracts
         env:

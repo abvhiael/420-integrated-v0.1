@@ -49,8 +49,14 @@ contract PokerProviderAccountability420 {
     // and callback regressions are mandatory on the qualifying SHA.
     // slither-disable-start reentrancy-balance
     function fund(bytes32 tableId,uint256 amount) external guarded {
-        if(!_provider(msg.sender)||amount==0)revert Unauthorized();
-        address asset=_token(tableId);
+        _fund(_token(tableId),amount);
+    }
+    function fundAsset(address asset,uint256 amount)external guarded{
+        _fund(asset,amount);
+    }
+    function _fund(address asset,uint256 amount)private {
+        if(!_provider(msg.sender)||amount==0||asset==address(0)||asset.code.length==0)
+            revert Unauthorized();
         IPokerToken420 token=IPokerToken420(asset);
         uint256 beforeBal=token.balanceOf(address(this));
         if(!token.transferFrom(msg.sender,address(this),amount))revert TransferFailed();

@@ -18,7 +18,7 @@ interface VmPokerNativeSign54 {
     function addr(uint256 privateKey)external returns(address);
     function sign(uint256 privateKey,bytes32 digest)external returns(uint8,bytes32,bytes32);
 }
-contract PokerNLHEBetting54Test is PokerPrivateShuffleGate54Test {
+contract PokerNLHEBetting54Fixture is PokerPrivateShuffleGate54Test {
     PokerActionKeys420 signing;
     PokerActionDisputeClock420 dispute;
     PokerNLHEBetting420 engine;
@@ -188,6 +188,8 @@ contract PokerNLHEBetting54Test is PokerPrivateShuffleGate54Test {
         (uint8 v,bytes32 rr,bytes32 ss)=signedVm.sign(privateKey,digest);
         engine.action(id,seat,move,chips,expiry,g.stateRoot,abi.encodePacked(rr,ss,v));
     }
+}
+contract PokerNLHEBetting54Test is PokerNLHEBetting54Fixture {
     function testSignedHeadsUpPreflopClosesOnlyAfterBothAct() public {
         bytes32 id=_readyBetting();
         PokerNLHEBetting420.Game memory g=engine.gameOf(id);
@@ -262,6 +264,8 @@ contract PokerNLHEBetting54Test is PokerPrivateShuffleGate54Test {
         engine.cancelWithheldDeal(id);
     }
 
+}
+contract PokerNLHEBetting54RecoveryTest is PokerNLHEBetting54Fixture {
     function testVerifiedDeliveryCannotBeReboundAfterRecipientKeyRotation() public {
         bytes32 id=_readyProvedDelivery();
         require(delivery.allAcknowledged(id),"complete delivered shares required");

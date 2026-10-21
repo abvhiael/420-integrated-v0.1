@@ -75,6 +75,10 @@ contract PokerNLHEBetting420 {
     mapping(bytes32=>bool) public flopOpened;
     mapping(bytes32=>bool) public handSettled;
     mapping(bytes32=>bool) public handAborted;
+    struct PreparedDeal {uint8 button;uint16 mask;uint64 epoch;bytes32 seatSnapshot;bool ready;}
+    mapping(bytes32=>PreparedDeal) public preparedDeal;
+    event DealAssignmentPrepared(bytes32 indexed handId,uint8 button,uint16 seatMask,bytes32 seatSnapshot);
+
     mapping(bytes32=>address) public outcomeForTable;
     mapping(bytes32=>PokerDeckDisclosure420) public deliveryForTable;
     event DeliveryBound(bytes32 indexed tableId,address gate);
@@ -264,6 +268,23 @@ contract PokerNLHEBetting420 {
         ledger.cancelReservedHand(h.tableId,handId);
         emit UnprovedDealAborted(handId,h.tableId);
     }
+    /// @notice Freeze canonical dealer/seat-order BEFORE private-card delivery.
+    /// @dev Readiness is derived from the previous consumed button; the active
+    /// funded hand and immutable seating snapshot must already be locked.
+    function prepareDealAssignment(bytes32 handId) external {
+        PokerConfidentialDeal420.Hand memory h=deals.getHand(handId);
+        uint16 mask=deals.handSeatMask(handId);
+        if(h.state!=PokerConfidentialDeal420.State.COMMITTED||
+           !shuffle.isProofComplete(handId)||preparedDeal[handId].ready||
+           ledger.activeHand(h.tableId)!=handId||mask==0||
+           ledger.seatingEpoch(h.tableId)!=h.epoch||
+           deals.snapshotFor(h.tableId,mask)!=h.seatSnapshotHash)
+           revert InvalidState();
+        uint8 button=hasButton[h.tableId]?
+            _nextSeat(mask,lastButton[h.tableId]):_nextSeat(mask,8);
+        preparedDeal[handId]=PreparedDeal(button,mask,h.epoch,h.seatSnapshotHash,true);
+        emit DealAssignmentPrepared(handId,button,mask,h.seatSnapshotHash);
+    }
     function start(bytes32 handId,uint256 ante,uint32 timeoutSecs) external {
         PokerConfidentialDeal420.Hand memory h=deals.getHand(handId);
         if(h.state!=PokerConfidentialDeal420.State.COMMITTED||
@@ -278,10 +299,14 @@ contract PokerNLHEBetting420 {
             revert InvalidState();
         PokerTableRegistry420.Table memory t=deals.tables().getTable(h.tableId);
         uint16 mask=deals.handSeatMask(handId);
-        uint8 button=0;
-        if(!hasButton[h.tableId]){
-            button=_nextSeat(mask,8);hasButton[h.tableId]=true;
-        } else button=_nextSeat(mask,lastButton[h.tableId]);
+        PreparedDeal memory assigned=preparedDeal[handId];
+        if(!assigned.ready||assigned.mask!=mask||assigned.epoch!=h.epoch||
+           assigned.seatSnapshot!=h.seatSnapshotHash)revert InvalidState();
+        uint8 button=assigned.button;
+        uint8 canonical=hasButton[h.tableId]?
+            _nextSeat(mask,lastButton[h.tableId]):_nextSeat(mask,8);
+        if(button!=canonical)revert InvalidState();
+        hasButton[h.tableId]=true;
         lastButton[h.tableId]=button;
         uint8 n=0;
         for(uint8 i=0;i<9;i++)if(_participates(mask,i))n++;

@@ -66,7 +66,7 @@ jobs:
       # Solc 0.8.24 via-IR Yul stack-allocation failure is a compiler backend
       # issue; keep optimizer enabled and ALL test assertions intact.
       # This owner builds reproducible 420Bet bytecode using the legacy backend.
-      FOUNDRY_VIA_IR: 'false'
+      FOUNDRY_VIA_IR: 'true'
       FOUNDRY_PROFILE: pr
     timeout-minutes: 45
     steps:
@@ -85,11 +85,25 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Prepare source-identical scoped poker Foundry test tree
+        working-directory: contracts
+        run: |
+          set -e
+          mkdir -p test/poker-l1
+          find test -maxdepth 1 -type f -name '*Poker*.t.sol' -exec cp -t test/poker-l1/ {} +
+          sed -i 's@\\.\\./src/@../../src/@g' test/poker-l1/*.t.sol
+          test -s test/poker-l1/BetPokerNLHEBetting54.t.sol
       - name: Qualify funded native hand and provider collateral integration
         working-directory: contracts
-        run: forge test --match-path 'test/BetPokerNLHEBetting54.t.sol' -vv
+        env:
+          FOUNDRY_SRC: src/bet
+          FOUNDRY_TEST: test/poker-l1
+        run: forge test --match-path 'test/poker-l1/BetPokerNLHEBetting54.t.sol' -vv
       - name: Scope commitment adversarial + inherited seating/table regression
         working-directory: contracts
+        env:
+          FOUNDRY_SRC: src/bet
+          FOUNDRY_TEST: test/poker-l1
         run: forge test --match-contract '^(PokerNativeOutcome54Test|PokerHandRank54Test|PokerLiveCardReveals54Test|PokerGnarkElGamalAdapters54Test|PokerCanonicalSettlement54Test|PokerVerifierVersions54Test|PokerCanonicalEvidence54Test|PokerCanonicalRake54Test|PokerActionDisputeClock54Test|PokerFinalCardOpenings54Test|PokerActionKeys54Test|PokerPrivateShuffleGate54Test|PokerVerifiedTerminalGate54Test|PokerHandAccountingProof54Test|PokerHandFinality54Test|PokerDeckDisclosure54Test|PokerConfidentialDeal54Test|PokerSeatLedger53Test|BetPokerTableRegistry52Test)$' -vv
       - name: Verify confidential shuffle and encrypted seat delivery
         run: node --test clients/420bet-poker/crypto/confidential-deal.test.mjs clients/420bet-poker/crypto/nlhe-replay.test.mjs clients/420bet-poker/crypto/nlhe-betting.test.mjs clients/420bet-poker/crypto/nlhe-verify-hand.test.mjs clients/420bet-poker/crypto/nlhe-economics.test.mjs clients/420bet-poker/crypto/nlhe-differential.test.mjs clients/420bet-poker/crypto/nlhe-pot-differential.test.mjs

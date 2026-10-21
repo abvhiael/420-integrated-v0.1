@@ -1,0 +1,143 @@
+{
+  "schema": "mad-buds-animation-manifest-v1",
+  "characterId": "kush_krusher",
+  "animationId": "kk_anim_05_airborne_tumble",
+  "animationName": "airborne_tumble",
+  "animationNumber": "05",
+  "frameCount": 10,
+  "frameWidth": 1024,
+  "frameHeight": 1024,
+  "frameFormat": "PNG",
+  "colorMode": "RGBA",
+  "fps": null,
+  "frameDurationMs": null,
+  "durationMs": null,
+  "loop": null,
+  "playbackTimingStatus": "NOT_SPECIFIED_OR_VERIFIED",
+  "source": "ten frames extracted from user-approved airborne tumble image strip",
+  "sourceApprovalStatus": "NOT_VERIFIED",
+  "qualificationStatus": "PENDING_VISUAL_APPROVAL",
+  "repositoryDestination": "assets/arcade/mad-buds/kush-krusher/animations/kk_anim_05_airborne_tumble/",
+  "frames": [
+    {
+      "index": 1,
+      "file": "kush_krusher_anim_05_airborne_tumble_frame_01.png",
+      "sha256": "5bf176b22a916e9ea7804727818e68015bf9f9051e50f3a20cb281f671164e1c",
+      "width": 1024,
+      "height": 1024,
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "index": 2,
+      "file": "kush_krusher_anim_05_airborne_tumble_frame_02.png",
+      "sha256": "a24dce5ffa2a575f803e38fa8897fe96798dff3e1e05899d953a484bf1acd9f3",
+      "width": 1024,
+      "height": 1024,
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "index": 3,
+      "file": "kush_krusher_anim_05_airborne_tumble_frame_03.png",
+      "sha256": "cfac3786d7d23934aff10a87d5f101ec34e6091a822d0b3473968cc0bf1d6f23",
+      "width": 1024,
+      "height": 1024,
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "index": 4,
+      "file": "kush_krusher_anim_05_airborne_tumble_frame_04.png",
+      "sha256": "c790f1d2a386f39f7601c80b2498f230d763637cab77e7feffcb2873a8c27ee9",
+      "width": 1024,
+      "height": 1024,
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "index": 5,
+      "file": "kush_krusher_anim_05_airborne_tumble_frame_05.png",
+      "sha256": "203aae60259b762bb892ea0ac5176807d02c4bee67febebf0edd330f1e85d6ac",
+      "width": 1024,
+      "height": 1024,
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "index": 6,
+      "file": "kush_krusher_anim_05_airborne_tumble_frame_06.png",
+      "sha256": "caba865d658ac7303bd251439147863da53450c2569b1037082d300bfbbe50ef",
+      "width": 1024,
+      "height": 1024,
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "index": 7,
+      "file": "kush_krusher_anim_05_airborne_tumble_frame_07.png",
+      "sha256": "f04f0bdaa7e57ac8654db0268274704fbc6a801ae4ed5f5ba449477b632f4c4a",
+      "width": 1024,
+      "height": 1024,
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "index": 8,
+      "file": "kush_krusher_anim_05_airborne_tumble_frame_08.png",
+      "sha256": "d909d58bd65735be0d3a9b30f2bb065669b9eb1ffe6345c6c6c1d90e9da479ab",
+      "width": 1024,
+      "height": 1024,
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "index": 9,
+      "file": "kush_krusher_anim_05_airborne_tumble_frame_09.png",
+      "sha256": "0c9ea18862bdeda709427a60880f1ffae9ddfe40628e9f8e37094ecd40166d79",
+      "width": 1024,
+      "height": 1024,
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "index": 10,
+      "file": "kush_krusher_anim_05_airborne_tumble_frame_10.png",
+      "sha256": "2cb13cfc44420d1fbb327a4ad2f504ded75be6649ca862e7f2df33d9a7bedfe7",
+      "width": 1024,
+      "height": 1024,
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    }
+  ]
+}

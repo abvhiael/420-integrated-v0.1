@@ -336,9 +336,9 @@ contract PokerNLHEBetting420 {
             ledger.activeHand(g.tableId)!=handId||
             !_missingRequiredEvidence(handId,g))revert InvalidState();
         if(block.timestamp<r.finalizableAt)revert TooEarly();
-        // An independently raised dispute must conclude through its own
-        // authenticated resolver; this timeout cannot overrule an appeal.
-        if(disputes.isFrozen(handId))revert InvalidState();
+        // Only the governance-bound native resolver may close an expired
+        // independent dispute, and only under the same missing-proof guard.
+        if(disputes.isFrozen(handId))disputes.finalizeUnprovableVoid(handId);
         handAborted[handId]=true;
         evidenceRecovery[handId].active=false;
         ledger.cancelReservedHand(g.tableId,handId);

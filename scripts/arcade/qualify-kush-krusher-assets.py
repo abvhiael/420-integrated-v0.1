@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Scoped Kush Krusher 15-animation structural and pixel-level qualification; no edits."""
+"""Scoped Kush Krusher 15-animation structural and pixel-level qualification; no edits.
+
+Exact owner policy: edge-reaching artwork is a warning, while dimensions, frame hashes,
+canonical naming and frame timing remain mandatory checks.
+"""
 import hashlib, json, re, sys, zlib, struct
 from pathlib import Path
 BASE=Path("assets/arcade/mad-buds/kush-krusher/animations")

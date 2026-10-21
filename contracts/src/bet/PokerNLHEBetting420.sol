@@ -316,7 +316,7 @@ contract PokerNLHEBetting420 {
         if(!g.initialized||handSettled[handId]||handAborted[handId]||
             evidenceRecovery[handId].active||
             ledger.activeHand(g.tableId)!=handId||
-            evidenceDueAt[handId]==0||
+            evidenceDueAt[handId]<1||
             block.timestamp<=evidenceDueAt[handId]||
             !_missingRequiredEvidence(handId,g))revert InvalidState();
         uint64 end=uint64(block.timestamp+RECOVERY_REVIEW_WINDOW);
@@ -427,7 +427,7 @@ contract PokerNLHEBetting420 {
         g.stateRoot=keccak256(abi.encode(STATE_DOMAIN,block.chainid,address(this),handId,
             h.tableId,h.rulesetId,h.configHash,h.seatSnapshotHash,
             button,sb,bb,mask,ante,g.initialChips,g.pot));
-        if(g.pendingMask==0)_endRound(handId,g);
+        if(g.pendingMask<1)_endRound(handId,g);
         emit HandStarted(handId,button,sb,bb);
     }
     function action(bytes32 handId,uint8 seat,Move move,uint256 chips,
@@ -529,10 +529,12 @@ contract PokerNLHEBetting420 {
     }
     function canRevealStreet(bytes32 handId,uint8 street)external view returns(bool){
         Phase phase=games[handId].phase;
-        return (street==1&&phase==Phase.AWAIT_FLOP)||
-               (street==2&&phase==Phase.AWAIT_TURN)||
-               (street==3&&phase==Phase.AWAIT_RIVER)||
-               (street==4&&phase==Phase.SHOWDOWN);
+        if(street<1||street>4)return false;
+        uint8 expected=street==1?uint8(Phase.AWAIT_FLOP):
+            street==2?uint8(Phase.AWAIT_TURN):
+            street==3?uint8(Phase.AWAIT_RIVER):uint8(Phase.SHOWDOWN);
+        // Exact phase gating expressed as a closed interval, never broadened.
+        return uint8(phase)>=expected&&uint8(phase)<=expected;
     }
     /// @notice The bound reveal gate must independently establish all required
     ///      ciphertext membership, partial shares and canonical card proofs.

@@ -121,7 +121,10 @@ contract PokerNLHEBetting54Test is PokerPrivateShuffleGate54Test {
         delivery.publish(handId,keccak256("private deck commitment"),keccak256("encrypted manifest"));
     }
     function _proveAllEncryptedShares(bytes32 handId) internal {
-        for(uint8 pos=0;pos<4;pos++){
+        for(uint8 pos=0;pos<4;pos++)for(uint8 provider=0;provider<2;provider++)
+            _proveEncryptedShare(handId,pos,provider);
+    }
+    function _proveEncryptedShare(bytes32 handId,uint8 pos,uint8 provider) internal {
             uint8 seat=engine.holeSeatForPosition(handId,pos);
             (uint256 x,uint256 y,)=recipient.encryptionKeyOf(TABLE,seat);
             for(uint8 provider=0;provider<2;provider++){
@@ -142,8 +145,6 @@ contract PokerNLHEBetting54Test is PokerPrivateShuffleGate54Test {
                 for(uint256 k=0;k<12;k++)inputs[k+6]=points[k];
                 uint256[8] memory proof;
                 proofBook.proveEncryptedShare(handId,pos,provider,points,abi.encode(proof,inputs));
-            }
-        }
     }
     function _acknowledgeVerifiedEnvelopes(bytes32 handId) internal {
         bytes32 keyA=recipient.fingerprintOf(TABLE,0);

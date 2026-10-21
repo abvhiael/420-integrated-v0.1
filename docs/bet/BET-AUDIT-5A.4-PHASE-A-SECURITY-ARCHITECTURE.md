@@ -118,3 +118,23 @@ Each proof family must have: frozen circuit source hash; dependency versions; au
 This architecture selects threshold-share encryption to recipients, not unproven direct recipient-key reencryption. Still requires independent verification of subgroup security, recipient key-authentication protocol, commitment encoding, MiMC collision assumptions, encrypted-share confidentiality/non-malleability, shared-randomness abuse, provider collusion, availability/slashing economics, key management, and setup ceremony. Key registration must not accept merely self-asserted possession. Real production artifacts require separate review before deploy or funded play.
 
 **Phase A status:** architecture decision recorded. Formal Level 1 qualification is not a substitute for these unimplemented on-chain changes.
+
+
+## 9. Frozen recovery clock parameters and invariant checks
+
+For the V1 implementation, a missing required proof becomes challengeable only when its canonical `dueAt` passes. `dueAt` is the earlier of (i) the corresponding hand/street proof-delivery deadline and (ii) the protocol's global bounded deadline; both are committed before betting. The required terminal periods are: **1 hour for late evidence after the first objective failure**, **1 day of review**, and **a single 1 day appeal extension**, using the existing `PokerActionDisputeClock420.REVIEW_WINDOW` constant. All elapsed-period tests are strict and specify whether the deadline instant itself is accepted. No further extensions or discretionary pauses are authorized. The execution layer must reject any overflow in timestamp arithmetic, prohibit `dueAt=0`, and implement terminal abort liveness when a provider disappears permanently.
+
+At no point may the engine call `cancelReservedHand` for an already settled hand, and at no point may it pay a terminal winner without fully verified outcome evidence. The original locked seat snapshot remains the only permissible void-refund vector, regardless of wagers already posted. Any provider collateral slash must use a **separate, fully funded and independently qualified collateral vault**; absent that vault, slashing cannot be claimed or simulated. Provider accountability/collateral availability remains a production admission prerequisite, not an implicit side effect of refunds.
+
+### Architecture review result against current code
+
+- **CONSISTENT:** `Reencrypt52` defines `(rG,M+rPK)`; new encrypted-share equations correspond to its same group and ciphertext semantics.
+- **CONSISTENT:** `ciphertext_merkle.go` fixes a 52-of-64 tree with six MiMC levels and physical-position leaf binding.
+- **CONSISTENT:** `PokerLiveCardReveals420` maps positions `0..2n-1` to round-robin seat indices and uses the stated burn/board positions.
+- **IMPLEMENTATION GAP:** `PokerNLHEBetting420.start` currently chooses button after testing acknowledgments, so the pre-start canonical assignment must be introduced rather than presumed to exist.
+- **IMPLEMENTATION GAP:** `PokerRecipientKeys420` stores a fingerprint only; it cannot authenticate a curve point or knowledge of a recipient decryption key.
+- **IMPLEMENTATION GAP:** `PokerDeckDisclosure420` accepts unproven envelopes and receipts; the true encrypted-share proof is not present.
+- **IMPLEMENTATION GAP:** `PokerActionDisputeClock420` and native settlement do not yet implement all failed-share terminal void transitions.
+- **EXTERNAL GATE:** cryptographic assumptions, key-subgroup constraints, censorship/availability economics and setup provenance require independent assessment before production.
+
+**Phase A Level 1 verdict:** This document defines a concrete proposed security architecture and identifies all observed contract-design conflicts. It is **not a formally qualified Phase A PASS** until the repository's canonical audit roadmap/exit criteria are reconciled against this design, the finite-state model and public-input encoding are reviewed as a coherent invariant set, and the architecture is formally accepted by the applicable owners. Do not treat the document commit itself as a qualification certificate.

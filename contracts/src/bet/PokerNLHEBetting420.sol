@@ -285,6 +285,18 @@ contract PokerNLHEBetting420 {
         preparedDeal[handId]=PreparedDeal(button,mask,h.epoch,h.seatSnapshotHash,true);
         emit DealAssignmentPrepared(handId,button,mask,h.seatSnapshotHash);
     }
+    /// @notice Unique seat owning a hole-card position in the *pre-start*
+    /// commitment; cannot be derived from a caller-supplied button.
+    function holeSeatForPosition(bytes32 handId,uint8 pos) external view returns(uint8){
+        PreparedDeal memory a=preparedDeal[handId];
+        if(!a.ready)revert InvalidState();
+        uint8 n=0;
+        for(uint8 i=0;i<9;i++)if(_participates(a.mask,i))n++;
+        if(n<2||pos>=2*n)revert InvalidState();
+        uint8 seat=n==2?a.button:_nextSeat(a.mask,a.button);
+        for(uint8 i=0;i<pos%n;i++)seat=_nextSeat(a.mask,seat);
+        return seat;
+    }
     function start(bytes32 handId,uint256 ante,uint32 timeoutSecs) external {
         PokerConfidentialDeal420.Hand memory h=deals.getHand(handId);
         if(h.state!=PokerConfidentialDeal420.State.COMMITTED||

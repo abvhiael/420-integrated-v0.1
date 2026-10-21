@@ -62,6 +62,11 @@ concurrency:
 jobs:
   commitment-envelope:
     runs-on: ubuntu-latest
+    env:
+      # Solc 0.8.24 via-IR Yul stack-allocation failure is a compiler backend
+      # issue; keep optimizer enabled and ALL test assertions intact.
+      # This owner builds reproducible 420Bet bytecode using the legacy backend.
+      FOUNDRY_VIA_IR: 'false'
     timeout-minutes: 45
     env:
       FOUNDRY_PROFILE: pr
@@ -81,12 +86,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Diagnose Solidity stack source locations without IR (informational only)
-        continue-on-error: true
-        env:
-          FOUNDRY_VIA_IR: 'false'
-        working-directory: contracts
-        run: forge test --match-path 'test/BetPokerNLHEBetting54.t.sol' -vv
       - name: Qualify funded native hand and provider collateral integration
         working-directory: contracts
         run: forge test --match-path 'test/BetPokerNLHEBetting54.t.sol' -vv

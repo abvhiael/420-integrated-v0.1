@@ -1,5 +1,5 @@
 require 'xcodeproj'
-require 'nokogiri'
+require 'rexml/document'
 project_path=Dir.glob('ios/*.xcodeproj').first or abort 'Missing generated iOS project'
 project=Xcodeproj::Project.open(project_path)
 app=project.targets.find{|t| t.product_type=='com.apple.product-type.application'} or abort 'Missing app target'
@@ -19,17 +19,15 @@ end
 project.save
 scheme=Dir.glob('ios/*.xcodeproj/xcshareddata/xcschemes/*.xcscheme').find{|x| File.basename(x,'.xcscheme')==app.name}
 abort 'Missing shared app scheme' unless scheme
-xml=Nokogiri::XML(File.read(scheme))
-testables=xml.at_xpath('//TestAction/Testables') or abort 'Missing Testables in scheme'
-ref=Nokogiri::XML::Node.new('TestableReference',xml)
-ref['skipped']='NO'
-buildable=Nokogiri::XML::Node.new('BuildableReference',xml)
-buildable['BuildableIdentifier']='primary'
-buildable['BlueprintIdentifier']=target.uuid
-buildable['BuildableName']=test_name+'.xctest'
-buildable['BlueprintName']=test_name
-buildable['ReferencedContainer']='container:'+File.basename(project_path)
-ref.add_child(buildable)
-testables.add_child(ref)
-File.write(scheme,xml.to_xml)
+xml=REXML::Document.new(File.read(scheme))
+testables=REXML::XPath.first(xml,'//TestAction/Testables') or abort 'Missing Testables in scheme'
+ref=testables.add_element('TestableReference',{'skipped'=>'NO'})
+ref.add_element('BuildableReference',{
+ 'BuildableIdentifier'=>'primary',
+ 'BlueprintIdentifier'=>target.uuid,
+ 'BuildableName'=>test_name+'.xctest',
+ 'BlueprintName'=>test_name,
+ 'ReferencedContainer'=>'container:'+File.basename(project_path)
+})
+File.open(scheme,'w'){|out| xml.write(out,2)}
 puts 'Configured native iOS XCTest UI journey'

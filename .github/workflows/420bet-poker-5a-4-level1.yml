@@ -87,9 +87,6 @@ jobs:
         run: |
           QUALIFIED=97d02e06d8cb4faddb33c320f122a7ce02f0f338
           git fetch --no-tags --depth=1 origin "$QUALIFIED"
-          # New recipient share/key-possession/aggregate circuits have their
-          # own scoped owner below; they do not invalidate the unchanged
-          # previously certified 52-card shuffle/initial/share/unmask circuits.
           changed_files=$(git diff --name-only "$QUALIFIED" HEAD -- clients/420bet-poker/zkshuffle | grep -Ev '(encrypted_share_delivery_circuit|recipient_key_possession_circuit|threshold_key_aggregate_circuit|make_private_delivery_adapter_forge_test)' || true)
           if test -z "$changed_files"; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
@@ -115,12 +112,13 @@ jobs:
           run-id: 39315000314
           github-token: ${{ secrets.GITHUB_TOKEN }}
           path: artifacts/420bet-5a-4
-      - name: Real focused recipient-delivery and provider-aggregate Groth16 qualification
+      - name: Qualify new recipient Groth16 proof families
         if: steps.cryptoscope.outputs.changed == 'false'
         env:
           POKER_ZK_ARTIFACT_DIR: ../../../artifacts/420bet-5a-4
         working-directory: clients/420bet-poker/zkshuffle
         run: go test -mod=mod -timeout 20m -run '^(TestEncryptedShareDeliveryProofAndAdversarialRejections|TestRecipientPublicKeyProofOfPossession|TestGenuineProviderKeyAggregateProof)
+        if: steps.cryptoscope.outputs.changed == 'true'
         run: |
           mkdir -p artifacts/420bet-5a-4
           git rev-parse HEAD > artifacts/420bet-5a-4/qualified-sha.txt
@@ -212,13 +210,13 @@ jobs:
         working-directory: contracts
         run: forge test --match-contract '^(PokerNativeOutcome54Test|PokerHandRank54Test|PokerLiveCardReveals54Test|PokerNLHEBetting54Test|PokerGnarkElGamalAdapters54Test|PokerCanonicalSettlement54Test|PokerVerifierVersions54Test|PokerCanonicalEvidence54Test|PokerCanonicalRake54Test|PokerActionDisputeClock54Test|PokerFinalCardOpenings54Test|PokerActionKeys54Test|PokerPrivateShuffleGate54Test|PokerVerifiedTerminalGate54Test|PokerHandAccountingProof54Test|PokerHandFinality54Test|PokerDeckDisclosure54Test|PokerConfidentialDeal54Test|PokerSeatLedger53Test|BetPokerTableRegistry52Test)$' -vv
  ./...
-      - name: Record actual new proof and source digests
+      - name: Record new proof digests
         run: |
           mkdir -p artifacts/420bet-5a-4
           printf 'implementation_sha=%s\n' "$(git rev-parse HEAD)" > artifacts/420bet-5a-4/recipient-proof-provenance.txt
-          sha256sum clients/420bet-poker/zkshuffle/encrypted_share_delivery_circuit.go clients/420bet-poker/zkshuffle/encrypted_share_delivery_circuit_test.go clients/420bet-poker/zkshuffle/recipient_key_possession_circuit.go clients/420bet-poker/zkshuffle/recipient_key_possession_circuit_test.go clients/420bet-poker/zkshuffle/threshold_key_aggregate_circuit.go clients/420bet-poker/zkshuffle/threshold_key_aggregate_circuit_test.go clients/420bet-poker/zkshuffle/make_private_delivery_adapter_forge_test.py > artifacts/420bet-5a-4/recipient-proof-source-sha256.txt
-          sha256sum artifacts/420bet-5a-4/EXPERIMENTAL-EncryptedShareDeliveryVerifier.sol artifacts/420bet-5a-4/EXPERIMENTAL-EncryptedShareDeliveryProof.bin artifacts/420bet-5a-4/EXPERIMENTAL-RecipientKeyPossessionVerifier.sol artifacts/420bet-5a-4/EXPERIMENTAL-RecipientKeyPossessionProof.bin artifacts/420bet-5a-4/EXPERIMENTAL-ThresholdKeyAggregateVerifier.sol artifacts/420bet-5a-4/EXPERIMENTAL-ThresholdKeyAggregateProof.bin > artifacts/420bet-5a-4/recipient-proof-artifact-sha256.txt
-      - name: Retain exact-SHA new recipient cryptographic evidence
+          sha256sum clients/420bet-poker/zkshuffle/encrypted_share_delivery_circuit.go clients/420bet-poker/zkshuffle/recipient_key_possession_circuit.go clients/420bet-poker/zkshuffle/threshold_key_aggregate_circuit.go > artifacts/420bet-5a-4/recipient-proof-source-sha256.txt
+          sha256sum artifacts/420bet-5a-4/EXPERIMENTAL-EncryptedShareDeliveryVerifier.sol artifacts/420bet-5a-4/EXPERIMENTAL-RecipientKeyPossessionVerifier.sol artifacts/420bet-5a-4/EXPERIMENTAL-ThresholdKeyAggregateVerifier.sol > artifacts/420bet-5a-4/recipient-proof-artifact-sha256.txt
+      - name: Upload new proof provenance
         uses: actions/upload-artifact@v4
         with:
           name: 420bet-5a-4-recipient-proof-provenance

@@ -100,7 +100,7 @@ contract PokerProviderAccountability420 {
         if(!b.locked||b.closed||!ledger.handConsumed(handId))revert InvalidState();
         b.closed=true;b.locked=false;b.faultMask=faultMask;
         address a=deals.providerA();address providerB=deals.providerB();
-        uint256 slash;
+        uint256 slash=0;
         if((faultMask&1)!=0)slash+=b.each;
         else available[b.asset][a]+=b.each;
         if((faultMask&2)!=0)slash+=b.each;

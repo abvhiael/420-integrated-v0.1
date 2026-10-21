@@ -338,9 +338,11 @@ contract PokerNLHEBetting420 {
         if(block.timestamp<r.finalizableAt)revert TooEarly();
         // Only the governance-bound native resolver may close an expired
         // independent dispute, and only under the same missing-proof guard.
-        if(disputes.isFrozen(handId))disputes.finalizeUnprovableVoid(handId);
+        // All terminal effects precede external resolver or ledger calls.
+        // A reverting resolver/ledger atomically restores these flags.
         handAborted[handId]=true;
         evidenceRecovery[handId].active=false;
+        if(disputes.isFrozen(handId))disputes.finalizeUnprovableVoid(handId);
         ledger.cancelReservedHand(g.tableId,handId);
         emit MissingEvidenceRecoveryVoided(handId,g.tableId);
     }

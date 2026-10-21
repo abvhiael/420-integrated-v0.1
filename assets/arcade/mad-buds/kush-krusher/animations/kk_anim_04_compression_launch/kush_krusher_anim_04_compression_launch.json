@@ -19,82 +19,82 @@
   },
   "repositoryDestination": "assets/arcade/mad-buds/kush-krusher/animations/kk_anim_04_compression_launch/",
   "visualApprovalStatus": "PENDING_OWNER_APPROVAL",
-  "qualificationStatus": "NOT_QUALIFIED",
+  "qualificationStatus": "PENDING_SCOPED_CI_VERIFICATION",
   "notes": [
-    "Manifest is a production template, not a qualified asset inventory.",
-    "Frame files have not been verified under canonical filenames; hashes must be populated from final PNG bytes.",
-    "Duration and FPS are working settings pending confirmation against authoritative Phase F requirements."
+    "All ten frame PNGs are present under canonical filenames. Frame SHA-256 values were calculated by the scoped Ubuntu GitHub runner from the uploaded PNG bytes; verify in the next affected CI qualification.",
+    "10 FPS, ten frames, 100 ms each, non-looping; no PNG edits.",
+    "Owner visual motion approval remains separate from structural qualification."
   ],
   "frames": [
     {
       "index": 1,
       "filename": "kush_krusher_anim_04_compression_launch_frame_01.png",
       "durationMs": 100,
-      "sha256": null,
-      "verificationStatus": "PENDING_FINAL_ASSET_VERIFICATION"
+      "sha256": "69850a569ff658c1c2687435b274ee53a4087baaf1d9b9d1d29c39d7dbf98702",
+      "verificationStatus": "SHA256_RECORDED_PENDING_CI_REQUALIFICATION"
     },
     {
       "index": 2,
       "filename": "kush_krusher_anim_04_compression_launch_frame_02.png",
       "durationMs": 100,
-      "sha256": null,
-      "verificationStatus": "PENDING_FINAL_ASSET_VERIFICATION"
+      "sha256": "90255788f2c1863784d0e8ca0d2e957576e52ea78b9cfa037c99caa7a80a6dfc",
+      "verificationStatus": "SHA256_RECORDED_PENDING_CI_REQUALIFICATION"
     },
     {
       "index": 3,
       "filename": "kush_krusher_anim_04_compression_launch_frame_03.png",
       "durationMs": 100,
-      "sha256": null,
-      "verificationStatus": "PENDING_FINAL_ASSET_VERIFICATION"
+      "sha256": "71b273199f5d3af4c7aef2f0ff1a7c7d3258064446560b6ffc6654b6cfcff4fb",
+      "verificationStatus": "SHA256_RECORDED_PENDING_CI_REQUALIFICATION"
     },
     {
       "index": 4,
       "filename": "kush_krusher_anim_04_compression_launch_frame_04.png",
       "durationMs": 100,
-      "sha256": null,
-      "verificationStatus": "PENDING_FINAL_ASSET_VERIFICATION"
+      "sha256": "1ee8badd9a20ffb01e0c16ccac241bd14d942983a5b2ec0be32e36489df86e33",
+      "verificationStatus": "SHA256_RECORDED_PENDING_CI_REQUALIFICATION"
     },
     {
       "index": 5,
       "filename": "kush_krusher_anim_04_compression_launch_frame_05.png",
       "durationMs": 100,
-      "sha256": null,
-      "verificationStatus": "PENDING_FINAL_ASSET_VERIFICATION"
+      "sha256": "994acac372ad074308ff883be434c151a8556f3e801d37276b585e2bca044565",
+      "verificationStatus": "SHA256_RECORDED_PENDING_CI_REQUALIFICATION"
     },
     {
       "index": 6,
       "filename": "kush_krusher_anim_04_compression_launch_frame_06.png",
       "durationMs": 100,
-      "sha256": null,
-      "verificationStatus": "PENDING_FINAL_ASSET_VERIFICATION"
+      "sha256": "e5c2b8b2be289c1ed60a45e61b4de48253af74697155fc8ddd1d9bed43b8acb4",
+      "verificationStatus": "SHA256_RECORDED_PENDING_CI_REQUALIFICATION"
     },
     {
       "index": 7,
       "filename": "kush_krusher_anim_04_compression_launch_frame_07.png",
       "durationMs": 100,
-      "sha256": null,
-      "verificationStatus": "PENDING_FINAL_ASSET_VERIFICATION"
+      "sha256": "277267a7bee3abc02630f97f9ab7c260e136faff6be0d6ad39bf024bb490987f",
+      "verificationStatus": "SHA256_RECORDED_PENDING_CI_REQUALIFICATION"
     },
     {
       "index": 8,
       "filename": "kush_krusher_anim_04_compression_launch_frame_08.png",
       "durationMs": 100,
-      "sha256": null,
-      "verificationStatus": "PENDING_FINAL_ASSET_VERIFICATION"
+      "sha256": "299dd21b3d250bc57481f6cbf49d230375a37daaeb6e98abc757c007482ff84e",
+      "verificationStatus": "SHA256_RECORDED_PENDING_CI_REQUALIFICATION"
     },
     {
       "index": 9,
       "filename": "kush_krusher_anim_04_compression_launch_frame_09.png",
       "durationMs": 100,
-      "sha256": null,
-      "verificationStatus": "PENDING_FINAL_ASSET_VERIFICATION"
+      "sha256": "8e6670d100384c74ecb613ffb7011294dd266d61632b760d0144e5f841b188fa",
+      "verificationStatus": "SHA256_RECORDED_PENDING_CI_REQUALIFICATION"
     },
     {
       "index": 10,
       "filename": "kush_krusher_anim_04_compression_launch_frame_10.png",
       "durationMs": 100,
-      "sha256": null,
-      "verificationStatus": "PENDING_FINAL_ASSET_VERIFICATION"
+      "sha256": "11ae748493ecd9e676deedaa6f8160bf3a9d9a92999cdac7b7ca6ddcbba77de2",
+      "verificationStatus": "SHA256_RECORDED_PENDING_CI_REQUALIFICATION"
     }
   ]
 }

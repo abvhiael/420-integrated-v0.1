@@ -63,7 +63,7 @@ for i,name in enumerate(NAMES,1):
                 if (d["width"],d["height"])!=(1024,1024):row["errors"].append(p.name+": wrong dimensions")
                 if (d["bitDepth"],d["colorType"],d["mode"])!=(8,6,"RGBA"):row["errors"].append(p.name+": not 8-bit RGBA")
                 if not d["alphaExtrema"] or d["alphaExtrema"][0]!=0 or d["alphaExtrema"][1]!=255:row["errors"].append(p.name+": no real mixed alpha")
-                if d["cornerAlpha"]!=[0,0,0,0]:row["errors"].append(p.name+": opaque corner/background")
+                if d["cornerAlpha"]!=[0,0,0,0]:row["warnings"].append(p.name+": nontransparent corner; accepted as possible edge-reaching artwork per owner direction")
                 if path.exists():
                     for entry in m.get("frames",[]):
                         if entry.get("filename",entry.get("file"))==p.name:

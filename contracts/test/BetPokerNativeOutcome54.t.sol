@@ -50,6 +50,10 @@ contract PokerNativeOutcome54Test is PokerLiveCardReveals54Test {
         cheat54.prank(PLAYER);engine.reserve(id);
         cheat54.prank(PLAYER);signing.bindSigner(TABLE,signedVm.addr(PLAYER_KEY));
         cheat54.prank(PLAYER_B);signing.bindSigner(TABLE,signedVm.addr(OPPONENT_KEY));
+        // Hole-card delivery is bound to the frozen funded dealer/seat order.
+        // The newer canonical engine requires that assignment before proof-backed
+        // recipient acknowledgments, including in inherited settlement tests.
+        engine.prepareDealAssignment(id);
         _acknowledgedPrivateDelivery(id);
         engine.start(id,0,60);
         cheat54.prank(ADMIN);engine.bindReveals(TABLE,address(live));

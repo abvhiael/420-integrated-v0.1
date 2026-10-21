@@ -155,6 +155,7 @@ jobs:
           retention-days: 90
           if-no-files-found: error
       - name: Compile exact generated 52-card Solidity verifier
+        if: steps.cryptoscope.outputs.changed == 'true'
         working-directory: contracts
         run: |
           mkdir -p src/bet/generated
@@ -163,6 +164,7 @@ jobs:
           cp ../artifacts/420bet-5a-4/EXPERIMENTAL-InitialDeck52Verifier.sol src/bet/generated/ExperimentalInitialDeck52Verifier.sol
           forge build src/bet/generated/ExperimentalInitialDeck52Verifier.sol
       - name: Verify genuine 52-card proof against generated Solidity verifier
+        if: steps.cryptoscope.outputs.changed == 'true'
         working-directory: contracts
         run: |
           python3 ../clients/420bet-poker/zkshuffle/make_full52_forge_test.py \
@@ -171,7 +173,8 @@ jobs:
             test/PokerGeneratedProofAcceptance.t.sol
           forge test --match-contract PokerGeneratedProofAcceptanceTest -vv
           rm test/PokerGeneratedProofAcceptance.t.sol
-      - name: Validate real starting-deck and selective card proofs in generated Solidity
+      - name: Validate inherited starting-deck and selective card proofs when cryptography changes
+        if: steps.cryptoscope.outputs.changed == 'true'
         working-directory: contracts
         run: |
           set -e
@@ -187,6 +190,11 @@ jobs:
           python3 ../clients/420bet-poker/zkshuffle/make_groth16_forge_test.py src/bet/generated/ExperimentalCardUnmaskVerifier.sol ../artifacts/420bet-5a-4/EXPERIMENTAL-CardUnmaskSolidityFixture.json test/PokerGeneratedUnmaskProof.t.sol PokerUnmaskGeneratedVerifierAcceptanceTest 0 1
           forge test --match-contract PokerUnmaskGeneratedVerifierAcceptanceTest -vv
           rm test/PokerGeneratedUnmaskProof.t.sol
+      - name: Qualify new real encrypted-share, recipient-key and aggregate Solidity verifier adapters
+        working-directory: contracts
+        run: |
+          set -e
+          mkdir -p src/bet/generated
           cp "../artifacts/420bet-5a-4/EXPERIMENTAL-EncryptedShareDeliveryVerifier.sol" "src/bet/generated/ExperimentalEncryptedShareDeliveryVerifier.sol"
           python3 ../clients/420bet-poker/zkshuffle/make_groth16_forge_test.py src/bet/generated/ExperimentalEncryptedShareDeliveryVerifier.sol ../artifacts/420bet-5a-4/EXPERIMENTAL-EncryptedShareDeliverySolidityFixture.json test/PokerGeneratedEncryptedDeliveryProof.t.sol PokerEncryptedDeliveryGeneratedVerifierAcceptanceTest 0 1
           forge test --match-contract PokerEncryptedDeliveryGeneratedVerifierAcceptanceTest -vv

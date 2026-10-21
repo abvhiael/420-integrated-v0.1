@@ -3,6 +3,7 @@ pragma solidity ^0.8.24;
 import "./PokerDeckDisclosure420.sol";
 import "./PokerPrivateShuffleGate420.sol";
 import "./PokerGnarkEncryptedShareDeliveryAdapter420.sol";
+import "./PokerGnarkThresholdKeyAggregateAdapter420.sol";
 
 interface IPokerPreparedDealAssignment420 {
     function deals() external view returns(PokerConfidentialDeal420);
@@ -22,6 +23,8 @@ contract PokerDeliveryProofBook420 is IPokerDeliveryProofBook420 {
         keccak256("420.BET.POKER.PRIVATE.SHARE.DELIVERY.CONTEXT.V1");
     bytes32 public constant ENVELOPE_DOMAIN=
         keccak256("420.BET.POKER.PRIVATE.SHARE.ENVELOPE.V1");
+    bytes32 public constant AGGREGATE_CONTEXT_DOMAIN=
+        keccak256("420.BET.POKER.PRIVATE.SHARE.AGGREGATE.V1");
     uint256 private constant FR=
         21888242871839275222246405745257275088696311157297823662689037894645226208583;
     PokerConfidentialDeal420 public immutable deals;
@@ -31,6 +34,9 @@ contract PokerDeliveryProofBook420 is IPokerDeliveryProofBook420 {
     IPokerPreparedDealAssignment420 public immutable assignment;
     IPokerEncryptedShareDelivery420 public immutable providerA;
     IPokerEncryptedShareDelivery420 public immutable providerB;
+    IPokerThresholdKeyAggregate420 public immutable aggregateVerifier;
+    bool public aggregateVerified;
+    event ProviderAggregateVerified(bytes32 indexed aggregateKeyHash);
     mapping(bytes32=>uint32[2]) private proofBits;
     // Each proof exposes only an encrypted decryption share, never its plaintext.
     mapping(bytes32=>mapping(uint8=>mapping(uint8=>uint256[4]))) private encryptedShares;
@@ -40,11 +46,12 @@ contract PokerDeliveryProofBook420 is IPokerDeliveryProofBook420 {
         uint8 indexed provider,uint8 seat,bytes32 encryptedShareHash);
 
     constructor(address deals_,address disclosure_,address shuffle_,
-        address assignment_,address providerA_,address providerB_) {
+        address assignment_,address providerA_,address providerB_,address aggregate_) {
         if(deals_==address(0)||disclosure_==address(0)||shuffle_==address(0)||
             assignment_==address(0)||providerA_==address(0)||providerB_==address(0)||
             providerA_==providerB_||providerA_.code.length==0||
-            providerB_.code.length==0||assignment_.code.length==0)
+            providerB_.code.length==0||assignment_.code.length==0||
+            aggregate_==address(0)||aggregate_.code.length==0)
             revert InvalidConfiguration();
         deals=PokerConfidentialDeal420(deals_);
         disclosure=PokerDeckDisclosure420(disclosure_);
@@ -53,6 +60,7 @@ contract PokerDeliveryProofBook420 is IPokerDeliveryProofBook420 {
         assignment=IPokerPreparedDealAssignment420(assignment_);
         providerA=IPokerEncryptedShareDelivery420(providerA_);
         providerB=IPokerEncryptedShareDelivery420(providerB_);
+        aggregateVerifier=IPokerThresholdKeyAggregate420(aggregate_);
         // Only registry-pinned adapters with distinct provider keys are
         // admissible; an arbitrary always-true interface is not a delivery
         // proof. Tests may use a separately marked generated-verifier stub,
@@ -69,6 +77,13 @@ contract PokerDeliveryProofBook420 is IPokerDeliveryProofBook420 {
            !b.versions().matches(b.versionId(),b.groth16Verifier(),
                b.verifyingKeyHash(),b.circuitHash(),b.schemaHash()))
                revert InvalidConfiguration();
+        PokerGnarkThresholdKeyAggregateAdapter420 aggregateAdapter=
+            PokerGnarkThresholdKeyAggregateAdapter420(aggregate_);
+        if(aggregateAdapter.thresholdKeyCommitment()!=shuffle.thresholdKeyCommitment()||
+           !aggregateAdapter.versions().matches(aggregateAdapter.versionId(),
+               aggregateAdapter.groth16Verifier(),aggregateAdapter.verifyingKeyHash(),
+               aggregateAdapter.circuitHash(),aggregateAdapter.schemaHash()))
+               revert InvalidConfiguration();
         if(address(disclosure.deals())!=deals_||
             address(shuffle.deals())!=deals_||
             address(assignment.deals())!=deals_||
@@ -76,6 +91,28 @@ contract PokerDeliveryProofBook420 is IPokerDeliveryProofBook420 {
             address(keys.ledger())!=address(deals.ledger()))revert InvalidConfiguration();
     }
 
+    /// @notice One genuine proof enforces that the two distinct decryption
+    /// providers' keys add to exactly the shuffle's aggregate key.
+    function aggregateScope(uint256[6] calldata points)public view returns(uint256){
+        return uint256(keccak256(abi.encode(AGGREGATE_CONTEXT_DOMAIN,block.chainid,
+            address(this),address(shuffle),address(providerA),address(providerB),points)))%FR;
+    }
+    function proveAggregateKey(uint256[6] calldata points,bytes calldata proof)external{
+        if(aggregateVerified||proof.length==0)revert InvalidState();
+        PokerGnarkEncryptedShareDeliveryAdapter420 a=
+            PokerGnarkEncryptedShareDeliveryAdapter420(address(providerA));
+        PokerGnarkEncryptedShareDeliveryAdapter420 b=
+            PokerGnarkEncryptedShareDeliveryAdapter420(address(providerB));
+        if(keccak256(abi.encode(points[0],points[1]))!=a.thresholdKeyCommitment()||
+           keccak256(abi.encode(points[2],points[3]))!=b.thresholdKeyCommitment()||
+           keccak256(abi.encode(points[4],points[5]))!=shuffle.thresholdKeyCommitment())
+            revert InvalidProof();
+        uint256 scope=aggregateScope(points);
+        if(scope==0||!aggregateVerifier.verifyAggregate(scope,points,proof))
+            revert InvalidProof();
+        aggregateVerified=true;
+        emit ProviderAggregateVerified(shuffle.thresholdKeyCommitment());
+    }
     function encryptedShareOf(bytes32 handId,uint8 position,uint8 provider)
         external view returns(uint256[4] memory) {
         if(provider>1||position>=52)revert InvalidState();
@@ -103,6 +140,7 @@ contract PokerDeliveryProofBook420 is IPokerDeliveryProofBook420 {
 
     function proveEncryptedShare(bytes32 handId,uint8 position,uint8 provider,
         uint256[12] calldata points,bytes calldata proof)external {
+        if(!aggregateVerified)revert InvalidState();
         if(position>=52||provider>1||proof.length==0)revert InvalidProof();
         PokerConfidentialDeal420.Hand memory h=deals.getHand(handId);
         if(h.state!=PokerConfidentialDeal420.State.COMMITTED||

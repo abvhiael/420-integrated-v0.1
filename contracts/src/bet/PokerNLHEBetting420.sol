@@ -530,9 +530,9 @@ contract PokerNLHEBetting420 {
     function canRevealStreet(bytes32 handId,uint8 street)external view returns(bool){
         Phase phase=games[handId].phase;
         if(street<1||street>4)return false;
-        uint8 expected=street==1?uint8(Phase.AWAIT_FLOP):
-            street==2?uint8(Phase.AWAIT_TURN):
-            street==3?uint8(Phase.AWAIT_RIVER):uint8(Phase.SHOWDOWN);
+        uint8 expected=street<2?uint8(Phase.AWAIT_FLOP):
+            street<3?uint8(Phase.AWAIT_TURN):
+            street<4?uint8(Phase.AWAIT_RIVER):uint8(Phase.SHOWDOWN);
         // Exact phase gating expressed as a closed interval, never broadened.
         return uint8(phase)>=expected&&uint8(phase)<=expected;
     }

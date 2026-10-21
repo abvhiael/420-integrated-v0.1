@@ -67,9 +67,8 @@ jobs:
       # issue; keep optimizer enabled and ALL test assertions intact.
       # This owner builds reproducible 420Bet bytecode using the legacy backend.
       FOUNDRY_VIA_IR: 'false'
-    timeout-minutes: 45
-    env:
       FOUNDRY_PROFILE: pr
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
         with:

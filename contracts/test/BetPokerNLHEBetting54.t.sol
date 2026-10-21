@@ -259,6 +259,19 @@ contract PokerNLHEBetting54Test is PokerPrivateShuffleGate54Test {
         engine.start(id,0,60);
         require(ledger.reservedInHand(TABLE)==800,"no escrow consumed by rotated proof");
     }
+    function testProviderBondsAreFullyFundedLockedAndWithdrawalSafe() public {
+        bytes32 id=_readyProvedDelivery();
+        require(providerBond.isCollateralized(id),"pre-betting full collateral");
+        (,,uint256 each,bool locked,bool closed,)=providerBond.bonds(id);
+        require(locked&&!closed&&each==800,"each provider stakes full hand escrow");
+        require(providerBond.available(address(coin),PROVIDER_A)==2200,"A free versus locked bond");
+        require(providerBond.available(address(coin),PROVIDER_B)==2200,"B free versus locked bond");
+        cheat54.expectRevert(PokerProviderAccountability420.Unauthorized.selector);
+        cheat54.prank(PROVIDER_A);providerBond.withdraw(address(coin),2201);
+        cheat54.prank(PROVIDER_A);providerBond.withdraw(address(coin),2200);
+        require(coin.balanceOf(address(providerBond))==3800,"locked reserves cannot be withdrawn");
+        require(ledger.reservedInHand(TABLE)==800,"provider bond segregated from player principal");
+    }
     function testPostBettingMissingFlopProofRecoversOriginalEscrowExactlyOnce() public {
         bytes32 id=_readyBetting();
         _signedAction(id,0,PokerNLHEBetting420.Move.CALL,10,PLAYER_KEY);

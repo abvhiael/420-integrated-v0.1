@@ -16,6 +16,8 @@ jobs:
           python-version: '3.11'
       - name: Install pinned PNG inspector
         run: python -m pip install Pillow==11.1.0
+      - name: Record actual Compression Launch frame hashes
+        run: sha256sum assets/arcade/mad-buds/kush-krusher/animations/kk_anim_04_compression_launch/*_frame_*.png
       - name: Qualify 15 Kush Krusher animation sets
         run: python scripts/arcade/qualify-kush-krusher-assets.py
       - name: Preserve scoped audit even on failure

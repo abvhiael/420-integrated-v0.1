@@ -92,8 +92,22 @@ contract PokerDeckDisclosure420 {
     }
     function getDeck(bytes32 handId) external view returns (Deck memory) { return decks[handId]; }
     function allAcknowledged(bytes32 handId) external view returns(bool) {
+        PokerConfidentialDeal420.Hand memory h=deals.getHand(handId);
         uint16 mask=deals.handSeatMask(handId);
-        return decks[handId].published && mask!=0 && (decks[handId].receiptMask & mask)==mask;
+        Deck storage d=decks[handId];
+        if(!d.published||d.disclosed||mask==0||
+           (d.deliveryMask&mask)!=mask||(d.receiptMask&mask)!=mask||
+           deals.ledger().seatingEpoch(h.tableId)!=h.epoch)return false;
+        // A receipt does not remain valid after a recipient changes their key.
+        // Re-evaluate the ownership/key binding immediately before hand start.
+        for(uint8 i=0;i<9;i++)if((mask&(uint16(1)<<i))!=0){
+            if(recipientEnvelopeHash[handId][i]==bytes32(0)||
+               receiptHash[handId][i]==bytes32(0)||
+               recipientKeyFingerprint[handId][i]==bytes32(0)||
+               keys.fingerprintOf(h.tableId,i)!=recipientKeyFingerprint[handId][i])
+                return false;
+        }
+        return true;
     }
 
     /// @notice Public verifier is suitable ONLY for already-released/post-game cards.

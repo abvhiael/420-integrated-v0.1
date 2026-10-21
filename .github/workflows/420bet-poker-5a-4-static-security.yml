@@ -14,6 +14,7 @@ on:
       - 'contracts/src/bet/PokerInitialEncryptedDeck420.sol'
       - 'contracts/src/bet/PokerVerifierVersions420.sol'
       - 'contracts/src/bet/PokerDeliveryProofBook420.sol'
+      - 'contracts/src/bet/PokerProviderAccountability420.sol'
       - 'contracts/src/bet/PokerDeckDisclosure420.sol'
       - 'contracts/src/bet/PokerRecipientKeys420.sol'
       - 'contracts/src/bet/PokerGnarkRecipientKeyPoPAdapter420.sol'

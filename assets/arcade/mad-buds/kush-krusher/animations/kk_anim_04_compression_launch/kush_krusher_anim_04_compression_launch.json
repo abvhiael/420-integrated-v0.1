@@ -1,0 +1,100 @@
+{
+  "schema": "mad-buds-animation-manifest-v1",
+  "schemaVersion": 1,
+  "characterId": "kush_krusher",
+  "animationId": "kk_anim_04_compression_launch",
+  "animationName": "compression_launch",
+  "animationNumber": "04",
+  "frameCount": 10,
+  "frameWidth": 1024,
+  "frameHeight": 1024,
+  "fps": 10,
+  "durationMs": 1000,
+  "loop": false,
+  "direction": "front_right_diagonal",
+  "sourceArt": {
+    "character": "kush-krusher.png",
+    "cannon": "cartoon_glass_bong_cannon_mortar.png",
+    "sourceHashesVerified": false
+  },
+  "repositoryDestination": "assets/arcade/mad-buds/kush-krusher/animations/kk_anim_04_compression_launch/",
+  "visualApprovalStatus": "PENDING_OWNER_APPROVAL",
+  "qualificationStatus": "NOT_QUALIFIED",
+  "notes": [
+    "Manifest is a production template, not a qualified asset inventory.",
+    "Frame files have not been verified under canonical filenames; hashes must be populated from final PNG bytes.",
+    "Duration and FPS are working settings pending confirmation against authoritative Phase F requirements."
+  ],
+  "frames": [
+    {
+      "index": 1,
+      "filename": "kush_krusher_anim_04_compression_launch_frame_01.png",
+      "durationMs": 100,
+      "sha256": null,
+      "verificationStatus": "PENDING_FINAL_ASSET_VERIFICATION"
+    },
+    {
+      "index": 2,
+      "filename": "kush_krusher_anim_04_compression_launch_frame_02.png",
+      "durationMs": 100,
+      "sha256": null,
+      "verificationStatus": "PENDING_FINAL_ASSET_VERIFICATION"
+    },
+    {
+      "index": 3,
+      "filename": "kush_krusher_anim_04_compression_launch_frame_03.png",
+      "durationMs": 100,
+      "sha256": null,
+      "verificationStatus": "PENDING_FINAL_ASSET_VERIFICATION"
+    },
+    {
+      "index": 4,
+      "filename": "kush_krusher_anim_04_compression_launch_frame_04.png",
+      "durationMs": 100,
+      "sha256": null,
+      "verificationStatus": "PENDING_FINAL_ASSET_VERIFICATION"
+    },
+    {
+      "index": 5,
+      "filename": "kush_krusher_anim_04_compression_launch_frame_05.png",
+      "durationMs": 100,
+      "sha256": null,
+      "verificationStatus": "PENDING_FINAL_ASSET_VERIFICATION"
+    },
+    {
+      "index": 6,
+      "filename": "kush_krusher_anim_04_compression_launch_frame_06.png",
+      "durationMs": 100,
+      "sha256": null,
+      "verificationStatus": "PENDING_FINAL_ASSET_VERIFICATION"
+    },
+    {
+      "index": 7,
+      "filename": "kush_krusher_anim_04_compression_launch_frame_07.png",
+      "durationMs": 100,
+      "sha256": null,
+      "verificationStatus": "PENDING_FINAL_ASSET_VERIFICATION"
+    },
+    {
+      "index": 8,
+      "filename": "kush_krusher_anim_04_compression_launch_frame_08.png",
+      "durationMs": 100,
+      "sha256": null,
+      "verificationStatus": "PENDING_FINAL_ASSET_VERIFICATION"
+    },
+    {
+      "index": 9,
+      "filename": "kush_krusher_anim_04_compression_launch_frame_09.png",
+      "durationMs": 100,
+      "sha256": null,
+      "verificationStatus": "PENDING_FINAL_ASSET_VERIFICATION"
+    },
+    {
+      "index": 10,
+      "filename": "kush_krusher_anim_04_compression_launch_frame_10.png",
+      "durationMs": 100,
+      "sha256": null,
+      "verificationStatus": "PENDING_FINAL_ASSET_VERIFICATION"
+    }
+  ]
+}

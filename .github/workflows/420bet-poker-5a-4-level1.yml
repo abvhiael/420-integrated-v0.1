@@ -81,6 +81,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Diagnose Solidity stack source locations without IR (informational only)
+        continue-on-error: true
+        env:
+          FOUNDRY_VIA_IR: 'false'
+        working-directory: contracts
+        run: forge test --match-path 'test/BetPokerNLHEBetting54.t.sol' -vv
       - name: Qualify funded native hand and provider collateral integration
         working-directory: contracts
         run: forge test --match-path 'test/BetPokerNLHEBetting54.t.sol' -vv

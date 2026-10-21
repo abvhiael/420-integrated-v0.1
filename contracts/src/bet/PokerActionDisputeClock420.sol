@@ -12,6 +12,8 @@ contract PokerActionDisputeClock420 {
     struct Clock { uint64 deadline; uint64 nonce; uint8 seat; bytes32 stateHash; bool active; bool disputed; }
     mapping(bytes32=>Clock) public clocks;
     mapping(bytes32=>bytes32) public evidenceHash;
+    mapping(bytes32=>uint64) public disputedAt;
+    mapping(bytes32=>bool) public voidFinalized;
     bytes32 public constant ACTION_BIND_RESOLVER=keccak256("BET_POKER_BIND_NATIVE_DISPUTE_RESOLVER.V1");
     uint64 public constant REVIEW_WINDOW=1 days;
     struct Resolution {
@@ -33,6 +35,7 @@ contract PokerActionDisputeClock420 {
     event ResolutionProposed(bytes32 indexed handId,bytes32 outcomeHash,uint64 executableAfter);
     event ResolutionAppealed(bytes32 indexed handId,bytes32 evidence,uint64 executableAfter);
     event ResolutionFinalized(bytes32 indexed handId,bytes32 outcomeHash);
+    event UnprovableVoidFinalized(bytes32 indexed handId);
     constructor(address deals_) {
         if(deals_==address(0))revert InvalidInput();
         deals=PokerConfidentialDeal420(deals_);
@@ -73,6 +76,7 @@ contract PokerActionDisputeClock420 {
            deals.ledger().seatOf(h.tableId,i).player==msg.sender)authorized=true;
         if(!authorized)revert Unauthorized();
         c.active=false;c.disputed=true;
+        disputedAt[handId]=uint64(block.timestamp);
         evidenceHash[handId]=evidence;
         emit Disputed(handId,msg.sender,evidence);
     }
@@ -130,6 +134,23 @@ contract PokerActionDisputeClock420 {
         r.finalized=true;
         clocks[handId].disputed=false;
         emit ResolutionFinalized(handId,actualResultHash);
+    }
+    /// @notice Authorized native engine may close an unprovable disputed hand
+    /// only after bounded evidence and appeal time has expired. This records
+    /// NO payout and cannot itself release a single chip.
+    function finalizeUnprovableVoid(bytes32 handId) external {
+        _requireResolver(handId);
+        uint64 opened=disputedAt[handId];
+        Resolution storage r=resolutions[handId];
+        if(opened==0||!clocks[handId].disputed||voidFinalized[handId]||
+            r.finalized)revert InvalidState();
+        uint256 earliest=uint256(opened)+1 hours+2*REVIEW_WINDOW;
+        if(r.proposedAt!=0&&uint256(r.executableAfter)>earliest)
+            earliest=uint256(r.executableAfter);
+        if(block.timestamp<earliest)revert Premature();
+        voidFinalized[handId]=true;
+        clocks[handId].disputed=false;
+        emit UnprovableVoidFinalized(handId);
     }
     function isFrozen(bytes32 handId) external view returns(bool){return clocks[handId].disputed;}
 }

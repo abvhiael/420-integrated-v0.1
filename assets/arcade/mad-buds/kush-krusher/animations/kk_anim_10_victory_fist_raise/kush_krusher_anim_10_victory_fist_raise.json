@@ -1,0 +1,86 @@
+{
+  "schema": "mad-buds.animation-manifest",
+  "schemaVersion": "1.0",
+  "characterId": "kush_krusher",
+  "animationId": "kk_anim_10_victory_fist_raise",
+  "animationName": "victory_fist_raise",
+  "animationNumber": "10",
+  "frameCount": 10,
+  "frameWidth": 1024,
+  "frameHeight": 1024,
+  "fps": 10,
+  "durationMs": 1000,
+  "loop": false,
+  "direction": "front",
+  "frames": [
+    {
+      "index": 1,
+      "filename": "kush_krusher_anim_10_victory_fist_raise_frame_01.png",
+      "durationMs": 100,
+      "sha256": "59adbc346519e7e6f5cf34be925295ba11010acbd7eba2d2c4c74539169f41f3"
+    },
+    {
+      "index": 2,
+      "filename": "kush_krusher_anim_10_victory_fist_raise_frame_02.png",
+      "durationMs": 100,
+      "sha256": "2174edd8bbad2994392b090e6d42bf11d23f83f5d4f5998dce21f2da4dadf2c5"
+    },
+    {
+      "index": 3,
+      "filename": "kush_krusher_anim_10_victory_fist_raise_frame_03.png",
+      "durationMs": 100,
+      "sha256": "85ce6fe289104198b1ead9bd9b828fcba610cb9f83875ebf82b44987613db3da"
+    },
+    {
+      "index": 4,
+      "filename": "kush_krusher_anim_10_victory_fist_raise_frame_04.png",
+      "durationMs": 100,
+      "sha256": "b50da4293a36093351c14296a0f8bbc1f8bbce18f89375d264a08d242a7c9bdf"
+    },
+    {
+      "index": 5,
+      "filename": "kush_krusher_anim_10_victory_fist_raise_frame_05.png",
+      "durationMs": 100,
+      "sha256": "639da1bd60c045e58c683fa2f276e9488424cc28985abaa45a652d7f618c08db"
+    },
+    {
+      "index": 6,
+      "filename": "kush_krusher_anim_10_victory_fist_raise_frame_06.png",
+      "durationMs": 100,
+      "sha256": "b9d0e16e0359b9e72d0e7ea5df25da21837d3307597d4c0b54e4d35322c783cb"
+    },
+    {
+      "index": 7,
+      "filename": "kush_krusher_anim_10_victory_fist_raise_frame_07.png",
+      "durationMs": 100,
+      "sha256": "f908d068cc0b166238369a5bf1deee17b63866a124c692830855f7117245d15d"
+    },
+    {
+      "index": 8,
+      "filename": "kush_krusher_anim_10_victory_fist_raise_frame_08.png",
+      "durationMs": 100,
+      "sha256": "6474af5a97379a80b46bc009ac76d212571e7be5e53757329860f9644295fbd2"
+    },
+    {
+      "index": 9,
+      "filename": "kush_krusher_anim_10_victory_fist_raise_frame_09.png",
+      "durationMs": 100,
+      "sha256": "aadbed5e8d0c61538de92287c3046e9c3737ffc4926a0beb69956e636e1925c6"
+    },
+    {
+      "index": 10,
+      "filename": "kush_krusher_anim_10_victory_fist_raise_frame_10.png",
+      "durationMs": 100,
+      "sha256": "242c1297a4017bb668c33b9d45d88b9833c51fdfdde9e39bf5e7cc1a59038849"
+    }
+  ],
+  "sourceArtwork": {
+    "filename": "kush_krusher_victory_pose_sequence.png",
+    "sha256": "c037d1a70e2ed79a9b610e432b306c1bc887d78668cdcfebfc203746af6e84ca",
+    "relationship": "source 10-panel storyboard; separated frames are derived from individual panels"
+  },
+  "productionMethod": "deterministic 2x5 panel cropping, background color keying with alpha-edge feathering, individual resampling onto transparent 1024x1024 RGBA canvases",
+  "repositoryDestination": "assets/arcade/mad-buds/kush-krusher/animations/kk_anim_10_victory_fist_raise/",
+  "visualApprovalStatus": "pending owner approval",
+  "qualificationStatus": "technical extraction verified; motion quality not qualified"
+}

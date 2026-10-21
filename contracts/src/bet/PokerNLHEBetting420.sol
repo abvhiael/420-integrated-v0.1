@@ -26,6 +26,9 @@ interface IPokerAuthenticatedStreet420 {
 /// or choose the player to act. Settlement must consume these stored values.
 /// @dev Does not itself implement seven-card hand ranking or finalize funds.
 ///      The latter MUST run against cryptographically authenticated revelations.
+interface IPokerMissingShareEvidence420 {
+    function missingProviders(bytes32 handId,uint8 street)external view returns(uint8);
+}
 contract PokerNLHEBetting420 {
     bytes32 public constant ACTION_DOMAIN=keccak256("420.BET.POKER.NLHE.AUTHENTICATED.ACTION.V1");
     bytes32 public constant STATE_DOMAIN=keccak256("420.BET.POKER.NLHE.STATE.V1");
@@ -391,8 +394,16 @@ contract PokerNLHEBetting420 {
         handAborted[handId]=true;
         evidenceRecovery[handId].active=false;
         if(disputes.isFrozen(handId))disputes.finalizeUnprovableVoid(handId);
+        uint8 blame;
+        if(address(revealForTable[g.tableId])!=address(0)){
+            uint8 street=r.failedPhase==Phase.AWAIT_FLOP?1:
+                r.failedPhase==Phase.AWAIT_TURN?2:
+                r.failedPhase==Phase.AWAIT_RIVER?3:4;
+            blame=IPokerMissingShareEvidence420(address(revealForTable[g.tableId]))
+                .missingProviders(handId,street);
+        }
         ledger.cancelReservedHand(g.tableId,handId);
-        _bond(g.tableId).close(handId,0);
+        _bond(g.tableId).close(handId,blame);
         emit MissingEvidenceRecoveryVoided(handId,g.tableId);
     }
 

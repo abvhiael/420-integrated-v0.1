@@ -315,8 +315,13 @@ contract PokerNLHEBetting420 {
            shuffle.isProofComplete(handId))revert InvalidState();
         if(block.timestamp<uint256(h.deadline)+1 hours)revert TooEarly();
         handAborted[handId]=true;
+        PokerPrivateShuffleGate420.Record memory record=shuffle.recordOf(handId);
+        uint8 missing;
+        if(record.stage==1)missing=2; // provider B failed its authenticated second stage
+        else if(record.stage==0&&shuffle.initialDeck().rootOf(handId)!=bytes32(0))
+            missing=1; // provider A failed after a proven initial deck
         ledger.cancelReservedHand(h.tableId,handId);
-        _bond(h.tableId).close(handId,0);
+        _bond(h.tableId).close(handId,missing);
         emit UnprovedDealAborted(handId,h.tableId);
     }
     /// @notice A completed shuffle still cannot force users to accept missing

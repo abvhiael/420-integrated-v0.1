@@ -7,11 +7,19 @@ import "./PokerRecipientKeys420.sol";
 /// @dev Cryptographic confidentiality depends on off-chain authenticated encryption and recipient-controlled keys.
 ///      This verifier proves commitments and a collision-free 52-card plaintext opening at the end of a hand.
 ///      It CANNOT prove ciphertext matches hidden cards before opening or guarantee a fair secret shuffle.
+interface IPokerDeliveryProofBook420 {
+    function allVerified(bytes32 handId) external view returns(bool);
+    function deals() external view returns(PokerConfidentialDeal420);
+    function keys() external view returns(PokerRecipientKeys420);
+}
 contract PokerDeckDisclosure420 {
     bytes32 public constant DOMAIN = keccak256("420.BET.POKER.DECK.DISCLOSURE.V1");
     PokerConfidentialDeal420 public immutable deals;
     BetAuthorization420 public immutable authorization;
     PokerRecipientKeys420 public immutable keys;
+    bytes32 public constant ACTION_BIND_PROOF_BOOK=keccak256("BET_POKER_BIND_PRIVATE_PROOF_BOOK.V1");
+    mapping(bytes32=>IPokerDeliveryProofBook420) public proofBookForTable;
+    event ProofBookBound(bytes32 indexed tableId,address proofBook);
 
     struct Deck {
         bytes32 commitment;
@@ -39,6 +47,19 @@ contract PokerDeckDisclosure420 {
         authorization=deals.authorization();
         keys=PokerRecipientKeys420(keys_);
         if(address(keys.ledger())!=address(deals.ledger())) revert InvalidValue();
+    }
+    /// @notice One-time governance binding; receipts without proof are never
+    /// sufficient for funding-enabled game start.
+    function bindProofBook(bytes32 tableId,address book) external {
+        if(book==address(0)||book.code.length==0||
+           address(proofBookForTable[tableId])!=address(0))revert InvalidValue();
+        if(!authorization.isAuthorized(msg.sender,ACTION_BIND_PROOF_BOOK,
+           authorization.scopeForTable(tableId),0))revert Unauthorized();
+        IPokerDeliveryProofBook420 proofs=IPokerDeliveryProofBook420(book);
+        if(address(proofs.deals())!=address(deals)||
+           address(proofs.keys())!=address(keys))revert InvalidValue();
+        proofBookForTable[tableId]=proofs;
+        emit ProofBookBound(tableId,book);
     }
     function hashDeck(bytes32 handId,uint8[52] calldata order,bytes32 salt)
         public view returns(bytes32) {
@@ -107,6 +128,8 @@ contract PokerDeckDisclosure420 {
                keys.fingerprintOf(h.tableId,i)!=recipientKeyFingerprint[handId][i])
                 return false;
         }
+        IPokerDeliveryProofBook420 proofs=proofBookForTable[h.tableId];
+        if(address(proofs)==address(0)||!proofs.allVerified(handId))return false;
         return true;
     }
 

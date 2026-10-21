@@ -127,7 +127,7 @@ contract PokerNLHEBetting54Test is PokerPrivateShuffleGate54Test {
         cheat54.prank(ADMIN);engine.bindDelivery(TABLE,address(delivery));
         require(proofBook.allVerified(handId),"four accepted encrypted shares per recipient");
     }
-    function _readyBetting() internal returns(bytes32 id){
+    function _readyProvedDelivery() internal returns(bytes32 id){
         id=_hand54();
         PokerConfidentialDeal420.Hand memory h=deal.getHand(id);
         bytes32 input=initialDeck.rootOf(id);
@@ -143,6 +143,9 @@ contract PokerNLHEBetting54Test is PokerPrivateShuffleGate54Test {
         cheat54.prank(PLAYER_B);signing.bindSigner(TABLE,signedVm.addr(OPPONENT_KEY));
         engine.prepareDealAssignment(id);
         _acknowledgedPrivateDelivery(id);
+    }
+    function _readyBetting() internal returns(bytes32 id){
+        id=_readyProvedDelivery();
         engine.start(id,0,60);
     }
     function _signedAction(bytes32 id,uint8 seat,PokerNLHEBetting420.Move move,
@@ -229,6 +232,24 @@ contract PokerNLHEBetting54Test is PokerPrivateShuffleGate54Test {
         engine.cancelWithheldDeal(id);
     }
 
+    function testVerifiedDeliveryCannotBeReboundAfterRecipientKeyRotation() public {
+        bytes32 id=_readyProvedDelivery();
+        require(delivery.allAcknowledged(id),"complete delivered shares required");
+        bytes32 beforeHash=proofBook.envelopeHashFor(id,0);
+        require(beforeHash!=bytes32(0),"authenticated ciphertext envelope");
+        PokerSeatLedger420.Seat memory seat=ledger.seatOf(TABLE,0);
+        uint256[8] memory raw;
+        uint256[3] memory pub=[
+            recipient.scopeForKey(TABLE,PLAYER,seat.epoch),uint256(555),uint256(666)];
+        cheat54.prank(PLAYER);
+        recipient.bindVerifiedKey(TABLE,555,666,abi.encode(raw,pub));
+        require(!delivery.allAcknowledged(id),"rotated key cannot reuse proved ciphertext");
+        cheat54.expectRevert(PokerDeliveryProofBook420.InvalidState.selector);
+        proofBook.envelopeHashFor(id,0);
+        cheat54.expectRevert(PokerNLHEBetting420.InvalidState.selector);
+        engine.start(id,0,60);
+        require(ledger.reservedInHand(TABLE)==800,"no escrow consumed by rotated proof");
+    }
     function testPostBettingMissingFlopProofRecoversOriginalEscrowExactlyOnce() public {
         bytes32 id=_readyBetting();
         _signedAction(id,0,PokerNLHEBetting420.Move.CALL,10,PLAYER_KEY);

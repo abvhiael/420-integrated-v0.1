@@ -138,7 +138,7 @@ contract PokerDeckDisclosure420 {
     function verifyOpenedDeck(bytes32 handId,uint8[52] calldata order,bytes32 salt) external view returns(bool) {
         Deck storage d=decks[handId];
         if (!d.published || salt==bytes32(0) || hashDeck(handId,order,salt)!=d.commitment) revert InvalidDeck();
-        uint256 bitmap;
+        uint256 bitmap=0;
         for(uint256 i=0;i<52;++i) {
             if(order[i]>=52) revert InvalidDeck();
             uint256 flag=uint256(1)<<order[i];

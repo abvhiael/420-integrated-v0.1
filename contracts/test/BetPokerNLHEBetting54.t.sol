@@ -72,6 +72,9 @@ contract PokerNLHEBetting54Fixture is PokerPrivateShuffleGate54Test {
         cheat54.prank(ADMIN);delivery.bindProofBook(TABLE,address(proofBook));
         cap.grant(ADMIN,engine.ACTION_BIND_DELIVERY(),auth.scopeForTable(TABLE),true);
         cap.grant(ADMIN,ledger.ACTION_BIND_SETTLEMENT(),auth.scopeForTable(TABLE),true);
+        // Wire immutable delivery evidence before reservation: withholding
+        // attribution must be available even when NO provider supplies shares.
+        cheat54.prank(ADMIN);engine.bindDelivery(TABLE,address(delivery));
     }
     function _configureKeyProof(bytes32 keyHash) internal {
         bytes32 popVersion=keccak256("test-only recipient key possession");
@@ -148,13 +151,16 @@ contract PokerNLHEBetting54Fixture is PokerPrivateShuffleGate54Test {
     function _acknowledgeVerifiedEnvelopes(bytes32 handId) internal {
         bytes32 keyA=recipient.fingerprintOf(TABLE,0);
         bytes32 keyB=recipient.fingerprintOf(TABLE,1);
+        // Compute both envelope arguments BEFORE prank. Otherwise the
+        // fingerprint lookup consumes Foundry's one-shot mocked sender.
+        bytes32 envelopeA=proofBook.envelopeHashFor(handId,0);
+        bytes32 envelopeB=proofBook.envelopeHashFor(handId,1);
         cheat54.prank(PROVIDER_A);
-        delivery.bindEnvelope(handId,0,proofBook.envelopeHashFor(handId,0),keyA);
+        delivery.bindEnvelope(handId,0,envelopeA,keyA);
         cheat54.prank(PROVIDER_B);
-        delivery.bindEnvelope(handId,1,proofBook.envelopeHashFor(handId,1),keyB);
+        delivery.bindEnvelope(handId,1,envelopeB,keyB);
         cheat54.prank(PLAYER);delivery.acknowledge(handId,0,keccak256("receipt A"));
         cheat54.prank(PLAYER_B);delivery.acknowledge(handId,1,keccak256("receipt B"));
-        cheat54.prank(ADMIN);engine.bindDelivery(TABLE,address(delivery));
         require(proofBook.allVerified(handId),"four accepted encrypted shares per recipient");
     }
     function _readyProvedDelivery() internal returns(bytes32 id){

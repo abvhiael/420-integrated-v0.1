@@ -93,34 +93,6 @@ jobs:
           find test -maxdepth 1 -type f -name '*Poker*.t.sol' -exec cp -t test/poker-l1/ {} +
           python3 -c "from pathlib import Path; files=Path('test/poker-l1').glob('*.t.sol'); [(p.write_text(p.read_text().replace('../src/', '../../src/'))) for p in files]"
           test -s test/poker-l1/BetPokerNLHEBetting54.t.sol
-      - name: Isolate exact Yul offender with individual source builds
-        working-directory: contracts
-        run: |
-          set -u
-          for unit in src/bet/PokerProviderAccountability420.sol src/bet/PokerDeliveryProofBook420.sol src/bet/PokerNLHEBetting420.sol src/bet/PokerLiveCardReveals420.sol; do
-            echo "::group::Diagnostic $unit"
-            forge build "$unit" > /tmp/poker-solc-isolation.log 2>&1
-            rc=$?
-            tail -n 14 /tmp/poker-solc-isolation.log
-            echo "DIAGNOSTIC_RESULT path=$unit exit=$rc"
-            echo "::endgroup::"
-          done
-          exit 0
-      - name: Isolate failing inherited poker test compilation unit
-        working-directory: contracts
-        run: |
-          set -u
-          export FOUNDRY_SRC=src/bet
-          export FOUNDRY_TEST=test/poker-l1
-          for unit in test/poker-l1/BetPokerConfidentialDeal54.t.sol test/poker-l1/BetPokerPrivateShuffleGate54.t.sol test/poker-l1/BetPokerNLHEBetting54.t.sol; do
-            echo "::group::Scoped test diagnostic $unit"
-            forge build "$unit" >/tmp/isolated-test.log 2>&1
-            rc=$?
-            tail -n 9 /tmp/isolated-test.log
-            echo "TEST_DIAGNOSTIC path=$unit exit=$rc"
-            echo "::endgroup::"
-          done
-          exit 0
       - name: Diagnose exact Solidity test function on temporary test-tree copy
         working-directory: contracts
         env:

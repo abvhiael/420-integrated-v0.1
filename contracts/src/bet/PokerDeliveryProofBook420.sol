@@ -53,6 +53,22 @@ contract PokerDeliveryProofBook420 is IPokerDeliveryProofBook420 {
         assignment=IPokerPreparedDealAssignment420(assignment_);
         providerA=IPokerEncryptedShareDelivery420(providerA_);
         providerB=IPokerEncryptedShareDelivery420(providerB_);
+        // Only registry-pinned adapters with distinct provider keys are
+        // admissible; an arbitrary always-true interface is not a delivery
+        // proof. Tests may use a separately marked generated-verifier stub,
+        // but production VK/circuit approval is a distinct release gate.
+        PokerGnarkEncryptedShareDeliveryAdapter420 a=
+            PokerGnarkEncryptedShareDeliveryAdapter420(providerA_);
+        PokerGnarkEncryptedShareDeliveryAdapter420 b=
+            PokerGnarkEncryptedShareDeliveryAdapter420(providerB_);
+        if(a.thresholdKeyCommitment()==bytes32(0)||
+           b.thresholdKeyCommitment()==bytes32(0)||
+           a.thresholdKeyCommitment()==b.thresholdKeyCommitment()||
+           !a.versions().matches(a.versionId(),a.groth16Verifier(),
+               a.verifyingKeyHash(),a.circuitHash(),a.schemaHash())||
+           !b.versions().matches(b.versionId(),b.groth16Verifier(),
+               b.verifyingKeyHash(),b.circuitHash(),b.schemaHash()))
+               revert InvalidConfiguration();
         if(address(disclosure.deals())!=deals_||
             address(shuffle.deals())!=deals_||
             address(assignment.deals())!=deals_||

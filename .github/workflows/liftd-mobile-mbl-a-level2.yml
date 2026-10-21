@@ -63,13 +63,16 @@ jobs:
             adb shell pidof org.integrated420.liftd.preview
             python3 rideshare/mobile/test/android-interactive-preview.py
       - name: Bind emulator evidence to exact implementation SHA
+        if: always()
         run: |
           mkdir -p mbl-a-android-evidence
           git rev-parse HEAD > mbl-a-android-evidence/implementation-sha.txt
-          sha256sum rideshare/mobile/android/app/build/outputs/apk/debug/app-debug.apk > mbl-a-android-evidence/apk-sha256.txt
+          if test -f rideshare/mobile/android/app/build/outputs/apk/debug/app-debug.apk; then sha256sum rideshare/mobile/android/app/build/outputs/apk/debug/app-debug.apk > mbl-a-android-evidence/apk-sha256.txt; fi
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: mbl-a-android-${{ github.event.pull_request.head.sha || github.sha }}
+          if-no-files-found: error
           path: mbl-a-android-evidence/
           if-no-files-found: error
   ios-simulator:

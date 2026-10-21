@@ -6,6 +6,13 @@ on:
       - 'scripts/arcade/qualify-kush-krusher-assets.py'
       - '.github/workflows/arcade-kush-krusher-assets.yml'
   workflow_dispatch:
+  push:
+    branches:
+      - audit/arcade-kush-krusher-phase-f-reconcile
+    paths:
+      - 'assets/arcade/mad-buds/kush-krusher/animations/**'
+      - 'scripts/arcade/qualify-kush-krusher-assets.py'
+      - '.github/workflows/arcade-kush-krusher-assets.yml'
 jobs:
   qualify-assets:
     runs-on: ubuntu-latest

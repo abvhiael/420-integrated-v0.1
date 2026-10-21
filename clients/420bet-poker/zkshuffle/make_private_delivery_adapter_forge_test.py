@@ -10,9 +10,9 @@ import re
 import sys
 
 if len(sys.argv) != 5:
-    raise SystemExit("usage: script.py delivery|recipient verifier.sol fixture.json output.t.sol")
+    raise SystemExit("usage: script.py delivery|recipient|aggregate verifier.sol fixture.json output.t.sol")
 kind, source, fixture, dest = sys.argv[1:]
-if kind not in {"delivery", "recipient"}:
+if kind not in {"delivery", "recipient", "aggregate"}:
     raise SystemExit("unrecognized verifier family")
 src = pathlib.Path(source)
 names = re.findall(r"^\s*contract\s+([A-Za-z_][A-Za-z0-9_]*)\b", src.read_text(), re.MULTILINE)
@@ -25,7 +25,7 @@ if not proof.startswith("0x") or len(proof) != 514:
 p = [int(proof[2+i*64:2+(i+1)*64], 16) for i in range(8)]
 x = [int(word) for word in data["public"]]
 fr = 21888242871839275222246405745257275088696311157297823662689037894645226208583
-n = 18 if kind == "delivery" else 3
+n = 18 if kind == "delivery" else 3 if kind == "recipient" else 7
 if len(x) != n or any(v < 0 or v >= fr for v in x):
     raise SystemExit("wrong public input schema or noncanonical field element")
 words = lambda vals: ",".join(f"uint256({v})" for v in vals)
@@ -35,6 +35,7 @@ import "../src/bet/generated/{src.name}";
 import "../src/bet/PokerVerifierVersions420.sol";
 import "../src/bet/PokerGnarkEncryptedShareDeliveryAdapter420.sol";
 import "../src/bet/PokerGnarkRecipientKeyPoPAdapter420.sol";
+import "../src/bet/PokerGnarkThresholdKeyAggregateAdapter420.sol";
 contract PokerActualPrivateDeliveryAdapterProofTest {{
  function testRealProofThroughPinnedAdapter() public {{
   {names[0]} verifier = new {names[0]}();
@@ -71,7 +72,7 @@ if kind == "delivery":
   require(!adapter.verifyDelivery(handId,root,uint8(input[2]),uint8(input[3]),
     uint8(input[4]),input[5],points,abi.encode(p,input)),"corrupt proof accepted");
 """
-else:
+elif kind == "recipient":
     body = """
   PokerGnarkRecipientKeyPoPAdapter420 adapter=
     new PokerGnarkRecipientKeyPoPAdapter420(
@@ -85,6 +86,23 @@ else:
   p[0]++;
   require(!adapter.verifyKeyPossession(input[0],input[1],input[2],abi.encode(p,input)),
     "corrupt proof accepted");
+"""
+else:
+    body = """
+  uint256[6] memory points;
+  for(uint256 i=0;i<6;i++)points[i]=input[i+1];
+  bytes32 aggregateHash=keccak256(abi.encode(points[4],points[5]));
+  PokerGnarkThresholdKeyAggregateAdapter420 adapter=
+    new PokerGnarkThresholdKeyAggregateAdapter420(
+      address(verifier),address(registry),version,circuit,vk,schema,aggregateHash);
+  require(adapter.verifyAggregate(input[0],points,packed),"real aggregate-key proof rejected");
+  require(!adapter.verifyAggregate(input[0]+1,points,packed),"aggregate proof replay accepted");
+  points[0]++;
+  require(!adapter.verifyAggregate(input[0],points,packed),"wrong provider key accepted");
+  points[0]--;
+  p[0]++;
+  require(!adapter.verifyAggregate(input[0],points,abi.encode(p,input)),
+    "corrupt aggregate proof accepted");
 """
 destp=pathlib.Path(dest)
 destp.parent.mkdir(parents=True,exist_ok=True)

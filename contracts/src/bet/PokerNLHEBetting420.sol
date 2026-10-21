@@ -6,6 +6,8 @@ import "./PokerPrivateShuffleGate420.sol";
 import "./PokerActionDisputeClock420.sol";
 import "./PokerCanonicalRake420.sol";
 import "./PokerDeckDisclosure420.sol";
+import "./PokerProviderAccountability420.sol";
+import "./PokerDeliveryProofBook420.sol";
 
 interface IPokerNativeOutcome420 {
     function engine() external view returns(address);
@@ -75,6 +77,11 @@ contract PokerNLHEBetting420 {
     mapping(bytes32=>bool) public flopOpened;
     mapping(bytes32=>bool) public handSettled;
     mapping(bytes32=>bool) public handAborted;
+    bytes32 public constant ACTION_BIND_PROVIDER_BOND=
+        keccak256("BET_POKER_BIND_PROVIDER_ACCOUNTABILITY.V1");
+    mapping(bytes32=>PokerProviderAccountability420) public bondForTable;
+    event ProviderBondBound(bytes32 indexed tableId,address bond);
+
     mapping(bytes32=>uint64) public evidenceDueAt;
     struct EvidenceRecovery {uint64 openedAt;uint64 finalizableAt;bytes32 stateRoot;Phase failedPhase;bool active;}
     mapping(bytes32=>EvidenceRecovery) public evidenceRecovery;
@@ -178,6 +185,7 @@ contract PokerNLHEBetting420 {
         if(disputes.isFrozen(handId))
             disputes.finalizeVerifiedOutcome(handId,_nativeResolutionHash(handId,g.stateRoot,balances,fee));
         ledger.settleReservedHand(g.tableId,handId,balances,fee);
+        _bond(g.tableId).close(handId,0);
         emit NativeHandSettled(handId,g.tableId,fee);
     }
     bytes32 public constant RESOLUTION_DOMAIN=keccak256("420.BET.POKER.NATIVE.RESOLUTION.V1");
@@ -249,6 +257,37 @@ contract PokerNLHEBetting420 {
 
     /// @notice Reserve funds before shuffling; any authenticated participant may
     /// initiate their already-authorized hand, but cannot choose its seats/stacks.
+    function bindProviderBond(bytes32 tableId,address bond)external {
+        if(bond==address(0)||bond.code.length==0||
+           address(bondForTable[tableId])!=address(0))revert InvalidState();
+        if(!deals.authorization().isAuthorized(msg.sender,ACTION_BIND_PROVIDER_BOND,
+            deals.authorization().scopeForTable(tableId),0))revert Unauthorized();
+        PokerProviderAccountability420 policy=PokerProviderAccountability420(bond);
+        if(address(policy.deals())!=address(deals)||policy.nativeEngine()!=address(this))
+            revert InvalidState();
+        bondForTable[tableId]=policy;
+        emit ProviderBondBound(tableId,bond);
+    }
+    function _bond(bytes32 tableId)private view returns(PokerProviderAccountability420 bond){
+        bond=bondForTable[tableId];
+        if(address(bond)==address(0))revert InvalidState();
+    }
+    /// @notice Objective missing delivery-proofs attribution, never a caller
+    /// specified fault or a fabricated accusation against a provider.
+    function _missingPrivateShareProviders(bytes32 handId,bytes32 tableId)
+        private view returns(uint8 fault){
+        PokerDeckDisclosure420 delivery=deliveryForTable[tableId];
+        if(address(delivery)==address(0))return 0;
+        IPokerDeliveryProofBook420 abstractBook=delivery.proofBookForTable(tableId);
+        if(address(abstractBook)==address(0))return 0;
+        uint16 mask=deals.handSeatMask(handId);
+        uint8 n=0;for(uint8 i=0;i<9;i++)if(_participates(mask,i))n++;
+        if(n<2||n>9)return 0;
+        uint32 required=(uint32(1)<<(2*n))-1;
+        PokerDeliveryProofBook420 book=PokerDeliveryProofBook420(address(abstractBook));
+        if((book.proofMaskOf(handId,0)&required)!=required)fault|=1;
+        if((book.proofMaskOf(handId,1)&required)!=required)fault|=2;
+    }
     function reserve(bytes32 handId) external {
         PokerConfidentialDeal420.Hand memory h=deals.getHand(handId);
         if(h.state!=PokerConfidentialDeal420.State.AWAITING &&
@@ -263,6 +302,7 @@ contract PokerNLHEBetting420 {
         bytes32 reservedSnapshot=ledger.reserveHand(h.tableId,handId,mask,h.epoch);
         if(reservedSnapshot==bytes32(0) ||
            reservedSnapshot!=ledger.lockedSnapshot(h.tableId))revert InvalidState();
+        _bond(h.tableId).lock(handId);
     }
     /// @notice Permissionless refund if providers fail to complete their proof
     /// before a strictly enforced deadline, provided no hand has begun.
@@ -276,6 +316,7 @@ contract PokerNLHEBetting420 {
         if(block.timestamp<uint256(h.deadline)+1 hours)revert TooEarly();
         handAborted[handId]=true;
         ledger.cancelReservedHand(h.tableId,handId);
+        _bond(h.tableId).close(handId,0);
         emit UnprovedDealAborted(handId,h.tableId);
     }
     /// @notice A completed shuffle still cannot force users to accept missing
@@ -290,7 +331,9 @@ contract PokerNLHEBetting420 {
         if(address(deliveryForTable[h.tableId])!=address(0)&&
             deliveryForTable[h.tableId].allAcknowledged(handId))revert InvalidState();
         handAborted[handId]=true;
+        uint8 faults=_missingPrivateShareProviders(handId,h.tableId);
         ledger.cancelReservedHand(h.tableId,handId);
+        _bond(h.tableId).close(handId,faults);
         emit UnverifiedDeliveryAborted(handId,h.tableId);
     }
 
@@ -344,6 +387,7 @@ contract PokerNLHEBetting420 {
         evidenceRecovery[handId].active=false;
         if(disputes.isFrozen(handId))disputes.finalizeUnprovableVoid(handId);
         ledger.cancelReservedHand(g.tableId,handId);
+        _bond(g.tableId).close(handId,0);
         emit MissingEvidenceRecoveryVoided(handId,g.tableId);
     }
 

@@ -48,6 +48,8 @@ jobs:
           api-level: 35
           arch: x86_64
           profile: pixel_6
+          emulator-options: -no-window -no-audio -no-boot-anim -gpu swiftshader_indirect -no-snapshot -no-metrics
+          disable-animations: false
           script: |
             set -eu
             adb reverse tcp:8081 tcp:8081

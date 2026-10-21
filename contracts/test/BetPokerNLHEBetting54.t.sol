@@ -92,8 +92,13 @@ contract PokerNLHEBetting54Test is PokerPrivateShuffleGate54Test {
                 aggregateSchema,gate.thresholdKeyCommitment());
     }
     function _acknowledgedPrivateDelivery(bytes32 handId) internal {
-        // NOTE: these are integration-only verifier stubs. Real Groth16 is
-        // qualified separately by generated Solidity proof acceptance.
+        _proveRecipientKeys();
+        _proveAggregateKey();
+        _publishEncryptedManifest(handId);
+        _proveAllEncryptedShares(handId);
+        _acknowledgeVerifiedEnvelopes(handId);
+    }
+    function _proveRecipientKeys() internal {
         uint256[8] memory keyProof;
         uint256[3] memory pkeyA=[recipient.scopeForKey(TABLE,PLAYER,ledger.seatOf(TABLE,0).epoch),
             uint256(111),uint256(222)];
@@ -101,6 +106,8 @@ contract PokerNLHEBetting54Test is PokerPrivateShuffleGate54Test {
             uint256(333),uint256(444)];
         cheat54.prank(PLAYER);recipient.bindVerifiedKey(TABLE,111,222,abi.encode(keyProof,pkeyA));
         cheat54.prank(PLAYER_B);recipient.bindVerifiedKey(TABLE,333,444,abi.encode(keyProof,pkeyB));
+    }
+    function _proveAggregateKey() internal {
         uint256[6] memory aggregateKeys=[
             uint256(100),uint256(200),uint256(101),uint256(201),uint256(19),uint256(20)];
         uint256[7] memory aggregatePublic=[
@@ -108,8 +115,12 @@ contract PokerNLHEBetting54Test is PokerPrivateShuffleGate54Test {
             uint256(101),uint256(201),uint256(19),uint256(20)];
         uint256[8] memory aggregateProof;
         proofBook.proveAggregateKey(aggregateKeys,abi.encode(aggregateProof,aggregatePublic));
+    }
+    function _publishEncryptedManifest(bytes32 handId) internal {
         cheat54.prank(PROVIDER_A);
         delivery.publish(handId,keccak256("private deck commitment"),keccak256("encrypted manifest"));
+    }
+    function _proveAllEncryptedShares(bytes32 handId) internal {
         for(uint8 pos=0;pos<4;pos++){
             uint8 seat=engine.holeSeatForPosition(handId,pos);
             (uint256 x,uint256 y,)=recipient.encryptionKeyOf(TABLE,seat);
@@ -133,6 +144,8 @@ contract PokerNLHEBetting54Test is PokerPrivateShuffleGate54Test {
                 proofBook.proveEncryptedShare(handId,pos,provider,points,abi.encode(proof,inputs));
             }
         }
+    }
+    function _acknowledgeVerifiedEnvelopes(bytes32 handId) internal {
         bytes32 keyA=recipient.fingerprintOf(TABLE,0);
         bytes32 keyB=recipient.fingerprintOf(TABLE,1);
         cheat54.prank(PROVIDER_A);

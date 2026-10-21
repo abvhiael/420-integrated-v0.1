@@ -3,6 +3,14 @@ pragma solidity ^0.8.24;
 import "./BetPokerConfidentialDeal54.t.sol";
 import "../src/bet/PokerDeckDisclosure420.sol";
 
+/// @dev Scope-isolated receipt tests use a stub proof-completion seam.
+/// Genuine proof soundness and the funded multi-proof book are tested separately.
+contract FakeProofBookDisclosure54 is IPokerDeliveryProofBook420 {
+    PokerConfidentialDeal420 public immutable deals;
+    PokerRecipientKeys420 public immutable keys;
+    constructor(address deal,address registry){deals=PokerConfidentialDeal420(deal);keys=PokerRecipientKeys420(registry);}
+    function allVerified(bytes32) external pure returns(bool){return true;}
+}
 contract PokerDeckDisclosure54Test is PokerConfidentialDeal54Test {
     PokerDeckDisclosure420 disclosure;
     PokerRecipientKeys420 keyRegistry;
@@ -11,6 +19,9 @@ contract PokerDeckDisclosure54Test is PokerConfidentialDeal54Test {
     constructor() {
         keyRegistry = new PokerRecipientKeys420(address(ledger));
         disclosure = new PokerDeckDisclosure420(address(deal),address(keyRegistry));
+        FakeProofBookDisclosure54 receiptScope=new FakeProofBookDisclosure54(address(deal),address(keyRegistry));
+        cap.grant(ADMIN,disclosure.ACTION_BIND_PROOF_BOOK(),auth.scopeForTable(TABLE),true);
+        cheat54.prank(ADMIN);disclosure.bindProofBook(TABLE,address(receiptScope));
     }
 
     function _ready() internal returns(bytes32 id) {

@@ -40,6 +40,7 @@ contract PokerDeliveryProofBook420 is IPokerDeliveryProofBook420 {
     mapping(bytes32=>uint32[2]) private proofBits;
     // Each proof exposes only an encrypted decryption share, never its plaintext.
     mapping(bytes32=>mapping(uint8=>mapping(uint8=>uint256[4]))) private encryptedShares;
+    mapping(bytes32=>mapping(uint8=>bytes32)) public proofRecipientFingerprint;
 
     error InvalidConfiguration();error InvalidState();error InvalidProof();error Duplicate();
     event RecipientShareProofVerified(bytes32 indexed handId,uint8 indexed position,
@@ -155,12 +156,15 @@ contract PokerDeliveryProofBook420 is IPokerDeliveryProofBook420 {
         uint32 bit=uint32(1)<<position;
         if((proofBits[handId][provider]&bit)!=0)revert Duplicate();
         (uint256 qx,uint256 qy,bytes32 fingerprint)=keys.encryptionKeyOf(h.tableId,seat);
+        if(proofRecipientFingerprint[handId][position]!=bytes32(0)&&
+           proofRecipientFingerprint[handId][position]!=fingerprint)revert InvalidProof();
         if(points[6]!=qx||points[7]!=qy)revert InvalidProof();
         bytes32 root=_root(handId);
         uint256 bound=context(handId,position,seat,provider,root,fingerprint,h.epoch,points);
         if(bound==0||!(provider==0?providerA:providerB).verifyDelivery(
             handId,root,position,seat,provider,bound,points,proof))revert InvalidProof();
         proofBits[handId][provider]|=bit;
+        proofRecipientFingerprint[handId][position]=fingerprint;
         encryptedShares[handId][position][provider]=
             [points[8],points[9],points[10],points[11]];
         emit RecipientShareProofVerified(handId,position,provider,seat,
@@ -183,6 +187,8 @@ contract PokerDeliveryProofBook420 is IPokerDeliveryProofBook420 {
         uint8 assigned;
         for(uint8 j=0;j<2*n;j++){
             if(assignment.holeSeatForPosition(handId,j)==seat){
+                if(proofRecipientFingerprint[handId][j]!=fingerprint)
+                    revert InvalidState();
                 digest=keccak256(abi.encode(digest,j,
                     encryptedShares[handId][j][0],encryptedShares[handId][j][1]));
                 assigned++;

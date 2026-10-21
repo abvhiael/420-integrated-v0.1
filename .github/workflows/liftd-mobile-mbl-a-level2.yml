@@ -9,7 +9,7 @@ permissions:
   contents: read
 jobs:
   android-emulator:
-    runs-on: ubuntu-latest
+    runs-on: macos-15
     timeout-minutes: 65
     steps:
       - uses: actions/checkout@v4
@@ -70,7 +70,7 @@ jobs:
         run: |
           mkdir -p mbl-a-android-evidence
           git rev-parse HEAD > mbl-a-android-evidence/implementation-sha.txt
-          if test -f rideshare/mobile/android/app/build/outputs/apk/debug/app-debug.apk; then sha256sum rideshare/mobile/android/app/build/outputs/apk/debug/app-debug.apk > mbl-a-android-evidence/apk-sha256.txt; fi
+          if test -f rideshare/mobile/android/app/build/outputs/apk/debug/app-debug.apk; then shasum -a 256 rideshare/mobile/android/app/build/outputs/apk/debug/app-debug.apk > mbl-a-android-evidence/apk-sha256.txt; fi
       - uses: actions/upload-artifact@v4
         if: always()
         with:

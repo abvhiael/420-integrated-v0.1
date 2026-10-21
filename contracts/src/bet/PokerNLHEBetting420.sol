@@ -194,6 +194,7 @@ contract PokerNLHEBetting420 {
         disputes.proposeVerifiedOutcome(handId,
             _nativeResolutionHash(handId,g.stateRoot,balances,fee));
     }
+    function isHandInitialized(bytes32 handId) external view returns(bool){return games[handId].initialized;}
     function gameOf(bytes32 handId) external view returns(Game memory){return games[handId];}
     function playerOf(bytes32 handId,uint8 seat) external view returns(Player memory){return players[handId][seat];}
     function _mask(uint8 seat) private pure returns(uint16){return uint16(1)<<seat;}

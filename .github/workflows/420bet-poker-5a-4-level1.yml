@@ -121,6 +121,12 @@ jobs:
             echo "::endgroup::"
           done
           exit 0
+      - name: Diagnose exact Solidity test function on temporary test-tree copy
+        working-directory: contracts
+        env:
+          FOUNDRY_SRC: src/bet
+          FOUNDRY_TEST: test/poker-l1
+        run: python3 ../scripts/diagnose-420bet-yul-test.py
       - name: Qualify funded native hand and provider collateral integration
         working-directory: contracts
         env:

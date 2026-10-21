@@ -1,0 +1,92 @@
+{
+  "schema": "mad-buds.animation-manifest",
+  "version": "1.0",
+  "characterId": "kush_krusher",
+  "animationId": "kk_anim_09_stuck_recovery",
+  "animationName": "stuck_recovery",
+  "animationNumber": "09",
+  "frameCount": 10,
+  "frameWidth": 1024,
+  "frameHeight": 1024,
+  "fps": 10,
+  "durationMs": 1000,
+  "loop": false,
+  "direction": "front",
+  "sourceStrip": "kush_krusher_s_impact_to_recovery_sequence.png",
+  "sourceStripSha256": "4d4dd6f00aee504cee0aee12786deea5686ff04e464641f9828d37ed194cb95e",
+  "productionMethod": "panel extraction from approved 10-frame image strip with background removal to transparent RGBA and standardized 1024x1024 canvas placement",
+  "frameFiles": [
+    "kush_krusher_anim_09_stuck_recovery_frame_01.png",
+    "kush_krusher_anim_09_stuck_recovery_frame_02.png",
+    "kush_krusher_anim_09_stuck_recovery_frame_03.png",
+    "kush_krusher_anim_09_stuck_recovery_frame_04.png",
+    "kush_krusher_anim_09_stuck_recovery_frame_05.png",
+    "kush_krusher_anim_09_stuck_recovery_frame_06.png",
+    "kush_krusher_anim_09_stuck_recovery_frame_07.png",
+    "kush_krusher_anim_09_stuck_recovery_frame_08.png",
+    "kush_krusher_anim_09_stuck_recovery_frame_09.png",
+    "kush_krusher_anim_09_stuck_recovery_frame_10.png"
+  ],
+  "frames": [
+    {
+      "index": 1,
+      "file": "kush_krusher_anim_09_stuck_recovery_frame_01.png",
+      "durationMs": 100,
+      "sha256": "2517b1300029c68f87a76308b28179a2be79a689586025e105a7f726eddf6b9b"
+    },
+    {
+      "index": 2,
+      "file": "kush_krusher_anim_09_stuck_recovery_frame_02.png",
+      "durationMs": 100,
+      "sha256": "77175aa30a441ded7d1f7b7e45b52562f916c3553178105cc825ba248c122705"
+    },
+    {
+      "index": 3,
+      "file": "kush_krusher_anim_09_stuck_recovery_frame_03.png",
+      "durationMs": 100,
+      "sha256": "208f87ee8d87381ae5cfd137cc2a1b27db863e9b12fdbbbb6d18a1b04e452ae8"
+    },
+    {
+      "index": 4,
+      "file": "kush_krusher_anim_09_stuck_recovery_frame_04.png",
+      "durationMs": 100,
+      "sha256": "4c1eb7430c41e839cfb2655a6078344ee7c04b3309171ec972c67232fc6e21cb"
+    },
+    {
+      "index": 5,
+      "file": "kush_krusher_anim_09_stuck_recovery_frame_05.png",
+      "durationMs": 100,
+      "sha256": "b99fa19537d790521c15806390be90d22a6486d3cdeafa213209ca7e43a73602"
+    },
+    {
+      "index": 6,
+      "file": "kush_krusher_anim_09_stuck_recovery_frame_06.png",
+      "durationMs": 100,
+      "sha256": "ec171162a2a3dd0cf508ee28704a5be7b37a8bd1f63853a33fcb62ae00960db6"
+    },
+    {
+      "index": 7,
+      "file": "kush_krusher_anim_09_stuck_recovery_frame_07.png",
+      "durationMs": 100,
+      "sha256": "d6521010723214a96931881e88c89f58cf4b93b0bb7e2e780dbf4a61ab7ade1f"
+    },
+    {
+      "index": 8,
+      "file": "kush_krusher_anim_09_stuck_recovery_frame_08.png",
+      "durationMs": 100,
+      "sha256": "30d981047786784b9aa6829006b7b39037c925d6dc09aae64730d5b59aba80da"
+    },
+    {
+      "index": 9,
+      "file": "kush_krusher_anim_09_stuck_recovery_frame_09.png",
+      "durationMs": 100,
+      "sha256": "4398b2bc36ceb6b14bf41039809c9c810e8df4ed0033e0c9664f15c559676cac"
+    },
+    {
+      "index": 10,
+      "file": "kush_krusher_anim_09_stuck_recovery_frame_10.png",
+      "durationMs": 100,
+      "sha256": "11a839e230b63bd834e1a28d991b2123ef5fe08c8fc781fc6b41165e5fdceed2"
+    }
+  ]
+}

@@ -184,7 +184,7 @@ contract PokerDeliveryProofBook420 is IPokerDeliveryProofBook420 {
         (,,bytes32 fingerprint)=keys.encryptionKeyOf(h.tableId,seat);
         digest=keccak256(abi.encode(ENVELOPE_DOMAIN,block.chainid,address(this),
             handId,seat,fingerprint,h.epoch,_root(handId)));
-        uint8 assigned;
+        uint8 assigned=0;
         for(uint8 j=0;j<2*n;j++){
             if(assignment.holeSeatForPosition(handId,j)==seat){
                 if(proofRecipientFingerprint[handId][j]!=fingerprint)

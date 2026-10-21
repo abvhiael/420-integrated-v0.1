@@ -13,16 +13,39 @@ def adb(*args):
     return subprocess.check_output(["adb",*args],text=True,timeout=75).strip()
 
 def tree():
-    adb("shell","uiautomator","dump","/sdcard/liftd-ui.xml")
-    subprocess.check_call(["adb","pull","/sdcard/liftd-ui.xml",str(OUT/"screen.xml")],stdout=subprocess.DEVNULL)
-    return ET.parse(OUT/"screen.xml").getroot()
+    # Android UIAutomator may return a null root while React Native is rendering or
+    # Android accessibility is starting. Retry is bounded and never counts as PASS.
+    last_error = "unknown"
+    for attempt in range(8):
+        try:
+            adb("shell","rm","-f","/sdcard/liftd-ui.xml")
+            result=subprocess.run(["adb","shell","uiautomator","dump","--compressed","/sdcard/liftd-ui.xml"],
+                                  capture_output=True,text=True,timeout=40)
+            if result.returncode != 0 or "null root node" in result.stdout+result.stderr:
+                raise RuntimeError((result.stdout+result.stderr)[-400:])
+            xml=subprocess.run(["adb","exec-out","cat","/sdcard/liftd-ui.xml"],
+                               capture_output=True,timeout=35,check=True).stdout
+            if b"<hierarchy" not in xml or b"<node" not in xml:
+                raise RuntimeError("Hierarchy unavailable or empty")
+            root=ET.fromstring(xml)
+            (OUT/"screen.xml").write_bytes(xml)
+            return root
+        except (OSError,RuntimeError,ET.ParseError,subprocess.SubprocessError) as exc:
+            last_error=str(exc)
+            time.sleep(min(2+attempt,8))
+    capture("hierarchy-failure")
+    (OUT/"hierarchy-error.txt").write_text(last_error[-1500:])
+    raise AssertionError("Android accessibility hierarchy unavailable after 8 bounded attempts: "+last_error[-200:])
 
 def locate(label):
-    root=tree()
-    for node in root.iter("node"):
-        if label in node.attrib.get("text","") or label in node.attrib.get("content-desc",""):
-            return node
-    raise AssertionError(f"Expected UI node absent: {label}")
+    # A missing target is NOT a transport failure. We never manufacture a node.
+    for attempt in range(4):
+        root=tree()
+        for node in root.iter("node"):
+            if label in node.attrib.get("text","") or label in node.attrib.get("content-desc",""):
+                return node
+        time.sleep(2)
+    raise AssertionError(f"Expected UI node absent after UI readiness window: {label}")
 
 def tap(label):
     bounds=locate(label).attrib.get("bounds","")

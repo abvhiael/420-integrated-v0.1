@@ -150,6 +150,32 @@ contract PokerLiveCardReveals420 is IPokerAuthenticatedStreet420 {
         }
         return false;
     }
+    /// @notice Objective provider attribution from MISSING accepted partial
+    /// shares at the canonical unrevealed street, not operator accusation.
+    /// A completed pair with an invalid unmask proof does not blame either
+    /// provider unless other cryptographic evidence proves their wrongdoing.
+    function missingProviders(bytes32 handId,uint8 street)external view returns(uint8 fault){
+        PokerNLHEBetting420.Game memory g=engine.gameOf(handId);
+        uint8 n=_playerCount(g.seatsMask);
+        if(n<2||n>9)return 0;
+        uint8 hole=2*n;
+        if(street==1){
+            for(uint8 pos=hole+1;pos<=hole+3;pos++){
+                if(!slots[handId][pos].shareA)fault|=1;
+                if(!slots[handId][pos].shareB)fault|=2;
+            }
+        }else if(street==2 || street==3){
+            uint8 pos=street==2?hole+5:hole+7;
+            if(!slots[handId][pos].shareA)fault|=1;
+            if(!slots[handId][pos].shareB)fault|=2;
+        }else if(street==4){
+            for(uint8 pos=0;pos<hole;pos++){
+                if(engine.playerOf(handId,_dealSeat(handId,pos)).folded)continue;
+                if(!slots[handId][pos].shareA)fault|=1;
+                if(!slots[handId][pos].shareB)fault|=2;
+            }
+        }
+    }
     function advance(bytes32 handId,uint8 street)external {
         if(street<1||street>3||!this.isStageComplete(handId,street))revert Incomplete();
         engine.advanceRevealedStreet(handId,street);

@@ -25,6 +25,7 @@ contract PokerNLHEBetting54Test is PokerPrivateShuffleGate54Test {
     PokerRecipientKeys420 recipient;
     PokerDeckDisclosure420 delivery;
     PokerDeliveryProofBook420 proofBook;
+    PokerProviderAccountability420 providerBond;
     PokerGnarkRecipientKeyPoPAdapter420 popVerifier;
     TestNativeGnarkBackend54 backend;
     PokerVerifierVersions420 versionRegistry;
@@ -35,6 +36,14 @@ contract PokerNLHEBetting54Test is PokerPrivateShuffleGate54Test {
         signing=new PokerActionKeys420(address(deal));
         dispute=new PokerActionDisputeClock420(address(deal));
         engine=new PokerNLHEBetting420(address(deal),address(gate),address(signing),address(dispute));
+        providerBond=new PokerProviderAccountability420(address(deal),address(engine),address(0xB00D));
+        coin.mint(PROVIDER_A,3000);coin.mint(PROVIDER_B,3000);
+        cheat54.prank(PROVIDER_A);coin.approve(address(providerBond),3000);
+        cheat54.prank(PROVIDER_B);coin.approve(address(providerBond),3000);
+        cheat54.prank(PROVIDER_A);providerBond.fundAsset(address(coin),3000);
+        cheat54.prank(PROVIDER_B);providerBond.fundAsset(address(coin),3000);
+        cap.grant(ADMIN,engine.ACTION_BIND_PROVIDER_BOND(),auth.scopeForTable(TABLE),true);
+        cheat54.prank(ADMIN);engine.bindProviderBond(TABLE,address(providerBond));
         recipient=new PokerRecipientKeys420(address(ledger));
         delivery=new PokerDeckDisclosure420(address(deal),address(recipient));
         backend=new TestNativeGnarkBackend54();
@@ -294,6 +303,9 @@ contract PokerNLHEBetting54Test is PokerPrivateShuffleGate54Test {
         require(engine.handAborted(id)&&ledger.handConsumed(id),"prebet void consumed");
         require(ledger.seatOf(TABLE,0).chips==400&&ledger.seatOf(TABLE,1).chips==400,
             "no private-card withholding can take escrow");
+        (,,,,bool locked,bool closed,uint8 faults)=providerBond.bonds(id);
+        require(!locked&&closed&&faults==3,"both withholding providers slashed objectively");
+        require(coin.balanceOf(address(0xB00D))==1600,"bond penalties kept separate from player escrow");
         cheat54.expectRevert(PokerNLHEBetting420.InvalidState.selector);
         engine.cancelWithheldDelivery(id);
     }

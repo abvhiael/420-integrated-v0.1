@@ -127,7 +127,6 @@ contract PokerNLHEBetting54Test is PokerPrivateShuffleGate54Test {
     function _proveEncryptedShare(bytes32 handId,uint8 pos,uint8 provider) internal {
             uint8 seat=engine.holeSeatForPosition(handId,pos);
             (uint256 x,uint256 y,)=recipient.encryptionKeyOf(TABLE,seat);
-            for(uint8 provider=0;provider<2;provider++){
                 uint256[12] memory points;
                 points[0]=1111+pos;points[1]=2222+pos;
                 points[2]=3333+pos;points[3]=4444+pos;

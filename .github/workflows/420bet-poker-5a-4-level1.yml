@@ -106,7 +106,7 @@ jobs:
         env:
           FOUNDRY_SRC: src/bet
           FOUNDRY_TEST: test/poker-l1
-        run: forge test --match-path 'test/poker-l1/BetPokerNLHEBetting54.t.sol' -vv
+        run: forge test --match-path 'test/poker-l1/BetPokerNLHEBetting54.t.sol' -vvvv
       - name: Scope commitment adversarial + inherited seating/table regression
         working-directory: contracts
         env:

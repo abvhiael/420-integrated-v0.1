@@ -93,12 +93,6 @@ jobs:
           find test -maxdepth 1 -type f -name '*Poker*.t.sol' -exec cp -t test/poker-l1/ {} +
           python3 -c "from pathlib import Path; files=Path('test/poker-l1').glob('*.t.sol'); [(p.write_text(p.read_text().replace('../src/', '../../src/'))) for p in files]"
           test -s test/poker-l1/BetPokerNLHEBetting54.t.sol
-      - name: Diagnose exact Solidity test function on temporary test-tree copy
-        working-directory: contracts
-        env:
-          FOUNDRY_SRC: src/bet
-          FOUNDRY_TEST: test/poker-l1
-        run: python3 ../scripts/diagnose-420bet-yul-test.py
       - name: Qualify funded native hand and provider collateral integration
         working-directory: contracts
         env:

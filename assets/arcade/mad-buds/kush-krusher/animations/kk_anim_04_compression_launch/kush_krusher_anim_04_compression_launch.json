@@ -1,0 +1,94 @@
+{
+  "animationId": "kk04_compression_launch",
+  "name": "Kush Krusher Compression Launch",
+  "sequence": "compression_launch",
+  "frameCount": 10,
+  "frameWidth": 1024,
+  "frameHeight": 1024,
+  "transparentBackground": true,
+  "fps": 12,
+  "loop": false,
+  "repoFolder": "apps/420arcade/public/assets/games/kush-krusher/animations/kk04_compression_launch/",
+  "frames": [
+    {
+      "index": 1,
+      "file": "kush_krusher_anim_04_compression_launch_frame_01.png",
+      "width": 1024,
+      "height": 1024,
+      "durationMs": 83,
+      "sha256": "ca5a3d20dfafd17f5554811230295d3548363d8ff2c0dab21d811dd2035197f3"
+    },
+    {
+      "index": 2,
+      "file": "kush_krusher_anim_04_compression_launch_frame_02.png",
+      "width": 1024,
+      "height": 1024,
+      "durationMs": 83,
+      "sha256": "f89819db632d42173548962df95fdfcf260ad10595635b6ea313b73e984650e2"
+    },
+    {
+      "index": 3,
+      "file": "kush_krusher_anim_04_compression_launch_frame_03.png",
+      "width": 1024,
+      "height": 1024,
+      "durationMs": 83,
+      "sha256": "2791f5179b069625636d24de701317a9d5af41154bc8baa02159511633647ab0"
+    },
+    {
+      "index": 4,
+      "file": "kush_krusher_anim_04_compression_launch_frame_04.png",
+      "width": 1024,
+      "height": 1024,
+      "durationMs": 83,
+      "sha256": "4b507d1e1240b7d11770213ff10efcf7fea5a9f45ea9a5da407756af50477ebf"
+    },
+    {
+      "index": 5,
+      "file": "kush_krusher_anim_04_compression_launch_frame_05.png",
+      "width": 1024,
+      "height": 1024,
+      "durationMs": 83,
+      "sha256": "2cc6e3c236430a365d03da6e071eea7c51bceac923730c5d24b7b1670867ff0d"
+    },
+    {
+      "index": 6,
+      "file": "kush_krusher_anim_04_compression_launch_frame_06.png",
+      "width": 1024,
+      "height": 1024,
+      "durationMs": 83,
+      "sha256": "ea39007e888dec72d45ac800843930c0b9fd10ad518e66c2d704f84b3c408b60"
+    },
+    {
+      "index": 7,
+      "file": "kush_krusher_anim_04_compression_launch_frame_07.png",
+      "width": 1024,
+      "height": 1024,
+      "durationMs": 83,
+      "sha256": "006c56f86b7d62630687d6a61b15d6a33dbe49003ca5d3d17c72c76d294cb09f"
+    },
+    {
+      "index": 8,
+      "file": "kush_krusher_anim_04_compression_launch_frame_08.png",
+      "width": 1024,
+      "height": 1024,
+      "durationMs": 83,
+      "sha256": "a26e2b31a80347bc2d31bcf4104f710b933e91d2e8f7c3ea3d5b90ea5fb9a2ee"
+    },
+    {
+      "index": 9,
+      "file": "kush_krusher_anim_04_compression_launch_frame_09.png",
+      "width": 1024,
+      "height": 1024,
+      "durationMs": 83,
+      "sha256": "a50fe2bfd27b2d5ab8ee83bc2157007b87df1ea85b2a3b18dc78963f6120fcf0"
+    },
+    {
+      "index": 10,
+      "file": "kush_krusher_anim_04_compression_launch_frame_10.png",
+      "width": 1024,
+      "height": 1024,
+      "durationMs": 83,
+      "sha256": "33ddceae487e0a029758360e43978a5226570ccbd1f05b4de34f19c76329ec7e"
+    }
+  ]
+}

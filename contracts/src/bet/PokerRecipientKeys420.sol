@@ -31,7 +31,7 @@ contract PokerRecipientKeys420 {
         if(verifier==address(0)||verifier.code.length==0||address(keyPoPVerifier)!=address(0))
             revert InvalidKey();
         if(!ledger.authorization().isAuthorized(msg.sender,ACTION_BIND_KEY_POP,
-            ledger.authorization().scopeForTable(bytes32(0)),0))revert Unauthorized();
+            ledger.authorization().scopeGlobal(),0))revert Unauthorized();
         keyPoPVerifier=IPokerRecipientKeyPoP420(verifier);
         emit KeyPoPVerifierBound(verifier);
     }

@@ -2,6 +2,11 @@
 pragma solidity ^0.8.24;
 import "./BetPokerConfidentialDeal54.t.sol";
 import "../src/bet/PokerActionDisputeClock420.sol";
+contract ClockNativeResolver54 {
+    function finish(PokerActionDisputeClock420 clock,bytes32 hand)external{
+        clock.finalizeUnprovableVoid(hand);
+    }
+}
 contract PokerActionDisputeClock54Test is PokerConfidentialDeal54Test {
     PokerActionDisputeClock420 clock;
     constructor(){
@@ -35,6 +40,24 @@ contract PokerActionDisputeClock54Test is PokerConfidentialDeal54Test {
         clock.expire(id);
         cheat54.expectRevert(PokerActionDisputeClock420.InvalidState.selector);
         cheat54.prank(ADMIN);clock.start(id,0,2,uint64(block.timestamp+60),keccak256("next"));
+    }
+    function testUndeterminedDisputeClosesOnlyAfterBoundedReviewByNativeResolver() public {
+        bytes32 id=_readyClock();
+        ClockNativeResolver54 resolver=new ClockNativeResolver54();
+        cap.grant(ADMIN,clock.ACTION_BIND_RESOLVER(),auth.scopeForTable(TABLE),true);
+        cheat54.prank(ADMIN);clock.bindResolver(TABLE,address(resolver));
+        cheat54.prank(ADMIN);
+        clock.start(id,0,1,uint64(block.timestamp+60),keccak256("state"));
+        cheat54.prank(PLAYER);clock.dispute(id,keccak256("cryptographic withholding"));
+        cheat54.expectRevert(PokerActionDisputeClock420.Unauthorized.selector);
+        clock.finalizeUnprovableVoid(id);
+        cheat54.expectRevert(PokerActionDisputeClock420.Premature.selector);
+        resolver.finish(clock,id);
+        cheat54.warp(block.timestamp+1 hours+2 days);
+        resolver.finish(clock,id);
+        require(!clock.isFrozen(id)&&clock.voidFinalized(id),"bounded disputed void finalized");
+        cheat54.expectRevert(PokerActionDisputeClock420.InvalidState.selector);
+        resolver.finish(clock,id);
     }
     function testUnauthorizedClockStartOrDisputeRejected() public {
         bytes32 id=_readyClock();

@@ -93,20 +93,12 @@ jobs:
           find test -maxdepth 1 -type f -name '*Poker*.t.sol' -exec cp -t test/poker-l1/ {} +
           python3 -c "from pathlib import Path; files=Path('test/poker-l1').glob('*.t.sol'); [(p.write_text(p.read_text().replace('../src/', '../../src/'))) for p in files]"
           test -s test/poker-l1/BetPokerNLHEBetting54.t.sol
-      - name: Trace funded happy path authorization and missing-delivery slash failures
-        working-directory: contracts
-        env:
-          FOUNDRY_SRC: src/bet
-          FOUNDRY_TEST: test/poker-l1
-        run: |
-          forge test --match-test testSignedHeadsUpPreflopClosesOnlyAfterBothAct -vvvv || true
-          forge test --match-test testCompletedShuffleButMissingProvedDeliveryVoidsPreBetting -vvvv || true
       - name: Qualify funded native hand and provider collateral integration
         working-directory: contracts
         env:
           FOUNDRY_SRC: src/bet
           FOUNDRY_TEST: test/poker-l1
-        run: forge test --match-path 'test/poker-l1/BetPokerNLHEBetting54.t.sol' -vvvv
+        run: forge test --match-path 'test/poker-l1/BetPokerNLHEBetting54.t.sol' -vv
       - name: Scope commitment adversarial + inherited seating/table regression
         working-directory: contracts
         env:

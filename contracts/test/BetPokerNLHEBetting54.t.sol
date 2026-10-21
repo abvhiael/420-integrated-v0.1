@@ -57,6 +57,7 @@ contract PokerNLHEBetting54Test is PokerPrivateShuffleGate54Test {
         cheat54.prank(PLAYER);engine.reserve(id);
         cheat54.prank(PLAYER);signing.bindSigner(TABLE,signedVm.addr(PLAYER_KEY));
         cheat54.prank(PLAYER_B);signing.bindSigner(TABLE,signedVm.addr(OPPONENT_KEY));
+        engine.prepareDealAssignment(id);
         _acknowledgedPrivateDelivery(id);
         engine.start(id,0,60);
     }

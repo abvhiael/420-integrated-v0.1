@@ -44,6 +44,9 @@ contract PokerNLHEBetting54Test is PokerPrivateShuffleGate54Test {
         cheat54.prank(PROVIDER_B);providerBond.fundAsset(address(coin),3000);
         cap.grant(ADMIN,engine.ACTION_BIND_PROVIDER_BOND(),auth.scopeForTable(TABLE),true);
         cheat54.prank(ADMIN);engine.bindProviderBond(TABLE,address(providerBond));
+        _configurePrivateDelivery();
+    }
+    function _configurePrivateDelivery() internal {
         recipient=new PokerRecipientKeys420(address(ledger));
         delivery=new PokerDeckDisclosure420(address(deal),address(recipient));
         backend=new TestNativeGnarkBackend54();
@@ -59,21 +62,8 @@ contract PokerNLHEBetting54Test is PokerPrivateShuffleGate54Test {
         PokerGnarkEncryptedShareDeliveryAdapter420 proverB=
             new PokerGnarkEncryptedShareDeliveryAdapter420(address(backend),address(versionRegistry),
                 version,circuitHash,keyHash,schemaHash,keccak256(abi.encode(uint256(101),uint256(201))));
-        bytes32 popVersion=keccak256("test-only recipient key possession");
-        bytes32 popCircuit=keccak256("test-only recipient point circuit");
-        bytes32 popSchema=keccak256("test-only key-possession schema");
-        versionRegistry.register(popVersion,address(backend),keyHash,popCircuit,popSchema);
-        popVerifier=new PokerGnarkRecipientKeyPoPAdapter420(address(backend),
-            address(versionRegistry),popVersion,keyHash,popCircuit,popSchema);
-        bytes32 aggregateVersion=keccak256("test-only aggregate key");
-        bytes32 aggregateCircuit=keccak256("test-only aggregate curve relation");
-        bytes32 aggregateSchema=keccak256("test-only aggregate schema");
-        versionRegistry.register(aggregateVersion,address(backend),keyHash,
-            aggregateCircuit,aggregateSchema);
-        PokerGnarkThresholdKeyAggregateAdapter420 aggregate=
-            new PokerGnarkThresholdKeyAggregateAdapter420(address(backend),
-                address(versionRegistry),aggregateVersion,aggregateCircuit,keyHash,
-                aggregateSchema,gate.thresholdKeyCommitment());
+        _configureKeyProof(keyHash);
+        PokerGnarkThresholdKeyAggregateAdapter420 aggregate=_configureAggregateProof(keyHash);
         proofBook=new PokerDeliveryProofBook420(address(deal),address(delivery),
             address(gate),address(engine),address(proverA),address(proverB),address(aggregate));
         cap.grant(ADMIN,recipient.ACTION_BIND_KEY_POP(),auth.scopeGlobal(),true);
@@ -82,6 +72,24 @@ contract PokerNLHEBetting54Test is PokerPrivateShuffleGate54Test {
         cheat54.prank(ADMIN);delivery.bindProofBook(TABLE,address(proofBook));
         cap.grant(ADMIN,engine.ACTION_BIND_DELIVERY(),auth.scopeForTable(TABLE),true);
         cap.grant(ADMIN,ledger.ACTION_BIND_SETTLEMENT(),auth.scopeForTable(TABLE),true);
+    }
+    function _configureKeyProof(bytes32 keyHash) internal {
+        bytes32 popVersion=keccak256("test-only recipient key possession");
+        bytes32 popCircuit=keccak256("test-only recipient point circuit");
+        bytes32 popSchema=keccak256("test-only key-possession schema");
+        versionRegistry.register(popVersion,address(backend),keyHash,popCircuit,popSchema);
+        popVerifier=new PokerGnarkRecipientKeyPoPAdapter420(address(backend),
+            address(versionRegistry),popVersion,keyHash,popCircuit,popSchema);    }
+    function _configureAggregateProof(bytes32 keyHash) internal returns(PokerGnarkThresholdKeyAggregateAdapter420 aggregate) {
+        bytes32 aggregateVersion=keccak256("test-only aggregate key");
+        bytes32 aggregateCircuit=keccak256("test-only aggregate curve relation");
+        bytes32 aggregateSchema=keccak256("test-only aggregate schema");
+        versionRegistry.register(aggregateVersion,address(backend),keyHash,
+            aggregateCircuit,aggregateSchema);
+        aggregate=
+            new PokerGnarkThresholdKeyAggregateAdapter420(address(backend),
+                address(versionRegistry),aggregateVersion,aggregateCircuit,keyHash,
+                aggregateSchema,gate.thresholdKeyCommitment());
     }
     function _acknowledgedPrivateDelivery(bytes32 handId) internal {
         // NOTE: these are integration-only verifier stubs. Real Groth16 is

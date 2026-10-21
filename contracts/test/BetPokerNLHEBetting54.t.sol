@@ -303,7 +303,7 @@ contract PokerNLHEBetting54Test is PokerPrivateShuffleGate54Test {
         require(engine.handAborted(id)&&ledger.handConsumed(id),"prebet void consumed");
         require(ledger.seatOf(TABLE,0).chips==400&&ledger.seatOf(TABLE,1).chips==400,
             "no private-card withholding can take escrow");
-        (,,,,bool locked,bool closed,uint8 faults)=providerBond.bonds(id);
+        (,,,bool locked,bool closed,uint8 faults)=providerBond.bonds(id);
         require(!locked&&closed&&faults==3,"both withholding providers slashed objectively");
         require(coin.balanceOf(address(0xB00D))==1600,"bond penalties kept separate from player escrow");
         cheat54.expectRevert(PokerNLHEBetting420.InvalidState.selector);

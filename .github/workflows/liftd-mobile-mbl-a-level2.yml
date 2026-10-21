@@ -1,0 +1,159 @@
+name: LIFTd M-MBL-A Level 2 Android iOS integration
+on:
+  pull_request:
+    paths:
+      - 'rideshare/mobile/**'
+      - '.github/workflows/liftd-mobile-mbl-a-level2.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  android-emulator:
+    runs-on: macos-15-intel
+    timeout-minutes: 65
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Verify Intel host before emulator setup
+        run: |
+          set -euo pipefail
+          arch=$(uname -m)
+          if [ "$arch" != "x86_64" ]; then
+            echo "::error title=ANDROID_INFRA_HOST_MISMATCH::Expected Intel x86_64 host, got $arch"
+            exit 31
+          fi
+          echo "ANDROID_INFRA_HOST_READY: $arch"
+      - name: Frozen dependency and integrated mobile policy regression
+        working-directory: rideshare/mobile
+        run: |
+          npm ci --ignore-scripts --no-audit --no-fund
+          npm run check
+          npx expo prebuild --platform android --non-interactive --no-install
+      - name: Build nonproduction Android APK
+        working-directory: rideshare/mobile/android
+        run: ./gradlew :app:assembleDebug --no-daemon
+      - name: Start scoped Metro bundle server for emulator UI
+        working-directory: rideshare/mobile
+        run: |
+          CI=1 npx expo start --localhost --port 8081 > metro-android.log 2>&1 &
+          echo $! > metro-android.pid
+          for i in $(seq 1 45); do
+            if curl -fsS http://127.0.0.1:8081/status | grep -q 'packager-status:running'; then exit 0; fi
+            sleep 2
+          done
+          tail -n 80 metro-android.log
+          exit 1
+      - name: Install and launch on actual Android emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 33
+          arch: x86_64
+          target: google_apis
+          profile: pixel_2
+          emulator-build: 16428233
+          emulator-options: -no-window -no-audio -no-boot-anim -gpu swiftshader_indirect -no-snapshot -no-metrics -cores 2 -memory 3072
+          disable-animations: false
+          script: |
+            set -eu
+            adb wait-for-device
+            test "$(adb shell getprop sys.boot_completed | tr -d '\r')" = 1 || { echo "ANDROID_INFRA_BOOT_INCOMPLETE"; exit 31; }
+            adb shell service check activity | grep -q 'found' || { echo "ANDROID_INFRA_ACTIVITY_SERVICE_UNAVAILABLE"; exit 31; }
+            adb shell pm list packages | grep -q 'package:android' || { echo "ANDROID_INFRA_PACKAGE_MANAGER_UNAVAILABLE"; exit 31; }
+            adb shell input keyevent 3 || { echo "ANDROID_INFRA_INPUT_UNAVAILABLE"; exit 31; }
+            echo "ANDROID_INFRA_BOOT_HEALTH_PASS"
+            adb reverse tcp:8081 tcp:8081
+            adb install -r rideshare/mobile/android/app/build/outputs/apk/debug/app-debug.apk
+            adb shell pm path org.integrated420.liftd.preview
+            adb shell monkey -p org.integrated420.liftd.preview -c android.intent.category.LAUNCHER 1
+            sleep 8
+            adb shell pidof org.integrated420.liftd.preview
+            ! adb shell dumpsys package org.integrated420.liftd.preview | grep -q 'android.permission.ACCESS_BACKGROUND_LOCATION'
+            adb shell am force-stop org.integrated420.liftd.preview
+            adb shell monkey -p org.integrated420.liftd.preview -c android.intent.category.LAUNCHER 1
+            sleep 5
+            adb shell pidof org.integrated420.liftd.preview
+            python3 rideshare/mobile/test/android-interactive-preview.py
+      - name: Bind emulator evidence to exact implementation SHA
+        if: always()
+        run: |
+          mkdir -p mbl-a-android-evidence
+          git rev-parse HEAD > mbl-a-android-evidence/implementation-sha.txt
+          if test -f rideshare/mobile/android/app/build/outputs/apk/debug/app-debug.apk; then shasum -a 256 rideshare/mobile/android/app/build/outputs/apk/debug/app-debug.apk > mbl-a-android-evidence/apk-sha256.txt; fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mbl-a-android-${{ github.event.pull_request.head.sha || github.sha }}
+          path: mbl-a-android-evidence/
+          if-no-files-found: error
+  ios-simulator:
+    runs-on: macos-15
+    timeout-minutes: 65
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Frozen dependency and integrated mobile policy regression
+        working-directory: rideshare/mobile
+        run: |
+          npm ci --ignore-scripts --no-audit --no-fund
+          npm run check
+          npx expo prebuild --platform ios --non-interactive --no-install
+      - name: Install native iOS dependencies
+        working-directory: rideshare/mobile/ios
+        run: pod install
+      - name: Configure native XCTest UI journey
+        working-directory: rideshare/mobile
+        run: ruby test/configure-ios-ui-tests.rb
+      - name: Build nonproduction iOS simulator app
+        working-directory: rideshare/mobile
+        run: |
+          set -o pipefail
+          workspace=$(find ios -maxdepth 1 -name '*.xcworkspace' -print -quit)
+          test -n "$workspace"
+          xcodebuild -workspace "$workspace" -scheme "$(basename "$workspace" .xcworkspace)" -configuration Debug -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO build > ios-build.log 2>&1 || { tail -n 120 ios-build.log; exit 1; }
+      - name: Start scoped Metro bundle server for simulator UI
+        working-directory: rideshare/mobile
+        run: |
+          CI=1 npx expo start --localhost --port 8081 > metro-ios.log 2>&1 &
+          echo $! > metro-ios.pid
+          for i in $(seq 1 45); do
+            if curl -fsS http://127.0.0.1:8081/status | grep -q 'packager-status:running'; then exit 0; fi
+            sleep 2
+          done
+          tail -n 80 metro-ios.log
+          exit 1
+      - name: Install and launch on actual iOS simulator
+        run: |
+          set -eu
+          app=$(find "$HOME/Library/Developer/Xcode/DerivedData" -path '*/Build/Products/Debug-iphonesimulator/*.app' -type d -print -quit)
+          test -n "$app"
+          id=$(xcrun simctl list devices available -j | python3 -c 'import json,sys; d=json.load(sys.stdin)["devices"]; print(next(device["udid"] for devices in d.values() for device in devices if device["state"]=="Shutdown" and "iPhone" in device["name"]))')
+          xcrun simctl boot "$id"
+          xcrun simctl bootstatus "$id" -b
+          xcrun simctl install "$id" "$app"
+          xcrun simctl launch "$id" org.integrated420.liftd.preview
+          xcrun simctl terminate "$id" org.integrated420.liftd.preview
+          xcrun simctl launch "$id" org.integrated420.liftd.preview
+          mkdir -p mbl-a-ios-evidence
+          workspace=$(find rideshare/mobile/ios -maxdepth 1 -name "*.xcworkspace" -print -quit)
+          test -n "$workspace"
+          xcodebuild -workspace "$workspace" -scheme "$(basename "$workspace" .xcworkspace)" -configuration Debug -destination "platform=iOS Simulator,id=$id" -only-testing:LIFTdPreviewUITests/LIFTdPreviewUITests -resultBundlePath "$PWD/mbl-a-ios-evidence/ui-tests.xcresult" CODE_SIGNING_ALLOWED=NO test > ios-interactive.log 2>&1 || { tail -n 180 ios-interactive.log; exit 1; }
+          git rev-parse HEAD > mbl-a-ios-evidence/implementation-sha.txt
+          /usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$app/Info.plist" | grep -Fx org.integrated420.liftd.preview
+          shasum -a 256 "$app/Info.plist" > mbl-a-ios-evidence/infoplist-sha256.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mbl-a-ios-${{ github.event.pull_request.head.sha || github.sha }}
+          path: mbl-a-ios-evidence/
+          if-no-files-found: error

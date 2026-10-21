@@ -1,5 +1,5 @@
-import React,{useState} from 'react';
-import {SafeAreaView,ScrollView,View,Text,Pressable,StyleSheet,useColorScheme} from 'react-native';
+import React,{useEffect,useState} from 'react';
+import {AppState,SafeAreaView,ScrollView,View,Text,Pressable,StyleSheet,useColorScheme} from 'react-native';
 import {StatusBar} from 'expo-status-bar';
 import {previewState} from './src/route-policy.mjs';
 import {theme} from './src/theme';
@@ -12,6 +12,8 @@ export default function App() {
  const [route,setRoute]=useState('welcome');
  const state=previewState(role,route);
  const dark=useColorScheme()==='dark';
+ // Process backgrounding invalidates even preview role selection; live authority must independently revalidate.
+ useEffect(()=>{const subscription=AppState.addEventListener('change',next=>{if(next!=='active'){setRole(null);setRoute('welcome');}});return ()=>subscription.remove();},[]);
  function choose(next:Exclude<Role,null>){setRole(next);setRoute(next);}
  function exit(){setRole(null);setRoute('welcome');}
  return <SafeAreaView style={[styles.root,{backgroundColor:dark?theme.ink:theme.cream}]}>

@@ -4,7 +4,7 @@ import {createMobileSession} from './session-controller.mjs';
 
 const key='liftd.preview.session.v1';
 const store={
- async read(){const value=await SecureStore.getItemAsync(key,{keychainService:key,requireAuthentication:false});return value?JSON.parse(value):null;},
+ async read(){const value=await SecureStore.getItemAsync(key,{keychainService:key,requireAuthentication:false});if(!value)return null;try{return JSON.parse(value);}catch{await SecureStore.deleteItemAsync(key,{keychainService:key});throw Error('SESSION_STORE_CORRUPT');}},
  async write(value:unknown){await SecureStore.setItemAsync(key,JSON.stringify(value),{keychainService:key,keychainAccessible:SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY});},
  async clear(){await SecureStore.deleteItemAsync(key,{keychainService:key});}
 };

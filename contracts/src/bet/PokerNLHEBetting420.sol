@@ -75,6 +75,15 @@ contract PokerNLHEBetting420 {
     mapping(bytes32=>bool) public flopOpened;
     mapping(bytes32=>bool) public handSettled;
     mapping(bytes32=>bool) public handAborted;
+    mapping(bytes32=>uint64) public evidenceDueAt;
+    struct EvidenceRecovery {uint64 openedAt;uint64 finalizableAt;bytes32 stateRoot;Phase failedPhase;bool active;}
+    mapping(bytes32=>EvidenceRecovery) public evidenceRecovery;
+    uint64 public constant PROOF_DELIVERY_WINDOW=1 hours;
+    uint64 public constant RECOVERY_REVIEW_WINDOW=2 days+1 hours;
+    event MissingEvidenceRecoveryOpened(bytes32 indexed handId,uint8 phase,bytes32 stateRoot,uint64 finalizableAt);
+    event MissingEvidenceRecoveryVoided(bytes32 indexed handId,bytes32 indexed tableId);
+    event UnverifiedDeliveryAborted(bytes32 indexed handId,bytes32 indexed tableId);
+
     struct PreparedDeal {uint8 button;uint16 mask;uint64 epoch;bytes32 seatSnapshot;bool ready;}
     mapping(bytes32=>PreparedDeal) public preparedDeal;
     event DealAssignmentPrepared(bytes32 indexed handId,uint8 button,uint16 seatMask,bytes32 seatSnapshot);
@@ -269,6 +278,73 @@ contract PokerNLHEBetting420 {
         ledger.cancelReservedHand(h.tableId,handId);
         emit UnprovedDealAborted(handId,h.tableId);
     }
+    /// @notice A completed shuffle still cannot force users to accept missing
+    /// private cards. No betting has occurred and locked original balances
+    /// are the unique cancellation vector.
+    function cancelWithheldDelivery(bytes32 handId) external {
+        PokerConfidentialDeal420.Hand memory h=deals.getHand(handId);
+        if(games[handId].initialized||handAborted[handId]||handSettled[handId]||
+            ledger.activeHand(h.tableId)!=handId||!shuffle.isProofComplete(handId))
+            revert InvalidState();
+        if(block.timestamp<uint256(h.deadline)+PROOF_DELIVERY_WINDOW)revert TooEarly();
+        if(address(deliveryForTable[h.tableId])!=address(0)&&
+            deliveryForTable[h.tableId].allAcknowledged(handId))revert InvalidState();
+        handAborted[handId]=true;
+        ledger.cancelReservedHand(h.tableId,handId);
+        emit UnverifiedDeliveryAborted(handId,h.tableId);
+    }
+
+    /// @notice Objective missing-proof predicate. No caller-supplied
+    /// "bad proof" flag can manufacture failure or unlock chips.
+    function _missingRequiredEvidence(bytes32 handId,Game storage g)
+        private view returns(bool){
+        uint8 stage;
+        if(g.phase==Phase.AWAIT_FLOP)stage=1;
+        else if(g.phase==Phase.AWAIT_TURN)stage=2;
+        else if(g.phase==Phase.AWAIT_RIVER)stage=3;
+        else if(g.phase==Phase.SHOWDOWN)stage=4;
+        else return false;
+        IPokerAuthenticatedStreet420 source=revealForTable[g.tableId];
+        return address(source)==address(0)||!source.isStageComplete(handId,stage);
+    }
+
+    /// @notice Begin bounded recovery only after a real unrevealed street's
+    /// deadline. Signed actions and accepted stakes are immutable, but lack
+    /// of proof cannot create an arbitrary winner or administrator payout.
+    function beginMissingEvidenceRecovery(bytes32 handId) external {
+        Game storage g=games[handId];
+        if(!g.initialized||handSettled[handId]||handAborted[handId]||
+            evidenceRecovery[handId].active||
+            ledger.activeHand(g.tableId)!=handId||
+            evidenceDueAt[handId]==0||
+            block.timestamp<=evidenceDueAt[handId]||
+            !_missingRequiredEvidence(handId,g))revert InvalidState();
+        uint64 end=uint64(block.timestamp+RECOVERY_REVIEW_WINDOW);
+        evidenceRecovery[handId]=EvidenceRecovery(uint64(block.timestamp),end,
+            g.stateRoot,g.phase,true);
+        emit MissingEvidenceRecoveryOpened(handId,uint8(g.phase),g.stateRoot,end);
+    }
+
+    /// @notice A proof may be supplied during review/appeal. If no genuinely
+    /// verifiable card evidence arrived by finality, return EXACT original
+    /// locked chips, not game pots or an operator-chosen settlement vector.
+    function finalizeMissingEvidenceRecovery(bytes32 handId) external {
+        Game storage g=games[handId];
+        EvidenceRecovery memory r=evidenceRecovery[handId];
+        if(!r.active||handSettled[handId]||handAborted[handId]||
+            g.stateRoot!=r.stateRoot||g.phase!=r.failedPhase||
+            ledger.activeHand(g.tableId)!=handId||
+            !_missingRequiredEvidence(handId,g))revert InvalidState();
+        if(block.timestamp<r.finalizableAt)revert TooEarly();
+        // An independently raised dispute must conclude through its own
+        // authenticated resolver; this timeout cannot overrule an appeal.
+        if(disputes.isFrozen(handId))revert InvalidState();
+        handAborted[handId]=true;
+        evidenceRecovery[handId].active=false;
+        ledger.cancelReservedHand(g.tableId,handId);
+        emit MissingEvidenceRecoveryVoided(handId,g.tableId);
+    }
+
     /// @notice Freeze canonical dealer/seat-order BEFORE private-card delivery.
     /// @dev Readiness is derived from the previous consumed button; the active
     /// funded hand and immutable seating snapshot must already be locked.
@@ -447,6 +523,7 @@ contract PokerNLHEBetting420 {
         else if(g.phase==Phase.RIVER)g.phase=Phase.SHOWDOWN;
         else revert InvalidState();
         g.stateRoot=keccak256(abi.encode(STATE_DOMAIN,handId,g.stateRoot,uint8(g.phase),g.pot));
+        evidenceDueAt[handId]=uint64(block.timestamp+PROOF_DELIVERY_WINDOW);
     }
     function canRevealStreet(bytes32 handId,uint8 street)external view returns(bool){
         Phase phase=games[handId].phase;

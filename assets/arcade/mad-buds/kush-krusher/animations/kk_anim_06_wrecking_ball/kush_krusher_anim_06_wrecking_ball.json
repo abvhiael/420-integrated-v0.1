@@ -1,0 +1,123 @@
+{
+  "schema": "mad-buds-animation-manifest-v1",
+  "characterId": "kush_krusher",
+  "animationId": "kk_anim_06_wrecking_ball",
+  "animationName": "wrecking_ball",
+  "animationNumber": "06",
+  "frameCount": 10,
+  "frameWidth": 1024,
+  "frameHeight": 1024,
+  "frameFormat": "PNG",
+  "colorMode": "RGBA",
+  "fps": 10,
+  "frameDurationMs": 100,
+  "durationMs": 1000,
+  "loop": false,
+  "playbackTimingStatus": "provisional; not independently approved",
+  "visualApprovalStatus": "pending",
+  "qualificationStatus": "not qualified; independently generated source images not rig-controlled",
+  "sourceStoryboard": "green_bud_creature_rolling_action_storyboard.png",
+  "repositoryDestination": "assets/arcade/mad-buds/kush-krusher/animations/kk_anim_06_wrecking_ball/",
+  "frames": [
+    {
+      "index": 1,
+      "filename": "kush_krusher_anim_06_wrecking_ball_frame_01.png",
+      "durationMs": 100,
+      "sha256": "418f82815808fd7fec689bb2a619b1f17a122bf80bb03387c7f88fc1f358d3a9",
+      "sourceFilename": "angry_moss_creature_in_red_sneakers.png",
+      "sourceSha256": "83ae6958124afff3c0b3aefe5cc6f863473211f1e700d7a5f7b609960d29a2ff",
+      "alphaZeroPixels": 582988,
+      "alphaOpaquePixels": 1478
+    },
+    {
+      "index": 2,
+      "filename": "kush_krusher_anim_06_wrecking_ball_frame_02.png",
+      "durationMs": 100,
+      "sha256": "ca0ec7cd834e034cbacd13f6719a9882767b3d29e3e8419af2587dd6d4959fd0",
+      "sourceFilename": "rolling_spiky_green_bud_monster.png",
+      "sourceSha256": "a5dac1d04924beaac44a23cc62ec4a31137755522fb5e539a484dcb7ed0353a9",
+      "alphaZeroPixels": 718794,
+      "alphaOpaquePixels": 1757
+    },
+    {
+      "index": 3,
+      "filename": "kush_krusher_anim_06_wrecking_ball_frame_03.png",
+      "durationMs": 100,
+      "sha256": "aed6f08259c28aa31154c7b0f76a704ac7625f88616708ed5526f1c0ae2c19e8",
+      "sourceFilename": "spiky_green_speedball_attack.png",
+      "sourceSha256": "c6cb05f3521b050a5d7bba552f79376703ab9bb843970bd71a83b38e53a88f32",
+      "alphaZeroPixels": 682022,
+      "alphaOpaquePixels": 1165
+    },
+    {
+      "index": 4,
+      "filename": "kush_krusher_anim_06_wrecking_ball_frame_04.png",
+      "durationMs": 100,
+      "sha256": "eecaa24185d878207693ca4c3d3ac15a38bd54aef4ced03baa0749c1e21cea39",
+      "sourceFilename": "kush_krusher_midair_roll.png",
+      "sourceSha256": "1e484a0f4d05541108de87f86050344b7376b255999d070b64aff6df05bff45f",
+      "alphaZeroPixels": 715531,
+      "alphaOpaquePixels": 1890
+    },
+    {
+      "index": 5,
+      "filename": "kush_krusher_anim_06_wrecking_ball_frame_05.png",
+      "durationMs": 100,
+      "sha256": "718dca988e66ca1ec5a3b80a2cd4115ff5e833f64f9f6e174bb47232b0f1063b",
+      "sourceFilename": "kush_krusher_rolling_green_fury.png",
+      "sourceSha256": "14ce359833f2e2d5db43f8b7d92e6a689b4ffb306f73d45a311641be186f7599",
+      "alphaZeroPixels": 715673,
+      "alphaOpaquePixels": 2753
+    },
+    {
+      "index": 6,
+      "filename": "kush_krusher_anim_06_wrecking_ball_frame_06.png",
+      "durationMs": 100,
+      "sha256": "b7c295b4bc06d8bdf254af574de09a3e90518c756c3d4b1f4a17a755a75d3141",
+      "sourceFilename": "angry_rolling_weed_nugget_mascot.png",
+      "sourceSha256": "98624540db04d2b0fc79b4a4f5c3026c8c6f3559407a07718cc4c3c1abf5f3bb",
+      "alphaZeroPixels": 602198,
+      "alphaOpaquePixels": 1012
+    },
+    {
+      "index": 7,
+      "filename": "kush_krusher_anim_06_wrecking_ball_frame_07.png",
+      "durationMs": 100,
+      "sha256": "c6b4ead4015074359c2dc882331589ec8ea5144625c470634df944f17c453033",
+      "sourceFilename": "kush_krusher_rolling_attack.png",
+      "sourceSha256": "9aa115f86347004bacbbbf06f7c36ac24dc06b0ad17b3773349a9e7c2d9cb899",
+      "alphaZeroPixels": 624371,
+      "alphaOpaquePixels": 1056
+    },
+    {
+      "index": 8,
+      "filename": "kush_krusher_anim_06_wrecking_ball_frame_08.png",
+      "durationMs": 100,
+      "sha256": "f32688dd45df3596a2d96b9bac5bf84d6b9f71e237bd8953ab2fc5bd7c188cc5",
+      "sourceFilename": "angry_green_monster_rollout.png",
+      "sourceSha256": "9d4c94f61503a4aca34d8bcbb6ed084eb6912b22a406c35713545114f37369a8",
+      "alphaZeroPixels": 677892,
+      "alphaOpaquePixels": 1279
+    },
+    {
+      "index": 9,
+      "filename": "kush_krusher_anim_06_wrecking_ball_frame_09.png",
+      "durationMs": 100,
+      "sha256": "cf1dbdec8b44791116152bb5b10dc7bf36a7b52d2f31310f2bd2f2b3072a40a9",
+      "sourceFilename": "kush_krusher_s_explosive_ground_slam.png",
+      "sourceSha256": "cf8e322f71eb58abf43d98c9543be79bc36d1c2c09ea434c85eb42b05d0faf24",
+      "alphaZeroPixels": 472267,
+      "alphaOpaquePixels": 665
+    },
+    {
+      "index": 10,
+      "filename": "kush_krusher_anim_06_wrecking_ball_frame_10.png",
+      "durationMs": 100,
+      "sha256": "02068d293b7e60ac30fd4f86c72215c5faa8bb79493fd484571ae5e915e03479",
+      "sourceFilename": "angry_spiky_green_bud_mascot.png",
+      "sourceSha256": "c90a32ce2bb341348d17ff5df881daf205d620fba804b7e0202a4b19afc928b4",
+      "alphaZeroPixels": 574751,
+      "alphaOpaquePixels": 1975
+    }
+  ]
+}

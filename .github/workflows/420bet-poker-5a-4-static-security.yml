@@ -18,6 +18,7 @@ on:
       - 'contracts/src/bet/PokerRecipientKeys420.sol'
       - 'contracts/src/bet/PokerGnarkRecipientKeyPoPAdapter420.sol'
       - 'contracts/src/bet/PokerGnarkEncryptedShareDeliveryAdapter420.sol'
+      - 'contracts/src/bet/PokerGnarkThresholdKeyAggregateAdapter420.sol'
       - 'clients/420bet-poker/zkshuffle/triage_slither_poker.py'
       - '.github/workflows/420bet-poker-5a-4-static-security.yml'
 permissions:

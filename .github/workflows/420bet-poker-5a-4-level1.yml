@@ -35,6 +35,7 @@ on:
       - 'contracts/src/bet/PokerHandRank420.sol'
       - 'contracts/test/BetPokerHandRank54.t.sol'
       - 'contracts/src/bet/PokerGnarkCardRevealAdapters420.sol'
+      - 'contracts/src/bet/PokerGnarkEncryptedShareDeliveryAdapter420.sol'
       - 'contracts/src/bet/PokerLiveCardReveals420.sol'
       - 'contracts/test/BetPokerLiveCardReveals54.t.sol'
       - 'contracts/test/BetPokerNLHEBetting54.t.sol'
@@ -110,12 +111,13 @@ jobs:
         run: |
           mkdir -p artifacts/420bet-5a-4
           git rev-parse HEAD > artifacts/420bet-5a-4/qualified-sha.txt
-          sha256sum clients/420bet-poker/zkshuffle/circuit.go clients/420bet-poker/zkshuffle/reencryption_circuit.go clients/420bet-poker/zkshuffle/circuit_test.go clients/420bet-poker/zkshuffle/reencryption_circuit_test.go clients/420bet-poker/zkshuffle/reencryption_full52_test.go clients/420bet-poker/zkshuffle/initial_deck_circuit.go clients/420bet-poker/zkshuffle/initial_deck_circuit_test.go clients/420bet-poker/zkshuffle/initial_full52_test.go clients/420bet-poker/zkshuffle/proof_export_test.go clients/420bet-poker/zkshuffle/partial_decryption_circuit.go clients/420bet-poker/zkshuffle/partial_decryption_circuit_test.go clients/420bet-poker/zkshuffle/ciphertext_merkle.go clients/420bet-poker/zkshuffle/ciphertext_merkle_test.go clients/420bet-poker/zkshuffle/card_unmask_circuit.go clients/420bet-poker/zkshuffle/card_unmask_circuit_test.go clients/420bet-poker/zkshuffle/go.mod > artifacts/420bet-5a-4/cryptographic-source-sha256.txt
+          sha256sum clients/420bet-poker/zkshuffle/circuit.go clients/420bet-poker/zkshuffle/reencryption_circuit.go clients/420bet-poker/zkshuffle/circuit_test.go clients/420bet-poker/zkshuffle/reencryption_circuit_test.go clients/420bet-poker/zkshuffle/reencryption_full52_test.go clients/420bet-poker/zkshuffle/initial_deck_circuit.go clients/420bet-poker/zkshuffle/initial_deck_circuit_test.go clients/420bet-poker/zkshuffle/initial_full52_test.go clients/420bet-poker/zkshuffle/proof_export_test.go clients/420bet-poker/zkshuffle/partial_decryption_circuit.go clients/420bet-poker/zkshuffle/partial_decryption_circuit_test.go clients/420bet-poker/zkshuffle/ciphertext_merkle.go clients/420bet-poker/zkshuffle/ciphertext_merkle_test.go clients/420bet-poker/zkshuffle/card_unmask_circuit.go clients/420bet-poker/zkshuffle/card_unmask_circuit_test.go clients/420bet-poker/zkshuffle/go.mod clients/420bet-poker/zkshuffle/encrypted_share_delivery_circuit.go clients/420bet-poker/zkshuffle/encrypted_share_delivery_circuit_test.go > artifacts/420bet-5a-4/cryptographic-source-sha256.txt
           cd clients/420bet-poker/zkshuffle
           go list -mod=mod -m all > ../../../artifacts/420bet-5a-4/go-module-versions.txt
           cp go.sum ../../../artifacts/420bet-5a-4/go.sum
           sha256sum ../../../artifacts/420bet-5a-4/EXPERIMENTAL-Reencrypt52Verifier.sol ../../../artifacts/420bet-5a-4/EXPERIMENTAL-Reencrypt52VerifyingKey.bin ../../../artifacts/420bet-5a-4/EXPERIMENTAL-Reencrypt52Proof.bin ../../../artifacts/420bet-5a-4/EXPERIMENTAL-Reencrypt52SolidityFixture.json ../../../artifacts/420bet-5a-4/EXPERIMENTAL-InitialDeck52Verifier.sol ../../../artifacts/420bet-5a-4/EXPERIMENTAL-InitialDeck52VK.bin ../../../artifacts/420bet-5a-4/EXPERIMENTAL-InitialDeck52Proof.bin > ../../../artifacts/420bet-5a-4/generated-proof-sha256.txt
           sha256sum ../../../artifacts/420bet-5a-4/EXPERIMENTAL-PartialShareVerifier.sol ../../../artifacts/420bet-5a-4/EXPERIMENTAL-PartialShareProof.bin ../../../artifacts/420bet-5a-4/EXPERIMENTAL-CardUnmaskVerifier.sol ../../../artifacts/420bet-5a-4/EXPERIMENTAL-CardUnmaskProof.bin >> ../../../artifacts/420bet-5a-4/generated-proof-sha256.txt
+          sha256sum ../../../artifacts/420bet-5a-4/EXPERIMENTAL-EncryptedShareDeliveryVerifier.sol ../../../artifacts/420bet-5a-4/EXPERIMENTAL-EncryptedShareDeliveryProof.bin ../../../artifacts/420bet-5a-4/EXPERIMENTAL-EncryptedShareDeliverySolidityFixture.json >> ../../../artifacts/420bet-5a-4/generated-proof-sha256.txt
           sha256sum go.sum >> ../../../artifacts/420bet-5a-4/cryptographic-source-sha256.txt
       - name: Upload exact-SHA proof provenance
         if: steps.cryptoscope.outputs.changed == 'true'
@@ -158,6 +160,10 @@ jobs:
           python3 ../clients/420bet-poker/zkshuffle/make_groth16_forge_test.py src/bet/generated/ExperimentalCardUnmaskVerifier.sol ../artifacts/420bet-5a-4/EXPERIMENTAL-CardUnmaskSolidityFixture.json test/PokerGeneratedUnmaskProof.t.sol PokerUnmaskGeneratedVerifierAcceptanceTest 0 1
           forge test --match-contract PokerUnmaskGeneratedVerifierAcceptanceTest -vv
           rm test/PokerGeneratedUnmaskProof.t.sol
+          cp "../artifacts/420bet-5a-4/EXPERIMENTAL-EncryptedShareDeliveryVerifier.sol" "src/bet/generated/ExperimentalEncryptedShareDeliveryVerifier.sol"
+          python3 ../clients/420bet-poker/zkshuffle/make_groth16_forge_test.py src/bet/generated/ExperimentalEncryptedShareDeliveryVerifier.sol ../artifacts/420bet-5a-4/EXPERIMENTAL-EncryptedShareDeliverySolidityFixture.json test/PokerGeneratedEncryptedDeliveryProof.t.sol PokerEncryptedDeliveryGeneratedVerifierAcceptanceTest 0 1
+          forge test --match-contract PokerEncryptedDeliveryGeneratedVerifierAcceptanceTest -vv
+          rm test/PokerGeneratedEncryptedDeliveryProof.t.sol
       - name: Record inherited exact-SHA cryptographic qualification
         if: steps.cryptoscope.outputs.changed == 'false'
         run: |

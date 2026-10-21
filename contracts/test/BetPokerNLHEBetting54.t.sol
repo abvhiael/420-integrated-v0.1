@@ -67,7 +67,7 @@ contract PokerNLHEBetting54Test is PokerPrivateShuffleGate54Test {
                 aggregateSchema,gate.thresholdKeyCommitment());
         proofBook=new PokerDeliveryProofBook420(address(deal),address(delivery),
             address(gate),address(engine),address(proverA),address(proverB),address(aggregate));
-        cap.grant(ADMIN,recipient.ACTION_BIND_KEY_POP(),auth.scopeForTable(bytes32(0)),true);
+        cap.grant(ADMIN,recipient.ACTION_BIND_KEY_POP(),auth.scopeGlobal(),true);
         cap.grant(ADMIN,delivery.ACTION_BIND_PROOF_BOOK(),auth.scopeForTable(TABLE),true);
         cheat54.prank(ADMIN);recipient.bindProofVerifier(address(popVerifier));
         cheat54.prank(ADMIN);delivery.bindProofBook(TABLE,address(proofBook));

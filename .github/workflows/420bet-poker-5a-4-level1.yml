@@ -38,6 +38,7 @@ on:
       - 'contracts/src/bet/PokerGnarkEncryptedShareDeliveryAdapter420.sol'
       - 'contracts/src/bet/PokerGnarkRecipientKeyPoPAdapter420.sol'
       - 'contracts/src/bet/PokerDeliveryProofBook420.sol'
+      - 'contracts/src/bet/PokerProviderAccountability420.sol'
       - 'contracts/src/bet/PokerGnarkThresholdKeyAggregateAdapter420.sol'
       - 'contracts/src/bet/PokerLiveCardReveals420.sol'
       - 'contracts/test/BetPokerLiveCardReveals54.t.sol'

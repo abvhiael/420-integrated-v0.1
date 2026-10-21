@@ -87,7 +87,7 @@ jobs:
         run: |
           QUALIFIED=50f662efe92537b807f138f40a3871b01b0e84eb
           git fetch --no-tags --depth=1 origin "$QUALIFIED"
-          changed_files=$(git diff --name-only "$QUALIFIED" HEAD -- clients/420bet-poker/zkshuffle | grep -Ev '(encrypted_share_delivery_circuit|recipient_key_possession_circuit|threshold_key_aggregate_circuit|make_private_delivery_adapter_forge_test)' || true)
+          changed_files=$(git diff --name-only "$QUALIFIED" HEAD -- clients/420bet-poker/zkshuffle | grep -Ev '(encrypted_share_delivery_circuit|recipient_key_possession_circuit|threshold_key_aggregate_circuit|make_private_delivery_adapter_forge_test|triage_slither_poker\.py)' || true)
           if test -z "$changed_files"; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
             echo "Unmodified Go cryptography inherits proof evidence run 39351176585 at $QUALIFIED"

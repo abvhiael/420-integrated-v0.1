@@ -38,6 +38,19 @@ contract PokerDeckDisclosure54Test is PokerConfidentialDeal54Test {
         cheat54.expectRevert(PokerDeckDisclosure420.InvalidState.selector);
         disclosure.disclose(id,cards,keccak256("salt"));
     }
+    function testReceiptInvalidatedByRecipientKeyRotation() public {
+        bytes32 id=_ready();
+        uint8[52] memory cards=_cards();
+        bytes32 deckHash=disclosure.hashDeck(id,cards,keccak256("salt"));
+        cheat54.prank(PROVIDER_A);disclosure.publish(id,deckHash,keccak256("manifest"));
+        cheat54.prank(PROVIDER_A);disclosure.bindEnvelope(id,0,keccak256("envelope A"),KEY_A);
+        cheat54.prank(PROVIDER_B);disclosure.bindEnvelope(id,1,keccak256("envelope B"),KEY_B);
+        cheat54.prank(PLAYER);disclosure.acknowledge(id,0,keccak256("receipt A"));
+        cheat54.prank(PLAYER_B);disclosure.acknowledge(id,1,keccak256("receipt B"));
+        require(disclosure.allAcknowledged(id),"initial delivery accepted");
+        cheat54.prank(PLAYER);keyRegistry.bindKey(TABLE,keccak256("rotated player key"));
+        require(!disclosure.allAcknowledged(id),"stale envelope must block hand start");
+    }
     function testWrongPlayerAndMissingReceiptRejected() public {
         bytes32 id=_ready();
         uint8[52] memory cards=_cards();

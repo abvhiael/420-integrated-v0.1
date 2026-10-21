@@ -189,7 +189,7 @@ contract PokerNLHEBetting54Fixture is PokerPrivateShuffleGate54Test {
         engine.action(id,seat,move,chips,expiry,g.stateRoot,abi.encodePacked(rr,ss,v));
     }
 }
-contract PokerNLHEBetting54Test is PokerNLHEBetting54Fixture {
+contract PokerNLHEBetting54Case1Test is PokerNLHEBetting54Fixture {
     function testSignedHeadsUpPreflopClosesOnlyAfterBothAct() public {
         bytes32 id=_readyBetting();
         PokerNLHEBetting420.Game memory g=engine.gameOf(id);
@@ -205,6 +205,9 @@ contract PokerNLHEBetting54Test is PokerNLHEBetting54Fixture {
         require(g.pot==40 && g.nonce==2,"conserved signed actions");
         require(ledger.reservedInHand(TABLE)==800,"funds locked through betting");
     }
+}
+
+contract PokerNLHEBetting54Case2Test is PokerNLHEBetting54Fixture {
     function testTimeoutFoldsOnlyPlayerFacingLiveBet() public {
         bytes32 id=_readyBetting();
         cheat54.warp(block.timestamp+61);
@@ -214,6 +217,9 @@ contract PokerNLHEBetting54Test is PokerNLHEBetting54Fixture {
         require(engine.playerOf(id,0).folded,"auto-fold on owed bet");
         require(g.pot==30 && g.nonce==1,"timeout cannot alter chips");
     }
+}
+
+contract PokerNLHEBetting54Case3Test is PokerNLHEBetting54Fixture {
     function testInvalidSignedCallAndWrongTurnCannotMutateTranscript() public {
         bytes32 id=_readyBetting();
         PokerNLHEBetting420.Game memory g=engine.gameOf(id);
@@ -231,6 +237,9 @@ contract PokerNLHEBetting54Test is PokerNLHEBetting54Fixture {
         engine.action(id,0,PokerNLHEBetting420.Move.CALL,4,expiry,g.stateRoot,signature);
         require(engine.gameOf(id).stateRoot==expected,"invalid action cannot advance");
     }
+}
+
+contract PokerNLHEBetting54Case4Test is PokerNLHEBetting54Fixture {
     function testReadOnlySignatureCheckCannotFrontRunCanonicalAction() public {
         bytes32 id=_readyBetting();
         PokerNLHEBetting420.Game memory g=engine.gameOf(id);
@@ -245,6 +254,9 @@ contract PokerNLHEBetting54Test is PokerNLHEBetting54Fixture {
         engine.action(id,0,PokerNLHEBetting420.Move.CALL,10,expiry,g.stateRoot,signature);
         require(engine.gameOf(id).nonce==1,"engine atomically consumes");
     }
+}
+
+contract PokerNLHEBetting54Case5Test is PokerNLHEBetting54Fixture {
     function testWithheldPreplayShuffleRefundsLockedBalancesWithoutOperatorConsent() public {
         _prepared();
         bytes32 id=_begin(1);
@@ -263,9 +275,9 @@ contract PokerNLHEBetting54Test is PokerNLHEBetting54Fixture {
         cheat54.expectRevert(PokerNLHEBetting420.InvalidState.selector);
         engine.cancelWithheldDeal(id);
     }
-
 }
-contract PokerNLHEBetting54RecoveryTest is PokerNLHEBetting54Fixture {
+
+contract PokerNLHEBetting54Case6Test is PokerNLHEBetting54Fixture {
     function testVerifiedDeliveryCannotBeReboundAfterRecipientKeyRotation() public {
         bytes32 id=_readyProvedDelivery();
         require(delivery.allAcknowledged(id),"complete delivered shares required");
@@ -284,6 +296,9 @@ contract PokerNLHEBetting54RecoveryTest is PokerNLHEBetting54Fixture {
         engine.start(id,0,60);
         require(ledger.reservedInHand(TABLE)==800,"no escrow consumed by rotated proof");
     }
+}
+
+contract PokerNLHEBetting54Case7Test is PokerNLHEBetting54Fixture {
     function testProviderBondsAreFullyFundedLockedAndWithdrawalSafe() public {
         bytes32 id=_readyProvedDelivery();
         require(providerBond.isCollateralized(id),"pre-betting full collateral");
@@ -297,6 +312,9 @@ contract PokerNLHEBetting54RecoveryTest is PokerNLHEBetting54Fixture {
         require(coin.balanceOf(address(providerBond))==3800,"locked reserves cannot be withdrawn");
         require(ledger.reservedInHand(TABLE)==800,"provider bond segregated from player principal");
     }
+}
+
+contract PokerNLHEBetting54Case8Test is PokerNLHEBetting54Fixture {
     function testPostBettingMissingFlopProofRecoversOriginalEscrowExactlyOnce() public {
         bytes32 id=_readyBetting();
         _signedAction(id,0,PokerNLHEBetting420.Move.CALL,10,PLAYER_KEY);
@@ -321,6 +339,9 @@ contract PokerNLHEBetting54RecoveryTest is PokerNLHEBetting54Fixture {
         cheat54.expectRevert(PokerNLHEBetting420.InvalidState.selector);
         engine.finalizeMissingEvidenceRecovery(id);
     }
+}
+
+contract PokerNLHEBetting54Case9Test is PokerNLHEBetting54Fixture {
     function testCompletedShuffleButMissingProvedDeliveryVoidsPreBetting() public {
         bytes32 id=_hand54();
         bytes32 input=initialDeck.rootOf(id);
@@ -347,6 +368,9 @@ contract PokerNLHEBetting54RecoveryTest is PokerNLHEBetting54Fixture {
         cheat54.expectRevert(PokerNLHEBetting420.InvalidState.selector);
         engine.cancelWithheldDelivery(id);
     }
+}
+
+contract PokerNLHEBetting54Case10Test is PokerNLHEBetting54Fixture {
     function testUnacknowledgedHoleDeliveryCannotStartOrMoveEscrow() public {
         bytes32 id=_hand54();
         bytes32 input=initialDeck.rootOf(id);
@@ -366,5 +390,4 @@ contract PokerNLHEBetting54RecoveryTest is PokerNLHEBetting54Fixture {
         engine.start(id,0,60);
         require(engine.gameOf(id).initialized,"recipient consent required");
     }
-
 }

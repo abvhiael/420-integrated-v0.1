@@ -1,0 +1,86 @@
+{
+  "schema": "420integrated.animation-manifest",
+  "version": "1.0",
+  "characterId": "kush_krusher",
+  "animationId": "kk_anim_03_cannon_loading",
+  "animationName": "cannon_loading",
+  "animationNumber": "03",
+  "frameCount": 10,
+  "frameWidth": 1024,
+  "frameHeight": 1024,
+  "fps": 10,
+  "durationMs": 1000,
+  "loop": false,
+  "direction": "front_right_diagonal",
+  "background": "transparent",
+  "sourceArt": {
+    "image": "a_wide_comic_style_clean_white_background_illust.png",
+    "sha256": "efd8add9818d6701c63813e641d461ec051203adfc908eaadc6ae4fb528bd3c1",
+    "derivation": "Ten crops in approved sequence, connected-background flood removal, constant scene transform. No independent generation of frames."
+  },
+  "repositoryDestination": "assets/arcade/mad-buds/kush-krusher/animations/kk_anim_03_cannon_loading/",
+  "visualApprovalStatus": "PENDING_OWNER_REVIEW",
+  "qualificationStatus": "UNQUALIFIED_MOTION",
+  "frames": [
+    {
+      "index": 1,
+      "filename": "kush_krusher_anim_03_cannon_loading_frame_01.png",
+      "durationMs": 100,
+      "sha256": "f8dd0e5aaad8f01dfa7553fc900bc441abcaca105aa1129adb66202d3370f96e"
+    },
+    {
+      "index": 2,
+      "filename": "kush_krusher_anim_03_cannon_loading_frame_02.png",
+      "durationMs": 100,
+      "sha256": "1016bcab3c151dc6f0e2dd8eff5893d7a161ea21721f1612d9800e74be23c4ca"
+    },
+    {
+      "index": 3,
+      "filename": "kush_krusher_anim_03_cannon_loading_frame_03.png",
+      "durationMs": 100,
+      "sha256": "7788812d0697690cf8de2e889ee3ba502a41457cb203135a33451c0017bb6810"
+    },
+    {
+      "index": 4,
+      "filename": "kush_krusher_anim_03_cannon_loading_frame_04.png",
+      "durationMs": 100,
+      "sha256": "fcb2c8bda49ef04104153df80f1f4cdc6081fde2228bfe307ecc0dfc6010762c"
+    },
+    {
+      "index": 5,
+      "filename": "kush_krusher_anim_03_cannon_loading_frame_05.png",
+      "durationMs": 100,
+      "sha256": "a200cf25933b6f90a43dd0cd6e49ace140f9479e85ef6a82fe2bae5e417818bd"
+    },
+    {
+      "index": 6,
+      "filename": "kush_krusher_anim_03_cannon_loading_frame_06.png",
+      "durationMs": 100,
+      "sha256": "45c3200be8fee30da15ca687fd845776d51b96557ebe4cd755d53e2a2065ef93"
+    },
+    {
+      "index": 7,
+      "filename": "kush_krusher_anim_03_cannon_loading_frame_07.png",
+      "durationMs": 100,
+      "sha256": "0461bd07203a72a3b49b8cdfb820bd2f61ac4f0b2c1d31a3d5446c2e353bcaaf"
+    },
+    {
+      "index": 8,
+      "filename": "kush_krusher_anim_03_cannon_loading_frame_08.png",
+      "durationMs": 100,
+      "sha256": "ec79485837a59c8aae7175f6e38b25c6a4c5b5f36d0c5cc3848ed8116e801168"
+    },
+    {
+      "index": 9,
+      "filename": "kush_krusher_anim_03_cannon_loading_frame_09.png",
+      "durationMs": 100,
+      "sha256": "d41a1266789b1c87fb57e67730c8e41e34e00bb6ac2dbe6685978ae00f5a9a2e"
+    },
+    {
+      "index": 10,
+      "filename": "kush_krusher_anim_03_cannon_loading_frame_10.png",
+      "durationMs": 100,
+      "sha256": "5e22f63a2a6a5a904474d0b9d115cb524c1f02b4199737f5dac4874b3b4e8c37"
+    }
+  ]
+}

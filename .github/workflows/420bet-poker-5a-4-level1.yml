@@ -265,54 +265,46 @@ jobs:
             test/PokerGeneratedProofAcceptance.t.sol
           forge test --match-contract PokerGeneratedProofAcceptanceTest -vv
           rm test/PokerGeneratedProofAcceptance.t.sol
-      - name: Validate inherited starting-deck and selective card proofs when cryptography changes
+      - name: Validate genuine initial-deck and selective-card Groth16 verifiers together
         if: steps.cryptoscope.outputs.changed == 'true'
         working-directory: contracts
+        env:
+          FOUNDRY_SRC: src/bet
+          FOUNDRY_TEST: test/initial52-groth16
         run: |
-          set -e
+          set -eu
+          mkdir -p src/bet/generated test/initial52-groth16
           for kind in InitialDeck52 PartialShare CardUnmask; do
             cp "../artifacts/420bet-5a-4/EXPERIMENTAL-${kind}Verifier.sol" "src/bet/generated/Experimental${kind}Verifier.sol"
           done
-          python3 ../clients/420bet-poker/zkshuffle/make_groth16_forge_test.py src/bet/generated/ExperimentalInitialDeck52Verifier.sol ../artifacts/420bet-5a-4/EXPERIMENTAL-InitialDeck52SolidityFixture.json test/PokerGeneratedInitialProof.t.sol PokerInitial52GeneratedVerifierAcceptanceTest 1 0
-          forge test --match-contract PokerInitial52GeneratedVerifierAcceptanceTest -vv
-          rm test/PokerGeneratedInitialProof.t.sol
-          python3 ../clients/420bet-poker/zkshuffle/make_initial52_adapter_forge_test.py src/bet/generated/ExperimentalInitialDeck52Verifier.sol ../artifacts/420bet-5a-4/EXPERIMENTAL-InitialDeck52SolidityFixture.json test/PokerActualInitial52AdapterProof.t.sol
-          forge test --match-contract PokerInitial52RealAdapterQualification -vv
-          forge test --match-contract PokerInitial52ActualContractQualification -vv
-          rm test/PokerActualInitial52AdapterProof.t.sol
-          python3 ../clients/420bet-poker/zkshuffle/make_groth16_forge_test.py src/bet/generated/ExperimentalPartialShareVerifier.sol ../artifacts/420bet-5a-4/EXPERIMENTAL-PartialShareSolidityFixture.json test/PokerGeneratedShareProof.t.sol PokerShareGeneratedVerifierAcceptanceTest 0 1
-          forge test --match-contract PokerShareGeneratedVerifierAcceptanceTest -vv
-          rm test/PokerGeneratedShareProof.t.sol
-          python3 ../clients/420bet-poker/zkshuffle/make_groth16_forge_test.py src/bet/generated/ExperimentalCardUnmaskVerifier.sol ../artifacts/420bet-5a-4/EXPERIMENTAL-CardUnmaskSolidityFixture.json test/PokerGeneratedUnmaskProof.t.sol PokerUnmaskGeneratedVerifierAcceptanceTest 0 1
-          forge test --match-contract PokerUnmaskGeneratedVerifierAcceptanceTest -vv
-          rm test/PokerGeneratedUnmaskProof.t.sol
-      - name: Qualify new real encrypted-share, recipient-key and aggregate Solidity verifier adapters
+          python3 ../clients/420bet-poker/zkshuffle/make_groth16_forge_test.py src/bet/generated/ExperimentalInitialDeck52Verifier.sol ../artifacts/420bet-5a-4/EXPERIMENTAL-InitialDeck52SolidityFixture.json test/initial52-groth16/PokerGeneratedInitialProof.t.sol PokerInitial52GeneratedVerifierAcceptanceTest 1 0
+          python3 ../clients/420bet-poker/zkshuffle/make_initial52_adapter_forge_test.py src/bet/generated/ExperimentalInitialDeck52Verifier.sol ../artifacts/420bet-5a-4/EXPERIMENTAL-InitialDeck52SolidityFixture.json test/initial52-groth16/PokerActualInitial52AdapterProof.t.sol
+          python3 ../clients/420bet-poker/zkshuffle/make_groth16_forge_test.py src/bet/generated/ExperimentalPartialShareVerifier.sol ../artifacts/420bet-5a-4/EXPERIMENTAL-PartialShareSolidityFixture.json test/initial52-groth16/PokerGeneratedShareProof.t.sol PokerShareGeneratedVerifierAcceptanceTest 0 1
+          python3 ../clients/420bet-poker/zkshuffle/make_groth16_forge_test.py src/bet/generated/ExperimentalCardUnmaskVerifier.sol ../artifacts/420bet-5a-4/EXPERIMENTAL-CardUnmaskSolidityFixture.json test/initial52-groth16/PokerGeneratedUnmaskProof.t.sol PokerUnmaskGeneratedVerifierAcceptanceTest 0 1
+          sed -i 's#../src/#../../src/#g' test/initial52-groth16/*.t.sol
+          forge test -vv
+          rm -rf test/initial52-groth16
+      - name: Qualify genuine encrypted-share recipient-key aggregate adapters together
         if: steps.cryptoscope.outputs.changed == 'true' || steps.recipient_scope.outputs.changed == 'true'
         working-directory: contracts
+        env:
+          FOUNDRY_SRC: src/bet
+          FOUNDRY_TEST: test/recipient-groth16
         run: |
-          set -e
-          mkdir -p src/bet/generated
-          cp "../artifacts/420bet-5a-4/EXPERIMENTAL-EncryptedShareDeliveryVerifier.sol" "src/bet/generated/ExperimentalEncryptedShareDeliveryVerifier.sol"
-          python3 ../clients/420bet-poker/zkshuffle/make_groth16_forge_test.py src/bet/generated/ExperimentalEncryptedShareDeliveryVerifier.sol ../artifacts/420bet-5a-4/EXPERIMENTAL-EncryptedShareDeliverySolidityFixture.json test/PokerGeneratedEncryptedDeliveryProof.t.sol PokerEncryptedDeliveryGeneratedVerifierAcceptanceTest 0 1
-          forge test --match-contract PokerEncryptedDeliveryGeneratedVerifierAcceptanceTest -vv
-          rm test/PokerGeneratedEncryptedDeliveryProof.t.sol
-          cp "../artifacts/420bet-5a-4/EXPERIMENTAL-RecipientKeyPossessionVerifier.sol" "src/bet/generated/ExperimentalRecipientKeyPossessionVerifier.sol"
-          python3 ../clients/420bet-poker/zkshuffle/make_groth16_forge_test.py src/bet/generated/ExperimentalRecipientKeyPossessionVerifier.sol ../artifacts/420bet-5a-4/EXPERIMENTAL-RecipientKeyPossessionSolidityFixture.json test/PokerGeneratedRecipientKeyProof.t.sol PokerRecipientKeyGeneratedVerifierAcceptanceTest 0 1
-          forge test --match-contract PokerRecipientKeyGeneratedVerifierAcceptanceTest -vv
-          rm test/PokerGeneratedRecipientKeyProof.t.sol
-          python3 ../clients/420bet-poker/zkshuffle/make_private_delivery_adapter_forge_test.py delivery src/bet/generated/ExperimentalEncryptedShareDeliveryVerifier.sol ../artifacts/420bet-5a-4/EXPERIMENTAL-EncryptedShareDeliverySolidityFixture.json test/PokerActualDeliveryAdapterProof.t.sol
-          forge test --match-contract PokerActualPrivateDeliveryAdapterProofTest -vv
-          rm test/PokerActualDeliveryAdapterProof.t.sol
-          python3 ../clients/420bet-poker/zkshuffle/make_private_delivery_adapter_forge_test.py recipient src/bet/generated/ExperimentalRecipientKeyPossessionVerifier.sol ../artifacts/420bet-5a-4/EXPERIMENTAL-RecipientKeyPossessionSolidityFixture.json test/PokerActualRecipientAdapterProof.t.sol
-          forge test --match-contract PokerActualPrivateDeliveryAdapterProofTest -vv
-          rm test/PokerActualRecipientAdapterProof.t.sol
-          cp "../artifacts/420bet-5a-4/EXPERIMENTAL-ThresholdKeyAggregateVerifier.sol" "src/bet/generated/ExperimentalThresholdKeyAggregateVerifier.sol"
-          python3 ../clients/420bet-poker/zkshuffle/make_groth16_forge_test.py src/bet/generated/ExperimentalThresholdKeyAggregateVerifier.sol ../artifacts/420bet-5a-4/EXPERIMENTAL-ThresholdKeyAggregateSolidityFixture.json test/PokerGeneratedAggregateProof.t.sol PokerAggregateGeneratedVerifierAcceptanceTest 0 1
-          forge test --match-contract PokerAggregateGeneratedVerifierAcceptanceTest -vv
-          rm test/PokerGeneratedAggregateProof.t.sol
-          python3 ../clients/420bet-poker/zkshuffle/make_private_delivery_adapter_forge_test.py aggregate src/bet/generated/ExperimentalThresholdKeyAggregateVerifier.sol ../artifacts/420bet-5a-4/EXPERIMENTAL-ThresholdKeyAggregateSolidityFixture.json test/PokerActualAggregateAdapterProof.t.sol
-          forge test --match-contract PokerActualPrivateDeliveryAdapterProofTest -vv
-          rm test/PokerActualAggregateAdapterProof.t.sol
+          set -eu
+          mkdir -p src/bet/generated test/recipient-groth16
+          for kind in EncryptedShareDelivery RecipientKeyPossession ThresholdKeyAggregate; do
+            cp "../artifacts/420bet-5a-4/EXPERIMENTAL-${kind}Verifier.sol" "src/bet/generated/Experimental${kind}Verifier.sol"
+          done
+          python3 ../clients/420bet-poker/zkshuffle/make_groth16_forge_test.py src/bet/generated/ExperimentalEncryptedShareDeliveryVerifier.sol ../artifacts/420bet-5a-4/EXPERIMENTAL-EncryptedShareDeliverySolidityFixture.json test/recipient-groth16/PokerGeneratedEncryptedDeliveryProof.t.sol PokerEncryptedDeliveryGeneratedVerifierAcceptanceTest 0 1
+          python3 ../clients/420bet-poker/zkshuffle/make_groth16_forge_test.py src/bet/generated/ExperimentalRecipientKeyPossessionVerifier.sol ../artifacts/420bet-5a-4/EXPERIMENTAL-RecipientKeyPossessionSolidityFixture.json test/recipient-groth16/PokerGeneratedRecipientKeyProof.t.sol PokerRecipientKeyGeneratedVerifierAcceptanceTest 0 1
+          python3 ../clients/420bet-poker/zkshuffle/make_private_delivery_adapter_forge_test.py delivery src/bet/generated/ExperimentalEncryptedShareDeliveryVerifier.sol ../artifacts/420bet-5a-4/EXPERIMENTAL-EncryptedShareDeliverySolidityFixture.json test/recipient-groth16/PokerActualDeliveryAdapterProof.t.sol
+          python3 ../clients/420bet-poker/zkshuffle/make_private_delivery_adapter_forge_test.py recipient src/bet/generated/ExperimentalRecipientKeyPossessionVerifier.sol ../artifacts/420bet-5a-4/EXPERIMENTAL-RecipientKeyPossessionSolidityFixture.json test/recipient-groth16/PokerActualRecipientAdapterProof.t.sol
+          python3 ../clients/420bet-poker/zkshuffle/make_groth16_forge_test.py src/bet/generated/ExperimentalThresholdKeyAggregateVerifier.sol ../artifacts/420bet-5a-4/EXPERIMENTAL-ThresholdKeyAggregateSolidityFixture.json test/recipient-groth16/PokerGeneratedAggregateProof.t.sol PokerAggregateGeneratedVerifierAcceptanceTest 0 1
+          python3 ../clients/420bet-poker/zkshuffle/make_private_delivery_adapter_forge_test.py aggregate src/bet/generated/ExperimentalThresholdKeyAggregateVerifier.sol ../artifacts/420bet-5a-4/EXPERIMENTAL-ThresholdKeyAggregateSolidityFixture.json test/recipient-groth16/PokerActualAggregateAdapterProof.t.sol
+          sed -i 's#../src/#../../src/#g' test/recipient-groth16/*.t.sol
+          forge test -vv
+          rm -rf test/recipient-groth16
       - name: Record inherited recipient-adapter evidence
         if: steps.cryptoscope.outputs.changed == 'false' && steps.recipient_scope.outputs.changed == 'false'
         run: |

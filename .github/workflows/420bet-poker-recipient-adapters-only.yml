@@ -1,0 +1,66 @@
+name: 420Bet Recipient Groth16 Adapters Only
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/420bet-poker-recipient-adapters-only.yml'
+  workflow_dispatch:
+jobs:
+  recipient-adapters-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      FOUNDRY_VIA_IR: 'true'
+      FOUNDRY_PROFILE: pr
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Pin exact tested SHA
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+          cache: false
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Generate only three recipient Groth16 proof families
+        working-directory: clients/420bet-poker/zkshuffle
+        env:
+          POKER_ZK_ARTIFACT_DIR: ../../../artifacts/420bet-5a-4
+        run: go test -mod=mod -timeout 20m -run '^(TestEncryptedShareDeliveryProofAndAdversarialRejections|TestRecipientPublicKeyProofOfPossession|TestGenuineProviderKeyAggregateProof)$' ./...
+      - name: Verify only recipient Groth16 Solidity adapters
+        working-directory: contracts
+        run: |
+          set -e
+          mkdir -p src/bet/generated
+          cp ../artifacts/420bet-5a-4/EXPERIMENTAL-EncryptedShareDeliveryVerifier.sol src/bet/generated/ExperimentalEncryptedShareDeliveryVerifier.sol
+          cp ../artifacts/420bet-5a-4/EXPERIMENTAL-RecipientKeyPossessionVerifier.sol src/bet/generated/ExperimentalRecipientKeyPossessionVerifier.sol
+          cp ../artifacts/420bet-5a-4/EXPERIMENTAL-ThresholdKeyAggregateVerifier.sol src/bet/generated/ExperimentalThresholdKeyAggregateVerifier.sol
+          python3 ../clients/420bet-poker/zkshuffle/make_groth16_forge_test.py src/bet/generated/ExperimentalEncryptedShareDeliveryVerifier.sol ../artifacts/420bet-5a-4/EXPERIMENTAL-EncryptedShareDeliverySolidityFixture.json test/PokerGeneratedEncryptedDeliveryProof.t.sol PokerEncryptedDeliveryGeneratedVerifierAcceptanceTest 0 1
+          python3 ../clients/420bet-poker/zkshuffle/make_groth16_forge_test.py src/bet/generated/ExperimentalRecipientKeyPossessionVerifier.sol ../artifacts/420bet-5a-4/EXPERIMENTAL-RecipientKeyPossessionSolidityFixture.json test/PokerGeneratedRecipientKeyProof.t.sol PokerRecipientKeyGeneratedVerifierAcceptanceTest 0 1
+          python3 ../clients/420bet-poker/zkshuffle/make_groth16_forge_test.py src/bet/generated/ExperimentalThresholdKeyAggregateVerifier.sol ../artifacts/420bet-5a-4/EXPERIMENTAL-ThresholdKeyAggregateSolidityFixture.json test/PokerGeneratedAggregateProof.t.sol PokerAggregateGeneratedVerifierAcceptanceTest 0 1
+          python3 ../clients/420bet-poker/zkshuffle/make_private_delivery_adapter_forge_test.py delivery src/bet/generated/ExperimentalEncryptedShareDeliveryVerifier.sol ../artifacts/420bet-5a-4/EXPERIMENTAL-EncryptedShareDeliverySolidityFixture.json test/PokerActualDeliveryAdapterProof.t.sol
+          python3 ../clients/420bet-poker/zkshuffle/make_private_delivery_adapter_forge_test.py recipient src/bet/generated/ExperimentalRecipientKeyPossessionVerifier.sol ../artifacts/420bet-5a-4/EXPERIMENTAL-RecipientKeyPossessionSolidityFixture.json test/PokerActualRecipientAdapterProof.t.sol
+          python3 ../clients/420bet-poker/zkshuffle/make_private_delivery_adapter_forge_test.py aggregate src/bet/generated/ExperimentalThresholdKeyAggregateVerifier.sol ../artifacts/420bet-5a-4/EXPERIMENTAL-ThresholdKeyAggregateSolidityFixture.json test/PokerActualAggregateAdapterProof.t.sol
+          forge test --match-path 'test/PokerGeneratedEncryptedDeliveryProof.t.sol' -vv
+          forge test --match-path 'test/PokerGeneratedRecipientKeyProof.t.sol' -vv
+          forge test --match-path 'test/PokerGeneratedAggregateProof.t.sol' -vv
+          forge test --match-path 'test/PokerActualDeliveryAdapterProof.t.sol' -vv
+          forge test --match-path 'test/PokerActualRecipientAdapterProof.t.sol' -vv
+          forge test --match-path 'test/PokerActualAggregateAdapterProof.t.sol' -vv
+      - name: Preserve exact-SHA recipient proof evidence
+        run: |
+          set -e
+          mkdir -p artifacts/420bet-5a-4
+          git rev-parse HEAD > artifacts/420bet-5a-4/recipient-adapters-qualified-sha.txt
+          sha256sum clients/420bet-poker/zkshuffle/{encrypted_share_delivery_circuit,recipient_key_possession_circuit,threshold_key_aggregate_circuit}.go > artifacts/420bet-5a-4/recipient-adapters-source-sha256.txt
+          sha256sum artifacts/420bet-5a-4/EXPERIMENTAL-{EncryptedShareDelivery,RecipientKeyPossession,ThresholdKeyAggregate}Verifier.sol > artifacts/420bet-5a-4/recipient-adapters-verifier-sha256.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: 420bet-recipient-adapters-only-evidence
+          path: artifacts/420bet-5a-4/recipient-adapters-*.txt
+          retention-days: 90
+          if-no-files-found: error

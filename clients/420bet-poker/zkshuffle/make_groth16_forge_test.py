@@ -18,7 +18,7 @@ proof=[int(raw[2+i*64:2+(i+1)*64],16) for i in range(8)]
 public=[int(x) for x in data["public"]]
 n=len(public)
 if not 0<=scope<n or not 0<=root<n or scope==root:raise SystemExit("wrong indices")
-field=21888242871839275222246405745257275088696311157297823662689037894645226208583
+field=21888242871839275222246405745257275088548364400416034343698204186575808495617
 if any(x<0 or x>=field for x in public):raise SystemExit("noncanonical public field")
 proof_words=",".join(f"uint256({x})" for x in proof)
 public_words=",".join(f"uint256({x})" for x in public)

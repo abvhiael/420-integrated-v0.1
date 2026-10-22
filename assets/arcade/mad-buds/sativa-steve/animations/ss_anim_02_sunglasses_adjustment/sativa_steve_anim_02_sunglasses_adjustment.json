@@ -1,0 +1,88 @@
+{
+  "schema": "mad-buds-animation-manifest-v1",
+  "schemaVersion": "1.0",
+  "characterId": "sativa_steve",
+  "animationId": "ss_anim_02_sunglasses_adjustment",
+  "animationName": "sunglasses_adjustment",
+  "frameCount": 10,
+  "frameWidth": 1024,
+  "frameHeight": 1024,
+  "fps": 10,
+  "durationMs": 1000,
+  "loop": true,
+  "direction": "front",
+  "pivotNormalized": [
+    0.5,
+    0.879
+  ],
+  "sourceArt": "sativa_steve_sunglasses_adjustment_sprite_sheet.png",
+  "sourceSHA256": "d481791dc51b66e9374978bc8911116c57f866596ef8009f89764b003dbd2d13",
+  "masterSheet": "sativa_steve_ss_d02_neutral_front.png",
+  "method": "ten sequential source-sheet poses isolated with uniform scaling and consistent 1024 square transparent canvases",
+  "repositoryDestination": "assets/arcade/mad-buds/sativa-steve/animations/ss_anim_02_sunglasses_adjustment/",
+  "visualApproval": "PENDING_OWNER_REVIEW_OF_EXTRACTED_SEQUENCE",
+  "qualification": "STRUCTURAL_CHECK_ONLY",
+  "preview": "sativa_steve_anim_02_sunglasses_adjustment_preview.gif",
+  "frames": [
+    {
+      "index": 1,
+      "filename": "sativa_steve_anim_02_sunglasses_adjustment_frame_01.png",
+      "durationMs": 100,
+      "sha256": "f7da7f6300d79dfc9d85d069a2b77bb2693dfc734d86194c336ad466db19ba41"
+    },
+    {
+      "index": 2,
+      "filename": "sativa_steve_anim_02_sunglasses_adjustment_frame_02.png",
+      "durationMs": 100,
+      "sha256": "4680284c77d8a4c3c2c9cdddf999b5bffa3e1e85a7ea51e5a3542dab6165e173"
+    },
+    {
+      "index": 3,
+      "filename": "sativa_steve_anim_02_sunglasses_adjustment_frame_03.png",
+      "durationMs": 100,
+      "sha256": "73582b288b36bf5f79754455bc753824ff48300249da573bb1eea1bc79839bb4"
+    },
+    {
+      "index": 4,
+      "filename": "sativa_steve_anim_02_sunglasses_adjustment_frame_04.png",
+      "durationMs": 100,
+      "sha256": "2fbe807fc1aa091621e08f1bd2442a7fafc6b2cda4e2c5795a252cc0d81e1b5d"
+    },
+    {
+      "index": 5,
+      "filename": "sativa_steve_anim_02_sunglasses_adjustment_frame_05.png",
+      "durationMs": 100,
+      "sha256": "757862347e8054dfed3fed1bc749dbac851ac7d7ad4e5e989f7eea7179d3192c"
+    },
+    {
+      "index": 6,
+      "filename": "sativa_steve_anim_02_sunglasses_adjustment_frame_06.png",
+      "durationMs": 100,
+      "sha256": "59a48397b3ff375d0f7ca4c1613d18b142b5ec1896bb627ce8bf5b4abe9152c5"
+    },
+    {
+      "index": 7,
+      "filename": "sativa_steve_anim_02_sunglasses_adjustment_frame_07.png",
+      "durationMs": 100,
+      "sha256": "d4e4f2562a57251b723fae0e465a9a34b97b5441c074c3de6e329fd77019b1ce"
+    },
+    {
+      "index": 8,
+      "filename": "sativa_steve_anim_02_sunglasses_adjustment_frame_08.png",
+      "durationMs": 100,
+      "sha256": "8065dceb5680d4efbdf0ab3f2ac722526c9d34b7d68dd284954b548f60980474"
+    },
+    {
+      "index": 9,
+      "filename": "sativa_steve_anim_02_sunglasses_adjustment_frame_09.png",
+      "durationMs": 100,
+      "sha256": "f76be659249a9793d65b18d8567f2ae61a08b1cfc0d1ca40bbb09a9ca8ac7d46"
+    },
+    {
+      "index": 10,
+      "filename": "sativa_steve_anim_02_sunglasses_adjustment_frame_10.png",
+      "durationMs": 100,
+      "sha256": "4794dbdc1b096650ebc6b8a093702e435dcf44dfc776ed0f284ab2941c626162"
+    }
+  ]
+}

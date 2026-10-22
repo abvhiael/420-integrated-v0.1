@@ -59,7 +59,7 @@ contract PokerGnarkElGamalAdapters54Test {
     function testInitialInputsBoundToExactDeck() public {
         uint256[8] memory proof;
         bytes32 statement=keccak256("statement");
-        uint256[5] memory publicValues=[uint256(100),uint256(statement)%21888242871839275222246405745257275088696311157297823662689037894645226208583,uint256(420),uint256(7),uint256(8)];
+        uint256[5] memory publicValues=[uint256(100),uint256(statement)%21888242871839275222246405745257275088548364400416034343698204186575808495617,uint256(420),uint256(7),uint256(8)];
         fakeInitial.setAccept(true);
         require(initial.verifyInitialDeck(statement,HAND,ROOT_ONE,KEY,
             abi.encode(proof,publicValues)),"initial accepted");

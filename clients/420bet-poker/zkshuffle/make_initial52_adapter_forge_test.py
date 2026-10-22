@@ -3,7 +3,7 @@
 import json, pathlib, re, sys
 if len(sys.argv)!=4: raise SystemExit("usage: script.py generated-verifier.sol fixture.json output.t.sol")
 verifier,fixture,out=map(pathlib.Path,sys.argv[1:])
-names=re.findall(r'^\\s*contract\\s+(\\w+)',verifier.read_text(),re.M)
+names=re.findall(r'^\s*contract\s+(\w+)',verifier.read_text(),re.M)
 if len(names)!=1: raise SystemExit("expected one generated verifier")
 data=json.loads(fixture.read_text())
 raw=data['proof']

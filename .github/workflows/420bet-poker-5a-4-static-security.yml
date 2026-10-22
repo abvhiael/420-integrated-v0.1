@@ -1,0 +1,84 @@
+name: 420Bet Poker 5A.4 Scoped Static Security
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'contracts/src/bet/PokerNLHEBetting420.sol'
+      - 'contracts/src/bet/PokerNativeOutcome420.sol'
+      - 'contracts/src/bet/PokerLiveCardReveals420.sol'
+      - 'contracts/src/bet/PokerCanonicalSettlement420.sol'
+      - 'contracts/src/bet/PokerSeatLedger420.sol'
+      - 'contracts/src/bet/PokerGnarkElGamalAdapters420.sol'
+      - 'contracts/src/bet/PokerGnarkCardRevealAdapters420.sol'
+      - 'contracts/src/bet/PokerPrivateShuffleGate420.sol'
+      - 'contracts/src/bet/PokerInitialEncryptedDeck420.sol'
+      - 'contracts/src/bet/PokerVerifierVersions420.sol'
+      - 'contracts/src/bet/PokerDeliveryProofBook420.sol'
+      - 'contracts/src/bet/PokerProviderAccountability420.sol'
+      - 'contracts/src/bet/PokerDeckDisclosure420.sol'
+      - 'contracts/src/bet/PokerRecipientKeys420.sol'
+      - 'contracts/src/bet/PokerGnarkRecipientKeyPoPAdapter420.sol'
+      - 'contracts/src/bet/PokerGnarkEncryptedShareDeliveryAdapter420.sol'
+      - 'contracts/src/bet/PokerGnarkThresholdKeyAggregateAdapter420.sol'
+      - 'clients/420bet-poker/zkshuffle/triage_slither_poker.py'
+      - '.github/workflows/420bet-poker-5a-4-static-security.yml'
+permissions:
+  contents: read
+concurrency:
+  group: bet-poker-5a-4-security-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  slither-owner:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Assert reviewed exact SHA
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install pinned Solidity security analyzer
+        run: python3 -m pip install slither-analyzer==0.11.6
+      - name: Static-analyze affected 420Bet Solidity source graph
+        working-directory: contracts
+        run: |
+          mkdir -p ../artifacts/420bet-5a-4-security
+          set +e
+          # Compile only the two affected canonical source graphs, not all
+          # Solidity contracts or the unrelated Genesis application suite.
+          slither src/bet/PokerNativeOutcome420.sol --json ../artifacts/420bet-5a-4-security/native.json > ../artifacts/420bet-5a-4-security/native.log 2>&1
+          native_exit=$?
+          slither src/bet/PokerCanonicalSettlement420.sol --json ../artifacts/420bet-5a-4-security/settlement.json > ../artifacts/420bet-5a-4-security/settlement.log 2>&1
+          settlement_exit=$?
+          slither src/bet/PokerDeliveryProofBook420.sol --json ../artifacts/420bet-5a-4-security/delivery.json > ../artifacts/420bet-5a-4-security/delivery.log 2>&1
+          delivery_exit=$?
+          set -e
+          printf 'native=%s\nsettlement=%s\n' "$native_exit" "$settlement_exit" > ../artifacts/420bet-5a-4-security/slither-exit.txt
+          printf 'delivery=%s\\n' "$delivery_exit" >> ../artifacts/420bet-5a-4-security/slither-exit.txt
+          for name in native settlement delivery; do
+            test -s "../artifacts/420bet-5a-4-security/$name.json" || {
+              tail -100 "../artifacts/420bet-5a-4-security/$name.log"
+              exit 1
+            }
+          done
+          python3 ../clients/420bet-poker/zkshuffle/triage_slither_poker.py \
+            ../artifacts/420bet-5a-4-security/native.json \
+            ../artifacts/420bet-5a-4-security/settlement.json \
+            ../artifacts/420bet-5a-4-security/delivery.json \
+            ../artifacts/420bet-5a-4-security/poker-security-findings.json
+      - name: Attach reproducible security evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: 420bet-5a-4-static-security
+          path: artifacts/420bet-5a-4-security/
+          retention-days: 90
+          if-no-files-found: warn

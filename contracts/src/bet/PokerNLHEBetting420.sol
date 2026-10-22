@@ -1,0 +1,620 @@
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity ^0.8.24;
+
+import "./PokerActionKeys420.sol";
+import "./PokerPrivateShuffleGate420.sol";
+import "./PokerActionDisputeClock420.sol";
+import "./PokerCanonicalRake420.sol";
+import "./PokerDeckDisclosure420.sol";
+import "./PokerProviderAccountability420.sol";
+import "./PokerDeliveryProofBook420.sol";
+
+interface IPokerNativeOutcome420 {
+    function engine() external view returns(address);
+    function reveals() external view returns(address);
+    function rakeEngine() external view returns(address);
+    function calculate(bytes32 handId,PokerCanonicalRake420.Policy calldata policy)
+        external view returns(uint256[9] memory finalChips,uint256 fee);
+}
+interface IPokerAuthenticatedStreet420 {
+    function engine() external view returns(PokerNLHEBetting420);
+    function isStageComplete(bytes32 handId,uint8 street) external view returns(bool);
+}
+
+/// @notice Native on-chain NLHE betting state machine. No controller can insert
+/// arbitrary stacks, skip a betting transition, reopen an illegal underraise,
+/// or choose the player to act. Settlement must consume these stored values.
+/// @dev Does not itself implement seven-card hand ranking or finalize funds.
+///      The latter MUST run against cryptographically authenticated revelations.
+interface IPokerMissingShareEvidence420 {
+    function missingProviders(bytes32 handId,uint8 street)external view returns(uint8);
+}
+contract PokerNLHEBetting420 {
+    bytes32 public constant ACTION_DOMAIN=keccak256("420.BET.POKER.NLHE.AUTHENTICATED.ACTION.V1");
+    bytes32 public constant STATE_DOMAIN=keccak256("420.BET.POKER.NLHE.STATE.V1");
+    bytes32 public constant ACTION_BIND_DELIVERY=keccak256("BET_POKER_BIND_PRIVATE_DELIVERY.V1");
+    bytes32 public constant ACTION_BIND_OUTCOME=keccak256("BET_POKER_BIND_CANONICAL_OUTCOME.V1");
+    bytes32 public constant ACTION_BIND_REVEALS=keccak256("BET_POKER_BIND_REVEAL_ENGINE.V1");
+
+    enum Phase {NONE,PREFLOP,AWAIT_FLOP,FLOP,AWAIT_TURN,TURN,AWAIT_RIVER,RIVER,SHOWDOWN,UNCONTESTED}
+    enum Move {FOLD,CHECK,CALL,RAISE}
+    struct Player {
+        uint256 stack;
+        uint256 bet;
+        uint256 contributed;
+        uint256 lastFacing;
+        bool acted;
+        bool folded;
+        bool allIn;
+    }
+    struct Game {
+        bytes32 tableId;
+        bytes32 stateRoot;
+        uint16 seatsMask;
+        uint16 pendingMask;
+        uint8 button;
+        uint8 smallBlindSeat;
+        uint8 bigBlindSeat;
+        uint8 toAct;
+        uint64 nonce;
+        uint64 deadline;
+        uint32 actionTimeout;
+        uint256 currentBet;
+        uint256 minRaise;
+        uint256 initialChips;
+        uint256 pot;
+        Phase phase;
+        bool initialized;
+    }
+    PokerConfidentialDeal420 public immutable deals;
+    PokerSeatLedger420 public immutable ledger;
+    PokerPrivateShuffleGate420 public immutable shuffle;
+    PokerActionKeys420 public immutable keys;
+    PokerActionDisputeClock420 public immutable disputes;
+    BetAuthorization420 public immutable authorization;
+    mapping(bytes32=>IPokerAuthenticatedStreet420) public revealForTable;
+    mapping(bytes32=>Game) private games;
+    mapping(bytes32=>mapping(uint8=>Player)) private players;
+    mapping(bytes32=>uint8) public lastButton;
+    mapping(bytes32=>bool) public hasButton;
+    mapping(bytes32=>bool) public flopOpened;
+    mapping(bytes32=>bool) public handSettled;
+    mapping(bytes32=>bool) public handAborted;
+    bytes32 public constant ACTION_BIND_PROVIDER_BOND=
+        keccak256("BET_POKER_BIND_PROVIDER_ACCOUNTABILITY.V1");
+    mapping(bytes32=>PokerProviderAccountability420) public bondForTable;
+    event ProviderBondBound(bytes32 indexed tableId,address bond);
+
+    mapping(bytes32=>uint64) public evidenceDueAt;
+    struct EvidenceRecovery {uint64 openedAt;uint64 finalizableAt;bytes32 stateRoot;Phase failedPhase;bool active;}
+    mapping(bytes32=>EvidenceRecovery) public evidenceRecovery;
+    uint64 public constant PROOF_DELIVERY_WINDOW=1 hours;
+    uint64 public constant RECOVERY_REVIEW_WINDOW=2 days+1 hours;
+    event MissingEvidenceRecoveryOpened(bytes32 indexed handId,uint8 phase,bytes32 stateRoot,uint64 finalizableAt);
+    event MissingEvidenceRecoveryVoided(bytes32 indexed handId,bytes32 indexed tableId);
+    event UnverifiedDeliveryAborted(bytes32 indexed handId,bytes32 indexed tableId);
+
+    struct PreparedDeal {uint8 button;uint16 mask;uint64 epoch;bytes32 seatSnapshot;bool ready;}
+    mapping(bytes32=>PreparedDeal) public preparedDeal;
+    event DealAssignmentPrepared(bytes32 indexed handId,uint8 button,uint16 seatMask,bytes32 seatSnapshot);
+
+    mapping(bytes32=>address) public outcomeForTable;
+    mapping(bytes32=>PokerDeckDisclosure420) public deliveryForTable;
+    event DeliveryBound(bytes32 indexed tableId,address gate);
+    event OutcomeBound(bytes32 indexed tableId,address outcome);
+    event NativeHandSettled(bytes32 indexed handId,bytes32 indexed tableId,uint256 rake);
+    event UnprovedDealAborted(bytes32 indexed handId,bytes32 indexed tableId);
+
+    error InvalidConfiguration();error InvalidState();error WrongTurn();
+    error Unauthorized();error InvalidAction();error Expired();error WaitingForReveal();
+    event HandStarted(bytes32 indexed handId,uint8 button,uint8 smallBlindSeat,uint8 bigBlindSeat);
+    event NLHEAction(bytes32 indexed handId,uint64 nonce,uint8 seat,Move action,uint256 chips,bytes32 stateRoot);
+    event NLHETimeout(bytes32 indexed handId,uint8 indexed seat,uint64 nonce,Move autoAction);
+    event StreetOpened(bytes32 indexed handId,uint8 street);
+    event RevealsBound(address indexed gate);
+
+    constructor(address deals_,address shuffle_,address keys_,address disputes_) {
+        if(deals_==address(0)||shuffle_==address(0)||keys_==address(0)||disputes_==address(0))
+            revert InvalidConfiguration();
+        deals=PokerConfidentialDeal420(deals_);
+        ledger=deals.ledger();
+        shuffle=PokerPrivateShuffleGate420(shuffle_);
+        keys=PokerActionKeys420(keys_);
+        disputes=PokerActionDisputeClock420(disputes_);
+        authorization=deals.authorization();
+        if(address(shuffle.deals())!=deals_||address(keys.deals())!=deals_||
+           address(disputes.deals())!=deals_)
+            revert InvalidConfiguration();
+    }
+
+    function bindReveals(bytes32 tableId,address gate) external {
+        if(address(revealForTable[tableId])!=address(0)||gate==address(0)||gate.code.length==0)
+            revert InvalidConfiguration();
+        if(!authorization.isAuthorized(msg.sender,ACTION_BIND_REVEALS,
+            authorization.scopeForTable(tableId),0))revert Unauthorized();
+        // A public reveal contract must be associated with this exact on-chain
+        // betting engine, not merely expose a compatible method selector.
+        if(address(IPokerAuthenticatedStreet420(gate).engine())!=address(this))
+            revert InvalidConfiguration();
+        revealForTable[tableId]=IPokerAuthenticatedStreet420(gate);
+        emit RevealsBound(gate);
+    }
+    /// @notice One-time table-governance approval of canonical native payout calculator.
+    /// @dev No address may provide arbitrarily chosen settlement amounts after binding.
+    /// @notice One-time per-table governance approval of player-owned
+    /// encrypted delivery + signed receipt authority.
+    function bindDelivery(bytes32 tableId,address gate) external {
+        if(address(deliveryForTable[tableId])!=address(0)||gate==address(0)||
+           gate.code.length==0)revert InvalidConfiguration();
+        if(!authorization.isAuthorized(msg.sender,ACTION_BIND_DELIVERY,
+            authorization.scopeForTable(tableId),0))revert Unauthorized();
+        PokerDeckDisclosure420 delivery=PokerDeckDisclosure420(gate);
+        if(address(delivery.deals())!=address(deals))revert InvalidConfiguration();
+        deliveryForTable[tableId]=delivery;
+        emit DeliveryBound(tableId,gate);
+    }
+    function bindOutcome(bytes32 tableId,address calculator) external {
+        if(outcomeForTable[tableId]!=address(0)||calculator==address(0)||
+           calculator.code.length==0)revert InvalidConfiguration();
+        if(!authorization.isAuthorized(msg.sender,ACTION_BIND_OUTCOME,
+            authorization.scopeForTable(tableId),0))revert Unauthorized();
+        // Refuse a calculator bound to a different engine or a different
+        // authenticated revelation channel, even if table governance submits it.
+        if(address(revealForTable[tableId])==address(0) ||
+           IPokerNativeOutcome420(calculator).engine()!=address(this) ||
+           IPokerNativeOutcome420(calculator).reveals()!=address(revealForTable[tableId]) ||
+           IPokerNativeOutcome420(calculator).rakeEngine()==address(0) ||
+           address(PokerCanonicalRake420(IPokerNativeOutcome420(calculator).rakeEngine()).tables())
+               !=address(deals.tables()))
+            revert InvalidConfiguration();
+        outcomeForTable[tableId]=calculator;
+        emit OutcomeBound(tableId,calculator);
+    }
+    /// @notice A permissionless, all-or-nothing on-chain escrow settlement.
+    /// @dev Uses the FULL actual betting transcript, revealed board/hole cards,
+    ///      exact immutable rake policy and native 5-of-7/side-pot recomputation.
+    function settle(bytes32 handId,PokerCanonicalRake420.Policy calldata policy) external {
+        Game storage g=games[handId];
+        if(!g.initialized||handSettled[handId]||
+           (g.phase!=Phase.SHOWDOWN&&g.phase!=Phase.UNCONTESTED)||
+           outcomeForTable[g.tableId]==address(0)||
+           ledger.activeHand(g.tableId)!=handId)revert InvalidState();
+        if(address(revealForTable[g.tableId])==address(0))revert InvalidState();
+        (uint256[9] memory balances,uint256 fee)=
+            IPokerNativeOutcome420(outcomeForTable[g.tableId]).calculate(handId,policy);
+        // Mark the hand consumed before any external dispute/ledger call.
+        // Reverts atomically restore this flag if either dependency fails.
+        handSettled[handId]=true;
+        if(disputes.isFrozen(handId))
+            disputes.finalizeVerifiedOutcome(handId,_nativeResolutionHash(handId,g.stateRoot,balances,fee));
+        ledger.settleReservedHand(g.tableId,handId,balances,fee);
+        _bond(g.tableId).close(handId,0);
+        emit NativeHandSettled(handId,g.tableId,fee);
+    }
+    bytes32 public constant RESOLUTION_DOMAIN=keccak256("420.BET.POKER.NATIVE.RESOLUTION.V1");
+    function _nativeResolutionHash(bytes32 handId,bytes32 stateRoot,
+        uint256[9] memory balances,uint256 fee)private view returns(bytes32){
+        PokerConfidentialDeal420.Hand memory h=deals.getHand(handId);
+        return keccak256(abi.encode(RESOLUTION_DOMAIN,block.chainid,address(this),
+            handId,stateRoot,h.seatSnapshotHash,ledger.lockedSnapshot(h.tableId),
+            balances,fee));
+    }
+    /// @notice Anyone may propose a native terminal outcome for transparent
+    /// time-bounded resolution; the dispute contract accepts proposals only from
+    /// its one-time governance-bound native engine, not an outside adjudicator.
+    function proposeDisputeResolution(bytes32 handId,
+        PokerCanonicalRake420.Policy calldata policy) external {
+        Game storage g=games[handId];
+        if(!g.initialized||handSettled[handId]||
+           (g.phase!=Phase.SHOWDOWN&&g.phase!=Phase.UNCONTESTED)||
+           !disputes.isFrozen(handId)||outcomeForTable[g.tableId]==address(0)||
+           ledger.activeHand(g.tableId)!=handId)revert InvalidState();
+        (uint256[9] memory balances,uint256 fee)=
+            IPokerNativeOutcome420(outcomeForTable[g.tableId]).calculate(handId,policy);
+        disputes.proposeVerifiedOutcome(handId,
+            _nativeResolutionHash(handId,g.stateRoot,balances,fee));
+    }
+    function isHandInitialized(bytes32 handId) external view returns(bool){return games[handId].initialized;}
+    function gameOf(bytes32 handId) external view returns(Game memory){return games[handId];}
+    function playerOf(bytes32 handId,uint8 seat) external view returns(Player memory){return players[handId][seat];}
+    function _mask(uint8 seat) private pure returns(uint16){return uint16(1)<<seat;}
+    function _participates(uint16 mask,uint8 i)private pure returns(bool){return (mask&_mask(i))!=0;}
+    function _nextSeat(uint16 mask,uint8 from)private pure returns(uint8){
+        for(uint8 j=1;j<=9;j++){
+            uint8 i=uint8((uint256(from)+j)%9);
+            if(_participates(mask,i))return i;
+        }
+        revert InvalidState();
+    }
+    function _pendingFor(bytes32 handId,uint16 mask)private view returns(uint16 pending) {
+        for(uint8 i=0;i<9;i++)if(_participates(mask,i)){
+            Player storage p=players[handId][i];
+            if(!p.folded&&!p.allIn)pending|=_mask(i);
+        }
+    }
+    function _nextToAct(bytes32 handId,uint16 mask,uint8 from)private view returns(uint8) {
+        for(uint8 j=1;j<=9;j++){
+            uint8 i=uint8((uint256(from)+j)%9);
+            if(_participates(mask,i)){
+                Player storage p=players[handId][i];
+                if(!p.folded&&!p.allIn)return i;
+            }
+        }
+        return type(uint8).max;
+    }
+    function _alive(bytes32 handId,uint16 mask)private view returns(uint8 count) {
+        for(uint8 i=0;i<9;i++)if(_participates(mask,i)&&!players[handId][i].folded)count++;
+    }
+    function _liveToAct(bytes32 handId,uint16 mask)private view returns(uint8 count) {
+        for(uint8 i=0;i<9;i++)if(_participates(mask,i)){
+            Player storage p=players[handId][i];if(!p.folded&&!p.allIn)count++;
+        }
+    }
+    function _debit(bytes32 handId,Game storage g,uint8 seat,uint256 amount,bool streetBet)private {
+        Player storage p=players[handId][seat];
+        if(amount>p.stack)revert InvalidAction();
+        p.stack-=amount;p.contributed+=amount;g.pot+=amount;
+        if(streetBet)p.bet+=amount;
+        if(p.stack==0)p.allIn=true;
+    }
+
+    /// @notice Reserve funds before shuffling; any authenticated participant may
+    /// initiate their already-authorized hand, but cannot choose its seats/stacks.
+    function bindProviderBond(bytes32 tableId,address bond)external {
+        if(bond==address(0)||bond.code.length==0||
+           address(bondForTable[tableId])!=address(0))revert InvalidState();
+        if(!deals.authorization().isAuthorized(msg.sender,ACTION_BIND_PROVIDER_BOND,
+            deals.authorization().scopeForTable(tableId),0))revert Unauthorized();
+        PokerProviderAccountability420 policy=PokerProviderAccountability420(bond);
+        if(address(policy.deals())!=address(deals)||policy.nativeEngine()!=address(this))
+            revert InvalidState();
+        bondForTable[tableId]=policy;
+        emit ProviderBondBound(tableId,bond);
+    }
+    function _bond(bytes32 tableId)private view returns(PokerProviderAccountability420 bond){
+        bond=bondForTable[tableId];
+        if(address(bond)==address(0))revert InvalidState();
+    }
+    /// @notice Objective missing delivery-proofs attribution, never a caller
+    /// specified fault or a fabricated accusation against a provider.
+    function _missingPrivateShareProviders(bytes32 handId,bytes32 tableId)
+        private view returns(uint8 fault){
+        PokerDeckDisclosure420 delivery=deliveryForTable[tableId];
+        if(address(delivery)==address(0))return 0;
+        IPokerDeliveryProofBook420 abstractBook=delivery.proofBookForTable(tableId);
+        if(address(abstractBook)==address(0))return 0;
+        uint16 mask=deals.handSeatMask(handId);
+        uint8 n=0;for(uint8 i=0;i<9;i++)if(_participates(mask,i))n++;
+        if(n<2||n>9)return 0;
+        uint32 required=(uint32(1)<<(2*n))-1;
+        PokerDeliveryProofBook420 book=PokerDeliveryProofBook420(address(abstractBook));
+        if((book.proofMaskOf(handId,0)&required)!=required)fault|=1;
+        if((book.proofMaskOf(handId,1)&required)!=required)fault|=2;
+    }
+    function reserve(bytes32 handId) external {
+        PokerConfidentialDeal420.Hand memory h=deals.getHand(handId);
+        if(h.state!=PokerConfidentialDeal420.State.AWAITING &&
+           h.state!=PokerConfidentialDeal420.State.COMMITTED)revert InvalidState();
+        bool permitted=msg.sender==deals.tables().getTable(h.tableId).controller;
+        uint16 mask=deals.handSeatMask(handId);
+        for(uint8 i=0;i<9;i++)if(_participates(mask,i)&&
+            ledger.seatOf(h.tableId,i).player==msg.sender)permitted=true;
+        if(!permitted||ledger.settlementCoordinator(h.tableId)!=address(this)||
+           h.seatSnapshotHash!=deals.snapshotFor(h.tableId,mask))
+            revert Unauthorized();
+        bytes32 reservedSnapshot=ledger.reserveHand(h.tableId,handId,mask,h.epoch);
+        if(reservedSnapshot==bytes32(0) ||
+           reservedSnapshot!=ledger.lockedSnapshot(h.tableId))revert InvalidState();
+        _bond(h.tableId).lock(handId);
+    }
+    /// @notice Permissionless refund if providers fail to complete their proof
+    /// before a strictly enforced deadline, provided no hand has begun.
+    /// No player outcome exists yet, so original escrow balances are restored.
+    function cancelWithheldDeal(bytes32 handId) external {
+        PokerConfidentialDeal420.Hand memory h=deals.getHand(handId);
+        Game storage g=games[handId];
+        if(g.initialized||handAborted[handId]||handSettled[handId]||
+           ledger.activeHand(h.tableId)!=handId||
+           shuffle.isProofComplete(handId))revert InvalidState();
+        if(block.timestamp<uint256(h.deadline)+1 hours)revert TooEarly();
+        handAborted[handId]=true;
+        PokerPrivateShuffleGate420.Record memory record=shuffle.recordOf(handId);
+        uint8 missing=0;
+        if(record.stage==1)missing=2; // provider B failed its authenticated second stage
+        else if(record.stage==0&&shuffle.initialDeck().rootOf(handId)!=bytes32(0))
+            missing=1; // provider A failed after a proven initial deck
+        ledger.cancelReservedHand(h.tableId,handId);
+        _bond(h.tableId).close(handId,missing);
+        emit UnprovedDealAborted(handId,h.tableId);
+    }
+    /// @notice A completed shuffle still cannot force users to accept missing
+    /// private cards. No betting has occurred and locked original balances
+    /// are the unique cancellation vector.
+    function cancelWithheldDelivery(bytes32 handId) external {
+        PokerConfidentialDeal420.Hand memory h=deals.getHand(handId);
+        if(games[handId].initialized||handAborted[handId]||handSettled[handId]||
+            ledger.activeHand(h.tableId)!=handId||!shuffle.isProofComplete(handId))
+            revert InvalidState();
+        if(block.timestamp<uint256(h.deadline)+PROOF_DELIVERY_WINDOW)revert TooEarly();
+        if(address(deliveryForTable[h.tableId])!=address(0)&&
+            deliveryForTable[h.tableId].allAcknowledged(handId))revert InvalidState();
+        handAborted[handId]=true;
+        uint8 faults=_missingPrivateShareProviders(handId,h.tableId);
+        ledger.cancelReservedHand(h.tableId,handId);
+        _bond(h.tableId).close(handId,faults);
+        emit UnverifiedDeliveryAborted(handId,h.tableId);
+    }
+
+    /// @notice Objective missing-proof predicate. No caller-supplied
+    /// "bad proof" flag can manufacture failure or unlock chips.
+    function _missingRequiredEvidence(bytes32 handId,Game storage g)
+        private view returns(bool){
+        uint8 stage;
+        if(g.phase==Phase.AWAIT_FLOP)stage=1;
+        else if(g.phase==Phase.AWAIT_TURN)stage=2;
+        else if(g.phase==Phase.AWAIT_RIVER)stage=3;
+        else if(g.phase==Phase.SHOWDOWN)stage=4;
+        else return false;
+        IPokerAuthenticatedStreet420 source=revealForTable[g.tableId];
+        return address(source)==address(0)||!source.isStageComplete(handId,stage);
+    }
+
+    /// @notice Begin bounded recovery only after a real unrevealed street's
+    /// deadline. Signed actions and accepted stakes are immutable, but lack
+    /// of proof cannot create an arbitrary winner or administrator payout.
+    function beginMissingEvidenceRecovery(bytes32 handId) external {
+        Game storage g=games[handId];
+        if(!g.initialized||handSettled[handId]||handAborted[handId]||
+            evidenceRecovery[handId].active||
+            ledger.activeHand(g.tableId)!=handId||
+            evidenceDueAt[handId]<1||
+            block.timestamp<=evidenceDueAt[handId]||
+            !_missingRequiredEvidence(handId,g))revert InvalidState();
+        uint64 end=uint64(block.timestamp+RECOVERY_REVIEW_WINDOW);
+        evidenceRecovery[handId]=EvidenceRecovery(uint64(block.timestamp),end,
+            g.stateRoot,g.phase,true);
+        emit MissingEvidenceRecoveryOpened(handId,uint8(g.phase),g.stateRoot,end);
+    }
+
+    /// @notice A proof may be supplied during review/appeal. If no genuinely
+    /// verifiable card evidence arrived by finality, return EXACT original
+    /// locked chips, not game pots or an operator-chosen settlement vector.
+    function finalizeMissingEvidenceRecovery(bytes32 handId) external {
+        Game storage g=games[handId];
+        EvidenceRecovery memory r=evidenceRecovery[handId];
+        if(!r.active||handSettled[handId]||handAborted[handId]||
+            g.stateRoot!=r.stateRoot||g.phase!=r.failedPhase||
+            ledger.activeHand(g.tableId)!=handId||
+            !_missingRequiredEvidence(handId,g))revert InvalidState();
+        if(block.timestamp<r.finalizableAt)revert TooEarly();
+        // Only the governance-bound native resolver may close an expired
+        // independent dispute, and only under the same missing-proof guard.
+        // All terminal effects precede external resolver or ledger calls.
+        // A reverting resolver/ledger atomically restores these flags.
+        handAborted[handId]=true;
+        evidenceRecovery[handId].active=false;
+        if(disputes.isFrozen(handId))disputes.finalizeUnprovableVoid(handId);
+        uint8 blame=0;
+        if(address(revealForTable[g.tableId])!=address(0)){
+            uint8 street=uint8(r.failedPhase)/2; // the four canonical missing-evidence phases are 2,4,6,8
+            blame=IPokerMissingShareEvidence420(address(revealForTable[g.tableId]))
+                .missingProviders(handId,street);
+        }
+        ledger.cancelReservedHand(g.tableId,handId);
+        _bond(g.tableId).close(handId,blame);
+        emit MissingEvidenceRecoveryVoided(handId,g.tableId);
+    }
+
+    /// @notice Freeze canonical dealer/seat-order BEFORE private-card delivery.
+    /// @dev Readiness is derived from the previous consumed button; the active
+    /// funded hand and immutable seating snapshot must already be locked.
+    function prepareDealAssignment(bytes32 handId) external {
+        PokerConfidentialDeal420.Hand memory h=deals.getHand(handId);
+        uint16 mask=deals.handSeatMask(handId);
+        if(h.state!=PokerConfidentialDeal420.State.COMMITTED||
+           !shuffle.isProofComplete(handId)||preparedDeal[handId].ready||
+           ledger.activeHand(h.tableId)!=handId||mask==0||
+           ledger.seatingEpoch(h.tableId)!=h.epoch||
+           deals.snapshotFor(h.tableId,mask)!=h.seatSnapshotHash)
+           revert InvalidState();
+        uint8 button=hasButton[h.tableId]?
+            _nextSeat(mask,lastButton[h.tableId]):_nextSeat(mask,8);
+        preparedDeal[handId]=PreparedDeal(button,mask,h.epoch,h.seatSnapshotHash,true);
+        emit DealAssignmentPrepared(handId,button,mask,h.seatSnapshotHash);
+    }
+    /// @notice Unique seat owning a hole-card position in the *pre-start*
+    /// commitment; cannot be derived from a caller-supplied button.
+    function holeSeatForPosition(bytes32 handId,uint8 pos) external view returns(uint8){
+        PreparedDeal memory a=preparedDeal[handId];
+        if(!a.ready)revert InvalidState();
+        uint8 n=0;
+        for(uint8 i=0;i<9;i++)if(_participates(a.mask,i))n++;
+        if(n<2||pos>=2*n)revert InvalidState();
+        uint8 seat=n==2?a.button:_nextSeat(a.mask,a.button);
+        for(uint8 i=0;i<pos%n;i++)seat=_nextSeat(a.mask,seat);
+        return seat;
+    }
+    function start(bytes32 handId,uint256 ante,uint32 timeoutSecs) external {
+        PokerConfidentialDeal420.Hand memory h=deals.getHand(handId);
+        if(h.state!=PokerConfidentialDeal420.State.COMMITTED||
+           !shuffle.isProofComplete(handId)||timeoutSecs<30||timeoutSecs>3600||ante!=0)
+            revert InvalidState();
+        if(address(deliveryForTable[h.tableId])==address(0)||
+           !deliveryForTable[h.tableId].allAcknowledged(handId))revert InvalidState();
+        Game storage g=games[handId];
+        if(g.initialized||ledger.activeHand(h.tableId)!=handId||
+           ledger.seatingEpoch(h.tableId)!=h.epoch||
+           h.seatSnapshotHash!=deals.snapshotFor(h.tableId,deals.handSeatMask(handId)))
+            revert InvalidState();
+        PokerTableRegistry420.Table memory t=deals.tables().getTable(h.tableId);
+        uint16 mask=deals.handSeatMask(handId);
+        PreparedDeal memory assigned=preparedDeal[handId];
+        if(!assigned.ready||assigned.mask!=mask||assigned.epoch!=h.epoch||
+           assigned.seatSnapshot!=h.seatSnapshotHash)revert InvalidState();
+        uint8 button=assigned.button;
+        uint8 canonical=hasButton[h.tableId]?
+            _nextSeat(mask,lastButton[h.tableId]):_nextSeat(mask,8);
+        if(button!=canonical)revert InvalidState();
+        hasButton[h.tableId]=true;
+        lastButton[h.tableId]=button;
+        uint8 n=0;
+        for(uint8 i=0;i<9;i++)if(_participates(mask,i))n++;
+        uint8 sb=n==2?button:_nextSeat(mask,button);
+        uint8 bb=_nextSeat(mask,sb);
+        g.tableId=h.tableId;g.seatsMask=mask;g.button=button;
+        g.smallBlindSeat=sb;g.bigBlindSeat=bb;g.actionTimeout=timeoutSecs;
+        g.phase=Phase.PREFLOP;g.minRaise=t.config.bigBlind;g.initialized=true;
+        for(uint8 i=0;i<9;i++)if(_participates(mask,i)){
+            PokerSeatLedger420.Seat memory s=ledger.seatOf(h.tableId,i);
+            if(s.player==address(0)||s.sittingOut||s.chips==0)revert InvalidState();
+            Player storage p=players[handId][i];
+            p.stack=s.chips;g.initialChips+=s.chips;
+            _debit(handId,g,i,ante<p.stack?ante:p.stack,false);
+        }
+        _debit(handId,g,sb,t.config.smallBlind<players[handId][sb].stack?
+            t.config.smallBlind:players[handId][sb].stack,true);
+        _debit(handId,g,bb,t.config.bigBlind<players[handId][bb].stack?
+            t.config.bigBlind:players[handId][bb].stack,true);
+        // The nominal big blind remains the minimum live preflop amount
+        // even when the big-blind seat posts less because they are all-in.
+        g.currentBet=t.config.bigBlind;
+        g.pendingMask=_pendingFor(handId,mask);
+        g.toAct=n==2 && (g.pendingMask&_mask(sb))!=0?sb:
+            _nextToAct(handId,mask,bb);
+        g.deadline=uint64(block.timestamp+timeoutSecs);
+        g.stateRoot=keccak256(abi.encode(STATE_DOMAIN,block.chainid,address(this),handId,
+            h.tableId,h.rulesetId,h.configHash,h.seatSnapshotHash,
+            button,sb,bb,mask,ante,g.initialChips,g.pot));
+        if(g.pendingMask<1)_endRound(handId,g);
+        emit HandStarted(handId,button,sb,bb);
+    }
+    function action(bytes32 handId,uint8 seat,Move move,uint256 chips,
+        uint64 expiry,bytes32 expectedRoot,bytes calldata signature) external {
+        Game storage g=games[handId];
+        if(!g.initialized || !_isBetting(g.phase))revert InvalidState();
+        if(block.timestamp>g.deadline)revert Expired();
+        if(seat!=g.toAct||(g.pendingMask&_mask(seat))==0)revert WrongTurn();
+        if(expectedRoot!=g.stateRoot)revert InvalidAction();
+        bytes32 moveHash=keccak256(abi.encode(ACTION_DOMAIN,handId,uint8(g.phase),
+            seat,uint8(move),chips));
+        bytes32 digest=keys.checkSignature(handId,seat,g.nonce+1,expectedRoot,moveHash,expiry,signature);
+        if(digest==bytes32(0))revert InvalidAction();
+        _apply(handId,g,seat,move,chips);
+    }
+    function timeout(bytes32 handId) external {
+        Game storage g=games[handId];
+        if(!g.initialized||!_isBetting(g.phase)||g.pendingMask==0)
+            revert InvalidState();
+        if(block.timestamp<=g.deadline)revert TooEarly();
+        uint8 seat=g.toAct;
+        Player storage p=players[handId][seat];
+        Move move=p.bet<g.currentBet?Move.FOLD:Move.CHECK;
+        uint64 nonce=g.nonce+1;
+        _apply(handId,g,seat,move,0);
+        emit NLHETimeout(handId,seat,nonce,move);
+    }
+    error TooEarly();
+    function _isBetting(Phase phase)private pure returns(bool){
+        return phase==Phase.PREFLOP||phase==Phase.FLOP||
+            phase==Phase.TURN||phase==Phase.RIVER;
+    }
+    function _apply(bytes32 handId,Game storage g,uint8 seat,Move move,uint256 chips)private {
+        Player storage p=players[handId][seat];
+        if(p.folded||p.allIn)revert InvalidAction();
+        uint256 owed=g.currentBet>p.bet?g.currentBet-p.bet:0;
+        if(move==Move.FOLD){
+            if(chips!=0)revert InvalidAction();p.folded=true;
+        }else if(move==Move.CHECK){
+            if(chips!=0||owed!=0)revert InvalidAction();
+        }else if(move==Move.CALL){
+            uint256 required=owed>p.stack?p.stack:owed;
+            if(owed==0||chips!=required)revert InvalidAction();
+            _debit(handId,g,seat,chips,true);
+        }else if(move==Move.RAISE){
+            if(_liveToAct(handId,g.seatsMask)<2)revert InvalidAction();
+            if(chips<=owed||chips>p.stack)revert InvalidAction();
+            if(p.acted && g.currentBet-p.lastFacing<g.minRaise)
+                revert InvalidAction();
+            uint256 increment=p.bet+chips-g.currentBet;
+            bool full=increment>=g.minRaise;
+            if(!full&&chips!=p.stack)revert InvalidAction();
+            _debit(handId,g,seat,chips,true);
+            g.currentBet=p.bet;
+            if(full){
+                g.minRaise=increment;
+                g.pendingMask=_pendingFor(handId,g.seatsMask)&~_mask(seat);
+            }else{
+                for(uint8 i=0;i<9;i++)if(i!=seat&&_participates(g.seatsMask,i)){
+                    Player storage other=players[handId][i];
+                    if(!other.folded&&!other.allIn&&other.bet<g.currentBet)
+                        g.pendingMask|=_mask(i);
+                }
+            }
+        }else revert InvalidAction();
+        p.acted=true;p.lastFacing=g.currentBet;
+        g.pendingMask&=~_mask(seat);
+        g.nonce++;
+        g.stateRoot=keccak256(abi.encode(STATE_DOMAIN,block.chainid,address(this),
+            handId,g.stateRoot,g.nonce,seat,move,chips,
+            g.currentBet,g.minRaise,g.pot,g.pendingMask,p.stack,p.bet,p.contributed,p.folded,p.allIn));
+        emit NLHEAction(handId,g.nonce,seat,move,chips,g.stateRoot);
+        if(_alive(handId,g.seatsMask)==1){
+            g.phase=Phase.UNCONTESTED;g.pendingMask=0;g.toAct=type(uint8).max;
+        }else if(g.pendingMask==0)_endRound(handId,g);
+        else{
+            g.toAct=_nextPending(handId,g.seatsMask,g.pendingMask,seat);
+            g.deadline=uint64(block.timestamp+g.actionTimeout);
+        }
+    }
+    function _nextPending(bytes32 handId,uint16 mask,uint16 pending,uint8 from)
+        private pure returns(uint8){
+        handId;mask;
+        for(uint8 j=1;j<=9;j++){
+            uint8 i=uint8((uint256(from)+j)%9);
+            if((pending&_mask(i))!=0)return i;
+        }
+        revert InvalidState();
+    }
+    function _endRound(bytes32 handId,Game storage g)private{
+        g.pendingMask=0;g.toAct=type(uint8).max;
+        if(g.phase==Phase.PREFLOP)g.phase=Phase.AWAIT_FLOP;
+        else if(g.phase==Phase.FLOP)g.phase=Phase.AWAIT_TURN;
+        else if(g.phase==Phase.TURN)g.phase=Phase.AWAIT_RIVER;
+        else if(g.phase==Phase.RIVER)g.phase=Phase.SHOWDOWN;
+        else revert InvalidState();
+        g.stateRoot=keccak256(abi.encode(STATE_DOMAIN,handId,g.stateRoot,uint8(g.phase),g.pot));
+        evidenceDueAt[handId]=uint64(block.timestamp+PROOF_DELIVERY_WINDOW);
+    }
+    function canRevealStreet(bytes32 handId,uint8 street)external view returns(bool){
+        Phase phase=games[handId].phase;
+        if(street<1||street>4)return false;
+        uint8 expected=street<2?uint8(Phase.AWAIT_FLOP):
+            street<3?uint8(Phase.AWAIT_TURN):
+            street<4?uint8(Phase.AWAIT_RIVER):uint8(Phase.SHOWDOWN);
+        // Exact phase gating expressed as a closed interval, never broadened.
+        return uint8(phase)>=expected&&uint8(phase)<=expected;
+    }
+    /// @notice The bound reveal gate must independently establish all required
+    ///      ciphertext membership, partial shares and canonical card proofs.
+    function advanceRevealedStreet(bytes32 handId,uint8 street)external {
+        Game storage g=games[handId];
+        if(msg.sender!=address(revealForTable[g.tableId])||msg.sender==address(0))revert Unauthorized();
+        if(!this.canRevealStreet(handId,street)||
+           !revealForTable[g.tableId].isStageComplete(handId,street))revert WaitingForReveal();
+        g.phase=street==1?Phase.FLOP:street==2?Phase.TURN:Phase.RIVER;
+        if(street==1)flopOpened[handId]=true;
+        for(uint8 i=0;i<9;i++)if(_participates(g.seatsMask,i)){
+            Player storage p=players[handId][i];p.bet=0;p.acted=false;p.lastFacing=0;
+        }
+        g.currentBet=0;
+        g.minRaise=deals.tables().getTable(g.tableId).config.bigBlind;
+        if(_liveToAct(handId,g.seatsMask)<=1){
+            _endRound(handId,g);return;
+        }
+        g.pendingMask=_pendingFor(handId,g.seatsMask);
+        g.toAct=_nextToAct(handId,g.seatsMask,g.button);
+        g.deadline=uint64(block.timestamp+g.actionTimeout);
+        g.stateRoot=keccak256(abi.encode(STATE_DOMAIN,handId,g.stateRoot,uint8(g.phase)));
+        emit StreetOpened(handId,street);
+    }
+}

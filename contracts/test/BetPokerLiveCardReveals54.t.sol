@@ -23,7 +23,7 @@ contract MismatchedReveal54 {
 }
 contract PokerLiveCardReveals54Test is PokerNLHEBetting54Test {
     uint256 internal constant FR=
-        21888242871839275222246405745257275088696311157297823662689037894645226208583;
+        21888242871839275222246405745257275088548364400416034343698204186575808495617;
     PokerVerifierVersions420 cardVersions;
     PokerGnarkPartialShareAdapter420 partialA;
     PokerGnarkPartialShareAdapter420 partialB;

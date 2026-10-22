@@ -21,7 +21,7 @@ jobs:
           node-version: '22'
       - name: Install scoped mobile dependencies
         working-directory: rideshare/mobile
-        run: npm install --ignore-scripts --no-audit --no-fund
+        run: npm ci --ignore-scripts --no-audit --no-fund
       - name: MBL-1 route security, configuration, typecheck
         working-directory: rideshare/mobile
         run: npm run check
@@ -49,11 +49,25 @@ jobs:
       - name: Install dependency and generate Android debug project
         working-directory: rideshare/mobile
         run: |
-          npm install --ignore-scripts --no-audit --no-fund
+          npm ci --ignore-scripts --no-audit --no-fund
           npx expo prebuild --platform android --non-interactive --no-install
       - name: Compile unsigned nonproduction Android debug APK
         working-directory: rideshare/mobile/android
         run: ./gradlew :app:assembleDebug --no-daemon
+      - name: Audit packaged Android permission set
+        run: |
+          python3 - <<'PY'
+          import subprocess
+          apk='rideshare/mobile/android/app/build/outputs/apk/debug/app-debug.apk'
+          sdk=subprocess.check_output(['bash','-lc','echo "$ANDROID_HOME"'],text=True).strip()
+          import os,glob
+          tool=sorted(glob.glob(os.path.join(sdk,'cmdline-tools','*','bin','apkanalyzer')))
+          if not tool: raise SystemExit('ANDROID_MANIFEST_AUDITOR_UNAVAILABLE')
+          permissions=subprocess.check_output([tool[-1],'manifest','permissions',apk],text=True)
+          print(permissions)
+          prohibited=('ACCESS_BACKGROUND_LOCATION','READ_CONTACTS','READ_SMS','RECORD_AUDIO','CAMERA','MANAGE_EXTERNAL_STORAGE','QUERY_ALL_PACKAGES')
+          if any(p in permissions for p in prohibited): raise SystemExit('UNEXPECTED_SENSITIVE_PERMISSION')
+          PY
       - name: Upload nonproduction APK and exact source SHA
         run: |
           mkdir -p liftd-mobile-evidence
@@ -80,7 +94,7 @@ jobs:
       - name: Install dependency and generate iOS simulator project
         working-directory: rideshare/mobile
         run: |
-          npm install --ignore-scripts --no-audit --no-fund
+          npm ci --ignore-scripts --no-audit --no-fund
           npx expo prebuild --platform ios --non-interactive --no-install
       - name: Install iOS native dependencies
         working-directory: rideshare/mobile/ios
@@ -93,3 +107,16 @@ jobs:
           test -n "$workspace"
           xcodebuild -workspace "$workspace" -scheme "$(basename "$workspace" .xcworkspace)" -configuration Debug -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO build > ios-build.log 2>&1 || { tail -n 120 ios-build.log; exit 1; }
           git rev-parse HEAD
+          app=$(find "$HOME/Library/Developer/Xcode/DerivedData" -path '*/Build/Products/Debug-iphonesimulator/*.app' -maxdepth 7 -type d -print -quit)
+          test -n "$app"
+          mkdir -p liftd-ios-evidence
+          git rev-parse HEAD > liftd-ios-evidence/implementation-sha.txt
+          /usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$app/Info.plist" | grep -Fx org.integrated420.liftd.preview
+          /usr/libexec/PlistBuddy -c 'Print :UIBackgroundModes' "$app/Info.plist" && exit 1 || true
+          ditto -c -k --sequesterRsrc --keepParent "$app" liftd-ios-evidence/liftd-preview-simulator.zip
+          shasum -a 256 liftd-ios-evidence/liftd-preview-simulator.zip > liftd-ios-evidence/ios-sha256.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: liftd-ios-simulator-${{ github.event.pull_request.head.sha || github.sha }}
+          path: rideshare/mobile/liftd-ios-evidence/
+          if-no-files-found: error

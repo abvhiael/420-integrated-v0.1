@@ -12,7 +12,7 @@ contract GnarkABIFixture54 {
 contract GnarkInitialABIFixture54 {
     bool public accept;
     function setAccept(bool value) external {accept=value;}
-    function verifyProof(uint256[8] calldata,uint256[4] calldata) external view returns(bool){return accept;}
+    function verifyProof(uint256[8] calldata,uint256[5] calldata) external view returns(bool){return accept;}
 }
 contract PokerGnarkElGamalAdapters54Test {
     VmElGamal54 constant vm=VmElGamal54(address(uint160(uint256(keccak256("hevm cheat code")))));
@@ -58,12 +58,14 @@ contract PokerGnarkElGamalAdapters54Test {
     }
     function testInitialInputsBoundToExactDeck() public {
         uint256[8] memory proof;
-        uint256[4] memory publicValues=[uint256(100),uint256(420),uint256(7),uint256(8)];
+        bytes32 statement=keccak256("statement");
+        uint256[5] memory publicValues=[uint256(100),uint256(statement)%21888242871839275222246405745257275088696311157297823662689037894645226208583,uint256(420),uint256(7),uint256(8)];
         fakeInitial.setAccept(true);
-        require(initial.verifyInitialDeck(keccak256("statement"),HAND,ROOT_ONE,KEY,
+        require(initial.verifyInitialDeck(statement,HAND,ROOT_ONE,KEY,
             abi.encode(proof,publicValues)),"initial accepted");
         require(!initial.verifyInitialDeck(keccak256("statement"),HAND,ROOT_TWO,KEY,
             abi.encode(proof,publicValues)),"root substitution blocked");
+        require(!initial.verifyInitialDeck(keccak256("different statement"),HAND,ROOT_ONE,KEY,abi.encode(proof,publicValues)),"changed full context accepted");
         fakeInitial.setAccept(false);
         require(!initial.verifyInitialDeck(keccak256("statement"),HAND,ROOT_ONE,KEY,
             abi.encode(proof,publicValues)),"invalid proof blocked");

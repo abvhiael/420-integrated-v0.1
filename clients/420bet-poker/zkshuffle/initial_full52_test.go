@@ -33,6 +33,7 @@ func TestFullInitial52RealProof(t *testing.T) {
  }
  root,_:=nativeCipherRootAndPath(420,w.Cards[:],0)
  w.DeckRoot=root
+ w.StatementScope=initial52TestStatement(root,pkX,pkY)
  cs,err:=frontend.Compile(ecc.BN254.ScalarField(),r1cs.NewBuilder,&InitialDeck52{})
  if err!=nil{t.Fatal(err)}
  t.Logf("canonical initial 52-card constraints: %d",cs.GetNbConstraints())

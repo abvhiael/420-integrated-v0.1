@@ -11,6 +11,9 @@ jobs:
     env:
       FOUNDRY_VIA_IR: 'true'
       FOUNDRY_PROFILE: pr
+      # Scope both the compiler input and test discovery to this qualification owner.
+      FOUNDRY_SRC: src/bet
+      FOUNDRY_TEST: test/recipient-groth16
     steps:
       - uses: actions/checkout@v4
         with:
@@ -35,22 +38,26 @@ jobs:
         working-directory: contracts
         run: |
           set -e
-          mkdir -p src/bet/generated
+          mkdir -p src/bet/generated test/recipient-groth16
           cp ../artifacts/420bet-5a-4/EXPERIMENTAL-EncryptedShareDeliveryVerifier.sol src/bet/generated/ExperimentalEncryptedShareDeliveryVerifier.sol
           cp ../artifacts/420bet-5a-4/EXPERIMENTAL-RecipientKeyPossessionVerifier.sol src/bet/generated/ExperimentalRecipientKeyPossessionVerifier.sol
           cp ../artifacts/420bet-5a-4/EXPERIMENTAL-ThresholdKeyAggregateVerifier.sol src/bet/generated/ExperimentalThresholdKeyAggregateVerifier.sol
-          python3 ../clients/420bet-poker/zkshuffle/make_groth16_forge_test.py src/bet/generated/ExperimentalEncryptedShareDeliveryVerifier.sol ../artifacts/420bet-5a-4/EXPERIMENTAL-EncryptedShareDeliverySolidityFixture.json test/PokerGeneratedEncryptedDeliveryProof.t.sol PokerEncryptedDeliveryGeneratedVerifierAcceptanceTest 0 1
-          python3 ../clients/420bet-poker/zkshuffle/make_groth16_forge_test.py src/bet/generated/ExperimentalRecipientKeyPossessionVerifier.sol ../artifacts/420bet-5a-4/EXPERIMENTAL-RecipientKeyPossessionSolidityFixture.json test/PokerGeneratedRecipientKeyProof.t.sol PokerRecipientKeyGeneratedVerifierAcceptanceTest 0 1
-          python3 ../clients/420bet-poker/zkshuffle/make_groth16_forge_test.py src/bet/generated/ExperimentalThresholdKeyAggregateVerifier.sol ../artifacts/420bet-5a-4/EXPERIMENTAL-ThresholdKeyAggregateSolidityFixture.json test/PokerGeneratedAggregateProof.t.sol PokerAggregateGeneratedVerifierAcceptanceTest 0 1
-          python3 ../clients/420bet-poker/zkshuffle/make_private_delivery_adapter_forge_test.py delivery src/bet/generated/ExperimentalEncryptedShareDeliveryVerifier.sol ../artifacts/420bet-5a-4/EXPERIMENTAL-EncryptedShareDeliverySolidityFixture.json test/PokerActualDeliveryAdapterProof.t.sol
-          python3 ../clients/420bet-poker/zkshuffle/make_private_delivery_adapter_forge_test.py recipient src/bet/generated/ExperimentalRecipientKeyPossessionVerifier.sol ../artifacts/420bet-5a-4/EXPERIMENTAL-RecipientKeyPossessionSolidityFixture.json test/PokerActualRecipientAdapterProof.t.sol
-          python3 ../clients/420bet-poker/zkshuffle/make_private_delivery_adapter_forge_test.py aggregate src/bet/generated/ExperimentalThresholdKeyAggregateVerifier.sol ../artifacts/420bet-5a-4/EXPERIMENTAL-ThresholdKeyAggregateSolidityFixture.json test/PokerActualAggregateAdapterProof.t.sol
-          forge test --match-path 'test/PokerGeneratedEncryptedDeliveryProof.t.sol' -vv
-          forge test --match-path 'test/PokerGeneratedRecipientKeyProof.t.sol' -vv
-          forge test --match-path 'test/PokerGeneratedAggregateProof.t.sol' -vv
-          forge test --match-path 'test/PokerActualDeliveryAdapterProof.t.sol' -vv
-          forge test --match-path 'test/PokerActualRecipientAdapterProof.t.sol' -vv
-          forge test --match-path 'test/PokerActualAggregateAdapterProof.t.sol' -vv
+          python3 ../clients/420bet-poker/zkshuffle/make_groth16_forge_test.py src/bet/generated/ExperimentalEncryptedShareDeliveryVerifier.sol ../artifacts/420bet-5a-4/EXPERIMENTAL-EncryptedShareDeliverySolidityFixture.json test/recipient-groth16/PokerGeneratedEncryptedDeliveryProof.t.sol PokerEncryptedDeliveryGeneratedVerifierAcceptanceTest 0 1
+          python3 ../clients/420bet-poker/zkshuffle/make_groth16_forge_test.py src/bet/generated/ExperimentalRecipientKeyPossessionVerifier.sol ../artifacts/420bet-5a-4/EXPERIMENTAL-RecipientKeyPossessionSolidityFixture.json test/recipient-groth16/PokerGeneratedRecipientKeyProof.t.sol PokerRecipientKeyGeneratedVerifierAcceptanceTest 0 1
+          python3 ../clients/420bet-poker/zkshuffle/make_groth16_forge_test.py src/bet/generated/ExperimentalThresholdKeyAggregateVerifier.sol ../artifacts/420bet-5a-4/EXPERIMENTAL-ThresholdKeyAggregateSolidityFixture.json test/recipient-groth16/PokerGeneratedAggregateProof.t.sol PokerAggregateGeneratedVerifierAcceptanceTest 0 1
+          python3 ../clients/420bet-poker/zkshuffle/make_private_delivery_adapter_forge_test.py delivery src/bet/generated/ExperimentalEncryptedShareDeliveryVerifier.sol ../artifacts/420bet-5a-4/EXPERIMENTAL-EncryptedShareDeliverySolidityFixture.json test/recipient-groth16/PokerActualDeliveryAdapterProof.t.sol
+          python3 ../clients/420bet-poker/zkshuffle/make_private_delivery_adapter_forge_test.py recipient src/bet/generated/ExperimentalRecipientKeyPossessionVerifier.sol ../artifacts/420bet-5a-4/EXPERIMENTAL-RecipientKeyPossessionSolidityFixture.json test/recipient-groth16/PokerActualRecipientAdapterProof.t.sol
+          python3 ../clients/420bet-poker/zkshuffle/make_private_delivery_adapter_forge_test.py aggregate src/bet/generated/ExperimentalThresholdKeyAggregateVerifier.sol ../artifacts/420bet-5a-4/EXPERIMENTAL-ThresholdKeyAggregateSolidityFixture.json test/recipient-groth16/PokerActualAggregateAdapterProof.t.sol
+          # Generated fixtures import ../src/ relative to test/; moving them into
+          # a dedicated test directory requires only an import-path adjustment.
+          # Preserve all real proof, replay, tamper, root and key assertions.
+          sed -i 's|"../src/|"../../src/|g' test/recipient-groth16/*.t.sol
+          forge test --match-path 'test/recipient-groth16/PokerGeneratedEncryptedDeliveryProof.t.sol' -vv
+          forge test --match-path 'test/recipient-groth16/PokerGeneratedRecipientKeyProof.t.sol' -vv
+          forge test --match-path 'test/recipient-groth16/PokerGeneratedAggregateProof.t.sol' -vv
+          forge test --match-path 'test/recipient-groth16/PokerActualDeliveryAdapterProof.t.sol' -vv
+          forge test --match-path 'test/recipient-groth16/PokerActualRecipientAdapterProof.t.sol' -vv
+          forge test --match-path 'test/recipient-groth16/PokerActualAggregateAdapterProof.t.sol' -vv
       - name: Preserve exact-SHA recipient proof evidence
         run: |
           set -e

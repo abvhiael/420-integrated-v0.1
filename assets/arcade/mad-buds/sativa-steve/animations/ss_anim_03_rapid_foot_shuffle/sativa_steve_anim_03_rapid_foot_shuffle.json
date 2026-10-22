@@ -1,0 +1,86 @@
+{
+  "schema": "mad-buds-animation-manifest-v1",
+  "schemaVersion": "1.0",
+  "characterId": "sativa_steve",
+  "animationId": "ss_anim_03_rapid_foot_shuffle",
+  "animationName": "rapid_foot_shuffle",
+  "frameCount": 10,
+  "frameWidth": 1024,
+  "frameHeight": 1024,
+  "fps": 10,
+  "durationMs": 1000,
+  "loop": true,
+  "direction": "front",
+  "pivotNormalized": [
+    0.5,
+    0.825
+  ],
+  "sourceArt": "sativa_steve_foot_shuffle_sprite_sheet.png",
+  "sourceSHA256": "45f7dcf9b039366b8a8d4508627dff891aeef503df18660ae246357cc2f3b8b7",
+  "method": "individual pose extraction from owner-accepted 10-pose image strip; background segmentation, global common scaling, grounded alignment; character artwork not regenerated",
+  "repositoryDestination": "assets/arcade/mad-buds/sativa-steve/animations/ss_anim_03_rapid_foot_shuffle/",
+  "visualApproval": "PENDING_OWNER_REVIEW_OF_EXTRACTED_FRAMES",
+  "qualification": "STRUCTURAL_VALIDATION_ONLY",
+  "frames": [
+    {
+      "index": 1,
+      "filename": "sativa_steve_anim_03_rapid_foot_shuffle_frame_01.png",
+      "durationMs": 100,
+      "sha256": "24872f82942b2d67948c3935f5594cab87d53efcfa48054482087b4c2eff1456"
+    },
+    {
+      "index": 2,
+      "filename": "sativa_steve_anim_03_rapid_foot_shuffle_frame_02.png",
+      "durationMs": 100,
+      "sha256": "a2b35b24cc83db5a8c1a41e93c979eb92c15c6f6a553176861b261ae41706735"
+    },
+    {
+      "index": 3,
+      "filename": "sativa_steve_anim_03_rapid_foot_shuffle_frame_03.png",
+      "durationMs": 100,
+      "sha256": "51b46f3cb0f173a95be11fc93b6d5a61e6040ac060e8554edddb954d9ba7d3ee"
+    },
+    {
+      "index": 4,
+      "filename": "sativa_steve_anim_03_rapid_foot_shuffle_frame_04.png",
+      "durationMs": 100,
+      "sha256": "0d1e4117f985aeea4561e0f150b28c1e55bb0c4d0b92ffa0986974937c1a4917"
+    },
+    {
+      "index": 5,
+      "filename": "sativa_steve_anim_03_rapid_foot_shuffle_frame_05.png",
+      "durationMs": 100,
+      "sha256": "50650ac8430f0f383cce2724c1a22c157bea9ce6dd06e45453c69f4d5b45ead8"
+    },
+    {
+      "index": 6,
+      "filename": "sativa_steve_anim_03_rapid_foot_shuffle_frame_06.png",
+      "durationMs": 100,
+      "sha256": "08bdeced5aedb8afb66cc02c6f84f7ff7f778343a3f285047ab0fb92a332d28d"
+    },
+    {
+      "index": 7,
+      "filename": "sativa_steve_anim_03_rapid_foot_shuffle_frame_07.png",
+      "durationMs": 100,
+      "sha256": "a51e4eb6c0118edd4c60fa45b7c87abe426b54666ed651fa01c444fd02ea44c0"
+    },
+    {
+      "index": 8,
+      "filename": "sativa_steve_anim_03_rapid_foot_shuffle_frame_08.png",
+      "durationMs": 100,
+      "sha256": "20216e2d5374afdce29bfd8577b51423481db11b886831fbc5f9597e9f7a5cf4"
+    },
+    {
+      "index": 9,
+      "filename": "sativa_steve_anim_03_rapid_foot_shuffle_frame_09.png",
+      "durationMs": 100,
+      "sha256": "6f14c496c1d7cee3bd1a76ed144a8fc3b0f41ea83057c444c7cb5f677260abea"
+    },
+    {
+      "index": 10,
+      "filename": "sativa_steve_anim_03_rapid_foot_shuffle_frame_10.png",
+      "durationMs": 100,
+      "sha256": "7b984de17636e6c13b35edd89baffa1a2890cccb0db1917401b836f31bce0ad4"
+    }
+  ]
+}

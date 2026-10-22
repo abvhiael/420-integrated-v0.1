@@ -1,0 +1,16 @@
+name: Mad Buds Kush Krusher gameplay animation Level 1
+on:
+  pull_request:
+    paths:
+      - 'packages/mad-buds-kush-krusher/**'
+      - '.github/workflows/mad-buds-kush-krusher-level1.yml'
+jobs:
+  animation-integration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Test local animation state integration
+        run: node --test packages/mad-buds-kush-krusher/test/*.test.mjs

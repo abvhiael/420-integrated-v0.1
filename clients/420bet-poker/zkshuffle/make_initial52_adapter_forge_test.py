@@ -50,16 +50,24 @@ contract PokerInitial52RealAdapterQualification {
 src += ''' 
 interface VmInitialReal54 {
  function etch(address,bytes calldata) external;
+ function chainId(uint256) external;
  function expectRevert(bytes4) external;
 }
 contract CanonicalInitialHandReal54 {
  uint64 public epoch=7;
+ bytes32 public tableId=keccak256("test-table");
+ bytes32 public configHash=keccak256("test-config");
+ bytes32 public rulesetId=keccak256("test-rules");
+ bytes32 public versionId=keccak256("test-version");
  function setEpoch(uint64 nextEpoch) external {epoch=nextEpoch;}
+ function setTableId(bytes32 nextValue) external {tableId=nextValue;}
+ function setRulesetId(bytes32 nextValue) external {rulesetId=nextValue;}
+ function setVersionId(bytes32 nextValue) external {versionId=nextValue;}
  function getHand(bytes32) external view returns(PokerConfidentialDeal420.Hand memory h) {
-  h.tableId=keccak256("test-table");
-  h.configHash=keccak256("test-config");
-  h.rulesetId=keccak256("test-rules");
-  h.versionId=keccak256("test-version");
+  h.tableId=tableId;
+  h.configHash=configHash;
+  h.rulesetId=rulesetId;
+  h.versionId=versionId;
   h.seatSnapshotHash=keccak256("test-snapshot");
   h.epoch=epoch;
   h.nonce=2;
@@ -104,6 +112,22 @@ contract PokerInitial52ActualContractQualification {
   vm.expectRevert(PokerInitialEncryptedDeck420.InvalidProof.selector);
   deck.submit(hand,root,packed);
   deals.setEpoch(7);
+  deals.setTableId(keccak256("wrong-table"));
+  vm.expectRevert(PokerInitialEncryptedDeck420.InvalidProof.selector);
+  deck.submit(hand,root,packed);
+  deals.setTableId(keccak256("test-table"));
+  deals.setRulesetId(keccak256("wrong-rules"));
+  vm.expectRevert(PokerInitialEncryptedDeck420.InvalidProof.selector);
+  deck.submit(hand,root,packed);
+  deals.setRulesetId(keccak256("test-rules"));
+  deals.setVersionId(keccak256("wrong-version"));
+  vm.expectRevert(PokerInitialEncryptedDeck420.InvalidProof.selector);
+  deck.submit(hand,root,packed);
+  deals.setVersionId(keccak256("test-version"));
+  vm.chainId(31338);
+  vm.expectRevert(PokerInitialEncryptedDeck420.InvalidProof.selector);
+  deck.submit(hand,root,packed);
+  vm.chainId(31337);
   deck.submit(hand,root,packed);
   require(deck.rootOf(hand)==root,"genuine proof did not bind the on-chain deck");
   vm.expectRevert(PokerInitialEncryptedDeck420.Duplicate.selector);

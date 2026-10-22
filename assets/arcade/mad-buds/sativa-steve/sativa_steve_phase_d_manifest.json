@@ -1,0 +1,152 @@
+{
+  "schema": "mad-buds-standalone-character-art-package-v1",
+  "characterId": "sativa_steve",
+  "phase": "D",
+  "repositoryDestination": "assets/arcade/mad-buds/sativa-steve/ (PROPOSED; repository path currently absent)",
+  "status": "OWNER_APPROVED; LOCAL FILE VALIDATION PASSED; REPOSITORY UPLOAD AND CI QUALIFICATION PENDING",
+  "assetCount": 9,
+  "originalAssetsPreserved": true,
+  "notes": [
+    "No cropping or upscaling has been applied.",
+    "Dimensions are original exports, not normalized to a uniform size.",
+    "RGBA transparency verified by alpha extrema; visual quality and background masking are not machine-certified.",
+    "The approved extra cannon-attack hero is not included in the 9-asset canonical Phase D matrix."
+  ],
+  "assets": [
+    {
+      "id": "SS-D01",
+      "asset": "full_body_hero",
+      "filename": "sativa_steve_ss_d01_full_body_hero.png",
+      "width": 1374,
+      "height": 1145,
+      "mode": "RGBA",
+      "alphaRange": [
+        0,
+        255
+      ],
+      "sha256": "5a1453c5660a7b45eebaef4d2306a5085f8eb7d4647a275059691cd5535b6af1",
+      "ownerApproval": "APPROVED_IN_CONVERSATION",
+      "structuralCheck": "PASS"
+    },
+    {
+      "id": "SS-D02",
+      "asset": "neutral_front",
+      "filename": "sativa_steve_ss_d02_neutral_front.png",
+      "width": 1240,
+      "height": 1269,
+      "mode": "RGBA",
+      "alphaRange": [
+        0,
+        255
+      ],
+      "sha256": "c3fc5196fba9edbfe87b44a2bb1fdb40d04ef031cc96fd64ca89397212d35ce0",
+      "ownerApproval": "APPROVED_IN_CONVERSATION",
+      "structuralCheck": "PASS"
+    },
+    {
+      "id": "SS-D03",
+      "asset": "neutral_side",
+      "filename": "sativa_steve_ss_d03_neutral_side.png",
+      "width": 1254,
+      "height": 1254,
+      "mode": "RGBA",
+      "alphaRange": [
+        0,
+        255
+      ],
+      "sha256": "fda6845d212a86f8f498f84759a094f0b94b617daac391c3a0c438f71fcce4b0",
+      "ownerApproval": "APPROVED_IN_CONVERSATION",
+      "structuralCheck": "PASS"
+    },
+    {
+      "id": "SS-D04",
+      "asset": "neutral_back",
+      "filename": "sativa_steve_ss_d04_neutral_back.png",
+      "width": 1240,
+      "height": 1269,
+      "mode": "RGBA",
+      "alphaRange": [
+        0,
+        255
+      ],
+      "sha256": "0cb465ed298a4452f62e30e4c4feb3eacbf95c5b48a32627995ecc645fb135a2",
+      "ownerApproval": "APPROVED_IN_CONVERSATION",
+      "structuralCheck": "PASS"
+    },
+    {
+      "id": "SS-D05",
+      "asset": "character_portrait",
+      "filename": "sativa_steve_ss_d05_character_portrait.png",
+      "width": 1254,
+      "height": 1254,
+      "mode": "RGBA",
+      "alphaRange": [
+        0,
+        255
+      ],
+      "sha256": "068dbdf26841de9ab21f45c688e4734bf7939303c1f61e17a33849a276e2832c",
+      "ownerApproval": "APPROVED_IN_CONVERSATION",
+      "structuralCheck": "PASS"
+    },
+    {
+      "id": "SS-D06",
+      "asset": "character_icon",
+      "filename": "sativa_steve_ss_d06_character_icon.png",
+      "width": 1254,
+      "height": 1254,
+      "mode": "RGBA",
+      "alphaRange": [
+        0,
+        255
+      ],
+      "sha256": "2cd6779ae02cab537ce6a205f5cbc135ada3258f833a4f6113cf0b2486d31efd",
+      "ownerApproval": "APPROVED_IN_CONVERSATION",
+      "structuralCheck": "PASS"
+    },
+    {
+      "id": "SS-D07",
+      "asset": "overdrive_hero",
+      "filename": "sativa_steve_ss_d07_overdrive_hero.png",
+      "width": 1254,
+      "height": 1254,
+      "mode": "RGBA",
+      "alphaRange": [
+        0,
+        255
+      ],
+      "sha256": "2d9fb766fcb42d937da9af73dbe78109d05dca0ce5d84a30fcf3f587fae3c44c",
+      "ownerApproval": "APPROVED_IN_CONVERSATION",
+      "structuralCheck": "PASS"
+    },
+    {
+      "id": "SS-D08",
+      "asset": "victory_hero",
+      "filename": "sativa_steve_ss_d08_victory_hero.png",
+      "width": 1254,
+      "height": 1254,
+      "mode": "RGBA",
+      "alphaRange": [
+        0,
+        255
+      ],
+      "sha256": "590f41afcb2b94175bee58816fb3d18e64f37466c95ede4c9eda02e6db81c35b",
+      "ownerApproval": "APPROVED_IN_CONVERSATION",
+      "structuralCheck": "PASS"
+    },
+    {
+      "id": "SS-D09",
+      "asset": "bong_cannon_companion",
+      "filename": "sativa_steve_ss_d09_bong_cannon_companion.png",
+      "width": 1254,
+      "height": 1254,
+      "mode": "RGBA",
+      "alphaRange": [
+        0,
+        255
+      ],
+      "sha256": "b8e43b75ded5daf513fc70d7b7b15b1033bb33353091e4534305bae84b21f107",
+      "ownerApproval": "APPROVED_IN_CONVERSATION",
+      "structuralCheck": "PASS"
+    }
+  ]
+}

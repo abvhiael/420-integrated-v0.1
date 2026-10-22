@@ -10,7 +10,7 @@ import "./PokerVerifierVersions420.sol";
 ///      A mock returning true is not a cryptographic proof verifier.
 abstract contract PokerGnarkVerifierBound420 {
     uint256 internal constant FR=
-        21888242871839275222246405745257275088696311157297823662689037894645226208583;
+        21888242871839275222246405745257275088548364400416034343698204186575808495617;
     address public immutable groth16Verifier;
     PokerVerifierVersions420 public immutable versions;
     bytes32 public immutable versionId;

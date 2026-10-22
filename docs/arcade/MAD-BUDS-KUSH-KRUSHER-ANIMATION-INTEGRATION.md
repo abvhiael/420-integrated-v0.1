@@ -1,0 +1,7 @@
+# Mad Buds — Kush Krusher gameplay animation integration
+
+The local-only controller in `packages/mad-buds-kush-krusher/src/index.mjs` maps all 15 approved animation sets to named gameplay states and explicit permitted transitions. States include idle, impatience, cannon loading, compression launch, tumble, wrecking-ball flight, heavy flight, collision squash, stuck recovery, victory, failure, anger, laughter and thumbs-up/down reactions. Ten frames at 10 FPS use fixed canonical asset paths.
+
+`KushKrusherAnimator` advances animation frames deterministically, holds the final pose for non-looping states, loops idle/flight states, and supports pause/resume/reset. `acceptKushGameplayEvent` connects trusted game events (LOAD, FIRE, COLLIDE, etc.) with the state machine, rejecting invalid transitions and unauthorized/unrecognized events.
+
+**Scope boundary:** the current 420Arcade launcher deliberately has no playable game; Mad Buds is not one of the frozen 11 launch-catalog game identities. This package does not invent game physics, render a playable scene, register a game, award scores, manipulate game collision, or claim independent owner visual-motion acceptance. A future Mad Buds game runtime can import the controller and feed the events from its real physics, launcher, collision and outcome systems. The assets in `assets/arcade/mad-buds/kush-krusher/animations/` are not automatically web-served by the existing Vite app. Bundle/public-copy integration remains required when a legitimate game runtime is present.

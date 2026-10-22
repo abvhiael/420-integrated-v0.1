@@ -239,6 +239,9 @@ jobs:
           python3 ../clients/420bet-poker/zkshuffle/make_groth16_forge_test.py src/bet/generated/ExperimentalInitialDeck52Verifier.sol ../artifacts/420bet-5a-4/EXPERIMENTAL-InitialDeck52SolidityFixture.json test/PokerGeneratedInitialProof.t.sol PokerInitial52GeneratedVerifierAcceptanceTest 1 0
           forge test --match-contract PokerInitial52GeneratedVerifierAcceptanceTest -vv
           rm test/PokerGeneratedInitialProof.t.sol
+          python3 ../clients/420bet-poker/zkshuffle/make_initial52_adapter_forge_test.py src/bet/generated/ExperimentalInitialDeck52Verifier.sol ../artifacts/420bet-5a-4/EXPERIMENTAL-InitialDeck52SolidityFixture.json test/PokerActualInitial52AdapterProof.t.sol
+          forge test --match-contract PokerInitial52RealAdapterQualification -vv
+          rm test/PokerActualInitial52AdapterProof.t.sol
           python3 ../clients/420bet-poker/zkshuffle/make_groth16_forge_test.py src/bet/generated/ExperimentalPartialShareVerifier.sol ../artifacts/420bet-5a-4/EXPERIMENTAL-PartialShareSolidityFixture.json test/PokerGeneratedShareProof.t.sol PokerShareGeneratedVerifierAcceptanceTest 0 1
           forge test --match-contract PokerShareGeneratedVerifierAcceptanceTest -vv
           rm test/PokerGeneratedShareProof.t.sol

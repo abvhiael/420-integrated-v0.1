@@ -18,6 +18,7 @@ src='''// SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
 import "../src/bet/generated/%s";
 import "../src/bet/PokerGnarkElGamalAdapters420.sol";
+import "../src/bet/PokerInitialEncryptedDeck420.sol";
 contract PokerInitial52RealAdapterQualification {
  function testRealProofThroughPinnedAdapter() public {
   %s verifier=new %s();
@@ -45,5 +46,70 @@ contract PokerInitial52RealAdapterQualification {
  }
 }
 '''%(verifier.name,names[0],names[0],p,inputs)
+
+src += ''' 
+interface VmInitialReal54 {
+ function etch(address,bytes calldata) external;
+ function expectRevert(bytes4) external;
+}
+contract CanonicalInitialHandReal54 {
+ uint64 public epoch=7;
+ function setEpoch(uint64 nextEpoch) external {epoch=nextEpoch;}
+ function getHand(bytes32) external view returns(PokerConfidentialDeal420.Hand memory h) {
+  h.tableId=keccak256("test-table");
+  h.configHash=keccak256("test-config");
+  h.rulesetId=keccak256("test-rules");
+  h.versionId=keccak256("test-version");
+  h.seatSnapshotHash=keccak256("test-snapshot");
+  h.epoch=epoch;
+  h.nonce=2;
+  h.transcriptCommitment=keccak256("test-transcript");
+  h.state=PokerConfidentialDeal420.State.COMMITTED;
+ }
+}
+contract PokerInitial52ActualContractQualification {
+ VmInitialReal54 private constant vm=VmInitialReal54(address(uint160(uint256(keccak256("hevm cheat code")))));
+ uint256 private constant FR=21888242871839275222246405745257275088696311157297823662689037894645226208583;
+ function testActualContractGenuineProofAndContextReplay() public {
+  %s realVerifier=new %s();
+  PokerVerifierVersions420 registry=new PokerVerifierVersions420(address(this));
+  bytes32 version=keccak256("initial-52-v2");
+  bytes32 circuit=keccak256("gnark-initial-52-context");
+  bytes32 vk=keccak256("test-only-vk");
+  bytes32 schema=keccak256("root,statement,hand,pkx,pky");
+  uint256[8] memory proof=[%s];
+  uint256[5] memory inputs=[%s];
+  bytes32 key=keccak256(abi.encode(inputs[3],inputs[4]));
+  registry.register(version,address(realVerifier),vk,circuit,schema);
+  PokerGnarkInitial52Adapter420 implementation=new PokerGnarkInitial52Adapter420(address(realVerifier),address(registry),version,circuit,vk,schema,key);
+  address adapterAddress=address(0x1002);
+  vm.etch(adapterAddress,address(implementation).code);
+  bytes32 deckVersion=keccak256("initial-52-contract-v2");
+  bytes32 deckCircuit=keccak256("initial-52-contract-circuit");
+  bytes32 deckKey=keccak256("initial-52-contract-key");
+  bytes32 deckSchema=keccak256("initial-52-contract-schema");
+  registry.register(deckVersion,adapterAddress,deckKey,deckCircuit,deckSchema);
+  CanonicalInitialHandReal54 deals=new CanonicalInitialHandReal54();
+  PokerInitialEncryptedDeck420 installed=new PokerInitialEncryptedDeck420(address(deals),address(registry),adapterAddress,deckVersion,deckCircuit,deckKey,deckSchema,key);
+  address deckAddress=address(0x1001);
+  vm.etch(deckAddress,address(installed).code);
+  PokerInitialEncryptedDeck420 deck=PokerInitialEncryptedDeck420(deckAddress);
+  bytes32 hand=bytes32(uint256(420));
+  bytes32 root=bytes32(inputs[0]);
+  require(uint256(deck.statement(hand,root))%%FR==inputs[1],"context fixture does not match real contract");
+  bytes memory packed=abi.encode(proof,inputs);
+  vm.expectRevert(PokerInitialEncryptedDeck420.InvalidProof.selector);
+  deck.submit(hand,bytes32(uint256(inputs[0]+1)),packed);
+  deals.setEpoch(8);
+  vm.expectRevert(PokerInitialEncryptedDeck420.InvalidProof.selector);
+  deck.submit(hand,root,packed);
+  deals.setEpoch(7);
+  deck.submit(hand,root,packed);
+  require(deck.rootOf(hand)==root,"genuine proof did not bind the on-chain deck");
+  vm.expectRevert(PokerInitialEncryptedDeck420.Duplicate.selector);
+  deck.submit(hand,root,packed);
+ }
+}
+'''%(names[0],names[0],p,inputs)
 out.parent.mkdir(parents=True,exist_ok=True)
 out.write_text(src)

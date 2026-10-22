@@ -24,7 +24,7 @@ func TestFullInitial52RealProof(t *testing.T) {
  if inverse8==nil{t.Fatal("cofactor not invertible in subgroup")}
  subgroupQ:=new(native.PointAffine).ScalarMultiplication(thresholdPK,inverse8)
  qx,qy:=coordinates(subgroupQ)
- w:=&InitialDeck52{HandScope:420,PublicKeyX:pkX,PublicKeyY:pkY,SubgroupPreimageX:qx,SubgroupPreimageY:qy}
+ w:=&InitialDeck52{HandScope:420,StatementScope:123456,PublicKeyX:pkX,PublicKeyY:pkY,SubgroupPreimageX:qx,SubgroupPreimageY:qy}
  for i:=0;i<52;i++ {
   randomness:=int64(i+100)
   c1,c2:=cipherOf(int64(i+1),randomness,&base,thresholdPK)
@@ -42,7 +42,7 @@ func TestFullInitial52RealProof(t *testing.T) {
  public,err:=witness.Public();if err!=nil{t.Fatal(err)}
  if err:=groth16.Verify(proof,vk,public);err!=nil{t.Fatalf("valid initial deck rejected: %v",err)}
  exportTestGroth16Solidity(t,"InitialDeck52",vk,proof,
-  w.DeckRoot,w.HandScope,w.PublicKeyX,w.PublicKeyY)
+  w.DeckRoot,w.StatementScope,w.HandScope,w.PublicKeyX,w.PublicKeyY)
  badSubgroup:=*w
  badSubgroup.SubgroupPreimageX=big.NewInt(42)
  badSubgroupWitness,err:=frontend.NewWitness(&badSubgroup,ecc.BN254.ScalarField());if err!=nil{t.Fatal(err)}
@@ -51,6 +51,10 @@ func TestFullInitial52RealProof(t *testing.T) {
  badWitness,err:=frontend.NewWitness(&tampered,ecc.BN254.ScalarField());if err!=nil{t.Fatal(err)}
  badPublic,err:=badWitness.Public();if err!=nil{t.Fatal(err)}
  if err:=groth16.Verify(proof,vk,badPublic);err==nil{t.Fatal("changed initial deck root verified")}
+ wrongContext:=*w;wrongContext.StatementScope=123457
+ wrongContextWitness,err:=frontend.NewWitness(&wrongContext,ecc.BN254.ScalarField());if err!=nil{t.Fatal(err)}
+ wrongContextPublic,err:=wrongContextWitness.Public();if err!=nil{t.Fatal(err)}
+ if err:=groth16.Verify(proof,vk,wrongContextPublic);err==nil{t.Fatal("changed full initial-deck context verified")}
  replay:=*w;replay.HandScope=421
  replayWitness,err:=frontend.NewWitness(&replay,ecc.BN254.ScalarField());if err!=nil{t.Fatal(err)}
  replayPublic,err:=replayWitness.Public();if err!=nil{t.Fatal(err)}

@@ -2,8 +2,8 @@
   "schema": "mad-buds-standalone-character-art-package-v1",
   "characterId": "sativa_steve",
   "phase": "D",
-  "repositoryDestination": "assets/arcade/mad-buds/sativa-steve/ (PROPOSED; repository path currently absent)",
-  "status": "OWNER_APPROVED; LOCAL FILE VALIDATION PASSED; REPOSITORY UPLOAD AND CI QUALIFICATION PENDING",
+  "repositoryDestination": "assets/arcade/mad-buds/sativa-steve/",
+  "status": "OWNER_APPROVED; SCOPED STRUCTURAL VALIDATION PASS 9/9; GITHUB MAIN ASSET BLOBS EXACT-MATCH VERIFIED; CI QUALIFICATION NOT RUN",
   "assetCount": 9,
   "originalAssetsPreserved": true,
   "notes": [
@@ -148,5 +148,12 @@
       "ownerApproval": "APPROVED_IN_CONVERSATION",
       "structuralCheck": "PASS"
     }
-  ]
+  ],
+  "reconciliation": {
+    "sourceCommit": "4f78272fe9d9cfbe1c199d5a81ad9b0b9f71c5ca",
+    "checks": "9/9 PNG, RGBA, dimensions, transparency extrema, SHA-256, and Git blob SHA exact match versus uploaded approved originals",
+    "checkContext": "Focused local check using approved original files; not a GitHub Actions CI result",
+    "assetChanges": "None; nine original PNG blobs preserved",
+    "evidenceFile": "PHASE-D-RECONCILIATION.md"
+  }
 }

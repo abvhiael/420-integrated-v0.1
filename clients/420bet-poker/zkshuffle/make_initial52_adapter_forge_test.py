@@ -10,7 +10,7 @@ raw=data['proof']
 if len(raw)!=514 or not raw.startswith('0x'):raise SystemExit("invalid proof")
 proof=[int(raw[2+64*i:2+64*(i+1)],16) for i in range(8)]
 public=list(map(int,data['public']))
-FR=21888242871839275222246405745257275088696311157297823662689037894645226208583
+FR=21888242871839275222246405745257275088548364400416034343698204186575808495617
 if len(public)!=5 or any(x<0 or x>=FR for x in public):raise SystemExit("wrong canonical 52-card inputs")
 p=','.join('uint256(%d)'%x for x in proof)
 inputs=','.join('uint256(%d)'%x for x in public)
@@ -69,7 +69,7 @@ contract CanonicalInitialHandReal54 {
 }
 contract PokerInitial52ActualContractQualification {
  VmInitialReal54 private constant vm=VmInitialReal54(address(uint160(uint256(keccak256("hevm cheat code")))));
- uint256 private constant FR=21888242871839275222246405745257275088696311157297823662689037894645226208583;
+ uint256 private constant FR=21888242871839275222246405745257275088548364400416034343698204186575808495617;
  function testActualContractGenuineProofAndContextReplay() public {
   %s realVerifier=new %s();
   PokerVerifierVersions420 registry=new PokerVerifierVersions420(address(this));

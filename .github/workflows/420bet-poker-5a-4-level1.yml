@@ -137,19 +137,49 @@ jobs:
           run-id: 39351176585
           github-token: ${{ secrets.GITHUB_TOKEN }}
           path: artifacts/420bet-5a-4
+      - name: Verify recipient Groth16 qualification ownership
+        id: recipient_scope
+        run: |
+          set -eu
+          QUALIFIED=a7c212dfada23c1c9155f7e8d9f7b414c0113a73
+          git fetch --no-tags --depth=1 origin "$QUALIFIED"
+          changed_files=$(git diff --name-only "$QUALIFIED" HEAD -- \
+            clients/420bet-poker/zkshuffle/encrypted_share_delivery_circuit.go \
+            clients/420bet-poker/zkshuffle/encrypted_share_delivery_circuit_test.go \
+            clients/420bet-poker/zkshuffle/recipient_key_possession_circuit.go \
+            clients/420bet-poker/zkshuffle/recipient_key_possession_circuit_test.go \
+            clients/420bet-poker/zkshuffle/threshold_key_aggregate_circuit.go \
+            clients/420bet-poker/zkshuffle/threshold_key_aggregate_circuit_test.go \
+            clients/420bet-poker/zkshuffle/go.mod \
+            clients/420bet-poker/zkshuffle/go.sum \
+            clients/420bet-poker/zkshuffle/make_groth16_forge_test.py \
+            clients/420bet-poker/zkshuffle/make_private_delivery_adapter_forge_test.py \
+            contracts/src/bet/PokerGnarkEncryptedShareDeliveryAdapter420.sol \
+            contracts/src/bet/PokerGnarkRecipientKeyPoPAdapter420.sol \
+            contracts/src/bet/PokerGnarkThresholdKeyAggregateAdapter420.sol \
+            contracts/src/bet/PokerVerifierVersions420.sol)
+          if test -n "$changed_files"; then
+            printf '%s\n' "$changed_files"
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "Recipient Groth16 inputs unchanged; inherit passing owner run 39716632965 at $QUALIFIED"
+          fi
       - name: Qualify new recipient Groth16 proof families
-        if: steps.cryptoscope.outputs.changed == 'false'
+        if: steps.cryptoscope.outputs.changed == 'false' && steps.recipient_scope.outputs.changed == 'true'
         env:
           POKER_ZK_ARTIFACT_DIR: ../../../artifacts/420bet-5a-4
         working-directory: clients/420bet-poker/zkshuffle
         run: go test -mod=mod -timeout 20m -run '^(TestEncryptedShareDeliveryProofAndAdversarialRejections|TestRecipientPublicKeyProofOfPossession|TestGenuineProviderKeyAggregateProof)$' ./...
       - name: Record new proof digests
+        if: steps.cryptoscope.outputs.changed == 'true' || steps.recipient_scope.outputs.changed == 'true'
         run: |
           mkdir -p artifacts/420bet-5a-4
           printf 'implementation_sha=%s\n' "$(git rev-parse HEAD)" > artifacts/420bet-5a-4/recipient-proof-provenance.txt
           sha256sum clients/420bet-poker/zkshuffle/encrypted_share_delivery_circuit.go clients/420bet-poker/zkshuffle/recipient_key_possession_circuit.go clients/420bet-poker/zkshuffle/threshold_key_aggregate_circuit.go > artifacts/420bet-5a-4/recipient-proof-source-sha256.txt
           sha256sum artifacts/420bet-5a-4/EXPERIMENTAL-EncryptedShareDeliveryVerifier.sol artifacts/420bet-5a-4/EXPERIMENTAL-RecipientKeyPossessionVerifier.sol artifacts/420bet-5a-4/EXPERIMENTAL-ThresholdKeyAggregateVerifier.sol > artifacts/420bet-5a-4/recipient-proof-artifact-sha256.txt
       - name: Upload new proof provenance
+        if: steps.cryptoscope.outputs.changed == 'true' || steps.recipient_scope.outputs.changed == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: 420bet-5a-4-recipient-proof-provenance
@@ -216,6 +246,7 @@ jobs:
           forge test --match-contract PokerUnmaskGeneratedVerifierAcceptanceTest -vv
           rm test/PokerGeneratedUnmaskProof.t.sol
       - name: Qualify new real encrypted-share, recipient-key and aggregate Solidity verifier adapters
+        if: steps.cryptoscope.outputs.changed == 'true' || steps.recipient_scope.outputs.changed == 'true'
         working-directory: contracts
         run: |
           set -e
@@ -241,6 +272,26 @@ jobs:
           python3 ../clients/420bet-poker/zkshuffle/make_private_delivery_adapter_forge_test.py aggregate src/bet/generated/ExperimentalThresholdKeyAggregateVerifier.sol ../artifacts/420bet-5a-4/EXPERIMENTAL-ThresholdKeyAggregateSolidityFixture.json test/PokerActualAggregateAdapterProof.t.sol
           forge test --match-contract PokerActualPrivateDeliveryAdapterProofTest -vv
           rm test/PokerActualAggregateAdapterProof.t.sol
+      - name: Record inherited recipient-adapter evidence
+        if: steps.cryptoscope.outputs.changed == 'false' && steps.recipient_scope.outputs.changed == 'false'
+        run: |
+          set -eu
+          mkdir -p artifacts/420bet-5a-4
+          {
+            echo 'inherited_recipient_qualified_sha=a7c212dfada23c1c9155f7e8d9f7b414c0113a73'
+            echo 'inherited_recipient_workflow_run=39716632965'
+            echo 'inherited_recipient_job=119620183356'
+            echo "current_qualified_integration_sha=$(git rev-parse HEAD)"
+            echo 'qualification_basis=recipient Groth16 sources, adapters, proof generators, dependencies and verifier registry unchanged'
+          } > artifacts/420bet-5a-4/recipient-adapters-inheritance.txt
+      - name: Upload inherited recipient-adapter qualification reference
+        if: steps.cryptoscope.outputs.changed == 'false' && steps.recipient_scope.outputs.changed == 'false'
+        uses: actions/upload-artifact@v4
+        with:
+          name: 420bet-recipient-adapters-inheritance
+          path: artifacts/420bet-5a-4/recipient-adapters-inheritance.txt
+          retention-days: 90
+          if-no-files-found: error
       - name: Record inherited exact-SHA cryptographic qualification
         if: steps.cryptoscope.outputs.changed == 'false'
         run: |

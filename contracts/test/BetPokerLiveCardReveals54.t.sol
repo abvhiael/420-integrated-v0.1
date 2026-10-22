@@ -143,6 +143,23 @@ contract PokerLiveCardReveals54Test is PokerNLHEBetting54Test {
         cheat54.expectRevert(PokerLiveCardReveals420.WrongStreet.selector);
         live.submitShare(id,4,0,0,p,_shareProof(id,0,0,p));
     }
+    function testProviderFaultNotAttributedBeforeAuthorizedReveal() public {
+        bytes32 id=_readyLive();
+        require(live.missingProviders(id,0)==0,"invalid street accused provider");
+        require(live.missingProviders(id,1)==0,"premature flop accused provider");
+        require(live.missingProviders(id,4)==0,"premature showdown accused provider");
+        _completePreflop(id);
+        require(engine.canRevealStreet(id,1),"flop authorization");
+        require(live.missingProviders(id,1)==3,"both missing shares must be attributable");
+        _submit(id,5,0);
+        require(live.missingProviders(id,1)==3,"provider fault persists across positions");
+        for(uint8 pos=5;pos<=7;pos++){
+            if(pos!=5)_submit(id,pos,0);
+            _submit(id,pos,1);
+        }
+        require(live.missingProviders(id,1)==0,"complete shares clear provider faults");
+        require(live.missingProviders(id,2)==0,"future turn accused provider");
+    }
     function testCannotBindForeignEngineAsCanonicalLiveReveal() public {
         bytes32 id=_readyBetting();
         require(id!=bytes32(0),"prepared");

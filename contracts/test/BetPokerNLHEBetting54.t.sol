@@ -373,6 +373,34 @@ contract PokerNLHEBetting54Case7Test is PokerNLHEBetting54Fixture {
 }
 
 contract PokerNLHEBetting54Case8Test is PokerNLHEBetting54Fixture {
+    function testFundedSnapshotAndEvidenceDeadlineCannotDriftAfterProofWithheld() public {
+        bytes32 id=_readyBetting();
+        bytes32 snapshot=engine.fundedSnapshot(id);
+        uint64 due=engine.fundedEvidenceDeadline(id);
+        require(snapshot!=bytes32(0)&&snapshot==ledger.lockedSnapshot(TABLE),
+            "exact funded immutable escrow snapshot");
+        require(due!=0,"immutable funded proof deadline");
+        _signedAction(id,0,PokerNLHEBetting420.Move.CALL,10,PLAYER_KEY);
+        _signedAction(id,1,PokerNLHEBetting420.Move.CHECK,0,OPPONENT_KEY);
+        uint64 streetDue=engine.evidenceDueAt(id);
+        cheat54.warp(uint256(streetDue)+3 days);
+        engine.beginMissingEvidenceRecovery(id);
+        (,uint64 reviewEnd,,,) = engine.evidenceRecovery(id);
+        require(reviewEnd==uint256(streetDue)+engine.RECOVERY_REVIEW_WINDOW(),
+            "review must be anchored to actual evidence deadline");
+        require(engine.recoveryOpened(id),"single recovery lifecycle");
+        require(engine.fundedSnapshot(id)==snapshot &&
+            engine.fundedEvidenceDeadline(id)==due,"funded evidence cannot be rewritten");
+        cheat54.expectRevert(PokerNLHEBetting420.InvalidState.selector);
+        engine.beginMissingEvidenceRecovery(id);
+        engine.finalizeMissingEvidenceRecovery(id);
+        require(engine.handAborted(id)&&!engine.handSettled(id),"single terminal void");
+        require(ledger.seatOf(TABLE,0).chips==400&&ledger.seatOf(TABLE,1).chips==400,
+            "canonical original snapshot refund, not pot distribution");
+        require(!providerBond.isCollateralized(id),"bond closed separately");
+        cheat54.expectRevert(PokerNLHEBetting420.InvalidState.selector);
+        engine.finalizeMissingEvidenceRecovery(id);
+    }
     function testPostBettingMissingFlopProofRecoversOriginalEscrowExactlyOnce() public {
         bytes32 id=_readyBetting();
         _signedAction(id,0,PokerNLHEBetting420.Move.CALL,10,PLAYER_KEY);

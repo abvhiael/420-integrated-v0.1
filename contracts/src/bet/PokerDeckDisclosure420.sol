@@ -11,6 +11,7 @@ interface IPokerDeliveryProofBook420 {
     function allVerified(bytes32 handId) external view returns(bool);
     function deals() external view returns(PokerConfidentialDeal420);
     function keys() external view returns(PokerRecipientKeys420);
+    function envelopeHashFor(bytes32 handId,uint8 seat) external view returns(bytes32);
 }
 contract PokerDeckDisclosure420 {
     bytes32 public constant DOMAIN = keccak256("420.BET.POKER.DECK.DISCLOSURE.V1");
@@ -91,6 +92,12 @@ contract PokerDeckDisclosure420 {
                 authorization.scopeForTable(h.tableId),0)) revert Unauthorized();
         if (envelopeHash==bytes32(0) || fingerprint==bytes32(0)) revert InvalidValue();
         if (keys.fingerprintOf(h.tableId,seat) != fingerprint) revert NotRecipient();
+        // A dealer cannot invent an envelope and later persuade the recipient
+        // to acknowledge it. Exact hash must already be derivable from BOTH
+        // independently verified shares for each of the assigned two cards.
+        IPokerDeliveryProofBook420 proofs=proofBookForTable[h.tableId];
+        if(address(proofs)==address(0)||
+           proofs.envelopeHashFor(handId,seat)!=envelopeHash) revert InvalidState();
         if ((d.deliveryMask&seatBit)!=0) revert Duplicate();
         d.deliveryMask|=seatBit;
         recipientEnvelopeHash[handId][seat]=envelopeHash;

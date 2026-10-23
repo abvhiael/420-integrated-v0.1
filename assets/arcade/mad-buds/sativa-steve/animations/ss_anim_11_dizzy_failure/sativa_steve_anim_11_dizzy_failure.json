@@ -10,7 +10,7 @@
   },
   "loop": false,
   "source_sprite_sheet": "sativa_steve_s_dizzy_fall_animation_sheet.png",
-  "export_folder_suggestion": "assets/characters/sativa_steve/animations/sativa_steve_anim_11_dizzy_failure/",
+  "export_folder_suggestion": "assets/arcade/mad-buds/sativa-steve/animations/ss_anim_11_dizzy_failure/",
   "frames": [
     {
       "index": 1,
@@ -93,5 +93,6 @@
       "sha256": "7f7a1e158be303d0fda65eb1858e35e2a2d0964cf6e96892b2df91aad022e2b5"
     }
   ],
-  "preview_gif": "sativa_steve_anim_11_dizzy_failure_preview.gif"
+  "preview_gif": "sativa_steve_anim_11_dizzy_failure_preview.gif",
+  "repository_destination": "assets/arcade/mad-buds/sativa-steve/animations/ss_anim_11_dizzy_failure/"
 }

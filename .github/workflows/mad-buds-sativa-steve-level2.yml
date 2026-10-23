@@ -1,0 +1,32 @@
+name: Mad Buds Sativa Steve Phase F Level 2
+on:
+  pull_request:
+    paths:
+      - 'assets/arcade/mad-buds/sativa-steve/animations/**'
+      - 'scripts/arcade/qualify-sativa-steve-assets.py'
+      - '.github/workflows/mad-buds-sativa-steve-level2.yml'
+  push:
+    branches:
+      - 'audit/sativa-steve-phase-f-level2'
+    paths:
+      - 'assets/arcade/mad-buds/sativa-steve/animations/**'
+      - 'scripts/arcade/qualify-sativa-steve-assets.py'
+      - '.github/workflows/mad-buds-sativa-steve-level2.yml'
+  workflow_dispatch:
+jobs:
+  sativa-steve-level2:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install Pillow==11.1.0
+      - name: Qualify all 11 sets and 110 frames
+        run: python scripts/arcade/qualify-sativa-steve-assets.py
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sativa-steve-level2-qualification
+          path: sativa-steve-level2-qualification.json
+          if-no-files-found: warn

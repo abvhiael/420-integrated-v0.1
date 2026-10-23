@@ -454,7 +454,8 @@ contract PokerNLHEBetting54Case8Test is PokerNLHEBetting54Fixture {
         (,uint64 reviewEnd,,,) = engine.evidenceRecovery(id);
         require(reviewEnd==uint256(streetDue)+engine.RECOVERY_REVIEW_WINDOW(),
             "review must be anchored to actual evidence deadline");
-        require(engine.recoveryOpened(id),"single recovery lifecycle");
+        require((engine.recoveryStageMask(id)&(uint16(1)<<uint8(PokerNLHEBetting420.Phase.AWAIT_FLOP)))!=0,
+            "one bounded review for actual missing flop");
         require(engine.fundedSnapshot(id)==snapshot &&
             engine.fundedEvidenceDeadline(id)==due,"funded evidence cannot be rewritten");
         cheat54.expectRevert(PokerNLHEBetting420.InvalidState.selector);

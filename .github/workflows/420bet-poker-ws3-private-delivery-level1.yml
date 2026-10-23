@@ -11,6 +11,7 @@ on:
       - 'contracts/src/bet/PokerDeliveryProofBook420.sol'
       - 'contracts/src/bet/PokerDeckDisclosure420.sol'
       - 'contracts/src/bet/PokerNLHEBetting420.sol'
+      - 'contracts/src/bet/PokerActionKeys420.sol'
       - 'contracts/test/BetPokerNLHEBetting54.t.sol'
       - 'contracts/test/BetPokerDeckDisclosure54.t.sol'
       - '.github/workflows/420bet-poker-ws3-private-delivery-level1.yml'
@@ -127,7 +128,7 @@ jobs:
       - name: Focused funded NLHE and private receipt adversarial regressions
         working-directory: contracts
         env:
-          FOUNDRY_VIA_IR: 'false'
+          FOUNDRY_VIA_IR: 'true'
           FOUNDRY_SRC: src/ws3-focused
           FOUNDRY_TEST: test/ws3-funded
         run: |
@@ -166,6 +167,7 @@ jobs:
             contracts/src/bet/PokerDeliveryProofBook420.sol \
             contracts/src/bet/PokerDeckDisclosure420.sol \
             contracts/src/bet/PokerNLHEBetting420.sol \
+            contracts/src/bet/PokerActionKeys420.sol \
             > artifacts/420bet-ws3/implementation-sha256.txt
           sha256sum artifacts/420bet-ws3/EXPERIMENTAL-WS3FullDeliveryVerifier.sol \
             artifacts/420bet-ws3/EXPERIMENTAL-WS3EightShareFixtures.json \

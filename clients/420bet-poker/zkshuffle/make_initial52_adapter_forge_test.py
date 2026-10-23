@@ -55,16 +55,16 @@ interface VmInitialReal54 {
 }
 contract CanonicalInitialHandReal54 {
  uint64 public epoch=7;
- bytes32 public tableId=keccak256("test-table");
+ bytes32 public canonicalTableId=keccak256("test-table");
  bytes32 public configHash=keccak256("test-config");
  bytes32 public rulesetId=keccak256("test-rules");
  bytes32 public versionId=keccak256("test-version");
  function setEpoch(uint64 nextEpoch) external {epoch=nextEpoch;}
- function setTableId(bytes32 nextValue) external {tableId=nextValue;}
+ function setTableId(bytes32 nextValue) external {canonicalTableId=nextValue;}
  function setRulesetId(bytes32 nextValue) external {rulesetId=nextValue;}
  function setVersionId(bytes32 nextValue) external {versionId=nextValue;}
  function getHand(bytes32) external view returns(PokerConfidentialDeal420.Hand memory h) {
-  h.tableId=tableId;
+  h.canonicalTableId=canonicalTableId;
   h.configHash=configHash;
   h.rulesetId=rulesetId;
   h.versionId=versionId;

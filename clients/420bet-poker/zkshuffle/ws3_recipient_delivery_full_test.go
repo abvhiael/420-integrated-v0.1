@@ -67,7 +67,13 @@ func TestWS3TwoRecipientEightPrivateShares(t *testing.T){
    pubx,puby:=coordinates(providerPK[provider])
    recx,recy:=coordinates(recipientPK[seat])
    ux,uy:=coordinates(u);vx,vy:=coordinates(v)
-   context:=big.NewInt(int64(700001+position*100+provider+seat*10000))
+   contextPoints:=[12]frontend.Variable{
+    cards[position].C1X,cards[position].C1Y,cards[position].C2X,cards[position].C2Y,
+    pubx,puby,recx,recy,ux,uy,vx,vy,
+   }
+   fingerprint:=ws3Fingerprint(seat,recx,recy)
+   context:=ws3DeliveryScope(root,position,seat,provider,fingerprint,contextPoints)
+   if context.Sign()==0{t.Fatal("invalid empty bound delivery context")}
    w:=&EncryptedShareDeliveryV1{
     HandScope:420,DeckRoot:root,Position:position,Seat:seat,ProviderIndex:provider,
     DeliveryContext:context,
@@ -135,6 +141,61 @@ func TestWS3TwoRecipientEightPrivateShares(t *testing.T){
   }
  }
  if len(fixtures)!=8{t.Fatal("exactly eight genuine provider share proofs required")}
+ // The SAME two recipient encryption keys are backed by independent genuine
+ // proofs of secret-key possession, bound to exact active seat and epoch.
+ popCS,err:=frontend.Compile(ecc.BN254.ScalarField(),r1cs.NewBuilder,&RecipientKeyPossessionV1{})
+ if err!=nil{t.Fatal(err)}
+ popPK,popVK,err:=groth16.Setup(popCS);if err!=nil{t.Fatal(err)}
+ type popFixture struct {
+  Proof string `json:"proof"`
+  Public []string `json:"public"`
+  Seat int `json:"seat"`
+ }
+ var recipientProofs []popFixture
+ for seat:=0;seat<2;seat++{
+  x,y:=coordinates(recipientPK[seat])
+  scope:=ws3KeyScope(seat)
+  w:=&RecipientKeyPossessionV1{Scope:scope,KeyX:x,KeyY:y,Secret:recipientSecrets[seat]}
+  witness,err:=frontend.NewWitness(w,ecc.BN254.ScalarField());if err!=nil{t.Fatal(err)}
+  proof,err:=groth16.Prove(popCS,popPK,witness);if err!=nil{t.Fatal(err)}
+  pub,err:=witness.Public();if err!=nil{t.Fatal(err)}
+  if err:=groth16.Verify(proof,popVK,pub);err!=nil{t.Fatal(err)}
+  serialized:=proof.(interface{MarshalSolidity()[]byte})
+  recipientProofs=append(recipientProofs,popFixture{
+   Proof:"0x"+hex.EncodeToString(serialized.MarshalSolidity()),
+   Public:[]string{scope.String(),x.(*big.Int).String(),y.(*big.Int).String()},Seat:seat})
+  if seat==0{exportTestGroth16Solidity(t,"WS3FullRecipientPoP",popVK,proof,scope,x,y)}
+ }
+ // The aggregate proof prohibits either provider inventing a different joint
+ // decryption key than the one used by the certified 52-card final deck.
+ ax,ay:=coordinates(providerPK[0]);bx,by:=coordinates(providerPK[1]);tx,ty:=coordinates(threshold)
+ aggScope:=ws3AggregateScope(ax,ay,bx,by,tx,ty)
+ aggregate:=&ThresholdKeyAggregateV1{Scope:aggScope,ProviderAX:ax,ProviderAY:ay,
+  ProviderBX:bx,ProviderBY:by,AggregateX:tx,AggregateY:ty}
+ aggCS,err:=frontend.Compile(ecc.BN254.ScalarField(),r1cs.NewBuilder,&ThresholdKeyAggregateV1{})
+ if err!=nil{t.Fatal(err)}
+ aggPK,aggVK,err:=groth16.Setup(aggCS);if err!=nil{t.Fatal(err)}
+ aggWitness,err:=frontend.NewWitness(aggregate,ecc.BN254.ScalarField());if err!=nil{t.Fatal(err)}
+ aggProof,err:=groth16.Prove(aggCS,aggPK,aggWitness);if err!=nil{t.Fatal(err)}
+ aggPublic,err:=aggWitness.Public();if err!=nil{t.Fatal(err)}
+ if err:=groth16.Verify(aggProof,aggVK,aggPublic);err!=nil{t.Fatal(err)}
+ exportTestGroth16Solidity(t,"WS3FullAggregate",aggVK,aggProof,aggScope,ax,ay,bx,by,tx,ty)
+ aggSerialized:=aggProof.(interface{MarshalSolidity()[]byte})
+ aggregateFixture:=map[string]interface{}{
+  "proof":"0x"+hex.EncodeToString(aggSerialized.MarshalSolidity()),
+  "public":[]string{aggScope.String(),ax.(*big.Int).String(),ay.(*big.Int).String(),
+   bx.(*big.Int).String(),by.(*big.Int).String(),tx.(*big.Int).String(),ty.(*big.Int).String()},
+ }
+ if dir:=os.Getenv("POKER_ZK_ARTIFACT_DIR");dir!=""{
+  for name,value:=range map[string]interface{}{
+   "EXPERIMENTAL-WS3TwoRecipientPoPFixtures.json":recipientProofs,
+   "EXPERIMENTAL-WS3AggregateFixture.json":aggregateFixture,
+  }{
+   f,err:=os.Create(filepath.Join(dir,name));if err!=nil{t.Fatal(err)}
+   if err:=json.NewEncoder(f).Encode(value);err!=nil{f.Close();t.Fatal(err)}
+   if err:=f.Close();err!=nil{t.Fatal(err)}
+  }
+ }
  if dir:=os.Getenv("POKER_ZK_ARTIFACT_DIR");dir!=""{
   if err:=os.MkdirAll(dir,0755);err!=nil{t.Fatal(err)}
   file,err:=os.Create(filepath.Join(dir,"EXPERIMENTAL-WS3EightShareFixtures.json"))

@@ -127,9 +127,8 @@ contract PokerDeckDisclosure54Test is PokerConfidentialDeal54Test {
         bytes32 deckHash=disclosure.hashDeck(id,cards,keccak256("salt"));
         cheat54.prank(PROVIDER_A);
         disclosure.publish(id,deckHash,keccak256("manifest"));
-        cheat54.expectRevert(PokerDeckDisclosure420.NotRecipient.selector);
         proofScope.allowEnvelope(id,0,keccak256("envelope"));
-
+        cheat54.expectRevert(PokerDeckDisclosure420.NotRecipient.selector);
         cheat54.prank(PROVIDER_A); disclosure.bindEnvelope(id,0,keccak256("envelope"),KEY_B);
     }
     function testDuplicateDeckRejected() public {

@@ -127,12 +127,12 @@ jobs:
       - name: Focused funded NLHE and private receipt adversarial regressions
         working-directory: contracts
         env:
-          FOUNDRY_VIA_IR: 'false'
-          FOUNDRY_SRC: src/bet
+          FOUNDRY_VIA_IR: 'true'
+          FOUNDRY_SRC: src/ws3-focused
           FOUNDRY_TEST: test/ws3-funded
         run: |
           set -eu
-          mkdir -p test/ws3-funded
+          mkdir -p src/ws3-focused test/ws3-funded
           python3 - <<'PY'
           from pathlib import Path
           import re

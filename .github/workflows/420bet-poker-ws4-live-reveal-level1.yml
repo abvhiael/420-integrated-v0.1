@@ -1,0 +1,114 @@
+name: 420Bet Poker WS4 Live Card Reveal Level 1
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/bet/PokerLiveCardReveals420.sol'
+      - 'contracts/src/bet/PokerGnarkCardRevealAdapters420.sol'
+      - 'contracts/test/BetPokerLiveCardReveals54.t.sol'
+      - 'clients/420bet-poker/zkshuffle/partial_decryption_circuit.go'
+      - 'clients/420bet-poker/zkshuffle/card_unmask_circuit.go'
+      - '.github/workflows/420bet-poker-ws4-live-reveal-level1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ws4-live-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  selective-proof-and-live-street:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    env:
+      FOUNDRY_VIA_IR: 'true'
+      FOUNDRY_PROFILE: pr
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Assert exact source SHA
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+          cache: false
+      - name: Generate actual threshold-share and unmask cryptographic proof evidence
+        working-directory: clients/420bet-poker/zkshuffle
+        env:
+          POKER_ZK_ARTIFACT_DIR: ../../../artifacts/420bet-ws4
+        run: |
+          set -eu
+          mkdir -p ../../../artifacts/420bet-ws4
+          go test -mod=mod -timeout 35m -run '^(TestRealThresholdShareProofValidTamperedAndReplay|TestRealThresholdUnmaskProofValidInvalidAndReplay)$' -count=1 -v .
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Qualify actual generated BN254 Solidity Groth16 partial and unmask verifiers
+        working-directory: contracts
+        env:
+          FOUNDRY_SRC: src/ws4-focused
+          FOUNDRY_TEST: test/ws4-real
+        run: |
+          set -eu
+          mkdir -p src/ws4-focused src/bet/generated test/ws4-real
+          cp ../artifacts/420bet-ws4/EXPERIMENTAL-PartialShareVerifier.sol src/bet/generated/
+          cp ../artifacts/420bet-ws4/EXPERIMENTAL-CardUnmaskVerifier.sol src/bet/generated/
+          python3 ../clients/420bet-poker/zkshuffle/make_groth16_forge_test.py \
+            ../artifacts/420bet-ws4/EXPERIMENTAL-PartialShareVerifier.sol \
+            ../artifacts/420bet-ws4/EXPERIMENTAL-PartialShareSolidityFixture.json \
+            test/ws4-real/WS4RealPartial.t.sol WS4RealPartialTest 0 1
+          python3 ../clients/420bet-poker/zkshuffle/make_groth16_forge_test.py \
+            ../artifacts/420bet-ws4/EXPERIMENTAL-CardUnmaskVerifier.sol \
+            ../artifacts/420bet-ws4/EXPERIMENTAL-CardUnmaskSolidityFixture.json \
+            test/ws4-real/WS4RealUnmask.t.sol WS4RealUnmaskTest 0 1
+          sed -i 's#import "../src/bet/generated/#import "../../src/bet/generated/#' test/ws4-real/*.t.sol
+          forge test --match-path 'test/ws4-real/*.t.sol' -vv
+      - name: Isolated authorized-street, withholding and forbidden-reveal adversarial tests
+        working-directory: contracts
+        env:
+          FOUNDRY_SRC: src/ws4-focused
+          FOUNDRY_TEST: test/ws4-streets
+        run: |
+          set -eu
+          mkdir -p test/ws4-streets
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          base=Path("test")
+          out=base/"ws4-streets"
+          found=set()
+          def copy(name):
+              if name in found:return
+              f=base/name
+              if not f.is_file():raise SystemExit(f"unresolved test import {name}")
+              found.add(name)
+              contents=f.read_text()
+              for ref in re.findall(r'import\s+["\x27](\./[^"\x27]+)["\x27]\s*;',contents):
+                  copy(Path(ref).name)
+              (out/name).write_text(contents.replace("../src/","../../src/"))
+          copy("BetPokerLiveCardReveals54.t.sol")
+          print("WS4 transitive test closure",sorted(found))
+          PY
+          forge test --use 0.8.30 --match-path 'test/ws4-streets/BetPokerLiveCardReveals54.t.sol' -vv
+      - name: Exact-source-SHA and real proof artifact certificate
+        run: |
+          set -eu
+          git rev-parse HEAD > artifacts/420bet-ws4/qualified-sha.txt
+          sha256sum contracts/src/bet/PokerLiveCardReveals420.sol \
+            contracts/src/bet/PokerGnarkCardRevealAdapters420.sol \
+            contracts/test/BetPokerLiveCardReveals54.t.sol \
+            clients/420bet-poker/zkshuffle/partial_decryption_circuit.go \
+            clients/420bet-poker/zkshuffle/card_unmask_circuit.go \
+            > artifacts/420bet-ws4/source-sha256.txt
+          sha256sum artifacts/420bet-ws4/EXPERIMENTAL-PartialShareVerifier.sol \
+            artifacts/420bet-ws4/EXPERIMENTAL-PartialShareSolidityFixture.json \
+            artifacts/420bet-ws4/EXPERIMENTAL-CardUnmaskVerifier.sol \
+            artifacts/420bet-ws4/EXPERIMENTAL-CardUnmaskSolidityFixture.json \
+            > artifacts/420bet-ws4/proofs-sha256.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: 420bet-ws4-genuine-reveal-exact-sha
+          path: artifacts/420bet-ws4/
+          retention-days: 90
+          if-no-files-found: error

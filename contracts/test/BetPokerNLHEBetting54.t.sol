@@ -430,6 +430,57 @@ contract PokerNLHEBetting54Case8Test is PokerNLHEBetting54Fixture {
 }
 
 contract PokerNLHEBetting54Case9Test is PokerNLHEBetting54Fixture {
+    function _withholdOneProvider(uint8 delinquent) internal returns(bytes32 id) {
+        id=_readyFrozenAssignmentWithoutDelivery();
+        _proveRecipientKeys();
+        _proveAggregateKey();
+        _publishEncryptedManifest(id);
+        uint8 good=delinquent==0?1:0;
+        for(uint8 pos=0;pos<4;pos++)_proveEncryptedShare(id,pos,good);
+        require(!proofBook.allVerified(id),"missing provider must block recipient acceptance");
+        cheat54.expectRevert(PokerNLHEBetting420.TooEarly.selector);
+        engine.cancelWithheldDelivery(id);
+        cheat54.warp(uint256(engine.fundedEvidenceDeadline(id))+1);
+        cheat54.prank(OTHER);engine.cancelWithheldDelivery(id);
+    }
+    function testOnlyWithholdingProviderAIsSlashedWithoutTouchingPlayerEscrow() public {
+        bytes32 id=_withholdOneProvider(0);
+        (,,,bool locked,bool closed,uint8 faults)=providerBond.bonds(id);
+        require(!locked&&closed&&faults==1,"only A is independently attributable");
+        require(providerBond.available(address(coin),PROVIDER_A)==2200,"A forfeits bond");
+        require(providerBond.available(address(coin),PROVIDER_B)==3000,"innocent B bond returned");
+        require(coin.balanceOf(address(0xB00D))==800,"A slash separate from players");
+        require(ledger.seatOf(TABLE,0).chips==400&&ledger.seatOf(TABLE,1).chips==400,
+            "original player escrow refunded exactly");
+        cheat54.expectRevert(PokerNLHEBetting420.InvalidState.selector);
+        engine.cancelWithheldDelivery(id);
+    }
+    function testOnlyWithholdingProviderBIsSlashedWithoutTouchingPlayerEscrow() public {
+        bytes32 id=_withholdOneProvider(1);
+        (,,,bool locked,bool closed,uint8 faults)=providerBond.bonds(id);
+        require(!locked&&closed&&faults==2,"only B objectively attributable");
+        require(providerBond.available(address(coin),PROVIDER_A)==3000,"innocent A bond returned");
+        require(providerBond.available(address(coin),PROVIDER_B)==2200,"B forfeits bond");
+        require(coin.balanceOf(address(0xB00D))==800,"B slash separate from players");
+        require(ledger.seatOf(TABLE,0).chips==400&&ledger.seatOf(TABLE,1).chips==400,
+            "canonical refunded escrow");
+    }
+    function testMaliciousAccusationCannotSlashTwoProvidersWithCompleteProvedShares() public {
+        bytes32 id=_readyFrozenAssignmentWithoutDelivery();
+        _proveRecipientKeys();_proveAggregateKey();_publishEncryptedManifest(id);
+        _proveAllEncryptedShares(id);
+        // Players may withhold their acceptance: that cannot be recast as
+        // provider withholding once both provider proofs have been accepted.
+        cheat54.warp(uint256(engine.fundedEvidenceDeadline(id))+1);
+        cheat54.prank(OTHER);engine.cancelWithheldDelivery(id);
+        (,,,bool locked,bool closed,uint8 faults)=providerBond.bonds(id);
+        require(!locked&&closed&&faults==0,"no provider accused absent objective fault");
+        require(coin.balanceOf(address(0xB00D))==0,"accusation yields no slash");
+        require(providerBond.available(address(coin),PROVIDER_A)==3000&&
+            providerBond.available(address(coin),PROVIDER_B)==3000,"bonds fully returned");
+        require(ledger.seatOf(TABLE,0).chips==400&&ledger.seatOf(TABLE,1).chips==400,
+            "refund independent of provider fault");
+    }
     function testCompletedShuffleButMissingProvedDeliveryVoidsPreBetting() public {
         bytes32 id=_hand54();
         bytes32 input=initialDeck.rootOf(id);

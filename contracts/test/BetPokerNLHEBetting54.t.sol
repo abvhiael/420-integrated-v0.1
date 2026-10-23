@@ -358,7 +358,69 @@ contract PokerNLHEBetting54WS3AdversarialTest is PokerNLHEBetting54Fixture {
         require(keyx==333&&keyy==444,"duplicate rejected without mutating recipient key");
     }
 }
+/// @dev Hostile ERC20 that attempts a reentrant withdrawal during both
+///      bond deposit and bond release; valid exact-balance transfers still
+///      proceed if and only if the guarded callback fails.
+contract WS5HostileBondToken54 {
+    mapping(address=>uint256) public balanceOf;
+    mapping(address=>mapping(address=>uint256)) public allowance;
+    address public target;
+    bytes public attack;
+    bool public attempted;
+    bool public succeeded;
+    bytes4 public failure;
+    function mint(address owner,uint256 amount) external {balanceOf[owner]+=amount;}
+    function approve(address spender,uint256 amount) external returns(bool){
+        allowance[msg.sender][spender]=amount;return true;
+    }
+    function configure(address t,bytes calldata callData)external{
+        target=t;attack=callData;attempted=false;succeeded=false;failure=bytes4(0);
+    }
+    function _callback() private {
+        if(target==address(0))return;
+        address to=target;bytes memory data=attack;target=address(0);
+        attempted=true;
+        (bool ok,bytes memory output)=to.call(data);
+        succeeded=ok;
+        if(!ok&&output.length>=4){assembly { mstore(0x00,mload(add(output,32))) }
+            failure=bytes4(output);
+        }
+    }
+    function transferFrom(address from,address to,uint256 value)external returns(bool){
+        require(balanceOf[from]>=value&&allowance[from][msg.sender]>=value,"insufficient");
+        allowance[from][msg.sender]-=value;
+        balanceOf[from]-=value;balanceOf[to]+=value;
+        _callback();return true;
+    }
+    function transfer(address to,uint256 value)external returns(bool){
+        require(balanceOf[msg.sender]>=value,"insufficient");
+        balanceOf[msg.sender]-=value;balanceOf[to]+=value;
+        _callback();return true;
+    }
+}
 contract PokerNLHEBetting54Case7Test is PokerNLHEBetting54Fixture {
+    function testHostileTokenCallbacksCannotReenterBondFundingOrWithdrawals() public {
+        WS5HostileBondToken54 token=new WS5HostileBondToken54();
+        token.mint(PROVIDER_A,100);
+        cheat54.prank(PROVIDER_A);token.approve(address(providerBond),100);
+        token.configure(address(providerBond),abi.encodeWithSelector(
+            providerBond.withdraw.selector,address(token),uint256(1)));
+        cheat54.prank(PROVIDER_A);providerBond.fundAsset(address(token),100);
+        require(token.attempted()&&!token.succeeded(),"fund callback rejected");
+        require(token.failure()==PokerProviderAccountability420.Reentrancy.selector,
+            "guard protects provider bond funding");
+        require(providerBond.available(address(token),PROVIDER_A)==100,"exact first deposit");
+        token.configure(address(providerBond),abi.encodeWithSelector(
+            providerBond.withdraw.selector,address(token),uint256(1)));
+        cheat54.prank(PROVIDER_A);providerBond.withdraw(address(token),40);
+        require(token.attempted()&&!token.succeeded(),"withdraw callback rejected");
+        require(token.failure()==PokerProviderAccountability420.Reentrancy.selector,
+            "guard protects withdrawal");
+        require(providerBond.available(address(token),PROVIDER_A)==60,
+            "only intended withdrawal applied");
+        require(token.balanceOf(PROVIDER_A)==40&&
+            token.balanceOf(address(providerBond))==60,"all custody conserved");
+    }
     function testProviderBondsAreFullyFundedLockedAndWithdrawalSafe() public {
         bytes32 id=_readyProvedDelivery();
         require(providerBond.isCollateralized(id),"pre-betting full collateral");

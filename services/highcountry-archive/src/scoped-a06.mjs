@@ -30,7 +30,7 @@ async function inspect(root,path){
   if(width===0||height===0)return {path,status:'invalid',reason:'png-dimensions'};
  }else if(path.endsWith('.svg')){
   const str=bytes.toString('utf8');
-  if(!/<svg\\b/.test(str)||/<script\\b|onload\\s*=|javascript:/i.test(str))return {path,status:'invalid',reason:'svg-invalid-or-active-content'};
+  if(!/<svg\b/.test(str)||/<script\b|onload\s*=|javascript:/i.test(str))return {path,status:'invalid',reason:'svg-invalid-or-active-content'};
  }
  return {path,status:'available',bytes:bytes.length,sha256:createHash('sha256').update(bytes).digest('hex'),...(width?{width,height}:{})};
 }

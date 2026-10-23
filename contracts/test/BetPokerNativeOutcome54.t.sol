@@ -58,7 +58,7 @@ contract PokerNativeOutcome54Test is PokerLiveCardReveals54Test {
         engine.start(id,0,60);
         cheat54.prank(ADMIN);engine.bindReveals(TABLE,address(live));
         cheat54.prank(ADMIN);engine.bindOutcome(TABLE,address(result));
-        cheat54.prank(ADMIN);dispute.bindResolver(TABLE,address(engine));
+        require(dispute.resolverForTable(TABLE)==address(engine),"funded resolver prebound");
     }
     function testOnChainUncontestedOutcomeSettlesExactEscrowOnce() public {
         bytes32 id=_fundedAndProved();

@@ -1,0 +1,195 @@
+name: 420Bet Poker WS3 Authenticated Recipient Delivery Level 1
+on:
+  pull_request:
+    paths:
+      - 'clients/420bet-poker/zkshuffle/ws3_recipient_delivery_full_test.go'
+      - 'clients/420bet-poker/zkshuffle/ws3_canonical_context_test.go'
+      - 'clients/420bet-poker/zkshuffle/make_ws3_eight_share_forge_test.py'
+      - 'clients/420bet-poker/zkshuffle/make_ws3_full_onchain_book_test.py'
+      - 'contracts/src/bet/PokerRecipientKeys420.sol'
+      - 'contracts/src/bet/PokerGnarkRecipientKeyPoPAdapter420.sol'
+      - 'contracts/src/bet/PokerDeliveryProofBook420.sol'
+      - 'contracts/src/bet/PokerDeckDisclosure420.sol'
+      - 'contracts/src/bet/PokerNLHEBetting420.sol'
+      - 'contracts/src/bet/PokerActionKeys420.sol'
+      - 'contracts/test/BetPokerNLHEBetting54.t.sol'
+      - 'contracts/test/BetPokerDeckDisclosure54.t.sol'
+      - '.github/workflows/420bet-poker-ws3-private-delivery-level1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: bet-ws3-recipient-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  genuine-eight-share-delivery:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    env:
+      FOUNDRY_PROFILE: pr
+      FOUNDRY_VIA_IR: 'true'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Validate exact source SHA
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+          cache: false
+      - name: Inherit qualified Workstream 2 final deck
+        uses: actions/download-artifact@v4
+        with:
+          name: 420bet-ws2-real-two-stage-exact-sha
+          run-id: 40003702620
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: artifacts/420bet-ws2
+      - name: Pin final 52-ciphertext deck root to passing WS2
+        run: |
+          set -eu
+          test -s artifacts/420bet-ws2/EXPERIMENTAL-Reencrypt52AvailabilityFixture.json
+          printf 'inherited_ws2_sha=69454ca9e53e544ee5ec802897ec517bb82ed1f0\ninherited_ws2_run=40003702620\n' > artifacts/420bet-ws2/ws3-inheritance.txt
+      - name: Check whether qualified recipient proving source changed
+        id: recipient_crypto
+        run: |
+          set -eu
+          PROVEN=b63b3dccb65313f1a484225ce94035423f99c424
+          git fetch --no-tags --depth=1 origin "$PROVEN"
+          changed=$(git diff --name-only "$PROVEN" HEAD -- \
+            clients/420bet-poker/zkshuffle/ws3_recipient_delivery_full_test.go \
+            clients/420bet-poker/zkshuffle/ws3_canonical_context_test.go \
+            clients/420bet-poker/zkshuffle/encrypted_share_delivery_circuit.go \
+            clients/420bet-poker/zkshuffle/recipient_key_possession_circuit.go \
+            clients/420bet-poker/zkshuffle/threshold_key_aggregate_circuit.go \
+            clients/420bet-poker/zkshuffle/ciphertext_merkle.go \
+            clients/420bet-poker/zkshuffle/reencryption_circuit_test.go \
+            clients/420bet-poker/zkshuffle/initial_deck_context_fixture_test.go \
+            clients/420bet-poker/zkshuffle/proof_export_test.go \
+            clients/420bet-poker/zkshuffle/go.mod \
+            clients/420bet-poker/zkshuffle/go.sum)
+          if test -z "$changed"; then
+            echo 'changed=false' >> "$GITHUB_OUTPUT"
+            echo "Reuse actual eight-share, two-recipient PoP and aggregate proving run 40013195917"
+          else
+            printf '%s\n' "$changed"
+            echo 'changed=true' >> "$GITHUB_OUTPUT"
+          fi
+      - name: Inherit unchanged eight real shares and genuine PoP and aggregate VKs
+        if: steps.recipient_crypto.outputs.changed == 'false'
+        uses: actions/download-artifact@v4
+        with:
+          name: 420bet-ws3-real-eight-share-exact-sha
+          run-id: 40013195917
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: artifacts/420bet-ws3
+      - name: Save proof inheritance with exact SHA and job
+        if: steps.recipient_crypto.outputs.changed == 'false'
+        run: |
+          printf 'recipient_go_proof_sha=b63b3dccb65313f1a484225ce94035423f99c424\nrecipient_go_proof_run=40013195917\nrecipient_go_proof_job=120618665292\n' > artifacts/420bet-ws3/recipient-crypto-inheritance.txt
+      - name: Generate eight genuine provider shares, PoPs and provider aggregate, check private recovery
+        if: steps.recipient_crypto.outputs.changed == 'true'
+        working-directory: clients/420bet-poker/zkshuffle
+        env:
+          POKER_ZK_ARTIFACT_DIR: ../../../artifacts/420bet-ws3
+        run: |
+          set -eu
+          mkdir -p ../../../artifacts/420bet-ws3
+          go test -mod=mod -timeout 40m -run '^TestWS3TwoRecipientEightPrivateShares$' -count=1 -v .
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Qualify genuine Groth16 proofs and actual recipient proof-book on-chain
+        working-directory: contracts
+        env:
+          FOUNDRY_SRC: src/bet
+          FOUNDRY_TEST: test/ws3-real
+        run: |
+          set -eu
+          mkdir -p src/bet/generated test/ws3-real
+          python3 ../clients/420bet-poker/zkshuffle/make_ws3_eight_share_forge_test.py \
+            ../artifacts/420bet-ws3/EXPERIMENTAL-WS3FullDeliveryVerifier.sol \
+            ../artifacts/420bet-ws3/EXPERIMENTAL-WS3EightShareFixtures.json \
+            ../artifacts/420bet-ws2/EXPERIMENTAL-Reencrypt52AvailabilityFixture.json \
+            test/ws3-real/WS3EightActualGroth16.t.sol
+          python3 ../clients/420bet-poker/zkshuffle/make_ws3_full_onchain_book_test.py \
+            ../artifacts/420bet-ws3/EXPERIMENTAL-WS3FullDeliveryVerifier.sol \
+            ../artifacts/420bet-ws3/EXPERIMENTAL-WS3EightShareFixtures.json \
+            ../artifacts/420bet-ws3/EXPERIMENTAL-WS3FullRecipientPoPVerifier.sol \
+            ../artifacts/420bet-ws3/EXPERIMENTAL-WS3TwoRecipientPoPFixtures.json \
+            ../artifacts/420bet-ws3/EXPERIMENTAL-WS3FullAggregateVerifier.sol \
+            ../artifacts/420bet-ws3/EXPERIMENTAL-WS3AggregateFixture.json \
+            ../artifacts/420bet-ws2/EXPERIMENTAL-Reencrypt52AvailabilityFixture.json \
+            test/ws3-real/WS3FullActualDeliveryBook.t.sol
+          forge test --match-contract '^(WS3EightActualGroth16Test|WS3FullActualDeliveryBookTest)$' -vv
+      - name: Focused funded NLHE and private receipt adversarial regressions
+        working-directory: contracts
+        env:
+          FOUNDRY_VIA_IR: 'true'
+        run: |
+          set -eu
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          base=Path("test")
+          roots={
+              "disclosure":"BetPokerDeckDisclosure54.t.sol",
+              "nlhe":"BetPokerNLHEBetting54.t.sol",
+          }
+          def collect(filename,found):
+              if filename in found:return
+              p=base/filename
+              if not p.is_file():raise SystemExit("missing required import: "+filename)
+              found.add(filename)
+              for dep in re.findall(r'import\s+["\'](\./[^"\']+)["\']\s*;',p.read_text()):
+                  collect(Path(dep).name,found)
+          for family,root in roots.items():
+              files=set()
+              collect(root,files)
+              out=base/("ws3-"+family)
+              out.mkdir(parents=True,exist_ok=True)
+              for filename in sorted(files):
+                  (out/filename).write_text((base/filename).read_text().replace("../src/","../../src/"))
+              print(family,"transitive Solidity test source closure:",sorted(files))
+          PY
+          mkdir -p src/ws3-focused
+          echo "Isolated disclosure compile/test (no NLHE root)"
+          FOUNDRY_SRC=src/ws3-focused FOUNDRY_TEST=test/ws3-disclosure \
+            forge test --match-contract '^PokerDeckDisclosure54Test$' -vv
+          echo "Isolated funded NLHE compile/test (separate Foundry invocation)"
+          FOUNDRY_SRC=src/ws3-focused FOUNDRY_TEST=test/ws3-nlhe \
+            forge test --use 0.8.30 --match-path 'test/ws3-nlhe/BetPokerNLHEBetting54.t.sol' -vv
+      - name: Preserve exact-SHA real proof and source evidence
+        run: |
+          set -eu
+          git rev-parse HEAD > artifacts/420bet-ws3/qualified-sha.txt
+          sha256sum clients/420bet-poker/zkshuffle/ws3_recipient_delivery_full_test.go \
+            clients/420bet-poker/zkshuffle/ws3_canonical_context_test.go \
+            clients/420bet-poker/zkshuffle/make_ws3_eight_share_forge_test.py \
+            clients/420bet-poker/zkshuffle/make_ws3_full_onchain_book_test.py \
+            contracts/src/bet/PokerRecipientKeys420.sol \
+            contracts/src/bet/PokerGnarkRecipientKeyPoPAdapter420.sol \
+            contracts/src/bet/PokerDeliveryProofBook420.sol \
+            contracts/src/bet/PokerDeckDisclosure420.sol \
+            contracts/src/bet/PokerNLHEBetting420.sol \
+            contracts/src/bet/PokerActionKeys420.sol \
+            > artifacts/420bet-ws3/implementation-sha256.txt
+          sha256sum artifacts/420bet-ws3/EXPERIMENTAL-WS3FullDeliveryVerifier.sol \
+            artifacts/420bet-ws3/EXPERIMENTAL-WS3EightShareFixtures.json \
+            artifacts/420bet-ws3/EXPERIMENTAL-WS3FullRecipientPoPVerifier.sol \
+            artifacts/420bet-ws3/EXPERIMENTAL-WS3TwoRecipientPoPFixtures.json \
+            artifacts/420bet-ws3/EXPERIMENTAL-WS3FullAggregateVerifier.sol \
+            artifacts/420bet-ws3/EXPERIMENTAL-WS3AggregateFixture.json \
+            artifacts/420bet-ws2/EXPERIMENTAL-Reencrypt52AvailabilityFixture.json \
+            > artifacts/420bet-ws3/cryptographic-artifacts-sha256.txt
+          cp artifacts/420bet-ws2/ws3-inheritance.txt artifacts/420bet-ws3/ws2-inheritance.txt
+      - name: Upload exact SHA WS3 evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: 420bet-ws3-real-eight-share-exact-sha
+          path: artifacts/420bet-ws3/
+          retention-days: 90
+          if-no-files-found: error

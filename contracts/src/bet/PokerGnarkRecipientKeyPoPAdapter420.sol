@@ -9,7 +9,7 @@ interface IPokerRecipientKeyPoP420 {
 /// BabyJubjub decryption scalar, with exact on-chain scope / curve point.
 contract PokerGnarkRecipientKeyPoPAdapter420 is IPokerRecipientKeyPoP420 {
     uint256 internal constant FR=
-        21888242871839275222246405745257275088696311157297823662689037894645226208583;
+        21888242871839275222246405745257275088548364400416034343698204186575808495617;
     bytes4 private constant SELECTOR=bytes4(keccak256("verifyProof(uint256[8],uint256[3])"));
     address public immutable verifier;
     bytes32 public immutable verifierCodeHash;

@@ -16,7 +16,7 @@ contract PokerRecipientKeys420 {
     IPokerRecipientKeyPoP420 public keyPoPVerifier;
     bytes32 public constant ACTION_BIND_KEY_POP=keccak256("BET_POKER_BIND_RECIPIENT_KEY_PROOF.V1");
     bytes32 public constant KEY_SCOPE_DOMAIN=keccak256("420.BET.POKER.RECIPIENT.KEY.POP.V1");
-    uint256 private constant FR=21888242871839275222246405745257275088696311157297823662689037894645226208583;
+    uint256 private constant FR=21888242871839275222246405745257275088548364400416034343698204186575808495617;
     event RecipientProvenEncryptionKey(bytes32 indexed tableId,address indexed player,uint64 epoch,uint256 x,uint256 y);
     event KeyPoPVerifierBound(address verifier);
 
@@ -45,6 +45,15 @@ contract PokerRecipientKeys420 {
         if(plusOne==0)revert NotSeated();
         PokerSeatLedger420.Seat memory seat=ledger.seatOf(tableId,plusOne-1);
         if(seat.player!=msg.sender||seat.epoch==0)revert NotSeated();
+        // No two active seats may use the same proven recipient secret.
+        // Otherwise one participant could decrypt the other's hole-card shares.
+        for(uint8 i=0;i<9;i++){
+            PokerSeatLedger420.Seat memory other=ledger.seatOf(tableId,i);
+            if(other.player==address(0)||other.player==msg.sender)continue;
+            ProvenEncryptionKey memory prior=provenKeys[tableId][other.player];
+            if(prior.proven&&prior.seatEpoch==other.epoch&&prior.x==x&&prior.y==y)
+                revert InvalidKey();
+        }
         uint256 scope=scopeForKey(tableId,msg.sender,seat.epoch);
         if(scope==0||!keyPoPVerifier.verifyKeyPossession(scope,x,y,proof))revert InvalidKey();
         bytes32 fingerprint=keccak256(abi.encode(KEY_SCOPE_DOMAIN,block.chainid,address(this),

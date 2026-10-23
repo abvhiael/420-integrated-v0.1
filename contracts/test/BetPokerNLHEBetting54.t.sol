@@ -146,6 +146,7 @@ contract PokerNLHEBetting54Fixture is PokerPrivateShuffleGate54Test {
                     recipient.fingerprintOf(TABLE,seat),ledger.seatingEpoch(TABLE),points);
                 for(uint256 k=0;k<12;k++)inputs[k+6]=points[k];
                 uint256[8] memory proof;
+                cheat54.prank(provider==0?PROVIDER_A:PROVIDER_B);
                 proofBook.proveEncryptedShare(handId,pos,provider,points,abi.encode(proof,inputs));
     }
     function _acknowledgeVerifiedEnvelopes(bytes32 handId) internal {

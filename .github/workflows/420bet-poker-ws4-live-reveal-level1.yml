@@ -8,6 +8,8 @@ on:
       - 'clients/420bet-poker/zkshuffle/partial_decryption_circuit.go'
       - 'clients/420bet-poker/zkshuffle/card_unmask_circuit.go'
       - 'clients/420bet-poker/zkshuffle/ws4_joint_revelation_test.go'
+      - 'clients/420bet-poker/zkshuffle/partial_decryption_circuit_test.go'
+      - 'clients/420bet-poker/zkshuffle/card_unmask_circuit_test.go'
       - '.github/workflows/420bet-poker-ws4-live-reveal-level1.yml'
   workflow_dispatch:
 permissions:
@@ -64,7 +66,7 @@ jobs:
             ../artifacts/420bet-ws4/EXPERIMENTAL-CardUnmaskSolidityFixture.json \
             test/ws4-real/WS4RealUnmask.t.sol WS4RealUnmaskTest 0 1
           sed -i 's#import "../src/bet/generated/#import "../../src/bet/generated/#' test/ws4-real/*.t.sol
-          for name in WS4JointPartialA WS4JointPartialB WS4JointUnmask; do
+          for name in WS4JointPartialA WS4JointPartialB WS4JointUnmask WS4ShowdownPartial WS4ShowdownUnmask; do
             cp "../artifacts/420bet-ws4/EXPERIMENTAL-${name}Verifier.sol" src/bet/generated/
             python3 ../clients/420bet-poker/zkshuffle/make_groth16_forge_test.py \
               "../artifacts/420bet-ws4/EXPERIMENTAL-${name}Verifier.sol" \
@@ -110,6 +112,8 @@ jobs:
             clients/420bet-poker/zkshuffle/partial_decryption_circuit.go \
             clients/420bet-poker/zkshuffle/card_unmask_circuit.go \
             clients/420bet-poker/zkshuffle/ws4_joint_revelation_test.go \
+            clients/420bet-poker/zkshuffle/partial_decryption_circuit_test.go \
+            clients/420bet-poker/zkshuffle/card_unmask_circuit_test.go \
             > artifacts/420bet-ws4/source-sha256.txt
           sha256sum artifacts/420bet-ws4/EXPERIMENTAL-PartialShareVerifier.sol \
             artifacts/420bet-ws4/EXPERIMENTAL-PartialShareSolidityFixture.json \
@@ -118,6 +122,8 @@ jobs:
             artifacts/420bet-ws4/EXPERIMENTAL-WS4JointPartialAVerifier.sol \
             artifacts/420bet-ws4/EXPERIMENTAL-WS4JointPartialBVerifier.sol \
             artifacts/420bet-ws4/EXPERIMENTAL-WS4JointUnmaskVerifier.sol \
+            artifacts/420bet-ws4/EXPERIMENTAL-WS4ShowdownPartialVerifier.sol \
+            artifacts/420bet-ws4/EXPERIMENTAL-WS4ShowdownUnmaskVerifier.sol \
             > artifacts/420bet-ws4/proofs-sha256.txt
       - uses: actions/upload-artifact@v4
         with:

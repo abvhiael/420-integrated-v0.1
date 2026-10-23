@@ -385,7 +385,9 @@ contract PokerNLHEBetting420 {
             evidenceDueAt[handId]<1||
             block.timestamp<=evidenceDueAt[handId]||
             !_missingRequiredEvidence(handId,g))revert InvalidState();
-        uint64 end=uint64(block.timestamp+RECOVERY_REVIEW_WINDOW);
+        // A delayed caller cannot move finality indefinitely: the bounded
+        // review period starts at the immutable street evidence deadline.
+        uint64 end=uint64(uint256(evidenceDueAt[handId])+RECOVERY_REVIEW_WINDOW);
         recoveryOpened[handId]=true;
         evidenceRecovery[handId]=EvidenceRecovery(uint64(block.timestamp),end,
             g.stateRoot,g.phase,true);

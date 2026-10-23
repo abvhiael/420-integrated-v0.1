@@ -44,6 +44,8 @@ contract PokerActionDisputeClock420 {
         Clock storage existing=clocks[handId];
         if(existing.disputed) revert InvalidState();
         PokerConfidentialDeal420.Hand memory h=deals.getHand(handId);
+        if(deals.ledger().handConsumed(handId)||voidFinalized[handId]||
+           resolutions[handId].finalized)revert InvalidState();
         if(h.state!=PokerConfidentialDeal420.State.COMMITTED||seat>=9||
            (deals.handSeatMask(handId)&(uint16(1)<<seat))==0||
            nonce==0||stateHash==bytes32(0)||deadline<=block.timestamp||
@@ -70,7 +72,8 @@ contract PokerActionDisputeClock420 {
         if(evidence==bytes32(0))revert InvalidInput();
         PokerConfidentialDeal420.Hand memory h=deals.getHand(handId);
         Clock storage c=clocks[handId];
-        if(c.nonce==0||c.disputed||resolutions[handId].finalized)revert InvalidState();
+        if(c.nonce==0||c.disputed||resolutions[handId].finalized||
+           voidFinalized[handId]||deals.ledger().handConsumed(handId))revert InvalidState();
         bool authorized=false;
         for(uint8 i=0;i<9;i++)if((deals.handSeatMask(handId)&(uint16(1)<<i))!=0 &&
            deals.ledger().seatOf(h.tableId,i).player==msg.sender)authorized=true;
@@ -100,7 +103,8 @@ contract PokerActionDisputeClock420 {
     /// action/board/escrow result before recording this outcome commitment.
     function proposeVerifiedOutcome(bytes32 handId,bytes32 resultHash) external {
         _requireResolver(handId);
-        if(!clocks[handId].disputed||resultHash==bytes32(0)||
+        if(!clocks[handId].disputed||voidFinalized[handId]||
+           deals.ledger().handConsumed(handId)||resultHash==bytes32(0)||
            resolutions[handId].proposedAt!=0)revert InvalidState();
         uint64 deadline=uint64(block.timestamp+REVIEW_WINDOW);
         resolutions[handId]=Resolution(resultHash,bytes32(0),

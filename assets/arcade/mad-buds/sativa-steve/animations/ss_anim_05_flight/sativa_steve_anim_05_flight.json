@@ -1,0 +1,86 @@
+{
+  "schema": "mad-buds-animation-manifest-v1",
+  "schemaVersion": "1.0",
+  "characterId": "sativa_steve",
+  "animationId": "ss_anim_05_flight",
+  "animationName": "flight",
+  "frameCount": 10,
+  "frameWidth": 1024,
+  "frameHeight": 1024,
+  "fps": 10,
+  "durationMs": 1000,
+  "loop": true,
+  "direction": "right",
+  "pivotNormalized": [
+    0.5,
+    0.54
+  ],
+  "sourceArt": "approved user-provided 10-frame flight strip from current conversation",
+  "sourceImagePath": "/mnt/data/ghostwriter_images/context/689dfa2e-44a3-56b6-90d9-87202d499137.png",
+  "sourceMethod": "Frame extraction from the supplied 5x2 strip with checkerboard background removed, printed frame-number region removed, minor cell-edge overlap suppression applied where needed, and all frames rendered to 1024x1024 RGBA canvases at consistent scale.",
+  "repositoryDestination": "assets/arcade/mad-buds/sativa-steve/animations/ss_anim_05_flight/",
+  "visualApproval": "PENDING_OWNER_VISUAL_REVIEW",
+  "qualification": "LOCAL_STRUCTURAL_VALIDATION_PASS; OWNER_VISUAL_APPROVAL_PENDING",
+  "frames": [
+    {
+      "index": 1,
+      "filename": "sativa_steve_anim_05_flight_frame_01.png",
+      "durationMs": 100,
+      "sha256": "716e836b7be9d69da3045e1132ea705e1c4d8e7d1ee0db478f83744221c5b536"
+    },
+    {
+      "index": 2,
+      "filename": "sativa_steve_anim_05_flight_frame_02.png",
+      "durationMs": 100,
+      "sha256": "02de881875c11be54a84b765a2c554c57f7d13fc3d29c08096cfe1b447d4c132"
+    },
+    {
+      "index": 3,
+      "filename": "sativa_steve_anim_05_flight_frame_03.png",
+      "durationMs": 100,
+      "sha256": "ca51882b1dc0b61f0e454fa3875f3719de76ea643f94bc1251410b370e94575a"
+    },
+    {
+      "index": 4,
+      "filename": "sativa_steve_anim_05_flight_frame_04.png",
+      "durationMs": 100,
+      "sha256": "ca92947bc7425c703d1401e0f23e8fa7542424dffd2ef3b037a19618b850ce64"
+    },
+    {
+      "index": 5,
+      "filename": "sativa_steve_anim_05_flight_frame_05.png",
+      "durationMs": 100,
+      "sha256": "35d8cf59d72f5ae91fa16501fe66d149c9c504978d35f1a22d8591bb94b8e3ec"
+    },
+    {
+      "index": 6,
+      "filename": "sativa_steve_anim_05_flight_frame_06.png",
+      "durationMs": 100,
+      "sha256": "f4a0c9a31c87ee6bf321588adf0149633a4ce663765adb0cbf5c0abb44f9ab79"
+    },
+    {
+      "index": 7,
+      "filename": "sativa_steve_anim_05_flight_frame_07.png",
+      "durationMs": 100,
+      "sha256": "aba9dd52ab8833030680006a3be03e4bf0d8039684ceec297ef6d3ad2608f4de"
+    },
+    {
+      "index": 8,
+      "filename": "sativa_steve_anim_05_flight_frame_08.png",
+      "durationMs": 100,
+      "sha256": "4a5df266871fd2d17b11ab062869df435b318efb65d16e52d611a788b7985228"
+    },
+    {
+      "index": 9,
+      "filename": "sativa_steve_anim_05_flight_frame_09.png",
+      "durationMs": 100,
+      "sha256": "a8730b288f00acdafaf9d9dd0ef441412edc85b6620e1f15e322efba43d342ed"
+    },
+    {
+      "index": 10,
+      "filename": "sativa_steve_anim_05_flight_frame_10.png",
+      "durationMs": 100,
+      "sha256": "a9de3bf1d272c528b69faa7694956729e9149a5e533cb0b255eb08193e4405d7"
+    }
+  ]
+}

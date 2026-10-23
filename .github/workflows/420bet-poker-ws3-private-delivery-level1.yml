@@ -161,7 +161,8 @@ jobs:
             forge test --match-contract '^PokerDeckDisclosure54Test$' -vv
           echo "Isolated funded NLHE compile/test (separate Foundry invocation)"
           FOUNDRY_SRC=src/ws3-focused FOUNDRY_TEST=test/ws3-nlhe \
-            forge test --use 0.8.30 --match-contract '^(PokerNLHEBetting54WS3AdversarialTest|PokerNLHEBetting54Case6Test|PokerNLHEBetting54Case1Test)      - name: Preserve exact-SHA real proof and source evidence
+            forge test --use 0.8.30 --match-path 'test/ws3-nlhe/BetPokerNLHEBetting54.t.sol' -vv
+      - name: Preserve exact-SHA real proof and source evidence
         run: |
           set -eu
           git rev-parse HEAD > artifacts/420bet-ws3/qualified-sha.txt

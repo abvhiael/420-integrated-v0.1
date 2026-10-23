@@ -569,8 +569,7 @@ contract PlantSourceConsumptionTest is PublicPlantCapacityFixture {
         _reject(
             address(plants),
             abi.encodeCall(
-                plants.registerPlantFromSource,
-                (1, GENOME, ALICE, 1, 1, PlantRegistry.PlantSourceKind.SEED, 1000)
+                plants.registerPlantFromSource, (1, GENOME, ALICE, 1, 1, PlantRegistry.PlantSourceKind.SEED, 1000)
             ),
             HCUnauthorized.selector
         );

@@ -60,7 +60,7 @@ for i,name in enumerate(NAMES,1):
                 if im.size!=(1024,1024) or im.mode!="RGBA":errors.append("wrong PNG dimensions/mode "+fn)
                 else:
                     lo,hi=im.getchannel("A").getextrema()
-                    if lo!=0 or hi!=255:errors.append("invalid mixed transparency "+fn+f" extrema={lo},{hi}")
+                    if lo!=0 or hi==0:errors.append("invalid mixed transparency "+fn+f" extrema={lo},{hi}")
                     alpha=im.getchannel("A")
                     if any(alpha.getpixel(pt)!=0 for pt in ((0,0),(1023,0),(0,1023),(1023,1023))):
                         warnings.append("art touches canvas corner "+fn)

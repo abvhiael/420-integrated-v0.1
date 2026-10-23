@@ -24,6 +24,8 @@ contract PokerPrivateShuffleGate420 {
     IPokerShuffleProofVerifier420 public immutable verifier;
     PokerShuffleProviderIndependence420 public immutable independence;
     PokerShuffleCiphertextAvailability420 public immutable availability;
+    bytes32 public immutable availabilityRuntimeHash;
+    bytes32 public immutable independenceRuntimeHash;
     uint256 internal constant FR = 21888242871839275222246405745257275088548364400416034343698204186575808495617;
     bytes32 public immutable circuitId;
     bytes32 public immutable thresholdKeyCommitment;
@@ -51,6 +53,8 @@ contract PokerPrivateShuffleGate420 {
         verifier=IPokerShuffleProofVerifier420(verifier_);
         independence=PokerShuffleProviderIndependence420(independence_);
         availability=PokerShuffleCiphertextAvailability420(availability_);
+        availabilityRuntimeHash=availability_.codehash;
+        independenceRuntimeHash=independence_.codehash;
         circuitId=circuitId_;
         thresholdKeyCommitment=keyCommitment_;
     }
@@ -69,6 +73,7 @@ contract PokerPrivateShuffleGate420 {
         bytes calldata proof) external {
         PokerConfidentialDeal420.Hand memory h=deals.getHand(handId);
         if(h.state!=PokerConfidentialDeal420.State.COMMITTED) revert InvalidState();
+        if(address(independence).codehash!=independenceRuntimeHash) revert Unauthorized();
         if(!independence.independentlyEligible(deals.providerA(),deals.providerB())) revert Unauthorized();
         if(stage!=1&&stage!=2) revert WrongStage();
         if((stage==1&&msg.sender!=deals.providerA()) ||
@@ -83,6 +88,7 @@ contract PokerPrivateShuffleGate420 {
             // Bind the initial ciphertext deck root to the hand's two-party transcript.
             if(inputRoot!=initialDeck.rootOf(handId)) revert InvalidProof();
         } else if(inputRoot!=rec.firstDeckRoot) revert InvalidProof();
+        if(address(availability).codehash!=availabilityRuntimeHash) revert InvalidProof();
         uint256 scope=uint256(handId)%FR;
         if(!availability.isAvailable(scope,inputRoot) || !availability.isAvailable(scope,outputRoot)) revert InvalidProof();
         bytes32 digest=statement(handId,stage,inputRoot,outputRoot);

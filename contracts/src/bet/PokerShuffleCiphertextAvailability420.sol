@@ -10,6 +10,10 @@ pragma solidity ^0.8.24;
 contract PokerShuffleCiphertextAvailability420 {
     uint256 internal constant FR =
         21888242871839275222246405745257275088548364400416034343698204186575808495617;
+    // SHA3/Keccak-256 of abi.encode(uint256[110] as a dynamic uint256[])
+    // extracted from the genuine, source-qualified gnark-crypto MiMC parameters.
+    bytes32 public constant CANONICAL_MIMC_ROUNDS_HASH =
+        0x0ccfd8dfcda1a0713073bdce261f0321511e4d8f43d479899d398f64123ed3f8;
     uint256 internal constant LEAF_DOMAIN = 4204201;
     uint256 internal constant NODE_DOMAIN = 4204202;
     uint256[] private roundConstants;
@@ -23,8 +27,8 @@ contract PokerShuffleCiphertextAvailability420 {
         uint256[208] ciphertextCoordinates,bytes32 calldataHash);
 
     constructor(uint256[] memory constants_,bytes32 vettedHash) {
-        if(constants_.length != 110 || vettedHash == bytes32(0)
-           || keccak256(abi.encode(constants_)) != vettedHash) revert InvalidConstants();
+        if(constants_.length != 110 || vettedHash != CANONICAL_MIMC_ROUNDS_HASH
+           || keccak256(abi.encode(constants_)) != CANONICAL_MIMC_ROUNDS_HASH) revert InvalidConstants();
         for(uint256 i; i<110; ++i) if(constants_[i] >= FR) revert InvalidConstants();
         roundConstants = constants_;
         roundConstantsHash = vettedHash;

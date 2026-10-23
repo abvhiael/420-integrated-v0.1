@@ -9,19 +9,27 @@ contract FakeProofBookDisclosure54 is IPokerDeliveryProofBook420 {
     PokerConfidentialDeal420 public immutable deals;
     PokerRecipientKeys420 public immutable keys;
     constructor(address deal,address registry){deals=PokerConfidentialDeal420(deal);keys=PokerRecipientKeys420(registry);}
+    mapping(bytes32=>mapping(uint8=>bytes32)) public expectedEnvelope;
+    function allowEnvelope(bytes32 handId,uint8 seat,bytes32 digest) external {
+        expectedEnvelope[handId][seat]=digest;
+    }
+    function envelopeHashFor(bytes32 handId,uint8 seat) external view returns(bytes32){
+        return expectedEnvelope[handId][seat];
+    }
     function allVerified(bytes32) external pure returns(bool){return true;}
 }
 contract PokerDeckDisclosure54Test is PokerConfidentialDeal54Test {
     PokerDeckDisclosure420 disclosure;
     PokerRecipientKeys420 keyRegistry;
+    FakeProofBookDisclosure54 proofScope;
     bytes32 constant KEY_A = keccak256("registered player A key");
     bytes32 constant KEY_B = keccak256("registered player B key");
     constructor() {
         keyRegistry = new PokerRecipientKeys420(address(ledger));
         disclosure = new PokerDeckDisclosure420(address(deal),address(keyRegistry));
-        FakeProofBookDisclosure54 receiptScope=new FakeProofBookDisclosure54(address(deal),address(keyRegistry));
+        proofScope=new FakeProofBookDisclosure54(address(deal),address(keyRegistry));
         cap.grant(ADMIN,disclosure.ACTION_BIND_PROOF_BOOK(),auth.scopeForTable(TABLE),true);
-        cheat54.prank(ADMIN);disclosure.bindProofBook(TABLE,address(receiptScope));
+        cheat54.prank(ADMIN);disclosure.bindProofBook(TABLE,address(proofScope));
     }
 
     function _ready() internal returns(bytes32 id) {
@@ -40,7 +48,11 @@ contract PokerDeckDisclosure54Test is PokerConfidentialDeal54Test {
         uint8[52] memory cards=_cards();
         bytes32 digest=disclosure.hashDeck(id,cards,keccak256("salt"));
         cheat54.prank(PROVIDER_A); disclosure.publish(id,digest,keccak256("encrypted manifest"));
+        proofScope.allowEnvelope(id,0,keccak256("encrypted seat 0"));
+
         cheat54.prank(PROVIDER_A); disclosure.bindEnvelope(id,0,keccak256("encrypted seat 0"),KEY_A);
+        proofScope.allowEnvelope(id,1,keccak256("encrypted seat 1"));
+
         cheat54.prank(PROVIDER_B); disclosure.bindEnvelope(id,1,keccak256("encrypted seat 1"),KEY_B);
         bytes32 expectedReceipt0=disclosure.receiptDigest(id,0);
 
@@ -58,8 +70,12 @@ contract PokerDeckDisclosure54Test is PokerConfidentialDeal54Test {
         uint8[52] memory cards=_cards();
         bytes32 deckHash=disclosure.hashDeck(id,cards,keccak256("salt"));
         cheat54.prank(PROVIDER_A);disclosure.publish(id,deckHash,keccak256("manifest"));
-        cheat54.prank(PROVIDER_A);disclosure.bindEnvelope(id,0,keccak256("envelope A"),KEY_A);
-        cheat54.prank(PROVIDER_B);disclosure.bindEnvelope(id,1,keccak256("envelope B"),KEY_B);
+        proofScope.allowEnvelope(id,0,keccak256("envelope A"));
+
+        cheat54.prank(PROVIDER_A); disclosure.bindEnvelope(id,0,keccak256("envelope A"),KEY_A);
+        proofScope.allowEnvelope(id,1,keccak256("envelope B"));
+
+        cheat54.prank(PROVIDER_B); disclosure.bindEnvelope(id,1,keccak256("envelope B"),KEY_B);
         bytes32 expectedReceipt0=disclosure.receiptDigest(id,0);
 
         cheat54.prank(PLAYER); disclosure.acknowledge(id,0,expectedReceipt0);
@@ -76,6 +92,8 @@ contract PokerDeckDisclosure54Test is PokerConfidentialDeal54Test {
         bytes32 deckHash=disclosure.hashDeck(id,cards,keccak256("salt"));
         cheat54.prank(PROVIDER_A);
         disclosure.publish(id,deckHash,keccak256("encrypted manifest"));
+        proofScope.allowEnvelope(id,0,keccak256("encrypted seat 0"));
+
         cheat54.prank(PROVIDER_A); disclosure.bindEnvelope(id,0,keccak256("encrypted seat 0"),KEY_A);
         cheat54.expectRevert(PokerDeckDisclosure420.NotRecipient.selector);
         cheat54.prank(OTHER); disclosure.acknowledge(id,0,keccak256("forgery"));
@@ -85,10 +103,12 @@ contract PokerDeckDisclosure54Test is PokerConfidentialDeal54Test {
         bytes32 id=_ready();
         cheat54.prank(PROVIDER_A);
         disclosure.publish(id,keccak256("deck root"),keccak256("manifest"));
-        cheat54.prank(PROVIDER_A);
-        disclosure.bindEnvelope(id,0,keccak256("envelope 0"),KEY_A);
-        cheat54.prank(PROVIDER_B);
-        disclosure.bindEnvelope(id,1,keccak256("envelope 1"),KEY_B);
+        proofScope.allowEnvelope(id,0,keccak256("envelope 0"));
+
+        cheat54.prank(PROVIDER_A); disclosure.bindEnvelope(id,0,keccak256("envelope 0"),KEY_A);
+        proofScope.allowEnvelope(id,1,keccak256("envelope 1"));
+
+        cheat54.prank(PROVIDER_B); disclosure.bindEnvelope(id,1,keccak256("envelope 1"),KEY_B);
         bytes32 receipt0=disclosure.receiptDigest(id,0);
         bytes32 receipt1=disclosure.receiptDigest(id,1);
         cheat54.expectRevert(PokerDeckDisclosure420.InvalidValue.selector);
@@ -108,8 +128,9 @@ contract PokerDeckDisclosure54Test is PokerConfidentialDeal54Test {
         cheat54.prank(PROVIDER_A);
         disclosure.publish(id,deckHash,keccak256("manifest"));
         cheat54.expectRevert(PokerDeckDisclosure420.NotRecipient.selector);
-        cheat54.prank(PROVIDER_A);
-        disclosure.bindEnvelope(id,0,keccak256("envelope"),KEY_B);
+        proofScope.allowEnvelope(id,0,keccak256("envelope"));
+
+        cheat54.prank(PROVIDER_A); disclosure.bindEnvelope(id,0,keccak256("envelope"),KEY_B);
     }
     function testDuplicateDeckRejected() public {
         bytes32 id=_ready(); uint8[52] memory cards=_cards();

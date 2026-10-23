@@ -13,12 +13,12 @@ export function createHighCountryServer({config,distRoot=root}={}){
   let path;
   try{path=new URL(req.url,'http://localhost').pathname;}catch{return send(400,'Bad path');}
   if(path==='/runtime-config.json')return send(200,JSON.stringify(config),'application/json');
-  if(path==='/'||['/play','/account','/settings','/about'].includes(path))path='/index.html';
+  if(path==='/'||['/play','/account','/settings','/about','/archive'].includes(path))path='/index.html';
   const resolved=resolve(distRoot,'.'+decodeURIComponent(path));
   if(resolved!==distRoot&&!resolved.startsWith(distRoot+sep))return send(403,'Forbidden');
   try{
    const data=await readFile(resolved);
-   const type=({'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json'}[extname(resolved)]||'application/octet-stream');
+   const type=({'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json','.png':'image/png','.svg':'image/svg+xml'}[extname(resolved)]||'application/octet-stream');
    return send(200,req.method==='HEAD'?'':data,type);
   }catch{return send(404,'Not found');}
  });

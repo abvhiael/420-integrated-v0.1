@@ -47,6 +47,7 @@ contract PokerNativeOutcome54Test is PokerLiveCardReveals54Test {
         verifier.allow(gate.statement(id,2,first,second));
         cheat54.prank(PROVIDER_B);gate.proveStage(id,2,first,second,hex"010203");
         cheat54.prank(ADMIN);ledger.bindSettlement(TABLE,address(engine),RAKES);
+        _ensureNativeDisputeResolver();
         cheat54.prank(PLAYER);engine.reserve(id);
         cheat54.prank(PLAYER);signing.bindSigner(TABLE,signedVm.addr(PLAYER_KEY));
         cheat54.prank(PLAYER_B);signing.bindSigner(TABLE,signedVm.addr(OPPONENT_KEY));

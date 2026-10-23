@@ -52,7 +52,45 @@ jobs:
           set -eu
           test -s artifacts/420bet-ws2/EXPERIMENTAL-Reencrypt52AvailabilityFixture.json
           printf 'inherited_ws2_sha=69454ca9e53e544ee5ec802897ec517bb82ed1f0\ninherited_ws2_run=40003702620\n' > artifacts/420bet-ws2/ws3-inheritance.txt
+      - name: Check whether qualified recipient proving source changed
+        id: recipient_crypto
+        run: |
+          set -eu
+          PROVEN=b63b3dccb65313f1a484225ce94035423f99c424
+          git fetch --no-tags --depth=1 origin "$PROVEN"
+          changed=$(git diff --name-only "$PROVEN" HEAD -- \
+            clients/420bet-poker/zkshuffle/ws3_recipient_delivery_full_test.go \
+            clients/420bet-poker/zkshuffle/ws3_canonical_context_test.go \
+            clients/420bet-poker/zkshuffle/encrypted_share_delivery_circuit.go \
+            clients/420bet-poker/zkshuffle/recipient_key_possession_circuit.go \
+            clients/420bet-poker/zkshuffle/threshold_key_aggregate_circuit.go \
+            clients/420bet-poker/zkshuffle/ciphertext_merkle.go \
+            clients/420bet-poker/zkshuffle/reencryption_circuit_test.go \
+            clients/420bet-poker/zkshuffle/initial_deck_context_fixture_test.go \
+            clients/420bet-poker/zkshuffle/proof_export_test.go \
+            clients/420bet-poker/zkshuffle/go.mod \
+            clients/420bet-poker/zkshuffle/go.sum)
+          if test -z "$changed"; then
+            echo 'changed=false' >> "$GITHUB_OUTPUT"
+            echo "Reuse actual eight-share, two-recipient PoP and aggregate proving run 40013195917"
+          else
+            printf '%s\n' "$changed"
+            echo 'changed=true' >> "$GITHUB_OUTPUT"
+          fi
+      - name: Inherit unchanged eight real shares and genuine PoP and aggregate VKs
+        if: steps.recipient_crypto.outputs.changed == 'false'
+        uses: actions/download-artifact@v4
+        with:
+          name: 420bet-ws3-real-eight-share-exact-sha
+          run-id: 40013195917
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: artifacts/420bet-ws3
+      - name: Save proof inheritance with exact SHA and job
+        if: steps.recipient_crypto.outputs.changed == 'false'
+        run: |
+          printf 'recipient_go_proof_sha=b63b3dccb65313f1a484225ce94035423f99c424\nrecipient_go_proof_run=40013195917\nrecipient_go_proof_job=120618665292\n' > artifacts/420bet-ws3/recipient-crypto-inheritance.txt
       - name: Generate eight genuine provider shares, PoPs and provider aggregate, check private recovery
+        if: steps.recipient_crypto.outputs.changed == 'true'
         working-directory: clients/420bet-poker/zkshuffle
         env:
           POKER_ZK_ARTIFACT_DIR: ../../../artifacts/420bet-ws3

@@ -14,6 +14,7 @@ interface IPokerDeliveryProofBook420 {
 }
 contract PokerDeckDisclosure420 {
     bytes32 public constant DOMAIN = keccak256("420.BET.POKER.DECK.DISCLOSURE.V1");
+    bytes32 public constant RECEIPT_DOMAIN = keccak256("420.BET.POKER.RECIPIENT.ENVELOPE.RECEIPT.V2");
     PokerConfidentialDeal420 public immutable deals;
     BetAuthorization420 public immutable authorization;
     PokerRecipientKeys420 public immutable keys;
@@ -96,6 +97,23 @@ contract PokerDeckDisclosure420 {
         recipientKeyFingerprint[handId][seat]=fingerprint;
         emit EnvelopeBound(handId,seat,envelopeHash);
     }
+    /// @notice Recipient-authenticated acknowledgement of the EXACT proof-backed
+    /// ciphertext envelope. A dealer-selected nonce or arbitrary receipt cannot
+    /// authorize gameplay. The seat owner submits this digest in their own transaction.
+    function receiptDigest(bytes32 handId,uint8 seat) public view returns(bytes32) {
+        PokerConfidentialDeal420.Hand memory h=deals.getHand(handId);
+        if(seat>=9||(deals.handSeatMask(handId)&(uint16(1)<<seat))==0)
+            revert NotRecipient();
+        PokerSeatLedger420.Seat memory s=deals.ledger().seatOf(h.tableId,seat);
+        Deck storage d=decks[handId];
+        if(s.player==address(0)||recipientEnvelopeHash[handId][seat]==bytes32(0)||
+            recipientKeyFingerprint[handId][seat]==bytes32(0)||!d.published)
+            revert InvalidState();
+        return keccak256(abi.encode(RECEIPT_DOMAIN,block.chainid,address(this),
+            handId,h.tableId,seat,s.player,h.epoch,h.seatSnapshotHash,
+            d.encryptedManifestHash,recipientKeyFingerprint[handId][seat],
+            recipientEnvelopeHash[handId][seat]));
+    }
     function acknowledge(bytes32 handId,uint8 seat,bytes32 receipt) external {
         Deck storage d=decks[handId];
         uint16 seatBit=uint16(1)<<seat;
@@ -104,7 +122,8 @@ contract PokerDeckDisclosure420 {
         if (h.state!=PokerConfidentialDeal420.State.COMMITTED) revert InvalidState();
         PokerSeatLedger420.Seat memory s=deals.ledger().seatOf(h.tableId,seat);
         if (msg.sender!=s.player || s.player==address(0)) revert NotRecipient();
-        if (receipt==bytes32(0) || (d.receiptMask&seatBit)!=0) revert InvalidValue();
+        if (receipt==bytes32(0) || receipt!=receiptDigest(handId,seat) ||
+            (d.receiptMask&seatBit)!=0) revert InvalidValue();
         if (deals.ledger().seatingEpoch(h.tableId)!=h.epoch ||
             keys.fingerprintOf(h.tableId,seat)!=recipientKeyFingerprint[handId][seat]) revert InvalidState();
         d.receiptMask|=seatBit;
@@ -124,6 +143,7 @@ contract PokerDeckDisclosure420 {
         for(uint8 i=0;i<9;i++)if((mask&(uint16(1)<<i))!=0){
             if(recipientEnvelopeHash[handId][i]==bytes32(0)||
                receiptHash[handId][i]==bytes32(0)||
+               receiptHash[handId][i]!=receiptDigest(handId,i)||
                recipientKeyFingerprint[handId][i]==bytes32(0)||
                keys.fingerprintOf(h.tableId,i)!=recipientKeyFingerprint[handId][i])
                 return false;

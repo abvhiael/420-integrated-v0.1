@@ -16,7 +16,7 @@ contract PokerRecipientKeys420 {
     IPokerRecipientKeyPoP420 public keyPoPVerifier;
     bytes32 public constant ACTION_BIND_KEY_POP=keccak256("BET_POKER_BIND_RECIPIENT_KEY_PROOF.V1");
     bytes32 public constant KEY_SCOPE_DOMAIN=keccak256("420.BET.POKER.RECIPIENT.KEY.POP.V1");
-    uint256 private constant FR=21888242871839275222246405745257275088696311157297823662689037894645226208583;
+    uint256 private constant FR=21888242871839275222246405745257275088548364400416034343698204186575808495617;
     event RecipientProvenEncryptionKey(bytes32 indexed tableId,address indexed player,uint64 epoch,uint256 x,uint256 y);
     event KeyPoPVerifierBound(address verifier);
 

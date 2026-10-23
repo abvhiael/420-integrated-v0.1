@@ -159,8 +159,10 @@ contract PokerNLHEBetting54Fixture is PokerPrivateShuffleGate54Test {
         delivery.bindEnvelope(handId,0,envelopeA,keyA);
         cheat54.prank(PROVIDER_B);
         delivery.bindEnvelope(handId,1,envelopeB,keyB);
-        cheat54.prank(PLAYER);delivery.acknowledge(handId,0,keccak256("receipt A"));
-        cheat54.prank(PLAYER_B);delivery.acknowledge(handId,1,keccak256("receipt B"));
+        bytes32 receiptA=delivery.receiptDigest(handId,0);
+        bytes32 receiptB=delivery.receiptDigest(handId,1);
+        cheat54.prank(PLAYER);delivery.acknowledge(handId,0,receiptA);
+        cheat54.prank(PLAYER_B);delivery.acknowledge(handId,1,receiptB);
         require(proofBook.allVerified(handId),"four accepted encrypted shares per recipient");
     }
     function _readyProvedDelivery() internal returns(bytes32 id){

@@ -26,7 +26,7 @@ contract PokerDeliveryProofBook420 is IPokerDeliveryProofBook420 {
     bytes32 public constant AGGREGATE_CONTEXT_DOMAIN=
         keccak256("420.BET.POKER.PRIVATE.SHARE.AGGREGATE.V1");
     uint256 private constant FR=
-        21888242871839275222246405745257275088696311157297823662689037894645226208583;
+        21888242871839275222246405745257275088548364400416034343698204186575808495617;
     PokerConfidentialDeal420 public immutable deals;
     PokerDeckDisclosure420 public immutable disclosure;
     PokerRecipientKeys420 public immutable keys;
@@ -143,6 +143,11 @@ contract PokerDeliveryProofBook420 is IPokerDeliveryProofBook420 {
         uint256[12] calldata points,bytes calldata proof)external {
         if(!aggregateVerified)revert InvalidState();
         if(position>=52||provider>1||proof.length==0)revert InvalidProof();
+        // A cryptographically correct share is not authorization to impersonate
+        // the other dealer. Each independently controlled provider must submit
+        // its own proof under the currently approved on-chain signing identity.
+        address expected=provider==0?deals.providerA():deals.providerB();
+        if(msg.sender!=expected) revert InvalidProof();
         PokerConfidentialDeal420.Hand memory h=deals.getHand(handId);
         if(h.state!=PokerConfidentialDeal420.State.COMMITTED||
             assignment.isHandInitialized(handId)||

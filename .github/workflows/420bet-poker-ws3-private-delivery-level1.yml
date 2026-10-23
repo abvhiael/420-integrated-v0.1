@@ -132,11 +132,24 @@ jobs:
         run: |
           set -eu
           mkdir -p test/ws3-funded
-          find test -maxdepth 1 -type f -name '*Poker*.t.sol' -exec cp -t test/ws3-funded/ {} +
           python3 - <<'PY'
           from pathlib import Path
-          for p in Path("test/ws3-funded").glob("*.t.sol"):
-              p.write_text(p.read_text().replace("../src/","../../src/"))
+          import re
+          base=Path("test")
+          out=base/"ws3-funded"
+          roots=["BetPokerDeckDisclosure54.t.sol","BetPokerNLHEBetting54.t.sol"]
+          discovered=set()
+          def include(filename):
+              if filename in discovered:return
+              original=base/filename
+              if not original.is_file():raise SystemExit("missing test import: "+filename)
+              discovered.add(filename)
+              text=original.read_text()
+              for imported in re.findall(r'import\s+["\'](\./[^"\']+)["\']\s*;',text):
+                  include(Path(imported).name)
+              (out/filename).write_text(text.replace("../src/","../../src/"))
+          for filename in roots:include(filename)
+          print("Exact funded NLHE test import closure:", sorted(discovered))
           PY
           forge test --match-contract '^(PokerDeckDisclosure54Test|PokerNLHEBetting54WS3AdversarialTest|PokerNLHEBetting54Case6Test|PokerNLHEBetting54Case1Test)$' -vv
       - name: Preserve exact-SHA real proof and source evidence

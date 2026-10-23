@@ -1,0 +1,27 @@
+name: High Country Original Sixteen A06 Scoped Level 1
+on:
+  pull_request:
+    paths:
+      - 'services/highcountry-archive/src/scoped-a06.mjs'
+      - 'services/highcountry-archive/test/scoped-a06.test.mjs'
+      - 'services/highcountry-archive/scripts/scoped-a06-report.mjs'
+      - '.github/workflows/highcountry-a06-scoped.yml'
+      - 'assets/highcountry/original-sixteen/**'
+permissions:
+  contents: read
+jobs:
+  scoped-a06:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test services/highcountry-archive/test/scoped-a06.test.mjs
+      - run: node services/highcountry-archive/scripts/scoped-a06-report.mjs . scoped-a06-manifest.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: highcountry-a06-scoped-manifest
+          path: scoped-a06-manifest.json

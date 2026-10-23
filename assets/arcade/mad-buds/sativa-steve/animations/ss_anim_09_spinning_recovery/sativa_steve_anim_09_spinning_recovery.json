@@ -1,0 +1,82 @@
+{
+  "schema": "mad-buds-animation-manifest-v1",
+  "schemaVersion": "1.0",
+  "characterId": "sativa_steve",
+  "animationId": "ss_anim_09_spinning_recovery",
+  "animationName": "spinning_recovery",
+  "frameCount": 10,
+  "frameWidth": 1024,
+  "frameHeight": 1024,
+  "fps": 10,
+  "durationMs": 1000,
+  "loop": false,
+  "sourceArt": "dizzy_cannabis_bud_spin_recovery_sprite_sheet.png",
+  "repositoryDestination": "assets/arcade/mad-buds/sativa-steve/animations/ss_anim_09_spinning_recovery/",
+  "visualApproval": "PENDING_OWNER_VISUAL_REVIEW",
+  "frames": [
+    {
+      "index": 1,
+      "filename": "sativa_steve_anim_09_spinning_recovery_frame_01.png",
+      "durationMs": 100,
+      "sha256": "4975f3927e90dea24099b476e4642b324937c7e9fe600eb54db5ec357b9755f6"
+    },
+    {
+      "index": 2,
+      "filename": "sativa_steve_anim_09_spinning_recovery_frame_02.png",
+      "durationMs": 100,
+      "sha256": "de784c6f61b8681507a6d3afbb7f56f054597d336323d43e32ea1ed381190452"
+    },
+    {
+      "index": 3,
+      "filename": "sativa_steve_anim_09_spinning_recovery_frame_03.png",
+      "durationMs": 100,
+      "sha256": "283001d4a5bb77e2f6a8ed1cc61e946fa2f4034d283fe225cf04b9d8574a4611"
+    },
+    {
+      "index": 4,
+      "filename": "sativa_steve_anim_09_spinning_recovery_frame_04.png",
+      "durationMs": 100,
+      "sha256": "e78b600acea5f0d53bc3f53f0c2110b395d27bc9b712465ee8e8c73ea5b3271e"
+    },
+    {
+      "index": 5,
+      "filename": "sativa_steve_anim_09_spinning_recovery_frame_05.png",
+      "durationMs": 100,
+      "sha256": "8bfbfae39cc4847555de8266fb1218bf3badbd1f441df5983293944771d2ce73"
+    },
+    {
+      "index": 6,
+      "filename": "sativa_steve_anim_09_spinning_recovery_frame_06.png",
+      "durationMs": 100,
+      "sha256": "3f6920070ad18bf3fa981a47c3397e3e81ad983c046a6527b27ad39ce7d621a9"
+    },
+    {
+      "index": 7,
+      "filename": "sativa_steve_anim_09_spinning_recovery_frame_07.png",
+      "durationMs": 100,
+      "sha256": "0de421434c74ca2c308cf77d812cadf22f7d3da122e62e4e521db5e87a12ddf5"
+    },
+    {
+      "index": 8,
+      "filename": "sativa_steve_anim_09_spinning_recovery_frame_08.png",
+      "durationMs": 100,
+      "sha256": "47d096da58fda0f64a0231ffa1f1f556ad8a6d172cda3532c17492ab794f5a95"
+    },
+    {
+      "index": 9,
+      "filename": "sativa_steve_anim_09_spinning_recovery_frame_09.png",
+      "durationMs": 100,
+      "sha256": "bc9ea4da0fc4f69c828f6cd883ab3503a8404ef78d57b0b9734b546b073e925a"
+    },
+    {
+      "index": 10,
+      "filename": "sativa_steve_anim_09_spinning_recovery_frame_10.png",
+      "durationMs": 100,
+      "sha256": "a79e24aa0b3ce2e4444607b39b660b411427cae979510d7f4913c9d952a64aa3"
+    }
+  ],
+  "preview": {
+    "filename": "sativa_steve_anim_09_spinning_recovery_preview.gif",
+    "sha256": "c1268bca6ce596dd6d425846721b6f25e7505927115d1af2f5cbe40c2f866539"
+  }
+}

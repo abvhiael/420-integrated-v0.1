@@ -20,7 +20,7 @@ func TestFull52RealEncryptedShuffleProof(t *testing.T) {
  base:=curve.Base
  pub:=new(native.PointAffine).ScalarMultiplication(&base,big.NewInt(1729))
  pkX,pkY:=coordinates(pub)
- witness:=&Reencrypt52{HandScope:420,PublicKeyX:pkX,PublicKeyY:pkY}
+ witness:=&Reencrypt52{StatementScope:123456,HandScope:420,PublicKeyX:pkX,PublicKeyY:pkY}
  for i:=0;i<52;i++ {
   c1,c2:=cipherOf(int64(i+1),int64(i+100),&base,pub)
   witness.Input[i]=reencryptInput(c1,c2)
@@ -82,13 +82,18 @@ func TestFull52RealEncryptedShuffleProof(t *testing.T) {
   rawProof,ok:=proof.(interface{MarshalSolidity() []byte})
   if !ok {t.Fatal("BN254 proof does not support Solidity serialization")}
   write("EXPERIMENTAL-Reencrypt52SolidityFixture.json",func(f *os.File)error{
-   _,err:=fmt.Fprintf(f,`{"proof":"0x%x","public":["%s","%s","420","%s","%s"]}`,
-     rawProof.MarshalSolidity(),inputRoot.String(),outputRoot.String(),
+   _,err:=fmt.Fprintf(f,`{"proof":"0x%x","public":["%s","%s","%s","420","%s","%s"]}`,
+     rawProof.MarshalSolidity(),inputRoot.String(),big.NewInt(123456).String(),outputRoot.String(),
      pkX.(*big.Int).String(),pkY.(*big.Int).String())
    return err
   })
  }
  // Sound verifier rejects a changed public deck output AND replay into another hand.
+ wrongContext:=*witness
+ wrongContext.StatementScope=123457
+ contextWitness,err:=frontend.NewWitness(&wrongContext,ecc.BN254.ScalarField());if err!=nil{t.Fatal(err)}
+ contextPublic,err:=contextWitness.Public();if err!=nil{t.Fatal(err)}
+ if err=groth16.Verify(proof,verifyingKey,contextPublic);err==nil{t.Fatal("cross-context shuffle replay accepted")}
  wrongDeck:=*witness
  wrongDeck.OutputRoot=big.NewInt(42)
  changedWitness,err:=frontend.NewWitness(&wrongDeck,ecc.BN254.ScalarField())

@@ -244,10 +244,6 @@ contract PhenotypeProvenanceTest is PublicPlantCapacityFixture {
         require(expression != bytes32(0), "expression missing");
         require(cultivation.sealedRulesetId(1) == approvedRulesetId, "versioned ruleset lost");
         require(cultivation.getState(1).expressionLocked, "canonical expression unsealed");
-        _reject(
-            address(cultivation),
-            abi.encodeCall(cultivation.updateEnvironment, (1, env)),
-            HCInvalidState.selector
-        );
+        _reject(address(cultivation), abi.encodeCall(cultivation.updateEnvironment, (1, env)), HCInvalidState.selector);
     }
 }

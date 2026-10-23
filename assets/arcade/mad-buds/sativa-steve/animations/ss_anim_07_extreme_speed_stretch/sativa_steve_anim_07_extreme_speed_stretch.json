@@ -1,0 +1,82 @@
+{
+  "character": "sativa_steve",
+  "animation_id": "ss_anim_07",
+  "animation_name": "extreme_speed_stretch",
+  "frame_count": 10,
+  "fps": 10,
+  "dimensions": {
+    "width": 1024,
+    "height": 1024
+  },
+  "background": "transparent",
+  "source_images": [
+    "/mnt/data/ghostwriter_images/context/adec9f2b-808c-5803-9686-3f2b2eb8aca2.png",
+    "/mnt/data/ghostwriter_images/context/9cafeda1-bdb3-5eaf-a66e-620b0ac038a5.png",
+    "/mnt/data/ghostwriter_images/context/6c4b020e-301c-5858-98af-1ec84ecaddce.png",
+    "/mnt/data/ghostwriter_images/context/f79d1b60-41e5-5a1c-b852-2856a59c75be.png",
+    "/mnt/data/ghostwriter_images/context/d6aa03b2-e7f5-5107-972d-44364416f314.png",
+    "/mnt/data/ghostwriter_images/context/a367cf00-e333-591a-ba3d-c293347c586d.png",
+    "/mnt/data/ghostwriter_images/context/8a0bd9e2-1bd9-5e3b-9355-7ec7c4528f64.png",
+    "/mnt/data/ghostwriter_images/context/f9056ee3-4ba9-5a7d-becb-ed43cd869aba.png",
+    "/mnt/data/ghostwriter_images/context/f8731158-c221-5944-b63d-a5e90b901a2e.png",
+    "/mnt/data/ghostwriter_images/context/ab6cefcd-bfd1-5daa-a255-8b61bf9eb240.png"
+  ],
+  "processing": "Each cleaned source frame cropped to non-transparent bounds, resized to fit within 940x940 while preserving aspect ratio, then centered on a 1024x1024 transparent canvas.",
+  "repository_destination": "assets/arcade/mad-buds/sativa-steve/animations/ss_anim_07_extreme_speed_stretch/",
+  "frames": [
+    {
+      "index": 1,
+      "file": "sativa_steve_anim_07_extreme_speed_stretch_frame_01.png",
+      "sha256": "ef2c33ef967acf232dd5c59ad1c55d0fa1d3be6dcbf0a447aa5034544a2e346c"
+    },
+    {
+      "index": 2,
+      "file": "sativa_steve_anim_07_extreme_speed_stretch_frame_02.png",
+      "sha256": "735a143d5eb5a59da4ac9ec2ac811a6f94031efc41e9da2c12851aa2a56e3dd0"
+    },
+    {
+      "index": 3,
+      "file": "sativa_steve_anim_07_extreme_speed_stretch_frame_03.png",
+      "sha256": "5feb799d6fd03a2a1c11b01dcc42b031f21de1386cb946c0b894b6de2c3e1571"
+    },
+    {
+      "index": 4,
+      "file": "sativa_steve_anim_07_extreme_speed_stretch_frame_04.png",
+      "sha256": "6ddd9c1f9b9eaa29d813ae15afd14ef60e7b4e5c2ba667287fd3d6107cadb37c"
+    },
+    {
+      "index": 5,
+      "file": "sativa_steve_anim_07_extreme_speed_stretch_frame_05.png",
+      "sha256": "5b7ebf3840f4a1c17fcafef7d262e5e02ac4de02a24c58f00007cb7aa0d03d93"
+    },
+    {
+      "index": 6,
+      "file": "sativa_steve_anim_07_extreme_speed_stretch_frame_06.png",
+      "sha256": "7bde5655c14d0232f0cb5008755d7e0c74d4d1c287686704a3bcb8d07a4ca36f"
+    },
+    {
+      "index": 7,
+      "file": "sativa_steve_anim_07_extreme_speed_stretch_frame_07.png",
+      "sha256": "35dfee4c70b90fb13781fb02cfa9ba02ef66a735e8179abefe52aee1a48b0efd"
+    },
+    {
+      "index": 8,
+      "file": "sativa_steve_anim_07_extreme_speed_stretch_frame_08.png",
+      "sha256": "ceb6449b39ac126080cfa1d14cefc3503b72ad6344c76cf68d9451fd2eb6577e"
+    },
+    {
+      "index": 9,
+      "file": "sativa_steve_anim_07_extreme_speed_stretch_frame_09.png",
+      "sha256": "bead15df3e21ebbc03eb79736eeae1fce695576fcfe049c27b15283100920a9f"
+    },
+    {
+      "index": 10,
+      "file": "sativa_steve_anim_07_extreme_speed_stretch_frame_10.png",
+      "sha256": "5ef3dd46e0137cc6c7a8f2b44fc85855a0236ccf749e382e12ec378ed22be218"
+    }
+  ],
+  "preview": {
+    "file": "sativa_steve_anim_07_extreme_speed_stretch_preview.gif",
+    "sha256": "0133a5d639e477379eecbd42025c6a9d567d0dd96fd3f8c5f44837cffe1962a5"
+  }
+}

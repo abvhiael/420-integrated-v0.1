@@ -188,12 +188,18 @@ contract PokerTwoStageActualGroth16WS2Test {
         vm.prank(PROVIDER_B);
         independence.claim(keccak256("independent controller B"),
             keccak256("audited operator B dossier"),uint64(block.timestamp+30 days));
+        vm.prank(address(0xC0FFEE));
+        bytes32 auditA=independence.recordAudit(PROVIDER_A,keccak256("independent controller A"),
+            keccak256("independent reviewer report A"),keccak256("audited operator A dossier"),
+            keccak256("external report reference A"));
+        vm.prank(address(0xD00D));
+        bytes32 auditB=independence.recordAudit(PROVIDER_B,keccak256("independent controller B"),
+            keccak256("independent reviewer report B"),keccak256("audited operator B dossier"),
+            keccak256("external report reference B"));
         independence.attest(PROVIDER_A,keccak256("independent controller A"),
-            keccak256("audited operator A dossier"),uint64(block.timestamp+30 days));
+            keccak256("audited operator A dossier"),uint64(block.timestamp+30 days),auditA);
         independence.attest(PROVIDER_B,keccak256("independent controller B"),
-            keccak256("audited operator B dossier"),uint64(block.timestamp+30 days));
-        independence.recordAudit(PROVIDER_A,keccak256("independent reviewer report A"),keccak256("audited operator A dossier"),keccak256("external report reference A"));
-        independence.recordAudit(PROVIDER_B,keccak256("independent reviewer report B"),keccak256("audited operator B dossier"),keccak256("external report reference B"));
+            keccak256("audited operator B dossier"),uint64(block.timestamp+30 days),auditB);
         PokerPrivateShuffleGate420 originalGate=new PokerPrivateShuffleGate420(
             address(deals),address(initialDeck),address(adapter),
             address(independence),address(availability),
@@ -275,14 +281,20 @@ contract PokerTwoStageActualGroth16WS2Test {
         (uint256[8] memory ap,uint256[6] memory ax)=_stageAProof();
         (uint256[8] memory bp,uint256[6] memory bx)=_stageBProof();
         vm.prank(PROVIDER_B); independence.claim(keccak256("independent controller A"),keccak256("conflict evidence"),uint64(block.timestamp+30 days));
+        vm.prank(address(0xC0FFEE));
+        bytes32 conflictAudit=independence.recordAudit(PROVIDER_B,keccak256("independent controller A"),
+            keccak256("review report matching conflict"),keccak256("conflict evidence"),keccak256("conflict report location"));
         independence.attest(PROVIDER_B,keccak256("independent controller A"),
-            keccak256("conflict evidence"),uint64(block.timestamp+30 days));
+            keccak256("conflict evidence"),uint64(block.timestamp+30 days),conflictAudit);
         vm.expectRevert(PokerPrivateShuffleGate420.Unauthorized.selector);
         vm.prank(PROVIDER_A);
         gate.proveStage(HAND,1,bytes32(ax[0]),bytes32(ax[2]),abi.encode(ap,ax));
         vm.prank(PROVIDER_B); independence.claim(keccak256("independent controller B"),keccak256("independent dossier"),uint64(block.timestamp+30 days));
+        vm.prank(address(0xC0FFEE));
+        bytes32 recoveredAudit=independence.recordAudit(PROVIDER_B,keccak256("independent controller B"),
+            keccak256("review recovery report"),keccak256("independent dossier"),keccak256("recovery report location"));
         independence.attest(PROVIDER_B,keccak256("independent controller B"),
-            keccak256("independent dossier"),uint64(block.timestamp+30 days));
+            keccak256("independent dossier"),uint64(block.timestamp+30 days),recoveredAudit);
         vm.expectRevert(PokerPrivateShuffleGate420.Unauthorized.selector);
         vm.prank(PROVIDER_B);
         gate.proveStage(HAND,1,bytes32(ax[0]),bytes32(ax[2]),abi.encode(ap,ax));

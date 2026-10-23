@@ -576,7 +576,7 @@ contract PlantSourceConsumptionTest is PublicPlantCapacityFixture {
         );
         require(!plants.exists(1) && plants.activePlantsByParcel(1) == 0, "failed public plant created");
         require(plants.activePublicPlants(1, ALICE) == 0, "failed public capacity charged");
-        require(publicAccess.allocationOf(1, ALICE) == 1, "failed admission lost allocation");
+        require(plots.allocationOf(1, ALICE) == 1, "failed admission lost allocation");
         require(seeds.remainingQuantity(1000) == 1, "failed admission consumed seed");
         require(seeds.plantApproval(1000, 1) == approval, "failed admission lost consent");
         _grant(address(plants), ModuleIds.SEED_REGISTRY, ActionIds.SEED_CONSUME, bytes32(uint256(1000)));

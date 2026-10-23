@@ -203,9 +203,18 @@ contract PokerTwoStageActualGroth16WS2Test {
         (,uint256[5] memory ix)=_initialProof();
         (,uint256[6] memory ax)=_stageAProof();
         (,uint256[6] memory bx)=_stageBProof();
-        require(availability.publish(420,_coords("initial.bin"))==bytes32(ix[0]),"initial MiMC mismatch");
-        require(availability.publish(420,_coords("stage-a.bin"))==bytes32(ax[2]),"stage A MiMC mismatch");
-        require(availability.publish(420,_coords("stage-b.bin"))==bytes32(bx[2]),"stage B MiMC mismatch");
+        uint256[208] memory initial=_coords("initial.bin");
+        uint256[208] memory shuffledA=_coords("stage-a.bin");
+        uint256[208] memory shuffledB=_coords("stage-b.bin");
+        uint256 beforeGas=gasleft();
+        require(availability.publish(420,initial)==bytes32(ix[0]),"initial MiMC mismatch");
+        require(beforeGas-gasleft()<=30_000_000,"initial ciphertext publication exceeds single-block gas budget");
+        beforeGas=gasleft();
+        require(availability.publish(420,shuffledA)==bytes32(ax[2]),"stage A MiMC mismatch");
+        require(beforeGas-gasleft()<=30_000_000,"stage A ciphertext publication exceeds single-block gas budget");
+        beforeGas=gasleft();
+        require(availability.publish(420,shuffledB)==bytes32(bx[2]),"stage B MiMC mismatch");
+        require(beforeGas-gasleft()<=30_000_000,"stage B ciphertext publication exceeds single-block gas budget");
     }
     function testRealTwoStageProofAndAuthenticatedCiphertextAvailability() public {
         (PokerInitialEncryptedDeck420 initialDeck,

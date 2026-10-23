@@ -555,4 +555,32 @@ contract PlantSourceConsumptionTest is PublicPlantCapacityFixture {
         _finish(1);
         require(seeds.consumedQuantity(1000) == quantity, "fuzz refund");
     }
+
+    function testPublicSeedAdmissionFailureRetainsAllocationConsentAndAllowsRetry() public {
+        _plot(1, 1);
+        _allocate(1, ALICE, 1);
+        _issueSeeds(1000, ALICE, 1);
+        _seedApproval(1000, 1, ALICE, 1, 1);
+        _plantGrant(1);
+        bytes32 approval = seeds.plantApproval(1000, 1);
+        bytes32 grantId =
+            _grant(address(plants), ModuleIds.SEED_REGISTRY, ActionIds.SEED_CONSUME, bytes32(uint256(1000)));
+        caps.revokeGrant(grantId);
+        _reject(
+            address(plants),
+            abi.encodeCall(
+                plants.registerPlantFromSource, (1, GENOME, ALICE, 1, 1, PlantRegistry.PlantSourceKind.SEED, 1000)
+            ),
+            HCUnauthorized.selector
+        );
+        require(!plants.exists(1) && plants.activePlantsByParcel(1) == 0, "failed public plant created");
+        require(plants.activePublicPlants(1, ALICE) == 0, "failed public capacity charged");
+        require(plots.allocationOf(1, ALICE) == 1, "failed admission lost allocation");
+        require(seeds.remainingQuantity(1000) == 1, "failed admission consumed seed");
+        require(seeds.plantApproval(1000, 1) == approval, "failed admission lost consent");
+        _grant(address(plants), ModuleIds.SEED_REGISTRY, ActionIds.SEED_CONSUME, bytes32(uint256(1000)));
+        _admit(1, 1000, PlantRegistry.PlantSourceKind.SEED, ALICE, 1, 1);
+        require(plants.activePublicPlants(1, ALICE) == 1, "retry failed public accounting");
+        require(seeds.remainingQuantity(1000) == 0, "retry failed seed consumption");
+    }
 }

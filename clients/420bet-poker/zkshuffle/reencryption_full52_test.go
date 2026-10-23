@@ -54,6 +54,28 @@ func TestFull52RealEncryptedShuffleProof(t *testing.T) {
  if err=groth16.Verify(proof,verifyingKey,public);err!=nil {
   t.Fatalf("full 52-card proof rejected: %v",err)
  }
+ // Independently prove provider B's distinct permutation and fresh rerandomization
+ // of exactly provider A's committed encrypted output (same circuit and VK).
+ stageB:=&Reencrypt52{StatementScope:123457,HandScope:420,PublicKeyX:pkX,PublicKeyY:pkY}
+ stageB.Input=witness.Output
+ for i:=0;i<52;i++{
+  stageB.Indices[i]=51-i
+  stageB.Nonces[i]=int64(2000+i)
+  c1,c2:=cipherOf(int64(i+1),int64(3151+i),&base,pub)
+  stageB.Output[i]=reencryptInput(c1,c2)
+ }
+ stageB.InputRoot=witness.OutputRoot
+ secondRoot,_:=nativeCipherRootAndPath(420,stageB.Output[:],0)
+ stageB.OutputRoot=secondRoot
+ secondWitness,err:=frontend.NewWitness(stageB,ecc.BN254.ScalarField());if err!=nil{t.Fatal(err)}
+ secondProof,err:=groth16.Prove(cs,provingKey,secondWitness)
+ if err!=nil{t.Fatalf("stage B full 52-card proof generation failed: %v",err)}
+ secondPublic,err:=secondWitness.Public();if err!=nil{t.Fatal(err)}
+ if err=groth16.Verify(secondProof,verifyingKey,secondPublic);err!=nil{t.Fatalf("stage B Groth16 proof rejected: %v",err)}
+ exportTestGroth16Solidity(t,"Reencrypt52StageB",verifyingKey,secondProof,
+  stageB.InputRoot,stageB.StatementScope,stageB.OutputRoot,stageB.HandScope,stageB.PublicKeyX,stageB.PublicKeyY)
+ // A valid stage B proof must not be reusable as a stage A proof.
+ if err=groth16.Verify(secondProof,verifyingKey,public);err==nil{t.Fatal("stage B proof accepted under stage A public inputs")}
  // Export the exact source-correlated generated Solidity verifier and key
  // artifacts, never claiming this test-generated SRS is production trusted.
  if dir:=os.Getenv("POKER_ZK_ARTIFACT_DIR");dir!=""{

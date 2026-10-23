@@ -53,6 +53,11 @@ func TestRealThresholdShareProofValidTamperedAndReplay(t *testing.T){
  showdownProof,err:=groth16.Prove(cs,pk,showdownWitness);if err!=nil{t.Fatalf("showdown share proof rejected: %v",err)}
  showdownPublic,err:=showdownWitness.Public();if err!=nil{t.Fatal(err)}
  if err:=groth16.Verify(showdownProof,vk,showdownPublic);err!=nil{t.Fatalf("showdown share verification failed: %v",err)}
+ exportTestGroth16Solidity(t,"WS4ShowdownPartial",vk,showdownProof,
+  showdown.HandScope,showdown.DeckRoot,showdown.CipherC2X,showdown.CipherC2Y,
+  showdown.Position,showdown.Street,showdown.ProviderIndex,
+  showdown.CipherC1X,showdown.CipherC1Y,showdown.ProviderPKX,showdown.ProviderPKY,
+  showdown.ShareDX,showdown.ShareDY)
  illegalStreet:=*assignment
  illegalStreet.Street=5
  illegalWitness,err:=frontend.NewWitness(&illegalStreet,ecc.BN254.ScalarField());if err!=nil{t.Fatal(err)}

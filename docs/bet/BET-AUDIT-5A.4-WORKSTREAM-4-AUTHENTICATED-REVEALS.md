@@ -1,0 +1,25 @@
+# BET-AUDIT-5A.4 — Workstream 4: authenticated live-card revelation
+
+## Canonical authority and reveal schedule
+
+The sole on-chain authority for a public reveal's timing is `PokerNLHEBetting420.canRevealStreet(handId, street)`, which returns true only in the exact pending phase for the requested street. No dealer-supplied clock, off-chain message, caller-chosen button, administrative signature or arbitrary receipt may expand this window. `PokerLiveCardReveals420.isStageComplete` checks the same exact timing before it returns true. The engine changes phases only after the authenticated whole-stage predicate succeeds.
+
+For n occupied participating seats (2 <= n <= 9), positions 0..2n-1 are the already frozen first two hole-card passes. Positions 2n and 2n+4 and 2n+6 are burned; the canonical **flop** consists of physical positions 2n+1, 2n+2, 2n+3; the **turn** is position 2n+5; the **river** is position 2n+7. Each can be disclosed only after the preceding canonical betting round completes, in AWAIT_FLOP, AWAIT_TURN and AWAIT_RIVER respectively. The canonical **showdown** window is Phase.SHOWDOWN, after the river betting round, and exposes only the two frozen hole-card positions of each nonfolded participating seat. Hole-card plaintext is never a public reveal before showdown.
+
+## Cryptographic chain of custody
+
+The only admissible ciphertext for a public slot is the 52-card ciphertext at that physical position under the exact stage-two final root accepted by `PokerPrivateShuffleGate420`. Each share prover must establish real ElGamal partial decryption for that ciphertext using its own registered provider secret and correct provider public key. The circuit proves six-level MiMC ciphertext membership and the key/share multiplication relation. The wrapper binds chain, hand, root, physical position, street, provider, C1, C2, provider key and share. Additionally `submitShare` requires the transaction sender to be the actual Provider A or B account; neither dealer can impersonate the other provider merely by borrowing or replaying a valid proof. The second provider's accepted C1/C2 must exactly match the first provider's C1/C2 at the same physical position.
+
+A public card cannot be opened unless both separately verified shares are present, neither share was already used, the proposed card index is in the 52-card canonical range, the card has never appeared elsewhere in the hand, and the Groth16 card-unmask proof establishes the canonical point equation from the same accepted C2 and both accepted public shares. The two provider public keys and combined key are checked against immutable adapter commitments and the final shuffle threshold key. The card index cannot be substituted and reveal state cannot be rolled back or duplicated. Only the genuinely verified canonical card index is persisted and emitted.
+
+The partial-share and card-unmask adapters explicitly allow street identifier **4** for showdown, matching their genuine gnark circuits. A street identifier greater than four is rejected. The full private-delivery proof book still binds both recipient-only encrypted shares to these exact final-root ciphertext positions. The public revelation system does not publish recipient decryption secrets, provider shuffle permutations or encrypted hole-card shares belonging to a future street.
+
+## Adversarial and milestone qualification
+
+The scoped WS4 workflow `.github/workflows/420bet-poker-ws4-live-reveal-level1.yml` runs:
+- Real gnark PartialDecryptCircuit and CardUnmaskCircuit proofs with exact generated Solidity verifiers, including invalid card, wrong aggregate, wrong root, wrong hand, proof corruption, stage replay and street-five rejection.
+- A joint proof relation establishing Provider A and Provider B's partial shares and canonical card-unmask against the **same** real 52-card ciphertext root and physical position rather than relying on unrelated proof fixtures.
+- A separate, isolated funded NLHE street test family. The street runner uses a pinned Solidity 0.8.30 compiler with via-IR to avoid the known Solidity 0.8.24 Yul optimizer stack error; it leaves the contract logic and all security assertions intact.
+- Negative contract tests for premature flop, turn, river and showdown disclosures; missing provider shares, provider impersonation, second-provider ciphertext substitution, wrong/repeated card and absent stage completion, as well as legal complete flop/turn/river/showdown progression and custody of reserved chips.
+
+Synthetic fixture verifier acceptance in street-transition unit tests is not a substitute for cryptographic soundness. The workflow therefore **also** requires actual generated Solidity Groth16 acceptance on the same SHA. Production deployment still requires production-specific verifying keys/trusted setup, cryptographic audit, validated beneficial-control evidence and secure recipient key custody. No Level 3 full phase closeout is implied by this Workstream 4 gate, and technical validation never transfers sole project governance authority.

@@ -66,6 +66,7 @@ contract PokerLiveCardReveals420 is IPokerAuthenticatedStreet420 {
     }
     function _authorized(bytes32 handId,uint8 street,uint8 pos)private view returns(bool){
         if(!engine.canRevealStreet(handId,street)||pos>=52)return false;
+        if(!engine.canRevealStreet(handId,street))return false;
         PokerNLHEBetting420.Game memory g=engine.gameOf(handId);
         uint8 n=_playerCount(g.seatsMask);if(n<2)return false;
         uint8 hole=2*n;
@@ -88,6 +89,8 @@ contract PokerLiveCardReveals420 is IPokerAuthenticatedStreet420 {
     function submitShare(bytes32 handId,uint8 street,uint8 position,uint8 holder,
         uint256[8] calldata points,bytes calldata proof)external {
         if(!_authorized(handId,street,position)||holder>1)revert WrongStreet();
+        // Every public partial share must be posted by its actual independent provider.
+        if(msg.sender!=(holder==0?engine.deals().providerA():engine.deals().providerB()))revert InvalidProof();
         Slot storage s=slots[handId][position];
         if(s.opened||(holder==0?s.shareA:s.shareB))revert Duplicate();
         if(s.shareA||s.shareB){

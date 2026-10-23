@@ -69,6 +69,7 @@ func proveReencryption(api frontend.API, input,output []ElGamalCipher,
   api.AssertIsDifferent(sourceC1.X,0)
   curve.AssertIsOnCurve(sourceC2)
   randomG:=curve.ScalarMul(generator,nonces[i])
+  api.AssertIsDifferent(randomG.X,0) // reject scalars that are zero modulo subgroup order
   randomK:=curve.ScalarMul(publicKey,nonces[i])
   outC1:=curve.Add(sourceC1,randomG)
   api.AssertIsDifferent(outC1.X,0)
@@ -77,6 +78,8 @@ func proveReencryption(api frontend.API, input,output []ElGamalCipher,
   api.AssertIsEqual(outC1.Y,output[i].C1Y)
   api.AssertIsEqual(outC2.X,output[i].C2X)
   api.AssertIsEqual(outC2.Y,output[i].C2Y)
+  curve.AssertIsOnCurve(twistededwards.Point{X:output[i].C1X,Y:output[i].C1Y})
+  curve.AssertIsOnCurve(twistededwards.Point{X:output[i].C2X,Y:output[i].C2Y})
  }
  return nil
 }

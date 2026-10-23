@@ -181,11 +181,17 @@ contract PokerTwoStageActualGroth16WS2Test {
         uint256[] memory constants=_constants();
         availability=new PokerShuffleCiphertextAvailability420(
             constants,keccak256(abi.encode(constants)));
-        independence=new PokerShuffleProviderIndependence420(address(this));
+        independence=new PokerShuffleProviderIndependence420(address(this),address(0xC0FFEE));
         independence.attest(PROVIDER_A,keccak256("independent controller A"),
             keccak256("audited operator A dossier"),uint64(block.timestamp+30 days));
         independence.attest(PROVIDER_B,keccak256("independent controller B"),
             keccak256("audited operator B dossier"),uint64(block.timestamp+30 days));
+        vm.prank(address(0xC0FFEE));
+        independence.review(PROVIDER_A,keccak256("independent controller A"),
+            keccak256("audited operator A independent-review dossier"),uint64(block.timestamp+30 days));
+        vm.prank(address(0xC0FFEE));
+        independence.review(PROVIDER_B,keccak256("independent controller B"),
+            keccak256("audited operator B independent-review dossier"),uint64(block.timestamp+30 days));
         PokerPrivateShuffleGate420 originalGate=new PokerPrivateShuffleGate420(
             address(deals),address(initialDeck),address(adapter),
             address(independence),address(availability),

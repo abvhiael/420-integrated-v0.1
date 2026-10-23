@@ -36,6 +36,8 @@ contract PokerNLHEBetting54Fixture is PokerPrivateShuffleGate54Test {
         signing=new PokerActionKeys420(address(deal));
         dispute=new PokerActionDisputeClock420(address(deal));
         engine=new PokerNLHEBetting420(address(deal),address(gate),address(signing),address(dispute));
+        cap.grant(ADMIN,dispute.ACTION_BIND_RESOLVER(),auth.scopeForTable(TABLE),true);
+        cheat54.prank(ADMIN);dispute.bindResolver(TABLE,address(engine));
         providerBond=new PokerProviderAccountability420(address(deal),address(engine),address(0xB00D));
         coin.mint(PROVIDER_A,3000);coin.mint(PROVIDER_B,3000);
         cheat54.prank(PROVIDER_A);coin.approve(address(providerBond),3000);

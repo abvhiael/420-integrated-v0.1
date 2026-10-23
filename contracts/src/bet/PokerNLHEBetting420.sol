@@ -86,6 +86,11 @@ contract PokerNLHEBetting420 {
     event ProviderBondBound(bytes32 indexed tableId,address bond);
 
     mapping(bytes32=>uint64) public evidenceDueAt;
+    // The active funded-hand escrow snapshot and initial evidence window are
+    // captured at reservation, before any provider can delay a proof.
+    mapping(bytes32=>uint64) public fundedEvidenceDeadline;
+    mapping(bytes32=>bytes32) public fundedSnapshot;
+    mapping(bytes32=>bool) public recoveryOpened;
     struct EvidenceRecovery {uint64 openedAt;uint64 finalizableAt;bytes32 stateRoot;Phase failedPhase;bool active;}
     mapping(bytes32=>EvidenceRecovery) public evidenceRecovery;
     uint64 public constant PROOF_DELIVERY_WINDOW=1 hours;
@@ -306,6 +311,10 @@ contract PokerNLHEBetting420 {
         if(reservedSnapshot==bytes32(0) ||
            reservedSnapshot!=ledger.lockedSnapshot(h.tableId))revert InvalidState();
         _bond(h.tableId).lock(handId);
+        if(fundedSnapshot[handId]!=bytes32(0)||fundedEvidenceDeadline[handId]!=0)
+            revert InvalidState();
+        fundedSnapshot[handId]=reservedSnapshot;
+        fundedEvidenceDeadline[handId]=uint64(uint256(h.deadline)+PROOF_DELIVERY_WINDOW);
     }
     /// @notice Permissionless refund if providers fail to complete their proof
     /// before a strictly enforced deadline, provided no hand has begun.
@@ -316,7 +325,9 @@ contract PokerNLHEBetting420 {
         if(g.initialized||handAborted[handId]||handSettled[handId]||
            ledger.activeHand(h.tableId)!=handId||
            shuffle.isProofComplete(handId))revert InvalidState();
-        if(block.timestamp<uint256(h.deadline)+1 hours)revert TooEarly();
+        if(fundedSnapshot[handId]==bytes32(0)||
+           ledger.lockedSnapshot(h.tableId)!=fundedSnapshot[handId])revert InvalidState();
+        if(block.timestamp<fundedEvidenceDeadline[handId])revert TooEarly();
         handAborted[handId]=true;
         PokerPrivateShuffleGate420.Record memory record=shuffle.recordOf(handId);
         uint8 missing=0;
@@ -335,7 +346,9 @@ contract PokerNLHEBetting420 {
         if(games[handId].initialized||handAborted[handId]||handSettled[handId]||
             ledger.activeHand(h.tableId)!=handId||!shuffle.isProofComplete(handId))
             revert InvalidState();
-        if(block.timestamp<uint256(h.deadline)+PROOF_DELIVERY_WINDOW)revert TooEarly();
+        if(fundedSnapshot[handId]==bytes32(0)||
+           ledger.lockedSnapshot(h.tableId)!=fundedSnapshot[handId])revert InvalidState();
+        if(block.timestamp<fundedEvidenceDeadline[handId])revert TooEarly();
         if(address(deliveryForTable[h.tableId])!=address(0)&&
             deliveryForTable[h.tableId].allAcknowledged(handId))revert InvalidState();
         handAborted[handId]=true;
@@ -365,12 +378,15 @@ contract PokerNLHEBetting420 {
     function beginMissingEvidenceRecovery(bytes32 handId) external {
         Game storage g=games[handId];
         if(!g.initialized||handSettled[handId]||handAborted[handId]||
-            evidenceRecovery[handId].active||
+            evidenceRecovery[handId].active||recoveryOpened[handId]||
             ledger.activeHand(g.tableId)!=handId||
+            fundedSnapshot[handId]==bytes32(0)||
+            ledger.lockedSnapshot(g.tableId)!=fundedSnapshot[handId]||
             evidenceDueAt[handId]<1||
             block.timestamp<=evidenceDueAt[handId]||
             !_missingRequiredEvidence(handId,g))revert InvalidState();
         uint64 end=uint64(block.timestamp+RECOVERY_REVIEW_WINDOW);
+        recoveryOpened[handId]=true;
         evidenceRecovery[handId]=EvidenceRecovery(uint64(block.timestamp),end,
             g.stateRoot,g.phase,true);
         emit MissingEvidenceRecoveryOpened(handId,uint8(g.phase),g.stateRoot,end);
@@ -385,6 +401,8 @@ contract PokerNLHEBetting420 {
         if(!r.active||handSettled[handId]||handAborted[handId]||
             g.stateRoot!=r.stateRoot||g.phase!=r.failedPhase||
             ledger.activeHand(g.tableId)!=handId||
+            fundedSnapshot[handId]==bytes32(0)||
+            ledger.lockedSnapshot(g.tableId)!=fundedSnapshot[handId]||
             !_missingRequiredEvidence(handId,g))revert InvalidState();
         if(block.timestamp<r.finalizableAt)revert TooEarly();
         // Only the governance-bound native resolver may close an expired

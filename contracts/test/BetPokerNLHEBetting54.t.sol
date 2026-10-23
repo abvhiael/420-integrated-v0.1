@@ -166,7 +166,7 @@ contract PokerNLHEBetting54Fixture is PokerPrivateShuffleGate54Test {
         cheat54.prank(PLAYER_B);delivery.acknowledge(handId,1,receiptB);
         require(proofBook.allVerified(handId),"four accepted encrypted shares per recipient");
     }
-    function _readyProvedDelivery() internal returns(bytes32 id){
+    function _readyFrozenAssignmentWithoutDelivery() internal returns(bytes32 id){
         id=_hand54();
         PokerConfidentialDeal420.Hand memory h=deal.getHand(id);
         bytes32 input=initialDeck.rootOf(id);
@@ -181,6 +181,9 @@ contract PokerNLHEBetting54Fixture is PokerPrivateShuffleGate54Test {
         cheat54.prank(PLAYER);signing.bindSigner(TABLE,signedVm.addr(PLAYER_KEY));
         cheat54.prank(PLAYER_B);signing.bindSigner(TABLE,signedVm.addr(OPPONENT_KEY));
         engine.prepareDealAssignment(id);
+    }
+    function _readyProvedDelivery() internal returns(bytes32 id){
+        id=_readyFrozenAssignmentWithoutDelivery();
         _acknowledgedPrivateDelivery(id);
     }
     function _readyBetting() internal returns(bytes32 id){
@@ -307,6 +310,52 @@ contract PokerNLHEBetting54Case6Test is PokerNLHEBetting54Fixture {
     }
 }
 
+contract PokerNLHEBetting54WS3AdversarialTest is PokerNLHEBetting54Fixture {
+    function testProviderAuthenticationMissingShareAndPrematureBettingRejected() public {
+        bytes32 id=_readyFrozenAssignmentWithoutDelivery();
+        _proveRecipientKeys();
+        _proveAggregateKey();
+        _publishEncryptedManifest(id);
+        cheat54.expectRevert(PokerNLHEBetting420.InvalidState.selector);
+        engine.start(id,0,60);
+        uint256[12] memory empty;
+        cheat54.expectRevert(PokerDeliveryProofBook420.InvalidProof.selector);
+        cheat54.prank(PROVIDER_B);
+        proofBook.proveEncryptedShare(id,0,0,empty,hex"01");
+        _proveEncryptedShare(id,0,0);
+        cheat54.expectRevert(PokerNLHEBetting420.InvalidState.selector);
+        engine.start(id,0,60);
+        _proveEncryptedShare(id,0,1);
+        _proveEncryptedShare(id,1,0);
+        _proveEncryptedShare(id,1,1);
+        _proveEncryptedShare(id,2,0);
+        _proveEncryptedShare(id,2,1);
+        _proveEncryptedShare(id,3,0);
+        cheat54.expectRevert(PokerNLHEBetting420.InvalidState.selector);
+        engine.start(id,0,60);
+        _proveEncryptedShare(id,3,1);
+        require(proofBook.envelopeHashFor(id,0)!=bytes32(0),"first player's two fully proven cards");
+        require(proofBook.envelopeHashFor(id,1)!=bytes32(0),"second player's two fully proven cards");
+        cheat54.expectRevert(PokerNLHEBetting420.InvalidState.selector);
+        engine.start(id,0,60);
+        _acknowledgeVerifiedEnvelopes(id);
+        engine.start(id,0,60);
+        require(engine.gameOf(id).initialized,"only complete private delivery enables gameplay");
+    }
+    function testDuplicateRecipientSecretAndWrongSeatKeyRejected() public {
+        _readyFrozenAssignmentWithoutDelivery();
+        _proveRecipientKeys();
+        PokerSeatLedger420.Seat memory seat=ledger.seatOf(TABLE,1);
+        uint256[3] memory duplicate=[
+            recipient.scopeForKey(TABLE,PLAYER_B,seat.epoch),uint256(111),uint256(222)];
+        uint256[8] memory raw;
+        cheat54.expectRevert(PokerRecipientKeys420.InvalidKey.selector);
+        cheat54.prank(PLAYER_B);
+        recipient.bindVerifiedKey(TABLE,111,222,abi.encode(raw,duplicate));
+        (uint256 keyx,uint256 keyy,)=recipient.encryptionKeyOf(TABLE,1);
+        require(keyx==333&&keyy==444,"duplicate rejected without mutating recipient key");
+    }
+}
 contract PokerNLHEBetting54Case7Test is PokerNLHEBetting54Fixture {
     function testProviderBondsAreFullyFundedLockedAndWithdrawalSafe() public {
         bytes32 id=_readyProvedDelivery();

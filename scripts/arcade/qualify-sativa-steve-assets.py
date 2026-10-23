@@ -53,14 +53,14 @@ for i,name in enumerate(NAMES,1):
             duration=ent.get("durationMs",ent.get("duration_ms"))
             if duration is not None and duration!=100:errors.append("bad frame timing "+fn)
             if hashlib.sha256(p.read_bytes()).hexdigest()!=ent.get("sha256"):
-                errors.append("SHA256 mismatch "+fn)
+                errors.append("SHA256 mismatch "+fn+" actual="+hashlib.sha256(p.read_bytes()).hexdigest())
         try:
             with Image.open(p) as im:
                 im.load()
                 if im.size!=(1024,1024) or im.mode!="RGBA":errors.append("wrong PNG dimensions/mode "+fn)
                 else:
                     lo,hi=im.getchannel("A").getextrema()
-                    if lo!=0 or hi!=255:errors.append("invalid mixed transparency "+fn)
+                    if lo!=0 or hi!=255:errors.append("invalid mixed transparency "+fn+f" extrema={lo},{hi}")
                     alpha=im.getchannel("A")
                     if any(alpha.getpixel(pt)!=0 for pt in ((0,0),(1023,0),(0,1023),(1023,1023))):
                         warnings.append("art touches canvas corner "+fn)

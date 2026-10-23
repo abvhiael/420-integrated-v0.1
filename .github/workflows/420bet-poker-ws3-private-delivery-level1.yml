@@ -129,31 +129,39 @@ jobs:
         working-directory: contracts
         env:
           FOUNDRY_VIA_IR: 'true'
-          FOUNDRY_SRC: src/ws3-focused
-          FOUNDRY_TEST: test/ws3-funded
         run: |
           set -eu
-          mkdir -p src/ws3-focused test/ws3-funded
           python3 - <<'PY'
           from pathlib import Path
           import re
           base=Path("test")
-          out=base/"ws3-funded"
-          roots=["BetPokerDeckDisclosure54.t.sol","BetPokerNLHEBetting54.t.sol"]
-          discovered=set()
-          def include(filename):
-              if filename in discovered:return
-              original=base/filename
-              if not original.is_file():raise SystemExit("missing test import: "+filename)
-              discovered.add(filename)
-              text=original.read_text()
-              for imported in re.findall(r'import\s+["\'](\./[^"\']+)["\']\s*;',text):
-                  include(Path(imported).name)
-              (out/filename).write_text(text.replace("../src/","../../src/"))
-          for filename in roots:include(filename)
-          print("Exact funded NLHE test import closure:", sorted(discovered))
+          roots={
+              "disclosure":"BetPokerDeckDisclosure54.t.sol",
+              "nlhe":"BetPokerNLHEBetting54.t.sol",
+          }
+          def collect(filename,found):
+              if filename in found:return
+              p=base/filename
+              if not p.is_file():raise SystemExit("missing required import: "+filename)
+              found.add(filename)
+              for dep in re.findall(r'import\s+["\'](\./[^"\']+)["\']\s*;',p.read_text()):
+                  collect(Path(dep).name,found)
+          for family,root in roots.items():
+              files=set()
+              collect(root,files)
+              out=base/("ws3-"+family)
+              out.mkdir(parents=True,exist_ok=True)
+              for filename in sorted(files):
+                  (out/filename).write_text((base/filename).read_text().replace("../src/","../../src/"))
+              print(family,"transitive Solidity test source closure:",sorted(files))
           PY
-          forge test --match-contract '^(PokerDeckDisclosure54Test|PokerNLHEBetting54WS3AdversarialTest|PokerNLHEBetting54Case6Test|PokerNLHEBetting54Case1Test)$' -vv
+          mkdir -p src/ws3-focused
+          echo "Isolated disclosure compile/test (no NLHE root)"
+          FOUNDRY_SRC=src/ws3-focused FOUNDRY_TEST=test/ws3-disclosure \
+            forge test --match-contract '^PokerDeckDisclosure54Test$' -vv
+          echo "Isolated funded NLHE compile/test (separate Foundry invocation)"
+          FOUNDRY_SRC=src/ws3-focused FOUNDRY_TEST=test/ws3-nlhe \
+            forge test --match-contract '^(PokerNLHEBetting54WS3AdversarialTest|PokerNLHEBetting54Case6Test|PokerNLHEBetting54Case1Test)$' -vv
       - name: Preserve exact-SHA real proof and source evidence
         run: |
           set -eu

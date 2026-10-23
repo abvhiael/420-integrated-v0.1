@@ -7,6 +7,7 @@ on:
       - 'services/highcountry-archive/scripts/scoped-a06-report.mjs'
       - '.github/workflows/highcountry-a06-scoped.yml'
       - 'assets/highcountry/original-sixteen/**'
+      - 'apps/highcountry-web/**'
 permissions:
   contents: read
 jobs:
@@ -20,6 +21,8 @@ jobs:
         with:
           node-version: '22'
       - run: node --test services/highcountry-archive/test/scoped-a06.test.mjs
+      - run: node --test apps/highcountry-web/test/archive-gallery.test.mjs
+      - run: node apps/highcountry-web/scripts/build.mjs
       - run: node services/highcountry-archive/scripts/scoped-a06-report.mjs . scoped-a06-manifest.json
       - uses: actions/upload-artifact@v4
         with:

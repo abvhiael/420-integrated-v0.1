@@ -161,6 +161,74 @@ contract PokerLiveCardReveals54Test is PokerNLHEBetting54Test {
         require(live.missingProviders(id,1)==0,"complete shares clear provider faults");
         require(live.missingProviders(id,2)==0,"future turn accused provider");
     }
+    function _submitPublicStreet(bytes32 id,uint8 street,uint8 pos,uint8 provider) internal {
+        uint256[8] memory p=_points(pos,provider);
+        uint256[13] memory pub=abi.decode(_shareProof(id,pos,provider,p),(uint256[8],uint256[13]));
+        pub[5]=street;
+        uint256[8] memory proof;
+        cheat54.prank(provider==0?PROVIDER_A:PROVIDER_B);
+        live.submitShare(id,street,pos,provider,p,abi.encode(proof,pub));
+    }
+    function _openPublicStreet(bytes32 id,uint8 street,uint8 pos,uint8 card) internal {
+        PokerLiveCardReveals420.Slot memory slot=live.slotOf(id,pos);
+        uint256[6] memory keys=[uint256(7),uint256(8),uint256(11),uint256(12),uint256(19),uint256(20)];
+        uint256[17] memory inputs;
+        inputs[0]=uint256(id)%FR;inputs[1]=1000;inputs[2]=pos;inputs[3]=street;inputs[4]=card;
+        inputs[5]=slot.c2x;inputs[6]=slot.c2y;inputs[7]=slot.dax;inputs[8]=slot.day;
+        inputs[9]=slot.dbx;inputs[10]=slot.dby;
+        for(uint8 i=0;i<6;i++)inputs[11+i]=keys[i];
+        uint256[8] memory proof;
+        live.reveal(id,street,pos,card,keys,abi.encode(proof,inputs));
+    }
+    function testCanonicalFlopTurnRiverShowdownProgressionWithNoFutureOrHoleLeaks() public {
+        bytes32 id=_readyLive();_completePreflop(id);
+        require(engine.canRevealStreet(id,1),"flop ready");
+        for(uint8 pos=5;pos<=7;pos++){
+            _submitPublicStreet(id,1,pos,0);_submitPublicStreet(id,1,pos,1);
+            _openPublicStreet(id,1,pos,pos);
+        }
+        require(live.isStageComplete(id,1),"three authenticated flop cards");
+        live.advance(id,1);
+        require(!engine.canRevealStreet(id,2),"turn closed until flop betting completed");
+        cheat54.expectRevert(PokerLiveCardReveals420.WrongStreet.selector);
+        cheat54.prank(PROVIDER_A);
+        live.submitShare(id,2,9,0,_points(9,0),hex"01");
+        _signedAction(id,1,PokerNLHEBetting420.Move.CHECK,0,OPPONENT_KEY);
+        _signedAction(id,0,PokerNLHEBetting420.Move.CHECK,0,PLAYER_KEY);
+        require(engine.canRevealStreet(id,2),"turn authorized");
+        _submitPublicStreet(id,2,9,0);_submitPublicStreet(id,2,9,1);
+        _openPublicStreet(id,2,9,13);
+        require(live.isStageComplete(id,2),"turn authenticated");
+        live.advance(id,2);
+        require(!engine.canRevealStreet(id,3),"river closed before turn betting");
+        _signedAction(id,1,PokerNLHEBetting420.Move.CHECK,0,OPPONENT_KEY);
+        _signedAction(id,0,PokerNLHEBetting420.Move.CHECK,0,PLAYER_KEY);
+        require(engine.canRevealStreet(id,3),"river authorized");
+        _submitPublicStreet(id,3,11,0);_submitPublicStreet(id,3,11,1);
+        _openPublicStreet(id,3,11,14);
+        live.advance(id,3);
+        require(!engine.canRevealStreet(id,4),"hole cards still hidden during river");
+        _signedAction(id,1,PokerNLHEBetting420.Move.CHECK,0,OPPONENT_KEY);
+        _signedAction(id,0,PokerNLHEBetting420.Move.CHECK,0,PLAYER_KEY);
+        require(engine.canRevealStreet(id,4),"showdown authorized after river betting");
+        require(!live.isStageComplete(id,4),"no showdown without both holes per seat");
+        for(uint8 pos=0;pos<4;pos++){
+            _submitPublicStreet(id,4,pos,0);_submitPublicStreet(id,4,pos,1);
+            _openPublicStreet(id,4,pos,20+pos);
+        }
+        require(live.isStageComplete(id,4),"all surviving players revealed exactly their two positions");
+        require(ledger.reservedInHand(TABLE)==800,"funded pot unchanged by selective reveals");
+    }
+    function testMismatchedProviderCiphertextIsRejected() public {
+        bytes32 id=_readyLive();_completePreflop(id);
+        _submit(id,5,0);
+        uint256[8] memory p=_points(5,1);
+        p[2]++;
+        cheat54.expectRevert(PokerLiveCardReveals420.InvalidProof.selector);
+        cheat54.prank(PROVIDER_B);
+        live.submitShare(id,1,5,1,p,_shareProof(id,5,1,p));
+        require(!live.slotOf(id,5).shareB,"wrong final-deck ciphertext cannot complete share");
+    }
     function testWrongProviderCannotSubmitEvenAValidShare() public {
         bytes32 id=_readyLive();_completePreflop(id);
         uint256[8] memory p=_points(5,0);

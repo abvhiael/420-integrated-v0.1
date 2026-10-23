@@ -1,0 +1,97 @@
+{
+  "animation_name": "sativa_steve_anim_11_dizzy_failure",
+  "character": "Sativa Steve",
+  "phase": "E",
+  "fps": 10,
+  "frame_count": 10,
+  "canvas": {
+    "width": 1024,
+    "height": 1024
+  },
+  "loop": false,
+  "source_sprite_sheet": "sativa_steve_s_dizzy_fall_animation_sheet.png",
+  "export_folder_suggestion": "assets/characters/sativa_steve/animations/sativa_steve_anim_11_dizzy_failure/",
+  "frames": [
+    {
+      "index": 1,
+      "file": "sativa_steve_anim_11_dizzy_failure_frame_01.png",
+      "duration_ms": 100,
+      "width": 1024,
+      "height": 1024,
+      "sha256": "18eb1b75ba992c8fce05ff213316f829e2a3b9557d29b67e2333df15f2c0ffb2"
+    },
+    {
+      "index": 2,
+      "file": "sativa_steve_anim_11_dizzy_failure_frame_02.png",
+      "duration_ms": 100,
+      "width": 1024,
+      "height": 1024,
+      "sha256": "736d99248988f4d129a92bfc818c2b7861206e8c6d64b03cfc0122b0dfe5b24f"
+    },
+    {
+      "index": 3,
+      "file": "sativa_steve_anim_11_dizzy_failure_frame_03.png",
+      "duration_ms": 100,
+      "width": 1024,
+      "height": 1024,
+      "sha256": "8c600a2abb14649a35eab1e09ad703ed47f419584b34da505e4a67c098fc0a13"
+    },
+    {
+      "index": 4,
+      "file": "sativa_steve_anim_11_dizzy_failure_frame_04.png",
+      "duration_ms": 100,
+      "width": 1024,
+      "height": 1024,
+      "sha256": "f33ae8741cc5f37502f68e2f491bfe642d42ced1db847ac57f38b18bc8beee7d"
+    },
+    {
+      "index": 5,
+      "file": "sativa_steve_anim_11_dizzy_failure_frame_05.png",
+      "duration_ms": 100,
+      "width": 1024,
+      "height": 1024,
+      "sha256": "008ae08b6ca8486227287ba6c9f7eb9817dcecfbef82fde8f8a98e7e14cf5ffe"
+    },
+    {
+      "index": 6,
+      "file": "sativa_steve_anim_11_dizzy_failure_frame_06.png",
+      "duration_ms": 100,
+      "width": 1024,
+      "height": 1024,
+      "sha256": "e4d865c6590c5b26c2bca5d7c1632985ab0a67a94dd6d8190d92e9b27752553e"
+    },
+    {
+      "index": 7,
+      "file": "sativa_steve_anim_11_dizzy_failure_frame_07.png",
+      "duration_ms": 100,
+      "width": 1024,
+      "height": 1024,
+      "sha256": "f13b5be3427630f3c2bffc6f4fd79b960ebb0a10a191fe4a56529410f50d20e5"
+    },
+    {
+      "index": 8,
+      "file": "sativa_steve_anim_11_dizzy_failure_frame_08.png",
+      "duration_ms": 100,
+      "width": 1024,
+      "height": 1024,
+      "sha256": "2f3b5e9edf2c711237291d463533f0215058bfaa1f711b1024e98e4c866a33b9"
+    },
+    {
+      "index": 9,
+      "file": "sativa_steve_anim_11_dizzy_failure_frame_09.png",
+      "duration_ms": 100,
+      "width": 1024,
+      "height": 1024,
+      "sha256": "6d616aa9833e0e5845e59e4d6908bdb1be9a390f529ac7706447f7c7fab91885"
+    },
+    {
+      "index": 10,
+      "file": "sativa_steve_anim_11_dizzy_failure_frame_10.png",
+      "duration_ms": 100,
+      "width": 1024,
+      "height": 1024,
+      "sha256": "7f7a1e158be303d0fda65eb1858e35e2a2d0964cf6e96892b2df91aad022e2b5"
+    }
+  ],
+  "preview_gif": "sativa_steve_anim_11_dizzy_failure_preview.gif"
+}

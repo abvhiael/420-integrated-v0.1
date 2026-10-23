@@ -288,6 +288,25 @@ jobs:
           sed -i 's#../src/#../../src/#g' test/initial52-groth16/*.t.sol
           forge test -vv
           rm -rf test/initial52-groth16
+      - name: Qualify genuine two-provider on-chain gate and canonical published ciphertexts
+        if: steps.cryptoscope.outputs.changed == 'true'
+        working-directory: contracts
+        env:
+          FOUNDRY_SRC: src/bet
+          FOUNDRY_TEST: test/ws2-real
+        run: |
+          set -eu
+          mkdir -p src/bet/generated test/ws2-real ../artifacts/contracts/poker-ws2
+          cp ../artifacts/420bet-5a-4/EXPERIMENTAL-InitialDeck52Verifier.sol src/bet/generated/ExperimentalInitialDeck52Verifier.sol
+          cp ../artifacts/420bet-5a-4/EXPERIMENTAL-Reencrypt52Verifier.sol src/bet/generated/ExperimentalReencrypt52Verifier.sol
+          python3 ../clients/420bet-poker/zkshuffle/make_two_stage_real_forge_test.py \
+            src/bet/generated/ExperimentalInitialDeck52Verifier.sol \
+            ../artifacts/420bet-5a-4/EXPERIMENTAL-InitialDeck52SolidityFixture.json \
+            src/bet/generated/ExperimentalReencrypt52Verifier.sol \
+            ../artifacts/420bet-5a-4 \
+            test/ws2-real/PokerTwoStageActualGroth16WS2.t.sol
+          forge test --match-contract PokerTwoStageActualGroth16WS2Test -vv
+          rm -rf test/ws2-real
       - name: Qualify genuine encrypted-share recipient-key aggregate adapters together
         if: steps.cryptoscope.outputs.changed == 'true' || steps.recipient_scope.outputs.changed == 'true'
         working-directory: contracts

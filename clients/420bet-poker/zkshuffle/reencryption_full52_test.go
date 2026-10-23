@@ -88,6 +88,31 @@ func TestFull52RealEncryptedShuffleProof(t *testing.T) {
    return err
   })
  }
+ // Adversarial checks use the same compiled 52-card relation without another setup.
+ reject:=func(label string,bad *Reencrypt52){
+  t.Helper()
+  forged,err:=frontend.NewWitness(bad,ecc.BN254.ScalarField())
+  if err!=nil{return} // invalid field encodings are rejected by witness construction
+  if err:=cs.IsSolved(forged);err==nil{t.Fatalf("%s unexpectedly satisfied shuffle relation",label)}
+ }
+ duplicate:=*witness
+ duplicate.Indices[1]=duplicate.Indices[0]
+ reject("duplicate permutation position",&duplicate)
+ missing:=*witness
+ missing.Indices[51]=52
+ reject("missing permutation position",&missing)
+ malformed:=*witness
+ malformed.Input[7].C1X=big.NewInt(123456789)
+ reject("malformed ciphertext point",&malformed)
+ wrongRandomness:=*witness
+ wrongRandomness.Nonces[12]=42
+ reject("incorrect rerandomization",&wrongRandomness)
+ zeroRandomness:=*witness
+ zeroRandomness.Nonces[12]=0
+ reject("zero rerandomization",&zeroRandomness)
+ tamperedOutput:=*witness
+ tamperedOutput.Output[27].C2X=big.NewInt(42)
+ reject("substituted output ciphertext",&tamperedOutput)
  // Sound verifier rejects a changed public deck output AND replay into another hand.
  wrongContext:=*witness
  wrongContext.StatementScope=123457

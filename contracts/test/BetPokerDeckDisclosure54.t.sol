@@ -42,8 +42,12 @@ contract PokerDeckDisclosure54Test is PokerConfidentialDeal54Test {
         cheat54.prank(PROVIDER_A); disclosure.publish(id,digest,keccak256("encrypted manifest"));
         cheat54.prank(PROVIDER_A); disclosure.bindEnvelope(id,0,keccak256("encrypted seat 0"),KEY_A);
         cheat54.prank(PROVIDER_B); disclosure.bindEnvelope(id,1,keccak256("encrypted seat 1"),KEY_B);
-        cheat54.prank(PLAYER); disclosure.acknowledge(id,0,keccak256("authenticated receipt 0"));
-        cheat54.prank(PLAYER_B); disclosure.acknowledge(id,1,keccak256("authenticated receipt 1"));
+        bytes32 expectedReceipt0=disclosure.receiptDigest(id,0);
+
+        cheat54.prank(PLAYER); disclosure.acknowledge(id,0,expectedReceipt0);
+        bytes32 expectedReceipt1=disclosure.receiptDigest(id,1);
+
+        cheat54.prank(PLAYER_B); disclosure.acknowledge(id,1,expectedReceipt1);
         require(disclosure.allAcknowledged(id),"all private receipts");
         require(disclosure.verifyOpenedDeck(id,cards,keccak256("salt")),"deck verified");
         cheat54.expectRevert(PokerDeckDisclosure420.InvalidState.selector);
@@ -56,8 +60,12 @@ contract PokerDeckDisclosure54Test is PokerConfidentialDeal54Test {
         cheat54.prank(PROVIDER_A);disclosure.publish(id,deckHash,keccak256("manifest"));
         cheat54.prank(PROVIDER_A);disclosure.bindEnvelope(id,0,keccak256("envelope A"),KEY_A);
         cheat54.prank(PROVIDER_B);disclosure.bindEnvelope(id,1,keccak256("envelope B"),KEY_B);
-        cheat54.prank(PLAYER);disclosure.acknowledge(id,0,keccak256("receipt A"));
-        cheat54.prank(PLAYER_B);disclosure.acknowledge(id,1,keccak256("receipt B"));
+        bytes32 expectedReceipt0=disclosure.receiptDigest(id,0);
+
+        cheat54.prank(PLAYER); disclosure.acknowledge(id,0,expectedReceipt0);
+        bytes32 expectedReceipt1=disclosure.receiptDigest(id,1);
+
+        cheat54.prank(PLAYER_B); disclosure.acknowledge(id,1,expectedReceipt1);
         require(disclosure.allAcknowledged(id),"initial delivery accepted");
         cheat54.prank(PLAYER);keyRegistry.bindKey(TABLE,keccak256("rotated player key"));
         require(!disclosure.allAcknowledged(id),"stale envelope must block hand start");
@@ -72,6 +80,27 @@ contract PokerDeckDisclosure54Test is PokerConfidentialDeal54Test {
         cheat54.expectRevert(PokerDeckDisclosure420.NotRecipient.selector);
         cheat54.prank(OTHER); disclosure.acknowledge(id,0,keccak256("forgery"));
         require(!disclosure.allAcknowledged(id),"incomplete");
+    }
+    function testForgedOrSwappedReceiptRejected() public {
+        bytes32 id=_ready();
+        cheat54.prank(PROVIDER_A);
+        disclosure.publish(id,keccak256("deck root"),keccak256("manifest"));
+        cheat54.prank(PROVIDER_A);
+        disclosure.bindEnvelope(id,0,keccak256("envelope 0"),KEY_A);
+        cheat54.prank(PROVIDER_B);
+        disclosure.bindEnvelope(id,1,keccak256("envelope 1"),KEY_B);
+        bytes32 receipt0=disclosure.receiptDigest(id,0);
+        bytes32 receipt1=disclosure.receiptDigest(id,1);
+        cheat54.expectRevert(PokerDeckDisclosure420.InvalidValue.selector);
+        cheat54.prank(PLAYER);
+        disclosure.acknowledge(id,0,receipt1);
+        cheat54.expectRevert(PokerDeckDisclosure420.InvalidValue.selector);
+        cheat54.prank(PLAYER);
+        disclosure.acknowledge(id,0,keccak256("dealer forged receipt"));
+        require(!disclosure.allAcknowledged(id),"forged receipts cannot start betting");
+        cheat54.prank(PLAYER);
+        disclosure.acknowledge(id,0,receipt0);
+        require(!disclosure.allAcknowledged(id),"second player receipt required");
     }
     function testWrongOrMissingKeyBindingRejected() public {
         bytes32 id=_ready(); uint8[52] memory cards=_cards();

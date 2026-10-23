@@ -1,0 +1,86 @@
+{
+  "schema": "mad-buds-animation-manifest-v1",
+  "schemaVersion": "1.0",
+  "characterId": "sativa_steve",
+  "animationId": "ss_anim_10_victory_pacing",
+  "animationName": "victory_pacing",
+  "frameCount": 10,
+  "frameWidth": 1024,
+  "frameHeight": 1024,
+  "fps": 10,
+  "durationMs": 1000,
+  "loop": true,
+  "pivotNormalized": [
+    0.5,
+    0.85
+  ],
+  "sourceArt": "wide_horizontal_transparent_background_sprite_shee.png",
+  "repositoryDestination": "assets/arcade/mad-buds/sativa-steve/animations/ss_anim_10_victory_pacing/",
+  "visualApproval": "OWNER_APPROVED_SOURCE_STRIP; EXTRACTED_FRAMES_PENDING",
+  "frames": [
+    {
+      "index": 1,
+      "filename": "sativa_steve_anim_10_victory_pacing_frame_01.png",
+      "durationMs": 100,
+      "sha256": "c8c5d3a082f76ff62ebf57c95e4458e064e7e797f0cf151433bd176d1232148a"
+    },
+    {
+      "index": 2,
+      "filename": "sativa_steve_anim_10_victory_pacing_frame_02.png",
+      "durationMs": 100,
+      "sha256": "d6eb3bd04ade7e05246d24164a9e3cec55ca6bcb55e99d1f6c018ea9e07859d0"
+    },
+    {
+      "index": 3,
+      "filename": "sativa_steve_anim_10_victory_pacing_frame_03.png",
+      "durationMs": 100,
+      "sha256": "492ef3b85fb1c04ac86dd5c3c708cd910f9a3172270d1c0a420d0516d5b0d0ac"
+    },
+    {
+      "index": 4,
+      "filename": "sativa_steve_anim_10_victory_pacing_frame_04.png",
+      "durationMs": 100,
+      "sha256": "b986147892fb58df8bf5b32800a90b8f138211fe26dcebda18f77381a27a7b11"
+    },
+    {
+      "index": 5,
+      "filename": "sativa_steve_anim_10_victory_pacing_frame_05.png",
+      "durationMs": 100,
+      "sha256": "5b55ee53dec9f480ec14b49b29ad3daac5ccdc141e7b7c9629ec77ccdd8444b6"
+    },
+    {
+      "index": 6,
+      "filename": "sativa_steve_anim_10_victory_pacing_frame_06.png",
+      "durationMs": 100,
+      "sha256": "c9b2d1110404a8712c82f547759e96b682700d52fcd4392b6398662576efedd5"
+    },
+    {
+      "index": 7,
+      "filename": "sativa_steve_anim_10_victory_pacing_frame_07.png",
+      "durationMs": 100,
+      "sha256": "e7ae9172b2cf12b81ed0ea1516339e06022e73651f75ca06e06d899895e6c168"
+    },
+    {
+      "index": 8,
+      "filename": "sativa_steve_anim_10_victory_pacing_frame_08.png",
+      "durationMs": 100,
+      "sha256": "93efb70fd0257aa898d0dab745ff70a7690beb1e59b963daacec28ffc4a0e0a0"
+    },
+    {
+      "index": 9,
+      "filename": "sativa_steve_anim_10_victory_pacing_frame_09.png",
+      "durationMs": 100,
+      "sha256": "778dab5c88d49ed5e441c2970df3bce894181a67fdfde0fe49ffde7bf3f36657"
+    },
+    {
+      "index": 10,
+      "filename": "sativa_steve_anim_10_victory_pacing_frame_10.png",
+      "durationMs": 100,
+      "sha256": "66a474dc82a033d0b031136388aafeef44ac47fc0deb0092fbc8183a25fdb45d"
+    }
+  ],
+  "preview": {
+    "filename": "sativa_steve_anim_10_victory_pacing_preview.gif",
+    "sha256": "28a724da483fe549179c48c3c94fd8e44639eedc739fbfdb9f260f1be873d0f5"
+  }
+}

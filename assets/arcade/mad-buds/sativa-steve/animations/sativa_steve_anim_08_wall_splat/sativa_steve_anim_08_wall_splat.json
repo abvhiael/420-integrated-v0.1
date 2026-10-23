@@ -1,0 +1,70 @@
+{
+  "character": "sativa_steve",
+  "animation_id": "ss_anim_08",
+  "animation_name": "wall_splat",
+  "frame_count": 10,
+  "fps": 10,
+  "dimensions": {
+    "width": 1024,
+    "height": 1024
+  },
+  "background": "transparent",
+  "source_strip": "/mnt/data/a_wide_transparent_background_sprite_sheet_style_i.png",
+  "repository_destination": "assets/arcade/mad-buds/sativa-steve/animations/ss_anim_08_wall_splat/",
+  "frames": [
+    {
+      "index": 1,
+      "file": "sativa_steve_anim_08_wall_splat_frame_01.png",
+      "sha256": "2fb57220c922264ba3f57ce3da98e8d1e90403381ca3ebd3e5809f8811abb93c"
+    },
+    {
+      "index": 2,
+      "file": "sativa_steve_anim_08_wall_splat_frame_02.png",
+      "sha256": "094083117e96f361ce52d559c854359ab2a50bae793fbe3291edc5503fb82b7a"
+    },
+    {
+      "index": 3,
+      "file": "sativa_steve_anim_08_wall_splat_frame_03.png",
+      "sha256": "db94b2b910687e2ac699bcb0fe19172bd4ff3c3233a8c2ff808e37fa512caec1"
+    },
+    {
+      "index": 4,
+      "file": "sativa_steve_anim_08_wall_splat_frame_04.png",
+      "sha256": "db672d3e370b9bd0964a926d8edec6c1bea1e6cacf06db3832c8f2a5af4d5df4"
+    },
+    {
+      "index": 5,
+      "file": "sativa_steve_anim_08_wall_splat_frame_05.png",
+      "sha256": "d9053bcd52ae4ca022082740df9ea40ad39d9e5e0d78c8082a6695a39ad57bc4"
+    },
+    {
+      "index": 6,
+      "file": "sativa_steve_anim_08_wall_splat_frame_06.png",
+      "sha256": "f402352590da0dd29491a849c4375edb7c32885b88baa192f3d621dd0c0e8342"
+    },
+    {
+      "index": 7,
+      "file": "sativa_steve_anim_08_wall_splat_frame_07.png",
+      "sha256": "e121823e98c9aa3133466c12414ab28ecd646d82643456f6a47e92df3232d473"
+    },
+    {
+      "index": 8,
+      "file": "sativa_steve_anim_08_wall_splat_frame_08.png",
+      "sha256": "48c406d231ce9b019e2923b55931bba2ca5a5524a223b467abe5f6e067fd7158"
+    },
+    {
+      "index": 9,
+      "file": "sativa_steve_anim_08_wall_splat_frame_09.png",
+      "sha256": "a682b6b41af2d3d33aab82ab40880dd0555ca74a922c7dfc9dfe4b1fb6f979ab"
+    },
+    {
+      "index": 10,
+      "file": "sativa_steve_anim_08_wall_splat_frame_10.png",
+      "sha256": "d42586c3262b2f1d4ed3b0d36e3b0486bb0af2423b89afa14409f7238e2c8ac5"
+    }
+  ],
+  "preview": {
+    "file": "sativa_steve_anim_08_wall_splat_preview.gif",
+    "sha256": "3c1b6657a952b73cf3b2d0f2d11586a78ab03b3d0495723550d095b334f7ebff"
+  }
+}

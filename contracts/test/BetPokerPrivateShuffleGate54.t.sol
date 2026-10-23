@@ -44,14 +44,12 @@ contract PokerPrivateShuffleGate54Test is PokerConfidentialDeal54Test {
             address(initialVerifier),keccak256("TEST INITIAL VERSION"),
             keccak256("TEST INITIAL CIRCUIT"),keccak256("TEST INITIAL KEY"),
             keccak256("TEST INITIAL SCHEMA"),keccak256(abi.encode(uint256(19),uint256(20))));
-        independence=new PokerShuffleProviderIndependence420(address(this),address(0xC0FFEE));
+        independence=new PokerShuffleProviderIndependence420(address(this));
+        cheat54.prank(PROVIDER_A); independence.claim(keccak256("provider A independently attested controller"),keccak256("provider A independently verified dossier"),uint64(block.timestamp+30 days));
+        cheat54.prank(PROVIDER_B); independence.claim(keccak256("provider B independently attested controller"),keccak256("provider B independently verified dossier"),uint64(block.timestamp+30 days));
         independence.attest(PROVIDER_A,keccak256("provider A independently attested controller"),keccak256("provider A independently verified dossier"),uint64(block.timestamp+30 days));
         independence.attest(PROVIDER_B,keccak256("provider B independently attested controller"),keccak256("provider B independently verified dossier"),uint64(block.timestamp+30 days));
         availability=new ShuffleAvailabilityFixture54();
-        cheat54.prank(address(0xC0FFEE));
-        independence.review(PROVIDER_A,keccak256("provider A independently attested controller"),keccak256("provider A independently reviewed dossier"),uint64(block.timestamp+30 days));
-        cheat54.prank(address(0xC0FFEE));
-        independence.review(PROVIDER_B,keccak256("provider B independently attested controller"),keccak256("provider B independently reviewed dossier"),uint64(block.timestamp+30 days));
         gate=new PokerPrivateShuffleGate420(address(deal),address(initialDeck),address(verifier),address(independence),address(availability),
             keccak256("ZK CIRCUIT MUST BE AUDITED BEFORE DEPLOY"),keccak256(abi.encode(uint256(19),uint256(20))));
     }
@@ -68,10 +66,12 @@ contract PokerPrivateShuffleGate54Test is PokerConfidentialDeal54Test {
         bytes32 root=initialDeck.rootOf(id);
         bytes32 output=keccak256("output");
         verifier.allow(gate.statement(id,1,root,output));
+        cheat54.prank(PROVIDER_B); independence.claim(keccak256("provider A independently attested controller"),keccak256("conflicting controller evidence"),uint64(block.timestamp+30 days));
         independence.attest(PROVIDER_B,keccak256("provider A independently attested controller"),
             keccak256("conflicting controller evidence"),uint64(block.timestamp+30 days));
         cheat54.expectRevert(PokerPrivateShuffleGate420.Unauthorized.selector);
         cheat54.prank(PROVIDER_A);gate.proveStage(id,1,root,output,hex"010203");
+        cheat54.prank(PROVIDER_B); independence.claim(keccak256("provider B independently attested controller"),keccak256("new independent evidence"),uint64(block.timestamp+30 days));
         independence.attest(PROVIDER_B,keccak256("provider B independently attested controller"),
             keccak256("new independent evidence"),uint64(block.timestamp+30 days));
         independence.revoke(PROVIDER_B);
@@ -83,6 +83,7 @@ contract PokerPrivateShuffleGate54Test is PokerConfidentialDeal54Test {
         bytes32 root=initialDeck.rootOf(id);
         bytes32 output=keccak256("output");
         verifier.allow(gate.statement(id,1,root,output));
+        cheat54.prank(PROVIDER_A); independence.claim(keccak256("provider A independently attested controller"),keccak256("expiring verification dossier"),uint64(block.timestamp+1));
         independence.attest(PROVIDER_A,keccak256("provider A independently attested controller"),
             keccak256("expiring verification dossier"),uint64(block.timestamp+1));
         cheat54.warp(block.timestamp+2);
@@ -98,13 +99,19 @@ contract PokerPrivateShuffleGate54Test is PokerConfidentialDeal54Test {
         cheat54.expectRevert(PokerPrivateShuffleGate420.InvalidProof.selector);
         cheat54.prank(PROVIDER_A);gate.proveStage(id,1,root,output,hex"010203");
     }
-    function testIndependentReviewerRevocationBlocksBothStages() public {
+    function testSoleGovernanceAndProviderEvidenceFailClosed() public {
         bytes32 id=_hand54();
         bytes32 root=initialDeck.rootOf(id);
         bytes32 output=keccak256("output");
         verifier.allow(gate.statement(id,1,root,output));
-        cheat54.prank(address(0xC0FFEE));
-        independence.revokeIndependentReview(PROVIDER_B);
+        cheat54.prank(PROVIDER_A);
+        cheat54.expectRevert(PokerShuffleProviderIndependence420.Unauthorized.selector);
+        independence.revoke(PROVIDER_B);
+        independence.recordAudit(PROVIDER_B,keccak256("independent public report"),
+            keccak256("provider B independently verified dossier"),keccak256("content-addressed report URL"));
+        require(independence.independentlyEligible(PROVIDER_A,PROVIDER_B),"reporter gained an approval veto");
+        cheat54.prank(PROVIDER_B); independence.claim(keccak256("unverified changed controller"),
+            keccak256("new unapproved evidence"),uint64(block.timestamp+30 days));
         cheat54.expectRevert(PokerPrivateShuffleGate420.Unauthorized.selector);
         cheat54.prank(PROVIDER_A);gate.proveStage(id,1,root,output,hex"010203");
     }

@@ -18,7 +18,7 @@ for index,d in enumerate(data):
     pub=[int(v) for v in d["public"]]
     if len(pub)!=18 or any(v<0 or v>=FR for v in pub):
         raise SystemExit("invalid public field")
-    if (pub[0],pub[1],pub[2],pub[3],pub[4])!=(420,root,index//2,index//4%2,index%2):
+    if (pub[0],pub[1],pub[2],pub[3],pub[4])!=(420,root,index//2,(index//2)%2,index%2):
         # generator loops position,provider; for 0..7: p=i//2, seat=p%2
         raise SystemExit("invalid physical-position, recipient, provider or authenticated root")
     if d["position"]!=pub[2] or d["seat"]!=pub[3] or d["provider"]!=pub[4]:
@@ -48,7 +48,6 @@ dst.parent.mkdir(parents=True,exist_ok=True)
 dst.write_text(text)
 def words(values):
     return ",".join("uint256("+str(x)+")" for x in values)
-body=String="""""
 header=r'''// SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
 import "../../src/bet/generated/QualifiedWS3EightDeliveryGroth16.sol";

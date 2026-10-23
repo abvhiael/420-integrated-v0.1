@@ -66,6 +66,17 @@ contract PokerPrivateShuffleGate54Test is PokerConfidentialDeal54Test {
         cheat54.expectRevert(PokerPrivateShuffleGate420.Unauthorized.selector);
         cheat54.prank(PROVIDER_A);gate.proveStage(id,1,root,output,hex"010203");
     }
+    function testExpiredAttestationBlocksStage() public {
+        bytes32 id=_hand54();
+        bytes32 root=initialDeck.rootOf(id);
+        bytes32 output=keccak256("output");
+        verifier.allow(gate.statement(id,1,root,output));
+        independence.attest(PROVIDER_A,keccak256("provider A independently attested controller"),
+            keccak256("expiring verification dossier"),uint64(block.timestamp+1));
+        cheat54.warp(block.timestamp+2);
+        cheat54.expectRevert(PokerPrivateShuffleGate420.Unauthorized.selector);
+        cheat54.prank(PROVIDER_A);gate.proveStage(id,1,root,output,hex"010203");
+    }
     function testProofGateStagesAndTranscriptBinding() public {
         bytes32 id=_hand54();
         bytes32 certifiedRoot=initialDeck.rootOf(id);

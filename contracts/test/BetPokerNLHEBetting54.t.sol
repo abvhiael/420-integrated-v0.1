@@ -382,8 +382,10 @@ contract WS5HostileBondToken54 {
         attempted=true;
         (bool ok,bytes memory output)=to.call(data);
         succeeded=ok;
-        if(!ok&&output.length>=4){assembly { mstore(0x00,mload(add(output,32))) }
-            failure=bytes4(output);
+        if(!ok&&output.length>=4){
+            bytes4 selector;
+            assembly { selector := mload(add(output,32)) }
+            failure=selector;
         }
     }
     function transferFrom(address from,address to,uint256 value)external returns(bool){

@@ -155,6 +155,12 @@ contract PokerLiveCardReveals420 is IPokerAuthenticatedStreet420 {
     /// A completed pair with an invalid unmask proof does not blame either
     /// provider unless other cryptographic evidence proves their wrongdoing.
     function missingProviders(bytes32 handId,uint8 street)external view returns(uint8 fault){
+        // Evidence of provider non-delivery is meaningful only for an actual,
+        // chain-authorized reveal window over a proven final shuffled deck.
+        // Never attribute fault for hypothetical, premature or closed streets.
+        if(street<1||street>4||!engine.canRevealStreet(handId,street))return 0;
+        PokerPrivateShuffleGate420.Record memory shuffled=shuffle.recordOf(handId);
+        if(shuffled.stage!=2||shuffled.finalDeckRoot==bytes32(0))return 0;
         PokerNLHEBetting420.Game memory g=engine.gameOf(handId);
         uint8 n=_playerCount(g.seatsMask);
         if(n<2||n>9)return 0;

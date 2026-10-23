@@ -24,7 +24,7 @@ func TestFullInitial52RealProof(t *testing.T) {
  if inverse8==nil{t.Fatal("cofactor not invertible in subgroup")}
  subgroupQ:=new(native.PointAffine).ScalarMultiplication(thresholdPK,inverse8)
  qx,qy:=coordinates(subgroupQ)
- w:=&InitialDeck52{HandScope:420,PublicKeyX:pkX,PublicKeyY:pkY,SubgroupPreimageX:qx,SubgroupPreimageY:qy}
+ w:=&InitialDeck52{HandScope:420,StatementScope:123456,PublicKeyX:pkX,PublicKeyY:pkY,SubgroupPreimageX:qx,SubgroupPreimageY:qy}
  for i:=0;i<52;i++ {
   randomness:=int64(i+100)
   c1,c2:=cipherOf(int64(i+1),randomness,&base,thresholdPK)
@@ -33,6 +33,7 @@ func TestFullInitial52RealProof(t *testing.T) {
  }
  root,_:=nativeCipherRootAndPath(420,w.Cards[:],0)
  w.DeckRoot=root
+ w.StatementScope=initial52TestStatement(root,pkX.(*big.Int),pkY.(*big.Int))
  cs,err:=frontend.Compile(ecc.BN254.ScalarField(),r1cs.NewBuilder,&InitialDeck52{})
  if err!=nil{t.Fatal(err)}
  t.Logf("canonical initial 52-card constraints: %d",cs.GetNbConstraints())
@@ -42,7 +43,27 @@ func TestFullInitial52RealProof(t *testing.T) {
  public,err:=witness.Public();if err!=nil{t.Fatal(err)}
  if err:=groth16.Verify(proof,vk,public);err!=nil{t.Fatalf("valid initial deck rejected: %v",err)}
  exportTestGroth16Solidity(t,"InitialDeck52",vk,proof,
-  w.DeckRoot,w.HandScope,w.PublicKeyX,w.PublicKeyY)
+  w.DeckRoot,w.StatementScope,w.HandScope,w.PublicKeyX,w.PublicKeyY)
+ // Adversarial relation checks reuse this exact compiled 52-card circuit.
+ // They never replace the genuine valid proof and verifier acceptance above.
+ assertUnsatisfied:=func(label string, forged *InitialDeck52){
+  t.Helper()
+  x,err:=frontend.NewWitness(forged,ecc.BN254.ScalarField())
+  if err!=nil{return} // missing or noncanonical field representation is rejected
+  if err:=cs.IsSolved(x);err==nil{t.Fatalf("%s satisfied authentic 52-card constraints",label)}
+ }
+ duplicate:=*w;duplicate.Cards[1]=w.Cards[0]
+ assertUnsatisfied("duplicated encrypted position",&duplicate)
+ tamperedCipher:=*w;tamperedCipher.Cards[19].C2X=big.NewInt(987654)
+ assertUnsatisfied("altered card ciphertext",&tamperedCipher)
+ missingPosition:=*w;missingPosition.Cards[51]=ElGamalCipher{C1X:0,C1Y:0,C2X:0,C2Y:0}
+ assertUnsatisfied("missing ciphertext position",&missingPosition)
+ zeroNonce:=*w;zeroNonce.Randomness[12]=0
+ assertUnsatisfied("zero encryption nonce",&zeroNonce)
+ wrongPublicKey:=*w;wrongPublicKey.PublicKeyX=big.NewInt(99)
+ assertUnsatisfied("malformed public key",&wrongPublicKey)
+ wrongStatement:=*w;wrongStatement.StatementScope=0
+ assertUnsatisfied("zero statement digest",&wrongStatement)
  badSubgroup:=*w
  badSubgroup.SubgroupPreimageX=big.NewInt(42)
  badSubgroupWitness,err:=frontend.NewWitness(&badSubgroup,ecc.BN254.ScalarField());if err!=nil{t.Fatal(err)}
@@ -51,6 +72,10 @@ func TestFullInitial52RealProof(t *testing.T) {
  badWitness,err:=frontend.NewWitness(&tampered,ecc.BN254.ScalarField());if err!=nil{t.Fatal(err)}
  badPublic,err:=badWitness.Public();if err!=nil{t.Fatal(err)}
  if err:=groth16.Verify(proof,vk,badPublic);err==nil{t.Fatal("changed initial deck root verified")}
+ wrongContext:=*w;wrongContext.StatementScope=123457
+ wrongContextWitness,err:=frontend.NewWitness(&wrongContext,ecc.BN254.ScalarField());if err!=nil{t.Fatal(err)}
+ wrongContextPublic,err:=wrongContextWitness.Public();if err!=nil{t.Fatal(err)}
+ if err:=groth16.Verify(proof,vk,wrongContextPublic);err==nil{t.Fatal("changed full initial-deck context verified")}
  replay:=*w;replay.HandScope=421
  replayWitness,err:=frontend.NewWitness(&replay,ecc.BN254.ScalarField());if err!=nil{t.Fatal(err)}
  replayPublic,err:=replayWitness.Public();if err!=nil{t.Fatal(err)}

@@ -10,7 +10,7 @@ import "./PokerVerifierVersions420.sol";
 ///      A mock returning true is not a cryptographic proof verifier.
 abstract contract PokerGnarkVerifierBound420 {
     uint256 internal constant FR=
-        21888242871839275222246405745257275088696311157297823662689037894645226208583;
+        21888242871839275222246405745257275088548364400416034343698204186575808495617;
     address public immutable groth16Verifier;
     PokerVerifierVersions420 public immutable versions;
     bytes32 public immutable versionId;
@@ -78,19 +78,19 @@ contract PokerGnarkShuffle52Adapter420 is PokerGnarkVerifierBound420,IPokerShuff
 /// @notice Initial encrypted 52-card correctness proof bridge.
 /// Public inputs: [initialDeckRoot,handScope,pkX,pkY].
 contract PokerGnarkInitial52Adapter420 is PokerGnarkVerifierBound420,IPokerInitialDeckProof420 {
-    bytes4 private constant SELECTOR=bytes4(keccak256("verifyProof(uint256[8],uint256[4])"));
+    bytes4 private constant SELECTOR=bytes4(keccak256("verifyProof(uint256[8],uint256[5])"));
     constructor(address actual_,address registry_,bytes32 version_,bytes32 circuit_,
         bytes32 keyHash_,bytes32 schema_,bytes32 thresholdKey_)
         PokerGnarkVerifierBound420(actual_,registry_,version_,circuit_,keyHash_,schema_,thresholdKey_) {}
     function verifyInitialDeck(bytes32 statementHash,bytes32 handId,bytes32 deckRoot,
         bytes32 thresholdKey,bytes calldata packedProof) external view returns(bool) {
         if(statementHash==bytes32(0)||handId==bytes32(0)||
-           thresholdKey!=thresholdKeyCommitment||packedProof.length!=384)return false;
-        (uint256[8] memory proof,uint256[4] memory input)=
-            abi.decode(packedProof,(uint256[8],uint256[4]));
-        if(input[0]!=uint256(deckRoot)||input[1]!=_scope(handId)||
-           !_publicKeyMatches(input[2],input[3]))return false;
-        for(uint256 i=0;i<4;i++)if(input[i]>=FR)return false;
+           thresholdKey!=thresholdKeyCommitment||packedProof.length!=416)return false;
+        (uint256[8] memory proof,uint256[5] memory input)=
+            abi.decode(packedProof,(uint256[8],uint256[5]));
+        if(input[0]!=uint256(deckRoot)||input[1]!=uint256(statementHash)%FR||
+           input[2]!=_scope(handId)||!_publicKeyMatches(input[3],input[4]))return false;
+        for(uint256 i=0;i<5;i++)if(input[i]>=FR)return false;
         return _safeVerify(abi.encodeWithSelector(SELECTOR,proof,input));
     }
 }

@@ -139,7 +139,7 @@ contract PokerNLHEBetting54Fixture is PokerPrivateShuffleGate54Test {
                 points[10]=3000+pos;points[11]=4000+provider;
                 uint256[18] memory inputs;
                 PokerPrivateShuffleGate420.Record memory deck=gate.recordOf(handId);
-                inputs[0]=uint256(handId)%21888242871839275222246405745257275088696311157297823662689037894645226208583;
+                inputs[0]=uint256(handId)%21888242871839275222246405745257275088548364400416034343698204186575808495617;
                 inputs[1]=uint256(deck.finalDeckRoot);
                 inputs[2]=pos;inputs[3]=seat;inputs[4]=provider;
                 inputs[5]=proofBook.context(handId,pos,seat,provider,deck.finalDeckRoot,

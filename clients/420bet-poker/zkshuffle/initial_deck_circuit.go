@@ -13,6 +13,7 @@ import (
 // deck commitment by the on-chain verifier adapter before live deployment.
 type InitialDeck52 struct {
  DeckRoot frontend.Variable `gnark:",public"`
+ StatementScope frontend.Variable `gnark:",public"`
  Cards [52]ElGamalCipher
  HandScope frontend.Variable `gnark:",public"`
  PublicKeyX frontend.Variable `gnark:",public"`
@@ -63,6 +64,9 @@ func initialDeckRelation(api frontend.API,cards []ElGamalCipher,scope,pkX,pkY fr
  return nil
 }
 func(c *InitialDeck52)Define(api frontend.API)error {
+ // A statement digest over chain, verifier, config, seat epoch and deck root is
+ // an actual Groth16 public input; it cannot be altered after proof generation.
+ api.AssertIsDifferent(c.StatementScope,0)
  if err:=initialDeckRelation(api,c.Cards[:],c.HandScope,c.PublicKeyX,c.PublicKeyY,c.SubgroupPreimageX,c.SubgroupPreimageY,c.Randomness[:]);err!=nil{return err}
  root,err:=ciphertextMerkleRoot(api,c.HandScope,c.Cards[:]);if err!=nil{return err}
  api.AssertIsEqual(root,c.DeckRoot)

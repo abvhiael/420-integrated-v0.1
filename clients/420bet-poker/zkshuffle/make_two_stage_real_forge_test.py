@@ -269,6 +269,36 @@ contract PokerTwoStageActualGroth16WS2Test {
         bytes32 altered=availability.publish(420,invalid);
         require(altered!=bytes32(ix[0]),"modified ciphertext accepted original MiMC root");
     }
+    function testSoleGovernanceAndIndependentEvidenceNoOutsideVeto() public {
+        PokerShuffleProviderIndependence420 registry=new PokerShuffleProviderIndependence420(address(this));
+        bytes32 controller=keccak256("independent controller A");
+        bytes32 dossier=keccak256("independently verifiable provider A dossier");
+        uint64 expiry=uint64(block.timestamp+30 days);
+        vm.prank(PROVIDER_A);
+        registry.claim(controller,dossier,expiry);
+        vm.expectRevert(PokerShuffleProviderIndependence420.InvalidAttestation.selector);
+        registry.attest(PROVIDER_A,controller,dossier,expiry,bytes32(0));
+        vm.prank(PROVIDER_A);
+        vm.expectRevert(PokerShuffleProviderIndependence420.InvalidAttestation.selector);
+        registry.recordAudit(PROVIDER_A,controller,keccak256("self signed audit"),dossier,keccak256("self report"));
+        vm.prank(address(0xC0FFEE));
+        bytes32 auditId=registry.recordAudit(PROVIDER_A,controller,keccak256("external signed report"),
+            dossier,keccak256("independently retrievable audit location"));
+        require(auditId!=bytes32(0),"missing independent report commitment");
+        vm.prank(address(0xC0FFEE));
+        vm.expectRevert(PokerShuffleProviderIndependence420.Unauthorized.selector);
+        registry.attest(PROVIDER_A,controller,dossier,expiry,auditId);
+        registry.attest(PROVIDER_A,controller,dossier,expiry,auditId);
+        vm.prank(address(0xC0FFEE));
+        vm.expectRevert(PokerShuffleProviderIndependence420.Unauthorized.selector);
+        registry.revoke(PROVIDER_A);
+        (bytes32 activeController,,,,)=registry.attestations(PROVIDER_A);
+        require(activeController==controller,"governance approval disrupted");
+        registry.revoke(PROVIDER_A);
+        vm.prank(PROVIDER_A);
+        vm.expectRevert(PokerShuffleProviderIndependence420.InvalidAttestation.selector);
+        registry.recordAudit(PROVIDER_A,controller,keccak256("second self audit"),dossier,keccak256("self location"));
+    }
     function testProviderControlConflictAndProofSubstitutionRejected() public {
         (PokerInitialEncryptedDeck420 initialDeck,
          PokerPrivateShuffleGate420 gate,

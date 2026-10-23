@@ -64,7 +64,7 @@ contract CanonicalInitialHandReal54 {
  function setRulesetId(bytes32 nextValue) external {rulesetId=nextValue;}
  function setVersionId(bytes32 nextValue) external {versionId=nextValue;}
  function getHand(bytes32) external view returns(PokerConfidentialDeal420.Hand memory h) {
-  h.canonicalTableId=canonicalTableId;
+  h.tableId=canonicalTableId;
   h.configHash=configHash;
   h.rulesetId=rulesetId;
   h.versionId=versionId;

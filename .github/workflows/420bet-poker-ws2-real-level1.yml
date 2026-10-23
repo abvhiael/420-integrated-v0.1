@@ -51,7 +51,40 @@ jobs:
           test -s artifacts/420bet-ws2/EXPERIMENTAL-InitialDeck52Verifier.sol
           test -s artifacts/420bet-ws2/EXPERIMENTAL-InitialDeck52SolidityFixture.json
           echo "Inherited unchanged InitialDeck52 SHA 4f16aa1c9e5c08c4327990ba6d381ef09c2885c5 from run 39982033941"
+      - name: Determine whether proven WS2 Go inputs changed
+        id: shuffle_scope
+        run: |
+          set -eu
+          QUALIFIED=752712b74306d2f2ce5670edea130dbede7c5f37
+          git fetch --no-tags --depth=1 origin "$QUALIFIED"
+          changed=$(git diff --name-only "$QUALIFIED" HEAD -- \
+            clients/420bet-poker/zkshuffle/reencryption_circuit.go \
+            clients/420bet-poker/zkshuffle/reencryption_full52_test.go \
+            clients/420bet-poker/zkshuffle/shuffle_context_fixture_test.go \
+            clients/420bet-poker/zkshuffle/ciphertext_merkle.go \
+            clients/420bet-poker/zkshuffle/go.mod \
+            clients/420bet-poker/zkshuffle/go.sum)
+          if test -z "$changed"; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "Genuine stage A/B proof fixtures inherit run 39998191650 at $QUALIFIED; no costly regeneration"
+          else
+            echo "$changed"
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Inherit unchanged genuine stage A/B Groth16 proofs and native MiMC ciphertext fixtures
+        if: steps.shuffle_scope.outputs.changed == 'false'
+        uses: actions/download-artifact@v4
+        with:
+          name: 420bet-ws2-real-two-stage-exact-sha
+          run-id: 39998191650
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: artifacts/420bet-ws2
+      - name: Preserve inherited proof provenance
+        if: steps.shuffle_scope.outputs.changed == 'false'
+        run: |
+          printf 'inherited_ws2_proof_sha=752712b74306d2f2ce5670edea130dbede7c5f37\ninherited_ws2_proof_run=39998191650\ninherited_ws2_proof_job=120567115740\n' > artifacts/420bet-ws2/proof-inheritance.txt
       - name: Generate only changed genuine two-stage 52-card shuffle proofs
+        if: steps.shuffle_scope.outputs.changed == 'true'
         working-directory: clients/420bet-poker/zkshuffle
         env:
           POKER_ZK_ARTIFACT_DIR: ../../../artifacts/420bet-ws2

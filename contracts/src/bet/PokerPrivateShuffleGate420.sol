@@ -2,6 +2,7 @@
 pragma solidity ^0.8.24;
 import "./PokerConfidentialDeal420.sol";
 import "./PokerInitialEncryptedDeck420.sol";
+import "./PokerShuffleProviderIndependence420.sol";
 
 /// @notice Proof-gated, transcript-bound two-party re-encryption shuffle pipeline.
 /// @dev Fail-closed integration seam. The external verifier MUST independently validate a
@@ -20,6 +21,7 @@ contract PokerPrivateShuffleGate420 {
     PokerConfidentialDeal420 public immutable deals;
     PokerInitialEncryptedDeck420 public immutable initialDeck;
     IPokerShuffleProofVerifier420 public immutable verifier;
+    PokerShuffleProviderIndependence420 public immutable independence;
     bytes32 public immutable circuitId;
     bytes32 public immutable thresholdKeyCommitment;
     struct Record {
@@ -34,14 +36,16 @@ contract PokerPrivateShuffleGate420 {
     error InvalidConfiguration(); error InvalidState(); error Unauthorized();
     error InvalidProof(); error WrongStage();
     event ShuffleStageVerified(bytes32 indexed handId,uint8 stage,bytes32 outputRoot,bytes32 proofHash);
-    constructor(address deals_,address initialDeck_,address verifier_,bytes32 circuitId_,bytes32 keyCommitment_) {
+    constructor(address deals_,address initialDeck_,address verifier_,address independence_,bytes32 circuitId_,bytes32 keyCommitment_) {
         if(deals_==address(0)||initialDeck_==address(0)||verifier_==address(0)||verifier_.code.length==0||
+            independence_==address(0)||independence_.code.length==0||
             circuitId_==bytes32(0)||keyCommitment_==bytes32(0)) revert InvalidConfiguration();
         deals=PokerConfidentialDeal420(deals_);
         initialDeck=PokerInitialEncryptedDeck420(initialDeck_);
         if(address(initialDeck.deals())!=deals_ ||
            initialDeck.thresholdKeyCommitment()!=keyCommitment_)revert InvalidConfiguration();
         verifier=IPokerShuffleProofVerifier420(verifier_);
+        independence=PokerShuffleProviderIndependence420(independence_);
         circuitId=circuitId_;
         thresholdKeyCommitment=keyCommitment_;
     }
@@ -60,6 +64,7 @@ contract PokerPrivateShuffleGate420 {
         bytes calldata proof) external {
         PokerConfidentialDeal420.Hand memory h=deals.getHand(handId);
         if(h.state!=PokerConfidentialDeal420.State.COMMITTED) revert InvalidState();
+        if(!independence.independentlyEligible(deals.providerA(),deals.providerB())) revert Unauthorized();
         if(stage!=1&&stage!=2) revert WrongStage();
         if((stage==1&&msg.sender!=deals.providerA()) ||
             (stage==2&&msg.sender!=deals.providerB())) revert Unauthorized();

@@ -90,7 +90,10 @@ contract PokerNLHEBetting420 {
     // captured at reservation, before any provider can delay a proof.
     mapping(bytes32=>uint64) public fundedEvidenceDeadline;
     mapping(bytes32=>bytes32) public fundedSnapshot;
-    mapping(bytes32=>bool) public recoveryOpened;
+    // Exactly one bounded recovery review per canonical missing-proof phase.
+    // Later stages may open their own windows after genuine late correction.
+    mapping(bytes32=>uint16) public recoveryStageMask;
+    event MissingEvidenceRecoveryCorrected(bytes32 indexed handId,uint8 failedPhase);
     struct EvidenceRecovery {uint64 openedAt;uint64 finalizableAt;bytes32 stateRoot;Phase failedPhase;bool active;}
     mapping(bytes32=>EvidenceRecovery) public evidenceRecovery;
     uint64 public constant PROOF_DELIVERY_WINDOW=1 hours;
@@ -382,7 +385,8 @@ contract PokerNLHEBetting420 {
     function beginMissingEvidenceRecovery(bytes32 handId) external {
         Game storage g=games[handId];
         if(!g.initialized||handSettled[handId]||handAborted[handId]||
-            evidenceRecovery[handId].active||recoveryOpened[handId]||
+            evidenceRecovery[handId].active||
+            (recoveryStageMask[handId]&(uint16(1)<<uint8(g.phase)))!=0||
             ledger.activeHand(g.tableId)!=handId||
             fundedSnapshot[handId]==bytes32(0)||
             ledger.lockedSnapshot(g.tableId)!=fundedSnapshot[handId]||
@@ -392,7 +396,7 @@ contract PokerNLHEBetting420 {
         // A delayed caller cannot move finality indefinitely: the bounded
         // review period starts at the immutable street evidence deadline.
         uint64 end=uint64(uint256(evidenceDueAt[handId])+RECOVERY_REVIEW_WINDOW);
-        recoveryOpened[handId]=true;
+        recoveryStageMask[handId]|=uint16(1)<<uint8(g.phase);
         evidenceRecovery[handId]=EvidenceRecovery(uint64(block.timestamp),end,
             g.stateRoot,g.phase,true);
         emit MissingEvidenceRecoveryOpened(handId,uint8(g.phase),g.stateRoot,end);
@@ -625,6 +629,15 @@ contract PokerNLHEBetting420 {
         if(msg.sender!=address(revealForTable[g.tableId])||msg.sender==address(0))revert Unauthorized();
         if(!this.canRevealStreet(handId,street)||
            !revealForTable[g.tableId].isStageComplete(handId,street))revert WaitingForReveal();
+        // Actual accepted late Groth16 shares close this stage's recovery
+        // atomically. A later street may still have its OWN one-time review.
+        EvidenceRecovery storage recovery=evidenceRecovery[handId];
+        if(recovery.active){
+            if(recovery.failedPhase!=g.phase||recovery.stateRoot!=g.stateRoot)
+                revert InvalidState();
+            recovery.active=false;
+            emit MissingEvidenceRecoveryCorrected(handId,uint8(g.phase));
+        }
         g.phase=street==1?Phase.FLOP:street==2?Phase.TURN:Phase.RIVER;
         if(street==1)flopOpened[handId]=true;
         for(uint8 i=0;i<9;i++)if(_participates(g.seatsMask,i)){

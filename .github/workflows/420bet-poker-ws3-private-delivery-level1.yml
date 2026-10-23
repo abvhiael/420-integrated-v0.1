@@ -127,6 +127,7 @@ jobs:
       - name: Focused funded NLHE and private receipt adversarial regressions
         working-directory: contracts
         env:
+          FOUNDRY_VIA_IR: 'false'
           FOUNDRY_SRC: src/bet
           FOUNDRY_TEST: test/ws3-funded
         run: |

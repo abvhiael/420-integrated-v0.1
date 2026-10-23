@@ -26,6 +26,7 @@ type Reencrypt2 struct {
 }
 type Reencrypt52 struct {
  InputRoot frontend.Variable `gnark:",public"`
+ StatementScope frontend.Variable `gnark:",public"`
  OutputRoot frontend.Variable `gnark:",public"`
  Input [52]ElGamalCipher
  Output [52]ElGamalCipher
@@ -68,6 +69,7 @@ func proveReencryption(api frontend.API, input,output []ElGamalCipher,
   api.AssertIsDifferent(sourceC1.X,0)
   curve.AssertIsOnCurve(sourceC2)
   randomG:=curve.ScalarMul(generator,nonces[i])
+  api.AssertIsDifferent(randomG.X,0) // reject scalars that are zero modulo subgroup order
   randomK:=curve.ScalarMul(publicKey,nonces[i])
   outC1:=curve.Add(sourceC1,randomG)
   api.AssertIsDifferent(outC1.X,0)
@@ -76,6 +78,8 @@ func proveReencryption(api frontend.API, input,output []ElGamalCipher,
   api.AssertIsEqual(outC1.Y,output[i].C1Y)
   api.AssertIsEqual(outC2.X,output[i].C2X)
   api.AssertIsEqual(outC2.Y,output[i].C2Y)
+  curve.AssertIsOnCurve(twistededwards.Point{X:output[i].C1X,Y:output[i].C1Y})
+  curve.AssertIsOnCurve(twistededwards.Point{X:output[i].C2X,Y:output[i].C2Y})
  }
  return nil
 }
@@ -83,6 +87,7 @@ func(c *Reencrypt2)Define(api frontend.API)error{
  return proveReencryption(api,c.Input[:],c.Output[:],c.PublicKeyX,c.PublicKeyY,c.HandScope,c.Indices[:],c.Nonces[:])
 }
 func(c *Reencrypt52)Define(api frontend.API)error{
+ api.AssertIsDifferent(c.StatementScope,0)
  if err:=proveReencryption(api,c.Input[:],c.Output[:],c.PublicKeyX,c.PublicKeyY,c.HandScope,c.Indices[:],c.Nonces[:]);err!=nil{return err}
  inputRoot,err:=ciphertextMerkleRoot(api,c.HandScope,c.Input[:]);if err!=nil{return err}
  outputRoot,err:=ciphertextMerkleRoot(api,c.HandScope,c.Output[:]);if err!=nil{return err}

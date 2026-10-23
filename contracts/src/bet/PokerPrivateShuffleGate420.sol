@@ -2,6 +2,8 @@
 pragma solidity ^0.8.24;
 import "./PokerConfidentialDeal420.sol";
 import "./PokerInitialEncryptedDeck420.sol";
+import "./PokerShuffleProviderIndependence420.sol";
+import "./PokerShuffleCiphertextAvailability420.sol";
 
 /// @notice Proof-gated, transcript-bound two-party re-encryption shuffle pipeline.
 /// @dev Fail-closed integration seam. The external verifier MUST independently validate a
@@ -20,6 +22,11 @@ contract PokerPrivateShuffleGate420 {
     PokerConfidentialDeal420 public immutable deals;
     PokerInitialEncryptedDeck420 public immutable initialDeck;
     IPokerShuffleProofVerifier420 public immutable verifier;
+    PokerShuffleProviderIndependence420 public immutable independence;
+    PokerShuffleCiphertextAvailability420 public immutable availability;
+    bytes32 public immutable availabilityRuntimeHash;
+    bytes32 public immutable independenceRuntimeHash;
+    uint256 internal constant FR = 21888242871839275222246405745257275088548364400416034343698204186575808495617;
     bytes32 public immutable circuitId;
     bytes32 public immutable thresholdKeyCommitment;
     struct Record {
@@ -34,14 +41,20 @@ contract PokerPrivateShuffleGate420 {
     error InvalidConfiguration(); error InvalidState(); error Unauthorized();
     error InvalidProof(); error WrongStage();
     event ShuffleStageVerified(bytes32 indexed handId,uint8 stage,bytes32 outputRoot,bytes32 proofHash);
-    constructor(address deals_,address initialDeck_,address verifier_,bytes32 circuitId_,bytes32 keyCommitment_) {
+    constructor(address deals_,address initialDeck_,address verifier_,address independence_,address availability_,bytes32 circuitId_,bytes32 keyCommitment_) {
         if(deals_==address(0)||initialDeck_==address(0)||verifier_==address(0)||verifier_.code.length==0||
+            independence_==address(0)||independence_.code.length==0||
+            availability_==address(0)||availability_.code.length==0||
             circuitId_==bytes32(0)||keyCommitment_==bytes32(0)) revert InvalidConfiguration();
         deals=PokerConfidentialDeal420(deals_);
         initialDeck=PokerInitialEncryptedDeck420(initialDeck_);
         if(address(initialDeck.deals())!=deals_ ||
            initialDeck.thresholdKeyCommitment()!=keyCommitment_)revert InvalidConfiguration();
         verifier=IPokerShuffleProofVerifier420(verifier_);
+        independence=PokerShuffleProviderIndependence420(independence_);
+        availability=PokerShuffleCiphertextAvailability420(availability_);
+        availabilityRuntimeHash=availability_.codehash;
+        independenceRuntimeHash=independence_.codehash;
         circuitId=circuitId_;
         thresholdKeyCommitment=keyCommitment_;
     }
@@ -60,6 +73,8 @@ contract PokerPrivateShuffleGate420 {
         bytes calldata proof) external {
         PokerConfidentialDeal420.Hand memory h=deals.getHand(handId);
         if(h.state!=PokerConfidentialDeal420.State.COMMITTED) revert InvalidState();
+        if(address(independence).codehash!=independenceRuntimeHash) revert Unauthorized();
+        if(!independence.independentlyEligible(deals.providerA(),deals.providerB())) revert Unauthorized();
         if(stage!=1&&stage!=2) revert WrongStage();
         if((stage==1&&msg.sender!=deals.providerA()) ||
             (stage==2&&msg.sender!=deals.providerB())) revert Unauthorized();
@@ -73,6 +88,9 @@ contract PokerPrivateShuffleGate420 {
             // Bind the initial ciphertext deck root to the hand's two-party transcript.
             if(inputRoot!=initialDeck.rootOf(handId)) revert InvalidProof();
         } else if(inputRoot!=rec.firstDeckRoot) revert InvalidProof();
+        if(address(availability).codehash!=availabilityRuntimeHash) revert InvalidProof();
+        uint256 scope=uint256(handId)%FR;
+        if(!availability.isAvailable(scope,inputRoot) || !availability.isAvailable(scope,outputRoot)) revert InvalidProof();
         bytes32 digest=statement(handId,stage,inputRoot,outputRoot);
         if(!verifier.verifyShuffleProof(digest,handId,inputRoot,outputRoot,thresholdKeyCommitment,proof)) revert InvalidProof();
         if(stage==1) {rec.initialDeckRoot=inputRoot;rec.firstDeckRoot=outputRoot;}

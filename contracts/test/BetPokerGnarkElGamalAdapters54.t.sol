@@ -7,7 +7,7 @@ interface VmElGamal54 {function prank(address) external;function expectRevert(by
 contract GnarkABIFixture54 {
     bool public accept;
     function setAccept(bool value) external {accept=value;}
-    function verifyProof(uint256[8] calldata,uint256[5] calldata) external view returns(bool){return accept;}
+    function verifyProof(uint256[8] calldata,uint256[6] calldata) external view returns(bool){return accept;}
 }
 contract GnarkInitialABIFixture54 {
     bool public accept;
@@ -42,7 +42,7 @@ contract PokerGnarkElGamalAdapters54Test {
     }
     function testShuffleInputsBoundToExactHandRootAndThresholdKey() public {
         uint256[8] memory proof;
-        uint256[5] memory publicValues=[uint256(100),uint256(101),uint256(420),uint256(7),uint256(8)];
+        uint256[6] memory publicValues=[uint256(100),uint256(keccak256("statement"))%21888242871839275222246405745257275088548364400416034343698204186575808495617,uint256(101),uint256(420),uint256(7),uint256(8)];
         fake.setAccept(true);
         require(shuffle.verifyShuffleProof(keccak256("statement"),HAND,ROOT_ONE,ROOT_TWO,KEY,
             abi.encode(proof,publicValues)),"valid ABI");
@@ -52,6 +52,7 @@ contract PokerGnarkElGamalAdapters54Test {
             ROOT_ONE,ROOT_TWO,KEY,abi.encode(proof,publicValues)),"wrong hand");
         require(!shuffle.verifyShuffleProof(keccak256("statement"),HAND,ROOT_ONE,ROOT_TWO,
             keccak256("wrong key"),abi.encode(proof,publicValues)),"wrong key");
+        require(!shuffle.verifyShuffleProof(keccak256("altered statement"),HAND,ROOT_ONE,ROOT_TWO,KEY,abi.encode(proof,publicValues)),"statement substitution accepted");
         fake.setAccept(false);
         require(!shuffle.verifyShuffleProof(keccak256("statement"),HAND,ROOT_ONE,
             ROOT_TWO,KEY,abi.encode(proof,publicValues)),"reverted/false cryptographic verifier");

@@ -57,7 +57,7 @@ abstract contract PokerGnarkVerifierBound420 {
 /// The Groth16 verifier MUST be generated from the exact Reencrypt52 circuit
 /// whose five public values are [inputRoot,outputRoot,handScope,pkX,pkY].
 contract PokerGnarkShuffle52Adapter420 is PokerGnarkVerifierBound420,IPokerShuffleProofVerifier420 {
-    bytes4 private constant SELECTOR=bytes4(keccak256("verifyProof(uint256[8],uint256[5])"));
+    bytes4 private constant SELECTOR=bytes4(keccak256("verifyProof(uint256[8],uint256[6])"));
     constructor(address actual_,address registry_,bytes32 version_,bytes32 circuit_,
         bytes32 keyHash_,bytes32 schema_,bytes32 thresholdKey_)
         PokerGnarkVerifierBound420(actual_,registry_,version_,circuit_,keyHash_,schema_,thresholdKey_) {}
@@ -65,12 +65,13 @@ contract PokerGnarkShuffle52Adapter420 is PokerGnarkVerifierBound420,IPokerShuff
         bytes32 outputRoot,bytes32 thresholdKey,bytes calldata packedProof)
         external view returns(bool){
         if(statementHash==bytes32(0)||handId==bytes32(0)||
-           thresholdKey!=thresholdKeyCommitment||packedProof.length!=416)return false;
-        (uint256[8] memory proof,uint256[5] memory input)=
-            abi.decode(packedProof,(uint256[8],uint256[5]));
-        if(input[0]!=uint256(inputRoot)||input[1]!=uint256(outputRoot)||
-           input[2]!=_scope(handId)||!_publicKeyMatches(input[3],input[4]))return false;
-        for(uint256 i=0;i<5;i++)if(input[i]>=FR)return false;
+           thresholdKey!=thresholdKeyCommitment||packedProof.length!=448)return false;
+        (uint256[8] memory proof,uint256[6] memory input)=
+            abi.decode(packedProof,(uint256[8],uint256[6]));
+        if(input[0]!=uint256(inputRoot)||input[1]!=uint256(statementHash)%FR||
+           input[2]!=uint256(outputRoot)||input[3]!=_scope(handId)||
+           !_publicKeyMatches(input[4],input[5]))return false;
+        for(uint256 i=0;i<6;i++)if(input[i]>=FR)return false;
         return _safeVerify(abi.encodeWithSelector(SELECTOR,proof,input));
     }
 }

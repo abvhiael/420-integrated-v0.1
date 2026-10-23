@@ -1,0 +1,132 @@
+name: 420Bet Poker WS2 Genuine Two-Stage Level 1
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'clients/420bet-poker/zkshuffle/reencryption_circuit.go'
+      - 'clients/420bet-poker/zkshuffle/reencryption_full52_test.go'
+      - 'clients/420bet-poker/zkshuffle/shuffle_context_fixture_test.go'
+      - 'clients/420bet-poker/zkshuffle/make_two_stage_real_forge_test.py'
+      - 'contracts/src/bet/PokerPrivateShuffleGate420.sol'
+      - 'contracts/src/bet/PokerGnarkElGamalAdapters420.sol'
+      - 'contracts/src/bet/PokerShuffleCiphertextAvailability420.sol'
+      - 'contracts/src/bet/PokerShuffleProviderIndependence420.sol'
+      - 'contracts/test/BetPokerPrivateShuffleGate54.t.sol'
+      - '.github/workflows/420bet-poker-ws2-real-level1.yml'
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: 420bet-poker-ws2-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  actual-cryptographic-acceptance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    env:
+      FOUNDRY_VIA_IR: 'true'
+      FOUNDRY_PROFILE: pr
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Bind exact checked-out SHA
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+          cache: false
+      - name: Inherit unchanged verified canonical initial-deck proof
+        uses: actions/download-artifact@v4
+        with:
+          name: 420bet-5a-4-cryptographic-provenance
+          run-id: 39982033941
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: artifacts/420bet-ws2
+      - name: Verify inherited genuine initial-deck artifacts
+        run: |
+          set -eu
+          test -s artifacts/420bet-ws2/EXPERIMENTAL-InitialDeck52Verifier.sol
+          test -s artifacts/420bet-ws2/EXPERIMENTAL-InitialDeck52SolidityFixture.json
+          echo "Inherited unchanged InitialDeck52 SHA 4f16aa1c9e5c08c4327990ba6d381ef09c2885c5 from run 39982033941"
+      - name: Determine whether proven WS2 Go inputs changed
+        id: shuffle_scope
+        run: |
+          set -eu
+          QUALIFIED=752712b74306d2f2ce5670edea130dbede7c5f37
+          git fetch --no-tags --depth=1 origin "$QUALIFIED"
+          changed=$(git diff --name-only "$QUALIFIED" HEAD -- \
+            clients/420bet-poker/zkshuffle/reencryption_circuit.go \
+            clients/420bet-poker/zkshuffle/reencryption_full52_test.go \
+            clients/420bet-poker/zkshuffle/shuffle_context_fixture_test.go \
+            clients/420bet-poker/zkshuffle/ciphertext_merkle.go \
+            clients/420bet-poker/zkshuffle/go.mod \
+            clients/420bet-poker/zkshuffle/go.sum)
+          if test -z "$changed"; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "Genuine stage A/B proof fixtures inherit run 39998191650 at $QUALIFIED; no costly regeneration"
+          else
+            echo "$changed"
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Inherit unchanged genuine stage A/B Groth16 proofs and native MiMC ciphertext fixtures
+        if: steps.shuffle_scope.outputs.changed == 'false'
+        uses: actions/download-artifact@v4
+        with:
+          name: 420bet-ws2-real-two-stage-exact-sha
+          run-id: 39998191650
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: artifacts/420bet-ws2
+      - name: Preserve inherited proof provenance
+        if: steps.shuffle_scope.outputs.changed == 'false'
+        run: |
+          printf 'inherited_ws2_proof_sha=752712b74306d2f2ce5670edea130dbede7c5f37\ninherited_ws2_proof_run=39998191650\ninherited_ws2_proof_job=120567115740\n' > artifacts/420bet-ws2/proof-inheritance.txt
+      - name: Generate only changed genuine two-stage 52-card shuffle proofs
+        if: steps.shuffle_scope.outputs.changed == 'true'
+        working-directory: clients/420bet-poker/zkshuffle
+        env:
+          POKER_ZK_ARTIFACT_DIR: ../../../artifacts/420bet-ws2
+        run: go test -mod=mod -timeout 35m -run '^TestFull52RealEncryptedShuffleProof$' .
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Actual on-chain Groth16 A/B and ciphertext-availability acceptance
+        working-directory: contracts
+        env:
+          FOUNDRY_SRC: src/bet
+          FOUNDRY_TEST: test/ws2-real
+        run: |
+          set -eu
+          mkdir -p src/bet/generated test/ws2-real ../artifacts/contracts/poker-ws2
+          python3 ../clients/420bet-poker/zkshuffle/make_two_stage_real_forge_test.py \
+            ../artifacts/420bet-ws2/EXPERIMENTAL-InitialDeck52Verifier.sol \
+            ../artifacts/420bet-ws2/EXPERIMENTAL-InitialDeck52SolidityFixture.json \
+            ../artifacts/420bet-ws2/EXPERIMENTAL-Reencrypt52Verifier.sol \
+            ../artifacts/420bet-ws2 \
+            test/ws2-real/PokerTwoStageActualGroth16WS2.t.sol
+          forge test --match-contract PokerTwoStageActualGroth16WS2Test -vv
+      - name: Preserve exact-SHA evidence
+        run: |
+          set -eu
+          git rev-parse HEAD > artifacts/420bet-ws2/qualified-sha.txt
+          sha256sum clients/420bet-poker/zkshuffle/reencryption_circuit.go \
+            clients/420bet-poker/zkshuffle/reencryption_full52_test.go \
+            clients/420bet-poker/zkshuffle/shuffle_context_fixture_test.go \
+            contracts/src/bet/PokerPrivateShuffleGate420.sol \
+            contracts/src/bet/PokerShuffleCiphertextAvailability420.sol \
+            contracts/src/bet/PokerShuffleProviderIndependence420.sol \
+            > artifacts/420bet-ws2/source-sha256.txt
+          sha256sum artifacts/420bet-ws2/EXPERIMENTAL-Reencrypt52Verifier.sol \
+            artifacts/420bet-ws2/EXPERIMENTAL-Reencrypt52Proof.bin \
+            artifacts/420bet-ws2/EXPERIMENTAL-Reencrypt52StageBProof.bin \
+            artifacts/420bet-ws2/EXPERIMENTAL-Reencrypt52AvailabilityFixture.json \
+            > artifacts/420bet-ws2/proof-sha256.txt
+      - name: Upload exact-SHA two-provider qualification
+        uses: actions/upload-artifact@v4
+        with:
+          name: 420bet-ws2-real-two-stage-exact-sha
+          path: artifacts/420bet-ws2/
+          retention-days: 90
+          if-no-files-found: error

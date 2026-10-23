@@ -75,6 +75,7 @@ contract PokerLiveCardReveals54Test is PokerNLHEBetting54Test {
     }
     function _submit(bytes32 handId,uint8 position,uint8 holder) internal {
         uint256[8] memory points=_points(position,holder);
+        cheat54.prank(holder==0?PROVIDER_A:PROVIDER_B);
         live.submitShare(handId,1,position,holder,points,_shareProof(handId,position,holder,points));
     }
     function _open(bytes32 handId,uint8 pos,uint8 card) internal {

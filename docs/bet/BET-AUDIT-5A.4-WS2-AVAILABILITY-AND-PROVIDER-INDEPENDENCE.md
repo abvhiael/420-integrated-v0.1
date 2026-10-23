@@ -22,7 +22,7 @@ For real providers, governance examines verifiable beneficial ownership and corp
 
 Privacy requires **at least one independently controlled honest provider** whose private permutation and encryption randomness are not disclosed to the other. If both providers collude, they may reconstruct the final permutation despite perfectly valid Groth16 proofs. A sole-governance approval and two provider-origin transaction signatures prove approval and signing-key custody, not that real-world controllers are independent or incorruptible. Residual risks include hidden shared ownership, coerced disclosures, shared HSMs, side channels, off-chain collusion, malicious auditors, chain data retention failures, governance capture, and compromised trusted setup.
 
-Eligibility is re-evaluated at both shuffle stages. If either reviewer revokes authorization after stage one, stage two fails closed and existing deterministic hand recovery and provider accountability processes must resolve the stalled hand. No unreviewed replacement operator, bypassed verifier, or replayed proof is permissible.
+Eligibility is re-evaluated at both shuffle stages. If sole governance revokes either provider, or either provider's independently attested claim expires or changes after stage one, stage two fails closed and existing deterministic hand recovery and provider accountability processes must resolve the stalled hand. No unreviewed replacement operator, bypassed verifier, or replayed proof is permissible.
 
 ## Reproducible qualification provenance
 

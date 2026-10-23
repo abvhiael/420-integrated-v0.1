@@ -16,7 +16,7 @@ contract PokerGnarkPartialShareAdapter420 is PokerGnarkVerifierBound420,IPokerPa
     function verifyPartial(bytes32 handId,bytes32 deckRoot,uint8 position,uint8 street,uint8 holder,
         uint256[8] calldata points,bytes calldata packedProof) external view returns(bool){
         if(handId==bytes32(0)||deckRoot==bytes32(0)||position>=52||
-           street>3||holder>1||packedProof.length!=672)return false;
+           street>4||holder>1||packedProof.length!=672)return false;
         (uint256[8] memory proof,uint256[13] memory pub)=
             abi.decode(packedProof,(uint256[8],uint256[13]));
         if(pub[0]!=_scope(handId)||pub[1]!=uint256(deckRoot)||
@@ -45,7 +45,7 @@ contract PokerGnarkCardUnmaskAdapter420 is PokerGnarkVerifierBound420,IPokerCard
     function verifyCard(bytes32 handId,bytes32 deckRoot,uint8 position,uint8 street,uint8 card,
         uint256[12] calldata points,bytes calldata packedProof) external view returns(bool){
         if(handId==bytes32(0)||deckRoot==bytes32(0)||position>=52||
-            street>3||card>=52||packedProof.length!=800)return false;
+            street>4||card>=52||packedProof.length!=800)return false;
         (uint256[8] memory proof,uint256[17] memory pub)=
             abi.decode(packedProof,(uint256[8],uint256[17]));
         if(pub[0]!=_scope(handId)||pub[1]!=uint256(deckRoot)||

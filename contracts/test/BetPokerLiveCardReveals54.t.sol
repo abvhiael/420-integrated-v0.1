@@ -163,7 +163,7 @@ contract PokerLiveCardReveals54Test is PokerNLHEBetting54Test {
     }
     function _submitPublicStreet(bytes32 id,uint8 street,uint8 pos,uint8 provider) internal {
         uint256[8] memory p=_points(pos,provider);
-        uint256[13] memory pub=abi.decode(_shareProof(id,pos,provider,p),(uint256[8],uint256[13]));
+        (,uint256[13] memory pub)=abi.decode(_shareProof(id,pos,provider,p),(uint256[8],uint256[13]));
         pub[5]=street;
         uint256[8] memory proof;
         cheat54.prank(provider==0?PROVIDER_A:PROVIDER_B);

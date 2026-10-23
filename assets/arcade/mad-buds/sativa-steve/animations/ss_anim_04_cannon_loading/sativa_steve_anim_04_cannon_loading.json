@@ -1,0 +1,86 @@
+{
+  "schema": "mad-buds-animation-manifest-v1",
+  "schemaVersion": "1.0",
+  "characterId": "sativa_steve",
+  "animationId": "ss_anim_04_cannon_loading",
+  "animationName": "cannon_loading",
+  "frameCount": 10,
+  "frameWidth": 1024,
+  "frameHeight": 1024,
+  "fps": 10,
+  "durationMs": 1000,
+  "loop": false,
+  "direction": "right",
+  "pivotNormalized": [
+    0.5,
+    0.95
+  ],
+  "sourceArt": "wide_transparent_background_illustration_sprite_sh.png",
+  "sourceMethod": "connected-component extraction of the 10 primary poses from the approved contact strip; labels excluded",
+  "repositoryDestination": "assets/arcade/mad-buds/sativa-steve/animations/ss_anim_04_cannon_loading/",
+  "visualApproval": "PENDING_OWNER_VISUAL_REVIEW",
+  "qualification": "LOCAL_STRUCTURAL_CHECKS_PASS; OWNER_VISUAL_REVIEW_PENDING",
+  "frames": [
+    {
+      "index": 1,
+      "filename": "sativa_steve_anim_04_cannon_loading_frame_01.png",
+      "durationMs": 100,
+      "sha256": "2dd49f76eacbe5e3b4e5c0c0d62c06b417b97c54ca56d190e410fd2338467e9c"
+    },
+    {
+      "index": 2,
+      "filename": "sativa_steve_anim_04_cannon_loading_frame_02.png",
+      "durationMs": 100,
+      "sha256": "7d877202d75ed2003745ff57784f72e441480feafc47300ac2f065fe0e175019"
+    },
+    {
+      "index": 3,
+      "filename": "sativa_steve_anim_04_cannon_loading_frame_03.png",
+      "durationMs": 100,
+      "sha256": "d484035eb3fb63d975f2500e5932c24c68b87ef112487b1981b546447ceccd28"
+    },
+    {
+      "index": 4,
+      "filename": "sativa_steve_anim_04_cannon_loading_frame_04.png",
+      "durationMs": 100,
+      "sha256": "33157de84ae5361f3f6486b4af5bc80494653a7972be5eb2f886c631a25c10b7"
+    },
+    {
+      "index": 5,
+      "filename": "sativa_steve_anim_04_cannon_loading_frame_05.png",
+      "durationMs": 100,
+      "sha256": "87c698c09e5d1a6e6bfc6499581964eff7ab381138db9c274beaadb771b29a2b"
+    },
+    {
+      "index": 6,
+      "filename": "sativa_steve_anim_04_cannon_loading_frame_06.png",
+      "durationMs": 100,
+      "sha256": "b86375db6d656e7f5aff10e07f8ab1579764a87928456ffc10cba3d3880201dd"
+    },
+    {
+      "index": 7,
+      "filename": "sativa_steve_anim_04_cannon_loading_frame_07.png",
+      "durationMs": 100,
+      "sha256": "02b59bb32444974a90b49d5ecddcd47186476cde09325a9e838ee73618071ea9"
+    },
+    {
+      "index": 8,
+      "filename": "sativa_steve_anim_04_cannon_loading_frame_08.png",
+      "durationMs": 100,
+      "sha256": "7d192e736358aae5b8a289a381562fdcbc0c5efdb95d94b039a0f519d01f7508"
+    },
+    {
+      "index": 9,
+      "filename": "sativa_steve_anim_04_cannon_loading_frame_09.png",
+      "durationMs": 100,
+      "sha256": "1bd4190a3924f1dfd065e840b7d302875bfbdf5173b2ab357ec960e810394c67"
+    },
+    {
+      "index": 10,
+      "filename": "sativa_steve_anim_04_cannon_loading_frame_10.png",
+      "durationMs": 100,
+      "sha256": "1eb66b41bf9cc77c0e1403f2ed8f5f4df9d276f26854983f96a3abc050b8c582"
+    }
+  ],
+  "method": "Connected-component isolation of each cannon-loading scene, excluding detached numbered labels; consistent 1.74x rescale on RGBA 1024x1024 canvases"
+}

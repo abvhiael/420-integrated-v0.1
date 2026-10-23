@@ -1,0 +1,77 @@
+name: 420Bet Poker WS5 Deterministic Recovery Level 1
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/bet/PokerNLHEBetting420.sol'
+      - 'contracts/src/bet/PokerActionDisputeClock420.sol'
+      - 'contracts/src/bet/PokerProviderAccountability420.sol'
+      - 'contracts/test/BetPokerNLHEBetting54.t.sol'
+      - 'contracts/test/BetPokerActionDisputeClock54.t.sol'
+      - '.github/workflows/420bet-poker-ws5-recovery-level1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: bet-ws5-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  bounded-disputes-and-custody:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      FOUNDRY_VIA_IR: 'true'
+      FOUNDRY_PROFILE: pr
+      FOUNDRY_SRC: src/ws5-only
+      FOUNDRY_TEST: test/ws5-focused
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact qualified SHA
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Focus only deterministic recovered escrow, disputes and provider bonds
+        working-directory: contracts
+        run: |
+          set -eu
+          mkdir -p src/ws5-only test/ws5-focused
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          base=Path("test")
+          out=base/"ws5-focused"
+          found=set()
+          def copy(name):
+              if name in found:return
+              source=base/name
+              if not source.is_file():raise SystemExit("missing test import: "+name)
+              found.add(name)
+              text=source.read_text()
+              for imported in re.findall(r'import\s+["\x27](\./[^"\x27]+)["\x27]\s*;',text):
+                  copy(Path(imported).name)
+              (out/name).write_text(text.replace("../src/","../../src/"))
+          for root in ("BetPokerNLHEBetting54.t.sol","BetPokerActionDisputeClock54.t.sol"):
+              copy(root)
+          print("WS5 isolated transitive dependency closure:",sorted(found))
+          PY
+          forge test --use 0.8.30 --match-contract '^(PokerNLHEBetting54Case5Test|PokerNLHEBetting54Case7Test|PokerNLHEBetting54Case8Test|PokerNLHEBetting54Case9Test|PokerActionDisputeClock54Test)$' -vv
+      - name: Record immutable exact SHA and affected source hashes
+        run: |
+          mkdir -p artifacts/420bet-ws5
+          git rev-parse HEAD > artifacts/420bet-ws5/qualified-sha.txt
+          sha256sum contracts/src/bet/PokerNLHEBetting420.sol \
+            contracts/src/bet/PokerActionDisputeClock420.sol \
+            contracts/src/bet/PokerProviderAccountability420.sol \
+            contracts/test/BetPokerNLHEBetting54.t.sol \
+            contracts/test/BetPokerActionDisputeClock54.t.sol \
+            > artifacts/420bet-ws5/source-sha256.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: 420bet-ws5-deterministic-recovery-exact-sha
+          path: artifacts/420bet-ws5
+          retention-days: 90
+          if-no-files-found: error

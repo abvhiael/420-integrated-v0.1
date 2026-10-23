@@ -304,6 +304,10 @@ contract PokerNLHEBetting420 {
         uint16 mask=deals.handSeatMask(handId);
         for(uint8 i=0;i<9;i++)if(_participates(mask,i)&&
             ledger.seatOf(h.tableId,i).player==msg.sender)permitted=true;
+        // An accepted funded hand must have its single governance-bound
+        // native dispute resolver installed BEFORE chips are locked. A
+        // malicious dispute must never strand escrow behind an unbound hook.
+        if(disputes.resolverForTable(h.tableId)!=address(this))revert InvalidState();
         if(!permitted||ledger.settlementCoordinator(h.tableId)!=address(this)||
            h.seatSnapshotHash!=deals.snapshotFor(h.tableId,mask))
             revert Unauthorized();

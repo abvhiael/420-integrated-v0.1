@@ -106,7 +106,7 @@ contract PokerLiveCardReveals54Test is PokerNLHEBetting54Test {
         uint256[8] memory p=_points(5,0);
         bytes memory proof=_shareProof(id,5,0,p);
         cheat54.expectRevert(PokerLiveCardReveals420.WrongStreet.selector);
-        live.submitShare(id,1,5,0,p,proof);
+        cheat54.prank(PROVIDER_A);live.submitShare(id,1,5,0,p,proof);
         _completePreflop(id);
         require(engine.canRevealStreet(id,1),"flop revealed only after complete preflop");
         _submit(id,5,0);_submit(id,5,1);_open(id,5,10);
@@ -124,7 +124,7 @@ contract PokerLiveCardReveals54Test is PokerNLHEBetting54Test {
         uint256[8] memory p=_points(5,0);
         _submit(id,5,0);
         cheat54.expectRevert(PokerLiveCardReveals420.Duplicate.selector);
-        live.submitShare(id,1,5,0,p,_shareProof(id,5,0,p));
+        cheat54.prank(PROVIDER_A);live.submitShare(id,1,5,0,p,_shareProof(id,5,0,p));
         uint256[8] memory bad=_points(5,1);
         bad[2]=999;
         // The fake Groth16 verifier cannot evaluate elliptic-curve witness
@@ -133,7 +133,7 @@ contract PokerLiveCardReveals54Test is PokerNLHEBetting54Test {
         // qualified separately against actual generated cryptographic proofs.
         partialFixture.setAccept(false);
         cheat54.expectRevert(PokerLiveCardReveals420.InvalidProof.selector);
-        live.submitShare(id,1,5,1,bad,_shareProof(id,5,1,bad));
+        cheat54.prank(PROVIDER_B);live.submitShare(id,1,5,1,bad,_shareProof(id,5,1,bad));
         partialFixture.setAccept(true);
         require(!live.slotOf(id,5).shareB,"rejected share must not persist");
         _openWithExpectedRevert(id,5,10,true);
@@ -142,7 +142,7 @@ contract PokerLiveCardReveals54Test is PokerNLHEBetting54Test {
         bytes32 id=_readyLive();_completePreflop(id);
         uint256[8] memory p=_points(0,0);
         cheat54.expectRevert(PokerLiveCardReveals420.WrongStreet.selector);
-        live.submitShare(id,4,0,0,p,_shareProof(id,0,0,p));
+        cheat54.prank(PROVIDER_A);live.submitShare(id,4,0,0,p,_shareProof(id,0,0,p));
     }
     function testProviderFaultNotAttributedBeforeAuthorizedReveal() public {
         bytes32 id=_readyLive();
@@ -160,6 +160,42 @@ contract PokerLiveCardReveals54Test is PokerNLHEBetting54Test {
         }
         require(live.missingProviders(id,1)==0,"complete shares clear provider faults");
         require(live.missingProviders(id,2)==0,"future turn accused provider");
+    }
+    function testWrongProviderCannotSubmitEvenAValidShare() public {
+        bytes32 id=_readyLive();_completePreflop(id);
+        uint256[8] memory p=_points(5,0);
+        cheat54.expectRevert(PokerLiveCardReveals420.InvalidProof.selector);
+        cheat54.prank(PROVIDER_B);
+        live.submitShare(id,1,5,0,p,_shareProof(id,5,0,p));
+        require(!live.slotOf(id,5).shareA,"provider B cannot impersonate provider A");
+    }
+    function testFutureStreetsAndMissingSharesFailClosed() public {
+        bytes32 id=_readyLive();_completePreflop(id);
+        require(!live.isStageComplete(id,2),"future turn cannot be complete");
+        require(!live.isStageComplete(id,3),"future river cannot be complete");
+        require(!live.isStageComplete(id,4),"premature showdown cannot be complete");
+        uint256[8] memory p=_points(9,0);
+        cheat54.expectRevert(PokerLiveCardReveals420.WrongStreet.selector);
+        cheat54.prank(PROVIDER_A);
+        live.submitShare(id,2,9,0,p,_shareProof(id,9,0,p));
+        p=_points(11,0);
+        cheat54.expectRevert(PokerLiveCardReveals420.WrongStreet.selector);
+        cheat54.prank(PROVIDER_A);
+        live.submitShare(id,3,11,0,p,_shareProof(id,11,0,p));
+        _submit(id,5,0);
+        require(!live.isStageComplete(id,1),"one provider never completes flop");
+        cheat54.expectRevert(PokerLiveCardReveals420.Incomplete.selector);
+        live.advance(id,1);
+    }
+    function testDuplicateCardsAcrossBoardAreRejected() public {
+        bytes32 id=_readyLive();_completePreflop(id);
+        _submit(id,5,0);_submit(id,5,1);_open(id,5,10);
+        _submit(id,6,0);_submit(id,6,1);
+        uint256[6] memory keys=[uint256(7),uint256(8),uint256(11),uint256(12),uint256(19),uint256(20)];
+        uint256[8] memory proof;
+        uint256[17] memory zeros;
+        cheat54.expectRevert(PokerLiveCardReveals420.Duplicate.selector);
+        live.reveal(id,1,6,10,keys,abi.encode(proof,zeros));
     }
     function testCannotBindForeignEngineAsCanonicalLiveReveal() public {
         bytes32 id=_readyBetting();

@@ -1,0 +1,86 @@
+{
+  "schema": "mad-buds-animation-manifest-v1",
+  "schemaVersion": "1.0",
+  "characterId": "terpene_tina",
+  "animationId": "tt_anim_01_composed_idle",
+  "animationName": "composed_idle",
+  "frameCount": 10,
+  "frameWidth": 1024,
+  "frameHeight": 1024,
+  "fps": 10,
+  "durationMs": 1000,
+  "loop": true,
+  "direction": "front",
+  "pivotNormalized": [
+    0.5,
+    0.90625
+  ],
+  "sourceArt": "colorful_chibi_bud_character_sprite_sheet.png",
+  "sourceSHA256": "37cd8f63a31860a6cbeb29c43d4242c416a82692c6d453bb0d7202a11297f771",
+  "method": "Rebuilt from original isolated approved two-row control sheet: each sprite enlarged ~2.82x uniformly, centered on transparent 1024x1024 canvas with fixed ground baseline y=928. Original character illustrations preserved.",
+  "repositoryDestination": "assets/arcade/mad-buds/terpene-tina/animations/tt_anim_01_composed_idle/",
+  "visualApproval": "PENDING OWNER REVIEW OF ENLARGED EXTRACTED FRAMES",
+  "qualification": "LOCAL DIMENSION ALPHA HASH VALIDATION ONLY",
+  "frames": [
+    {
+      "index": 1,
+      "filename": "terpene_tina_anim_01_composed_idle_frame_01.png",
+      "durationMs": 100,
+      "sha256": "ef8e3f5ec143a08b677df607216e89814ff75277d7c2d56afedd971f8101953c"
+    },
+    {
+      "index": 2,
+      "filename": "terpene_tina_anim_01_composed_idle_frame_02.png",
+      "durationMs": 100,
+      "sha256": "96787ebe0e362b127425f016a0177ed5a870184b601accebbc3e3a8c6fd7303e"
+    },
+    {
+      "index": 3,
+      "filename": "terpene_tina_anim_01_composed_idle_frame_03.png",
+      "durationMs": 100,
+      "sha256": "0aa1e624a400164f2c60282cc479d096e940fa6a14c4f54598e0f28c6f1daa00"
+    },
+    {
+      "index": 4,
+      "filename": "terpene_tina_anim_01_composed_idle_frame_04.png",
+      "durationMs": 100,
+      "sha256": "4a3e3bb1c9e413bdce6c11a67ffada8cd94aafe3cc596baaaea0bc846ad52a12"
+    },
+    {
+      "index": 5,
+      "filename": "terpene_tina_anim_01_composed_idle_frame_05.png",
+      "durationMs": 100,
+      "sha256": "72b2aa93702a941fbb5067676020969f9c437c0d0621ea374919aeb8f64a1c8d"
+    },
+    {
+      "index": 6,
+      "filename": "terpene_tina_anim_01_composed_idle_frame_06.png",
+      "durationMs": 100,
+      "sha256": "cfe9311b6d952466e3ab15261cd01d5b378b72323329339627d13b7fb70366db"
+    },
+    {
+      "index": 7,
+      "filename": "terpene_tina_anim_01_composed_idle_frame_07.png",
+      "durationMs": 100,
+      "sha256": "1cd667e32ce98394f4d1a19539194cc48bf77f25f01464484eca913630090e92"
+    },
+    {
+      "index": 8,
+      "filename": "terpene_tina_anim_01_composed_idle_frame_08.png",
+      "durationMs": 100,
+      "sha256": "54274b80252dc8807a94a123550fc9e751ea8e5cd230b61ab097c8e947d9267f"
+    },
+    {
+      "index": 9,
+      "filename": "terpene_tina_anim_01_composed_idle_frame_09.png",
+      "durationMs": 100,
+      "sha256": "4e31e86b90e1df7472d7a06a20d668100bd6a7efc0947af6a91e68f9f30c8995"
+    },
+    {
+      "index": 10,
+      "filename": "terpene_tina_anim_01_composed_idle_frame_10.png",
+      "durationMs": 100,
+      "sha256": "eb96aaf974743c06b900ec49083d822ce523aa70cf11fa51cdf601ee4ae64194"
+    }
+  ]
+}

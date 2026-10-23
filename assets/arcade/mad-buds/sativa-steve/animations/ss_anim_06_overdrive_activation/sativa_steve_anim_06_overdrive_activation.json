@@ -1,0 +1,86 @@
+{
+  "schema": "mad-buds-animation-manifest-v1",
+  "schemaVersion": "1.0",
+  "characterId": "sativa_steve",
+  "animationId": "ss_anim_06_overdrive_activation",
+  "animationName": "overdrive_activation",
+  "frameCount": 10,
+  "frameWidth": 1024,
+  "frameHeight": 1024,
+  "fps": 10,
+  "durationMs": 1000,
+  "loop": true,
+  "direction": "front_or_three_quarter",
+  "pivotNormalized": [
+    0.5,
+    0.56
+  ],
+  "sourceArt": "user-provided 10-frame overdrive activation strip from current conversation",
+  "sourceImagePath": "/mnt/data/ghostwriter_images/context/125ad5b3-cf0b-5c5a-b610-620fa126a42a.png",
+  "sourceMethod": "The strip was reprocessed from scratch. Ten primary figure regions were identified from the source alpha, sorted in frame order, cropped directly from the original transparent strip with preserved aura margins, then rendered to 1024x1024 RGBA canvases at consistent scale.",
+  "repositoryDestination": "assets/arcade/mad-buds/sativa-steve/animations/ss_anim_06_overdrive_activation/",
+  "visualApproval": "PENDING_OWNER_VISUAL_REVIEW",
+  "qualification": "LOCAL_STRUCTURAL_VALIDATION_PASS; OWNER_VISUAL_APPROVAL_PENDING",
+  "frames": [
+    {
+      "index": 1,
+      "filename": "sativa_steve_anim_06_overdrive_activation_frame_01.png",
+      "durationMs": 100,
+      "sha256": "18667f15961d24e4d70cb275b74daadd8f737113d82d270527922280eff1cd20"
+    },
+    {
+      "index": 2,
+      "filename": "sativa_steve_anim_06_overdrive_activation_frame_02.png",
+      "durationMs": 100,
+      "sha256": "5f63350747fa7db52ae257b8854107cdb5877374fcf73f4407bf7bc70bd4f6a7"
+    },
+    {
+      "index": 3,
+      "filename": "sativa_steve_anim_06_overdrive_activation_frame_03.png",
+      "durationMs": 100,
+      "sha256": "dda18e6e90a7fb11f2b87b4273259469f24ff3dd61e8f3e2849800ad64c82a00"
+    },
+    {
+      "index": 4,
+      "filename": "sativa_steve_anim_06_overdrive_activation_frame_04.png",
+      "durationMs": 100,
+      "sha256": "dd64e6f08ad2f060c374d87523c948ad5cb08a3ae906f45ce2b00c2e6af2099a"
+    },
+    {
+      "index": 5,
+      "filename": "sativa_steve_anim_06_overdrive_activation_frame_05.png",
+      "durationMs": 100,
+      "sha256": "8994c97cae45b25b4de3fce4bc95fc74d8d4115604285aac9501a30c71af9aa5"
+    },
+    {
+      "index": 6,
+      "filename": "sativa_steve_anim_06_overdrive_activation_frame_06.png",
+      "durationMs": 100,
+      "sha256": "c46e337dfc059b0416b47afee6ef8ee08acce279a9c5bc8f452e9cddebe22d2e"
+    },
+    {
+      "index": 7,
+      "filename": "sativa_steve_anim_06_overdrive_activation_frame_07.png",
+      "durationMs": 100,
+      "sha256": "7ae9e41757fbbfe12ac7280e8180ce8501da640361edd9d98ff7a990324703aa"
+    },
+    {
+      "index": 8,
+      "filename": "sativa_steve_anim_06_overdrive_activation_frame_08.png",
+      "durationMs": 100,
+      "sha256": "216bb6f34291df1a17d1617787d451c41e9763457b7ad7ca24f0657522bbb0aa"
+    },
+    {
+      "index": 9,
+      "filename": "sativa_steve_anim_06_overdrive_activation_frame_09.png",
+      "durationMs": 100,
+      "sha256": "d609e334be797fa9c130aa2c55a612fba651cfaff498e7ad44a49aa12377b3a8"
+    },
+    {
+      "index": 10,
+      "filename": "sativa_steve_anim_06_overdrive_activation_frame_10.png",
+      "durationMs": 100,
+      "sha256": "c7c9ee69f415be9c2e6ab257dac2bb37f36094869f66ebf191a868b6ecc17b61"
+    }
+  ]
+}

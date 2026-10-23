@@ -37,7 +37,6 @@ contract PokerNLHEBetting54Fixture is PokerPrivateShuffleGate54Test {
         dispute=new PokerActionDisputeClock420(address(deal));
         engine=new PokerNLHEBetting420(address(deal),address(gate),address(signing),address(dispute));
         cap.grant(ADMIN,dispute.ACTION_BIND_RESOLVER(),auth.scopeForTable(TABLE),true);
-        cheat54.prank(ADMIN);dispute.bindResolver(TABLE,address(engine));
         providerBond=new PokerProviderAccountability420(address(deal),address(engine),address(0xB00D));
         coin.mint(PROVIDER_A,3000);coin.mint(PROVIDER_B,3000);
         cheat54.prank(PROVIDER_A);coin.approve(address(providerBond),3000);
@@ -47,6 +46,13 @@ contract PokerNLHEBetting54Fixture is PokerPrivateShuffleGate54Test {
         cap.grant(ADMIN,engine.ACTION_BIND_PROVIDER_BOND(),auth.scopeForTable(TABLE),true);
         cheat54.prank(ADMIN);engine.bindProviderBond(TABLE,address(providerBond));
         _configurePrivateDelivery();
+    }
+    function _ensureNativeDisputeResolver() internal {
+        // Binding requires a registered table. The fixture constructor runs
+        // before registration, so resolution must be wired at funded admission.
+        if(dispute.resolverForTable(TABLE)==address(0)){
+            cheat54.prank(ADMIN);dispute.bindResolver(TABLE,address(engine));
+        }
     }
     function _configurePrivateDelivery() internal {
         recipient=new PokerRecipientKeys420(address(ledger));
@@ -179,6 +185,7 @@ contract PokerNLHEBetting54Fixture is PokerPrivateShuffleGate54Test {
         verifier.allow(gate.statement(id,2,first,second));
         cheat54.prank(PROVIDER_B);gate.proveStage(id,2,first,second,hex"010203");
         cheat54.prank(ADMIN);ledger.bindSettlement(TABLE,address(engine),address(0x500BEEF));
+        _ensureNativeDisputeResolver();
         cheat54.prank(PLAYER);engine.reserve(id);
         cheat54.prank(PLAYER);signing.bindSigner(TABLE,signedVm.addr(PLAYER_KEY));
         cheat54.prank(PLAYER_B);signing.bindSigner(TABLE,signedVm.addr(OPPONENT_KEY));
@@ -275,6 +282,7 @@ contract PokerNLHEBetting54Case5Test is PokerNLHEBetting54Fixture {
         _prepared();
         bytes32 id=_begin(1);
         cheat54.prank(ADMIN);ledger.bindSettlement(TABLE,address(engine),address(0x500BEEF));
+        _ensureNativeDisputeResolver();
         cheat54.prank(PLAYER);engine.reserve(id);
         require(ledger.reservedInHand(TABLE)==800,"funded escrow locked");
         cheat54.expectRevert(PokerNLHEBetting420.TooEarly.selector);
@@ -556,6 +564,7 @@ contract PokerNLHEBetting54Case9Test is PokerNLHEBetting54Fixture {
         verifier.allow(gate.statement(id,2,first,last));
         cheat54.prank(PROVIDER_B);gate.proveStage(id,2,first,last,hex"010203");
         cheat54.prank(ADMIN);ledger.bindSettlement(TABLE,address(engine),address(0x500BEEF));
+        _ensureNativeDisputeResolver();
         cheat54.prank(PLAYER);engine.reserve(id);
         engine.prepareDealAssignment(id);
         cheat54.expectRevert(PokerNLHEBetting420.TooEarly.selector);
@@ -585,6 +594,7 @@ contract PokerNLHEBetting54Case10Test is PokerNLHEBetting54Fixture {
         verifier.allow(gate.statement(id,2,first,second));
         cheat54.prank(PROVIDER_B);gate.proveStage(id,2,first,second,hex"010203");
         cheat54.prank(ADMIN);ledger.bindSettlement(TABLE,address(engine),address(0x500BEEF));
+        _ensureNativeDisputeResolver();
         cheat54.prank(PLAYER);engine.reserve(id);
         cheat54.expectRevert(PokerNLHEBetting420.InvalidState.selector);
         engine.start(id,0,60);

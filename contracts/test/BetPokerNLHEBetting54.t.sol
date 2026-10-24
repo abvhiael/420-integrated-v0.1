@@ -625,6 +625,10 @@ contract PokerNLHEBetting54Case10Test is PokerNLHEBetting54Fixture {
         cheat54.prank(ADMIN);ledger.bindSettlement(TABLE,address(engine),address(0x500BEEF));
         _ensureNativeDisputeResolver();
         cheat54.prank(PLAYER);engine.reserve(id);
+        // Isolate missing recipient consent with otherwise admission-ready seats.
+        // An unbound signer is independently rejected by the 5A.5 admission gate.
+        cheat54.prank(PLAYER);signing.bindSigner(TABLE,signedVm.addr(PLAYER_KEY));
+        cheat54.prank(PLAYER_B);signing.bindSigner(TABLE,signedVm.addr(OPPONENT_KEY));
         cheat54.expectRevert(PokerNLHEBetting420.InvalidState.selector);
         engine.start(id,0,60);
         require(ledger.reservedInHand(TABLE)==800,"escrow never moved");

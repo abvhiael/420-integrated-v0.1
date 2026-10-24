@@ -6,7 +6,7 @@ test('R06.4 browser origin preflight and authenticated market intent deny unauth
  const runtime={
   identity:{registeredPrincipal:async()=>{touched++;return 'player';}},
   rewards:{claim:async()=>{touched++;return null;}},
-  market:{list:async()=>{touched++;return null;},importAsset:async()=>{touched++;return null;}},
+  market:{authority:{canonicalSettlementRequired:true},list:async()=>{touched++;return null;},importAsset:async()=>{touched++;return null;}},
   settlement:{prepare:async()=>{touched++;return {status:'prepared'};}},
   worker:{tick:async()=>{touched++;return null;}}
  };

@@ -1,0 +1,160 @@
+name: 420Bet Poker WS8 Security Milestone Level 2
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/420bet-poker-ws8-*.yml'
+      - 'contracts/test/BetPokerIntegratedAdversarial54.t.sol'
+      - 'contracts/test/BetPokerWS8*.sol'
+      - 'contracts/src/bet/**'
+      - 'clients/420bet-poker/zkshuffle/**'
+      - 'scripts/bet/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: poker-ws8-level2-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  inherited-proof-provenance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - name: Verify unchanged historical owners and immutable passing evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          python3 scripts/bet/verify-ws8-inheritance.py
+  scoped-level1-cryptography:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      GOMEMLIMIT: 2GiB
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Bind exact source SHA
+        run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+          cache: false
+      - name: Verify actual compiled relations, VK-generated Solidity and all 41 genuine proofs
+        working-directory: clients/420bet-poker/zkshuffle
+        run: |
+          set -euo pipefail
+          mkdir -p ../../../artifacts/ws8-crypto
+          python3 ../../../scripts/bet/package-ws8-evidence.py --verify
+          go test -mod=readonly -timeout 10m -count=1 -json -run '^TestWS8CommittedCryptographicEvidence$' . | tee ../../../artifacts/ws8-crypto/go-execution.jsonl
+          python3 ../../../scripts/bet/verify-ws8-execution.py go ../../../artifacts/ws8-crypto/go-execution.jsonl ../../../artifacts/ws8-crypto/execution.json
+          go list -m all > ../../../artifacts/ws8-crypto/go-modules.txt
+          diff -u fixtures/ws8/historical-go-modules.txt ../../../artifacts/ws8-crypto/go-modules.txt
+          git rev-parse HEAD > ../../../artifacts/ws8-crypto/candidate-sha.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ws8-level1-genuine-cryptography
+          path: artifacts/ws8-crypto/
+          if-no-files-found: error
+  real-funded-hand-and-adversarial-integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      FOUNDRY_PROFILE: pr
+      FOUNDRY_VIA_IR: 'true'
+      FOUNDRY_SRC: src/bet
+      FOUNDRY_TEST: test/ws8-focused
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Bind exact source SHA
+        run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.8.6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Prepare checksum-verified genuine proof fixtures and isolated actual test owners
+        run: |
+          python3 scripts/bet/prepare-ws8-verifiers.py --committed
+          python3 scripts/bet/prepare-ws8-test-owner.py
+          python3 scripts/bet/verify-ws8-integrated-security.py
+          mkdir -p artifacts/ws8-funded
+      - name: Execute funded context and record actual verifier identities and runtime code hashes
+        working-directory: contracts
+        run: |
+          set -euo pipefail
+          forge test --use 0.8.30 --match-contract BetPokerWS8FrozenHandContext54Test --match-test testFreezeCanonicalFundedHandContext -vvvv | tee ../artifacts/ws8-funded/context.log
+          python3 ../scripts/bet/export-ws8-context.py ../artifacts/ws8-funded/context.log ../artifacts/ws8-funded/exported-context
+          cmp ../artifacts/ws8-funded/exported-context/context.bin ../artifacts/contracts/ws8/context.bin
+          python3 ../scripts/bet/inspect-ws8-proof-context.py ../artifacts/ws8-funded/context.log ../artifacts/ws8-funded/context-compatibility.json
+      - name: Execute legitimate control, all ten attacks and inherited green registry/fixture cases
+        working-directory: contracts
+        run: |
+          set -euo pipefail
+          forge test --use 0.8.30 --match-path 'test/ws8-focused/BetPokerIntegratedAdversarial54.t.sol' --json > ../artifacts/ws8-funded/foundry-execution.json
+          python3 ../scripts/bet/verify-ws8-execution.py foundry ../artifacts/ws8-funded/foundry-execution.json ../artifacts/ws8-funded/execution.json
+      - name: Independently replay the actual authenticated hand and export every accepted public statement
+        working-directory: contracts
+        run: |
+          set -euo pipefail
+          forge test --use 0.8.30 --match-contract BetPokerIntegratedFundedAdversarial54Test --match-test testLegitimateFundedHandSettlement -vvvv | tee ../artifacts/ws8-funded/legitimate-trace.log
+          node ../scripts/bet/verify-ws8-transcript.mjs ../artifacts/ws8-funded/legitimate-trace.log ../artifacts/ws8-funded/independent-outcome.json
+          git rev-parse HEAD > ../artifacts/ws8-funded/candidate-sha.txt
+          find src/bet -type f -name '*.sol' -print0 | sort -z | xargs -0 -r sha256sum > ../artifacts/ws8-funded/source-sha256.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ws8-level2-funded-hand-execution
+          path: artifacts/ws8-funded/
+          if-no-files-found: error
+  security-evidence-certificate:
+    needs: [inherited-proof-provenance,scoped-level1-cryptography,real-funded-hand-and-adversarial-integration]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require every actual owner to pass
+        env:
+          A: ${{ needs.inherited-proof-provenance.result }}
+          B: ${{ needs.scoped-level1-cryptography.result }}
+          C: ${{ needs.real-funded-hand-and-adversarial-integration.result }}
+        run: |
+          test "$A" = success
+          test "$B" = success
+          test "$C" = success
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: ws8-level1-genuine-cryptography
+          path: artifacts/ws8-crypto
+      - uses: actions/download-artifact@v4
+        with:
+          name: ws8-level2-funded-hand-execution
+          path: artifacts/ws8-funded
+      - name: Certify matching exact-SHA actual execution records
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: python3 scripts/bet/certify-ws8-level2.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ws8-level2-exact-sha-certificate
+          path: artifacts/ws8-certificate/
+          if-no-files-found: error
+  milestone-gate:
+    needs: [security-evidence-certificate]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fail closed on incomplete exact-SHA security evidence
+        env:
+          ACCEPT: ${{ needs.security-evidence-certificate.result }}
+        run: test "$ACCEPT" = success

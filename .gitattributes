@@ -1,2 +1,6 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# Preserve immutable cryptographic fixture bytes across platforms.
+clients/420bet-poker/zkshuffle/fixtures/ws8/** -text
+contracts/src/bet/generated/WS8*.sol text eol=lf

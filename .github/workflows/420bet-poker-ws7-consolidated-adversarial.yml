@@ -1,0 +1,132 @@
+name: 420Bet Poker WS7 Consolidated Adversarial Security
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/bet/**'
+      - 'contracts/test/BetPoker*.t.sol'
+      - 'clients/420bet-poker/crypto/**'
+      - 'clients/420bet-poker/zkshuffle/**'
+      - '.github/workflows/420bet-poker-ws7-consolidated-adversarial.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: poker-ws7-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  cryptographic-attacks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 65
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Enforce exact SHA
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+          cache: false
+      - name: Real share, unmask, replay, two-provider cryptographic attack matrix
+        working-directory: clients/420bet-poker/zkshuffle
+        run: go test -mod=mod -timeout 55m -count=1 -run '^(TestRealThresholdShareProofValidTamperedAndReplay|TestRealThresholdUnmaskProofValidInvalidAndReplay|TestWS4TwoGenuineProviderSharesAndMatchingCanonicalCard)$' -v .
+      - name: Exact SHA evidence
+        run: |
+          mkdir -p artifacts/ws7-crypto
+          git rev-parse HEAD > artifacts/ws7-crypto/qualified-sha.txt
+          sha256sum clients/420bet-poker/zkshuffle/partial_decryption_circuit.go clients/420bet-poker/zkshuffle/card_unmask_circuit.go clients/420bet-poker/zkshuffle/ws4_joint_revelation_test.go > artifacts/ws7-crypto/source-sha256.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ws7-crypto-exact-sha
+          path: artifacts/ws7-crypto/
+          if-no-files-found: error
+  replay-and-economics:
+    runs-on: ubuntu-latest
+    timeout-minutes: 65
+    env:
+      FOUNDRY_VIA_IR: 'true'
+      FOUNDRY_PROFILE: pr
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Enforce exact SHA
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Independent transcript, ranking and side-pot differential tests
+        run: node --test clients/420bet-poker/crypto/nlhe-replay.test.mjs clients/420bet-poker/crypto/nlhe-differential.test.mjs clients/420bet-poker/crypto/nlhe-independent-verifier.test.mjs
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Run actual funded ledger, recovery, live reveals, signature, reentrancy and settlement suites
+        working-directory: contracts
+        env:
+          FOUNDRY_SRC: src/ws7-focused
+          FOUNDRY_TEST: test/ws7-focused
+        run: |
+          set -eu
+          mkdir -p src/ws7-focused test/ws7-focused
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          base=Path('test')
+          out=base/'ws7-focused'
+          found=set()
+          def cp(name):
+              if name in found:return
+              src=base/name
+              if not src.is_file():raise SystemExit('MISSING mandatory attack test '+name)
+              found.add(name)
+              body=src.read_text()
+              for dep in re.findall(r'import\s+["\x27](\./[^"\x27]+)["\x27]\s*;',body):
+                  cp(Path(dep).name)
+              (out/name).write_text(body.replace('../src/','../../src/'))
+          for root in (
+              'BetPokerNLHEBetting54.t.sol',
+              'BetPokerActionDisputeClock54.t.sol',
+              'BetPokerRecovery54.t.sol',
+              'BetPokerNativeOutcome54.t.sol',
+              'BetPokerLedgerReentrancy54.t.sol',
+              'BetPokerLiveCardReveals54.t.sol',
+              'BetPokerHandRank54.t.sol',
+              'BetPokerCanonicalSettlement54.t.sol',
+          ):
+              cp(root)
+          print('Mandatory attack suite source closure:',sorted(found))
+          PY
+          forge test --use 0.8.30 --match-path 'test/ws7-focused/BetPokerNLHEBetting54.t.sol' -vv
+          forge test --use 0.8.30 --match-path 'test/ws7-focused/BetPokerActionDisputeClock54.t.sol' -vv
+          forge test --use 0.8.30 --match-path 'test/ws7-focused/BetPokerRecovery54.t.sol' -vv
+          forge test --use 0.8.30 --match-path 'test/ws7-focused/BetPokerNativeOutcome54.t.sol' -vv
+          forge test --use 0.8.30 --match-path 'test/ws7-focused/BetPokerLedgerReentrancy54.t.sol' -vv
+          forge test --use 0.8.30 --match-path 'test/ws7-focused/BetPokerLiveCardReveals54.t.sol' -vv
+          forge test --use 0.8.30 --match-path 'test/ws7-focused/BetPokerHandRank54.t.sol' -vv
+          forge test --use 0.8.30 --match-path 'test/ws7-focused/BetPokerCanonicalSettlement54.t.sol' -vv
+      - name: Exact SHA evidence
+        run: |
+          mkdir -p artifacts/ws7-native
+          git rev-parse HEAD > artifacts/ws7-native/qualified-sha.txt
+          sha256sum contracts/src/bet/PokerNLHEBetting420.sol contracts/src/bet/PokerNativeOutcome420.sol contracts/src/bet/PokerLiveCardReveals420.sol contracts/src/bet/PokerSeatLedger420.sol contracts/src/bet/PokerCanonicalSettlement420.sol > artifacts/ws7-native/source-sha256.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ws7-native-exact-sha
+          path: artifacts/ws7-native/
+          if-no-files-found: error
+  consolidated-gate:
+    needs: [cryptographic-attacks, replay-and-economics]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fail closed unless every mandatory attack suite passes
+        env:
+          CRYPTO: ${{ needs.cryptographic-attacks.result }}
+          NATIVE: ${{ needs.replay-and-economics.result }}
+        run: |
+          test "$CRYPTO" = success
+          test "$NATIVE" = success

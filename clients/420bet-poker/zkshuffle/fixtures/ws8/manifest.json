@@ -1,0 +1,436 @@
+{
+  "format": 1,
+  "setup": "experimental qualification fixture; not a production trusted ceremony",
+  "keys": [
+    {
+      "name": "InitialDeck52",
+      "relationSHA256": "206ebeac0bd5714cb8d43710a95fe8877b7e30079629c81f02bbda19ad4204ef"
+    },
+    {
+      "name": "Reencrypt52",
+      "relationSHA256": "bcd0da64d4c07a3a179e4cbfd45bf875243363027d3f98b34c463724a92c987b"
+    },
+    {
+      "name": "Delivery",
+      "relationSHA256": "1ad5af09a480976f9d674a723fb47e8298f7756fe753cedcfdd9226f6241496c"
+    },
+    {
+      "name": "RecipientPoP",
+      "relationSHA256": "46e35ff688764312e2ba0bb81ceca4d350b9b93589c03d673c8d985031d3bee9"
+    },
+    {
+      "name": "Aggregate",
+      "relationSHA256": "3b992513f801e76464f8c9ec564e7acdb76f4d59e6716f7b9ae9a45231db2831"
+    },
+    {
+      "name": "Partial",
+      "relationSHA256": "dac8817f07591e2e9e62c0cf08480d496d440b488e4fd5ee3d0b9138c426f498"
+    },
+    {
+      "name": "Unmask",
+      "relationSHA256": "b7d34e132516bc81708b56548752dd3170b72af219b40039d167cb83a1964bc8"
+    }
+  ],
+  "proofs": [
+    {
+      "name": "WS8Aggregate",
+      "key": "Aggregate"
+    },
+    {
+      "name": "WS8Delivery00",
+      "key": "Delivery"
+    },
+    {
+      "name": "WS8Delivery01",
+      "key": "Delivery"
+    },
+    {
+      "name": "WS8Delivery10",
+      "key": "Delivery"
+    },
+    {
+      "name": "WS8Delivery11",
+      "key": "Delivery"
+    },
+    {
+      "name": "WS8Delivery20",
+      "key": "Delivery"
+    },
+    {
+      "name": "WS8Delivery21",
+      "key": "Delivery"
+    },
+    {
+      "name": "WS8Delivery30",
+      "key": "Delivery"
+    },
+    {
+      "name": "WS8Delivery31",
+      "key": "Delivery"
+    },
+    {
+      "name": "WS8Initial",
+      "key": "InitialDeck52"
+    },
+    {
+      "name": "WS8Partial150",
+      "key": "Partial"
+    },
+    {
+      "name": "WS8Partial151",
+      "key": "Partial"
+    },
+    {
+      "name": "WS8Partial160",
+      "key": "Partial"
+    },
+    {
+      "name": "WS8Partial161",
+      "key": "Partial"
+    },
+    {
+      "name": "WS8Partial170",
+      "key": "Partial"
+    },
+    {
+      "name": "WS8Partial171",
+      "key": "Partial"
+    },
+    {
+      "name": "WS8Partial290",
+      "key": "Partial"
+    },
+    {
+      "name": "WS8Partial291",
+      "key": "Partial"
+    },
+    {
+      "name": "WS8Partial3110",
+      "key": "Partial"
+    },
+    {
+      "name": "WS8Partial3111",
+      "key": "Partial"
+    },
+    {
+      "name": "WS8Partial400",
+      "key": "Partial"
+    },
+    {
+      "name": "WS8Partial401",
+      "key": "Partial"
+    },
+    {
+      "name": "WS8Partial410",
+      "key": "Partial"
+    },
+    {
+      "name": "WS8Partial411",
+      "key": "Partial"
+    },
+    {
+      "name": "WS8Partial420",
+      "key": "Partial"
+    },
+    {
+      "name": "WS8Partial421",
+      "key": "Partial"
+    },
+    {
+      "name": "WS8Partial430",
+      "key": "Partial"
+    },
+    {
+      "name": "WS8Partial431",
+      "key": "Partial"
+    },
+    {
+      "name": "WS8Recipient0",
+      "key": "RecipientPoP"
+    },
+    {
+      "name": "WS8Recipient1",
+      "key": "RecipientPoP"
+    },
+    {
+      "name": "WS8Shuffle1",
+      "key": "Reencrypt52"
+    },
+    {
+      "name": "WS8Shuffle2",
+      "key": "Reencrypt52"
+    },
+    {
+      "name": "WS8Unmask15",
+      "key": "Unmask"
+    },
+    {
+      "name": "WS8Unmask16",
+      "key": "Unmask"
+    },
+    {
+      "name": "WS8Unmask17",
+      "key": "Unmask"
+    },
+    {
+      "name": "WS8Unmask29",
+      "key": "Unmask"
+    },
+    {
+      "name": "WS8Unmask311",
+      "key": "Unmask"
+    },
+    {
+      "name": "WS8Unmask40",
+      "key": "Unmask"
+    },
+    {
+      "name": "WS8Unmask41",
+      "key": "Unmask"
+    },
+    {
+      "name": "WS8Unmask42",
+      "key": "Unmask"
+    },
+    {
+      "name": "WS8Unmask43",
+      "key": "Unmask"
+    }
+  ],
+  "files": {
+    "clients/420bet-poker/zkshuffle/card_unmask_circuit.go": "71f016d53539de173acda8efe062a5a86d1fc24b74b3b073bb94fc79cb517f80",
+    "clients/420bet-poker/zkshuffle/ciphertext_merkle.go": "7edbf2b500b05a8a52c799d9bf0c879afb8582b980e234586a804f4620791f3f",
+    "clients/420bet-poker/zkshuffle/encrypted_share_delivery_circuit.go": "41c7d578386efc1464dbf6658ed0e839b99be3f5b3b9c2a7a1c38ad3856ae060",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/context.bin": "cdf653304b3158e9aa097e74c21b3856fedb3c871254113cb3d81f4e0db37c7c",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/context.json": "fd14f3b1c47f99c3c4a5409b3de48e220c8bd477d56b53ff89757ad65d66e61c",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/historical-contexts.json": "0408aac3a225a595bc98af099fddbd1d2c34657326a5d40691197254b64a3c60",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/historical-go-modules.txt": "64707e077fb8f5ac5a223f4d89658d97992ceda82c9931ce9caadbb5c06e615a",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/keys/Aggregate.vk": "b45633d62999e080db4c41342e147c069c7dbb04788765345cbb8457fc76be9d",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/keys/Delivery.vk": "84a54e840617a469032deaab0e55598fce5236ea767b42f3ec290022b274b660",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/keys/InitialDeck52.vk": "2fe2a70862312d03961d6e8d64e75f79796fbe945e3db0a8d8bf98a8fa478b07",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/keys/Partial.vk": "bec094cbedcb5ab9dd5d7808779580812aa5c81723481511adec0e2df9c1a986",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/keys/RecipientPoP.vk": "402567c80914fa2797af19e2e8592db08d4cf8db965fd90997658b9acf2eabf5",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/keys/Reencrypt52.vk": "762cf764e808dff32e149030306b355da4eaca7d387a4e42280f312be3c9c8d3",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/keys/Unmask.vk": "cce8f27d5da4847a629550396416faa87f2a8c1102184bf1dc0baaafaebb7e05",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/deck-0.bin": "5a32a85bfcb8549d3529b8b582ea2cff05d46648bba8d8d75dfe41a96e27cb7d",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/deck-1.bin": "707b34748c6dc85c68a9be73682a8bf14c2dffa8564429055f2cacdd3f8203ba",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/deck-2.bin": "4640f7068b37ce6b01e0668f1e67d89e65ef208b49ac9f38f19049ab5b5c3907",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/roots.bin": "e62b908e88d9074bc8ca8c24cb914c035d6f6f9e827e761e8c5f4ace66296cd1",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Aggregate.abi": "24814a1f7f28be9591c4e08cb777f4cef522cb76a3b0020d8c8137dc663690a9",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Aggregate.public": "6633d2c59b4a6d9839c13cda63c3be23da4b0b153655c362db6153107ff5970a",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8AggregateProof.bin": "e5ac1bd6b4e25ae388cdee0f302334bcba79d9bd2bd51f2120d506f84b577ba5",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8AggregateSolidityFixture.json": "8073d0c34735645d995a7d4ae57afb884d2621a9fadfda21bd19b927d98f3dc3",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Delivery00.abi": "a32b8bdf9675d7701d8cd8e1a442928feba07aa6042f0c3513ea2a4deaf7e053",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Delivery00.points": "666779acdf04dc49842dee71021e1dcd82ff0c5035b3d195f23758adaf92bb0a",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Delivery00.public": "ea3a51c2e1f5ca644abefd05a68b324fa4e2a209d1e14f19f6d07266ecab595f",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Delivery00Proof.bin": "a33ce87b71100ba0099bafc2db71954d97721ecfc4633651176aa491068e3d95",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Delivery00SolidityFixture.json": "fea206cbf98d81a7e0f0b8265f7c3ad8be8b5ea3cfffff152a8451f0f8d08031",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Delivery01.abi": "3035c1c1b840fb83495d60a244bb7fea1be5e37757e3d0b609e6a77b8bb6b417",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Delivery01.points": "edc351506454c0ba78ae3f89c84a14d5ba474bb8b7a13865f1c5ed33055741f2",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Delivery01.public": "f5672a829302b2b6a1df2aab7a86da957545ada881e570a3779b32b34e519702",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Delivery01Proof.bin": "b8fa4bb3d98c7d1a54a2866da209754d03b464719926c25a18470d7e882639e3",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Delivery01SolidityFixture.json": "38f8a283fbc4f56e631901c9ab6cea7daa9b5b5ad183c52c5384641e34cebb9e",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Delivery10.abi": "3fcd3bb751b8ce2bcb78f25b7e1c2a44ceaf71a0e59f906049e7c5c85cda379d",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Delivery10.points": "d498730e178d29063dd4a0d2397d97e68e24a36aa40eb54bfa9f937376912a0c",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Delivery10.public": "6f0c950b2cbd5a3174d1ac16a46c312a5dcc05118c22968c12827c125ff01e08",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Delivery10Proof.bin": "87b36cb4e71f0c8000c5d966934f9a79b9175b22e9c5ae60e7ce9ded47f73915",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Delivery10SolidityFixture.json": "1b1dbf28fefcd138e71368d4d58c7efedccd97fb765285ec2c89718ce02eacfe",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Delivery11.abi": "1643351a2d052f21b96ce4fc3d25379ba079ce6aa3904f501612f638a1c04fec",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Delivery11.points": "5d6805c32cb3d7f4231dbb7899a787ed403ab917554059d3e5ab3fa1be199281",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Delivery11.public": "9ec4b1896e03c903f687d1c62460cd4391910afa6135b19840a30ce86e5f974d",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Delivery11Proof.bin": "cbbb3edbce891c4cd01710ce87c44443116c4333763b044c6aadc0bf4b6130b1",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Delivery11SolidityFixture.json": "a5bf842ecb5da80d7f9ab5782b9e8959cf3a321ed06f32ee1f97f366b776eea6",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Delivery20.abi": "cf2f47b78e87932c5d30f0d771248458df8b2043d9154aa2ee09551818ddae28",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Delivery20.points": "0fbf15ed0d6ef65f6a36a3f2c13a055fa9e96739d98910142aabe0b1f2e2ceb7",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Delivery20.public": "76e083bc28dba526aa46e47f895fa0b47300252f80ee1d70186c57cc325960bf",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Delivery20Proof.bin": "77866b4f4b5f43bef8a4badc20886f2470e7450e30a7cc43d598379c4b5174c4",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Delivery20SolidityFixture.json": "52217440ec5d9ffa301e2240017dd2731410eb0f7b9c12db6027ba7e1cb56c8c",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Delivery21.abi": "a77608f1e4edde23bd04b4687308c9bf4f3539dfea5ac5d1ad050e2d7ec2b05b",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Delivery21.points": "8ace2314b2f9b460337dbd04fffabb526d2a140602eba53a3800cdd81a52885b",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Delivery21.public": "423bdb141958d5b157d0765e98c45512af89e369b14768aae5580251e5987a40",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Delivery21Proof.bin": "a6c3562297a75f2a7a5e306dcc308495ff84d8bdb238dd86eaa8eff70018d091",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Delivery21SolidityFixture.json": "1d13a284a9b538bd0c54f494d5dbc073e46f18c94696e5fd9ee73fe2375b946a",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Delivery30.abi": "aacdd54436df5d9e636fcc6d4066576b5fc7b670a3e22d36f683fde50ffc4806",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Delivery30.points": "94f958fc827aeff335a81c966af9fd00d2bacbd5bc38564e9d91293456f3825b",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Delivery30.public": "c46cee502ee13e59e24115261835edcc003178b905b7a633a07d51f20027b93a",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Delivery30Proof.bin": "322a5d389d9aa5116d4c0ed9675f2ed04da61d70edc317c6cbb051dca8d962bb",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Delivery30SolidityFixture.json": "745da4027b164ff11ea273dfdaf34743098b1f5921c80e69c56ff8914102a5f1",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Delivery31.abi": "dc5a424776baaaaa36b7ec4bf3cb19b19049d34f5af5fe0c7bb7ee162b707f80",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Delivery31.points": "b85320627edb5cc3f72ab35c0119e51c88a8950a5505e96bd2719296f5eca664",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Delivery31.public": "d253247a7e0b5ad9a71d56e6d58cd921303a9f0ce274e9da201832388caf403f",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Delivery31Proof.bin": "21e0933d25b5ce22c249cbfc7302a1ed72c38e17fc73d493ae027776aa4ee2a7",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Delivery31SolidityFixture.json": "fdfe13e2f37537deb36cc5181658ddf76352663e13d3e84bbbf7a4689fb2b1fc",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Initial.abi": "1bb61e91d1a77bcc23e8036700a8cfb724e054fc2b4a64d032f7c317fc4a0726",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Initial.public": "7103c0fa62b7f37fa37989b2d552ba0bf38279cf078acd5563dc2375db391b90",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8InitialProof.bin": "0fd9bbb439e43a17950366a483d5d53b6d73a2fe5c2498f3f6741a05baf59630",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8InitialSolidityFixture.json": "4085efdb5f4c0f9c3a00fc63afd3c1b69aba1649264cea561bc6156bbb292296",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial150.abi": "bfaf563e73dc43b6befde3fe59f6b94c5f6b98de2f3494992fa133d9af1c8cd4",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial150.points": "73f2a710c5372810b2093feb5a21c13df4a6793aa689b2738808b03f70905d9e",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial150.public": "ce7f599bc209d49bfdc955a0a34596c58fb112da739453e26f5f1218d7e9734c",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial150Proof.bin": "a6a8d4399dfd23fd2a8daa19b5ede9811a2de6cc1f2d22d4cd796828af652c1b",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial150SolidityFixture.json": "5237d84d79a43f9faa6c137b6f0ddba1a9e686d7bfd80544c4ecba488537ab31",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial151.abi": "983790ae4a6ab98cef2b12996059174bf26dc150b76bb009498642eebc0a376a",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial151.points": "d94ab172c9f1a84ee3bf18c5a3563f8533eb7b3c74ad15cb088154f7aa57ff0f",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial151.public": "49e4368eb51ce2ff36e4fabf2cc6589bf4cc616f2d6071172f3d5c95e59ac21e",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial151Proof.bin": "e07106f1d028c4e34099d54f6fb0644d85008f6d730a55a4502ceccffa854c4e",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial151SolidityFixture.json": "cf184dbc9caef1576510e55a04912ff75f36773a47c50d8630904c39ed55fc84",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial160.abi": "fd0d241ed26a411f71d309f41aa2440324bc23f2c12c63cfab5237c381ef7fa8",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial160.points": "48f3b5b388b50a4639ec86501df9922ee1cc64ba4238792ac0cef5b4c1cccf95",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial160.public": "e246bef1edc00f93c9b290b67a0c9a3e870fa5b8b41a1d83c60314af6e185636",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial160Proof.bin": "ac3ab9efe6dc42db3a76a46842e6c9db0dca46fcec873114d09785908129e681",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial160SolidityFixture.json": "6b564c385efff4ef29db8c0319c14e6abcdb9e1df49c49b6e6d855134a299840",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial161.abi": "cbaf7cdaf550e720282b2e524c9d4071a3fe6b5000a34a40bc3445d7dadf2218",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial161.points": "350986ff850424f739063b40b93c4a81969e2511a13989a1c1a94235b3dee51f",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial161.public": "682ec118ecedad0d5880eb15c0804e4da09b839f5a7ea47bc47df7fb002ef966",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial161Proof.bin": "8415a4dcb6c02bfed9a08b6736e3277805f803c69cf29e2792157016e1816c73",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial161SolidityFixture.json": "f6589e920ba474c778d48fe02de5e4e9995e9b75b4e5d655a3d10beffd766fad",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial170.abi": "ddf296f6469a822c1cc40c7e40544c6ad60729e170422b705e707cc115cba70d",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial170.points": "cb5e94f1b42a4ae72712311bedb76d75616d820fcac875ac1a6f2e00d8432c34",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial170.public": "8433a2bb87c139a5d111557cd377366b83f0b9e51dd0b5a36b1f17d46f95a4b8",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial170Proof.bin": "7eabc4ea6ded827d2e043718a869ecc27a6705cb146a78efebead2556d7ab38a",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial170SolidityFixture.json": "1aeb57081579cf5860045013a416ce722055fa394e84389bbcbac5e364806445",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial171.abi": "37d2d63508e3228b17dd5ed641f1b3bebc9c4deaaeec35702ec18d094d75bc86",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial171.points": "b5313f899ad290fb4cc5e327ee2dd200f20035ae2e0ee6a752853801d51690bf",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial171.public": "5518d2e9945ca535a517a26186dfd58c6c053565c17fd618e0db98de5708c87c",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial171Proof.bin": "a8a5363ad4aad17a456e67807e39105feeaac7dd6d1782a520e15077cc9636b8",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial171SolidityFixture.json": "3f8940006f1c6a24433d3f43fc26e18eb7da638d9d1d5d2a3b167d9b731f25bc",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial290.abi": "172ebb177e70e9c36de3574b111bbc291ae245b63dc911bc91e376fd5f622426",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial290.points": "68dd05fbd109be7cc9d4f575c46c561440d0d7250445ba382fb698628eced0fb",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial290.public": "940c34d36454681b5b0ca5e68f35ce7309eae91c81ca34f0a9df3e351dc9f88c",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial290Proof.bin": "52ed29ddc6989402430d1ec04ff47ad683f56b48282715673fa0c5053c91b146",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial290SolidityFixture.json": "ca3cad49455f1e5a0c12eba0f2dff41e2f02bf0cee19c8f2eba5cdffa3a144f5",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial291.abi": "9f81a73c04eaf7a4656669b327533b08549428373acf7f13b479fd0bba126a8d",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial291.points": "c9c4974dc775c0907d555b866936d18eeb31807a6643bb50cc0a0f4146f892bf",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial291.public": "8d9cf7a9727350ede61f282c327c409bbbfb99806121084d11909ba3f8efa82d",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial291Proof.bin": "5c704d6339a944bbfdca7c05a70ec8c7ac5382a34b1d0d119fbae0a20d7b53f4",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial291SolidityFixture.json": "899313bd14e3285282f4d2776ceddab5555e94d00a9fd609bb67bd9e8bcb21f4",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial3110.abi": "c15bf8ec9e77310e5e571b21c98dff731d58523f679f4a8946c8e162521e90d3",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial3110.points": "a7805bf4c9f04a0fbd28837fce2eee5b0e51b9e509f61599006d215adf52f5e9",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial3110.public": "8fe51f0f1d14063760f79798ecc96485b1ef4aef57d00ea2ca42a590b92acf9d",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial3110Proof.bin": "51036a41d1a332d569f61be4b13c9ef551fef36bd1ec112c567d79a4809c2749",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial3110SolidityFixture.json": "d4d801116dd02c2db37799176f2e7f565170be2ac474818a91e003057327f3e2",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial3111.abi": "c0257cbf8ee6ba488e5f4dd8a3f0b6c0c5e81e88e72375087b252bf837dd8f68",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial3111.points": "195f45e6c86cec6d8b8e6d0aa1efe1c5f392ab1bc5a4cbbbffc2e61210bf2c2f",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial3111.public": "fc4c907dbee783c40368fb7df36a8b33427805d3193b395b849c17295e64324a",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial3111Proof.bin": "603cf7ffc005e29d2f62202a93787af3d520db7bd86a016f53fe86e9d0438a05",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial3111SolidityFixture.json": "1bc28008b641b7bcad4fc13a55e9eb4f8ddf2af1e9b391fd17d758f9506c2000",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial400.abi": "8fd62e21605d0e3e6444c63eff3ea9275a7d5350dc49b1c9909d470c110e821a",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial400.points": "14ebaa8fca07cf4d5cfcda9f5a849353f891eb9decbcd3920675958d6ec4a3a6",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial400.public": "cf0c0a691e1b758550bf43fae616e04500f94239afb19db33cff6329e0a07669",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial400Proof.bin": "489e4529181351aa057c92c7f2fcd7ef04867b741bd805e5a9b9caf1023b4b64",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial400SolidityFixture.json": "ce29f7fa4d8e1c739810723c91bd952858b6eec50b9ae1441ae0578484d7dd3a",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial401.abi": "00802e29c0d224e11b7ce1d828b2511e9807765f5968e62e8fb15f6aa9da14d1",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial401.points": "38a2a8cb052fd75e00ab68f193d64c66d206d6247f18cb2a49b1b78c0c4a0695",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial401.public": "48fcae66254895e4b3189c1b10201db492619423041ca397172663299d3b2930",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial401Proof.bin": "534e55e184ceae10c0f33abbaa97747bf0563e0b58702bd3be360b83bd16b104",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial401SolidityFixture.json": "13e904b5d664e569a01d085d934301724ff84dce592a394933406d179e1a31ba",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial410.abi": "9274bc971dd6c2f98533201d3632ba318afef09763b8791c4b924eac5e9eb60a",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial410.points": "2ec278b5e5951a28998c637475aeff37d462861d96b069a14ffbbad7726bde6c",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial410.public": "e62b5baadd0fa5094cdf4caff422f6fd0e1265fd764c95d452502790c79eeef7",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial410Proof.bin": "56ae9ac98aefe28c655ea729b4488419cabdb831e78bbd216308651cfbe2ce16",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial410SolidityFixture.json": "d339aa6ea1e662abf880f683bcb71deb77deb2c054c9453354821210ea2d7c57",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial411.abi": "306bce2748ac981e5a468d07e3bc0da0a59d15168e20d327b4f47e14907b9123",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial411.points": "f6b5d6d6332f3bc3a1a339f668a527021720fa593c656b31943656a25a29935f",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial411.public": "512642262bbe4e5899267a4071778b26097b6d813b47f344017e66bc07061db3",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial411Proof.bin": "8fb30954d26e8966ed3375728e422f6b87ae475fcb3497b54bfa2d19c0478de9",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial411SolidityFixture.json": "47598ae2420a65ea0fd6c844cfeee37f3857b3992d2c96f7fc44c2d734ed0326",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial420.abi": "1ba92011f08c51c63d963615c5cfb33b478a2a732e339fe9c1d62f5e700a2936",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial420.points": "26a3c13114a4ba5335316e82df86c5d667a1d0bc0c61c37998ab006d5d4c2792",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial420.public": "7b82bc3e6f008816431b7c690853e64313990973110e9b6f1c50f4bc55abbdcc",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial420Proof.bin": "5610e245907f30956c5f4db0528b1ecb1c5a832681d2ba883f3c2dd6b65b704f",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial420SolidityFixture.json": "0093b2c3b3a89e600f81f63b681a1ffd97aadbf5e67e40440ffa3abeecf37810",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial421.abi": "8b1e3389361f01030e46ae3bf9c83b056bf71f5105b0115bc132234cb8569d20",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial421.points": "bbf71cb42ea82086e7bd2699cb2f236a241a7a3052d68b00be34daa637784076",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial421.public": "c72ddf1c80604d1f57e81a008b25d36fe73191a88e8f5d916ac75087d981ecf3",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial421Proof.bin": "83f2b3339ab7763681cd1b5110254f38f94ffa966cfa4483801fd3e55ab1ac04",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial421SolidityFixture.json": "a4ccf8e72c945c283fb3bd027474ffda9550db7bbbc8254146d50e0f668a702e",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial430.abi": "82d3ed7ba8533a660eeb2f51de78880af88d2f576929d993b421e498fd0bcce0",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial430.points": "0dfacbb05fb5fbf7e6b4940669a7621037f34b2079d53498fa90f696d48d72b4",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial430.public": "479a83f5a3c4dc4009cdfd9ed12e2f52305df23a0961d381e9a230e5781d8973",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial430Proof.bin": "227ec52c49e2244a32f6639393931feca2f714d4b563f917158d1a1d08ed645f",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial430SolidityFixture.json": "b62720919bf80854f09fe0b9021b2654b73d5d3d171a8d88d79f69d13d8843aa",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial431.abi": "e4872d7f6cc330e44e490b4296e538ec1f7c74261686568c9179df069632ced5",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial431.points": "cd156b430e29b54df250b5c8d7d44301ca8391d0ec74d142b59e3e8b58489125",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial431.public": "7aa0199944d536bd2da0d5667fab8ae9049292832cec3e6ce7f717a3de8f513b",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial431Proof.bin": "ec746492c3f1c3550ead8ddf86c26bba56cfc5defe05e5befaf2033d591d5981",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Partial431SolidityFixture.json": "7dc4273f93ededd12e5ed3e541792de4b017642b68ee0032e2789544a8f47477",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Recipient0.abi": "3564fbf92942a076293da83f136e971ce19ac6559cd2e7fe7faee1d039ac1a17",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Recipient0.public": "b64ebc780c400edb098c6ebf37a482cce0d04a767cb864fc5e84ca1b6b363d89",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Recipient0Proof.bin": "5302eab41a8716f0101e468869008b4f37cd5df031bb7547ebc0203b068ccd6b",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Recipient0SolidityFixture.json": "0b3c1b9e5f4461e748a82c495205e3a268364156f4d4ea7d2db0d0cefa27b081",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Recipient1.abi": "772d1631dccf70f357c269a726005962ceb5d9a88306fcf569aa83c467bade43",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Recipient1.public": "94e989debe17534e918a566d064c041536d2065df9daf46846c8818751a14c7f",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Recipient1Proof.bin": "58b6749d0ba925e69ed233f15e90d784b7536d5400da3dd5b188eeaa3243ab55",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Recipient1SolidityFixture.json": "7de49fb2ea559f18613c1e6baba056ce9420eed65d18edbe7d0880c3d2eca752",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Shuffle1.abi": "a44a6643adc52fc1df9eb471197a2746abd61488ff1bdae0165040cb49baf01a",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Shuffle1.public": "5b466a8cb80c6c2d97e57ff46a11da1717e03c4b3d2654c8382a389e8151caea",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Shuffle1Proof.bin": "d395902237015b5e1a3a2b049f95e05bd657880e5dc11768d373c31bab628915",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Shuffle1SolidityFixture.json": "3b22511cb33cc04fc2b95ebc0e9442155155df0aa9f4d92d7bd51468414737e9",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Shuffle2.abi": "43d11ff66979a42367f5b53e4733520bdaa5d060d8eac9bec94d3df6b201dca0",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Shuffle2.public": "eac1da77d8744a237080b68f781a534554baf47c4d8f6b939946a4a4a74f63f7",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Shuffle2Proof.bin": "08cac5c4e2ec6aa345a90d2626fb3bf44e52ce7fa921b4b2d714df9814d19c90",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Shuffle2SolidityFixture.json": "6202563745edb417ead10184a1d124066daed5ef39e8a7ac18f05413e67daee5",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Unmask15.abi": "02f47a94d7146d96455db36422af5f8c59e611658273eba799cf0460f69dffed",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Unmask15.public": "2edbe28fa17fb3c70ee3c4273936a1fe09820eb65796929c512e2d8426e43f57",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Unmask15Proof.bin": "1b685076ce1b74016c833cea1e78ef39beac892e435b85a100ef0291eafcbecc",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Unmask15SolidityFixture.json": "33ffb7e437ed4e056c3a366963cea6dd3e0cde4006be4b6b9dd79f9b462e39d2",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Unmask16.abi": "89e8224c1dea7298909903cbac1990e26c9ba713ffc4adf15bcdbce689b74268",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Unmask16.public": "14dc3c43fd056a4ec9958c8c541e8383491084d9bdfd38a50ed8e85b42acd423",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Unmask16Proof.bin": "06ee7be67569ea8918f8348ee97ffdd495afd5878c082d0c28c0c3a6a087b1a8",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Unmask16SolidityFixture.json": "c12828b04f57843f627c8c69f026b0ce7dab8d3f0b70f70a8af69bc99ef3049e",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Unmask17.abi": "cbd724f01398dbc17ee5ea83f4c54e456b4668c2b468e938a606c6e28ce70932",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Unmask17.public": "aab069f9e20c9c985ee4b0f6f4658eb1f4cde0d03ae6dfdd3c127a079a79731e",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Unmask17Proof.bin": "94837909175c845d3d4e0fbe2a373d699242fbf039c5069b928e71d31070be8a",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Unmask17SolidityFixture.json": "6a23e968b34097b0d51ead79e120493d6cc7f1df5c6f2107eea3bed3c2bcc1c0",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Unmask29.abi": "ec2e5c54b479b99403b4d0ea18d5b6e671560ca95c2a7066bca8ffe3b3affd48",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Unmask29.public": "0997cd0483896faaec2719c9ba48d43055bf29bc0a8ea2785c62f1c3147f25e8",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Unmask29Proof.bin": "2a44b0b692cb28fe7ad2b89a2ce4d9464a98587bd825d6a5c182add7afef5ec2",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Unmask29SolidityFixture.json": "5925b1ee51618bb5a340a8b26aec3e9da772705fa760eef84bf5d149092eee08",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Unmask311.abi": "1d5d806ae2cc82e2cb9cb43ed685ae7be20192a0ed9e8ca98d34f07c7be29d28",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Unmask311.public": "2c9d83e4acfc1256d4f6e29a10fae949f164c66db4f1b550d5c695f82d5ffaf5",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Unmask311Proof.bin": "ea8c1de78f683d728245e69b663757762ef89dd6424e94192279f637c60ad855",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Unmask311SolidityFixture.json": "61a8a6701bbff84da1fe902b8c4471deb974900820a59716b0b02e61ed18e86c",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Unmask40.abi": "d490fc9fe519ba5a7449452e4ffa8a1ab9e7f8603d05c0f875fd25d245fdaa44",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Unmask40.public": "a923e8213e3235c03c3ab231f6ad9e74b1006174695380642c606e51688b19fe",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Unmask40Proof.bin": "a54e2b42ebc56850c2f2cb611328a36d32bd719ea5f54f51f81dc75e0cd77db0",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Unmask40SolidityFixture.json": "a7b11d33f0751083104ee9803fa876cfa86684a64cc9318e562b6acb9ee3b11b",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Unmask41.abi": "7cc7d868a16fc852b5ccc0a991731c3760351f7c72f13ff0f67d92e9594bbe45",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Unmask41.public": "ce36542b9396b95eaf54d1e7fc171b0fea04a7f71d6b1347d25a10ac8d698f98",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Unmask41Proof.bin": "ec8004ab1605180dca4bf18e994c7e9c4ca680394df74d782476de3c3a84fe97",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Unmask41SolidityFixture.json": "c803bc4619525a8dc873116e5e5ad0d75f3b9fdd7c42a85ee93817a04f651cdd",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Unmask42.abi": "4595afeb57d636f296dd0ad5324b9b59859052e085ec327f3eb1a5198258c1a5",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Unmask42.public": "cca7e01304de06a149c6943788a33d5b8646965a59bc68013d832360067978ee",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Unmask42Proof.bin": "ae7bb68c48e73e22615cb83a8196cc8914f9bfee34ac5bf580bb21371cb6e7a0",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Unmask42SolidityFixture.json": "d19a084cbfdc9c92bb54c3a897652d0b85593754a9de520faa667cb7d02e65d8",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Unmask43.abi": "767174a7366564cc7148031de395ebe41e2a3ba7f35567052aad180944361476",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Unmask43.public": "2a4faff79e6e28d999f44a49086ac2a36a4b62a48e7164bf3026285faf959d86",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Unmask43Proof.bin": "68654ceb67c2061d5881496bc8a60b160c40de4bd618dbf996ad8e8be86c43ac",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Unmask43SolidityFixture.json": "c681e7e35b60475d1487c0bfbda5ec8c8c30cdc385dd11397a416287812088a5",
+    "clients/420bet-poker/zkshuffle/fixtures/ws8/rounds.bin": "f835bed938a81b2b4451aabe628189677d8a33da1ee6d0795b8cbd740eef44c9",
+    "clients/420bet-poker/zkshuffle/initial_deck_circuit.go": "359641b11aa61009ae532ec44527cd2a20afedcddda5ff901b4f939398a82dff",
+    "clients/420bet-poker/zkshuffle/partial_decryption_circuit.go": "688d8ffcb275a966eeedd7cd9a2955b6b387ea4e37f6c9925631c199dbb8c0a8",
+    "clients/420bet-poker/zkshuffle/recipient_key_possession_circuit.go": "9b015f200923624adf8b2bf63b2c853e3bc5e4708b8cbb58a4d0b3622721681a",
+    "clients/420bet-poker/zkshuffle/reencryption_circuit.go": "66e904774c81ef5d948719e3a60577459e32fdf75fbde9966fff51edc4529f12",
+    "clients/420bet-poker/zkshuffle/threshold_key_aggregate_circuit.go": "95f732fe61ef3c809a5e5e64e03d06b9bf4887d759b58e69c36eaffe3bc43229",
+    "contracts/src/bet/generated/WS8AggregateVerifier.sol": "b70341afc955b3161f68072f90be5f6f87f8087b3a81b80aecf5d13db14dcfdd",
+    "contracts/src/bet/generated/WS8DeliveryVerifier.sol": "fe5347a2dd835774091645131c42df32ce607ad00f6761942ec06fbd3019353b",
+    "contracts/src/bet/generated/WS8InitialDeck52Verifier.sol": "b409e0a4d8618160bed478702cbdcbe5555634b829df68279f2968059d2e1cf0",
+    "contracts/src/bet/generated/WS8PartialVerifier.sol": "dcaf08271fac106c2382fc457a261af763802b87f6fa94db4a10ba95909ab49f",
+    "contracts/src/bet/generated/WS8RecipientPoPVerifier.sol": "6ab9e2bd7e46c1b3d4a5432a985116592c428f96bf68ac4e1191598c18d975df",
+    "contracts/src/bet/generated/WS8Reencrypt52Verifier.sol": "1e6657ece49a85359fad2d743bba95371e426831ddf65ead4024219635f069e4",
+    "contracts/src/bet/generated/WS8UnmaskVerifier.sol": "628a6e0fdd4c704ec720bf54b6a383c6a0bbd8bcf3a37abce91ba17c8548baf1",
+    "contracts/src/bet/generated/WS8VerifierData.sol": "ed155270a5c3aa02774bf6001368f790e9bbc8d80351580de934ee16f16f6842"
+  },
+  "historicalArtifacts": {
+    "WS2": {
+      "run": 40003702620,
+      "artifact": 12522623783,
+      "zipSHA256": "c591c05daaaad50ed82d0add978b901683452a72f349450f3d14f53ddac20e9c"
+    },
+    "WS3": {
+      "run": 40013195917,
+      "artifact": 12527008958,
+      "zipSHA256": "74b557d7c11d4a9d892177e18ad0d1fa3d2496aafaf009e7f2f7d50aafbe938b"
+    }
+  }
+}

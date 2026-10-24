@@ -21,7 +21,8 @@ export function mountSkills({document,main,runtime,authenticate,fetchImpl=fetch}
  };
  const operate=async(action,message)=>{
   if(busy)return;busy=true;
-  try{await action();status.textContent=message;await refresh();}
+  try{const outcome=await action();if(outcome===false){status.textContent='Player cancelled the action. No BUDS were spent.';return;}
+   status.textContent=message;await refresh();}
   catch(e){status.textContent='Progression unavailable or denied: '+e.message;}
   finally{busy=false;}
  };
@@ -60,7 +61,7 @@ export function mountSkills({document,main,runtime,authenticate,fetchImpl=fetch}
    }
    if(!record.unlocked&&record.points===record.requiredPoints){
     button(card,'Unlock for '+record.cost+' BUDS',()=>operate(async()=>{
-     if(globalThis.confirm?.('Spend '+record.cost+' BUDS on '+record.id+'?')!==true)return;
+     if(globalThis.confirm?.('Spend '+record.cost+' BUDS on '+record.id+'?')!==true)return false;
      await post('/progression/unlock',{operation:op(),trackId:record.id});
     },'Unlock request processed by the authoritative service.'));
    }

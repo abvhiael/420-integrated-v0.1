@@ -16,7 +16,7 @@ const a=JSON.parse(animation);assert.equal(a.frameCount,10);assert.equal(a.fps,1
 for(const f of a.frames)assert.match(f.sha256,/^[0-9a-f]{64}$/);
 assert(d.unresolved.some(s=>s.includes("Godot")));
 assert.equal(d.qualification.passed,false);
-console.log("MIG-0.4 scoped source boundary audit PASS; binary assets and Godot project remain unverified.");
+console.log("MIG-0.4 scoped source-boundary audit PASS; see cross-repository Godot evidence for binary/runtime checks.");
 
 const evidence=JSON.parse(read("docs/migration/MIG-0.4-provenance-evidence.json"));
 assert.equal(evidence.step,"MIG-0.4");
@@ -27,5 +27,8 @@ assert.equal(evidence.godot.sourceRepository,"abvhiael/MadBuds-Godot");
 assert.match(evidence.godot.gitTreeSha,/^[0-9a-f]{40}$/);
 assert.equal(evidence.godot.trackedPngs,150);
 assert.equal(evidence.godot.assetManifests,15);
-assert.equal(evidence.binaryAssets.sha256VerifiedAgainstBytes,0);
-assert.equal(evidence.finalStatus,"PARTIAL_PENDING_BINARY_SHA256_AND_RUNTIME_QUALIFICATION");
+assert.equal(evidence.binaryAssets.sha256VerifiedAgainstBytes,150);
+assert.equal(evidence.godotQualification.result,"SUCCESS");
+assert.equal(evidence.godotQualification.workflowRun,40108948204);
+assert.equal(evidence.godotQualification.exactHeadSha,"0562825a51b6193d0936e18f3bd8e9937220ee16");
+assert.equal(evidence.finalStatus,"GODOT_BINARY_AND_RUNTIME_QUALIFIED_UNITY_RECURSIVE_INVENTORY_STILL_OPEN");

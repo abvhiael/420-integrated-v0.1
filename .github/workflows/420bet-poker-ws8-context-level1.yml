@@ -4,6 +4,7 @@ on:
     paths:
       - 'contracts/test/BetPokerWS8FrozenHandContext54.t.sol'
       - '.github/workflows/420bet-poker-ws8-context-level1.yml'
+      - 'scripts/bet/inspect-ws8-proof-context.py'
   workflow_dispatch:
 permissions:
   contents: read
@@ -57,10 +58,15 @@ jobs:
           grep -q 'WS8FrozenHand' ws8-context-level1.log
           grep -q 'WS8ProviderBonds' ws8-context-level1.log
           grep -q 'WS8SeatSigningKeys' ws8-context-level1.log
+      - name: Compare historical proof scope with real funded-hand context
+        working-directory: contracts
+        run: python3 ../scripts/bet/inspect-ws8-proof-context.py ws8-context-level1.log ws8-proof-context.json
       - uses: actions/upload-artifact@v4
         with:
           name: 420bet-ws8-step1-frozen-context
-          path: contracts/ws8-context-level1.log
+          path: |
+            contracts/ws8-context-level1.log
+            contracts/ws8-proof-context.json
           if-no-files-found: error
  -vvvv | tee ws8-context-level1.log
           grep 'WS8FrozenHand' ws8-context-level1.log || true

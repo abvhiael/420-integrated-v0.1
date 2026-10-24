@@ -2,6 +2,7 @@ import {SettlementError} from './buds-ledger.js';
 import {CanonicalEscrowReader} from './canonical-escrow-reader.js';
 import {CanonicalMarketSettlement} from './canonical-settlement.js';
 import {CanonicalSettlementWorker} from './canonical-settlement-worker.js';
+import {CanonicalIndexerReconciler} from './canonical-indexer-reconciler.js';
 import {calldata,words,address} from './finalized-rpc.js';
 import {keccak256} from './keccak.js';
 export class CanonicalRpcEscrowClient {
@@ -28,7 +29,22 @@ export class CanonicalRpcEscrowClient {
    if(l.removed||address(l.address)!==address(target)||BigInt(l.blockNumber)>BigInt(h.number)
       ||l.topics?.[0]!==keccak256(Buffer.from(signatures[eventName])))throw new SettlementError('noncanonical event');
    const block=await this.rpc.request('eth_getBlockByNumber',[l.blockNumber,false]);
-   if(!block||block.hash!==l.blockHash)throw new SettlementError('event reorg');
+   if(!block||block.hash?.toLowerCase()!==l.blockHash?.toLowerCase())throw new SettlementError('event reorg');
+   // Independently authenticate the successful finalized transaction and exact emitted log.
+   if(!/^0x[0-9a-f]{64}$/i.test(l.transactionHash)||!/^0x[0-9a-f]+$/i.test(l.logIndex))
+    throw new SettlementError('invalid transaction receipt locator');
+   const receipt=await this.rpc.request('eth_getTransactionReceipt',[l.transactionHash]);
+   if(!receipt||receipt.status!=='0x1'||address(receipt.to)!==address(target)
+      ||receipt.blockHash?.toLowerCase()!==l.blockHash.toLowerCase()
+      ||BigInt(receipt.blockNumber)!==BigInt(l.blockNumber)
+      ||!Array.isArray(receipt.logs))throw new SettlementError('unauthenticated finalized receipt');
+   const matching=receipt.logs.filter(x=>x.logIndex===l.logIndex
+      &&x.transactionHash?.toLowerCase()===l.transactionHash.toLowerCase()
+      &&x.blockHash?.toLowerCase()===l.blockHash.toLowerCase()
+      &&address(x.address)===address(target)
+      &&x.data?.toLowerCase()===l.data?.toLowerCase()
+      &&JSON.stringify(x.topics?.map(t=>t.toLowerCase()))===JSON.stringify(l.topics?.map(t=>t.toLowerCase())));
+   if(matching.length!==1)throw new SettlementError('receipt log mismatch');
    const ev={listingId:l.topics[1]};
    if(eventName==='EscrowSettled'){ev.operationId=l.topics[2];ev.buyer=address('0x'+l.topics[3].slice(-40));}
    if(eventName==='EscrowListed'){const w=words(l.data);ev.owner=address('0x'+l.topics[2].slice(-40));ev.asset=l.topics[3];ev.quantity=BigInt('0x'+w[0]);ev.expiresAt=BigInt('0x'+w[1]);}
@@ -38,7 +54,7 @@ export class CanonicalRpcEscrowClient {
   return out;
  }
 }
-export function composeSettlementRuntime({store,identity,rpc,operator,issuer,marketDomain,signerRpc,fromBlock=0n,clock}){
+export function composeSettlementRuntime({store,identity,rpc,operator,issuer,marketDomain,signerRpc,fromBlock=0n,clock,indexer}){
  if(!marketDomain||!signerRpc||!operator)throw new SettlementError('missing settlement deployment policy');
  const reader=new CanonicalEscrowReader({client:new CanonicalRpcEscrowClient(rpc),
   escrow:rpc.contracts.escrow.address,chainId:rpc.chainId,issuer,fromBlock});
@@ -85,7 +101,7 @@ export function composeSettlementRuntime({store,identity,rpc,operator,issuer,mar
   requireSubmissionAllowed:async()=>{if(!await rpc.unrestricted(marketDomain))throw new SettlementError('market restricted');}
  };
  const settlement=new CanonicalMarketSettlement(store,authority,clock);
- const submitCanonical=async intent=>{
+ const preflightSubmission=async intent=>{
   await authority.requireSubmissionAllowed();
   // Re-read durable reservation immediately before asking the external operator wallet to sign.
   const current=await store.transact(s=>s.transferIntents.get(intent.transferOp));
@@ -104,10 +120,22 @@ export function composeSettlementRuntime({store,identity,rpc,operator,issuer,mar
   const actual=words((await rpc.call('escrow',calldata('marketOperator()'))).result)[0];
   if(address('0x'+actual.slice(24))!==address(operator))throw new SettlementError('wrong signer authority');
   if(Number(BigInt(await signerRpc.request('eth_chainId',[])))!==rpc.chainId)throw new SettlementError('signer wrong chain');
-  const txHash=await signerRpc.request('eth_sendTransaction',[{from:address(operator),to:address(rpc.contracts.escrow.address),
-   data:calldata('settle(bytes32,address)',intent.sourceReceiptId,buyer),value:'0x0',chainId:'0x'+rpc.chainId.toString(16)}]);
+  return {from:address(operator),to:address(rpc.contracts.escrow.address),
+   data:calldata('settle(bytes32,address)',intent.sourceReceiptId,buyer),
+   value:'0x0',chainId:'0x'+rpc.chainId.toString(16)};
+ };
+ authority.preflightSubmission=preflightSubmission;
+ const submitCanonical=async(_intent,txRequest)=>{
+  if(!txRequest||txRequest.from!==address(operator)
+    ||txRequest.to!==address(rpc.contracts.escrow.address))
+   throw new SettlementError('missing reviewed canonical preflight');
+  // The next external call may broadcast even if its response is lost.
+  const txHash=await signerRpc.request('eth_sendTransaction',[txRequest]);
   if(!/^0x[0-9a-f]{64}$/i.test(txHash))throw new SettlementError('invalid submission hash');
   return {txHash};
  };
- return {reader,authority,settlement,worker:new CanonicalSettlementWorker({store,settlement,authority,submitCanonical,clock})};
+ const reconciler=indexer?new CanonicalIndexerReconciler({store,reader,indexer}):null;
+ return {reader,authority,settlement,reconciler,
+  worker:new CanonicalSettlementWorker({store,settlement,authority,submitCanonical,clock,
+   reconcileTransfer:reconciler?op=>reconciler.transfer(op):undefined})};
 }

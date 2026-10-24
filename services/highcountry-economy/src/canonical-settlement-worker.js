@@ -4,13 +4,14 @@
 import {SettlementError} from './buds-ledger.js';
 const valid=x=>typeof x==='string'&&/^[a-zA-Z0-9:_-]{1,128}$/.test(x);
 export class CanonicalSettlementWorker {
- constructor({store,settlement,authority,submitCanonical,clock=()=>Date.now(),leaseMs=60000}){
+ constructor({store,settlement,authority,submitCanonical,reconcileTransfer,clock=()=>Date.now(),leaseMs=60000}){
   if(typeof store?.transact!=='function'||typeof settlement?.finalize!=='function'||
      typeof settlement?.abort!=='function'||typeof authority?.confirmedReservedTransfer!=='function'||
      typeof authority?.proveUnexecutedAndCancelled!=='function'||typeof submitCanonical!=='function'||
      !Number.isSafeInteger(leaseMs)||leaseMs<1000||leaseMs>300000)
     throw new SettlementError('invalid settlement worker configuration');
-  Object.assign(this,{store,settlement,authority,submitCanonical,clock,leaseMs});
+  if(reconcileTransfer!==undefined&&typeof reconcileTransfer!=='function')throw new SettlementError('invalid indexer reconciliation');
+  Object.assign(this,{store,settlement,authority,submitCanonical,reconcileTransfer,clock,leaseMs});
  }
  async tick(transferOp){
   if(!valid(transferOp))throw new SettlementError('invalid transfer operation');
@@ -36,6 +37,7 @@ export class CanonicalSettlementWorker {
   });
   try{
    if(await this.authority.confirmedReservedTransfer(transferOp)){
+    if(this.reconcileTransfer)await this.reconcileTransfer(transferOp);
     const result=await this.settlement.finalize('finalize:'+transferOp,transferOp);
     await release();
     return {status:'finalized',result};
@@ -49,8 +51,23 @@ export class CanonicalSettlementWorker {
    // Never automatically submit twice once txHash has been durably recorded.
    // A post-broadcast/pre-record crash relies on deterministic on-chain replay protection.
    if(claim.job.txHash){await release();return {status:'awaiting-finality',txHash:claim.job.txHash};}
+   // A prior broadcast may have succeeded before its hash reached PostgreSQL.
+   // An indeterminate dispatch must be reconciled on-chain, never rebroadcast.
+   if(claim.job.dispatchStarted){await release();return {status:'reconcile-dispatch'};}
    if(typeof this.authority.requireSubmissionAllowed==='function')await this.authority.requireSubmissionAllowed(claim.intent);
-   const submission=await this.submitCanonical({...claim.intent});
+   // All deterministic authorization, signer and escrow preflight must finish before
+   // entering the uncertain-broadcast state; a rejection here remains retryable.
+   const txRequest=typeof this.authority.preflightSubmission==='function'
+    ?await this.authority.preflightSubmission({...claim.intent}):undefined;
+   // Commit the write-ahead dispatch marker BEFORE calling a non-transactional RPC.
+   // Recovery is fail-closed if a process dies after broadcasting but before hash persistence.
+   await this.store.transact(s=>{
+    const t=s.transferIntents.get(transferOp),job=s.settlementJobs.get(transferOp);
+    if(!t||t.status!=='prepared'||!job||job.leaseUntil!==now+this.leaseMs||job.dispatchStarted)
+     throw new SettlementError('lost canonical dispatch lease');
+    job.dispatchStarted=true;
+   });
+   const submission=await this.submitCanonical({...claim.intent},txRequest);
    if(!submission||!valid(submission.txHash))throw new SettlementError('invalid chain submission');
    await release(submission.txHash);
    return {status:'submitted',txHash:submission.txHash};

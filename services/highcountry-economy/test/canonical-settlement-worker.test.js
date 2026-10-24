@@ -47,3 +47,69 @@ test('an active transaction lease prevents overlapping workers',async()=>{
  unlock({txHash:'tx:2'});
  assert.equal((await running).status,'submitted');
 });
+
+test('crash after broadcast before hash recording cannot submit twice',async()=>{
+ const {store,state}=setup();
+ const authority={confirmedReservedTransfer:async()=>state.finalized,
+  proveUnexecutedAndCancelled:async()=>state.cancelled};
+ const settlement={finalize:async()=>{store.state.transferIntents.get('transfer:1').status='finalized';},
+  abort:async()=>{store.state.transferIntents.get('transfer:1').status='cancelled';}};
+ const first=new CanonicalSettlementWorker({store,settlement,authority,leaseMs:1000,clock:()=>1000,
+  submitCanonical:async()=>{state.submissions++;throw new Error('RPC response lost after broadcast');}});
+ await assert.rejects(first.tick('transfer:1'),/RPC response lost/);
+ assert.equal(store.state.settlementJobs.get('transfer:1').dispatchStarted,true);
+ const recovered=new CanonicalSettlementWorker({store,settlement,authority,leaseMs:1000,clock:()=>3000,
+  submitCanonical:async()=>{state.submissions++;return {txHash:'tx:unexpected'};}});
+ assert.equal((await recovered.tick('transfer:1')).status,'reconcile-dispatch');
+ assert.equal(state.submissions,1,'uncertain broadcast never repeated');
+ state.finalized=true;
+ assert.equal((await recovered.tick('transfer:1')).status,'finalized');
+ assert.equal(state.submissions,1);
+});
+test('dispatch marker is durable before calling the transaction writer',async()=>{
+ const {store,state}=setup();
+ const authority={confirmedReservedTransfer:async()=>false,proveUnexecutedAndCancelled:async()=>false};
+ const settlement={finalize:async()=>{},abort:async()=>{}};
+ const worker=new CanonicalSettlementWorker({store,settlement,authority,leaseMs:1000,clock:()=>1000,
+  submitCanonical:async()=>{
+   assert.equal(store.state.settlementJobs.get('transfer:1').dispatchStarted,true);
+   state.submissions++;return {txHash:'tx:1'};
+  }});
+ assert.equal((await worker.tick('transfer:1')).status,'submitted');
+ assert.equal(state.submissions,1);
+});
+
+test('configured indexer divergence prevents payout until independent reconciliation agrees',async()=>{
+ const {store,state}=setup();state.finalized=true;
+ let agree=false,paid=0;
+ const authority={confirmedReservedTransfer:async()=>true,proveUnexecutedAndCancelled:async()=>false};
+ const settlement={finalize:async()=>{paid++;store.state.transferIntents.get('transfer:1').status='finalized';},
+  abort:async()=>{throw Error('unexpected refund');}};
+ const worker=new CanonicalSettlementWorker({store,settlement,authority,leaseMs:1000,clock:()=>1000,
+  submitCanonical:async()=>{throw Error('should not broadcast');},
+  reconcileTransfer:async()=>{if(!agree)throw Error('indexer divergent');}});
+ await assert.rejects(worker.tick('transfer:1'),/indexer divergent/);
+ assert.equal(paid,0);assert.equal(store.state.transferIntents.get('transfer:1').status,'prepared');
+ agree=true;
+ assert.equal((await worker.tick('transfer:1')).status,'finalized');
+ assert.equal(paid,1);
+});
+
+test('rejected signer preflight never writes uncertain-dispatch marker; retry can succeed safely',async()=>{
+ const {store,state}=setup();let fail=true;
+ const authority={confirmedReservedTransfer:async()=>false,
+  proveUnexecutedAndCancelled:async()=>false,
+  preflightSubmission:async()=>{if(fail)throw new Error('signer not available');return {reviewed:true};}};
+ const settlement={finalize:async()=>{},abort:async()=>{}};
+ const worker=new CanonicalSettlementWorker({store,settlement,authority,leaseMs:1000,
+  clock:()=>1000,submitCanonical:async(_,request)=>{
+   assert.deepEqual(request,{reviewed:true});state.submissions++;return {txHash:'tx:reviewed'};
+  }});
+ await assert.rejects(worker.tick('transfer:1'),/signer not available/);
+ assert.equal(store.state.settlementJobs.get('transfer:1').dispatchStarted,undefined);
+ assert.equal(state.submissions,0);
+ fail=false;
+ assert.equal((await worker.tick('transfer:1')).status,'submitted');
+ assert.equal(store.state.settlementJobs.get('transfer:1').dispatchStarted,true);
+ assert.equal(state.submissions,1);
+});

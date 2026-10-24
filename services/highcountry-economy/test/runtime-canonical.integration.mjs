@@ -61,12 +61,24 @@ try {
  const empty={schema:1,balances:[],operations:[],claims:[],sourceIssued:[],assets:[],assetSources:[],listings:[],transferIntents:[],importedAssets:[],issued:0,burned:0};
  await admin.query('INSERT INTO highcountry_buds_state(namespace,state) VALUES($1,$2::jsonb)',[role,JSON.stringify(empty)]);
  pool=new pg.Pool({connectionString:databaseUrl.toString()});
+ let projectedOperation=null,projectedBuyer=seller;
+ const indexer={
+  baseUrl:'http://127.0.0.1:8675',allowLocal:true,
+  fetchImpl:async url=>{
+   const isTransfer=url.includes('/escrow/transfers/');
+   const result=isTransfer?{operationId:projectedOperation,listingId:listing,
+    seller,buyer:projectedBuyer,asset,quantity:3}:
+    {id:listing,status:'sold',operationId:projectedOperation,asset,quantity:3};
+   return new Response(JSON.stringify({chainId:420,escrow:addresses.escrow,result}),
+    {status:200,headers:{'content-type':'application/json'}});
+  }
+ };
  const config={pool,namespace:role,authority:{issuers:{idp:{publicKey:sessionKeys.publicKey,operators:{operator:{sources:['inventory'],marketOperator:true}}}},
   audience:'hc-local-ci',gameId:game,chainId:420,origin:'http://hc.local-ci'},
   rpc:{url:rpcUrl,chainId:420,contracts},
   sources:{mission:{kind:'mission',contract:addresses.mission,publicKey:proofKeys.publicKey,epoch:0,maxAward:100,totalCap:200,
    emergencyDomain:keccak256(Buffer.from('HC.EMERGENCY.MISSION_ACTIVATION'))}},
-  marketDomain:keccak256(Buffer.from('HC.EMERGENCY.MARKET')),operator,issuer:operator,signerRpc:chain};
+  marketDomain:keccak256(Buffer.from('HC.EMERGENCY.MARKET')),operator,issuer:operator,signerRpc:chain,indexer};
  const runtime=await createRuntime(config);
  server=runtimeHttpServer(runtime,{origin:'http://hc.local-ci'});await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
  const base='http://127.0.0.1:'+server.address().port;
@@ -88,11 +100,21 @@ try {
   source:'mission',contract:addresses.mission,objective,amount:100,expires:Date.now()+60000,epoch:0})).toString('base64url');
  const proof={payload,signature:sign(null,Buffer.from(payload),proofKeys.privateKey).toString('base64url')};
  await post('buyer','/rewards/claim',{source:'mission',proof});await post('buyer','/rewards/claim',{source:'mission',proof},403);
+ // Adversarial finalized receipt authentication: an event without a successful receipt cannot admit goods.
+ const originalRpcRequest=runtime.reader.client.rpc.request.bind(runtime.reader.client.rpc);
+ runtime.reader.client.rpc.request=async(method,args)=>{
+  const result=await originalRpcRequest(method,args);
+  if(method==='eth_getTransactionReceipt')return {...result,status:'0x0'};
+  return result;
+ };
+ await assert.rejects(runtime.reader.lockedEscrowReceipt(listing,1),/unauthenticated finalized receipt/);
+ runtime.reader.client.rpc.request=originalRpcRequest;
  const lock=await runtime.reader.lockedEscrowReceipt(listing,1);assert.ok(lock);
  await post('buyer','/market/import',{operation:'wrong-issuer',receipt:{...lock,owner:'seller'}},403);
  await post('operator','/market/import',{operation:'canonical-import',receipt:{...lock,owner:'seller'}});
  await post('seller','/market/list',{operation:'canonical-list',listing,asset,quantity:3,price:20,expiresAt:expires*1000});
  const op=await runtime.authority.expectedTransferOperation(listing,'buyer');
+ projectedOperation=op;
  await post('buyer','/market/prepare',{operation:'prepare',listing,transferOperation:op});
  await send(operator,addresses.emergency,calldata('setRestricted(bytes32,bool)',config.marketDomain,1));
  await post('operator','/operator/reconcile',{transferOperation:op},403);
@@ -101,7 +123,15 @@ try {
  await receipt(submitted.txHash);await chain.request('anvil_mine',['0x40']);
  await post('buyer','/wallet/unlink');await post('seller','/wallet/unlink');
  // A newly constructed worker/service instance reconciles the persisted intent and finalized canonical receipt.
- const restarted=await createRuntime(config);const settled=await restarted.worker.tick(op);assert.equal(settled.status,'finalized');
+ const restarted=await createRuntime(config);
+ await assert.rejects(restarted.worker.tick(op),/indexer transfer diverges from finalized chain/);
+ const pending=await restarted.store.transact(s=>({intent:s.transferIntents.get(op),buyer:s.balances.get('buyer')}));
+ assert.equal(pending.intent.status,'prepared','indexer mismatch cannot pay out');
+ assert.equal(pending.buyer.reserved,20,'funds remain held pending reconciliation');
+ projectedBuyer=buyer;
+ assert.equal((await restarted.reconciler.transfer(op)).status,'finalized');
+ assert.equal((await restarted.reconciler.listing(listing)).status,'sold');
+ const settled=await restarted.worker.tick(op);assert.equal(settled.status,'finalized');
  const balances=await restarted.store.transact(s=>({buyer:s.balances.get('buyer'),seller:s.balances.get('seller'),intent:s.transferIntents.get(op),issued:s.issued}));
  assert.equal(balances.buyer.available,80);assert.equal(balances.buyer.reserved,0);assert.equal(balances.seller.available,20);
  assert.equal(balances.issued,100);assert.equal(balances.intent.status,'finalized');

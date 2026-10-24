@@ -54,11 +54,11 @@ export class SkillResearchService {
   const track=this.catalog.tracks.find(t=>t.id===trackId);
   if(!track||points>track.maxPointsPerProof)throw new SettlementError('track proof cap exceeded');
   const verified=await this.verifyEvidence({principal,trackId,version:this.catalog.version,evidence,points});
-  if(verified!==true)throw new SettlementError('independent progression evidence required');
+  if(!verified||!id(verified.sourceEvent))throw new SettlementError('independent progression evidence required');
   return this.store.transact(s=>{
    this._state(s);
    if(s.operations.has(operation))throw new SettlementError('replayed operation');
-   const proofKey=JSON.stringify([this.catalog.version,trackId,evidence]);
+   const proofKey=JSON.stringify([this.catalog.version,verified.sourceEvent]);
    if(s.skillResearchProofs.has(proofKey))throw new SettlementError('replayed progression evidence');
    const key=JSON.stringify([principal,trackId,this.catalog.version]);
    const r=s.skillResearch.get(key)||{points:0,unlocked:false};

@@ -2,6 +2,7 @@ import {SettlementError} from './buds-ledger.js';
 import {CanonicalEscrowReader} from './canonical-escrow-reader.js';
 import {CanonicalMarketSettlement} from './canonical-settlement.js';
 import {CanonicalSettlementWorker} from './canonical-settlement-worker.js';
+import {CanonicalIndexerReconciler} from './canonical-indexer-reconciler.js';
 import {calldata,words,address} from './finalized-rpc.js';
 import {keccak256} from './keccak.js';
 export class CanonicalRpcEscrowClient {
@@ -53,7 +54,7 @@ export class CanonicalRpcEscrowClient {
   return out;
  }
 }
-export function composeSettlementRuntime({store,identity,rpc,operator,issuer,marketDomain,signerRpc,fromBlock=0n,clock}){
+export function composeSettlementRuntime({store,identity,rpc,operator,issuer,marketDomain,signerRpc,fromBlock=0n,clock,indexer}){
  if(!marketDomain||!signerRpc||!operator)throw new SettlementError('missing settlement deployment policy');
  const reader=new CanonicalEscrowReader({client:new CanonicalRpcEscrowClient(rpc),
   escrow:rpc.contracts.escrow.address,chainId:rpc.chainId,issuer,fromBlock});
@@ -124,5 +125,8 @@ export function composeSettlementRuntime({store,identity,rpc,operator,issuer,mar
   if(!/^0x[0-9a-f]{64}$/i.test(txHash))throw new SettlementError('invalid submission hash');
   return {txHash};
  };
- return {reader,authority,settlement,worker:new CanonicalSettlementWorker({store,settlement,authority,submitCanonical,clock})};
+ const reconciler=indexer?new CanonicalIndexerReconciler({store,reader,indexer}):null;
+ return {reader,authority,settlement,reconciler,
+  worker:new CanonicalSettlementWorker({store,settlement,authority,submitCanonical,clock,
+   reconcileTransfer:reconciler?op=>reconciler.transfer(op):undefined})};
 }

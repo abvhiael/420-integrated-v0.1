@@ -63,3 +63,7 @@ The remaining live-environment phases have been transferred to the canonical tes
 - **MEDIA-AUDIT-13 — Genesis / production release**.
 
 These are no longer unfinished repository-audit remediation steps. They remain blocked on the real testnet/release environment and must not be inferred complete from repository CI, local Anvil, fixtures or synthetic evidence.
+
+## Deferred qualification label
+
+Production-equivalent public-testnet qualification remains **MEDIA-AUDIT-12**, deferred until verified deployed network evidence exists. This records the roadmap obligation, not a passing qualification.

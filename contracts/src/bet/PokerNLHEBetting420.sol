@@ -32,6 +32,7 @@ interface IPokerMissingShareEvidence420 {
 contract PokerNLHEBetting420 {
     bytes32 public constant ACTION_DOMAIN=keccak256("420.BET.POKER.NLHE.AUTHENTICATED.ACTION.V1");
     bytes32 public constant STATE_DOMAIN=keccak256("420.BET.POKER.NLHE.STATE.V1");
+    bytes32 public constant TRANSCRIPT_DOMAIN=keccak256("420.BET.POKER.NLHE.INDEPENDENT.REPLAY.V1");
     bytes32 public constant ACTION_BIND_DELIVERY=keccak256("BET_POKER_BIND_PRIVATE_DELIVERY.V1");
     bytes32 public constant ACTION_BIND_OUTCOME=keccak256("BET_POKER_BIND_CANONICAL_OUTCOME.V1");
     bytes32 public constant ACTION_BIND_REVEALS=keccak256("BET_POKER_BIND_REVEAL_ENGINE.V1");
@@ -107,6 +108,14 @@ contract PokerNLHEBetting420 {
     event DealAssignmentPrepared(bytes32 indexed handId,uint8 button,uint16 seatMask,bytes32 seatSnapshot);
 
     mapping(bytes32=>address) public outcomeForTable;
+    mapping(bytes32=>bytes32) public outcomeCodeHash;
+    mapping(bytes32=>bytes32) public terminalTranscript;
+    mapping(bytes32=>bytes32) public actionTranscriptRoot;
+    event SignedActionEvidence(bytes32 indexed handId,uint64 nonce,uint8 seat,
+        bytes32 priorStateRoot,bytes32 signerDigest,uint64 expiry,bytes signature);
+    event TimeoutActionEvidence(bytes32 indexed handId,uint64 nonce,uint8 seat,
+        bytes32 priorStateRoot,uint64 actionDeadline);
+    event TerminalTranscriptSealed(bytes32 indexed handId,bytes32 transcriptHash);
     mapping(bytes32=>PokerDeckDisclosure420) public deliveryForTable;
     event DeliveryBound(bytes32 indexed tableId,address gate);
     event OutcomeBound(bytes32 indexed tableId,address outcome);
@@ -176,6 +185,7 @@ contract PokerNLHEBetting420 {
                !=address(deals.tables()))
             revert InvalidConfiguration();
         outcomeForTable[tableId]=calculator;
+        outcomeCodeHash[tableId]=calculator.codehash;
         emit OutcomeBound(tableId,calculator);
     }
     /// @notice A permissionless, all-or-nothing on-chain escrow settlement.
@@ -188,11 +198,19 @@ contract PokerNLHEBetting420 {
            outcomeForTable[g.tableId]==address(0)||
            ledger.activeHand(g.tableId)!=handId)revert InvalidState();
         if(address(revealForTable[g.tableId])==address(0))revert InvalidState();
+        if(outcomeCodeHash[g.tableId]==bytes32(0)||
+           outcomeForTable[g.tableId].codehash!=outcomeCodeHash[g.tableId])revert InvalidState();
         (uint256[9] memory balances,uint256 fee)=
             IPokerNativeOutcome420(outcomeForTable[g.tableId]).calculate(handId,policy);
         // Mark the hand consumed before any external dispute/ledger call.
         // Reverts atomically restore this flag if either dependency fails.
         handSettled[handId]=true;
+        terminalTranscript[handId]=keccak256(abi.encode(STATE_DOMAIN,handId,
+            g.tableId,g.stateRoot,g.nonce,actionTranscriptRoot[handId],g.pot,g.initialChips,
+            fundedSnapshot[handId],outcomeCodeHash[g.tableId],
+            policy.rakeBps,policy.cap,policy.noFlopNoDrop,
+            policy.noRakeOnUncontested,balances,fee));
+        emit TerminalTranscriptSealed(handId,terminalTranscript[handId]);
         if(disputes.isFrozen(handId))
             disputes.finalizeVerifiedOutcome(handId,_nativeResolutionHash(handId,g.stateRoot,balances,fee));
         ledger.settleReservedHand(g.tableId,handId,balances,fee);
@@ -532,6 +550,10 @@ contract PokerNLHEBetting420 {
         bytes32 digest=keys.checkSignature(handId,seat,g.nonce+1,expectedRoot,moveHash,expiry,signature);
         if(digest==bytes32(0))revert InvalidAction();
         _apply(handId,g,seat,move,chips);
+        actionTranscriptRoot[handId]=keccak256(abi.encode(TRANSCRIPT_DOMAIN,
+            actionTranscriptRoot[handId],handId,g.nonce,seat,uint8(move),chips,
+            expectedRoot,g.stateRoot,digest,expiry,keccak256(signature)));
+        emit SignedActionEvidence(handId,g.nonce,seat,expectedRoot,digest,expiry,signature);
     }
     function timeout(bytes32 handId) external {
         Game storage g=games[handId];
@@ -542,7 +564,13 @@ contract PokerNLHEBetting420 {
         Player storage p=players[handId][seat];
         Move move=p.bet<g.currentBet?Move.FOLD:Move.CHECK;
         uint64 nonce=g.nonce+1;
+        bytes32 prior=g.stateRoot;
+        uint64 deadline=g.deadline;
         _apply(handId,g,seat,move,0);
+        actionTranscriptRoot[handId]=keccak256(abi.encode(TRANSCRIPT_DOMAIN,
+            actionTranscriptRoot[handId],handId,nonce,seat,uint8(move),uint256(0),
+            prior,g.stateRoot,bytes32(0),deadline,bytes32(0)));
+        emit TimeoutActionEvidence(handId,nonce,seat,prior,deadline);
         emit NLHETimeout(handId,seat,nonce,move);
     }
     error TooEarly();

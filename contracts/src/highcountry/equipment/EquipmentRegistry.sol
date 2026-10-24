@@ -241,7 +241,7 @@ contract EquipmentRegistry is R04EmergencyConsumer {
         if (item.parcelId != 0 && !disabled[equipmentId]) {
             for (uint256 i; i < 6; ++i) {
                 _totals[item.parcelId][i] += _effect(equipmentId, i, isDegraded)
-                    - _effect(equipmentId, i, degraded[equipmentId]);
+                - _effect(equipmentId, i, degraded[equipmentId]);
             }
         }
         degraded[equipmentId] = isDegraded;

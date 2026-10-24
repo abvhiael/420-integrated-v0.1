@@ -1,0 +1,56 @@
+{
+  "schema": "420-mig-1-external-v1",
+  "sdk": {
+    "name": "@420/gaming-sdk",
+    "version": "0.1.0",
+    "minimum": "0.1.0",
+    "exports": [
+      "./src/index.js"
+    ],
+    "private": true,
+    "distribution": "source-vendored/snapshot until package registry publication; publishing not claimed"
+  },
+  "gameIds": {
+    "highCountry": "420/GAMING/GAME/HIGH_COUNTRY/V1",
+    "greenRoad": "420/GAMING/GAME/THE_GREEN_ROAD/V1",
+    "budtender": "420/GAMING/GAME/BUDTENDER/V1",
+    "smokeAndChrome": "420/GAMING/GAME/SMOKE_AND_CHROME/V1",
+    "madBuds": "UNREGISTERED_DO_NOT_INVENT"
+  },
+  "walletMethods": [
+    "eip1193",
+    "guest"
+  ],
+  "supportedChains": {
+    "offline": [],
+    "testnet": [],
+    "reason": "deployments/gaming/testnet.runtime.json has unresolved chainId and addresses; no verified chain can be claimed"
+  },
+  "entitlementSchema": {
+    "version": 1,
+    "required": [
+      "gameId",
+      "profileId",
+      "entitlementId",
+      "entitlementType",
+      "contentId",
+      "active"
+    ]
+  },
+  "rewardClaimSchema": {
+    "version": 1,
+    "required": [
+      "gameId",
+      "profileId",
+      "claimId",
+      "evidenceHash",
+      "network"
+    ]
+  },
+  "profiles": {
+    "offline": "local mock, no network, no rewards",
+    "testnet": "fail-closed until chainId and contracts published"
+  },
+  "reliability": "adapter failures return unavailable/null; gameplay state outside adapter never mutated",
+  "exitEvidence": "portable SDK boundary has no Genesis imports; offline compatibility tests; real-network not qualified pending deployment"
+}

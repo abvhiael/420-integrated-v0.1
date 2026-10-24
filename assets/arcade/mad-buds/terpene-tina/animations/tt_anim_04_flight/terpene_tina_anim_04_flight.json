@@ -1,0 +1,92 @@
+{
+  "schema": "mad-buds-animation-manifest-v1",
+  "schemaVersion": "1.0",
+  "characterId": "terpene_tina",
+  "animationId": "tt_anim_04_flight",
+  "animationName": "flight",
+  "frameCount": 10,
+  "frameWidth": 1024,
+  "frameHeight": 1024,
+  "fps": 10,
+  "durationMs": 1000,
+  "loop": true,
+  "direction": "variable",
+  "pivotNormalized": [
+    0.5,
+    0.5
+  ],
+  "sourceArt": "mixed: source flight strip plus corrected uncropped replacement frames",
+  "sourceSHA256": "e9fa2c416058f80c18ff1146a6568746b066beabc9130d757e45a7139cf22c06",
+  "method": "Frames 5,6,7,10 retained from the extracted strip. Frames 1,2,3,4,8,9 replaced with corrected uncropped transparent PNG frames matching the approved Terpene Tina flight sequence, then resized to 1024x1024.",
+  "repositoryDestination": "assets/arcade/mad-buds/terpene-tina/animations/tt_anim_04_flight/",
+  "visualApproval": "PENDING OWNER REVIEW",
+  "qualification": "LOCAL STRUCTURAL VALIDATION ONLY; corrected package pending owner visual approval",
+  "frames": [
+    {
+      "index": 1,
+      "filename": "terpene_tina_anim_04_flight_frame_01.png",
+      "durationMs": 100,
+      "sha256": "35a64265f0320b79dfd5175d4e8a0dab27543c16c49887b9d4feb65ad3613526",
+      "notes": "corrected replacement frame with full uncropped artwork and transparent background, resized to 1024x1024"
+    },
+    {
+      "index": 2,
+      "filename": "terpene_tina_anim_04_flight_frame_02.png",
+      "durationMs": 100,
+      "sha256": "f40a144be41daf53fb55b4ab996071865333d913ead426b63f4fc2a831a8aaad",
+      "notes": "corrected replacement frame with full uncropped artwork and transparent background, resized to 1024x1024"
+    },
+    {
+      "index": 3,
+      "filename": "terpene_tina_anim_04_flight_frame_03.png",
+      "durationMs": 100,
+      "sha256": "4a3e2a95a722568d57645002f8ff1b805f8e7a5d72bca82c5357d24a66bb9a45",
+      "notes": "corrected replacement frame with full uncropped artwork and transparent background, resized to 1024x1024"
+    },
+    {
+      "index": 4,
+      "filename": "terpene_tina_anim_04_flight_frame_04.png",
+      "durationMs": 100,
+      "sha256": "2d96260a001269daf69b0ef3ce2b26c31a42a5f7d1833e6184f8c09423708c9f",
+      "notes": "corrected replacement frame with full uncropped artwork and transparent background, resized to 1024x1024"
+    },
+    {
+      "index": 5,
+      "filename": "terpene_tina_anim_04_flight_frame_05.png",
+      "durationMs": 100,
+      "sha256": "1103e8eff759131943bcf572adc23356bba0c023cfaa3507029d31bd661abc0b"
+    },
+    {
+      "index": 6,
+      "filename": "terpene_tina_anim_04_flight_frame_06.png",
+      "durationMs": 100,
+      "sha256": "736f72267b088439b06cc1a5fd1d8abeb04fe9da34fdf9c88453ab04e22633bb"
+    },
+    {
+      "index": 7,
+      "filename": "terpene_tina_anim_04_flight_frame_07.png",
+      "durationMs": 100,
+      "sha256": "9464aec6134975321402340cf0f3d439d2efc1a1148bda4847d5112fe9345a63"
+    },
+    {
+      "index": 8,
+      "filename": "terpene_tina_anim_04_flight_frame_08.png",
+      "durationMs": 100,
+      "sha256": "ae695a9cfa9975539915cb5d3f18fb0168538e69ddab756ed6f4425003b7e408",
+      "notes": "corrected replacement frame with full uncropped artwork and transparent background, resized to 1024x1024"
+    },
+    {
+      "index": 9,
+      "filename": "terpene_tina_anim_04_flight_frame_09.png",
+      "durationMs": 100,
+      "sha256": "ac935cb1ecb8d02961173327279cc3629e9b3aed3f2487ddf6f46cdb4ca42ca4",
+      "notes": "corrected replacement frame with full uncropped artwork and transparent background, resized to 1024x1024"
+    },
+    {
+      "index": 10,
+      "filename": "terpene_tina_anim_04_flight_frame_10.png",
+      "durationMs": 100,
+      "sha256": "04596468841f17b2f1830d9afeda11293f0669191dc71d1737b3a67c06be1865"
+    }
+  ]
+}

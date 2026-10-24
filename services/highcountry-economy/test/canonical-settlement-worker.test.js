@@ -78,3 +78,19 @@ test('dispatch marker is durable before calling the transaction writer',async()=
  assert.equal((await worker.tick('transfer:1')).status,'submitted');
  assert.equal(state.submissions,1);
 });
+
+test('configured indexer divergence prevents payout until independent reconciliation agrees',async()=>{
+ const {store,state}=setup();state.finalized=true;
+ let agree=false,paid=0;
+ const authority={confirmedReservedTransfer:async()=>true,proveUnexecutedAndCancelled:async()=>false};
+ const settlement={finalize:async()=>{paid++;store.state.transferIntents.get('transfer:1').status='finalized';},
+  abort:async()=>{throw Error('unexpected refund');}};
+ const worker=new CanonicalSettlementWorker({store,settlement,authority,leaseMs:1000,clock:()=>1000,
+  submitCanonical:async()=>{throw Error('should not broadcast');},
+  reconcileTransfer:async()=>{if(!agree)throw Error('indexer divergent');}});
+ await assert.rejects(worker.tick('transfer:1'),/indexer divergent/);
+ assert.equal(paid,0);assert.equal(store.state.transferIntents.get('transfer:1').status,'prepared');
+ agree=true;
+ assert.equal((await worker.tick('transfer:1')).status,'finalized');
+ assert.equal(paid,1);
+});

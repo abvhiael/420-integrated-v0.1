@@ -378,16 +378,33 @@ contract EquipmentLifecycleR044Test {
                 );
                 require(lifecycle.policy(d.typeId).version == d.version, "class policy mismatch");
                 require(equipment.equipmentType(d.typeId).catalogueVersion == d.version, "class effect mismatch");
+                bytes32 item = keccak256(abi.encode("HC.CATALOGUE.TEST.ITEM", category, tier));
+                bytes32 earning = keccak256(abi.encode("HC.CATALOGUE.TEST.EARNING", category, tier));
+                equipment.issue(item, d.typeId, address(player), earning);
+                uint256 previouslyConsumed = ledger.consumed(d.operatingResource);
+                inventory.acquire(
+                    keccak256(abi.encode("HC.CATALOGUE.TEST.FUND", category, tier)),
+                    d.operatingResource,
+                    address(player),
+                    d.operatingCost
+                );
+                player.place(equipment, item);
+                lifecycle.recordUse(item);
+                require(
+                    ledger.consumed(d.operatingResource) == previouslyConsumed + d.operatingCost,
+                    "class use did not burn authoritative materials"
+                );
+                int256[6] memory actual = equipment.effectiveEffects(1, address(player));
+                for (uint256 control; control < 6; ++control) {
+                    require(actual[control] == d.effects[control], "class effect mismatch");
+                }
+                player.remove(equipment, item);
+                actual = equipment.effectiveEffects(1, address(player));
+                for (uint256 control; control < 6; ++control) {
+                    require(actual[control] == 0, "class removal left phantom effect");
+                }
+                require(equipment.occupiedSlots(1) == 0, "class removal did not release slots");
             }
         }
-        EquipmentClassCatalogueV1.Definition memory lighting = catalogue.definition(0, 0);
-        bytes32 lightItem = keccak256("CATALOGUE-LIGHT-INSTANCE");
-        equipment.issue(lightItem, lighting.typeId, address(player), keccak256("CATALOGUE-LIGHT-EARNING"));
-        inventory.acquire(keccak256("CATALOGUE-POWER-FUND"), power, address(player), 2);
-        player.place(equipment, lightItem);
-        lifecycle.recordUse(lightItem);
-        require(ledger.balance(power, address(player)).available == 1, "lighting fuel not debited");
-        require(ledger.balance(power, address(player)).consumed == 1, "lighting fuel not burned");
-        require(equipment.effectiveEffects(1, address(player))[2] == 600, "baseline light class effect");
     }
 }

@@ -5,6 +5,15 @@ import "../src/bet/PokerNativeOutcome420.sol";
 import "../src/bet/PokerHandRank420.sol";
 import "../src/bet/PokerCanonicalRake420.sol";
 
+contract WS6NativePotsHarness54 is PokerNativeOutcome420 {
+    constructor(address engine_,address reveals_,address rake_,address ranks_)
+        PokerNativeOutcome420(engine_,reveals_,rake_,ranks_) {}
+    function distribute(uint256[9] memory deposits,bool[9] memory folded,
+        uint256[9] memory ranks,uint8 button,uint256 fee,uint256 gross)
+        external pure returns(uint256[9] memory paid) {
+        _awardPots(deposits,folded,ranks,button,fee,gross,paid);
+    }
+}
 contract WrongEngineOutcome54 {
     function engine() external pure returns(address) { return address(0xDEAD); }
     function reveals() external pure returns(address) { return address(0xBEEF); }
@@ -104,6 +113,33 @@ contract PokerNativeOutcome54Test is PokerLiveCardReveals54Test {
         require(ledger.handConsumed(id)&&engine.handSettled(id),"single atomic terminal result");
         cheat54.expectRevert(PokerNLHEBetting420.InvalidState.selector);
         engine.settle(id,policy);
+    }
+    function testNativeSidePotsShortAllInAndFoldedSeatCannotWin() public {
+        WS6NativePotsHarness54 checker=new WS6NativePotsHarness54(address(engine),
+            address(live),address(actualRake),address(actualRanker));
+        uint256[9] memory contrib=[uint256(100),200,300,300,0,0,0,0,0];
+        bool[9] memory folded;folded[3]=true;
+        uint256[9] memory ranks=[uint256(400),300,200,999,0,0,0,0,0];
+        uint256[9] memory paid=checker.distribute(contrib,folded,ranks,0,0,900);
+        require(paid[0]==400&&paid[1]==300&&paid[2]==200&&paid[3]==0,
+            "real kernel must independently select covered live sidepot winners");
+    }
+    function testNativeOddChipsAndNineSeatSidePotConservation() public {
+        WS6NativePotsHarness54 checker=new WS6NativePotsHarness54(address(engine),
+            address(live),address(actualRake),address(actualRanker));
+        uint256[9] memory c=[uint256(5),5,5,0,0,0,0,0,0];
+        bool[9] memory folded;folded[2]=true;
+        uint256[9] memory scores=[uint256(100),100,1,0,0,0,0,0,0];
+        uint256[9] memory odd=checker.distribute(c,folded,scores,0,0,15);
+        require(odd[0]==7&&odd[1]==8&&odd[2]==0,
+            "clockwise odd-chip payout from button");
+        uint256[9] memory nine=[uint256(10),20,30,40,50,60,70,80,80];
+        bool[9] memory none;
+        uint256[9] memory ratings=[uint256(100),90,80,70,60,50,40,30,20];
+        uint256[9] memory out=checker.distribute(nine,none,ratings,4,10,440);
+        uint256 total;
+        for(uint8 seat=0;seat<9;seat++)total+=out[seat];
+        require(total+10==440,"all nine players' real side pots conserve chips and rake");
     }
     function testOnChainUncontestedOutcomeSettlesExactEscrowOnce() public {
         bytes32 id=_fundedAndProved();

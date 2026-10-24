@@ -25,12 +25,13 @@ test('mission activates progresses completes claims once without BUDS issuance o
  const final=await x.mission.progress('alice','two','journal-first-steps','proof:2',1);
  assert.equal(final.status,'complete');
  const receipt=await x.mission.claim('alice','claim','journal-first-steps');
- assert.deepEqual(receipt.reward,{kind:'catalogue-metadata',units:0,objective:'verified-journal-entry',
+ assert.deepEqual(receipt.reward,{kind:'cosmetic-badge',badgeId:'first-journal-badge',units:0,objective:'verified-journal-entry',
   version:'HC-MISSIONS-V1'});
  await assert.rejects(x.mission.claim('alice','reclaim','journal-first-steps'),/not complete/);
  assert.equal(x.store.state.issued,30);assert.equal(x.store.state.burned,0);
  assert.equal(x.store.state.balances.get('alice').available,30);
  assert.equal(x.store.state.assets.size,0);
+ assert.equal((await x.mission.snapshot('alice')).badges[0].badgeId,'first-journal-badge');
  await x.mission.activate('alice','next','field-notes');
 });
 test('mission cancellation irreversible and does not grant rewards',async()=>{

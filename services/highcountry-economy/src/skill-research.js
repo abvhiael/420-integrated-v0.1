@@ -67,12 +67,15 @@ export class SkillResearchService {
    return {trackId,version:this.catalog.version,points:r.points,unlocked:false};
   });
  }
- async unlock(session,operation,trackId,{playerLevel}={}){
+ async unlock(session,operation,trackId){
   const principal=await this.identity.registeredPrincipal(session);
-  if(!id(principal)||!id(operation)||!id(trackId)||!integer(playerLevel,100))
+  if(!id(principal)||!id(operation)||!id(trackId))
    throw new SettlementError('invalid skill unlock request');
   const track=this.catalog.tracks.find(t=>t.id===trackId);
   if(!track)throw new SettlementError('unknown progression track');
+  if(typeof this.identity.playerLevel!=='function')throw new SettlementError('authoritative player level unavailable');
+  const playerLevel=await this.identity.playerLevel(session);
+  if(!integer(playerLevel,100))throw new SettlementError('invalid verified player level');
   return this.ledger.operate(operation,s=>{
    this._state(s);
    const key=JSON.stringify([principal,trackId,this.catalog.version]);

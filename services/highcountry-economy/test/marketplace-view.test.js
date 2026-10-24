@@ -80,3 +80,18 @@ test('only authorized market operator may review then close disputes without cre
  assert.equal((await view.snapshot('buyer')).disputes[0].decision,'no-ledger-adjustment');
  assert.deepEqual(store.state.balances,before);
 });
+
+test('canonical buyer sees prepared escrow as pending, never completed or wallet-free',async()=>{
+ const {store,market,view}=setup();
+ market.authority.canonicalSettlementRequired=true;
+ store.state.listings.set('canonical',{seller:'alice',asset:'0xasset',quantity:1,price:25,
+  expiresAt:200,status:'settling',sourceReceiptId:'canonical'});
+ store.state.transferIntents.set('transfer',{listingId:'canonical',buyer:'bob',status:'prepared'});
+ const buyer=await view.snapshot('buyer');
+ assert.equal(buyer.mode,'canonical');
+ assert.equal(buyer.walletRequired,true);
+ assert.equal(buyer.history[0].listing,'canonical');
+ assert.equal(buyer.history[0].status,'settling');
+ assert.equal(buyer.history[0].buyer,'bob');
+ assert.equal(buyer.browse.length,0);
+});

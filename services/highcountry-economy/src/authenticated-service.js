@@ -29,6 +29,9 @@ export class AuthenticatedEconomyService {
  // Requires separate R04.8 asset-ledger atomic acceptance before service route activation.
  async settleMarket(serviceCredential,op,buyer,seller,amount) {
   await this.authority.requireMarketOperator(serviceCredential);
-  return this.ledger.settle(op,principal(buyer),principal(seller),amount,0);
+  // This legacy facade has no finalized asset-delivery receipt or bound buyer reservation.
+  // Never allow a service credential alone to move BUDS to an arbitrary seller.
+  // CanonicalMarketSettlement.finalize is the only supported market payout path.
+  throw new SettlementError('canonical asset settlement required');
  }
 }

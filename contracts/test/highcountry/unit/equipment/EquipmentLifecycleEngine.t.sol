@@ -343,6 +343,22 @@ contract EquipmentLifecycleR044Test {
                 require(d.craftParts != 0 && d.craftOperatingInput != 0, "missing acquisition costs");
                 require(d.repairCost != 0 && d.recycleOutput != 0, "missing lifecycle costs");
                 equipment.registerType(d.typeId, d.version, d.slots, d.effects);
+                if (category == 0 && tier == 0) {
+                    try lifecycle.registerPolicy(
+                        d.typeId,
+                        d.version,
+                        d.maximum,
+                        d.degradeBelow,
+                        d.useCost,
+                        d.repairResource,
+                        d.repairCost,
+                        d.repairRestore,
+                        d.recycleResource,
+                        d.recycleOutput
+                    ) {
+                        revert("v1 class accepted policy without operating materials");
+                    } catch {}
+                }
                 lifecycle.registerPolicyWithInput(
                     d.typeId,
                     EquipmentLifecycleEngine.Policy({

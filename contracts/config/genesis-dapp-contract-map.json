@@ -418,6 +418,11 @@
         "TestnetFaucet420.sol"
       ],
       "testnet_only": true
+    },
+    {
+      "dapp": "420Arcade",
+      "contracts": [],
+      "note": "Public Genesis guest-first contract-free games application. Uses optional 420 Gaming Protocol integration; no escrow, authorization or on-chain game authority is introduced."
     }
   ]
 }

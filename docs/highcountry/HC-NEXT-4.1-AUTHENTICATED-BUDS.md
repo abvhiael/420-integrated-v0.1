@@ -1,6 +1,6 @@
 # HC-NEXT-4.1 — Authenticated BUDS operations audit
 
-Status: **partial hardening candidate; not fully qualified**.
+Status: **expanded security hardening candidate; exact-SHA CI and final release acceptance pending**.
 
 The registered economy uses signed, short-lived, audience/game-bound sessions with account epochs, immutable policy-limited reward sources, proof/objective replay protection, SERIALIZABLE PostgreSQL transactions, and a finalized receipt-aware canonical market settlement. Guests retain local-only preview state. BUDS are integer internal game units and not native $420.
 
@@ -11,9 +11,9 @@ The registered economy uses signed, short-lived, audience/game-bound sessions wi
 ## Additional requirements before claiming full HC-NEXT-4.1
 
 - Verify **every** deployed service route maps a signed authenticated registered principal to a concrete account; direct facade methods must never accept client-provided owner values as proof of ownership.
-- Ensure owner-controlled reservation release cannot drain funds locked to an active canonical market transfer; source-scoped BUDS holds and recovery are needed for universal escrow isolation.
+- **Implemented:** derive market-locked BUDS from immutable prepared intents; ordinary BUDS release and generic settlement reject debits below total active prepared market holds. Canonical finalize/abort alone resolve the hold. An actual PostgreSQL multi-instance test covers attempted drain, concurrent finalization, replay, durable conservation and restart using the existing least-privilege RLS fixture.
 - Qualify mission/progression objective proofs, total source issuance caps, sink authorization, account/source revocation, credential rotation, replay and concurrency across two live service instances.
-- Prove PostgreSQL persistence/rollback and restart on the final deployment configuration, enforce operator least privilege, and reconcile every unsettled listing against finality.
+- **Implemented in test coverage:** reject inconsistent issued/burned/balance totals on PostgreSQL transaction decode and before commit; an adversarial rollback test enforces no writes on failed conservation. Existing runtime integration tests exercise PostgreSQL persistence, RLS/least privilege, restart and finalized on-chain receipt reconciliation. Production deployment qualification remains independent.
 - Run exact-SHA Level 1 BUDS and Level 2 economic integration checks, then production-equivalent deployment acceptance.
 
 This document does not convert existing historical R04.5 qualification into new HC-NEXT-4.1 acceptance.

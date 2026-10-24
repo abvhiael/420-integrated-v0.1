@@ -16,10 +16,11 @@ export function createSignedProgressionEvidence({publicKey,issuer,clock=()=>Date
    if(bytes.length>2048||!verify(null,bytes,key,Buffer.from(encoded.signature,'base64url')))return false;
    claim=JSON.parse(bytes.toString('utf8'));
   }catch{return false;}
-  return claim?.domain==='HC.PROGRESSION.EVIDENCE.V1'&&claim.issuer===issuer
+  const accepted=claim?.domain==='HC.PROGRESSION.EVIDENCE.V1'&&claim.issuer===issuer
    &&claim.principal===principal&&claim.trackId===trackId&&claim.version===version
    &&claim.points===points&&id(claim.sourceEvent)
    &&Number.isSafeInteger(claim.expiresAt)&&clock()<claim.expiresAt
    &&claim.expiresAt<=clock()+300000;
+  return accepted?Object.freeze({sourceEvent:claim.sourceEvent}):false;
  };
 }

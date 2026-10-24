@@ -17,6 +17,7 @@ contract BetPokerWS8FrozenHandContext54Test is PokerConfidentialDeal54Test {
     address internal constant RISK_VAULT = address(0xB00D);
     bytes32 internal constant PREVIOUS_STATE = keccak256("WS8.PREVIOUS.STATE.V1");
 
+    event WS8ProverHandScope(uint256 scope,bytes32 indexed handId);
     event WS8ProviderBonds(address indexed bondVault,uint256 perProvider,uint256 totalCollateral,uint256 playerEscrow);
     event WS8SeatSigningKeys(address indexed player0,address indexed player1,address signer0,address signer1,uint64 epoch0,uint64 epoch1);
     event WS8FrozenHand(
@@ -58,6 +59,7 @@ contract BetPokerWS8FrozenHandContext54Test is PokerConfidentialDeal54Test {
         require(block.chainid==CONTEXT_CHAIN_ID,
             "WS8 runner MUST pin chainid=31337: refuse different Groth16 context");
         bytes32 handId=_freeze();
+        emit WS8ProverHandScope(uint256(handId) % 21888242871839275222246405745257275088548364400416034343698204186575808495617, handId);
         PokerActionKeys420 signing=new PokerActionKeys420(address(deal));
         cheat54.prank(PLAYER);signing.bindSigner(TABLE,address(0xC001));
         cheat54.prank(PLAYER_B);signing.bindSigner(TABLE,address(0xC002));

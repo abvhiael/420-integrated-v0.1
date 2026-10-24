@@ -91,3 +91,19 @@ test('revoked session epoch is checked again inside progression atomic write',as
  await x.engine.progress('alice-token','current','archive-index','valid-proof',1);
  assert.equal(x.store.state.skillResearch.size,1);
 });
+
+test('catalogue revision preserves historical purchased record but never silently activates prior version effects',async()=>{
+ const x=setup();
+ await x.engine.progress('alice-token','a','archive-index','pa',1);
+ await x.engine.progress('alice-token','b','archive-index','pb',1);
+ await x.engine.unlock('alice-token','buy','archive-index');
+ const newer={version:'hc-next-5-1-v2',tracks:[{...catalogue.tracks[0],cost:11}]};
+ const next=new SkillResearchService({store:x.store,identity:x.engine.identity,catalog:newer,
+  verifyEvidence:x.engine.verifyEvidence,getPlayerLevel:x.engine.getPlayerLevel});
+ const snapshot=await next.snapshot('alice-token');
+ assert.equal(snapshot.records[0].unlocked,false);
+ assert.equal(snapshot.effects['archive-filters'],undefined);
+ assert.equal(snapshot.history[0].version,'hc-next-5-1-v1');
+ assert.equal(snapshot.history[0].unlocked,true);
+ assert.equal(x.store.state.burned,10);
+});

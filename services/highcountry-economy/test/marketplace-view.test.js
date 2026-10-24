@@ -61,3 +61,22 @@ test('server read model never identifies provisional expired listings as success
  await market.expire('expire','one').catch(()=>{}); // Market clock remains 100, cannot execute early.
  assert.equal((await view.snapshot('seller')).history[0].status,'expired-pending-release');
 });
+
+test('only authorized market operator may review then close disputes without credit mutations',async()=>{
+ const {store,market,view,ledger}=setup();
+ await market.importAsset('issuer','import',{receiptId:'source',owner:'alice',asset:'lot',quantity:2});
+ await ledger.earn('fund','bob','source','proof',30);
+ await market.list('seller','list','one','lot',2,30,200);
+ await market.buy('buyer','buy','one');
+ await view.dispute('buyer','dispute','one','payment');
+ const before=structuredClone(store.state.balances);
+ await assert.rejects(view.review('buyer','op0','dispute','under-review','evidence'),/dispute review disabled/);
+ view.identity.requireMarketOperator=async token=>{if(token!=='operator')throw Error('denied operator');};
+ await assert.rejects(view.review('buyer','op1','dispute','under-review','evidence'),/denied operator/);
+ await assert.rejects(view.review('operator','op2','dispute','closed-no-adjustment','evidence'),/review required/);
+ assert.equal((await view.review('operator','op3','dispute','under-review','evidence')).status,'under-review');
+ assert.equal((await view.review('operator','op4','dispute','closed-no-adjustment','evidence2')).status,'closed-no-adjustment');
+ await assert.rejects(view.review('operator','op5','dispute','referred','evidence3'),/not reviewable/);
+ assert.equal((await view.snapshot('buyer')).disputes[0].decision,'no-ledger-adjustment');
+ assert.deepEqual(store.state.balances,before);
+});

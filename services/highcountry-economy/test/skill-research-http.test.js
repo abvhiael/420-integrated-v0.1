@@ -31,8 +31,9 @@ test('authenticated progression HTTP accepts verified proof, spends exact BUDS a
   evidence:'approved-two',points:1})).status,200);
  assert.equal((await post('/progression/evidence',{operation:'step3',trackId:'workbench-notes-I',
   evidence:'approved-one',points:1})).status,403);
- assert.equal((await post('/progression/unlock',{operation:'unlock',trackId:'archive-index-I',
-  playerLevel:1000,owner:'victim'})).status,200);
+ assert.equal((await post('/progression/unlock',{operation:'forged',trackId:'archive-index-I',
+  playerLevel:1000,owner:'victim'})).status,403);
+ assert.equal((await post('/progression/unlock',{operation:'unlock',trackId:'archive-index-I'})).status,200);
  const snap=(await post('/progression/snapshot',{})).body.result;
  assert.equal(snap.records[0].unlocked,true);
  assert.equal(snap.availableBuds,10);

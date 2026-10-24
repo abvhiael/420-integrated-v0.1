@@ -5,10 +5,11 @@ import {createSignedProgressionEvidence} from '../src/signed-progression-evidenc
 test('signed progression proof binds principal, track, version, points and globally unique source event',async()=>{
  const keys=generateKeyPairSync('ed25519');
  let now=10000;
- const verify=createSignedProgressionEvidence({publicKey:keys.publicKey,issuer:'approved-quest-service',clock:()=>now});
+ const gameId='0x'+'11'.repeat(32);
+ const verify=createSignedProgressionEvidence({publicKey:keys.publicKey,issuer:'approved-quest-service',gameId,chainId:420,clock:()=>now});
  function envelope(overrides={}){
   const claim={domain:'HC.PROGRESSION.EVIDENCE.V1',issuer:'approved-quest-service',principal:'alice',
-   trackId:'archive-index-I',version:'HC-SKILL-RESEARCH-V1',points:1,sourceEvent:'server-event-12',expiresAt:now+60000,...overrides};
+   gameId,chainId:420,trackId:'archive-index-I',version:'HC-SKILL-RESEARCH-V1',points:1,sourceEvent:'server-event-12',expiresAt:now+60000,...overrides};
   const bytes=Buffer.from(JSON.stringify(claim));
   return Buffer.from(JSON.stringify({payload:bytes.toString('base64url'),
    signature:sign(null,bytes,keys.privateKey).toString('base64url')})).toString('base64url');
@@ -18,6 +19,8 @@ test('signed progression proof binds principal, track, version, points and globa
  for(const change of [{principal:'bob'},{trackId:'different'},{version:'other'},{points:2}])
   assert.equal(await verify({...params,...change,evidence:envelope()}),false);
  assert.equal(await verify({...params,evidence:envelope({issuer:'forged'})}),false);
+ assert.equal(await verify({...params,evidence:envelope({chainId:421})}),false);
+ assert.equal(await verify({...params,evidence:envelope({gameId:'0x'+'ee'.repeat(32)})}),false);
  assert.equal(await verify({...params,evidence:envelope({domain:'HC.CANONICAL.MINT'})}),false);
  assert.equal(await verify({...params,evidence:'tampered'}),false);
  now+=60001;

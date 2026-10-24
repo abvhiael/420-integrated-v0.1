@@ -171,6 +171,68 @@ contract InventoryRegistry {
         ledger.consume(op, id, owner, amount, true);
     }
 
+    /// @notice Origin-scoped reservations prevent cross-workflow escrow substitution.
+    function reserveTaggedFor(
+        bytes32 op,
+        bytes32 id,
+        address owner,
+        uint256 amount
+    ) external {
+        if (!inventoryOperators[owner][msg.sender]) revert HCInvalidState();
+        _ensureActive(id);
+        ledger.reserveTagged(op, id, owner, amount);
+    }
+
+    function consumeTaggedFor(
+        bytes32 op,
+        bytes32 reservation,
+        bytes32 id,
+        address owner,
+        uint256 amount
+    ) external {
+        if (!inventoryOperators[owner][msg.sender]) revert HCInvalidState();
+        _ensureKnown(id);
+        ledger.consumeTagged(op, reservation, id, owner, amount);
+    }
+
+    function releaseTaggedFor(
+        bytes32 op,
+        bytes32 reservation,
+        bytes32 id,
+        address owner,
+        uint256 amount
+    ) external {
+        if (!inventoryOperators[owner][msg.sender]) revert HCInvalidState();
+        _ensureKnown(id);
+        ledger.releaseTagged(op, reservation, id, owner, amount);
+    }
+
+    /// @notice Owner can always recover their own tagged reservation after operator revocation.
+    function releaseTagged(
+        bytes32 op,
+        bytes32 reservation,
+        bytes32 id,
+        uint256 amount
+    ) external {
+        _ensureKnown(id);
+        ledger.releaseTagged(op, reservation, id, msg.sender, amount);
+    }
+
+    function transferTaggedFor(
+        bytes32 op,
+        bytes32 reservation,
+        bytes32 id,
+        address owner,
+        address to,
+        uint256 amount
+    ) external {
+        if (!inventoryOperators[owner][msg.sender] || !marketTransferOperators[owner][msg.sender]) {
+            revert HCInvalidState();
+        }
+        _ensureActive(id);
+        ledger.transferTagged(op, reservation, id, owner, to, amount);
+    }
+
     /// @notice Market custody transfer has distinct, explicit owner consent.
     /// @dev Existing manufacturing operators do not inherit this new transfer authority.
     function setMarketTransferOperator(

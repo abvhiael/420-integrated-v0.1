@@ -36,6 +36,16 @@ contract MarketSeller {
         inv.release(op, asset, quantity);
     }
 
+    function releaseTaggedDirect(
+        InventoryRegistry inv,
+        bytes32 op,
+        bytes32 reserveOp,
+        bytes32 asset,
+        uint256 quantity
+    ) external {
+        inv.releaseTagged(op, reserveOp, asset, quantity);
+    }
+
     function cancel(
         CanonicalMarketEscrow market,
         bytes32 id
@@ -112,11 +122,37 @@ contract CanonicalMarketEscrowR048Test {
         require(market.listing(LISTING).status == CanonicalMarketEscrow.Status.Cancelled, "closure stranded");
         ResourceLedger.Balance memory locked = ledger.balance(ASSET, address(seller));
         require(locked.reserved == 2, "unexpected automatic release");
-        seller.releaseDirect(inv, bytes32(uint256(501)), ASSET, 2);
+        (bool unsafelyReleased,) =
+            address(seller).call(abi.encodeCall(seller.releaseDirect, (inv, bytes32(uint256(500)), ASSET, uint256(2))));
+        require(!unsafelyReleased, "generic release drained origin-locked custody");
+        seller.releaseTaggedDirect(inv, bytes32(uint256(501)), market.reserveOperation(LISTING), ASSET, 2);
         ResourceLedger.Balance memory restored = ledger.balance(ASSET, address(seller));
         require(restored.reserved == 0 && restored.available == 10, "manual recovery failed");
         (bool sold,) = address(market).call(abi.encodeCall(market.settle, (LISTING, BUYER)));
         require(!sold, "closed escrow sold");
+    }
+
+    function testTwoMarketReservationsCannotSubstituteOrDoubleSpend() public {
+        bytes32 other = keccak256("other-escrow");
+        seller.open(market, LISTING, ASSET, 6, uint64(block.timestamp + 100));
+        seller.open(market, other, ASSET, 4, uint64(block.timestamp + 100));
+        require(ledger.lockedReserved(ASSET, address(seller)) == 10, "missing reservation isolation");
+        (bool genericRelease,) =
+            address(seller).call(abi.encodeCall(seller.releaseDirect, (inv, bytes32(uint256(904)), ASSET, uint256(1))));
+        require(!genericRelease, "generic release stole reserved market stock");
+        (bool crossRelease,) = address(seller).call(
+            abi.encodeCall(
+                seller.releaseTaggedDirect,
+                (inv, bytes32(uint256(905)), market.reserveOperation(other), ASSET, uint256(6))
+            )
+        );
+        require(!crossRelease, "cross-listing reservation allowed");
+        market.settle(LISTING, BUYER);
+        require(ledger.balance(ASSET, BUYER).available == 6, "first escrow not settled");
+        seller.cancel(market, other);
+        require(ledger.balance(ASSET, address(seller)).available == 4, "second escrow refund lost");
+        require(ledger.lockedReserved(ASSET, address(seller)) == 0, "escrow lock stranded");
+        require(ledger.reconciles(ASSET), "cross-escrow issuance mismatch");
     }
 
     function testSelfTradeAndCallerScope() public {

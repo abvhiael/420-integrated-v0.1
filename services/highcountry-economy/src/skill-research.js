@@ -43,7 +43,12 @@ export class SkillResearchService {
      requiredPoints:t.requiredPoints,cost:t.cost,prerequisites:t.prerequisites,
      eligibility:t.eligibility,effect:t.effect,effectValue:t.effectValue,cap:t.cap,minLevel:t.minLevel};
    });
-   return {version:this.catalog.version,records,availableBuds:s.balances.get(principal)?.available??0};
+   const history=[...s.skillResearch].flatMap(([key,record])=>{
+    let tuple;try{tuple=JSON.parse(key);}catch{return [];}
+    if(!Array.isArray(tuple)||tuple.length!==3||tuple[0]!==principal||tuple[2]===this.catalog.version)return [];
+    return [{trackId:tuple[1],version:tuple[2],points:record.points,unlocked:record.unlocked===true}];
+   }).slice(-100);
+   return {version:this.catalog.version,records,history,availableBuds:s.balances.get(principal)?.available??0};
   });
  }
  // Evidence is checked independently by the configured verifier. The caller cannot attest its own points.

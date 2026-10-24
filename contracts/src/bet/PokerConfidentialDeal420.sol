@@ -74,6 +74,7 @@ contract PokerConfidentialDeal420 {
             revert Unauthorized();
         if (msg.sender == providerA || msg.sender == providerB) revert Unauthorized();
         if (_verifySeats(tableId,t.config.seats,seatsMask) < 2) revert InvalidInput();
+        ledger.checkAbuseParticipants(tableId,seatsMask);
         if (seatSnapshotHash != snapshotFor(tableId,seatsMask)) revert ParticipantsChanged();
         uint64 epoch = ledger.seatingEpoch(tableId);
         handId = keccak256(abi.encode(DOMAIN,block.chainid,address(this),tableId,t.configHash,
@@ -83,6 +84,7 @@ contract PokerConfidentialDeal420 {
             priorStateHash,seatSnapshotHash,epoch,nonce,deadline,bytes32(0),bytes32(0),bytes32(0),State.AWAITING);
         lastNonce[tableId]=nonce;
         handSeatMask[handId]=seatsMask;
+        ledger.noteAbuseDeal(tableId,handId);
         emit DealRequested(handId,tableId,nonce,deadline);
     }
 

@@ -58,6 +58,7 @@ ReceiptAndRanksSurviveCashoutAndTablePause
 WrongRakePolicyCannotPublishReceipt
 LateShowdownProofsClosePendingRecoveryOnSettlement
 TerminalReceiptRejectsReplayActionsAndRecovery'''.splitlines()
+ABUSE = ['test59LegitimateProtectedFundedHandAndGovernedRestriction', 'test59UnconfirmedIdentityCannotFundASeat', 'test59RelatedAccountsCannotCoseatEvenWhenOtherSitsOut', 'test59IdentityChangeCannotAdmitRelatedExistingSeats', 'test59PendingIdentityCannotUnilaterallyRevokeConfirmedAdmission', 'test59IdentityApprovalBindsExactProposalAndLiveDistinctAuditors', 'test59ControllerProviderAndPlayerCannotAttestThemselves', 'test59ExpiredAndRevokedIdentityCannotStartAnotherHand', 'test59SelfExclusionOnlyTightensAndPreservesFundedHandAndExit', 'test59PlayerAvoidanceIsSymmetricAndCannotRewriteCurrentHand', 'test59LeaveAndSitOutCooldownsCannotBeBypassedByRebuyOrLegacyReturn', 'test59BindingAndPolicyAreImmutableAndCannotBeInstalledAfterFunding', 'test59OnlyCanonicalLedgerCanAdmitOrRecordDeals', 'test59PendingDealRequestsAreRateLimitedAndReplaceableAfterDeadline', 'test59ReportsRequireFrozenParticipantsAndCannotFreezePayment', 'test59DuplicateReportsAndCrossIntentNonceReplayAreRejected', 'test59OneReviewerControllerProviderOrSubjectCannotRestrict', 'test59RestrictionApprovalAndActivationRecheckExactEvidenceAndLiveRoles', 'test59AppealDelaysOnceAndCannotHoldCurrentHandOrSettlement', 'test59MidHandRestrictionOnlyGatesFutureAdmission', 'test59ExpiredReviewCannotBeExecutedLaterAndRestrictionExpiresExactly', 'test59BoundedRestrictionExpiresAndDoesNotDestroyHistoricalReceipt', 'test59IndependentLiftCannotReplayOrClearAReplacementRestriction', 'test59ReviewerMayWithdrawAfterAppealWithoutAnyCustodyChange', 'test59UnavailablePolicyFailsNewFundingButNeverTrapsFundedExit', 'test59MissingProviderRecoveryStillRefundsARestrictedPlayer', 'test59DailyReportQuotaCannotBeBypassedAcrossRealFundedReservations', 'test59HistoricalReportsUseFrozenPlayersAfterSeatReplacement', 'test59FirstBindingCannotBeInstalledAfterLegacyDeposits', 'test59IdentityApprovalCannotReplayAcrossControlDeployments']
 LIFECYCLE = ['test58DisconnectedTurnReconnectionAndTimeoutEvidence', 'test58QueuedExitAfterGenuineShowdown', 'test58QueuedSitOutCannotChangeCurrentCardsActionsOrSnapshot', 'test58QueuedExitCannotCashOutActiveOrFoldedHand', 'test58CancelExitDoesNotSilentlyReturnOrCancelSitOut', 'test58ReconnectRequiresExplicitReturnAndDoesNotGrantNewTurn', 'test58TimeoutCheckContinuesVerifiedStreetAndSitsOutNextHand', 'test58DisconnectedAllInPlayerRetainsProvenShowdownEligibility', 'test58DisconnectDuringFundedAdmissionDoesNotInvalidateExistingHand', 'test58IdleDisconnectedSeatCannotBeginNewDeal', 'test58IdleEligibilityChangeInvalidatesPreparedUnfundedDeal', 'test58OnlySeatOwnerCanRequestPresenceOrExit', 'test58StaleNonceAndSeatEpochCannotOverwriteNewerIntent', 'test58TimeoutInvalidatesStaleLifecycleIntent', 'test58TransportAndOtherEnginesCannotFabricateTimeout', 'test58RevokedPresenceCapabilityCannotChangeIntentButTimeoutWorks', 'test58QueuedCashoutRechecksCurrentWithdrawalCapability', 'test58ExitRemainsAvailableWhenPausedAndOperatorSuspended', 'test58UnavailableProvidersRefundThenQueuedExit', 'test58DisconnectedRecipientWithoutAcknowledgmentUsesBoundedRefund', 'test58QueuedLeaveSurvivesBoundedMissingStreetRecovery', 'test58FailedCashoutAtomicallyPreservesSeatIntentAndEscrow', 'test58CashoutCallbackCannotReenterCompleteLeave', 'test58ExitReplayAndRebuyCannotReusePreviousSeatIntent', 'test58ReconnectSnapshotRotatedSignerAndCanonicalTurn', 'test58SnapshotRejectsWrongHandAndUnknownTable', 'test58CannotReturnWhileDisconnectedOrLeaving']
 OWNERS = ['PokerNLHEBetting54Case'+str(i)+'Test' for i in range(1,11)] + [
     'PokerNLHEBetting54WS3AdversarialTest', 'PokerNativeOutcome54Test',
@@ -124,10 +125,13 @@ def main():
     lifecycle = owners.get('PokerPlayerLifecycle58Test', {})
     if set(lifecycle) != set(LIFECYCLE):
         raise SystemExit('mandatory actual 5A.8 lifecycle execution missing or unexpected')
+    abuse = owners.get('PokerAbuseProtection59Test', {})
+    if set(abuse) != set(ABUSE):
+        raise SystemExit('mandatory actual 5A.9 protected-hand execution missing or unexpected')
     tap = directory / 'node.tap'
     text = tap.read_text(encoding='utf-8-sig')
     passes = re.findall(r'^# pass (\d+)\s*$', text, re.M)
-    if len(passes) != 1 or int(passes[0]) < 59 or re.search(r'^[ \t]*not ok\b|^[ \t]*(?:ok|not ok)\b[^\r\n]*#\s*(?:SKIP|TODO)\b', text, re.M | re.I):
+    if len(passes) != 1 or int(passes[0]) < 74 or re.search(r'^[ \t]*not ok\b|^[ \t]*(?:ok|not ok)\b[^\r\n]*#\s*(?:SKIP|TODO)\b', text, re.M | re.I):
         raise SystemExit('actual independent replay execution incomplete or failed/skipped')
     for field in ('fail', 'cancelled', 'skipped', 'todo'):
         if not re.search(r'^# '+field+r' 0\s*$', text, re.M):
@@ -135,7 +139,12 @@ def main():
     args = ['git', '-c', 'safe.directory='+ROOT.as_posix()]
     sha = subprocess.check_output(args+['rev-parse', 'HEAD'], cwd=ROOT, text=True).strip()
     dirty = subprocess.run(args+['diff', '--quiet', 'HEAD'], cwd=ROOT).returncode != 0
-    for file in ('contracts/test/BetPokerPlayerLifecycle58.t.sol',
+    for file in ('contracts/test/BetPokerAbuseProtection59.t.sol',
+                 'contracts/src/bet/PokerAbuseControls420.sol',
+                 'contracts/src/bet/IPokerAbuseControls420.sol',
+                 'clients/420bet-poker/crypto/nlhe-abuse-monitor.mjs',
+                 'scripts/bet/verify-poker-5a9-abuse.mjs',
+                 'contracts/test/BetPokerPlayerLifecycle58.t.sol',
                  'contracts/src/bet/PokerPlayerRecovery420.sol',
                  'clients/420bet-poker/crypto/nlhe-player-lifecycle.mjs',
                  'contracts/test/BetPokerShowdown57.t.sol',
@@ -150,7 +159,7 @@ def main():
                                 stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode != 0
     report = dict(level=1, qualifiedSHA=None if dirty else sha,
                   sourceCommit=sha, trackedWorkingTreeDirty=dirty,
-                  mandatoryTests=mandatory, lifecycle5A8Tests={name:'Success' for name in lifecycle}, showdown5A7Tests={name: 'Success' for name in showdown}, evaluation5A6Tests={name: 'Success' for name in evaluation}, nativeOwners={o: len(t) for o,t in owners.items()},
+                  mandatoryTests=mandatory, abuse5A9Tests={name:'Success' for name in abuse}, lifecycle5A8Tests={name:'Success' for name in lifecycle}, showdown5A7Tests={name: 'Success' for name in showdown}, evaluation5A6Tests={name: 'Success' for name in evaluation}, nativeOwners={o: len(t) for o,t in owners.items()},
                   totalPassed=sum(map(len, owners.values())), independentTestsPassed=int(passes[0]),
                   executionSHA256={p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in files+[tap]})
     output.write_text(json.dumps(report, indent=2)+'\n', encoding='utf-8')

@@ -16,7 +16,23 @@ assert betting['independentTestsPassed'] >= 23
 assert len(betting['evaluation5A6Tests']) == 11 and set(betting['evaluation5A6Tests'].values()) == {'Success'}
 assert len(betting['showdown5A7Tests']) == 18 and set(betting['showdown5A7Tests'].values()) == {'Success'}
 assert len(betting['lifecycle5A8Tests'])==27 and set(betting['lifecycle5A8Tests'].values())=={'Success'}
-assert betting['independentTestsPassed']>=59
+assert betting['independentTestsPassed']>=74
+assert len(betting['abuse5A9Tests'])==30 and set(betting['abuse5A9Tests'].values())=={'Success'}
+abusePath=Path('artifacts/poker-5a5/abuse-replay.json')
+abuse=json.loads(abusePath.read_text(encoding='utf-8'))
+assert abuse['qualifiedSHA']==sha and abuse['trackedWorkingTreeDirty'] is False
+assert abuse['independentQuorumVerified'] and abuse['reviewDelayVerified'] and abuse['canonicalOutcomePreserved']
+assert abuse['proofStatementsVerified']==41 and abuse['balances']==[399,399] and abuse['rake']==2
+assert abuse['monitoring']['signals']==[] and abuse['monitoring']['automatedSanction'] is False
+paths += [abusePath]
+protectedReplayPath=Path('artifacts/poker-5a5/abuse-independent-outcome.json')
+protectedReplay=json.loads(protectedReplayPath.read_text(encoding='utf-8'))
+assert protectedReplay['qualifiedSHA']==sha and protectedReplay['trackedWorkingTreeDirty'] is False
+assert protectedReplay['settlementReceiptVerified'] and len(protectedReplay['statements'])==41
+assert protectedReplay['balances']==[399,399] and protectedReplay['fee']==2
+assert hashlib.sha256(protectedReplayPath.read_bytes()).hexdigest()==abuse['independentReplaySHA256']
+assert hashlib.sha256(Path('artifacts/poker-5a5/abuse-trace.log').read_bytes()).hexdigest()==abuse['traceSHA256']
+paths += [protectedReplayPath]
 lifecyclePath=Path('artifacts/poker-5a5/lifecycle-replay.json')
 lifecycle=json.loads(lifecyclePath.read_text(encoding='utf-8'))
 assert lifecycle['qualifiedSHA']==sha and lifecycle['trackedWorkingTreeDirty'] is False
@@ -39,6 +55,7 @@ assert runtime['runtimeDeploymentCompatible'] is True
 assert 0<runtime['constructorGasUsed']<=runtime['constructorGasBudget']==16_000_000
 assert lifecycle['projectionIdentity']['runtimeBytes']==runtime['contracts']['PokerPlayerRecovery420']['runtimeTemplateBytes']
 assert lifecycle['ledgerIdentity']['runtimeBytes']==runtime['contracts']['PokerSeatLedger420']['runtimeTemplateBytes']
+assert abuse['controlsIdentity']['runtimeBytes']==runtime['contracts']['PokerAbuseControls420']['runtimeTemplateBytes']
 contextPath=Path('artifacts/ws8-funded/context-compatibility.json')
 context=json.loads(contextPath.read_text(encoding='utf-8'))
 assert len(context['actualVerifierIdentities'])==7 and len(context['actualNativeIdentities'])==10
@@ -62,6 +79,8 @@ assert len(replay["statements"]) == 41 and replay["balances"] == [399, 399] and 
 assert sum(replay["balances"]) + replay["fee"] == 800
 out = Path("artifacts/ws8-certificate");out.mkdir(parents=True, exist_ok=True)
 report = {"level": 2, "qualifiedSHA": sha, "acceptance": "passed", "genuineProofsVerified": 41,
+    "abuse5A9Tests": betting['abuse5A9Tests'], "abuseControlsIdentity": abuse['controlsIdentity'],
+    "protectedAbuseHandVerified": True, "automatedSanction": False,
     "lifecycle5A8Tests": betting['lifecycle5A8Tests'], "reconnectionReplayVerified": True,
     "playerRecoveryIdentity": lifecycle['projectionIdentity'], "seatLedgerIdentity": lifecycle['ledgerIdentity'],
     "showdown5A7Tests": betting['showdown5A7Tests'],

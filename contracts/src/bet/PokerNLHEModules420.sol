@@ -74,6 +74,8 @@ contract PokerNLHEAdmissionModule420 is PokerNLHEModule420 {
         }
         g.stateRoot=keccak256(abi.encode(STATE_DOMAIN,block.chainid,address(this),handId,
             h.tableId,h.rulesetId,h.configHash,h.seatSnapshotHash,mask,g.initialChips,_layout().turnPolicyForHand[handId]));
+        bytes32 abuseRoot=ledger.abuseAdmission(handId);
+        if(abuseRoot!=bytes32(0))g.stateRoot=keccak256(abi.encode(g.stateRoot,keccak256("420.BET.POKER.ABUSE.ADMISSION.V1"),abuseRoot));
         _postBlinds(handId,g,button,t.config.smallBlind,t.config.bigBlind);
         _layout().lastBigBlind[h.tableId]=g.bigBlindSeat;
         _commitTurn(handId,g);

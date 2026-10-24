@@ -146,6 +146,9 @@ abstract contract PokerWS8ProductionFixture54 is PokerConfidentialDeal54Test {
     }
 
     function _ws8Version(uint8 i) internal pure returns(bytes32) {return keccak256(abi.encode("WS8.GENUINE.VERIFIER.V1",i));}
+    // New admission-control owners may bind their policy before any chip is
+    // deposited. Existing qualified fixture owners retain their exact context.
+    function _configurePlayerAbuseControls() internal virtual {}
 
     function _ws8FundedHand() internal returns(bytes32 id) {
         require(block.chainid==31337,"WS8 chain context");
@@ -156,6 +159,7 @@ abstract contract PokerWS8ProductionFixture54 is PokerConfidentialDeal54Test {
         cheat54.prank(ADMIN);registry.register(config,ADMIN);
         cheat54.prank(ADMIN);registry.approve(TABLE);
         cheat54.prank(ADMIN);registry.open(TABLE);
+        _configurePlayerAbuseControls();
         _buy();cheat54.prank(PLAYER_B);ledger.buyIn(TABLE,1,400);
         bytes32 scope=auth.scopeForTable(TABLE);
         cap.grant(ADMIN,ledger.ACTION_BIND_SETTLEMENT(),scope,true);

@@ -20,7 +20,7 @@ def copy(name):
         copy(Path(dep).name)
     (out / name).write_text(body.replace('../src/', '../../src/'), encoding='utf-8')
 
-for name in ('BetPokerPlayerLifecycle58.t.sol', 'BetPokerShowdown57.t.sol', 'BetPokerEvaluation56.t.sol', 'BetPokerBettingRounds55.t.sol', 'BetPokerWS8FrozenHandContext54.t.sol',
+for name in ('BetPokerAbuseProtection59.t.sol', 'BetPokerPlayerLifecycle58.t.sol', 'BetPokerShowdown57.t.sol', 'BetPokerEvaluation56.t.sol', 'BetPokerBettingRounds55.t.sol', 'BetPokerWS8FrozenHandContext54.t.sol',
              'BetPokerNLHEBetting54.t.sol', 'BetPokerNativeOutcome54.t.sol',
              'BetPokerActionDisputeClock54.t.sol', 'BetPokerRecovery54.t.sol',
              'BetPokerLedgerReentrancy54.t.sol', 'BetPokerHandRank54.t.sol',

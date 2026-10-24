@@ -18,7 +18,7 @@ if any(report.get("success") is not True for report in reports):
     raise SystemExit("one or more scoped Slither analyzers reported unsuccessful execution")
 focus = re.compile(
     r"(?:^|/)src/bet/(?:PokerNLHEBetting420|PokerNLHEStorage420|PokerNLHEModules420|PokerNLHEModuleFactories420|PokerNativeOutcome420|PokerPotMath420|PokerHandRank420|PokerCanonicalRake420|"
-    r"PokerLiveCardReveals420|PokerCanonicalSettlement420|PokerSeatLedger420|PokerConfidentialDeal420|PokerPlayerRecovery420|"
+    r"PokerLiveCardReveals420|PokerCanonicalSettlement420|PokerSeatLedger420|PokerConfidentialDeal420|PokerPlayerRecovery420|PokerAbuseControls420|"
     r"PokerGnarkElGamalAdapters420|PokerGnarkCardRevealAdapters420|"
     r"PokerPrivateShuffleGate420|PokerInitialEncryptedDeck420|"
     r"PokerVerifierVersions420|PokerRecipientKeys420|PokerDeckDisclosure420|"

@@ -7,12 +7,13 @@ import path from 'node:path';
 import {verifyBettingTranscript,verifyShowdownSettlement} from '../../clients/420bet-poker/crypto/nlhe-independent-verifier.mjs';
 
 const [logPath,output,variant]=process.argv.slice(2);
-assert(variant===undefined||variant==='winner57','unknown executed fixture');
+assert(variant===undefined||variant==='winner57'||variant==='abuse59','unknown executed fixture');
 const winner=variant==='winner57';
+const abuse=variant==='abuse59';
 assert(logPath&&output,'usage: verify-ws8-transcript.mjs executed-forge.log report.json');
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../..');
 const log=readFileSync(logPath,'utf8');
-assert(log.includes(winner?'[PASS] test57GenuineSingleWinnerShowdown()':'[PASS] testLegitimateFundedHandSettlement()'),'actual passing legitimate funded-hand execution required');
+assert(log.includes(winner?'[PASS] test57GenuineSingleWinnerShowdown()':abuse?'[PASS] test59LegitimateProtectedFundedHandAndGovernedRestriction()':'[PASS] testLegitimateFundedHandSettlement()'),'actual passing legitimate funded-hand execution required');
 const actions=[],cards=new Map(),owners=new Map(),statements=[];
 const streetNames={1:['AWAIT_FLOP','FLOP'],2:['AWAIT_TURN','TURN'],3:['AWAIT_RIVER','RIVER']};
 for(const line of log.split('\n')) {
@@ -52,7 +53,7 @@ const [,handId,terminalTranscript,a,b,rake]=settled[0];
 assert.deepEqual(balances,[Number(a),Number(b)]);assert.equal(result.fee,Number(rake));
 assert.equal(balances.reduce((x,y)=>x+y,0)+fee,800);
 const receipts=[...log.matchAll(/emit SettlementReceiptRecorded\(handId: (0x[0-9a-f]+), transcript: (0x[0-9a-f]+), finalChips: \[([^\]]+)\], rake: (\d+)\)/gi)];
-if(winner){
+if(winner||abuse){
  assert.equal(receipts.length,1,'one actual immutable settlement receipt required');
  const [,receiptHand,receiptRoot,payoutText,receiptFee]=receipts[0];
  const payout=payoutText.split(',').map(x=>Number(x.trim()));
@@ -60,12 +61,12 @@ if(winner){
  assert.equal(receiptRoot.toLowerCase(),terminalTranscript.toLowerCase());
  assert.deepEqual(payout,[...balances,0,0,0,0,0,0,0]);
  assert.equal(Number(receiptFee),fee);
- assert.deepEqual(balances,[418,380]);
+ assert.deepEqual(balances,winner?[418,380]:[399,399]);
 }
 const gitConfig=['-c','safe.directory='+root.replaceAll('\\','/')];
 const dirty=spawnSync('git',[...gitConfig,'diff','--quiet','HEAD'],{cwd:root}).status!==0;
 const report={trackedWorkingTreeDirty:dirty,qualifiedSHA:dirty?null:execFileSync('git',['-c','safe.directory='+root.replaceAll('\\','/'),'rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim(),handId,terminalTranscript,
  inputAuthentication:'Accepted production engine action, reveal and proof-book events from the executed Foundry test; independent replay does not manufacture authentication',
- settlementReceiptVerified:winner,actions:replay.record,board,holeCards,balances,fee,statements};
+ settlementReceiptVerified:winner||abuse,actions:replay.record,board,holeCards,balances,fee,statements};
 writeFileSync(output,JSON.stringify(report,null,2)+'\n');
 console.log('Independent executed-hand replay matched native settlement:',JSON.stringify({balances,fee,proofStatements:statements.length}));

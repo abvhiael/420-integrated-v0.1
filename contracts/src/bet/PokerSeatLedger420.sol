@@ -3,6 +3,7 @@ pragma solidity ^0.8.24;
 
 import "./PokerTableRegistry420.sol";
 import "./BetIds420.sol";
+import "./IPokerAbuseControls420.sol";
 
 interface IPokerToken420 {
     function transferFrom(address from, address to, uint256 amount) external returns (bool);
@@ -36,6 +37,16 @@ contract PokerSeatLedger420 {
     // Next-hand policy is separate from the immutable funded-seat snapshot.
     struct PlayerLifecycle { uint64 nonce; bool disconnected; bool sitOutNextHand; bool leaveRequested; }
     mapping(bytes32=>mapping(uint8=>PlayerLifecycle)) private lifecycle;
+    bytes32 public constant ACTION_BIND_ABUSE_CONTROLS=keccak256("BET_POKER_BIND_ABUSE_CONTROLS.V1");
+    mapping(bytes32=>address) public abuseControls;
+    mapping(bytes32=>bytes32) public abuseControlsCodeHash;
+    mapping(bytes32=>bytes32) public abuseAdmission;
+    mapping(bytes32=>mapping(address=>uint64)) public lastExitAt;
+    mapping(bytes32=>mapping(address=>uint64)) public lastSitOutAt;
+    mapping(bytes32=>bytes32) public abusePolicyHash;
+    error AbuseBindingInvalid();
+    event AbuseControlsBound(bytes32 indexed tableId,address controls,bytes32 policyHash,bytes32 codeHash);
+    event HandAbuseAdmissionRecorded(bytes32 indexed tableId,bytes32 indexed handId,bytes32 admissionRoot);
     enum LifecycleReason { DISCONNECT, RECONNECT, SIT_OUT, RETURN, REQUEST_LEAVE, CANCEL_LEAVE, TIMEOUT }
     error StaleLifecycle(); error InvalidLifecycle();
     event PlayerLifecycleUpdated(bytes32 indexed tableId,uint8 indexed seat,address indexed player,
@@ -71,11 +82,44 @@ contract PokerSeatLedger420 {
     }
 
     function seatOf(bytes32 id, uint8 seat) external view returns (Seat memory) { return seats[id][seat]; }
+    /// @notice Immutable opt-in before any seat or escrow exists. An unbound
+    /// legacy table must never be presented as a qualified protected table.
+    function bindAbuseControls(bytes32 id,address controls) external nonReentrant {
+        _table(id);
+        if(!authorization.isAuthorized(msg.sender,ACTION_BIND_ABUSE_CONTROLS,authorization.scopeForTable(id),0))revert Unauthorized();
+        if(controls==address(0)||controls.code.length==0||abuseControls[id]!=address(0)||
+           seatingEpoch[id]!=0||totalChips[id]!=0||activeHand[id]!=bytes32(0))revert AbuseBindingInvalid();
+        IPokerAbuseControls420 gate=IPokerAbuseControls420(controls);
+        bytes32 policy=gate.policyHash(id);
+        if(gate.ledgerAddress()!=address(this)||gate.dealsAddress()==address(0)||policy==bytes32(0))revert AbuseBindingInvalid();
+        abuseControls[id]=controls;abuseControlsCodeHash[id]=controls.codehash;abusePolicyHash[id]=policy;
+        emit AbuseControlsBound(id,controls,policy,controls.codehash);
+    }
+    function _abuseGate(bytes32 id)private view returns(IPokerAbuseControls420 gate){
+        address target=abuseControls[id];
+        if(target!=address(0)&&target.codehash!=abuseControlsCodeHash[id])revert AbuseBindingInvalid();
+        gate=IPokerAbuseControls420(target);
+    }
+    function checkAbuseParticipants(bytes32 id,uint16 mask) external view {
+        IPokerAbuseControls420 gate=_abuseGate(id);
+        if(address(gate)!=address(0))gate.checkParticipants(id,mask);
+    }
+    function noteAbuseDeal(bytes32 id,bytes32 handId) external nonReentrant {
+        IPokerAbuseControls420 gate=_abuseGate(id);
+        if(address(gate)!=address(0)){
+            if(msg.sender!=gate.dealsAddress())revert Unauthorized();
+            gate.noteDealRequested(id,handId);
+        }
+    }
     function lifecycleOf(bytes32 id,uint8 seat) external view returns(PlayerLifecycle memory){return lifecycle[id][seat];}
     function eligibleForNextHand(bytes32 id,uint8 seat) public view returns(bool){
         Seat storage s=seats[id][seat];PlayerLifecycle storage p=lifecycle[id][seat];
-        return s.player!=address(0)&&s.chips!=0&&!s.sittingOut&&
-            !p.disconnected&&!p.sitOutNextHand&&!p.leaveRequested;
+        if(s.player==address(0)||s.chips==0||s.sittingOut||p.disconnected||p.sitOutNextHand||p.leaveRequested)return false;
+        address target=abuseControls[id];if(target==address(0))return true;
+        if(target.codehash!=abuseControlsCodeHash[id])return false;
+        // A failed admission policy hides no current-hand/cashout state and
+        // cannot turn a read-only reconnect projection into a custody hold.
+        try IPokerAbuseControls420(target).checkReturn(id,s.player){return true;}catch{return false;}
     }
 
     /// @notice Owner-reported connectivity, never a transport/operator claim.
@@ -94,6 +138,7 @@ contract PokerSeatLedger420 {
         _authorize(id,BetIds420.ACTION_POKER_SIT_OUT,0);
         PlayerLifecycle storage p=lifecycle[id][seat];
         if(p.sitOutNextHand==value||(!value&&(p.disconnected||p.leaveRequested)))revert InvalidLifecycle();
+        if(!value)_checkReturn(id,msg.sender);
         p.sitOutNextHand=value;
         _lifecycleChanged(id,seat,value?LifecycleReason.SIT_OUT:LifecycleReason.RETURN);
     }
@@ -150,6 +195,7 @@ contract PokerSeatLedger420 {
         PlayerLifecycle storage p=lifecycle[id][seat];Seat storage s=seats[id][seat];
         bool out=p.disconnected||p.sitOutNextHand||p.leaveRequested;
         if(s.player!=address(0)&&s.sittingOut!=out){
+            if(out)lastSitOutAt[id][s.player]=uint64(block.timestamp);
             s.sittingOut=out;++seatingEpoch[id];emit SitOut(id,seat,out);
         }
     }
@@ -194,6 +240,12 @@ contract PokerSeatLedger420 {
         if(count<2||sum==0)revert SettlementInvalid();
         activeHand[id]=handId;lockedMask[id]=mask;lockedEpoch[id]=epoch;
         lockedSnapshot[id]=snapshot;lockedTotal[id]=sum;reservedInHand[id]=sum;
+        IPokerAbuseControls420 gate=_abuseGate(id);
+        if(address(gate)!=address(0)){
+            bytes32 root=gate.admitHand(id,handId,mask);
+            if(root==bytes32(0)||abuseAdmission[handId]!=bytes32(0))revert AbuseBindingInvalid();
+            abuseAdmission[handId]=root;emit HandAbuseAdmissionRecorded(id,handId,root);
+        }
         emit HandReserved(id,handId,sum,snapshot);
     }
     /// @notice Restore original escrow balances on canonically authorized void/recovery.
@@ -266,6 +318,8 @@ contract PokerSeatLedger420 {
         if (playerSeatPlusOne[id][msg.sender] != 0) revert AlreadySeated();
         if (amount < t.config.minBuyIn || amount > t.config.maxBuyIn) revert BuyInLimit();
         _authorize(id, BetIds420.ACTION_POKER_BUY_IN, amount);
+        IPokerAbuseControls420 gate=_abuseGate(id);
+        if(address(gate)!=address(0))gate.checkDeposit(id,msg.sender,seat);
         uint64 epoch = ++seatingEpoch[id];
         seats[id][seat] = Seat(msg.sender, amount, false, epoch);
         playerSeatPlusOne[id][msg.sender] = seat + 1;
@@ -284,6 +338,8 @@ contract PokerSeatLedger420 {
         Seat storage s = seats[id][plusOne - 1];
         if (amount == 0 || s.chips + amount > t.config.maxBuyIn) revert BuyInLimit();
         _authorize(id, BetIds420.ACTION_POKER_TOP_UP, amount);
+        IPokerAbuseControls420 gate=_abuseGate(id);
+        if(address(gate)!=address(0))gate.checkDeposit(id,msg.sender,plusOne-1);
         s.chips += amount;
         totalChips[id] += amount;
         _deposit(t.config.asset, amount);
@@ -298,6 +354,7 @@ contract PokerSeatLedger420 {
         _authorize(id, BetIds420.ACTION_POKER_SIT_OUT, 0);
         PlayerLifecycle storage p=lifecycle[id][plusOne-1];
         if(!value&&(p.disconnected||p.leaveRequested))revert InvalidLifecycle();
+        if(!value)_checkReturn(id,msg.sender);
         p.sitOutNextHand=value;
         _lifecycleChanged(id,plusOne-1,value?LifecycleReason.SIT_OUT:LifecycleReason.RETURN);
     }
@@ -318,9 +375,14 @@ contract PokerSeatLedger420 {
         delete seats[id][seat];delete lifecycle[id][seat];
         delete playerSeatPlusOne[id][player];
         ++seatingEpoch[id];
+        lastExitAt[id][player]=uint64(block.timestamp);
         totalChips[id] -= amount;
         if(amount!=0)_withdraw(asset,player,amount);
         emit Left(id,seat,player,amount);
+    }
+    function _checkReturn(bytes32 id,address player)private view {
+        IPokerAbuseControls420 gate=_abuseGate(id);
+        if(address(gate)!=address(0))gate.checkReturn(id,player);
     }
 
     function _table(bytes32 id) private view returns (PokerTableRegistry420.Table memory) {

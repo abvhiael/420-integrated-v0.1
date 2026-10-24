@@ -122,8 +122,12 @@ contract R04EquipmentEmergencyTest is PublicPlantCapacityFixture {
         inventory.registerResource(REPAIR, InventoryRegistry.Unit.COUNT);
         inventory.registerResource(GEAR, InventoryRegistry.Unit.COUNT);
         inventory.registerResource(SCRAP, InventoryRegistry.Unit.COUNT);
+        inventory.registerResource(keccak256("HC.UTILITY.WATER.CAPACITY.V1"), InventoryRegistry.Unit.CAPACITY);
+        inventory.registerResource(keccak256("HC.UTILITY.ELECTRICITY.CAPACITY.V1"), InventoryRegistry.Unit.CAPACITY);
         inventory.setIssuer(address(this), true);
         inventory.acquire(keccak256("earned-raw"), RAW, address(this), 20);
+        inventory.acquire(keccak256("funded-water"), keccak256("HC.UTILITY.WATER.CAPACITY.V1"), address(this), 100);
+        inventory.acquire(keccak256("funded-power"), keccak256("HC.UTILITY.ELECTRICITY.CAPACITY.V1"), address(this), 100);
         equipment = new EquipmentRegistry(address(auth), address(land));
         bind(equipment);
         int16[6] memory effects;
@@ -140,6 +144,8 @@ contract R04EquipmentEmergencyTest is PublicPlantCapacityFixture {
         );
         bind(bridge);
         lifecycle.setUseVerifier(address(bridge), true);
+        bridge.registerUtilityPolicy(TYPE, keccak256("utility-cost-v1"), 7, 11);
+        inventory.setInventoryOperator(address(bridge), true);
         _grant(address(bridge), ModuleIds.CULTIVATION_ENGINE, ActionIds.CULTIVATION_UPDATE, bytes32(uint256(1)));
         manufacturing = new ManufacturingEngine(address(auth), address(inventory), 2);
         bind(manufacturing);
@@ -173,6 +179,52 @@ contract R04EquipmentEmergencyTest is PublicPlantCapacityFixture {
 
     function environment() internal pure returns (CultivationEngine.EnvironmentSnapshot memory) {
         return CultivationEngine.EnvironmentSnapshot(2400, 6000, 7000, 6000, 6500, 5000);
+    }
+
+    function testWaterAndPowerConservedByAuthorizedEnvironmentalUpdate() public {
+        bytes32 water = bridge.WATER_RESOURCE();
+        bytes32 power = bridge.POWER_RESOURCE();
+        bridge.applyEnvironment(1, ITEM, environment());
+        require(inventory.ledger().balance(water, address(this)).available == 93, "water debit");
+        require(inventory.ledger().balance(power, address(this)).available == 89, "power debit");
+        require(inventory.ledger().balance(water, address(this)).consumed == 7, "water consumed");
+        require(inventory.ledger().balance(power, address(this)).consumed == 11, "power consumed");
+        require(cultivation.getState(1).environment.temperature == 2450, "paid benefit absent");
+        require(bridge.plantOperationNonce(1) == 1, "nonce missing");
+    }
+
+    function testMissingUtilityRevertsBothDebitsAndEnvironmentalBenefit() public {
+        bytes32 water = bridge.WATER_RESOURCE();
+        bytes32 power = bridge.POWER_RESOURCE();
+        inventory.consume(keccak256("drain-power"), power, 95, false);
+        (bool ok,) = address(bridge).call(abi.encodeCall(bridge.applyEnvironment, (uint64(1), ITEM, environment())));
+        require(!ok, "unpaid benefit permitted");
+        require(inventory.ledger().balance(water, address(this)).available == 100, "water lost on power failure");
+        require(inventory.ledger().balance(power, address(this)).available == 5, "power unexpectedly debited");
+        require(lifecycle.condition(ITEM).usages == 0, "durability lost on revert");
+        require(bridge.plantOperationNonce(1) == 0, "failed call advanced nonce");
+        (bool received,) = address(cultivation).call(abi.encodeCall(cultivation.getState, (uint64(1))));
+        require(!received, "environment updated without payment");
+    }
+
+    function testCultivationFailureRollsBackUtilitiesAndDurability() public {
+        bytes32 water = bridge.WATER_RESOURCE();
+        bytes32 power = bridge.POWER_RESOURCE();
+        CultivationEngine.EnvironmentSnapshot memory bad = environment();
+        bad.temperature = 4000;
+        (bool ok,) = address(bridge).call(abi.encodeCall(bridge.applyEnvironment, (uint64(1), ITEM, bad)));
+        require(!ok, "invalid environment succeeded");
+        require(inventory.ledger().balance(water, address(this)).consumed == 0, "water debit not rolled back");
+        require(inventory.ledger().balance(power, address(this)).consumed == 0, "power debit not rolled back");
+        require(lifecycle.condition(ITEM).usages == 0, "durability not rolled back");
+        require(bridge.plantOperationNonce(1) == 0, "nonce not rolled back");
+    }
+
+    function testOperatorRevocationPreventsEnvironmentalUtilitySpend() public {
+        inventory.setInventoryOperator(address(bridge), false);
+        (bool ok,) = address(bridge).call(abi.encodeCall(bridge.applyEnvironment, (uint64(1), ITEM, environment())));
+        require(!ok, "revoked bridge operator awarded benefit");
+        require(bridge.plantOperationNonce(1) == 0, "revoked request persisted");
     }
 
     function testManufacturedRepairResourcesActualLandAndCultivationEffects() public {

@@ -1,0 +1,347 @@
+{
+  "schema": "420-migration-ownership-inventory-v1",
+  "step": "MIG-0.1",
+  "status": "OWNERSHIP_CLASSIFIED_PENDING_EXHAUSTIVE_TREE_AND_LEVEL1",
+  "sourceRepositories": [
+    "abvhiael/420-integrated-v0.1",
+    "abvhiael/420-integrated"
+  ],
+  "decision": "Games are post-Genesis; High Country and canonical Gaming Protocol remain in Genesis",
+  "destinations": [
+    "420-arcade",
+    "420-budtender",
+    "420-smoke-and-chrome",
+    "420-green-road"
+  ],
+  "classificationRules": [
+    "move: copy and qualify before removing from Genesis",
+    "retain: canonical source remains Genesis-owned",
+    "split: game-side tests and docs move; canonical policy/integration evidence remains",
+    "review: mixed or historical source cannot move automatically"
+  ],
+  "entries": [
+    {
+      "id": "MIG01-001",
+      "sourceRepository": "abvhiael/420-integrated-v0.1",
+      "source": "apps/arcade-web/",
+      "destination": "420-arcade",
+      "disposition": "move"
+    },
+    {
+      "id": "MIG01-002",
+      "sourceRepository": "abvhiael/420-integrated-v0.1",
+      "source": "packages/arcade-*/",
+      "destination": "420-arcade",
+      "disposition": "move"
+    },
+    {
+      "id": "MIG01-003",
+      "sourceRepository": "abvhiael/420-integrated-v0.1",
+      "source": "services/arcade-ranking/",
+      "destination": "420-arcade",
+      "disposition": "move"
+    },
+    {
+      "id": "MIG01-004",
+      "sourceRepository": "abvhiael/420-integrated-v0.1",
+      "source": "scripts/arcade/",
+      "destination": "420-arcade",
+      "disposition": "move"
+    },
+    {
+      "id": "MIG01-005",
+      "sourceRepository": "abvhiael/420-integrated-v0.1",
+      "source": "docs/arcade/",
+      "destination": "420-arcade",
+      "disposition": "split"
+    },
+    {
+      "id": "MIG01-006",
+      "sourceRepository": "abvhiael/420-integrated-v0.1",
+      "source": "config/arcade-*.json",
+      "destination": "420-arcade",
+      "disposition": "split"
+    },
+    {
+      "id": "MIG01-007",
+      "sourceRepository": "abvhiael/420-integrated",
+      "source": "mad-buds/",
+      "destination": "420-arcade",
+      "disposition": "review",
+      "note": "abvhiael/420-integrated: legacy Unity tree; preserve history and reconcile with Godot"
+    },
+    {
+      "id": "MIG01-008",
+      "sourceRepository": "abvhiael/420-integrated-v0.1",
+      "source": "src/budtender/",
+      "destination": "420-budtender",
+      "disposition": "move"
+    },
+    {
+      "id": "MIG01-009",
+      "sourceRepository": "abvhiael/420-integrated-v0.1",
+      "source": "assets/budtender/",
+      "destination": "420-budtender",
+      "disposition": "move"
+    },
+    {
+      "id": "MIG01-010",
+      "sourceRepository": "abvhiael/420-integrated-v0.1",
+      "source": "scripts/budtender/",
+      "destination": "420-budtender",
+      "disposition": "move"
+    },
+    {
+      "id": "MIG01-011",
+      "sourceRepository": "abvhiael/420-integrated-v0.1",
+      "source": "clients/budtender-access-v1/",
+      "destination": "420-budtender",
+      "disposition": "move"
+    },
+    {
+      "id": "MIG01-012",
+      "sourceRepository": "abvhiael/420-integrated-v0.1",
+      "source": "clients/budtender-web-v1/",
+      "destination": "420-budtender",
+      "disposition": "move"
+    },
+    {
+      "id": "MIG01-013",
+      "sourceRepository": "abvhiael/420-integrated-v0.1",
+      "source": "docs/budtender/",
+      "destination": "420-budtender",
+      "disposition": "move"
+    },
+    {
+      "id": "MIG01-014",
+      "sourceRepository": "abvhiael/420-integrated-v0.1",
+      "source": "clients/smoke-chrome-access-v1/",
+      "destination": "420-smoke-and-chrome",
+      "disposition": "move"
+    },
+    {
+      "id": "MIG01-015",
+      "sourceRepository": "abvhiael/420-integrated-v0.1",
+      "source": "docs/games/smoke-and-chrome/",
+      "destination": "420-smoke-and-chrome",
+      "disposition": "move"
+    },
+    {
+      "id": "MIG01-016",
+      "sourceRepository": "abvhiael/420-integrated-v0.1",
+      "source": "clients/greenroad-access-v1/",
+      "destination": "420-green-road",
+      "disposition": "move"
+    },
+    {
+      "id": "MIG01-017",
+      "sourceRepository": "abvhiael/420-integrated-v0.1",
+      "source": "docs/gaming/TGR-0-ARCHITECTURE.md",
+      "destination": "420-green-road",
+      "disposition": "split"
+    },
+    {
+      "id": "MIG01-018",
+      "sourceRepository": "abvhiael/420-integrated-v0.1",
+      "source": "packages/420-gaming-sdk/",
+      "destination": "genesis",
+      "disposition": "retain"
+    },
+    {
+      "id": "MIG01-019",
+      "sourceRepository": "abvhiael/420-integrated-v0.1",
+      "source": "contracts/src/gaming/",
+      "destination": "genesis",
+      "disposition": "retain"
+    },
+    {
+      "id": "MIG01-020",
+      "sourceRepository": "abvhiael/420-integrated-v0.1",
+      "source": "contracts/test/GamingProtocol420*.t.sol",
+      "destination": "genesis",
+      "disposition": "retain"
+    },
+    {
+      "id": "MIG01-021",
+      "sourceRepository": "abvhiael/420-integrated-v0.1",
+      "source": "services/420-gaming-query/",
+      "destination": "genesis",
+      "disposition": "retain"
+    },
+    {
+      "id": "MIG01-022",
+      "sourceRepository": "abvhiael/420-integrated-v0.1",
+      "source": "developer-hub/src/gaming-*.mjs",
+      "destination": "genesis",
+      "disposition": "retain"
+    },
+    {
+      "id": "MIG01-023",
+      "sourceRepository": "abvhiael/420-integrated-v0.1",
+      "source": "docs/developers/gaming-onboarding.md",
+      "destination": "genesis",
+      "disposition": "retain"
+    },
+    {
+      "id": "MIG01-024",
+      "sourceRepository": "abvhiael/420-integrated-v0.1",
+      "source": "clients/highcountry-access-v1/",
+      "destination": "genesis",
+      "disposition": "retain"
+    },
+    {
+      "id": "MIG01-025",
+      "sourceRepository": "abvhiael/420-integrated-v0.1",
+      "source": "docs/highcountry/",
+      "destination": "genesis",
+      "disposition": "retain"
+    },
+    {
+      "id": "MIG01-026",
+      "sourceRepository": "abvhiael/420-integrated-v0.1",
+      "source": "docs/GENESIS-DAPPS.md",
+      "destination": "genesis",
+      "disposition": "retain"
+    },
+    {
+      "id": "MIG01-027",
+      "sourceRepository": "abvhiael/420-integrated-v0.1",
+      "source": "config/genesis-applications.json",
+      "destination": "genesis",
+      "disposition": "retain"
+    },
+    {
+      "id": "MIG01-028",
+      "sourceRepository": "abvhiael/420-integrated-v0.1",
+      "source": "deployments/gaming/",
+      "destination": "genesis",
+      "disposition": "split"
+    },
+    {
+      "id": "MIG01-029",
+      "sourceRepository": "abvhiael/420-integrated-v0.1",
+      "source": "packages/420-gaming-client-hardening/",
+      "destination": "genesis",
+      "disposition": "split",
+      "note": "replace source-relative four-game tests with versioned contract fixtures"
+    },
+    {
+      "id": "MIG01-030",
+      "sourceRepository": "abvhiael/420-integrated-v0.1",
+      "source": "packages/420-gaming-cross-game-qualification/",
+      "destination": "genesis",
+      "disposition": "split",
+      "note": "rework cross-game qualification"
+    },
+    {
+      "id": "MIG01-031",
+      "sourceRepository": "abvhiael/420-integrated-v0.1",
+      "source": "scripts/gaming/",
+      "destination": "genesis",
+      "disposition": "split"
+    },
+    {
+      "id": "MIG01-032",
+      "sourceRepository": "abvhiael/420-integrated-v0.1",
+      "source": ".github/workflows/gaming-four-game-e2e.yml",
+      "destination": "genesis",
+      "disposition": "split"
+    },
+    {
+      "id": "MIG01-033",
+      "sourceRepository": "abvhiael/420-integrated-v0.1",
+      "source": ".github/workflows/gaming-client-hardening.yml",
+      "destination": "genesis",
+      "disposition": "split"
+    },
+    {
+      "id": "MIG01-034",
+      "sourceRepository": "abvhiael/420-integrated-v0.1",
+      "source": ".github/workflows/gaming-cross-game-qualification.yml",
+      "destination": "genesis",
+      "disposition": "split"
+    },
+    {
+      "id": "MIG01-035",
+      "sourceRepository": "abvhiael/420-integrated-v0.1",
+      "source": ".github/workflows/green-road-gaming.yml",
+      "destination": "420-green-road",
+      "disposition": "move"
+    },
+    {
+      "id": "MIG01-036",
+      "sourceRepository": "abvhiael/420-integrated-v0.1",
+      "source": ".github/workflows/smoke-chrome-gaming.yml",
+      "destination": "420-smoke-and-chrome",
+      "disposition": "move"
+    },
+    {
+      "id": "MIG01-037",
+      "sourceRepository": "abvhiael/420-integrated-v0.1",
+      "source": ".github/workflows/budtender-gaming.yml",
+      "destination": "420-budtender",
+      "disposition": "move"
+    },
+    {
+      "id": "MIG01-038",
+      "sourceRepository": "abvhiael/420-integrated-v0.1",
+      "source": ".github/workflows/arcade-*.yml",
+      "destination": "420-arcade",
+      "disposition": "review"
+    },
+    {
+      "id": "MIG01-039",
+      "sourceRepository": "abvhiael/420-integrated-v0.1",
+      "source": "docs/gaming/420GP-11-THE-GREEN-ROAD.md",
+      "destination": "genesis",
+      "disposition": "split"
+    },
+    {
+      "id": "MIG01-040",
+      "sourceRepository": "abvhiael/420-integrated-v0.1",
+      "source": "docs/gaming/420GP-12-BUDTENDER.md",
+      "destination": "genesis",
+      "disposition": "split"
+    },
+    {
+      "id": "MIG01-041",
+      "sourceRepository": "abvhiael/420-integrated-v0.1",
+      "source": "docs/gaming/420GP-13-SMOKE-CHROME.md",
+      "destination": "genesis",
+      "disposition": "split"
+    },
+    {
+      "id": "MIG01-042",
+      "sourceRepository": "abvhiael/420-integrated-v0.1",
+      "source": "docs/gaming/420GP-14-CROSS-GAME-QUALIFICATION.md",
+      "destination": "genesis",
+      "disposition": "retain"
+    }
+  ],
+  "exclusions": [
+    "High Country gameplay and contracts remain within Genesis",
+    "420 Gaming Protocol retains identity, registration, entitlements and claims authority",
+    "No game is granted mint, signing, wallet custody or canonical protocol authority"
+  ],
+  "unresolved": [
+    "Full recursive Git tree inventory and binary checksums",
+    "Current Godot source location and approved off-repo PNG/ZIP manifests",
+    "All active game PR head SHAs and unmerged assets",
+    "Complete reverse dependency import graph",
+    "GENESIS decision #2 PR #734 conflict reconciliation",
+    "Publishable gaming SDK packaging"
+  ],
+  "qualification": {
+    "level": 1,
+    "scope": "ownership inventory metadata only",
+    "passed": false,
+    "required": [
+      "schema integrity",
+      "unique ids and sources",
+      "destination/disposition integrity",
+      "known core retains",
+      "four destination coverage",
+      "unresolved gaps remain explicit"
+    ]
+  }
+}

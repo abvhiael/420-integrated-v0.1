@@ -51,7 +51,15 @@ jobs:
           FOUNDRY_SRC: src/bet
           FOUNDRY_TEST: test/ws8-context
         run: |
-          forge test --match-contract '^BetPokerWS8FrozenHandContext54Test$' -vvv | tee ws8-context-level1.log
+          set -euo pipefail
+          forge test --match-contract '^BetPokerWS8FrozenHandContext54Test
+          grep 'WS8FrozenHand' ws8-context-level1.log || true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: 420bet-ws8-step1-frozen-context
+          path: contracts/ws8-context-level1.log
+          if-no-files-found: error
+ -vvv | tee ws8-context-level1.log
           grep 'WS8FrozenHand' ws8-context-level1.log || true
       - uses: actions/upload-artifact@v4
         with:

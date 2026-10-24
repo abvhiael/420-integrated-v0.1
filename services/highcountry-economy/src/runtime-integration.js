@@ -33,7 +33,7 @@ export class RuntimeAuthority {
   const c=this.verifyToken(token);
   return this.store.transact(s=>{
    runtimeState(s);const a=s.runtimeAccounts.get(c.sub);
-   if(!a||a.issuer!==c.iss||(s.runtimeEpochs.get(c.sub)||0)!==c.epoch)fail('account revoked or unregistered');
+   if(!a||a.issuer!==c.iss||(a.epoch??0)!==c.epoch||(s.runtimeEpochs.get(c.sub)||0)!==c.epoch)fail('account revoked or unregistered');
    return c.sub;
   });
  }
@@ -43,14 +43,15 @@ export class RuntimeAuthority {
    runtimeState(s);
    if((s.runtimeEpochs.get(c.sub)||0)!==c.epoch)fail('account revoked');
    const old=s.runtimeAccounts.get(c.sub);if(old&&old.issuer!==c.iss)fail('account issuer collision');
-   s.runtimeAccounts.set(c.sub,{issuer:c.iss,game:this.gameId});return c.sub;
+   s.runtimeAccounts.set(c.sub,{issuer:c.iss,game:this.gameId,epoch:c.epoch});return c.sub;
   });
  }
  async requireRegisteredRecipient(principal){
   if(!id(principal))fail('invalid reward recipient');
   return this.store.transact(s=>{
    runtimeState(s);
-   if(!s.runtimeAccounts.has(principal))fail('unregistered reward recipient');
+   const a=s.runtimeAccounts.get(principal);
+   if(!a||(a.epoch??0)!==(s.runtimeEpochs.get(principal)||0))fail('unregistered reward recipient');
    return principal;
   });
  }

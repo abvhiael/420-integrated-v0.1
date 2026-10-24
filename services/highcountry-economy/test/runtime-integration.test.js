@@ -35,6 +35,8 @@ test('Ethereum hash/ABI vectors use Keccak rather than SHA3',()=>{
 test('signed session scope expiry forgery registration and revocation',async()=>{
  const f=fixture();await assert.rejects(f.authority.registeredPrincipal(f.token()),/unregistered/);
  await f.authority.register(f.token());assert.equal(await f.authority.registeredPrincipal(f.token()),'alice');
+ assert.equal(await f.authority.requireRegisteredRecipient('alice'),'alice');
+ await assert.rejects(f.authority.requireRegisteredRecipient('unregistered'),/unregistered/);
  await assert.rejects(f.authority.register(f.token({aud:'other'})),/denied/);
  await assert.rejects(f.authority.register(f.token({game:'other'})),/denied/);
  await assert.rejects(f.authority.register(f.token({exp:10000})),/denied/);

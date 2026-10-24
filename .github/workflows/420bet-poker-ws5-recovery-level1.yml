@@ -81,4 +81,3 @@ jobs:
           path: artifacts/420bet-ws5
           retention-days: 90
           if-no-files-found: error
- -vv

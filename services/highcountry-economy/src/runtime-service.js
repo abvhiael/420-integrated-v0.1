@@ -104,6 +104,9 @@ export function runtimeHttpServer(runtime,{origin}){
     case '/market/dispute':
      if(!marketView)throw new SettlementError('market dispute intake unavailable');
      result=await marketView.dispute(token,b.operation,b.listing,b.reason);break;
+    case '/operator/market-dispute':
+     if(!marketView)throw new SettlementError('market dispute resolution unavailable');
+     result=await marketView.review(token,b.operation,b.dispute,b.status,b.evidence);break;
     case '/market/buy':
      if(market?.authority?.canonicalSettlementRequired!==false)throw new SettlementError('ordinary market disabled');
      result=await market.buy(token,b.operation,b.listing);break;

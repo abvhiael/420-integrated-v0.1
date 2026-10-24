@@ -95,7 +95,9 @@ contract EquipmentLifecycleEngine is R04EmergencyConsumer {
                 || repairRestore == 0 || repairRestore > maximum || repairResource == bytes32(0) || repairCost == 0
                 || recycleResource == bytes32(0) || recycleOutput == 0
         ) revert HCInvalidState();
-        equipment.equipmentType(typeId);
+        // The lifecycle policy must belong to the same immutable catalogue version
+        // as the equipment effects and slot policy it governs.
+        if (equipment.equipmentType(typeId).catalogueVersion != version) revert HCInvalidState();
         _policies[typeId] = Policy(
             version,
             maximum,

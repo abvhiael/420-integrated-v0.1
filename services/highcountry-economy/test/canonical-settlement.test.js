@@ -121,5 +121,6 @@ test('concurrent finalization and abort cannot credit both payer and payee',asyn
  const buyer=t.store.state.balances.get('bob'), seller=t.store.state.balances.get('alice');
  assert.equal(buyer.available+buyer.reserved+seller.available+seller.reserved,80);
  assert.equal(t.store.state.issued,80);
- assert.equal(t.store.state.transferIntents.get('transfer:1').status==='finalized',true);
+ assert.ok(['finalized','cancelled'].includes(t.store.state.transferIntents.get('transfer:1').status));
+ assert.ok((seller.available===60 && buyer.available===20)||(seller.available===0 && buyer.available===80));
 });

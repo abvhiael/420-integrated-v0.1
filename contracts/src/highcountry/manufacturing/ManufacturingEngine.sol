@@ -44,6 +44,8 @@ contract ManufacturingEngine is R04EmergencyConsumer {
     mapping(bytes32 => Job) private _jobs;
     mapping(address => uint256) public nonceOf;
     mapping(address => uint256) public activeJobs;
+    mapping(address => mapping(bytes32 => bytes32)) public requestJob;
+    event ManufacturingRequestBound(address indexed owner, bytes32 indexed requestId, bytes32 indexed jobId);
     bool private entered;
 
     event RecipeRegistered(bytes32 indexed recipeId, bytes32 indexed version);
@@ -146,6 +148,29 @@ contract ManufacturingEngine is R04EmergencyConsumer {
     function start(
         bytes32 recipeId
     ) external guarded r04Unrestricted(EmergencyDomains.MANUFACTURING) returns (bytes32 jobId) {
+        return _start(recipeId);
+    }
+
+    /// @notice Safe at-least-once client start: a request cannot create more than one job.
+    /// @dev A retry must refer to the identical recipe, including after a terminal job state.
+    function startWithRequest(
+        bytes32 recipeId,
+        bytes32 requestId
+    ) external guarded r04Unrestricted(EmergencyDomains.MANUFACTURING) returns (bytes32 jobId) {
+        if (requestId == bytes32(0)) revert HCInvalidState();
+        jobId = requestJob[msg.sender][requestId];
+        if (jobId != bytes32(0)) {
+            if (_jobs[jobId].recipeId != recipeId) revert HCInvalidState();
+            return jobId;
+        }
+        jobId = _start(recipeId);
+        requestJob[msg.sender][requestId] = jobId;
+        emit ManufacturingRequestBound(msg.sender, requestId, jobId);
+    }
+
+    function _start(
+        bytes32 recipeId
+    ) private returns (bytes32 jobId) {
         Recipe storage r = _recipes[recipeId];
         if (!r.exists || !r.active || activeJobs[msg.sender] >= maxJobsPerOwner) revert HCInvalidState();
         uint256 nonce = ++nonceOf[msg.sender];
@@ -168,6 +193,13 @@ contract ManufacturingEngine is R04EmergencyConsumer {
     ) external guarded r04Unrestricted(EmergencyDomains.MANUFACTURING) {
         Job storage j = _jobs[jobId];
         if (j.status != Status.ACTIVE || j.owner != msg.sender) revert HCInvalidState();
+        _complete(jobId, j);
+    }
+
+    function _complete(
+        bytes32 jobId,
+        Job storage j
+    ) private {
         Recipe storage r = _recipes[j.recipeId];
         if (block.timestamp < uint256(j.startedAt) + r.duration) revert HCInvalidState();
         j.status = Status.COMPLETED;
@@ -183,6 +215,20 @@ contract ManufacturingEngine is R04EmergencyConsumer {
             }
         }
         emit ManufacturingCompleted(jobId, msg.sender);
+    }
+
+    /// @notice Idempotent settlement endpoint for crash/retry clients.
+    /// @dev The original complete() deliberately rejects terminal replays; this variant
+    ///      acknowledges an already completed owner's job without posting inventory again.
+    function completeIdempotent(
+        bytes32 jobId
+    ) external guarded r04Unrestricted(EmergencyDomains.MANUFACTURING) {
+        Job storage j = _jobs[jobId];
+        if (j.owner != msg.sender || j.status == Status.NONE || j.status == Status.CANCELLED) {
+            revert HCInvalidState();
+        }
+        if (j.status == Status.COMPLETED) return;
+        _complete(jobId, j);
     }
 
     /// @notice Cancelled input loss is floor(input * lossBps / 10000), remaining reserved input refunded.

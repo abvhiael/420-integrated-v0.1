@@ -49,7 +49,7 @@ export class SkillResearchService {
  // Evidence is checked independently by the configured verifier. The caller cannot attest its own points.
  async progress(session,operation,trackId,evidence,points){
   const principal=await this.identity.registeredPrincipal(session);
-  if(!id(principal)||!id(operation)||!id(trackId)||!id(evidence)||!integer(points,1000)||!points)
+  if(!id(principal)||!id(operation)||!id(trackId)||typeof evidence!=='string'||!evidence||evidence.length>8192||!integer(points,1000)||!points)
    throw new SettlementError('invalid progression request');
   const track=this.catalog.tracks.find(t=>t.id===trackId);
   if(!track||points>track.maxPointsPerProof)throw new SettlementError('track proof cap exceeded');

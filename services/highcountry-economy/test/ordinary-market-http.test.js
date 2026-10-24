@@ -32,6 +32,7 @@ test('ordinary HTTP trades require authenticated session, atomic BUDS, and expli
  assert.equal((await post('/market/list','intruder',{operation:'fraud',listing:'one',asset:'lot',quantity:2,price:30,expiresAt:200})).status,503);
  assert.equal((await post('/market/list','seller-token',{operation:'list',listing:'one',asset:'lot',quantity:2,price:30,expiresAt:200})).status,200);
  assert.equal((await post('/market/buy','intruder',{operation:'steal',listing:'one'})).status,503);
+ assert.equal((await post('/market/prepare','buyer-token',{operation:'wrong-mode',listing:'one',transferOperation:'unverified'})).status,403);
  assert.equal((await post('/market/buy','buyer-token',{operation:'buy',listing:'one'})).status,200);
  assert.equal((await post('/market/buy','buyer-token',{operation:'buy-replay',listing:'one'})).status,403);
  assert.equal(store.state.balances.get('buyer').available,50);

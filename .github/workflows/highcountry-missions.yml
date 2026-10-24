@@ -16,7 +16,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: npm ci
+      - run: npm install --no-package-lock --ignore-scripts --no-audit --no-fund
       - name: Mission Level 1 and signed evidence
         run: node --test test/missions.test.js
       - name: Existing economy regression Level 2

@@ -223,7 +223,7 @@ jobs:
           if-no-files-found: error
   security-evidence-certificate:
     needs: [inherited-proof-provenance,scoped-level1-cryptography,real-funded-hand-and-adversarial-integration,scoped-level1-betting-and-turns,scoped-level1-static-security]
-    if: always()
+    if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     steps:
       - name: Require every actual owner to pass
@@ -269,7 +269,7 @@ jobs:
           if-no-files-found: error
   milestone-gate:
     needs: [security-evidence-certificate]
-    if: always()
+    if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     steps:
       - name: Fail closed on incomplete exact-SHA security evidence

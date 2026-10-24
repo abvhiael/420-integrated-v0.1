@@ -1,4 +1,4 @@
-# 5A.5 â€” Blinds, betting rounds, turn authorization and timeouts
+# 5A.5 — Blinds, betting rounds, turn authorization and timeouts
 
 This work owns the cash NLHE turn state machine. Qualification requires executed
 tests and source-bound evidence; this document is not an acceptance certificate.
@@ -25,7 +25,7 @@ require actual proofs, even though no strategic betting turns remain. Terminal,
 refunded and settled hands cannot reopen betting or accept late public reveals.
 
 Before reservation, scoped governance binds the native resolver and one immutable
-30â€“3600 second turn duration. A starter must use that duration. The native engine
+30–3600 second turn duration. A starter must use that duration. The native engine
 alone commits the actor, next nonce, deadline and state root to the dispute clock.
 Controllers cannot replace or expire a native turn through legacy clock APIs.
 

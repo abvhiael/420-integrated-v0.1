@@ -58,6 +58,16 @@ export function runtimeHttpServer(runtime,{origin}){
     case '/rewards/claim':result=await rewards.claim(token,b.source,b.proof);break;
     case '/market/import':result=await market.importAsset(token,b.operation,b.receipt);break;
     case '/market/list':result=await market.list(token,b.operation,b.listing,b.asset,b.quantity,b.price,b.expiresAt);break;
+    case '/market/buy':
+     if(market?.authority?.canonicalSettlementRequired!==false)throw new SettlementError('ordinary market disabled');
+     result=await market.buy(token,b.operation,b.listing);break;
+    case '/market/cancel':
+     if(market?.authority?.canonicalSettlementRequired!==false)throw new SettlementError('ordinary market disabled');
+     result=await market.cancel(token,b.operation,b.listing);break;
+    case '/market/expire':
+     if(market?.authority?.canonicalSettlementRequired!==false)throw new SettlementError('ordinary market disabled');
+     await identity.registeredPrincipal(token);
+     result=await market.expire(b.operation,b.listing);break;
     case '/market/prepare':result=await settlement.prepare(token,b.operation,b.listing,b.transferOperation);break;
     case '/operator/revoke-account':result=await identity.revoke(token,b.principal);break;
     case '/operator/revoke-source':result=await identity.revokeSource(token,b.source);break;

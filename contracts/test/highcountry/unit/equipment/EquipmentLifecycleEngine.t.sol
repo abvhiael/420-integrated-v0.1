@@ -291,4 +291,34 @@ contract EquipmentLifecycleR044Test {
         require(ledger.balance(RECYCLE, address(buyer)).available == 3, "buyer did not receive salvage");
         require(ledger.balance(RECYCLE, address(player)).available == 0, "seller received salvage");
     }
+
+    function testDegradedEffectsAndRepairRestoreCanonicalParcelTotals() public {
+        bytes32 type3 = keccak256("EQUIPMENT-DEGRADE");
+        bytes32 item3 = keccak256("EQUIPMENT-DEGRADE-INSTANCE");
+        int16[6] memory effects;
+        effects[0] = 101;
+        equipment.registerType(type3, bytes32(uint256(4)), 1, effects);
+        equipment.issue(item3, type3, address(player), bytes32(uint256(4)));
+        lifecycle.registerPolicy(type3, bytes32(uint256(4)), 12, 8, 5, REPAIR, 2, 6, RECYCLE, 3);
+        player.place(equipment, item3);
+        require(equipment.effectiveEffects(1, address(player))[0] == 101, "full effect absent");
+        lifecycle.recordUse(item3);
+        require(lifecycle.condition(item3).state == EquipmentLifecycleEngine.State.DEGRADED, "degradation absent");
+        require(equipment.degraded(item3), "degradation flag absent");
+        require(equipment.effectiveEffects(1, address(player))[0] == 50, "degraded effect not halved");
+        require(equipment.activeItemEffects(item3)[0] == 50, "bridge item effect not halved");
+        lifecycle.recordUse(item3);
+        lifecycle.recordUse(item3);
+        require(equipment.disabled(item3), "broken equipment still active");
+        require(equipment.effectiveEffects(1, address(player))[0] == 0, "broken effect still in totals");
+        player.repair(lifecycle, item3);
+        require(!equipment.disabled(item3), "repair left equipment disabled");
+        require(equipment.effectiveEffects(1, address(player))[0] == 50, "degraded repair restored full effect");
+        player.repair(lifecycle, item3);
+        require(lifecycle.condition(item3).state == EquipmentLifecycleEngine.State.FUNCTIONAL, "full repair state");
+        require(equipment.effectiveEffects(1, address(player))[0] == 101, "full repair failed totals");
+        player.remove(equipment, item3);
+        require(equipment.occupiedSlots(1) == 0, "removal did not release capacity");
+        require(equipment.effectiveEffects(1, address(player))[0] == 0, "removal left phantom effects");
+    }
 }

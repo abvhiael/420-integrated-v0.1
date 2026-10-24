@@ -88,3 +88,39 @@ test('canonical custody delivery never mints a second off-chain spendable admiss
  assert.equal(t.store.state.transferIntents.get('transfer:1').status,'finalized');
  assert.equal(t.store.state.balances.get('alice').available,60);
 });
+
+test('pending canonical settlement locks BUDS against ordinary release and privileged direct settle',async()=>{
+ const t=setup();await listed(t);
+ await t.buds.reserve('independent-hold','bob',5);
+ await t.settle.prepare('buyer','prepare','listing','transfer:1');
+ assert.deepEqual(t.store.state.balances.get('bob'),{available:15,reserved:65});
+ await assert.rejects(t.buds.release('steal-hold','bob',6),/market reserve locked/);
+ await assert.rejects(t.buds.settle('steal-payment','bob','attacker',6),/market reserve locked/);
+ assert.equal(t.store.state.operations.has('steal-hold'),false);
+ assert.equal(t.store.state.balances.has('attacker'),false);
+ await t.buds.release('legitimate-release','bob',5);
+ assert.equal(t.store.state.balances.get('bob').reserved,60);
+ t.state.finalized=true;
+ await t.settle.finalize('finalize','transfer:1');
+ assert.deepEqual(t.store.state.balances.get('bob'),{available:20,reserved:0});
+ assert.equal(t.store.state.balances.get('alice').available,60);
+ assert.equal(t.store.state.issued,80);
+ assert.equal(t.store.state.burned,0);
+});
+
+test('concurrent finalization and abort cannot credit both payer and payee',async()=>{
+ const t=setup();await listed(t);
+ await t.settle.prepare('buyer','prepare','listing','transfer:1');
+ t.state.finalized=true;t.state.cancelled=true;
+ const attempts=await Promise.allSettled([
+  t.settle.finalize('finalize-one','transfer:1'),
+  t.settle.finalize('finalize-two','transfer:1'),
+  t.settle.abort('abort-race','transfer:1')
+ ]);
+ assert.equal(attempts.filter(r=>r.status==='fulfilled').length,1);
+ const buyer=t.store.state.balances.get('bob'), seller=t.store.state.balances.get('alice')||{available:0,reserved:0};
+ assert.equal(buyer.available+buyer.reserved+seller.available+seller.reserved,80);
+ assert.equal(t.store.state.issued,80);
+ assert.ok(['finalized','cancelled'].includes(t.store.state.transferIntents.get('transfer:1').status));
+ assert.ok((seller.available===60 && buyer.available===20)||(seller.available===0 && buyer.available===80));
+});

@@ -8,6 +8,7 @@ import {BudsLedger} from '../src/buds-ledger.js';
 import {generateKeyPairSync,sign} from 'node:crypto';
 import {RuntimeAuthority} from '../src/runtime-integration.js';
 import {HighCountryMarket} from '../src/market.js';
+import {CanonicalMarketSettlement} from '../src/canonical-settlement.js';
 const url=process.env.HC_TEST_POSTGRES_URL;
 if(!url)throw new Error('HC_TEST_POSTGRES_URL required (dedicated test database only)');
 const pool=new pg.Pool({connectionString:url,max:8,connectionTimeoutMillis:5000});
@@ -47,6 +48,40 @@ try {
  assert.equal(bob.reserved,70,'existing hold persists');
  assert.equal(row.issued,100);assert.equal(row.burned,0);
  assert.equal(row.listings.find(([id])=>id==='listing:1')?.[1].status,'sold');
+ // Two independent PostgreSQL-backed service instances must never release a prepared canonical buyer hold.
+ await market.list('alice','asset:list:canonical','listing:canonical','lot:1',1,5,1000);
+ const canonicalAuthority={
+  registeredPrincipal:async token=>token==='bob'?'bob':Promise.reject(Error('unregistered')),
+  expectedTransferOperation:async()=> 'transfer:canonical',
+  confirmedReservedTransfer:async op=>({
+   finalized:true,operationId:op,asset:'lot:1',from:'alice',to:'bob',
+   quantity:1,sourceReceiptId:'verified:1'
+  }),
+  proveUnexecutedAndCancelled:async()=>false,
+  confirmedListingClosure:async()=>false
+ };
+ const firstSettlement=new CanonicalMarketSettlement(store,canonicalAuthority,()=>100);
+ await firstSettlement.prepare('bob','canonical:prepare','listing:canonical','transfer:canonical');
+ await assert.rejects(other.release('canonical:drain','bob',71),/market reserve locked/);
+ await assert.rejects(other.settle('canonical:steal','bob','attacker',71),/market reserve locked/);
+ await other.release('canonical:release-unlocked','bob',70);
+ const secondSettlement=new CanonicalMarketSettlement(restarted,canonicalAuthority,()=>100);
+ const races=await Promise.allSettled([
+  firstSettlement.finalize('canonical:finalize:A','transfer:canonical'),
+  secondSettlement.finalize('canonical:finalize:B','transfer:canonical')
+ ]);
+ assert.equal(races.filter(x=>x.status==='fulfilled').length,1,'canonical paid exactly once');
+ const confirmed=(await pool.query('SELECT state FROM highcountry_buds_state WHERE namespace=$1',[ns])).rows[0].state;
+ const canonicalBob=confirmed.balances.find(([id])=>id==='bob')?.[1];
+ const canonicalAlice=confirmed.balances.find(([id])=>id==='alice')?.[1];
+ assert.equal(canonicalBob.available,75,'buyer post-finality funds');
+ assert.equal(canonicalBob.reserved,0,'escrow lock released');
+ assert.equal(canonicalAlice.available,25,'seller paid once');
+ assert.equal(confirmed.issued,100,'exact issuance');
+ assert.equal(confirmed.burned,0,'no fabricated BUDS burning');
+ assert.equal(confirmed.transferIntents.find(([id])=>id==='transfer:canonical')?.[1].status,'finalized');
+ assert.ok(!confirmed.balances.some(([id])=>id==='attacker'),'rejected payout not persisted');
+ console.log('Live PostgreSQL cross-instance canonical reserve isolation, finality payout, replay and conservation: PASS');
  const role='hc_runtime_'+process.pid;
  await pool.query(await readFile(new URL('../migrations/002_runtime_namespace_rls.sql',import.meta.url),'utf8'));
  await pool.query('CREATE ROLE '+role+" LOGIN PASSWORD 'hc_ci_runtime_only'");

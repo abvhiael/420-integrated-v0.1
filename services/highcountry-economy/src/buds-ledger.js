@@ -6,6 +6,13 @@ const requireId = x => { if (typeof x !== 'string' || !/^[a-zA-Z0-9:_-]{1,128}$/
 const units = x => { if (!Number.isSafeInteger(x) || x < 0) throw new SettlementError('unsafe integer units'); return x; };
 const add = (a,b) => { const n=a+b; return units(n); };
 const balance = () => ({ available: 0, reserved: 0 });
+export const marketLocked = (s,owner) => {
+  let held=0;
+  for (const intent of s.transferIntents.values()) {
+    if (intent.status==='prepared' && intent.buyer===owner) held=add(held,units(intent.price));
+  }
+  return held;
+};
 const total = s => [...s.balances.values()].reduce((n,b)=>add(add(n,b.available),b.reserved),0);
 export class BudsLedger {
   constructor(store, catalog) {
@@ -49,14 +56,14 @@ export class BudsLedger {
   });}
   async release(op,owner,amount) {return this.operate(op,s=>{
     units(amount);if(!amount)throw new SettlementError('zero release');
-    const b=this.get(s,owner);if(b.reserved<amount)throw new SettlementError('insufficient reserve');
+    const b=this.get(s,owner);if(b.reserved<amount || b.reserved-amount<marketLocked(s,owner))throw new SettlementError('market reserve locked');
     b.reserved-=amount;b.available=add(b.available,amount);
   });}
   async settle(op,buyer,seller,amount,feeBps=0) {return this.operate(op,s=>{
     requireId(buyer);requireId(seller);if(buyer===seller)throw new SettlementError('self trade');
     units(amount);if(!amount||feeBps!==0)throw new SettlementError('zero fee full-fill only');
     const a=this.get(s,buyer),b=this.get(s,seller);
-    if(a.reserved<amount)throw new SettlementError('unfunded settlement');
+    if(a.reserved<amount || a.reserved-amount<marketLocked(s,buyer))throw new SettlementError('market reserve locked');
     a.reserved-=amount;b.available=add(b.available,amount);
   });}
   async spend(op,owner,amount,sink) {return this.operate(op,s=>{

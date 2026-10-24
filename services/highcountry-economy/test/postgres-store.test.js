@@ -37,3 +37,11 @@ test('durable transaction rollback on malformed state',async()=>{
  await assert.rejects(ledger.earn('one','alice','bad','bad',1));
  assert.equal(fake.commits(),0);assert.equal(fake.rollbacks(),1);
 });
+
+test('durable state refuses corrupt supply balances and rolls back without committing',async()=>{
+ const corrupt=db();
+ const store=new PostgresBudsStore(corrupt.pool,'hc:registered');
+ await assert.rejects(store.transact(s=>{s.balances.set('alice',{available:10,reserved:0});}),/conservation mismatch/);
+ assert.equal(corrupt.commits(),0);
+ assert.equal(corrupt.rollbacks(),1);
+});

@@ -22,13 +22,31 @@ function decode(raw) {
   const importedAssets=new Set(raw.importedAssets ?? []);
   const safe=x=>Number.isSafeInteger(x)&&x>=0;
   if(!safe(raw.issued)||!safe(raw.burned)||raw.burned>raw.issued)throw new SettlementError('corrupt totals');
-  for(const b of balances.values())if(!safe(b.available)||!safe(b.reserved))throw new SettlementError('corrupt balance');
+  let total=0;
+  for(const b of balances.values()){
+   if(!b||!safe(b.available)||!safe(b.reserved))throw new SettlementError('corrupt balance');
+   total+=b.available+b.reserved;
+   if(!safe(total))throw new SettlementError('corrupt total balance');
+  }
+  if(total!==raw.issued-raw.burned)throw new SettlementError('durable BUDS conservation mismatch');
   for(const v of sourceIssued.values())if(!safe(v))throw new SettlementError('corrupt issuance');
   for(const b of assets.values())if(!safe(b.available)||!safe(b.reserved))throw new SettlementError('corrupt asset');
   return {...runtime,balances,operations,claims,sourceIssued,assets,assetSources,listings,transferIntents,settlementJobs,importedAssets,issued:raw.issued,burned:raw.burned};
 }
-const encode = s => JSON.stringify({schema:1,...Object.fromEntries(['runtimeAccounts','runtimeWallets','runtimeWalletOwners','runtimeNonces','runtimeEpochs','runtimeSourceEpochs'].map(k=>[k,[...(s[k]??new Map())]])),balances:[...s.balances],operations:[...s.operations],
+const encode = s => {
+  let total=0;
+  for(const b of s.balances.values()){
+    if(!Number.isSafeInteger(b.available)||b.available<0||!Number.isSafeInteger(b.reserved)||b.reserved<0)
+      throw new SettlementError('invalid durable BUDS balance');
+    total+=b.available+b.reserved;
+    if(!Number.isSafeInteger(total))throw new SettlementError('unsafe durable BUDS total');
+  }
+  if(!Number.isSafeInteger(s.issued)||!Number.isSafeInteger(s.burned)||s.burned<0
+    ||s.issued<s.burned||total!==s.issued-s.burned)
+    throw new SettlementError('durable BUDS conservation mismatch');
+  return JSON.stringify({schema:1,...Object.fromEntries(['runtimeAccounts','runtimeWallets','runtimeWalletOwners','runtimeNonces','runtimeEpochs','runtimeSourceEpochs'].map(k=>[k,[...(s[k]??new Map())]])),balances:[...s.balances],operations:[...s.operations],
   claims:[...s.claims],sourceIssued:[...s.sourceIssued],assets:[...s.assets],assetSources:[...s.assetSources],listings:[...s.listings],transferIntents:[...s.transferIntents],settlementJobs:[...s.settlementJobs],importedAssets:[...s.importedAssets],issued:s.issued,burned:s.burned});
+};
 export class PostgresBudsStore {
   constructor(pool, namespace) {
     if(typeof pool?.connect!=='function'||typeof namespace!=='string'

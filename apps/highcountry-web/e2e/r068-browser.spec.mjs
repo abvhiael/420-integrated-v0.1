@@ -64,3 +64,12 @@ test('real Chromium: unavailable artwork degrades to local fallback without game
  await expect(page.locator('.game-panel img')).toHaveAttribute('src',/highcountry-growing\.svg/);
  await expect(page.getByRole('button',{name:'Recheck elapsed time'})).toBeEnabled();
 });
+
+test('real Chromium: marketplace route is bundled and wallet-free offline disclosure is visible',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto(origin+'/marketplace');
+ await expect(page.getByRole('heading',{name:'Marketplace'})).toBeVisible();
+ await expect(page.getByText(/Marketplace unavailable offline/)).toBeVisible();
+ await expect(page.getByRole('navigation',{name:'Main navigation'}).getByRole('link',{name:'Marketplace'})).toHaveAttribute('aria-current','page');
+ expect(errors).toEqual([]);
+});

@@ -20,15 +20,16 @@ function decode(raw) {
   const transferIntents=mapEntries(raw.transferIntents ?? []);
   const settlementJobs=mapEntries(raw.settlementJobs ?? []);
   const importedAssets=new Set(raw.importedAssets ?? []);
+  const marketDisputes=mapEntries(raw.marketDisputes ?? []);
   const safe=x=>Number.isSafeInteger(x)&&x>=0;
   if(!safe(raw.issued)||!safe(raw.burned)||raw.burned>raw.issued)throw new SettlementError('corrupt totals');
   for(const b of balances.values())if(!safe(b.available)||!safe(b.reserved))throw new SettlementError('corrupt balance');
   for(const v of sourceIssued.values())if(!safe(v))throw new SettlementError('corrupt issuance');
   for(const b of assets.values())if(!safe(b.available)||!safe(b.reserved))throw new SettlementError('corrupt asset');
-  return {...runtime,balances,operations,claims,sourceIssued,assets,assetSources,listings,transferIntents,settlementJobs,importedAssets,issued:raw.issued,burned:raw.burned};
+  return {...runtime,balances,operations,claims,sourceIssued,assets,assetSources,listings,transferIntents,settlementJobs,marketDisputes,importedAssets,issued:raw.issued,burned:raw.burned};
 }
 const encode = s => JSON.stringify({schema:1,...Object.fromEntries(['runtimeAccounts','runtimeWallets','runtimeWalletOwners','runtimeNonces','runtimeEpochs','runtimeSourceEpochs'].map(k=>[k,[...(s[k]??new Map())]])),balances:[...s.balances],operations:[...s.operations],
-  claims:[...s.claims],sourceIssued:[...s.sourceIssued],assets:[...s.assets],assetSources:[...s.assetSources],listings:[...s.listings],transferIntents:[...s.transferIntents],settlementJobs:[...s.settlementJobs],importedAssets:[...s.importedAssets],issued:s.issued,burned:s.burned});
+  claims:[...s.claims],sourceIssued:[...s.sourceIssued],assets:[...s.assets],assetSources:[...s.assetSources],listings:[...s.listings],transferIntents:[...s.transferIntents],settlementJobs:[...s.settlementJobs],marketDisputes:[...(s.marketDisputes??new Map())],importedAssets:[...s.importedAssets],issued:s.issued,burned:s.burned});
 export class PostgresBudsStore {
   constructor(pool, namespace) {
     if(typeof pool?.connect!=='function'||typeof namespace!=='string'

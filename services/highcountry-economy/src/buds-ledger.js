@@ -67,7 +67,7 @@ export class BudsLedger {
 }
 // Test-only copy-on-write serial transaction fixture. Never wire it to production accounts.
 export class MemoryTransactionFixture {
-  constructor(){this.state={balances:new Map(),operations:new Set(),claims:new Set(),sourceIssued:new Map(),assets:new Map(),assetSources:new Map(),listings:new Map(),transferIntents:new Map(),settlementJobs:new Map(),importedAssets:new Set(),issued:0,burned:0};}
+  constructor(){this.state={balances:new Map(),operations:new Set(),claims:new Set(),sourceIssued:new Map(),assets:new Map(),assetSources:new Map(),listings:new Map(),transferIntents:new Map(),settlementJobs:new Map(),marketDisputes:new Map(),importedAssets:new Set(),issued:0,burned:0};}
   async transact(fn){
     const s=structuredClone(this.state);
     const r=fn(s);this.state=s;return r;

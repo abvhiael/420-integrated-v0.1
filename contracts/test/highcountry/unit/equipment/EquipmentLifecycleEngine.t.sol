@@ -273,6 +273,13 @@ contract EquipmentLifecycleR044Test {
             .call(abi.encodeCall(player.offer, (equipment, ID, address(buyer), uint64(block.timestamp + 2 days))));
         require(!placed, "placed item transfer offered");
         player.remove(equipment, ID);
+        (bool expiredOffer,) =
+            address(player).call(abi.encodeCall(player.offer, (equipment, ID, address(buyer), uint64(block.timestamp))));
+        require(!expiredOffer, "expired transfer offered");
+        player.offer(equipment, ID, address(buyer), uint64(block.timestamp + 2 days));
+        player.cancel(equipment, ID);
+        (bool cancelled,) = address(buyer).call(abi.encodeCall(buyer.accept, (equipment, ID)));
+        require(!cancelled, "cancelled offer accepted");
         player.offer(equipment, ID, address(buyer), uint64(block.timestamp + 2 days));
         (bool unauthorized,) = address(equipment).call(abi.encodeCall(equipment.acceptTransfer, (ID)));
         require(!unauthorized, "uninvited transferee accepted");

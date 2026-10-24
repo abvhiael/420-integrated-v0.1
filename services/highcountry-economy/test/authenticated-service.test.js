@@ -17,8 +17,13 @@ test('derive owner from authenticated session, reject guest and unauthorized iss
  await assert.rejects(api.reserve('guest','guest-op',10));
  await api.reserve('alice-session','reserved',20);
  await assert.rejects(api.settleMarket('alice-session','fraud','alice','bob',20));
- await api.settleMarket('market-service','settled','alice','bob',20);
+ await assert.rejects(
+  api.settleMarket('market-service','settled','alice','bob',20),
+  /canonical asset settlement required/
+ );
  assert.equal(store.state.balances.get('alice').available,30);
- assert.equal(store.state.balances.get('bob').available,20);
+ assert.equal(store.state.balances.get('alice').reserved,20);
+ assert.equal(store.state.balances.has('bob'),false);
  assert.equal(store.state.operations.has('fraud'),false);
+ assert.equal(store.state.operations.has('settled'),false);
 });

@@ -16,8 +16,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: npm
-          cache-dependency-path: services/highcountry-economy/package-lock.json
       - run: npm ci
       - name: Mission Level 1 and signed evidence
         run: node --test test/missions.test.js

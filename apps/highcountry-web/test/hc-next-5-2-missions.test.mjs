@@ -31,8 +31,8 @@ test('registered mission page renders server-supplied objective progress and cla
  await new Promise(ok=>setImmediate(ok));
  assert.equal(new URL(calls[0].url).pathname,'/missions/snapshot');
  assert.equal(calls[0].opts.headers.authorization,'Bearer valid-token');
- assert.match(root.children[1].children[1].children[1].textContent,/2\/2/);
- assert.equal(root.children[1].children[1].children[3].textContent,'Claim completed mission');
+ assert.match(root.children[1].children[2].children[1].textContent,/2\/2/);
+ assert.equal(root.children[1].children[2].children[3].textContent,'Claim completed mission');
 });
 test('anonymous mission page fails closed',async()=>{
  const root=new Node('main');let calls=0;

@@ -59,14 +59,14 @@
     ],
     "assetManifests": 15,
     "trackedPngs": 150,
-    "conclusion": "SOURCE_PROJECT_AND_COMPLETE_GIT_TREE_VERIFIED; GODOT_IMPORT_AND_RUNTIME_NOT_EXECUTED"
+    "conclusion": "SOURCE_AND_HEADLESS_RUNTIME_QUALIFIED_AT_GODOT_PR4_SHA"
   },
   "binaryAssets": {
     "trackedPngsInGodot": 150,
     "manifestFilesInGodot": 15,
-    "sha256VerifiedAgainstBytes": 0,
-    "conclusion": "TREE_PATHS_VERIFIED; BINARY_SHA256_UNVERIFIED",
-    "note": "All 150 PNG paths are present in a non-truncated Git tree; 150 hash comparisons require actual bytes and are not inferred from Git blob SHA-1."
+    "sha256VerifiedAgainstBytes": 150,
+    "conclusion": "PASS_AT_GODOT_PR4_SHA",
+    "note": "GitHub Actions run 40108948204 verified the actual 150 PNG bytes against all 15 manifests at 0562825a51b6193d0936e18f3bd8e9937220ee16."
   },
   "legacyUnity": {
     "sourceRepo": "abvhiael/420-integrated",
@@ -77,7 +77,7 @@
     "unityReadmeBlob": "7a5937f3f38771a937719fc90db1b322ac791453",
     "conclusion": "KNOWN_PATHS_VERIFIED; EXHAUSTIVE_RECURSIVE_TREE_UNVERIFIED"
   },
-  "finalStatus": "PARTIAL_PENDING_BINARY_SHA256_AND_RUNTIME_QUALIFICATION",
+  "finalStatus": "GODOT_BINARY_AND_RUNTIME_QUALIFIED_UNITY_RECURSIVE_INVENTORY_STILL_OPEN",
   "releasePolicy": "No source deletions or migration cutover permitted until Godot, binary and full Unity provenance gates are satisfied",
   "godotQualification": {
     "sourceRepository": "abvhiael/MadBuds-Godot",
@@ -93,6 +93,7 @@
       "gameplay contract",
       "real scene integration"
     ],
-    "result": "QUEUED_AT_LAST_CHECK"
+    "result": "SUCCESS",
+    "secondaryLevel1Run": 40108948149
   }
 }

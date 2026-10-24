@@ -200,8 +200,9 @@ contract EquipmentLifecycleEngine is R04EmergencyConsumer {
         ++c.usages;
         State next =
             c.durability == 0 ? State.BROKEN : c.durability < p.degradeBelow ? State.DEGRADED : State.FUNCTIONAL;
-        if (next == State.BROKEN) equipment.setLifecycleDisabled(id, true);
-        else if (next == State.DEGRADED && c.state != State.DEGRADED) {
+        if (next == State.BROKEN) {
+            equipment.setLifecycleDisabled(id, true);
+        } else if (next == State.DEGRADED && c.state != State.DEGRADED) {
             equipment.setLifecycleDegraded(id, true);
         }
         c.state = next;

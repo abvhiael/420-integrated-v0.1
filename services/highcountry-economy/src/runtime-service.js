@@ -7,6 +7,7 @@ import {FinalizedRpc,address} from './finalized-rpc.js';
 import {PostgresBudsStore} from './postgres-store.js';
 import {SettlementError} from './buds-ledger.js';
 import {SkillResearchService} from './skill-research.js';
+import {MissionService} from './missions.js';
 
 async function requireLeastPrivilegeRuntimeRole(pool,namespace) {
  const check=await pool.query("SELECT current_user AS role, r.rolsuper, r.rolbypassrls, c.relrowsecurity, pg_get_userbyid(c.relowner) AS owner, has_table_privilege(current_user,'highcountry_buds_state','SELECT') AS can_select, has_table_privilege(current_user,'highcountry_buds_state','UPDATE') AS can_update, has_table_privilege(current_user,'highcountry_buds_state','INSERT,DELETE,TRUNCATE,REFERENCES,TRIGGER') AS elevated FROM pg_roles r JOIN pg_class c ON c.oid='highcountry_buds_state'::regclass WHERE r.rolname=current_user");
@@ -15,7 +16,7 @@ async function requireLeastPrivilegeRuntimeRole(pool,namespace) {
 }
 
 /// Composition uses one provisioned durable namespace and independently configured canonical RPC/signer/issuer policy.
-export async function createRuntime({pool,namespace,authority:authConfig,rpc:rpcConfig,sources,marketDomain,operator,issuer,signerRpc,clock,progression}){
+export async function createRuntime({pool,namespace,authority:authConfig,rpc:rpcConfig,sources,marketDomain,operator,issuer,signerRpc,clock,progression,missions}){
  await requireLeastPrivilegeRuntimeRole(pool,namespace);
  const store=new PostgresBudsStore(pool,namespace),rpc=new FinalizedRpc(rpcConfig);
  for(const [name,policy] of Object.entries(sources))if(address(rpc.contracts[name]?.address)!==address(policy.contract))throw new SettlementError('source contract mismatch');
@@ -37,7 +38,8 @@ export async function createRuntime({pool,namespace,authority:authConfig,rpc:rpc
  };
  const market=new HighCountryMarket(store,marketAuthority,clock);
  const skillResearch=progression?new SkillResearchService({store,identity,...progression,clock}):null;
- return {store,identity,rewards,market,marketView:new HighCountryMarketplaceView({store,identity,market,clock}),skillResearch,...chain};
+ const missionService=missions?new MissionService({store,identity,...missions,clock}):null;
+ return {store,identity,rewards,market,marketView:new HighCountryMarketplaceView({store,identity,market,clock}),skillResearch,missionService,...chain};
 }
 // Production entrypoint for a wallet-optional, registered-player ordinary economy.
 // Never silently repurpose the canonical on-chain escrow settlement runtime.
@@ -53,7 +55,7 @@ export async function createOrdinaryRuntime({pool,namespace,authority:authConfig
    throw new SettlementError('source contract mismatch');
  const identity=new RuntimeAuthority({...authConfig,store,rpc,sourcePolicies:sources,clock});
  const rewards=new GameplayRewardRuntime({store,authority:identity,rpc,sources,clock});
- return composeOrdinaryMarketRuntime({store,identity,rewards,inventoryAuthority,clock,progression});
+ return composeOrdinaryMarketRuntime({store,identity,rewards,inventoryAuthority,clock,progression,missions});
 }
 // Separate ordinary market composition. The canonical runtime above remains chain-settlement-only.
 export function composeOrdinaryMarketRuntime({store,identity,rewards,inventoryAuthority,clock,progression}) {
@@ -72,10 +74,10 @@ export function composeOrdinaryMarketRuntime({store,identity,rewards,inventoryAu
  };
  const market=new HighCountryMarket(store,authority,clock);
  const skillResearch=progression?new SkillResearchService({store,identity,...progression,clock}):null;
- return {store,identity,rewards,market,marketView:new HighCountryMarketplaceView({store,identity,market,clock}),skillResearch};
+ return {store,identity,rewards,market,marketView:new HighCountryMarketplaceView({store,identity,market,clock}),skillResearch,missionService};
 }
 export function runtimeHttpServer(runtime,{origin}){
- const {identity,rewards,market,marketView,skillResearch,settlement,worker}=runtime;
+ const {identity,rewards,market,marketView,skillResearch,missionService,settlement,worker}=runtime;
  return createServer(async(req,res)=>{
   res.setHeader('content-type','application/json');res.setHeader('cache-control','no-store');
   res.setHeader('x-content-type-options','nosniff');
@@ -110,6 +112,18 @@ export function runtimeHttpServer(runtime,{origin}){
      if(!skillResearch||Object.keys(b).sort().join(',')!=='operation,trackId')
       throw new SettlementError('progression unlock request denied');
      result=await skillResearch.unlock(token,b.operation,b.trackId);break;
+    case '/missions/snapshot':
+     if(!missionService||Object.keys(b).length)throw new SettlementError('mission snapshot denied');
+     result=await missionService.snapshot(token);break;
+    case '/missions/activate':
+    case '/missions/claim':
+    case '/missions/cancel':
+    case '/missions/expire':
+     if(!missionService||Object.keys(b).sort().join(',')!=='id,operation')throw new SettlementError('mission request denied');
+     result=await missionService[req.url.split('/')[2]](token,b.operation,b.id);break;
+    case '/missions/progress':
+     if(!missionService||Object.keys(b).sort().join(',')!=='amount,evidence,id,operation')throw new SettlementError('mission evidence request denied');
+     result=await missionService.progress(token,b.operation,b.id,b.evidence,b.amount);break;
     case '/market/import':result=await market.importAsset(token,b.operation,b.receipt);break;
     case '/market/list':result=await market.list(token,b.operation,b.listing,b.asset,b.quantity,b.price,b.expiresAt);break;
     case '/market/snapshot':

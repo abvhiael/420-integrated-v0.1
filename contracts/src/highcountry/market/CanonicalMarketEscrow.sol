@@ -87,7 +87,7 @@ contract CanonicalMarketEscrow is R04EmergencyConsumer {
                 || _listings[id].status != Status.None
         ) revert HCInvalidState();
         _listings[id] = Listing(msg.sender, asset, quantity, expiresAt, Status.Active);
-        inventory.reserveFor(reserveOperation(id), asset, msg.sender, quantity);
+        inventory.reserveTaggedFor(reserveOperation(id), asset, msg.sender, quantity);
         emit EscrowListed(id, msg.sender, asset, quantity, expiresAt);
     }
 
@@ -104,7 +104,7 @@ contract CanonicalMarketEscrow is R04EmergencyConsumer {
         ) revert HCInvalidState();
         l.status = Status.Sold;
         op = transferOperation(id, buyer);
-        inventory.transferReservedFor(op, l.asset, l.owner, buyer, l.quantity);
+        inventory.transferTaggedFor(op, reserveOperation(id), l.asset, l.owner, buyer, l.quantity);
         emit EscrowSettled(id, op, buyer);
     }
 
@@ -135,7 +135,7 @@ contract CanonicalMarketEscrow is R04EmergencyConsumer {
         bytes32 id,
         Listing storage l
     ) private {
-        try inventory.releaseFor(releaseOperation(id), l.asset, l.owner, l.quantity) { }
+        try inventory.releaseTaggedFor(releaseOperation(id), reserveOperation(id), l.asset, l.owner, l.quantity) { }
         catch {
             emit ManualRecoveryRequired(id, l.owner, l.asset, l.quantity);
         }

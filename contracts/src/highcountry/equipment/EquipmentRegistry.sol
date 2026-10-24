@@ -51,9 +51,13 @@ contract EquipmentRegistry is R04EmergencyConsumer {
     }
     mapping(bytes32 => TransferOffer) public pendingTransfers;
     uint64 public constant MAX_TRANSFER_OFFER_DURATION = 30 days;
-    event EquipmentTransferOffered(bytes32 indexed equipmentId, address indexed owner, address indexed recipient, uint64 expiresAt);
+    event EquipmentTransferOffered(
+        bytes32 indexed equipmentId, address indexed owner, address indexed recipient, uint64 expiresAt
+    );
     event EquipmentTransferCancelled(bytes32 indexed equipmentId, address indexed owner);
-    event EquipmentOwnershipTransferred(bytes32 indexed equipmentId, address indexed previousOwner, address indexed newOwner);
+    event EquipmentOwnershipTransferred(
+        bytes32 indexed equipmentId, address indexed previousOwner, address indexed newOwner
+    );
 
     address public lifecycleController;
     mapping(bytes32 => bool) public disabled;

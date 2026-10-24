@@ -1,0 +1,88 @@
+name: 420Bet Poker WS8 Security Milestone Level 2
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/420bet-poker-ws7-consolidated-adversarial.yml'
+      - '.github/workflows/420bet-poker-ws8-security-level2.yml'
+      - 'docs/bet/BET-AUDIT-5A.4-WORKSTREAM-8-EXACT-SHA-RECONCILIATION.md'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  inherited-proof-provenance-and-full-scope:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - name: Require exact tested candidate
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"
+      - name: Cryptographic source and native economic code unchanged since recorded WS7 success
+        run: |
+          set -eu
+          git fetch --no-tags origin 0bf8aede5ed1675493017d5e054f972abcede24c
+          test -z "$(git diff --name-only 0bf8aede5ed1675493017d5e054f972abcede24c HEAD -- contracts/src/bet clients/420bet-poker/zkshuffle clients/420bet-poker/crypto contracts/test/BetPoker\*.t.sol)"
+      - name: Verify inherited, genuinely successful WS7 jobs and artifact hashes
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -eu
+          python3 - <<'PY'
+          import json,os,urllib.request
+          repo=os.environ['GITHUB_REPOSITORY']
+          token=os.environ['GH_TOKEN']
+          run=40054572031
+          def get(path):
+              req=urllib.request.Request(f'https://api.github.com/repos/{repo}/{path}',
+                  headers={'Authorization':'Bearer '+token,'Accept':'application/vnd.github+json'})
+              with urllib.request.urlopen(req, timeout=30) as response:return json.load(response)
+          jobs=get(f'actions/runs/{run}/jobs?per_page=100')['jobs']
+          required={'cryptographic-attacks','replay-and-economics','consolidated-gate'}
+          passed={j['name']:j['id'] for j in jobs if j['conclusion']=='success'}
+          assert required <= passed.keys(), 'missing successful inherited WS7 jobs'
+          artifacts=get(f'actions/runs/{run}/artifacts?per_page=100')['artifacts']
+          accepted={a['name']:a['id'] for a in artifacts if not a['expired']}
+          assert {'ws7-crypto-exact-sha','ws7-native-exact-sha'} <= accepted.keys(), 'missing immutable WS7 artifacts'
+          with open('ws8-inherited-evidence.json','w') as out:
+              json.dump({'source_sha':'0bf8aede5ed1675493017d5e054f972abcede24c','run':run,'jobs':passed,
+                         'artifacts':accepted,'qualified_candidate':os.environ['GITHUB_SHA']},out,indent=2)
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ws8-inherited-source-provenance
+          path: ws8-inherited-evidence.json
+          if-no-files-found: error
+  scope-coverage-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Mandatory scenario evidence must be explicitly accounted for
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          evidence=Path('docs/bet/BET-AUDIT-5A.4-WORKSTREAM-8-EXACT-SHA-RECONCILIATION.md').read_text()
+          # Do not upgrade historical success to full acceptance while the document
+          # itself records outstanding combined-protocol adversarial scenarios.
+          for word in ('colluding dealer','forged recipient','ciphertext substitution','key revocation'):
+              if word not in evidence:
+                  raise SystemExit('missing disclosure of unqualified scope '+word)
+          if 'FULL SECURITY ACCEPTANCE: PASS' not in evidence:
+              raise SystemExit('WS8 milestone remains unqualified: cross-component attack evidence not yet accepted')
+          PY
+  milestone-gate:
+    needs: [inherited-proof-provenance-and-full-scope,scope-coverage-gate]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fail closed unless both milestone owners qualify
+        env:
+          A: ${{ needs.inherited-proof-provenance-and-full-scope.result }}
+          B: ${{ needs.scope-coverage-gate.result }}
+        run: |
+          test "$A" = success
+          test "$B" = success

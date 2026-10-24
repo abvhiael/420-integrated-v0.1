@@ -1,0 +1,133 @@
+{
+  "schema": "420-migration-pr-disposition-v1",
+  "step": "MIG-0.3",
+  "sourceRepository": "abvhiael/420-integrated-v0.1",
+  "status": "RECORDED_PENDING_HEAD_SHA_AND_FILE_DIFF_RECONCILIATION",
+  "discoveredAt": "2026-10-24",
+  "policy": {
+    "noMergeOrCloseDuringDiscovery": true,
+    "requireHeadShaBeforeTransfer": true,
+    "requireAssetAndQualificationProvenance": true,
+    "doNotReinstateArcadeGenesis": true,
+    "retainGameProtocol": true
+  },
+  "pullRequests": [
+    {
+      "number": 780,
+      "url": "https://github.com/abvhiael/420-integrated-v0.1/pull/780",
+      "destination": "420-arcade",
+      "disposition": "preserve-transfer",
+      "rationale": "MadBuds portable character contract; draft, Unity runtime acceptance unresolved",
+      "headSha": null,
+      "mergeAuthorized": false
+    },
+    {
+      "number": 771,
+      "url": "https://github.com/abvhiael/420-integrated-v0.1/pull/771",
+      "destination": "420-arcade",
+      "disposition": "preserve-transfer",
+      "rationale": "Sativa Steve Phase E animation preparation",
+      "headSha": null,
+      "mergeAuthorized": false
+    },
+    {
+      "number": 715,
+      "url": "https://github.com/abvhiael/420-integrated-v0.1/pull/715",
+      "destination": "420-budtender",
+      "disposition": "preserve-transfer",
+      "rationale": "Budtender character roadmap and art direction",
+      "headSha": null,
+      "mergeAuthorized": false
+    },
+    {
+      "number": 621,
+      "url": "https://github.com/abvhiael/420-integrated-v0.1/pull/621",
+      "destination": "420-budtender",
+      "disposition": "preserve-transfer",
+      "rationale": "Budtender 3.15 expansion seams",
+      "headSha": null,
+      "mergeAuthorized": false
+    },
+    {
+      "number": 561,
+      "url": "https://github.com/abvhiael/420-integrated-v0.1/pull/561",
+      "destination": "420-budtender",
+      "disposition": "review-and-transfer",
+      "rationale": "Budtender audit remediation and qualification evidence",
+      "headSha": null,
+      "mergeAuthorized": false
+    },
+    {
+      "number": 151,
+      "url": "https://github.com/abvhiael/420-integrated-v0.1/pull/151",
+      "destination": "420-green-road",
+      "disposition": "preserve-transfer",
+      "rationale": "Green Road reusable scene engine",
+      "headSha": null,
+      "mergeAuthorized": false
+    },
+    {
+      "number": 788,
+      "url": "https://github.com/abvhiael/420-integrated-v0.1/pull/788",
+      "destination": "genesis",
+      "disposition": "reconcile-conflict",
+      "rationale": "Arcade Genesis inventory-owner proposal conflicts with deferral",
+      "headSha": null,
+      "mergeAuthorized": false
+    },
+    {
+      "number": 734,
+      "url": "https://github.com/abvhiael/420-integrated-v0.1/pull/734",
+      "destination": "genesis",
+      "disposition": "reconcile-conflict",
+      "rationale": "Genesis Application Decision #2 must not silently reinstate deferred games",
+      "headSha": null,
+      "mergeAuthorized": false
+    },
+    {
+      "number": 791,
+      "url": "https://github.com/abvhiael/420-integrated-v0.1/pull/791",
+      "destination": "genesis",
+      "disposition": "preserve-audit",
+      "rationale": "MIG-0.1 inventory PR pending reconciliation",
+      "headSha": null,
+      "mergeAuthorized": false
+    },
+    {
+      "number": 792,
+      "url": "https://github.com/abvhiael/420-integrated-v0.1/pull/792",
+      "destination": "genesis",
+      "disposition": "preserve-audit",
+      "rationale": "MIG-0.2 dependency audit PR pending reconciliation",
+      "headSha": null,
+      "mergeAuthorized": false
+    },
+    {
+      "number": 787,
+      "url": "https://github.com/abvhiael/420-integrated-v0.1/pull/787",
+      "destination": "genesis",
+      "disposition": "review-only",
+      "rationale": "Bet WS8 mentions Arcade; inspect actual file overlap before changing",
+      "headSha": null,
+      "mergeAuthorized": false
+    }
+  ],
+  "absentFromOpenSearch": [
+    {
+      "project": "Smoke & Chrome",
+      "status": "NO_MATCHING_OPEN_PR_IN_SEARCH"
+    }
+  ],
+  "unresolved": [
+    "Capture immutable head SHA and complete changed-file list for each PR",
+    "Reconcile current open/closed status at execution time",
+    "Check mixed PR #787 for actual Arcade file changes",
+    "Preserve PR reviews, run URLs, source snapshots, artwork provenance",
+    "Reconcile #734 and #788 against owner-approved Genesis deferral"
+  ],
+  "qualification": {
+    "level": 1,
+    "passed": false,
+    "mode": "metadata-disposition-only"
+  }
+}

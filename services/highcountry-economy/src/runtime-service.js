@@ -7,6 +7,7 @@ import {FinalizedRpc,address} from './finalized-rpc.js';
 import {PostgresBudsStore} from './postgres-store.js';
 import {SettlementError} from './buds-ledger.js';
 import {SkillResearchService} from './skill-research.js';
+import {MissionService} from './missions.js';
 
 async function requireLeastPrivilegeRuntimeRole(pool,namespace) {
  const check=await pool.query("SELECT current_user AS role, r.rolsuper, r.rolbypassrls, c.relrowsecurity, pg_get_userbyid(c.relowner) AS owner, has_table_privilege(current_user,'highcountry_buds_state','SELECT') AS can_select, has_table_privilege(current_user,'highcountry_buds_state','UPDATE') AS can_update, has_table_privilege(current_user,'highcountry_buds_state','INSERT,DELETE,TRUNCATE,REFERENCES,TRIGGER') AS elevated FROM pg_roles r JOIN pg_class c ON c.oid='highcountry_buds_state'::regclass WHERE r.rolname=current_user");
@@ -15,7 +16,7 @@ async function requireLeastPrivilegeRuntimeRole(pool,namespace) {
 }
 
 /// Composition uses one provisioned durable namespace and independently configured canonical RPC/signer/issuer policy.
-export async function createRuntime({pool,namespace,authority:authConfig,rpc:rpcConfig,sources,marketDomain,operator,issuer,signerRpc,clock,progression}){
+export async function createRuntime({pool,namespace,authority:authConfig,rpc:rpcConfig,sources,marketDomain,operator,issuer,signerRpc,clock,progression,missions}){
  await requireLeastPrivilegeRuntimeRole(pool,namespace);
  const store=new PostgresBudsStore(pool,namespace),rpc=new FinalizedRpc(rpcConfig);
  for(const [name,policy] of Object.entries(sources))if(address(rpc.contracts[name]?.address)!==address(policy.contract))throw new SettlementError('source contract mismatch');
@@ -37,11 +38,12 @@ export async function createRuntime({pool,namespace,authority:authConfig,rpc:rpc
  };
  const market=new HighCountryMarket(store,marketAuthority,clock);
  const skillResearch=progression?new SkillResearchService({store,identity,...progression,clock}):null;
- return {store,identity,rewards,market,marketView:new HighCountryMarketplaceView({store,identity,market,clock}),skillResearch,...chain};
+ const missionService=missions?new MissionService({store,identity,...missions,clock}):null;
+ return {store,identity,rewards,market,marketView:new HighCountryMarketplaceView({store,identity,market,clock}),skillResearch,missionService,...chain};
 }
 // Production entrypoint for a wallet-optional, registered-player ordinary economy.
 // Never silently repurpose the canonical on-chain escrow settlement runtime.
-export async function createOrdinaryRuntime({pool,namespace,authority:authConfig,rpc:rpcConfig,sources,inventoryAuthority,clock,progression}) {
+export async function createOrdinaryRuntime({pool,namespace,authority:authConfig,rpc:rpcConfig,sources,inventoryAuthority,clock,progression,missions}) {
  await requireLeastPrivilegeRuntimeRole(pool,namespace);
  if(!inventoryAuthority||typeof inventoryAuthority.verifyAssetReceipt!=='function'
     ||typeof inventoryAuthority.requireMarketOpen!=='function')
@@ -53,10 +55,10 @@ export async function createOrdinaryRuntime({pool,namespace,authority:authConfig
    throw new SettlementError('source contract mismatch');
  const identity=new RuntimeAuthority({...authConfig,store,rpc,sourcePolicies:sources,clock});
  const rewards=new GameplayRewardRuntime({store,authority:identity,rpc,sources,clock});
- return composeOrdinaryMarketRuntime({store,identity,rewards,inventoryAuthority,clock,progression});
+ return composeOrdinaryMarketRuntime({store,identity,rewards,inventoryAuthority,clock,progression,missions});
 }
 // Separate ordinary market composition. The canonical runtime above remains chain-settlement-only.
-export function composeOrdinaryMarketRuntime({store,identity,rewards,inventoryAuthority,clock,progression}) {
+export function composeOrdinaryMarketRuntime({store,identity,rewards,inventoryAuthority,clock,progression,missions}) {
  if(typeof store?.transact!=='function'||identity?.store!==store
    ||typeof identity?.registeredPrincipal!=='function'
    ||typeof identity?.requireTrustedIssuer!=='function'
@@ -72,10 +74,10 @@ export function composeOrdinaryMarketRuntime({store,identity,rewards,inventoryAu
  };
  const market=new HighCountryMarket(store,authority,clock);
  const skillResearch=progression?new SkillResearchService({store,identity,...progression,clock}):null;
- return {store,identity,rewards,market,marketView:new HighCountryMarketplaceView({store,identity,market,clock}),skillResearch};
+ return {store,identity,rewards,market,marketView:new HighCountryMarketplaceView({store,identity,market,clock}),skillResearch,missionService};
 }
 export function runtimeHttpServer(runtime,{origin}){
- const {identity,rewards,market,marketView,skillResearch,settlement,worker}=runtime;
+ const {identity,rewards,market,marketView,skillResearch,missionService,settlement,worker}=runtime;
  return createServer(async(req,res)=>{
   res.setHeader('content-type','application/json');res.setHeader('cache-control','no-store');
   res.setHeader('x-content-type-options','nosniff');
@@ -99,6 +101,29 @@ export function runtimeHttpServer(runtime,{origin}){
     case '/wallet/link':result=await identity.linkWallet(token,b.nonce,b.signature);break;
     case '/wallet/unlink':result=await identity.unlink(token);break;
     case '/rewards/claim':result=await rewards.claim(token,b.source,b.proof);break;
+    case '/missions/snapshot':
+     if(!missionService||Object.keys(b).length!==0)throw new SettlementError('mission snapshot denied');
+     result=await missionService.snapshot(token);break;
+    case '/missions/activate':
+     if(!missionService||Object.keys(b).sort().join(',')!=='missionId,operation')
+      throw new SettlementError('mission activation denied');
+     result=await missionService.activate(token,b.operation,b.missionId);break;
+    case '/missions/progress':
+     if(!missionService||Object.keys(b).sort().join(',')!=='amount,evidence,missionId,operation')
+      throw new SettlementError('mission progress denied');
+     result=await missionService.progress(token,b.operation,b.missionId,b.evidence,b.amount);break;
+    case '/missions/claim':
+     if(!missionService||Object.keys(b).sort().join(',')!=='missionId,operation')
+      throw new SettlementError('mission claim denied');
+     result=await missionService.claim(token,b.operation,b.missionId);break;
+    case '/missions/cancel':
+     if(!missionService||Object.keys(b).sort().join(',')!=='missionId,operation')
+      throw new SettlementError('mission cancellation denied');
+     result=await missionService.cancel(token,b.operation,b.missionId);break;
+    case '/missions/expire':
+     if(!missionService||Object.keys(b).sort().join(',')!=='missionId,operation')
+      throw new SettlementError('mission expiry denied');
+     result=await missionService.expire(token,b.operation,b.missionId);break;
     case '/progression/snapshot':
      if(!skillResearch||Object.keys(b).length!==0)throw new SettlementError('progression snapshot denied');
      result=await skillResearch.snapshot(token);break;

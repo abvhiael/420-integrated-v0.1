@@ -94,7 +94,16 @@ jobs:
           for name in seen:
               (out/name).write_text((root/name).read_text().replace('../src/','../../src/'))
           PY
-          forge test --match-contract '^BetPokerWS8FrozenHandContext54Test
+          forge test --match-contract BetPokerWS8FrozenHandContext54Test -vvvv | tee ws8-scope.log
+          python3 ../scripts/bet/inspect-ws8-proof-context.py ws8-scope.log ../artifacts/ws8-proof-context.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ws8-funded-hand-proof-scope
+          path: |
+            contracts/ws8-scope.log
+            artifacts/ws8-proof-context.json
+          if-no-files-found: error
+      - name: Run real generated verifier and delivery admission control
         working-directory: contracts
         env:
           FOUNDRY_SRC: src/bet

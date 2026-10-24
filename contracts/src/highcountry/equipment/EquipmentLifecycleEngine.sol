@@ -202,6 +202,9 @@ contract EquipmentLifecycleEngine is R04EmergencyConsumer {
         State next =
             c.durability == 0 ? State.BROKEN : c.durability < p.degradeBelow ? State.DEGRADED : State.FUNCTIONAL;
         if (next == State.BROKEN) equipment.setLifecycleDisabled(id, true);
+        else if (next == State.DEGRADED && c.state != State.DEGRADED) {
+            equipment.setLifecycleDegraded(id, true);
+        }
         c.state = next;
         emit ConditionUpdated(id, next, c.durability);
     }
@@ -222,6 +225,8 @@ contract EquipmentLifecycleEngine is R04EmergencyConsumer {
             uint256(c.durability) + p.repairRestore > p.maximum ? p.maximum : uint256(c.durability) + p.repairRestore
         );
         State next = c.durability < p.degradeBelow ? State.DEGRADED : State.FUNCTIONAL;
+        bool shouldDegrade = next == State.DEGRADED;
+        if (equipment.degraded(id) != shouldDegrade) equipment.setLifecycleDegraded(id, shouldDegrade);
         if (c.state == State.BROKEN) equipment.setLifecycleDisabled(id, false);
         c.state = next;
         emit ConditionUpdated(id, next, c.durability);

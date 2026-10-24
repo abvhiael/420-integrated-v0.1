@@ -50,7 +50,7 @@ contract ManufacturedEquipmentIssuer is R04EmergencyConsumer {
             revert InvalidManufacturedEquipment();
         }
         ManufacturingEngine.Recipe memory r = manufacturing.recipe(recipe);
-        equipment.equipmentType(typeId);
+        if (equipment.equipmentType(typeId).catalogueVersion != r.version) revert InvalidManufacturedEquipment();
         bool matchOutput;
         for (uint256 i; i < 2; i++) {
             if (r.outputs[i] == resource && r.outputAmounts[i] == quantity) matchOutput = true;

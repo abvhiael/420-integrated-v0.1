@@ -18,6 +18,7 @@ contract ResourceLedger {
     mapping(bytes32 => uint256) public reservedTotal;
     mapping(bytes32 => uint256) public consumed;
     mapping(bytes32 => bool) public applied;
+
     struct Reservation {
         bytes32 resource;
         address owner;
@@ -161,7 +162,6 @@ contract ResourceLedger {
         availableTotal[id] += amount;
         emit Movement(op, id, from, to, 5, amount);
     }
-
 
     /// @notice Reserve stock for a single immutable operation; unrelated operations cannot draw it.
     function reserveTagged(

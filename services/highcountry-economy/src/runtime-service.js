@@ -43,7 +43,7 @@ export async function createRuntime({pool,namespace,authority:authConfig,rpc:rpc
 }
 // Production entrypoint for a wallet-optional, registered-player ordinary economy.
 // Never silently repurpose the canonical on-chain escrow settlement runtime.
-export async function createOrdinaryRuntime({pool,namespace,authority:authConfig,rpc:rpcConfig,sources,inventoryAuthority,clock,progression}) {
+export async function createOrdinaryRuntime({pool,namespace,authority:authConfig,rpc:rpcConfig,sources,inventoryAuthority,clock,progression,missions}) {
  await requireLeastPrivilegeRuntimeRole(pool,namespace);
  if(!inventoryAuthority||typeof inventoryAuthority.verifyAssetReceipt!=='function'
     ||typeof inventoryAuthority.requireMarketOpen!=='function')
@@ -58,7 +58,7 @@ export async function createOrdinaryRuntime({pool,namespace,authority:authConfig
  return composeOrdinaryMarketRuntime({store,identity,rewards,inventoryAuthority,clock,progression,missions});
 }
 // Separate ordinary market composition. The canonical runtime above remains chain-settlement-only.
-export function composeOrdinaryMarketRuntime({store,identity,rewards,inventoryAuthority,clock,progression}) {
+export function composeOrdinaryMarketRuntime({store,identity,rewards,inventoryAuthority,clock,progression,missions}) {
  if(typeof store?.transact!=='function'||identity?.store!==store
    ||typeof identity?.registeredPrincipal!=='function'
    ||typeof identity?.requireTrustedIssuer!=='function'
@@ -74,6 +74,7 @@ export function composeOrdinaryMarketRuntime({store,identity,rewards,inventoryAu
  };
  const market=new HighCountryMarket(store,authority,clock);
  const skillResearch=progression?new SkillResearchService({store,identity,...progression,clock}):null;
+ const missionService=missions?new MissionService({store,identity,...missions,clock}):null;
  return {store,identity,rewards,market,marketView:new HighCountryMarketplaceView({store,identity,market,clock}),skillResearch,missionService};
 }
 export function runtimeHttpServer(runtime,{origin}){

@@ -1,0 +1,86 @@
+{
+  "schema": "mad-buds-animation-manifest-v1",
+  "schemaVersion": "1.0",
+  "characterId": "terpene_tina",
+  "animationId": "tt_anim_02_perfume_flourish",
+  "animationName": "perfume_flourish",
+  "frameCount": 10,
+  "frameWidth": 1024,
+  "frameHeight": 1024,
+  "fps": 10,
+  "durationMs": 1000,
+  "loop": false,
+  "direction": "front",
+  "pivotNormalized": [
+    0.5,
+    0.9033
+  ],
+  "sourceArt": "terpene_tina_s_floral_perfume_dance.png",
+  "sourceSHA256": "cede4ad3a989fd900e3a366368e25c0e32bbf7e562fee140f0a484655d7a9b51",
+  "method": "RGBA source alpha preserved; faint background matte rejected; thin cell-edge feathering; independently enlarged on transparent 1024px canvases",
+  "repositoryDestination": "assets/arcade/mad-buds/terpene-tina/animations/tt_anim_02_perfume_flourish/",
+  "visualApproval": "PENDING \u2014 adjacent perfume VFX in source may remain truncated at frame boundaries",
+  "qualification": "LOCAL STRUCTURAL PASS \u2014 artistic acceptance pending",
+  "frames": [
+    {
+      "index": 1,
+      "filename": "terpene_tina_anim_02_perfume_flourish_frame_01.png",
+      "durationMs": 100,
+      "sha256": "0d83b182a2e42b0319672a7ed2318720204e29c047eed31729bd8ca58ec8a34b"
+    },
+    {
+      "index": 2,
+      "filename": "terpene_tina_anim_02_perfume_flourish_frame_02.png",
+      "durationMs": 100,
+      "sha256": "76c6096374fa0be5e07dea1becb076ebcabbc9c6a54233a5a467dfca9444a9ba"
+    },
+    {
+      "index": 3,
+      "filename": "terpene_tina_anim_02_perfume_flourish_frame_03.png",
+      "durationMs": 100,
+      "sha256": "718120fb16cf60c06be837b5a6844cf08f96684d9ff3adf50cf36450eba15162"
+    },
+    {
+      "index": 4,
+      "filename": "terpene_tina_anim_02_perfume_flourish_frame_04.png",
+      "durationMs": 100,
+      "sha256": "bed5d146f66600459b960a1b68fac975792ed66938e7ae55f0dab8a923b9d3d9"
+    },
+    {
+      "index": 5,
+      "filename": "terpene_tina_anim_02_perfume_flourish_frame_05.png",
+      "durationMs": 100,
+      "sha256": "962f3fae25237e4428950a3c80d2471b7fd8d0a6c5486e0175bebdfd7606d32f"
+    },
+    {
+      "index": 6,
+      "filename": "terpene_tina_anim_02_perfume_flourish_frame_06.png",
+      "durationMs": 100,
+      "sha256": "8e477f1c944acbc54adbeaacae9bc168bb0e1cab4c096a8ed9976aa65b052cf6"
+    },
+    {
+      "index": 7,
+      "filename": "terpene_tina_anim_02_perfume_flourish_frame_07.png",
+      "durationMs": 100,
+      "sha256": "b7825fd59f7b7660398f28511837fd3b3cb0649c681f3f8b3aa40add408f2d22"
+    },
+    {
+      "index": 8,
+      "filename": "terpene_tina_anim_02_perfume_flourish_frame_08.png",
+      "durationMs": 100,
+      "sha256": "9e5e92b1b7ee0b9a8f937bbf4b9d5faae4ec292af61585397d72c5bc97910140"
+    },
+    {
+      "index": 9,
+      "filename": "terpene_tina_anim_02_perfume_flourish_frame_09.png",
+      "durationMs": 100,
+      "sha256": "bfe3c706c7d9660d3746f86655acaa257a744c66af058c7ad95896eacafb5d5c"
+    },
+    {
+      "index": 10,
+      "filename": "terpene_tina_anim_02_perfume_flourish_frame_10.png",
+      "durationMs": 100,
+      "sha256": "5295c884f59ffe81f752c0f37eb137662233678490a8c1eab709d6af0b9e23f5"
+    }
+  ]
+}

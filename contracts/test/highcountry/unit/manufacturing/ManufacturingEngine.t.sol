@@ -104,6 +104,9 @@ contract ManufacturingEngineR043Test {
         (bool replay,) = address(alice).call(abi.encodeCall(alice.complete, (engine, id)));
         require(!replay, "double completion");
         require(engine.activeJobs(address(alice)) == 0, "queue not released");
+        require(ledger.reconciles(RAW) && ledger.reconciles(FINISHED), "manufacturing supply mismatch");
+        require(ledger.availableTotal(RAW) == 20 && ledger.reservedTotal(RAW) == 0, "input totals mismatch");
+        require(ledger.availableTotal(FINISHED) == 3, "output totals mismatch");
     }
 
     function testCancelLossAndRefund() public {
@@ -112,6 +115,8 @@ contract ManufacturingEngineR043Test {
         ResourceLedger.Balance memory b = ledger.balance(RAW, address(alice));
         require(b.available == 29 && b.reserved == 0 && b.consumed == 1, "cancel loss");
         require(ledger.balance(FINISHED, address(alice)).available == 0, "output on cancel");
+        require(ledger.availableTotal(RAW) == 29 && ledger.reservedTotal(RAW) == 0, "cancel supply mismatch");
+        require(ledger.reconciles(RAW) && ledger.reconciles(FINISHED), "cancel conservation mismatch");
         (bool twice,) = address(alice).call(abi.encodeCall(alice.cancel, (engine, id)));
         require(!twice, "duplicate cancel");
     }

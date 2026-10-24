@@ -57,6 +57,99 @@ jobs:
           name: ws8-inherited-source-provenance
           path: ws8-inherited-evidence.json
           if-no-files-found: error
+  real-recipient-admission:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    env:
+      FOUNDRY_PROFILE: pr
+      FOUNDRY_VIA_IR: 'true'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Bind exact candidate SHA
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"
+      - uses: actions/download-artifact@v4
+        with:
+          name: 420bet-ws2-real-two-stage-exact-sha
+          run-id: 40003702620
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: artifacts/420bet-ws2
+      - uses: actions/download-artifact@v4
+        with:
+          name: 420bet-ws3-real-eight-share-exact-sha
+          run-id: 40013195917
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: artifacts/420bet-ws3
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Compile genuine generated verifier contracts and exercise actual delivery admission
+        working-directory: contracts
+        env:
+          FOUNDRY_SRC: src/bet
+          FOUNDRY_TEST: test/ws8-real
+        run: |
+          set -eu
+          mkdir -p src/bet/generated test/ws8-real
+          python3 ../clients/420bet-poker/zkshuffle/make_ws3_full_onchain_book_test.py \\
+            ../artifacts/420bet-ws3/EXPERIMENTAL-WS3FullDeliveryVerifier.sol \\
+            ../artifacts/420bet-ws3/EXPERIMENTAL-WS3EightShareFixtures.json \\
+            ../artifacts/420bet-ws3/EXPERIMENTAL-WS3FullRecipientPoPVerifier.sol \\
+            ../artifacts/420bet-ws3/EXPERIMENTAL-WS3TwoRecipientPoPFixtures.json \\
+            ../artifacts/420bet-ws3/EXPERIMENTAL-WS3FullAggregateVerifier.sol \\
+            ../artifacts/420bet-ws3/EXPERIMENTAL-WS3AggregateFixture.json \\
+            ../artifacts/420bet-ws2/EXPERIMENTAL-Reencrypt52AvailabilityFixture.json \\
+            test/ws8-real/WS3FullActualDeliveryBook.t.sol
+          forge test --match-contract '^WS3FullActualDeliveryBookTest    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Mandatory scenario evidence must be explicitly accounted for
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          evidence=Path('docs/bet/BET-AUDIT-5A.4-WORKSTREAM-8-EXACT-SHA-RECONCILIATION.md').read_text()
+          # Do not upgrade historical success to full acceptance while the document
+          # itself records outstanding combined-protocol adversarial scenarios.
+          for word in ('colluding dealer','forged recipient','ciphertext substitution','key revocation'):
+              if word not in evidence:
+                  raise SystemExit('missing disclosure of unqualified scope '+word)
+          if 'FULL SECURITY ACCEPTANCE: PASS' not in evidence:
+              raise SystemExit('WS8 milestone remains unqualified: cross-component attack evidence not yet accepted')
+          PY
+  milestone-gate:
+    needs: [inherited-proof-provenance-and-full-scope,real-recipient-admission,scope-coverage-gate]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fail closed unless both milestone owners qualify
+        env:
+          A: ${{ needs.inherited-proof-provenance-and-full-scope.result }}
+          B: ${{ needs.scope-coverage-gate.result }}
+          C: ${{ needs.real-recipient-admission.result }}
+        run: |
+          test "$A" = success
+          test "$B" = success
+          test "$C" = success
+ -vv
+      - name: Record inherited real verifier hashes and final candidate
+        run: |
+          set -eu
+          mkdir -p artifacts/ws8-real
+          git rev-parse HEAD > artifacts/ws8-real/candidate-sha.txt
+          sha256sum artifacts/420bet-ws3/EXPERIMENTAL-WS3FullDeliveryVerifier.sol \\
+            artifacts/420bet-ws3/EXPERIMENTAL-WS3FullRecipientPoPVerifier.sol \\
+            artifacts/420bet-ws3/EXPERIMENTAL-WS3FullAggregateVerifier.sol \\
+            artifacts/420bet-ws3/EXPERIMENTAL-WS3EightShareFixtures.json \\
+            artifacts/420bet-ws2/EXPERIMENTAL-Reencrypt52AvailabilityFixture.json \\
+            > artifacts/ws8-real/inherited-verifier-fixture-sha256.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ws8-real-recipient-admission-evidence
+          path: artifacts/ws8-real/
+          if-no-files-found: error
   scope-coverage-gate:
     runs-on: ubuntu-latest
     steps:

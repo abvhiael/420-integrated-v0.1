@@ -31,6 +31,7 @@ export function mountSkills({document,main,runtime,authenticate,fetchImpl=fetch}
   if(!snapshot||!Array.isArray(snapshot.records))throw Error('progression-invalid-response');
   pane.replaceChildren();
   pane.append(el('p','Progression catalogue '+snapshot.version+' · available BUDS '+snapshot.availableBuds));
+  pane.append(el('p','Active approved conveniences: '+Object.entries(snapshot.effects??{}).map(([k,v])=>k+' '+v).join(', ')||'none'));
   for(const record of snapshot.records){
    const card=el('article');card.append(el('h3',record.id+' · '+record.kind));
    card.append(el('p','Evidence '+record.points+'/'+record.requiredPoints+

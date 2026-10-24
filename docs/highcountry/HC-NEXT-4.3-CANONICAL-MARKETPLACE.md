@@ -29,3 +29,13 @@ Required targeted exact-SHA evidence: R04.8 Level 1, R04.5 Level 1 where economy
 5. Reconcile deployment transaction receipts with PostgreSQL issued/burned/available/reserved BUDS and chain custody balances; attest to no free assets/duplicate credits or payout after reversal. Capture actual runner logs, deployment manifest, signer approval and operational security signoff.
 
 Until this externally witnessed gate is satisfied, **do not label the step fully qualified, deployed or ready for production**, even when all repository-side tests pass. Do not invent addresses, network access, approval or proof of a remote broadcast.
+
+## Executable external testnet closeout (not a local CI substitute)
+
+After an independently authorized **actual deployed-chain write**, set `HC_DEPLOYED_CANONICAL_ACCEPTANCE` to the operator-approved JSON manifest and run:
+
+`node services/highcountry-economy/test/deployed-canonical-acceptance.mjs`
+
+Required manifest keys: `environment` = `authorized-deployed-testnet`, `operatorApproval` = `true`, `rpcUrl`, `chainId`, `contracts` (with escrow address and exact pinned code hashes), `issuer`, `listingId`, `transferOp`, `sellerWallet`, `buyerWallet`, `sellerPrincipal`, `buyerPrincipal`, `asset`, `quantity`, `txHash`, `fromBlock`, `indexerUrl`, `postgresUrl`, `namespace`, and `expectedBurned`. Use the secret `HC_DEPLOYED_INDEXER_TOKEN` separately if authentication is required. The verifier refuses localhost, insecure RPC/indexer, incorrect chain/code, unfinalized transactions, forged escrow events, indexer divergence, non-finalized durable intent and any BUDS conservation mismatch. The approved operator writes the transaction through the authenticated service first; the verifier **never submits transactions**. Keep both the service's on-chain submission log and the verifier's emitted `DEPLOYED_CHAIN_ACCEPTANCE_PASS` evidence.
+
+This harness is intentionally *not* silently included in disposable-Anvil CI: CI cannot forge the missing remote deployment, signer approval, indexer service, operator-managed PostgreSQL or live transaction hash.

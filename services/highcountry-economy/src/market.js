@@ -85,9 +85,14 @@ export class HighCountryMarket {
      if(!sellerAssets||sellerAssets.reserved<l.quantity)throw new SettlementError('unbacked listing');
      const receivingKey=key(buyer,l.asset),buyerAssets=s.assets.get(receivingKey)||blank();
      if(buyerAssets.available>Number.MAX_SAFE_INTEGER-l.quantity)throw new SettlementError('asset overflow');
+     // Preserve verified receipt lineage through resale and reject incompatible merges.
+     const provenance=s.assetSources.get(receivingKey);
+     if(!l.sourceReceiptId||(provenance&&provenance!==l.sourceReceiptId))
+       throw new SettlementError('conflicting inventory provenance');
      buyerBuds.available-=l.price;sellerBuds.available+=l.price;
      sellerAssets.reserved-=l.quantity;buyerAssets.available+=l.quantity;
      s.assets.set(receivingKey,buyerAssets);
+     s.assetSources.set(receivingKey,l.sourceReceiptId);
      l.status='sold';l.buyer=buyer;
      return {buyer,seller:l.seller,asset:l.asset,quantity:l.quantity,price:l.price,fee:0};
    });

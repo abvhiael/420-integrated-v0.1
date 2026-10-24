@@ -140,12 +140,13 @@ contract CanonicalMarketEscrowR048Test {
         (bool genericRelease,) =
             address(seller).call(abi.encodeCall(seller.releaseDirect, (inv, bytes32(uint256(904)), ASSET, uint256(1))));
         require(!genericRelease, "generic release stole reserved market stock");
-        (bool crossRelease,) = address(seller).call(
-            abi.encodeCall(
-                seller.releaseTaggedDirect,
-                (inv, bytes32(uint256(905)), market.reserveOperation(other), ASSET, uint256(6))
-            )
-        );
+        (bool crossRelease,) = address(seller)
+            .call(
+                abi.encodeCall(
+                    seller.releaseTaggedDirect,
+                    (inv, bytes32(uint256(905)), market.reserveOperation(other), ASSET, uint256(6))
+                )
+            );
         require(!crossRelease, "cross-listing reservation allowed");
         market.settle(LISTING, BUYER);
         require(ledger.balance(ASSET, BUYER).available == 6, "first escrow not settled");

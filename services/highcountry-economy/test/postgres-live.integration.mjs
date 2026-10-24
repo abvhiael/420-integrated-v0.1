@@ -8,6 +8,7 @@ import {BudsLedger} from '../src/buds-ledger.js';
 import {generateKeyPairSync,sign} from 'node:crypto';
 import {RuntimeAuthority} from '../src/runtime-integration.js';
 import {HighCountryMarket} from '../src/market.js';
+import {createOrdinaryRuntime} from '../src/runtime-service.js';
 const url=process.env.HC_TEST_POSTGRES_URL;
 if(!url)throw new Error('HC_TEST_POSTGRES_URL required (dedicated test database only)');
 const pool=new pg.Pool({connectionString:url,max:8,connectionTimeoutMillis:5000});
@@ -47,6 +48,29 @@ try {
  assert.equal(bob.reserved,70,'existing hold persists');
  assert.equal(row.issued,100);assert.equal(row.burned,0);
  assert.equal(row.listings.find(([id])=>id==='listing:1')?.[1].status,'sold');
+ // Actual PostgreSQL race: the remaining item and zero-fee credits can transfer once only.
+ await ledger.earn('award:charlie','charlie','approved','proof-charlie',20);
+ authority.registeredPrincipal=async token=>token==='alice'?'alice':token==='bob'?'bob':
+  token==='charlie'?'charlie':Promise.reject(Error('guest'));
+ await market.list('alice','asset:list-race','listing:race','lot:1',1,10,1000);
+ const competingMarket=new HighCountryMarket(new PostgresBudsStore(pool,ns),authority,()=>100);
+ const race=await Promise.allSettled([
+  market.buy('bob','asset:race-bob','listing:race'),
+  competingMarket.buy('charlie','asset:race-charlie','listing:race')
+ ]);
+ assert.equal(race.filter(x=>x.status==='fulfilled').length,1,'single successful competing buyer');
+ const afterRace=(await pool.query('SELECT state FROM highcountry_buds_state WHERE namespace=$1',[ns])).rows[0].state;
+ assert.equal(afterRace.listings.find(([key])=>key==='listing:race')[1].status,'sold');
+ assert.equal(afterRace.issued,120,'no issued credit duplication');
+ assert.equal(afterRace.burned,0,'approved ordinary zero-fee policy');
+ const credits=afterRace.balances.reduce((n,[,b])=>n+b.available+b.reserved,0);
+ assert.equal(credits,120,'BUDS conserved with two independent buyers');
+ const sellerAssets=afterRace.assets.find(([key])=>key===JSON.stringify(['alice','lot:1']))[1];
+ assert.equal(sellerAssets.available,0);assert.equal(sellerAssets.reserved,0);
+ const bobAssets=afterRace.assets.find(([key])=>key===JSON.stringify(['bob','lot:1']))?.[1].available||0;
+ const charlieAssets=afterRace.assets.find(([key])=>key===JSON.stringify(['charlie','lot:1']))?.[1].available||0;
+ assert.equal(bobAssets+charlieAssets,3,'all imported goods accounted for');
+ console.log('Postgres competing buyers, one ordinary fill, zero-fee credits and asset conservation: PASS');
  const role='hc_runtime_'+process.pid;
  await pool.query(await readFile(new URL('../migrations/002_runtime_namespace_rls.sql',import.meta.url),'utf8'));
  await pool.query('CREATE ROLE '+role+" LOGIN PASSWORD 'hc_ci_runtime_only'");
@@ -70,6 +94,22 @@ try {
   assert.equal((await runtimePool.query('SELECT * FROM highcountry_buds_state WHERE namespace=$1',[ns])).rows.length,0,'namespace isolation');
   await assert.rejects(runtimePool.query('INSERT INTO highcountry_buds_state(namespace,state) VALUES($1,$2::jsonb)',[role+'other',JSON.stringify(empty)]));
   await assert.rejects(runtimePool.query('ALTER TABLE highcountry_buds_state ADD COLUMN unsafe text'));
+  const ordinary=await createOrdinaryRuntime({
+   pool:runtimePool,namespace:role,
+   authority:{issuers:{idp:{publicKey:keys.publicKey,operators:{alice:{sources:['inventory']}}}},
+    audience:'hc',gameId:game,chainId:420,origin:'https://hc.example'},
+   rpc:{url:'http://127.0.0.1:8545',chainId:420,contracts:{}},sources:{},
+   inventoryAuthority:{requireMarketOpen:async()=>{},
+    verifyAssetReceipt:async r=>r.receiptId==='verified-inventory-ci'},clock:()=>1000
+  });
+  await ordinary.market.importAsset(token,'ordinary:import',
+   {receiptId:'verified-inventory-ci',owner:'alice',asset:'ci:lot',quantity:2});
+  await ordinary.market.list(token,'ordinary:list','ci:listing','ci:lot',1,1,2000);
+  const admitted=await ordinary.store.transact(s=>s.listings.get('ci:listing'));
+  assert.equal(admitted.seller,'alice');
+  assert.equal(admitted.sourceReceiptId,'verified-inventory-ci');
+  await assert.rejects(ordinary.market.list('forged-token','ordinary:forged','ci:other','ci:lot',1,1,2000));
+  console.log('Least-privilege PostgreSQL ordinary runtime construction, authenticated listing and source admission: PASS');
   console.log('Postgres runtime session/wallet nonce restart persistence and least-privilege/RLS denial: PASS');
  } finally {
   await runtimePool.end();

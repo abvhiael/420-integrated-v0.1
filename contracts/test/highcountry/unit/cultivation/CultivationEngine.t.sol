@@ -910,14 +910,41 @@ contract CultivationEngineTest is PlantSourcesFixture {
             qualificationRoot: keccak256("q")
         });
     }
+
     function testRegisteredHarvestToInventoryRetryTransferAndConsumption() public {
         uint64 plantId = 96;
-        _grant(address(this), ModuleIds.PLANT_REGISTRY, ActionIds.PLANT_REGISTER, bytes32(uint256(plantId)), keccak256("hc-next:inv:plant"));
-        _grant(address(this), ModuleIds.CULTIVATION_ENGINE, ActionIds.CULTIVATION_UPDATE, bytes32(uint256(plantId)), keccak256("hc-next:inv:env"));
-        _grant(address(this), ModuleIds.CULTIVATION_ENGINE, ActionIds.PHENOTYPE_EXPRESS, bytes32(uint256(plantId)), keccak256("hc-next:inv:phenotype"));
-        _grant(address(this), ModuleIds.HARVEST_ENGINE, ActionIds.HARVEST_ACCEPT, bytes32(uint256(plantId)), keccak256("hc-next:inv:harvest"));
+        _grant(
+            address(this),
+            ModuleIds.PLANT_REGISTRY,
+            ActionIds.PLANT_REGISTER,
+            bytes32(uint256(plantId)),
+            keccak256("hc-next:inv:plant")
+        );
+        _grant(
+            address(this),
+            ModuleIds.CULTIVATION_ENGINE,
+            ActionIds.CULTIVATION_UPDATE,
+            bytes32(uint256(plantId)),
+            keccak256("hc-next:inv:env")
+        );
+        _grant(
+            address(this),
+            ModuleIds.CULTIVATION_ENGINE,
+            ActionIds.PHENOTYPE_EXPRESS,
+            bytes32(uint256(plantId)),
+            keccak256("hc-next:inv:phenotype")
+        );
+        _grant(
+            address(this),
+            ModuleIds.HARVEST_ENGINE,
+            ActionIds.HARVEST_ACCEPT,
+            bytes32(uint256(plantId)),
+            keccak256("hc-next:inv:harvest")
+        );
         _sourcePlant(caps, plants, plantId, genomeId, address(this), 11);
-        cultivation.updateEnvironment(plantId, CultivationEngine.EnvironmentSnapshot(2400, 6000, 7000, 6000, 6000, 5000));
+        cultivation.updateEnvironment(
+            plantId, CultivationEngine.EnvironmentSnapshot(2400, 6000, 7000, 6000, 6000, 5000)
+        );
         _ready(plantId);
         cultivation.expressPhenotype(plantId, genomeId, approvedRulesetId);
         harvest.acceptHarvest(plantId);

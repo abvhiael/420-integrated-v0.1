@@ -360,9 +360,9 @@ There is no remaining repository-only DoobTube implementation task before the li
 - BUILD COMPLETE: **YES for repository scope**.
 - CONTRACT COMPLETE: **YES for current V1 scope** — no DoobTube contract is required and external bindings are qualified.
 - TEST COMPLETE: **YES for repository scope** — retained app suites, Level 2 integration and Level 3 repository owners passed on the reconciled exact SHA.
-- DOCUMENTATION COMPLETE: **YES for repository scope** — global Docs qualification passed on the reconciled exact SHA.
+- DOCUMENTATION COMPLETE: **YES for repository app scope** — global Docs qualification passed on the reconciled exact SHA.
 - INTEGRATION COMPLETE: **YES for repository scope** — live production-equivalent integration remains DOOBTUBE-12.
-- SECURITY QUALIFIED: **YES for repository scope** — contract hardening/static/security ownership passed on the reconciled exact SHA.
+- SECURITY QUALIFIED: **YES for current app repository scope** — contract hardening/static/security ownership passed on the reconciled exact SHA.
 - TESTNET READY: **NO**.
 - GENESIS READY: **NO**.
 - PRODUCTION READY: **NO**.
@@ -374,5 +374,9 @@ There is no remaining repository-only DoobTube implementation task before the li
 Exact reconciled implementation SHA `c71bc027d284fc9bbb7a68f2ac0e068aecd10cd7` passed the canonical Level 3 owner set. Durable run/job evidence is recorded in `docs/audit/DOOBTUBE-PHASE-CLOSEOUT.md`.
 
 This does **not** claim public-testnet, Genesis, or production readiness. All unfinished DOOBTUBE-12/13 live-environment work has been transferred to the canonical testnet/release roadmap in `docs/ROADMAP.md`.
+
+Historical baseline (before DOOBTUBE-11 repository closeout): CODE COMPLETE: **NO**. This is a superseded snapshot, not the current implementation status. The authoritative current status is CODE COMPLETE: **YES for repository scope**, qualified through DOOBTUBE-11; testnet and production readiness remain NO.
+
+Current remediation state: **DOOBTUBE-0 through DOOBTUBE-10 complete**.
 
 Historical pre-closeout state, retained for verifier/evidence continuity: **DOOBTUBE-0 through DOOBTUBE-10 are complete. Next: DOOBTUBE-11 — Repository Level 3 exact-head closeout.**

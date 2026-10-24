@@ -53,6 +53,13 @@
       "role": "asset-validator",
       "destination": "games/madbuds/scripts/",
       "verification": "path identified"
+    },
+    {
+      "repository": "abvhiael/MadBuds-Godot",
+      "path": "project.godot",
+      "role": "primary-godot-runtime",
+      "destination": "games/madbuds/godot/",
+      "verification": "full non-truncated main Git tree 196 files; 2 scenes, 7 GDScript files, 15 JSON manifests, 150 PNGs"
     }
   ],
   "canon": {
@@ -75,8 +82,8 @@
       "sativa-steve",
       "terpene-tina"
     ],
-    "godotProject": "NOT_VERIFIED_IN_ACCESSIBLE_REPOSITORY_SEARCH",
-    "godotSourcePolicy": "Do not invent or mark imported until source project.godot and file hashes confirmed",
+    "godotProject": "abvhiael/MadBuds-Godot:project.godot",
+    "godotSourcePolicy": "Verified on main tree babda3859a10e77f3c362d97acd18f170ae2fda6; 2 scenes, 7 GDScript files including tests, 15 manifests and 150 PNG paths. Runtime and SHA-256 checks remain separate.",
     "assetPolicy": "Do not assume PNG existence solely from JSON manifests; verify each referenced frame byte SHA-256 at extraction",
     "legacyPolicy": "Retain Unity source as legacy, do not replace canonical Godot runtime by Unity silently",
     "identityPolicy": "MadBuds and Mad Bud Delivery arcade candidate are distinct identities; preserve namespaces"
@@ -92,12 +99,12 @@
     }
   ],
   "unresolved": [
-    "Current authoritative Godot project.godot path and ownership",
     "Current Godot imported assets, scenes and live playback evidence",
     "Exhaustive legacy Unity file enumeration and binary provenance",
     "All image files referenced by animation manifests and verified SHA-256",
     "PR branch-only code and art changes, exact PR HEAD SHA",
-    "Complete runtime integration and playable build verification"
+    "Complete runtime integration and playable build verification",
+    "Godot project import and gameplay runtime tests not executed at verified source SHA"
   ],
   "qualification": {
     "scope": "source classification and source-backed boundary inventory",

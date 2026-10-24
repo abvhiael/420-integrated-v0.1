@@ -269,9 +269,8 @@ contract EquipmentLifecycleR044Test {
     function testEquipmentOwnershipHandoffPreservesProvenanceAndRecycling() public {
         R044Land buyer = new R044Land();
         player.place(equipment, ID);
-        (bool placed,) = address(player).call(
-            abi.encodeCall(player.offer, (equipment, ID, address(buyer), uint64(block.timestamp + 2 days)))
-        );
+        (bool placed,) = address(player)
+            .call(abi.encodeCall(player.offer, (equipment, ID, address(buyer), uint64(block.timestamp + 2 days))));
         require(!placed, "placed item transfer offered");
         player.remove(equipment, ID);
         player.offer(equipment, ID, address(buyer), uint64(block.timestamp + 2 days));

@@ -4,6 +4,7 @@ import "./BetPokerConfidentialDeal54.t.sol";
 import "../src/bet/PokerInitialEncryptedDeck420.sol";
 import "../src/bet/PokerPrivateShuffleGate420.sol";
 import "../src/bet/PokerProviderAccountability420.sol";
+import "../src/bet/PokerActionKeys420.sol";
 
 /// @notice WS8 PASS ONE: immutable contract-derived context export.
 /// @dev Not a proof-admission/settlement qualification. The real Groth16 owners
@@ -15,6 +16,7 @@ contract BetPokerWS8FrozenHandContext54Test is PokerConfidentialDeal54Test {
     address internal constant RISK_VAULT = address(0xB00D);
     bytes32 internal constant PREVIOUS_STATE = keccak256("WS8.PREVIOUS.STATE.V1");
 
+    event WS8SeatSigningKeys(address indexed player0,address indexed player1,address signer0,address signer1,uint64 epoch0,uint64 epoch1);
     event WS8FrozenHand(
         bytes32 indexed handId,bytes32 indexed tableId,bytes32 configHash,
         bytes32 rulesetId,bytes32 gameVersionId,bytes32 seatSnapshot,
@@ -43,6 +45,11 @@ contract BetPokerWS8FrozenHandContext54Test is PokerConfidentialDeal54Test {
         require(block.chainid==CONTEXT_CHAIN_ID,
             "WS8 runner MUST pin chainid=31337: refuse different Groth16 context");
         bytes32 handId=_freeze();
+        PokerActionKeys420 signing=new PokerActionKeys420(address(deal));
+        cheat54.prank(PLAYER);signing.bindSigner(TABLE,address(0xC001));
+        cheat54.prank(PLAYER_B);signing.bindSigner(TABLE,address(0xC002));
+        emit WS8SeatSigningKeys(PLAYER,PLAYER_B,address(0xC001),address(0xC002),
+            ledger.seatOf(TABLE,0).epoch,ledger.seatOf(TABLE,1).epoch);
         PokerConfidentialDeal420.Hand memory h=deal.getHand(handId);
         PokerTableRegistry420.Table memory t=registry.getTable(TABLE);
         require(h.tableId==TABLE&&h.nonce==1&&h.epoch==ledger.seatingEpoch(TABLE),

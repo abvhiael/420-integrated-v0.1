@@ -125,14 +125,12 @@ contract EquipmentLifecycleEngine is R04EmergencyConsumer {
         Policy memory proposed
     ) private {
         if (
-            typeId == bytes32(0) || proposed.version == bytes32(0) || _policies[typeId].exists
-                || proposed.maximum == 0 || proposed.degradeBelow == 0
-                || proposed.degradeBelow >= proposed.maximum || proposed.useCost == 0
+            typeId == bytes32(0) || proposed.version == bytes32(0) || _policies[typeId].exists || proposed.maximum == 0
+                || proposed.degradeBelow == 0 || proposed.degradeBelow >= proposed.maximum || proposed.useCost == 0
                 || proposed.useCost > proposed.maximum || proposed.repairRestore == 0
                 || proposed.repairRestore > proposed.maximum || proposed.repairResource == bytes32(0)
-                || proposed.repairCost == 0 || proposed.recycleResource == bytes32(0)
-                || proposed.recycleOutput == 0 || !proposed.exists
-                || (proposed.operatingResource == bytes32(0)) != (proposed.operatingCost == 0)
+                || proposed.repairCost == 0 || proposed.recycleResource == bytes32(0) || proposed.recycleOutput == 0
+                || !proposed.exists || (proposed.operatingResource == bytes32(0)) != (proposed.operatingCost == 0)
         ) revert HCInvalidState();
         if (equipment.equipmentType(typeId).catalogueVersion != proposed.version) revert HCInvalidState();
         if (proposed.version == keccak256("HC.EQUIPMENT.CATALOGUE.V1") && proposed.operatingCost == 0) {
@@ -192,9 +190,7 @@ contract EquipmentLifecycleEngine is R04EmergencyConsumer {
         if (item.parcelId == 0 || equipment.retired(id)) revert HCInvalidState();
         if (equipment.land().effectiveOperator(item.parcelId) != item.owner) revert HCInvalidState();
         if (p.operatingCost != 0) {
-            bytes32 op = keccak256(
-                abi.encode("HC.EQUIPMENT.OPERATE.V1", block.chainid, address(this), id, c.usages)
-            );
+            bytes32 op = keccak256(abi.encode("HC.EQUIPMENT.OPERATE.V1", block.chainid, address(this), id, c.usages));
             inventory.reserveFor(op, p.operatingResource, item.owner, p.operatingCost);
             inventory.consumeReservedFor(
                 keccak256(abi.encode(op, "CONSUME")), p.operatingResource, item.owner, p.operatingCost

@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {runtimeHttpServer,composeOrdinaryMarketRuntime} from '../src/runtime-service.js';
+import {runtimeHttpServer,composeOrdinaryMarketRuntime,createOrdinaryRuntime} from '../src/runtime-service.js';
 import {HighCountryMarket} from '../src/market.js';
 import {BudsLedger,MemoryTransactionFixture} from '../src/buds-ledger.js';
 
@@ -98,4 +98,12 @@ test('ordinary runtime requires same identity store and verified inventory recei
   {owner:'seller',asset:'lot',quantity:1,receiptId:'canonical-receipt'});
  await runtime.market.list('seller-token','list','one','lot',1,5,200);
  assert.equal(store.state.assets.get(JSON.stringify(['seller','lot'])).reserved,1);
+});
+
+test('ordinary production entrypoint refuses elevated or unprovisioned database runtime role',async()=>{
+ const unsafePool={query:async()=>({rows:[{role:'root',rolsuper:true}]})};
+ await assert.rejects(createOrdinaryRuntime({pool:unsafePool,namespace:'game',authority:{},
+  rpc:{url:'http://127.0.0.1:8545',chainId:420,contracts:{}},sources:{},
+  inventoryAuthority:{verifyAssetReceipt:async()=>true,requireMarketOpen:async()=>{}}}),
+ /unsafe runtime database role/);
 });

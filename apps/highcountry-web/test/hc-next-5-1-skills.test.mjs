@@ -33,7 +33,7 @@ test('registered skills view renders version cost prerequisite and capped effect
  assert.equal(new URL(calls[0].url).pathname,'/progression/snapshot');
  assert.equal(calls[0].init.headers.authorization,'Bearer verified-account-token');
  assert.match(main.children[0].textContent,/Authenticated progression loaded/);
- const pane=main.children[1],card=pane.children[1];
+ const pane=main.children[1],card=pane.children[2];
  assert.match(card.children[1].textContent,/cost 10 BUDS/);
  assert.match(card.children[3].textContent,/No canonical assets or protected scoring benefit/);
  assert.equal(card.children[4].textContent,'Unlock for 10 BUDS');

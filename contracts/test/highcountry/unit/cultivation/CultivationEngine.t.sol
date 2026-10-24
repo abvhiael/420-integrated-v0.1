@@ -17,6 +17,8 @@ import { RulesetRegistry } from "../../../../src/highcountry/rules/RulesetRegist
 import { CultivationEngine } from "../../../../src/highcountry/cultivation/CultivationEngine.sol";
 import { HarvestEngine } from "../../../../src/highcountry/harvest/HarvestEngine.sol";
 import { HarvestProductRegistry } from "../../../../src/highcountry/harvest/HarvestProductRegistry.sol";
+import { InventoryRegistry } from "../../../../src/highcountry/inventory/InventoryRegistry.sol";
+import { ResourceLedger } from "../../../../src/highcountry/inventory/ResourceLedger.sol";
 import { HarvestScoring } from "../../../../src/highcountry/harvest/HarvestScoring.sol";
 import { GenesisRoots } from "../../../../src/highcountry/types/HighCountryTypes.sol";
 import { HCInvalidState, HCCapacityExceeded } from "../../../../src/highcountry/errors/HighCountryErrors.sol";
@@ -907,5 +909,68 @@ contract CultivationEngineTest is PlantSourcesFixture {
             randomnessRoot: keccak256("x"),
             qualificationRoot: keccak256("q")
         });
+    }
+
+    function testRegisteredHarvestToInventoryRetryTransferAndConsumption() public {
+        uint64 plantId = 96;
+        _grant(
+            address(this),
+            ModuleIds.PLANT_REGISTRY,
+            ActionIds.PLANT_REGISTER,
+            bytes32(uint256(plantId)),
+            keccak256("hc-next:inv:plant")
+        );
+        _grant(
+            address(this),
+            ModuleIds.CULTIVATION_ENGINE,
+            ActionIds.CULTIVATION_UPDATE,
+            bytes32(uint256(plantId)),
+            keccak256("hc-next:inv:env")
+        );
+        _grant(
+            address(this),
+            ModuleIds.CULTIVATION_ENGINE,
+            ActionIds.PHENOTYPE_EXPRESS,
+            bytes32(uint256(plantId)),
+            keccak256("hc-next:inv:phenotype")
+        );
+        _grant(
+            address(this),
+            ModuleIds.HARVEST_ENGINE,
+            ActionIds.HARVEST_ACCEPT,
+            bytes32(uint256(plantId)),
+            keccak256("hc-next:inv:harvest")
+        );
+        _sourcePlant(caps, plants, plantId, genomeId, address(this), 11);
+        cultivation.updateEnvironment(
+            plantId, CultivationEngine.EnvironmentSnapshot(2400, 6000, 7000, 6000, 6000, 5000)
+        );
+        _ready(plantId);
+        cultivation.expressPhenotype(plantId, genomeId, approvedRulesetId);
+        harvest.acceptHarvest(plantId);
+        bytes32 productId = products.registerHarvestProduct(plantId);
+        InventoryRegistry inventory = new InventoryRegistry(address(products));
+        ResourceLedger stock = inventory.ledger();
+        bytes32 lotId = inventory.importHarvest(productId);
+        HarvestProductRegistry.Product memory receipt = products.getProduct(productId);
+        require(inventory.lot(lotId).grower == address(this), "inventory owner provenance");
+        require(inventory.lot(lotId).productId == productId, "inventory product provenance");
+        require(stock.balance(lotId, address(this)).available == receipt.quantityGrams, "import amount mismatch");
+        (bool duplicate,) = address(inventory).call(abi.encodeCall(inventory.importHarvest, (productId)));
+        require(!duplicate, "retry duplicated harvest stock");
+        uint256 consumedAmount = receipt.quantityGrams / 2;
+        if (consumedAmount == 0) consumedAmount = 1;
+        inventory.consume(keccak256("hc-next:inv:consume"), lotId, consumedAmount, false);
+        require(stock.balance(lotId, address(this)).consumed == consumedAmount, "consumption not persisted");
+        uint256 remainder = receipt.quantityGrams - consumedAmount;
+        if (remainder > 0) {
+            inventory.transferAvailable(keccak256("hc-next:inv:transfer"), lotId, address(0xBEEF), remainder);
+            require(stock.balance(lotId, address(0xBEEF)).available == remainder, "transfer not persisted");
+        }
+        require(stock.issued(lotId) == receipt.quantityGrams, "inventory supply altered");
+        require(stock.consumed(lotId) == consumedAmount, "inventory burn altered");
+        plants.advanceStage(plantId, PlantRegistry.PlantStage.TERMINATED);
+        require(plants.activePlantsByParcel(11) == 0, "capacity not released");
+        require(stock.issued(lotId) == receipt.quantityGrams, "termination changed stock");
     }
 }

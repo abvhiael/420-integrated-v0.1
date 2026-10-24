@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {runtimeHttpServer} from '../src/runtime-service.js';
+import {runtimeHttpServer,composeOrdinaryMarketRuntime} from '../src/runtime-service.js';
 import {HighCountryMarket} from '../src/market.js';
 import {BudsLedger,MemoryTransactionFixture} from '../src/buds-ledger.js';
 
@@ -76,4 +76,26 @@ test('ordinary HTTP cancellation and expiry return exact reserved goods without 
  assert.equal(await post('buyer-token','/market/expire',{operation:'expire',listing:'two'}),200);
  assert.deepEqual(store.state.assets.get(JSON.stringify(['seller','lot'])),{available:5,reserved:0});
  assert.equal(store.state.issued,0);
+});
+
+test('ordinary runtime requires same identity store and verified inventory receipts',async()=>{
+ const store=new MemoryTransactionFixture();
+ const identity={
+  store,registeredPrincipal:async token=>token==='seller-token'?'seller':Promise.reject(Error('guest')),
+  requireTrustedIssuer:async (token,source)=>{
+   if(token!=='issuer-token'||source!=='inventory')throw new Error('issuer denied');
+  }
+ };
+ assert.throws(()=>composeOrdinaryMarketRuntime({store,identity:{...identity,store:new MemoryTransactionFixture()},
+  inventoryAuthority:{verifyAssetReceipt:async()=>true}}),/trusted dependencies/);
+ const runtime=composeOrdinaryMarketRuntime({store,identity,
+  inventoryAuthority:{verifyAssetReceipt:async receipt=>receipt.receiptId==='canonical-receipt'},clock:()=>100});
+ await assert.rejects(runtime.market.importAsset('guest','denied',
+  {owner:'seller',asset:'lot',quantity:1,receiptId:'canonical-receipt'}));
+ await assert.rejects(runtime.market.importAsset('issuer-token','forged',
+  {owner:'seller',asset:'lot',quantity:1,receiptId:'fabricated'}),/unverified inventory/);
+ await runtime.market.importAsset('issuer-token','import',
+  {owner:'seller',asset:'lot',quantity:1,receiptId:'canonical-receipt'});
+ await runtime.market.list('seller-token','list','one','lot',1,5,200);
+ assert.equal(store.state.assets.get(JSON.stringify(['seller','lot'])).reserved,1);
 });

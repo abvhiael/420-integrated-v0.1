@@ -47,3 +47,34 @@ test('an active transaction lease prevents overlapping workers',async()=>{
  unlock({txHash:'tx:2'});
  assert.equal((await running).status,'submitted');
 });
+
+test('crash after broadcast before hash recording cannot submit twice',async()=>{
+ const {store,state}=setup();
+ const authority={confirmedReservedTransfer:async()=>state.finalized,
+  proveUnexecutedAndCancelled:async()=>state.cancelled};
+ const settlement={finalize:async()=>{store.state.transferIntents.get('transfer:1').status='finalized';},
+  abort:async()=>{store.state.transferIntents.get('transfer:1').status='cancelled';}};
+ const first=new CanonicalSettlementWorker({store,settlement,authority,leaseMs:1000,clock:()=>1000,
+  submitCanonical:async()=>{state.submissions++;throw new Error('RPC response lost after broadcast');}});
+ await assert.rejects(first.tick('transfer:1'),/RPC response lost/);
+ assert.equal(store.state.settlementJobs.get('transfer:1').dispatchStarted,true);
+ const recovered=new CanonicalSettlementWorker({store,settlement,authority,leaseMs:1000,clock:()=>3000,
+  submitCanonical:async()=>{state.submissions++;return {txHash:'tx:unexpected'};}});
+ assert.equal((await recovered.tick('transfer:1')).status,'reconcile-dispatch');
+ assert.equal(state.submissions,1,'uncertain broadcast never repeated');
+ state.finalized=true;
+ assert.equal((await recovered.tick('transfer:1')).status,'finalized');
+ assert.equal(state.submissions,1);
+});
+test('dispatch marker is durable before calling the transaction writer',async()=>{
+ const {store,state}=setup();
+ const authority={confirmedReservedTransfer:async()=>false,proveUnexecutedAndCancelled:async()=>false};
+ const settlement={finalize:async()=>{},abort:async()=>{}};
+ const worker=new CanonicalSettlementWorker({store,settlement,authority,leaseMs:1000,clock:()=>1000,
+  submitCanonical:async()=>{
+   assert.equal(store.state.settlementJobs.get('transfer:1').dispatchStarted,true);
+   state.submissions++;return {txHash:'tx:1'};
+  }});
+ assert.equal((await worker.tick('transfer:1')).status,'submitted');
+ assert.equal(state.submissions,1);
+});

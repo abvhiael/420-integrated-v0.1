@@ -145,7 +145,7 @@ contract PokerNativeOutcome420 {
     }
     function _awardPots(uint256[9] memory deposits,bool[9] memory folded,
         uint256[9] memory scores,uint8 button,uint256 rake,uint256 gross,
-        uint256[9] memory finalChips)private pure {
+        uint256[9] memory finalChips)internal pure {
         uint256 previous = 0;
         uint256 remainingRake=rake;
         for(uint8 stage=0;stage<9;stage++){

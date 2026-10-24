@@ -36,8 +36,19 @@ for line in raw.splitlines():
  ident['verifierAddress']=re.search(r'0x[0-9a-fA-F]{40}',segment)[0]
  identities.append(ident)
 if len(identities)!=7 or len({x['index'] for x in identities})!=7:raise SystemExit('seven actual verifier runtime identities required')
+native=[]
+for line in raw.splitlines():
+ if 'emit WS8NativeImplementationIdentity(' not in line:continue
+ role=re.search(r'role: "([^"]+)"',line)[1]
+ address=re.search(r'0x[0-9a-fA-F]{40}',line.split('implementation: ',1)[1])[0]
+ codehash=re.search(r'runtimeCodeHash: (0x[0-9a-fA-F]{64})',line)[1]
+ size=int(re.search(r'runtimeBytes: (\d+)',line)[1])
+ if not 0<size<=24576:raise SystemExit('actual native runtime exceeds EIP-170: '+role)
+ native.append(dict(role=role,address=address,runtimeCodeHash=codehash,runtimeBytes=size))
+expected={'engine','clock','admission','play','custody','settlement','admission-factory','play-factory','custody-factory','settlement-factory'}
+if len(native)!=10 or {x['role'] for x in native}!=expected:raise SystemExit('ten actual fixed native implementation identities required')
 report=dict(contractDerivedHandScope=str(scope),previousProofScope='420',scopeCompatibleWithPreviouslyQualifiedWS2WS3=scope==420,
- historicalStatementComparisons=comparisons,actualVerifierIdentities=identities,
+ historicalStatementComparisons=comparisons,actualVerifierIdentities=identities,actualNativeIdentities=native,
  provingMaterial='Historical archives contain no proving keys. New experimental exact-relation fixture keys were persisted and reused for all context-specific proofs; no old proof was relabelled.',
  qualification='CONTEXT/IDENTITY REPORT ONLY; actual cryptographic verification and funded execution are separate mandatory gates')
 out=Path(sys.argv[2]);out.parent.mkdir(parents=True,exist_ok=True);out.write_text(json.dumps(report,indent=2)+'\n',encoding='utf-8')

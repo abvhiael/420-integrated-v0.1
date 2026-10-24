@@ -21,9 +21,12 @@ paths = [p for p in paths if not p.endswith(("/go.mod", "/go.sum"))]
 fresh = {
     'contracts/src/bet/PokerNLHEBetting420.sol',
     'contracts/src/bet/PokerActionDisputeClock420.sol',
+    'contracts/src/bet/PokerNativeOutcome420.sol',
+    'clients/420bet-poker/zkshuffle/triage_slither_poker.py',
     'clients/420bet-poker/crypto/nlhe-betting.mjs',
     'clients/420bet-poker/crypto/nlhe-betting.test.mjs',
     'clients/420bet-poker/crypto/nlhe-independent-verifier.mjs',
+    'clients/420bet-poker/crypto/nlhe-independent-verifier.test.mjs',
 }
 paths = [p for p in paths if p not in fresh]
 subprocess.run(["git", "diff", "--exit-code", SOURCE, "HEAD", "--", *paths], check=True)

@@ -73,8 +73,8 @@ contract PokerNativeOutcome54Test is PokerLiveCardReveals54Test {
     function testFullProvenShowdownReconstructsCanonicalPayoutAndSealsTranscript() public {
         bytes32 id=_fundedAndProved();
         PokerCanonicalRake420.Policy memory policy=PokerCanonicalRake420.Policy(500,20,true,true);
-        _signedAction(id,0,PokerNLHEBetting420.Move.CALL,10,PLAYER_KEY);
-        _signedAction(id,1,PokerNLHEBetting420.Move.CHECK,0,OPPONENT_KEY);
+        _signedAction(id,0,PokerNLHEStorage420.Move.CALL,10,PLAYER_KEY);
+        _signedAction(id,1,PokerNLHEStorage420.Move.CHECK,0,OPPONENT_KEY);
         bytes32 earlyTranscript=engine.actionTranscriptRoot(id);
         require(earlyTranscript!=bytes32(0),"signed actions must have independently replayable commitment");
         for(uint8 pos=5;pos<=7;pos++){
@@ -82,18 +82,18 @@ contract PokerNativeOutcome54Test is PokerLiveCardReveals54Test {
             _openPublicStreet(id,1,pos,pos);
         }
         live.advance(id,1);
-        _signedAction(id,1,PokerNLHEBetting420.Move.CHECK,0,OPPONENT_KEY);
-        _signedAction(id,0,PokerNLHEBetting420.Move.CHECK,0,PLAYER_KEY);
+        _signedAction(id,1,PokerNLHEStorage420.Move.CHECK,0,OPPONENT_KEY);
+        _signedAction(id,0,PokerNLHEStorage420.Move.CHECK,0,PLAYER_KEY);
         _submitPublicStreet(id,2,9,0);_submitPublicStreet(id,2,9,1);
         _openPublicStreet(id,2,9,13);
         live.advance(id,2);
-        _signedAction(id,1,PokerNLHEBetting420.Move.CHECK,0,OPPONENT_KEY);
-        _signedAction(id,0,PokerNLHEBetting420.Move.CHECK,0,PLAYER_KEY);
+        _signedAction(id,1,PokerNLHEStorage420.Move.CHECK,0,OPPONENT_KEY);
+        _signedAction(id,0,PokerNLHEStorage420.Move.CHECK,0,PLAYER_KEY);
         _submitPublicStreet(id,3,11,0);_submitPublicStreet(id,3,11,1);
         _openPublicStreet(id,3,11,14);
         live.advance(id,3);
-        _signedAction(id,1,PokerNLHEBetting420.Move.CHECK,0,OPPONENT_KEY);
-        _signedAction(id,0,PokerNLHEBetting420.Move.CHECK,0,PLAYER_KEY);
+        _signedAction(id,1,PokerNLHEStorage420.Move.CHECK,0,OPPONENT_KEY);
+        _signedAction(id,0,PokerNLHEStorage420.Move.CHECK,0,PLAYER_KEY);
         cheat54.expectRevert(PokerNativeOutcome420.InvalidState.selector);
         result.calculate(id,policy);
         for(uint8 pos=0;pos<4;pos++){
@@ -111,7 +111,7 @@ contract PokerNativeOutcome54Test is PokerLiveCardReveals54Test {
         require(ledger.seatOf(TABLE,0).chips==balances[0]&&
             ledger.seatOf(TABLE,1).chips==balances[1],"ledger only accepts recomputed winner");
         require(ledger.handConsumed(id)&&engine.handSettled(id),"single atomic terminal result");
-        cheat54.expectRevert(PokerNLHEBetting420.InvalidState.selector);
+        cheat54.expectRevert(PokerNLHEStorage420.InvalidState.selector);
         engine.settle(id,policy);
     }
     function testNativeSidePotsShortAllInAndFoldedSeatCannotWin() public {
@@ -144,10 +144,10 @@ contract PokerNativeOutcome54Test is PokerLiveCardReveals54Test {
     function testOnChainUncontestedOutcomeSettlesExactEscrowOnce() public {
         bytes32 id=_fundedAndProved();
         PokerCanonicalRake420.Policy memory policy=PokerCanonicalRake420.Policy(500,20,true,true);
-        cheat54.expectRevert(PokerNLHEBetting420.InvalidState.selector);
+        cheat54.expectRevert(PokerNLHEStorage420.InvalidState.selector);
         engine.settle(id,policy);
-        _signedAction(id,0,PokerNLHEBetting420.Move.FOLD,0,PLAYER_KEY);
-        require(engine.gameOf(id).phase==PokerNLHEBetting420.Phase.UNCONTESTED,"uncontested");
+        _signedAction(id,0,PokerNLHEStorage420.Move.FOLD,0,PLAYER_KEY);
+        require(engine.gameOf(id).phase==PokerNLHEStorage420.Phase.UNCONTESTED,"uncontested");
         (uint256[9] memory amounts,uint256 rake)=result.calculate(id,policy);
         require(amounts[0]==390&&amounts[1]==410&&rake==0,"uncalled blind/refund");
         cheat54.prank(OTHER);engine.settle(id,policy);
@@ -156,12 +156,12 @@ contract PokerNativeOutcome54Test is PokerLiveCardReveals54Test {
         require(coin.balanceOf(address(ledger))==800&&ledger.totalChips(TABLE)==800,
             "token-backing preserved");
         require(ledger.handConsumed(id)&&engine.handSettled(id),"replay protection");
-        cheat54.expectRevert(PokerNLHEBetting420.InvalidState.selector);
+        cheat54.expectRevert(PokerNLHEStorage420.InvalidState.selector);
         engine.settle(id,policy);
     }
     function testTableCannotSubstituteRakePolicyAtSettlement() public {
         bytes32 id=_fundedAndProved();
-        _signedAction(id,0,PokerNLHEBetting420.Move.FOLD,0,PLAYER_KEY);
+        _signedAction(id,0,PokerNLHEStorage420.Move.FOLD,0,PLAYER_KEY);
         PokerCanonicalRake420.Policy memory forged=PokerCanonicalRake420.Policy(300,20,true,true);
         cheat54.expectRevert(PokerCanonicalRake420.InvalidPolicy.selector);
         engine.settle(id,forged);
@@ -176,7 +176,7 @@ contract PokerNativeOutcome54Test is PokerLiveCardReveals54Test {
         require(dispute.isFrozen(id),"settlement temporarily frozen");
         // Objective native gameplay continues despite a claim with no verified
         // contradictory proof. The escrow remains immutable.
-        _signedAction(id,0,PokerNLHEBetting420.Move.FOLD,0,PLAYER_KEY);
+        _signedAction(id,0,PokerNLHEStorage420.Move.FOLD,0,PLAYER_KEY);
         cheat54.expectRevert(PokerActionDisputeClock420.InvalidState.selector);
         engine.settle(id,policy);
         cheat54.prank(OTHER);engine.proposeDisputeResolution(id,policy);
@@ -206,7 +206,7 @@ contract PokerNativeOutcome54Test is PokerLiveCardReveals54Test {
         // No calculator is currently bound, so this verifies the actual
         // foreign-engine/reveal rejection, not just immutability on rebinding.
         WrongEngineOutcome54 attacker=new WrongEngineOutcome54();
-        cheat54.expectRevert(PokerNLHEBetting420.InvalidConfiguration.selector);
+        cheat54.expectRevert(PokerNLHEStorage420.InvalidConfiguration.selector);
         cheat54.prank(ADMIN);engine.bindOutcome(TABLE,address(attacker));
     }
 

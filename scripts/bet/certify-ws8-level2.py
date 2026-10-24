@@ -11,10 +11,29 @@ assert subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip() 
 paths = [Path("artifacts/ws8-crypto/execution.json"), Path("artifacts/ws8-funded/execution.json"), Path("artifacts/ws8-funded/independent-outcome.json"), Path("artifacts/poker-5a5/execution.json")]
 crypto, funded, replay, betting = [json.loads(p.read_text(encoding="utf-8")) for p in paths]
 assert all(r["qualifiedSHA"] == sha and r["trackedWorkingTreeDirty"] is False for r in [crypto, funded, replay, betting])
-assert len(betting['mandatoryTests']) == 30 and set(betting['mandatoryTests'].values()) == {'Success'}
+assert len(betting['mandatoryTests']) == 32 and set(betting['mandatoryTests'].values()) == {'Success'}
 assert betting['independentTestsPassed'] >= 23
 runtime = json.loads(Path('artifacts/poker-5a5/runtime-size.json').read_text(encoding='utf-8'))
 assert runtime['sourceCommit'] == sha
+assert runtime['qualifiedSHA']==sha and runtime['trackedWorkingTreeDirty'] is False
+assert runtime['runtimeDeploymentCompatible'] is True
+assert 0<runtime['constructorGasUsed']<=runtime['constructorGasBudget']==16_000_000
+contextPath=Path('artifacts/ws8-funded/context-compatibility.json')
+context=json.loads(contextPath.read_text(encoding='utf-8'))
+assert len(context['actualVerifierIdentities'])==7 and len(context['actualNativeIdentities'])==10
+assert all(0<x['runtimeBytes']<=24576 for x in context['actualNativeIdentities'])
+for identity in context['actualNativeIdentities']:
+    role=identity['role']
+    name={'engine':'PokerNLHEBetting420','clock':'PokerActionDisputeClock420'}.get(role)
+    if name is None:
+        name='PokerNLHE'+role.split('-')[0].capitalize()+('Factory420' if role.endswith('-factory') else 'Module420')
+    assert identity['runtimeBytes']==runtime['contracts'][name]['runtimeTemplateBytes']
+paths += [contextPath,Path('artifacts/poker-5a5/runtime-size.json')]
+staticPath=Path('artifacts/poker-5a5-static/execution.json')
+static=json.loads(staticPath.read_text(encoding='utf-8'))
+assert static['qualifiedSHA']==sha and static['trackedWorkingTreeDirty'] is False
+assert not any(x['severity'].lower() in {'high','medium'} for x in static['findings'])
+paths += [staticPath]
 assert crypto["genuineProofsVerified"] == 41
 assert len(funded["mandatoryTests"]) == 11 and set(funded["mandatoryTests"].values()) == {"Success"}
 assert funded["totalPassed"] >= 15
@@ -25,6 +44,9 @@ report = {"level": 2, "qualifiedSHA": sha, "acceptance": "passed", "genuineProof
     "betting5A5Tests": betting['mandatoryTests'], "freshNativeOwners": betting['nativeOwners'],
     "scope": "Level 2 local rules and cryptographic integration; not Level 3 or live deployment acceptance",
     "liveDeploymentReady": runtime['liveDeploymentReady'], "compiledRuntimeSizes": runtime['contracts'],
+    "constructorGasUsed": runtime['constructorGasUsed'],
+    "actualNativeIdentities": context['actualNativeIdentities'],
+    "staticFindings": static['total'], "unresolvedHighMedium": 0,
     "mandatoryTests": funded["mandatoryTests"], "scopedTestsPassed": funded["totalPassed"],
     "handId": replay["handId"], "terminalTranscript": replay["terminalTranscript"],
     "runURL": f"https://github.com/{os.environ['GITHUB_REPOSITORY']}/actions/runs/{os.environ['GITHUB_RUN_ID']}",

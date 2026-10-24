@@ -5,7 +5,7 @@ import {replayBetting as replay} from './nlhe-betting.mjs';
 
 const base={stacks:[400,400],button:0,smallBlind:10,bigBlind:20};
 const signed=(nonce,seat,type,amount=0,timestamp=100)=>({nonce,seat,type,amount,timestamp,
-  epochCurrent:true,stateRootMatched:true,signed:true,signatureMatchesSeat:true,expiry:10000});
+  epochCurrent:true,stateRootMatched:true,signed:true,signatureMatchesSeat:true,actionAuthorized:true,expiry:10000});
 const reveal=(from,to,timestamp=100)=>({type:'reveal',from,to,timestamp,accepted:true,finalRootMatched:true});
 
 test('5A5 exact deadline belongs to action; timeout requires the canonical deadline',()=>{
@@ -30,6 +30,7 @@ test('5A5 old deadline cannot expire next actor and timestamps cannot go backwar
 
 test('5A5 signed action capability is independently enforced',()=>{
   assert.throws(()=>verify({...base,actions:[{...signed(1,0,'call',10),actionAuthorized:false}]}),/revoked/);
+  assert.throws(()=>verify({...base,actions:[{...signed(1,0,'call',10),actionAuthorized:undefined}]}),/missing/);
   assert.equal(verify({...base,actions:[]}).timingVerified,false);
 });
 

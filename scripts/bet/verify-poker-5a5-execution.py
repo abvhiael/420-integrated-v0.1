@@ -8,7 +8,9 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-FUNDED = '''ImmutableTurnPolicyRejectsStarterChosenClock
+FUNDED = '''ProductionConstructorFitsSixteenMillionGasBudget
+FixedModulesFitDeploymentLimitsAndRejectDirectMutation
+ImmutableTurnPolicyRejectsStarterChosenClock
 PolicyRequiresGovernanceBoundResolverAndValidDuration
 EveryActionAtomicallyCommitsActorClockAndDeadline
 ControllerCannotOverwriteOrExpireNativeTurnClock
@@ -93,7 +95,10 @@ def main():
     dirty = subprocess.run(args+['diff', '--quiet', 'HEAD'], cwd=ROOT).returncode != 0
     for file in ('contracts/test/BetPokerBettingRounds55.t.sol',
                  'clients/420bet-poker/crypto/nlhe-5a5.test.mjs',
-                 'scripts/bet/verify-poker-5a5-execution.py'):
+                 'scripts/bet/verify-poker-5a5-execution.py',
+                 'contracts/src/bet/PokerNLHEStorage420.sol',
+                 'contracts/src/bet/PokerNLHEModules420.sol',
+                 'contracts/src/bet/PokerNLHEModuleFactories420.sol'):
         dirty |= subprocess.run(args+['ls-files', '--error-unmatch', file], cwd=ROOT,
                                 stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode != 0
     report = dict(level=1, qualifiedSHA=None if dirty else sha,

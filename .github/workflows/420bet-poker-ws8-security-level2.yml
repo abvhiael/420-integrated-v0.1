@@ -20,6 +20,40 @@ concurrency:
   group: poker-ws8-level2-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 jobs:
+  scoped-level1-static-security:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Bind exact source SHA
+        run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install scoped analyzer and compiler
+        run: |
+          mkdir -p artifacts/poker-5a5-static
+          python3 -m pip install slither-analyzer==0.11.6 web3==7.13.0 eth-abi==5.2.0 eth-typing==5.2.1 eth-utils==5.3.1
+          python3 -m pip freeze > artifacts/poker-5a5-static/python-modules.txt
+          solc-select install 0.8.30
+          solc-select use 0.8.30
+      - name: Analyze actual module, proof and custody graphs; reject every unresolved High/Medium finding
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/poker-5a5-static
+          for target in PokerNativeOutcome420 PokerCanonicalSettlement420 PokerDeliveryProofBook420; do
+            slither "contracts/src/bet/$target.sol" --compile-force-framework solc --solc-args '--optimize --optimize-runs 200 --via-ir --evm-version cancun' --json "artifacts/poker-5a5-static/$target.json" > "artifacts/poker-5a5-static/$target.log" 2>&1 || {
+              test -s "artifacts/poker-5a5-static/$target.json" || { cat "artifacts/poker-5a5-static/$target.log"; exit 1; }
+            }
+          done
+          python3 clients/420bet-poker/zkshuffle/triage_slither_poker.py artifacts/poker-5a5-static/PokerNativeOutcome420.json artifacts/poker-5a5-static/PokerCanonicalSettlement420.json artifacts/poker-5a5-static/PokerDeliveryProofBook420.json artifacts/poker-5a5-static/execution.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: poker-5a5-level1-static-execution
+          path: artifacts/poker-5a5-static/
+          if-no-files-found: error
   scoped-level1-betting-and-turns:
     runs-on: ubuntu-latest
     timeout-minutes: 65
@@ -54,6 +88,7 @@ jobs:
         run: |
           set -euo pipefail
           forge test --use 0.8.30 --match-contract 'PokerBetting(Kernel|Rounds)55Test' --json > ../artifacts/poker-5a5/foundry-55.json
+          forge test --use 0.8.30 --match-contract PokerBettingRounds55Test --match-test test55ProductionConstructorFitsSixteenMillionGasBudget -vvvv | tee ../artifacts/poker-5a5/constructor.log
       - name: Fresh execution of changed engine native regressions
         working-directory: contracts
         run: |
@@ -64,7 +99,7 @@ jobs:
       - name: Require every mandatory actual execution and source identity
         run: |
           python3 scripts/bet/verify-poker-5a5-execution.py artifacts/poker-5a5 artifacts/poker-5a5/execution.json
-          python3 scripts/bet/record-poker-runtime-size.py artifacts/poker-5a5/runtime-size.json
+          python3 scripts/bet/record-poker-runtime-size.py artifacts/poker-5a5/runtime-size.json artifacts/poker-5a5/constructor.log
       - uses: actions/upload-artifact@v4
         with:
           name: poker-5a5-level1-native-execution
@@ -170,7 +205,7 @@ jobs:
           path: artifacts/ws8-funded/
           if-no-files-found: error
   security-evidence-certificate:
-    needs: [inherited-proof-provenance,scoped-level1-cryptography,real-funded-hand-and-adversarial-integration,scoped-level1-betting-and-turns]
+    needs: [inherited-proof-provenance,scoped-level1-cryptography,real-funded-hand-and-adversarial-integration,scoped-level1-betting-and-turns,scoped-level1-static-security]
     if: always()
     runs-on: ubuntu-latest
     steps:
@@ -180,11 +215,13 @@ jobs:
           B: ${{ needs.scoped-level1-cryptography.result }}
           C: ${{ needs.real-funded-hand-and-adversarial-integration.result }}
           D: ${{ needs.scoped-level1-betting-and-turns.result }}
+          E: ${{ needs.scoped-level1-static-security.result }}
         run: |
           test "$A" = success
           test "$B" = success
           test "$C" = success
           test "$D" = success
+          test "$E" = success
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
@@ -200,6 +237,10 @@ jobs:
         with:
           name: poker-5a5-level1-native-execution
           path: artifacts/poker-5a5
+      - uses: actions/download-artifact@v4
+        with:
+          name: poker-5a5-level1-static-execution
+          path: artifacts/poker-5a5-static
       - name: Certify matching exact-SHA actual execution records
         env:
           EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}

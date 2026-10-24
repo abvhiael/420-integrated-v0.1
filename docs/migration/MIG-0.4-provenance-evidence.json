@@ -1,0 +1,99 @@
+{
+  "schema": "420-mig-0-4-provenance-evidence-v1",
+  "step": "MIG-0.4",
+  "verifiedAt": "2026-10-24",
+  "qualifyingRun": {
+    "id": 40106566317,
+    "implementationSha": "bd53c0c68bb933be90604a59621b58ee48859ccf",
+    "conclusion": "success",
+    "scope": "static source boundary only"
+  },
+  "pullRequests": [
+    {
+      "number": 780,
+      "headSha": "969732595513691ce55c2a2c49a0d9871f577c58",
+      "baseSha": "6da29d73153e0771caeecc2b739f763ca414651d",
+      "state": "open",
+      "draft": true,
+      "changedPaths": [
+        "docs/arcade/MAD-BUDS-MB3-1-SOURCE-BOUNDARY.md",
+        "packages/mad-buds-kush-krusher/src/character-contract.mjs",
+        "packages/mad-buds-kush-krusher/test/character-contract.test.mjs"
+      ]
+    },
+    {
+      "number": 771,
+      "headSha": "ade0268f0b507e5912181e278c6f25923a3472d8",
+      "baseSha": "a8d40eff26f464d4f32251a852edbffcf41a6d5d",
+      "state": "open",
+      "draft": false,
+      "changedPaths": [
+        "assets/arcade/mad-buds/sativa-steve/PHASE-E-ANIMATION-PREPARATION.md"
+      ]
+    }
+  ],
+  "godot": {
+    "primaryRuntimeIntended": "Godot",
+    "sourceRepository": "abvhiael/MadBuds-Godot",
+    "branch": "main",
+    "gitTreeSha": "babda3859a10e77f3c362d97acd18f170ae2fda6",
+    "treeTruncated": false,
+    "projectFileFound": true,
+    "projectPath": "project.godot",
+    "projectBlobSha": "b66c4a462160315e63cd72ba74b6557e988afdb2",
+    "trackedFiles": 196,
+    "scenes": [
+      "scenes/characters/kush_krusher.tscn",
+      "scenes/main.tscn"
+    ],
+    "scripts": [
+      "scripts/destructible.gd",
+      "scripts/kush_animation.gd",
+      "scripts/kush_krusher.gd",
+      "scripts/main.gd"
+    ],
+    "testScripts": [
+      "tests/test_animation_assets.gd",
+      "tests/test_kush_contract.gd",
+      "tests/test_mb3_level2.gd"
+    ],
+    "assetManifests": 15,
+    "trackedPngs": 150,
+    "conclusion": "SOURCE_AND_HEADLESS_RUNTIME_QUALIFIED_AT_GODOT_PR4_SHA"
+  },
+  "binaryAssets": {
+    "trackedPngsInGodot": 150,
+    "manifestFilesInGodot": 15,
+    "sha256VerifiedAgainstBytes": 150,
+    "conclusion": "PASS_AT_GODOT_PR4_SHA",
+    "note": "GitHub Actions run 40108948204 verified the actual 150 PNG bytes against all 15 manifests at 0562825a51b6193d0936e18f3bd8e9937220ee16."
+  },
+  "legacyUnity": {
+    "sourceRepo": "abvhiael/420-integrated",
+    "sourcePath": "mad-buds/",
+    "characterBibleBlob": "622b528b66b9f7836dd79c33fbb6966de34e6902",
+    "integrationContractBlob": "3d96370bb7ff571bb04eace85d95fd164c916e52",
+    "artReadmeBlob": "9d1db94492b0dbb3504425e0a4f5895996c79296",
+    "unityReadmeBlob": "7a5937f3f38771a937719fc90db1b322ac791453",
+    "conclusion": "KNOWN_PATHS_VERIFIED; EXHAUSTIVE_RECURSIVE_TREE_UNVERIFIED"
+  },
+  "finalStatus": "GODOT_BINARY_AND_RUNTIME_QUALIFIED_UNITY_RECURSIVE_INVENTORY_STILL_OPEN",
+  "releasePolicy": "No source deletions or migration cutover permitted until Godot, binary and full Unity provenance gates are satisfied",
+  "godotQualification": {
+    "sourceRepository": "abvhiael/MadBuds-Godot",
+    "pr": 4,
+    "exactHeadSha": "0562825a51b6193d0936e18f3bd8e9937220ee16",
+    "workflowRun": 40108948204,
+    "workflowUrl": "https://github.com/abvhiael/MadBuds-Godot/actions/runs/40108948204",
+    "checks": [
+      "15 manifest JSONs",
+      "150 PNG byte SHA-256 comparisons",
+      "Godot 4.4.1 headless import",
+      "texture playback",
+      "gameplay contract",
+      "real scene integration"
+    ],
+    "result": "SUCCESS",
+    "secondaryLevel1Run": 40108948149
+  }
+}

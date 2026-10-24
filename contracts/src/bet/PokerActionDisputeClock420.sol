@@ -43,6 +43,12 @@ contract PokerActionDisputeClock420 {
         if(deals_==address(0))revert InvalidInput();
         deals=PokerConfidentialDeal420(deals_);
     }
+    /// @notice Canonical turn snapshot. The dispute hold remains a separate
+    /// settlement concern and cannot freeze objectively authenticated gameplay.
+    function nativeTurnOf(bytes32 handId) external view returns(uint64 deadline,uint64 nonce,uint8 seat,bytes32 stateHash,bool active){
+        Clock storage c=clocks[handId];
+        return(c.deadline,c.nonce,c.seat,c.stateHash,c.active);
+    }
     function start(bytes32 handId,uint8 seat,uint64 nonce,uint64 deadline,bytes32 stateHash) external {
         Clock storage existing=clocks[handId];
         if(existing.disputed) revert InvalidState();

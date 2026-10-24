@@ -75,7 +75,7 @@ export function verifyBettingTranscript({stacks,button,smallBlind,bigBlind,actio
       if(owed)p.folded=true;
     } else {
       requireTrue(!timed||event.timestamp<=turnDeadline,'expired turn');
-      requireTrue(event.actionAuthorized!==false,'revoked action capability');
+      requireTrue(event.actionAuthorized===true,'revoked or missing action capability');
       requireTrue(event.signed===true&&event.signatureMatchesSeat===true&&event.expiry>=event.timestamp,'unauthenticated action');
       switch(event.type) {
       case 'fold':requireTrue(amount===0,'fold amount');p.folded=true;break;

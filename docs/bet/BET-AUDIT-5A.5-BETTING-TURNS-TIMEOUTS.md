@@ -72,15 +72,33 @@ same clean Git SHA. Historical cryptographic inheritance is valid only where
 source identities match; changed native contracts require fresh native tests.
 Unrelated 420Arcade documentation failures are a separate owner.
 
-## Retained deployment gate
+## Deployable fixed modules
 
 Level 1/2 establish executable cash-game rules and cryptographic integration in
 the local qualification environment. They do not grant live deployment or Level
 3 acceptance. A direct Solidity 0.8.30 / Cancun / via-IR / optimizer-200 compilation
 of the main baseline (`6b13e491b7088c113f4be0abd5826509053ed3bb`) produced a
 31,872-byte betting-engine runtime, already above the EIP-170 24,576-byte limit.
-The 5A.5 candidate is also above that limit. Its actual compiled size is exported
-by CI and included in the certificate, which explicitly records that live
-deployment is not ready. Splitting the monolithic engine into deployable modules,
-then requalifying its exact deployed identities, remains a deployment gate; a
-passing Foundry test must never be presented as evidence that this gate passed.
+The native engine therefore delegates mutations to four fixed modules: admission,
+play, custody/recovery and settlement. The engine records each module's runtime
+code hash at construction and checks it on every entry. There is no module
+replacement, upgrade or caller-selected delegate target. Modules reject every
+direct mutating call and share one explicit ERC-7201 storage layout. The
+engine remains the actor seen by the ledger, dispute clock and proof gates;
+authenticated relayers retain their original caller identity.
+Public game-state views live on the facade, avoiding four duplicated copies in
+the modules. A real constructor execution must stay within a 16-million-gas
+transaction budget in addition to the code and initcode size limits.
+
+Four linked factory libraries deploy the modules without embedding all module
+creation code in the engine initcode. Deployment must link these exact compiled
+libraries. CI requires every engine, module and factory to satisfy EIP-170 and
+EIP-3860, and exports actual compiler template sizes. The funded security owner
+also checks actual deployed sizes, pinned code hashes and all 18 direct-mutation
+rejections. Source-level Solidity enum values and error selectors use the
+declaring `PokerNLHEStorage420` namespace; canonical ABI selectors remain the same.
+
+Runtime compatibility alone does not grant live deployment approval. Existing
+production ceremony/key custody, external audit and live-network acceptance gates
+remain separate. The certificate explicitly distinguishes runtime compatibility
+from Level 3/live deployment readiness.

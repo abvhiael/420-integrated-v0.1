@@ -18,7 +18,7 @@ for(const line of log.split('\n')) {
  if((m=line.match(/emit WS8ActionRecord\(nonce: (\d+), seat: (\d+), move: (\d+), amount: (\d+)\)/))) {
   const [,nonce,seat,move,amount]=m.map(Number);
   actions.push({nonce,seat,type:['fold','check','call','raise'][move],amount,
-   epochCurrent:true,stateRootMatched:true,signed:true,signatureMatchesSeat:true,expiry:1700000050,timestamp:1700000000});
+   epochCurrent:true,stateRootMatched:true,signed:true,signatureMatchesSeat:true,actionAuthorized:true,expiry:1700000050,timestamp:1700000000});
  } else if((m=line.match(/emit WS8StreetRecord\(street: (\d+)\)/))) {
   const [from,to]=streetNames[m[1]];actions.push({type:'reveal',from,to,accepted:true,finalRootMatched:true});
  } else if((m=line.match(/emit CanonicalCardRevealed\(handId: (0x[0-9a-f]+), position: (\d+), street: (\d+), card: (\d+)\)/i))) {

@@ -220,12 +220,12 @@ contract PokerNLHEBetting54Case1Test is PokerNLHEBetting54Fixture {
         PokerNLHEBetting420.Game memory g=engine.gameOf(id);
         require(g.toAct==0&&g.pot==30&&g.currentBet==20,"heads-up blind/button");
         require(!engine.canRevealStreet(id,1),"flop cannot be exposed prematurely");
-        _signedAction(id,0,PokerNLHEBetting420.Move.CALL,10,PLAYER_KEY);
+        _signedAction(id,0,PokerNLHEStorage420.Move.CALL,10,PLAYER_KEY);
         g=engine.gameOf(id);
         require(g.toAct==1 && g.pot==40,"next actor");
-        _signedAction(id,1,PokerNLHEBetting420.Move.CHECK,0,OPPONENT_KEY);
+        _signedAction(id,1,PokerNLHEStorage420.Move.CHECK,0,OPPONENT_KEY);
         g=engine.gameOf(id);
-        require(g.phase==PokerNLHEBetting420.Phase.AWAIT_FLOP,"waiting for verified board");
+        require(g.phase==PokerNLHEStorage420.Phase.AWAIT_FLOP,"waiting for verified board");
         require(engine.canRevealStreet(id,1),"authorized flop");
         require(g.pot==40 && g.nonce==2,"conserved signed actions");
         require(ledger.reservedInHand(TABLE)==800,"funds locked through betting");
@@ -238,7 +238,7 @@ contract PokerNLHEBetting54Case2Test is PokerNLHEBetting54Fixture {
         cheat54.warp(block.timestamp+61);
         engine.timeout(id);
         PokerNLHEBetting420.Game memory g=engine.gameOf(id);
-        require(g.phase==PokerNLHEBetting420.Phase.UNCONTESTED,"fold terminal");
+        require(g.phase==PokerNLHEStorage420.Phase.UNCONTESTED,"fold terminal");
         require(engine.playerOf(id,0).folded,"auto-fold on owed bet");
         require(g.pot==30 && g.nonce==1,"timeout cannot alter chips");
     }
@@ -248,18 +248,18 @@ contract PokerNLHEBetting54Case3Test is PokerNLHEBetting54Fixture {
     function testInvalidSignedCallAndWrongTurnCannotMutateTranscript() public {
         bytes32 id=_readyBetting();
         PokerNLHEBetting420.Game memory g=engine.gameOf(id);
-        cheat54.expectRevert(PokerNLHEBetting420.WrongTurn.selector);
-        engine.action(id,1,PokerNLHEBetting420.Move.CHECK,0,uint64(block.timestamp+30),
+        cheat54.expectRevert(PokerNLHEStorage420.WrongTurn.selector);
+        engine.action(id,1,PokerNLHEStorage420.Move.CHECK,0,uint64(block.timestamp+30),
             g.stateRoot,hex"dead");
         bytes32 expected=g.stateRoot;
         uint64 expiry=uint64(block.timestamp+50);
         bytes32 moveHash=keccak256(abi.encode(engine.ACTION_DOMAIN(),id,
-            uint8(g.phase),uint8(0),uint8(PokerNLHEBetting420.Move.CALL),uint256(4)));
+            uint8(g.phase),uint8(0),uint8(PokerNLHEStorage420.Move.CALL),uint256(4)));
         bytes32 digest=signing.actionDigest(id,0,1,g.stateRoot,moveHash,expiry);
         (uint8 v,bytes32 rr,bytes32 ss)=signedVm.sign(PLAYER_KEY,digest);
         bytes memory signature=abi.encodePacked(rr,ss,v);
-        cheat54.expectRevert(PokerNLHEBetting420.InvalidAction.selector);
-        engine.action(id,0,PokerNLHEBetting420.Move.CALL,4,expiry,g.stateRoot,signature);
+        cheat54.expectRevert(PokerNLHEStorage420.InvalidAction.selector);
+        engine.action(id,0,PokerNLHEStorage420.Move.CALL,4,expiry,g.stateRoot,signature);
         require(engine.gameOf(id).stateRoot==expected,"invalid action cannot advance");
     }
 }
@@ -270,13 +270,13 @@ contract PokerNLHEBetting54Case4Test is PokerNLHEBetting54Fixture {
         PokerNLHEBetting420.Game memory g=engine.gameOf(id);
         uint64 expiry=uint64(block.timestamp+50);
         bytes32 moveHash=keccak256(abi.encode(engine.ACTION_DOMAIN(),id,
-            uint8(g.phase),uint8(0),uint8(PokerNLHEBetting420.Move.CALL),uint256(10)));
+            uint8(g.phase),uint8(0),uint8(PokerNLHEStorage420.Move.CALL),uint256(10)));
         bytes32 digest=signing.actionDigest(id,0,1,g.stateRoot,moveHash,expiry);
         (uint8 v,bytes32 rr,bytes32 ss)=signedVm.sign(PLAYER_KEY,digest);
         bytes memory signature=abi.encodePacked(rr,ss,v);
         signing.checkSignature(id,0,1,g.stateRoot,moveHash,expiry,signature);
         require(signing.lastActionNonce(id,0)==0,"signature remains unconsumed");
-        engine.action(id,0,PokerNLHEBetting420.Move.CALL,10,expiry,g.stateRoot,signature);
+        engine.action(id,0,PokerNLHEStorage420.Move.CALL,10,expiry,g.stateRoot,signature);
         require(engine.gameOf(id).nonce==1,"engine atomically consumes");
     }
 }
@@ -289,7 +289,7 @@ contract PokerNLHEBetting54Case5Test is PokerNLHEBetting54Fixture {
         _ensureNativeDisputeResolver();
         cheat54.prank(PLAYER);engine.reserve(id);
         require(ledger.reservedInHand(TABLE)==800,"funded escrow locked");
-        cheat54.expectRevert(PokerNLHEBetting420.TooEarly.selector);
+        cheat54.expectRevert(PokerNLHEStorage420.TooEarly.selector);
         cheat54.prank(OTHER);engine.cancelWithheldDeal(id);
         cheat54.warp(block.timestamp+1 hours+121);
         cheat54.prank(OTHER);engine.cancelWithheldDeal(id);
@@ -298,7 +298,7 @@ contract PokerNLHEBetting54Case5Test is PokerNLHEBetting54Fixture {
             "no locks after safe original-balance refund");
         require(ledger.seatOf(TABLE,0).chips==400&&ledger.seatOf(TABLE,1).chips==400,
             "dealer never transfers chips");
-        cheat54.expectRevert(PokerNLHEBetting420.InvalidState.selector);
+        cheat54.expectRevert(PokerNLHEStorage420.InvalidState.selector);
         engine.cancelWithheldDeal(id);
     }
 }
@@ -318,7 +318,7 @@ contract PokerNLHEBetting54Case6Test is PokerNLHEBetting54Fixture {
         require(!delivery.allAcknowledged(id),"rotated key cannot reuse proved ciphertext");
         cheat54.expectRevert(PokerDeliveryProofBook420.InvalidState.selector);
         proofBook.envelopeHashFor(id,0);
-        cheat54.expectRevert(PokerNLHEBetting420.InvalidState.selector);
+        cheat54.expectRevert(PokerNLHEStorage420.InvalidState.selector);
         engine.start(id,0,60);
         require(ledger.reservedInHand(TABLE)==800,"no escrow consumed by rotated proof");
     }
@@ -330,14 +330,14 @@ contract PokerNLHEBetting54WS3AdversarialTest is PokerNLHEBetting54Fixture {
         _proveRecipientKeys();
         _proveAggregateKey();
         _publishEncryptedManifest(id);
-        cheat54.expectRevert(PokerNLHEBetting420.InvalidState.selector);
+        cheat54.expectRevert(PokerNLHEStorage420.InvalidState.selector);
         engine.start(id,0,60);
         uint256[12] memory empty;
         cheat54.expectRevert(PokerDeliveryProofBook420.InvalidProof.selector);
         cheat54.prank(PROVIDER_B);
         proofBook.proveEncryptedShare(id,0,0,empty,hex"01");
         _proveEncryptedShare(id,0,0);
-        cheat54.expectRevert(PokerNLHEBetting420.InvalidState.selector);
+        cheat54.expectRevert(PokerNLHEStorage420.InvalidState.selector);
         engine.start(id,0,60);
         _proveEncryptedShare(id,0,1);
         _proveEncryptedShare(id,1,0);
@@ -345,12 +345,12 @@ contract PokerNLHEBetting54WS3AdversarialTest is PokerNLHEBetting54Fixture {
         _proveEncryptedShare(id,2,0);
         _proveEncryptedShare(id,2,1);
         _proveEncryptedShare(id,3,0);
-        cheat54.expectRevert(PokerNLHEBetting420.InvalidState.selector);
+        cheat54.expectRevert(PokerNLHEStorage420.InvalidState.selector);
         engine.start(id,0,60);
         _proveEncryptedShare(id,3,1);
         require(proofBook.envelopeHashFor(id,0)!=bytes32(0),"first player's two fully proven cards");
         require(proofBook.envelopeHashFor(id,1)!=bytes32(0),"second player's two fully proven cards");
-        cheat54.expectRevert(PokerNLHEBetting420.InvalidState.selector);
+        cheat54.expectRevert(PokerNLHEStorage420.InvalidState.selector);
         engine.start(id,0,60);
         _acknowledgeVerifiedEnvelopes(id);
         engine.start(id,0,60);
@@ -458,39 +458,39 @@ contract PokerNLHEBetting54Case8Test is PokerNLHEBetting54Fixture {
         require(snapshot!=bytes32(0)&&snapshot==ledger.lockedSnapshot(TABLE),
             "exact funded immutable escrow snapshot");
         require(due!=0,"immutable funded proof deadline");
-        _signedAction(id,0,PokerNLHEBetting420.Move.CALL,10,PLAYER_KEY);
-        _signedAction(id,1,PokerNLHEBetting420.Move.CHECK,0,OPPONENT_KEY);
+        _signedAction(id,0,PokerNLHEStorage420.Move.CALL,10,PLAYER_KEY);
+        _signedAction(id,1,PokerNLHEStorage420.Move.CHECK,0,OPPONENT_KEY);
         uint64 streetDue=engine.evidenceDueAt(id);
         cheat54.warp(uint256(streetDue)+3 days);
         engine.beginMissingEvidenceRecovery(id);
         (,uint64 reviewEnd,,,) = engine.evidenceRecovery(id);
         require(reviewEnd==uint256(streetDue)+engine.RECOVERY_REVIEW_WINDOW(),
             "review must be anchored to actual evidence deadline");
-        require((engine.recoveryStageMask(id)&(uint16(1)<<uint8(PokerNLHEBetting420.Phase.AWAIT_FLOP)))!=0,
+        require((engine.recoveryStageMask(id)&(uint16(1)<<uint8(PokerNLHEStorage420.Phase.AWAIT_FLOP)))!=0,
             "one bounded review for actual missing flop");
         require(engine.fundedSnapshot(id)==snapshot &&
             engine.fundedEvidenceDeadline(id)==due,"funded evidence cannot be rewritten");
-        cheat54.expectRevert(PokerNLHEBetting420.InvalidState.selector);
+        cheat54.expectRevert(PokerNLHEStorage420.InvalidState.selector);
         engine.beginMissingEvidenceRecovery(id);
         engine.finalizeMissingEvidenceRecovery(id);
         require(engine.handAborted(id)&&!engine.handSettled(id),"single terminal void");
         require(ledger.seatOf(TABLE,0).chips==400&&ledger.seatOf(TABLE,1).chips==400,
             "canonical original snapshot refund, not pot distribution");
         require(!providerBond.isCollateralized(id),"bond closed separately");
-        cheat54.expectRevert(PokerNLHEBetting420.InvalidState.selector);
+        cheat54.expectRevert(PokerNLHEStorage420.InvalidState.selector);
         engine.finalizeMissingEvidenceRecovery(id);
     }
     function testPostBettingMissingFlopProofRecoversOriginalEscrowExactlyOnce() public {
         bytes32 id=_readyBetting();
-        _signedAction(id,0,PokerNLHEBetting420.Move.CALL,10,PLAYER_KEY);
-        _signedAction(id,1,PokerNLHEBetting420.Move.CHECK,0,OPPONENT_KEY);
-        require(engine.gameOf(id).phase==PokerNLHEBetting420.Phase.AWAIT_FLOP,
+        _signedAction(id,0,PokerNLHEStorage420.Move.CALL,10,PLAYER_KEY);
+        _signedAction(id,1,PokerNLHEStorage420.Move.CHECK,0,OPPONENT_KEY);
+        require(engine.gameOf(id).phase==PokerNLHEStorage420.Phase.AWAIT_FLOP,
             "actual committed flop reveal awaited");
-        cheat54.expectRevert(PokerNLHEBetting420.InvalidState.selector);
+        cheat54.expectRevert(PokerNLHEStorage420.InvalidState.selector);
         engine.beginMissingEvidenceRecovery(id);
         cheat54.warp(uint256(engine.evidenceDueAt(id))+1);
         engine.beginMissingEvidenceRecovery(id);
-        cheat54.expectRevert(PokerNLHEBetting420.TooEarly.selector);
+        cheat54.expectRevert(PokerNLHEStorage420.TooEarly.selector);
         engine.finalizeMissingEvidenceRecovery(id);
         (,uint64 afterAt,,,) = engine.evidenceRecovery(id);
         cheat54.warp(afterAt);
@@ -501,7 +501,7 @@ contract PokerNLHEBetting54Case8Test is PokerNLHEBetting54Fixture {
         require(ledger.seatOf(TABLE,0).chips==400&&ledger.seatOf(TABLE,1).chips==400,
             "wagers cannot be fabricated into refunds");
         require(ledger.totalChips(TABLE)==800,"no fictitious winnings or rake");
-        cheat54.expectRevert(PokerNLHEBetting420.InvalidState.selector);
+        cheat54.expectRevert(PokerNLHEStorage420.InvalidState.selector);
         engine.finalizeMissingEvidenceRecovery(id);
     }
 }
@@ -529,7 +529,7 @@ contract PokerNLHEBetting54Case9Test is PokerNLHEBetting54Fixture {
             "exact original player snapshots, never adjudicator payout");
         cheat54.expectRevert(PokerActionDisputeClock420.InvalidState.selector);
         cheat54.prank(PLAYER);dispute.dispute(id,keccak256("post-refund replay"));
-        cheat54.expectRevert(PokerNLHEBetting420.InvalidState.selector);
+        cheat54.expectRevert(PokerNLHEStorage420.InvalidState.selector);
         engine.cancelWithheldDelivery(id);
     }
     function _withholdOneProvider(uint8 delinquent) internal returns(bytes32 id) {
@@ -540,7 +540,7 @@ contract PokerNLHEBetting54Case9Test is PokerNLHEBetting54Fixture {
         uint8 good=delinquent==0?1:0;
         for(uint8 pos=0;pos<4;pos++)_proveEncryptedShare(id,pos,good);
         require(!proofBook.allVerified(id),"missing provider must block recipient acceptance");
-        cheat54.expectRevert(PokerNLHEBetting420.TooEarly.selector);
+        cheat54.expectRevert(PokerNLHEStorage420.TooEarly.selector);
         engine.cancelWithheldDelivery(id);
         cheat54.warp(uint256(engine.fundedEvidenceDeadline(id))+1);
         cheat54.prank(OTHER);engine.cancelWithheldDelivery(id);
@@ -554,7 +554,7 @@ contract PokerNLHEBetting54Case9Test is PokerNLHEBetting54Fixture {
         require(coin.balanceOf(address(0xB00D))==800,"A slash separate from players");
         require(ledger.seatOf(TABLE,0).chips==400&&ledger.seatOf(TABLE,1).chips==400,
             "original player escrow refunded exactly");
-        cheat54.expectRevert(PokerNLHEBetting420.InvalidState.selector);
+        cheat54.expectRevert(PokerNLHEStorage420.InvalidState.selector);
         engine.cancelWithheldDelivery(id);
     }
     function testOnlyWithholdingProviderBIsSlashedWithoutTouchingPlayerEscrow() public {
@@ -596,7 +596,7 @@ contract PokerNLHEBetting54Case9Test is PokerNLHEBetting54Fixture {
         _ensureNativeDisputeResolver();
         cheat54.prank(PLAYER);engine.reserve(id);
         engine.prepareDealAssignment(id);
-        cheat54.expectRevert(PokerNLHEBetting420.TooEarly.selector);
+        cheat54.expectRevert(PokerNLHEStorage420.TooEarly.selector);
         engine.cancelWithheldDelivery(id);
         PokerConfidentialDeal420.Hand memory h=deal.getHand(id);
         cheat54.warp(uint256(h.deadline)+1 hours+1);
@@ -607,7 +607,7 @@ contract PokerNLHEBetting54Case9Test is PokerNLHEBetting54Fixture {
         (,,,bool locked,bool closed,uint8 faults)=providerBond.bonds(id);
         require(!locked&&closed&&faults==3,"both withholding providers slashed objectively");
         require(coin.balanceOf(address(0xB00D))==1600,"bond penalties kept separate from player escrow");
-        cheat54.expectRevert(PokerNLHEBetting420.InvalidState.selector);
+        cheat54.expectRevert(PokerNLHEStorage420.InvalidState.selector);
         engine.cancelWithheldDelivery(id);
     }
 }
@@ -629,7 +629,7 @@ contract PokerNLHEBetting54Case10Test is PokerNLHEBetting54Fixture {
         // An unbound signer is independently rejected by the 5A.5 admission gate.
         cheat54.prank(PLAYER);signing.bindSigner(TABLE,signedVm.addr(PLAYER_KEY));
         cheat54.prank(PLAYER_B);signing.bindSigner(TABLE,signedVm.addr(OPPONENT_KEY));
-        cheat54.expectRevert(PokerNLHEBetting420.InvalidState.selector);
+        cheat54.expectRevert(PokerNLHEStorage420.InvalidState.selector);
         engine.start(id,0,60);
         require(ledger.reservedInHand(TABLE)==800,"escrow never moved");
         engine.prepareDealAssignment(id);

@@ -1,0 +1,65 @@
+{
+  "schema": "420-mig-0-5-closeout-v1",
+  "step": "MIG-0.5",
+  "status": "CONSOLIDATED_AUDIT_PENDING_FULL_SOURCE_FREEZE",
+  "migrationPolicy": "copy-qualify-remove; no game source deletions",
+  "priorQualifications": [
+    {
+      "step": "MIG-0.1",
+      "pr": 791,
+      "head": "16da1d0f47d6a405d6cbda099df92c53701bbd50",
+      "run": 40065907626,
+      "result": "success",
+      "record": "docs/migration/MIG-0.1-ownership-inventory.json"
+    },
+    {
+      "step": "MIG-0.2",
+      "pr": 792,
+      "head": "5bf07f61f502e2a4f8a64587dee98026a5440270",
+      "run": 40067994481,
+      "result": "success",
+      "record": "docs/migration/MIG-0.2-boundaries.json"
+    },
+    {
+      "step": "MIG-0.3",
+      "pr": 794,
+      "head": "c43e282bca3610687570a697da8e79031dd7f2b9",
+      "run": 40103626441,
+      "result": "success",
+      "record": "docs/migration/MIG-0.3-pr-disposition.json"
+    },
+    {
+      "step": "MIG-0.4",
+      "pr": 795,
+      "head": "f7b6204dfac06e2392a143e1c8624af07edb433a",
+      "run": 40110361380,
+      "result": "success",
+      "record": "docs/migration/MIG-0.4-provenance-evidence.json"
+    }
+  ],
+  "godotQualification": {
+    "repository": "abvhiael/MadBuds-Godot",
+    "head": "0562825a51b6193d0936e18f3bd8e9937220ee16",
+    "binaryAndRuntimeRun": 40108948204,
+    "level1Run": 40108948149,
+    "result": "success",
+    "manifestCount": 15,
+    "pngSha256Verified": 150
+  },
+  "priorPrDisposition": "PRs #791, #792 and #794 passed focused tests but are non-mergeable against current main; their unchanged record contents are consolidated here; do not force merges",
+  "ownership": "Gaming Protocol, SDK, canonical game identities and High Country stay Genesis-owned; 420Arcade/MadBuds, Budtender, Smoke & Chrome, Green Road become independent game repos",
+  "remainingGates": [
+    "Full recursive legacy Unity source enumeration and per-file provenance baseline",
+    "Full recursive latest Genesis game path inventory and approved asset provenance across all projects",
+    "Freeze baseline commit SHAs for every source repo and pending PR branch before actual migration",
+    "Game/SDK reverse dependency graph and corresponding independent package publication",
+    "Resolve Genesis catalog conflicts PRs #734 and #788 via authorized amendment",
+    "Validate asset files outside GitHub or confirm formally absent",
+    "Single final MIG-0 Level 3 only after all gates resolved"
+  ],
+  "qualification": {
+    "level": 1,
+    "passed": false,
+    "scope": "consolidation and reference integrity; not complete MIG-0 phase closure"
+  }
+}

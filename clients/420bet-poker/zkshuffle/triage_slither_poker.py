@@ -8,6 +8,7 @@ an explicit, separately reviewed risk acceptance tied to an exact SHA.
 import json
 import pathlib
 import re
+import subprocess
 import sys
 
 if len(sys.argv) < 3:
@@ -16,7 +17,7 @@ reports = [json.loads(pathlib.Path(path).read_text()) for path in sys.argv[1:-1]
 if any(report.get("success") is not True for report in reports):
     raise SystemExit("one or more scoped Slither analyzers reported unsuccessful execution")
 focus = re.compile(
-    r"(?:^|/)src/bet/(?:PokerNLHEBetting420|PokerNativeOutcome420|"
+    r"(?:^|/)src/bet/(?:PokerNLHEBetting420|PokerNLHEStorage420|PokerNLHEModules420|PokerNLHEModuleFactories420|PokerNativeOutcome420|"
     r"PokerLiveCardReveals420|PokerCanonicalSettlement420|PokerSeatLedger420|"
     r"PokerGnarkElGamalAdapters420|PokerGnarkCardRevealAdapters420|"
     r"PokerPrivateShuffleGate420|PokerInitialEncryptedDeck420|"
@@ -51,9 +52,15 @@ for finding in records:
         seen.add(key)
         unique.append(finding)
 records = unique
+root=pathlib.Path(__file__).resolve().parents[3]
+git=['git','-c','safe.directory='+root.as_posix()]
+sha=subprocess.check_output(git+['rev-parse','HEAD'],cwd=root,text=True).strip()
+dirty=subprocess.run(git+['diff','--quiet','HEAD'],cwd=root).returncode!=0
 pathlib.Path(sys.argv[-1]).write_text(json.dumps({
     "tool": "Slither 0.11.6",
     "scope": "420Bet poker canonical execution and proof contracts",
+    "qualifiedSHA": None if dirty else sha,
+    "trackedWorkingTreeDirty": dirty,
     "total": len(records),
     "findings": records,
 }, indent=2) + "\n")

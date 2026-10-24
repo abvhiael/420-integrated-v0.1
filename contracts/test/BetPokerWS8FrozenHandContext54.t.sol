@@ -24,6 +24,11 @@ contract BetPokerWS8FrozenHandContext54Test is PokerWS8ProductionFixture54 {
     event WS8ShuffleStatement(uint8 stage,bytes32 statement,bytes32 inputRoot,bytes32 outputRoot);
     event WS8RecipientScope(uint8 seat,uint256 scope,uint64 epoch);
     event WS8AggregateScope(uint256 scope,uint256[6] points);
+    event WS8NativeImplementationIdentity(string role,address implementation,bytes32 runtimeCodeHash,uint256 runtimeBytes);
+    function _nativeIdentity(string memory role,address implementation) internal {
+        require(implementation.code.length>0&&implementation.code.length<=24576,"native implementation exceeds deployment limit");
+        emit WS8NativeImplementationIdentity(role,implementation,implementation.codehash,implementation.code.length);
+    }
 
     /// @dev Prover input export only. It admits no proof and issues no Level 2
     /// certificate; the original frozen/admitted owner below must still pass.
@@ -48,6 +53,16 @@ contract BetPokerWS8FrozenHandContext54Test is PokerWS8ProductionFixture54 {
             PROVIDER_A,PROVIDER_B,t.config.rakePolicyHash);
         emit WS8ProductionComponents(address(ws8Initial),address(ws8Shuffle),address(ws8Recipients),
             address(ws8Book),address(ws8Engine),address(ws8Live),address(ws8Outcome));
+        _nativeIdentity("engine",address(ws8Engine));
+        _nativeIdentity("clock",address(ws8Disputes));
+        _nativeIdentity("admission",ws8Engine.admissionModule());
+        _nativeIdentity("play",ws8Engine.playModule());
+        _nativeIdentity("custody",ws8Engine.custodyModule());
+        _nativeIdentity("settlement",ws8Engine.settlementModule());
+        _nativeIdentity("admission-factory",address(PokerNLHEAdmissionFactory420));
+        _nativeIdentity("play-factory",address(PokerNLHEPlayFactory420));
+        _nativeIdentity("custody-factory",address(PokerNLHECustodyFactory420));
+        _nativeIdentity("settlement-factory",address(PokerNLHESettlementFactory420));
         for(uint8 i;i<7;i++){
             (bytes32 circuit,bytes32 schema)=WS8VerifierData.identity(i);
             emit WS8VerifierIdentity(i,ws8Backends[i],ws8Keys[i],ws8Backends[i].codehash,circuit,schema);

@@ -3,6 +3,7 @@ on:
   pull_request:
     paths:
       - 'docs/migration/MIG-0.4-madbuds-reconciliation.json'
+      - 'docs/migration/MIG-0.4-provenance-evidence.json'
       - 'scripts/migration/verify-mig-0-4.mjs'
       - '.github/workflows/mig-0-4-madbuds.yml'
   workflow_dispatch:

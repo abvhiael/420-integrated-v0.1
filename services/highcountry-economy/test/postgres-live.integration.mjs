@@ -11,6 +11,8 @@ import {HighCountryMarket} from '../src/market.js';
 import {createOrdinaryRuntime} from '../src/runtime-service.js';
 import {SkillResearchService} from '../src/skill-research.js';
 import {HIGHCOUNTRY_SKILL_RESEARCH_V1} from '../src/skill-catalog-v1.js';
+import {MissionService} from '../src/missions.js';
+import {HIGHCOUNTRY_MISSIONS_V1} from '../src/mission-catalog-v1.js';
 const url=process.env.HC_TEST_POSTGRES_URL;
 if(!url)throw new Error('HC_TEST_POSTGRES_URL required (dedicated test database only)');
 const pool=new pg.Pool({connectionString:url,max:8,connectionTimeoutMillis:5000});
@@ -99,6 +101,28 @@ try {
   'HC-SKILL-RESEARCH-V1']))?.[1].unlocked,true,'skill entitlement persists across instance restart');
  assert.equal(afterSkill.assets.length,afterRace.assets.length,'skill grants no canonical or ordinary inventory');
  console.log('Postgres skill versioned points/restart/proof replay, exact BUDS burn and asset non-mint: PASS');
+
+ const missions=new MissionService({store:new PostgresBudsStore(pool,ns),
+  identity:{registeredPrincipal:async token=>token==='bob'?'bob':Promise.reject(Error('unregistered'))},
+  catalog:HIGHCOUNTRY_MISSIONS_V1,
+  verifyEvidence:async({evidence})=>({sourceEvent:evidence}),clock:()=>100});
+ await missions.activate('bob','mission:activate','journal-first-steps');
+ await missions.progress('bob','mission:progress1','journal-first-steps','mission:proof1',1);
+ const restartMission=new MissionService({store:new PostgresBudsStore(pool,ns),identity:missions.identity,
+  catalog:HIGHCOUNTRY_MISSIONS_V1,verifyEvidence:missions.verifyEvidence,clock:()=>101});
+ assert.equal((await restartMission.snapshot('bob')).missions[0].progress,1,'mission survives PostgreSQL adapter restart');
+ await assert.rejects(restartMission.progress('bob','mission:replay','journal-first-steps','mission:proof1',1),
+  'durable mission proof replay protection');
+ await restartMission.progress('bob','mission:progress2','journal-first-steps','mission:proof2',1);
+ const receipt=await restartMission.claim('bob','mission:claim','journal-first-steps');
+ assert.equal(receipt.reward.units,0,'no unapproved BUDS grants');
+ const afterMission=(await pool.query('SELECT state FROM highcountry_buds_state WHERE namespace=$1',[ns])).rows[0].state;
+ assert.equal(afterMission.issued,afterSkill.issued,'mission completion never mints BUDS');
+ assert.equal(afterMission.burned,afterSkill.burned,'mission completion never burns BUDS');
+ assert.equal(afterMission.missions.length,1,'mission persisted');
+ assert.equal(afterMission.missionProofs.length,2,'proof identities persisted');
+ console.log('Postgres mission activation restart proof replay completion reward separation: PASS');
+
 
  const role='hc_runtime_'+process.pid;
  await pool.query(await readFile(new URL('../migrations/002_runtime_namespace_rls.sql',import.meta.url),'utf8'));

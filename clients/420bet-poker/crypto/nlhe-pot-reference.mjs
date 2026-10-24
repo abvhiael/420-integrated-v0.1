@@ -18,6 +18,7 @@ export function referenceAward({contributions,folded,ranks,button}){
   returns[top]=max-second;spent[top]=second;
  }
  const won=Array(n).fill(0),maxLevel=Math.max(...spent);
+ let layerSize=0;
  for(let level=1;level<=maxLevel;level++){
   const supporters=spent.map((c,i)=>c>=level?i:-1).filter(i=>i>=0);
   if(!supporters.length)continue;
@@ -26,11 +27,16 @@ export function referenceAward({contributions,folded,ranks,button}){
   let best=contestants[0],winners=[];
   for(const i of contestants)if(cmp(ranks[i],ranks[best])>0)best=i;
   for(const i of contestants)if(cmp(ranks[i],ranks[best])===0)winners.push(i);
-  const each=Math.floor(supporters.length/winners.length);
+  // Accumulate physical chip layers into one pot until eligibility changes.
+  // Splitting every layer independently would award odd chips repeatedly.
+  layerSize+=supporters.length;
+  if(!spent.includes(level))continue;
+  const each=Math.floor(layerSize/winners.length);
   for(const i of winners)won[i]+=each;
   const ordered=[...winners].sort((a,b)=>(a-button-1+n)%n-(b-button-1+n)%n);
-  let odd=supporters.length%winners.length;
+  let odd=layerSize%winners.length;
   for(const i of ordered)if(odd-->0)won[i]++;
+  layerSize=0;
  }
  const payout=won.map((x,i)=>x+returns[i]);
  if(payout.reduce((a,v)=>a+v,0)!==contributions.reduce((a,v)=>a+v,0))throw Error('conservation');

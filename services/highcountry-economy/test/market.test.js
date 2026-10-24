@@ -102,3 +102,40 @@ test('expiry boundary and simultaneous cancel/expiry return reserved units only 
  assert.ok(['cancelled','expired'].includes(t.store.state.listings.get('listing').status));
  assert.equal(t.store.state.operations.has('cancel')&&t.store.state.operations.has('expire'),false);
 });
+
+test('verified lot provenance follows ordinary resale and rejects incompatible merges',async()=>{
+ const t=setup();await t.market.importAsset('inventory-service','import',receipt());
+ await t.buds.earn('fund-bob','bob','approved','bob-proof',100);
+ await t.market.list('seller','initial-list','initial','lot:1',2,30,200);
+ await t.market.buy('buyer','first-sale','initial');
+ assert.equal(t.store.state.assetSources.get(JSON.stringify(['bob','lot:1'])),'verified:1');
+ t.market.authority.registeredPrincipal=async s=>s==='seller'?'alice':s==='buyer'?'bob':s==='third'?'charlie':Promise.reject(Error('unauthorized'));
+ await t.buds.earn('fund-charlie','charlie','approved','charlie-proof',100);
+ await t.market.list('buyer','resale-list','resale','lot:1',2,40,200);
+ await t.market.buy('third','second-sale','resale');
+ assert.equal(t.store.state.assetSources.get(JSON.stringify(['charlie','lot:1'])),'verified:1');
+ assert.equal(t.store.state.assets.get(JSON.stringify(['charlie','lot:1'])).available,2);
+ await t.market.importAsset('inventory-service','import-other',
+  {receiptId:'verified:other',owner:'alice',asset:'other',quantity:1});
+ await t.market.list('seller','different-list','different','other',1,10,200);
+ await t.market.buy('buyer','other-sale','different');
+ assert.equal(t.store.state.assetSources.get(JSON.stringify(['bob','other'])),'verified:other');
+ assert.equal(t.store.state.issued,200);
+ assert.equal(t.store.state.burned,0);
+});
+test('incompatible verified source receipts cannot merge into buyer asset inventory',async()=>{
+ const t=setup();await t.market.importAsset('inventory-service','import',receipt());
+ t.market.authority.registeredPrincipal=async s=>s==='seller'?'alice':s==='buyer'?'bob':s==='third'?'charlie':Promise.reject(Error('unauthorized'));
+ await t.buds.earn('fund-bob','bob','approved','bob-proof',100);
+ await t.market.list('seller','one-list','one','lot:1',1,20,200);
+ await t.market.buy('buyer','first-buy','one');
+ await t.market.importAsset('inventory-service','import-other',
+  {receiptId:'verified:other',owner:'charlie',asset:'lot:1',quantity:1});
+ await t.market.list('third','two-list','two','lot:1',1,20,200);
+ await assert.rejects(t.market.buy('buyer','conflict','two'),/conflicting inventory provenance/);
+ assert.equal(t.store.state.operations.has('conflict'),false);
+ assert.equal(t.store.state.listings.get('two').status,'active');
+ assert.equal(t.store.state.balances.get('bob').available,80);
+ assert.equal(t.store.state.balances.get('charlie')?.available||0,0);
+ assert.equal(t.store.state.assets.get(JSON.stringify(['charlie','lot:1'])).reserved,1);
+});

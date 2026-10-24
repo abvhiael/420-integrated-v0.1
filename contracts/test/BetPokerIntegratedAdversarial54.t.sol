@@ -100,13 +100,13 @@ contract BetPokerIntegratedFundedAdversarial54Test is PokerWS8ProductionFixture5
         bytes memory b=new bytes(len);while(v!=0){b[--len]=bytes1(uint8(48+v%10));v/=10;}return string(b);
     }
     function _data(string memory name) internal returns(bytes memory){
-        return ws8vm.readFileBinary(string.concat("../artifacts/contracts/ws8/proofs/",name));
+        return ws8vm.readFileBinary(string.concat("../clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/",name));
     }
     function _proof(string memory name) internal returns(bytes memory){return _data(string.concat(name,".abi"));}
     function _roots() internal returns(bytes32[3] memory){return abi.decode(_data("roots.bin"),(bytes32[3]));}
     function _funded() internal returns(bytes32 id){
         id=_ws8FundedHand();
-        require(keccak256(abi.encode(_ws8Context(id)))==keccak256(ws8vm.readFileBinary("../artifacts/contracts/ws8/context.bin")),
+        require(keccak256(abi.encode(_ws8Context(id)))==keccak256(ws8vm.readFileBinary("../clients/420bet-poker/zkshuffle/fixtures/ws8/context.bin")),
             "proof material does not match production contract context");
     }
     function _attest(address provider,address auditor,bytes32 group) internal {

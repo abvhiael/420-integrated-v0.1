@@ -52,11 +52,11 @@ contract BetPokerWS8FrozenHandContext54Test is PokerWS8ProductionFixture54 {
         uint256[6] memory points=WS8VerifierData.keys();
         emit WS8AggregateScope(ws8Book.aggregateScope(points),points);
         emit WS8StatementContext(abi.encode(_ws8Context(handId)));
-        bytes32[3] memory roots=abi.decode(ws8vm.readFileBinary("../artifacts/contracts/ws8/proofs/roots.bin"),(bytes32[3]));
+        bytes32[3] memory roots=abi.decode(ws8vm.readFileBinary("../clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/roots.bin"),(bytes32[3]));
         bytes32 initialRoot=roots[0];bytes32 firstRoot=roots[1];bytes32 finalRoot=roots[2];
-        (,uint256[5] memory initialPublic)=abi.decode(ws8vm.readFileBinary("../artifacts/contracts/ws8/proofs/WS8Initial.abi"),(uint256[8],uint256[5]));
-        (,uint256[6] memory firstPublic)=abi.decode(ws8vm.readFileBinary("../artifacts/contracts/ws8/proofs/WS8Shuffle1.abi"),(uint256[8],uint256[6]));
-        (,uint256[6] memory finalPublic)=abi.decode(ws8vm.readFileBinary("../artifacts/contracts/ws8/proofs/WS8Shuffle2.abi"),(uint256[8],uint256[6]));
+        (,uint256[5] memory initialPublic)=abi.decode(ws8vm.readFileBinary("../clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Initial.abi"),(uint256[8],uint256[5]));
+        (,uint256[6] memory firstPublic)=abi.decode(ws8vm.readFileBinary("../clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Shuffle1.abi"),(uint256[8],uint256[6]));
+        (,uint256[6] memory finalPublic)=abi.decode(ws8vm.readFileBinary("../clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/WS8Shuffle2.abi"),(uint256[8],uint256[6]));
         require(initialPublic[1]==uint256(ws8Initial.statement(handId,initialRoot))%WS8_FR,"initial contract statement differs");
         require(firstPublic[1]==uint256(ws8Shuffle.statement(handId,1,initialRoot,firstRoot))%WS8_FR,"first contract statement differs");
         require(finalPublic[1]==uint256(ws8Shuffle.statement(handId,2,firstRoot,finalRoot))%WS8_FR,"second contract statement differs");

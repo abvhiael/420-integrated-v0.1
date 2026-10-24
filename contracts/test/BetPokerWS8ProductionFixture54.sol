@@ -90,7 +90,7 @@ abstract contract PokerWS8ProductionFixture54 is PokerConfidentialDeal54Test {
             address(new WS8DeliveryVerifier()),address(new WS8RecipientPoPVerifier()),
             address(new WS8AggregateVerifier()),address(new WS8PartialVerifier()),address(new WS8UnmaskVerifier())];
         for(uint8 i;i<7;i++) {
-            ws8Keys[i]=keccak256(ws8vm.readFileBinary(string.concat("../artifacts/contracts/ws8/",ws8Names[i],".vk")));
+            ws8Keys[i]=keccak256(ws8vm.readFileBinary(string.concat("../clients/420bet-poker/zkshuffle/fixtures/ws8/keys/",ws8Names[i],".vk")));
             (bytes32 circuit,bytes32 schema)=WS8VerifierData.identity(i);
             ws8Versions.register(_ws8Version(i),ws8Backends[i],ws8Keys[i],circuit,schema);
         }
@@ -106,7 +106,7 @@ abstract contract PokerWS8ProductionFixture54 is PokerConfidentialDeal54Test {
         (circuit,schema)=WS8VerifierData.identity(1);
         PokerGnarkShuffle52Adapter420 shuffleAdapter=new PokerGnarkShuffle52Adapter420(
             ws8Backends[1],address(ws8Versions),_ws8Version(1),circuit,ws8Keys[1],schema,threshold);
-        uint256[] memory rounds=abi.decode(ws8vm.readFileBinary("../artifacts/contracts/ws8/rounds.bin"),(uint256[]));
+        uint256[] memory rounds=abi.decode(ws8vm.readFileBinary("../clients/420bet-poker/zkshuffle/fixtures/ws8/rounds.bin"),(uint256[]));
         ws8Availability=new PokerShuffleCiphertextAvailability420(rounds,keccak256(abi.encode(rounds)));
         ws8Independence=new PokerShuffleProviderIndependence420(address(this));
         ws8Shuffle=new PokerPrivateShuffleGate420(address(deal),address(ws8Initial),address(shuffleAdapter),

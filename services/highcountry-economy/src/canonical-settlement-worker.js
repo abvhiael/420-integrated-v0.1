@@ -4,13 +4,14 @@
 import {SettlementError} from './buds-ledger.js';
 const valid=x=>typeof x==='string'&&/^[a-zA-Z0-9:_-]{1,128}$/.test(x);
 export class CanonicalSettlementWorker {
- constructor({store,settlement,authority,submitCanonical,clock=()=>Date.now(),leaseMs=60000}){
+ constructor({store,settlement,authority,submitCanonical,reconcileTransfer,clock=()=>Date.now(),leaseMs=60000}){
   if(typeof store?.transact!=='function'||typeof settlement?.finalize!=='function'||
      typeof settlement?.abort!=='function'||typeof authority?.confirmedReservedTransfer!=='function'||
      typeof authority?.proveUnexecutedAndCancelled!=='function'||typeof submitCanonical!=='function'||
      !Number.isSafeInteger(leaseMs)||leaseMs<1000||leaseMs>300000)
     throw new SettlementError('invalid settlement worker configuration');
-  Object.assign(this,{store,settlement,authority,submitCanonical,clock,leaseMs});
+  if(reconcileTransfer!==undefined&&typeof reconcileTransfer!=='function')throw new SettlementError('invalid indexer reconciliation');
+  Object.assign(this,{store,settlement,authority,submitCanonical,reconcileTransfer,clock,leaseMs});
  }
  async tick(transferOp){
   if(!valid(transferOp))throw new SettlementError('invalid transfer operation');
@@ -36,6 +37,7 @@ export class CanonicalSettlementWorker {
   });
   try{
    if(await this.authority.confirmedReservedTransfer(transferOp)){
+    if(this.reconcileTransfer)await this.reconcileTransfer(transferOp);
     const result=await this.settlement.finalize('finalize:'+transferOp,transferOp);
     await release();
     return {status:'finalized',result};

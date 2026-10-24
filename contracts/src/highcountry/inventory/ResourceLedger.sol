@@ -14,6 +14,8 @@ contract ResourceLedger {
     address public immutable inventoryRegistry;
     mapping(bytes32 => mapping(address => Balance)) private _balances;
     mapping(bytes32 => uint256) public issued;
+    mapping(bytes32 => uint256) public availableTotal;
+    mapping(bytes32 => uint256) public reservedTotal;
     mapping(bytes32 => uint256) public consumed;
     mapping(bytes32 => bool) public applied;
 
@@ -45,6 +47,13 @@ contract ResourceLedger {
         return _balances[id][owner];
     }
 
+    /// @notice Canonical aggregate proof for a typed resource, independent of owner enumeration.
+    function reconciles(
+        bytes32 id
+    ) external view returns (bool) {
+        return issued[id] >= consumed[id] && issued[id] - consumed[id] == availableTotal[id] + reservedTotal[id];
+    }
+
     function _once(
         bytes32 op,
         bytes32 id,
@@ -64,6 +73,7 @@ contract ResourceLedger {
         _once(op, id, amount);
         if (owner == address(0)) revert HCZeroAddress();
         _balances[id][owner].available += amount;
+        availableTotal[id] += amount;
         issued[id] += amount;
         emit Movement(op, id, owner, address(0), 0, amount);
     }
@@ -79,6 +89,8 @@ contract ResourceLedger {
         if (b.available < amount) revert HCInvalidState();
         b.available -= amount;
         b.reserved += amount;
+        availableTotal[id] -= amount;
+        reservedTotal[id] += amount;
         emit Movement(op, id, owner, address(0), 1, amount);
     }
 
@@ -93,6 +105,8 @@ contract ResourceLedger {
         if (b.reserved < amount) revert HCInvalidState();
         b.reserved -= amount;
         b.available += amount;
+        reservedTotal[id] -= amount;
+        availableTotal[id] += amount;
         emit Movement(op, id, owner, address(0), 2, amount);
     }
 
@@ -112,6 +126,8 @@ contract ResourceLedger {
             if (b.available < amount) revert HCInvalidState();
             b.available -= amount;
         }
+        if (fromReserve) reservedTotal[id] -= amount;
+        else availableTotal[id] -= amount;
         b.consumed += amount;
         consumed[id] += amount;
         emit Movement(op, id, owner, address(0), 3, amount);
@@ -131,6 +147,8 @@ contract ResourceLedger {
         if (source.reserved < amount) revert HCInvalidState();
         source.reserved -= amount;
         _balances[id][to].available += amount;
+        reservedTotal[id] -= amount;
+        availableTotal[id] += amount;
         emit Movement(op, id, from, to, 5, amount);
     }
 

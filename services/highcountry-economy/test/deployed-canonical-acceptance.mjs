@@ -15,9 +15,11 @@ const c=JSON.parse(configText);
 if(c.environment!=='authorized-deployed-testnet'||c.operatorApproval!==true)
  throw Error('independent testnet operator authorization required');
 for(const field of ['rpcUrl','chainId','contracts','issuer','listingId','transferOp','sellerWallet',
- 'buyerWallet','asset','quantity','txHash','indexerUrl','postgresUrl','namespace'])
+ 'buyerWallet','buyerPrincipal','sellerPrincipal','asset','quantity','txHash','indexerUrl','postgresUrl','namespace','fromBlock','expectedBurned'])
  if(c[field]===undefined||c[field]===null||c[field]==='')
   throw Error('missing deployed acceptance evidence: '+field);
+assert.ok(Number.isSafeInteger(c.quantity)&&c.quantity>0,'safe canonical quantity required');
+assert.ok(Number.isSafeInteger(c.expectedBurned)&&c.expectedBurned>=0,'pinned burn policy required');
 for(const u of [c.rpcUrl,c.indexerUrl,c.postgresUrl]){
  const p=new URL(u);
  if(['127.0.0.1','localhost','[::1]'].includes(p.hostname))throw Error('local fixtures are not deployed-chain evidence');

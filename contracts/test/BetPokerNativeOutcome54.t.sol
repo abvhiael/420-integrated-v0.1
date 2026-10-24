@@ -102,10 +102,15 @@ contract PokerNativeOutcome54Test is PokerLiveCardReveals54Test {
         cheat54.expectRevert(PokerActionDisputeClock420.Premature.selector);
         engine.settle(id,policy);
         cheat54.prank(PLAYER);dispute.appeal(id,keccak256("one documented appeal"));
-        cheat54.warp(block.timestamp+1 days+1);
+        // Qualify against the ACTUAL immutable appealed review deadline,
+        // never guessed increments from test-runner clock state.
+        (,,,uint64 reviewExpiresAt,bool appealed,bool finalized)=dispute.resolutions(id);
+        require(appealed&&!finalized&&reviewExpiresAt>block.timestamp,
+            "one pending on-chain appeal");
+        cheat54.warp(uint256(reviewExpiresAt)-1);
         cheat54.expectRevert(PokerActionDisputeClock420.Premature.selector);
         engine.settle(id,policy);
-        cheat54.warp(block.timestamp+1 days+1);
+        cheat54.warp(reviewExpiresAt);
         cheat54.prank(OTHER);engine.settle(id,policy);
         require(!dispute.isFrozen(id) && dispute.resolutionOf(id).finalized,
             "one-appeal objective resolution");

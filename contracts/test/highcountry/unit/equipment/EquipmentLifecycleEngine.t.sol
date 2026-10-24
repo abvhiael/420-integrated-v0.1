@@ -3,6 +3,7 @@ pragma solidity ^0.8.24;
 import { bindRetainedR04Emergency, retainedR04AuthorizationRoot } from "../../mocks/R04EmergencyFixture.sol";
 
 import { EquipmentRegistry } from "../../../../src/highcountry/equipment/EquipmentRegistry.sol";
+import { EquipmentClassCatalogueV1 } from "../../../../src/highcountry/equipment/EquipmentClassCatalogueV1.sol";
 import { EquipmentLifecycleEngine } from "../../../../src/highcountry/equipment/EquipmentLifecycleEngine.sol";
 import { InventoryRegistry } from "../../../../src/highcountry/inventory/InventoryRegistry.sol";
 import { HarvestProductRegistry } from "../../../../src/highcountry/harvest/HarvestProductRegistry.sol";
@@ -320,5 +321,57 @@ contract EquipmentLifecycleR044Test {
         player.remove(equipment, item3);
         require(equipment.occupiedSlots(1) == 0, "removal did not release capacity");
         require(equipment.effectiveEffects(1, address(player))[0] == 0, "removal left phantom effects");
+    }
+
+    function testFiveCatalogueClassesAndUpgradesUseVersionPinnedRealInputs() public {
+        EquipmentClassCatalogueV1 catalogue = new EquipmentClassCatalogueV1();
+        bytes32 power = catalogue.POWER_UNITS();
+        bytes32 water = catalogue.WATER_UNITS();
+        bytes32 nutrients = catalogue.NUTRIENT_UNITS();
+        bytes32 parts = catalogue.REPAIR_PARTS();
+        bytes32 scrap = catalogue.RECYCLED_SCRAP();
+        inventory.registerResource(power, InventoryRegistry.Unit.COUNT);
+        inventory.registerResource(water, InventoryRegistry.Unit.COUNT);
+        inventory.registerResource(nutrients, InventoryRegistry.Unit.COUNT);
+        inventory.registerResource(parts, InventoryRegistry.Unit.COUNT);
+        inventory.registerResource(scrap, InventoryRegistry.Unit.COUNT);
+        for (uint8 category; category < 5; ++category) {
+            for (uint8 tier; tier < 2; ++tier) {
+                EquipmentClassCatalogueV1.Definition memory d = catalogue.definition(category, tier);
+                require(d.version == catalogue.CATALOGUE_VERSION(), "version drift");
+                require(d.operatingResource != bytes32(0) && d.operatingCost != 0, "missing per-use input");
+                require(d.craftParts != 0 && d.craftOperatingInput != 0, "missing acquisition costs");
+                require(d.repairCost != 0 && d.recycleOutput != 0, "missing lifecycle costs");
+                equipment.registerType(d.typeId, d.version, d.slots, d.effects);
+                lifecycle.registerPolicyWithInput(
+                    d.typeId,
+                    EquipmentLifecycleEngine.Policy({
+                        version: d.version,
+                        maximum: d.maximum,
+                        degradeBelow: d.degradeBelow,
+                        useCost: d.useCost,
+                        repairResource: d.repairResource,
+                        repairCost: d.repairCost,
+                        repairRestore: d.repairRestore,
+                        recycleResource: d.recycleResource,
+                        recycleOutput: d.recycleOutput,
+                        operatingResource: d.operatingResource,
+                        operatingCost: d.operatingCost,
+                        exists: true
+                    })
+                );
+                require(lifecycle.policy(d.typeId).version == d.version, "class policy mismatch");
+                require(equipment.equipmentType(d.typeId).catalogueVersion == d.version, "class effect mismatch");
+            }
+        }
+        EquipmentClassCatalogueV1.Definition memory lighting = catalogue.definition(0, 0);
+        bytes32 lightItem = keccak256("CATALOGUE-LIGHT-INSTANCE");
+        equipment.issue(lightItem, lighting.typeId, address(player), keccak256("CATALOGUE-LIGHT-EARNING"));
+        inventory.acquire(keccak256("CATALOGUE-POWER-FUND"), power, address(player), 2);
+        player.place(equipment, lightItem);
+        lifecycle.recordUse(lightItem);
+        require(ledger.balance(power, address(player)).available == 1, "lighting fuel not debited");
+        require(ledger.balance(power, address(player)).consumed == 1, "lighting fuel not burned");
+        require(equipment.effectiveEffects(1, address(player))[2] == 600, "baseline light class effect");
     }
 }

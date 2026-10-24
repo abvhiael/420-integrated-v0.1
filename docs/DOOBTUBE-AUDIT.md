@@ -362,7 +362,7 @@ There is no remaining repository-only DoobTube implementation task before the li
 - TEST COMPLETE: **YES for repository scope** — retained app suites, Level 2 integration and Level 3 repository owners passed on the reconciled exact SHA.
 - DOCUMENTATION COMPLETE: **YES for repository app scope** — global Docs qualification passed on the reconciled exact SHA.
 - INTEGRATION COMPLETE: **YES for repository scope** — live production-equivalent integration remains DOOBTUBE-12.
-- SECURITY QUALIFIED: **YES for repository scope** — contract hardening/static/security ownership passed on the reconciled exact SHA.
+- SECURITY QUALIFIED: **YES for current app repository scope** — contract hardening/static/security ownership passed on the reconciled exact SHA.
 - TESTNET READY: **NO**.
 - GENESIS READY: **NO**.
 - PRODUCTION READY: **NO**.

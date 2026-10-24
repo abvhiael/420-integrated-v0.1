@@ -1,5 +1,6 @@
 import {createServer} from 'node:http';
 import {HighCountryMarket} from './market.js';
+import {HighCountryMarketplaceView} from './marketplace-view.js';
 import {GameplayRewardRuntime,RuntimeAuthority} from './runtime-integration.js';
 import {composeSettlementRuntime} from './settlement-runtime.js';
 import {FinalizedRpc,address} from './finalized-rpc.js';
@@ -33,7 +34,8 @@ export async function createRuntime({pool,namespace,authority:authConfig,rpc:rpc
    return !!lock&&lock.owner===b.wallet&&lock.asset===r.asset&&lock.quantity===r.quantity;
   }
  };
- return {store,identity,rewards,market:new HighCountryMarket(store,marketAuthority,clock),...chain};
+ const market=new HighCountryMarket(store,marketAuthority,clock);
+ return {store,identity,rewards,market,marketView:new HighCountryMarketplaceView({store,identity,market,clock}),...chain};
 }
 // Production entrypoint for a wallet-optional, registered-player ordinary economy.
 // Never silently repurpose the canonical on-chain escrow settlement runtime.
@@ -66,10 +68,11 @@ export function composeOrdinaryMarketRuntime({store,identity,rewards,inventoryAu
   requireMarketOpen:inventoryAuthority.requireMarketOpen
    ?()=>inventoryAuthority.requireMarketOpen():undefined
  };
- return {store,identity,rewards,market:new HighCountryMarket(store,authority,clock)};
+ const market=new HighCountryMarket(store,authority,clock);
+ return {store,identity,rewards,market,marketView:new HighCountryMarketplaceView({store,identity,market,clock})};
 }
 export function runtimeHttpServer(runtime,{origin}){
- const {identity,rewards,market,settlement,worker}=runtime;
+ const {identity,rewards,market,marketView,settlement,worker}=runtime;
  return createServer(async(req,res)=>{
   res.setHeader('content-type','application/json');res.setHeader('cache-control','no-store');
   res.setHeader('x-content-type-options','nosniff');
@@ -95,6 +98,12 @@ export function runtimeHttpServer(runtime,{origin}){
     case '/rewards/claim':result=await rewards.claim(token,b.source,b.proof);break;
     case '/market/import':result=await market.importAsset(token,b.operation,b.receipt);break;
     case '/market/list':result=await market.list(token,b.operation,b.listing,b.asset,b.quantity,b.price,b.expiresAt);break;
+    case '/market/snapshot':
+     if(!marketView)throw new SettlementError('market read model unavailable');
+     result=await marketView.snapshot(token);break;
+    case '/market/dispute':
+     if(!marketView)throw new SettlementError('market dispute intake unavailable');
+     result=await marketView.dispute(token,b.operation,b.listing,b.reason);break;
     case '/market/buy':
      if(market?.authority?.canonicalSettlementRequired!==false)throw new SettlementError('ordinary market disabled');
      result=await market.buy(token,b.operation,b.listing);break;

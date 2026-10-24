@@ -42,6 +42,12 @@ test('signed session scope expiry forgery registration and revocation',async()=>
  await assert.rejects(f.authority.register(f.token({exp:10000})),/denied/);
  const token=f.token();await assert.rejects(f.authority.register(token.slice(0,-5)+'AAAAA'),/denied/);
  await f.authority.revoke(token,'alice');await assert.rejects(f.authority.registeredPrincipal(token),/revoked/);
+ await assert.rejects(f.authority.requireRegisteredRecipient('alice'),/unregistered/);
+ const next=f.token({epoch:1});
+ await assert.rejects(f.authority.registeredPrincipal(next),/unregistered/);
+ await f.authority.register(next);
+ assert.equal(await f.authority.registeredPrincipal(next),'alice');
+ assert.equal(await f.authority.requireRegisteredRecipient('alice'),'alice');
 });
 test('wallet consent nonce is durable one-use scoped and unlink preserves internal account',async()=>{
  const f=fixture();await f.authority.register(f.token());const c=await f.authority.linkChallenge(f.token(),wallet);

@@ -32,10 +32,17 @@ export class SkillResearchService {
   this.ledger=new BudsLedger(store,null);
  }
  _state(s){if(!s.skillResearch)s.skillResearch=new Map();if(!s.skillResearchProofs)s.skillResearchProofs=new Set();}
+ _session(s,session,principal){
+  if(typeof this.identity.verifyToken!=='function')return;
+  const claims=this.identity.verifyToken(session);
+  if(claims?.sub!==principal||!Number.isSafeInteger(claims.epoch)
+    ||(s.runtimeEpochs?.get(principal)??0)!==claims.epoch)
+   throw new SettlementError('progression account authority revoked');
+ }
  async snapshot(session){
   const principal=await this.identity.registeredPrincipal(session);if(!id(principal))throw new SettlementError('unregistered player');
   return this.store.transact(s=>{
-   this._state(s);
+   this._state(s);this._session(s,session,principal);
    const records=this.catalog.tracks.map(t=>{
     const r=s.skillResearch.get(JSON.stringify([principal,t.id,this.catalog.version]))||
      {points:0,unlocked:false};
@@ -67,7 +74,7 @@ export class SkillResearchService {
   const verified=await this.verifyEvidence({principal,trackId,version:this.catalog.version,evidence,points});
   if(!verified||!id(verified.sourceEvent))throw new SettlementError('independent progression evidence required');
   return this.store.transact(s=>{
-   this._state(s);
+   this._state(s);this._session(s,session,principal);
    if(s.operations.has(operation))throw new SettlementError('replayed operation');
    const proofKey=verified.sourceEvent;
    if(s.skillResearchProofs.has(proofKey))throw new SettlementError('replayed progression evidence');
@@ -87,7 +94,7 @@ export class SkillResearchService {
   const playerLevel=await this.getPlayerLevel({principal,session});
   if(!integer(playerLevel,100))throw new SettlementError('invalid verified player level');
   return this.ledger.operate(operation,s=>{
-   this._state(s);
+   this._state(s);this._session(s,session,principal);
    const key=JSON.stringify([principal,trackId,this.catalog.version]);
    const r=s.skillResearch.get(key);
    if(!r||r.unlocked||r.points!==track.requiredPoints||playerLevel<track.minLevel)

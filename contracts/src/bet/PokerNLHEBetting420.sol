@@ -107,6 +107,9 @@ contract PokerNLHEBetting420 {
     event DealAssignmentPrepared(bytes32 indexed handId,uint8 button,uint16 seatMask,bytes32 seatSnapshot);
 
     mapping(bytes32=>address) public outcomeForTable;
+    mapping(bytes32=>bytes32) public outcomeCodeHash;
+    mapping(bytes32=>bytes32) public terminalTranscript;
+    event TerminalTranscriptSealed(bytes32 indexed handId,bytes32 transcriptHash);
     mapping(bytes32=>PokerDeckDisclosure420) public deliveryForTable;
     event DeliveryBound(bytes32 indexed tableId,address gate);
     event OutcomeBound(bytes32 indexed tableId,address outcome);
@@ -176,6 +179,7 @@ contract PokerNLHEBetting420 {
                !=address(deals.tables()))
             revert InvalidConfiguration();
         outcomeForTable[tableId]=calculator;
+        outcomeCodeHash[tableId]=calculator.codehash;
         emit OutcomeBound(tableId,calculator);
     }
     /// @notice A permissionless, all-or-nothing on-chain escrow settlement.
@@ -188,11 +192,19 @@ contract PokerNLHEBetting420 {
            outcomeForTable[g.tableId]==address(0)||
            ledger.activeHand(g.tableId)!=handId)revert InvalidState();
         if(address(revealForTable[g.tableId])==address(0))revert InvalidState();
+        if(outcomeCodeHash[g.tableId]==bytes32(0)||
+           outcomeForTable[g.tableId].codehash!=outcomeCodeHash[g.tableId])revert InvalidState();
         (uint256[9] memory balances,uint256 fee)=
             IPokerNativeOutcome420(outcomeForTable[g.tableId]).calculate(handId,policy);
         // Mark the hand consumed before any external dispute/ledger call.
         // Reverts atomically restore this flag if either dependency fails.
         handSettled[handId]=true;
+        terminalTranscript[handId]=keccak256(abi.encode(STATE_DOMAIN,handId,
+            g.tableId,g.stateRoot,g.nonce,g.pot,g.initialChips,
+            fundedSnapshot[handId],outcomeCodeHash[g.tableId],
+            policy.rakeBps,policy.cap,policy.noFlopNoDrop,
+            policy.noRakeOnUncontested,balances,fee));
+        emit TerminalTranscriptSealed(handId,terminalTranscript[handId]);
         if(disputes.isFrozen(handId))
             disputes.finalizeVerifiedOutcome(handId,_nativeResolutionHash(handId,g.stateRoot,balances,fee));
         ledger.settleReservedHand(g.tableId,handId,balances,fee);

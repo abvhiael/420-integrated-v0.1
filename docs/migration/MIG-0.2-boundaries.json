@@ -1,0 +1,127 @@
+{
+  "schema": "420-migration-integration-boundaries-v1",
+  "step": "MIG-0.2",
+  "classification": "DISCOVERY_ONLY",
+  "source": "abvhiael/420-integrated-v0.1",
+  "coreOwner": "genesis",
+  "sdk": {
+    "path": "packages/420-gaming-sdk/package.json",
+    "name": "@420/gaming-sdk",
+    "version": "0.1.0",
+    "private": true,
+    "requiredChange": "publish immutable versioned dependency before extraction; no duplicate SDK authority"
+  },
+  "canonical": [
+    {
+      "path": "contracts/src/gaming/",
+      "owner": "genesis",
+      "purpose": "registry identity authorization entitlements claims and cross-game authority"
+    },
+    {
+      "path": "packages/420-gaming-sdk/",
+      "owner": "genesis",
+      "purpose": "versioned read/write adapter entrypoint"
+    },
+    {
+      "path": "services/420-gaming-query/",
+      "owner": "genesis",
+      "purpose": "finality-aware read projections"
+    },
+    {
+      "path": "developer-hub/src/gaming-*.mjs",
+      "owner": "genesis",
+      "purpose": "onboarding, game registration and authorization profiles"
+    },
+    {
+      "path": "deployments/gaming/testnet.runtime.json",
+      "owner": "genesis",
+      "purpose": "network deployments and operator references, not private keys"
+    },
+    {
+      "path": "clients/highcountry-access-v1/",
+      "owner": "genesis",
+      "purpose": "retained game and reference integration"
+    }
+  ],
+  "consumers": [
+    {
+      "destination": "420-budtender",
+      "adapter": "clients/budtender-access-v1/src/access.js",
+      "gameId": "420/GAMING/GAME/BUDTENDER/V1",
+      "core": "CORE_MANAGEMENT",
+      "registered": "CLOUD_SAVE",
+      "wallet": "PREMIUM_DECOR",
+      "directImport": "../../../packages/420-gaming-sdk/src/index.js"
+    },
+    {
+      "destination": "420-smoke-and-chrome",
+      "adapter": "clients/smoke-chrome-access-v1/src/access.js",
+      "gameId": "420/GAMING/GAME/SMOKE_AND_CHROME/V1",
+      "core": "CORE_MATCH",
+      "registered": "CLOUD_SAVE",
+      "wallet": "OWNED_EDITION",
+      "directImport": "../../../packages/420-gaming-sdk/src/index.js"
+    },
+    {
+      "destination": "420-green-road",
+      "adapter": "clients/greenroad-access-v1/src/access.js",
+      "gameId": "420/GAMING/GAME/THE_GREEN_ROAD/V1",
+      "core": "CORE_ROAD_TRIP",
+      "registered": "CLOUD_SAVE",
+      "wallet": "SECRET_ROUTE",
+      "directImport": "../../../packages/420-gaming-sdk/src/index.js"
+    },
+    {
+      "destination": "420-arcade",
+      "adapter": "apps/arcade-web/",
+      "gameId": "UNREGISTERED_GAME_SPECIFIC",
+      "core": "GUEST_GAMEPLAY",
+      "registered": "OPTIONAL",
+      "wallet": "OPTIONAL_ENTITLEMENTS",
+      "directImport": "REQUIRES_MODULE_IMPORT_SCAN"
+    }
+  ],
+  "couplings": [
+    {
+      "path": "packages/420-gaming-client-hardening/test/four-game-e2e.test.js",
+      "issue": "relative imports to three outgoing clients and High Country",
+      "resolution": "convert to immutable fixtures and separately versioned game compatibility suites"
+    },
+    {
+      "path": "packages/420-gaming-cross-game-qualification/test/cross-game.test.js",
+      "issue": "relative imports to three outgoing clients and High Country",
+      "resolution": "contract conformance fixtures and pinned consumer releases"
+    },
+    {
+      "path": ".github/workflows/gaming-four-game-e2e.yml",
+      "issue": "paths trigger on outgoing client trees",
+      "resolution": "retain core-contract checks; relocate consumer tests to game repositories"
+    },
+    {
+      "path": "deployments/gaming/testnet.runtime.json",
+      "issue": "four game IDs and operator refs, chainId/contracts null",
+      "resolution": "preserve game IDs and owner references; leave unresolved values null until evidence; active=true denotes config intent, not live acceptance"
+    }
+  ],
+  "invariants": [
+    "guest game core does not require wallet",
+    "registered cloud saves do not require wallet linkage",
+    "wallet-only entitlements are explicit, scoped and fail closed",
+    "do not copy private keys, admin privileges, on-chain identity or treasury authority",
+    "no game-specific mutable state shared with High Country",
+    "no operator/finality/integration proof may be inferred from a config active flag",
+    "no game-specific change may require full Genesis global test"
+  ],
+  "outstanding": [
+    "SDK distribution mechanism and pinned version",
+    "Arcade actual runtime imports and all transitive dependencies",
+    "Full reverse import tree outside sampled paths",
+    "API/ABI compatibility snapshots and deployed addresses",
+    "Cross-repo CI trust and release provenance"
+  ],
+  "qualification": {
+    "level": 1,
+    "passed": false,
+    "scope": "static canonical paths and adapter requirements only; no runtime smoke or live testnet claims"
+  }
+}

@@ -360,7 +360,7 @@ There is no remaining repository-only DoobTube implementation task before the li
 - BUILD COMPLETE: **YES for repository scope**.
 - CONTRACT COMPLETE: **YES for current V1 scope** — no DoobTube contract is required and external bindings are qualified.
 - TEST COMPLETE: **YES for repository scope** — retained app suites, Level 2 integration and Level 3 repository owners passed on the reconciled exact SHA.
-- DOCUMENTATION COMPLETE: **YES for repository scope** — global Docs qualification passed on the reconciled exact SHA.
+- DOCUMENTATION COMPLETE: **YES for repository app scope** — global Docs qualification passed on the reconciled exact SHA.
 - INTEGRATION COMPLETE: **YES for repository scope** — live production-equivalent integration remains DOOBTUBE-12.
 - SECURITY QUALIFIED: **YES for repository scope** — contract hardening/static/security ownership passed on the reconciled exact SHA.
 - TESTNET READY: **NO**.

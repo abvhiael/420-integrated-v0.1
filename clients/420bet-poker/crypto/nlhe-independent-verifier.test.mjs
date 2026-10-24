@@ -24,6 +24,13 @@ test('heads-up button has small blind and first preflop action; 2 to 9 seat butt
     assert.equal(initial.pot,15);
   }
 });
+test('both blinds short all-in have no discretionary actor and preserve every chip',()=>{
+  const game=verifyBettingTranscript({stacks:[1,2],button:0,smallBlind:5,bigBlind:10,actions:[]});
+  assert.equal(game.phase,'AWAIT_FLOP');
+  assert.equal(game.toAct,-1);
+  assert.deepEqual(game.seats.map(p=>p.contributed),[1,2]);
+  assert.equal(game.pot,3);
+});
 test('forged, expired, stale, wrong-turn, replay or short non-all-in actions are rejected',()=>{
   for(const event of [
     {...legal(1,0,'call',5),signed:false},

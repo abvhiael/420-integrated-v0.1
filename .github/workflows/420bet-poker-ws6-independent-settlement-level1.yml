@@ -1,0 +1,87 @@
+name: 420Bet Poker WS6 Independent NLHE Settlement Level 1
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/bet/PokerNativeOutcome420.sol'
+      - 'contracts/src/bet/PokerNLHEBetting420.sol'
+      - 'contracts/test/BetPokerNativeOutcome54.t.sol'
+      - 'contracts/test/BetPokerHandRank54.t.sol'
+      - 'clients/420bet-poker/crypto/nlhe-replay*.mjs'
+      - 'clients/420bet-poker/crypto/nlhe-differential.test.mjs'
+      - '.github/workflows/420bet-poker-ws6-independent-settlement-level1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ws6-settlement-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  independent-replay-and-funded-atomic-settlement:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      FOUNDRY_PROFILE: pr
+      FOUNDRY_VIA_IR: 'true'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact qualified SHA
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Independent NLHE action replay, side pots, ties and independent ranking differential
+        run: node --test clients/420bet-poker/crypto/nlhe-replay.test.mjs clients/420bet-poker/crypto/nlhe-differential.test.mjs
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Full funded outcome, dispute, rake and authenticated showdown test owner
+        working-directory: contracts
+        env:
+          FOUNDRY_SRC: src/ws6-focused
+          FOUNDRY_TEST: test/ws6-focused
+        run: |
+          set -eu
+          mkdir -p src/ws6-focused test/ws6-focused
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          base=Path("test")
+          out=base/"ws6-focused"
+          found=set()
+          def cp(name):
+              if name in found:return
+              p=base/name
+              if not p.is_file():raise SystemExit("missing test dependency "+name)
+              found.add(name)
+              c=p.read_text()
+              for dep in re.findall(r'import\s+["\x27](\./[^"\x27]+)["\x27]\s*;',c):
+                  cp(Path(dep).name)
+              (out/name).write_text(c.replace("../src/","../../src/"))
+          for name in ("BetPokerNativeOutcome54.t.sol","BetPokerHandRank54.t.sol"):
+              cp(name)
+          print("Independent outcome/rank focused compile source closure:",sorted(found))
+          PY
+          forge test --use 0.8.30 --match-path 'test/ws6-focused/BetPokerNativeOutcome54.t.sol' -vv
+          forge test --use 0.8.30 --match-path 'test/ws6-focused/BetPokerHandRank54.t.sol' -vv
+      - name: Preserve exact-source-SHA and independent calculation evidence
+        run: |
+          set -eu
+          mkdir -p artifacts/420bet-ws6
+          git rev-parse HEAD > artifacts/420bet-ws6/qualified-sha.txt
+          sha256sum contracts/src/bet/PokerNativeOutcome420.sol \
+            contracts/src/bet/PokerNLHEBetting420.sol \
+            contracts/test/BetPokerNativeOutcome54.t.sol \
+            contracts/test/BetPokerHandRank54.t.sol \
+            clients/420bet-poker/crypto/nlhe-replay.mjs \
+            clients/420bet-poker/crypto/nlhe-differential.test.mjs \
+            > artifacts/420bet-ws6/source-sha256.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: 420bet-ws6-independent-nlhe-settlement-exact-sha
+          path: artifacts/420bet-ws6/
+          retention-days: 90
+          if-no-files-found: error

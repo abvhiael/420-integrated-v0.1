@@ -1,0 +1,108 @@
+{
+  "schema": "420-mig-0-4-madbuds-reconciliation-v1",
+  "step": "MIG-0.4",
+  "status": "RECONCILED_WITH_EXPLICIT_UNVERIFIED_GODOT_AND_BINARY_SCOPE",
+  "decision": {
+    "destination": "420-arcade/games/madbuds",
+    "primaryTargetRuntime": "Godot",
+    "legacyRuntime": "Unity",
+    "preserveAllSource": true,
+    "automaticDeletion": false,
+    "gameplayWalletOptional": true
+  },
+  "sources": [
+    {
+      "repository": "abvhiael/420-integrated",
+      "path": "mad-buds/",
+      "role": "legacy-unity",
+      "destination": "games/madbuds/legacy/unity/",
+      "verification": "source docs and Unity runtime path confirmed",
+      "canonicalFor": "historical design and legacy code only"
+    },
+    {
+      "repository": "abvhiael/420-integrated-v0.1",
+      "path": "packages/mad-buds-kush-krusher/",
+      "role": "gameplay-controller",
+      "destination": "games/madbuds/packages/kush-krusher/",
+      "verification": "gameplay controller and tests located"
+    },
+    {
+      "repository": "abvhiael/420-integrated-v0.1",
+      "path": "assets/arcade/mad-buds/",
+      "role": "character-sprites-and-manifests",
+      "destination": "games/madbuds/assets/",
+      "verification": "JSON manifests and character families located; full PNG checksum reconciliation pending"
+    },
+    {
+      "repository": "abvhiael/420-integrated-v0.1",
+      "path": "docs/arcade/MAD-BUDS-KUSH-KRUSHER-ANIMATION-INTEGRATION.md",
+      "role": "runtime-boundary-document",
+      "destination": "games/madbuds/docs/",
+      "verification": "documents non-playable arcade controller and 15 state animations"
+    },
+    {
+      "repository": "abvhiael/420-integrated-v0.1",
+      "path": "scripts/arcade/qualify-kush-krusher-assets.py",
+      "role": "asset-validator",
+      "destination": "games/madbuds/scripts/",
+      "verification": "path identified"
+    },
+    {
+      "repository": "abvhiael/420-integrated-v0.1",
+      "path": "scripts/arcade/qualify-sativa-steve-assets.py",
+      "role": "asset-validator",
+      "destination": "games/madbuds/scripts/",
+      "verification": "path identified"
+    }
+  ],
+  "canon": {
+    "characterDocument": "abvhiael/420-integrated:mad-buds/Docs/CHARACTER_BIBLE.md",
+    "characters": [
+      "Kush Krusher",
+      "Sativa Steve",
+      "Terpene Tina",
+      "Hash Gordon",
+      "Dabby",
+      "Purple Haze",
+      "Roach",
+      "The Edible",
+      "Bongwater Bob",
+      "Northern Lights"
+    ],
+    "integrationContract": "abvhiael/420-integrated:mad-buds/Docs/420_INTEGRATION_CONTRACT.md",
+    "assetFamilies": [
+      "kush-krusher",
+      "sativa-steve",
+      "terpene-tina"
+    ],
+    "godotProject": "NOT_VERIFIED_IN_ACCESSIBLE_REPOSITORY_SEARCH",
+    "godotSourcePolicy": "Do not invent or mark imported until source project.godot and file hashes confirmed",
+    "assetPolicy": "Do not assume PNG existence solely from JSON manifests; verify each referenced frame byte SHA-256 at extraction",
+    "legacyPolicy": "Retain Unity source as legacy, do not replace canonical Godot runtime by Unity silently",
+    "identityPolicy": "MadBuds and Mad Bud Delivery arcade candidate are distinct identities; preserve namespaces"
+  },
+  "openPrs": [
+    {
+      "number": 780,
+      "disposition": "preserve portable contract, reconcile Unity scope"
+    },
+    {
+      "number": 771,
+      "disposition": "preserve Sativa Steve animation work"
+    }
+  ],
+  "unresolved": [
+    "Current authoritative Godot project.godot path and ownership",
+    "Current Godot imported assets, scenes and live playback evidence",
+    "Exhaustive legacy Unity file enumeration and binary provenance",
+    "All image files referenced by animation manifests and verified SHA-256",
+    "PR branch-only code and art changes, exact PR HEAD SHA",
+    "Complete runtime integration and playable build verification"
+  ],
+  "qualification": {
+    "scope": "source classification and source-backed boundary inventory",
+    "level": 1,
+    "passed": false,
+    "claim": "static-source audit only, not full source migration or animation acceptance"
+  }
+}

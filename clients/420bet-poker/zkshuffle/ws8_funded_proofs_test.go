@@ -120,33 +120,53 @@ func TestWS8GenuineFundedHandProofs(t *testing.T) {
 		}
 		return s
 	}
+	var reuseReport []map[string]string
 	prove := func(s setup, name string, w frontend.Circuit, values ...frontend.Variable) {
 		t.Helper()
 		full, e := frontend.NewWitness(w, ecc.BN254.ScalarField())
 		if e != nil {
 			t.Fatal(e)
 		}
-		proof, e := groth16.Prove(s.cs, s.pk, full)
-		if e != nil {
-			t.Fatal(name, e)
-		}
 		pub, e := full.Public()
 		if e != nil {
 			t.Fatal(e)
 		}
-		if e = groth16.Verify(proof, s.vk, pub); e != nil {
-			t.Fatal(name, e)
-		}
-		// Verify that declared Solidity words exactly match the actual public witness.
 		serialized, e := pub.MarshalBinary()
 		if e != nil {
 			t.Fatal(e)
 		}
-		write(name+".public", serialized)
 		encoded := pack(values...)
 		if len(serialized) < len(encoded) || !bytes.Equal(serialized[len(serialized)-len(encoded):], encoded) {
 			t.Fatal(name, "public serialization mismatch")
 		}
+		var proof groth16.Proof
+		status := "generated-context-specific"
+		cache := os.Getenv("POKER_WS8_REUSE_DIR")
+		if cache != "" {
+			old, err := os.ReadFile(filepath.Join(cache, name+".public"))
+			if err == nil && bytes.Equal(old, serialized) {
+				raw, err := os.ReadFile(filepath.Join(cache, name+"Proof.bin"))
+				if err != nil {
+					t.Fatal(err)
+				}
+				proof = groth16.NewProof(ecc.BN254)
+				if _, err = proof.ReadFrom(bytes.NewReader(raw)); err != nil {
+					t.Fatal(err)
+				}
+				status = "reused-identical-public-witness"
+			}
+		}
+		if proof == nil {
+			proof, e = groth16.Prove(s.cs, s.pk, full)
+			if e != nil {
+				t.Fatal(name, e)
+			}
+		}
+		if e = groth16.Verify(proof, s.vk, pub); e != nil {
+			t.Fatal(name, e)
+		}
+		reuseReport = append(reuseReport, map[string]string{"proof": name, "material": status})
+		write(name+".public", serialized)
 		solidity, ok := proof.(interface{ MarshalSolidity() []byte })
 		if !ok {
 			t.Fatal("missing Solidity encoding")
@@ -183,6 +203,21 @@ func TestWS8GenuineFundedHandProofs(t *testing.T) {
 	if pkx.(*big.Int).Cmp(c[32]) != 0 || pky.(*big.Int).Cmp(c[33]) != 0 {
 		t.Fatal("threshold key differs from production")
 	}
+	variant := os.Getenv("POKER_WS8_SINGLE_WINNER")
+	if variant != "" && variant != "1" {
+		t.Fatal("unknown showdown fixture")
+	}
+	cardAt := func(i int) int {
+		if variant == "1" {
+			if i == 0 {
+				return 12
+			}
+			if i == 12 {
+				return 0
+			}
+		}
+		return i
+	}
 	var decks [3][52]ElGamalCipher
 	for i := 0; i < 52; i++ {
 		a, b := cipherOf(int64(i+1), int64(i+100), &base, threshold)
@@ -190,7 +225,7 @@ func TestWS8GenuineFundedHandProofs(t *testing.T) {
 		// Stage A reverses the original order and independently rerandomizes.
 		a, b = cipherOf(int64(52-i), 1151, &base, threshold)
 		decks[1][i] = reencryptInput(a, b)
-		a, b = cipherOf(int64(i+1), int64(3151+i), &base, threshold)
+		a, b = cipherOf(int64(cardAt(i)+1), int64(3151+i), &base, threshold)
 		decks[2][i] = reencryptInput(a, b)
 	}
 	var roots [3]*big.Int
@@ -229,6 +264,9 @@ func TestWS8GenuineFundedHandProofs(t *testing.T) {
 		w := &Reencrypt52{HandScope: scope, StatementScope: statement, PublicKeyX: pkx, PublicKeyY: pky, InputRoot: roots[stage-1], OutputRoot: roots[stage], Input: decks[stage-1], Output: decks[stage]}
 		for i := 0; i < 52; i++ {
 			w.Indices[i] = 51 - i
+			if stage == 2 {
+				w.Indices[i] = 51 - cardAt(i)
+			}
 			w.Nonces[i] = stage*1000 + i
 		}
 		prove(shuffleSetup, fmt.Sprintf("WS8Shuffle%d", stage), w, roots[stage-1], statement, roots[stage], scope, pkx, pky)
@@ -263,7 +301,7 @@ func TestWS8GenuineFundedHandProofs(t *testing.T) {
 		seat := position % 2
 		card := decks[2][position]
 		_, path := rootPath(decks[2][:], position)
-		c1, _ := cipherOf(int64(position+1), int64(3151+position), &base, threshold)
+		c1, _ := cipherOf(int64(cardAt(position)+1), int64(3151+position), &base, threshold)
 		for provider := 0; provider < 2; provider++ {
 			nonce := big.NewInt(int64(100001 + position*100 + provider*13))
 			share := new(native.PointAffine).ScalarMultiplication(&c1, providers[provider])
@@ -307,7 +345,7 @@ func TestWS8GenuineFundedHandProofs(t *testing.T) {
 		street, position := slot[0], slot[1]
 		card := decks[2][position]
 		_, path := rootPath(decks[2][:], position)
-		c1, _ := cipherOf(int64(position+1), int64(3151+position), &base, threshold)
+		c1, _ := cipherOf(int64(cardAt(position)+1), int64(3151+position), &base, threshold)
 		var shares [2]*native.PointAffine
 		for provider := 0; provider < 2; provider++ {
 			shares[provider] = new(native.PointAffine).ScalarMultiplication(&c1, providers[provider])
@@ -323,9 +361,14 @@ func TestWS8GenuineFundedHandProofs(t *testing.T) {
 		}
 		ax, ay := coordinates(shares[0])
 		bx, by := coordinates(shares[1])
-		w := &CardUnmaskCircuit{HandScope: scope, DeckRoot: roots[2], Position: position, Street: street, CardIndex: position, CipherC2X: card.C2X, CipherC2Y: card.C2Y, ShareAX: ax, ShareAY: ay, ShareBX: bx, ShareBY: by, ProviderAX: c[28], ProviderAY: c[29], ProviderBX: c[30], ProviderBY: c[31], AggregatePKX: c[32], AggregatePKY: c[33]}
-		prove(unmaskSetup, fmt.Sprintf("WS8Unmask%d%d", street, position), w, scope, roots[2], position, street, position, card.C2X, card.C2Y, ax, ay, bx, by, c[28], c[29], c[30], c[31], c[32], c[33])
+		w := &CardUnmaskCircuit{HandScope: scope, DeckRoot: roots[2], Position: position, Street: street, CardIndex: cardAt(position), CipherC2X: card.C2X, CipherC2Y: card.C2Y, ShareAX: ax, ShareAY: ay, ShareBX: bx, ShareBY: by, ProviderAX: c[28], ProviderAY: c[29], ProviderBX: c[30], ProviderBY: c[31], AggregatePKX: c[32], AggregatePKY: c[33]}
+		prove(unmaskSetup, fmt.Sprintf("WS8Unmask%d%d", street, position), w, scope, roots[2], position, street, cardAt(position), card.C2X, card.C2Y, ax, ay, bx, by, c[28], c[29], c[30], c[31], c[32], c[33])
 	}
+	report, e := json.MarshalIndent(reuseReport, "", "  ")
+	if e != nil {
+		t.Fatal(e)
+	}
+	write("reuse-report.json", append(report, '\n'))
 	// Force a direct relation between all recomputed roots and the context export.
 	_ = hash
 }

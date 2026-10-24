@@ -132,6 +132,22 @@ abstract contract PokerNLHEStorage420 {
 
     error TooEarly();
     bytes32 public constant RESOLUTION_DOMAIN=keccak256("420.BET.POKER.NATIVE.RESOLUTION.V1");
+    struct SettlementReceipt {
+        bytes32 tableId;
+        bytes32 stateRoot;
+        bytes32 actionRoot;
+        bytes32 escrowSnapshot;
+        bytes32 calculatorCodeHash;
+        bytes32 terminalTranscript;
+        uint256[9] finalChips;
+        uint256 rake;
+        uint64 actionNonce;
+        uint64 settledAt;
+        uint16 seatsMask;
+        bool contested;
+    }
+    event SettlementReceiptRecorded(bytes32 indexed handId,bytes32 indexed transcript,
+        uint256[9] finalChips,uint256 rake);
     /// @custom:storage-location erc7201:420.bet.poker.nlhe
     struct Layout {
         mapping(bytes32=>IPokerAuthenticatedStreet420) revealForTable;
@@ -157,6 +173,34 @@ abstract contract PokerNLHEStorage420 {
         mapping(bytes32=>bytes32) terminalTranscript;
         mapping(bytes32=>bytes32) actionTranscriptRoot;
         mapping(bytes32=>PokerDeckDisclosure420) deliveryForTable;
+        mapping(bytes32=>SettlementReceipt) settlementReceipts;
+    }
+    /// @dev Identical immutable dependency and funded-state admission for both
+    /// direct settlement and a disputed native outcome proposal.
+    function _checkedOutcome(bytes32 handId)internal view returns(address calculator){
+        Game storage g=_layout().games[handId];
+        calculator=_layout().outcomeForTable[g.tableId];
+        if(!g.initialized||_layout().handSettled[handId]||_layout().handAborted[handId]||
+           (g.phase!=Phase.SHOWDOWN&&g.phase!=Phase.UNCONTESTED)||
+           calculator==address(0)||address(_layout().revealForTable[g.tableId])==address(0)||
+           ledger.activeHand(g.tableId)!=handId||
+           _layout().fundedSnapshot[handId]==bytes32(0)||
+           ledger.lockedSnapshot(g.tableId)!=_layout().fundedSnapshot[handId]||
+           ledger.lockedMask(g.tableId)!=g.seatsMask||
+           _layout().outcomeCodeHash[g.tableId]==bytes32(0)||
+           calculator.codehash!=_layout().outcomeCodeHash[g.tableId])revert InvalidState();
+    }
+    function _recordSettlement(bytes32 handId,Game storage g,uint256[9] memory balances,uint256 fee)internal {
+        SettlementReceipt storage r=_layout().settlementReceipts[handId];
+        r.tableId=g.tableId;r.stateRoot=g.stateRoot;
+        r.actionRoot=_layout().actionTranscriptRoot[handId];
+        r.escrowSnapshot=_layout().fundedSnapshot[handId];
+        r.calculatorCodeHash=_layout().outcomeCodeHash[g.tableId];
+        r.terminalTranscript=_layout().terminalTranscript[handId];
+        r.finalChips=balances;r.rake=fee;r.actionNonce=g.nonce;
+        r.settledAt=uint64(block.timestamp);r.seatsMask=g.seatsMask;
+        r.contested=g.phase==Phase.SHOWDOWN;
+        emit SettlementReceiptRecorded(handId,r.terminalTranscript,balances,fee);
     }
     bytes32 internal constant STATE_STORAGE_LOCATION=0xc82808a11c315da0b37d34e330c3c1512e3c74004acb522adf12173c8e40f200;
     function _layout() internal pure returns(Layout storage state) {

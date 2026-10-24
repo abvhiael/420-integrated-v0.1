@@ -6,11 +6,13 @@ import {fileURLToPath} from 'node:url';
 import path from 'node:path';
 import {verifyBettingTranscript,verifyShowdownSettlement} from '../../clients/420bet-poker/crypto/nlhe-independent-verifier.mjs';
 
-const [logPath,output]=process.argv.slice(2);
+const [logPath,output,variant]=process.argv.slice(2);
+assert(variant===undefined||variant==='winner57','unknown executed fixture');
+const winner=variant==='winner57';
 assert(logPath&&output,'usage: verify-ws8-transcript.mjs executed-forge.log report.json');
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../..');
 const log=readFileSync(logPath,'utf8');
-assert(log.includes('[PASS] testLegitimateFundedHandSettlement()'),'actual passing legitimate funded-hand execution required');
+assert(log.includes(winner?'[PASS] test57GenuineSingleWinnerShowdown()':'[PASS] testLegitimateFundedHandSettlement()'),'actual passing legitimate funded-hand execution required');
 const actions=[],cards=new Map(),owners=new Map(),statements=[];
 const streetNames={1:['AWAIT_FLOP','FLOP'],2:['AWAIT_TURN','TURN'],3:['AWAIT_RIVER','RIVER']};
 for(const line of log.split('\n')) {
@@ -28,7 +30,7 @@ for(const line of log.split('\n')) {
  } else if((m=line.match(/emit WS8VerifiedPublicStatement\(label: "([^"]+)", proofAndPublicInputs: (0x[0-9a-f]+)\)/i))) {
   const alias={initial:'WS8Initial',shuffle1:'WS8Shuffle1',shuffle2:'WS8Shuffle2',recipient0:'WS8Recipient0',recipient1:'WS8Recipient1',aggregate:'WS8Aggregate'};
   const name=alias[m[1]]??m[1],bytes=Buffer.from(m[2].slice(2),'hex');
-  assert.deepEqual(bytes,readFileSync(path.join(root,'clients/420bet-poker/zkshuffle/fixtures/ws8/proofs',name+'.abi')),'executed proof bytes differ from evidence');
+  assert.deepEqual(bytes,readFileSync(path.join(root,'clients/420bet-poker/zkshuffle/fixtures/'+(winner?'ws8/winner':'ws8')+'/proofs',name+'.abi')),'executed proof bytes differ from evidence');
   assert((bytes.length-256)%32===0,'invalid public statement ABI');
   const publicInputs=[];for(let i=256;i<bytes.length;i+=32)publicInputs.push(BigInt('0x'+bytes.subarray(i,i+32).toString('hex')).toString());
   statements.push({name,publicInputs,proofAndStatementSHA256:createHash('sha256').update(bytes).digest('hex')});
@@ -49,10 +51,21 @@ assert.equal(settled.length,1,'one actual native settlement required');
 const [,handId,terminalTranscript,a,b,rake]=settled[0];
 assert.deepEqual(balances,[Number(a),Number(b)]);assert.equal(result.fee,Number(rake));
 assert.equal(balances.reduce((x,y)=>x+y,0)+fee,800);
+const receipts=[...log.matchAll(/emit SettlementReceiptRecorded\(handId: (0x[0-9a-f]+), transcript: (0x[0-9a-f]+), finalChips: \[([^\]]+)\], rake: (\d+)\)/gi)];
+if(winner){
+ assert.equal(receipts.length,1,'one actual immutable settlement receipt required');
+ const [,receiptHand,receiptRoot,payoutText,receiptFee]=receipts[0];
+ const payout=payoutText.split(',').map(x=>Number(x.trim()));
+ assert.equal(receiptHand.toLowerCase(),handId.toLowerCase());
+ assert.equal(receiptRoot.toLowerCase(),terminalTranscript.toLowerCase());
+ assert.deepEqual(payout,[...balances,0,0,0,0,0,0,0]);
+ assert.equal(Number(receiptFee),fee);
+ assert.deepEqual(balances,[418,380]);
+}
 const gitConfig=['-c','safe.directory='+root.replaceAll('\\','/')];
 const dirty=spawnSync('git',[...gitConfig,'diff','--quiet','HEAD'],{cwd:root}).status!==0;
 const report={trackedWorkingTreeDirty:dirty,qualifiedSHA:dirty?null:execFileSync('git',['-c','safe.directory='+root.replaceAll('\\','/'),'rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim(),handId,terminalTranscript,
  inputAuthentication:'Accepted production engine action, reveal and proof-book events from the executed Foundry test; independent replay does not manufacture authentication',
- actions:replay.record,board,holeCards,balances,fee,statements};
+ settlementReceiptVerified:winner,actions:replay.record,board,holeCards,balances,fee,statements};
 writeFileSync(output,JSON.stringify(report,null,2)+'\n');
 console.log('Independent executed-hand replay matched native settlement:',JSON.stringify({balances,fee,proofStatements:statements.length}));

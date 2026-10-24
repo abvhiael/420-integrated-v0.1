@@ -344,15 +344,18 @@ contract PokerNLHESettlementModule420 is PokerNLHEModule420 {
 
     function settle(bytes32 handId,PokerCanonicalRake420.Policy calldata policy) external onlyHost {
         Game storage g=_layout().games[handId];
-        if(!g.initialized||_layout().handSettled[handId]||
-           (g.phase!=Phase.SHOWDOWN&&g.phase!=Phase.UNCONTESTED)||
-           _layout().outcomeForTable[g.tableId]==address(0)||
-           ledger.activeHand(g.tableId)!=handId)revert InvalidState();
-        if(address(_layout().revealForTable[g.tableId])==address(0))revert InvalidState();
-        if(_layout().outcomeCodeHash[g.tableId]==bytes32(0)||
-           _layout().outcomeForTable[g.tableId].codehash!=_layout().outcomeCodeHash[g.tableId])revert InvalidState();
+        address calculator=_checkedOutcome(handId);
         (uint256[9] memory balances,uint256 fee)=
-            IPokerNativeOutcome420(_layout().outcomeForTable[g.tableId]).calculate(handId,policy);
+            IPokerNativeOutcome420(calculator).calculate(handId,policy);
+        // Complete late showdown proofs correct their pending recovery just as
+        // advancing a proved street does. Preserve its history, close its timer.
+        EvidenceRecovery storage recovery=_layout().evidenceRecovery[handId];
+        if(recovery.active){
+            if(recovery.failedPhase!=g.phase||recovery.stateRoot!=g.stateRoot)
+                revert InvalidState();
+            recovery.active=false;
+            emit MissingEvidenceRecoveryCorrected(handId,uint8(g.phase));
+        }
         // Mark the hand consumed before any external dispute/ledger call.
         // Reverts atomically restore this flag if either dependency fails.
         _layout().handSettled[handId]=true;
@@ -362,6 +365,7 @@ contract PokerNLHESettlementModule420 is PokerNLHEModule420 {
             policy.rakeBps,policy.cap,policy.noFlopNoDrop,
             policy.noRakeOnUncontested,balances,fee));
         emit TerminalTranscriptSealed(handId,_layout().terminalTranscript[handId]);
+        _recordSettlement(handId,g,balances,fee);
         if(disputes.isFrozen(handId))
             disputes.finalizeVerifiedOutcome(handId,_nativeResolutionHash(handId,g.stateRoot,balances,fee));
         ledger.settleReservedHand(g.tableId,handId,balances,fee);
@@ -372,12 +376,10 @@ contract PokerNLHESettlementModule420 is PokerNLHEModule420 {
     function proposeDisputeResolution(bytes32 handId,
         PokerCanonicalRake420.Policy calldata policy) external onlyHost {
         Game storage g=_layout().games[handId];
-        if(!g.initialized||_layout().handSettled[handId]||
-           (g.phase!=Phase.SHOWDOWN&&g.phase!=Phase.UNCONTESTED)||
-           !disputes.isFrozen(handId)||_layout().outcomeForTable[g.tableId]==address(0)||
-           ledger.activeHand(g.tableId)!=handId)revert InvalidState();
+        address calculator=_checkedOutcome(handId);
+        if(!disputes.isFrozen(handId))revert InvalidState();
         (uint256[9] memory balances,uint256 fee)=
-            IPokerNativeOutcome420(_layout().outcomeForTable[g.tableId]).calculate(handId,policy);
+            IPokerNativeOutcome420(calculator).calculate(handId,policy);
         disputes.proposeVerifiedOutcome(handId,
             _nativeResolutionHash(handId,g.stateRoot,balances,fee));
     }

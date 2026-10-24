@@ -1,4 +1,4 @@
-name: 420Bet Poker 5A.5, 5A.6 and WS8 Security Milestone Level 2
+name: 420Bet Poker 5A.5–5A.7 and WS8 Security Milestone Level 2
 on:
   pull_request:
     paths:
@@ -7,6 +7,7 @@ on:
       - 'contracts/test/BetPokerWS8*.sol'
       - 'contracts/test/BetPokerBettingRounds55.t.sol'
       - 'contracts/test/BetPokerEvaluation56.t.sol'
+      - 'contracts/test/BetPokerShowdown57.t.sol'
       - 'contracts/test/PokerEvaluationVectors56.sol'
       - 'contracts/test/BetPokerNLHEBetting54.t.sol'
       - 'contracts/test/BetPokerNativeOutcome54.t.sol'
@@ -79,6 +80,7 @@ jobs:
       - name: Prepare actual new and affected native owners
         run: |
           python3 scripts/bet/package-ws8-evidence.py --verify
+          python3 scripts/bet/package-poker-5a7-evidence.py --verify
           node scripts/bet/generate-poker-5a6-vectors.mjs --check
           python3 scripts/bet/prepare-poker-5a5-owner.py
           mkdir -p artifacts/poker-5a5
@@ -90,6 +92,9 @@ jobs:
         working-directory: contracts
         run: |
           set -euo pipefail
+          forge test --use 0.8.30 --match-contract PokerShowdown57Test --match-test '^test57' --json > ../artifacts/poker-5a5/foundry-57.json
+          forge test --use 0.8.30 --match-contract PokerShowdown57Test --match-test test57GenuineSingleWinnerShowdown -vvvv | tee ../artifacts/poker-5a5/winner-trace.log
+          node ../scripts/bet/verify-ws8-transcript.mjs ../artifacts/poker-5a5/winner-trace.log ../artifacts/poker-5a5/winner-independent-outcome.json winner57
           forge test --use 0.8.30 --match-contract PokerEvaluation56Test --json > ../artifacts/poker-5a5/foundry-56.json
           forge test --use 0.8.30 --match-contract 'PokerBetting(Kernel|Rounds)55Test' --json > ../artifacts/poker-5a5/foundry-55.json
           forge test --use 0.8.30 --match-contract PokerBettingRounds55Test --match-test test55ProductionConstructorFitsSixteenMillionGasBudget -vvvv | tee ../artifacts/poker-5a5/constructor.log
@@ -147,6 +152,9 @@ jobs:
           python3 ../../../scripts/bet/package-ws8-evidence.py --verify
           go test -mod=readonly -timeout 10m -count=1 -json -run '^TestWS8CommittedCryptographicEvidence$' . | tee ../../../artifacts/ws8-crypto/go-execution.jsonl
           python3 ../../../scripts/bet/verify-ws8-execution.py go ../../../artifacts/ws8-crypto/go-execution.jsonl ../../../artifacts/ws8-crypto/execution.json
+          python3 ../../../scripts/bet/package-poker-5a7-evidence.py --verify
+          go test -mod=readonly -timeout 10m -count=1 -json -run '^TestPoker5A7WinnerCommittedCryptographicEvidence$' . | tee ../../../artifacts/ws8-crypto/winner-go-execution.jsonl
+          python3 ../../../scripts/bet/verify-ws8-execution.py go57 ../../../artifacts/ws8-crypto/winner-go-execution.jsonl ../../../artifacts/ws8-crypto/winner-execution.json
           go list -m all > ../../../artifacts/ws8-crypto/go-modules.txt
           diff -u fixtures/ws8/historical-go-modules.txt ../../../artifacts/ws8-crypto/go-modules.txt
           git rev-parse HEAD > ../../../artifacts/ws8-crypto/candidate-sha.txt

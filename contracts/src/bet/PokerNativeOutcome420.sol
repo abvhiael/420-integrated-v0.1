@@ -83,6 +83,15 @@ contract PokerNativeOutcome420 {
             scores[seat]=rankings.rank7(cards);
         }
     }
+    /// @notice Recompute authenticated survivor rankings at a complete showdown,
+    /// including after settlement. Folded and absent seats have score zero.
+    function showdownRanks(bytes32 handId)external view returns(uint256[9] memory){
+        PokerNLHEBetting420.Game memory g=engine.gameOf(handId);
+        if(!g.initialized||g.phase!=PokerNLHEStorage420.Phase.SHOWDOWN||engine.handAborted(handId)||
+           address(engine.revealForTable(g.tableId))!=address(reveals))
+            revert InvalidState();
+        return _ranks(handId,g);
+    }
     /// @notice Calculates every seat's exact final escrow balance, rake and
     /// uncalled refunds from native on-chain actions and selectively revealed cards.
     function calculate(bytes32 handId,PokerCanonicalRake420.Policy calldata policy)

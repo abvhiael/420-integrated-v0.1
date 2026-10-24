@@ -40,6 +40,24 @@ CumulativeShortAllInsReopenOnlyWithAnotherLiveOpponent
 SingleShortAllInDoesNotReopenPreviouslyActingSeat
 AllFourRoundsWaitForEveryPendingNonAllInSeat
 FuzzBlindConservationAndPendingActor'''.splitlines()
+SHOWDOWN = '''SharedBoardTieSealsCanonicalReceipt
+GenuineSingleWinnerShowdown
+UncontestedWinnerNeedsNoHoleOrBoardDisclosure
+EverySurvivorMustHaveBothAuthenticatedHoleCards
+PrematureSettlementAndRankingCannotChooseWinner
+FoldedHoleCardsCannotBePubliclyOpened
+CallerCannotSubmitPayoutVectorToLedger
+OutOfTablePayoutSlotsAreRejected
+ChangedCalculatorRuntimeCannotSettle
+ChangedCalculatorRuntimeCannotProposeDisputedWinner
+RakeTransferFailureRollsBackReceiptAndCustody
+BondCloseFailureRollsBackPaidRakeAndReceipt
+RakeCallbackCannotPublishSecondReceiptOrSettleTwice
+DisputedShowdownAppealHoldsPaymentUntilExactDeadline
+ReceiptAndRanksSurviveCashoutAndTablePause
+WrongRakePolicyCannotPublishReceipt
+LateShowdownProofsClosePendingRecoveryOnSettlement
+TerminalReceiptRejectsReplayActionsAndRecovery'''.splitlines()
 OWNERS = ['PokerNLHEBetting54Case'+str(i)+'Test' for i in range(1,11)] + [
     'PokerNLHEBetting54WS3AdversarialTest', 'PokerNativeOutcome54Test',
     'PokerLiveCardReveals54Test', 'PokerActionDisputeClock54Test',
@@ -99,6 +117,9 @@ def main():
         raise SystemExit('mandatory 5A.6 native execution missing or unexpected')
     if evaluation['testFuzzProportionalChargeBounds'].get('kind', {}).get('Fuzz', {}).get('runs', 0) < 2500:
         raise SystemExit('2500 actual 5A.6 fuzz executions required')
+    showdown = owners.get('PokerShowdown57Test', {})
+    if set(showdown) != {'test57'+name for name in SHOWDOWN}:
+        raise SystemExit('mandatory 5A.7 funded showdown execution missing or unexpected')
     tap = directory / 'node.tap'
     text = tap.read_text(encoding='utf-8-sig')
     passes = re.findall(r'^# pass (\d+)\s*$', text, re.M)
@@ -110,7 +131,9 @@ def main():
     args = ['git', '-c', 'safe.directory='+ROOT.as_posix()]
     sha = subprocess.check_output(args+['rev-parse', 'HEAD'], cwd=ROOT, text=True).strip()
     dirty = subprocess.run(args+['diff', '--quiet', 'HEAD'], cwd=ROOT).returncode != 0
-    for file in ('contracts/test/BetPokerBettingRounds55.t.sol',
+    for file in ('contracts/test/BetPokerShowdown57.t.sol',
+                 'clients/420bet-poker/zkshuffle/fixtures/ws8/winner/manifest.json',
+                 'contracts/test/BetPokerBettingRounds55.t.sol',
                  'clients/420bet-poker/crypto/nlhe-5a5.test.mjs',
                  'scripts/bet/verify-poker-5a5-execution.py',
                  'contracts/src/bet/PokerNLHEStorage420.sol',
@@ -120,7 +143,7 @@ def main():
                                 stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode != 0
     report = dict(level=1, qualifiedSHA=None if dirty else sha,
                   sourceCommit=sha, trackedWorkingTreeDirty=dirty,
-                  mandatoryTests=mandatory, evaluation5A6Tests={name: 'Success' for name in evaluation}, nativeOwners={o: len(t) for o,t in owners.items()},
+                  mandatoryTests=mandatory, showdown5A7Tests={name: 'Success' for name in showdown}, evaluation5A6Tests={name: 'Success' for name in evaluation}, nativeOwners={o: len(t) for o,t in owners.items()},
                   totalPassed=sum(map(len, owners.values())), independentTestsPassed=int(passes[0]),
                   executionSHA256={p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in files+[tap]})
     output.write_text(json.dumps(report, indent=2)+'\n', encoding='utf-8')

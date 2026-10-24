@@ -8,6 +8,7 @@ const principal = value => {
 export class AuthenticatedEconomyService {
  constructor(ledger,authority) {
   if(!ledger||typeof authority?.registeredPrincipal!=='function'
+     ||typeof authority?.requireRegisteredRecipient!=='function'
      ||typeof authority?.requireTrustedIssuer!=='function'
      ||typeof authority?.requireMarketOperator!=='function')
     throw new SettlementError('registered authority required');
@@ -15,7 +16,9 @@ export class AuthenticatedEconomyService {
  }
  async earn(session,op,owner,source,proof,amount) {
   await this.authority.requireTrustedIssuer(session,source);
-  return this.ledger.earn(op,principal(owner),source,proof,amount);
+  const recipient=principal(owner);
+  await this.authority.requireRegisteredRecipient(recipient);
+  return this.ledger.earn(op,recipient,source,proof,amount);
  }
  async reserve(session,op,amount) {
   return this.ledger.reserve(op,principal(await this.authority.registeredPrincipal(session)),amount);

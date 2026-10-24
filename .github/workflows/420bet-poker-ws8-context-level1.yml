@@ -4,6 +4,8 @@ on:
     paths:
       - 'contracts/test/BetPokerWS8*.sol'
       - 'contracts/src/bet/generated/WS8*.sol'
+      - 'contracts/src/bet/PokerNLHE*.sol'
+      - 'contracts/src/bet/PokerActionDisputeClock420.sol'
       - 'clients/420bet-poker/zkshuffle/fixtures/ws8/**'
       - '.github/workflows/420bet-poker-ws8-context-level1.yml'
       - 'scripts/bet/**'

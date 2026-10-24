@@ -46,15 +46,17 @@ test('blind and ante amounts stay conserved, ante does not count as a call',()=>
 });
 
 test('two cumulative short all-ins reopen only at full raise increment',()=>{
- const result=replayBetting({stacks:[1000,30,40,25],button:0,smallBlind:5,bigBlind:10,actions:[
+ const result=replayBetting({stacks:[1000,30,40,25,1000],button:0,smallBlind:5,bigBlind:10,actions:[
   a(1,0,3,'raise',25),
-  a(2,0,0,'call',25),
-  a(3,0,1,'raise',25),
-  a(4,0,2,'raise',30),
-  a(5,0,0,'raise',50)
+  a(2,0,4,'call',25),
+  a(3,0,0,'call',25),
+  a(4,0,1,'raise',25),
+  a(5,0,2,'raise',30),
+  a(6,0,4,'raise',50),
+  a(7,0,0,'call',50)
  ]});
  assert.equal(result.committed[0],75);
- assert.equal(result.nonce,5);
+ assert.equal(result.nonce,7);
 });
 test('one short all-in does not reopen previously acting player',()=>{
  assert.throws(()=>replayBetting({stacks:[1000,30,1000,25],button:0,smallBlind:5,bigBlind:10,actions:[

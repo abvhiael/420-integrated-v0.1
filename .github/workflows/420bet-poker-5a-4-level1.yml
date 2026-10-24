@@ -29,7 +29,7 @@ on:
       - 'contracts/test/BetPokerVerifierVersions54.t.sol'
       - 'contracts/src/bet/PokerInitialEncryptedDeck420.sol'
       - 'contracts/src/bet/PokerGnarkElGamalAdapters420.sol'
-      - 'contracts/src/bet/PokerNLHEBetting420.sol'
+      - 'contracts/src/bet/PokerNLHE*.sol'
       - 'contracts/src/bet/PokerNativeOutcome420.sol'
       - 'contracts/test/BetPokerNativeOutcome54.t.sol'
       - 'contracts/src/bet/PokerHandRank420.sol'
@@ -90,8 +90,8 @@ jobs:
         run: |
           set -e
           mkdir -p test/poker-l1
-          find test -maxdepth 1 -type f -name '*Poker*.t.sol' -exec cp -t test/poker-l1/ {} +
-          python3 -c "from pathlib import Path; files=Path('test/poker-l1').glob('*.t.sol'); [(p.write_text(p.read_text().replace('../src/', '../../src/'))) for p in files]"
+          find test -maxdepth 1 -type f -name '*Poker*.sol' -exec cp -t test/poker-l1/ {} +
+          python3 -c "from pathlib import Path; files=Path('test/poker-l1').glob('*.sol'); [(p.write_text(p.read_text().replace('../src/', '../../src/'))) for p in files]"
           test -s test/poker-l1/BetPokerNLHEBetting54.t.sol
       - name: Verify inherited scoped Solidity integration and adversarial evidence
         id: solidity_scope
@@ -113,14 +113,14 @@ jobs:
         env:
           FOUNDRY_SRC: src/bet
           FOUNDRY_TEST: test/poker-l1
-        run: forge test --match-path 'test/poker-l1/BetPokerNLHEBetting54.t.sol' -vv
+        run: forge test --use 0.8.30 --match-path 'test/poker-l1/BetPokerNLHEBetting54.t.sol' -vv
       - name: Scope commitment adversarial + inherited seating/table regression
         if: steps.solidity_scope.outputs.changed == 'true'
         working-directory: contracts
         env:
           FOUNDRY_SRC: src/bet
           FOUNDRY_TEST: test/poker-l1
-        run: forge test --match-contract '^(PokerNativeOutcome54Test|PokerHandRank54Test|PokerLiveCardReveals54Test|PokerGnarkElGamalAdapters54Test|PokerCanonicalSettlement54Test|PokerVerifierVersions54Test|PokerCanonicalEvidence54Test|PokerCanonicalRake54Test|PokerActionDisputeClock54Test|PokerFinalCardOpenings54Test|PokerActionKeys54Test|PokerPrivateShuffleGate54Test|PokerVerifiedTerminalGate54Test|PokerHandAccountingProof54Test|PokerHandFinality54Test|PokerDeckDisclosure54Test|PokerConfidentialDeal54Test|PokerSeatLedger53Test|BetPokerTableRegistry52Test)$' -vv
+        run: forge test --use 0.8.30 --match-contract '^(PokerNativeOutcome54Test|PokerHandRank54Test|PokerLiveCardReveals54Test|PokerGnarkElGamalAdapters54Test|PokerCanonicalSettlement54Test|PokerVerifierVersions54Test|PokerCanonicalEvidence54Test|PokerCanonicalRake54Test|PokerActionDisputeClock54Test|PokerFinalCardOpenings54Test|PokerActionKeys54Test|PokerPrivateShuffleGate54Test|PokerVerifiedTerminalGate54Test|PokerHandAccountingProof54Test|PokerHandFinality54Test|PokerDeckDisclosure54Test|PokerConfidentialDeal54Test|PokerSeatLedger53Test|BetPokerTableRegistry52Test)$' -vv
       - name: Verify confidential shuffle and encrypted seat delivery
         if: steps.solidity_scope.outputs.changed == 'true'
         run: node --test clients/420bet-poker/crypto/confidential-deal.test.mjs clients/420bet-poker/crypto/nlhe-replay.test.mjs clients/420bet-poker/crypto/nlhe-betting.test.mjs clients/420bet-poker/crypto/nlhe-verify-hand.test.mjs clients/420bet-poker/crypto/nlhe-economics.test.mjs clients/420bet-poker/crypto/nlhe-differential.test.mjs clients/420bet-poker/crypto/nlhe-pot-differential.test.mjs

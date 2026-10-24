@@ -4,7 +4,7 @@ import json,re,sys
 from pathlib import Path
 if len(sys.argv)!=3:raise SystemExit('usage: export-ws8-context.py forge.log output-directory')
 s=Path(sys.argv[1]).read_text(encoding='utf-8')
-if '[PASS] testFreezeCanonicalFundedHandContext()' not in s:raise SystemExit('executed passing context test required')
+if '[PASS] testFreezeCanonicalFundedHandContext()' not in s and '[PASS] testExportFundedContextForProver()' not in s:raise SystemExit('executed passing context test required')
 m=re.findall(r'emit WS8StatementContext\(encoded: (0x[0-9a-fA-F]+)\)',s)
 if len(m)!=1:raise SystemExit('one actual contract context emission required')
 b=bytes.fromhex(m[0][2:])

@@ -167,6 +167,8 @@ abstract contract PokerWS8ProductionFixture54 is PokerConfidentialDeal54Test {
         cap.grant(ADMIN,ws8Delivery.ACTION_BIND_PROOF_BOOK(),scope,true);
         cheat54.prank(ADMIN);ledger.bindSettlement(TABLE,address(ws8Engine),WS8_RAKES);
         cheat54.prank(ADMIN);ws8Disputes.bindResolver(TABLE,address(ws8Engine));
+        cap.grant(ADMIN,ws8Engine.ACTION_BIND_TURN_POLICY(),scope,true);
+        cheat54.prank(ADMIN);ws8Engine.bindTurnPolicy(TABLE,60);
         cheat54.prank(ADMIN);ws8Engine.bindProviderBond(TABLE,address(ws8Bonds));
         cheat54.prank(ADMIN);ws8Delivery.bindProofBook(TABLE,address(ws8Book));
         cheat54.prank(ADMIN);ws8Engine.bindDelivery(TABLE,address(ws8Delivery));

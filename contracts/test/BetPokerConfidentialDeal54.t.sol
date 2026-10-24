@@ -13,6 +13,8 @@ contract PokerConfidentialDeal54Test is PokerSeatLedger53Test {
     PokerConfidentialDeal420 deal;
 
     constructor() {
+        cap.grant(PLAYER,BetIds420.ACTION_POKER_ACTION,auth.scopeForTable(TABLE),true);
+        cap.grant(PLAYER_B,BetIds420.ACTION_POKER_ACTION,auth.scopeForTable(TABLE),true);
         deal = new PokerConfidentialDeal420(address(registry),address(ledger),PROVIDER_A,PROVIDER_B);
         cap.grant(ADMIN,deal.ACTION_BEGIN(),auth.scopeForTable(TABLE),true);
         cap.grant(PROVIDER_A,deal.ACTION_PROVIDER_COMMIT(),auth.scopeForTable(TABLE),true);

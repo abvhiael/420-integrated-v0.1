@@ -193,12 +193,12 @@ contract BetPokerIntegratedFundedAdversarial54Test is PokerWS8ProductionFixture5
         require(ws8Live.slotOf(id,pos).opened&&ws8Live.slotOf(id,pos).card==pos,"verified canonical card");
     }
     function _preflop(bytes32 id) internal {
-        _signed(id,0,PokerNLHEBetting420.Move.CALL,10,WS8_PLAYER_KEY);
-        _signed(id,1,PokerNLHEBetting420.Move.CHECK,0,WS8_OPPONENT_KEY);
+        _signed(id,0,PokerNLHEStorage420.Move.CALL,10,WS8_PLAYER_KEY);
+        _signed(id,1,PokerNLHEStorage420.Move.CHECK,0,WS8_OPPONENT_KEY);
     }
     function _checks(bytes32 id) internal {
-        _signed(id,1,PokerNLHEBetting420.Move.CHECK,0,WS8_OPPONENT_KEY);
-        _signed(id,0,PokerNLHEBetting420.Move.CHECK,0,WS8_PLAYER_KEY);
+        _signed(id,1,PokerNLHEStorage420.Move.CHECK,0,WS8_OPPONENT_KEY);
+        _signed(id,0,PokerNLHEStorage420.Move.CHECK,0,WS8_PLAYER_KEY);
     }
     function _showdown(bytes32 id) internal {
         _preflop(id);
@@ -207,7 +207,7 @@ contract BetPokerIntegratedFundedAdversarial54Test is PokerWS8ProductionFixture5
         _reveal(id,2,9);ws8Live.advance(id,2);emit WS8StreetRecord(2);_checks(id);
         _reveal(id,3,11);ws8Live.advance(id,3);emit WS8StreetRecord(3);_checks(id);
         for(uint8 pos;pos<4;pos++)_reveal(id,4,pos);
-        require(ws8Engine.gameOf(id).phase==PokerNLHEBetting420.Phase.SHOWDOWN&&ws8Live.isStageComplete(id,4),"genuine showdown");
+        require(ws8Engine.gameOf(id).phase==PokerNLHEStorage420.Phase.SHOWDOWN&&ws8Live.isStageComplete(id,4),"genuine showdown");
     }
     function _policy() internal pure returns(PokerCanonicalRake420.Policy memory){return PokerCanonicalRake420.Policy(500,20,true,true);}
     function _settle(bytes32 id) internal {
@@ -267,7 +267,7 @@ contract BetPokerIntegratedFundedAdversarial54Test is PokerWS8ProductionFixture5
         bytes32 id=_shuffled();_deliver(id);
         cheat54.prank(PLAYER);ws8Recipients.bindKey(TABLE,keccak256("WS8.REVOKED.RECIPIENT"));
         require(!ws8Delivery.allAcknowledged(id),"stale encrypted receipt remained live");
-        cheat54.expectRevert(PokerNLHEBetting420.InvalidState.selector);ws8Engine.start(id,0,60);
+        cheat54.expectRevert(PokerNLHEStorage420.InvalidState.selector);ws8Engine.start(id,0,60);
         _escrowUnchanged(id);
         // Restore the actual key with its genuine current-seat possession proof.
         bytes memory pop=_proof("WS8Recipient0");(,uint256[3] memory key)=abi.decode(pop,(uint256[8],uint256[3]));
@@ -280,7 +280,7 @@ contract BetPokerIntegratedFundedAdversarial54Test is PokerWS8ProductionFixture5
         require(ws8Engine.gameOf(id).nonce==0,"revoked signer consumed nonce");_escrowUnchanged(id);
     }
     function attackWithOldSigner(bytes32 id) external {
-        require(msg.sender==address(this));_signed(id,0,PokerNLHEBetting420.Move.CALL,10,WS8_PLAYER_KEY);
+        require(msg.sender==address(this));_signed(id,0,PokerNLHEStorage420.Move.CALL,10,WS8_PLAYER_KEY);
     }
     function testCrossHandReplay() public {
         bytes32 id=_funded();_independent();bytes32[3] memory roots=_roots();
@@ -310,20 +310,19 @@ contract BetPokerIntegratedFundedAdversarial54Test is PokerWS8ProductionFixture5
         bytes32 id=_shuffled();_keys();
         cheat54.prank(PROVIDER_A);ws8Delivery.publish(id,keccak256("WS8.AUTHENTICATED.DECK"),keccak256("WS8.ENCRYPTED.MANIFEST"));
         for(uint8 pos;pos<4;pos++)_deliveryShare(id,pos,0);
-        cheat54.expectRevert(PokerNLHEBetting420.InvalidState.selector);ws8Engine.start(id,0,60);
+        cheat54.expectRevert(PokerNLHEStorage420.InvalidState.selector);ws8Engine.start(id,0,60);
         _escrowUnchanged(id);cheat54.warp(ws8Engine.fundedEvidenceDeadline(id));
         ws8Engine.cancelWithheldDelivery(id);
         require(ledger.handConsumed(id)&&ws8Engine.handAborted(id)&&!ws8Engine.handSettled(id),"withholding terminal refund");
         require(ledger.seatOf(TABLE,0).chips==400&&ledger.seatOf(TABLE,1).chips==400&&coin.balanceOf(address(ledger))==800,"original escrow restored");
         require(ws8Bonds.available(address(coin),PROVIDER_A)==800&&ws8Bonds.available(address(coin),PROVIDER_B)==0,"objective missing-provider blame");
         require(coin.balanceOf(WS8_RISK)==800,"only withholding provider slashed");
-        cheat54.expectRevert(PokerNLHEBetting420.InvalidState.selector);ws8Engine.cancelWithheldDelivery(id);
+        cheat54.expectRevert(PokerNLHEStorage420.InvalidState.selector);ws8Engine.cancelWithheldDelivery(id);
     }
     function testDisputeAbuse() public {
         bytes32 id=_ready();_showdown(id);
-        cap.grant(ADMIN,ws8Disputes.ACTION_START_CLOCK(),auth.scopeForTable(TABLE),true);
-        bytes32 finalState=ws8Engine.gameOf(id).stateRoot;
-        cheat54.prank(ADMIN);ws8Disputes.start(id,0,1,uint64(block.timestamp+60),finalState);
+        (,,,bytes32 finalState,bool clockActive,)=ws8Disputes.clocks(id);
+        require(!clockActive&&finalState==ws8Engine.gameOf(id).stateRoot,"canonical terminal clock anchor");
         cheat54.expectRevert(PokerActionDisputeClock420.Unauthorized.selector);
         cheat54.prank(OTHER);ws8Disputes.dispute(id,keccak256("outsider claim"));
         cheat54.prank(PLAYER);ws8Disputes.dispute(id,keccak256("seated claim"));
@@ -339,7 +338,7 @@ contract BetPokerIntegratedFundedAdversarial54Test is PokerWS8ProductionFixture5
     }
     function testDoubleSettlement() public {
         bytes32 id=_ready();_showdown(id);_settle(id);bytes32 transcript=ws8Engine.terminalTranscript(id);
-        cheat54.expectRevert(PokerNLHEBetting420.InvalidState.selector);ws8Engine.settle(id,_policy());
+        cheat54.expectRevert(PokerNLHEStorage420.InvalidState.selector);ws8Engine.settle(id,_policy());
         require(ws8Engine.terminalTranscript(id)==transcript&&coin.balanceOf(WS8_RAKES)==2&&ledger.totalChips(TABLE)==798,"double payout or rake");
     }
     function testReentrancy() public {
@@ -348,7 +347,7 @@ contract BetPokerIntegratedFundedAdversarial54Test is PokerWS8ProductionFixture5
         hostile.prepareCallback(address(ws8Engine),abi.encodeCall(PokerNLHEBetting420.settle,(id,_policy())));
         _settle(id);
         require(hostile.callbackAttempted()&&!hostile.callbackSucceeded(),"settlement callback attack was not rejected");
-        require(hostile.callbackError()==PokerNLHEBetting420.InvalidState.selector,"terminal-state callback protection");
+        require(hostile.callbackError()==PokerNLHEStorage420.InvalidState.selector,"terminal-state callback protection");
         require(ledger.totalChips(TABLE)==798&&coin.balanceOf(WS8_RAKES)==2,"callback changed atomic payout");
     }
 }

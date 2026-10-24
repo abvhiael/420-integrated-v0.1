@@ -21,11 +21,11 @@ contract PokerWS5Recovery54Test is PokerLiveCardReveals54Test {
         live.advance(id,1);
         (,,,,bool active)=engine.evidenceRecovery(id);
         require(!active,"proof correction closes stale review");
-        require(engine.gameOf(id).phase==PokerNLHEBetting420.Phase.FLOP,
+        require(engine.gameOf(id).phase==PokerNLHEStorage420.Phase.FLOP,
             "corrected evidence resumes authenticated gameplay");
-        _signedAction(id,1,PokerNLHEBetting420.Move.CHECK,0,OPPONENT_KEY);
-        _signedAction(id,0,PokerNLHEBetting420.Move.CHECK,0,PLAYER_KEY);
-        require(engine.gameOf(id).phase==PokerNLHEBetting420.Phase.AWAIT_TURN,
+        _signedAction(id,1,PokerNLHEStorage420.Move.CHECK,0,OPPONENT_KEY);
+        _signedAction(id,0,PokerNLHEStorage420.Move.CHECK,0,PLAYER_KEY);
+        require(engine.gameOf(id).phase==PokerNLHEStorage420.Phase.AWAIT_TURN,
             "fresh turn is an independently bounded proof window");
         cheat54.warp(uint256(engine.evidenceDueAt(id))+1);
         engine.beginMissingEvidenceRecovery(id);
@@ -39,7 +39,7 @@ contract PokerWS5Recovery54Test is PokerLiveCardReveals54Test {
             "exact original funded chip snapshot");
         require(coin.balanceOf(address(0xB00D))==1600,
             "both genuinely missing turn provider shares charged to segregated bonds");
-        cheat54.expectRevert(PokerNLHEBetting420.InvalidState.selector);
+        cheat54.expectRevert(PokerNLHEStorage420.InvalidState.selector);
         engine.finalizeMissingEvidenceRecovery(id);
     }
     function testInvalidPublicShareIsNotEvidenceAndCannotAvoidObjectiveFault() public {

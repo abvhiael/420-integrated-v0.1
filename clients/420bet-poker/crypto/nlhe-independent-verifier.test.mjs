@@ -4,7 +4,7 @@ import {verifyBettingTranscript,verifyShowdownSettlement} from './nlhe-independe
 
 const legal=(nonce,seat,type,amount=0)=>({
   nonce,seat,type,amount,epochCurrent:true,stateRootMatched:true,
-  signed:true,signatureMatchesSeat:true,expiry:1000,timestamp:100,
+  signed:true,signatureMatchesSeat:true,actionAuthorized:true,expiry:1000,timestamp:100,
 });
 const deal={stacks:[100,100],button:0,smallBlind:5,bigBlind:10};
 test('heads-up button has small blind and first preflop action; 2 to 9 seat buttons rotate correctly',()=>{

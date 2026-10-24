@@ -27,11 +27,14 @@ contract PokerActionDisputeClock420 {
     mapping(bytes32=>Resolution) public resolutions;
     function resolutionOf(bytes32 handId) external view returns(Resolution memory){return resolutions[handId];}
     mapping(bytes32=>address) public resolverForTable;
+    mapping(bytes32=>address) public turnEngineForTable;
     error InvalidInput(); error Unauthorized(); error InvalidState(); error Premature();
     event ClockStarted(bytes32 indexed handId,uint8 seat,uint64 nonce,uint64 deadline,bytes32 stateHash);
     event ClockExpired(bytes32 indexed handId,uint8 seat,uint64 nonce);
     event Disputed(bytes32 indexed handId,address challenger,bytes32 evidence);
     event NativeResolverBound(bytes32 indexed tableId,address resolver);
+    event NativeTurnEngineBound(bytes32 indexed tableId,address engine);
+    event NativeTurnSynchronized(bytes32 indexed handId,uint64 nextNonce,uint8 seat,uint64 deadline,bytes32 stateHash,bool active);
     event ResolutionProposed(bytes32 indexed handId,bytes32 outcomeHash,uint64 executableAfter);
     event ResolutionAppealed(bytes32 indexed handId,bytes32 evidence,uint64 executableAfter);
     event ResolutionFinalized(bytes32 indexed handId,bytes32 outcomeHash);
@@ -40,10 +43,17 @@ contract PokerActionDisputeClock420 {
         if(deals_==address(0))revert InvalidInput();
         deals=PokerConfidentialDeal420(deals_);
     }
+    /// @notice Canonical turn snapshot. The dispute hold remains a separate
+    /// settlement concern and cannot freeze objectively authenticated gameplay.
+    function nativeTurnOf(bytes32 handId) external view returns(uint64 deadline,uint64 nonce,uint8 seat,bytes32 stateHash,bool active){
+        Clock storage c=clocks[handId];
+        return(c.deadline,c.nonce,c.seat,c.stateHash,c.active);
+    }
     function start(bytes32 handId,uint8 seat,uint64 nonce,uint64 deadline,bytes32 stateHash) external {
         Clock storage existing=clocks[handId];
         if(existing.disputed) revert InvalidState();
         PokerConfidentialDeal420.Hand memory h=deals.getHand(handId);
+        if(turnEngineForTable[h.tableId]!=address(0))revert Unauthorized();
         if(deals.ledger().handConsumed(handId)||voidFinalized[handId]||
            resolutions[handId].finalized)revert InvalidState();
         if(h.state!=PokerConfidentialDeal420.State.COMMITTED||seat>=9||
@@ -62,6 +72,7 @@ contract PokerActionDisputeClock420 {
         emit ClockStarted(handId,seat,nonce,deadline,stateHash);
     }
     function expire(bytes32 handId) external {
+        if(turnEngineForTable[deals.getHand(handId).tableId]!=address(0))revert Unauthorized();
         Clock storage c=clocks[handId];
         if(!c.active||c.disputed)revert InvalidState();
         if(block.timestamp<c.deadline)revert Premature();
@@ -78,7 +89,10 @@ contract PokerActionDisputeClock420 {
         for(uint8 i=0;i<9;i++)if((deals.handSeatMask(handId)&(uint16(1)<<i))!=0 &&
            deals.ledger().seatOf(h.tableId,i).player==msg.sender)authorized=true;
         if(!authorized)revert Unauthorized();
-        c.active=false;c.disputed=true;
+        // Native turns continue deterministically while the claim holds payment.
+        // Legacy standalone clocks retain their original freeze semantics.
+        if(turnEngineForTable[h.tableId]==address(0))c.active=false;
+        c.disputed=true;
         disputedAt[handId]=uint64(block.timestamp);
         evidenceHash[handId]=evidence;
         emit Disputed(handId,msg.sender,evidence);
@@ -93,6 +107,31 @@ contract PokerActionDisputeClock420 {
             deals.authorization().scopeForTable(tableId),0))revert Unauthorized();
         resolverForTable[tableId]=resolver;
         emit NativeResolverBound(tableId,resolver);
+    }
+    function bindTurnEngine(bytes32 tableId) external {
+        if(msg.sender!=resolverForTable[tableId]||turnEngineForTable[tableId]!=address(0)||
+           deals.ledger().activeHand(tableId)!=bytes32(0))revert Unauthorized();
+        turnEngineForTable[tableId]=msg.sender;
+        emit NativeTurnEngineBound(tableId,msg.sender);
+    }
+    /// @notice The one-time native resolver is the sole writer of actor, nonce,
+    /// state and deadline. Relayers must call its atomic action/timeout entry.
+    function syncTurn(bytes32 handId,uint64 nextNonce,uint8 seat,uint64 deadline,
+        bytes32 stateHash,bool active) external {
+        PokerConfidentialDeal420.Hand memory h=deals.getHand(handId);
+        if(msg.sender!=turnEngineForTable[h.tableId]||msg.sender==address(0))revert Unauthorized();
+        if(deals.ledger().activeHand(h.tableId)!=handId||deals.ledger().handConsumed(handId)||
+           voidFinalized[handId]||resolutions[handId].finalized||stateHash==bytes32(0)||
+           nextNonce==0||nextNonce<clocks[handId].nonce||nextNonce>clocks[handId].nonce+1)
+            revert InvalidState();
+        if(active){
+            if(h.state!=PokerConfidentialDeal420.State.COMMITTED||seat>=9||
+               (deals.handSeatMask(handId)&(uint16(1)<<seat))==0||deadline<=block.timestamp||
+               deadline>block.timestamp+1 hours)revert InvalidInput();
+        }else if(deadline!=0||seat!=type(uint8).max)revert InvalidInput();
+        Clock storage c=clocks[handId];
+        c.deadline=deadline;c.nonce=nextNonce;c.seat=seat;c.stateHash=stateHash;c.active=active;
+        emit NativeTurnSynchronized(handId,nextNonce,seat,deadline,stateHash,active);
     }
     function _requireResolver(bytes32 handId) private view {
         PokerConfidentialDeal420.Hand memory h=deals.getHand(handId);

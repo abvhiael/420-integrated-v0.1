@@ -19,10 +19,14 @@ export function replayBetting({stacks,button,smallBlind,bigBlind,actions,ante=0}
   // Heads-up: dealer is small blind, other seat is big blind.
   const sb=n===2?button:(button+1)%n,bb=(sb+1)%n;
   debit(sb,Math.min(smallBlind,remaining[sb]));debit(bb,Math.min(bigBlind,remaining[bb]));
-  let currentBet=Math.max(...streetPut),minRaise=bigBlind,street=0,nonce=0;
+  let currentBet=remaining.filter((_,i)=>active(i)).length>=2?bigBlind:Math.max(...streetPut),minRaise=bigBlind,street=0,nonce=0;
   let toAct=n===2?(active(sb)?sb:next(sb)):next(bb);
   // Pending action set tracks each player's right to respond to the current bet.
   let pending=new Set(remaining.map((_,i)=>active(i)?i:null).filter(x=>x!==null));
+  if(pending.size<=1){
+    for(const i of pending)if(streetPut[i]>=currentBet)pending.delete(i);
+    if(!pending.size){street=4;toAct=null;}
+  }
   // Track the bet amount each seat last acted against. Multiple short all-ins
   // cumulatively reopen betting only once the player faces a full-raise increment.
   let lastActedAgainst=Array(n).fill(null);
@@ -40,6 +44,7 @@ export function replayBetting({stacks,button,smallBlind,bigBlind,actions,ante=0}
       if(owed===0||v!==Math.min(owed,remaining[i]))throw Error('illegal call');
       debit(i,v);pending.delete(i);
     } else if(a.type==='raise'){
+      if(remaining.filter((_,j)=>active(j)).length<2)throw Error('no live opponent');
       if(v<=owed||v>remaining[i])throw Error('illegal raise size');
       if(lastActedAgainst[i]!==null &&
          currentBet-lastActedAgainst[i]<minRaise)throw Error('betting not reopened');
@@ -59,17 +64,17 @@ export function replayBetting({stacks,button,smallBlind,bigBlind,actions,ante=0}
     pending.delete(i);
     nonce++;
     transcript.push({nonce,street,seat:i,type:a.type,amount:v,committed:[...committed]});
-    if(liveCount()<2){pending.clear();break;}
+    if(liveCount()<2){pending.clear();toAct=null;continue;}
     // Close the street only when all non-all-in players have answered.
     if(!pending.size){
-      if(street===3)break;
+      if(street===3){street=4;toAct=null;continue;}
       street++;
       streetPut.fill(0);currentBet=0;minRaise=bigBlind;
       lastActedAgainst.fill(null);
       pending=new Set(remaining.map((_,j)=>active(j)?j:null).filter(x=>x!==null));
       if(pending.size<=1 && remaining.filter((_,j)=>!folded[j]&&!allIn[j]).length<=1){
         // No strategic action can occur without a live opponent. Board runout still required.
-        street=4;pending.clear();break;
+        street=4;pending.clear();toAct=null;continue;
       }
       // After preflop, action begins at the first active seat left of the button.
       toAct=next(button);

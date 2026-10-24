@@ -98,8 +98,8 @@ contract PokerLiveCardReveals54Test is PokerNLHEBetting54Test {
         live.reveal(handId,1,pos,card,keys,abi.encode(proof,pub));
     }
     function _completePreflop(bytes32 id) internal {
-        _signedAction(id,0,PokerNLHEBetting420.Move.CALL,10,PLAYER_KEY);
-        _signedAction(id,1,PokerNLHEBetting420.Move.CHECK,0,OPPONENT_KEY);
+        _signedAction(id,0,PokerNLHEStorage420.Move.CALL,10,PLAYER_KEY);
+        _signedAction(id,1,PokerNLHEStorage420.Move.CHECK,0,OPPONENT_KEY);
     }
     function testNoPrematureDisclosureAndActualStageProgression() public {
         bytes32 id=_readyLive();
@@ -116,7 +116,7 @@ contract PokerLiveCardReveals54Test is PokerNLHEBetting54Test {
         _submit(id,7,0);_submit(id,7,1);_open(id,7,12);
         require(live.isStageComplete(id,1),"three verified flop positions");
         cheat54.prank(OTHER);live.advance(id,1);
-        require(engine.gameOf(id).phase==PokerNLHEBetting420.Phase.FLOP,"street opened");
+        require(engine.gameOf(id).phase==PokerNLHEStorage420.Phase.FLOP,"street opened");
         require(ledger.reservedInHand(TABLE)==800,"funds remain escrowed");
     }
     function testDuplicateAndInvalidThresholdSharesCannotOpenBoard() public {
@@ -193,23 +193,23 @@ contract PokerLiveCardReveals54Test is PokerNLHEBetting54Test {
         cheat54.expectRevert(PokerLiveCardReveals420.WrongStreet.selector);
         cheat54.prank(PROVIDER_A);
         live.submitShare(id,2,9,0,_points(9,0),hex"01");
-        _signedAction(id,1,PokerNLHEBetting420.Move.CHECK,0,OPPONENT_KEY);
-        _signedAction(id,0,PokerNLHEBetting420.Move.CHECK,0,PLAYER_KEY);
+        _signedAction(id,1,PokerNLHEStorage420.Move.CHECK,0,OPPONENT_KEY);
+        _signedAction(id,0,PokerNLHEStorage420.Move.CHECK,0,PLAYER_KEY);
         require(engine.canRevealStreet(id,2),"turn authorized");
         _submitPublicStreet(id,2,9,0);_submitPublicStreet(id,2,9,1);
         _openPublicStreet(id,2,9,13);
         require(live.isStageComplete(id,2),"turn authenticated");
         live.advance(id,2);
         require(!engine.canRevealStreet(id,3),"river closed before turn betting");
-        _signedAction(id,1,PokerNLHEBetting420.Move.CHECK,0,OPPONENT_KEY);
-        _signedAction(id,0,PokerNLHEBetting420.Move.CHECK,0,PLAYER_KEY);
+        _signedAction(id,1,PokerNLHEStorage420.Move.CHECK,0,OPPONENT_KEY);
+        _signedAction(id,0,PokerNLHEStorage420.Move.CHECK,0,PLAYER_KEY);
         require(engine.canRevealStreet(id,3),"river authorized");
         _submitPublicStreet(id,3,11,0);_submitPublicStreet(id,3,11,1);
         _openPublicStreet(id,3,11,14);
         live.advance(id,3);
         require(!engine.canRevealStreet(id,4),"hole cards still hidden during river");
-        _signedAction(id,1,PokerNLHEBetting420.Move.CHECK,0,OPPONENT_KEY);
-        _signedAction(id,0,PokerNLHEBetting420.Move.CHECK,0,PLAYER_KEY);
+        _signedAction(id,1,PokerNLHEStorage420.Move.CHECK,0,OPPONENT_KEY);
+        _signedAction(id,0,PokerNLHEStorage420.Move.CHECK,0,PLAYER_KEY);
         require(engine.canRevealStreet(id,4),"showdown authorized after river betting");
         require(!live.isStageComplete(id,4),"no showdown without both holes per seat");
         for(uint8 pos=0;pos<4;pos++){
@@ -269,7 +269,7 @@ contract PokerLiveCardReveals54Test is PokerNLHEBetting54Test {
         bytes32 id=_readyBetting();
         require(id!=bytes32(0),"prepared");
         MismatchedReveal54 malicious=new MismatchedReveal54();
-        cheat54.expectRevert(PokerNLHEBetting420.InvalidConfiguration.selector);
+        cheat54.expectRevert(PokerNLHEStorage420.InvalidConfiguration.selector);
         cheat54.prank(ADMIN);engine.bindReveals(TABLE,address(malicious));
     }
 

@@ -336,6 +336,9 @@ contract PokerNLHEBetting420 {
            ledger.lockedSnapshot(h.tableId)!=fundedSnapshot[handId])revert InvalidState();
         if(block.timestamp<fundedEvidenceDeadline[handId])revert TooEarly();
         handAborted[handId]=true;
+        // A bounded disputed withholding review must also reach one terminal
+        // dispute-clock state; never strand an already-refunded hand as frozen.
+        if(disputes.isFrozen(handId))disputes.finalizeUnprovableVoid(handId);
         PokerPrivateShuffleGate420.Record memory record=shuffle.recordOf(handId);
         uint8 missing=0;
         if(record.stage==1)missing=2; // provider B failed its authenticated second stage
@@ -359,6 +362,7 @@ contract PokerNLHEBetting420 {
         if(address(deliveryForTable[h.tableId])!=address(0)&&
             deliveryForTable[h.tableId].allAcknowledged(handId))revert InvalidState();
         handAborted[handId]=true;
+        if(disputes.isFrozen(handId))disputes.finalizeUnprovableVoid(handId);
         uint8 faults=_missingPrivateShareProviders(handId,h.tableId);
         ledger.cancelReservedHand(h.tableId,handId);
         _bond(h.tableId).close(handId,faults);

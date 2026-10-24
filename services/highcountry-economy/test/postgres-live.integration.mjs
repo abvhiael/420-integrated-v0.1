@@ -75,6 +75,7 @@ try {
  console.log('Postgres competing buyers, one ordinary fill, zero-fee credits and asset conservation: PASS');
 
 // HC-NEXT-5.1 real PostgreSQL durability, distinct instance restart, proof replay and burn conservation.
+ await ledger.earn('skill:award','bob','approved','skill:fund-proof',20);
  const skills=new SkillResearchService({store:new PostgresBudsStore(pool,ns),
   identity:{registeredPrincipal:async token=>token==='bob'?'bob':Promise.reject(Error('unregistered'))},
   catalog:HIGHCOUNTRY_SKILL_RESEARCH_V1,

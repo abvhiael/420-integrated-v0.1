@@ -31,6 +31,23 @@ export async function createRuntime({pool,namespace,authority:authConfig,rpc:rpc
  };
  return {store,identity,rewards,market:new HighCountryMarket(store,marketAuthority,clock),...chain};
 }
+// Separate ordinary market composition. The canonical runtime above remains chain-settlement-only.
+export function composeOrdinaryMarketRuntime({store,identity,rewards,inventoryAuthority,clock}) {
+ if(typeof store?.transact!=='function'||identity?.store!==store
+   ||typeof identity?.registeredPrincipal!=='function'
+   ||typeof identity?.requireTrustedIssuer!=='function'
+   ||typeof inventoryAuthority?.verifyAssetReceipt!=='function')
+  throw new SettlementError('ordinary market trusted dependencies missing');
+ const authority={
+  canonicalSettlementRequired:false,
+  registeredPrincipal:session=>identity.registeredPrincipal(session),
+  requireAssetIssuer:session=>identity.requireTrustedIssuer(session,'inventory'),
+  verifyAssetReceipt:receipt=>inventoryAuthority.verifyAssetReceipt(receipt),
+  requireMarketOpen:inventoryAuthority.requireMarketOpen
+   ?()=>inventoryAuthority.requireMarketOpen():undefined
+ };
+ return {store,identity,rewards,market:new HighCountryMarket(store,authority,clock)};
+}
 export function runtimeHttpServer(runtime,{origin}){
  const {identity,rewards,market,settlement,worker}=runtime;
  return createServer(async(req,res)=>{
@@ -73,7 +90,9 @@ export function runtimeHttpServer(runtime,{origin}){
      result=await settlement.prepare(token,b.operation,b.listing,b.transferOperation);break;
     case '/operator/revoke-account':result=await identity.revoke(token,b.principal);break;
     case '/operator/revoke-source':result=await identity.revokeSource(token,b.source);break;
-    case '/operator/reconcile':await identity.requireMarketOperator(token);result=await worker.tick(b.transferOperation);break;
+    case '/operator/reconcile':
+     if(market?.authority?.canonicalSettlementRequired!==true)throw new SettlementError('canonical settlement disabled');
+     await identity.requireMarketOperator(token);result=await worker.tick(b.transferOperation);break;
     default:throw new SettlementError('unknown route');
    }
    res.end(JSON.stringify({ok:true,result:result??null}));

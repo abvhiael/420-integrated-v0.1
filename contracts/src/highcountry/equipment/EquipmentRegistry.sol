@@ -43,6 +43,18 @@ contract EquipmentRegistry is R04EmergencyConsumer {
     mapping(uint64 => address) public placementOperator;
     mapping(uint64 => int256[6]) private _totals;
     uint256 public issuedCount;
+
+    /// @notice Explicit owner offer + recipient acceptance, not payment or market escrow.
+    struct TransferOffer {
+        address recipient;
+        uint64 expiresAt;
+    }
+    mapping(bytes32 => TransferOffer) public pendingTransfers;
+    uint64 public constant MAX_TRANSFER_OFFER_DURATION = 30 days;
+    event EquipmentTransferOffered(bytes32 indexed equipmentId, address indexed owner, address indexed recipient, uint64 expiresAt);
+    event EquipmentTransferCancelled(bytes32 indexed equipmentId, address indexed owner);
+    event EquipmentOwnershipTransferred(bytes32 indexed equipmentId, address indexed previousOwner, address indexed newOwner);
+
     address public lifecycleController;
     mapping(bytes32 => bool) public disabled;
     mapping(bytes32 => bool) public retired;
@@ -135,6 +147,50 @@ contract EquipmentRegistry is R04EmergencyConsumer {
         emit EquipmentEarned(equipmentId, typeId, owner, earningRef);
     }
 
+    /// @notice Proposed owner-controlled custody transfer. Payment settlement is not implied.
+    /// @dev Placed or retired equipment cannot be transferred; the existing condition/provenance follows the item.
+    function offerTransfer(
+        bytes32 equipmentId,
+        address recipient,
+        uint64 expiresAt
+    ) external r04Unrestricted(EmergencyDomains.MARKET) {
+        Equipment storage item = _equipment[equipmentId];
+        if (
+            !item.exists || item.owner != msg.sender || item.parcelId != 0 || retired[equipmentId]
+                || recipient == address(0) || recipient == msg.sender || expiresAt <= block.timestamp
+                || uint256(expiresAt) > block.timestamp + MAX_TRANSFER_OFFER_DURATION
+        ) revert HCInvalidState();
+        pendingTransfers[equipmentId] = TransferOffer(recipient, expiresAt);
+        emit EquipmentTransferOffered(equipmentId, msg.sender, recipient, expiresAt);
+    }
+
+    /// @notice Cancellation remains available even when marketplace ingress is paused.
+    function cancelTransfer(
+        bytes32 equipmentId
+    ) external {
+        Equipment storage item = _equipment[equipmentId];
+        if (!item.exists || item.owner != msg.sender || pendingTransfers[equipmentId].recipient == address(0)) {
+            revert HCInvalidState();
+        }
+        delete pendingTransfers[equipmentId];
+        emit EquipmentTransferCancelled(equipmentId, msg.sender);
+    }
+
+    function acceptTransfer(
+        bytes32 equipmentId
+    ) external r04Unrestricted(EmergencyDomains.MARKET) {
+        Equipment storage item = _equipment[equipmentId];
+        TransferOffer memory offer = pendingTransfers[equipmentId];
+        if (
+            !item.exists || retired[equipmentId] || item.parcelId != 0 || offer.recipient != msg.sender
+                || block.timestamp > offer.expiresAt
+        ) revert HCInvalidState();
+        address previous = item.owner;
+        delete pendingTransfers[equipmentId];
+        item.owner = msg.sender;
+        emit EquipmentOwnershipTransferred(equipmentId, previous, msg.sender);
+    }
+
     /// @notice Lifecycle authority is bound once, permanently, to prevent arbitrary status toggles.
     function bindLifecycleController(
         address controller
@@ -175,6 +231,7 @@ contract EquipmentRegistry is R04EmergencyConsumer {
             occupiedSlots[parcelId] -= _types[item.typeId].slotCost;
             if (occupiedSlots[parcelId] == 0) placementOperator[parcelId] = address(0);
         }
+        delete pendingTransfers[equipmentId];
         retired[equipmentId] = true;
         emit EquipmentRetired(equipmentId);
     }
@@ -187,7 +244,7 @@ contract EquipmentRegistry is R04EmergencyConsumer {
         Equipment storage item = _equipment[equipmentId];
         if (
             !item.exists || retired[equipmentId] || disabled[equipmentId] || item.owner != msg.sender
-                || item.parcelId != 0 || parcelId == 0
+                || item.parcelId != 0 || parcelId == 0 || pendingTransfers[equipmentId].recipient != address(0)
         ) {
             revert HCInvalidState();
         }

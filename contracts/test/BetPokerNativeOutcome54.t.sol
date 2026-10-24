@@ -170,7 +170,8 @@ contract PokerNativeOutcome54Test is PokerLiveCardReveals54Test {
     function testDisputedHandAppealDoesNotOverrideVerifiedNativeOutcome() public {
         bytes32 id=_fundedAndProved();
         PokerCanonicalRake420.Policy memory policy=PokerCanonicalRake420.Policy(500,20,true,true);
-        cheat54.prank(ADMIN);dispute.start(id,0,1,uint64(block.timestamp+90),keccak256("state"));
+        (,,,bytes32 clockState,bool active,)=dispute.clocks(id);
+        require(active&&clockState==engine.gameOf(id).stateRoot,"actual native turn anchor");
         cheat54.prank(PLAYER_B);dispute.dispute(id,keccak256("challenge evidence"));
         require(dispute.isFrozen(id),"settlement temporarily frozen");
         // Objective native gameplay continues despite a claim with no verified

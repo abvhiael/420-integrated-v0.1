@@ -8,9 +8,11 @@ from pathlib import Path
 
 sha = os.environ["EXPECTED_SHA"]
 assert subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip() == sha
-paths = [Path("artifacts/ws8-crypto/execution.json"), Path("artifacts/ws8-funded/execution.json"), Path("artifacts/ws8-funded/independent-outcome.json")]
-crypto, funded, replay = [json.loads(p.read_text(encoding="utf-8")) for p in paths]
-assert all(r["qualifiedSHA"] == sha and r["trackedWorkingTreeDirty"] is False for r in [crypto, funded, replay])
+paths = [Path("artifacts/ws8-crypto/execution.json"), Path("artifacts/ws8-funded/execution.json"), Path("artifacts/ws8-funded/independent-outcome.json"), Path("artifacts/poker-5a5/execution.json")]
+crypto, funded, replay, betting = [json.loads(p.read_text(encoding="utf-8")) for p in paths]
+assert all(r["qualifiedSHA"] == sha and r["trackedWorkingTreeDirty"] is False for r in [crypto, funded, replay, betting])
+assert len(betting['mandatoryTests']) == 30 and set(betting['mandatoryTests'].values()) == {'Success'}
+assert betting['independentTestsPassed'] >= 23
 assert crypto["genuineProofsVerified"] == 41
 assert len(funded["mandatoryTests"]) == 11 and set(funded["mandatoryTests"].values()) == {"Success"}
 assert funded["totalPassed"] >= 15
@@ -18,6 +20,7 @@ assert len(replay["statements"]) == 41 and replay["balances"] == [399, 399] and 
 assert sum(replay["balances"]) + replay["fee"] == 800
 out = Path("artifacts/ws8-certificate");out.mkdir(parents=True, exist_ok=True)
 report = {"level": 2, "qualifiedSHA": sha, "acceptance": "passed", "genuineProofsVerified": 41,
+    "betting5A5Tests": betting['mandatoryTests'], "freshNativeOwners": betting['nativeOwners'],
     "mandatoryTests": funded["mandatoryTests"], "scopedTestsPassed": funded["totalPassed"],
     "handId": replay["handId"], "terminalTranscript": replay["terminalTranscript"],
     "runURL": f"https://github.com/{os.environ['GITHUB_REPOSITORY']}/actions/runs/{os.environ['GITHUB_RUN_ID']}",

@@ -321,9 +321,8 @@ contract BetPokerIntegratedFundedAdversarial54Test is PokerWS8ProductionFixture5
     }
     function testDisputeAbuse() public {
         bytes32 id=_ready();_showdown(id);
-        cap.grant(ADMIN,ws8Disputes.ACTION_START_CLOCK(),auth.scopeForTable(TABLE),true);
-        bytes32 finalState=ws8Engine.gameOf(id).stateRoot;
-        cheat54.prank(ADMIN);ws8Disputes.start(id,0,1,uint64(block.timestamp+60),finalState);
+        (,,,bytes32 finalState,bool clockActive,)=ws8Disputes.clocks(id);
+        require(!clockActive&&finalState==ws8Engine.gameOf(id).stateRoot,"canonical terminal clock anchor");
         cheat54.expectRevert(PokerActionDisputeClock420.Unauthorized.selector);
         cheat54.prank(OTHER);ws8Disputes.dispute(id,keccak256("outsider claim"));
         cheat54.prank(PLAYER);ws8Disputes.dispute(id,keccak256("seated claim"));

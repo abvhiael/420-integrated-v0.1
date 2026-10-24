@@ -53,6 +53,10 @@ contract PokerNLHEBetting54Fixture is PokerPrivateShuffleGate54Test {
         if(dispute.resolverForTable(TABLE)==address(0)){
             cheat54.prank(ADMIN);dispute.bindResolver(TABLE,address(engine));
         }
+        if(engine.turnSecondsForTable(TABLE)==0){
+            cap.grant(ADMIN,engine.ACTION_BIND_TURN_POLICY(),auth.scopeForTable(TABLE),true);
+            cheat54.prank(ADMIN);engine.bindTurnPolicy(TABLE,60);
+        }
     }
     function _configurePrivateDelivery() internal {
         recipient=new PokerRecipientKeys420(address(ledger));
@@ -506,8 +510,7 @@ contract PokerNLHEBetting54Case9Test is PokerNLHEBetting54Fixture {
     function testDisputedPreplayWithholdingConsumesBoundedAppealAndCannotFreezeRefundedEscrow() public {
         bytes32 id=_readyFrozenAssignmentWithoutDelivery();
         cap.grant(ADMIN,dispute.ACTION_START_CLOCK(),auth.scopeForTable(TABLE),true);
-        cheat54.prank(ADMIN);
-        dispute.start(id,0,1,uint64(block.timestamp+60),keccak256("documented state"));
+        require(dispute.turnEngineForTable(TABLE)==address(engine),"native preplay clock authority");
         cheat54.prank(PLAYER);dispute.dispute(id,keccak256("withheld recipient proof"));
         require(dispute.isFrozen(id),"genuine seated dispute registered");
         cheat54.warp(uint256(engine.fundedEvidenceDeadline(id))+1);

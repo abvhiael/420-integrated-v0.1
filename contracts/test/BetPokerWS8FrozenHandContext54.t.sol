@@ -25,6 +25,14 @@ contract BetPokerWS8FrozenHandContext54Test is PokerWS8ProductionFixture54 {
     event WS8RecipientScope(uint8 seat,uint256 scope,uint64 epoch);
     event WS8AggregateScope(uint256 scope,uint256[6] points);
 
+    /// @dev Prover input export only. It admits no proof and issues no Level 2
+    /// certificate; the original frozen/admitted owner below must still pass.
+    function testExportFundedContextForProver() public {
+        bytes32 id=_ws8FundedHand();
+        emit WS8ProverHandScope(uint256(id)%WS8_FR,id);
+        emit WS8StatementContext(abi.encode(_ws8Context(id)));
+    }
+
     function testFreezeCanonicalFundedHandContext() public {
         bytes32 handId=_ws8FundedHand();
         emit WS8ProverHandScope(uint256(handId)%WS8_FR,handId);

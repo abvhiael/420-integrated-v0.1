@@ -67,6 +67,20 @@ contract PokerNLHEBetting420 {
         Phase phase;
         bool initialized;
     }
+    struct Turn {
+        uint8 seat;
+        address player;
+        address signer;
+        uint64 nonce;
+        uint64 deadline;
+        bytes32 stateRoot;
+        uint256 callChips;
+        uint256 minimumRaiseChips;
+        uint256 maximumRaiseChips;
+        uint8 allowedMoves;
+        bool shortAllInOnly;
+        bool canTimeout;
+    }
     PokerConfidentialDeal420 public immutable deals;
     PokerSeatLedger420 public immutable ledger;
     PokerPrivateShuffleGate420 public immutable shuffle;
@@ -74,10 +88,17 @@ contract PokerNLHEBetting420 {
     PokerActionDisputeClock420 public immutable disputes;
     BetAuthorization420 public immutable authorization;
     mapping(bytes32=>IPokerAuthenticatedStreet420) public revealForTable;
-    mapping(bytes32=>Game) private games;
-    mapping(bytes32=>mapping(uint8=>Player)) private players;
+    mapping(bytes32=>Game) internal games;
+    mapping(bytes32=>mapping(uint8=>Player)) internal players;
     mapping(bytes32=>uint8) public lastButton;
+    mapping(bytes32=>uint8) public lastBigBlind;
     mapping(bytes32=>bool) public hasButton;
+    bytes32 public constant ACTION_BIND_TURN_POLICY=keccak256("BET_POKER_BIND_TURN_POLICY.V1");
+    bytes32 public constant TURN_POLICY_DOMAIN=keccak256("420.BET.POKER.NLHE.TURN.POLICY.V1");
+    mapping(bytes32=>uint32) public turnSecondsForTable;
+    mapping(bytes32=>bytes32) public turnPolicyForHand;
+    event TurnPolicyBound(bytes32 indexed tableId,uint32 secondsPerTurn,bytes32 policyHash);
+    event TurnCommitted(bytes32 indexed handId,uint64 nextNonce,uint8 seat,uint64 deadline,bytes32 stateRoot,bool active);
     mapping(bytes32=>bool) public flopOpened;
     mapping(bytes32=>bool) public handSettled;
     mapping(bytes32=>bool) public handAborted;
@@ -142,6 +163,64 @@ contract PokerNLHEBetting420 {
         if(address(shuffle.deals())!=deals_||address(keys.deals())!=deals_||
            address(disputes.deals())!=deals_)
             revert InvalidConfiguration();
+    }
+
+    /// @notice Freeze the cash-table turn duration before its first reservation.
+    /// A relay or hand starter cannot shorten or extend a participant's clock.
+    function bindTurnPolicy(bytes32 tableId,uint32 secondsPerTurn) external {
+        deals.tables().getTable(tableId);
+        if(secondsPerTurn<30||secondsPerTurn>3600||turnSecondsForTable[tableId]!=0||
+           ledger.activeHand(tableId)!=bytes32(0)||hasButton[tableId])revert InvalidConfiguration();
+        if(!authorization.isAuthorized(msg.sender,ACTION_BIND_TURN_POLICY,
+            authorization.scopeForTable(tableId),0))revert Unauthorized();
+        if(disputes.resolverForTable(tableId)!=address(this))revert InvalidConfiguration();
+        turnSecondsForTable[tableId]=secondsPerTurn;
+        disputes.bindTurnEngine(tableId);
+        emit TurnPolicyBound(tableId,secondsPerTurn,turnPolicyHash(tableId));
+    }
+    function turnPolicyHash(bytes32 tableId) public view returns(bytes32){
+        uint32 secondsPerTurn=turnSecondsForTable[tableId];
+        if(secondsPerTurn==0)return bytes32(0);
+        return keccak256(abi.encode(TURN_POLICY_DOMAIN,block.chainid,address(this),tableId,secondsPerTurn));
+    }
+    function _actionAuthorized(bytes32 tableId,uint8 seat) private view returns(bool){
+        PokerSeatLedger420.Seat memory s=ledger.seatOf(tableId,seat);
+        (address signer,uint64 epoch,)=keys.keys(tableId,s.player);
+        return s.player!=address(0)&&signer!=address(0)&&epoch==s.epoch&&
+            authorization.isAuthorized(s.player,BetIds420.ACTION_POKER_ACTION,
+                authorization.scopeForTable(tableId),0);
+    }
+    function _admissionAvailable(bytes32 handId) private view returns(bool){
+        PokerConfidentialDeal420.Hand memory h=deals.getHand(handId);
+        PokerTableRegistry420.Table memory t=deals.tables().getTable(h.tableId);
+        if(t.status!=PokerTableRegistry420.Status.OPEN||
+           !deals.tables().operators().isActive(t.config.operatorId)||
+           deals.tables().emergency().isHalted(BetTypes420.EmergencyDomain.POKER_NEW_HANDS,h.versionId))return false;
+        uint16 mask=deals.handSeatMask(handId);
+        for(uint8 i;i<9;i++)if(_participates(mask,i)&&!_actionAuthorized(h.tableId,i))return false;
+        return true;
+    }
+    function _assertLive(bytes32 handId,Game storage g) private view {
+        if(handSettled[handId]||handAborted[handId]||ledger.handConsumed(handId)||
+           ledger.activeHand(g.tableId)!=handId||fundedSnapshot[handId]==bytes32(0)||
+           ledger.lockedSnapshot(g.tableId)!=fundedSnapshot[handId])revert InvalidState();
+        PokerConfidentialDeal420.Hand memory h=deals.getHand(handId);
+        if(h.state!=PokerConfidentialDeal420.State.COMMITTED||h.epoch!=ledger.seatingEpoch(g.tableId)||
+           h.seatSnapshotHash!=deals.snapshotFor(g.tableId,g.seatsMask))revert InvalidState();
+        (uint64 deadline,uint64 nonce,uint8 seat,bytes32 root,bool active,)=disputes.clocks(handId);
+        if(!active||deadline!=g.deadline||nonce!=g.nonce+1||seat!=g.toAct||root!=g.stateRoot)
+            revert InvalidState();
+    }
+    /// @dev A dispute holds payment, not objectively authenticated play. Freezing
+    /// the actor's timer on an arbitrary claim would create a player griefing exit.
+    function _commitTurn(bytes32 handId,Game storage g) private {
+        bool active=_isBetting(g.phase)&&g.pendingMask!=0;
+        if(!active){g.deadline=0;g.toAct=type(uint8).max;}
+        g.stateRoot=keccak256(abi.encode(STATE_DOMAIN,handId,g.stateRoot,
+            turnPolicyForHand[handId],uint8(g.phase),g.toAct,g.deadline,g.nonce,
+            g.pendingMask,g.currentBet,g.minRaise,g.pot));
+        disputes.syncTurn(handId,g.nonce+1,g.toAct,g.deadline,g.stateRoot,active);
+        emit TurnCommitted(handId,g.nonce+1,g.toAct,g.deadline,g.stateRoot,active);
     }
 
     function bindReveals(bytes32 tableId,address gate) external {
@@ -243,6 +322,30 @@ contract PokerNLHEBetting420 {
     function isHandInitialized(bytes32 handId) external view returns(bool){return games[handId].initialized;}
     function gameOf(bytes32 handId) external view returns(Game memory){return games[handId];}
     function playerOf(bytes32 handId,uint8 seat) external view returns(Player memory){return players[handId][seat];}
+    /// @notice Read-only canonical action limits. Amounts are additional chips,
+    /// matching action(), not controller-computed total-bet suggestions.
+    function turnOf(bytes32 handId) external view returns(Turn memory t){
+        Game storage g=games[handId];
+        t.seat=type(uint8).max;t.nonce=g.nonce+1;t.deadline=g.deadline;t.stateRoot=g.stateRoot;
+        if(!g.initialized||!_isBetting(g.phase)||g.pendingMask==0||handSettled[handId]||
+           handAborted[handId]||ledger.activeHand(g.tableId)!=handId)return t;
+        t.seat=g.toAct;
+        PokerSeatLedger420.Seat memory s=ledger.seatOf(g.tableId,t.seat);t.player=s.player;
+        (t.signer,,)=keys.keys(g.tableId,s.player);
+        t.canTimeout=block.timestamp>g.deadline;
+        Player storage p=players[handId][t.seat];
+        uint256 owed=g.currentBet>p.bet?g.currentBet-p.bet:0;
+        t.callChips=owed<p.stack?owed:p.stack;t.maximumRaiseChips=p.stack;
+        bool overflow=owed>type(uint256).max-g.minRaise;
+        t.minimumRaiseChips=overflow?type(uint256).max:owed+g.minRaise;
+        t.shortAllInOnly=overflow||t.minimumRaiseChips>p.stack;
+        if(t.canTimeout||!_actionAuthorized(g.tableId,t.seat))return t;
+        t.allowedMoves=uint8(1)<<uint8(Move.FOLD);
+        t.allowedMoves|=owed==0?uint8(1)<<uint8(Move.CHECK):uint8(1)<<uint8(Move.CALL);
+        if(_liveToAct(handId,g.seatsMask)>=2&&p.stack>owed&&
+           (!p.acted||g.currentBet-p.lastFacing>=g.minRaise))
+            t.allowedMoves|=uint8(1)<<uint8(Move.RAISE);
+    }
     function _mask(uint8 seat) private pure returns(uint16){return uint16(1)<<seat;}
     function _participates(uint16 mask,uint8 i)private pure returns(bool){return (mask&_mask(i))!=0;}
     function _nextSeat(uint16 mask,uint8 from)private pure returns(uint8){
@@ -328,7 +431,8 @@ contract PokerNLHEBetting420 {
         // An accepted funded hand must have its single governance-bound
         // native dispute resolver installed BEFORE chips are locked. A
         // malicious dispute must never strand escrow behind an unbound hook.
-        if(disputes.resolverForTable(h.tableId)!=address(this))revert InvalidState();
+        if(disputes.resolverForTable(h.tableId)!=address(this)||
+           turnSecondsForTable[h.tableId]==0||disputes.turnEngineForTable(h.tableId)!=address(this))revert InvalidState();
         if(!permitted||ledger.settlementCoordinator(h.tableId)!=address(this)||
            h.seatSnapshotHash!=deals.snapshotFor(h.tableId,mask))
             revert Unauthorized();
@@ -340,6 +444,22 @@ contract PokerNLHEBetting420 {
             revert InvalidState();
         fundedSnapshot[handId]=reservedSnapshot;
         fundedEvidenceDeadline[handId]=uint64(uint256(h.deadline)+PROOF_DELIVERY_WINDOW);
+        turnPolicyForHand[handId]=turnPolicyHash(h.tableId);
+        disputes.syncTurn(handId,1,type(uint8).max,0,reservedSnapshot,false);
+    }
+    /// @notice Preserve custody if a fully delivered hand loses admission before
+    /// any bet. Governance/eligibility changes never strand the funded snapshot.
+    function cancelUnavailableStart(bytes32 handId) external {
+        PokerConfidentialDeal420.Hand memory h=deals.getHand(handId);
+        if(games[handId].initialized||handAborted[handId]||handSettled[handId]||
+           ledger.activeHand(h.tableId)!=handId||fundedSnapshot[handId]==bytes32(0)||
+           ledger.lockedSnapshot(h.tableId)!=fundedSnapshot[handId]||_admissionAvailable(handId))revert InvalidState();
+        if(block.timestamp<fundedEvidenceDeadline[handId])revert TooEarly();
+        handAborted[handId]=true;
+        if(disputes.isFrozen(handId))disputes.finalizeUnprovableVoid(handId);
+        ledger.cancelReservedHand(h.tableId,handId);
+        _bond(h.tableId).close(handId,0);
+        emit UnverifiedDeliveryAborted(handId,h.tableId);
     }
     /// @notice Permissionless refund if providers fail to complete their proof
     /// before a strictly enforced deadline, provided no hand has begun.
@@ -441,15 +561,17 @@ contract PokerNLHEBetting420 {
         // independent dispute, and only under the same missing-proof guard.
         // All terminal effects precede external resolver or ledger calls.
         // A reverting resolver/ledger atomically restores these flags.
-        handAborted[handId]=true;
-        evidenceRecovery[handId].active=false;
-        if(disputes.isFrozen(handId))disputes.finalizeUnprovableVoid(handId);
+        // Compute attribution with the live authorization window still intact.
+        // This external view is a STATICCALL and cannot mutate custody.
         uint8 blame=0;
         if(address(revealForTable[g.tableId])!=address(0)){
             uint8 street=uint8(r.failedPhase)/2; // the four canonical missing-evidence phases are 2,4,6,8
             blame=IPokerMissingShareEvidence420(address(revealForTable[g.tableId]))
                 .missingProviders(handId,street);
         }
+        handAborted[handId]=true;
+        evidenceRecovery[handId].active=false;
+        if(disputes.isFrozen(handId))disputes.finalizeUnprovableVoid(handId);
         ledger.cancelReservedHand(g.tableId,handId);
         _bond(g.tableId).close(handId,blame);
         emit MissingEvidenceRecoveryVoided(handId,g.tableId);
@@ -467,10 +589,43 @@ contract PokerNLHEBetting420 {
            ledger.seatingEpoch(h.tableId)!=h.epoch||
            deals.snapshotFor(h.tableId,mask)!=h.seatSnapshotHash)
            revert InvalidState();
-        uint8 button=hasButton[h.tableId]?
-            _nextSeat(mask,lastButton[h.tableId]):_nextSeat(mask,8);
+        uint8 button=_canonicalButton(h.tableId,mask);
         preparedDeal[handId]=PreparedDeal(button,mask,h.epoch,h.seatSnapshotHash,true);
         emit DealAssignmentPrepared(handId,button,mask,h.seatSnapshotHash);
+    }
+    function _canonicalButton(bytes32 tableId,uint16 mask) internal view returns(uint8 button){
+        button=hasButton[tableId]?_nextSeat(mask,lastButton[tableId]):_nextSeat(mask,8);
+        uint8 n;for(uint8 i;i<9;i++)if(_participates(mask,i))n++;
+        // At a three-plus to heads-up transition, do not charge the surviving
+        // previous big blind twice merely because the old button left the table.
+        if(n==2&&hasButton[tableId]&&_nextSeat(mask,button)==lastBigBlind[tableId])
+            button=lastBigBlind[tableId];
+    }
+    /// @dev Shared by production admission and the isolated arithmetic/rules
+    /// harness. This function never admits a deck or asserts proof validity.
+    function _postBlinds(bytes32 handId,Game storage g,uint8 button,uint256 smallBlind,uint256 bigBlind) internal {
+        uint8 n;for(uint8 i;i<9;i++)if(_participates(g.seatsMask,i))n++;
+        if(n<2||!_participates(g.seatsMask,button)||bigBlind!=2*smallBlind||smallBlind==0)
+            revert InvalidConfiguration();
+        uint8 sb=n==2?button:_nextSeat(g.seatsMask,button);
+        uint8 bb=_nextSeat(g.seatsMask,sb);
+        g.button=button;g.smallBlindSeat=sb;g.bigBlindSeat=bb;
+        g.phase=Phase.PREFLOP;g.minRaise=bigBlind;
+        _debit(handId,g,sb,smallBlind<players[handId][sb].stack?smallBlind:players[handId][sb].stack,true);
+        _debit(handId,g,bb,bigBlind<players[handId][bb].stack?bigBlind:players[handId][bb].stack,true);
+        g.currentBet=bigBlind;g.pendingMask=_pendingFor(handId,g.seatsMask);
+        if(_liveToAct(handId,g.seatsMask)<=1){
+            // A lone player cannot bet into an empty side pot. They respond only
+            // to actual posted chips, not the unmatched nominal short big blind.
+            g.currentBet=0;
+            for(uint8 i;i<9;i++)if(_participates(g.seatsMask,i)&&players[handId][i].bet>g.currentBet)
+                g.currentBet=players[handId][i].bet;
+            for(uint8 i;i<9;i++)if((g.pendingMask&_mask(i))!=0&&players[handId][i].bet>=g.currentBet)
+                g.pendingMask&=~_mask(i);
+        }
+        g.toAct=n==2&&(g.pendingMask&_mask(sb))!=0?sb:_nextToAct(handId,g.seatsMask,bb);
+        g.deadline=uint64(block.timestamp+g.actionTimeout);
+        if(g.pendingMask==0)_endRound(handId,g);
     }
     /// @notice Unique seat owning a hole-card position in the *pre-start*
     /// commitment; cannot be derived from a caller-supplied button.
@@ -487,8 +642,9 @@ contract PokerNLHEBetting420 {
     function start(bytes32 handId,uint256 ante,uint32 timeoutSecs) external {
         PokerConfidentialDeal420.Hand memory h=deals.getHand(handId);
         if(h.state!=PokerConfidentialDeal420.State.COMMITTED||
-           !shuffle.isProofComplete(handId)||timeoutSecs<30||timeoutSecs>3600||ante!=0)
+           !shuffle.isProofComplete(handId)||timeoutSecs!=turnSecondsForTable[h.tableId]||timeoutSecs==0||ante!=0)
             revert InvalidState();
+        if(!_admissionAvailable(handId))revert Unauthorized();
         if(address(deliveryForTable[h.tableId])==address(0)||
            !deliveryForTable[h.tableId].allAcknowledged(handId))revert InvalidState();
         Game storage g=games[handId];
@@ -502,54 +658,40 @@ contract PokerNLHEBetting420 {
         if(!assigned.ready||assigned.mask!=mask||assigned.epoch!=h.epoch||
            assigned.seatSnapshot!=h.seatSnapshotHash)revert InvalidState();
         uint8 button=assigned.button;
-        uint8 canonical=hasButton[h.tableId]?
-            _nextSeat(mask,lastButton[h.tableId]):_nextSeat(mask,8);
+        uint8 canonical=_canonicalButton(h.tableId,mask);
         if(button!=canonical)revert InvalidState();
         hasButton[h.tableId]=true;
         lastButton[h.tableId]=button;
-        uint8 n=0;
-        for(uint8 i=0;i<9;i++)if(_participates(mask,i))n++;
-        uint8 sb=n==2?button:_nextSeat(mask,button);
-        uint8 bb=_nextSeat(mask,sb);
-        g.tableId=h.tableId;g.seatsMask=mask;g.button=button;
-        g.smallBlindSeat=sb;g.bigBlindSeat=bb;g.actionTimeout=timeoutSecs;
-        g.phase=Phase.PREFLOP;g.minRaise=t.config.bigBlind;g.initialized=true;
-        for(uint8 i=0;i<9;i++)if(_participates(mask,i)){
-            PokerSeatLedger420.Seat memory s=ledger.seatOf(h.tableId,i);
-            if(s.player==address(0)||s.sittingOut||s.chips==0)revert InvalidState();
-            Player storage p=players[handId][i];
-            p.stack=s.chips;g.initialChips+=s.chips;
-            _debit(handId,g,i,ante<p.stack?ante:p.stack,false);
+        g.tableId=h.tableId;g.seatsMask=mask;g.actionTimeout=timeoutSecs;
+        g.initialized=true;
+        for(uint8 i;i<9;i++)if(_participates(mask,i)){
+            PokerSeatLedger420.Seat memory seat=ledger.seatOf(h.tableId,i);
+            if(seat.player==address(0)||seat.sittingOut||seat.chips==0)revert InvalidState();
+            players[handId][i].stack=seat.chips;g.initialChips+=seat.chips;
         }
-        _debit(handId,g,sb,t.config.smallBlind<players[handId][sb].stack?
-            t.config.smallBlind:players[handId][sb].stack,true);
-        _debit(handId,g,bb,t.config.bigBlind<players[handId][bb].stack?
-            t.config.bigBlind:players[handId][bb].stack,true);
-        // The nominal big blind remains the minimum live preflop amount
-        // even when the big-blind seat posts less because they are all-in.
-        g.currentBet=t.config.bigBlind;
-        g.pendingMask=_pendingFor(handId,mask);
-        g.toAct=n==2 && (g.pendingMask&_mask(sb))!=0?sb:
-            _nextToAct(handId,mask,bb);
-        g.deadline=uint64(block.timestamp+timeoutSecs);
         g.stateRoot=keccak256(abi.encode(STATE_DOMAIN,block.chainid,address(this),handId,
-            h.tableId,h.rulesetId,h.configHash,h.seatSnapshotHash,
-            button,sb,bb,mask,ante,g.initialChips,g.pot));
-        if(g.pendingMask<1)_endRound(handId,g);
-        emit HandStarted(handId,button,sb,bb);
+            h.tableId,h.rulesetId,h.configHash,h.seatSnapshotHash,mask,g.initialChips,turnPolicyForHand[handId]));
+        _postBlinds(handId,g,button,t.config.smallBlind,t.config.bigBlind);
+        lastBigBlind[h.tableId]=g.bigBlindSeat;
+        _commitTurn(handId,g);
+        emit HandStarted(handId,button,g.smallBlindSeat,g.bigBlindSeat);
     }
     function action(bytes32 handId,uint8 seat,Move move,uint256 chips,
         uint64 expiry,bytes32 expectedRoot,bytes calldata signature) external {
         Game storage g=games[handId];
         if(!g.initialized || !_isBetting(g.phase))revert InvalidState();
+        _assertLive(handId,g);
         if(block.timestamp>g.deadline)revert Expired();
         if(seat!=g.toAct||(g.pendingMask&_mask(seat))==0)revert WrongTurn();
         if(expectedRoot!=g.stateRoot)revert InvalidAction();
+        if(!_actionAuthorized(g.tableId,seat))revert Unauthorized();
         bytes32 moveHash=keccak256(abi.encode(ACTION_DOMAIN,handId,uint8(g.phase),
             seat,uint8(move),chips));
         bytes32 digest=keys.checkSignature(handId,seat,g.nonce+1,expectedRoot,moveHash,expiry,signature);
         if(digest==bytes32(0))revert InvalidAction();
         _apply(handId,g,seat,move,chips);
+        _commitTurn(handId,g);
+        emit NLHEAction(handId,g.nonce,seat,move,chips,g.stateRoot);
         actionTranscriptRoot[handId]=keccak256(abi.encode(TRANSCRIPT_DOMAIN,
             actionTranscriptRoot[handId],handId,g.nonce,seat,uint8(move),chips,
             expectedRoot,g.stateRoot,digest,expiry,keccak256(signature)));
@@ -559,6 +701,7 @@ contract PokerNLHEBetting420 {
         Game storage g=games[handId];
         if(!g.initialized||!_isBetting(g.phase)||g.pendingMask==0)
             revert InvalidState();
+        _assertLive(handId,g);
         if(block.timestamp<=g.deadline)revert TooEarly();
         uint8 seat=g.toAct;
         Player storage p=players[handId][seat];
@@ -567,6 +710,8 @@ contract PokerNLHEBetting420 {
         bytes32 prior=g.stateRoot;
         uint64 deadline=g.deadline;
         _apply(handId,g,seat,move,0);
+        _commitTurn(handId,g);
+        emit NLHEAction(handId,g.nonce,seat,move,0,g.stateRoot);
         actionTranscriptRoot[handId]=keccak256(abi.encode(TRANSCRIPT_DOMAIN,
             actionTranscriptRoot[handId],handId,nonce,seat,uint8(move),uint256(0),
             prior,g.stateRoot,bytes32(0),deadline,bytes32(0)));
@@ -578,7 +723,7 @@ contract PokerNLHEBetting420 {
         return phase==Phase.PREFLOP||phase==Phase.FLOP||
             phase==Phase.TURN||phase==Phase.RIVER;
     }
-    function _apply(bytes32 handId,Game storage g,uint8 seat,Move move,uint256 chips)private {
+    function _apply(bytes32 handId,Game storage g,uint8 seat,Move move,uint256 chips)internal {
         Player storage p=players[handId][seat];
         if(p.folded||p.allIn)revert InvalidAction();
         uint256 owed=g.currentBet>p.bet?g.currentBet-p.bet:0;
@@ -617,9 +762,8 @@ contract PokerNLHEBetting420 {
         g.stateRoot=keccak256(abi.encode(STATE_DOMAIN,block.chainid,address(this),
             handId,g.stateRoot,g.nonce,seat,move,chips,
             g.currentBet,g.minRaise,g.pot,g.pendingMask,p.stack,p.bet,p.contributed,p.folded,p.allIn));
-        emit NLHEAction(handId,g.nonce,seat,move,chips,g.stateRoot);
         if(_alive(handId,g.seatsMask)==1){
-            g.phase=Phase.UNCONTESTED;g.pendingMask=0;g.toAct=type(uint8).max;
+            g.phase=Phase.UNCONTESTED;g.pendingMask=0;g.toAct=type(uint8).max;g.deadline=0;
         }else if(g.pendingMask==0)_endRound(handId,g);
         else{
             g.toAct=_nextPending(handId,g.seatsMask,g.pendingMask,seat);
@@ -636,7 +780,7 @@ contract PokerNLHEBetting420 {
         revert InvalidState();
     }
     function _endRound(bytes32 handId,Game storage g)private{
-        g.pendingMask=0;g.toAct=type(uint8).max;
+        g.pendingMask=0;g.toAct=type(uint8).max;g.deadline=0;
         if(g.phase==Phase.PREFLOP)g.phase=Phase.AWAIT_FLOP;
         else if(g.phase==Phase.FLOP)g.phase=Phase.AWAIT_TURN;
         else if(g.phase==Phase.TURN)g.phase=Phase.AWAIT_RIVER;
@@ -646,7 +790,9 @@ contract PokerNLHEBetting420 {
         evidenceDueAt[handId]=uint64(block.timestamp+PROOF_DELIVERY_WINDOW);
     }
     function canRevealStreet(bytes32 handId,uint8 street)external view returns(bool){
-        Phase phase=games[handId].phase;
+        Game storage g=games[handId];
+        if(!g.initialized||handAborted[handId]||handSettled[handId]||ledger.activeHand(g.tableId)!=handId)return false;
+        Phase phase=g.phase;
         if(street<1||street>4)return false;
         uint8 expected=street<2?uint8(Phase.AWAIT_FLOP):
             street<3?uint8(Phase.AWAIT_TURN):
@@ -670,13 +816,18 @@ contract PokerNLHEBetting420 {
             recovery.active=false;
             emit MissingEvidenceRecoveryCorrected(handId,uint8(g.phase));
         }
+        _openBettingStreet(handId,g,street,deals.tables().getTable(g.tableId).config.bigBlind);
+        _commitTurn(handId,g);
+        emit StreetOpened(handId,street);
+    }
+    function _openBettingStreet(bytes32 handId,Game storage g,uint8 street,uint256 bigBlind) internal {
         g.phase=street==1?Phase.FLOP:street==2?Phase.TURN:Phase.RIVER;
         if(street==1)flopOpened[handId]=true;
         for(uint8 i=0;i<9;i++)if(_participates(g.seatsMask,i)){
             Player storage p=players[handId][i];p.bet=0;p.acted=false;p.lastFacing=0;
         }
         g.currentBet=0;
-        g.minRaise=deals.tables().getTable(g.tableId).config.bigBlind;
+        g.minRaise=bigBlind;
         if(_liveToAct(handId,g.seatsMask)<=1){
             _endRound(handId,g);return;
         }
@@ -684,6 +835,6 @@ contract PokerNLHEBetting420 {
         g.toAct=_nextToAct(handId,g.seatsMask,g.button);
         g.deadline=uint64(block.timestamp+g.actionTimeout);
         g.stateRoot=keccak256(abi.encode(STATE_DOMAIN,handId,g.stateRoot,uint8(g.phase)));
-        emit StreetOpened(handId,street);
+
     }
 }

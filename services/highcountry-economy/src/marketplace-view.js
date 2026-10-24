@@ -24,11 +24,31 @@ export class HighCountryMarketplaceView {
    const browse=listings.filter(l=>l.status==='active'&&l.seller!==principal).slice(-100);
    const history=listings.filter(l=>l.seller===principal||l.buyer===principal).slice(-100).reverse();
    const disputes=[...(s.marketDisputes??new Map())].filter(([,d])=>d.principal===principal)
-    .map(([dispute,d])=>({dispute,listing:d.listing,reason:d.reason,status:d.status,createdAt:d.createdAt}))
+    .map(([dispute,d])=>({dispute,listing:d.listing,reason:d.reason,status:d.status,createdAt:d.createdAt,decision:d.decision??null,evidence:d.evidence??null}))
     .slice(-50).reverse();
    return {principal,mode:canonical?'canonical':'ordinary',
     buds:{available:bal.available,reserved:bal.reserved},inventory,browse,history,disputes,
     walletRequired:canonical,feePolicy:canonical?'independent-chain-policy':'zero'};
+  });
+ }
+ async review(session,operation,dispute,status,evidence){
+  if(typeof this.identity.requireMarketOperator!=='function')throw new SettlementError('dispute review disabled');
+  await this.identity.requireMarketOperator(session);
+  id(operation);id(dispute);id(evidence);
+  if(!['under-review','closed-no-adjustment','referred'].includes(status))
+   throw new SettlementError('invalid dispute transition');
+  return this.store.transact(s=>{
+   if(s.operations.has(operation))throw new SettlementError('replayed dispute action');
+   const d=s.marketDisputes?.get(dispute);
+   if(!d||!['open','under-review'].includes(d.status))throw new SettlementError('dispute not reviewable');
+   if(d.status==='open'&&status!=='under-review')throw new SettlementError('review required before closure');
+   if(d.status==='under-review'&&status==='under-review')throw new SettlementError('duplicate dispute review');
+   d.status=status;d.evidence=evidence;
+   d.decision=status==='closed-no-adjustment'?'no-ledger-adjustment':
+    status==='referred'?'external-authority-required':null;
+   s.operations.add(operation);
+   // This workflow is descriptive evidence, NEVER an escrow or credit adjustment.
+   return {dispute,status,settlementChanged:false};
   });
  }
  async dispute(session,operation,listing,reason){

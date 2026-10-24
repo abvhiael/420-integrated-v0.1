@@ -2,7 +2,7 @@
 
 Status: **expanded security hardening candidate; exact-SHA CI and final release acceptance pending**.
 
-The registered economy uses signed, short-lived, audience/game-bound sessions with account epochs, immutable policy-limited reward sources, proof/objective replay protection, SERIALIZABLE PostgreSQL transactions, and a finalized receipt-aware canonical market settlement. Guests retain local-only preview state. BUDS are integer internal game units and not native $420.
+The registered economy uses signed, short-lived, audience/game-bound sessions with account epochs, immutable policy-limited reward sources, proof/objective replay protection, SERIALIZABLE PostgreSQL transactions, and a finalized receipt-aware canonical market settlement. Revocation now invalidates the prior registered-account epoch itself; receipt of newly issued credentials requires explicit re-registration, and legacy trusted-issuer reward grants require a currently registered recipient. Guests retain local-only preview state. BUDS are integer internal game units and not native $420.
 
 ## Security remediation
 

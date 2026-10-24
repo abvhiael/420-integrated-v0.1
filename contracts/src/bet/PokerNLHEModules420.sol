@@ -119,6 +119,7 @@ contract PokerNLHEPlayModule420 is PokerNLHEModule420 {
         bytes32 prior=g.stateRoot;
         uint64 deadline=g.deadline;
         _apply(handId,g,seat,move,0);
+        ledger.markTimedOut(g.tableId,handId,seat);
         _commitTurn(handId,g);
         emit NLHEAction(handId,g.nonce,seat,move,0,g.stateRoot);
         _layout().actionTranscriptRoot[handId]=keccak256(abi.encode(TRANSCRIPT_DOMAIN,

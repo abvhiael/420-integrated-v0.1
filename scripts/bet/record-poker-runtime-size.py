@@ -15,7 +15,9 @@ sha = subprocess.check_output(['git', '-c', 'safe.directory='+root.as_posix(),
 dirty=subprocess.run(['git','-c','safe.directory='+root.as_posix(),'diff','--quiet','HEAD'],cwd=root).returncode!=0
 measurements = {}
 targets = [('PokerNLHEBetting420', 'PokerNLHEBetting420.sol',128),
-           ('PokerActionDisputeClock420', 'PokerActionDisputeClock420.sol',32)]
+           ('PokerActionDisputeClock420', 'PokerActionDisputeClock420.sol',32),
+           ('PokerSeatLedger420','PokerSeatLedger420.sol',32),
+           ('PokerPlayerRecovery420','PokerPlayerRecovery420.sol',32)]
 for group in ('Admission','Play','Custody','Settlement'):
     targets += [('PokerNLHE'+group+'Module420','PokerNLHEModules420.sol',160),
                 ('PokerNLHE'+group+'Factory420','PokerNLHEModuleFactories420.sol',0)]

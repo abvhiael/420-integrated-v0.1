@@ -15,6 +15,14 @@ assert len(betting['mandatoryTests']) == 32 and set(betting['mandatoryTests'].va
 assert betting['independentTestsPassed'] >= 23
 assert len(betting['evaluation5A6Tests']) == 11 and set(betting['evaluation5A6Tests'].values()) == {'Success'}
 assert len(betting['showdown5A7Tests']) == 18 and set(betting['showdown5A7Tests'].values()) == {'Success'}
+assert len(betting['lifecycle5A8Tests'])==25 and set(betting['lifecycle5A8Tests'].values())=={'Success'}
+assert betting['independentTestsPassed']>=59
+lifecyclePath=Path('artifacts/poker-5a5/lifecycle-replay.json')
+lifecycle=json.loads(lifecyclePath.read_text(encoding='utf-8'))
+assert lifecycle['qualifiedSHA']==sha and lifecycle['trackedWorkingTreeDirty'] is False
+assert lifecycle['clockPreservedAcrossReconnect'] and lifecycle['pendingIntentPreservedFundedSnapshot'] and lifecycle['timeoutFoldAndSitOutVerified']
+assert lifecycle['canonicalPayouts']==[390,410] and lifecycle['rake']==0
+paths += [lifecyclePath]
 winnerCryptoPath=Path('artifacts/ws8-crypto/winner-execution.json')
 winnerReplayPath=Path('artifacts/poker-5a5/winner-independent-outcome.json')
 winnerCrypto=json.loads(winnerCryptoPath.read_text(encoding='utf-8'))
@@ -29,6 +37,8 @@ assert runtime['sourceCommit'] == sha
 assert runtime['qualifiedSHA']==sha and runtime['trackedWorkingTreeDirty'] is False
 assert runtime['runtimeDeploymentCompatible'] is True
 assert 0<runtime['constructorGasUsed']<=runtime['constructorGasBudget']==16_000_000
+assert lifecycle['projectionIdentity']['runtimeBytes']==runtime['contracts']['PokerPlayerRecovery420']['runtimeTemplateBytes']
+assert lifecycle['ledgerIdentity']['runtimeBytes']==runtime['contracts']['PokerSeatLedger420']['runtimeTemplateBytes']
 contextPath=Path('artifacts/ws8-funded/context-compatibility.json')
 context=json.loads(contextPath.read_text(encoding='utf-8'))
 assert len(context['actualVerifierIdentities'])==7 and len(context['actualNativeIdentities'])==10
@@ -52,6 +62,8 @@ assert len(replay["statements"]) == 41 and replay["balances"] == [399, 399] and 
 assert sum(replay["balances"]) + replay["fee"] == 800
 out = Path("artifacts/ws8-certificate");out.mkdir(parents=True, exist_ok=True)
 report = {"level": 2, "qualifiedSHA": sha, "acceptance": "passed", "genuineProofsVerified": 41,
+    "lifecycle5A8Tests": betting['lifecycle5A8Tests'], "reconnectionReplayVerified": True,
+    "playerRecoveryIdentity": lifecycle['projectionIdentity'], "seatLedgerIdentity": lifecycle['ledgerIdentity'],
     "showdown5A7Tests": betting['showdown5A7Tests'],
     "genuineWinnerProofsVerified": 41, "newWinnerProofsGenerated": 36, "reusedWinnerProofs": 5,
     "winnerBalances": winnerReplay['balances'], "winnerFee": winnerReplay['fee'],

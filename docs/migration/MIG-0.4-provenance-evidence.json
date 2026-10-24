@@ -34,17 +34,39 @@
   ],
   "godot": {
     "primaryRuntimeIntended": "Godot",
-    "projectFileFound": false,
-    "method": "GitHub default-branch file search for project.godot and godot returned no matching files; other branches and local-only files not exhaustively scanned",
-    "verifiedScenes": 0,
-    "verifiedImportedFiles": 0,
-    "conclusion": "BLOCKED_SOURCE_NOT_LOCATED"
+    "sourceRepository": "abvhiael/MadBuds-Godot",
+    "branch": "main",
+    "gitTreeSha": "babda3859a10e77f3c362d97acd18f170ae2fda6",
+    "treeTruncated": false,
+    "projectFileFound": true,
+    "projectPath": "project.godot",
+    "projectBlobSha": "b66c4a462160315e63cd72ba74b6557e988afdb2",
+    "trackedFiles": 196,
+    "scenes": [
+      "scenes/characters/kush_krusher.tscn",
+      "scenes/main.tscn"
+    ],
+    "scripts": [
+      "scripts/destructible.gd",
+      "scripts/kush_animation.gd",
+      "scripts/kush_krusher.gd",
+      "scripts/main.gd"
+    ],
+    "testScripts": [
+      "tests/test_animation_assets.gd",
+      "tests/test_kush_contract.gd",
+      "tests/test_mb3_level2.gd"
+    ],
+    "assetManifests": 15,
+    "trackedPngs": 150,
+    "conclusion": "SOURCE_PROJECT_AND_COMPLETE_GIT_TREE_VERIFIED; GODOT_IMPORT_AND_RUNTIME_NOT_EXECUTED"
   },
   "binaryAssets": {
+    "trackedPngsInGodot": 150,
+    "manifestFilesInGodot": 15,
     "sha256VerifiedAgainstBytes": 0,
-    "method": "Existing manifests expose expected SHA-256; no complete binary byte inventory available through this connector audit",
-    "conclusion": "NOT_VERIFIED",
-    "note": "Manifest hash string syntax and referenced frame count alone do not prove binary integrity"
+    "conclusion": "TREE_PATHS_VERIFIED; BINARY_SHA256_UNVERIFIED",
+    "note": "All 150 PNG paths are present in a non-truncated Git tree; 150 hash comparisons require actual bytes and are not inferred from Git blob SHA-1."
   },
   "legacyUnity": {
     "sourceRepo": "abvhiael/420-integrated",
@@ -55,6 +77,6 @@
     "unityReadmeBlob": "7a5937f3f38771a937719fc90db1b322ac791453",
     "conclusion": "KNOWN_PATHS_VERIFIED; EXHAUSTIVE_RECURSIVE_TREE_UNVERIFIED"
   },
-  "finalStatus": "PARTIAL_NO_FULL_MIG_0_4_QUALIFICATION",
+  "finalStatus": "PARTIAL_PENDING_BINARY_SHA256_AND_RUNTIME_QUALIFICATION",
   "releasePolicy": "No source deletions or migration cutover permitted until Godot, binary and full Unity provenance gates are satisfied"
 }

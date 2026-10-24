@@ -18,7 +18,7 @@ All durable reports are kept in the same SERIALIZABLE PostgreSQL namespace (with
 
 ### Separate optional canonical market
 
-A connected canonical marketplace may show read-only canonical listings and history. The page does **not** pretend that a clicked buy button authorizes chain settlement, nor allow canonical cancellation via the ordinary API. Canonical wallet authorization, operator submission, finality, indexer reconciliation and return status belong to the separately reviewed wallet/settlement service of HC-NEXT-4.3. Until a configured real-network deployment has completed its own acceptance, canonical purchase is visibly unavailable here. A finalized transaction inclusion alone is not proof of canonical custody or a settled BUDS payout.
+A connected canonical marketplace may show read-only canonical listings and history, including buyer-visible `settling` state derived from a durable prepared transfer intent without falsely marking the item delivered. The page does **not** pretend that a clicked buy button authorizes chain settlement, nor allow canonical cancellation via the ordinary API. Canonical wallet authorization, operator submission, finality, indexer reconciliation and return status belong to the separately reviewed wallet/settlement service of HC-NEXT-4.3. Until a configured real-network deployment has completed its own acceptance, canonical purchase is visibly unavailable here. A finalized transaction inclusion alone is not proof of canonical custody or a settled BUDS payout.
 
 ### Qualification and limitations
 

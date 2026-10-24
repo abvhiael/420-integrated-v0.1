@@ -88,6 +88,15 @@ try {
   source:'mission',contract:addresses.mission,objective,amount:100,expires:Date.now()+60000,epoch:0})).toString('base64url');
  const proof={payload,signature:sign(null,Buffer.from(payload),proofKeys.privateKey).toString('base64url')};
  await post('buyer','/rewards/claim',{source:'mission',proof});await post('buyer','/rewards/claim',{source:'mission',proof},403);
+ // Adversarial finalized receipt authentication: an event without a successful receipt cannot admit goods.
+ const originalRpcRequest=runtime.reader.client.rpc.request.bind(runtime.reader.client.rpc);
+ runtime.reader.client.rpc.request=async(method,args)=>{
+  const result=await originalRpcRequest(method,args);
+  if(method==='eth_getTransactionReceipt')return {...result,status:'0x0'};
+  return result;
+ };
+ await assert.rejects(runtime.reader.lockedEscrowReceipt(listing,1),/unauthenticated finalized receipt/);
+ runtime.reader.client.rpc.request=originalRpcRequest;
  const lock=await runtime.reader.lockedEscrowReceipt(listing,1);assert.ok(lock);
  await post('buyer','/market/import',{operation:'wrong-issuer',receipt:{...lock,owner:'seller'}},403);
  await post('operator','/market/import',{operation:'canonical-import',receipt:{...lock,owner:'seller'}});

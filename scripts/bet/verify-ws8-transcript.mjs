@@ -30,7 +30,7 @@ for(const line of log.split('\n')) {
  } else if((m=line.match(/emit WS8VerifiedPublicStatement\(label: "([^"]+)", proofAndPublicInputs: (0x[0-9a-f]+)\)/i))) {
   const alias={initial:'WS8Initial',shuffle1:'WS8Shuffle1',shuffle2:'WS8Shuffle2',recipient0:'WS8Recipient0',recipient1:'WS8Recipient1',aggregate:'WS8Aggregate'};
   const name=alias[m[1]]??m[1],bytes=Buffer.from(m[2].slice(2),'hex');
-  assert.deepEqual(bytes,readFileSync(path.join(root,'clients/420bet-poker/zkshuffle/fixtures/'+(winner?'ws8-winner':'ws8')+'/proofs',name+'.abi')),'executed proof bytes differ from evidence');
+  assert.deepEqual(bytes,readFileSync(path.join(root,'clients/420bet-poker/zkshuffle/fixtures/'+(winner?'ws8/winner':'ws8')+'/proofs',name+'.abi')),'executed proof bytes differ from evidence');
   assert((bytes.length-256)%32===0,'invalid public statement ABI');
   const publicInputs=[];for(let i=256;i<bytes.length;i+=32)publicInputs.push(BigInt('0x'+bytes.subarray(i,i+32).toString('hex')).toString());
   statements.push({name,publicInputs,proofAndStatementSHA256:createHash('sha256').update(bytes).digest('hex')});

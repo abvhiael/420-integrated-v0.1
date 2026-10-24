@@ -132,7 +132,7 @@ def main():
     sha = subprocess.check_output(args+['rev-parse', 'HEAD'], cwd=ROOT, text=True).strip()
     dirty = subprocess.run(args+['diff', '--quiet', 'HEAD'], cwd=ROOT).returncode != 0
     for file in ('contracts/test/BetPokerShowdown57.t.sol',
-                 'clients/420bet-poker/zkshuffle/fixtures/ws8-winner/manifest.json',
+                 'clients/420bet-poker/zkshuffle/fixtures/ws8/winner/manifest.json',
                  'contracts/test/BetPokerBettingRounds55.t.sol',
                  'clients/420bet-poker/crypto/nlhe-5a5.test.mjs',
                  'scripts/bet/verify-poker-5a5-execution.py',

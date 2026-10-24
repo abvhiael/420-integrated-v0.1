@@ -25,7 +25,7 @@ contract PokerShowdown57Test is BetPokerIntegratedFundedAdversarial54Test {
 
     function _data(string memory name)internal override returns(bytes memory){
         if(!singleWinner)return super._data(name);
-        return ws8vm.readFileBinary(string.concat("../clients/420bet-poker/zkshuffle/fixtures/ws8-winner/proofs/",name));
+        return ws8vm.readFileBinary(string.concat("../clients/420bet-poker/zkshuffle/fixtures/ws8/winner/proofs/",name));
     }
     function _reveal(bytes32 id,uint8 street,uint8 pos)internal override {
         uint8 card=singleWinner&&pos==0?12:pos;

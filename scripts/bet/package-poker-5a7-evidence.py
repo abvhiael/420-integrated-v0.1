@@ -8,7 +8,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 BASE = ROOT / 'clients/420bet-poker/zkshuffle/fixtures/ws8'
-OUT = BASE.parent / 'ws8-winner'
+OUT = BASE / 'winner'
 def digest(p):
     return hashlib.sha256(p.read_bytes()).hexdigest()
 

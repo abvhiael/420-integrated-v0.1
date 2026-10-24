@@ -4,7 +4,7 @@
   "buildArtifactAbiSha256": "5ea63254c724148eba47ee720486f41105f003602558cbd0b0a43bdc346d3a6e",
   "compiler": {
     "evmVersion": "cancun",
-    "foundryConfigBlobSha1": "b72075a43aecc4c9ab6ed2d26057453ad49648f6",
+    "foundryConfigBlobSha1": "3768be4e992feb9d6439ce47692e2f7247a139a6",
     "optimizer": true,
     "optimizerRuns": 200,
     "solidity": "0.8.24",

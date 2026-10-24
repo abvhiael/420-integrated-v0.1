@@ -23,7 +23,7 @@ func TestWS8CommittedCryptographicEvidence(t *testing.T) {
 	verifyCommittedPokerBundle(t, filepath.Join("fixtures", "ws8"))
 }
 func TestPoker5A7WinnerCommittedCryptographicEvidence(t *testing.T) {
-	verifyCommittedPokerBundle(t, filepath.Join("fixtures", "ws8-winner"))
+	verifyCommittedPokerBundle(t, filepath.Join("fixtures", "ws8", "winner"))
 }
 func verifyCommittedPokerBundle(t *testing.T, root string) {
 	type keyRecord struct {

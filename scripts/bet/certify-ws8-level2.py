@@ -15,7 +15,7 @@ assert len(betting['mandatoryTests']) == 32 and set(betting['mandatoryTests'].va
 assert betting['independentTestsPassed'] >= 23
 assert len(betting['evaluation5A6Tests']) == 11 and set(betting['evaluation5A6Tests'].values()) == {'Success'}
 assert len(betting['showdown5A7Tests']) == 18 and set(betting['showdown5A7Tests'].values()) == {'Success'}
-assert len(betting['lifecycle5A8Tests'])==25 and set(betting['lifecycle5A8Tests'].values())=={'Success'}
+assert len(betting['lifecycle5A8Tests'])==27 and set(betting['lifecycle5A8Tests'].values())=={'Success'}
 assert betting['independentTestsPassed']>=59
 lifecyclePath=Path('artifacts/poker-5a5/lifecycle-replay.json')
 lifecycle=json.loads(lifecyclePath.read_text(encoding='utf-8'))

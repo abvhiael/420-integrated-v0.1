@@ -177,6 +177,36 @@ contract PokerPlayerLifecycle58Test is BetPokerIntegratedFundedAdversarial54Test
         require(ledger.seatOf(TABLE,0).chips==400&&ledger.seatOf(TABLE,0).sittingOut,"refund or pending state lost");
         ledger.completeLeave(TABLE,PLAYER,_epoch(),_nonce());
     }
+    function test58DisconnectedRecipientWithoutAcknowledgmentUsesBoundedRefund()public {
+        bytes32 id=_shuffled();_keys();_disconnect(true);_requestExit();
+        cheat54.prank(PROVIDER_A);ws8Delivery.publish(id,keccak256("WS8.AUTHENTICATED.DECK"),keccak256("WS8.ENCRYPTED.MANIFEST"));
+        for(uint8 pos;pos<4;pos++)for(uint8 provider;provider<2;provider++)_deliveryShare(id,pos,provider);
+        for(uint8 seat;seat<2;seat++){
+            bytes32 envelope=ws8Book.envelopeHashFor(id,seat);bytes32 fingerprint=ws8Recipients.fingerprintOf(TABLE,seat);
+            cheat54.prank(seat==0?PROVIDER_A:PROVIDER_B);ws8Delivery.bindEnvelope(id,seat,envelope,fingerprint);
+        }
+        bytes32 receipt=ws8Delivery.receiptDigest(id,1);cheat54.prank(PLAYER_B);ws8Delivery.acknowledge(id,1,receipt);
+        require(ws8Book.allVerified(id)&&!ws8Delivery.allAcknowledged(id),"missing recipient was fabricated");
+        cheat54.expectRevert(PokerNLHEStorage420.InvalidState.selector);ws8Engine.start(id,0,60);
+        cheat54.expectRevert(PokerNLHEStorage420.TooEarly.selector);ws8Engine.cancelWithheldDelivery(id);
+        cheat54.warp(ws8Engine.fundedEvidenceDeadline(id));ws8Engine.cancelWithheldDelivery(id);
+        require(ws8Engine.handAborted(id)&&ledger.seatOf(TABLE,0).chips==400,"no-ack hand was played or charged");
+        require(coin.balanceOf(WS8_RISK)==0&&ws8Bonds.available(address(coin),PROVIDER_A)==800&&ws8Bonds.available(address(coin),PROVIDER_B)==800,"player disconnect blamed providers");
+        ledger.completeLeave(TABLE,PLAYER,_epoch(),_nonce());
+    }
+    function test58QueuedLeaveSurvivesBoundedMissingStreetRecovery()public {
+        bytes32 id=_ready();_preflop(id);_disconnect(true);_requestExit();
+        cheat54.warp(ws8Engine.evidenceDueAt(id)+1);ws8Engine.beginMissingEvidenceRecovery(id);
+        PokerPlayerRecovery420.Snapshot memory s=recoveryView.snapshot(TABLE,PLAYER,id);
+        require(s.recoveryActive&&s.recoveryStateRoot==s.game.stateRoot&&s.recoveryFinalizableAt>block.timestamp,"reconnect lost recovery state");
+        uint64 e=_epoch();uint64 n=_nonce();
+        cheat54.expectRevert(PokerSeatLedger420.Locked.selector);ledger.completeLeave(TABLE,PLAYER,e,n);
+        cheat54.warp(s.recoveryFinalizableAt);ws8Engine.finalizeMissingEvidenceRecovery(id);
+        require(ws8Engine.handAborted(id)&&ledger.seatOf(TABLE,0).chips==400&&ledger.seatOf(TABLE,0).sittingOut,"recovery lost original stack or next-hand intent");
+        require(coin.balanceOf(WS8_RISK)==1600,"genuinely withheld street shares not charged to providers");
+        ledger.completeLeave(TABLE,PLAYER,e,n);
+        s=recoveryView.snapshot(TABLE,PLAYER,id);require(s.aborted&&s.seatPlusOne==0&&!s.recoveryActive,"terminal refund recovery view stale");
+    }
     function test58FailedCashoutAtomicallyPreservesSeatIntentAndEscrow()public {
         bytes32 id=_ready();_requestExit();_fold(id);ws8Engine.settle(id,_policy());
         uint64 e=_epoch();uint64 n=_nonce();uint64 epoch=ledger.seatingEpoch(TABLE);bytes memory original=address(coin).code;

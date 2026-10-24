@@ -68,7 +68,7 @@ reconnection never fabricates possession or decryptability.
 
 ## Focused qualification
 
-The Level 2 workflow requires 25 actual `test58` native cases, 12 independent
+The Level 2 workflow requires 27 actual `test58` native cases, 12 independent
 client unit cases, actual reconnect/timeout/settlement trace replay and deployed
 projection/ledger runtime identities, plus fresh direct seating/deal regressions.
 All inherited mandatory 5A.5–5A.7 cases, rules/recovery/settlement owners, both

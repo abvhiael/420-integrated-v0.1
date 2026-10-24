@@ -123,7 +123,8 @@ export function mountMarketplace({document,main,runtime,authenticate,fetchImpl=f
   }
   const disputes=section('My dispute status');
   if(!data.disputes.length)disputes.append(el('p','No disputes filed.'));
-  for(const d of data.disputes)disputes.append(el('p',d.listing+' · '+d.reason+' · '+d.status+' (no automatic settlement)'));
+  for(const d of data.disputes)disputes.append(el('p',d.listing+' · '+d.reason+' · '+d.status+
+   (d.decision?' · '+d.decision:'')+' (no automatic settlement)'));
  }
  button(main,'Refresh marketplace',()=>run(async()=>{},null));
  refresh().catch(e=>{status.textContent='Marketplace unavailable: '+e.message;});

@@ -15,13 +15,13 @@ export function createMarketplaceClient({apiUrl,authenticate,fetchImpl=fetch}={}
   return result.result;
  };
  const action=(name,fields)=>{
-  if(!fields||!opaque(fields.operation)||!opaque(fields.listing))throw Error('marketplace-input-invalid');
+  if(!fields||Object.keys(fields).sort().join(',')!=='listing,operation'||!opaque(fields.operation)||!opaque(fields.listing))throw Error('marketplace-input-invalid');
   return post('/market/'+name,fields);
  };
  return Object.freeze({
   snapshot:()=>post('/market/snapshot',{}),
   list:input=>{
-   if(!input||!opaque(input.operation)||!opaque(input.listing)||!opaque(input.asset)
+   if(!input||Object.keys(input).sort().join(',')!=='asset,expiresAt,listing,operation,price,quantity'||!opaque(input.operation)||!opaque(input.listing)||!opaque(input.asset)
     ||!pos(input.quantity)||!pos(input.price)||!Number.isSafeInteger(input.expiresAt)
     ||input.expiresAt<=Date.now())throw Error('marketplace-input-invalid');
    return post('/market/list',input);
@@ -32,7 +32,8 @@ export function createMarketplaceClient({apiUrl,authenticate,fetchImpl=fetch}={}
   dispute:input=>{
    if(!['missing-item','incorrect-item','payment','other'].includes(input?.reason))
     throw Error('marketplace-dispute-invalid');
-   return action('dispute',input);
+   if(Object.keys(input).sort().join(',')!=='listing,operation,reason'||!opaque(input.operation)||!opaque(input.listing))throw Error('marketplace-input-invalid');
+   return post('/market/dispute',input);
   }
  });
 }

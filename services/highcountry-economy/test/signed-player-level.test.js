@@ -15,6 +15,12 @@ test('trusted signed level binds game chain issuer player freshness and exact in
  const source=createSignedPlayerLevelProvider({url:'https://levels.example/api/',publicKey:keys.publicKey,
   issuer:'approved-levels',gameId,chainId:420,clock:()=>now,fetchImpl});
  assert.equal(await source({principal:'alice'}),2);
+ const fromPem=createSignedPlayerLevelProvider({url:'https://levels.example/api/',
+  publicKey:keys.publicKey.export({type:'spki',format:'pem'}),issuer:'approved-levels',
+  gameId,chainId:420,clock:()=>now,fetchImpl});
+ assert.equal(await fromPem({principal:'alice'}),2);
+ assert.throws(()=>createSignedPlayerLevelProvider({url:'https://levels.example/api/',
+  publicKey:keys.privateKey,issuer:'approved-levels',gameId,chainId:420,fetchImpl}),/Invalid key object type|invalid progression public key/);
  for(const bad of [{issuer:'forged'},{principal:'victim'},{chainId:421},{gameId:'0x'+'ee'.repeat(32)},
   {level:101},{level:-1},{expiresAt:1000}]){
   claim=bad;await assert.rejects(source({principal:'alice'}),/stale or wrong player level/);

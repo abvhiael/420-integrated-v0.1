@@ -62,6 +62,29 @@ contract R044Land {
     ) external {
         i.setInventoryOperator(operator, true);
     }
+
+    function offer(
+        EquipmentRegistry e,
+        bytes32 id,
+        address buyer,
+        uint64 expiry
+    ) external {
+        e.offerTransfer(id, buyer, expiry);
+    }
+
+    function cancel(
+        EquipmentRegistry e,
+        bytes32 id
+    ) external {
+        e.cancelTransfer(id);
+    }
+
+    function accept(
+        EquipmentRegistry e,
+        bytes32 id
+    ) external {
+        e.acceptTransfer(id);
+    }
 }
 
 contract R044Product {
@@ -196,5 +219,76 @@ contract EquipmentLifecycleR044Test {
         require(!mismatch, "mismatched equipment and lifecycle rules admitted");
         lifecycle.registerPolicy(nextType, bytes32(uint256(2)), 10, 5, 5, REPAIR, 2, 6, RECYCLE, 3);
         require(lifecycle.policy(nextType).version == bytes32(uint256(2)), "matched ruleset version lost");
+    }
+
+    function testOperatingInputConservationBreakageAndFailedRetry() public {
+        bytes32 fuel = keccak256("EQUIPMENT-FUEL");
+        bytes32 type2 = keccak256("EQUIPMENT-WITH-FUEL");
+        bytes32 item2 = keccak256("EQUIPMENT-WITH-FUEL-1");
+        inventory.registerResource(fuel, InventoryRegistry.Unit.COUNT);
+        inventory.acquire(bytes32(uint256(102)), fuel, address(player), 4);
+        int16[6] memory effects;
+        effects[3] = 100;
+        equipment.registerType(type2, bytes32(uint256(3)), 1, effects);
+        equipment.issue(item2, type2, address(player), bytes32(uint256(3)));
+        lifecycle.registerPolicyWithInput(
+            type2,
+            EquipmentLifecycleEngine.Policy({
+                version: bytes32(uint256(3)),
+                maximum: 10,
+                degradeBelow: 5,
+                useCost: 5,
+                repairResource: REPAIR,
+                repairCost: 2,
+                repairRestore: 6,
+                recycleResource: RECYCLE,
+                recycleOutput: 3,
+                operatingResource: fuel,
+                operatingCost: 2,
+                exists: true
+            })
+        );
+        player.place(equipment, item2);
+        lifecycle.recordUse(item2);
+        require(ledger.balance(fuel, address(player)).available == 2, "first use not charged");
+        require(ledger.balance(fuel, address(player)).consumed == 2, "first use not burned");
+        lifecycle.recordUse(item2);
+        require(equipment.disabled(item2), "broken item effects active");
+        require(ledger.balance(fuel, address(player)).consumed == 4, "second use not charged");
+        require(lifecycle.condition(item2).usages == 2, "use count wrong");
+        player.repair(lifecycle, item2);
+        require(!equipment.disabled(item2), "repair failed");
+        (bool exhausted,) = address(lifecycle).call(abi.encodeCall(lifecycle.recordUse, (item2)));
+        require(!exhausted, "unfunded use accepted");
+        require(lifecycle.condition(item2).usages == 2, "failed use advanced time");
+        require(ledger.consumed(fuel) == 4, "failed use changed consumed stock");
+        require(equipment.effectiveEffects(1, address(player))[3] == 100, "failed use altered effects");
+    }
+
+    function testEquipmentOwnershipHandoffPreservesProvenanceAndRecycling() public {
+        R044Land buyer = new R044Land();
+        player.place(equipment, ID);
+        (bool placed,) = address(player).call(
+            abi.encodeCall(player.offer, (equipment, ID, address(buyer), uint64(block.timestamp + 2 days)))
+        );
+        require(!placed, "placed item transfer offered");
+        player.remove(equipment, ID);
+        player.offer(equipment, ID, address(buyer), uint64(block.timestamp + 2 days));
+        (bool unauthorized,) = address(equipment).call(abi.encodeCall(equipment.acceptTransfer, (ID)));
+        require(!unauthorized, "uninvited transferee accepted");
+        (bool blockedPlace,) = address(player).call(abi.encodeCall(player.place, (equipment, ID)));
+        require(!blockedPlace, "offered item placed");
+        buyer.accept(equipment, ID);
+        require(equipment.equipment(ID).owner == address(buyer), "owner not transferred");
+        require(equipment.equipment(ID).earningRef == bytes32(uint256(1)), "earning provenance replaced");
+        require(lifecycle.condition(ID).durability == 10, "transfer reset wear");
+        (bool replay,) = address(buyer).call(abi.encodeCall(buyer.accept, (equipment, ID)));
+        require(!replay, "transfer replay");
+        (bool oldOwner,) = address(player).call(abi.encodeCall(player.retire, (lifecycle, ID)));
+        require(!oldOwner, "seller still owns item");
+        buyer.retire(lifecycle, ID);
+        buyer.recycle(lifecycle, ID);
+        require(ledger.balance(RECYCLE, address(buyer)).available == 3, "buyer did not receive salvage");
+        require(ledger.balance(RECYCLE, address(player)).available == 0, "seller received salvage");
     }
 }

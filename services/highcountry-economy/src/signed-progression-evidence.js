@@ -5,7 +5,8 @@ const b64=x=>typeof x==='string'&&/^[A-Za-z0-9_-]{1,4096}$/.test(x);
 export function createSignedProgressionEvidence({publicKey,issuer,gameId,chainId,clock=()=>Date.now()}){
  if(!publicKey||!id(issuer)||!/^0x[0-9a-f]{64}$/i.test(gameId)||!Number.isSafeInteger(chainId)||chainId<1||typeof clock!=='function')
   throw new SettlementError('missing approved progression verifier');
- const key=publicKey instanceof KeyObject&&publicKey.type==='public'?publicKey:createPublicKey(publicKey);
+ if(publicKey instanceof KeyObject&&publicKey.type!=='public')throw new SettlementError('invalid progression public key');
+ const key=publicKey instanceof KeyObject?publicKey:createPublicKey(publicKey);
  if(key.type!=='public'||key.asymmetricKeyType!=='ed25519')throw new SettlementError('invalid progression public key');
  return async ({principal,trackId,version,evidence,points})=>{
   if(!id(principal)||!id(trackId)||!id(version)||!Number.isSafeInteger(points)||points<1)return false;

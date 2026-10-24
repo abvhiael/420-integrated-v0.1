@@ -29,12 +29,14 @@ export function mountMissions({document,main,runtime,authenticate,fetchImpl=fetc
   const snapshot=await post('/missions/snapshot',{});
   if(!snapshot||!Array.isArray(snapshot.missions))throw Error('mission-invalid-response');
   panel.replaceChildren(el('p','Mission catalogue '+snapshot.version));
+  panel.append(el('p','Earned noncompetitive mission badges: '+
+   ((snapshot.badges??[]).map(b=>b.badgeId).join(', ')||'none')));
   for(const m of snapshot.missions){
    const card=el('article');card.append(el('h3',m.id));
    card.append(el('p','Objective: '+m.objective+' · '+m.progress+'/'+m.target+
     ' · '+m.status+' · maximum '+m.maxPerProof+' point per independent proof'));
    card.append(el('p','Deadline: '+(m.deadline===null?'Not started':new Date(m.deadline).toLocaleString())+
-    ' · reward metadata '+m.rewardUnits+' · no automatic BUDS issuance'));
+    ' · badge '+m.badgeId+' · no automatic BUDS issuance'));
    if(m.status==='available'){
     button(card,'Activate mission',()=>post('/missions/activate',{operation:operation(),missionId:m.id}));
    }

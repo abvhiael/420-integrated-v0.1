@@ -86,6 +86,14 @@ contract PokerNLHEBetting420 {
     event ProviderBondBound(bytes32 indexed tableId,address bond);
 
     mapping(bytes32=>uint64) public evidenceDueAt;
+    // The active funded-hand escrow snapshot and initial evidence window are
+    // captured at reservation, before any provider can delay a proof.
+    mapping(bytes32=>uint64) public fundedEvidenceDeadline;
+    mapping(bytes32=>bytes32) public fundedSnapshot;
+    // Exactly one bounded recovery review per canonical missing-proof phase.
+    // Later stages may open their own windows after genuine late correction.
+    mapping(bytes32=>uint16) public recoveryStageMask;
+    event MissingEvidenceRecoveryCorrected(bytes32 indexed handId,uint8 failedPhase);
     struct EvidenceRecovery {uint64 openedAt;uint64 finalizableAt;bytes32 stateRoot;Phase failedPhase;bool active;}
     mapping(bytes32=>EvidenceRecovery) public evidenceRecovery;
     uint64 public constant PROOF_DELIVERY_WINDOW=1 hours;
@@ -299,6 +307,10 @@ contract PokerNLHEBetting420 {
         uint16 mask=deals.handSeatMask(handId);
         for(uint8 i=0;i<9;i++)if(_participates(mask,i)&&
             ledger.seatOf(h.tableId,i).player==msg.sender)permitted=true;
+        // An accepted funded hand must have its single governance-bound
+        // native dispute resolver installed BEFORE chips are locked. A
+        // malicious dispute must never strand escrow behind an unbound hook.
+        if(disputes.resolverForTable(h.tableId)!=address(this))revert InvalidState();
         if(!permitted||ledger.settlementCoordinator(h.tableId)!=address(this)||
            h.seatSnapshotHash!=deals.snapshotFor(h.tableId,mask))
             revert Unauthorized();
@@ -306,6 +318,10 @@ contract PokerNLHEBetting420 {
         if(reservedSnapshot==bytes32(0) ||
            reservedSnapshot!=ledger.lockedSnapshot(h.tableId))revert InvalidState();
         _bond(h.tableId).lock(handId);
+        if(fundedSnapshot[handId]!=bytes32(0)||fundedEvidenceDeadline[handId]!=0)
+            revert InvalidState();
+        fundedSnapshot[handId]=reservedSnapshot;
+        fundedEvidenceDeadline[handId]=uint64(uint256(h.deadline)+PROOF_DELIVERY_WINDOW);
     }
     /// @notice Permissionless refund if providers fail to complete their proof
     /// before a strictly enforced deadline, provided no hand has begun.
@@ -316,8 +332,13 @@ contract PokerNLHEBetting420 {
         if(g.initialized||handAborted[handId]||handSettled[handId]||
            ledger.activeHand(h.tableId)!=handId||
            shuffle.isProofComplete(handId))revert InvalidState();
-        if(block.timestamp<uint256(h.deadline)+1 hours)revert TooEarly();
+        if(fundedSnapshot[handId]==bytes32(0)||
+           ledger.lockedSnapshot(h.tableId)!=fundedSnapshot[handId])revert InvalidState();
+        if(block.timestamp<fundedEvidenceDeadline[handId])revert TooEarly();
         handAborted[handId]=true;
+        // A bounded disputed withholding review must also reach one terminal
+        // dispute-clock state; never strand an already-refunded hand as frozen.
+        if(disputes.isFrozen(handId))disputes.finalizeUnprovableVoid(handId);
         PokerPrivateShuffleGate420.Record memory record=shuffle.recordOf(handId);
         uint8 missing=0;
         if(record.stage==1)missing=2; // provider B failed its authenticated second stage
@@ -335,10 +356,13 @@ contract PokerNLHEBetting420 {
         if(games[handId].initialized||handAborted[handId]||handSettled[handId]||
             ledger.activeHand(h.tableId)!=handId||!shuffle.isProofComplete(handId))
             revert InvalidState();
-        if(block.timestamp<uint256(h.deadline)+PROOF_DELIVERY_WINDOW)revert TooEarly();
+        if(fundedSnapshot[handId]==bytes32(0)||
+           ledger.lockedSnapshot(h.tableId)!=fundedSnapshot[handId])revert InvalidState();
+        if(block.timestamp<fundedEvidenceDeadline[handId])revert TooEarly();
         if(address(deliveryForTable[h.tableId])!=address(0)&&
             deliveryForTable[h.tableId].allAcknowledged(handId))revert InvalidState();
         handAborted[handId]=true;
+        if(disputes.isFrozen(handId))disputes.finalizeUnprovableVoid(handId);
         uint8 faults=_missingPrivateShareProviders(handId,h.tableId);
         ledger.cancelReservedHand(h.tableId,handId);
         _bond(h.tableId).close(handId,faults);
@@ -366,11 +390,17 @@ contract PokerNLHEBetting420 {
         Game storage g=games[handId];
         if(!g.initialized||handSettled[handId]||handAborted[handId]||
             evidenceRecovery[handId].active||
+            (recoveryStageMask[handId]&(uint16(1)<<uint8(g.phase)))!=0||
             ledger.activeHand(g.tableId)!=handId||
+            fundedSnapshot[handId]==bytes32(0)||
+            ledger.lockedSnapshot(g.tableId)!=fundedSnapshot[handId]||
             evidenceDueAt[handId]<1||
             block.timestamp<=evidenceDueAt[handId]||
             !_missingRequiredEvidence(handId,g))revert InvalidState();
-        uint64 end=uint64(block.timestamp+RECOVERY_REVIEW_WINDOW);
+        // A delayed caller cannot move finality indefinitely: the bounded
+        // review period starts at the immutable street evidence deadline.
+        uint64 end=uint64(uint256(evidenceDueAt[handId])+RECOVERY_REVIEW_WINDOW);
+        recoveryStageMask[handId]|=uint16(1)<<uint8(g.phase);
         evidenceRecovery[handId]=EvidenceRecovery(uint64(block.timestamp),end,
             g.stateRoot,g.phase,true);
         emit MissingEvidenceRecoveryOpened(handId,uint8(g.phase),g.stateRoot,end);
@@ -385,6 +415,8 @@ contract PokerNLHEBetting420 {
         if(!r.active||handSettled[handId]||handAborted[handId]||
             g.stateRoot!=r.stateRoot||g.phase!=r.failedPhase||
             ledger.activeHand(g.tableId)!=handId||
+            fundedSnapshot[handId]==bytes32(0)||
+            ledger.lockedSnapshot(g.tableId)!=fundedSnapshot[handId]||
             !_missingRequiredEvidence(handId,g))revert InvalidState();
         if(block.timestamp<r.finalizableAt)revert TooEarly();
         // Only the governance-bound native resolver may close an expired
@@ -601,6 +633,15 @@ contract PokerNLHEBetting420 {
         if(msg.sender!=address(revealForTable[g.tableId])||msg.sender==address(0))revert Unauthorized();
         if(!this.canRevealStreet(handId,street)||
            !revealForTable[g.tableId].isStageComplete(handId,street))revert WaitingForReveal();
+        // Actual accepted late Groth16 shares close this stage's recovery
+        // atomically. A later street may still have its OWN one-time review.
+        EvidenceRecovery storage recovery=evidenceRecovery[handId];
+        if(recovery.active){
+            if(recovery.failedPhase!=g.phase||recovery.stateRoot!=g.stateRoot)
+                revert InvalidState();
+            recovery.active=false;
+            emit MissingEvidenceRecoveryCorrected(handId,uint8(g.phase));
+        }
         g.phase=street==1?Phase.FLOP:street==2?Phase.TURN:Phase.RIVER;
         if(street==1)flopOpened[handId]=true;
         for(uint8 i=0;i<9;i++)if(_participates(g.seatsMask,i)){

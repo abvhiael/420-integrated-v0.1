@@ -47,6 +47,7 @@ contract PokerNativeOutcome54Test is PokerLiveCardReveals54Test {
         verifier.allow(gate.statement(id,2,first,second));
         cheat54.prank(PROVIDER_B);gate.proveStage(id,2,first,second,hex"010203");
         cheat54.prank(ADMIN);ledger.bindSettlement(TABLE,address(engine),RAKES);
+        _ensureNativeDisputeResolver();
         cheat54.prank(PLAYER);engine.reserve(id);
         cheat54.prank(PLAYER);signing.bindSigner(TABLE,signedVm.addr(PLAYER_KEY));
         cheat54.prank(PLAYER_B);signing.bindSigner(TABLE,signedVm.addr(OPPONENT_KEY));
@@ -58,7 +59,7 @@ contract PokerNativeOutcome54Test is PokerLiveCardReveals54Test {
         engine.start(id,0,60);
         cheat54.prank(ADMIN);engine.bindReveals(TABLE,address(live));
         cheat54.prank(ADMIN);engine.bindOutcome(TABLE,address(result));
-        cheat54.prank(ADMIN);dispute.bindResolver(TABLE,address(engine));
+        require(dispute.resolverForTable(TABLE)==address(engine),"funded resolver prebound");
     }
     function testOnChainUncontestedOutcomeSettlesExactEscrowOnce() public {
         bytes32 id=_fundedAndProved();
@@ -101,10 +102,15 @@ contract PokerNativeOutcome54Test is PokerLiveCardReveals54Test {
         cheat54.expectRevert(PokerActionDisputeClock420.Premature.selector);
         engine.settle(id,policy);
         cheat54.prank(PLAYER);dispute.appeal(id,keccak256("one documented appeal"));
-        cheat54.warp(block.timestamp+1 days+1);
+        // Qualify against the ACTUAL immutable appealed review deadline,
+        // never guessed increments from test-runner clock state.
+        (,,,uint64 reviewExpiresAt,bool appealed,bool finalized)=dispute.resolutions(id);
+        require(appealed&&!finalized&&reviewExpiresAt>block.timestamp,
+            "one pending on-chain appeal");
+        cheat54.warp(uint256(reviewExpiresAt)-1);
         cheat54.expectRevert(PokerActionDisputeClock420.Premature.selector);
         engine.settle(id,policy);
-        cheat54.warp(block.timestamp+1 days+1);
+        cheat54.warp(reviewExpiresAt);
         cheat54.prank(OTHER);engine.settle(id,policy);
         require(!dispute.isFrozen(id) && dispute.resolutionOf(id).finalized,
             "one-appeal objective resolution");

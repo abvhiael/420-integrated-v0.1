@@ -36,6 +36,7 @@ contract PokerNLHEBetting54Fixture is PokerPrivateShuffleGate54Test {
         signing=new PokerActionKeys420(address(deal));
         dispute=new PokerActionDisputeClock420(address(deal));
         engine=new PokerNLHEBetting420(address(deal),address(gate),address(signing),address(dispute));
+        cap.grant(ADMIN,dispute.ACTION_BIND_RESOLVER(),auth.scopeForTable(TABLE),true);
         providerBond=new PokerProviderAccountability420(address(deal),address(engine),address(0xB00D));
         coin.mint(PROVIDER_A,3000);coin.mint(PROVIDER_B,3000);
         cheat54.prank(PROVIDER_A);coin.approve(address(providerBond),3000);
@@ -45,6 +46,13 @@ contract PokerNLHEBetting54Fixture is PokerPrivateShuffleGate54Test {
         cap.grant(ADMIN,engine.ACTION_BIND_PROVIDER_BOND(),auth.scopeForTable(TABLE),true);
         cheat54.prank(ADMIN);engine.bindProviderBond(TABLE,address(providerBond));
         _configurePrivateDelivery();
+    }
+    function _ensureNativeDisputeResolver() internal {
+        // Binding requires a registered table. The fixture constructor runs
+        // before registration, so resolution must be wired at funded admission.
+        if(dispute.resolverForTable(TABLE)==address(0)){
+            cheat54.prank(ADMIN);dispute.bindResolver(TABLE,address(engine));
+        }
     }
     function _configurePrivateDelivery() internal {
         recipient=new PokerRecipientKeys420(address(ledger));
@@ -177,6 +185,7 @@ contract PokerNLHEBetting54Fixture is PokerPrivateShuffleGate54Test {
         verifier.allow(gate.statement(id,2,first,second));
         cheat54.prank(PROVIDER_B);gate.proveStage(id,2,first,second,hex"010203");
         cheat54.prank(ADMIN);ledger.bindSettlement(TABLE,address(engine),address(0x500BEEF));
+        _ensureNativeDisputeResolver();
         cheat54.prank(PLAYER);engine.reserve(id);
         cheat54.prank(PLAYER);signing.bindSigner(TABLE,signedVm.addr(PLAYER_KEY));
         cheat54.prank(PLAYER_B);signing.bindSigner(TABLE,signedVm.addr(OPPONENT_KEY));
@@ -273,6 +282,7 @@ contract PokerNLHEBetting54Case5Test is PokerNLHEBetting54Fixture {
         _prepared();
         bytes32 id=_begin(1);
         cheat54.prank(ADMIN);ledger.bindSettlement(TABLE,address(engine),address(0x500BEEF));
+        _ensureNativeDisputeResolver();
         cheat54.prank(PLAYER);engine.reserve(id);
         require(ledger.reservedInHand(TABLE)==800,"funded escrow locked");
         cheat54.expectRevert(PokerNLHEBetting420.TooEarly.selector);
@@ -356,7 +366,71 @@ contract PokerNLHEBetting54WS3AdversarialTest is PokerNLHEBetting54Fixture {
         require(keyx==333&&keyy==444,"duplicate rejected without mutating recipient key");
     }
 }
+/// @dev Hostile ERC20 that attempts a reentrant withdrawal during both
+///      bond deposit and bond release; valid exact-balance transfers still
+///      proceed if and only if the guarded callback fails.
+contract WS5HostileBondToken54 {
+    mapping(address=>uint256) public balanceOf;
+    mapping(address=>mapping(address=>uint256)) public allowance;
+    address public target;
+    bytes public attack;
+    bool public attempted;
+    bool public succeeded;
+    bytes4 public failure;
+    function mint(address owner,uint256 amount) external {balanceOf[owner]+=amount;}
+    function approve(address spender,uint256 amount) external returns(bool){
+        allowance[msg.sender][spender]=amount;return true;
+    }
+    function configure(address t,bytes calldata callData)external{
+        target=t;attack=callData;attempted=false;succeeded=false;failure=bytes4(0);
+    }
+    function _callback() private {
+        if(target==address(0))return;
+        address to=target;bytes memory data=attack;target=address(0);
+        attempted=true;
+        (bool ok,bytes memory output)=to.call(data);
+        succeeded=ok;
+        if(!ok&&output.length>=4){
+            bytes4 selector;
+            assembly { selector := mload(add(output,32)) }
+            failure=selector;
+        }
+    }
+    function transferFrom(address from,address to,uint256 value)external returns(bool){
+        require(balanceOf[from]>=value&&allowance[from][msg.sender]>=value,"insufficient");
+        allowance[from][msg.sender]-=value;
+        balanceOf[from]-=value;balanceOf[to]+=value;
+        _callback();return true;
+    }
+    function transfer(address to,uint256 value)external returns(bool){
+        require(balanceOf[msg.sender]>=value,"insufficient");
+        balanceOf[msg.sender]-=value;balanceOf[to]+=value;
+        _callback();return true;
+    }
+}
 contract PokerNLHEBetting54Case7Test is PokerNLHEBetting54Fixture {
+    function testHostileTokenCallbacksCannotReenterBondFundingOrWithdrawals() public {
+        WS5HostileBondToken54 token=new WS5HostileBondToken54();
+        token.mint(PROVIDER_A,100);
+        cheat54.prank(PROVIDER_A);token.approve(address(providerBond),100);
+        token.configure(address(providerBond),abi.encodeWithSelector(
+            providerBond.withdraw.selector,address(token),uint256(1)));
+        cheat54.prank(PROVIDER_A);providerBond.fundAsset(address(token),100);
+        require(token.attempted()&&!token.succeeded(),"fund callback rejected");
+        require(token.failure()==PokerProviderAccountability420.Reentrancy.selector,
+            "guard protects provider bond funding");
+        require(providerBond.available(address(token),PROVIDER_A)==100,"exact first deposit");
+        token.configure(address(providerBond),abi.encodeWithSelector(
+            providerBond.withdraw.selector,address(token),uint256(1)));
+        cheat54.prank(PROVIDER_A);providerBond.withdraw(address(token),40);
+        require(token.attempted()&&!token.succeeded(),"withdraw callback rejected");
+        require(token.failure()==PokerProviderAccountability420.Reentrancy.selector,
+            "guard protects withdrawal");
+        require(providerBond.available(address(token),PROVIDER_A)==60,
+            "only intended withdrawal applied");
+        require(token.balanceOf(PROVIDER_A)==40&&
+            token.balanceOf(address(providerBond))==60,"all custody conserved");
+    }
     function testProviderBondsAreFullyFundedLockedAndWithdrawalSafe() public {
         bytes32 id=_readyProvedDelivery();
         require(providerBond.isCollateralized(id),"pre-betting full collateral");
@@ -373,6 +447,35 @@ contract PokerNLHEBetting54Case7Test is PokerNLHEBetting54Fixture {
 }
 
 contract PokerNLHEBetting54Case8Test is PokerNLHEBetting54Fixture {
+    function testFundedSnapshotAndEvidenceDeadlineCannotDriftAfterProofWithheld() public {
+        bytes32 id=_readyBetting();
+        bytes32 snapshot=engine.fundedSnapshot(id);
+        uint64 due=engine.fundedEvidenceDeadline(id);
+        require(snapshot!=bytes32(0)&&snapshot==ledger.lockedSnapshot(TABLE),
+            "exact funded immutable escrow snapshot");
+        require(due!=0,"immutable funded proof deadline");
+        _signedAction(id,0,PokerNLHEBetting420.Move.CALL,10,PLAYER_KEY);
+        _signedAction(id,1,PokerNLHEBetting420.Move.CHECK,0,OPPONENT_KEY);
+        uint64 streetDue=engine.evidenceDueAt(id);
+        cheat54.warp(uint256(streetDue)+3 days);
+        engine.beginMissingEvidenceRecovery(id);
+        (,uint64 reviewEnd,,,) = engine.evidenceRecovery(id);
+        require(reviewEnd==uint256(streetDue)+engine.RECOVERY_REVIEW_WINDOW(),
+            "review must be anchored to actual evidence deadline");
+        require((engine.recoveryStageMask(id)&(uint16(1)<<uint8(PokerNLHEBetting420.Phase.AWAIT_FLOP)))!=0,
+            "one bounded review for actual missing flop");
+        require(engine.fundedSnapshot(id)==snapshot &&
+            engine.fundedEvidenceDeadline(id)==due,"funded evidence cannot be rewritten");
+        cheat54.expectRevert(PokerNLHEBetting420.InvalidState.selector);
+        engine.beginMissingEvidenceRecovery(id);
+        engine.finalizeMissingEvidenceRecovery(id);
+        require(engine.handAborted(id)&&!engine.handSettled(id),"single terminal void");
+        require(ledger.seatOf(TABLE,0).chips==400&&ledger.seatOf(TABLE,1).chips==400,
+            "canonical original snapshot refund, not pot distribution");
+        require(!providerBond.isCollateralized(id),"bond closed separately");
+        cheat54.expectRevert(PokerNLHEBetting420.InvalidState.selector);
+        engine.finalizeMissingEvidenceRecovery(id);
+    }
     function testPostBettingMissingFlopProofRecoversOriginalEscrowExactlyOnce() public {
         bytes32 id=_readyBetting();
         _signedAction(id,0,PokerNLHEBetting420.Move.CALL,10,PLAYER_KEY);
@@ -400,6 +503,83 @@ contract PokerNLHEBetting54Case8Test is PokerNLHEBetting54Fixture {
 }
 
 contract PokerNLHEBetting54Case9Test is PokerNLHEBetting54Fixture {
+    function testDisputedPreplayWithholdingConsumesBoundedAppealAndCannotFreezeRefundedEscrow() public {
+        bytes32 id=_readyFrozenAssignmentWithoutDelivery();
+        cap.grant(ADMIN,dispute.ACTION_START_CLOCK(),auth.scopeForTable(TABLE),true);
+        cheat54.prank(ADMIN);
+        dispute.start(id,0,1,uint64(block.timestamp+60),keccak256("documented state"));
+        cheat54.prank(PLAYER);dispute.dispute(id,keccak256("withheld recipient proof"));
+        require(dispute.isFrozen(id),"genuine seated dispute registered");
+        cheat54.warp(uint256(engine.fundedEvidenceDeadline(id))+1);
+        uint256 reviewEnd=uint256(dispute.disputedAt(id))+1 hours+2 days;
+        if(block.timestamp<reviewEnd){
+            cheat54.expectRevert(PokerActionDisputeClock420.Premature.selector);
+            engine.cancelWithheldDelivery(id);
+            cheat54.warp(reviewEnd);
+        }
+        engine.cancelWithheldDelivery(id);
+        require(dispute.voidFinalized(id)&&!dispute.isFrozen(id),
+            "bounded dispute terminates atomically with objective refund");
+        require(engine.handAborted(id)&&ledger.handConsumed(id),
+            "no stale frozen hand and one native finality");
+        require(ledger.seatOf(TABLE,0).chips==400&&ledger.seatOf(TABLE,1).chips==400,
+            "exact original player snapshots, never adjudicator payout");
+        cheat54.expectRevert(PokerActionDisputeClock420.InvalidState.selector);
+        cheat54.prank(PLAYER);dispute.dispute(id,keccak256("post-refund replay"));
+        cheat54.expectRevert(PokerNLHEBetting420.InvalidState.selector);
+        engine.cancelWithheldDelivery(id);
+    }
+    function _withholdOneProvider(uint8 delinquent) internal returns(bytes32 id) {
+        id=_readyFrozenAssignmentWithoutDelivery();
+        _proveRecipientKeys();
+        _proveAggregateKey();
+        _publishEncryptedManifest(id);
+        uint8 good=delinquent==0?1:0;
+        for(uint8 pos=0;pos<4;pos++)_proveEncryptedShare(id,pos,good);
+        require(!proofBook.allVerified(id),"missing provider must block recipient acceptance");
+        cheat54.expectRevert(PokerNLHEBetting420.TooEarly.selector);
+        engine.cancelWithheldDelivery(id);
+        cheat54.warp(uint256(engine.fundedEvidenceDeadline(id))+1);
+        cheat54.prank(OTHER);engine.cancelWithheldDelivery(id);
+    }
+    function testOnlyWithholdingProviderAIsSlashedWithoutTouchingPlayerEscrow() public {
+        bytes32 id=_withholdOneProvider(0);
+        (,,,bool locked,bool closed,uint8 faults)=providerBond.bonds(id);
+        require(!locked&&closed&&faults==1,"only A is independently attributable");
+        require(providerBond.available(address(coin),PROVIDER_A)==2200,"A forfeits bond");
+        require(providerBond.available(address(coin),PROVIDER_B)==3000,"innocent B bond returned");
+        require(coin.balanceOf(address(0xB00D))==800,"A slash separate from players");
+        require(ledger.seatOf(TABLE,0).chips==400&&ledger.seatOf(TABLE,1).chips==400,
+            "original player escrow refunded exactly");
+        cheat54.expectRevert(PokerNLHEBetting420.InvalidState.selector);
+        engine.cancelWithheldDelivery(id);
+    }
+    function testOnlyWithholdingProviderBIsSlashedWithoutTouchingPlayerEscrow() public {
+        bytes32 id=_withholdOneProvider(1);
+        (,,,bool locked,bool closed,uint8 faults)=providerBond.bonds(id);
+        require(!locked&&closed&&faults==2,"only B objectively attributable");
+        require(providerBond.available(address(coin),PROVIDER_A)==3000,"innocent A bond returned");
+        require(providerBond.available(address(coin),PROVIDER_B)==2200,"B forfeits bond");
+        require(coin.balanceOf(address(0xB00D))==800,"B slash separate from players");
+        require(ledger.seatOf(TABLE,0).chips==400&&ledger.seatOf(TABLE,1).chips==400,
+            "canonical refunded escrow");
+    }
+    function testMaliciousAccusationCannotSlashTwoProvidersWithCompleteProvedShares() public {
+        bytes32 id=_readyFrozenAssignmentWithoutDelivery();
+        _proveRecipientKeys();_proveAggregateKey();_publishEncryptedManifest(id);
+        _proveAllEncryptedShares(id);
+        // Players may withhold their acceptance: that cannot be recast as
+        // provider withholding once both provider proofs have been accepted.
+        cheat54.warp(uint256(engine.fundedEvidenceDeadline(id))+1);
+        cheat54.prank(OTHER);engine.cancelWithheldDelivery(id);
+        (,,,bool locked,bool closed,uint8 faults)=providerBond.bonds(id);
+        require(!locked&&closed&&faults==0,"no provider accused absent objective fault");
+        require(coin.balanceOf(address(0xB00D))==0,"accusation yields no slash");
+        require(providerBond.available(address(coin),PROVIDER_A)==3000&&
+            providerBond.available(address(coin),PROVIDER_B)==3000,"bonds fully returned");
+        require(ledger.seatOf(TABLE,0).chips==400&&ledger.seatOf(TABLE,1).chips==400,
+            "refund independent of provider fault");
+    }
     function testCompletedShuffleButMissingProvedDeliveryVoidsPreBetting() public {
         bytes32 id=_hand54();
         bytes32 input=initialDeck.rootOf(id);
@@ -410,6 +590,7 @@ contract PokerNLHEBetting54Case9Test is PokerNLHEBetting54Fixture {
         verifier.allow(gate.statement(id,2,first,last));
         cheat54.prank(PROVIDER_B);gate.proveStage(id,2,first,last,hex"010203");
         cheat54.prank(ADMIN);ledger.bindSettlement(TABLE,address(engine),address(0x500BEEF));
+        _ensureNativeDisputeResolver();
         cheat54.prank(PLAYER);engine.reserve(id);
         engine.prepareDealAssignment(id);
         cheat54.expectRevert(PokerNLHEBetting420.TooEarly.selector);
@@ -439,6 +620,7 @@ contract PokerNLHEBetting54Case10Test is PokerNLHEBetting54Fixture {
         verifier.allow(gate.statement(id,2,first,second));
         cheat54.prank(PROVIDER_B);gate.proveStage(id,2,first,second,hex"010203");
         cheat54.prank(ADMIN);ledger.bindSettlement(TABLE,address(engine),address(0x500BEEF));
+        _ensureNativeDisputeResolver();
         cheat54.prank(PLAYER);engine.reserve(id);
         cheat54.expectRevert(PokerNLHEBetting420.InvalidState.selector);
         engine.start(id,0,60);

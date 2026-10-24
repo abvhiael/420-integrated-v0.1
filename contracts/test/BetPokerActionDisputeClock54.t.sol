@@ -3,6 +3,12 @@ pragma solidity ^0.8.24;
 import "./BetPokerConfidentialDeal54.t.sol";
 import "../src/bet/PokerActionDisputeClock420.sol";
 contract ClockNativeResolver54 {
+    function propose(PokerActionDisputeClock420 clock,bytes32 hand,bytes32 hash)external{
+        clock.proposeVerifiedOutcome(hand,hash);
+    }
+    function finalize(PokerActionDisputeClock420 clock,bytes32 hand,bytes32 hash)external{
+        clock.finalizeVerifiedOutcome(hand,hash);
+    }
     function finish(PokerActionDisputeClock420 clock,bytes32 hand)external{
         clock.finalizeUnprovableVoid(hand);
     }
@@ -56,6 +62,39 @@ contract PokerActionDisputeClock54Test is PokerConfidentialDeal54Test {
         cheat54.warp(block.timestamp+1 hours+2 days);
         resolver.finish(clock,id);
         require(!clock.isFrozen(id)&&clock.voidFinalized(id),"bounded disputed void finalized");
+        cheat54.expectRevert(PokerActionDisputeClock420.InvalidState.selector);
+        resolver.finish(clock,id);
+    }
+    function testOneReviewOneAppealAndNoSecondTerminalOutcome() public {
+        bytes32 id=_readyClock();
+        ClockNativeResolver54 resolver=new ClockNativeResolver54();
+        cap.grant(ADMIN,clock.ACTION_BIND_RESOLVER(),auth.scopeForTable(TABLE),true);
+        cheat54.prank(ADMIN);clock.bindResolver(TABLE,address(resolver));
+        cheat54.prank(ADMIN);
+        clock.start(id,0,1,uint64(block.timestamp+60),keccak256("state"));
+        cheat54.prank(PLAYER);clock.dispute(id,keccak256("submitted evidence"));
+        bytes32 correct=keccak256("independent native result");
+        resolver.propose(clock,id,correct);
+        cheat54.expectRevert(PokerActionDisputeClock420.InvalidState.selector);
+        resolver.propose(clock,id,correct);
+        cheat54.expectRevert(PokerActionDisputeClock420.Premature.selector);
+        resolver.finalize(clock,id,correct);
+        cheat54.prank(PLAYER);
+        clock.appeal(id,keccak256("challenged evidence"));
+        cheat54.expectRevert(PokerActionDisputeClock420.InvalidState.selector);
+        cheat54.prank(PLAYER);clock.appeal(id,keccak256("second appeal"));
+        (, , ,uint64 deadline, bool appealed,bool finalized)=clock.resolutions(id);
+        require(appealed&&!finalized,"bounded single appeal");
+        cheat54.warp(deadline-1);
+        cheat54.expectRevert(PokerActionDisputeClock420.Premature.selector);
+        resolver.finalize(clock,id,correct);
+        cheat54.warp(deadline);
+        cheat54.expectRevert(PokerActionDisputeClock420.InvalidState.selector);
+        resolver.finalize(clock,id,keccak256("operator-selected replacement"));
+        resolver.finalize(clock,id,correct);
+        require(!clock.isFrozen(id),"verified resolution closes dispute");
+        cheat54.expectRevert(PokerActionDisputeClock420.InvalidState.selector);
+        resolver.finalize(clock,id,correct);
         cheat54.expectRevert(PokerActionDisputeClock420.InvalidState.selector);
         resolver.finish(clock,id);
     }

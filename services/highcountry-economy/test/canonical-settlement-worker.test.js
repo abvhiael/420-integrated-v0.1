@@ -94,3 +94,22 @@ test('configured indexer divergence prevents payout until independent reconcilia
  assert.equal((await worker.tick('transfer:1')).status,'finalized');
  assert.equal(paid,1);
 });
+
+test('rejected signer preflight never writes uncertain-dispatch marker; retry can succeed safely',async()=>{
+ const {store,state}=setup();let fail=true;
+ const authority={confirmedReservedTransfer:async()=>false,
+  proveUnexecutedAndCancelled:async()=>false,
+  preflightSubmission:async()=>{if(fail)throw new Error('signer not available');return {reviewed:true};}};
+ const settlement={finalize:async()=>{},abort:async()=>{}};
+ const worker=new CanonicalSettlementWorker({store,settlement,authority,leaseMs:1000,
+  clock:()=>1000,submitCanonical:async(_,request)=>{
+   assert.deepEqual(request,{reviewed:true});state.submissions++;return {txHash:'tx:reviewed'};
+  }});
+ await assert.rejects(worker.tick('transfer:1'),/signer not available/);
+ assert.equal(store.state.settlementJobs.get('transfer:1').dispatchStarted,undefined);
+ assert.equal(state.submissions,0);
+ fail=false;
+ assert.equal((await worker.tick('transfer:1')).status,'submitted');
+ assert.equal(store.state.settlementJobs.get('transfer:1').dispatchStarted,true);
+ assert.equal(state.submissions,1);
+});

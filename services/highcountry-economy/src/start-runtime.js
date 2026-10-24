@@ -3,6 +3,9 @@ import {readFile} from 'node:fs/promises';
 import pg from 'pg';
 import {FinalizedRpc} from './finalized-rpc.js';
 import {createRuntime,runtimeHttpServer} from './runtime-service.js';
+import {HIGHCOUNTRY_SKILL_RESEARCH_V1} from './skill-catalog-v1.js';
+import {createSignedProgressionEvidence} from './signed-progression-evidence.js';
+import {createSignedPlayerLevelProvider} from './signed-player-level.js';
 const required=name=>{const x=process.env[name];if(!x)throw Error(name+' required');return x;};
 const config=JSON.parse(await readFile(required('HC_RUNTIME_CONFIG_FILE'),'utf8'));
 const port=Number(required('PORT'));
@@ -12,7 +15,21 @@ const pool=new pg.Pool({connectionString:required('HC_DATABASE_URL'),max:8,
  ssl:{ca:await readFile(required('HC_DATABASE_CA_FILE'),'utf8'),rejectUnauthorized:true}});
 try {
  const signerRpc=new FinalizedRpc(config.signerRpc);
- const runtime=await createRuntime({...config,pool,signerRpc});
+ let progression;
+ if(config.progression){
+  const p=config.progression;
+  if(p.catalogVersion!==HIGHCOUNTRY_SKILL_RESEARCH_V1.version)
+   throw Error('unapproved progression catalogue version');
+  progression={
+   catalog:HIGHCOUNTRY_SKILL_RESEARCH_V1,
+   verifyEvidence:createSignedProgressionEvidence({publicKey:p.evidencePublicKey,
+    issuer:p.evidenceIssuer,gameId:config.authority.gameId,chainId:config.authority.chainId}),
+   getPlayerLevel:createSignedPlayerLevelProvider({url:p.levelProviderUrl,
+    publicKey:p.levelPublicKey,issuer:p.levelIssuer,
+    gameId:config.authority.gameId,chainId:config.authority.chainId})
+  };
+ }
+ const runtime=await createRuntime({...config,pool,signerRpc,progression});
  const server=runtimeHttpServer(runtime,{origin:config.authority.origin});
  server.listen(port,'0.0.0.0');
  let closing=false;

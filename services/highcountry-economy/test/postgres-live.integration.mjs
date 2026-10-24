@@ -9,6 +9,8 @@ import {generateKeyPairSync,sign} from 'node:crypto';
 import {RuntimeAuthority} from '../src/runtime-integration.js';
 import {HighCountryMarket} from '../src/market.js';
 import {createOrdinaryRuntime} from '../src/runtime-service.js';
+import {SkillResearchService} from '../src/skill-research.js';
+import {HIGHCOUNTRY_SKILL_RESEARCH_V1} from '../src/skill-catalog-v1.js';
 const url=process.env.HC_TEST_POSTGRES_URL;
 if(!url)throw new Error('HC_TEST_POSTGRES_URL required (dedicated test database only)');
 const pool=new pg.Pool({connectionString:url,max:8,connectionTimeoutMillis:5000});
@@ -71,6 +73,33 @@ try {
  const charlieAssets=afterRace.assets.find(([key])=>key===JSON.stringify(['charlie','lot:1']))?.[1].available||0;
  assert.equal(bobAssets+charlieAssets,3,'all imported goods accounted for');
  console.log('Postgres competing buyers, one ordinary fill, zero-fee credits and asset conservation: PASS');
+
+// HC-NEXT-5.1 real PostgreSQL durability, distinct instance restart, proof replay and burn conservation.
+ await ledger.earn('skill:award','bob','approved','skill:fund-proof',20);
+ const skills=new SkillResearchService({store:new PostgresBudsStore(pool,ns),
+  identity:{registeredPrincipal:async token=>token==='bob'?'bob':Promise.reject(Error('unregistered'))},
+  catalog:HIGHCOUNTRY_SKILL_RESEARCH_V1,
+  verifyEvidence:async({evidence})=>({sourceEvent:evidence}),
+  getPlayerLevel:async()=>1,clock:()=>100});
+ await skills.progress('bob','skill:step1','archive-index-I','skill:proof1',1);
+ await skills.progress('bob','skill:step2','archive-index-I','skill:proof2',1);
+ const rebooted=new SkillResearchService({store:new PostgresBudsStore(pool,ns),identity:skills.identity,
+  catalog:HIGHCOUNTRY_SKILL_RESEARCH_V1,verifyEvidence:skills.verifyEvidence,
+  getPlayerLevel:skills.getPlayerLevel,clock:()=>101});
+ assert.equal((await rebooted.snapshot('bob')).records[0].points,2,'points survive new process adapter');
+ await assert.rejects(rebooted.progress('bob','skill:replay','workbench-notes-I','skill:proof1',1),
+  'source proof is globally single-use even across research tracks');
+ const bought=await rebooted.unlock('bob','skill:unlock','archive-index-I');
+ assert.equal(bought.spent,10);
+ const afterSkill=(await pool.query('SELECT state FROM highcountry_buds_state WHERE namespace=$1',[ns])).rows[0].state;
+ assert.equal(afterSkill.burned,10,'real PostgreSQL records BUDS skill sink');
+ const outstanding=afterSkill.balances.reduce((n,[,b])=>n+b.available+b.reserved,0);
+ assert.equal(outstanding,afterSkill.issued-afterSkill.burned,'BUDS conserved after skill research purchase');
+ assert.equal(afterSkill.skillResearch.find(([key])=>key===JSON.stringify(['bob','archive-index-I',
+  'HC-SKILL-RESEARCH-V1']))?.[1].unlocked,true,'skill entitlement persists across instance restart');
+ assert.equal(afterSkill.assets.length,afterRace.assets.length,'skill grants no canonical or ordinary inventory');
+ console.log('Postgres skill versioned points/restart/proof replay, exact BUDS burn and asset non-mint: PASS');
+
  const role='hc_runtime_'+process.pid;
  await pool.query(await readFile(new URL('../migrations/002_runtime_namespace_rls.sql',import.meta.url),'utf8'));
  await pool.query('CREATE ROLE '+role+" LOGIN PASSWORD 'hc_ci_runtime_only'");

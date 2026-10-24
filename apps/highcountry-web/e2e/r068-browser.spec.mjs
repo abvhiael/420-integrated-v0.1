@@ -73,3 +73,13 @@ test('real Chromium: marketplace route is bundled and wallet-free offline disclo
  await expect(page.getByRole('navigation',{name:'Main navigation'}).getByRole('link',{name:'Marketplace'})).toHaveAttribute('aria-current','page');
  expect(errors).toEqual([]);
 });
+
+test('real Chromium: skills and research route protects offline play and does not request wallet',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.addInitScript(()=>{window.ethereum={request:async()=>{throw Error('unexpected-wallet-request');}};});
+ await page.goto(origin+'/skills');
+ await expect(page.getByRole('heading',{name:'Skills & Research'})).toBeVisible();
+ await expect(page.getByText(/Skills and research require a verified registered profile/)).toBeVisible();
+ await expect(page.getByRole('link',{name:'Skills & Research'})).toHaveAttribute('aria-current','page');
+ expect(errors).toEqual([]);
+});

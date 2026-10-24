@@ -375,4 +375,6 @@ Exact reconciled implementation SHA `c71bc027d284fc9bbb7a68f2ac0e068aecd10cd7` p
 
 This does **not** claim public-testnet, Genesis, or production readiness. All unfinished DOOBTUBE-12/13 live-environment work has been transferred to the canonical testnet/release roadmap in `docs/ROADMAP.md`.
 
+Current remediation state: **DOOBTUBE-0 through DOOBTUBE-10 complete**.
+
 Historical pre-closeout state, retained for verifier/evidence continuity: **DOOBTUBE-0 through DOOBTUBE-10 are complete. Next: DOOBTUBE-11 — Repository Level 3 exact-head closeout.**

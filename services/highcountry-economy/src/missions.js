@@ -10,7 +10,7 @@ export function validateMissionCatalog(c){
   if(!t||!id(t.id)||known.has(t.id)||!id(t.objective)||!uint(t.target)||t.target<1||t.target>10000
    ||!uint(t.maxPerProof)||t.maxPerProof<1||t.maxPerProof>t.target
    ||!uint(t.durationMs)||t.durationMs<60000||t.durationMs>2592000000
-   ||!uint(t.rewardUnits)||t.rewardUnits>1000000
+   ||t.rewardUnits!==0||!id(t.badgeId)
    ||(t.prerequisite!==null&&(!id(t.prerequisite)||!known.has(t.prerequisite))))
    throw new SettlementError('invalid mission template');
   known.add(t.id);
@@ -47,7 +47,9 @@ export class MissionService{
      progress:m?.progress??0,deadline:m?.deadline??null,
      reward:m?.reward??null};
    });
-   return {version:this.catalog.version,missions};
+   const badges=missions.filter(m=>m.status==='claimed'&&m.reward?.kind==='cosmetic-badge')
+    .map(m=>({missionId:m.id,badgeId:m.reward.badgeId,version:m.version}));
+   return {version:this.catalog.version,missions,badges};
   });
  }
  async activate(token,operation,templateId){
@@ -63,7 +65,7 @@ export class MissionService{
    const startedAt=this.clock(),deadline=startedAt+t.durationMs;
    if(!uint(startedAt)||!uint(deadline))throw new SettlementError('invalid mission clock');
    const m={status:'active',progress:0,startedAt,deadline,objective:t.objective,
-    target:t.target,rewardUnits:t.rewardUnits,version:this.catalog.version,proofs:0};
+    target:t.target,rewardUnits:t.rewardUnits,badgeId:t.badgeId,version:this.catalog.version,proofs:0};
    s.missions.set(this._key(principal,t.id),m);s.operations.add(operation);
    return {id:t.id,status:m.status,deadline};
   });
@@ -104,7 +106,7 @@ export class MissionService{
    if(m.status!=='complete')throw new SettlementError('mission not complete or expired');
    // This is an immutable reward *entitlement record*, not BUDS issuance.
    // Existing GameplayRewardRuntime.claim separately authenticates canonical source and mints authorized BUDS.
-   m.status='claimed';m.reward={kind:'catalogue-metadata',units:m.rewardUnits,
+   m.status='claimed';m.reward={kind:'cosmetic-badge',badgeId:m.badgeId,units:0,
     objective:m.objective,version:m.version};
    s.operations.add(operation);return {id:t.id,status:m.status,reward:m.reward};
   });

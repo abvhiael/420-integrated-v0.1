@@ -10,7 +10,7 @@ Authenticated registered-player, integer BUDS, fixed-price, full-fill only, **ze
 
 - `POST /market/import`: issuer-authenticated evidence import. Receipt replay, unsafe quantity and provenance conflicts reject.
 - `POST /market/list`: seller principal taken from authenticated session; exact inventory quantity moves available to reserved in one serializable transaction; price/expiry/asset/owner are frozen and listing ID unique.
-- `POST /market/buy`: authenticated buyer, explicit ordinary market mode, active unexpired listing, no self trade, adequate unreserved BUDS. Exactly one serializable commit moves seller reserved inventory to buyer and available buyer BUDS to seller with **fee zero**. Other buyers and replay reject.
+- `POST /market/buy`: authenticated buyer, explicit ordinary market mode, active unexpired listing, no self trade, adequate unreserved BUDS. Exactly one serializable commit moves seller reserved inventory to buyer and available buyer BUDS to seller with **fee zero**, retaining the immutable verified receipt provenance through subsequent resales. Conflicting sources for the same buyer/asset inventory cannot silently merge. Other buyers and replay reject.
 - `POST /market/cancel`: authenticated original owner only. Only active listings close; exactly the held goods return to seller.
 - `POST /market/expire`: requires authenticated registered session but not listing ownership; time must reach frozen expiry. Returns exactly the reserved goods; second closure rejects.
 - `POST /market/prepare`: canonical settlement only; explicitly denied in ordinary mode. Ordinary buy/cancel/expiry routes are denied in canonical mode. No cross-mode authority bypass.
@@ -19,6 +19,6 @@ Authenticated registered-player, integer BUDS, fixed-price, full-fill only, **ze
 
 ## Acceptance evidence
 
-Unit tests cover owner-only listing, reservation limits, forged receipt rejection, duplicate import/list/trade, zero-fee full fill, two racing buyers (one winner), concurrent cancel-versus-expire (one release), no free assets, no duplicated credits, and rollbacks. HTTP tests exercise ordinary routes with authorized/unauthorized sessions and fail-closed cross-mode routing. Disposable live PostgreSQL integration tests exercise two independently constructed market instances racing for one listing and verify total game goods and issuance after the winner commits.
+Unit tests cover owner-only listing, reservation limits, forged receipt rejection, duplicate import/list/trade, zero-fee full fill, two racing buyers (one winner), verified source retention through resale and conflict rejection, concurrent cancel-versus-expire (one release), no free assets, no duplicated credits, and rollbacks. HTTP tests exercise ordinary routes with authorized/unauthorized sessions and fail-closed cross-mode routing. Disposable live PostgreSQL integration tests exercise two independently constructed market instances racing for one listing and verify total game goods and issuance after the winner commits.
 
 The retained R04.8 Level 1, R04.5–R04.8 Level 2 economic integration, and R04 app Level 2 must all pass on the *same final SHA*. Do not inherit green results from predecessor commits as final qualification. No unrelated global suite required.

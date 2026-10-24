@@ -1,0 +1,25 @@
+name: High Country missions Level 1
+on:
+  pull_request:
+    paths:
+      - 'services/highcountry-economy/**'
+      - '.github/workflows/highcountry-missions.yml'
+  workflow_dispatch:
+jobs:
+  mission-level-1:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/highcountry-economy
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: services/highcountry-economy/package-lock.json
+      - run: npm ci
+      - name: Mission Level 1 and signed evidence
+        run: node --test test/missions.test.js
+      - name: Existing economy regression Level 2
+        run: npm test

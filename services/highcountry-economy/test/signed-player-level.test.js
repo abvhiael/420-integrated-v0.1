@@ -20,6 +20,6 @@ test('trusted signed level binds game chain issuer player freshness and exact in
   claim=bad;await assert.rejects(source({principal:'alice'}),/stale or wrong player level/);
  }
  claim={};
- await assert.rejects(createSignedPlayerLevelProvider({url:'http://localhost:3000',publicKey:keys.publicKey,
+ assert.throws(()=>createSignedPlayerLevelProvider({url:'http://localhost:3000',publicKey:keys.publicKey,
   issuer:'approved-levels',gameId,chainId:420}),/untrusted level provider/);
 });

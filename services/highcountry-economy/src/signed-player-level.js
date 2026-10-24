@@ -8,7 +8,8 @@ export function createSignedPlayerLevelProvider({url,publicKey,issuer,gameId,cha
    ||!publicKey||!id(issuer)||!/^0x[0-9a-f]{64}$/i.test(gameId)
    ||!Number.isSafeInteger(chainId)||chainId<1||typeof fetchImpl!=='function')
   throw new SettlementError('untrusted level provider');
- const key=publicKey instanceof KeyObject&&publicKey.type==='public'?publicKey:createPublicKey(publicKey);
+ if(publicKey instanceof KeyObject&&publicKey.type!=='public')throw new SettlementError('invalid progression public key');
+ const key=publicKey instanceof KeyObject?publicKey:createPublicKey(publicKey);
  if(key.type!=='public'||key.asymmetricKeyType!=='ed25519')throw new SettlementError('invalid progression public key');
  return async ({principal})=>{
   if(!id(principal))throw new SettlementError('invalid player level principal');

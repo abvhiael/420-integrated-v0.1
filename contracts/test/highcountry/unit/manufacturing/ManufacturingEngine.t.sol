@@ -176,8 +176,8 @@ contract ManufacturingEngineR043Test {
         require(engine.nonceOf(address(alice)) == 1, "duplicate start advanced nonce");
         require(engine.activeJobs(address(alice)) == 1, "duplicate start used queue");
         require(ledger.balance(RAW, address(alice)).reserved == 10, "duplicate reserve");
-        (bool crossRecipe,) = address(alice)
-            .call(abi.encodeCall(alice.startRequest, (engine, bytes32(uint256(99)), requestId)));
+        (bool crossRecipe,) =
+            address(alice).call(abi.encodeCall(alice.startRequest, (engine, bytes32(uint256(99)), requestId)));
         require(!crossRecipe, "request reused across recipes");
         vm.warp(block.timestamp + 100);
         alice.finishRetry(engine, id);
@@ -191,7 +191,7 @@ contract ManufacturingEngineR043Test {
         require(!wrongOwner, "foreign client replay allowed");
     }
 
-    function testFailedOutputIssuanceRecoveryWithRequestIdentity() public {
+    function testOutputIssuanceFailureRecoveryWithRequestIdentity() public {
         bytes32 requestId = keccak256("client-request-recovery");
         bytes32 id = alice.startRequest(engine, RECIPE, requestId);
         inventory.setIssuer(address(engine), false);

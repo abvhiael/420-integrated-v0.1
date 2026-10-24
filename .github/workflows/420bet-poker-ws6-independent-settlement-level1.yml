@@ -7,6 +7,7 @@ on:
       - 'contracts/test/BetPokerNativeOutcome54.t.sol'
       - 'contracts/test/BetPokerHandRank54.t.sol'
       - 'clients/420bet-poker/crypto/nlhe-replay*.mjs'
+      - 'clients/420bet-poker/crypto/nlhe-independent-verifier*.mjs'
       - 'clients/420bet-poker/crypto/nlhe-differential.test.mjs'
       - '.github/workflows/420bet-poker-ws6-independent-settlement-level1.yml'
   workflow_dispatch:
@@ -34,7 +35,7 @@ jobs:
         with:
           node-version: '22'
       - name: Independent NLHE action replay, side pots, ties and independent ranking differential
-        run: node --test clients/420bet-poker/crypto/nlhe-replay.test.mjs clients/420bet-poker/crypto/nlhe-differential.test.mjs
+        run: node --test clients/420bet-poker/crypto/nlhe-replay.test.mjs clients/420bet-poker/crypto/nlhe-differential.test.mjs clients/420bet-poker/crypto/nlhe-independent-verifier.test.mjs
       - uses: foundry-rs/foundry-toolchain@v1
         with:
           version: stable
@@ -78,6 +79,8 @@ jobs:
             contracts/test/BetPokerHandRank54.t.sol \
             clients/420bet-poker/crypto/nlhe-replay.mjs \
             clients/420bet-poker/crypto/nlhe-differential.test.mjs \
+            clients/420bet-poker/crypto/nlhe-independent-verifier.mjs \
+            clients/420bet-poker/crypto/nlhe-independent-verifier.test.mjs \
             > artifacts/420bet-ws6/source-sha256.txt
       - uses: actions/upload-artifact@v4
         with:

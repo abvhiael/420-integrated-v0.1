@@ -169,4 +169,20 @@ contract EquipmentLifecycleR044Test {
         require(!overwrite, "rewrote policy");
         require(lifecycle.condition(ID).durability == 10, "default condition");
     }
+
+    function testLifecyclePolicyMustMatchImmutableEquipmentCatalogueVersion() public {
+        bytes32 nextType = keccak256("EQUIPMENT-VERSION-2");
+        int16[6] memory effects;
+        effects[2] = 125;
+        equipment.registerType(nextType, bytes32(uint256(2)), 1, effects);
+        (bool mismatch,) = address(lifecycle).call(
+            abi.encodeCall(
+                lifecycle.registerPolicy,
+                (nextType, bytes32(uint256(1)), uint32(10), uint32(5), uint32(5), REPAIR, uint256(2), uint32(6), RECYCLE, uint256(3))
+            )
+        );
+        require(!mismatch, "mismatched equipment and lifecycle rules admitted");
+        lifecycle.registerPolicy(nextType, bytes32(uint256(2)), 10, 5, 5, REPAIR, 2, 6, RECYCLE, 3);
+        require(lifecycle.policy(nextType).version == bytes32(uint256(2)), "matched ruleset version lost");
+    }
 }

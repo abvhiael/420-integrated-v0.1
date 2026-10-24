@@ -15,7 +15,7 @@ Authenticated registered-player, integer BUDS, fixed-price, full-fill only, **ze
 - `POST /market/expire`: requires authenticated registered session but not listing ownership; time must reach frozen expiry. Returns exactly the reserved goods; second closure rejects.
 - `POST /market/prepare`: canonical settlement only; explicitly denied in ordinary mode. Ordinary buy/cancel/expiry routes are denied in canonical mode. No cross-mode authority bypass.
 
-`BudsLedger.operate` and all market methods share one PostgreSQL SERIALIZABLE state transaction, so BUDS/inventory mutations and listing status/operation replay have the same commit boundary. MemoryTransactionFixture is test-only. Production operation depends on a correctly configured authenticated identity/session verifier, trusted receipt issuer, and least-privilege provisioned PostgreSQL namespace.
+`BudsLedger.operate` and all market methods share one PostgreSQL SERIALIZABLE state transaction, so BUDS/inventory mutations and listing status/operation replay have the same commit boundary. MemoryTransactionFixture is test-only. `composeOrdinaryMarketRuntime` provides an explicit ordinary-only runtime composition and rejects mismatched identity/store instances or a missing trusted receipt verifier. It requires authenticated `RuntimeAuthority` registered principals and inventory issuer scopes. Production operation additionally depends on a correctly configured authenticated identity/session verifier, independently deployed receipt issuer, and least-privilege provisioned PostgreSQL namespace. The existing `createRuntime` remains canonical-only; this avoids silently enabling ordinary transfers on canonical custody deployments.
 
 ## Acceptance evidence
 

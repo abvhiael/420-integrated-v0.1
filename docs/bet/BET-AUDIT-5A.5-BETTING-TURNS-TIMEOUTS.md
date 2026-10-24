@@ -1,4 +1,4 @@
-# 5A.5 — Blinds, betting rounds, turn authorization and timeouts
+# 5A.5 â€” Blinds, betting rounds, turn authorization and timeouts
 
 This work owns the cash NLHE turn state machine. Qualification requires executed
 tests and source-bound evidence; this document is not an acceptance certificate.
@@ -25,7 +25,7 @@ require actual proofs, even though no strategic betting turns remain. Terminal,
 refunded and settled hands cannot reopen betting or accept late public reveals.
 
 Before reservation, scoped governance binds the native resolver and one immutable
-30–3600 second turn duration. A starter must use that duration. The native engine
+30â€“3600 second turn duration. A starter must use that duration. The native engine
 alone commits the actor, next nonce, deadline and state root to the dispute clock.
 Controllers cannot replace or expire a native turn through legacy clock APIs.
 
@@ -42,8 +42,7 @@ delivery is complete. They cannot blame providers for an admission failure.
 Already funded play continues objectively. A dispute holds settlement and grants
 bounded review; it does not let a participant freeze the betting clock.
 
-These decisions retain the repository's cash rules. The [official TDA rules]
-(https://www.pokertda.com/view-poker-tda-rules/) provide reference for heads-up
+These decisions retain the repository's cash rules. The [official TDA rules](https://www.pokertda.com/view-poker-tda-rules/) provide reference for heads-up
 order, deadline ties and full-raise reopening; this is not a tournament feature.
 Antes, straddles, time banks and tournament blind schedules are outside this cash
 policy and cannot be introduced by a hand starter.
@@ -72,3 +71,16 @@ bind actual executed native, cryptographic and independent replay results to the
 same clean Git SHA. Historical cryptographic inheritance is valid only where
 source identities match; changed native contracts require fresh native tests.
 Unrelated 420Arcade documentation failures are a separate owner.
+
+## Retained deployment gate
+
+Level 1/2 establish executable cash-game rules and cryptographic integration in
+the local qualification environment. They do not grant live deployment or Level
+3 acceptance. A direct Solidity 0.8.30 / Cancun / via-IR / optimizer-200 compilation
+of the main baseline (`6b13e491b7088c113f4be0abd5826509053ed3bb`) produced a
+31,872-byte betting-engine runtime, already above the EIP-170 24,576-byte limit.
+The 5A.5 candidate is also above that limit. Its actual compiled size is exported
+by CI and included in the certificate, which explicitly records that live
+deployment is not ready. Splitting the monolithic engine into deployable modules,
+then requalifying its exact deployed identities, remains a deployment gate; a
+passing Foundry test must never be presented as evidence that this gate passed.

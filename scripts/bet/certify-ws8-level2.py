@@ -13,6 +13,8 @@ crypto, funded, replay, betting = [json.loads(p.read_text(encoding="utf-8")) for
 assert all(r["qualifiedSHA"] == sha and r["trackedWorkingTreeDirty"] is False for r in [crypto, funded, replay, betting])
 assert len(betting['mandatoryTests']) == 30 and set(betting['mandatoryTests'].values()) == {'Success'}
 assert betting['independentTestsPassed'] >= 23
+runtime = json.loads(Path('artifacts/poker-5a5/runtime-size.json').read_text(encoding='utf-8'))
+assert runtime['sourceCommit'] == sha
 assert crypto["genuineProofsVerified"] == 41
 assert len(funded["mandatoryTests"]) == 11 and set(funded["mandatoryTests"].values()) == {"Success"}
 assert funded["totalPassed"] >= 15
@@ -21,6 +23,8 @@ assert sum(replay["balances"]) + replay["fee"] == 800
 out = Path("artifacts/ws8-certificate");out.mkdir(parents=True, exist_ok=True)
 report = {"level": 2, "qualifiedSHA": sha, "acceptance": "passed", "genuineProofsVerified": 41,
     "betting5A5Tests": betting['mandatoryTests'], "freshNativeOwners": betting['nativeOwners'],
+    "scope": "Level 2 local rules and cryptographic integration; not Level 3 or live deployment acceptance",
+    "liveDeploymentReady": runtime['liveDeploymentReady'], "compiledRuntimeSizes": runtime['contracts'],
     "mandatoryTests": funded["mandatoryTests"], "scopedTestsPassed": funded["totalPassed"],
     "handId": replay["handId"], "terminalTranscript": replay["terminalTranscript"],
     "runURL": f"https://github.com/{os.environ['GITHUB_REPOSITORY']}/actions/runs/{os.environ['GITHUB_RUN_ID']}",

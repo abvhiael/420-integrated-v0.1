@@ -62,7 +62,9 @@ jobs:
           forge test --use 0.8.30 --match-contract 'PokerNativeOutcome54Test|PokerLiveCardReveals54Test|PokerWS5Recovery54Test' --json > ../artifacts/poker-5a5/foundry-outcome54.json
           forge test --use 0.8.30 --match-contract 'PokerActionDisputeClock54Test|PokerLedgerReentrancy54Test|PokerCanonicalSettlement54Test|PokerHandRank54Test' --json > ../artifacts/poker-5a5/foundry-clock54.json
       - name: Require every mandatory actual execution and source identity
-        run: python3 scripts/bet/verify-poker-5a5-execution.py artifacts/poker-5a5 artifacts/poker-5a5/execution.json
+        run: |
+          python3 scripts/bet/verify-poker-5a5-execution.py artifacts/poker-5a5 artifacts/poker-5a5/execution.json
+          python3 scripts/bet/record-poker-runtime-size.py artifacts/poker-5a5/runtime-size.json
       - uses: actions/upload-artifact@v4
         with:
           name: poker-5a5-level1-native-execution

@@ -175,7 +175,11 @@ contract ManufacturingEngine is R04EmergencyConsumer {
         for (uint256 i; i < 2; ++i) {
             if (r.inputs[i] != bytes32(0)) {
                 inventory.consumeTaggedFor(
-                    _operation(jobId, bytes32("CONSUME"), i), _operation(jobId, bytes32("RESERVE"), i), r.inputs[i], msg.sender, r.inputAmounts[i]
+                    _operation(jobId, bytes32("CONSUME"), i),
+                    _operation(jobId, bytes32("RESERVE"), i),
+                    r.inputs[i],
+                    msg.sender,
+                    r.inputAmounts[i]
                 );
             }
             if (r.outputs[i] != bytes32(0)) {
@@ -199,11 +203,21 @@ contract ManufacturingEngine is R04EmergencyConsumer {
             uint256 loss =
                 r.inputAmounts[i] / 10000 * r.cancelLossBps + (r.inputAmounts[i] % 10000) * r.cancelLossBps / 10000;
             if (loss != 0) {
-                inventory.consumeTaggedFor(_operation(jobId, bytes32("LOSS"), i), _operation(jobId, bytes32("RESERVE"), i), r.inputs[i], msg.sender, loss);
+                inventory.consumeTaggedFor(
+                    _operation(jobId, bytes32("LOSS"), i),
+                    _operation(jobId, bytes32("RESERVE"), i),
+                    r.inputs[i],
+                    msg.sender,
+                    loss
+                );
             }
             if (r.inputAmounts[i] > loss) {
                 inventory.releaseTaggedFor(
-                    _operation(jobId, bytes32("REFUND"), i), _operation(jobId, bytes32("RESERVE"), i), r.inputs[i], msg.sender, r.inputAmounts[i] - loss
+                    _operation(jobId, bytes32("REFUND"), i),
+                    _operation(jobId, bytes32("RESERVE"), i),
+                    r.inputs[i],
+                    msg.sender,
+                    r.inputAmounts[i] - loss
                 );
             }
         }

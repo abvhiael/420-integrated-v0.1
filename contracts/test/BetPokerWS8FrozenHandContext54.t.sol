@@ -5,6 +5,7 @@ import "../src/bet/PokerInitialEncryptedDeck420.sol";
 import "../src/bet/PokerPrivateShuffleGate420.sol";
 import "../src/bet/PokerProviderAccountability420.sol";
 import "../src/bet/PokerActionKeys420.sol";
+import "../src/bet/PokerCanonicalRake420.sol";
 
 /// @notice WS8 PASS ONE: immutable contract-derived context export.
 /// @dev Not a proof-admission/settlement qualification. The real Groth16 owners
@@ -30,7 +31,18 @@ contract BetPokerWS8FrozenHandContext54Test is PokerConfidentialDeal54Test {
 
     function _freeze() internal returns(bytes32 handId) {
         cheat54.warp(CONTEXT_TIMESTAMP);
-        _prepared();
+        // Use the canonical production rake policy rather than the base
+        // fixture's generic configuration hash.
+        PokerCanonicalRake420 rake = new PokerCanonicalRake420(address(registry));
+        PokerTableRegistry420.Configuration memory config = _config();
+        config.asset=address(coin);
+        config.rakePolicyHash=rake.policyHash(
+            PokerCanonicalRake420.Policy(500,20,true,true));
+        cheat54.prank(ADMIN);registry.register(config,ADMIN);
+        cheat54.prank(ADMIN);registry.approve(TABLE);
+        cheat54.prank(ADMIN);registry.open(TABLE);
+        _buy();
+        cheat54.prank(PLAYER_B);ledger.buyIn(TABLE,1,400);
         bytes32 snapshot = deal.snapshotFor(TABLE,SEATS_MASK);
         cheat54.prank(ADMIN);
         handId=deal.begin(TABLE,1,uint64(block.timestamp+3600),PREVIOUS_STATE,snapshot,SEATS_MASK);

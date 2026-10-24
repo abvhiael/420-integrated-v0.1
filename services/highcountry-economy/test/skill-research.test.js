@@ -14,7 +14,7 @@ function setup(){
  let level=1,verified=true;
  const identity={registeredPrincipal:async t=>{if(t==='alice-token')return 'alice';if(t==='bob-token')return 'bob';throw new SettlementError('unregistered');}};
  const engine=new SkillResearchService({store,identity,catalog:catalogue,
-  verifyEvidence:async()=>verified,getPlayerLevel:async()=>level,clock:()=>12345});
+  verifyEvidence:async({evidence})=>verified?{sourceEvent:evidence}:false,getPlayerLevel:async()=>level,clock:()=>12345});
  return {store,engine,setLevel:v=>{level=v;},setVerified:v=>{verified=v;}};
 }
 test('progression is version-pinned, proof-unique and independently admitted',async()=>{

@@ -22,7 +22,8 @@ export function verifyBettingTranscript({stacks,button,smallBlind,bigBlind,actio
   pay(bb,Math.min(bigBlind,seats[bb].stack));
   let phase='PREFLOP',currentBet=bigBlind,minRaise=bigBlind,nonce=0,pot=seats.reduce((v,p)=>v+p.contributed,0);
   let pending=seats.reduce((mask,p)=>mask|(p.allIn?0:bit(p.seat)),0);
-  let toAct=n===2&&pending&bit(sb)?sb:clockwise(pending,bb,n);
+  let toAct=pending===0?-1:(n===2&&(pending&bit(sb))?sb:clockwise(pending,bb,n));
+  if(pending===0)phase='AWAIT_FLOP';
   let turnDeadline=null;
   const record=[];
   const countAlive=()=>seats.filter(x=>!x.folded).length;

@@ -24,7 +24,10 @@ def main():
         require(f"BNB-S{n:02d}" in content, f"missing requirement BNB-S{n:02d}")
     genesis = json.loads(read("config/genesis-applications.json"))
     require(genesis.get("status") == "FROZEN", "frozen application decision was altered")
-    require(not any("bnb" in a.get("name", "").lower() for a in genesis.get("apps", [])), "new BnB Genesis promotion requires explicit reconciliation")
+    decision = json.loads(read("config/genesis-application-decision-2.json"))
+    approval=next((x for x in decision["entries"] if x["name"]=="420BnB"),None)
+    require(approval is not None and approval["readiness"]=="release_gated" and approval["release_enabled"] is False, "new BnB Genesis promotion requires explicit disabled approval")
+    require(any(a.get("name")=="420BnB" and a.get("class")=="GENESIS_USER_APP" for a in genesis.get("apps", [])), "approved BnB catalog entry missing")
     consumers = json.loads(read("config/genesis-consumer-services.json"))
     flags = {entry["key"]: entry["genesis_default"] for entry in consumers["feature_flags"]}
     require(flags.get("travel.bnb_booking") is False, "BNB Genesis flag must remain disabled")

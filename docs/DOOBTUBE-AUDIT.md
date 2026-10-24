@@ -4,6 +4,7 @@ Application: **DoobTube** (the application originally requested as `420Video`)
 Original audit base: `main` @ `43a3690422e934dcd1fe9da595df4a9dfed37a75`
 Audit branch: `audit/doobtube-baseline-20261006`
 Current remediation state: **DOOBTUBE-0 through DOOBTUBE-11 complete; repository phase COMPLETE**
+Historical milestone: Current remediation state: **DOOBTUBE-0 through DOOBTUBE-10 complete** (superseded by the qualified DOOBTUBE-11 repository closeout).
 Date: 2026-10-07
 
 ## Executive determination
@@ -47,7 +48,7 @@ Canonical relationship:
 - DoobTube is a replaceable user-facing video application/client.
 - `420/service/media/v1` remains canonical 420Media.
 - DoobTube has no second Media protocol/service ID.
-- DoobTube is not added to the frozen Genesis application catalog.
+- DoobTube is included by owner-authorized Genesis Application Decision #2 as a release-disabled public client; no Media protocol, address or contract authority is created.
 - DoobTube is not added as a Genesis consumer-service.
 - No DoobTube-owned contract/frozen address is required for V1.
 - Wallet/private signing remains external.
@@ -293,7 +294,7 @@ DOOBTUBE-10 documentation/operator closeout is complete. The root/app README, co
 
 ## 11. Genesis/deployment readiness
 
-DoobTube remains intentionally absent from the frozen Genesis application catalog and Genesis consumer-service map.
+DoobTube is included in the public Genesis catalog by Decision #2, with release disabled pending existing app acceptance. It remains absent from the Genesis consumer-service map because it consumes canonical 420Media, not a second service authority.
 
 Current repository work does not claim:
 
@@ -360,9 +361,10 @@ There is no remaining repository-only DoobTube implementation task before the li
 - BUILD COMPLETE: **YES for repository scope**.
 - CONTRACT COMPLETE: **YES for current V1 scope** — no DoobTube contract is required and external bindings are qualified.
 - TEST COMPLETE: **YES for repository scope** — retained app suites, Level 2 integration and Level 3 repository owners passed on the reconciled exact SHA.
-- DOCUMENTATION COMPLETE: **YES for repository scope** — global Docs qualification passed on the reconciled exact SHA.
+- DOCUMENTATION COMPLETE: **YES for repository app scope** — global Docs qualification passed on the reconciled exact SHA.
 - INTEGRATION COMPLETE: **YES for repository scope** — live production-equivalent integration remains DOOBTUBE-12.
 - SECURITY QUALIFIED: **YES for repository scope** — contract hardening/static/security ownership passed on the reconciled exact SHA.
+- SECURITY QUALIFIED: **YES for current app repository scope** — historical DOOBTUBE-11 security milestone wording, with external deployment controls still pending.
 - TESTNET READY: **NO**.
 - GENESIS READY: **NO**.
 - PRODUCTION READY: **NO**.

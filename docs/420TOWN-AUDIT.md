@@ -1,4 +1,6 @@
 # 420Town repository audit
+> **Decision #2 classification update (2026-10-18):** The owner-authorized 51-entry Genesis catalog includes **TownSquare** solely as a release-disabled `GENESIS_USER_APP` frontend, with `contracts_required=false`. The underlying `420Town Community Boards` remains the replaceable GEN-SVC application at `420/service/town/v1`; its service identity, authority, moderation, private transport, Registry-discovery binding and release gates are unchanged. Historical statements below that Town lacked any public catalog representation refer to the earlier Decision #1 baseline. Inclusion does not enable Town service transactions or grant new protocol powers. See `config/genesis-application-decision-2.json` and `config/genesis-applications.json`.
+
 
 Status: ACTIVE / NOT COMPLETE  
 Audit branch: `audit/420town-complete-20261004`  

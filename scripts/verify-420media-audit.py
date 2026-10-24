@@ -112,7 +112,10 @@ flags = {x["key"]: x["genesis_default"] for x in svc["feature_flags"]}
 assert flags.get("media.livestreaming") is True
 
 apps = json.loads(need("config/genesis-applications.json"))
-assert all(x["name"] != "420Media" for x in apps["apps"]), "audit policy changed: 420Media is now frozen; reconcile audit"
+decision=json.loads(need("config/genesis-application-decision-2.json"))
+media_approval=next((e for e in decision["entries"] if e["name"]=="420Media"),None)
+assert media_approval and media_approval["release_enabled"] is False and media_approval["existing_authority"]=="420Media service"
+assert any(x["name"]=="420Media" and x["contracts_required"] is False for x in apps["apps"])
 
 for path in [
     "contracts/src/media/MediaCapabilityRegistry420.sol",

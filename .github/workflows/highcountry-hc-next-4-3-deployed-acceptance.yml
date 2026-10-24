@@ -21,10 +21,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: npm
-          cache-dependency-path: services/highcountry-economy/package-lock.json
       - name: Install pinned economy service dependencies
-        run: npm ci --prefix services/highcountry-economy
+        run: npm install --prefix services/highcountry-economy --ignore-scripts --no-audit --no-fund
       - name: Require authorized deployed-chain acceptance secrets
         env:
           HC_DEPLOYED_CANONICAL_ACCEPTANCE: ${{ secrets.HC_DEPLOYED_CANONICAL_ACCEPTANCE }}

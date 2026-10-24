@@ -132,6 +132,9 @@ contract InventoryRegistryR041Test {
         ledgerCheck(RESOURCE, address(alice), 30, 20, 30);
         ledgerCheck(RESOURCE, address(bob), 20, 0, 0);
         require(ledger.issued(RESOURCE) == 100 && ledger.consumed(RESOURCE) == 30, "global totals");
+        require(ledger.availableTotal(RESOURCE) == 50, "available total mismatch");
+        require(ledger.reservedTotal(RESOURCE) == 20, "reserved total mismatch");
+        require(ledger.reconciles(RESOURCE), "issuance not conserved");
     }
 
     function testReplayAndOverdrawFailClosed() public {
@@ -154,6 +157,7 @@ contract InventoryRegistryR041Test {
         bytes32 id = inventory.importHarvest(product);
         ledgerCheck(id, address(alice), 55, 0, 0);
         require(ledger.issued(id) == 55, "harvest issued");
+        require(ledger.availableTotal(id) == 55 && ledger.reconciles(id), "harvest supply not reconciled");
         (bool replay,) = address(inventory).call(abi.encodeCall(inventory.importHarvest, (product)));
         require(!replay, "double import");
         (bool spoof,) =
@@ -178,6 +182,9 @@ contract InventoryRegistryR041Test {
         ledgerCheck(RESOURCE, address(alice), 3, 2, 0);
         ledgerCheck(RESOURCE, address(bob), 5, 0, 0);
         require(ledger.issued(RESOURCE) == 10 && ledger.consumed(RESOURCE) == 0, "conservation");
+        require(ledger.availableTotal(RESOURCE) == 8, "handoff liquidity mismatch");
+        require(ledger.reservedTotal(RESOURCE) == 2, "handoff reservation mismatch");
+        require(ledger.reconciles(RESOURCE), "handoff duplicated units");
         (bool replay,) = address(inventory)
             .call(
                 abi.encodeCall(

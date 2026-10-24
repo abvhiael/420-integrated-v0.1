@@ -66,6 +66,8 @@ contract PokerNativeOutcome54Test is PokerLiveCardReveals54Test {
         PokerCanonicalRake420.Policy memory policy=PokerCanonicalRake420.Policy(500,20,true,true);
         _signedAction(id,0,PokerNLHEBetting420.Move.CALL,10,PLAYER_KEY);
         _signedAction(id,1,PokerNLHEBetting420.Move.CHECK,0,OPPONENT_KEY);
+        bytes32 earlyTranscript=engine.actionTranscriptRoot(id);
+        require(earlyTranscript!=bytes32(0),"signed actions must have independently replayable commitment");
         for(uint8 pos=5;pos<=7;pos++){
             _submitPublicStreet(id,1,pos,0);_submitPublicStreet(id,1,pos,1);
             _openPublicStreet(id,1,pos,pos);
@@ -95,6 +97,8 @@ contract PokerNativeOutcome54Test is PokerLiveCardReveals54Test {
         require(engine.terminalTranscript(id)==bytes32(0),"transcript unsealed before settlement");
         cheat54.prank(OTHER);engine.settle(id,policy);
         require(engine.terminalTranscript(id)!=bytes32(0),"immutable terminal transcript sealed");
+        require(engine.actionTranscriptRoot(id)!=earlyTranscript,
+            "each later street commits its own signed action evidence");
         require(ledger.seatOf(TABLE,0).chips==balances[0]&&
             ledger.seatOf(TABLE,1).chips==balances[1],"ledger only accepts recomputed winner");
         require(ledger.handConsumed(id)&&engine.handSettled(id),"single atomic terminal result");

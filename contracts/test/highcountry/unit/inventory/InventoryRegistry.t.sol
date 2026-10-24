@@ -227,25 +227,27 @@ contract InventoryRegistryR041Test {
         (bool drain,) =
             address(alice).call(abi.encodeCall(alice.release, (inventory, bytes32(uint256(302)), RESOURCE, uint256(1))));
         require(!drain, "unscoped release stole reserved stock");
-        (bool wrongTag,) = address(inventory).call(
-            abi.encodeCall(
-                inventory.consumeTaggedFor,
-                (bytes32(uint256(303)), market, RESOURCE, address(alice), uint256(8))
-            )
-        );
+        (bool wrongTag,) = address(inventory)
+            .call(
+                abi.encodeCall(
+                    inventory.consumeTaggedFor, (bytes32(uint256(303)), market, RESOURCE, address(alice), uint256(8))
+                )
+            );
         require(!wrongTag, "other job capacity used");
         inventory.consumeTaggedFor(bytes32(uint256(304)), farm, RESOURCE, address(alice), 8);
         inventory.transferTaggedFor(bytes32(uint256(305)), market, RESOURCE, address(alice), address(bob), 7);
         require(ledger.lockedReserved(RESOURCE, address(alice)) == 0, "lock not cleared");
-        require(ledger.availableTotal(RESOURCE) == 12 && ledger.reservedTotal(RESOURCE) == 0, "global movement mismatch");
+        require(
+            ledger.availableTotal(RESOURCE) == 12 && ledger.reservedTotal(RESOURCE) == 0, "global movement mismatch"
+        );
         require(ledger.consumed(RESOURCE) == 8 && ledger.reconciles(RESOURCE), "tagged supply duplicated");
         require(ledger.balance(RESOURCE, address(bob)).available == 7, "transferred tagged stock missing");
-        (bool twice,) = address(inventory).call(
-            abi.encodeCall(
-                inventory.consumeTaggedFor,
-                (bytes32(uint256(306)), farm, RESOURCE, address(alice), uint256(1))
-            )
-        );
+        (bool twice,) = address(inventory)
+            .call(
+                abi.encodeCall(
+                    inventory.consumeTaggedFor, (bytes32(uint256(306)), farm, RESOURCE, address(alice), uint256(1))
+                )
+            );
         require(!twice, "spent reservation replay");
     }
 

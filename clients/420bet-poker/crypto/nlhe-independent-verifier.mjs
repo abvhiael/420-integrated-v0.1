@@ -31,7 +31,7 @@ export function verifyBettingTranscript({stacks,button,smallBlind,bigBlind,actio
   const streetAfter={AWAIT_FLOP:'FLOP',AWAIT_TURN:'TURN',AWAIT_RIVER:'RIVER'};
   const nextPending=(from)=>clockwise(pending,from,n);
   for(const event of actions) {
-    requireTrue(event&&Number.isSafeInteger(event.nonce),'nonce');
+    requireTrue(event&&typeof event==='object','event');
     if(event.type==='reveal') {
       requireTrue(phase===event.from&&streetAfter[phase]===event.to,'premature reveal');
       requireTrue(event.accepted===true&&event.finalRootMatched===true,'unproved public card');
@@ -42,6 +42,7 @@ export function verifyBettingTranscript({stacks,button,smallBlind,bigBlind,actio
       record.push({phase,type:'reveal',street:event.from,accepted:true});
       continue;
     }
+    requireTrue(Number.isSafeInteger(event.nonce),'nonce');
     requireTrue(['PREFLOP','FLOP','TURN','RIVER'].includes(phase),'street/terminal');
     requireTrue(event.nonce===nonce+1,'nonce replay');
     requireTrue(event.seat===toAct&&(pending&bit(toAct))!==0,'out of turn');

@@ -46,6 +46,14 @@ export class RuntimeAuthority {
    s.runtimeAccounts.set(c.sub,{issuer:c.iss,game:this.gameId});return c.sub;
   });
  }
+ async requireRegisteredRecipient(principal){
+  if(!id(principal))fail('invalid reward recipient');
+  return this.store.transact(s=>{
+   runtimeState(s);
+   if(!s.runtimeAccounts.has(principal))fail('unregistered reward recipient');
+   return principal;
+  });
+ }
  async requireTrustedIssuer(token,source){
   const c=this.verifyToken(token);await this.registeredPrincipal(token);
   if(!this.issuers[c.iss]?.operators?.[c.sub]?.sources?.includes(source))fail('source issuer denied');

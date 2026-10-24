@@ -8,11 +8,11 @@ Version: `HC-MISSIONS-V1`; declared in `services/highcountry-economy/src/mission
 
 | Mission | Required independently verified activity | Prerequisite claimed | Target | Proof cap | Duration | Reward |
 |---|---|---|---:|---:|---|---|
-| journal-first-steps | verified-journal-entry | none | 2 | 1/event | 24 hours | 0 BUDS; metadata receipt |
-| field-notes | verified-field-observation | journal-first-steps | 3 | 1/event | 48 hours | 0 BUDS; metadata receipt |
-| workshop-checklist | verified-workshop-check | field-notes | 3 | 1/event | 72 hours | 0 BUDS; metadata receipt |
+| journal-first-steps | verified-journal-entry | none | 2 | 1/event | 24 hours | 0 BUDS; first-journal-badge |
+| field-notes | verified-field-observation | journal-first-steps | 3 | 1/event | 48 hours | 0 BUDS; field-observer-badge |
+| workshop-checklist | verified-workshop-check | field-notes | 3 | 1/event | 72 hours | 0 BUDS; workshop-keeper-badge |
 
-These are new conservative V1 baseline values, not retrospectively asserted historical R04.7 approved numerical parameters. Rewards are explicitly zero until a separately approved bounded economic source and canonical issuer are commissioned. A claim returns immutable metadata `{kind,units,objective,version}`, not a redeemable payout. No deposit, penalty or confiscation is introduced.
+These are new conservative V1 baseline values, not retrospectively asserted historical R04.7 approved numerical parameters. Rewards are explicitly zero until a separately approved bounded economic source and canonical issuer are commissioned. A claim issues a durable, noncompetitive cosmetic badge entitlement. A claim returns immutable metadata `{kind,badgeId,units,objective,version}`, not a redeemable payout. No deposit, penalty or confiscation is introduced.
 
 ## State machine and invariants
 

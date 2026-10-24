@@ -1,0 +1,60 @@
+{
+  "schema": "420-mig-0-4-provenance-evidence-v1",
+  "step": "MIG-0.4",
+  "verifiedAt": "2026-10-24",
+  "qualifyingRun": {
+    "id": 40106566317,
+    "implementationSha": "bd53c0c68bb933be90604a59621b58ee48859ccf",
+    "conclusion": "success",
+    "scope": "static source boundary only"
+  },
+  "pullRequests": [
+    {
+      "number": 780,
+      "headSha": "969732595513691ce55c2a2c49a0d9871f577c58",
+      "baseSha": "6da29d73153e0771caeecc2b739f763ca414651d",
+      "state": "open",
+      "draft": true,
+      "changedPaths": [
+        "docs/arcade/MAD-BUDS-MB3-1-SOURCE-BOUNDARY.md",
+        "packages/mad-buds-kush-krusher/src/character-contract.mjs",
+        "packages/mad-buds-kush-krusher/test/character-contract.test.mjs"
+      ]
+    },
+    {
+      "number": 771,
+      "headSha": "ade0268f0b507e5912181e278c6f25923a3472d8",
+      "baseSha": "a8d40eff26f464d4f32251a852edbffcf41a6d5d",
+      "state": "open",
+      "draft": false,
+      "changedPaths": [
+        "assets/arcade/mad-buds/sativa-steve/PHASE-E-ANIMATION-PREPARATION.md"
+      ]
+    }
+  ],
+  "godot": {
+    "primaryRuntimeIntended": "Godot",
+    "projectFileFound": false,
+    "method": "GitHub default-branch file search for project.godot and godot returned no matching files; other branches and local-only files not exhaustively scanned",
+    "verifiedScenes": 0,
+    "verifiedImportedFiles": 0,
+    "conclusion": "BLOCKED_SOURCE_NOT_LOCATED"
+  },
+  "binaryAssets": {
+    "sha256VerifiedAgainstBytes": 0,
+    "method": "Existing manifests expose expected SHA-256; no complete binary byte inventory available through this connector audit",
+    "conclusion": "NOT_VERIFIED",
+    "note": "Manifest hash string syntax and referenced frame count alone do not prove binary integrity"
+  },
+  "legacyUnity": {
+    "sourceRepo": "abvhiael/420-integrated",
+    "sourcePath": "mad-buds/",
+    "characterBibleBlob": "622b528b66b9f7836dd79c33fbb6966de34e6902",
+    "integrationContractBlob": "3d96370bb7ff571bb04eace85d95fd164c916e52",
+    "artReadmeBlob": "9d1db94492b0dbb3504425e0a4f5895996c79296",
+    "unityReadmeBlob": "7a5937f3f38771a937719fc90db1b322ac791453",
+    "conclusion": "KNOWN_PATHS_VERIFIED; EXHAUSTIVE_RECURSIVE_TREE_UNVERIFIED"
+  },
+  "finalStatus": "PARTIAL_NO_FULL_MIG_0_4_QUALIFICATION",
+  "releasePolicy": "No source deletions or migration cutover permitted until Godot, binary and full Unity provenance gates are satisfied"
+}

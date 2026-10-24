@@ -39,6 +39,23 @@ export function mountSkills({document,main,runtime,authenticate,fetchImpl=fetch}
    card.append(el('p','Prerequisites: '+(record.prerequisites.join(', ')||'none')));
    card.append(el('p','Approved convenience: '+record.effect+' ('+record.effectValue+'/'+record.cap+
     '). No canonical assets or protected scoring benefit.'));
+   if(!record.unlocked&&record.points<record.requiredPoints){
+    const label=el('label','Approved signed progression evidence (base64url) ');
+    const proof=document.createElement('input');proof.type='text';proof.maxLength=8192;
+    label.append(proof);card.append(label);
+    const pointsLabel=el('label','Verified evidence points ');
+    const pointsInput=document.createElement('input');pointsInput.type='number';
+    pointsInput.min='1';pointsInput.max=String(record.requiredPoints-record.points);
+    pointsInput.step='1';pointsLabel.append(pointsInput);card.append(pointsLabel);
+    button(card,'Submit verified progress',()=>operate(async()=>{
+     const points=Number(pointsInput.value);
+     if(!Number.isSafeInteger(points)||points<1||points>record.requiredPoints-record.points
+       ||typeof proof.value!=='string'||!proof.value||proof.value.length>8192)
+      throw Error('invalid progression evidence');
+     await post('/progression/evidence',{operation:op(),trackId:record.id,
+      evidence:proof.value,points});
+    },'Independent progression evidence accepted.'));
+   }
    if(!record.unlocked&&record.points===record.requiredPoints){
     button(card,'Unlock for '+record.cost+' BUDS',()=>operate(async()=>{
      if(globalThis.confirm?.('Spend '+record.cost+' BUDS on '+record.id+'?')!==true)return;

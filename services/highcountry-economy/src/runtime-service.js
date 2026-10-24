@@ -100,14 +100,16 @@ export function runtimeHttpServer(runtime,{origin}){
     case '/wallet/unlink':result=await identity.unlink(token);break;
     case '/rewards/claim':result=await rewards.claim(token,b.source,b.proof);break;
     case '/progression/snapshot':
-     if(!skillResearch)throw new SettlementError('progression catalogue not activated');
+     if(!skillResearch||Object.keys(b).length!==0)throw new SettlementError('progression snapshot denied');
      result=await skillResearch.snapshot(token);break;
     case '/progression/evidence':
-     if(!skillResearch)throw new SettlementError('progression catalogue not activated');
+     if(!skillResearch||Object.keys(b).sort().join(',')!=='evidence,operation,points,trackId')
+      throw new SettlementError('progression evidence request denied');
      result=await skillResearch.progress(token,b.operation,b.trackId,b.evidence,b.points);break;
     case '/progression/unlock':
-     if(!skillResearch)throw new SettlementError('progression catalogue not activated');
-     result=await skillResearch.unlock(token,b.operation,b.trackId,{playerLevel:b.playerLevel});break;
+     if(!skillResearch||Object.keys(b).sort().join(',')!=='operation,trackId')
+      throw new SettlementError('progression unlock request denied');
+     result=await skillResearch.unlock(token,b.operation,b.trackId);break;
     case '/market/import':result=await market.importAsset(token,b.operation,b.receipt);break;
     case '/market/list':result=await market.list(token,b.operation,b.listing,b.asset,b.quantity,b.price,b.expiresAt);break;
     case '/market/snapshot':

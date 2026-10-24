@@ -16,6 +16,11 @@ test('signed progression proof binds principal, track, version, points and globa
  }
  const params={principal:'alice',trackId:'archive-index-I',version:'HC-SKILL-RESEARCH-V1',points:1};
  assert.deepEqual(await verify({...params,evidence:envelope()}),{sourceEvent:'server-event-12'});
+ const fromPem=createSignedProgressionEvidence({publicKey:keys.publicKey.export({type:'spki',format:'pem'}),
+  issuer:'approved-quest-service',gameId,chainId:420,clock:()=>now});
+ assert.deepEqual(await fromPem({...params,evidence:envelope()}),{sourceEvent:'server-event-12'});
+ assert.throws(()=>createSignedProgressionEvidence({publicKey:keys.privateKey,
+  issuer:'approved-quest-service',gameId,chainId:420}),/Invalid key object type|invalid progression public key/);
  for(const change of [{principal:'bob'},{trackId:'different'},{version:'other'},{points:2}])
   assert.equal(await verify({...params,...change,evidence:envelope()}),false);
  assert.equal(await verify({...params,evidence:envelope({issuer:'forged'})}),false);

@@ -4,6 +4,7 @@ on:
     paths:
       - '.github/workflows/420bet-poker-ws8-security-level2.yml'
       - 'contracts/test/BetPokerIntegratedAdversarial54.t.sol'
+      - 'scripts/bet/verify-ws8-integrated-security.py'
       - 'clients/420bet-poker/zkshuffle/**'
       - 'contracts/src/bet/**'
   workflow_dispatch:
@@ -100,13 +101,25 @@ jobs:
           if-no-files-found: error
   integrated-adversarial-attacks:
     runs-on: ubuntu-latest
+    timeout-minutes: 55
+    env:
+      FOUNDRY_PROFILE: pr
+      FOUNDRY_VIA_IR: 'true'
     steps:
       - uses: actions/checkout@v4
-      - name: Require funded-to-settlement real verifier suite
-        run: |
-          set -eu
-          test -s contracts/test/BetPokerIntegratedAdversarial54.t.sol
-          python3 scripts/bet/verify-ws8-integrated-security.py
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Enforce real verifier test-owner coverage
+        run: python3 scripts/bet/verify-ws8-integrated-security.py
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Run mandatory real admission through terminal atomic settlement and attacks
+        working-directory: contracts
+        env:
+          FOUNDRY_SRC: src/bet
+          FOUNDRY_TEST: test
+        run: forge test --match-path 'test/BetPokerIntegratedAdversarial54.t.sol' -vv
   security-evidence-certificate:
     needs: [inherited-proof-provenance,real-funded-hand-integration,integrated-adversarial-attacks]
     if: always()

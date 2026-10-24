@@ -78,3 +78,16 @@ test('player cannot buy on forged level or unverified session',async()=>{
  await assert.rejects(x.engine.unlock('alice-token','pay','archive-index'),/invalid verified player level/);
  await assert.rejects(x.engine.unlock('guest','pay','archive-index'),/unregistered/);
 });
+
+test('revoked session epoch is checked again inside progression atomic write',async()=>{
+ const x=setup();
+ x.engine.identity.verifyToken=()=>({sub:'alice',epoch:0});
+ x.store.state.runtimeEpochs=new Map([['alice',1]]);
+ await assert.rejects(x.engine.snapshot('alice-token'),/progression account authority revoked/);
+ await assert.rejects(x.engine.progress('alice-token','stale','archive-index','stale-proof',1),
+  /progression account authority revoked/);
+ assert.equal(x.store.state.skillResearch.size,0);
+ x.engine.identity.verifyToken=()=>({sub:'alice',epoch:1});
+ await x.engine.progress('alice-token','current','archive-index','valid-proof',1);
+ assert.equal(x.store.state.skillResearch.size,1);
+});

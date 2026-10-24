@@ -3,6 +3,7 @@ import {HighCountryMarket} from './market.js';
 import {GameplayRewardRuntime,RuntimeAuthority} from './runtime-integration.js';
 import {composeSettlementRuntime} from './settlement-runtime.js';
 import {FinalizedRpc,address} from './finalized-rpc.js';
+import {CanonicalHttpIndexer} from './canonical-http-indexer.js';
 import {PostgresBudsStore} from './postgres-store.js';
 import {SettlementError} from './buds-ledger.js';
 
@@ -13,13 +14,14 @@ async function requireLeastPrivilegeRuntimeRole(pool,namespace) {
 }
 
 /// Composition uses one provisioned durable namespace and independently configured canonical RPC/signer/issuer policy.
-export async function createRuntime({pool,namespace,authority:authConfig,rpc:rpcConfig,sources,marketDomain,operator,issuer,signerRpc,clock}){
+export async function createRuntime({pool,namespace,authority:authConfig,rpc:rpcConfig,sources,marketDomain,operator,issuer,signerRpc,indexer:indexerConfig,clock}){
  await requireLeastPrivilegeRuntimeRole(pool,namespace);
  const store=new PostgresBudsStore(pool,namespace),rpc=new FinalizedRpc(rpcConfig);
  for(const [name,policy] of Object.entries(sources))if(address(rpc.contracts[name]?.address)!==address(policy.contract))throw new SettlementError('source contract mismatch');
  const identity=new RuntimeAuthority({...authConfig,store,rpc,sourcePolicies:sources,clock});
  const rewards=new GameplayRewardRuntime({store,authority:identity,rpc,sources,clock});
- const chain=composeSettlementRuntime({store,identity,rpc,operator,issuer,marketDomain,signerRpc,clock});
+ const indexer=indexerConfig?new CanonicalHttpIndexer({...indexerConfig,chainId:rpc.chainId,escrow:rpc.contracts.escrow.address}):undefined;
+ const chain=composeSettlementRuntime({store,identity,rpc,operator,issuer,marketDomain,signerRpc,indexer,clock});
  const marketAuthority={
   canonicalSettlementRequired:true,
   registeredPrincipal:t=>identity.registeredPrincipal(t),

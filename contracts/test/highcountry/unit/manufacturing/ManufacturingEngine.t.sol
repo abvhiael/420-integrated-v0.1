@@ -49,6 +49,21 @@ contract R043Actor {
     ) external {
         engine.cancel(id);
     }
+
+    function startRequest(
+        ManufacturingEngine engine,
+        bytes32 recipeId,
+        bytes32 requestId
+    ) external returns (bytes32) {
+        return engine.startWithRequest(recipeId, requestId);
+    }
+
+    function finishRetry(
+        ManufacturingEngine engine,
+        bytes32 id
+    ) external {
+        engine.completeIdempotent(id);
+    }
 }
 
 contract ManufacturingEngineR043Test {
@@ -152,5 +167,48 @@ contract ManufacturingEngineR043Test {
         require(ledger.balance(RAW, address(alice)).reserved == 10, "reserved inputs lost");
         inventory.setIssuer(address(engine), true);
         alice.complete(engine, id);
+    }
+
+    function testRetrySafeStartAndCompleteSurviveReplayedRequests() public {
+        bytes32 requestId = keccak256("client-request-1");
+        bytes32 id = alice.startRequest(engine, RECIPE, requestId);
+        require(alice.startRequest(engine, RECIPE, requestId) == id, "duplicate start produced new job");
+        require(engine.nonceOf(address(alice)) == 1, "duplicate start advanced nonce");
+        require(engine.activeJobs(address(alice)) == 1, "duplicate start used queue");
+        require(ledger.balance(RAW, address(alice)).reserved == 10, "duplicate reserve");
+        (bool crossRecipe,) = address(alice)
+            .call(abi.encodeCall(alice.startRequest, (engine, bytes32(uint256(99)), requestId)));
+        require(!crossRecipe, "request reused across recipes");
+        vm.warp(block.timestamp + 100);
+        alice.finishRetry(engine, id);
+        alice.finishRetry(engine, id);
+        require(ledger.balance(RAW, address(alice)).consumed == 10, "replay double consumed");
+        require(ledger.balance(FINISHED, address(alice)).available == 3, "replay double issued");
+        require(engine.activeJobs(address(alice)) == 0, "completion did not release queue");
+        require(alice.startRequest(engine, RECIPE, requestId) == id, "terminal retry started new job");
+        require(engine.nonceOf(address(alice)) == 1, "terminal replay changed nonce");
+        (bool wrongOwner,) = address(bob).call(abi.encodeCall(bob.finishRetry, (engine, id)));
+        require(!wrongOwner, "foreign client replay allowed");
+    }
+
+    function testFailedOutputIssuanceRecoveryWithRequestIdentity() public {
+        bytes32 requestId = keccak256("client-request-recovery");
+        bytes32 id = alice.startRequest(engine, RECIPE, requestId);
+        inventory.setIssuer(address(engine), false);
+        vm.warp(block.timestamp + 100);
+        (bool rejected,) = address(alice).call(abi.encodeCall(alice.finishRetry, (engine, id)));
+        require(!rejected, "failed downstream issuance accepted");
+        require(engine.job(id).status == ManufacturingEngine.Status.ACTIVE, "failed job went terminal");
+        require(engine.activeJobs(address(alice)) == 1, "failed settlement freed queue");
+        require(ledger.balance(RAW, address(alice)).reserved == 10, "failed settle lost reservation");
+        require(ledger.balance(RAW, address(alice)).consumed == 0, "failed settle consumed inputs");
+        require(ledger.balance(FINISHED, address(alice)).available == 0, "failed settle issued outputs");
+        require(alice.startRequest(engine, RECIPE, requestId) == id, "recovery lost request identity");
+        inventory.setIssuer(address(engine), true);
+        alice.finishRetry(engine, id);
+        alice.finishRetry(engine, id);
+        require(ledger.balance(RAW, address(alice)).consumed == 10, "recovery input nonconservation");
+        require(ledger.balance(FINISHED, address(alice)).available == 3, "recovery duplicate output");
+        require(engine.activeJobs(address(alice)) == 0, "recovery queue leak");
     }
 }

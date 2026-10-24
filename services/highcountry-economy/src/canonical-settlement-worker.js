@@ -49,7 +49,18 @@ export class CanonicalSettlementWorker {
    // Never automatically submit twice once txHash has been durably recorded.
    // A post-broadcast/pre-record crash relies on deterministic on-chain replay protection.
    if(claim.job.txHash){await release();return {status:'awaiting-finality',txHash:claim.job.txHash};}
+   // A prior broadcast may have succeeded before its hash reached PostgreSQL.
+   // An indeterminate dispatch must be reconciled on-chain, never rebroadcast.
+   if(claim.job.dispatchStarted){await release();return {status:'reconcile-dispatch'};}
    if(typeof this.authority.requireSubmissionAllowed==='function')await this.authority.requireSubmissionAllowed(claim.intent);
+   // Commit the write-ahead dispatch marker BEFORE calling a non-transactional RPC.
+   // Recovery is fail-closed if a process dies after broadcasting but before hash persistence.
+   await this.store.transact(s=>{
+    const t=s.transferIntents.get(transferOp),job=s.settlementJobs.get(transferOp);
+    if(!t||t.status!=='prepared'||!job||job.leaseUntil!==now+this.leaseMs||job.dispatchStarted)
+     throw new SettlementError('lost canonical dispatch lease');
+    job.dispatchStarted=true;
+   });
    const submission=await this.submitCanonical({...claim.intent});
    if(!submission||!valid(submission.txHash))throw new SettlementError('invalid chain submission');
    await release(submission.txHash);

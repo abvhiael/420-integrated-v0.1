@@ -28,7 +28,22 @@ export class CanonicalRpcEscrowClient {
    if(l.removed||address(l.address)!==address(target)||BigInt(l.blockNumber)>BigInt(h.number)
       ||l.topics?.[0]!==keccak256(Buffer.from(signatures[eventName])))throw new SettlementError('noncanonical event');
    const block=await this.rpc.request('eth_getBlockByNumber',[l.blockNumber,false]);
-   if(!block||block.hash!==l.blockHash)throw new SettlementError('event reorg');
+   if(!block||block.hash?.toLowerCase()!==l.blockHash?.toLowerCase())throw new SettlementError('event reorg');
+   // Independently authenticate the successful finalized transaction and exact emitted log.
+   if(!/^0x[0-9a-f]{64}$/i.test(l.transactionHash)||!/^0x[0-9a-f]+$/i.test(l.logIndex))
+    throw new SettlementError('invalid transaction receipt locator');
+   const receipt=await this.rpc.request('eth_getTransactionReceipt',[l.transactionHash]);
+   if(!receipt||receipt.status!=='0x1'||address(receipt.to)!==address(target)
+      ||receipt.blockHash?.toLowerCase()!==l.blockHash.toLowerCase()
+      ||BigInt(receipt.blockNumber)!==BigInt(l.blockNumber)
+      ||!Array.isArray(receipt.logs))throw new SettlementError('unauthenticated finalized receipt');
+   const matching=receipt.logs.filter(x=>x.logIndex===l.logIndex
+      &&x.transactionHash?.toLowerCase()===l.transactionHash.toLowerCase()
+      &&x.blockHash?.toLowerCase()===l.blockHash.toLowerCase()
+      &&address(x.address)===address(target)
+      &&x.data?.toLowerCase()===l.data?.toLowerCase()
+      &&JSON.stringify(x.topics?.map(t=>t.toLowerCase()))===JSON.stringify(l.topics?.map(t=>t.toLowerCase())));
+   if(matching.length!==1)throw new SettlementError('receipt log mismatch');
    const ev={listingId:l.topics[1]};
    if(eventName==='EscrowSettled'){ev.operationId=l.topics[2];ev.buyer=address('0x'+l.topics[3].slice(-40));}
    if(eventName==='EscrowListed'){const w=words(l.data);ev.owner=address('0x'+l.topics[2].slice(-40));ev.asset=l.topics[3];ev.quantity=BigInt('0x'+w[0]);ev.expiresAt=BigInt('0x'+w[1]);}

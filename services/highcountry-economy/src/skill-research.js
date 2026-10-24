@@ -24,11 +24,11 @@ export function validateProgressionCatalog(c){
  return Object.freeze({version:c.version,tracks:Object.freeze(ordered)});
 }
 export class SkillResearchService {
- constructor({store,identity,catalog,verifyEvidence,clock=()=>Date.now()}){
+ constructor({store,identity,catalog,verifyEvidence,getPlayerLevel,clock=()=>Date.now()}){
   if(typeof store?.transact!=='function'||typeof identity?.registeredPrincipal!=='function'
-   ||typeof verifyEvidence!=='function'||typeof clock!=='function')
+   ||typeof verifyEvidence!=='function'||typeof getPlayerLevel!=='function'||typeof clock!=='function')
    throw new SettlementError('progression authority not configured');
-  this.catalog=validateProgressionCatalog(catalog);Object.assign(this,{store,identity,verifyEvidence,clock});
+  this.catalog=validateProgressionCatalog(catalog);Object.assign(this,{store,identity,verifyEvidence,getPlayerLevel,clock});
   this.ledger=new BudsLedger(store,null);
  }
  _state(s){if(!s.skillResearch)s.skillResearch=new Map();if(!s.skillResearchProofs)s.skillResearchProofs=new Set();}
@@ -73,8 +73,7 @@ export class SkillResearchService {
    throw new SettlementError('invalid skill unlock request');
   const track=this.catalog.tracks.find(t=>t.id===trackId);
   if(!track)throw new SettlementError('unknown progression track');
-  if(typeof this.identity.playerLevel!=='function')throw new SettlementError('authoritative player level unavailable');
-  const playerLevel=await this.identity.playerLevel(session);
+  const playerLevel=await this.getPlayerLevel({principal,session});
   if(!integer(playerLevel,100))throw new SettlementError('invalid verified player level');
   return this.ledger.operate(operation,s=>{
    this._state(s);

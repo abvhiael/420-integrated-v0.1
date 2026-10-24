@@ -15,12 +15,15 @@ export class HighCountryMarketplaceView {
     .map(([key,b])=>({asset:JSON.parse(key)[1],available:b.available,reserved:b.reserved}))
     .sort((a,b)=>a.asset.localeCompare(b.asset)).slice(0,200);
    const canonical=this.market.authority?.canonicalSettlementRequired===true;
+   const pendingByListing=new Map([...s.transferIntents.values()].filter(t=>t.status==='prepared')
+    .map(t=>[t.listingId,t]));
    const listings=[...s.listings].filter(([,l])=>l&&
-    (canonical?true:!l.canonicalOnly)).map(([listing,l])=>({
-    listing,seller:l.seller,asset:l.asset,quantity:l.quantity,price:l.price,
+    (canonical?true:!l.canonicalOnly)).map(([listing,l])=>{
+    const pending=canonical?pendingByListing.get(listing):null;
+    return {listing,seller:l.seller,asset:l.asset,quantity:l.quantity,price:l.price,
     expiresAt:l.expiresAt,status:l.status==='active'&&now>=l.expiresAt?'expired-pending-release':l.status,
-    buyer:l.buyer??null,kind:canonical?'canonical':'ordinary'
-   }));
+    buyer:l.buyer??pending?.buyer??null,kind:canonical?'canonical':'ordinary'};
+   });
    const browse=listings.filter(l=>l.status==='active'&&l.seller!==principal).slice(-100);
    const history=listings.filter(l=>l.seller===principal||l.buyer===principal).slice(-100).reverse();
    const disputes=[...(s.marketDisputes??new Map())].filter(([,d])=>d.principal===principal)

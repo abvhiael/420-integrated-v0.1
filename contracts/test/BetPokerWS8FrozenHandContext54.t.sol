@@ -16,6 +16,7 @@ contract BetPokerWS8FrozenHandContext54Test is PokerConfidentialDeal54Test {
     address internal constant RISK_VAULT = address(0xB00D);
     bytes32 internal constant PREVIOUS_STATE = keccak256("WS8.PREVIOUS.STATE.V1");
 
+    event WS8ProviderBonds(address indexed bondVault,uint256 perProvider,uint256 totalCollateral,uint256 playerEscrow);
     event WS8SeatSigningKeys(address indexed player0,address indexed player1,address signer0,address signer1,uint64 epoch0,uint64 epoch1);
     event WS8FrozenHand(
         bytes32 indexed handId,bytes32 indexed tableId,bytes32 configHash,
@@ -73,6 +74,24 @@ contract BetPokerWS8FrozenHandContext54Test is PokerConfidentialDeal54Test {
         require(ledger.reservedInHand(TABLE)==800 && ledger.lockedTotal(TABLE)==800
             &&ledger.activeHand(TABLE)==handId, "actual 800-chip escrow not locked");
         require(coin.balanceOf(address(ledger))==800, "escrow conservation failed");
+        // Real collateral custody, pre-funded and locked by the export-pass
+        // coordinator. The production NLHE engine replaces this temporary
+        // coordinator for the final proof-admission fixture in pass two.
+        PokerProviderAccountability420 bonds=
+            new PokerProviderAccountability420(address(deal),address(this),RISK_VAULT);
+        coin.mint(PROVIDER_A,800);
+        coin.mint(PROVIDER_B,800);
+        cheat54.prank(PROVIDER_A);coin.approve(address(bonds),800);
+        cheat54.prank(PROVIDER_B);coin.approve(address(bonds),800);
+        cheat54.prank(PROVIDER_A);bonds.fundAsset(address(coin),800);
+        cheat54.prank(PROVIDER_B);bonds.fundAsset(address(coin),800);
+        require(bonds.available(address(coin),PROVIDER_A)==800
+            &&bonds.available(address(coin),PROVIDER_B)==800,"provider deposits missing");
+        bonds.lock(handId);
+        require(bonds.isCollateralized(handId),"both provider bonds must lock");
+        require(coin.balanceOf(address(bonds))==1600,"provider collateral is not funded");
+        require(coin.balanceOf(address(ledger))==800,"collateral mixed into player escrow");
+        emit WS8ProviderBonds(address(bonds),800,1600,800);
         emit WS8FrozenHand(handId,TABLE,h.configHash,h.rulesetId,h.versionId,
             h.seatSnapshotHash,locked,h.transcriptCommitment,h.epoch,h.nonce,h.deadline,
             block.chainid,address(deal),address(ledger),800,400,400,

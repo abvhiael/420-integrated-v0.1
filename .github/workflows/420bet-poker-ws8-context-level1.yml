@@ -1,0 +1,60 @@
+name: 420Bet WS8 Frozen Funded Hand Context Level 1
+on:
+  pull_request:
+    paths:
+      - 'contracts/test/BetPokerWS8FrozenHandContext54.t.sol'
+      - '.github/workflows/420bet-poker-ws8-context-level1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  frozen-funded-hand:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      FOUNDRY_PROFILE: pr
+      FOUNDRY_VIA_IR: 'true'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Exact candidate SHA
+        run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Build scoped WS8 context test closure
+        working-directory: contracts
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          root=Path('test')
+          seen=set()
+          def visit(filename):
+              if filename in seen:return
+              p=root/filename
+              if not p.is_file():raise SystemExit('missing dependency '+filename)
+              seen.add(filename)
+              for imported in re.findall(r'import\s+["\'](\./[^"\']+)["\']\s*;',p.read_text()):
+                  visit(Path(imported).name)
+          visit('BetPokerWS8FrozenHandContext54.t.sol')
+          output=root/'ws8-context'
+          output.mkdir(parents=True,exist_ok=True)
+          for filename in sorted(seen):
+              (output/filename).write_text((root/filename).read_text().replace('../src/','../../src/'))
+          print('Prepared files:',sorted(seen))
+          PY
+      - name: Qualify contract-derived frozen hand/escrow context
+        working-directory: contracts
+        env:
+          FOUNDRY_SRC: src/bet
+          FOUNDRY_TEST: test/ws8-context
+        run: |
+          forge test --match-contract '^BetPokerWS8FrozenHandContext54Test$' -vvv | tee ws8-context-level1.log
+          grep 'WS8FrozenHand' ws8-context-level1.log || true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: 420bet-ws8-step1-frozen-context
+          path: contracts/ws8-context-level1.log
+          if-no-files-found: error

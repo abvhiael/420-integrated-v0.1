@@ -61,6 +61,46 @@ contract PokerNativeOutcome54Test is PokerLiveCardReveals54Test {
         cheat54.prank(ADMIN);engine.bindOutcome(TABLE,address(result));
         require(dispute.resolverForTable(TABLE)==address(engine),"funded resolver prebound");
     }
+    function testFullProvenShowdownReconstructsCanonicalPayoutAndSealsTranscript() public {
+        bytes32 id=_fundedAndProved();
+        PokerCanonicalRake420.Policy memory policy=PokerCanonicalRake420.Policy(500,20,true,true);
+        _signedAction(id,0,PokerNLHEBetting420.Move.CALL,10,PLAYER_KEY);
+        _signedAction(id,1,PokerNLHEBetting420.Move.CHECK,0,OPPONENT_KEY);
+        for(uint8 pos=5;pos<=7;pos++){
+            _submitPublicStreet(id,1,pos,0);_submitPublicStreet(id,1,pos,1);
+            _openPublicStreet(id,1,pos,pos);
+        }
+        live.advance(id,1);
+        _signedAction(id,1,PokerNLHEBetting420.Move.CHECK,0,OPPONENT_KEY);
+        _signedAction(id,0,PokerNLHEBetting420.Move.CHECK,0,PLAYER_KEY);
+        _submitPublicStreet(id,2,9,0);_submitPublicStreet(id,2,9,1);
+        _openPublicStreet(id,2,9,13);
+        live.advance(id,2);
+        _signedAction(id,1,PokerNLHEBetting420.Move.CHECK,0,OPPONENT_KEY);
+        _signedAction(id,0,PokerNLHEBetting420.Move.CHECK,0,PLAYER_KEY);
+        _submitPublicStreet(id,3,11,0);_submitPublicStreet(id,3,11,1);
+        _openPublicStreet(id,3,11,14);
+        live.advance(id,3);
+        _signedAction(id,1,PokerNLHEBetting420.Move.CHECK,0,OPPONENT_KEY);
+        _signedAction(id,0,PokerNLHEBetting420.Move.CHECK,0,PLAYER_KEY);
+        cheat54.expectRevert(PokerNativeOutcome420.InvalidState.selector);
+        result.calculate(id,policy);
+        for(uint8 pos=0;pos<4;pos++){
+            _submitPublicStreet(id,4,pos,0);_submitPublicStreet(id,4,pos,1);
+            _openPublicStreet(id,4,pos,20+pos);
+        }
+        require(live.isStageComplete(id,4),"authenticated showdown completion");
+        (uint256[9] memory balances,uint256 fee)=result.calculate(id,policy);
+        require(balances[0]+balances[1]+fee==800,"canonical chip conservation");
+        require(engine.terminalTranscript(id)==bytes32(0),"transcript unsealed before settlement");
+        cheat54.prank(OTHER);engine.settle(id,policy);
+        require(engine.terminalTranscript(id)!=bytes32(0),"immutable terminal transcript sealed");
+        require(ledger.seatOf(TABLE,0).chips==balances[0]&&
+            ledger.seatOf(TABLE,1).chips==balances[1],"ledger only accepts recomputed winner");
+        require(ledger.handConsumed(id)&&engine.handSettled(id),"single atomic terminal result");
+        cheat54.expectRevert(PokerNLHEBetting420.InvalidState.selector);
+        engine.settle(id,policy);
+    }
     function testOnChainUncontestedOutcomeSettlesExactEscrowOnce() public {
         bytes32 id=_fundedAndProved();
         PokerCanonicalRake420.Policy memory policy=PokerCanonicalRake420.Policy(500,20,true,true);

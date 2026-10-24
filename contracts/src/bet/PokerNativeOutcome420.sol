@@ -54,9 +54,11 @@ contract PokerNativeOutcome420 {
     }
     function _ranks(bytes32 handId,PokerNLHEBetting420.Game memory g)
         private view returns(uint256[9] memory scores){
-        if(!reveals.isStageComplete(handId,1)||!reveals.isStageComplete(handId,2)||
-           !reveals.isStageComplete(handId,3)||!reveals.isStageComplete(handId,4))
-            revert InvalidState();
+        // Historical streets are no longer the CURRENT pending street at
+        // showdown. Validate their immutable, proof-verified open slots rather
+        // than reusing the live admission predicate (which fails closed once
+        // that street has advanced). The showdown stage itself must be complete.
+        if(!reveals.isStageComplete(handId,4))revert InvalidState();
         uint8 n = 0;
         for(uint8 i=0;i<9;i++)if(_active(g.seatsMask,i))n++;
         uint8 start=2*n;
@@ -66,6 +68,13 @@ contract PokerNativeOutcome420 {
         board[2]=reveals.slotOf(handId,start+3).card;
         board[3]=reveals.slotOf(handId,start+5).card;
         board[4]=reveals.slotOf(handId,start+7).card;
+        // All five physical board positions must have been authenticated.
+        // Merely supplying a card index does not demonstrate its reveal proof.
+        if(!reveals.slotOf(handId,start+1).opened||
+           !reveals.slotOf(handId,start+2).opened||
+           !reveals.slotOf(handId,start+3).opened||
+           !reveals.slotOf(handId,start+5).opened||
+           !reveals.slotOf(handId,start+7).opened)revert InvalidState();
         for(uint8 seat=0;seat<9;seat++){
             if(!_active(g.seatsMask,seat)||engine.playerOf(handId,seat).folded)continue;
             (uint8 c1,uint8 c2)=_holeCards(handId,g,seat);

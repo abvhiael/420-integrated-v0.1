@@ -135,6 +135,9 @@ contract EquipmentLifecycleEngine is R04EmergencyConsumer {
                 || (proposed.operatingResource == bytes32(0)) != (proposed.operatingCost == 0)
         ) revert HCInvalidState();
         if (equipment.equipmentType(typeId).catalogueVersion != proposed.version) revert HCInvalidState();
+        if (proposed.version == keccak256("HC.EQUIPMENT.CATALOGUE.V1") && proposed.operatingCost == 0) {
+            revert HCInvalidState();
+        }
         _policies[typeId] = proposed;
         emit PolicyRegistered(typeId, proposed.version);
     }

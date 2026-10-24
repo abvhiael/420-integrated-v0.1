@@ -58,6 +58,35 @@ contract BetPokerIntegratedAdversarial54Test {
         require(!ok, "unauthorized registration accepted");
     }
 
+
+    /// @dev A second registration cannot substitute a different verifier/VK
+    /// for an already registered circuit version.
+    function testRegisteredVerifierVersionCannotBeOverwritten() public {
+        bytes32 id = keccak256("WS8.IMMUTABLE.VK.VERSION");
+        bytes32 vk = keccak256("WS8.ORIGINAL.VK");
+        bytes32 circuit = keccak256("WS8.ORIGINAL.CIRCUIT");
+        bytes32 schema = keccak256("WS8.ORIGINAL.SCHEMA");
+        versions.register(id, address(this), vk, circuit, schema);
+        (bool ok,) = address(versions).call(abi.encodeCall(
+            PokerVerifierVersions420.register,
+            (id, address(this), keccak256("ATTACKER.VK"), circuit, schema)
+        ));
+        require(!ok, "verifier version overwritten");
+        require(versions.matches(id,address(this),vk,circuit,schema),
+            "previous verified identity changed");
+    }
+
+    /// @dev Invalid/undeployed verifiers cannot become trusted identities.
+    function testUncontractedVerifierCannotBeRegistered() public {
+        bytes32 id = keccak256("WS8.NONCONTRACT.VERIFIER");
+        (bool ok,) = address(versions).call(abi.encodeCall(
+            PokerVerifierVersions420.register,
+            (id, address(0x123456), keccak256("VK"),keccak256("CIRCUIT"),keccak256("SCHEMA"))
+        ));
+        require(!ok, "uncontracted verifier registered");
+        require(!versions.get(id).exists, "bad verifier persisted");
+    }
+
     /// @dev Required full-hand legitimate control is deliberately absent:
     /// no success or security milestone may be inferred from the registry tests.
     /// TODO (blocking): implement testLegitimateFundedHandSettlement using

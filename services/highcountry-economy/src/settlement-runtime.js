@@ -101,7 +101,7 @@ export function composeSettlementRuntime({store,identity,rpc,operator,issuer,mar
   requireSubmissionAllowed:async()=>{if(!await rpc.unrestricted(marketDomain))throw new SettlementError('market restricted');}
  };
  const settlement=new CanonicalMarketSettlement(store,authority,clock);
- const submitCanonical=async intent=>{
+ const preflightSubmission=async intent=>{
   await authority.requireSubmissionAllowed();
   // Re-read durable reservation immediately before asking the external operator wallet to sign.
   const current=await store.transact(s=>s.transferIntents.get(intent.transferOp));
@@ -120,8 +120,17 @@ export function composeSettlementRuntime({store,identity,rpc,operator,issuer,mar
   const actual=words((await rpc.call('escrow',calldata('marketOperator()'))).result)[0];
   if(address('0x'+actual.slice(24))!==address(operator))throw new SettlementError('wrong signer authority');
   if(Number(BigInt(await signerRpc.request('eth_chainId',[])))!==rpc.chainId)throw new SettlementError('signer wrong chain');
-  const txHash=await signerRpc.request('eth_sendTransaction',[{from:address(operator),to:address(rpc.contracts.escrow.address),
-   data:calldata('settle(bytes32,address)',intent.sourceReceiptId,buyer),value:'0x0',chainId:'0x'+rpc.chainId.toString(16)}]);
+  return {from:address(operator),to:address(rpc.contracts.escrow.address),
+   data:calldata('settle(bytes32,address)',intent.sourceReceiptId,buyer),
+   value:'0x0',chainId:'0x'+rpc.chainId.toString(16)};
+ };
+ authority.preflightSubmission=preflightSubmission;
+ const submitCanonical=async(_intent,txRequest)=>{
+  if(!txRequest||txRequest.from!==address(operator)
+    ||txRequest.to!==address(rpc.contracts.escrow.address))
+   throw new SettlementError('missing reviewed canonical preflight');
+  // The next external call may broadcast even if its response is lost.
+  const txHash=await signerRpc.request('eth_sendTransaction',[txRequest]);
   if(!/^0x[0-9a-f]{64}$/i.test(txHash))throw new SettlementError('invalid submission hash');
   return {txHash};
  };

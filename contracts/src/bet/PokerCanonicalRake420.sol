@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
 import "./PokerTableRegistry420.sol";
+import "./PokerPotMath420.sol";
 
 /// @notice Stateless canonical NLHE cash-game rake-policy verification.
 /// @dev Only policies whose hash matches a registered table configuration are valid.
@@ -29,10 +30,7 @@ contract PokerCanonicalRake420 {
         bool flopSeen,bool uncontested) external view returns(uint256 value) {
         if(!verify(tableId,p))revert InvalidPolicy();
         if((!flopSeen&&p.noFlopNoDrop)||(uncontested&&p.noRakeOnUncontested))return 0;
-        // Reduce arithmetic overflow by quotient-first calculation.
-        uint256 quotient=grossPot/10000;
-        uint256 remainder=grossPot%10000;
-        value=quotient*p.rakeBps+(remainder*p.rakeBps)/10000;
+        value=PokerPotMath420.portion(grossPot,p.rakeBps,10000);
         if(value>p.cap)value=p.cap;
     }
 }

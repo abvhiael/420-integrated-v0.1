@@ -4,6 +4,7 @@ pragma solidity ^0.8.24;
 import "./PokerLiveCardReveals420.sol";
 import "./PokerCanonicalRake420.sol";
 import "./PokerHandRank420.sol";
+import "./PokerPotMath420.sol";
 
 /// @notice Deterministic on-chain NLHE outcome calculation from native state and
 /// proven live-card openings. Never accepts operator-supplied winners or chip totals.
@@ -146,43 +147,6 @@ contract PokerNativeOutcome420 {
     function _awardPots(uint256[9] memory deposits,bool[9] memory folded,
         uint256[9] memory scores,uint8 button,uint256 rake,uint256 gross,
         uint256[9] memory finalChips)internal pure {
-        uint256 previous = 0;
-        uint256 remainingRake=rake;
-        for(uint8 stage=0;stage<9;stage++){
-            uint256 tier=type(uint256).max;
-            uint8 supporters = 0;
-            for(uint8 i=0;i<9;i++)if(deposits[i]>previous&&deposits[i]<tier)
-                tier=deposits[i];
-            if(tier==type(uint256).max)break;
-            for(uint8 i=0;i<9;i++)if(deposits[i]>=tier)supporters++;
-            uint256 pot=(tier-previous)*supporters;
-            uint256 cut = 0;
-            bool last=true;
-            for(uint8 i=0;i<9;i++)if(deposits[i]>tier)last=false;
-            if(last)cut=remainingRake;
-            else {
-                if(gross==0||rake>type(uint256).max/pot)revert InvalidPot();
-                cut=(rake*pot)/gross;
-            }
-            if(cut>pot||cut>remainingRake)revert InvalidPot();
-            remainingRake-=cut;
-            uint256 best=0;uint16 winners=0;uint8 count=0;
-            for(uint8 i=0;i<9;i++)if(deposits[i]>=tier&&!folded[i]){
-                if(winners==0||scores[i]>best){best=scores[i];winners=uint16(1)<<i;count=1;}
-                else if(scores[i]==best){winners|=uint16(1)<<i;count++;}
-            }
-            if(count==0)revert InvalidPot();
-            uint256 each=(pot-cut)/count;
-            uint256 odd=(pot-cut)%count;
-            for(uint8 j=1;j<=9;j++){
-                uint8 seat=uint8((uint256(button)+j)%9);
-                if((winners&(uint16(1)<<seat))!=0){
-                    finalChips[seat]+=each;
-                    if(odd!=0){finalChips[seat]++;odd--;}
-                }
-            }
-            previous=tier;
-        }
-        if(remainingRake!=0)revert InvalidPot();
+        PokerPotMath420.award(deposits,folded,scores,button,rake,gross,finalChips);
     }
 }

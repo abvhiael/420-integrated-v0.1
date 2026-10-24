@@ -82,6 +82,23 @@ def main():
     for owner in OWNERS:
         if owner not in owners:
             raise SystemExit('affected inherited native owner was not executed: ' + owner)
+    evaluation_names = [
+        'NineTierRakeRemainderCannotDeadlockSettlement',
+        'SparseSeatsSplitEachPotAndAssignOddChipsClockwise',
+        'NineDifferentAllInLevelsSelectOnlyCoveredWinners',
+        'InvalidGrossButtonFeeAndWinnerRejected',
+        'FullWidthPotAndExactRakeDoNotOverflow',
+        'TwoTripsThreePairsAndBoardOnlyBestFive',
+        'EveryHandCategoryHasCanonicalOrdering',
+        'FuzzProportionalChargeBounds',
+        'IndependentSevenCardVectorsAgainstNativeEvaluator',
+        'IndependentTwoThroughNineSeatPotVectors',
+        'IndependentFullWidthIntegerDivisionVectors']
+    evaluation = owners.get('PokerEvaluation56Test', {})
+    if set(evaluation) != {'test'+name for name in evaluation_names}:
+        raise SystemExit('mandatory 5A.6 native execution missing or unexpected')
+    if evaluation['testFuzzProportionalChargeBounds'].get('kind', {}).get('Fuzz', {}).get('runs', 0) < 2500:
+        raise SystemExit('2500 actual 5A.6 fuzz executions required')
     tap = directory / 'node.tap'
     text = tap.read_text(encoding='utf-8-sig')
     passes = re.findall(r'^# pass (\d+)\s*$', text, re.M)
@@ -103,7 +120,7 @@ def main():
                                 stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode != 0
     report = dict(level=1, qualifiedSHA=None if dirty else sha,
                   sourceCommit=sha, trackedWorkingTreeDirty=dirty,
-                  mandatoryTests=mandatory, nativeOwners={o: len(t) for o,t in owners.items()},
+                  mandatoryTests=mandatory, evaluation5A6Tests={name: 'Success' for name in evaluation}, nativeOwners={o: len(t) for o,t in owners.items()},
                   totalPassed=sum(map(len, owners.values())), independentTestsPassed=int(passes[0]),
                   executionSHA256={p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in files+[tap]})
     output.write_text(json.dumps(report, indent=2)+'\n', encoding='utf-8')

@@ -18,7 +18,7 @@ export function canonicalRake({grossPot,flopSeen,bps,cap,noFlopNoDrop=true}){
  [grossPot,bps,cap].forEach(chips);
  if(bps>10000)throw Error('bps');
  if(!flopSeen&&noFlopNoDrop)return 0;
- return Math.min(cap,Math.floor(grossPot*bps/10000));
+ return Math.min(cap,Number(BigInt(grossPot)*BigInt(bps)/10000n));
 }
 export function settleWithRake({contributions,folded,ranks,button,flopSeen,
  rakeBps,rakeCap,noFlopNoDrop=true}){
@@ -26,15 +26,20 @@ export function settleWithRake({contributions,folded,ranks,button,flopSeen,
  const original=contributions.reduce((a,b)=>a+chips(b),0);
  const pot=net.reduce((a,b)=>a+b,0);
  const rake=canonicalRake({grossPot:pot,flopSeen,bps:rakeBps,cap:rakeCap,noFlopNoDrop});
+ if(!Number.isInteger(button)||button<0||button>=net.length||
+    folded.some(x=>typeof x!=='boolean')||!Array.isArray(ranks)||ranks.length!==net.length)
+  throw Error('invalid seats');
+ chips(original);chips(pot);
  // Rake is removed from contestable pots *proportionally by their tier value*,
- // with deterministic assignment of integer remainder to earliest tiers.
+ // with cumulative integer rounding, carrying fractions to later tiers.
  const tiers=[...new Set(net.filter(x=>x>0))].sort((a,b)=>a-b);
- const pots=[];let prev=0,leftRake=rake,remainingPot=pot;
+ const pots=[];let prev=0,charged=0,cumulative=0;
  for(let i=0;i<tiers.length;i++){
   const x=tiers[i],participants=net.map((v,j)=>v>=x?j:-1).filter(j=>j>=0);
   const gross=(x-prev)*participants.length;
-  const cut=i===tiers.length-1?leftRake:Math.floor(rake*gross/pot);
-  leftRake-=cut;remainingPot-=gross;
+  cumulative+=gross;
+  const nextCharge=Number(BigInt(rake)*BigInt(cumulative)/BigInt(pot));
+  const cut=nextCharge-charged;charged=nextCharge;
   if(cut>gross)throw Error('rake allocation');
   const eligible=participants.filter(j=>!folded[j]);
   if(!eligible.length)throw Error('no pot winner');

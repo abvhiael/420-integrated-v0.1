@@ -1,4 +1,4 @@
-name: 420Bet Poker 5A.5 and WS8 Security Milestone Level 2
+name: 420Bet Poker 5A.5, 5A.6 and WS8 Security Milestone Level 2
 on:
   pull_request:
     paths:
@@ -6,6 +6,8 @@ on:
       - 'contracts/test/BetPokerIntegratedAdversarial54.t.sol'
       - 'contracts/test/BetPokerWS8*.sol'
       - 'contracts/test/BetPokerBettingRounds55.t.sol'
+      - 'contracts/test/BetPokerEvaluation56.t.sol'
+      - 'contracts/test/PokerEvaluationVectors56.sol'
       - 'contracts/test/BetPokerNLHEBetting54.t.sol'
       - 'contracts/test/BetPokerNativeOutcome54.t.sol'
       - 'clients/420bet-poker/crypto/nlhe-*.mjs'
@@ -77,6 +79,7 @@ jobs:
       - name: Prepare actual new and affected native owners
         run: |
           python3 scripts/bet/package-ws8-evidence.py --verify
+          node scripts/bet/generate-poker-5a6-vectors.mjs --check
           python3 scripts/bet/prepare-poker-5a5-owner.py
           mkdir -p artifacts/poker-5a5
       - name: Execute independent betting, turn timing and replay models
@@ -87,6 +90,7 @@ jobs:
         working-directory: contracts
         run: |
           set -euo pipefail
+          forge test --use 0.8.30 --match-contract PokerEvaluation56Test --json > ../artifacts/poker-5a5/foundry-56.json
           forge test --use 0.8.30 --match-contract 'PokerBetting(Kernel|Rounds)55Test' --json > ../artifacts/poker-5a5/foundry-55.json
           forge test --use 0.8.30 --match-contract PokerBettingRounds55Test --match-test test55ProductionConstructorFitsSixteenMillionGasBudget -vvvv | tee ../artifacts/poker-5a5/constructor.log
       - name: Fresh execution of changed engine native regressions

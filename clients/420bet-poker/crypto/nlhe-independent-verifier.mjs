@@ -112,10 +112,12 @@ export function verifyBettingTranscript({stacks,button,smallBlind,bigBlind,actio
 export function verifyShowdownSettlement({contributions,folded,holeCards,board,button=0,rake=0}) {
   const n=contributions.length;
   requireTrue(n>=2&&n<=9&&holeCards.length===n&&folded.length===n,'seats');
-  requireTrue(board.length===5&&new Set(board).size===5,'authenticated board');
+  requireTrue(board.length===5&&board.every(x=>Number.isInteger(x)&&x>=0&&x<52)&&new Set(board).size===5,'authenticated board');
+  requireTrue(Number.isInteger(button)&&button>=0&&button<n&&folded.every(x=>typeof x==='boolean'),'seat identity');
+  requireTrue(folded.filter(x=>!x).length>=2,'showdown survivors');
   requireTrue(contributions.every(x=>Number.isSafeInteger(x)&&x>=0)&&Number.isSafeInteger(rake)&&rake>=0,'pot/rake');
   const gross=contributions.reduce((a,b)=>a+b,0);
-  requireTrue(rake<=gross,'excess rake');
+  requireTrue(Number.isSafeInteger(gross)&&rake<=gross,'excess rake');
   const payouts=Array(n).fill(0);
   const contribution=[...contributions];
   // Return only the unmatched portion of a unique maximum contributor,
@@ -126,20 +128,24 @@ export function verifyShowdownSettlement({contributions,folded,holeCards,board,b
   if(top.length===1){refund=max-(order[1]??0);payouts[contribution.indexOf(max)]+=refund;contribution[contribution.indexOf(max)]-=refund;}
   const remainingGross=gross-refund;
   requireTrue(rake<=remainingGross,'rake above contested pot');
+  const opened=new Set(board);
   const score=holeCards.map((cards,i)=>{
     if(folded[i])return null;
     requireTrue(Array.isArray(cards)&&cards.length===2&&new Set([...cards,...board]).size===7,'invalid or duplicate opened card');
+    requireTrue(cards.every(x=>!opened.has(x)),'duplicate across opened seats');
+    for(const card of cards)opened.add(card);
     return rank7([...cards,...board]);
   });
   const tiers=[...new Set(contribution.filter(x=>x>0))].sort((a,b)=>a-b);
-  let lower=0,remainingRake=rake;
+  let lower=0,remainingRake=rake,cumulative=0;
   for(let k=0;k<tiers.length;k++){
     const tier=tiers[k];
     const eligible=contribution.map((v,i)=>v>=tier&&!folded[i]?i:-1).filter(x=>x>=0);
     requireTrue(eligible.length>0,'no eligible survivor');
     const amount=(tier-lower)*contribution.filter(x=>x>=tier).length;
-    const last=k===tiers.length-1;
-    const cut=last?remainingRake:Math.floor(rake*amount/remainingGross);
+    cumulative+=amount;
+    const charged=Number(BigInt(rake)*BigInt(cumulative)/BigInt(remainingGross));
+    const cut=charged-(rake-remainingRake);
     requireTrue(cut<=amount&&cut<=remainingRake,'bad rake tier');
     remainingRake-=cut;
     let winners=[],best=null;

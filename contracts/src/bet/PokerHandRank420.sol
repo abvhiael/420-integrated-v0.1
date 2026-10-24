@@ -8,7 +8,7 @@ contract PokerHandRank420 {
     error InvalidCard();
 
     function rank7(uint8[7] memory cards) public pure returns(uint256 best) {
-        uint256 seen;
+        uint256 seen=0;
         for(uint8 i=0;i<7;i++){
             if(cards[i]>=52||(seen&(uint256(1)<<cards[i]))!=0)revert InvalidCard();
             seen|=uint256(1)<<cards[i];
@@ -24,7 +24,7 @@ contract PokerHandRank420 {
         }
     }
     function rank5(uint8[5] memory cards) external pure returns(uint256){
-        uint256 seen;
+        uint256 seen=0;
         for(uint8 i=0;i<5;i++){
             if(cards[i]>=52||(seen&(uint256(1)<<cards[i]))!=0)revert InvalidCard();
             seen|=uint256(1)<<cards[i];
@@ -32,11 +32,11 @@ contract PokerHandRank420 {
         return _rank5(cards);
     }
     function _rank5(uint8[5] memory cards) private pure returns(uint256){
-        uint8[15] memory cnt;
-        uint8[4] memory suits;
+        uint8[15] memory cnt=[uint8(0),0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+        uint8[4] memory suits=[uint8(0),0,0,0];
         for(uint8 i=0;i<5;i++){cnt[(cards[i]%13)+2]++;suits[cards[i]/13]++;}
         bool flush=suits[0]==5||suits[1]==5||suits[2]==5||suits[3]==5;
-        uint8 straight;
+        uint8 straight=0;
         for(uint8 high=14;high>=5;high--){
             bool all=true;
             for(uint8 j=0;j<5;j++){
@@ -46,12 +46,12 @@ contract PokerHandRank420 {
             }
             if(all){straight=high;break;}
         }
-        uint8 four;
-        uint8 trip;
-        uint8 hiPair;
-        uint8 lowPair;
-        uint8[5] memory kickers;
-        uint8 cursor;
+        uint8 four=0;
+        uint8 trip=0;
+        uint8 hiPair=0;
+        uint8 lowPair=0;
+        uint8[5] memory kickers=[uint8(0),0,0,0,0];
+        uint8 cursor=0;
         for(uint8 rank=14;rank>=2;rank--){
             if(cnt[rank]==4)four=rank;
             else if(cnt[rank]==3)trip=rank;
@@ -60,8 +60,8 @@ contract PokerHandRank420 {
             }
             for(uint8 j=0;j<cnt[rank];j++)kickers[cursor++]=rank;
         }
-        uint8[5] memory ordered;
-        uint8 category;
+        uint8[5] memory ordered=[uint8(0),0,0,0,0];
+        uint8 category=0;
         if(flush&&straight!=0){category=8;ordered[0]=straight;}
         else if(four!=0){
             category=7;ordered[0]=four;

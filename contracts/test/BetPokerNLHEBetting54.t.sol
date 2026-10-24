@@ -503,6 +503,32 @@ contract PokerNLHEBetting54Case8Test is PokerNLHEBetting54Fixture {
 }
 
 contract PokerNLHEBetting54Case9Test is PokerNLHEBetting54Fixture {
+    function testDisputedPreplayWithholdingConsumesBoundedAppealAndCannotFreezeRefundedEscrow() public {
+        bytes32 id=_readyFrozenAssignmentWithoutDelivery();
+        cap.grant(ADMIN,dispute.ACTION_START_CLOCK(),auth.scopeForTable(TABLE),true);
+        cheat54.prank(ADMIN);
+        dispute.start(id,0,1,uint64(block.timestamp+60),keccak256("documented state"));
+        cheat54.prank(PLAYER);dispute.dispute(id,keccak256("withheld recipient proof"));
+        require(dispute.isFrozen(id),"genuine seated dispute registered");
+        cheat54.warp(uint256(engine.fundedEvidenceDeadline(id))+1);
+        uint256 reviewEnd=uint256(dispute.disputedAt(id))+1 hours+2 days;
+        if(block.timestamp<reviewEnd){
+            cheat54.expectRevert(PokerActionDisputeClock420.Premature.selector);
+            engine.cancelWithheldDelivery(id);
+            cheat54.warp(reviewEnd);
+        }
+        engine.cancelWithheldDelivery(id);
+        require(dispute.voidFinalized(id)&&!dispute.isFrozen(id),
+            "bounded dispute terminates atomically with objective refund");
+        require(engine.handAborted(id)&&ledger.handConsumed(id),
+            "no stale frozen hand and one native finality");
+        require(ledger.seatOf(TABLE,0).chips==400&&ledger.seatOf(TABLE,1).chips==400,
+            "exact original player snapshots, never adjudicator payout");
+        cheat54.expectRevert(PokerActionDisputeClock420.InvalidState.selector);
+        cheat54.prank(PLAYER);dispute.dispute(id,keccak256("post-refund replay"));
+        cheat54.expectRevert(PokerNLHEBetting420.InvalidState.selector);
+        engine.cancelWithheldDelivery(id);
+    }
     function _withholdOneProvider(uint8 delinquent) internal returns(bytes32 id) {
         id=_readyFrozenAssignmentWithoutDelivery();
         _proveRecipientKeys();

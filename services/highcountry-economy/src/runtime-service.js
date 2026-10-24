@@ -6,11 +6,15 @@ import {FinalizedRpc,address} from './finalized-rpc.js';
 import {PostgresBudsStore} from './postgres-store.js';
 import {SettlementError} from './buds-ledger.js';
 
-/// Composition uses one provisioned durable namespace and independently configured canonical RPC/signer/issuer policy.
-export async function createRuntime({pool,namespace,authority:authConfig,rpc:rpcConfig,sources,marketDomain,operator,issuer,signerRpc,clock}){
+async function requireLeastPrivilegeRuntimeRole(pool,namespace) {
  const check=await pool.query("SELECT current_user AS role, r.rolsuper, r.rolbypassrls, c.relrowsecurity, pg_get_userbyid(c.relowner) AS owner, has_table_privilege(current_user,'highcountry_buds_state','SELECT') AS can_select, has_table_privilege(current_user,'highcountry_buds_state','UPDATE') AS can_update, has_table_privilege(current_user,'highcountry_buds_state','INSERT,DELETE,TRUNCATE,REFERENCES,TRIGGER') AS elevated FROM pg_roles r JOIN pg_class c ON c.oid='highcountry_buds_state'::regclass WHERE r.rolname=current_user");
  const role=check.rows[0];
  if(!role||role.role!==namespace||role.rolsuper||role.rolbypassrls||!role.relrowsecurity||role.owner===role.role||!role.can_select||!role.can_update||role.elevated)throw new SettlementError('unsafe runtime database role');
+}
+
+/// Composition uses one provisioned durable namespace and independently configured canonical RPC/signer/issuer policy.
+export async function createRuntime({pool,namespace,authority:authConfig,rpc:rpcConfig,sources,marketDomain,operator,issuer,signerRpc,clock}){
+ await requireLeastPrivilegeRuntimeRole(pool,namespace);
  const store=new PostgresBudsStore(pool,namespace),rpc=new FinalizedRpc(rpcConfig);
  for(const [name,policy] of Object.entries(sources))if(address(rpc.contracts[name]?.address)!==address(policy.contract))throw new SettlementError('source contract mismatch');
  const identity=new RuntimeAuthority({...authConfig,store,rpc,sourcePolicies:sources,clock});
@@ -30,6 +34,22 @@ export async function createRuntime({pool,namespace,authority:authConfig,rpc:rpc
   }
  };
  return {store,identity,rewards,market:new HighCountryMarket(store,marketAuthority,clock),...chain};
+}
+// Production entrypoint for a wallet-optional, registered-player ordinary economy.
+// Never silently repurpose the canonical on-chain escrow settlement runtime.
+export async function createOrdinaryRuntime({pool,namespace,authority:authConfig,rpc:rpcConfig,sources,inventoryAuthority,clock}) {
+ await requireLeastPrivilegeRuntimeRole(pool,namespace);
+ if(!inventoryAuthority||typeof inventoryAuthority.verifyAssetReceipt!=='function'
+    ||typeof inventoryAuthority.requireMarketOpen!=='function')
+  throw new SettlementError('ordinary inventory admission authority missing');
+ const store=new PostgresBudsStore(pool,namespace),rpc=new FinalizedRpc(rpcConfig);
+ if(!sources||typeof sources!=='object')throw new SettlementError('approved reward sources required');
+ for(const [name,policy] of Object.entries(sources))
+  if(address(rpc.contracts[name]?.address)!==address(policy.contract))
+   throw new SettlementError('source contract mismatch');
+ const identity=new RuntimeAuthority({...authConfig,store,rpc,sourcePolicies:sources,clock});
+ const rewards=new GameplayRewardRuntime({store,authority:identity,rpc,sources,clock});
+ return composeOrdinaryMarketRuntime({store,identity,rewards,inventoryAuthority,clock});
 }
 // Separate ordinary market composition. The canonical runtime above remains chain-settlement-only.
 export function composeOrdinaryMarketRuntime({store,identity,rewards,inventoryAuthority,clock}) {

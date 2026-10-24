@@ -1,0 +1,34 @@
+name: High Country HC-NEXT-4.3 Deployed Canonical Acceptance
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: highcountry-hc-next-4-3-deployed-acceptance
+  cancel-in-progress: false
+
+jobs:
+  deployed-canonical-acceptance:
+    name: Real testnet escrow and indexer acceptance
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    environment: highcountry-testnet
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: services/highcountry-economy/package-lock.json
+      - name: Install pinned economy service dependencies
+        run: npm ci --prefix services/highcountry-economy
+      - name: Require authorized deployed-chain acceptance secrets
+        env:
+          HC_DEPLOYED_CANONICAL_ACCEPTANCE: ${{ secrets.HC_DEPLOYED_CANONICAL_ACCEPTANCE }}
+          HC_DEPLOYED_INDEXER_TOKEN: ${{ secrets.HC_DEPLOYED_INDEXER_TOKEN }}
+        run: |
+          test -n "$HC_DEPLOYED_CANONICAL_ACCEPTANCE" || { echo 'No approved deployed-chain acceptance manifest. Gate remains OPEN.'; exit 1; }
+          node services/highcountry-economy/test/deployed-canonical-acceptance.mjs

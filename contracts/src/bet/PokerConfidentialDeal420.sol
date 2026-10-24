@@ -144,7 +144,7 @@ contract PokerConfidentialDeal420 {
         for (uint8 i=0; i<maxSeats; ++i) {
             if ((mask & (uint16(1)<<i)) != 0) {
                 PokerSeatLedger420.Seat memory s=ledger.seatOf(id,i);
-                if (s.player==address(0) || s.sittingOut || s.chips==0) revert InvalidInput();
+                if (!ledger.eligibleForNextHand(id,i)) revert InvalidInput();
                 if (s.player==providerA || s.player==providerB) revert InvalidInput();
                 ++occupied;
             }

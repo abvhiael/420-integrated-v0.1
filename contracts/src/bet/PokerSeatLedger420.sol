@@ -12,7 +12,8 @@ interface IPokerToken420 {
 
 /// @notice Cash-game seating and actual escrowed-chip ledger. Does not authorize hands.
 /// @dev Separate from LP bankroll. Every chip has a corresponding ERC20 asset held here.
-///      Unsettled hand balances cannot be withdrawn; no hand engine is authorized in 5A.3.
+///      Unsettled hand balances cannot be withdrawn. Next-hand lifecycle intent
+///      cannot mutate a funded snapshot or authorize the current hand's actions.
 contract PokerSeatLedger420 {
     struct Seat { address player; uint256 chips; bool sittingOut; uint64 epoch; }
     PokerTableRegistry420 public immutable tables;
@@ -32,6 +33,14 @@ contract PokerSeatLedger420 {
     mapping(bytes32=>bytes32) public lockedSnapshot;
     mapping(bytes32=>uint256) public lockedTotal;
     mapping(bytes32=>bool) public handConsumed;
+    // Next-hand policy is separate from the immutable funded-seat snapshot.
+    struct PlayerLifecycle { uint64 nonce; bool disconnected; bool sitOutNextHand; bool leaveRequested; }
+    mapping(bytes32=>mapping(uint8=>PlayerLifecycle)) private lifecycle;
+    enum LifecycleReason { DISCONNECT, RECONNECT, SIT_OUT, RETURN, REQUEST_LEAVE, CANCEL_LEAVE, TIMEOUT }
+    error StaleLifecycle(); error InvalidLifecycle();
+    event PlayerLifecycleUpdated(bytes32 indexed tableId,uint8 indexed seat,address indexed player,
+        uint64 seatEpoch,uint64 nonce,bytes32 handId,LifecycleReason reason,
+        bool disconnected,bool sitOutNextHand,bool leaveRequested);
 
     error ZeroAddress(); error Unauthorized(); error NotOpen(); error InvalidSeat();
     error Occupied(); error AlreadySeated(); error NotSeated(); error InvalidAmount();
@@ -62,6 +71,88 @@ contract PokerSeatLedger420 {
     }
 
     function seatOf(bytes32 id, uint8 seat) external view returns (Seat memory) { return seats[id][seat]; }
+    function lifecycleOf(bytes32 id,uint8 seat) external view returns(PlayerLifecycle memory){return lifecycle[id][seat];}
+    function eligibleForNextHand(bytes32 id,uint8 seat) public view returns(bool){
+        Seat storage s=seats[id][seat];PlayerLifecycle storage p=lifecycle[id][seat];
+        return s.player!=address(0)&&s.chips!=0&&!s.sittingOut&&
+            !p.disconnected&&!p.sitOutNextHand&&!p.leaveRequested;
+    }
+
+    /// @notice Owner-reported connectivity, never a transport/operator claim.
+    /// Reconnecting does not renew a turn, recover encryption secrets or sit in.
+    function setDisconnected(bytes32 id,bool value,uint64 epoch,uint64 nonce) external nonReentrant {
+        uint8 seat=_currentOwner(id,epoch,nonce);
+        _authorize(id,BetIds420.ACTION_POKER_SIT_OUT,0);
+        PlayerLifecycle storage p=lifecycle[id][seat];
+        if(p.disconnected==value)revert InvalidLifecycle();
+        p.disconnected=value;if(value)p.sitOutNextHand=true;
+        _lifecycleChanged(id,seat,value?LifecycleReason.DISCONNECT:LifecycleReason.RECONNECT);
+    }
+    /// @notice Change only next-hand eligibility while escrow is locked.
+    function requestSitOut(bytes32 id,bool value,uint64 epoch,uint64 nonce) external nonReentrant {
+        uint8 seat=_currentOwner(id,epoch,nonce);
+        _authorize(id,BetIds420.ACTION_POKER_SIT_OUT,0);
+        PlayerLifecycle storage p=lifecycle[id][seat];
+        if(p.sitOutNextHand==value||(!value&&(p.disconnected||p.leaveRequested)))revert InvalidLifecycle();
+        p.sitOutNextHand=value;
+        _lifecycleChanged(id,seat,value?LifecycleReason.SIT_OUT:LifecycleReason.RETURN);
+    }
+    function requestLeave(bytes32 id,uint64 epoch,uint64 nonce) external nonReentrant {
+        uint8 seat=_currentOwner(id,epoch,nonce);
+        _authorize(id,BetIds420.ACTION_POKER_LEAVE,0);
+        PlayerLifecycle storage p=lifecycle[id][seat];
+        if(p.leaveRequested)revert InvalidLifecycle();
+        p.leaveRequested=true;p.sitOutNextHand=true;
+        _lifecycleChanged(id,seat,LifecycleReason.REQUEST_LEAVE);
+    }
+    function cancelLeave(bytes32 id,uint64 epoch,uint64 nonce) external nonReentrant {
+        uint8 seat=_currentOwner(id,epoch,nonce);
+        _authorize(id,BetIds420.ACTION_POKER_LEAVE,0);
+        PlayerLifecycle storage p=lifecycle[id][seat];
+        if(!p.leaveRequested)revert InvalidLifecycle();
+        p.leaveRequested=false;
+        _lifecycleChanged(id,seat,LifecycleReason.CANCEL_LEAVE);
+    }
+    /// @notice Anyone may deliver an already-requested exit, only to its owner.
+    /// Live leave/withdraw capabilities are checked against the actual payout.
+    function completeLeave(bytes32 id,address player,uint64 epoch,uint64 nonce) external nonReentrant {
+        PokerTableRegistry420.Table memory t=_table(id);
+        uint8 plusOne=playerSeatPlusOne[id][player];if(plusOne==0)revert NotSeated();
+        uint8 seat=plusOne-1;
+        if(seats[id][seat].epoch!=epoch||lifecycle[id][seat].nonce!=nonce)revert StaleLifecycle();
+        if(!lifecycle[id][seat].leaveRequested)revert InvalidLifecycle();
+        if(reservedInHand[id]!=0)revert Locked();
+        _leave(id,seat,player,t.config.asset);
+    }
+    /// @dev Only the bound hand engine can record an actually executed timeout.
+    function markTimedOut(bytes32 id,bytes32 handId,uint8 seat) external nonReentrant {
+        _checkLockedCaller(id,handId);
+        if(seat>=9||(lockedMask[id]&(uint16(1)<<seat))==0)revert InvalidSeat();
+        if(!lifecycle[id][seat].sitOutNextHand){
+            lifecycle[id][seat].sitOutNextHand=true;
+            _lifecycleChanged(id,seat,LifecycleReason.TIMEOUT);
+        }
+    }
+    function _currentOwner(bytes32 id,uint64 epoch,uint64 nonce) private view returns(uint8 seat){
+        _table(id);
+        uint8 plusOne=playerSeatPlusOne[id][msg.sender];if(plusOne==0)revert NotSeated();
+        seat=plusOne-1;
+        if(seats[id][seat].epoch!=epoch||lifecycle[id][seat].nonce!=nonce)revert StaleLifecycle();
+    }
+    function _lifecycleChanged(bytes32 id,uint8 seat,LifecycleReason reason) private {
+        PlayerLifecycle storage p=lifecycle[id][seat];Seat storage s=seats[id][seat];
+        ++p.nonce;
+        if(activeHand[id]==bytes32(0))_applyEligibility(id,seat);
+        emit PlayerLifecycleUpdated(id,seat,s.player,s.epoch,p.nonce,activeHand[id],reason,
+            p.disconnected,p.sitOutNextHand,p.leaveRequested);
+    }
+    function _applyEligibility(bytes32 id,uint8 seat) private {
+        PlayerLifecycle storage p=lifecycle[id][seat];Seat storage s=seats[id][seat];
+        bool out=p.disconnected||p.sitOutNextHand||p.leaveRequested;
+        if(s.player!=address(0)&&s.sittingOut!=out){
+            s.sittingOut=out;++seatingEpoch[id];emit SitOut(id,seat,out);
+        }
+    }
 
     /// @notice Governance-authorized, immutable table-local settlement consumer binding.
     /// @dev A table cannot change executors or rake destination after binding.
@@ -96,7 +187,7 @@ contract PokerSeatLedger420 {
         for(uint8 i=0;i<t.config.seats;i++){
             if((mask&(uint16(1)<<i))==0)continue;
             Seat memory s=seats[id][i];
-            if(s.player==address(0)||s.sittingOut||s.chips==0)revert SettlementInvalid();
+            if(!eligibleForNextHand(id,i))revert SettlementInvalid();
             sum+=s.chips;count++;
             snapshot=keccak256(abi.encode(snapshot,i,s.player,s.chips,s.sittingOut,s.epoch));
         }
@@ -165,6 +256,7 @@ contract PokerSeatLedger420 {
         handConsumed[handId]=true;activeHand[id]=bytes32(0);
         reservedInHand[id]=0;lockedMask[id]=0;lockedEpoch[id]=0;
         lockedSnapshot[id]=bytes32(0);lockedTotal[id]=0;
+        for(uint8 i;i<9;i++)_applyEligibility(id,i);
     }
 
     function buyIn(bytes32 id, uint8 seat, uint256 amount) external nonReentrant {
@@ -204,8 +296,10 @@ contract PokerSeatLedger420 {
         if (plusOne == 0) revert NotSeated();
         if (reservedInHand[id] != 0) revert Locked();
         _authorize(id, BetIds420.ACTION_POKER_SIT_OUT, 0);
-        seats[id][plusOne - 1].sittingOut = value;
-        emit SitOut(id, plusOne - 1, value);
+        PlayerLifecycle storage p=lifecycle[id][plusOne-1];
+        if(!value&&(p.disconnected||p.leaveRequested))revert InvalidLifecycle();
+        p.sitOutNextHand=value;
+        _lifecycleChanged(id,plusOne-1,value?LifecycleReason.SIT_OUT:LifecycleReason.RETURN);
     }
 
     /// @notice Safe cashout remains available when table is paused/closed.
@@ -214,15 +308,19 @@ contract PokerSeatLedger420 {
         uint8 plusOne = playerSeatPlusOne[id][msg.sender];
         if (plusOne == 0) revert NotSeated();
         if (reservedInHand[id] != 0) revert Locked();
-        Seat storage s = seats[id][plusOne - 1];
-        uint256 amount = s.chips;
-        _authorize(id, BetIds420.ACTION_POKER_LEAVE, 0);
-        _authorize(id, BetIds420.ACTION_POKER_WITHDRAW, amount);
-        delete seats[id][plusOne - 1];
-        delete playerSeatPlusOne[id][msg.sender];
+        _leave(id,plusOne-1,msg.sender,t.config.asset);
+    }
+    function _leave(bytes32 id,uint8 seat,address player,address asset) private {
+        uint256 amount=seats[id][seat].chips;
+        bytes32 scope=authorization.scopeForTable(id);
+        if(!authorization.isAuthorized(player,BetIds420.ACTION_POKER_LEAVE,scope,0)||
+           !authorization.isAuthorized(player,BetIds420.ACTION_POKER_WITHDRAW,scope,amount))revert Unauthorized();
+        delete seats[id][seat];delete lifecycle[id][seat];
+        delete playerSeatPlusOne[id][player];
+        ++seatingEpoch[id];
         totalChips[id] -= amount;
-        _withdraw(t.config.asset, msg.sender, amount);
-        emit Left(id, plusOne - 1, msg.sender, amount);
+        if(amount!=0)_withdraw(asset,player,amount);
+        emit Left(id,seat,player,amount);
     }
 
     function _table(bytes32 id) private view returns (PokerTableRegistry420.Table memory) {

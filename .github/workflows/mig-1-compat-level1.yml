@@ -1,0 +1,24 @@
+name: MIG-1 External Compatibility Level 1
+on:
+  pull_request:
+    paths:
+      - 'packages/420-gaming-sdk/src/external-compat.js'
+      - 'packages/420-gaming-sdk/test/external-compat.test.js'
+      - 'packages/420-gaming-sdk/src/index.js'
+      - 'packages/420-gaming-sdk/src/abi-bindings.js'
+      - 'packages/420-gaming-sdk/src/keccak.js'
+      - 'docs/migration/MIG-1-external-contract.json'
+      - 'docs/migration/MIGRATION-TESTNET-ROADMAP.md'
+      - 'scripts/migration/verify-mig-1-independent-consumer.mjs'
+      - '.github/workflows/mig-1-compat-level1.yml'
+jobs:
+  compatibility:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test packages/420-gaming-sdk/test/external-compat.test.js
+      - run: node -e "const fs=require('node:fs');const s=fs.readFileSync('packages/420-gaming-sdk/src/external-compat.js','utf8');if(/from\\s*['\"][^'\"]*(services|contracts|clients|genesis|\\.\\.\\/)/i.test(s))process.exit(1)"
+      - run: node scripts/migration/verify-mig-1-independent-consumer.mjs

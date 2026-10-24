@@ -16,9 +16,10 @@ for(let k=0;k<256;k++){
  c[0]=40;c[n-1]=40;
  const folded=c.map((_,i)=>i>=n||rnd(3)===0);folded[0]=folded[n-1]=false;
  const ratings=c.map(()=>1+rnd(4)),button=rnd(9);
- const paid=referenceAward({contributions:c,folded,ranks:ratings.map(x=>[x]),button});
+ const gross=c.reduce((a,b)=>a+b,0),rake=k%3===0?0:rnd(gross+1);
+ const paid=referenceAward({contributions:c,folded,ranks:ratings.map(x=>[x]),button,rake});
  pots+=c.map(byte).join('')+folded.map(x=>x?'01':'00').join('')+
-  ratings.map(byte).join('')+byte(button)+paid.map(x=>x.toString(16).padStart(4,'0')).join('');
+  ratings.map(byte).join('')+byte(button)+rake.toString(16).padStart(4,'0')+paid.map(x=>x.toString(16).padStart(4,'0')).join('');
 }
 let ratios='';
 const wide=()=>{let x=0n;for(let i=0;i<8;i++)x=(x<<32n)|BigInt(rnd(0x100000000));return x;};

@@ -106,17 +106,18 @@ contract PokerEvaluation56Test {
     }
     function testIndependentTwoThroughNineSeatPotVectors()public view {
         bytes memory vectors=PokerEvaluationVectors56.pots();
-        require(vectors.length==256*46,"complete independent pot corpus");
-        for(uint256 offset=0;offset<vectors.length;offset+=46){
+        require(vectors.length==256*48,"complete independent pot corpus");
+        for(uint256 offset=0;offset<vectors.length;offset+=48){
             uint256[9] memory c;bool[9] memory f;uint256[9] memory r;uint256 gross=0;
             for(uint8 i=0;i<9;i++){
                 c[i]=uint8(vectors[offset+i]);gross+=c[i];
                 f[i]=uint8(vectors[offset+9+i])!=0;
                 r[i]=uint8(vectors[offset+18+i]);
             }
-            uint256[9] memory paid=pot.award(c,f,r,uint8(vectors[offset+27]),0,gross);
+            uint256[9] memory paid=pot.award(c,f,r,uint8(vectors[offset+27]),
+                uint256(uint8(vectors[offset+28]))*256+uint8(vectors[offset+29]),gross);
             for(uint8 i=0;i<9;i++)require(paid[i]==
-                uint256(uint8(vectors[offset+28+2*i]))*256+uint8(vectors[offset+29+2*i]),
+                uint256(uint8(vectors[offset+30+2*i]))*256+uint8(vectors[offset+31+2*i]),
                 "independent native pot differential");
         }
     }

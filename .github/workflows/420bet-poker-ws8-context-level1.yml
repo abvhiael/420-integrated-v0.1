@@ -53,6 +53,7 @@ jobs:
         run: |
           set -euo pipefail
           forge test --match-contract '^BetPokerWS8FrozenHandContext54Test
+          grep -q 'WS8ProverHandScope' ws8-context-level1.log
           grep -q 'WS8FrozenHand' ws8-context-level1.log
           grep -q 'WS8ProviderBonds' ws8-context-level1.log
           grep -q 'WS8SeatSigningKeys' ws8-context-level1.log

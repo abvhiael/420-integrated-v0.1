@@ -85,7 +85,7 @@ def main():
     tap = directory / 'node.tap'
     text = tap.read_text(encoding='utf-8-sig')
     passes = re.findall(r'^# pass (\d+)\s*$', text, re.M)
-    if len(passes) != 1 or int(passes[0]) < 23 or re.search(r'^not ok\b|# (?:SKIP|TODO)\b', text, re.M | re.I):
+    if len(passes) != 1 or int(passes[0]) < 23 or re.search(r'^[ \t]*not ok\b|^[ \t]*(?:ok|not ok)\b[^\r\n]*#\s*(?:SKIP|TODO)\b', text, re.M | re.I):
         raise SystemExit('actual independent replay execution incomplete or failed/skipped')
     for field in ('fail', 'cancelled', 'skipped', 'todo'):
         if not re.search(r'^# '+field+r' 0\s*$', text, re.M):

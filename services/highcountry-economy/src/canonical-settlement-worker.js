@@ -55,6 +55,10 @@ export class CanonicalSettlementWorker {
    // An indeterminate dispatch must be reconciled on-chain, never rebroadcast.
    if(claim.job.dispatchStarted){await release();return {status:'reconcile-dispatch'};}
    if(typeof this.authority.requireSubmissionAllowed==='function')await this.authority.requireSubmissionAllowed(claim.intent);
+   // All deterministic authorization, signer and escrow preflight must finish before
+   // entering the uncertain-broadcast state; a rejection here remains retryable.
+   const txRequest=typeof this.authority.preflightSubmission==='function'
+    ?await this.authority.preflightSubmission({...claim.intent}):undefined;
    // Commit the write-ahead dispatch marker BEFORE calling a non-transactional RPC.
    // Recovery is fail-closed if a process dies after broadcasting but before hash persistence.
    await this.store.transact(s=>{
@@ -63,7 +67,7 @@ export class CanonicalSettlementWorker {
      throw new SettlementError('lost canonical dispatch lease');
     job.dispatchStarted=true;
    });
-   const submission=await this.submitCanonical({...claim.intent});
+   const submission=await this.submitCanonical({...claim.intent},txRequest);
    if(!submission||!valid(submission.txHash))throw new SettlementError('invalid chain submission');
    await release(submission.txHash);
    return {status:'submitted',txHash:submission.txHash};

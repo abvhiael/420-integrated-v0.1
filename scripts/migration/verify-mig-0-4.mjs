@@ -22,6 +22,10 @@ const evidence=JSON.parse(read("docs/migration/MIG-0.4-provenance-evidence.json"
 assert.equal(evidence.step,"MIG-0.4");
 assert.equal(evidence.qualifyingRun.conclusion,"success");
 for(const pr of evidence.pullRequests){assert.match(pr.headSha,/^[0-9a-f]{40}$/);assert(pr.changedPaths.length>0);}
-assert.equal(evidence.godot.projectFileFound,false);
+assert.equal(evidence.godot.projectFileFound,true);
+assert.equal(evidence.godot.sourceRepository,"abvhiael/MadBuds-Godot");
+assert.match(evidence.godot.gitTreeSha,/^[0-9a-f]{40}$/);
+assert.equal(evidence.godot.trackedPngs,150);
+assert.equal(evidence.godot.assetManifests,15);
 assert.equal(evidence.binaryAssets.sha256VerifiedAgainstBytes,0);
-assert.equal(evidence.finalStatus,"PARTIAL_NO_FULL_MIG_0_4_QUALIFICATION");
+assert.equal(evidence.finalStatus,"PARTIAL_PENDING_BINARY_SHA256_AND_RUNTIME_QUALIFICATION");

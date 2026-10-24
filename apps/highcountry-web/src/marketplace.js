@@ -97,7 +97,10 @@ export function mountMarketplace({document,main,runtime,authenticate,fetchImpl=f
      run(()=>client.buy({operation:operationId(),listing:item.listing}),
       'Purchase completed by the server. Refresh history to verify settlement.');
     });
-   }else row.append(el('p','Wallet-authorized canonical settlement is separate; browsing does not submit a chain transaction.'));
+   }else {
+    row.append(el('p','Canonical trades require independently verified wallet consent, a prepared escrow intent, operator execution and finalized chain/indexer reconciliation.'));
+    const link=el('a','Open optional canonical wallet and transaction controls');link.href='/account';row.append(link);
+   }
    browse.append(row);
   }
   const history=section('My listings and trade history');

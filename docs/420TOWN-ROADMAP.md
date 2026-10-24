@@ -388,3 +388,8 @@ The remaining live-environment phases have been transferred to the canonical tes
 
 Those phases require real deployment/environment evidence and must not be completed from repository CI, local fixtures or synthetic manifests.
 
+
+
+## TOWN-AUDIT-11 — Live testnet qualification
+
+Deferred until production-equivalent testnet infrastructure, deployed code hashes, authentic wallet sessions and end-to-end recovery evidence are available. This heading is an outstanding work definition, not a completion certificate.

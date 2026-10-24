@@ -1,6 +1,6 @@
 // R05.8 minimal generated-compatible ABI bindings. Selectors derived from exact
 // canonical Solidity signatures; the provider never accepts arbitrary method strings.
-import {keccak256} from '../../../services/highcountry-economy/src/keccak.js';
+import {keccak256} from './keccak.js';
 import {GamingTransportError420} from './transports.js';
 const fail=x=>{throw new GamingTransportError420(x)};
 const signatures=Object.freeze({

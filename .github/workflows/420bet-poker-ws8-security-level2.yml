@@ -70,6 +70,112 @@ jobs:
       - uses: foundry-rs/foundry-toolchain@v1
         with:
           version: stable
+      - name: Export true funded-hand proving scope and compare WS2 inherited fixture
+        working-directory: contracts
+        env:
+          FOUNDRY_SRC: src/bet
+          FOUNDRY_TEST: test/ws8-context
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          root=Path('test')
+          seen=set()
+          def walk(name):
+              if name in seen:return
+              p=root/name
+              if not p.is_file():raise SystemExit('missing dependency '+name)
+              seen.add(name)
+              for match in re.findall(r'import\s+["\'](\./[^"\']+)["\']\s*;',p.read_text()):
+                  walk(Path(match).name)
+          walk('BetPokerWS8FrozenHandContext54.t.sol')
+          out=root/'ws8-context';out.mkdir(parents=True,exist_ok=True)
+          for name in seen:
+              (out/name).write_text((root/name).read_text().replace('../src/','../../src/'))
+          PY
+          forge test --match-contract '^BetPokerWS8FrozenHandContext54Test
+        working-directory: contracts
+        env:
+          FOUNDRY_SRC: src/bet
+          FOUNDRY_TEST: test/ws8-real
+        run: |
+          set -eu
+          mkdir -p src/bet/generated test/ws8-real
+          python3 ../clients/420bet-poker/zkshuffle/make_ws3_full_onchain_book_test.py \
+            ../artifacts/420bet-ws3/EXPERIMENTAL-WS3FullDeliveryVerifier.sol \
+            ../artifacts/420bet-ws3/EXPERIMENTAL-WS3EightShareFixtures.json \
+            ../artifacts/420bet-ws3/EXPERIMENTAL-WS3FullRecipientPoPVerifier.sol \
+            ../artifacts/420bet-ws3/EXPERIMENTAL-WS3TwoRecipientPoPFixtures.json \
+            ../artifacts/420bet-ws3/EXPERIMENTAL-WS3FullAggregateVerifier.sol \
+            ../artifacts/420bet-ws3/EXPERIMENTAL-WS3AggregateFixture.json \
+            ../artifacts/420bet-ws2/EXPERIMENTAL-Reencrypt52AvailabilityFixture.json \
+            test/ws8-real/WS3FullActualDeliveryBook.t.sol
+          forge test --match-contract '^WS3FullActualDeliveryBookTest$' -vv
+      - name: Hash every inherited verifier and proof fixture
+        run: |
+          set -eu
+          mkdir -p artifacts/ws8-security
+          git rev-parse HEAD > artifacts/ws8-security/candidate-sha.txt
+          find artifacts/420bet-ws2 artifacts/420bet-ws3 -type f -print0 | sort -z | xargs -0 sha256sum > artifacts/ws8-security/input-sha256.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ws8-real-verifier-admission-provenance
+          path: artifacts/ws8-security/
+          if-no-files-found: error
+  integrated-adversarial-attacks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    env:
+      FOUNDRY_PROFILE: pr
+      FOUNDRY_VIA_IR: 'true'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Enforce real verifier test-owner coverage
+        run: python3 scripts/bet/verify-ws8-integrated-security.py
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Run mandatory real admission through terminal atomic settlement and attacks
+        working-directory: contracts
+        env:
+          FOUNDRY_SRC: src/bet
+          FOUNDRY_TEST: test
+        run: forge test --match-path 'test/BetPokerIntegratedAdversarial54.t.sol' -vv
+  security-evidence-certificate:
+    needs: [inherited-proof-provenance,real-funded-hand-integration,integrated-adversarial-attacks]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require every actual owner to pass (no documentation assertions)
+        env:
+          A: ${{ needs.inherited-proof-provenance.result }}
+          B: ${{ needs.real-funded-hand-integration.result }}
+          C: ${{ needs.integrated-adversarial-attacks.result }}
+        run: |
+          test "$A" = success
+          test "$B" = success
+          test "$C" = success
+  milestone-gate:
+    needs: [security-evidence-certificate]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fail closed on any incomplete security evidence
+        env:
+          ACCEPT: ${{ needs.security-evidence-certificate.result }}
+        run: test "$ACCEPT" = success
+ -vvvv | tee ws8-scope.log
+          python3 ../scripts/bet/inspect-ws8-proof-context.py ws8-scope.log ../artifacts/ws8-proof-context.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ws8-funded-hand-proof-scope
+          path: |
+            contracts/ws8-scope.log
+            artifacts/ws8-proof-context.json
+          if-no-files-found: error
       - name: Run real generated verifier and delivery admission control
         working-directory: contracts
         env:

@@ -20,7 +20,12 @@ import (
 // regenerating valid proof material. Relate every VK to its actual generated
 // Solidity verifier, and every proof's ABI bytes to its actual public witness.
 func TestWS8CommittedCryptographicEvidence(t *testing.T) {
-	root := filepath.Join("fixtures", "ws8")
+	verifyCommittedPokerBundle(t, filepath.Join("fixtures", "ws8"))
+}
+func TestPoker5A7WinnerCommittedCryptographicEvidence(t *testing.T) {
+	verifyCommittedPokerBundle(t, filepath.Join("fixtures", "ws8-winner"))
+}
+func verifyCommittedPokerBundle(t *testing.T, root string) {
 	type keyRecord struct {
 		Name           string `json:"name"`
 		RelationSHA256 string `json:"relationSHA256"`

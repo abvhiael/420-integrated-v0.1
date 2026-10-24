@@ -126,6 +126,9 @@ contract PokerSeatLedger420 {
             if((mask&(uint16(1)<<i))!=0) total+=finalChips[i];
             else if(finalChips[i]!=seats[id][i].chips)revert SettlementInvalid();
         }
+        // All nine canonical payout slots are meaningful: a smaller table
+        // cannot attach phantom amounts to seats outside its configuration.
+        for(uint8 i=t.config.seats;i<9;i++)if(finalChips[i]!=0)revert SettlementInvalid();
         if(total>lockedTotal[id] || lockedTotal[id]-total!=rake)
             revert SettlementInvalid();
         for(uint8 i=0;i<t.config.seats;i++){

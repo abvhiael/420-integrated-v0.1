@@ -110,6 +110,10 @@ contract PokerNLHEBetting420 is PokerNLHEStorage420 {
 
     function flopOpened(bytes32 id) external view returns(bool){return _layout().flopOpened[id];}
 
+    function settlementReceipt(bytes32 id)external view returns(SettlementReceipt memory){
+        return _layout().settlementReceipts[id];
+    }
+
     function handSettled(bytes32 id) external view returns(bool){return _layout().handSettled[id];}
 
     function handAborted(bytes32 id) external view returns(bool){return _layout().handAborted[id];}

@@ -99,7 +99,7 @@ contract BetPokerIntegratedFundedAdversarial54Test is PokerWS8ProductionFixture5
         if(v==0)return "0";uint256 x=v;uint256 len;while(x!=0){len++;x/=10;}
         bytes memory b=new bytes(len);while(v!=0){b[--len]=bytes1(uint8(48+v%10));v/=10;}return string(b);
     }
-    function _data(string memory name) internal returns(bytes memory){
+    function _data(string memory name) internal virtual returns(bytes memory){
         return ws8vm.readFileBinary(string.concat("../clients/420bet-poker/zkshuffle/fixtures/ws8/proofs/",name));
     }
     function _proof(string memory name) internal returns(bytes memory){return _data(string.concat(name,".abi"));}
@@ -186,7 +186,7 @@ contract BetPokerIntegratedFundedAdversarial54Test is PokerWS8ProductionFixture5
         cheat54.prank(provider==0?PROVIDER_A:PROVIDER_B);ws8Live.submitShare(id,street,pos,provider,points,proof);
         emit WS8VerifiedPublicStatement(name,proof);
     }
-    function _reveal(bytes32 id,uint8 street,uint8 pos) internal {
+    function _reveal(bytes32 id,uint8 street,uint8 pos) internal virtual {
         _partial(id,street,pos,0);_partial(id,street,pos,1);
         ws8Live.reveal(id,street,pos,pos,WS8VerifierData.keys(),_proof(string.concat("WS8Unmask",_n(street),_n(pos))));
         emit WS8VerifiedPublicStatement(string.concat("WS8Unmask",_n(street),_n(pos)),_proof(string.concat("WS8Unmask",_n(street),_n(pos))));

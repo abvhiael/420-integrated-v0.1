@@ -1,0 +1,166 @@
+[
+  {
+    "material": "reused-identical-public-witness",
+    "proof": "WS8Initial"
+  },
+  {
+    "material": "reused-identical-public-witness",
+    "proof": "WS8Shuffle1"
+  },
+  {
+    "material": "generated-context-specific",
+    "proof": "WS8Shuffle2"
+  },
+  {
+    "material": "reused-identical-public-witness",
+    "proof": "WS8Recipient0"
+  },
+  {
+    "material": "reused-identical-public-witness",
+    "proof": "WS8Recipient1"
+  },
+  {
+    "material": "reused-identical-public-witness",
+    "proof": "WS8Aggregate"
+  },
+  {
+    "material": "generated-context-specific",
+    "proof": "WS8Delivery00"
+  },
+  {
+    "material": "generated-context-specific",
+    "proof": "WS8Delivery01"
+  },
+  {
+    "material": "generated-context-specific",
+    "proof": "WS8Delivery10"
+  },
+  {
+    "material": "generated-context-specific",
+    "proof": "WS8Delivery11"
+  },
+  {
+    "material": "generated-context-specific",
+    "proof": "WS8Delivery20"
+  },
+  {
+    "material": "generated-context-specific",
+    "proof": "WS8Delivery21"
+  },
+  {
+    "material": "generated-context-specific",
+    "proof": "WS8Delivery30"
+  },
+  {
+    "material": "generated-context-specific",
+    "proof": "WS8Delivery31"
+  },
+  {
+    "material": "generated-context-specific",
+    "proof": "WS8Partial150"
+  },
+  {
+    "material": "generated-context-specific",
+    "proof": "WS8Partial151"
+  },
+  {
+    "material": "generated-context-specific",
+    "proof": "WS8Unmask15"
+  },
+  {
+    "material": "generated-context-specific",
+    "proof": "WS8Partial160"
+  },
+  {
+    "material": "generated-context-specific",
+    "proof": "WS8Partial161"
+  },
+  {
+    "material": "generated-context-specific",
+    "proof": "WS8Unmask16"
+  },
+  {
+    "material": "generated-context-specific",
+    "proof": "WS8Partial170"
+  },
+  {
+    "material": "generated-context-specific",
+    "proof": "WS8Partial171"
+  },
+  {
+    "material": "generated-context-specific",
+    "proof": "WS8Unmask17"
+  },
+  {
+    "material": "generated-context-specific",
+    "proof": "WS8Partial290"
+  },
+  {
+    "material": "generated-context-specific",
+    "proof": "WS8Partial291"
+  },
+  {
+    "material": "generated-context-specific",
+    "proof": "WS8Unmask29"
+  },
+  {
+    "material": "generated-context-specific",
+    "proof": "WS8Partial3110"
+  },
+  {
+    "material": "generated-context-specific",
+    "proof": "WS8Partial3111"
+  },
+  {
+    "material": "generated-context-specific",
+    "proof": "WS8Unmask311"
+  },
+  {
+    "material": "generated-context-specific",
+    "proof": "WS8Partial400"
+  },
+  {
+    "material": "generated-context-specific",
+    "proof": "WS8Partial401"
+  },
+  {
+    "material": "generated-context-specific",
+    "proof": "WS8Unmask40"
+  },
+  {
+    "material": "generated-context-specific",
+    "proof": "WS8Partial410"
+  },
+  {
+    "material": "generated-context-specific",
+    "proof": "WS8Partial411"
+  },
+  {
+    "material": "generated-context-specific",
+    "proof": "WS8Unmask41"
+  },
+  {
+    "material": "generated-context-specific",
+    "proof": "WS8Partial420"
+  },
+  {
+    "material": "generated-context-specific",
+    "proof": "WS8Partial421"
+  },
+  {
+    "material": "generated-context-specific",
+    "proof": "WS8Unmask42"
+  },
+  {
+    "material": "generated-context-specific",
+    "proof": "WS8Partial430"
+  },
+  {
+    "material": "generated-context-specific",
+    "proof": "WS8Partial431"
+  },
+  {
+    "material": "generated-context-specific",
+    "proof": "WS8Unmask43"
+  }
+]

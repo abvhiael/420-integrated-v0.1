@@ -32,9 +32,9 @@ if kind == "foundry":
     if not all_tests or any(r["status"] != "Success" for r in all_tests.values()):
         raise SystemExit("an inherited or mandatory scoped test failed/skipped")
     report.update(mandatoryTests={n: actual[n]["status"] for n in REQUIRED}, totalPassed=len(all_tests))
-elif kind == "go":
+elif kind in {"go", "go57"}:
     events = [json.loads(line) for line in Path(source).read_text(encoding="utf-8").splitlines() if line.strip()]
-    target = "TestWS8CommittedCryptographicEvidence"
+    target = "TestWS8CommittedCryptographicEvidence" if kind == "go" else "TestPoker5A7WinnerCommittedCryptographicEvidence"
     relevant = [e for e in events if e.get("Test") == target]
     if not any(e["Action"] == "pass" for e in relevant) or any(e["Action"] in {"fail", "skip"} for e in events):
         raise SystemExit("actual cryptographic owner did not pass")

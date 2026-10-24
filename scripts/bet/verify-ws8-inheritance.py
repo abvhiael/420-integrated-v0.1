@@ -19,6 +19,7 @@ paths = [p for p in paths if not p.endswith(("/go.mod", "/go.sum"))]
 # NOT inherited: the Level 2 workflow requires fresh execution and an exact-SHA
 # report from all affected native owners plus both independent replay models.
 fresh = {
+    'contracts/src/bet/PokerSeatLedger420.sol',
     'contracts/src/bet/PokerHandRank420.sol',
     'contracts/src/bet/PokerCanonicalRake420.sol',
     'clients/420bet-poker/crypto/nlhe-economics.mjs',

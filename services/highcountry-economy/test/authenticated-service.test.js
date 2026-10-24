@@ -9,10 +9,12 @@ test('derive owner from authenticated session, reject guest and unauthorized iss
  const authority={
   async registeredPrincipal(session){if(session==='alice-session')return 'alice';throw Error('guest');},
   async requireTrustedIssuer(session){if(session!=='trusted-issuer')throw Error('issuer denied');},
+  async requireRegisteredRecipient(owner){if(owner!=='alice')throw Error('unregistered reward recipient');},
   async requireMarketOperator(session){if(session!=='market-service')throw Error('market denied');}
  };
  const api=new AuthenticatedEconomyService(ledger,authority);
  await assert.rejects(api.earn('alice-session','bad','alice','mission','proof',50));
+ await assert.rejects(api.earn('trusted-issuer','other','intruder','mission','fake',50),/unregistered/);
  await api.earn('trusted-issuer','good','alice','mission','proof',50);
  await assert.rejects(api.reserve('guest','guest-op',10));
  await api.reserve('alice-session','reserved',20);

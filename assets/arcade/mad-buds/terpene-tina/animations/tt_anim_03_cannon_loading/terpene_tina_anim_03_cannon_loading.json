@@ -1,0 +1,89 @@
+{
+  "schema": "mad-buds-animation-manifest-v1",
+  "schemaVersion": "1.0",
+  "characterId": "terpene_tina",
+  "animationId": "tt_anim_03_cannon_loading",
+  "animationName": "cannon_loading",
+  "frameCount": 10,
+  "frameWidth": 1024,
+  "frameHeight": 1024,
+  "fps": 10,
+  "durationMs": 1000,
+  "loop": false,
+  "direction": "side",
+  "pivotNormalized": [
+    0.5,
+    0.903
+  ],
+  "sourceArt": "543a2b73-3e03-40ab-864e-aab32d0619f6.png",
+  "sourceSHA256": "7729005114c95f3c4f4c59cbdc2b03c9b666d0bb66f291aa202b11842deb55db",
+  "method": "Frames 8-10 re-extracted from original 1536x1024 uploaded sheet with widened crop, explicit neutral-checkerboard removal, and fit-to-canvas; frames 1-7 unchanged.",
+  "repositoryDestination": "assets/arcade/mad-buds/terpene-tina/animations/tt_anim_03_cannon_loading/",
+  "visualApproval": "PENDING OWNER VISUAL APPROVAL \u2014 FRAMES 8-10 REEXTRACTED",
+  "qualification": "LOCAL STRUCTURAL VALIDATION; VISUAL CHECK PENDING",
+  "frames": [
+    {
+      "index": 1,
+      "filename": "terpene_tina_anim_03_cannon_loading_frame_01.png",
+      "durationMs": 100,
+      "sha256": "df4cc480b87c5989db483d72edaabc2ea7ede28bc4d56b1fd0262000239f1ef3"
+    },
+    {
+      "index": 2,
+      "filename": "terpene_tina_anim_03_cannon_loading_frame_02.png",
+      "durationMs": 100,
+      "sha256": "77e3eee9ddd997b7b47e4e44d1e4e2c89e1dd56410cf56f1b6b10d726ffe32cc"
+    },
+    {
+      "index": 3,
+      "filename": "terpene_tina_anim_03_cannon_loading_frame_03.png",
+      "durationMs": 100,
+      "sha256": "9682638689bf55294b86d750a74f47ec7fd1c3b2d49b9523328528d95b418d2d"
+    },
+    {
+      "index": 4,
+      "filename": "terpene_tina_anim_03_cannon_loading_frame_04.png",
+      "durationMs": 100,
+      "sha256": "19324b7cc7bbdf1379cad2dbdc239427da55722393a3428da6a3035f0cb655e8"
+    },
+    {
+      "index": 5,
+      "filename": "terpene_tina_anim_03_cannon_loading_frame_05.png",
+      "durationMs": 100,
+      "sha256": "41ecce55c74e7ce31f310056de711e832828e25e01903829f9e534fbaf4447c2"
+    },
+    {
+      "index": 6,
+      "filename": "terpene_tina_anim_03_cannon_loading_frame_06.png",
+      "durationMs": 100,
+      "sha256": "5adc85a5a54d9bf67e6e342a9ae8fe98b34d573dafd458122e9f07b90f02c2fa"
+    },
+    {
+      "index": 7,
+      "filename": "terpene_tina_anim_03_cannon_loading_frame_07.png",
+      "durationMs": 100,
+      "sha256": "7fa340137531efcb1f38cfaafb85c1c8fb32746419aa27b532800bdba262f849"
+    },
+    {
+      "index": 8,
+      "filename": "terpene_tina_anim_03_cannon_loading_frame_08.png",
+      "durationMs": 100,
+      "sha256": "253f6d3a36cc9f9387e8e78e536525bc52b7ed7d9883743eacaf0b86a9b36503",
+      "notes": "Corrected wide source crop, full cannon and character preserved within transparent 1024px canvas; owner visual approval pending"
+    },
+    {
+      "index": 9,
+      "filename": "terpene_tina_anim_03_cannon_loading_frame_09.png",
+      "durationMs": 100,
+      "sha256": "1287ff19b3c8e1e82d93d81b11d76acabd6b59628abe16670b127f02d3f69155",
+      "notes": "Corrected wide source crop, full cannon and character preserved within transparent 1024px canvas; owner visual approval pending"
+    },
+    {
+      "index": 10,
+      "filename": "terpene_tina_anim_03_cannon_loading_frame_10.png",
+      "durationMs": 100,
+      "sha256": "e48c988ebf62fa07ae59dc76a6bea38704302582d2320ca0f0eb2fdaabe7c59e",
+      "notes": "Corrected wide source crop, full cannon and character preserved within transparent 1024px canvas; owner visual approval pending"
+    }
+  ]
+}

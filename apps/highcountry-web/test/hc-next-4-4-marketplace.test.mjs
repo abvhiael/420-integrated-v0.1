@@ -22,7 +22,7 @@ test('wallet-free client authenticates server snapshot and reviewed operations o
   ['/market/snapshot','/market/buy','/market/cancel','/market/expire','/market/dispute']);
  assert.ok(actions.every(x=>x.options.headers.authorization==='Bearer signed-session-token'));
  assert.ok(actions.every(x=>!Object.hasOwn(JSON.parse(x.options.body),'buyer')));
- assert.throws(()=>client.buy({operation:'op',listing:'bad',owner:'victim'}),/marketplace-input-invalid|^$/); // unknown owner is ignored, server determines principal
+ assert.throws(()=>client.buy({operation:'op',listing:'bad',owner:'victim'}),/marketplace-input-invalid/); // no caller-supplied principal accepted
 });
 test('invalid inputs and unavailable auth fail closed before sending',async()=>{
  let calls=0;

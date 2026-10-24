@@ -63,9 +63,8 @@ contract ManufacturedEquipmentIssuer is R04EmergencyConsumer {
                     if (
                         r.inputs[0] != d.repairResource || r.inputAmounts[0] != d.craftParts
                             || r.inputs[1] != d.operatingResource || r.inputAmounts[1] != d.craftOperatingInput
-                            || r.outputs[0] != d.craftOutput || r.outputAmounts[0] != 1
-                            || r.outputs[1] != bytes32(0) || r.outputAmounts[1] != 0
-                            || resource != d.craftOutput || quantity != 1
+                            || r.outputs[0] != d.craftOutput || r.outputAmounts[0] != 1 || r.outputs[1] != bytes32(0)
+                            || r.outputAmounts[1] != 0 || resource != d.craftOutput || quantity != 1
                     ) revert InvalidManufacturedEquipment();
                     validClass = true;
                 }

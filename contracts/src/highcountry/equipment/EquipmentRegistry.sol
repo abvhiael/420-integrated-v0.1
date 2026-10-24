@@ -57,7 +57,9 @@ contract EquipmentRegistry is R04EmergencyConsumer {
 
     address public lifecycleController;
     mapping(bytes32 => bool) public disabled;
+    mapping(bytes32 => bool) public degraded;
     mapping(bytes32 => bool) public retired;
+    event EquipmentDegradationStatus(bytes32 indexed equipmentId, bool degraded);
 
     event LifecycleControllerSet(address indexed controller);
     event EquipmentEffectStatus(bytes32 indexed equipmentId, bool disabled);
@@ -202,6 +204,46 @@ contract EquipmentRegistry is R04EmergencyConsumer {
         emit LifecycleControllerSet(controller);
     }
 
+    /// @notice Degraded equipment contributes half its signed effect, rounded toward zero.
+    /// @dev Disabled equipment has zero active contribution; state still follows the equipment.
+    function activeItemEffects(
+        bytes32 equipmentId
+    ) external view returns (int256[6] memory values) {
+        Equipment storage item = _equipment[equipmentId];
+        if (!item.exists) revert HCInvalidState();
+        if (disabled[equipmentId] || retired[equipmentId]) return values;
+        for (uint256 i; i < 6; ++i) {
+            values[i] = _effect(equipmentId, i, degraded[equipmentId]);
+        }
+    }
+
+    function _effect(
+        bytes32 equipmentId,
+        uint256 index,
+        bool degraded_
+    ) private view returns (int256) {
+        int256 base = _types[_equipment[equipmentId].typeId].effects[index];
+        return degraded_ ? base / 2 : base;
+    }
+
+    /// @notice Only the fixed lifecycle authority may apply deterministic degradation.
+    function setLifecycleDegraded(
+        bytes32 equipmentId,
+        bool isDegraded
+    ) external {
+        if (msg.sender != lifecycleController || retired[equipmentId]) revert HCInvalidState();
+        Equipment storage item = _equipment[equipmentId];
+        if (!item.exists || degraded[equipmentId] == isDegraded) revert HCInvalidState();
+        if (item.parcelId != 0 && !disabled[equipmentId]) {
+            for (uint256 i; i < 6; ++i) {
+                _totals[item.parcelId][i] +=
+                    _effect(equipmentId, i, isDegraded) - _effect(equipmentId, i, degraded[equipmentId]);
+            }
+        }
+        degraded[equipmentId] = isDegraded;
+        emit EquipmentDegradationStatus(equipmentId, isDegraded);
+    }
+
     function setLifecycleDisabled(
         bytes32 equipmentId,
         bool isDisabled
@@ -212,7 +254,7 @@ contract EquipmentRegistry is R04EmergencyConsumer {
         if (item.parcelId != 0) {
             int256 direction = isDisabled ? int256(-1) : int256(1);
             for (uint256 i; i < 6; ++i) {
-                _totals[item.parcelId][i] += direction * _types[item.typeId].effects[i];
+                _totals[item.parcelId][i] += direction * _effect(equipmentId, i, degraded[equipmentId]);
             }
         }
         disabled[equipmentId] = isDisabled;
@@ -256,7 +298,7 @@ contract EquipmentRegistry is R04EmergencyConsumer {
         item.parcelId = parcelId;
         occupiedSlots[parcelId] += kind.slotCost;
         for (uint256 i; i < 6; ++i) {
-            _totals[parcelId][i] += kind.effects[i];
+            _totals[parcelId][i] += _effect(equipmentId, i, degraded[equipmentId]);
         }
         emit EquipmentPlaced(equipmentId, parcelId, msg.sender);
     }
@@ -272,7 +314,7 @@ contract EquipmentRegistry is R04EmergencyConsumer {
         occupiedSlots[parcelId] -= kind.slotCost;
         if (occupiedSlots[parcelId] == 0) placementOperator[parcelId] = address(0);
         for (uint256 i; i < 6; ++i) {
-            if (!disabled[equipmentId]) _totals[parcelId][i] -= kind.effects[i];
+            if (!disabled[equipmentId]) _totals[parcelId][i] -= _effect(equipmentId, i, degraded[equipmentId]);
         }
         emit EquipmentRemoved(equipmentId, parcelId);
     }

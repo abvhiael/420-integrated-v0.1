@@ -1,5 +1,5 @@
 // Independently signed current player level. Never accept a browser-submitted level.
-import {verify,createPublicKey} from 'node:crypto';
+import {verify,createPublicKey,KeyObject} from 'node:crypto';
 import {SettlementError} from './buds-ledger.js';
 const id=x=>typeof x==='string'&&/^[A-Za-z0-9:_-]{1,128}$/.test(x);
 export function createSignedPlayerLevelProvider({url,publicKey,issuer,gameId,chainId,fetchImpl=fetch,clock=()=>Date.now()}){
@@ -8,7 +8,8 @@ export function createSignedPlayerLevelProvider({url,publicKey,issuer,gameId,cha
    ||!publicKey||!id(issuer)||!/^0x[0-9a-f]{64}$/i.test(gameId)
    ||!Number.isSafeInteger(chainId)||chainId<1||typeof fetchImpl!=='function')
   throw new SettlementError('untrusted level provider');
- const key=createPublicKey(publicKey);
+ const key=publicKey instanceof KeyObject&&publicKey.type==='public'?publicKey:createPublicKey(publicKey);
+ if(key.type!=='public'||key.asymmetricKeyType!=='ed25519')throw new SettlementError('invalid progression public key');
  return async ({principal})=>{
   if(!id(principal))throw new SettlementError('invalid player level principal');
   const requestUrl=new URL('levels/'+encodeURIComponent(principal),parsed);

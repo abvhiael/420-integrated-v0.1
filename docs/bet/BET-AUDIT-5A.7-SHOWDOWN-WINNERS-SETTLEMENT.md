@@ -37,6 +37,8 @@ nonce, time, seat mask and contested/uncontested status. The existing transcript
 formula and wire methods are retained. A receipt event exports the complete
 payout vector for independent replay. Failed dispute finalization, token payment
 or bond closure rolls back all receipts, flags, ledger updates and transfers.
+Successful late showdown correction also closes its pending recovery flag,
+retaining the historical recovery fields and emitting the correction event.
 Original-snapshot voids remain distinct from verified winner settlements.
 
 The ledger rejects nonzero payouts outside a table's configured seats as well as
@@ -65,16 +67,16 @@ setup ceremony or cryptographic acceptance mock is introduced.
 
 ## Execution gates
 
-`PokerShowdown57Test` owns 17 mandatory production-funded cases: tie and single
+`PokerShowdown57Test` owns 18 mandatory production-funded cases: tie and single
 winner, uncontested privacy, complete survivor openings, premature rejection,
 folded-card confidentiality, forged ledger vectors, out-of-table slots, changed
 calculator rejection for settlement and proposals, rake and bond failure rollback,
 actual token callback rejection, appealed deadline boundaries, durable history
-after cashout, wrong policy rejection and terminal replay/recovery rejection.
+after cashout, wrong policy rejection, late showdown recovery closure and terminal replay/recovery rejection.
 Runtime fault injection tests rejection and rollback; it never supplies accepted
 cryptographic results.
 
-Level 2 requires fresh exact-SHA execution of all 17 cases, all 32 inherited 5A.5
+Level 2 requires fresh exact-SHA execution of all 18 cases, all 32 inherited 5A.5
 and eleven 5A.6 mandatory cases, affected native regressions, both genuine proof
 bundles, independent executed-hand replay with receipt validation, scoped static
 analysis and actual deployment size/constructor-budget evidence. Certificates

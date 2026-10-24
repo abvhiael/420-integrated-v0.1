@@ -14,7 +14,7 @@ assert all(r["qualifiedSHA"] == sha and r["trackedWorkingTreeDirty"] is False fo
 assert len(betting['mandatoryTests']) == 32 and set(betting['mandatoryTests'].values()) == {'Success'}
 assert betting['independentTestsPassed'] >= 23
 assert len(betting['evaluation5A6Tests']) == 11 and set(betting['evaluation5A6Tests'].values()) == {'Success'}
-assert len(betting['showdown5A7Tests']) == 17 and set(betting['showdown5A7Tests'].values()) == {'Success'}
+assert len(betting['showdown5A7Tests']) == 18 and set(betting['showdown5A7Tests'].values()) == {'Success'}
 winnerCryptoPath=Path('artifacts/ws8-crypto/winner-execution.json')
 winnerReplayPath=Path('artifacts/poker-5a5/winner-independent-outcome.json')
 winnerCrypto=json.loads(winnerCryptoPath.read_text(encoding='utf-8'))

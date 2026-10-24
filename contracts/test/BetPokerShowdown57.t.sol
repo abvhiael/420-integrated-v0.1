@@ -176,6 +176,17 @@ contract PokerShowdown57Test is BetPokerIntegratedFundedAdversarial54Test {
         require(keccak256(abi.encode(ws8Engine.settlementReceipt(id)))==receiptHash,"durable archived receipt");
         require(keccak256(abi.encode(ws8Outcome.showdownRanks(id)))==keccak256(abi.encode(ranks)),"frozen showdown audit");
     }
+    function test57LateShowdownProofsClosePendingRecoveryOnSettlement()public {
+        bytes32 id=_ready();bytes32 snapshot=ledger.lockedSnapshot(TABLE);_river(id);
+        cheat54.warp(uint256(ws8Engine.evidenceDueAt(id))+1);
+        ws8Engine.beginMissingEvidenceRecovery(id);
+        (,,,,bool active)=ws8Engine.evidenceRecovery(id);
+        require(active,"real missing-showdown recovery opened");
+        for(uint8 pos=0;pos<4;pos++)_reveal(id,4,pos);
+        ws8Engine.settle(id,_policy());_receipt(id,snapshot,399,399,2,true);
+        (,,,,active)=ws8Engine.evidenceRecovery(id);
+        require(!active,"settlement must close corrected recovery");
+    }
     function test57WrongRakePolicyCannotPublishReceipt()public {
         bytes32 id=_ready();_showdown(id);PokerCanonicalRake420.Policy memory wrong=_policy();wrong.rakeBps=499;
         cheat54.expectRevert(PokerCanonicalRake420.InvalidPolicy.selector);ws8Engine.settle(id,wrong);

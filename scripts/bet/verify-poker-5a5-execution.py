@@ -56,6 +56,7 @@ RakeCallbackCannotPublishSecondReceiptOrSettleTwice
 DisputedShowdownAppealHoldsPaymentUntilExactDeadline
 ReceiptAndRanksSurviveCashoutAndTablePause
 WrongRakePolicyCannotPublishReceipt
+LateShowdownProofsClosePendingRecoveryOnSettlement
 TerminalReceiptRejectsReplayActionsAndRecovery'''.splitlines()
 OWNERS = ['PokerNLHEBetting54Case'+str(i)+'Test' for i in range(1,11)] + [
     'PokerNLHEBetting54WS3AdversarialTest', 'PokerNativeOutcome54Test',

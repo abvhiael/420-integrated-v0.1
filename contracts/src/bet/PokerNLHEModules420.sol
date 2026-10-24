@@ -347,6 +347,15 @@ contract PokerNLHESettlementModule420 is PokerNLHEModule420 {
         address calculator=_checkedOutcome(handId);
         (uint256[9] memory balances,uint256 fee)=
             IPokerNativeOutcome420(calculator).calculate(handId,policy);
+        // Complete late showdown proofs correct their pending recovery just as
+        // advancing a proved street does. Preserve its history, close its timer.
+        EvidenceRecovery storage recovery=_layout().evidenceRecovery[handId];
+        if(recovery.active){
+            if(recovery.failedPhase!=g.phase||recovery.stateRoot!=g.stateRoot)
+                revert InvalidState();
+            recovery.active=false;
+            emit MissingEvidenceRecoveryCorrected(handId,uint8(g.phase));
+        }
         // Mark the hand consumed before any external dispute/ledger call.
         // Reverts atomically restore this flag if either dependency fails.
         _layout().handSettled[handId]=true;

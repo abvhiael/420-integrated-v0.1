@@ -130,6 +130,180 @@
       "purpose": "Eleven guest-first, wallet-free arcade games using the existing 420 Gaming Protocol only for optional scoped identity, entitlements and cross-game attestations; ordinary core gameplay is available without registration, wallet linkage or blockchain connectivity"
     },
     {
+      "name": "420Exchange",
+      "class": "GENESIS_USER_APP",
+      "contracts_required": false,
+      "purpose": "Exchange trading client; no independent swap or custody authority; release disabled until documented per-app approval; existing authority: 420 Swap"
+    },
+    {
+      "name": "BongGoggles",
+      "class": "GENESIS_USER_APP",
+      "contracts_required": false,
+      "purpose": "Gaming and media experience; unresolved BG-19 production web/moderation gates; release disabled until documented per-app approval; existing authority: 420Media / 420 Gaming Protocol"
+    },
+    {
+      "name": "420Launchpad",
+      "class": "GENESIS_USER_APP",
+      "contracts_required": false,
+      "purpose": "Crowdfunding frontend; on-chain campaign authority remains canonical; release disabled until documented per-app approval; existing authority: 420 Launchpad protocol / 420Pay"
+    },
+    {
+      "name": "420Mail",
+      "class": "GENESIS_USER_APP",
+      "contracts_required": false,
+      "purpose": "Identity-addressed private inbox with external SMTP disabled; release disabled until documented per-app approval; existing authority: 420Messenger / 420Storage / 420Identity"
+    },
+    {
+      "name": "TownSquare",
+      "class": "GENESIS_USER_APP",
+      "contracts_required": false,
+      "purpose": "Public community front end over canonical 420Town moderation and state; release disabled until documented per-app approval; existing authority: 420Town Community Boards"
+    },
+    {
+      "name": "420Media",
+      "class": "GENESIS_USER_APP",
+      "contracts_required": false,
+      "purpose": "Media publishing/streaming service frontend; no duplicate media authority; release disabled until documented per-app approval; existing authority: 420Media service"
+    },
+    {
+      "name": "PuffBuddies",
+      "class": "GENESIS_USER_APP",
+      "contracts_required": false,
+      "purpose": "Independent game experience, optional wallet only; release disabled until documented per-app approval; existing authority: 420 Gaming Protocol"
+    },
+    {
+      "name": "ReeferReview",
+      "class": "GENESIS_USER_APP",
+      "contracts_required": false,
+      "purpose": "Editorial/publication frontend with provenance and moderated visibility; release disabled until documented per-app approval; existing authority: Reefer Review Publishing"
+    },
+    {
+      "name": "DoobTube",
+      "class": "GENESIS_USER_APP",
+      "contracts_required": false,
+      "purpose": "Public creator/video frontend over 420Media; no second Media protocol; release disabled until documented per-app approval; existing authority: 420Media"
+    },
+    {
+      "name": "420Hz",
+      "class": "GENESIS_USER_APP",
+      "contracts_required": false,
+      "purpose": "Music foundation at launch; planned Generate/Community/Awards expansion not yet accepted; release disabled until documented per-app approval; existing authority: 420Media / 420Rights / 420AI"
+    },
+    {
+      "name": "420Grow",
+      "class": "GENESIS_USER_APP",
+      "contracts_required": false,
+      "purpose": "Cultivation management application with jurisdictional restrictions; release disabled until documented per-app approval; existing authority: 420Location / 420Compliance"
+    },
+    {
+      "name": "HighStreetMarket",
+      "class": "GENESIS_USER_APP",
+      "contracts_required": false,
+      "purpose": "420Commerce marketplace frontend; canonical order/settlement remain protocol-owned; release disabled until documented per-app approval; existing authority: 420 Market / 420Pay"
+    },
+    {
+      "name": "420BnB",
+      "class": "GENESIS_USER_APP",
+      "contracts_required": false,
+      "purpose": "Lodging discovery; booking and settlement disabled until authorized; release disabled until documented per-app approval; existing authority: 420Travel / 420Pay / 420Compliance"
+    },
+    {
+      "name": "420Travel",
+      "class": "GENESIS_USER_APP",
+      "contracts_required": false,
+      "purpose": "Travel discovery and trip planning; release disabled until documented per-app approval; existing authority: 420Travel consumer service"
+    },
+    {
+      "name": "420Events",
+      "class": "GENESIS_USER_APP",
+      "contracts_required": false,
+      "purpose": "Events discovery and participation; release disabled until documented per-app approval; existing authority: 420Events consumer service"
+    },
+    {
+      "name": "420Calendar",
+      "class": "GENESIS_USER_APP",
+      "contracts_required": false,
+      "purpose": "Calendaring and scheduling thin UI; release disabled until documented per-app approval; existing authority: 420Calendar consumer service"
+    },
+    {
+      "name": "420Classifieds",
+      "class": "GENESIS_USER_APP",
+      "contracts_required": false,
+      "purpose": "Non-commerce classifieds and moderated local discovery; release disabled until documented per-app approval; existing authority: 420Classifieds consumer service"
+    },
+    {
+      "name": "420Learn",
+      "class": "GENESIS_USER_APP",
+      "contracts_required": false,
+      "purpose": "Education and knowledge frontend; release disabled until documented per-app approval; existing authority: 420Learn + 420Knowledge consumer service"
+    },
+    {
+      "name": "420University",
+      "class": "GENESIS_USER_APP",
+      "contracts_required": false,
+      "purpose": "Education umbrella without self-issued credential authority; release disabled until documented per-app approval; existing authority: 420University umbrella shell"
+    },
+    {
+      "name": "420Freelance",
+      "class": "GENESIS_USER_APP",
+      "contracts_required": false,
+      "purpose": "Professional services listings; consumer registry still marks POST_GENESIS_APP_GENESIS_SCHEMA; release disabled until documented per-app approval; existing authority: 420Freelance consumer service"
+    },
+    {
+      "name": "420Reputation",
+      "class": "GENESIS_USER_APP",
+      "contracts_required": false,
+      "purpose": "Non-authoritative trust/reputation reader; release disabled until documented per-app approval; existing authority: 420Reputation consumer service"
+    },
+    {
+      "name": "420Location",
+      "class": "GENESIS_USER_APP",
+      "contracts_required": false,
+      "purpose": "Privacy-scoped maps and location client; release disabled until documented per-app approval; existing authority: 420Location consumer service"
+    },
+    {
+      "name": "420Pay",
+      "class": "GENESIS_PROTOCOL_AND_USER_APP",
+      "contracts_required": true,
+      "purpose": "Payment interface without parallel payment custody; release disabled until documented per-app approval; existing authority: 420Pay canonical protocol"
+    },
+    {
+      "name": "420Rights",
+      "class": "GENESIS_PROTOCOL_AND_USER_APP",
+      "contracts_required": true,
+      "purpose": "Rights and provenance interface without separate ownership authority; release disabled until documented per-app approval; existing authority: 420Rights canonical protocol"
+    },
+    {
+      "name": "420Treasury",
+      "class": "GENESIS_PROTOCOL_AND_USER_APP",
+      "contracts_required": true,
+      "purpose": "Public transparent treasury interface; release disabled until documented per-app approval; existing authority: 420Treasury canonical protocol"
+    },
+    {
+      "name": "420Grants",
+      "class": "GENESIS_PROTOCOL_AND_USER_APP",
+      "contracts_required": true,
+      "purpose": "Grants participation/disbursement interface; release disabled until documented per-app approval; existing authority: 420Grants canonical protocol"
+    },
+    {
+      "name": "DOOBr",
+      "class": "GENESIS_USER_APP",
+      "contracts_required": false,
+      "purpose": "Delivery interface; disabled until jurisdiction/operator approval; release disabled until documented per-app approval; existing authority: 420Compliance / 420Pay / 420Location"
+    },
+    {
+      "name": "LIFTd",
+      "class": "GENESIS_USER_APP",
+      "contracts_required": false,
+      "purpose": "Rideshare interface; disabled pending transport and insurance approval; release disabled until documented per-app approval; existing authority: 420Compliance / 420Location / 420Pay"
+    },
+    {
+      "name": "420Bet",
+      "class": "GENESIS_USER_APP",
+      "contracts_required": false,
+      "purpose": "Gaming interface; wagering disabled until independent RNG/economic/legal approvals; release disabled until documented per-app approval; existing authority: 420Randomness / 420Pay / 420Compliance"
+    },
+    {
       "name": "420 Faucet",
       "class": "TESTNET_ONLY",
       "contracts_required": true,
@@ -156,6 +330,8 @@
     "420 Stake does not include stake-weighted delegation at genesis.",
     "420 Attention cannot access wallet keys, auto-sign, execute arbitrary wallet code, or transact on behalf of users.",
     "420Arcade ordinary core gameplay remains wallet-free and accessible to guests without registration or blockchain connectivity; optional Gaming Protocol integrations cannot create pay-to-win advantages or separate wallet or contract authority.",
-    "420 Faucet never participates in mainnet genesis economics."
+    "420 Faucet never participates in mainnet genesis economics.",
+    "Genesis Application Decision #2 authorizes catalog inclusion only. Newly listed application entry points remain disabled until per-application implementation, security, operational and external acceptance; no listed client gains protocol, signing, payment, moderation, or governance authority solely from inclusion.",
+    "DOOBr, LIFTd and 420Bet regulated/economic execution remain disabled until applicable jurisdictional, independent risk, legal and production-release approvals. 420Freelance requires independent product implementation qualification despite catalog inclusion."
   ]
 }

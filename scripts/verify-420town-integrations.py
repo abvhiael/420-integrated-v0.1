@@ -62,9 +62,17 @@ if townsvc:
     need(townsvc.get("authority")=="REPLACEABLE_APPLICATION","Town GEN-SVC authority drift")
     need(set(townsvc.get("depends_on",[]))=={"420 Identity","420 Search","420 Notifications","420 Storage"},"Town direct GEN-SVC dependency drift")
 
-# Frozen catalog must not list Town by service id/name.
-blob=json.dumps(frozen).lower()
-need("420/service/town/v1" not in blob and "420town" not in blob,"Town was promoted into frozen Genesis application catalog")
+# Decision #2 authorizes only the release-disabled TownSquare public client.
+# It does not promote the underlying Town service ID or grant new authority.
+decision=json.loads((ROOT/"config/genesis-application-decision-2.json").read_text())
+entry=next((x for x in decision.get("entries",[]) if x.get("name")=="TownSquare"),None)
+need(decision.get("decision_id")=="GENESIS_APPLICATION_DECISION_2","TownSquare catalog authorization decision missing")
+need(entry is not None and entry.get("release_enabled") is False and entry.get("class")=="GENESIS_USER_APP" and entry.get("contracts_required") is False,"TownSquare requires expressly authorized, release-disabled app classification")
+need(entry is not None and entry.get("existing_authority")=="420Town Community Boards","TownSquare must retain canonical Town service authority")
+need(sum(x.get("name")=="TownSquare" for x in frozen.get("apps",[]))==1,"TownSquare public catalog classification drift")
+need(not any(x.get("name")=="420Town" for x in frozen.get("apps",[])),"Town service must not become a separate public app")
+need(all("420/service/town/v1" not in x.get("name","") for x in frozen.get("apps",[])),"Town service ID must not masquerade as public app")
+need(townsvc is not None and townsvc.get("role")=="GENESIS_FACING_UPDATE","Town canonical GEN-SVC implementation role drift")
 
 for preimage in [
  "420/service/identity/v1","420/service/resource-protocol/v1","420/service/search/v1",
@@ -121,5 +129,5 @@ print("420Town service integration verifier PASS")
 print("dependencies=identity,storage,search,notifications,messenger,rewards")
 print("search=PUBLIC_ONLY_NON_CANONICAL")
 print("transport=ENCRYPTED_REPLACEABLE")
-print("catalog=frozen_genesis_app:false")
+print("catalog=TownSquare:release_disabled; town_service=GEN_SVC_only")
 print(f"invariants={len(cfg['invariants'])}")

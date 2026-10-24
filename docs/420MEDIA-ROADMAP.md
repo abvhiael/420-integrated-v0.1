@@ -59,7 +59,7 @@ Repository-side MEDIA-AUDIT work is complete through **MEDIA-AUDIT-11**.
 
 The remaining live-environment phases have been transferred to the canonical testnet/release work roadmap in `docs/ROADMAP.md`:
 
-- **MEDIA-AUDIT-12 — production-equivalent public-testnet qualification**;
+- **MEDIA-AUDIT-12 — Production-equivalent public-testnet qualification**;
 - **MEDIA-AUDIT-13 — Genesis / production release**.
 
 These are no longer unfinished repository-audit remediation steps. They remain blocked on the real testnet/release environment and must not be inferred complete from repository CI, local Anvil, fixtures or synthetic evidence.

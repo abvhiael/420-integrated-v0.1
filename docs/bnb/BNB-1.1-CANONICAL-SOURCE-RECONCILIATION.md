@@ -86,3 +86,8 @@ Status describes existing 420BnB implementation **not** intended product priorit
 - **Not executed:** `go test`, `go vet`, `go build`, Python verifiers, dedicated BnB CI (none identified), browser acceptance and financial/security dynamic checks. Passing claims are **not** made for any of them.
 - **Evidence:** this retained inventory links each observation to authoritative source paths. A dedicated exact-SHA CI assertion and proof remain outstanding before declaring BNB-1.1 *fully Level-1 qualified*.
 - **Level 2:** M1 after BNB-1.3. **Level 3:** single complete BNB-1 phase closeout after BNB-1.10.
+
+
+## Genesis Decision #2 reconciliation (2026-10-18)
+
+Owner-authorized Decision #2 now lists 420BnB as a public Genesis application with `release_enabled=false`. This updates the historical BNB-1.1 catalog-exclusion observation but does not amend the frozen 420Travel booking boundary, authorize booking or payments, change ownership of escrow/settlement, or convert earlier BNB-1.1 inventory evidence into product readiness. `travel.bnb_booking` and `bnb_compatibility.enabled_at_genesis` remain false pending independent qualified authorization. The Decision #2 entry is a catalog record, not a runtime feature flag.

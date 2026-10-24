@@ -78,5 +78,21 @@
     "conclusion": "KNOWN_PATHS_VERIFIED; EXHAUSTIVE_RECURSIVE_TREE_UNVERIFIED"
   },
   "finalStatus": "PARTIAL_PENDING_BINARY_SHA256_AND_RUNTIME_QUALIFICATION",
-  "releasePolicy": "No source deletions or migration cutover permitted until Godot, binary and full Unity provenance gates are satisfied"
+  "releasePolicy": "No source deletions or migration cutover permitted until Godot, binary and full Unity provenance gates are satisfied",
+  "godotQualification": {
+    "sourceRepository": "abvhiael/MadBuds-Godot",
+    "pr": 4,
+    "exactHeadSha": "0562825a51b6193d0936e18f3bd8e9937220ee16",
+    "workflowRun": 40108948204,
+    "workflowUrl": "https://github.com/abvhiael/MadBuds-Godot/actions/runs/40108948204",
+    "checks": [
+      "15 manifest JSONs",
+      "150 PNG byte SHA-256 comparisons",
+      "Godot 4.4.1 headless import",
+      "texture playback",
+      "gameplay contract",
+      "real scene integration"
+    ],
+    "result": "QUEUED_AT_LAST_CHECK"
+  }
 }

@@ -58,7 +58,7 @@ export class SkillResearchService {
   return this.store.transact(s=>{
    this._state(s);
    if(s.operations.has(operation))throw new SettlementError('replayed operation');
-   const proofKey=JSON.stringify([this.catalog.version,verified.sourceEvent]);
+   const proofKey=verified.sourceEvent;
    if(s.skillResearchProofs.has(proofKey))throw new SettlementError('replayed progression evidence');
    const key=JSON.stringify([principal,trackId,this.catalog.version]);
    const r=s.skillResearch.get(key)||{points:0,unlocked:false};

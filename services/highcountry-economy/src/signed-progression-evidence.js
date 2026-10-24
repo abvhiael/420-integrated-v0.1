@@ -1,11 +1,12 @@
-import {verify,createPublicKey} from 'node:crypto';
+import {verify,createPublicKey,KeyObject} from 'node:crypto';
 import {SettlementError} from './buds-ledger.js';
 const id=x=>typeof x==='string'&&/^[A-Za-z0-9:_-]{1,128}$/.test(x);
 const b64=x=>typeof x==='string'&&/^[A-Za-z0-9_-]{1,4096}$/.test(x);
 export function createSignedProgressionEvidence({publicKey,issuer,gameId,chainId,clock=()=>Date.now()}){
  if(!publicKey||!id(issuer)||!/^0x[0-9a-f]{64}$/i.test(gameId)||!Number.isSafeInteger(chainId)||chainId<1||typeof clock!=='function')
   throw new SettlementError('missing approved progression verifier');
- const key=createPublicKey(publicKey);
+ const key=publicKey instanceof KeyObject&&publicKey.type==='public'?publicKey:createPublicKey(publicKey);
+ if(key.type!=='public'||key.asymmetricKeyType!=='ed25519')throw new SettlementError('invalid progression public key');
  return async ({principal,trackId,version,evidence,points})=>{
   if(!id(principal)||!id(trackId)||!id(version)||!Number.isSafeInteger(points)||points<1)return false;
   let claim;

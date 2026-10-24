@@ -2,9 +2,11 @@ name: 420Bet WS8 Frozen Funded Hand Context Level 1
 on:
   pull_request:
     paths:
-      - 'contracts/test/BetPokerWS8FrozenHandContext54.t.sol'
+      - 'contracts/test/BetPokerWS8*.sol'
+      - 'contracts/src/bet/generated/WS8*.sol'
+      - 'clients/420bet-poker/zkshuffle/fixtures/ws8/**'
       - '.github/workflows/420bet-poker-ws8-context-level1.yml'
-      - 'scripts/bet/inspect-ws8-proof-context.py'
+      - 'scripts/bet/**'
   workflow_dispatch:
 permissions:
   contents: read
@@ -15,6 +17,8 @@ jobs:
     env:
       FOUNDRY_PROFILE: pr
       FOUNDRY_VIA_IR: 'true'
+      FOUNDRY_SRC: src/bet
+      FOUNDRY_TEST: test/ws8-focused
     steps:
       - uses: actions/checkout@v4
         with:
@@ -23,55 +27,23 @@ jobs:
         run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
       - uses: foundry-rs/foundry-toolchain@v1
         with:
-          version: stable
-      - name: Build scoped WS8 context test closure
-        working-directory: contracts
+          version: v1.8.6
+      - name: Prepare genuine verifier evidence and scoped test closure
         run: |
-          python3 - <<'PY'
-          from pathlib import Path
-          import re
-          root=Path('test')
-          seen=set()
-          def visit(filename):
-              if filename in seen:return
-              p=root/filename
-              if not p.is_file():raise SystemExit('missing dependency '+filename)
-              seen.add(filename)
-              for imported in re.findall(r'import\s+["\'](\./[^"\']+)["\']\s*;',p.read_text()):
-                  visit(Path(imported).name)
-          visit('BetPokerWS8FrozenHandContext54.t.sol')
-          output=root/'ws8-context'
-          output.mkdir(parents=True,exist_ok=True)
-          for filename in sorted(seen):
-              (output/filename).write_text((root/filename).read_text().replace('../src/','../../src/'))
-          print('Prepared files:',sorted(seen))
-          PY
-      - name: Qualify contract-derived frozen hand/escrow context
+          python3 scripts/bet/prepare-ws8-verifiers.py --committed
+          python3 scripts/bet/prepare-ws8-test-owner.py
+          mkdir -p artifacts/ws8-context
+      - name: Execute canonical funded context and verifier-identity checks
         working-directory: contracts
-        env:
-          FOUNDRY_SRC: src/bet
-          FOUNDRY_TEST: test/ws8-context
         run: |
           set -euo pipefail
-          forge test --match-contract '^BetPokerWS8FrozenHandContext54Test
-          grep -q 'WS8ProverHandScope' ws8-context-level1.log
-          grep -q 'WS8FrozenHand' ws8-context-level1.log
-          grep -q 'WS8ProviderBonds' ws8-context-level1.log
-          grep -q 'WS8SeatSigningKeys' ws8-context-level1.log
-      - name: Compare historical proof scope with real funded-hand context
-        working-directory: contracts
-        run: python3 ../scripts/bet/inspect-ws8-proof-context.py ws8-context-level1.log ws8-proof-context.json
+          forge test --use 0.8.30 --match-contract BetPokerWS8FrozenHandContext54Test --match-test testFreezeCanonicalFundedHandContext -vvvv | tee ../artifacts/ws8-context/context.log
+          python3 ../scripts/bet/export-ws8-context.py ../artifacts/ws8-context/context.log ../artifacts/ws8-context/exported
+          cmp ../artifacts/ws8-context/exported/context.bin ../artifacts/contracts/ws8/context.bin
+          python3 ../scripts/bet/inspect-ws8-proof-context.py ../artifacts/ws8-context/context.log ../artifacts/ws8-context/compatibility.json
+          git rev-parse HEAD > ../artifacts/ws8-context/candidate-sha.txt
       - uses: actions/upload-artifact@v4
         with:
-          name: 420bet-ws8-step1-frozen-context
-          path: |
-            contracts/ws8-context-level1.log
-            contracts/ws8-proof-context.json
-          if-no-files-found: error
- -vvvv | tee ws8-context-level1.log
-          grep 'WS8FrozenHand' ws8-context-level1.log || true
-      - uses: actions/upload-artifact@v4
-        with:
-          name: 420bet-ws8-step1-frozen-context
-          path: contracts/ws8-context-level1.log
+          name: 420bet-ws8-production-funded-context-level1
+          path: artifacts/ws8-context/
           if-no-files-found: error

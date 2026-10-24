@@ -1,0 +1,87 @@
+{
+  "schema": "mad-buds-animation-manifest-v1",
+  "schemaVersion": "1.0",
+  "characterId": "terpene_tina",
+  "animationId": "tt_anim_05_bloom_activation",
+  "animationName": "bloom_activation",
+  "frameCount": 10,
+  "frameWidth": 1024,
+  "frameHeight": 1024,
+  "fps": 10,
+  "durationMs": 1000,
+  "loop": false,
+  "direction": "front",
+  "pivotNormalized": [
+    0.5,
+    0.88
+  ],
+  "sourceArt": "bfb205f7-d61b-5d6e-8fc1-975c1f5a0007.png",
+  "sourceSHA256": "e5df4cfe37626b4766e80db4ab0671902f3b7295a929cd96a511c981d5b5fcb3",
+  "method": "Extracted from approved 10-frame bloom activation sheet arranged in 2 rows of 5; white background removed; each pose centered on a 1024x1024 transparent canvas with a common baseline.",
+  "repositoryDestination": "assets/arcade/mad-buds/terpene-tina/animations/tt_anim_05_bloom_activation/",
+  "visualApproval": "PENDING OWNER REVIEW \u2014 frame 04 enlarged to correct character scale",
+  "qualification": "LOCAL STRUCTURAL VALIDATION ONLY",
+  "frames": [
+    {
+      "index": 1,
+      "filename": "terpene_tina_anim_05_bloom_activation_frame_01.png",
+      "durationMs": 100,
+      "sha256": "ff07b1d51ea349e6c7eb0a3d0668af6f38685eef93a4c2af3b595b5509b84a85"
+    },
+    {
+      "index": 2,
+      "filename": "terpene_tina_anim_05_bloom_activation_frame_02.png",
+      "durationMs": 100,
+      "sha256": "6c6c9f9aa431188c5b49f77bfe93f9324a9afddeb3b74ee5c949c47ee9a2486b"
+    },
+    {
+      "index": 3,
+      "filename": "terpene_tina_anim_05_bloom_activation_frame_03.png",
+      "durationMs": 100,
+      "sha256": "94bb3cb27181e14d6a874c3e02e5eeabcb6058d03868fb5d1f0afd0d7be4382a"
+    },
+    {
+      "index": 4,
+      "filename": "terpene_tina_anim_05_bloom_activation_frame_04.png",
+      "durationMs": 100,
+      "sha256": "08fe04142a681ea69dca8e173c888101dfaad130ee40fbb771d445ce766f9953",
+      "notes": "Owner-requested frame 04 scale correction: enlarged 15 percent, complete bloom rings and footwear preserved, re-centered on transparent canvas."
+    },
+    {
+      "index": 5,
+      "filename": "terpene_tina_anim_05_bloom_activation_frame_05.png",
+      "durationMs": 100,
+      "sha256": "329f7be7b8bb4a5d786140f227567d80ca0bf78a6e18550fc85fbef3802b7728"
+    },
+    {
+      "index": 6,
+      "filename": "terpene_tina_anim_05_bloom_activation_frame_06.png",
+      "durationMs": 100,
+      "sha256": "5a8a81d590dcc1be3a40178a7767db3563c59d4cd7b2fe4b769d2592f597cab5"
+    },
+    {
+      "index": 7,
+      "filename": "terpene_tina_anim_05_bloom_activation_frame_07.png",
+      "durationMs": 100,
+      "sha256": "4f816354ae7cde51690270905b18d0fa60a87b3615676fabb0c0177c5ddf273e"
+    },
+    {
+      "index": 8,
+      "filename": "terpene_tina_anim_05_bloom_activation_frame_08.png",
+      "durationMs": 100,
+      "sha256": "b4dc02ffadd466c482317a4b556b37a9d185062900e04585e68b43e04fbd841c"
+    },
+    {
+      "index": 9,
+      "filename": "terpene_tina_anim_05_bloom_activation_frame_09.png",
+      "durationMs": 100,
+      "sha256": "918285c42f1cd1f2a0f46d84770a186ef9e9fbfc7669a20dca64ed2e3b303a1e"
+    },
+    {
+      "index": 10,
+      "filename": "terpene_tina_anim_05_bloom_activation_frame_10.png",
+      "durationMs": 100,
+      "sha256": "7a2eda13251258f6be9e9970a320052d6f1413a046927df34e7b61af3268040c"
+    }
+  ]
+}

@@ -1,0 +1,86 @@
+{
+  "schema": "mad-buds-animation-manifest-v1",
+  "schemaVersion": "1.0",
+  "characterId": "terpene_tina",
+  "animationId": "tt_anim_06_field_sustain",
+  "animationName": "field_sustain",
+  "frameCount": 10,
+  "frameWidth": 1024,
+  "frameHeight": 1024,
+  "fps": 10,
+  "durationMs": 1000,
+  "loop": true,
+  "direction": "front",
+  "pivotNormalized": [
+    0.5,
+    0.88
+  ],
+  "sourceArt": "84cba102-f811-512a-9c1e-fe2d5099fd48.png",
+  "sourceSHA256": "e5df4cfe37626b4766e80db4ab0671902f3b7295a929cd96a511c981d5b5fcb3",
+  "method": "Extracted from approved 10-frame field sustain sheet arranged in 2 rows of 5; white background removed; each pose centered on a 1024x1024 transparent canvas with a common baseline.",
+  "repositoryDestination": "assets/arcade/mad-buds/terpene-tina/animations/tt_anim_06_field_sustain/",
+  "visualApproval": "PENDING OWNER REVIEW OF EXTRACTED FRAMES",
+  "qualification": "LOCAL STRUCTURAL VALIDATION ONLY",
+  "frames": [
+    {
+      "index": 1,
+      "filename": "terpene_tina_anim_06_field_sustain_frame_01.png",
+      "durationMs": 100,
+      "sha256": "3ed36521b7ef520e2aaeeb10363ef6b2f3f055d7ff091809adf81420cfb41d51"
+    },
+    {
+      "index": 2,
+      "filename": "terpene_tina_anim_06_field_sustain_frame_02.png",
+      "durationMs": 100,
+      "sha256": "35049b2a838063967f7e9eb6599ae013a8cfd963cc5567a926b4f396351c3d3b"
+    },
+    {
+      "index": 3,
+      "filename": "terpene_tina_anim_06_field_sustain_frame_03.png",
+      "durationMs": 100,
+      "sha256": "690047455a1f91d4cb8d3198dd5b37f7ea3f232e9f7ac42d4ca36ce215c3e59f"
+    },
+    {
+      "index": 4,
+      "filename": "terpene_tina_anim_06_field_sustain_frame_04.png",
+      "durationMs": 100,
+      "sha256": "bb7660bc82054d64293ccbb42a2110b919134461efcdcfa93297432d52a0a1cd"
+    },
+    {
+      "index": 5,
+      "filename": "terpene_tina_anim_06_field_sustain_frame_05.png",
+      "durationMs": 100,
+      "sha256": "386edd28cf33f1aa283beeb0625f61721f2dffd9ab15c44544550554c8882129"
+    },
+    {
+      "index": 6,
+      "filename": "terpene_tina_anim_06_field_sustain_frame_06.png",
+      "durationMs": 100,
+      "sha256": "fc695413433b725da1fc09a597c35ff156b5b5fd93b85bb303dbbbbae36506dd"
+    },
+    {
+      "index": 7,
+      "filename": "terpene_tina_anim_06_field_sustain_frame_07.png",
+      "durationMs": 100,
+      "sha256": "786e9eba18fd463ea855c756aa823f3fd645e2465089ba69f6ff8774704911dc"
+    },
+    {
+      "index": 8,
+      "filename": "terpene_tina_anim_06_field_sustain_frame_08.png",
+      "durationMs": 100,
+      "sha256": "e8cc7e190f6f801e93e3612c9c66026e69aefd0b068b84a697b49f7a8d492f95"
+    },
+    {
+      "index": 9,
+      "filename": "terpene_tina_anim_06_field_sustain_frame_09.png",
+      "durationMs": 100,
+      "sha256": "5061e14dae8406f4d90ae6919acc50177868730a6165424c6c25b64b6e5845f5"
+    },
+    {
+      "index": 10,
+      "filename": "terpene_tina_anim_06_field_sustain_frame_10.png",
+      "durationMs": 100,
+      "sha256": "4d67db295fa7418355dbb8d312ff8c9c6ffa684587233e0eb9891d127cbd11ee"
+    }
+  ]
+}

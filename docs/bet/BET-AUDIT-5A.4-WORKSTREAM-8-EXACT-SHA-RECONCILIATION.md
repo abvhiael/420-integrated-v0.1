@@ -1,4 +1,4 @@
-# BET 5A.4 — Workstream 8 exact-SHA reconciliation and evidence register
+# BET 5A.4 â€” Workstream 8 exact-SHA reconciliation and evidence register
 
 ## Candidate and source-of-truth
 - Repository: `abvhiael/420-integrated-v0.1`.
@@ -30,3 +30,61 @@ The historical WS7 run is genuinely green; its artifacts are immutable reference
 
 ## Disposition
 Evidence recorded; candidate validation and final exit acceptance remain **OPEN** until the new exact-SHA checks and omitted security scenarios are established. This document is not a passing certificate and grants no new privileged authority.
+
+
+## Production-equivalent funded integration owner
+
+`BetPokerWS8ProductionFixture54.sol` now deploys the production table, seat ledger,
+confidential deal, initial-deck gate, two-stage shuffle, ciphertext availability,
+provider independence registry, recipient-key registry, encrypted delivery book,
+action keys, native betting engine, live reveals, canonical rake and independent
+native outcome calculator. Actual current-seat secp256k1 keys authorize actions.
+The native engine exclusively reserves 800 player chips and locks two separately
+funded 800-chip provider bonds. The same callback-capable, exactly accounted token
+backs the legitimate game and adversarial settlement callback.
+
+Seven actual generated Groth16 verifiers are registered by hashes of their real
+serialized VKs, compiled relation identities and actual deployed runtime code.
+The archives from WS2 run 40003702620 and WS3 run 40013195917 were downloaded and
+matched their GitHub-recorded SHA-256 digests. Their 14 public statements are
+preserved in `fixtures/ws8/historical-contexts.json`. They cannot be relabelled for
+the production hand. The archives contain no proving keys. New experimental
+fixture setup material was persisted, then reused to generate 41 context-specific
+proofs. No claim of a production trusted ceremony or Level 3 closure is made.
+
+`TestWS8CommittedCryptographicEvidence` recompiles all seven exact relations,
+checks their serialized identities, regenerates Solidity from each actual VK and
+verifies all 41 genuine proofs and their exact ABI public witnesses. This check
+reuses valid material and does not rerun old expensive proving suites. Committed
+fixture checksums use Git-canonical LF for source text and exact bytes for all
+cryptographic evidence. The resolved Go module graph is compared to the historical
+qualified graph; normalizing go.mod does not silently upgrade cryptography.
+
+`BetPokerIntegratedFundedAdversarial54Test` executes the legitimate funded hand,
+all ten named attacks and inherited fixture tests. The legitimate hand reaches
+showdown through eight seat-signed actions, all eight encrypted private-share
+proofs, both recipient receipts and nine genuinely verified card openings. The
+native calculator and atomic ledger settlement produce 399 chips per participant
+and 2 chips canonical rake, returning both provider bonds. The independent Node
+interpreter replays the actual executed action/reveal events and compares its own
+ranking, pot and payoff computation to native settlement. It exports every one of
+the 41 accepted proof statements from that same executed hand.
+
+## Exact-SHA acceptance and merge policy
+
+The WS8 context Level 1 and combined security Level 2 workflows are executable
+owners. Malformed duplicated YAML/shell tails have been removed. They pin checkout
+to the actual PR head, use Solidity 0.8.30 / Foundry 1.8.6, prepare only the scoped
+test closure and require machine-readable execution records. Missing, skipped or
+failed mandatory tests, zero-test runs, proof/VK/source checksum differences,
+context differences and mismatched report SHAs fail closed. The certificate job
+requires passing historical provenance, fresh scoped cryptographic verification,
+actual funded/adversarial execution and independent executed-hand replay.
+
+A documentation statement is never acceptance. The authoritative final run URL,
+qualified SHA, exact execution reports, verifier runtime identities and checksums
+are the `ws8-level2-exact-sha-certificate`, `ws8-level1-genuine-cryptography` and
+`ws8-level2-funded-hand-execution` artifacts of the final successful Level 2 run.
+PR metadata records those immutable references and the actual merge SHA after the
+last gate passes. Unrelated 420Arcade documentation checks remain outside this
+poker qualification; no global phase or Level 3 rerun is requested.

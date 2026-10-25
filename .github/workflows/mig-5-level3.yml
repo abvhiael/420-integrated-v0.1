@@ -1,0 +1,22 @@
+name: MIG-5 Migration Level 3 Bounded Closeout
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/mig-5-level3.yml'
+      - 'scripts/migration/verify-mig-5-level3.mjs'
+      - 'docs/migration/MIG-5-closeout-manifest.json'
+  workflow_dispatch:
+jobs:
+  bounded-closeout:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: MIG-4 preserved Level 1 and Level 2 invariants
+        run: |
+          node scripts/migration/verify-mig-4-decoupling.mjs
+          node scripts/migration/verify-mig-4-level2.mjs
+      - name: MIG-5 bounded closeout invariant gate
+        run: node scripts/migration/verify-mig-5-level3.mjs

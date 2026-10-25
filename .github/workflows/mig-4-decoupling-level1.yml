@@ -1,0 +1,18 @@
+name: MIG-4 Genesis Game Decoupling Level 1
+on:
+  pull_request:
+    paths:
+      - 'docs/migration/MIG-4-verified-game-assets.json'
+      - 'scripts/migration/verify-mig-4-decoupling.mjs'
+      - '.github/workflows/mig-4-decoupling-level1.yml'
+      - 'config/genesis-applications.json'
+  workflow_dispatch:
+jobs:
+  decoupling:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node scripts/migration/verify-mig-4-decoupling.mjs

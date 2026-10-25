@@ -77,6 +77,7 @@ export function composeOrdinaryMarketRuntime({store,identity,rewards,inventoryAu
  const market=new HighCountryMarket(store,authority,clock);
  const skillResearch=progression?new SkillResearchService({store,identity,...progression,clock}):null;
  const missionService=missions?new MissionService({store,identity,...missions,clock}):null;
+ const discoveryService=discovery?new DiscoveryIntegration({store,identity,...discovery,clock}):null;
  return {store,identity,rewards,market,marketView:new HighCountryMarketplaceView({store,identity,market,clock}),skillResearch,missionService,discoveryService};
 }
 export function runtimeHttpServer(runtime,{origin}){

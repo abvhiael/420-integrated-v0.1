@@ -737,6 +737,21 @@ contract FantasyContestEngine420Test is FantasyEngineFixture420 {
         require(engine.credit(DEV) == gross * 3 / 100, "fee rounded once");
     }
 
+    function testMaximumFundedGrossPreservesExactFeeAndPrize() public {
+        uint256 fee = type(uint256).max / 2;
+        vm.deal(USER, fee + 1);
+        vm.deal(USER2, fee + 1);
+        _ready(2, fee);
+        _settle();
+        FantasyContestEngine420.Pool memory p = engine.poolOf(CONTEST);
+        require(p.gross == type(uint256).max - 1, "maximum funded gross");
+        require(p.fee == 3473762677119485862707129550260637235598099539969216921183727520237393889198, "full-width exact three percent");
+        require(p.netPrize + p.fee == p.gross, "full-width conservation");
+        engine.collect(CONTEST, 1);
+        engine.collect(CONTEST, 2);
+        require(engine.credit(USER) + engine.credit(USER2) + engine.credit(DEV) == p.gross, "full-width credits conserved");
+    }
+
     function testTokenPoolUsesExactSameAssetForEntryPrizesAndDevelopment() public {
         ERC20Template420 token = new ERC20Template420(
             "Test 420 denomination",

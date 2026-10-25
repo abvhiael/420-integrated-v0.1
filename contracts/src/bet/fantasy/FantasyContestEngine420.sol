@@ -150,7 +150,7 @@ contract FantasyContestEngine420 is IFantasyDisputeHost420 {
                 || address(slateBook.oracle()) != address(disputes.oracle())
         ) revert InvalidInput();
         rankings = new FantasyRankingBook420(address(this));
-        admission = new FantasyAdmission420(slates_, address(disputes.identities()), issuer_, credentialType_);
+        admission = new FantasyAdmission420(slates_, address(disputes.identities()), issuer_, credentialType_, address(authorization));
         payoutPolicy = new FantasyPayoutPolicy420(address(this));
     }
     modifier nonReentrant() {
@@ -172,8 +172,8 @@ contract FantasyContestEngine420 is IFantasyDisputeHost420 {
         return entries[id][index];
     }
 
-    function _cap(bytes32 action, bytes32 scope) private view {
-        if (!authorization.isAuthorized(msg.sender, action, scope, 0)) revert Unauthorized();
+    function _cap(bytes32 action, bytes32 id, bool global) private view {
+        admission.requireAuthority(msg.sender, action, id, global);
     }
 
     function registerIdentity(bytes32 subject, bytes32 credential) external nonReentrant {
@@ -181,7 +181,7 @@ contract FantasyContestEngine420 is IFantasyDisputeHost420 {
     }
 
     function createPool(bytes32 id, Config calldata config, bytes calldata payoutBands) external payable nonReentrant {
-        _cap(CREATE, authorization.scopeGlobal());
+        _cap(CREATE, bytes32(0), true);
         admission.requireController(config.launcher, msg.sender);
         FantasySlateBook420.Slate memory s = slateBook.slateOf(config.slate);
         if (
@@ -232,7 +232,7 @@ contract FantasyContestEngine420 is IFantasyDisputeHost420 {
     }
 
     function setInvitation(bytes32 id, bytes32 subject, bool allowed) external nonReentrant {
-        _cap(INVITE, authorization.scopeForContest(id));
+        _cap(INVITE, id, false);
         _open(id);
         if (!configs[id].inviteOnly || subject == 0) revert InvalidInput();
         invited[id][subject] = allowed;
@@ -240,7 +240,7 @@ contract FantasyContestEngine420 is IFantasyDisputeHost420 {
     }
 
     function recordConflict(bytes32 id, bytes32 subject) external nonReentrant {
-        _cap(CONFLICT, authorization.scopeForContest(id));
+        _cap(CONFLICT, id, false);
         if (pools[id].state == State.NONE || subject == 0) revert InvalidInput();
         conflicts[id][subject] = true;
         emit ConflictRecorded(id, subject);
@@ -445,8 +445,13 @@ contract FantasyContestEngine420 is IFantasyDisputeHost420 {
                 || (s.earlyStart != 0 && p.lastAcceptedAt >= s.earlyStart)
         ) revert InvalidState();
         p.state = State.REVIEW;
-        p.fee = configs[id].paid ? (p.gross / 100) * 3 + (p.gross % 100) * 3 / 100 : 0;
-        p.netPrize = p.gross - p.fee;
+        // Both products are bounded: 3 * floor(gross / 100) <= 3 * floor(max / 100),
+        // and 3 * (gross % 100) <= 297. Their sum is floor(3 * gross / 100)
+        // and cannot exceed gross, so these checks cannot reject any uint256 input.
+        unchecked {
+            p.fee = configs[id].paid ? (p.gross / 100) * 3 + (p.gross % 100) * 3 / 100 : 0;
+            p.netPrize = p.gross - p.fee;
+        }
         disputes.startCorrection(id, s.resolvedAt);
     }
 

@@ -1,0 +1,59 @@
+name: 420Bet daily application local Level 2
+on:
+  push:
+    branches: ['bet/5b2-daily-application']
+    paths:
+      - 'clients/420bet-fantasy/**'
+      - 'contracts/script/fantasy/**'
+      - 'contracts/src/**'
+      - 'scripts/fantasy/qualify-daily-application.py'
+      - '.github/workflows/420bet-daily-application-level2.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: daily-application-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  actual-browser-custody-escrow:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: pnpm/action-setup@v4
+        with:
+          version: '11.25.0'
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.8.6
+      - run: python -m pip install -r clients/420bet-fantasy/daily/requirements.txt
+      - run: pnpm --dir clients/420bet-fantasy/daily install --frozen-lockfile --ignore-scripts
+      - run: pnpm --dir clients/420bet-fantasy/daily exec playwright install --with-deps chromium
+      - run: node clients/420bet-fantasy/daily/build.mjs
+      - name: Execute real browser, custody, oracle, challenge and ERC20 settlement
+        run: python scripts/fantasy/qualify-daily-application.py --output artifacts/daily-application
+      - name: Upload public evidence only
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: daily-application-${{ github.sha }}
+          if-no-files-found: error
+          path: |
+            artifacts/daily-application/qualification.json
+            artifacts/daily-application/source-checksums.json
+            artifacts/daily-application/bundle-checksums.json
+            artifacts/daily-application/deployment.json
+            artifacts/daily-application/browser-result.json
+            artifacts/daily-application/conservation.json
+            artifacts/daily-application/transactions.json
+            artifacts/daily-application/versions.json
+            artifacts/daily-application/*.log
+            artifacts/daily-application/*.png

@@ -74,7 +74,7 @@ def normalise(records, mapping, as_of, cutoff):
     if type(as_of) is not int or type(cutoff) is not int or not 0<as_of<2**64 or not 0<cutoff<2**64:fail("invalid revision time")
     if set(records)!={"summary","pbp","time-on-ice"}:fail("all three captures required")
     gid=mapping.get("providerGameID");endpoint("summary",gid)
-    if mapping.get("version")!=1:fail("unsupported identity mapping")
+    if type(mapping.get("version")) is not int or mapping["version"]!=1:fail("unsupported identity mapping")
     if not re.fullmatch(r"0x[0-9a-f]{64}",mapping.get("game","")):fail("invalid canonical game")
     # Canonical game IDs have one deterministic provider namespace in this adapter.
     if mapping["game"] != "0x"+k256(encode(["string","string"],["SPORTRADAR.NHL.V7",gid])).hex():fail("wrong game mapping")
@@ -108,6 +108,7 @@ def normalise(records, mapping, as_of, cutoff):
     for row in rows:
         pid=row.get("providerID");aid=row.get("athlete");p=allplayers.get(pid)
         if p is None or pid in mapped or type(aid) is not int or not 0<aid<2**32 or aid in ids:fail("ambiguous athlete mapping")
+        if type(row.get("positions")) is not int or row["positions"] not in POSITIONS.values():fail("unknown or invalid position mask")
         if row.get("reference")!=p.get("reference") or str(aid)!=p.get("reference") or row.get("positions")!=POSITIONS.get(p.get("primary_position")):fail("identity/position mismatch")
         mapped[pid]=row;ids.add(aid)
     eventstats={pid:Counter() for pid in allplayers};eventids=set();eventplayers=set()

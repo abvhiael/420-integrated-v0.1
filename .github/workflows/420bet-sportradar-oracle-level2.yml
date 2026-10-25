@@ -41,4 +41,5 @@ jobs:
             artifacts/sportradar-oracle/*.json
             artifacts/sportradar-oracle/*.log
             artifacts/sportradar-oracle/*.abi
+            artifacts/sportradar-oracle/*.toml
           if-no-files-found: error

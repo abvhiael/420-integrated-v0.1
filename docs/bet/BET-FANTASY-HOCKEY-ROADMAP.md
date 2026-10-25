@@ -1,6 +1,6 @@
 # 5B.1 - Hockey fantasy framework mini-roadmap
 
-Research began 2026-10-24. Current status: daily NHL contract engine implemented and merged; Sportradar scoring normalization and canonical oracle/scorer integration implemented with scoped Level 1/2 evidence on the testing branch. Other formats remain open. The consolidated specifications and current evidence below supersede older proposed/open decision-log wording for the daily format.
+Research began 2026-10-24. Historical starting status: daily NHL contract engine implemented and merged; Sportradar scoring normalization and canonical oracle/scorer integration implemented with scoped Level 1/2 evidence on the testing branch. Other formats remain open. The consolidated specifications and current evidence below supersede older proposed/open decision-log wording for the daily format.
 
 Hockey is the selected starting sport. NHL regular-season hockey is the proposed first coverage boundary. Playoffs, preseason, international competitions and other leagues require explicit coverage and rules versions. Numeric scoring presets below remain discussion candidates.
 
@@ -21,15 +21,17 @@ Rules changes create a new profile version. Existing funded contests retain thei
 
 ## Mini-roadmap inside 5B.1
 
-Current scoped status is recorded below; no row is closed for every fantasy format. Daily contract/runtime evidence does not imply an application client, production custodian service or live funded testnet acceptance.
+**Current implementation update — 2026-10-25:** approved NHL daily, salary/captain, four season modes and peer/house pick'em now have canonical contract, publisher/source and confidential SDK/custodian implementations. Source `e3c8a0dcaaa5ae79bf4717519804a6e036540167` passed funded local Level 2 (190 tests, 5,000 matching fuzz cases, 34 funded scenarios and 297 expected EVM rejections). Reconciliation with current main rechecks affected source identities and the inherited daily engine. See [approved implementation and qualification](BET-FANTASY-APPROVED-IMPLEMENTATION-V1.md). Official deployment/live and independent acceptance remain TN-FAN-01–05; new-format webpages remain separate. Playoff pools and other sports are future additions. Older discussion candidates below are historical; the approved V1 decision records supersede them.
+
+The retained daily evidence is recorded below; the current approved implementation update above supersedes older draft/open implementation wording. Daily contract/runtime evidence does not imply an application client, production custodian service or live funded testnet acceptance.
 
 - Daily contract engine: [consolidated rules](BET-FANTASY-CONTEST-ENGINE-V1.md), merged PR #822.
 - Daily scoring/source-to-oracle integration: [implementation and field rules](BET-FANTASY-SPORTRADAR-SCORING-ORACLE.md), exact head `3a4379e6ef76599e35151416403d2978c99c3bf9`, [Level 2 run](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/40166254483); merged with the daily application in PR #825 at `c0c17bd71ad42b4f1c7d40dac6c958fc21d0851d`.
 - Official deployment and prospective live funded settlement: moved to [420Bet testnet roadmap, TN-FAN-01 through TN-FAN-05](../420BET-TESTNET-WORK-ROADMAP.md#daily-nhl-fantasy-official-testnet-deployment-and-live-settlement-qualification).
 - **Daily application implementation:** confidential lineup custody, wallet client and isolated browser/ERC20 integration runner are in [daily application](https://github.com/abvhiael/420-integrated-v0.1/blob/main/clients/420bet-fantasy/daily/README.md). The runner requires actual execution and a clean source SHA for a Level 2 certificate; official-network operations remain TN-FAN-01–05.
 - **Opening fantasy test scope (2026-10-25):** use the established uncapped seven-position daily NHL points pool for initial testing. Paid and launcher-funded free pools are configurations of this one format.
-- **TN-FAN-01 local preparation:** deployment/authority/manifest/client-binding tooling is implemented and locally qualified (32 deployment checks and 12 browser scenarios in each asset mode, code SHA `9a259013a9a32258d33b64cb5d010620f5a99a77`); see [local readiness and boundary](BET-FANTASY-TN-FAN-01-LOCAL-READINESS.md). Official inputs can be provided before launch; only live evidence belongs in TN-FAN-01-L1–L4. H07/H08/H09 remain deferred until testnet is running.
-- **Next official-network work:** execute TN-FAN-01-L1–L4, then TN-FAN-02–05 when testnet is running. This does not mark deferred formats complete.
+- **TN-FAN-01 local preparation:** deployment/authority/manifest/client-binding tooling is implemented and locally qualified (32 deployment checks and 12 browser scenarios in each asset mode, code SHA `9a259013a9a32258d33b64cb5d010620f5a99a77`); see [local readiness and boundary](BET-FANTASY-TN-FAN-01-LOCAL-READINESS.md). Official inputs can be provided before launch; only live evidence belongs in TN-FAN-01-L1–L4. H07/H08/H09 were reopened for local draft-framework implementation by user direction; see [executable scope and remaining integration](BET-FANTASY-FORMAT-FRAMEWORKS-V1.md).
+- **Next official-network work:** execute TN-FAN-01-L1–L4, then TN-FAN-02–05 when testnet is running. Approved new-format funded integration is locally implemented and qualified; official receipts still require the running testnet.
 
 | ID | Work | Completion evidence |
 |---|---|---|
@@ -39,10 +41,10 @@ Current scoped status is recorded below; no row is closed for every fantasy form
 | 5B.1-H04 | Specify scoring profile versions | Captured reference rules, explicit deviations, exact arithmetic and independently calculated example results |
 | 5B.1-H05 | Specify common contest lifecycle | Entry/lock/finality/challenge/settlement/refund transitions, role boundaries and custody invariants |
 | 5B.1-H06 | Daily and single-event framework | Daily contract roster/slate/escrow/scoring/dispute engine implemented and scoped-qualified. Confidential custodian service and daily application/client are implemented with an executable local browser/Anvil qualification path; prospective funded deployment/settlement is TN-FAN-01–05. Single-event variant decisions remain open. |
-| 5B.1-H07 | Salary-cap and captain variants | DEFERRED until testnet is running. Salary/position/captain decisions, frozen snapshots, implementation and focused qualification |
-| 5B.1-H08 | Season-long framework | DEFERRED until testnet is running. Points, H2H and category/roto decisions; draft/waiver/period rules; implementation and focused qualification |
-| 5B.1-H09 | Pick'em framework | DEFERRED until testnet is running. Metric/line/void/payout decisions, liability boundaries, implementation and focused qualification |
-| 5B.1-H10 | Oracle and cross-format acceptance | Daily Sportradar field normalization and canonical oracle/scorer connection implemented and scoped-qualified. Official-network acceptance is TN-FAN-01–05; cross-format integration and independent-source acceptance remain open. |
+| 5B.1-H07 | Salary-cap and captain variants | Approved V1 salary publisher, nine-player salary and six-player captain rules, canonical funded hosts, confidential client/custodian adapters and funded local Level 2 implemented; official/live acceptance remains open |
+| 5B.1-H08 | Season-long framework | Approved total/H2H points, categories/roto, verifiable snake draft/timeouts, confidential preferences/waivers, trades, fixed weeks, proof scoring and season escrow/refunds implemented with funded local qualification; official/live acceptance remains open |
+| 5B.1-H09 | Pick'em framework | Approved peer and house V1 cards, short-schedule whitelist, participation/void grading, separately funded gross house liabilities, disputes and canonical settlement/refunds implemented and funded locally qualified; official/live acceptance remains open |
+| 5B.1-H10 | Oracle and cross-format acceptance | Daily Sportradar field normalization and canonical oracle/scorer connection implemented and scoped-qualified. Official-network acceptance is TN-FAN-01–05; approved cross-format local integration is implemented and funded locally qualified; independent-source acceptance remains open. |
 
 H01-H05 establish shared contracts and interfaces. H06-H09 each follow: discuss scoring and boundaries, approve a precise version, implement the framework, execute tests, then qualify. Provider evaluation and schema design can proceed alongside format discussions. Live provider and official-chain acceptance belongs in the testnet roadmap; local implementation and replay qualification need not wait for an active testnet.
 
@@ -258,3 +260,8 @@ Daily payout adaptation confirmed: for three or more qualifying entrants, automa
 
 
 Daily-engine implementation update: [the consolidated V1 specification](BET-FANTASY-CONTEST-ENGINE-V1.md) now maps approved daily rules to actual pool, escrow, encrypted admission/lock, verified scoring, bounded rankings and dispute-gated settlement modules. H06/H10 runtime framework work is implemented; exact scoped qualification evidence is emitted by the contest runner. Licensed live ingestion, deployment and the other format workstreams remain open.
+
+
+## Framework decision update — 2026-10-25
+
+User selected reuse of NHL scoring for salary/captain and season points modes, draft status for new defaults, and both peer-funded and house-backed pick'em with separate liabilities. [Executable frameworks V1](BET-FANTASY-FORMAT-FRAMEWORKS-V1.md) records the implemented domain engines, scoped Level 1 runner and remaining local contract/client/Level 2 work. These frameworks no longer wait for testnet; official deployment/live acceptance still does.

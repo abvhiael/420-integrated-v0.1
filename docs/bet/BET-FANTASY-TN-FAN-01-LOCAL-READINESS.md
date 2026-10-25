@@ -1,6 +1,6 @@
 # TN-FAN-01: local deployment readiness and official-network boundary
 
-The opening format remains the established uncapped daily NHL points pool, with paid and launcher-funded free configurations. H07 salary-cap/captain, H08 season-long and H09 pick'em remain deferred until testnet is running. This step adds deployment/integration tooling, not another fantasy format or production activation.
+The opening format remains the established uncapped daily NHL points pool, with paid and launcher-funded free configurations. The earlier deferral of H07 salary-cap/captain, H08 season-long and H09 pick'em was superseded by the user's 2026-10-25 request for [local draft frameworks](BET-FANTASY-FORMAT-FRAMEWORKS-V1.md). Their funded integration remains a separate local milestone. This step adds deployment/integration tooling, not another fantasy format or production activation.
 
 ## Work split
 

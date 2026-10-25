@@ -1,0 +1,630 @@
+{
+  "reviewType": "Local source review only; no independent security approval",
+  "analyzerVersion": "0.11.6",
+  "normalizedSourceSHA256": {
+    "contracts/src/bet/BetAuthorization420.sol": "984e7bef82674a1f1b9c5a303cb90ede07d7619ae7f49664dd88f42147cf7f96",
+    "contracts/src/bet/BetIds420.sol": "578e3ef0b71336be6030452defed6e26824beb8e268e420c2db89c407eccfab8",
+    "contracts/src/bet/BetTypes420.sol": "f4feff47fe44c67ff0d0305a95d2e8063e78dc768140041234b484985bea741e",
+    "contracts/src/interfaces/I420System.sol": "02e1ef2bec417289bc13c53c3c7453b132442be6932162683099c301f624ed02",
+    "contracts/src/interfaces/genesis/ICapabilityRegistry420.sol": "0731b19a560a63242e2afeb177eb3c8e1f2ace8abd3612abc0b0eb50a6910431",
+    "contracts/src/interfaces/genesis/ICapabilityRegistryExtended420.sol": "2ab13853023a734c75adc0c19bdd7483d77d7aaf75fe8daa079f7258771fdf85",
+    "contracts/src/system/CapabilityRegistry420.sol": "eec70c83ff91b2c7a5fd3fc10728db06d402642be0f8e0c48c4530ac96e7b7ef",
+    "contracts/src/revenue/DevelopmentCompensationIds420.sol": "5a7c4b05901c16194fc84c5f279ef2ea22e81a537516ccd156fe5e6f7feecdd3",
+    "contracts/src/revenue/DevelopmentCompensationVault420.sol": "4f28e6fbcd71e78632ce8decee2aac2967c7117d41e7574f67f8c95ec32a3e8b",
+    "contracts/src/token/ERC20Template420.sol": "d7b62c98bfc75be6b56f15180d027a62b4afaae6f674df27fbe35e163596c738",
+    "contracts/src/apps/Identity420.sol": "f47526bce8b55d10c64fb3d8d320fc1e4dc6d43945db064e86d373adec7e0152",
+    "contracts/src/bet/fantasy/FantasyAdmission420.sol": "77899c8b082bb69e4265a5e3abff4ad738586c2d3eb253b29385c98fa08d4749",
+    "contracts/src/bet/fantasy/FantasySlateBook420.sol": "1007ffa2b5946c99fdbe6202e4c87114668a41d357e03f6f6eabced5cf0e6b4a",
+    "contracts/src/bet/fantasy/FantasyTypes420.sol": "c9fe9a5df74fc931a1ad4f838a332c32e65314c2444631243b4f3e822429f068",
+    "contracts/src/interfaces/IOracle420.sol": "2b68ecfb6c818f53f2853467035edbc34e0ebdbe1581c0ebaff48c6c8d9a38a3",
+    "contracts/src/interfaces/genesis/IIdentityCredential420.sol": "74f96b43758ee97d3124e112d669e9ba9bccf9ce63be1e6c7dee8e1948f4f978",
+    "contracts/src/interfaces/genesis/Types420.sol": "bee557da20b6ab622fc2e9cb779c27bb9efecfb9f7bc5d73f646446bab17f5ff",
+    "contracts/src/system/SystemAccess.sol": "22cbbfabb8ecef4cae12d5617968996a00ae223988f1a55f1265886f1aa56223",
+    "contracts/script/fantasy/FantasyApprovedLocalImports420.sol": "a49d9d02719531d1dd906196be7784ffbb00dd5e1e1d705cc99ac2b7bd1126e5",
+    "contracts/script/fantasy/FantasyDailyLocalImports420.sol": "5688f48bcb43df54d64921f3ba246beb87e5034dbb7766f7326153defa8874a3",
+    "contracts/src/bet/fantasy/FantasyContestEngine420.sol": "baa30f3438ec3939091cc2a41343d59d28a67bf970befb7a9a2c6df76c79f587",
+    "contracts/src/bet/fantasy/FantasyDisputeController420.sol": "c6f07275ad8b7843eae991d6ed48eb506959ab939402603a221441fadcf68855",
+    "contracts/src/bet/fantasy/FantasyDraftEntropy420.sol": "7361099eda674f1179c3df3d273eb00794be9e21fef357c2dad9bfe571517fae",
+    "contracts/src/bet/fantasy/FantasyFormatBook420.sol": "b2fb5c1d4e4119bb639e385fc7372b28e3af7a683f060dd4e92a63199b67aeee",
+    "contracts/src/bet/fantasy/FantasyFormatEscrow420.sol": "923f4069a80ef4458182f7df41538ecc50ba9775aba970296f61ce3d31bcd615",
+    "contracts/src/bet/fantasy/FantasyFormatReceipt420.sol": "3f7535fd969d4757ffd8b454bb3e2130ac7364aee2fe24a1cae8b2d3398eba86",
+    "contracts/src/bet/fantasy/FantasyNHLScoring420.sol": "d3e4bb3a34fa00d1fd9409c7d933d052d9325b80c6816a64c7c9920fc778e269",
+    "contracts/src/bet/fantasy/FantasyPayoutPolicy420.sol": "3414f49e3f158f89def9c4929615f98adbeadb990523cbea4eb38a9b62406530",
+    "contracts/src/bet/fantasy/FantasyRankingBook420.sol": "f9e651b7edec826e81ccc8352ae3408da78ff5f88959ddab893564416e7e21d8",
+    "contracts/src/bet/fantasy/FantasySeasonActions420.sol": "725ce06a5a1fdb0bd4da28d71d6ac256329764bbfaaf7eb5c7f467b606a5f195",
+    "contracts/src/bet/fantasy/FantasySeasonData420.sol": "bbd4b5f4ef8fcf48be4a64abc1abc5b3074c204556844ae3a1d212f809b3b9bb",
+    "contracts/src/bet/fantasy/FantasySeasonEscrow420.sol": "10e53a29d52dfb44794e2f2a0fbe2af45638d7debf29cf872aae236049ecb56b",
+    "contracts/src/bet/fantasy/FantasySeasonMath420.sol": "7d92d69e4871083937da6b9823721381f974919e2338b0278f8f2a043cf0ed8a",
+    "contracts/src/bet/fantasy/FantasySeasonReceipt420.sol": "28c5a43809bce2d6a2068bbba646243a1caabef98026c4cb7376381f42220177",
+    "contracts/src/bet/fantasy/FantasySeasonRoster420.sol": "e794a097b82d8f88a922168731dda6135e170a61b3bec4d6297904e1edbddb84",
+    "contracts/src/bet/fantasy/FantasySeasonScores420.sol": "ec4a22337ffe53d7e6dd6c8a3488d034d306ffb49663dc7607d10d24496a37f0",
+    "contracts/src/bet/fantasy/FantasySeasonTransactions420.sol": "954a986f526fad3a66b8f9c36024bda3974e57245aae9bbc19aff4ed05efcca5",
+    "contracts/src/bet/fantasy/IFantasyDisputeHost420.sol": "09b9bd98ef9888a66a1aa8648d809ee26dd407d31684f362d1196ed1b2834740",
+    "contracts/src/exchange/Wrapped420.sol": "f82959dd62d4ab6b19090dda30a86917b8bd70ab1f060a9ce0280e3cce22fb5a",
+    "contracts/src/interfaces/IRandomnessRouter420.sol": "3cfa763ced15ff1ff237f37176526c5f08d39a10ec0f3309db3bce16f0cbbf12",
+    "contracts/src/interfaces/IRandomnessVerifier420.sol": "22d7c4be6e48d9549000a9eb4f3eabfc52a960983d0fd4b43c86c1ab3eb8b0e1",
+    "contracts/src/oracle/OracleFeedRegistry420.sol": "415ae8e270e469548d00401ec692e549de0d9b152ba23c3004162d5af1b54717",
+    "contracts/src/oracle/OracleIds420.sol": "3675b68162cc93e382477881af8e5f939f4d1bfcb3da8772d3f187e95170eba2",
+    "contracts/src/oracle/OracleProviderRegistry420.sol": "a40ca1c6f71d494c5a1b5cb8b01bb263098083495e354c22695b6e4403292236",
+    "contracts/src/oracle/OracleRiskPolicy420.sol": "9d5cb508a98b49f8daef1d25d7147383f4cce91cd7d2cfbdd66a08e4dc890864",
+    "contracts/src/oracle/OracleRouter420.sol": "8d5ae7bbb3d59178c9b94c088bcafb409396a818a0a193f8a9629ee37f5de799",
+    "contracts/src/randomness/RandomnessDraw420.sol": "d5c5017bb6d19ea326dbfbf9a57410e14948fbe4d6eebf8455faa1816b791886",
+    "contracts/src/randomness/RandomnessIds420.sol": "e37d4e7ae6629526b55e920b4318b3bc08b87d2db4f7ea2e25dca604d813b711",
+    "contracts/src/randomness/RandomnessProfileRegistry420.sol": "6474ada3f985f9ad6bd35f7b1951a32135ba172b7b4cbbe463581efe1bfcede1",
+    "contracts/src/randomness/RandomnessRegistry.sol": "9e83b1d6069cab8fe7f00f58308732ba3b79d2b2f77bbd9632185126ab8a3623",
+    "contracts/src/randomness/RandomnessRouteRegistry420.sol": "e32a0b95e998b8f7962140c5b62ce35bcb7340f296178eb316e3bb9ec810a346",
+    "contracts/src/randomness/RandomnessRouter420.sol": "c4bf8a457df29c18c979cf3f0ef50ecbdd2b2f608430d5ff069704dc3f831115"
+  },
+  "dispositions": {
+    "ccd78e2bb29ff74359107520ac9c5ce5baf4f671e4ba33140420db6365adcfe0": {
+      "severity": "High",
+      "check": "arbitrary-send-eth",
+      "location": "FantasyContestEngine420._sendExact(address,uint256) (contracts/src/bet/fantasy/FantasyContestEngine420.sol#590-603) sends eth to arbitrary user",
+      "reason": "Inherited canonical daily/dispute withdrawal sends only the withdrawing beneficiary\u2019s fixed credit, with debit-before-send, guarded mutex and exact transfer checks; no new arbitrary recipient path is introduced."
+    },
+    "4f68e487368e19b8c46f241c4620461dfb2c0d3718af1a702067b4f81d901526": {
+      "severity": "High",
+      "check": "arbitrary-send-eth",
+      "location": "FantasyDisputeController420._sendExact(address,uint256) (contracts/src/bet/fantasy/FantasyDisputeController420.sol#528-541) sends eth to arbitrary user",
+      "reason": "Inherited canonical daily/dispute withdrawal sends only the withdrawing beneficiary\u2019s fixed credit, with debit-before-send, guarded mutex and exact transfer checks; no new arbitrary recipient path is introduced."
+    },
+    "fab1bd323ef54e83b49793c27cbd5d8008fddc19576c443bcd504f685ade60b6": {
+      "severity": "High",
+      "check": "reentrancy-balance",
+      "location": "Reentrancy in FantasyContestEngine420._sendExact(address,uint256) (contracts/src/bet/fantasy/FantasyContestEngine420.sol#590-603):",
+      "reason": "All prize/bond token ingress and withdrawal entry points have the existing guarded mutex. Withdrawals debit credit and total liability before transfer. Exact before/after balance checks deliberately detect fee/rebasing/short transfers; they do not authorize payout from a stale balance. Canonical Wrapped420 is exercised in funded flows."
+    },
+    "4f3d62ce7753b2a7d5d55a0179fd88d35d351b2af8e0678bf9e4459234c6cd46": {
+      "severity": "High",
+      "check": "reentrancy-balance",
+      "location": "Reentrancy in FantasySeasonEscrow420._receive(uint256) (contracts/src/bet/fantasy/FantasySeasonEscrow420.sol#57-60):",
+      "reason": "All prize/bond token ingress and withdrawal entry points have the existing guarded mutex. Withdrawals debit credit and total liability before transfer. Exact before/after balance checks deliberately detect fee/rebasing/short transfers; they do not authorize payout from a stale balance. Canonical Wrapped420 is exercised in funded flows."
+    },
+    "322a231a03b4420941b653d81256fd2effcbb18579e46bcb2ec7292667c7ef38": {
+      "severity": "High",
+      "check": "reentrancy-balance",
+      "location": "Reentrancy in FantasyFormatEscrowBase420._receive(uint256) (contracts/src/bet/fantasy/FantasyFormatEscrow420.sol#70-75):",
+      "reason": "All prize/bond token ingress and withdrawal entry points have the existing guarded mutex. Withdrawals debit credit and total liability before transfer. Exact before/after balance checks deliberately detect fee/rebasing/short transfers; they do not authorize payout from a stale balance. Canonical Wrapped420 is exercised in funded flows."
+    },
+    "fb957aea4a2c796fb1f8f20b30262a6f5b590395176980443190e028575743f0": {
+      "severity": "High",
+      "check": "reentrancy-balance",
+      "location": "Reentrancy in FantasyDisputeController420._sendExact(address,uint256) (contracts/src/bet/fantasy/FantasyDisputeController420.sol#528-541):",
+      "reason": "All prize/bond token ingress and withdrawal entry points have the existing guarded mutex. Withdrawals debit credit and total liability before transfer. Exact before/after balance checks deliberately detect fee/rebasing/short transfers; they do not authorize payout from a stale balance. Canonical Wrapped420 is exercised in funded flows."
+    },
+    "8a454061ae8e15aaa68b68141e5da19d8e9a1dd566409c83beaa3f0f509eb4c5": {
+      "severity": "High",
+      "check": "reentrancy-balance",
+      "location": "Reentrancy in FantasyContestEngine420._sendExact(address,uint256) (contracts/src/bet/fantasy/FantasyContestEngine420.sol#590-603):",
+      "reason": "All prize/bond token ingress and withdrawal entry points have the existing guarded mutex. Withdrawals debit credit and total liability before transfer. Exact before/after balance checks deliberately detect fee/rebasing/short transfers; they do not authorize payout from a stale balance. Canonical Wrapped420 is exercised in funded flows."
+    },
+    "b59b01adf9c514b545bd79f9166ae195ae8e043e78b75f57591bdc9c03347c1d": {
+      "severity": "High",
+      "check": "reentrancy-balance",
+      "location": "Reentrancy in FantasyFormatEscrowBase420.withdrawCredit() (contracts/src/bet/fantasy/FantasyFormatEscrow420.sol#275-279):",
+      "reason": "All prize/bond token ingress and withdrawal entry points have the existing guarded mutex. Withdrawals debit credit and total liability before transfer. Exact before/after balance checks deliberately detect fee/rebasing/short transfers; they do not authorize payout from a stale balance. Canonical Wrapped420 is exercised in funded flows."
+    },
+    "3cd87dca40b70b31dd4c19e910adb4ca38e7ba75be93add11a5bc0e269499b12": {
+      "severity": "High",
+      "check": "reentrancy-balance",
+      "location": "Reentrancy in FantasySeasonEscrow420.withdrawCredit() (contracts/src/bet/fantasy/FantasySeasonEscrow420.sol#168-171):",
+      "reason": "All prize/bond token ingress and withdrawal entry points have the existing guarded mutex. Withdrawals debit credit and total liability before transfer. Exact before/after balance checks deliberately detect fee/rebasing/short transfers; they do not authorize payout from a stale balance. Canonical Wrapped420 is exercised in funded flows."
+    },
+    "2e7d76abbfacb7944d69b824cd1913055f53b24a0f771e85c38461056abd14fd": {
+      "severity": "High",
+      "check": "reentrancy-balance",
+      "location": "Reentrancy in FantasyDisputeController420._receiveExact(uint256) (contracts/src/bet/fantasy/FantasyDisputeController420.sol#512-526):",
+      "reason": "All prize/bond token ingress and withdrawal entry points have the existing guarded mutex. Withdrawals debit credit and total liability before transfer. Exact before/after balance checks deliberately detect fee/rebasing/short transfers; they do not authorize payout from a stale balance. Canonical Wrapped420 is exercised in funded flows."
+    },
+    "7c4b168e07613a55e5f7f07536ea94ffef8324c69be5c7e00052ffeca9a28a70": {
+      "severity": "High",
+      "check": "reentrancy-balance",
+      "location": "Reentrancy in FantasyContestEngine420._receiveExact(uint256) (contracts/src/bet/fantasy/FantasyContestEngine420.sol#574-588):",
+      "reason": "All prize/bond token ingress and withdrawal entry points have the existing guarded mutex. Withdrawals debit credit and total liability before transfer. Exact before/after balance checks deliberately detect fee/rebasing/short transfers; they do not authorize payout from a stale balance. Canonical Wrapped420 is exercised in funded flows."
+    },
+    "0a7359a8c914d5f087936f64c39116b93bb6a2dbb040510cdcf52c998f1ea1ae": {
+      "severity": "High",
+      "check": "reentrancy-balance",
+      "location": "Reentrancy in FantasyDisputeController420._sendExact(address,uint256) (contracts/src/bet/fantasy/FantasyDisputeController420.sol#528-541):",
+      "reason": "All prize/bond token ingress and withdrawal entry points have the existing guarded mutex. Withdrawals debit credit and total liability before transfer. Exact before/after balance checks deliberately detect fee/rebasing/short transfers; they do not authorize payout from a stale balance. Canonical Wrapped420 is exercised in funded flows."
+    },
+    "c06153b44be4302fe9bbf57401c2450c36230de50cbda8af2f68bc61dede63da": {
+      "severity": "High",
+      "check": "reentrancy-balance",
+      "location": "Reentrancy in FantasyDisputeController420._receiveExact(uint256) (contracts/src/bet/fantasy/FantasyDisputeController420.sol#512-526):",
+      "reason": "All prize/bond token ingress and withdrawal entry points have the existing guarded mutex. Withdrawals debit credit and total liability before transfer. Exact before/after balance checks deliberately detect fee/rebasing/short transfers; they do not authorize payout from a stale balance. Canonical Wrapped420 is exercised in funded flows."
+    },
+    "2f47ad337faa986cf644455f509f5e3ae8f1fbf0155b103ca96d9638b63d93b7": {
+      "severity": "High",
+      "check": "reentrancy-balance",
+      "location": "Reentrancy in FantasyContestEngine420._receiveExact(uint256) (contracts/src/bet/fantasy/FantasyContestEngine420.sol#574-588):",
+      "reason": "All prize/bond token ingress and withdrawal entry points have the existing guarded mutex. Withdrawals debit credit and total liability before transfer. Exact before/after balance checks deliberately detect fee/rebasing/short transfers; they do not authorize payout from a stale balance. Canonical Wrapped420 is exercised in funded flows."
+    },
+    "ed707161c1385182efbdc79467e5a6f3ff78c634384d136c77718a39a1c41cb4": {
+      "severity": "High",
+      "check": "uninitialized-state",
+      "location": "Identity420._credentialCandidates (contracts/src/apps/Identity420.sol#51) is never initialized. It is used in:",
+      "reason": "Inherited Identity420 credential-candidate mapping has default empty arrays; issueCredential appends candidates. A mapping has no explicit initializer. Canonical identity source is unchanged."
+    },
+    "6d9aa076685aaa2c1752d82b8dba69d8f33aa0e90be5193cd7901e2a97e073c5": {
+      "severity": "Medium",
+      "check": "divide-before-multiply",
+      "location": "FantasyFormatEscrowBase420.settleHouse(bytes32,uint64) (contracts/src/bet/fantasy/FantasyFormatEscrow420.sol#229-236) performs a multiplication on the result of a division:",
+      "reason": "Quotient plus remainder expressions intentionally compute exact floor(3*gross/100), ceil(3*stake/100), or tie allocation without multiplying an unbounded gross first. Remainder products restore the division remainder; they are not a truncated fee. Funded fee/refund and independent allocation checks cover these paths."
+    },
+    "50b3f7de1f3332c02ea182f3aa0cb88b1976716db4564a80cb6e27bf0eb8baaf": {
+      "severity": "Medium",
+      "check": "divide-before-multiply",
+      "location": "FantasyFormatEscrowBase420.initializeRanking(bytes32) (contracts/src/bet/fantasy/FantasyFormatEscrow420.sol#162-167) performs a multiplication on the result of a division:",
+      "reason": "Quotient plus remainder expressions intentionally compute exact floor(3*gross/100), ceil(3*stake/100), or tie allocation without multiplying an unbounded gross first. Remainder products restore the division remainder; they are not a truncated fee. Funded fee/refund and independent allocation checks cover these paths."
+    },
+    "75c45e17ce54b86dd8e8bf665746d67e57a717fa251d759935f67d02e1b267d8": {
+      "severity": "Medium",
+      "check": "divide-before-multiply",
+      "location": "FantasySeasonEscrow420.initializeFinal(bytes32) (contracts/src/bet/fantasy/FantasySeasonEscrow420.sol#119-124) performs a multiplication on the result of a division:",
+      "reason": "Quotient plus remainder expressions intentionally compute exact floor(3*gross/100), ceil(3*stake/100), or tie allocation without multiplying an unbounded gross first. Remainder products restore the division remainder; they are not a truncated fee. Funded fee/refund and independent allocation checks cover these paths."
+    },
+    "9952bac4b90de74f4e79fb31c33464ddeab5b54e3e22f875b468ce3cbb0f1c93": {
+      "severity": "Medium",
+      "check": "divide-before-multiply",
+      "location": "FantasyFormatEscrowBase420.enter(bytes32,bytes32,bytes32,FantasyFormatEscrowBase420.Submission) (contracts/src/bet/fantasy/FantasyFormatEscrow420.sol#110-126) performs a multiplication on the result of a division:",
+      "reason": "Quotient plus remainder expressions intentionally compute exact floor(3*gross/100), ceil(3*stake/100), or tie allocation without multiplying an unbounded gross first. Remainder products restore the division remainder; they are not a truncated fee. Funded fee/refund and independent allocation checks cover these paths."
+    },
+    "dbd16d283708d246cf3aefbb1eadc05431cf0c90140e31ce718054b64032edab": {
+      "severity": "Medium",
+      "check": "divide-before-multiply",
+      "location": "FantasyRankingBook420._close(bytes32) (contracts/src/bet/fantasy/FantasyRankingBook420.sol#127-137) performs a multiplication on the result of a division:",
+      "reason": "Quotient plus remainder expressions intentionally compute exact floor(3*gross/100), ceil(3*stake/100), or tie allocation without multiplying an unbounded gross first. Remainder products restore the division remainder; they are not a truncated fee. Funded fee/refund and independent allocation checks cover these paths."
+    },
+    "024006ce5b3a3896ba0062ef5c768b49950a7e5d1593cb31517e14582bbb7f4d": {
+      "severity": "Medium",
+      "check": "divide-before-multiply",
+      "location": "FantasyContestEngine420._startReview(bytes32) (contracts/src/bet/fantasy/FantasyContestEngine420.sol#439-451) performs a multiplication on the result of a division:",
+      "reason": "Quotient plus remainder expressions intentionally compute exact floor(3*gross/100), ceil(3*stake/100), or tie allocation without multiplying an unbounded gross first. Remainder products restore the division remainder; they are not a truncated fee. Funded fee/refund and independent allocation checks cover these paths."
+    },
+    "a2261e7c4a0030eb7ccb7f09e6f91e035ec8e6e41bfcfdbc278b8a16139381f1": {
+      "severity": "Medium",
+      "check": "incorrect-equality",
+      "location": "FantasyFormatEscrowBase420.isInterested(bytes32,bytes32) (contracts/src/bet/fantasy/FantasyFormatEscrow420.sol#192-196) uses a dangerous strict equality:",
+      "reason": "These comparisons are exact identity/state/revision/checkpoint sentinels, not assumptions about externally mutable balances. Zero identities fail closed; same-block checkpoints deliberately update the existing checkpoint."
+    },
+    "140b25435556d2f01d8ae4845afd4c32ef78d5b3194a274d86ab65be33c82ca6": {
+      "severity": "Medium",
+      "check": "incorrect-equality",
+      "location": "Identity420.credential(bytes32) (contracts/src/apps/Identity420.sol#185-197) uses a dangerous strict equality:",
+      "reason": "These comparisons are exact identity/state/revision/checkpoint sentinels, not assumptions about externally mutable balances. Zero identities fail closed; same-block checkpoints deliberately update the existing checkpoint."
+    },
+    "8b5574679960a868b4676cb9aa158cbf620a498fa10de1f9903d007595d42386": {
+      "severity": "Medium",
+      "check": "incorrect-equality",
+      "location": "FantasyFormatEscrowBase420.candidateIsCurrent(bytes32,bytes32) (contracts/src/bet/fantasy/FantasyFormatEscrow420.sol#184-189) uses a dangerous strict equality:",
+      "reason": "These comparisons are exact identity/state/revision/checkpoint sentinels, not assumptions about externally mutable balances. Zero identities fail closed; same-block checkpoints deliberately update the existing checkpoint."
+    },
+    "1d0e301068ed52e851b95d7b5ab86ada2882d3669b31b13e3ae49b2d9eb36d79": {
+      "severity": "Medium",
+      "check": "incorrect-equality",
+      "location": "CapabilityRegistry420._currentUsage(bytes32,uint64) (contracts/src/system/CapabilityRegistry420.sol#229-239) uses a dangerous strict equality:",
+      "reason": "These comparisons are exact identity/state/revision/checkpoint sentinels, not assumptions about externally mutable balances. Zero identities fail closed; same-block checkpoints deliberately update the existing checkpoint."
+    },
+    "e7d02c51107cc1e6cb0a194a9b7d5bc123fe9779dbf044a476aa876aa83964c3": {
+      "severity": "Medium",
+      "check": "incorrect-equality",
+      "location": "Identity420.credentialValid(bytes32) (contracts/src/apps/Identity420.sol#169-175) uses a dangerous strict equality:",
+      "reason": "These comparisons are exact identity/state/revision/checkpoint sentinels, not assumptions about externally mutable balances. Zero identities fail closed; same-block checkpoints deliberately update the existing checkpoint."
+    },
+    "f9e11b5bb70e64a45fe0cf93799ab072d297a9d058315e8c4e9d3e66e4a21cfa": {
+      "severity": "Medium",
+      "check": "incorrect-equality",
+      "location": "ERC20Template420._writeCheckpoint(address,bool,uint256) (contracts/src/token/ERC20Template420.sol#284-296) uses a dangerous strict equality:",
+      "reason": "These comparisons are exact identity/state/revision/checkpoint sentinels, not assumptions about externally mutable balances. Zero identities fail closed; same-block checkpoints deliberately update the existing checkpoint."
+    },
+    "14f43fb8903ee1cd6e4fad2d041e8f5c4c9cb968cc26ca978e531be483963990": {
+      "severity": "Medium",
+      "check": "incorrect-equality",
+      "location": "RandomnessRouter420.request(bytes32) (contracts/src/randomness/RandomnessRouter420.sol#266-271) uses a dangerous strict equality:",
+      "reason": "These comparisons are exact identity/state/revision/checkpoint sentinels, not assumptions about externally mutable balances. Zero identities fail closed; same-block checkpoints deliberately update the existing checkpoint."
+    },
+    "50edd6de40550c734a0526f6a4eb7bfc628e065565725bd90ccaa602fa164552": {
+      "severity": "Medium",
+      "check": "incorrect-equality",
+      "location": "RandomnessRouter420.result(bytes32) (contracts/src/randomness/RandomnessRouter420.sol#273-278) uses a dangerous strict equality:",
+      "reason": "These comparisons are exact identity/state/revision/checkpoint sentinels, not assumptions about externally mutable balances. Zero identities fail closed; same-block checkpoints deliberately update the existing checkpoint."
+    },
+    "0245ffff5238f2af552f5e77513a8bd4690ad812def7987fbdfebb7176e946fc": {
+      "severity": "Medium",
+      "check": "reentrancy-no-eth",
+      "location": "Reentrancy in FantasyFormatEscrowBase420.recover(bytes32) (contracts/src/bet/fantasy/FantasyFormatEscrow420.sol#243-255):",
+      "reason": "Prize/bond state transitions are guarded across callbacks. SeasonTransactions.process calls only the immutable bound Roster, whose mutation paths authenticate Transactions and call only fixed data/math view functions, with no user callback or token transfer. Payout/ranking children are constructed by their host. Raw findings and immutable-source identities remain retained."
+    },
+    "9167460f220953af1df0537a92fc697656513d084d8525ec56f6e4696be3f22b": {
+      "severity": "Medium",
+      "check": "reentrancy-no-eth",
+      "location": "Reentrancy in FantasyContestEngine420._cancel(bytes32,bytes32) (contracts/src/bet/fantasy/FantasyContestEngine420.sol#384-393):",
+      "reason": "Prize/bond state transitions are guarded across callbacks. SeasonTransactions.process calls only the immutable bound Roster, whose mutation paths authenticate Transactions and call only fixed data/math view functions, with no user callback or token transfer. Payout/ranking children are constructed by their host. Raw findings and immutable-source identities remain retained."
+    },
+    "30876a502174b003a8b970f79dbc42221b22a05177f0626c506cd1288589f5d9": {
+      "severity": "Medium",
+      "check": "reentrancy-no-eth",
+      "location": "Reentrancy in FantasyContestEngine420.recover(bytes32) (contracts/src/bet/fantasy/FantasyContestEngine420.sol#395-433):",
+      "reason": "Prize/bond state transitions are guarded across callbacks. SeasonTransactions.process calls only the immutable bound Roster, whose mutation paths authenticate Transactions and call only fixed data/math view functions, with no user callback or token transfer. Payout/ranking children are constructed by their host. Raw findings and immutable-source identities remain retained."
+    },
+    "1a482c5227ab102a9283eaa29ab109e64dc97f0c55f7a03df5ba1f3c0c772843": {
+      "severity": "Medium",
+      "check": "reentrancy-no-eth",
+      "location": "Reentrancy in FantasyContestEngine420.recover(bytes32) (contracts/src/bet/fantasy/FantasyContestEngine420.sol#395-433):",
+      "reason": "Prize/bond state transitions are guarded across callbacks. SeasonTransactions.process calls only the immutable bound Roster, whose mutation paths authenticate Transactions and call only fixed data/math view functions, with no user callback or token transfer. Payout/ranking children are constructed by their host. Raw findings and immutable-source identities remain retained."
+    },
+    "e5257ae827cd39d010b5b7b5ca6df2fb53025246645fa94a2e0e61120911850d": {
+      "severity": "Medium",
+      "check": "reentrancy-no-eth",
+      "location": "Reentrancy in FantasyContestEngine420.recover(bytes32) (contracts/src/bet/fantasy/FantasyContestEngine420.sol#395-433):",
+      "reason": "Prize/bond state transitions are guarded across callbacks. SeasonTransactions.process calls only the immutable bound Roster, whose mutation paths authenticate Transactions and call only fixed data/math view functions, with no user callback or token transfer. Payout/ranking children are constructed by their host. Raw findings and immutable-source identities remain retained."
+    },
+    "9eeb67e02f13b4f3e77a8df7cab68a481c5a15f190f6a77bc1e45b8eefb179d4": {
+      "severity": "Medium",
+      "check": "reentrancy-no-eth",
+      "location": "Reentrancy in FantasySeasonEscrow420.startDraft(bytes32) (contracts/src/bet/fantasy/FantasySeasonEscrow420.sol#90-93):",
+      "reason": "Prize/bond state transitions are guarded across callbacks. SeasonTransactions.process calls only the immutable bound Roster, whose mutation paths authenticate Transactions and call only fixed data/math view functions, with no user callback or token transfer. Payout/ranking children are constructed by their host. Raw findings and immutable-source identities remain retained."
+    },
+    "2264ca88969385cb7e4c06a2c3dd57889cf106fe2e80bdf354b138a40781425b": {
+      "severity": "Medium",
+      "check": "reentrancy-no-eth",
+      "location": "Reentrancy in FantasyContestEngine420.publishLineup(bytes32,uint64,uint32[7],bytes32) (contracts/src/bet/fantasy/FantasyContestEngine420.sol#363-382):",
+      "reason": "Prize/bond state transitions are guarded across callbacks. SeasonTransactions.process calls only the immutable bound Roster, whose mutation paths authenticate Transactions and call only fixed data/math view functions, with no user callback or token transfer. Payout/ranking children are constructed by their host. Raw findings and immutable-source identities remain retained."
+    },
+    "28a35c8ed9eea0216b11a19d859cc9e14be209f9ee7d3e34e7d195312cc2ddf5": {
+      "severity": "Medium",
+      "check": "reentrancy-no-eth",
+      "location": "Reentrancy in FantasyContestEngine420.enterPool(bytes32,bytes32,bytes32,FantasyContestEngine420.Submission) (contracts/src/bet/fantasy/FantasyContestEngine420.sol#297-328):",
+      "reason": "Prize/bond state transitions are guarded across callbacks. SeasonTransactions.process calls only the immutable bound Roster, whose mutation paths authenticate Transactions and call only fixed data/math view functions, with no user callback or token transfer. Payout/ranking children are constructed by their host. Raw findings and immutable-source identities remain retained."
+    },
+    "a15e0d30e624f22c71986a1805977e0abf34e1d1cf128ac2ee4650f6240339b8": {
+      "severity": "Medium",
+      "check": "reentrancy-no-eth",
+      "location": "Reentrancy in FantasyContestEngine420.recover(bytes32) (contracts/src/bet/fantasy/FantasyContestEngine420.sol#395-433):",
+      "reason": "Prize/bond state transitions are guarded across callbacks. SeasonTransactions.process calls only the immutable bound Roster, whose mutation paths authenticate Transactions and call only fixed data/math view functions, with no user callback or token transfer. Payout/ranking children are constructed by their host. Raw findings and immutable-source identities remain retained."
+    },
+    "bef395a94fdc131fbf20440961775de935482bf3ecefd933e25c9880c2c34af8": {
+      "severity": "Medium",
+      "check": "reentrancy-no-eth",
+      "location": "Reentrancy in FantasyContestEngine420._startReview(bytes32) (contracts/src/bet/fantasy/FantasyContestEngine420.sol#439-451):",
+      "reason": "Prize/bond state transitions are guarded across callbacks. SeasonTransactions.process calls only the immutable bound Roster, whose mutation paths authenticate Transactions and call only fixed data/math view functions, with no user callback or token transfer. Payout/ranking children are constructed by their host. Raw findings and immutable-source identities remain retained."
+    },
+    "94e7c6d20539516eadc496de7182c5cd219d3578a9c40314b79fb4542f4beb7c": {
+      "severity": "Medium",
+      "check": "reentrancy-no-eth",
+      "location": "Reentrancy in FantasySeasonTransactions420.process(bytes32,uint16) (contracts/src/bet/fantasy/FantasySeasonTransactions420.sol#55-84):",
+      "reason": "Prize/bond state transitions are guarded across callbacks. SeasonTransactions.process calls only the immutable bound Roster, whose mutation paths authenticate Transactions and call only fixed data/math view functions, with no user callback or token transfer. Payout/ranking children are constructed by their host. Raw findings and immutable-source identities remain retained."
+    },
+    "76a95dd59849cbe06c50d915b2faa9c8ae8bcf1dab02a550c5482a68b168ed86": {
+      "severity": "Medium",
+      "check": "reentrancy-no-eth",
+      "location": "Reentrancy in FantasyFormatEscrowBase420.publishCandidate(bytes32) (contracts/src/bet/fantasy/FantasyFormatEscrow420.sol#180-183):",
+      "reason": "Prize/bond state transitions are guarded across callbacks. SeasonTransactions.process calls only the immutable bound Roster, whose mutation paths authenticate Transactions and call only fixed data/math view functions, with no user callback or token transfer. Payout/ranking children are constructed by their host. Raw findings and immutable-source identities remain retained."
+    },
+    "fb31c1d0807bb4fa336c75b1188994cb532c39a7118cef5840a452729f9388d2": {
+      "severity": "Medium",
+      "check": "reentrancy-no-eth",
+      "location": "Reentrancy in FantasyFormatEscrowBase420.recoverHouse(bytes32,uint64) (contracts/src/bet/fantasy/FantasyFormatEscrow420.sol#256-265):",
+      "reason": "Prize/bond state transitions are guarded across callbacks. SeasonTransactions.process calls only the immutable bound Roster, whose mutation paths authenticate Transactions and call only fixed data/math view functions, with no user callback or token transfer. Payout/ranking children are constructed by their host. Raw findings and immutable-source identities remain retained."
+    },
+    "1620d47a27353b58dd667b9cc5da52fc80010fa658a45b96f189fcab31ade026": {
+      "severity": "Medium",
+      "check": "reentrancy-no-eth",
+      "location": "Reentrancy in FantasyFormatEscrowBase420.publishHouse(bytes32,uint64) (contracts/src/bet/fantasy/FantasyFormatEscrow420.sol#217-221):",
+      "reason": "Prize/bond state transitions are guarded across callbacks. SeasonTransactions.process calls only the immutable bound Roster, whose mutation paths authenticate Transactions and call only fixed data/math view functions, with no user callback or token transfer. Payout/ranking children are constructed by their host. Raw findings and immutable-source identities remain retained."
+    },
+    "d984bebeadd7f00a72b5aac8e3a438c5cc2a7429b230f3858faeef1cea09e725": {
+      "severity": "Medium",
+      "check": "reentrancy-no-eth",
+      "location": "Reentrancy in FantasyContestEngine420.beginRevision(bytes32,FantasyTypes420.StatReport) (contracts/src/bet/fantasy/FantasyContestEngine420.sol#453-470):",
+      "reason": "Prize/bond state transitions are guarded across callbacks. SeasonTransactions.process calls only the immutable bound Roster, whose mutation paths authenticate Transactions and call only fixed data/math view functions, with no user callback or token transfer. Payout/ranking children are constructed by their host. Raw findings and immutable-source identities remain retained."
+    },
+    "09dfbc1cb106025c5669f576178e40b56dbf0a6091d9ecee8734de785bc4f4d0": {
+      "severity": "Medium",
+      "check": "reentrancy-no-eth",
+      "location": "Reentrancy in FantasyContestEngine420.publishLineup(bytes32,uint64,uint32[7],bytes32) (contracts/src/bet/fantasy/FantasyContestEngine420.sol#363-382):",
+      "reason": "Prize/bond state transitions are guarded across callbacks. SeasonTransactions.process calls only the immutable bound Roster, whose mutation paths authenticate Transactions and call only fixed data/math view functions, with no user callback or token transfer. Payout/ranking children are constructed by their host. Raw findings and immutable-source identities remain retained."
+    },
+    "bab10f734bceb952225658367efbabf3f411111a290bfe8749a7f369a3c0d490": {
+      "severity": "Medium",
+      "check": "reentrancy-no-eth",
+      "location": "Reentrancy in FantasyContestEngine420.recover(bytes32) (contracts/src/bet/fantasy/FantasyContestEngine420.sol#395-433):",
+      "reason": "Prize/bond state transitions are guarded across callbacks. SeasonTransactions.process calls only the immutable bound Roster, whose mutation paths authenticate Transactions and call only fixed data/math view functions, with no user callback or token transfer. Payout/ranking children are constructed by their host. Raw findings and immutable-source identities remain retained."
+    },
+    "8140315fc0e0a261309011274a955dd99ff1f611fbe70cf36d7d4d39d684abdc": {
+      "severity": "Medium",
+      "check": "reentrancy-no-eth",
+      "location": "Reentrancy in FantasySeasonEscrow420.recover(bytes32) (contracts/src/bet/fantasy/FantasySeasonEscrow420.sol#143-159):",
+      "reason": "Prize/bond state transitions are guarded across callbacks. SeasonTransactions.process calls only the immutable bound Roster, whose mutation paths authenticate Transactions and call only fixed data/math view functions, with no user callback or token transfer. Payout/ranking children are constructed by their host. Raw findings and immutable-source identities remain retained."
+    },
+    "38173bfb643ee188137c45fd1735be7225921c37f4b951bdac2ff746078b985f": {
+      "severity": "Medium",
+      "check": "reentrancy-no-eth",
+      "location": "Reentrancy in FantasySeasonEscrow420.join(bytes32,bytes32,bytes32) (contracts/src/bet/fantasy/FantasySeasonEscrow420.sol#75-79):",
+      "reason": "Prize/bond state transitions are guarded across callbacks. SeasonTransactions.process calls only the immutable bound Roster, whose mutation paths authenticate Transactions and call only fixed data/math view functions, with no user callback or token transfer. Payout/ranking children are constructed by their host. Raw findings and immutable-source identities remain retained."
+    },
+    "8f512b539cc5fc829faf219df1643255b0168656aa5add955942d8e5db4d85f5": {
+      "severity": "Medium",
+      "check": "reentrancy-no-eth",
+      "location": "Reentrancy in FantasyContestEngine420.publishCandidate(bytes32) (contracts/src/bet/fantasy/FantasyContestEngine420.sol#498-505):",
+      "reason": "Prize/bond state transitions are guarded across callbacks. SeasonTransactions.process calls only the immutable bound Roster, whose mutation paths authenticate Transactions and call only fixed data/math view functions, with no user callback or token transfer. Payout/ranking children are constructed by their host. Raw findings and immutable-source identities remain retained."
+    },
+    "7336b6bec8e80b7da42caabaa6935d71dfde2f70ff44e04adf3b84e17475f2f6": {
+      "severity": "Medium",
+      "check": "reentrancy-no-eth",
+      "location": "Reentrancy in FantasyContestEngine420.recover(bytes32) (contracts/src/bet/fantasy/FantasyContestEngine420.sol#395-433):",
+      "reason": "Prize/bond state transitions are guarded across callbacks. SeasonTransactions.process calls only the immutable bound Roster, whose mutation paths authenticate Transactions and call only fixed data/math view functions, with no user callback or token transfer. Payout/ranking children are constructed by their host. Raw findings and immutable-source identities remain retained."
+    },
+    "5af31b2d5132314dcab402e51e65c50d7ce2ff8f93715b930134ffe9685965e6": {
+      "severity": "Medium",
+      "check": "reentrancy-no-eth",
+      "location": "Reentrancy in FantasyFormatEscrowBase420.enter(bytes32,bytes32,bytes32,FantasyFormatEscrowBase420.Submission) (contracts/src/bet/fantasy/FantasyFormatEscrow420.sol#110-126):",
+      "reason": "Prize/bond state transitions are guarded across callbacks. SeasonTransactions.process calls only the immutable bound Roster, whose mutation paths authenticate Transactions and call only fixed data/math view functions, with no user callback or token transfer. Payout/ranking children are constructed by their host. Raw findings and immutable-source identities remain retained."
+    },
+    "68929e8bbff592a6f9e491067345702a4fd8a3f6a59ce604ee05b66baae84f7e": {
+      "severity": "Medium",
+      "check": "reentrancy-no-eth",
+      "location": "Reentrancy in FantasyFormatEscrowBase420.enter(bytes32,bytes32,bytes32,FantasyFormatEscrowBase420.Submission) (contracts/src/bet/fantasy/FantasyFormatEscrow420.sol#110-126):",
+      "reason": "Prize/bond state transitions are guarded across callbacks. SeasonTransactions.process calls only the immutable bound Roster, whose mutation paths authenticate Transactions and call only fixed data/math view functions, with no user callback or token transfer. Payout/ranking children are constructed by their host. Raw findings and immutable-source identities remain retained."
+    },
+    "23f2e3b8da8a0501c18bbf73752425271206fbb02fbc7a3d41379a6f36fb8e0b": {
+      "severity": "Medium",
+      "check": "reentrancy-no-eth",
+      "location": "Reentrancy in FantasySeasonTransactions420.process(bytes32,uint16) (contracts/src/bet/fantasy/FantasySeasonTransactions420.sol#55-84):",
+      "reason": "Prize/bond state transitions are guarded across callbacks. SeasonTransactions.process calls only the immutable bound Roster, whose mutation paths authenticate Transactions and call only fixed data/math view functions, with no user callback or token transfer. Payout/ranking children are constructed by their host. Raw findings and immutable-source identities remain retained."
+    },
+    "91d33a17cbb82429b7991f1cfe3fec59e87e6f3b998db1a6b7c5d8fb0b5f28e9": {
+      "severity": "Medium",
+      "check": "reentrancy-no-eth",
+      "location": "Reentrancy in FantasyContestEngine420.createPool(bytes32,FantasyContestEngine420.Config,bytes) (contracts/src/bet/fantasy/FantasyContestEngine420.sol#183-232):",
+      "reason": "Prize/bond state transitions are guarded across callbacks. SeasonTransactions.process calls only the immutable bound Roster, whose mutation paths authenticate Transactions and call only fixed data/math view functions, with no user callback or token transfer. Payout/ranking children are constructed by their host. Raw findings and immutable-source identities remain retained."
+    },
+    "b683cb509d56991c8cdfe6cc9294af939717e26400b01b7eb46cc6b8e6ae63ef": {
+      "severity": "Medium",
+      "check": "uninitialized-local",
+      "location": "FantasySeasonMath420.leagueFeasible(uint16[32][],uint16[32]).neighbors_scope_3 (contracts/src/bet/fantasy/FantasySeasonMath420.sol#40) is a local variable never initialized",
+      "reason": "Solidity zero-initializes these value and fixed-array memory locals. They are counters, flags, accumulators and optional absent fallback values; zero is their required initial state. No uninitialized storage pointer is used."
+    },
+    "1c4d23b5b2ef8a20cba25fcfc6bdae30ad84733c91857ce127860014f5e05cc3": {
+      "severity": "Medium",
+      "check": "uninitialized-local",
+      "location": "FantasySeasonScores420.rank(bytes32,uint8).minimum (contracts/src/bet/fantasy/FantasySeasonScores420.sol#47) is a local variable never initialized",
+      "reason": "Solidity zero-initializes these value and fixed-array memory locals. They are counters, flags, accumulators and optional absent fallback values; zero is their required initial state. No uninitialized storage pointer is used."
+    },
+    "afcd3b237511abef45d10bb8bb41d5c252082842cab205c7407169d3a94ba570": {
+      "severity": "Medium",
+      "check": "uninitialized-local",
+      "location": "FantasySeasonRoster420._fallback(bytes32,uint8,uint32[7]).found (contracts/src/bet/fantasy/FantasySeasonRoster420.sol#195) is a local variable never initialized",
+      "reason": "Solidity zero-initializes these value and fixed-array memory locals. They are counters, flags, accumulators and optional absent fallback values; zero is their required initial state. No uninitialized storage pointer is used."
+    },
+    "61800934a3da987f7a9ee5fb7c73444e4b7f3ae0f1eab92dc071c359cb193688": {
+      "severity": "Medium",
+      "check": "uninitialized-local",
+      "location": "FantasySeasonTransactions420.process(bytes32,uint16).cursor (contracts/src/bet/fantasy/FantasySeasonTransactions420.sol#67) is a local variable never initialized",
+      "reason": "Solidity zero-initializes these value and fixed-array memory locals. They are counters, flags, accumulators and optional absent fallback values; zero is their required initial state. No uninitialized storage pointer is used."
+    },
+    "7e43a193faaf6764fb93bce2a64dd2a9fe0056a770d2be3708e33e7593127d0b": {
+      "severity": "Medium",
+      "check": "uninitialized-local",
+      "location": "FantasyFormatBook420.validate(bytes32,bytes).twiceCost (contracts/src/bet/fantasy/FantasyFormatBook420.sol#118) is a local variable never initialized",
+      "reason": "Solidity zero-initializes these value and fixed-array memory locals. They are counters, flags, accumulators and optional absent fallback values; zero is their required initial state. No uninitialized storage pointer is used."
+    },
+    "c510af5f5da0e12e9cdd7a06f129cc2b203e7171bacc307156d2c1b173d07219": {
+      "severity": "Medium",
+      "check": "uninitialized-local",
+      "location": "FantasySeasonRoster420._fallback(bytes32,uint8,uint32[7]).candidate (contracts/src/bet/fantasy/FantasySeasonRoster420.sol#188) is a local variable never initialized",
+      "reason": "Solidity zero-initializes these value and fixed-array memory locals. They are counters, flags, accumulators and optional absent fallback values; zero is their required initial state. No uninitialized storage pointer is used."
+    },
+    "2b7d22799b6cf839704493cf82eab8f0d71149fbdcf997a20233762df14ee3cb": {
+      "severity": "Medium",
+      "check": "uninitialized-local",
+      "location": "FantasySeasonMath420.deficiency(uint16[32],uint8).neighbors (contracts/src/bet/fantasy/FantasySeasonMath420.sol#19) is a local variable never initialized",
+      "reason": "Solidity zero-initializes these value and fixed-array memory locals. They are counters, flags, accumulators and optional absent fallback values; zero is their required initial state. No uninitialized storage pointer is used."
+    },
+    "4ff2366a257b0e185001bc61fe34ba606df0e52b434a65b00065b82037a25024": {
+      "severity": "Medium",
+      "check": "uninitialized-local",
+      "location": "FantasySeasonRoster420._sealRanking(bytes32).available (contracts/src/bet/fantasy/FantasySeasonRoster420.sol#66) is a local variable never initialized",
+      "reason": "Solidity zero-initializes these value and fixed-array memory locals. They are counters, flags, accumulators and optional absent fallback values; zero is their required initial state. No uninitialized storage pointer is used."
+    },
+    "467f2a44ae467969a965a72e8d0e0a37f23192b96d0e181e31c7f3b93d0ebfc9": {
+      "severity": "Medium",
+      "check": "uninitialized-local",
+      "location": "FantasySeasonEscrow420.initializeFinal(bytes32).nonvoid (contracts/src/bet/fantasy/FantasySeasonEscrow420.sol#121) is a local variable never initialized",
+      "reason": "Solidity zero-initializes these value and fixed-array memory locals. They are counters, flags, accumulators and optional absent fallback values; zero is their required initial state. No uninitialized storage pointer is used."
+    },
+    "50d973c95f16690e80a78dfc0d04704f2f7530500c9cd118bcfcf77258b319c4": {
+      "severity": "Medium",
+      "check": "uninitialized-local",
+      "location": "FantasyFormatBook420.calculate(bytes32,bytes,bytes).wins (contracts/src/bet/fantasy/FantasyFormatBook420.sol#154) is a local variable never initialized",
+      "reason": "Solidity zero-initializes these value and fixed-array memory locals. They are counters, flags, accumulators and optional absent fallback values; zero is their required initial state. No uninitialized storage pointer is used."
+    },
+    "6b0f49db08b74c8f9925b8e2e7591abf400a73f27f79e43ef6ab2c2ef65ec1b5": {
+      "severity": "Medium",
+      "check": "uninitialized-local",
+      "location": "FantasySeasonRoster420._futureWith(bytes32,uint8,uint8,uint8).own (contracts/src/bet/fantasy/FantasySeasonRoster420.sol#105) is a local variable never initialized",
+      "reason": "Solidity zero-initializes these value and fixed-array memory locals. They are counters, flags, accumulators and optional absent fallback values; zero is their required initial state. No uninitialized storage pointer is used."
+    },
+    "3f41fceb713bf8648c93c37b9ab31fe6ac3abbb197be6a222deb1826a0800517": {
+      "severity": "Medium",
+      "check": "uninitialized-local",
+      "location": "FantasySeasonMath420.leagueFeasible(uint16[32][],uint16[32]).neighbors (contracts/src/bet/fantasy/FantasySeasonMath420.sol#32) is a local variable never initialized",
+      "reason": "Solidity zero-initializes these value and fixed-array memory locals. They are counters, flags, accumulators and optional absent fallback values; zero is their required initial state. No uninitialized storage pointer is used."
+    },
+    "04725aaed959ef31ed391823e7275ea4b00a6fa0c8a7a326dcf0d59f16fcc3e4": {
+      "severity": "Medium",
+      "check": "uninitialized-local",
+      "location": "RandomnessRouter420.requestRandomness(bytes32,bytes32,bytes32,uint64).fallback_ (contracts/src/randomness/RandomnessRouter420.sol#95) is a local variable never initialized",
+      "reason": "Solidity zero-initializes these value and fixed-array memory locals. They are counters, flags, accumulators and optional absent fallback values; zero is their required initial state. No uninitialized storage pointer is used."
+    },
+    "55b85e7697cd16340c2daf45daf1710204c13d1ba43e70c91c125fd87ccb4ea5": {
+      "severity": "Medium",
+      "check": "uninitialized-local",
+      "location": "FantasySeasonRoster420._fillable(bytes32,uint8).counts (contracts/src/bet/fantasy/FantasySeasonRoster420.sol#102) is a local variable never initialized",
+      "reason": "Solidity zero-initializes these value and fixed-array memory locals. They are counters, flags, accumulators and optional absent fallback values; zero is their required initial state. No uninitialized storage pointer is used."
+    },
+    "ece088fb23a57229ab62db11fd59d1b6928612dc822b3e1dc9dcd234ae261678": {
+      "severity": "Medium",
+      "check": "uninitialized-local",
+      "location": "FantasyFormatBook420.validate(bytes32,bytes).unique (contracts/src/bet/fantasy/FantasyFormatBook420.sol#118) is a local variable never initialized",
+      "reason": "Solidity zero-initializes these value and fixed-array memory locals. They are counters, flags, accumulators and optional absent fallback values; zero is their required initial state. No uninitialized storage pointer is used."
+    },
+    "6b6dada085b8fbbb495b044b932ae4595193a49c4bfae563a9460f7ce735278a": {
+      "severity": "Medium",
+      "check": "uninitialized-local",
+      "location": "FantasySeasonRoster420._futureWith(bytes32,uint8,uint8,uint8).all (contracts/src/bet/fantasy/FantasySeasonRoster420.sol#105) is a local variable never initialized",
+      "reason": "Solidity zero-initializes these value and fixed-array memory locals. They are counters, flags, accumulators and optional absent fallback values; zero is their required initial state. No uninitialized storage pointer is used."
+    },
+    "b0e3344e7896c55d860e9c0917ca145d22df05a96cc64cbaf4acb5a94765b71c": {
+      "severity": "Medium",
+      "check": "uninitialized-local",
+      "location": "FantasySeasonData420.update(bytes32,uint16,FantasySeasonData420.Report,FantasySeasonData420.Disposition[]).count (contracts/src/bet/fantasy/FantasySeasonData420.sol#114) is a local variable never initialized",
+      "reason": "Solidity zero-initializes these value and fixed-array memory locals. They are counters, flags, accumulators and optional absent fallback values; zero is their required initial state. No uninitialized storage pointer is used."
+    },
+    "914661c0dd6d51b57ef06c38f0c720d1165e283470eb8061981d0efc96c538bc": {
+      "severity": "Medium",
+      "check": "uninitialized-local",
+      "location": "FantasySeasonData420.update(bytes32,uint16,FantasySeasonData420.Report,FantasySeasonData420.Disposition[]).firstEarly (contracts/src/bet/fantasy/FantasySeasonData420.sol#114) is a local variable never initialized",
+      "reason": "Solidity zero-initializes these value and fixed-array memory locals. They are counters, flags, accumulators and optional absent fallback values; zero is their required initial state. No uninitialized storage pointer is used."
+    },
+    "7373a07b40eb001c4faac76445767ac518f98a4161aabb4118e1c32924f1895c": {
+      "severity": "Medium",
+      "check": "uninitialized-local",
+      "location": "RandomnessDraw420.weightedSelection(bytes32,bytes32,uint256,uint256[]).total (contracts/src/randomness/RandomnessDraw420.sol#70) is a local variable never initialized",
+      "reason": "Solidity zero-initializes these value and fixed-array memory locals. They are counters, flags, accumulators and optional absent fallback values; zero is their required initial state. No uninitialized storage pointer is used."
+    },
+    "cb157975cbbd7922e96c899cec202452b8ecf11fec4f14b10b878a0b6375f15c": {
+      "severity": "Medium",
+      "check": "uninitialized-local",
+      "location": "FantasyFormatBook420.validate(bytes32,bytes).count (contracts/src/bet/fantasy/FantasyFormatBook420.sol#123) is a local variable never initialized",
+      "reason": "Solidity zero-initializes these value and fixed-array memory locals. They are counters, flags, accumulators and optional absent fallback values; zero is their required initial state. No uninitialized storage pointer is used."
+    },
+    "5d8897fa25b468f5b502477129cbfd0bd7c3dc7f838b539b5629c10c63460297": {
+      "severity": "Medium",
+      "check": "uninitialized-local",
+      "location": "FantasyFormatBook420.calculate(bytes32,bytes,bytes).over (contracts/src/bet/fantasy/FantasyFormatBook420.sol#151) is a local variable never initialized",
+      "reason": "Solidity zero-initializes these value and fixed-array memory locals. They are counters, flags, accumulators and optional absent fallback values; zero is their required initial state. No uninitialized storage pointer is used."
+    },
+    "9c34126eb86ee07e323e23b44b98c99bcddee794546df10b3fb5c04e6459064d": {
+      "severity": "Medium",
+      "check": "uninitialized-local",
+      "location": "FantasySeasonMath420.deficiency(uint16[32],uint8).demand (contracts/src/bet/fantasy/FantasySeasonMath420.sol#11) is a local variable never initialized",
+      "reason": "Solidity zero-initializes these value and fixed-array memory locals. They are counters, flags, accumulators and optional absent fallback values; zero is their required initial state. No uninitialized storage pointer is used."
+    },
+    "c9532aaa9f8230b07937f42fa97047e45f9a19cbb974f7285dd59e4a3e5c430c": {
+      "severity": "Medium",
+      "check": "uninitialized-local",
+      "location": "FantasySeasonRoster420._ownedRank(bytes32,uint8,uint8).counts (contracts/src/bet/fantasy/FantasySeasonRoster420.sol#123) is a local variable never initialized",
+      "reason": "Solidity zero-initializes these value and fixed-array memory locals. They are counters, flags, accumulators and optional absent fallback values; zero is their required initial state. No uninitialized storage pointer is used."
+    },
+    "c99ebf16ce4ac06f5957fe5403cfe66f3b2defc65e354120bd17df2067e9c8d8": {
+      "severity": "Medium",
+      "check": "uninitialized-local",
+      "location": "FantasySeasonScores420.rank(bytes32,uint8).tied (contracts/src/bet/fantasy/FantasySeasonScores420.sol#65) is a local variable never initialized",
+      "reason": "Solidity zero-initializes these value and fixed-array memory locals. They are counters, flags, accumulators and optional absent fallback values; zero is their required initial state. No uninitialized storage pointer is used."
+    },
+    "5c774c25df86e844791f140b46bcf8edcb680430ed58a4c11d8b7c4d94183c43": {
+      "severity": "Medium",
+      "check": "uninitialized-local",
+      "location": "FantasySeasonTransactions420.process(bytes32,uint16).remaining (contracts/src/bet/fantasy/FantasySeasonTransactions420.sol#67) is a local variable never initialized",
+      "reason": "Solidity zero-initializes these value and fixed-array memory locals. They are counters, flags, accumulators and optional absent fallback values; zero is their required initial state. No uninitialized storage pointer is used."
+    },
+    "f69315790530600928d07639b7ce660a5242e49cb0ac59764a00e2a493225625": {
+      "severity": "Medium",
+      "check": "uninitialized-local",
+      "location": "FantasySeasonRoster420.autoPick(bytes32,FantasySeasonRoster420.Preference[]).selected (contracts/src/bet/fantasy/FantasySeasonRoster420.sol#157) is a local variable never initialized",
+      "reason": "Solidity zero-initializes these value and fixed-array memory locals. They are counters, flags, accumulators and optional absent fallback values; zero is their required initial state. No uninitialized storage pointer is used."
+    },
+    "febd922c2251f5a11fbe3749f0c8ee9fa51ef09b2582f164c6f1d6277fef87ea": {
+      "severity": "Medium",
+      "check": "uninitialized-local",
+      "location": "FantasySeasonTransactions420.process(bytes32,uint16).success (contracts/src/bet/fantasy/FantasySeasonTransactions420.sol#72) is a local variable never initialized",
+      "reason": "Solidity zero-initializes these value and fixed-array memory locals. They are counters, flags, accumulators and optional absent fallback values; zero is their required initial state. No uninitialized storage pointer is used."
+    },
+    "4871893cef57a46f39c107009fe4c612636c95f05d89926d41ac66fa8a37d6d9": {
+      "severity": "Medium",
+      "check": "uninitialized-local",
+      "location": "FantasySeasonScores420.rank(bytes32,uint8).periodCount (contracts/src/bet/fantasy/FantasySeasonScores420.sol#47) is a local variable never initialized",
+      "reason": "Solidity zero-initializes these value and fixed-array memory locals. They are counters, flags, accumulators and optional absent fallback values; zero is their required initial state. No uninitialized storage pointer is used."
+    },
+    "8d59179b0bcc04ccd96ed2d19521d9d6506c018c44c94674f12741cb2de4b81b": {
+      "severity": "Medium",
+      "check": "uninitialized-local",
+      "location": "FantasySeasonRoster420._fallback(bytes32,uint8,uint32[7]).counts (contracts/src/bet/fantasy/FantasySeasonRoster420.sol#192) is a local variable never initialized",
+      "reason": "Solidity zero-initializes these value and fixed-array memory locals. They are counters, flags, accumulators and optional absent fallback values; zero is their required initial state. No uninitialized storage pointer is used."
+    },
+    "50db39af6528a99f2ca02673f2556a4292b24e5c9eabbd485eaccfcf42ec7a80": {
+      "severity": "Medium",
+      "check": "uninitialized-local",
+      "location": "RandomnessDraw420.weightedSelection(bytes32,bytes32,uint256,uint256[]).cumulative (contracts/src/randomness/RandomnessDraw420.sol#76) is a local variable never initialized",
+      "reason": "Solidity zero-initializes these value and fixed-array memory locals. They are counters, flags, accumulators and optional absent fallback values; zero is their required initial state. No uninitialized storage pointer is used."
+    },
+    "f298d799f1873c5c433017be6e0847073562ecb2ff1e0e20c4cd7fd9112909b0": {
+      "severity": "Medium",
+      "check": "uninitialized-local",
+      "location": "FantasySeasonRoster420._fallback(bytes32,uint8,uint32[7]).used (contracts/src/bet/fantasy/FantasySeasonRoster420.sol#187) is a local variable never initialized",
+      "reason": "Solidity zero-initializes these value and fixed-array memory locals. They are counters, flags, accumulators and optional absent fallback values; zero is their required initial state. No uninitialized storage pointer is used."
+    },
+    "4719147d37c75444ba22adb22ba76749c4696b7546ff07e9337933fd39b4e797": {
+      "severity": "Medium",
+      "check": "uninitialized-local",
+      "location": "FantasyFormatBook420.calculate(bytes32,bytes,bytes).active (contracts/src/bet/fantasy/FantasyFormatBook420.sol#154) is a local variable never initialized",
+      "reason": "Solidity zero-initializes these value and fixed-array memory locals. They are counters, flags, accumulators and optional absent fallback values; zero is their required initial state. No uninitialized storage pointer is used."
+    },
+    "3d4bfc99ac8aa4348579a5f2c7e5917586ae68e5bc99dde977fbea8220233465": {
+      "severity": "Medium",
+      "check": "uninitialized-local",
+      "location": "FantasySeasonMath420.leagueFeasible(uint16[32][],uint16[32]).need (contracts/src/bet/fantasy/FantasySeasonMath420.sol#27) is a local variable never initialized",
+      "reason": "Solidity zero-initializes these value and fixed-array memory locals. They are counters, flags, accumulators and optional absent fallback values; zero is their required initial state. No uninitialized storage pointer is used."
+    },
+    "25f92ed553032e952ddbaa3296f3bf0c8849fe4390fb4074068dba0e6518b100": {
+      "severity": "Medium",
+      "check": "uninitialized-local",
+      "location": "FantasySeasonRoster420.canPick(bytes32,uint8,uint32).free (contracts/src/bet/fantasy/FantasySeasonRoster420.sol#114) is a local variable never initialized",
+      "reason": "Solidity zero-initializes these value and fixed-array memory locals. They are counters, flags, accumulators and optional absent fallback values; zero is their required initial state. No uninitialized storage pointer is used."
+    },
+    "1fc9d4356d387ce2af7589a2758093854924c32538e7ac46f84c05d7f7da9282": {
+      "severity": "Medium",
+      "check": "uninitialized-local",
+      "location": "FantasySeasonRoster420._fallback(bytes32,uint8,uint32[7]).used_scope_7 (contracts/src/bet/fantasy/FantasySeasonRoster420.sol#197) is a local variable never initialized",
+      "reason": "Solidity zero-initializes these value and fixed-array memory locals. They are counters, flags, accumulators and optional absent fallback values; zero is their required initial state. No uninitialized storage pointer is used."
+    },
+    "0e91fd7ebe5ff9c7d07820f2323a665b337ffc4007dde64862d5e39bb67f71f9": {
+      "severity": "Medium",
+      "check": "uninitialized-local",
+      "location": "FantasySeasonScores420.rank(bytes32,uint8).better (contracts/src/bet/fantasy/FantasySeasonScores420.sol#65) is a local variable never initialized",
+      "reason": "Solidity zero-initializes these value and fixed-array memory locals. They are counters, flags, accumulators and optional absent fallback values; zero is their required initial state. No uninitialized storage pointer is used."
+    },
+    "e33dd2f4bccdfc0e01d08492c2700b743dca2a3e2941e93c6dd74c029590c57f": {
+      "severity": "Medium",
+      "check": "uninitialized-local",
+      "location": "FantasySeasonMath420.leagueFeasible(uint16[32][],uint16[32]).missing (contracts/src/bet/fantasy/FantasySeasonMath420.sol#29) is a local variable never initialized",
+      "reason": "Solidity zero-initializes these value and fixed-array memory locals. They are counters, flags, accumulators and optional absent fallback values; zero is their required initial state. No uninitialized storage pointer is used."
+    },
+    "114ce03ebe4d9aebfda40ecfd04bb123d7abb65b5cb988c3d00624daa3b20974": {
+      "severity": "Medium",
+      "check": "unused-return",
+      "location": "FantasyAdmission420.controllerOf(bytes32) (contracts/src/bet/fantasy/FantasyAdmission420.sol#23-26) ignores return value by (actor,None,None,None,None,None,active) = identities.profiles(subject) (contracts/src/bet/fantasy/FantasyAdmission420.sol#24)",
+      "reason": "Tuple fields unrelated to the identity/controller/person-key predicate are deliberately ignored. The queried canonical identity functions and credential validity/controller checks cover the required fields; canonical source is unchanged."
+    },
+    "77b95d23ed67ad7c543aba3dc21db55a6a81a843468da82b8f143b220a28f89f": {
+      "severity": "Medium",
+      "check": "unused-return",
+      "location": "FantasyAdmission420.credentialKey(bytes32,bytes32) (contracts/src/bet/fantasy/FantasyAdmission420.sol#32-41) ignores return value by (None,None,None,person,None,None,None,None) = identities.credentials(credential) (contracts/src/bet/fantasy/FantasyAdmission420.sol#38)",
+      "reason": "Tuple fields unrelated to the identity/controller/person-key predicate are deliberately ignored. The queried canonical identity functions and credential validity/controller checks cover the required fields; canonical source is unchanged."
+    },
+    "241ab95aa892a66400fb9150797039e280884b05499b266eeb4475137efc855e": {
+      "severity": "Medium",
+      "check": "unused-return",
+      "location": "FantasyDisputeController420._controller(bytes32,address) (contracts/src/bet/fantasy/FantasyDisputeController420.sol#280-283) ignores return value by (controller,None,None,None,None,None,active) = identities.profiles(subject) (contracts/src/bet/fantasy/FantasyDisputeController420.sol#281)",
+      "reason": "Tuple fields unrelated to the identity/controller/person-key predicate are deliberately ignored. The queried canonical identity functions and credential validity/controller checks cover the required fields; canonical source is unchanged."
+    },
+    "185894de51703e65e3cbd56e59947458bca936b65370b409635917f60de6cf17": {
+      "severity": "Medium",
+      "check": "unused-return",
+      "location": "FantasyDisputeController420.delegateResolver(bytes32,bytes32,bytes32,uint64) (contracts/src/bet/fantasy/FantasyDisputeController420.sol#338-353) ignores return value by (actor,None,None,None,None,None,None) = identities.profiles(subject) (contracts/src/bet/fantasy/FantasyDisputeController420.sol#346)",
+      "reason": "Tuple fields unrelated to the identity/controller/person-key predicate are deliberately ignored. The queried canonical identity functions and credential validity/controller checks cover the required fields; canonical source is unchanged."
+    }
+  }
+}

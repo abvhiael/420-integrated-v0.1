@@ -200,7 +200,9 @@ contract LandRegistryHC3Test {
         address successor = address(0xBEEF);
         land.setOccupancy(parcelId, tenant, LandRegistry.OccupancyKind.LEASE, leaseRef);
         MockLandPlantCountR049 counts = new MockLandPlantCountR049(address(land));
-        _grantScope(ModuleIds.LAND_REGISTRY, ActionIds.LAND_BIND_PLANTS, land.PLANTS_BIND_SCOPE(), keccak256("bind-plants-6"));
+        _grantScope(
+            ModuleIds.LAND_REGISTRY, ActionIds.LAND_BIND_PLANTS, land.PLANTS_BIND_SCOPE(), keccak256("bind-plants-6")
+        );
         land.bindCanonicalPlants(address(counts));
         counts.setCount(3);
         land.transferOwner(parcelId, successor);
@@ -212,7 +214,12 @@ contract LandRegistryHC3Test {
         require(land.effectiveOperator(parcelId) == tenant, "operator changed without occupancy authority");
         (bool cleared,) = address(land).call(abi.encodeCall(land.clearOccupancy, (parcelId)));
         require(!cleared, "eviction of live plants after title transfer");
-        (bool overwritten,) = address(land).call(abi.encodeCall(land.setOccupancy, (parcelId, successor, LandRegistry.OccupancyKind.LICENSE, keccak256("forged"))));
+        (bool overwritten,) = address(land)
+            .call(
+                abi.encodeCall(
+                    land.setOccupancy, (parcelId, successor, LandRegistry.OccupancyKind.LICENSE, keccak256("forged"))
+                )
+            );
         require(!overwritten, "parcel reassigned with existing tenant");
         counts.setCount(0);
         land.clearOccupancy(parcelId);

@@ -26,3 +26,7 @@ After effective lock, anyone holding the latest matching plaintext/salt can publ
 For scoring, encode `Stats[7]` and `bytes32[][7]` as the scorer witness. `FIELDS` and `STATS_ABI` define the exact V1 schema. No missing/null fields may be zero-filled. Full-game/sole-goalie facts govern shutout eligibility. Source captures must preserve authentication/provenance and correction availability times; source selection alone does not prove a real-world fact.
 
 Run `python -m unittest discover -s clients/420bet-fantasy -p test_nhl.py` from the repository root after installing requirements. The checked-in encryption fixtures contain **public test keys and synthetic lineups only**. Never reuse their keys, salts, nonces or ciphertext for a real contest.
+
+## Sportradar trial capture
+
+Use `sportradar.py` for fixed-origin NHL v7 trial HTTPS captures. Set `SPORTRADAR_API_KEY` in the worker process, or `SPORTRADAR_API_KEY_FILE` to a private file outside this checkout. See `docs/bet/BET-FANTASY-SPORTRADAR-TESTING.md` for commands, request budgeting and the distinction between captured responses, coverage inspection and accepted oracle statistics. Run `python -m unittest discover -s clients/420bet-fantasy -p "test_*.py" -v` to include both provider transport and existing genuine cryptographic client tests. No account/key is required for these explicitly offline tests.

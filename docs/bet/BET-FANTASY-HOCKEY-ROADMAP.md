@@ -107,6 +107,12 @@ A void leg may reduce the number of legs only through a precommitted payout tabl
 - A published lock must address actual early puck drop and delayed reporting. Block timestamps alone cannot prove that play has not begun.
 - Decide roster privacy honestly: plaintext on-chain lineups are public. Commit/reveal designs need legality checks and a bounded reveal policy that prevents selective non-reveal after outcomes; a hash alone does not solve fairness.
 
+## Selected testing provider — Sportradar NHL
+
+Decision: use Sportradar NHL API v7 trial access for development and testing. Defer evaluation of alternate providers until the userbase begins to grow. This selection does not assert an active account, an issued API key, successful live ingestion or production licensing. See [testing runbook](BET-FANTASY-SPORTRADAR-TESTING.md).
+
+Use the existing provider-neutral oracle/contest interfaces. Keep official NHL evidence precedence and all frozen pool/source-policy identities unchanged. A single Sportradar upstream with multiple reporters is single-source testing, not independent multi-provider qualification. Alternate-provider procurement below is deferred.
+
 ## External data recommendation
 
 | Candidate | Recommended role | Conditions still to establish |

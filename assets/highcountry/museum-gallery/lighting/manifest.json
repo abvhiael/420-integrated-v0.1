@@ -1,0 +1,402 @@
+{
+  "project": "High Country",
+  "role": "Museum/gallery lighting assets",
+  "files": [
+    {
+      "filename": "light_chandelier_large.png",
+      "category": "museum_gallery_lighting",
+      "game": "High Country",
+      "source_rect": [
+        24,
+        120,
+        387,
+        383
+      ],
+      "pixel_dimensions": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "5764a71a689540d04b077c6fa28d51e37b3dbe6be897e684ea8338bae2420f53",
+      "asset_status": "provisional_extracted_sprite"
+    },
+    {
+      "filename": "light_chandelier_wagon.png",
+      "category": "museum_gallery_lighting",
+      "game": "High Country",
+      "source_rect": [
+        390,
+        119,
+        625,
+        383
+      ],
+      "pixel_dimensions": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "12b887057c78d261e451b48826ca664dffd5b67308c7b2d6d9f9d8df1cdb05d5",
+      "asset_status": "provisional_extracted_sprite"
+    },
+    {
+      "filename": "light_chandelier_wagonwheel.png",
+      "category": "museum_gallery_lighting",
+      "game": "High Country",
+      "source_rect": [
+        630,
+        118,
+        933,
+        383
+      ],
+      "pixel_dimensions": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "5014ad6244b9afd090ee6d287070138f4d1131ad13ab6b23d545ebb3731c2d0b",
+      "asset_status": "provisional_extracted_sprite"
+    },
+    {
+      "filename": "light_lantern_wall_large.png",
+      "category": "museum_gallery_lighting",
+      "game": "High Country",
+      "source_rect": [
+        955,
+        131,
+        1110,
+        378
+      ],
+      "pixel_dimensions": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "a79b20bdec02726a16c155446c9a84bdbb7a35f7c9d86d4c9580fd15bb624555",
+      "asset_status": "provisional_extracted_sprite"
+    },
+    {
+      "filename": "light_lantern_wall_medium.png",
+      "category": "museum_gallery_lighting",
+      "game": "High Country",
+      "source_rect": [
+        1106,
+        135,
+        1334,
+        378
+      ],
+      "pixel_dimensions": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "af5cbb8dbe38b899258e37f73e4b78f65b3643315ab97e95a3706fde50f2dcd6",
+      "asset_status": "provisional_extracted_sprite"
+    },
+    {
+      "filename": "light_lantern_wall_small.png",
+      "category": "museum_gallery_lighting",
+      "game": "High Country",
+      "source_rect": [
+        1345,
+        135,
+        1511,
+        378
+      ],
+      "pixel_dimensions": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "41e0f308ce620fd4ed5941683b9beb91f96418f50669492a9c09f8bc50f066ce",
+      "asset_status": "provisional_extracted_sprite"
+    },
+    {
+      "filename": "light_sconce_torch.png",
+      "category": "museum_gallery_lighting",
+      "game": "High Country",
+      "source_rect": [
+        25,
+        450,
+        244,
+        688
+      ],
+      "pixel_dimensions": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "8b5da62d3efc2c67b90e668a25ecae5057ed1eb3a96f48d4b3f48278fb4741f7",
+      "asset_status": "provisional_extracted_sprite"
+    },
+    {
+      "filename": "light_sconce_double.png",
+      "category": "museum_gallery_lighting",
+      "game": "High Country",
+      "source_rect": [
+        243,
+        447,
+        465,
+        687
+      ],
+      "pixel_dimensions": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "0d164151de5a5716eb2b7a3d6aa3a2253c7fe94bf670bcdc7d13ec2d2989e2e8",
+      "asset_status": "provisional_extracted_sprite"
+    },
+    {
+      "filename": "light_sconce_single.png",
+      "category": "museum_gallery_lighting",
+      "game": "High Country",
+      "source_rect": [
+        465,
+        457,
+        656,
+        687
+      ],
+      "pixel_dimensions": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "22fd529691e344e35026fd8dd7034417cb28de256ffb2d9e621b1947037e1eca",
+      "asset_status": "provisional_extracted_sprite"
+    },
+    {
+      "filename": "light_sconce_shade.png",
+      "category": "museum_gallery_lighting",
+      "game": "High Country",
+      "source_rect": [
+        656,
+        453,
+        867,
+        689
+      ],
+      "pixel_dimensions": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "d0491eae5b07b9d3ad955d91703e50676cb466953a3e1ff77bc49c5f32a27449",
+      "asset_status": "provisional_extracted_sprite"
+    },
+    {
+      "filename": "light_sconce_globe.png",
+      "category": "museum_gallery_lighting",
+      "game": "High Country",
+      "source_rect": [
+        879,
+        471,
+        1073,
+        689
+      ],
+      "pixel_dimensions": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "730e4ddd7ef8bc0b77928130f535e5a1fb62e01403cb6a06ab4e46a1d7052f9e",
+      "asset_status": "provisional_extracted_sprite"
+    },
+    {
+      "filename": "light_sconce_crystal.png",
+      "category": "museum_gallery_lighting",
+      "game": "High Country",
+      "source_rect": [
+        1072,
+        437,
+        1280,
+        689
+      ],
+      "pixel_dimensions": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "d51565e2701d1071953b60a598323371d94fa3b6785e153efb377a24e1b2c0eb",
+      "asset_status": "provisional_extracted_sprite"
+    },
+    {
+      "filename": "light_sconce_cage.png",
+      "category": "museum_gallery_lighting",
+      "game": "High Country",
+      "source_rect": [
+        1329,
+        444,
+        1509,
+        689
+      ],
+      "pixel_dimensions": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "d927c770229db21e1077b41b83feb88a8cdc5b4c91a64fdbdcb463b10bbe93a7",
+      "asset_status": "provisional_extracted_sprite"
+    },
+    {
+      "filename": "light_pendant_dome.png",
+      "category": "museum_gallery_lighting",
+      "game": "High Country",
+      "source_rect": [
+        14,
+        738,
+        176,
+        938
+      ],
+      "pixel_dimensions": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "7b9cf3066cd1e438d05be473e07fb156709b5572094b57707c20a654573d94e0",
+      "asset_status": "provisional_extracted_sprite"
+    },
+    {
+      "filename": "light_pendant_industrial.png",
+      "category": "museum_gallery_lighting",
+      "game": "High Country",
+      "source_rect": [
+        172,
+        735,
+        362,
+        939
+      ],
+      "pixel_dimensions": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "a9c2274a93ab7cb7c5fb2e34f6d3b2bcc097d18c44b65d987e3bb22c70865bbb",
+      "asset_status": "provisional_extracted_sprite"
+    },
+    {
+      "filename": "light_pendant_shade.png",
+      "category": "museum_gallery_lighting",
+      "game": "High Country",
+      "source_rect": [
+        363,
+        736,
+        533,
+        939
+      ],
+      "pixel_dimensions": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "c7ab07d41e47e5423dcc2c966826a8f97b0ccae44e332a2402c02de1fa62b01d",
+      "asset_status": "provisional_extracted_sprite"
+    },
+    {
+      "filename": "light_pendant_glass.png",
+      "category": "museum_gallery_lighting",
+      "game": "High Country",
+      "source_rect": [
+        532,
+        738,
+        617,
+        940
+      ],
+      "pixel_dimensions": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "0ba5ee6d7ce5d4f7cdd61d53bba71790b3f7be047d86fd4bfb1c1dcbe78eb92d",
+      "asset_status": "provisional_extracted_sprite"
+    },
+    {
+      "filename": "light_track_small.png",
+      "category": "museum_gallery_lighting",
+      "game": "High Country",
+      "source_rect": [
+        616,
+        762,
+        912,
+        939
+      ],
+      "pixel_dimensions": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "b89b8f574ffa373d083c6207bb484f2bae07702b335fa6137dee003533931efe",
+      "asset_status": "provisional_extracted_sprite"
+    },
+    {
+      "filename": "light_spotlight.png",
+      "category": "museum_gallery_lighting",
+      "game": "High Country",
+      "source_rect": [
+        927,
+        755,
+        1080,
+        939
+      ],
+      "pixel_dimensions": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "ad2f1919e2f66bbadf2cb8791b9a08c47f412d3fa6c856ed1a6b3676b9adedb4",
+      "asset_status": "provisional_extracted_sprite"
+    },
+    {
+      "filename": "light_track_spot.png",
+      "category": "museum_gallery_lighting",
+      "game": "High Country",
+      "source_rect": [
+        1082,
+        756,
+        1240,
+        939
+      ],
+      "pixel_dimensions": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "e3e79afed525abb43d7051687885d5c7ff1def4bba6caed00aa9c50ecca546bb",
+      "asset_status": "provisional_extracted_sprite"
+    },
+    {
+      "filename": "light_truck_lamp.png",
+      "category": "museum_gallery_lighting",
+      "game": "High Country",
+      "source_rect": [
+        1227,
+        743,
+        1368,
+        942
+      ],
+      "pixel_dimensions": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "d2944b899912efc2ea732812a40c1ac93cfb7dd271d068cc58fcf60bf9356597",
+      "asset_status": "provisional_extracted_sprite"
+    },
+    {
+      "filename": "light_table_lamp.png",
+      "category": "museum_gallery_lighting",
+      "game": "High Country",
+      "source_rect": [
+        1364,
+        745,
+        1528,
+        939
+      ],
+      "pixel_dimensions": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "9ba26655853237d77a9fda1ba02efe0280fa603063b1810d0ab6f680d6ed7445",
+      "asset_status": "provisional_extracted_sprite"
+    }
+  ]
+}

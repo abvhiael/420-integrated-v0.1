@@ -6,6 +6,8 @@ import {createRuntime,runtimeHttpServer} from './runtime-service.js';
 import {HIGHCOUNTRY_SKILL_RESEARCH_V1} from './skill-catalog-v1.js';
 import {createSignedProgressionEvidence} from './signed-progression-evidence.js';
 import {createSignedPlayerLevelProvider} from './signed-player-level.js';
+import {HIGHCOUNTRY_MISSIONS_V1} from './mission-catalog-v1.js';
+import {createSignedMissionEvidence} from './signed-mission-evidence.js';
 const required=name=>{const x=process.env[name];if(!x)throw Error(name+' required');return x;};
 const config=JSON.parse(await readFile(required('HC_RUNTIME_CONFIG_FILE'),'utf8'));
 const port=Number(required('PORT'));
@@ -29,7 +31,15 @@ try {
     gameId:config.authority.gameId,chainId:config.authority.chainId})
   };
  }
- const runtime=await createRuntime({...config,pool,signerRpc,progression});
+ let missions;
+ if(config.missions){
+  const m=config.missions;
+  if(m.catalogVersion!==HIGHCOUNTRY_MISSIONS_V1.version)throw Error('unapproved mission catalogue version');
+  missions={catalog:HIGHCOUNTRY_MISSIONS_V1,
+   verifyEvidence:createSignedMissionEvidence({publicKey:m.evidencePublicKey,
+    issuer:m.evidenceIssuer,gameId:config.authority.gameId,chainId:config.authority.chainId})};
+ }
+ const runtime=await createRuntime({...config,pool,signerRpc,progression,missions});
  const server=runtimeHttpServer(runtime,{origin:config.authority.origin});
  server.listen(port,'0.0.0.0');
  let closing=false;

@@ -3,9 +3,10 @@ import {cultivationStageArt} from './cultivation-art.js';
 import {mountAccountPanel} from './account.js';
 import {mountMarketplace} from './marketplace.js';
 import {mountSkills} from './skills.js';
+import {mountMissions} from './missions.js';
 import {validateHighCountryRuntime,detectHighCountryNetwork} from './runtime.js';
 import {newGuest,loadGuest,saveGuest,plant,setEnvironment,advance,stage,harvest} from './guest.js';
-const pages=Object.freeze({'/':'Home','/play':'Play','/account':'Account','/settings':'Settings','/about':'About','/archive':'Archive','/marketplace':'Marketplace','/skills':'Skills & Research'});
+const pages=Object.freeze({'/':'Home','/play':'Play','/account':'Account','/settings':'Settings','/about':'About','/archive':'Archive','/marketplace':'Marketplace','/skills':'Skills & Research','/missions':'Missions'});
 export function resolveRoute(path){return Object.hasOwn(pages,path)?path:'/not-found';}
 export function createHighCountryApp({document,location,config,fetchImpl,storage=globalThis.localStorage,authenticate=globalThis.highCountryAuth?.getToken,localAuth=globalThis.highCountryLocalAuth,walletProvider=globalThis.ethereum}){
  const runtime=validateHighCountryRuntime(config),root=document.getElementById('app');if(!root)throw Error('missing-game-root');
@@ -18,7 +19,7 @@ export function createHighCountryApp({document,location,config,fetchImpl,storage
   const head=el('header','');const brand=el('a','');brand.href='/';brand.className='brand';brand.setAttribute('aria-label','High Country home');const mark=el('img','');mark.src='/assets/highcountry-logo.svg';mark.alt='High Country';mark.width=320;mark.height=96;brand.append(mark);head.append(brand,el('h1','High Country'));const nav=el('nav','');nav.setAttribute('aria-label','Main navigation');
   for(const [route,label] of Object.entries(pages)){const link=el('a',label);link.href=route;if(route===path)link.setAttribute('aria-current','page');nav.append(link);}
   const main=el('main','');main.id='main';main.append(el('h2',pages[path]||'Page not found'));
-  if(path==='/skills'){mountSkills({document,main,runtime,authenticate:localAuth?()=>localAuth.getToken():authenticate,fetchImpl});}else if(path==='/play'){
+  if(path==='/missions'){mountMissions({document,main,runtime,authenticate:localAuth?()=>localAuth.getToken():authenticate,fetchImpl});}else if(path==='/skills'){mountSkills({document,main,runtime,authenticate:localAuth?()=>localAuth.getToken():authenticate,fetchImpl});}else if(path==='/play'){
    main.append(el('p','Local guest play only. Saves remain on this device. No account, wallet, BUDS, or canonical assets are created.'));
    if(error){const p=el('p','Save error: '+error);p.setAttribute('role','alert');main.append(p);}
    if(guest){const stats=el('div','');stats.className='game-stats';stats.append(el('p','Completed local harvests: '+guest.completed));main.append(stats);if(guest.plant){

@@ -1,0 +1,21 @@
+{
+  "analyzer": "slither-analyzer==0.11.6",
+  "reviewType": "local source review, not independent security approval",
+  "normalizedSourceSHA256": {
+    "contracts/src/bet/BetAuthorization420.sol": "984e7bef82674a1f1b9c5a303cb90ede07d7619ae7f49664dd88f42147cf7f96",
+    "contracts/src/bet/BetIds420.sol": "578e3ef0b71336be6030452defed6e26824beb8e268e420c2db89c407eccfab8",
+    "contracts/src/bet/BetOperatorRegistry420.sol": "d8b8d369b8b9b825a2f8f02fa6b7f499a9da80600fda96b9c5b130a1875d7fe8",
+    "contracts/src/bet/BetTypes420.sol": "f4feff47fe44c67ff0d0305a95d2e8063e78dc768140041234b484985bea741e",
+    "contracts/src/bet/tournament/PokerTournamentPolicy420.sol": "f9db8f1db569ebf00cc057a8dfa4a36245501d629793223d7def4e4b25aa65bd",
+    "contracts/src/bet/tournament/PokerTournamentPolicyRegistry420.sol": "e193b609653e1871f55366e7926788a9d8656417b8974fb7335e1796d0972039",
+    "contracts/src/interfaces/I420System.sol": "02e1ef2bec417289bc13c53c3c7453b132442be6932162683099c301f624ed02",
+    "contracts/src/interfaces/genesis/ICapabilityRegistry420.sol": "0731b19a560a63242e2afeb177eb3c8e1f2ace8abd3612abc0b0eb50a6910431"
+  },
+  "dispositions": {
+    "873d3ddb3832f31eab64b0d3d3887ce872178361fd57e65d709faeb6bcd84b2b": {
+      "severity": "Medium",
+      "check": "divide-before-multiply",
+      "reason": "The quotient and remainder terms together equal floor(3*buyIn/100) exactly, without overflowing for uint256 buyIn. The published quote is computed once; each purchase uses that quote. Native fuzz compares it against an independent bounded product for every uint128 input domain sampled. No fee remainder is discarded before multiplication."
+    }
+  }
+}

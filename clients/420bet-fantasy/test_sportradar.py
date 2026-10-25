@@ -26,8 +26,10 @@ class Response:
 
 
 def sample():
-    return {"game":{"id":ID,"status":"closed","home":{"players":[{"id":PLAYER,"reference":"8471675","primary_position":"C","played":True,
-        "statistics":{"goals":1,"assists":2,"shots":5,"blocked_shots":3,"shorthanded":{"goals":1,"assists":1}}}]},"away":{"players":[]}}}
+    # Synthetic values, matching the structure observed in authenticated v7 JSON.
+    return {"id":ID,"status":"closed","home":{"players":[{"id":PLAYER,"reference":"8471675","primary_position":"C","played":True,
+        "statistics":{"total":{"goals":1,"assists":2,"shots":5,"blocked_shots":3},"shorthanded":{"goals":1,"assists":1}}}]},"away":{"players":[]}}
+
 
 
 class SportradarTrialTest(unittest.TestCase):
@@ -120,10 +122,10 @@ class SportradarTrialTest(unittest.TestCase):
         self.assertFalse(r["settlementReady"]);self.assertFalse(r["oracleAccepted"])
         self.assertEqual(r["players"][0]["observedSkaterFields"],{"goals":1,"assists":2,"shots":5,"blocks":3,"shorthanded":2})
     def test_missing_stats_not_zero(self):
-        data=sample();del data["game"]["home"]["players"][0]["statistics"]["shots"]
+        data=sample();del data["home"]["players"][0]["statistics"]["total"]["shots"]
         manifest,_=self.capture(data);self.assertIsNone(inspect_summary(manifest)["players"][0]["observedSkaterFields"]["shots"])
     def test_missing_inventory_and_duplicates_rejected(self):
-        for mutate in [lambda d:d["game"].pop("away"),lambda d:d["game"]["away"]["players"].append(copy.deepcopy(d["game"]["home"]["players"][0]))]:
+        for mutate in [lambda d:d.pop("away"),lambda d:d["away"]["players"].append(copy.deepcopy(d["home"]["players"][0]))]:
             with tempfile.TemporaryDirectory() as td:
                 data=sample();mutate(data)
                 c=TrialClient(td,KEY)
@@ -148,8 +150,11 @@ class SportradarTrialTest(unittest.TestCase):
     def test_wrong_game_domain_rejected(self):
         manifest,_=self.capture();d=json.loads(manifest.read_text());d["endpoint"]=endpoint("summary",PLAYER);manifest.write_text(json.dumps(d))
         with self.assertRaises(CaptureError):inspect_summary(manifest)
+    def test_wrapped_game_schema_rejected(self):
+        manifest,_=self.capture({"game":sample()})
+        with self.assertRaises(CaptureError):inspect_summary(manifest)
     def test_invalid_numeric_fields_stay_unresolved(self):
-        data=sample();data["game"]["home"]["players"][0]["statistics"]["goals"]=True
+        data=sample();data["home"]["players"][0]["statistics"]["total"]["goals"]=True
         manifest,_=self.capture(data);self.assertIsNone(inspect_summary(manifest)["players"][0]["observedSkaterFields"]["goals"])
 
 

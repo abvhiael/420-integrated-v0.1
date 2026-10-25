@@ -61,3 +61,9 @@ Select the actual test date; the example date is not a frozen slate. Captures pr
 The summary inspector inventories documented skater fields and explicitly lists unresolved shootout/completeness/mapping/goalie facts. It never emits settlement-ready statistics or oracle acceptance. Complete source-to-engine normalization requires authenticated representative captures and validated goalie/shootout semantics; this is a pending integration gate, not implemented acceptance. No live Sportradar request has been made without a real credential.
 
 Offline tests use clearly synthetic HTTP responses to exercise transport failure paths. They are not cryptographic mocks and are never labeled real provider observations. The existing encrypted-lineup, signature, Merkle and payout client tests continue to execute real cryptographic primitives. Contract sources and their inherited Level 2 evidence are unchanged.
+
+## First authenticated trial check — 2026-10-25 UTC
+
+Authenticated trial access succeeded for the 2026-10-24 daily schedule and one completed game's summary, play-by-play and time-on-ice (four successful HTTPS captures). Raw provider evidence is kept privately outside the Git checkout; only checksums and execution metadata are exported. The first blocked-network attempt is retained in the local attempt budget.
+
+Actual v7 game responses place the game object at the JSON root, and ordinary player totals under statistics.total. The inspector and synthetic regression shape were corrected against these real observations. The sample is Ducks–Flyers, provider game 32cd71ea-939d-4290-80d9-06a37b178cb4, status closed. This establishes API access and capture/inspection, not complete source-to-engine normalization or oracle acceptance. No credential or raw licensed payload is committed.

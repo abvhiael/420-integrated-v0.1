@@ -230,8 +230,9 @@ def inspect_summary(manifest):
     captures. A fixture-based parser cannot claim those gates have passed.
     """
     record, data = load_capture(manifest)
-    game = data.get("game")
-    if not isinstance(game, dict): raise CaptureError("missing game object")
+    # Actual v7 JSON has the game at the document root.
+    game = data
+    if "game" in data: raise CaptureError("unexpected wrapped game schema")
     gid = game.get("id")
     if record["endpoint"] != endpoint("summary", gid): raise CaptureError("game/endpoint mismatch")
     result = {"provider": "SPORTRADAR", "gameID": gid, "status": game.get("status"), "bodySHA256": record["bodySHA256"],
@@ -249,8 +250,10 @@ def inspect_summary(manifest):
             fields = {}
             stats = player.get("statistics", {})
             if not isinstance(stats, dict): raise CaptureError("invalid statistics object")
+            totals = stats.get("total", {})
+            if not isinstance(totals, dict): raise CaptureError("invalid statistics totals")
             for target, source in (("goals","goals"),("assists","assists"),("shots","shots"),("blocks","blocked_shots")):
-                value = stats.get(source)
+                value = totals.get(source)
                 fields[target] = value if type(value) is int and 0 <= value < 65536 else None
             short = stats.get("shorthanded", {})
             fields["shorthanded"] = None

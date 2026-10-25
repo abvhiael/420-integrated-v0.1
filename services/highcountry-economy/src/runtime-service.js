@@ -10,6 +10,7 @@ import {SkillResearchService} from './skill-research.js';
 import {MissionService} from './missions.js';
 import {DiscoveryIntegration} from './discovery-integration.js';
 import {LandLeaseAccounts} from './land-lease-accounts.js';
+import {GameplayLicensing} from './gameplay-licensing.js';
 
 async function requireLeastPrivilegeRuntimeRole(pool,namespace) {
  const check=await pool.query("SELECT current_user AS role, r.rolsuper, r.rolbypassrls, c.relrowsecurity, pg_get_userbyid(c.relowner) AS owner, has_table_privilege(current_user,'highcountry_buds_state','SELECT') AS can_select, has_table_privilege(current_user,'highcountry_buds_state','UPDATE') AS can_update, has_table_privilege(current_user,'highcountry_buds_state','INSERT,DELETE,TRUNCATE,REFERENCES,TRIGGER') AS elevated FROM pg_roles r JOIN pg_class c ON c.oid='highcountry_buds_state'::regclass WHERE r.rolname=current_user");
@@ -43,7 +44,8 @@ export async function createRuntime({pool,namespace,authority:authConfig,rpc:rpc
  const missionService=missions?new MissionService({store,identity,...missions,clock}):null;
  const discoveryService=discovery?new DiscoveryIntegration({store,identity,...discovery,clock}):null;
  const landRightsService=landRights?new LandLeaseAccounts({store,identity,...landRights,clock}):null;
- return {store,identity,rewards,market,marketView:new HighCountryMarketplaceView({store,identity,market,clock}),skillResearch,missionService,discoveryService,landRightsService,...chain};
+ const gameplayLicensing=landRightsService?new GameplayLicensing({landRights:landRightsService,identity,canonical:landRights.canonical}):null;
+ return {store,identity,rewards,market,marketView:new HighCountryMarketplaceView({store,identity,market,clock}),skillResearch,missionService,discoveryService,landRightsService,gameplayLicensing,...chain};
 }
 // Production entrypoint for a wallet-optional, registered-player ordinary economy.
 // Never silently repurpose the canonical on-chain escrow settlement runtime.
@@ -81,10 +83,11 @@ export function composeOrdinaryMarketRuntime({store,identity,rewards,inventoryAu
  const missionService=missions?new MissionService({store,identity,...missions,clock}):null;
  const discoveryService=discovery?new DiscoveryIntegration({store,identity,...discovery,clock}):null;
  const landRightsService=landRights?new LandLeaseAccounts({store,identity,...landRights,clock}):null;
- return {store,identity,rewards,market,marketView:new HighCountryMarketplaceView({store,identity,market,clock}),skillResearch,missionService,discoveryService};
+ const gameplayLicensing=landRightsService?new GameplayLicensing({landRights:landRightsService,identity,canonical:landRights.canonical}):null;
+ return {store,identity,rewards,market,marketView:new HighCountryMarketplaceView({store,identity,market,clock}),skillResearch,missionService,discoveryService,landRightsService,gameplayLicensing};
 }
 export function runtimeHttpServer(runtime,{origin}){
- const {identity,rewards,market,marketView,skillResearch,missionService,discoveryService,landRightsService,settlement,worker}=runtime;
+ const {identity,rewards,market,marketView,skillResearch,missionService,discoveryService,landRightsService,gameplayLicensing,settlement,worker}=runtime;
  return createServer(async(req,res)=>{
   res.setHeader('content-type','application/json');res.setHeader('cache-control','no-store');
   res.setHeader('x-content-type-options','nosniff');
@@ -119,6 +122,9 @@ export function runtimeHttpServer(runtime,{origin}){
      if(!skillResearch||Object.keys(b).sort().join(',')!=='operation,trackId')
       throw new SettlementError('progression unlock request denied');
      result=await skillResearch.unlock(token,b.operation,b.trackId);break;
+    case '/land/license/evaluate':
+     if(!gameplayLicensing||Object.keys(b).sort().join(',')!=='capability,namespace,parcelId')throw new SettlementError('gameplay licence request denied');
+     result=await gameplayLicensing.evaluate(token,b);break;
     case '/land/rights':
      if(!landRightsService||Object.keys(b).sort().join(',')!=='parcelId')throw new SettlementError('land rights request denied');
      result=await landRightsService.rights(token,b.parcelId);break;

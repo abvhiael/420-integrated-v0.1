@@ -1,0 +1,25 @@
+name: High Country Licensing Rights Level 1
+on:
+  pull_request:
+    paths:
+      - 'services/highcountry-economy/**'
+      - 'docs/highcountry/HC-NEXT-6.2-LICENSING-RIGHTS.md'
+      - '.github/workflows/highcountry-licensing-rights.yml'
+  workflow_dispatch:
+jobs:
+  license-boundary-level-1:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Economy dependencies
+        working-directory: services/highcountry-economy
+        run: npm install --no-package-lock --ignore-scripts --no-audit --no-fund
+      - name: Licensing boundary and canonical land Level 1
+        working-directory: services/highcountry-economy
+        run: node --test test/gameplay-licensing.test.js test/land-lease-accounts.test.js
+      - name: Affected economy integration Level 2
+        working-directory: services/highcountry-economy
+        run: npm test

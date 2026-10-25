@@ -35,5 +35,7 @@ jobs:
           node --check packages/420-gaming-sdk/src/transports.js
           node --check packages/420-gaming-sdk/src/abi-bindings.js
           node --check packages/420-gaming-sdk/src/index.js
-          git diff --check 5cc1f58bc3f9c9935bfe661be4e21cc960906cd7 HEAD
+          # Validate only SDK/client changes introduced by this PR; historical LIFTd files are outside R05.8 ownership.
+          BASE_SHA="$(git merge-base HEAD origin/main)"
+          git diff --check "$BASE_SHA" HEAD -- packages/420-gaming-sdk/ clients/highcountry-access-v1/ .github/workflows/highcountry-r05-8.yml
           test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"

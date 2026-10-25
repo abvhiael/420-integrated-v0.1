@@ -24,11 +24,12 @@ Rules changes create a new profile version. Existing funded contests retain thei
 Current scoped status is recorded below; no row is closed for every fantasy format. Daily contract/runtime evidence does not imply an application client, production custodian service or live funded testnet acceptance.
 
 - Daily contract engine: [consolidated rules](BET-FANTASY-CONTEST-ENGINE-V1.md), merged PR #822.
-- Daily scoring/source-to-oracle integration: [implementation and field rules](BET-FANTASY-SPORTRADAR-SCORING-ORACLE.md), exact head `3a4379e6ef76599e35151416403d2978c99c3bf9`, [Level 2 run](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/40166254483); branch reconciliation/merge remains separate.
+- Daily scoring/source-to-oracle integration: [implementation and field rules](BET-FANTASY-SPORTRADAR-SCORING-ORACLE.md), exact head `3a4379e6ef76599e35151416403d2978c99c3bf9`, [Level 2 run](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/40166254483); merged with the daily application in PR #825 at `c0c17bd71ad42b4f1c7d40dac6c958fc21d0851d`.
 - Official deployment and prospective live funded settlement: moved to [420Bet testnet roadmap, TN-FAN-01 through TN-FAN-05](../420BET-TESTNET-WORK-ROADMAP.md#daily-nhl-fantasy-official-testnet-deployment-and-live-settlement-qualification).
 - **Daily application implementation:** confidential lineup custody, wallet client and isolated browser/ERC20 integration runner are in [daily application](https://github.com/abvhiael/420-integrated-v0.1/blob/main/clients/420bet-fantasy/daily/README.md). The runner requires actual execution and a clean source SHA for a Level 2 certificate; official-network operations remain TN-FAN-01–05.
 - **Opening fantasy test scope (2026-10-25):** use the established uncapped seven-position daily NHL points pool for initial testing. Paid and launcher-funded free pools are configurations of this one format.
-- **Next:** prepare and execute TN-FAN-01–05 for this daily format when the official testnet is running. H07 salary-cap/captain, H08 season-long and H09 pick'em are explicitly deferred until after testnet is running; resume their rule discussions and implementation as separately qualified integrations. Deferral does not mark them complete.
+- **TN-FAN-01 local preparation:** deployment/authority/manifest/client-binding tooling is implemented and locally qualified (32 deployment checks and 12 browser scenarios in each asset mode, code SHA `9a259013a9a32258d33b64cb5d010620f5a99a77`); see [local readiness and boundary](BET-FANTASY-TN-FAN-01-LOCAL-READINESS.md). Official inputs can be provided before launch; only live evidence belongs in TN-FAN-01-L1–L4. H07/H08/H09 remain deferred until testnet is running.
+- **Next official-network work:** execute TN-FAN-01-L1–L4, then TN-FAN-02–05 when testnet is running. This does not mark deferred formats complete.
 
 | ID | Work | Completion evidence |
 |---|---|---|

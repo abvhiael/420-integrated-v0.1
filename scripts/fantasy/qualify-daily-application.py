@@ -23,7 +23,7 @@ def port():
     with socket.socket() as s:s.bind(('127.0.0.1',0));return s.getsockname()[1]
 
 def main():
-    p=argparse.ArgumentParser();p.add_argument('--forge',default='forge');p.add_argument('--anvil',default='anvil');p.add_argument('--solc',default='0.8.30');p.add_argument('--output',required=True);p.add_argument('--allow-dirty',action='store_true');a=p.parse_args()
+    p=argparse.ArgumentParser();p.add_argument('--forge',default='forge');p.add_argument('--anvil',default='anvil');p.add_argument('--solc',default='0.8.30');p.add_argument('--output',required=True);p.add_argument('--allow-dirty',action='store_true');p.add_argument('--asset-kind',choices=['erc20','wrapped-native'],default='erc20');a=p.parse_args()
     sha=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip()
     dirty=subprocess.check_output(['git','status','--porcelain','--untracked-files=normal','--','clients/420bet-fantasy','contracts/src','contracts/script/fantasy','scripts/fantasy/qualify-daily-application.py','.github/workflows/420bet-daily-application-level2.yml'],cwd=ROOT,text=True).strip()
     if dirty and not a.allow_dirty:raise RuntimeError('scoped source is dirty; commit before qualification or use diagnostic --allow-dirty')
@@ -44,7 +44,7 @@ def main():
             try:
                 urllib.request.urlopen(urllib.request.Request(rpc,data=b'{"jsonrpc":"2.0","id":1,"method":"eth_chainId","params":[]}',headers={'Content-Type':'application/json'}),timeout=1);break
             except Exception:time.sleep(.1)
-        private=out/'private'/str(uuid4());fixture=LocalFixture(rpc,out/'build',private);config=fixture.setup();(out/'deployment.json').write_text(json.dumps(config,indent=2)+'\n')
+        private=out/'private'/str(uuid4());fixture=LocalFixture(rpc,out/'build',private,a.asset_kind);config=fixture.setup();(out/'deployment.json').write_text(json.dumps(config,indent=2)+'\n')
         app_log=(out/'service.log').open('w')
         def start_service():return subprocess.Popen([sys.executable,str(APP/'server.py'),'--config',str(private/'application.json'),'--private-directory',str(private),'--port',str(web_port)],cwd=ROOT,env=os.environ,stdout=app_log,stderr=app_log,**kwargs)
         service=start_service();token=os.urandom(24).hex()
@@ -59,7 +59,7 @@ def main():
                     elif action=='score':value={'scores':fixture.score(body['pool'],int(body.get('revision',1)),body.get('bobWins',False))}
                     elif action=='prepareCorrection':value=fixture.score(body['pool'],2,True,prepare_only=True)
                     elif action=='scopeResolver':
-                        scope=fixture.disputes.functions.claimScope(b32(body['claim'])).call();fixture.grant(fixture.accounts[4],fixture.disputes.functions.RESOLVE().call(),scope);value={'granted':True}
+                        scope=fixture.disputes.functions.claimScope(b32(body['claim'])).call();claim=fixture.disputes.functions.claimOf(b32(body['claim'])).call();deadline=fixture.disputes.functions.poolOf(claim[0]).call()[3];fixture.grant(fixture.accounts[4],fixture.disputes.functions.RESOLVE().call(),scope,valid_until=deadline);value={'granted':True}
                     elif action=='totals':value={'balances':[str(fixture.token.functions.balanceOf(w).call()) for w in fixture.accounts], 'engineBalance':str(fixture.token.functions.balanceOf(fixture.engine.address).call()),'engineLiability':str(fixture.engine.functions.totalLiability().call()),'bondBalance':str(fixture.token.functions.balanceOf(fixture.disputes.address).call()),'bondLiability':str(fixture.disputes.functions.totalLiability().call())}
                     elif action=='restart':service.terminate();service.wait(timeout=10);service=start_service();value={'restarted':True}
                     else:raise ValueError('unknown qualification action')
@@ -99,7 +99,7 @@ def main():
             if result['passed']!=len(result['steps']) or result['passed']!=12:raise RuntimeError('mandatory browser scenarios missing')
             files=['bundle-checksums.json','transactions.json','versions.json','source-checksums.json','deployment.json','browser-result.json','conservation.json','browser.stdout.log','browser.stderr.log','compile.stdout.log','compile.stderr.log','daily-pool.png','daily-pool-mobile.png']
             evidence={name:hashlib.sha256((out/name).read_bytes()).hexdigest() for name in files}
-            certificate={'schema':'420bet.daily-application.local-level2.v1','qualifiedSHA':sha,'level':2,'scope':'daily application local integration','status':'passed','syntheticSportsData':True,'testnetLiveSettlementQualified':False,'externalWalletExtensionQualified':False,'evidenceSHA256':evidence}
+            certificate={'schema':'420bet.daily-application.local-level2.v1','qualifiedSHA':sha,'level':2,'assetKind':a.asset_kind,'scope':'daily application local integration','status':'passed','syntheticSportsData':True,'testnetLiveSettlementQualified':False,'externalWalletExtensionQualified':False,'evidenceSHA256':evidence}
             (out/'qualification.json').write_text(json.dumps(certificate,indent=2)+'\n',encoding='utf-8')
         else:print('DIAGNOSTIC ONLY: dirty source; no qualification certificate issued')
     finally:

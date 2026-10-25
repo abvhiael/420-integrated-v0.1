@@ -7,4 +7,5 @@ import "../../src/oracle/OracleFeedRegistry420.sol";
 import "../../src/oracle/OracleRiskPolicy420.sol";
 import "../../src/oracle/OracleRouter420.sol";
 import "../../src/token/ERC20Template420.sol";
+import "../../src/exchange/Wrapped420.sol";
 contract FantasyDailyLocalImports420 {}

@@ -29,6 +29,8 @@ class Chain:
         if url.scheme!="https" and not(url.scheme=="http" and url.hostname in ("127.0.0.1","localhost","::1")):raise ValueError("RPC must use HTTPS or loopback")
         self.w3=Web3(Web3.HTTPProvider(config["rpc"],request_kwargs={"timeout":10}))
         if self.w3.eth.chain_id!=config["chainID"]:raise ValueError("wrong configured chain")
+        if not config.get("localQualification") and not config.get("genesisHash"):raise ValueError("official application configuration requires pinned genesis identity")
+        if config.get("genesisHash") and hx(self.w3.eth.get_block(0).hash).lower()!=config["genesisHash"].lower():raise ValueError("wrong configured genesis")
         if config.get("localQualification") and (config["chainID"]!=31337 or url.hostname not in ("127.0.0.1","localhost")):raise ValueError("local qualification requires isolated loopback Anvil")
         self.engine=self.contract("FantasyContestEngine420",config["engine"])
         self.book=self.contract("FantasySlateBook420",self.engine.functions.slateBook().call())
@@ -39,7 +41,9 @@ class Chain:
         self.rankings=self.contract("FantasyRankingBook420",self.engine.functions.rankings().call())
         asset=self.engine.functions.asset().call()
         if int(asset,16)==0:raise ValueError("daily app requires configured canonical ERC20 $420")
-        self.token=self.contract("ERC20Template420",asset)
+        self.asset_kind=config.get("assetKind","erc20")
+        if self.asset_kind not in ("erc20","wrapped-native"):raise ValueError("unsupported canonical asset kind")
+        self.token=self.contract("Wrapped420" if self.asset_kind=="wrapped-native" else "ERC20Template420",asset)
         if asset.lower()!=config["asset"].lower():raise ValueError("wrong canonical $420")
         self.decimals=self.token.functions.decimals().call()
         if not 0<=self.decimals<=36:raise ValueError("unsupported token precision")
@@ -110,10 +114,16 @@ class Chain:
                 index=self.engine.functions.entryForSubject(b32(pool),b32(profile['subject'])).call(block_identifier=snap['number'])
                 if index:own.append({'id':index,**self.entry(pool,index,snap['number'])})
         return {"payoutWeights":self.policy.functions.weightsFor(b32(pool),2 if c["cap"]==2 else 3).call(block_identifier=snap["number"]),"ownEntries":own,"pageStart":start,"nextPage":start+50 if start+50<=p['count'] else None,"id":pool,"config":c,"pool":p,"slate":s,"dispute":named(DPOOL_FIELDS,self.disputes.functions.poolOf(b32(pool)).call(block_identifier=snap["number"])),"entries":rows,"claims":claims,
-                "balance":str(self.token.functions.balanceOf(actor).call(block_identifier=snap["number"])),"credit":str(self.engine.functions.credit(actor).call(block_identifier=snap["number"])),"bondCredit":str(self.disputes.functions.credit(actor).call(block_identifier=snap["number"])),"challengeBond":str(self.disputes.functions.bondFor(b32(pool)).call(block_identifier=snap["number"])),"timestamp":snap["timestamp"]}
+                "nativeBalance":str(self.w3.eth.get_balance(actor,snap["number"])),"balance":str(self.token.functions.balanceOf(actor).call(block_identifier=snap["number"])),"credit":str(self.engine.functions.credit(actor).call(block_identifier=snap["number"])),"bondCredit":str(self.disputes.functions.credit(actor).call(block_identifier=snap["number"])),"challengeBond":str(self.disputes.functions.bondFor(b32(pool)).call(block_identifier=snap["number"])),"timestamp":snap["timestamp"]}
     def draft(self,action,payload,actor):
         actor=Web3.to_checksum_address(actor);pid=b32(payload.get("pool",ZERO));value=0;approval=None
-        if action=="create":
+        if action in ("wrap","unwrap"):
+            if self.asset_kind!="wrapped-native":raise ValueError("native wrapping requires the pinned Wrapped420 asset")
+            amount=int(payload["amount"])
+            if not 0<amount<2**256:raise ValueError("positive wrapping amount required")
+            if action=="wrap":fn=self.token.functions.deposit();value=amount
+            else:fn=self.token.functions.withdraw(amount)
+        elif action=="create":
             slate=b32(payload["slate"]);fee=int(payload["entryFee"]);prize=int(payload["freePrize"]);cap=int(payload["cap"])
             if fee<0 or prize<0 or (fee and prize) or (cap and cap<2):raise ValueError("invalid pool funding")
             weights=[int(w) for w in payload.get("payoutWeights",[6000,3000,1000])]

@@ -30,10 +30,10 @@ async function open(index){const context=await browser.newContext();const page=a
   if(method==='eth_requestAccounts'||method==='eth_accounts')return [wallet.address];
   if(method==='personal_sign'){assert.equal(params[1].toLowerCase(),wallet.address.toLowerCase());return wallet.signMessage(getBytes(params[0]));}
   if(method==='eth_sendTransaction'){assert.equal(params[0].from.toLowerCase(),wallet.address.toLowerCase());return rpcCall(method,params);}
-  if(['eth_chainId','eth_getTransactionReceipt','eth_estimateGas'].includes(method))return rpcCall(method,params);
+  if(['eth_chainId','eth_getTransactionReceipt','eth_estimateGas','eth_getBlockByNumber'].includes(method))return rpcCall(method,params);
   throw Error('unsupported test wallet method '+method);
  });
- await page.addInitScript(()=>{window.ethereum={request:({method,params})=>window.localWalletRequest({method,params}),on:()=>{}};});
+ await page.addInitScript(()=>{window.ethereum={request:async({method,params})=>{const result=await window.localWalletRequest({method,params});return method==='eth_getBlockByNumber'&&window.__qualificationWrongGenesis?{...result,hash:'0x'+'ff'.repeat(32)}:result;},on:()=>{}};});
  page.on('request',request=>{if(request.method()==='POST'&&request.url().startsWith(url+'/api/'))posts.push({url:request.url(),body:request.postData()});});
  page.on('pageerror',error=>console.error('BROWSER '+error.message));
  await page.goto(url);await page.waitForFunction(()=>document.getElementById('profile').options.length>0);
@@ -49,6 +49,7 @@ async function waitPublished(pool,count){for(let i=0;i<100;i++){const v=await vi
 try{
  const admin=await open(0),alice=await open(1),bob=await open(2),resolver=await open(4);
  await record('platform creates paid, sponsored-free, underfilled and timeout pools through browser',async()=>{
+  if(config.assetKind==='wrapped-native'){await alice.fill('#wrap-amount','0.125');await click(alice,'#wrap','wrapped at 1:1');await click(alice,'#unwrap','unwrapped at 1:1');}
   await admin.locator('#admin summary').click();
   for(const [i,fee,prize,slate] of [[0,'1','0',slates[0]],[1,'0','10',slates[0]],[2,'1','0',slates[0]],[3,'1','0',slates[1]],[4,'0','3',slates[0]]]){
    await admin.selectOption('#access',i===4?'invite':'public');await admin.fill('#payout-weights',i===4?'70,20,10':'60,30,10');await admin.selectOption('#new-pool',pools[i]);await admin.selectOption('#slate',slate);await admin.fill('#entry-fee',fee);await admin.fill('#free-prize',prize);await click(admin,'#create','Pool created');
@@ -75,6 +76,7 @@ try{
   const replay=await api('/api/attest',JSON.parse(latest.body));assert.equal(replay.status,400);
   const foreign={...JSON.parse(latest.body),pool:pools[1]};assert.equal((await api('/api/attest',foreign)).status,400);
   const csrf=await fetch(url+'/api/attest',{method:'POST',headers:{'Content-Type':'application/json',Origin:'https://attacker.invalid'},body:latest.body});assert.equal(csrf.status,403);
+  await choose(alice,pools[0]);await alice.evaluate(()=>window.__qualificationWrongGenesis=true);await alice.locator('#submit').click();await alice.waitForFunction(()=>document.body.dataset.busy==='false');assert.ok((await alice.locator('#status').textContent()).includes('genesis'));assert.equal((await view(pools[0],1)).entries[0].nonce,2);await alice.evaluate(()=>window.__qualificationWrongGenesis=false);await click(alice,'#connect');
  });
  await record('custodian rejects authenticated malformed lineups, tampered ciphertext and wrong-wallet consent',async()=>{
   const invalid=await authorize(await submission(pools[0],1,[2,1,3,4,5,6,7]),1);assert.equal((await api('/api/attest',invalid)).status,400);
@@ -121,6 +123,6 @@ try{
   await writeFile(join(out,'conservation.json'),JSON.stringify(totals,null,2));
  });
  await choose(alice,pools[0]);await alice.screenshot({path:join(out,'daily-pool.png'),fullPage:true});await alice.setViewportSize({width:390,height:844});await alice.screenshot({path:join(out,'daily-pool-mobile.png'),fullPage:true});
- await writeFile(join(out,'browser-result.json'),JSON.stringify({steps,passed:steps.length,realBrowser:true,realEncryption:true,realTokenEscrow:true,realCanonicalSettlement:true,syntheticSportsData:true,externalWalletExtensionQualified:false},null,2));
+ await writeFile(join(out,'browser-result.json'),JSON.stringify({steps,passed:steps.length,realBrowser:true,realEncryption:true,realTokenEscrow:true,realCanonicalSettlement:true,assetKind:config.assetKind,realNativeWrapping:config.assetKind==='wrapped-native',syntheticSportsData:true,externalWalletExtensionQualified:false},null,2));
  console.log(JSON.stringify({passed:steps.length,realBrowser:true}));
 }catch(error){for(const [i,page] of pages.entries())await page.screenshot({path:join(out,'failure-'+i+'.png'),fullPage:true}).catch(()=>{});throw error;}finally{await browser.close();}

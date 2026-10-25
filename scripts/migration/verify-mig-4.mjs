@@ -1,0 +1,13 @@
+import assert from 'node:assert/strict';
+import {readFileSync,existsSync,readdirSync} from 'node:fs';
+const cat=JSON.parse(readFileSync('config/genesis-applications.json','utf8'));
+const apps=cat.apps.map(a=>a.name);
+assert.equal(apps.includes('420Arcade'),false,'Arcade must be explicitly deferred from Genesis');
+assert.equal(apps.includes('420 Gaming Protocol'),true,'The independent Genesis Gaming Protocol must remain');
+assert.ok((cat.amendments||[]).some(a=>/ARCADE_DEFERRAL/.test(a.id)),'An explicit approved deferral amendment is required');
+for(const p of ['packages/420-gaming-sdk/src/index.js','clients/highcountry-access-v1/package.json','docs/migration/MIG-3-level2-ecosystem-qualification.md','docs/migration/MIG-4-genesis-external-game-boundary.md'])assert.equal(existsSync(p),true,'Required Genesis authority/evidence missing: '+p);
+for(const p of ['assets/arcade','assets/budtender','apps/arcade-web','clients/budtender-access-v1','clients/budtender-web-v1','clients/greenroad-access-v1','clients/smoke-chrome-access-v1','src/budtender','packages/arcade-assets','packages/arcade-core','packages/420-gaming-client-hardening','packages/420-gaming-cross-game-qualification'])assert.equal(existsSync(p),false,'Extracted game source still coupled to Genesis: '+p);
+for(const wf of readdirSync('.github/workflows'))assert.doesNotMatch(wf,/^(arcade-|budtender-|green-road-gaming|smoke-chrome-gaming|gaming-four-game-e2e|gaming-cross-game-qualification|gaming-client-hardening)/,'Extracted game CI remains active: '+wf);
+assert.equal(existsSync('.github/workflows/gaming-sdk.yml'),true);
+assert.equal(existsSync('.github/workflows/gaming-runtime.yml'),true);
+console.log('MIG-4 scoped Genesis catalog, protocol retention, extracted source and CI boundaries: PASS');

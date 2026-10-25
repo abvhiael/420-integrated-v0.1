@@ -124,12 +124,6 @@
       "purpose": "Network, finality, validator, RPC, bridge, swap and AI service health"
     },
     {
-      "name": "420Arcade",
-      "class": "GENESIS_USER_APP",
-      "contracts_required": false,
-      "purpose": "Eleven guest-first, wallet-free arcade games using the existing 420 Gaming Protocol only for optional scoped identity, entitlements and cross-game attestations; ordinary core gameplay is available without registration, wallet linkage or blockchain connectivity"
-    },
-    {
       "name": "420 Faucet",
       "class": "TESTNET_ONLY",
       "contracts_required": true,
@@ -155,7 +149,20 @@
     "420 Identity is optional and pseudonymous.",
     "420 Stake does not include stake-weighted delegation at genesis.",
     "420 Attention cannot access wallet keys, auto-sign, execute arbitrary wallet code, or transact on behalf of users.",
-    "420Arcade ordinary core gameplay remains wallet-free and accessible to guests without registration or blockchain connectivity; optional Gaming Protocol integrations cannot create pay-to-win advantages or separate wallet or contract authority.",
+    "Post-Genesis 420Arcade ordinary core gameplay remains wallet-free and accessible to guests without registration or blockchain connectivity; optional Gaming Protocol integrations cannot create pay-to-win advantages or separate wallet or contract authority.",
     "420 Faucet never participates in mainnet genesis economics."
+  ],
+  "amendments": [
+    {
+      "id": "GENESIS_APPLICATION_DECISION_1_ARCADE_DEFERRAL_2026_10_24",
+      "scope": "Launch requirements only",
+      "decision": "420Arcade removed from Genesis public-launch application scope; 420 Gaming Protocol stays Genesis; gameplay and assets retained for post-Genesis independent game development",
+      "retained": "Optional-wallet integration and guest-first non-pay-to-win policy; existing contracts and code preserved",
+      "noChanges": [
+        "420 Gaming Protocol contracts",
+        "High Country Genesis continuation",
+        "historical audit evidence"
+      ]
+    }
   ]
 }

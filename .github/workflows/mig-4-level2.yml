@@ -1,0 +1,24 @@
+name: MIG-4 Genesis Decoupling Level 2
+on:
+  pull_request:
+    paths:
+      - 'config/genesis-applications.json'
+      - 'docs/audit/genesis-contract-documentation-inventory.json'
+      - 'docs/migration/MIG-4-genesis-external-game-boundary.md'
+      - 'scripts/migration/verify-mig-4.mjs'
+      - '.github/workflows/mig-4-level2.yml'
+  push:
+    branches: ['migration/mig-4-genesis-game-decoupling']
+    paths:
+      - '.github/workflows/mig-4-level2.yml'
+      - 'scripts/migration/verify-mig-4.mjs'
+jobs:
+  boundary:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Scoped MIG-4 source and authority separation
+        run: node scripts/migration/verify-mig-4.mjs

@@ -1,0 +1,56 @@
+name: 420Bet approved NHL formats funded local Level 2
+on:
+  push:
+    branches: ['bet/fantasy-format-frameworks']
+    paths:
+      - 'clients/420bet-fantasy/**'
+      - 'contracts/src/bet/fantasy/**'
+      - 'contracts/test/fantasy-approved/**'
+      - 'contracts/script/fantasy/**'
+      - 'scripts/fantasy/**'
+      - '.github/workflows/420bet-fantasy-approved-level2.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: fantasy-approved-local-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  funded-local:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - name: Bind exact source SHA
+        run: test "$(git rev-parse HEAD)" = "${{ github.sha }}"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.8.6
+      - name: Install pinned cryptographic and calendar dependencies
+        run: |
+          python -m pip install -r clients/420bet-fantasy/formats/requirements.txt
+          python -m pip install slither-analyzer==0.11.6
+          solc-select install 0.8.30
+          solc-select use 0.8.30
+      - name: Execute source-bound Level 1 and actual funded local Level 2
+        run: python scripts/fantasy/qualify-approved-formats.py --output artifacts/fantasy-approved
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: fantasy-approved-local-${{ github.sha }}
+          path: |
+            artifacts/fantasy-approved/*.json
+            artifacts/fantasy-approved/*.log
+            artifacts/fantasy-approved/formats/*.json
+            artifacts/fantasy-approved/formats/*.log
+            artifacts/fantasy-approved/seasons/*.json
+            artifacts/fantasy-approved/seasons/*.log
+          if-no-files-found: error

@@ -1,0 +1,27 @@
+name: 420Bet fantasy format frameworks Level 1
+on:
+  push:
+    branches: ['bet/fantasy-format-frameworks']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  scoped-frameworks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r clients/420bet-fantasy/requirements.txt
+      - name: Execute draft formats and inherited client tests at exact SHA
+        run: python scripts/fantasy/qualify-format-frameworks.py --output artifacts/fantasy-formats
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: fantasy-formats-${{ github.sha }}
+          path: artifacts/fantasy-formats/
+          if-no-files-found: error

@@ -127,5 +127,23 @@
       "requiresChangeControl": true,
       "qualifications": "Pending scoped Level 1 render/technical verification; no certificate implied"
     }
+  },
+  "uploadReconciliation": {
+    "status": "CANONICAL_ALIASES_CREATED_AWAITING_LEVEL1_VALIDATION",
+    "repositoryPath": "assets/highcountry/original-sixteen/",
+    "originalDoubleExtensionImages": 208,
+    "normalizedByteIdenticalAliases": 208,
+    "additionalGameplayContractAliases": 48,
+    "immediateExpected": 157,
+    "archiveEditionArtworkExpected": 32,
+    "remainingOptionalArtworkKinds": [
+      "bud-illustration",
+      "botanical-plate"
+    ],
+    "remainingOptionalArtworkCount": 32,
+    "retainedLegacyPaths": true,
+    "verification": "SHA-256 original/canonical identity and PNG validity enforced by services/highcountry-archive/test/scoped-a06.test.mjs",
+    "independentFromCollectionEntitlements": true,
+    "museumWorldArtRequired": false
   }
 }

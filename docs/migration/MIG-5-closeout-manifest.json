@@ -1,0 +1,66 @@
+{
+  "schema": "mig-5-genesis-closeout-v1",
+  "milestone": "MIG-5",
+  "qualification": "PASSED_LEVEL_3",
+  "genesisBaseline": "9ac46ab7247fbdebe33c036913e30049ef334314",
+  "migrationPRs": {
+    "800": "OPEN_HISTORICAL_INVENTORY_RECONCILIATION",
+    "804": "MERGED_ARCADE_DEFERRAL",
+    "817": "MERGED_MIG3",
+    "820": "MERGED_MIG4"
+  },
+  "independentRepositories": {
+    "420-arcade": {
+      "repository": "abvhiael/420-arcade",
+      "qualifiedCommit": "d8bdb101dcef59048c48fe387078f7a6295462b4",
+      "publishedGithubRelease": false,
+      "gameBuildMandatoryForGenesis": false
+    },
+    "420-budtender": {
+      "repository": "abvhiael/420-budtender",
+      "qualifiedCommit": "9ab751e3cdf1fa2e8725dda0981749208ab038f5",
+      "publishedGithubRelease": false,
+      "gameBuildMandatoryForGenesis": false
+    },
+    "420-smoke-and-chrome": {
+      "repository": "abvhiael/420-smoke-and-chrome",
+      "qualifiedCommit": "861feb3561ed22dd6c8c8a8209c30321bab3e599",
+      "publishedGithubRelease": false,
+      "gameBuildMandatoryForGenesis": false
+    },
+    "420-green-road": {
+      "repository": "abvhiael/420-green-road",
+      "qualifiedCommit": "fb0c2e72730c4a562cb465fdc526036d79164766",
+      "publishedGithubRelease": false,
+      "gameBuildMandatoryForGenesis": false
+    }
+  },
+  "gameIds": {
+    "420-green-road": "420/GAMING/GAME/THE_GREEN_ROAD/V1",
+    "420-budtender": "420/GAMING/GAME/BUDTENDER/V1",
+    "420-smoke-and-chrome": "420/GAMING/GAME/SMOKE_AND_CHROME/V1",
+    "420-arcade": "LOCAL_CANDIDATE_ONLY"
+  },
+  "preserve": [
+    "420 Gaming Protocol",
+    "High Country",
+    "packages/420-gaming-sdk",
+    "cross-game adversarial tests"
+  ],
+  "postGenesis": [
+    "MTN-0 live registration qualification",
+    "MTN-2 wallet sessions",
+    "MTN-3 ledger claims and settlements",
+    "MTN-4 public package distribution and acceptance",
+    "Game release publication and independent ownership of Kush Krusher animation",
+    "Historical nonidentical test files and MIG-0 PR 800 reconciliation"
+  ],
+  "limits": "No live network or production release acceptance asserted.",
+  "level3Evidence": {
+    "runId": 40167041132,
+    "qualifiedParentSha": "4d4c5ad717e1a5c40f8a6c8595da21671ed8022e",
+    "conclusion": "success",
+    "scope": "Bounded structural Level 3 plus inherited MIG-3 and MIG-4 qualified integration tests",
+    "noGlobalRerun": true
+  }
+}

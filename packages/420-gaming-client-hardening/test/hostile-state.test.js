@@ -12,23 +12,10 @@ import {
   evaluateFeatureAccess as evaluateHighCountryAccess
 } from "../../../clients/highcountry-access-v1/src/access-state.js";
 import {
-  GREEN_ROAD_GAME_ID,
-  GreenRoadFeature,
-  createGreenRoadGamingClient,
-  evaluateGreenRoadAccess
-} from "../../../clients/greenroad-access-v1/src/access.js";
-import {
-  BUDTENDER_GAME_ID,
-  BudtenderFeature,
-  createBudtenderGamingClient,
-  evaluateBudtenderAccess
-} from "../../../clients/budtender-access-v1/src/access.js";
-import {
-  SMOKE_CHROME_GAME_ID,
-  SmokeChromeFeature,
-  createSmokeChromeGamingClient,
-  evaluateSmokeChromeAccess
-} from "../../../clients/smoke-chrome-access-v1/src/access.js";
+  GREEN_ROAD_GAME_ID, GreenRoadFeature, createGreenRoadGamingClient, evaluateGreenRoadAccess,
+  BUDTENDER_GAME_ID, BudtenderFeature, createBudtenderGamingClient, evaluateBudtenderAccess,
+  SMOKE_CHROME_GAME_ID, SmokeChromeFeature, createSmokeChromeGamingClient, evaluateSmokeChromeAccess
+} from "../../420-gaming-sdk/test-support/extracted-game-contracts.js";
 
 const HIGH_COUNTRY_GAME_ID = "420/GAMING/GAME/HIGH_COUNTRY/V1";
 

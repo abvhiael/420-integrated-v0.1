@@ -83,3 +83,37 @@ test('real Chromium: skills and research route protects offline play and does no
  await expect(page.getByRole('link',{name:'Skills & Research'})).toHaveAttribute('aria-current','page');
  expect(errors).toEqual([]);
 });
+
+test('HC-GFX-2.1.2: real Chromium loads each of nine approved cultivation backgrounds',async({page})=>{
+ const failures=[];page.on('pageerror',error=>failures.push(error.message));
+ await page.goto(origin+'/play');
+ await page.getByRole('button',{name:'Start guest game'}).click();
+ const regionSelect=page.getByRole('combobox',{name:'Preview region'});
+ const environmentSelect=page.getByRole('combobox',{name:'Preview environment'});
+ for(const region of ['emerald-coast','golden-prairie','red-mesa']){
+  await regionSelect.selectOption(region);
+  for(const environment of ['outdoor','greenhouse','indoor']){
+   await environmentSelect.selectOption(environment);
+   const name='hc-env-'+region+'-'+environment+'-background.png';
+   const image=page.locator('.cultivation-scene-image');
+   await expect(image).toHaveAttribute('src','/assets/cultivation/environments/'+name);
+   await expect(image).toBeVisible();
+   await expect.poll(()=>image.evaluate(element=>element.complete&&element.naturalWidth>0)).toBe(true);
+   const response=await page.request.get(origin+'/assets/cultivation/environments/'+name);
+   expect(response.status(),name).toBe(200);
+   const bytes=await response.body();
+   expect(bytes.subarray(0,8).toString('hex'),name).toBe('89504e470d0a1a0a');
+  }
+ }
+ expect(failures).toEqual([]);
+ await expect(page.getByText(/not a verified parcel/)).toBeVisible();
+});
+
+test('HC-GFX-2.1.2: failed background fetch leaves local cultivation usable',async({page})=>{
+ await page.route('**/assets/cultivation/environments/hc-env-emerald-coast-outdoor-background.png',route=>route.abort());
+ await page.goto(origin+'/play');
+ await page.getByRole('button',{name:'Start guest game'}).click();
+ await expect(page.getByText(/Regional scene artwork has not been uploaded or could not be loaded/)).toBeVisible();
+ await page.getByRole('button',{name:'Plant locally'}).click();
+ await expect(page.getByText('Plant stage: germination')).toBeVisible();
+});

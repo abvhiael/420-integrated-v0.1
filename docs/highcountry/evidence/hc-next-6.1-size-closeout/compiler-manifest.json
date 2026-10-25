@@ -1,0 +1,21 @@
+{
+  "input_sha256": "5872786a80257524ee5effedb97ae4a51cf8e386d549eb41d3a1e8dd008a2602",
+  "native_solc": "/root/.svm/0.8.24/solc-0.8.24",
+  "contract_outputs": 224,
+  "batches": 51,
+  "sources": 145,
+  "settings": {
+    "optimizer": {
+      "enabled": true,
+      "runs": 200
+    },
+    "metadata": {
+      "useLiteralContent": false,
+      "bytecodeHash": "ipfs",
+      "appendCBOR": true
+    },
+    "evmVersion": "cancun",
+    "viaIR": true,
+    "libraries": {}
+  }
+}

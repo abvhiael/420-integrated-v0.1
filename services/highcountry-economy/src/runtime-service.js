@@ -9,6 +9,7 @@ import {SettlementError} from './buds-ledger.js';
 import {SkillResearchService} from './skill-research.js';
 import {MissionService} from './missions.js';
 import {DiscoveryIntegration} from './discovery-integration.js';
+import {LandLeaseAccounts} from './land-lease-accounts.js';
 
 async function requireLeastPrivilegeRuntimeRole(pool,namespace) {
  const check=await pool.query("SELECT current_user AS role, r.rolsuper, r.rolbypassrls, c.relrowsecurity, pg_get_userbyid(c.relowner) AS owner, has_table_privilege(current_user,'highcountry_buds_state','SELECT') AS can_select, has_table_privilege(current_user,'highcountry_buds_state','UPDATE') AS can_update, has_table_privilege(current_user,'highcountry_buds_state','INSERT,DELETE,TRUNCATE,REFERENCES,TRIGGER') AS elevated FROM pg_roles r JOIN pg_class c ON c.oid='highcountry_buds_state'::regclass WHERE r.rolname=current_user");
@@ -17,7 +18,7 @@ async function requireLeastPrivilegeRuntimeRole(pool,namespace) {
 }
 
 /// Composition uses one provisioned durable namespace and independently configured canonical RPC/signer/issuer policy.
-export async function createRuntime({pool,namespace,authority:authConfig,rpc:rpcConfig,sources,marketDomain,operator,issuer,signerRpc,clock,progression,missions,discovery}){
+export async function createRuntime({pool,namespace,authority:authConfig,rpc:rpcConfig,sources,marketDomain,operator,issuer,signerRpc,clock,progression,missions,discovery,landRights}){
  await requireLeastPrivilegeRuntimeRole(pool,namespace);
  const store=new PostgresBudsStore(pool,namespace),rpc=new FinalizedRpc(rpcConfig);
  for(const [name,policy] of Object.entries(sources))if(address(rpc.contracts[name]?.address)!==address(policy.contract))throw new SettlementError('source contract mismatch');
@@ -41,11 +42,12 @@ export async function createRuntime({pool,namespace,authority:authConfig,rpc:rpc
  const skillResearch=progression?new SkillResearchService({store,identity,...progression,clock}):null;
  const missionService=missions?new MissionService({store,identity,...missions,clock}):null;
  const discoveryService=discovery?new DiscoveryIntegration({store,identity,...discovery,clock}):null;
- return {store,identity,rewards,market,marketView:new HighCountryMarketplaceView({store,identity,market,clock}),skillResearch,missionService,discoveryService,...chain};
+ const landRightsService=landRights?new LandLeaseAccounts({store,identity,...landRights,clock}):null;
+ return {store,identity,rewards,market,marketView:new HighCountryMarketplaceView({store,identity,market,clock}),skillResearch,missionService,discoveryService,landRightsService,...chain};
 }
 // Production entrypoint for a wallet-optional, registered-player ordinary economy.
 // Never silently repurpose the canonical on-chain escrow settlement runtime.
-export async function createOrdinaryRuntime({pool,namespace,authority:authConfig,rpc:rpcConfig,sources,inventoryAuthority,clock,progression,missions,discovery}) {
+export async function createOrdinaryRuntime({pool,namespace,authority:authConfig,rpc:rpcConfig,sources,inventoryAuthority,clock,progression,missions,discovery,landRights}) {
  await requireLeastPrivilegeRuntimeRole(pool,namespace);
  if(!inventoryAuthority||typeof inventoryAuthority.verifyAssetReceipt!=='function'
     ||typeof inventoryAuthority.requireMarketOpen!=='function')
@@ -57,10 +59,10 @@ export async function createOrdinaryRuntime({pool,namespace,authority:authConfig
    throw new SettlementError('source contract mismatch');
  const identity=new RuntimeAuthority({...authConfig,store,rpc,sourcePolicies:sources,clock});
  const rewards=new GameplayRewardRuntime({store,authority:identity,rpc,sources,clock});
- return composeOrdinaryMarketRuntime({store,identity,rewards,inventoryAuthority,clock,progression,missions,discovery});
+ return composeOrdinaryMarketRuntime({store,identity,rewards,inventoryAuthority,clock,progression,missions,discovery,landRights});
 }
 // Separate ordinary market composition. The canonical runtime above remains chain-settlement-only.
-export function composeOrdinaryMarketRuntime({store,identity,rewards,inventoryAuthority,clock,progression,missions,discovery}) {
+export function composeOrdinaryMarketRuntime({store,identity,rewards,inventoryAuthority,clock,progression,missions,discovery,landRights}) {
  if(typeof store?.transact!=='function'||identity?.store!==store
    ||typeof identity?.registeredPrincipal!=='function'
    ||typeof identity?.requireTrustedIssuer!=='function'
@@ -78,10 +80,11 @@ export function composeOrdinaryMarketRuntime({store,identity,rewards,inventoryAu
  const skillResearch=progression?new SkillResearchService({store,identity,...progression,clock}):null;
  const missionService=missions?new MissionService({store,identity,...missions,clock}):null;
  const discoveryService=discovery?new DiscoveryIntegration({store,identity,...discovery,clock}):null;
+ const landRightsService=landRights?new LandLeaseAccounts({store,identity,...landRights,clock}):null;
  return {store,identity,rewards,market,marketView:new HighCountryMarketplaceView({store,identity,market,clock}),skillResearch,missionService,discoveryService};
 }
 export function runtimeHttpServer(runtime,{origin}){
- const {identity,rewards,market,marketView,skillResearch,missionService,discoveryService,settlement,worker}=runtime;
+ const {identity,rewards,market,marketView,skillResearch,missionService,discoveryService,landRightsService,settlement,worker}=runtime;
  return createServer(async(req,res)=>{
   res.setHeader('content-type','application/json');res.setHeader('cache-control','no-store');
   res.setHeader('x-content-type-options','nosniff');
@@ -116,6 +119,15 @@ export function runtimeHttpServer(runtime,{origin}){
      if(!skillResearch||Object.keys(b).sort().join(',')!=='operation,trackId')
       throw new SettlementError('progression unlock request denied');
      result=await skillResearch.unlock(token,b.operation,b.trackId);break;
+    case '/land/rights':
+     if(!landRightsService||Object.keys(b).sort().join(',')!=='parcelId')throw new SettlementError('land rights request denied');
+     result=await landRightsService.rights(token,b.parcelId);break;
+    case '/land/rent/history':
+     if(!landRightsService||Object.keys(b).sort().join(',')!=='leaseId')throw new SettlementError('rent history request denied');
+     result=await landRightsService.rentHistory(token,b.leaseId);break;
+    case '/land/rent/record':
+     if(!landRightsService||Object.keys(b).sort().join(',')!=='amount,leaseId,operation,parcelId,period,sourceReceipt')throw new SettlementError('rent accounting request denied');
+     result=await landRightsService.recordRent(token,b);break;
     case '/discovery/snapshot':
      if(!discoveryService||Object.keys(b).length)throw new SettlementError('discovery snapshot denied');
      result=await discoveryService.snapshot(token);break;

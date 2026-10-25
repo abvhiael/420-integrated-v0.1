@@ -1,0 +1,26 @@
+name: High Country Land Leases Level 1
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/highcountry/land/**'
+      - 'contracts/test/highcountry/**'
+      - 'services/highcountry-economy/**'
+      - '.github/workflows/highcountry-land-leases.yml'
+  workflow_dispatch:
+jobs:
+  land-rent-level-1:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Economy dependencies
+        working-directory: services/highcountry-economy
+        run: npm install --no-package-lock --ignore-scripts --no-audit --no-fund
+      - name: Canonical land and rent Level 1
+        working-directory: services/highcountry-economy
+        run: node --test test/land-lease-accounts.test.js
+      - name: Affected economy regression Level 2
+        working-directory: services/highcountry-economy
+        run: npm test

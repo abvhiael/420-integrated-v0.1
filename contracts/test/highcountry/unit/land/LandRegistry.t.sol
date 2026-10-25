@@ -187,6 +187,45 @@ contract LandRegistryHC3Test {
         require(land.effectiveOperator(4) == newOwner, "owner not restored as operator");
     }
 
+    function testOwnershipTransferPreservesOccupiedLeaseAndLivePlants() public {
+        genesis.finalizeGenesis();
+        uint64 parcelId = 6;
+        _grant(ModuleIds.LAND_REGISTRY, ActionIds.LAND_REGISTER, parcelId, 20, keccak256("register-6"));
+        _grant(ModuleIds.LAND_REGISTRY, ActionIds.LAND_TRANSFER, parcelId, 0, keccak256("transfer-6"));
+        _grant(ModuleIds.LAND_REGISTRY, ActionIds.LAND_SET_OCCUPANCY, parcelId, 0, keccak256("occupy-6"));
+        _grant(ModuleIds.LAND_REGISTRY, ActionIds.LAND_CLEAR_OCCUPANCY, parcelId, 0, keccak256("clear-6"));
+        land.registerParcel(parcelId, 1, address(this), 20, keccak256("TYPE"), keccak256("META"));
+        bytes32 leaseRef = keccak256("lease:6");
+        address tenant = address(0xCAFE);
+        address successor = address(0xBEEF);
+        land.setOccupancy(parcelId, tenant, LandRegistry.OccupancyKind.LEASE, leaseRef);
+        MockLandPlantCountR049 counts = new MockLandPlantCountR049(address(land));
+        _grantScope(
+            ModuleIds.LAND_REGISTRY, ActionIds.LAND_BIND_PLANTS, land.PLANTS_BIND_SCOPE(), keccak256("bind-plants-6")
+        );
+        land.bindCanonicalPlants(address(counts));
+        counts.setCount(3);
+        land.transferOwner(parcelId, successor);
+        LandRegistry.LandParcel memory p = land.getParcel(parcelId);
+        require(p.owner == successor, "legitimate title transfer blocked");
+        require(p.occupant == tenant && p.occupancyRef == leaseRef, "tenant displaced by title transfer");
+        require(p.occupancyKind == LandRegistry.OccupancyKind.LEASE, "lease kind changed");
+        require(counts.activePlantsByParcel(parcelId) == 3, "active plants altered");
+        require(land.effectiveOperator(parcelId) == tenant, "operator changed without occupancy authority");
+        (bool cleared,) = address(land).call(abi.encodeCall(land.clearOccupancy, (parcelId)));
+        require(!cleared, "eviction of live plants after title transfer");
+        (bool overwritten,) = address(land)
+            .call(
+                abi.encodeCall(
+                    land.setOccupancy, (parcelId, successor, LandRegistry.OccupancyKind.LICENSE, keccak256("forged"))
+                )
+            );
+        require(!overwritten, "parcel reassigned with existing tenant");
+        counts.setCount(0);
+        land.clearOccupancy(parcelId);
+        require(land.effectiveOperator(parcelId) == successor, "new owner not operator after lawful exit");
+    }
+
     function testGenesisRegistrationClosesAfterFinalization() public {
         uint64 parcelId = 5;
         uint32 capacity = 7;

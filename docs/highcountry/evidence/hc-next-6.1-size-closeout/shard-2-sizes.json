@@ -1,0 +1,31 @@
+{
+  "shard": 2,
+  "compiler_input_sha256": "e48882a2ca7a9de7b1a2536b4338a0e1f1e85f77ee764484c9fd12ea58c6ecd4",
+  "source_count": 837,
+  "settings": {
+    "optimizer": {
+      "enabled": true,
+      "runs": 200
+    },
+    "metadata": {
+      "useLiteralContent": false,
+      "bytecodeHash": "ipfs",
+      "appendCBOR": true
+    },
+    "evmVersion": "cancun",
+    "viaIR": true,
+    "libraries": {}
+  },
+  "sizes": {
+    "FantasyContestEngine420": {
+      "runtime": 24429,
+      "initcode": 46407,
+      "runtime_margin": 147
+    },
+    "FantasyAdmission420": {
+      "runtime": 5331,
+      "initcode": 5644,
+      "runtime_margin": 19245
+    }
+  }
+}

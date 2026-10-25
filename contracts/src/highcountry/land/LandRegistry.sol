@@ -149,6 +149,10 @@ contract LandRegistry {
     ) external {
         if (newOwner == address(0)) revert HCZeroAddress();
         LandParcel storage parcel = _requireParcel(parcelId);
+        // Ownership transfer is not an occupancy transition. Keep the canonical occupant,
+        // occupancyRef, lease/license kind and active plants unchanged. Existing occupancy
+        // is invalidated for *new* cultivation when its old lessor ceases to own the parcel;
+        // clearing that occupancy still requires the canonical plant counter to reach zero.
         _requireAuthorized(ActionIds.LAND_TRANSFER, parcelId, 0);
 
         address previousOwner = parcel.owner;

@@ -7,14 +7,16 @@ import "../../apps/Identity420.sol";
 contract FantasyAdmission420 {
     FantasySlateBook420 public immutable slates;
     Identity420 public immutable identities;
+    BetAuthorization420 public immutable hostAuthorization;
     bytes32 public immutable issuer;
     bytes32 public immutable credentialType;
     mapping(bytes32 => bytes32) public credentialOf;
     error Unauthorized();
     error InvalidSignature();
 
-    constructor(address slate_, address identity_, bytes32 issuer_, bytes32 type_) {
+    constructor(address slate_, address identity_, bytes32 issuer_, bytes32 type_, address hostAuthorization_) {
         slates = FantasySlateBook420(slate_);
+        hostAuthorization = BetAuthorization420(hostAuthorization_);
         identities = Identity420(identity_);
         issuer = issuer_;
         credentialType = type_;
@@ -53,6 +55,14 @@ contract FantasyAdmission420 {
     function requireEntryActor(bytes32 subject, address actor, bytes32 pool) external view {
         if (actor == address(0) || controllerOf(subject) != actor) revert Unauthorized();
         _entryAuthority(actor, pool, 0);
+    }
+
+    /// @notice Host capabilities use the same immutable authority as the contest engine.
+    /// @dev Explicit constructor binding avoids trusting a later slate getter for host authority.
+    function requireAuthority(address actor, bytes32 action, bytes32 pool, bool global) external view {
+        BetAuthorization420 auth = hostAuthorization;
+        bytes32 scope = global ? auth.scopeGlobal() : auth.scopeForContest(pool);
+        if (!auth.isAuthorized(actor, action, scope, 0)) revert Unauthorized();
     }
 
     function _entryAuthority(address actor, bytes32 pool, uint256 amount) private view {

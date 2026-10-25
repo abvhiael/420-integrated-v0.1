@@ -1,0 +1,320 @@
+Compiling 145 files with Solc 0.8.24
+Solc 0.8.24 finished in 418.84s
+Compiler run successful with warnings:
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> src/bet/PokerNLHEBetting420.sol:32:29:
+   |
+32 |     function bindTurnPolicy(bytes32 tableId,uint32 secondsPerTurn) external {
+   |                             ^^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> src/bet/PokerNLHEBetting420.sol:32:45:
+   |
+32 |     function bindTurnPolicy(bytes32 tableId,uint32 secondsPerTurn) external {
+   |                                             ^^^^^^^^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> src/bet/PokerNLHEBetting420.sol:35:36:
+   |
+35 |     function prepareDealAssignment(bytes32 handId) external {
+   |                                    ^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> src/bet/PokerNLHEBetting420.sol:38:20:
+   |
+38 |     function start(bytes32 handId,uint256 ante,uint32 timeoutSecs) external {
+   |                    ^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> src/bet/PokerNLHEBetting420.sol:38:35:
+   |
+38 |     function start(bytes32 handId,uint256 ante,uint32 timeoutSecs) external {
+   |                                   ^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> src/bet/PokerNLHEBetting420.sol:38:48:
+   |
+38 |     function start(bytes32 handId,uint256 ante,uint32 timeoutSecs) external {
+   |                                                ^^^^^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> src/bet/PokerNLHEBetting420.sol:41:21:
+   |
+41 |     function action(bytes32 handId,uint8 seat,Move move,uint256 chips,
+   |                     ^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> src/bet/PokerNLHEBetting420.sol:41:36:
+   |
+41 |     function action(bytes32 handId,uint8 seat,Move move,uint256 chips,
+   |                                    ^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> src/bet/PokerNLHEBetting420.sol:41:47:
+   |
+41 |     function action(bytes32 handId,uint8 seat,Move move,uint256 chips,
+   |                                               ^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> src/bet/PokerNLHEBetting420.sol:41:57:
+   |
+41 |     function action(bytes32 handId,uint8 seat,Move move,uint256 chips,
+   |                                                         ^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> src/bet/PokerNLHEBetting420.sol:42:9:
+   |
+42 |         uint64 expiry,bytes32 expectedRoot,bytes calldata signature) external {
+   |         ^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> src/bet/PokerNLHEBetting420.sol:42:23:
+   |
+42 |         uint64 expiry,bytes32 expectedRoot,bytes calldata signature) external {
+   |                       ^^^^^^^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> src/bet/PokerNLHEBetting420.sol:42:44:
+   |
+42 |         uint64 expiry,bytes32 expectedRoot,bytes calldata signature) external {
+   |                                            ^^^^^^^^^^^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> src/bet/PokerNLHEBetting420.sol:45:22:
+   |
+45 |     function timeout(bytes32 handId) external {
+   |                      ^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> src/bet/PokerNLHEBetting420.sol:48:36:
+   |
+48 |     function advanceRevealedStreet(bytes32 handId,uint8 street)external {
+   |                                    ^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> src/bet/PokerNLHEBetting420.sol:48:51:
+   |
+48 |     function advanceRevealedStreet(bytes32 handId,uint8 street)external {
+   |                                                   ^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> src/bet/PokerNLHEBetting420.sol:51:22:
+   |
+51 |     function reserve(bytes32 handId) external {
+   |                      ^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> src/bet/PokerNLHEBetting420.sol:54:37:
+   |
+54 |     function cancelUnavailableStart(bytes32 handId) external {
+   |                                     ^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> src/bet/PokerNLHEBetting420.sol:57:33:
+   |
+57 |     function cancelWithheldDeal(bytes32 handId) external {
+   |                                 ^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> src/bet/PokerNLHEBetting420.sol:60:37:
+   |
+60 |     function cancelWithheldDelivery(bytes32 handId) external {
+   |                                     ^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> src/bet/PokerNLHEBetting420.sol:63:43:
+   |
+63 |     function beginMissingEvidenceRecovery(bytes32 handId) external {
+   |                                           ^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> src/bet/PokerNLHEBetting420.sol:66:46:
+   |
+66 |     function finalizeMissingEvidenceRecovery(bytes32 handId) external {
+   |                                              ^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> src/bet/PokerNLHEBetting420.sol:69:26:
+   |
+69 |     function bindReveals(bytes32 tableId,address gate) external {
+   |                          ^^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> src/bet/PokerNLHEBetting420.sol:69:42:
+   |
+69 |     function bindReveals(bytes32 tableId,address gate) external {
+   |                                          ^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> src/bet/PokerNLHEBetting420.sol:72:27:
+   |
+72 |     function bindDelivery(bytes32 tableId,address gate) external {
+   |                           ^^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> src/bet/PokerNLHEBetting420.sol:72:43:
+   |
+72 |     function bindDelivery(bytes32 tableId,address gate) external {
+   |                                           ^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> src/bet/PokerNLHEBetting420.sol:75:26:
+   |
+75 |     function bindOutcome(bytes32 tableId,address calculator) external {
+   |                          ^^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> src/bet/PokerNLHEBetting420.sol:75:42:
+   |
+75 |     function bindOutcome(bytes32 tableId,address calculator) external {
+   |                                          ^^^^^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> src/bet/PokerNLHEBetting420.sol:78:31:
+   |
+78 |     function bindProviderBond(bytes32 tableId,address bond)external {
+   |                               ^^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> src/bet/PokerNLHEBetting420.sol:78:47:
+   |
+78 |     function bindProviderBond(bytes32 tableId,address bond)external {
+   |                                               ^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> src/bet/PokerNLHEBetting420.sol:81:21:
+   |
+81 |     function settle(bytes32 handId,PokerCanonicalRake420.Policy calldata policy) external {
+   |                     ^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> src/bet/PokerNLHEBetting420.sol:81:36:
+   |
+81 |     function settle(bytes32 handId,PokerCanonicalRake420.Policy calldata policy) external {
+   |                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> src/bet/PokerNLHEBetting420.sol:84:39:
+   |
+84 |     function proposeDisputeResolution(bytes32 handId,
+   |                                       ^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> src/bet/PokerNLHEBetting420.sol:85:9:
+   |
+85 |         PokerCanonicalRake420.Policy calldata policy) external {
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Warning (2519): This declaration shadows an existing declaration.
+  --> test/BetPokerWS8ProductionFixture54.sol:94:14:
+   |
+94 |             (bytes32 circuit,bytes32 schema)=WS8VerifierData.identity(i);
+   |              ^^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> test/BetPokerWS8ProductionFixture54.sol:99:10:
+   |
+99 |         (bytes32 circuit,bytes32 schema)=WS8VerifierData.identity(0);
+   |          ^^^^^^^^^^^^^^^
+
+Warning (2519): This declaration shadows an existing declaration.
+  --> test/BetPokerWS8ProductionFixture54.sol:94:30:
+   |
+94 |             (bytes32 circuit,bytes32 schema)=WS8VerifierData.identity(i);
+   |                              ^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> test/BetPokerWS8ProductionFixture54.sol:99:26:
+   |
+99 |         (bytes32 circuit,bytes32 schema)=WS8VerifierData.identity(0);
+   |                          ^^^^^^^^^^^^^^
+
+
+Ran 1 test for test/fantasy/FantasyMixedGames420.t.sol:FantasyMixedGames420Test
+[PASS] testExcludedGameContributesZeroWhileEligibleGameSettlesFundedPool() (gas: 9159411)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 26.72ms (20.98ms CPU time)
+
+Ran 6 tests for test/fantasy/FantasySlatePublication420.t.sol:FantasySlatePublication420Test
+[PASS] testDSTClockChangeElapsedBoundsAreAccepted() (gas: 2185468)
+[PASS] testDraftScheduleCannotBeOverwritten() (gas: 1062572)
+[PASS] testDuplicateAcrossBatchesRollsBackSnapshotHash() (gas: 1086194)
+[PASS] testLargeSlatePublicationUsesBoundedBatchesAndImmutableSeal() (gas: 14796481)
+[PASS] testSealedRosterCannotBeExtended() (gas: 73856)
+[PASS] testUnsealedSnapshotCannotOpenFundedPool() (gas: 1116146)
+Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 5.17s (6.05ms CPU time)
+
+Ran 73 tests for test/fantasy/FantasyContestEngine420.t.sol:FantasyContestEngine420Test
+[PASS] testActualDisputeDenialRoutesBondAndReleasesPrizes() (gas: 8931616)
+[PASS] testActualDisputeTimeoutRefundsEntriesAndBonds() (gas: 8548805)
+[PASS] testAllGamesExcludedCancelsWholePool() (gas: 2688582)
+[PASS] testAllProductionModulesFitEVMRuntimeLimit() (gas: 31455)
+[PASS] testAlteredEnvelopeInvalidatesSignedReceipt() (gas: 815501)
+[PASS] testCanonicalOracleCannotBeBypassedToPublishRanks() (gas: 7796789)
+[PASS] testCanonicalPersonCannotEnterUsingAnotherProfileOrWallet() (gas: 1581623)
+[PASS] testConfiguredEntrantCapRejectsExcess() (gas: 1653123)
+[PASS] testCustodianCanonicalControlGroupCannotEnterPool() (gas: 977750)
+[PASS] testDifferentDevelopmentCapabilityRegistryCannotBind() (gas: 2617269)
+[PASS] testDuplicateEntryRejectedWithoutSecondPayment() (gas: 1311729)
+[PASS] testDuplicatePrizeCollectionAndSettlementRejected() (gas: 8305399)
+[PASS] testEarlyPuckDropWithLateEntryCancelsPool() (gas: 2154816)
+[PASS] testEarlyStartDiscoveredInFinalReportBlocksScoring() (gas: 2638300)
+[PASS] testEditReplacesCommitmentWithoutSecondEntryOrPayment() (gas: 1347068)
+[PASS] testEngineConstructorFitsSixteenMillionGas() (gas: 8714195)
+[PASS] testEntrantAliasCannotResolvePoolEvenWithResolverCapability() (gas: 9106406)
+[PASS] testEntryCredentialRevocationFailsClosed() (gas: 860511)
+[PASS] testExactlyScheduledLockRejectsEntry() (gas: 725062)
+[PASS] testFinalAtExactCutoffIsExcludedRatherThanScored() (gas: 46318)
+[PASS] testForgedStatProofCannotCreateScore() (gas: 4834936)
+[PASS] testFreeCancellationReturnsLauncherEscrow() (gas: 744474)
+[PASS] testFreeLauncherPrizeEscrowNoDevelopmentDeduction() (gas: 8096670)
+[PASS] testFullyEligibleShutoutCannotOmitItsBonus() (gas: 12432)
+[PASS] testFutureStartCannotBeReportedAsAnEarlyStart() (gas: 39066)
+[PASS] testFuzzRankingPayoutConservesEveryUnit(uint96) (runs: 2500, μ: 10844865, ~: 10863238)
+[PASS] testGameDispositionCannotChangeAfterResolution() (gas: 597645)
+[PASS] testGoalieAndMilestoneArithmeticMatchesApprovedExamples() (gas: 24604)
+[PASS] testHiddenEntryStoresNoPlaintextLineupUntilPublication() (gas: 1121219)
+[PASS] testIncompleteRankingCannotPublishCandidate() (gas: 5089210)
+[PASS] testIncompleteStatsCannotBeZeroFilled() (gas: 10273)
+[PASS] testLauncherCannotResolveOwnPool() (gas: 8505067)
+[PASS] testLineupCanBePublishedByCustodianWithoutEntrantAction() (gas: 1985944)
+[PASS] testMalformedSignedLineupTriggersFullRefundNotAnInvalidWinner() (gas: 1818580)
+[PASS] testMaximumFundedGrossPreservesExactFeeAndPrize() (gas: 8269590)
+[PASS] testMissingCustodianPublicationCancelsEveryEntry() (gas: 2015534)
+[PASS] testMissingHostRegistrationAuthorityRollsBackFreePrizeAndManifest() (gas: 570320)
+[PASS] testMissingSourceOrCandidateHasBoundedRefundPath() (gas: 2130103)
+[PASS] testMoreThanOneEntrantCountBandSelectsPrepublishedRow() (gas: 10579605)
+[PASS] testNegativeGoalieScoresAndDNP() (gas: 16346)
+[PASS] testNewerAuthenticatedRevisionBlocksOldFinalityAndTimesOut() (gas: 8944780)
+[PASS] testNewlyGrantedSignerCannotReplaceFrozenSlateValidator() (gas: 999870)
+[PASS] testPaidTwoEntrantsWinnerTakeAllAndThreePercentFund() (gas: 8357750)
+[PASS] testPayoutTableGapCannotLaunchPool() (gas: 134936)
+[PASS] testPayoutWeightsMustAllocateEntirePrize() (gas: 227373)
+[PASS] testPermissionlessDevelopmentForwardingUsesCanonicalBeneficiary() (gas: 8313072)
+[PASS] testPostLockEditRejectedEvenWithValidReceipt() (gas: 1634902)
+[PASS] testPostponementCannotBeExcludedBeforeCutoffWithoutDefinitiveCancellation() (gas: 45488)
+[PASS] testPreLockPublicationRejected() (gas: 1631722)
+[PASS] testPrizeLessFreePoolStillProducesStandings() (gas: 7868346)
+[PASS] testReentrantDevelopmentRecipientCannotWithdrawTwice() (gas: 18152178)
+[PASS] testRejectingDevelopmentRecipientCannotBlockEntrantPayout() (gas: 18086747)
+[PASS] testReliefGoalieCannotReceiveShutoutBonus() (gas: 11280)
+[PASS] testRevokedEntryCapabilityBlocksEditsButCannotConfiscateRefund() (gas: 1459488)
+[PASS] testSeparatePoolsCannotSpendEachOthersEscrow() (gas: 9076410)
+[PASS] testSettlementBeforeDisputeFinalityRejected() (gas: 7958321)
+[PASS] testSingleEntrantCancelsAndRefundsFullPayment() (gas: 1280094)
+[PASS] testStaleEditSignatureCannotReplay() (gas: 1410453)
+[PASS] testSuspendedUnfinishedGameCanBeExcludedAtCutoff() (gas: 2688725)
+[PASS] testThreeEntrantsTiedSecondShareOccupiedRankPrizes() (gas: 11088605)
+[PASS] testTieAtFirstTwoEntrantsSplitNetPrize() (gas: 8239548)
+[PASS] testTokenPoolUsesExactSameAssetForEntryPrizesAndDevelopment() (gas: 23208336)
+[PASS] testUnderfundedFreePrizeCannotLaunch() (gas: 484243)
+[PASS] testUnfundedPaidEntryRollsBackMembership() (gas: 1116249)
+[PASS] testUninvitedUserRejectedAndAcceptedEntrySurvivesRevocation() (gas: 1683903)
+[PASS] testUnprivilegedUserCannotCreatePool() (gas: 74915)
+[PASS] testUpheldDisputeCorrectsScoresAndRequiresReReview() (gas: 14020968)
+[PASS] testValidEarlyClosureWithNoLateEntriesDoesNotCancel() (gas: 2128559)
+[PASS] testValidatorCapabilityRevocationStopsNewAdmission() (gas: 882157)
+[PASS] testVerifiedCredentialAndCustodianReceiptDoNotReplaceEntryCapability() (gas: 854253)
+[PASS] testWrongRankInsertionHintRejected() (gas: 6675157)
+[PASS] testWrongSaltCannotRevealOrChangeLineup() (gas: 1675184)
+[PASS] testWrongScoringImplementationCannotBind() (gas: 835112)
+Suite result: ok. 73 passed; 0 failed; 0 skipped; finished in 5.17s (5.50s CPU time)
+
+Ran 3 test suites in 5.17s (10.37s CPU time): 80 tests passed, 0 failed, 0 skipped (80 total tests)

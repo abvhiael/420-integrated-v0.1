@@ -29,7 +29,17 @@ def review(raw_path, report_path):
         if hashlib.sha256(normalized).hexdigest() != digest:
             raise RuntimeError("source changed since finding review: " + path)
     severe = [finding for finding in raw["results"].get("detectors", []) if finding["impact"] in ("High", "Medium")]
-    actual = {signature(finding): finding for finding in severe}
+    # Slither's platform-dependent alias propagation can include the final
+    # netPrize write in this exact reviewed finding. Preserve raw evidence,
+    # accept only enumerated source-bound variants, and reject duplicates.
+    variants = expected.get("reviewedSignatureVariants", {})
+    actual = {}
+    for finding in severe:
+        fingerprint = signature(finding)
+        key = variants.get(fingerprint, fingerprint)
+        if key in actual:
+            raise RuntimeError("duplicate reviewed finding: " + key)
+        actual[key] = finding
     known = expected["dispositions"]
     if set(actual) != set(known):
         raise RuntimeError("new/missing High/Medium findings need source review: " + json.dumps({"new": sorted(set(actual)-set(known)), "missing": sorted(set(known)-set(actual))}))

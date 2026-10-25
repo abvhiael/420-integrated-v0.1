@@ -376,5 +376,9 @@
         "testVerifiedCredentialAndCustodianReceiptDoNotReplaceEntryCapability"
       ]
     }
-  }
+  },
+  "reviewedSignatureVariants": {
+    "bef395a94fdc131fbf20440961775de935482bf3ecefd933e25c9880c2c34af8": "40f1c84b2272402fd87329e6822b747aafaf7d1206fc5702a5f7a87f55c75902"
+  },
+  "signatureVariantReview": "Linux Slither 0.11.6 additionally reports p.netPrize = p.gross - p.fee in _startReview after _lockPool. Reviewed against unchanged source: every public mutator is nonReentrant, the host-created immutable dispute module cannot mutate this host through its read callbacks, and _lockPool cancellation cannot proceed past the LOCKED state guard. Windows omits this propagated alias write. Both exact raw reports retained; no severity or source assertion relaxed."
 }

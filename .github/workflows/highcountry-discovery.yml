@@ -1,0 +1,26 @@
+name: High Country Discovery Level 1
+on:
+  pull_request:
+    paths:
+      - 'services/highcountry-economy/**'
+      - 'apps/highcountry-web/**'
+      - 'deployments/highcountry/original-sixteen-*.json'
+      - '.github/workflows/highcountry-discovery.yml'
+  workflow_dispatch:
+jobs:
+  discovery-level-1:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Discovery adversarial Level 1
+        working-directory: services/highcountry-economy
+        run: node --test test/discovery-integration.test.js
+      - name: Affected economy Level 2
+        working-directory: services/highcountry-economy
+        run: node --test test/*.test.js
+      - name: Browser bundle includes discovery
+        working-directory: apps/highcountry-web
+        run: npm run build && test -s dist/src/discovery.js

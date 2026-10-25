@@ -1,0 +1,10 @@
+# HC-NEXT-6.1 — Land rights and leases
+Canonical chain authority remains `LandRegistry`, `LeaseRegistry`, `RightsRegistry`, and `PlantRegistry`. This step does not create a replacement title/lease authority. Registered players receive owner/occupant scoped rights reads from the canonical parcel, lease, occupancy and live plant tuple; only an active current cultivation-scope lease permits new placement.
+
+A parcel occupied under a live or terminating lease cannot be reassigned, and parcel transfer is denied when plant occupancy is nonzero or the canonical plant reader is not bound. End/expiry/revocation/dispute disables new cultivation, but never discards existing plants or permits eviction while the canonical count remains nonzero. Termination of active plants continues through the canonical plant-authorized lifecycle.
+
+Rent metadata on chain is **not payment**. The `LandLeaseAccounts` runtime requires an independently verified settled receipt before recording a rent-period payment. Amounts are nonnegative bounded integer units, every receipt and rent period is once-only, and the serialized PostgreSQL state contains replay markers and auditable receipts. Neither rent history nor owner-provided evidence creates BUDS.
+
+Operational requirements: configure a trusted `landRights.canonical` adapter backed by finalized canonical chain data and independently verified ledger settlement receipts. Disable the routes until the adapter has a genuine deployed authorization boundary. This code is not a statutory real estate deed or real-world cultivation license.
+
+Qualification: scoped `High Country Land Leases Level 1` with affected economy regression Level 2, plus Solidity-owned Foundry land/plant binding tests and retained PostgreSQL/browser qualification where affected. Deployment acceptance requires on-chain chain ID/address binding, finalized reads, adversarial live-plant transaction evidence, independent settlement proof and failover tests. Do not conflate this with Genesis Docs, global CI or post-Genesis launch gates.

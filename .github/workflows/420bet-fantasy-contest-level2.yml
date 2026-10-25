@@ -1,0 +1,59 @@
+name: 420Bet daily NHL contest scoped Level 2
+on:
+  push:
+    branches: ['bet/5b1-fantasy-disputes']
+    paths:
+      - 'contracts/src/bet/fantasy/**'
+      - 'contracts/test/fantasy/**'
+      - 'clients/420bet-fantasy/**'
+      - 'scripts/fantasy/**'
+      - '.github/workflows/420bet-fantasy-contest-level2.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: fantasy-contest-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  scoped-integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - name: Bind exact implementation SHA
+        run: test "$(git rev-parse HEAD)" = "${{ github.sha }}"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.8.6
+      - name: Install pinned independent client primitives
+        run: python3 -m pip install -r clients/420bet-fantasy/requirements.txt
+      - name: Install scoped source analyzer
+        run: |
+          python3 -m pip install slither-analyzer==0.11.6 web3==7.13.0 eth-typing==5.2.1 eth-utils==5.3.1
+          solc-select install 0.8.30
+          solc-select use 0.8.30
+      - name: Analyze actual fantasy graph and reject unreviewed findings
+        run: |
+          mkdir -p artifacts/fantasy-static
+          slither contracts/src/bet/fantasy/FantasyContestEngine420.sol --compile-force-framework solc --solc-args '--optimize --optimize-runs 200 --via-ir --evm-version cancun' --json artifacts/fantasy-static/raw.json > artifacts/fantasy-static/raw.log 2>&1 || test -s artifacts/fantasy-static/raw.json
+          python3 scripts/fantasy/review-static.py artifacts/fantasy-static/raw.json artifacts/fantasy-static/review.json
+      - name: Execute actual native, cryptographic client and independent replay qualification
+        run: python3 scripts/fantasy/qualify-contest.py --output artifacts/fantasy-contest
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: fantasy-contest-level2-${{ github.sha }}
+          path: |
+            artifacts/fantasy-contest/*.json
+            artifacts/fantasy-contest/*.log
+            artifacts/fantasy-static/*.json
+            artifacts/fantasy-static/*.log
+          if-no-files-found: error

@@ -1,0 +1,384 @@
+{
+  "reviewType": "local source review; independent deployment security approval still required",
+  "normalizedSourceSHA256": {
+    "contracts/src/apps/Identity420.sol": "f47526bce8b55d10c64fb3d8d320fc1e4dc6d43945db064e86d373adec7e0152",
+    "contracts/src/bet/BetAuthorization420.sol": "984e7bef82674a1f1b9c5a303cb90ede07d7619ae7f49664dd88f42147cf7f96",
+    "contracts/src/bet/BetIds420.sol": "578e3ef0b71336be6030452defed6e26824beb8e268e420c2db89c407eccfab8",
+    "contracts/src/bet/BetTypes420.sol": "f4feff47fe44c67ff0d0305a95d2e8063e78dc768140041234b484985bea741e",
+    "contracts/src/bet/fantasy/FantasyAdmission420.sol": "29233f40a5b6aecc43d3afa9e4b71a4e0055d792be915bb03f8a14dd0f41324f",
+    "contracts/src/bet/fantasy/FantasyContestEngine420.sol": "e6b74663219cdf3432113db84152c3defa53bf43adcef9537e58ddc038367608",
+    "contracts/src/bet/fantasy/FantasyDisputeController420.sol": "c6f07275ad8b7843eae991d6ed48eb506959ab939402603a221441fadcf68855",
+    "contracts/src/bet/fantasy/FantasyNHLScoring420.sol": "d3e4bb3a34fa00d1fd9409c7d933d052d9325b80c6816a64c7c9920fc778e269",
+    "contracts/src/bet/fantasy/FantasyPayoutPolicy420.sol": "3414f49e3f158f89def9c4929615f98adbeadb990523cbea4eb38a9b62406530",
+    "contracts/src/bet/fantasy/FantasyRankingBook420.sol": "f9e651b7edec826e81ccc8352ae3408da78ff5f88959ddab893564416e7e21d8",
+    "contracts/src/bet/fantasy/FantasySlateBook420.sol": "1007ffa2b5946c99fdbe6202e4c87114668a41d357e03f6f6eabced5cf0e6b4a",
+    "contracts/src/bet/fantasy/FantasyTypes420.sol": "c9fe9a5df74fc931a1ad4f838a332c32e65314c2444631243b4f3e822429f068",
+    "contracts/src/bet/fantasy/IFantasyDisputeHost420.sol": "09b9bd98ef9888a66a1aa8648d809ee26dd407d31684f362d1196ed1b2834740",
+    "contracts/src/interfaces/I420System.sol": "02e1ef2bec417289bc13c53c3c7453b132442be6932162683099c301f624ed02",
+    "contracts/src/interfaces/IOracle420.sol": "2b68ecfb6c818f53f2853467035edbc34e0ebdbe1581c0ebaff48c6c8d9a38a3",
+    "contracts/src/interfaces/genesis/ICapabilityRegistry420.sol": "0731b19a560a63242e2afeb177eb3c8e1f2ace8abd3612abc0b0eb50a6910431",
+    "contracts/src/interfaces/genesis/IIdentityCredential420.sol": "74f96b43758ee97d3124e112d669e9ba9bccf9ce63be1e6c7dee8e1948f4f978",
+    "contracts/src/interfaces/genesis/Types420.sol": "bee557da20b6ab622fc2e9cb779c27bb9efecfb9f7bc5d73f646446bab17f5ff",
+    "contracts/src/revenue/DevelopmentCompensationIds420.sol": "5a7c4b05901c16194fc84c5f279ef2ea22e81a537516ccd156fe5e6f7feecdd3",
+    "contracts/src/revenue/DevelopmentCompensationVault420.sol": "4f28e6fbcd71e78632ce8decee2aac2967c7117d41e7574f67f8c95ec32a3e8b",
+    "contracts/src/system/SystemAccess.sol": "22cbbfabb8ecef4cae12d5617968996a00ae223988f1a55f1265886f1aa56223"
+  },
+  "dispositions": {
+    "ccd78e2bb29ff74359107520ac9c5ce5baf4f671e4ba33140420db6365adcfe0": {
+      "disposition": "reviewed contextual false positive",
+      "finding": "FantasyContestEngine420._sendExact(address,uint256) (contracts/src/bet/fantasy/FantasyContestEngine420.sol#590-603) sends eth to arbitrary user",
+      "rationale": "Contextual false positive: the transfer helper is private; its only destinations are the authenticated credit owner or immutable canonical development beneficiary. Credit is consumed before guarded delivery, and callers cannot supply arbitrary recipients.",
+      "supportingTests": [
+        "testPaidTwoEntrantsWinnerTakeAllAndThreePercentFund",
+        "testPermissionlessDevelopmentForwardingUsesCanonicalBeneficiary",
+        "testRejectingDevelopmentRecipientCannotBlockEntrantPayout"
+      ]
+    },
+    "4f68e487368e19b8c46f241c4620461dfb2c0d3718af1a702067b4f81d901526": {
+      "disposition": "reviewed contextual false positive",
+      "finding": "FantasyDisputeController420._sendExact(address,uint256) (contracts/src/bet/fantasy/FantasyDisputeController420.sol#528-541) sends eth to arbitrary user",
+      "rationale": "Contextual false positive: the transfer helper is private; its only destinations are the authenticated credit owner or immutable canonical development beneficiary. Credit is consumed before guarded delivery, and callers cannot supply arbitrary recipients.",
+      "supportingTests": [
+        "testPaidTwoEntrantsWinnerTakeAllAndThreePercentFund",
+        "testPermissionlessDevelopmentForwardingUsesCanonicalBeneficiary",
+        "testRejectingDevelopmentRecipientCannotBlockEntrantPayout"
+      ]
+    },
+    "fab1bd323ef54e83b49793c27cbd5d8008fddc19576c443bcd504f685ade60b6": {
+      "disposition": "reviewed contextual false positive",
+      "finding": "Reentrancy in FantasyContestEngine420._sendExact(address,uint256) (contracts/src/bet/fantasy/FantasyContestEngine420.sol#590-603):",
+      "rationale": "Contextual false positive: exact before/after deltas deliberately reject unsupported token semantics. Incoming and outgoing transfer paths are covered by the shared nonReentrant lock; liability/credit effects precede outgoing delivery and failure reverts the entire operation.",
+      "supportingTests": [
+        "testTokenPoolUsesExactSameAssetForEntryPrizesAndDevelopment",
+        "testFuzzRankingPayoutConservesEveryUnit",
+        "testReentrantDevelopmentRecipientCannotWithdrawTwice",
+        "testWrongPaymentRejectedAtomically"
+      ]
+    },
+    "fb957aea4a2c796fb1f8f20b30262a6f5b590395176980443190e028575743f0": {
+      "disposition": "reviewed contextual false positive",
+      "finding": "Reentrancy in FantasyDisputeController420._sendExact(address,uint256) (contracts/src/bet/fantasy/FantasyDisputeController420.sol#528-541):",
+      "rationale": "Contextual false positive: exact before/after deltas deliberately reject unsupported token semantics. Incoming and outgoing transfer paths are covered by the shared nonReentrant lock; liability/credit effects precede outgoing delivery and failure reverts the entire operation.",
+      "supportingTests": [
+        "testTokenPoolUsesExactSameAssetForEntryPrizesAndDevelopment",
+        "testFuzzRankingPayoutConservesEveryUnit",
+        "testReentrantDevelopmentRecipientCannotWithdrawTwice",
+        "testWrongPaymentRejectedAtomically"
+      ]
+    },
+    "8a454061ae8e15aaa68b68141e5da19d8e9a1dd566409c83beaa3f0f509eb4c5": {
+      "disposition": "reviewed contextual false positive",
+      "finding": "Reentrancy in FantasyContestEngine420._sendExact(address,uint256) (contracts/src/bet/fantasy/FantasyContestEngine420.sol#590-603):",
+      "rationale": "Contextual false positive: exact before/after deltas deliberately reject unsupported token semantics. Incoming and outgoing transfer paths are covered by the shared nonReentrant lock; liability/credit effects precede outgoing delivery and failure reverts the entire operation.",
+      "supportingTests": [
+        "testTokenPoolUsesExactSameAssetForEntryPrizesAndDevelopment",
+        "testFuzzRankingPayoutConservesEveryUnit",
+        "testReentrantDevelopmentRecipientCannotWithdrawTwice",
+        "testWrongPaymentRejectedAtomically"
+      ]
+    },
+    "2e7d76abbfacb7944d69b824cd1913055f53b24a0f771e85c38461056abd14fd": {
+      "disposition": "reviewed contextual false positive",
+      "finding": "Reentrancy in FantasyDisputeController420._receiveExact(uint256) (contracts/src/bet/fantasy/FantasyDisputeController420.sol#512-526):",
+      "rationale": "Contextual false positive: exact before/after deltas deliberately reject unsupported token semantics. Incoming and outgoing transfer paths are covered by the shared nonReentrant lock; liability/credit effects precede outgoing delivery and failure reverts the entire operation.",
+      "supportingTests": [
+        "testTokenPoolUsesExactSameAssetForEntryPrizesAndDevelopment",
+        "testFuzzRankingPayoutConservesEveryUnit",
+        "testReentrantDevelopmentRecipientCannotWithdrawTwice",
+        "testWrongPaymentRejectedAtomically"
+      ]
+    },
+    "7c4b168e07613a55e5f7f07536ea94ffef8324c69be5c7e00052ffeca9a28a70": {
+      "disposition": "reviewed contextual false positive",
+      "finding": "Reentrancy in FantasyContestEngine420._receiveExact(uint256) (contracts/src/bet/fantasy/FantasyContestEngine420.sol#574-588):",
+      "rationale": "Contextual false positive: exact before/after deltas deliberately reject unsupported token semantics. Incoming and outgoing transfer paths are covered by the shared nonReentrant lock; liability/credit effects precede outgoing delivery and failure reverts the entire operation.",
+      "supportingTests": [
+        "testTokenPoolUsesExactSameAssetForEntryPrizesAndDevelopment",
+        "testFuzzRankingPayoutConservesEveryUnit",
+        "testReentrantDevelopmentRecipientCannotWithdrawTwice",
+        "testWrongPaymentRejectedAtomically"
+      ]
+    },
+    "0a7359a8c914d5f087936f64c39116b93bb6a2dbb040510cdcf52c998f1ea1ae": {
+      "disposition": "reviewed contextual false positive",
+      "finding": "Reentrancy in FantasyDisputeController420._sendExact(address,uint256) (contracts/src/bet/fantasy/FantasyDisputeController420.sol#528-541):",
+      "rationale": "Contextual false positive: exact before/after deltas deliberately reject unsupported token semantics. Incoming and outgoing transfer paths are covered by the shared nonReentrant lock; liability/credit effects precede outgoing delivery and failure reverts the entire operation.",
+      "supportingTests": [
+        "testTokenPoolUsesExactSameAssetForEntryPrizesAndDevelopment",
+        "testFuzzRankingPayoutConservesEveryUnit",
+        "testReentrantDevelopmentRecipientCannotWithdrawTwice",
+        "testWrongPaymentRejectedAtomically"
+      ]
+    },
+    "c06153b44be4302fe9bbf57401c2450c36230de50cbda8af2f68bc61dede63da": {
+      "disposition": "reviewed contextual false positive",
+      "finding": "Reentrancy in FantasyDisputeController420._receiveExact(uint256) (contracts/src/bet/fantasy/FantasyDisputeController420.sol#512-526):",
+      "rationale": "Contextual false positive: exact before/after deltas deliberately reject unsupported token semantics. Incoming and outgoing transfer paths are covered by the shared nonReentrant lock; liability/credit effects precede outgoing delivery and failure reverts the entire operation.",
+      "supportingTests": [
+        "testTokenPoolUsesExactSameAssetForEntryPrizesAndDevelopment",
+        "testFuzzRankingPayoutConservesEveryUnit",
+        "testReentrantDevelopmentRecipientCannotWithdrawTwice",
+        "testWrongPaymentRejectedAtomically"
+      ]
+    },
+    "2f47ad337faa986cf644455f509f5e3ae8f1fbf0155b103ca96d9638b63d93b7": {
+      "disposition": "reviewed contextual false positive",
+      "finding": "Reentrancy in FantasyContestEngine420._receiveExact(uint256) (contracts/src/bet/fantasy/FantasyContestEngine420.sol#574-588):",
+      "rationale": "Contextual false positive: exact before/after deltas deliberately reject unsupported token semantics. Incoming and outgoing transfer paths are covered by the shared nonReentrant lock; liability/credit effects precede outgoing delivery and failure reverts the entire operation.",
+      "supportingTests": [
+        "testTokenPoolUsesExactSameAssetForEntryPrizesAndDevelopment",
+        "testFuzzRankingPayoutConservesEveryUnit",
+        "testReentrantDevelopmentRecipientCannotWithdrawTwice",
+        "testWrongPaymentRejectedAtomically"
+      ]
+    },
+    "ed707161c1385182efbdc79467e5a6f3ff78c634384d136c77718a39a1c41cb4": {
+      "disposition": "reviewed contextual false positive",
+      "finding": "Identity420._credentialCandidates (contracts/src/apps/Identity420.sol#51) is never initialized. It is used in:",
+      "rationale": "Inherited Identity420 credential-candidate mapping uses EVM zero initialization and push-based registration; the source is unchanged. Real issuance, exact credential validation, revocation and controller rotation execute in the suite.",
+      "supportingTests": [
+        "testRevokedDelegateCredentialRejected",
+        "testIdentityKeyRotationRevokesOldDelegateSigner",
+        "testDelegateCannotUseAnotherSubjectsCredential"
+      ]
+    },
+    "dbd16d283708d246cf3aefbb1eadc05431cf0c90140e31ce718054b64032edab": {
+      "disposition": "reviewed contextual false positive",
+      "finding": "FantasyRankingBook420._close(bytes32) (contracts/src/bet/fantasy/FantasyRankingBook420.sol#127-137) performs a multiplication on the result of a division:",
+      "rationale": "Intentional full-precision quotient/remainder decomposition, not premature truncation. Development fee recombines quotient*3 and remainder*3/100. Tie entitlement recombines prize/denominator*weight and its remainder product; denominator is uint64 group size * 10000 and weight<=10000, bounding the intermediate product.",
+      "supportingTests": [
+        "testFuzzRankingPayoutConservesEveryUnit",
+        "testFuzzMixedScoreGroupsMatchIndependentRationalAllocation",
+        "testMaxUintPrizeRequiresNoOverflowingIntermediateProduct"
+      ]
+    },
+    "024006ce5b3a3896ba0062ef5c768b49950a7e5d1593cb31517e14582bbb7f4d": {
+      "disposition": "reviewed contextual false positive",
+      "finding": "FantasyContestEngine420._startReview(bytes32) (contracts/src/bet/fantasy/FantasyContestEngine420.sol#439-451) performs a multiplication on the result of a division:",
+      "rationale": "Intentional full-precision quotient/remainder decomposition, not premature truncation. Development fee recombines quotient*3 and remainder*3/100. Tie entitlement recombines prize/denominator*weight and its remainder product; denominator is uint64 group size * 10000 and weight<=10000, bounding the intermediate product.",
+      "supportingTests": [
+        "testFuzzRankingPayoutConservesEveryUnit",
+        "testFuzzMixedScoreGroupsMatchIndependentRationalAllocation",
+        "testMaxUintPrizeRequiresNoOverflowingIntermediateProduct"
+      ]
+    },
+    "140b25435556d2f01d8ae4845afd4c32ef78d5b3194a274d86ab65be33c82ca6": {
+      "disposition": "reviewed contextual false positive",
+      "finding": "Identity420.credential(bytes32) (contracts/src/apps/Identity420.sol#185-197) uses a dangerous strict equality:",
+      "rationale": "Inherited Identity420 equality checks a forbidden zero credential-subject identifier, not a user-manipulable asset balance. Exact subject/type/issuer/trust and live profile control are enforced at the respective boundaries.",
+      "supportingTests": [
+        "testUnverifiedResolverRejected",
+        "testDelegateCannotUseAnotherSubjectsCredential",
+        "testEntryCredentialRevocationFailsClosed"
+      ]
+    },
+    "e7d02c51107cc1e6cb0a194a9b7d5bc123fe9779dbf044a476aa876aa83964c3": {
+      "disposition": "reviewed contextual false positive",
+      "finding": "Identity420.credentialValid(bytes32) (contracts/src/apps/Identity420.sol#169-175) uses a dangerous strict equality:",
+      "rationale": "Inherited Identity420 equality checks a forbidden zero credential-subject identifier, not a user-manipulable asset balance. Exact subject/type/issuer/trust and live profile control are enforced at the respective boundaries.",
+      "supportingTests": [
+        "testUnverifiedResolverRejected",
+        "testDelegateCannotUseAnotherSubjectsCredential",
+        "testEntryCredentialRevocationFailsClosed"
+      ]
+    },
+    "9167460f220953af1df0537a92fc697656513d084d8525ec56f6e4696be3f22b": {
+      "disposition": "reviewed contextual false positive",
+      "finding": "Reentrancy in FantasyContestEngine420._cancel(bytes32,bytes32) (contracts/src/bet/fantasy/FantasyContestEngine420.sol#384-393):",
+      "rationale": "Contextual false positive on immutable typed module calls: every external engine mutation acquires the same nonReentrant lock; internal lock/review/cancel helpers are reachable only under it. Ranking/policy/admission modules are constructor-created and not replaceable; oracle/profile reads are static calls. Controller cancellation/review/publication is fixed code, and current-candidate callbacks are read-only. No callback can mutate engine credit or settle a stale/unresolved candidate.",
+      "supportingTests": [
+        "testNewerAuthenticatedRevisionBlocksOldFinalityAndTimesOut",
+        "testActualDisputeTimeoutRefundsEntriesAndBonds",
+        "testMissingHostRegistrationAuthorityRollsBackFreePrizeAndManifest",
+        "testReentrantDevelopmentRecipientCannotWithdrawTwice"
+      ]
+    },
+    "30876a502174b003a8b970f79dbc42221b22a05177f0626c506cd1288589f5d9": {
+      "disposition": "reviewed contextual false positive",
+      "finding": "Reentrancy in FantasyContestEngine420.recover(bytes32) (contracts/src/bet/fantasy/FantasyContestEngine420.sol#395-433):",
+      "rationale": "Contextual false positive on immutable typed module calls: every external engine mutation acquires the same nonReentrant lock; internal lock/review/cancel helpers are reachable only under it. Ranking/policy/admission modules are constructor-created and not replaceable; oracle/profile reads are static calls. Controller cancellation/review/publication is fixed code, and current-candidate callbacks are read-only. No callback can mutate engine credit or settle a stale/unresolved candidate.",
+      "supportingTests": [
+        "testNewerAuthenticatedRevisionBlocksOldFinalityAndTimesOut",
+        "testActualDisputeTimeoutRefundsEntriesAndBonds",
+        "testMissingHostRegistrationAuthorityRollsBackFreePrizeAndManifest",
+        "testReentrantDevelopmentRecipientCannotWithdrawTwice"
+      ]
+    },
+    "1a482c5227ab102a9283eaa29ab109e64dc97f0c55f7a03df5ba1f3c0c772843": {
+      "disposition": "reviewed contextual false positive",
+      "finding": "Reentrancy in FantasyContestEngine420.recover(bytes32) (contracts/src/bet/fantasy/FantasyContestEngine420.sol#395-433):",
+      "rationale": "Contextual false positive on immutable typed module calls: every external engine mutation acquires the same nonReentrant lock; internal lock/review/cancel helpers are reachable only under it. Ranking/policy/admission modules are constructor-created and not replaceable; oracle/profile reads are static calls. Controller cancellation/review/publication is fixed code, and current-candidate callbacks are read-only. No callback can mutate engine credit or settle a stale/unresolved candidate.",
+      "supportingTests": [
+        "testNewerAuthenticatedRevisionBlocksOldFinalityAndTimesOut",
+        "testActualDisputeTimeoutRefundsEntriesAndBonds",
+        "testMissingHostRegistrationAuthorityRollsBackFreePrizeAndManifest",
+        "testReentrantDevelopmentRecipientCannotWithdrawTwice"
+      ]
+    },
+    "e5257ae827cd39d010b5b7b5ca6df2fb53025246645fa94a2e0e61120911850d": {
+      "disposition": "reviewed contextual false positive",
+      "finding": "Reentrancy in FantasyContestEngine420.recover(bytes32) (contracts/src/bet/fantasy/FantasyContestEngine420.sol#395-433):",
+      "rationale": "Contextual false positive on immutable typed module calls: every external engine mutation acquires the same nonReentrant lock; internal lock/review/cancel helpers are reachable only under it. Ranking/policy/admission modules are constructor-created and not replaceable; oracle/profile reads are static calls. Controller cancellation/review/publication is fixed code, and current-candidate callbacks are read-only. No callback can mutate engine credit or settle a stale/unresolved candidate.",
+      "supportingTests": [
+        "testNewerAuthenticatedRevisionBlocksOldFinalityAndTimesOut",
+        "testActualDisputeTimeoutRefundsEntriesAndBonds",
+        "testMissingHostRegistrationAuthorityRollsBackFreePrizeAndManifest",
+        "testReentrantDevelopmentRecipientCannotWithdrawTwice"
+      ]
+    },
+    "2264ca88969385cb7e4c06a2c3dd57889cf106fe2e80bdf354b138a40781425b": {
+      "disposition": "reviewed contextual false positive",
+      "finding": "Reentrancy in FantasyContestEngine420.publishLineup(bytes32,uint64,uint32[7],bytes32) (contracts/src/bet/fantasy/FantasyContestEngine420.sol#363-382):",
+      "rationale": "Contextual false positive on immutable typed module calls: every external engine mutation acquires the same nonReentrant lock; internal lock/review/cancel helpers are reachable only under it. Ranking/policy/admission modules are constructor-created and not replaceable; oracle/profile reads are static calls. Controller cancellation/review/publication is fixed code, and current-candidate callbacks are read-only. No callback can mutate engine credit or settle a stale/unresolved candidate.",
+      "supportingTests": [
+        "testNewerAuthenticatedRevisionBlocksOldFinalityAndTimesOut",
+        "testActualDisputeTimeoutRefundsEntriesAndBonds",
+        "testMissingHostRegistrationAuthorityRollsBackFreePrizeAndManifest",
+        "testReentrantDevelopmentRecipientCannotWithdrawTwice"
+      ]
+    },
+    "28a35c8ed9eea0216b11a19d859cc9e14be209f9ee7d3e34e7d195312cc2ddf5": {
+      "disposition": "reviewed contextual false positive",
+      "finding": "Reentrancy in FantasyContestEngine420.enterPool(bytes32,bytes32,bytes32,FantasyContestEngine420.Submission) (contracts/src/bet/fantasy/FantasyContestEngine420.sol#297-328):",
+      "rationale": "Contextual false positive on immutable typed module calls: every external engine mutation acquires the same nonReentrant lock; internal lock/review/cancel helpers are reachable only under it. Ranking/policy/admission modules are constructor-created and not replaceable; oracle/profile reads are static calls. Controller cancellation/review/publication is fixed code, and current-candidate callbacks are read-only. No callback can mutate engine credit or settle a stale/unresolved candidate.",
+      "supportingTests": [
+        "testNewerAuthenticatedRevisionBlocksOldFinalityAndTimesOut",
+        "testActualDisputeTimeoutRefundsEntriesAndBonds",
+        "testMissingHostRegistrationAuthorityRollsBackFreePrizeAndManifest",
+        "testReentrantDevelopmentRecipientCannotWithdrawTwice"
+      ]
+    },
+    "a15e0d30e624f22c71986a1805977e0abf34e1d1cf128ac2ee4650f6240339b8": {
+      "disposition": "reviewed contextual false positive",
+      "finding": "Reentrancy in FantasyContestEngine420.recover(bytes32) (contracts/src/bet/fantasy/FantasyContestEngine420.sol#395-433):",
+      "rationale": "Contextual false positive on immutable typed module calls: every external engine mutation acquires the same nonReentrant lock; internal lock/review/cancel helpers are reachable only under it. Ranking/policy/admission modules are constructor-created and not replaceable; oracle/profile reads are static calls. Controller cancellation/review/publication is fixed code, and current-candidate callbacks are read-only. No callback can mutate engine credit or settle a stale/unresolved candidate.",
+      "supportingTests": [
+        "testNewerAuthenticatedRevisionBlocksOldFinalityAndTimesOut",
+        "testActualDisputeTimeoutRefundsEntriesAndBonds",
+        "testMissingHostRegistrationAuthorityRollsBackFreePrizeAndManifest",
+        "testReentrantDevelopmentRecipientCannotWithdrawTwice"
+      ]
+    },
+    "d984bebeadd7f00a72b5aac8e3a438c5cc2a7429b230f3858faeef1cea09e725": {
+      "disposition": "reviewed contextual false positive",
+      "finding": "Reentrancy in FantasyContestEngine420.beginRevision(bytes32,FantasyTypes420.StatReport) (contracts/src/bet/fantasy/FantasyContestEngine420.sol#453-470):",
+      "rationale": "Contextual false positive on immutable typed module calls: every external engine mutation acquires the same nonReentrant lock; internal lock/review/cancel helpers are reachable only under it. Ranking/policy/admission modules are constructor-created and not replaceable; oracle/profile reads are static calls. Controller cancellation/review/publication is fixed code, and current-candidate callbacks are read-only. No callback can mutate engine credit or settle a stale/unresolved candidate.",
+      "supportingTests": [
+        "testNewerAuthenticatedRevisionBlocksOldFinalityAndTimesOut",
+        "testActualDisputeTimeoutRefundsEntriesAndBonds",
+        "testMissingHostRegistrationAuthorityRollsBackFreePrizeAndManifest",
+        "testReentrantDevelopmentRecipientCannotWithdrawTwice"
+      ]
+    },
+    "09dfbc1cb106025c5669f576178e40b56dbf0a6091d9ecee8734de785bc4f4d0": {
+      "disposition": "reviewed contextual false positive",
+      "finding": "Reentrancy in FantasyContestEngine420.publishLineup(bytes32,uint64,uint32[7],bytes32) (contracts/src/bet/fantasy/FantasyContestEngine420.sol#363-382):",
+      "rationale": "Contextual false positive on immutable typed module calls: every external engine mutation acquires the same nonReentrant lock; internal lock/review/cancel helpers are reachable only under it. Ranking/policy/admission modules are constructor-created and not replaceable; oracle/profile reads are static calls. Controller cancellation/review/publication is fixed code, and current-candidate callbacks are read-only. No callback can mutate engine credit or settle a stale/unresolved candidate.",
+      "supportingTests": [
+        "testNewerAuthenticatedRevisionBlocksOldFinalityAndTimesOut",
+        "testActualDisputeTimeoutRefundsEntriesAndBonds",
+        "testMissingHostRegistrationAuthorityRollsBackFreePrizeAndManifest",
+        "testReentrantDevelopmentRecipientCannotWithdrawTwice"
+      ]
+    },
+    "bab10f734bceb952225658367efbabf3f411111a290bfe8749a7f369a3c0d490": {
+      "disposition": "reviewed contextual false positive",
+      "finding": "Reentrancy in FantasyContestEngine420.recover(bytes32) (contracts/src/bet/fantasy/FantasyContestEngine420.sol#395-433):",
+      "rationale": "Contextual false positive on immutable typed module calls: every external engine mutation acquires the same nonReentrant lock; internal lock/review/cancel helpers are reachable only under it. Ranking/policy/admission modules are constructor-created and not replaceable; oracle/profile reads are static calls. Controller cancellation/review/publication is fixed code, and current-candidate callbacks are read-only. No callback can mutate engine credit or settle a stale/unresolved candidate.",
+      "supportingTests": [
+        "testNewerAuthenticatedRevisionBlocksOldFinalityAndTimesOut",
+        "testActualDisputeTimeoutRefundsEntriesAndBonds",
+        "testMissingHostRegistrationAuthorityRollsBackFreePrizeAndManifest",
+        "testReentrantDevelopmentRecipientCannotWithdrawTwice"
+      ]
+    },
+    "8f512b539cc5fc829faf219df1643255b0168656aa5add955942d8e5db4d85f5": {
+      "disposition": "reviewed contextual false positive",
+      "finding": "Reentrancy in FantasyContestEngine420.publishCandidate(bytes32) (contracts/src/bet/fantasy/FantasyContestEngine420.sol#498-505):",
+      "rationale": "Contextual false positive on immutable typed module calls: every external engine mutation acquires the same nonReentrant lock; internal lock/review/cancel helpers are reachable only under it. Ranking/policy/admission modules are constructor-created and not replaceable; oracle/profile reads are static calls. Controller cancellation/review/publication is fixed code, and current-candidate callbacks are read-only. No callback can mutate engine credit or settle a stale/unresolved candidate.",
+      "supportingTests": [
+        "testNewerAuthenticatedRevisionBlocksOldFinalityAndTimesOut",
+        "testActualDisputeTimeoutRefundsEntriesAndBonds",
+        "testMissingHostRegistrationAuthorityRollsBackFreePrizeAndManifest",
+        "testReentrantDevelopmentRecipientCannotWithdrawTwice"
+      ]
+    },
+    "7336b6bec8e80b7da42caabaa6935d71dfde2f70ff44e04adf3b84e17475f2f6": {
+      "disposition": "reviewed contextual false positive",
+      "finding": "Reentrancy in FantasyContestEngine420.recover(bytes32) (contracts/src/bet/fantasy/FantasyContestEngine420.sol#395-433):",
+      "rationale": "Contextual false positive on immutable typed module calls: every external engine mutation acquires the same nonReentrant lock; internal lock/review/cancel helpers are reachable only under it. Ranking/policy/admission modules are constructor-created and not replaceable; oracle/profile reads are static calls. Controller cancellation/review/publication is fixed code, and current-candidate callbacks are read-only. No callback can mutate engine credit or settle a stale/unresolved candidate.",
+      "supportingTests": [
+        "testNewerAuthenticatedRevisionBlocksOldFinalityAndTimesOut",
+        "testActualDisputeTimeoutRefundsEntriesAndBonds",
+        "testMissingHostRegistrationAuthorityRollsBackFreePrizeAndManifest",
+        "testReentrantDevelopmentRecipientCannotWithdrawTwice"
+      ]
+    },
+    "40f1c84b2272402fd87329e6822b747aafaf7d1206fc5702a5f7a87f55c75902": {
+      "disposition": "reviewed contextual false positive",
+      "finding": "Reentrancy in FantasyContestEngine420._startReview(bytes32) (contracts/src/bet/fantasy/FantasyContestEngine420.sol#439-451):",
+      "rationale": "Contextual false positive on immutable typed module calls: every external engine mutation acquires the same nonReentrant lock; internal lock/review/cancel helpers are reachable only under it. Ranking/policy/admission modules are constructor-created and not replaceable; oracle/profile reads are static calls. Controller cancellation/review/publication is fixed code, and current-candidate callbacks are read-only. No callback can mutate engine credit or settle a stale/unresolved candidate.",
+      "supportingTests": [
+        "testNewerAuthenticatedRevisionBlocksOldFinalityAndTimesOut",
+        "testActualDisputeTimeoutRefundsEntriesAndBonds",
+        "testMissingHostRegistrationAuthorityRollsBackFreePrizeAndManifest",
+        "testReentrantDevelopmentRecipientCannotWithdrawTwice"
+      ]
+    },
+    "91d33a17cbb82429b7991f1cfe3fec59e87e6f3b998db1a6b7c5d8fb0b5f28e9": {
+      "disposition": "reviewed contextual false positive",
+      "finding": "Reentrancy in FantasyContestEngine420.createPool(bytes32,FantasyContestEngine420.Config,bytes) (contracts/src/bet/fantasy/FantasyContestEngine420.sol#183-232):",
+      "rationale": "Contextual false positive on immutable typed module calls: every external engine mutation acquires the same nonReentrant lock; internal lock/review/cancel helpers are reachable only under it. Ranking/policy/admission modules are constructor-created and not replaceable; oracle/profile reads are static calls. Controller cancellation/review/publication is fixed code, and current-candidate callbacks are read-only. No callback can mutate engine credit or settle a stale/unresolved candidate.",
+      "supportingTests": [
+        "testNewerAuthenticatedRevisionBlocksOldFinalityAndTimesOut",
+        "testActualDisputeTimeoutRefundsEntriesAndBonds",
+        "testMissingHostRegistrationAuthorityRollsBackFreePrizeAndManifest",
+        "testReentrantDevelopmentRecipientCannotWithdrawTwice"
+      ]
+    },
+    "114ce03ebe4d9aebfda40ecfd04bb123d7abb65b5cb988c3d00624daa3b20974": {
+      "disposition": "reviewed contextual false positive",
+      "finding": "FantasyAdmission420.controllerOf(bytes32) (contracts/src/bet/fantasy/FantasyAdmission420.sol#23-26) ignores return value by (actor,None,None,None,None,None,active) = identities.profiles(subject) (contracts/src/bet/fantasy/FantasyAdmission420.sol#24)",
+      "rationale": "Intentional tuple projection: actor/active govern profile control and canonical-person claim governs user grouping. Metadata, pending controller and timestamps confer no action authority. Exact credential subject/type/issuer/trust are checked separately; no capability return is ignored.",
+      "supportingTests": [
+        "testCanonicalPersonCannotEnterUsingAnotherProfileOrWallet",
+        "testEntrantAliasCannotResolvePoolEvenWithResolverCapability",
+        "testVerifiedCredentialAndCustodianReceiptDoNotReplaceEntryCapability"
+      ]
+    },
+    "77b95d23ed67ad7c543aba3dc21db55a6a81a843468da82b8f143b220a28f89f": {
+      "disposition": "reviewed contextual false positive",
+      "finding": "FantasyAdmission420.credentialKey(bytes32,bytes32) (contracts/src/bet/fantasy/FantasyAdmission420.sol#32-41) ignores return value by (None,None,None,person,None,None,None,None) = identities.credentials(credential) (contracts/src/bet/fantasy/FantasyAdmission420.sol#38)",
+      "rationale": "Intentional tuple projection: actor/active govern profile control and canonical-person claim governs user grouping. Metadata, pending controller and timestamps confer no action authority. Exact credential subject/type/issuer/trust are checked separately; no capability return is ignored.",
+      "supportingTests": [
+        "testCanonicalPersonCannotEnterUsingAnotherProfileOrWallet",
+        "testEntrantAliasCannotResolvePoolEvenWithResolverCapability",
+        "testVerifiedCredentialAndCustodianReceiptDoNotReplaceEntryCapability"
+      ]
+    },
+    "241ab95aa892a66400fb9150797039e280884b05499b266eeb4475137efc855e": {
+      "disposition": "reviewed contextual false positive",
+      "finding": "FantasyDisputeController420._controller(bytes32,address) (contracts/src/bet/fantasy/FantasyDisputeController420.sol#280-283) ignores return value by (controller,None,None,None,None,None,active) = identities.profiles(subject) (contracts/src/bet/fantasy/FantasyDisputeController420.sol#281)",
+      "rationale": "Intentional tuple projection: actor/active govern profile control and canonical-person claim governs user grouping. Metadata, pending controller and timestamps confer no action authority. Exact credential subject/type/issuer/trust are checked separately; no capability return is ignored.",
+      "supportingTests": [
+        "testCanonicalPersonCannotEnterUsingAnotherProfileOrWallet",
+        "testEntrantAliasCannotResolvePoolEvenWithResolverCapability",
+        "testVerifiedCredentialAndCustodianReceiptDoNotReplaceEntryCapability"
+      ]
+    },
+    "185894de51703e65e3cbd56e59947458bca936b65370b409635917f60de6cf17": {
+      "disposition": "reviewed contextual false positive",
+      "finding": "FantasyDisputeController420.delegateResolver(bytes32,bytes32,bytes32,uint64) (contracts/src/bet/fantasy/FantasyDisputeController420.sol#338-353) ignores return value by (actor,None,None,None,None,None,None) = identities.profiles(subject) (contracts/src/bet/fantasy/FantasyDisputeController420.sol#346)",
+      "rationale": "Intentional tuple projection: actor/active govern profile control and canonical-person claim governs user grouping. Metadata, pending controller and timestamps confer no action authority. Exact credential subject/type/issuer/trust are checked separately; no capability return is ignored.",
+      "supportingTests": [
+        "testCanonicalPersonCannotEnterUsingAnotherProfileOrWallet",
+        "testEntrantAliasCannotResolvePoolEvenWithResolverCapability",
+        "testVerifiedCredentialAndCustodianReceiptDoNotReplaceEntryCapability"
+      ]
+    }
+  },
+  "reviewedSignatureVariants": {
+    "bef395a94fdc131fbf20440961775de935482bf3ecefd933e25c9880c2c34af8": "40f1c84b2272402fd87329e6822b747aafaf7d1206fc5702a5f7a87f55c75902"
+  },
+  "signatureVariantReview": "Linux Slither 0.11.6 additionally reports p.netPrize = p.gross - p.fee in _startReview after _lockPool. Reviewed against unchanged source: every public mutator is nonReentrant, the host-created immutable dispute module cannot mutate this host through its read callbacks, and _lockPool cancellation cannot proceed past the LOCKED state guard. Windows omits this propagated alias write. Both exact raw reports retained; no severity or source assertion relaxed."
+}

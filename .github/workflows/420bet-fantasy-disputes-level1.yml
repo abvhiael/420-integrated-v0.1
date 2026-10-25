@@ -1,0 +1,30 @@
+name: 420Bet fantasy disputes scoped Level 1
+# Explicit dispatch avoids triggering unrelated poker/global qualification.
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  dispute-controller:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - name: Bind exact source SHA
+        run: test "$(git rev-parse HEAD)" = "${{ github.sha }}"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.8.6
+      - name: Execute actual controller tests and source-bound evidence
+        run: python3 scripts/fantasy/qualify-disputes.py --output artifacts/fantasy-disputes
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: fantasy-disputes-level1-${{ github.sha }}
+          path: artifacts/fantasy-disputes/
+          if-no-files-found: error

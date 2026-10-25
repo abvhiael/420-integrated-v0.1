@@ -36,11 +36,21 @@ func TestWS8GenuineFundedHandProofs(t *testing.T) {
 	if err = json.Unmarshal(raw, &fields); err != nil {
 		t.Fatal(err)
 	}
-	if len(fields) != 34 {
+	seats := 2
+	if os.Getenv("POKER_WS8_MULTIPLAYER") == "9" {
+		seats = 9
+	} else if os.Getenv("POKER_WS8_MULTIPLAYER") != "" {
+		t.Fatal("unsupported multiplayer context")
+	}
+	expectedWords := 34
+	if seats == 9 {
+		expectedWords = 48
+	}
+	if len(fields) != expectedWords {
 		t.Fatal("wrong contract ABI context length")
 	}
 	var c [34]*big.Int
-	for i, s := range fields {
+	for i, s := range fields[:34] {
 		var ok bool
 		c[i], ok = new(big.Int).SetString(s, 10)
 		if !ok || c[i].Sign() < 0 || c[i].BitLen() > 256 {
@@ -208,6 +218,14 @@ func TestWS8GenuineFundedHandProofs(t *testing.T) {
 		t.Fatal("unknown showdown fixture")
 	}
 	cardAt := func(i int) int {
+		if seats == 9 {
+			if i == 0 {
+				return 24
+			}
+			if i == 24 {
+				return 0
+			}
+		}
 		if variant == "1" {
 			if i == 0 {
 				return 12
@@ -272,17 +290,34 @@ func TestWS8GenuineFundedHandProofs(t *testing.T) {
 		prove(shuffleSetup, fmt.Sprintf("WS8Shuffle%d", stage), w, roots[stage-1], statement, roots[stage], scope, pkx, pky)
 	}
 	providers := [2]*big.Int{big.NewInt(887), big.NewInt(842)}
-	recipientSecrets := [2]*big.Int{big.NewInt(1021), big.NewInt(1237)}
-	var providerPK, recipientPK [2]*native.PointAffine
-	var fingerprints [2][32]byte
+	recipientSecrets := make([]*big.Int, seats)
+	for i := range recipientSecrets {
+		recipientSecrets[i] = big.NewInt(int64(1021 + i*216))
+	}
+	var providerPK [2]*native.PointAffine
+	recipientPK := make([]*native.PointAffine, seats)
+	for i := 0; i < 2; i++ {
+		providerPK[i] = new(native.PointAffine).ScalarMultiplication(&base, providers[i])
+	}
+	fingerprints := make([][32]byte, seats)
 	popSetup := load("RecipientPoP")
-	for seat := 0; seat < 2; seat++ {
-		providerPK[seat] = new(native.PointAffine).ScalarMultiplication(&base, providers[seat])
+	for seat := 0; seat < seats; seat++ {
 		recipientPK[seat] = new(native.PointAffine).ScalarMultiplication(&base, recipientSecrets[seat])
 		x, y := coordinates(recipientPK[seat])
 		keyWords := [][32]byte{testTextHash("420.BET.POKER.RECIPIENT.KEY.POP.V1")}
-		for _, i := range []int{9, 20, 1, 22 + 2*seat, 23 + 2*seat} {
+		for _, i := range []int{9, 20, 1} {
 			keyWords = append(keyWords, word(c[i]))
+		}
+		for j := 0; j < 2; j++ {
+			index := 22 + 2*seat + j
+			if seat >= 2 {
+				index = 34 + 2*(seat-2) + j
+			}
+			value, ok := new(big.Int).SetString(fields[index], 10)
+			if !ok || value.Sign() < 0 || value.BitLen() > 256 {
+				t.Fatal("invalid recipient context")
+			}
+			keyWords = append(keyWords, word(value))
 		}
 		keyScope := ws3Scalar(keyWords...)
 		fingerprints[seat] = ws3Hash(append(keyWords, ws3Word(x), ws3Word(y))...)
@@ -297,8 +332,11 @@ func TestWS8GenuineFundedHandProofs(t *testing.T) {
 	agg := &ThresholdKeyAggregateV1{Scope: aggScope, ProviderAX: c[28], ProviderAY: c[29], ProviderBX: c[30], ProviderBY: c[31], AggregateX: c[32], AggregateY: c[33]}
 	prove(load("Aggregate"), "WS8Aggregate", agg, aggScope, c[28], c[29], c[30], c[31], c[32], c[33])
 	deliverySetup := load("Delivery")
-	for position := 0; position < 4; position++ {
-		seat := position % 2
+	for position := 0; position < 2*seats; position++ {
+		seat := position % seats
+		if seats > 2 {
+			seat = (seat + 1) % seats
+		}
 		card := decks[2][position]
 		_, path := rootPath(decks[2][:], position)
 		c1, _ := cipherOf(int64(cardAt(position)+1), int64(3151+position), &base, threshold)
@@ -332,7 +370,7 @@ func TestWS8GenuineFundedHandProofs(t *testing.T) {
 			if !recovered.Equal(share) {
 				t.Fatal("recipient cannot recover provider share")
 			}
-			wrong := new(native.PointAffine).ScalarMultiplication(u, recipientSecrets[1-seat])
+			wrong := new(native.PointAffine).ScalarMultiplication(u, recipientSecrets[(seat+1)%seats])
 			wrong.Neg(wrong)
 			wrong.Add(v, wrong)
 			if wrong.Equal(share) {
@@ -341,7 +379,11 @@ func TestWS8GenuineFundedHandProofs(t *testing.T) {
 		}
 	}
 	partialSetup, unmaskSetup := load("Partial"), load("Unmask")
-	for _, slot := range [][2]int{{1, 5}, {1, 6}, {1, 7}, {2, 9}, {3, 11}, {4, 0}, {4, 1}, {4, 2}, {4, 3}} {
+	slots := [][2]int{{1, 2*seats + 1}, {1, 2*seats + 2}, {1, 2*seats + 3}, {2, 2*seats + 5}, {3, 2*seats + 7}}
+	for i := 0; i < 2*seats; i++ {
+		slots = append(slots, [2]int{4, i})
+	}
+	for _, slot := range slots {
 		street, position := slot[0], slot[1]
 		card := decks[2][position]
 		_, path := rootPath(decks[2][:], position)

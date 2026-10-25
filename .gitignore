@@ -88,3 +88,10 @@ venv/
 Thumbs.db
 .idea/
 .vscode/
+
+# Expanded, checksum-verified 5A.10 evidence (canonical archive is tracked).
+/clients/420bet-poker/zkshuffle/fixtures/ws8/multiplayer/proofs/
+/clients/420bet-poker/zkshuffle/fixtures/ws8/multiplayer/keys/
+/clients/420bet-poker/zkshuffle/fixtures/ws8/multiplayer/context.bin
+/clients/420bet-poker/zkshuffle/fixtures/ws8/multiplayer/context.json
+/clients/420bet-poker/zkshuffle/fixtures/ws8/multiplayer/manifest.json

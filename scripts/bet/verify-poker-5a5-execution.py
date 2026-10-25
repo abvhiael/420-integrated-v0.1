@@ -8,6 +8,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+MULTIPLAYER = ['test610ExportFundedNinePlayerContext', 'test610GenuineNinePlayerAllInSidePotsAndSettlement', 'test610OtherSeatCannotForgeCurrentActor', 'test610ValidOtherSeatSignatureCannotPlayOutOfTurn', 'test610SignedStaleRootCannotAdvanceTurn', 'test610StaleActionNonceCannotAdvanceTurn', 'test610OverStackBetCannotCreateChips', 'test610RevokedNinthPlayerCannotAct', 'test610EarlyTimeoutCannotStealCurrentTurn', 'test610DisconnectedActorTimesOutWithoutForgedSignature', 'test610PendingLeaveDoesNotChangeAcceptedNineSeatHand', 'test610PlayerCannotWithdrawReservedNineSeatEscrow', 'test610ProviderCannotWithdrawLockedNineSeatBond', 'test610HeadupProofCannotAdmitNineSeatContext', 'test610CorruptProofCannotAdmitNineSeatDeck', 'test610NinthRecipientCannotBindAnotherOwnersKey', 'test610MissingNinthAcknowledgmentCannotStart', 'test610PrematureHoleRevealCannotExposePrivateCards', 'test610MissingRevealsRefundAllNinePlayers', 'test610DoubleSettlementCannotDuplicateNineSeatPayout', 'test610SettlementCallbackCannotReenterNineSeatPayout', 'testFuzz610TamperedGeneratedInitialProofIsRejected', 'test610Funded2SeatsCancelWithoutEvidence', 'test610Funded3SeatsCancelWithoutEvidence', 'test610Funded4SeatsCancelWithoutEvidence', 'test610Funded5SeatsCancelWithoutEvidence', 'test610Funded6SeatsCancelWithoutEvidence', 'test610Funded7SeatsCancelWithoutEvidence', 'test610Funded8SeatsCancelWithoutEvidence', 'test610Funded9SeatsCancelWithoutEvidence', 'test610LastPrivateShareWithholdingBlamesOnlyMissingProvider', 'test610RelatedProvidersCannotShuffleNineSeatHand']
 FUNDED = '''ProductionConstructorFitsSixteenMillionGasBudget
 FixedModulesFitDeploymentLimitsAndRejectDirectMutation
 ImmutableTurnPolicyRejectsStarterChosenClock
@@ -125,13 +126,16 @@ def main():
     lifecycle = owners.get('PokerPlayerLifecycle58Test', {})
     if set(lifecycle) != set(LIFECYCLE):
         raise SystemExit('mandatory actual 5A.8 lifecycle execution missing or unexpected')
+    multiplayer=owners.get('PokerMultiplayerSecurity610Test',{})
+    if set(multiplayer)!=set(MULTIPLAYER):raise SystemExit('mandatory actual 5A.10 multiplayer cases missing or unexpected')
+    if multiplayer['testFuzz610TamperedGeneratedInitialProofIsRejected'].get('kind',{}).get('Fuzz',{}).get('runs',0)<2500:raise SystemExit('2500 actual multiplayer cryptographic fuzz executions required')
     abuse = owners.get('PokerAbuseProtection59Test', {})
     if set(abuse) != set(ABUSE):
         raise SystemExit('mandatory actual 5A.9 protected-hand execution missing or unexpected')
     tap = directory / 'node.tap'
     text = tap.read_text(encoding='utf-8-sig')
     passes = re.findall(r'^# pass (\d+)\s*$', text, re.M)
-    if len(passes) != 1 or int(passes[0]) < 74 or re.search(r'^[ \t]*not ok\b|^[ \t]*(?:ok|not ok)\b[^\r\n]*#\s*(?:SKIP|TODO)\b', text, re.M | re.I):
+    if len(passes) != 1 or int(passes[0]) < 90 or re.search(r'^[ \t]*not ok\b|^[ \t]*(?:ok|not ok)\b[^\r\n]*#\s*(?:SKIP|TODO)\b', text, re.M | re.I):
         raise SystemExit('actual independent replay execution incomplete or failed/skipped')
     for field in ('fail', 'cancelled', 'skipped', 'todo'):
         if not re.search(r'^# '+field+r' 0\s*$', text, re.M):
@@ -139,7 +143,11 @@ def main():
     args = ['git', '-c', 'safe.directory='+ROOT.as_posix()]
     sha = subprocess.check_output(args+['rev-parse', 'HEAD'], cwd=ROOT, text=True).strip()
     dirty = subprocess.run(args+['diff', '--quiet', 'HEAD'], cwd=ROOT).returncode != 0
-    for file in ('contracts/test/BetPokerAbuseProtection59.t.sol',
+    for file in ('contracts/test/BetPokerMultiplayerSecurity610.t.sol',
+                 'clients/420bet-poker/zkshuffle/fixtures/ws8/multiplayer/evidence.zip',
+                 'clients/420bet-poker/zkshuffle/fixtures/ws8/multiplayer/bundle.json',
+                 'scripts/bet/verify-poker-5a10-multiplayer.mjs',
+                 'contracts/test/BetPokerAbuseProtection59.t.sol',
                  'contracts/src/bet/PokerAbuseControls420.sol',
                  'contracts/src/bet/IPokerAbuseControls420.sol',
                  'clients/420bet-poker/crypto/nlhe-abuse-monitor.mjs',
@@ -159,7 +167,7 @@ def main():
                                 stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode != 0
     report = dict(level=1, qualifiedSHA=None if dirty else sha,
                   sourceCommit=sha, trackedWorkingTreeDirty=dirty,
-                  mandatoryTests=mandatory, abuse5A9Tests={name:'Success' for name in abuse}, lifecycle5A8Tests={name:'Success' for name in lifecycle}, showdown5A7Tests={name: 'Success' for name in showdown}, evaluation5A6Tests={name: 'Success' for name in evaluation}, nativeOwners={o: len(t) for o,t in owners.items()},
+                  mandatoryTests=mandatory, multiplayer5A10Tests={name:"Success" for name in multiplayer}, abuse5A9Tests={name:'Success' for name in abuse}, lifecycle5A8Tests={name:'Success' for name in lifecycle}, showdown5A7Tests={name: 'Success' for name in showdown}, evaluation5A6Tests={name: 'Success' for name in evaluation}, nativeOwners={o: len(t) for o,t in owners.items()},
                   totalPassed=sum(map(len, owners.values())), independentTestsPassed=int(passes[0]),
                   executionSHA256={p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in files+[tap]})
     output.write_text(json.dumps(report, indent=2)+'\n', encoding='utf-8')

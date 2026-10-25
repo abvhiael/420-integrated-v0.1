@@ -1,0 +1,21 @@
+{
+  "sha256": "9eda07994fee6204cc733997df45ff2c833666b7a18644e96c9175f2e3c43b98",
+  "players": 9,
+  "proofs": 118,
+  "generatedProofs": 106,
+  "reusedProofs": [
+    "WS8Initial",
+    "WS8Shuffle1",
+    "WS8Recipient0",
+    "WS8Recipient1",
+    "WS8Recipient2",
+    "WS8Recipient3",
+    "WS8Recipient4",
+    "WS8Recipient5",
+    "WS8Recipient6",
+    "WS8Recipient7",
+    "WS8Recipient8",
+    "WS8Aggregate"
+  ],
+  "keys": 7
+}

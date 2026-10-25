@@ -4,8 +4,10 @@ import hashlib
 import json
 import os
 import subprocess
+import sys
 from pathlib import Path
 
+root=Path(__file__).resolve().parents[2]
 sha = os.environ["EXPECTED_SHA"]
 assert subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip() == sha
 paths = [Path("artifacts/ws8-crypto/execution.json"), Path("artifacts/ws8-funded/execution.json"), Path("artifacts/ws8-funded/independent-outcome.json"), Path("artifacts/poker-5a5/execution.json")]
@@ -16,8 +18,31 @@ assert betting['independentTestsPassed'] >= 23
 assert len(betting['evaluation5A6Tests']) == 11 and set(betting['evaluation5A6Tests'].values()) == {'Success'}
 assert len(betting['showdown5A7Tests']) == 18 and set(betting['showdown5A7Tests'].values()) == {'Success'}
 assert len(betting['lifecycle5A8Tests'])==27 and set(betting['lifecycle5A8Tests'].values())=={'Success'}
-assert betting['independentTestsPassed']>=74
+assert betting['independentTestsPassed']>=90
+assert len(betting['multiplayer5A10Tests'])==32 and set(betting['multiplayer5A10Tests'].values())=={'Success'}
 assert len(betting['abuse5A9Tests'])==30 and set(betting['abuse5A9Tests'].values())=={'Success'}
+multiplayerPath=Path('artifacts/poker-5a5/multiplayer-replay.json')
+multiplayerCryptoPath=Path('artifacts/ws8-crypto/multiplayer-execution.json')
+multiplayer=json.loads(multiplayerPath.read_text(encoding='utf-8'))
+multiplayerCrypto=json.loads(multiplayerCryptoPath.read_text(encoding='utf-8'))
+assert all(r['qualifiedSHA']==sha and r['trackedWorkingTreeDirty'] is False for r in [multiplayer,multiplayerCrypto])
+# Recompute the accepted multiplayer transcript at issuance, rather than trusting
+# a conserved but substituted report. This output is uploaded with the certificate.
+subprocess.run([sys.executable,str(root/'scripts/bet/package-poker-5a10-evidence.py'),'--verify'],check=True)
+checkedMultiplayerPath=Path('artifacts/ws8-certificate/multiplayer-replay-checked.json')
+checkedMultiplayerPath.parent.mkdir(parents=True,exist_ok=True)
+subprocess.run(['node',str(root/'scripts/bet/verify-poker-5a10-multiplayer.mjs'),
+                'artifacts/poker-5a5/multiplayer-trace.log',str(checkedMultiplayerPath)],check=True)
+assert json.loads(checkedMultiplayerPath.read_text(encoding='utf-8'))==multiplayer
+paths += [checkedMultiplayerPath]
+assert multiplayer['players']==9 and multiplayer['publicStatementsVerified']==118 and len(multiplayer['statements'])==118
+assert multiplayerCrypto['genuineProofsVerified']==118 and multiplayer['settlementReceiptVerified']
+assert multiplayer['ownerReceiptsVerified']==9 and multiplayer['providerBondVerified']
+assert multiplayer['startingEscrow']==5400 and multiplayer['providerCollateral']==10800 and multiplayer['fee']==20
+assert multiplayer['balances']==[0,3986,50,100,150,200,250,299,345] and sum(multiplayer['balances'])+20==5400
+assert multiplayer['uncalledRefund']==50 and len(multiplayer['sidePotTiers'])==8
+assert hashlib.sha256(Path('artifacts/poker-5a5/multiplayer-trace.log').read_bytes()).hexdigest()==multiplayer['traceSHA256']
+paths += [multiplayerPath,multiplayerCryptoPath]
 abusePath=Path('artifacts/poker-5a5/abuse-replay.json')
 abuse=json.loads(abusePath.read_text(encoding='utf-8'))
 assert abuse['qualifiedSHA']==sha and abuse['trackedWorkingTreeDirty'] is False
@@ -79,6 +104,7 @@ assert len(replay["statements"]) == 41 and replay["balances"] == [399, 399] and 
 assert sum(replay["balances"]) + replay["fee"] == 800
 out = Path("artifacts/ws8-certificate");out.mkdir(parents=True, exist_ok=True)
 report = {"level": 2, "qualifiedSHA": sha, "acceptance": "passed", "genuineProofsVerified": 41,
+    "multiplayer5A10Tests":betting["multiplayer5A10Tests"],"genuineMultiplayerProofsVerified":118,"multiplayerBalances":multiplayer["balances"],"multiplayerAdmissionRoot":multiplayer["admissionRoot"],
     "abuse5A9Tests": betting['abuse5A9Tests'], "abuseControlsIdentity": abuse['controlsIdentity'],
     "protectedAbuseHandVerified": True, "automatedSanction": False,
     "lifecycle5A8Tests": betting['lifecycle5A8Tests'], "reconnectionReplayVerified": True,

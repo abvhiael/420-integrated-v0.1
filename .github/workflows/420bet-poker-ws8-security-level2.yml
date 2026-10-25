@@ -1,4 +1,4 @@
-name: 420Bet Poker 5A.5–5A.9 and WS8 Security Milestone Level 2
+name: 420Bet Poker 5A.5-5A.10 and WS8 Security Milestone Level 2
 on:
   pull_request:
     paths:
@@ -10,6 +10,7 @@ on:
       - 'contracts/test/BetPokerShowdown57.t.sol'
       - 'contracts/test/BetPokerPlayerLifecycle58.t.sol'
       - 'contracts/test/BetPokerAbuseProtection59.t.sol'
+      - 'contracts/test/BetPokerMultiplayerSecurity610.t.sol'
       - 'contracts/test/PokerEvaluationVectors56.sol'
       - 'contracts/test/BetPokerNLHEBetting54.t.sol'
       - 'contracts/test/BetPokerNativeOutcome54.t.sol'
@@ -90,10 +91,13 @@ jobs:
         run: |
           set -euo pipefail
           node --test --test-reporter=tap clients/420bet-poker/crypto/nlhe-*.test.mjs | tee artifacts/poker-5a5/node.tap
-      - name: Execute 5A.5 kernel and genuine funded-hand owners
+      - name: Execute 5A.5 through 5A.10 mandatory native owners
         working-directory: contracts
         run: |
           set -euo pipefail
+          forge test --use 0.8.30 --match-contract PokerMultiplayerSecurity610Test --match-test '^(test610|testFuzz610)' --json > ../artifacts/poker-5a5/foundry-610.json
+          forge test --use 0.8.30 --match-contract PokerMultiplayerSecurity610Test --match-test test610GenuineNinePlayerAllInSidePotsAndSettlement -vvvv | tee ../artifacts/poker-5a5/multiplayer-trace.log
+          node ../scripts/bet/verify-poker-5a10-multiplayer.mjs ../artifacts/poker-5a5/multiplayer-trace.log ../artifacts/poker-5a5/multiplayer-replay.json
           forge test --use 0.8.30 --match-contract PokerAbuseProtection59Test --match-test '^test59' --json > ../artifacts/poker-5a5/foundry-59.json
           forge test --use 0.8.30 --match-contract PokerAbuseProtection59Test --match-test test59LegitimateProtectedFundedHandAndGovernedRestriction -vvvv | tee ../artifacts/poker-5a5/abuse-trace.log
           node ../scripts/bet/verify-ws8-transcript.mjs ../artifacts/poker-5a5/abuse-trace.log ../artifacts/poker-5a5/abuse-independent-outcome.json abuse59
@@ -154,7 +158,7 @@ jobs:
         with:
           go-version: '1.24'
           cache: false
-      - name: Verify actual compiled relations, VK-generated Solidity and all 41 genuine proofs
+      - name: Verify actual compiled relations, VK-generated Solidity and all 200 genuine proofs
         working-directory: clients/420bet-poker/zkshuffle
         run: |
           set -euo pipefail
@@ -162,6 +166,9 @@ jobs:
           python3 ../../../scripts/bet/package-ws8-evidence.py --verify
           go test -mod=readonly -timeout 10m -count=1 -json -run '^TestWS8CommittedCryptographicEvidence$' . | tee ../../../artifacts/ws8-crypto/go-execution.jsonl
           python3 ../../../scripts/bet/verify-ws8-execution.py go ../../../artifacts/ws8-crypto/go-execution.jsonl ../../../artifacts/ws8-crypto/execution.json
+          python3 ../../../scripts/bet/package-poker-5a10-evidence.py --verify
+          go test -mod=readonly -timeout 10m -count=1 -json -run '^TestPoker5A10MultiplayerCommittedCryptographicEvidence$' . | tee ../../../artifacts/ws8-crypto/multiplayer-go-execution.jsonl
+          python3 ../../../scripts/bet/verify-ws8-execution.py go610 ../../../artifacts/ws8-crypto/multiplayer-go-execution.jsonl ../../../artifacts/ws8-crypto/multiplayer-execution.json
           python3 ../../../scripts/bet/package-poker-5a7-evidence.py --verify
           go test -mod=readonly -timeout 10m -count=1 -json -run '^TestPoker5A7WinnerCommittedCryptographicEvidence$' . | tee ../../../artifacts/ws8-crypto/winner-go-execution.jsonl
           python3 ../../../scripts/bet/verify-ws8-execution.py go57 ../../../artifacts/ws8-crypto/winner-go-execution.jsonl ../../../artifacts/ws8-crypto/winner-execution.json
@@ -263,6 +270,9 @@ jobs:
         with:
           name: poker-5a5-level1-static-execution
           path: artifacts/poker-5a5-static
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
       - name: Certify matching exact-SHA actual execution records
         env:
           EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}

@@ -32,15 +32,15 @@ if kind == "foundry":
     if not all_tests or any(r["status"] != "Success" for r in all_tests.values()):
         raise SystemExit("an inherited or mandatory scoped test failed/skipped")
     report.update(mandatoryTests={n: actual[n]["status"] for n in REQUIRED}, totalPassed=len(all_tests))
-elif kind in {"go", "go57"}:
+elif kind in {"go", "go57", "go610"}:
     events = [json.loads(line) for line in Path(source).read_text(encoding="utf-8").splitlines() if line.strip()]
-    target = "TestWS8CommittedCryptographicEvidence" if kind == "go" else "TestPoker5A7WinnerCommittedCryptographicEvidence"
+    target = "TestWS8CommittedCryptographicEvidence" if kind == "go" else "TestPoker5A7WinnerCommittedCryptographicEvidence" if kind=="go57" else "TestPoker5A10MultiplayerCommittedCryptographicEvidence"
     relevant = [e for e in events if e.get("Test") == target]
     if not any(e["Action"] == "pass" for e in relevant) or any(e["Action"] in {"fail", "skip"} for e in events):
         raise SystemExit("actual cryptographic owner did not pass")
     count = sum("verified committed genuine proof " in e.get("Output", "") for e in relevant)
-    if count != 41:
-        raise SystemExit("actual cryptographic verification did not cover 41 proofs")
+    if count != (118 if kind=="go610" else 41):
+        raise SystemExit("actual cryptographic verification did not cover all mandatory genuine proofs")
     report.update(test=target, genuineProofsVerified=count)
 else:
     raise SystemExit("unknown execution kind")

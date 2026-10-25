@@ -29,7 +29,7 @@ class Application:
             except Exception:self.worker_errors+=1  # never log keys, ciphertext or decrypted data
     def public_config(self):
         c=self.chain.config
-        return {"chainID":c["chainID"],"engine":self.chain.engine.address,"asset":self.chain.token.address,"disputes":self.chain.disputes.address,"decimals":self.chain.decimals,"profiles":c["profiles"],"slates":c["slates"],"plannedPools":c["plannedPools"],"encryptionPublicKey":hx(self.custodian.public),"localQualification":c.get("localQualification",False)}
+        return {"assetKind":self.chain.asset_kind,"chainID":c["chainID"],"genesisHash":hx(self.chain.w3.eth.get_block(0).hash),"engine":self.chain.engine.address,"asset":self.chain.token.address,"disputes":self.chain.disputes.address,"decimals":self.chain.decimals,"profiles":c["profiles"],"slates":c["slates"],"plannedPools":c["plannedPools"],"encryptionPublicKey":hx(self.custodian.public),"localQualification":c.get("localQualification",False)}
 
 
 def handler_for(app,origin):

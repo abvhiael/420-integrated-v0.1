@@ -1,0 +1,35 @@
+{
+  "schema": "420.fantasy.official-binding-inputs.v1",
+  "status": "AWAITING_AUTHORITATIVE_INPUTS",
+  "productionAuthorized": false,
+  "network": {"chainID": null, "genesisHash": null, "rpc": null, "designationEvidence": null},
+  "asset": {"integrationProfile": "Wrapped420 (canonical ERC20 representation of native $420)", "address": null, "decimals": null, "designationEvidence": null},
+  "canonicalModules": {
+    "CapabilityRegistry420": null, "BetAuthorization420": null, "Identity420": null,
+    "OracleProviderRegistry420": null, "OracleFeedRegistry420": null,
+    "OracleRiskPolicy420": null, "OracleRouter420": null, "DevelopmentCompensationVault420": null
+  },
+  "parameters": {
+    "chainID": null,
+    "assetKind": "wrapped-native",
+    "issuer": null, "userType": null, "resolverType": null, "governance": null,
+    "developmentBeneficiary": null, "community": null, "publisherMinimumGasWei": null,
+    "slate": null, "pool": null, "claim": null
+  },
+  "roles": {
+    "administrator": null, "validator": null, "publisher": null, "resolver": null,
+    "reporterA": null, "reporterB": null,
+    "validatorSubject": null, "validatorCredential": null, "validatorUserCredential": null,
+    "resolverSubject": null, "resolverCredential": null, "resolverUserCredential": null
+  },
+  "policy": {
+    "maximumAuthorityLeaseSeconds": 604800, "reporterOperators": 2,
+    "upstreamSources": 1, "upstream": "sportradar", "feedType": "OUTCOME",
+    "aggregation": "QUORUM_EQUAL", "quorum": 2, "minimumConfidenceBps": 10000
+  },
+  "pendingEvidence": [
+    "official network designation", "approved canonical asset representation",
+    "approved beneficiaries and authority identities", "finalized deployment receipts",
+    "finalized provider/feed/source epochs", "actual gas funding and operational drills"
+  ]
+}

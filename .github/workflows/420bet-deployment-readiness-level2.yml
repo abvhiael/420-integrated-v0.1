@@ -1,0 +1,99 @@
+name: 420Bet TN-FAN-01 local deployment readiness Level 2
+on:
+  push:
+    branches: ['bet/tn-fan-01-local-readiness']
+    paths:
+      - 'clients/420bet-fantasy/daily/**'
+      - 'contracts/src/**'
+      - 'contracts/script/fantasy/**'
+      - 'scripts/fantasy/qualify-deployment-readiness.py'
+      - '.github/workflows/420bet-deployment-readiness-level2.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: fantasy-deployment-readiness-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  actual-deployment-and-authority-bindings:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.8.6
+      - run: python -m pip install -r clients/420bet-fantasy/daily/requirements.txt
+      - name: Execute actual local deployment, wiring, authority and rejection cases
+        run: python scripts/fantasy/qualify-deployment-readiness.py --output artifacts/fantasy-deployment-readiness
+      - name: Retain public evidence only
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fantasy-deployment-readiness-${{ github.sha }}
+          if-no-files-found: error
+          path: |
+            artifacts/fantasy-deployment-readiness/qualification.json
+            artifacts/fantasy-deployment-readiness/offline-bundle.json
+            artifacts/fantasy-deployment-readiness/local-deployment-manifest.json
+            artifacts/fantasy-deployment-readiness/constructor-transactions.json
+            artifacts/fantasy-deployment-readiness/receipt-evidence.json
+            artifacts/fantasy-deployment-readiness/unsigned-authority-plan.json
+            artifacts/fantasy-deployment-readiness/local-attestation.json
+            artifacts/fantasy-deployment-readiness/application-config.json
+            artifacts/fantasy-deployment-readiness/compile.*.log
+            artifacts/fantasy-deployment-readiness/tests.*.log
+  browser-escrow:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        asset: [erc20, wrapped-native]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: pnpm/action-setup@v4
+        with:
+          version: '11.25.0'
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.8.6
+      - run: python -m pip install -r clients/420bet-fantasy/daily/requirements.txt
+      - run: pnpm --dir clients/420bet-fantasy/daily install --frozen-lockfile --ignore-scripts
+      - run: pnpm --dir clients/420bet-fantasy/daily exec playwright install --with-deps chromium
+      - run: node clients/420bet-fantasy/daily/build.mjs
+      - name: Execute complete real browser escrow flow
+        run: python scripts/fantasy/qualify-daily-application.py --asset-kind '${{ matrix.asset }}' --output 'artifacts/daily-${{ matrix.asset }}'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: daily-${{ matrix.asset }}-${{ github.sha }}
+          if-no-files-found: error
+          path: |
+            artifacts/daily-${{ matrix.asset }}/qualification.json
+            artifacts/daily-${{ matrix.asset }}/source-checksums.json
+            artifacts/daily-${{ matrix.asset }}/bundle-checksums.json
+            artifacts/daily-${{ matrix.asset }}/deployment.json
+            artifacts/daily-${{ matrix.asset }}/browser-result.json
+            artifacts/daily-${{ matrix.asset }}/conservation.json
+            artifacts/daily-${{ matrix.asset }}/transactions.json
+            artifacts/daily-${{ matrix.asset }}/versions.json
+            artifacts/daily-${{ matrix.asset }}/compile.*.log
+            artifacts/daily-${{ matrix.asset }}/browser.*.log
+            artifacts/daily-${{ matrix.asset }}/*.png

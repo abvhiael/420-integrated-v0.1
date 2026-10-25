@@ -15,7 +15,9 @@ from chain import hx,b32,Chain
 
 
 class LocalFixture:
-    def __init__(self,rpc,build,private):
+    def __init__(self,rpc,build,private,asset_kind="erc20"):
+        self.asset_kind=asset_kind
+        if asset_kind not in ("erc20","wrapped-native"):raise ValueError("unsupported qualification asset")
         self.w3=Web3(Web3.HTTPProvider(rpc));self.build=Path(build);self.private=Path(private);self.private.mkdir(parents=True,exist_ok=True)
         if self.w3.eth.chain_id!=31337 or not rpc.startswith('http://127.0.0.1:'):raise ValueError("fixture refuses non-local chain")
         self.accounts=self.w3.eth.accounts;self.admin=self.accounts[0];self.nonce=0;self.contracts={};self.oracle_nonce=0;self.prepared={}
@@ -26,8 +28,11 @@ class LocalFixture:
     def deploy(self,name,*args):
         artifact=json.loads((self.build/(name+'.sol')/(name+'.json')).read_text());factory=self.w3.eth.contract(abi=artifact['abi'],bytecode=artifact['bytecode']['object'])
         receipt=self.tx(factory.constructor(*args));c=self.w3.eth.contract(address=receipt.contractAddress,abi=artifact['abi']);self.contracts[name]=c;return c
-    def grant(self,principal,action,scope):
-        self.nonce+=1;return self.tx(self.cap.functions.createGrant(k256(encode(['string','uint256'],['daily-local-grant',self.nonce])),principal,k256(b'420.BET.CORE'),action,scope,0,0,0,0,0))
+    def grant(self,principal,action,scope,valid_until=None):
+        now=self.w3.eth.get_block('latest').timestamp
+        end=now+7*86400 if valid_until is None else int(valid_until)
+        if not now<end<=now+7*86400:raise ValueError('local authority must be a bounded lease')
+        self.nonce+=1;return self.tx(self.cap.functions.createGrant(k256(encode(['string','uint256'],['daily-local-grant',self.nonce])),principal,k256(b'420.BET.CORE'),action,scope,0,0,0,now,end))
     def advance(self,timestamp):
         current=self.w3.eth.get_block('latest').timestamp
         if timestamp>current:self.w3.provider.make_request('evm_increaseTime',[timestamp-current])
@@ -46,7 +51,9 @@ class LocalFixture:
         self.providers=self.deploy('OracleProviderRegistry420',self.admin);self.feeds=self.deploy('OracleFeedRegistry420',self.admin,self.providers.address);self.risk=self.deploy('OracleRiskPolicy420',self.admin)
         self.router=self.deploy('OracleRouter420',self.admin,self.providers.address,self.feeds.address,self.risk.address)
         for i in range(2):self.tx(self.providers.functions.setProvider(k256(('daily-operator-'+str(i)).encode()),self.accounts[5+i],k256(b'synthetic fixture; shared source'),bytes(32),True))
-        self.token=self.deploy('ERC20Template420','Local qualification $420','$420',self.admin,1000000*10**18,0,False,False,False,False,k256(b'local $420'))
+        if self.asset_kind=='wrapped-native':
+            self.token=self.deploy('Wrapped420');self.tx(self.token.functions.deposit(),value=500*10**18)
+        else:self.token=self.deploy('ERC20Template420','Local qualification $420','$420',self.admin,1000000*10**18,0,False,False,False,False,k256(b'local $420'))
         for address in self.accounts[1:5]:self.tx(self.token.functions.transfer(address,100*10**18))
         self.disputes=self.deploy('FantasyDisputeController420',self.auth.address,self.identity.address,self.router.address,self.resolver_type,self.token.address,self.accounts[9])
         self.book=self.deploy('FantasySlateBook420',self.auth.address,self.router.address);self.scorer=self.deploy('FantasyNHLScoring420');self.vault=self.deploy('DevelopmentCompensationVault420',self.cap.address,self.accounts[8])
@@ -56,6 +63,15 @@ class LocalFixture:
             (self.private/name).write_text(data,encoding='utf-8');os.chmod(self.private/name,0o600)
         (self.private/'storage.key').write_bytes(get_random_bytes(32));os.chmod(self.private/'storage.key',0o600)
         self.w3.eth.wait_for_transaction_receipt(self.w3.eth.send_transaction({'from':self.admin,'to':publisher.address,'value':10**18}))
+        self.w3.eth.wait_for_transaction_receipt(self.w3.eth.send_transaction({'from':self.admin,'to':validator.address,'value':10**18}))
+        custodian_subject=k256(b'daily-local-verified-custodian');custodian_credential=k256(b'daily-local-custodian-credential');custodian_person=k256(b'daily-local-custodian-person')
+        tx=self.identity.functions.createProfile(custodian_subject,k256(b'local custodian profile')).build_transaction({'from':validator.address,'nonce':0,'chainId':31337,'gas':500000})
+        receipt=self.w3.eth.wait_for_transaction_receipt(self.w3.eth.send_raw_transaction(validator.sign_transaction(tx).raw_transaction))
+        if receipt.status!=1:raise RuntimeError('actual custodian controller profile failed')
+        self.tx(self.identity.functions.issueCredential(custodian_credential,self.issuer,custodian_subject,self.user_type,custodian_person,0))
+        self.tx(self.engine.functions.registerIdentity(custodian_subject,custodian_credential))
+        self.validator_profile={'subject':hx(custodian_subject),'credential':hx(custodian_credential),'account':validator.address}
+        custodian_key=k256(encode(['bytes32','bytes32'],[self.issuer,custodian_person]))
         self.start=self.w3.eth.get_block('latest').timestamp+3600;self.slates={};self.athletes=[]
         for i in range(1,22):
             pos=[1,2,4,8,8,16,1][(i-1)%7];name=['Center','Left wing','Right wing','Defense','Defense','Goalie','Flex'][(i-1)%7]+' '+str(i)
@@ -66,7 +82,7 @@ class LocalFixture:
             module=(Path(__file__).resolve().parent.parent/'slate-time.mjs').as_uri()
             script="import {cutoffForSlate} from "+json.dumps(module)+";console.log(cutoffForSlate([Number(process.argv[1])]).cutoff)"
             cutoff=int(subprocess.check_output(['node','--input-type=module','-e',script,str(lock)],text=True))
-            self.tx(self.book.functions.publish(sid,feed,k256(encryption.public_key().export_key(format='raw')),k256(b'nonparticipating custodian'),validator.address,cutoff,[(game,lock)],[(a['id'],game,a['positions']) for a in self.athletes]));self.tx(self.book.functions.sealSlate(sid))
+            self.tx(self.book.functions.publish(sid,feed,k256(encryption.public_key().export_key(format='raw')),custodian_key,validator.address,cutoff,[(game,lock)],[(a['id'],game,a['positions']) for a in self.athletes]));self.tx(self.book.functions.sealSlate(sid))
             self.slates[hx(sid)]={'name':'Local NHL slate '+str(index+1),'athletes':self.athletes,'game':hx(game),'lockAt':lock,'feed':hx(feed)}
         self.pools=[hx(k256(('daily-local-pool-'+str(i)).encode())) for i in range(6)];candidate={}
         self.grant(self.admin,self.engine.functions.CREATE().call(),self.auth.functions.scopeGlobal().call())
@@ -75,7 +91,7 @@ class LocalFixture:
             scope=self.auth.functions.scopeForContest(b32(pid)).call();self.grant(self.engine.address,self.disputes.functions.REGISTER().call(),scope);self.grant(self.admin,self.engine.functions.INVITE().call(),scope)
             for actor in self.accounts[1:5]:self.grant(actor,k256(b'BET_FANTASY_ENTER'),scope)
             feed=k256(('candidate-'+pid).encode());self.feed(feed);candidate[pid]=hx(feed)
-        config={'rpc':self.w3.provider.endpoint_uri,'chainID':31337,'localQualification':True,'engine':self.engine.address,'asset':self.token.address,'deploymentBlock':0,'profiles':self.profiles,'slates':self.slates,'plannedPools':self.pools,'candidateFeed':candidate[self.pools[0]],'candidateFeeds':candidate,'codeHashes':{c.address:hx(Web3.keccak(self.w3.eth.get_code(c.address))) for c in self.contracts.values()}}
+        config={'assetKind':self.asset_kind,'rpc':self.w3.provider.endpoint_uri,'chainID':31337,'localQualification':True,'engine':self.engine.address,'asset':self.token.address,'deploymentBlock':0,'profiles':self.profiles,'slates':self.slates,'plannedPools':self.pools,'candidateFeed':candidate[self.pools[0]],'candidateFeeds':candidate,'codeHashes':{c.address:hx(Web3.keccak(self.w3.eth.get_code(c.address))) for c in self.contracts.values()}}
         # Include constructor-created module identities in the pinned client config.
         for address in [self.engine.functions.admission().call(),self.engine.functions.rankings().call(),self.engine.functions.payoutPolicy().call()]:config['codeHashes'][address]=hx(Web3.keccak(self.w3.eth.get_code(address)))
         (self.private/'application.json').write_text(json.dumps(config,indent=2)+'\n',encoding='utf-8');self.config=config

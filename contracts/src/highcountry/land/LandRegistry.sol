@@ -149,12 +149,10 @@ contract LandRegistry {
     ) external {
         if (newOwner == address(0)) revert HCZeroAddress();
         LandParcel storage parcel = _requireParcel(parcelId);
-        // Owner reassignment cannot orphan a live cultivation obligation. Terminate plants under their
-        // canonical authority and clear occupancy before any reassignment of parcel title.
-        if (parcel.occupant != address(0)) revert HCOccupancyConflict();
-        if (address(canonicalPlants) == address(0) || canonicalPlants.activePlantsByParcel(parcelId) != 0) {
-            revert HCInvalidState();
-        }
+        // Ownership transfer is not an occupancy transition. Keep the canonical occupant,
+        // occupancyRef, lease/license kind and active plants unchanged. Existing occupancy
+        // is invalidated for *new* cultivation when its old lessor ceases to own the parcel;
+        // clearing that occupancy still requires the canonical plant counter to reach zero.
         _requireAuthorized(ActionIds.LAND_TRANSFER, parcelId, 0);
 
         address previousOwner = parcel.owner;

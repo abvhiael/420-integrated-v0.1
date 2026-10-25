@@ -1,0 +1,53 @@
+{
+  "implementation_sha": "e5cc476ff449215245cbbbfed04b08d7db4f86de",
+  "implementation_tree": "cb529e1e40c683340753581c45d087ed8529df2e",
+  "reconciled_main": "1995edc3df97359570e403cc6ab2999928198b33",
+  "fixture_before_sha256": "4ef8f92b6445974b77834b558aa3f0488f8ba5c06628b76297126b8589fc51e7",
+  "fixture_after_sha256": "46e79becbee52123a7c3dde9650b5a2a5a3004a7748cdc3f420ae6b9f9978456",
+  "test_entrypoints_preserved": 18,
+  "assertions_before": 80,
+  "assertions_after": 81,
+  "selected_source_test_names": 37,
+  "executed_selected_names": 37,
+  "missing_selected_names": [],
+  "poker": {
+    "suites": 16,
+    "passed": 585,
+    "failed": 0,
+    "skipped": 0
+  },
+  "land": {
+    "passed": 6,
+    "failed": 0,
+    "skipped": 0
+  },
+  "retained_economy": {
+    "sha": "cb6f8e38ae6512fc51b0ff19a618e3c2fc6c58da",
+    "run_id": 40169905502,
+    "level1_passed": 3,
+    "level2_passed": 72
+  },
+  "merge_gate": "BLOCKED: FantasyContestEngine420 exceeds EIP-170 by 411 bytes in the scoped native build",
+  "file_sha256": {
+    "bounded-solc.py": "2ff1b7cf42c6d59ba910f5d5f7413dcf82a9f55b51083eaa51d3f773f203e992",
+    "candidate-case9-after.json": "0aaad0a661df4c67c986e9c4d57d47005b535bb0ef623f443f99e6673693e8e7",
+    "capture-solc.py": "ab2f2cdd87b4933127b8885f6f217ad01e313236a8022d85dfd12de25c0b128b",
+    "case9-helper-before.yul": "5949489d567e0e35683c3c9e43f10df8eb99a167ee05ffb7ef9065d7749d9aa8",
+    "compiler-manifest.json": "1a6ed301e4174fb32210c22020dccfb923aab16a89200e2d001e132cd76332a7",
+    "fantasy-size.log": "43f3f982524b8acc92e40565b6b779710f4be18907310a605004404184ff335b",
+    "isolate-ir.py": "c05a07d5a8028daabc47d665898eb1ba5a896e5ed3fdc4aaf99a819c3f361cda",
+    "isolate-output.py": "aa529f103ab5901f68d593ac33b3b859b34cb0cb1488d3ab3207229b1bc2b49b",
+    "land-size.log": "f09df0ac171d9cd0fbe3797d442186c37427daf2f61e4506694cbf5c5c428f07",
+    "land-tests.log": "5e6b0c39d5d8726b9988fdeaf0a02d60a5b0558f11a3f452160aed67aaa14fdc",
+    "main-case9-before.json": "88099d803b89b4f6630661a167cd4b3090ba9f8928dcabaf5cc8f8795742094e",
+    "main-yul-reproduction.json": "ceaf9e42b6861fe3f02e058f2d0d4303aae337c3c2109f343b62de4b40657bc3",
+    "poker-tests.log": "7365a49f63e1b760fbaf001c20e71ea49601bfefbab10b6064ecd875f0f9af3c",
+    "prewarm-more.log": "c893dc7f884f60ad486d0133514e8ef5c594f462286eb6a524da34880f9d7320",
+    "prewarm-more.py": "ec4da914f82a25c5618f308d2805833c947d1c94bb7d25208c962537050f6f86",
+    "prewarm-solc.log": "4d3ed47a37e84a57c47d807f968d12a53a644b04239d52d1719b9c60ddc9a2de",
+    "prewarm-solc.py": "f68c6441e0e6019ce609ce9bddc1e7cd42c154f5dbdeef42c1b945ea0ba43f4f",
+    "toolchain.txt": "79c628bd830f2376c98496d60eec0b37c2b288e99f7dedaeb6764ac7cffa2439"
+  },
+  "raw_land_size_stdout_sha256": "9f045fde86d1ee4216742311b84deb19963f3ae80ebbd0dd7567a10288611607",
+  "log_normalization": "land-size.log has trailing empty lines removed; no diagnostic or table content changed"
+}

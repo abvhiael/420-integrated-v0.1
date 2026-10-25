@@ -1,0 +1,894 @@
+Compiling 125 files with Solc 0.8.24
+Solc 0.8.24 finished in 1054.21s
+Compiler run successful with warnings:
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> src/bet/PokerNLHEBetting420.sol:32:29:
+   |
+32 |     function bindTurnPolicy(bytes32 tableId,uint32 secondsPerTurn) external {
+   |                             ^^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> src/bet/PokerNLHEBetting420.sol:32:45:
+   |
+32 |     function bindTurnPolicy(bytes32 tableId,uint32 secondsPerTurn) external {
+   |                                             ^^^^^^^^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> src/bet/PokerNLHEBetting420.sol:35:36:
+   |
+35 |     function prepareDealAssignment(bytes32 handId) external {
+   |                                    ^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> src/bet/PokerNLHEBetting420.sol:38:20:
+   |
+38 |     function start(bytes32 handId,uint256 ante,uint32 timeoutSecs) external {
+   |                    ^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> src/bet/PokerNLHEBetting420.sol:38:35:
+   |
+38 |     function start(bytes32 handId,uint256 ante,uint32 timeoutSecs) external {
+   |                                   ^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> src/bet/PokerNLHEBetting420.sol:38:48:
+   |
+38 |     function start(bytes32 handId,uint256 ante,uint32 timeoutSecs) external {
+   |                                                ^^^^^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> src/bet/PokerNLHEBetting420.sol:41:21:
+   |
+41 |     function action(bytes32 handId,uint8 seat,Move move,uint256 chips,
+   |                     ^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> src/bet/PokerNLHEBetting420.sol:41:36:
+   |
+41 |     function action(bytes32 handId,uint8 seat,Move move,uint256 chips,
+   |                                    ^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> src/bet/PokerNLHEBetting420.sol:41:47:
+   |
+41 |     function action(bytes32 handId,uint8 seat,Move move,uint256 chips,
+   |                                               ^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> src/bet/PokerNLHEBetting420.sol:41:57:
+   |
+41 |     function action(bytes32 handId,uint8 seat,Move move,uint256 chips,
+   |                                                         ^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> src/bet/PokerNLHEBetting420.sol:42:9:
+   |
+42 |         uint64 expiry,bytes32 expectedRoot,bytes calldata signature) external {
+   |         ^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> src/bet/PokerNLHEBetting420.sol:42:23:
+   |
+42 |         uint64 expiry,bytes32 expectedRoot,bytes calldata signature) external {
+   |                       ^^^^^^^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> src/bet/PokerNLHEBetting420.sol:42:44:
+   |
+42 |         uint64 expiry,bytes32 expectedRoot,bytes calldata signature) external {
+   |                                            ^^^^^^^^^^^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> src/bet/PokerNLHEBetting420.sol:45:22:
+   |
+45 |     function timeout(bytes32 handId) external {
+   |                      ^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> src/bet/PokerNLHEBetting420.sol:48:36:
+   |
+48 |     function advanceRevealedStreet(bytes32 handId,uint8 street)external {
+   |                                    ^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> src/bet/PokerNLHEBetting420.sol:48:51:
+   |
+48 |     function advanceRevealedStreet(bytes32 handId,uint8 street)external {
+   |                                                   ^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> src/bet/PokerNLHEBetting420.sol:51:22:
+   |
+51 |     function reserve(bytes32 handId) external {
+   |                      ^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> src/bet/PokerNLHEBetting420.sol:54:37:
+   |
+54 |     function cancelUnavailableStart(bytes32 handId) external {
+   |                                     ^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> src/bet/PokerNLHEBetting420.sol:57:33:
+   |
+57 |     function cancelWithheldDeal(bytes32 handId) external {
+   |                                 ^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> src/bet/PokerNLHEBetting420.sol:60:37:
+   |
+60 |     function cancelWithheldDelivery(bytes32 handId) external {
+   |                                     ^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> src/bet/PokerNLHEBetting420.sol:63:43:
+   |
+63 |     function beginMissingEvidenceRecovery(bytes32 handId) external {
+   |                                           ^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> src/bet/PokerNLHEBetting420.sol:66:46:
+   |
+66 |     function finalizeMissingEvidenceRecovery(bytes32 handId) external {
+   |                                              ^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> src/bet/PokerNLHEBetting420.sol:69:26:
+   |
+69 |     function bindReveals(bytes32 tableId,address gate) external {
+   |                          ^^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> src/bet/PokerNLHEBetting420.sol:69:42:
+   |
+69 |     function bindReveals(bytes32 tableId,address gate) external {
+   |                                          ^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> src/bet/PokerNLHEBetting420.sol:72:27:
+   |
+72 |     function bindDelivery(bytes32 tableId,address gate) external {
+   |                           ^^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> src/bet/PokerNLHEBetting420.sol:72:43:
+   |
+72 |     function bindDelivery(bytes32 tableId,address gate) external {
+   |                                           ^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> src/bet/PokerNLHEBetting420.sol:75:26:
+   |
+75 |     function bindOutcome(bytes32 tableId,address calculator) external {
+   |                          ^^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> src/bet/PokerNLHEBetting420.sol:75:42:
+   |
+75 |     function bindOutcome(bytes32 tableId,address calculator) external {
+   |                                          ^^^^^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> src/bet/PokerNLHEBetting420.sol:78:31:
+   |
+78 |     function bindProviderBond(bytes32 tableId,address bond)external {
+   |                               ^^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> src/bet/PokerNLHEBetting420.sol:78:47:
+   |
+78 |     function bindProviderBond(bytes32 tableId,address bond)external {
+   |                                               ^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> src/bet/PokerNLHEBetting420.sol:81:21:
+   |
+81 |     function settle(bytes32 handId,PokerCanonicalRake420.Policy calldata policy) external {
+   |                     ^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> src/bet/PokerNLHEBetting420.sol:81:36:
+   |
+81 |     function settle(bytes32 handId,PokerCanonicalRake420.Policy calldata policy) external {
+   |                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> src/bet/PokerNLHEBetting420.sol:84:39:
+   |
+84 |     function proposeDisputeResolution(bytes32 handId,
+   |                                       ^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> src/bet/PokerNLHEBetting420.sol:85:9:
+   |
+85 |         PokerCanonicalRake420.Policy calldata policy) external {
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Warning (2072): Unused local variable.
+   --> test/BetPokerPrivateShuffleGate54.t.sol:137:9:
+    |
+137 |         PokerConfidentialDeal420.Hand memory h=deal.getHand(id);
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Warning (2072): Unused local variable.
+   --> test/BetPokerPrivateShuffleGate54.t.sol:149:9:
+    |
+149 |         PokerConfidentialDeal420.Hand memory h=deal.getHand(id);
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Warning (2072): Unused local variable.
+   --> test/BetPokerPrivateShuffleGate54.t.sol:159:9:
+    |
+159 |         PokerConfidentialDeal420.Hand memory h=deal.getHand(id);
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Warning (2072): Unused local variable.
+   --> test/BetPokerPrivateShuffleGate54.t.sol:169:9:
+    |
+169 |         PokerConfidentialDeal420.Hand memory h=deal.getHand(id);
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Warning (2072): Unused local variable.
+   --> test/BetPokerNLHEBetting54.t.sol:193:9:
+    |
+193 |         PokerConfidentialDeal420.Hand memory h=deal.getHand(id);
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Warning (2519): This declaration shadows an existing declaration.
+  --> test/BetPokerWS8ProductionFixture54.sol:94:14:
+   |
+94 |             (bytes32 circuit,bytes32 schema)=WS8VerifierData.identity(i);
+   |              ^^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> test/BetPokerWS8ProductionFixture54.sol:99:10:
+   |
+99 |         (bytes32 circuit,bytes32 schema)=WS8VerifierData.identity(0);
+   |          ^^^^^^^^^^^^^^^
+
+Warning (2519): This declaration shadows an existing declaration.
+  --> test/BetPokerWS8ProductionFixture54.sol:94:30:
+   |
+94 |             (bytes32 circuit,bytes32 schema)=WS8VerifierData.identity(i);
+   |                              ^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> test/BetPokerWS8ProductionFixture54.sol:99:26:
+   |
+99 |         (bytes32 circuit,bytes32 schema)=WS8VerifierData.identity(0);
+   |                          ^^^^^^^^^^^^^^
+
+
+Ran 33 tests for test/BetPokerNLHEBetting54.t.sol:PokerNLHEBetting54Test
+[PASS] testCannotSkipStageOrSwapProvider() (gas: 2243965)
+[PASS] testCanonicalConfigurationAndImmutableCommitment() (gas: 473286)
+[PASS] testCompleteLifecycleAndTerminalClosure() (gas: 700939)
+[PASS] testDuplicateSeatAndBadSeatRejected() (gas: 1078694)
+[PASS] testEmergencyBlocksBegin() (gas: 1184767)
+[PASS] testEmergencyBlocksNewBuyInsButPreservesExit() (gas: 1059279)
+[PASS] testEmergencyBlocksNewTablesAndReopeningButAllowsClose() (gas: 694947)
+[PASS] testExpiredAttestationBlocksStage() (gas: 2438572)
+[PASS] testForgedSnapshotRejected() (gas: 1128112)
+[PASS] testFundedBuyInAndExactChipConservation() (gas: 799263)
+[PASS] testIdenticalCommitmentsRejectedInEitherArrivalOrder() (gas: 1711030)
+[PASS] testInvalidBuyInAndOverCapRejected() (gas: 983912)
+[PASS] testInvalidProofAndWrongRootRejected() (gas: 2286508)
+[PASS] testInvalidSeatsAndNoOnePlayerHands() (gas: 962521)
+[PASS] testMissingPublicCiphertextDataBlocksBothStages() (gas: 2216735)
+[PASS] testNoPrematureOpenAndNoUnauthorizedResume() (gas: 599182)
+[PASS] testNoReplayOrNonceSkip() (gas: 1590498)
+[PASS] testOperatorSuspendFailsClosed() (gas: 509970)
+[PASS] testParticipantChangeInvalidatesPendingCommit() (gas: 1668470)
+[PASS] testPauseBlocksFundingButAllowsWithdrawal() (gas: 1041416)
+[PASS] testProofGateStagesAndTranscriptBinding() (gas: 2598882)
+[PASS] testRejectInvalidConfigurationAndUnauthorizedVersionSubstitution() (gas: 143950)
+[PASS] testRevokedAuthorizationDoesNotCreateChips() (gas: 660529)
+[PASS] testRevokedProviderCannotSubmitEvenAValidProof() (gas: 2243997)
+[PASS] testRevokedProviderDenied() (gas: 1516562)
+[PASS] testSitOutAndUnauthorizedWithdrawalRejection() (gas: 1075292)
+[PASS] testSoleGovernanceAndProviderEvidenceFailClosed() (gas: 2466293)
+[PASS] testTopUpAndWithdrawExactlyOnce() (gas: 1161258)
+[PASS] testTwoProviderCommitNoPlaintextCards() (gas: 1834054)
+[PASS] testUnattestedCommonControlOrRevocationBlocksBothStages() (gas: 2859324)
+[PASS] testUnauthorizedAndCapabilityRevocation() (gas: 513841)
+[PASS] testUnauthorizedAndDuplicateCommitRejected() (gas: 1737376)
+[PASS] testWithheldCommitExpiresWithoutSettlingFunds() (gas: 1688576)
+Suite result: ok. 33 passed; 0 failed; 0 skipped; finished in 25.47ms (19.33ms CPU time)
+
+Ran 34 tests for test/BetPokerNLHEBetting54.t.sol:PokerNLHEBetting54Case5Test
+[PASS] testCannotSkipStageOrSwapProvider() (gas: 2243965)
+[PASS] testCanonicalConfigurationAndImmutableCommitment() (gas: 473286)
+[PASS] testCompleteLifecycleAndTerminalClosure() (gas: 700939)
+[PASS] testDuplicateSeatAndBadSeatRejected() (gas: 1078694)
+[PASS] testEmergencyBlocksBegin() (gas: 1184767)
+[PASS] testEmergencyBlocksNewBuyInsButPreservesExit() (gas: 1059279)
+[PASS] testEmergencyBlocksNewTablesAndReopeningButAllowsClose() (gas: 694947)
+[PASS] testExpiredAttestationBlocksStage() (gas: 2438572)
+[PASS] testForgedSnapshotRejected() (gas: 1128112)
+[PASS] testFundedBuyInAndExactChipConservation() (gas: 799262)
+[PASS] testIdenticalCommitmentsRejectedInEitherArrivalOrder() (gas: 1711030)
+[PASS] testInvalidBuyInAndOverCapRejected() (gas: 983912)
+[PASS] testInvalidProofAndWrongRootRejected() (gas: 2286508)
+[PASS] testInvalidSeatsAndNoOnePlayerHands() (gas: 962521)
+[PASS] testMissingPublicCiphertextDataBlocksBothStages() (gas: 2216735)
+[PASS] testNoPrematureOpenAndNoUnauthorizedResume() (gas: 599182)
+[PASS] testNoReplayOrNonceSkip() (gas: 1590498)
+[PASS] testOperatorSuspendFailsClosed() (gas: 509970)
+[PASS] testParticipantChangeInvalidatesPendingCommit() (gas: 1668470)
+[PASS] testPauseBlocksFundingButAllowsWithdrawal() (gas: 1041416)
+[PASS] testProofGateStagesAndTranscriptBinding() (gas: 2598882)
+[PASS] testRejectInvalidConfigurationAndUnauthorizedVersionSubstitution() (gas: 143950)
+[PASS] testRevokedAuthorizationDoesNotCreateChips() (gas: 660529)
+[PASS] testRevokedProviderCannotSubmitEvenAValidProof() (gas: 2243997)
+[PASS] testRevokedProviderDenied() (gas: 1516562)
+[PASS] testSitOutAndUnauthorizedWithdrawalRejection() (gas: 1075292)
+[PASS] testSoleGovernanceAndProviderEvidenceFailClosed() (gas: 2466315)
+[PASS] testTopUpAndWithdrawExactlyOnce() (gas: 1161258)
+[PASS] testTwoProviderCommitNoPlaintextCards() (gas: 1834054)
+[PASS] testUnattestedCommonControlOrRevocationBlocksBothStages() (gas: 2859324)
+[PASS] testUnauthorizedAndCapabilityRevocation() (gas: 513841)
+[PASS] testUnauthorizedAndDuplicateCommitRejected() (gas: 1737376)
+[PASS] testWithheldCommitExpiresWithoutSettlingFunds() (gas: 1688576)
+[PASS] testWithheldPreplayShuffleRefundsLockedBalancesWithoutOperatorConsent() (gas: 2974267)
+Suite result: ok. 34 passed; 0 failed; 0 skipped; finished in 28.45ms (22.67ms CPU time)
+
+Ran 35 tests for test/BetPokerNLHEBetting54.t.sol:PokerNLHEBetting54Case7Test
+[PASS] testCannotSkipStageOrSwapProvider() (gas: 2243965)
+[PASS] testCanonicalConfigurationAndImmutableCommitment() (gas: 473274)
+[PASS] testCompleteLifecycleAndTerminalClosure() (gas: 700927)
+[PASS] testDuplicateSeatAndBadSeatRejected() (gas: 1078738)
+[PASS] testEmergencyBlocksBegin() (gas: 1184789)
+[PASS] testEmergencyBlocksNewBuyInsButPreservesExit() (gas: 1059279)
+[PASS] testEmergencyBlocksNewTablesAndReopeningButAllowsClose() (gas: 694947)
+[PASS] testExpiredAttestationBlocksStage() (gas: 2438616)
+[PASS] testForgedSnapshotRejected() (gas: 1128112)
+[PASS] testFundedBuyInAndExactChipConservation() (gas: 799307)
+[PASS] testHostileTokenCallbacksCannotReenterBondFundingOrWithdrawals() (gas: 1163518)
+[PASS] testIdenticalCommitmentsRejectedInEitherArrivalOrder() (gas: 1711074)
+[PASS] testInvalidBuyInAndOverCapRejected() (gas: 983912)
+[PASS] testInvalidProofAndWrongRootRejected() (gas: 2286552)
+[PASS] testInvalidSeatsAndNoOnePlayerHands() (gas: 962565)
+[PASS] testMissingPublicCiphertextDataBlocksBothStages() (gas: 2216779)
+[PASS] testNoPrematureOpenAndNoUnauthorizedResume() (gas: 599182)
+[PASS] testNoReplayOrNonceSkip() (gas: 1590542)
+[PASS] testOperatorSuspendFailsClosed() (gas: 509970)
+[PASS] testParticipantChangeInvalidatesPendingCommit() (gas: 1668492)
+[PASS] testPauseBlocksFundingButAllowsWithdrawal() (gas: 1041438)
+[PASS] testProofGateStagesAndTranscriptBinding() (gas: 2598882)
+[PASS] testProviderBondsAreFullyFundedLockedAndWithdrawalSafe() (gas: 9917858)
+[PASS] testRejectInvalidConfigurationAndUnauthorizedVersionSubstitution() (gas: 143950)
+[PASS] testRevokedAuthorizationDoesNotCreateChips() (gas: 660551)
+[PASS] testRevokedProviderCannotSubmitEvenAValidProof() (gas: 2244019)
+[PASS] testRevokedProviderDenied() (gas: 1516606)
+[PASS] testSitOutAndUnauthorizedWithdrawalRejection() (gas: 1075292)
+[PASS] testSoleGovernanceAndProviderEvidenceFailClosed() (gas: 2466337)
+[PASS] testTopUpAndWithdrawExactlyOnce() (gas: 1161280)
+[PASS] testTwoProviderCommitNoPlaintextCards() (gas: 1834098)
+[PASS] testUnattestedCommonControlOrRevocationBlocksBothStages() (gas: 2859368)
+[PASS] testUnauthorizedAndCapabilityRevocation() (gas: 513841)
+[PASS] testUnauthorizedAndDuplicateCommitRejected() (gas: 1737398)
+[PASS] testWithheldCommitExpiresWithoutSettlingFunds() (gas: 1688576)
+Suite result: ok. 35 passed; 0 failed; 0 skipped; finished in 33.46ms (26.32ms CPU time)
+
+Ran 34 tests for test/BetPokerNLHEBetting54.t.sol:PokerNLHEBetting54Case1Test
+[PASS] testCannotSkipStageOrSwapProvider() (gas: 2243965)
+[PASS] testCanonicalConfigurationAndImmutableCommitment() (gas: 473301)
+[PASS] testCompleteLifecycleAndTerminalClosure() (gas: 700954)
+[PASS] testDuplicateSeatAndBadSeatRejected() (gas: 1078694)
+[PASS] testEmergencyBlocksBegin() (gas: 1184767)
+[PASS] testEmergencyBlocksNewBuyInsButPreservesExit() (gas: 1059279)
+[PASS] testEmergencyBlocksNewTablesAndReopeningButAllowsClose() (gas: 694947)
+[PASS] testExpiredAttestationBlocksStage() (gas: 2438572)
+[PASS] testForgedSnapshotRejected() (gas: 1128112)
+[PASS] testFundedBuyInAndExactChipConservation() (gas: 799285)
+[PASS] testIdenticalCommitmentsRejectedInEitherArrivalOrder() (gas: 1711030)
+[PASS] testInvalidBuyInAndOverCapRejected() (gas: 983912)
+[PASS] testInvalidProofAndWrongRootRejected() (gas: 2286530)
+[PASS] testInvalidSeatsAndNoOnePlayerHands() (gas: 962543)
+[PASS] testMissingPublicCiphertextDataBlocksBothStages() (gas: 2216735)
+[PASS] testNoPrematureOpenAndNoUnauthorizedResume() (gas: 599182)
+[PASS] testNoReplayOrNonceSkip() (gas: 1590520)
+[PASS] testOperatorSuspendFailsClosed() (gas: 509970)
+[PASS] testParticipantChangeInvalidatesPendingCommit() (gas: 1668470)
+[PASS] testPauseBlocksFundingButAllowsWithdrawal() (gas: 1041416)
+[PASS] testProofGateStagesAndTranscriptBinding() (gas: 2598882)
+[PASS] testRejectInvalidConfigurationAndUnauthorizedVersionSubstitution() (gas: 143950)
+[PASS] testRevokedAuthorizationDoesNotCreateChips() (gas: 660529)
+[PASS] testRevokedProviderCannotSubmitEvenAValidProof() (gas: 2243997)
+[PASS] testRevokedProviderDenied() (gas: 1516562)
+[PASS] testSignedHeadsUpPreflopClosesOnlyAfterBothAct() (gas: 11672384)
+[PASS] testSitOutAndUnauthorizedWithdrawalRejection() (gas: 1075292)
+[PASS] testSoleGovernanceAndProviderEvidenceFailClosed() (gas: 2466315)
+[PASS] testTopUpAndWithdrawExactlyOnce() (gas: 1161258)
+[PASS] testTwoProviderCommitNoPlaintextCards() (gas: 1834215)
+[PASS] testUnattestedCommonControlOrRevocationBlocksBothStages() (gas: 2859346)
+[PASS] testUnauthorizedAndCapabilityRevocation() (gas: 513841)
+[PASS] testUnauthorizedAndDuplicateCommitRejected() (gas: 1737376)
+[PASS] testWithheldCommitExpiresWithoutSettlingFunds() (gas: 1688649)
+Suite result: ok. 34 passed; 0 failed; 0 skipped; finished in 34.13ms (28.66ms CPU time)
+
+Ran 34 tests for test/BetPokerNLHEBetting54.t.sol:PokerNLHEBetting54Case6Test
+[PASS] testCannotSkipStageOrSwapProvider() (gas: 2243987)
+[PASS] testCanonicalConfigurationAndImmutableCommitment() (gas: 473274)
+[PASS] testCompleteLifecycleAndTerminalClosure() (gas: 700927)
+[PASS] testDuplicateSeatAndBadSeatRejected() (gas: 1078716)
+[PASS] testEmergencyBlocksBegin() (gas: 1184789)
+[PASS] testEmergencyBlocksNewBuyInsButPreservesExit() (gas: 1059279)
+[PASS] testEmergencyBlocksNewTablesAndReopeningButAllowsClose() (gas: 694947)
+[PASS] testExpiredAttestationBlocksStage() (gas: 2438594)
+[PASS] testForgedSnapshotRejected() (gas: 1128112)
+[PASS] testFundedBuyInAndExactChipConservation() (gas: 799285)
+[PASS] testIdenticalCommitmentsRejectedInEitherArrivalOrder() (gas: 1711052)
+[PASS] testInvalidBuyInAndOverCapRejected() (gas: 983934)
+[PASS] testInvalidProofAndWrongRootRejected() (gas: 2286530)
+[PASS] testInvalidSeatsAndNoOnePlayerHands() (gas: 962543)
+[PASS] testMissingPublicCiphertextDataBlocksBothStages() (gas: 2216757)
+[PASS] testNoPrematureOpenAndNoUnauthorizedResume() (gas: 599182)
+[PASS] testNoReplayOrNonceSkip() (gas: 1590520)
+[PASS] testOperatorSuspendFailsClosed() (gas: 509970)
+[PASS] testParticipantChangeInvalidatesPendingCommit() (gas: 1668492)
+[PASS] testPauseBlocksFundingButAllowsWithdrawal() (gas: 1041438)
+[PASS] testProofGateStagesAndTranscriptBinding() (gas: 2598904)
+[PASS] testRejectInvalidConfigurationAndUnauthorizedVersionSubstitution() (gas: 143950)
+[PASS] testRevokedAuthorizationDoesNotCreateChips() (gas: 660551)
+[PASS] testRevokedProviderCannotSubmitEvenAValidProof() (gas: 2244019)
+[PASS] testRevokedProviderDenied() (gas: 1516584)
+[PASS] testSitOutAndUnauthorizedWithdrawalRejection() (gas: 1075292)
+[PASS] testSoleGovernanceAndProviderEvidenceFailClosed() (gas: 2466315)
+[PASS] testTopUpAndWithdrawExactlyOnce() (gas: 1161280)
+[PASS] testTwoProviderCommitNoPlaintextCards() (gas: 1834076)
+[PASS] testUnattestedCommonControlOrRevocationBlocksBothStages() (gas: 2859346)
+[PASS] testUnauthorizedAndCapabilityRevocation() (gas: 513841)
+[PASS] testUnauthorizedAndDuplicateCommitRejected() (gas: 1737398)
+[PASS] testVerifiedDeliveryCannotBeReboundAfterRecipientKeyRotation() (gas: 10806389)
+[PASS] testWithheldCommitExpiresWithoutSettlingFunds() (gas: 1688598)
+Suite result: ok. 34 passed; 0 failed; 0 skipped; finished in 35.67ms (30.04ms CPU time)
+
+Ran 34 tests for test/BetPokerNLHEBetting54.t.sol:PokerNLHEBetting54Case3Test
+[PASS] testCannotSkipStageOrSwapProvider() (gas: 2243965)
+[PASS] testCanonicalConfigurationAndImmutableCommitment() (gas: 473301)
+[PASS] testCompleteLifecycleAndTerminalClosure() (gas: 700954)
+[PASS] testDuplicateSeatAndBadSeatRejected() (gas: 1078694)
+[PASS] testEmergencyBlocksBegin() (gas: 1184767)
+[PASS] testEmergencyBlocksNewBuyInsButPreservesExit() (gas: 1059279)
+[PASS] testEmergencyBlocksNewTablesAndReopeningButAllowsClose() (gas: 694947)
+[PASS] testExpiredAttestationBlocksStage() (gas: 2438572)
+[PASS] testForgedSnapshotRejected() (gas: 1128112)
+[PASS] testFundedBuyInAndExactChipConservation() (gas: 799262)
+[PASS] testIdenticalCommitmentsRejectedInEitherArrivalOrder() (gas: 1711030)
+[PASS] testInvalidBuyInAndOverCapRejected() (gas: 983912)
+[PASS] testInvalidProofAndWrongRootRejected() (gas: 2286507)
+[PASS] testInvalidSeatsAndNoOnePlayerHands() (gas: 962521)
+[PASS] testInvalidSignedCallAndWrongTurnCannotMutateTranscript() (gas: 11159232)
+[PASS] testMissingPublicCiphertextDataBlocksBothStages() (gas: 2216735)
+[PASS] testNoPrematureOpenAndNoUnauthorizedResume() (gas: 599182)
+[PASS] testNoReplayOrNonceSkip() (gas: 1590498)
+[PASS] testOperatorSuspendFailsClosed() (gas: 509970)
+[PASS] testParticipantChangeInvalidatesPendingCommit() (gas: 1668470)
+[PASS] testPauseBlocksFundingButAllowsWithdrawal() (gas: 1041416)
+[PASS] testProofGateStagesAndTranscriptBinding() (gas: 2598882)
+[PASS] testRejectInvalidConfigurationAndUnauthorizedVersionSubstitution() (gas: 143950)
+[PASS] testRevokedAuthorizationDoesNotCreateChips() (gas: 660529)
+[PASS] testRevokedProviderCannotSubmitEvenAValidProof() (gas: 2243997)
+[PASS] testRevokedProviderDenied() (gas: 1516562)
+[PASS] testSitOutAndUnauthorizedWithdrawalRejection() (gas: 1075292)
+[PASS] testSoleGovernanceAndProviderEvidenceFailClosed() (gas: 2466298)
+[PASS] testTopUpAndWithdrawExactlyOnce() (gas: 1161258)
+[PASS] testTwoProviderCommitNoPlaintextCards() (gas: 1834215)
+[PASS] testUnattestedCommonControlOrRevocationBlocksBothStages() (gas: 2859324)
+[PASS] testUnauthorizedAndCapabilityRevocation() (gas: 513841)
+[PASS] testUnauthorizedAndDuplicateCommitRejected() (gas: 1737376)
+[PASS] testWithheldCommitExpiresWithoutSettlingFunds() (gas: 1688649)
+Suite result: ok. 34 passed; 0 failed; 0 skipped; finished in 35.16ms (29.31ms CPU time)
+
+Ran 34 tests for test/BetPokerNLHEBetting54.t.sol:PokerNLHEBetting54Case2Test
+[PASS] testCannotSkipStageOrSwapProvider() (gas: 2243965)
+[PASS] testCanonicalConfigurationAndImmutableCommitment() (gas: 473301)
+[PASS] testCompleteLifecycleAndTerminalClosure() (gas: 700954)
+[PASS] testDuplicateSeatAndBadSeatRejected() (gas: 1078694)
+[PASS] testEmergencyBlocksBegin() (gas: 1184767)
+[PASS] testEmergencyBlocksNewBuyInsButPreservesExit() (gas: 1059279)
+[PASS] testEmergencyBlocksNewTablesAndReopeningButAllowsClose() (gas: 694947)
+[PASS] testExpiredAttestationBlocksStage() (gas: 2438572)
+[PASS] testForgedSnapshotRejected() (gas: 1128112)
+[PASS] testFundedBuyInAndExactChipConservation() (gas: 799262)
+[PASS] testIdenticalCommitmentsRejectedInEitherArrivalOrder() (gas: 1711030)
+[PASS] testInvalidBuyInAndOverCapRejected() (gas: 983912)
+[PASS] testInvalidProofAndWrongRootRejected() (gas: 2286507)
+[PASS] testInvalidSeatsAndNoOnePlayerHands() (gas: 962521)
+[PASS] testMissingPublicCiphertextDataBlocksBothStages() (gas: 2216735)
+[PASS] testNoPrematureOpenAndNoUnauthorizedResume() (gas: 599182)
+[PASS] testNoReplayOrNonceSkip() (gas: 1590498)
+[PASS] testOperatorSuspendFailsClosed() (gas: 509970)
+[PASS] testParticipantChangeInvalidatesPendingCommit() (gas: 1668470)
+[PASS] testPauseBlocksFundingButAllowsWithdrawal() (gas: 1041416)
+[PASS] testProofGateStagesAndTranscriptBinding() (gas: 2598882)
+[PASS] testRejectInvalidConfigurationAndUnauthorizedVersionSubstitution() (gas: 143950)
+[PASS] testRevokedAuthorizationDoesNotCreateChips() (gas: 660529)
+[PASS] testRevokedProviderCannotSubmitEvenAValidProof() (gas: 2243997)
+[PASS] testRevokedProviderDenied() (gas: 1516562)
+[PASS] testSitOutAndUnauthorizedWithdrawalRejection() (gas: 1075292)
+[PASS] testSoleGovernanceAndProviderEvidenceFailClosed() (gas: 2466315)
+[PASS] testTimeoutFoldsOnlyPlayerFacingLiveBet() (gas: 11023868)
+[PASS] testTopUpAndWithdrawExactlyOnce() (gas: 1161258)
+[PASS] testTwoProviderCommitNoPlaintextCards() (gas: 1834054)
+[PASS] testUnattestedCommonControlOrRevocationBlocksBothStages() (gas: 2859324)
+[PASS] testUnauthorizedAndCapabilityRevocation() (gas: 513841)
+[PASS] testUnauthorizedAndDuplicateCommitRejected() (gas: 1737376)
+[PASS] testWithheldCommitExpiresWithoutSettlingFunds() (gas: 1688576)
+Suite result: ok. 34 passed; 0 failed; 0 skipped; finished in 32.14ms (27.27ms CPU time)
+
+Ran 35 tests for test/BetPokerNLHEBetting54.t.sol:PokerNLHEBetting54WS3AdversarialTest
+[PASS] testCannotSkipStageOrSwapProvider() (gas: 2243987)
+[PASS] testCanonicalConfigurationAndImmutableCommitment() (gas: 473301)
+[PASS] testCompleteLifecycleAndTerminalClosure() (gas: 700976)
+[PASS] testDuplicateRecipientSecretAndWrongSeatKeyRejected() (gas: 4604469)
+[PASS] testDuplicateSeatAndBadSeatRejected() (gas: 1078716)
+[PASS] testEmergencyBlocksBegin() (gas: 1184789)
+[PASS] testEmergencyBlocksNewBuyInsButPreservesExit() (gas: 1059279)
+[PASS] testEmergencyBlocksNewTablesAndReopeningButAllowsClose() (gas: 694947)
+[PASS] testExpiredAttestationBlocksStage() (gas: 2438594)
+[PASS] testForgedSnapshotRejected() (gas: 1128112)
+[PASS] testFundedBuyInAndExactChipConservation() (gas: 799285)
+[PASS] testIdenticalCommitmentsRejectedInEitherArrivalOrder() (gas: 1711052)
+[PASS] testInvalidBuyInAndOverCapRejected() (gas: 983934)
+[PASS] testInvalidProofAndWrongRootRejected() (gas: 2286530)
+[PASS] testInvalidSeatsAndNoOnePlayerHands() (gas: 962543)
+[PASS] testMissingPublicCiphertextDataBlocksBothStages() (gas: 2216757)
+[PASS] testNoPrematureOpenAndNoUnauthorizedResume() (gas: 599182)
+[PASS] testNoReplayOrNonceSkip() (gas: 1590520)
+[PASS] testOperatorSuspendFailsClosed() (gas: 509970)
+[PASS] testParticipantChangeInvalidatesPendingCommit() (gas: 1668492)
+[PASS] testPauseBlocksFundingButAllowsWithdrawal() (gas: 1041438)
+[PASS] testProofGateStagesAndTranscriptBinding() (gas: 2598904)
+[PASS] testProviderAuthenticationMissingShareAndPrematureBettingRejected() (gas: 11739764)
+[PASS] testRejectInvalidConfigurationAndUnauthorizedVersionSubstitution() (gas: 143972)
+[PASS] testRevokedAuthorizationDoesNotCreateChips() (gas: 660551)
+[PASS] testRevokedProviderCannotSubmitEvenAValidProof() (gas: 2244019)
+[PASS] testRevokedProviderDenied() (gas: 1516584)
+[PASS] testSitOutAndUnauthorizedWithdrawalRejection() (gas: 1075292)
+[PASS] testSoleGovernanceAndProviderEvidenceFailClosed() (gas: 2466337)
+[PASS] testTopUpAndWithdrawExactlyOnce() (gas: 1161280)
+[PASS] testTwoProviderCommitNoPlaintextCards() (gas: 1834076)
+[PASS] testUnattestedCommonControlOrRevocationBlocksBothStages() (gas: 2859346)
+[PASS] testUnauthorizedAndCapabilityRevocation() (gas: 513841)
+[PASS] testUnauthorizedAndDuplicateCommitRejected() (gas: 1737398)
+[PASS] testWithheldCommitExpiresWithoutSettlingFunds() (gas: 1688598)
+Suite result: ok. 35 passed; 0 failed; 0 skipped; finished in 37.11ms (32.09ms CPU time)
+
+Ran 34 tests for test/BetPokerNLHEBetting54.t.sol:PokerNLHEBetting54Case10Test
+[PASS] testCannotSkipStageOrSwapProvider() (gas: 2243965)
+[PASS] testCanonicalConfigurationAndImmutableCommitment() (gas: 473301)
+[PASS] testCompleteLifecycleAndTerminalClosure() (gas: 700954)
+[PASS] testDuplicateSeatAndBadSeatRejected() (gas: 1078694)
+[PASS] testEmergencyBlocksBegin() (gas: 1184767)
+[PASS] testEmergencyBlocksNewBuyInsButPreservesExit() (gas: 1059279)
+[PASS] testEmergencyBlocksNewTablesAndReopeningButAllowsClose() (gas: 694947)
+[PASS] testExpiredAttestationBlocksStage() (gas: 2438572)
+[PASS] testForgedSnapshotRejected() (gas: 1128112)
+[PASS] testFundedBuyInAndExactChipConservation() (gas: 799262)
+[PASS] testIdenticalCommitmentsRejectedInEitherArrivalOrder() (gas: 1711030)
+[PASS] testInvalidBuyInAndOverCapRejected() (gas: 983912)
+[PASS] testInvalidProofAndWrongRootRejected() (gas: 2286508)
+[PASS] testInvalidSeatsAndNoOnePlayerHands() (gas: 962521)
+[PASS] testMissingPublicCiphertextDataBlocksBothStages() (gas: 2216735)
+[PASS] testNoPrematureOpenAndNoUnauthorizedResume() (gas: 599182)
+[PASS] testNoReplayOrNonceSkip() (gas: 1590498)
+[PASS] testOperatorSuspendFailsClosed() (gas: 509970)
+[PASS] testParticipantChangeInvalidatesPendingCommit() (gas: 1668470)
+[PASS] testPauseBlocksFundingButAllowsWithdrawal() (gas: 1041416)
+[PASS] testProofGateStagesAndTranscriptBinding() (gas: 2598882)
+[PASS] testRejectInvalidConfigurationAndUnauthorizedVersionSubstitution() (gas: 143950)
+[PASS] testRevokedAuthorizationDoesNotCreateChips() (gas: 660529)
+[PASS] testRevokedProviderCannotSubmitEvenAValidProof() (gas: 2243997)
+[PASS] testRevokedProviderDenied() (gas: 1516562)
+[PASS] testSitOutAndUnauthorizedWithdrawalRejection() (gas: 1075292)
+[PASS] testSoleGovernanceAndProviderEvidenceFailClosed() (gas: 2466315)
+[PASS] testTopUpAndWithdrawExactlyOnce() (gas: 1161258)
+[PASS] testTwoProviderCommitNoPlaintextCards() (gas: 1834054)
+[PASS] testUnacknowledgedHoleDeliveryCannotStartOrMoveEscrow() (gas: 10938242)
+[PASS] testUnattestedCommonControlOrRevocationBlocksBothStages() (gas: 2859324)
+[PASS] testUnauthorizedAndCapabilityRevocation() (gas: 513841)
+[PASS] testUnauthorizedAndDuplicateCommitRejected() (gas: 1737376)
+[PASS] testWithheldCommitExpiresWithoutSettlingFunds() (gas: 1688576)
+Suite result: ok. 34 passed; 0 failed; 0 skipped; finished in 29.85ms (27.21ms CPU time)
+
+Ran 35 tests for test/BetPokerNLHEBetting54.t.sol:PokerNLHEBetting54Case8Test
+[PASS] testCannotSkipStageOrSwapProvider() (gas: 2243987)
+[PASS] testCanonicalConfigurationAndImmutableCommitment() (gas: 473301)
+[PASS] testCompleteLifecycleAndTerminalClosure() (gas: 700976)
+[PASS] testDuplicateSeatAndBadSeatRejected() (gas: 1078716)
+[PASS] testEmergencyBlocksBegin() (gas: 1184789)
+[PASS] testEmergencyBlocksNewBuyInsButPreservesExit() (gas: 1059279)
+[PASS] testEmergencyBlocksNewTablesAndReopeningButAllowsClose() (gas: 694947)
+[PASS] testExpiredAttestationBlocksStage() (gas: 2438594)
+[PASS] testForgedSnapshotRejected() (gas: 1128112)
+[PASS] testFundedBuyInAndExactChipConservation() (gas: 799284)
+[PASS] testFundedSnapshotAndEvidenceDeadlineCannotDriftAfterProofWithheld() (gas: 12152487)
+[PASS] testIdenticalCommitmentsRejectedInEitherArrivalOrder() (gas: 1711052)
+[PASS] testInvalidBuyInAndOverCapRejected() (gas: 983934)
+[PASS] testInvalidProofAndWrongRootRejected() (gas: 2286530)
+[PASS] testInvalidSeatsAndNoOnePlayerHands() (gas: 962543)
+[PASS] testMissingPublicCiphertextDataBlocksBothStages() (gas: 2216757)
+[PASS] testNoPrematureOpenAndNoUnauthorizedResume() (gas: 599182)
+[PASS] testNoReplayOrNonceSkip() (gas: 1590520)
+[PASS] testOperatorSuspendFailsClosed() (gas: 509970)
+[PASS] testParticipantChangeInvalidatesPendingCommit() (gas: 1668492)
+[PASS] testPauseBlocksFundingButAllowsWithdrawal() (gas: 1041438)
+[PASS] testPostBettingMissingFlopProofRecoversOriginalEscrowExactlyOnce() (gas: 12223397)
+[PASS] testProofGateStagesAndTranscriptBinding() (gas: 2598904)
+[PASS] testRejectInvalidConfigurationAndUnauthorizedVersionSubstitution() (gas: 143972)
+[PASS] testRevokedAuthorizationDoesNotCreateChips() (gas: 660551)
+[PASS] testRevokedProviderCannotSubmitEvenAValidProof() (gas: 2244019)
+[PASS] testRevokedProviderDenied() (gas: 1516584)
+[PASS] testSitOutAndUnauthorizedWithdrawalRejection() (gas: 1075292)
+[PASS] testSoleGovernanceAndProviderEvidenceFailClosed() (gas: 2466337)
+[PASS] testTopUpAndWithdrawExactlyOnce() (gas: 1161280)
+[PASS] testTwoProviderCommitNoPlaintextCards() (gas: 1834237)
+[PASS] testUnattestedCommonControlOrRevocationBlocksBothStages() (gas: 2859346)
+[PASS] testUnauthorizedAndCapabilityRevocation() (gas: 513841)
+[PASS] testUnauthorizedAndDuplicateCommitRejected() (gas: 1737398)
+[PASS] testWithheldCommitExpiresWithoutSettlingFunds() (gas: 1688671)
+Suite result: ok. 35 passed; 0 failed; 0 skipped; finished in 42.10ms (37.13ms CPU time)
+
+Ran 33 tests for test/BetPokerNLHEBetting54.t.sol:PokerNLHEBetting54Fixture
+[PASS] testCannotSkipStageOrSwapProvider() (gas: 2243965)
+[PASS] testCanonicalConfigurationAndImmutableCommitment() (gas: 473286)
+[PASS] testCompleteLifecycleAndTerminalClosure() (gas: 700939)
+[PASS] testDuplicateSeatAndBadSeatRejected() (gas: 1078694)
+[PASS] testEmergencyBlocksBegin() (gas: 1184767)
+[PASS] testEmergencyBlocksNewBuyInsButPreservesExit() (gas: 1059279)
+[PASS] testEmergencyBlocksNewTablesAndReopeningButAllowsClose() (gas: 694947)
+[PASS] testExpiredAttestationBlocksStage() (gas: 2438572)
+[PASS] testForgedSnapshotRejected() (gas: 1128112)
+[PASS] testFundedBuyInAndExactChipConservation() (gas: 799263)
+[PASS] testIdenticalCommitmentsRejectedInEitherArrivalOrder() (gas: 1711030)
+[PASS] testInvalidBuyInAndOverCapRejected() (gas: 983912)
+[PASS] testInvalidProofAndWrongRootRejected() (gas: 2286508)
+[PASS] testInvalidSeatsAndNoOnePlayerHands() (gas: 962521)
+[PASS] testMissingPublicCiphertextDataBlocksBothStages() (gas: 2216735)
+[PASS] testNoPrematureOpenAndNoUnauthorizedResume() (gas: 599182)
+[PASS] testNoReplayOrNonceSkip() (gas: 1590498)
+[PASS] testOperatorSuspendFailsClosed() (gas: 509970)
+[PASS] testParticipantChangeInvalidatesPendingCommit() (gas: 1668470)
+[PASS] testPauseBlocksFundingButAllowsWithdrawal() (gas: 1041416)
+[PASS] testProofGateStagesAndTranscriptBinding() (gas: 2598882)
+[PASS] testRejectInvalidConfigurationAndUnauthorizedVersionSubstitution() (gas: 143950)
+[PASS] testRevokedAuthorizationDoesNotCreateChips() (gas: 660529)
+[PASS] testRevokedProviderCannotSubmitEvenAValidProof() (gas: 2243997)
+[PASS] testRevokedProviderDenied() (gas: 1516562)
+[PASS] testSitOutAndUnauthorizedWithdrawalRejection() (gas: 1075292)
+[PASS] testSoleGovernanceAndProviderEvidenceFailClosed() (gas: 2466293)
+[PASS] testTopUpAndWithdrawExactlyOnce() (gas: 1161258)
+[PASS] testTwoProviderCommitNoPlaintextCards() (gas: 1834054)
+[PASS] testUnattestedCommonControlOrRevocationBlocksBothStages() (gas: 2859324)
+[PASS] testUnauthorizedAndCapabilityRevocation() (gas: 513841)
+[PASS] testUnauthorizedAndDuplicateCommitRejected() (gas: 1737376)
+[PASS] testWithheldCommitExpiresWithoutSettlingFunds() (gas: 1688576)
+Suite result: ok. 33 passed; 0 failed; 0 skipped; finished in 37.74ms (21.66ms CPU time)
+
+Ran 38 tests for test/BetPokerNLHEBetting54.t.sol:PokerNLHEBetting54Case9Test
+[PASS] testCannotSkipStageOrSwapProvider() (gas: 2243987)
+[PASS] testCanonicalConfigurationAndImmutableCommitment() (gas: 473296)
+[PASS] testCompleteLifecycleAndTerminalClosure() (gas: 700949)
+[PASS] testCompletedShuffleButMissingProvedDeliveryVoidsPreBetting() (gas: 4368174)
+[PASS] testDisputedPreplayWithholdingConsumesBoundedAppealAndCannotFreezeRefundedEscrow() (gas: 4869079)
+[PASS] testDuplicateSeatAndBadSeatRejected() (gas: 1078738)
+[PASS] testEmergencyBlocksBegin() (gas: 1184789)
+[PASS] testEmergencyBlocksNewBuyInsButPreservesExit() (gas: 1059301)
+[PASS] testEmergencyBlocksNewTablesAndReopeningButAllowsClose() (gas: 694969)
+[PASS] testExpiredAttestationBlocksStage() (gas: 2438616)
+[PASS] testForgedSnapshotRejected() (gas: 1128134)
+[PASS] testFundedBuyInAndExactChipConservation() (gas: 799328)
+[PASS] testIdenticalCommitmentsRejectedInEitherArrivalOrder() (gas: 1711074)
+[PASS] testInvalidBuyInAndOverCapRejected() (gas: 983934)
+[PASS] testInvalidProofAndWrongRootRejected() (gas: 2286552)
+[PASS] testInvalidSeatsAndNoOnePlayerHands() (gas: 962587)
+[PASS] testMaliciousAccusationCannotSlashTwoProvidersWithCompleteProvedShares() (gas: 8641186)
+[PASS] testMissingPublicCiphertextDataBlocksBothStages() (gas: 2216779)
+[PASS] testNoPrematureOpenAndNoUnauthorizedResume() (gas: 599182)
+[PASS] testNoReplayOrNonceSkip() (gas: 1590542)
+[PASS] testOnlyWithholdingProviderAIsSlashedWithoutTouchingPlayerEscrow() (gas: 7142646)
+[PASS] testOnlyWithholdingProviderBIsSlashedWithoutTouchingPlayerEscrow() (gas: 7077341)
+[PASS] testOperatorSuspendFailsClosed() (gas: 509992)
+[PASS] testParticipantChangeInvalidatesPendingCommit() (gas: 1668492)
+[PASS] testPauseBlocksFundingButAllowsWithdrawal() (gas: 1041438)
+[PASS] testProofGateStagesAndTranscriptBinding() (gas: 2598904)
+[PASS] testRejectInvalidConfigurationAndUnauthorizedVersionSubstitution() (gas: 143972)
+[PASS] testRevokedAuthorizationDoesNotCreateChips() (gas: 660551)
+[PASS] testRevokedProviderCannotSubmitEvenAValidProof() (gas: 2244019)
+[PASS] testRevokedProviderDenied() (gas: 1516606)
+[PASS] testSitOutAndUnauthorizedWithdrawalRejection() (gas: 1075314)
+[PASS] testSoleGovernanceAndProviderEvidenceFailClosed() (gas: 2466386)
+[PASS] testTopUpAndWithdrawExactlyOnce() (gas: 1161280)
+[PASS] testTwoProviderCommitNoPlaintextCards() (gas: 1834098)
+[PASS] testUnattestedCommonControlOrRevocationBlocksBothStages() (gas: 2859390)
+[PASS] testUnauthorizedAndCapabilityRevocation() (gas: 514159)
+[PASS] testUnauthorizedAndDuplicateCommitRejected() (gas: 1737398)
+[PASS] testWithheldCommitExpiresWithoutSettlingFunds() (gas: 1688598)
+Suite result: ok. 38 passed; 0 failed; 0 skipped; finished in 67.42ms (37.66ms CPU time)
+
+Ran 45 tests for test/BetPokerRecovery54.t.sol:PokerWS5Recovery54Test
+[PASS] testCannotBindForeignEngineAsCanonicalLiveReveal() (gas: 10818641)
+[PASS] testCannotSkipStageOrSwapProvider() (gas: 2244031)
+[PASS] testCanonicalConfigurationAndImmutableCommitment() (gas: 473301)
+[PASS] testCanonicalFlopTurnRiverShowdownProgressionWithNoFutureOrHoleLeaks() (gas: 21512861)
+[PASS] testCompleteLifecycleAndTerminalClosure() (gas: 700998)
+[PASS] testDuplicateAndInvalidThresholdSharesCannotOpenBoard() (gas: 12285918)
+[PASS] testDuplicateCardsAcrossBoardAreRejected() (gas: 12857063)
+[PASS] testDuplicateSeatAndBadSeatRejected() (gas: 1078826)
+[PASS] testEmergencyBlocksBegin() (gas: 1184855)
+[PASS] testEmergencyBlocksNewBuyInsButPreservesExit() (gas: 1059323)
+[PASS] testEmergencyBlocksNewTablesAndReopeningButAllowsClose() (gas: 694991)
+[PASS] testExpiredAttestationBlocksStage() (gas: 2438704)
+[PASS] testForgedSnapshotRejected() (gas: 1128156)
+[PASS] testFundedBuyInAndExactChipConservation() (gas: 799416)
+[PASS] testFutureStreetsAndMissingSharesFailClosed() (gas: 12224507)
+[PASS] testGenuineLateStreetCorrectionAllowsNextStageRecoveryAndRefund() (gas: 15516794)
+[PASS] testHoleCardsNeverPubliclyRevealedBeforeShowdown() (gas: 11687903)
+[PASS] testIdenticalCommitmentsRejectedInEitherArrivalOrder() (gas: 1711140)
+[PASS] testInvalidBuyInAndOverCapRejected() (gas: 983978)
+[PASS] testInvalidProofAndWrongRootRejected() (gas: 2286640)
+[PASS] testInvalidPublicShareIsNotEvidenceAndCannotAvoidObjectiveFault() (gas: 12397181)
+[PASS] testInvalidSeatsAndNoOnePlayerHands() (gas: 962675)
+[PASS] testMismatchedProviderCiphertextIsRejected() (gas: 12028131)
+[PASS] testMissingPublicCiphertextDataBlocksBothStages() (gas: 2216845)
+[PASS] testNoPrematureDisclosureAndActualStageProgression() (gas: 14064946)
+[PASS] testNoPrematureOpenAndNoUnauthorizedResume() (gas: 599182)
+[PASS] testNoReplayOrNonceSkip() (gas: 1590630)
+[PASS] testOperatorSuspendFailsClosed() (gas: 510014)
+[PASS] testParticipantChangeInvalidatesPendingCommit() (gas: 1668558)
+[PASS] testPauseBlocksFundingButAllowsWithdrawal() (gas: 1041504)
+[PASS] testProofGateStagesAndTranscriptBinding() (gas: 2598970)
+[PASS] testProviderFaultNotAttributedBeforeAuthorizedReveal() (gas: 13337865)
+[PASS] testRejectInvalidConfigurationAndUnauthorizedVersionSubstitution() (gas: 143994)
+[PASS] testRevokedAuthorizationDoesNotCreateChips() (gas: 660617)
+[PASS] testRevokedProviderCannotSubmitEvenAValidProof() (gas: 2244085)
+[PASS] testRevokedProviderDenied() (gas: 1516672)
+[PASS] testSitOutAndUnauthorizedWithdrawalRejection() (gas: 1075336)
+[PASS] testSoleGovernanceAndProviderEvidenceFailClosed() (gas: 2466518)
+[PASS] testTopUpAndWithdrawExactlyOnce() (gas: 1161368)
+[PASS] testTwoProviderCommitNoPlaintextCards() (gas: 1834347)
+[PASS] testUnattestedCommonControlOrRevocationBlocksBothStages() (gas: 2859478)
+[PASS] testUnauthorizedAndCapabilityRevocation() (gas: 513885)
+[PASS] testUnauthorizedAndDuplicateCommitRejected() (gas: 1737486)
+[PASS] testWithheldCommitExpiresWithoutSettlingFunds() (gas: 1688737)
+[PASS] testWrongProviderCannotSubmitEvenAValidShare() (gas: 11734002)
+Suite result: ok. 45 passed; 0 failed; 0 skipped; finished in 89.98ms (157.44ms CPU time)
+
+Ran 34 tests for test/BetPokerNLHEBetting54.t.sol:PokerNLHEBetting54Case4Test
+[PASS] testCannotSkipStageOrSwapProvider() (gas: 2243965)
+[PASS] testCanonicalConfigurationAndImmutableCommitment() (gas: 473301)
+[PASS] testCompleteLifecycleAndTerminalClosure() (gas: 700954)
+[PASS] testDuplicateSeatAndBadSeatRejected() (gas: 1078716)
+[PASS] testEmergencyBlocksBegin() (gas: 1184767)
+[PASS] testEmergencyBlocksNewBuyInsButPreservesExit() (gas: 1059279)
+[PASS] testEmergencyBlocksNewTablesAndReopeningButAllowsClose() (gas: 694947)
+[PASS] testExpiredAttestationBlocksStage() (gas: 2438594)
+[PASS] testForgedSnapshotRejected() (gas: 1128112)
+[PASS] testFundedBuyInAndExactChipConservation() (gas: 799285)
+[PASS] testIdenticalCommitmentsRejectedInEitherArrivalOrder() (gas: 1711052)
+[PASS] testInvalidBuyInAndOverCapRejected() (gas: 983912)
+[PASS] testInvalidProofAndWrongRootRejected() (gas: 2286530)
+[PASS] testInvalidSeatsAndNoOnePlayerHands() (gas: 962543)
+[PASS] testMissingPublicCiphertextDataBlocksBothStages() (gas: 2216757)
+[PASS] testNoPrematureOpenAndNoUnauthorizedResume() (gas: 599182)
+[PASS] testNoReplayOrNonceSkip() (gas: 1590520)
+[PASS] testOperatorSuspendFailsClosed() (gas: 509970)
+[PASS] testParticipantChangeInvalidatesPendingCommit() (gas: 1668470)
+[PASS] testPauseBlocksFundingButAllowsWithdrawal() (gas: 1041416)
+[PASS] testProofGateStagesAndTranscriptBinding() (gas: 2598882)
+[PASS] testReadOnlySignatureCheckCannotFrontRunCanonicalAction() (gas: 11261266)
+[PASS] testRejectInvalidConfigurationAndUnauthorizedVersionSubstitution() (gas: 143950)
+[PASS] testRevokedAuthorizationDoesNotCreateChips() (gas: 660529)
+[PASS] testRevokedProviderCannotSubmitEvenAValidProof() (gas: 2243997)
+[PASS] testRevokedProviderDenied() (gas: 1516584)
+[PASS] testSitOutAndUnauthorizedWithdrawalRejection() (gas: 1075292)
+[PASS] testSoleGovernanceAndProviderEvidenceFailClosed() (gas: 2466315)
+[PASS] testTopUpAndWithdrawExactlyOnce() (gas: 1161258)
+[PASS] testTwoProviderCommitNoPlaintextCards() (gas: 1834237)
+[PASS] testUnattestedCommonControlOrRevocationBlocksBothStages() (gas: 2859346)
+[PASS] testUnauthorizedAndCapabilityRevocation() (gas: 513841)
+[PASS] testUnauthorizedAndDuplicateCommitRejected() (gas: 1737376)
+[PASS] testWithheldCommitExpiresWithoutSettlingFunds() (gas: 1688649)
+Suite result: ok. 34 passed; 0 failed; 0 skipped; finished in 128.11ms (33.85ms CPU time)
+
+Ran 43 tests for test/BetPokerLiveCardReveals54.t.sol:PokerLiveCardReveals54Test
+[PASS] testCannotBindForeignEngineAsCanonicalLiveReveal() (gas: 10818619)
+[PASS] testCannotSkipStageOrSwapProvider() (gas: 2244031)
+[PASS] testCanonicalConfigurationAndImmutableCommitment() (gas: 473301)
+[PASS] testCanonicalFlopTurnRiverShowdownProgressionWithNoFutureOrHoleLeaks() (gas: 21512801)
+[PASS] testCompleteLifecycleAndTerminalClosure() (gas: 700998)
+[PASS] testDuplicateAndInvalidThresholdSharesCannotOpenBoard() (gas: 12285919)
+[PASS] testDuplicateCardsAcrossBoardAreRejected() (gas: 12857063)
+[PASS] testDuplicateSeatAndBadSeatRejected() (gas: 1078826)
+[PASS] testEmergencyBlocksBegin() (gas: 1184855)
+[PASS] testEmergencyBlocksNewBuyInsButPreservesExit() (gas: 1059323)
+[PASS] testEmergencyBlocksNewTablesAndReopeningButAllowsClose() (gas: 694991)
+[PASS] testExpiredAttestationBlocksStage() (gas: 2438704)
+[PASS] testForgedSnapshotRejected() (gas: 1128156)
+[PASS] testFundedBuyInAndExactChipConservation() (gas: 799417)
+[PASS] testFutureStreetsAndMissingSharesFailClosed() (gas: 12224507)
+[PASS] testHoleCardsNeverPubliclyRevealedBeforeShowdown() (gas: 11687876)
+[PASS] testIdenticalCommitmentsRejectedInEitherArrivalOrder() (gas: 1711140)
+[PASS] testInvalidBuyInAndOverCapRejected() (gas: 983978)
+[PASS] testInvalidProofAndWrongRootRejected() (gas: 2286640)
+[PASS] testInvalidSeatsAndNoOnePlayerHands() (gas: 962675)
+[PASS] testMismatchedProviderCiphertextIsRejected() (gas: 12028131)
+[PASS] testMissingPublicCiphertextDataBlocksBothStages() (gas: 2216845)
+[PASS] testNoPrematureDisclosureAndActualStageProgression() (gas: 14064946)
+[PASS] testNoPrematureOpenAndNoUnauthorizedResume() (gas: 599182)
+[PASS] testNoReplayOrNonceSkip() (gas: 1590630)
+[PASS] testOperatorSuspendFailsClosed() (gas: 510014)
+[PASS] testParticipantChangeInvalidatesPendingCommit() (gas: 1668558)
+[PASS] testPauseBlocksFundingButAllowsWithdrawal() (gas: 1041504)
+[PASS] testProofGateStagesAndTranscriptBinding() (gas: 2598970)
+[PASS] testProviderFaultNotAttributedBeforeAuthorizedReveal() (gas: 13337881)
+[PASS] testRejectInvalidConfigurationAndUnauthorizedVersionSubstitution() (gas: 143994)
+[PASS] testRevokedAuthorizationDoesNotCreateChips() (gas: 660617)
+[PASS] testRevokedProviderCannotSubmitEvenAValidProof() (gas: 2244085)
+[PASS] testRevokedProviderDenied() (gas: 1516672)
+[PASS] testSitOutAndUnauthorizedWithdrawalRejection() (gas: 1075336)
+[PASS] testSoleGovernanceAndProviderEvidenceFailClosed() (gas: 2466496)
+[PASS] testTopUpAndWithdrawExactlyOnce() (gas: 1161368)
+[PASS] testTwoProviderCommitNoPlaintextCards() (gas: 1834347)
+[PASS] testUnattestedCommonControlOrRevocationBlocksBothStages() (gas: 2859478)
+[PASS] testUnauthorizedAndCapabilityRevocation() (gas: 513885)
+[PASS] testUnauthorizedAndDuplicateCommitRejected() (gas: 1737486)
+[PASS] testWithheldCommitExpiresWithoutSettlingFunds() (gas: 1688737)
+[PASS] testWrongProviderCannotSubmitEvenAValidShare() (gas: 11734002)
+Suite result: ok. 43 passed; 0 failed; 0 skipped; finished in 128.30ms (135.55ms CPU time)
+
+Ran 50 tests for test/BetPokerNativeOutcome54.t.sol:PokerNativeOutcome54Test
+[PASS] testCannotBindForeignEngineAsCanonicalLiveReveal() (gas: 10818431)
+[PASS] testCannotSkipStageOrSwapProvider() (gas: 2244075)
+[PASS] testCanonicalConfigurationAndImmutableCommitment() (gas: 473301)
+[PASS] testCanonicalFlopTurnRiverShowdownProgressionWithNoFutureOrHoleLeaks() (gas: 21515680)
+[PASS] testCompleteLifecycleAndTerminalClosure() (gas: 701020)
+[PASS] testDisputedHandAppealDoesNotOverrideVerifiedNativeOutcome() (gas: 15036332)
+[PASS] testDuplicateAndInvalidThresholdSharesCannotOpenBoard() (gas: 12285744)
+[PASS] testDuplicateCardsAcrossBoardAreRejected() (gas: 12856844)
+[PASS] testDuplicateSeatAndBadSeatRejected() (gas: 1078936)
+[PASS] testEmergencyBlocksBegin() (gas: 1184899)
+[PASS] testEmergencyBlocksNewBuyInsButPreservesExit() (gas: 1059323)
+[PASS] testEmergencyBlocksNewTablesAndReopeningButAllowsClose() (gas: 695013)
+[PASS] testExpiredAttestationBlocksStage() (gas: 2438814)
+[PASS] testForgedSnapshotRejected() (gas: 1128178)
+[PASS] testFullProvenShowdownReconstructsCanonicalPayoutAndSealsTranscript() (gas: 25574387)
+[PASS] testFundedBuyInAndExactChipConservation() (gas: 799592)
+[PASS] testFutureStreetsAndMissingSharesFailClosed() (gas: 12224244)
+[PASS] testGovernanceCannotBindForeignEngineOrRevealCalculator() (gas: 10893499)
+[PASS] testHoleCardsNeverPubliclyRevealedBeforeShowdown() (gas: 11687701)
+[PASS] testIdenticalCommitmentsRejectedInEitherArrivalOrder() (gas: 1711250)
+[PASS] testInvalidBuyInAndOverCapRejected() (gas: 984022)
+[PASS] testInvalidProofAndWrongRootRejected() (gas: 2286794)
+[PASS] testInvalidSeatsAndNoOnePlayerHands() (gas: 962829)
+[PASS] testMismatchedProviderCiphertextIsRejected() (gas: 12027956)
+[PASS] testMissingPublicCiphertextDataBlocksBothStages() (gas: 2216933)
+[PASS] testNativeOddChipsAndNineSeatSidePotConservation() (gas: 2430399)
+[PASS] testNativeSidePotsShortAllInAndFoldedSeatCannotWin() (gas: 2339295)
+[PASS] testNoPrematureDisclosureAndActualStageProgression() (gas: 14064661)
+[PASS] testNoPrematureOpenAndNoUnauthorizedResume() (gas: 599182)
+[PASS] testNoReplayOrNonceSkip() (gas: 1590784)
+[PASS] testOnChainUncontestedOutcomeSettlesExactEscrowOnce() (gas: 12580450)
+[PASS] testOperatorSuspendFailsClosed() (gas: 510036)
+[PASS] testParticipantChangeInvalidatesPendingCommit() (gas: 1668602)
+[PASS] testPauseBlocksFundingButAllowsWithdrawal() (gas: 1041548)
+[PASS] testProofGateStagesAndTranscriptBinding() (gas: 2599014)
+[PASS] testProviderFaultNotAttributedBeforeAuthorizedReveal() (gas: 13337552)
+[PASS] testRejectInvalidConfigurationAndUnauthorizedVersionSubstitution() (gas: 144016)
+[PASS] testRevokedAuthorizationDoesNotCreateChips() (gas: 660661)
+[PASS] testRevokedProviderCannotSubmitEvenAValidProof() (gas: 2244151)
+[PASS] testRevokedProviderDenied() (gas: 1516760)
+[PASS] testSitOutAndUnauthorizedWithdrawalRejection() (gas: 1075379)
+[PASS] testSoleGovernanceAndProviderEvidenceFailClosed() (gas: 2466650)
+[PASS] testTableCannotSubstituteRakePolicyAtSettlement() (gas: 11706902)
+[PASS] testTopUpAndWithdrawExactlyOnce() (gas: 1161456)
+[PASS] testTwoProviderCommitNoPlaintextCards() (gas: 1834479)
+[PASS] testUnattestedCommonControlOrRevocationBlocksBothStages() (gas: 2859632)
+[PASS] testUnauthorizedAndCapabilityRevocation() (gas: 513907)
+[PASS] testUnauthorizedAndDuplicateCommitRejected() (gas: 1737574)
+[PASS] testWithheldCommitExpiresWithoutSettlingFunds() (gas: 1688781)
+[PASS] testWrongProviderCannotSubmitEvenAValidShare() (gas: 11733673)
+Suite result: ok. 50 passed; 0 failed; 0 skipped; finished in 91.80ms (201.33ms CPU time)
+
+Ran 16 test suites in 130.67ms (876.89ms CPU time): 585 tests passed, 0 failed, 0 skipped (585 total tests)

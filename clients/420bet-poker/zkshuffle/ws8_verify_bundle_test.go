@@ -1,15 +1,18 @@
 package shuffle
 
 import (
+	"archive/zip"
 	"bytes"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"github.com/consensys/gnark-crypto/ecc"
 	"github.com/consensys/gnark/backend/groth16"
 	"github.com/consensys/gnark/backend/witness"
 	"github.com/consensys/gnark/frontend"
 	"github.com/consensys/gnark/frontend/cs/r1cs"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -20,12 +23,37 @@ import (
 // regenerating valid proof material. Relate every VK to its actual generated
 // Solidity verifier, and every proof's ABI bytes to its actual public witness.
 func TestWS8CommittedCryptographicEvidence(t *testing.T) {
-	verifyCommittedPokerBundle(t, filepath.Join("fixtures", "ws8"))
+	verifyCommittedPokerBundle(t, filepath.Join("fixtures", "ws8"), 41)
 }
 func TestPoker5A7WinnerCommittedCryptographicEvidence(t *testing.T) {
-	verifyCommittedPokerBundle(t, filepath.Join("fixtures", "ws8", "winner"))
+	verifyCommittedPokerBundle(t, filepath.Join("fixtures", "ws8", "winner"), 41)
 }
-func verifyCommittedPokerBundle(t *testing.T, root string) {
+func TestPoker5A10MultiplayerCommittedCryptographicEvidence(t *testing.T) {
+	verifyCommittedPokerBundle(t, filepath.Join("fixtures", "ws8", "multiplayer"), 118)
+}
+func verifyCommittedPokerBundle(t *testing.T, root string, expectedProofs int) {
+	readBundle := func(relative string) ([]byte, error) { return os.ReadFile(filepath.Join(root, relative)) }
+	if expectedProofs == 118 {
+		archive, err := zip.OpenReader(filepath.Join(root, "evidence.zip"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer archive.Close()
+		readBundle = func(relative string) ([]byte, error) {
+			relative = filepath.ToSlash(relative)
+			for _, entry := range archive.File {
+				if entry.Name == relative {
+					f, e := entry.Open()
+					if e != nil {
+						return nil, e
+					}
+					defer f.Close()
+					return io.ReadAll(f)
+				}
+			}
+			return nil, fmt.Errorf("missing archived evidence: %s", relative)
+		}
+	}
 	type keyRecord struct {
 		Name           string `json:"name"`
 		RelationSHA256 string `json:"relationSHA256"`
@@ -38,7 +66,7 @@ func verifyCommittedPokerBundle(t *testing.T, root string) {
 		Keys   []keyRecord   `json:"keys"`
 		Proofs []proofRecord `json:"proofs"`
 	}
-	data, err := os.ReadFile(filepath.Join(root, "manifest.json"))
+	data, err := readBundle("manifest.json")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -48,8 +76,8 @@ func verifyCommittedPokerBundle(t *testing.T, root string) {
 	circuits := map[string]frontend.Circuit{"InitialDeck52": &InitialDeck52{}, "Reencrypt52": &Reencrypt52{},
 		"Delivery": &EncryptedShareDeliveryV1{}, "RecipientPoP": &RecipientKeyPossessionV1{},
 		"Aggregate": &ThresholdKeyAggregateV1{}, "Partial": &PartialDecryptCircuit{}, "Unmask": &CardUnmaskCircuit{}}
-	if len(manifest.Keys) != 7 || len(manifest.Proofs) != 41 {
-		t.Fatal("incomplete seven-key/41-proof evidence")
+	if len(manifest.Keys) != 7 || len(manifest.Proofs) != expectedProofs {
+		t.Fatal("incomplete seven-key/proof-count evidence")
 	}
 	keys := map[string]groth16.VerifyingKey{}
 	for _, record := range manifest.Keys {
@@ -70,7 +98,7 @@ func verifyCommittedPokerBundle(t *testing.T, root string) {
 			t.Fatal(record.Name, "compiled relation differs from proving setup")
 		}
 		vk := groth16.NewVerifyingKey(ecc.BN254)
-		raw, err := os.ReadFile(filepath.Join(root, "keys", record.Name+".vk"))
+		raw, err := readBundle(filepath.Join("keys", record.Name+".vk"))
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -99,7 +127,7 @@ func verifyCommittedPokerBundle(t *testing.T, root string) {
 		seen[record.Name] = true
 		read := func(suffix string) []byte {
 			t.Helper()
-			b, e := os.ReadFile(filepath.Join(root, "proofs", record.Name+suffix))
+			b, e := readBundle(filepath.Join("proofs", record.Name+suffix))
 			if e != nil {
 				t.Fatal(e)
 			}

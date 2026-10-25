@@ -1,4 +1,4 @@
-name: 420Bet Poker 5A.5–5A.9 and WS8 Security Milestone Level 2
+name: 420Bet Poker 5A.5â€“5A.9 and WS8 Security Milestone Level 2
 on:
   pull_request:
     paths:
@@ -10,6 +10,7 @@ on:
       - 'contracts/test/BetPokerShowdown57.t.sol'
       - 'contracts/test/BetPokerPlayerLifecycle58.t.sol'
       - 'contracts/test/BetPokerAbuseProtection59.t.sol'
+      - 'contracts/test/BetPokerMultiplayerSecurity610.t.sol'
       - 'contracts/test/PokerEvaluationVectors56.sol'
       - 'contracts/test/BetPokerNLHEBetting54.t.sol'
       - 'contracts/test/BetPokerNativeOutcome54.t.sol'
@@ -94,6 +95,9 @@ jobs:
         working-directory: contracts
         run: |
           set -euo pipefail
+          forge test --use 0.8.30 --match-contract PokerMultiplayerSecurity610Test --match-test '^(test610|testFuzz610)' --json > ../artifacts/poker-5a5/foundry-610.json
+          forge test --use 0.8.30 --match-contract PokerMultiplayerSecurity610Test --match-test test610GenuineNinePlayerAllInSidePotsAndSettlement -vvvv | tee ../artifacts/poker-5a5/multiplayer-trace.log
+          node ../scripts/bet/verify-poker-5a10-multiplayer.mjs ../artifacts/poker-5a5/multiplayer-trace.log ../artifacts/poker-5a5/multiplayer-replay.json
           forge test --use 0.8.30 --match-contract PokerAbuseProtection59Test --match-test '^test59' --json > ../artifacts/poker-5a5/foundry-59.json
           forge test --use 0.8.30 --match-contract PokerAbuseProtection59Test --match-test test59LegitimateProtectedFundedHandAndGovernedRestriction -vvvv | tee ../artifacts/poker-5a5/abuse-trace.log
           node ../scripts/bet/verify-ws8-transcript.mjs ../artifacts/poker-5a5/abuse-trace.log ../artifacts/poker-5a5/abuse-independent-outcome.json abuse59
@@ -162,6 +166,9 @@ jobs:
           python3 ../../../scripts/bet/package-ws8-evidence.py --verify
           go test -mod=readonly -timeout 10m -count=1 -json -run '^TestWS8CommittedCryptographicEvidence$' . | tee ../../../artifacts/ws8-crypto/go-execution.jsonl
           python3 ../../../scripts/bet/verify-ws8-execution.py go ../../../artifacts/ws8-crypto/go-execution.jsonl ../../../artifacts/ws8-crypto/execution.json
+          python3 ../../../scripts/bet/package-poker-5a10-evidence.py --verify
+          go test -mod=readonly -timeout 10m -count=1 -json -run '^TestPoker5A10MultiplayerCommittedCryptographicEvidence$' . | tee ../../../artifacts/ws8-crypto/multiplayer-go-execution.jsonl
+          python3 ../../../scripts/bet/verify-ws8-execution.py go610 ../../../artifacts/ws8-crypto/multiplayer-go-execution.jsonl ../../../artifacts/ws8-crypto/multiplayer-execution.json
           python3 ../../../scripts/bet/package-poker-5a7-evidence.py --verify
           go test -mod=readonly -timeout 10m -count=1 -json -run '^TestPoker5A7WinnerCommittedCryptographicEvidence$' . | tee ../../../artifacts/ws8-crypto/winner-go-execution.jsonl
           python3 ../../../scripts/bet/verify-ws8-execution.py go57 ../../../artifacts/ws8-crypto/winner-go-execution.jsonl ../../../artifacts/ws8-crypto/winner-execution.json

@@ -1,6 +1,6 @@
 # 5B.1 - Hockey fantasy framework mini-roadmap
 
-Research date: 2026-10-24. Status: proposed architecture and decision roadmap; no runtime implementation or qualification claimed.
+Research began 2026-10-24. Current status: daily NHL contract engine implemented and merged; Sportradar scoring normalization and canonical oracle/scorer integration implemented with scoped Level 1/2 evidence on the testing branch. Other formats remain open. The consolidated specifications and current evidence below supersede older proposed/open decision-log wording for the daily format.
 
 Hockey is the selected starting sport. NHL regular-season hockey is the proposed first coverage boundary. Playoffs, preseason, international competitions and other leagues require explicit coverage and rules versions. Numeric scoring presets below remain discussion candidates.
 
@@ -21,7 +21,13 @@ Rules changes create a new profile version. Existing funded contests retain thei
 
 ## Mini-roadmap inside 5B.1
 
-All rows are OPEN. Completion requires the listed evidence, not a documentation success marker.
+Current scoped status is recorded below; no row is closed for every fantasy format. Daily contract/runtime evidence does not imply an application client, production custodian service or live funded testnet acceptance.
+
+- Daily contract engine: [consolidated rules](BET-FANTASY-CONTEST-ENGINE-V1.md), merged PR #822.
+- Daily scoring/source-to-oracle integration: [implementation and field rules](BET-FANTASY-SPORTRADAR-SCORING-ORACLE.md), exact head `3a4379e6ef76599e35151416403d2978c99c3bf9`, [Level 2 run](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/40166254483); branch reconciliation/merge remains separate.
+- Official deployment and prospective live funded settlement: moved to [420Bet testnet roadmap, TN-FAN-01 through TN-FAN-05](../420BET-TESTNET-WORK-ROADMAP.md#daily-nhl-fantasy--official-testnet-deployment-and-live-settlement-qualification).
+- **Next local development:** confidential lineup custodian service, then daily-pool client/application integration. Build and test these locally before their official-network operational acceptance.
+- After completing the daily application path, continue H07 salary-cap/captain rule decisions and framework work; H08/H09 remain later format tracks.
 
 | ID | Work | Completion evidence |
 |---|---|---|
@@ -30,11 +36,11 @@ All rows are OPEN. Completion requires the listed evidence, not a documentation 
 | 5B.1-H03 | Specify canonical hockey data | Schemas, event transitions, revisions, missing-data handling and replayable normalization fixtures |
 | 5B.1-H04 | Specify scoring profile versions | Captured reference rules, explicit deviations, exact arithmetic and independently calculated example results |
 | 5B.1-H05 | Specify common contest lifecycle | Entry/lock/finality/challenge/settlement/refund transitions, role boundaries and custody invariants |
-| 5B.1-H06 | Daily and single-event framework | Scoring discussion, frozen profile, implemented roster/slate engine and focused qualification |
+| 5B.1-H06 | Daily and single-event framework | Daily contract roster/slate/escrow/scoring/dispute engine implemented and scoped-qualified. Confidential custodian service and daily application/client remain local work; prospective funded deployment/settlement is TN-FAN-01–05. Single-event variant decisions remain open. |
 | 5B.1-H07 | Salary-cap and captain variants | Salary/position/captain decisions, frozen snapshots, implementation and focused qualification |
 | 5B.1-H08 | Season-long framework | Points, H2H and category/roto decisions; draft/waiver/period rules; implementation and focused qualification |
 | 5B.1-H09 | Pick'em framework | Metric/line/void/payout decisions, liability boundaries, implementation and focused qualification |
-| 5B.1-H10 | Oracle and cross-format acceptance | Genuine source adapters, correction/dispute tests, adversarial integration and scoped Level 2 evidence |
+| 5B.1-H10 | Oracle and cross-format acceptance | Daily Sportradar field normalization and canonical oracle/scorer connection implemented and scoped-qualified. Official-network acceptance is TN-FAN-01–05; cross-format integration and independent-source acceptance remain open. |
 
 H01-H05 establish shared contracts and interfaces. H06-H09 each follow: discuss scoring and boundaries, approve a precise version, implement the framework, execute tests, then qualify. Provider evaluation and schema design can proceed alongside format discussions. Live provider and official-chain acceptance belongs in the testnet roadmap; local implementation and replay qualification need not wait for an active testnet.
 
@@ -237,7 +243,7 @@ Daily dispute architecture update: 72-hour resolution deadline after the origina
 
 ## Controller implementation progress
 
-The dispute-controller portion of H10 is implemented with focused native tests; see [Fantasy disputes V1](BET-FANTASY-DISPUTES-V1.md). H10 as a whole remains open: production fantasy host/scoring/payout integration and licensed NHL ingestion are not present. Source precedence is approved: official NHL evidence, then Sportradar, then SportsDataIO, under the documented cutoff, fallback and fail-closed rules. This does not close 5B.1 or qualify full fantasy Level 2.
+Historical status at the dispute-only checkpoint (superseded for daily runtime implementation by the current status above): the dispute controller was implemented first; the integrated daily host/scoring/payout engine and Sportradar source-to-oracle work have since been implemented. H10 remains open for cross-format and official-network acceptance; see [Fantasy disputes V1](BET-FANTASY-DISPUTES-V1.md). Source precedence is approved: official NHL evidence, then Sportradar, then SportsDataIO, under the documented cutoff, fallback and fail-closed rules. This does not close 5B.1 or qualify full fantasy Level 2.
 
 
 Daily monetary rounding approved: floor the 3% development allocation once over gross accepted paid entries; distribute all prize units using exact entitlements, final floor rounding and deterministic residual units by immutable entry ID. Retain upward rounding for challenge bonds. Refund original amounts exactly. Contest-engine implementation and qualification remain open.

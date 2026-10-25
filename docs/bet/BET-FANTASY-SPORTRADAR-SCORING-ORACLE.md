@@ -52,3 +52,7 @@ Production activation, official testnet oracle deployment/keys, confidential lin
 - https://developer.sportradar.com/ice-hockey/reference/nhl-game-summary
 - https://developer.sportradar.com/ice-hockey/reference/nhl-game-time-on-ice
 - https://developer.sportradar.com/getting-started/docs/authentication
+
+## Ownership of the remaining live milestone
+
+Official testnet deployment and prospective funded live settlement qualification are tracked in [420Bet testnet work roadmap, TN-FAN-01–05](../420BET-TESTNET-WORK-ROADMAP.md#daily-nhl-fantasy--official-testnet-deployment-and-live-settlement-qualification). This moves those external/prospective acceptance gates only. Locally executable custodian service, application integration and defect repairs remain development work.

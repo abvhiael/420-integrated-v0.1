@@ -1,4 +1,4 @@
-name: 420Bet Poker 5A.5â€“5A.9 and WS8 Security Milestone Level 2
+name: 420Bet Poker 5A.5-5A.10 and WS8 Security Milestone Level 2
 on:
   pull_request:
     paths:
@@ -91,7 +91,7 @@ jobs:
         run: |
           set -euo pipefail
           node --test --test-reporter=tap clients/420bet-poker/crypto/nlhe-*.test.mjs | tee artifacts/poker-5a5/node.tap
-      - name: Execute 5A.5 kernel and genuine funded-hand owners
+      - name: Execute 5A.5 through 5A.10 mandatory native owners
         working-directory: contracts
         run: |
           set -euo pipefail
@@ -158,7 +158,7 @@ jobs:
         with:
           go-version: '1.24'
           cache: false
-      - name: Verify actual compiled relations, VK-generated Solidity and all 41 genuine proofs
+      - name: Verify actual compiled relations, VK-generated Solidity and all 200 genuine proofs
         working-directory: clients/420bet-poker/zkshuffle
         run: |
           set -euo pipefail

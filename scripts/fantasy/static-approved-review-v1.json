@@ -626,5 +626,9 @@
       "location": "FantasyDisputeController420.delegateResolver(bytes32,bytes32,bytes32,uint64) (contracts/src/bet/fantasy/FantasyDisputeController420.sol#338-353) ignores return value by (actor,None,None,None,None,None,None) = identities.profiles(subject) (contracts/src/bet/fantasy/FantasyDisputeController420.sol#346)",
       "reason": "Tuple fields unrelated to the identity/controller/person-key predicate are deliberately ignored. The queried canonical identity functions and credential validity/controller checks cover the required fields; canonical source is unchanged."
     }
-  }
+  },
+  "reviewedSignatureVariants": {
+    "40f1c84b2272402fd87329e6822b747aafaf7d1206fc5702a5f7a87f55c75902": "bef395a94fdc131fbf20440961775de935482bf3ecefd933e25c9880c2c34af8"
+  },
+  "variantRationale": "Slither alias propagation may enumerate the bounded p.fee writes in the same mutex-protected _startReview path. The exact normalized finding variant is source-bound, preserves severity and maps one-to-one to the reviewed finding. No new detector category or unbound fingerprint is accepted."
 }

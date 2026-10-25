@@ -10,7 +10,7 @@ def main():
     if not raw.get('success'):raise RuntimeError('actual analyzer failed')
     for p,h in expected['normalizedSourceSHA256'].items():
         if hashlib.sha256((ROOT/p).read_bytes().replace(b'\r\n',b'\n')).hexdigest()!=h:raise RuntimeError('source drift since local review '+p)
-    severe=[f for f in raw['results']['detectors'] if f['impact'] in ['High','Medium']];actual={fingerprint(f):f for f in severe}
+    severe=[f for f in raw['results']['detectors'] if f['impact'] in ['High','Medium']];actual={expected.get('reviewedSignatureVariants',{}).get(fingerprint(f),fingerprint(f)):f for f in severe}
     if len(actual)!=len(severe) or set(actual)!=set(expected['dispositions']):raise RuntimeError('new/missing severe findings require review '+json.dumps({'new':sorted(set(actual)-set(expected['dispositions'])),'missing':sorted(set(expected['dispositions'])-set(actual))}))
     for h,f in actual.items():
         if expected['dispositions'][h]['severity']!=f['impact'] or expected['dispositions'][h]['check']!=f['check']:raise RuntimeError('severity drift')

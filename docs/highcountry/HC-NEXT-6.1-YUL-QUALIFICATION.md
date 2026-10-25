@@ -1,6 +1,6 @@
 # HC-NEXT-6.1 — Yul compiler investigation and qualification
 
-Status: **BLOCKED — do not merge**. The compiler fix and affected runtime regressions are qualified (585 poker tests and six land tests passed). The separate FantasyContestEngine420 production size gate fails. This is not a Genesis or phase-wide qualification certificate.
+Status: **Yul qualification retained; subsequent size blocker resolved**. This document records the earlier implementation and failure evidence. The [size-gate closeout](HC-NEXT-6.1-SIZE-GATE-CLOSEOUT.md) records the corrected implementation, passing deployment limits and 80 additional fantasy tests. This is not a Genesis or phase-wide qualification certificate.
 
 ## Exact snapshots
 
@@ -68,7 +68,7 @@ The monolithic affected-test compile also reached the memory ceiling and was sto
 
 The economy-service files are identical to the qualified original PR head, including after main reconciliation. Retain [High Country Land Leases run 40169905502](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/40169905502), job 121098459865, on `cb6f8e38ae6512fc51b0ff19a618e3c2fc6c58da`: canonical land/rent Level 1 **3/3 passed**, affected economy Level 2 **72/72 passed**, zero failures. No redundant economy, global, game or documentation execution is claimed or launched.
 
-## Independent deployment-size blocker
+## Historical deployment-size blocker (resolved)
 
 These commands retain the default size enforcement and original compiler/profile settings. Separate output/cache directories isolate concurrent evidence collection:
 
@@ -89,4 +89,4 @@ The [original Solidity workflow 40169905403](https://github.com/abvhiael/420-int
 
 ## Merge decision
 
-PR #823 remains open and unmerged. The affected runtime qualification has completed successfully. The independent FantasyContestEngine420 size gate must still be resolved and qualified before merge. The Solidity workflow has not been declared green. Skip-CI markers on the reconciliation/evidence commits deliberately avoid unrelated automatic global/game/Docs reruns; the passing historical results are retained only for unchanged dependencies.
+The earlier size blocker is resolved by the [qualified size-gate closeout](HC-NEXT-6.1-SIZE-GATE-CLOSEOUT.md). The 585 poker and six land tests above remain valid; the additional fantasy qualification and exact size contexts are recorded there. No full Solidity workflow rerun is claimed. Skip-CI markers on the reconciliation/evidence commits deliberately avoid unrelated automatic global/game/Docs reruns; the passing historical results are retained only for unchanged dependencies.

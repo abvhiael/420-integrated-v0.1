@@ -1,0 +1,44 @@
+{
+  "qualified_implementation_sha": "25678fff5e7f5d94477d5d122b7d085148dc6861",
+  "base_sha": "2281b7cabaa3d77a2aa2842edf12a365f76fa9a7",
+  "reconciled_main_sha": "1995edc3df97359570e403cc6ab2999928198b33",
+  "runtime_tests": {
+    "suites": 3,
+    "passed": 80,
+    "failed": 0,
+    "skipped": 0,
+    "fuzz_runs": 2500,
+    "previous_entry_points_preserved": 79,
+    "current_entry_points_executed": 80,
+    "previous_assertions_preserved": 61
+  },
+  "size_gate": "PASS in all three shard graphs containing the changed deployables; shard 0 does not contain them",
+  "engine_abi_unchanged": true,
+  "retained": {
+    "poker_passed": 585,
+    "land_passed": 6,
+    "economy_level1_passed": 3,
+    "economy_level2_passed": 72
+  },
+  "source_sha256": {
+    "contracts/src/bet/fantasy/FantasyAdmission420.sol": "77899c8b082bb69e4265a5e3abff4ad738586c2d3eb253b29385c98fa08d4749",
+    "contracts/src/bet/fantasy/FantasyContestEngine420.sol": "baa30f3438ec3939091cc2a41343d59d28a67bf970befb7a9a2c6df76c79f587",
+    "contracts/test/fantasy/FantasyContestEngine420.t.sol": "45df9b49c4c8373be7dd3acb0b251566e59ee0e7692528cb55e39c4786208225"
+  },
+  "file_sha256": {
+    "abi-comparison.json": "96ed438db83182762af3d6f55cac39871d2e358d0384ffe27b8db9526aa6de54",
+    "capture-size-solc.py": "a5292397178434cbbfda428da5f7429cfc4dd774f2c834c58303cd4f08a1562e",
+    "compiler-manifest.json": "cd6bd4ac87af9c7f1ec61a3ef6cf48de8c108e13bb68616cae5b41e5eeff516c",
+    "fantasy-qualification.log": "347bb4a6048997a6ad851ae0c93bc72542fb08ab0e75ae78560f7f7b9378d730",
+    "production-sizes.log": "6dfe5304ca7938958058f9c992b1d015dc80652405cda973d482669470055889",
+    "qualify-size-contexts.py": "4a5c07371770a67a6b7229037b859baaaf508fb5a0c322e047085e2d8722ea49",
+    "retained-evidence.json": "718e91945b1eb0ce5fc2e83de2d970aefef94e51f053deae78ccdcd948a8224e",
+    "shard-1-sizes.json": "dc6510757ccfa36b03a29e93ddf85290844ac842c01e68a36d2ed061d4845f73",
+    "shard-2-sizes.json": "df95d20fed8c14744592f4265d18206b78037128a175ed680e83139f117132fe",
+    "shard-3-sizes.json": "f90d0690570a4a319fc7355f5c80d2f26cd83ccffcb332357e008f99886d23a5",
+    "shard-size-contexts.jsonl": "600993e2f48635132d79325f220123266415cb54da0da12eb6ad8a9e48df1606"
+  },
+  "raw_capture_sha256": {
+    "production-sizes.log": "38a383d5cd045f8c9d98ed4887d98e7b5e7cacbd3685f7cb3a7bbf638522eae3"
+  }
+}

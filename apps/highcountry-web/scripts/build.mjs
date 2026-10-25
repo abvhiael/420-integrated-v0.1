@@ -10,7 +10,7 @@ console.log('High Country static bundle built without substituting runtime value
 const repo=resolve(root,'../..');
 const manifest=await buildScopedA06Manifest(repo);
 if(manifest.totals.invalid)throw Error('a06-invalid-artwork');
-for(const entry of manifest.immediate.filter(x=>x.status==='available')){
+for(const entry of [...manifest.immediate,...manifest.deferred].filter(x=>x.status==='available')){
  const dst=join(dist,entry.path);await mkdir(resolve(dst,'..'),{recursive:true});await cp(join(repo,entry.path),dst);
 }
 const manifestPath=join(dist,'assets/highcountry/original-sixteen/a06-scoped-manifest.json');

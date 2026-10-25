@@ -19,6 +19,14 @@ export async function mountOriginalSixteenGallery({document,main,fetchImpl=fetch
   const art=resolveGalleryArtwork(manifest,id);
   if(art){const img=document.createElement('img');img.src=art;img.alt='Illustrated heritage key art for '+names[i];img.width=240;img.loading='lazy';img.addEventListener('error',()=>{img.replaceWith(document.createTextNode('Illustration unavailable'));});card.append(img);}
   else{const missing=document.createElement('p');missing.textContent='Illustration pending; heritage collection remains accessible without this image.';card.append(missing);}
+  for(const [kind,label] of [['archive-front','Archive Edition front'],['archive-back','Archive Edition back'],['bud-illustration','Heritage bud illustration'],['botanical-plate','Botanical heritage plate']]){
+   const path='assets/highcountry/original-sixteen/'+id+'-'+kind+'.png';
+   const record=manifest.deferred?.find(x=>x.path===path);
+   if(record?.status==='available'&&/^[a-f0-9]{64}$/.test(record.sha256)){
+    const img=document.createElement('img');img.src='/'+path;img.alt=label+' for '+names[i];img.width=240;img.loading='lazy';
+    img.addEventListener('error',()=>img.replaceWith(document.createTextNode(label+' unavailable')));card.append(img);
+   }
+  }
   collection.append(card);
  }
 }

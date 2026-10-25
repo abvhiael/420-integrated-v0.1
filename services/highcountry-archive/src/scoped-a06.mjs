@@ -36,17 +36,18 @@ async function inspect(root,path){
 }
 export async function buildScopedA06Manifest(root){
  const immediate=await Promise.all(immediatePaths.map(path=>inspect(root,path)));
- // Deliberately never read deferred files: entitlement logic and later production are independent.
- const deferred=deferredPaths.map(path=>({path,status:'deferred',reason:'owner-approved-pre-public-release'}));
+ // Inspect optional uploaded archive art without requiring it for reward issuance.
+ const deferred=await Promise.all(deferredPaths.map(path=>inspect(root,path)));
+ for(const item of deferred)if(item.status==='missing'){item.status='deferred';item.reason='asset-not-at-canonical-path';}
  const present=immediate.filter(x=>x.status==='available').length;
  return {schema:'HC.ORIGINAL_SIXTEEN.A06.SCOPED.V1',status:'SCOPED_PARTIAL_NOT_221_CLOSEOUT',
   generatedAt:null,totals:{full:221,immediate:157,deferred:64,available:present,missing:immediate.filter(x=>x.status==='missing').length,invalid:immediate.filter(x=>x.status==='invalid').length},
-  immediate,deferred,qualification:{level:1,fullA06Qualified:false},
+  immediate,deferred,availableDeferred:deferred.filter(x=>x.status==='available').length,qualification:{level:1,fullA06Qualified:false},
   policy:{entitlementsIndependentOfArtwork:true,founderRevelationRetained:true,archiveEditionEntitlementsRetained:true,founderSealsRetained:true,museumEntitlementsRetained:true,masterRewardRetained:true,geneticsUnchanged:true}};
 }
 // Explicit fail-closed lookup: only verified available images are served; the caller may render its existing fallback.
 export function resolveOriginalSixteenArt(manifest,path){
- if(!immediatePaths.includes(path)||manifest?.schema!=='HC.ORIGINAL_SIXTEEN.A06.SCOPED.V1')return null;
- const entry=manifest.immediate?.find(x=>x.path===path);
+ if(![...immediatePaths,...deferredPaths].includes(path)||manifest?.schema!=='HC.ORIGINAL_SIXTEEN.A06.SCOPED.V1')return null;
+ const entry=[...(manifest.immediate??[]),...(manifest.deferred??[])].find(x=>x.path===path);
  return entry?.status==='available'&&/^[a-f0-9]{64}$/.test(entry.sha256)?'/'+path:null;
 }

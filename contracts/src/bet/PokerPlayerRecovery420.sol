@@ -45,9 +45,25 @@ contract PokerPlayerRecovery420 {
         PokerNLHEStorage420.SettlementReceipt receipt;
     }
     error InvalidContext();
+    struct AbuseState {address controls;bytes32 controlsCodeHash;bytes32 policyHash;bytes32 admissionRoot;bool seatEligibleForNextHand;}
     constructor(address engine_){
         if(engine_==address(0)||engine_.code.length==0)revert InvalidContext();
         engine=PokerNLHEBetting420(engine_);ledger=engine.ledger();
+    }
+    /// @notice Additive protection projection. It reads pinned ledger records,
+    /// not a potentially unavailable policy dependency, for the policy identity.
+    function abuseState(bytes32 tableId,address player,bytes32 handId)external view returns(AbuseState memory s){
+        PokerTableRegistry420.Table memory table=ledger.tables().getTable(tableId);
+        if(!table.exists||player==address(0))revert InvalidContext();
+        if(handId==bytes32(0))handId=ledger.activeHand(tableId);
+        if(handId!=bytes32(0)){
+            PokerConfidentialDeal420.Hand memory h=engine.deals().getHand(handId);
+            if(h.tableId!=tableId||h.state<PokerConfidentialDeal420.State.AWAITING)revert InvalidContext();
+        }
+        s.controls=ledger.abuseControls(tableId);s.controlsCodeHash=ledger.abuseControlsCodeHash(tableId);
+        s.policyHash=ledger.abusePolicyHash(tableId);s.admissionRoot=ledger.abuseAdmission(handId);
+        uint8 plusOne=ledger.playerSeatPlusOne(tableId,player);
+        if(plusOne>0)s.seatEligibleForNextHand=ledger.eligibleForNextHand(tableId,plusOne-1);
     }
     /// @dev Read via eth_call at a caller-selected canonical/finalized block.
     /// An explicit hand permits recovery of terminal receipts after cashout.

@@ -1,4 +1,4 @@
-name: 420Bet Poker 5A.5–5A.8 and WS8 Security Milestone Level 2
+name: 420Bet Poker 5A.5–5A.9 and WS8 Security Milestone Level 2
 on:
   pull_request:
     paths:
@@ -9,6 +9,7 @@ on:
       - 'contracts/test/BetPokerEvaluation56.t.sol'
       - 'contracts/test/BetPokerShowdown57.t.sol'
       - 'contracts/test/BetPokerPlayerLifecycle58.t.sol'
+      - 'contracts/test/BetPokerAbuseProtection59.t.sol'
       - 'contracts/test/PokerEvaluationVectors56.sol'
       - 'contracts/test/BetPokerNLHEBetting54.t.sol'
       - 'contracts/test/BetPokerNativeOutcome54.t.sol'
@@ -47,12 +48,12 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p artifacts/poker-5a5-static
-          for target in PokerNativeOutcome420 PokerCanonicalSettlement420 PokerDeliveryProofBook420 PokerPlayerRecovery420; do
+          for target in PokerNativeOutcome420 PokerCanonicalSettlement420 PokerDeliveryProofBook420 PokerPlayerRecovery420 PokerAbuseControls420; do
             slither "contracts/src/bet/$target.sol" --compile-force-framework solc --solc-args '--optimize --optimize-runs 200 --via-ir --evm-version cancun' --json "artifacts/poker-5a5-static/$target.json" > "artifacts/poker-5a5-static/$target.log" 2>&1 || {
               test -s "artifacts/poker-5a5-static/$target.json" || { cat "artifacts/poker-5a5-static/$target.log"; exit 1; }
             }
           done
-          python3 clients/420bet-poker/zkshuffle/triage_slither_poker.py artifacts/poker-5a5-static/PokerNativeOutcome420.json artifacts/poker-5a5-static/PokerCanonicalSettlement420.json artifacts/poker-5a5-static/PokerDeliveryProofBook420.json artifacts/poker-5a5-static/PokerPlayerRecovery420.json artifacts/poker-5a5-static/execution.json
+          python3 clients/420bet-poker/zkshuffle/triage_slither_poker.py artifacts/poker-5a5-static/PokerNativeOutcome420.json artifacts/poker-5a5-static/PokerCanonicalSettlement420.json artifacts/poker-5a5-static/PokerDeliveryProofBook420.json artifacts/poker-5a5-static/PokerPlayerRecovery420.json artifacts/poker-5a5-static/PokerAbuseControls420.json artifacts/poker-5a5-static/execution.json
       - uses: actions/upload-artifact@v4
         with:
           name: poker-5a5-level1-static-execution
@@ -93,6 +94,10 @@ jobs:
         working-directory: contracts
         run: |
           set -euo pipefail
+          forge test --use 0.8.30 --match-contract PokerAbuseProtection59Test --match-test '^test59' --json > ../artifacts/poker-5a5/foundry-59.json
+          forge test --use 0.8.30 --match-contract PokerAbuseProtection59Test --match-test test59LegitimateProtectedFundedHandAndGovernedRestriction -vvvv | tee ../artifacts/poker-5a5/abuse-trace.log
+          node ../scripts/bet/verify-ws8-transcript.mjs ../artifacts/poker-5a5/abuse-trace.log ../artifacts/poker-5a5/abuse-independent-outcome.json abuse59
+          node ../scripts/bet/verify-poker-5a9-abuse.mjs ../artifacts/poker-5a5/abuse-trace.log ../artifacts/poker-5a5/abuse-independent-outcome.json ../artifacts/poker-5a5/abuse-replay.json
           forge test --use 0.8.30 --match-contract PokerPlayerLifecycle58Test --match-test '^test58' --json > ../artifacts/poker-5a5/foundry-58.json
           forge test --use 0.8.30 --match-contract PokerPlayerLifecycle58Test --match-test test58DisconnectedTurnReconnectionAndTimeoutEvidence -vvvv | tee ../artifacts/poker-5a5/lifecycle-trace.log
           node ../scripts/bet/verify-poker-5a8-reconnect.mjs ../artifacts/poker-5a5/lifecycle-trace.log ../artifacts/poker-5a5/lifecycle-replay.json

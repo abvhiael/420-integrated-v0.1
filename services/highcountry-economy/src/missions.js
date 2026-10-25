@@ -90,7 +90,7 @@ export class MissionService {
    if(s.operations.has(operation))throw new SettlementError('replayed operation');
    const key=this._key(principal,id),r=s.missions.get(key);
    if(!r||r.state!=='active'||now>=r.deadline)throw new SettlementError('mission not active');
-   if(s.missionProofs.has(verified.sourceEvent))throw new SettlementError('replayed mission evidence');
+   if(s.missionProofs.has(verified.sourceEvent)||s.discoveryEvents?.has(verified.sourceEvent))throw new SettlementError('replayed mission evidence');
    if(r.progress+amount>def.target)throw new SettlementError('mission progress capped');
    r.progress+=amount;r.proofs.push(verified.sourceEvent);
    s.missionProofs.add(verified.sourceEvent);s.operations.add(operation);

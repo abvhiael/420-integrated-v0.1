@@ -8,6 +8,7 @@ import {createSignedProgressionEvidence} from './signed-progression-evidence.js'
 import {createSignedPlayerLevelProvider} from './signed-player-level.js';
 import {HIGHCOUNTRY_MISSIONS_V1} from './mission-catalog-v1.js';
 import {createSignedMissionEvidence} from './signed-mission-evidence.js';
+import {readFile as readCatalog} from 'node:fs/promises';
 const required=name=>{const x=process.env[name];if(!x)throw Error(name+' required');return x;};
 const config=JSON.parse(await readFile(required('HC_RUNTIME_CONFIG_FILE'),'utf8'));
 const port=Number(required('PORT'));
@@ -39,7 +40,17 @@ try {
    verifyEvidence:createSignedMissionEvidence({publicKey:m.evidencePublicKey,
     issuer:m.evidenceIssuer,gameId:config.authority.gameId,chainId:config.authority.chainId})};
  }
- const runtime=await createRuntime({...config,pool,signerRpc,progression,missions});
+ let discovery;
+ if(config.discovery){
+  const d=config.discovery;
+  const journeys=JSON.parse(await readCatalog(new URL('../../../deployments/highcountry/original-sixteen-discovery-journeys.v1.json',import.meta.url),'utf8'));
+  const canonical=JSON.parse(await readCatalog(new URL('../../../deployments/highcountry/original-sixteen-archive.v1.json',import.meta.url),'utf8'));
+  if(d.catalogVersion!==journeys.schema)throw Error('unapproved discovery version');
+  discovery={journeys,canonical,verifyEvidence:createSignedMissionEvidence({
+   publicKey:d.evidencePublicKey,issuer:d.evidenceIssuer,
+   gameId:config.authority.gameId,chainId:config.authority.chainId})};
+ }
+ const runtime=await createRuntime({...config,pool,signerRpc,progression,missions,discovery});
  const server=runtimeHttpServer(runtime,{origin:config.authority.origin});
  server.listen(port,'0.0.0.0');
  let closing=false;

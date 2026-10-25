@@ -19,7 +19,7 @@ export class DiscoveryIntegration {
    }
   }
  }
- _state(s){s.discoveryFragments??=new Map();s.discoveryEvents??=new Set();s.discoveryEntitlements??=new Map();}
+ _state(s){s.discoveryFragments??=new Map();s.discoveryEvents??=new Set();s.discoveryEntitlements??=new Map();s.discoveryAudit??=new Map();}
  _session(s,token,principal){
   if(typeof this.identity.verifyToken!=='function')return;
   const claim=this.identity.verifyToken(token);
@@ -45,7 +45,8 @@ export class DiscoveryIntegration {
      primary:{type:g.trigger.type,site:g.trigger.site,objectiveId:g.trigger.objectiveId},
      accessible:{type:g.alternate.type,site:g.alternate.site,objectiveId:g.alternate.objectiveId}})),
     revelation:f.final.title,revealed:entitlements.includes(f.final.id)})),
-    master:entitlements.includes('ORIGINAL_SIXTEEN_MASTER'),entitlements};
+    master:entitlements.includes('ORIGINAL_SIXTEEN_MASTER'),entitlements,
+    audit:(s.discoveryAudit.get(principal)??[]).map(a=>({...a}))};
   });
  }
  async ingest(token,operation,objectiveId,evidence){
@@ -66,18 +67,31 @@ export class DiscoveryIntegration {
    if(owned.includes(target.fragment.fragmentId))
     throw new SettlementError('discovery already completed');
    owned.push(target.fragment.fragmentId);s.discoveryFragments.set(principal,owned);
+   const at=this.clock();
+   const audit=s.discoveryAudit.get(principal)??[];
+   audit.push({kind:'fragment',id:target.fragment.fragmentId,founderId:target.founder.founderId,objectiveId,eventId:approved.sourceEvent,operation,at});
    s.discoveryEvents.add(approved.sourceEvent);s.operations.add(operation);
    const ent=s.discoveryEntitlements.get(principal)??[];
+   const award=(key,kind,founderId)=>{
+    if(ent.includes(key))return false;
+    ent.push(key);audit.push({kind,id:key,founderId,eventId:approved.sourceEvent,operation,at});return true;
+   };
    const f=target.founder;
    let revelation=false,master=false;
    if(f.fragments.every(z=>owned.includes(z.fragmentId))&&!ent.includes(f.final.id)){
-    ent.push(f.final.id);revelation=true;
+    revelation=award(f.final.id,'revelation',f.founderId);
+    award(f.founderId+'-ARCHIVE-EDITION','archive-edition',f.founderId);
+    award(f.founderId+'-FOUNDER-SEAL','founder-seal',f.founderId);
+    award(f.founderId+'-MUSEUM-ENTRY','museum-entry',f.founderId);
     if(this.journeys.journeys.every(z=>ent.includes(z.final.id))
       &&!ent.includes('ORIGINAL_SIXTEEN_MASTER')){
-     ent.push('ORIGINAL_SIXTEEN_MASTER');master=true;
+     master=award('ORIGINAL_SIXTEEN_MASTER','master-collection',null);
+     award('MASTER_FOUNDER_SEAL','master-seal',null);
+     award('ORIGINAL_SIXTEEN_MUSEUM_EXHIBITION','master-exhibition',null);
     }
    }
    s.discoveryEntitlements.set(principal,ent);
+   s.discoveryAudit.set(principal,audit);
    return {status:'unlocked',fragmentId:target.fragment.fragmentId,
     founderId:f.founderId,revelation,master};
   });

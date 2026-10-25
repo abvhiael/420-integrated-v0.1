@@ -6,23 +6,10 @@ import {
   evaluateFeatureAccess
 } from "../../../clients/highcountry-access-v1/src/access-state.js";
 import {
-  GREEN_ROAD_GAME_ID,
-  GreenRoadFeature,
-  evaluateGreenRoadAccess,
-  createGreenRoadGamingClient
-} from "../../../clients/greenroad-access-v1/src/access.js";
-import {
-  BUDTENDER_GAME_ID,
-  BudtenderFeature,
-  evaluateBudtenderAccess,
-  createBudtenderGamingClient
-} from "../../../clients/budtender-access-v1/src/access.js";
-import {
-  SMOKE_CHROME_GAME_ID,
-  SmokeChromeFeature,
-  evaluateSmokeChromeAccess,
-  createSmokeChromeGamingClient
-} from "../../../clients/smoke-chrome-access-v1/src/access.js";
+  GREEN_ROAD_GAME_ID, GreenRoadFeature, createGreenRoadGamingClient, evaluateGreenRoadAccess,
+  BUDTENDER_GAME_ID, BudtenderFeature, createBudtenderGamingClient, evaluateBudtenderAccess,
+  SMOKE_CHROME_GAME_ID, SmokeChromeFeature, createSmokeChromeGamingClient, evaluateSmokeChromeAccess
+} from "../../420-gaming-sdk/test-support/extracted-game-contracts.js";
 
 const guest = { registered: false, walletLinked: false, walletConnected: false };
 const registered = { registered: true, walletLinked: false, walletConnected: false };

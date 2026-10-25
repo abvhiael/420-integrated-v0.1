@@ -35,3 +35,19 @@ test('verified present PNG is resolved while invalid and deferred remain unavail
   assert.equal(resolveOriginalSixteenArt(manifest,founderPath(1,'archive-back')),null);
  }finally{await rm(root,{recursive:true,force:true});}
 });
+
+test('uploaded verified Archive Edition art is available but not a reward prerequisite',async()=>{
+ const root=await mkdtemp(join(tmpdir(),'hc-a06-'));
+ try{
+  const archive=founderPath(1,'archive-front');
+  await mkdir(dirname(join(root,archive)),{recursive:true});
+  const bytes=Buffer.alloc(24);Buffer.from('89504e470d0a1a0a','hex').copy(bytes);
+  bytes.write('IHDR',12);bytes.writeUInt32BE(1024,16);bytes.writeUInt32BE(1024,20);
+  await writeFile(join(root,archive),bytes);
+  const manifest=await buildScopedA06Manifest(root);
+  assert.equal(manifest.availableDeferred,1);
+  assert.equal(resolveOriginalSixteenArt(manifest,archive),'/'+archive);
+  assert.equal(manifest.qualification.fullA06Qualified,false);
+  assert.equal(manifest.policy.entitlementsIndependentOfArtwork,true);
+ }finally{await rm(root,{recursive:true,force:true});}
+});

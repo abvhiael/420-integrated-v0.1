@@ -14,7 +14,10 @@ interface VmR0410 {
 }
 
 contract R0410Actor {
-    function acceptLeadership(OrganizationRegistry r, bytes32 id) external {
+    function acceptLeadership(
+        OrganizationRegistry r,
+        bytes32 id
+    ) external {
         r.acceptAdmin(id);
     }
 

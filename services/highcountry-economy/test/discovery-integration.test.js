@@ -50,7 +50,15 @@ test('every founder revelation and master issued exactly once without currency',
  }
  const s=await service.snapshot('alice');
  assert.equal(s.master,true);assert.equal(s.founders.filter(f=>f.revealed).length,16);
- assert.equal(new Set(s.entitlements).size,17);
+ assert.equal(new Set(s.entitlements).size,67);
+ assert.equal(s.audit.length,131);
+ for(const f of journeys.journeys){
+  for(const suffix of ['-REVELATION','-ARCHIVE-EDITION','-FOUNDER-SEAL','-MUSEUM-ENTRY'])
+   assert.ok(s.entitlements.includes(f.founderId+suffix));
+ }
+ for(const key of ['ORIGINAL_SIXTEEN_MASTER','MASTER_FOUNDER_SEAL','ORIGINAL_SIXTEEN_MUSEUM_EXHIBITION'])assert.ok(s.entitlements.includes(key));
+ assert.equal(new Set(s.audit.map(a=>a.kind+':'+a.id)).size,131);
+ for(const record of s.audit)assert.ok(record.eventId&&record.operation&&Number.isSafeInteger(record.at));
  assert.equal(store.state.issued,0);assert.equal(store.state.burned,0);
 });
 test('revoked epoch prevents mutation and events stay unclaimed',async()=>{
@@ -58,4 +66,19 @@ test('revoked epoch prevents mutation and events stay unclaimed',async()=>{
  store.state.runtimeEpochs=new Map([['alice',1]]);
  await assert.rejects(service.ingest('alice','op',journeys.journeys[0].fragments[0].trigger.objectiveId,'e1'),/revoked/);
  assert.equal(store.state.discoveryEvents.size,0);
+});
+
+test('reward acquisition audit is permanent and primary/alternative attempts cannot double award',async()=>{
+ const {service,store}=fixture();
+ const f=journeys.journeys[0];
+ for(let i=0;i<4;i++)await service.ingest('alice','o'+i,f.fragments[i].alternate.objectiveId,'e'+i);
+ const before=await service.snapshot('alice');
+ assert.equal(before.audit.length,8);
+ assert.equal(before.entitlements.length,4);
+ await assert.rejects(service.ingest('alice','dup',f.fragments[0].trigger.objectiveId,'other'),/already completed/);
+ const after=await service.snapshot('alice');
+ assert.deepEqual(after.audit,before.audit);
+ assert.deepEqual(after.entitlements,before.entitlements);
+ assert.equal((await service.snapshot('bob')).entitlements.length,0);
+ assert.equal(store.state.issued,0);
 });

@@ -28,6 +28,7 @@ function decode(raw) {
   const discoveryFragments=mapEntries(raw.discoveryFragments??[]),discoveryEntitlements=mapEntries(raw.discoveryEntitlements??[]);
   if(!Array.isArray(raw.discoveryEvents??[]))throw new SettlementError('invalid discovery events');
   const discoveryEvents=new Set(raw.discoveryEvents??[]);
+  const discoveryAudit=mapEntries(raw.discoveryAudit??[]);
   if(!Array.isArray(raw.skillResearchProofs??[]))throw new SettlementError('invalid progression proof state');
   const skillResearchProofs=new Set(raw.skillResearchProofs??[]);
   const safe=x=>Number.isSafeInteger(x)&&x>=0;
@@ -35,10 +36,10 @@ function decode(raw) {
   for(const b of balances.values())if(!safe(b.available)||!safe(b.reserved))throw new SettlementError('corrupt balance');
   for(const v of sourceIssued.values())if(!safe(v))throw new SettlementError('corrupt issuance');
   for(const b of assets.values())if(!safe(b.available)||!safe(b.reserved))throw new SettlementError('corrupt asset');
-  return {...runtime,balances,operations,claims,sourceIssued,assets,assetSources,listings,transferIntents,settlementJobs,marketDisputes,skillResearch,skillResearchProofs,missions,missionProofs,missionRewards,discoveryFragments,discoveryEntitlements,discoveryEvents,importedAssets,issued:raw.issued,burned:raw.burned};
+  return {...runtime,balances,operations,claims,sourceIssued,assets,assetSources,listings,transferIntents,settlementJobs,marketDisputes,skillResearch,skillResearchProofs,missions,missionProofs,missionRewards,discoveryFragments,discoveryEntitlements,discoveryEvents,discoveryAudit,importedAssets,issued:raw.issued,burned:raw.burned};
 }
 const encode = s => JSON.stringify({schema:1,...Object.fromEntries(['runtimeAccounts','runtimeWallets','runtimeWalletOwners','runtimeNonces','runtimeEpochs','runtimeSourceEpochs'].map(k=>[k,[...(s[k]??new Map())]])),balances:[...s.balances],operations:[...s.operations],
-  claims:[...s.claims],sourceIssued:[...s.sourceIssued],assets:[...s.assets],assetSources:[...s.assetSources],listings:[...s.listings],transferIntents:[...s.transferIntents],settlementJobs:[...s.settlementJobs],marketDisputes:[...(s.marketDisputes??new Map())],skillResearch:[...(s.skillResearch??new Map())],skillResearchProofs:[...(s.skillResearchProofs??new Set())],missions:[...(s.missions??new Map())],missionProofs:[...(s.missionProofs??new Set())],missionRewards:[...(s.missionRewards??new Map())],discoveryFragments:[...(s.discoveryFragments??new Map())],discoveryEntitlements:[...(s.discoveryEntitlements??new Map())],discoveryEvents:[...(s.discoveryEvents??new Set())],importedAssets:[...s.importedAssets],issued:s.issued,burned:s.burned});
+  claims:[...s.claims],sourceIssued:[...s.sourceIssued],assets:[...s.assets],assetSources:[...s.assetSources],listings:[...s.listings],transferIntents:[...s.transferIntents],settlementJobs:[...s.settlementJobs],marketDisputes:[...(s.marketDisputes??new Map())],skillResearch:[...(s.skillResearch??new Map())],skillResearchProofs:[...(s.skillResearchProofs??new Set())],missions:[...(s.missions??new Map())],missionProofs:[...(s.missionProofs??new Set())],missionRewards:[...(s.missionRewards??new Map())],discoveryFragments:[...(s.discoveryFragments??new Map())],discoveryEntitlements:[...(s.discoveryEntitlements??new Map())],discoveryEvents:[...(s.discoveryEvents??new Set())],discoveryAudit:[...(s.discoveryAudit??new Map())],importedAssets:[...s.importedAssets],issued:s.issued,burned:s.burned});
 export class PostgresBudsStore {
   constructor(pool, namespace) {
     if(typeof pool?.connect!=='function'||typeof namespace!=='string'

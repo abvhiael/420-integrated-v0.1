@@ -1,7 +1,7 @@
 name: 420Bet Sportradar scoring and oracle Level 2
 on:
   push:
-    branches: ['bet/5b2-sportradar-testing']
+    branches: ['bet/5b2-sportradar-testing', 'bet/5b2-daily-application']
     paths:
       - 'clients/420bet-fantasy/**'
       - 'contracts/test/fantasy-oracle/**'

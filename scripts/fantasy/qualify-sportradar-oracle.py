@@ -118,6 +118,9 @@ def main():
     native=[]
     for name,game in cases:
         vector=out/(name+".abi");write_vector(game,vector);execute_env["FANTASY_ORACLE_VECTOR"]=str(vector)
+        if name=="synthetic":
+            embedded=(ROOT/"contracts/test/fantasy-oracle/FantasySportradarOracle420.t.sol").read_text()
+            if 'encoded=hex"'+vector.read_text().removeprefix("0x")+'";' not in embedded:raise RuntimeError("standalone oracle vector differs from regenerated genuine input")
         cmd=[a.forge,"test","--root",str(ROOT/"contracts"),"--config-path",str(config),"--no-dynamic-test-linking","--use",a.solc,"--match-contract","FantasySportradarOracle420Test"]
         raw=execute(cmd+["--json"],execute_env,out,name+"-native",ROOT/"contracts");suites=json.loads(raw)
         tests=[t for suite in suites.values() for t in suite["test_results"].values()]
@@ -126,6 +129,10 @@ def main():
         result=verify_trace(trace,game);result.update(case=name,nativeTestsPassed=11,source="synthetic schema" if name=="synthetic" else "authenticated Sportradar historical replay")
         native.append(result)
         # Licensed derived statistics remain in the explicitly private output.
+    ordinary_env=dict(execute_env);ordinary_env.pop("FANTASY_ORACLE_VECTOR",None)
+    raw=execute(cmd+["--json"],ordinary_env,out,"ordinary-native",ROOT/"contracts");ordinary=json.loads(raw)
+    ordinary_tests=[t for suite in ordinary.values() for t in suite["test_results"].values()]
+    if len(ordinary_tests)!=11 or any(t["status"]!="Success" for t in ordinary_tests):raise RuntimeError("ordinary native execution failed")
     if git("rev-parse","HEAD")!=sha or (git("status","--porcelain","--untracked-files=no") and not a.allow_dirty):raise RuntimeError("source changed")
     paths=git("ls-files","clients/420bet-fantasy","contracts/test/fantasy-oracle","scripts/fantasy/qualify-sportradar-oracle.py").splitlines()
     for module in ["FantasySlateBook420","OracleRouter420","FantasyNHLScoring420"]:
@@ -140,7 +147,7 @@ def main():
     paths=sorted(set(paths))
     if not a.allow_dirty:
         for path in paths:git("ls-files","--error-unmatch",path)
-    report={"qualifiedSHA":sha,"levels":[1,2],"scope":"Sportradar scoring normalization and canonical oracle/scorer connection; no live settlement","pythonTestsPassed":count,"timezoneTestsPassed":6,"native":native,"sourceValidation":source_results,
+    report={"qualifiedSHA":sha,"levels":[1,2],"scope":"Sportradar scoring normalization and canonical oracle/scorer connection; no live settlement","pythonTestsPassed":count,"timezoneTestsPassed":6,"ordinaryNativeTestsPassed":11,"native":native,"sourceValidation":source_results,
             "officialTestnetDeployed":False,"liveSettlementQualified":False,"upstreamIndependenceQualified":False,"newNetworkCallsDuringQualification":0,"diagnosticOnly":a.allow_dirty,
             "sourceSHA256":{p:hashlib.sha256((ROOT/p).read_bytes()).hexdigest() for p in paths},"evidenceSHA256":{p.name:hashlib.sha256(p.read_bytes()).hexdigest() for p in out.iterdir() if p.is_file()},"completedAt":datetime.now(timezone.utc).isoformat()}
     if not a.allow_dirty:cert.write_text(json.dumps(report,indent=2)+"\n",encoding="utf-8")

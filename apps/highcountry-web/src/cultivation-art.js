@@ -20,3 +20,12 @@ export function cultivationStageArt(stage){
  return Object.freeze({src:CULTIVATION_ART_BASE+item.file,alt:item.alt,
   fallback:stage==='ready'?'/assets/highcountry-ready.svg':'/assets/highcountry-growing.svg'});
 }
+
+export const CULTIVATION_SCENE_BASE=CULTIVATION_ART_BASE+'environments/';
+export const CULTIVATION_REGIONS=Object.freeze(['emerald-coast','golden-prairie','red-mesa']);
+export const CULTIVATION_ENVIRONMENTS=Object.freeze(['outdoor','greenhouse','indoor']);
+export function cultivationSceneArt(region,environment){
+ if(!CULTIVATION_REGIONS.includes(region)||!CULTIVATION_ENVIRONMENTS.includes(environment))throw Error('unknown-cultivation-scene');
+ const file='hc-env-'+region+'-'+environment+'-background.png';
+ return Object.freeze({src:CULTIVATION_SCENE_BASE+file,alt:'Empty '+environment+' cultivation setting in '+region.replaceAll('-',' '),file});
+}

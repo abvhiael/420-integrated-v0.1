@@ -1,0 +1,45 @@
+name: 420Bet Sportradar scoring and oracle Level 2
+on:
+  push:
+    branches: ['bet/5b2-sportradar-testing', 'bet/5b2-daily-application']
+    paths:
+      - 'clients/420bet-fantasy/**'
+      - 'contracts/test/fantasy-oracle/**'
+      - 'scripts/fantasy/qualify-sportradar-oracle.py'
+      - '.github/workflows/420bet-sportradar-oracle-level2.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: sportradar-oracle-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  source-to-canonical-oracle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.8.6
+      - run: python -m pip install -r clients/420bet-fantasy/requirements.txt
+      - name: Execute normalization, canonical quorum/proofs and independent ABI replay
+        run: python scripts/fantasy/qualify-sportradar-oracle.py --output artifacts/sportradar-oracle
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sportradar-oracle-level2-${{ github.sha }}
+          path: |
+            artifacts/sportradar-oracle/*.json
+            artifacts/sportradar-oracle/*.log
+            artifacts/sportradar-oracle/*.abi
+            artifacts/sportradar-oracle/*.toml
+          if-no-files-found: error

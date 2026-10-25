@@ -1,1 +1,0 @@
-kk foot tap idle

@@ -1,5 +1,5 @@
 import {mountOriginalSixteenGallery} from './archive-gallery.js';
-import {cultivationStageArt} from './cultivation-art.js';
+import {cultivationStageArt,cultivationSceneArt,CULTIVATION_REGIONS,CULTIVATION_ENVIRONMENTS} from './cultivation-art.js';
 import {mountAccountPanel} from './account.js';
 import {mountMarketplace} from './marketplace.js';
 import {mountSkills} from './skills.js';
@@ -12,6 +12,8 @@ export function resolveRoute(path){return Object.hasOwn(pages,path)?path:'/not-f
 export function createHighCountryApp({document,location,config,fetchImpl,storage=globalThis.localStorage,authenticate=globalThis.highCountryAuth?.getToken,localAuth=globalThis.highCountryLocalAuth,walletProvider=globalThis.ethereum}){
  const runtime=validateHighCountryRuntime(config),root=document.getElementById('app');if(!root)throw Error('missing-game-root');
  let guest=null,error='';
+ // Guest-only visual controls: no claim of land ownership, region authority or cultivation permission.
+ let previewRegion='emerald-coast',previewEnvironment='outdoor';
  try{guest=loadGuest(storage);}catch(e){error=e.message;}
  const el=(tag,text)=>{const n=document.createElement(tag);n.textContent=text;return n;};
  function command(fn){try{const current=guest||newGuest();const updated=fn(current);saveGuest(storage,updated);guest=updated;error='';}catch(e){error=e.message;}render();}
@@ -23,6 +25,24 @@ export function createHighCountryApp({document,location,config,fetchImpl,storage
   if(path==='/discovery'){mountDiscovery({document,main,runtime,authenticate:localAuth?()=>localAuth.getToken():authenticate,fetchImpl});}else if(path==='/missions'){mountMissions({document,main,runtime,authenticate:localAuth?()=>localAuth.getToken():authenticate,fetchImpl});}else if(path==='/skills'){mountSkills({document,main,runtime,authenticate:localAuth?()=>localAuth.getToken():authenticate,fetchImpl});}else if(path==='/play'){
    main.append(el('p','Local guest play only. Saves remain on this device. No account, wallet, BUDS, or canonical assets are created.'));
    if(error){const p=el('p','Save error: '+error);p.setAttribute('role','alert');main.append(p);}
+
+   const visual=el('section','');visual.className='cultivation-scene-preview';
+   const visualHead=el('h3','Cultivation environment preview');visual.append(visualHead);
+   visual.append(el('p','Illustration preview only — not a verified parcel, lease, or cultivation authorization.'));
+   const selectors=el('div','');selectors.className='scene-selectors';
+   for(const [title,values,current,set] of [['Region',CULTIVATION_REGIONS,previewRegion,value=>previewRegion=value],['Environment',CULTIVATION_ENVIRONMENTS,previewEnvironment,value=>previewEnvironment=value]]){
+    const label=el('label',title);const select=document.createElement('select');
+    select.setAttribute('aria-label','Preview '+title.toLowerCase());
+    for(const value of values){const option=document.createElement('option');option.value=value;option.textContent=value.replaceAll('-',' ');option.selected=value===current;select.append(option);}
+    select.addEventListener('change',()=>{if(!values.includes(select.value))return;set(select.value);render();});
+    label.append(select);selectors.append(label);
+   }
+   visual.append(selectors);
+   const scene=cultivationSceneArt(previewRegion,previewEnvironment);
+   const sceneImg=el('img','');sceneImg.className='cultivation-scene-image';sceneImg.src=scene.src;sceneImg.alt=scene.alt;
+   const fallback=el('p','Regional scene artwork has not been uploaded or could not be loaded. Cultivation remains playable.');fallback.hidden=true;
+   sceneImg.addEventListener('error',()=>{sceneImg.hidden=true;fallback.hidden=false;});
+   visual.append(sceneImg,fallback);main.append(visual);
    if(guest){const stats=el('div','');stats.className='game-stats';stats.append(el('p','Completed local harvests: '+guest.completed));main.append(stats);if(guest.plant){
     const p=guest.plant;const phase=stage(p,Math.max(guest.lastSeen,Date.now()));const panel=el('div','');panel.className='game-panel';const art=el('img','');const illustration=cultivationStageArt(phase);art.src=illustration.src;art.alt=illustration.alt;art.addEventListener('error',()=>{if(!art.dataset.fallback){art.dataset.fallback='true';art.src=illustration.fallback;}});art.width=240;art.height=180;panel.append(art);const detail=el('div','');detail.append(el('h3','Current cultivation'),el('p','Plant stage: '+phase));panel.append(detail);main.append(panel);
     main.append(el('p','Local preview plant: '+p.id));

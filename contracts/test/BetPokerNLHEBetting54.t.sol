@@ -178,16 +178,24 @@ contract PokerNLHEBetting54Fixture is PokerPrivateShuffleGate54Test {
         cheat54.prank(PLAYER_B);delivery.acknowledge(handId,1,receiptB);
         require(proofBook.allVerified(handId),"four accepted encrypted shares per recipient");
     }
+    // Keep each proof stage behind a real call boundary. Solc 0.8.24's IR
+    // optimizer otherwise keeps both stages' ABI temporaries live across this
+    // fixture's admission setup and exhausts the EVM stack in Case9Test.
+    // The self-only helper preserves the original provider prank and proof.
+    function proveFrozenShuffleStage(bytes32 id,uint8 stage,bytes32 input,bytes32 output) external {
+        require(msg.sender==address(this),"fixture self call only");
+        verifier.allow(gate.statement(id,stage,input,output));
+        cheat54.prank(stage==1?PROVIDER_A:PROVIDER_B);
+        gate.proveStage(id,stage,input,output,hex"010203");
+    }
     function _readyFrozenAssignmentWithoutDelivery() internal returns(bytes32 id){
         id=_hand54();
         PokerConfidentialDeal420.Hand memory h=deal.getHand(id);
         bytes32 input=initialDeck.rootOf(id);
         bytes32 first=keccak256("encrypted shuffle A");
         bytes32 second=bytes32(uint256(1000));
-        verifier.allow(gate.statement(id,1,input,first));
-        cheat54.prank(PROVIDER_A);gate.proveStage(id,1,input,first,hex"010203");
-        verifier.allow(gate.statement(id,2,first,second));
-        cheat54.prank(PROVIDER_B);gate.proveStage(id,2,first,second,hex"010203");
+        this.proveFrozenShuffleStage(id,1,input,first);
+        this.proveFrozenShuffleStage(id,2,first,second);
         cheat54.prank(ADMIN);ledger.bindSettlement(TABLE,address(engine),address(0x500BEEF));
         _ensureNativeDisputeResolver();
         cheat54.prank(PLAYER);engine.reserve(id);

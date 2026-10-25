@@ -1,0 +1,97 @@
+{
+  "schema": "HC-GFX-2.1.2-APPROVED-ENVIRONMENTS-V1",
+  "note": "Owner-selected nine scene backgrounds, original bytes preserved. Art assets only; renderer integration and qualifications not performed.",
+  "destination": "apps/highcountry-web/public/assets/cultivation/environments/",
+  "assets": [
+    {
+      "path": "apps/highcountry-web/public/assets/cultivation/environments/hc-env-emerald-coast-greenhouse-background.png",
+      "filename": "hc-env-emerald-coast-greenhouse-background.png",
+      "source": "ec-greenhouse.png",
+      "width": 1672,
+      "height": 941,
+      "mode": "RGBA",
+      "bytes": 4431394,
+      "sha256": "751fe511e98042a021331d4845598776811ef1cd5b98cd3c4d145fabdcbb5519"
+    },
+    {
+      "path": "apps/highcountry-web/public/assets/cultivation/environments/hc-env-golden-prairie-greenhouse-background.png",
+      "filename": "hc-env-golden-prairie-greenhouse-background.png",
+      "source": "gp-greenhouse.png",
+      "width": 1672,
+      "height": 941,
+      "mode": "RGBA",
+      "bytes": 4397341,
+      "sha256": "34d9decc4766557f28e68eea7a5bceb93ad96c5c21152e244af32d1a4bc6b794"
+    },
+    {
+      "path": "apps/highcountry-web/public/assets/cultivation/environments/hc-env-red-mesa-greenhouse-background.png",
+      "filename": "hc-env-red-mesa-greenhouse-background.png",
+      "source": "rm-greenhouse.png",
+      "width": 1672,
+      "height": 941,
+      "mode": "RGBA",
+      "bytes": 4321000,
+      "sha256": "2a66525330b778082d78ffef371b5f4650d7a621588cae16294f67114d9cc3e1"
+    },
+    {
+      "path": "apps/highcountry-web/public/assets/cultivation/environments/hc-env-emerald-coast-outdoor-background.png",
+      "filename": "hc-env-emerald-coast-outdoor-background.png",
+      "source": "ec-outdoors.png",
+      "width": 1672,
+      "height": 941,
+      "mode": "RGBA",
+      "bytes": 4498983,
+      "sha256": "262836b824d65f5547f99196fd45f7ebb38265ed98b57c7fb6aa0a5595b09951"
+    },
+    {
+      "path": "apps/highcountry-web/public/assets/cultivation/environments/hc-env-golden-prairie-outdoor-background.png",
+      "filename": "hc-env-golden-prairie-outdoor-background.png",
+      "source": "gp-outdoors.png",
+      "width": 1672,
+      "height": 941,
+      "mode": "RGBA",
+      "bytes": 4187030,
+      "sha256": "8e0c9bc255485b52cac0bab8086e98b92b08b66685155a2d3572f009b40e3d79"
+    },
+    {
+      "path": "apps/highcountry-web/public/assets/cultivation/environments/hc-env-red-mesa-outdoor-background.png",
+      "filename": "hc-env-red-mesa-outdoor-background.png",
+      "source": "rm-outdoors.png",
+      "width": 1672,
+      "height": 941,
+      "mode": "RGBA",
+      "bytes": 4357077,
+      "sha256": "a045ef469c399e55866e38a6bb1d8979d844a6b80c3b130398978e755cf39621"
+    },
+    {
+      "path": "apps/highcountry-web/public/assets/cultivation/environments/hc-env-emerald-coast-indoor-background.png",
+      "filename": "hc-env-emerald-coast-indoor-background.png",
+      "source": "ec-indoors.png",
+      "width": 2048,
+      "height": 682,
+      "mode": "RGBA",
+      "bytes": 3293907,
+      "sha256": "6e2fd3b6a1f8cc0f134b0b5ce6724d889af03449314142dbf50dff5b6e3c6c58"
+    },
+    {
+      "path": "apps/highcountry-web/public/assets/cultivation/environments/hc-env-golden-prairie-indoor-background.png",
+      "filename": "hc-env-golden-prairie-indoor-background.png",
+      "source": "gp-indoors.png",
+      "width": 2048,
+      "height": 682,
+      "mode": "RGBA",
+      "bytes": 3263743,
+      "sha256": "3a49853f49d581aadf9ec0aab013408cabeac018c7d60a040641f58913bda6a9"
+    },
+    {
+      "path": "apps/highcountry-web/public/assets/cultivation/environments/hc-env-red-mesa-indoor-background.png",
+      "filename": "hc-env-red-mesa-indoor-background.png",
+      "source": "rm-indoors.png",
+      "width": 2048,
+      "height": 682,
+      "mode": "RGBA",
+      "bytes": 3234376,
+      "sha256": "685cdacdff854f1b4bd60990aae80180aebfa1db66b5eeaff61ea8329d4380bb"
+    }
+  ]
+}

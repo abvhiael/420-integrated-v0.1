@@ -1,0 +1,619 @@
+{
+  "asset_set": "highcountry-museum-botanical",
+  "status": "hand-edit source crops",
+  "count": 36,
+  "assets": [
+    {
+      "filename": "plant_palm_large.png",
+      "category": "highcountry-museum-botanical",
+      "size": [
+        1024,
+        1024
+      ],
+      "rgba": true,
+      "source_rect": [
+        0,
+        55,
+        295,
+        340
+      ],
+      "sha256": "6b07d9d48dba3c4ca19fecca674a200f7f44978835f392f71ac259eae5688582",
+      "note": "Wide transparent source crop; neighboring objects may be visible and require manual cleanup."
+    },
+    {
+      "filename": "plant_areca_palm.png",
+      "category": "highcountry-museum-botanical",
+      "size": [
+        1024,
+        1024
+      ],
+      "rgba": true,
+      "source_rect": [
+        188,
+        55,
+        472,
+        340
+      ],
+      "sha256": "bd5fd5abc345af0f66eac2f3b18721ac52774df42bdbea7bb3bbc936bb67f84c",
+      "note": "Wide transparent source crop; neighboring objects may be visible and require manual cleanup."
+    },
+    {
+      "filename": "plant_monstera_large.png",
+      "category": "highcountry-museum-botanical",
+      "size": [
+        1024,
+        1024
+      ],
+      "rgba": true,
+      "source_rect": [
+        376,
+        55,
+        660,
+        340
+      ],
+      "sha256": "c23a19a79a5f715956aa6078da287e11f21121861c5208d24b8a8f5d1f98aee3",
+      "note": "Wide transparent source crop; neighboring objects may be visible and require manual cleanup."
+    },
+    {
+      "filename": "plant_fern_large.png",
+      "category": "highcountry-museum-botanical",
+      "size": [
+        1024,
+        1024
+      ],
+      "rgba": true,
+      "source_rect": [
+        562,
+        55,
+        846,
+        340
+      ],
+      "sha256": "aab8ec8b5103619cae76f5f1b94a693690827efd8169573a4511c437eab78864",
+      "note": "Wide transparent source crop; neighboring objects may be visible and require manual cleanup."
+    },
+    {
+      "filename": "plant_dracaena.png",
+      "category": "highcountry-museum-botanical",
+      "size": [
+        1024,
+        1024
+      ],
+      "rgba": true,
+      "source_rect": [
+        754,
+        55,
+        1040,
+        340
+      ],
+      "sha256": "6beed8254b65147fb2ff531c0043ab40db503383af6142bd049662630f9ef800",
+      "note": "Wide transparent source crop; neighboring objects may be visible and require manual cleanup."
+    },
+    {
+      "filename": "plant_fern_medium.png",
+      "category": "highcountry-museum-botanical",
+      "size": [
+        1024,
+        1024
+      ],
+      "rgba": true,
+      "source_rect": [
+        940,
+        55,
+        1224,
+        340
+      ],
+      "sha256": "f667f21800de8d9d2ad9f2ef86ba7cc2f994b297ad52a497b55fe9ee25d45eda",
+      "note": "Wide transparent source crop; neighboring objects may be visible and require manual cleanup."
+    },
+    {
+      "filename": "plant_palm_medium.png",
+      "category": "highcountry-museum-botanical",
+      "size": [
+        1024,
+        1024
+      ],
+      "rgba": true,
+      "source_rect": [
+        1108,
+        55,
+        1392,
+        340
+      ],
+      "sha256": "30a965b4883764581aa5fa5355d649d2beefdc357b39140ee84f57f9b2fded2b",
+      "note": "Wide transparent source crop; neighboring objects may be visible and require manual cleanup."
+    },
+    {
+      "filename": "plant_rubber_plant.png",
+      "category": "highcountry-museum-botanical",
+      "size": [
+        1024,
+        1024
+      ],
+      "rgba": true,
+      "source_rect": [
+        1288,
+        55,
+        1536,
+        340
+      ],
+      "sha256": "554915bacc481d2c84a9ae57ddb05e7d9b5447824ab7d62be7bd9ff6ac6ec3b1",
+      "note": "Wide transparent source crop; neighboring objects may be visible and require manual cleanup."
+    },
+    {
+      "filename": "plant_pothos_bush.png",
+      "category": "highcountry-museum-botanical",
+      "size": [
+        1024,
+        1024
+      ],
+      "rgba": true,
+      "source_rect": [
+        0,
+        375,
+        239,
+        548
+      ],
+      "sha256": "12bf8e1f4718a13ccc91619e22f0168c686b3065648c60057997de2d0f03fe84",
+      "note": "Wide transparent source crop; neighboring objects may be visible and require manual cleanup."
+    },
+    {
+      "filename": "plant_peace_lily.png",
+      "category": "highcountry-museum-botanical",
+      "size": [
+        1024,
+        1024
+      ],
+      "rgba": true,
+      "source_rect": [
+        181,
+        375,
+        421,
+        548
+      ],
+      "sha256": "da342d24431add80d6ff2c5471e7b8b4111ed28da2324e6fb2311def4f44a6c6",
+      "note": "Wide transparent source crop; neighboring objects may be visible and require manual cleanup."
+    },
+    {
+      "filename": "plant_bromeliad_red.png",
+      "category": "highcountry-museum-botanical",
+      "size": [
+        1024,
+        1024
+      ],
+      "rgba": true,
+      "source_rect": [
+        354,
+        375,
+        594,
+        548
+      ],
+      "sha256": "a1601d80f231a0ee631bbf89910e1573b86388a900e714e4153327c44e43a259",
+      "note": "Wide transparent source crop; neighboring objects may be visible and require manual cleanup."
+    },
+    {
+      "filename": "plant_bromeliad_orange.png",
+      "category": "highcountry-museum-botanical",
+      "size": [
+        1024,
+        1024
+      ],
+      "rgba": true,
+      "source_rect": [
+        529,
+        375,
+        769,
+        548
+      ],
+      "sha256": "d1acbbb74c8e3c39dd0d79e96c0c6af5849832c1920175ca1f4206eb8a41a1e4",
+      "note": "Wide transparent source crop; neighboring objects may be visible and require manual cleanup."
+    },
+    {
+      "filename": "plant_pothos_trailing.png",
+      "category": "highcountry-museum-botanical",
+      "size": [
+        1024,
+        1024
+      ],
+      "rgba": true,
+      "source_rect": [
+        697,
+        375,
+        957,
+        548
+      ],
+      "sha256": "1317022d04728ceaa288c97df78b49ab93294a366a56e81a3fbd40db6761c507",
+      "note": "Wide transparent source crop; neighboring objects may be visible and require manual cleanup."
+    },
+    {
+      "filename": "plant_pothos_hanging.png",
+      "category": "highcountry-museum-botanical",
+      "size": [
+        1024,
+        1024
+      ],
+      "rgba": true,
+      "source_rect": [
+        896,
+        375,
+        1136,
+        548
+      ],
+      "sha256": "f5b1b45a989af9f02dfe67b4a1e4087254ed9108fd8878b46a352ad5d7c8ce23",
+      "note": "Wide transparent source crop; neighboring objects may be visible and require manual cleanup."
+    },
+    {
+      "filename": "plant_ivy_trailing_large.png",
+      "category": "highcountry-museum-botanical",
+      "size": [
+        1024,
+        1024
+      ],
+      "rgba": true,
+      "source_rect": [
+        1084,
+        375,
+        1344,
+        548
+      ],
+      "sha256": "9eb3e28fc0b0af2568a1cc323865eff9e9e8a358d0f747010bff10f28f781711",
+      "note": "Wide transparent source crop; neighboring objects may be visible and require manual cleanup."
+    },
+    {
+      "filename": "plant_ivy_trailing_small.png",
+      "category": "highcountry-museum-botanical",
+      "size": [
+        1024,
+        1024
+      ],
+      "rgba": true,
+      "source_rect": [
+        1294,
+        375,
+        1534,
+        548
+      ],
+      "sha256": "2367682e7f8d4d0956011babd1df5b7fb73e205882b894235229f5879d475988",
+      "note": "Wide transparent source crop; neighboring objects may be visible and require manual cleanup."
+    },
+    {
+      "filename": "plant_fern_bush.png",
+      "category": "highcountry-museum-botanical",
+      "size": [
+        1024,
+        1024
+      ],
+      "rgba": true,
+      "source_rect": [
+        4,
+        580,
+        188,
+        757
+      ],
+      "sha256": "993686967923853e9f46764c16ffb21fea06251e847db8f3b8d8abfae9fe98c7",
+      "note": "Wide transparent source crop; neighboring objects may be visible and require manual cleanup."
+    },
+    {
+      "filename": "plant_grass_tall.png",
+      "category": "highcountry-museum-botanical",
+      "size": [
+        1024,
+        1024
+      ],
+      "rgba": true,
+      "source_rect": [
+        152,
+        580,
+        336,
+        757
+      ],
+      "sha256": "d3df1a274c0bc6fbe179ea6da3045ef1a8c43072a5a281879c1f0bb17c0472c3",
+      "note": "Wide transparent source crop; neighboring objects may be visible and require manual cleanup."
+    },
+    {
+      "filename": "plant_grass_flower.png",
+      "category": "highcountry-museum-botanical",
+      "size": [
+        1024,
+        1024
+      ],
+      "rgba": true,
+      "source_rect": [
+        282,
+        580,
+        466,
+        757
+      ],
+      "sha256": "e2dcd0732c7217ec396c2f438bf395f42bfc2fb8331a39bf947e830c9a51d847",
+      "note": "Wide transparent source crop; neighboring objects may be visible and require manual cleanup."
+    },
+    {
+      "filename": "plant_agave.png",
+      "category": "highcountry-museum-botanical",
+      "size": [
+        1024,
+        1024
+      ],
+      "rgba": true,
+      "source_rect": [
+        418,
+        580,
+        604,
+        757
+      ],
+      "sha256": "cfefd0820dc9ed2f71a4d985d9d434f500eee25cbc965bf5b4f5f16234a490d1",
+      "note": "Wide transparent source crop; neighboring objects may be visible and require manual cleanup."
+    },
+    {
+      "filename": "plant_cactus_tall.png",
+      "category": "highcountry-museum-botanical",
+      "size": [
+        1024,
+        1024
+      ],
+      "rgba": true,
+      "source_rect": [
+        568,
+        580,
+        752,
+        757
+      ],
+      "sha256": "0af05085cfed5f9e84ed54848f7552e0f2524cbc0785a3daecc9b395aa344c90",
+      "note": "Wide transparent source crop; neighboring objects may be visible and require manual cleanup."
+    },
+    {
+      "filename": "plant_cactus_mixed.png",
+      "category": "highcountry-museum-botanical",
+      "size": [
+        1024,
+        1024
+      ],
+      "rgba": true,
+      "source_rect": [
+        705,
+        580,
+        965,
+        757
+      ],
+      "sha256": "6a3b5034782cbb6487c3f3b2c4a396f4d67ce3d56815f03705692a26be7f5dbf",
+      "note": "Wide transparent source crop; neighboring objects may be visible and require manual cleanup."
+    },
+    {
+      "filename": "plant_grass_medium.png",
+      "category": "highcountry-museum-botanical",
+      "size": [
+        1024,
+        1024
+      ],
+      "rgba": true,
+      "source_rect": [
+        910,
+        580,
+        1096,
+        757
+      ],
+      "sha256": "eef06c596147851ee5b7e3f70300ca43177ba099d020fa6bdb99728d6cac9dcc",
+      "note": "Wide transparent source crop; neighboring objects may be visible and require manual cleanup."
+    },
+    {
+      "filename": "plant_bonsai.png",
+      "category": "highcountry-museum-botanical",
+      "size": [
+        1024,
+        1024
+      ],
+      "rgba": true,
+      "source_rect": [
+        1066,
+        580,
+        1250,
+        757
+      ],
+      "sha256": "ec16f3982997dcdff75baca084b46a6df4a67120c77bac519ad109d306358204",
+      "note": "Wide transparent source crop; neighboring objects may be visible and require manual cleanup."
+    },
+    {
+      "filename": "plant_orchid.png",
+      "category": "highcountry-museum-botanical",
+      "size": [
+        1024,
+        1024
+      ],
+      "rgba": true,
+      "source_rect": [
+        1216,
+        580,
+        1402,
+        757
+      ],
+      "sha256": "6f5859f68a1bd4c8c31918df8c61c7d9b5dc4e89992c8623a662ffce45a66291",
+      "note": "Wide transparent source crop; neighboring objects may be visible and require manual cleanup."
+    },
+    {
+      "filename": "plant_succulent.png",
+      "category": "highcountry-museum-botanical",
+      "size": [
+        1024,
+        1024
+      ],
+      "rgba": true,
+      "source_rect": [
+        1358,
+        580,
+        1536,
+        757
+      ],
+      "sha256": "6b55383ee734fa317a29c5336d7aa1ea246ac8711b2734745e38e2d64fb0e32b",
+      "note": "Wide transparent source crop; neighboring objects may be visible and require manual cleanup."
+    },
+    {
+      "filename": "plant_dried_pampas.png",
+      "category": "highcountry-museum-botanical",
+      "size": [
+        1024,
+        1024
+      ],
+      "rgba": true,
+      "source_rect": [
+        0,
+        785,
+        182,
+        971
+      ],
+      "sha256": "878cac61203f53f3c86dd09a12f08c55e995b423080045bf58fd913b89e1deb4",
+      "note": "Wide transparent source crop; neighboring objects may be visible and require manual cleanup."
+    },
+    {
+      "filename": "plant_dried_wheat.png",
+      "category": "highcountry-museum-botanical",
+      "size": [
+        1024,
+        1024
+      ],
+      "rgba": true,
+      "source_rect": [
+        136,
+        785,
+        322,
+        971
+      ],
+      "sha256": "6fae207b6cb148bbd3b214b95fad4b95fd1ecd8fcdca2bd12135fcf7639c7a14",
+      "note": "Wide transparent source crop; neighboring objects may be visible and require manual cleanup."
+    },
+    {
+      "filename": "plant_dried_cotton.png",
+      "category": "highcountry-museum-botanical",
+      "size": [
+        1024,
+        1024
+      ],
+      "rgba": true,
+      "source_rect": [
+        266,
+        785,
+        452,
+        971
+      ],
+      "sha256": "1d75f3cc7b1a10d88f131f03c8a3fe70ed1903363dac6587f9a0f7eb272faa3e",
+      "note": "Wide transparent source crop; neighboring objects may be visible and require manual cleanup."
+    },
+    {
+      "filename": "plant_dried_lavender.png",
+      "category": "highcountry-museum-botanical",
+      "size": [
+        1024,
+        1024
+      ],
+      "rgba": true,
+      "source_rect": [
+        406,
+        785,
+        590,
+        971
+      ],
+      "sha256": "daa5c55629d1a953447887abc0847944010afbc1fb6543993f5e5ac7f4628794",
+      "note": "Wide transparent source crop; neighboring objects may be visible and require manual cleanup."
+    },
+    {
+      "filename": "plant_dried_sunflowers.png",
+      "category": "highcountry-museum-botanical",
+      "size": [
+        1024,
+        1024
+      ],
+      "rgba": true,
+      "source_rect": [
+        560,
+        785,
+        744,
+        971
+      ],
+      "sha256": "dff7127dd439360065aec580f10d144a5e00ab58dc6930631eb0002e729e5c6c",
+      "note": "Wide transparent source crop; neighboring objects may be visible and require manual cleanup."
+    },
+    {
+      "filename": "plant_dried_eucalyptus.png",
+      "category": "highcountry-museum-botanical",
+      "size": [
+        1024,
+        1024
+      ],
+      "rgba": true,
+      "source_rect": [
+        704,
+        785,
+        890,
+        971
+      ],
+      "sha256": "d6b98b8ee99641df65142e2e9a98be15ce58f6b9a69a6104831d15691751dab7",
+      "note": "Wide transparent source crop; neighboring objects may be visible and require manual cleanup."
+    },
+    {
+      "filename": "plant_dried_hydrangea.png",
+      "category": "highcountry-museum-botanical",
+      "size": [
+        1024,
+        1024
+      ],
+      "rgba": true,
+      "source_rect": [
+        852,
+        785,
+        1038,
+        971
+      ],
+      "sha256": "e79fd8dcdd9eca4b8bec3cb8fe604e748039f02a5b6c637cefc8a51ed703c7a7",
+      "note": "Wide transparent source crop; neighboring objects may be visible and require manual cleanup."
+    },
+    {
+      "filename": "plant_terrarium.png",
+      "category": "highcountry-museum-botanical",
+      "size": [
+        1024,
+        1024
+      ],
+      "rgba": true,
+      "source_rect": [
+        1013,
+        785,
+        1203,
+        971
+      ],
+      "sha256": "cf7d856fa50fc4b1cdd76c88a32b244112e0c0a77a99b9d61b0e751484a47abd",
+      "note": "Wide transparent source crop; neighboring objects may be visible and require manual cleanup."
+    },
+    {
+      "filename": "plant_moss_bowl.png",
+      "category": "highcountry-museum-botanical",
+      "size": [
+        1024,
+        1024
+      ],
+      "rgba": true,
+      "source_rect": [
+        1168,
+        785,
+        1352,
+        971
+      ],
+      "sha256": "95282dcd9cf972616ede2742cb0f1a2689ccd3cde51e5a0fb0835105675f11cd",
+      "note": "Wide transparent source crop; neighboring objects may be visible and require manual cleanup."
+    },
+    {
+      "filename": "plant_bonsai_small.png",
+      "category": "highcountry-museum-botanical",
+      "size": [
+        1024,
+        1024
+      ],
+      "rgba": true,
+      "source_rect": [
+        1324,
+        785,
+        1508,
+        971
+      ],
+      "sha256": "a94d1cf5dc080327569d087568b70c7d19f6681e2aba329ede27305d07263de8",
+      "note": "Wide transparent source crop; neighboring objects may be visible and require manual cleanup."
+    }
+  ]
+}

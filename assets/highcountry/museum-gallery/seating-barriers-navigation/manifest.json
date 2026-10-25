@@ -1,0 +1,457 @@
+{
+  "asset_set": "highcountry-museum-seating-barriers-navigation",
+  "destination": "assets/highcountry/museum-gallery/seating-barriers-navigation/",
+  "note": "Extracted from composite original; check edges and neighboring object fragments before production. Source resolution upscaled.",
+  "assets": [
+    {
+      "filename": "seat_bench_green.png",
+      "category": "highcountry-museum-seating-barriers-navigation",
+      "width": 1024,
+      "height": 1024,
+      "format": "PNG",
+      "mode": "RGBA",
+      "sha256": "591b7c4670594825d1712bc92dfaf64c4086ef53962c1ef8ec0335c7b3dbcf4f",
+      "source_box": [
+        0,
+        25,
+        390,
+        193
+      ]
+    },
+    {
+      "filename": "seat_bench_red.png",
+      "category": "highcountry-museum-seating-barriers-navigation",
+      "width": 1024,
+      "height": 1024,
+      "format": "PNG",
+      "mode": "RGBA",
+      "sha256": "8efaa1cb7fddd2bd15636a3efddf31aec160e33fa71f99bf032ca241766efe4f",
+      "source_box": [
+        390,
+        25,
+        770,
+        193
+      ]
+    },
+    {
+      "filename": "seat_bench_brown.png",
+      "category": "highcountry-museum-seating-barriers-navigation",
+      "width": 1024,
+      "height": 1024,
+      "format": "PNG",
+      "mode": "RGBA",
+      "sha256": "c64fa407c714a3c8f30fc2de55c533a3359d9edaf1847d66e259eba0752d1e6b",
+      "source_box": [
+        770,
+        25,
+        1120,
+        193
+      ]
+    },
+    {
+      "filename": "seat_stool_round_green.png",
+      "category": "highcountry-museum-seating-barriers-navigation",
+      "width": 1024,
+      "height": 1024,
+      "format": "PNG",
+      "mode": "RGBA",
+      "sha256": "44b0570309a6f5595f6d0f856e93d6c5004bc31568f6247fef9009311f7f5785",
+      "source_box": [
+        1120,
+        25,
+        1335,
+        193
+      ]
+    },
+    {
+      "filename": "seat_stool_round_red.png",
+      "category": "highcountry-museum-seating-barriers-navigation",
+      "width": 1024,
+      "height": 1024,
+      "format": "PNG",
+      "mode": "RGBA",
+      "sha256": "86b576016faed3cd4d600f3309e3aef11cd24c54d5b010d44807967898fbd072",
+      "source_box": [
+        1335,
+        25,
+        1536,
+        193
+      ]
+    },
+    {
+      "filename": "seat_chair_green.png",
+      "category": "highcountry-museum-seating-barriers-navigation",
+      "width": 1024,
+      "height": 1024,
+      "format": "PNG",
+      "mode": "RGBA",
+      "sha256": "c01dc3c96d8db51aa981f8ae72aa487d5c8767de79565765e1475fd1dcd03d0b",
+      "source_box": [
+        0,
+        239,
+        240,
+        446
+      ]
+    },
+    {
+      "filename": "seat_chair_red.png",
+      "category": "highcountry-museum-seating-barriers-navigation",
+      "width": 1024,
+      "height": 1024,
+      "format": "PNG",
+      "mode": "RGBA",
+      "sha256": "82bfbb2985bd65e484cd9f6a6cd7c5e2bea43b6e44ba8eb2a3f27e503ad5da1d",
+      "source_box": [
+        240,
+        239,
+        455,
+        446
+      ]
+    },
+    {
+      "filename": "seat_lounge_chair.png",
+      "category": "highcountry-museum-seating-barriers-navigation",
+      "width": 1024,
+      "height": 1024,
+      "format": "PNG",
+      "mode": "RGBA",
+      "sha256": "511f498c4b6089c11f52f0de5156ab74f19b51e8eab5dcb2e546f7290c0999a7",
+      "source_box": [
+        455,
+        239,
+        704,
+        446
+      ]
+    },
+    {
+      "filename": "seat_ottoman_round.png",
+      "category": "highcountry-museum-seating-barriers-navigation",
+      "width": 1024,
+      "height": 1024,
+      "format": "PNG",
+      "mode": "RGBA",
+      "sha256": "898bd7540d65e7270203b94bd10db88c5482a602d97f40387489d43d220f19bb",
+      "source_box": [
+        704,
+        239,
+        910,
+        446
+      ]
+    },
+    {
+      "filename": "seat_ottoman_square.png",
+      "category": "highcountry-museum-seating-barriers-navigation",
+      "width": 1024,
+      "height": 1024,
+      "format": "PNG",
+      "mode": "RGBA",
+      "sha256": "27b5920bea70a2bc236275b94fdbd7c99b43f43a60ec726b81fd6ecf504ef8fd",
+      "source_box": [
+        910,
+        239,
+        1140,
+        446
+      ]
+    },
+    {
+      "filename": "seat_divan.png",
+      "category": "highcountry-museum-seating-barriers-navigation",
+      "width": 1024,
+      "height": 1024,
+      "format": "PNG",
+      "mode": "RGBA",
+      "sha256": "b6e888c953aa30638b4651f064634cfec2fe61c4452c7f6570ddaf2b7bbe7d40",
+      "source_box": [
+        1140,
+        239,
+        1536,
+        446
+      ]
+    },
+    {
+      "filename": "barrier_post.png",
+      "category": "highcountry-museum-seating-barriers-navigation",
+      "width": 1024,
+      "height": 1024,
+      "format": "PNG",
+      "mode": "RGBA",
+      "sha256": "ec465d8c3db7828df0675a29702e52af3dfa8ec97644a5ca88e001a144b638c2",
+      "source_box": [
+        0,
+        495,
+        130,
+        682
+      ]
+    },
+    {
+      "filename": "barrier_rope_red.png",
+      "category": "highcountry-museum-seating-barriers-navigation",
+      "width": 1024,
+      "height": 1024,
+      "format": "PNG",
+      "mode": "RGBA",
+      "sha256": "378864408e79824e40e8c534cdb0197b6d09b04da9e477579a3caaf9eae25179",
+      "source_box": [
+        130,
+        495,
+        365,
+        682
+      ]
+    },
+    {
+      "filename": "barrier_rope_green.png",
+      "category": "highcountry-museum-seating-barriers-navigation",
+      "width": 1024,
+      "height": 1024,
+      "format": "PNG",
+      "mode": "RGBA",
+      "sha256": "8df810376553a20c35d1ee20a555b97287fb57f0430131bcb36e5135c7fd6e5c",
+      "source_box": [
+        365,
+        495,
+        600,
+        682
+      ]
+    },
+    {
+      "filename": "barrier_chain.png",
+      "category": "highcountry-museum-seating-barriers-navigation",
+      "width": 1024,
+      "height": 1024,
+      "format": "PNG",
+      "mode": "RGBA",
+      "sha256": "db0df6424dee9230ae41417c0c67e64a44df5b6fb5665e8e97747706d1d234c1",
+      "source_box": [
+        600,
+        495,
+        755,
+        682
+      ]
+    },
+    {
+      "filename": "barrier_sign.png",
+      "category": "highcountry-museum-seating-barriers-navigation",
+      "width": 1024,
+      "height": 1024,
+      "format": "PNG",
+      "mode": "RGBA",
+      "sha256": "4454e67b1451602819ef435f4ac49918b8a769dc8ae9d5ea893147958508b118",
+      "source_box": [
+        755,
+        495,
+        900,
+        682
+      ]
+    },
+    {
+      "filename": "barrier_post_single.png",
+      "category": "highcountry-museum-seating-barriers-navigation",
+      "width": 1024,
+      "height": 1024,
+      "format": "PNG",
+      "mode": "RGBA",
+      "sha256": "f882a4ce77fc48808abe8a4f3e19050b6ef936a55368a61cfbadf5fb5309d6d4",
+      "source_box": [
+        900,
+        495,
+        1025,
+        682
+      ]
+    },
+    {
+      "filename": "sign_info_stand.png",
+      "category": "highcountry-museum-seating-barriers-navigation",
+      "width": 1024,
+      "height": 1024,
+      "format": "PNG",
+      "mode": "RGBA",
+      "sha256": "8a885b31a5609bb8c1d4dba8aaa00d83d90c5ec7fa27fa29796108ca371fbe06",
+      "source_box": [
+        1025,
+        495,
+        1170,
+        682
+      ]
+    },
+    {
+      "filename": "sign_plaque.png",
+      "category": "highcountry-museum-seating-barriers-navigation",
+      "width": 1024,
+      "height": 1024,
+      "format": "PNG",
+      "mode": "RGBA",
+      "sha256": "15a99a69fc6d15c3404b36bfdd9d1f67ac3267a605f62597b6ae31d56b848acd",
+      "source_box": [
+        1170,
+        495,
+        1355,
+        682
+      ]
+    },
+    {
+      "filename": "sign_hanging.png",
+      "category": "highcountry-museum-seating-barriers-navigation",
+      "width": 1024,
+      "height": 1024,
+      "format": "PNG",
+      "mode": "RGBA",
+      "sha256": "03cbd47f447a7a147fdbc9581fcfcc34f8ef0734de620b03525ff5ba7991fae2",
+      "source_box": [
+        1355,
+        495,
+        1536,
+        682
+      ]
+    },
+    {
+      "filename": "banner_emerald.png",
+      "category": "highcountry-museum-seating-barriers-navigation",
+      "width": 1024,
+      "height": 1024,
+      "format": "PNG",
+      "mode": "RGBA",
+      "sha256": "5f0589ef62ba539116e855a19081152d4d90c8a1546b8db60a7e66f2612d1ce4",
+      "source_box": [
+        0,
+        723,
+        140,
+        929
+      ]
+    },
+    {
+      "filename": "banner_golden.png",
+      "category": "highcountry-museum-seating-barriers-navigation",
+      "width": 1024,
+      "height": 1024,
+      "format": "PNG",
+      "mode": "RGBA",
+      "sha256": "57022935f9cff007efca3ea75df371fd5ad1886551bf982c3c075c3f23ef10a1",
+      "source_box": [
+        140,
+        723,
+        275,
+        929
+      ]
+    },
+    {
+      "filename": "banner_redmesa.png",
+      "category": "highcountry-museum-seating-barriers-navigation",
+      "width": 1024,
+      "height": 1024,
+      "format": "PNG",
+      "mode": "RGBA",
+      "sha256": "6da4edb7482d6de490040f2c61185c0442e8a53ab51f825dc896d8887ba30bfd",
+      "source_box": [
+        275,
+        723,
+        405,
+        929
+      ]
+    },
+    {
+      "filename": "nav_emblem_emerald.png",
+      "category": "highcountry-museum-seating-barriers-navigation",
+      "width": 1024,
+      "height": 1024,
+      "format": "PNG",
+      "mode": "RGBA",
+      "sha256": "5f26ab28bb7e0f78065d0f1ea5a581055b92585e8f3cd53a201b1dfd8ee11763",
+      "source_box": [
+        405,
+        723,
+        565,
+        929
+      ]
+    },
+    {
+      "filename": "nav_emblem_golden.png",
+      "category": "highcountry-museum-seating-barriers-navigation",
+      "width": 1024,
+      "height": 1024,
+      "format": "PNG",
+      "mode": "RGBA",
+      "sha256": "4317bae755ff5718969456116e1dcf445768ebf6fa04b3b12e35b313a488dba6",
+      "source_box": [
+        565,
+        723,
+        740,
+        929
+      ]
+    },
+    {
+      "filename": "nav_emblem_redmesa.png",
+      "category": "highcountry-museum-seating-barriers-navigation",
+      "width": 1024,
+      "height": 1024,
+      "format": "PNG",
+      "mode": "RGBA",
+      "sha256": "a15a72f9e3da25942d243076c218a7dfd42f4b0c614a6230f4ba4396f6f267ff",
+      "source_box": [
+        740,
+        723,
+        900,
+        929
+      ]
+    },
+    {
+      "filename": "nav_compass.png",
+      "category": "highcountry-museum-seating-barriers-navigation",
+      "width": 1024,
+      "height": 1024,
+      "format": "PNG",
+      "mode": "RGBA",
+      "sha256": "9e6071923439eef86adda427afb671baf983aae8d4b08bf77e536a30d160e0d7",
+      "source_box": [
+        900,
+        723,
+        1058,
+        929
+      ]
+    },
+    {
+      "filename": "nav_button_back.png",
+      "category": "highcountry-museum-seating-barriers-navigation",
+      "width": 1024,
+      "height": 1024,
+      "format": "PNG",
+      "mode": "RGBA",
+      "sha256": "b3bad70ae9b91f9cd7a26cc797da16de4ceb3be186782082e9100dc96624c39a",
+      "source_box": [
+        1058,
+        723,
+        1218,
+        929
+      ]
+    },
+    {
+      "filename": "nav_button_home.png",
+      "category": "highcountry-museum-seating-barriers-navigation",
+      "width": 1024,
+      "height": 1024,
+      "format": "PNG",
+      "mode": "RGBA",
+      "sha256": "3ee7cedec995ccb55587f2a2f169ca264a43255c40b048c7042660e2e8e38a02",
+      "source_box": [
+        1218,
+        723,
+        1370,
+        929
+      ]
+    },
+    {
+      "filename": "nav_button_next.png",
+      "category": "highcountry-museum-seating-barriers-navigation",
+      "width": 1024,
+      "height": 1024,
+      "format": "PNG",
+      "mode": "RGBA",
+      "sha256": "99f8a532e8b421b42e4f636ad211c50755dbd28eeddfed5b0c291ce2105a80c2",
+      "source_box": [
+        1370,
+        723,
+        1536,
+        929
+      ]
+    }
+  ]
+}

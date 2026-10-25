@@ -1,0 +1,23 @@
+name: MIG-4 External Game Decoupling Level 2
+on:
+  pull_request:
+    paths:
+      - 'docs/migration/MIG-4-verified-game-assets.json'
+      - 'docs/migration/MIG-4-verified-source-cleanup.json'
+      - 'scripts/migration/verify-mig-4-level2.mjs'
+      - 'scripts/migration/stage-mig-4-game-consumers.sh'
+      - '.github/workflows/mig-4-level2.yml'
+      - '.github/workflows/gaming-client-hardening.yml'
+      - '.github/workflows/gaming-cross-game-qualification.yml'
+      - '.github/workflows/gaming-four-game-e2e.yml'
+  workflow_dispatch:
+jobs:
+  qualification:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify migration boundaries and preserved security tests
+        run: node scripts/migration/verify-mig-4-level2.mjs

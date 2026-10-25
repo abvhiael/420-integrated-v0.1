@@ -270,6 +270,9 @@ jobs:
         with:
           name: poker-5a5-level1-static-execution
           path: artifacts/poker-5a5-static
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
       - name: Certify matching exact-SHA actual execution records
         env:
           EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}

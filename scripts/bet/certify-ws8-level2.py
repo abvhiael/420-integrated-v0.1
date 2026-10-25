@@ -4,8 +4,10 @@ import hashlib
 import json
 import os
 import subprocess
+import sys
 from pathlib import Path
 
+root=Path(__file__).resolve().parents[2]
 sha = os.environ["EXPECTED_SHA"]
 assert subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip() == sha
 paths = [Path("artifacts/ws8-crypto/execution.json"), Path("artifacts/ws8-funded/execution.json"), Path("artifacts/ws8-funded/independent-outcome.json"), Path("artifacts/poker-5a5/execution.json")]
@@ -24,11 +26,20 @@ multiplayerCryptoPath=Path('artifacts/ws8-crypto/multiplayer-execution.json')
 multiplayer=json.loads(multiplayerPath.read_text(encoding='utf-8'))
 multiplayerCrypto=json.loads(multiplayerCryptoPath.read_text(encoding='utf-8'))
 assert all(r['qualifiedSHA']==sha and r['trackedWorkingTreeDirty'] is False for r in [multiplayer,multiplayerCrypto])
+# Recompute the accepted multiplayer transcript at issuance, rather than trusting
+# a conserved but substituted report. This output is uploaded with the certificate.
+subprocess.run([sys.executable,str(root/'scripts/bet/package-poker-5a10-evidence.py'),'--verify'],check=True)
+checkedMultiplayerPath=Path('artifacts/ws8-certificate/multiplayer-replay-checked.json')
+checkedMultiplayerPath.parent.mkdir(parents=True,exist_ok=True)
+subprocess.run(['node',str(root/'scripts/bet/verify-poker-5a10-multiplayer.mjs'),
+                'artifacts/poker-5a5/multiplayer-trace.log',str(checkedMultiplayerPath)],check=True)
+assert json.loads(checkedMultiplayerPath.read_text(encoding='utf-8'))==multiplayer
+paths += [checkedMultiplayerPath]
 assert multiplayer['players']==9 and multiplayer['publicStatementsVerified']==118 and len(multiplayer['statements'])==118
 assert multiplayerCrypto['genuineProofsVerified']==118 and multiplayer['settlementReceiptVerified']
 assert multiplayer['ownerReceiptsVerified']==9 and multiplayer['providerBondVerified']
 assert multiplayer['startingEscrow']==5400 and multiplayer['providerCollateral']==10800 and multiplayer['fee']==20
-assert len(multiplayer['balances'])==9 and sum(multiplayer['balances'])+20==5400
+assert multiplayer['balances']==[0,3986,50,100,150,200,250,299,345] and sum(multiplayer['balances'])+20==5400
 assert multiplayer['uncalledRefund']==50 and len(multiplayer['sidePotTiers'])==8
 assert hashlib.sha256(Path('artifacts/poker-5a5/multiplayer-trace.log').read_bytes()).hexdigest()==multiplayer['traceSHA256']
 paths += [multiplayerPath,multiplayerCryptoPath]

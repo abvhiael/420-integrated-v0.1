@@ -1,8 +1,8 @@
-# BET 5A.10 — Adversarial security and multiplayer integration
+# BET 5A.10 â€” Adversarial security and multiplayer integration
 
 ## Scope and authority
 
-This qualification joins the production 5A.2–5A.9 contracts into an executed
+This qualification joins the production 5A.2â€“5A.9 contracts into an executed
 nine-player NLHE hand. It preserves the existing genuine heads-up control, its
 ten attacks, the single-winner proof bundle and the protected-hand review case.
 It does not authorize a live deployment or replace independent security, game
@@ -72,7 +72,7 @@ The native owner requires 32 actual cases, including:
 
 | Boundary | Required executed coverage |
 |---|---|
-| Participant counts | Funded reservation and bounded refund separately for every count 2–9 |
+| Participant counts | Funded reservation and bounded refund separately for every count 2â€“9 |
 | Actual complete hand | Genuine nine-owner delivery, unequal all-ins, eight tiers and immutable atomic settlement |
 | Signature/turn authority | Wrong owner, valid other-seat signature out of turn, stale root, stale action nonce, over-stack bet and revoked ninth player's action |
 | Disconnect and exit | Early timeout denial, deterministic disconnected-actor timeout, queued exit preserving the accepted hand and locked escrow cashout denial |
@@ -99,6 +99,9 @@ the original 40-case funded integration owner and 200 genuine proof
 verifications across three bundles (41 + 41 + 118). No skipped or documentation
 success marker can satisfy these gates.
 
+The issuer recomputes the multiplayer replay from the raw executed trace and
+requires complete equality with the supplied report, rejecting conserved but
+substituted payout vectors. Its checked replay is uploaded with the certificate.
 The certificate requires a clean exact SHA, 118 accepted multiplayer statements,
 nine independently replayed balances, eight tiers, the 50-chip refund, 5,400
 player escrow, 10,800 segregated provider collateral and a verified canonical

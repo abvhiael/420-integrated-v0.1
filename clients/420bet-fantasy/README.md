@@ -30,3 +30,5 @@ Run `python -m unittest discover -s clients/420bet-fantasy -p test_nhl.py` from 
 ## Sportradar trial capture
 
 Use `sportradar.py` for fixed-origin NHL v7 trial HTTPS captures. Set `SPORTRADAR_API_KEY` in the worker process, or `SPORTRADAR_API_KEY_FILE` to a private file outside this checkout. See `docs/bet/BET-FANTASY-SPORTRADAR-TESTING.md` for commands, request budgeting and the distinction between captured responses, coverage inspection and accepted oracle statistics. Run `python -m unittest discover -s clients/420bet-fantasy -p "test_*.py" -v` to include both provider transport and existing genuine cryptographic client tests. No account/key is required for these explicitly offline tests.
+
+`sportradar_scoring.py` adds strict three-feed reconciliation, complete typed engine statistics, Merkle proofs and canonical oracle report/calldata preparation. See `docs/bet/BET-FANTASY-SPORTRADAR-SCORING-ORACLE.md`. Run `scripts/fantasy/qualify-sportradar-oracle.py` for actual scoped native quorum/scorer execution and independent ABI replay; private authenticated captures can be supplied separately with `--capture-store`.

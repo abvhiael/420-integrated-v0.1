@@ -67,3 +67,7 @@ Offline tests use clearly synthetic HTTP responses to exercise transport failure
 Authenticated trial access succeeded for the 2026-10-24 daily schedule and one completed game's summary, play-by-play and time-on-ice (four successful HTTPS captures). Raw provider evidence is kept privately outside the Git checkout; only checksums and execution metadata are exported. The first blocked-network attempt is retained in the local attempt budget.
 
 Actual v7 game responses place the game object at the JSON root, and ordinary player totals under statistics.total. The inspector and synthetic regression shape were corrected against these real observations. The sample is Ducks–Flyers, provider game 32cd71ea-939d-4290-80d9-06a37b178cb4, status closed. This establishes API access and capture/inspection, not complete source-to-engine normalization or oracle acceptance. No credential or raw licensed payload is committed.
+
+## Scoring/oracle implementation follow-up
+
+The earlier coverage-only inspector is now supplemented by the strict normalizer and canonical oracle transaction builder. See [scoring and oracle integration](BET-FANTASY-SPORTRADAR-SCORING-ORACLE.md) for current field validation, operators, actual native qualification and remaining live-settlement gates. Raw capture success alone is still not settlement acceptance.

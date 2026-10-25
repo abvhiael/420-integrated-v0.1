@@ -78,8 +78,7 @@ contract OrganizationRegistry is R04EmergencyConsumer {
         if (
             !organizations[id].active || !invitations[id][msg.sender]
                 || block.timestamp >= invitationExpiry[id][msg.sender]
-                || members[id][msg.sender].status == Status.Active
-                || members[id][msg.sender].pendingObligations != 0
+                || members[id][msg.sender].status == Status.Active || members[id][msg.sender].pendingObligations != 0
         ) revert Invalid();
         invitations[id][msg.sender] = false;
         delete invitationExpiry[id][msg.sender];
@@ -171,22 +170,30 @@ contract OrganizationRegistry is R04EmergencyConsumer {
     }
 
     /// @notice Only the current administrator may nominate an active, obligation-free successor.
-    function proposeAdmin(bytes32 id, address candidate) external r04Unrestricted(EmergencyDomains.ORGANIZATION_GOVERNANCE) {
+    function proposeAdmin(
+        bytes32 id,
+        address candidate
+    ) external r04Unrestricted(EmergencyDomains.ORGANIZATION_GOVERNANCE) {
         Organization storage org = organizations[id];
-        if (!org.active || msg.sender != org.administrator || candidate == address(0)
-            || candidate == msg.sender || members[id][candidate].status != Status.Active
-            || members[id][candidate].pendingObligations != 0) revert Unauthorized();
+        if (
+            !org.active || msg.sender != org.administrator || candidate == address(0) || candidate == msg.sender
+                || members[id][candidate].status != Status.Active || members[id][candidate].pendingObligations != 0
+        ) revert Unauthorized();
         proposedAdministrator[id] = candidate;
         leadershipDeadline[id] = uint64(block.timestamp + LEADERSHIP_LIFETIME);
         emit LeadershipProposed(id, candidate, leadershipDeadline[id]);
     }
 
     /// @notice Successor must explicitly accept; nomination alone grants no administrative authority.
-    function acceptAdmin(bytes32 id) external r04Unrestricted(EmergencyDomains.ORGANIZATION_GOVERNANCE) {
+    function acceptAdmin(
+        bytes32 id
+    ) external r04Unrestricted(EmergencyDomains.ORGANIZATION_GOVERNANCE) {
         Organization storage org = organizations[id];
-        if (!org.active || proposedAdministrator[id] != msg.sender || block.timestamp >= leadershipDeadline[id]
-            || members[id][msg.sender].status != Status.Active || members[id][msg.sender].pendingObligations != 0
-            || members[id][org.administrator].pendingObligations != 0) revert Unauthorized();
+        if (
+            !org.active || proposedAdministrator[id] != msg.sender || block.timestamp >= leadershipDeadline[id]
+                || members[id][msg.sender].status != Status.Active || members[id][msg.sender].pendingObligations != 0
+                || members[id][org.administrator].pendingObligations != 0
+        ) revert Unauthorized();
         address old = org.administrator;
         org.administrator = msg.sender;
         delete proposedAdministrator[id];
@@ -195,7 +202,10 @@ contract OrganizationRegistry is R04EmergencyConsumer {
     }
 
     /// @notice The old unilateral transfer entry point is closed; use proposeAdmin + acceptAdmin.
-    function transferAdmin(bytes32, address) external pure {
+    function transferAdmin(
+        bytes32,
+        address
+    ) external pure {
         revert Unauthorized();
     }
 

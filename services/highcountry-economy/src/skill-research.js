@@ -77,7 +77,7 @@ export class SkillResearchService {
    this._state(s);this._session(s,session,principal);
    if(s.operations.has(operation))throw new SettlementError('replayed operation');
    const proofKey=verified.sourceEvent;
-   if(s.skillResearchProofs.has(proofKey))throw new SettlementError('replayed progression evidence');
+   if(s.skillResearchProofs.has(proofKey)||s.discoveryEvents?.has(proofKey))throw new SettlementError('replayed progression evidence');
    const key=JSON.stringify([principal,trackId,this.catalog.version]);
    const r=s.skillResearch.get(key)||{points:0,unlocked:false};
    if(r.unlocked||r.points+points>track.requiredPoints)throw new SettlementError('progression capped');

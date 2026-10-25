@@ -1,0 +1,389 @@
+{
+  "schema": "mig-4-source-cleanup-v1",
+  "genesisParentSha": "5a3d0737f536361c8f47a6423f02c49af6fa5669",
+  "qualifiedCopies": {
+    "420-arcade": "d8bdb101dcef59048c48fe387078f7a6295462b4",
+    "420-budtender": "9ab751e3cdf1fa2e8725dda0981749208ab038f5"
+  },
+  "removed": [
+    {
+      "path": "apps/arcade-web/.gitignore",
+      "sha": "3ff38cc06ffdeeba7e4aea30cfe19dbdcc6728a2"
+    },
+    {
+      "path": "apps/arcade-web/index.html",
+      "sha": "c56baa744f959e9fae3801e1209eb7b8356842f4"
+    },
+    {
+      "path": "apps/arcade-web/package-lock.json",
+      "sha": "bdcc046e19ab1785eb36f63460adf6a108eb8b1a"
+    },
+    {
+      "path": "apps/arcade-web/package.json",
+      "sha": "e311a35f936b11862678a179f04b374fe4ef6b58"
+    },
+    {
+      "path": "apps/arcade-web/scripts/lint.mjs",
+      "sha": "ec206fe250460ea48b82ec11d9707fc98ca2fb6f"
+    },
+    {
+      "path": "apps/arcade-web/src/App.tsx",
+      "sha": "7b7cb3fcd75c15001079b7b81d99829fd42f13d3"
+    },
+    {
+      "path": "apps/arcade-web/src/ArcadeGameErrorBoundary.tsx",
+      "sha": "fdc0505e7da434f3131f2ae2542d6f517f7b9e78"
+    },
+    {
+      "path": "apps/arcade-web/src/AudioAccessibilityControls.tsx",
+      "sha": "c13014580f18a5ce566d6491dddd30caea7057ab"
+    },
+    {
+      "path": "apps/arcade-web/src/UniversalGamePanel.tsx",
+      "sha": "d1e2189691b933fa5b742ace330406db47c33387"
+    },
+    {
+      "path": "apps/arcade-web/src/casualAdapter.tsx",
+      "sha": "56555154b9f71170c8293602d695597a4ce77a60"
+    },
+    {
+      "path": "apps/arcade-web/src/main.tsx",
+      "sha": "6b626f7d386ee64c498950079c96691218155f7f"
+    },
+    {
+      "path": "apps/arcade-web/src/style.css",
+      "sha": "31e722178a21ccbb1db5862a2557ac3f730e4063"
+    },
+    {
+      "path": "apps/arcade-web/test/asset-recovery.test.mjs",
+      "sha": "81b7cd8a507b78d69f3633d9efbb28c6468a0c69"
+    },
+    {
+      "path": "apps/arcade-web/test/audio-controls.test.mjs",
+      "sha": "3085b579c591b1c711145f7fab076a3baae65502"
+    },
+    {
+      "path": "apps/arcade-web/test/bootstrap.test.mjs",
+      "sha": "f000c9ef8b78ba79730fe67f6cebf68d632709d1"
+    },
+    {
+      "path": "apps/arcade-web/test/casual-bridge.test.mjs",
+      "sha": "0fb74ec2d041d00f417517c60eb67bc27cde010f"
+    },
+    {
+      "path": "apps/arcade-web/test/catalog.test.mjs",
+      "sha": "f9256da71d4ca2a554de0a302ab18de166c148e0"
+    },
+    {
+      "path": "apps/arcade-web/test/framework.test.mjs",
+      "sha": "a5020cef9f04e45029c49d31c7408e50fbdc3163"
+    },
+    {
+      "path": "apps/arcade-web/test/navigation.test.mjs",
+      "sha": "ace23aecc04d46bfca89aa2f63dfa095fbcfd097"
+    },
+    {
+      "path": "apps/arcade-web/test/universal-controls.test.mjs",
+      "sha": "ae9ebce5c09c9760019363b938e8f2020ea6dad3"
+    },
+    {
+      "path": "apps/arcade-web/tsconfig.json",
+      "sha": "52dfd08875937f11fb99bc1ee6617d83b49f0dd0"
+    },
+    {
+      "path": "apps/arcade-web/vite.config.ts",
+      "sha": "e9a0274de985f41d190e30f4da713767b9613451"
+    },
+    {
+      "path": "clients/budtender-access-v1/package.json",
+      "sha": "b33e050ae74d797565432184dbbc3bb8ec86f8c9"
+    },
+    {
+      "path": "clients/budtender-access-v1/src/access.js",
+      "sha": "1f29e47742cacacfd7015fe1f41d3490f4edc203"
+    },
+    {
+      "path": "clients/budtender-access-v1/test/access.test.js",
+      "sha": "05f7fe197735bb86962126ec51359a49ca016d1b"
+    },
+    {
+      "path": "clients/budtender-web-v1/README.md",
+      "sha": "67df9f4acd0022440ec45a4c034d10b78acf191c"
+    },
+    {
+      "path": "clients/budtender-web-v1/deployment.runtime.json",
+      "sha": "525568b4fdf9b6050baefb64a31bb0abebe42caa"
+    },
+    {
+      "path": "clients/budtender-web-v1/package.json",
+      "sha": "ff8661fa170a64a24907013c7aa44f57c84c12b8"
+    },
+    {
+      "path": "clients/budtender-web-v1/public/app.js",
+      "sha": "40365e560410629aec076243c204012c7a367a08"
+    },
+    {
+      "path": "clients/budtender-web-v1/public/export-categories.js",
+      "sha": "1bf0e80607d4769478ed7079e5efb15e80d6c96e"
+    },
+    {
+      "path": "clients/budtender-web-v1/public/index.html",
+      "sha": "081175184b99fbe4a1b29f3ceb0b6a4dca561e07"
+    },
+    {
+      "path": "clients/budtender-web-v1/public/scene-layers.js",
+      "sha": "9cdbead2e6b3d94383c33c515b64ad5fb449e5e4"
+    },
+    {
+      "path": "clients/budtender-web-v1/public/scene-variants.js",
+      "sha": "5d20fb6a1670a362b772be01abb7d1f9dba1318f"
+    },
+    {
+      "path": "clients/budtender-web-v1/public/styles.css",
+      "sha": "d8831dbabbd78ba08a840c9fa11514e8761ef2a5"
+    },
+    {
+      "path": "clients/budtender-web-v1/scripts/asset-qualification.mjs",
+      "sha": "9b0bc7260353054bf94b4939e506242e7389c2f4"
+    },
+    {
+      "path": "clients/budtender-web-v1/scripts/operations-check.mjs",
+      "sha": "3a0c1232164330391de2249a2f28c61a8c9d405c"
+    },
+    {
+      "path": "clients/budtender-web-v1/scripts/resize-phase-317.py",
+      "sha": "ddce9c380ebcf8e3644cd127aa83c23dbe283dff"
+    },
+    {
+      "path": "clients/budtender-web-v1/scripts/security-check.mjs",
+      "sha": "8e13709f1f21d09e2df27aa21373b7afe6e21570"
+    },
+    {
+      "path": "clients/budtender-web-v1/src/runtime-config.ts",
+      "sha": "ed00a3b58157ffc831cbd209db5fc4c595fada94"
+    },
+    {
+      "path": "clients/budtender-web-v1/src/server.ts",
+      "sha": "d2229d6a7a53384f6fab87b99cd56f714ccd79d2"
+    },
+    {
+      "path": "clients/budtender-web-v1/test/artwork.test.ts",
+      "sha": "35da1abb1696ec66d93f579bb5a9a4c062f85978"
+    },
+    {
+      "path": "clients/budtender-web-v1/test/export-categories.test.ts",
+      "sha": "c92ba3df3d3531b579aba6258d9563241d639239"
+    },
+    {
+      "path": "clients/budtender-web-v1/test/hotspots.test.ts",
+      "sha": "2b62eb4ca27814462427bd08affc097fddb65c0e"
+    },
+    {
+      "path": "clients/budtender-web-v1/test/runtime-config.test.ts",
+      "sha": "8437905b641e1d9a10994a7e0e152461338f4103"
+    },
+    {
+      "path": "clients/budtender-web-v1/test/server.test.ts",
+      "sha": "096700ef84fce9accdf277ced597f541a6486d1a"
+    },
+    {
+      "path": "config/arcade-0-7-scope-freeze.json",
+      "sha": "b0cb009615e33fd55da748795dcefe998ed126d6"
+    },
+    {
+      "path": "config/arcade-game-identities.json",
+      "sha": "6a29a566b37ce22f33944f20eba3a358cbde5cb8"
+    },
+    {
+      "path": "config/arcade-module-architecture.json",
+      "sha": "91a5aaf685b432befcf5a4c770da7b6ae4a45a0c"
+    },
+    {
+      "path": "config/arcade-platform-requirements.json",
+      "sha": "b31c13974ddbc9b4f5ae16948a7c0b4ac64e7c1e"
+    },
+    {
+      "path": "packages/arcade-assets/package.json",
+      "sha": "6b26e096f07c5f6fbfcd47bc1c540df8dd3e2abe"
+    },
+    {
+      "path": "packages/arcade-assets/src/index.mjs",
+      "sha": "6eff8128abde68096f72ada1389305022b37509c"
+    },
+    {
+      "path": "packages/arcade-assets/test/assets.test.mjs",
+      "sha": "f2401588bb5a61767a884ae90fac3688dcb01537"
+    },
+    {
+      "path": "packages/arcade-audio/src/index.d.mts",
+      "sha": "7ce963e759652916f19ac783158790588823b749"
+    },
+    {
+      "path": "packages/arcade-audio/src/index.mjs",
+      "sha": "3585d8a4fad7bb7773a11804343c19380effa392"
+    },
+    {
+      "path": "packages/arcade-audio/test/audio.test.mjs",
+      "sha": "cd740424048e707dc5c6948147a9feef3dfddef2"
+    },
+    {
+      "path": "packages/arcade-controls/package.json",
+      "sha": "10238bc3a4c1c166652701db9b134f6ffb0e40d7"
+    },
+    {
+      "path": "packages/arcade-controls/src/index.mjs",
+      "sha": "34801decf945911041dd6c2f982b61d68a1283db"
+    },
+    {
+      "path": "packages/arcade-controls/test/controls.test.mjs",
+      "sha": "7f908c8a05035d2a2cfffeaa5abe72c7458f28cf"
+    },
+    {
+      "path": "packages/arcade-core/package.json",
+      "sha": "a22a74683ba066d1cbac2683c36c66678b12951d"
+    },
+    {
+      "path": "packages/arcade-core/src/react-casual.mjs",
+      "sha": "1813f7cc4fa5078a93b94aa6ad0e592586f8aed8"
+    },
+    {
+      "path": "packages/arcade-core/test/react-casual.test.mjs",
+      "sha": "775858710c960c9b395da077fd367df5b2a2e3cc"
+    },
+    {
+      "path": "packages/arcade-input/package.json",
+      "sha": "5f36a29dd2c3db13d03bf59563d04890456dcafb"
+    },
+    {
+      "path": "packages/arcade-input/src/index.mjs",
+      "sha": "05c217349722a1f493c91b39d9ae6cf61e91d422"
+    },
+    {
+      "path": "packages/arcade-input/test/input.test.mjs",
+      "sha": "04f74b1b3d6b2891a08336b0ace2d7a41a77126b"
+    },
+    {
+      "path": "packages/arcade-phaser/package.json",
+      "sha": "9fa0ecdeb3dbd324f6c0b8597ac70c7cf51eea47"
+    },
+    {
+      "path": "packages/arcade-phaser/src/index.mjs",
+      "sha": "048a62e01f01eac325d18abe8baa0b5e7a4ece38"
+    },
+    {
+      "path": "packages/arcade-phaser/test/lifecycle.test.mjs",
+      "sha": "b1fe697f55ab4759db5a3e27fdd380faf0a55f7a"
+    },
+    {
+      "path": "packages/arcade-saves/package.json",
+      "sha": "4e2e89abcd904a51b907a717dc72cf9d0a6f0474"
+    },
+    {
+      "path": "packages/arcade-saves/src/index.mjs",
+      "sha": "b5b2cfb94193b9f81011a8033e279ef683f6b3a0"
+    },
+    {
+      "path": "packages/arcade-saves/test/saves.test.mjs",
+      "sha": "45be89ec453efd36f20d67e50aac921f64213ac9"
+    },
+    {
+      "path": "packages/arcade-score/package.json",
+      "sha": "c6d26c988d1de9335d60db98f3d8c49886877865"
+    },
+    {
+      "path": "packages/arcade-score/src/index.mjs",
+      "sha": "1c12362c84d3a2f60bbe0965b9b10a4cab8f74a2"
+    },
+    {
+      "path": "packages/arcade-score/test/events.test.mjs",
+      "sha": "94a0ffc434503406d6285cc9167d057fdb6c5e5d"
+    },
+    {
+      "path": "packages/arcade-testing/package.json",
+      "sha": "1f5a2859bcbcc1b9b54af6e2fc01705907ef2b4d"
+    },
+    {
+      "path": "packages/arcade-testing/scripts/qualify.mjs",
+      "sha": "3dee8cc3d4a2a7a9b51ddefff024dd9506b7355c"
+    },
+    {
+      "path": "packages/arcade-testing/test/runtime-qualification.test.mjs",
+      "sha": "a7f5a76c9a02dea4538c933a1e6cde4b601c8cd4"
+    },
+    {
+      "path": "scripts/arcade/qualify-kush-krusher-assets.py",
+      "sha": "65def669ba3b5656ba73df1464dfefd6408a97f4"
+    },
+    {
+      "path": "scripts/arcade/qualify-sativa-steve-assets.py",
+      "sha": "e7e11ba13527fbe798ec0b837aa0de9e75b48c8c"
+    },
+    {
+      "path": "scripts/arcade/verify-arc-0-1.mjs",
+      "sha": "2f55b3829777daae1ef03c80307f8bf2086f49fe"
+    },
+    {
+      "path": "scripts/arcade/verify-arc-0-2.mjs",
+      "sha": "1424cc5f159b9bfc984164dc1f086ce589de114f"
+    },
+    {
+      "path": "scripts/arcade/verify-arc-0-4.mjs",
+      "sha": "6c4e055f4c261a6d9b17c9c32172ce0cf55b6727"
+    },
+    {
+      "path": "scripts/arcade/verify-arc-0-5.mjs",
+      "sha": "07777246ba73ab70aaba5d669e5f92b9a870fd38"
+    },
+    {
+      "path": "scripts/arcade/verify-arc-0-6.mjs",
+      "sha": "cd0bba6a3a26908a48a340451ab452c2df68bdfd"
+    },
+    {
+      "path": "scripts/arcade/verify-arc-0-7.mjs",
+      "sha": "c7a420c9a144af63a8b4da4f58e2ff25fe805f15"
+    },
+    {
+      "path": "scripts/budtender/normalize-phase316-artwork.mjs",
+      "sha": "0c8dee9f2fe76bcac3a6917433c04e45a8a38383"
+    },
+    {
+      "path": "src/budtender/BudtenderApplicationService.ts",
+      "sha": "4631337d4587cc811151598c133db7a9ca71f0da"
+    },
+    {
+      "path": "src/budtender/BudtenderCustomers.ts",
+      "sha": "3ddfb5bcec49062bb2d1d74148b4ff1685da3579"
+    },
+    {
+      "path": "src/budtender/BudtenderStore.ts",
+      "sha": "a308e835b6626e61d46780b2f221a746ed6c2b6d"
+    },
+    {
+      "path": "src/budtender/OfflineProgression.ts",
+      "sha": "76a3e1f14f3660a759c7a69596792bd4a1721ae3"
+    },
+    {
+      "path": "src/budtender/ProductInventory.ts",
+      "sha": "ff226b7df31166e8df022a943a5e7d66daf8c958"
+    },
+    {
+      "path": "src/budtender/README.md",
+      "sha": "91a12446953abfcc7b70d5bcaa44a7ec74b0d596"
+    },
+    {
+      "path": "src/budtender/StoreProgression.ts",
+      "sha": "a6887e9332b824ae7e3152fab4778467f7e1d8ce"
+    }
+  ],
+  "retainedPendingPathOrDependencyProof": [
+    "scripts/arcade/verify-arc-0-3.mjs",
+    "test/budtender/BudtenderApplicationService.spec.ts",
+    "test/budtender/BudtenderCustomers.spec.ts",
+    "test/budtender/BudtenderIntegration.spec.ts",
+    "test/budtender/BudtenderStore.spec.ts",
+    "test/budtender/OfflineProgression.spec.ts",
+    "test/budtender/ProductInventory.spec.ts",
+    "test/budtender/StoreProgression.spec.ts"
+  ],
+  "note": "MIG-4 incomplete until remaining mixed consumer dependencies are reconciled; no testnet claims."
+}

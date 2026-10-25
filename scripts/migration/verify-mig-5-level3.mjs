@@ -27,5 +27,7 @@ for(const p of ['.github/workflows/gaming-client-hardening.yml','.github/workflo
 assert(!fs.existsSync('assets/arcade'));
 assert(!fs.existsSync('assets/budtender'));
 assert.equal(manifest.migrationPRs['800'],'OPEN_HISTORICAL_INVENTORY_RECONCILIATION');
-assert.equal(manifest.qualification,'PENDING_LEVEL_3');
+assert.equal(manifest.qualification,'PASSED_LEVEL_3');
+assert.equal(manifest.level3Evidence.conclusion,'success');
+assert.equal(manifest.level3Evidence.runId,40167041132);
 console.log('MIG-5 bounded structural Level 3 candidate PASS — independent pins, game IDs, workflow isolation, Genesis protocol boundaries');

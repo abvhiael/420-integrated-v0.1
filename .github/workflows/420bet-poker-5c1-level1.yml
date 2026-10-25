@@ -1,0 +1,49 @@
+name: 420Bet Poker 5C.1 policy and lifecycle Level 1
+on:
+  push:
+    branches: ['bet/5c1-tournament-formats-registration-lifecycle']
+    paths:
+      - 'contracts/src/bet/tournament/**'
+      - 'contracts/test/tournament-5c1/**'
+      - 'clients/420bet-poker/tournament/**'
+      - 'scripts/bet/qualify-poker-5c1.py'
+      - 'scripts/bet/poker-5c1-static-review.json'
+      - '.github/workflows/420bet-poker-5c1-level1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: poker-5c1-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  policy-and-lifecycle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.8.6
+      - name: Install pinned analyzer
+        run: |
+          python -m pip install slither-analyzer==0.11.6
+          solc-select install 0.8.30
+          solc-select use 0.8.30
+      - name: Bind exact implementation SHA
+        run: test "$(git rev-parse HEAD)" = "${{ github.sha }}"
+      - name: Execute real native, reference and static qualification
+        run: python scripts/bet/qualify-poker-5c1.py --output artifacts/poker-5c1
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: poker-5c1-${{ github.sha }}
+          path: |
+            artifacts/poker-5c1/*.json
+            artifacts/poker-5c1/*.log
+          if-no-files-found: error

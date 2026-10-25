@@ -110,3 +110,16 @@ The local client integration now supports the repository-defined Wrapped420 repr
 ## Qualification inheritance
 
 Evidence-only ledger/certificate commits may inherit previous exact-SHA executable qualification if their diff changes no contracts, tests, workflows, dependencies, runtime config, or generated input. Revalidate affected suites only for substantive changes. At app-phase boundary run Level 3 once against the final reconciled candidate—not once per step.
+
+
+## Poker tournaments — external acceptance after local Phase C integration
+
+5C.1 establishes the [approved tournament policy and executable reference lifecycle](bet/BET-AUDIT-5C.1-TOURNAMENT-POLICY.md). Its Level 1 scope is non-custodial and does not certify live hands or prize settlement. Actual registration custody, hand/chip-ledger integration, blind snapshots, multi-table balancing, ranking, prize/refund execution and funded adversarial qualification remain **local Phase C implementation**, not testnet-only work.
+
+| External gate | Required later evidence |
+| --- | --- |
+| TN-TOUR-01 — official binding and authority | After local implementation qualifies: approved network/asset, actual deployed tournament modules and dependency hashes, separated operator/provider/identity/capability custody and finalized deployment/binding receipts |
+| TN-TOUR-02 — prospective funded tournament | Real paid and prefunded free registrations, allowed/rejected late/re-entry/rebuy activity, verified tournament hands, seat/level transitions, independent ranking and finalized prize/refund/fee receipts under original frozen policy |
+| TN-TOUR-03 — operational and independent acceptance | Outage, disconnect, incident, pause/recovery and reorg drills; source/proof/evidence retention; independent security/math/risk/eligibility/legal reviews and explicit release authorization |
+
+These gates remain OPEN and depend on the corresponding local integrations. No policy publication, reference model or local certificate is production wagering authorization.

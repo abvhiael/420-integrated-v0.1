@@ -6,8 +6,8 @@ const hash=x=>typeof x==='string'&&/^0x[0-9a-fA-F]{64}$/.test(x);
 const bytes=x=>typeof x==='string'&&/^0x([0-9a-fA-F]{2})+$/.test(x);
 const b32=x=>{if(!hash(x)||BigInt(x)===0n)fail('bytes32 identifier required');return x.toLowerCase();};
 const enc=(sig,args)=>calldata(sig,...args);
-const ORG_DOMAIN='organizations',COOP_DOMAIN='cooperatives';
-const ENABLED=new Set(['organization.create','organization.invite','organization.invitation.revoke','organization.join','organization.leave','organization.remove','organization.leader.propose','organization.leader.accept','cooperative.create','cooperative.enroll','cooperative.withdraw']);
+export const SOC5A_ENABLED_ACTIONS=Object.freeze(['organization.create','organization.invite','organization.invitation.revoke','organization.join','organization.leave','organization.remove','organization.leader.propose','organization.leader.accept','cooperative.create','cooperative.enroll','cooperative.withdraw']);
+const ENABLED=new Set(SOC5A_ENABLED_ACTIONS);
 const TABLE=Object.freeze({
  'organization.create':{contract:'organizations',sig:'create(bytes32,bytes32)',fields:['id','metadataHash'],check:'create'},
  'organization.invite':{contract:'organizations',sig:'invite(bytes32,address,bool)',fields:['organization','account'],extra:true,check:'admin'},
@@ -25,8 +25,19 @@ const TABLE=Object.freeze({
  'cooperative.proposal.cancel':{contract:'governance',sig:'cancel(bytes32)',fields:['proposal'],check:'proposer'},
  'cooperative.execute':{contract:'executor',sig:'execute(bytes32)',fields:['proposal'],check:'executable'}
 });
+// Recover the signer of the actual serialized Ethereum transaction locally.
+// RPC eth_getTransactionByHash is NOT acceptable as pre-broadcast signature evidence.
+export async function recoverSignedSocialEnvelope(raw){
+ if(!bytes(raw))fail('wallet signed raw transaction required');
+ const {parseTransaction,recoverTransactionAddress}=await import('viem');
+ let parsed,from;
+ try{parsed=parseTransaction(raw);from=await recoverTransactionAddress({serializedTransaction:raw});}
+ catch{fail('invalid cryptographic transaction signature');}
+ if(!parsed?.to||parsed.chainId===undefined||parsed.nonce===undefined||!from)fail('incomplete signed transaction');
+ return {from,to:parsed.to,input:parsed.data??'0x',chainId:parsed.chainId,value:parsed.value??0n,nonce:parsed.nonce};
+}
 export class CanonicalSocialChainAdapter {
- constructor({rpc,contracts,scope,emergencyDomain,organizationEmergencyDomain,cooperativeEmergencyDomain,verifySignedEnvelope}){
+ constructor({rpc,contracts,scope,emergencyDomain,organizationEmergencyDomain,cooperativeEmergencyDomain,verifySignedEnvelope=recoverSignedSocialEnvelope}){
   if(typeof rpc?.request!=='function'||typeof rpc?.call!=='function'||!contracts||!hash(emergencyDomain)||!hash(organizationEmergencyDomain)||!hash(cooperativeEmergencyDomain)||typeof verifySignedEnvelope!=='function')fail('pinned social chain and signed envelope verifier required');
   for(const key of ['organizations','cooperatives','governance','executor'])
    if(!rpc.contracts[key]?.codeHash||address(rpc.contracts[key].address)!==address(contracts[key]))fail('unpinned social contract');
@@ -40,7 +51,9 @@ export class CanonicalSocialChainAdapter {
   if(op.extra==='support')params.push(payload.support===true||payload.support==='true'?1:0);
   let allowed=false;
   try{
-   if(!await this.rpc.unrestricted(this.emergencyDomain)||!await this.rpc.unrestricted(op.contract==='organizations'?this.organizationEmergencyDomain:this.cooperativeEmergencyDomain))return {allowed:false};
+   if(!await this.rpc.unrestricted(this.emergencyDomain))return {allowed:false};
+   const domain=op.contract==='organizations'?this.organizationEmergencyDomain:this.cooperativeEmergencyDomain;
+   if(BigInt('0x'+(await this.read(op.contract,'r04DomainOpen(bytes32)',domain))[0])!==1n)return {allowed:false};
    const id=payload.organization??payload.cooperative??payload.id;
    const org=id?b32(id):null;
    if(op.check==='create'){

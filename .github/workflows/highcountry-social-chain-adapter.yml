@@ -5,6 +5,11 @@ on:
       - 'services/highcountry-economy/src/canonical-social-chain-adapter.js'
       - 'services/highcountry-economy/test/canonical-social-chain-adapter.test.js'
       - 'services/highcountry-economy/migrations/008-social-rls.sql'
+      - 'services/highcountry-economy/qualification/social-abi-wallet.test.mjs'
+      - 'services/highcountry-economy/src/canonical-social-gateway.js'
+      - 'services/highcountry-economy/package.json'
+      - 'clients/highcountry-access-v1/src/social-http-gateway.js'
+      - 'clients/highcountry-access-v1/test/social-http-gateway.test.js'
       - '.github/workflows/highcountry-social-chain-adapter.yml'
   workflow_dispatch:
 permissions:
@@ -29,5 +34,9 @@ jobs:
         run: npm install --prefix services/highcountry-economy --ignore-scripts --no-audit --no-fund
       - name: Chain adapter adversarial tests
         run: node --test services/highcountry-economy/test/canonical-social-chain-adapter.test.js
+      - name: SOC-5A actual Solidity ABI and cryptographic wallet recovery
+        run: node --test services/highcountry-economy/qualification/social-abi-wallet.test.mjs
+      - name: SOC-5A browser player signing tests
+        run: node --test clients/highcountry-access-v1/test/social-http-gateway.test.js
       - name: Retained social gateway adversarial tests
         run: node --test services/highcountry-economy/test/canonical-social-gateway.test.js

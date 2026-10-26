@@ -109,3 +109,18 @@ fs_permissions = [
   { access = "read", path = "../clients/420bet-poker/zkshuffle/fixtures/tournament-5c5" },
   { access = "read", path = "../clients/420bet-poker/zkshuffle/fixtures/tournament-5c6" }
 ]
+
+# C7 versioned financial settlement, isolated from retained owners.
+[profile.tournament5c7]
+src = "src/bet/tournament"
+test = "test/tournament-5c7"
+script = "script/__empty__"
+solc_version = "0.8.30"
+via_ir = true
+fuzz = { runs = 2500, max_test_rejects = 65536, seed = "0x420" }
+fs_permissions = [
+  { access = "read", path = "../clients/420bet-poker/zkshuffle/fixtures/ws8" },
+  { access = "read", path = "../clients/420bet-poker/zkshuffle/fixtures/tournament-5c5" },
+  { access = "read", path = "../clients/420bet-poker/zkshuffle/fixtures/tournament-5c6" },
+  { access = "read", path = "../clients/420bet-poker/zkshuffle/fixtures/tournament-5c7" }
+]

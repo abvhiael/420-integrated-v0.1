@@ -1,3 +1,4 @@
+import {SUPPORT_CATALOG} from './support-catalog.js';
 // HC-NEXT-4.4 player experience. All balances, ownership and settlement states are server-derived.
 const opaque=x=>typeof x==='string'&&/^[A-Za-z0-9:_-]{1,128}$/.test(x);
 const pos=x=>Number.isSafeInteger(x)&&x>0;
@@ -37,10 +38,25 @@ export function createMarketplaceClient({apiUrl,authenticate,fetchImpl=fetch}={}
   }
  });
 }
+export function mountSupportArtCatalog({document,main}){
+ const section=document.createElement('section');section.setAttribute('aria-label','Cultivation support asset catalog');
+ const heading=document.createElement('h3');heading.textContent='HC-ART-01-A · Plant supports';section.append(heading);
+ const note=document.createElement('p');note.textContent='Artwork catalog only. BUDS prices and purchases require server-registered items and authenticated listings; browsing does not create inventory or entitlement.';section.append(note);
+ const grid=document.createElement('div');grid.className='support-art-catalog';section.append(grid);
+ for(const asset of SUPPORT_CATALOG){
+  const card=document.createElement('article');card.className='support-art-card';
+  const title=document.createElement('h4');title.textContent=asset.name;card.append(title);
+  const picture=document.createElement('img');picture.src=asset.paths.sprite;picture.alt=asset.name+' support artwork';picture.loading='lazy';picture.width=128;picture.height=128;card.append(picture);
+  const caption=document.createElement('p');caption.textContent=asset.region+' · '+asset.anchor+' anchor · '+asset.footprint.columns+'×'+asset.footprint.rows+' base tiles'+(asset.layering==='split'?' · layered':'');card.append(caption);
+  grid.append(card);
+ }
+ main.append(section);
+}
 export function mountMarketplace({document,main,runtime,authenticate,fetchImpl=fetch,operationId=()=>globalThis.crypto?.randomUUID?.().replaceAll('-','')}){
  const el=(tag,text='')=>{const e=document.createElement(tag);e.textContent=text;return e;};
  const status=el('p',runtime.mode==='connected'?'Sign in to load verified marketplace inventory.':'Marketplace unavailable offline; guest items are never spendable.');
  status.setAttribute('role','status');status.setAttribute('aria-live','polite');main.append(status);
+ mountSupportArtCatalog({document,main});
  if(runtime.mode!=='connected'||typeof authenticate!=='function')return;
  const client=createMarketplaceClient({apiUrl:runtime.apiUrl,authenticate,fetchImpl});
  const region=el('section');region.setAttribute('aria-label','Marketplace');main.append(region);

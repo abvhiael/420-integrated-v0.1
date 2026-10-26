@@ -1,0 +1,67 @@
+name: High Country SOC-5C Local EVM Level 1
+on:
+  pull_request:
+    paths:
+      - 'services/highcountry-economy/src/canonical-social-*'
+      - 'services/highcountry-economy/src/runtime-service.js'
+      - 'services/highcountry-economy/migrations/010-social-events.sql'
+      - 'services/highcountry-economy/scripts/provision-social-role.mjs'
+      - 'services/highcountry-economy/qualification/social-events.test.mjs'
+      - 'services/highcountry-economy/qualification/social-local-evm.test.mjs'
+      - '.github/workflows/highcountry-soc-5c.yml'
+permissions:
+  contents: read
+jobs:
+  local-evm:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: testpassword
+          POSTGRES_DB: hc5c
+        ports: ['5432:5432']
+        options: --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 15
+    env:
+      HC_SOC5C_ANVIL_URL: http://127.0.0.1:8545
+      HC_MIGRATION_DATABASE_URL: postgresql://postgres:testpassword@localhost:5432/hc5c
+      PGPASSWORD: testpassword
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: foundry-rs/foundry-toolchain@v1
+      - name: Verify immutable qualification SHA
+        env:
+          SHA: ${{ github.event.pull_request.head.sha }}
+        run: test "$(git rev-parse HEAD)" = "$SHA"
+      - name: Install scoped dependencies and local Solidity compiler
+        run: |
+          npm install --prefix services/highcountry-economy --ignore-scripts --no-audit --no-fund
+          npm install --prefix services/highcountry-economy --no-save --ignore-scripts --no-audit --no-fund solc@0.8.24
+      - name: Provision real PostgreSQL 16 journal and tenant RLS
+        run: |
+          for migration in 007-social-operations 008-social-rls 009-social-intents 010-social-events; do
+            psql -h localhost -U postgres -d hc5c -v ON_ERROR_STOP=1 -f "services/highcountry-economy/migrations/$migration.sql"
+          done
+          psql -h localhost -U postgres -d hc5c -v ON_ERROR_STOP=1 -c "CREATE ROLE hc_social_test_runtime NOLOGIN NOINHERIT NOSUPERUSER NOBYPASSRLS"
+          node services/highcountry-economy/scripts/provision-social-role.mjs HC hc_social_test_runtime
+      - name: Execute pinned-topic and adversarial provenance assertions
+        run: node --test services/highcountry-economy/qualification/social-events.test.mjs
+      - name: Launch local Anvil EVM
+        run: |
+          anvil --host 127.0.0.1 --port 8545 --chain-id 420 > /tmp/hc-soc5c-anvil.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -s -H 'content-type: application/json' -d '{"jsonrpc":"2.0","id":1,"method":"eth_chainId","params":[]}' http://127.0.0.1:8545 | grep -q '0x1a4'; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/hc-soc5c-anvil.log
+          exit 1
+      - name: Actual local EVM deployed contract signed transactions and canonical event logs
+        run: node --test services/highcountry-economy/qualification/social-local-evm.test.mjs
+      - name: Retained gateway tests
+        run: node --test services/highcountry-economy/test/canonical-social-gateway.test.js

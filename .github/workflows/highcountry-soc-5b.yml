@@ -46,6 +46,7 @@ jobs:
           psql -h localhost -U postgres -d highcountry_soc5b -v ON_ERROR_STOP=1 -f services/highcountry-economy/migrations/007-social-operations.sql
           psql -h localhost -U postgres -d highcountry_soc5b -v ON_ERROR_STOP=1 -f services/highcountry-economy/migrations/008-social-rls.sql
           psql -h localhost -U postgres -d highcountry_soc5b -v ON_ERROR_STOP=1 -f services/highcountry-economy/migrations/009-social-intents.sql
+          psql -h localhost -U postgres -d highcountry_soc5b -v ON_ERROR_STOP=1 -f services/highcountry-economy/migrations/010-social-events.sql
           psql -h localhost -U postgres -d highcountry_soc5b -v ON_ERROR_STOP=1 -c "CREATE ROLE hc_social_test_runtime NOLOGIN NOINHERIT NOSUPERUSER NOBYPASSRLS"
           node services/highcountry-economy/scripts/provision-social-role.mjs hc5b-test hc_social_test_runtime
       - name: Actual Postgres 16 isolation and persistence

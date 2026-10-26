@@ -28,7 +28,8 @@ def main():
         tests+=native(r,ROOT/'contracts/test/tournament-5c4'/file,count);counts[suite]=count
     old=[]
     for folder,file,count in [('tournament-5c1','PokerTournamentPolicy420.t.sol',36),('tournament-5c2','PokerTournamentEntryEscrow420.t.sol',60),('tournament-5c3','PokerTournamentStructure420.t.sol',91)]:
-        r=execute(cmd+['--json'],ROOT/'contracts',dict(env,FOUNDRY_TEST='test/'+folder),out,'inherited-'+folder);old+=native(r,ROOT/'contracts/test'/folder/file,count)
+        selection=['--match-contract','^TournamentStructure.*Test$'] if folder=='tournament-5c3' else []
+        r=execute(cmd+selection+['--json'],ROOT/'contracts',dict(env,FOUNDRY_TEST='test/'+folder),out,'inherited-'+folder);old+=native(r,ROOT/'contracts/test'/folder/file,count)
     fuzz={s+':'+n:t['kind']['Fuzz']['runs'] for s,n,t in tests+old if 'Fuzz' in t['kind']}
     if len(fuzz)!=10 or any(n<2500 for n in fuzz.values()):raise RuntimeError('Incomplete fuzz execution')
     r=execute([sys.executable,'clients/420bet-poker/tournament/check_lifecycle.py'],ROOT,env,out,'inherited-reference');log=r.stderr.decode('utf-8').replace('\r\n','\n')

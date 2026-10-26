@@ -106,3 +106,8 @@ test('market emergency blocks submissions while finalized reconciliation remains
  await assert.rejects(f.worker.tick(f.alice,p.id),/market restricted/);assert.equal(f.submits(),0);
  f.issued.set(i.lotId,{fixtureOnly:true});assert.equal((await f.worker.tick(f.alice,p.id)).status,'issued');
 });
+test('changed canonical profile cannot receive a stale prepared issuance',async()=>{
+ const f=await setup(),[p]=await f.packs.starter(f.alice,'Red Mesa');await f.packs.prepare(f.alice,p.id);
+ f.identity.rpc.playerProfile=async()=> '0x'+'99'.repeat(32);
+ await assert.rejects(f.worker.tick(f.alice,p.id),/profile changed/);assert.equal(f.submits(),0);
+});

@@ -33,10 +33,10 @@ export class SeedIssuanceWorker {
    // Check session, recipient binding and immutable reservation again immediately before signing.
    await this.store.transact(s=>{
     this.packs.guard(s,token,issuer,true);const job=s.seedIssuanceJobs.get(packId);if(job.leaseToken!==leaseToken||job.leaseUntil<=this.clock())fail('seed dispatch lease lost');if(job.attempts>=50)fail('seed dispatch attempts exhausted');job.attempts++;const current=s.seedLotIntents.get(packId),account=s.runtimeAccounts?.get(current.owner),binding=s.runtimeWallets?.get(current.owner);
-    if(!account||binding?.wallet!==current.wallet||(s.runtimeEpochs?.get(current.owner)??0)!==current.ownerEpoch||JSON.stringify(current)!==JSON.stringify(claim.intent))fail('seed recipient authority changed');
+    if(!account||binding?.wallet!==current.wallet||binding.profile!==current.ownerProfile||binding.game!==this.identity.gameId||binding.chainId!==this.identity.chainId||(s.runtimeEpochs?.get(current.owner)??0)!==current.ownerEpoch||JSON.stringify(current)!==JSON.stringify(claim.intent))fail('seed recipient authority changed');
    });
    const i=claim.intent;
-   await this.identity.rpc.playerProfile(this.identity.gameId,i.wallet);
+   if(await this.identity.rpc.playerProfile(this.identity.gameId,i.wallet)!==i.ownerProfile)fail('seed recipient profile changed');
    if(Number(BigInt(await this.signerRpc.request('eth_chainId',[])))!==this.rpc.chainId)fail('seed signer wrong chain');
    if(!await this.rpc.unrestricted(MARKET_DOMAIN))fail('seed issuance market restricted');
    const h=await this.rpc.header(),transaction={from:this.operator,to:address(this.rpc.contracts.seeds.address),data:i.calldata};

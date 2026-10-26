@@ -79,7 +79,7 @@ export class SeedPacks {
    const metadataHash=hash(['HC.SEED.LOT.V1',this.identity.gameId,SEED_PACK_POLICY.version,packId,principal,wallet,cid,genome.genomeId,pack.seeds]);
    const lotId=BigInt(hash(['HC.SEED.LOT.ID.V1',this.identity.gameId,packId]).slice(0,18)).toString();
    if(lotId==='0'||s.seedLotIds.has(lotId))fail('seed lot identity collision');
-   const intent={packId,owner:principal,ownerEpoch:s.runtimeEpochs?.get(principal)??0,wallet,cultivarId:cid,genomeId:genome.genomeId,breedingEventId:'0',quantity:pack.seeds,lotId,metadataHash,status:'prepared',policyVersion:SEED_PACK_POLICY.version,genomeEvidence:genome,source:pack.source};
+   const intent={packId,owner:principal,ownerEpoch:s.runtimeEpochs?.get(principal)??0,ownerProfile:s.runtimeWallets.get(principal).profile,wallet,cultivarId:cid,genomeId:genome.genomeId,breedingEventId:'0',quantity:pack.seeds,lotId,metadataHash,status:'prepared',policyVersion:SEED_PACK_POLICY.version,genomeEvidence:genome,source:pack.source};
    intent.calldata=calldata('registerSeedLot(uint64,bytes32,uint64,address,uint32,bytes32)',lotId,intent.genomeId,0,wallet,intent.quantity,metadataHash);
    s.seedStarterWalletClaims.set(wallet,principal);s.seedLotIds.set(lotId,packId);s.seedLotIntents.set(packId,intent);current.status='issuance-prepared';return structuredClone(intent);
   });

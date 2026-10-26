@@ -1,3 +1,4 @@
+import {keccak256} from './keccak.js';
 import {randomBytes} from 'node:crypto';
 import {SettlementError} from './buds-ledger.js';
 import {address} from './finalized-rpc.js';
@@ -12,7 +13,7 @@ const hex=x=>typeof x==='string'&&/^0x[0-9a-fA-F]{64}$/.test(x);
 export class CanonicalSocialGateway {
  constructor({identity,pool,chain,scope,clock=()=>Date.now()}){
   if(typeof identity?.registeredPrincipal!=='function'||typeof identity?.walletOf!=='function'||typeof pool?.connect!=='function'||!ident(scope))fail('canonical social dependencies required');
-  for(const method of ['snapshot','permission','transactionIntent','submitSigned','finalizedReceipt','history','verifyFinality','verifyTreasurySettlement'])
+  for(const method of ['snapshot','permission','transactionIntent','prepareSigned','submitSigned','finalizedReceipt','history','verifyFinality','verifyTreasurySettlement'])
    if(typeof chain?.[method]!=='function')fail('canonical social chain adapter missing: '+method);
   Object.assign(this,{identity,pool,chain,scope,clock});
   this.grants=new Map(); // ephemeral challenges only; never authority or persistent history
@@ -42,14 +43,31 @@ export class CanonicalSocialGateway {
   // Canonical adapter must obtain a real wallet-authorized signed transaction.
   // A backend signer impersonating the member is expressly prohibited.
   if(typeof ctx.signedRawTransaction!=='string'||!/^0x[0-9a-fA-F]+$/.test(ctx.signedRawTransaction))fail('wallet-signed transaction required');
-  const tx=await this.chain.submitSigned({...ctx,payload:{...ctx.payload,signedRawTransaction:ctx.signedRawTransaction},wallet:who.wallet,principal:who.principal,authorization:ctx.authorizationProof});
-  if(!hex(tx?.hash)||tx?.signer?.toLowerCase()!==who.wallet||tx?.chainId!==this.identity.chainId||tx?.isFundTransfer===true)fail('invalid signed social transaction');
-  const operationId=tx.hash.toLowerCase();
+  // Journal signed bytes before broadcast. A crash before or after broadcast can
+  // be reconciled using the deterministic signed-transaction hash.
+  const raw=ctx.signedRawTransaction.toLowerCase();
+  const preflight=await this.chain.prepareSigned({wallet:who.wallet,action:ctx.action,payload:{...ctx.payload,signedRawTransaction:raw}});
+  const preparedHash=keccak256(Buffer.from(raw.slice(2),'hex')).toLowerCase();
+  if(preflight?.hash!==preparedHash)fail('signed preflight hash mismatch');
   const client=await this.pool.connect();let started=false;
-  try{await client.query('BEGIN');started=true;
-   await client.query('INSERT INTO highcountry_social_operations(scope, operation_id, principal, wallet, action, tx_hash, state) VALUES ($1,$2,$3,$4,$5,$6,$7) ON CONFLICT (scope,operation_id) DO NOTHING',[this.scope,operationId,who.principal,who.wallet,ctx.action,operationId,'submitted']);
+  try{
+   await client.query('BEGIN ISOLATION LEVEL SERIALIZABLE');started=true;
+   const written=await client.query(
+    "INSERT INTO highcountry_social_intents(scope,tx_hash,principal,wallet,action,raw_transaction,state) VALUES ($1,$2,$3,$4,$5,$6,'prepared') ON CONFLICT (scope,tx_hash) DO NOTHING",
+    [this.scope,preparedHash,who.principal,who.wallet,ctx.action,raw]);
+   if(written.rowCount!==1)fail('signed transaction already journaled');
    await client.query('COMMIT');started=false;
   }catch(e){if(started)await client.query('ROLLBACK');throw e;}finally{client.release();}
+  const tx=await this.chain.submitSigned({...ctx,payload:{...ctx.payload,signedRawTransaction:raw},wallet:who.wallet,principal:who.principal,authorization:ctx.authorizationProof});
+  if(tx?.hash?.toLowerCase()!==preparedHash)fail('journaled signed transaction hash mismatch');
+  if(!hex(tx?.hash)||tx?.signer?.toLowerCase()!==who.wallet||tx?.chainId!==this.identity.chainId||tx?.isFundTransfer===true)fail('invalid signed social transaction');
+  const operationId=tx.hash.toLowerCase();
+  const persisted=await this.pool.connect();let persistedStarted=false;
+  try{await persisted.query('BEGIN ISOLATION LEVEL SERIALIZABLE');persistedStarted=true;
+   await persisted.query('INSERT INTO highcountry_social_operations(scope, operation_id, principal, wallet, action, tx_hash, state) VALUES ($1,$2,$3,$4,$5,$6,$7) ON CONFLICT (scope,operation_id) DO NOTHING',[this.scope,operationId,who.principal,who.wallet,ctx.action,operationId,'submitted']);
+   await persisted.query("UPDATE highcountry_social_intents SET state='broadcast',updated_at=now() WHERE scope=$1 AND tx_hash=$2",[this.scope,operationId]);
+   await persisted.query('COMMIT');persistedStarted=false;
+  }catch(e){if(persistedStarted)await persisted.query('ROLLBACK');throw e;}finally{persisted.release();}
   return {operationId};
  }
  async receipt({session,scope,operationId}){
@@ -60,6 +78,7 @@ export class CanonicalSocialGateway {
   if(!receipt||receipt.finalized!==true||receipt.success!==true||receipt.signer?.toLowerCase()!==who.wallet||receipt.action!==row.action||receipt.hash?.toLowerCase()!==row.tx_hash||receipt.isFundTransfer===true||!hex(receipt.blockHash))fail('canonical finalized receipt unavailable');
   if(await this.chain.verifyFinality(receipt)!==true)fail('canonical finality proof denied');
   await this.pool.query('UPDATE highcountry_social_operations SET state=$3, block_hash=$4 WHERE scope=$1 AND operation_id=$2',[scope,operationId.toLowerCase(),'finalized',receipt.blockHash]);
+  await this.pool.query("UPDATE highcountry_social_intents SET state='finalized',block_hash=$3,updated_at=now() WHERE scope=$1 AND tx_hash=$2",[scope,operationId.toLowerCase(),receipt.blockHash]);
   return {operationId:operationId.toLowerCase(),action:row.action,finalized:true,authorized:true,isFundTransfer:false,blockHash:receipt.blockHash};
  }
  async history({session,scope,kind,id,cursor=null}){

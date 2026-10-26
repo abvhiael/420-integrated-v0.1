@@ -1,7 +1,8 @@
+import {keccak256} from '../src/keccak.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {CanonicalSocialGateway} from '../src/canonical-social-gateway.js';
-const H='0x'+'a'.repeat(64),B='0x'+'b'.repeat(64),W='0x'+'1'.repeat(40);
+const H=keccak256(Buffer.from('1234','hex')),B='0x'+'b'.repeat(64),W='0x'+'1'.repeat(40);
 const identity={chainId:420,registeredPrincipal:async()=> 'alice',walletOf:async()=>W};
 function fixture(overrides={}){
  const rows=new Map();let submitted=0;
@@ -9,7 +10,7 @@ function fixture(overrides={}){
   connect:async()=>({query:async(sql,args=[])=>{
    if(sql.startsWith('INSERT'))rows.set(args[1],{principal:args[2],wallet:args[3],action:args[4],tx_hash:args[5]});
    if(sql.startsWith('SELECT'))return {rows:[rows.get(args[1])].filter(Boolean)};
-   return {rows:[]};
+   return {rows:[],rowCount:1};
   },release(){}}),
   query:async(sql,args=[])=>sql.startsWith('SELECT')?{rows:[rows.get(args[1])].filter(Boolean)}:{rows:[]}
  };
@@ -17,6 +18,7 @@ function fixture(overrides={}){
   snapshot:async()=>({organizations:[],cooperatives:[],permissions:[]}),
   permission:async()=>({allowed:true,policyHash:H,blockHash:B}),
   transactionIntent:async()=>({from:W,to:W,chainId:420,value:'0x0',data:'0x1234'}),
+  prepareSigned:async()=>({hash:H}),
   submitSigned:async()=>{submitted++;return {hash:H,signer:W,chainId:420,isFundTransfer:false};},
   finalizedReceipt:async()=>({hash:H,signer:W,action:'organization.join',finalized:true,success:true,isFundTransfer:false,blockHash:B}),
   verifyFinality:async()=>true,

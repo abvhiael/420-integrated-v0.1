@@ -1,7 +1,7 @@
 name: 420Bet Poker 5C.6 genuine tournament Level 1 and 2
 on:
   push:
-    branches: ['bet/5c6-purchases-addons-late-registration']
+    branches: ['bet/5c6-purchases-addons-late-registration', 'audit/420bet-5c6-reconcile-main']
   workflow_dispatch:
 permissions:
   contents: read

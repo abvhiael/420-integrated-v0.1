@@ -1,0 +1,74 @@
+name: HighCountry HC-SEED-07 qualification
+on:
+  pull_request:
+    paths:
+      - 'services/highcountry-economy/src/seed-*'
+      - 'services/highcountry-economy/src/postgres-store.js'
+      - 'services/highcountry-economy/src/runtime-service.js'
+      - 'services/highcountry-economy/src/start-runtime.js'
+      - 'services/highcountry-economy/test/seed-*'
+      - 'apps/highcountry-web/src/seed-*'
+      - 'apps/highcountry-web/test/seed-*'
+      - 'deployments/highcountry/seed-pack-policy.v1.json'
+      - 'scripts/highcountry/build_seed_pack_policy.mjs'
+      - 'scripts/highcountry/run_seed_pack_contracts.py'
+      - 'scripts/highcountry/seed-packs-contract-test.sol'
+      - 'contracts/src/highcountry/genetics/SeedRegistry.sol'
+      - '.github/workflows/highcountry-seed-packs.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  packs-runtime:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: seed07_disposable_only
+          POSTGRES_DB: seed07_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      HC_TEST_POSTGRES_URL: postgresql://postgres:seed07_disposable_only@localhost:5432/seed07_test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Scoped integration dependencies
+        run: |
+          npm install --prefix /tmp/hc-seed07 --no-save pg@8.16.3 jsdom@26.1.0
+          ln -s /tmp/hc-seed07/node_modules node_modules
+      - name: L1 authenticated service, HTTP, catalogue, currency and social regressions
+        run: node --test services/highcountry-economy/test/seed-packs*.test.js services/highcountry-economy/test/seed-catalogue*.test.js services/highcountry-economy/test/postgres-store.test.js services/highcountry-economy/test/runtime-integration.test.js services/highcountry-economy/test/canonical-social-chain-adapter.test.js services/highcountry-economy/test/canonical-social-gateway.test.js
+      - name: L2 real PostgreSQL concurrency, restart, replay and RLS
+        run: node services/highcountry-economy/test/seed-packs-postgres.integration.mjs
+      - name: Browser component interactions
+        run: node --test apps/highcountry-web/test/seed-packs-dom.integration.mjs apps/highcountry-web/test/seed-catalogue-dom.integration.mjs
+      - name: Build and reproducible policy
+        run: |
+          node apps/highcountry-web/scripts/build.mjs
+          node scripts/highcountry/build_seed_pack_policy.mjs
+          git diff --exit-code -- deployments/highcountry/seed-pack-policy.v1.json apps/highcountry-web/public/assets/highcountry/seed-catalogue.v1.json
+  canonical-issuance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.7.1
+      - name: Contract formatting
+        run: forge fmt --root contracts --check "$GITHUB_WORKSPACE/scripts/highcountry/seed-packs-contract-test.sol"
+      - name: L2 actual scoped authorization, three-seed issuance and registry replay protection
+        run: python scripts/highcountry/run_seed_pack_contracts.py

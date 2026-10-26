@@ -1,0 +1,201 @@
+{
+  "schema": "HC.SEED.PACKS.V1",
+  "policy": {
+    "version": "HC.SEED.PACKS.V1",
+    "seedsPerPack": 3,
+    "starterPacks": 2,
+    "starterAccountLimit": 100000,
+    "standardLimitPerPool": 100000,
+    "maxSeedUnitsPerCultivar": 100000,
+    "maxExclusiveSeedUnitsPerCultivar": 10000,
+    "priceBuds": 420,
+    "priceNative420Wei": "1000000000000000000",
+    "oddsBps": {
+      "common": 6000,
+      "rare": 3000,
+      "exclusive": 1000
+    }
+  },
+  "pools": {
+    "Emerald Coast": {
+      "common": [
+        "HC-C-alaskan-thunder-fuck",
+        "HC-C-blue-dream",
+        "HC-C-durban-poison",
+        "HC-C-gelato",
+        "HC-C-granddaddy-purple",
+        "HC-C-green-crack",
+        "HC-C-pineapple-express",
+        "HC-C-super-silver-haze"
+      ],
+      "rare": [
+        "HC-R-cedar-skunk",
+        "HC-R-coastal-kush",
+        "HC-R-emerald-mist",
+        "HC-R-misty-harbor",
+        "HC-R-pacific-sunset",
+        "HC-R-rainforest-queen",
+        "HC-R-salty-dog",
+        "HC-R-spirit-bear",
+        "HC-R-tempest"
+      ],
+      "exclusive": [
+        "HC-F01",
+        "HC-F02",
+        "HC-F03",
+        "HC-F04",
+        "HC-F05",
+        "HC-F06"
+      ]
+    },
+    "Golden Prairie": {
+      "common": [
+        "HC-C-blueberry",
+        "HC-C-chemdawg",
+        "HC-C-girl-scout-cookies",
+        "HC-C-jack-herer",
+        "HC-C-northern-lights",
+        "HC-C-purple-haze",
+        "HC-C-sour-diesel",
+        "HC-C-trainwreck"
+      ],
+      "rare": [
+        "HC-R-blue-moon",
+        "HC-R-fields-of-green",
+        "HC-R-golden-haze",
+        "HC-R-honey-trail",
+        "HC-R-prairie-fire",
+        "HC-R-prairie-gold",
+        "HC-R-saska-sour",
+        "HC-R-thunder-fields"
+      ],
+      "exclusive": [
+        "HC-F07",
+        "HC-F08",
+        "HC-F09",
+        "HC-F10",
+        "HC-F11"
+      ]
+    },
+    "Red Mesa": {
+      "common": [
+        "HC-C-acapulco-gold",
+        "HC-C-afghan-kush",
+        "HC-C-bubba-kush",
+        "HC-C-og-kush",
+        "HC-C-strawberry-cough",
+        "HC-C-white-widow",
+        "HC-C-zkittlez"
+      ],
+      "rare": [
+        "HC-R-canyon-fire",
+        "HC-R-crow-mother",
+        "HC-R-desert-bloom",
+        "HC-R-desert-shadow",
+        "HC-R-fire-canyon",
+        "HC-R-midnight-mesa",
+        "HC-R-red-rock-dream",
+        "HC-R-red-rock-kush",
+        "HC-R-sage-rider"
+      ],
+      "exclusive": [
+        "HC-F12",
+        "HC-F13",
+        "HC-F14",
+        "HC-F15",
+        "HC-F16"
+      ]
+    },
+    "World": {
+      "common": [
+        "HC-C-acapulco-gold",
+        "HC-C-afghan-kush",
+        "HC-C-alaskan-thunder-fuck",
+        "HC-C-blue-dream",
+        "HC-C-blueberry",
+        "HC-C-bubba-kush",
+        "HC-C-chemdawg",
+        "HC-C-durban-poison",
+        "HC-C-gelato",
+        "HC-C-girl-scout-cookies",
+        "HC-C-granddaddy-purple",
+        "HC-C-green-crack",
+        "HC-C-jack-herer",
+        "HC-C-northern-lights",
+        "HC-C-og-kush",
+        "HC-C-pineapple-express",
+        "HC-C-purple-haze",
+        "HC-C-sour-diesel",
+        "HC-C-strawberry-cough",
+        "HC-C-super-silver-haze",
+        "HC-C-trainwreck",
+        "HC-C-white-widow",
+        "HC-C-zkittlez"
+      ],
+      "rare": [
+        "HC-R-blue-moon",
+        "HC-R-canyon-fire",
+        "HC-R-cedar-skunk",
+        "HC-R-coastal-kush",
+        "HC-R-crow-mother",
+        "HC-R-desert-bloom",
+        "HC-R-desert-shadow",
+        "HC-R-emerald-mist",
+        "HC-R-fields-of-green",
+        "HC-R-fire-canyon",
+        "HC-R-golden-haze",
+        "HC-R-honey-trail",
+        "HC-R-midnight-mesa",
+        "HC-R-misty-harbor",
+        "HC-R-pacific-sunset",
+        "HC-R-prairie-fire",
+        "HC-R-prairie-gold",
+        "HC-R-rainforest-queen",
+        "HC-R-red-rock-dream",
+        "HC-R-red-rock-kush",
+        "HC-R-sage-rider",
+        "HC-R-salty-dog",
+        "HC-R-saska-sour",
+        "HC-R-spirit-bear",
+        "HC-R-tempest",
+        "HC-R-thunder-fields"
+      ],
+      "exclusive": [
+        "HC-F01",
+        "HC-F02",
+        "HC-F03",
+        "HC-F04",
+        "HC-F05",
+        "HC-F06",
+        "HC-F07",
+        "HC-F08",
+        "HC-F09",
+        "HC-F10",
+        "HC-F11",
+        "HC-F12",
+        "HC-F13",
+        "HC-F14",
+        "HC-F15",
+        "HC-F16"
+      ]
+    }
+  },
+  "starterCultivars": {
+    "Emerald Coast": [
+      "HC-C-alaskan-thunder-fuck",
+      "HC-C-blue-dream"
+    ],
+    "Golden Prairie": [
+      "HC-C-blueberry",
+      "HC-C-chemdawg"
+    ],
+    "Red Mesa": [
+      "HC-C-acapulco-gold",
+      "HC-C-afghan-kush"
+    ]
+  },
+  "supplySemantics": "Lifetime per provisioned game namespace; no automatic season reset. Starter seed units reserve at grant; unopened packs never release supply. Cultivar exhaustion is a hard stop, never a reroll or a substitute.",
+  "standardOpening": "HC-SEED-08 required; one tier and one cultivar, three seeds, same odds for every currency and region.",
+  "purchaseSettlement": "HC-SEED-09 required. Native quote is 1 native $420 (18 decimal units), not USD; no conversion, peg or redemption is implied.",
+  "deploymentStatus": "DISABLED_UNTIL_REVIEWED_LIVE_AUTHORITY_AND_GENOME_REGISTRATION"
+}

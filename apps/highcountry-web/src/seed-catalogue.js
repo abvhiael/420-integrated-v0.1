@@ -1,3 +1,4 @@
+import {mountSeedPacks} from './seed-packs.js';
 const plant=x=>typeof x==='string'&&/^[1-9]\d{0,19}$/.test(x)&&BigInt(x)<2n**64n;
 export function createSeedCatalogueClient({apiUrl,authenticate,fetchImpl=fetch}){
  if(typeof apiUrl!=='string'||!/^https:\/\/[^/?#]+$/.test(apiUrl))throw Error('seed-service-config-invalid');
@@ -27,6 +28,7 @@ export function mountSeedCatalogue({document,main,runtime,authenticate,fetchImpl
  const detail=el('section');detail.className='seed-detail';detail.setAttribute('aria-label','Cultivar details');wrapper.append(detail);
  const collectionPanel=el('section');collectionPanel.className='seed-collection';collectionPanel.append(el('h3','My harvest collection'),el('p','Cards are personal cosmetic records. They grant no BUDS, seed inventory or founder privileges.'));wrapper.append(collectionPanel);
  const collectionStatus=el('p',runtime.mode==='connected'?'Sign in and refresh to verify collection records.':'Offline browsing. Ownership and harvest awards require the authenticated game service.');collectionStatus.setAttribute('role','status');collectionPanel.append(collectionStatus);
+ mountSeedPacks({document,parent:wrapper,runtime,authenticate,fetchImpl});
  let entries=[],collection=null,selected=null,busy=false;
  const client=runtime.mode==='connected'?createSeedCatalogueClient({apiUrl:runtime.apiUrl,authenticate,fetchImpl}):null;
  const button=(parent,text,fn)=>{const b=el('button',text);b.type='button';b.addEventListener('click',fn);parent.append(b);return b;};

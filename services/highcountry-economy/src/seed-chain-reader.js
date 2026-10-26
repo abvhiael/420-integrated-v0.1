@@ -83,6 +83,24 @@ export class SeedChainReader {
   const finish=async()=>{const check=await this.rpc.request('eth_getBlockByNumber',[header.number,false]);if(check?.hash?.toLowerCase()!==header.hash.toLowerCase())fail('seed finalized anchor changed');return {blockHash:header.hash,blockNumber:header.number,chainId:this.rpc.chainId};};
   return {header,call,resolve,finish};
  }
+ async cultivar(cultivarId){
+  const s=await this.session();
+  let gid=[...this.common.values()].find(g=>g.cultivarId===cultivarId)?.genomeId??[...this.rare.entries()].find(([,e])=>e.cultivarId===cultivarId)?.[0];
+  if(!gid){const line=[...this.founders.entries()].find(([,id])=>id===cultivarId)?.[0];if(line){const out=await s.call('genomes','foundingGenomeOfLine(bytes32)',line);if(out.length!==1)fail('founding genome unavailable');gid=hex(out[0]);}}
+  if(!gid)fail('cultivar genome unavailable');const record=await s.resolve(gid);
+  if(record?.cultivarId!==cultivarId)fail('cultivar genome identity mismatch');
+  return {...record,anchor:await s.finish()};
+ }
+ async issuance(intent){
+  const s=await this.session(),exists=await s.call('seeds','exists(uint64)',intent.lotId);
+  if(exists.length!==1||n(exists[0])>1n)fail('invalid seed existence');
+  if(n(exists[0])===0n){await s.finish();return null;}
+  const lot=await s.call('seeds','getSeedLot(uint64)',intent.lotId);
+  if(lot.length!==7||n(lot[0])!==BigInt(intent.lotId)||hex(lot[1])!==intent.genomeId||n(lot[2])!==BigInt(intent.breedingEventId)||a(lot[3])!==address(intent.wallet)||n(lot[4])!==BigInt(intent.quantity)||hex(lot[5])!==intent.metadataHash||n(lot[6])!==1n)fail('issued seed lot intent mismatch');
+  const genome=await s.resolve(intent.genomeId);if(genome?.cultivarId!==intent.cultivarId)fail('issued seed genome mismatch');
+  return {registry:address(this.rpc.contracts.seeds.address),lotId:intent.lotId,metadataHash:intent.metadataHash,genome,anchor:await s.finish()};
+ }
+ async issuedLot(intent){const result=await this.issuance(intent);if(!result)fail('seed lot not finalized');return result;}
  async ownership(wallet){
   wallet=address(wallet);const s=await this.session(),head=Number(BigInt(s.header.number));
   if(!Number.isSafeInteger(head)||head<this.deploymentBlock||head-this.deploymentBlock+1>this.maxScanBlocks)fail('seed index range unavailable');

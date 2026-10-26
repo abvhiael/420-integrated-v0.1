@@ -58,6 +58,8 @@ try {
   if(config.seedCatalogue.version!=='HC.SEED.CATALOGUE.V1')throw Error('unapproved seed catalogue version');
   seedCatalogue={...config.seedCatalogue,catalog:await load('seed-catalog.v1.json'),research:await load('common-cultivar-research.v1.json'),rarePairs:await load('rare-parent-pairs.v1.json'),founders:await load('original-sixteen-archive.v1.json'),commonReferences:await load('common-reference-genomes.v1.json'),rarePlan:parseSeedBreedingPlan(await readFile(new URL('rare-breeding-plan.v1.json',d),'utf8'))};
  }
+ if(config.seedPacks&&config.seedPacks.version!=='HC.SEED.PACKS.V1')throw Error('unapproved seed pack version');
+ if(config.seedPacks&&!seedCatalogue)throw Error('seed catalogue required for issuance');
  const runtime=await createRuntime({...config,pool,signerRpc,progression,missions,discovery,seedCatalogue});
  const server=runtimeHttpServer(runtime,{origin:config.authority.origin});
  server.listen(port,'0.0.0.0');

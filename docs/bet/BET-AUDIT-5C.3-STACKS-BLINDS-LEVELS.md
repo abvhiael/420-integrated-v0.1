@@ -37,7 +37,7 @@ The book cannot start an actual tournament, post blinds into the cash ledger, co
 
 ## Focused qualification
 
-The executable `scripts/bet/qualify-poker-5c3.py` requires a tracked clean exact SHA reconciled with main `6a06b54b1c182411ab2ea46586989ab1cadde76e`, rejects changes outside this step and preserves inherited source identities. It runs:
+The executable `scripts/bet/qualify-poker-5c3.py` requires a tracked clean exact SHA reconciled with main `d94064e48448b47cb3be7f12463b5c8db67e6a43`, rejects changes outside this step and preserves inherited source identities. It runs:
 
 - Level 1: 36 native clock/snapshot tests and nine blind-arithmetic tests, including 7,500 fuzz cases. Both native sources receive actual pinned static analysis; unknown severe findings or source drift fail closed.
 - Level 2 for this component: 46 actual funded structure/starting-stack reservation tests, including 2,500 generated funded reservation/refund sequences. These use real canonical Wrapped420, Identity420, policy/operator/capability modules and the real 5C.2 escrow. A successful funded trace exports deployed book runtime hash, immutable structure/event digest, reserved chips and actual asset liability.

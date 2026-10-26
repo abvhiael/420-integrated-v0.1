@@ -1,0 +1,41 @@
+name: High Country Organizations HC-NEXT-6.3 Level 1
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/highcountry/organization/**'
+      - 'contracts/test/highcountry/unit/organization/**'
+      - 'docs/highcountry/HC-NEXT-6.3-ORGANIZATIONS.md'
+      - '.github/workflows/highcountry-organizations-next-6-3.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  organizations-level-1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      FOUNDRY_SRC: src/highcountry
+      FOUNDRY_TEST: test/highcountry
+      FOUNDRY_SCRIPT: script/highcountry
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Exact SHA
+        env:
+          SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$SHA"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Canonical organization build and deployable sizes
+        working-directory: contracts
+        run: forge build src/highcountry/organization --sizes
+      - name: Formatting and static checks
+        working-directory: contracts
+        run: |
+          forge fmt --check src/highcountry/organization test/highcountry/unit/organization
+          forge lint src/highcountry/organization --severity high med low
+      - name: Membership, succession and delegated role adversarial tests
+        working-directory: contracts
+        run: forge test --match-path 'test/highcountry/unit/organization/*.t.sol' -vv

@@ -14,6 +14,13 @@ interface VmR0410 {
 }
 
 contract R0410Actor {
+    function acceptLeadership(
+        OrganizationRegistry r,
+        bytes32 id
+    ) external {
+        r.acceptAdmin(id);
+    }
+
     function join(
         OrganizationRegistry r,
         bytes32 id
@@ -109,6 +116,39 @@ contract R0410OrganizationTest {
         alice.join(r, ORG);
     }
 
+    function testLeadershipRequiresConsentAndExpires() public {
+        (bool unilateral,) = address(r).call(abi.encodeCall(r.transferAdmin, (ORG, address(alice))));
+        require(!unilateral, "unilateral leadership transfer accepted");
+        (bool uninvited,) = address(alice).call(abi.encodeCall(alice.acceptLeadership, (r, ORG)));
+        require(!uninvited, "successor promoted without nomination");
+        r.proposeAdmin(ORG, address(alice));
+        (bool wrong,) = address(bob).call(abi.encodeCall(bob.acceptLeadership, (r, ORG)));
+        require(!wrong, "wrong successor accepted");
+        vm.warp(block.timestamp + 2 days);
+        (bool expired,) = address(alice).call(abi.encodeCall(alice.acceptLeadership, (r, ORG)));
+        require(!expired, "expired leadership proposal accepted");
+        r.proposeAdmin(ORG, address(alice));
+        alice.acceptLeadership(r, ORG);
+        (address admin,,) = r.organizations(ORG);
+        require(admin == address(alice), "successor did not accept leadership");
+    }
+
+    function testInvitationsExpireAndCannotReplayAfterRemoval() public {
+        r.invite(ORG, address(bob), true);
+        vm.warp(block.timestamp + 7 days);
+        (bool expired,) = address(bob).call(abi.encodeCall(bob.join, (r, ORG)));
+        require(!expired, "expired invitation admitted");
+        r.invite(ORG, address(bob), true);
+        r.invite(ORG, address(bob), false);
+        (bool revoked,) = address(bob).call(abi.encodeCall(bob.join, (r, ORG)));
+        require(!revoked, "revoked invitation admitted");
+        r.invite(ORG, address(bob), true);
+        bob.join(r, ORG);
+        r.remove(ORG, address(bob));
+        (bool replay,) = address(bob).call(abi.encodeCall(bob.join, (r, ORG)));
+        require(!replay, "removed member rejoined without consent");
+    }
+
     function testMembershipInvitationAndReplay() public {
         (bool denied,) = address(bob).call(abi.encodeCall(bob.join, (r, ORG)));
         require(!denied, "uninvited member entered");
@@ -174,7 +214,8 @@ contract R0410OrganizationTest {
         bytes32 id = a.delegate(
             ORG, address(alice), ACTION, SCOPE, uint64(block.timestamp), uint64(block.timestamp + 1 days), 5
         );
-        r.transferAdmin(ORG, address(alice));
+        r.proposeAdmin(ORG, address(alice));
+        alice.acceptLeadership(r, ORG);
         require(!a.valid(id, address(alice), ACTION, SCOPE), "old admin grants survived rotation");
         (bool retained,) = address(a)
             .call(
@@ -249,7 +290,8 @@ contract R0410OrganizationTest {
         bindRetainedR04Emergency(address(policy));
         bytes32 id = policy.propose(ORG, address(alice), ACTION, SCOPE, uint64(block.timestamp + 1 days), 100);
         bob.approveTreasury(policy, id);
-        r.transferAdmin(ORG, address(alice));
+        r.proposeAdmin(ORG, address(alice));
+        alice.acceptLeadership(r, ORG);
         require(!policy.permitted(id, address(alice), ACTION, SCOPE, 1), "former admin permission survived");
     }
 

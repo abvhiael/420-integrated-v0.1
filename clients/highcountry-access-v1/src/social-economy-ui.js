@@ -16,7 +16,7 @@ function actionForm(parent,controller,{label,action,fields=[],refresh}) {
  });
 }
 // Keep unsupported methods visible as unavailable, never as actionable promises.
-const ENABLED_ACTIONS=new Set(['organization.create','organization.invite','organization.invitation.revoke','organization.join','organization.leave','organization.remove','organization.leader.propose','organization.leader.accept','cooperative.create','cooperative.enroll','cooperative.withdraw']);
+const ENABLED_ACTIONS=new Set(Object.values(OPERATIONS));
 const forms={
  createOrganization:['id','metadataHash'],invite:['organization','account'],revokeInvitation:['organization','account'],join:['organization'],
  leave:['organization'],remove:['organization','account'],proposeLeader:['organization','candidate'],acceptLeader:['organization'],

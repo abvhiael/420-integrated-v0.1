@@ -3,9 +3,10 @@ Status: implemented visual-only browser preview; scoped qualification pending.
 
 - Schema: `hc-cultivation-scene/v1`.
 - Fixed art-space: 1920 × 1080; origin top-left, X right, Y down.
-- Optional 80-unit placement guide: 24 horizontal columns × 13.5 vertical rows. **Not** a gameplay collision grid.
+- Approved ground tile: **64 × 64 px** footprint, **32 px** nominal isometric rise, based on the HC-GFX-2.1 control sheet. The 1920 × 1080 browser canvas is a separate illustration/compositing coordinate space, not a tile map.
 - Anchor: bottom-center of each sprite; Z: category band followed by bottom-edge Y. Stable ID breaks exact ties.
-- Category art-space widths: beds 400, containers 125, irrigation 110, workstations 340, equipment 170, tall equipment 160; per-sprite width overrides allowed. Aspect ratios are explicit reference ratios pending artwork metadata audit, rather than claiming source pixel normalization.
+- Canonical container footprints: standard pot **1×1** (64×64), fabric pot **1×1** (64×64), raised bed **2×1** (128×64), large planter **2×2** (128×128). These are logical ground occupancies and are independent of the illustrated object bounding boxes.
+- Preview art-space widths: beds 400, containers 125, irrigation 110, workstations 340, equipment 170, tall equipment 160; per-sprite width overrides allowed. Aspect ratios are explicit reference ratios pending artwork metadata audit, rather than claiming source pixel normalization.
 - Placement uses percentage coordinates so backgrounds and overlays scale together.
 - Each of the nine regional scenes uses one of three environment positioning profiles; coordinates are editable example placements, not saved gameplay layout or parcel coordinates.
 - Sprite alpha backgrounds are expected, but loaded artwork is not rewritten. Individual files must be reviewed for proper alpha and canonical path.

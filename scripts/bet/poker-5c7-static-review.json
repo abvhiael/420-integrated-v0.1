@@ -18,7 +18,7 @@
     "contracts/src/bet/tournament/PokerTournamentEntryEscrow420.sol": "22d499a1a5df3618c55f7c88761a5bcd69a5feab47947720a8813e3386b4c83c",
     "contracts/src/apps/Identity420.sol": "f47526bce8b55d10c64fb3d8d320fc1e4dc6d43945db064e86d373adec7e0152",
     "contracts/src/bet/tournament/PokerTournamentPolicy420.sol": "f9db8f1db569ebf00cc057a8dfa4a36245501d629793223d7def4e4b25aa65bd",
-    "contracts/src/randomness/RandomnessRouter420.sol": "c4bf8a457df29c18c979cf3f0ef50ecbdd2b2f608430d5ff069704dc3f831115",
+    "contracts/src/randomness/RandomnessRouter420.sol": "6036aef19ebc4868657657961140817a4f82d362769090053bfbf22f2561aae7",
     "contracts/src/bet/tournament/PokerTournamentAssignments420.sol": "336ea5e599a4979afa18510f156f020c613a0cfff0bccebc898729c52fce8908",
     "contracts/src/bet/tournament/PokerTournamentSeatingEntropy420.sol": "ad66577e0e108072773ed43ec91bf8e287d8e7a5898e9e198ab49731d8aa33a2",
     "contracts/src/randomness/RandomnessDraw420.sol": "d5c5017bb6d19ea326dbfbf9a57410e14948fbe4d6eebf8455faa1816b791886",
@@ -277,19 +277,19 @@
       "description": "PokerTournamentPurchaseEscrowState420._quote(bytes32) (contracts/src/bet/tournament/purchases/PokerTournamentPurchaseEscrowState420.sol) uses a dangerous strict equality: - events_[id].state == State.NONE (contracts/src/bet/tournament/purchases/PokerTournamentPurchaseEscrowState420.sol)",
       "disposition": "reviewed, source-bound; raw severity retained"
     },
+    "50edd6de40550c734a0526f6a4eb7bfc628e065565725bd90ccaa602fa164552": {
+      "severity": "Medium",
+      "check": "incorrect-equality",
+      "description": "RandomnessRouter420.result(bytes32) (contracts/src/randomness/RandomnessRouter420.sol) uses a dangerous strict equality: - _requests[requestId].status == Status.NONE (contracts/src/randomness/RandomnessRouter420.sol)",
+      "disposition": "reviewed, source-bound; raw severity retained",
+      "reason": "Retained randomness result State.NONE sentinel rejects nonexistent IDs; fulfilled/void state gates remain mandatory."
+    },
     "140b25435556d2f01d8ae4845afd4c32ef78d5b3194a274d86ab65be33c82ca6": {
       "severity": "Medium",
       "check": "incorrect-equality",
       "description": "Identity420.credential(bytes32) (contracts/src/apps/Identity420.sol) uses a dangerous strict equality: - c.subjectProfileId == bytes32(0) (contracts/src/apps/Identity420.sol)",
       "disposition": "reviewed, source-bound; raw severity retained",
       "reason": "Retained credential zero issuer sentinel denotes absence; equality is not a numeric price/balance assumption. Credential owner/issuer/active/expiry are separately validated."
-    },
-    "e7d02c51107cc1e6cb0a194a9b7d5bc123fe9779dbf044a476aa876aa83964c3": {
-      "severity": "Medium",
-      "check": "incorrect-equality",
-      "description": "Identity420.credentialValid(bytes32) (contracts/src/apps/Identity420.sol) uses a dangerous strict equality: - c.subjectProfileId == bytes32(0) || c.revokedAt != 0 || c.subjectRejected (contracts/src/apps/Identity420.sol)",
-      "disposition": "reviewed, source-bound; raw severity retained",
-      "reason": "Retained credential zero issuer sentinel denotes absence; exact sentinel comparison is necessary and no external party can force issuance by a token transfer."
     },
     "14f43fb8903ee1cd6e4fad2d041e8f5c4c9cb968cc26ca978e531be483963990": {
       "severity": "Medium",
@@ -298,12 +298,12 @@
       "disposition": "reviewed, source-bound; raw severity retained",
       "reason": "Retained randomness request State.NONE sentinel rejects nonexistent IDs; enum equality is intentional state authorization."
     },
-    "50edd6de40550c734a0526f6a4eb7bfc628e065565725bd90ccaa602fa164552": {
+    "e7d02c51107cc1e6cb0a194a9b7d5bc123fe9779dbf044a476aa876aa83964c3": {
       "severity": "Medium",
       "check": "incorrect-equality",
-      "description": "RandomnessRouter420.result(bytes32) (contracts/src/randomness/RandomnessRouter420.sol) uses a dangerous strict equality: - _requests[requestId].status == Status.NONE (contracts/src/randomness/RandomnessRouter420.sol)",
+      "description": "Identity420.credentialValid(bytes32) (contracts/src/apps/Identity420.sol) uses a dangerous strict equality: - c.subjectProfileId == bytes32(0) || c.revokedAt != 0 || c.subjectRejected (contracts/src/apps/Identity420.sol)",
       "disposition": "reviewed, source-bound; raw severity retained",
-      "reason": "Retained randomness result State.NONE sentinel rejects nonexistent IDs; fulfilled/void state gates remain mandatory."
+      "reason": "Retained credential zero issuer sentinel denotes absence; exact sentinel comparison is necessary and no external party can force issuance by a token transfer."
     },
     "dcd686f3d957950a72af804dfd5fd58c28ef48619329a1de7b9ad5fa6cbcbae4": {
       "severity": "Medium",
@@ -368,13 +368,6 @@
       "description": "PokerTournamentPrizePolicies420.register(bytes32,bytes32,uint16[],uint16[][]).sum (contracts/src/bet/tournament/settlement/PokerTournamentPrizePolicies420.sol) is a local variable never initialized",
       "disposition": "reviewed, source-bound; raw severity retained"
     },
-    "04725aaed959ef31ed391823e7275ea4b00a6fa0c8a7a326dcf0d59f16fcc3e4": {
-      "severity": "Medium",
-      "check": "uninitialized-local",
-      "description": "RandomnessRouter420.requestRandomness(bytes32,bytes32,bytes32,uint64).fallback_ (contracts/src/randomness/RandomnessRouter420.sol) is a local variable never initialized",
-      "disposition": "reviewed, source-bound; raw severity retained",
-      "reason": "Retained router memory FallbackConfig is Solidity zero-initialized, representing no fallback. Round profile explicitly rejects fallback routes; withholding becomes recovery, not an operator seed."
-    },
     "7373a07b40eb001c4faac76445767ac518f98a4161aabb4118e1c32924f1895c": {
       "severity": "Medium",
       "check": "uninitialized-local",
@@ -388,6 +381,13 @@
       "description": "RandomnessDraw420.weightedSelection(bytes32,bytes32,uint256,uint256[]).cumulative (contracts/src/randomness/RandomnessDraw420.sol) is a local variable never initialized",
       "disposition": "reviewed, source-bound; raw severity retained",
       "reason": "Retained weighted-selection cumulative integer starts at Solidity zero. It is updated in bounded deterministic iteration."
+    },
+    "626c84ca01fbe72626964407287f633e364ad1e8bc78dfab4e8765c5f9c87c62": {
+      "severity": "Medium",
+      "check": "uninitialized-local",
+      "description": "RandomnessRouter420._requestRandomness(bytes32,bytes32,bytes32,uint64).fallback_ (contracts/src/randomness/RandomnessRouter420.sol) is a local variable never initialized",
+      "disposition": "reviewed, source-bound; raw severity retained",
+      "reason": "The upstream router extracted its existing request body into _requestRandomness. The fallback route memory struct intentionally starts at Solidity zero values and is populated only for a configured fallback. Legacy poker calls requestRandomness, not the new persistent endpoint; its deadline and void guards remain enforced for ordinary requests. Reconciled C5-C7 genuine hand and withholding/refund owners exercise that path. No production poker assertion is relaxed."
     },
     "b122c564efab695cd2e8e1e8c9cdf8f546a654f1403203879da3f9f0fa38d6b3": {
       "severity": "Medium",

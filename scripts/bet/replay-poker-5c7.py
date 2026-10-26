@@ -83,7 +83,34 @@ def replay(trace,require_certificate=True):
         result.update(certificateVerified=True,uniquePlayers=unique,rounds=wave,standingsRoot=f'{root:064x}',heldPrize=w[59],heldFees=w[60])
     result.update(replay_purchases(trace));result.update(replay_prizes(trace))
     return result
+def event_number(line,name):
+    match=re.search(r'\b'+re.escape(name)+r': (0x[0-9a-fA-F]+|\d+)',line);assert match,(name,line)
+    return int(match[1],16 if match[1].startswith('0x')else 10)
+
+def event_address(line,name):
+    match=re.search(r'\b'+re.escape(name)+r': ([^,\n]+)',line);assert match,(name,line)
+    values=re.findall(r'0x[0-9a-fA-F]{40}\b',match[1]);assert len(values)==1,(name,line)
+    return int(values[0],16)
+
+def purchase_event_ledger(trace):
+    # Cross-check every original payer, including receipts superseded by another
+    # purchase. The final payout receipt alone cannot authenticate that history.
+    bank=packets(trace,'C7FinancialSeedData',12)[0][2];start=trace.index('emit C7FundingTermsData(');pending=[];purchases={};outgoing=defaultdict(int)
+    for name,line in re.findall(r'emit (Transfer|Purchased)\(([^)\n]+)\)',trace[start:]):
+        if name=='Transfer':
+            sender=event_address(line,'from');receiver=event_address(line,'to');amount=event_number(line,'amount')
+            if receiver==bank:pending.append((sender,amount))
+            if sender==bank:outgoing[receiver]+=amount
+            continue
+        row=[event_number(line,'id'),event_number(line,'receipt'),event_number(line,'person'),event_address(line,'payer'),event_number(line,'nonce'),event_number(line,'buyIn'),event_number(line,'fee'),event_number(line,'chips')]
+        assert row[1]not in purchases,'duplicate purchased receipt'
+        if row[5]+row[6]:assert pending and pending.pop(0)==(row[3],row[5]+row[6]),'purchase payer differs from actual token funding'
+        purchases[row[1]]=row
+    assert not pending,'unmatched incoming token funding'
+    return purchases,dict(outgoing)
+
 def replay_purchases(trace):
+    purchases,_=purchase_event_ledger(trace)
     balances={};generations={};latest={};records={};nonces={};funding=packets(trace,'C7FundingTermsData',7)[0];prize=funding[2];fees=0;minted=0;addOns=set();root=digest(encoded(packets(trace,'C7PurchaseSeedData',3)[0]));rootRows=[];actualRows=[]
     pattern=r'emit (C6ReceiptData|C7ExecutedHandData|C6PurchaseRootSeed|C6PurchaseRoot)\(([^\n]+)'
     for name,line in re.findall(pattern,trace):
@@ -102,6 +129,7 @@ def replay_purchases(trace):
             continue
         assert len(w)==13
         event,index,kind,status,person,payer,nonce,buyIn,fee,chips,accepted,deadline,previous=w
+        assert purchases[index]==[event,index,person,payer,nonce,buyIn,fee,chips],'receipt differs from actual purchase/funding event'
         assert buyIn==funding[0] and fee==buyIn*3//100==funding[3] and chips==funding[1]
         old=records.get(index)
         if old is None:
@@ -120,6 +148,7 @@ def replay_purchases(trace):
             balances[person]+=chips;minted+=chips;latest[person]=index
         records[index]=w
         if kind!=0:actualRows.append(tuple(w))
+    assert set(records)==set(purchases),'missing purchase receipt'
     assert rootRows==actualRows,'host purchase-root stream differs from real escrow receipts'
     assert root==int(re.search(r'emit C7FinalPurchaseRoot\(root: (0x[0-9a-fA-F]+)',trace)[1],16),'final host purchase root mismatch'
     c=packets(trace,'C7CertifiedStandingsData',61)[0];unique=c[4];people=c[5:14][:unique]
@@ -151,12 +180,13 @@ def replay_prizes(trace):
         assert ev==event and person==people[i] and payee==payees[person] and receipt==receipts[i] and (a,z)==(first[i],last[i]) and amount==expected[person]
         root=digest(encoded([root,person,payee,receipt,a,z,amount]));assert root==observed
     credits=re.findall(r'emit C7FinancialCredit\(eventId: (0x[0-9a-fA-F]+), kind: (\d+), person: (0x[0-9a-fA-F]+), receipt: (\d+), payee: .*?\[(0x[0-9a-fA-F]{40})\], prize: (\d+), fee: (\d+)\)',trace);assert len(credits)==unique+1
-    credited=0;seen=set()
+    credited=0;seen=set();expected_transfers=defaultdict(int)
     for i,row in enumerate(credits):
         ev,kind,person,receipt,payee,prize,fee=[int(x,16)if x.startswith('0x')else int(x)for x in row];assert ev==event
         if i==0:assert kind==1 and person==receipt==prize==0 and payee==funding[6] and fee==fees
         else:assert kind==0 and person not in seen and payee==payees[person] and prize==expected[person] and fee==0;seen.add(person)
-        credited+=prize+fee
+        credited+=prize+fee;expected_transfers[payee]+=prize+fee
+    _,actual_transfers=purchase_event_ledger(trace);assert actual_transfers=={payee:amount for payee,amount in expected_transfers.items()if amount},'actual token withdrawals differ from fixed beneficiaries'
     final=packets(trace,'C7FinalFinanceData',12)[0];assert final[:3]==[event,4,root] and final[3:10]==[pot+fees,pot+fees,0,0,0,0,0] and final[10]==fees and final[11]==200000 and credited==pot+fees
     return {'prizePool':pot,'developmentFees':fees,'actualWithdrawals':final[4],'financialRoot':f'{root:064x}','independentPrizeReplay':True,'beneficiariesVerified':len(people),'bankLiabilityAfterWithdrawals':0}
 

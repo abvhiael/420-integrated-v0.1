@@ -16,6 +16,7 @@ function fixture(overrides={}){
  const chain={
   snapshot:async()=>({organizations:[],cooperatives:[],permissions:[]}),
   permission:async()=>({allowed:true,policyHash:H,blockHash:B}),
+  transactionIntent:async()=>({from:W,to:W,chainId:420,value:'0x0',data:'0x1234'}),
   submitSigned:async()=>{submitted++;return {hash:H,signer:W,chainId:420,isFundTransfer:false};},
   finalizedReceipt:async()=>({hash:H,signer:W,action:'organization.join',finalized:true,success:true,isFundTransfer:false,blockHash:B}),
   verifyFinality:async()=>true,
@@ -36,14 +37,14 @@ test('canonical permission changes and replay are rejected before sign',async()=
  let calls=0;
  const f=fixture({permission:async()=>({allowed:true,policyHash:++calls===1?H:B,blockHash:B})});
  const permit=await f.gateway.authorize(ctx);
- await assert.rejects(f.gateway.submit({...ctx,authorizationProof:permit.proof}),/permission changed/);
+ await assert.rejects(f.gateway.submit({...ctx,authorizationProof:permit.proof,signedRawTransaction:'0x1234'}),/permission changed/);
  assert.equal(f.submissions,0);
  await assert.rejects(f.gateway.submit({...ctx,authorizationProof:permit.proof}),/replayed/);
 });
 test('forged signer, protected actions and unfinalized receipts fail closed',async()=>{
  const f=fixture({submitSigned:async()=>({hash:H,signer:'0x'+'2'.repeat(40),chainId:420})});
  const p=await f.gateway.authorize(ctx);
- await assert.rejects(f.gateway.submit({...ctx,authorizationProof:p.proof}),/invalid signed/);
+ await assert.rejects(f.gateway.submit({...ctx,authorizationProof:p.proof,signedRawTransaction:'0x1234'}),/invalid signed/);
  await assert.rejects(f.gateway.authorize({...ctx,action:'wallet.transfer'}),/forbidden/);
  await assert.rejects(f.gateway.authorize({...ctx,action:'cooperative.execute',payload:{kind:'treasury'}}),/forbidden/);
 });

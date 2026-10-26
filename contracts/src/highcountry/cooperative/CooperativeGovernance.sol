@@ -78,7 +78,10 @@ contract CooperativeGovernance is R04EmergencyConsumer {
         uint32 eligible;
         for (uint256 i; i < len; i++) {
             address m = registry.voterAt(cooperative, i);
-            if (registry.enrolled(cooperative, m) && OrganizationRegistry(address(registry.organizations())).isActiveMember(org, m)) {
+            if (
+                registry.enrolled(cooperative, m)
+                    && OrganizationRegistry(address(registry.organizations())).isActiveMember(org, m)
+            ) {
                 voterSnapshot[id][m] = true;
                 eligible++;
             }
@@ -143,16 +146,20 @@ contract CooperativeGovernance is R04EmergencyConsumer {
                 || p.yesVotes <= p.noVotes
         ) return false;
         (bytes32 org,, uint32 version,, bool active) = registry.cooperatives(p.cooperative);
-        if (!active || version != 1 || !registry.enrolled(p.cooperative, p.proposer)
-            || !OrganizationRegistry(address(registry.organizations())).isActiveMember(org, p.proposer)) return false;
+        if (
+            !active || version != 1 || !registry.enrolled(p.cooperative, p.proposer)
+                || !OrganizationRegistry(address(registry.organizations())).isActiveMember(org, p.proposer)
+        ) return false;
         // Historical votes remain auditable, but withdrawn/departed voters cannot supply execution quorum.
         uint32 validYes;
         uint32 validNo;
         uint256 len = registry.voterCount(p.cooperative);
         for (uint256 i; i < len; i++) {
             address voter = registry.voterAt(p.cooperative, i);
-            if (!voterSnapshot[id][voter] || !voted[id][voter] || !registry.enrolled(p.cooperative, voter)
-                || !OrganizationRegistry(address(registry.organizations())).isActiveMember(org, voter)) continue;
+            if (
+                !voterSnapshot[id][voter] || !voted[id][voter] || !registry.enrolled(p.cooperative, voter)
+                    || !OrganizationRegistry(address(registry.organizations())).isActiveMember(org, voter)
+            ) continue;
             if (supported[id][voter]) validYes++;
             else validNo++;
         }

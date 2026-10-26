@@ -1,0 +1,32 @@
+# 5C.4 — Player assignments and table balancing
+
+This step qualifies native assignment/movement mechanics at Level 1 and actual funded initial assignments with genuinely verified canonical randomness at Level 2. It does **not** qualify live tournament hand admission, live elimination/balancing, extra purchases, prize execution, provider operational independence, or deployment. Those boundaries remain explicit in machine evidence. No mock proof verifier or operator-supplied accepted seed exists.
+
+## Frozen rules
+
+- Maximum 64 active tables and 576 players at nine seats. Generic multi-table capacity is 3–9; two-seat events are single-table only. Larger fields need a scaling qualification.
+- Every active paid initial receipt at the real escrow roster lock participates. Optional starting-stack claims are unnecessary. Refunded receipts are skipped; payer, verified person key, receipt nonce and frozen stack are retained. The roster is scanned in receipt order using bounded calls; callers cannot select subsets.
+- The published seating-policy digest binds chain, coordinator, structure book, escrow, router/verifier identities and runtime hashes, complete profile/route revisions, timeout and capacity rules before registration opens. The C3 structure manifest must already be bound.
+- Two distinct verified, scoped-authorized provider identities commit before the actual roster lock. A canonical router request binds the completed roster root. Both must reveal matching secrets before the frozen deadline; the real verifier checks both commitments, actual identities, authority, context and request status. Either provider can withhold and abort. There is no fallback, replacement request or redraw. This is commit/reveal under independent-provider assumptions, **not a VRF or a guarantee against colluding providers**. No bond or slashing mechanism is claimed.
+- Initial assignment uses domain-separated rejection-sampled Fisher–Yates and balanced table/seat placement; the button is separately derived for each table. Chunk boundaries never select an alternative permutation. No player/operator chooses a seat.
+- Native balancing selects the next-due big blind from a largest table into a smallest table, with lowest table ID resolving ties. It selects the worst legal vacancy, never the small blind, preserves all existing blind history/obligations and chips, and invents no extra blind charge. It waits if either table is in a hand or no legal destination exists. Revisions reject stale plans.
+- Surplus tables close in descending table-ID order. A seeded player permutation and separate table/seat draws place their players among least-populated safe receiving tables. Planning precedes atomic movement; insufficient idle vacancies cause a wait with no partial movement. Broken-table players may enter a small-blind seat at a safe boundary. Further ordinary balancing may be necessary after a break. Closed IDs are not reused; the field consolidates to one final table when it fits.
+- Internal future-host admission supports new players, zero-stack re-entry and zero-stack rebuy accounting without enabling actual purchases. Re-entry increments generation, rebuy retains it, nonzero/active stacks cannot buy again, and consumed receipts cannot replay. Actual authenticated purchase windows and hand outcomes remain upstream requirements.
+
+The next-big-blind/worst-seat rule and the distinction for broken tables follow the [official Poker TDA rules, rules 8, 11 and 12](https://www.pokertda.com/view-poker-tda-rules/). The stricter one-player balance target and deterministic highest-table closure are this platform's approved frozen policies.
+
+## Execution and recovery boundary
+
+`PokerTournamentAssignments420` has no live-hand, elimination, movement, stack-debit, fund-transfer or prize-release API. Its library is internal; the mathematical harness is test-only and explicitly labels simulated stack/boundary states. Those tests never establish genuine poker proof acceptance. A later qualified host must authenticate canonical hand outcomes, C3 blind snapshots, current controller/seat-key authority and safe hand boundaries before using native movement/admission. This is remaining **local gameplay integration**, not work that inherently requires testnet.
+
+Historical assignments and proof statements remain inspectable. `assignmentLive` becomes false at the escrow's original technical timeout without requiring a keeper. The unchanged C2 escrow still automatically cancels unstarted events and returns full buy-in plus held fee; seating cannot start that financial escrow. An earlier entropy timeout does not accelerate the independently frozen escrow refund deadline.
+
+## Qualification
+
+Run `python scripts/bet/qualify-poker-5c4.py --output <fresh-directory>` on a clean committed scope using Foundry 1.8.6, Solc 0.8.30, Python 3.12 and Slither 0.11.6. The branch workflow executes this program on the exact triggering SHA and uploads raw outputs on success or failure. Documentation markers cannot satisfy acceptance.
+
+The program requires 30 funded/entropy tests, 28 native balancing tests, all 187 inherited native tests, 43 reference tests, ten native fuzz methods with at least 2,500 executions each, and retained 1,000 randomized reference cases. The 576-player case uses actual verified identities, canonical entry authorization, native-backed $420 deposits and genuine provider commit/reveal. It verifies all 64 full tables, 57,600 prize units, 1,728 held fee units and 59,328 liability units. These are smallest-unit fixture values, not a selected commercial buy-in. The full fixture setup is test orchestration; individual on-chain processing calls use 32-item chunks and must each consume under 15 million gas.
+
+Evidence includes actual funded proof bytes, provider word, canonical request/roster/result hashes, verifier/router deployed runtime hashes, proof checksum, assignment root, every chunk's gas, raw test/analyzer logs, EVM code-size/compiler checks, ABI gate, source closure checksums and an exact-SHA certificate. Static findings retain raw severity and explicit source-bound local dispositions; this is not an independent security audit. Inherited source identities and cryptographic material are unchanged. No unrelated global or 420Arcade qualification is invoked.
+
+Level 3 external security/deployment acceptance and actual operational provider independence remain unaccepted. A successful Level 2 certificate must not be represented as production or testnet approval.

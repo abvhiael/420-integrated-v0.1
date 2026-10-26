@@ -30,6 +30,7 @@ def main():
     tool=execute([a.forge,'--version'],ROOT,env,out,'foundry-version').stdout.decode()
     gotool=execute([a.go,'version'],ROOT,env,out,'go-version').stdout.decode()
     if '1.8.6' not in tool or 'go1.27.3' not in gotool or version('slither-analyzer')!='0.11.6' or sys.version_info[:2]!=(3,12):raise RuntimeError('Unqualified toolchain')
+    execute([sys.executable,'scripts/bet/unpack-poker-5c5-evidence.py'],ROOT,env,out,'unpack-inherited-evidence')
     execute([sys.executable,'scripts/bet/unpack-poker-5c6-evidence.py'],ROOT,env,out,'unpack-evidence')
     r=execute([a.go,'test','-mod=readonly','-count=1','-timeout','10m','-run','^TestTournament5C6CommittedCryptographicEvidence$','-v','.'],ROOT/'clients/420bet-poker/zkshuffle',env,out,'genuine-groth16-verification')
     log=r.stdout.decode('utf-8')

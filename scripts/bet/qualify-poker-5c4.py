@@ -23,7 +23,7 @@ def main():
     tool=execute([a.forge,'--version'],ROOT,env,out,'foundry-version').stdout.decode()
     if '1.8.6' not in tool or version('slither-analyzer')!='0.11.6' or sys.version_info[:2]!=(3,12):raise RuntimeError('Unqualified toolchain')
     cmd=[a.forge,'test','--no-dynamic-test-linking','--use',a.solc];tests=[];counts={}
-    for suite,file,count in [('TournamentAssignmentsFunded420Test','PokerTournamentAssignments420.t.sol',30),('TournamentTableBalance420Test','PokerTournamentBalance420.t.sol',28)]:
+    for suite,file,count in [('TournamentAssignmentsFunded420Test','PokerTournamentAssignments420.t.sol',31),('TournamentTableBalance420Test','PokerTournamentBalance420.t.sol',28)]:
         r=execute(cmd+['--match-contract','^'+suite+'$','--json'],ROOT/'contracts',env,out,suite)
         tests+=native(r,ROOT/'contracts/test/tournament-5c4'/file,count);counts[suite]=count
     old=[]
@@ -82,6 +82,6 @@ def main():
     write(out,'static-review.json',{'rawHigh':sum(f['impact']=='High' for f in severe),'rawMedium':sum(f['impact']=='Medium' for f in severe),'unreviewedHighMedium':0,'review':review,'independentAudit':False})
     if git('rev-parse','HEAD')!=head or git('status','--porcelain','--',*SCOPE) or any(sha(ROOT/f)!=h for f,h in {**sources,**closure}.items()):raise RuntimeError('Source drift')
     evidence={f.relative_to(out).as_posix():sha(f) for f in out.rglob('*') if f.is_file() and not any(x in f.relative_to(out).parts for x in ['build','cache'])}
-    report={'schema':'420-poker-5c4-funded-seating-v1','qualifiedSHA':head,'reconciledMain':BASE,'tree':git('rev-parse','HEAD^{tree}'),'nativeMechanicsLevel1Accepted':True,'fundedInitialSeatingLevel2Accepted':True,'testsPassed':{**counts,'inheritedNative':187,'inheritedReference':43,'total':288},'fuzzRuns':fuzz,'retainedRandomizedReferenceCases':1000,'maximumTables':64,'maximumPlayers':576,'genuineRandomnessVerifierExecuted':True,'genuineTournamentHandIntegrationAccepted':False,'liveBalancingAccepted':False,'gameplayPurchasesEnabled':False,'prizeExecutionAccepted':False,'externalProviderIndependenceAccepted':False,'officialTestnetAccepted':False,'productionApproved':False,'sourceSHA256':sources,'compiledSourceClosureSHA256':closure,'evidenceSHA256':evidence,'completedAt':datetime.now(timezone.utc).isoformat()}
+    report={'schema':'420-poker-5c4-funded-seating-v1','qualifiedSHA':head,'reconciledMain':BASE,'tree':git('rev-parse','HEAD^{tree}'),'nativeMechanicsLevel1Accepted':True,'fundedInitialSeatingLevel2Accepted':True,'testsPassed':{**counts,'inheritedNative':187,'inheritedReference':43,'total':289},'fuzzRuns':fuzz,'retainedRandomizedReferenceCases':1000,'maximumTables':64,'maximumPlayers':576,'genuineRandomnessVerifierExecuted':True,'genuineTournamentHandIntegrationAccepted':False,'liveBalancingAccepted':False,'gameplayPurchasesEnabled':False,'prizeExecutionAccepted':False,'externalProviderIndependenceAccepted':False,'officialTestnetAccepted':False,'productionApproved':False,'sourceSHA256':sources,'compiledSourceClosureSHA256':closure,'evidenceSHA256':evidence,'completedAt':datetime.now(timezone.utc).isoformat()}
     write(out,'qualification.json',report);print(json.dumps({k:report[k] for k in ['qualifiedSHA','nativeMechanicsLevel1Accepted','fundedInitialSeatingLevel2Accepted','testsPassed']}),flush=True)
 if __name__=='__main__':main()

@@ -12,7 +12,7 @@
     "contracts/src/revenue/DevelopmentCompensationVault420.sol": "4f28e6fbcd71e78632ce8decee2aac2967c7117d41e7574f67f8c95ec32a3e8b",
     "contracts/src/bet/tournament/PokerTournamentStructure420.sol": "0d261bf5a0c1ecf4e1411c18600505da79f7d4f73fc3720fe7705f4a8535c974",
     "contracts/src/bet/tournament/PokerTournamentStructureBook420.sol": "c63cd63230eeb388782b9944328ccef5721a6a3f9cc2391c9632fbf28314a869",
-    "contracts/src/bet/tournament/PokerTournamentAssignments420.sol": "2d5286231641ee87df860750640241ab225d98db68ce76f4c987efb88c869f4e",
+    "contracts/src/bet/tournament/PokerTournamentAssignments420.sol": "336ea5e599a4979afa18510f156f020c613a0cfff0bccebc898729c52fce8908",
     "contracts/src/bet/tournament/PokerTournamentSeatingEntropy420.sol": "ad66577e0e108072773ed43ec91bf8e287d8e7a5898e9e198ab49731d8aa33a2",
     "contracts/src/bet/tournament/PokerTournamentTableBalance420.sol": "e459031d9dfaff0984a91e933e858582f605189ba1c7e3400c0eaa6f5e18235b",
     "contracts/src/randomness/RandomnessRouter420.sol": "c4bf8a457df29c18c979cf3f0ef50ecbdd2b2f608430d5ff069704dc3f831115",

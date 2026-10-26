@@ -142,8 +142,10 @@ contract PokerTournamentAssignments420 {
     function expire(bytes32 id) external guarded {
         Event storage e=events_[id];if(e.stage==Stage.NONE||e.stage==Stage.VOID)revert Invalid();
         PokerTournamentEntryEscrow420.EventAccount memory a=escrow.eventOf(id);
-        bool expired=a.readyAt!=0&&block.timestamp>uint256(a.readyAt)+e.timeout;
-        if(!expired&&a.state!=PokerTournamentEntryEscrow420.State.CANCELLED)revert Invalid();
+        bool technical=a.readyAt!=0&&block.timestamp>=uint256(a.readyAt)+escrow.configOf(id).technicalGrace;
+        bool unresolved=e.requestId==0||router.status(e.requestId)!=IRandomnessRouter420.Status.FULFILLED;
+        bool expired=a.readyAt!=0&&block.timestamp>uint256(a.readyAt)+e.timeout&&unresolved;
+        if(!expired&&!technical&&a.state!=PokerTournamentEntryEscrow420.State.CANCELLED)revert Invalid();
         // A completed draw remains historical; no replacement request or redraw is possible.
         if(e.stage==Stage.READY&&a.state!=PokerTournamentEntryEscrow420.State.CANCELLED&&block.timestamp<uint256(a.readyAt)+escrow.configOf(id).technicalGrace)revert Invalid();
         if(e.requestId!=0&&router.status(e.requestId)==IRandomnessRouter420.Status.REQUESTED)router.voidExpired(e.requestId);

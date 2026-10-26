@@ -80,6 +80,11 @@ contract TournamentAssignmentsFunded420Test is EntryFixture420 {
     }
     function testExactEntropyDeadlineAllowedButLaterRevealRejected()public {requested();vm.warp(700);p0.invoke(address(entropy),abi.encodeCall(entropy.reveal,(address(seating),purpose,S0)));vm.warp(701);_fail(p1,address(entropy),abi.encodeCall(entropy.reveal,(address(seating),purpose,S1)));}
     function testReplayedResolutionRejected()public {complete();_reject(address(seating),abi.encodeCall(seating.resolve,(EVENT)));}
+    function testFulfilledDrawCannotBeGriefExpiredDuringChunkProcessing()public {
+        requested();reveals();seating.resolve(EVENT);vm.warp(701);_reject(address(seating),abi.encodeCall(seating.expire,(EVENT)));
+        seating.shuffle(EVENT,1);_reject(address(seating),abi.encodeCall(seating.expire,(EVENT)));seating.assign(EVENT,1);
+        _reject(address(seating),abi.encodeCall(seating.expire,(EVENT)));seating.assign(EVENT,1);require(seating.assignmentLive(EVENT));
+    }
     function testNoCallerSelectedSeedOrMovementAuthority()public {complete();(bool ok,)=address(seating).call(abi.encodeWithSignature("setSeed(bytes32,bytes32)",EVENT,S0));require(!ok);(ok,)=address(seating).call(abi.encodeWithSignature("move(bytes32,bytes32,uint32,uint8)",EVENT,A,uint32(1),uint8(1)));require(!ok);}
     function testPrematureRosterAndZeroChunkRejected()public {commits();_reject(address(seating),abi.encodeCall(seating.loadRoster,(EVENT,uint32(128))));funded();_reject(address(seating),abi.encodeCall(seating.loadRoster,(EVENT,uint32(0))));_reject(address(seating),abi.encodeCall(seating.loadRoster,(EVENT,uint32(129))));}
     function testChunkedRosterIncludesAllPaidPlayers()public {commits();funded();seating.loadRoster(EVENT,1);require(seating.eventOf(EVENT).stage==PokerTournamentAssignments420.Stage.LOADING&&seating.rosterCount(EVENT)==1);outsider.invoke(address(seating),abi.encodeCall(seating.loadRoster,(EVENT,uint32(1))));require(seating.rosterCount(EVENT)==2);}

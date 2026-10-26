@@ -12,7 +12,7 @@ test('unsupported operations fail closed and missing signed wallet transaction r
  await assert.rejects(a.submitSigned({wallet:addr,action:'organization.join',payload:{organization:policy}}),/signed raw transaction required/);
 });
 test('signed chain operation requires actual RPC transaction and signer matching',async()=>{
- const a=make({request:async()=>h});
+ const a=make({request:async(method)=>method==='eth_sendRawTransaction'?h:{from:'0x'+'2'.repeat(40),to:addr,input:'0x12345678',chainId:'0x1a4',value:'0x0'}});
  await assert.rejects(a.submitSigned({wallet:addr,action:'organization.join',payload:{organization:policy,signedRawTransaction:'0x1234'}}),/social transaction intent mismatch/);
 });
 test('unprovisioned social indexer does not forge persistent snapshot or histories',async()=>{

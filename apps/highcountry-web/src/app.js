@@ -1,3 +1,4 @@
+import {demoScene,placementStyle} from './cultivation-scene-layout.js';
 import {mountOriginalSixteenGallery} from './archive-gallery.js';
 import {cultivationStageArt,cultivationSceneArt,CULTIVATION_REGIONS,CULTIVATION_ENVIRONMENTS} from './cultivation-art.js';
 import {mountAccountPanel} from './account.js';
@@ -42,7 +43,16 @@ export function createHighCountryApp({document,location,config,fetchImpl,storage
    const sceneImg=el('img','');sceneImg.className='cultivation-scene-image';sceneImg.src=scene.src;sceneImg.alt=scene.alt;
    const fallback=el('p','Regional scene artwork has not been uploaded or could not be loaded. Cultivation remains playable.');fallback.hidden=true;
    sceneImg.addEventListener('error',()=>{sceneImg.hidden=true;fallback.hidden=false;});
-   visual.append(sceneImg,fallback);main.append(visual);
+   const canvas=el('div','');canvas.className='cultivation-scene-canvas';canvas.append(sceneImg);
+   for(const item of demoScene(previewEnvironment)){
+    const sprite=el('img','');sprite.className='cultivation-scene-prop';sprite.src=item.src;sprite.alt='';
+    sprite.setAttribute('aria-hidden','true');
+    const style=placementStyle(item);
+    sprite.style.left=style.left;sprite.style.top=style.top;sprite.style.width=style.width;sprite.style.height=style.height;sprite.style.zIndex=style.zIndex;
+    sprite.addEventListener('error',()=>{sprite.hidden=true;});
+    canvas.append(sprite);
+   }
+   visual.append(canvas,fallback);main.append(visual);
    if(guest){const stats=el('div','');stats.className='game-stats';stats.append(el('p','Completed local harvests: '+guest.completed));main.append(stats);if(guest.plant){
     const p=guest.plant;const phase=stage(p,Math.max(guest.lastSeen,Date.now()));const panel=el('div','');panel.className='game-panel';const art=el('img','');const illustration=cultivationStageArt(phase);art.src=illustration.src;art.alt=illustration.alt;art.addEventListener('error',()=>{if(!art.dataset.fallback){art.dataset.fallback='true';art.src=illustration.fallback;}});art.width=240;art.height=180;panel.append(art);const detail=el('div','');detail.append(el('h3','Current cultivation'),el('p','Plant stage: '+phase));panel.append(detail);main.append(panel);
     main.append(el('p','Local preview plant: '+p.id));

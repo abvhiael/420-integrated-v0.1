@@ -169,18 +169,21 @@ export class CanonicalSocialChainAdapter {
   const params=await this.parameters(op,payload);
   return {from:address(wallet),to:address(this.contracts[op.contract]),data:enc(op.sig,params),chainId:this.rpc.chainId,value:'0x0'};
  }
- async submitSigned({wallet,action,payload}){
+ async prepareSigned({wallet,action,payload}){
   const op=TABLE[action];if(!op||!ENABLED.has(action))fail('unapproved social operation');
   const raw=payload?.signedRawTransaction;
   if(!bytes(raw))fail('wallet signed raw transaction required');
   const params=await this.parameters(op,payload);
   const expected=enc(op.sig,params).toLowerCase();
-  // Decode and authenticate the real player-signed envelope before any broadcast.
-  // The verifier is a required local cryptographic implementation, never RPC self-attestation.
   const verified=await this.verifySignedEnvelope(raw);
   if(!verified||address(verified.from)!==address(wallet)||address(verified.to)!==address(this.contracts[op.contract])||verified.input?.toLowerCase()!==expected||verified.chainId!==this.rpc.chainId||BigInt(verified.value)!==0n||!Number.isSafeInteger(verified.nonce)||verified.nonce<0)fail('prebroadcast signed intent mismatch');
+  return {hash:keccak256(Buffer.from(raw.slice(2),'hex')).toLowerCase(),verified,op,expected};
+ }
+ async submitSigned({wallet,action,payload}){
+  const raw=payload?.signedRawTransaction;
+  const {hash:preparedHash,verified,op,expected}=await this.prepareSigned({wallet,action,payload});
   const txHash=await this.rpc.request('eth_sendRawTransaction',[raw]);
-  if(!hash(txHash)||txHash.toLowerCase()!==keccak256(Buffer.from(raw.slice(2),'hex')).toLowerCase())fail('signed transaction hash mismatch');
+  if(!hash(txHash)||txHash.toLowerCase()!==preparedHash)fail('signed transaction hash mismatch');
   const tx=await this.rpc.request('eth_getTransactionByHash',[txHash]);
   if(!tx||tx.hash?.toLowerCase()!==txHash.toLowerCase()||address(tx.from)!==address(wallet)||address(tx.to)!==address(this.contracts[op.contract])
    ||tx.input?.toLowerCase()!==expected||Number(BigInt(tx.chainId))!==this.rpc.chainId||BigInt(tx.value)!==0n||BigInt(tx.nonce)!==BigInt(verified.nonce))fail('signed social transaction intent mismatch');

@@ -1,3 +1,4 @@
+import {entertainmentCatalogue,getEntertainmentAsset} from './entertainment-catalogue.js';
 // HC-NEXT-4.4 player experience. All balances, ownership and settlement states are server-derived.
 const opaque=x=>typeof x==='string'&&/^[A-Za-z0-9:_-]{1,128}$/.test(x);
 const pos=x=>Number.isSafeInteger(x)&&x>0;
@@ -69,9 +70,17 @@ export function mountMarketplace({document,main,runtime,authenticate,fetchImpl=f
    ?'Internal BUDS marketplace · no wallet needed · zero transaction fee.'
    :'Canonical escrow marketplace · separate wallet authorization and finalized chain confirmation required.'));
   region.append(el('p','BUDS available: '+data.buds.available+' · reserved: '+data.buds.reserved));
+  const entertainment=section('Entertainment, recreation & relaxation');
+  entertainment.append(el('p','Decorative asset catalogue only. Purchases and prices require authenticated server-verified listings.'));
+  for(const asset of entertainmentCatalogue){
+   const item=el('article');const img=document.createElement('img');
+   img.src=asset.assetUrl;img.alt=asset.name;img.width=96;img.height=96;img.loading='lazy';
+   item.append(img,el('p',asset.name+' · '+asset.footprint.width+'×'+asset.footprint.height+' · '+asset.placement.layer));
+   entertainment.append(item);
+  }
   const inventory=section('My verified inventory');
   if(!data.inventory.length)inventory.append(el('p','No tradeable registered inventory. Local guest harvests cannot be listed.'));
-  for(const item of data.inventory)inventory.append(el('p',item.asset+' · available '+item.available+' · reserved '+item.reserved));
+  for(const item of data.inventory)inventory.append(el('p',(getEntertainmentAsset(item.asset)?.name||item.asset)+' · available '+item.available+' · reserved '+item.reserved));
   if(data.mode==='ordinary'){
    const list=section('Create a listing');
    const asset=formField(list,'Verified asset ID');
@@ -89,7 +98,7 @@ export function mountMarketplace({document,main,runtime,authenticate,fetchImpl=f
   const browse=section('Browse available listings');
   if(!data.browse.length)browse.append(el('p','No available listings.'));
   for(const item of data.browse){
-   const row=el('article');row.append(el('p',item.asset+' · '+item.quantity+' units · '+item.price+' BUDS · seller '+item.seller));
+   const row=el('article');row.append(el('p',(getEntertainmentAsset(item.asset)?.name||item.asset)+' · '+item.quantity+' units · '+item.price+' BUDS · seller '+item.seller));
    row.append(el('p','Listing '+item.listing+' · expires '+new Date(item.expiresAt).toLocaleString()));
    if(data.mode==='ordinary'){
     button(row,'Purchase for '+item.price+' BUDS',()=>{
@@ -106,7 +115,7 @@ export function mountMarketplace({document,main,runtime,authenticate,fetchImpl=f
   const history=section('My listings and trade history');
   if(!data.history.length)history.append(el('p','No trade history on this registered profile.'));
   for(const item of data.history){
-   const row=el('article');row.append(el('p',item.asset+' · '+item.quantity+' units · '+item.price+' BUDS · '+item.status));
+   const row=el('article');row.append(el('p',(getEntertainmentAsset(item.asset)?.name||item.asset)+' · '+item.quantity+' units · '+item.price+' BUDS · '+item.status));
    row.append(el('p','Listing '+item.listing+' · '+(item.seller===data.principal?'I am the seller':'I am the buyer')));
    if(data.mode==='ordinary'&&item.seller===data.principal&&item.status==='active')
     button(row,'Cancel listing',()=>run(()=>client.cancel({operation:operationId(),listing:item.listing}),

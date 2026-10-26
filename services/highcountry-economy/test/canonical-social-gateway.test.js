@@ -18,6 +18,7 @@ function fixture(overrides={}){
   snapshot:async()=>({organizations:[],cooperatives:[],permissions:[]}),
   permission:async()=>({allowed:true,policyHash:H,blockHash:B}),
   transactionIntent:async()=>({from:W,to:W,chainId:420,value:'0x0',data:'0x1234'}),
+  prepareSigned:async()=>({hash:H}),
   submitSigned:async()=>{submitted++;return {hash:H,signer:W,chainId:420,isFundTransfer:false};},
   finalizedReceipt:async()=>({hash:H,signer:W,action:'organization.join',finalized:true,success:true,isFundTransfer:false,blockHash:B}),
   verifyFinality:async()=>true,

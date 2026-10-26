@@ -25,6 +25,8 @@ jobs:
         run: |
           test "$(git rev-parse HEAD)" = "$SHA"
           node --check services/highcountry-economy/src/canonical-social-chain-adapter.js
+      - name: Install pinned cryptographic transaction verifier
+        run: npm install --prefix services/highcountry-economy --ignore-scripts --no-audit --no-fund
       - name: Chain adapter adversarial tests
         run: node --test services/highcountry-economy/test/canonical-social-chain-adapter.test.js
       - name: Retained social gateway adversarial tests

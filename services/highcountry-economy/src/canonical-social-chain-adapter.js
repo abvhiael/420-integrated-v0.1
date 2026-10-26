@@ -206,5 +206,6 @@ export class CanonicalSocialChainAdapter {
  }
  async verifyTreasurySettlement(){return false;} // no treasury settlement from a permission event
  async snapshot(){fail('canonical indexed social snapshots are not provisioned');}
- async history(){fail('canonical social event indexer is not provisioned');}
+ async history(ctx){if(!this.eventIndexer)fail('canonical social event indexer is not provisioned');return this.eventIndexer.history(ctx);}
+ async indexFinalized(ctx){if(!this.eventIndexer)fail('canonical social event indexer is not provisioned');return this.eventIndexer.indexFinalized(ctx);}
 }

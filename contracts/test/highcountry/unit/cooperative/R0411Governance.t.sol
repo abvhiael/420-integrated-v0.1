@@ -112,6 +112,17 @@ contract R0411GovernanceTest {
         require(!executed, "withdrawn proposer policy execution succeeded");
     }
 
+    function testDepartedYesVotesCannotSupplyExecutionQuorum() public {
+        bytes32 id = _proposal();
+        alice.vote(g, id, true);
+        bob.vote(g, id, true);
+        alice.withdraw(r, COOP);
+        vm.warp(block.timestamp + g.VOTING_PERIOD() + g.TIMELOCK());
+        require(!g.executable(id), "withdrawn yes vote counted toward execution quorum");
+        (bool executed,) = address(e).call(abi.encodeCall(e.execute, (id)));
+        require(!executed, "expired consent funded governance execution");
+    }
+
     function testQuorumTimelockAndSingleExecution() public {
         bytes32 id = _proposal();
         alice.vote(g, id, true);

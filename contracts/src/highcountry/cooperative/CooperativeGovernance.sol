@@ -31,6 +31,7 @@ contract CooperativeGovernance is R04EmergencyConsumer {
     mapping(bytes32 => Proposal) public proposals;
     mapping(bytes32 => mapping(address => bool)) public voterSnapshot;
     mapping(bytes32 => mapping(address => bool)) public voted;
+    mapping(bytes32 => mapping(address => bool)) public supported;
     mapping(bytes32 => uint256) public nonces;
     bytes32 public constant ACTION_SET_POLICY = keccak256("HC.COOP.POLICY.SET");
     event Proposed(bytes32 indexed id, bytes32 indexed cooperative, uint32 electorate, uint32 quorum);
@@ -77,7 +78,10 @@ contract CooperativeGovernance is R04EmergencyConsumer {
         uint32 eligible;
         for (uint256 i; i < len; i++) {
             address m = registry.voterAt(cooperative, i);
-            if (OrganizationRegistry(address(registry.organizations())).isActiveMember(org, m)) {
+            if (
+                registry.enrolled(cooperative, m)
+                    && OrganizationRegistry(address(registry.organizations())).isActiveMember(org, m)
+            ) {
                 voterSnapshot[id][m] = true;
                 eligible++;
             }
@@ -108,13 +112,14 @@ contract CooperativeGovernance is R04EmergencyConsumer {
         Proposal storage p = proposals[id];
         if (
             p.end == 0 || block.timestamp >= p.end || p.cancelled || p.executed || voted[id][msg.sender]
-                || !voterSnapshot[id][msg.sender]
+                || !voterSnapshot[id][msg.sender] || !registry.enrolled(p.cooperative, msg.sender)
         ) revert Unauthorized();
         (bytes32 org,,,,) = registry.cooperatives(p.cooperative);
         if (!OrganizationRegistry(address(registry.organizations())).isActiveMember(org, msg.sender)) {
             revert Unauthorized();
         }
         voted[id][msg.sender] = true;
+        supported[id][msg.sender] = support;
         if (support) p.yesVotes++;
         else p.noVotes++;
         emit Voted(id, msg.sender, support);
@@ -141,8 +146,24 @@ contract CooperativeGovernance is R04EmergencyConsumer {
                 || p.yesVotes <= p.noVotes
         ) return false;
         (bytes32 org,, uint32 version,, bool active) = registry.cooperatives(p.cooperative);
-        return active && version == 1
-            && OrganizationRegistry(address(registry.organizations())).isActiveMember(org, p.proposer);
+        if (
+            !active || version != 1 || !registry.enrolled(p.cooperative, p.proposer)
+                || !OrganizationRegistry(address(registry.organizations())).isActiveMember(org, p.proposer)
+        ) return false;
+        // Historical votes remain auditable, but withdrawn/departed voters cannot supply execution quorum.
+        uint32 validYes;
+        uint32 validNo;
+        uint256 len = registry.voterCount(p.cooperative);
+        for (uint256 i; i < len; i++) {
+            address voter = registry.voterAt(p.cooperative, i);
+            if (
+                !voterSnapshot[id][voter] || !voted[id][voter] || !registry.enrolled(p.cooperative, voter)
+                    || !OrganizationRegistry(address(registry.organizations())).isActiveMember(org, voter)
+            ) continue;
+            if (supported[id][voter]) validYes++;
+            else validNo++;
+        }
+        return validYes >= p.quorum && validYes > validNo;
     }
 
     function executionPayload(

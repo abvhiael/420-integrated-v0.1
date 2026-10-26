@@ -44,6 +44,7 @@ jobs:
     outputs:
       compute_only: ${{ steps.scope.outputs.compute_only }}
       organization_only: ${{ steps.scope.outputs.organization_only }}
+      cooperative_only: ${{ steps.scope.outputs.cooperative_only }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -62,10 +63,19 @@ jobs:
           cat "$scope_files"
           compute_only=true
           organization_only=true
+          cooperative_only=true
+          cooperative_changed=false
           organization_changed=false
           while IFS= read -r file; do
             case "$file" in
+              contracts/src/highcountry/cooperative/*|contracts/test/highcountry/unit/cooperative/*) cooperative_changed=true ;;
+            esac
+            case "$file" in
               contracts/src/highcountry/organization/*|contracts/test/highcountry/unit/organization/*) organization_changed=true ;;
+            esac
+            case "$file" in
+              contracts/src/highcountry/cooperative/*|contracts/test/highcountry/unit/cooperative/*|docs/highcountry/HC-NEXT-6.4-COOPERATIVES-GOVERNANCE.md|.github/workflows/highcountry-cooperatives-next-6-4.yml|.github/workflows/contracts-foundry.yml) ;;
+              *) cooperative_only=false ;;
             esac
             case "$file" in
               contracts/src/highcountry/organization/*|contracts/test/highcountry/unit/organization/*|docs/highcountry/HC-NEXT-6.3-ORGANIZATIONS.md|.github/workflows/highcountry-organizations-next-6-3.yml|.github/workflows/contracts-foundry.yml) ;;
@@ -92,8 +102,10 @@ jobs:
             compute_only=false
           fi
           if [[ "$organization_changed" != true ]]; then organization_only=false; fi
+          if [[ "$cooperative_changed" != true ]]; then cooperative_only=false; fi
           echo "compute_only=$compute_only" >> "$GITHUB_OUTPUT"
           echo "organization_only=$organization_only" >> "$GITHUB_OUTPUT"
+          echo "cooperative_only=$cooperative_only" >> "$GITHUB_OUTPUT"
 
   compute-fast:
     needs: classify-pr
@@ -152,10 +164,37 @@ jobs:
           forge lint src/highcountry/organization --severity high med low
           forge test --match-path 'test/highcountry/unit/organization/*.t.sol' -vv
 
+  # Cooperative-only changes use their canonical R04.11 Foundry adversarial suite.
+  cooperative-fast:
+    needs: classify-pr
+    if: github.event_name == 'pull_request' && needs.classify-pr.outputs.cooperative_only == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Canonical cooperative contract build and adversarial tests
+        working-directory: contracts
+        run: |
+          forge build src/highcountry/cooperative --sizes
+          forge fmt --check src/highcountry/cooperative test/highcountry/unit/cooperative
+          forge lint src/highcountry/cooperative --severity high med low
+          forge test --match-path 'test/highcountry/unit/cooperative/*.t.sol' -vv
+
   # Non-Compute or mixed Solidity PRs still qualify the complete inventory.
   pr-shards:
     needs: classify-pr
-    if: github.event_name == 'pull_request' && github.head_ref != 'qualification/bnb-phase3-level3-20261013' && github.head_ref != 'qualification/highcountry-r04-level3-main-20261013' && needs.classify-pr.outputs.compute_only != 'true' && needs.classify-pr.outputs.organization_only != 'true' && (!(startsWith(github.head_ref, 'audit/') || contains(github.head_ref, '-audit-')) || github.head_ref == 'audit/420launchpad-remediation' || github.head_ref == 'audit/420verify-20261003' || github.head_ref == 'audit/420token-complete-20261004' || github.head_ref == 'audit/420town-complete-20261004' || github.head_ref == 'audit/420media-complete-20261006' || github.head_ref == 'audit/doobtube-baseline-20261006')
+    if: github.event_name == 'pull_request' && github.head_ref != 'qualification/bnb-phase3-level3-20261013' && github.head_ref != 'qualification/highcountry-r04-level3-main-20261013' && needs.classify-pr.outputs.compute_only != 'true' && needs.classify-pr.outputs.organization_only != 'true' && needs.classify-pr.outputs.cooperative_only != 'true' && (!(startsWith(github.head_ref, 'audit/') || contains(github.head_ref, '-audit-')) || github.head_ref == 'audit/420launchpad-remediation' || github.head_ref == 'audit/420verify-20261003' || github.head_ref == 'audit/420token-complete-20261004' || github.head_ref == 'audit/420town-complete-20261004' || github.head_ref == 'audit/420media-complete-20261006' || github.head_ref == 'audit/doobtube-baseline-20261006')
     runs-on: ubuntu-latest
     timeout-minutes: 60
     strategy:

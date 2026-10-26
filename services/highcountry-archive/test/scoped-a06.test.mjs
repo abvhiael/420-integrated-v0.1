@@ -59,7 +59,9 @@ test('all 16 uploaded founder assets retain exact byte identity across corrected
  const manifest=await buildScopedA06Manifest(repository);
  assert.equal(manifest.totals.invalid,0);
  assert.equal(manifest.totals.missing,0);
- assert.equal(manifest.availableDeferred,32);
+ assert.equal(manifest.availableDeferred,48);
+ // All 16 botanical plates have since been uploaded in addition to 32 archive card faces.
+ // Preserve exact SHA-256 comparisons; do not substitute existence checks for integrity.
  for(let i=1;i<=16;i++){
   const stem='assets/highcountry/original-sixteen/hc-f'+String(i).padStart(2,'0')+'-';
   for(const kind of ['front','back','key-art','archive-front','archive-back','fragment-01','fragment-02','fragment-03','fragment-04','final-revelation','founders-front','founders-back','seal']){
@@ -74,7 +76,7 @@ test('all 16 uploaded founder assets retain exact byte identity across corrected
    const b=await readFile(join(repository,stem+canonical+'.png'));
    assert.equal(createHash('sha256').update(a).digest('hex'),createHash('sha256').update(b).digest('hex'));
   }
-  for(const kind of ['archive-front','archive-back']){
+  for(const kind of ['archive-front','archive-back','botanical-plate']){
    const path=stem+kind+'.png';
    const record=manifest.deferred.find(x=>x.path===path);
    assert.equal(record.status,'available');

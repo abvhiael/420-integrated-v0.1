@@ -1,20 +1,10 @@
--- Migration companion: execute as owner with provisioned, non-superuser service role.
--- Required environment substitutions are performed by deployment provisioning, not by players.
--- Provision role only through restricted deployment process; never grant PUBLIC.
-DO $$
-BEGIN
- IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='highcountry_social_runtime') THEN
-  CREATE ROLE highcountry_social_runtime NOLOGIN NOSUPERUSER NOBYPASSRLS;
- END IF;
-END $$;
+-- Fail-closed social-operation row security. Provisioning must define a trusted
+-- per-namespace database role/policy before allowing any application access.
+-- PostgreSQL session custom settings are caller-mutable: NEVER trust a namespace
+-- custom GUC alone as the tenant-isolation boundary.
 REVOKE ALL ON highcountry_social_operations FROM PUBLIC;
 ALTER TABLE highcountry_social_operations FORCE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS social_runtime_namespace ON highcountry_social_operations;
--- Database runtime must set a transaction-local trusted namespace before querying.
--- Only the authenticated service role may be granted table privileges.
-CREATE POLICY social_runtime_namespace ON highcountry_social_operations
- FOR ALL TO highcountry_social_runtime
- USING (scope = current_setting('highcountry.social_namespace', true))
- WITH CHECK (scope = current_setting('highcountry.social_namespace', true));
-GRANT SELECT,INSERT,UPDATE ON highcountry_social_operations TO highcountry_social_runtime;
--- DELETE, TRUNCATE, REFERENCES, TRIGGER are never granted.
+-- No permissive RLS policies are installed here. A privileged deployment
+-- migration must create a fixed scope-bound policy for a dedicated per-namespace
+-- runtime role, after validating its login path and least-privilege grants.

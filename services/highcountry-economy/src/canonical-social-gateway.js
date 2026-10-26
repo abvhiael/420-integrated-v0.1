@@ -79,6 +79,7 @@ export class CanonicalSocialGateway {
   if(await this.chain.verifyFinality(receipt)!==true)fail('canonical finality proof denied');
   await this.pool.query('UPDATE highcountry_social_operations SET state=$3, block_hash=$4 WHERE scope=$1 AND operation_id=$2',[scope,operationId.toLowerCase(),'finalized',receipt.blockHash]);
   await this.pool.query("UPDATE highcountry_social_intents SET state='finalized',block_hash=$3,updated_at=now() WHERE scope=$1 AND tx_hash=$2",[scope,operationId.toLowerCase(),receipt.blockHash]);
+  if(typeof this.chain.indexFinalized==='function')await this.chain.indexFinalized({txHash:operationId.toLowerCase(),principal:who.principal,wallet:who.wallet,action:row.action});
   return {operationId:operationId.toLowerCase(),action:row.action,finalized:true,authorized:true,isFundTransfer:false,blockHash:receipt.blockHash};
  }
  async history({session,scope,kind,id,cursor=null}){

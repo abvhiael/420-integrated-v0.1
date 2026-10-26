@@ -1,5 +1,6 @@
-// HC-ART-02-A prospective artwork specifications; no file or server SKU is assumed to exist.
-export const SEATING_CATALOG_VERSION='hc-art-02a/design-v1';
+// HC-ART-02-A verified uploaded art paths from main; server SKU and purchase authority not registered.
+export const SEATING_CATALOG_VERSION='hc-art-02a/assets-v1';
+export const SEATING_ART_ROOT='/assets/cultivation/props/comfort-furniture/sofas-seating/universal/';
 export const SEATING_DESIGNS=Object.freeze([
   {
     "id": "hc-prop-furniture-worn-three-seat-couch",
@@ -22,7 +23,7 @@ export const SEATING_DESIGNS=Object.freeze([
     "tags": [
       "seating"
     ],
-    "assetStatus": "proposed",
+    "assetStatus": "uploaded-main",
     "marketStatus": "not-registered"
   },
   {
@@ -299,4 +300,6 @@ export const SEATING_DESIGNS=Object.freeze([
     "assetStatus": "proposed",
     "marketStatus": "not-registered"
   }
-].map(x=>Object.freeze({...x,footprintTiles:Object.freeze(x.footprintTiles),environments:Object.freeze(x.environments),regions:Object.freeze(x.regions),conditionArtCandidates:Object.freeze(x.conditionArtCandidates),tags:Object.freeze(x.tags)})));
+].map(x=>Object.freeze({...x,footprintTiles:Object.freeze(x.footprintTiles),environments:Object.freeze(x.environments),regions:Object.freeze(x.regions),conditionArtCandidates:Object.freeze(x.conditionArtCandidates),tags:Object.freeze(x.tags),sprite:Object.freeze({src:SEATING_ART_ROOT+x.id+'.png',alt:x.name+' seating artwork'}),placement:Object.freeze({tilePx:64,anchorX:.5,anchorY:1,collision:'tile-occupancy',depth:'ground-contact-y'})})));
+export function seatingDesign(id){const item=SEATING_DESIGNS.find(x=>x.id===id);if(!item)throw Error('unknown-seating-design');return item;}
+export function seatingPlacement(id){const item=seatingDesign(id);return Object.freeze({id:item.id,src:item.sprite.src,footprintTiles:item.footprintTiles,anchorX:.5,anchorY:1,tilePx:64,collision:'tile-occupancy',depth:'ground-contact-y'});}

@@ -7,7 +7,7 @@ ROOT=Path(__file__).resolve().parents[2]
 BASE='91a24aafbe1aa1e6136115fd8ed382e812e25bcf'
 SCOPE=['contracts/foundry.toml','contracts/test/tournament-5c5','clients/420bet-poker/zkshuffle/fixtures/tournament-5c5','clients/420bet-poker/zkshuffle/tournament5c5_funded_proofs_test.go','clients/420bet-poker/zkshuffle/tournament5c5_verify_evidence_test.go','scripts/bet/qualify-poker-5c5.py','scripts/bet/export-poker-5c5-context.py','scripts/bet/replay-poker-5c5.py','scripts/bet/unpack-poker-5c5-evidence.py','scripts/bet/poker-5c5-static-review.json','docs/bet/BET-AUDIT-5C.5-ELIMINATIONS-STANDINGS.md','.github/workflows/420bet-poker-5c5-level2.yml']
 SCOPE += ['contracts/src/bet/tournament/'+n+'.sol' for n in ['PokerTournamentAdmission420','PokerTournamentNLHE420','PokerTournamentRuntimeEscrow420','PokerTournamentStandings420','PokerTournamentRoundEntropy420','PokerTournamentHost420','PokerTournamentHostState420','PokerTournamentHostFactories420','PokerTournamentHostConfiguration420','PokerTournamentHostAdmission420','PokerTournamentHostLedger420','PokerTournamentHostRounds420','PokerTournamentHostBalance420']]
-SCOPE += ['contracts/src/bet/tournament/generated']
+SCOPE += ['contracts/src/bet/tournament/generated','.github/workflows/identity-id-audit-4.yml','.github/workflows/identity-id-audit-5.yml']
 def module(name,file):
     s=importlib.util.spec_from_file_location(name,ROOT/file);m=importlib.util.module_from_spec(s);s.loader.exec_module(m);return m
 helpers=module('previous_helpers','scripts/bet/qualify-poker-5c2.py')

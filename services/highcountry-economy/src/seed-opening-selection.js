@@ -22,7 +22,7 @@ export function reduceSeedWord(value,bound){
  const b=BigInt(bound);return {accepted:value>=(2n**256n)%b,ticket:Number(value%b)};
 }
 export function uniformSeedDraw(entropy,requestId,domain,bound){
- if(!/^0x[0-9a-f]{64}$/i.test(entropy)||BigInt(entropy)===0n||!/^0x[0-9a-f]{64}$/i.test(requestId)||BigInt(requestId)===0n||!Number.isSafeInteger(bound)||bound<1||bound>65)throw Error('invalid seed draw');
+ if(!/^0x[0-9a-f]{64}$/i.test(entropy)||!/^0x[0-9a-f]{64}$/i.test(requestId)||BigInt(requestId)===0n||!Number.isSafeInteger(bound)||bound<1||bound>65)throw Error('invalid seed draw');
  for(let counter=0;counter<256;counter++){const value=BigInt(abiHash(entropy,requestId,seedHash(domain),counter)),r=reduceSeedWord(value,bound);if(r.accepted)return r.ticket;}
  throw Error('seed draw expansion exhausted');
 }

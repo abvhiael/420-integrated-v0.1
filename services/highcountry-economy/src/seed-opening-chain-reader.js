@@ -2,7 +2,8 @@ import {SettlementError} from './buds-ledger.js';
 import {address,calldata,words,word} from './finalized-rpc.js';
 import {keccak256} from './keccak.js';
 import {OPENING_DOMAIN,OPENING_POLICY_HASH,openingPurpose,poolDefinition,OPENING_POOLS,selectSeedOutcome,seedHash,openingKey,openingCommitment} from './seed-opening-selection.js';
-const H=x=>typeof x==='string'&&/^0x[0-9a-f]{64}$/i.test(x)&&BigInt(x)!==0n;
+const B=x=>typeof x==='string'&&/^0x[0-9a-f]{64}$/i.test(x);
+const H=x=>B(x)&&BigInt(x)!==0n;
 const n=x=>BigInt('0x'+x),hex=x=>'0x'+x,a=x=>address('0x'+x.slice(24));
 const fail=m=>{throw new SettlementError(m);};
 export class SeedOpeningChainReader {
@@ -47,7 +48,7 @@ export class SeedOpeningChainReader {
   const result={contract:address(this.rpc.contracts.seedOpening.address),openingKey:intent.openingKey,commitment:intent.commitment,requestId,fulfilled,routerReady};
   if(fulfilled){
    const rng=await s.call('randomRouter','result(bytes32)',requestId);
-   if(!routerReady||rng.length!==2||!H(hex(rng[0]))||!H(hex(rng[1]))||o[6]!==rng[0]||o[7]!==rng[1])fail('opening proof or entropy mismatch');
+   if(!routerReady||rng.length!==2||!B(hex(rng[0]))||!B(hex(rng[1]))||o[6]!==rng[0]||o[7]!==rng[1])fail('opening proof or entropy mismatch');
    const selected=selectSeedOutcome(pool,hex(rng[0]),requestId);
    if(n(o[4])!==BigInt(selected.tierIndex)||n(o[5])!==BigInt(selected.index))fail('canonical opening selection mismatch');
    Object.assign(result,{tier:selected.tierIndex,index:selected.index,entropy:hex(rng[0]),proofHash:hex(rng[1])});

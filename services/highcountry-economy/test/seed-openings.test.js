@@ -7,7 +7,7 @@ async function complete(f,p){const i=await f.openings.open(f.alice,p.id);await f
 test('exact 6/3/1 tier partition and independent bounded selection across all four immutable pools',async()=>{
  const counts=[0,0,0];for(let i=0;i<10;i++)counts[seedTier(i)]++;assert.deepEqual(counts,[6,3,1]);assert.throws(()=>seedTier(10));
  const f=await openingFixture();for(const region of OPENING_POOLS){const p=poolDefinition(f.catalogue,region);for(let n=0;n<100;n++){const o=selectSeedOutcome(p,seedHash('root:'+n),seedHash('request:'+n));assert.ok(p.tiers[o.tierIndex].includes(o.cultivarId));assert.ok(o.index>=0&&o.index<p.tiers[o.tierIndex].length);}}
- assert.throws(()=>uniformSeedDraw('0x'+'00'.repeat(32),seedHash('r'),'d',10));
+ assert.ok(uniformSeedDraw('0x'+'00'.repeat(32),seedHash('r'),'d',10)>=0);
 });
 test('ownership and exact source provenance required; no preview or caller-provided outcome',async()=>{
  const f=await openingFixture(),[p]=await f.allocate();assert.equal((await f.openings.status(f.alice,p.id)).status,'not-committed');await assert.rejects(f.openings.reconcile(f.alice,p.id),/committed/);await assert.rejects(f.openings.open(f.bob,p.id),/ownership/);
@@ -97,4 +97,11 @@ test('changing deployed opening/router/profile configuration cannot reroll an ex
   const reader=new SeedOpeningChainReader({rpc,catalogue:f.catalogue,gameId:f.identity.gameId,profileId:f.profile,timeoutSeconds:100,approvedRoutes:[f.route]});await assert.rejects(reader.read(intent),/deployment cannot be replaced/);
  }
  const reader=new SeedOpeningChainReader({rpc:f.rpc,catalogue:f.catalogue,gameId:f.identity.gameId,profileId:seedHash('new-profile'),timeoutSeconds:100,approvedRoutes:[f.route]});await assert.rejects(reader.read(intent),/deployment cannot be replaced/);assert.equal(f.state.records.size,1);assert.ok([...f.store.state.seedOpeningHolds.values()].every(n=>n===3));
+});
+
+test('fulfilled zero-valued canonical result retains its entitlement and exactly-once selection',async()=>{
+ const f=await openingFixture(),[p]=await f.allocate(),i=await f.openings.open(f.alice,p.id);await f.worker.tick(f.alice,p.id);
+ const record=f.state.records.get(i.openingKey);record.entropy='0x'+'00'.repeat(32);record.proofHash='0x'+'00'.repeat(32);f.prove(i.openingKey);
+ await f.worker.tick(f.alice,p.id);const done=await f.openings.reconcile(f.alice,p.id);assert.equal(done.status,'fulfilled');
+ const lot=await f.packs.prepare(f.alice,p.id);assert.equal(lot.cultivarId,done.outcome.cultivarId);assert.deepEqual(await f.packs.prepare(f.alice,p.id),lot);
 });

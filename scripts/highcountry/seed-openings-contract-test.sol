@@ -13,6 +13,11 @@ import { IRandomnessRouter420 } from "../../contracts/src/interfaces/IRandomness
 import { SeedTestSignatureVerifier } from "./seed-rare-contract-test.sol";
 
 interface OpeningVm {
+    function mockCall(
+        address,
+        bytes calldata,
+        bytes calldata
+    ) external;
     function warp(
         uint256
     ) external;
@@ -136,6 +141,17 @@ contract SeedOpeningQualificationTest {
         bytes memory p = proof(id, e);
         vm.prank(vm.addr(KEY));
         router.fulfillRandomness(id, e, p);
+    }
+
+    // Explicit boundary injection only: finding a zero Keccak preimage is not claimed.
+    // Real request status and context are fulfilled through the actual router first.
+    function testFulfilledZeroResultDoesNotStrandEntitlement() public {
+        bytes32 id = request();
+        fulfill(id);
+        vm.mockCall(address(router), abi.encodeCall(router.result, (id)), abi.encode(bytes32(0), bytes32(0)));
+        opening.fulfillOpening(PACK);
+        require(opening.getOpening(PACK).fulfilled, "zero result stranded");
+        opening.fulfillOpening(PACK);
     }
 
     function testModuloBiasRejectionBoundaries() public view {

@@ -167,7 +167,7 @@ contract SeedPackOpening {
         bytes32 domain,
         uint256 bound
     ) public pure returns (uint256) {
-        if (entropy == 0 || requestId == 0 || bound == 0 || bound > 65) revert InvalidOpening();
+        if (requestId == 0 || bound == 0 || bound > 65) revert InvalidOpening();
         for (uint256 counter; counter < 256; counter++) {
             uint256 value = uint256(keccak256(abi.encode(entropy, requestId, domain, counter)));
             (bool accepted, uint256 ticket) = reduce(value, bound);
@@ -210,7 +210,6 @@ contract SeedPackOpening {
                 || r.securityTier < 2 || r.fallbackPolicy != 0
         ) revert UnverifiedRandomness();
         (bytes32 entropy, bytes32 proof) = router.result(o.requestId);
-        if (entropy == 0 || proof == 0) revert UnverifiedRandomness();
         uint8 tier = tierForTicket(uniform(entropy, o.requestId, TIER_DRAW, 10));
         uint16 index = uint16(uniform(entropy, o.requestId, CULTIVAR_DRAW, _poolSizes[o.pool][tier]));
         o.tier = tier;

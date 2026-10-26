@@ -3,7 +3,6 @@ import assert from 'node:assert/strict';
 import {fixture,chainFixture,data,ALICE,BOB} from './seed-catalogue.fixture.mjs';
 import {SeedCatalogue,SeedCollection} from '../src/seed-catalogue.js';
 import {parseSeedBreedingPlan,canonicalSeedChild} from '../src/seed-chain-reader.js';
-import {spawnSync} from 'node:child_process';
 
 test('all 65 public entries, exact region/tier filters and source-safe ancestry',()=>{
  const c=new SeedCatalogue(data);assert.equal(c.browse().entries.length,65);assert.equal(c.browse({tier:'common',region:'Red Mesa'}).entries.length,7);
@@ -55,11 +54,6 @@ test('all chain reads use the same finalized block hash and canonicality require
 test('uint64 breeding IDs retain exact values through parsing',()=>{
  const p=parseSeedBreedingPlan('{"breedingEventId":18446744073709551614}');assert.equal(p.breedingEventId,'18446744073709551614');
 });
-test('JavaScript inheritance matches qualified Python model across every planned rare cross',()=>{
- const script=`import sys,json;sys.path.insert(0,'scripts/highcountry');import rare_genome_lifecycle as r\np=r.g.load('rare-breeding-plan.v1.json');c={e['genomeId']:e for e in r.g.load('common-reference-genomes.v1.json')['genomes']}\nprint(json.dumps([{'id':str(e['breedingEventId']),'entropy':r.g.k(('SEED05_TEST:'+str(i)).encode()),'a':c[e['parentAGenomeId']]['loci'],'b':c[e['parentBGenomeId']]['loci'],'expected':r.offspring(c[e['parentAGenomeId']]['loci'],c[e['parentBGenomeId']]['loci'],r.g.k(('SEED05_TEST:'+str(i)).encode()),e['breedingEventId'])[0]} for i,e in enumerate(p['events'])]))`;
- const run=spawnSync('python',['-c',script],{cwd:new URL('../../../',import.meta.url),encoding:'utf8'});assert.equal(run.status,0,run.stderr);for(const v of JSON.parse(run.stdout))assert.deepEqual(canonicalSeedChild(v.a,v.b,v.entropy,v.id),v.expected);
-});
-
 test('rare catalogue identity requires consumed canonical breeding, proof binding and inherited loci',async()=>{
  const good=chainFixture();good.state.harvestGenome=good.rare.childGenomeId;assert.equal((await good.reader.harvest(ALICE,'7')).cultivarId,good.rare.cultivarId);
  for(const key of ['badRare','badProof','badLoci']){const f=chainFixture();f.state.harvestGenome=f.rare.childGenomeId;f.state[key]=true;await assert.rejects(f.reader.harvest(ALICE,'7'));}

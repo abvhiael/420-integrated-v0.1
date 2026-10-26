@@ -44,7 +44,7 @@ jobs:
           ln -s /tmp/hc-seed05/node_modules node_modules
           /tmp/hc-seed05/node_modules/.bin/playwright install --with-deps chromium
       - name: L1 catalogue, authority, HTTP and browser component tests
-        run: node --test services/highcountry-economy/test/seed-catalogue*.test.js apps/highcountry-web/test/seed-catalogue.test.mjs services/highcountry-economy/test/postgres-store.test.js services/highcountry-economy/test/runtime-integration.test.js services/highcountry-economy/test/r064-browser-runtime-http.test.js
+        run: node --test services/highcountry-economy/test/seed-catalogue*.test.js apps/highcountry-web/test/seed-catalogue-dom.integration.mjs services/highcountry-economy/test/seed-breeding-crosscheck.integration.mjs services/highcountry-economy/test/postgres-store.test.js services/highcountry-economy/test/runtime-integration.test.js services/highcountry-economy/test/r064-browser-runtime-http.test.js
       - name: L2 durable PostgreSQL and restricted-role integration
         run: node services/highcountry-economy/test/seed-catalogue-postgres.integration.mjs
       - name: Build and verify public projection

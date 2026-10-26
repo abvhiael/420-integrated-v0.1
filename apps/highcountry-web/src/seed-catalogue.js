@@ -11,6 +11,13 @@ export function createSeedCatalogueClient({apiUrl,authenticate,fetchImpl=fetch})
  }
  return {catalogue:()=>post('/seeds/catalogue',{filters:{}}),collection:()=>post('/seeds/collection',{},true),claim:plantId=>{if(!plant(plantId))throw Error('invalid-harvest-plant');return post('/seeds/harvest-card',{plantId},true);}};
 }
+// Only canonical same-origin filenames may be rendered, even if catalogue JSON is malformed.
+export function canonicalSeedArt(entry,kind){
+ const id=entry?.id,tier=entry?.tier;if(typeof id!=='string'||!((tier==='exclusive'&&/^HC-F(?:0[1-9]|1[0-6])$/.test(id))||(tier==='common'&&/^HC-C-[a-z0-9-]+$/.test(id))||(tier==='rare'&&/^HC-R-[a-z0-9-]+$/.test(id))))return null;
+ const slug=id.toLowerCase(),group=tier==='exclusive'?'original-sixteen':tier;
+ const expected=kind==='illustration'?(tier==='exclusive'?'/assets/highcountry/original-sixteen/'+slug+'-botanical-plate.png':'/assets/highcountry/seed-catalogue/'+tier+'/'+slug+'-botanical-plate.png'):kind==='harvestCard'?'/assets/highcountry/seed-catalogue/harvest-cards/'+group+'/'+slug+'-harvest-card.png':kind==='harvestSeal'?'/assets/highcountry/seed-catalogue/harvest-cards/seals/hc-harvest-seal-'+group+'.png':null;
+ return expected&&entry.art?.[kind]===expected?expected:null;
+}
 export function mountSeedCatalogue({document,main,runtime,authenticate,fetchImpl=fetch}){
  const el=(tag,text='')=>{const e=document.createElement(tag);e.textContent=text;return e;};
  if(!document.getElementById('seed-catalogue-style')){const link=el('link');link.id='seed-catalogue-style';link.rel='stylesheet';link.href='/seed-catalogue.css';document.head?.append(link);}
@@ -34,8 +41,11 @@ export function mountSeedCatalogue({document,main,runtime,authenticate,fetchImpl
  const button=(parent,text,fn)=>{const b=el('button',text);b.type='button';b.addEventListener('click',fn);parent.append(b);return b;};
  const progress=id=>collection?.entries.find(e=>e.id===id);
  const ownedText=p=>p?.ownedSeeds===null||!p?'Ownership not verified':p.ownedSeeds+' seeds owned';
+ function picture(entry,kind,className){const src=canonicalSeedArt(entry,kind);if(!src)return null;const img=el('img');img.src=src;img.alt=entry.name+(kind==='illustration'?' botanical interpretation':kind==='harvestCard'?' unearned harvest card artwork':' authenticated harvest seal');img.className=className;img.loading='lazy';img.addEventListener('error',()=>{img.hidden=true;});return img;}
  function showDetail(entry){
   selected=entry.id;detail.replaceChildren();detail.append(el('p',entry.region+' · '+(entry.tier==='exclusive'?'Original Sixteen':entry.tier)),el('h3',entry.name),el('p',entry.history),el('h4','Ancestry'));
+  const art=picture(entry,'illustration','seed-detail-art');if(art)detail.append(art);
+  const preview=picture(entry,'harvestCard','seed-card-preview');if(preview){const box=el('details');box.append(el('summary','Harvest card preview · unearned'),preview);detail.append(box);}
   if(entry.ancestry.parents){for(const parent of entry.ancestry.parents)button(detail,parent.name,()=>showDetail(entries.find(e=>e.id===parent.id)));}
   else if(entry.ancestry.candidates?.length)for(const candidate of entry.ancestry.candidates)detail.append(el('p',candidate.join(' × ')));
   else detail.append(el('p','No confirmed parental pair recorded.'));
@@ -60,14 +70,14 @@ export function mountSeedCatalogue({document,main,runtime,authenticate,fetchImpl
   if(!rows.length)grid.append(el('p',state.value&&!collection?'Refresh your authenticated collection to use this filter.':'No cultivars match these filters.'));
   for(const e of rows){const p=progress(e.id),card=el('article');card.className='seed-tile '+e.region.toLowerCase().replaceAll(' ','-');card.setAttribute('data-cultivar',e.id);
    const seal=el('div',e.name.split(' ').map(n=>n[0]).join('').slice(0,3));seal.className='seed-monogram';seal.setAttribute('aria-hidden','true');
-   card.append(seal,el('p',e.region),el('h4',e.name),el('span',e.tier==='exclusive'?'ORIGINAL SIXTEEN':e.tier.toUpperCase()),el('p',p?.harvested?'Harvest card earned':p?.discovered?'Discovered':'Not yet discovered'),el('p',ownedText(p)));
+   card.append(picture(e,'illustration','seed-cultivar-art')??seal,el('p',e.region),el('h4',e.name),el('span',e.tier==='exclusive'?'ORIGINAL SIXTEEN':e.tier.toUpperCase()),el('p',p?.harvested?'Harvest card earned':p?.discovered?'Discovered':'Not yet discovered'),el('p',ownedText(p)));
    button(card,'View '+e.name,()=>showDetail(e));grid.append(card);
   }
   if(selected)showDetail(entries.find(e=>e.id===selected));
  }
  for(const field of [search,region,tier,state])field.addEventListener(field===search?'input':'change',render);
  const cards=el('div');cards.className='seed-earned-cards';collectionPanel.append(cards);
- function renderCards(){cards.replaceChildren();for(const card of collection?.cards??[]){const e=entries.find(e=>e.id===card.cultivarId);if(!e)continue;const tile=el('article');tile.className='seed-earned';tile.append(el('p','HARVEST COLLECTION'),el('h4',e.name),el('p',e.region),el('p','Verified harvest · plant '+card.firstHarvest.plantId),el('p','Quality '+card.firstHarvest.qualityBps+' / 10000 · '+card.firstHarvest.quantityGrams+' g'),el('p','Personal · nontransferable'));cards.append(tile);}if(!cards.children.length)cards.append(el('p','No authenticated harvest cards earned yet.'));}
+ function renderCards(){cards.replaceChildren();for(const card of collection?.cards??[]){const e=entries.find(e=>e.id===card.cultivarId);if(!e||card.id!=='HC-HARVEST-CARD:'+e.id||card.nonTransferable!==true||card.cosmeticOnly!==true||card.firstHarvest?.successful!==true||!card.firstHarvest.sourceKey)continue;const tile=el('article');tile.className='seed-earned';const base=picture(e,'harvestCard','seed-harvest-art'),seal=picture(e,'harvestSeal','seed-harvest-seal');if(base){const art=el('div');art.className='seed-harvest-artwork';art.append(base);if(seal)art.append(seal);tile.append(art);}tile.append(el('p','HARVEST COLLECTION'),el('h4',e.name),el('p',e.region),el('p','Verified harvest · plant '+card.firstHarvest.plantId),el('p','Quality '+card.firstHarvest.qualityBps+' / 10000 · '+card.firstHarvest.quantityGrams+' g'),el('p','Personal · nontransferable'));cards.append(tile);}if(!cards.children.length)cards.append(el('p','No authenticated harvest cards earned yet.'));}
  async function refresh(){if(!client||busy)return;busy=true;collection=null;render();renderCards();collectionStatus.textContent='Verifying ownership and collection…';try{collection=await client.collection();collectionStatus.textContent=collection.ownershipStatus==='verified-finalized'?'Collection verified against finalized game records.':'Account collection loaded. Link a canonical wallet to verify seed ownership and harvest evidence.';render();renderCards();}catch(e){collectionStatus.textContent='Collection unavailable: '+e.message;}finally{busy=false;}}
  if(client){button(collectionPanel,'Refresh my collection',refresh);const field=el('label','Harvested plant ID '),plantId=el('input');plantId.inputMode='numeric';plantId.setAttribute('aria-label','Harvested plant ID');field.append(plantId);collectionPanel.append(field);
   button(collectionPanel,'Verify harvest and earn card',async()=>{if(busy)return;busy=true;try{await client.claim(plantId.value.trim());collectionStatus.textContent='Harvest verified. Loading your collection…';}catch(e){collectionStatus.textContent='Harvest card not awarded: '+e.message;busy=false;return;}busy=false;await refresh();});

@@ -35,6 +35,7 @@ export class SeedPaymentReader {
   const status=Number(BigInt('0x'+r[3]));if(![0,1,2].includes(status))fail('payment receipt status mismatch');
   if(status===0&&r.some(w=>BigInt('0x'+w)!==0n))fail('malformed missing payment');
   if(status&&'0x'+r[0].slice(24)!==i.wallet)fail('payment payer mismatch');
+  if(status===2&&(BigInt('0x'+r[1])!==0n||BigInt('0x'+r[2])!==0n))fail('malformed cancelled payment');
   if(status===1&&('0x'+r[1]!==i.commitment||Number(BigInt('0x'+r[2]))!==i.pool))fail('payment commitment mismatch');
   // A finalized contract receipt cannot be asserted with caller-supplied transaction facts.
   let event=null;
@@ -42,6 +43,7 @@ export class SeedPaymentReader {
    const logs=await this.rpc.request('eth_getLogs',[{address:this.binding.contract,fromBlock:'0x0',toBlock:h.number,topics:[topic,i.nativeId,'0x'+word(i.wallet)]}]);
    if(logs.length!==1||logs[0].removed||address(logs[0].address)!==this.binding.contract||JSON.stringify(logs[0].topics)!==JSON.stringify([topic,i.nativeId,'0x'+word(i.wallet)]))fail('payment event required');
    const l=logs[0];if(!/^0x[0-9a-f]{64}$/i.test(l.transactionHash??''))fail('payment transaction identity required');event={transactionHash:l.transactionHash,blockHash:l.blockHash,blockNumber:l.blockNumber};const b=await this.rpc.request('eth_getBlockByNumber',[l.blockNumber,false]);if(b?.hash?.toLowerCase()!==l.blockHash?.toLowerCase()||BigInt(l.blockNumber)>BigInt(h.number))fail('payment event anchor mismatch');
+   if(status===2&&l.data!=='0x')fail('cancelled payment event mismatch');
    if(status===1&&l.data!==('0x'+[i.commitment,i.pool,i.amount].map(word).join('')))fail('payment event mismatch');
   }
   const last=await this.rpc.request('eth_getBlockByNumber',[h.number,false]);if(last?.hash?.toLowerCase()!==h.hash.toLowerCase())fail('payment finalized anchor changed');

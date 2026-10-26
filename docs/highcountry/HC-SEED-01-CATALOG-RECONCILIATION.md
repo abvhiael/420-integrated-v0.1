@@ -26,7 +26,7 @@ The botanical sheets contain no verified pedigrees. Common historical origin is 
 
 Level 1: `node scripts/highcountry/seed-catalog.mjs` and `node --test scripts/highcountry/seed-catalog.test.mjs`. Coverage includes exact founder reconciliation, owner regional pools, all source panels, unique IDs and normalized lookups, contextual renames, reserved namespace rejection, missing/duplicate panel rejection and false registration claims. Dedicated path-scoped workflow: `.github/workflows/highcountry-seed-catalog.yml`. No Solidity or unrelated global rerun is needed for this metadata-only change. A CI result must be recorded against the resulting implementation SHA before calling remote qualification complete.
 
-## Remaining roadmap
+## Roadmap (historical plan; implementation closeout is HC-SEED-10)
 
 1. HC-SEED-01: identity catalog and source-art reconciliation (this change).
 2. HC-SEED-02: verify Leafly coverage, then source common histories and attributed ancestry; preserve unknowns.
@@ -39,4 +39,4 @@ Level 1: `node scripts/highcountry/seed-catalog.mjs` and `node --test scripts/hi
 9. HC-SEED-09: BUDS and native $420 purchase settlement, identical odds for equivalent packs, authoritative ownership and purchase history.
 10. HC-SEED-10: bounded integration/adversarial closeout and eventual merge to main. Level 1 per step, Level 2 at milestones, one final Level 3; retain unaffected evidence.
 
-Rarity is scarcity, not automatic statistical superiority. Descendants of Original Sixteen parents do not inherit founder identity. No museum expansion is required. The current branch is held for the ongoing roadmap rather than merged at this step.
+Rarity is scarcity, not automatic statistical superiority. Descendants of Original Sixteen parents do not inherit founder identity. No museum expansion is required. HC-SEED-01–07 merged through PR #838, HC-SEED-08 through #854 and HC-SEED-09 through #858. Final implementation/art/source reconciliation and retained qualification evidence are recorded by HC-SEED-10. Historical identity-only/genome planning statuses are preserved; they never attest live registration. See `HC-SEED-10-QUALIFICATION-CLOSEOUT.md` and the versioned release/evidence ledgers.

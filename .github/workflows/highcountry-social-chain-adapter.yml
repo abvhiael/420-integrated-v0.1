@@ -1,0 +1,49 @@
+name: High Country Social Chain Adapter Scoped Level 1
+on:
+  pull_request:
+    paths:
+      - 'services/highcountry-economy/src/canonical-social-chain-adapter.js'
+      - 'services/highcountry-economy/test/canonical-social-chain-adapter.test.js'
+      - 'services/highcountry-economy/migrations/008-social-rls.sql'
+      - 'services/highcountry-economy/qualification/social-abi-wallet.test.mjs'
+      - 'services/highcountry-economy/src/canonical-social-gateway.js'
+      - 'services/highcountry-economy/src/runtime-service.js'
+      - 'clients/highcountry-access-v1/src/social-economy-ui.js'
+      - 'services/highcountry-economy/package.json'
+      - 'clients/highcountry-access-v1/src/social-http-gateway.js'
+      - 'clients/highcountry-access-v1/test/social-http-gateway.test.js'
+      - '.github/workflows/highcountry-social-chain-adapter.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  adapter:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Exact SHA and module syntax
+        env:
+          SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$SHA"
+          node --check services/highcountry-economy/src/canonical-social-chain-adapter.js
+          node --check services/highcountry-economy/src/runtime-service.js
+          node --check clients/highcountry-access-v1/src/social-http-gateway.js
+          node --check clients/highcountry-access-v1/src/social-economy-ui.js
+      - name: Install pinned cryptographic transaction verifier
+        run: npm install --prefix services/highcountry-economy --ignore-scripts --no-audit --no-fund
+      - name: Chain adapter adversarial tests
+        run: node --test services/highcountry-economy/test/canonical-social-chain-adapter.test.js
+      - name: SOC-5A actual Solidity ABI and cryptographic wallet recovery
+        run: node --test services/highcountry-economy/qualification/social-abi-wallet.test.mjs
+      - name: SOC-5A browser player signing tests
+        run: node --test clients/highcountry-access-v1/test/social-http-gateway.test.js
+      - name: Retained social gateway adversarial tests
+        run: node --test services/highcountry-economy/test/canonical-social-gateway.test.js
+      - name: Retained browser social authorization tests
+        run: node --test clients/highcountry-access-v1/test/social-economy.test.js

@@ -1,3 +1,4 @@
+import {CanonicalSocialChainAdapter} from './canonical-social-chain-adapter.js';
 import {CanonicalSocialGateway} from './canonical-social-gateway.js';
 import {dispatchSocialGateway} from './social-http.js';
 import {createServer} from 'node:http';
@@ -47,7 +48,8 @@ export async function createRuntime({pool,namespace,authority:authConfig,rpc:rpc
  const discoveryService=discovery?new DiscoveryIntegration({store,identity,...discovery,clock}):null;
  const landRightsService=landRights?new LandLeaseAccounts({store,identity,...landRights,clock}):null;
  const gameplayLicensing=landRightsService?new GameplayLicensing({landRights:landRightsService,identity,canonical:landRights.canonical}):null;
- const socialGateway=social?new CanonicalSocialGateway({identity,pool:store.pool,chain:social.chain,scope:social.scope,clock}):null;
+ const socialChain=social?new CanonicalSocialChainAdapter({rpc:identity.rpc,contracts:social.contracts,scope:social.scope,emergencyDomain:social.emergencyDomain,organizationEmergencyDomain:social.organizationEmergencyDomain,cooperativeEmergencyDomain:social.cooperativeEmergencyDomain}):null;
+ const socialGateway=social?new CanonicalSocialGateway({identity,pool:store.pool,chain:socialChain,scope:social.scope,clock}):null;
  return {store,identity,rewards,market,marketView:new HighCountryMarketplaceView({store,identity,market,clock}),skillResearch,missionService,discoveryService,landRightsService,gameplayLicensing,socialGateway,...chain};
 }
 // Production entrypoint for a wallet-optional, registered-player ordinary economy.
@@ -87,7 +89,8 @@ export function composeOrdinaryMarketRuntime({store,identity,rewards,inventoryAu
  const discoveryService=discovery?new DiscoveryIntegration({store,identity,...discovery,clock}):null;
  const landRightsService=landRights?new LandLeaseAccounts({store,identity,...landRights,clock}):null;
  const gameplayLicensing=landRightsService?new GameplayLicensing({landRights:landRightsService,identity,canonical:landRights.canonical}):null;
- const socialGateway=social?new CanonicalSocialGateway({identity,pool:store.pool,chain:social.chain,scope:social.scope,clock}):null;
+ const socialChain=social?new CanonicalSocialChainAdapter({rpc:identity.rpc,contracts:social.contracts,scope:social.scope,emergencyDomain:social.emergencyDomain,organizationEmergencyDomain:social.organizationEmergencyDomain,cooperativeEmergencyDomain:social.cooperativeEmergencyDomain}):null;
+ const socialGateway=social?new CanonicalSocialGateway({identity,pool:store.pool,chain:socialChain,scope:social.scope,clock}):null;
  return {store,identity,rewards,market,marketView:new HighCountryMarketplaceView({store,identity,market,clock}),skillResearch,missionService,discoveryService,landRightsService,gameplayLicensing,socialGateway};
 }
 export function runtimeHttpServer(runtime,{origin}){

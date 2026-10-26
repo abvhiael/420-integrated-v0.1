@@ -12,7 +12,7 @@ const hex=x=>typeof x==='string'&&/^0x[0-9a-fA-F]{64}$/.test(x);
 export class CanonicalSocialGateway {
  constructor({identity,pool,chain,scope,clock=()=>Date.now()}){
   if(typeof identity?.registeredPrincipal!=='function'||typeof identity?.walletOf!=='function'||typeof pool?.connect!=='function'||!ident(scope))fail('canonical social dependencies required');
-  for(const method of ['snapshot','permission','submitSigned','finalizedReceipt','history','verifyFinality','verifyTreasurySettlement'])
+  for(const method of ['snapshot','permission','transactionIntent','submitSigned','finalizedReceipt','history','verifyFinality','verifyTreasurySettlement'])
    if(typeof chain?.[method]!=='function')fail('canonical social chain adapter missing: '+method);
   Object.assign(this,{identity,pool,chain,scope,clock});
   this.grants=new Map(); // ephemeral challenges only; never authority or persistent history
@@ -28,8 +28,10 @@ export class CanonicalSocialGateway {
   const permit=await this.chain.permission({wallet:who.wallet,principal:who.principal,scope:ctx.scope,action:ctx.action,payload:ctx.payload});
   if(permit?.allowed!==true||!hex(permit?.blockHash)||!hex(permit?.policyHash))fail('canonical permission denied');
   const proof=randomBytes(32).toString('hex');
-  this.grants.set(proof,{wallet:who.wallet,principal:who.principal,action:ctx.action,scope:ctx.scope,payload:JSON.stringify(ctx.payload),policyHash:permit.policyHash,expires:this.clock()+60000});
-  return {allowed:true,proof};
+  const transaction=await this.chain.transactionIntent({wallet:who.wallet,action:ctx.action,payload:ctx.payload});
+  if(transaction?.from!==who.wallet||transaction?.chainId!==this.identity.chainId||transaction?.value!=='0x0')fail('invalid contract transaction intent');
+  this.grants.set(proof,{wallet:who.wallet,principal:who.principal,action:ctx.action,scope:ctx.scope,payload:JSON.stringify(ctx.payload),policyHash:permit.policyHash,transaction,expires:this.clock()+60000});
+  return {allowed:true,proof,transaction};
  }
  async submit(ctx){
   this.context(ctx);const who=await this.principal(ctx.session);const g=this.grants.get(ctx.authorizationProof);
@@ -39,7 +41,8 @@ export class CanonicalSocialGateway {
   if(fresh?.allowed!==true||fresh.policyHash!==g.policyHash)fail('canonical permission changed');
   // Canonical adapter must obtain a real wallet-authorized signed transaction.
   // A backend signer impersonating the member is expressly prohibited.
-  const tx=await this.chain.submitSigned({...ctx,wallet:who.wallet,principal:who.principal,authorization:ctx.authorizationProof});
+  if(typeof ctx.signedRawTransaction!=='string'||!/^0x[0-9a-fA-F]+$/.test(ctx.signedRawTransaction))fail('wallet-signed transaction required');
+  const tx=await this.chain.submitSigned({...ctx,payload:{...ctx.payload,signedRawTransaction:ctx.signedRawTransaction},wallet:who.wallet,principal:who.principal,authorization:ctx.authorizationProof});
   if(!hex(tx?.hash)||tx?.signer?.toLowerCase()!==who.wallet||tx?.chainId!==this.identity.chainId||tx?.isFundTransfer===true)fail('invalid signed social transaction');
   const operationId=tx.hash.toLowerCase();
   const client=await this.pool.connect();let started=false;

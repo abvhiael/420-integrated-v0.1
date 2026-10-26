@@ -300,3 +300,24 @@ These gates require an actual independently authorized live network/deployment. 
 | Production operations | Real secret-managed TLS database, deployed multi-instance recovery, signed release approval, security review and rollback/incident response rehearsal |
 
 **Pre-testnet (must not be deferred):** finish real authenticated API routes, durable Postgres migrations/outbox/queues, actual moderation providers and blocklists, heritage exception admin screen, appointment grant adapters, wallet/browser integration, equipment/market use gates, consumer authorization wiring, local Anvil full journey and scoped Level 1/2 certificate. Repository modules are foundations until these end-to-end paths are exercised. No production settlement/paid name release may be implied from local mocks.
+
+
+## HC-NEXT-6.5 — Social economy gateway: pre-testnet and live-testnet handoff
+
+**Disposition:** HC-NEXT-6.5 social UI, server gateway foundation and signed chain adapter are repository work. Do not claim production-equivalent Level 2 solely from existing R02/R04 integration CI. Finish bounded **local** Level 2 before testnet, then carry only deployment-specific acceptance here.
+
+### Pre-testnet mini-roadmap (complete before claiming local Level 2)
+
+1. **SOC-5A — ABI and wallet integration:** Reconcile every enabled UI action, parameter format, selector, signer and emergency domain against deployed-intent Solidity interfaces; disable incomplete methods and implement genuine player-controlled signed transaction envelope validation *before* network broadcast, with test vectors.
+2. **SOC-5B — Durable services:** Provision temporary local PostgreSQL using migration scripts and fixed service role with enforced tenant-isolated RLS; reject malicious tenant-context switching. Persist signed intent/outbox, operation receipts, membership event projections and replay keys. Provide actual local role/grant SQL, not just a documentation placeholder.
+3. **SOC-5C — Local chain and history:** Deploy the canonical organization/cooperative/governance/executor Solidity contracts to a disposable local EVM and connect a real log reader. Test invites, join/leave, vote, quorum, revocation, emergency, signed calls, finalized/reverted/pending receipts; never present a governance permission as evidence of money movement.
+4. **SOC-5D — Restart and adversarial closeout:** Kill and restart the service/indexer before and after broadcast/commit; replay finalized logs with stable deduplication, reorg simulation, authorization revocation, cross-tenant reads, retries and reconciliation. Run scoped exact-SHA local Level 2 and document failures, evidence and immutable SHAs. Retain unaffected passing qualifications without global re-runs.
+
+### Deferred to live testnet (required later, not waived)
+
+- Pin real deployed contract addresses/code hashes, network chain ID and signer/issuer authority; establish independently finalized on-chain transaction and event/indexer receipt evidence.
+- Deploy migrations under approved secrets-managed TLS PostgreSQL credentials and real restricted roles; verify service isolation, RLS, least-privilege grants, persisted history across redeploy/failover, backups and restore.
+- Run genuine wallet-signed operations and governed shared-resource actions on the named testnet with reorg/stale event and emergency behavior; independently reconcile ledger settlement records if/when treasury movement is separately enabled.
+- Qualify multi-instance failure recovery, monitoring/alerts, audit/security and release signoff. Only those production-environment checks can close **live testnet acceptance**.
+
+**Do not block local HC-NEXT-6.5 engineering on testnet availability. Do not represent synthetic mock receipts or a permission-grant record as proof of genuine fund transfer.**

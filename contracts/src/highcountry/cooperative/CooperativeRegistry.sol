@@ -22,6 +22,7 @@ contract CooperativeRegistry is R04EmergencyConsumer {
     mapping(bytes32 => mapping(address => bool)) public enrolled;
     event CooperativeCreated(bytes32 indexed id, bytes32 indexed organization);
     event MemberEnrolled(bytes32 indexed id, address indexed member, uint32 count);
+    event MemberWithdrawn(bytes32 indexed id, address indexed member, uint32 count);
 
     constructor(
         address r04Authorization_,
@@ -47,13 +48,25 @@ contract CooperativeRegistry is R04EmergencyConsumer {
     ) external r04Unrestricted(EmergencyDomains.COOPERATIVE_GOVERNANCE) {
         Cooperative storage c = cooperatives[id];
         if (
-            !c.active || enrolled[id][msg.sender] || c.memberCount >= 64
+            !c.active || enrolled[id][msg.sender] || roster[id].length >= 64
                 || !organizations.isActiveMember(c.organization, msg.sender)
         ) revert Unauthorized();
         enrolled[id][msg.sender] = true;
         roster[id].push(msg.sender);
         c.memberCount++;
         emit MemberEnrolled(id, msg.sender, c.memberCount);
+    }
+
+    /// @notice Voluntary revocation of cooperative consent; retained roster is historical only.
+    /// @dev A withdrawn address cannot vote on a newly created proposal.
+    function withdraw(
+        bytes32 id
+    ) external {
+        Cooperative storage c = cooperatives[id];
+        if (!c.active || !enrolled[id][msg.sender]) revert Unauthorized();
+        enrolled[id][msg.sender] = false;
+        c.memberCount--;
+        emit MemberWithdrawn(id, msg.sender, c.memberCount);
     }
 
     function voterAt(

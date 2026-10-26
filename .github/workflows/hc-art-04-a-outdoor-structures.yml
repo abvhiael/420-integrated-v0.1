@@ -1,0 +1,26 @@
+name: HC-ART-04-A Outdoor Structures Level 1
+on:
+  pull_request:
+    paths:
+      - 'apps/highcountry-web/src/outdoor-structure-catalogue.js'
+      - 'apps/highcountry-web/src/marketplace.js'
+      - 'apps/highcountry-web/test/outdoor-structure-catalogue.test.mjs'
+      - '.github/workflows/hc-art-04-a-outdoor-structures.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  scoped-catalogue-marketplace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check affected Javascript modules
+        run: |
+          node --check apps/highcountry-web/src/outdoor-structure-catalogue.js
+          node --check apps/highcountry-web/src/marketplace.js
+      - name: Run scoped placement and marketplace tests
+        working-directory: apps/highcountry-web
+        run: node --test test/outdoor-structure-catalogue.test.mjs test/hc-next-4-4-marketplace.test.mjs test/r064-market.test.mjs

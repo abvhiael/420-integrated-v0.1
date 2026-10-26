@@ -1,0 +1,86 @@
+name: HighCountry HC-SEED-08 verifiable opening
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/highcountry/seeds/**'
+      - 'contracts/src/randomness/RandomnessRouter420.sol'
+      - 'services/highcountry-economy/src/seed-*'
+      - 'services/highcountry-economy/src/postgres-store.js'
+      - 'services/highcountry-economy/src/runtime-service.js'
+      - 'services/highcountry-economy/src/start-runtime.js'
+      - 'services/highcountry-economy/test/seed-openings*'
+      - 'apps/highcountry-web/src/seed-packs.js'
+      - 'apps/highcountry-web/test/seed-packs-dom.integration.mjs'
+      - 'deployments/highcountry/seed-opening-*.json'
+      - 'scripts/highcountry/*seed_opening*'
+      - 'scripts/highcountry/dispatch_seed_openings.mjs'
+      - 'scripts/highcountry/seed-openings-contract-test.sol'
+      - '.github/workflows/highcountry-seed-openings.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  opening-runtime:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: seed08_disposable_only
+          POSTGRES_DB: seed08_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      HC_TEST_POSTGRES_URL: postgresql://postgres:seed08_disposable_only@localhost:5432/seed08_test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Scoped integration dependencies
+        run: |
+          npm install --prefix /tmp/hc-seed08 --no-save pg@8.16.3 jsdom@26.1.0 playwright@1.56.1
+          ln -s /tmp/hc-seed08/node_modules node_modules
+          /tmp/hc-seed08/node_modules/.bin/playwright install --with-deps chromium
+      - name: L1 opening, issuance, ownership, HTTP, source authority and persistence regression checks
+        run: node --test services/highcountry-economy/test/seed-openings*.test.js services/highcountry-economy/test/seed-packs*.test.js services/highcountry-economy/test/seed-catalogue*.test.js services/highcountry-economy/test/postgres-store.test.js services/highcountry-economy/test/runtime-integration.test.js services/highcountry-economy/test/r064-browser-runtime-http.test.js services/highcountry-economy/test/canonical-social-chain-adapter.test.js services/highcountry-economy/test/canonical-social-gateway.test.js
+      - name: L2 actual PostgreSQL concurrent commitment, crash/restart, holds and exactly-once outcome
+        run: node services/highcountry-economy/test/seed-openings-postgres.integration.mjs
+      - name: Browser component interactions and closed preview/reroll surface
+        run: node --test apps/highcountry-web/test/seed-packs-dom.integration.mjs apps/highcountry-web/test/seed-catalogue-dom.integration.mjs
+      - name: Build and immutable opening policy/vector parity
+        run: |
+          node scripts/highcountry/build_seed_opening_policy.mjs
+          node apps/highcountry-web/scripts/build.mjs
+          git diff --exit-code -- deployments/highcountry/seed-opening-policy.v1.json apps/highcountry-web/public/assets/highcountry/seed-catalogue.v1.json
+      - name: Actual Chromium production module graph, catalogue and responsive regression
+        run: node apps/highcountry-web/test/seed-catalogue-browser.integration.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: hc-seed-08-browser-evidence
+          path: artifacts/highcountry/hc-seed-05-*.png
+          if-no-files-found: warn
+  canonical-opening:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.7.1
+      - name: Canonical formatting
+        run: forge fmt --root contracts --check "$GITHUB_WORKSPACE/contracts/src/highcountry/seeds/SeedPackOpening.sol" "$GITHUB_WORKSPACE/contracts/src/randomness/RandomnessRouter420.sol" "$GITHUB_WORKSPACE/scripts/highcountry/seed-openings-contract-test.sol"
+      - name: L2 actual canonical router/registry, exact draw vectors, persistence, replay, provider and legacy expiry checks
+        run: python scripts/highcountry/run_seed_opening_contracts.py
+      - name: Affected existing canonical rare breeding lifecycle regression
+        run: python scripts/highcountry/run_seed_rare_contracts.py

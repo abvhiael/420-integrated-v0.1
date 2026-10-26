@@ -25,7 +25,7 @@ export class SeedPacks {
   if(c.sub!==principal||s.runtimeAccounts?.get(principal)?.issuer!==c.iss||(s.runtimeEpochs?.get(principal)??0)!==c.epoch)fail('seed issuance session revoked');
   if(operator&&!this.identity.issuers[c.iss]?.operators?.[principal]?.sources?.includes('seed-packs'))fail('seed pack issuer denied');
  }
- policy(){return {policy:structuredClone(SEED_PACK_POLICY),pools:structuredClone(Object.fromEntries(this.pools)),purchaseStatus:'awaiting-HC-SEED-09',openingStatus:'standard-packs-await-HC-SEED-08'};}
+ policy(){return {policy:structuredClone(SEED_PACK_POLICY),pools:structuredClone(Object.fromEntries(this.pools)),purchaseStatus:'awaiting-HC-SEED-09',openingStatus:this.openingsEnabled?'canonical-persistent-opening':'standard-packs-await-HC-SEED-08'};}
  async inventory(token){const principal=await this.identity.registeredPrincipal(token);return this.store.transact(s=>{this.guard(s,token,principal);seedPackState(s);return {policyVersion:SEED_PACK_POLICY.version,starterClaimed:s.seedStarterGrants.has(principal),packs:[...s.seedPacks.values()].filter(p=>p.owner===principal).map(p=>structuredClone(p)),lots:[...s.seedLotIntents.values()].filter(p=>p.owner===principal).map(p=>structuredClone(p))};});}
  create(s,{packId,owner,region,source,starterCultivarId=null}){
   if(s.seedPacks.has(packId))fail('duplicate seed pack');
@@ -41,7 +41,7 @@ export class SeedPacks {
    const count=used(s,'starter:accounts');if(count>=SEED_PACK_POLICY.starterAccountLimit)fail('starter supply exhausted');
    // Fixed catalogue allocations, not a chance draw. Exactly two distinct common cultivars.
    const cultivars=this.pools.get(region).common.slice(0,2);
-   for(const cid of cultivars){const key='seeds:'+cid,previous=used(s,key);if(previous+3>SEED_PACK_POLICY.maxSeedUnitsPerCultivar)fail('starter cultivar supply exhausted');s.seedSupply.set(key,previous+3);}
+   for(const cid of cultivars){const key='seeds:'+cid,previous=used(s,key);const held=s.seedOpeningHolds?.get(cid)??0;if(!Number.isSafeInteger(held)||held<0)fail('corrupt opening holds');if(previous+held+3>SEED_PACK_POLICY.maxSeedUnitsPerCultivar)fail('starter cultivar supply exhausted');s.seedSupply.set(key,previous+3);}
    const packIds=cultivars.map((cid,i)=>'starter:'+hash([this.identity.gameId,principal,i]).slice(2));
    const source={kind:'starter',principal,policyVersion:SEED_PACK_POLICY.version,region};
    const packs=packIds.map((packId,i)=>this.create(s,{packId,owner:principal,region,source,starterCultivarId:cultivars[i]}));
@@ -74,22 +74,27 @@ export class SeedPacks {
  async prepare(token,packId){
   if(!valid(packId))fail('invalid seed pack');const principal=await this.identity.registeredPrincipal(token);
   const pack=await this.store.transact(s=>{this.guard(s,token,principal);seedPackState(s);const p=s.seedPacks.get(packId);if(!p||p.owner!==principal)fail('pack ownership required');return structuredClone(p);});
-  if(!pack.starterCultivarId)fail('canonical HC-SEED-08 pack outcome required');
+  const opening=pack.starterCultivarId?null:await this.store.transact(s=>{this.guard(s,token,principal);const o=s.seedOpenings?.get(packId);if(o?.status!=='fulfilled')fail('canonical HC-SEED-08 pack outcome required');return structuredClone(o);});
+  if(opening){const proof=await this.openingVerifier?.read(opening);if(!proof?.fulfilled||proof.requestId!==opening.requestId||proof.proofHash!==opening.outcome.proofHash||proof.entropy!==opening.outcome.entropy)fail('current canonical opening evidence required');}
+  const cultivarId=pack.starterCultivarId??opening.outcome.cultivarId;
   const wallet=address(await this.identity.walletOf(token));
-  const genome=await this.reader.cultivar(pack.starterCultivarId);
-  if(!genome||genome.cultivarId!==pack.starterCultivarId||genome.basis!=='registered-common-reference')fail('registered common genome required');
+  if(opening&&wallet!==opening.wallet)fail('opening seed wallet is immutable');
+  const genome=await this.reader.cultivar(cultivarId);
+  if(!genome||genome.cultivarId!==cultivarId||(!opening&&genome.basis!=='registered-common-reference')||(opening&&(genome.genomeId!==opening.outcome.genomeId||!['registered-common-reference','finalized-canonical-breeding','registered-founding-line'].includes(genome.basis))))fail('registered common genome required or canonical outcome genome mismatch');
   return this.store.transact(s=>{
    this.guard(s,token,principal);seedPackState(s);if(s.runtimeWallets?.get(principal)?.wallet!==wallet)fail('seed wallet binding changed');
    const current=s.seedPacks.get(packId);if(JSON.stringify(current)!==JSON.stringify(pack))fail('pack changed during preparation');
-   const walletClaim=s.seedStarterWalletClaims.get(wallet);if(walletClaim&&walletClaim!==principal)fail('starter wallet already used by another account');
+   const walletClaim=pack.starterCultivarId?s.seedStarterWalletClaims.get(wallet):null;if(walletClaim&&walletClaim!==principal)fail('starter wallet already used by another account');
    const existing=s.seedLotIntents.get(packId);if(existing){if(existing.wallet!==wallet)fail('issued seed wallet is immutable');return structuredClone(existing);}
-   const cid=pack.starterCultivarId;
-   const metadataHash=hash(['HC.SEED.LOT.V1',this.identity.gameId,SEED_PACK_POLICY.version,packId,principal,wallet,cid,genome.genomeId,pack.seeds]);
+   if(opening&&(s.seedOpenings.get(packId)?.commitment!==opening.commitment||s.runtimeWallets.get(principal).profile!==opening.ownerProfile))fail('opening seed authority changed');
+   const cid=cultivarId;
+   const metadata=['HC.SEED.LOT.V1',this.identity.gameId,SEED_PACK_POLICY.version,packId,principal,wallet,cid,genome.genomeId,pack.seeds];if(opening)metadata.push(opening.requestId,opening.commitment,opening.outcome.proofHash);const metadataHash=hash(metadata);
    const lotId=BigInt(hash(['HC.SEED.LOT.ID.V1',this.identity.gameId,packId]).slice(0,18)).toString();
    if(lotId==='0'||s.seedLotIds.has(lotId))fail('seed lot identity collision');
-   const intent={packId,owner:principal,ownerEpoch:s.runtimeEpochs?.get(principal)??0,ownerProfile:s.runtimeWallets.get(principal).profile,wallet,cultivarId:cid,genomeId:genome.genomeId,breedingEventId:'0',quantity:pack.seeds,lotId,metadataHash,status:'prepared',policyVersion:SEED_PACK_POLICY.version,genomeEvidence:genome,source:pack.source};
-   intent.calldata=calldata('registerSeedLot(uint64,bytes32,uint64,address,uint32,bytes32)',lotId,intent.genomeId,0,wallet,intent.quantity,metadataHash);
-   s.seedStarterWalletClaims.set(wallet,principal);s.seedLotIds.set(lotId,packId);s.seedLotIntents.set(packId,intent);current.status='issuance-prepared';return structuredClone(intent);
+   const intent={packId,owner:principal,ownerEpoch:s.runtimeEpochs?.get(principal)??0,ownerProfile:s.runtimeWallets.get(principal).profile,wallet,cultivarId:cid,genomeId:genome.genomeId,breedingEventId:opening?(genome.breedingEventId??'0'):'0',quantity:pack.seeds,lotId,metadataHash,status:'prepared',policyVersion:SEED_PACK_POLICY.version,genomeEvidence:genome,source:pack.source};
+   intent.calldata=calldata('registerSeedLot(uint64,bytes32,uint64,address,uint32,bytes32)',lotId,intent.genomeId,intent.breedingEventId,wallet,intent.quantity,metadataHash);
+   if(opening)intent.openingEvidence=opening.outcome;
+   if(pack.starterCultivarId)s.seedStarterWalletClaims.set(wallet,principal);s.seedLotIds.set(lotId,packId);s.seedLotIntents.set(packId,intent);current.status='issuance-prepared';return structuredClone(intent);
   });
  }
  async confirm(token,packId){

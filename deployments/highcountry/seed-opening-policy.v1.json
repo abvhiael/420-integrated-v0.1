@@ -1,0 +1,2528 @@
+{
+  "schema": "HC.SEED.OPENINGS.V1",
+  "policyHash": "0xd45982653f5c70b29279a61b2f2e21e21b5b88e8fe29c5d9b4539812206ef343",
+  "tiers": [
+    "common",
+    "rare",
+    "exclusive"
+  ],
+  "oddsBps": [
+    6000,
+    3000,
+    1000
+  ],
+  "seedsPerPack": 3,
+  "selection": "Domain-separated Keccak expansion with rejection sampling; tier ticket 0..9 (6/3/1), then independent uniform index in committed tier.",
+  "timeout": "Opt-in persistent single-route canonical request; same proof binding accepted late; no void, cancel, replacement request, provider switching or caller entropy.",
+  "supply": "Reserve 3 units against every eligible cultivar before entropy, then release unselected holds and convert selected hold atomically; starter grants honor active holds.",
+  "pools": [
+    {
+      "index": 0,
+      "region": "Emerald Coast",
+      "tiers": [
+        [
+          "HC-C-alaskan-thunder-fuck",
+          "HC-C-blue-dream",
+          "HC-C-durban-poison",
+          "HC-C-gelato",
+          "HC-C-granddaddy-purple",
+          "HC-C-green-crack",
+          "HC-C-pineapple-express",
+          "HC-C-super-silver-haze"
+        ],
+        [
+          "HC-R-cedar-skunk",
+          "HC-R-coastal-kush",
+          "HC-R-emerald-mist",
+          "HC-R-misty-harbor",
+          "HC-R-pacific-sunset",
+          "HC-R-rainforest-queen",
+          "HC-R-salty-dog",
+          "HC-R-spirit-bear",
+          "HC-R-tempest"
+        ],
+        [
+          "HC-F01",
+          "HC-F02",
+          "HC-F03",
+          "HC-F04",
+          "HC-F05",
+          "HC-F06"
+        ]
+      ],
+      "hash": "0x1a5e5e790cb75382f428e45c0d10b2df9fae1d796ff94888be7c9fd22ab13c7e",
+      "tierSizes": [
+        8,
+        9,
+        6
+      ]
+    },
+    {
+      "index": 1,
+      "region": "Golden Prairie",
+      "tiers": [
+        [
+          "HC-C-blueberry",
+          "HC-C-chemdawg",
+          "HC-C-girl-scout-cookies",
+          "HC-C-jack-herer",
+          "HC-C-northern-lights",
+          "HC-C-purple-haze",
+          "HC-C-sour-diesel",
+          "HC-C-trainwreck"
+        ],
+        [
+          "HC-R-blue-moon",
+          "HC-R-fields-of-green",
+          "HC-R-golden-haze",
+          "HC-R-honey-trail",
+          "HC-R-prairie-fire",
+          "HC-R-prairie-gold",
+          "HC-R-saska-sour",
+          "HC-R-thunder-fields"
+        ],
+        [
+          "HC-F07",
+          "HC-F08",
+          "HC-F09",
+          "HC-F10",
+          "HC-F11"
+        ]
+      ],
+      "hash": "0xeed9c4f024c044f213a6da0887e958405573afda24c9224a1763cf33e5afda35",
+      "tierSizes": [
+        8,
+        8,
+        5
+      ]
+    },
+    {
+      "index": 2,
+      "region": "Red Mesa",
+      "tiers": [
+        [
+          "HC-C-acapulco-gold",
+          "HC-C-afghan-kush",
+          "HC-C-bubba-kush",
+          "HC-C-og-kush",
+          "HC-C-strawberry-cough",
+          "HC-C-white-widow",
+          "HC-C-zkittlez"
+        ],
+        [
+          "HC-R-canyon-fire",
+          "HC-R-crow-mother",
+          "HC-R-desert-bloom",
+          "HC-R-desert-shadow",
+          "HC-R-fire-canyon",
+          "HC-R-midnight-mesa",
+          "HC-R-red-rock-dream",
+          "HC-R-red-rock-kush",
+          "HC-R-sage-rider"
+        ],
+        [
+          "HC-F12",
+          "HC-F13",
+          "HC-F14",
+          "HC-F15",
+          "HC-F16"
+        ]
+      ],
+      "hash": "0xf89904fd48d51cbb28366b1e32a95c4a8a0b2b0410d1ac6a6ac5d0de877b19a7",
+      "tierSizes": [
+        7,
+        9,
+        5
+      ]
+    },
+    {
+      "index": 3,
+      "region": "World",
+      "tiers": [
+        [
+          "HC-C-acapulco-gold",
+          "HC-C-afghan-kush",
+          "HC-C-alaskan-thunder-fuck",
+          "HC-C-blue-dream",
+          "HC-C-blueberry",
+          "HC-C-bubba-kush",
+          "HC-C-chemdawg",
+          "HC-C-durban-poison",
+          "HC-C-gelato",
+          "HC-C-girl-scout-cookies",
+          "HC-C-granddaddy-purple",
+          "HC-C-green-crack",
+          "HC-C-jack-herer",
+          "HC-C-northern-lights",
+          "HC-C-og-kush",
+          "HC-C-pineapple-express",
+          "HC-C-purple-haze",
+          "HC-C-sour-diesel",
+          "HC-C-strawberry-cough",
+          "HC-C-super-silver-haze",
+          "HC-C-trainwreck",
+          "HC-C-white-widow",
+          "HC-C-zkittlez"
+        ],
+        [
+          "HC-R-blue-moon",
+          "HC-R-canyon-fire",
+          "HC-R-cedar-skunk",
+          "HC-R-coastal-kush",
+          "HC-R-crow-mother",
+          "HC-R-desert-bloom",
+          "HC-R-desert-shadow",
+          "HC-R-emerald-mist",
+          "HC-R-fields-of-green",
+          "HC-R-fire-canyon",
+          "HC-R-golden-haze",
+          "HC-R-honey-trail",
+          "HC-R-midnight-mesa",
+          "HC-R-misty-harbor",
+          "HC-R-pacific-sunset",
+          "HC-R-prairie-fire",
+          "HC-R-prairie-gold",
+          "HC-R-rainforest-queen",
+          "HC-R-red-rock-dream",
+          "HC-R-red-rock-kush",
+          "HC-R-sage-rider",
+          "HC-R-salty-dog",
+          "HC-R-saska-sour",
+          "HC-R-spirit-bear",
+          "HC-R-tempest",
+          "HC-R-thunder-fields"
+        ],
+        [
+          "HC-F01",
+          "HC-F02",
+          "HC-F03",
+          "HC-F04",
+          "HC-F05",
+          "HC-F06",
+          "HC-F07",
+          "HC-F08",
+          "HC-F09",
+          "HC-F10",
+          "HC-F11",
+          "HC-F12",
+          "HC-F13",
+          "HC-F14",
+          "HC-F15",
+          "HC-F16"
+        ]
+      ],
+      "hash": "0x9e102de490e21521081fbc72939cdf8646c7e48c62f4a8864e67fbd0f2cc6a1d",
+      "tierSizes": [
+        23,
+        26,
+        16
+      ]
+    }
+  ],
+  "testOnlyVectors": [
+    {
+      "pool": 0,
+      "entropy": "0x603eeda4de5797a007e1c69e53a6333a1c8ffdd272cac08776d8567c7fdadc56",
+      "requestId": "0x771389222c070b0295ea2b812643650a8aec744e266aa410f431f729072fe61b",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 0,
+      "cultivarId": "HC-C-alaskan-thunder-fuck"
+    },
+    {
+      "pool": 0,
+      "entropy": "0xe0ed2f0d4341c0f33408bde9f1fafee231453935ed95efcde71791a9334b0edd",
+      "requestId": "0x88071b93a68a0c9a553c3ab64572652676356554453183e14da38b16cd6497bd",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 5,
+      "cultivarId": "HC-C-green-crack"
+    },
+    {
+      "pool": 0,
+      "entropy": "0xe336cdcdefc47e94a04c7653ff782b32bb45703104a8578659b7c8266532766e",
+      "requestId": "0xa3a83096df224f6ba664587415611f7ea7b73310adbf6a1777e5f82eba8030b3",
+      "tier": "rare",
+      "tierIndex": 1,
+      "index": 2,
+      "cultivarId": "HC-R-emerald-mist"
+    },
+    {
+      "pool": 0,
+      "entropy": "0xe2dbf4e33b410989f9e8ef3716bb3b276d8fa6df16404c3b21e56bdd1103e914",
+      "requestId": "0xacd9e21e696239503d207838e810c1724a43863d35ece80872ff0485a9a0d9ee",
+      "tier": "rare",
+      "tierIndex": 1,
+      "index": 7,
+      "cultivarId": "HC-R-spirit-bear"
+    },
+    {
+      "pool": 0,
+      "entropy": "0x37a2961cc8468f7388b5d92026269b9f50723e07a5938b69b0f2bc7f47699c3b",
+      "requestId": "0x100e4419cb82be563d288e59ad391d535326b442f27ba9b05f28868e9d309290",
+      "tier": "exclusive",
+      "tierIndex": 2,
+      "index": 4,
+      "cultivarId": "HC-F05"
+    },
+    {
+      "pool": 0,
+      "entropy": "0x895320436e0bbf66aa50b29cd194cb3aaa61a3969c0e3ceb3c1acc24f17267aa",
+      "requestId": "0x2c632ebab371a71eb0ab7e8c6be0d118e1852326146145d4ab141588eb6a9d88",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 7,
+      "cultivarId": "HC-C-super-silver-haze"
+    },
+    {
+      "pool": 0,
+      "entropy": "0x32c100504b745e5206449cb402e76e1a9b456ddec6ccd633621a76b2ac13e1e6",
+      "requestId": "0x6ac91a90ddd9475cfd6007a1c7ddabb41a81a9917b1b98a7ca5104e5ee4bc7ae",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 4,
+      "cultivarId": "HC-C-granddaddy-purple"
+    },
+    {
+      "pool": 0,
+      "entropy": "0x96ee530de58f86e02e6b525f6dc1b49682ccb5c4fdcc3c40d60a36b825e1aa30",
+      "requestId": "0xceecc856c686f8da6887875319609fae60c3b8937d948dc67ae469f61e18580d",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 6,
+      "cultivarId": "HC-C-pineapple-express"
+    },
+    {
+      "pool": 0,
+      "entropy": "0x3e8efbbd11a03117fd3071bcf15fa91dd827aef72eca4065f5c9e0a8bffb24ee",
+      "requestId": "0x8e51dedb214d8843fe8f3eb8e4680e2a776ca4ed2d3dfb8a90235284ecd7bc1b",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 1,
+      "cultivarId": "HC-C-blue-dream"
+    },
+    {
+      "pool": 0,
+      "entropy": "0x865baa6e26752d4cf0604a1a46aa5e27c16d7bb10bc4b484db911a8541901c74",
+      "requestId": "0xeb23cec81fddd969b47e5b4432268abef5d186c23679f1a845ffe43c302ee2de",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 7,
+      "cultivarId": "HC-C-super-silver-haze"
+    },
+    {
+      "pool": 0,
+      "entropy": "0x70739cea734ab2d514642a61f7462f38f56eed9f66cd23af17a332474ba68f41",
+      "requestId": "0x0c573df01d687556e840f6336dafe15f082e38d281d7bffadd33bfd3a0267ed0",
+      "tier": "exclusive",
+      "tierIndex": 2,
+      "index": 0,
+      "cultivarId": "HC-F01"
+    },
+    {
+      "pool": 0,
+      "entropy": "0x331bd15d7e8f642f987471e979cc65aae2ec03ff42531c3ec9dfb9d3ce216e03",
+      "requestId": "0x296869edba1cc0111e2774b7e0b078e573a3a48c4edde71a97c71465bfa98954",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 2,
+      "cultivarId": "HC-C-durban-poison"
+    },
+    {
+      "pool": 0,
+      "entropy": "0xfe763e678924054bc6a9a2ba479a4b0bfbcfba297cc6168e4fc234ea6e1eefe7",
+      "requestId": "0x7a73f4b201fc989b6974fdec5417b2d2e6d741d78685b594a66e5d8094e6ddab",
+      "tier": "rare",
+      "tierIndex": 1,
+      "index": 0,
+      "cultivarId": "HC-R-cedar-skunk"
+    },
+    {
+      "pool": 0,
+      "entropy": "0x93a771a2147e7adfac3257cccd30d8a7d82a23de16e57ee4d9b768a89f2c1eea",
+      "requestId": "0xc48851cbcec884bb0e2904f980238677f23fadd3bcdc63f5260cd88692691073",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 2,
+      "cultivarId": "HC-C-durban-poison"
+    },
+    {
+      "pool": 0,
+      "entropy": "0x69267f908e9d6db8446aa132c2f61528d89570565cac02e6f49e77ee5b9e28a8",
+      "requestId": "0xd77170117e1ce472df2bc7b02dd6094be79403b4d6d7d31a4f90617acdec51f1",
+      "tier": "exclusive",
+      "tierIndex": 2,
+      "index": 2,
+      "cultivarId": "HC-F03"
+    },
+    {
+      "pool": 0,
+      "entropy": "0xa3fd819399503f62e09db7560e2fa35e322cead51742834563eab5b5bb18115b",
+      "requestId": "0xe49e3407d6a6db4d32b49d801be99456004eb71b9b81f57a6b071989bce9bb11",
+      "tier": "exclusive",
+      "tierIndex": 2,
+      "index": 4,
+      "cultivarId": "HC-F05"
+    },
+    {
+      "pool": 0,
+      "entropy": "0x0a20ba9720123dae5efd799466da7f4cf3ead4523709d565ae193958a69fe5a6",
+      "requestId": "0x91cfc8c54dce6c0014ba2c95c5209ed3851e7b0a214066c97d79dcbbbcf3d067",
+      "tier": "rare",
+      "tierIndex": 1,
+      "index": 0,
+      "cultivarId": "HC-R-cedar-skunk"
+    },
+    {
+      "pool": 0,
+      "entropy": "0x45740715457526bf141eb3ee76765a10c1928a101285d62bb5ccaa310d8bb1d4",
+      "requestId": "0xa1bd67072858af04feaf5f7fad40cf342e2a15a79914c384f8fb115a1309eaff",
+      "tier": "rare",
+      "tierIndex": 1,
+      "index": 8,
+      "cultivarId": "HC-R-tempest"
+    },
+    {
+      "pool": 0,
+      "entropy": "0x13f603ab29247d075a8ce342a596a748cfcb64bf923c30965eaf630c632515d0",
+      "requestId": "0x08e1a63a2c2b171bd902de5d865ab767468e4a9b52fac94363fd6c92d5fd53d3",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 5,
+      "cultivarId": "HC-C-green-crack"
+    },
+    {
+      "pool": 0,
+      "entropy": "0x6e925175d0f97c569ffcf4344ed12d212b3aadc9c379954d84ec9bc8e6464ddb",
+      "requestId": "0x53363b3221a6db47eb8fbd29e973fafd89a7ae1b3eaa1851a267fbb1310904c6",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 4,
+      "cultivarId": "HC-C-granddaddy-purple"
+    },
+    {
+      "pool": 0,
+      "entropy": "0x7dc396f20a4553cff383595ba14884192008759870d07f14e33df1910c8330a2",
+      "requestId": "0x53d907168f2147f2728b584a3730593f8e43af9828728276873dd16d2c3c7cf7",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 2,
+      "cultivarId": "HC-C-durban-poison"
+    },
+    {
+      "pool": 0,
+      "entropy": "0x29dd1ee4398e63065b0cf9e6d55a5563e31c2a14aff201205c0da0ff441163a0",
+      "requestId": "0xb1bfeea185ed695c7bec26dd13de5073ea6ac0b756b48bc27d624d72864b831a",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 1,
+      "cultivarId": "HC-C-blue-dream"
+    },
+    {
+      "pool": 0,
+      "entropy": "0x62f2aa4f805e6233eaf98b261232b2356448506e62cfb9674de17c653d7670e9",
+      "requestId": "0x9764f6d87a7ff21e38cab0f156fdfa95bff17318b6a8daa019f46f6cb7d145bf",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 4,
+      "cultivarId": "HC-C-granddaddy-purple"
+    },
+    {
+      "pool": 0,
+      "entropy": "0x729248c12df9634d68fd3c5054ec2e533f2cc645abff5524ddcbbea712d67dad",
+      "requestId": "0xe3dfadc96df409897b9b92e6641b1abca0e7487ff8e510eed7edd3c5f666bead",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 1,
+      "cultivarId": "HC-C-blue-dream"
+    },
+    {
+      "pool": 0,
+      "entropy": "0xb9c557b41fa6335eefc38d9973309a5f527a0f86d289cb2b636fff252ca706da",
+      "requestId": "0x49fc2935b21efb26c65f8804e972e6501f3b3dedbe8635fdf6cb8d945e43ebe3",
+      "tier": "rare",
+      "tierIndex": 1,
+      "index": 6,
+      "cultivarId": "HC-R-salty-dog"
+    },
+    {
+      "pool": 0,
+      "entropy": "0x21e97c5920c4d05c227d614493c7838e3960e530553fa7a70dca05853240f273",
+      "requestId": "0x4966a78ccdc05818571634077ecc5f0d5d2b4fa2f06831b87c578341523dfe7f",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 4,
+      "cultivarId": "HC-C-granddaddy-purple"
+    },
+    {
+      "pool": 0,
+      "entropy": "0xe69b7b1a65a3be81c57153b0256f3a29712e51200a5d0e2c6180f5f7a3411c54",
+      "requestId": "0x8cbfd2947d5eadec8e448459626f83d82ee756e2c871a1d998a18b12cb65efe8",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 5,
+      "cultivarId": "HC-C-green-crack"
+    },
+    {
+      "pool": 0,
+      "entropy": "0x368d1b7807d1c54f4755be22f95eb8aa37796530ee0739f877ee0db8738bf1b7",
+      "requestId": "0xc9b957713c4cd62014ef705ecebddbd03e9c35e05fb4816959cc3e760b473c24",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 0,
+      "cultivarId": "HC-C-alaskan-thunder-fuck"
+    },
+    {
+      "pool": 0,
+      "entropy": "0x60cdf277880b3fd911194725a4daa749b8b10208541fafe52aae699c2084b6ea",
+      "requestId": "0x45485eb8764783b35e889ccd2a00bcc56e20221b58b536e903e676bed4ded692",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 1,
+      "cultivarId": "HC-C-blue-dream"
+    },
+    {
+      "pool": 0,
+      "entropy": "0x33bbf431d8cb07e3a4a21fdf28232578eb052f187bb93edebf4b0d87c9a13741",
+      "requestId": "0xc7870835b3f9641296c9ff359e8c2876718ab36813932318a6d763652a3af279",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 5,
+      "cultivarId": "HC-C-green-crack"
+    },
+    {
+      "pool": 0,
+      "entropy": "0x4032e79cdd6fa264190db7021da6a3f7cfbb7e8c895b17fd51827836542903c9",
+      "requestId": "0xcbfd694d0a73e5575ac0f5785e7e83cbd17099e3a0747fc0818559e3b82a8a24",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 1,
+      "cultivarId": "HC-C-blue-dream"
+    },
+    {
+      "pool": 0,
+      "entropy": "0x4437cdc7a7834248d19ea85faa37ca9b57286d4dfade2312c86b91fcc69cfbd0",
+      "requestId": "0xa98f8b32057cd8d681a2304d043a8933d7ef5fc54d6b7cde82b1f2cf4525d5d1",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 0,
+      "cultivarId": "HC-C-alaskan-thunder-fuck"
+    },
+    {
+      "pool": 0,
+      "entropy": "0xfe7bb25a6794c839eef2c2ef68a949d0a2b404d792c9d7861fd9058295665372",
+      "requestId": "0x2dd940edaa88841b8aba8dffa8f34e5a107455f7d8c8a7ee28366cfad822c08f",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 7,
+      "cultivarId": "HC-C-super-silver-haze"
+    },
+    {
+      "pool": 0,
+      "entropy": "0x3ba3b13e42a8456c2a62ba008572d858c50f6018155fc5de48865fa9407df9d4",
+      "requestId": "0xd5b1480174c37af34ca65a1c073b24176c993bce7b663dd39d69105498aab127",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 2,
+      "cultivarId": "HC-C-durban-poison"
+    },
+    {
+      "pool": 0,
+      "entropy": "0x9927180e3a09ae838d369e4a763b52a42ba4bc3d70d9b6053eb5935574e46de6",
+      "requestId": "0xee624242839708b6599056752fb3d8b24c334ead688674e769b7da0ce5dc430e",
+      "tier": "rare",
+      "tierIndex": 1,
+      "index": 3,
+      "cultivarId": "HC-R-misty-harbor"
+    },
+    {
+      "pool": 0,
+      "entropy": "0xc95bd361d274120d73e864b19c9d0f9bd258bc8d2e87303c7423bc1c55edf28d",
+      "requestId": "0x6cbdc9af2ab282df0ad6d0afc295761d770005ba038b2e07724d1d489d76a860",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 5,
+      "cultivarId": "HC-C-green-crack"
+    },
+    {
+      "pool": 0,
+      "entropy": "0x71cd0812d8c3ba8cb2c6fa4087e0948c0795b07c6e7667fa1f691e22b4279960",
+      "requestId": "0x5936160f5e9ee9bbb609b2f713952040cadd058eeea999b89833db0bc4ef4d12",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 5,
+      "cultivarId": "HC-C-green-crack"
+    },
+    {
+      "pool": 0,
+      "entropy": "0x0180172a4b0c64ecd37ed40984b1ca5e9b174873116cf4c3f90ddbba49182ccd",
+      "requestId": "0x4a8d7a63e3b28630a0694bbfa50bc99c452cba0f6fac8676dd29012cc0765e7e",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 6,
+      "cultivarId": "HC-C-pineapple-express"
+    },
+    {
+      "pool": 0,
+      "entropy": "0x16b0d0cc576be3d29c187180149168ecb90741a0f793e362f3b3b69bc0ad3cd2",
+      "requestId": "0xdfd027965601189f73c5b70387c2464c8a408823f8546ae6e01c94065d4d0317",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 4,
+      "cultivarId": "HC-C-granddaddy-purple"
+    },
+    {
+      "pool": 0,
+      "entropy": "0x2b60e2f8b4f3efb28adaefd08c247bc698c43dec43510072d0b28e3d0639e358",
+      "requestId": "0x8b55adb88fc8a25a40931ef78f24eee6ac092f56a86de15eb2626b8803c6e2a1",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 4,
+      "cultivarId": "HC-C-granddaddy-purple"
+    },
+    {
+      "pool": 0,
+      "entropy": "0x4cae381f3dec35cd90084c98e305b1e2b7d013fbbf935f06563c2d1cd1aefa6b",
+      "requestId": "0x1eff3cbe2d2f3db592f6db179f17bce950e32c5d0818a798f44e2cd4c1e49562",
+      "tier": "rare",
+      "tierIndex": 1,
+      "index": 3,
+      "cultivarId": "HC-R-misty-harbor"
+    },
+    {
+      "pool": 0,
+      "entropy": "0xc35c303f789bd4e91b865b68a0183eabe75e7b9b8a934add290bad425ae757be",
+      "requestId": "0x5cb16ebcad03c1ba08a2a04028b42caf15e0db8b598dfe8952f71de3918b9925",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 6,
+      "cultivarId": "HC-C-pineapple-express"
+    },
+    {
+      "pool": 0,
+      "entropy": "0xf41107d52a7d4e265dad12bb436a0d906dbdb90e0e32396dc27909b97310b8ac",
+      "requestId": "0xd725a2f0e8151c1c969c5d811adf5fd5ff32407bf516f162dbab0ebcb79816b5",
+      "tier": "rare",
+      "tierIndex": 1,
+      "index": 0,
+      "cultivarId": "HC-R-cedar-skunk"
+    },
+    {
+      "pool": 0,
+      "entropy": "0x702f488fe5f77fdce0cc6a2470edde99b9c2108f9261c3244e74d539a9977b86",
+      "requestId": "0x7fd964aa27c684110b04b416cb41072d46c1c511b2f59ef5d0e2673fab856c4b",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 7,
+      "cultivarId": "HC-C-super-silver-haze"
+    },
+    {
+      "pool": 0,
+      "entropy": "0xc8784981307f41a422694f5b97b823f7cf33d1af947bb27d258d854092ebdf9b",
+      "requestId": "0xe15ad466ad23332e9aab5ca5f7ff33a0b34e9c8f628301ab158e8819ba8d97cd",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 4,
+      "cultivarId": "HC-C-granddaddy-purple"
+    },
+    {
+      "pool": 0,
+      "entropy": "0xaf2b74c58a4160de18fe3c288bf0fe8392203c5a4fbcfa6c800d300eb2eecc4e",
+      "requestId": "0x63cafdcffc0f300c2e3a436a9d5d2e30897e3f5ec3ad34a11867b362050c16a0",
+      "tier": "exclusive",
+      "tierIndex": 2,
+      "index": 4,
+      "cultivarId": "HC-F05"
+    },
+    {
+      "pool": 0,
+      "entropy": "0x7b8df84ef28fbc5e5a317fce552bad581983ad55a73148b7a0aac39610822727",
+      "requestId": "0xe0c22a9d0e6b9207cf8d8b4206ab967aa863ae906d7f58743a7c06b5eb21c7d6",
+      "tier": "exclusive",
+      "tierIndex": 2,
+      "index": 3,
+      "cultivarId": "HC-F04"
+    },
+    {
+      "pool": 0,
+      "entropy": "0xc19a9b1723d25fe57d3bce994899f2a8b9cb77fbe121cf183ec74c7eefc34aac",
+      "requestId": "0x585ce21978581f254ad4f694b1d8d2de42e6bcad5ad1f704137b626aed1553e9",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 1,
+      "cultivarId": "HC-C-blue-dream"
+    },
+    {
+      "pool": 0,
+      "entropy": "0xc7f6fd2f334c6b32f9db01c49436491a8108a49c284fd2c4133020c73b1f9837",
+      "requestId": "0x611d9498848fa89e09e1cbfb806e233092bb86646a2e68d058dc2d5c88a3c0dc",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 6,
+      "cultivarId": "HC-C-pineapple-express"
+    },
+    {
+      "pool": 0,
+      "entropy": "0x203f0c1df2b142009d2e05cd006cdd6d12d87caa587f391cc34b7f64d35970b7",
+      "requestId": "0x014f0b356c02bce6a6058bd7e2d8f82f9cfd51024e6950509249b114bd6b4e1d",
+      "tier": "exclusive",
+      "tierIndex": 2,
+      "index": 5,
+      "cultivarId": "HC-F06"
+    },
+    {
+      "pool": 0,
+      "entropy": "0x1c8168e223e2b10274ea537d53693067826f305a1876a10e0bee105bcf0d6fa0",
+      "requestId": "0xc3c835479ba200afa58548465045f90567f0578eb449baa2a336b0de15339cb1",
+      "tier": "rare",
+      "tierIndex": 1,
+      "index": 5,
+      "cultivarId": "HC-R-rainforest-queen"
+    },
+    {
+      "pool": 0,
+      "entropy": "0x0af7200f8aa00922c90761a82b3bd04ea62add8bd65e52faacd9c1ca2da1e0b0",
+      "requestId": "0xb5615a267f586a9523202661db7a2e9d97366d5c57cc782cc51fe31ddb51ded9",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 5,
+      "cultivarId": "HC-C-green-crack"
+    },
+    {
+      "pool": 0,
+      "entropy": "0x7ac0ca7dec7aa2daace2abe1e734be6311ef0c904a1153d7444fcd8b6506c2cf",
+      "requestId": "0xe68435397976c4bf6546708ca5e3bc6235ea11745db2ece60573698711b46729",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 6,
+      "cultivarId": "HC-C-pineapple-express"
+    },
+    {
+      "pool": 0,
+      "entropy": "0x7e9dde68fc0d6c7e36c08cfe5676b58e76116cf5220beb069b3b71919c01f956",
+      "requestId": "0x13f184b9a1f7c4996fd58c715966a7e3b399c6ccba9449fb8f658d2b7dbbb888",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 6,
+      "cultivarId": "HC-C-pineapple-express"
+    },
+    {
+      "pool": 0,
+      "entropy": "0xa0abdfe8765112fd0e9a5dddbe34180d61fc5815cfec660603707fcf01d25ab4",
+      "requestId": "0xaf2c031480f5919c6ac9d4043cc59732b1a6331a68e726166838a1ef291c7baf",
+      "tier": "rare",
+      "tierIndex": 1,
+      "index": 7,
+      "cultivarId": "HC-R-spirit-bear"
+    },
+    {
+      "pool": 0,
+      "entropy": "0xe74a5e669909577b40559a26e7bb67118e78849fe0cf66d78d06752361144498",
+      "requestId": "0xf520491ac849b77463e0c2a1010859db40446ce6788a413b288a5637978038bf",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 6,
+      "cultivarId": "HC-C-pineapple-express"
+    },
+    {
+      "pool": 0,
+      "entropy": "0xec391e089244350d694545db4fe498ce064b1c791e341e5d5094ef3bd5ac9325",
+      "requestId": "0xeb337c37c23388bf8fd7cea0c5d4290e8c04cc2cf6dae14b3622422168494f4f",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 4,
+      "cultivarId": "HC-C-granddaddy-purple"
+    },
+    {
+      "pool": 0,
+      "entropy": "0x02fe57ee9837a9a90b2316a656e8c15e87ef519f9c6716a68c7af7ada4f2a4ae",
+      "requestId": "0xfddc1aff3de725b68bcad5bb1df6c45b9d78d67e7069c5140e4449341ad37f0a",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 7,
+      "cultivarId": "HC-C-super-silver-haze"
+    },
+    {
+      "pool": 0,
+      "entropy": "0x7c6676e63a1084887c856af216c0be3229da7dda81784ba45d6414cf9ad7d54c",
+      "requestId": "0xfcfaf5b3106ba6a91f83dfcaaa2be945d15c1416ad6758e3010c0ac580ebda46",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 3,
+      "cultivarId": "HC-C-gelato"
+    },
+    {
+      "pool": 0,
+      "entropy": "0x951e2ae5899184bfe499e5da9df8f1cb977a777e444070b788c286594eaaee41",
+      "requestId": "0xc45bd6639dcc384321acdc05f50e54891c8edb27457b226b35513fdf259bdf3b",
+      "tier": "rare",
+      "tierIndex": 1,
+      "index": 7,
+      "cultivarId": "HC-R-spirit-bear"
+    },
+    {
+      "pool": 0,
+      "entropy": "0xf1ac5909e535ce24c3b7c6b87d932de8c69924f5672bd0d2fd74213d698f20b3",
+      "requestId": "0x6e2ea498860a2190bb2b5ad1c39b4e556d47c2c399f2444fafd8edccf49b2114",
+      "tier": "rare",
+      "tierIndex": 1,
+      "index": 2,
+      "cultivarId": "HC-R-emerald-mist"
+    },
+    {
+      "pool": 0,
+      "entropy": "0xacde429bebc57c57369ff8c9b4b34137a801459e0ac481df8430c41c17a025e0",
+      "requestId": "0x6980351096a70d76bfa8e90939b2fc62ee1d9b9991c5cac0b25351d732608858",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 5,
+      "cultivarId": "HC-C-green-crack"
+    },
+    {
+      "pool": 0,
+      "entropy": "0xbc76057bc5660301bbb871e5e99c30fc16971fdb31460c22e37d81cfa1e06968",
+      "requestId": "0x4d84b7106cc7e65a24707caae77b8d7e7f74d07bc865491d74fb2b9c38591816",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 6,
+      "cultivarId": "HC-C-pineapple-express"
+    },
+    {
+      "pool": 0,
+      "entropy": "0xe1efdd788808b9867824b4b527197eff8875137d75afa1f8ec6204e2a9b45e8a",
+      "requestId": "0xc02002def75eb89be3ab7739f57352e21d3cdd069d2da670180730ca4fc280a1",
+      "tier": "rare",
+      "tierIndex": 1,
+      "index": 5,
+      "cultivarId": "HC-R-rainforest-queen"
+    },
+    {
+      "pool": 1,
+      "entropy": "0x210c5b2cd57c931211e3ed495e6ac8698995130a074db6c6f1acaee6be8d8313",
+      "requestId": "0xade68f99dbf064828cca58521a7ac0b0af51188fc23595ddc0fc0ab009a7be71",
+      "tier": "rare",
+      "tierIndex": 1,
+      "index": 6,
+      "cultivarId": "HC-R-saska-sour"
+    },
+    {
+      "pool": 1,
+      "entropy": "0x7cb618dc7d31ec81cb4231ca6916837d0c0379a8ceaec23acfc12921e1e1df6f",
+      "requestId": "0x32362baaadbda0c0ed8f279ddd9cd6637041bd7b6639a5bf9bd2c8b457d2fcd2",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 1,
+      "cultivarId": "HC-C-chemdawg"
+    },
+    {
+      "pool": 1,
+      "entropy": "0x0c5203a4fa73203ef37c3b4c7f6f5e0afa104f018b3a08b1394c41f87b78328f",
+      "requestId": "0x0b96582ef8f65b0cbda5af8c9e61a9d568703359e1200c01e12c6b4a74a395f5",
+      "tier": "exclusive",
+      "tierIndex": 2,
+      "index": 1,
+      "cultivarId": "HC-F08"
+    },
+    {
+      "pool": 1,
+      "entropy": "0xc105b8d637d5a0c4fe98c0becd233c1c69cbc33a442862b2eb67c4e5a4abc3b1",
+      "requestId": "0xd8b98a29047db6ec5623ecc50f0d2a8b5e825af6ab562a4afa6318555d875a95",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 7,
+      "cultivarId": "HC-C-trainwreck"
+    },
+    {
+      "pool": 1,
+      "entropy": "0x0de8629e93baaa45367c0399dac9d4ab0a0196f18d20ca3ae553f9bd16f92aae",
+      "requestId": "0x15d079988c46d779babdf682e25fd2e0697cfaf9af809cc3eff20ba5fc3d6665",
+      "tier": "rare",
+      "tierIndex": 1,
+      "index": 4,
+      "cultivarId": "HC-R-prairie-fire"
+    },
+    {
+      "pool": 1,
+      "entropy": "0x694773adc75a0383aa947135a155ca2c0f783fd99a0d948429db4be65e968f14",
+      "requestId": "0x513d9ffd01e5bbbdffa04b97fe075690a051ac3db65e08d236a46e6b8f573ce7",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 3,
+      "cultivarId": "HC-C-jack-herer"
+    },
+    {
+      "pool": 1,
+      "entropy": "0xe4e80d3e9d5d075e978a8595a4e2356610b399fb44c0464c0e0574b63e079530",
+      "requestId": "0xe540290f64af63f94fefa905393aa5479cb23d6c5a8d7af1380c913d78ec5788",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 2,
+      "cultivarId": "HC-C-girl-scout-cookies"
+    },
+    {
+      "pool": 1,
+      "entropy": "0x06e1a25e0c2e82a046c1ac3fe96e172e63a2fb031f74df86f0f6064ab5324557",
+      "requestId": "0x3bcd7bb2f071a5f97ec81a22157035c4ad877eced5fbed0000cac5b2db432ee2",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 0,
+      "cultivarId": "HC-C-blueberry"
+    },
+    {
+      "pool": 1,
+      "entropy": "0x7a06b401f50b484545605939508eb9c8cc3cb343c84605872a17431ac1f96d9e",
+      "requestId": "0x56923fc292fac08b3b0c875b2f102c4b14bab9596c4baa7ee66d70cbf6dec90e",
+      "tier": "rare",
+      "tierIndex": 1,
+      "index": 0,
+      "cultivarId": "HC-R-blue-moon"
+    },
+    {
+      "pool": 1,
+      "entropy": "0xed7968c8506d4b936f771cb7c0a826b9fdf969a7559ed485def78ee9519b4367",
+      "requestId": "0x4b474b1bd7fbbe5d644c41e22b811163a745ae69f954534b56dadadd0bd6eae0",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 7,
+      "cultivarId": "HC-C-trainwreck"
+    },
+    {
+      "pool": 1,
+      "entropy": "0x9f356ee73925c188bf4f0a51d2d5260537afe13128113c637102a08c989ca46c",
+      "requestId": "0x50fa1ea74f9f3522c25b950a6050a5a4fb07499dfc42b546764f0aec5b1451a3",
+      "tier": "rare",
+      "tierIndex": 1,
+      "index": 2,
+      "cultivarId": "HC-R-golden-haze"
+    },
+    {
+      "pool": 1,
+      "entropy": "0xca8034f9d21e9490f03368def3e59e6c1e05e0e5d46b21e9f8ec4e248b58c026",
+      "requestId": "0xbd39775aa4e0d9661a59368409395bbfc1395e2543cefb9b6884f03ef2979f93",
+      "tier": "exclusive",
+      "tierIndex": 2,
+      "index": 1,
+      "cultivarId": "HC-F08"
+    },
+    {
+      "pool": 1,
+      "entropy": "0xb581b531114ffd132490d1c1bfc9a4622cec6a69e9afaf8c1c15ceaa7d8b587f",
+      "requestId": "0x958325a57ae5f21cc7a3199ce1d1a249977f2c998261e307b0ae28850cb87a23",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 4,
+      "cultivarId": "HC-C-northern-lights"
+    },
+    {
+      "pool": 1,
+      "entropy": "0xc34b23bf0907f1a16f72e3df0dcf29c3465c6eeb02610b4a22c10e08ecda6559",
+      "requestId": "0x8083a81ba03bf1fe04e062ce7ca7fcbd95e02010c21608844664fbb1450eb9cc",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 4,
+      "cultivarId": "HC-C-northern-lights"
+    },
+    {
+      "pool": 1,
+      "entropy": "0x52338b8cc8d5697bae30190091d9182d80f3e59aa970a9267fea258280fcbce3",
+      "requestId": "0xb42395966c1a186626bf9b6f95204cc6f4c85693f304d6b8c617c597a09d992f",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 7,
+      "cultivarId": "HC-C-trainwreck"
+    },
+    {
+      "pool": 1,
+      "entropy": "0xf3751df3ed008d2869ac520c2a6e9002400ca9885f005cc7a3a3add1fc8ccb14",
+      "requestId": "0x062792c4aea63c0b84c3975aee45ef9ce078220786bd8a9cd1b68accfec125ee",
+      "tier": "rare",
+      "tierIndex": 1,
+      "index": 1,
+      "cultivarId": "HC-R-fields-of-green"
+    },
+    {
+      "pool": 1,
+      "entropy": "0x4e5cbdd7fc6f63b90a1654207b748f57ac24cbb4bf6db1c6dec0c9f33f58345f",
+      "requestId": "0x918b0fc01d1029fd5f8ada12ee06dc89fc7b372321e84fa8eec229314ccd03a4",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 4,
+      "cultivarId": "HC-C-northern-lights"
+    },
+    {
+      "pool": 1,
+      "entropy": "0x8dc2771988227f3b73971bab2dca85b7a5be2613023cbdd6c07385c9d1f2867d",
+      "requestId": "0x01a1ca642bf8b74185fab890e5ddceccf9ea05a8fd04309d55d1b818a9830ebb",
+      "tier": "rare",
+      "tierIndex": 1,
+      "index": 3,
+      "cultivarId": "HC-R-honey-trail"
+    },
+    {
+      "pool": 1,
+      "entropy": "0x15e1270b74ff9dbb44246f9c303855cf62bf1b97730cfb401c8fbbd342877b9e",
+      "requestId": "0x989abe78b2aa4511263b644c229518f9705f636fc809c6f5d9dab608263f827b",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 1,
+      "cultivarId": "HC-C-chemdawg"
+    },
+    {
+      "pool": 1,
+      "entropy": "0x93dcf3a539fb24bc2702cdff4a3a0f6e31f452d268df08111e0f1b2956a5a650",
+      "requestId": "0x54f98ef175e1df6d9e4d510bf672978744c97868d864274216af7bc6bf69425f",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 1,
+      "cultivarId": "HC-C-chemdawg"
+    },
+    {
+      "pool": 1,
+      "entropy": "0x0687bece8b34e1440e54e843e2da7931c4df6dfba104632017c22c1f221727b6",
+      "requestId": "0x080f3a886dfc5be788da589ffe8dfb7aac35cd9c20857368352ee3039c5ed28d",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 4,
+      "cultivarId": "HC-C-northern-lights"
+    },
+    {
+      "pool": 1,
+      "entropy": "0x65e25f894ee67f65d7b511d48c8cd2577dac586874e30a10c30e755699eebdec",
+      "requestId": "0xf48ef47953a466c5dff54405bd52448aeddb30c1a5d4ff6c8d20a0154a9e79bb",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 5,
+      "cultivarId": "HC-C-purple-haze"
+    },
+    {
+      "pool": 1,
+      "entropy": "0x559ba7c048fcb1165b32cfe9202e9860dd8e3b3c944c48c0aca136b1ac11e877",
+      "requestId": "0x921e5a78dfadfe0538544a4a7a989d9664f9df047e126f4ac11060c33612a84d",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 1,
+      "cultivarId": "HC-C-chemdawg"
+    },
+    {
+      "pool": 1,
+      "entropy": "0xf06d8ea27194b667ab1283d1552b8f21e2d69d6c7ee9206f3c7a87e7c65e4a43",
+      "requestId": "0x3a19255a90daf3ab8b450e05fb5ab41b64f1aecd096888b16e7c0b213e610ed5",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 5,
+      "cultivarId": "HC-C-purple-haze"
+    },
+    {
+      "pool": 1,
+      "entropy": "0x2d014da323780c23a9d48505a3905f396da6f59c6fc2460c6ab451fb341ac76c",
+      "requestId": "0x042403f111152b69e831a7ab6fcc8b65612cc25a4b7b04d3261eea43a1192e6e",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 2,
+      "cultivarId": "HC-C-girl-scout-cookies"
+    },
+    {
+      "pool": 1,
+      "entropy": "0xb7f9da2692d95b0d645ec9a34105028a9c7b6c63e696aaa2ec7767d7b6e4e7bf",
+      "requestId": "0xfe1b02ce58c3d0f8d70cd846acda43c8444b41ce7d6391f0fb7a13bb92c677b9",
+      "tier": "exclusive",
+      "tierIndex": 2,
+      "index": 1,
+      "cultivarId": "HC-F08"
+    },
+    {
+      "pool": 1,
+      "entropy": "0x92504e12b4608d25f5ff1adcd8781fbdaaf5430e52605f397580bc615f39568f",
+      "requestId": "0x211f4d8c923904072d88033df56290152fe0c1cd269581df4262bf06fe2cd2d3",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 1,
+      "cultivarId": "HC-C-chemdawg"
+    },
+    {
+      "pool": 1,
+      "entropy": "0x95221de7188db45d1e6769f1c77ed59e2d6348f59c64899b337fdf3052062086",
+      "requestId": "0xd40afb932d03d15268f4e6d37ca8c95acd127f697053da05d2277d31914e569d",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 2,
+      "cultivarId": "HC-C-girl-scout-cookies"
+    },
+    {
+      "pool": 1,
+      "entropy": "0x3803b48cba17305af1554fa0ed6b876430eaae60bf61a5c1bbb9ffd5479a2df3",
+      "requestId": "0x27e5323737583ff949e03d5013ea7ff30b1570994256fb16e1e63d068ba42efd",
+      "tier": "rare",
+      "tierIndex": 1,
+      "index": 2,
+      "cultivarId": "HC-R-golden-haze"
+    },
+    {
+      "pool": 1,
+      "entropy": "0x5d678e17d0aba21c1cecc6d7d725db6fc3399a7585dc29ef608b5bb5bac9b27c",
+      "requestId": "0x957b36aa8122310e39c969c9096b08e658c0f08cae51b8332ef410519271bb71",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 1,
+      "cultivarId": "HC-C-chemdawg"
+    },
+    {
+      "pool": 1,
+      "entropy": "0x59b0e49954bb8ad4f5f3adafa4793da5f1c4f4aafe31e80b2bdba99a14745aba",
+      "requestId": "0x613c80ca872743e5293c7d8d4a0fcce8a3a610b4dc92d8cc0b44f6309881d0fd",
+      "tier": "rare",
+      "tierIndex": 1,
+      "index": 3,
+      "cultivarId": "HC-R-honey-trail"
+    },
+    {
+      "pool": 1,
+      "entropy": "0xe757928731d74adeb77bde6826bd9604c8f7af6aeb801531aff71251248bd0b3",
+      "requestId": "0x343156157c3765b98a00dcb57a9df6c250fe73f54376b6c2470b7a2df579835e",
+      "tier": "exclusive",
+      "tierIndex": 2,
+      "index": 0,
+      "cultivarId": "HC-F07"
+    },
+    {
+      "pool": 1,
+      "entropy": "0xc056798e6fb27154098c29235886705fed3ff6c01f078dbc08837512416d25eb",
+      "requestId": "0xa83ff13851f41ee94a251aefa1b459584fab8bcbf1101ee9c8900138d216b0a9",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 1,
+      "cultivarId": "HC-C-chemdawg"
+    },
+    {
+      "pool": 1,
+      "entropy": "0xe3538ffe0880a98a9ee83111ae871d91b5668f9e6c280f4addc26cdc573dc00d",
+      "requestId": "0x8df2eb4223e24ff0aa6be1a6bbe5d7aa778c2b2431ea53e2ed37902460926045",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 2,
+      "cultivarId": "HC-C-girl-scout-cookies"
+    },
+    {
+      "pool": 1,
+      "entropy": "0xc7747e6909ad29ef582152c8644d5ecb31cbf376670fa2579a3c38c619508168",
+      "requestId": "0xbcadbdcb188e5e8e3b1b9884d15dd9f1e96958356b92f5fffcbc5c94bb95d683",
+      "tier": "exclusive",
+      "tierIndex": 2,
+      "index": 0,
+      "cultivarId": "HC-F07"
+    },
+    {
+      "pool": 1,
+      "entropy": "0x6326ff8ed9319c971cf9322c75d287bb967155a025d565493cd03e1311d0bffe",
+      "requestId": "0x5b80e017e83d9a1645cedd529b3bcb4400495f5339c5b0063b730709c5fe575c",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 3,
+      "cultivarId": "HC-C-jack-herer"
+    },
+    {
+      "pool": 1,
+      "entropy": "0x40654d49d76b9edce2a968695a1f3f4cd01094381897bcddff39a9f6c07dec12",
+      "requestId": "0x2f3358177090bb6c695be90d3d36782ca6889d5b43341c8ce33922d1945f2c55",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 4,
+      "cultivarId": "HC-C-northern-lights"
+    },
+    {
+      "pool": 1,
+      "entropy": "0xa38eae7fc7d0d3373f773b204d17766710812e5279e154e66b59b34666416554",
+      "requestId": "0xbe57ab1e1f16865f7e26d678b78b6bf3aa2a81ab063ff723cb2dd7ea21ac40e2",
+      "tier": "rare",
+      "tierIndex": 1,
+      "index": 7,
+      "cultivarId": "HC-R-thunder-fields"
+    },
+    {
+      "pool": 1,
+      "entropy": "0xca314128f68c5025006d96048babaaacc8fd65f160cfbee6e6811fcd5d7708d9",
+      "requestId": "0x94694483e2def82718b17eb2d04403510f7e49e6ca1f361b80d0cec10bf801f4",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 4,
+      "cultivarId": "HC-C-northern-lights"
+    },
+    {
+      "pool": 1,
+      "entropy": "0x834744c830eef5388e7489d471cb3b80cc07a53a7b7f822ff1b94727d0673810",
+      "requestId": "0x4b4c6f8d6dc65e1ada67b7838f47485b674643a98ad1fd90843b25b28c33eadc",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 7,
+      "cultivarId": "HC-C-trainwreck"
+    },
+    {
+      "pool": 1,
+      "entropy": "0xbf82e0f22cb0f3c9b3c2a82337bc46efea4d53c668c0d1e1e14c9c72aaed3948",
+      "requestId": "0x3680c3e7524725891e5df1adb2ffe58d4acaca619ca056b30e960e957caa9271",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 7,
+      "cultivarId": "HC-C-trainwreck"
+    },
+    {
+      "pool": 1,
+      "entropy": "0xc71e665ddb23d64a2525fad7edcd838b791101657693d8b3e64c14b0d066844e",
+      "requestId": "0x07e46ae7c7a4f24efe24b38d3d10ba386f7f4655ec7191e6885c4fab54b3ae5c",
+      "tier": "rare",
+      "tierIndex": 1,
+      "index": 7,
+      "cultivarId": "HC-R-thunder-fields"
+    },
+    {
+      "pool": 1,
+      "entropy": "0xaf458bb6dd127568ad740cd98eaee1272d7d9604d87dddf29b2c985dd40b58c3",
+      "requestId": "0x31e7d4ed56d3f6c831aaeea797583262dd179d2ccb3623a048efc18ba46c1395",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 0,
+      "cultivarId": "HC-C-blueberry"
+    },
+    {
+      "pool": 1,
+      "entropy": "0xd90112e36c5736b286586a85af888602e969ae4333065c0f36a597851e011958",
+      "requestId": "0x5de230b5d9c216d76b7e8945e64f2e20f6986c4e4cca2c396e276de27a457d04",
+      "tier": "rare",
+      "tierIndex": 1,
+      "index": 7,
+      "cultivarId": "HC-R-thunder-fields"
+    },
+    {
+      "pool": 1,
+      "entropy": "0x1d6fbf4a990643f2b24a28d5c548ada17e6c0c7cfc8293df00c7edbd68cdc3ed",
+      "requestId": "0x6a89585b20c4151e35f15a421c42bf69b4ad653bf0615e1b119fb3897f67c2a6",
+      "tier": "rare",
+      "tierIndex": 1,
+      "index": 6,
+      "cultivarId": "HC-R-saska-sour"
+    },
+    {
+      "pool": 1,
+      "entropy": "0x2efe18a0ce4ba21a8ac5bf9ba9f2ccec67f6e4072de714d4163f5d0ffaef8f26",
+      "requestId": "0x62d8b4fa8ad2b4a9ccb7132f138f9c23827ba63224b6744a5100589854178d77",
+      "tier": "exclusive",
+      "tierIndex": 2,
+      "index": 4,
+      "cultivarId": "HC-F11"
+    },
+    {
+      "pool": 1,
+      "entropy": "0x078893a099e346770f3db53c933ff87b37603ad86ede315164d8fc1a4d8512d3",
+      "requestId": "0x82224e8fe1d16d0a54fe3157fb3e0bf8a8ef91dd334e6da583f3db5810622364",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 4,
+      "cultivarId": "HC-C-northern-lights"
+    },
+    {
+      "pool": 1,
+      "entropy": "0x5b1829c2d84f636c1a19c395c9a93a657c8f1021c70a71534acc94032050567a",
+      "requestId": "0xb920dd2e9f2b7b9046ef9406e6fa6a9f36f2ef2e9e7f01164690b8b81b9636a2",
+      "tier": "exclusive",
+      "tierIndex": 2,
+      "index": 3,
+      "cultivarId": "HC-F10"
+    },
+    {
+      "pool": 1,
+      "entropy": "0x57fa3c59278c762bbd973041990a59a2ad3d27ece8eeff829d609cef35697765",
+      "requestId": "0x3401c9f2418a693fbf48b07db96e3fd1f0bb53354a14792979728ba5bd7ef47c",
+      "tier": "rare",
+      "tierIndex": 1,
+      "index": 1,
+      "cultivarId": "HC-R-fields-of-green"
+    },
+    {
+      "pool": 1,
+      "entropy": "0xc8d16ba0a2142abbc6d3c10e0810d778d8737cc59c7b074175314bc2d3939a51",
+      "requestId": "0x2a56c87c15225b599c4424fac46731da60e348e47a0dbc1f24286ec3d5dbb0a8",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 2,
+      "cultivarId": "HC-C-girl-scout-cookies"
+    },
+    {
+      "pool": 1,
+      "entropy": "0xee142375be241af6a3cd1f6282e764874e56a677ff8bc1fbd3a506573cb75540",
+      "requestId": "0x685982631995b27ade4952bb612a984044c01d811c13186b282b19e7243f9feb",
+      "tier": "rare",
+      "tierIndex": 1,
+      "index": 3,
+      "cultivarId": "HC-R-honey-trail"
+    },
+    {
+      "pool": 1,
+      "entropy": "0x395f8f9e1753166b65f61c4c41b73f83ba2ad5a4f8e7b32796ce2907eae4cf1c",
+      "requestId": "0x1e2c44d928719937d6380320eba39643763368afaa27607a16ab84ec34ccff64",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 6,
+      "cultivarId": "HC-C-sour-diesel"
+    },
+    {
+      "pool": 1,
+      "entropy": "0x2e64213e3372eb23c611709d4e4db875d911967bb4327521f943cba80c7b2c15",
+      "requestId": "0x32d58ff7419a62e29aad6841c43c84e1a74f33d0fe0b5e30a74c95c6dd7e2bea",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 0,
+      "cultivarId": "HC-C-blueberry"
+    },
+    {
+      "pool": 1,
+      "entropy": "0xf6ced118b8fc9ee67e20e5b9e30213bc4a88a3ec1cf6f0da4f31cb456d8a3b7b",
+      "requestId": "0x1a828d9ef696efde59cd617879990fe08babe0c00f5db0b09b9831353d17cd21",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 6,
+      "cultivarId": "HC-C-sour-diesel"
+    },
+    {
+      "pool": 1,
+      "entropy": "0xbc64646f1bf02c4c1d68c52479460c637eff4b5d6228cda040ad53e107d1ba0f",
+      "requestId": "0x0feb530f7351f0c62f721fae78d6f3461f7c5b5928e77d195ab42e2a505216a6",
+      "tier": "rare",
+      "tierIndex": 1,
+      "index": 4,
+      "cultivarId": "HC-R-prairie-fire"
+    },
+    {
+      "pool": 1,
+      "entropy": "0xec889285c20265f39d604d61d584cc1ce25550e197f1dceb5b3d9bfcde057f84",
+      "requestId": "0x01248d4df93b70b2bdd58124464c002c643d400995c362d396a5f083fc6e3a88",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 2,
+      "cultivarId": "HC-C-girl-scout-cookies"
+    },
+    {
+      "pool": 1,
+      "entropy": "0x15e9fdfcbc4864158141cda37aa2fa7eb8e86c18e126120690a1fcb62cd17d5d",
+      "requestId": "0x120b62b2c6ef07c991a6d2b230962a633a0876313748fdb5e5d51f8d82a17331",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 4,
+      "cultivarId": "HC-C-northern-lights"
+    },
+    {
+      "pool": 1,
+      "entropy": "0xa634d129ad387354cde480fee023995074e578b0685be70d1c4ed7e9ae8db0d6",
+      "requestId": "0xcaa1054e1fda6b569c5922460b1881b096bee74e646efcdd605107ae0fa1b397",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 7,
+      "cultivarId": "HC-C-trainwreck"
+    },
+    {
+      "pool": 1,
+      "entropy": "0xd9118c6146729ad28663b859f50462bb3adb4edc1b3a3805ef9d6ab30dba897c",
+      "requestId": "0x7117511a2c68564435e254bf74bf6e545be3d1814acd43f1bdf2c061f0bd4232",
+      "tier": "exclusive",
+      "tierIndex": 2,
+      "index": 1,
+      "cultivarId": "HC-F08"
+    },
+    {
+      "pool": 1,
+      "entropy": "0x81a3864a1022c9c5698d60a17c71535a3f90c9989d56bc5f1b59e2afd7f94902",
+      "requestId": "0x4a5be33b2aa23ed273c597e4b2d38e0a929d50a608de76d29e32851430776ad4",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 0,
+      "cultivarId": "HC-C-blueberry"
+    },
+    {
+      "pool": 1,
+      "entropy": "0x5599c37904d065a32d5e338813392eea4622e05192f973a291a935e55e04fd13",
+      "requestId": "0x097d93e56cfd7819c8259751521226faa790d259fbe9efc20b93900e92ad1e4f",
+      "tier": "rare",
+      "tierIndex": 1,
+      "index": 7,
+      "cultivarId": "HC-R-thunder-fields"
+    },
+    {
+      "pool": 1,
+      "entropy": "0x3dffacee0bc3f036973dd076dccd05657b4554877800d244e857a5e3bee61b51",
+      "requestId": "0x2a8a71eb19f0f6667a1dc2b202ffcb04b91066cd898ea42d1f097b5a16fce25e",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 1,
+      "cultivarId": "HC-C-chemdawg"
+    },
+    {
+      "pool": 1,
+      "entropy": "0xfd0b8592370d08a58e49914ef4ac85645592d817b93c2c9973ff4cbce95a3272",
+      "requestId": "0x596f9b5de4c01c44b4893c376b3a9b2eb5ddc24c400973aa1937f4a1d1f51251",
+      "tier": "rare",
+      "tierIndex": 1,
+      "index": 2,
+      "cultivarId": "HC-R-golden-haze"
+    },
+    {
+      "pool": 1,
+      "entropy": "0x4a7e0c322b72b6b0caf20b375a00ce1c4f795e3a00a78d46cf048c1a69d120f6",
+      "requestId": "0xf4acee88d39b7dc6783638d22e89b0788e12ff1fc0c7a02f4ce9f7f7fde2c7e4",
+      "tier": "rare",
+      "tierIndex": 1,
+      "index": 0,
+      "cultivarId": "HC-R-blue-moon"
+    },
+    {
+      "pool": 2,
+      "entropy": "0x4151ef352d8c6cd2a2fc53a82e9a5246515cfad64e61b867695be7e982ab1372",
+      "requestId": "0x1686cd3636adf647ad64ff1034470c6ea0f3621925a878faa98287e118807407",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 5,
+      "cultivarId": "HC-C-white-widow"
+    },
+    {
+      "pool": 2,
+      "entropy": "0xd04680961fca0d8518372b22defc75586bb4398fc2e6ebfecde4ba386d17d5f2",
+      "requestId": "0x79b4b060dfd96e0645259628fa42b49db78300b01a12a113ded89455143882ed",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 4,
+      "cultivarId": "HC-C-strawberry-cough"
+    },
+    {
+      "pool": 2,
+      "entropy": "0x6c17e3bd1fcff9137323669c7b7280896c135d0838a215f28ca8d2335d7f5bc5",
+      "requestId": "0xa47d7fd89f2e7a723d91705e9a86fce33931e1180b7a2087c9e23a71022dc7ae",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 1,
+      "cultivarId": "HC-C-afghan-kush"
+    },
+    {
+      "pool": 2,
+      "entropy": "0xee28c89668c4cc7cea2973bfbd889d94f6b3191260980808d8ae0c909637a49f",
+      "requestId": "0xb7b455019c0f7ab0249923a93513e7614592120e89b71c36b646610f6c7f2057",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 2,
+      "cultivarId": "HC-C-bubba-kush"
+    },
+    {
+      "pool": 2,
+      "entropy": "0x8530f5781a7881dc0c0917f233cdef25110c1e32408223e23433bf2b5066452d",
+      "requestId": "0x88e27a38618662b4138fcb5ba16a6cef53bfe0ef371e4b88addd76d2de2bbd6b",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 0,
+      "cultivarId": "HC-C-acapulco-gold"
+    },
+    {
+      "pool": 2,
+      "entropy": "0xf9cabc7c8ea79e3e4389ce7b626c944a011a25d468847adaa3e214222aef45c2",
+      "requestId": "0x4c4cf23c7f2c580e2d94fcae68ebe0ec52e262570473ae1ab4899b67a96b63cf",
+      "tier": "rare",
+      "tierIndex": 1,
+      "index": 8,
+      "cultivarId": "HC-R-sage-rider"
+    },
+    {
+      "pool": 2,
+      "entropy": "0x4d2e1bb937f97ee3c7c65fa1de7b25bd9690b2f4327b95d70f507293471d2a00",
+      "requestId": "0x666fb91e527909f9f8b0a43e3ff08fc898aea6ea8c7fcec4ba785e14dd8ef45b",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 2,
+      "cultivarId": "HC-C-bubba-kush"
+    },
+    {
+      "pool": 2,
+      "entropy": "0x2d73f2a1d00ac7f9cfb1c91fcb6a223e4e7862d35edb2ac2dc68f42675ec8f4f",
+      "requestId": "0xfc1311cec4667994c05c768420045540b0f4338f0e679a8f1c0a88d2832b8660",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 6,
+      "cultivarId": "HC-C-zkittlez"
+    },
+    {
+      "pool": 2,
+      "entropy": "0x97f518b2d6c285e9a01db160c08fb2b87d51156587c92c0b17e292f898a67e65",
+      "requestId": "0xabd1e978675339b1c577d136913a969a15d24286dad6962cab2067477692974e",
+      "tier": "rare",
+      "tierIndex": 1,
+      "index": 8,
+      "cultivarId": "HC-R-sage-rider"
+    },
+    {
+      "pool": 2,
+      "entropy": "0x420ebb38030fd84b213b9c17d364ac0c141a2c6283029e482c7b227fb09a34cf",
+      "requestId": "0xb65de4efd54283770128476462e6f7dcf7a6d887dd4e50c6c1eb8d22b2113ab2",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 0,
+      "cultivarId": "HC-C-acapulco-gold"
+    },
+    {
+      "pool": 2,
+      "entropy": "0x2a8264f053a19ee5e27bef3d44e6d1153592a6c5fd5e36c545cc791907b645af",
+      "requestId": "0x01a6dfb1c76bac0f38251fdf85e08b175a86eec6f888fe9c231a2adb1ee06738",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 4,
+      "cultivarId": "HC-C-strawberry-cough"
+    },
+    {
+      "pool": 2,
+      "entropy": "0x8f9aeef0d2a6593ff1fee9b34df51d02084b7bcc3e077cc3019e9ffdc42d37a8",
+      "requestId": "0x8a9ba15182bb1b5556e54dcf64b9fe80fa58c500abdd6683fd2d3af339f23221",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 2,
+      "cultivarId": "HC-C-bubba-kush"
+    },
+    {
+      "pool": 2,
+      "entropy": "0xa82734bf14eff10995d3ab2ee1a1f30cb6f271063a5fedf4ea79051855719f6a",
+      "requestId": "0xb8a74cea0f53d051108ff73d6ba1ff13e2be951ba828c806caf8b22828a05b9d",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 1,
+      "cultivarId": "HC-C-afghan-kush"
+    },
+    {
+      "pool": 2,
+      "entropy": "0x9753d57b907f13145686ab533a18bb814a7d947ad628820498568a6ba8864590",
+      "requestId": "0xa2ebb6441d5f7c7fe88a6207db667ccb3fd0da704e893498269c55775affacdf",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 0,
+      "cultivarId": "HC-C-acapulco-gold"
+    },
+    {
+      "pool": 2,
+      "entropy": "0x831bf463e344f5631cb870b39c34798d4ec8ae9f6c4b8f9808c1f091c658c4ec",
+      "requestId": "0x9b04579ed10f67ed5e52780592be4d05e970e059ba23428bfe434eb8b61c393d",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 4,
+      "cultivarId": "HC-C-strawberry-cough"
+    },
+    {
+      "pool": 2,
+      "entropy": "0xf5a7862a0e3975971d96aa61016e9928c4f7845b04ce126639665f4f194cfe68",
+      "requestId": "0x654f1a075faff3c6de1945cab6c72000e1bd9c9ee21529f943aee98d5936c587",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 1,
+      "cultivarId": "HC-C-afghan-kush"
+    },
+    {
+      "pool": 2,
+      "entropy": "0xa1d647778e718c2f37f1b4e3bdde636057cc05b054341d2915e7d9d239afffae",
+      "requestId": "0xd091b1f96426a5d89f5b42a282495ca352fc3588057438a716984c276d1a0152",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 1,
+      "cultivarId": "HC-C-afghan-kush"
+    },
+    {
+      "pool": 2,
+      "entropy": "0xe41a7b8ff6c73318c434c831927540fb97da1e50608d7031eb07b383200cc0ac",
+      "requestId": "0x273c06a6b0aa13d3599f0466d1a41933112dd4c88f7c6e0b396f4a33b82ff0d4",
+      "tier": "rare",
+      "tierIndex": 1,
+      "index": 4,
+      "cultivarId": "HC-R-fire-canyon"
+    },
+    {
+      "pool": 2,
+      "entropy": "0x1877246a59dea4609cc569788cc20a092fa69b5741ee9a3aa607f8a91be43dfc",
+      "requestId": "0xd45795e6d120c0cd5c7c2199e7a219c2a267271dcbc09fb02fb1ba5115965c18",
+      "tier": "exclusive",
+      "tierIndex": 2,
+      "index": 0,
+      "cultivarId": "HC-F12"
+    },
+    {
+      "pool": 2,
+      "entropy": "0x04674a3a61a413bade60043cb6a41f8b4e38bb383f8b72aa6fe963bb60cbc4ae",
+      "requestId": "0x7b3c3e38edc65a31899dd689e9812c09798fa7871fab1f3d480f287b488979a3",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 4,
+      "cultivarId": "HC-C-strawberry-cough"
+    },
+    {
+      "pool": 2,
+      "entropy": "0x400b336000557c5cb8ef2f8afe059d9f167febaf5183d8b18c88d1b79de19d80",
+      "requestId": "0x4b2aad31ecb2b667da98f3744fc46cdcae7dd1487309a393dc113a917f0aad45",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 1,
+      "cultivarId": "HC-C-afghan-kush"
+    },
+    {
+      "pool": 2,
+      "entropy": "0x2b32089ec2bbbb8c9d04139c20f0098bb9cd655c8f995fdf88986bb7031c0d0a",
+      "requestId": "0x616e1445cda441f1fc1475394a3043119a67032f1fcb38d4065b2f45369637e8",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 4,
+      "cultivarId": "HC-C-strawberry-cough"
+    },
+    {
+      "pool": 2,
+      "entropy": "0xc4033e00dfb697e92d27011fb6d5ccc4678b547acfb07ac7c25a2241ffbc8563",
+      "requestId": "0x1d82ef7074d9227eeab839773aa3542ff7528998ed2684f3d3b79b8add6338ff",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 2,
+      "cultivarId": "HC-C-bubba-kush"
+    },
+    {
+      "pool": 2,
+      "entropy": "0x794dead5599c50da232aff5fcf7599126b54573f35bc23a1ed785da14aa0143e",
+      "requestId": "0xb56113d3ee0ccbd639d09276707c02b7da23242f217ff13a93e510da9dcf8551",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 2,
+      "cultivarId": "HC-C-bubba-kush"
+    },
+    {
+      "pool": 2,
+      "entropy": "0xa7451b82f3129b761f1da2496fbfb40444918530c0172ba8aeac127d3b6b68b3",
+      "requestId": "0x5f3fe93f4a5067d7c5958cf9e824f87655f682d63d8b9aa38c145a296495b078",
+      "tier": "rare",
+      "tierIndex": 1,
+      "index": 7,
+      "cultivarId": "HC-R-red-rock-kush"
+    },
+    {
+      "pool": 2,
+      "entropy": "0xbfc552d924d37fd0647fe0e6d281ecc68ec4ee2dd1da0c655b2ede53781f171e",
+      "requestId": "0x3d6b4b75d966cc3f01e4ebee536e49770c4b7905bd5a8a4ffa2c248d146b6701",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 2,
+      "cultivarId": "HC-C-bubba-kush"
+    },
+    {
+      "pool": 2,
+      "entropy": "0x4e42731c7c692bfd78b4adbdd5a4e7b4859523c71bf58a126339759c15c8645d",
+      "requestId": "0xa83d70828223066efc111868e678df656d3d57bc927e0abe6b22d86f25aa4981",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 5,
+      "cultivarId": "HC-C-white-widow"
+    },
+    {
+      "pool": 2,
+      "entropy": "0xded952ca39171b9bb214badd47aafa6e5cbb624127503c6274b1c4517d7484ef",
+      "requestId": "0x25dd7d39a91700cb7707eb0eba9d08efb7eda38d756ec02e170711508ed41820",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 3,
+      "cultivarId": "HC-C-og-kush"
+    },
+    {
+      "pool": 2,
+      "entropy": "0x7fbc7d269aa0a56c3eca9669ff211ac0e4d353a167a8aa82ea7f4a1c7aa74ba1",
+      "requestId": "0xd22e221209cd2a5fd78aa0e70cc6029251b6d265428f47ecf96107e1bca7ea2f",
+      "tier": "exclusive",
+      "tierIndex": 2,
+      "index": 2,
+      "cultivarId": "HC-F14"
+    },
+    {
+      "pool": 2,
+      "entropy": "0x392bff2d92263a4ed5f2b14b07cda57c4db1c3112a3b466f0382a86257575749",
+      "requestId": "0x07477c403423aaf51cb8d9fb36b6553a01e71f7240256a2a3deb911e3804e27e",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 3,
+      "cultivarId": "HC-C-og-kush"
+    },
+    {
+      "pool": 2,
+      "entropy": "0x1f5f28664ee32cadfe0c8e40b049e81b13dee6ad83993608ad97d81c803a70a2",
+      "requestId": "0x5743e2db9832f798c6d9521b90119c11707ad1965c8a749279d8c00e5ec881ca",
+      "tier": "rare",
+      "tierIndex": 1,
+      "index": 0,
+      "cultivarId": "HC-R-canyon-fire"
+    },
+    {
+      "pool": 2,
+      "entropy": "0xf52877104a56a170a47ba21f9e8f2746530934df03311e034c42c4371f376942",
+      "requestId": "0xb9dab74edace950ec11efd5e0ec476d2720b59bdfa9329811d033b3e731e4f0f",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 6,
+      "cultivarId": "HC-C-zkittlez"
+    },
+    {
+      "pool": 2,
+      "entropy": "0x6e3a7b1b01d4cde6c56315ff8c3d9dd808b31857d92e8b529f1ca925456aeae7",
+      "requestId": "0x555ddaf10f188844a79461ea1157145699791c25258f090eb4d7051ac71ac026",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 2,
+      "cultivarId": "HC-C-bubba-kush"
+    },
+    {
+      "pool": 2,
+      "entropy": "0x075591d3f608b02616862392b10fa712cc840c5aa98532c177c50ac6c99c6765",
+      "requestId": "0xa0ca3577d633930a6d66529e68da42acaae5967fd96aa8909326c85da80a2d4c",
+      "tier": "rare",
+      "tierIndex": 1,
+      "index": 5,
+      "cultivarId": "HC-R-midnight-mesa"
+    },
+    {
+      "pool": 2,
+      "entropy": "0x738d339d9ab96d9bdb5d558fbee7026f4cf7d95386a140da280b75df26a275b1",
+      "requestId": "0x08866c2c482d55521a25756aef5ee5ef3ed7f253dfffa42aa65d7c36c786506b",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 6,
+      "cultivarId": "HC-C-zkittlez"
+    },
+    {
+      "pool": 2,
+      "entropy": "0x02f6ffd36ffb61fd2dd69662bc00ab048da7946991a87c103384a9b4d419458a",
+      "requestId": "0x043d68b6032ce37ff0a2a2705f4b3587d40b2e7be029727d9a2bd9291a0cd93a",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 2,
+      "cultivarId": "HC-C-bubba-kush"
+    },
+    {
+      "pool": 2,
+      "entropy": "0xeaac9b5577b699d91ac46f9d06d337a7e4b1d894389221bf6c7c852b46ac8402",
+      "requestId": "0xb47d1f0fab7c00a86981fe1a5f2e78e9dcdced0ad57d7887077ab52431ed0f1a",
+      "tier": "rare",
+      "tierIndex": 1,
+      "index": 2,
+      "cultivarId": "HC-R-desert-bloom"
+    },
+    {
+      "pool": 2,
+      "entropy": "0x3a26ac30cd71867e9fc799a02aeb82368102cd3ee02b3786cf8a595190156b81",
+      "requestId": "0x80ddbe621c260c0315b6f9e82aded348778fd7dcef3be080cbfafa6410c96f43",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 6,
+      "cultivarId": "HC-C-zkittlez"
+    },
+    {
+      "pool": 2,
+      "entropy": "0xc745dad881dfbc8a92c0f27b558b0068befbd22d2e5f1973a9673e2ddde85b74",
+      "requestId": "0x4abeadd6551b623cbb6e279680c42132d99c3b91058855749d988bb08c45d9c3",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 3,
+      "cultivarId": "HC-C-og-kush"
+    },
+    {
+      "pool": 2,
+      "entropy": "0xc025675b67e1ce19cb57b3f584036188c6e637d0bc73f16bc711fab1c92eb947",
+      "requestId": "0x32a28cdecb71739aa7ce90b72e7eaca00748f6e60d910796408476f05b562110",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 4,
+      "cultivarId": "HC-C-strawberry-cough"
+    },
+    {
+      "pool": 2,
+      "entropy": "0x62878e624fda870180fe33e9af2ebb1f5106371e94f44d028b7b3463bfa2b07c",
+      "requestId": "0xc4b6ed2f77bc97dddade607aceddf0401c0885ff8dea832359f200b0b0bca109",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 1,
+      "cultivarId": "HC-C-afghan-kush"
+    },
+    {
+      "pool": 2,
+      "entropy": "0x6f898a5cafd5121df7d000c0ef6a7e3aa1100a747bdd59666d9abdaee86873de",
+      "requestId": "0x34ead9e62b8ad92102fd786c87cea043b974ed10fb127cba98bc3930c22bfea0",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 4,
+      "cultivarId": "HC-C-strawberry-cough"
+    },
+    {
+      "pool": 2,
+      "entropy": "0xed1e76e33edfb57536c7f5711e777a73597b938564fd51585f4917b91878cb06",
+      "requestId": "0x5c6c571f903f6afdb65ccf14ffcefceb4fda043c936c2ccfd7be1b2f85fac06e",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 6,
+      "cultivarId": "HC-C-zkittlez"
+    },
+    {
+      "pool": 2,
+      "entropy": "0x10b4affbecd2b67b830a10ef92a1dca6bd1cf938469b33c520245a0bbfb3efd6",
+      "requestId": "0x5022d25b1e86f75d2f253d4a0dc509489cb8d312f0783d98e78496681db5b64f",
+      "tier": "exclusive",
+      "tierIndex": 2,
+      "index": 2,
+      "cultivarId": "HC-F14"
+    },
+    {
+      "pool": 2,
+      "entropy": "0x8adce036970821788be8243183851e9263d88e47d2e824b7220ef7c04bfd4356",
+      "requestId": "0x7092cee52ff3c3167a0179bb288d65306cefbf42336243eae63babe994b69a2c",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 0,
+      "cultivarId": "HC-C-acapulco-gold"
+    },
+    {
+      "pool": 2,
+      "entropy": "0x768545a266cdf85f0c006075364fdf972b26102a5cc43009957f4f209ebc0df1",
+      "requestId": "0x0c24e0a531f3ad40541b42235d11caf321090584671ae1b592cb3604df0d09a6",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 0,
+      "cultivarId": "HC-C-acapulco-gold"
+    },
+    {
+      "pool": 2,
+      "entropy": "0x35be161d1183925187c21844b25c98e57303f808ab37a041af82a24f120be4fa",
+      "requestId": "0x8b9781b6eef4b3e03eb5b25c612d84f6ea61cd5e21b3285b980c4f751da70505",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 1,
+      "cultivarId": "HC-C-afghan-kush"
+    },
+    {
+      "pool": 2,
+      "entropy": "0xc4e8ba828b257e8e03c77664cd3ae0cdb0115da5822d27811d9a72851234e647",
+      "requestId": "0xbb422ff8bfe43dc06854d8567a6a6b8ba5a905badafd2a1196ef85530c13584a",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 3,
+      "cultivarId": "HC-C-og-kush"
+    },
+    {
+      "pool": 2,
+      "entropy": "0x2acd8516a1ceaf00f5210f06bf78981ab2320218e7274b395dc5e92d77ca4b0b",
+      "requestId": "0x582a5a9d352e5eff1215b84d00586dad6d0172eaae5aadf0e1c38a2d0f61ba23",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 0,
+      "cultivarId": "HC-C-acapulco-gold"
+    },
+    {
+      "pool": 2,
+      "entropy": "0xfaaff560d115789f2f1457a328cecd723fe67dd966ac682d943559c1bdcde6d3",
+      "requestId": "0xe6da62d53de82d50726391d236be776debdb6c64884573a9c19d4fb67811ca7e",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 0,
+      "cultivarId": "HC-C-acapulco-gold"
+    },
+    {
+      "pool": 2,
+      "entropy": "0xbff0cabce35a1128b7ef31a33d70a511274905916c92e5b3453d2673da3a627a",
+      "requestId": "0xe1aaa1eacad147f36a3f4b468abec1f697ab8c9a4988b3fa47f11432fd296428",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 1,
+      "cultivarId": "HC-C-afghan-kush"
+    },
+    {
+      "pool": 2,
+      "entropy": "0x53ffab26b1cca9f1329e582d3d6dc4a70a7ee5b06d3fc26a55e19f4ab814ea1c",
+      "requestId": "0x0486b98623a84488cdbde552f2cc6162600f30d4365619be973891155fc34d61",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 6,
+      "cultivarId": "HC-C-zkittlez"
+    },
+    {
+      "pool": 2,
+      "entropy": "0x216a45df72a360bd23b03638ce5fa23a878203dcfe286dc6ac8bd851bd41a472",
+      "requestId": "0x77a67be18913555d1df5b3318709c8492805f5d7762e55c6e26d8f1de237193e",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 3,
+      "cultivarId": "HC-C-og-kush"
+    },
+    {
+      "pool": 2,
+      "entropy": "0x8eb226d6f7a31bc03a58a3bf03e84a840a29c9cbab39d2cc25e07b2ea202b301",
+      "requestId": "0x894c26c613cda8051f3c39c30d9c03e87bf2741f087f257374d3467aae89ec99",
+      "tier": "exclusive",
+      "tierIndex": 2,
+      "index": 2,
+      "cultivarId": "HC-F14"
+    },
+    {
+      "pool": 2,
+      "entropy": "0xa9fa9d962c4cfd0084b1f7b2c8f3e0f2b441d9b131acc2ee304ebfd0560348ea",
+      "requestId": "0x7d664688a01520c07926fe59f138c34e61c70e58340872eef5b4688c7af05613",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 3,
+      "cultivarId": "HC-C-og-kush"
+    },
+    {
+      "pool": 2,
+      "entropy": "0x2e7115e7c6d72b84e1ac0b31ed16d558ac0a3d82036e501269804fdeee5e7877",
+      "requestId": "0x0a5b0972dae0fe12e36b93ca900abf808f7d1232d39c29376cba433b942feabb",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 1,
+      "cultivarId": "HC-C-afghan-kush"
+    },
+    {
+      "pool": 2,
+      "entropy": "0x31c1823969c797154781b1f9f59eaaf88175ad27830f74d605314325f5d18d5a",
+      "requestId": "0x4f445fb16827405c739ccfe94a2a4e2bd169abb47e3fb2482e50cbddbb5afc2f",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 3,
+      "cultivarId": "HC-C-og-kush"
+    },
+    {
+      "pool": 2,
+      "entropy": "0x937fcafb37841cd73b2cef2c28509cda3cc2d958a047658b55962e2ea1ef10df",
+      "requestId": "0xbef073551f9f68944b35f86bdac21c8dc79ee62420d0e8cd4c0dda4fb2421fab",
+      "tier": "rare",
+      "tierIndex": 1,
+      "index": 5,
+      "cultivarId": "HC-R-midnight-mesa"
+    },
+    {
+      "pool": 2,
+      "entropy": "0xc2db683d566625935e3e57e68468db70b28daf42ca3147eda4537e16ccc3393d",
+      "requestId": "0x8a85ef8ccb9c3fa86c00daf60c7276b8feef9a2a7b1f24dbb310a424642bd501",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 5,
+      "cultivarId": "HC-C-white-widow"
+    },
+    {
+      "pool": 2,
+      "entropy": "0x73953647c5454b4699f8dfffaf4c3962857e1d49d6924945e8c6f54f8a706c3f",
+      "requestId": "0x5648311fb8498534dd8c2a87f117f7a47a7b75805ceef0aa0ef5a5dd26fddc94",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 3,
+      "cultivarId": "HC-C-og-kush"
+    },
+    {
+      "pool": 2,
+      "entropy": "0x4ce0e4b1c120d93b481f1526ceb8eeaa3bbe040c1e51f341ca47e4a2f25ad15b",
+      "requestId": "0x329630b8612465b809a3d6c374d20f58a106d655c127042b33a746efe8932fb7",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 0,
+      "cultivarId": "HC-C-acapulco-gold"
+    },
+    {
+      "pool": 2,
+      "entropy": "0x38f4da0ec2afee4e34953e58a8db6d9b0b00b0baab9b2fe4e57a5750c068c1d4",
+      "requestId": "0x1f280e085d238fee4c21f3f51cabdfa5c79556f46d9d2d0e853574129c5bbbe6",
+      "tier": "rare",
+      "tierIndex": 1,
+      "index": 3,
+      "cultivarId": "HC-R-desert-shadow"
+    },
+    {
+      "pool": 2,
+      "entropy": "0xf4fb920dacdb8b72e7c155f50e540320a105fb68979648f44a264f89b11a3fec",
+      "requestId": "0xc247ec8202dfb38f80ae2327925e01456e1b2e845f2550cdeebdf984b0540ca5",
+      "tier": "rare",
+      "tierIndex": 1,
+      "index": 3,
+      "cultivarId": "HC-R-desert-shadow"
+    },
+    {
+      "pool": 2,
+      "entropy": "0x2bb5159b8632fff8974b0078c41591990a8e7b90b3f3435b25eca6dc9ff0e2c8",
+      "requestId": "0xd602ff4debcda7f7c5d92bdb12bbf3732421dfee80f4675c7d05947d6aacbab3",
+      "tier": "exclusive",
+      "tierIndex": 2,
+      "index": 0,
+      "cultivarId": "HC-F12"
+    },
+    {
+      "pool": 3,
+      "entropy": "0x2d294a1c61f95f6620f264544fb6ee5af88e4836cef8947d7c547f42d5843d1e",
+      "requestId": "0x993e3b20f47f86143b4a92eb9c62335b2a888bdda24205736bba3a43ef106de8",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 8,
+      "cultivarId": "HC-C-gelato"
+    },
+    {
+      "pool": 3,
+      "entropy": "0x4d8bb981c32d38b8a9fe609c274c6daac7e72f199e990e030fcc658518298bb6",
+      "requestId": "0x35fcf0af551e08bb86dc34ad05c0910764adfc97d9231b8c6d8c05da7bb5d276",
+      "tier": "exclusive",
+      "tierIndex": 2,
+      "index": 2,
+      "cultivarId": "HC-F03"
+    },
+    {
+      "pool": 3,
+      "entropy": "0x2f9de36c1db9933088426847653c267feb11fb1f05f85902876b14d6138316ca",
+      "requestId": "0xfc5d22bcfa445bfc1d314830e7cf5c9a08b0ced61956f11a5dd05bf88552721a",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 2,
+      "cultivarId": "HC-C-alaskan-thunder-fuck"
+    },
+    {
+      "pool": 3,
+      "entropy": "0x8d1227d92dc38d60b44bcecdd109e1e021dd903626a7bdd70da2503ef50592c5",
+      "requestId": "0x0b51a1d57e495d0472c72f962b864ec0714e1f11c1c8c144796ff42d27d178fe",
+      "tier": "rare",
+      "tierIndex": 1,
+      "index": 2,
+      "cultivarId": "HC-R-cedar-skunk"
+    },
+    {
+      "pool": 3,
+      "entropy": "0xc26e719137976e9cc998269ff43d51f32745bc13998a48eaf8f1fd276962293a",
+      "requestId": "0x29c1419f7b7ab0a08f5ed4f593d7033591985831db6efb0bbe3a94d0e3709b95",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 1,
+      "cultivarId": "HC-C-afghan-kush"
+    },
+    {
+      "pool": 3,
+      "entropy": "0x3a4275ab33b9dfaafea586680ffcfd9ccde28f9114bcf53c50d207a170171c19",
+      "requestId": "0xcb66a29dac23d7a771321998050964e608d3c5e753d7de3adc60253d7bc11e4b",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 22,
+      "cultivarId": "HC-C-zkittlez"
+    },
+    {
+      "pool": 3,
+      "entropy": "0xe4b8fad06947dedc7799b974f603ff195c6c991901146d3448f83a98df6936b6",
+      "requestId": "0x2ef506483408c44c4538d0d0a6ff0009f98dd7338d52635838be285e6157f8dc",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 7,
+      "cultivarId": "HC-C-durban-poison"
+    },
+    {
+      "pool": 3,
+      "entropy": "0xe0ba14461ecd976ea99cbccfd82baf1254fe7a7fa5a8f70f2cd7aadb730b22d6",
+      "requestId": "0x234a384dc6c314888509651bf478c3e3ae31ffddfb4ff76a24bdd9eeb8379182",
+      "tier": "exclusive",
+      "tierIndex": 2,
+      "index": 14,
+      "cultivarId": "HC-F15"
+    },
+    {
+      "pool": 3,
+      "entropy": "0x46c999f8488deed98f59a35415abb3f3add10fffac71497eb82f2da67f0decac",
+      "requestId": "0x2e0dd9b608c2c04cd112b9469d2e744336f108174d7f97efa3fcef44fda8dcd4",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 18,
+      "cultivarId": "HC-C-strawberry-cough"
+    },
+    {
+      "pool": 3,
+      "entropy": "0xadffad04f75c6d666e381a5276890598e38cd2c16ee1ca8e1486aaedae59346c",
+      "requestId": "0xdff7699daec22754b5c196db10a01ef98779ee0b4d86b8c1e0bdf1e01749c247",
+      "tier": "rare",
+      "tierIndex": 1,
+      "index": 14,
+      "cultivarId": "HC-R-pacific-sunset"
+    },
+    {
+      "pool": 3,
+      "entropy": "0x5a774f389bdb94769a9f34d43d6cfe2319ad5bc18082afac0872f112c11e0226",
+      "requestId": "0x40ac9c911350ba570531522cd78e5ec685b98b024e6faa23f537cbae8376a5e0",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 13,
+      "cultivarId": "HC-C-northern-lights"
+    },
+    {
+      "pool": 3,
+      "entropy": "0x0b2032ba8179f57d139016603cbb571011ab7cab38d2f410fe9e0409a4e7d23a",
+      "requestId": "0x80338dc269b88eeb555ff8d8117afc6196126fb9842fa5110f28f539fc6b871e",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 5,
+      "cultivarId": "HC-C-bubba-kush"
+    },
+    {
+      "pool": 3,
+      "entropy": "0xb065a9af64c906ed141b0a62724d30f76282773388d6157fb7f2f36323405964",
+      "requestId": "0xd7f4b5e6bd495cc0fd79d2498076b56995ef22100a7b8c49a9d2169b1c32073b",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 9,
+      "cultivarId": "HC-C-girl-scout-cookies"
+    },
+    {
+      "pool": 3,
+      "entropy": "0xc90dff99bda538afa8744c1d80b651d146c72908ad8914cbb5f32be1b28bd6e8",
+      "requestId": "0x05bb274f86f125c73625d65fc7a77decadb6355cc0aae7fc87cec0374404a448",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 17,
+      "cultivarId": "HC-C-sour-diesel"
+    },
+    {
+      "pool": 3,
+      "entropy": "0xeea254324e5ff080aeec42d34e9dad5f7c91774a33e1cc674ceade114aade7cf",
+      "requestId": "0x2ff22d5ee0c1b6e17a6bc5a1df20f1ddf1bf87a6dc81e4ef0444d6c4ba23ea72",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 8,
+      "cultivarId": "HC-C-gelato"
+    },
+    {
+      "pool": 3,
+      "entropy": "0xd04a587baa21e94b3719926d7306c5cbdd64c87655fa7c9e2f7755837270cdb3",
+      "requestId": "0xd1217e7119bd41bfc51252d0d3d97606e323d4f64e247da62431b96b8ec46ad8",
+      "tier": "rare",
+      "tierIndex": 1,
+      "index": 4,
+      "cultivarId": "HC-R-crow-mother"
+    },
+    {
+      "pool": 3,
+      "entropy": "0x52ba4d4353ac61ce8bb5d0e336b56935d9cbf4949f0ff5881aa3d3622a240c4d",
+      "requestId": "0x94bd58314852503506081d76f450c905472a7e5e1718ac8b02729d5bbefb69e8",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 6,
+      "cultivarId": "HC-C-chemdawg"
+    },
+    {
+      "pool": 3,
+      "entropy": "0x57c143a28c933539af1ca4f4600b7ece5d87b063370cd02252a3340f02fc70f0",
+      "requestId": "0xcdf11d8c79f6414277377accb2908619ed59283d34de2d2e79e85d89ad299072",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 8,
+      "cultivarId": "HC-C-gelato"
+    },
+    {
+      "pool": 3,
+      "entropy": "0xa457c079ba795c23eb77f700000568cc84c54fb1a56b478b972fb8f3803a0961",
+      "requestId": "0xdddceca01619ed1e5a4899220da6f0ef529b1653da1f9d8a85c3a551f464ba7f",
+      "tier": "exclusive",
+      "tierIndex": 2,
+      "index": 9,
+      "cultivarId": "HC-F10"
+    },
+    {
+      "pool": 3,
+      "entropy": "0x78ef9c4032d716331f95e8e52904dcad541b7b1d4fb9ee950e75073551cf8e24",
+      "requestId": "0xc6462f5cc16b505e40b0a951de324d5d924948c2496e028e03734bcf8ef96fe6",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 2,
+      "cultivarId": "HC-C-alaskan-thunder-fuck"
+    },
+    {
+      "pool": 3,
+      "entropy": "0x2502ba5705c1921421d9b1ade7d761b0280d40ca60f51f1c791777c09e308ae0",
+      "requestId": "0xd9a8e327ecdbe52a72fec0d5e04b62f37e22c3c28b3d165232bc13e9fa08d0e0",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 3,
+      "cultivarId": "HC-C-blue-dream"
+    },
+    {
+      "pool": 3,
+      "entropy": "0xa5d579ab7ec51050b1913fa60c77946e0bb85f58b6234fda67f91239280d1dfe",
+      "requestId": "0x81ad60a739d2b43aeb478a62af8e42241b3cfab92ca4ab785ca8948cc7051d78",
+      "tier": "rare",
+      "tierIndex": 1,
+      "index": 16,
+      "cultivarId": "HC-R-prairie-gold"
+    },
+    {
+      "pool": 3,
+      "entropy": "0xecff5cb8ab30065a617f4905a5fc251419e09303d866cf47b63672c70d7ae9ae",
+      "requestId": "0xfc94b0273870e06611d25c6c836a9865522243c8d9ac417d29f3488a7b03b19b",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 0,
+      "cultivarId": "HC-C-acapulco-gold"
+    },
+    {
+      "pool": 3,
+      "entropy": "0xe1c3c6b37bdf8fd2d631ea972d727a9804c96833da1658de6ae48d714794064c",
+      "requestId": "0xf3e530ac38296bc02d0d35d89c38bd49b7f38fbaa2322889e04e6b9d20fa7151",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 6,
+      "cultivarId": "HC-C-chemdawg"
+    },
+    {
+      "pool": 3,
+      "entropy": "0x4e757a3d7e6face1853e133e72de5874cb21db0a6214882fdf88a057be7a0b07",
+      "requestId": "0x1e9075392cce3bc8e2bf465cf3ae21c9ca9c2a756fe31687a2d7e6f8135c3a32",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 18,
+      "cultivarId": "HC-C-strawberry-cough"
+    },
+    {
+      "pool": 3,
+      "entropy": "0xaff0f3a92489b336ef7c079b3a9eb4ef08e1a5920836fb1831b2de59282252af",
+      "requestId": "0x78a99d3d92fec6cc90ce04059731018c4dd0cf3c9dc9a86c584cbdbd214604bd",
+      "tier": "rare",
+      "tierIndex": 1,
+      "index": 16,
+      "cultivarId": "HC-R-prairie-gold"
+    },
+    {
+      "pool": 3,
+      "entropy": "0x6ccdd4888f78589d7d3e5c13cc46cff53b6598e947f4d84a421d1a8fa0f11cc7",
+      "requestId": "0xfc8d9b352248c4405f31372e2285fd9b4d61d5c1283f1934bee88b122a1db5b0",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 1,
+      "cultivarId": "HC-C-afghan-kush"
+    },
+    {
+      "pool": 3,
+      "entropy": "0xf2ccf5d7f961f0567779949766a628fe5f252529b9367300714f5a58116cc7a1",
+      "requestId": "0xb97d31d75398d14f06758ba9a366552c4c864a5d210cd19d0880b0bb5cb05f70",
+      "tier": "rare",
+      "tierIndex": 1,
+      "index": 20,
+      "cultivarId": "HC-R-sage-rider"
+    },
+    {
+      "pool": 3,
+      "entropy": "0x2bae0fdf97ce33dcb42b7f3e759bee3f1fe92e8ac6f48bc2ed204da9e26f3c3d",
+      "requestId": "0xc68b83f5a5cd683b2bd478faeb2c479a4021c6deb2d9b7aa4fb6dc2736a83886",
+      "tier": "rare",
+      "tierIndex": 1,
+      "index": 14,
+      "cultivarId": "HC-R-pacific-sunset"
+    },
+    {
+      "pool": 3,
+      "entropy": "0x376bfe87ed035d5cb5f7b576c428783cfb8713ecdbd50c7107141f293b83d257",
+      "requestId": "0x7c4fc09ffbba665f580bf96fb88e7c44a133ccc8cbe9e26442832edd9b9bee8d",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 7,
+      "cultivarId": "HC-C-durban-poison"
+    },
+    {
+      "pool": 3,
+      "entropy": "0x633238ed968bea862cf1ba654fba0c4dd6f8f206a9d3e2fb25093c02979765fe",
+      "requestId": "0x0cafd00660c74d2f97eb5584a66e868bb7f0875a8fb9b09eab65b7c7c0a645c3",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 10,
+      "cultivarId": "HC-C-granddaddy-purple"
+    },
+    {
+      "pool": 3,
+      "entropy": "0x722f31e59b72e9c88720dde8577fc0018f07b0f35f9e671f722331991b8f3491",
+      "requestId": "0x186559e0cd7ebebc189950dd05e0ed6c92ff4c382b7cf20e149d1edbb91cbb5a",
+      "tier": "exclusive",
+      "tierIndex": 2,
+      "index": 8,
+      "cultivarId": "HC-F09"
+    },
+    {
+      "pool": 3,
+      "entropy": "0x7749f59a2c1a66ed59bf06e0e239094156ff9cf2200dbc51c0067a877378d6ff",
+      "requestId": "0x4f9e4c675bdc5750dc3e1bda51d07a75830be355a1c335e22eb241a5689cc8b9",
+      "tier": "rare",
+      "tierIndex": 1,
+      "index": 10,
+      "cultivarId": "HC-R-golden-haze"
+    },
+    {
+      "pool": 3,
+      "entropy": "0x599e6413b32490bcb6e00ec6e03dcbc655d363ea8742596b6d6c0a8d8bbf73c6",
+      "requestId": "0x24a527e007816ad5909a81590bbec4a3007e000ce13fe41dc23404bcd7b6200e",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 1,
+      "cultivarId": "HC-C-afghan-kush"
+    },
+    {
+      "pool": 3,
+      "entropy": "0x50e12e855b93c5244ca2c9f3912633764cfbb4937f0c53233390507615a54803",
+      "requestId": "0x439c3a0719858075321ac3c6373813e92e15e3525e58d0b164db4a99abc95427",
+      "tier": "rare",
+      "tierIndex": 1,
+      "index": 2,
+      "cultivarId": "HC-R-cedar-skunk"
+    },
+    {
+      "pool": 3,
+      "entropy": "0x0e26aea90396bc4c2fbb042224ffe8d5a341c5e4359ec0fb4d3ddd7ddf42220e",
+      "requestId": "0x6a5d5e2a9d82c99ce82e4f19dd501d1b808c8775b20028c99ba40f98386efdd2",
+      "tier": "rare",
+      "tierIndex": 1,
+      "index": 3,
+      "cultivarId": "HC-R-coastal-kush"
+    },
+    {
+      "pool": 3,
+      "entropy": "0x6166bae37b7836e3093e0658e2fdeceb4557f5de77dec91047912df5e2878b0d",
+      "requestId": "0xe2180a611c71a13b53aa97aede6a032f3bb00908ffc00fa9a103f9c68d76fdd4",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 13,
+      "cultivarId": "HC-C-northern-lights"
+    },
+    {
+      "pool": 3,
+      "entropy": "0x28ab7444342bbeba7e8cc7935c829ad7f69f261f932d9e6606fa47f2fc852d67",
+      "requestId": "0xcce6c6afa2b49db2e4ca94c9e3b55a89347727e7a3794481d547e623239a1d11",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 3,
+      "cultivarId": "HC-C-blue-dream"
+    },
+    {
+      "pool": 3,
+      "entropy": "0x4d67aa00178979a3755fdac694fdf26f249d45cf9f9d3fd45ee1be2edad84dc9",
+      "requestId": "0x55ff57f8ad133f2d7525f21c1186b9655fe466558bfa2ba64f1021af3019cc6a",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 4,
+      "cultivarId": "HC-C-blueberry"
+    },
+    {
+      "pool": 3,
+      "entropy": "0x7b3b50098c1b5d3c6df876cf407bdd89520f3d07a856c84211026e2affeac264",
+      "requestId": "0x91239623a0ca23eef2973cd01e927875dc3928e3c6b6ca21a1bb4f5614d4ed41",
+      "tier": "rare",
+      "tierIndex": 1,
+      "index": 10,
+      "cultivarId": "HC-R-golden-haze"
+    },
+    {
+      "pool": 3,
+      "entropy": "0xf23acda762186acf9a8dfea5e76557d44421b52a4e7847e70fd48c92c6940c49",
+      "requestId": "0xa2142b91b15c19d4f13ba58b5d48438f6c371c12527a31db1f561f703519161c",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 12,
+      "cultivarId": "HC-C-jack-herer"
+    },
+    {
+      "pool": 3,
+      "entropy": "0x1bf0c13c38e6260e7bede5831b2d788ed1e3a205670800735e0c038b45bbbad3",
+      "requestId": "0xd9444399616bff4141118f7f0f70192371d13c3f561e315315e494233a230cfb",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 12,
+      "cultivarId": "HC-C-jack-herer"
+    },
+    {
+      "pool": 3,
+      "entropy": "0x766bfe9a2a59d4ffa0475d3a3b4842b3a167001e0be79a885d3086597dcd0514",
+      "requestId": "0xe4275850a6bf1bbb10150ffd67ec29d5927f64d832abcfc3b40694d07972eb8f",
+      "tier": "rare",
+      "tierIndex": 1,
+      "index": 5,
+      "cultivarId": "HC-R-desert-bloom"
+    },
+    {
+      "pool": 3,
+      "entropy": "0x1f19547a7da0af891618a409c06339af09820c1efd128d8419f65435e24c29e4",
+      "requestId": "0x7a894cfd522f23c97a3a52a677655c8bcf28fd4f6ecfce19e96e8e37076eec24",
+      "tier": "rare",
+      "tierIndex": 1,
+      "index": 14,
+      "cultivarId": "HC-R-pacific-sunset"
+    },
+    {
+      "pool": 3,
+      "entropy": "0x7d2de790af922d12f0be35315e82a8edc87f836084d752f31665946f57ef30bb",
+      "requestId": "0xfec6fba7cae5cc09703fbe7bc22107fb0444e1ce3a84ef1fcc2f50e314223b50",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 22,
+      "cultivarId": "HC-C-zkittlez"
+    },
+    {
+      "pool": 3,
+      "entropy": "0x07f65f06fbb413fe6cc8aac09a5366509af1345acdd720e67579152e80f05ba5",
+      "requestId": "0xaba8439755f8344c45fb188f63dfc69dc454c6209f7f2a43409733acbe88b7c1",
+      "tier": "rare",
+      "tierIndex": 1,
+      "index": 5,
+      "cultivarId": "HC-R-desert-bloom"
+    },
+    {
+      "pool": 3,
+      "entropy": "0x7214e19fd3f99179588373a5fc29398c77b1b6e34b570c82c6adf7c357292440",
+      "requestId": "0x3a702a9993651af5384aba15f67af09b330d168af172291f9e9e09d0e0836aac",
+      "tier": "exclusive",
+      "tierIndex": 2,
+      "index": 4,
+      "cultivarId": "HC-F05"
+    },
+    {
+      "pool": 3,
+      "entropy": "0xcb6afa146f632dfe108d96cea1f9442bca2cdc2870f2e96fb5dd39521f34f881",
+      "requestId": "0x2865e4deb3748ac601d30c9fbc1196e0e029125f33687a4db97ba3e8c48f79aa",
+      "tier": "rare",
+      "tierIndex": 1,
+      "index": 22,
+      "cultivarId": "HC-R-saska-sour"
+    },
+    {
+      "pool": 3,
+      "entropy": "0x02c61f0fb5608255ff32fbbfd39cfdabede7b266716d01bbbbb09e57990a75d4",
+      "requestId": "0xb0b88d1308358fded1bd5e3dc1947a02f403cc328e3dc520f31309f9c1eb3f6d",
+      "tier": "rare",
+      "tierIndex": 1,
+      "index": 13,
+      "cultivarId": "HC-R-misty-harbor"
+    },
+    {
+      "pool": 3,
+      "entropy": "0xac4f0d04f0fd483ce4e7370ba4750966ce1b18d3f79f2e02d5914c36d1e2f135",
+      "requestId": "0x0d72c2fddb8b041798558f4ff603516a348fab9f568086ddaf701adcdc3f33f1",
+      "tier": "rare",
+      "tierIndex": 1,
+      "index": 16,
+      "cultivarId": "HC-R-prairie-gold"
+    },
+    {
+      "pool": 3,
+      "entropy": "0xc26dcfdd902eb96c104a3fcbdfa6ff8d570b23a6e396ca82b160e115a994dd6f",
+      "requestId": "0xb04b9cda670299928f9a5ac9d380fd32b4fd42a891fc4e0417408178c09dd485",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 20,
+      "cultivarId": "HC-C-trainwreck"
+    },
+    {
+      "pool": 3,
+      "entropy": "0xaf7192982560c51c98924927fbb485d30db093d68a02834edc5838e4684ca79a",
+      "requestId": "0x8ae9dc19d3f7a408d6632691e6be6f731e2f592f486170ae12ad3e76b10ec3eb",
+      "tier": "rare",
+      "tierIndex": 1,
+      "index": 23,
+      "cultivarId": "HC-R-spirit-bear"
+    },
+    {
+      "pool": 3,
+      "entropy": "0x9dd686d77254a48f52db1731f836ea78bacaa559df814181019b32f42baea34b",
+      "requestId": "0x8561de8a8f7793e16fa40197b5268e3a0822f8e6ec0857fb41b0d1430b84baf3",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 3,
+      "cultivarId": "HC-C-blue-dream"
+    },
+    {
+      "pool": 3,
+      "entropy": "0x20d3c28c5ff6b19531e1a66e4981e29e28a0b774280578b92ae6c0a62f65b616",
+      "requestId": "0x5c5ed1bd9bacd8fc9a740e3d9af8c4d94823b25a5de4bc884708676bd0f7d930",
+      "tier": "rare",
+      "tierIndex": 1,
+      "index": 3,
+      "cultivarId": "HC-R-coastal-kush"
+    },
+    {
+      "pool": 3,
+      "entropy": "0xcdcc6c80c9ea99d8b07a3d4f5e614307677ca8cc7c65f0da61d29b5d1b09738c",
+      "requestId": "0x9c3b205a05431a460f51534f976c2dade3eb12af5ba9bd20828d282ae61336e8",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 9,
+      "cultivarId": "HC-C-girl-scout-cookies"
+    },
+    {
+      "pool": 3,
+      "entropy": "0x484202003caa104cfea35437353826a9fad5b53e43829bb1b438fcb5523809eb",
+      "requestId": "0xe0817e9a90b1127dc99322d1f5d79b789b3a124fc046352fbf8c291929c1da4a",
+      "tier": "rare",
+      "tierIndex": 1,
+      "index": 6,
+      "cultivarId": "HC-R-desert-shadow"
+    },
+    {
+      "pool": 3,
+      "entropy": "0x219187a4d2496e33c75733cf26d42bffafc2593a3ae5e99d3fee01b60b67ec10",
+      "requestId": "0x78611756796893420c10b68a11526a512b3279213b48abaa7b3d83d093ac4fae",
+      "tier": "rare",
+      "tierIndex": 1,
+      "index": 22,
+      "cultivarId": "HC-R-saska-sour"
+    },
+    {
+      "pool": 3,
+      "entropy": "0xce1c70fa5869f7f4e58a57561085b18a15ee6b8568af402be12d66e7a4c79c90",
+      "requestId": "0xde07d3fc0cda61e8a3f4b10a3fbc8c3cef6f301c3cd44f1907c7c6e4941a489d",
+      "tier": "rare",
+      "tierIndex": 1,
+      "index": 18,
+      "cultivarId": "HC-R-red-rock-dream"
+    },
+    {
+      "pool": 3,
+      "entropy": "0x1af6199b277cf8aaec3f533f3916c9c7ab40166e8e8f524073a5ad47eb7bfd9a",
+      "requestId": "0xc772e8f15100c9c1ae358761180bd50996f469f1c5554c41df5ca2339809ad5c",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 8,
+      "cultivarId": "HC-C-gelato"
+    },
+    {
+      "pool": 3,
+      "entropy": "0x642d7492495dfabf6bb96dc536689c5e3d1c2917cfc2495745b5d818736c7d89",
+      "requestId": "0xe19d0f7d7421bf04c66dd0d07a5164cb0bfe3d341ffb8a7dabd3bdf98a406bcb",
+      "tier": "rare",
+      "tierIndex": 1,
+      "index": 14,
+      "cultivarId": "HC-R-pacific-sunset"
+    },
+    {
+      "pool": 3,
+      "entropy": "0xe6e74282bb2e07e4458c78095a26fe4976f8d7601496bd21d06f873f6f863926",
+      "requestId": "0x4847508c72ffed6a6359593b612e996b887b84c830cb7be7743fa37c06806f81",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 19,
+      "cultivarId": "HC-C-super-silver-haze"
+    },
+    {
+      "pool": 3,
+      "entropy": "0xbca403f9a872e8e94661e890bf38a692c1e89c1c1bd78e4b85e71349b68ee031",
+      "requestId": "0x93a4af7478342d83a9837473a612ef1de8fc8bdadcae74affbaaa087711e3df3",
+      "tier": "rare",
+      "tierIndex": 1,
+      "index": 22,
+      "cultivarId": "HC-R-saska-sour"
+    },
+    {
+      "pool": 3,
+      "entropy": "0x4bfbee23fcb65a73126001444f1b27ffd9be88971b032dea993c8e43f17ff2fc",
+      "requestId": "0xd8695fce44f09db2bac5495084869cf4a79616e1ea23b661aac62fc4c7205f7a",
+      "tier": "exclusive",
+      "tierIndex": 2,
+      "index": 12,
+      "cultivarId": "HC-F13"
+    },
+    {
+      "pool": 3,
+      "entropy": "0xf5129dd020cdb5b3be1708879efff6b3715499e3e1360d49be78b56714e862b7",
+      "requestId": "0x1621aea0fd86067cacfd07900f66401f5fdebd3e1346becd4040b34080a5d744",
+      "tier": "common",
+      "tierIndex": 0,
+      "index": 13,
+      "cultivarId": "HC-C-northern-lights"
+    }
+  ]
+}

@@ -1,0 +1,2038 @@
+{
+  "schema": "HC.SEED.COMMON_RESEARCH.V1",
+  "editorialPublisher": "Leafly",
+  "reviewedOn": "2026-10-25",
+  "reviewTimezone": "America/Regina",
+  "catalogBaseline": "2c97a9454f9a51cee10ed57a6c98ec21d1b01bda",
+  "scope": "attributed research; no encoded loci or authorized genome registration",
+  "policy": {
+    "singlePublisher": "All accepted source accounts are from Leafly; no third-party retailer or unsourced folklore fills gaps.",
+    "confidence": "reported-cross is a publisher claim, not independently established biological parentage.",
+    "variation": "Names, classifications, aromas, terpenes and reader effects do not uniquely identify a genotype.",
+    "clinicalClaims": "Medical-use assertions, dosage and consumer potency values are excluded from game genetics.",
+    "unknowns": "Unknown historical origin, undisclosed parents and disputed crosses remain explicit; research completeness does not imply historical certainty.",
+    "simulationBoundary": "HC-SEED-03 must define canonical simulation translation; regional homes remain owner-controlled game metadata.",
+    "copyright": "Concise attributed paraphrases only; no copied Leafly articles, reviews, photos or profile text."
+  },
+  "coverage": {
+    "expectedCommonCultivars": 23,
+    "reviewedProfiles": 23,
+    "supplementalLeaflyArticles": 2,
+    "missingProfiles": 0,
+    "unresolvedRetrievalFailures": 0,
+    "gapResolution": "Unknowns and conflicting accounts explicitly retained, not filled by invention."
+  },
+  "cultivars": [
+    {
+      "cultivarId": "HC-C-acapulco-gold",
+      "canonicalName": "Acapulco Gold",
+      "canonicalRegion": "Red Mesa",
+      "coverage": "profile-reviewed",
+      "sources": [
+        {
+          "id": "leafly-acapulco-gold",
+          "publisher": "Leafly",
+          "url": "https://www.leafly.com/strains/acapulco-gold",
+          "sourceTitle": "Acapulco Gold strain",
+          "reviewedOn": "2026-10-25",
+          "reviewTimezone": "America/Regina",
+          "retrieval": "web-open successful; profile body inspected",
+          "sections": [
+            "profile introduction",
+            "top flavors",
+            "terpenes",
+            "top effects"
+          ],
+          "claimBasis": "publisher account and aggregated profile observations; not DNA verification"
+        }
+      ],
+      "ancestry": {
+        "status": "unknown",
+        "candidateParentSets": [],
+        "attribution": "Leafly profile account",
+        "biologicallyVerified": false,
+        "crossOrder": "not-established",
+        "sourceIds": [
+          "leafly-acapulco-gold"
+        ]
+      },
+      "characteristics": {
+        "publisherClassification": "Sativa",
+        "reportedFlavors": [
+          "Honey",
+          "Chestnut",
+          "Coffee"
+        ],
+        "profileTerpenes": [
+          "Caryophyllene",
+          "Myrcene",
+          "Limonene"
+        ],
+        "readerReportedEffects": [
+          "Focused",
+          "Energetic",
+          "Creative"
+        ],
+        "morphologySummary": "Gold, green and brown flowers with orange hairs and resin; a caramelized aroma.",
+        "morphologyCoverage": "described",
+        "sourceId": "leafly-acapulco-gold"
+      },
+      "history": {
+        "originAsAttributed": "Acapulco, Mexico",
+        "summary": "Leafly associates this established variety with the Acapulco area; it supplies no named breeder or dated origin.",
+        "sourceIds": [
+          "leafly-acapulco-gold"
+        ],
+        "originCoverage": "attributed"
+      },
+      "uncertainty": {
+        "notes": "Named parents are absent. Preserve geographic provenance without inventing a two-parent cross.",
+        "sourceIds": [
+          "leafly-acapulco-gold"
+        ],
+        "resolution": "Retain the qualification; no unsupported pedigree, date or genome inference."
+      },
+      "sourceNameMappings": [],
+      "coverageGaps": [
+        {
+          "field": "ancestry.candidateParentSets",
+          "resolution": "unknown-retained",
+          "reason": "Regional or historical association does not identify a named parental cross."
+        }
+      ],
+      "reviewStatus": "reviewed-with-explicit-limitations",
+      "genomeAdmission": "not-authorized-by-research"
+    },
+    {
+      "cultivarId": "HC-C-afghan-kush",
+      "canonicalName": "Afghan Kush",
+      "canonicalRegion": "Red Mesa",
+      "coverage": "profile-reviewed",
+      "sources": [
+        {
+          "id": "leafly-afghan-kush",
+          "publisher": "Leafly",
+          "url": "https://www.leafly.com/strains/afghan-kush",
+          "sourceTitle": "Afghan Kush strain",
+          "reviewedOn": "2026-10-25",
+          "reviewTimezone": "America/Regina",
+          "retrieval": "web-open successful; profile body inspected",
+          "sections": [
+            "profile introduction",
+            "top flavors",
+            "terpenes",
+            "top effects"
+          ],
+          "claimBasis": "publisher account and aggregated profile observations; not DNA verification"
+        }
+      ],
+      "ancestry": {
+        "status": "regional-population",
+        "candidateParentSets": [],
+        "attribution": "Leafly profile account",
+        "biologicallyVerified": false,
+        "crossOrder": "not-established",
+        "sourceIds": [
+          "leafly-afghan-kush"
+        ]
+      },
+      "characteristics": {
+        "publisherClassification": "Indica",
+        "reportedFlavors": [
+          "Woody",
+          "Tar",
+          "Earthy"
+        ],
+        "profileTerpenes": [
+          "Myrcene",
+          "Caryophyllene",
+          "Pinene"
+        ],
+        "readerReportedEffects": [
+          "Sleepy",
+          "Hungry",
+          "Relaxed"
+        ],
+        "morphologySummary": "Large blunt-topped flowers with substantial resin.",
+        "morphologyCoverage": "described",
+        "sourceId": "leafly-afghan-kush"
+      },
+      "history": {
+        "originAsAttributed": "Hindu Kush near the Afghanistan–Pakistan border",
+        "summary": "Leafly links the variety to longstanding regional hash traditions and credits White Label, a Sensi Seeds partner, with distributing seeds.",
+        "sourceIds": [
+          "leafly-afghan-kush"
+        ],
+        "originCoverage": "attributed"
+      },
+      "uncertainty": {
+        "notes": "No individual parental pair is supplied. Afghan Kush must not automatically substitute for every Afghani or Hindu Kush ancestor.",
+        "sourceIds": [
+          "leafly-afghan-kush"
+        ],
+        "resolution": "Retain the qualification; no unsupported pedigree, date or genome inference."
+      },
+      "sourceNameMappings": [],
+      "coverageGaps": [
+        {
+          "field": "ancestry.candidateParentSets",
+          "resolution": "unknown-retained",
+          "reason": "Regional or historical association does not identify a named parental cross."
+        }
+      ],
+      "reviewStatus": "reviewed-with-explicit-limitations",
+      "genomeAdmission": "not-authorized-by-research"
+    },
+    {
+      "cultivarId": "HC-C-alaskan-thunder-fuck",
+      "canonicalName": "Alaskan Thunder Fuck",
+      "canonicalRegion": "Emerald Coast",
+      "coverage": "profile-reviewed",
+      "sources": [
+        {
+          "id": "leafly-alaskan-thunder-fuck",
+          "publisher": "Leafly",
+          "url": "https://www.leafly.com/strains/alaskan-thunder-fuck",
+          "sourceTitle": "Alaskan Thunder Fuck strain",
+          "reviewedOn": "2026-10-25",
+          "reviewTimezone": "America/Regina",
+          "retrieval": "web-open successful; profile body inspected",
+          "sections": [
+            "profile introduction",
+            "top flavors",
+            "terpenes",
+            "top effects"
+          ],
+          "claimBasis": "publisher account and aggregated profile observations; not DNA verification"
+        }
+      ],
+      "ancestry": {
+        "status": "legend",
+        "candidateParentSets": [
+          [
+            "Northern California sativa",
+            "Russian ruderalis",
+            "Afghani"
+          ]
+        ],
+        "attribution": "Leafly profile account",
+        "biologicallyVerified": false,
+        "crossOrder": "not-established",
+        "sourceIds": [
+          "leafly-alaskan-thunder-fuck"
+        ]
+      },
+      "characteristics": {
+        "publisherClassification": "Hybrid",
+        "reportedFlavors": [
+          "Menthol",
+          "Sage",
+          "Pine"
+        ],
+        "profileTerpenes": [
+          "Myrcene",
+          "Caryophyllene",
+          "Limonene"
+        ],
+        "readerReportedEffects": [
+          "Energetic",
+          "Uplifted",
+          "Euphoric"
+        ],
+        "morphologySummary": "Large frosted flowers; pine, lemon and menthol scents.",
+        "morphologyCoverage": "described",
+        "sourceId": "leafly-alaskan-thunder-fuck"
+      },
+      "history": {
+        "originAsAttributed": "Matanuska Valley, Alaska",
+        "summary": "Leafly recounts an origin legend involving a northern cross and an Afghani addition during the late 1970s.",
+        "sourceIds": [
+          "leafly-alaskan-thunder-fuck"
+        ],
+        "originCoverage": "attributed"
+      },
+      "uncertainty": {
+        "notes": "Ancestry is explicitly a legend. A ruderalis mention does not establish an autoflowering genotype. The header says hybrid while prose also calls it sativa.",
+        "sourceIds": [
+          "leafly-alaskan-thunder-fuck"
+        ],
+        "resolution": "Retain the qualification; no unsupported pedigree, date or genome inference."
+      },
+      "sourceNameMappings": [],
+      "coverageGaps": [
+        {
+          "field": "ancestry",
+          "resolution": "qualified-account-retained",
+          "reason": "See the attributed ancestry status and entry-specific uncertainty notes."
+        }
+      ],
+      "reviewStatus": "reviewed-with-explicit-limitations",
+      "genomeAdmission": "not-authorized-by-research"
+    },
+    {
+      "cultivarId": "HC-C-blue-dream",
+      "canonicalName": "Blue Dream",
+      "canonicalRegion": "Emerald Coast",
+      "coverage": "profile-reviewed",
+      "sources": [
+        {
+          "id": "leafly-blue-dream",
+          "publisher": "Leafly",
+          "url": "https://www.leafly.com/strains/blue-dream",
+          "sourceTitle": "Blue Dream strain",
+          "reviewedOn": "2026-10-25",
+          "reviewTimezone": "America/Regina",
+          "retrieval": "web-open successful; profile body inspected",
+          "sections": [
+            "profile introduction",
+            "top flavors",
+            "terpenes",
+            "top effects"
+          ],
+          "claimBasis": "publisher account and aggregated profile observations; not DNA verification"
+        }
+      ],
+      "ancestry": {
+        "status": "reported-cross",
+        "candidateParentSets": [
+          [
+            "Blueberry",
+            "Haze"
+          ]
+        ],
+        "attribution": "Leafly profile account",
+        "biologicallyVerified": false,
+        "crossOrder": "not-established",
+        "sourceIds": [
+          "leafly-blue-dream"
+        ]
+      },
+      "characteristics": {
+        "publisherClassification": "Hybrid",
+        "reportedFlavors": [
+          "Berry",
+          "Blueberry",
+          "Sweet"
+        ],
+        "profileTerpenes": [
+          "Myrcene",
+          "Pinene",
+          "Caryophyllene"
+        ],
+        "readerReportedEffects": [
+          "Creative",
+          "Euphoric",
+          "Happy"
+        ],
+        "morphologySummary": null,
+        "morphologyCoverage": "not-described-in-reviewed-profile",
+        "sourceId": "leafly-blue-dream"
+      },
+      "history": {
+        "originAsAttributed": "California",
+        "summary": "Leafly describes a California variety that became prominent on the West Coast.",
+        "sourceIds": [
+          "leafly-blue-dream"
+        ],
+        "originCoverage": "attributed"
+      },
+      "uncertainty": {
+        "notes": "The exact Haze selection and parental direction are not established; a shared name is not evidence of one universal clone.",
+        "sourceIds": [
+          "leafly-blue-dream"
+        ],
+        "resolution": "Retain the qualification; no unsupported pedigree, date or genome inference."
+      },
+      "sourceNameMappings": [],
+      "coverageGaps": [
+        {
+          "field": "characteristics.morphologySummary",
+          "resolution": "unknown-retained",
+          "reason": "No structural description recorded from the inspected profile introduction."
+        }
+      ],
+      "reviewStatus": "reviewed-with-explicit-limitations",
+      "genomeAdmission": "not-authorized-by-research"
+    },
+    {
+      "cultivarId": "HC-C-blueberry",
+      "canonicalName": "Blueberry",
+      "canonicalRegion": "Golden Prairie",
+      "coverage": "profile-reviewed",
+      "sources": [
+        {
+          "id": "leafly-blueberry",
+          "publisher": "Leafly",
+          "url": "https://www.leafly.com/strains/blueberry",
+          "sourceTitle": "Blueberry strain",
+          "reviewedOn": "2026-10-25",
+          "reviewTimezone": "America/Regina",
+          "retrieval": "web-open successful; profile body inspected",
+          "sections": [
+            "profile introduction",
+            "top flavors",
+            "terpenes",
+            "top effects"
+          ],
+          "claimBasis": "publisher account and aggregated profile observations; not DNA verification"
+        },
+        {
+          "id": "leafly-blueberry-feature",
+          "publisher": "Leafly",
+          "url": "https://www.leafly.com/news/strains-products/blueberry-weed-strain-trend",
+          "sourceTitle": "New Blueberry weed strains are about to make a wave",
+          "reviewedOn": "2026-10-25",
+          "reviewTimezone": "America/Regina",
+          "retrieval": "web-open successful; feature inspected",
+          "sections": [
+            "DJ Short’s Blueberry",
+            "introduction"
+          ],
+          "claimBasis": "Leafly attribution to DJ Short; not DNA verification"
+        }
+      ],
+      "ancestry": {
+        "status": "conflicting-reports",
+        "candidateParentSets": [
+          [
+            "Purple Thai",
+            "Thai"
+          ],
+          [
+            "Highland Thai (Juicy Fruit Thai)",
+            "Purple Thai (Chocolate Thai × Oaxacan Gold)",
+            "Afghani"
+          ]
+        ],
+        "attribution": "Leafly profile and Leafly feature contain differing levels of pedigree detail",
+        "biologicallyVerified": false,
+        "crossOrder": "not-established",
+        "candidateSourceIds": [
+          [
+            "leafly-blueberry"
+          ],
+          [
+            "leafly-blueberry-feature"
+          ]
+        ],
+        "sourceIds": [
+          "leafly-blueberry",
+          "leafly-blueberry-feature"
+        ]
+      },
+      "characteristics": {
+        "publisherClassification": "Indica",
+        "reportedFlavors": [
+          "Blueberry",
+          "Berry",
+          "Sweet"
+        ],
+        "profileTerpenes": [
+          "Myrcene",
+          "Caryophyllene",
+          "Pinene"
+        ],
+        "readerReportedEffects": [
+          "Sleepy",
+          "Relaxed",
+          "Happy"
+        ],
+        "morphologySummary": "Colorful flowers are noted, without a fixed pigment guarantee.",
+        "morphologyCoverage": "described",
+        "sourceId": "leafly-blueberry"
+      },
+      "history": {
+        "originAsAttributed": null,
+        "summary": "Leafly links DJ Short’s breeding work to the late 1970s and a 2000 Cannabis Cup award. Its separate feature supplies a more extensive ancestry account.",
+        "sourceIds": [
+          "leafly-blueberry",
+          "leafly-blueberry-feature"
+        ],
+        "originCoverage": "not-established-in-reviewed-profile"
+      },
+      "uncertainty": {
+        "notes": "The profile lists two Thai-related parents; the feature also includes Afghani. The feature gives inconsistent release-era wording. Retain both pedigrees and omit a definitive release date.",
+        "sourceIds": [
+          "leafly-blueberry",
+          "leafly-blueberry-feature"
+        ],
+        "resolution": "Retain the qualification; no unsupported pedigree, date or genome inference."
+      },
+      "sourceNameMappings": [],
+      "coverageGaps": [
+        {
+          "field": "history.originAsAttributed",
+          "resolution": "unknown-retained",
+          "reason": "No definitive geographic origin established by the inspected account."
+        },
+        {
+          "field": "ancestry",
+          "resolution": "qualified-account-retained",
+          "reason": "See the attributed ancestry status and entry-specific uncertainty notes."
+        }
+      ],
+      "reviewStatus": "reviewed-with-explicit-limitations",
+      "genomeAdmission": "not-authorized-by-research"
+    },
+    {
+      "cultivarId": "HC-C-bubba-kush",
+      "canonicalName": "Bubba Kush",
+      "canonicalRegion": "Red Mesa",
+      "coverage": "profile-reviewed",
+      "sources": [
+        {
+          "id": "leafly-bubba-kush",
+          "publisher": "Leafly",
+          "url": "https://www.leafly.com/strains/bubba-kush",
+          "sourceTitle": "Bubba Kush strain",
+          "reviewedOn": "2026-10-25",
+          "reviewTimezone": "America/Regina",
+          "retrieval": "web-open successful; profile body inspected",
+          "sections": [
+            "profile introduction",
+            "top flavors",
+            "terpenes",
+            "top effects"
+          ],
+          "claimBasis": "publisher account and aggregated profile observations; not DNA verification"
+        }
+      ],
+      "ancestry": {
+        "status": "uncertain",
+        "candidateParentSets": [
+          [
+            "OG Kush",
+            "unknown indica (Bubba)"
+          ]
+        ],
+        "attribution": "Leafly profile account",
+        "biologicallyVerified": false,
+        "crossOrder": "not-established",
+        "sourceIds": [
+          "leafly-bubba-kush"
+        ]
+      },
+      "characteristics": {
+        "publisherClassification": "Indica",
+        "reportedFlavors": [
+          "Coffee",
+          "Earthy",
+          "Pungent"
+        ],
+        "profileTerpenes": [
+          "Caryophyllene",
+          "Limonene",
+          "Myrcene"
+        ],
+        "readerReportedEffects": [
+          "Sleepy",
+          "Relaxed",
+          "Hungry"
+        ],
+        "morphologySummary": "Short stature and bulky green-to-purple flowers; coffee and chocolate notes.",
+        "morphologyCoverage": "described",
+        "sourceId": "leafly-bubba-kush"
+      },
+      "history": {
+        "originAsAttributed": "Florida (profile attribution)",
+        "summary": "Leafly relays a breeder account placing its emergence after 1996, involving an unidentified indica obtained in New Orleans.",
+        "sourceIds": [
+          "leafly-bubba-kush"
+        ],
+        "originCoverage": "attributed"
+      },
+      "uncertainty": {
+        "notes": "Northern Lights is suggested, not confirmed, as the unidentified indica. Appearance-based Afghani inference is not pedigree proof.",
+        "sourceIds": [
+          "leafly-bubba-kush"
+        ],
+        "resolution": "Retain the qualification; no unsupported pedigree, date or genome inference."
+      },
+      "sourceNameMappings": [],
+      "coverageGaps": [
+        {
+          "field": "ancestry",
+          "resolution": "qualified-account-retained",
+          "reason": "See the attributed ancestry status and entry-specific uncertainty notes."
+        }
+      ],
+      "reviewStatus": "reviewed-with-explicit-limitations",
+      "genomeAdmission": "not-authorized-by-research"
+    },
+    {
+      "cultivarId": "HC-C-chemdawg",
+      "canonicalName": "Chemdawg",
+      "canonicalRegion": "Golden Prairie",
+      "coverage": "profile-reviewed",
+      "sources": [
+        {
+          "id": "leafly-chemdawg",
+          "publisher": "Leafly",
+          "url": "https://www.leafly.com/strains/chemdawg",
+          "sourceTitle": "Chemdawg strain",
+          "reviewedOn": "2026-10-25",
+          "reviewTimezone": "America/Regina",
+          "retrieval": "web-open successful; profile body inspected",
+          "sections": [
+            "profile introduction",
+            "top flavors",
+            "terpenes",
+            "top effects"
+          ],
+          "claimBasis": "publisher account and aggregated profile observations; not DNA verification"
+        }
+      ],
+      "ancestry": {
+        "status": "unknown",
+        "candidateParentSets": [],
+        "attribution": "Leafly profile account",
+        "biologicallyVerified": false,
+        "crossOrder": "not-established",
+        "sourceIds": [
+          "leafly-chemdawg"
+        ]
+      },
+      "characteristics": {
+        "publisherClassification": "Hybrid",
+        "reportedFlavors": [
+          "Chemical",
+          "Diesel",
+          "Pungent"
+        ],
+        "profileTerpenes": [
+          "Caryophyllene",
+          "Myrcene",
+          "Limonene"
+        ],
+        "readerReportedEffects": [
+          "Euphoric",
+          "Relaxed",
+          "Tingly"
+        ],
+        "morphologySummary": null,
+        "morphologyCoverage": "not-described-in-reviewed-profile",
+        "sourceId": "leafly-chemdawg"
+      },
+      "history": {
+        "originAsAttributed": "Northern California bag-seed attribution via a Colorado concert",
+        "summary": "Leafly attributes propagation to Chemdog from 1991 and recounts a Grateful Dead concert connection; Chem 91, Chem 4 and Chem Sis are related selections.",
+        "sourceIds": [
+          "leafly-chemdawg"
+        ],
+        "originCoverage": "attributed"
+      },
+      "uncertainty": {
+        "notes": "Named parents are absent. Bag-seed provenance is not parentage; the related selections are not interchangeable reference genomes.",
+        "sourceIds": [
+          "leafly-chemdawg"
+        ],
+        "resolution": "Retain the qualification; no unsupported pedigree, date or genome inference."
+      },
+      "sourceNameMappings": [],
+      "coverageGaps": [
+        {
+          "field": "ancestry.candidateParentSets",
+          "resolution": "unknown-retained",
+          "reason": "Regional or historical association does not identify a named parental cross."
+        },
+        {
+          "field": "characteristics.morphologySummary",
+          "resolution": "unknown-retained",
+          "reason": "No structural description recorded from the inspected profile introduction."
+        }
+      ],
+      "reviewStatus": "reviewed-with-explicit-limitations",
+      "genomeAdmission": "not-authorized-by-research"
+    },
+    {
+      "cultivarId": "HC-C-durban-poison",
+      "canonicalName": "Durban Poison",
+      "canonicalRegion": "Emerald Coast",
+      "coverage": "profile-reviewed",
+      "sources": [
+        {
+          "id": "leafly-durban-poison",
+          "publisher": "Leafly",
+          "url": "https://www.leafly.com/strains/durban-poison",
+          "sourceTitle": "Durban Poison strain",
+          "reviewedOn": "2026-10-25",
+          "reviewTimezone": "America/Regina",
+          "retrieval": "web-open successful; profile body inspected",
+          "sections": [
+            "profile introduction",
+            "top flavors",
+            "terpenes",
+            "top effects"
+          ],
+          "claimBasis": "publisher account and aggregated profile observations; not DNA verification"
+        }
+      ],
+      "ancestry": {
+        "status": "regional-population",
+        "candidateParentSets": [],
+        "attribution": "Leafly profile account",
+        "biologicallyVerified": false,
+        "crossOrder": "not-established",
+        "sourceIds": [
+          "leafly-durban-poison"
+        ]
+      },
+      "characteristics": {
+        "publisherClassification": "Sativa",
+        "reportedFlavors": [
+          "Pine",
+          "Earthy",
+          "Sage"
+        ],
+        "profileTerpenes": [
+          "Terpinolene",
+          "Myrcene",
+          "Ocimene"
+        ],
+        "readerReportedEffects": [
+          "Focused",
+          "Energetic",
+          "Uplifted"
+        ],
+        "morphologySummary": "Rounded substantial flowers and conspicuous resin glands.",
+        "morphologyCoverage": "described",
+        "sourceId": "leafly-durban-poison"
+      },
+      "history": {
+        "originAsAttributed": "Durban, South Africa",
+        "summary": "Leafly traces its regional association to Durban and describes subsequent international popularity.",
+        "sourceIds": [
+          "leafly-durban-poison"
+        ],
+        "originCoverage": "attributed"
+      },
+      "uncertainty": {
+        "notes": "The profile supplies no named parental pair or dated breeder history. Regional ancestry does not prove every commercial specimen is genetically identical.",
+        "sourceIds": [
+          "leafly-durban-poison"
+        ],
+        "resolution": "Retain the qualification; no unsupported pedigree, date or genome inference."
+      },
+      "sourceNameMappings": [],
+      "coverageGaps": [
+        {
+          "field": "ancestry.candidateParentSets",
+          "resolution": "unknown-retained",
+          "reason": "Regional or historical association does not identify a named parental cross."
+        }
+      ],
+      "reviewStatus": "reviewed-with-explicit-limitations",
+      "genomeAdmission": "not-authorized-by-research"
+    },
+    {
+      "cultivarId": "HC-C-gelato",
+      "canonicalName": "Gelato",
+      "canonicalRegion": "Emerald Coast",
+      "coverage": "profile-reviewed",
+      "sources": [
+        {
+          "id": "leafly-gelato",
+          "publisher": "Leafly",
+          "url": "https://www.leafly.com/strains/gelato",
+          "sourceTitle": "Gelato strain",
+          "reviewedOn": "2026-10-25",
+          "reviewTimezone": "America/Regina",
+          "retrieval": "web-open successful; profile body inspected",
+          "sections": [
+            "profile introduction",
+            "top flavors",
+            "terpenes",
+            "top effects"
+          ],
+          "claimBasis": "publisher account and aggregated profile observations; not DNA verification"
+        }
+      ],
+      "ancestry": {
+        "status": "reported-cross",
+        "candidateParentSets": [
+          [
+            "Sunset Sherbet",
+            "Thin Mint Girl Scout Cookies"
+          ]
+        ],
+        "attribution": "Leafly profile account",
+        "biologicallyVerified": false,
+        "crossOrder": "not-established",
+        "sourceIds": [
+          "leafly-gelato"
+        ]
+      },
+      "characteristics": {
+        "publisherClassification": "Hybrid",
+        "reportedFlavors": [
+          "Sweet",
+          "Flowery",
+          "Pepper"
+        ],
+        "profileTerpenes": [
+          "Caryophyllene",
+          "Limonene",
+          "Humulene"
+        ],
+        "readerReportedEffects": [
+          "Relaxed",
+          "Aroused",
+          "Euphoric"
+        ],
+        "morphologySummary": "Dark-purple flowers, orange hairs and a pale resin coating; creamy fruit notes.",
+        "morphologyCoverage": "described",
+        "sourceId": "leafly-gelato"
+      },
+      "history": {
+        "originAsAttributed": null,
+        "summary": "Leafly describes a dessert-family hybrid and distinguishes multiple numbered Gelato selections.",
+        "sourceIds": [
+          "leafly-gelato"
+        ],
+        "originCoverage": "not-established-in-reviewed-profile"
+      },
+      "uncertainty": {
+        "notes": "Thin Mint GSC is a selection, not any generic GSC specimen. Numbered Gelato names do not prove identical genotypes; this profile does not establish a release date or breeder.",
+        "sourceIds": [
+          "leafly-gelato"
+        ],
+        "resolution": "Retain the qualification; no unsupported pedigree, date or genome inference."
+      },
+      "sourceNameMappings": [],
+      "coverageGaps": [
+        {
+          "field": "history.originAsAttributed",
+          "resolution": "unknown-retained",
+          "reason": "No definitive geographic origin established by the inspected account."
+        }
+      ],
+      "reviewStatus": "reviewed-with-explicit-limitations",
+      "genomeAdmission": "not-authorized-by-research"
+    },
+    {
+      "cultivarId": "HC-C-girl-scout-cookies",
+      "canonicalName": "Girl Scout Cookies",
+      "canonicalRegion": "Golden Prairie",
+      "coverage": "profile-reviewed",
+      "sources": [
+        {
+          "id": "leafly-gsc",
+          "publisher": "Leafly",
+          "url": "https://www.leafly.com/strains/gsc",
+          "sourceTitle": "GSC strain",
+          "reviewedOn": "2026-10-25",
+          "reviewTimezone": "America/Regina",
+          "retrieval": "web-open successful; profile body inspected",
+          "sections": [
+            "profile introduction",
+            "top flavors",
+            "terpenes",
+            "top effects"
+          ],
+          "claimBasis": "publisher account and aggregated profile observations; not DNA verification"
+        }
+      ],
+      "ancestry": {
+        "status": "reported-cross",
+        "candidateParentSets": [
+          [
+            "OG Kush subtype",
+            "F1 Durban"
+          ]
+        ],
+        "attribution": "Leafly profile account",
+        "biologicallyVerified": false,
+        "crossOrder": "not-established",
+        "sourceIds": [
+          "leafly-gsc"
+        ]
+      },
+      "characteristics": {
+        "publisherClassification": "Hybrid",
+        "reportedFlavors": [
+          "Mint",
+          "Sweet",
+          "Earthy"
+        ],
+        "profileTerpenes": [
+          "Caryophyllene",
+          "Myrcene",
+          "Limonene"
+        ],
+        "readerReportedEffects": [
+          "Relaxed",
+          "Hungry",
+          "Happy"
+        ],
+        "morphologySummary": "Dessert-like scent with mint, cherry and lemon associations.",
+        "morphologyCoverage": "described",
+        "sourceId": "leafly-gsc"
+      },
+      "history": {
+        "originAsAttributed": "California",
+        "summary": "Leafly credits breeder Jigga and describes the GSC family’s awards and later selections.",
+        "sourceIds": [
+          "leafly-gsc"
+        ],
+        "originCoverage": "attributed"
+      },
+      "uncertainty": {
+        "notes": "The source names an OG subtype and intermediate F1 Durban. Do not replace F1 Durban with the common Durban Poison genome or collapse Thin Mint and Platinum selections.",
+        "sourceIds": [
+          "leafly-gsc"
+        ],
+        "resolution": "Retain the qualification; no unsupported pedigree, date or genome inference."
+      },
+      "sourceNameMappings": [
+        {
+          "sourceName": "GSC",
+          "resolution": "same-cultivar-source-label",
+          "changesCanonicalIdentity": false
+        }
+      ],
+      "coverageGaps": [],
+      "reviewStatus": "reviewed-with-explicit-limitations",
+      "genomeAdmission": "not-authorized-by-research"
+    },
+    {
+      "cultivarId": "HC-C-granddaddy-purple",
+      "canonicalName": "Granddaddy Purple",
+      "canonicalRegion": "Emerald Coast",
+      "coverage": "profile-reviewed",
+      "sources": [
+        {
+          "id": "leafly-granddaddy-purple",
+          "publisher": "Leafly",
+          "url": "https://www.leafly.com/strains/granddaddy-purple",
+          "sourceTitle": "Granddaddy Purple strain",
+          "reviewedOn": "2026-10-25",
+          "reviewTimezone": "America/Regina",
+          "retrieval": "web-open successful; profile body inspected",
+          "sections": [
+            "profile introduction",
+            "top flavors",
+            "terpenes",
+            "top effects"
+          ],
+          "claimBasis": "publisher account and aggregated profile observations; not DNA verification"
+        },
+        {
+          "id": "leafly-gdp-interview",
+          "publisher": "Leafly",
+          "url": "https://www.leafly.com/news/strains-products/ken-estes-granddaddy-purple-interview",
+          "sourceTitle": "Meet the daddy of Granddaddy Purple",
+          "reviewedOn": "2026-10-25",
+          "reviewTimezone": "America/Regina",
+          "retrieval": "web-open successful; interview inspected",
+          "sections": [
+            "Granddaddy Purple",
+            "Tell me the story of Granddaddy Purple",
+            "What year was that",
+            "Were you in Humboldt then"
+          ],
+          "claimBasis": "Leafly interview of Ken Estes; attributed personal history"
+        }
+      ],
+      "ancestry": {
+        "status": "conflicting-reports",
+        "candidateParentSets": [
+          [
+            "Mendo Purps",
+            "Skunk",
+            "Afghanistan"
+          ],
+          [
+            "Big Bud",
+            "Purple Urkle"
+          ]
+        ],
+        "attribution": "Leafly profile account",
+        "biologicallyVerified": false,
+        "crossOrder": "not-established",
+        "sourceIds": [
+          "leafly-granddaddy-purple"
+        ]
+      },
+      "characteristics": {
+        "publisherClassification": "Indica",
+        "reportedFlavors": [
+          "Grape",
+          "Berry",
+          "Violet"
+        ],
+        "profileTerpenes": [
+          "Myrcene",
+          "Pinene",
+          "Caryophyllene"
+        ],
+        "readerReportedEffects": [
+          "Sleepy",
+          "Relaxed",
+          "Hungry"
+        ],
+        "morphologySummary": "Deep-purple flowers with pale resin; grape and berry associations.",
+        "morphologyCoverage": "described",
+        "sourceId": "leafly-granddaddy-purple"
+      },
+      "history": {
+        "originAsAttributed": "California; Oakland launch in the attributed interview",
+        "summary": "Leafly credits Ken Estes with popularizing GDP in 2003. In its interview, Estes recounts obtaining Purple Medicine and introducing it in Oakland.",
+        "sourceIds": [
+          "leafly-granddaddy-purple",
+          "leafly-gdp-interview"
+        ],
+        "originCoverage": "attributed"
+      },
+      "uncertainty": {
+        "notes": "Leafly presents competing crosses. The interview is a personal account, not independent pedigree verification; no candidate is selected as settled ancestry.",
+        "sourceIds": [
+          "leafly-granddaddy-purple",
+          "leafly-gdp-interview"
+        ],
+        "resolution": "Retain the qualification; no unsupported pedigree, date or genome inference."
+      },
+      "sourceNameMappings": [],
+      "coverageGaps": [
+        {
+          "field": "ancestry",
+          "resolution": "qualified-account-retained",
+          "reason": "See the attributed ancestry status and entry-specific uncertainty notes."
+        }
+      ],
+      "reviewStatus": "reviewed-with-explicit-limitations",
+      "genomeAdmission": "not-authorized-by-research"
+    },
+    {
+      "cultivarId": "HC-C-green-crack",
+      "canonicalName": "Green Crack",
+      "canonicalRegion": "Emerald Coast",
+      "coverage": "profile-reviewed",
+      "sources": [
+        {
+          "id": "leafly-green-crack",
+          "publisher": "Leafly",
+          "url": "https://www.leafly.com/strains/green-crack",
+          "sourceTitle": "Green Crack strain",
+          "reviewedOn": "2026-10-25",
+          "reviewTimezone": "America/Regina",
+          "retrieval": "web-open successful; profile body inspected",
+          "sections": [
+            "profile introduction",
+            "top flavors",
+            "terpenes",
+            "top effects"
+          ],
+          "claimBasis": "publisher account and aggregated profile observations; not DNA verification"
+        }
+      ],
+      "ancestry": {
+        "status": "partial",
+        "candidateParentSets": [
+          [
+            "Skunk #1",
+            "unknown indica"
+          ]
+        ],
+        "attribution": "Leafly profile account",
+        "biologicallyVerified": false,
+        "crossOrder": "not-established",
+        "sourceIds": [
+          "leafly-green-crack"
+        ]
+      },
+      "characteristics": {
+        "publisherClassification": "Sativa",
+        "reportedFlavors": [
+          "Citrus",
+          "Mango",
+          "Earthy"
+        ],
+        "profileTerpenes": [
+          "Myrcene",
+          "Caryophyllene",
+          "Pinene"
+        ],
+        "readerReportedEffects": [
+          "Energetic",
+          "Focused",
+          "Talkative"
+        ],
+        "morphologySummary": "Tart fruit and mango associations.",
+        "morphologyCoverage": "described",
+        "sourceId": "leafly-green-crack"
+      },
+      "history": {
+        "originAsAttributed": null,
+        "summary": "Leafly documents alternate names including Green Cush and explains that some renaming responds to the original name’s connotations.",
+        "sourceIds": [
+          "leafly-green-crack"
+        ],
+        "originCoverage": "not-established-in-reviewed-profile"
+      },
+      "uncertainty": {
+        "notes": "One parent is unidentified. The profile does not establish a dated origin or named breeder; alternate labels remain research metadata, not new canonical cultivar IDs.",
+        "sourceIds": [
+          "leafly-green-crack"
+        ],
+        "resolution": "Retain the qualification; no unsupported pedigree, date or genome inference."
+      },
+      "sourceNameMappings": [],
+      "coverageGaps": [
+        {
+          "field": "history.originAsAttributed",
+          "resolution": "unknown-retained",
+          "reason": "No definitive geographic origin established by the inspected account."
+        },
+        {
+          "field": "ancestry",
+          "resolution": "qualified-account-retained",
+          "reason": "See the attributed ancestry status and entry-specific uncertainty notes."
+        }
+      ],
+      "reviewStatus": "reviewed-with-explicit-limitations",
+      "genomeAdmission": "not-authorized-by-research"
+    },
+    {
+      "cultivarId": "HC-C-jack-herer",
+      "canonicalName": "Jack Herer",
+      "canonicalRegion": "Golden Prairie",
+      "coverage": "profile-reviewed",
+      "sources": [
+        {
+          "id": "leafly-jack-herer",
+          "publisher": "Leafly",
+          "url": "https://www.leafly.com/strains/jack-herer",
+          "sourceTitle": "Jack Herer strain",
+          "reviewedOn": "2026-10-25",
+          "reviewTimezone": "America/Regina",
+          "retrieval": "web-open successful; profile body inspected",
+          "sections": [
+            "profile introduction",
+            "top flavors",
+            "terpenes",
+            "top effects"
+          ],
+          "claimBasis": "publisher account and aggregated profile observations; not DNA verification"
+        }
+      ],
+      "ancestry": {
+        "status": "reported-cross",
+        "candidateParentSets": [
+          [
+            "Haze hybrid",
+            "Northern Lights #5 × Shiva Skunk"
+          ]
+        ],
+        "attribution": "Leafly profile account",
+        "biologicallyVerified": false,
+        "crossOrder": "not-established",
+        "sourceIds": [
+          "leafly-jack-herer"
+        ]
+      },
+      "characteristics": {
+        "publisherClassification": "Sativa",
+        "reportedFlavors": [
+          "Pine",
+          "Woody",
+          "Earthy"
+        ],
+        "profileTerpenes": [
+          "Terpinolene",
+          "Caryophyllene",
+          "Pinene"
+        ],
+        "readerReportedEffects": [
+          "Focused",
+          "Energetic",
+          "Creative"
+        ],
+        "morphologySummary": "Pine and spice scent; resin production is emphasized.",
+        "morphologyCoverage": "described",
+        "sourceId": "leafly-jack-herer"
+      },
+      "history": {
+        "originAsAttributed": "Netherlands",
+        "summary": "Leafly credits Sensi Seeds with creating the variety in the mid-1990s and names the activist and author commemorated by it.",
+        "sourceIds": [
+          "leafly-jack-herer"
+        ],
+        "originCoverage": "attributed"
+      },
+      "uncertainty": {
+        "notes": "Leafly describes multiple phenotypes. Northern Lights #5 is not automatically the common Northern Lights reference, and no allele ratios are established.",
+        "sourceIds": [
+          "leafly-jack-herer"
+        ],
+        "resolution": "Retain the qualification; no unsupported pedigree, date or genome inference."
+      },
+      "sourceNameMappings": [],
+      "coverageGaps": [],
+      "reviewStatus": "reviewed-with-explicit-limitations",
+      "genomeAdmission": "not-authorized-by-research"
+    },
+    {
+      "cultivarId": "HC-C-northern-lights",
+      "canonicalName": "Northern Lights",
+      "canonicalRegion": "Golden Prairie",
+      "coverage": "profile-reviewed",
+      "sources": [
+        {
+          "id": "leafly-northern-lights",
+          "publisher": "Leafly",
+          "url": "https://www.leafly.com/strains/northern-lights",
+          "sourceTitle": "Northern Lights strain",
+          "reviewedOn": "2026-10-25",
+          "reviewTimezone": "America/Regina",
+          "retrieval": "web-open successful; profile body inspected",
+          "sections": [
+            "profile introduction",
+            "top flavors",
+            "terpenes",
+            "top effects"
+          ],
+          "claimBasis": "publisher account and aggregated profile observations; not DNA verification"
+        }
+      ],
+      "ancestry": {
+        "status": "reported-cross",
+        "candidateParentSets": [
+          [
+            "Afghani",
+            "Thai"
+          ]
+        ],
+        "attribution": "Leafly profile account",
+        "biologicallyVerified": false,
+        "crossOrder": "not-established",
+        "sourceIds": [
+          "leafly-northern-lights"
+        ]
+      },
+      "characteristics": {
+        "publisherClassification": "Indica",
+        "reportedFlavors": [
+          "Pine",
+          "Earthy",
+          "Woody"
+        ],
+        "profileTerpenes": [
+          "Myrcene",
+          "Caryophyllene",
+          "Limonene"
+        ],
+        "readerReportedEffects": [
+          "Sleepy",
+          "Relaxed",
+          "Hungry"
+        ],
+        "morphologySummary": "Resinous flowers with possible purple coloration.",
+        "morphologyCoverage": "described",
+        "sourceId": "leafly-northern-lights"
+      },
+      "history": {
+        "originAsAttributed": "Seattle area is described as a rumor; later propagation in Holland",
+        "summary": "Leafly recounts a possible Seattle origin and dissemination through what became Sensi Seeds after 1985.",
+        "sourceIds": [
+          "leafly-northern-lights"
+        ],
+        "originCoverage": "attributed"
+      },
+      "uncertainty": {
+        "notes": "Keep the Seattle origin qualified as rumor. The indica label and mixed regional ancestry are different kinds of description; neither defines a genetic percentage.",
+        "sourceIds": [
+          "leafly-northern-lights"
+        ],
+        "resolution": "Retain the qualification; no unsupported pedigree, date or genome inference."
+      },
+      "sourceNameMappings": [],
+      "coverageGaps": [],
+      "reviewStatus": "reviewed-with-explicit-limitations",
+      "genomeAdmission": "not-authorized-by-research"
+    },
+    {
+      "cultivarId": "HC-C-og-kush",
+      "canonicalName": "OG Kush",
+      "canonicalRegion": "Red Mesa",
+      "coverage": "profile-reviewed",
+      "sources": [
+        {
+          "id": "leafly-og-kush",
+          "publisher": "Leafly",
+          "url": "https://www.leafly.com/strains/og-kush",
+          "sourceTitle": "OG Kush strain",
+          "reviewedOn": "2026-10-25",
+          "reviewTimezone": "America/Regina",
+          "retrieval": "web-open successful; profile body inspected",
+          "sections": [
+            "profile introduction",
+            "top flavors",
+            "terpenes",
+            "top effects"
+          ],
+          "claimBasis": "publisher account and aggregated profile observations; not DNA verification"
+        }
+      ],
+      "ancestry": {
+        "status": "uncertain",
+        "candidateParentSets": [
+          [
+            "Northern California strain",
+            "Chemdawg",
+            "Lemon Thai",
+            "Hindu Kush selection from Amsterdam"
+          ]
+        ],
+        "attribution": "Leafly profile account",
+        "biologicallyVerified": false,
+        "crossOrder": "not-established",
+        "sourceIds": [
+          "leafly-og-kush"
+        ]
+      },
+      "characteristics": {
+        "publisherClassification": "Hybrid",
+        "reportedFlavors": [
+          "Woody",
+          "Pine",
+          "Earthy"
+        ],
+        "profileTerpenes": [
+          "Myrcene",
+          "Limonene",
+          "Caryophyllene"
+        ],
+        "readerReportedEffects": [
+          "Hungry",
+          "Relaxed",
+          "Sleepy"
+        ],
+        "morphologySummary": "Lemon, pine, fuel and spice scent associations.",
+        "morphologyCoverage": "described",
+        "sourceId": "leafly-og-kush"
+      },
+      "history": {
+        "originAsAttributed": "Florida; later Los Angeles",
+        "summary": "Leafly recounts early-1990s Florida cultivation and a 1996 transfer by Matt Berger to Josh D in Los Angeles.",
+        "sourceIds": [
+          "leafly-og-kush"
+        ],
+        "originCoverage": "attributed"
+      },
+      "uncertainty": {
+        "notes": "The ancestry account is explicitly qualified; its four components do not specify a cross order. Multiple interpretations of OG and multiple selections are recorded.",
+        "sourceIds": [
+          "leafly-og-kush"
+        ],
+        "resolution": "Retain the qualification; no unsupported pedigree, date or genome inference."
+      },
+      "sourceNameMappings": [],
+      "coverageGaps": [
+        {
+          "field": "ancestry",
+          "resolution": "qualified-account-retained",
+          "reason": "See the attributed ancestry status and entry-specific uncertainty notes."
+        }
+      ],
+      "reviewStatus": "reviewed-with-explicit-limitations",
+      "genomeAdmission": "not-authorized-by-research"
+    },
+    {
+      "cultivarId": "HC-C-pineapple-express",
+      "canonicalName": "Pineapple Express",
+      "canonicalRegion": "Emerald Coast",
+      "coverage": "profile-reviewed",
+      "sources": [
+        {
+          "id": "leafly-pineapple-express",
+          "publisher": "Leafly",
+          "url": "https://www.leafly.com/strains/pineapple-express",
+          "sourceTitle": "Pineapple Express strain",
+          "reviewedOn": "2026-10-25",
+          "reviewTimezone": "America/Regina",
+          "retrieval": "web-open successful; profile body inspected",
+          "sections": [
+            "profile introduction",
+            "top flavors",
+            "terpenes",
+            "top effects"
+          ],
+          "claimBasis": "publisher account and aggregated profile observations; not DNA verification"
+        }
+      ],
+      "ancestry": {
+        "status": "reported-cross",
+        "candidateParentSets": [
+          [
+            "Trainwreck",
+            "Hawaiian"
+          ]
+        ],
+        "attribution": "Leafly profile account",
+        "biologicallyVerified": false,
+        "crossOrder": "not-established",
+        "sourceIds": [
+          "leafly-pineapple-express"
+        ]
+      },
+      "characteristics": {
+        "publisherClassification": "Hybrid",
+        "reportedFlavors": [
+          "Pineapple",
+          "Tropical",
+          "Citrus"
+        ],
+        "profileTerpenes": [
+          "Myrcene",
+          "Caryophyllene",
+          "Pinene"
+        ],
+        "readerReportedEffects": [
+          "Happy",
+          "Giggly",
+          "Energetic"
+        ],
+        "morphologySummary": "Citrus and pineapple scent associations.",
+        "morphologyCoverage": "described",
+        "sourceId": "leafly-pineapple-express",
+        "narrativeTerpenes": [
+          "Caryophyllene",
+          "Limonene",
+          "Ocimene"
+        ]
+      },
+      "history": {
+        "originAsAttributed": null,
+        "summary": "Leafly connects the variety’s wider fame to the 2008 film while distinguishing the cultivar from the movie.",
+        "sourceIds": [
+          "leafly-pineapple-express"
+        ],
+        "originCoverage": "not-established-in-reviewed-profile"
+      },
+      "uncertainty": {
+        "notes": "Film release is not a proven breeding date. The page’s terpene panel and narrative list differ; both are recorded without assigning a fixed chemotype.",
+        "sourceIds": [
+          "leafly-pineapple-express"
+        ],
+        "resolution": "Retain the qualification; no unsupported pedigree, date or genome inference."
+      },
+      "sourceNameMappings": [],
+      "coverageGaps": [
+        {
+          "field": "history.originAsAttributed",
+          "resolution": "unknown-retained",
+          "reason": "No definitive geographic origin established by the inspected account."
+        }
+      ],
+      "reviewStatus": "reviewed-with-explicit-limitations",
+      "genomeAdmission": "not-authorized-by-research"
+    },
+    {
+      "cultivarId": "HC-C-purple-haze",
+      "canonicalName": "Purple Haze",
+      "canonicalRegion": "Golden Prairie",
+      "coverage": "profile-reviewed",
+      "sources": [
+        {
+          "id": "leafly-purple-haze",
+          "publisher": "Leafly",
+          "url": "https://www.leafly.com/strains/purple-haze",
+          "sourceTitle": "Purple Haze strain",
+          "reviewedOn": "2026-10-25",
+          "reviewTimezone": "America/Regina",
+          "retrieval": "web-open successful; profile body inspected",
+          "sections": [
+            "profile introduction",
+            "top flavors",
+            "terpenes",
+            "top effects"
+          ],
+          "claimBasis": "publisher account and aggregated profile observations; not DNA verification"
+        }
+      ],
+      "ancestry": {
+        "status": "uncertain",
+        "candidateParentSets": [
+          [
+            "Purple Thai",
+            "Haze"
+          ]
+        ],
+        "attribution": "Leafly profile account",
+        "biologicallyVerified": false,
+        "crossOrder": "not-established",
+        "sourceIds": [
+          "leafly-purple-haze"
+        ]
+      },
+      "characteristics": {
+        "publisherClassification": "Sativa",
+        "reportedFlavors": [
+          "Lavender",
+          "Flowery",
+          "Violet"
+        ],
+        "profileTerpenes": [
+          "Myrcene",
+          "Caryophyllene",
+          "Limonene"
+        ],
+        "readerReportedEffects": [
+          "Creative",
+          "Euphoric",
+          "Giggly"
+        ],
+        "morphologySummary": "Lavender coloration with berry and spice scent associations.",
+        "morphologyCoverage": "described",
+        "sourceId": "leafly-purple-haze"
+      },
+      "history": {
+        "originAsAttributed": null,
+        "summary": "Leafly associates its popular image with the 1967 Hendrix song, without establishing a cultivar release date.",
+        "sourceIds": [
+          "leafly-purple-haze"
+        ],
+        "originCoverage": "not-established-in-reviewed-profile"
+      },
+      "uncertainty": {
+        "notes": "The pedigree is described as believed. A song association does not prove the named cultivar existed in that year.",
+        "sourceIds": [
+          "leafly-purple-haze"
+        ],
+        "resolution": "Retain the qualification; no unsupported pedigree, date or genome inference."
+      },
+      "sourceNameMappings": [],
+      "coverageGaps": [
+        {
+          "field": "history.originAsAttributed",
+          "resolution": "unknown-retained",
+          "reason": "No definitive geographic origin established by the inspected account."
+        },
+        {
+          "field": "ancestry",
+          "resolution": "qualified-account-retained",
+          "reason": "See the attributed ancestry status and entry-specific uncertainty notes."
+        }
+      ],
+      "reviewStatus": "reviewed-with-explicit-limitations",
+      "genomeAdmission": "not-authorized-by-research"
+    },
+    {
+      "cultivarId": "HC-C-sour-diesel",
+      "canonicalName": "Sour Diesel",
+      "canonicalRegion": "Golden Prairie",
+      "coverage": "profile-reviewed",
+      "sources": [
+        {
+          "id": "leafly-sour-diesel",
+          "publisher": "Leafly",
+          "url": "https://www.leafly.com/strains/sour-diesel",
+          "sourceTitle": "Sour Diesel strain",
+          "reviewedOn": "2026-10-25",
+          "reviewTimezone": "America/Regina",
+          "retrieval": "web-open successful; profile body inspected",
+          "sections": [
+            "profile introduction",
+            "top flavors",
+            "terpenes",
+            "top effects"
+          ],
+          "claimBasis": "publisher account and aggregated profile observations; not DNA verification"
+        }
+      ],
+      "ancestry": {
+        "status": "reported-cross",
+        "candidateParentSets": [
+          [
+            "Chemdawg",
+            "Super Skunk"
+          ]
+        ],
+        "attribution": "Leafly profile account",
+        "biologicallyVerified": false,
+        "crossOrder": "not-established",
+        "sourceIds": [
+          "leafly-sour-diesel"
+        ]
+      },
+      "characteristics": {
+        "publisherClassification": "Hybrid",
+        "reportedFlavors": [
+          "Diesel",
+          "Chemical",
+          "Skunk"
+        ],
+        "profileTerpenes": [
+          "Caryophyllene",
+          "Myrcene",
+          "Limonene"
+        ],
+        "readerReportedEffects": [
+          "Energetic",
+          "Uplifted",
+          "Talkative"
+        ],
+        "morphologySummary": "Strong fuel-like scent.",
+        "morphologyCoverage": "described",
+        "sourceId": "leafly-sour-diesel"
+      },
+      "history": {
+        "originAsAttributed": null,
+        "summary": "Leafly places its rise in popularity in the early 1990s.",
+        "sourceIds": [
+          "leafly-sour-diesel"
+        ],
+        "originCoverage": "not-established-in-reviewed-profile"
+      },
+      "uncertainty": {
+        "notes": "The profile header says hybrid while its separately labeled AI review summary calls it sativa. Use the editorial pedigree; exclude the AI summary as historical evidence.",
+        "sourceIds": [
+          "leafly-sour-diesel"
+        ],
+        "resolution": "Retain the qualification; no unsupported pedigree, date or genome inference."
+      },
+      "sourceNameMappings": [],
+      "coverageGaps": [
+        {
+          "field": "history.originAsAttributed",
+          "resolution": "unknown-retained",
+          "reason": "No definitive geographic origin established by the inspected account."
+        }
+      ],
+      "reviewStatus": "reviewed-with-explicit-limitations",
+      "genomeAdmission": "not-authorized-by-research"
+    },
+    {
+      "cultivarId": "HC-C-strawberry-cough",
+      "canonicalName": "Strawberry Cough",
+      "canonicalRegion": "Red Mesa",
+      "coverage": "profile-reviewed",
+      "sources": [
+        {
+          "id": "leafly-strawberry-cough",
+          "publisher": "Leafly",
+          "url": "https://www.leafly.com/strains/strawberry-cough",
+          "sourceTitle": "Strawberry Cough strain",
+          "reviewedOn": "2026-10-25",
+          "reviewTimezone": "America/Regina",
+          "retrieval": "web-open successful; profile body inspected",
+          "sections": [
+            "profile introduction",
+            "top flavors",
+            "terpenes",
+            "top effects"
+          ],
+          "claimBasis": "publisher account and aggregated profile observations; not DNA verification"
+        }
+      ],
+      "ancestry": {
+        "status": "uncertain",
+        "candidateParentSets": [
+          [
+            "Haze",
+            "Strawberry Fields"
+          ]
+        ],
+        "attribution": "Leafly profile account",
+        "biologicallyVerified": false,
+        "crossOrder": "not-established",
+        "sourceIds": [
+          "leafly-strawberry-cough"
+        ]
+      },
+      "characteristics": {
+        "publisherClassification": "Sativa",
+        "reportedFlavors": [
+          "Strawberry",
+          "Sweet",
+          "Berry"
+        ],
+        "profileTerpenes": [
+          "Myrcene",
+          "Pinene",
+          "Caryophyllene"
+        ],
+        "readerReportedEffects": [
+          "Uplifted",
+          "Energetic",
+          "Happy"
+        ],
+        "morphologySummary": "Strawberry and skunky berry scent associations.",
+        "morphologyCoverage": "described",
+        "sourceId": "leafly-strawberry-cough"
+      },
+      "history": {
+        "originAsAttributed": null,
+        "summary": "Leafly describes a recognizable strawberry-scented variety but explicitly characterizes its genetic origins as mysterious.",
+        "sourceIds": [
+          "leafly-strawberry-cough"
+        ],
+        "originCoverage": "not-established-in-reviewed-profile"
+      },
+      "uncertainty": {
+        "notes": "The cross is a proposed account, not verified parentage. No dated release or breeder attribution is supplied in the inspected profile.",
+        "sourceIds": [
+          "leafly-strawberry-cough"
+        ],
+        "resolution": "Retain the qualification; no unsupported pedigree, date or genome inference."
+      },
+      "sourceNameMappings": [],
+      "coverageGaps": [
+        {
+          "field": "history.originAsAttributed",
+          "resolution": "unknown-retained",
+          "reason": "No definitive geographic origin established by the inspected account."
+        },
+        {
+          "field": "ancestry",
+          "resolution": "qualified-account-retained",
+          "reason": "See the attributed ancestry status and entry-specific uncertainty notes."
+        }
+      ],
+      "reviewStatus": "reviewed-with-explicit-limitations",
+      "genomeAdmission": "not-authorized-by-research"
+    },
+    {
+      "cultivarId": "HC-C-super-silver-haze",
+      "canonicalName": "Super Silver Haze",
+      "canonicalRegion": "Emerald Coast",
+      "coverage": "profile-reviewed",
+      "sources": [
+        {
+          "id": "leafly-super-silver-haze",
+          "publisher": "Leafly",
+          "url": "https://www.leafly.com/strains/super-silver-haze",
+          "sourceTitle": "Super Silver Haze strain",
+          "reviewedOn": "2026-10-25",
+          "reviewTimezone": "America/Regina",
+          "retrieval": "web-open successful; profile body inspected",
+          "sections": [
+            "profile introduction",
+            "top flavors",
+            "terpenes",
+            "top effects"
+          ],
+          "claimBasis": "publisher account and aggregated profile observations; not DNA verification"
+        }
+      ],
+      "ancestry": {
+        "status": "reported-cross",
+        "candidateParentSets": [
+          [
+            "Skunk",
+            "Northern Lights",
+            "Haze"
+          ]
+        ],
+        "attribution": "Leafly profile account",
+        "biologicallyVerified": false,
+        "crossOrder": "not-established",
+        "sourceIds": [
+          "leafly-super-silver-haze"
+        ]
+      },
+      "characteristics": {
+        "publisherClassification": "Sativa",
+        "reportedFlavors": [
+          "Citrus",
+          "Skunk",
+          "Earthy"
+        ],
+        "profileTerpenes": [
+          "Myrcene",
+          "Caryophyllene",
+          "Limonene"
+        ],
+        "readerReportedEffects": [
+          "Energetic",
+          "Uplifted",
+          "Focused"
+        ],
+        "morphologySummary": "Sticky resinous flowers.",
+        "morphologyCoverage": "described",
+        "sourceId": "leafly-super-silver-haze"
+      },
+      "history": {
+        "originAsAttributed": null,
+        "summary": "Leafly credits Green House Seeds and records first-place Cannabis Cup results in 1997, 1998 and 1999.",
+        "sourceIds": [
+          "leafly-super-silver-haze"
+        ],
+        "originCoverage": "not-established-in-reviewed-profile"
+      },
+      "uncertainty": {
+        "notes": "The profile names three ancestral components but does not specify mating order, parental selections or allele fractions; do not infer equal thirds.",
+        "sourceIds": [
+          "leafly-super-silver-haze"
+        ],
+        "resolution": "Retain the qualification; no unsupported pedigree, date or genome inference."
+      },
+      "sourceNameMappings": [],
+      "coverageGaps": [
+        {
+          "field": "history.originAsAttributed",
+          "resolution": "unknown-retained",
+          "reason": "No definitive geographic origin established by the inspected account."
+        }
+      ],
+      "reviewStatus": "reviewed-with-explicit-limitations",
+      "genomeAdmission": "not-authorized-by-research"
+    },
+    {
+      "cultivarId": "HC-C-trainwreck",
+      "canonicalName": "Trainwreck",
+      "canonicalRegion": "Golden Prairie",
+      "coverage": "profile-reviewed",
+      "sources": [
+        {
+          "id": "leafly-trainwreck",
+          "publisher": "Leafly",
+          "url": "https://www.leafly.com/strains/trainwreck",
+          "sourceTitle": "Trainwreck strain",
+          "reviewedOn": "2026-10-25",
+          "reviewTimezone": "America/Regina",
+          "retrieval": "web-open successful; profile body inspected",
+          "sections": [
+            "profile introduction",
+            "top flavors",
+            "terpenes",
+            "top effects"
+          ],
+          "claimBasis": "publisher account and aggregated profile observations; not DNA verification"
+        }
+      ],
+      "ancestry": {
+        "status": "reported-cross",
+        "candidateParentSets": [
+          [
+            "Mexican sativa",
+            "Thai sativa",
+            "Afghani indica"
+          ]
+        ],
+        "attribution": "Leafly profile account",
+        "biologicallyVerified": false,
+        "crossOrder": "not-established",
+        "sourceIds": [
+          "leafly-trainwreck"
+        ]
+      },
+      "characteristics": {
+        "publisherClassification": "Hybrid",
+        "reportedFlavors": [
+          "Pine",
+          "Earthy",
+          "Woody"
+        ],
+        "profileTerpenes": [
+          "Terpinolene",
+          "Myrcene",
+          "Pinene"
+        ],
+        "readerReportedEffects": [
+          "Euphoric",
+          "Uplifted",
+          "Creative"
+        ],
+        "morphologySummary": "Spreading structure is mentioned in one naming story; lemon and spicy pine scent associations.",
+        "morphologyCoverage": "described",
+        "sourceId": "leafly-trainwreck"
+      },
+      "history": {
+        "originAsAttributed": "Northern California",
+        "summary": "Leafly associates the cultivar with Northern California and recounts competing explanations for its railway-related name.",
+        "sourceIds": [
+          "leafly-trainwreck"
+        ],
+        "originCoverage": "attributed"
+      },
+      "uncertainty": {
+        "notes": "Naming stories are alternatives, not established events. The header says hybrid while prose calls it sativa; three ancestral populations do not establish a mating sequence.",
+        "sourceIds": [
+          "leafly-trainwreck"
+        ],
+        "resolution": "Retain the qualification; no unsupported pedigree, date or genome inference."
+      },
+      "sourceNameMappings": [],
+      "coverageGaps": [],
+      "reviewStatus": "reviewed-with-explicit-limitations",
+      "genomeAdmission": "not-authorized-by-research"
+    },
+    {
+      "cultivarId": "HC-C-white-widow",
+      "canonicalName": "White Widow",
+      "canonicalRegion": "Red Mesa",
+      "coverage": "profile-reviewed",
+      "sources": [
+        {
+          "id": "leafly-white-widow",
+          "publisher": "Leafly",
+          "url": "https://www.leafly.com/strains/white-widow",
+          "sourceTitle": "White Widow strain",
+          "reviewedOn": "2026-10-25",
+          "reviewTimezone": "America/Regina",
+          "retrieval": "web-open successful; profile body inspected",
+          "sections": [
+            "profile introduction",
+            "top flavors",
+            "terpenes",
+            "top effects"
+          ],
+          "claimBasis": "publisher account and aggregated profile observations; not DNA verification"
+        }
+      ],
+      "ancestry": {
+        "status": "reported-cross",
+        "candidateParentSets": [
+          [
+            "Brazilian sativa landrace",
+            "South Indian indica"
+          ]
+        ],
+        "attribution": "Leafly profile account",
+        "biologicallyVerified": false,
+        "crossOrder": "not-established",
+        "sourceIds": [
+          "leafly-white-widow"
+        ]
+      },
+      "characteristics": {
+        "publisherClassification": "Hybrid",
+        "reportedFlavors": [
+          "Woody",
+          "Earthy",
+          "Flowery"
+        ],
+        "profileTerpenes": [
+          "Myrcene",
+          "Caryophyllene",
+          "Pinene"
+        ],
+        "readerReportedEffects": [
+          "Euphoric",
+          "Uplifted",
+          "Talkative"
+        ],
+        "morphologySummary": "Pale crystal resin and conical substantial flowers.",
+        "morphologyCoverage": "described",
+        "sourceId": "leafly-white-widow"
+      },
+      "history": {
+        "originAsAttributed": "Netherlands",
+        "summary": "Leafly credits Green House Seeds and places its development in the 1990s.",
+        "sourceIds": [
+          "leafly-white-widow"
+        ],
+        "originCoverage": "attributed"
+      },
+      "uncertainty": {
+        "notes": "Leafly notes phenotype and environmental variation. Source percentages are not validated genome composition and will not be encoded as allele fractions.",
+        "sourceIds": [
+          "leafly-white-widow"
+        ],
+        "resolution": "Retain the qualification; no unsupported pedigree, date or genome inference."
+      },
+      "sourceNameMappings": [],
+      "coverageGaps": [],
+      "reviewStatus": "reviewed-with-explicit-limitations",
+      "genomeAdmission": "not-authorized-by-research"
+    },
+    {
+      "cultivarId": "HC-C-zkittlez",
+      "canonicalName": "Zkittlez",
+      "canonicalRegion": "Red Mesa",
+      "coverage": "profile-reviewed",
+      "sources": [
+        {
+          "id": "leafly-zkittlez",
+          "publisher": "Leafly",
+          "url": "https://www.leafly.com/strains/zkittlez",
+          "sourceTitle": "The Original Z strain",
+          "reviewedOn": "2026-10-25",
+          "reviewTimezone": "America/Regina",
+          "retrieval": "web-open successful; profile body inspected",
+          "sections": [
+            "profile introduction",
+            "top flavors",
+            "terpenes",
+            "top effects"
+          ],
+          "claimBasis": "publisher account and aggregated profile observations; not DNA verification"
+        }
+      ],
+      "ancestry": {
+        "status": "partial",
+        "candidateParentSets": [
+          [
+            "Grape Ape",
+            "Grapefruit",
+            "undisclosed strain"
+          ]
+        ],
+        "attribution": "Leafly profile account",
+        "biologicallyVerified": false,
+        "crossOrder": "not-established",
+        "sourceIds": [
+          "leafly-zkittlez"
+        ]
+      },
+      "characteristics": {
+        "publisherClassification": "Indica",
+        "reportedFlavors": [
+          "Grapefruit",
+          "Grape",
+          "Berry"
+        ],
+        "profileTerpenes": [
+          "Caryophyllene",
+          "Linalool",
+          "Humulene"
+        ],
+        "readerReportedEffects": [
+          "Relaxed",
+          "Sleepy",
+          "Hungry"
+        ],
+        "morphologySummary": "Medium-sized soft green flowers with sweet tropical-fruit associations.",
+        "morphologyCoverage": "described",
+        "sourceId": "leafly-zkittlez"
+      },
+      "history": {
+        "originAsAttributed": null,
+        "summary": "Leafly now titles the profile The Original Z. It recounts 2010s market emergence, Terp Hogz promotion and a 2023 naming change.",
+        "sourceIds": [
+          "leafly-zkittlez"
+        ],
+        "originCoverage": "not-established-in-reviewed-profile"
+      },
+      "uncertainty": {
+        "notes": "The proposed mix is described as alleged and includes an undisclosed component. Keep the approved Zkittlez ID; The Original Z is a source-name mapping, not a new exclusive identity.",
+        "sourceIds": [
+          "leafly-zkittlez"
+        ],
+        "resolution": "Retain the qualification; no unsupported pedigree, date or genome inference."
+      },
+      "sourceNameMappings": [
+        {
+          "sourceName": "The Original Z",
+          "resolution": "renamed-source-profile",
+          "changesCanonicalIdentity": false
+        }
+      ],
+      "coverageGaps": [
+        {
+          "field": "history.originAsAttributed",
+          "resolution": "unknown-retained",
+          "reason": "No definitive geographic origin established by the inspected account."
+        },
+        {
+          "field": "ancestry",
+          "resolution": "qualified-account-retained",
+          "reason": "See the attributed ancestry status and entry-specific uncertainty notes."
+        }
+      ],
+      "reviewStatus": "reviewed-with-explicit-limitations",
+      "genomeAdmission": "not-authorized-by-research"
+    }
+  ]
+}

@@ -62,7 +62,7 @@ export class CanonicalSocialEventIndexer{
   wallet=address(wallet);
   const lower=cursor===null?null:Number(cursor);
   if(cursor!==null&&(!Number.isSafeInteger(lower)||lower<0))fail('invalid history cursor');
-  const r=await this.pool.query('SELECT tx_hash,log_index,block_number,block_hash,kind,entity_id,event_json FROM highcountry_social_events WHERE scope=$1 AND principal=$2 AND wallet=$3 AND kind=$4 AND entity_id=$5 AND ($6::bigint IS NULL OR block_number < $6) ORDER BY block_number DESC,log_index DESC LIMIT $7',
+  const r=await this.pool.query('SELECT tx_hash,log_index,block_number,block_hash,kind,entity_id,event_json FROM highcountry_social_events WHERE scope=$1 AND principal=$2 AND wallet=$3 AND kind=$4 AND entity_id=$5 AND canonical=true AND ($6::bigint IS NULL OR block_number < $6) ORDER BY block_number DESC,log_index DESC LIMIT $7',
    [this.scope,principal,wallet,kind,id,lower,limit+1]);
   const selected=r.rows.slice(0,limit);
   const entries=selected.map(row=>({hash:row.tx_hash,blockHash:row.block_hash,blockNumber:'0x'+BigInt(row.block_number).toString(16),logIndex:Number(row.log_index),kind:row.kind,id:row.entity_id,...row.event_json,visibleTo:[wallet],settled:false}));

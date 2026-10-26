@@ -1,0 +1,31 @@
+name: High Country Social Chain Adapter Scoped Level 1
+on:
+  pull_request:
+    paths:
+      - 'services/highcountry-economy/src/canonical-social-chain-adapter.js'
+      - 'services/highcountry-economy/test/canonical-social-chain-adapter.test.js'
+      - 'services/highcountry-economy/migrations/008-social-rls.sql'
+      - '.github/workflows/highcountry-social-chain-adapter.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  adapter:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Exact SHA and module syntax
+        env:
+          SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$SHA"
+          node --check services/highcountry-economy/src/canonical-social-chain-adapter.js
+      - name: Chain adapter adversarial tests
+        run: node --test services/highcountry-economy/test/canonical-social-chain-adapter.test.js
+      - name: Retained social gateway adversarial tests
+        run: node --test services/highcountry-economy/test/canonical-social-gateway.test.js

@@ -33,7 +33,7 @@ For each event, `received = prize + fees + credited`. `credited` is cumulative r
 
 ## Focused qualification
 
-`scripts/bet/qualify-poker-5c2.py` requires a clean tracked exact SHA reconciled with main `1af1bf94d8f9a644228b003f45f22463a14b6a26`. It fails on unrelated changes or changed inherited policy/cash/crypto source identities. It actually executes:
+`scripts/bet/qualify-poker-5c2.py` requires a clean tracked exact SHA reconciled with main `269262583f86d996935afc8ee1a4a3064123c630`. It fails on unrelated changes or changed inherited policy/cash/crypto source identities. It actually executes:
 
 1. Level 1: all seven new arithmetic tests and seven hostile-token boundary tests; exact quote fuzz, real analyzer execution, compiled/source/runtime identity and code-size checks, with no payable or gameplay escape endpoints. Raw High/Medium analyzer findings retain severity and an exact-source local disposition. This is not independent security review.
 2. Level 2: all 46 actual funded entry tests, including 2,500 generated deposit/refund sequences, with canonical Wrapped420, Identity420, capability/operator registries, policy registry and development-fund binding. It exports a successful actual funded receipt trace and deployed escrow runtime hash. These are entry-custody tests, not genuine tournament-hand or prize-execution acceptance.

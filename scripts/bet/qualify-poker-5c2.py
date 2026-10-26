@@ -5,7 +5,7 @@ from datetime import datetime,timezone
 from importlib.metadata import version
 
 ROOT=Path(__file__).resolve().parents[2]
-BASE='1af1bf94d8f9a644228b003f45f22463a14b6a26'
+BASE='269262583f86d996935afc8ee1a4a3064123c630'
 SCOPE=['contracts/src/bet/tournament/PokerTournamentEntryEscrow420.sol','contracts/src/bet/tournament/PokerTournamentPurchaseAccounting420.sol','contracts/test/tournament-5c2','scripts/bet/qualify-poker-5c2.py','scripts/bet/poker-5c2-static-review.json','docs/bet/BET-AUDIT-5C.2-ENTRY-ACCOUNTING.md','.github/workflows/420bet-poker-5c2-level2.yml']
 INHERITED=['contracts/src/bet/tournament/PokerTournamentPolicy420.sol','contracts/src/bet/tournament/PokerTournamentPolicyRegistry420.sol','contracts/test/tournament-5c1/PokerTournamentPolicy420.t.sol','clients/420bet-poker/tournament/lifecycle.py','clients/420bet-poker/tournament/check_lifecycle.py']
 

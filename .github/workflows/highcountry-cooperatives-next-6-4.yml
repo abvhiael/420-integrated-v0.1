@@ -1,0 +1,41 @@
+name: High Country Cooperatives HC-NEXT-6.4 Level 1
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/highcountry/cooperative/**'
+      - 'contracts/test/highcountry/unit/cooperative/**'
+      - '.github/workflows/highcountry-cooperatives-next-6-4.yml'
+      - 'docs/highcountry/HC-NEXT-6.4-COOPERATIVES-GOVERNANCE.md'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  cooperatives-level-1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      FOUNDRY_SRC: src/highcountry
+      FOUNDRY_TEST: test/highcountry
+      FOUNDRY_SCRIPT: script/highcountry
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Exact SHA
+        env:
+          SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$SHA"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Cooperative compilation and sizes
+        working-directory: contracts
+        run: forge build src/highcountry/cooperative --sizes
+      - name: Formatting and static security lint
+        working-directory: contracts
+        run: |
+          forge fmt --check src/highcountry/cooperative test/highcountry/unit/cooperative
+          forge lint src/highcountry/cooperative --severity high med low
+      - name: Proposal, voting, timelock, withdrawal and executor adversarial tests
+        working-directory: contracts
+        run: forge test --match-path 'test/highcountry/unit/cooperative/*.t.sol' -vv

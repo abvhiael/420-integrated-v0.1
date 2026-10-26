@@ -1,14 +1,16 @@
+import {reconcileSeedArt} from './seed-art.js';
 import {SettlementError} from './buds-ledger.js';
 const id=x=>typeof x==='string'&&/^[A-Za-z0-9:_-]{1,128}$/.test(x);
 export class SeedCatalogue {
  constructor({catalog,research,rarePairs,founders}){
   if(catalog?.cultivars?.length!==65||research?.cultivars?.length!==23||rarePairs?.pairs?.length!==26||founders?.founders?.length!==16)throw new SettlementError('seed catalogue cardinality');
+  const artwork=reconcileSeedArt(catalog);
   this.rows=new Map();const studied=new Map(research.cultivars.map(e=>[e.cultivarId,e]));
   const pairs=new Map(rarePairs.pairs.map(e=>[e.cultivarId,e]));
   const names=new Map(catalog.cultivars.map(e=>[e.id,e.name]));
   for(const c of catalog.cultivars){
    if(!id(c.id)||this.rows.has(c.id)||!['common','rare','exclusive'].includes(c.tier)||!['Emerald Coast','Golden Prairie','Red Mesa'].includes(c.region))throw new SettlementError('seed identity');
-   const row={id:c.id,name:c.name,tier:c.tier,region:c.region,artStatus:'pending',art:null,geneticSemantics:'Reference descriptions do not change a plant’s yield, potency or growing requirements.'};
+   const row={id:c.id,name:c.name,tier:c.tier,region:c.region,artStatus:'approved-cosmetic',art:artwork.get(c.id),geneticSemantics:'Reference descriptions do not change a plant’s yield, potency or growing requirements.'};
    if(c.tier==='common'){
     const r=studied.get(c.id);if(r?.canonicalName!==c.name||r.canonicalRegion!==c.region)throw new SettlementError('research identity');
     row.ancestry={basis:'attributed-research',status:r.ancestry.status,candidates:r.ancestry.candidateParentSets,uncertainty:r.uncertainty.notes};

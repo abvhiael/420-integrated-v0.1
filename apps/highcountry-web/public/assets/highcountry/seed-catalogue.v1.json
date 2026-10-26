@@ -7,8 +7,13 @@
       "name": "Acapulco Gold",
       "tier": "common",
       "region": "Red Mesa",
-      "artStatus": "pending",
-      "art": null,
+      "artStatus": "approved-cosmetic",
+      "art": {
+        "illustration": "/assets/highcountry/seed-catalogue/common/hc-c-acapulco-gold-botanical-plate.png",
+        "harvestCard": "/assets/highcountry/seed-catalogue/harvest-cards/common/hc-c-acapulco-gold-harvest-card.png",
+        "seedIcon": "/assets/highcountry/seed-icons/hc-seed-icon-red-mesa-common.png",
+        "harvestSeal": "/assets/highcountry/seed-catalogue/harvest-cards/seals/hc-harvest-seal-common.png"
+      },
       "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
       "ancestry": {
         "basis": "attributed-research",
@@ -43,8 +48,13 @@
       "name": "Afghan Kush",
       "tier": "common",
       "region": "Red Mesa",
-      "artStatus": "pending",
-      "art": null,
+      "artStatus": "approved-cosmetic",
+      "art": {
+        "illustration": "/assets/highcountry/seed-catalogue/common/hc-c-afghan-kush-botanical-plate.png",
+        "harvestCard": "/assets/highcountry/seed-catalogue/harvest-cards/common/hc-c-afghan-kush-harvest-card.png",
+        "seedIcon": "/assets/highcountry/seed-icons/hc-seed-icon-red-mesa-common.png",
+        "harvestSeal": "/assets/highcountry/seed-catalogue/harvest-cards/seals/hc-harvest-seal-common.png"
+      },
       "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
       "ancestry": {
         "basis": "attributed-research",
@@ -79,8 +89,13 @@
       "name": "Alaskan Thunder Fuck",
       "tier": "common",
       "region": "Emerald Coast",
-      "artStatus": "pending",
-      "art": null,
+      "artStatus": "approved-cosmetic",
+      "art": {
+        "illustration": "/assets/highcountry/seed-catalogue/common/hc-c-alaskan-thunder-fuck-botanical-plate.png",
+        "harvestCard": "/assets/highcountry/seed-catalogue/harvest-cards/common/hc-c-alaskan-thunder-fuck-harvest-card.png",
+        "seedIcon": "/assets/highcountry/seed-icons/hc-seed-icon-emerald-coast-common.png",
+        "harvestSeal": "/assets/highcountry/seed-catalogue/harvest-cards/seals/hc-harvest-seal-common.png"
+      },
       "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
       "ancestry": {
         "basis": "attributed-research",
@@ -121,8 +136,13 @@
       "name": "Blackwater Haze",
       "tier": "exclusive",
       "region": "Emerald Coast",
-      "artStatus": "pending",
-      "art": null,
+      "artStatus": "approved-cosmetic",
+      "art": {
+        "illustration": "/assets/highcountry/original-sixteen/hc-f02-botanical-plate.png",
+        "harvestCard": "/assets/highcountry/seed-catalogue/harvest-cards/original-sixteen/hc-f02-harvest-card.png",
+        "seedIcon": "/assets/highcountry/seed-icons/hc-seed-icon-emerald-coast-exclusive.png",
+        "harvestSeal": "/assets/highcountry/seed-catalogue/harvest-cards/seals/hc-harvest-seal-original-sixteen.png"
+      },
       "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
       "ancestry": {
         "basis": "original-sixteen-heritage",
@@ -137,8 +157,13 @@
       "name": "Blue Dream",
       "tier": "common",
       "region": "Emerald Coast",
-      "artStatus": "pending",
-      "art": null,
+      "artStatus": "approved-cosmetic",
+      "art": {
+        "illustration": "/assets/highcountry/seed-catalogue/common/hc-c-blue-dream-botanical-plate.png",
+        "harvestCard": "/assets/highcountry/seed-catalogue/harvest-cards/common/hc-c-blue-dream-harvest-card.png",
+        "seedIcon": "/assets/highcountry/seed-icons/hc-seed-icon-emerald-coast-common.png",
+        "harvestSeal": "/assets/highcountry/seed-catalogue/harvest-cards/seals/hc-harvest-seal-common.png"
+      },
       "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
       "ancestry": {
         "basis": "attributed-research",
@@ -178,8 +203,13 @@
       "name": "Blue Moon",
       "tier": "rare",
       "region": "Golden Prairie",
-      "artStatus": "pending",
-      "art": null,
+      "artStatus": "approved-cosmetic",
+      "art": {
+        "illustration": "/assets/highcountry/seed-catalogue/rare/hc-r-blue-moon-botanical-plate.png",
+        "harvestCard": "/assets/highcountry/seed-catalogue/harvest-cards/rare/hc-r-blue-moon-harvest-card.png",
+        "seedIcon": "/assets/highcountry/seed-icons/hc-seed-icon-golden-prairie-rare.png",
+        "harvestSeal": "/assets/highcountry/seed-catalogue/harvest-cards/seals/hc-harvest-seal-rare.png"
+      },
       "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
       "ancestry": {
         "basis": "approved-game-cross",
@@ -204,8 +234,13 @@
       "name": "Blueberry",
       "tier": "common",
       "region": "Golden Prairie",
-      "artStatus": "pending",
-      "art": null,
+      "artStatus": "approved-cosmetic",
+      "art": {
+        "illustration": "/assets/highcountry/seed-catalogue/common/hc-c-blueberry-botanical-plate.png",
+        "harvestCard": "/assets/highcountry/seed-catalogue/harvest-cards/common/hc-c-blueberry-harvest-card.png",
+        "seedIcon": "/assets/highcountry/seed-icons/hc-seed-icon-golden-prairie-common.png",
+        "harvestSeal": "/assets/highcountry/seed-catalogue/harvest-cards/seals/hc-harvest-seal-common.png"
+      },
       "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
       "ancestry": {
         "basis": "attributed-research",
@@ -254,8 +289,13 @@
       "name": "Bracken Gold",
       "tier": "exclusive",
       "region": "Emerald Coast",
-      "artStatus": "pending",
-      "art": null,
+      "artStatus": "approved-cosmetic",
+      "art": {
+        "illustration": "/assets/highcountry/original-sixteen/hc-f05-botanical-plate.png",
+        "harvestCard": "/assets/highcountry/seed-catalogue/harvest-cards/original-sixteen/hc-f05-harvest-card.png",
+        "seedIcon": "/assets/highcountry/seed-icons/hc-seed-icon-emerald-coast-exclusive.png",
+        "harvestSeal": "/assets/highcountry/seed-catalogue/harvest-cards/seals/hc-harvest-seal-original-sixteen.png"
+      },
       "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
       "ancestry": {
         "basis": "original-sixteen-heritage",
@@ -270,8 +310,13 @@
       "name": "Bubba Kush",
       "tier": "common",
       "region": "Red Mesa",
-      "artStatus": "pending",
-      "art": null,
+      "artStatus": "approved-cosmetic",
+      "art": {
+        "illustration": "/assets/highcountry/seed-catalogue/common/hc-c-bubba-kush-botanical-plate.png",
+        "harvestCard": "/assets/highcountry/seed-catalogue/harvest-cards/common/hc-c-bubba-kush-harvest-card.png",
+        "seedIcon": "/assets/highcountry/seed-icons/hc-seed-icon-red-mesa-common.png",
+        "harvestSeal": "/assets/highcountry/seed-catalogue/harvest-cards/seals/hc-harvest-seal-common.png"
+      },
       "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
       "ancestry": {
         "basis": "attributed-research",
@@ -311,8 +356,13 @@
       "name": "Canyon Fire",
       "tier": "rare",
       "region": "Red Mesa",
-      "artStatus": "pending",
-      "art": null,
+      "artStatus": "approved-cosmetic",
+      "art": {
+        "illustration": "/assets/highcountry/seed-catalogue/rare/hc-r-canyon-fire-botanical-plate.png",
+        "harvestCard": "/assets/highcountry/seed-catalogue/harvest-cards/rare/hc-r-canyon-fire-harvest-card.png",
+        "seedIcon": "/assets/highcountry/seed-icons/hc-seed-icon-red-mesa-rare.png",
+        "harvestSeal": "/assets/highcountry/seed-catalogue/harvest-cards/seals/hc-harvest-seal-rare.png"
+      },
       "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
       "ancestry": {
         "basis": "approved-game-cross",
@@ -337,8 +387,13 @@
       "name": "Cedar Skunk",
       "tier": "rare",
       "region": "Emerald Coast",
-      "artStatus": "pending",
-      "art": null,
+      "artStatus": "approved-cosmetic",
+      "art": {
+        "illustration": "/assets/highcountry/seed-catalogue/rare/hc-r-cedar-skunk-botanical-plate.png",
+        "harvestCard": "/assets/highcountry/seed-catalogue/harvest-cards/rare/hc-r-cedar-skunk-harvest-card.png",
+        "seedIcon": "/assets/highcountry/seed-icons/hc-seed-icon-emerald-coast-rare.png",
+        "harvestSeal": "/assets/highcountry/seed-catalogue/harvest-cards/seals/hc-harvest-seal-rare.png"
+      },
       "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
       "ancestry": {
         "basis": "approved-game-cross",
@@ -363,8 +418,13 @@
       "name": "Cedar Widow",
       "tier": "exclusive",
       "region": "Emerald Coast",
-      "artStatus": "pending",
-      "art": null,
+      "artStatus": "approved-cosmetic",
+      "art": {
+        "illustration": "/assets/highcountry/original-sixteen/hc-f03-botanical-plate.png",
+        "harvestCard": "/assets/highcountry/seed-catalogue/harvest-cards/original-sixteen/hc-f03-harvest-card.png",
+        "seedIcon": "/assets/highcountry/seed-icons/hc-seed-icon-emerald-coast-exclusive.png",
+        "harvestSeal": "/assets/highcountry/seed-catalogue/harvest-cards/seals/hc-harvest-seal-original-sixteen.png"
+      },
       "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
       "ancestry": {
         "basis": "original-sixteen-heritage",
@@ -379,8 +439,13 @@
       "name": "Chemdawg",
       "tier": "common",
       "region": "Golden Prairie",
-      "artStatus": "pending",
-      "art": null,
+      "artStatus": "approved-cosmetic",
+      "art": {
+        "illustration": "/assets/highcountry/seed-catalogue/common/hc-c-chemdawg-botanical-plate.png",
+        "harvestCard": "/assets/highcountry/seed-catalogue/harvest-cards/common/hc-c-chemdawg-harvest-card.png",
+        "seedIcon": "/assets/highcountry/seed-icons/hc-seed-icon-golden-prairie-common.png",
+        "harvestSeal": "/assets/highcountry/seed-catalogue/harvest-cards/seals/hc-harvest-seal-common.png"
+      },
       "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
       "ancestry": {
         "basis": "attributed-research",
@@ -415,8 +480,13 @@
       "name": "Coastal Kush",
       "tier": "rare",
       "region": "Emerald Coast",
-      "artStatus": "pending",
-      "art": null,
+      "artStatus": "approved-cosmetic",
+      "art": {
+        "illustration": "/assets/highcountry/seed-catalogue/rare/hc-r-coastal-kush-botanical-plate.png",
+        "harvestCard": "/assets/highcountry/seed-catalogue/harvest-cards/rare/hc-r-coastal-kush-harvest-card.png",
+        "seedIcon": "/assets/highcountry/seed-icons/hc-seed-icon-emerald-coast-rare.png",
+        "harvestSeal": "/assets/highcountry/seed-catalogue/harvest-cards/seals/hc-harvest-seal-rare.png"
+      },
       "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
       "ancestry": {
         "basis": "approved-game-cross",
@@ -441,8 +511,13 @@
       "name": "Copperhead",
       "tier": "exclusive",
       "region": "Red Mesa",
-      "artStatus": "pending",
-      "art": null,
+      "artStatus": "approved-cosmetic",
+      "art": {
+        "illustration": "/assets/highcountry/original-sixteen/hc-f13-botanical-plate.png",
+        "harvestCard": "/assets/highcountry/seed-catalogue/harvest-cards/original-sixteen/hc-f13-harvest-card.png",
+        "seedIcon": "/assets/highcountry/seed-icons/hc-seed-icon-red-mesa-exclusive.png",
+        "harvestSeal": "/assets/highcountry/seed-catalogue/harvest-cards/seals/hc-harvest-seal-original-sixteen.png"
+      },
       "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
       "ancestry": {
         "basis": "original-sixteen-heritage",
@@ -457,8 +532,13 @@
       "name": "Crimson Ghost",
       "tier": "exclusive",
       "region": "Red Mesa",
-      "artStatus": "pending",
-      "art": null,
+      "artStatus": "approved-cosmetic",
+      "art": {
+        "illustration": "/assets/highcountry/original-sixteen/hc-f16-botanical-plate.png",
+        "harvestCard": "/assets/highcountry/seed-catalogue/harvest-cards/original-sixteen/hc-f16-harvest-card.png",
+        "seedIcon": "/assets/highcountry/seed-icons/hc-seed-icon-red-mesa-exclusive.png",
+        "harvestSeal": "/assets/highcountry/seed-catalogue/harvest-cards/seals/hc-harvest-seal-original-sixteen.png"
+      },
       "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
       "ancestry": {
         "basis": "original-sixteen-heritage",
@@ -473,8 +553,13 @@
       "name": "Crow Mother",
       "tier": "rare",
       "region": "Red Mesa",
-      "artStatus": "pending",
-      "art": null,
+      "artStatus": "approved-cosmetic",
+      "art": {
+        "illustration": "/assets/highcountry/seed-catalogue/rare/hc-r-crow-mother-botanical-plate.png",
+        "harvestCard": "/assets/highcountry/seed-catalogue/harvest-cards/rare/hc-r-crow-mother-harvest-card.png",
+        "seedIcon": "/assets/highcountry/seed-icons/hc-seed-icon-red-mesa-rare.png",
+        "harvestSeal": "/assets/highcountry/seed-catalogue/harvest-cards/seals/hc-harvest-seal-rare.png"
+      },
       "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
       "ancestry": {
         "basis": "approved-game-cross",
@@ -499,8 +584,13 @@
       "name": "Desert Bloom",
       "tier": "rare",
       "region": "Red Mesa",
-      "artStatus": "pending",
-      "art": null,
+      "artStatus": "approved-cosmetic",
+      "art": {
+        "illustration": "/assets/highcountry/seed-catalogue/rare/hc-r-desert-bloom-botanical-plate.png",
+        "harvestCard": "/assets/highcountry/seed-catalogue/harvest-cards/rare/hc-r-desert-bloom-harvest-card.png",
+        "seedIcon": "/assets/highcountry/seed-icons/hc-seed-icon-red-mesa-rare.png",
+        "harvestSeal": "/assets/highcountry/seed-catalogue/harvest-cards/seals/hc-harvest-seal-rare.png"
+      },
       "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
       "ancestry": {
         "basis": "approved-game-cross",
@@ -525,8 +615,13 @@
       "name": "Desert Saint",
       "tier": "exclusive",
       "region": "Red Mesa",
-      "artStatus": "pending",
-      "art": null,
+      "artStatus": "approved-cosmetic",
+      "art": {
+        "illustration": "/assets/highcountry/original-sixteen/hc-f14-botanical-plate.png",
+        "harvestCard": "/assets/highcountry/seed-catalogue/harvest-cards/original-sixteen/hc-f14-harvest-card.png",
+        "seedIcon": "/assets/highcountry/seed-icons/hc-seed-icon-red-mesa-exclusive.png",
+        "harvestSeal": "/assets/highcountry/seed-catalogue/harvest-cards/seals/hc-harvest-seal-original-sixteen.png"
+      },
       "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
       "ancestry": {
         "basis": "original-sixteen-heritage",
@@ -541,8 +636,13 @@
       "name": "Desert Shadow",
       "tier": "rare",
       "region": "Red Mesa",
-      "artStatus": "pending",
-      "art": null,
+      "artStatus": "approved-cosmetic",
+      "art": {
+        "illustration": "/assets/highcountry/seed-catalogue/rare/hc-r-desert-shadow-botanical-plate.png",
+        "harvestCard": "/assets/highcountry/seed-catalogue/harvest-cards/rare/hc-r-desert-shadow-harvest-card.png",
+        "seedIcon": "/assets/highcountry/seed-icons/hc-seed-icon-red-mesa-rare.png",
+        "harvestSeal": "/assets/highcountry/seed-catalogue/harvest-cards/seals/hc-harvest-seal-rare.png"
+      },
       "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
       "ancestry": {
         "basis": "approved-game-cross",
@@ -567,8 +667,13 @@
       "name": "Durban Poison",
       "tier": "common",
       "region": "Emerald Coast",
-      "artStatus": "pending",
-      "art": null,
+      "artStatus": "approved-cosmetic",
+      "art": {
+        "illustration": "/assets/highcountry/seed-catalogue/common/hc-c-durban-poison-botanical-plate.png",
+        "harvestCard": "/assets/highcountry/seed-catalogue/harvest-cards/common/hc-c-durban-poison-harvest-card.png",
+        "seedIcon": "/assets/highcountry/seed-icons/hc-seed-icon-emerald-coast-common.png",
+        "harvestSeal": "/assets/highcountry/seed-catalogue/harvest-cards/seals/hc-harvest-seal-common.png"
+      },
       "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
       "ancestry": {
         "basis": "attributed-research",
@@ -603,8 +708,13 @@
       "name": "Dust Devil",
       "tier": "exclusive",
       "region": "Golden Prairie",
-      "artStatus": "pending",
-      "art": null,
+      "artStatus": "approved-cosmetic",
+      "art": {
+        "illustration": "/assets/highcountry/original-sixteen/hc-f08-botanical-plate.png",
+        "harvestCard": "/assets/highcountry/seed-catalogue/harvest-cards/original-sixteen/hc-f08-harvest-card.png",
+        "seedIcon": "/assets/highcountry/seed-icons/hc-seed-icon-golden-prairie-exclusive.png",
+        "harvestSeal": "/assets/highcountry/seed-catalogue/harvest-cards/seals/hc-harvest-seal-original-sixteen.png"
+      },
       "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
       "ancestry": {
         "basis": "original-sixteen-heritage",
@@ -619,8 +729,13 @@
       "name": "Emerald Ghost",
       "tier": "exclusive",
       "region": "Emerald Coast",
-      "artStatus": "pending",
-      "art": null,
+      "artStatus": "approved-cosmetic",
+      "art": {
+        "illustration": "/assets/highcountry/original-sixteen/hc-f01-botanical-plate.png",
+        "harvestCard": "/assets/highcountry/seed-catalogue/harvest-cards/original-sixteen/hc-f01-harvest-card.png",
+        "seedIcon": "/assets/highcountry/seed-icons/hc-seed-icon-emerald-coast-exclusive.png",
+        "harvestSeal": "/assets/highcountry/seed-catalogue/harvest-cards/seals/hc-harvest-seal-original-sixteen.png"
+      },
       "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
       "ancestry": {
         "basis": "original-sixteen-heritage",
@@ -635,8 +750,13 @@
       "name": "Emerald Mist",
       "tier": "rare",
       "region": "Emerald Coast",
-      "artStatus": "pending",
-      "art": null,
+      "artStatus": "approved-cosmetic",
+      "art": {
+        "illustration": "/assets/highcountry/seed-catalogue/rare/hc-r-emerald-mist-botanical-plate.png",
+        "harvestCard": "/assets/highcountry/seed-catalogue/harvest-cards/rare/hc-r-emerald-mist-harvest-card.png",
+        "seedIcon": "/assets/highcountry/seed-icons/hc-seed-icon-emerald-coast-rare.png",
+        "harvestSeal": "/assets/highcountry/seed-catalogue/harvest-cards/seals/hc-harvest-seal-rare.png"
+      },
       "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
       "ancestry": {
         "basis": "approved-game-cross",
@@ -661,8 +781,13 @@
       "name": "Fields of Green",
       "tier": "rare",
       "region": "Golden Prairie",
-      "artStatus": "pending",
-      "art": null,
+      "artStatus": "approved-cosmetic",
+      "art": {
+        "illustration": "/assets/highcountry/seed-catalogue/rare/hc-r-fields-of-green-botanical-plate.png",
+        "harvestCard": "/assets/highcountry/seed-catalogue/harvest-cards/rare/hc-r-fields-of-green-harvest-card.png",
+        "seedIcon": "/assets/highcountry/seed-icons/hc-seed-icon-golden-prairie-rare.png",
+        "harvestSeal": "/assets/highcountry/seed-catalogue/harvest-cards/seals/hc-harvest-seal-rare.png"
+      },
       "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
       "ancestry": {
         "basis": "approved-game-cross",
@@ -687,8 +812,13 @@
       "name": "Fire Canyon",
       "tier": "rare",
       "region": "Red Mesa",
-      "artStatus": "pending",
-      "art": null,
+      "artStatus": "approved-cosmetic",
+      "art": {
+        "illustration": "/assets/highcountry/seed-catalogue/rare/hc-r-fire-canyon-botanical-plate.png",
+        "harvestCard": "/assets/highcountry/seed-catalogue/harvest-cards/rare/hc-r-fire-canyon-harvest-card.png",
+        "seedIcon": "/assets/highcountry/seed-icons/hc-seed-icon-red-mesa-rare.png",
+        "harvestSeal": "/assets/highcountry/seed-catalogue/harvest-cards/seals/hc-harvest-seal-rare.png"
+      },
       "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
       "ancestry": {
         "basis": "approved-game-cross",
@@ -713,8 +843,13 @@
       "name": "Gelato",
       "tier": "common",
       "region": "Emerald Coast",
-      "artStatus": "pending",
-      "art": null,
+      "artStatus": "approved-cosmetic",
+      "art": {
+        "illustration": "/assets/highcountry/seed-catalogue/common/hc-c-gelato-botanical-plate.png",
+        "harvestCard": "/assets/highcountry/seed-catalogue/harvest-cards/common/hc-c-gelato-harvest-card.png",
+        "seedIcon": "/assets/highcountry/seed-icons/hc-seed-icon-emerald-coast-common.png",
+        "harvestSeal": "/assets/highcountry/seed-catalogue/harvest-cards/seals/hc-harvest-seal-common.png"
+      },
       "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
       "ancestry": {
         "basis": "attributed-research",
@@ -754,8 +889,13 @@
       "name": "Girl Scout Cookies",
       "tier": "common",
       "region": "Golden Prairie",
-      "artStatus": "pending",
-      "art": null,
+      "artStatus": "approved-cosmetic",
+      "art": {
+        "illustration": "/assets/highcountry/seed-catalogue/common/hc-c-girl-scout-cookies-botanical-plate.png",
+        "harvestCard": "/assets/highcountry/seed-catalogue/harvest-cards/common/hc-c-girl-scout-cookies-harvest-card.png",
+        "seedIcon": "/assets/highcountry/seed-icons/hc-seed-icon-golden-prairie-common.png",
+        "harvestSeal": "/assets/highcountry/seed-catalogue/harvest-cards/seals/hc-harvest-seal-common.png"
+      },
       "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
       "ancestry": {
         "basis": "attributed-research",
@@ -795,8 +935,13 @@
       "name": "Golden Haze",
       "tier": "rare",
       "region": "Golden Prairie",
-      "artStatus": "pending",
-      "art": null,
+      "artStatus": "approved-cosmetic",
+      "art": {
+        "illustration": "/assets/highcountry/seed-catalogue/rare/hc-r-golden-haze-botanical-plate.png",
+        "harvestCard": "/assets/highcountry/seed-catalogue/harvest-cards/rare/hc-r-golden-haze-harvest-card.png",
+        "seedIcon": "/assets/highcountry/seed-icons/hc-seed-icon-golden-prairie-rare.png",
+        "harvestSeal": "/assets/highcountry/seed-catalogue/harvest-cards/seals/hc-harvest-seal-rare.png"
+      },
       "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
       "ancestry": {
         "basis": "approved-game-cross",
@@ -821,8 +966,13 @@
       "name": "Golden Hour",
       "tier": "exclusive",
       "region": "Golden Prairie",
-      "artStatus": "pending",
-      "art": null,
+      "artStatus": "approved-cosmetic",
+      "art": {
+        "illustration": "/assets/highcountry/original-sixteen/hc-f11-botanical-plate.png",
+        "harvestCard": "/assets/highcountry/seed-catalogue/harvest-cards/original-sixteen/hc-f11-harvest-card.png",
+        "seedIcon": "/assets/highcountry/seed-icons/hc-seed-icon-golden-prairie-exclusive.png",
+        "harvestSeal": "/assets/highcountry/seed-catalogue/harvest-cards/seals/hc-harvest-seal-original-sixteen.png"
+      },
       "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
       "ancestry": {
         "basis": "original-sixteen-heritage",
@@ -837,8 +987,13 @@
       "name": "Granddaddy Purple",
       "tier": "common",
       "region": "Emerald Coast",
-      "artStatus": "pending",
-      "art": null,
+      "artStatus": "approved-cosmetic",
+      "art": {
+        "illustration": "/assets/highcountry/seed-catalogue/common/hc-c-granddaddy-purple-botanical-plate.png",
+        "harvestCard": "/assets/highcountry/seed-catalogue/harvest-cards/common/hc-c-granddaddy-purple-harvest-card.png",
+        "seedIcon": "/assets/highcountry/seed-icons/hc-seed-icon-emerald-coast-common.png",
+        "harvestSeal": "/assets/highcountry/seed-catalogue/harvest-cards/seals/hc-harvest-seal-common.png"
+      },
       "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
       "ancestry": {
         "basis": "attributed-research",
@@ -887,8 +1042,13 @@
       "name": "Green Crack",
       "tier": "common",
       "region": "Emerald Coast",
-      "artStatus": "pending",
-      "art": null,
+      "artStatus": "approved-cosmetic",
+      "art": {
+        "illustration": "/assets/highcountry/seed-catalogue/common/hc-c-green-crack-botanical-plate.png",
+        "harvestCard": "/assets/highcountry/seed-catalogue/harvest-cards/common/hc-c-green-crack-harvest-card.png",
+        "seedIcon": "/assets/highcountry/seed-icons/hc-seed-icon-emerald-coast-common.png",
+        "harvestSeal": "/assets/highcountry/seed-catalogue/harvest-cards/seals/hc-harvest-seal-common.png"
+      },
       "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
       "ancestry": {
         "basis": "attributed-research",
@@ -928,8 +1088,13 @@
       "name": "Harbour Lights",
       "tier": "exclusive",
       "region": "Emerald Coast",
-      "artStatus": "pending",
-      "art": null,
+      "artStatus": "approved-cosmetic",
+      "art": {
+        "illustration": "/assets/highcountry/original-sixteen/hc-f04-botanical-plate.png",
+        "harvestCard": "/assets/highcountry/seed-catalogue/harvest-cards/original-sixteen/hc-f04-harvest-card.png",
+        "seedIcon": "/assets/highcountry/seed-icons/hc-seed-icon-emerald-coast-exclusive.png",
+        "harvestSeal": "/assets/highcountry/seed-catalogue/harvest-cards/seals/hc-harvest-seal-original-sixteen.png"
+      },
       "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
       "ancestry": {
         "basis": "original-sixteen-heritage",
@@ -944,8 +1109,13 @@
       "name": "Harvest Moon",
       "tier": "exclusive",
       "region": "Golden Prairie",
-      "artStatus": "pending",
-      "art": null,
+      "artStatus": "approved-cosmetic",
+      "art": {
+        "illustration": "/assets/highcountry/original-sixteen/hc-f09-botanical-plate.png",
+        "harvestCard": "/assets/highcountry/seed-catalogue/harvest-cards/original-sixteen/hc-f09-harvest-card.png",
+        "seedIcon": "/assets/highcountry/seed-icons/hc-seed-icon-golden-prairie-exclusive.png",
+        "harvestSeal": "/assets/highcountry/seed-catalogue/harvest-cards/seals/hc-harvest-seal-original-sixteen.png"
+      },
       "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
       "ancestry": {
         "basis": "original-sixteen-heritage",
@@ -960,8 +1130,13 @@
       "name": "Honey Trail",
       "tier": "rare",
       "region": "Golden Prairie",
-      "artStatus": "pending",
-      "art": null,
+      "artStatus": "approved-cosmetic",
+      "art": {
+        "illustration": "/assets/highcountry/seed-catalogue/rare/hc-r-honey-trail-botanical-plate.png",
+        "harvestCard": "/assets/highcountry/seed-catalogue/harvest-cards/rare/hc-r-honey-trail-harvest-card.png",
+        "seedIcon": "/assets/highcountry/seed-icons/hc-seed-icon-golden-prairie-rare.png",
+        "harvestSeal": "/assets/highcountry/seed-catalogue/harvest-cards/seals/hc-harvest-seal-rare.png"
+      },
       "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
       "ancestry": {
         "basis": "approved-game-cross",
@@ -986,8 +1161,13 @@
       "name": "Jack Herer",
       "tier": "common",
       "region": "Golden Prairie",
-      "artStatus": "pending",
-      "art": null,
+      "artStatus": "approved-cosmetic",
+      "art": {
+        "illustration": "/assets/highcountry/seed-catalogue/common/hc-c-jack-herer-botanical-plate.png",
+        "harvestCard": "/assets/highcountry/seed-catalogue/harvest-cards/common/hc-c-jack-herer-harvest-card.png",
+        "seedIcon": "/assets/highcountry/seed-icons/hc-seed-icon-golden-prairie-common.png",
+        "harvestSeal": "/assets/highcountry/seed-catalogue/harvest-cards/seals/hc-harvest-seal-common.png"
+      },
       "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
       "ancestry": {
         "basis": "attributed-research",
@@ -1027,8 +1207,13 @@
       "name": "Midnight Elevator",
       "tier": "exclusive",
       "region": "Golden Prairie",
-      "artStatus": "pending",
-      "art": null,
+      "artStatus": "approved-cosmetic",
+      "art": {
+        "illustration": "/assets/highcountry/original-sixteen/hc-f10-botanical-plate.png",
+        "harvestCard": "/assets/highcountry/seed-catalogue/harvest-cards/original-sixteen/hc-f10-harvest-card.png",
+        "seedIcon": "/assets/highcountry/seed-icons/hc-seed-icon-golden-prairie-exclusive.png",
+        "harvestSeal": "/assets/highcountry/seed-catalogue/harvest-cards/seals/hc-harvest-seal-original-sixteen.png"
+      },
       "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
       "ancestry": {
         "basis": "original-sixteen-heritage",
@@ -1043,8 +1228,13 @@
       "name": "Midnight Mesa",
       "tier": "rare",
       "region": "Red Mesa",
-      "artStatus": "pending",
-      "art": null,
+      "artStatus": "approved-cosmetic",
+      "art": {
+        "illustration": "/assets/highcountry/seed-catalogue/rare/hc-r-midnight-mesa-botanical-plate.png",
+        "harvestCard": "/assets/highcountry/seed-catalogue/harvest-cards/rare/hc-r-midnight-mesa-harvest-card.png",
+        "seedIcon": "/assets/highcountry/seed-icons/hc-seed-icon-red-mesa-rare.png",
+        "harvestSeal": "/assets/highcountry/seed-catalogue/harvest-cards/seals/hc-harvest-seal-rare.png"
+      },
       "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
       "ancestry": {
         "basis": "approved-game-cross",
@@ -1069,8 +1259,13 @@
       "name": "Misty Harbor",
       "tier": "rare",
       "region": "Emerald Coast",
-      "artStatus": "pending",
-      "art": null,
+      "artStatus": "approved-cosmetic",
+      "art": {
+        "illustration": "/assets/highcountry/seed-catalogue/rare/hc-r-misty-harbor-botanical-plate.png",
+        "harvestCard": "/assets/highcountry/seed-catalogue/harvest-cards/rare/hc-r-misty-harbor-harvest-card.png",
+        "seedIcon": "/assets/highcountry/seed-icons/hc-seed-icon-emerald-coast-rare.png",
+        "harvestSeal": "/assets/highcountry/seed-catalogue/harvest-cards/seals/hc-harvest-seal-rare.png"
+      },
       "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
       "ancestry": {
         "basis": "approved-game-cross",
@@ -1095,8 +1290,13 @@
       "name": "Northern Lights",
       "tier": "common",
       "region": "Golden Prairie",
-      "artStatus": "pending",
-      "art": null,
+      "artStatus": "approved-cosmetic",
+      "art": {
+        "illustration": "/assets/highcountry/seed-catalogue/common/hc-c-northern-lights-botanical-plate.png",
+        "harvestCard": "/assets/highcountry/seed-catalogue/harvest-cards/common/hc-c-northern-lights-harvest-card.png",
+        "seedIcon": "/assets/highcountry/seed-icons/hc-seed-icon-golden-prairie-common.png",
+        "harvestSeal": "/assets/highcountry/seed-catalogue/harvest-cards/seals/hc-harvest-seal-common.png"
+      },
       "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
       "ancestry": {
         "basis": "attributed-research",
@@ -1136,8 +1336,13 @@
       "name": "OG Kush",
       "tier": "common",
       "region": "Red Mesa",
-      "artStatus": "pending",
-      "art": null,
+      "artStatus": "approved-cosmetic",
+      "art": {
+        "illustration": "/assets/highcountry/seed-catalogue/common/hc-c-og-kush-botanical-plate.png",
+        "harvestCard": "/assets/highcountry/seed-catalogue/harvest-cards/common/hc-c-og-kush-harvest-card.png",
+        "seedIcon": "/assets/highcountry/seed-icons/hc-seed-icon-red-mesa-common.png",
+        "harvestSeal": "/assets/highcountry/seed-catalogue/harvest-cards/seals/hc-harvest-seal-common.png"
+      },
       "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
       "ancestry": {
         "basis": "attributed-research",
@@ -1179,8 +1384,13 @@
       "name": "Pacific Sunset",
       "tier": "rare",
       "region": "Emerald Coast",
-      "artStatus": "pending",
-      "art": null,
+      "artStatus": "approved-cosmetic",
+      "art": {
+        "illustration": "/assets/highcountry/seed-catalogue/rare/hc-r-pacific-sunset-botanical-plate.png",
+        "harvestCard": "/assets/highcountry/seed-catalogue/harvest-cards/rare/hc-r-pacific-sunset-harvest-card.png",
+        "seedIcon": "/assets/highcountry/seed-icons/hc-seed-icon-emerald-coast-rare.png",
+        "harvestSeal": "/assets/highcountry/seed-catalogue/harvest-cards/seals/hc-harvest-seal-rare.png"
+      },
       "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
       "ancestry": {
         "basis": "approved-game-cross",
@@ -1205,8 +1415,13 @@
       "name": "Pineapple Express",
       "tier": "common",
       "region": "Emerald Coast",
-      "artStatus": "pending",
-      "art": null,
+      "artStatus": "approved-cosmetic",
+      "art": {
+        "illustration": "/assets/highcountry/seed-catalogue/common/hc-c-pineapple-express-botanical-plate.png",
+        "harvestCard": "/assets/highcountry/seed-catalogue/harvest-cards/common/hc-c-pineapple-express-harvest-card.png",
+        "seedIcon": "/assets/highcountry/seed-icons/hc-seed-icon-emerald-coast-common.png",
+        "harvestSeal": "/assets/highcountry/seed-catalogue/harvest-cards/seals/hc-harvest-seal-common.png"
+      },
       "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
       "ancestry": {
         "basis": "attributed-research",
@@ -1246,8 +1461,13 @@
       "name": "Prairie Fire",
       "tier": "rare",
       "region": "Golden Prairie",
-      "artStatus": "pending",
-      "art": null,
+      "artStatus": "approved-cosmetic",
+      "art": {
+        "illustration": "/assets/highcountry/seed-catalogue/rare/hc-r-prairie-fire-botanical-plate.png",
+        "harvestCard": "/assets/highcountry/seed-catalogue/harvest-cards/rare/hc-r-prairie-fire-harvest-card.png",
+        "seedIcon": "/assets/highcountry/seed-icons/hc-seed-icon-golden-prairie-rare.png",
+        "harvestSeal": "/assets/highcountry/seed-catalogue/harvest-cards/seals/hc-harvest-seal-rare.png"
+      },
       "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
       "ancestry": {
         "basis": "approved-game-cross",
@@ -1272,8 +1492,13 @@
       "name": "Prairie Gold",
       "tier": "rare",
       "region": "Golden Prairie",
-      "artStatus": "pending",
-      "art": null,
+      "artStatus": "approved-cosmetic",
+      "art": {
+        "illustration": "/assets/highcountry/seed-catalogue/rare/hc-r-prairie-gold-botanical-plate.png",
+        "harvestCard": "/assets/highcountry/seed-catalogue/harvest-cards/rare/hc-r-prairie-gold-harvest-card.png",
+        "seedIcon": "/assets/highcountry/seed-icons/hc-seed-icon-golden-prairie-rare.png",
+        "harvestSeal": "/assets/highcountry/seed-catalogue/harvest-cards/seals/hc-harvest-seal-rare.png"
+      },
       "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
       "ancestry": {
         "basis": "approved-game-cross",
@@ -1298,8 +1523,13 @@
       "name": "Prairie Thunder",
       "tier": "exclusive",
       "region": "Golden Prairie",
-      "artStatus": "pending",
-      "art": null,
+      "artStatus": "approved-cosmetic",
+      "art": {
+        "illustration": "/assets/highcountry/original-sixteen/hc-f07-botanical-plate.png",
+        "harvestCard": "/assets/highcountry/seed-catalogue/harvest-cards/original-sixteen/hc-f07-harvest-card.png",
+        "seedIcon": "/assets/highcountry/seed-icons/hc-seed-icon-golden-prairie-exclusive.png",
+        "harvestSeal": "/assets/highcountry/seed-catalogue/harvest-cards/seals/hc-harvest-seal-original-sixteen.png"
+      },
       "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
       "ancestry": {
         "basis": "original-sixteen-heritage",
@@ -1314,8 +1544,13 @@
       "name": "Purple Haze",
       "tier": "common",
       "region": "Golden Prairie",
-      "artStatus": "pending",
-      "art": null,
+      "artStatus": "approved-cosmetic",
+      "art": {
+        "illustration": "/assets/highcountry/seed-catalogue/common/hc-c-purple-haze-botanical-plate.png",
+        "harvestCard": "/assets/highcountry/seed-catalogue/harvest-cards/common/hc-c-purple-haze-harvest-card.png",
+        "seedIcon": "/assets/highcountry/seed-icons/hc-seed-icon-golden-prairie-common.png",
+        "harvestSeal": "/assets/highcountry/seed-catalogue/harvest-cards/seals/hc-harvest-seal-common.png"
+      },
       "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
       "ancestry": {
         "basis": "attributed-research",
@@ -1355,8 +1590,13 @@
       "name": "Rainforest Queen",
       "tier": "rare",
       "region": "Emerald Coast",
-      "artStatus": "pending",
-      "art": null,
+      "artStatus": "approved-cosmetic",
+      "art": {
+        "illustration": "/assets/highcountry/seed-catalogue/rare/hc-r-rainforest-queen-botanical-plate.png",
+        "harvestCard": "/assets/highcountry/seed-catalogue/harvest-cards/rare/hc-r-rainforest-queen-harvest-card.png",
+        "seedIcon": "/assets/highcountry/seed-icons/hc-seed-icon-emerald-coast-rare.png",
+        "harvestSeal": "/assets/highcountry/seed-catalogue/harvest-cards/seals/hc-harvest-seal-rare.png"
+      },
       "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
       "ancestry": {
         "basis": "approved-game-cross",
@@ -1381,8 +1621,13 @@
       "name": "Rainmaker",
       "tier": "exclusive",
       "region": "Emerald Coast",
-      "artStatus": "pending",
-      "art": null,
+      "artStatus": "approved-cosmetic",
+      "art": {
+        "illustration": "/assets/highcountry/original-sixteen/hc-f06-botanical-plate.png",
+        "harvestCard": "/assets/highcountry/seed-catalogue/harvest-cards/original-sixteen/hc-f06-harvest-card.png",
+        "seedIcon": "/assets/highcountry/seed-icons/hc-seed-icon-emerald-coast-exclusive.png",
+        "harvestSeal": "/assets/highcountry/seed-catalogue/harvest-cards/seals/hc-harvest-seal-original-sixteen.png"
+      },
       "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
       "ancestry": {
         "basis": "original-sixteen-heritage",
@@ -1397,8 +1642,13 @@
       "name": "Red Rock Dream",
       "tier": "rare",
       "region": "Red Mesa",
-      "artStatus": "pending",
-      "art": null,
+      "artStatus": "approved-cosmetic",
+      "art": {
+        "illustration": "/assets/highcountry/seed-catalogue/rare/hc-r-red-rock-dream-botanical-plate.png",
+        "harvestCard": "/assets/highcountry/seed-catalogue/harvest-cards/rare/hc-r-red-rock-dream-harvest-card.png",
+        "seedIcon": "/assets/highcountry/seed-icons/hc-seed-icon-red-mesa-rare.png",
+        "harvestSeal": "/assets/highcountry/seed-catalogue/harvest-cards/seals/hc-harvest-seal-rare.png"
+      },
       "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
       "ancestry": {
         "basis": "approved-game-cross",
@@ -1423,8 +1673,13 @@
       "name": "Red Rock Kush",
       "tier": "rare",
       "region": "Red Mesa",
-      "artStatus": "pending",
-      "art": null,
+      "artStatus": "approved-cosmetic",
+      "art": {
+        "illustration": "/assets/highcountry/seed-catalogue/rare/hc-r-red-rock-kush-botanical-plate.png",
+        "harvestCard": "/assets/highcountry/seed-catalogue/harvest-cards/rare/hc-r-red-rock-kush-harvest-card.png",
+        "seedIcon": "/assets/highcountry/seed-icons/hc-seed-icon-red-mesa-rare.png",
+        "harvestSeal": "/assets/highcountry/seed-catalogue/harvest-cards/seals/hc-harvest-seal-rare.png"
+      },
       "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
       "ancestry": {
         "basis": "approved-game-cross",
@@ -1449,8 +1704,13 @@
       "name": "Redline",
       "tier": "exclusive",
       "region": "Red Mesa",
-      "artStatus": "pending",
-      "art": null,
+      "artStatus": "approved-cosmetic",
+      "art": {
+        "illustration": "/assets/highcountry/original-sixteen/hc-f12-botanical-plate.png",
+        "harvestCard": "/assets/highcountry/seed-catalogue/harvest-cards/original-sixteen/hc-f12-harvest-card.png",
+        "seedIcon": "/assets/highcountry/seed-icons/hc-seed-icon-red-mesa-exclusive.png",
+        "harvestSeal": "/assets/highcountry/seed-catalogue/harvest-cards/seals/hc-harvest-seal-original-sixteen.png"
+      },
       "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
       "ancestry": {
         "basis": "original-sixteen-heritage",
@@ -1465,8 +1725,13 @@
       "name": "Sage Rider",
       "tier": "rare",
       "region": "Red Mesa",
-      "artStatus": "pending",
-      "art": null,
+      "artStatus": "approved-cosmetic",
+      "art": {
+        "illustration": "/assets/highcountry/seed-catalogue/rare/hc-r-sage-rider-botanical-plate.png",
+        "harvestCard": "/assets/highcountry/seed-catalogue/harvest-cards/rare/hc-r-sage-rider-harvest-card.png",
+        "seedIcon": "/assets/highcountry/seed-icons/hc-seed-icon-red-mesa-rare.png",
+        "harvestSeal": "/assets/highcountry/seed-catalogue/harvest-cards/seals/hc-harvest-seal-rare.png"
+      },
       "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
       "ancestry": {
         "basis": "approved-game-cross",
@@ -1491,8 +1756,13 @@
       "name": "Salty Dog",
       "tier": "rare",
       "region": "Emerald Coast",
-      "artStatus": "pending",
-      "art": null,
+      "artStatus": "approved-cosmetic",
+      "art": {
+        "illustration": "/assets/highcountry/seed-catalogue/rare/hc-r-salty-dog-botanical-plate.png",
+        "harvestCard": "/assets/highcountry/seed-catalogue/harvest-cards/rare/hc-r-salty-dog-harvest-card.png",
+        "seedIcon": "/assets/highcountry/seed-icons/hc-seed-icon-emerald-coast-rare.png",
+        "harvestSeal": "/assets/highcountry/seed-catalogue/harvest-cards/seals/hc-harvest-seal-rare.png"
+      },
       "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
       "ancestry": {
         "basis": "approved-game-cross",
@@ -1517,8 +1787,13 @@
       "name": "Saska Sour",
       "tier": "rare",
       "region": "Golden Prairie",
-      "artStatus": "pending",
-      "art": null,
+      "artStatus": "approved-cosmetic",
+      "art": {
+        "illustration": "/assets/highcountry/seed-catalogue/rare/hc-r-saska-sour-botanical-plate.png",
+        "harvestCard": "/assets/highcountry/seed-catalogue/harvest-cards/rare/hc-r-saska-sour-harvest-card.png",
+        "seedIcon": "/assets/highcountry/seed-icons/hc-seed-icon-golden-prairie-rare.png",
+        "harvestSeal": "/assets/highcountry/seed-catalogue/harvest-cards/seals/hc-harvest-seal-rare.png"
+      },
       "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
       "ancestry": {
         "basis": "approved-game-cross",
@@ -1543,8 +1818,13 @@
       "name": "Solstice Fire",
       "tier": "exclusive",
       "region": "Red Mesa",
-      "artStatus": "pending",
-      "art": null,
+      "artStatus": "approved-cosmetic",
+      "art": {
+        "illustration": "/assets/highcountry/original-sixteen/hc-f15-botanical-plate.png",
+        "harvestCard": "/assets/highcountry/seed-catalogue/harvest-cards/original-sixteen/hc-f15-harvest-card.png",
+        "seedIcon": "/assets/highcountry/seed-icons/hc-seed-icon-red-mesa-exclusive.png",
+        "harvestSeal": "/assets/highcountry/seed-catalogue/harvest-cards/seals/hc-harvest-seal-original-sixteen.png"
+      },
       "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
       "ancestry": {
         "basis": "original-sixteen-heritage",
@@ -1559,8 +1839,13 @@
       "name": "Sour Diesel",
       "tier": "common",
       "region": "Golden Prairie",
-      "artStatus": "pending",
-      "art": null,
+      "artStatus": "approved-cosmetic",
+      "art": {
+        "illustration": "/assets/highcountry/seed-catalogue/common/hc-c-sour-diesel-botanical-plate.png",
+        "harvestCard": "/assets/highcountry/seed-catalogue/harvest-cards/common/hc-c-sour-diesel-harvest-card.png",
+        "seedIcon": "/assets/highcountry/seed-icons/hc-seed-icon-golden-prairie-common.png",
+        "harvestSeal": "/assets/highcountry/seed-catalogue/harvest-cards/seals/hc-harvest-seal-common.png"
+      },
       "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
       "ancestry": {
         "basis": "attributed-research",
@@ -1600,8 +1885,13 @@
       "name": "Spirit Bear",
       "tier": "rare",
       "region": "Emerald Coast",
-      "artStatus": "pending",
-      "art": null,
+      "artStatus": "approved-cosmetic",
+      "art": {
+        "illustration": "/assets/highcountry/seed-catalogue/rare/hc-r-spirit-bear-botanical-plate.png",
+        "harvestCard": "/assets/highcountry/seed-catalogue/harvest-cards/rare/hc-r-spirit-bear-harvest-card.png",
+        "seedIcon": "/assets/highcountry/seed-icons/hc-seed-icon-emerald-coast-rare.png",
+        "harvestSeal": "/assets/highcountry/seed-catalogue/harvest-cards/seals/hc-harvest-seal-rare.png"
+      },
       "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
       "ancestry": {
         "basis": "approved-game-cross",
@@ -1626,8 +1916,13 @@
       "name": "Strawberry Cough",
       "tier": "common",
       "region": "Red Mesa",
-      "artStatus": "pending",
-      "art": null,
+      "artStatus": "approved-cosmetic",
+      "art": {
+        "illustration": "/assets/highcountry/seed-catalogue/common/hc-c-strawberry-cough-botanical-plate.png",
+        "harvestCard": "/assets/highcountry/seed-catalogue/harvest-cards/common/hc-c-strawberry-cough-harvest-card.png",
+        "seedIcon": "/assets/highcountry/seed-icons/hc-seed-icon-red-mesa-common.png",
+        "harvestSeal": "/assets/highcountry/seed-catalogue/harvest-cards/seals/hc-harvest-seal-common.png"
+      },
       "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
       "ancestry": {
         "basis": "attributed-research",
@@ -1667,8 +1962,13 @@
       "name": "Super Silver Haze",
       "tier": "common",
       "region": "Emerald Coast",
-      "artStatus": "pending",
-      "art": null,
+      "artStatus": "approved-cosmetic",
+      "art": {
+        "illustration": "/assets/highcountry/seed-catalogue/common/hc-c-super-silver-haze-botanical-plate.png",
+        "harvestCard": "/assets/highcountry/seed-catalogue/harvest-cards/common/hc-c-super-silver-haze-harvest-card.png",
+        "seedIcon": "/assets/highcountry/seed-icons/hc-seed-icon-emerald-coast-common.png",
+        "harvestSeal": "/assets/highcountry/seed-catalogue/harvest-cards/seals/hc-harvest-seal-common.png"
+      },
       "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
       "ancestry": {
         "basis": "attributed-research",
@@ -1709,8 +2009,13 @@
       "name": "Tempest",
       "tier": "rare",
       "region": "Emerald Coast",
-      "artStatus": "pending",
-      "art": null,
+      "artStatus": "approved-cosmetic",
+      "art": {
+        "illustration": "/assets/highcountry/seed-catalogue/rare/hc-r-tempest-botanical-plate.png",
+        "harvestCard": "/assets/highcountry/seed-catalogue/harvest-cards/rare/hc-r-tempest-harvest-card.png",
+        "seedIcon": "/assets/highcountry/seed-icons/hc-seed-icon-emerald-coast-rare.png",
+        "harvestSeal": "/assets/highcountry/seed-catalogue/harvest-cards/seals/hc-harvest-seal-rare.png"
+      },
       "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
       "ancestry": {
         "basis": "approved-game-cross",
@@ -1735,8 +2040,13 @@
       "name": "Thunder Fields",
       "tier": "rare",
       "region": "Golden Prairie",
-      "artStatus": "pending",
-      "art": null,
+      "artStatus": "approved-cosmetic",
+      "art": {
+        "illustration": "/assets/highcountry/seed-catalogue/rare/hc-r-thunder-fields-botanical-plate.png",
+        "harvestCard": "/assets/highcountry/seed-catalogue/harvest-cards/rare/hc-r-thunder-fields-harvest-card.png",
+        "seedIcon": "/assets/highcountry/seed-icons/hc-seed-icon-golden-prairie-rare.png",
+        "harvestSeal": "/assets/highcountry/seed-catalogue/harvest-cards/seals/hc-harvest-seal-rare.png"
+      },
       "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
       "ancestry": {
         "basis": "approved-game-cross",
@@ -1761,8 +2071,13 @@
       "name": "Trainwreck",
       "tier": "common",
       "region": "Golden Prairie",
-      "artStatus": "pending",
-      "art": null,
+      "artStatus": "approved-cosmetic",
+      "art": {
+        "illustration": "/assets/highcountry/seed-catalogue/common/hc-c-trainwreck-botanical-plate.png",
+        "harvestCard": "/assets/highcountry/seed-catalogue/harvest-cards/common/hc-c-trainwreck-harvest-card.png",
+        "seedIcon": "/assets/highcountry/seed-icons/hc-seed-icon-golden-prairie-common.png",
+        "harvestSeal": "/assets/highcountry/seed-catalogue/harvest-cards/seals/hc-harvest-seal-common.png"
+      },
       "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
       "ancestry": {
         "basis": "attributed-research",
@@ -1803,8 +2118,13 @@
       "name": "White Widow",
       "tier": "common",
       "region": "Red Mesa",
-      "artStatus": "pending",
-      "art": null,
+      "artStatus": "approved-cosmetic",
+      "art": {
+        "illustration": "/assets/highcountry/seed-catalogue/common/hc-c-white-widow-botanical-plate.png",
+        "harvestCard": "/assets/highcountry/seed-catalogue/harvest-cards/common/hc-c-white-widow-harvest-card.png",
+        "seedIcon": "/assets/highcountry/seed-icons/hc-seed-icon-red-mesa-common.png",
+        "harvestSeal": "/assets/highcountry/seed-catalogue/harvest-cards/seals/hc-harvest-seal-common.png"
+      },
       "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
       "ancestry": {
         "basis": "attributed-research",
@@ -1844,8 +2164,13 @@
       "name": "Zkittlez",
       "tier": "common",
       "region": "Red Mesa",
-      "artStatus": "pending",
-      "art": null,
+      "artStatus": "approved-cosmetic",
+      "art": {
+        "illustration": "/assets/highcountry/seed-catalogue/common/hc-c-zkittlez-botanical-plate.png",
+        "harvestCard": "/assets/highcountry/seed-catalogue/harvest-cards/common/hc-c-zkittlez-harvest-card.png",
+        "seedIcon": "/assets/highcountry/seed-icons/hc-seed-icon-red-mesa-common.png",
+        "harvestSeal": "/assets/highcountry/seed-catalogue/harvest-cards/seals/hc-harvest-seal-common.png"
+      },
       "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
       "ancestry": {
         "basis": "attributed-research",

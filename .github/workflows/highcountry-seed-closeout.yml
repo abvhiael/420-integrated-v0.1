@@ -1,0 +1,142 @@
+name: HighCountry HC-SEED-10 bounded Level 3 closeout
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/highcountry-seed-closeout.yml'
+      - 'services/highcountry-economy/src/seed-art.js'
+      - 'services/highcountry-economy/src/seed-catalogue.js'
+      - 'services/highcountry-economy/src/seed-payment-reader.js'
+      - 'services/highcountry-economy/test/seed-closeout.test.js'
+      - 'apps/highcountry-web/src/seed-catalogue.js'
+      - 'apps/highcountry-web/public/seed-catalogue.css'
+      - 'apps/highcountry-web/public/assets/highcountry/seed-catalogue.v1.json'
+      - 'apps/highcountry-web/public/assets/highcountry/seed-catalogue/**'
+      - 'deployments/highcountry/seed-assets.v1.json'
+      - 'deployments/highcountry/seed-closeout-release.v1.json'
+      - 'scripts/highcountry/audit_seed_assets.py'
+      - 'scripts/highcountry/reconcile_seed_release.py'
+      - 'scripts/highcountry/run_seed_phase_contracts.py'
+      - 'scripts/highcountry/run_seed_closeout_contracts.py'
+      - 'scripts/highcountry/seed-closeout-contract-test.sol'
+      - 'scripts/highcountry/verify_seed_art_delivery.mjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+env:
+  HC_SEED_CLOSEOUT_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+jobs:
+  source-genome-art-reconciliation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Bounded audit dependencies
+        run: python -m pip install pycryptodome==3.23.0 Pillow==11.3.0
+      - name: Exact source checkout and historical catalogue/research boundaries
+        run: |
+          test "$(git rev-parse HEAD)" = "$HC_SEED_CLOSEOUT_HEAD"
+          node --test scripts/highcountry/seed-catalog.test.mjs scripts/highcountry/common-cultivar-research.test.mjs
+          python -m unittest discover -s scripts/highcountry -p 'test_*genome*.py'
+          python scripts/highcountry/reconcile_seed_release.py
+      - name: Every canonical PNG byte, dimensions, alpha and identity
+        run: |
+          python scripts/highcountry/audit_seed_assets.py
+          python -c 'import json; print("HC_SEED_ASSET_AUDIT_JSON="+json.dumps(json.load(open("artifacts/highcountry/hc-seed-10-assets.json")),separators=(",",":")))'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: hc-seed-10-source-genome-art
+          path: artifacts/highcountry/hc-seed-10-*.json
+  runtime-integration-adversarial:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: seed10_disposable_only
+          POSTGRES_DB: seed10_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      HC_TEST_POSTGRES_URL: postgresql://postgres:seed10_disposable_only@localhost:5432/seed10_test
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Scoped dependencies and real browser
+        run: |
+          npm install --prefix /tmp/hc-seed10 --no-save pg@8.16.3 jsdom@26.1.0 playwright@1.56.1
+          ln -s /tmp/hc-seed10/node_modules node_modules
+          if [ -x /usr/bin/google-chrome ]; then
+            echo 'HC_TEST_CHROMIUM_PATH=/usr/bin/google-chrome' >> "$GITHUB_ENV"
+          else
+            /tmp/hc-seed10/node_modules/.bin/playwright install --with-deps chromium
+          fi
+      - name: Bounded source, ownership, payment, opening and adversarial regressions
+        run: node --test services/highcountry-economy/test/seed-closeout.test.js services/highcountry-economy/test/seed-purchases*.test.js services/highcountry-economy/test/seed-openings*.test.js services/highcountry-economy/test/seed-packs*.test.js services/highcountry-economy/test/seed-catalogue*.test.js services/highcountry-economy/test/postgres-store.test.js services/highcountry-economy/test/runtime-integration.test.js services/highcountry-economy/test/r064-browser-runtime-http.test.js services/highcountry-economy/test/canonical-social-chain-adapter.test.js services/highcountry-economy/test/canonical-social-gateway.test.js apps/highcountry-web/test/seed-purchases-dom.integration.mjs apps/highcountry-web/test/seed-packs-dom.integration.mjs apps/highcountry-web/test/seed-catalogue-dom.integration.mjs apps/highcountry-web/test/hc-next-4-4-marketplace.test.mjs
+      - name: Real PostgreSQL collection, starter, opening and purchase crash/restart/RLS integration
+        run: |
+          node services/highcountry-economy/test/seed-catalogue-postgres.integration.mjs
+          node services/highcountry-economy/test/seed-packs-postgres.integration.mjs
+          node services/highcountry-economy/test/seed-openings-postgres.integration.mjs
+          node services/highcountry-economy/test/seed-purchases-postgres.integration.mjs
+      - name: Production build, immutable pool/catalogue parity and 146 delivered PNGs
+        run: |
+          node scripts/highcountry/build_seed_opening_policy.mjs
+          node apps/highcountry-web/scripts/build.mjs
+          git diff --exit-code -- deployments/highcountry/seed-opening-policy.v1.json apps/highcountry-web/public/assets/highcountry/seed-catalogue.v1.json
+          node scripts/highcountry/verify_seed_art_delivery.mjs
+      - name: Actual Chromium catalogue and two-currency payment through seed delivery/history
+        run: |
+          node apps/highcountry-web/test/seed-catalogue-browser.integration.mjs
+          node apps/highcountry-web/test/seed-purchases-browser.integration.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: hc-seed-10-runtime-browser
+          path: |
+            artifacts/highcountry/hc-seed-10-*.json
+            artifacts/highcountry/hc-seed-09-*.png
+            artifacts/highcountry/hc-seed-05-*.png
+  canonical-lifecycle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.7.1
+      - name: Canonical closeout fixture formatting
+        run: forge fmt --root contracts --check "$GITHUB_WORKSPACE/scripts/highcountry/seed-closeout-contract-test.sol"
+      - name: One bounded 52-case actual-contract phase closeout
+        run: |
+          python scripts/highcountry/run_seed_phase_contracts.py
+          python -m pip install pycryptodome==3.23.0
+          python scripts/highcountry/verify_seed_rare_test_evidence.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: hc-seed-10-canonical-lifecycle
+          path: |
+            artifacts/highcountry/hc-seed-10-*.json
+            artifacts/highcountry/hc-seed-04-*.json

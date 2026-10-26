@@ -1,0 +1,97 @@
+{
+  "schema": "HC.SEED.CLOSEOUT_RELEASE.V1",
+  "baselineCommit": "7acca59af7670e1027ffed5b85ec301ffa2fd792",
+  "qualificationModel": "One bounded Level 3 closeout; retain unaffected Level 1/2 evidence; no unrelated global or Docs rerun",
+  "retainedEvidence": [
+    {
+      "step": "HC-SEED-01",
+      "qualifiedSha": "2c97a9454f9a51cee10ed57a6c98ec21d1b01bda",
+      "runId": 40265740974,
+      "runUrl": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/40265740974"
+    },
+    {
+      "step": "HC-SEED-02",
+      "qualifiedSha": "830cb2ce38ef18c9be0269aaef844fbd42d5f293",
+      "runId": 40266592926,
+      "runUrl": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/40266592926"
+    },
+    {
+      "step": "HC-SEED-03",
+      "qualifiedSha": "4f17985fff984a4df0b31b15eb7d1b1f6e759eda",
+      "runId": 40268715028,
+      "runUrl": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/40268715028"
+    },
+    {
+      "step": "HC-SEED-04",
+      "qualifiedSha": "0ffef090ec6a9b099392cd46045cd00274ade4c1",
+      "runId": 40271577586,
+      "runUrl": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/40271577586"
+    },
+    {
+      "step": "HC-SEED-05",
+      "qualifiedSha": "5778df0406ed0a2f31c85e5c9a9093b4a3f84aba",
+      "runId": 40274798369,
+      "runUrl": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/40274798369"
+    },
+    {
+      "step": "HC-SEED-07",
+      "qualifiedSha": "5a3347e5e8628907eccaeea5e80fc4a71fdca909",
+      "runId": 40355872679,
+      "runUrl": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/40355872679"
+    },
+    {
+      "step": "HC-SEED-08",
+      "qualifiedSha": "a8a072eba82a9028eb6a5cc097795c1047a6d8e2",
+      "runId": 40370307916,
+      "runUrl": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/40370307916"
+    },
+    {
+      "step": "HC-SEED-09",
+      "qualifiedSha": "0ec4c137e52c9493863062e27a9cc22f42e20390",
+      "runId": 40378863104,
+      "runUrl": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/40378863104"
+    }
+  ],
+  "mergedBatches": [
+    {
+      "steps": "01-07",
+      "pr": 838,
+      "mergeSha": "d8f16751691f32bd0821c1ff9f9394960e43da7f"
+    },
+    {
+      "steps": "08",
+      "pr": 854,
+      "mergeSha": "a853df9ccfae8ce0b4bd965dd3999cc140f54d2f"
+    },
+    {
+      "steps": "09",
+      "pr": 858,
+      "mergeSha": "7acca59af7670e1027ffed5b85ec301ffa2fd792"
+    }
+  ],
+  "artReconciliation": {
+    "step": "HC-SEED-06",
+    "manifest": "deployments/highcountry/seed-assets.v1.json",
+    "assets": 146,
+    "illustrations": 65,
+    "harvestCards": 65,
+    "seedBadges": 9,
+    "packs": 4,
+    "earnedSeals": 3,
+    "authority": "Cosmetic assets; source identity and byte verification are separate from authenticated awards"
+  },
+  "liveActivation": {
+    "status": "BLOCKED",
+    "required": [
+      "Reviewed actual deployments and pinned runtime code",
+      "Finalized actual Genesis and game/identity registration",
+      "Approved unique-output VRF profile/provider/verifier",
+      "Actual authorized registration and independent readback of all 23 commons and 26 rare offspring, plus actual founding registry mappings",
+      "Scoped operator capabilities, native treasury and external EOA quote signer",
+      "TLS PostgreSQL least-privilege role and namespace RLS",
+      "Production-equivalent testnet transaction, recovery and provider evidence"
+    ],
+    "liveRegistration": false
+  },
+  "finalEvidence": "deployments/highcountry/seed-closeout-evidence.v1.json"
+}

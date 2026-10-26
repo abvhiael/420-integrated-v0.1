@@ -1,0 +1,31 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {CanonicalSocialEventIndexer,SOCIAL_EVENT_TOPICS} from '../src/canonical-social-event-indexer.js';
+import {keccak256} from '../src/keccak.js';
+const hex=c=>'0x'+c.repeat(64), addr=c=>'0x'+c.repeat(40);
+const tx=hex('a'),block=hex('b'),id=hex('c'),wallet=addr('1'),contract=addr('2'),topic=keccak256(Buffer.from('OrganizationCreated(bytes32,address,bytes32)'));
+test('event signature is independently pinned to Solidity ABI',()=>{
+ assert.equal(SOCIAL_EVENT_TOPICS[topic].contract,'organizations');
+});
+test('reject foreign or reorged provenance, require finalized private journal before indexing',async()=>{
+ let journal={principal:'alice',wallet,action:'organization.create',state:'finalized'};
+ const calls=[];const pool={connect:async()=>({query:async(sql,args)=>{calls.push(sql);
+  if(sql.startsWith('SELECT principal'))return {rows:[journal].filter(Boolean)};
+  return {rowCount:1,rows:[]};
+ },release(){}})};
+ const base={transactionHash:tx,blockHash:block,blockNumber:'0x5',status:'0x1',logs:[{transactionHash:tx,blockHash:block,blockNumber:'0x5',logIndex:'0x0',address:contract,topics:[topic,id],data:'0x'}]};
+ let receipt=base;
+ const rpc={request:async(method)=>method==='eth_getTransactionReceipt'?receipt:method==='eth_getTransactionByHash'?{hash:tx,from:wallet}: {hash:block},header:async()=>({number:'0x7'})};
+ const contracts={organizations:contract};
+ const idx=new CanonicalSocialEventIndexer({pool,rpc,contracts,scope:'HC'});
+ journal={...journal,state:'prepared'};
+ await assert.rejects(idx.indexFinalized({txHash:tx,principal:'alice',wallet,action:'organization.create'}),/finalized private journal/);
+ journal={...journal,state:'finalized'};
+ receipt={...base,blockHash:hex('f')};
+ await assert.rejects(idx.indexFinalized({txHash:tx,principal:'alice',wallet,action:'organization.create'}),/reorganized receipt/);
+ receipt={...base,logs:[{...base.logs[0],address:addr('3')}]};
+ assert.equal(await idx.indexFinalized({txHash:tx,principal:'alice',wallet,action:'organization.create'}),0);
+ receipt=base;
+ assert.equal(await idx.indexFinalized({txHash:tx,principal:'alice',wallet,action:'organization.create'}),1);
+ assert.equal(calls.filter(x=>x.startsWith('INSERT INTO highcountry_social_events')).length,1);
+});

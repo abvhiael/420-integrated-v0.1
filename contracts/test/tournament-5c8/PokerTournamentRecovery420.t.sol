@@ -5,8 +5,9 @@ import "../../src/bet/tournament/recovery/PokerTournamentRecovery420.sol";
 interface C8Vm420 {function chainId(uint256)external;function etch(address,bytes calldata)external;}
 abstract contract TournamentRecoveryBase420 is TournamentPrizeTestsBase420 {
     PokerTournamentRecovery420 internal recovery;
+    event C8RecoveryBinding(address bank,address host,address engine,address entropy);
     C8Vm420 internal constant rvm=C8Vm420(address(uint160(uint256(keccak256("hevm cheat code")))));
-    function _coordinator()internal{recovery=new PokerTournamentRecovery420(address(runtimeEscrow));require(address(recovery).code.length<=24576);}
+    function _coordinator()internal{recovery=new PokerTournamentRecovery420(address(runtimeEscrow));require(address(recovery).code.length<=24576);emit C8RecoveryBinding(address(runtimeEscrow),address(host),address(ws8Engine),address(roundEntropy));}
     function _step(PokerTournamentRecovery420.Action action,uint32 table,uint32 cursor,uint32 limit)internal returns(uint32){return recovery.advance(EVENT,recovery.snapshot(EVENT,table),action,table,cursor,limit);}
     function _bad(PokerTournamentRecovery420.Action action,uint32 table,uint32 cursor,uint32 limit)internal{bytes32 snapshot=recovery.snapshot(EVENT,table);_fails(address(recovery),abi.encodeCall(recovery.advance,(EVENT,snapshot,action,table,cursor,limit)));}
     function _checkpoint()internal{_step(PokerTournamentRecovery420.Action.CHECKPOINT,0,0,0);}

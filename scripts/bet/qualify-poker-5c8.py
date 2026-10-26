@@ -5,7 +5,7 @@ from pathlib import Path
 from importlib.metadata import version
 ROOT=Path(__file__).resolve().parents[2]
 BASE='a86534c944ee9700110854213eee58d2bf5a0328'
-SCOPE=['.github/workflows/identity-id-audit-4.yml','.github/workflows/identity-id-audit-5.yml','clients/420bet-poker/zkshuffle/fixtures/tournament-5c8/inherited-level2.zip','contracts/foundry.toml','contracts/src/bet/tournament/recovery','contracts/test/tournament-5c8','scripts/bet/qualify-poker-5c8.py','scripts/bet/inherit-poker-5c8.py','scripts/bet/monitor-poker-5c8.py','scripts/bet/check-poker-5c8-monitor.py','scripts/bet/poker-5c8-static-review.json','docs/bet/BET-AUDIT-5C.8-RECOVERY-SECURITY-QUALIFICATION.md','docs/420BET-TESTNET-WORK-ROADMAP.md','.github/workflows/420bet-poker-5c8-level2.yml']
+SCOPE=['.github/workflows/identity-id-audit-4.yml','.github/workflows/identity-id-audit-5.yml','clients/420bet-poker/zkshuffle/fixtures/tournament-5c8/inherited-level2.zip','contracts/foundry.toml','contracts/src/bet/tournament/recovery','contracts/test/tournament-5c8','scripts/bet/qualify-poker-5c8.py','scripts/bet/inherit-poker-5c8.py','scripts/bet/replay-poker-5c8-refunds.py','scripts/bet/monitor-poker-5c8.py','scripts/bet/check-poker-5c8-monitor.py','scripts/bet/poker-5c8-static-review.json','docs/bet/BET-AUDIT-5C.8-RECOVERY-SECURITY-QUALIFICATION.md','docs/420BET-TESTNET-WORK-ROADMAP.md','.github/workflows/420bet-poker-5c8-level2.yml']
 def module(name,file):
  s=importlib.util.spec_from_file_location(name,ROOT/file);m=importlib.util.module_from_spec(s);s.loader.exec_module(m);return m
 helpers=module('helpers','scripts/bet/qualify-poker-5c2.py');execute,git=helpers.execute,helpers.git
@@ -44,11 +44,11 @@ def main():
  if len(fuzz)!=1 or min(fuzz.values())<2500:raise RuntimeError('Incomplete fuzz execution')
  r=execute([sys.executable,'scripts/bet/check-poker-5c8-monitor.py'],ROOT,env,out,'monitor-tests');log=r.stderr.decode('utf-8').replace('\r\n','\n')
  if not re.search(r'Ran 20 tests\b',log)or '\nOK\n'not in log:raise RuntimeError('Incomplete monitor execution')
- replayer=module('refunds','scripts/bet/replay-poker-5c7-refunds.py')
+ replayer=module('refunds','scripts/bet/replay-poker-5c8-refunds.py');tamper_cases=0
  owners=[('Security','testCoordinatorRefundsRealPlayedHandAndWithheldDeal','withheld'),('Security','testRestartBetweenEveryRefundChunkRetainsOriginalPayers','restarted'),('Security','testQueuedPurchasesBlockRefundUntilBoundedDrain','queued'),('Security','testActiveAuthenticatedHandBlocksRefundAndTimesOutCanonically','active'),('Security','testMissingPublicEvidenceUsesOriginalReviewDeadline','missing'),('Security','testPauseDeadlineDoesNotMoveWhenObservedLateOrRestarted','pause'),('Security','testGenuineShuffleWithoutDeliveryCannotStartAndRefunds','delivery'),('Rebuy','testPendingRebuyExpiresBeforeRecoveryCanReleaseMoney','rebuy')]
  for owner,test,label in owners:
   execute(cmd+['--match-contract','^TournamentRecovery'+owner+'420Test$','--match-test','^'+test+r'\(\)$','-vvvv'],ROOT/'contracts',env,out,label+'-trace')
-  trace=(out/(label+'-trace.stdout.log')).read_text(encoding='utf-8-sig');write(out,label+'-independent-replay.json',replayer.replay(trace))
+  trace=(out/(label+'-trace.stdout.log')).read_text(encoding='utf-8-sig');write(out,label+'-independent-replay.json',replayer.replay(trace));tamper_cases+=replayer.tamper(trace)
  execute(cmd+['--match-contract','^TournamentRecoverySecurity420Test$','--match-test',r'^testCanonicalPrizesResumeThroughIndependentCoordinators\(\)$','-vvvv'],ROOT/'contracts',env,out,'prize-restart-trace')
  from Crypto.Hash import keccak
  def k256(b):h=keccak.new(digest_bits=256);h.update(b);return h.hexdigest()
@@ -80,6 +80,6 @@ def main():
  write(out,'static-review.json',{'rawHigh':sum(f['impact']=='High'for f in actual.values()),'rawMedium':sum(f['impact']=='Medium'for f in actual.values()),'unreviewedHighMedium':0,'independentAudit':False,'review':review})
  if git('rev-parse','HEAD')!=head or git('status','--porcelain','--',*SCOPE)or any(sha(ROOT/f)!=h for f,h in {**sources,**closure}.items()):raise RuntimeError('Source drift')
  evidence={f.relative_to(out).as_posix():hashlib.sha256(f.read_bytes()).hexdigest()for f in out.rglob('*')if f.is_file()and not any(x in f.relative_to(out).parts for x in ['build','cache'])}
- report={'schema':'420-poker-5c8-security-recovery-v1','qualifiedSHA':head,'tree':git('rev-parse','HEAD^{tree}'),'reconciledMain':BASE,'level1Accepted':True,'fundedRecoveryLevel2Accepted':True,'newNativeTestsPassed':len(tests),'newMonitorTestsPassed':20,'newFuzzRuns':fuzz,'independentRefundReplays':len(owners),'independentRestartedPrizeReplay':True,'retainedQualification':retained,'newProofMaterialRequired':False,'sourceSHA256':sources,'compiledSourceClosureSHA256':closure,'evidenceSHA256':evidence,'officialTestnetAccepted':False,'externalProviderIndependenceAccepted':False,'independentAuditAccepted':False,'productionApproved':False,'completedAt':datetime.now(timezone.utc).isoformat()}
+ report={'schema':'420-poker-5c8-security-recovery-v1','qualifiedSHA':head,'tree':git('rev-parse','HEAD^{tree}'),'reconciledMain':BASE,'level1Accepted':True,'fundedRecoveryLevel2Accepted':True,'newNativeTestsPassed':len(tests),'newMonitorTestsPassed':20,'newFuzzRuns':fuzz,'independentRefundReplays':len(owners),'alteredRefundEvidenceRejected':tamper_cases,'independentRestartedPrizeReplay':True,'retainedQualification':retained,'newProofMaterialRequired':False,'sourceSHA256':sources,'compiledSourceClosureSHA256':closure,'evidenceSHA256':evidence,'officialTestnetAccepted':False,'externalProviderIndependenceAccepted':False,'independentAuditAccepted':False,'productionApproved':False,'completedAt':datetime.now(timezone.utc).isoformat()}
  write(out,'qualification.json',report);print(json.dumps({k:report[k]for k in ['qualifiedSHA','level1Accepted','fundedRecoveryLevel2Accepted','newNativeTestsPassed','newMonitorTestsPassed']}),flush=True)
 if __name__=='__main__':main()

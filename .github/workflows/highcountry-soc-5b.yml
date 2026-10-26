@@ -1,0 +1,54 @@
+name: High Country SOC-5B PostgreSQL Level 1
+on:
+  pull_request:
+    paths:
+      - 'services/highcountry-economy/migrations/00*-social-*.sql'
+      - 'services/highcountry-economy/scripts/provision-social-role.mjs'
+      - 'services/highcountry-economy/qualification/social-postgres.integration.test.mjs'
+      - 'services/highcountry-economy/src/canonical-social-gateway.js'
+      - '.github/workflows/highcountry-soc-5b.yml'
+permissions:
+  contents: read
+jobs:
+  scoped-postgres:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: testpassword
+          POSTGRES_DB: highcountry_soc5b
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s --health-timeout 5s --health-retries 15
+    env:
+      HC_SOC5B_TEST_DATABASE_URL: postgresql://postgres:testpassword@localhost:5432/highcountry_soc5b
+      HC_MIGRATION_DATABASE_URL: postgresql://postgres:testpassword@localhost:5432/highcountry_soc5b
+      PGPASSWORD: testpassword
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify exact SHA
+        env:
+          SHA: ${{ github.event.pull_request.head.sha }}
+        run: test "$(git rev-parse HEAD)" = "$SHA"
+      - name: Install scoped dependencies
+        run: npm install --prefix services/highcountry-economy --ignore-scripts --no-audit --no-fund
+      - name: Apply migrations and provision fixed-scope runtime role
+        run: |
+          psql -h localhost -U postgres -d highcountry_soc5b -v ON_ERROR_STOP=1 -f services/highcountry-economy/migrations/007-social-operations.sql
+          psql -h localhost -U postgres -d highcountry_soc5b -v ON_ERROR_STOP=1 -f services/highcountry-economy/migrations/008-social-rls.sql
+          psql -h localhost -U postgres -d highcountry_soc5b -v ON_ERROR_STOP=1 -f services/highcountry-economy/migrations/009-social-intents.sql
+          psql -h localhost -U postgres -d highcountry_soc5b -v ON_ERROR_STOP=1 -c "CREATE ROLE hc_social_test_runtime NOLOGIN NOINHERIT NOSUPERUSER NOBYPASSRLS"
+          node services/highcountry-economy/scripts/provision-social-role.mjs hc5b-test hc_social_test_runtime
+      - name: Actual Postgres 16 isolation and persistence
+        run: node --test services/highcountry-economy/qualification/social-postgres.integration.test.mjs
+      - name: Retained gateway security regressions
+        run: node --test services/highcountry-economy/test/canonical-social-gateway.test.js

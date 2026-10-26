@@ -1,0 +1,48 @@
+name: 420Bet Poker 5C.4 funded assignments and native table balancing Level 1 and 2
+on:
+  push:
+    branches: ['bet/5c4-assignments-table-balancing']
+    paths:
+      - 'contracts/src/bet/tournament/PokerTournamentAssignments420.sol'
+      - 'contracts/src/bet/tournament/PokerTournamentSeatingEntropy420.sol'
+      - 'contracts/src/bet/tournament/PokerTournamentTableBalance420.sol'
+      - 'contracts/test/tournament-5c4/**'
+      - 'scripts/bet/qualify-poker-5c4.py'
+      - 'scripts/bet/poker-5c4-static-review.json'
+      - '.github/workflows/420bet-poker-5c4-level2.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: poker-5c4-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  assignments-and-native-balancing:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.8.6
+      - name: Install pinned analyzer and compiler
+        run: |
+          python -m pip install slither-analyzer==0.11.6
+          solc-select install 0.8.30
+          solc-select use 0.8.30
+      - name: Bind exact implementation SHA
+        run: test "$(git rev-parse HEAD)" = "${{ github.sha }}"
+      - name: Execute native and funded qualification and inherited regression
+        run: python scripts/bet/qualify-poker-5c4.py --output artifacts/poker-5c4
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: poker-5c4-${{ github.sha }}
+          path: artifacts/poker-5c4/**
+          if-no-files-found: error

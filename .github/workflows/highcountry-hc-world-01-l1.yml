@@ -1,0 +1,20 @@
+name: HighCountry HC-WORLD-01 Level 1
+on:
+  pull_request:
+    paths:
+      - 'deployments/highcountry/hc-world-founding-spec.v1.json'
+      - 'scripts/highcountry/hc-world-01.test.mjs'
+      - 'deployments/highcountry/original-sixteen-archive.v1.json'
+      - 'deployments/highcountry/original-sixteen-discovery-journeys.v1.json'
+      - '.github/workflows/highcountry-hc-world-01-l1.yml'
+  workflow_dispatch:
+jobs:
+  world-schema-l1:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify HC-WORLD-01 versioned world schema and canonical lore
+        run: node --test scripts/highcountry/hc-world-01.test.mjs

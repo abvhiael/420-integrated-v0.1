@@ -31,7 +31,9 @@ test('SOC-5B real Postgres 16: RLS tenant isolation, restrictions, journal uniqu
    await reopened.query('BEGIN');await reopened.query('SET LOCAL ROLE '+role);
    const r=await reopened.query('SELECT state,raw_transaction FROM highcountry_social_intents WHERE tx_hash=$1',[tx]);
    assert.equal(r.rows.length,1);assert.equal(r.rows[0].state,'prepared');assert.equal(r.rows[0].raw_transaction,'0x1234');
-   await reopened.query('ROLLBACK');
+   const transition=await reopened.query("UPDATE highcountry_social_intents SET state='broadcast' WHERE scope=$1 AND tx_hash=$2 RETURNING state",[a,tx]);
+   assert.equal(transition.rowCount,1);assert.equal(transition.rows[0].state,'broadcast');
+   await reopened.query('COMMIT');
   }finally{reopened.release();}
   const afterRestart=await pool.connect();
   try{

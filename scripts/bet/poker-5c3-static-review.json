@@ -1,0 +1,76 @@
+{
+  "analyzer": "slither-analyzer==0.11.6",
+  "reviewType": "source-bound local review; inherited severities retained; not independent security approval",
+  "normalizedSourceSHA256": {
+    "contracts/src/bet/tournament/PokerTournamentEntryEscrow420.sol": "22d499a1a5df3618c55f7c88761a5bcd69a5feab47947720a8813e3386b4c83c",
+    "contracts/src/bet/tournament/PokerTournamentPurchaseAccounting420.sol": "b83cdb31523c4b141463d358d45d5d59953d4f669e0313945e3583574528eca7",
+    "contracts/src/bet/tournament/PokerTournamentPolicy420.sol": "f9db8f1db569ebf00cc057a8dfa4a36245501d629793223d7def4e4b25aa65bd",
+    "contracts/src/bet/tournament/PokerTournamentPolicyRegistry420.sol": "e193b609653e1871f55366e7926788a9d8656417b8974fb7335e1796d0972039",
+    "contracts/src/bet/BetAuthorization420.sol": "984e7bef82674a1f1b9c5a303cb90ede07d7619ae7f49664dd88f42147cf7f96",
+    "contracts/src/bet/BetOperatorRegistry420.sol": "d8b8d369b8b9b825a2f8f02fa6b7f499a9da80600fda96b9c5b130a1875d7fe8",
+    "contracts/src/apps/Identity420.sol": "f47526bce8b55d10c64fb3d8d320fc1e4dc6d43945db064e86d373adec7e0152",
+    "contracts/src/revenue/DevelopmentCompensationVault420.sol": "4f28e6fbcd71e78632ce8decee2aac2967c7117d41e7574f67f8c95ec32a3e8b",
+    "contracts/src/bet/tournament/PokerTournamentStructure420.sol": "0d261bf5a0c1ecf4e1411c18600505da79f7d4f73fc3720fe7705f4a8535c974",
+    "contracts/src/bet/tournament/PokerTournamentStructureBook420.sol": "c63cd63230eeb388782b9944328ccef5721a6a3f9cc2391c9632fbf28314a869"
+  },
+  "dispositions": {
+    "book": {
+      "cb5216c6a7b99e46678198d3474c08b59a0abf094b0123fad647701bd668815a": {
+        "severity": "High",
+        "check": "reentrancy-balance",
+        "reason": "Every external state-changing custody entry point shares the same entered mutex. Withdraw clears credit before transfer; deposits finalize entry/state effects before transfer. Exact before/after balances deliberately detect short or nonmoving ERC20 transfers. Actual hostile-token deposit and withdrawal callbacks are rejected by the mutex, and rollback/delta tests preserve credits. No external host consumes transient view balances. Raw High severity is retained; this is a local source disposition, not an independent audit."
+      },
+      "b2a0f92f50ed622c2779da3ffe282a535a97644c580d45da5baf9d089856ec6c": {
+        "severity": "High",
+        "check": "reentrancy-balance",
+        "reason": "Every external state-changing custody entry point shares the same entered mutex. Withdraw clears credit before transfer; deposits finalize entry/state effects before transfer. Exact before/after balances deliberately detect short or nonmoving ERC20 transfers. Actual hostile-token deposit and withdrawal callbacks are rejected by the mutex, and rollback/delta tests preserve credits. No external host consumes transient view balances. Raw High severity is retained; this is a local source disposition, not an independent audit."
+      },
+      "da170769dfe1deadf3f479992f1eb80c2daa3e0abfc8e0b9a1e19157740e6038": {
+        "severity": "High",
+        "check": "reentrancy-balance",
+        "reason": "Every external state-changing custody entry point shares the same entered mutex. Withdraw clears credit before transfer; deposits finalize entry/state effects before transfer. Exact before/after balances deliberately detect short or nonmoving ERC20 transfers. Actual hostile-token deposit and withdrawal callbacks are rejected by the mutex, and rollback/delta tests preserve credits. No external host consumes transient view balances. Raw High severity is retained; this is a local source disposition, not an independent audit."
+      },
+      "f4857782760d576786b3f1ff5140aae30eeb73660a021b8faa463387b0710ba9": {
+        "severity": "High",
+        "check": "reentrancy-balance",
+        "reason": "Every external state-changing custody entry point shares the same entered mutex. Withdraw clears credit before transfer; deposits finalize entry/state effects before transfer. Exact before/after balances deliberately detect short or nonmoving ERC20 transfers. Actual hostile-token deposit and withdrawal callbacks are rejected by the mutex, and rollback/delta tests preserve credits. No external host consumes transient view balances. Raw High severity is retained; this is a local source disposition, not an independent audit."
+      },
+      "ed707161c1385182efbdc79467e5a6f3ff78c634384d136c77718a39a1c41cb4": {
+        "severity": "High",
+        "check": "uninitialized-state",
+        "reason": "Inherited Identity420 candidate arrays are Solidity storage mappings of initially empty arrays. issueCredential pushes canonical credential IDs into the subject/type array; pruning/removal operate that same storage. No constructor initialization is required for mapping/dynamic-array defaults. Funded tests create real profiles and issuer credentials and exercise valid, expired, revoked, wrong-type and low-trust reads. The inherited source is unchanged from main."
+      },
+      "873d3ddb3832f31eab64b0d3d3887ce872178361fd57e65d709faeb6bcd84b2b": {
+        "severity": "Medium",
+        "check": "divide-before-multiply",
+        "reason": "Inherited quotient plus remainder is exactly floor(3*buyIn/100), without uint256 multiplication overflow. New uint128 quote fuzz independently compares uint256(stake)*3/100. Inherited source and previous 5C.1 evidence remain unchanged."
+      },
+      "140b25435556d2f01d8ae4845afd4c32ef78d5b3194a274d86ab65be33c82ca6": {
+        "severity": "Medium",
+        "check": "incorrect-equality",
+        "reason": "These are identifier/state sentinels, not token-balance equality. Zero subject means nonexistent canonical credential; State.NONE means nonexistent escrow event. Exact equality is required to reject unknown objects. Actual identity and unknown-event negative tests exercise those branches."
+      },
+      "e7d02c51107cc1e6cb0a194a9b7d5bc123fe9779dbf044a476aa876aa83964c3": {
+        "severity": "Medium",
+        "check": "incorrect-equality",
+        "reason": "These are identifier/state sentinels, not token-balance equality. Zero subject means nonexistent canonical credential; State.NONE means nonexistent escrow event. Exact equality is required to reject unknown objects. Actual identity and unknown-event negative tests exercise those branches."
+      },
+      "dcd686f3d957950a72af804dfd5fd58c28ef48619329a1de7b9ad5fa6cbcbae4": {
+        "severity": "Medium",
+        "check": "incorrect-equality",
+        "reason": "These are identifier/state sentinels, not token-balance equality. Zero subject means nonexistent canonical credential; State.NONE means nonexistent escrow event. Exact equality is required to reject unknown objects. Actual identity and unknown-event negative tests exercise those branches."
+      },
+      "76ee1d83587632d4106667bf9949d15a4c7dee667fa1436a835dc7fd02441e7c": {
+        "severity": "Medium",
+        "check": "unused-return",
+        "reason": "Tuple components are intentionally unused metadata. Admission validates active current controller, credential subject/type/issuer, nonzero issuer-attested person claim and canonical VERIFIED trust/validity. Expires/revokes/issuer activation are enforced through credentialMeetsTrust. Original payer is frozen separately for refunds; controller metadata cannot redirect payment."
+      },
+      "b52c20cb9436631579db0835431998ce93d984f154ce50cf354f7b48e715ee58": {
+        "severity": "Medium",
+        "check": "unused-return",
+        "reason": "Tuple components are intentionally unused metadata. Admission validates active current controller, credential subject/type/issuer, nonzero issuer-attested person claim and canonical VERIFIED trust/validity. Expires/revokes/issuer activation are enforced through credentialMeetsTrust. Original payer is frozen separately for refunds; controller metadata cannot redirect payment."
+      }
+    },
+    "clock": {}
+  }
+}

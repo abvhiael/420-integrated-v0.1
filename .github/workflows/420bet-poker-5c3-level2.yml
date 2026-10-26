@@ -1,0 +1,47 @@
+name: 420Bet Poker 5C.3 stacks blinds and levels Level 1 and 2
+on:
+  push:
+    branches: ['bet/5c3-stacks-blinds-levels']
+    paths:
+      - 'contracts/src/bet/tournament/PokerTournamentStructure420.sol'
+      - 'contracts/src/bet/tournament/PokerTournamentStructureBook420.sol'
+      - 'contracts/test/tournament-5c3/**'
+      - 'scripts/bet/qualify-poker-5c3.py'
+      - 'scripts/bet/poker-5c3-static-review.json'
+      - '.github/workflows/420bet-poker-5c3-level2.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: poker-5c3-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  structures-and-funded-stacks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.8.6
+      - name: Install pinned analyzer and compiler
+        run: |
+          python -m pip install slither-analyzer==0.11.6
+          solc-select install 0.8.30
+          solc-select use 0.8.30
+      - name: Bind exact implementation SHA
+        run: test "$(git rev-parse HEAD)" = "${{ github.sha }}"
+      - name: Execute native and funded qualification and inherited regression
+        run: python scripts/bet/qualify-poker-5c3.py --output artifacts/poker-5c3
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: poker-5c3-${{ github.sha }}
+          path: artifacts/poker-5c3/**
+          if-no-files-found: error

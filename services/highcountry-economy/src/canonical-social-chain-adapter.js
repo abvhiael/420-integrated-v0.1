@@ -172,10 +172,10 @@ export class CanonicalSocialChainAdapter {
   const verified=await this.verifySignedEnvelope(raw);
   if(!verified||address(verified.from)!==address(wallet)||address(verified.to)!==address(this.contracts[op.contract])||verified.input?.toLowerCase()!==expected||verified.chainId!==this.rpc.chainId||BigInt(verified.value)!==0n||!Number.isSafeInteger(verified.nonce)||verified.nonce<0)fail('prebroadcast signed intent mismatch');
   const txHash=await this.rpc.request('eth_sendRawTransaction',[raw]);
-  if(!hash(txHash))fail('canonical tx hash missing');
+  if(!hash(txHash)||txHash.toLowerCase()!==keccak256(Buffer.from(raw.slice(2),'hex')).toLowerCase())fail('signed transaction hash mismatch');
   const tx=await this.rpc.request('eth_getTransactionByHash',[txHash]);
-  if(!tx||address(tx.from)!==address(wallet)||address(tx.to)!==address(this.contracts[op.contract])
-   ||tx.input?.toLowerCase()!==expected||Number(BigInt(tx.chainId))!==this.rpc.chainId||BigInt(tx.value)!==0n)fail('signed social transaction intent mismatch');
+  if(!tx||tx.hash?.toLowerCase()!==txHash.toLowerCase()||address(tx.from)!==address(wallet)||address(tx.to)!==address(this.contracts[op.contract])
+   ||tx.input?.toLowerCase()!==expected||Number(BigInt(tx.chainId))!==this.rpc.chainId||BigInt(tx.value)!==0n||BigInt(tx.nonce)!==BigInt(verified.nonce))fail('signed social transaction intent mismatch');
   return {hash:txHash,signer:address(tx.from),chainId:this.rpc.chainId,isFundTransfer:false};
  }
  async finalizedReceipt({hash:txHash,wallet,action}){

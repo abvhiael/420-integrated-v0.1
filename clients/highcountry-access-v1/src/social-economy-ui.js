@@ -5,7 +5,9 @@ function section(title,parent){const s=el('section','hc-social-section');s.appen
 function actionForm(parent,controller,{label,action,fields=[],refresh}) {
  const form=el('form','hc-social-form'),inputs={};form.append(el('h4','',label));
  for(const name of fields){const f=field(name);inputs[name]=f.input;form.append(f.element);}
- const b=el('button','',label);b.type='submit';form.append(b);parent.append(form);
+ const b=el('button','',label);b.type='submit';
+ if(!ENABLED_ACTIONS.has(action)){b.disabled=true;b.title='Operation pending canonical on-chain authorization qualification';form.setAttribute('aria-disabled','true');}
+ form.append(b);parent.append(form);
  form.addEventListener('submit',async event=>{
   event.preventDefault();b.disabled=true;
   try{const payload=Object.fromEntries(Object.entries(inputs).map(([k,v])=>[k,v.value.trim()]));await controller.act(action,payload);form.reset();await refresh();}
@@ -13,6 +15,8 @@ function actionForm(parent,controller,{label,action,fields=[],refresh}) {
   finally{b.disabled=false;}
  });
 }
+// Keep unsupported methods visible as unavailable, never as actionable promises.
+const ENABLED_ACTIONS=new Set(['organization.create','organization.invite','organization.invitation.revoke','organization.join','organization.leave','organization.remove','organization.leader.propose','organization.leader.accept','cooperative.create','cooperative.enroll','cooperative.withdraw']);
 const forms={
  createOrganization:['id','metadataHash'],invite:['organization','account'],revokeInvitation:['organization','account'],join:['organization'],
  leave:['organization'],remove:['organization','account'],proposeLeader:['organization','candidate'],acceptLeader:['organization'],

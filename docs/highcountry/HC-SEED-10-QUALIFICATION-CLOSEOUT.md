@@ -41,3 +41,9 @@ HC-SEED-01–07 were merged through PR #838 (`d8f16751691f32bd0821c1ff9f9394960e
 - Qualify production-equivalent testnet payment, provider availability, finality, recovery, privacy and operational monitoring. Keep existing unresolved runtime templates fail-closed until actual evidence exists.
 
 Merge of this closeout does not activate purchases, issue real seeds, declare live registration, expand the museum, alter 60/30/10 odds or convert BUDS into redeemable currency.
+
+## Final qualified implementation
+
+Qualified source SHA: `4ef5755a2d21ab1d979d029d371cf2446dfbdaa6`. Dedicated Level 3 run [40385133442](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/40385133442) passed all three jobs: source/genome/art `121791273357`, runtime integration `121791272946`, canonical lifecycle `121791273403`. Results: 49 catalogue/research checks, 45 Python genetics checks, 115 runtime/UI checks, 52 actual-contract cases, four real PostgreSQL lifecycle suites, 146 PNG integrity and public-URL checks, and both real Chromium flows. The rare evidence independently verifies all 728 loci and 49 registrations in disposable test contracts.
+
+Closeout PR: [#860](https://github.com/abvhiael/420-integrated-v0.1/pull/860). The evidence ledger embeds the actual CI JSON reports, all image SHA-256/geometry records, chain trace and rare breeding evidence so artifact expiry cannot erase them. The evidence/documentation-only descendant inherits the above qualified source after exact diff review; no runtime, contract, policy or asset bytes change. Live activation remains blocked as documented above.

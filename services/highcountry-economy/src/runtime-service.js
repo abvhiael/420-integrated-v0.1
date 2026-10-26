@@ -1,3 +1,5 @@
+import {SeedPurchases} from './seed-purchases.js';
+import {SeedPaymentReader} from './seed-payment-reader.js';
 import {SeedOpenings} from './seed-openings.js';
 import {SeedOpeningChainReader} from './seed-opening-chain-reader.js';
 import {SeedOpeningWorker} from './seed-opening-worker.js';
@@ -29,7 +31,7 @@ async function requireLeastPrivilegeRuntimeRole(pool,namespace) {
 }
 
 /// Composition uses one provisioned durable namespace and independently configured canonical RPC/signer/issuer policy.
-export async function createRuntime({pool,namespace,authority:authConfig,rpc:rpcConfig,sources,marketDomain,operator,issuer,signerRpc,clock,progression,missions,discovery,landRights,social,seedCatalogue,seedPacks,seedOpenings}){
+export async function createRuntime({pool,namespace,authority:authConfig,rpc:rpcConfig,sources,marketDomain,operator,issuer,signerRpc,clock,progression,missions,discovery,landRights,social,seedCatalogue,seedPacks,seedOpenings,seedPurchases}){
  await requireLeastPrivilegeRuntimeRole(pool,namespace);
  const store=new PostgresBudsStore(pool,namespace),rpc=new FinalizedRpc(rpcConfig);
  for(const [name,policy] of Object.entries(sources))if(address(rpc.contracts[name]?.address)!==address(policy.contract))throw new SettlementError('source contract mismatch');
@@ -63,11 +65,13 @@ export async function createRuntime({pool,namespace,authority:authConfig,rpc:rpc
  const seedPackService=seedPacks?new SeedPacks({store,identity,catalogue:seedCatalogueService,reader:new SeedChainReader({...seedCatalogue,rpc:identity.rpc}),clock}):null;
  if(seedOpenings&&(!seedPackService||seedOpenings.version!=='HC.SEED.OPENINGS.V1'))throw new SettlementError('unapproved opening runtime');
  const seedOpeningService=seedOpenings?new SeedOpenings({packs:seedPackService,reader:new SeedOpeningChainReader({...seedOpenings,rpc:identity.rpc,catalogue:seedCatalogueService,gameId:identity.gameId}),clock}):null;
- return {store,identity,rewards,market,seedOpenings:seedOpeningService,seedPacks:seedPackService,seedCatalogue:seedCatalogueService,seedCollection,marketView:new HighCountryMarketplaceView({store,identity,market,clock}),skillResearch,missionService,discoveryService,landRightsService,gameplayLicensing,socialGateway,seedOpeningWorker:seedOpeningService?new SeedOpeningWorker({openings:seedOpeningService,signerRpc,operator,clock}):null,seedIssuanceWorker:seedPackService?new SeedIssuanceWorker({packs:seedPackService,reader:seedPackService.reader,rpc,signerRpc,operator,clock}):null,...chain};
+ if(seedPurchases&&(!seedOpeningService||seedPurchases.version!=='HC.SEED.PURCHASES.V1'))throw new SettlementError('unapproved seed purchase runtime');
+ const seedPurchaseService=seedPurchases?new SeedPurchases({packs:seedPackService,signerRpc,reader:new SeedPaymentReader({...seedPurchases,rpc:identity.rpc,gameId:identity.gameId}),clock}):null;
+ return {store,identity,rewards,market,seedPurchases:seedPurchaseService,seedOpenings:seedOpeningService,seedPacks:seedPackService,seedCatalogue:seedCatalogueService,seedCollection,marketView:new HighCountryMarketplaceView({store,identity,market,clock}),skillResearch,missionService,discoveryService,landRightsService,gameplayLicensing,socialGateway,seedOpeningWorker:seedOpeningService?new SeedOpeningWorker({openings:seedOpeningService,signerRpc,operator,clock}):null,seedIssuanceWorker:seedPackService?new SeedIssuanceWorker({packs:seedPackService,reader:seedPackService.reader,rpc,signerRpc,operator,clock}):null,...chain};
 }
 // Production entrypoint for a wallet-optional, registered-player ordinary economy.
 // Never silently repurpose the canonical on-chain escrow settlement runtime.
-export async function createOrdinaryRuntime({pool,namespace,authority:authConfig,rpc:rpcConfig,sources,inventoryAuthority,clock,progression,missions,discovery,landRights,social,seedCatalogue,seedPacks,seedOpenings}) {
+export async function createOrdinaryRuntime({pool,namespace,authority:authConfig,rpc:rpcConfig,sources,inventoryAuthority,signerRpc,clock,progression,missions,discovery,landRights,social,seedCatalogue,seedPacks,seedOpenings,seedPurchases}) {
  await requireLeastPrivilegeRuntimeRole(pool,namespace);
  if(!inventoryAuthority||typeof inventoryAuthority.verifyAssetReceipt!=='function'
     ||typeof inventoryAuthority.requireMarketOpen!=='function')
@@ -79,10 +83,10 @@ export async function createOrdinaryRuntime({pool,namespace,authority:authConfig
    throw new SettlementError('source contract mismatch');
  const identity=new RuntimeAuthority({...authConfig,store,rpc,sourcePolicies:sources,clock});
  const rewards=new GameplayRewardRuntime({store,authority:identity,rpc,sources,clock});
- return composeOrdinaryMarketRuntime({store,identity,rewards,inventoryAuthority,clock,progression,missions,discovery,landRights,social,seedCatalogue,seedPacks,seedOpenings});
+ return composeOrdinaryMarketRuntime({store,identity,rewards,inventoryAuthority,signerRpc,clock,progression,missions,discovery,landRights,social,seedCatalogue,seedPacks,seedOpenings,seedPurchases});
 }
 // Separate ordinary market composition. The canonical runtime above remains chain-settlement-only.
-export function composeOrdinaryMarketRuntime({store,identity,rewards,inventoryAuthority,clock,progression,missions,discovery,landRights,social,seedCatalogue,seedPacks,seedOpenings}) {
+export function composeOrdinaryMarketRuntime({store,identity,rewards,inventoryAuthority,signerRpc,clock,progression,missions,discovery,landRights,social,seedCatalogue,seedPacks,seedOpenings,seedPurchases}) {
  if(typeof store?.transact!=='function'||identity?.store!==store
    ||typeof identity?.registeredPrincipal!=='function'
    ||typeof identity?.requireTrustedIssuer!=='function'
@@ -110,10 +114,12 @@ export function composeOrdinaryMarketRuntime({store,identity,rewards,inventoryAu
  const seedPackService=seedPacks?new SeedPacks({store,identity,catalogue:seedCatalogueService,reader:new SeedChainReader({...seedCatalogue,rpc:identity.rpc}),clock}):null;
  if(seedOpenings&&(!seedPackService||seedOpenings.version!=='HC.SEED.OPENINGS.V1'))throw new SettlementError('unapproved opening runtime');
  const seedOpeningService=seedOpenings?new SeedOpenings({packs:seedPackService,reader:new SeedOpeningChainReader({...seedOpenings,rpc:identity.rpc,catalogue:seedCatalogueService,gameId:identity.gameId}),clock}):null;
- return {store,identity,rewards,market,seedOpenings:seedOpeningService,seedPacks:seedPackService,seedCatalogue:seedCatalogueService,seedCollection,marketView:new HighCountryMarketplaceView({store,identity,market,clock}),skillResearch,missionService,discoveryService,landRightsService,gameplayLicensing,socialGateway};
+ if(seedPurchases&&(!seedOpeningService||seedPurchases.version!=='HC.SEED.PURCHASES.V1'))throw new SettlementError('unapproved seed purchase runtime');
+ const seedPurchaseService=seedPurchases?new SeedPurchases({packs:seedPackService,signerRpc,reader:new SeedPaymentReader({...seedPurchases,rpc:identity.rpc,gameId:identity.gameId}),clock}):null;
+ return {store,identity,rewards,market,seedPurchases:seedPurchaseService,seedOpenings:seedOpeningService,seedPacks:seedPackService,seedCatalogue:seedCatalogueService,seedCollection,marketView:new HighCountryMarketplaceView({store,identity,market,clock}),skillResearch,missionService,discoveryService,landRightsService,gameplayLicensing,socialGateway};
 }
 export function runtimeHttpServer(runtime,{origin}){
- const {identity,rewards,market,marketView,skillResearch,missionService,discoveryService,landRightsService,gameplayLicensing,socialGateway,seedCatalogue,seedCollection,seedPacks,seedOpenings,seedOpeningWorker,seedIssuanceWorker,settlement,worker}=runtime;
+ const {identity,rewards,market,marketView,skillResearch,missionService,discoveryService,landRightsService,gameplayLicensing,socialGateway,seedCatalogue,seedCollection,seedPacks,seedOpenings,seedPurchases,seedOpeningWorker,seedIssuanceWorker,settlement,worker}=runtime;
  return createServer(async(req,res)=>{
   res.setHeader('content-type','application/json');res.setHeader('cache-control','no-store');
   res.setHeader('x-content-type-options','nosniff');
@@ -145,6 +151,18 @@ export function runtimeHttpServer(runtime,{origin}){
     return res.end(JSON.stringify({ok:true,result:result??null}));
    }
    switch(req.url){
+    case '/seeds/packs/shop':
+     if(!seedPurchases||Object.keys(b).length)throw new SettlementError('seed marketplace denied');
+     result=await seedPurchases.browse(token);break;
+    case '/seeds/packs/purchase-prepare':
+     if(!seedPurchases||Object.keys(b).sort().join(',')!=='currency,operation,region')throw new SettlementError('seed purchase denied');
+     result=await seedPurchases.prepare(token,b);break;
+    case '/seeds/packs/purchase-confirm':
+     if(!seedPurchases||Object.keys(b).sort().join(',')!=='purchaseId')throw new SettlementError('seed purchase confirmation denied');
+     result=await seedPurchases.confirm(token,b.purchaseId);break;
+    case '/seeds/packs/purchase-cancel':
+     if(!seedPurchases||Object.keys(b).sort().join(',')!=='purchaseId')throw new SettlementError('seed purchase cancellation denied');
+     result=await seedPurchases.cancel(token,b.purchaseId);break;
     case '/seeds/packs/open':
      if(!seedOpenings||Object.keys(b).sort().join(',')!=='packId')throw new SettlementError('seed opening request denied');
      result=await seedOpenings.open(token,b.packId);break;

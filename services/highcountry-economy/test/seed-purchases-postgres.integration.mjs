@@ -1,0 +1,24 @@
+import assert from 'node:assert/strict';import pg from 'pg';import {readFile} from 'node:fs/promises';
+import {PostgresBudsStore} from '../src/postgres-store.js';import {purchaseFixture} from './seed-purchases.fixture.mjs';import {SeedPurchases} from '../src/seed-purchases.js';import {SeedPacks} from '../src/seed-packs.js';import {SeedOpenings} from '../src/seed-openings.js';import {SeedOpeningWorker} from '../src/seed-opening-worker.js';
+const url=process.env.HC_TEST_POSTGRES_URL;if(!url)throw Error('dedicated PostgreSQL required');const admin=new pg.Pool({connectionString:url,max:4}),role='hc_seed09_'+process.pid,foreign=role+'_other';let pool;
+const empty={schema:1,balances:[],operations:[],claims:[],sourceIssued:[],assets:[],assetSources:[],listings:[],transferIntents:[],importedAssets:[],issued:0,burned:0};
+try{
+ for(const name of ['001_buds_state.sql','002_runtime_namespace_rls.sql'])await admin.query(await readFile(new URL('../migrations/'+name,import.meta.url),'utf8'));
+ await admin.query('CREATE ROLE '+role+" LOGIN PASSWORD 'seed09_disposable_only'");await admin.query('GRANT USAGE ON SCHEMA public TO '+role);await admin.query('GRANT SELECT, UPDATE ON highcountry_buds_state TO '+role);
+ for(const ns of [role,foreign])await admin.query('INSERT INTO highcountry_buds_state(namespace,state) VALUES($1,$2::jsonb)',[ns,JSON.stringify(empty)]);
+ const runtimeUrl=new URL(url);runtimeUrl.username=role;runtimeUrl.password='seed09_disposable_only';pool=new pg.Pool({connectionString:runtimeUrl.toString(),max:8});
+ const f=await purchaseFixture({store:new PostgresBudsStore(pool,role)});await f.fund(840);
+ const race=await Promise.allSettled(Array.from({length:12},()=>f.purchases.prepare(f.alice,{operation:'race:one',currency:'BUDS',region:'World'})));assert.ok(race.some(x=>x.status==='fulfilled'));
+ const p=await f.purchases.prepare(f.alice,{operation:'race:one',currency:'BUDS',region:'World'});
+ await Promise.allSettled(Array.from({length:12},()=>f.purchases.confirm(f.alice,p.id)));
+ // Independent identity/service/store instance must recover the same debit and pack after a lost response.
+ const store=new PostgresBudsStore(pool,role),identity=Object.create(Object.getPrototypeOf(f.identity));Object.assign(identity,f.identity,{store});
+ const packs=new SeedPacks({store,identity,catalogue:f.catalogue,reader:f.genomeReader}),openings=new SeedOpenings({packs,reader:f.reader}),purchases=new SeedPurchases({packs,reader:f.paymentReader,signerRpc:f.purchases.signerRpc}),worker=new SeedOpeningWorker({openings,signerRpc:f.worker.signerRpc,operator:f.worker.operator});
+ const first=await purchases.confirm(f.alice,p.id);const native=await purchases.prepare(f.alice,{operation:'native:one',currency:'420',region:'World'});assert.equal((await purchases.confirm(f.alice,native.id)).status,'pending');f.pay(native);
+ const second=await purchases.confirm(f.alice,native.id);assert.equal((await purchases.confirm(f.alice,native.id)).packId,second.packId);
+ for(const paid of [first,second]){const i=await openings.open(f.alice,paid.packId);await worker.tick(f.alice,paid.packId);f.prove(i.openingKey);await worker.tick(f.alice,paid.packId);await openings.reconcile(f.alice,paid.packId);const lot=await packs.prepare(f.alice,paid.packId);f.genomeReader.issuedLot=async i=>({fixtureOnly:true,lotId:i.lotId});await packs.confirm(f.alice,paid.packId);assert.equal((await purchases.historyOne(f.alice,paid.id)).delivery.lotId,lot.lotId);}
+ const state=await new PostgresBudsStore(pool,role).transact(s=>({purchases:s.seedPurchases.size,packs:s.seedPacks.size,lots:s.seedLotIntents.size,burned:s.burned,issued:s.issued,available:s.balances.get('alice').available,packHolds:[...s.seedPurchaseHolds.values()].reduce((a,b)=>a+b,0),seedHolds:[...s.seedOpeningHolds.values()].reduce((a,b)=>a+b,0),delivered:[...s.seedLotIntents.values()].filter(x=>x.status==='issued').length,assets:s.assets.size}));
+ assert.deepEqual(state,{purchases:2,packs:2,lots:2,burned:420,issued:840,available:420,packHolds:0,seedHolds:0,delivered:2,assets:0});
+ assert.equal((await pool.query('SELECT * FROM highcountry_buds_state WHERE namespace=$1',[foreign])).rows.length,0);await assert.rejects(new PostgresBudsStore(pool,foreign).transact(()=>null),/unprovisioned/);await assert.rejects(pool.query('ALTER TABLE highcountry_buds_state ADD COLUMN forbidden text'));
+ console.log('HC-SEED-09 PostgreSQL: racing checkout/payment, independent restart, one BUDS debit, exact native receipt, two owned packs, two once-only openings/lots, durable delivery history, conserved currency and restricted-role/RLS PASS');
+}finally{if(pool)await pool.end();await admin.query('DELETE FROM highcountry_buds_state WHERE namespace IN ($1,$2)',[role,foreign]).catch(()=>{});await admin.query('DROP OWNED BY '+role).catch(()=>{});await admin.query('DROP ROLE '+role).catch(()=>{});await admin.end();}

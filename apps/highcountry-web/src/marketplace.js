@@ -70,6 +70,7 @@ export function mountMarketplace({document,main,runtime,authenticate,fetchImpl=f
    ?'Internal BUDS marketplace · no wallet needed · zero transaction fee.'
    :'Canonical escrow marketplace · separate wallet authorization and finalized chain confirmation required.'));
   region.append(el('p','BUDS available: '+data.buds.available+' · reserved: '+data.buds.reserved));
+  const seedLink=el('a','Seed packs · regional and World · 420 BUDS or 1 $420');seedLink.href='/seeds#seed-pack-marketplace';region.append(seedLink);
   const premium=section('Premium comfort & regional furniture');
   premium.append(el('p','Visual catalogue only. Prices and availability require authenticated server-verified listings.'));
   for(const asset of premiumFurnitureCatalogue){

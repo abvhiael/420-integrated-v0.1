@@ -25,7 +25,7 @@ export class SeedPacks {
   if(c.sub!==principal||s.runtimeAccounts?.get(principal)?.issuer!==c.iss||(s.runtimeEpochs?.get(principal)??0)!==c.epoch)fail('seed issuance session revoked');
   if(operator&&!this.identity.issuers[c.iss]?.operators?.[principal]?.sources?.includes('seed-packs'))fail('seed pack issuer denied');
  }
- policy(){return {policy:structuredClone(SEED_PACK_POLICY),pools:structuredClone(Object.fromEntries(this.pools)),purchaseStatus:'awaiting-HC-SEED-09',openingStatus:this.openingsEnabled?'canonical-persistent-opening':'standard-packs-await-HC-SEED-08'};}
+ policy(){return {policy:structuredClone(SEED_PACK_POLICY),pools:structuredClone(Object.fromEntries(this.pools)),purchaseStatus:this.purchasesEnabled?'canonical-seed-market':'awaiting-HC-SEED-09',openingStatus:this.openingsEnabled?'canonical-persistent-opening':'standard-packs-await-HC-SEED-08'};}
  async inventory(token){const principal=await this.identity.registeredPrincipal(token);return this.store.transact(s=>{this.guard(s,token,principal);seedPackState(s);return {policyVersion:SEED_PACK_POLICY.version,starterClaimed:s.seedStarterGrants.has(principal),packs:[...s.seedPacks.values()].filter(p=>p.owner===principal).map(p=>structuredClone(p)),lots:[...s.seedLotIntents.values()].filter(p=>p.owner===principal).map(p=>structuredClone(p))};});}
  create(s,{packId,owner,region,source,starterCultivarId=null}){
   if(s.seedPacks.has(packId))fail('duplicate seed pack');
@@ -57,7 +57,7 @@ export class SeedPacks {
    const key='allocation:'+receiptId,request={owner,region,count};const old=s.seedPackSources.get(key);
    if(old){if(JSON.stringify(old.request)!==JSON.stringify(request)||old.issuer!==issuer)fail('seed source replay mismatch');return old.packIds.map(id=>structuredClone(s.seedPacks.get(id)));}
    const supplyKey='standard:'+region,previous=used(s,supplyKey);
-   if(previous+count>SEED_PACK_POLICY.standardLimitPerPool)fail('pack supply exhausted');
+   if(previous+count+(s.seedPurchaseHolds?.get(region)??0)>SEED_PACK_POLICY.standardLimitPerPool)fail('pack supply exhausted');
    const source={kind:'authorized-allocation',receiptId,issuer,policyVersion:SEED_PACK_POLICY.version};
    const packs=Array.from({length:count},(_,i)=>this.create(s,{packId:'pack:'+hash([this.identity.gameId,key,i]).slice(2),owner,region,source}));
    s.seedSupply.set(supplyKey,previous+count);s.seedPackSources.set(key,{issuer,request,packIds:packs.map(p=>p.id),source});return packs;
@@ -71,9 +71,11 @@ export class SeedPacks {
    return {intents:rows.slice(0,limit).map(i=>structuredClone(i)),next:rows.length>limit?rows[limit-1].packId:null};
   });
  }
+ async verifyPurchase(pack,wallet){if(pack.source?.kind==='settled-purchase'){if(!this.purchaseVerifier)fail('purchase payment verifier required');await this.purchaseVerifier.checkPack(pack,wallet);}}
  async prepare(token,packId){
   if(!valid(packId))fail('invalid seed pack');const principal=await this.identity.registeredPrincipal(token);
   const pack=await this.store.transact(s=>{this.guard(s,token,principal);seedPackState(s);const p=s.seedPacks.get(packId);if(!p||p.owner!==principal)fail('pack ownership required');return structuredClone(p);});
+  await this.verifyPurchase(pack);
   const opening=pack.starterCultivarId?null:await this.store.transact(s=>{this.guard(s,token,principal);const o=s.seedOpenings?.get(packId);if(o?.status!=='fulfilled')fail('canonical HC-SEED-08 pack outcome required');return structuredClone(o);});
   if(opening){const proof=await this.openingVerifier?.read(opening);if(!proof?.fulfilled||proof.requestId!==opening.requestId||proof.proofHash!==opening.outcome.proofHash||proof.entropy!==opening.outcome.entropy)fail('current canonical opening evidence required');}
   const cultivarId=pack.starterCultivarId??opening.outcome.cultivarId;

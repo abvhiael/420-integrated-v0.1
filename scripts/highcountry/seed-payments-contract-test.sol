@@ -83,8 +83,7 @@ contract SeedPaymentsQualificationTest {
 
     function testQuoteCannotReplayAcrossPaymentDeployments() public {
         bytes memory data = payload(KEY, COMMIT, 3);
-        SeedPackPayments other =
-            new SeedPackPayments(
+        SeedPackPayments other = new SeedPackPayments(
             keccak256("game"), keccak256("policy"), address(this), address(emergency), vm.addr(0x420)
         );
         vm.prank(BUYER);

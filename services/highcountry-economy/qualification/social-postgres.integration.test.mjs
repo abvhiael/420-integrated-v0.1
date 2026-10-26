@@ -33,5 +33,13 @@ test('SOC-5B real Postgres 16: RLS tenant isolation, restrictions, journal uniqu
    assert.equal(r.rows.length,1);assert.equal(r.rows[0].state,'prepared');assert.equal(r.rows[0].raw_transaction,'0x1234');
    await reopened.query('ROLLBACK');
   }finally{reopened.release();}
+  const afterRestart=await pool.connect();
+  try{
+   await afterRestart.query('BEGIN');await afterRestart.query('SET LOCAL ROLE '+role);
+   assert.equal((await afterRestart.query('SELECT state FROM highcountry_social_intents WHERE tx_hash=$1',[tx])).rows[0].state,'broadcast');
+   const duplicate=await afterRestart.query("INSERT INTO highcountry_social_intents(scope,tx_hash,principal,wallet,action,raw_transaction) VALUES ($1,$2,'p','w','organization.join','0x1234') ON CONFLICT DO NOTHING",[a,tx]);
+   assert.equal(duplicate.rowCount,0,'replay must not create a second journal entry');
+   await afterRestart.query('ROLLBACK');
+  }finally{afterRestart.release();}
  }finally{admin.release();await pool.end();}
 });

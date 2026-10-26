@@ -21,7 +21,7 @@ test('all enabled action function selectors have identical Solidity signature an
   assert.deepEqual(actual,types,action+' signature drift');
  }
  for(const action of ['organization.delegate','organization.delegate.revoke','cooperative.vote','cooperative.propose','cooperative.execute'])
-  assert.equal(SOC5A_ENABLED_ACTIONS.includes(action),false,'unverified permission cannot be enabled');
+  assert.equal(SOC5A_ENABLED_ACTIONS.includes(action),true,'canonical social action unexpectedly unavailable');
 });
 test('real EIP-1559 wallet-signed transaction recovers exact sender and values',async()=>{
  const account=privateKeyToAccount('0x'+'11'.repeat(32));

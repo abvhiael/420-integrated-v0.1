@@ -18,9 +18,9 @@ contract PokerTournamentPrizeModule420 is PokerTournamentFinanceModule420 {
         if(f.loaded==f.unique)f.mode=Mode.ALLOCATING;
     }
     function allocatePrizes(bytes32 id,uint32 limit)external onlyBank guarded{
-        Financial storage f=_financial().events[id];if(f.mode!=Mode.ALLOCATING||limit==0||limit>8)revert Invalid();uint16[] memory weights=prizePolicies.select(configs[id].payoutPolicy,f.unique);uint256 remainder=PokerTournamentPrizeMath420.dust(f.prize,weights);PokerTournamentPrizeMath420.Rank[] memory snapshot=PokerTournamentPrizeMath420.snapshot(f.rows);
+        Financial storage f=_financial().events[id];if(f.mode!=Mode.ALLOCATING||limit==0||limit>8)revert Invalid();uint16[] memory weights=prizePolicies.select(configs[id].payoutPolicy,f.unique);PokerTournamentPrizeMath420.Totals memory prefix=PokerTournamentPrizeMath420.totals(f.prize,weights);PokerTournamentPrizeMath420.Rank[] memory snapshot=PokerTournamentPrizeMath420.snapshot(f.rows);
         for(uint32 n;n<limit&&f.allocated<f.unique;n++){
-            uint32 index=f.allocated++;PokerTournamentPrizeMath420.Row storage r=f.rows[index];r.amount=PokerTournamentPrizeMath420.assign(snapshot,index,f.prize,weights,remainder);f.allocatedSum+=r.amount;if(r.amount!=0)f.positiveClaims++;
+            uint32 index=f.allocated++;PokerTournamentPrizeMath420.Row storage r=f.rows[index];r.amount=PokerTournamentPrizeMath420.assign(snapshot,index,prefix);f.allocatedSum+=r.amount;if(r.amount!=0)f.positiveClaims++;
             f.financialRoot=keccak256(abi.encode(f.financialRoot,r.person,r.payee,r.receipt,r.first,r.last,r.amount));emit C7PrizeRow(id,r.person,r.payee,r.receipt,r.first,r.last,r.amount,f.financialRoot);
         }
         if(f.allocated==f.unique){EventAccount storage e=events_[id];if(f.allocatedSum!=f.prize||e.prize!=f.prize||e.fees!=f.fees)revert Invalid();e.fees=0;e.sponsored=0;heldFees-=f.fees;_credit(id,developmentFund,f.fees);emit C7FinancialCredit(id,1,0,0,developmentFund,0,f.fees);f.mode=f.prize==0?Mode.PAID:Mode.CLAIMABLE;_solvent();emit C7FinancialState(id,uint8(f.mode),f.financialRoot,f.prize,f.fees);}

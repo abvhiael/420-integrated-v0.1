@@ -20,7 +20,7 @@ Recovery freezes the receipt boundary, returns the sponsored remainder to its or
 
 ## Qualification ownership
 
-Level 1 covers immutable policy publication, deterministic arithmetic, hostile-token custody, access boundaries, bounded allocation, source identities and reviewed static findings. Native 576-player arithmetic snapshots exercise the same allocation function but cannot authenticate hands or release funds; they do not claim genuine 576-player gameplay.
+Level 1 covers immutable policy publication, deterministic arithmetic, hostile-token custody, access boundaries, bounded allocation, source identities and reviewed static findings. A single cumulative prize table per chunk avoids repeated payout-band scans. Native 576-player arithmetic snapshots with all 576 places paid exercise the same allocation function but cannot authenticate hands or release funds; they do not claim genuine 576-player gameplay.
 
 Level 2 runs funded native-backed $420 tournaments with actual Identity authority, independently funded provider bonds, the retained seven Groth16 proving relations and generated verifiers, authenticated actions, verified cards, independent pot/standing/prize replay and actual beneficiary withdrawals. Owners cover paid re-entry, paid rebuy, free sponsored odd-unit ties and two-player winner-take-all, plus genuine recovery of extra purchases, queued receipts, pending rebuy choices, simultaneous live/aborted tables and sponsored prizes. Every context proof is reused only after its public statement and actual verification match; otherwise a genuine proof is generated using the original setup.
 

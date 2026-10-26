@@ -42,7 +42,7 @@ def main():
     suites=json.loads(r.stdout.decode('utf-8-sig'));tests=[(s,n,t) for s,v in suites.items() for n,t in v['test_results'].items()]
     expected=set()
     for file in (ROOT/'contracts/test/tournament-5c7').glob('*.sol'):expected.update(re.findall(r'function\s+(test\w+)\s*\(',file.read_text(encoding='utf-8')))
-    if len(tests)!=77 or {n.split('(')[0] for s,n,t in tests}!=expected or any(t['status']!='Success' for s,n,t in tests):raise RuntimeError('Incomplete funded/native C7 inventory')
+    if len(tests)!=78 or {n.split('(')[0] for s,n,t in tests}!=expected or any(t['status']!='Success' for s,n,t in tests):raise RuntimeError('Incomplete funded/native C7 inventory')
     old=[]
     r=execute(cmd+['--match-contract','^Tournament(PurchasesFunded|RebuyPurchasesFunded|PurchaseQueue|PurchasePolicy|PurchaseAssetAttack)420Test$','--json'],ROOT/'contracts',dict(env,FOUNDRY_PROFILE='tournament5c6',FOUNDRY_TEST='test/tournament-5c6'),out,'inherited-c6-tests')
     retained6=[(s,n,t)for s,v in json.loads(r.stdout.decode('utf-8-sig')).items()for n,t in v['test_results'].items()]
@@ -78,9 +78,9 @@ def main():
     if len(identities)!=7 or not re.search(r'emit C7RuntimeIdentity\(',traces['legitimate']):raise RuntimeError('Missing executed verifier/runtime identities')
     write(out,'executed-verifier-identities.json',identities)
     execute(cmd+['--match-contract','^TournamentPrizeCapacity420Test$','--match-test','testFull576PlayerTieUsesBoundedEightRowChunks','-vvvv'],ROOT/'contracts',env,out,'capacity-trace')
-    trace=(out/'capacity-trace.stdout.log').read_text(encoding='utf-8-sig');chunks=re.findall(r'emit PrizeAllocationChunkGas\(players: 576, chunk: 8, measuredGas: (\d+)(?: \[[^\]]+\])?, conservativeColdBound: (\d+)',trace)
+    trace=(out/'capacity-trace.stdout.log').read_text(encoding='utf-8-sig');chunks=re.findall(r'emit PrizeAllocationChunkGas\(players: 576, paidPlaces: 576, chunk: 8, measuredGas: (\d+)(?: \[[^\]]+\])?, conservativeColdBound: (\d+)',trace)
     if len(chunks)!=72 or any(int(bound)>=15000000 for measured,bound in chunks):raise RuntimeError('Incomplete bounded prize allocation evidence')
-    write(out,'capacity-gas.json',{'nativePlayers':576,'chunk':8,'chunks':72,'maximumMeasuredGas':max(int(x[0])for x in chunks),'maximumConservativeColdBound':max(int(x[1])for x in chunks),'genuine576PlayerHandsClaimed':False})
+    write(out,'capacity-gas.json',{'nativePlayers':576,'paidPlaces':576,'chunk':8,'chunks':72,'maximumMeasuredGas':max(int(x[0])for x in chunks),'maximumConservativeColdBound':max(int(x[1])for x in chunks),'genuine576PlayerHandsClaimed':False})
     from Crypto.Hash import keccak
     def k256(data):h=keccak.new(digest_bits=256);h.update(data);return h.hexdigest()
     closure={};artifacts={}
@@ -118,6 +118,6 @@ def main():
     write(out,'static-review.json',{'rawHigh':sum(f['impact']=='High' for f in severe),'rawMedium':sum(f['impact']=='Medium' for f in severe),'unreviewedHighMedium':0,'review':review,'independentAudit':False})
     if git('rev-parse','HEAD')!=head or git('status','--porcelain','--',*SCOPE) or any(sha(ROOT/f)!=h for f,h in {**sources,**closure}.items()):raise RuntimeError('Source drift')
     evidence={f.relative_to(out).as_posix():sha(f) for f in out.rglob('*') if f.is_file() and not any(x in f.relative_to(out).parts for x in ['build','cache'])}
-    report={'schema':'420-poker-5c7-genuine-finance-v1','qualifiedSHA':head,'reconciledMain':BASE,'tree':git('rev-parse','HEAD^{tree}'),'level1Accepted':True,'fundedTournamentLevel2Accepted':True,'testsPassed':{'c7':77,'inheritedNative':354,'inheritedReference':43,'total':474},'genuineProofsVerified':574,'inheritedGenuineProofsVerified':864,'fuzzRuns':fuzz,'retainedRandomizedReferenceCases':1000,'independentReplayTamperCases':10,'genuineTournamentHandIntegrationAccepted':True,'liveConsolidationAccepted':True,'liveOrdinaryBalancingAccepted':True,'receiptFundedExtraPurchasesAccepted':True,'prizeExecutionAccepted':True,'canonicalFullRefundRecoveryAccepted':True,'externalProviderIndependenceAccepted':False,'productionTrustedCeremonyAccepted':False,'officialTestnetAccepted':False,'productionApproved':False,'sourceSHA256':sources,'compiledSourceClosureSHA256':closure,'evidenceSHA256':evidence,'completedAt':datetime.now(timezone.utc).isoformat()}
+    report={'schema':'420-poker-5c7-genuine-finance-v1','qualifiedSHA':head,'reconciledMain':BASE,'tree':git('rev-parse','HEAD^{tree}'),'level1Accepted':True,'fundedTournamentLevel2Accepted':True,'testsPassed':{'c7':78,'inheritedNative':354,'inheritedReference':43,'total':475},'genuineProofsVerified':574,'inheritedGenuineProofsVerified':864,'fuzzRuns':fuzz,'retainedRandomizedReferenceCases':1000,'independentReplayTamperCases':10,'genuineTournamentHandIntegrationAccepted':True,'liveConsolidationAccepted':True,'liveOrdinaryBalancingAccepted':True,'receiptFundedExtraPurchasesAccepted':True,'prizeExecutionAccepted':True,'canonicalFullRefundRecoveryAccepted':True,'externalProviderIndependenceAccepted':False,'productionTrustedCeremonyAccepted':False,'officialTestnetAccepted':False,'productionApproved':False,'sourceSHA256':sources,'compiledSourceClosureSHA256':closure,'evidenceSHA256':evidence,'completedAt':datetime.now(timezone.utc).isoformat()}
     write(out,'qualification.json',report);print(json.dumps({k:report[k] for k in ['qualifiedSHA','level1Accepted','fundedTournamentLevel2Accepted','testsPassed']}),flush=True)
 if __name__=='__main__':main()

@@ -32,8 +32,8 @@
     "contracts/src/bet/tournament/settlement/PokerTournamentFinancialKeeper420.sol": "3dc02dabca1eee47a2fcceea264a03d01428b78fbfdb62aea4d20febc2206a2e",
     "contracts/src/bet/tournament/settlement/PokerTournamentPrizeEscrow420.sol": "726126ba9b918d7414fd3dba7ba3d6c6a4767346c294eb8f37e351f0bc591c50",
     "contracts/src/bet/tournament/settlement/PokerTournamentPrizeHost420.sol": "1e1c44e5bd957d207cfb8a66f1ad74cf9a14a6a6666ec5d0300f7cb8d4ac1490",
-    "contracts/src/bet/tournament/settlement/PokerTournamentPrizeMath420.sol": "564f9e853d6e7c7a19cbd664ca94d87148bc465a6652322f86f184a7525e533c",
-    "contracts/src/bet/tournament/settlement/PokerTournamentPrizeModule420.sol": "b0ec19a1e306b9758a73d8849fe3272aee7d7f78bc65d22846842ac2daa03fc1",
+    "contracts/src/bet/tournament/settlement/PokerTournamentPrizeMath420.sol": "c5b8ab1665cb5cef4ea0f8a43d62259a2fbfe7b79706d4b5c01b78d674864366",
+    "contracts/src/bet/tournament/settlement/PokerTournamentPrizeModule420.sol": "af41935f41d6c64a1407e32834b091480e2894b6c527b0b60787e6869a0f38ff",
     "contracts/src/bet/tournament/settlement/PokerTournamentPrizePolicies420.sol": "771e058b1c1ece80891fb444a9aa6ba3d45723a67c83b5b247f1922175866e43",
     "contracts/src/bet/tournament/settlement/PokerTournamentRefundModule420.sol": "a828b68fb3aa8f4a21981dd681f0952ab8eb64f38d0a91bef122534284bfc4c3",
     "contracts/src/bet/tournament/PokerTournamentRoundEntropy420.sol": "1ebe73675a609080743824c5d62d67eaa2693d47f23a7e88e0e987dc40c743aa"
@@ -256,19 +256,19 @@
       "description": "PokerTournamentPurchaseEscrowState420.pendingReceipt (contracts/src/bet/tournament/purchases/PokerTournamentPurchaseEscrowState420.sol) is never initialized. It is used in: - PokerTournamentPrizeEscrow420.purchase(bytes32,bytes32,bytes32,uint64,uint256,bytes32) (contracts/src/bet/tournament/settlement/PokerTournamentPrizeEscrow420.sol)",
       "disposition": "reviewed, source-bound; raw severity retained"
     },
-    "873d3ddb3832f31eab64b0d3d3887ce872178361fd57e65d709faeb6bcd84b2b": {
-      "severity": "Medium",
-      "check": "divide-before-multiply",
-      "description": "PokerTournamentPolicy420.fee(uint256) (contracts/src/bet/tournament/PokerTournamentPolicy420.sol) performs a multiplication on the result of a division: - (buyIn / 100) * 3 + (buyIn % 100) * 3 / 100 (contracts/src/bet/tournament/PokerTournamentPolicy420.sol)",
-      "disposition": "reviewed, source-bound; raw severity retained",
-      "reason": "Retained policy fee uses quotient/remainder arithmetic to calculate floor(buyIn*3/100) without overflowing multiplication; reference and native quote fuzz assert this exact rule."
-    },
     "7db3ded5dc8e08f7deaca2e03c1e1aa4cc8180f9fd5817feb862c9908d5391b2": {
       "severity": "Medium",
       "check": "divide-before-multiply",
       "reason": "The quotient/remainder identity floor(pot*w/10000)=(pot//10000)*w+((pot%10000)*w)//10000 is exact for w<=10000 and avoids uint256 multiplication overflow. Both maximum-uint256 and 2500 randomized conservation cases execute; independent Python uses unbounded direct multiplication.",
       "description": "PokerTournamentPrizeMath420.base(uint256,uint16) (contracts/src/bet/tournament/settlement/PokerTournamentPrizeMath420.sol) performs a multiplication on the result of a division: - (pot / 10000) * weight + ((pot % 10000) * weight) / 10000 (contracts/src/bet/tournament/settlement/PokerTournamentPrizeMath420.sol)",
       "disposition": "reviewed, source-bound; raw severity retained"
+    },
+    "873d3ddb3832f31eab64b0d3d3887ce872178361fd57e65d709faeb6bcd84b2b": {
+      "severity": "Medium",
+      "check": "divide-before-multiply",
+      "description": "PokerTournamentPolicy420.fee(uint256) (contracts/src/bet/tournament/PokerTournamentPolicy420.sol) performs a multiplication on the result of a division: - (buyIn / 100) * 3 + (buyIn % 100) * 3 / 100 (contracts/src/bet/tournament/PokerTournamentPolicy420.sol)",
+      "disposition": "reviewed, source-bound; raw severity retained",
+      "reason": "Retained policy fee uses quotient/remainder arithmetic to calculate floor(buyIn*3/100) without overflowing multiplication; reference and native quote fuzz assert this exact rule."
     },
     "7cf8229e2e4795450ace453c0dcfe5408ca80153487517941b89a4d87796f588": {
       "severity": "Medium",
@@ -395,6 +395,13 @@
       "description": "PokerShuffleCiphertextAvailability420.computeRoot(uint256,uint256[208]).nodes (contracts/src/bet/PokerShuffleCiphertextAvailability420.sol) is a local variable never initialized",
       "disposition": "reviewed, source-bound; raw severity retained",
       "reason": "Retained ciphertext Merkle scratch array is Solidity zero-initialized, then all actual leaves/internal nodes required for the returned root are assigned. Actual initial and both shuffle roots are admitted by genuine proofs."
+    },
+    "776894b3739263e4779e7a6a8b4757ec894504ce2706e5d95141d3b2f5f025d4": {
+      "severity": "Medium",
+      "check": "uninitialized-local",
+      "reason": "Solidity value-type locals initialize to zero. This accumulator is incremented only after bounded input checks; exact 10000 weight and whole-pot conservation assertions remain mandatory. Native registry/math and actual funded financial replay exercise its result.",
+      "description": "PokerTournamentPrizeMath420.totals(uint256,uint16[]).sum (contracts/src/bet/tournament/settlement/PokerTournamentPrizeMath420.sol) is a local variable never initialized",
+      "disposition": "reviewed, source-bound; raw severity retained"
     },
     "76ee1d83587632d4106667bf9949d15a4c7dee667fa1436a835dc7fd02441e7c": {
       "severity": "Medium",

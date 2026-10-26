@@ -1,0 +1,22 @@
+name: HighCountry HC-SEED-01 Level 1
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'deployments/highcountry/seed-catalog.v1.json'
+      - 'deployments/highcountry/original-sixteen-archive.v1.json'
+      - 'scripts/highcountry/seed-catalog*.mjs'
+      - '.github/workflows/highcountry-seed-catalog.yml'
+permissions:
+  contents: read
+jobs:
+  catalog-level1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node scripts/highcountry/seed-catalog.mjs
+      - run: node --test scripts/highcountry/seed-catalog.test.mjs

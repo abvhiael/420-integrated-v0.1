@@ -45,7 +45,7 @@ jobs:
           npm install --prefix services/highcountry-economy --no-save --ignore-scripts --no-audit --no-fund solc@0.8.24
       - name: Provision real PostgreSQL 16 journal and tenant RLS
         run: |
-          for migration in 007-social-operations 008-social-rls 009-social-intents 010-social-events; do
+          for migration in 007-social-operations 008-social-rls 009-social-intents 010-social-events 011-social-recovery; do
             psql -h localhost -U postgres -d hc5c -v ON_ERROR_STOP=1 -f "services/highcountry-economy/migrations/$migration.sql"
           done
           psql -h localhost -U postgres -d hc5c -v ON_ERROR_STOP=1 -c "CREATE ROLE hc_social_test_runtime NOLOGIN NOINHERIT NOSUPERUSER NOBYPASSRLS"

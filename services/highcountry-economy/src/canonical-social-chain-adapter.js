@@ -169,6 +169,19 @@ export class CanonicalSocialChainAdapter {
   const params=await this.parameters(op,payload);
   return {from:address(wallet),to:address(this.contracts[op.contract]),data:enc(op.sig,params),chainId:this.rpc.chainId,value:'0x0'};
  }
+ async recoveryPayload({action,rawTransaction}){
+  const op=TABLE[action];if(!op)fail('unapproved recovery action');
+  const verified=await this.verifySignedEnvelope(rawTransaction);
+  const {decodeFunctionData}=await import('viem');
+  const types=op.sig.slice(op.sig.indexOf('(')+1,-1).split(',');
+  const abi=[{type:'function',name:op.sig.slice(0,op.sig.indexOf('(')),stateMutability:'nonpayable',inputs:types.map((type,i)=>({name:'arg'+i,type})),outputs:[]}];
+  let decoded;
+  try{decoded=decodeFunctionData({abi,data:verified.input});}catch{fail('recovery calldata mismatch');}
+  const payload=Object.fromEntries(op.fields.map((key,i)=>[key,typeof decoded.args[i]==='bigint'?decoded.args[i].toString():decoded.args[i]]));
+  if(op.extra==='support')payload.support=decoded.args.at(-1);
+  if(op.extra===true&&decoded.args.at(-1)!==true||op.extra===false&&decoded.args.at(-1)!==false)fail('recovery function direction mismatch');
+  return {...payload,signedRawTransaction:rawTransaction};
+ }
  async prepareSigned({wallet,action,payload}){
   const op=TABLE[action];if(!op||!ENABLED.has(action))fail('unapproved social operation');
   const raw=payload?.signedRawTransaction;

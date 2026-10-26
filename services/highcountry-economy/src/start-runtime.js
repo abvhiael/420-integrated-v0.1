@@ -64,9 +64,19 @@ try {
  if(config.seedOpenings&&config.seedOpenings.version!=='HC.SEED.OPENINGS.V1')throw Error('unapproved opening version');
  if(config.seedOpenings&&(!config.seedPacks||!seedCatalogue))throw Error('seed opening dependencies required');
  const runtime=await createRuntime({...config,pool,signerRpc,progression,missions,discovery,seedCatalogue});
+ if(runtime.socialRecovery)await runtime.socialRecovery.runOnce();
  const server=runtimeHttpServer(runtime,{origin:config.authority.origin});
  server.listen(port,'0.0.0.0');
+ let recovering=false;
+ const recoveryTimer=runtime.socialRecovery?setInterval(async()=>{
+  if(recovering)return;
+  recovering=true;
+  try{await runtime.socialRecovery.runOnce();}
+  catch(error){console.error('social recovery reconciliation failed',error);server.close();process.exitCode=1;}
+  finally{recovering=false;}
+ },5000):null;
+ recoveryTimer?.unref();
  let closing=false;
- const drain=()=>{if(closing)return;closing=true;server.close(async()=>{await pool.end();process.exit(0);});};
+ const drain=()=>{if(closing)return;closing=true;if(recoveryTimer)clearInterval(recoveryTimer);server.close(async()=>{await pool.end();process.exit(0);});};
  process.on('SIGTERM',drain);process.on('SIGINT',drain);
 }catch(error){await pool.end();throw error;}

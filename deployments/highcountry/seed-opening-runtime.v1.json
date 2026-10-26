@@ -1,0 +1,25 @@
+{
+  "schema": "HC.SEED.OPENING_RUNTIME.V1",
+  "state": "UNRESOLVED_NOT_DEPLOYED",
+  "version": "HC.SEED.OPENINGS.V1",
+  "chainId": null,
+  "gameId": null,
+  "profileId": null,
+  "timeoutSeconds": null,
+  "operator": null,
+  "contracts": {
+    "seedOpening": {"address": null, "codeHash": null},
+    "randomRouter": {"address": null, "codeHash": null},
+    "emergency": {"address": null, "codeHash": null}
+  },
+  "approvedRoutes": [],
+  "requirements": [
+    "Deploy and independently pin the canonical router with opt-in persistent request support; legacy deployed routers cannot be assumed to support it.",
+    "Approve an actual unique-output native threshold VRF or external VRF verifier; test signature verifiers and arbitrary operator entropy are not production evidence.",
+    "Use security tier >= 2 and fallback-void only. Persistent requests cannot expire, void, cancel or switch provider; late original proofs remain valid.",
+    "Deploy SeedPackOpening with the reviewed game ID, generated policy/pool hashes and sizes, actual authorization, EmergencyState, profile ID and timeout.",
+    "Register all eligible common, rare and founding reference genomes through existing authorized lifecycles before admitting any opening.",
+    "Grant only the exact opening key capability to the reviewed external signer. No private keys, self-grant command or provider-fulfillment command is shipped.",
+    "Retain approved frozen route/verifier revisions until their committed openings complete. Default production opening remains disabled."
+  ]
+}

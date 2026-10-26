@@ -16,6 +16,10 @@ contract RandomnessRouter420 is I420System, IRandomnessRouter420 {
     RandomnessRouteRegistry420 public immutable routeRegistry;
     RandomnessRegistry public immutable randomnessRegistry;
 
+    // Explicit non-refundable consumers may preserve one fixed-route request through provider outages.
+    mapping(bytes32 => bool) public persistentRequest;
+    error PersistentRequestCannotVoid();
+    event PersistentRandomnessRequested(bytes32 indexed requestId);
     mapping(address => uint256) public requesterNonce;
     mapping(bytes32 => Request) private _requests;
 
@@ -78,6 +82,36 @@ contract RandomnessRouter420 is I420System, IRandomnessRouter420 {
         bytes32 purpose,
         uint64 deadline
     ) external returns (bytes32 requestId) {
+        return _requestRandomness(profileId, domain, purpose, deadline);
+    }
+
+    /// @notice Opt-in only: no expiry/refund, no provider switching, same original proof binding forever.
+    /// @dev Legacy requests retain all original deadline and void semantics.
+    function requestPersistentRandomness(
+        bytes32 profileId,
+        bytes32 domain,
+        bytes32 purpose,
+        uint64 deadline
+    ) external returns (bytes32 requestId) {
+        RandomnessProfileRegistry420.Profile memory p = profileRegistry.profile(profileId);
+        if (p.fallbackPolicy != RandomnessIds420.FALLBACK_VOID || p.securityTier < RandomnessIds420.SECURITY_HIGH) {
+            revert InvalidProfile();
+        }
+        bytes32 method = routeRegistry.route(p.primaryRoute).methodId;
+        if (method != RandomnessIds420.METHOD_NATIVE_THRESHOLD_VRF && method != RandomnessIds420.METHOD_EXTERNAL_VRF) {
+            revert InvalidProfile();
+        }
+        requestId = _requestRandomness(profileId, domain, purpose, deadline);
+        persistentRequest[requestId] = true;
+        emit PersistentRandomnessRequested(requestId);
+    }
+
+    function _requestRandomness(
+        bytes32 profileId,
+        bytes32 domain,
+        bytes32 purpose,
+        uint64 deadline
+    ) private returns (bytes32 requestId) {
         if (profileId == bytes32(0) || domain == bytes32(0) || purpose == bytes32(0)) revert InvalidRequest();
         if (deadline <= block.timestamp) revert InvalidDeadline();
 
@@ -181,7 +215,7 @@ contract RandomnessRouter420 is I420System, IRandomnessRouter420 {
         Request storage request_ = _requests[requestId];
         if (request_.status == Status.NONE) revert UnknownRequest();
         if (request_.status != Status.REQUESTED && request_.status != Status.FALLBACK_ACTIVE) revert WrongStatus();
-        if (block.timestamp > request_.deadline) revert RequestExpired();
+        if (!persistentRequest[requestId] && block.timestamp > request_.deadline) revert RequestExpired();
 
         bytes32 routeId;
         uint32 routeRevision;
@@ -190,7 +224,9 @@ contract RandomnessRouter420 is I420System, IRandomnessRouter420 {
         bytes32 methodId;
 
         if (request_.status == Status.REQUESTED) {
-            if (block.timestamp > request_.primaryDeadline) revert PrimaryWindowElapsed();
+            if (!persistentRequest[requestId] && block.timestamp > request_.primaryDeadline) {
+                revert PrimaryWindowElapsed();
+            }
             routeId = request_.primaryRoute;
             routeRevision = request_.primaryRouteRevision;
             operator = request_.primaryOperator;
@@ -249,6 +285,7 @@ contract RandomnessRouter420 is I420System, IRandomnessRouter420 {
     function voidExpired(
         bytes32 requestId
     ) external {
+        if (persistentRequest[requestId]) revert PersistentRequestCannotVoid();
         Request storage request_ = _requests[requestId];
         if (request_.status == Status.NONE) revert UnknownRequest();
         if (request_.status != Status.REQUESTED && request_.status != Status.FALLBACK_ACTIVE) revert WrongStatus();

@@ -36,6 +36,7 @@ export class SeedIssuanceWorker {
     if(!account||binding?.wallet!==current.wallet||binding.profile!==current.ownerProfile||binding.game!==this.identity.gameId||binding.chainId!==this.identity.chainId||(s.runtimeEpochs?.get(current.owner)??0)!==current.ownerEpoch||JSON.stringify(current)!==JSON.stringify(claim.intent))fail('seed recipient authority changed');
    });
    const i=claim.intent;
+   if(i.openingEvidence){const opening=await this.store.transact(s=>structuredClone(s.seedOpenings?.get(packId)));if(!opening||!this.packs.openingVerifier)fail('canonical opening verifier required for seed dispatch');const proof=await this.packs.openingVerifier.read(opening);if(!proof?.fulfilled||proof.requestId!==i.openingEvidence.requestId||proof.entropy!==i.openingEvidence.entropy||proof.proofHash!==i.openingEvidence.proofHash)fail('seed opening proof no longer canonical');}
    if(await this.identity.rpc.playerProfile(this.identity.gameId,i.wallet)!==i.ownerProfile)fail('seed recipient profile changed');
    if(Number(BigInt(await this.signerRpc.request('eth_chainId',[])))!==this.rpc.chainId)fail('seed signer wrong chain');
    if(!await this.rpc.unrestricted(MARKET_DOMAIN))fail('seed issuance market restricted');

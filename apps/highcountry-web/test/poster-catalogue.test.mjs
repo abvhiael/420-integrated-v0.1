@@ -1,5 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {existsSync} from 'node:fs';
+import {fileURLToPath} from 'node:url';
 import {posterCatalogue,canPlacePoster} from '../src/poster-catalogue.js';
 test('twelve canonical posters are wall-only and never collide with floor furniture',()=>{
  assert.equal(posterCatalogue.length,12);
@@ -19,4 +21,13 @@ test('wall occupancy/ownership govern poster placement independent of floor occu
  assert.equal(canPlacePoster({id,owned:false,hasWallAnchor:true}),false);
  assert.equal(canPlacePoster({id,owned:true,hasWallAnchor:false}),false);
  assert.equal(canPlacePoster({id:'bogus',owned:true,hasWallAnchor:true}),false);
+});
+
+test('each poster resolves to an uploaded public PNG in the checkout',()=>{
+ const root=fileURLToPath(new URL('../public',import.meta.url));
+ for(const p of posterCatalogue){
+  assert.ok(existsSync(root+p.assetUrl),p.id+' must have a real uploaded PNG');
+  assert.equal(p.marketplace.inventoryPolicy,'authenticated-server-owned');
+  assert.equal(p.placement.wallSlotExclusive,true);
+ }
 });

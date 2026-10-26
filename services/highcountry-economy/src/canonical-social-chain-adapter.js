@@ -8,7 +8,8 @@ const b32=x=>{if(!hash(x)||BigInt(x)===0n)fail('bytes32 identifier required');re
 const enc=(sig,args)=>calldata(sig,...args);
 export const SOC5A_ENABLED_ACTIONS=Object.freeze(['organization.create','organization.invite','organization.invitation.revoke','organization.join','organization.leave','organization.remove','organization.leader.propose','organization.leader.accept','cooperative.create','cooperative.enroll','cooperative.withdraw']);
 const ENABLED=new Set(SOC5A_ENABLED_ACTIONS);
-const TABLE=Object.freeze({
+const TABLE=SOC5A_ABI;
+export const SOC5A_ABI=Object.freeze({
  'organization.create':{contract:'organizations',sig:'create(bytes32,bytes32)',fields:['id','metadataHash'],check:'create'},
  'organization.invite':{contract:'organizations',sig:'invite(bytes32,address,bool)',fields:['organization','account'],extra:true,check:'admin'},
  'organization.invitation.revoke':{contract:'organizations',sig:'invite(bytes32,address,bool)',fields:['organization','account'],extra:false,check:'admin'},

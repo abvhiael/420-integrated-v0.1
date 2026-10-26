@@ -25,11 +25,55 @@
 | Mines V1 | Approved 25-cell/1–24-mine distribution and progressive 99%-nominal-return policy; independent mathematical review of rounding/cashout/RTP and maximum exposure; verified **pre-randomness** seed commitments, deterministic board mask/salts/Merkle root, per-cell hidden reveal proofs and post-terminal seed disclosure/board certification **before** canonical fund settlement; provider-withheld-seed timeout and refund acceptance; funded live reveal/explosion/cashout/expiry settlement and bankroll conservation receipts |
 | Crash V1 | Approved crash distribution, auto-cashout-only policy and maximum multiplier/risk cap, fairness and timing proofs; real network auto-cashout/void/settlement |
 | Video Poker V1 | Once engine is actually implemented and qualified: independently approved deck/hand evaluator, deal/draw odds, held-card payout tables, RTP/liability and live draw/settlement |
-| Live multiplayer Poker | Once implementation exists: independently approved rake/fees, collateral/pots/side-pot conservation, private-card authority, collusion controls, real tables/seating/showdown and dispute/recovery |
+| Live multiplayer Poker | **BET-AUDIT-5A.11 - Live Poker milestone qualification: DEFERRED to official testnet acceptance.** Local implementation and Level 2 evidence are retained; live deployment, funded multiplayer hands, independent approvals and operational acceptance remain open. See the dedicated 5A.11 section below. |
 | Poker tournaments | Once implemented: entry/payout structure, tournament treasury, blindness/seat reconciliation, elimination, cancellations, prizes and live tournament proof |
 | Fantasy sports pools | Daily NHL contract engine and scoped source-to-oracle implementation exist; complete the NHL gates below for official deployments, prospective slate/entry timing, live provider evidence, custody operations and funded prize/refund proof. Daily remains the opening live test configuration. Approved salary/captain, season-long and pick'em implementations and their funded local qualification path are tracked separately in the approved implementation ledger; official acceptance remains open. |
 | Sportsbook | Unfinished implementation is user-deferred into TN-BOOK-00 below; official network, odds/outcome provenance, exposure, licensing and live book settlement are TN-BOOK-01–05. This is not an implementation-complete claim |
 | Prediction markets | Once implemented: market/oracle governance, collateral/reserve accounting, invalid resolution/appeals, reorg resistance, trading/redemption and live liquidation/recovery |
+
+## BET-AUDIT-5A.11 - Live Poker milestone qualification
+
+**Disposition: DEFERRED - official testnet / independent approval required; NOT COMPLETE.**
+This roadmap owns the live acceptance work for 5A.11. Preserve the canonical
+5A.11 identifier; moving its execution here does not renumber the audit, waive
+its gates or mark the Live Poker milestone as passed. The milestone cannot
+close until the designated official testnet is active and its required live
+receipts and independent approvals exist.
+
+**Retained local baseline:** 5A.10 was merged in [PR #815](https://github.com/abvhiael/420-integrated-v0.1/pull/815)
+at `73e38c833593d78887929b8b731fd2b0c44f55cf`. Its exact qualified source SHA is
+`833481ea2389c38dd4338bee9af1d515ca8c1f62`, with passing
+[Level 2 run 40148187827](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/40148187827):
+930 native tests, 90 model tests, 40 funded integration tests and 200 genuine
+proof verifications, including a complete nine-player hand. These are local
+rules/cryptographic integration evidence, not live testnet or Level 3 acceptance.
+Preserve that evidence when source identities match; qualify substantive changes
+against their own exact SHA.
+
+| Gate | Required official testnet / independent evidence |
+| --- | --- |
+| Network and deployment identity | Official network designation, chain ID, genesis/finality policy, available RPC/indexing, funded test accounts, deployment transactions/receipts, frozen component addresses, runtime code hashes and exact source/build/configuration digests |
+| Production-equivalent cryptography and authority | Reviewed proving setup and generated verifier/VK identities, real seat-key authority, independently controlled provider/key custody evidence, scoped operator/player/provider/reviewer capabilities and tested revocation; distinct addresses alone do not prove independent control |
+| Funded multiplayer lifecycle | Real table creation, seating and player escrow, independently funded provider bonds, initial-deck admission, both authenticated shuffles, recipient possession proofs, encrypted delivery and owner receipts, signed betting/turns/timeouts, authorized reveals, independently checked winners/side pots/rake and canonical atomic settlement; retain successful transaction hashes and receipts |
+| Failure and adversarial acceptance | Live unauthorized/replayed/cross-hand input rejection, withheld delivery/reveal and provider-fault recovery, disconnect/reconnection/sit-out/leave, bounded refunds, dispute/appeal handling, duplicate settlement and reentrancy rejection, reorg/finality recovery and escrow/provider/rake conservation evidence |
+| Economics, eligibility and abuse governance | Independent game-math/rake/fee and liability approvals; operator, legal/jurisdiction/age/privacy/responsible-play authorization; independently governed collusion/abuse review, monitoring provenance and correction/appeal procedures |
+| Operational readiness and milestone decision | Authenticated multiplayer client/transport smoke, ciphertext availability, trusted indexing and independent replay, monitors/alerts, provider outage and pause/recovery drills, incident/runbook ownership, signed independent go/no-go and a durable gate-by-gate acceptance record |
+
+For every live gate, record the network, exact candidate SHA, configuration and
+artifact digests, authorized actor/reviewer, transaction/block hashes and finality,
+expected versus observed results, evidence location and acceptance decision.
+Local fixtures, deterministic test keys, documentation markers and self-issued
+approvals cannot satisfy live acceptance.
+
+**Work that can proceed before testnet activation:** deployment/evidence tooling,
+runbooks, independent reviews, configuration preparation, local defect repairs
+and qualification preflight remain executable work. Moving 5A.11 does not defer
+unfinished local implementation or weaken 5A.1-5A.10 requirements. Follow the
+three-level qualification model and the inheritance rule below; run phase-wide
+Level 3 once against the final reconciled candidate when its prerequisites are
+met. A Level 2 result or roadmap move does not grant Level 3/live acceptance.
+Keep production wagering disabled until all applicable live and independent
+release gates pass.
 
 ## Video Poker — production-equivalent draw, economics and settlement acceptance
 

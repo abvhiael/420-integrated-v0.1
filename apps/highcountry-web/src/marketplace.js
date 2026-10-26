@@ -1,3 +1,4 @@
+import {OUTDOOR_SEATING_DESIGNS} from './outdoor-seating-catalog.js';
 import {GREENHOUSE_LOUNGE_DESIGNS} from './greenhouse-lounge-catalog.js';
 import {SEATING_DESIGNS} from './seating-design-catalog.js';
 import {SUPPORT_CATALOG} from './support-catalog.js';
@@ -39,6 +40,20 @@ export function createMarketplaceClient({apiUrl,authenticate,fetchImpl=fetch}={}
    return post('/market/dispute',input);
   }
  });
+}
+export function mountOutdoorSeatingCatalog({document,main}){
+ const section=document.createElement('section');section.setAttribute('aria-label','Outdoor seating and patio furniture catalog');
+ const heading=document.createElement('h3');heading.textContent='HC-ART-02-C · Outdoor seating and patio furniture';section.append(heading);
+ const note=document.createElement('p');note.textContent='Art catalog only. BUDS purchase or resale requires verified inventory, item registration and authenticated server settlement.';section.append(note);
+ const grid=document.createElement('div');grid.className='support-art-catalog';section.append(grid);
+ for(const item of OUTDOOR_SEATING_DESIGNS){
+  const card=document.createElement('article');card.className='support-art-card';
+  const title=document.createElement('h4');title.textContent=item.name;card.append(title);
+  const img=document.createElement('img');img.src=item.sprite.src;img.alt=item.sprite.alt;img.width=128;img.height=128;img.loading='lazy';card.append(img);
+  const caption=document.createElement('p');caption.textContent=item.footprintTiles.columns+'×'+item.footprintTiles.rows+' tiles · outdoor · BUDS listing pending registration';card.append(caption);
+  grid.append(card);
+ }
+ main.append(section);
 }
 export function mountGreenhouseLoungeCatalog({document,main}){
  const section=document.createElement('section');section.setAttribute('aria-label','Greenhouse lounge furniture catalog');
@@ -89,6 +104,7 @@ export function mountMarketplace({document,main,runtime,authenticate,fetchImpl=f
  mountSupportArtCatalog({document,main});
  mountSeatingArtCatalog({document,main});
  mountGreenhouseLoungeCatalog({document,main});
+ mountOutdoorSeatingCatalog({document,main});
  if(runtime.mode!=='connected'||typeof authenticate!=='function')return;
  const client=createMarketplaceClient({apiUrl:runtime.apiUrl,authenticate,fetchImpl});
  const region=el('section');region.setAttribute('aria-label','Marketplace');main.append(region);

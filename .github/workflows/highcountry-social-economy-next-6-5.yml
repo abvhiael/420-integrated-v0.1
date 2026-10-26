@@ -1,0 +1,34 @@
+name: High Country HC-NEXT-6.5 Social Economy Level 1
+on:
+  pull_request:
+    paths:
+      - 'clients/highcountry-access-v1/src/social-economy-*'
+      - 'clients/highcountry-access-v1/test/social-economy.test.js'
+      - '.github/workflows/highcountry-social-economy-next-6-5.yml'
+      - 'docs/highcountry/HC-NEXT-6.5-SOCIAL-ECONOMY-UI.md'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  social-economy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact SHA
+        env:
+          SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Static module syntax
+        run: |
+          node --check clients/highcountry-access-v1/src/social-economy-controller.js
+          node --check clients/highcountry-access-v1/src/social-economy-ui.js
+      - name: Social economy permission and finality adversarial tests
+        run: node --test clients/highcountry-access-v1/test/social-economy.test.js
+      - name: Retained High Country browser client regression
+        run: node --test clients/highcountry-access-v1/test/*.test.js

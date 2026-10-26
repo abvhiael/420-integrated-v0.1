@@ -50,12 +50,12 @@ test('forged signer, protected actions and unfinalized receipts fail closed',asy
 });
 test('persistent transaction requires real finality before completion',async()=>{
  const f=fixture({verifyFinality:async()=>false});
- const p=await f.gateway.authorize(ctx);const tx=await f.gateway.submit({...ctx,authorizationProof:p.proof});
+ const p=await f.gateway.authorize(ctx);const tx=await f.gateway.submit({...ctx,authorizationProof:p.proof,signedRawTransaction:'0x1234'});
  assert.equal(tx.operationId,H);
  await assert.rejects(f.gateway.receipt({session:'signed-session',scope:'HC-GAME',operationId:H}),/finality proof denied/);
 });
 test('private receipt cannot be read by other account',async()=>{
- const f=fixture();const p=await f.gateway.authorize(ctx);await f.gateway.submit({...ctx,authorizationProof:p.proof});
+ const f=fixture();const p=await f.gateway.authorize(ctx);await f.gateway.submit({...ctx,authorizationProof:p.proof,signedRawTransaction:'0x1234'});
  f.rows.get(H).principal='mallory';
  await assert.rejects(f.gateway.receipt({session:'signed-session',scope:'HC-GAME',operationId:H}),/private operation denied/);
 });

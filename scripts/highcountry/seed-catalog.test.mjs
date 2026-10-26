@@ -27,3 +27,20 @@ const mutations={
 };
 for(const [name,mutate] of Object.entries(mutations)) test(`reject ${name}`,()=>{const c=structuredClone(catalog);mutate(c);assert.throws(()=>validateCatalog(c,archive));});
 test('Northern Lights is common even on the mistaken founders sheet',()=>{const n=resolveCultivar(catalog,'Northern Lights');assert.equal(n.tier,'common');assert.ok(n.sourceArt.some(r=>r.sourceId==='seal-concept-b'));});
+const sourceNames={
+ 'botanical-2':'Alaskan Thunder Fuck|Acapulco Gold|Afghan Kush|Blue Dream|Blueberry|Bubba Kush|Chemdawg|Durban Poison|Girl Scout Cookies|Green Crack|Jack Herer|OG Kush|Pineapple Express|Sour Diesel|White Widow|Northern Lights|Super Silver Haze|Trainwreck|Zkittlez|Gelato',
+ 'botanical-3':'Acapulco Gold|Alaskan Thunder Fuck|Blue Dream|Green Crack|Granddaddy Purple|Jack Herer|Northern Lights|Pineapple Express|Purple Haze|Sour Diesel|Strawberry Cough|Super Silver Haze|White Widow|Bubba Kush|OG Kush|Zkittlez',
+ 'seal-concept-a':'Emerald Ghost|Coastal Kush|Misty Harbor|Salty Dog|Tempest|Rainforest Queen|Prairie Fire|Golden Haze|Harvest Moon|Fields of Green|Honey Trail|Crimson Ghost|Red Rock Kush|Desert Bloom|Sage Rider|Fire Canyon',
+ 'seal-concept-b':'Emerald Mist|Coastal Kush|Salty Dog|Cedar Skunk|Rainforest Queen|Pacific Sunset|Prairie Gold|Thunder Fields|Saska Sour|Harvest Moon|Northern Lights|Red Rock Dream|Desert Shadow|Sage Rider|Canyon Fire|Midnight Mesa'};
+for(const [sourceId,names] of Object.entries(sourceNames)) test(`visually transcribed panel order and identity: ${sourceId}`,()=>{
+ const rows=catalog.cultivars.flatMap(e=>(e.sourceArt??[]).filter(r=>r.sourceId===sourceId).map(r=>({e,r}))).sort((a,b)=>a.r.panel-b.r.panel);
+ assert.deepEqual(rows.map(x=>x.r.printedName),names.split('|'));
+ const replacements={'Emerald Ghost':'Spirit Bear','Harvest Moon':'Blue Moon','Crimson Ghost':'Crow Mother'};
+ for(const {e,r} of rows){
+  assert.equal(e.name,replacements[r.printedName]??r.printedName);
+  const cols=sourceId==='botanical-2'?5:sourceId==='botanical-3'?4:null;
+  assert.equal(r.row,cols?Math.floor((r.panel-1)/cols)+1:r.panel<=6?1:r.panel<=11?2:3);
+  assert.equal(r.column,cols?(r.panel-1)%cols+1:r.panel<=6?r.panel:r.panel<=11?r.panel-6:r.panel-11);
+  if(!cols && e.tier==='rare') assert.equal(e.region,r.row===1?'Emerald Coast':r.row===2?'Golden Prairie':'Red Mesa');
+ }
+});

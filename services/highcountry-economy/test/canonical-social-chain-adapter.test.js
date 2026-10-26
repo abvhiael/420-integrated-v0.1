@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {CanonicalSocialChainAdapter} from '../src/canonical-social-chain-adapter.js';
-import {keccak256} from '../src/keccak.js';
+import {keccak256,selector} from '../src/keccak.js';
 const addr='0x'+'1'.repeat(40),contracts=Object.fromEntries(['organizations','cooperatives','governance','executor','authority'].map(k=>[k,addr]));
 const policy='0x'+'a'.repeat(64),h='0x'+'b'.repeat(64);
 const ORG=keccak256(Buffer.from('HC.EMERGENCY.ORGANIZATION_GOVERNANCE'));
@@ -38,4 +38,27 @@ test('unfinalized receipt remains visibly unfinalized',async()=>{
  const a=make({request:async(m)=>m==='eth_getTransactionReceipt'?{blockNumber:'0x2',blockHash:h,status:'0x1'}:m==='eth_getTransactionByHash'?{from:addr,value:'0x0'}:m==='eth_getBlockByNumber'?{hash:h}:null});
  const result=await a.finalizedReceipt({hash:h,wallet:addr,action:'organization.join'});
  assert.equal(result.finalized,false);
+});
+
+test('contract-bound emergency restriction denies writes; unrestricted canonical organization create admits only absent IDs',async()=>{
+ const zero='0'.repeat(64),one='0'.repeat(63)+'1';
+ const rpcCall=async(_name,data)=>{
+  const signature=data.slice(2,10);
+  if(signature===selector('r04DomainOpen(bytes32)'))return {result:'0x'+one};
+  if(signature===selector('organizations(bytes32)'))return {result:'0x'+zero.repeat(3)};
+  throw Error('unapproved view');
+ };
+ const a=make({call:rpcCall,request:async(method)=>method==='eth_getBlockByNumber'?{hash:h,timestamp:'0x100'}:null});
+ const p=await a.permission({wallet:addr,action:'organization.create',payload:{id:policy,metadataHash:'0x'+zero}});
+ assert.equal(p.allowed,true);
+ assert.equal(p.blockHash,h);
+ const blocked=make({call:async(name,data)=>data.slice(2,10)===selector('r04DomainOpen(bytes32)')?{result:'0x'+zero}:rpcCall(name,data),
+  request:async(method)=>method==='eth_getBlockByNumber'?{hash:h,timestamp:'0x100'}:null});
+ assert.deepEqual(await blocked.permission({wallet:addr,action:'organization.create',payload:{id:policy,metadataHash:'0x'+zero}}),{allowed:false});
+});
+test('wrong finalized timestamp anchor fails closed before authorizing',async()=>{
+ const one='0'.repeat(63)+'1',zero='0'.repeat(64);
+ const a=make({call:async(name,data)=>({result:data.slice(2,10)===selector('r04DomainOpen(bytes32)')?'0x'+one:'0x'+zero.repeat(3)}),
+  request:async()=>({hash:policy,timestamp:'0x100'})});
+ assert.deepEqual(await a.permission({wallet:addr,action:'organization.create',payload:{id:policy,metadataHash:'0x'+zero}}),{allowed:false});
 });

@@ -27,6 +27,13 @@ contract CoopMemberR0411 {
         r.enroll(coop);
     }
 
+    function withdraw(
+        CooperativeRegistry r,
+        bytes32 coop
+    ) external {
+        r.withdraw(coop);
+    }
+
     function vote(
         CooperativeGovernance g,
         bytes32 id,
@@ -80,6 +87,29 @@ contract R0411GovernanceTest {
 
     function _proposal() internal returns (bytes32) {
         return g.propose(COOP, g.ACTION_SET_POLICY(), SCOPE, keccak256("yes"));
+    }
+
+    function testCooperativeWithdrawalRevokesVoteAndRetainsBoundedRoster() public {
+        bytes32 id = _proposal();
+        alice.withdraw(r, COOP);
+        require(!r.enrolled(COOP, address(alice)), "withdrawn consent active");
+        (bool voteAllowed,) = address(alice).call(abi.encodeCall(alice.vote, (g, id, true)));
+        require(!voteAllowed, "withdrawn member retained voting power");
+        (bool repeated,) = address(alice).call(abi.encodeCall(alice.withdraw, (r, COOP)));
+        require(!repeated, "withdrawal replay");
+        bytes32 later = _proposal();
+        require(!g.voterSnapshot(later, address(alice)), "withdrawn elector included in later snapshot");
+    }
+
+    function testProposerWithdrawalBlocksExecutionDespiteRecordedYesVotes() public {
+        bytes32 id = _proposal();
+        alice.vote(g, id, true);
+        bob.vote(g, id, true);
+        r.withdraw(COOP);
+        vm.warp(block.timestamp + g.VOTING_PERIOD() + g.TIMELOCK());
+        require(!g.executable(id), "withdrawn proposer authorized execution");
+        (bool executed,) = address(e).call(abi.encodeCall(e.execute, (id)));
+        require(!executed, "withdrawn proposer policy execution succeeded");
     }
 
     function testQuorumTimelockAndSingleExecution() public {

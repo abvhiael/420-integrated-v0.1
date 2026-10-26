@@ -137,7 +137,14 @@ export class CanonicalSocialChainAdapter {
     case 'cooperative.propose':{
      const info=await coop(coopId),org='0x'+info[0],actionVal=await this.read('governance','ACTION_SET_POLICY()');
      const count=await this.read('cooperatives','voterCount(bytes32)',coopId);
-     allowed=trueWord(info[4])&&BigInt('0x'+info[2])===1n&&await enrolled(coopId,wallet)&&await activeMember(org,wallet)&&actionVal[0].toLowerCase()===params[1].slice(2)&&BigInt('0x'+count[0])>=2n&&BigInt('0x'+count[0])<=64n;break;
+     const length=Number(BigInt('0x'+count[0]));let eligible=0;
+     if(length>64)return {allowed:false};
+     for(let i=0;i<length;i++){
+      const voterWord=await this.read('cooperatives','voterAt(bytes32,uint256)',coopId,i);
+      const voter=address('0x'+voterWord[0].slice(24));
+      if(await enrolled(coopId,voter)&&await activeMember(org,voter))eligible++;
+     }
+     allowed=trueWord(info[4])&&BigInt('0x'+info[2])===1n&&await enrolled(coopId,wallet)&&await activeMember(org,wallet)&&actionVal[0].toLowerCase()===params[1].slice(2)&&eligible>=2;break;
     }
     case 'cooperative.vote':{
      const p=await proposal(params[0]),info=await coop('0x'+p[0]);

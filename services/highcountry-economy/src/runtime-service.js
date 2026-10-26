@@ -1,3 +1,5 @@
+import {SeedCatalogue,SeedCollection} from './seed-catalogue.js';
+import {SeedChainReader} from './seed-chain-reader.js';
 import {createServer} from 'node:http';
 import {HighCountryMarket} from './market.js';
 import {HighCountryMarketplaceView} from './marketplace-view.js';
@@ -19,7 +21,7 @@ async function requireLeastPrivilegeRuntimeRole(pool,namespace) {
 }
 
 /// Composition uses one provisioned durable namespace and independently configured canonical RPC/signer/issuer policy.
-export async function createRuntime({pool,namespace,authority:authConfig,rpc:rpcConfig,sources,marketDomain,operator,issuer,signerRpc,clock,progression,missions,discovery,landRights}){
+export async function createRuntime({pool,namespace,authority:authConfig,rpc:rpcConfig,sources,marketDomain,operator,issuer,signerRpc,clock,progression,missions,discovery,landRights,seedCatalogue}){
  await requireLeastPrivilegeRuntimeRole(pool,namespace);
  const store=new PostgresBudsStore(pool,namespace),rpc=new FinalizedRpc(rpcConfig);
  for(const [name,policy] of Object.entries(sources))if(address(rpc.contracts[name]?.address)!==address(policy.contract))throw new SettlementError('source contract mismatch');
@@ -45,11 +47,13 @@ export async function createRuntime({pool,namespace,authority:authConfig,rpc:rpc
  const discoveryService=discovery?new DiscoveryIntegration({store,identity,...discovery,clock}):null;
  const landRightsService=landRights?new LandLeaseAccounts({store,identity,...landRights,clock}):null;
  const gameplayLicensing=landRightsService?new GameplayLicensing({landRights:landRightsService,identity,canonical:landRights.canonical}):null;
- return {store,identity,rewards,market,marketView:new HighCountryMarketplaceView({store,identity,market,clock}),skillResearch,missionService,discoveryService,landRightsService,gameplayLicensing,...chain};
+ const seedCatalogueService=seedCatalogue?new SeedCatalogue(seedCatalogue):null;
+ const seedCollection=seedCatalogueService?new SeedCollection({store,identity,catalogue:seedCatalogueService,reader:new SeedChainReader({...seedCatalogue,rpc:identity.rpc}),clock}):null;
+ return {store,identity,rewards,market,seedCatalogue:seedCatalogueService,seedCollection,marketView:new HighCountryMarketplaceView({store,identity,market,clock}),skillResearch,missionService,discoveryService,landRightsService,gameplayLicensing,...chain};
 }
 // Production entrypoint for a wallet-optional, registered-player ordinary economy.
 // Never silently repurpose the canonical on-chain escrow settlement runtime.
-export async function createOrdinaryRuntime({pool,namespace,authority:authConfig,rpc:rpcConfig,sources,inventoryAuthority,clock,progression,missions,discovery,landRights}) {
+export async function createOrdinaryRuntime({pool,namespace,authority:authConfig,rpc:rpcConfig,sources,inventoryAuthority,clock,progression,missions,discovery,landRights,seedCatalogue}) {
  await requireLeastPrivilegeRuntimeRole(pool,namespace);
  if(!inventoryAuthority||typeof inventoryAuthority.verifyAssetReceipt!=='function'
     ||typeof inventoryAuthority.requireMarketOpen!=='function')
@@ -61,10 +65,10 @@ export async function createOrdinaryRuntime({pool,namespace,authority:authConfig
    throw new SettlementError('source contract mismatch');
  const identity=new RuntimeAuthority({...authConfig,store,rpc,sourcePolicies:sources,clock});
  const rewards=new GameplayRewardRuntime({store,authority:identity,rpc,sources,clock});
- return composeOrdinaryMarketRuntime({store,identity,rewards,inventoryAuthority,clock,progression,missions,discovery,landRights});
+ return composeOrdinaryMarketRuntime({store,identity,rewards,inventoryAuthority,clock,progression,missions,discovery,landRights,seedCatalogue});
 }
 // Separate ordinary market composition. The canonical runtime above remains chain-settlement-only.
-export function composeOrdinaryMarketRuntime({store,identity,rewards,inventoryAuthority,clock,progression,missions,discovery,landRights}) {
+export function composeOrdinaryMarketRuntime({store,identity,rewards,inventoryAuthority,clock,progression,missions,discovery,landRights,seedCatalogue}) {
  if(typeof store?.transact!=='function'||identity?.store!==store
    ||typeof identity?.registeredPrincipal!=='function'
    ||typeof identity?.requireTrustedIssuer!=='function'
@@ -84,10 +88,12 @@ export function composeOrdinaryMarketRuntime({store,identity,rewards,inventoryAu
  const discoveryService=discovery?new DiscoveryIntegration({store,identity,...discovery,clock}):null;
  const landRightsService=landRights?new LandLeaseAccounts({store,identity,...landRights,clock}):null;
  const gameplayLicensing=landRightsService?new GameplayLicensing({landRights:landRightsService,identity,canonical:landRights.canonical}):null;
- return {store,identity,rewards,market,marketView:new HighCountryMarketplaceView({store,identity,market,clock}),skillResearch,missionService,discoveryService,landRightsService,gameplayLicensing};
+ const seedCatalogueService=seedCatalogue?new SeedCatalogue(seedCatalogue):null;
+ const seedCollection=seedCatalogueService?new SeedCollection({store,identity,catalogue:seedCatalogueService,reader:new SeedChainReader({...seedCatalogue,rpc:identity.rpc}),clock}):null;
+ return {store,identity,rewards,market,seedCatalogue:seedCatalogueService,seedCollection,marketView:new HighCountryMarketplaceView({store,identity,market,clock}),skillResearch,missionService,discoveryService,landRightsService,gameplayLicensing};
 }
 export function runtimeHttpServer(runtime,{origin}){
- const {identity,rewards,market,marketView,skillResearch,missionService,discoveryService,landRightsService,gameplayLicensing,settlement,worker}=runtime;
+ const {identity,rewards,market,marketView,skillResearch,missionService,discoveryService,landRightsService,gameplayLicensing,seedCatalogue,seedCollection,settlement,worker}=runtime;
  return createServer(async(req,res)=>{
   res.setHeader('content-type','application/json');res.setHeader('cache-control','no-store');
   res.setHeader('x-content-type-options','nosniff');
@@ -101,11 +107,21 @@ export function runtimeHttpServer(runtime,{origin}){
   try{
    if(req.method!=='POST'||(req.headers.origin&&req.headers.origin!==origin))throw new SettlementError('request denied');
    const token=req.headers.authorization?.match(/^Bearer (.+)$/)?.[1];
-   if(!token)throw new SettlementError('session required');
    let raw='',size=0;for await(const chunk of req){size+=chunk.length;if(size>16384)throw new SettlementError('request too large');raw+=chunk;}
    let b;try{b=JSON.parse(raw||'{}');}catch{throw new SettlementError('invalid request');}
+   if(req.url==='/seeds/catalogue'){
+    if(!seedCatalogue||Object.keys(b).sort().join(',')!=='filters')throw new SettlementError('seed catalogue request denied');
+    return res.end(JSON.stringify({ok:true,result:seedCatalogue.browse(b.filters)}));
+   }
+   if(!token)throw new SettlementError('session required');
    let result;
    switch(req.url){
+    case '/seeds/collection':
+     if(!seedCollection||Object.keys(b).length)throw new SettlementError('seed collection request denied');
+     result=await seedCollection.snapshot(token);break;
+    case '/seeds/harvest-card':
+     if(!seedCollection||Object.keys(b).sort().join(',')!=='plantId')throw new SettlementError('harvest card request denied');
+     result=await seedCollection.claimHarvest(token,b.plantId);break;
     case '/accounts/register':result=await identity.register(token);break;
     case '/wallet/challenge':result=await identity.linkChallenge(token,b.wallet);break;
     case '/wallet/link':result=await identity.linkWallet(token,b.nonce,b.signature);break;

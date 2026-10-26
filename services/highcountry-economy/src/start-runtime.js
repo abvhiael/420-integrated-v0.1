@@ -2,6 +2,7 @@
 import {readFile} from 'node:fs/promises';
 import pg from 'pg';
 import {FinalizedRpc} from './finalized-rpc.js';
+import {parseSeedBreedingPlan} from './seed-chain-reader.js';
 import {createRuntime,runtimeHttpServer} from './runtime-service.js';
 import {HIGHCOUNTRY_SKILL_RESEARCH_V1} from './skill-catalog-v1.js';
 import {createSignedProgressionEvidence} from './signed-progression-evidence.js';
@@ -50,7 +51,14 @@ try {
    publicKey:d.evidencePublicKey,issuer:d.evidenceIssuer,
    gameId:config.authority.gameId,chainId:config.authority.chainId})};
  }
- const runtime=await createRuntime({...config,pool,signerRpc,progression,missions,discovery});
+ let seedCatalogue;
+ if(config.seedCatalogue){
+  const d=new URL('../../../deployments/highcountry/',import.meta.url);
+  const load=async name=>JSON.parse(await readFile(new URL(name,d),'utf8'));
+  if(config.seedCatalogue.version!=='HC.SEED.CATALOGUE.V1')throw Error('unapproved seed catalogue version');
+  seedCatalogue={...config.seedCatalogue,catalog:await load('seed-catalog.v1.json'),research:await load('common-cultivar-research.v1.json'),rarePairs:await load('rare-parent-pairs.v1.json'),founders:await load('original-sixteen-archive.v1.json'),commonReferences:await load('common-reference-genomes.v1.json'),rarePlan:parseSeedBreedingPlan(await readFile(new URL('rare-breeding-plan.v1.json',d),'utf8'))};
+ }
+ const runtime=await createRuntime({...config,pool,signerRpc,progression,missions,discovery,seedCatalogue});
  const server=runtimeHttpServer(runtime,{origin:config.authority.origin});
  server.listen(port,'0.0.0.0');
  let closing=false;

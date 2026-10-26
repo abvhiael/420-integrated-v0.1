@@ -10,6 +10,7 @@ function decode(raw) {
   if (!raw || raw.schema !== 1) throw new SettlementError('unknown economy schema');
   const runtime={};
   for(const key of ['runtimeAccounts','runtimeWallets','runtimeWalletOwners','runtimeNonces','runtimeEpochs','runtimeSourceEpochs'])runtime[key]=mapEntries(raw[key]??[]);
+  const seedDiscoveries=mapEntries(raw.seedDiscoveries??[]),seedHarvestCards=mapEntries(raw.seedHarvestCards??[]),seedHarvestClaims=mapEntries(raw.seedHarvestClaims??[]);
   const balances=mapEntries(raw.balances);
   const operations=new Set(raw.operations);
   const claims=new Set(raw.claims);
@@ -39,9 +40,9 @@ function decode(raw) {
   for(const b of balances.values())if(!safe(b.available)||!safe(b.reserved))throw new SettlementError('corrupt balance');
   for(const v of sourceIssued.values())if(!safe(v))throw new SettlementError('corrupt issuance');
   for(const b of assets.values())if(!safe(b.available)||!safe(b.reserved))throw new SettlementError('corrupt asset');
-  return {...runtime,balances,operations,claims,sourceIssued,assets,assetSources,listings,transferIntents,settlementJobs,marketDisputes,skillResearch,skillResearchProofs,missions,missionProofs,missionRewards,discoveryFragments,discoveryEntitlements,discoveryEvents,discoveryAudit,landRentAccounts,landRentAudit,landRentEvents,importedAssets,issued:raw.issued,burned:raw.burned};
+  return {...runtime,seedDiscoveries,seedHarvestCards,seedHarvestClaims,balances,operations,claims,sourceIssued,assets,assetSources,listings,transferIntents,settlementJobs,marketDisputes,skillResearch,skillResearchProofs,missions,missionProofs,missionRewards,discoveryFragments,discoveryEntitlements,discoveryEvents,discoveryAudit,landRentAccounts,landRentAudit,landRentEvents,importedAssets,issued:raw.issued,burned:raw.burned};
 }
-const encode = s => JSON.stringify({schema:1,...Object.fromEntries(['runtimeAccounts','runtimeWallets','runtimeWalletOwners','runtimeNonces','runtimeEpochs','runtimeSourceEpochs'].map(k=>[k,[...(s[k]??new Map())]])),balances:[...s.balances],operations:[...s.operations],
+const encode = s => JSON.stringify({schema:1,seedDiscoveries:[...(s.seedDiscoveries??new Map())],seedHarvestCards:[...(s.seedHarvestCards??new Map())],seedHarvestClaims:[...(s.seedHarvestClaims??new Map())],...Object.fromEntries(['runtimeAccounts','runtimeWallets','runtimeWalletOwners','runtimeNonces','runtimeEpochs','runtimeSourceEpochs'].map(k=>[k,[...(s[k]??new Map())]])),balances:[...s.balances],operations:[...s.operations],
   claims:[...s.claims],sourceIssued:[...s.sourceIssued],assets:[...s.assets],assetSources:[...s.assetSources],listings:[...s.listings],transferIntents:[...s.transferIntents],settlementJobs:[...s.settlementJobs],marketDisputes:[...(s.marketDisputes??new Map())],skillResearch:[...(s.skillResearch??new Map())],skillResearchProofs:[...(s.skillResearchProofs??new Set())],missions:[...(s.missions??new Map())],missionProofs:[...(s.missionProofs??new Set())],missionRewards:[...(s.missionRewards??new Map())],discoveryFragments:[...(s.discoveryFragments??new Map())],discoveryEntitlements:[...(s.discoveryEntitlements??new Map())],discoveryEvents:[...(s.discoveryEvents??new Set())],discoveryAudit:[...(s.discoveryAudit??new Map())],landRentAccounts:[...(s.landRentAccounts??new Map())],landRentAudit:[...(s.landRentAudit??new Map())],landRentEvents:[...(s.landRentEvents??new Set())],importedAssets:[...s.importedAssets],issued:s.issued,burned:s.burned});
 export class PostgresBudsStore {
   constructor(pool, namespace) {

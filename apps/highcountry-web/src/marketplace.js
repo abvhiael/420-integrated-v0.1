@@ -1,3 +1,8 @@
+import {TABLES_DESKS_DESIGNS} from './tables-desks-catalog.js';
+import {OUTDOOR_SEATING_DESIGNS} from './outdoor-seating-catalog.js';
+import {GREENHOUSE_LOUNGE_DESIGNS} from './greenhouse-lounge-catalog.js';
+import {SEATING_DESIGNS} from './seating-design-catalog.js';
+import {SUPPORT_CATALOG} from './support-catalog.js';
 // HC-NEXT-4.4 player experience. All balances, ownership and settlement states are server-derived.
 const opaque=x=>typeof x==='string'&&/^[A-Za-z0-9:_-]{1,128}$/.test(x);
 const pos=x=>Number.isSafeInteger(x)&&x>0;
@@ -37,10 +42,86 @@ export function createMarketplaceClient({apiUrl,authenticate,fetchImpl=fetch}={}
   }
  });
 }
+export function mountTablesDesksCatalog({document,main}){
+ const section=document.createElement('section');section.setAttribute('aria-label','Tables, desks and personal workspaces catalog');
+ const heading=document.createElement('h3');heading.textContent='HC-ART-02-D · Tables, desks and personal workspaces';section.append(heading);
+ const note=document.createElement('p');note.textContent='Artwork catalog only. Purchases and resale require registered inventory and authenticated server listings. Browsing grants no items or bonuses.';section.append(note);
+ const grid=document.createElement('div');grid.className='support-art-catalog';section.append(grid);
+ for(const item of TABLES_DESKS_DESIGNS){
+  const card=document.createElement('article');card.className='support-art-card';card.setAttribute('data-asset-id',item.id);
+  const title=document.createElement('h4');title.textContent=item.name;card.append(title);
+  const img=document.createElement('img');img.src=item.sprite.src;img.alt=item.sprite.alt;img.width=128;img.height=128;img.loading='lazy';card.append(img);
+  img.addEventListener('error',()=>{img.hidden=true;});
+  const caption=document.createElement('p');caption.textContent=item.footprintTiles.columns+'×'+item.footprintTiles.rows+' tiles · '+item.environments.join(', ')+' · all regions · BUDS listing pending registration';card.append(caption);
+  grid.append(card);
+ }
+ main.append(section);
+}
+export function mountOutdoorSeatingCatalog({document,main}){
+ const section=document.createElement('section');section.setAttribute('aria-label','Outdoor seating and patio furniture catalog');
+ const heading=document.createElement('h3');heading.textContent='HC-ART-02-C · Outdoor seating and patio furniture';section.append(heading);
+ const note=document.createElement('p');note.textContent='Art catalog only. BUDS purchase or resale requires verified inventory, item registration and authenticated server settlement.';section.append(note);
+ const grid=document.createElement('div');grid.className='support-art-catalog';section.append(grid);
+ for(const item of OUTDOOR_SEATING_DESIGNS){
+  const card=document.createElement('article');card.className='support-art-card';
+  const title=document.createElement('h4');title.textContent=item.name;card.append(title);
+  const img=document.createElement('img');img.src=item.sprite.src;img.alt=item.sprite.alt;img.width=128;img.height=128;img.loading='lazy';card.append(img);
+  const caption=document.createElement('p');caption.textContent=item.footprintTiles.columns+'×'+item.footprintTiles.rows+' tiles · outdoor · BUDS listing pending registration';card.append(caption);
+  grid.append(card);
+ }
+ main.append(section);
+}
+export function mountGreenhouseLoungeCatalog({document,main}){
+ const section=document.createElement('section');section.setAttribute('aria-label','Greenhouse lounge furniture catalog');
+ const heading=document.createElement('h3');heading.textContent='HC-ART-02-B · Greenhouse lounge and botanical furniture';section.append(heading);
+ const note=document.createElement('p');note.textContent='Artwork preview only. BUDS prices, ownership and purchases require authenticated server inventory and listings.';section.append(note);
+ const grid=document.createElement('div');grid.className='support-art-catalog';section.append(grid);
+ for(const item of GREENHOUSE_LOUNGE_DESIGNS){
+  const card=document.createElement('article');card.className='support-art-card';
+  const title=document.createElement('h4');title.textContent=item.name;card.append(title);
+  const img=document.createElement('img');img.src=item.sprite.src;img.alt=item.sprite.alt;img.width=128;img.height=128;img.loading='lazy';card.append(img);
+  const caption=document.createElement('p');caption.textContent=item.footprintTiles.columns+'×'+item.footprintTiles.rows+' tiles · greenhouse · BUDS listing pending registration';card.append(caption);
+  grid.append(card);
+ }
+ main.append(section);
+}
+export function mountSeatingArtCatalog({document,main}){
+ const section=document.createElement('section');section.setAttribute('aria-label','Comfort furniture catalog');
+ const heading=document.createElement('h3');heading.textContent='HC-ART-02-A · Sofas, armchairs and casual seating';section.append(heading);
+ const note=document.createElement('p');note.textContent='Visual furniture catalog only. BUDS purchase and resale require verified inventory, instance ownership, listing and server settlement.';section.append(note);
+ const grid=document.createElement('div');grid.className='support-art-catalog';section.append(grid);
+ for(const item of SEATING_DESIGNS){
+  const card=document.createElement('article');card.className='support-art-card';
+  const title=document.createElement('h4');title.textContent=item.name;card.append(title);
+  const img=document.createElement('img');img.src=item.sprite.src;img.alt=item.sprite.alt;img.width=128;img.height=128;img.loading='lazy';card.append(img);
+  const label=document.createElement('p');label.textContent=item.footprintTiles.columns+'×'+item.footprintTiles.rows+' tiles · '+item.environments.join(', ')+' · BUDS listing pending registration';card.append(label);
+  grid.append(card);
+ }
+ main.append(section);
+}
+export function mountSupportArtCatalog({document,main}){
+ const section=document.createElement('section');section.setAttribute('aria-label','Cultivation support asset catalog');
+ const heading=document.createElement('h3');heading.textContent='HC-ART-01-A · Plant supports';section.append(heading);
+ const note=document.createElement('p');note.textContent='Artwork catalog only. BUDS prices and purchases require server-registered items and authenticated listings; browsing does not create inventory or entitlement.';section.append(note);
+ const grid=document.createElement('div');grid.className='support-art-catalog';section.append(grid);
+ for(const asset of SUPPORT_CATALOG){
+  const card=document.createElement('article');card.className='support-art-card';
+  const title=document.createElement('h4');title.textContent=asset.name;card.append(title);
+  const picture=document.createElement('img');picture.src=asset.paths.sprite;picture.alt=asset.name+' support artwork';picture.loading='lazy';picture.width=128;picture.height=128;card.append(picture);
+  const caption=document.createElement('p');caption.textContent=asset.region+' · '+asset.anchor+' anchor · '+asset.footprint.columns+'×'+asset.footprint.rows+' base tiles'+(asset.layering==='split'?' · layered':'');card.append(caption);
+  grid.append(card);
+ }
+ main.append(section);
+}
 export function mountMarketplace({document,main,runtime,authenticate,fetchImpl=fetch,operationId=()=>globalThis.crypto?.randomUUID?.().replaceAll('-','')}){
  const el=(tag,text='')=>{const e=document.createElement(tag);e.textContent=text;return e;};
  const status=el('p',runtime.mode==='connected'?'Sign in to load verified marketplace inventory.':'Marketplace unavailable offline; guest items are never spendable.');
  status.setAttribute('role','status');status.setAttribute('aria-live','polite');main.append(status);
+ mountSupportArtCatalog({document,main});
+ mountSeatingArtCatalog({document,main});
+ mountGreenhouseLoungeCatalog({document,main});
+ mountOutdoorSeatingCatalog({document,main});
+ mountTablesDesksCatalog({document,main});
  if(runtime.mode!=='connected'||typeof authenticate!=='function')return;
  const client=createMarketplaceClient({apiUrl:runtime.apiUrl,authenticate,fetchImpl});
  const region=el('section');region.setAttribute('aria-label','Marketplace');main.append(region);

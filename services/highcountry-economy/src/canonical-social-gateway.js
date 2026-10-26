@@ -13,7 +13,7 @@ const hex=x=>typeof x==='string'&&/^0x[0-9a-fA-F]{64}$/.test(x);
 export class CanonicalSocialGateway {
  constructor({identity,pool,chain,scope,clock=()=>Date.now()}){
   if(typeof identity?.registeredPrincipal!=='function'||typeof identity?.walletOf!=='function'||typeof pool?.connect!=='function'||!ident(scope))fail('canonical social dependencies required');
-  for(const method of ['snapshot','permission','transactionIntent','submitSigned','finalizedReceipt','history','verifyFinality','verifyTreasurySettlement'])
+  for(const method of ['snapshot','permission','transactionIntent','prepareSigned','submitSigned','finalizedReceipt','history','verifyFinality','verifyTreasurySettlement'])
    if(typeof chain?.[method]!=='function')fail('canonical social chain adapter missing: '+method);
   Object.assign(this,{identity,pool,chain,scope,clock});
   this.grants=new Map(); // ephemeral challenges only; never authority or persistent history
@@ -45,7 +45,10 @@ export class CanonicalSocialGateway {
   if(typeof ctx.signedRawTransaction!=='string'||!/^0x[0-9a-fA-F]+$/.test(ctx.signedRawTransaction))fail('wallet-signed transaction required');
   // Journal signed bytes before broadcast. A crash before or after broadcast can
   // be reconciled using the deterministic signed-transaction hash.
-  const raw=ctx.signedRawTransaction.toLowerCase(), preparedHash=keccak256(Buffer.from(raw.slice(2),'hex')).toLowerCase();
+  const raw=ctx.signedRawTransaction.toLowerCase();
+  const preflight=await this.chain.prepareSigned({wallet:who.wallet,action:ctx.action,payload:{...ctx.payload,signedRawTransaction:raw}});
+  const preparedHash=keccak256(Buffer.from(raw.slice(2),'hex')).toLowerCase();
+  if(preflight?.hash!==preparedHash)fail('signed preflight hash mismatch');
   const client=await this.pool.connect();let started=false;
   try{
    await client.query('BEGIN ISOLATION LEVEL SERIALIZABLE');started=true;

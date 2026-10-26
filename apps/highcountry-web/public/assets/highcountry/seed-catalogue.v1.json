@@ -1,0 +1,1885 @@
+{
+  "schema": "HC.SEED.CATALOGUE.V1",
+  "total": 65,
+  "entries": [
+    {
+      "id": "HC-C-acapulco-gold",
+      "name": "Acapulco Gold",
+      "tier": "common",
+      "region": "Red Mesa",
+      "artStatus": "pending",
+      "art": null,
+      "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
+      "ancestry": {
+        "basis": "attributed-research",
+        "status": "unknown",
+        "candidates": [],
+        "uncertainty": "Named parents are absent. Preserve geographic provenance without inventing a two-parent cross."
+      },
+      "characteristics": {
+        "classification": "Sativa",
+        "flavors": [
+          "Honey",
+          "Chestnut",
+          "Coffee"
+        ],
+        "terpenes": [
+          "Caryophyllene",
+          "Myrcene",
+          "Limonene"
+        ],
+        "morphology": "Gold, green and brown flowers with orange hairs and resin; a caramelized aroma."
+      },
+      "history": "Leafly associates this established variety with the Acapulco area; it supplies no named breeder or dated origin.",
+      "sources": [
+        {
+          "title": "Acapulco Gold strain",
+          "url": "https://www.leafly.com/strains/acapulco-gold"
+        }
+      ]
+    },
+    {
+      "id": "HC-C-afghan-kush",
+      "name": "Afghan Kush",
+      "tier": "common",
+      "region": "Red Mesa",
+      "artStatus": "pending",
+      "art": null,
+      "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
+      "ancestry": {
+        "basis": "attributed-research",
+        "status": "regional-population",
+        "candidates": [],
+        "uncertainty": "No individual parental pair is supplied. Afghan Kush must not automatically substitute for every Afghani or Hindu Kush ancestor."
+      },
+      "characteristics": {
+        "classification": "Indica",
+        "flavors": [
+          "Woody",
+          "Tar",
+          "Earthy"
+        ],
+        "terpenes": [
+          "Myrcene",
+          "Caryophyllene",
+          "Pinene"
+        ],
+        "morphology": "Large blunt-topped flowers with substantial resin."
+      },
+      "history": "Leafly links the variety to longstanding regional hash traditions and credits White Label, a Sensi Seeds partner, with distributing seeds.",
+      "sources": [
+        {
+          "title": "Afghan Kush strain",
+          "url": "https://www.leafly.com/strains/afghan-kush"
+        }
+      ]
+    },
+    {
+      "id": "HC-C-alaskan-thunder-fuck",
+      "name": "Alaskan Thunder Fuck",
+      "tier": "common",
+      "region": "Emerald Coast",
+      "artStatus": "pending",
+      "art": null,
+      "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
+      "ancestry": {
+        "basis": "attributed-research",
+        "status": "legend",
+        "candidates": [
+          [
+            "Northern California sativa",
+            "Russian ruderalis",
+            "Afghani"
+          ]
+        ],
+        "uncertainty": "Ancestry is explicitly a legend. A ruderalis mention does not establish an autoflowering genotype. The header says hybrid while prose also calls it sativa."
+      },
+      "characteristics": {
+        "classification": "Hybrid",
+        "flavors": [
+          "Menthol",
+          "Sage",
+          "Pine"
+        ],
+        "terpenes": [
+          "Myrcene",
+          "Caryophyllene",
+          "Limonene"
+        ],
+        "morphology": "Large frosted flowers; pine, lemon and menthol scents."
+      },
+      "history": "Leafly recounts an origin legend involving a northern cross and an Afghani addition during the late 1970s.",
+      "sources": [
+        {
+          "title": "Alaskan Thunder Fuck strain",
+          "url": "https://www.leafly.com/strains/alaskan-thunder-fuck"
+        }
+      ]
+    },
+    {
+      "id": "HC-F02",
+      "name": "Blackwater Haze",
+      "tier": "exclusive",
+      "region": "Emerald Coast",
+      "artStatus": "pending",
+      "art": null,
+      "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
+      "ancestry": {
+        "basis": "original-sixteen-heritage",
+        "status": "ancestry not encoded as verified biological pedigree"
+      },
+      "history": "River Trade · Moss Landing · The River Ledger",
+      "characteristics": null,
+      "sources": []
+    },
+    {
+      "id": "HC-C-blue-dream",
+      "name": "Blue Dream",
+      "tier": "common",
+      "region": "Emerald Coast",
+      "artStatus": "pending",
+      "art": null,
+      "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
+      "ancestry": {
+        "basis": "attributed-research",
+        "status": "reported-cross",
+        "candidates": [
+          [
+            "Blueberry",
+            "Haze"
+          ]
+        ],
+        "uncertainty": "The exact Haze selection and parental direction are not established; a shared name is not evidence of one universal clone."
+      },
+      "characteristics": {
+        "classification": "Hybrid",
+        "flavors": [
+          "Berry",
+          "Blueberry",
+          "Sweet"
+        ],
+        "terpenes": [
+          "Myrcene",
+          "Pinene",
+          "Caryophyllene"
+        ],
+        "morphology": null
+      },
+      "history": "Leafly describes a California variety that became prominent on the West Coast.",
+      "sources": [
+        {
+          "title": "Blue Dream strain",
+          "url": "https://www.leafly.com/strains/blue-dream"
+        }
+      ]
+    },
+    {
+      "id": "HC-R-blue-moon",
+      "name": "Blue Moon",
+      "tier": "rare",
+      "region": "Golden Prairie",
+      "artStatus": "pending",
+      "art": null,
+      "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
+      "ancestry": {
+        "basis": "approved-game-cross",
+        "status": "planned-cross; registration requires canonical evidence",
+        "parents": [
+          {
+            "id": "HC-C-blueberry",
+            "name": "Blueberry"
+          },
+          {
+            "id": "HC-C-northern-lights",
+            "name": "Northern Lights"
+          }
+        ]
+      },
+      "history": "A fictional HighCountry cross. Actual offspring must come from canonical breeding; no unverified phenotype is assigned.",
+      "characteristics": null,
+      "sources": []
+    },
+    {
+      "id": "HC-C-blueberry",
+      "name": "Blueberry",
+      "tier": "common",
+      "region": "Golden Prairie",
+      "artStatus": "pending",
+      "art": null,
+      "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
+      "ancestry": {
+        "basis": "attributed-research",
+        "status": "conflicting-reports",
+        "candidates": [
+          [
+            "Purple Thai",
+            "Thai"
+          ],
+          [
+            "Highland Thai (Juicy Fruit Thai)",
+            "Purple Thai (Chocolate Thai × Oaxacan Gold)",
+            "Afghani"
+          ]
+        ],
+        "uncertainty": "The profile lists two Thai-related parents; the feature also includes Afghani. The feature gives inconsistent release-era wording. Retain both pedigrees and omit a definitive release date."
+      },
+      "characteristics": {
+        "classification": "Indica",
+        "flavors": [
+          "Blueberry",
+          "Berry",
+          "Sweet"
+        ],
+        "terpenes": [
+          "Myrcene",
+          "Caryophyllene",
+          "Pinene"
+        ],
+        "morphology": "Colorful flowers are noted, without a fixed pigment guarantee."
+      },
+      "history": "Leafly links DJ Short’s breeding work to the late 1970s and a 2000 Cannabis Cup award. Its separate feature supplies a more extensive ancestry account.",
+      "sources": [
+        {
+          "title": "Blueberry strain",
+          "url": "https://www.leafly.com/strains/blueberry"
+        },
+        {
+          "title": "New Blueberry weed strains are about to make a wave",
+          "url": "https://www.leafly.com/news/strains-products/blueberry-weed-strain-trend"
+        }
+      ]
+    },
+    {
+      "id": "HC-F05",
+      "name": "Bracken Gold",
+      "tier": "exclusive",
+      "region": "Emerald Coast",
+      "artStatus": "pending",
+      "art": null,
+      "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
+      "ancestry": {
+        "basis": "original-sixteen-heritage",
+        "status": "ancestry not encoded as verified biological pedigree"
+      },
+      "history": "Valley Cooperative · Bracken Falls · The Shared Harvest",
+      "characteristics": null,
+      "sources": []
+    },
+    {
+      "id": "HC-C-bubba-kush",
+      "name": "Bubba Kush",
+      "tier": "common",
+      "region": "Red Mesa",
+      "artStatus": "pending",
+      "art": null,
+      "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
+      "ancestry": {
+        "basis": "attributed-research",
+        "status": "uncertain",
+        "candidates": [
+          [
+            "OG Kush",
+            "unknown indica (Bubba)"
+          ]
+        ],
+        "uncertainty": "Northern Lights is suggested, not confirmed, as the unidentified indica. Appearance-based Afghani inference is not pedigree proof."
+      },
+      "characteristics": {
+        "classification": "Indica",
+        "flavors": [
+          "Coffee",
+          "Earthy",
+          "Pungent"
+        ],
+        "terpenes": [
+          "Caryophyllene",
+          "Limonene",
+          "Myrcene"
+        ],
+        "morphology": "Short stature and bulky green-to-purple flowers; coffee and chocolate notes."
+      },
+      "history": "Leafly relays a breeder account placing its emergence after 1996, involving an unidentified indica obtained in New Orleans.",
+      "sources": [
+        {
+          "title": "Bubba Kush strain",
+          "url": "https://www.leafly.com/strains/bubba-kush"
+        }
+      ]
+    },
+    {
+      "id": "HC-R-canyon-fire",
+      "name": "Canyon Fire",
+      "tier": "rare",
+      "region": "Red Mesa",
+      "artStatus": "pending",
+      "art": null,
+      "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
+      "ancestry": {
+        "basis": "approved-game-cross",
+        "status": "planned-cross; registration requires canonical evidence",
+        "parents": [
+          {
+            "id": "HC-C-acapulco-gold",
+            "name": "Acapulco Gold"
+          },
+          {
+            "id": "HC-C-sour-diesel",
+            "name": "Sour Diesel"
+          }
+        ]
+      },
+      "history": "A fictional HighCountry cross. Actual offspring must come from canonical breeding; no unverified phenotype is assigned.",
+      "characteristics": null,
+      "sources": []
+    },
+    {
+      "id": "HC-R-cedar-skunk",
+      "name": "Cedar Skunk",
+      "tier": "rare",
+      "region": "Emerald Coast",
+      "artStatus": "pending",
+      "art": null,
+      "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
+      "ancestry": {
+        "basis": "approved-game-cross",
+        "status": "planned-cross; registration requires canonical evidence",
+        "parents": [
+          {
+            "id": "HC-C-jack-herer",
+            "name": "Jack Herer"
+          },
+          {
+            "id": "HC-C-afghan-kush",
+            "name": "Afghan Kush"
+          }
+        ]
+      },
+      "history": "A fictional HighCountry cross. Actual offspring must come from canonical breeding; no unverified phenotype is assigned.",
+      "characteristics": null,
+      "sources": []
+    },
+    {
+      "id": "HC-F03",
+      "name": "Cedar Widow",
+      "tier": "exclusive",
+      "region": "Emerald Coast",
+      "artStatus": "pending",
+      "art": null,
+      "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
+      "ancestry": {
+        "basis": "original-sixteen-heritage",
+        "status": "ancestry not encoded as verified biological pedigree"
+      },
+      "history": "Mountain Homestead · Cedar Hollow · The Widow's Garden",
+      "characteristics": null,
+      "sources": []
+    },
+    {
+      "id": "HC-C-chemdawg",
+      "name": "Chemdawg",
+      "tier": "common",
+      "region": "Golden Prairie",
+      "artStatus": "pending",
+      "art": null,
+      "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
+      "ancestry": {
+        "basis": "attributed-research",
+        "status": "unknown",
+        "candidates": [],
+        "uncertainty": "Named parents are absent. Bag-seed provenance is not parentage; the related selections are not interchangeable reference genomes."
+      },
+      "characteristics": {
+        "classification": "Hybrid",
+        "flavors": [
+          "Chemical",
+          "Diesel",
+          "Pungent"
+        ],
+        "terpenes": [
+          "Caryophyllene",
+          "Myrcene",
+          "Limonene"
+        ],
+        "morphology": null
+      },
+      "history": "Leafly attributes propagation to Chemdog from 1991 and recounts a Grateful Dead concert connection; Chem 91, Chem 4 and Chem Sis are related selections.",
+      "sources": [
+        {
+          "title": "Chemdawg strain",
+          "url": "https://www.leafly.com/strains/chemdawg"
+        }
+      ]
+    },
+    {
+      "id": "HC-R-coastal-kush",
+      "name": "Coastal Kush",
+      "tier": "rare",
+      "region": "Emerald Coast",
+      "artStatus": "pending",
+      "art": null,
+      "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
+      "ancestry": {
+        "basis": "approved-game-cross",
+        "status": "planned-cross; registration requires canonical evidence",
+        "parents": [
+          {
+            "id": "HC-C-og-kush",
+            "name": "OG Kush"
+          },
+          {
+            "id": "HC-C-blueberry",
+            "name": "Blueberry"
+          }
+        ]
+      },
+      "history": "A fictional HighCountry cross. Actual offspring must come from canonical breeding; no unverified phenotype is assigned.",
+      "characteristics": null,
+      "sources": []
+    },
+    {
+      "id": "HC-F13",
+      "name": "Copperhead",
+      "tier": "exclusive",
+      "region": "Red Mesa",
+      "artStatus": "pending",
+      "art": null,
+      "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
+      "ancestry": {
+        "basis": "original-sixteen-heritage",
+        "status": "ancestry not encoded as verified biological pedigree"
+      },
+      "history": "Mining Settlement · Copper Ridge · The Miners' Exchange",
+      "characteristics": null,
+      "sources": []
+    },
+    {
+      "id": "HC-F16",
+      "name": "Crimson Ghost",
+      "tier": "exclusive",
+      "region": "Red Mesa",
+      "artStatus": "pending",
+      "art": null,
+      "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
+      "ancestry": {
+        "basis": "original-sixteen-heritage",
+        "status": "ancestry not encoded as verified biological pedigree"
+      },
+      "history": "Lost Desert Collection · Dusthaven · The Missing Entry",
+      "characteristics": null,
+      "sources": []
+    },
+    {
+      "id": "HC-R-crow-mother",
+      "name": "Crow Mother",
+      "tier": "rare",
+      "region": "Red Mesa",
+      "artStatus": "pending",
+      "art": null,
+      "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
+      "ancestry": {
+        "basis": "approved-game-cross",
+        "status": "planned-cross; registration requires canonical evidence",
+        "parents": [
+          {
+            "id": "HC-C-granddaddy-purple",
+            "name": "Granddaddy Purple"
+          },
+          {
+            "id": "HC-C-chemdawg",
+            "name": "Chemdawg"
+          }
+        ]
+      },
+      "history": "A fictional HighCountry cross. Actual offspring must come from canonical breeding; no unverified phenotype is assigned.",
+      "characteristics": null,
+      "sources": []
+    },
+    {
+      "id": "HC-R-desert-bloom",
+      "name": "Desert Bloom",
+      "tier": "rare",
+      "region": "Red Mesa",
+      "artStatus": "pending",
+      "art": null,
+      "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
+      "ancestry": {
+        "basis": "approved-game-cross",
+        "status": "planned-cross; registration requires canonical evidence",
+        "parents": [
+          {
+            "id": "HC-C-zkittlez",
+            "name": "Zkittlez"
+          },
+          {
+            "id": "HC-C-durban-poison",
+            "name": "Durban Poison"
+          }
+        ]
+      },
+      "history": "A fictional HighCountry cross. Actual offspring must come from canonical breeding; no unverified phenotype is assigned.",
+      "characteristics": null,
+      "sources": []
+    },
+    {
+      "id": "HC-F14",
+      "name": "Desert Saint",
+      "tier": "exclusive",
+      "region": "Red Mesa",
+      "artStatus": "pending",
+      "art": null,
+      "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
+      "ancestry": {
+        "basis": "original-sixteen-heritage",
+        "status": "ancestry not encoded as verified biological pedigree"
+      },
+      "history": "Isolated Settlement · Solstice Wells · The Caretaker's Garden",
+      "characteristics": null,
+      "sources": []
+    },
+    {
+      "id": "HC-R-desert-shadow",
+      "name": "Desert Shadow",
+      "tier": "rare",
+      "region": "Red Mesa",
+      "artStatus": "pending",
+      "art": null,
+      "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
+      "ancestry": {
+        "basis": "approved-game-cross",
+        "status": "planned-cross; registration requires canonical evidence",
+        "parents": [
+          {
+            "id": "HC-C-bubba-kush",
+            "name": "Bubba Kush"
+          },
+          {
+            "id": "HC-C-purple-haze",
+            "name": "Purple Haze"
+          }
+        ]
+      },
+      "history": "A fictional HighCountry cross. Actual offspring must come from canonical breeding; no unverified phenotype is assigned.",
+      "characteristics": null,
+      "sources": []
+    },
+    {
+      "id": "HC-C-durban-poison",
+      "name": "Durban Poison",
+      "tier": "common",
+      "region": "Emerald Coast",
+      "artStatus": "pending",
+      "art": null,
+      "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
+      "ancestry": {
+        "basis": "attributed-research",
+        "status": "regional-population",
+        "candidates": [],
+        "uncertainty": "The profile supplies no named parental pair or dated breeder history. Regional ancestry does not prove every commercial specimen is genetically identical."
+      },
+      "characteristics": {
+        "classification": "Sativa",
+        "flavors": [
+          "Pine",
+          "Earthy",
+          "Sage"
+        ],
+        "terpenes": [
+          "Terpinolene",
+          "Myrcene",
+          "Ocimene"
+        ],
+        "morphology": "Rounded substantial flowers and conspicuous resin glands."
+      },
+      "history": "Leafly traces its regional association to Durban and describes subsequent international popularity.",
+      "sources": [
+        {
+          "title": "Durban Poison strain",
+          "url": "https://www.leafly.com/strains/durban-poison"
+        }
+      ]
+    },
+    {
+      "id": "HC-F08",
+      "name": "Dust Devil",
+      "tier": "exclusive",
+      "region": "Golden Prairie",
+      "artStatus": "pending",
+      "art": null,
+      "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
+      "ancestry": {
+        "basis": "original-sixteen-heritage",
+        "status": "ancestry not encoded as verified biological pedigree"
+      },
+      "history": "Dryland Settlement · Dry Gulch · The Roadside Exchange",
+      "characteristics": null,
+      "sources": []
+    },
+    {
+      "id": "HC-F01",
+      "name": "Emerald Ghost",
+      "tier": "exclusive",
+      "region": "Emerald Coast",
+      "artStatus": "pending",
+      "art": null,
+      "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
+      "ancestry": {
+        "basis": "original-sixteen-heritage",
+        "status": "ancestry not encoded as verified biological pedigree"
+      },
+      "history": "Rainforest Homestead · Port Alder · The Keeper's Line",
+      "characteristics": null,
+      "sources": []
+    },
+    {
+      "id": "HC-R-emerald-mist",
+      "name": "Emerald Mist",
+      "tier": "rare",
+      "region": "Emerald Coast",
+      "artStatus": "pending",
+      "art": null,
+      "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
+      "ancestry": {
+        "basis": "approved-game-cross",
+        "status": "planned-cross; registration requires canonical evidence",
+        "parents": [
+          {
+            "id": "HC-C-blue-dream",
+            "name": "Blue Dream"
+          },
+          {
+            "id": "HC-C-white-widow",
+            "name": "White Widow"
+          }
+        ]
+      },
+      "history": "A fictional HighCountry cross. Actual offspring must come from canonical breeding; no unverified phenotype is assigned.",
+      "characteristics": null,
+      "sources": []
+    },
+    {
+      "id": "HC-R-fields-of-green",
+      "name": "Fields of Green",
+      "tier": "rare",
+      "region": "Golden Prairie",
+      "artStatus": "pending",
+      "art": null,
+      "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
+      "ancestry": {
+        "basis": "approved-game-cross",
+        "status": "planned-cross; registration requires canonical evidence",
+        "parents": [
+          {
+            "id": "HC-C-green-crack",
+            "name": "Green Crack"
+          },
+          {
+            "id": "HC-C-jack-herer",
+            "name": "Jack Herer"
+          }
+        ]
+      },
+      "history": "A fictional HighCountry cross. Actual offspring must come from canonical breeding; no unverified phenotype is assigned.",
+      "characteristics": null,
+      "sources": []
+    },
+    {
+      "id": "HC-R-fire-canyon",
+      "name": "Fire Canyon",
+      "tier": "rare",
+      "region": "Red Mesa",
+      "artStatus": "pending",
+      "art": null,
+      "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
+      "ancestry": {
+        "basis": "approved-game-cross",
+        "status": "planned-cross; registration requires canonical evidence",
+        "parents": [
+          {
+            "id": "HC-C-sour-diesel",
+            "name": "Sour Diesel"
+          },
+          {
+            "id": "HC-C-afghan-kush",
+            "name": "Afghan Kush"
+          }
+        ]
+      },
+      "history": "A fictional HighCountry cross. Actual offspring must come from canonical breeding; no unverified phenotype is assigned.",
+      "characteristics": null,
+      "sources": []
+    },
+    {
+      "id": "HC-C-gelato",
+      "name": "Gelato",
+      "tier": "common",
+      "region": "Emerald Coast",
+      "artStatus": "pending",
+      "art": null,
+      "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
+      "ancestry": {
+        "basis": "attributed-research",
+        "status": "reported-cross",
+        "candidates": [
+          [
+            "Sunset Sherbet",
+            "Thin Mint Girl Scout Cookies"
+          ]
+        ],
+        "uncertainty": "Thin Mint GSC is a selection, not any generic GSC specimen. Numbered Gelato names do not prove identical genotypes; this profile does not establish a release date or breeder."
+      },
+      "characteristics": {
+        "classification": "Hybrid",
+        "flavors": [
+          "Sweet",
+          "Flowery",
+          "Pepper"
+        ],
+        "terpenes": [
+          "Caryophyllene",
+          "Limonene",
+          "Humulene"
+        ],
+        "morphology": "Dark-purple flowers, orange hairs and a pale resin coating; creamy fruit notes."
+      },
+      "history": "Leafly describes a dessert-family hybrid and distinguishes multiple numbered Gelato selections.",
+      "sources": [
+        {
+          "title": "Gelato strain",
+          "url": "https://www.leafly.com/strains/gelato"
+        }
+      ]
+    },
+    {
+      "id": "HC-C-girl-scout-cookies",
+      "name": "Girl Scout Cookies",
+      "tier": "common",
+      "region": "Golden Prairie",
+      "artStatus": "pending",
+      "art": null,
+      "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
+      "ancestry": {
+        "basis": "attributed-research",
+        "status": "reported-cross",
+        "candidates": [
+          [
+            "OG Kush subtype",
+            "F1 Durban"
+          ]
+        ],
+        "uncertainty": "The source names an OG subtype and intermediate F1 Durban. Do not replace F1 Durban with the common Durban Poison genome or collapse Thin Mint and Platinum selections."
+      },
+      "characteristics": {
+        "classification": "Hybrid",
+        "flavors": [
+          "Mint",
+          "Sweet",
+          "Earthy"
+        ],
+        "terpenes": [
+          "Caryophyllene",
+          "Myrcene",
+          "Limonene"
+        ],
+        "morphology": "Dessert-like scent with mint, cherry and lemon associations."
+      },
+      "history": "Leafly credits breeder Jigga and describes the GSC family’s awards and later selections.",
+      "sources": [
+        {
+          "title": "GSC strain",
+          "url": "https://www.leafly.com/strains/gsc"
+        }
+      ]
+    },
+    {
+      "id": "HC-R-golden-haze",
+      "name": "Golden Haze",
+      "tier": "rare",
+      "region": "Golden Prairie",
+      "artStatus": "pending",
+      "art": null,
+      "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
+      "ancestry": {
+        "basis": "approved-game-cross",
+        "status": "planned-cross; registration requires canonical evidence",
+        "parents": [
+          {
+            "id": "HC-C-acapulco-gold",
+            "name": "Acapulco Gold"
+          },
+          {
+            "id": "HC-C-super-silver-haze",
+            "name": "Super Silver Haze"
+          }
+        ]
+      },
+      "history": "A fictional HighCountry cross. Actual offspring must come from canonical breeding; no unverified phenotype is assigned.",
+      "characteristics": null,
+      "sources": []
+    },
+    {
+      "id": "HC-F11",
+      "name": "Golden Hour",
+      "tier": "exclusive",
+      "region": "Golden Prairie",
+      "artStatus": "pending",
+      "art": null,
+      "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
+      "ancestry": {
+        "basis": "original-sixteen-heritage",
+        "status": "ancestry not encoded as verified biological pedigree"
+      },
+      "history": "Family Agricultural Tradition · Prairie Crossing · The Evening Journal",
+      "characteristics": null,
+      "sources": []
+    },
+    {
+      "id": "HC-C-granddaddy-purple",
+      "name": "Granddaddy Purple",
+      "tier": "common",
+      "region": "Emerald Coast",
+      "artStatus": "pending",
+      "art": null,
+      "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
+      "ancestry": {
+        "basis": "attributed-research",
+        "status": "conflicting-reports",
+        "candidates": [
+          [
+            "Mendo Purps",
+            "Skunk",
+            "Afghanistan"
+          ],
+          [
+            "Big Bud",
+            "Purple Urkle"
+          ]
+        ],
+        "uncertainty": "Leafly presents competing crosses. The interview is a personal account, not independent pedigree verification; no candidate is selected as settled ancestry."
+      },
+      "characteristics": {
+        "classification": "Indica",
+        "flavors": [
+          "Grape",
+          "Berry",
+          "Violet"
+        ],
+        "terpenes": [
+          "Myrcene",
+          "Pinene",
+          "Caryophyllene"
+        ],
+        "morphology": "Deep-purple flowers with pale resin; grape and berry associations."
+      },
+      "history": "Leafly credits Ken Estes with popularizing GDP in 2003. In its interview, Estes recounts obtaining Purple Medicine and introducing it in Oakland.",
+      "sources": [
+        {
+          "title": "Granddaddy Purple strain",
+          "url": "https://www.leafly.com/strains/granddaddy-purple"
+        },
+        {
+          "title": "Meet the daddy of Granddaddy Purple",
+          "url": "https://www.leafly.com/news/strains-products/ken-estes-granddaddy-purple-interview"
+        }
+      ]
+    },
+    {
+      "id": "HC-C-green-crack",
+      "name": "Green Crack",
+      "tier": "common",
+      "region": "Emerald Coast",
+      "artStatus": "pending",
+      "art": null,
+      "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
+      "ancestry": {
+        "basis": "attributed-research",
+        "status": "partial",
+        "candidates": [
+          [
+            "Skunk #1",
+            "unknown indica"
+          ]
+        ],
+        "uncertainty": "One parent is unidentified. The profile does not establish a dated origin or named breeder; alternate labels remain research metadata, not new canonical cultivar IDs."
+      },
+      "characteristics": {
+        "classification": "Sativa",
+        "flavors": [
+          "Citrus",
+          "Mango",
+          "Earthy"
+        ],
+        "terpenes": [
+          "Myrcene",
+          "Caryophyllene",
+          "Pinene"
+        ],
+        "morphology": "Tart fruit and mango associations."
+      },
+      "history": "Leafly documents alternate names including Green Cush and explains that some renaming responds to the original name’s connotations.",
+      "sources": [
+        {
+          "title": "Green Crack strain",
+          "url": "https://www.leafly.com/strains/green-crack"
+        }
+      ]
+    },
+    {
+      "id": "HC-F04",
+      "name": "Harbour Lights",
+      "tier": "exclusive",
+      "region": "Emerald Coast",
+      "artStatus": "pending",
+      "art": null,
+      "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
+      "ancestry": {
+        "basis": "original-sixteen-heritage",
+        "status": "ancestry not encoded as verified biological pedigree"
+      },
+      "history": "Dockside Cooperative · Port Alder · The Night Shift",
+      "characteristics": null,
+      "sources": []
+    },
+    {
+      "id": "HC-F09",
+      "name": "Harvest Moon",
+      "tier": "exclusive",
+      "region": "Golden Prairie",
+      "artStatus": "pending",
+      "art": null,
+      "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
+      "ancestry": {
+        "basis": "original-sixteen-heritage",
+        "status": "ancestry not encoded as verified biological pedigree"
+      },
+      "history": "Cooperative Heirloom · Willow Creek · The Autumn Gathering",
+      "characteristics": null,
+      "sources": []
+    },
+    {
+      "id": "HC-R-honey-trail",
+      "name": "Honey Trail",
+      "tier": "rare",
+      "region": "Golden Prairie",
+      "artStatus": "pending",
+      "art": null,
+      "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
+      "ancestry": {
+        "basis": "approved-game-cross",
+        "status": "planned-cross; registration requires canonical evidence",
+        "parents": [
+          {
+            "id": "HC-C-girl-scout-cookies",
+            "name": "Girl Scout Cookies"
+          },
+          {
+            "id": "HC-C-pineapple-express",
+            "name": "Pineapple Express"
+          }
+        ]
+      },
+      "history": "A fictional HighCountry cross. Actual offspring must come from canonical breeding; no unverified phenotype is assigned.",
+      "characteristics": null,
+      "sources": []
+    },
+    {
+      "id": "HC-C-jack-herer",
+      "name": "Jack Herer",
+      "tier": "common",
+      "region": "Golden Prairie",
+      "artStatus": "pending",
+      "art": null,
+      "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
+      "ancestry": {
+        "basis": "attributed-research",
+        "status": "reported-cross",
+        "candidates": [
+          [
+            "Haze hybrid",
+            "Northern Lights #5 × Shiva Skunk"
+          ]
+        ],
+        "uncertainty": "Leafly describes multiple phenotypes. Northern Lights #5 is not automatically the common Northern Lights reference, and no allele ratios are established."
+      },
+      "characteristics": {
+        "classification": "Sativa",
+        "flavors": [
+          "Pine",
+          "Woody",
+          "Earthy"
+        ],
+        "terpenes": [
+          "Terpinolene",
+          "Caryophyllene",
+          "Pinene"
+        ],
+        "morphology": "Pine and spice scent; resin production is emphasized."
+      },
+      "history": "Leafly credits Sensi Seeds with creating the variety in the mid-1990s and names the activist and author commemorated by it.",
+      "sources": [
+        {
+          "title": "Jack Herer strain",
+          "url": "https://www.leafly.com/strains/jack-herer"
+        }
+      ]
+    },
+    {
+      "id": "HC-F10",
+      "name": "Midnight Elevator",
+      "tier": "exclusive",
+      "region": "Golden Prairie",
+      "artStatus": "pending",
+      "art": null,
+      "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
+      "ancestry": {
+        "basis": "original-sixteen-heritage",
+        "status": "ancestry not encoded as verified biological pedigree"
+      },
+      "history": "Railway Settlement · Stonebridge · The Last Grain Train",
+      "characteristics": null,
+      "sources": []
+    },
+    {
+      "id": "HC-R-midnight-mesa",
+      "name": "Midnight Mesa",
+      "tier": "rare",
+      "region": "Red Mesa",
+      "artStatus": "pending",
+      "art": null,
+      "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
+      "ancestry": {
+        "basis": "approved-game-cross",
+        "status": "planned-cross; registration requires canonical evidence",
+        "parents": [
+          {
+            "id": "HC-C-granddaddy-purple",
+            "name": "Granddaddy Purple"
+          },
+          {
+            "id": "HC-C-afghan-kush",
+            "name": "Afghan Kush"
+          }
+        ]
+      },
+      "history": "A fictional HighCountry cross. Actual offspring must come from canonical breeding; no unverified phenotype is assigned.",
+      "characteristics": null,
+      "sources": []
+    },
+    {
+      "id": "HC-R-misty-harbor",
+      "name": "Misty Harbor",
+      "tier": "rare",
+      "region": "Emerald Coast",
+      "artStatus": "pending",
+      "art": null,
+      "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
+      "ancestry": {
+        "basis": "approved-game-cross",
+        "status": "planned-cross; registration requires canonical evidence",
+        "parents": [
+          {
+            "id": "HC-C-northern-lights",
+            "name": "Northern Lights"
+          },
+          {
+            "id": "HC-C-blue-dream",
+            "name": "Blue Dream"
+          }
+        ]
+      },
+      "history": "A fictional HighCountry cross. Actual offspring must come from canonical breeding; no unverified phenotype is assigned.",
+      "characteristics": null,
+      "sources": []
+    },
+    {
+      "id": "HC-C-northern-lights",
+      "name": "Northern Lights",
+      "tier": "common",
+      "region": "Golden Prairie",
+      "artStatus": "pending",
+      "art": null,
+      "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
+      "ancestry": {
+        "basis": "attributed-research",
+        "status": "reported-cross",
+        "candidates": [
+          [
+            "Afghani",
+            "Thai"
+          ]
+        ],
+        "uncertainty": "Keep the Seattle origin qualified as rumor. The indica label and mixed regional ancestry are different kinds of description; neither defines a genetic percentage."
+      },
+      "characteristics": {
+        "classification": "Indica",
+        "flavors": [
+          "Pine",
+          "Earthy",
+          "Woody"
+        ],
+        "terpenes": [
+          "Myrcene",
+          "Caryophyllene",
+          "Limonene"
+        ],
+        "morphology": "Resinous flowers with possible purple coloration."
+      },
+      "history": "Leafly recounts a possible Seattle origin and dissemination through what became Sensi Seeds after 1985.",
+      "sources": [
+        {
+          "title": "Northern Lights strain",
+          "url": "https://www.leafly.com/strains/northern-lights"
+        }
+      ]
+    },
+    {
+      "id": "HC-C-og-kush",
+      "name": "OG Kush",
+      "tier": "common",
+      "region": "Red Mesa",
+      "artStatus": "pending",
+      "art": null,
+      "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
+      "ancestry": {
+        "basis": "attributed-research",
+        "status": "uncertain",
+        "candidates": [
+          [
+            "Northern California strain",
+            "Chemdawg",
+            "Lemon Thai",
+            "Hindu Kush selection from Amsterdam"
+          ]
+        ],
+        "uncertainty": "The ancestry account is explicitly qualified; its four components do not specify a cross order. Multiple interpretations of OG and multiple selections are recorded."
+      },
+      "characteristics": {
+        "classification": "Hybrid",
+        "flavors": [
+          "Woody",
+          "Pine",
+          "Earthy"
+        ],
+        "terpenes": [
+          "Myrcene",
+          "Limonene",
+          "Caryophyllene"
+        ],
+        "morphology": "Lemon, pine, fuel and spice scent associations."
+      },
+      "history": "Leafly recounts early-1990s Florida cultivation and a 1996 transfer by Matt Berger to Josh D in Los Angeles.",
+      "sources": [
+        {
+          "title": "OG Kush strain",
+          "url": "https://www.leafly.com/strains/og-kush"
+        }
+      ]
+    },
+    {
+      "id": "HC-R-pacific-sunset",
+      "name": "Pacific Sunset",
+      "tier": "rare",
+      "region": "Emerald Coast",
+      "artStatus": "pending",
+      "art": null,
+      "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
+      "ancestry": {
+        "basis": "approved-game-cross",
+        "status": "planned-cross; registration requires canonical evidence",
+        "parents": [
+          {
+            "id": "HC-C-acapulco-gold",
+            "name": "Acapulco Gold"
+          },
+          {
+            "id": "HC-C-gelato",
+            "name": "Gelato"
+          }
+        ]
+      },
+      "history": "A fictional HighCountry cross. Actual offspring must come from canonical breeding; no unverified phenotype is assigned.",
+      "characteristics": null,
+      "sources": []
+    },
+    {
+      "id": "HC-C-pineapple-express",
+      "name": "Pineapple Express",
+      "tier": "common",
+      "region": "Emerald Coast",
+      "artStatus": "pending",
+      "art": null,
+      "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
+      "ancestry": {
+        "basis": "attributed-research",
+        "status": "reported-cross",
+        "candidates": [
+          [
+            "Trainwreck",
+            "Hawaiian"
+          ]
+        ],
+        "uncertainty": "Film release is not a proven breeding date. The page’s terpene panel and narrative list differ; both are recorded without assigning a fixed chemotype."
+      },
+      "characteristics": {
+        "classification": "Hybrid",
+        "flavors": [
+          "Pineapple",
+          "Tropical",
+          "Citrus"
+        ],
+        "terpenes": [
+          "Myrcene",
+          "Caryophyllene",
+          "Pinene"
+        ],
+        "morphology": "Citrus and pineapple scent associations."
+      },
+      "history": "Leafly connects the variety’s wider fame to the 2008 film while distinguishing the cultivar from the movie.",
+      "sources": [
+        {
+          "title": "Pineapple Express strain",
+          "url": "https://www.leafly.com/strains/pineapple-express"
+        }
+      ]
+    },
+    {
+      "id": "HC-R-prairie-fire",
+      "name": "Prairie Fire",
+      "tier": "rare",
+      "region": "Golden Prairie",
+      "artStatus": "pending",
+      "art": null,
+      "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
+      "ancestry": {
+        "basis": "approved-game-cross",
+        "status": "planned-cross; registration requires canonical evidence",
+        "parents": [
+          {
+            "id": "HC-C-acapulco-gold",
+            "name": "Acapulco Gold"
+          },
+          {
+            "id": "HC-C-girl-scout-cookies",
+            "name": "Girl Scout Cookies"
+          }
+        ]
+      },
+      "history": "A fictional HighCountry cross. Actual offspring must come from canonical breeding; no unverified phenotype is assigned.",
+      "characteristics": null,
+      "sources": []
+    },
+    {
+      "id": "HC-R-prairie-gold",
+      "name": "Prairie Gold",
+      "tier": "rare",
+      "region": "Golden Prairie",
+      "artStatus": "pending",
+      "art": null,
+      "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
+      "ancestry": {
+        "basis": "approved-game-cross",
+        "status": "planned-cross; registration requires canonical evidence",
+        "parents": [
+          {
+            "id": "HC-C-acapulco-gold",
+            "name": "Acapulco Gold"
+          },
+          {
+            "id": "HC-C-northern-lights",
+            "name": "Northern Lights"
+          }
+        ]
+      },
+      "history": "A fictional HighCountry cross. Actual offspring must come from canonical breeding; no unverified phenotype is assigned.",
+      "characteristics": null,
+      "sources": []
+    },
+    {
+      "id": "HC-F07",
+      "name": "Prairie Thunder",
+      "tier": "exclusive",
+      "region": "Golden Prairie",
+      "artStatus": "pending",
+      "art": null,
+      "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
+      "ancestry": {
+        "basis": "original-sixteen-heritage",
+        "status": "ancestry not encoded as verified biological pedigree"
+      },
+      "history": "Plains Agricultural Heritage · Harvest Junction · The Storm Years",
+      "characteristics": null,
+      "sources": []
+    },
+    {
+      "id": "HC-C-purple-haze",
+      "name": "Purple Haze",
+      "tier": "common",
+      "region": "Golden Prairie",
+      "artStatus": "pending",
+      "art": null,
+      "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
+      "ancestry": {
+        "basis": "attributed-research",
+        "status": "uncertain",
+        "candidates": [
+          [
+            "Purple Thai",
+            "Haze"
+          ]
+        ],
+        "uncertainty": "The pedigree is described as believed. A song association does not prove the named cultivar existed in that year."
+      },
+      "characteristics": {
+        "classification": "Sativa",
+        "flavors": [
+          "Lavender",
+          "Flowery",
+          "Violet"
+        ],
+        "terpenes": [
+          "Myrcene",
+          "Caryophyllene",
+          "Limonene"
+        ],
+        "morphology": "Lavender coloration with berry and spice scent associations."
+      },
+      "history": "Leafly associates its popular image with the 1967 Hendrix song, without establishing a cultivar release date.",
+      "sources": [
+        {
+          "title": "Purple Haze strain",
+          "url": "https://www.leafly.com/strains/purple-haze"
+        }
+      ]
+    },
+    {
+      "id": "HC-R-rainforest-queen",
+      "name": "Rainforest Queen",
+      "tier": "rare",
+      "region": "Emerald Coast",
+      "artStatus": "pending",
+      "art": null,
+      "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
+      "ancestry": {
+        "basis": "approved-game-cross",
+        "status": "planned-cross; registration requires canonical evidence",
+        "parents": [
+          {
+            "id": "HC-C-durban-poison",
+            "name": "Durban Poison"
+          },
+          {
+            "id": "HC-C-blue-dream",
+            "name": "Blue Dream"
+          }
+        ]
+      },
+      "history": "A fictional HighCountry cross. Actual offspring must come from canonical breeding; no unverified phenotype is assigned.",
+      "characteristics": null,
+      "sources": []
+    },
+    {
+      "id": "HC-F06",
+      "name": "Rainmaker",
+      "tier": "exclusive",
+      "region": "Emerald Coast",
+      "artStatus": "pending",
+      "art": null,
+      "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
+      "ancestry": {
+        "basis": "original-sixteen-heritage",
+        "status": "ancestry not encoded as verified biological pedigree"
+      },
+      "history": "Agricultural Innovation · Greyhaven · The Weather Room",
+      "characteristics": null,
+      "sources": []
+    },
+    {
+      "id": "HC-R-red-rock-dream",
+      "name": "Red Rock Dream",
+      "tier": "rare",
+      "region": "Red Mesa",
+      "artStatus": "pending",
+      "art": null,
+      "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
+      "ancestry": {
+        "basis": "approved-game-cross",
+        "status": "planned-cross; registration requires canonical evidence",
+        "parents": [
+          {
+            "id": "HC-C-blue-dream",
+            "name": "Blue Dream"
+          },
+          {
+            "id": "HC-C-afghan-kush",
+            "name": "Afghan Kush"
+          }
+        ]
+      },
+      "history": "A fictional HighCountry cross. Actual offspring must come from canonical breeding; no unverified phenotype is assigned.",
+      "characteristics": null,
+      "sources": []
+    },
+    {
+      "id": "HC-R-red-rock-kush",
+      "name": "Red Rock Kush",
+      "tier": "rare",
+      "region": "Red Mesa",
+      "artStatus": "pending",
+      "art": null,
+      "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
+      "ancestry": {
+        "basis": "approved-game-cross",
+        "status": "planned-cross; registration requires canonical evidence",
+        "parents": [
+          {
+            "id": "HC-C-afghan-kush",
+            "name": "Afghan Kush"
+          },
+          {
+            "id": "HC-C-og-kush",
+            "name": "OG Kush"
+          }
+        ]
+      },
+      "history": "A fictional HighCountry cross. Actual offspring must come from canonical breeding; no unverified phenotype is assigned.",
+      "characteristics": null,
+      "sources": []
+    },
+    {
+      "id": "HC-F12",
+      "name": "Redline",
+      "tier": "exclusive",
+      "region": "Red Mesa",
+      "artStatus": "pending",
+      "art": null,
+      "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
+      "ancestry": {
+        "basis": "original-sixteen-heritage",
+        "status": "ancestry not encoded as verified biological pedigree"
+      },
+      "history": "Desert Trade Route · Cinder Springs · The Long Road",
+      "characteristics": null,
+      "sources": []
+    },
+    {
+      "id": "HC-R-sage-rider",
+      "name": "Sage Rider",
+      "tier": "rare",
+      "region": "Red Mesa",
+      "artStatus": "pending",
+      "art": null,
+      "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
+      "ancestry": {
+        "basis": "approved-game-cross",
+        "status": "planned-cross; registration requires canonical evidence",
+        "parents": [
+          {
+            "id": "HC-C-og-kush",
+            "name": "OG Kush"
+          },
+          {
+            "id": "HC-C-durban-poison",
+            "name": "Durban Poison"
+          }
+        ]
+      },
+      "history": "A fictional HighCountry cross. Actual offspring must come from canonical breeding; no unverified phenotype is assigned.",
+      "characteristics": null,
+      "sources": []
+    },
+    {
+      "id": "HC-R-salty-dog",
+      "name": "Salty Dog",
+      "tier": "rare",
+      "region": "Emerald Coast",
+      "artStatus": "pending",
+      "art": null,
+      "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
+      "ancestry": {
+        "basis": "approved-game-cross",
+        "status": "planned-cross; registration requires canonical evidence",
+        "parents": [
+          {
+            "id": "HC-C-chemdawg",
+            "name": "Chemdawg"
+          },
+          {
+            "id": "HC-C-trainwreck",
+            "name": "Trainwreck"
+          }
+        ]
+      },
+      "history": "A fictional HighCountry cross. Actual offspring must come from canonical breeding; no unverified phenotype is assigned.",
+      "characteristics": null,
+      "sources": []
+    },
+    {
+      "id": "HC-R-saska-sour",
+      "name": "Saska Sour",
+      "tier": "rare",
+      "region": "Golden Prairie",
+      "artStatus": "pending",
+      "art": null,
+      "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
+      "ancestry": {
+        "basis": "approved-game-cross",
+        "status": "planned-cross; registration requires canonical evidence",
+        "parents": [
+          {
+            "id": "HC-C-sour-diesel",
+            "name": "Sour Diesel"
+          },
+          {
+            "id": "HC-C-northern-lights",
+            "name": "Northern Lights"
+          }
+        ]
+      },
+      "history": "A fictional HighCountry cross. Actual offspring must come from canonical breeding; no unverified phenotype is assigned.",
+      "characteristics": null,
+      "sources": []
+    },
+    {
+      "id": "HC-F15",
+      "name": "Solstice Fire",
+      "tier": "exclusive",
+      "region": "Red Mesa",
+      "artStatus": "pending",
+      "art": null,
+      "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
+      "ancestry": {
+        "basis": "original-sixteen-heritage",
+        "status": "ancestry not encoded as verified biological pedigree"
+      },
+      "history": "Seasonal Cooperative · Solstice Wells · The Longest Day",
+      "characteristics": null,
+      "sources": []
+    },
+    {
+      "id": "HC-C-sour-diesel",
+      "name": "Sour Diesel",
+      "tier": "common",
+      "region": "Golden Prairie",
+      "artStatus": "pending",
+      "art": null,
+      "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
+      "ancestry": {
+        "basis": "attributed-research",
+        "status": "reported-cross",
+        "candidates": [
+          [
+            "Chemdawg",
+            "Super Skunk"
+          ]
+        ],
+        "uncertainty": "The profile header says hybrid while its separately labeled AI review summary calls it sativa. Use the editorial pedigree; exclude the AI summary as historical evidence."
+      },
+      "characteristics": {
+        "classification": "Hybrid",
+        "flavors": [
+          "Diesel",
+          "Chemical",
+          "Skunk"
+        ],
+        "terpenes": [
+          "Caryophyllene",
+          "Myrcene",
+          "Limonene"
+        ],
+        "morphology": "Strong fuel-like scent."
+      },
+      "history": "Leafly places its rise in popularity in the early 1990s.",
+      "sources": [
+        {
+          "title": "Sour Diesel strain",
+          "url": "https://www.leafly.com/strains/sour-diesel"
+        }
+      ]
+    },
+    {
+      "id": "HC-R-spirit-bear",
+      "name": "Spirit Bear",
+      "tier": "rare",
+      "region": "Emerald Coast",
+      "artStatus": "pending",
+      "art": null,
+      "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
+      "ancestry": {
+        "basis": "approved-game-cross",
+        "status": "planned-cross; registration requires canonical evidence",
+        "parents": [
+          {
+            "id": "HC-C-white-widow",
+            "name": "White Widow"
+          },
+          {
+            "id": "HC-C-blueberry",
+            "name": "Blueberry"
+          }
+        ]
+      },
+      "history": "A fictional HighCountry cross. Actual offspring must come from canonical breeding; no unverified phenotype is assigned.",
+      "characteristics": null,
+      "sources": []
+    },
+    {
+      "id": "HC-C-strawberry-cough",
+      "name": "Strawberry Cough",
+      "tier": "common",
+      "region": "Red Mesa",
+      "artStatus": "pending",
+      "art": null,
+      "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
+      "ancestry": {
+        "basis": "attributed-research",
+        "status": "uncertain",
+        "candidates": [
+          [
+            "Haze",
+            "Strawberry Fields"
+          ]
+        ],
+        "uncertainty": "The cross is a proposed account, not verified parentage. No dated release or breeder attribution is supplied in the inspected profile."
+      },
+      "characteristics": {
+        "classification": "Sativa",
+        "flavors": [
+          "Strawberry",
+          "Sweet",
+          "Berry"
+        ],
+        "terpenes": [
+          "Myrcene",
+          "Pinene",
+          "Caryophyllene"
+        ],
+        "morphology": "Strawberry and skunky berry scent associations."
+      },
+      "history": "Leafly describes a recognizable strawberry-scented variety but explicitly characterizes its genetic origins as mysterious.",
+      "sources": [
+        {
+          "title": "Strawberry Cough strain",
+          "url": "https://www.leafly.com/strains/strawberry-cough"
+        }
+      ]
+    },
+    {
+      "id": "HC-C-super-silver-haze",
+      "name": "Super Silver Haze",
+      "tier": "common",
+      "region": "Emerald Coast",
+      "artStatus": "pending",
+      "art": null,
+      "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
+      "ancestry": {
+        "basis": "attributed-research",
+        "status": "reported-cross",
+        "candidates": [
+          [
+            "Skunk",
+            "Northern Lights",
+            "Haze"
+          ]
+        ],
+        "uncertainty": "The profile names three ancestral components but does not specify mating order, parental selections or allele fractions; do not infer equal thirds."
+      },
+      "characteristics": {
+        "classification": "Sativa",
+        "flavors": [
+          "Citrus",
+          "Skunk",
+          "Earthy"
+        ],
+        "terpenes": [
+          "Myrcene",
+          "Caryophyllene",
+          "Limonene"
+        ],
+        "morphology": "Sticky resinous flowers."
+      },
+      "history": "Leafly credits Green House Seeds and records first-place Cannabis Cup results in 1997, 1998 and 1999.",
+      "sources": [
+        {
+          "title": "Super Silver Haze strain",
+          "url": "https://www.leafly.com/strains/super-silver-haze"
+        }
+      ]
+    },
+    {
+      "id": "HC-R-tempest",
+      "name": "Tempest",
+      "tier": "rare",
+      "region": "Emerald Coast",
+      "artStatus": "pending",
+      "art": null,
+      "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
+      "ancestry": {
+        "basis": "approved-game-cross",
+        "status": "planned-cross; registration requires canonical evidence",
+        "parents": [
+          {
+            "id": "HC-C-trainwreck",
+            "name": "Trainwreck"
+          },
+          {
+            "id": "HC-C-super-silver-haze",
+            "name": "Super Silver Haze"
+          }
+        ]
+      },
+      "history": "A fictional HighCountry cross. Actual offspring must come from canonical breeding; no unverified phenotype is assigned.",
+      "characteristics": null,
+      "sources": []
+    },
+    {
+      "id": "HC-R-thunder-fields",
+      "name": "Thunder Fields",
+      "tier": "rare",
+      "region": "Golden Prairie",
+      "artStatus": "pending",
+      "art": null,
+      "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
+      "ancestry": {
+        "basis": "approved-game-cross",
+        "status": "planned-cross; registration requires canonical evidence",
+        "parents": [
+          {
+            "id": "HC-C-alaskan-thunder-fuck",
+            "name": "Alaskan Thunder Fuck"
+          },
+          {
+            "id": "HC-C-chemdawg",
+            "name": "Chemdawg"
+          }
+        ]
+      },
+      "history": "A fictional HighCountry cross. Actual offspring must come from canonical breeding; no unverified phenotype is assigned.",
+      "characteristics": null,
+      "sources": []
+    },
+    {
+      "id": "HC-C-trainwreck",
+      "name": "Trainwreck",
+      "tier": "common",
+      "region": "Golden Prairie",
+      "artStatus": "pending",
+      "art": null,
+      "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
+      "ancestry": {
+        "basis": "attributed-research",
+        "status": "reported-cross",
+        "candidates": [
+          [
+            "Mexican sativa",
+            "Thai sativa",
+            "Afghani indica"
+          ]
+        ],
+        "uncertainty": "Naming stories are alternatives, not established events. The header says hybrid while prose calls it sativa; three ancestral populations do not establish a mating sequence."
+      },
+      "characteristics": {
+        "classification": "Hybrid",
+        "flavors": [
+          "Pine",
+          "Earthy",
+          "Woody"
+        ],
+        "terpenes": [
+          "Terpinolene",
+          "Myrcene",
+          "Pinene"
+        ],
+        "morphology": "Spreading structure is mentioned in one naming story; lemon and spicy pine scent associations."
+      },
+      "history": "Leafly associates the cultivar with Northern California and recounts competing explanations for its railway-related name.",
+      "sources": [
+        {
+          "title": "Trainwreck strain",
+          "url": "https://www.leafly.com/strains/trainwreck"
+        }
+      ]
+    },
+    {
+      "id": "HC-C-white-widow",
+      "name": "White Widow",
+      "tier": "common",
+      "region": "Red Mesa",
+      "artStatus": "pending",
+      "art": null,
+      "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
+      "ancestry": {
+        "basis": "attributed-research",
+        "status": "reported-cross",
+        "candidates": [
+          [
+            "Brazilian sativa landrace",
+            "South Indian indica"
+          ]
+        ],
+        "uncertainty": "Leafly notes phenotype and environmental variation. Source percentages are not validated genome composition and will not be encoded as allele fractions."
+      },
+      "characteristics": {
+        "classification": "Hybrid",
+        "flavors": [
+          "Woody",
+          "Earthy",
+          "Flowery"
+        ],
+        "terpenes": [
+          "Myrcene",
+          "Caryophyllene",
+          "Pinene"
+        ],
+        "morphology": "Pale crystal resin and conical substantial flowers."
+      },
+      "history": "Leafly credits Green House Seeds and places its development in the 1990s.",
+      "sources": [
+        {
+          "title": "White Widow strain",
+          "url": "https://www.leafly.com/strains/white-widow"
+        }
+      ]
+    },
+    {
+      "id": "HC-C-zkittlez",
+      "name": "Zkittlez",
+      "tier": "common",
+      "region": "Red Mesa",
+      "artStatus": "pending",
+      "art": null,
+      "geneticSemantics": "Reference descriptions do not change a plant’s yield, potency or growing requirements.",
+      "ancestry": {
+        "basis": "attributed-research",
+        "status": "partial",
+        "candidates": [
+          [
+            "Grape Ape",
+            "Grapefruit",
+            "undisclosed strain"
+          ]
+        ],
+        "uncertainty": "The proposed mix is described as alleged and includes an undisclosed component. Keep the approved Zkittlez ID; The Original Z is a source-name mapping, not a new exclusive identity."
+      },
+      "characteristics": {
+        "classification": "Indica",
+        "flavors": [
+          "Grapefruit",
+          "Grape",
+          "Berry"
+        ],
+        "terpenes": [
+          "Caryophyllene",
+          "Linalool",
+          "Humulene"
+        ],
+        "morphology": "Medium-sized soft green flowers with sweet tropical-fruit associations."
+      },
+      "history": "Leafly now titles the profile The Original Z. It recounts 2010s market emergence, Terp Hogz promotion and a 2023 naming change.",
+      "sources": [
+        {
+          "title": "The Original Z strain",
+          "url": "https://www.leafly.com/strains/zkittlez"
+        }
+      ]
+    }
+  ]
+}

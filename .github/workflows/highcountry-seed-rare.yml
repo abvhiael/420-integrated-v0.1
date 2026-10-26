@@ -1,0 +1,62 @@
+name: HighCountry HC-SEED-04 Level 1 and genetics Level 2
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'deployments/highcountry/rare-*.v1.json'
+      - 'deployments/highcountry/seed-registration-runtime.v1.json'
+      - 'deployments/highcountry/common-reference-genomes.v1.json'
+      - 'deployments/highcountry/seed-catalog.v1.json'
+      - 'scripts/highcountry/rare_genome_lifecycle.py'
+      - 'scripts/highcountry/seed_registration_rpc.py'
+      - 'scripts/highcountry/test_rare_genome_lifecycle.py'
+      - 'scripts/highcountry/run_seed_rare_contracts.py'
+      - 'scripts/highcountry/seed-rare-contract-test.sol'
+      - 'scripts/highcountry/verify_seed_rare_test_evidence.py'
+      - 'contracts/src/highcountry/**'
+      - 'contracts/src/randomness/**'
+      - 'contracts/src/interfaces/IRandomness*.sol'
+      - 'contracts/src/system/SystemAccess.sol'
+      - 'contracts/test/highcountry/mocks/MockCapabilityRegistry.sol'
+      - '.github/workflows/highcountry-seed-rare.yml'
+permissions:
+  contents: read
+jobs:
+  rare-lifecycle-level1-level2:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /deployments/highcountry/
+            /scripts/highcountry/
+            /contracts/src/
+            /contracts/test/highcountry/mocks/MockCapabilityRegistry.sol
+            /contracts/foundry.toml
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install pycryptodome==3.23.0
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.7.1
+      - name: Validate common references and 26 reconciled crosses
+        run: python scripts/highcountry/rare_genome_lifecycle.py --check
+      - name: Level 1 plan and deployment boundary checks
+        run: python -m unittest discover -s scripts/highcountry -p 'test_rare_genome_lifecycle.py' -v
+      - name: Canonical formatting
+        run: forge fmt --root contracts --check "$GITHUB_WORKSPACE/scripts/highcountry/seed-rare-contract-test.sol"
+      - name: Level 2 canonical 49-genome registration and breeding lifecycle
+        run: python scripts/highcountry/run_seed_rare_contracts.py
+      - name: Verify test evidence and cross-language inherited loci
+        run: python scripts/highcountry/verify_seed_rare_test_evidence.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: hc-seed-04-test-evidence-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            artifacts/highcountry/hc-seed-04-test-evidence.json
+            artifacts/highcountry/hc-seed-04-qualification-report.json
+          if-no-files-found: error
+          retention-days: 30

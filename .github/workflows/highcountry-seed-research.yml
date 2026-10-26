@@ -1,0 +1,29 @@
+name: HighCountry HC-SEED-02 Level 1
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'deployments/highcountry/common-cultivar-research.v1.json'
+      - 'deployments/highcountry/seed-catalog.v1.json'
+      - 'scripts/highcountry/common-cultivar-research*.mjs'
+      - '.github/workflows/highcountry-seed-research.yml'
+permissions:
+  contents: read
+jobs:
+  common-research-level1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /deployments/highcountry/common-cultivar-research.v1.json
+            /deployments/highcountry/seed-catalog.v1.json
+            /scripts/highcountry/common-cultivar-research.mjs
+            /scripts/highcountry/common-cultivar-research.test.mjs
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node scripts/highcountry/common-cultivar-research.mjs
+      - run: node --test scripts/highcountry/common-cultivar-research.test.mjs

@@ -1,0 +1,1401 @@
+{
+  "schema": "HC.SEED.CATALOG.V1",
+  "status": "identity-catalog-only",
+  "canonicalBaseline": "ae7888e1df93be95498531ef787f2adc591f92bf",
+  "counts": {
+    "exclusive": 16,
+    "common": 23,
+    "rare": 26,
+    "total": 65
+  },
+  "regions": [
+    "Emerald Coast",
+    "Golden Prairie",
+    "Red Mesa"
+  ],
+  "identityRules": {
+    "founderNamespace": "HC-F01..HC-F16 reserved; never inferred from concept artwork",
+    "commonNamespace": "HC-C-<immutable-slug>",
+    "rareNamespace": "HC-R-<immutable-slug>",
+    "aliases": "globally unique normalized lookup names; no founder-name aliases on renamed rares",
+    "conceptRenames": "source-panel scoped only; never global aliases",
+    "historicalOrigin": "separate from in-world regional assignment",
+    "sourceAuthority": "owner decisions override source-art text; canonical archive owns founders",
+    "runtimeAdmission": "catalog presence does not register a genome, issue seeds, or enable purchases"
+  },
+  "sources": [
+    {
+      "id": "botanical-2",
+      "filename": "later strains botanical 2.png",
+      "sha256": "3dcb7ca49731d2531153edd352a7987ef75b101f4d429249368501a1cc4b9bf8",
+      "role": "reference-only; not canonical production art",
+      "libraryFileId": "libfile_a5dd62b09f388191bb3570928668905c"
+    },
+    {
+      "id": "botanical-3",
+      "filename": "later strains botanical 3.png",
+      "sha256": "8c074d90892eda6803ec93819c15567f8e856f4e3d367444b6d7887e2752d302",
+      "role": "reference-only; not canonical production art",
+      "libraryFileId": "libfile_c5b207eb58c48191a3d934c1269b3814"
+    },
+    {
+      "id": "seal-concept-a",
+      "filename": "49730098-6242-43ef-a5bc-1133c7307a77.png",
+      "sha256": "f6d59ed69cf90401c44f1febc6f52fe39032c8e099cbd71db5a9910c3b74a6a9",
+      "role": "reference-only; not canonical production art",
+      "libraryFileId": "libfile_f7aaac22d1688191a5725563606035a1"
+    },
+    {
+      "id": "seal-concept-b",
+      "filename": "a2621f70-6350-483c-9355-5461e22365b0.png",
+      "sha256": "9acf37c07e0cb09c200bf4d401b4da714bfee61ede239945a31516bdb14a9256",
+      "role": "reference-only; not canonical production art",
+      "libraryFileId": "libfile_06c3c7fbf0a881919ea27af420db14f0"
+    }
+  ],
+  "cultivars": [
+    {
+      "id": "HC-F01",
+      "name": "Emerald Ghost",
+      "tier": "exclusive",
+      "region": "Emerald Coast",
+      "aliases": [],
+      "canonicalSource": {
+        "path": "deployments/highcountry/original-sixteen-archive.v1.json",
+        "founderIndex": 1
+      },
+      "genomeStatus": "existing-canonical-identity; registration-not-attested-by-this-catalog"
+    },
+    {
+      "id": "HC-F02",
+      "name": "Blackwater Haze",
+      "tier": "exclusive",
+      "region": "Emerald Coast",
+      "aliases": [],
+      "canonicalSource": {
+        "path": "deployments/highcountry/original-sixteen-archive.v1.json",
+        "founderIndex": 2
+      },
+      "genomeStatus": "existing-canonical-identity; registration-not-attested-by-this-catalog"
+    },
+    {
+      "id": "HC-F03",
+      "name": "Cedar Widow",
+      "tier": "exclusive",
+      "region": "Emerald Coast",
+      "aliases": [],
+      "canonicalSource": {
+        "path": "deployments/highcountry/original-sixteen-archive.v1.json",
+        "founderIndex": 3
+      },
+      "genomeStatus": "existing-canonical-identity; registration-not-attested-by-this-catalog"
+    },
+    {
+      "id": "HC-F04",
+      "name": "Harbour Lights",
+      "tier": "exclusive",
+      "region": "Emerald Coast",
+      "aliases": [],
+      "canonicalSource": {
+        "path": "deployments/highcountry/original-sixteen-archive.v1.json",
+        "founderIndex": 4
+      },
+      "genomeStatus": "existing-canonical-identity; registration-not-attested-by-this-catalog"
+    },
+    {
+      "id": "HC-F05",
+      "name": "Bracken Gold",
+      "tier": "exclusive",
+      "region": "Emerald Coast",
+      "aliases": [],
+      "canonicalSource": {
+        "path": "deployments/highcountry/original-sixteen-archive.v1.json",
+        "founderIndex": 5
+      },
+      "genomeStatus": "existing-canonical-identity; registration-not-attested-by-this-catalog"
+    },
+    {
+      "id": "HC-F06",
+      "name": "Rainmaker",
+      "tier": "exclusive",
+      "region": "Emerald Coast",
+      "aliases": [],
+      "canonicalSource": {
+        "path": "deployments/highcountry/original-sixteen-archive.v1.json",
+        "founderIndex": 6
+      },
+      "genomeStatus": "existing-canonical-identity; registration-not-attested-by-this-catalog"
+    },
+    {
+      "id": "HC-F07",
+      "name": "Prairie Thunder",
+      "tier": "exclusive",
+      "region": "Golden Prairie",
+      "aliases": [],
+      "canonicalSource": {
+        "path": "deployments/highcountry/original-sixteen-archive.v1.json",
+        "founderIndex": 7
+      },
+      "genomeStatus": "existing-canonical-identity; registration-not-attested-by-this-catalog"
+    },
+    {
+      "id": "HC-F08",
+      "name": "Dust Devil",
+      "tier": "exclusive",
+      "region": "Golden Prairie",
+      "aliases": [],
+      "canonicalSource": {
+        "path": "deployments/highcountry/original-sixteen-archive.v1.json",
+        "founderIndex": 8
+      },
+      "genomeStatus": "existing-canonical-identity; registration-not-attested-by-this-catalog"
+    },
+    {
+      "id": "HC-F09",
+      "name": "Harvest Moon",
+      "tier": "exclusive",
+      "region": "Golden Prairie",
+      "aliases": [],
+      "canonicalSource": {
+        "path": "deployments/highcountry/original-sixteen-archive.v1.json",
+        "founderIndex": 9
+      },
+      "genomeStatus": "existing-canonical-identity; registration-not-attested-by-this-catalog"
+    },
+    {
+      "id": "HC-F10",
+      "name": "Midnight Elevator",
+      "tier": "exclusive",
+      "region": "Golden Prairie",
+      "aliases": [],
+      "canonicalSource": {
+        "path": "deployments/highcountry/original-sixteen-archive.v1.json",
+        "founderIndex": 10
+      },
+      "genomeStatus": "existing-canonical-identity; registration-not-attested-by-this-catalog"
+    },
+    {
+      "id": "HC-F11",
+      "name": "Golden Hour",
+      "tier": "exclusive",
+      "region": "Golden Prairie",
+      "aliases": [],
+      "canonicalSource": {
+        "path": "deployments/highcountry/original-sixteen-archive.v1.json",
+        "founderIndex": 11
+      },
+      "genomeStatus": "existing-canonical-identity; registration-not-attested-by-this-catalog"
+    },
+    {
+      "id": "HC-F12",
+      "name": "Redline",
+      "tier": "exclusive",
+      "region": "Red Mesa",
+      "aliases": [],
+      "canonicalSource": {
+        "path": "deployments/highcountry/original-sixteen-archive.v1.json",
+        "founderIndex": 12
+      },
+      "genomeStatus": "existing-canonical-identity; registration-not-attested-by-this-catalog"
+    },
+    {
+      "id": "HC-F13",
+      "name": "Copperhead",
+      "tier": "exclusive",
+      "region": "Red Mesa",
+      "aliases": [],
+      "canonicalSource": {
+        "path": "deployments/highcountry/original-sixteen-archive.v1.json",
+        "founderIndex": 13
+      },
+      "genomeStatus": "existing-canonical-identity; registration-not-attested-by-this-catalog"
+    },
+    {
+      "id": "HC-F14",
+      "name": "Desert Saint",
+      "tier": "exclusive",
+      "region": "Red Mesa",
+      "aliases": [],
+      "canonicalSource": {
+        "path": "deployments/highcountry/original-sixteen-archive.v1.json",
+        "founderIndex": 14
+      },
+      "genomeStatus": "existing-canonical-identity; registration-not-attested-by-this-catalog"
+    },
+    {
+      "id": "HC-F15",
+      "name": "Solstice Fire",
+      "tier": "exclusive",
+      "region": "Red Mesa",
+      "aliases": [],
+      "canonicalSource": {
+        "path": "deployments/highcountry/original-sixteen-archive.v1.json",
+        "founderIndex": 15
+      },
+      "genomeStatus": "existing-canonical-identity; registration-not-attested-by-this-catalog"
+    },
+    {
+      "id": "HC-F16",
+      "name": "Crimson Ghost",
+      "tier": "exclusive",
+      "region": "Red Mesa",
+      "aliases": [],
+      "canonicalSource": {
+        "path": "deployments/highcountry/original-sixteen-archive.v1.json",
+        "founderIndex": 16
+      },
+      "genomeStatus": "existing-canonical-identity; registration-not-attested-by-this-catalog"
+    },
+    {
+      "id": "HC-C-acapulco-gold",
+      "name": "Acapulco Gold",
+      "tier": "common",
+      "region": "Red Mesa",
+      "aliases": [],
+      "sourceArt": [
+        {
+          "sourceId": "botanical-2",
+          "panel": 2,
+          "printedName": "Acapulco Gold",
+          "printedRegion": "Golden Prairie",
+          "row": 1,
+          "column": 2
+        },
+        {
+          "sourceId": "botanical-3",
+          "panel": 1,
+          "printedName": "Acapulco Gold",
+          "printedRegion": "Emerald Coast",
+          "row": 1,
+          "column": 1
+        }
+      ],
+      "genomeStatus": "not-registered",
+      "productionArtStatus": "not-produced"
+    },
+    {
+      "id": "HC-C-afghan-kush",
+      "name": "Afghan Kush",
+      "tier": "common",
+      "region": "Red Mesa",
+      "aliases": [],
+      "sourceArt": [
+        {
+          "sourceId": "botanical-2",
+          "panel": 3,
+          "printedName": "Afghan Kush",
+          "printedRegion": "Red Mesa",
+          "row": 1,
+          "column": 3
+        }
+      ],
+      "genomeStatus": "not-registered",
+      "productionArtStatus": "not-produced"
+    },
+    {
+      "id": "HC-C-alaskan-thunder-fuck",
+      "name": "Alaskan Thunder Fuck",
+      "tier": "common",
+      "region": "Emerald Coast",
+      "aliases": [],
+      "sourceArt": [
+        {
+          "sourceId": "botanical-2",
+          "panel": 1,
+          "printedName": "Alaskan Thunder Fuck",
+          "printedRegion": "Northern Lights",
+          "row": 1,
+          "column": 1
+        },
+        {
+          "sourceId": "botanical-3",
+          "panel": 2,
+          "printedName": "Alaskan Thunder Fuck",
+          "printedRegion": "Emerald Coast",
+          "row": 1,
+          "column": 2
+        }
+      ],
+      "genomeStatus": "not-registered",
+      "productionArtStatus": "not-produced"
+    },
+    {
+      "id": "HC-C-blue-dream",
+      "name": "Blue Dream",
+      "tier": "common",
+      "region": "Emerald Coast",
+      "aliases": [],
+      "sourceArt": [
+        {
+          "sourceId": "botanical-2",
+          "panel": 4,
+          "printedName": "Blue Dream",
+          "printedRegion": "Emerald Coast",
+          "row": 1,
+          "column": 4
+        },
+        {
+          "sourceId": "botanical-3",
+          "panel": 3,
+          "printedName": "Blue Dream",
+          "printedRegion": "Emerald Coast",
+          "row": 1,
+          "column": 3
+        }
+      ],
+      "genomeStatus": "not-registered",
+      "productionArtStatus": "not-produced"
+    },
+    {
+      "id": "HC-C-blueberry",
+      "name": "Blueberry",
+      "tier": "common",
+      "region": "Golden Prairie",
+      "aliases": [],
+      "sourceArt": [
+        {
+          "sourceId": "botanical-2",
+          "panel": 5,
+          "printedName": "Blueberry",
+          "printedRegion": "Northern Lights",
+          "row": 1,
+          "column": 5
+        }
+      ],
+      "genomeStatus": "not-registered",
+      "productionArtStatus": "not-produced"
+    },
+    {
+      "id": "HC-C-bubba-kush",
+      "name": "Bubba Kush",
+      "tier": "common",
+      "region": "Red Mesa",
+      "aliases": [],
+      "sourceArt": [
+        {
+          "sourceId": "botanical-2",
+          "panel": 6,
+          "printedName": "Bubba Kush",
+          "printedRegion": "Red Mesa",
+          "row": 2,
+          "column": 1
+        },
+        {
+          "sourceId": "botanical-3",
+          "panel": 14,
+          "printedName": "Bubba Kush",
+          "printedRegion": "Red Mesa",
+          "row": 4,
+          "column": 2
+        }
+      ],
+      "genomeStatus": "not-registered",
+      "productionArtStatus": "not-produced"
+    },
+    {
+      "id": "HC-C-chemdawg",
+      "name": "Chemdawg",
+      "tier": "common",
+      "region": "Golden Prairie",
+      "aliases": [],
+      "sourceArt": [
+        {
+          "sourceId": "botanical-2",
+          "panel": 7,
+          "printedName": "Chemdawg",
+          "printedRegion": "Golden Prairie",
+          "row": 2,
+          "column": 2
+        }
+      ],
+      "genomeStatus": "not-registered",
+      "productionArtStatus": "not-produced"
+    },
+    {
+      "id": "HC-C-durban-poison",
+      "name": "Durban Poison",
+      "tier": "common",
+      "region": "Emerald Coast",
+      "aliases": [],
+      "sourceArt": [
+        {
+          "sourceId": "botanical-2",
+          "panel": 8,
+          "printedName": "Durban Poison",
+          "printedRegion": "Emerald Coast",
+          "row": 2,
+          "column": 3
+        }
+      ],
+      "genomeStatus": "not-registered",
+      "productionArtStatus": "not-produced"
+    },
+    {
+      "id": "HC-C-gelato",
+      "name": "Gelato",
+      "tier": "common",
+      "region": "Emerald Coast",
+      "aliases": [],
+      "sourceArt": [
+        {
+          "sourceId": "botanical-2",
+          "panel": 20,
+          "printedName": "Gelato",
+          "printedRegion": "Emerald Coast",
+          "row": 4,
+          "column": 5
+        }
+      ],
+      "genomeStatus": "not-registered",
+      "productionArtStatus": "not-produced"
+    },
+    {
+      "id": "HC-C-girl-scout-cookies",
+      "name": "Girl Scout Cookies",
+      "tier": "common",
+      "region": "Golden Prairie",
+      "aliases": [],
+      "sourceArt": [
+        {
+          "sourceId": "botanical-2",
+          "panel": 9,
+          "printedName": "Girl Scout Cookies",
+          "printedRegion": "Golden Prairie",
+          "row": 2,
+          "column": 4
+        }
+      ],
+      "genomeStatus": "not-registered",
+      "productionArtStatus": "not-produced"
+    },
+    {
+      "id": "HC-C-granddaddy-purple",
+      "name": "Granddaddy Purple",
+      "tier": "common",
+      "region": "Emerald Coast",
+      "aliases": [],
+      "sourceArt": [
+        {
+          "sourceId": "botanical-3",
+          "panel": 5,
+          "printedName": "Granddaddy Purple",
+          "printedRegion": "Emerald Coast",
+          "row": 2,
+          "column": 1
+        }
+      ],
+      "genomeStatus": "not-registered",
+      "productionArtStatus": "not-produced"
+    },
+    {
+      "id": "HC-C-green-crack",
+      "name": "Green Crack",
+      "tier": "common",
+      "region": "Emerald Coast",
+      "aliases": [],
+      "sourceArt": [
+        {
+          "sourceId": "botanical-2",
+          "panel": 10,
+          "printedName": "Green Crack",
+          "printedRegion": "Emerald Coast",
+          "row": 2,
+          "column": 5
+        },
+        {
+          "sourceId": "botanical-3",
+          "panel": 4,
+          "printedName": "Green Crack",
+          "printedRegion": "Emerald Coast",
+          "row": 1,
+          "column": 4
+        }
+      ],
+      "genomeStatus": "not-registered",
+      "productionArtStatus": "not-produced"
+    },
+    {
+      "id": "HC-C-jack-herer",
+      "name": "Jack Herer",
+      "tier": "common",
+      "region": "Golden Prairie",
+      "aliases": [],
+      "sourceArt": [
+        {
+          "sourceId": "botanical-2",
+          "panel": 11,
+          "printedName": "Jack Herer",
+          "printedRegion": "Golden Prairie",
+          "row": 3,
+          "column": 1
+        },
+        {
+          "sourceId": "botanical-3",
+          "panel": 6,
+          "printedName": "Jack Herer",
+          "printedRegion": "Golden Prairie",
+          "row": 2,
+          "column": 2
+        }
+      ],
+      "genomeStatus": "not-registered",
+      "productionArtStatus": "not-produced"
+    },
+    {
+      "id": "HC-C-northern-lights",
+      "name": "Northern Lights",
+      "tier": "common",
+      "region": "Golden Prairie",
+      "aliases": [],
+      "sourceArt": [
+        {
+          "sourceId": "botanical-2",
+          "panel": 16,
+          "printedName": "Northern Lights",
+          "printedRegion": "Northern Lights",
+          "row": 4,
+          "column": 1
+        },
+        {
+          "sourceId": "botanical-3",
+          "panel": 7,
+          "printedName": "Northern Lights",
+          "printedRegion": "Golden Prairie",
+          "row": 2,
+          "column": 3
+        },
+        {
+          "sourceId": "seal-concept-b",
+          "panel": 11,
+          "printedName": "Northern Lights",
+          "printedRegion": "Golden Prairie",
+          "row": 2,
+          "column": 5,
+          "printedFounderId": "HC-F11",
+          "founderIdIsInvalidForThisPanel": true
+        }
+      ],
+      "genomeStatus": "not-registered",
+      "productionArtStatus": "not-produced"
+    },
+    {
+      "id": "HC-C-og-kush",
+      "name": "OG Kush",
+      "tier": "common",
+      "region": "Red Mesa",
+      "aliases": [],
+      "sourceArt": [
+        {
+          "sourceId": "botanical-2",
+          "panel": 12,
+          "printedName": "OG Kush",
+          "printedRegion": "Red Mesa",
+          "row": 3,
+          "column": 2
+        },
+        {
+          "sourceId": "botanical-3",
+          "panel": 15,
+          "printedName": "OG Kush",
+          "printedRegion": "Red Mesa",
+          "row": 4,
+          "column": 3
+        }
+      ],
+      "genomeStatus": "not-registered",
+      "productionArtStatus": "not-produced"
+    },
+    {
+      "id": "HC-C-pineapple-express",
+      "name": "Pineapple Express",
+      "tier": "common",
+      "region": "Emerald Coast",
+      "aliases": [],
+      "sourceArt": [
+        {
+          "sourceId": "botanical-2",
+          "panel": 13,
+          "printedName": "Pineapple Express",
+          "printedRegion": "Emerald Coast",
+          "row": 3,
+          "column": 3
+        },
+        {
+          "sourceId": "botanical-3",
+          "panel": 8,
+          "printedName": "Pineapple Express",
+          "printedRegion": "Golden Prairie",
+          "row": 2,
+          "column": 4
+        }
+      ],
+      "genomeStatus": "not-registered",
+      "productionArtStatus": "not-produced"
+    },
+    {
+      "id": "HC-C-purple-haze",
+      "name": "Purple Haze",
+      "tier": "common",
+      "region": "Golden Prairie",
+      "aliases": [],
+      "sourceArt": [
+        {
+          "sourceId": "botanical-3",
+          "panel": 9,
+          "printedName": "Purple Haze",
+          "printedRegion": "Golden Prairie",
+          "row": 3,
+          "column": 1
+        }
+      ],
+      "genomeStatus": "not-registered",
+      "productionArtStatus": "not-produced"
+    },
+    {
+      "id": "HC-C-sour-diesel",
+      "name": "Sour Diesel",
+      "tier": "common",
+      "region": "Golden Prairie",
+      "aliases": [],
+      "sourceArt": [
+        {
+          "sourceId": "botanical-2",
+          "panel": 14,
+          "printedName": "Sour Diesel",
+          "printedRegion": "Golden Prairie",
+          "row": 3,
+          "column": 4
+        },
+        {
+          "sourceId": "botanical-3",
+          "panel": 10,
+          "printedName": "Sour Diesel",
+          "printedRegion": "Golden Prairie",
+          "row": 3,
+          "column": 2
+        }
+      ],
+      "genomeStatus": "not-registered",
+      "productionArtStatus": "not-produced"
+    },
+    {
+      "id": "HC-C-strawberry-cough",
+      "name": "Strawberry Cough",
+      "tier": "common",
+      "region": "Red Mesa",
+      "aliases": [],
+      "sourceArt": [
+        {
+          "sourceId": "botanical-3",
+          "panel": 11,
+          "printedName": "Strawberry Cough",
+          "printedRegion": "Red Mesa",
+          "row": 3,
+          "column": 3
+        }
+      ],
+      "genomeStatus": "not-registered",
+      "productionArtStatus": "not-produced"
+    },
+    {
+      "id": "HC-C-super-silver-haze",
+      "name": "Super Silver Haze",
+      "tier": "common",
+      "region": "Emerald Coast",
+      "aliases": [],
+      "sourceArt": [
+        {
+          "sourceId": "botanical-2",
+          "panel": 17,
+          "printedName": "Super Silver Haze",
+          "printedRegion": "Emerald Coast",
+          "row": 4,
+          "column": 2
+        },
+        {
+          "sourceId": "botanical-3",
+          "panel": 12,
+          "printedName": "Super Silver Haze",
+          "printedRegion": "Red Mesa",
+          "row": 3,
+          "column": 4
+        }
+      ],
+      "genomeStatus": "not-registered",
+      "productionArtStatus": "not-produced"
+    },
+    {
+      "id": "HC-C-trainwreck",
+      "name": "Trainwreck",
+      "tier": "common",
+      "region": "Golden Prairie",
+      "aliases": [],
+      "sourceArt": [
+        {
+          "sourceId": "botanical-2",
+          "panel": 18,
+          "printedName": "Trainwreck",
+          "printedRegion": "Golden Prairie",
+          "row": 4,
+          "column": 3
+        }
+      ],
+      "genomeStatus": "not-registered",
+      "productionArtStatus": "not-produced"
+    },
+    {
+      "id": "HC-C-white-widow",
+      "name": "White Widow",
+      "tier": "common",
+      "region": "Red Mesa",
+      "aliases": [],
+      "sourceArt": [
+        {
+          "sourceId": "botanical-2",
+          "panel": 15,
+          "printedName": "White Widow",
+          "printedRegion": "Northern Lights",
+          "row": 3,
+          "column": 5
+        },
+        {
+          "sourceId": "botanical-3",
+          "panel": 13,
+          "printedName": "White Widow",
+          "printedRegion": "Red Mesa",
+          "row": 4,
+          "column": 1
+        }
+      ],
+      "genomeStatus": "not-registered",
+      "productionArtStatus": "not-produced"
+    },
+    {
+      "id": "HC-C-zkittlez",
+      "name": "Zkittlez",
+      "tier": "common",
+      "region": "Red Mesa",
+      "aliases": [],
+      "sourceArt": [
+        {
+          "sourceId": "botanical-2",
+          "panel": 19,
+          "printedName": "Zkittlez",
+          "printedRegion": "Red Mesa",
+          "row": 4,
+          "column": 4
+        },
+        {
+          "sourceId": "botanical-3",
+          "panel": 16,
+          "printedName": "Zkittlez",
+          "printedRegion": "Red Mesa",
+          "row": 4,
+          "column": 4
+        }
+      ],
+      "genomeStatus": "not-registered",
+      "productionArtStatus": "not-produced"
+    },
+    {
+      "id": "HC-R-blue-moon",
+      "name": "Blue Moon",
+      "tier": "rare",
+      "region": "Golden Prairie",
+      "aliases": [],
+      "sourceArt": [
+        {
+          "sourceId": "seal-concept-a",
+          "panel": 9,
+          "printedName": "Harvest Moon",
+          "printedRegion": "Golden Prairie",
+          "row": 2,
+          "column": 3,
+          "printedFounderId": "HC-F09",
+          "founderIdIsInvalidForThisPanel": true,
+          "contextualRename": true
+        },
+        {
+          "sourceId": "seal-concept-b",
+          "panel": 10,
+          "printedName": "Harvest Moon",
+          "printedRegion": "Golden Prairie",
+          "row": 2,
+          "column": 4,
+          "printedFounderId": "HC-F10",
+          "founderIdIsInvalidForThisPanel": true,
+          "contextualRename": true
+        }
+      ],
+      "genomeStatus": "not-registered",
+      "productionArtStatus": "not-produced"
+    },
+    {
+      "id": "HC-R-canyon-fire",
+      "name": "Canyon Fire",
+      "tier": "rare",
+      "region": "Red Mesa",
+      "aliases": [],
+      "sourceArt": [
+        {
+          "sourceId": "seal-concept-b",
+          "panel": 15,
+          "printedName": "Canyon Fire",
+          "printedRegion": "Red Mesa",
+          "row": 3,
+          "column": 4,
+          "printedFounderId": "HC-F15",
+          "founderIdIsInvalidForThisPanel": true
+        }
+      ],
+      "genomeStatus": "not-registered",
+      "productionArtStatus": "not-produced"
+    },
+    {
+      "id": "HC-R-cedar-skunk",
+      "name": "Cedar Skunk",
+      "tier": "rare",
+      "region": "Emerald Coast",
+      "aliases": [],
+      "sourceArt": [
+        {
+          "sourceId": "seal-concept-b",
+          "panel": 4,
+          "printedName": "Cedar Skunk",
+          "printedRegion": "Emerald Coast",
+          "row": 1,
+          "column": 4,
+          "printedFounderId": "HC-F04",
+          "founderIdIsInvalidForThisPanel": true
+        }
+      ],
+      "genomeStatus": "not-registered",
+      "productionArtStatus": "not-produced"
+    },
+    {
+      "id": "HC-R-coastal-kush",
+      "name": "Coastal Kush",
+      "tier": "rare",
+      "region": "Emerald Coast",
+      "aliases": [],
+      "sourceArt": [
+        {
+          "sourceId": "seal-concept-a",
+          "panel": 2,
+          "printedName": "Coastal Kush",
+          "printedRegion": "Emerald Coast",
+          "row": 1,
+          "column": 2,
+          "printedFounderId": "HC-F02",
+          "founderIdIsInvalidForThisPanel": true
+        },
+        {
+          "sourceId": "seal-concept-b",
+          "panel": 2,
+          "printedName": "Coastal Kush",
+          "printedRegion": "Emerald Coast",
+          "row": 1,
+          "column": 2,
+          "printedFounderId": "HC-F02",
+          "founderIdIsInvalidForThisPanel": true
+        }
+      ],
+      "genomeStatus": "not-registered",
+      "productionArtStatus": "not-produced"
+    },
+    {
+      "id": "HC-R-crow-mother",
+      "name": "Crow Mother",
+      "tier": "rare",
+      "region": "Red Mesa",
+      "aliases": [],
+      "sourceArt": [
+        {
+          "sourceId": "seal-concept-a",
+          "panel": 12,
+          "printedName": "Crimson Ghost",
+          "printedRegion": "Red Mesa",
+          "row": 3,
+          "column": 1,
+          "printedFounderId": "HC-F12",
+          "founderIdIsInvalidForThisPanel": true,
+          "contextualRename": true
+        }
+      ],
+      "genomeStatus": "not-registered",
+      "productionArtStatus": "not-produced"
+    },
+    {
+      "id": "HC-R-desert-bloom",
+      "name": "Desert Bloom",
+      "tier": "rare",
+      "region": "Red Mesa",
+      "aliases": [],
+      "sourceArt": [
+        {
+          "sourceId": "seal-concept-a",
+          "panel": 14,
+          "printedName": "Desert Bloom",
+          "printedRegion": "Red Mesa",
+          "row": 3,
+          "column": 3,
+          "printedFounderId": "HC-F14",
+          "founderIdIsInvalidForThisPanel": true
+        }
+      ],
+      "genomeStatus": "not-registered",
+      "productionArtStatus": "not-produced"
+    },
+    {
+      "id": "HC-R-desert-shadow",
+      "name": "Desert Shadow",
+      "tier": "rare",
+      "region": "Red Mesa",
+      "aliases": [],
+      "sourceArt": [
+        {
+          "sourceId": "seal-concept-b",
+          "panel": 13,
+          "printedName": "Desert Shadow",
+          "printedRegion": "Red Mesa",
+          "row": 3,
+          "column": 2,
+          "printedFounderId": "HC-F13",
+          "founderIdIsInvalidForThisPanel": true
+        }
+      ],
+      "genomeStatus": "not-registered",
+      "productionArtStatus": "not-produced"
+    },
+    {
+      "id": "HC-R-emerald-mist",
+      "name": "Emerald Mist",
+      "tier": "rare",
+      "region": "Emerald Coast",
+      "aliases": [],
+      "sourceArt": [
+        {
+          "sourceId": "seal-concept-b",
+          "panel": 1,
+          "printedName": "Emerald Mist",
+          "printedRegion": "Emerald Coast",
+          "row": 1,
+          "column": 1,
+          "printedFounderId": "HC-F01",
+          "founderIdIsInvalidForThisPanel": true
+        }
+      ],
+      "genomeStatus": "not-registered",
+      "productionArtStatus": "not-produced"
+    },
+    {
+      "id": "HC-R-fields-of-green",
+      "name": "Fields of Green",
+      "tier": "rare",
+      "region": "Golden Prairie",
+      "aliases": [],
+      "sourceArt": [
+        {
+          "sourceId": "seal-concept-a",
+          "panel": 10,
+          "printedName": "Fields of Green",
+          "printedRegion": "Golden Prairie",
+          "row": 2,
+          "column": 4,
+          "printedFounderId": "HC-F10",
+          "founderIdIsInvalidForThisPanel": true
+        }
+      ],
+      "genomeStatus": "not-registered",
+      "productionArtStatus": "not-produced"
+    },
+    {
+      "id": "HC-R-fire-canyon",
+      "name": "Fire Canyon",
+      "tier": "rare",
+      "region": "Red Mesa",
+      "aliases": [],
+      "sourceArt": [
+        {
+          "sourceId": "seal-concept-a",
+          "panel": 16,
+          "printedName": "Fire Canyon",
+          "printedRegion": "Red Mesa",
+          "row": 3,
+          "column": 5,
+          "printedFounderId": "HC-F16",
+          "founderIdIsInvalidForThisPanel": true
+        }
+      ],
+      "genomeStatus": "not-registered",
+      "productionArtStatus": "not-produced"
+    },
+    {
+      "id": "HC-R-golden-haze",
+      "name": "Golden Haze",
+      "tier": "rare",
+      "region": "Golden Prairie",
+      "aliases": [],
+      "sourceArt": [
+        {
+          "sourceId": "seal-concept-a",
+          "panel": 8,
+          "printedName": "Golden Haze",
+          "printedRegion": "Golden Prairie",
+          "row": 2,
+          "column": 2,
+          "printedFounderId": "HC-F08",
+          "founderIdIsInvalidForThisPanel": true
+        }
+      ],
+      "genomeStatus": "not-registered",
+      "productionArtStatus": "not-produced"
+    },
+    {
+      "id": "HC-R-honey-trail",
+      "name": "Honey Trail",
+      "tier": "rare",
+      "region": "Golden Prairie",
+      "aliases": [],
+      "sourceArt": [
+        {
+          "sourceId": "seal-concept-a",
+          "panel": 11,
+          "printedName": "Honey Trail",
+          "printedRegion": "Golden Prairie",
+          "row": 2,
+          "column": 5,
+          "printedFounderId": "HC-F11",
+          "founderIdIsInvalidForThisPanel": true
+        }
+      ],
+      "genomeStatus": "not-registered",
+      "productionArtStatus": "not-produced"
+    },
+    {
+      "id": "HC-R-midnight-mesa",
+      "name": "Midnight Mesa",
+      "tier": "rare",
+      "region": "Red Mesa",
+      "aliases": [],
+      "sourceArt": [
+        {
+          "sourceId": "seal-concept-b",
+          "panel": 16,
+          "printedName": "Midnight Mesa",
+          "printedRegion": "Red Mesa",
+          "row": 3,
+          "column": 5,
+          "printedFounderId": "HC-F16",
+          "founderIdIsInvalidForThisPanel": true
+        }
+      ],
+      "genomeStatus": "not-registered",
+      "productionArtStatus": "not-produced"
+    },
+    {
+      "id": "HC-R-misty-harbor",
+      "name": "Misty Harbor",
+      "tier": "rare",
+      "region": "Emerald Coast",
+      "aliases": [],
+      "sourceArt": [
+        {
+          "sourceId": "seal-concept-a",
+          "panel": 3,
+          "printedName": "Misty Harbor",
+          "printedRegion": "Emerald Coast",
+          "row": 1,
+          "column": 3,
+          "printedFounderId": "HC-F03",
+          "founderIdIsInvalidForThisPanel": true
+        }
+      ],
+      "genomeStatus": "not-registered",
+      "productionArtStatus": "not-produced"
+    },
+    {
+      "id": "HC-R-pacific-sunset",
+      "name": "Pacific Sunset",
+      "tier": "rare",
+      "region": "Emerald Coast",
+      "aliases": [],
+      "sourceArt": [
+        {
+          "sourceId": "seal-concept-b",
+          "panel": 6,
+          "printedName": "Pacific Sunset",
+          "printedRegion": "Emerald Coast",
+          "row": 1,
+          "column": 6,
+          "printedFounderId": "HC-F06",
+          "founderIdIsInvalidForThisPanel": true
+        }
+      ],
+      "genomeStatus": "not-registered",
+      "productionArtStatus": "not-produced"
+    },
+    {
+      "id": "HC-R-prairie-fire",
+      "name": "Prairie Fire",
+      "tier": "rare",
+      "region": "Golden Prairie",
+      "aliases": [],
+      "sourceArt": [
+        {
+          "sourceId": "seal-concept-a",
+          "panel": 7,
+          "printedName": "Prairie Fire",
+          "printedRegion": "Golden Prairie",
+          "row": 2,
+          "column": 1,
+          "printedFounderId": "HC-F07",
+          "founderIdIsInvalidForThisPanel": true
+        }
+      ],
+      "genomeStatus": "not-registered",
+      "productionArtStatus": "not-produced"
+    },
+    {
+      "id": "HC-R-prairie-gold",
+      "name": "Prairie Gold",
+      "tier": "rare",
+      "region": "Golden Prairie",
+      "aliases": [],
+      "sourceArt": [
+        {
+          "sourceId": "seal-concept-b",
+          "panel": 7,
+          "printedName": "Prairie Gold",
+          "printedRegion": "Golden Prairie",
+          "row": 2,
+          "column": 1,
+          "printedFounderId": "HC-F07",
+          "founderIdIsInvalidForThisPanel": true
+        }
+      ],
+      "genomeStatus": "not-registered",
+      "productionArtStatus": "not-produced"
+    },
+    {
+      "id": "HC-R-rainforest-queen",
+      "name": "Rainforest Queen",
+      "tier": "rare",
+      "region": "Emerald Coast",
+      "aliases": [],
+      "sourceArt": [
+        {
+          "sourceId": "seal-concept-a",
+          "panel": 6,
+          "printedName": "Rainforest Queen",
+          "printedRegion": "Emerald Coast",
+          "row": 1,
+          "column": 6,
+          "printedFounderId": "HC-F06",
+          "founderIdIsInvalidForThisPanel": true
+        },
+        {
+          "sourceId": "seal-concept-b",
+          "panel": 5,
+          "printedName": "Rainforest Queen",
+          "printedRegion": "Emerald Coast",
+          "row": 1,
+          "column": 5,
+          "printedFounderId": "HC-F05",
+          "founderIdIsInvalidForThisPanel": true
+        }
+      ],
+      "genomeStatus": "not-registered",
+      "productionArtStatus": "not-produced"
+    },
+    {
+      "id": "HC-R-red-rock-dream",
+      "name": "Red Rock Dream",
+      "tier": "rare",
+      "region": "Red Mesa",
+      "aliases": [],
+      "sourceArt": [
+        {
+          "sourceId": "seal-concept-b",
+          "panel": 12,
+          "printedName": "Red Rock Dream",
+          "printedRegion": "Red Mesa",
+          "row": 3,
+          "column": 1,
+          "printedFounderId": "HC-F12",
+          "founderIdIsInvalidForThisPanel": true
+        }
+      ],
+      "genomeStatus": "not-registered",
+      "productionArtStatus": "not-produced"
+    },
+    {
+      "id": "HC-R-red-rock-kush",
+      "name": "Red Rock Kush",
+      "tier": "rare",
+      "region": "Red Mesa",
+      "aliases": [],
+      "sourceArt": [
+        {
+          "sourceId": "seal-concept-a",
+          "panel": 13,
+          "printedName": "Red Rock Kush",
+          "printedRegion": "Red Mesa",
+          "row": 3,
+          "column": 2,
+          "printedFounderId": "HC-F13",
+          "founderIdIsInvalidForThisPanel": true
+        }
+      ],
+      "genomeStatus": "not-registered",
+      "productionArtStatus": "not-produced"
+    },
+    {
+      "id": "HC-R-sage-rider",
+      "name": "Sage Rider",
+      "tier": "rare",
+      "region": "Red Mesa",
+      "aliases": [],
+      "sourceArt": [
+        {
+          "sourceId": "seal-concept-a",
+          "panel": 15,
+          "printedName": "Sage Rider",
+          "printedRegion": "Red Mesa",
+          "row": 3,
+          "column": 4,
+          "printedFounderId": "HC-F15",
+          "founderIdIsInvalidForThisPanel": true
+        },
+        {
+          "sourceId": "seal-concept-b",
+          "panel": 14,
+          "printedName": "Sage Rider",
+          "printedRegion": "Red Mesa",
+          "row": 3,
+          "column": 3,
+          "printedFounderId": "HC-F14",
+          "founderIdIsInvalidForThisPanel": true
+        }
+      ],
+      "genomeStatus": "not-registered",
+      "productionArtStatus": "not-produced"
+    },
+    {
+      "id": "HC-R-salty-dog",
+      "name": "Salty Dog",
+      "tier": "rare",
+      "region": "Emerald Coast",
+      "aliases": [],
+      "sourceArt": [
+        {
+          "sourceId": "seal-concept-a",
+          "panel": 4,
+          "printedName": "Salty Dog",
+          "printedRegion": "Emerald Coast",
+          "row": 1,
+          "column": 4,
+          "printedFounderId": "HC-F04",
+          "founderIdIsInvalidForThisPanel": true
+        },
+        {
+          "sourceId": "seal-concept-b",
+          "panel": 3,
+          "printedName": "Salty Dog",
+          "printedRegion": "Emerald Coast",
+          "row": 1,
+          "column": 3,
+          "printedFounderId": "HC-F03",
+          "founderIdIsInvalidForThisPanel": true
+        }
+      ],
+      "genomeStatus": "not-registered",
+      "productionArtStatus": "not-produced"
+    },
+    {
+      "id": "HC-R-saska-sour",
+      "name": "Saska Sour",
+      "tier": "rare",
+      "region": "Golden Prairie",
+      "aliases": [],
+      "sourceArt": [
+        {
+          "sourceId": "seal-concept-b",
+          "panel": 9,
+          "printedName": "Saska Sour",
+          "printedRegion": "Golden Prairie",
+          "row": 2,
+          "column": 3,
+          "printedFounderId": "HC-F09",
+          "founderIdIsInvalidForThisPanel": true
+        }
+      ],
+      "genomeStatus": "not-registered",
+      "productionArtStatus": "not-produced"
+    },
+    {
+      "id": "HC-R-spirit-bear",
+      "name": "Spirit Bear",
+      "tier": "rare",
+      "region": "Emerald Coast",
+      "aliases": [],
+      "sourceArt": [
+        {
+          "sourceId": "seal-concept-a",
+          "panel": 1,
+          "printedName": "Emerald Ghost",
+          "printedRegion": "Emerald Coast",
+          "row": 1,
+          "column": 1,
+          "printedFounderId": "HC-F01",
+          "founderIdIsInvalidForThisPanel": true,
+          "contextualRename": true
+        }
+      ],
+      "genomeStatus": "not-registered",
+      "productionArtStatus": "not-produced"
+    },
+    {
+      "id": "HC-R-tempest",
+      "name": "Tempest",
+      "tier": "rare",
+      "region": "Emerald Coast",
+      "aliases": [],
+      "sourceArt": [
+        {
+          "sourceId": "seal-concept-a",
+          "panel": 5,
+          "printedName": "Tempest",
+          "printedRegion": "Emerald Coast",
+          "row": 1,
+          "column": 5,
+          "printedFounderId": "HC-F05",
+          "founderIdIsInvalidForThisPanel": true
+        }
+      ],
+      "genomeStatus": "not-registered",
+      "productionArtStatus": "not-produced"
+    },
+    {
+      "id": "HC-R-thunder-fields",
+      "name": "Thunder Fields",
+      "tier": "rare",
+      "region": "Golden Prairie",
+      "aliases": [],
+      "sourceArt": [
+        {
+          "sourceId": "seal-concept-b",
+          "panel": 8,
+          "printedName": "Thunder Fields",
+          "printedRegion": "Golden Prairie",
+          "row": 2,
+          "column": 2,
+          "printedFounderId": "HC-F08",
+          "founderIdIsInvalidForThisPanel": true
+        }
+      ],
+      "genomeStatus": "not-registered",
+      "productionArtStatus": "not-produced"
+    }
+  ]
+}

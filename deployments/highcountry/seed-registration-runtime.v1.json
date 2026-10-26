@@ -1,0 +1,50 @@
+{
+  "schema": "HC.SEED.REGISTRATION_RUNTIME.V1",
+  "state": "UNRESOLVED_NOT_DEPLOYED",
+  "chainId": null,
+  "operator": null,
+  "profileId": null,
+  "confirmations": 2,
+  "contracts": {
+    "GenomeRegistry": {
+      "address": null,
+      "codeHash": null
+    },
+    "GenesisRegistry": {
+      "address": null,
+      "codeHash": null
+    },
+    "HighCountryAuthorization": {
+      "address": null,
+      "codeHash": null
+    },
+    "BreedingEngine": {
+      "address": null,
+      "codeHash": null
+    },
+    "CanonicalBreedingRandomnessAdapter": {
+      "address": null,
+      "codeHash": null
+    },
+    "RandomnessRouter420": {
+      "address": null,
+      "codeHash": null
+    },
+    "EmergencyState": {
+      "address": null,
+      "codeHash": null
+    }
+  },
+  "requirements": [
+    "Resolve and approve the actual deployed chain, operator, contract addresses and independently verified runtime code hashes.",
+    "Reference the governance-approved, proof-verified canonical randomness profile. No test signature verifier or raw entropy coordinator is a production substitute.",
+    "Genesis must already be finalized through the canonical launch process; this runner cannot finalize Genesis or grant capabilities.",
+    "Provision exact-scoped existing capabilities for common registration, breeding request/finalization and child registration by the BreedingEngine.",
+    "Use HC_SEED_RPC_URL for JSON-RPC. Transaction signing must be supplied by the authorized external signer/RPC; no private keys in runtime files.",
+    "Qualifying a local test does not populate live registration evidence."
+  ],
+  "randomnessPolicy": {
+    "minimumSecurityTier": 2,
+    "approvedRoutes": []
+  }
+}

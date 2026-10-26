@@ -146,8 +146,7 @@ contract SeedPackOpening {
         o.commitment = commitment;
         o.owner = owner;
         o.pool = pool;
-        bytes32 id =
-            router.requestPersistentRandomness(
+        bytes32 id = router.requestPersistentRandomness(
             profileId, DOMAIN, purpose(key, owner, pool, commitment), uint64(deadline)
         );
         IRandomnessRouter420.Request memory r = router.request(id);

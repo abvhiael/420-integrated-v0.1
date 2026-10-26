@@ -1,3 +1,4 @@
+import {SEATING_DESIGNS} from './seating-design-catalog.js';
 import {SUPPORT_CATALOG} from './support-catalog.js';
 // HC-NEXT-4.4 player experience. All balances, ownership and settlement states are server-derived.
 const opaque=x=>typeof x==='string'&&/^[A-Za-z0-9:_-]{1,128}$/.test(x);
@@ -38,6 +39,20 @@ export function createMarketplaceClient({apiUrl,authenticate,fetchImpl=fetch}={}
   }
  });
 }
+export function mountSeatingArtCatalog({document,main}){
+ const section=document.createElement('section');section.setAttribute('aria-label','Comfort furniture catalog');
+ const heading=document.createElement('h3');heading.textContent='HC-ART-02-A · Sofas, armchairs and casual seating';section.append(heading);
+ const note=document.createElement('p');note.textContent='Visual furniture catalog only. BUDS purchase and resale require verified inventory, instance ownership, listing and server settlement.';section.append(note);
+ const grid=document.createElement('div');grid.className='support-art-catalog';section.append(grid);
+ for(const item of SEATING_DESIGNS){
+  const card=document.createElement('article');card.className='support-art-card';
+  const title=document.createElement('h4');title.textContent=item.name;card.append(title);
+  const img=document.createElement('img');img.src=item.sprite.src;img.alt=item.sprite.alt;img.width=128;img.height=128;img.loading='lazy';card.append(img);
+  const label=document.createElement('p');label.textContent=item.footprintTiles.columns+'×'+item.footprintTiles.rows+' tiles · '+item.environments.join(', ')+' · BUDS listing pending registration';card.append(label);
+  grid.append(card);
+ }
+ main.append(section);
+}
 export function mountSupportArtCatalog({document,main}){
  const section=document.createElement('section');section.setAttribute('aria-label','Cultivation support asset catalog');
  const heading=document.createElement('h3');heading.textContent='HC-ART-01-A · Plant supports';section.append(heading);
@@ -57,6 +72,7 @@ export function mountMarketplace({document,main,runtime,authenticate,fetchImpl=f
  const status=el('p',runtime.mode==='connected'?'Sign in to load verified marketplace inventory.':'Marketplace unavailable offline; guest items are never spendable.');
  status.setAttribute('role','status');status.setAttribute('aria-live','polite');main.append(status);
  mountSupportArtCatalog({document,main});
+ mountSeatingArtCatalog({document,main});
  if(runtime.mode!=='connected'||typeof authenticate!=='function')return;
  const client=createMarketplaceClient({apiUrl:runtime.apiUrl,authenticate,fetchImpl});
  const region=el('section');region.setAttribute('aria-label','Marketplace');main.append(region);

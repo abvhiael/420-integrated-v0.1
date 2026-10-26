@@ -9,7 +9,7 @@ try{
  await client.query('BEGIN');
  const r=await client.query('SELECT rolname,rolsuper,rolbypassrls FROM pg_roles WHERE rolname=$1',[role]);
  if(r.rows.length!==1||r.rows[0].rolsuper||r.rows[0].rolbypassrls)throw Error('provision restricted runtime role first');
- for(const t of ['highcountry_social_operations','highcountry_social_intents']){
+ for(const t of ['highcountry_social_operations','highcountry_social_intents','highcountry_social_events']){
   await client.query('REVOKE ALL ON '+qid(t)+' FROM PUBLIC');
   await client.query('ALTER TABLE '+qid(t)+' FORCE ROW LEVEL SECURITY');
   const policy=role+'_'+t+'_scope';

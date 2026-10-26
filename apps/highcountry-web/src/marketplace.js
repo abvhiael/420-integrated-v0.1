@@ -1,3 +1,4 @@
+import {GREENHOUSE_LOUNGE_DESIGNS} from './greenhouse-lounge-catalog.js';
 import {SEATING_DESIGNS} from './seating-design-catalog.js';
 import {SUPPORT_CATALOG} from './support-catalog.js';
 // HC-NEXT-4.4 player experience. All balances, ownership and settlement states are server-derived.
@@ -39,6 +40,20 @@ export function createMarketplaceClient({apiUrl,authenticate,fetchImpl=fetch}={}
   }
  });
 }
+export function mountGreenhouseLoungeCatalog({document,main}){
+ const section=document.createElement('section');section.setAttribute('aria-label','Greenhouse lounge furniture catalog');
+ const heading=document.createElement('h3');heading.textContent='HC-ART-02-B · Greenhouse lounge and botanical furniture';section.append(heading);
+ const note=document.createElement('p');note.textContent='Artwork preview only. BUDS prices, ownership and purchases require authenticated server inventory and listings.';section.append(note);
+ const grid=document.createElement('div');grid.className='support-art-catalog';section.append(grid);
+ for(const item of GREENHOUSE_LOUNGE_DESIGNS){
+  const card=document.createElement('article');card.className='support-art-card';
+  const title=document.createElement('h4');title.textContent=item.name;card.append(title);
+  const img=document.createElement('img');img.src=item.sprite.src;img.alt=item.sprite.alt;img.width=128;img.height=128;img.loading='lazy';card.append(img);
+  const caption=document.createElement('p');caption.textContent=item.footprintTiles.columns+'×'+item.footprintTiles.rows+' tiles · greenhouse · BUDS listing pending registration';card.append(caption);
+  grid.append(card);
+ }
+ main.append(section);
+}
 export function mountSeatingArtCatalog({document,main}){
  const section=document.createElement('section');section.setAttribute('aria-label','Comfort furniture catalog');
  const heading=document.createElement('h3');heading.textContent='HC-ART-02-A · Sofas, armchairs and casual seating';section.append(heading);
@@ -73,6 +88,7 @@ export function mountMarketplace({document,main,runtime,authenticate,fetchImpl=f
  status.setAttribute('role','status');status.setAttribute('aria-live','polite');main.append(status);
  mountSupportArtCatalog({document,main});
  mountSeatingArtCatalog({document,main});
+ mountGreenhouseLoungeCatalog({document,main});
  if(runtime.mode!=='connected'||typeof authenticate!=='function')return;
  const client=createMarketplaceClient({apiUrl:runtime.apiUrl,authenticate,fetchImpl});
  const region=el('section');region.setAttribute('aria-label','Marketplace');main.append(region);

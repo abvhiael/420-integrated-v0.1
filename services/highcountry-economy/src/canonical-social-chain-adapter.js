@@ -74,7 +74,8 @@ export class CanonicalSocialChainAdapter {
    }
    const nowHeader=await this.rpc.header();
    const block=await this.rpc.request('eth_getBlockByNumber',[nowHeader.number,false]);
-   const now=BigInt(block?.timestamp??'0x0');
+   if(block?.hash?.toLowerCase()!==nowHeader.hash.toLowerCase()||!/^0x[0-9a-f]+$/i.test(block.timestamp))return {allowed:false};
+   const now=BigInt(block.timestamp);
    const orgId=payload.organization??payload.id,coopId=payload.cooperative;
    const orgInfo=async id=>this.read('organizations','organizations(bytes32)',id);
    const activeOrg=async id=>{const o=await orgInfo(id);return {admin:address('0x'+o[0].slice(24)),active:BigInt('0x'+o[1])===1n};};

@@ -73,7 +73,7 @@ def main():
     for owner,test,label in [('Reentry','testGenuineReentryAddOnRecoveryRefundsEveryOriginalPayer','purchase-refunds'),('Reentry','testQueuedReceiptsMustBeReconciledBeforeFullRecoveryRefund','queue-refunds'),('Reentry','testOneAbortedHandDoesNotPermitRefundWhileAnotherIsActive','active-hand-refunds'),('Rebuy','testRecoveryRequiresExpiredRebuyChoicesToBeReconciled','choice-refunds'),('Free','testGenuineFreeEventRecoveryReturnsSponsorAndChargesNoFees','sponsor-refunds')]:
         execute(cmd+['--match-contract','^TournamentPrize'+owner+'Funded420Test$','--match-test','^'+test+r'\(\)$','-vvvv'],ROOT/'contracts',env,out,label+'-trace')
         execute([sys.executable,'scripts/bet/replay-poker-5c7-refunds.py',out/(label+'-trace.stdout.log'),'--output',out/(label+'-independent-replay.json')],ROOT,env,out,label+'-replay')
-    execute([sys.executable,'scripts/bet/check-poker-5c7-replay.py','scripts/bet/replay-poker-5c7-refunds.py','--traces',out,'--output',out/'replay-tamper-checks.json'],ROOT,env,out,'independent-replay-tamper-checks')
+    execute([sys.executable,'scripts/bet/check-poker-5c7-replay.py','--traces',out,'--output',out/'replay-tamper-checks.json'],ROOT,env,out,'independent-replay-tamper-checks')
     identities=re.findall(r'emit C7VerifierIdentity\(index: (\d+), backend: .*?\[(0x[0-9a-fA-F]{40})\], verifyingKey: (0x[0-9a-fA-F]{64}), runtimeHash: (0x[0-9a-fA-F]{64}), circuit: (0x[0-9a-fA-F]{64}), schema: (0x[0-9a-fA-F]{64})\)',traces['legitimate'])
     if len(identities)!=7 or not re.search(r'emit C7RuntimeIdentity\(',traces['legitimate']):raise RuntimeError('Missing executed verifier/runtime identities')
     write(out,'executed-verifier-identities.json',identities)

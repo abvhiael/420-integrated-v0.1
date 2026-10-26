@@ -88,18 +88,27 @@ test('mismatched chain, revoked recipient, busy lease and chain mismatch evidenc
 test('finalized reader resolves canonical eligibility and rejects altered lot fields or chain anchors',async()=>{
  const f=await fixture(),c=data.commonReferences.genomes.find(e=>e.cultivarId==='HC-C-blue-dream');
  const i={lotId:'1',genomeId:c.genomeId,breedingEventId:'0',wallet:ALICE,quantity:3,metadataHash:'0x'+'55'.repeat(32),cultivarId:c.cultivarId};
- const {selector}=await import('../src/keccak.js'),{word}=await import('../src/finalized-rpc.js');const previous=f.chain.rpc.request;let exists=false,alter=false;
+ const {selector}=await import('../src/keccak.js'),{word}=await import('../src/finalized-rpc.js');const previous=f.chain.rpc.request;let exists=false,alter=false,currentOwner=ALICE,registrationOwner=ALICE,omitRegistration=false;
  f.chain.rpc.request=async(method,args)=>{
+  if(method==='eth_getLogs'){
+   if(omitRegistration)return [];
+   return [{address:f.chain.rpc.contracts.seeds.address,topics:[args[0].topics[0],'0x'+word(i.lotId),i.genomeId,'0x'+word(registrationOwner)],data:'0x'+word(i.quantity)+word(i.breedingEventId),blockNumber:'0x64',blockHash:'0x'+'aa'.repeat(32),transactionHash:'0x'+'77'.repeat(32),removed:false}];
+  }
   if(method==='eth_call'&&args[0].data.startsWith('0x'+selector('exists(uint64)')))return '0x'+word(exists?1:0);
-  if(method==='eth_call'&&args[0].data.startsWith('0x'+selector('getSeedLot(uint64)')))return '0x'+[i.lotId,i.genomeId,0,ALICE,alter?4:3,i.metadataHash,1].map(word).join('');
+  if(method==='eth_call'&&args[0].data.startsWith('0x'+selector('getSeedLot(uint64)')))return '0x'+[i.lotId,i.genomeId,0,currentOwner,alter?4:3,i.metadataHash,1].map(word).join('');
   return previous(method,args);
  };
  assert.equal((await f.chain.reader.cultivar(c.cultivarId)).genomeId,c.genomeId);
  assert.equal(await f.chain.reader.issuance(i),null);exists=true;assert.equal((await f.chain.reader.issuedLot(i)).lotId,'1');
+ currentOwner=BOB;assert.equal((await f.chain.reader.issuedLot(i)).registration.owner,ALICE);
+ registrationOwner=BOB;await assert.rejects(f.chain.reader.issuedLot(i),/event mismatch/);registrationOwner=ALICE;
+ omitRegistration=true;await assert.rejects(f.chain.reader.issuedLot(i),/registration event required/);omitRegistration=false;
  alter=true;await assert.rejects(f.chain.reader.issuedLot(i),/intent mismatch/);alter=false;
  for(const change of [{wallet:BOB},{metadataHash:'0x'+'66'.repeat(32)},{cultivarId:'HC-C-not-real'},{breedingEventId:'1'}])await assert.rejects(f.chain.reader.issuedLot({...i,...change}));
  f.chain.state.referenceTampered=true;await assert.rejects(f.chain.reader.issuedLot(i),/reference record/);f.chain.state.referenceTampered=false;
- f.chain.state.reorg=true;await assert.rejects(f.chain.reader.issuedLot(i),/anchor changed/);
+ f.chain.state.reorg=true;await assert.rejects(f.chain.reader.issuedLot(i),/seed registration event anchor mismatch/);
+ f.chain.state.reorg=false;const transport=f.chain.rpc.request;let anchors=0;f.chain.rpc.request=async(method,args)=>{if(method==='eth_getBlockByNumber'&&++anchors===2)return {hash:'0x'+'bb'.repeat(32),number:'0x64'};return transport(method,args);};
+ await assert.rejects(f.chain.reader.issuedLot(i),/seed finalized anchor changed/);
 });
 test('market emergency blocks submissions while finalized reconciliation remains available',async()=>{
  const f=await setup(),[p]=await f.packs.starter(f.alice,'Red Mesa'),i=await f.packs.prepare(f.alice,p.id);f.worker.rpc.unrestricted=async()=>false;

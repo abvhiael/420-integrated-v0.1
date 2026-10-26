@@ -96,9 +96,26 @@ export class SeedChainReader {
   if(exists.length!==1||n(exists[0])>1n)fail('invalid seed existence');
   if(n(exists[0])===0n){await s.finish();return null;}
   const lot=await s.call('seeds','getSeedLot(uint64)',intent.lotId);
-  if(lot.length!==7||n(lot[0])!==BigInt(intent.lotId)||hex(lot[1])!==intent.genomeId||n(lot[2])!==BigInt(intent.breedingEventId)||a(lot[3])!==address(intent.wallet)||n(lot[4])!==BigInt(intent.quantity)||hex(lot[5])!==intent.metadataHash||n(lot[6])!==1n)fail('issued seed lot intent mismatch');
+  if(lot.length!==7||n(lot[0])!==BigInt(intent.lotId)||hex(lot[1])!==intent.genomeId||n(lot[2])!==BigInt(intent.breedingEventId)||n(lot[4])!==BigInt(intent.quantity)||hex(lot[5])!==intent.metadataHash||n(lot[6])!==1n)fail('issued seed lot intent mismatch');
   const genome=await s.resolve(intent.genomeId);if(genome?.cultivarId!==intent.cultivarId)fail('issued seed genome mismatch');
-  return {registry:address(this.rpc.contracts.seeds.address),lotId:intent.lotId,metadataHash:intent.metadataHash,genome,anchor:await s.finish()};
+  // The mutable current owner cannot prove the original mint recipient. Bind the registration event.
+  const head=Number(BigInt(s.header.number)),registry=address(this.rpc.contracts.seeds.address);
+  if(!Number.isSafeInteger(head)||head<this.deploymentBlock||head-this.deploymentBlock+1>this.maxScanBlocks)fail('seed issuance index range unavailable');
+  const signature=keccak256(Buffer.from('SeedLotRegistered(uint64,bytes32,address,uint32,uint64)'));
+  const topics=[signature,'0x'+word(intent.lotId),intent.genomeId,'0x'+word(address(intent.wallet))];let registration=null;
+  for(let from=this.deploymentBlock;from<=head;from+=this.logChunk){
+   const to=Math.min(head,from+this.logChunk-1),logs=await this.rpc.request('eth_getLogs',[{address:registry,fromBlock:'0x'+from.toString(16),toBlock:'0x'+to.toString(16),topics}]);
+   if(!Array.isArray(logs)||logs.length>10000)fail('seed issuance index unavailable');
+   for(const log of logs){
+    if(registration||log.removed||address(log.address)!==registry||log.topics?.length!==4||topics.some((t,i)=>log.topics[i]?.toLowerCase()!==t.toLowerCase())||!H(log.blockHash)||!H(log.transactionHash))fail('seed registration event mismatch');
+    const block=Number(BigInt(log.blockNumber)),fields=words(log.data);
+    if(block<from||block>to||fields.length!==2||n(fields[0])!==BigInt(intent.quantity)||n(fields[1])!==BigInt(intent.breedingEventId))fail('seed registration event quantity mismatch');
+    const anchor=await this.rpc.request('eth_getBlockByNumber',[log.blockNumber,false]);if(anchor?.hash?.toLowerCase()!==log.blockHash.toLowerCase())fail('seed registration event anchor mismatch');
+    registration={transactionHash:log.transactionHash,blockHash:log.blockHash,blockNumber:log.blockNumber,owner:address(intent.wallet)};
+   }
+  }
+  if(!registration)fail('original seed registration event required');
+  return {registry,lotId:intent.lotId,metadataHash:intent.metadataHash,genome,registration,anchor:await s.finish()};
  }
  async issuedLot(intent){const result=await this.issuance(intent);if(!result)fail('seed lot not finalized');return result;}
  async ownership(wallet){

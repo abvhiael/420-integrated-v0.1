@@ -1,7 +1,7 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import {SCENE_CONTRACT_VERSION,SCENE_SIZE,CATEGORY_RULES,PROP_CATALOG,ENVIRONMENT_SLOTS,normalizePlacement,layoutProp,demoScene,placementStyle} from '../src/cultivation-scene-layout.js';
+import {SCENE_CONTRACT_VERSION,SCENE_SIZE,TILE_CONTRACT,CONTAINER_FOOTPRINTS,footprintDimensions,CATEGORY_RULES,PROP_CATALOG,ENVIRONMENT_SLOTS,normalizePlacement,layoutProp,demoScene,placementStyle} from '../src/cultivation-scene-layout.js';
 test('versioned coordinate contract and source-size independent anchors',()=>{
- assert.equal(SCENE_CONTRACT_VERSION,'hc-cultivation-scene/v1');assert.deepEqual(SCENE_SIZE,{width:1920,height:1080,grid:80});
+ assert.equal(SCENE_CONTRACT_VERSION,'hc-cultivation-scene/v1');assert.deepEqual(SCENE_SIZE,{width:1920,height:1080,grid:64});
  for(const [category,rule] of Object.entries(CATEGORY_RULES)){const p=normalizePlacement({id:'test',x:100,y:200,category});assert.equal(p.anchorX,.5);assert.equal(p.anchorY,1);assert.equal(p.depth,rule.depth);}
 });
 test('different object classes retain meaningful size differences',()=>{
@@ -23,4 +23,15 @@ test('untrusted placement and filenames fail closed',()=>{
  for(const v of [0,2,NaN])assert.throws(()=>layoutProp('raised-bed',100,200,v),/invalid-scene-scale/);
  assert.throws(()=>layoutProp('../evil',100,200),/unknown-scene-prop/);
  assert.throws(()=>demoScene('../bad'),/unknown-scene-environment/);
+});
+
+test('approved tile footprint standards are exact and independent of sprite artwork',()=>{
+ assert.deepEqual(TILE_CONTRACT,{width:64,depth:64,isometricHeight:32});
+ assert.deepEqual(footprintDimensions('standardPot'),{columns:1,rows:1,width:64,depth:64});
+ assert.deepEqual(footprintDimensions('fabricPot'),{columns:1,rows:1,width:64,depth:64});
+ assert.deepEqual(footprintDimensions('raisedBed'),{columns:2,rows:1,width:128,depth:64});
+ assert.deepEqual(footprintDimensions('largePlanter'),{columns:2,rows:2,width:128,depth:128});
+ assert.deepEqual(layoutProp('raised-bed',500,700).footprint,footprintDimensions('raisedBed'));
+ assert.deepEqual(layoutProp('fabric-pot',500,700).footprint,footprintDimensions('fabricPot'));
+ assert.throws(()=>footprintDimensions('../bad'),/unknown-tile-footprint/);
 });

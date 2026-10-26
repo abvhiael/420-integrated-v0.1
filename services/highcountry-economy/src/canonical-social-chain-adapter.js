@@ -1,11 +1,13 @@
 import {SettlementError} from './buds-ledger.js';
-import {address,calldata,words,word} from './finalized-rpc.js';
+import {address,calldata,words} from './finalized-rpc.js';
 import {keccak256} from './keccak.js';
 const fail=m=>{throw new SettlementError(m);};
 const hash=x=>typeof x==='string'&&/^0x[0-9a-fA-F]{64}$/.test(x);
 const bytes=x=>typeof x==='string'&&/^0x([0-9a-fA-F]{2})+$/.test(x);
 const b32=x=>{if(!hash(x)||BigInt(x)===0n)fail('bytes32 identifier required');return x.toLowerCase();};
 const enc=(sig,args)=>calldata(sig,...args);
+const ORG_DOMAIN='organizations',COOP_DOMAIN='cooperatives';
+const ENABLED=new Set(['organization.create','organization.invite','organization.invitation.revoke','organization.join','organization.leave','organization.remove','organization.leader.propose','organization.leader.accept','cooperative.create','cooperative.enroll','cooperative.withdraw']);
 const TABLE=Object.freeze({
  'organization.create':{contract:'organizations',sig:'create(bytes32,bytes32)',fields:['id','metadataHash'],check:'create'},
  'organization.invite':{contract:'organizations',sig:'invite(bytes32,address,bool)',fields:['organization','account'],extra:true,check:'admin'},
@@ -24,26 +26,29 @@ const TABLE=Object.freeze({
  'cooperative.execute':{contract:'executor',sig:'execute(bytes32)',fields:['proposal'],check:'executable'}
 });
 export class CanonicalSocialChainAdapter {
- constructor({rpc,contracts,scope,emergencyDomain}){
-  if(typeof rpc?.request!=='function'||typeof rpc?.call!=='function'||!contracts||!hash(emergencyDomain))fail('pinned social chain dependencies required');
+ constructor({rpc,contracts,scope,emergencyDomain,organizationEmergencyDomain,cooperativeEmergencyDomain,verifySignedEnvelope}){
+  if(typeof rpc?.request!=='function'||typeof rpc?.call!=='function'||!contracts||!hash(emergencyDomain)||!hash(organizationEmergencyDomain)||!hash(cooperativeEmergencyDomain)||typeof verifySignedEnvelope!=='function')fail('pinned social chain and signed envelope verifier required');
   for(const key of ['organizations','cooperatives','governance','executor'])
    if(!rpc.contracts[key]?.codeHash||address(rpc.contracts[key].address)!==address(contracts[key]))fail('unpinned social contract');
-  Object.assign(this,{rpc,contracts,scope,emergencyDomain});
+  Object.assign(this,{rpc,contracts,scope,emergencyDomain,organizationEmergencyDomain,cooperativeEmergencyDomain,verifySignedEnvelope});
  }
  async read(name,sig,...args){return words((await this.rpc.call(name,enc(sig,args))).result);}
  async permission({wallet,action,payload}){
-  wallet=address(wallet);const op=TABLE[action];if(!op)return {allowed:false};
+  wallet=address(wallet);const op=TABLE[action];if(!op||!ENABLED.has(action))return {allowed:false};
   const params=op.fields.map(k=>k==='account'||k==='candidate'?address(payload[k]):b32(payload[k]));
   if(op.extra===true||op.extra===false)params.push(op.extra?1:0);
   if(op.extra==='support')params.push(payload.support===true||payload.support==='true'?1:0);
   let allowed=false;
   try{
-   if(!await this.rpc.unrestricted(this.emergencyDomain))return {allowed:false};
+   if(!await this.rpc.unrestricted(this.emergencyDomain)||!await this.rpc.unrestricted(op.contract==='organizations'?this.organizationEmergencyDomain:this.cooperativeEmergencyDomain))return {allowed:false};
    const id=payload.organization??payload.cooperative??payload.id;
    const org=id?b32(id):null;
-   if(op.check==='create'){allowed=BigInt('0x'+(await this.read('organizations','organizations(bytes32)',params[0]))[0])===0n;}
+   if(op.check==='create'){
+    if(action==='organization.create')allowed=BigInt('0x'+(await this.read('organizations','organizations(bytes32)',params[0]))[0])===0n;
+    else {const info=await this.read('organizations','organizations(bytes32)',params[1]);allowed=address('0x'+info[0].slice(24))===wallet&&BigInt('0x'+info[1])===1n&&BigInt('0x'+(await this.read('cooperatives','cooperatives(bytes32)',params[0]))[4])===0n;}
+   }
    else if(op.check==='admin'){const info=await this.read('organizations','organizations(bytes32)',org);allowed=address('0x'+info[0].slice(24))===wallet&&BigInt('0x'+info[1])===1n;}
-   else if(op.check==='invited'){const info=await this.read('organizations','invitations(bytes32,address)',org,wallet);allowed=BigInt('0x'+info[0])===1n;}
+   else if(op.check==='invited'){const info=await this.read('organizations','invitations(bytes32,address)',org,wallet);const expiry=await this.read('organizations','invitationExpiry(bytes32,address)',org,wallet);const header=await this.rpc.header();const block=await this.rpc.request('eth_getBlockByNumber',[header.number,false]);allowed=BigInt('0x'+info[0])===1n&&BigInt('0x'+expiry[0])>BigInt(block.timestamp);}
    else if(op.check==='member'){allowed=BigInt('0x'+(await this.read('organizations','isActiveMember(bytes32,address)',org,wallet))[0])===1n;}
    else if(op.check==='successor'){const info=await this.read('organizations','proposedAdministrator(bytes32)',org);allowed=address('0x'+info[0].slice(24))===wallet;}
    else if(op.check==='orgMember'||op.check==='enrolled'){
@@ -60,14 +65,17 @@ export class CanonicalSocialChainAdapter {
   return {allowed:true,blockHash:header.hash,policyHash:keccak256(Buffer.from(JSON.stringify([wallet,action,params,header.hash])))};
  }
  async submitSigned({wallet,action,payload}){
-  const op=TABLE[action];if(!op)fail('unapproved social operation');
+  const op=TABLE[action];if(!op||!ENABLED.has(action))fail('unapproved social operation');
   const raw=payload?.signedRawTransaction;
   if(!bytes(raw))fail('wallet signed raw transaction required');
   const params=op.fields.map(k=>k==='account'||k==='candidate'?address(payload[k]):b32(payload[k]));
   if(typeof op.extra==='boolean')params.push(op.extra?1:0);
   if(op.extra==='support')params.push(payload.support===true||payload.support==='true'?1:0);
   const expected=enc(op.sig,params).toLowerCase();
-  // Broadcast untrusted bytes only; independently authenticate resulting chain transaction.
+  // Decode and authenticate the real player-signed envelope before any broadcast.
+  // The verifier is a required local cryptographic implementation, never RPC self-attestation.
+  const verified=await this.verifySignedEnvelope(raw);
+  if(!verified||address(verified.from)!==address(wallet)||address(verified.to)!==address(this.contracts[op.contract])||verified.input?.toLowerCase()!==expected||verified.chainId!==this.rpc.chainId||BigInt(verified.value)!==0n||!Number.isSafeInteger(verified.nonce)||verified.nonce<0)fail('prebroadcast signed intent mismatch');
   const txHash=await this.rpc.request('eth_sendRawTransaction',[raw]);
   if(!hash(txHash))fail('canonical tx hash missing');
   const tx=await this.rpc.request('eth_getTransactionByHash',[txHash]);

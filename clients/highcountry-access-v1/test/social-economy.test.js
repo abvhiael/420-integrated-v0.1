@@ -45,7 +45,7 @@ test('treasury permission is never treated as a transfer receipt',async()=>{
  await controller.connect('session');
  const h=await controller.history('treasury','org-a');
  assert.equal(h.entries[0].settled,false);assert.equal(h.entries[0].settlementProof,null);
- await assert.rejects(controller.act(OPERATIONS.execute,{kind:'treasury'}),/separate canonical treasury/);
+ await assert.rejects(controller.act(OPERATIONS.execute,{kind:'treasury'}),/governance cannot execute treasury transfers/);
 });
 test('settled history requires canonical ledger proof',async()=>{
  const {controller}=harness({history:async()=>({entries:[{id:'payout-1',state:'settled'}]})});

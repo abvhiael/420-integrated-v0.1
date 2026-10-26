@@ -117,3 +117,24 @@ test('HC-GFX-2.1.2: failed background fetch leaves local cultivation usable',asy
  await page.getByRole('button',{name:'Plant locally'}).click();
  await expect(page.getByText('Plant stage: germination')).toBeVisible();
 });
+
+test('HC-GFX-2.1.4: scene overlays and anchors render across nine backgrounds',async({page})=>{
+ await page.goto(origin+'/play');
+ const region=page.getByRole('combobox',{name:'Preview region'});
+ const environment=page.getByRole('combobox',{name:'Preview environment'});
+ for(const r of ['emerald-coast','golden-prairie','red-mesa']){
+  await region.selectOption(r);
+  for(const e of ['outdoor','greenhouse','indoor']){
+   await environment.selectOption(e);
+   const canvas=page.locator('.cultivation-scene-canvas');
+   await expect(canvas).toBeVisible();
+   await expect(canvas.locator('.cultivation-scene-prop')).toHaveCount(3);
+   const objects=await canvas.locator('.cultivation-scene-prop').evaluateAll(items=>items.map(el=>({
+    width:parseFloat(el.style.width),left:parseFloat(el.style.left),top:parseFloat(el.style.top),
+    transform:getComputedStyle(el).transform,src:el.getAttribute('src')
+   })));
+   expect(objects[0].width).toBeGreaterThan(objects[2].width);
+   for(const obj of objects){expect(obj.left).toBeGreaterThan(0);expect(obj.left).toBeLessThan(100);expect(obj.top).toBeGreaterThan(0);expect(obj.top).toBeLessThan(100);expect(obj.src).toMatch(/^\\/assets\\/cultivation\\/props\\//);}
+  }
+ }
+});

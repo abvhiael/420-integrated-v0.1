@@ -49,7 +49,7 @@ export const SEATING_DESIGNS=Object.freeze([
     "tags": [
       "seating"
     ],
-    "assetStatus": "proposed",
+    "assetStatus": "uploaded-main",
     "marketStatus": "not-registered"
   },
   {
@@ -73,7 +73,7 @@ export const SEATING_DESIGNS=Object.freeze([
     "tags": [
       "seating"
     ],
-    "assetStatus": "proposed",
+    "assetStatus": "uploaded-main",
     "marketStatus": "not-registered"
   },
   {
@@ -97,7 +97,7 @@ export const SEATING_DESIGNS=Object.freeze([
     "tags": [
       "seating"
     ],
-    "assetStatus": "proposed",
+    "assetStatus": "uploaded-main",
     "marketStatus": "not-registered"
   },
   {
@@ -121,7 +121,7 @@ export const SEATING_DESIGNS=Object.freeze([
     "tags": [
       "seating"
     ],
-    "assetStatus": "proposed",
+    "assetStatus": "uploaded-main",
     "marketStatus": "not-registered"
   },
   {
@@ -145,7 +145,7 @@ export const SEATING_DESIGNS=Object.freeze([
     "tags": [
       "seating"
     ],
-    "assetStatus": "proposed",
+    "assetStatus": "uploaded-main",
     "marketStatus": "not-registered"
   },
   {
@@ -169,7 +169,7 @@ export const SEATING_DESIGNS=Object.freeze([
     "tags": [
       "seating"
     ],
-    "assetStatus": "proposed",
+    "assetStatus": "uploaded-main",
     "marketStatus": "not-registered"
   },
   {
@@ -195,7 +195,7 @@ export const SEATING_DESIGNS=Object.freeze([
     "tags": [
       "seating"
     ],
-    "assetStatus": "proposed",
+    "assetStatus": "uploaded-main",
     "marketStatus": "not-registered"
   },
   {
@@ -221,7 +221,7 @@ export const SEATING_DESIGNS=Object.freeze([
     "tags": [
       "seating"
     ],
-    "assetStatus": "proposed",
+    "assetStatus": "uploaded-main",
     "marketStatus": "not-registered"
   },
   {
@@ -248,7 +248,7 @@ export const SEATING_DESIGNS=Object.freeze([
     "tags": [
       "seating"
     ],
-    "assetStatus": "proposed",
+    "assetStatus": "uploaded-main",
     "marketStatus": "not-registered"
   },
   {
@@ -272,7 +272,7 @@ export const SEATING_DESIGNS=Object.freeze([
     "tags": [
       "seating"
     ],
-    "assetStatus": "proposed",
+    "assetStatus": "uploaded-main",
     "marketStatus": "not-registered"
   },
   {
@@ -297,7 +297,7 @@ export const SEATING_DESIGNS=Object.freeze([
     "tags": [
       "seating"
     ],
-    "assetStatus": "proposed",
+    "assetStatus": "uploaded-main",
     "marketStatus": "not-registered"
   }
 ].map(x=>Object.freeze({...x,footprintTiles:Object.freeze(x.footprintTiles),environments:Object.freeze(x.environments),regions:Object.freeze(x.regions),conditionArtCandidates:Object.freeze(x.conditionArtCandidates),tags:Object.freeze(x.tags),sprite:Object.freeze({src:SEATING_ART_ROOT+x.id+'.png',alt:x.name+' seating artwork'}),placement:Object.freeze({tilePx:64,anchorX:.5,anchorY:1,collision:'tile-occupancy',depth:'ground-contact-y'})})));

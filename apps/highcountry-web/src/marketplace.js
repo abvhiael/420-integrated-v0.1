@@ -1,3 +1,4 @@
+import {TABLES_DESKS_DESIGNS} from './tables-desks-catalog.js';
 import {OUTDOOR_SEATING_DESIGNS} from './outdoor-seating-catalog.js';
 import {GREENHOUSE_LOUNGE_DESIGNS} from './greenhouse-lounge-catalog.js';
 import {SEATING_DESIGNS} from './seating-design-catalog.js';
@@ -40,6 +41,21 @@ export function createMarketplaceClient({apiUrl,authenticate,fetchImpl=fetch}={}
    return post('/market/dispute',input);
   }
  });
+}
+export function mountTablesDesksCatalog({document,main}){
+ const section=document.createElement('section');section.setAttribute('aria-label','Tables, desks and personal workspaces catalog');
+ const heading=document.createElement('h3');heading.textContent='HC-ART-02-D · Tables, desks and personal workspaces';section.append(heading);
+ const note=document.createElement('p');note.textContent='Artwork catalog only. Purchases and resale require registered inventory and authenticated server listings. Browsing grants no items or bonuses.';section.append(note);
+ const grid=document.createElement('div');grid.className='support-art-catalog';section.append(grid);
+ for(const item of TABLES_DESKS_DESIGNS){
+  const card=document.createElement('article');card.className='support-art-card';card.setAttribute('data-asset-id',item.id);
+  const title=document.createElement('h4');title.textContent=item.name;card.append(title);
+  const img=document.createElement('img');img.src=item.sprite.src;img.alt=item.sprite.alt;img.width=128;img.height=128;img.loading='lazy';card.append(img);
+  img.addEventListener('error',()=>{img.hidden=true;});
+  const caption=document.createElement('p');caption.textContent=item.footprintTiles.columns+'×'+item.footprintTiles.rows+' tiles · '+item.environments.join(', ')+' · all regions · BUDS listing pending registration';card.append(caption);
+  grid.append(card);
+ }
+ main.append(section);
 }
 export function mountOutdoorSeatingCatalog({document,main}){
  const section=document.createElement('section');section.setAttribute('aria-label','Outdoor seating and patio furniture catalog');
@@ -105,6 +121,7 @@ export function mountMarketplace({document,main,runtime,authenticate,fetchImpl=f
  mountSeatingArtCatalog({document,main});
  mountGreenhouseLoungeCatalog({document,main});
  mountOutdoorSeatingCatalog({document,main});
+ mountTablesDesksCatalog({document,main});
  if(runtime.mode!=='connected'||typeof authenticate!=='function')return;
  const client=createMarketplaceClient({apiUrl:runtime.apiUrl,authenticate,fetchImpl});
  const region=el('section');region.setAttribute('aria-label','Marketplace');main.append(region);

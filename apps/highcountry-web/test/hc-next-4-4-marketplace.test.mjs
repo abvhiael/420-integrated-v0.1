@@ -44,7 +44,8 @@ test('offline marketplace renders disclosure without service requests or wallet 
  const doc={createElement:tag=>new Element(tag)},main=new Element('main');
  mountMarketplace({document:doc,main,runtime:{mode:'offline'}});
  assert.match(main.children[0].textContent,/unavailable offline/);
- assert.equal(main.children.length,1);
+ assert.equal(main.children.filter(x=>x.attributes?.['aria-label']==='Tables, desks and personal workspaces catalog').length,1);
+ assert.equal(main.children.some(x=>x.attributes?.['aria-label']==='Marketplace'),false);
 });
 test('ordinary marketplace renders real browse, listing and history without wallet provider',async()=>{
  const doc={createElement:tag=>new Element(tag)},main=new Element('main');
@@ -58,7 +59,7 @@ test('ordinary marketplace renders real browse, listing and history without wall
   authenticate:async()=> 'session',fetchImpl:async()=>{fetched++;return {ok:true,json:async()=>({ok:true,result:snapshot})};}});
  await new Promise(resolve=>setImmediate(resolve));
  assert.equal(fetched,1);
- const region=main.children[1];
+ const region=main.children.find(x=>x.attributes?.['aria-label']==='Marketplace');
  assert.ok(region.children.length>4);
  assert.match(main.children[0].textContent,/Server-verified marketplace/);
  assert.ok(region.children.some(x=>x.children?.some(y=>y.textContent==='Create a listing')));

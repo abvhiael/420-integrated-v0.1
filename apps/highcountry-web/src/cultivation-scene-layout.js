@@ -1,6 +1,19 @@
 // HC-GFX-2.1.4 v1 — non-authoritative visual placement. Coordinates are not parcel or collision rights.
 export const SCENE_CONTRACT_VERSION='hc-cultivation-scene/v1';
-export const SCENE_SIZE=Object.freeze({width:1920,height:1080,grid:80});
+export const SCENE_SIZE=Object.freeze({width:1920,height:1080,grid:64});
+// Canonical approved control sheet: nominal 64×64 ground footprint, 32px isometric rise.
+export const TILE_CONTRACT=Object.freeze({width:64,depth:64,isometricHeight:32});
+export const CONTAINER_FOOTPRINTS=Object.freeze({
+ standardPot:Object.freeze({columns:1,rows:1}),
+ fabricPot:Object.freeze({columns:1,rows:1}),
+ raisedBed:Object.freeze({columns:2,rows:1}),
+ largePlanter:Object.freeze({columns:2,rows:2})
+});
+export function footprintDimensions(type){
+ if(!Object.hasOwn(CONTAINER_FOOTPRINTS,type))throw Error('unknown-tile-footprint');
+ const {columns,rows}=CONTAINER_FOOTPRINTS[type];
+ return Object.freeze({columns,rows,width:columns*TILE_CONTRACT.width,depth:rows*TILE_CONTRACT.depth});
+}
 export const CATEGORY_RULES=Object.freeze({
  raisedBed:Object.freeze({width:400,depth:1,anchorX:.5,anchorY:1}),
  container:Object.freeze({width:125,depth:2,anchorX:.5,anchorY:1}),
@@ -10,8 +23,8 @@ export const CATEGORY_RULES=Object.freeze({
  tallEquipment:Object.freeze({width:160,depth:3,anchorX:.5,anchorY:1})
 });
 export const PROP_CATALOG=Object.freeze({
- 'raised-bed':Object.freeze({category:'raisedBed',file:'containers/hc-prop-raised-bed-wood-square-large.png',ratio:1.85}),
- 'fabric-pot':Object.freeze({category:'container',file:'containers/hc-prop-pot-fabric-black-large.png',ratio:1.1}),
+ 'raised-bed':Object.freeze({footprint:'raisedBed',category:'raisedBed',file:'containers/hc-prop-raised-bed-wood-square-large.png',ratio:1.85}),
+ 'fabric-pot':Object.freeze({footprint:'fabricPot',category:'container',file:'containers/hc-prop-pot-fabric-black-large.png',ratio:1.1}),
  'water-tank':Object.freeze({category:'irrigation',file:'irrigation/hc-prop-irrigation-water-tank-500gal.png',ratio:.95,width:175}),
  'workbench':Object.freeze({category:'workstation',file:'workstations/hc-prop-workbench-wood-basic.png',ratio:1.7}),
  'ladder':Object.freeze({category:'tallEquipment',file:'tools-equipment/hc-prop-ladder-wood-step-4.png',ratio:.57}),
@@ -35,7 +48,7 @@ export function layoutProp(id,x,y,scale=1){
  const place=normalizePlacement({id,x,y,scale,category:prop.category});
  const width=Math.round((prop.width||rule.width)*scale);
  const height=Math.round(width/prop.ratio);
- return Object.freeze({...place,width,height,src:'/assets/cultivation/props/'+prop.file,
+ return Object.freeze({...place,width,height,footprint:prop.footprint?footprintDimensions(prop.footprint):null,src:'/assets/cultivation/props/'+prop.file,
   // Stable ordering: category band, then ground-contact Y, then stable ID.
   zIndex:rule.depth*10000+Math.round(y)});
 }

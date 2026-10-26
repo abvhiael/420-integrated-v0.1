@@ -1,0 +1,189 @@
+{
+  "schema": "HC.SEED.RARE_PARENT_PAIRS.V1",
+  "version": 1,
+  "authority": "owner-approved fictional HighCountry pairings from HC-SEED roadmap; not real-world pedigrees",
+  "pairs": [
+    {
+      "cultivarId": "HC-R-blue-moon",
+      "canonicalName": "Blue Moon",
+      "canonicalRegion": "Golden Prairie",
+      "parentA": "HC-C-blueberry",
+      "parentB": "HC-C-northern-lights"
+    },
+    {
+      "cultivarId": "HC-R-canyon-fire",
+      "canonicalName": "Canyon Fire",
+      "canonicalRegion": "Red Mesa",
+      "parentA": "HC-C-acapulco-gold",
+      "parentB": "HC-C-sour-diesel"
+    },
+    {
+      "cultivarId": "HC-R-cedar-skunk",
+      "canonicalName": "Cedar Skunk",
+      "canonicalRegion": "Emerald Coast",
+      "parentA": "HC-C-jack-herer",
+      "parentB": "HC-C-afghan-kush"
+    },
+    {
+      "cultivarId": "HC-R-coastal-kush",
+      "canonicalName": "Coastal Kush",
+      "canonicalRegion": "Emerald Coast",
+      "parentA": "HC-C-og-kush",
+      "parentB": "HC-C-blueberry"
+    },
+    {
+      "cultivarId": "HC-R-crow-mother",
+      "canonicalName": "Crow Mother",
+      "canonicalRegion": "Red Mesa",
+      "parentA": "HC-C-granddaddy-purple",
+      "parentB": "HC-C-chemdawg"
+    },
+    {
+      "cultivarId": "HC-R-desert-bloom",
+      "canonicalName": "Desert Bloom",
+      "canonicalRegion": "Red Mesa",
+      "parentA": "HC-C-zkittlez",
+      "parentB": "HC-C-durban-poison"
+    },
+    {
+      "cultivarId": "HC-R-desert-shadow",
+      "canonicalName": "Desert Shadow",
+      "canonicalRegion": "Red Mesa",
+      "parentA": "HC-C-bubba-kush",
+      "parentB": "HC-C-purple-haze"
+    },
+    {
+      "cultivarId": "HC-R-emerald-mist",
+      "canonicalName": "Emerald Mist",
+      "canonicalRegion": "Emerald Coast",
+      "parentA": "HC-C-blue-dream",
+      "parentB": "HC-C-white-widow"
+    },
+    {
+      "cultivarId": "HC-R-fields-of-green",
+      "canonicalName": "Fields of Green",
+      "canonicalRegion": "Golden Prairie",
+      "parentA": "HC-C-green-crack",
+      "parentB": "HC-C-jack-herer"
+    },
+    {
+      "cultivarId": "HC-R-fire-canyon",
+      "canonicalName": "Fire Canyon",
+      "canonicalRegion": "Red Mesa",
+      "parentA": "HC-C-sour-diesel",
+      "parentB": "HC-C-afghan-kush"
+    },
+    {
+      "cultivarId": "HC-R-golden-haze",
+      "canonicalName": "Golden Haze",
+      "canonicalRegion": "Golden Prairie",
+      "parentA": "HC-C-acapulco-gold",
+      "parentB": "HC-C-super-silver-haze"
+    },
+    {
+      "cultivarId": "HC-R-honey-trail",
+      "canonicalName": "Honey Trail",
+      "canonicalRegion": "Golden Prairie",
+      "parentA": "HC-C-girl-scout-cookies",
+      "parentB": "HC-C-pineapple-express"
+    },
+    {
+      "cultivarId": "HC-R-midnight-mesa",
+      "canonicalName": "Midnight Mesa",
+      "canonicalRegion": "Red Mesa",
+      "parentA": "HC-C-granddaddy-purple",
+      "parentB": "HC-C-afghan-kush"
+    },
+    {
+      "cultivarId": "HC-R-misty-harbor",
+      "canonicalName": "Misty Harbor",
+      "canonicalRegion": "Emerald Coast",
+      "parentA": "HC-C-northern-lights",
+      "parentB": "HC-C-blue-dream"
+    },
+    {
+      "cultivarId": "HC-R-pacific-sunset",
+      "canonicalName": "Pacific Sunset",
+      "canonicalRegion": "Emerald Coast",
+      "parentA": "HC-C-acapulco-gold",
+      "parentB": "HC-C-gelato"
+    },
+    {
+      "cultivarId": "HC-R-prairie-fire",
+      "canonicalName": "Prairie Fire",
+      "canonicalRegion": "Golden Prairie",
+      "parentA": "HC-C-acapulco-gold",
+      "parentB": "HC-C-girl-scout-cookies"
+    },
+    {
+      "cultivarId": "HC-R-prairie-gold",
+      "canonicalName": "Prairie Gold",
+      "canonicalRegion": "Golden Prairie",
+      "parentA": "HC-C-acapulco-gold",
+      "parentB": "HC-C-northern-lights"
+    },
+    {
+      "cultivarId": "HC-R-rainforest-queen",
+      "canonicalName": "Rainforest Queen",
+      "canonicalRegion": "Emerald Coast",
+      "parentA": "HC-C-durban-poison",
+      "parentB": "HC-C-blue-dream"
+    },
+    {
+      "cultivarId": "HC-R-red-rock-dream",
+      "canonicalName": "Red Rock Dream",
+      "canonicalRegion": "Red Mesa",
+      "parentA": "HC-C-blue-dream",
+      "parentB": "HC-C-afghan-kush"
+    },
+    {
+      "cultivarId": "HC-R-red-rock-kush",
+      "canonicalName": "Red Rock Kush",
+      "canonicalRegion": "Red Mesa",
+      "parentA": "HC-C-afghan-kush",
+      "parentB": "HC-C-og-kush"
+    },
+    {
+      "cultivarId": "HC-R-sage-rider",
+      "canonicalName": "Sage Rider",
+      "canonicalRegion": "Red Mesa",
+      "parentA": "HC-C-og-kush",
+      "parentB": "HC-C-durban-poison"
+    },
+    {
+      "cultivarId": "HC-R-salty-dog",
+      "canonicalName": "Salty Dog",
+      "canonicalRegion": "Emerald Coast",
+      "parentA": "HC-C-chemdawg",
+      "parentB": "HC-C-trainwreck"
+    },
+    {
+      "cultivarId": "HC-R-saska-sour",
+      "canonicalName": "Saska Sour",
+      "canonicalRegion": "Golden Prairie",
+      "parentA": "HC-C-sour-diesel",
+      "parentB": "HC-C-northern-lights"
+    },
+    {
+      "cultivarId": "HC-R-spirit-bear",
+      "canonicalName": "Spirit Bear",
+      "canonicalRegion": "Emerald Coast",
+      "parentA": "HC-C-white-widow",
+      "parentB": "HC-C-blueberry"
+    },
+    {
+      "cultivarId": "HC-R-tempest",
+      "canonicalName": "Tempest",
+      "canonicalRegion": "Emerald Coast",
+      "parentA": "HC-C-trainwreck",
+      "parentB": "HC-C-super-silver-haze"
+    },
+    {
+      "cultivarId": "HC-R-thunder-fields",
+      "canonicalName": "Thunder Fields",
+      "canonicalRegion": "Golden Prairie",
+      "parentA": "HC-C-alaskan-thunder-fuck",
+      "parentB": "HC-C-chemdawg"
+    }
+  ]
+}

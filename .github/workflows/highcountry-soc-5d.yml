@@ -1,0 +1,15 @@
+name: High Country SOC-5D Recovery Level 2
+# Default-branch registration only. The complete qualification workflow and
+# implementation remain isolated to PR #850 until review and merge.
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  default-branch-guard:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require SOC-5D qualification branch
+        run: |
+          echo "::error::Select hc-soc-5d-recovery-reorg-l2 in the Run workflow branch dropdown. SOC-5D tests and implementation are not on main."
+          exit 1

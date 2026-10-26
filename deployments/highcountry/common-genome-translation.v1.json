@@ -1,0 +1,44 @@
+{
+  "schema": "HC.SEED.COMMON_TRANSLATION.V1",
+  "version": 1,
+  "locusCount": 28,
+  "hashAlgorithm": "Ethereum Keccak-256; not SHA3-256",
+  "serialization": "UTF-8 JSON with recursively sorted object keys, compact separators, ensure_ascii=true, no floating point values",
+  "locusSemantics": "opaque commitments; no inherited botanical or performance interpretation",
+  "domains": {
+    "line": "HC.COMMON.LINE.V1",
+    "locus": "HC.COMMON.LOCUS.V1",
+    "genome": "HC.COMMON.GENOME.V1"
+  },
+  "translation": {
+    "classification": "source annotation only; never indica/sativa allele fractions",
+    "flavors": "source annotation only; no locus decoding claim",
+    "terpenes": "source annotation only; no fixed chemotype or medical effect",
+    "morphology": "source annotation only, including explicit nulls",
+    "ancestry": "retain all attributed candidates and uncertainty; not a fabricated breeding event",
+    "readerEffects": "research only; excluded from reference trait annotations",
+    "performance": "no research-derived yield, flowering, resistance, climate, potency or rarity advantage",
+    "loci": "Keccak of canonical JSON [locus domain, cultivar ID, reference version, zero-based locus index, research-entry Keccak]; exactly 28",
+    "metadata": "Keccak of canonical JSON metadata object including source evidence, descriptive annotations and translation policy commitment",
+    "genomeId": "Keccak of canonical JSON [genome domain, cultivar ID, reference version, line ID, metadata hash, all 28 loci]",
+    "lineId": "Keccak of canonical JSON [line domain, cultivar ID]; stable across reference versions"
+  },
+  "registration": {
+    "method": "registerGenome(bytes32,bytes32,bytes32,bytes32[28])",
+    "founding": false,
+    "genesisFinalizedRequired": true,
+    "authorizationModule": "ModuleIds.GENOME_REGISTRY",
+    "authorizationAction": "ActionIds.GENOME_REGISTER",
+    "scope": "exact genomeId",
+    "amount": 0,
+    "executionStage": "HC-SEED-04; no live registration performed by generation"
+  },
+  "existingEngine": {
+    "GenomeRegistry": "immutable 28-byte32-locus records and post-Genesis capability gate",
+    "BreedingEngine": "per-locus parent selection from fulfilled entropy, with existing bounded hash mutation; no botanical decoder",
+    "CultivationEngine": "environment-derived stress/quality; seals genome identity without decoding loci",
+    "HarvestScoring": "genome-ID-derived modifier of 9000 + uint256(genomeId) % 2001; unchanged; never search IDs for desired modifiers"
+  },
+  "mutationPolicy": "A bred or mutated genome remains a new genome. Reference annotations apply only to an exact reference record; no inferred traits from partial loci or ancestry.",
+  "versionPolicy": "Never edit a published reference version in place. Metadata or input changes require a new reference version. Line ID remains stable; genome ID and metadata commitment change."
+}

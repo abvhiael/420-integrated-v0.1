@@ -1,0 +1,3410 @@
+{
+  "schema": "HC.SEED.COMMON_REFERENCE_GENOMES.V1",
+  "referenceVersion": 1,
+  "translationPolicyHash": "0xe25c1a6766da890e15b3671b6bf91b820e51cb0aa312c2993bda6c7b9f570b06",
+  "catalogHash": "0x4e7d841130bf0789f1b87ebece17a1bf4d031722961f8c417bc5e3f75da3017a",
+  "researchHash": "0xef24e9ed943cb8a42cc0484903da98232a55fb50a62ef004f21407ba5848c566",
+  "status": "REGISTRATION_READY_NOT_REGISTERED",
+  "genomes": [
+    {
+      "cultivarId": "HC-C-acapulco-gold",
+      "referenceVersion": 1,
+      "genomeId": "0xfc631f3635c14ebeef58f282faa17616617dfff91f46737c0632e77563dca5dc",
+      "lineId": "0x2cba3f6391cd647868e26bf51a97362eba9353e3816c53f40c2e4e11afbbcd9b",
+      "metadataHash": "0xf60f3e38b70115e040fb312e405aa32bd54e4e344163fccc48be7e354083367a",
+      "loci": [
+        "0xae7ae0ee982c191880fae6b592788e654a725da35c683e95db923c51972432f1",
+        "0x8b32a3cfee948653383ac75db6ab3fde611f080a0763e7238759728e3e1504e3",
+        "0x730c8d288792a4cf41ea5a155114491e2b1bceaf3e31dbe62c4ec085a6bd9db2",
+        "0xe2866f4d003ceb4063311a8960703f6ea1ff93baaf99dc232063c6c5465163a2",
+        "0x192aabe2e723d87527b434220c9d1c4c93c03f873fa81097954c9a6a4d73f186",
+        "0x112d16a88dec1eabf693f5e83a43fb899f4f77438ce448b62b2fa165ffa97123",
+        "0x1745c1216d3323a2779ed1b8aef99111b91801f28a9a8238968cb30be01b6b49",
+        "0xd3d1ea93248cb5bad91bbc65faf334fda45792c2940618d3953f7e4e697c58fe",
+        "0x57554670acd1a462648e8a70138f4b7253ac8cfe4d1aa2093b3bc6e18c1a0b0d",
+        "0x1098d06048f66f70c151dabf9d7b9e264a5f62cf9a7beacdd74b3bae9a0dc53e",
+        "0xe742acc6eda406b6716b00b09a58d8cc26b112a07870dbd85797695d8c456e86",
+        "0x2ec7884f37db76e42efa1672ee367f0e5fff136d253c5a8a6be77d2ee14ea605",
+        "0x927320a71d26a41b55bb32ae361d92c2a6f024e017a80e62bd50fc05087a8bd3",
+        "0x3ae3e2d4af55b4f2dd124005035f9c37495cea942ba8f8ab1df83af12e0d604a",
+        "0xd65030cb8a80bc0b5e1e5f138a662915617d3a58b57a2b8cbfc2fb88ad5d09e5",
+        "0x62dbf9ceec4fe64d2f5f5141885de77de2f31aa0298b2407a4db15fcfcf88f3b",
+        "0x09dfbb5ba63f09cc3c6d3570d167087cca46b2edfb5241eb1eb63cd59128b9d3",
+        "0x78df9c823f79b65ea109668d58dd533e3c3f187c27c678bccb68e6db6dbb8c42",
+        "0xb51bbf4de0745df3a8c0e16bda54f080217baa0394520be39096257db370d8e3",
+        "0x527014957d9e39dbb7c2fa43ba35af06f9deca036cfc60d70161105715ea7176",
+        "0x98733bedfbba8d767fe78206aeff1de4f281e31b63320dd6058df96e459ec6d7",
+        "0x82fa7020bbe903c05a75e36416b922062eb2f935b28656ca120f5a2e496099f6",
+        "0x4ec8cf17a28bb0ede5c12af24647d38a922af75f8879896b709c2587f5a96052",
+        "0x579adc70d47a942d2cca5e204c9c991cac91d48ddfdbddd159524d45468ba02b",
+        "0x5d46ac44786f5f6a5cfc782f44e6cb2714bd1d1ac1f54549de17c48e90f774be",
+        "0x70166b7894852e01715bf90877378753d956d1ec5039893951ebfad43d30a8a4",
+        "0xd7aac33242c52e23cf9384d9e1f038b9d10daf0b89a33f433ce0632dc927e73e",
+        "0xadd3bdff95af67b8bd22f5ac15d1add4c189da2664b76c7392db27ff0217b779"
+      ],
+      "founding": false,
+      "metadata": {
+        "schema": "HC.SEED.COMMON_REFERENCE_METADATA.V1",
+        "cultivarId": "HC-C-acapulco-gold",
+        "canonicalName": "Acapulco Gold",
+        "canonicalRegion": "Red Mesa",
+        "referenceVersion": 1,
+        "translationPolicyHash": "0xe25c1a6766da890e15b3671b6bf91b820e51cb0aa312c2993bda6c7b9f570b06",
+        "researchEntryHash": "0x405fdfef8d64b9d090ace00d8250f2e2ec22133c2aa5d153bab11c9d3b13d975",
+        "ancestryAccount": {
+          "status": "unknown",
+          "candidateParentSets": [],
+          "attribution": "Leafly profile account",
+          "biologicallyVerified": false,
+          "crossOrder": "not-established",
+          "sourceIds": [
+            "leafly-acapulco-gold"
+          ]
+        },
+        "descriptiveAnnotations": {
+          "publisherClassification": "Sativa",
+          "reportedFlavors": [
+            "Honey",
+            "Chestnut",
+            "Coffee"
+          ],
+          "profileTerpenes": [
+            "Caryophyllene",
+            "Myrcene",
+            "Limonene"
+          ],
+          "morphologySummary": "Gold, green and brown flowers with orange hairs and resin; a caramelized aroma.",
+          "morphologyCoverage": "described",
+          "sourceId": "leafly-acapulco-gold"
+        },
+        "sources": [
+          {
+            "id": "leafly-acapulco-gold",
+            "publisher": "Leafly",
+            "url": "https://www.leafly.com/strains/acapulco-gold",
+            "sourceTitle": "Acapulco Gold strain",
+            "reviewedOn": "2026-10-25",
+            "reviewTimezone": "America/Regina",
+            "retrieval": "web-open successful; profile body inspected",
+            "sections": [
+              "profile introduction",
+              "top flavors",
+              "terpenes",
+              "top effects"
+            ],
+            "claimBasis": "publisher account and aggregated profile observations; not DNA verification"
+          }
+        ],
+        "uncertainty": {
+          "notes": "Named parents are absent. Preserve geographic provenance without inventing a two-parent cross.",
+          "sourceIds": [
+            "leafly-acapulco-gold"
+          ],
+          "resolution": "Retain the qualification; no unsupported pedigree, date or genome inference."
+        },
+        "semantics": "reference annotations only; not decoded, inherited or measured biological traits"
+      },
+      "registration": {
+        "method": "registerGenome",
+        "args": [
+          "0xfc631f3635c14ebeef58f282faa17616617dfff91f46737c0632e77563dca5dc",
+          "0x2cba3f6391cd647868e26bf51a97362eba9353e3816c53f40c2e4e11afbbcd9b",
+          "0xf60f3e38b70115e040fb312e405aa32bd54e4e344163fccc48be7e354083367a",
+          [
+            "0xae7ae0ee982c191880fae6b592788e654a725da35c683e95db923c51972432f1",
+            "0x8b32a3cfee948653383ac75db6ab3fde611f080a0763e7238759728e3e1504e3",
+            "0x730c8d288792a4cf41ea5a155114491e2b1bceaf3e31dbe62c4ec085a6bd9db2",
+            "0xe2866f4d003ceb4063311a8960703f6ea1ff93baaf99dc232063c6c5465163a2",
+            "0x192aabe2e723d87527b434220c9d1c4c93c03f873fa81097954c9a6a4d73f186",
+            "0x112d16a88dec1eabf693f5e83a43fb899f4f77438ce448b62b2fa165ffa97123",
+            "0x1745c1216d3323a2779ed1b8aef99111b91801f28a9a8238968cb30be01b6b49",
+            "0xd3d1ea93248cb5bad91bbc65faf334fda45792c2940618d3953f7e4e697c58fe",
+            "0x57554670acd1a462648e8a70138f4b7253ac8cfe4d1aa2093b3bc6e18c1a0b0d",
+            "0x1098d06048f66f70c151dabf9d7b9e264a5f62cf9a7beacdd74b3bae9a0dc53e",
+            "0xe742acc6eda406b6716b00b09a58d8cc26b112a07870dbd85797695d8c456e86",
+            "0x2ec7884f37db76e42efa1672ee367f0e5fff136d253c5a8a6be77d2ee14ea605",
+            "0x927320a71d26a41b55bb32ae361d92c2a6f024e017a80e62bd50fc05087a8bd3",
+            "0x3ae3e2d4af55b4f2dd124005035f9c37495cea942ba8f8ab1df83af12e0d604a",
+            "0xd65030cb8a80bc0b5e1e5f138a662915617d3a58b57a2b8cbfc2fb88ad5d09e5",
+            "0x62dbf9ceec4fe64d2f5f5141885de77de2f31aa0298b2407a4db15fcfcf88f3b",
+            "0x09dfbb5ba63f09cc3c6d3570d167087cca46b2edfb5241eb1eb63cd59128b9d3",
+            "0x78df9c823f79b65ea109668d58dd533e3c3f187c27c678bccb68e6db6dbb8c42",
+            "0xb51bbf4de0745df3a8c0e16bda54f080217baa0394520be39096257db370d8e3",
+            "0x527014957d9e39dbb7c2fa43ba35af06f9deca036cfc60d70161105715ea7176",
+            "0x98733bedfbba8d767fe78206aeff1de4f281e31b63320dd6058df96e459ec6d7",
+            "0x82fa7020bbe903c05a75e36416b922062eb2f935b28656ca120f5a2e496099f6",
+            "0x4ec8cf17a28bb0ede5c12af24647d38a922af75f8879896b709c2587f5a96052",
+            "0x579adc70d47a942d2cca5e204c9c991cac91d48ddfdbddd159524d45468ba02b",
+            "0x5d46ac44786f5f6a5cfc782f44e6cb2714bd1d1ac1f54549de17c48e90f774be",
+            "0x70166b7894852e01715bf90877378753d956d1ec5039893951ebfad43d30a8a4",
+            "0xd7aac33242c52e23cf9384d9e1f038b9d10daf0b89a33f433ce0632dc927e73e",
+            "0xadd3bdff95af67b8bd22f5ac15d1add4c189da2664b76c7392db27ff0217b779"
+          ]
+        ],
+        "scopeHash": "0xfc631f3635c14ebeef58f282faa17616617dfff91f46737c0632e77563dca5dc",
+        "amount": 0,
+        "requiresFinalizedGenesis": true,
+        "status": "prepared-not-submitted"
+      }
+    },
+    {
+      "cultivarId": "HC-C-afghan-kush",
+      "referenceVersion": 1,
+      "genomeId": "0x5fc68a352fb47d467e4fb98a385e3630614edaa17ffaf1979b486ed40c877e9b",
+      "lineId": "0xb07794a822307717e2dd1b05ea8f069eedf5cbfb8c4639e5b1a8fd01ef626d21",
+      "metadataHash": "0x5df21cad1a5c24d4839ae40ffb8a062d359ff6dd8c44e8f2cccb031a00196eb2",
+      "loci": [
+        "0x2969cf5c5e446016dba497901ff8cfab812fdcef6549a7a13149146f82bb0e1d",
+        "0x246ffc1209a13c9488d00e4dae723d1345bdcf613351118d5063441653564117",
+        "0xfc542a42312e6c7fce5147a09add4e1cee0faf04821e1cd9e7b676416d68d654",
+        "0xcd68066cd0a5680dc82ac379cb4aec8990780b400ea2d83119bf190ee929bc9d",
+        "0xf12a72d940d27b94babc918b5f1ad0ae10e819499e35582876408eff0738cf8c",
+        "0x53ec5995a0a4f88b9c1ec79252598c079b047dda75d46ef2bdc38ce2222426ce",
+        "0x18481cb8625970ee7e544b3ac27ae3ce28a65122483a19fc2ec971e63fe54d33",
+        "0x76d8fe669892a19ce3bb897a68ace1cf9b8ef953f67940d360bba93ad0184f0b",
+        "0xd272bc9da67de96a923b955c458032a47fd0b2f33552a6d18de02898eacfed02",
+        "0xa2e6f5f36a406da46951b5947607eaef1aa9bf7a0fcb11c75cecae4400aaa1e3",
+        "0x7c83a2e81ac9ba43a6a348b204262849a5ba5d1d9836b58ff32fb0471e2320ca",
+        "0x02fb33e46adaa94ab9d007fc3479371cd4540f8e45a1b4cff7c9be86041cd750",
+        "0x124fe2cf536b67acd2113914f0961a0ac73b3124bced7a17256d690252e9989d",
+        "0xfb2c06485764954834fee1721fef8200fea3be542bd0df9adc933e3e8f82690d",
+        "0x77c5e6ce7ae6d6eda4c0978069c532c465bd37ce40e9a16f46a0158391e3ab4a",
+        "0x62915b86103f8d8c07259f7103e43f176af0b48ad995d3f24bf9390640387df7",
+        "0x4fa0287af1f982896ed9764781d0ceba4f8191e672d5dcf8b1559dcd04c852ed",
+        "0xb34e6e191cd756041cbfaba9c2aeb2c6d0f9eca95af1e1c02c8182afe54f9f2b",
+        "0xc0a6204c01b6455f6a2ac754e9c3a3cf13980ed2d82275e56a99d58637556387",
+        "0x8ab7278fb8e2b2ca98fc5a3935d5eedf9c04db67fc5271f5c0f5fdeb0e5d4711",
+        "0xc5973e9ac0eb018cbf0a3c1b2668a3763aeaf7f6fdf935e7322ce0174bc1946c",
+        "0x05dba7d08008c4842dd98c093e42ce59571d5dc416850077a3bc9738ea9351c3",
+        "0x57ab3bc53afd3ab2a15f37e031da7da0b8edef943efc6544df69485636e77fad",
+        "0xcc57cd19f8cebae5c02603bd2c529074d579e73264ca1b0bc797dbf225d28d88",
+        "0x6d2c04d1d2f40b3d94dbf65116ed4a8ad3e0805599313387ac8172fc52e7dbf3",
+        "0x5f1927f012b163bc585874dcf1db86af247af83edf6b91cae61f92dbfd7b16c5",
+        "0x7eae57bd4fd86893b4a67e2187bbc42d6a63d4369d691e6a879881164c0e7062",
+        "0x46c4b83ed20f2ba8f96f55e1b822c9b1dac528b9ef3fe2e14bd6485f814c3bfe"
+      ],
+      "founding": false,
+      "metadata": {
+        "schema": "HC.SEED.COMMON_REFERENCE_METADATA.V1",
+        "cultivarId": "HC-C-afghan-kush",
+        "canonicalName": "Afghan Kush",
+        "canonicalRegion": "Red Mesa",
+        "referenceVersion": 1,
+        "translationPolicyHash": "0xe25c1a6766da890e15b3671b6bf91b820e51cb0aa312c2993bda6c7b9f570b06",
+        "researchEntryHash": "0x7b80c034eed2d013a071e2760d88074ae03cce47be386adf09eea9cb096410d6",
+        "ancestryAccount": {
+          "status": "regional-population",
+          "candidateParentSets": [],
+          "attribution": "Leafly profile account",
+          "biologicallyVerified": false,
+          "crossOrder": "not-established",
+          "sourceIds": [
+            "leafly-afghan-kush"
+          ]
+        },
+        "descriptiveAnnotations": {
+          "publisherClassification": "Indica",
+          "reportedFlavors": [
+            "Woody",
+            "Tar",
+            "Earthy"
+          ],
+          "profileTerpenes": [
+            "Myrcene",
+            "Caryophyllene",
+            "Pinene"
+          ],
+          "morphologySummary": "Large blunt-topped flowers with substantial resin.",
+          "morphologyCoverage": "described",
+          "sourceId": "leafly-afghan-kush"
+        },
+        "sources": [
+          {
+            "id": "leafly-afghan-kush",
+            "publisher": "Leafly",
+            "url": "https://www.leafly.com/strains/afghan-kush",
+            "sourceTitle": "Afghan Kush strain",
+            "reviewedOn": "2026-10-25",
+            "reviewTimezone": "America/Regina",
+            "retrieval": "web-open successful; profile body inspected",
+            "sections": [
+              "profile introduction",
+              "top flavors",
+              "terpenes",
+              "top effects"
+            ],
+            "claimBasis": "publisher account and aggregated profile observations; not DNA verification"
+          }
+        ],
+        "uncertainty": {
+          "notes": "No individual parental pair is supplied. Afghan Kush must not automatically substitute for every Afghani or Hindu Kush ancestor.",
+          "sourceIds": [
+            "leafly-afghan-kush"
+          ],
+          "resolution": "Retain the qualification; no unsupported pedigree, date or genome inference."
+        },
+        "semantics": "reference annotations only; not decoded, inherited or measured biological traits"
+      },
+      "registration": {
+        "method": "registerGenome",
+        "args": [
+          "0x5fc68a352fb47d467e4fb98a385e3630614edaa17ffaf1979b486ed40c877e9b",
+          "0xb07794a822307717e2dd1b05ea8f069eedf5cbfb8c4639e5b1a8fd01ef626d21",
+          "0x5df21cad1a5c24d4839ae40ffb8a062d359ff6dd8c44e8f2cccb031a00196eb2",
+          [
+            "0x2969cf5c5e446016dba497901ff8cfab812fdcef6549a7a13149146f82bb0e1d",
+            "0x246ffc1209a13c9488d00e4dae723d1345bdcf613351118d5063441653564117",
+            "0xfc542a42312e6c7fce5147a09add4e1cee0faf04821e1cd9e7b676416d68d654",
+            "0xcd68066cd0a5680dc82ac379cb4aec8990780b400ea2d83119bf190ee929bc9d",
+            "0xf12a72d940d27b94babc918b5f1ad0ae10e819499e35582876408eff0738cf8c",
+            "0x53ec5995a0a4f88b9c1ec79252598c079b047dda75d46ef2bdc38ce2222426ce",
+            "0x18481cb8625970ee7e544b3ac27ae3ce28a65122483a19fc2ec971e63fe54d33",
+            "0x76d8fe669892a19ce3bb897a68ace1cf9b8ef953f67940d360bba93ad0184f0b",
+            "0xd272bc9da67de96a923b955c458032a47fd0b2f33552a6d18de02898eacfed02",
+            "0xa2e6f5f36a406da46951b5947607eaef1aa9bf7a0fcb11c75cecae4400aaa1e3",
+            "0x7c83a2e81ac9ba43a6a348b204262849a5ba5d1d9836b58ff32fb0471e2320ca",
+            "0x02fb33e46adaa94ab9d007fc3479371cd4540f8e45a1b4cff7c9be86041cd750",
+            "0x124fe2cf536b67acd2113914f0961a0ac73b3124bced7a17256d690252e9989d",
+            "0xfb2c06485764954834fee1721fef8200fea3be542bd0df9adc933e3e8f82690d",
+            "0x77c5e6ce7ae6d6eda4c0978069c532c465bd37ce40e9a16f46a0158391e3ab4a",
+            "0x62915b86103f8d8c07259f7103e43f176af0b48ad995d3f24bf9390640387df7",
+            "0x4fa0287af1f982896ed9764781d0ceba4f8191e672d5dcf8b1559dcd04c852ed",
+            "0xb34e6e191cd756041cbfaba9c2aeb2c6d0f9eca95af1e1c02c8182afe54f9f2b",
+            "0xc0a6204c01b6455f6a2ac754e9c3a3cf13980ed2d82275e56a99d58637556387",
+            "0x8ab7278fb8e2b2ca98fc5a3935d5eedf9c04db67fc5271f5c0f5fdeb0e5d4711",
+            "0xc5973e9ac0eb018cbf0a3c1b2668a3763aeaf7f6fdf935e7322ce0174bc1946c",
+            "0x05dba7d08008c4842dd98c093e42ce59571d5dc416850077a3bc9738ea9351c3",
+            "0x57ab3bc53afd3ab2a15f37e031da7da0b8edef943efc6544df69485636e77fad",
+            "0xcc57cd19f8cebae5c02603bd2c529074d579e73264ca1b0bc797dbf225d28d88",
+            "0x6d2c04d1d2f40b3d94dbf65116ed4a8ad3e0805599313387ac8172fc52e7dbf3",
+            "0x5f1927f012b163bc585874dcf1db86af247af83edf6b91cae61f92dbfd7b16c5",
+            "0x7eae57bd4fd86893b4a67e2187bbc42d6a63d4369d691e6a879881164c0e7062",
+            "0x46c4b83ed20f2ba8f96f55e1b822c9b1dac528b9ef3fe2e14bd6485f814c3bfe"
+          ]
+        ],
+        "scopeHash": "0x5fc68a352fb47d467e4fb98a385e3630614edaa17ffaf1979b486ed40c877e9b",
+        "amount": 0,
+        "requiresFinalizedGenesis": true,
+        "status": "prepared-not-submitted"
+      }
+    },
+    {
+      "cultivarId": "HC-C-alaskan-thunder-fuck",
+      "referenceVersion": 1,
+      "genomeId": "0x369f7903ca65b54b666a75c34658738c2da2097346277e85fd7e074bd190ddc4",
+      "lineId": "0xeeb8e2608df59b2bc20dcc9d54777c4aaa18b412193e83b59f22ed0ecd41e158",
+      "metadataHash": "0xb3e3a0518d2687d3673cf3f822e67f5069a496a0741d80b42d423c77e8a2f4ea",
+      "loci": [
+        "0xb175f968b8897a6739571d4085466b5838af2a9bf46064f156ed2801d92e3c82",
+        "0xe753f1b8060de9805afdaeaed63e14fb6be77362aae2742ca6316da6526c2bf7",
+        "0xf44bc12913f34de430cde6b50b73a1ba37456a61f0270854eb2ce6ec0cd70ed6",
+        "0x33b0ae7b6a17ad8084ce8e3c383e23bdd823c23d3500c462217d652632c92acb",
+        "0x2538d3e91d35301f898302f9f77bbbc6b3eb5a924806bcecfccf3fe83417e9bd",
+        "0x214f6a1ea229703372f91e7785f84f5f106861c2b7be30f0cd3d059b96ff54b3",
+        "0x1f80248d7e4a8c35090c7da462611e27e2fff11451ae788eadc7b72feb4c6eb9",
+        "0x8463d86f8e6d3244bdc01cf91f34b5ac93de631202e3e45c0feced7f298efd46",
+        "0xa1fda1e3ff77730cdf30c8dccc49c01a4a7b41e29e74a3621cea48f8b7d74438",
+        "0x0a9e15e02634acc891f12049fa0b88b3976b59b49d252177a4f14585bbd685a6",
+        "0x064d1852b685dd57af948c2a3fd79c2f0f32fa8891b733b3b8c8e9f3dd05843d",
+        "0x1adab669e053198a6dd57d9e751aa29d7b5bd80a6a480f1ce154dd08e754d3ca",
+        "0xaf1cc5caec7f59fa64097c4371fe24311a0fbfa81b0f7e1388380973ee6e21b2",
+        "0x3e1464f411a811a4b32d95cc579d17f616547d15176fbdb6d7b562f97890e964",
+        "0xc333beca7464db8c52ef7c7a491595b8ce49d22f6e13559db0d8154053504b77",
+        "0x9ff4c7573b548fc2d60e55c852c0b1eb636ecb5f1c5a5672d36708e76bcac6e3",
+        "0x14e39d16f839f24edf1fdfe44ede4a20916a4bace44bf5f40c3f0fbce6c02092",
+        "0xbb4a09de11ab8e87db3546968991d29787913a14aff4c969de78657718ae900e",
+        "0x2c7a03ca6a46a3a17b81f5afd09b31ec6d563106d341d0cc9c19bc6249f07dd6",
+        "0x7fe49ec72179b81e5fff547adb3b9ab64454dd7b2a94bc16aae34d940f242166",
+        "0xa1e878084d7b52a7c94e3bde876a03b2349b1407f58efd6abb1e8a2e52c26b62",
+        "0x3d64f67979f7c4e7872bbc4de61a3b194d41cbc0b52bfab3e716ab640408f848",
+        "0x6b949eddb39dc355b3b4b97208bb8fd2e51f9358a6252638e66135165b804a07",
+        "0x71f24cee4f144de7de61d1088fd015f975f7fb9d79d1d57ecc16e88dff6394aa",
+        "0x32c099e7bdedbb796ba86dbdee901f74f7b42965dcdefb4fdd26b4f4281312ad",
+        "0xa33811018e12a925ceaabb313f68ecf71dfd7ecc16b1a00c667454b19d6182aa",
+        "0x55dc81c21f71be32be109c1940e73d6a8f4c61cd843a4f019b0717d3eaa016fd",
+        "0xd92c8a9e256ab642dcf8e050246febfca8ceefa4f6996335d14601a691d46626"
+      ],
+      "founding": false,
+      "metadata": {
+        "schema": "HC.SEED.COMMON_REFERENCE_METADATA.V1",
+        "cultivarId": "HC-C-alaskan-thunder-fuck",
+        "canonicalName": "Alaskan Thunder Fuck",
+        "canonicalRegion": "Emerald Coast",
+        "referenceVersion": 1,
+        "translationPolicyHash": "0xe25c1a6766da890e15b3671b6bf91b820e51cb0aa312c2993bda6c7b9f570b06",
+        "researchEntryHash": "0x96a7b6c30eeacb416c41f96ae95230cd7bd9a722ca1b113164772e9a9422b555",
+        "ancestryAccount": {
+          "status": "legend",
+          "candidateParentSets": [
+            [
+              "Northern California sativa",
+              "Russian ruderalis",
+              "Afghani"
+            ]
+          ],
+          "attribution": "Leafly profile account",
+          "biologicallyVerified": false,
+          "crossOrder": "not-established",
+          "sourceIds": [
+            "leafly-alaskan-thunder-fuck"
+          ]
+        },
+        "descriptiveAnnotations": {
+          "publisherClassification": "Hybrid",
+          "reportedFlavors": [
+            "Menthol",
+            "Sage",
+            "Pine"
+          ],
+          "profileTerpenes": [
+            "Myrcene",
+            "Caryophyllene",
+            "Limonene"
+          ],
+          "morphologySummary": "Large frosted flowers; pine, lemon and menthol scents.",
+          "morphologyCoverage": "described",
+          "sourceId": "leafly-alaskan-thunder-fuck"
+        },
+        "sources": [
+          {
+            "id": "leafly-alaskan-thunder-fuck",
+            "publisher": "Leafly",
+            "url": "https://www.leafly.com/strains/alaskan-thunder-fuck",
+            "sourceTitle": "Alaskan Thunder Fuck strain",
+            "reviewedOn": "2026-10-25",
+            "reviewTimezone": "America/Regina",
+            "retrieval": "web-open successful; profile body inspected",
+            "sections": [
+              "profile introduction",
+              "top flavors",
+              "terpenes",
+              "top effects"
+            ],
+            "claimBasis": "publisher account and aggregated profile observations; not DNA verification"
+          }
+        ],
+        "uncertainty": {
+          "notes": "Ancestry is explicitly a legend. A ruderalis mention does not establish an autoflowering genotype. The header says hybrid while prose also calls it sativa.",
+          "sourceIds": [
+            "leafly-alaskan-thunder-fuck"
+          ],
+          "resolution": "Retain the qualification; no unsupported pedigree, date or genome inference."
+        },
+        "semantics": "reference annotations only; not decoded, inherited or measured biological traits"
+      },
+      "registration": {
+        "method": "registerGenome",
+        "args": [
+          "0x369f7903ca65b54b666a75c34658738c2da2097346277e85fd7e074bd190ddc4",
+          "0xeeb8e2608df59b2bc20dcc9d54777c4aaa18b412193e83b59f22ed0ecd41e158",
+          "0xb3e3a0518d2687d3673cf3f822e67f5069a496a0741d80b42d423c77e8a2f4ea",
+          [
+            "0xb175f968b8897a6739571d4085466b5838af2a9bf46064f156ed2801d92e3c82",
+            "0xe753f1b8060de9805afdaeaed63e14fb6be77362aae2742ca6316da6526c2bf7",
+            "0xf44bc12913f34de430cde6b50b73a1ba37456a61f0270854eb2ce6ec0cd70ed6",
+            "0x33b0ae7b6a17ad8084ce8e3c383e23bdd823c23d3500c462217d652632c92acb",
+            "0x2538d3e91d35301f898302f9f77bbbc6b3eb5a924806bcecfccf3fe83417e9bd",
+            "0x214f6a1ea229703372f91e7785f84f5f106861c2b7be30f0cd3d059b96ff54b3",
+            "0x1f80248d7e4a8c35090c7da462611e27e2fff11451ae788eadc7b72feb4c6eb9",
+            "0x8463d86f8e6d3244bdc01cf91f34b5ac93de631202e3e45c0feced7f298efd46",
+            "0xa1fda1e3ff77730cdf30c8dccc49c01a4a7b41e29e74a3621cea48f8b7d74438",
+            "0x0a9e15e02634acc891f12049fa0b88b3976b59b49d252177a4f14585bbd685a6",
+            "0x064d1852b685dd57af948c2a3fd79c2f0f32fa8891b733b3b8c8e9f3dd05843d",
+            "0x1adab669e053198a6dd57d9e751aa29d7b5bd80a6a480f1ce154dd08e754d3ca",
+            "0xaf1cc5caec7f59fa64097c4371fe24311a0fbfa81b0f7e1388380973ee6e21b2",
+            "0x3e1464f411a811a4b32d95cc579d17f616547d15176fbdb6d7b562f97890e964",
+            "0xc333beca7464db8c52ef7c7a491595b8ce49d22f6e13559db0d8154053504b77",
+            "0x9ff4c7573b548fc2d60e55c852c0b1eb636ecb5f1c5a5672d36708e76bcac6e3",
+            "0x14e39d16f839f24edf1fdfe44ede4a20916a4bace44bf5f40c3f0fbce6c02092",
+            "0xbb4a09de11ab8e87db3546968991d29787913a14aff4c969de78657718ae900e",
+            "0x2c7a03ca6a46a3a17b81f5afd09b31ec6d563106d341d0cc9c19bc6249f07dd6",
+            "0x7fe49ec72179b81e5fff547adb3b9ab64454dd7b2a94bc16aae34d940f242166",
+            "0xa1e878084d7b52a7c94e3bde876a03b2349b1407f58efd6abb1e8a2e52c26b62",
+            "0x3d64f67979f7c4e7872bbc4de61a3b194d41cbc0b52bfab3e716ab640408f848",
+            "0x6b949eddb39dc355b3b4b97208bb8fd2e51f9358a6252638e66135165b804a07",
+            "0x71f24cee4f144de7de61d1088fd015f975f7fb9d79d1d57ecc16e88dff6394aa",
+            "0x32c099e7bdedbb796ba86dbdee901f74f7b42965dcdefb4fdd26b4f4281312ad",
+            "0xa33811018e12a925ceaabb313f68ecf71dfd7ecc16b1a00c667454b19d6182aa",
+            "0x55dc81c21f71be32be109c1940e73d6a8f4c61cd843a4f019b0717d3eaa016fd",
+            "0xd92c8a9e256ab642dcf8e050246febfca8ceefa4f6996335d14601a691d46626"
+          ]
+        ],
+        "scopeHash": "0x369f7903ca65b54b666a75c34658738c2da2097346277e85fd7e074bd190ddc4",
+        "amount": 0,
+        "requiresFinalizedGenesis": true,
+        "status": "prepared-not-submitted"
+      }
+    },
+    {
+      "cultivarId": "HC-C-blue-dream",
+      "referenceVersion": 1,
+      "genomeId": "0x669f3ed75a31949898104ba9e5ac509adb4195067f02b20c81db08447add031c",
+      "lineId": "0x1d7f0c27046c1453bbf64b1297e3be8275189b53cd070818db000010dbac3cbd",
+      "metadataHash": "0xb9ece6f1bec7ecbcb268fade5efe346bf738fc5731f76920c9ff76ea643a67af",
+      "loci": [
+        "0xe0fb371f2774a3c93392aca4ab97a851e5c9dd8048a33947fd95716ff86d2fc4",
+        "0x82c0bd94cdc506c0318282f02a43ee69e406a37924c1cd2269a7dfa1ebbc1a5a",
+        "0xfa7e347f47daad39dc7db7c1f81d4b1b5962632d58eaf79691370a40d2b7f3d1",
+        "0x8a102722f3f77ec1b4448fa336be342419a1e1f8acd3b5d7c14386329cbefb95",
+        "0x9d297a99868c5f89f411440434b0db01956f9e03e90b967de5fe2471174de23a",
+        "0x089a81f35963f95bab1776b891db93db957d1a040a8aafdda3d5c43ff30bd905",
+        "0xc535d637cb34515c4d41691091d71f9455e21beb1ff953ae0e7f22f0a32ca6a0",
+        "0x36b8f278f5e7c007e89646e9f3305187545a391d4fb163d25fc9a5f5d900d9fe",
+        "0x4fede595cebb1860b3b12f55e1b6987b16c11671ff395403903dcb445eb640d2",
+        "0xcdbd59f117b87de4160f17c2af8e65c6453e594bb7f9ccbe419028206f9c9623",
+        "0xdd86822f4f9ce30c576cf1460a216757dbb1e5868d48986a16fbba20a3899e14",
+        "0x4f42f747c074670bdce8f140e64cfc5ef620d6a6e115e9bfb0d09023eaacf11b",
+        "0xa2a896bf5ced08a9501e48533708498dc660220e0940d89345d904447f66b55c",
+        "0x027990294cf908b92e86ac26516e53b45adb336a6557acca78051738540c6bb9",
+        "0xddebee57183dc341c398ebc2f6d02a6b5e6b139923a96a0655fb163722558687",
+        "0x094be7dd7c74aa41a431540c6bc7623ff221649842287a10d793283d908dee00",
+        "0xf31313b8007cd8e8dfa376b7c10e9c9cc482f99c495a82871b4a4f513184f647",
+        "0x5c582d235a1076115cde156a77269ef9015e168fec9cacdf61bd00dc145fb1ee",
+        "0x207ba9b116e69f903e8a5cc4beec14f9d2b95ca450bc5bc0413de55f41f3bbd8",
+        "0x2b3750d8531de5ea1278316048be3aba5cf95edff390bc8a8cc51317848b3906",
+        "0x2582f0cd31d074f147bab78ce8e033bb25d393f60cea2d8c7d2f0c0fd5728d1d",
+        "0x651f02d92205951c8076f69687a2a641d00354baa9b64168f9e2023f174916d7",
+        "0x4040b536a1078a4c2c5a7379d895a79620e22a4935f6bcce38bd61ec83fccdae",
+        "0x9ae794a30beb27a4ae231a09b386ad7b384ea44e0e510b5107aed7349c2d783f",
+        "0xe6a496232129aa087643dc2aaaf000f20aa8f705e808b41cec69e1b640a38977",
+        "0xd7cf7388f5a58ce37b7510ab7f5dd457fbc1368141c00f039a7b3b95d835a7cf",
+        "0xb728d5a3c5e1cb1e2fe82581aceba28ee5a1fa82bc300037bcfc6f5a6e6f165e",
+        "0x4e758c611c553a70cd816499026e04a76a825f2379daab4f66fdcc563d1843d9"
+      ],
+      "founding": false,
+      "metadata": {
+        "schema": "HC.SEED.COMMON_REFERENCE_METADATA.V1",
+        "cultivarId": "HC-C-blue-dream",
+        "canonicalName": "Blue Dream",
+        "canonicalRegion": "Emerald Coast",
+        "referenceVersion": 1,
+        "translationPolicyHash": "0xe25c1a6766da890e15b3671b6bf91b820e51cb0aa312c2993bda6c7b9f570b06",
+        "researchEntryHash": "0x95b2d4ae63f0d5a02ee868120e0d0ff416f66b2d5d9181c68e0a22945b08e57d",
+        "ancestryAccount": {
+          "status": "reported-cross",
+          "candidateParentSets": [
+            [
+              "Blueberry",
+              "Haze"
+            ]
+          ],
+          "attribution": "Leafly profile account",
+          "biologicallyVerified": false,
+          "crossOrder": "not-established",
+          "sourceIds": [
+            "leafly-blue-dream"
+          ]
+        },
+        "descriptiveAnnotations": {
+          "publisherClassification": "Hybrid",
+          "reportedFlavors": [
+            "Berry",
+            "Blueberry",
+            "Sweet"
+          ],
+          "profileTerpenes": [
+            "Myrcene",
+            "Pinene",
+            "Caryophyllene"
+          ],
+          "morphologySummary": null,
+          "morphologyCoverage": "not-described-in-reviewed-profile",
+          "sourceId": "leafly-blue-dream"
+        },
+        "sources": [
+          {
+            "id": "leafly-blue-dream",
+            "publisher": "Leafly",
+            "url": "https://www.leafly.com/strains/blue-dream",
+            "sourceTitle": "Blue Dream strain",
+            "reviewedOn": "2026-10-25",
+            "reviewTimezone": "America/Regina",
+            "retrieval": "web-open successful; profile body inspected",
+            "sections": [
+              "profile introduction",
+              "top flavors",
+              "terpenes",
+              "top effects"
+            ],
+            "claimBasis": "publisher account and aggregated profile observations; not DNA verification"
+          }
+        ],
+        "uncertainty": {
+          "notes": "The exact Haze selection and parental direction are not established; a shared name is not evidence of one universal clone.",
+          "sourceIds": [
+            "leafly-blue-dream"
+          ],
+          "resolution": "Retain the qualification; no unsupported pedigree, date or genome inference."
+        },
+        "semantics": "reference annotations only; not decoded, inherited or measured biological traits"
+      },
+      "registration": {
+        "method": "registerGenome",
+        "args": [
+          "0x669f3ed75a31949898104ba9e5ac509adb4195067f02b20c81db08447add031c",
+          "0x1d7f0c27046c1453bbf64b1297e3be8275189b53cd070818db000010dbac3cbd",
+          "0xb9ece6f1bec7ecbcb268fade5efe346bf738fc5731f76920c9ff76ea643a67af",
+          [
+            "0xe0fb371f2774a3c93392aca4ab97a851e5c9dd8048a33947fd95716ff86d2fc4",
+            "0x82c0bd94cdc506c0318282f02a43ee69e406a37924c1cd2269a7dfa1ebbc1a5a",
+            "0xfa7e347f47daad39dc7db7c1f81d4b1b5962632d58eaf79691370a40d2b7f3d1",
+            "0x8a102722f3f77ec1b4448fa336be342419a1e1f8acd3b5d7c14386329cbefb95",
+            "0x9d297a99868c5f89f411440434b0db01956f9e03e90b967de5fe2471174de23a",
+            "0x089a81f35963f95bab1776b891db93db957d1a040a8aafdda3d5c43ff30bd905",
+            "0xc535d637cb34515c4d41691091d71f9455e21beb1ff953ae0e7f22f0a32ca6a0",
+            "0x36b8f278f5e7c007e89646e9f3305187545a391d4fb163d25fc9a5f5d900d9fe",
+            "0x4fede595cebb1860b3b12f55e1b6987b16c11671ff395403903dcb445eb640d2",
+            "0xcdbd59f117b87de4160f17c2af8e65c6453e594bb7f9ccbe419028206f9c9623",
+            "0xdd86822f4f9ce30c576cf1460a216757dbb1e5868d48986a16fbba20a3899e14",
+            "0x4f42f747c074670bdce8f140e64cfc5ef620d6a6e115e9bfb0d09023eaacf11b",
+            "0xa2a896bf5ced08a9501e48533708498dc660220e0940d89345d904447f66b55c",
+            "0x027990294cf908b92e86ac26516e53b45adb336a6557acca78051738540c6bb9",
+            "0xddebee57183dc341c398ebc2f6d02a6b5e6b139923a96a0655fb163722558687",
+            "0x094be7dd7c74aa41a431540c6bc7623ff221649842287a10d793283d908dee00",
+            "0xf31313b8007cd8e8dfa376b7c10e9c9cc482f99c495a82871b4a4f513184f647",
+            "0x5c582d235a1076115cde156a77269ef9015e168fec9cacdf61bd00dc145fb1ee",
+            "0x207ba9b116e69f903e8a5cc4beec14f9d2b95ca450bc5bc0413de55f41f3bbd8",
+            "0x2b3750d8531de5ea1278316048be3aba5cf95edff390bc8a8cc51317848b3906",
+            "0x2582f0cd31d074f147bab78ce8e033bb25d393f60cea2d8c7d2f0c0fd5728d1d",
+            "0x651f02d92205951c8076f69687a2a641d00354baa9b64168f9e2023f174916d7",
+            "0x4040b536a1078a4c2c5a7379d895a79620e22a4935f6bcce38bd61ec83fccdae",
+            "0x9ae794a30beb27a4ae231a09b386ad7b384ea44e0e510b5107aed7349c2d783f",
+            "0xe6a496232129aa087643dc2aaaf000f20aa8f705e808b41cec69e1b640a38977",
+            "0xd7cf7388f5a58ce37b7510ab7f5dd457fbc1368141c00f039a7b3b95d835a7cf",
+            "0xb728d5a3c5e1cb1e2fe82581aceba28ee5a1fa82bc300037bcfc6f5a6e6f165e",
+            "0x4e758c611c553a70cd816499026e04a76a825f2379daab4f66fdcc563d1843d9"
+          ]
+        ],
+        "scopeHash": "0x669f3ed75a31949898104ba9e5ac509adb4195067f02b20c81db08447add031c",
+        "amount": 0,
+        "requiresFinalizedGenesis": true,
+        "status": "prepared-not-submitted"
+      }
+    },
+    {
+      "cultivarId": "HC-C-blueberry",
+      "referenceVersion": 1,
+      "genomeId": "0x6d71e6d89fb5f0d2e0748595b9e0e56e3b5dd28cd360845234fdd6ea5174cc15",
+      "lineId": "0xaf8a3abcc4b3acd7d225d0806872ed78aa793c24afea9ddce3516e97b148bc07",
+      "metadataHash": "0x11969d2dfc5074e53e8c9b46bffd662868e398e65e3dceb6c8e7f2afe35e8b6a",
+      "loci": [
+        "0x0b0ddc154e3c98fedea9dc4186f75d8aeeace0257911bdf14d60292aa032e320",
+        "0xb8d53def049c84361e061213f7d498c4055c02ebc8d1868b0a660334e36f72f7",
+        "0x5d5abb032da3fe0d6ac0e9245c23d406919c0b1ebc88baef6c08a16c61485a28",
+        "0x0c8eb369f814eea1c253de547d2f2eb0675496fb0e80545784eb9df13b32409e",
+        "0x2a0be8270229fe2bff8b42dff024a0bbad0610c057c906d16c540fdea263f1f8",
+        "0x070955b8ca3b8f943c9e5ae82e9f23d00133e7791f7ce2a474a67c3b04e34c51",
+        "0xed7cf55f36b797eaa427b0066b16722f84a0453f2a2b4e75926ec6648db3617e",
+        "0x6a87378af7daa973611ef07098a6a6aa54c59845e96a7047f93b4d0fbd8fe54f",
+        "0xedd4e804c4a5ce69428ebbd8a18ee228cd820f9fc9aeeddb6161c35a25f7d98b",
+        "0xba04bb1b3aa46a389efc6b855a01422c461667d1810d8d697080645c994b7bb7",
+        "0xa384d54ad2a22d043b5a98106603dd223a828e3963bdc74c38efbaddbfc56648",
+        "0xbfd9896718acaff7bd1ad7004c143bc7ee1ca90ea9eb11e40b91e0f2c0af3ba1",
+        "0x723dc0d98ad2ff66d6c645461811d5f947c1e79366d1e02bae997ebface1e06a",
+        "0x4f0608d57eceb501b05f79bc55974cd391265fe5389a17c3b7e3cad7a2374478",
+        "0x16351735c2731c43702fcd3fa823332e673b1c4fff375f00f5117eabd5c6a89a",
+        "0x84beebc194e2205f71e56c68d2014bb350e106c5e4288ea047e66c44d235b8f5",
+        "0x79b95ea473d6114e84969c58ccca4a98d037094efcf27de711da98ff2a32ab86",
+        "0x1e35596c7c4102f7eb6b6fb339f2277f75a97abdbec90f74b7015142ba5c63f8",
+        "0x03c42397f599edd525e66ce24634ab30f0ba3d115ddbd76db0dd87f85127e9d0",
+        "0x5f4af791934cc66a2129bf4cd33ecf8994f4eeef632a3d2097d2c5e8327b72cb",
+        "0x1227771ea66c7a3b6d73ef2d6489d3bc2df39078378b8dbad52bcb2c4ef96491",
+        "0x560f451b0481822fb7fc7a35131f7464393f3a8f735237ea1fa34dff678fb234",
+        "0xfeb7c69c6d2857a9ef5e5a4f2138d95aa7ed4a662902cdd29df9a3790a9598fd",
+        "0x1c4704282815b8c4f38dfdd2773c82394960b3f4dfb4d1b34327c9970763c137",
+        "0x1f9c7f1b91c07567a3d1347833546265487dc960f23f3bebce57a93ea3d847b5",
+        "0xece59d32997dc5b218717468d6905d73265ad6ab0bd7ef1f54c2b9390a5c37e3",
+        "0xb6cb9bad05cfefead51fa922cc8226a2c688d7ed5ecb74bc6773ea88a4df1773",
+        "0x112217cba6c3edf9c32b094cfc247c4c8bdf56d8caccb323caa3a3c728976def"
+      ],
+      "founding": false,
+      "metadata": {
+        "schema": "HC.SEED.COMMON_REFERENCE_METADATA.V1",
+        "cultivarId": "HC-C-blueberry",
+        "canonicalName": "Blueberry",
+        "canonicalRegion": "Golden Prairie",
+        "referenceVersion": 1,
+        "translationPolicyHash": "0xe25c1a6766da890e15b3671b6bf91b820e51cb0aa312c2993bda6c7b9f570b06",
+        "researchEntryHash": "0xf660b5057f133bd275d874ba4ced7f3e2345b323c3c8e102e904b425b8de38cc",
+        "ancestryAccount": {
+          "status": "conflicting-reports",
+          "candidateParentSets": [
+            [
+              "Purple Thai",
+              "Thai"
+            ],
+            [
+              "Highland Thai (Juicy Fruit Thai)",
+              "Purple Thai (Chocolate Thai \u00d7 Oaxacan Gold)",
+              "Afghani"
+            ]
+          ],
+          "attribution": "Leafly profile and Leafly feature contain differing levels of pedigree detail",
+          "biologicallyVerified": false,
+          "crossOrder": "not-established",
+          "candidateSourceIds": [
+            [
+              "leafly-blueberry"
+            ],
+            [
+              "leafly-blueberry-feature"
+            ]
+          ],
+          "sourceIds": [
+            "leafly-blueberry",
+            "leafly-blueberry-feature"
+          ]
+        },
+        "descriptiveAnnotations": {
+          "publisherClassification": "Indica",
+          "reportedFlavors": [
+            "Blueberry",
+            "Berry",
+            "Sweet"
+          ],
+          "profileTerpenes": [
+            "Myrcene",
+            "Caryophyllene",
+            "Pinene"
+          ],
+          "morphologySummary": "Colorful flowers are noted, without a fixed pigment guarantee.",
+          "morphologyCoverage": "described",
+          "sourceId": "leafly-blueberry"
+        },
+        "sources": [
+          {
+            "id": "leafly-blueberry",
+            "publisher": "Leafly",
+            "url": "https://www.leafly.com/strains/blueberry",
+            "sourceTitle": "Blueberry strain",
+            "reviewedOn": "2026-10-25",
+            "reviewTimezone": "America/Regina",
+            "retrieval": "web-open successful; profile body inspected",
+            "sections": [
+              "profile introduction",
+              "top flavors",
+              "terpenes",
+              "top effects"
+            ],
+            "claimBasis": "publisher account and aggregated profile observations; not DNA verification"
+          },
+          {
+            "id": "leafly-blueberry-feature",
+            "publisher": "Leafly",
+            "url": "https://www.leafly.com/news/strains-products/blueberry-weed-strain-trend",
+            "sourceTitle": "New Blueberry weed strains are about to make a wave",
+            "reviewedOn": "2026-10-25",
+            "reviewTimezone": "America/Regina",
+            "retrieval": "web-open successful; feature inspected",
+            "sections": [
+              "DJ Short\u2019s Blueberry",
+              "introduction"
+            ],
+            "claimBasis": "Leafly attribution to DJ Short; not DNA verification"
+          }
+        ],
+        "uncertainty": {
+          "notes": "The profile lists two Thai-related parents; the feature also includes Afghani. The feature gives inconsistent release-era wording. Retain both pedigrees and omit a definitive release date.",
+          "sourceIds": [
+            "leafly-blueberry",
+            "leafly-blueberry-feature"
+          ],
+          "resolution": "Retain the qualification; no unsupported pedigree, date or genome inference."
+        },
+        "semantics": "reference annotations only; not decoded, inherited or measured biological traits"
+      },
+      "registration": {
+        "method": "registerGenome",
+        "args": [
+          "0x6d71e6d89fb5f0d2e0748595b9e0e56e3b5dd28cd360845234fdd6ea5174cc15",
+          "0xaf8a3abcc4b3acd7d225d0806872ed78aa793c24afea9ddce3516e97b148bc07",
+          "0x11969d2dfc5074e53e8c9b46bffd662868e398e65e3dceb6c8e7f2afe35e8b6a",
+          [
+            "0x0b0ddc154e3c98fedea9dc4186f75d8aeeace0257911bdf14d60292aa032e320",
+            "0xb8d53def049c84361e061213f7d498c4055c02ebc8d1868b0a660334e36f72f7",
+            "0x5d5abb032da3fe0d6ac0e9245c23d406919c0b1ebc88baef6c08a16c61485a28",
+            "0x0c8eb369f814eea1c253de547d2f2eb0675496fb0e80545784eb9df13b32409e",
+            "0x2a0be8270229fe2bff8b42dff024a0bbad0610c057c906d16c540fdea263f1f8",
+            "0x070955b8ca3b8f943c9e5ae82e9f23d00133e7791f7ce2a474a67c3b04e34c51",
+            "0xed7cf55f36b797eaa427b0066b16722f84a0453f2a2b4e75926ec6648db3617e",
+            "0x6a87378af7daa973611ef07098a6a6aa54c59845e96a7047f93b4d0fbd8fe54f",
+            "0xedd4e804c4a5ce69428ebbd8a18ee228cd820f9fc9aeeddb6161c35a25f7d98b",
+            "0xba04bb1b3aa46a389efc6b855a01422c461667d1810d8d697080645c994b7bb7",
+            "0xa384d54ad2a22d043b5a98106603dd223a828e3963bdc74c38efbaddbfc56648",
+            "0xbfd9896718acaff7bd1ad7004c143bc7ee1ca90ea9eb11e40b91e0f2c0af3ba1",
+            "0x723dc0d98ad2ff66d6c645461811d5f947c1e79366d1e02bae997ebface1e06a",
+            "0x4f0608d57eceb501b05f79bc55974cd391265fe5389a17c3b7e3cad7a2374478",
+            "0x16351735c2731c43702fcd3fa823332e673b1c4fff375f00f5117eabd5c6a89a",
+            "0x84beebc194e2205f71e56c68d2014bb350e106c5e4288ea047e66c44d235b8f5",
+            "0x79b95ea473d6114e84969c58ccca4a98d037094efcf27de711da98ff2a32ab86",
+            "0x1e35596c7c4102f7eb6b6fb339f2277f75a97abdbec90f74b7015142ba5c63f8",
+            "0x03c42397f599edd525e66ce24634ab30f0ba3d115ddbd76db0dd87f85127e9d0",
+            "0x5f4af791934cc66a2129bf4cd33ecf8994f4eeef632a3d2097d2c5e8327b72cb",
+            "0x1227771ea66c7a3b6d73ef2d6489d3bc2df39078378b8dbad52bcb2c4ef96491",
+            "0x560f451b0481822fb7fc7a35131f7464393f3a8f735237ea1fa34dff678fb234",
+            "0xfeb7c69c6d2857a9ef5e5a4f2138d95aa7ed4a662902cdd29df9a3790a9598fd",
+            "0x1c4704282815b8c4f38dfdd2773c82394960b3f4dfb4d1b34327c9970763c137",
+            "0x1f9c7f1b91c07567a3d1347833546265487dc960f23f3bebce57a93ea3d847b5",
+            "0xece59d32997dc5b218717468d6905d73265ad6ab0bd7ef1f54c2b9390a5c37e3",
+            "0xb6cb9bad05cfefead51fa922cc8226a2c688d7ed5ecb74bc6773ea88a4df1773",
+            "0x112217cba6c3edf9c32b094cfc247c4c8bdf56d8caccb323caa3a3c728976def"
+          ]
+        ],
+        "scopeHash": "0x6d71e6d89fb5f0d2e0748595b9e0e56e3b5dd28cd360845234fdd6ea5174cc15",
+        "amount": 0,
+        "requiresFinalizedGenesis": true,
+        "status": "prepared-not-submitted"
+      }
+    },
+    {
+      "cultivarId": "HC-C-bubba-kush",
+      "referenceVersion": 1,
+      "genomeId": "0xa0fe4cba6d372d3c56a42b9d1d7eb31c4cfc1839264f6e269371f1a7162f55c0",
+      "lineId": "0xc9e5e6ccf94ff90c9bddfdef9a870106f6ced540bf9d3204a585da88000b7822",
+      "metadataHash": "0x017bfe8b5aed8f32a3a2587611b7b1b30b2f68c9f6afcd1fee80a167bdf93d76",
+      "loci": [
+        "0xe1d8b270171c52fe258178a4b0d530e6dc232ad69c73e91f227ae5d6a4b339fc",
+        "0xb44cb3d64a9480fc6d891aec1175645851203bb482dae81540bc431dfd30bea5",
+        "0x23c6e22611b1b2a9864e13eb78dd04de6f3b98bc8557e5b26afbf5d386815942",
+        "0x1ae8afe55961ed2a5ef0dadd9ae543be68a55f79b23bc67cfdbac2bca4433b87",
+        "0x80ff92ea27c0a9e0191369d96072e77ec4a41014eaef173dd4481b36cac84d5d",
+        "0xedfdd42687b8c393bf4659b0b6c639d2ca7921d7630dfd8a378135b5a6b89f32",
+        "0xbfc12c6d334c86a3a61be66fed929801e51a7faa854da14e6de1e1896ddd59dc",
+        "0x13a01ae0850fe25a6cdef50d868ce91b1c5f8388066b8ece1cb2d2d32df7dd0e",
+        "0x602bee4741682f1887dfd6455ac9fd26461b7ca7cbf72c6b0363c26c50164683",
+        "0x73226d288f38ff5e374f637af46e93eb77fae8149b899b7021105a84f46d8190",
+        "0x4fa00fed98ffb147b5b2ca5cd51513c1596a0cf135f4f802667be4bfae12c76e",
+        "0x435093f1e6a86c40a1c20537fb98b4c4ad1a8a65245e669b19177f371c6ef3a9",
+        "0x6e5f945a1ec3a9d046d9b2a53fd3eab66b769a89230a04db05e00c6067f27691",
+        "0x8be2ba6f26224dd8685795c84468e9731c7432d26803d9aba81d5eaf547d6a16",
+        "0xbaccdfccf7f74612581d8f76707553db054d49219496a68a19e929d222cb7d59",
+        "0x18bca8c98514e09b0a50d85ab4ff9fab076225cde5a709b589db46fcd8ec7e99",
+        "0x270543399ee0aac7a0e482537d4e934e6346025856f9fc37af1838f3699de1d2",
+        "0x5dbd9313fcda3a8cdca798388dbc695320af9f2fa761212c4b8fc804c81865e5",
+        "0x3c0b6f891a6e782f53a1b0d9c2aefa6acd927b10df475e69aaeb7c1eb4a43a11",
+        "0x383f3a47031448d348213bf8e4b72e7f9c7f58e12407f6c9c1717e4a1fb3c21c",
+        "0x165d8c754f89606308936cb56792d1bddbba286e5f6808eda8a6c197a602ed4d",
+        "0xeb44c8e01272c8d13808852099560970d2009935c2cdbc2b7cd1dbe3cc8b22a1",
+        "0x224f2ea7d621d5816507bc3d919dc1604c1745ffd707dbd713d5fc251edadcaa",
+        "0xf3ece378d5f667fd20277e6ca897dff2316ea881be13a0ae29dba1e77ff66d37",
+        "0xbfba3860f438e3c69e2c06a2e7ee32ef67fbd7a3b3200ac5e3fb49032a2bcf2f",
+        "0x6449efa29df99c1572a8b96a8a03b1bb7abe9bb378df7c4e87bd9d5ebe446ecd",
+        "0xcfe49ead94df42dc6b6c44e3b737b1015cceff16af3cdc03f05129bd60af7acd",
+        "0x52361627118d7ac9deaaee257856c7b7cb7a67ae15cad033e4028e5216cfa895"
+      ],
+      "founding": false,
+      "metadata": {
+        "schema": "HC.SEED.COMMON_REFERENCE_METADATA.V1",
+        "cultivarId": "HC-C-bubba-kush",
+        "canonicalName": "Bubba Kush",
+        "canonicalRegion": "Red Mesa",
+        "referenceVersion": 1,
+        "translationPolicyHash": "0xe25c1a6766da890e15b3671b6bf91b820e51cb0aa312c2993bda6c7b9f570b06",
+        "researchEntryHash": "0x48daea1eb58f4d80c2437663e769ffa1a5da9cb3bb8afe67d20df982220072ae",
+        "ancestryAccount": {
+          "status": "uncertain",
+          "candidateParentSets": [
+            [
+              "OG Kush",
+              "unknown indica (Bubba)"
+            ]
+          ],
+          "attribution": "Leafly profile account",
+          "biologicallyVerified": false,
+          "crossOrder": "not-established",
+          "sourceIds": [
+            "leafly-bubba-kush"
+          ]
+        },
+        "descriptiveAnnotations": {
+          "publisherClassification": "Indica",
+          "reportedFlavors": [
+            "Coffee",
+            "Earthy",
+            "Pungent"
+          ],
+          "profileTerpenes": [
+            "Caryophyllene",
+            "Limonene",
+            "Myrcene"
+          ],
+          "morphologySummary": "Short stature and bulky green-to-purple flowers; coffee and chocolate notes.",
+          "morphologyCoverage": "described",
+          "sourceId": "leafly-bubba-kush"
+        },
+        "sources": [
+          {
+            "id": "leafly-bubba-kush",
+            "publisher": "Leafly",
+            "url": "https://www.leafly.com/strains/bubba-kush",
+            "sourceTitle": "Bubba Kush strain",
+            "reviewedOn": "2026-10-25",
+            "reviewTimezone": "America/Regina",
+            "retrieval": "web-open successful; profile body inspected",
+            "sections": [
+              "profile introduction",
+              "top flavors",
+              "terpenes",
+              "top effects"
+            ],
+            "claimBasis": "publisher account and aggregated profile observations; not DNA verification"
+          }
+        ],
+        "uncertainty": {
+          "notes": "Northern Lights is suggested, not confirmed, as the unidentified indica. Appearance-based Afghani inference is not pedigree proof.",
+          "sourceIds": [
+            "leafly-bubba-kush"
+          ],
+          "resolution": "Retain the qualification; no unsupported pedigree, date or genome inference."
+        },
+        "semantics": "reference annotations only; not decoded, inherited or measured biological traits"
+      },
+      "registration": {
+        "method": "registerGenome",
+        "args": [
+          "0xa0fe4cba6d372d3c56a42b9d1d7eb31c4cfc1839264f6e269371f1a7162f55c0",
+          "0xc9e5e6ccf94ff90c9bddfdef9a870106f6ced540bf9d3204a585da88000b7822",
+          "0x017bfe8b5aed8f32a3a2587611b7b1b30b2f68c9f6afcd1fee80a167bdf93d76",
+          [
+            "0xe1d8b270171c52fe258178a4b0d530e6dc232ad69c73e91f227ae5d6a4b339fc",
+            "0xb44cb3d64a9480fc6d891aec1175645851203bb482dae81540bc431dfd30bea5",
+            "0x23c6e22611b1b2a9864e13eb78dd04de6f3b98bc8557e5b26afbf5d386815942",
+            "0x1ae8afe55961ed2a5ef0dadd9ae543be68a55f79b23bc67cfdbac2bca4433b87",
+            "0x80ff92ea27c0a9e0191369d96072e77ec4a41014eaef173dd4481b36cac84d5d",
+            "0xedfdd42687b8c393bf4659b0b6c639d2ca7921d7630dfd8a378135b5a6b89f32",
+            "0xbfc12c6d334c86a3a61be66fed929801e51a7faa854da14e6de1e1896ddd59dc",
+            "0x13a01ae0850fe25a6cdef50d868ce91b1c5f8388066b8ece1cb2d2d32df7dd0e",
+            "0x602bee4741682f1887dfd6455ac9fd26461b7ca7cbf72c6b0363c26c50164683",
+            "0x73226d288f38ff5e374f637af46e93eb77fae8149b899b7021105a84f46d8190",
+            "0x4fa00fed98ffb147b5b2ca5cd51513c1596a0cf135f4f802667be4bfae12c76e",
+            "0x435093f1e6a86c40a1c20537fb98b4c4ad1a8a65245e669b19177f371c6ef3a9",
+            "0x6e5f945a1ec3a9d046d9b2a53fd3eab66b769a89230a04db05e00c6067f27691",
+            "0x8be2ba6f26224dd8685795c84468e9731c7432d26803d9aba81d5eaf547d6a16",
+            "0xbaccdfccf7f74612581d8f76707553db054d49219496a68a19e929d222cb7d59",
+            "0x18bca8c98514e09b0a50d85ab4ff9fab076225cde5a709b589db46fcd8ec7e99",
+            "0x270543399ee0aac7a0e482537d4e934e6346025856f9fc37af1838f3699de1d2",
+            "0x5dbd9313fcda3a8cdca798388dbc695320af9f2fa761212c4b8fc804c81865e5",
+            "0x3c0b6f891a6e782f53a1b0d9c2aefa6acd927b10df475e69aaeb7c1eb4a43a11",
+            "0x383f3a47031448d348213bf8e4b72e7f9c7f58e12407f6c9c1717e4a1fb3c21c",
+            "0x165d8c754f89606308936cb56792d1bddbba286e5f6808eda8a6c197a602ed4d",
+            "0xeb44c8e01272c8d13808852099560970d2009935c2cdbc2b7cd1dbe3cc8b22a1",
+            "0x224f2ea7d621d5816507bc3d919dc1604c1745ffd707dbd713d5fc251edadcaa",
+            "0xf3ece378d5f667fd20277e6ca897dff2316ea881be13a0ae29dba1e77ff66d37",
+            "0xbfba3860f438e3c69e2c06a2e7ee32ef67fbd7a3b3200ac5e3fb49032a2bcf2f",
+            "0x6449efa29df99c1572a8b96a8a03b1bb7abe9bb378df7c4e87bd9d5ebe446ecd",
+            "0xcfe49ead94df42dc6b6c44e3b737b1015cceff16af3cdc03f05129bd60af7acd",
+            "0x52361627118d7ac9deaaee257856c7b7cb7a67ae15cad033e4028e5216cfa895"
+          ]
+        ],
+        "scopeHash": "0xa0fe4cba6d372d3c56a42b9d1d7eb31c4cfc1839264f6e269371f1a7162f55c0",
+        "amount": 0,
+        "requiresFinalizedGenesis": true,
+        "status": "prepared-not-submitted"
+      }
+    },
+    {
+      "cultivarId": "HC-C-chemdawg",
+      "referenceVersion": 1,
+      "genomeId": "0x0650bb6d46a509caf83cc7dc732020454e12e37fa4cd1784aebfc9de0404dc26",
+      "lineId": "0x090f7722f4558f2397419bb657864aa3923902c53ffaf994447a0f30cb16cccc",
+      "metadataHash": "0x4054b247a6018c6475e1a5e65f8d9730bc7251d1193a41eb858dc635a77b9825",
+      "loci": [
+        "0x6fd0a0634d1090c2b2b14ed5ed320b4b850cd412bfa4dbf89eb36a85edfefc25",
+        "0x90075cde63fc9d917ce77b7841ae711fb3fd4fd68f807b1b29ed00815babf70c",
+        "0x93aa24ca07c60df80a98fcb92f5ce7349e4a6cd92fb459cdb23e5b03808a4e9a",
+        "0xb96808ae061cbf6e49658eb039d9fe2e847199c4769499510312b412ccfd9d8d",
+        "0x927d18ece3b722a62110a11b3430599e79d358b1929376979172311e207ec46e",
+        "0x604e1e85c5e89172dd0c9665463d2030fb3d1dd5206dd1a7c26bec613bf70ef3",
+        "0x8988025b6df09449a7d7159a2d778098564f6f64c861a0de41d310916e156a59",
+        "0x03326bd0566b0c814ddc7ccee627110b0619f8e93544f9a1d48cf6d5d83ad7d4",
+        "0x335576d4745334691b9fd368da4c91e418fa1f291107e33ab3c522df9c7bf1ff",
+        "0x4907c6610e56175b1a4d908c42295f06f87bc76f174393e0f9dc852f92f8aea9",
+        "0xc6038494e1ad83318c316cd62c20d11be191da69be757a4e986756a803ef7740",
+        "0x42aa46dd833d2a655cd86830a9fae641a53d8016db11a3d1e04d57fdd79ceede",
+        "0xee0491f94f372da979474af5e0b581b37aaf898eea759f75050c0dcc3fe7b8f9",
+        "0x8fcb6907fed94a8a613bb0730a1a650eda9f26072ae55363f7785711c9dc9415",
+        "0xb3e81d8fcce1f9c62b8a3f05c8c259475d72582c9f3fe43e78b9df9dd7e6d54e",
+        "0xf0db7edc66cceb88bc12cb22f7475a42fdc9cd31e5283c53c3fafbc198e9dad3",
+        "0x8c68ee1b77c73e08368679ec1f2efef8e0c21352336b72914e19af54efd211e4",
+        "0x6027fa63abeb12ed1b564c344f26ec1f9828b6dc5e1aa544092723467194918d",
+        "0x0a64379100a56f42e6019d7d2bbabdb5e2e70190d7ce1915f2e99daacff66239",
+        "0xd741af6e1fbd7bfd62083caea6f57fa41ca82dd359921ed8e84320e6daedfe62",
+        "0xaa9183e559fc85e8ee2c61028b8af3d88e44cb341abe112bfbebc120c4508cab",
+        "0xc92882abc74e73910ace4e3c7395f469368b03e029a9dc0c0ef1154b85bbdf01",
+        "0xaf00137b24eab8256455525df1fe33ca8a8c27148c382e2321aba50a46afe4ce",
+        "0xffd6f7d7d60295a0b39b0affa1eab871e0486ad70f4b8c781f5e12d5cae93b1d",
+        "0xdf7caee6fb7e0d3c1966126fb7bf7d8fa256920d2a8dbd20223556afbeb9e8d2",
+        "0x3ca4ec005070931d484092c72ce18a7bdecd212f2bf80fc9d382f2778242320f",
+        "0x51eac9b835882c4fb704d96107b95af13d7b7a20dfc842b4e9f606eb6c230102",
+        "0xa3aee654417ec146291b82322c3ef2927bed59c9c12beee5184162089b43d8e0"
+      ],
+      "founding": false,
+      "metadata": {
+        "schema": "HC.SEED.COMMON_REFERENCE_METADATA.V1",
+        "cultivarId": "HC-C-chemdawg",
+        "canonicalName": "Chemdawg",
+        "canonicalRegion": "Golden Prairie",
+        "referenceVersion": 1,
+        "translationPolicyHash": "0xe25c1a6766da890e15b3671b6bf91b820e51cb0aa312c2993bda6c7b9f570b06",
+        "researchEntryHash": "0xba81ff0b4d436497588393fdee20e801cbeed44ed03355764c8ce5b268cb489f",
+        "ancestryAccount": {
+          "status": "unknown",
+          "candidateParentSets": [],
+          "attribution": "Leafly profile account",
+          "biologicallyVerified": false,
+          "crossOrder": "not-established",
+          "sourceIds": [
+            "leafly-chemdawg"
+          ]
+        },
+        "descriptiveAnnotations": {
+          "publisherClassification": "Hybrid",
+          "reportedFlavors": [
+            "Chemical",
+            "Diesel",
+            "Pungent"
+          ],
+          "profileTerpenes": [
+            "Caryophyllene",
+            "Myrcene",
+            "Limonene"
+          ],
+          "morphologySummary": null,
+          "morphologyCoverage": "not-described-in-reviewed-profile",
+          "sourceId": "leafly-chemdawg"
+        },
+        "sources": [
+          {
+            "id": "leafly-chemdawg",
+            "publisher": "Leafly",
+            "url": "https://www.leafly.com/strains/chemdawg",
+            "sourceTitle": "Chemdawg strain",
+            "reviewedOn": "2026-10-25",
+            "reviewTimezone": "America/Regina",
+            "retrieval": "web-open successful; profile body inspected",
+            "sections": [
+              "profile introduction",
+              "top flavors",
+              "terpenes",
+              "top effects"
+            ],
+            "claimBasis": "publisher account and aggregated profile observations; not DNA verification"
+          }
+        ],
+        "uncertainty": {
+          "notes": "Named parents are absent. Bag-seed provenance is not parentage; the related selections are not interchangeable reference genomes.",
+          "sourceIds": [
+            "leafly-chemdawg"
+          ],
+          "resolution": "Retain the qualification; no unsupported pedigree, date or genome inference."
+        },
+        "semantics": "reference annotations only; not decoded, inherited or measured biological traits"
+      },
+      "registration": {
+        "method": "registerGenome",
+        "args": [
+          "0x0650bb6d46a509caf83cc7dc732020454e12e37fa4cd1784aebfc9de0404dc26",
+          "0x090f7722f4558f2397419bb657864aa3923902c53ffaf994447a0f30cb16cccc",
+          "0x4054b247a6018c6475e1a5e65f8d9730bc7251d1193a41eb858dc635a77b9825",
+          [
+            "0x6fd0a0634d1090c2b2b14ed5ed320b4b850cd412bfa4dbf89eb36a85edfefc25",
+            "0x90075cde63fc9d917ce77b7841ae711fb3fd4fd68f807b1b29ed00815babf70c",
+            "0x93aa24ca07c60df80a98fcb92f5ce7349e4a6cd92fb459cdb23e5b03808a4e9a",
+            "0xb96808ae061cbf6e49658eb039d9fe2e847199c4769499510312b412ccfd9d8d",
+            "0x927d18ece3b722a62110a11b3430599e79d358b1929376979172311e207ec46e",
+            "0x604e1e85c5e89172dd0c9665463d2030fb3d1dd5206dd1a7c26bec613bf70ef3",
+            "0x8988025b6df09449a7d7159a2d778098564f6f64c861a0de41d310916e156a59",
+            "0x03326bd0566b0c814ddc7ccee627110b0619f8e93544f9a1d48cf6d5d83ad7d4",
+            "0x335576d4745334691b9fd368da4c91e418fa1f291107e33ab3c522df9c7bf1ff",
+            "0x4907c6610e56175b1a4d908c42295f06f87bc76f174393e0f9dc852f92f8aea9",
+            "0xc6038494e1ad83318c316cd62c20d11be191da69be757a4e986756a803ef7740",
+            "0x42aa46dd833d2a655cd86830a9fae641a53d8016db11a3d1e04d57fdd79ceede",
+            "0xee0491f94f372da979474af5e0b581b37aaf898eea759f75050c0dcc3fe7b8f9",
+            "0x8fcb6907fed94a8a613bb0730a1a650eda9f26072ae55363f7785711c9dc9415",
+            "0xb3e81d8fcce1f9c62b8a3f05c8c259475d72582c9f3fe43e78b9df9dd7e6d54e",
+            "0xf0db7edc66cceb88bc12cb22f7475a42fdc9cd31e5283c53c3fafbc198e9dad3",
+            "0x8c68ee1b77c73e08368679ec1f2efef8e0c21352336b72914e19af54efd211e4",
+            "0x6027fa63abeb12ed1b564c344f26ec1f9828b6dc5e1aa544092723467194918d",
+            "0x0a64379100a56f42e6019d7d2bbabdb5e2e70190d7ce1915f2e99daacff66239",
+            "0xd741af6e1fbd7bfd62083caea6f57fa41ca82dd359921ed8e84320e6daedfe62",
+            "0xaa9183e559fc85e8ee2c61028b8af3d88e44cb341abe112bfbebc120c4508cab",
+            "0xc92882abc74e73910ace4e3c7395f469368b03e029a9dc0c0ef1154b85bbdf01",
+            "0xaf00137b24eab8256455525df1fe33ca8a8c27148c382e2321aba50a46afe4ce",
+            "0xffd6f7d7d60295a0b39b0affa1eab871e0486ad70f4b8c781f5e12d5cae93b1d",
+            "0xdf7caee6fb7e0d3c1966126fb7bf7d8fa256920d2a8dbd20223556afbeb9e8d2",
+            "0x3ca4ec005070931d484092c72ce18a7bdecd212f2bf80fc9d382f2778242320f",
+            "0x51eac9b835882c4fb704d96107b95af13d7b7a20dfc842b4e9f606eb6c230102",
+            "0xa3aee654417ec146291b82322c3ef2927bed59c9c12beee5184162089b43d8e0"
+          ]
+        ],
+        "scopeHash": "0x0650bb6d46a509caf83cc7dc732020454e12e37fa4cd1784aebfc9de0404dc26",
+        "amount": 0,
+        "requiresFinalizedGenesis": true,
+        "status": "prepared-not-submitted"
+      }
+    },
+    {
+      "cultivarId": "HC-C-durban-poison",
+      "referenceVersion": 1,
+      "genomeId": "0x5fb25bc3e2ccb1f549e23dd53101dbcc46d1afb89be9a1cc35bcc62b7f29ba87",
+      "lineId": "0x4b0b02798c9752d367de92ce080e1c16b7814d0151e5f0083dc09b711c2d42ec",
+      "metadataHash": "0x3cc03a03a3460c2b89586a2f2eec0a250eb6ac6b2d45726f6ff60df01efd074a",
+      "loci": [
+        "0xbd30284b10cf428249e3785801f9cf9b97b29981d5ed364bf403480cf3b17576",
+        "0x94d0b58ce3f1fe10d114b8e1cd5b39f962577140cf33f74398e22fa4c032f6cb",
+        "0xe5f0c505b3246782b916c2a49341ca27079ff7b2f9be1df586082fc08970b62b",
+        "0x6eb1513da2f1e34a813af4bc8a0c23ff1f37a512aa23353718b9ec7276a578f6",
+        "0x69ccc85dc8f49b3f67db6a4480416b109313be439d0a44d102f669da4185f056",
+        "0xc2f67ec0c9bd1bc2f3792e703bb059c35d9e41c64189508a27473506d48f6bc5",
+        "0x35c90f1075acbd1aedafc98ba931216e2d11ef540790e92d7d172b734d1ab425",
+        "0xa2abe51e4258239afcd55fa98cbed58a0f7a20bd132b31ec08055ce5d6f1d781",
+        "0x23571495706083769653a6c211b0ccdc722310035bef77c50cef84517e60152b",
+        "0xd007510b41e15c4ce788ca9ab7f672c6e01eee0a36ba94d303d42486f15d2f3a",
+        "0x8f1a14c0b22b47be61da8aa9b309bfb564f107cc01851afc0bba1947b58842c8",
+        "0xadf5c66da4c38f76a00d3cedc170212155d193bbbccdd8ac04fd98627f6c01dc",
+        "0x5197d024b5e48eb2c93164a949d54a3a8a574e07ea1d45a4829c83280f3909d7",
+        "0x55291a46001eb4df0755ef249458e4065734eefd013dee0cf86ea9caa146c5c7",
+        "0x21ee6eb3f7a4d9543a4756d6870fbcc17c99294c1c45c7dac0fd578b545fe4a4",
+        "0x8ed99c83dc7eacc97517a31afae8ed3ec80c033522a5427f8259193edfb81ecc",
+        "0x9f2064e094ef39cf9e045bcde96987acc8d93a88f1d980ee2bf2bd5a7c40ff36",
+        "0x513c126aed7f11247941bf3b7395022da2660f0aae30d12e3ac660164556c7f8",
+        "0x5377006aeb1e8d46a3abc38a91909c320459ce86e8103f5dd8253685b645ec65",
+        "0xa357eaf754812ab5b952e0282c7beeb3809899f6933d01ab0211854f873d3a65",
+        "0x0c7bd0434322b806143ec864d74cb94538d36ebbfc88946b4a954850f9542099",
+        "0x883a5977eacad941f60f387770337f2fb9efd8e7402c3319f4d8c3a4fe03fef6",
+        "0x79446617be7582cacf6c30b7bfacad9216099e4414f000fad0979d4b976be6a5",
+        "0xbb360f9889f084f04322cc4b64e1f943a3509120049143d73ed4611b728c18db",
+        "0xfc5c9800d5612d052772184ac2dab994a3aa30a523bb79eec8e20918cd3fa44b",
+        "0x0c96637d289266614c84a59e471c3854d22d4bf45beabe791764e5abf89d7192",
+        "0x20a13ea72d1047476215a0b6e9ee456a3ad4c25e9c71d64d92f1797098f90706",
+        "0x0feff8f154340a89575431b591a43bea3a7151d9e65b5d681019ad6d7c61afe5"
+      ],
+      "founding": false,
+      "metadata": {
+        "schema": "HC.SEED.COMMON_REFERENCE_METADATA.V1",
+        "cultivarId": "HC-C-durban-poison",
+        "canonicalName": "Durban Poison",
+        "canonicalRegion": "Emerald Coast",
+        "referenceVersion": 1,
+        "translationPolicyHash": "0xe25c1a6766da890e15b3671b6bf91b820e51cb0aa312c2993bda6c7b9f570b06",
+        "researchEntryHash": "0x28fc6efc85dce680323b8b56e020f74f9c0559362ee48130b5d51fe4ac101a9e",
+        "ancestryAccount": {
+          "status": "regional-population",
+          "candidateParentSets": [],
+          "attribution": "Leafly profile account",
+          "biologicallyVerified": false,
+          "crossOrder": "not-established",
+          "sourceIds": [
+            "leafly-durban-poison"
+          ]
+        },
+        "descriptiveAnnotations": {
+          "publisherClassification": "Sativa",
+          "reportedFlavors": [
+            "Pine",
+            "Earthy",
+            "Sage"
+          ],
+          "profileTerpenes": [
+            "Terpinolene",
+            "Myrcene",
+            "Ocimene"
+          ],
+          "morphologySummary": "Rounded substantial flowers and conspicuous resin glands.",
+          "morphologyCoverage": "described",
+          "sourceId": "leafly-durban-poison"
+        },
+        "sources": [
+          {
+            "id": "leafly-durban-poison",
+            "publisher": "Leafly",
+            "url": "https://www.leafly.com/strains/durban-poison",
+            "sourceTitle": "Durban Poison strain",
+            "reviewedOn": "2026-10-25",
+            "reviewTimezone": "America/Regina",
+            "retrieval": "web-open successful; profile body inspected",
+            "sections": [
+              "profile introduction",
+              "top flavors",
+              "terpenes",
+              "top effects"
+            ],
+            "claimBasis": "publisher account and aggregated profile observations; not DNA verification"
+          }
+        ],
+        "uncertainty": {
+          "notes": "The profile supplies no named parental pair or dated breeder history. Regional ancestry does not prove every commercial specimen is genetically identical.",
+          "sourceIds": [
+            "leafly-durban-poison"
+          ],
+          "resolution": "Retain the qualification; no unsupported pedigree, date or genome inference."
+        },
+        "semantics": "reference annotations only; not decoded, inherited or measured biological traits"
+      },
+      "registration": {
+        "method": "registerGenome",
+        "args": [
+          "0x5fb25bc3e2ccb1f549e23dd53101dbcc46d1afb89be9a1cc35bcc62b7f29ba87",
+          "0x4b0b02798c9752d367de92ce080e1c16b7814d0151e5f0083dc09b711c2d42ec",
+          "0x3cc03a03a3460c2b89586a2f2eec0a250eb6ac6b2d45726f6ff60df01efd074a",
+          [
+            "0xbd30284b10cf428249e3785801f9cf9b97b29981d5ed364bf403480cf3b17576",
+            "0x94d0b58ce3f1fe10d114b8e1cd5b39f962577140cf33f74398e22fa4c032f6cb",
+            "0xe5f0c505b3246782b916c2a49341ca27079ff7b2f9be1df586082fc08970b62b",
+            "0x6eb1513da2f1e34a813af4bc8a0c23ff1f37a512aa23353718b9ec7276a578f6",
+            "0x69ccc85dc8f49b3f67db6a4480416b109313be439d0a44d102f669da4185f056",
+            "0xc2f67ec0c9bd1bc2f3792e703bb059c35d9e41c64189508a27473506d48f6bc5",
+            "0x35c90f1075acbd1aedafc98ba931216e2d11ef540790e92d7d172b734d1ab425",
+            "0xa2abe51e4258239afcd55fa98cbed58a0f7a20bd132b31ec08055ce5d6f1d781",
+            "0x23571495706083769653a6c211b0ccdc722310035bef77c50cef84517e60152b",
+            "0xd007510b41e15c4ce788ca9ab7f672c6e01eee0a36ba94d303d42486f15d2f3a",
+            "0x8f1a14c0b22b47be61da8aa9b309bfb564f107cc01851afc0bba1947b58842c8",
+            "0xadf5c66da4c38f76a00d3cedc170212155d193bbbccdd8ac04fd98627f6c01dc",
+            "0x5197d024b5e48eb2c93164a949d54a3a8a574e07ea1d45a4829c83280f3909d7",
+            "0x55291a46001eb4df0755ef249458e4065734eefd013dee0cf86ea9caa146c5c7",
+            "0x21ee6eb3f7a4d9543a4756d6870fbcc17c99294c1c45c7dac0fd578b545fe4a4",
+            "0x8ed99c83dc7eacc97517a31afae8ed3ec80c033522a5427f8259193edfb81ecc",
+            "0x9f2064e094ef39cf9e045bcde96987acc8d93a88f1d980ee2bf2bd5a7c40ff36",
+            "0x513c126aed7f11247941bf3b7395022da2660f0aae30d12e3ac660164556c7f8",
+            "0x5377006aeb1e8d46a3abc38a91909c320459ce86e8103f5dd8253685b645ec65",
+            "0xa357eaf754812ab5b952e0282c7beeb3809899f6933d01ab0211854f873d3a65",
+            "0x0c7bd0434322b806143ec864d74cb94538d36ebbfc88946b4a954850f9542099",
+            "0x883a5977eacad941f60f387770337f2fb9efd8e7402c3319f4d8c3a4fe03fef6",
+            "0x79446617be7582cacf6c30b7bfacad9216099e4414f000fad0979d4b976be6a5",
+            "0xbb360f9889f084f04322cc4b64e1f943a3509120049143d73ed4611b728c18db",
+            "0xfc5c9800d5612d052772184ac2dab994a3aa30a523bb79eec8e20918cd3fa44b",
+            "0x0c96637d289266614c84a59e471c3854d22d4bf45beabe791764e5abf89d7192",
+            "0x20a13ea72d1047476215a0b6e9ee456a3ad4c25e9c71d64d92f1797098f90706",
+            "0x0feff8f154340a89575431b591a43bea3a7151d9e65b5d681019ad6d7c61afe5"
+          ]
+        ],
+        "scopeHash": "0x5fb25bc3e2ccb1f549e23dd53101dbcc46d1afb89be9a1cc35bcc62b7f29ba87",
+        "amount": 0,
+        "requiresFinalizedGenesis": true,
+        "status": "prepared-not-submitted"
+      }
+    },
+    {
+      "cultivarId": "HC-C-gelato",
+      "referenceVersion": 1,
+      "genomeId": "0xd196f0c4a627c436a68053c179efc80494cb49bea1a269a954bb8bd45ca5a000",
+      "lineId": "0x6a39c28d49c362b1cb085de1a5abe8296962fa01950ae5d05cde4743bdb54b87",
+      "metadataHash": "0x39822ca528569c5bed3a5e2f6b412afb2d57361eb7ed376cbf9c8b1ad23df490",
+      "loci": [
+        "0x3d729f06b522aeb75efe7c37e722bf9b0397e23c078584c36fa5c49d9183232c",
+        "0xcd0f07f897f86d9e56aefc776c55c671eaca25d0d7f4622e2a01fdabbc84cd44",
+        "0xa28841c1132e0d3d71e207b4e3fc7414509a7c6708f543a6d3a479438c7cf251",
+        "0xa74ef7598e810208b9a89e1a08e27b04510dc222cc16268270b458532afd0999",
+        "0x5d61755eaef50daea4bf59c5b67806e8dbf1322244bdc7c4f4a8baea442a99bb",
+        "0xb7cbe6f1f5d003ad76a8883af48d69eeebd9102ee7f3fb08200bf6a36ba0540a",
+        "0xe2cc43325bf4e85957cfa38855e6c18f27a8e4d1db729f1ed3aa3f3169fe64cb",
+        "0x93305e62b5c64a6c24bf0683c23b1170fd8222e20bb0b8f97e7c06a30583b7ff",
+        "0xf9e97abc3d5ceec4bf64d0a8e8e5eda6acb5bc8143379016ae25b16b4a88988a",
+        "0x348109920ed6282ea0942ae0ecf6ce06f3ddbe2e07f9421b59f09929069fc141",
+        "0xe9db43fff2601c1ba90805cb040fac4bb2762e10b1b2e0a5f5b4b11ad7136d5f",
+        "0x34c32fd9d58d6ebe3820b2655c8954e9e636a0fdd08475c99e3ce222b4caa13a",
+        "0xff2ab94b1ed2713feda2c9241bd31dfdfb45abf3e95c4306c8971c6e85bf54cd",
+        "0xdb78b6eabeeb19bfbc1e0e95c162d05eb4a34dbe470d2ed1df97b0a9e1e43b9f",
+        "0x640ef3739d4ea3a10e67b8d0c48d36725577f8b2205641f7551aac5b4e54388f",
+        "0x10e2e63bc4f027bf4ae2566d6938f06b5d0e204f35e890596f95e7fd5fc94073",
+        "0x1215a31632e4c5938e8fca6347be57577bb32638d87116250068ceedf2ce9c05",
+        "0xf3bdcfc1e9d01f4b3c0c8b4061551cb07a36e328777db2ad43c26a9e39212f7c",
+        "0x227b5b3e69d76a568d175f2213c84ee787aa2013e886515961386dae6d6d8e86",
+        "0xf6fce05139c708b93b999bcaa8dbcac42eb634735e892d2d6d829fc10821667b",
+        "0x82bfe7f9af0c93bfd345453e2e9c97c29711d806f156cd36f69cbab7e4b8bf2d",
+        "0xa15c1efdc4ec843f8d183745aa521636f1a18eab878afaf2fb7d2ac29a46158b",
+        "0x29d3aff10c5bf54867ff69a6196f0cc86c7cf5f3e622cae2bf8b6e5668b9f9f4",
+        "0x13d86307bd6edb711e6465fa5cee672385a680d2b10aac2b6f7f2def47766216",
+        "0x8ea513378d3bab93850dc00354331f8c0b1a6530e91103f248926a8d2ec4417f",
+        "0xcb2475c9970abfcf0c880e295b9de24fe058d7a2507dc6b3b81ab1b90e692a46",
+        "0xec7c12fd67390a2faf5e4c8f05b06159aa6052769255e8be1291cf8c97fab693",
+        "0xc1c3b231306a6144de01614881977e9271bd7d499902d16bb7fe920ea8d30e19"
+      ],
+      "founding": false,
+      "metadata": {
+        "schema": "HC.SEED.COMMON_REFERENCE_METADATA.V1",
+        "cultivarId": "HC-C-gelato",
+        "canonicalName": "Gelato",
+        "canonicalRegion": "Emerald Coast",
+        "referenceVersion": 1,
+        "translationPolicyHash": "0xe25c1a6766da890e15b3671b6bf91b820e51cb0aa312c2993bda6c7b9f570b06",
+        "researchEntryHash": "0x0b7297260ed89ecfce9fd9a01c3b488f335e1041fe3a495e99851ca8f14ee750",
+        "ancestryAccount": {
+          "status": "reported-cross",
+          "candidateParentSets": [
+            [
+              "Sunset Sherbet",
+              "Thin Mint Girl Scout Cookies"
+            ]
+          ],
+          "attribution": "Leafly profile account",
+          "biologicallyVerified": false,
+          "crossOrder": "not-established",
+          "sourceIds": [
+            "leafly-gelato"
+          ]
+        },
+        "descriptiveAnnotations": {
+          "publisherClassification": "Hybrid",
+          "reportedFlavors": [
+            "Sweet",
+            "Flowery",
+            "Pepper"
+          ],
+          "profileTerpenes": [
+            "Caryophyllene",
+            "Limonene",
+            "Humulene"
+          ],
+          "morphologySummary": "Dark-purple flowers, orange hairs and a pale resin coating; creamy fruit notes.",
+          "morphologyCoverage": "described",
+          "sourceId": "leafly-gelato"
+        },
+        "sources": [
+          {
+            "id": "leafly-gelato",
+            "publisher": "Leafly",
+            "url": "https://www.leafly.com/strains/gelato",
+            "sourceTitle": "Gelato strain",
+            "reviewedOn": "2026-10-25",
+            "reviewTimezone": "America/Regina",
+            "retrieval": "web-open successful; profile body inspected",
+            "sections": [
+              "profile introduction",
+              "top flavors",
+              "terpenes",
+              "top effects"
+            ],
+            "claimBasis": "publisher account and aggregated profile observations; not DNA verification"
+          }
+        ],
+        "uncertainty": {
+          "notes": "Thin Mint GSC is a selection, not any generic GSC specimen. Numbered Gelato names do not prove identical genotypes; this profile does not establish a release date or breeder.",
+          "sourceIds": [
+            "leafly-gelato"
+          ],
+          "resolution": "Retain the qualification; no unsupported pedigree, date or genome inference."
+        },
+        "semantics": "reference annotations only; not decoded, inherited or measured biological traits"
+      },
+      "registration": {
+        "method": "registerGenome",
+        "args": [
+          "0xd196f0c4a627c436a68053c179efc80494cb49bea1a269a954bb8bd45ca5a000",
+          "0x6a39c28d49c362b1cb085de1a5abe8296962fa01950ae5d05cde4743bdb54b87",
+          "0x39822ca528569c5bed3a5e2f6b412afb2d57361eb7ed376cbf9c8b1ad23df490",
+          [
+            "0x3d729f06b522aeb75efe7c37e722bf9b0397e23c078584c36fa5c49d9183232c",
+            "0xcd0f07f897f86d9e56aefc776c55c671eaca25d0d7f4622e2a01fdabbc84cd44",
+            "0xa28841c1132e0d3d71e207b4e3fc7414509a7c6708f543a6d3a479438c7cf251",
+            "0xa74ef7598e810208b9a89e1a08e27b04510dc222cc16268270b458532afd0999",
+            "0x5d61755eaef50daea4bf59c5b67806e8dbf1322244bdc7c4f4a8baea442a99bb",
+            "0xb7cbe6f1f5d003ad76a8883af48d69eeebd9102ee7f3fb08200bf6a36ba0540a",
+            "0xe2cc43325bf4e85957cfa38855e6c18f27a8e4d1db729f1ed3aa3f3169fe64cb",
+            "0x93305e62b5c64a6c24bf0683c23b1170fd8222e20bb0b8f97e7c06a30583b7ff",
+            "0xf9e97abc3d5ceec4bf64d0a8e8e5eda6acb5bc8143379016ae25b16b4a88988a",
+            "0x348109920ed6282ea0942ae0ecf6ce06f3ddbe2e07f9421b59f09929069fc141",
+            "0xe9db43fff2601c1ba90805cb040fac4bb2762e10b1b2e0a5f5b4b11ad7136d5f",
+            "0x34c32fd9d58d6ebe3820b2655c8954e9e636a0fdd08475c99e3ce222b4caa13a",
+            "0xff2ab94b1ed2713feda2c9241bd31dfdfb45abf3e95c4306c8971c6e85bf54cd",
+            "0xdb78b6eabeeb19bfbc1e0e95c162d05eb4a34dbe470d2ed1df97b0a9e1e43b9f",
+            "0x640ef3739d4ea3a10e67b8d0c48d36725577f8b2205641f7551aac5b4e54388f",
+            "0x10e2e63bc4f027bf4ae2566d6938f06b5d0e204f35e890596f95e7fd5fc94073",
+            "0x1215a31632e4c5938e8fca6347be57577bb32638d87116250068ceedf2ce9c05",
+            "0xf3bdcfc1e9d01f4b3c0c8b4061551cb07a36e328777db2ad43c26a9e39212f7c",
+            "0x227b5b3e69d76a568d175f2213c84ee787aa2013e886515961386dae6d6d8e86",
+            "0xf6fce05139c708b93b999bcaa8dbcac42eb634735e892d2d6d829fc10821667b",
+            "0x82bfe7f9af0c93bfd345453e2e9c97c29711d806f156cd36f69cbab7e4b8bf2d",
+            "0xa15c1efdc4ec843f8d183745aa521636f1a18eab878afaf2fb7d2ac29a46158b",
+            "0x29d3aff10c5bf54867ff69a6196f0cc86c7cf5f3e622cae2bf8b6e5668b9f9f4",
+            "0x13d86307bd6edb711e6465fa5cee672385a680d2b10aac2b6f7f2def47766216",
+            "0x8ea513378d3bab93850dc00354331f8c0b1a6530e91103f248926a8d2ec4417f",
+            "0xcb2475c9970abfcf0c880e295b9de24fe058d7a2507dc6b3b81ab1b90e692a46",
+            "0xec7c12fd67390a2faf5e4c8f05b06159aa6052769255e8be1291cf8c97fab693",
+            "0xc1c3b231306a6144de01614881977e9271bd7d499902d16bb7fe920ea8d30e19"
+          ]
+        ],
+        "scopeHash": "0xd196f0c4a627c436a68053c179efc80494cb49bea1a269a954bb8bd45ca5a000",
+        "amount": 0,
+        "requiresFinalizedGenesis": true,
+        "status": "prepared-not-submitted"
+      }
+    },
+    {
+      "cultivarId": "HC-C-girl-scout-cookies",
+      "referenceVersion": 1,
+      "genomeId": "0x44d9fe2fda2b87b068b2b60aa47da2f849fa00e6ebf1489419902bae66daa8ea",
+      "lineId": "0x1bd29201e4aec8484cdf54504294088d1c9acd5f20d191833262fef5cac57145",
+      "metadataHash": "0x96d9a4ccf65fa73bec3e588e6d15eb7d91c5329644d0c2c4c0a65995aef3f8e4",
+      "loci": [
+        "0xebf662a6e80ffe87c479647a76770eef57f3fa941fc9df438c9175d49ee4b8b5",
+        "0x56b49d20efd0e393d6d0b8a8834a22a0f4304ae622776e79e87b16ad56986c35",
+        "0xf06b1d36fae7826e9c0960c96f48aa82736420d69ddb7552826014a46f8314ff",
+        "0xea029a8445a453470bcdbfc8d046901037d628828d7363fd0fd003c1f86d9c56",
+        "0x6744f92ac1246f1b916c970adcb4d06d4591640253220cf34585d87f33e8189a",
+        "0xd5a3ee5e27072b15a051a282f23571bcc2953365b32055fd4f60b1cec093ae69",
+        "0x2b7ad24f95d8eab63a6a214e3f08f761402b8cb3e3784243f89186c0e8299922",
+        "0xcfeff4426ca570e0ebf4237d23b1eadaf461f3a64884cf18155ef5bd4cdc25d0",
+        "0x51b7519d8d742daa746da64a8dd31bdbaa6bcc7301037012ac3d9a7ca23f4e9d",
+        "0x0eb777617fc1124aa004cd116c269d085a0ae345e9c0cdebdd405adab887a1ec",
+        "0x4648f073524e9691c1125d0d12f3260e2a7396dbec566570d60ce5013be1454a",
+        "0xe0b28cd0d5a6865493c8ff52c68c4568afd61605e9991c8987009ab92ce5a3f9",
+        "0x882e5b7a1ab50d459e2aeba305942503d469bde70d43a98e6d020eaadc7dc022",
+        "0x4e45a7dc5cc92da3e417c14ac646a5774eeb41b68ff945b551e8d1d85ed9e3e2",
+        "0x31840c2f448d3dfe64f75275cb5847002cba2c3ab1a980680f25c286c18d770e",
+        "0xc92d547c48c34d6e49274d0548d8e1890d04e4c14976bc0b325c4dc8fd7618cb",
+        "0x1e601367d63ccb4f168bd9922908a94ba028e85bdeb09ffc6124692559e2c063",
+        "0x4275f70f86b6a65b6d0566a48d216865d0d6a8692c8b28f58b59ce50ab870f86",
+        "0xc13377481eccf12933532924b5a5762f91311d49a3e8ae2539fe043f990b3541",
+        "0x51e6bc0be1078b0fa08c3f58ce08d2de112e12f136c9a5d117179e8bb62156c5",
+        "0x9f617bcfb6bc0199bbc3f7fc241d698ae9df1234af2cb66d025821abdc603e90",
+        "0x8f9d91d6fdda7cebbe3b1a61e51b99fc54dbcd4c1ef80c0986aa2d952865bb94",
+        "0x37bef77e540d9b697ae0df9df073c634c734ce1acebff560cdb7601272971648",
+        "0xa4b6b3db3a096702ec89d5b295abd24a8c563bd5b2347c39ef6c768b14ec8c2c",
+        "0xb34b3445d85ddbb5c03a315e12dbf8afdf10e81530cebccd5e84e41b83d8acab",
+        "0x98b987a93b8a0a041b8aeae8c48402696ba0eca8ce7537d8b17398f4001c1e64",
+        "0x6b836fe5bbd4cdfda7e986b865f5c49547740d77391b1566b76abd622445682c",
+        "0xc7dd500114b9352d79b24cec20df1f5517cefbff3834fbb280af62b9be892ec6"
+      ],
+      "founding": false,
+      "metadata": {
+        "schema": "HC.SEED.COMMON_REFERENCE_METADATA.V1",
+        "cultivarId": "HC-C-girl-scout-cookies",
+        "canonicalName": "Girl Scout Cookies",
+        "canonicalRegion": "Golden Prairie",
+        "referenceVersion": 1,
+        "translationPolicyHash": "0xe25c1a6766da890e15b3671b6bf91b820e51cb0aa312c2993bda6c7b9f570b06",
+        "researchEntryHash": "0x511708c9838590ef83a030adb8eb4ba90068a5e126d29eadda18e279a4f2edb6",
+        "ancestryAccount": {
+          "status": "reported-cross",
+          "candidateParentSets": [
+            [
+              "OG Kush subtype",
+              "F1 Durban"
+            ]
+          ],
+          "attribution": "Leafly profile account",
+          "biologicallyVerified": false,
+          "crossOrder": "not-established",
+          "sourceIds": [
+            "leafly-gsc"
+          ]
+        },
+        "descriptiveAnnotations": {
+          "publisherClassification": "Hybrid",
+          "reportedFlavors": [
+            "Mint",
+            "Sweet",
+            "Earthy"
+          ],
+          "profileTerpenes": [
+            "Caryophyllene",
+            "Myrcene",
+            "Limonene"
+          ],
+          "morphologySummary": "Dessert-like scent with mint, cherry and lemon associations.",
+          "morphologyCoverage": "described",
+          "sourceId": "leafly-gsc"
+        },
+        "sources": [
+          {
+            "id": "leafly-gsc",
+            "publisher": "Leafly",
+            "url": "https://www.leafly.com/strains/gsc",
+            "sourceTitle": "GSC strain",
+            "reviewedOn": "2026-10-25",
+            "reviewTimezone": "America/Regina",
+            "retrieval": "web-open successful; profile body inspected",
+            "sections": [
+              "profile introduction",
+              "top flavors",
+              "terpenes",
+              "top effects"
+            ],
+            "claimBasis": "publisher account and aggregated profile observations; not DNA verification"
+          }
+        ],
+        "uncertainty": {
+          "notes": "The source names an OG subtype and intermediate F1 Durban. Do not replace F1 Durban with the common Durban Poison genome or collapse Thin Mint and Platinum selections.",
+          "sourceIds": [
+            "leafly-gsc"
+          ],
+          "resolution": "Retain the qualification; no unsupported pedigree, date or genome inference."
+        },
+        "semantics": "reference annotations only; not decoded, inherited or measured biological traits"
+      },
+      "registration": {
+        "method": "registerGenome",
+        "args": [
+          "0x44d9fe2fda2b87b068b2b60aa47da2f849fa00e6ebf1489419902bae66daa8ea",
+          "0x1bd29201e4aec8484cdf54504294088d1c9acd5f20d191833262fef5cac57145",
+          "0x96d9a4ccf65fa73bec3e588e6d15eb7d91c5329644d0c2c4c0a65995aef3f8e4",
+          [
+            "0xebf662a6e80ffe87c479647a76770eef57f3fa941fc9df438c9175d49ee4b8b5",
+            "0x56b49d20efd0e393d6d0b8a8834a22a0f4304ae622776e79e87b16ad56986c35",
+            "0xf06b1d36fae7826e9c0960c96f48aa82736420d69ddb7552826014a46f8314ff",
+            "0xea029a8445a453470bcdbfc8d046901037d628828d7363fd0fd003c1f86d9c56",
+            "0x6744f92ac1246f1b916c970adcb4d06d4591640253220cf34585d87f33e8189a",
+            "0xd5a3ee5e27072b15a051a282f23571bcc2953365b32055fd4f60b1cec093ae69",
+            "0x2b7ad24f95d8eab63a6a214e3f08f761402b8cb3e3784243f89186c0e8299922",
+            "0xcfeff4426ca570e0ebf4237d23b1eadaf461f3a64884cf18155ef5bd4cdc25d0",
+            "0x51b7519d8d742daa746da64a8dd31bdbaa6bcc7301037012ac3d9a7ca23f4e9d",
+            "0x0eb777617fc1124aa004cd116c269d085a0ae345e9c0cdebdd405adab887a1ec",
+            "0x4648f073524e9691c1125d0d12f3260e2a7396dbec566570d60ce5013be1454a",
+            "0xe0b28cd0d5a6865493c8ff52c68c4568afd61605e9991c8987009ab92ce5a3f9",
+            "0x882e5b7a1ab50d459e2aeba305942503d469bde70d43a98e6d020eaadc7dc022",
+            "0x4e45a7dc5cc92da3e417c14ac646a5774eeb41b68ff945b551e8d1d85ed9e3e2",
+            "0x31840c2f448d3dfe64f75275cb5847002cba2c3ab1a980680f25c286c18d770e",
+            "0xc92d547c48c34d6e49274d0548d8e1890d04e4c14976bc0b325c4dc8fd7618cb",
+            "0x1e601367d63ccb4f168bd9922908a94ba028e85bdeb09ffc6124692559e2c063",
+            "0x4275f70f86b6a65b6d0566a48d216865d0d6a8692c8b28f58b59ce50ab870f86",
+            "0xc13377481eccf12933532924b5a5762f91311d49a3e8ae2539fe043f990b3541",
+            "0x51e6bc0be1078b0fa08c3f58ce08d2de112e12f136c9a5d117179e8bb62156c5",
+            "0x9f617bcfb6bc0199bbc3f7fc241d698ae9df1234af2cb66d025821abdc603e90",
+            "0x8f9d91d6fdda7cebbe3b1a61e51b99fc54dbcd4c1ef80c0986aa2d952865bb94",
+            "0x37bef77e540d9b697ae0df9df073c634c734ce1acebff560cdb7601272971648",
+            "0xa4b6b3db3a096702ec89d5b295abd24a8c563bd5b2347c39ef6c768b14ec8c2c",
+            "0xb34b3445d85ddbb5c03a315e12dbf8afdf10e81530cebccd5e84e41b83d8acab",
+            "0x98b987a93b8a0a041b8aeae8c48402696ba0eca8ce7537d8b17398f4001c1e64",
+            "0x6b836fe5bbd4cdfda7e986b865f5c49547740d77391b1566b76abd622445682c",
+            "0xc7dd500114b9352d79b24cec20df1f5517cefbff3834fbb280af62b9be892ec6"
+          ]
+        ],
+        "scopeHash": "0x44d9fe2fda2b87b068b2b60aa47da2f849fa00e6ebf1489419902bae66daa8ea",
+        "amount": 0,
+        "requiresFinalizedGenesis": true,
+        "status": "prepared-not-submitted"
+      }
+    },
+    {
+      "cultivarId": "HC-C-granddaddy-purple",
+      "referenceVersion": 1,
+      "genomeId": "0x940e16a8ae9de0c6d66c564ec4693e5362dd05a145367899d1af4dfbab253684",
+      "lineId": "0x1df5eba8524330b9fa5c4aa8cc1b8b3e30ea08e37d33291e03b547f76af81d0c",
+      "metadataHash": "0x92d4fab944b6eb388b1566ad6109d05f4fba15ffc0488a4d830aa896510ee770",
+      "loci": [
+        "0xba5ac4eff3823f644661cbdb28c02af2ed5ed117b1c6db08c9925994ce75a606",
+        "0xeebe7eafdfda1112355fa013cb2bfd04befddfd5fa1f94b0fe6df372db1bb3f7",
+        "0x47590ff4b6b27130191c5162cffd00894f70f4b9484a2bf28c8399d772dc366f",
+        "0xb612c4f60adc3d822bde54d2918c0d2a3ec68cf19aa90890c1efb301a2a7e232",
+        "0x752d20ba553a65a6600f76410bc19c98d097360d5767681dd9538243cda2fe2f",
+        "0xab4d7c0c5035d04b3d408d11e7d90fd3bce2ffe8f7433dea7518cc4e3174e775",
+        "0xaacc3e626f15ab5808acf9dbd0a93e022babfee1400e8a86394c0dcab00d4a1f",
+        "0xedd79c36c30366e8d401355776b95a82575910c87f7891bdf1361d85786b7bcd",
+        "0xca3465acd18841319aea69ba79d53e01f574acce99f610e8714775cb9d24c707",
+        "0xd9494256dfdd763a188eb214e6fc5e1cb45b838f4ec63441e8cea8ca1e26a352",
+        "0xd8a528bba763dd0be01de935c2ad3ac5b464d005ece768351003de5cca6b2c42",
+        "0x4fd6099e617ec3da29fbb05847f106fa1332f22dad9a3672e096594d70736f9b",
+        "0x12bb00b8a00b7960bdfa87a6c5710f8fe9c83f83ce2e32a35b12fe614fa5e9ac",
+        "0xacdf62b989b4b7364b8dbd33d019c14fbff7ffaa5110175236ca3568f08f126c",
+        "0x12a5bcf0d260cff3c8be4dd9a4808a1fb1c03c87d8cb9057d857e4f70cfc4414",
+        "0x91e897d199e50b23b3a4ab412924e8486effcf9c7a1503b5c223b9eae146a427",
+        "0x0ded9a8e2a933225963d61a243b1835ce2d12b53af747b9b4bf43dcb82733bac",
+        "0x1c17442302503a77cda6a51a0be8a4e311e82d047284bb5d56c6953986684880",
+        "0xfd5c20307a40858aaf96d683c4413fee6518763971085fa69f918136aa1fa7e3",
+        "0xb17ad170dcf849ab9fe1c76d40957bf43cc5396ae0f8fe079ff53b1dbc4233e5",
+        "0x8d2d352b5ea576bc3ff1722b3390c55248470601c484315cab43ad33cd3497fa",
+        "0x9712a315e79b4d6378c8d5936693d50ea0d9696459184b7b2a2f6ade62f2d3a6",
+        "0x0d7c16805cd5cd74f53c80427b3b024149ec911fd6b143f54ac15d31ecdb7668",
+        "0xea13a0ed203a4f8f40d30c1c8b3de5dffe88a96d6fb06ceffbabdaf61130dd0f",
+        "0xbc4874ebf40b44e5183ad1023781fc0b0e27d9b0a1bd7f7dd0fc9e3a2b0a6bf0",
+        "0xd7fee6feb2eb1cc1dcafe00f27a6211172daff3ed28bd9400d23e0bead907fa5",
+        "0x3e38f3cf56b9043b0233b1b3ac9004a4f9a40291413d3ac181586242370f7f13",
+        "0x29f4bc9c3948dcdd4559dbdc5c96e10f970bce95150f25ac872bdecaa5d5724e"
+      ],
+      "founding": false,
+      "metadata": {
+        "schema": "HC.SEED.COMMON_REFERENCE_METADATA.V1",
+        "cultivarId": "HC-C-granddaddy-purple",
+        "canonicalName": "Granddaddy Purple",
+        "canonicalRegion": "Emerald Coast",
+        "referenceVersion": 1,
+        "translationPolicyHash": "0xe25c1a6766da890e15b3671b6bf91b820e51cb0aa312c2993bda6c7b9f570b06",
+        "researchEntryHash": "0x8359b4b9fd0d4899701cb0aad038bad62bcc765f4b44319b8a79660aeb7b76cc",
+        "ancestryAccount": {
+          "status": "conflicting-reports",
+          "candidateParentSets": [
+            [
+              "Mendo Purps",
+              "Skunk",
+              "Afghanistan"
+            ],
+            [
+              "Big Bud",
+              "Purple Urkle"
+            ]
+          ],
+          "attribution": "Leafly profile account",
+          "biologicallyVerified": false,
+          "crossOrder": "not-established",
+          "sourceIds": [
+            "leafly-granddaddy-purple"
+          ]
+        },
+        "descriptiveAnnotations": {
+          "publisherClassification": "Indica",
+          "reportedFlavors": [
+            "Grape",
+            "Berry",
+            "Violet"
+          ],
+          "profileTerpenes": [
+            "Myrcene",
+            "Pinene",
+            "Caryophyllene"
+          ],
+          "morphologySummary": "Deep-purple flowers with pale resin; grape and berry associations.",
+          "morphologyCoverage": "described",
+          "sourceId": "leafly-granddaddy-purple"
+        },
+        "sources": [
+          {
+            "id": "leafly-granddaddy-purple",
+            "publisher": "Leafly",
+            "url": "https://www.leafly.com/strains/granddaddy-purple",
+            "sourceTitle": "Granddaddy Purple strain",
+            "reviewedOn": "2026-10-25",
+            "reviewTimezone": "America/Regina",
+            "retrieval": "web-open successful; profile body inspected",
+            "sections": [
+              "profile introduction",
+              "top flavors",
+              "terpenes",
+              "top effects"
+            ],
+            "claimBasis": "publisher account and aggregated profile observations; not DNA verification"
+          },
+          {
+            "id": "leafly-gdp-interview",
+            "publisher": "Leafly",
+            "url": "https://www.leafly.com/news/strains-products/ken-estes-granddaddy-purple-interview",
+            "sourceTitle": "Meet the daddy of Granddaddy Purple",
+            "reviewedOn": "2026-10-25",
+            "reviewTimezone": "America/Regina",
+            "retrieval": "web-open successful; interview inspected",
+            "sections": [
+              "Granddaddy Purple",
+              "Tell me the story of Granddaddy Purple",
+              "What year was that",
+              "Were you in Humboldt then"
+            ],
+            "claimBasis": "Leafly interview of Ken Estes; attributed personal history"
+          }
+        ],
+        "uncertainty": {
+          "notes": "Leafly presents competing crosses. The interview is a personal account, not independent pedigree verification; no candidate is selected as settled ancestry.",
+          "sourceIds": [
+            "leafly-granddaddy-purple",
+            "leafly-gdp-interview"
+          ],
+          "resolution": "Retain the qualification; no unsupported pedigree, date or genome inference."
+        },
+        "semantics": "reference annotations only; not decoded, inherited or measured biological traits"
+      },
+      "registration": {
+        "method": "registerGenome",
+        "args": [
+          "0x940e16a8ae9de0c6d66c564ec4693e5362dd05a145367899d1af4dfbab253684",
+          "0x1df5eba8524330b9fa5c4aa8cc1b8b3e30ea08e37d33291e03b547f76af81d0c",
+          "0x92d4fab944b6eb388b1566ad6109d05f4fba15ffc0488a4d830aa896510ee770",
+          [
+            "0xba5ac4eff3823f644661cbdb28c02af2ed5ed117b1c6db08c9925994ce75a606",
+            "0xeebe7eafdfda1112355fa013cb2bfd04befddfd5fa1f94b0fe6df372db1bb3f7",
+            "0x47590ff4b6b27130191c5162cffd00894f70f4b9484a2bf28c8399d772dc366f",
+            "0xb612c4f60adc3d822bde54d2918c0d2a3ec68cf19aa90890c1efb301a2a7e232",
+            "0x752d20ba553a65a6600f76410bc19c98d097360d5767681dd9538243cda2fe2f",
+            "0xab4d7c0c5035d04b3d408d11e7d90fd3bce2ffe8f7433dea7518cc4e3174e775",
+            "0xaacc3e626f15ab5808acf9dbd0a93e022babfee1400e8a86394c0dcab00d4a1f",
+            "0xedd79c36c30366e8d401355776b95a82575910c87f7891bdf1361d85786b7bcd",
+            "0xca3465acd18841319aea69ba79d53e01f574acce99f610e8714775cb9d24c707",
+            "0xd9494256dfdd763a188eb214e6fc5e1cb45b838f4ec63441e8cea8ca1e26a352",
+            "0xd8a528bba763dd0be01de935c2ad3ac5b464d005ece768351003de5cca6b2c42",
+            "0x4fd6099e617ec3da29fbb05847f106fa1332f22dad9a3672e096594d70736f9b",
+            "0x12bb00b8a00b7960bdfa87a6c5710f8fe9c83f83ce2e32a35b12fe614fa5e9ac",
+            "0xacdf62b989b4b7364b8dbd33d019c14fbff7ffaa5110175236ca3568f08f126c",
+            "0x12a5bcf0d260cff3c8be4dd9a4808a1fb1c03c87d8cb9057d857e4f70cfc4414",
+            "0x91e897d199e50b23b3a4ab412924e8486effcf9c7a1503b5c223b9eae146a427",
+            "0x0ded9a8e2a933225963d61a243b1835ce2d12b53af747b9b4bf43dcb82733bac",
+            "0x1c17442302503a77cda6a51a0be8a4e311e82d047284bb5d56c6953986684880",
+            "0xfd5c20307a40858aaf96d683c4413fee6518763971085fa69f918136aa1fa7e3",
+            "0xb17ad170dcf849ab9fe1c76d40957bf43cc5396ae0f8fe079ff53b1dbc4233e5",
+            "0x8d2d352b5ea576bc3ff1722b3390c55248470601c484315cab43ad33cd3497fa",
+            "0x9712a315e79b4d6378c8d5936693d50ea0d9696459184b7b2a2f6ade62f2d3a6",
+            "0x0d7c16805cd5cd74f53c80427b3b024149ec911fd6b143f54ac15d31ecdb7668",
+            "0xea13a0ed203a4f8f40d30c1c8b3de5dffe88a96d6fb06ceffbabdaf61130dd0f",
+            "0xbc4874ebf40b44e5183ad1023781fc0b0e27d9b0a1bd7f7dd0fc9e3a2b0a6bf0",
+            "0xd7fee6feb2eb1cc1dcafe00f27a6211172daff3ed28bd9400d23e0bead907fa5",
+            "0x3e38f3cf56b9043b0233b1b3ac9004a4f9a40291413d3ac181586242370f7f13",
+            "0x29f4bc9c3948dcdd4559dbdc5c96e10f970bce95150f25ac872bdecaa5d5724e"
+          ]
+        ],
+        "scopeHash": "0x940e16a8ae9de0c6d66c564ec4693e5362dd05a145367899d1af4dfbab253684",
+        "amount": 0,
+        "requiresFinalizedGenesis": true,
+        "status": "prepared-not-submitted"
+      }
+    },
+    {
+      "cultivarId": "HC-C-green-crack",
+      "referenceVersion": 1,
+      "genomeId": "0x52feb4d88e4a9566dc3387fa4e64d0779cf9859af5f887e83ca582fb61a0ec0d",
+      "lineId": "0xb4abd8a33c5670f58266afb2300aca38663c7586cbb991b9e13ff5a88cb549f7",
+      "metadataHash": "0xd2a57d4542a835f164e123b0bb6af87c5b17337257b242a2921ca3eaa7dcd950",
+      "loci": [
+        "0x20f8fe7b28572f8e7d5a57eed35af70e12d4c73b4c5fdd68ed51d39d19ec9bf4",
+        "0xe01c356fc8108cd0a48a6fd392b5b1a1ea7f17b0feaa199fca332db72cc8de0c",
+        "0x4dee7d6c33b473d15ca00c90d2ee480a8a838990c12a7f0b97e4572b29f9c9ca",
+        "0xb805da30a11c8b339438936a25a03be9751214ecdac151ac74c9b966f1a57619",
+        "0x7ca9f72db11e0606f11a316e145ceefdee4403f92ad2f5f86c7b57a88b8c14f3",
+        "0xc71fd451a883ca41ea0d856d5fbb41b854ccadb56e57ccae7de611061b73814d",
+        "0x49d1298723f32c9f7d3c557d1bd861a27afd56b22c212684251885d319094c4b",
+        "0x14dc5d017fc2347041e95a43caff4472a87b5bb07129a2d94872d3f7ede711bb",
+        "0xdd27dc55c83d033cb4b6eac232a240dc88dee5613598731809dee85211e28fb9",
+        "0x5ae16a83538579c72be16ef0cdce2116034220504ea36988fc58b03278b623c7",
+        "0xa90f7e65916cd1955b56ea2d135f4cb323b13405e81e94aa747357cf65c88f5d",
+        "0x72f2b2192a874649f5d229e1af3411d49ff6d740de964b876c4f21bbb057bad5",
+        "0xcd036add530d61106e3ad198a1eb956e6dadc352988d4fca9687306570b1ede9",
+        "0x560c98adba37e1d99c1d3bbade2c8805c512302e2a50587b47707a33d688726e",
+        "0xb2ff9de738f4b6a39454afb0c741c6aedd0fd65f9e4f8408d642e875cb871dc7",
+        "0xa15917c3a1633569cfdb0e2e74a7253808404b66e3e37eb8db9c4062065559a8",
+        "0xa9e7b37bc1ce99c96b4cd64230191a01dc6efc761641d3dc265d956453fbb884",
+        "0xe303b212912e31a7bf0ba41fbc393412ca8743721b78cda323840323c8a813bd",
+        "0xc80538a8dbf32a6abea2e07474f9666c9281ac8a045f3e367715a31c3ab89d0e",
+        "0xe636391982ea954375692a9384726e8d8e06c0902f17458cc5daab5cdeb81783",
+        "0xea120763800b3cabb032ddf134792470627ec7b8748367b51ea847249c3e70d5",
+        "0xd50bbef142b01d31ef940167d799adb387e9c2d946a4b8835ceb7ed5590a5344",
+        "0x0e3e4e15ac39d957125839f4b4b561e39bbc0a456a1642d2f306b69d5a3cb6be",
+        "0xe493f558b5ecc6666f834dcaa33432d74d42652ce4383402dc07e64886b3d7a8",
+        "0xa13d6f29618548523ef871734f28317c9b93d1e6345821bfa952d2e2f4329d5b",
+        "0xca7cecd25949de539d10e65eb438188eee3a98399d2e42e81338e4676997bba2",
+        "0x3a4625c0599069240e0dedc0d16bebd970f55927b3dfbc502820ad9f075ef699",
+        "0x04045547c6464516c42553b6fed030799da77c42ebb17ff973af818dccc5e668"
+      ],
+      "founding": false,
+      "metadata": {
+        "schema": "HC.SEED.COMMON_REFERENCE_METADATA.V1",
+        "cultivarId": "HC-C-green-crack",
+        "canonicalName": "Green Crack",
+        "canonicalRegion": "Emerald Coast",
+        "referenceVersion": 1,
+        "translationPolicyHash": "0xe25c1a6766da890e15b3671b6bf91b820e51cb0aa312c2993bda6c7b9f570b06",
+        "researchEntryHash": "0xfaf78fac314958aae08fcd6c7f46c92cff1ebb1366895b7d9a990ce66056cab1",
+        "ancestryAccount": {
+          "status": "partial",
+          "candidateParentSets": [
+            [
+              "Skunk #1",
+              "unknown indica"
+            ]
+          ],
+          "attribution": "Leafly profile account",
+          "biologicallyVerified": false,
+          "crossOrder": "not-established",
+          "sourceIds": [
+            "leafly-green-crack"
+          ]
+        },
+        "descriptiveAnnotations": {
+          "publisherClassification": "Sativa",
+          "reportedFlavors": [
+            "Citrus",
+            "Mango",
+            "Earthy"
+          ],
+          "profileTerpenes": [
+            "Myrcene",
+            "Caryophyllene",
+            "Pinene"
+          ],
+          "morphologySummary": "Tart fruit and mango associations.",
+          "morphologyCoverage": "described",
+          "sourceId": "leafly-green-crack"
+        },
+        "sources": [
+          {
+            "id": "leafly-green-crack",
+            "publisher": "Leafly",
+            "url": "https://www.leafly.com/strains/green-crack",
+            "sourceTitle": "Green Crack strain",
+            "reviewedOn": "2026-10-25",
+            "reviewTimezone": "America/Regina",
+            "retrieval": "web-open successful; profile body inspected",
+            "sections": [
+              "profile introduction",
+              "top flavors",
+              "terpenes",
+              "top effects"
+            ],
+            "claimBasis": "publisher account and aggregated profile observations; not DNA verification"
+          }
+        ],
+        "uncertainty": {
+          "notes": "One parent is unidentified. The profile does not establish a dated origin or named breeder; alternate labels remain research metadata, not new canonical cultivar IDs.",
+          "sourceIds": [
+            "leafly-green-crack"
+          ],
+          "resolution": "Retain the qualification; no unsupported pedigree, date or genome inference."
+        },
+        "semantics": "reference annotations only; not decoded, inherited or measured biological traits"
+      },
+      "registration": {
+        "method": "registerGenome",
+        "args": [
+          "0x52feb4d88e4a9566dc3387fa4e64d0779cf9859af5f887e83ca582fb61a0ec0d",
+          "0xb4abd8a33c5670f58266afb2300aca38663c7586cbb991b9e13ff5a88cb549f7",
+          "0xd2a57d4542a835f164e123b0bb6af87c5b17337257b242a2921ca3eaa7dcd950",
+          [
+            "0x20f8fe7b28572f8e7d5a57eed35af70e12d4c73b4c5fdd68ed51d39d19ec9bf4",
+            "0xe01c356fc8108cd0a48a6fd392b5b1a1ea7f17b0feaa199fca332db72cc8de0c",
+            "0x4dee7d6c33b473d15ca00c90d2ee480a8a838990c12a7f0b97e4572b29f9c9ca",
+            "0xb805da30a11c8b339438936a25a03be9751214ecdac151ac74c9b966f1a57619",
+            "0x7ca9f72db11e0606f11a316e145ceefdee4403f92ad2f5f86c7b57a88b8c14f3",
+            "0xc71fd451a883ca41ea0d856d5fbb41b854ccadb56e57ccae7de611061b73814d",
+            "0x49d1298723f32c9f7d3c557d1bd861a27afd56b22c212684251885d319094c4b",
+            "0x14dc5d017fc2347041e95a43caff4472a87b5bb07129a2d94872d3f7ede711bb",
+            "0xdd27dc55c83d033cb4b6eac232a240dc88dee5613598731809dee85211e28fb9",
+            "0x5ae16a83538579c72be16ef0cdce2116034220504ea36988fc58b03278b623c7",
+            "0xa90f7e65916cd1955b56ea2d135f4cb323b13405e81e94aa747357cf65c88f5d",
+            "0x72f2b2192a874649f5d229e1af3411d49ff6d740de964b876c4f21bbb057bad5",
+            "0xcd036add530d61106e3ad198a1eb956e6dadc352988d4fca9687306570b1ede9",
+            "0x560c98adba37e1d99c1d3bbade2c8805c512302e2a50587b47707a33d688726e",
+            "0xb2ff9de738f4b6a39454afb0c741c6aedd0fd65f9e4f8408d642e875cb871dc7",
+            "0xa15917c3a1633569cfdb0e2e74a7253808404b66e3e37eb8db9c4062065559a8",
+            "0xa9e7b37bc1ce99c96b4cd64230191a01dc6efc761641d3dc265d956453fbb884",
+            "0xe303b212912e31a7bf0ba41fbc393412ca8743721b78cda323840323c8a813bd",
+            "0xc80538a8dbf32a6abea2e07474f9666c9281ac8a045f3e367715a31c3ab89d0e",
+            "0xe636391982ea954375692a9384726e8d8e06c0902f17458cc5daab5cdeb81783",
+            "0xea120763800b3cabb032ddf134792470627ec7b8748367b51ea847249c3e70d5",
+            "0xd50bbef142b01d31ef940167d799adb387e9c2d946a4b8835ceb7ed5590a5344",
+            "0x0e3e4e15ac39d957125839f4b4b561e39bbc0a456a1642d2f306b69d5a3cb6be",
+            "0xe493f558b5ecc6666f834dcaa33432d74d42652ce4383402dc07e64886b3d7a8",
+            "0xa13d6f29618548523ef871734f28317c9b93d1e6345821bfa952d2e2f4329d5b",
+            "0xca7cecd25949de539d10e65eb438188eee3a98399d2e42e81338e4676997bba2",
+            "0x3a4625c0599069240e0dedc0d16bebd970f55927b3dfbc502820ad9f075ef699",
+            "0x04045547c6464516c42553b6fed030799da77c42ebb17ff973af818dccc5e668"
+          ]
+        ],
+        "scopeHash": "0x52feb4d88e4a9566dc3387fa4e64d0779cf9859af5f887e83ca582fb61a0ec0d",
+        "amount": 0,
+        "requiresFinalizedGenesis": true,
+        "status": "prepared-not-submitted"
+      }
+    },
+    {
+      "cultivarId": "HC-C-jack-herer",
+      "referenceVersion": 1,
+      "genomeId": "0x2c8d528e91213146dc84428c2100bd0bec93a7d253c079b52693e8ecef90323f",
+      "lineId": "0xd08511ff8837e3acb392c462303b9c0809d9aec05cd73e2fec053270ebd887e7",
+      "metadataHash": "0x76a589980b93db5375434e0b8543aade90259edda0d46c0d3adc12b76be40b79",
+      "loci": [
+        "0x5b03092aedda556babaab5a03a29cdfae011ed95430ca0b5a17f5529e4ac287f",
+        "0x55ce1f2b0f6b978ed8c2841d1172fd8773e1f7b9fdaf46ff179080c041eb4ccc",
+        "0xf64c7ab30327a5309817ba57172ad1287a9d83b2f6707f44895b50ef639e39f8",
+        "0x567d9a4a17a3466d21dfd407ac8a9ea5b25436a1a567e6e536421226031e0700",
+        "0x50dd7113eb2f36af5a862f3ae8bc4212573784c6432d526fb62b7c530c5c7bda",
+        "0x1d56ab6f50277fa71442df2d7a59c6eee76fbca91066b4fd4ad0713f7392d160",
+        "0xdf4f10de0dec00979260c84bb65cc56b302ae78b757816d2ef7a3635b3232cce",
+        "0xe2775f5b7aeb8674748f7915fc5c377a7506c992073a01668f3c69118dbca253",
+        "0x83debd6e201ae88b5a033162526765fe99fdda3851b4e278acadde34b8ad5a04",
+        "0xdc4e06c25022970ca3a3704866d727f1393668bcf81490e6d88d92781a9ded0a",
+        "0x65f89efe7c2e0d71557e06a207e07364788657a6a727311b8d0f0ab407909fa0",
+        "0x1a6740ae4a196f8306239c872bfcf74711b387a8f529af32fad663a729e172df",
+        "0x39c2e813192525ffc3652e3016e6727b65740cefab3c7a7da6872da7d97df1b8",
+        "0x9a600b101cb836df1a108d1e88774f428d51defc19e20eb9aaed5e4665aae38a",
+        "0x7fbe0167c3ac9a6c3e4ef2d7e433d501d51fd0a5cdeb3e7dfa750a0b6015e843",
+        "0x5c40ce30a88e77d3afe19d0273d801abd472049e7d9780c837cb143f8bdbcc0c",
+        "0xbce3ca3285c6835d9e560e7c7233f35c9393a31eb5aeeb7d7f102d015d600d99",
+        "0xfee91ac155ddc5e89ada9d801330faa5df32ac64c6682327ef800ce4fed7b5c1",
+        "0x383d5b1a76fbdffa7ea38ae8c41f37accc57c9cb17b172b8964ffbb5ee19c87f",
+        "0xb3d8a8037d38539a8757a42174c16111967a78f42f26662362d2ceaade49f7ab",
+        "0x6ed2b10c7a593590d77ba3cdb9caf6178d218c4ae2643e75520d3412402e85c6",
+        "0x957582641a564ba680ffa8177e265dc3c2167f8a6baf01f57765a6965495d098",
+        "0xd69e129a61cd932667e51d213eaf3ee459835c4d87b80252c6c221e32391934c",
+        "0xc514ad486ac8ae2e8544ec11495ed5633eee5366a487b43e2b56c7cdc2b46c55",
+        "0xfb41c17347f482661afd13d319bcf0aa816637f7c9c33d8f4e6816388ab72726",
+        "0xd751728d02d1f5175dfeb56b95a46db757f25074c75c6f61862b1cb5ab4e17fd",
+        "0x3357269d08f4ae03b2fc6911dff16a199c41dee1ecdb3e08952caf170ab80592",
+        "0xa16f5af20092638d41dbbefc7a83e160282eb12cd30bf451970512a14b887605"
+      ],
+      "founding": false,
+      "metadata": {
+        "schema": "HC.SEED.COMMON_REFERENCE_METADATA.V1",
+        "cultivarId": "HC-C-jack-herer",
+        "canonicalName": "Jack Herer",
+        "canonicalRegion": "Golden Prairie",
+        "referenceVersion": 1,
+        "translationPolicyHash": "0xe25c1a6766da890e15b3671b6bf91b820e51cb0aa312c2993bda6c7b9f570b06",
+        "researchEntryHash": "0x8c82aae97b2e1becd08b9891fa0ce8f2b4d972d58c453a18c03497eb003c68be",
+        "ancestryAccount": {
+          "status": "reported-cross",
+          "candidateParentSets": [
+            [
+              "Haze hybrid",
+              "Northern Lights #5 \u00d7 Shiva Skunk"
+            ]
+          ],
+          "attribution": "Leafly profile account",
+          "biologicallyVerified": false,
+          "crossOrder": "not-established",
+          "sourceIds": [
+            "leafly-jack-herer"
+          ]
+        },
+        "descriptiveAnnotations": {
+          "publisherClassification": "Sativa",
+          "reportedFlavors": [
+            "Pine",
+            "Woody",
+            "Earthy"
+          ],
+          "profileTerpenes": [
+            "Terpinolene",
+            "Caryophyllene",
+            "Pinene"
+          ],
+          "morphologySummary": "Pine and spice scent; resin production is emphasized.",
+          "morphologyCoverage": "described",
+          "sourceId": "leafly-jack-herer"
+        },
+        "sources": [
+          {
+            "id": "leafly-jack-herer",
+            "publisher": "Leafly",
+            "url": "https://www.leafly.com/strains/jack-herer",
+            "sourceTitle": "Jack Herer strain",
+            "reviewedOn": "2026-10-25",
+            "reviewTimezone": "America/Regina",
+            "retrieval": "web-open successful; profile body inspected",
+            "sections": [
+              "profile introduction",
+              "top flavors",
+              "terpenes",
+              "top effects"
+            ],
+            "claimBasis": "publisher account and aggregated profile observations; not DNA verification"
+          }
+        ],
+        "uncertainty": {
+          "notes": "Leafly describes multiple phenotypes. Northern Lights #5 is not automatically the common Northern Lights reference, and no allele ratios are established.",
+          "sourceIds": [
+            "leafly-jack-herer"
+          ],
+          "resolution": "Retain the qualification; no unsupported pedigree, date or genome inference."
+        },
+        "semantics": "reference annotations only; not decoded, inherited or measured biological traits"
+      },
+      "registration": {
+        "method": "registerGenome",
+        "args": [
+          "0x2c8d528e91213146dc84428c2100bd0bec93a7d253c079b52693e8ecef90323f",
+          "0xd08511ff8837e3acb392c462303b9c0809d9aec05cd73e2fec053270ebd887e7",
+          "0x76a589980b93db5375434e0b8543aade90259edda0d46c0d3adc12b76be40b79",
+          [
+            "0x5b03092aedda556babaab5a03a29cdfae011ed95430ca0b5a17f5529e4ac287f",
+            "0x55ce1f2b0f6b978ed8c2841d1172fd8773e1f7b9fdaf46ff179080c041eb4ccc",
+            "0xf64c7ab30327a5309817ba57172ad1287a9d83b2f6707f44895b50ef639e39f8",
+            "0x567d9a4a17a3466d21dfd407ac8a9ea5b25436a1a567e6e536421226031e0700",
+            "0x50dd7113eb2f36af5a862f3ae8bc4212573784c6432d526fb62b7c530c5c7bda",
+            "0x1d56ab6f50277fa71442df2d7a59c6eee76fbca91066b4fd4ad0713f7392d160",
+            "0xdf4f10de0dec00979260c84bb65cc56b302ae78b757816d2ef7a3635b3232cce",
+            "0xe2775f5b7aeb8674748f7915fc5c377a7506c992073a01668f3c69118dbca253",
+            "0x83debd6e201ae88b5a033162526765fe99fdda3851b4e278acadde34b8ad5a04",
+            "0xdc4e06c25022970ca3a3704866d727f1393668bcf81490e6d88d92781a9ded0a",
+            "0x65f89efe7c2e0d71557e06a207e07364788657a6a727311b8d0f0ab407909fa0",
+            "0x1a6740ae4a196f8306239c872bfcf74711b387a8f529af32fad663a729e172df",
+            "0x39c2e813192525ffc3652e3016e6727b65740cefab3c7a7da6872da7d97df1b8",
+            "0x9a600b101cb836df1a108d1e88774f428d51defc19e20eb9aaed5e4665aae38a",
+            "0x7fbe0167c3ac9a6c3e4ef2d7e433d501d51fd0a5cdeb3e7dfa750a0b6015e843",
+            "0x5c40ce30a88e77d3afe19d0273d801abd472049e7d9780c837cb143f8bdbcc0c",
+            "0xbce3ca3285c6835d9e560e7c7233f35c9393a31eb5aeeb7d7f102d015d600d99",
+            "0xfee91ac155ddc5e89ada9d801330faa5df32ac64c6682327ef800ce4fed7b5c1",
+            "0x383d5b1a76fbdffa7ea38ae8c41f37accc57c9cb17b172b8964ffbb5ee19c87f",
+            "0xb3d8a8037d38539a8757a42174c16111967a78f42f26662362d2ceaade49f7ab",
+            "0x6ed2b10c7a593590d77ba3cdb9caf6178d218c4ae2643e75520d3412402e85c6",
+            "0x957582641a564ba680ffa8177e265dc3c2167f8a6baf01f57765a6965495d098",
+            "0xd69e129a61cd932667e51d213eaf3ee459835c4d87b80252c6c221e32391934c",
+            "0xc514ad486ac8ae2e8544ec11495ed5633eee5366a487b43e2b56c7cdc2b46c55",
+            "0xfb41c17347f482661afd13d319bcf0aa816637f7c9c33d8f4e6816388ab72726",
+            "0xd751728d02d1f5175dfeb56b95a46db757f25074c75c6f61862b1cb5ab4e17fd",
+            "0x3357269d08f4ae03b2fc6911dff16a199c41dee1ecdb3e08952caf170ab80592",
+            "0xa16f5af20092638d41dbbefc7a83e160282eb12cd30bf451970512a14b887605"
+          ]
+        ],
+        "scopeHash": "0x2c8d528e91213146dc84428c2100bd0bec93a7d253c079b52693e8ecef90323f",
+        "amount": 0,
+        "requiresFinalizedGenesis": true,
+        "status": "prepared-not-submitted"
+      }
+    },
+    {
+      "cultivarId": "HC-C-northern-lights",
+      "referenceVersion": 1,
+      "genomeId": "0x15d28e4f121fc185df85fde0ad2592f34f761a9f08715a3151bd872726b0c5c0",
+      "lineId": "0x20bdc99aebe316c25d5fdaa5e1320635a58c0ccb069940bdcb849d05feb6207f",
+      "metadataHash": "0xecf3674b351cadc40c662ea899d9a8553ee394f7c04676f75cd294c3c447a735",
+      "loci": [
+        "0x855a64e756419343cbdf460aa9ebdd7c18b06bf8f8ed2e5c13b2e5900764a00a",
+        "0x356a77c0f9c4e98cbacb20a2b41a0c1502b89035cc1fd3fee8f767a363c8df36",
+        "0xa4181603fc441717bc8d67e3cac7be11a628d89dbbbb6e09d5df9d9289032905",
+        "0xfa6524ba087a8ceebe6a85f86b8093c92a76df8c954bb8e760011b9dd13f3b77",
+        "0x7d4529c1bb492c4dd6caf8f67ffc5e7d0dee0e3708aeede65f0307ccd14908c6",
+        "0xa1054e54c9d9259cafdd958bc80d88f92abba6cb2a3ec5147f1e961a0eb2b973",
+        "0xc96b1fd228d75600ef1a41da5ea6e575c0dbd21c61a75607faaaf4e0d464154d",
+        "0xf1aa87b64942afe2735f66ff8367398c52009f32230ca023373c1a6b4aed42a1",
+        "0x3b21b9fc3096bd8d93cadb14f82be1958f6d38cb231ea1c34e362f6a63f6e302",
+        "0xeb1f3da4b0b458da99b6d840583908995e88e25c7133031036935bb0fe90d520",
+        "0xb5b98d1d2878ed3bf79523c62c1be1c1810f3e025af6026fc173c7d7f6f72b68",
+        "0x1582742da14255249efb9d7a800d9248cda5c0fc9b15bdd9f0ada022ab48cad1",
+        "0x237c7bc5bcf0fd9d51ca0b614d1c1eb232cf2e6c6bb0f0604305463443b43eb7",
+        "0x660d9a0566fd1773b5d0d324fea83936df6003901402205c6f2aa9a860048f14",
+        "0xc3ca00b141c75f893f1447639e5c08cd1e6fecffee1261adb371a05047f318cb",
+        "0xd0923d51148e4c1e397b9d8c10d107d611ec40134599caf48cb58797e4f8b3e4",
+        "0x416ae85dd4d7f573f9ff00655f8866936be492235c6a5177095ac296d0744349",
+        "0x59991371b76a763764a8a500c1271978c6d03e29cf0783389230ad779a50bc45",
+        "0x75c302581a05ff9753cb490490b47a7612d52cb98180ec8403b9289700c78b45",
+        "0x81d5fd6bce7574a3febd15bb24bc11e5d42ab92fa9521295a8aa61bee3db484e",
+        "0x9468d1c93d4f954fa7917ce45b2c6921d60d0c208a9f549d883c3122457640c4",
+        "0xba1ce632116ad282ab4b315f7d40e4ce4b58cd8b4982db67d519ff7f94d2c99f",
+        "0xe21e84e659e2754f1a83a1c3105dc877194a4a0724ab0f4c1645cb47a25a2468",
+        "0x805389934b32f17a89bc69c2586911db7670635bb95551ace9cc24973a170774",
+        "0xda6b665dfb1aafec78833d4e60031077cf4263d8411fc6a2a44a5e997227e6c0",
+        "0x306447841cddb827f6efeaf0d2aad3a99b771dbd6393c73e5c1bcc344c93b633",
+        "0xc4634de20bce52a25ee203635440932b3c5e04c10a14cc9033c39673a04b13c8",
+        "0x3a722795af6641fbc6efc44c15d1dccbf4183e09641b558efc81396bcafb7c9c"
+      ],
+      "founding": false,
+      "metadata": {
+        "schema": "HC.SEED.COMMON_REFERENCE_METADATA.V1",
+        "cultivarId": "HC-C-northern-lights",
+        "canonicalName": "Northern Lights",
+        "canonicalRegion": "Golden Prairie",
+        "referenceVersion": 1,
+        "translationPolicyHash": "0xe25c1a6766da890e15b3671b6bf91b820e51cb0aa312c2993bda6c7b9f570b06",
+        "researchEntryHash": "0x4ef23de3735e8c583a1e663081171dc660413fb16f570cc40fbb34366d2aa81c",
+        "ancestryAccount": {
+          "status": "reported-cross",
+          "candidateParentSets": [
+            [
+              "Afghani",
+              "Thai"
+            ]
+          ],
+          "attribution": "Leafly profile account",
+          "biologicallyVerified": false,
+          "crossOrder": "not-established",
+          "sourceIds": [
+            "leafly-northern-lights"
+          ]
+        },
+        "descriptiveAnnotations": {
+          "publisherClassification": "Indica",
+          "reportedFlavors": [
+            "Pine",
+            "Earthy",
+            "Woody"
+          ],
+          "profileTerpenes": [
+            "Myrcene",
+            "Caryophyllene",
+            "Limonene"
+          ],
+          "morphologySummary": "Resinous flowers with possible purple coloration.",
+          "morphologyCoverage": "described",
+          "sourceId": "leafly-northern-lights"
+        },
+        "sources": [
+          {
+            "id": "leafly-northern-lights",
+            "publisher": "Leafly",
+            "url": "https://www.leafly.com/strains/northern-lights",
+            "sourceTitle": "Northern Lights strain",
+            "reviewedOn": "2026-10-25",
+            "reviewTimezone": "America/Regina",
+            "retrieval": "web-open successful; profile body inspected",
+            "sections": [
+              "profile introduction",
+              "top flavors",
+              "terpenes",
+              "top effects"
+            ],
+            "claimBasis": "publisher account and aggregated profile observations; not DNA verification"
+          }
+        ],
+        "uncertainty": {
+          "notes": "Keep the Seattle origin qualified as rumor. The indica label and mixed regional ancestry are different kinds of description; neither defines a genetic percentage.",
+          "sourceIds": [
+            "leafly-northern-lights"
+          ],
+          "resolution": "Retain the qualification; no unsupported pedigree, date or genome inference."
+        },
+        "semantics": "reference annotations only; not decoded, inherited or measured biological traits"
+      },
+      "registration": {
+        "method": "registerGenome",
+        "args": [
+          "0x15d28e4f121fc185df85fde0ad2592f34f761a9f08715a3151bd872726b0c5c0",
+          "0x20bdc99aebe316c25d5fdaa5e1320635a58c0ccb069940bdcb849d05feb6207f",
+          "0xecf3674b351cadc40c662ea899d9a8553ee394f7c04676f75cd294c3c447a735",
+          [
+            "0x855a64e756419343cbdf460aa9ebdd7c18b06bf8f8ed2e5c13b2e5900764a00a",
+            "0x356a77c0f9c4e98cbacb20a2b41a0c1502b89035cc1fd3fee8f767a363c8df36",
+            "0xa4181603fc441717bc8d67e3cac7be11a628d89dbbbb6e09d5df9d9289032905",
+            "0xfa6524ba087a8ceebe6a85f86b8093c92a76df8c954bb8e760011b9dd13f3b77",
+            "0x7d4529c1bb492c4dd6caf8f67ffc5e7d0dee0e3708aeede65f0307ccd14908c6",
+            "0xa1054e54c9d9259cafdd958bc80d88f92abba6cb2a3ec5147f1e961a0eb2b973",
+            "0xc96b1fd228d75600ef1a41da5ea6e575c0dbd21c61a75607faaaf4e0d464154d",
+            "0xf1aa87b64942afe2735f66ff8367398c52009f32230ca023373c1a6b4aed42a1",
+            "0x3b21b9fc3096bd8d93cadb14f82be1958f6d38cb231ea1c34e362f6a63f6e302",
+            "0xeb1f3da4b0b458da99b6d840583908995e88e25c7133031036935bb0fe90d520",
+            "0xb5b98d1d2878ed3bf79523c62c1be1c1810f3e025af6026fc173c7d7f6f72b68",
+            "0x1582742da14255249efb9d7a800d9248cda5c0fc9b15bdd9f0ada022ab48cad1",
+            "0x237c7bc5bcf0fd9d51ca0b614d1c1eb232cf2e6c6bb0f0604305463443b43eb7",
+            "0x660d9a0566fd1773b5d0d324fea83936df6003901402205c6f2aa9a860048f14",
+            "0xc3ca00b141c75f893f1447639e5c08cd1e6fecffee1261adb371a05047f318cb",
+            "0xd0923d51148e4c1e397b9d8c10d107d611ec40134599caf48cb58797e4f8b3e4",
+            "0x416ae85dd4d7f573f9ff00655f8866936be492235c6a5177095ac296d0744349",
+            "0x59991371b76a763764a8a500c1271978c6d03e29cf0783389230ad779a50bc45",
+            "0x75c302581a05ff9753cb490490b47a7612d52cb98180ec8403b9289700c78b45",
+            "0x81d5fd6bce7574a3febd15bb24bc11e5d42ab92fa9521295a8aa61bee3db484e",
+            "0x9468d1c93d4f954fa7917ce45b2c6921d60d0c208a9f549d883c3122457640c4",
+            "0xba1ce632116ad282ab4b315f7d40e4ce4b58cd8b4982db67d519ff7f94d2c99f",
+            "0xe21e84e659e2754f1a83a1c3105dc877194a4a0724ab0f4c1645cb47a25a2468",
+            "0x805389934b32f17a89bc69c2586911db7670635bb95551ace9cc24973a170774",
+            "0xda6b665dfb1aafec78833d4e60031077cf4263d8411fc6a2a44a5e997227e6c0",
+            "0x306447841cddb827f6efeaf0d2aad3a99b771dbd6393c73e5c1bcc344c93b633",
+            "0xc4634de20bce52a25ee203635440932b3c5e04c10a14cc9033c39673a04b13c8",
+            "0x3a722795af6641fbc6efc44c15d1dccbf4183e09641b558efc81396bcafb7c9c"
+          ]
+        ],
+        "scopeHash": "0x15d28e4f121fc185df85fde0ad2592f34f761a9f08715a3151bd872726b0c5c0",
+        "amount": 0,
+        "requiresFinalizedGenesis": true,
+        "status": "prepared-not-submitted"
+      }
+    },
+    {
+      "cultivarId": "HC-C-og-kush",
+      "referenceVersion": 1,
+      "genomeId": "0x281248b0b5fbf81222b7989334fb8f585a05bc152f939f9e99b9979865c368e9",
+      "lineId": "0x81eeb094e1029a096232b6716bf98138901ab79b3ad0a6a68209f0139b53bd76",
+      "metadataHash": "0x6d506fe8a06b02bf2aefb135d7bbe6d40fb74fc0af7ab1b7558ef91874f0ab9a",
+      "loci": [
+        "0x7eda845143443008673211628bfe1504ffc18652fe1ce0b504e81dad003fb60b",
+        "0x90df7410d863ef8799fa16111298f7e73d695b1b38c4789837a62349b8ed0bfd",
+        "0x718055965660066cf1a9e5b84e7dfebc436f61431a16903c5f3199a0d138b358",
+        "0xeb9e7b56fcd763bd2450014a44692acc2ad1cc9b06e0b85ac13ebade7ed76d23",
+        "0x707cc621a2f89348bfe45a9bb7d1e3a97668b17b02401d851f6862f366b69e65",
+        "0xf4e15558086bebef80287f5c7c593fe8f32f5159d2fe2a6efb968e3d9351b15f",
+        "0x7831b1b5b4e28ff14845932ad4711e3664174020fab130d7fa9414c74136f4be",
+        "0x76e5efedef25961fbcbf67d54c68b9a18b52ce97259ed38db8cc430cd0b7f76b",
+        "0xe5ee6f8bf0375b3ac8ff7eeaf65b45c9c48403b3296520aefebc2261bdb3cea7",
+        "0xa80d59a0c6315a7fcecd391afddd96ed5e3ea021f6723844a91be69ed92140b9",
+        "0x2f3050b1de5c979fc48a341e19bb4ddf317b361db89f903c83bbc6cf98f30cc3",
+        "0x73b054b1a6e655c04d5f4bccc8cd0f192705c99888e377ac684eba41186dbb44",
+        "0x13861c43d255b56b4630e8a919cdf8728acc6b2b9d7e5d494175d89ba96f12a4",
+        "0x347558418adfe468c26f7b3e7f44dfeca925cacc30ec1d46340bbbb1eb5e8ffc",
+        "0x1e2a127ace522b3392ad1a7481b436043ae3c902aab0bd88a0d6741a04c1e8cc",
+        "0x2aefa1e175ca43f4c0556a7e61ba5c33aaa7e861f7f9aac07708ead2d50a4d30",
+        "0x3a673692c055e385cf386f156c797a9a1b7b95c1565b1fa40c46a09fa3fcb291",
+        "0xee19f19c068ac3d175b7acf5a5c70ace5267ab58578a1cf4529c7e3aadd98552",
+        "0xcec9933be52e6f446945f40d55f4fe94711b7a2482ffcfbad1863e1f80b169e4",
+        "0x3e7c3d18c93ffcc28a02b8d3b5ddebd5fcffd60e8c2b221b0961d8983635e469",
+        "0xebb504616f46047cf126407ba76cd53f20b0405a12d54620a01ee2d6a092d1a0",
+        "0x244f4e3e3d6a241c6f1fd610d1807ab089f12ccbef5eaa6b7c1f19f03c242923",
+        "0x9b5128604fc6e15c83a60b48855eaca9c2fc8ec287604529115b1053b201e4d1",
+        "0x7e97be7b6497143f6130ad06ee02bfd083c28f43d52c9cdfcdfe2b904cee427e",
+        "0xcbab5bfccd0113b1dcfe1ad60114c18ca073953abd5012deaa8b34bc72a7377e",
+        "0x61735666c86cfaf0573bbdfe1afd15253cdbbf93dffe6581f8494de6373d5456",
+        "0xba2e9b5f4f7706f7084bffdfe529d75f1dae0975c25b06c09372f3bd5e950aef",
+        "0x82ada6e695e52f5146b606d4ba16dbd9d35c55b6f45be9e8cb8d1eddc1b6b5dc"
+      ],
+      "founding": false,
+      "metadata": {
+        "schema": "HC.SEED.COMMON_REFERENCE_METADATA.V1",
+        "cultivarId": "HC-C-og-kush",
+        "canonicalName": "OG Kush",
+        "canonicalRegion": "Red Mesa",
+        "referenceVersion": 1,
+        "translationPolicyHash": "0xe25c1a6766da890e15b3671b6bf91b820e51cb0aa312c2993bda6c7b9f570b06",
+        "researchEntryHash": "0x8ccf2e782491f247cd6bfad87c1b6e174be9f6a4dfdb8eb9747ecbf054b35656",
+        "ancestryAccount": {
+          "status": "uncertain",
+          "candidateParentSets": [
+            [
+              "Northern California strain",
+              "Chemdawg",
+              "Lemon Thai",
+              "Hindu Kush selection from Amsterdam"
+            ]
+          ],
+          "attribution": "Leafly profile account",
+          "biologicallyVerified": false,
+          "crossOrder": "not-established",
+          "sourceIds": [
+            "leafly-og-kush"
+          ]
+        },
+        "descriptiveAnnotations": {
+          "publisherClassification": "Hybrid",
+          "reportedFlavors": [
+            "Woody",
+            "Pine",
+            "Earthy"
+          ],
+          "profileTerpenes": [
+            "Myrcene",
+            "Limonene",
+            "Caryophyllene"
+          ],
+          "morphologySummary": "Lemon, pine, fuel and spice scent associations.",
+          "morphologyCoverage": "described",
+          "sourceId": "leafly-og-kush"
+        },
+        "sources": [
+          {
+            "id": "leafly-og-kush",
+            "publisher": "Leafly",
+            "url": "https://www.leafly.com/strains/og-kush",
+            "sourceTitle": "OG Kush strain",
+            "reviewedOn": "2026-10-25",
+            "reviewTimezone": "America/Regina",
+            "retrieval": "web-open successful; profile body inspected",
+            "sections": [
+              "profile introduction",
+              "top flavors",
+              "terpenes",
+              "top effects"
+            ],
+            "claimBasis": "publisher account and aggregated profile observations; not DNA verification"
+          }
+        ],
+        "uncertainty": {
+          "notes": "The ancestry account is explicitly qualified; its four components do not specify a cross order. Multiple interpretations of OG and multiple selections are recorded.",
+          "sourceIds": [
+            "leafly-og-kush"
+          ],
+          "resolution": "Retain the qualification; no unsupported pedigree, date or genome inference."
+        },
+        "semantics": "reference annotations only; not decoded, inherited or measured biological traits"
+      },
+      "registration": {
+        "method": "registerGenome",
+        "args": [
+          "0x281248b0b5fbf81222b7989334fb8f585a05bc152f939f9e99b9979865c368e9",
+          "0x81eeb094e1029a096232b6716bf98138901ab79b3ad0a6a68209f0139b53bd76",
+          "0x6d506fe8a06b02bf2aefb135d7bbe6d40fb74fc0af7ab1b7558ef91874f0ab9a",
+          [
+            "0x7eda845143443008673211628bfe1504ffc18652fe1ce0b504e81dad003fb60b",
+            "0x90df7410d863ef8799fa16111298f7e73d695b1b38c4789837a62349b8ed0bfd",
+            "0x718055965660066cf1a9e5b84e7dfebc436f61431a16903c5f3199a0d138b358",
+            "0xeb9e7b56fcd763bd2450014a44692acc2ad1cc9b06e0b85ac13ebade7ed76d23",
+            "0x707cc621a2f89348bfe45a9bb7d1e3a97668b17b02401d851f6862f366b69e65",
+            "0xf4e15558086bebef80287f5c7c593fe8f32f5159d2fe2a6efb968e3d9351b15f",
+            "0x7831b1b5b4e28ff14845932ad4711e3664174020fab130d7fa9414c74136f4be",
+            "0x76e5efedef25961fbcbf67d54c68b9a18b52ce97259ed38db8cc430cd0b7f76b",
+            "0xe5ee6f8bf0375b3ac8ff7eeaf65b45c9c48403b3296520aefebc2261bdb3cea7",
+            "0xa80d59a0c6315a7fcecd391afddd96ed5e3ea021f6723844a91be69ed92140b9",
+            "0x2f3050b1de5c979fc48a341e19bb4ddf317b361db89f903c83bbc6cf98f30cc3",
+            "0x73b054b1a6e655c04d5f4bccc8cd0f192705c99888e377ac684eba41186dbb44",
+            "0x13861c43d255b56b4630e8a919cdf8728acc6b2b9d7e5d494175d89ba96f12a4",
+            "0x347558418adfe468c26f7b3e7f44dfeca925cacc30ec1d46340bbbb1eb5e8ffc",
+            "0x1e2a127ace522b3392ad1a7481b436043ae3c902aab0bd88a0d6741a04c1e8cc",
+            "0x2aefa1e175ca43f4c0556a7e61ba5c33aaa7e861f7f9aac07708ead2d50a4d30",
+            "0x3a673692c055e385cf386f156c797a9a1b7b95c1565b1fa40c46a09fa3fcb291",
+            "0xee19f19c068ac3d175b7acf5a5c70ace5267ab58578a1cf4529c7e3aadd98552",
+            "0xcec9933be52e6f446945f40d55f4fe94711b7a2482ffcfbad1863e1f80b169e4",
+            "0x3e7c3d18c93ffcc28a02b8d3b5ddebd5fcffd60e8c2b221b0961d8983635e469",
+            "0xebb504616f46047cf126407ba76cd53f20b0405a12d54620a01ee2d6a092d1a0",
+            "0x244f4e3e3d6a241c6f1fd610d1807ab089f12ccbef5eaa6b7c1f19f03c242923",
+            "0x9b5128604fc6e15c83a60b48855eaca9c2fc8ec287604529115b1053b201e4d1",
+            "0x7e97be7b6497143f6130ad06ee02bfd083c28f43d52c9cdfcdfe2b904cee427e",
+            "0xcbab5bfccd0113b1dcfe1ad60114c18ca073953abd5012deaa8b34bc72a7377e",
+            "0x61735666c86cfaf0573bbdfe1afd15253cdbbf93dffe6581f8494de6373d5456",
+            "0xba2e9b5f4f7706f7084bffdfe529d75f1dae0975c25b06c09372f3bd5e950aef",
+            "0x82ada6e695e52f5146b606d4ba16dbd9d35c55b6f45be9e8cb8d1eddc1b6b5dc"
+          ]
+        ],
+        "scopeHash": "0x281248b0b5fbf81222b7989334fb8f585a05bc152f939f9e99b9979865c368e9",
+        "amount": 0,
+        "requiresFinalizedGenesis": true,
+        "status": "prepared-not-submitted"
+      }
+    },
+    {
+      "cultivarId": "HC-C-pineapple-express",
+      "referenceVersion": 1,
+      "genomeId": "0x27bc2e0d8e182ae129ca0a06ab4430fcc95c963d5003151d2045c0d8e075d7ab",
+      "lineId": "0x308850dd2d1957b89a5d4dd3333241d17d2ccf8ca09387fe3dbcbcb85c57b80e",
+      "metadataHash": "0x19015a6c0be8e77da54dec0fa3dde183216b41d34ce20f7c8ff807283e66b90c",
+      "loci": [
+        "0x273cd79f55555e10f73db254f2babef5b235f3acd1f1d985916598c4fbfaaf80",
+        "0xdd240c01e4dfa7f1822daf689e75f272fcce147c33110fc7be91b4fab701489a",
+        "0x711fd4ef1d6dc323f8fcf51441f919ce7ca396d588941a6a144a9457ce14d841",
+        "0x4f5f29cde2aa2d1a41334c1f3c9b90771debf04f92f3a114af9f95641ecac08b",
+        "0x0ab47de8420649554eca9f4e92437c8ee3ddfcc5c5f06b995de5161457a1ca12",
+        "0x2afad3bd6bded2ce9d4efb2ea88c7cf2d69847c5efd7d7ed23eb1e5276af3968",
+        "0x56a8045aa5a84020008a5db653fd0877155af2c98b2012b6f41eda9fa22af8f4",
+        "0xfc86da5a9c9e5dbe21b3c88988cd7c237e7568effa0babac5a6e39128d78208c",
+        "0xad8358c3dc6d4c4ba52d46377a08374e30720f63143d75c7a7525a22f3337ba6",
+        "0x4558e9d09145a2ec0f620644378a2a7a275932f99994138e4a1521cc1df19f88",
+        "0xdc27843376afd2d22c6eacd55d9cf06fa4f0435c014c0d71798907575426c178",
+        "0x977c04b427d96b2ebab33f6dd7b3214656215585add7fccf5d0a4599ee0a4861",
+        "0x4ddd659a0e949128951cafb175f73a422e315fe15148d8bd5a115fed53d24fe7",
+        "0xbe1ca5896f6bcbe3fb804cdb39bad5a58c3564cb0e2fc84ef3f3e64d38292f76",
+        "0x04631b477d26a1765d25c21259f74109e1919ecc3a74ed15bf446290c143e2bf",
+        "0xc39f34489b1e2e808c1bea9f31190743b6cfb074907280beb674051b53ee1855",
+        "0xdc4657e94eda89a6c7d418a9d1963640e04d5af271959ba10b9a1d83f2e60bc9",
+        "0x8d1bb86055993169eae55f91ecadb10d89f7eddf06a361a30c926987b3d01c18",
+        "0x2174f9f58ffed41d293dea4b89e49a40325213f939368692dd6c0ee963b6abfb",
+        "0x3a83dc57d82541511555af484a6dac1197d00baaa26c526c34dc15257126d454",
+        "0x5b94c1a02c1e2bda6313729fd54f90bd242a15e0b53fb4d0fed58f266f008ce4",
+        "0x0589b6041b004d9f18659accc2e2b6d09febba7cc95d112aee0ce94b58ad4ac9",
+        "0x8c540915569d2c5e8e60d4d8b799904f985ef6a904e1c5cea86e072b6752dd89",
+        "0x6bcfc880c78e0c2e0e44d2a73c821ec36504c5bd2a3eb47ebf733a485af50231",
+        "0x59606d1abb09e015aed5948d5b4fa4f80b802390faa4d9a5af9ee68d3dc67685",
+        "0x7220b85fb5d24d470a984d1a5bc6767442cc421a9ed82312cbcf59f52018a4c1",
+        "0x17099b712390c94a771c6112691e94c353428e60567631be6c45e53e4cede80c",
+        "0xed15842d381040a16dfa7cb96f4da65cb11eb396fcb50bf9e0a7dd7ce11810a1"
+      ],
+      "founding": false,
+      "metadata": {
+        "schema": "HC.SEED.COMMON_REFERENCE_METADATA.V1",
+        "cultivarId": "HC-C-pineapple-express",
+        "canonicalName": "Pineapple Express",
+        "canonicalRegion": "Emerald Coast",
+        "referenceVersion": 1,
+        "translationPolicyHash": "0xe25c1a6766da890e15b3671b6bf91b820e51cb0aa312c2993bda6c7b9f570b06",
+        "researchEntryHash": "0xb560fbdef9461fd75be4d50c31f0077f34fbe129ad8367aac4f337fff77c6c0e",
+        "ancestryAccount": {
+          "status": "reported-cross",
+          "candidateParentSets": [
+            [
+              "Trainwreck",
+              "Hawaiian"
+            ]
+          ],
+          "attribution": "Leafly profile account",
+          "biologicallyVerified": false,
+          "crossOrder": "not-established",
+          "sourceIds": [
+            "leafly-pineapple-express"
+          ]
+        },
+        "descriptiveAnnotations": {
+          "publisherClassification": "Hybrid",
+          "reportedFlavors": [
+            "Pineapple",
+            "Tropical",
+            "Citrus"
+          ],
+          "profileTerpenes": [
+            "Myrcene",
+            "Caryophyllene",
+            "Pinene"
+          ],
+          "morphologySummary": "Citrus and pineapple scent associations.",
+          "morphologyCoverage": "described",
+          "sourceId": "leafly-pineapple-express",
+          "narrativeTerpenes": [
+            "Caryophyllene",
+            "Limonene",
+            "Ocimene"
+          ]
+        },
+        "sources": [
+          {
+            "id": "leafly-pineapple-express",
+            "publisher": "Leafly",
+            "url": "https://www.leafly.com/strains/pineapple-express",
+            "sourceTitle": "Pineapple Express strain",
+            "reviewedOn": "2026-10-25",
+            "reviewTimezone": "America/Regina",
+            "retrieval": "web-open successful; profile body inspected",
+            "sections": [
+              "profile introduction",
+              "top flavors",
+              "terpenes",
+              "top effects"
+            ],
+            "claimBasis": "publisher account and aggregated profile observations; not DNA verification"
+          }
+        ],
+        "uncertainty": {
+          "notes": "Film release is not a proven breeding date. The page\u2019s terpene panel and narrative list differ; both are recorded without assigning a fixed chemotype.",
+          "sourceIds": [
+            "leafly-pineapple-express"
+          ],
+          "resolution": "Retain the qualification; no unsupported pedigree, date or genome inference."
+        },
+        "semantics": "reference annotations only; not decoded, inherited or measured biological traits"
+      },
+      "registration": {
+        "method": "registerGenome",
+        "args": [
+          "0x27bc2e0d8e182ae129ca0a06ab4430fcc95c963d5003151d2045c0d8e075d7ab",
+          "0x308850dd2d1957b89a5d4dd3333241d17d2ccf8ca09387fe3dbcbcb85c57b80e",
+          "0x19015a6c0be8e77da54dec0fa3dde183216b41d34ce20f7c8ff807283e66b90c",
+          [
+            "0x273cd79f55555e10f73db254f2babef5b235f3acd1f1d985916598c4fbfaaf80",
+            "0xdd240c01e4dfa7f1822daf689e75f272fcce147c33110fc7be91b4fab701489a",
+            "0x711fd4ef1d6dc323f8fcf51441f919ce7ca396d588941a6a144a9457ce14d841",
+            "0x4f5f29cde2aa2d1a41334c1f3c9b90771debf04f92f3a114af9f95641ecac08b",
+            "0x0ab47de8420649554eca9f4e92437c8ee3ddfcc5c5f06b995de5161457a1ca12",
+            "0x2afad3bd6bded2ce9d4efb2ea88c7cf2d69847c5efd7d7ed23eb1e5276af3968",
+            "0x56a8045aa5a84020008a5db653fd0877155af2c98b2012b6f41eda9fa22af8f4",
+            "0xfc86da5a9c9e5dbe21b3c88988cd7c237e7568effa0babac5a6e39128d78208c",
+            "0xad8358c3dc6d4c4ba52d46377a08374e30720f63143d75c7a7525a22f3337ba6",
+            "0x4558e9d09145a2ec0f620644378a2a7a275932f99994138e4a1521cc1df19f88",
+            "0xdc27843376afd2d22c6eacd55d9cf06fa4f0435c014c0d71798907575426c178",
+            "0x977c04b427d96b2ebab33f6dd7b3214656215585add7fccf5d0a4599ee0a4861",
+            "0x4ddd659a0e949128951cafb175f73a422e315fe15148d8bd5a115fed53d24fe7",
+            "0xbe1ca5896f6bcbe3fb804cdb39bad5a58c3564cb0e2fc84ef3f3e64d38292f76",
+            "0x04631b477d26a1765d25c21259f74109e1919ecc3a74ed15bf446290c143e2bf",
+            "0xc39f34489b1e2e808c1bea9f31190743b6cfb074907280beb674051b53ee1855",
+            "0xdc4657e94eda89a6c7d418a9d1963640e04d5af271959ba10b9a1d83f2e60bc9",
+            "0x8d1bb86055993169eae55f91ecadb10d89f7eddf06a361a30c926987b3d01c18",
+            "0x2174f9f58ffed41d293dea4b89e49a40325213f939368692dd6c0ee963b6abfb",
+            "0x3a83dc57d82541511555af484a6dac1197d00baaa26c526c34dc15257126d454",
+            "0x5b94c1a02c1e2bda6313729fd54f90bd242a15e0b53fb4d0fed58f266f008ce4",
+            "0x0589b6041b004d9f18659accc2e2b6d09febba7cc95d112aee0ce94b58ad4ac9",
+            "0x8c540915569d2c5e8e60d4d8b799904f985ef6a904e1c5cea86e072b6752dd89",
+            "0x6bcfc880c78e0c2e0e44d2a73c821ec36504c5bd2a3eb47ebf733a485af50231",
+            "0x59606d1abb09e015aed5948d5b4fa4f80b802390faa4d9a5af9ee68d3dc67685",
+            "0x7220b85fb5d24d470a984d1a5bc6767442cc421a9ed82312cbcf59f52018a4c1",
+            "0x17099b712390c94a771c6112691e94c353428e60567631be6c45e53e4cede80c",
+            "0xed15842d381040a16dfa7cb96f4da65cb11eb396fcb50bf9e0a7dd7ce11810a1"
+          ]
+        ],
+        "scopeHash": "0x27bc2e0d8e182ae129ca0a06ab4430fcc95c963d5003151d2045c0d8e075d7ab",
+        "amount": 0,
+        "requiresFinalizedGenesis": true,
+        "status": "prepared-not-submitted"
+      }
+    },
+    {
+      "cultivarId": "HC-C-purple-haze",
+      "referenceVersion": 1,
+      "genomeId": "0xb820cf9bdef4ceb5458709b544cc1a27d45db624c0206cc8df0b19b5219a6bee",
+      "lineId": "0x0dc2ea7d6f25abab38b2f7458707e019514e8b78404c8009b64b875656a1e7cf",
+      "metadataHash": "0x95aa2ae56448a1013a61190f70a0de04b4eedef01ab4020853406fd1751820f1",
+      "loci": [
+        "0x3cb39aae6ea3528ee8408bead65d9edeb670d3b92950820bdfe5ef7fcd4c37f0",
+        "0xb2cb402ede859c639eb65d7d807f66dccaaf0c04e3954be1671ef92f8003424d",
+        "0x36a0ce21f4f5954cda7738d928b4a7cc4196ee05032cbc7f33a75c6c9e28f83a",
+        "0xbee86302717d758b2230b61a4cdfd69816736028a69eb3f0a8bb3fcffec804c9",
+        "0x8ec582155f3cb6720447dd2c79de2e5f80f4baf3388802955bdc50b43200d82f",
+        "0x50b75a16f525e2eb73180ea5bbb5970f5dbf22b136860b671e7da7dc75b99cb2",
+        "0xa329a291a1e25715159b9c3b5cfcb239eacc1a0ee820fc6874a551316d1109e3",
+        "0x58f55a748e5f6a239a57f83a6340bb36648491824f7ee838d7a1454a54f7ff2a",
+        "0x168557b25b3f490fe5903657f65a08ecf0b8323d1212929d4c834bee7ab1c429",
+        "0x4d4680135006be2eabbe8927b5b569fad84bdb507180c180e7cf1b3aadad2e1a",
+        "0x8d369705ca1ccfffe18f05e63b993fb7e3acfb7ea7b194c034c39c5038eaca2b",
+        "0x16e37eb82921fe3da573169450c2e5bf18a92965fb71eab5af411698a970e977",
+        "0xaa91c01c2331f6e16653273559a47678c94d775276ff75b83a12d1d200243380",
+        "0x4585b64e5ad1ba1e0cc90267e99489e0e9570237f35bb771ab1be461df1260b4",
+        "0x1330235579094e2a2e757b9550734319b5cafb671a8fee2c400464c96f596504",
+        "0xf92276347abdb6a06d17ef4e8a83fd235c9701858086722f8c8fe793ee2742a1",
+        "0xe0558d02d926ef355937d842b9ef0152a9bb531a304ba22a69b1b7e33093acc8",
+        "0xdca2edd540569184f888b2f4172e4ad6cbbb050685b74e44bc60da8ff3b75765",
+        "0xa795fce1e21d44060e29ceef975afbff2f245f37b0ca8735f668c64d1ff56ab4",
+        "0x6f36eef8ba221740a05f26170f906927f4e91c2ad923942574ab638969aca3ab",
+        "0x6ff2b6b5340c7a1561cdba2554ce5c40ab191eab0ca84cf7d8455c02ded2d5a0",
+        "0x761b50b6a82a131eec8a814a08111be31a705e479d37d82ad716e28164531298",
+        "0xaa01d00111c8a16ac25a07b60d8bb1ebdbbcafabe6223acf22518c2a83f02d3f",
+        "0x9ba9164639f89dd1aa96dea1ed843ece72fbb8ece4713f595d1e2ba07bf2b621",
+        "0x89617f8526437f2d2a78a1b7e7ac99c59dad5e40436b29576b748dc27c2d77c7",
+        "0xe09f2ce4273be5d39e3a8d8e782b81fc103341df856b1f781f8080f8b6b89f9e",
+        "0x7546260c5ee65d80ff198c239d6b5901a15115f4e33b7259d4bcfa06b7052b43",
+        "0x51c413210b6ba6c1a25ee9d78c5d2591cba645e9b7b8b270b7887b5d52db1c4e"
+      ],
+      "founding": false,
+      "metadata": {
+        "schema": "HC.SEED.COMMON_REFERENCE_METADATA.V1",
+        "cultivarId": "HC-C-purple-haze",
+        "canonicalName": "Purple Haze",
+        "canonicalRegion": "Golden Prairie",
+        "referenceVersion": 1,
+        "translationPolicyHash": "0xe25c1a6766da890e15b3671b6bf91b820e51cb0aa312c2993bda6c7b9f570b06",
+        "researchEntryHash": "0x9a2711d4284a0de0c8af7511797ea8540dcae01bab98e803c17f8dbc63038d10",
+        "ancestryAccount": {
+          "status": "uncertain",
+          "candidateParentSets": [
+            [
+              "Purple Thai",
+              "Haze"
+            ]
+          ],
+          "attribution": "Leafly profile account",
+          "biologicallyVerified": false,
+          "crossOrder": "not-established",
+          "sourceIds": [
+            "leafly-purple-haze"
+          ]
+        },
+        "descriptiveAnnotations": {
+          "publisherClassification": "Sativa",
+          "reportedFlavors": [
+            "Lavender",
+            "Flowery",
+            "Violet"
+          ],
+          "profileTerpenes": [
+            "Myrcene",
+            "Caryophyllene",
+            "Limonene"
+          ],
+          "morphologySummary": "Lavender coloration with berry and spice scent associations.",
+          "morphologyCoverage": "described",
+          "sourceId": "leafly-purple-haze"
+        },
+        "sources": [
+          {
+            "id": "leafly-purple-haze",
+            "publisher": "Leafly",
+            "url": "https://www.leafly.com/strains/purple-haze",
+            "sourceTitle": "Purple Haze strain",
+            "reviewedOn": "2026-10-25",
+            "reviewTimezone": "America/Regina",
+            "retrieval": "web-open successful; profile body inspected",
+            "sections": [
+              "profile introduction",
+              "top flavors",
+              "terpenes",
+              "top effects"
+            ],
+            "claimBasis": "publisher account and aggregated profile observations; not DNA verification"
+          }
+        ],
+        "uncertainty": {
+          "notes": "The pedigree is described as believed. A song association does not prove the named cultivar existed in that year.",
+          "sourceIds": [
+            "leafly-purple-haze"
+          ],
+          "resolution": "Retain the qualification; no unsupported pedigree, date or genome inference."
+        },
+        "semantics": "reference annotations only; not decoded, inherited or measured biological traits"
+      },
+      "registration": {
+        "method": "registerGenome",
+        "args": [
+          "0xb820cf9bdef4ceb5458709b544cc1a27d45db624c0206cc8df0b19b5219a6bee",
+          "0x0dc2ea7d6f25abab38b2f7458707e019514e8b78404c8009b64b875656a1e7cf",
+          "0x95aa2ae56448a1013a61190f70a0de04b4eedef01ab4020853406fd1751820f1",
+          [
+            "0x3cb39aae6ea3528ee8408bead65d9edeb670d3b92950820bdfe5ef7fcd4c37f0",
+            "0xb2cb402ede859c639eb65d7d807f66dccaaf0c04e3954be1671ef92f8003424d",
+            "0x36a0ce21f4f5954cda7738d928b4a7cc4196ee05032cbc7f33a75c6c9e28f83a",
+            "0xbee86302717d758b2230b61a4cdfd69816736028a69eb3f0a8bb3fcffec804c9",
+            "0x8ec582155f3cb6720447dd2c79de2e5f80f4baf3388802955bdc50b43200d82f",
+            "0x50b75a16f525e2eb73180ea5bbb5970f5dbf22b136860b671e7da7dc75b99cb2",
+            "0xa329a291a1e25715159b9c3b5cfcb239eacc1a0ee820fc6874a551316d1109e3",
+            "0x58f55a748e5f6a239a57f83a6340bb36648491824f7ee838d7a1454a54f7ff2a",
+            "0x168557b25b3f490fe5903657f65a08ecf0b8323d1212929d4c834bee7ab1c429",
+            "0x4d4680135006be2eabbe8927b5b569fad84bdb507180c180e7cf1b3aadad2e1a",
+            "0x8d369705ca1ccfffe18f05e63b993fb7e3acfb7ea7b194c034c39c5038eaca2b",
+            "0x16e37eb82921fe3da573169450c2e5bf18a92965fb71eab5af411698a970e977",
+            "0xaa91c01c2331f6e16653273559a47678c94d775276ff75b83a12d1d200243380",
+            "0x4585b64e5ad1ba1e0cc90267e99489e0e9570237f35bb771ab1be461df1260b4",
+            "0x1330235579094e2a2e757b9550734319b5cafb671a8fee2c400464c96f596504",
+            "0xf92276347abdb6a06d17ef4e8a83fd235c9701858086722f8c8fe793ee2742a1",
+            "0xe0558d02d926ef355937d842b9ef0152a9bb531a304ba22a69b1b7e33093acc8",
+            "0xdca2edd540569184f888b2f4172e4ad6cbbb050685b74e44bc60da8ff3b75765",
+            "0xa795fce1e21d44060e29ceef975afbff2f245f37b0ca8735f668c64d1ff56ab4",
+            "0x6f36eef8ba221740a05f26170f906927f4e91c2ad923942574ab638969aca3ab",
+            "0x6ff2b6b5340c7a1561cdba2554ce5c40ab191eab0ca84cf7d8455c02ded2d5a0",
+            "0x761b50b6a82a131eec8a814a08111be31a705e479d37d82ad716e28164531298",
+            "0xaa01d00111c8a16ac25a07b60d8bb1ebdbbcafabe6223acf22518c2a83f02d3f",
+            "0x9ba9164639f89dd1aa96dea1ed843ece72fbb8ece4713f595d1e2ba07bf2b621",
+            "0x89617f8526437f2d2a78a1b7e7ac99c59dad5e40436b29576b748dc27c2d77c7",
+            "0xe09f2ce4273be5d39e3a8d8e782b81fc103341df856b1f781f8080f8b6b89f9e",
+            "0x7546260c5ee65d80ff198c239d6b5901a15115f4e33b7259d4bcfa06b7052b43",
+            "0x51c413210b6ba6c1a25ee9d78c5d2591cba645e9b7b8b270b7887b5d52db1c4e"
+          ]
+        ],
+        "scopeHash": "0xb820cf9bdef4ceb5458709b544cc1a27d45db624c0206cc8df0b19b5219a6bee",
+        "amount": 0,
+        "requiresFinalizedGenesis": true,
+        "status": "prepared-not-submitted"
+      }
+    },
+    {
+      "cultivarId": "HC-C-sour-diesel",
+      "referenceVersion": 1,
+      "genomeId": "0x02bb2fc228d06a439c89559cc7e068e6847809e5f21129426ae732ece0d9ac0e",
+      "lineId": "0xcb886c609d0d77cd80b17e1a22e90f4a390a708f8c9cb25e7f41f9f2e57dc33b",
+      "metadataHash": "0x0ad26e6ec7cd13261f62c6f32719a2f53704850e4de0e7f03602cdac3926342a",
+      "loci": [
+        "0xfb888f4fb0895bad82986e66cea7fc3520406ba042ff6464f16c029328f93793",
+        "0x2901922522796ccf2fd5598288bc5d75b6e73d3a6f0488914249a6bec5534d16",
+        "0x595200fea2b2cd839d199081743a0190e08e0aaed165c2fd297c8805b60edcbc",
+        "0x29d6da874eefd1b355c4f05a5b656746873fb57a6e8ca83ed0dfe278d7fb50b2",
+        "0x87774b03a10ac967d18eef136e4b119ed82dbd99a68f49b256e157a89d183ec6",
+        "0x2a7b53a0e74df5fd1c65b6a87ba7955358e081c7e4db14c2112b579a90a85c27",
+        "0x8bca15efbd9ab7883fc380d8b449061af7a6a807fc5d306dc61619483db04202",
+        "0x0ce88867d7d7c2899d395102bd94b027603e997c493274006fc6d87fa494235b",
+        "0x22821ee3c29f1b8bf99b25f6d00d7216a4117fc6b3ce163196aa9f3ab5138a3a",
+        "0xbf012065f3fdced240fd3f7c3437987e289c046ca6a033e11fc5c7504ba5aba8",
+        "0x7c8ac0d69bfddeee5df60c6fb20dcf38c374273fd358e1971ae82605a1d7dc71",
+        "0xe376d06cc8bb8a1c372d2fee7afd7916678978cada4d66dbbd9b3e438ca2167b",
+        "0xb6bb728414952e67edf01fde2fab16f48742963e2ecf0f5bc87a5d87fb99feea",
+        "0xebe4bad6c20d3ba77a70617441199872ff5b0a8a8f4f41c1e5e9dd79df6145a8",
+        "0xeb2a6ed3c3aec005e20edc752741ac9acb130d62bc28b22f771fa8cb9dceb4ff",
+        "0xbc0b2d2e05157e5543af20217286435d7479122a5d95c8fb78105e3c2761fff0",
+        "0x692202440c1d07f188e669c246c77c0ac99e371b9e36de0e6bddfd9b28fdc499",
+        "0x266c34b9ca5017d3529aea7ae7a7f315a23e4767b72f6d497a7bdae433812be7",
+        "0xaea8db85360725592e952dd691a3db7aa0d3a06661a5e6d0ab95d894aa4cc3da",
+        "0xd78117032d5720776f4a9a5ec57f07d5c89fca1b2c4bac1573e2c00d8f9cca60",
+        "0x07b3ec55f9d4b10c4a3883f7b4e0770f57c8bc152f847c478a31a365de0fc2da",
+        "0x6dedaf3f7678b2a61633902e2ae054434524f5652ba087c9d879c08a6de3fbc6",
+        "0x30d189d00d6f7dba3c90dff052201ebf4cfe76136bfa8473d24b9e47eef160fe",
+        "0xd188152039a3657fde083ba3ad844d63886d9c39c42fc549440ac3cff6f7c8fd",
+        "0xc3225b54e3b9dc7381b2890e607d56b799a58720d8a7e5b05d30d3b95d26ea5e",
+        "0xc110cd142efab122ac9a06d0b007a8207370ee28886e8ee4cfd1092d3221935a",
+        "0xf29aa0ca7596823a6b6b2dd745ab7da003ec6bfe138011629bf3e2e14b68e66b",
+        "0x59fcefdf15df89afbab10f4e49b6c88392c29e15fd8ccb07e8fc57bf0659aeee"
+      ],
+      "founding": false,
+      "metadata": {
+        "schema": "HC.SEED.COMMON_REFERENCE_METADATA.V1",
+        "cultivarId": "HC-C-sour-diesel",
+        "canonicalName": "Sour Diesel",
+        "canonicalRegion": "Golden Prairie",
+        "referenceVersion": 1,
+        "translationPolicyHash": "0xe25c1a6766da890e15b3671b6bf91b820e51cb0aa312c2993bda6c7b9f570b06",
+        "researchEntryHash": "0x0194db098508b0252b2422179958ab31ce90287605b4a393bdd148832165c2de",
+        "ancestryAccount": {
+          "status": "reported-cross",
+          "candidateParentSets": [
+            [
+              "Chemdawg",
+              "Super Skunk"
+            ]
+          ],
+          "attribution": "Leafly profile account",
+          "biologicallyVerified": false,
+          "crossOrder": "not-established",
+          "sourceIds": [
+            "leafly-sour-diesel"
+          ]
+        },
+        "descriptiveAnnotations": {
+          "publisherClassification": "Hybrid",
+          "reportedFlavors": [
+            "Diesel",
+            "Chemical",
+            "Skunk"
+          ],
+          "profileTerpenes": [
+            "Caryophyllene",
+            "Myrcene",
+            "Limonene"
+          ],
+          "morphologySummary": "Strong fuel-like scent.",
+          "morphologyCoverage": "described",
+          "sourceId": "leafly-sour-diesel"
+        },
+        "sources": [
+          {
+            "id": "leafly-sour-diesel",
+            "publisher": "Leafly",
+            "url": "https://www.leafly.com/strains/sour-diesel",
+            "sourceTitle": "Sour Diesel strain",
+            "reviewedOn": "2026-10-25",
+            "reviewTimezone": "America/Regina",
+            "retrieval": "web-open successful; profile body inspected",
+            "sections": [
+              "profile introduction",
+              "top flavors",
+              "terpenes",
+              "top effects"
+            ],
+            "claimBasis": "publisher account and aggregated profile observations; not DNA verification"
+          }
+        ],
+        "uncertainty": {
+          "notes": "The profile header says hybrid while its separately labeled AI review summary calls it sativa. Use the editorial pedigree; exclude the AI summary as historical evidence.",
+          "sourceIds": [
+            "leafly-sour-diesel"
+          ],
+          "resolution": "Retain the qualification; no unsupported pedigree, date or genome inference."
+        },
+        "semantics": "reference annotations only; not decoded, inherited or measured biological traits"
+      },
+      "registration": {
+        "method": "registerGenome",
+        "args": [
+          "0x02bb2fc228d06a439c89559cc7e068e6847809e5f21129426ae732ece0d9ac0e",
+          "0xcb886c609d0d77cd80b17e1a22e90f4a390a708f8c9cb25e7f41f9f2e57dc33b",
+          "0x0ad26e6ec7cd13261f62c6f32719a2f53704850e4de0e7f03602cdac3926342a",
+          [
+            "0xfb888f4fb0895bad82986e66cea7fc3520406ba042ff6464f16c029328f93793",
+            "0x2901922522796ccf2fd5598288bc5d75b6e73d3a6f0488914249a6bec5534d16",
+            "0x595200fea2b2cd839d199081743a0190e08e0aaed165c2fd297c8805b60edcbc",
+            "0x29d6da874eefd1b355c4f05a5b656746873fb57a6e8ca83ed0dfe278d7fb50b2",
+            "0x87774b03a10ac967d18eef136e4b119ed82dbd99a68f49b256e157a89d183ec6",
+            "0x2a7b53a0e74df5fd1c65b6a87ba7955358e081c7e4db14c2112b579a90a85c27",
+            "0x8bca15efbd9ab7883fc380d8b449061af7a6a807fc5d306dc61619483db04202",
+            "0x0ce88867d7d7c2899d395102bd94b027603e997c493274006fc6d87fa494235b",
+            "0x22821ee3c29f1b8bf99b25f6d00d7216a4117fc6b3ce163196aa9f3ab5138a3a",
+            "0xbf012065f3fdced240fd3f7c3437987e289c046ca6a033e11fc5c7504ba5aba8",
+            "0x7c8ac0d69bfddeee5df60c6fb20dcf38c374273fd358e1971ae82605a1d7dc71",
+            "0xe376d06cc8bb8a1c372d2fee7afd7916678978cada4d66dbbd9b3e438ca2167b",
+            "0xb6bb728414952e67edf01fde2fab16f48742963e2ecf0f5bc87a5d87fb99feea",
+            "0xebe4bad6c20d3ba77a70617441199872ff5b0a8a8f4f41c1e5e9dd79df6145a8",
+            "0xeb2a6ed3c3aec005e20edc752741ac9acb130d62bc28b22f771fa8cb9dceb4ff",
+            "0xbc0b2d2e05157e5543af20217286435d7479122a5d95c8fb78105e3c2761fff0",
+            "0x692202440c1d07f188e669c246c77c0ac99e371b9e36de0e6bddfd9b28fdc499",
+            "0x266c34b9ca5017d3529aea7ae7a7f315a23e4767b72f6d497a7bdae433812be7",
+            "0xaea8db85360725592e952dd691a3db7aa0d3a06661a5e6d0ab95d894aa4cc3da",
+            "0xd78117032d5720776f4a9a5ec57f07d5c89fca1b2c4bac1573e2c00d8f9cca60",
+            "0x07b3ec55f9d4b10c4a3883f7b4e0770f57c8bc152f847c478a31a365de0fc2da",
+            "0x6dedaf3f7678b2a61633902e2ae054434524f5652ba087c9d879c08a6de3fbc6",
+            "0x30d189d00d6f7dba3c90dff052201ebf4cfe76136bfa8473d24b9e47eef160fe",
+            "0xd188152039a3657fde083ba3ad844d63886d9c39c42fc549440ac3cff6f7c8fd",
+            "0xc3225b54e3b9dc7381b2890e607d56b799a58720d8a7e5b05d30d3b95d26ea5e",
+            "0xc110cd142efab122ac9a06d0b007a8207370ee28886e8ee4cfd1092d3221935a",
+            "0xf29aa0ca7596823a6b6b2dd745ab7da003ec6bfe138011629bf3e2e14b68e66b",
+            "0x59fcefdf15df89afbab10f4e49b6c88392c29e15fd8ccb07e8fc57bf0659aeee"
+          ]
+        ],
+        "scopeHash": "0x02bb2fc228d06a439c89559cc7e068e6847809e5f21129426ae732ece0d9ac0e",
+        "amount": 0,
+        "requiresFinalizedGenesis": true,
+        "status": "prepared-not-submitted"
+      }
+    },
+    {
+      "cultivarId": "HC-C-strawberry-cough",
+      "referenceVersion": 1,
+      "genomeId": "0x1329fcf6e71295ac3e11e4c2f0400acdd4f12d6f4a01d9b2b90213c59e753bbf",
+      "lineId": "0x243b46bdab533a8eeb4fd1cb64f3166884f8ce483b2a6a280824b18fc86da91f",
+      "metadataHash": "0x33e38b7c898784afc3c90e0022ed5701d91ad1e082d01a23e84c76a3e5fbba6f",
+      "loci": [
+        "0x80a04500dc48342d352ba344bed713c47c6a01d79e0b153295d80a99abf29fb5",
+        "0x95caf5dca2d9e19e740eb52b74ed15fbf500c28474857ae96561a1bb82bac0b4",
+        "0x81a6dbf94d7aefeba542ce716abe6d5b58dece4b28b9e4d791f249fdc52014c0",
+        "0xd10f55b7a060270bdd7189bbe712cdbb634a85a0a658f5f741083ba74c7b6d28",
+        "0x46653b941107e1112a9ab50fc228390cb71f40b263179cd5a02902bd3b97bbde",
+        "0xc3f7a88ff2e0292b98a9b35ec4c05945c1eeda4193cd3eea03d1d1ad047a3273",
+        "0x82a9a7a2a7b00f39b9356bba0a99b7629abf1d14abe8a94026487e3e388b8b08",
+        "0x2a600c643d18ce1c05fa5831f41ddd1ec4a0fd9bb1af241f0df119ba23706f74",
+        "0x631161d6c469f00f79502aacc9a33ad503b3851014226c090fa52be34689a895",
+        "0x7e982b29595c41c730cff2abfcd41ff022b27b5bc3dae7ad6f341b2fc0f82249",
+        "0xd8cc868dedd0eb77f49eaca1a12cb8a5a17e1db623f2a5c45a6bc4c138843034",
+        "0xab84e0eb544cc3864288b0eff31af12ae4112790635174d1e42a611785c96304",
+        "0xe572f6921ec8f51a5bdf48a5c3069cee0171fb31ede79346e5df4a3cd75ed6a6",
+        "0xfce41b9565aaf79f563e0af116f7776741e9f918c30aec9db0ea7f81b8f1cc96",
+        "0xaf1e0f71faabae6f7e94fab4b5046a6e35c476f469f78d196b157c3149bd2c78",
+        "0xb12ca0208ab6534627c7caf1b8f9c602aad221650ff142236bc691f194617130",
+        "0x5e0c684e24ec0127445f62c2bf92d555f6db86a3ad9a8bdf997a5506daf5e989",
+        "0xe281b2c169f3f50900d0ac8972524dd501241ac2519026f3033ed5648066e99e",
+        "0x61f5c11e6a5062349d4ebab5421b596bbb803ac10cf7288c3a6e5e0c1d560cf8",
+        "0xbd35e7adb62ac322e5ddb494869730f89e759387c6bcaf8f4fc0ede570a8b1fc",
+        "0xf33f3ea45cecc79428b6c32aee839e4609f19ba286907ab33cc61fbbd5cfa36a",
+        "0x69d2e54e171e59d70dac96cf4cc34fd8117055af26e65ff984ec7da9d7299893",
+        "0x1b9c19044e7f91aa8b75caf7c447f3c4d13172b1d13f60bbfe532d3706abfc42",
+        "0x176f0abac563be2e74db02318ef65488857d7f15c516576d3750181427f737ee",
+        "0xb1a673515a7f3ed7145a152b970bf0ffb2f866e28b4d7e520c7d036a4bdf6eaa",
+        "0x146088407b8d66627b0f0cedfa9257ee95404971ef2ca6ead8affe58f9b3b3d0",
+        "0xe4c9e7a244191f4e3ba57d3573ed5562ce8c25e6b2e4f197dc8b823e03e81465",
+        "0xcc247866ae8c82a505b6da7a2f1b91d58412995896915d5b2053514df352fc08"
+      ],
+      "founding": false,
+      "metadata": {
+        "schema": "HC.SEED.COMMON_REFERENCE_METADATA.V1",
+        "cultivarId": "HC-C-strawberry-cough",
+        "canonicalName": "Strawberry Cough",
+        "canonicalRegion": "Red Mesa",
+        "referenceVersion": 1,
+        "translationPolicyHash": "0xe25c1a6766da890e15b3671b6bf91b820e51cb0aa312c2993bda6c7b9f570b06",
+        "researchEntryHash": "0xfdc5cb5d7a9c7afad6a795aa4c38f9f254108b61fccb9dfded72de35a8570918",
+        "ancestryAccount": {
+          "status": "uncertain",
+          "candidateParentSets": [
+            [
+              "Haze",
+              "Strawberry Fields"
+            ]
+          ],
+          "attribution": "Leafly profile account",
+          "biologicallyVerified": false,
+          "crossOrder": "not-established",
+          "sourceIds": [
+            "leafly-strawberry-cough"
+          ]
+        },
+        "descriptiveAnnotations": {
+          "publisherClassification": "Sativa",
+          "reportedFlavors": [
+            "Strawberry",
+            "Sweet",
+            "Berry"
+          ],
+          "profileTerpenes": [
+            "Myrcene",
+            "Pinene",
+            "Caryophyllene"
+          ],
+          "morphologySummary": "Strawberry and skunky berry scent associations.",
+          "morphologyCoverage": "described",
+          "sourceId": "leafly-strawberry-cough"
+        },
+        "sources": [
+          {
+            "id": "leafly-strawberry-cough",
+            "publisher": "Leafly",
+            "url": "https://www.leafly.com/strains/strawberry-cough",
+            "sourceTitle": "Strawberry Cough strain",
+            "reviewedOn": "2026-10-25",
+            "reviewTimezone": "America/Regina",
+            "retrieval": "web-open successful; profile body inspected",
+            "sections": [
+              "profile introduction",
+              "top flavors",
+              "terpenes",
+              "top effects"
+            ],
+            "claimBasis": "publisher account and aggregated profile observations; not DNA verification"
+          }
+        ],
+        "uncertainty": {
+          "notes": "The cross is a proposed account, not verified parentage. No dated release or breeder attribution is supplied in the inspected profile.",
+          "sourceIds": [
+            "leafly-strawberry-cough"
+          ],
+          "resolution": "Retain the qualification; no unsupported pedigree, date or genome inference."
+        },
+        "semantics": "reference annotations only; not decoded, inherited or measured biological traits"
+      },
+      "registration": {
+        "method": "registerGenome",
+        "args": [
+          "0x1329fcf6e71295ac3e11e4c2f0400acdd4f12d6f4a01d9b2b90213c59e753bbf",
+          "0x243b46bdab533a8eeb4fd1cb64f3166884f8ce483b2a6a280824b18fc86da91f",
+          "0x33e38b7c898784afc3c90e0022ed5701d91ad1e082d01a23e84c76a3e5fbba6f",
+          [
+            "0x80a04500dc48342d352ba344bed713c47c6a01d79e0b153295d80a99abf29fb5",
+            "0x95caf5dca2d9e19e740eb52b74ed15fbf500c28474857ae96561a1bb82bac0b4",
+            "0x81a6dbf94d7aefeba542ce716abe6d5b58dece4b28b9e4d791f249fdc52014c0",
+            "0xd10f55b7a060270bdd7189bbe712cdbb634a85a0a658f5f741083ba74c7b6d28",
+            "0x46653b941107e1112a9ab50fc228390cb71f40b263179cd5a02902bd3b97bbde",
+            "0xc3f7a88ff2e0292b98a9b35ec4c05945c1eeda4193cd3eea03d1d1ad047a3273",
+            "0x82a9a7a2a7b00f39b9356bba0a99b7629abf1d14abe8a94026487e3e388b8b08",
+            "0x2a600c643d18ce1c05fa5831f41ddd1ec4a0fd9bb1af241f0df119ba23706f74",
+            "0x631161d6c469f00f79502aacc9a33ad503b3851014226c090fa52be34689a895",
+            "0x7e982b29595c41c730cff2abfcd41ff022b27b5bc3dae7ad6f341b2fc0f82249",
+            "0xd8cc868dedd0eb77f49eaca1a12cb8a5a17e1db623f2a5c45a6bc4c138843034",
+            "0xab84e0eb544cc3864288b0eff31af12ae4112790635174d1e42a611785c96304",
+            "0xe572f6921ec8f51a5bdf48a5c3069cee0171fb31ede79346e5df4a3cd75ed6a6",
+            "0xfce41b9565aaf79f563e0af116f7776741e9f918c30aec9db0ea7f81b8f1cc96",
+            "0xaf1e0f71faabae6f7e94fab4b5046a6e35c476f469f78d196b157c3149bd2c78",
+            "0xb12ca0208ab6534627c7caf1b8f9c602aad221650ff142236bc691f194617130",
+            "0x5e0c684e24ec0127445f62c2bf92d555f6db86a3ad9a8bdf997a5506daf5e989",
+            "0xe281b2c169f3f50900d0ac8972524dd501241ac2519026f3033ed5648066e99e",
+            "0x61f5c11e6a5062349d4ebab5421b596bbb803ac10cf7288c3a6e5e0c1d560cf8",
+            "0xbd35e7adb62ac322e5ddb494869730f89e759387c6bcaf8f4fc0ede570a8b1fc",
+            "0xf33f3ea45cecc79428b6c32aee839e4609f19ba286907ab33cc61fbbd5cfa36a",
+            "0x69d2e54e171e59d70dac96cf4cc34fd8117055af26e65ff984ec7da9d7299893",
+            "0x1b9c19044e7f91aa8b75caf7c447f3c4d13172b1d13f60bbfe532d3706abfc42",
+            "0x176f0abac563be2e74db02318ef65488857d7f15c516576d3750181427f737ee",
+            "0xb1a673515a7f3ed7145a152b970bf0ffb2f866e28b4d7e520c7d036a4bdf6eaa",
+            "0x146088407b8d66627b0f0cedfa9257ee95404971ef2ca6ead8affe58f9b3b3d0",
+            "0xe4c9e7a244191f4e3ba57d3573ed5562ce8c25e6b2e4f197dc8b823e03e81465",
+            "0xcc247866ae8c82a505b6da7a2f1b91d58412995896915d5b2053514df352fc08"
+          ]
+        ],
+        "scopeHash": "0x1329fcf6e71295ac3e11e4c2f0400acdd4f12d6f4a01d9b2b90213c59e753bbf",
+        "amount": 0,
+        "requiresFinalizedGenesis": true,
+        "status": "prepared-not-submitted"
+      }
+    },
+    {
+      "cultivarId": "HC-C-super-silver-haze",
+      "referenceVersion": 1,
+      "genomeId": "0x562ecdb2efc7b352fe0bef5c036696870555a045fa48f0223df912079e0bd4e0",
+      "lineId": "0x394f6baefc3649ba35ae9098192160e2b94a148bbc853341289e9d651ff6f2db",
+      "metadataHash": "0x0bd377c073c66e8e2901ab885cb418385c30b14cedb27bfa8deb87b1d1c290bb",
+      "loci": [
+        "0x767a81d8e41fd80eb41114bea83b5c9ae72f0f28fea04c05f6cde7cb779759ec",
+        "0xc1cc84f7d04f08b4a9c1075701f54a4babde936b93e0ca13e33fd8ad17974900",
+        "0x6a356f08e5276b155482250c5b6397026c92004a4577d1c180db211c90c3f6da",
+        "0x5cc0d9901f17475f61d8098e033a1ee88b8114adc9e3f8c83210985f41990d33",
+        "0x314b63646649cd8ba856c43e1ff87247245a8fd7882dc7dd3c8c387b43db1b45",
+        "0xa6f3f83ee03183da0da39b173f37c1421ea15cab32bdef3945fbc521547dfa08",
+        "0xd5c97290d53ada78affe712b5464f1c4a872ef9af6738129cb700483f4e5149c",
+        "0x007e51af888f2050e39b5fbd2e71ca5a608ef3d0589d95c52ed2ea0d0f75fc32",
+        "0x7c2c4db44f10590a3b5ac13074274a8936f3c8a32cce028ec686d6bfcf3fa332",
+        "0x67fcbe7a90414eea409168a665e5defded7585abb599ed5b21b30e848d6b9dc9",
+        "0xd57d7eef76dfc0d511bdd7a3906a401e2c75b9321166b15184121b7b0cf93af0",
+        "0xc41ae91ae9f71ae75640262825b0881b7c51b5a0bf18e63936ae7d6f22c00050",
+        "0xb177b2c63d7699da181b1c55e514d427aa2f47d51050af78b48dc6019923d30a",
+        "0x1a6b77b0171e8b49ce7717d340b8d29243539bbbe460467c978a9b9e21d6333d",
+        "0xb7cc5d8f6d5fb9e76669aa60fb345afed297055e660a9def0588b7861243e408",
+        "0x6265d3a02b486131d54e12d4d686dcfc93665427f49bc652a24a3429adb01e48",
+        "0x4e85d27a748b305f7919a52e2dd5323d7c59e4e2b40b3acec506041fa6addeeb",
+        "0xe579ab57d401bf9338ffda1fdd9fd8dbbd096d449430701e3148aa7c9235575f",
+        "0xe09342a2ab2cdc90013e8ad7a57a26a79e6c86f8ed8228396ee812cca962f37d",
+        "0x5d9fdf984161ec67b8c8250ca4658d91639780451c935e97922bcf7b9a65756b",
+        "0x6da3cfd32c83965f28316ed4f295bd0684bf8c4c6e1442780bef8fa54c947be2",
+        "0x0daf2b75a9ae72400d1e2f7696f7587ea9de930711aa0618acf028c732623b41",
+        "0xfedce5265e7b71ad32759bd6be37f7f76ef53ffff8ffacf317ab5b7a56752abe",
+        "0x70af4b994083794767336cd9ba7789414fb2994cb3e7b037bd6da1659fcb50c5",
+        "0x01cb1125b77a2d6dd185d65e406ba9665220aba5d316c083c51d357ea8cdb2d5",
+        "0xeb3db12ef9d8a764f8f9a231bb858f851f01639d49040d479529130bc4e56459",
+        "0x802cfad557895e059fa7f006d4f50278e97a5a166a575ac2c81bca3ffc079610",
+        "0x69cf18a96f6b646ca027d77032ab35fdf1d381b5ce50108113b0f0f523f1f9ce"
+      ],
+      "founding": false,
+      "metadata": {
+        "schema": "HC.SEED.COMMON_REFERENCE_METADATA.V1",
+        "cultivarId": "HC-C-super-silver-haze",
+        "canonicalName": "Super Silver Haze",
+        "canonicalRegion": "Emerald Coast",
+        "referenceVersion": 1,
+        "translationPolicyHash": "0xe25c1a6766da890e15b3671b6bf91b820e51cb0aa312c2993bda6c7b9f570b06",
+        "researchEntryHash": "0x1c17dc851d5943e38401271f2a9f98c038bbc6d7366bfc7c818d29a6d9aa9df2",
+        "ancestryAccount": {
+          "status": "reported-cross",
+          "candidateParentSets": [
+            [
+              "Skunk",
+              "Northern Lights",
+              "Haze"
+            ]
+          ],
+          "attribution": "Leafly profile account",
+          "biologicallyVerified": false,
+          "crossOrder": "not-established",
+          "sourceIds": [
+            "leafly-super-silver-haze"
+          ]
+        },
+        "descriptiveAnnotations": {
+          "publisherClassification": "Sativa",
+          "reportedFlavors": [
+            "Citrus",
+            "Skunk",
+            "Earthy"
+          ],
+          "profileTerpenes": [
+            "Myrcene",
+            "Caryophyllene",
+            "Limonene"
+          ],
+          "morphologySummary": "Sticky resinous flowers.",
+          "morphologyCoverage": "described",
+          "sourceId": "leafly-super-silver-haze"
+        },
+        "sources": [
+          {
+            "id": "leafly-super-silver-haze",
+            "publisher": "Leafly",
+            "url": "https://www.leafly.com/strains/super-silver-haze",
+            "sourceTitle": "Super Silver Haze strain",
+            "reviewedOn": "2026-10-25",
+            "reviewTimezone": "America/Regina",
+            "retrieval": "web-open successful; profile body inspected",
+            "sections": [
+              "profile introduction",
+              "top flavors",
+              "terpenes",
+              "top effects"
+            ],
+            "claimBasis": "publisher account and aggregated profile observations; not DNA verification"
+          }
+        ],
+        "uncertainty": {
+          "notes": "The profile names three ancestral components but does not specify mating order, parental selections or allele fractions; do not infer equal thirds.",
+          "sourceIds": [
+            "leafly-super-silver-haze"
+          ],
+          "resolution": "Retain the qualification; no unsupported pedigree, date or genome inference."
+        },
+        "semantics": "reference annotations only; not decoded, inherited or measured biological traits"
+      },
+      "registration": {
+        "method": "registerGenome",
+        "args": [
+          "0x562ecdb2efc7b352fe0bef5c036696870555a045fa48f0223df912079e0bd4e0",
+          "0x394f6baefc3649ba35ae9098192160e2b94a148bbc853341289e9d651ff6f2db",
+          "0x0bd377c073c66e8e2901ab885cb418385c30b14cedb27bfa8deb87b1d1c290bb",
+          [
+            "0x767a81d8e41fd80eb41114bea83b5c9ae72f0f28fea04c05f6cde7cb779759ec",
+            "0xc1cc84f7d04f08b4a9c1075701f54a4babde936b93e0ca13e33fd8ad17974900",
+            "0x6a356f08e5276b155482250c5b6397026c92004a4577d1c180db211c90c3f6da",
+            "0x5cc0d9901f17475f61d8098e033a1ee88b8114adc9e3f8c83210985f41990d33",
+            "0x314b63646649cd8ba856c43e1ff87247245a8fd7882dc7dd3c8c387b43db1b45",
+            "0xa6f3f83ee03183da0da39b173f37c1421ea15cab32bdef3945fbc521547dfa08",
+            "0xd5c97290d53ada78affe712b5464f1c4a872ef9af6738129cb700483f4e5149c",
+            "0x007e51af888f2050e39b5fbd2e71ca5a608ef3d0589d95c52ed2ea0d0f75fc32",
+            "0x7c2c4db44f10590a3b5ac13074274a8936f3c8a32cce028ec686d6bfcf3fa332",
+            "0x67fcbe7a90414eea409168a665e5defded7585abb599ed5b21b30e848d6b9dc9",
+            "0xd57d7eef76dfc0d511bdd7a3906a401e2c75b9321166b15184121b7b0cf93af0",
+            "0xc41ae91ae9f71ae75640262825b0881b7c51b5a0bf18e63936ae7d6f22c00050",
+            "0xb177b2c63d7699da181b1c55e514d427aa2f47d51050af78b48dc6019923d30a",
+            "0x1a6b77b0171e8b49ce7717d340b8d29243539bbbe460467c978a9b9e21d6333d",
+            "0xb7cc5d8f6d5fb9e76669aa60fb345afed297055e660a9def0588b7861243e408",
+            "0x6265d3a02b486131d54e12d4d686dcfc93665427f49bc652a24a3429adb01e48",
+            "0x4e85d27a748b305f7919a52e2dd5323d7c59e4e2b40b3acec506041fa6addeeb",
+            "0xe579ab57d401bf9338ffda1fdd9fd8dbbd096d449430701e3148aa7c9235575f",
+            "0xe09342a2ab2cdc90013e8ad7a57a26a79e6c86f8ed8228396ee812cca962f37d",
+            "0x5d9fdf984161ec67b8c8250ca4658d91639780451c935e97922bcf7b9a65756b",
+            "0x6da3cfd32c83965f28316ed4f295bd0684bf8c4c6e1442780bef8fa54c947be2",
+            "0x0daf2b75a9ae72400d1e2f7696f7587ea9de930711aa0618acf028c732623b41",
+            "0xfedce5265e7b71ad32759bd6be37f7f76ef53ffff8ffacf317ab5b7a56752abe",
+            "0x70af4b994083794767336cd9ba7789414fb2994cb3e7b037bd6da1659fcb50c5",
+            "0x01cb1125b77a2d6dd185d65e406ba9665220aba5d316c083c51d357ea8cdb2d5",
+            "0xeb3db12ef9d8a764f8f9a231bb858f851f01639d49040d479529130bc4e56459",
+            "0x802cfad557895e059fa7f006d4f50278e97a5a166a575ac2c81bca3ffc079610",
+            "0x69cf18a96f6b646ca027d77032ab35fdf1d381b5ce50108113b0f0f523f1f9ce"
+          ]
+        ],
+        "scopeHash": "0x562ecdb2efc7b352fe0bef5c036696870555a045fa48f0223df912079e0bd4e0",
+        "amount": 0,
+        "requiresFinalizedGenesis": true,
+        "status": "prepared-not-submitted"
+      }
+    },
+    {
+      "cultivarId": "HC-C-trainwreck",
+      "referenceVersion": 1,
+      "genomeId": "0x4f7614dd406b4ed1a0a865231a78f0094f99a0262dfb4eb7ebffe619215c3bd1",
+      "lineId": "0x345b129243b6c99b54afc3de6c2269514e8ccea77b15a53ed77a2a6a9dc0ef0f",
+      "metadataHash": "0xaa4de8ec98791ebbf9a796dc28c3c42765e1cb2c875c0020f1b0576f98da34d6",
+      "loci": [
+        "0x5d20a9552cafe5462932206b9d2b492245eacbaf1d2e4d56ca151d67103100ea",
+        "0x392dbde5f2fd46aa3f50dc87d91f057e8148d9fdf4351291a1e047dc596b5a97",
+        "0x2f25a7f803bcba2225e99289d22ac82dba852fdfe14feb327c162216eca307de",
+        "0xcbde97493c6825fbd72ba6d83a0605618273f1ba45b0d4a7d47a46d94bf09da6",
+        "0x39f99acad82d558c125379dfc6879945735686fe4f96485c05d2610884f3b186",
+        "0x7d4bfb00d7f24569803dec196f7f76f47662bffb4eedab33422addcec05067c8",
+        "0x0598df2be0546fd636cc5d006e9e37f36b21e93585b7469619e225ef0850905d",
+        "0x53cb9656197dce5a891e51c009f87cf8262df8c84d237c0c35a6ddf2fb2e8aac",
+        "0xd429685d03584299c5fd0ac2604901f471a96e260bc2b1614641eac4b31633de",
+        "0xc1c795a9b813d3270cb2642bd314e4959fd37c71832f25851bde87e8bdf5992a",
+        "0xfff42cacda7ef939531f4e5a381469cc9f9b77ad0e8506dca0cd31fc0125c6f1",
+        "0x832194512f541b48125c8f9b8ab30a8e937629300b171903b064c13d2c6eeea1",
+        "0x60f8f83ce473fc5d9e264cbbcb3a6cb22fb636784faaa2db4c533ec85296f8ba",
+        "0x6e7fe81a4e7941c37ab85f01c2a4c0d1fbc32db6899dd20a4a9cff767a5f875b",
+        "0x9beb51d88739b3d27014de3a2521d6195b1693fd87bcdc5872472e9028653a72",
+        "0xd8755edbb6353a07217fbe268dd19a705b1bc9b707ecae1bcc2e9aa16fdaf266",
+        "0x2fc1b4153a6704a95609e9cf7162a284cf976ae81a484be8307f5c76f3c40b99",
+        "0x50becff42d51dc630d695bda6a4b7b7bd6f87be094170aa08e32e2618c4e5fc3",
+        "0xc9b5813d1a09816fe342c49a2500503740a35d2cd8bf2d44a1de33725590cb53",
+        "0x7a36b0bd37608f45b5292149506a98736f7553f689ae430efdc4e176d32b5ba4",
+        "0xfbe5cdd64e3b0bd064d956191a510ae2e1026d8d8e8d02aa296f8d6160feac92",
+        "0x21df5731d9c2fa2f1c06a075c48d3b499ed8e9366c6189a4d7bd44741959ce44",
+        "0xd5cba4fc763309fa9e996a080000aef96e8a841b82953322e941dd745e7fef1a",
+        "0x93f9db813c238851592f81a404e839ac1f8d4579d16e4c25a2d7752fbd9c308d",
+        "0x3067e10b730b56c344bd4fe5af073a6d73cd73ac781f86d528379d5c305d3596",
+        "0x2ad8485b43511bba517d4dd915082507171609495adc5cc219f6c5a658d05e26",
+        "0x5e12d6d15d0432637d32870df3890ea80fa16bbc102fb0ddd4332c27a33e81fb",
+        "0x3fc9593ff67790575dabdf2b608d2f48438230bc3f1ca93489578323dbbb784b"
+      ],
+      "founding": false,
+      "metadata": {
+        "schema": "HC.SEED.COMMON_REFERENCE_METADATA.V1",
+        "cultivarId": "HC-C-trainwreck",
+        "canonicalName": "Trainwreck",
+        "canonicalRegion": "Golden Prairie",
+        "referenceVersion": 1,
+        "translationPolicyHash": "0xe25c1a6766da890e15b3671b6bf91b820e51cb0aa312c2993bda6c7b9f570b06",
+        "researchEntryHash": "0x6b99e6b69ae594fa67b121dc2c7593ff3a8be5149f3eebbcfdbc767200e18f35",
+        "ancestryAccount": {
+          "status": "reported-cross",
+          "candidateParentSets": [
+            [
+              "Mexican sativa",
+              "Thai sativa",
+              "Afghani indica"
+            ]
+          ],
+          "attribution": "Leafly profile account",
+          "biologicallyVerified": false,
+          "crossOrder": "not-established",
+          "sourceIds": [
+            "leafly-trainwreck"
+          ]
+        },
+        "descriptiveAnnotations": {
+          "publisherClassification": "Hybrid",
+          "reportedFlavors": [
+            "Pine",
+            "Earthy",
+            "Woody"
+          ],
+          "profileTerpenes": [
+            "Terpinolene",
+            "Myrcene",
+            "Pinene"
+          ],
+          "morphologySummary": "Spreading structure is mentioned in one naming story; lemon and spicy pine scent associations.",
+          "morphologyCoverage": "described",
+          "sourceId": "leafly-trainwreck"
+        },
+        "sources": [
+          {
+            "id": "leafly-trainwreck",
+            "publisher": "Leafly",
+            "url": "https://www.leafly.com/strains/trainwreck",
+            "sourceTitle": "Trainwreck strain",
+            "reviewedOn": "2026-10-25",
+            "reviewTimezone": "America/Regina",
+            "retrieval": "web-open successful; profile body inspected",
+            "sections": [
+              "profile introduction",
+              "top flavors",
+              "terpenes",
+              "top effects"
+            ],
+            "claimBasis": "publisher account and aggregated profile observations; not DNA verification"
+          }
+        ],
+        "uncertainty": {
+          "notes": "Naming stories are alternatives, not established events. The header says hybrid while prose calls it sativa; three ancestral populations do not establish a mating sequence.",
+          "sourceIds": [
+            "leafly-trainwreck"
+          ],
+          "resolution": "Retain the qualification; no unsupported pedigree, date or genome inference."
+        },
+        "semantics": "reference annotations only; not decoded, inherited or measured biological traits"
+      },
+      "registration": {
+        "method": "registerGenome",
+        "args": [
+          "0x4f7614dd406b4ed1a0a865231a78f0094f99a0262dfb4eb7ebffe619215c3bd1",
+          "0x345b129243b6c99b54afc3de6c2269514e8ccea77b15a53ed77a2a6a9dc0ef0f",
+          "0xaa4de8ec98791ebbf9a796dc28c3c42765e1cb2c875c0020f1b0576f98da34d6",
+          [
+            "0x5d20a9552cafe5462932206b9d2b492245eacbaf1d2e4d56ca151d67103100ea",
+            "0x392dbde5f2fd46aa3f50dc87d91f057e8148d9fdf4351291a1e047dc596b5a97",
+            "0x2f25a7f803bcba2225e99289d22ac82dba852fdfe14feb327c162216eca307de",
+            "0xcbde97493c6825fbd72ba6d83a0605618273f1ba45b0d4a7d47a46d94bf09da6",
+            "0x39f99acad82d558c125379dfc6879945735686fe4f96485c05d2610884f3b186",
+            "0x7d4bfb00d7f24569803dec196f7f76f47662bffb4eedab33422addcec05067c8",
+            "0x0598df2be0546fd636cc5d006e9e37f36b21e93585b7469619e225ef0850905d",
+            "0x53cb9656197dce5a891e51c009f87cf8262df8c84d237c0c35a6ddf2fb2e8aac",
+            "0xd429685d03584299c5fd0ac2604901f471a96e260bc2b1614641eac4b31633de",
+            "0xc1c795a9b813d3270cb2642bd314e4959fd37c71832f25851bde87e8bdf5992a",
+            "0xfff42cacda7ef939531f4e5a381469cc9f9b77ad0e8506dca0cd31fc0125c6f1",
+            "0x832194512f541b48125c8f9b8ab30a8e937629300b171903b064c13d2c6eeea1",
+            "0x60f8f83ce473fc5d9e264cbbcb3a6cb22fb636784faaa2db4c533ec85296f8ba",
+            "0x6e7fe81a4e7941c37ab85f01c2a4c0d1fbc32db6899dd20a4a9cff767a5f875b",
+            "0x9beb51d88739b3d27014de3a2521d6195b1693fd87bcdc5872472e9028653a72",
+            "0xd8755edbb6353a07217fbe268dd19a705b1bc9b707ecae1bcc2e9aa16fdaf266",
+            "0x2fc1b4153a6704a95609e9cf7162a284cf976ae81a484be8307f5c76f3c40b99",
+            "0x50becff42d51dc630d695bda6a4b7b7bd6f87be094170aa08e32e2618c4e5fc3",
+            "0xc9b5813d1a09816fe342c49a2500503740a35d2cd8bf2d44a1de33725590cb53",
+            "0x7a36b0bd37608f45b5292149506a98736f7553f689ae430efdc4e176d32b5ba4",
+            "0xfbe5cdd64e3b0bd064d956191a510ae2e1026d8d8e8d02aa296f8d6160feac92",
+            "0x21df5731d9c2fa2f1c06a075c48d3b499ed8e9366c6189a4d7bd44741959ce44",
+            "0xd5cba4fc763309fa9e996a080000aef96e8a841b82953322e941dd745e7fef1a",
+            "0x93f9db813c238851592f81a404e839ac1f8d4579d16e4c25a2d7752fbd9c308d",
+            "0x3067e10b730b56c344bd4fe5af073a6d73cd73ac781f86d528379d5c305d3596",
+            "0x2ad8485b43511bba517d4dd915082507171609495adc5cc219f6c5a658d05e26",
+            "0x5e12d6d15d0432637d32870df3890ea80fa16bbc102fb0ddd4332c27a33e81fb",
+            "0x3fc9593ff67790575dabdf2b608d2f48438230bc3f1ca93489578323dbbb784b"
+          ]
+        ],
+        "scopeHash": "0x4f7614dd406b4ed1a0a865231a78f0094f99a0262dfb4eb7ebffe619215c3bd1",
+        "amount": 0,
+        "requiresFinalizedGenesis": true,
+        "status": "prepared-not-submitted"
+      }
+    },
+    {
+      "cultivarId": "HC-C-white-widow",
+      "referenceVersion": 1,
+      "genomeId": "0xd9477a18285cd98bf8acc250206676fa14454ff6df3b5cf12cb841d0304eb72f",
+      "lineId": "0x921cdd8e632a5a238fd4f0327925b2b92756f5b5a7fce1dbcb9061871204fb6b",
+      "metadataHash": "0x5eb2c520a0d0725bb5ce57429e5bebe07ece9ba1987bdd046a522b164fdf56b8",
+      "loci": [
+        "0xb25c8aadb921ebff06fb0e0385c1db000ad9676b144cb35146dd49dff1fdca20",
+        "0xeeefdf70755c1700d6e86e2581d756690d041411c3b841e48251d6f99537afb8",
+        "0x8e7db0bb7509ffb50977f595251f41d08325744b546175a335c25102fea0c371",
+        "0xb382b86e92b33718ba3167b29b4a0aee097fbf3e02d004239d6c992a81255512",
+        "0xc27d22a14a88813bba69c0db42f7a2e1a3078abf987ae900c70353a49566a351",
+        "0x0cc4e2610fc490ec8a2294c9b858232ca0da7e414d00dee005cebff66341b8e3",
+        "0xe6e12f0bf22f23bc0ea44391623b1e0506fc032cdaa01aad2eb61acf80cdd4d1",
+        "0xfc9df2310f96ec37a2241b34a007a90934f6b2fec5d766cf290f50df939651ed",
+        "0x094e2a54d0989656ad52231241592061f6063d263837a781cc90adc97684ad44",
+        "0x32b43544be9b34954eb29d226331d8dc58200147297c0ece264ea6c717651beb",
+        "0x0810cd5e690fb5adc5b512c024a21633e18a1928dc9e2492f4893a29a19e89fd",
+        "0x4ffd8ed90dfae860bc17b7725cdd6afeb34995234df425ede220f482f288f736",
+        "0x3a61a818fcf5abab823a4cac449cd4f9d38826b842fcf54da7f3340381d16843",
+        "0x4520edb4eedd30f49c17d99ff5990251e6c43761b2c2ecd75d5ae10188d9588f",
+        "0xcb5d6a98c4cacdd79634e4f019fd916c30fc5fbcc7e7d7f9a8d60c4e050dda51",
+        "0x0037fa26ebf6f792efff57c62b2179b44b30e07c10a5438a5a69f888d7e80339",
+        "0xa47729a782c4dfbee0b47fe18cfcecaae6a4b0037c8fe7502ca4493f81a3ced6",
+        "0xed928f600f7c3d255541f1dbb289c315704390beb2c7d0477bca1bb8c9581832",
+        "0x9e343743307b2aaf47f2fbc9f7f2679c36634c07417468a9217882025855317e",
+        "0x030c9796d0f5bcdf916cb4eecd0761f8fbe723f37e6355111c01404c670f6e80",
+        "0x0aabf10974867b52685b4ddaaf9b20969e135612f5379003d5b9812902abbdf3",
+        "0xf7cc1087e20ba2c68c907689e5fccd8dac17693ec61f959930f7992a16b84cab",
+        "0xbde67e6e7d0eb7c9040ff7a527fb64e32032383cff1e8d10a454ef76368ef97f",
+        "0x5ebb8827852535060e22b03fbc13820d27e30797974214b528e6efad013e55bd",
+        "0xeccfddcc7f6ef82c28b94eaea264114c4ada4ff4f8a313c3901f55982a15bbdd",
+        "0x8aba12c521d48bed91093aaf43867ae791978b178ecadebf58b0fee8e777b939",
+        "0x395b7553b8a25a0d5c21ea489ed076f3f93201467639a681b7321cbeae7d3e13",
+        "0xd0255a2eba1a3ff0d6dea9de1e2cb52b64a02b2bcf7099892ab6bbbb9baa53a1"
+      ],
+      "founding": false,
+      "metadata": {
+        "schema": "HC.SEED.COMMON_REFERENCE_METADATA.V1",
+        "cultivarId": "HC-C-white-widow",
+        "canonicalName": "White Widow",
+        "canonicalRegion": "Red Mesa",
+        "referenceVersion": 1,
+        "translationPolicyHash": "0xe25c1a6766da890e15b3671b6bf91b820e51cb0aa312c2993bda6c7b9f570b06",
+        "researchEntryHash": "0x379461f1a3766c52e1b67187e6221e301b9c48ca8d66ff9908c417c81ca9d445",
+        "ancestryAccount": {
+          "status": "reported-cross",
+          "candidateParentSets": [
+            [
+              "Brazilian sativa landrace",
+              "South Indian indica"
+            ]
+          ],
+          "attribution": "Leafly profile account",
+          "biologicallyVerified": false,
+          "crossOrder": "not-established",
+          "sourceIds": [
+            "leafly-white-widow"
+          ]
+        },
+        "descriptiveAnnotations": {
+          "publisherClassification": "Hybrid",
+          "reportedFlavors": [
+            "Woody",
+            "Earthy",
+            "Flowery"
+          ],
+          "profileTerpenes": [
+            "Myrcene",
+            "Caryophyllene",
+            "Pinene"
+          ],
+          "morphologySummary": "Pale crystal resin and conical substantial flowers.",
+          "morphologyCoverage": "described",
+          "sourceId": "leafly-white-widow"
+        },
+        "sources": [
+          {
+            "id": "leafly-white-widow",
+            "publisher": "Leafly",
+            "url": "https://www.leafly.com/strains/white-widow",
+            "sourceTitle": "White Widow strain",
+            "reviewedOn": "2026-10-25",
+            "reviewTimezone": "America/Regina",
+            "retrieval": "web-open successful; profile body inspected",
+            "sections": [
+              "profile introduction",
+              "top flavors",
+              "terpenes",
+              "top effects"
+            ],
+            "claimBasis": "publisher account and aggregated profile observations; not DNA verification"
+          }
+        ],
+        "uncertainty": {
+          "notes": "Leafly notes phenotype and environmental variation. Source percentages are not validated genome composition and will not be encoded as allele fractions.",
+          "sourceIds": [
+            "leafly-white-widow"
+          ],
+          "resolution": "Retain the qualification; no unsupported pedigree, date or genome inference."
+        },
+        "semantics": "reference annotations only; not decoded, inherited or measured biological traits"
+      },
+      "registration": {
+        "method": "registerGenome",
+        "args": [
+          "0xd9477a18285cd98bf8acc250206676fa14454ff6df3b5cf12cb841d0304eb72f",
+          "0x921cdd8e632a5a238fd4f0327925b2b92756f5b5a7fce1dbcb9061871204fb6b",
+          "0x5eb2c520a0d0725bb5ce57429e5bebe07ece9ba1987bdd046a522b164fdf56b8",
+          [
+            "0xb25c8aadb921ebff06fb0e0385c1db000ad9676b144cb35146dd49dff1fdca20",
+            "0xeeefdf70755c1700d6e86e2581d756690d041411c3b841e48251d6f99537afb8",
+            "0x8e7db0bb7509ffb50977f595251f41d08325744b546175a335c25102fea0c371",
+            "0xb382b86e92b33718ba3167b29b4a0aee097fbf3e02d004239d6c992a81255512",
+            "0xc27d22a14a88813bba69c0db42f7a2e1a3078abf987ae900c70353a49566a351",
+            "0x0cc4e2610fc490ec8a2294c9b858232ca0da7e414d00dee005cebff66341b8e3",
+            "0xe6e12f0bf22f23bc0ea44391623b1e0506fc032cdaa01aad2eb61acf80cdd4d1",
+            "0xfc9df2310f96ec37a2241b34a007a90934f6b2fec5d766cf290f50df939651ed",
+            "0x094e2a54d0989656ad52231241592061f6063d263837a781cc90adc97684ad44",
+            "0x32b43544be9b34954eb29d226331d8dc58200147297c0ece264ea6c717651beb",
+            "0x0810cd5e690fb5adc5b512c024a21633e18a1928dc9e2492f4893a29a19e89fd",
+            "0x4ffd8ed90dfae860bc17b7725cdd6afeb34995234df425ede220f482f288f736",
+            "0x3a61a818fcf5abab823a4cac449cd4f9d38826b842fcf54da7f3340381d16843",
+            "0x4520edb4eedd30f49c17d99ff5990251e6c43761b2c2ecd75d5ae10188d9588f",
+            "0xcb5d6a98c4cacdd79634e4f019fd916c30fc5fbcc7e7d7f9a8d60c4e050dda51",
+            "0x0037fa26ebf6f792efff57c62b2179b44b30e07c10a5438a5a69f888d7e80339",
+            "0xa47729a782c4dfbee0b47fe18cfcecaae6a4b0037c8fe7502ca4493f81a3ced6",
+            "0xed928f600f7c3d255541f1dbb289c315704390beb2c7d0477bca1bb8c9581832",
+            "0x9e343743307b2aaf47f2fbc9f7f2679c36634c07417468a9217882025855317e",
+            "0x030c9796d0f5bcdf916cb4eecd0761f8fbe723f37e6355111c01404c670f6e80",
+            "0x0aabf10974867b52685b4ddaaf9b20969e135612f5379003d5b9812902abbdf3",
+            "0xf7cc1087e20ba2c68c907689e5fccd8dac17693ec61f959930f7992a16b84cab",
+            "0xbde67e6e7d0eb7c9040ff7a527fb64e32032383cff1e8d10a454ef76368ef97f",
+            "0x5ebb8827852535060e22b03fbc13820d27e30797974214b528e6efad013e55bd",
+            "0xeccfddcc7f6ef82c28b94eaea264114c4ada4ff4f8a313c3901f55982a15bbdd",
+            "0x8aba12c521d48bed91093aaf43867ae791978b178ecadebf58b0fee8e777b939",
+            "0x395b7553b8a25a0d5c21ea489ed076f3f93201467639a681b7321cbeae7d3e13",
+            "0xd0255a2eba1a3ff0d6dea9de1e2cb52b64a02b2bcf7099892ab6bbbb9baa53a1"
+          ]
+        ],
+        "scopeHash": "0xd9477a18285cd98bf8acc250206676fa14454ff6df3b5cf12cb841d0304eb72f",
+        "amount": 0,
+        "requiresFinalizedGenesis": true,
+        "status": "prepared-not-submitted"
+      }
+    },
+    {
+      "cultivarId": "HC-C-zkittlez",
+      "referenceVersion": 1,
+      "genomeId": "0x0ca944ed197c1e6c3277187cc187c8f992fdaf71cd78361a716840b0fe70aac4",
+      "lineId": "0xe25066fe0d0b2f2840bda87e0515ac9301657ac6898626ae924393a0b951f900",
+      "metadataHash": "0x0d6111a9b0613112751a5d758a4a70d02c18b0c080f07124076430e28ea917ac",
+      "loci": [
+        "0x906f4b8bdeee044c8997ab3d4ec5da7136f1ef580415854843be2ed34d398e36",
+        "0xfef4d7f865009c0c262b561ec067df2cb6d7554ecc20feb90b96703cf21cce3e",
+        "0xfa07dff933b388d84284ae4dad797beebcff3ffbc0f9bc6876fffbd821cfce5f",
+        "0x0feaf4587efc0dbbdd181f231809e6f5181977ab58e5dff75370e5ddbdddc55b",
+        "0xe55b8acee3a7a6bed2554293d21c13a36e6c832c1f817b9e932e4c226790d91d",
+        "0x02ae5f1edb74bf29351044886f2575939d7bf4a8f88d619a9b9d05d351f5c11b",
+        "0x39e5156d3ae92343781849e66ec6038571ef27d34a516cd679d870237fbd419c",
+        "0xd3f4e53211700f24cef3c3dec956439400120cf1053b230b4f36e388737a3e41",
+        "0x73ec3ac49d63b8e0b15f2475ccb143974b9e9cdf634ed917220b7b0cf90513f1",
+        "0xe2840cce7ed5a479abb1ea3f8d7712da75bf4a42c382813441574f1d4ea410e3",
+        "0x9d6e55d40e47c48505ced07739f62c64d3526baecc3eef89bb08f7f06be8f7ef",
+        "0x63d596aebdb0bb3fd1b94a710acb03b1f81a7105aa6e8999df09a32e33592772",
+        "0x6e19aee0a6e053e95475a585fdc0acfdf245b9ea32de07a222ef547f6a11353f",
+        "0x9bc97187a737e2301a9d0cc4db7a450953a20c444c7445c195e62d4f8ca57361",
+        "0x9f69211675c85f9b5017f85fc8cdfc78ab9c07a8ea67fda1c9b53b1a7755dc75",
+        "0xfa031b74bad2db4a289d3b6bdd8e96a326dbddd0ac38ab39fd2f0113ffcd9a52",
+        "0xb595b055da44f40e17f1a122ae3844ed3fd3631067c7c0d77801a419b98fe461",
+        "0xa737c3888539ac9c1fa57a3286fdd5ba93651758f605ee9d3afb245f853d8d9a",
+        "0x6e88908ea341ac9de497399e141808b472a389bb2713782f97b9e4c8874036f9",
+        "0x3136e2ae17719c1fea9e55db607d43250d3a174c520a9e6e1e77aa0588644050",
+        "0x70da31fc4c8c59a530ba2ef083e083a7fc058cf91f61ad2751af9e1a39b933b0",
+        "0xa5569f178134e1f8c15badf897bec2fd3b781469a70ecc4358afd9d90b220dcc",
+        "0x1491094f12e2afc57f7d71c4925fb4c0a1cda28b7a570972c7905434e8278fde",
+        "0x396427dea47e14dcefe116b1bbefc6c2d72081fb8001d790c7f953e48cc22b7f",
+        "0x254e411d2237c232715e26080da883bb300919204ccbb006d56951fc0651a353",
+        "0xb297f7ea7a3c04074922a04e9105b7514cfb677b7d1edc7896ec9967dd7ca17b",
+        "0x0dd45d505442534e62d6bbe16f0fb20d3ba9a20e62b8ebd1da2e8f3a5467af8e",
+        "0xd1240944f233ec6d503133bf5569df937672c27a5545fe2cb4ced206dda3d554"
+      ],
+      "founding": false,
+      "metadata": {
+        "schema": "HC.SEED.COMMON_REFERENCE_METADATA.V1",
+        "cultivarId": "HC-C-zkittlez",
+        "canonicalName": "Zkittlez",
+        "canonicalRegion": "Red Mesa",
+        "referenceVersion": 1,
+        "translationPolicyHash": "0xe25c1a6766da890e15b3671b6bf91b820e51cb0aa312c2993bda6c7b9f570b06",
+        "researchEntryHash": "0x82acd9c0d155ad74e0c03c36dc63250f00ba521c8101fda3a9e9ce8a3df10715",
+        "ancestryAccount": {
+          "status": "partial",
+          "candidateParentSets": [
+            [
+              "Grape Ape",
+              "Grapefruit",
+              "undisclosed strain"
+            ]
+          ],
+          "attribution": "Leafly profile account",
+          "biologicallyVerified": false,
+          "crossOrder": "not-established",
+          "sourceIds": [
+            "leafly-zkittlez"
+          ]
+        },
+        "descriptiveAnnotations": {
+          "publisherClassification": "Indica",
+          "reportedFlavors": [
+            "Grapefruit",
+            "Grape",
+            "Berry"
+          ],
+          "profileTerpenes": [
+            "Caryophyllene",
+            "Linalool",
+            "Humulene"
+          ],
+          "morphologySummary": "Medium-sized soft green flowers with sweet tropical-fruit associations.",
+          "morphologyCoverage": "described",
+          "sourceId": "leafly-zkittlez"
+        },
+        "sources": [
+          {
+            "id": "leafly-zkittlez",
+            "publisher": "Leafly",
+            "url": "https://www.leafly.com/strains/zkittlez",
+            "sourceTitle": "The Original Z strain",
+            "reviewedOn": "2026-10-25",
+            "reviewTimezone": "America/Regina",
+            "retrieval": "web-open successful; profile body inspected",
+            "sections": [
+              "profile introduction",
+              "top flavors",
+              "terpenes",
+              "top effects"
+            ],
+            "claimBasis": "publisher account and aggregated profile observations; not DNA verification"
+          }
+        ],
+        "uncertainty": {
+          "notes": "The proposed mix is described as alleged and includes an undisclosed component. Keep the approved Zkittlez ID; The Original Z is a source-name mapping, not a new exclusive identity.",
+          "sourceIds": [
+            "leafly-zkittlez"
+          ],
+          "resolution": "Retain the qualification; no unsupported pedigree, date or genome inference."
+        },
+        "semantics": "reference annotations only; not decoded, inherited or measured biological traits"
+      },
+      "registration": {
+        "method": "registerGenome",
+        "args": [
+          "0x0ca944ed197c1e6c3277187cc187c8f992fdaf71cd78361a716840b0fe70aac4",
+          "0xe25066fe0d0b2f2840bda87e0515ac9301657ac6898626ae924393a0b951f900",
+          "0x0d6111a9b0613112751a5d758a4a70d02c18b0c080f07124076430e28ea917ac",
+          [
+            "0x906f4b8bdeee044c8997ab3d4ec5da7136f1ef580415854843be2ed34d398e36",
+            "0xfef4d7f865009c0c262b561ec067df2cb6d7554ecc20feb90b96703cf21cce3e",
+            "0xfa07dff933b388d84284ae4dad797beebcff3ffbc0f9bc6876fffbd821cfce5f",
+            "0x0feaf4587efc0dbbdd181f231809e6f5181977ab58e5dff75370e5ddbdddc55b",
+            "0xe55b8acee3a7a6bed2554293d21c13a36e6c832c1f817b9e932e4c226790d91d",
+            "0x02ae5f1edb74bf29351044886f2575939d7bf4a8f88d619a9b9d05d351f5c11b",
+            "0x39e5156d3ae92343781849e66ec6038571ef27d34a516cd679d870237fbd419c",
+            "0xd3f4e53211700f24cef3c3dec956439400120cf1053b230b4f36e388737a3e41",
+            "0x73ec3ac49d63b8e0b15f2475ccb143974b9e9cdf634ed917220b7b0cf90513f1",
+            "0xe2840cce7ed5a479abb1ea3f8d7712da75bf4a42c382813441574f1d4ea410e3",
+            "0x9d6e55d40e47c48505ced07739f62c64d3526baecc3eef89bb08f7f06be8f7ef",
+            "0x63d596aebdb0bb3fd1b94a710acb03b1f81a7105aa6e8999df09a32e33592772",
+            "0x6e19aee0a6e053e95475a585fdc0acfdf245b9ea32de07a222ef547f6a11353f",
+            "0x9bc97187a737e2301a9d0cc4db7a450953a20c444c7445c195e62d4f8ca57361",
+            "0x9f69211675c85f9b5017f85fc8cdfc78ab9c07a8ea67fda1c9b53b1a7755dc75",
+            "0xfa031b74bad2db4a289d3b6bdd8e96a326dbddd0ac38ab39fd2f0113ffcd9a52",
+            "0xb595b055da44f40e17f1a122ae3844ed3fd3631067c7c0d77801a419b98fe461",
+            "0xa737c3888539ac9c1fa57a3286fdd5ba93651758f605ee9d3afb245f853d8d9a",
+            "0x6e88908ea341ac9de497399e141808b472a389bb2713782f97b9e4c8874036f9",
+            "0x3136e2ae17719c1fea9e55db607d43250d3a174c520a9e6e1e77aa0588644050",
+            "0x70da31fc4c8c59a530ba2ef083e083a7fc058cf91f61ad2751af9e1a39b933b0",
+            "0xa5569f178134e1f8c15badf897bec2fd3b781469a70ecc4358afd9d90b220dcc",
+            "0x1491094f12e2afc57f7d71c4925fb4c0a1cda28b7a570972c7905434e8278fde",
+            "0x396427dea47e14dcefe116b1bbefc6c2d72081fb8001d790c7f953e48cc22b7f",
+            "0x254e411d2237c232715e26080da883bb300919204ccbb006d56951fc0651a353",
+            "0xb297f7ea7a3c04074922a04e9105b7514cfb677b7d1edc7896ec9967dd7ca17b",
+            "0x0dd45d505442534e62d6bbe16f0fb20d3ba9a20e62b8ebd1da2e8f3a5467af8e",
+            "0xd1240944f233ec6d503133bf5569df937672c27a5545fe2cb4ced206dda3d554"
+          ]
+        ],
+        "scopeHash": "0x0ca944ed197c1e6c3277187cc187c8f992fdaf71cd78361a716840b0fe70aac4",
+        "amount": 0,
+        "requiresFinalizedGenesis": true,
+        "status": "prepared-not-submitted"
+      }
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+import {readFile,writeFile} from 'node:fs/promises';
+import {SEED_PACK_POLICY,SEED_REGIONS} from '../../services/highcountry-economy/src/seed-packs.js';
+const root=new URL('../../',import.meta.url),catalog=JSON.parse(await readFile(new URL('deployments/highcountry/seed-catalog.v1.json',root),'utf8'));
+const pools=Object.fromEntries([...SEED_REGIONS,'World'].map(region=>[region,Object.fromEntries(['common','rare','exclusive'].map(t=>[t,catalog.cultivars.filter(c=>c.tier===t&&(region==='World'||region===c.region)).map(c=>c.id).sort()]))]));
+if(catalog.cultivars.length!==65||Object.values(pools).some(t=>Object.values(t).some(p=>!p.length)))throw Error('seed pool coverage');
+const output={schema:SEED_PACK_POLICY.version,policy:SEED_PACK_POLICY,pools,starterCultivars:Object.fromEntries(SEED_REGIONS.map(r=>[r,pools[r].common.slice(0,2)])),supplySemantics:'Lifetime per provisioned game namespace; no automatic season reset. Starter seed units reserve at grant; unopened packs never release supply. Cultivar exhaustion is a hard stop, never a reroll or a substitute.',standardOpening:'HC-SEED-08 required; one tier and one cultivar, three seeds, same odds for every currency and region.',purchaseSettlement:'HC-SEED-09 required. Native quote is 1 native $420 (18 decimal units), not USD; no conversion, peg or redemption is implied.',deploymentStatus:'DISABLED_UNTIL_REVIEWED_LIVE_AUTHORITY_AND_GENOME_REGISTRATION'};
+await writeFile(new URL('deployments/highcountry/seed-pack-policy.v1.json',root),JSON.stringify(output,null,2)+'\n');

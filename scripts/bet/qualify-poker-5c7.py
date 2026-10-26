@@ -4,8 +4,8 @@ from datetime import datetime,timezone
 from pathlib import Path
 from importlib.metadata import version
 ROOT=Path(__file__).resolve().parents[2]
-BASE='450cccb0a7b84a3b3b47bebbeaccac671f6e4936'
-SCOPE=['contracts/foundry.toml','contracts/src/bet/tournament/settlement','contracts/test/tournament-5c7','clients/420bet-poker/zkshuffle/fixtures/tournament-5c7','clients/420bet-poker/zkshuffle/tournament5c7_funded_proofs_test.go','clients/420bet-poker/zkshuffle/tournament5c7_verify_evidence_test.go','scripts/bet/qualify-poker-5c7.py','scripts/bet/export-poker-5c7-context.py','scripts/bet/replay-poker-5c7.py','scripts/bet/check-poker-5c7-replay.py','scripts/bet/replay-poker-5c7-refunds.py','scripts/bet/unpack-poker-5c7-evidence.py','scripts/bet/poker-5c7-static-review.json','docs/bet/BET-AUDIT-5C.7-PRIZES-CANCELLATION-REFUNDS.md','.github/workflows/420bet-poker-5c7-level2.yml']
+BASE='f22c8463bcdd7cd4031db4a688e07d667e64bb33'
+SCOPE=['.github/workflows/identity-id-audit-4.yml','.github/workflows/identity-id-audit-5.yml','contracts/foundry.toml','contracts/src/bet/tournament/settlement','contracts/test/tournament-5c7','clients/420bet-poker/zkshuffle/fixtures/tournament-5c7','clients/420bet-poker/zkshuffle/tournament5c7_funded_proofs_test.go','clients/420bet-poker/zkshuffle/tournament5c7_verify_evidence_test.go','scripts/bet/qualify-poker-5c7.py','scripts/bet/export-poker-5c7-context.py','scripts/bet/replay-poker-5c7.py','scripts/bet/check-poker-5c7-replay.py','scripts/bet/replay-poker-5c7-refunds.py','scripts/bet/unpack-poker-5c7-evidence.py','scripts/bet/poker-5c7-static-review.json','docs/bet/BET-AUDIT-5C.7-PRIZES-CANCELLATION-REFUNDS.md','.github/workflows/420bet-poker-5c7-level2.yml']
 
 def module(name,file):
     s=importlib.util.spec_from_file_location(name,ROOT/file);m=importlib.util.module_from_spec(s);s.loader.exec_module(m);return m

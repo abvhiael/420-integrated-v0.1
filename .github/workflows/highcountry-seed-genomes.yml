@@ -1,0 +1,59 @@
+name: HighCountry HC-SEED-03 Level 1
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'deployments/highcountry/common-genome-translation.v1.json'
+      - 'deployments/highcountry/common-genome-engine-inspection.v1.json'
+      - 'deployments/highcountry/common-reference-genomes.v*.json'
+      - 'deployments/highcountry/common-cultivar-research.v1.json'
+      - 'deployments/highcountry/seed-catalog.v1.json'
+      - 'scripts/highcountry/common_reference_genomes.py'
+      - 'scripts/highcountry/test_common_reference_genomes.py'
+      - 'scripts/highcountry/run_seed_genome_contracts.py'
+      - 'scripts/highcountry/seed-genomes-contract-test.sol'
+      - 'contracts/src/highcountry/genetics/GenomeRegistry.sol'
+      - 'contracts/src/highcountry/breeding/BreedingEngine.sol'
+      - 'contracts/src/highcountry/cultivation/CultivationEngine.sol'
+      - 'contracts/src/highcountry/harvest/HarvestScoring.sol'
+      - 'contracts/src/highcountry/genetics/FoundingGenetics.sol'
+      - 'contracts/src/highcountry/genesis/GenesisRegistry.sol'
+      - 'contracts/src/highcountry/auth/HighCountryAuthorization.sol'
+      - 'contracts/src/highcountry/constants/**'
+      - 'contracts/src/highcountry/interfaces/**'
+      - 'contracts/src/highcountry/types/**'
+      - 'contracts/src/highcountry/errors/**'
+      - 'contracts/src/interfaces/genesis/**'
+      - 'contracts/test/highcountry/mocks/MockCapabilityRegistry.sol'
+      - '.github/workflows/highcountry-seed-genomes.yml'
+permissions:
+  contents: read
+jobs:
+  common-genomes-level1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /deployments/highcountry/
+            /scripts/highcountry/
+            /contracts/src/
+            /contracts/test/highcountry/mocks/MockCapabilityRegistry.sol
+            /contracts/foundry.toml
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install pycryptodome==3.23.0
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.7.1
+      - name: Verify reproducible 23-reference manifest
+        run: python scripts/highcountry/common_reference_genomes.py --check
+      - name: Reference generation and integrity tests
+        run: python -m unittest discover -s scripts/highcountry -p 'test_common_reference_genomes.py' -v
+      - name: Canonical formatting
+        run: forge fmt --root contracts --check "$GITHUB_WORKSPACE/scripts/highcountry/seed-genomes-contract-test.sol"
+      - name: Solidity registration and cross-language commitments
+        run: python scripts/highcountry/run_seed_genome_contracts.py

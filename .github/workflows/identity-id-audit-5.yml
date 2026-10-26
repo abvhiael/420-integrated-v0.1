@@ -103,7 +103,7 @@ jobs:
 
       - name: Commit generated ID-AUDIT-5 Genesis outputs when absent or stale
         # Preserve this scoped poker PR's exact qualified source; validation above still runs.
-        if: github.event_name == 'pull_request' && github.head_ref != 'audit/420bet-5c5-reconcile-main' && github.head_ref != 'audit/420bet-5c6-reconcile-main' && github.head_ref != 'audit/420bet-5c7-reconcile-main'
+        if: github.event_name == 'pull_request' && github.head_ref != 'audit/420bet-5c5-reconcile-main' && github.head_ref != 'audit/420bet-5c6-reconcile-main' && github.head_ref != 'audit/420bet-5c7-reconcile-main' && github.head_ref != 'bet/5c8-recovery-security-qualification'
         shell: bash
         run: |
           set -euo pipefail

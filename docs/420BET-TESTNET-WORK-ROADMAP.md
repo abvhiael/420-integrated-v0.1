@@ -123,3 +123,7 @@ Evidence-only ledger/certificate commits may inherit previous exact-SHA executab
 | TN-TOUR-03 — operational and independent acceptance | Outage, disconnect, incident, pause/recovery and reorg drills; source/proof/evidence retention; independent security/math/risk/eligibility/legal reviews and explicit release authorization |
 
 These gates remain OPEN and depend on the corresponding local integrations. No policy publication, reference model or local certificate is production wagering authorization.
+
+### TN-TOUR C8 operational acceptance
+
+The local [C8 recovery/security implementation](bet/BET-AUDIT-5C.8-RECOVERY-SECURITY-QUALIFICATION.md) must qualify without a live testnet. TN-TOUR-01–03 separately require official coordinator/bank/host/engine/entropy runtime bindings, independent RPC endpoints and consensus-finality configuration; prospective funded incident/restart/refund and prize receipts; multi-node reorg/RPC-disagreement and provider-outage drills; separated key custody, monitoring/incident evidence retention and independent security/release approval. Local confirmation-depth fault fixtures and retained C7 cryptographic execution do not establish those live gates.

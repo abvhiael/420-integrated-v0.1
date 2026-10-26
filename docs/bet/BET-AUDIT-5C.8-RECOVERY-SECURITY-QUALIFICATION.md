@@ -1,0 +1,28 @@
+# 5C.8 — Tournament recovery, security and qualification
+
+## Local scope
+
+The immutable C1–C7 policy, custody, genuine hand, standings and settlement authorities remain canonical. C8 adds `PokerTournamentRecovery420`, a stateless, permissionless coordinator with no funds, signing authority, discretionary winners, amount vectors, arbitrary calls, replacement entropy or deadline extension. It binds the existing bank, host, engine and entropy runtimes. Calls require a checkpoint derived from the actual event/manifest, chain, coordinator, phase, finances, queue, standings and selected hand state. Another keeper's progress invalidates a stale checkpoint. Each underlying authority still enforces its own authorization, proof, timeout and settlement guards.
+
+Recovery observations and work are separate transactions. Failed work rolls back atomically. Queue/choice/claim/unstarted-refund batches are capped at 16, financial refunds at 32, prize loading at 16 and prize allocation at four (leaving headroom for checkpoint reads around the inherited allocator). Selected hand targets derive from the event's bounded table inventory; callers cannot supply a foreign hand. Financial cursors live in canonical custody; replacing a keeper never resets progress or original-payer credits. Anyone can continue. Withdrawals remain exclusively the credited account's action.
+
+Supported incident paths include expired entropy preparation or draw, bounded pause expiry, withheld shuffle/delivery, missing public card evidence, authenticated player timeout and canonical zero-rake tournament settlement. An initialized live hand, queued purchase or pending rebuy decision must reconcile before full refunds. Successful completion cannot be converted into cancellation. Original immutable failure clocks determine deadlines, including the missing-evidence review window; the observer's arrival time never moves them.
+
+## Operations and restart
+
+1. Stop new risk using the existing scoped operator/emergency authority when appropriate. C8 grants no pause privileges. Ongoing canonical hand/credit obligations must still reconcile.
+2. Read authoritative event, table, hand and financial state. Retain the chain/deployment manifest and failure evidence. Do not substitute indexer standings, a UI result or an operator payout list.
+3. Use `monitor-poker-5c8.py` with two distinct RPC endpoints, a pinned chain/genesis, five runtime bindings, event and confirmation depth. It performs read-only calls, compares both views, checks prior checkpoint canonicality and writes atomically only on agreement. Confirmation depth is a monitoring bound, not official consensus-finality certification. RPC disagreement, wrong network, missing/changed code and reorgs fail closed. Checkpoint reset after a reorg requires operator review; stale observations must never be reused for submission.
+4. Refresh `snapshot(event, table)` before each permitted `advance` call. A stale plan must be rebuilt from canonical state. Recovery cannot bypass unfinished hands, purchases or choices. Finalized canonical receipts, not transaction submission, establish progress.
+5. Resume bounded chunks after restart. Check exact original-payer credits, sponsor return, fee segregation, chip conservation and final liabilities. Credit holders pull their own withdrawals; the keeper cannot redirect or withdraw them.
+6. Retain raw calls/events, execution logs, source/compiler/verifier identities, report checksums, network evidence and incident disposition. Escalate unavailable signing authorities or provider failures; never weaken proof verification or introduce an alternative seed.
+
+## Qualification boundary
+
+Level 1 covers runtime/manifest/stale-plan boundaries, bounded arguments, direct-call/authorization protections, source-bound static review, monitoring fault tests and exact compiler/source identities. Level 2 executes funded cryptographic tournaments, provider withholding and missing evidence, canonical timeouts, original-payer refunds, pending/queued reconciliation and restarted prize/refund processing. Actual executions and independent refund replay are mandatory; documentation is not acceptance.
+
+The complete immutable C7 execution archive is retained in `clients/420bet-poker/zkshuffle/fixtures/tournament-5c8/inherited-level2.zip`, pinned by its original SHA-256 so qualification remains reproducible after remote artifact expiry. The C7 run at `98a2d504d7e218c301d3309fd680660b193043c7` supplies 475 previously executed green tests, 1,438 genuine proof verifications, 32,500 fuzz cases and 21 altered-evidence cases. C8 must verify every retained evidence checksum and all qualified source/compiled identities before inheriting those results. It does not claim those tests ran again. All seven circuit/VK identities and context-bound proof bundles are preserved; changed statements require genuine reproving.
+
+Local Level 1/2 status is established only by the clean exact-SHA C8 qualifier and its scoped workflow. Level 3, official testnet deployment/provider independence, prospective multi-node finality/reorg drills, independent external review and production ceremony/release authorization remain separate TN-TOUR gates. No live-network or production readiness follows from local evidence.
+
+The two Identity workflows retain all validation and only extend their existing exact-head automatic-commit exclusions to this C8 branch. Inheritance accepts precisely that added condition, compares the remaining workflow bytes with the qualified originals, and records the new workflow hashes in C8 evidence. No generated Identity artifact is accepted as a poker qualification change.

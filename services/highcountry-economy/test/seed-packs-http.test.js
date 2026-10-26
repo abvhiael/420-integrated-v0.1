@@ -17,6 +17,10 @@ test('pack HTTP enforces authenticated ownership, exact inputs, allowed origins 
   assert.equal((await (await post('inventory',{},f.bob)).json()).result.packs.length,0);
   assert.equal((await post('prepare',{packId:first.result[0].id},f.bob)).status,403);
   assert.equal((await post('allocate',{receiptId:'forged',owner:'alice',region:'World',count:1})).status,403);
+  assert.equal((await post('pending',{after:'',limit:100})).status,403);
+  f.identity.issuers.idp.operators={alice:{sources:['seed-packs']}};
+  assert.equal((await post('pending',{after:'',limit:100})).status,200);
+  assert.equal((await post('pending',{after:'',limit:100,owner:'alice'})).status,403);
   assert.equal((await post('dispatch',{packId:first.result[0].id})).status,403);
  }finally{server.close();await once(server,'close');}
 });

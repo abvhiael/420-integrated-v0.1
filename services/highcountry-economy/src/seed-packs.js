@@ -63,6 +63,14 @@ export class SeedPacks {
    s.seedSupply.set(supplyKey,previous+count);s.seedPackSources.set(key,{issuer,request,packIds:packs.map(p=>p.id),source});return packs;
   });
  }
+ async pending(token,{after='',limit=100}){
+  if((after!==''&&!valid(after))||!Number.isSafeInteger(limit)||limit<1||limit>100)fail('invalid seed queue page');
+  await this.identity.requireTrustedIssuer(token,'seed-packs');const issuer=await this.identity.registeredPrincipal(token);
+  return this.store.transact(s=>{this.guard(s,token,issuer,true);seedPackState(s);
+   const rows=[...s.seedLotIntents.values()].filter(i=>i.status==='prepared'&&i.packId>after).sort((a,b)=>a.packId<b.packId?-1:a.packId>b.packId?1:0);
+   return {intents:rows.slice(0,limit).map(i=>structuredClone(i)),next:rows.length>limit?rows[limit-1].packId:null};
+  });
+ }
  async prepare(token,packId){
   if(!valid(packId))fail('invalid seed pack');const principal=await this.identity.registeredPrincipal(token);
   const pack=await this.store.transact(s=>{this.guard(s,token,principal);seedPackState(s);const p=s.seedPacks.get(packId);if(!p||p.owner!==principal)fail('pack ownership required');return structuredClone(p);});

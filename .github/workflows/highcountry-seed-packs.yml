@@ -11,6 +11,7 @@ on:
       - 'apps/highcountry-web/test/seed-*'
       - 'deployments/highcountry/seed-pack-policy.v1.json'
       - 'scripts/highcountry/build_seed_pack_policy.mjs'
+      - 'scripts/highcountry/dispatch_seed_lots.mjs'
       - 'scripts/highcountry/run_seed_pack_contracts.py'
       - 'scripts/highcountry/seed-packs-contract-test.sol'
       - 'contracts/src/highcountry/genetics/SeedRegistry.sol'

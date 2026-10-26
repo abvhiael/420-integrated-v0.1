@@ -147,6 +147,9 @@ export function runtimeHttpServer(runtime,{origin}){
     case '/seeds/packs/allocate':
      if(!seedPacks||Object.keys(b).sort().join(',')!=='count,owner,receiptId,region')throw new SettlementError('seed allocation request denied');
      result=await seedPacks.allocate(token,b);break;
+    case '/seeds/packs/pending':
+     if(!seedPacks||Object.keys(b).sort().join(',')!=='after,limit')throw new SettlementError('seed queue request denied');
+     result=await seedPacks.pending(token,b);break;
     case '/seeds/packs/prepare':
      if(!seedPacks||Object.keys(b).sort().join(',')!=='packId')throw new SettlementError('seed preparation request denied');
      result=await seedPacks.prepare(token,b.packId);break;

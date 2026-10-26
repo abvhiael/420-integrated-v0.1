@@ -111,3 +111,25 @@ test('changed canonical profile cannot receive a stale prepared issuance',async(
  f.identity.rpc.playerProfile=async()=> '0x'+'99'.repeat(32);
  await assert.rejects(f.worker.tick(f.alice,p.id),/profile changed/);assert.equal(f.submits(),0);
 });
+test('issuer queue pages immutable prepared intents and denies ordinary players',async()=>{
+ const f=await setup(),grants=await f.packs.starter(f.bob,'Red Mesa');for(const p of grants)await f.packs.prepare(f.bob,p.id);
+ await assert.rejects(f.packs.pending(f.bob,{after:'',limit:1}),/denied/);
+ const one=await f.packs.pending(f.alice,{after:'',limit:1}),two=await f.packs.pending(f.alice,{after:one.next,limit:1});
+ assert.equal(one.intents.length,1);assert.equal(two.intents.length,1);assert.notEqual(one.intents[0].lotId,two.intents[0].lotId);assert.equal(two.next,null);
+ await assert.rejects(f.packs.pending(f.alice,{after:'',limit:101}));
+ await f.store.transact(s=>s.runtimeEpochs.set('bob',1));await assert.rejects(f.worker.tick(f.alice,one.intents[0].packId),/recipient authority changed/);assert.equal(f.submits(),0);
+});
+test('dispatch lease and attempt exhaustion cannot prevent later finalized reconciliation',async()=>{
+ const f=await setup(),[p]=await f.packs.starter(f.alice,'Red Mesa'),i=await f.packs.prepare(f.alice,p.id);
+ await f.store.transact(s=>{s.seedIssuanceJobs=new Map([[p.id,{leaseUntil:2000,attempts:50}]]);});assert.equal((await f.worker.tick(f.alice,p.id)).status,'leased');assert.equal(f.submits(),0);
+ await f.store.transact(s=>s.seedIssuanceJobs.get(p.id).leaseUntil=0);await assert.rejects(f.worker.tick(f.alice,p.id),/attempts exhausted/);
+ f.issued.set(i.lotId,{fixtureOnly:true});assert.equal((await f.worker.tick(f.alice,p.id)).status,'issued');assert.equal(f.submits(),0);
+});
+test('operator runner defaults to read-only plans, pages queue and submits only explicit immutable IDs',async()=>{
+ const {dispatchSeedLots}=await import('../../../scripts/highcountry/dispatch_seed_lots.mjs');
+ const f=await setup(),[p]=await f.packs.starter(f.alice,'Red Mesa'),i=await f.packs.prepare(f.alice,p.id),calls=[],reports=[];
+ const fetchImpl=async(url,opt)=>{calls.push({url:String(url),body:JSON.parse(opt.body)});return {ok:true,json:async()=>({ok:true,result:String(url).endsWith('/pending')?{intents:[i],next:null}:{status:'submitted'}})};};
+ assert.deepEqual(await dispatchSeedLots({apiUrl:'https://hc.example',token:'signed',fetchImpl,report:x=>reports.push(x)}),{processed:1,failed:0});assert.equal(calls.length,1);assert.equal(reports[0].mode,'plan');assert.equal(reports[0].lotId,i.lotId);
+ await dispatchSeedLots({apiUrl:'https://hc.example',token:'signed',dispatch:true,fetchImpl,report:()=>{}});assert.deepEqual(calls.at(-1).body,{packId:p.id});
+ await assert.rejects(dispatchSeedLots({apiUrl:'http://hc.example',token:'signed',fetchImpl}));
+});

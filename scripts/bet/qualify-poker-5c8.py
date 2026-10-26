@@ -50,12 +50,16 @@ def main():
   execute(cmd+['--match-contract','^TournamentRecovery'+owner+'420Test$','--match-test','^'+test+r'\(\)$','-vvvv'],ROOT/'contracts',env,out,label+'-trace')
   trace=(out/(label+'-trace.stdout.log')).read_text(encoding='utf-8-sig');write(out,label+'-independent-replay.json',replayer.replay(trace));tamper_cases+=replayer.tamper(trace)
  execute(cmd+['--match-contract','^TournamentRecoverySecurity420Test$','--match-test',r'^testCanonicalPrizesResumeThroughIndependentCoordinators\(\)$','-vvvv'],ROOT/'contracts',env,out,'prize-restart-trace')
+ prize=module('prizes','scripts/bet/replay-poker-5c7.py');write(out,'prize-restart-independent-replay.json',prize.replay((out/'prize-restart-trace.stdout.log').read_text(encoding='utf-8-sig'),True))
+ if tamper_cases!=56:raise RuntimeError('Incomplete independent refund tamper execution')
  from Crypto.Hash import keccak
  def k256(b):h=keccak.new(digest_bits=256);h.update(b);return h.hexdigest()
  closure={};artifacts={}
  for f in (out/'build').glob('*/*.json'):
   d=json.loads(f.read_text(encoding='utf-8'));code=d.get('deployedBytecode',{}).get('object','').removeprefix('0x')
-  for rel,entry in d.get('metadata',{}).get('sources',{}).items():
+  metadata=d.get('metadata',{})
+  if metadata and (not metadata['compiler']['version'].startswith('0.8.30+')or metadata['settings'].get('viaIR')is not True or metadata['settings'].get('evmVersion')!='cancun' or metadata['settings'].get('optimizer')!={'enabled':True,'runs':200}):raise RuntimeError('Compiled toolchain/settings drift')
+  for rel,entry in metadata.get('sources',{}).items():
    path='contracts/'+rel;data=(ROOT/path).read_bytes().replace(b'\r\n',b'\n')
    if k256(data)!=entry['keccak256'].removeprefix('0x'):raise RuntimeError('Compiled source drift: '+path)
    closure[path]=sha(ROOT/path)

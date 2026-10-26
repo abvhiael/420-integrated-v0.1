@@ -1,7 +1,7 @@
 import {SettlementError} from './buds-ledger.js';
 import {SEED_PACK_POLICY,seedPackState} from './seed-packs.js';
 import {address,calldata} from './finalized-rpc.js';
-import {seedHash,OPENING_POLICY_HASH,poolDefinition,openingKey,openingPurpose,selectSeedOutcome,openingCommitment} from './seed-opening-selection.js';
+import {seedHash,OPENING_POLICY_HASH,poolDefinition,openingKey,openingPurpose,selectSeedOutcome,openingCommitment,eligibleGenomeCommitment} from './seed-opening-selection.js';
 const fail=m=>{throw new SettlementError(m);};
 const id=x=>typeof x==='string'&&/^[A-Za-z0-9:_-]{1,128}$/.test(x);
 const used=(map,key)=>{const n=map.get(key)??0;if(!Number.isSafeInteger(n)||n<0)fail('corrupt opening supply');return n;};
@@ -19,8 +19,9 @@ export class SeedOpenings {
   if(!id(packId))fail('invalid opening pack');const principal=await this.identity.registeredPrincipal(token);
   const snapshot=await this.store.transact(s=>{this.packs.guard(s,token,principal);seedOpeningState(s);const p=s.seedPacks.get(packId);if(!p||p.owner!==principal||p.starterCultivarId)fail('standard pack ownership required');return {pack:structuredClone(p),existing:structuredClone(s.seedOpenings.get(packId))};});
   if(snapshot.existing)return snapshot.existing;
-  const pack=snapshot.pack;if(pack.status!=='sealed'||pack.policyVersion!==SEED_PACK_POLICY.version||pack.seeds!==3||pack.source?.kind!=='authorized-allocation')fail('eligible sealed pack source required');
+  const pack=snapshot.pack;if(pack.status!=='sealed'||pack.policyVersion!==SEED_PACK_POLICY.version||pack.seeds!==3||!['authorized-allocation','settled-purchase'].includes(pack.source?.kind))fail('eligible sealed pack source required');
   const wallet=address(await this.identity.walletOf(token)),pool=poolDefinition(this.packs.catalogue,pack.region);
+  await this.packs.verifyPurchase(pack,wallet);
   await this.reader.validatePool(pool);
   // Admission never shrinks a tier to whichever genomes or supply happen to be available.
   const eligible=[];
@@ -33,13 +34,17 @@ export class SeedOpenings {
    const existing=s.seedOpenings.get(packId);if(existing)return structuredClone(existing);
    const current=s.seedPacks.get(packId),binding=s.runtimeWallets?.get(principal);
    if(JSON.stringify(current)!==JSON.stringify(pack)||binding?.wallet!==wallet)fail('opening authority or pack changed');
-   const source=s.seedPackSources.get('allocation:'+pack.source.receiptId);
+   const source=s.seedPackSources.get((pack.source.kind==='settled-purchase'?'purchase:':'allocation:')+pack.source.receiptId);
    if(!source||source.issuer!==pack.source.issuer||!source.packIds.includes(packId)||source.request.owner!==principal||source.request.region!==pack.region)fail('opening source admission missing');
+   const prepaid=pack.source.kind==='settled-purchase'?s.seedPurchases?.get(pack.source.receiptId):null;
+   if(pack.source.kind==='settled-purchase'&&!prepaid)fail('purchase seed reservation absent');
+   if(prepaid&&(prepaid.status!=='paid'||prepaid.holdStatus!=='reserved'||prepaid.poolHash!==pool.hash||eligibleGenomeCommitment(prepaid.eligible)!==eligibleGenomeCommitment(eligible)))fail('purchase seed reservation mismatch');
    for(const cid of pool.tiers.flat()){
+    if(prepaid){if(used(s.seedOpeningHolds,cid)<3)fail('purchase seed reservation absent');continue;}
     const cap=this.packs.catalogue.detail(cid).tier==='exclusive'?SEED_PACK_POLICY.maxExclusiveSeedUnitsPerCultivar:SEED_PACK_POLICY.maxSeedUnitsPerCultivar;
     if(used(s.seedSupply,'seeds:'+cid)+used(s.seedOpeningHolds,cid)+3>cap)fail('complete opening pool supply unavailable');
    }
-   for(const cid of pool.tiers.flat())s.seedOpeningHolds.set(cid,used(s.seedOpeningHolds,cid)+3);
+   if(prepaid)prepaid.holdStatus='opening';else for(const cid of pool.tiers.flat())s.seedOpeningHolds.set(cid,used(s.seedOpeningHolds,cid)+3);
    const intent={packId,owner:principal,ownerEpoch:s.runtimeEpochs?.get(principal)??0,ownerProfile:binding.profile,wallet,gameId:this.identity.gameId,deployment:structuredClone(this.reader.binding),pool:pool.index,poolHash:pool.hash,policyHash:OPENING_POLICY_HASH,openingKey:openingKey(this.identity.gameId,packId),commitment:null,sourcePack:pack,eligible,status:'committed',createdAt:this.clock(),requestId:null,outcome:null};
    intent.commitment=openingCommitment(intent);intent.purpose=openingPurpose(intent);intent.calldata=calldata('requestOpening(bytes32,address,uint8,bytes32)',intent.openingKey,wallet,intent.pool,intent.commitment);
    s.seedOpenings.set(packId,intent);current.status='opening-committed';return structuredClone(intent);

@@ -3,3 +3,5 @@
 .seed-pack-art{display:block;width:120px;height:180px;object-fit:contain;margin:.5rem 0}.seed-packs select{padding:.7rem;background:#17271e;color:#f3f0df;border:1px solid #718366;font:inherit}.seed-packs article{margin:1rem 0;max-width:25rem}
 
 .seed-packs .seed-earned{overflow-wrap:anywhere}.seed-packs details{margin:.8rem 0}.seed-packs summary{cursor:pointer;color:var(--seed-accent)}
+
+.seed-packs article{overflow-wrap:anywhere}.seed-packs button{max-width:100%;white-space:normal}

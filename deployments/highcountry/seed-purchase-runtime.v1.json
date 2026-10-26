@@ -1,0 +1,21 @@
+{
+  "schema": "HC.SEED.PURCHASE.RUNTIME.V1",
+  "status": "UNRESOLVED_NOT_DEPLOYED",
+  "seedPurchases": {
+    "version": "HC.SEED.PURCHASES.V1",
+    "treasury": null,
+    "quoteSigner": null
+  },
+  "rpc": {
+    "chainId": null,
+    "contracts": {
+      "seedPayments": {"address": null, "codeHash": null},
+      "emergency": {"address": null, "codeHash": null}
+    }
+  },
+  "constructor": ["actual gameId", "HC-SEED-07 opening policy hash", "reviewed treasury", "actual EmergencyState", "reviewed external EOA quoteSigner"],
+  "requires": ["HC-SEED-07 packs and authorized issuance", "HC-SEED-08 persistent openings and reviewed unique-output VRF", "all registered canonical pool genomes", "TLS Postgres restricted runtime role and namespace RLS", "authenticated external signer RPC with personal_sign for the reviewed quoteSigner"],
+  "prices": {"BUDS": 420, "native420Wei": "1000000000000000000"},
+  "budsSettlement": "Atomic approved HC.SEED.PURCHASE.V1 sink/burn and owned-pack issuance; no conversion or new BUDS issuance",
+  "nativeSettlement": "Buyer-bound authorized quote, exact value, pinned finalized receipt and matching canonical event; pending is not payment"
+}

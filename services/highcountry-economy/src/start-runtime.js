@@ -60,6 +60,7 @@ try {
  }
  if(config.seedPacks&&config.seedPacks.version!=='HC.SEED.PACKS.V1')throw Error('unapproved seed pack version');
  if(config.seedPacks&&!seedCatalogue)throw Error('seed catalogue required for issuance');
+ if(config.seedPurchases&&(config.seedPurchases.version!=='HC.SEED.PURCHASES.V1'||!config.seedOpenings))throw Error('unapproved seed purchase dependencies');
  if(config.seedOpenings&&config.seedOpenings.version!=='HC.SEED.OPENINGS.V1')throw Error('unapproved opening version');
  if(config.seedOpenings&&(!config.seedPacks||!seedCatalogue))throw Error('seed opening dependencies required');
  const runtime=await createRuntime({...config,pool,signerRpc,progression,missions,discovery,seedCatalogue});

@@ -1,0 +1,88 @@
+name: HighCountry HC-SEED-09 marketplace payments
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/highcountry/seeds/SeedPackPayments.sol'
+      - 'services/highcountry-economy/src/seed-*'
+      - 'services/highcountry-economy/src/postgres-store.js'
+      - 'services/highcountry-economy/src/runtime-service.js'
+      - 'services/highcountry-economy/src/start-runtime.js'
+      - 'services/highcountry-economy/test/seed-purchases*'
+      - 'apps/highcountry-web/src/seed-packs.js'
+      - 'apps/highcountry-web/src/marketplace.js'
+      - 'apps/highcountry-web/public/seed-catalogue.css'
+      - 'apps/highcountry-web/test/seed-purchases*'
+      - 'deployments/highcountry/seed-purchase-runtime.v1.json'
+      - 'scripts/highcountry/*seed_payment*'
+      - 'scripts/highcountry/seed-payments-contract-test.sol'
+      - '.github/workflows/highcountry-seed-purchases.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  purchase-runtime:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: seed09_disposable_only
+          POSTGRES_DB: seed09_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      HC_TEST_POSTGRES_URL: postgresql://postgres:seed09_disposable_only@localhost:5432/seed09_test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Scoped dependencies and real browser
+        run: |
+          npm install --prefix /tmp/hc-seed09 --no-save pg@8.16.3 jsdom@26.1.0 playwright@1.56.1
+          ln -s /tmp/hc-seed09/node_modules node_modules
+          if [ -x /usr/bin/google-chrome ]; then
+            echo 'HC_TEST_CHROMIUM_PATH=/usr/bin/google-chrome' >> "$GITHUB_ENV"
+          else
+            /tmp/hc-seed09/node_modules/.bin/playwright install --with-deps chromium
+          fi
+      - name: L1 payments, HTTP, issuance, opening, currency and source-authority regression
+        run: node --test services/highcountry-economy/test/seed-purchases*.test.js services/highcountry-economy/test/seed-openings*.test.js services/highcountry-economy/test/seed-packs*.test.js services/highcountry-economy/test/seed-catalogue*.test.js services/highcountry-economy/test/postgres-store.test.js services/highcountry-economy/test/runtime-integration.test.js services/highcountry-economy/test/r064-browser-runtime-http.test.js services/highcountry-economy/test/canonical-social-chain-adapter.test.js services/highcountry-economy/test/canonical-social-gateway.test.js
+      - name: L2 real PostgreSQL payment races, restart, holds and two-currency delivery
+        run: node services/highcountry-economy/test/seed-purchases-postgres.integration.mjs
+      - name: Affected browser components and marketplace regression
+        run: node --test apps/highcountry-web/test/seed-purchases-dom.integration.mjs apps/highcountry-web/test/seed-packs-dom.integration.mjs apps/highcountry-web/test/seed-catalogue-dom.integration.mjs apps/highcountry-web/test/hc-next-4-4-marketplace.test.mjs
+      - name: Production build and unchanged canonical catalogue/pool parity
+        run: |
+          node scripts/highcountry/build_seed_opening_policy.mjs
+          node apps/highcountry-web/scripts/build.mjs
+          git diff --exit-code -- deployments/highcountry/seed-opening-policy.v1.json apps/highcountry-web/public/assets/highcountry/seed-catalogue.v1.json
+      - name: Actual Chromium two-currency checkout through authenticated delivery
+        run: node apps/highcountry-web/test/seed-purchases-browser.integration.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: hc-seed-09-browser-evidence
+          path: artifacts/highcountry/hc-seed-09-*.png
+          if-no-files-found: warn
+  canonical-payments:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.7.1
+      - name: Canonical formatting
+        run: forge fmt --root contracts --check "$GITHUB_WORKSPACE/contracts/src/highcountry/seeds/SeedPackPayments.sol" "$GITHUB_WORKSPACE/scripts/highcountry/seed-payments-contract-test.sol"
+      - name: L2 actual native value, cryptographic quotes, receipt, replay, cancellation and treasury conservation
+        run: python scripts/highcountry/run_seed_payment_contracts.py

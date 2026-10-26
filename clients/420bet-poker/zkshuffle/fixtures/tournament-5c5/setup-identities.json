@@ -1,0 +1,58 @@
+[
+  {
+    "name": "InitialDeck52",
+    "relationSHA256": "206ebeac0bd5714cb8d43710a95fe8877b7e30079629c81f02bbda19ad4204ef",
+    "schemaSHA256": "7714a3d648383c0787c6ca74924ce9b8691c836aa6e53b6d789b497c1e44fa65",
+    "vkSHA256": "2fe2a70862312d03961d6e8d64e75f79796fbe945e3db0a8d8bf98a8fa478b07",
+    "setup": "reused original WS8 experimental Groth16 setup; not production trusted ceremony",
+    "publicInputs": 5
+  },
+  {
+    "name": "Reencrypt52",
+    "relationSHA256": "bcd0da64d4c07a3a179e4cbfd45bf875243363027d3f98b34c463724a92c987b",
+    "schemaSHA256": "2c7ac2929ab7e54e75fe81848da69171914b68c51ad05a3c47c20415a81cb941",
+    "vkSHA256": "762cf764e808dff32e149030306b355da4eaca7d387a4e42280f312be3c9c8d3",
+    "setup": "reused original WS8 experimental Groth16 setup; not production trusted ceremony",
+    "publicInputs": 6
+  },
+  {
+    "name": "Delivery",
+    "relationSHA256": "1ad5af09a480976f9d674a723fb47e8298f7756fe753cedcfdd9226f6241496c",
+    "schemaSHA256": "41f6f4464b1e8f6422a1bc04e53e2ff7442fc31bfbca839b15c1321aa3a4e975",
+    "vkSHA256": "84a54e840617a469032deaab0e55598fce5236ea767b42f3ec290022b274b660",
+    "setup": "reused original WS8 experimental Groth16 setup; not production trusted ceremony",
+    "publicInputs": 18
+  },
+  {
+    "name": "RecipientPoP",
+    "relationSHA256": "46e35ff688764312e2ba0bb81ceca4d350b9b93589c03d673c8d985031d3bee9",
+    "schemaSHA256": "8113e0415a2c4018dbcb45d6faf390adfd64a78c250741bdefb93f0622b46695",
+    "vkSHA256": "402567c80914fa2797af19e2e8592db08d4cf8db965fd90997658b9acf2eabf5",
+    "setup": "reused original WS8 experimental Groth16 setup; not production trusted ceremony",
+    "publicInputs": 3
+  },
+  {
+    "name": "Aggregate",
+    "relationSHA256": "3b992513f801e76464f8c9ec564e7acdb76f4d59e6716f7b9ae9a45231db2831",
+    "schemaSHA256": "704a2ac7fbdf1a1f9f3e3906fe315f8b4a46c2f1b46ec0c111023713553224b0",
+    "vkSHA256": "b45633d62999e080db4c41342e147c069c7dbb04788765345cbb8457fc76be9d",
+    "setup": "reused original WS8 experimental Groth16 setup; not production trusted ceremony",
+    "publicInputs": 7
+  },
+  {
+    "name": "Partial",
+    "relationSHA256": "dac8817f07591e2e9e62c0cf08480d496d440b488e4fd5ee3d0b9138c426f498",
+    "schemaSHA256": "40899554951db3ff96c0ac9c6aedd0591bbb49aa9275ee0e9f630a695f312ddf",
+    "vkSHA256": "bec094cbedcb5ab9dd5d7808779580812aa5c81723481511adec0e2df9c1a986",
+    "setup": "reused original WS8 experimental Groth16 setup; not production trusted ceremony",
+    "publicInputs": 13
+  },
+  {
+    "name": "Unmask",
+    "relationSHA256": "b7d34e132516bc81708b56548752dd3170b72af219b40039d167cb83a1964bc8",
+    "schemaSHA256": "36e7aa933f9039a8a03697044b9774b1b044f364c0fad30831b6ea8041f77add",
+    "vkSHA256": "cce8f27d5da4847a629550396416faa87f2a8c1102184bf1dc0baaafaebb7e05",
+    "setup": "reused original WS8 experimental Groth16 setup; not production trusted ceremony",
+    "publicInputs": 17
+  }
+]

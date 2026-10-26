@@ -102,7 +102,8 @@ jobs:
           forge test --match-path 'test/RegistryIdentityNames420.t.sol' -vv
 
       - name: Commit generated ID-AUDIT-5 Genesis outputs when absent or stale
-        if: github.event_name == 'pull_request'
+        # Preserve this scoped poker PR's exact qualified source; validation above still runs.
+        if: github.event_name == 'pull_request' && github.head_ref != 'audit/420bet-5c5-reconcile-main'
         shell: bash
         run: |
           set -euo pipefail

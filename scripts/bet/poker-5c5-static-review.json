@@ -1,0 +1,261 @@
+{
+  "schema": "420-poker-5c5-static-review-v1",
+  "analyzer": "slither-analyzer 0.11.6",
+  "rawSeverityPreserved": true,
+  "independentAudit": false,
+  "dispositions": {
+    "45ee4e96a2bc6b25b932151186297008fd0115684571288018a98c9681e9f062": {
+      "severity": "High",
+      "check": "reentrancy-balance",
+      "description": "Reentrancy in PokerTournamentRuntimeEscrow420._receive(uint256) (contracts/src/bet/tournament/PokerTournamentRuntimeEscrow420.sol): External call allowing reentrancy: - amount != 0 && ! t.transferFrom(msg.sender,address(this),amount) (contracts/src/bet/tournament/PokerTournamentRuntimeEscrow420.sol) Balance read before the call: - before_ = t.balanceOf(address(this)) (contracts/src/bet/tournament/PokerTournamentRuntimeEscrow420.sol) Possible stale balance used after the call in a condition: - t.balanceOf(address(this)) != before_ + amount || t.balanceOf(msg.sender) + amount != payer (contracts/src/bet/tournament/PokerTournamentRuntimeEscrow420.sol) - stale variable `before_`",
+      "disposition": "reviewed, source-bound; raw severity retained",
+      "reason": "Intentional escrow balance delta, not a reusable authorization balance. Every caller is guarded; transferFrom must increase custody by exactly amount and decrease payer by exactly amount or the entire receipt/capability/liability transaction reverts. New runtime hostile-token deposit and reentry tests exercise the successor itself."
+    },
+    "f9c47d3eb94266047e1a2534a41371fa939dd4f2d8461339557e07d7d14d498d": {
+      "severity": "High",
+      "check": "reentrancy-balance",
+      "description": "Reentrancy in PokerTournamentRuntimeEscrow420._receive(uint256) (contracts/src/bet/tournament/PokerTournamentRuntimeEscrow420.sol): External call allowing reentrancy: - amount != 0 && ! t.transferFrom(msg.sender,address(this),amount) (contracts/src/bet/tournament/PokerTournamentRuntimeEscrow420.sol) Balance read before the call: - payer = t.balanceOf(msg.sender) (contracts/src/bet/tournament/PokerTournamentRuntimeEscrow420.sol) Possible stale balance used after the call in a condition: - t.balanceOf(address(this)) != before_ + amount || t.balanceOf(msg.sender) + amount != payer (contracts/src/bet/tournament/PokerTournamentRuntimeEscrow420.sol) - stale variable `payer`",
+      "disposition": "reviewed, source-bound; raw severity retained",
+      "reason": "The payer pre-call balance is deliberately compared with the post-call balance to reject overcharging. The global guarded modifier excludes cross-function mutation; token calls cannot supply tournament results. New runtime overcharge, short incoming and callback tests retain this assertion."
+    },
+    "cb5216c6a7b99e46678198d3474c08b59a0abf094b0123fad647701bd668815a": {
+      "severity": "High",
+      "check": "reentrancy-balance",
+      "description": "Reentrancy in PokerTournamentEntryEscrow420._receive(uint256) (contracts/src/bet/tournament/PokerTournamentEntryEscrow420.sol): External call allowing reentrancy: - amount != 0 && ! t.transferFrom(msg.sender,address(this),amount) (contracts/src/bet/tournament/PokerTournamentEntryEscrow420.sol) Balance read before the call: - before_ = t.balanceOf(address(this)) (contracts/src/bet/tournament/PokerTournamentEntryEscrow420.sol) Possible stale balance used after the call in a condition: - t.balanceOf(address(this)) != before_ + amount || t.balanceOf(msg.sender) + amount != payer (contracts/src/bet/tournament/PokerTournamentEntryEscrow420.sol) - stale variable `before_`",
+      "disposition": "reviewed, source-bound; raw severity retained",
+      "reason": "Retained C2 source: exact incoming custody/payer deltas under its global guard; inherited hostile-token tests are re-executed, not replaced by runtime-only tests."
+    },
+    "ebee5947237ed20fc5b461f43c01d006fea10235d1ec4c70595807a6fd568691": {
+      "severity": "High",
+      "check": "reentrancy-balance",
+      "description": "Reentrancy in PokerTournamentRuntimeEscrow420.withdraw() (contracts/src/bet/tournament/PokerTournamentRuntimeEscrow420.sol): External call allowing reentrancy: - ! t.transfer(msg.sender,amount) || t.balanceOf(address(this)) + amount != before_ || t.balanceOf(msg.sender) != recipient + amount (contracts/src/bet/tournament/PokerTournamentRuntimeEscrow420.sol) Balance read before the call: - recipient = t.balanceOf(msg.sender) (contracts/src/bet/tournament/PokerTournamentRuntimeEscrow420.sol) Possible stale balance used after the call in a condition: - ! t.transfer(msg.sender,amount) || t.balanceOf(address(this)) + amount != before_ || t.balanceOf(msg.sender) != recipient + amount (contracts/src/bet/tournament/PokerTournamentRuntimeEscrow420.sol) - stale variable `recipient`",
+      "disposition": "reviewed, source-bound; raw severity retained",
+      "reason": "Intentional recipient delta verifies full refund delivery. Credit and total liability are consumed under the global guard before transfer; any failure or short recipient/custody delta reverts them atomically. New runtime callback/short-output/failing-output tests exercise the successor."
+    },
+    "f9e28d3966180af73ceee134bb2e4abe12c96ff40d4fc734601dcb2f7823e93c": {
+      "severity": "High",
+      "check": "reentrancy-balance",
+      "description": "Reentrancy in PokerTournamentRuntimeEscrow420.withdraw() (contracts/src/bet/tournament/PokerTournamentRuntimeEscrow420.sol): External call allowing reentrancy: - ! t.transfer(msg.sender,amount) || t.balanceOf(address(this)) + amount != before_ || t.balanceOf(msg.sender) != recipient + amount (contracts/src/bet/tournament/PokerTournamentRuntimeEscrow420.sol) Balance read before the call: - before_ = t.balanceOf(address(this)) (contracts/src/bet/tournament/PokerTournamentRuntimeEscrow420.sol) Possible stale balance used after the call in a condition: - ! t.transfer(msg.sender,amount) || t.balanceOf(address(this)) + amount != before_ || t.balanceOf(msg.sender) != recipient + amount (contracts/src/bet/tournament/PokerTournamentRuntimeEscrow420.sol) - stale variable `before_`",
+      "disposition": "reviewed, source-bound; raw severity retained",
+      "reason": "Intentional custody pre-call balance verifies exactly one refund left escrow. Global guard and checks-effects-interactions prevent double withdrawal; both token balance deltas remain mandatory."
+    },
+    "b2a0f92f50ed622c2779da3ffe282a535a97644c580d45da5baf9d089856ec6c": {
+      "severity": "High",
+      "check": "reentrancy-balance",
+      "description": "Reentrancy in PokerTournamentEntryEscrow420.withdraw() (contracts/src/bet/tournament/PokerTournamentEntryEscrow420.sol): External call allowing reentrancy: - ! t.transfer(msg.sender,amount) || t.balanceOf(address(this)) + amount != before_ || t.balanceOf(msg.sender) != recipient + amount (contracts/src/bet/tournament/PokerTournamentEntryEscrow420.sol) Balance read before the call: - recipient = t.balanceOf(msg.sender) (contracts/src/bet/tournament/PokerTournamentEntryEscrow420.sol) Possible stale balance used after the call in a condition: - ! t.transfer(msg.sender,amount) || t.balanceOf(address(this)) + amount != before_ || t.balanceOf(msg.sender) != recipient + amount (contracts/src/bet/tournament/PokerTournamentEntryEscrow420.sol) - stale variable `recipient`",
+      "disposition": "reviewed, source-bound; raw severity retained",
+      "reason": "Retained C2 source and global guard; exact outgoing custody/recipient deltas are essential refund assertions. Inherited refund/reentry hostile-token tests execute."
+    },
+    "da170769dfe1deadf3f479992f1eb80c2daa3e0abfc8e0b9a1e19157740e6038": {
+      "severity": "High",
+      "check": "reentrancy-balance",
+      "description": "Reentrancy in PokerTournamentEntryEscrow420._receive(uint256) (contracts/src/bet/tournament/PokerTournamentEntryEscrow420.sol): External call allowing reentrancy: - amount != 0 && ! t.transferFrom(msg.sender,address(this),amount) (contracts/src/bet/tournament/PokerTournamentEntryEscrow420.sol) Balance read before the call: - payer = t.balanceOf(msg.sender) (contracts/src/bet/tournament/PokerTournamentEntryEscrow420.sol) Possible stale balance used after the call in a condition: - t.balanceOf(address(this)) != before_ + amount || t.balanceOf(msg.sender) + amount != payer (contracts/src/bet/tournament/PokerTournamentEntryEscrow420.sol) - stale variable `payer`",
+      "disposition": "reviewed, source-bound; raw severity retained",
+      "reason": "Retained C2 payer pre-call balance is deliberate exact transfer accounting; inherited overcharge/fee-on-transfer tests execute."
+    },
+    "f4857782760d576786b3f1ff5140aae30eeb73660a021b8faa463387b0710ba9": {
+      "severity": "High",
+      "check": "reentrancy-balance",
+      "description": "Reentrancy in PokerTournamentEntryEscrow420.withdraw() (contracts/src/bet/tournament/PokerTournamentEntryEscrow420.sol): External call allowing reentrancy: - ! t.transfer(msg.sender,amount) || t.balanceOf(address(this)) + amount != before_ || t.balanceOf(msg.sender) != recipient + amount (contracts/src/bet/tournament/PokerTournamentEntryEscrow420.sol) Balance read before the call: - before_ = t.balanceOf(address(this)) (contracts/src/bet/tournament/PokerTournamentEntryEscrow420.sol) Possible stale balance used after the call in a condition: - ! t.transfer(msg.sender,amount) || t.balanceOf(address(this)) + amount != before_ || t.balanceOf(msg.sender) != recipient + amount (contracts/src/bet/tournament/PokerTournamentEntryEscrow420.sol) - stale variable `before_`",
+      "disposition": "reviewed, source-bound; raw severity retained",
+      "reason": "Retained C2 recipient/custody pre-call balances intentionally bind exact outgoing asset delivery; inherited short-output and credit preservation tests execute."
+    },
+    "ed707161c1385182efbdc79467e5a6f3ff78c634384d136c77718a39a1c41cb4": {
+      "severity": "High",
+      "check": "uninitialized-state",
+      "description": "Identity420._credentialCandidates (contracts/src/apps/Identity420.sol) is never initialized. It is used in: - Identity420.issueCredential(bytes32,bytes32,bytes32,bytes32,bytes32,uint64) (contracts/src/apps/Identity420.sol) - Identity420.hasValidCredential(bytes32,bytes32) (contracts/src/apps/Identity420.sol) - Identity420._pruneCredentialCandidates(bytes32,bytes32) (contracts/src/apps/Identity420.sol) - Identity420._removeCredentialCandidate(bytes32,bytes32,bytes32) (contracts/src/apps/Identity420.sol)",
+      "disposition": "reviewed, source-bound; raw severity retained",
+      "reason": "Retained Identity420 dynamic nested mapping arrays have Solidity zero/empty initialization; issueCredential pushes the ID and prune/remove mutate those arrays. This is not an uninitialized storage pointer. Genuine actor credential and revocation regression exercises identity authority."
+    },
+    "873d3ddb3832f31eab64b0d3d3887ce872178361fd57e65d709faeb6bcd84b2b": {
+      "severity": "Medium",
+      "check": "divide-before-multiply",
+      "description": "PokerTournamentPolicy420.fee(uint256) (contracts/src/bet/tournament/PokerTournamentPolicy420.sol) performs a multiplication on the result of a division: - (buyIn / 100) * 3 + (buyIn % 100) * 3 / 100 (contracts/src/bet/tournament/PokerTournamentPolicy420.sol)",
+      "disposition": "reviewed, source-bound; raw severity retained",
+      "reason": "Retained policy fee uses quotient/remainder arithmetic to calculate floor(buyIn*3/100) without overflowing multiplication; reference and native quote fuzz assert this exact rule."
+    },
+    "140b25435556d2f01d8ae4845afd4c32ef78d5b3194a274d86ab65be33c82ca6": {
+      "severity": "Medium",
+      "check": "incorrect-equality",
+      "description": "Identity420.credential(bytes32) (contracts/src/apps/Identity420.sol) uses a dangerous strict equality: - c.subjectProfileId == bytes32(0) (contracts/src/apps/Identity420.sol)",
+      "disposition": "reviewed, source-bound; raw severity retained",
+      "reason": "Retained credential zero issuer sentinel denotes absence; equality is not a numeric price/balance assumption. Credential owner/issuer/active/expiry are separately validated."
+    },
+    "e7d02c51107cc1e6cb0a194a9b7d5bc123fe9779dbf044a476aa876aa83964c3": {
+      "severity": "Medium",
+      "check": "incorrect-equality",
+      "description": "Identity420.credentialValid(bytes32) (contracts/src/apps/Identity420.sol) uses a dangerous strict equality: - c.subjectProfileId == bytes32(0) || c.revokedAt != 0 || c.subjectRejected (contracts/src/apps/Identity420.sol)",
+      "disposition": "reviewed, source-bound; raw severity retained",
+      "reason": "Retained credential zero issuer sentinel denotes absence; exact sentinel comparison is necessary and no external party can force issuance by a token transfer."
+    },
+    "14f43fb8903ee1cd6e4fad2d041e8f5c4c9cb968cc26ca978e531be483963990": {
+      "severity": "Medium",
+      "check": "incorrect-equality",
+      "description": "RandomnessRouter420.request(bytes32) (contracts/src/randomness/RandomnessRouter420.sol) uses a dangerous strict equality: - _requests[requestId].status == Status.NONE (contracts/src/randomness/RandomnessRouter420.sol)",
+      "disposition": "reviewed, source-bound; raw severity retained",
+      "reason": "Retained randomness request State.NONE sentinel rejects nonexistent IDs; enum equality is intentional state authorization."
+    },
+    "50edd6de40550c734a0526f6a4eb7bfc628e065565725bd90ccaa602fa164552": {
+      "severity": "Medium",
+      "check": "incorrect-equality",
+      "description": "RandomnessRouter420.result(bytes32) (contracts/src/randomness/RandomnessRouter420.sol) uses a dangerous strict equality: - _requests[requestId].status == Status.NONE (contracts/src/randomness/RandomnessRouter420.sol)",
+      "disposition": "reviewed, source-bound; raw severity retained",
+      "reason": "Retained randomness result State.NONE sentinel rejects nonexistent IDs; fulfilled/void state gates remain mandatory."
+    },
+    "dcd686f3d957950a72af804dfd5fd58c28ef48619329a1de7b9ad5fa6cbcbae4": {
+      "severity": "Medium",
+      "check": "incorrect-equality",
+      "description": "PokerTournamentEntryEscrow420.quote(bytes32) (contracts/src/bet/tournament/PokerTournamentEntryEscrow420.sol) uses a dangerous strict equality: - events_[id].state == State.NONE (contracts/src/bet/tournament/PokerTournamentEntryEscrow420.sol)",
+      "disposition": "reviewed, source-bound; raw severity retained",
+      "reason": "Retained C2 event State.NONE sentinel rejects an absent event before quoting; enum equality is required."
+    },
+    "3ca590ad4afd464d0215ae21c6a8335baa8dc4c748e20fa2c0741292f0ea67e4": {
+      "severity": "Medium",
+      "check": "incorrect-equality",
+      "description": "PokerTournamentRuntimeEscrow420.quote(bytes32) (contracts/src/bet/tournament/PokerTournamentRuntimeEscrow420.sol) uses a dangerous strict equality: - events_[id].state == State.NONE (contracts/src/bet/tournament/PokerTournamentRuntimeEscrow420.sol)",
+      "disposition": "reviewed, source-bound; raw severity retained",
+      "reason": "Runtime event State.NONE sentinel rejects an absent event before quoting; no value equality or external balance used as event existence."
+    },
+    "6729ede355aee1a6103c4ecf0e8fb6d7669b5785d1e0614423f07d9c3465d96e": {
+      "severity": "Medium",
+      "check": "reentrancy-no-eth",
+      "description": "Reentrancy in PokerTournamentAssignments420.expire(bytes32) (contracts/src/bet/tournament/PokerTournamentAssignments420.sol): External calls: - router.voidExpired(e.requestId) (contracts/src/bet/tournament/PokerTournamentAssignments420.sol) State variables written after the call(s): - e.stage = Stage.VOID (contracts/src/bet/tournament/PokerTournamentAssignments420.sol) PokerTournamentAssignments420.events_ (contracts/src/bet/tournament/PokerTournamentAssignments420.sol) can be used in cross function reentrancies: - PokerTournamentAssignments420._live(bytes32) (contracts/src/bet/tournament/PokerTournamentAssignments420.sol) - PokerTournamentAssignments420.assign(bytes32,uint32) (contracts/src/bet/tournament/PokerTournamentAssignments420.sol) - PokerTournamentAssignments420.assignmentLive(bytes32) (contracts/src/bet/tournament/PokerTournamentAssignments420.sol) - PokerTournamentAssignments420.bind(bytes32,bytes32,uint32) (contracts/src/bet/tournament/PokerTournamentAssignments420.sol) - PokerTournamentAssignments420.eventOf(bytes32) (contracts/src/bet/tournament/PokerTournamentAssignments420.sol) - PokerTournamentAssignments420.expire(bytes32) (contracts/src/bet/tournament/PokerTournamentAssignments420.sol) - PokerTournamentAssignments420.fulfill(bytes32,bytes32,bytes) (contracts/src/bet/tournament/PokerTournamentAssignments420.sol) - PokerTournamentAssignments420.loadRoster(bytes32,uint32) (contracts/src/bet/tournament/PokerTournamentAssignments420.sol) - PokerTournamentAssignments420.resolve(bytes32) (contracts/src/bet/tournament/PokerTournamentAssignments420.sol) - PokerTournamentAssignments420.shuffle(bytes32,uint32) (contracts/src/bet/tournament/PokerTournamentAssignments420.sol)",
+      "disposition": "reviewed, source-bound; raw severity retained",
+      "reason": "Retained C4 expiry calls the runtime-pinned canonical Router. Router.voidExpired has no consumer callback; expire is guarded and marks VOID only on verified terminal state. There is no arbitrary router setter. Existing exact-source C4 expiry/withholding tests execute."
+    },
+    "4dd48eec76b863d3fef91ce0f6fa28a3d4555f59ee0787aa964765991fab5267": {
+      "severity": "Medium",
+      "check": "reentrancy-no-eth",
+      "description": "Reentrancy in PokerTournamentAssignments420.loadRoster(bytes32,uint32) (contracts/src/bet/tournament/PokerTournamentAssignments420.sol): External calls: - escrow.tick(id) (contracts/src/bet/tournament/PokerTournamentAssignments420.sol) - e.requestId = router.requestRandomness(e.profile,RandomnessIds420.DOMAIN_BET,entropy.requestPurpose(e.purpose,e.rosterRoot),uint64(deadline)) (contracts/src/bet/tournament/PokerTournamentAssignments420.sol) - entropy.attachRequest(e.purpose,e.requestId,e.rosterRoot) (contracts/src/bet/tournament/PokerTournamentAssignments420.sol) State variables written after the call(s): - e.stage = Stage.REQUESTED (contracts/src/bet/tournament/PokerTournamentAssignments420.sol) PokerTournamentAssignments420.events_ (contracts/src/bet/tournament/PokerTournamentAssignments420.sol) can be used in cross function reentrancies: - PokerTournamentAssignments420._live(bytes32) (contracts/src/bet/tournament/PokerTournamentAssignments420.sol) - PokerTournamentAssignments420.assign(bytes32,uint32) (contracts/src/bet/tournament/PokerTournamentAssignments420.sol) - PokerTournamentAssignments420.assignmentLive(bytes32) (contracts/src/bet/tournament/PokerTournamentAssignments420.sol) - PokerTournamentAssignments420.bind(bytes32,bytes32,uint32) (contracts/src/bet/tournament/PokerTournamentAssignments420.sol) - PokerTournamentAssignments420.eventOf(bytes32) (contracts/src/bet/tournament/PokerTournamentAssignments420.sol) - PokerTournamentAssignments420.expire(bytes32) (contracts/src/bet/tournament/PokerTournamentAssignments420.sol) - PokerTournamentAssignments420.fulfill(bytes32,bytes32,bytes) (contracts/src/bet/tournament/PokerTournamentAssignments420.sol) - PokerTournamentAssignments420.loadRoster(bytes32,uint32) (contracts/src/bet/tournament/PokerTournamentAssignments420.sol) - PokerTournamentAssignments420.resolve(bytes32) (contracts/src/bet/tournament/PokerTournamentAssignments420.sol) - PokerTournamentAssignments420.shuffle(bytes32,uint32) (contracts/src/bet/tournament/PokerTournamentAssignments420.sol)",
+      "disposition": "reviewed, source-bound; raw severity retained",
+      "reason": "Retained C4 loader is guarded, and its escrow/router/entropy addresses and code hashes are pinned. Canonical tick/requestRandomness/attachRequest do not call back consumer state; stage changes only after actual requests. Runtime successor tick has the same ABI and global guard, no external call in the no-sponsor STARTING tick path. Full funded roster and capacity regressions execute."
+    },
+    "1636562a97f6f2fcfe0d842a9ffcf8ce5197100a7a99b789aa4013834b749d22": {
+      "severity": "Medium",
+      "check": "reentrancy-no-eth",
+      "description": "Reentrancy in PokerTournamentSeatingEntropy420.commit(address,bytes32,bytes32) (contracts/src/bet/tournament/PokerTournamentSeatingEntropy420.sol): External calls: - escrow.tick(r.eventId) (contracts/src/bet/tournament/PokerTournamentSeatingEntropy420.sol) State variables written after the call(s): - r.commitments[index] = value (contracts/src/bet/tournament/PokerTournamentSeatingEntropy420.sol) PokerTournamentSeatingEntropy420.rounds (contracts/src/bet/tournament/PokerTournamentSeatingEntropy420.sol) can be used in cross function reentrancies: - PokerTournamentSeatingEntropy420.attachRequest(bytes32,bytes32,bytes32) (contracts/src/bet/tournament/PokerTournamentSeatingEntropy420.sol) - PokerTournamentSeatingEntropy420.commit(address,bytes32,bytes32) (contracts/src/bet/tournament/PokerTournamentSeatingEntropy420.sol) - PokerTournamentSeatingEntropy420.prepare(bytes32,bytes32) (contracts/src/bet/tournament/PokerTournamentSeatingEntropy420.sol) - PokerTournamentSeatingEntropy420.proofFor(address,bytes32) (contracts/src/bet/tournament/PokerTournamentSeatingEntropy420.sol) - PokerTournamentSeatingEntropy420.reveal(address,bytes32,bytes32) (contracts/src/bet/tournament/PokerTournamentSeatingEntropy420.sol) - PokerTournamentSeatingEntropy420.roundOf(address,bytes32) (contracts/src/bet/tournament/PokerTournamentSeatingEntropy420.sol) - PokerTournamentSeatingEntropy420.verifyRandomness(bytes32,bytes32,bytes32,bytes32,bytes) (contracts/src/bet/tournament/PokerTournamentSeatingEntropy420.sol) - r.committedAt[index] = uint64(block.timestamp) (contracts/src/bet/tournament/PokerTournamentSeatingEntropy420.sol) PokerTournamentSeatingEntropy420.rounds (contracts/src/bet/tournament/PokerTournamentSeatingEntropy420.sol) can be used in cross function reentrancies: - PokerTournamentSeatingEntropy420.attachRequest(bytes32,bytes32,bytes32) (contracts/src/bet/tournament/PokerTournamentSeatingEntropy420.sol) - PokerTournamentSeatingEntropy420.commit(address,bytes32,bytes32) (contracts/src/bet/tournament/PokerTournamentSeatingEntropy420.sol) - PokerTournamentSeatingEntropy420.prepare(bytes32,bytes32) (contracts/src/bet/tournament/PokerTournamentSeatingEntropy420.sol) - PokerTournamentSeatingEntropy420.proofFor(address,bytes32) (contracts/src/bet/tournament/PokerTournamentSeatingEntropy420.sol) - PokerTournamentSeatingEntropy420.reveal(address,bytes32,bytes32) (contracts/src/bet/tournament/PokerTournamentSeatingEntropy420.sol) - PokerTournamentSeatingEntropy420.roundOf(address,bytes32) (contracts/src/bet/tournament/PokerTournamentSeatingEntropy420.sol) - PokerTournamentSeatingEntropy420.verifyRandomness(bytes32,bytes32,bytes32,bytes32,bytes) (contracts/src/bet/tournament/PokerTournamentSeatingEntropy420.sol)",
+      "disposition": "reviewed, source-bound; raw severity retained",
+      "reason": "Retained C4 commit calls pinned registration escrow.tick, whose canonical implementation has no callback in this state transition; commitments and timestamp follow identity/capability checks and cannot be overwritten. Actual independent provider commits and no-redraw tests execute."
+    },
+    "04725aaed959ef31ed391823e7275ea4b00a6fa0c8a7a326dcf0d59f16fcc3e4": {
+      "severity": "Medium",
+      "check": "uninitialized-local",
+      "description": "RandomnessRouter420.requestRandomness(bytes32,bytes32,bytes32,uint64).fallback_ (contracts/src/randomness/RandomnessRouter420.sol) is a local variable never initialized",
+      "disposition": "reviewed, source-bound; raw severity retained",
+      "reason": "Retained router memory FallbackConfig is Solidity zero-initialized, representing no fallback. Round profile explicitly rejects fallback routes; withholding becomes recovery, not an operator seed."
+    },
+    "7373a07b40eb001c4faac76445767ac518f98a4161aabb4118e1c32924f1895c": {
+      "severity": "Medium",
+      "check": "uninitialized-local",
+      "description": "RandomnessDraw420.weightedSelection(bytes32,bytes32,uint256,uint256[]).total (contracts/src/randomness/RandomnessDraw420.sol) is a local variable never initialized",
+      "disposition": "reviewed, source-bound; raw severity retained",
+      "reason": "Retained weighted-selection integer accumulator is Solidity initialized to zero; no storage pointer or uninitialized external value."
+    },
+    "50db39af6528a99f2ca02673f2556a4292b24e5c9eabbd485eaccfcf42ec7a80": {
+      "severity": "Medium",
+      "check": "uninitialized-local",
+      "description": "RandomnessDraw420.weightedSelection(bytes32,bytes32,uint256,uint256[]).cumulative (contracts/src/randomness/RandomnessDraw420.sol) is a local variable never initialized",
+      "disposition": "reviewed, source-bound; raw severity retained",
+      "reason": "Retained weighted-selection cumulative integer starts at Solidity zero. It is updated in bounded deterministic iteration."
+    },
+    "b122c564efab695cd2e8e1e8c9cdf8f546a654f1403203879da3f9f0fa38d6b3": {
+      "severity": "Medium",
+      "check": "uninitialized-local",
+      "description": "PokerShuffleCiphertextAvailability420.computeRoot(uint256,uint256[208]).nodes (contracts/src/bet/PokerShuffleCiphertextAvailability420.sol) is a local variable never initialized",
+      "disposition": "reviewed, source-bound; raw severity retained",
+      "reason": "Retained ciphertext Merkle scratch array is Solidity zero-initialized, then all actual leaves/internal nodes required for the returned root are assigned. Actual initial and both shuffle roots are admitted by genuine proofs."
+    },
+    "76ee1d83587632d4106667bf9949d15a4c7dee667fa1436a835dc7fd02441e7c": {
+      "severity": "Medium",
+      "check": "unused-return",
+      "description": "PokerTournamentEntryEscrow420.personKey(bytes32,bytes32,address) (contracts/src/bet/tournament/PokerTournamentEntryEscrow420.sol) ignores return value by (controller,None,None,None,None,None,active) = identities.profiles(subject) (contracts/src/bet/tournament/PokerTournamentEntryEscrow420.sol)",
+      "disposition": "reviewed, source-bound; raw severity retained",
+      "reason": "Retained C2 profile destructuring intentionally selects controller/active only; credentials separately supply person and exact issuer/type/validity checks. Other metadata is not authority."
+    },
+    "f2960763ca0e445b1b5ffdd8bfa36611f92493271d48c67a77b4a1676a7959a2": {
+      "severity": "Medium",
+      "check": "unused-return",
+      "description": "PokerTournamentHostAdmission420.bootstrap(bytes32,uint32) (contracts/src/bet/tournament/PokerTournamentHostAdmission420.sol) ignores return value by (None,None,k) = draw.rosterAt(id,i) (contracts/src/bet/tournament/PokerTournamentHostAdmission420.sol)",
+      "disposition": "reviewed, source-bound; raw severity retained",
+      "reason": "bootstrap first reads only permutation index k, then separately reads entry and receipt at k; the ignored raw row is deliberately not the shuffled participant. Actual C4 matching positions, receipts, chips and button are checked before READY."
+    },
+    "ac4353758fb6e762bad3d81a8af115d8f2ba60956e0c9074274cf2a81af9f3cf": {
+      "severity": "Medium",
+      "check": "unused-return",
+      "description": "PokerActionDisputeClock420.bindResolver(bytes32,address) (contracts/src/bet/PokerActionDisputeClock420.sol) ignores return value by deals.tables().getTable(tableId) (contracts/src/bet/PokerActionDisputeClock420.sol)",
+      "disposition": "reviewed, source-bound; raw severity retained",
+      "reason": "Retained dispute binder invokes getTable for its nonexistent-table revert, then separately enforces controller/capability/resolver binding; table return data is not an authorization substitute."
+    },
+    "edc444cb9219a8b6b828b6753581139b13fdf5f32e05171d37d28269171add73": {
+      "severity": "Medium",
+      "check": "unused-return",
+      "description": "PokerTournamentRuntimeEscrow420.personKey(bytes32,bytes32,address) (contracts/src/bet/tournament/PokerTournamentRuntimeEscrow420.sol) ignores return value by (controller,None,None,None,None,None,active) = identities.profiles(subject) (contracts/src/bet/tournament/PokerTournamentRuntimeEscrow420.sol)",
+      "disposition": "reviewed, source-bound; raw severity retained",
+      "reason": "Runtime profile destructuring deliberately selects controller/active; exact credential issuer/type/subject/expiry/revocation and person are separately required. Genuine purchases use actual current seat authority."
+    },
+    "82e655cd0f052d4db5b16674ff392e579a0bd7d1870916bafd5d66a7d8047aa2": {
+      "severity": "Medium",
+      "check": "unused-return",
+      "description": "PokerTournamentHostBalance420.balance(bytes32) (contracts/src/bet/tournament/PokerTournamentHostBalance420.sol) ignores return value by (low,high,None,None) = seats.bounds() (contracts/src/bet/tournament/PokerTournamentHostBalance420.sol)",
+      "disposition": "reviewed, source-bound; raw severity retained",
+      "reason": "bounds return low/high counts plus table IDs. balance needs only counts to decide READY; the actual move delegates to qualified kernel which selects source/destination and preserves obligations. Funded 3/1 to 2/2 movement executes."
+    },
+    "420e26a93dfb3c57d97e60281501ec355900c1afb62bb25f8472e64ba9877e9a": {
+      "severity": "Medium",
+      "check": "unused-return",
+      "description": "PokerTournamentRuntimeEscrow420.personKey(bytes32,bytes32,address) (contracts/src/bet/tournament/PokerTournamentRuntimeEscrow420.sol) ignores return value by (None,None,None,person,None,None,None,None) = identities.credentials(credential) (contracts/src/bet/tournament/PokerTournamentRuntimeEscrow420.sol)",
+      "disposition": "reviewed, source-bound; raw severity retained",
+      "reason": "Runtime credential destructuring selects person after credentialValid and exact credential context checks; unrelated schema/claim metadata is not seat authority."
+    },
+    "a41495bb29597b18461cc86a89783539272d0ea5532d742c9ffdd9c06234bc48": {
+      "severity": "Medium",
+      "check": "unused-return",
+      "description": "PokerTournamentHostAdmission420.acceptPurchase(bytes32,uint64) (contracts/src/bet/tournament/PokerTournamentHostAdmission420.sol) ignores return value by (destination,None) = s.seating[id].admit(q,PokerTournamentTableBalance420.Purchase.RE_ENTRY,e.drawSeed,s.seating[id].revision) (contracts/src/bet/tournament/PokerTournamentHostAdmission420.sol)",
+      "disposition": "reviewed, source-bound; raw severity retained",
+      "reason": "admit returns destination and seat. Kernel writes and validates seat atomically itself; host needs destination to require configured genuine bundle and increment seat version. Funded reentry checks actual player position/stack/receipt/generation."
+    },
+    "10e5e51f710f6efac1b3b88b17288fb006d1e47c664066e65171ef19519c95b6": {
+      "severity": "Medium",
+      "check": "unused-return",
+      "description": "PokerTournamentHostAdmission420.bootstrap(bytes32,uint32) (contracts/src/bet/tournament/PokerTournamentHostAdmission420.sol) ignores return value by (x,receipt,None) = draw.rosterAt(id,k) (contracts/src/bet/tournament/PokerTournamentHostAdmission420.sol)",
+      "disposition": "reviewed, source-bound; raw severity retained",
+      "reason": "Second rosterAt selects raw entry and receipt; its permutation index is not needed. The earlier k establishes canonical shuffle order and checked actual assignment binds entry receipt/person/payer/chips."
+    },
+    "0824ac8d1b1237b629ce14cbf0d93164e95b53b5059228dd7d1ea31273c76307": {
+      "severity": "Medium",
+      "check": "unused-return",
+      "description": "PokerTournamentHostAdmission420.acceptLatePurchase(bytes32,uint64) (contracts/src/bet/tournament/PokerTournamentHostAdmission420.sol) ignores return value by (destination,None) = s.seating[id].admit(p,PokerTournamentTableBalance420.Purchase.NEW_PLAYER,e.drawSeed,s.seating[id].revision) (contracts/src/bet/tournament/PokerTournamentHostAdmission420.sol)",
+      "disposition": "reviewed, source-bound; raw severity retained",
+      "reason": "Late admit writes/validates seat inside kernel; host uses destination to reject an unconfigured table atomically. Real payment and admission either both succeed or both revert. Funded late entry and balancing execute."
+    },
+    "b52c20cb9436631579db0835431998ce93d984f154ce50cf354f7b48e715ee58": {
+      "severity": "Medium",
+      "check": "unused-return",
+      "description": "PokerTournamentEntryEscrow420.personKey(bytes32,bytes32,address) (contracts/src/bet/tournament/PokerTournamentEntryEscrow420.sol) ignores return value by (None,None,None,person,None,None,None,None) = identities.credentials(credential) (contracts/src/bet/tournament/PokerTournamentEntryEscrow420.sol)",
+      "disposition": "reviewed, source-bound; raw severity retained",
+      "reason": "Retained C2 credential destructuring uses person after independent exact credential validation; ignored credential metadata does not grant authority."
+    },
+    "5ac769555e2fca44cfccd88f6ab6bc515ac561722fffaff1ab9c7433e729f0b0": {
+      "severity": "Medium",
+      "check": "unused-return",
+      "description": "PokerTournamentHostRounds420.beginHand(bytes32,uint32) (contracts/src/bet/tournament/PokerTournamentHostRounds420.sol) ignores return value by e.hands.lock(e.clock,e.levels,e.context,key,hand,block.timestamp) (contracts/src/bet/tournament/PokerTournamentHostRounds420.sol)",
+      "disposition": "reviewed, source-bound; raw severity retained",
+      "reason": "C3 hands.lock persists canonical blind snapshot and enforces unique table/hand/active limits. Host computes the same position in the same transaction from pinned frozen schedule and timestamp before lock, so unused returned copy is not a caller-controlled blind choice. Actual engine reads frozen host plan for every street; inherited C3 snapshot tests also execute."
+    }
+  },
+  "normalizedSourceSHA256": {
+    "contracts/src/bet/tournament/PokerTournamentRuntimeEscrow420.sol": "2bc754ffa1de4c6e729fcd3154b884554c31f78ca9e968002d6b71764c381c2d",
+    "contracts/src/bet/tournament/PokerTournamentEntryEscrow420.sol": "22d499a1a5df3618c55f7c88761a5bcd69a5feab47947720a8813e3386b4c83c",
+    "contracts/src/apps/Identity420.sol": "f47526bce8b55d10c64fb3d8d320fc1e4dc6d43945db064e86d373adec7e0152",
+    "contracts/src/bet/tournament/PokerTournamentPolicy420.sol": "f9db8f1db569ebf00cc057a8dfa4a36245501d629793223d7def4e4b25aa65bd",
+    "contracts/src/randomness/RandomnessRouter420.sol": "c4bf8a457df29c18c979cf3f0ef50ecbdd2b2f608430d5ff069704dc3f831115",
+    "contracts/src/bet/tournament/PokerTournamentAssignments420.sol": "336ea5e599a4979afa18510f156f020c613a0cfff0bccebc898729c52fce8908",
+    "contracts/src/bet/tournament/PokerTournamentSeatingEntropy420.sol": "ad66577e0e108072773ed43ec91bf8e287d8e7a5898e9e198ab49731d8aa33a2",
+    "contracts/src/randomness/RandomnessDraw420.sol": "d5c5017bb6d19ea326dbfbf9a57410e14948fbe4d6eebf8455faa1816b791886",
+    "contracts/src/bet/PokerShuffleCiphertextAvailability420.sol": "cd7fe43473d064d05d12cbba6b8b007a75300a47fd074f7b687104652545f90f",
+    "contracts/src/bet/tournament/PokerTournamentHostAdmission420.sol": "f85c4228d1be352a891d199f6b6a601a2cf95c781d06fd1b8221a75e8222daf3",
+    "contracts/src/bet/PokerActionDisputeClock420.sol": "436bac5a5ecce761f22a2cf524eb94d068cd9c3c54047ef03ceab3212b2162fa",
+    "contracts/src/bet/tournament/PokerTournamentHostBalance420.sol": "a812c31ede37d2ae87eef6dd836d20f5317e2ef311a9e4ee78edc8db1b9a538b",
+    "contracts/src/bet/tournament/PokerTournamentHostRounds420.sol": "93ea06da656a692cd1af9409cd93f515c806b83af8182dfda7d116445d5a386e"
+  }
+}

@@ -12,7 +12,6 @@ const bool=x=>{if(x===true||x==='true')return 1;if(x===false||x==='false')return
 const enc=(sig,args)=>calldata(sig,...args);
 export const SOC5A_ENABLED_ACTIONS=Object.freeze(['organization.create','organization.invite','organization.invitation.revoke','organization.join','organization.leave','organization.remove','organization.leader.propose','organization.leader.accept','organization.delegate','organization.delegate.revoke','cooperative.create','cooperative.enroll','cooperative.withdraw','cooperative.propose','cooperative.vote','cooperative.proposal.cancel','cooperative.execute']);
 const ENABLED=new Set(SOC5A_ENABLED_ACTIONS);
-const TABLE=SOC5A_ABI;
 export const SOC5A_ABI=Object.freeze({
  'organization.create':{contract:'organizations',sig:'create(bytes32,bytes32)',fields:['id','metadataHash'],check:'create'},
  'organization.invite':{contract:'organizations',sig:'invite(bytes32,address,bool)',fields:['organization','account'],extra:true,check:'admin'},
@@ -32,6 +31,7 @@ export const SOC5A_ABI=Object.freeze({
  'cooperative.proposal.cancel':{contract:'governance',sig:'cancel(bytes32)',fields:['proposal'],check:'proposer'},
  'cooperative.execute':{contract:'executor',sig:'execute(bytes32)',fields:['proposal'],check:'executable'}
 });
+const TABLE=SOC5A_ABI;
 // Recover the signer of the actual serialized Ethereum transaction locally.
 // RPC eth_getTransactionByHash is NOT acceptable as pre-broadcast signature evidence.
 export async function recoverSignedSocialEnvelope(raw){
@@ -46,6 +46,7 @@ export async function recoverSignedSocialEnvelope(raw){
 export class CanonicalSocialChainAdapter {
  constructor({rpc,contracts,scope,emergencyDomain,organizationEmergencyDomain,cooperativeEmergencyDomain,verifySignedEnvelope=recoverSignedSocialEnvelope}){
   if(typeof rpc?.request!=='function'||typeof rpc?.call!=='function'||!contracts||!hash(emergencyDomain)||!hash(organizationEmergencyDomain)||!hash(cooperativeEmergencyDomain)||typeof verifySignedEnvelope!=='function')fail('pinned social chain and signed envelope verifier required');
+  if(organizationEmergencyDomain.toLowerCase()!==keccak256(Buffer.from('HC.EMERGENCY.ORGANIZATION_GOVERNANCE'))||cooperativeEmergencyDomain.toLowerCase()!==keccak256(Buffer.from('HC.EMERGENCY.COOPERATIVE_GOVERNANCE')))fail('incorrect canonical emergency domain binding');
   for(const key of ['organizations','cooperatives','governance','executor','authority'])
    if(!rpc.contracts[key]?.codeHash||address(rpc.contracts[key].address)!==address(contracts[key]))fail('unpinned social contract');
   Object.assign(this,{rpc,contracts,scope,emergencyDomain,organizationEmergencyDomain,cooperativeEmergencyDomain,verifySignedEnvelope});

@@ -1,0 +1,26 @@
+{
+  "schema": "HC.SEED.ENGINE_INSPECTION.V1",
+  "baseline": "830cb2ce38ef18c9be0269aaef844fbd42d5f293",
+  "files": [
+    {
+      "path": "contracts/src/highcountry/genetics/GenomeRegistry.sol",
+      "sha256": "eab5d6e6db62009877cf6660610e074c40cff151cc2f258e55b31a41b668ee6a"
+    },
+    {
+      "path": "contracts/src/highcountry/genetics/FoundingGenetics.sol",
+      "sha256": "855be8148a7073bec3d6036ba4fd7d9ba89ce75d1cee1bcde33d45c61030fbdc"
+    },
+    {
+      "path": "contracts/src/highcountry/breeding/BreedingEngine.sol",
+      "sha256": "2201ba978d0781072368587e0fcb303a299d8c704a221cc482985f2e02a65637"
+    },
+    {
+      "path": "contracts/src/highcountry/cultivation/CultivationEngine.sol",
+      "sha256": "6f13b17a10c10f3311de7840cb380187c46bfefd2bf9075524b907fc7ccfd2b4"
+    },
+    {
+      "path": "contracts/src/highcountry/harvest/HarvestScoring.sol",
+      "sha256": "c440fd655988ad967a23f286840b0377b710d939bcebcaadea97e9ad88df82a4"
+    }
+  ]
+}

@@ -37,7 +37,7 @@ jobs:
       - name: Execute genuine funded hands, adversarial cases and inherited regression
         run: python scripts/bet/qualify-poker-5c5.py --output artifacts/poker-5c5
       - uses: actions/upload-artifact@v4
-        if: always()
+        if: always() && !cancelled()
         with:
           name: poker-5c5-${{ github.sha }}
           path: artifacts/poker-5c5/**

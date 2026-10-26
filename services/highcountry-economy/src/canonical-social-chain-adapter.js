@@ -77,6 +77,13 @@ export class CanonicalSocialChainAdapter {
   const header=await this.rpc.header();
   return {allowed:true,blockHash:header.hash,policyHash:keccak256(Buffer.from(JSON.stringify([wallet,action,params,header.hash])))};
  }
+ async transactionIntent({wallet,action,payload}){
+  const op=TABLE[action];if(!op||!ENABLED.has(action))fail('unapproved social operation');
+  const params=op.fields.map(k=>k==='account'||k==='candidate'?address(payload[k]):b32(payload[k]));
+  if(typeof op.extra==='boolean')params.push(op.extra?1:0);
+  if(op.extra==='support')params.push(payload.support===true||payload.support==='true'?1:0);
+  return {from:address(wallet),to:address(this.contracts[op.contract]),data:enc(op.sig,params),chainId:this.rpc.chainId,value:'0x0'};
+ }
  async submitSigned({wallet,action,payload}){
   const op=TABLE[action];if(!op||!ENABLED.has(action))fail('unapproved social operation');
   const raw=payload?.signedRawTransaction;

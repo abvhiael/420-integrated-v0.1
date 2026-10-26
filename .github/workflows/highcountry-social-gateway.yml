@@ -1,0 +1,39 @@
+name: High Country Canonical Social Gateway Level 1
+on:
+  pull_request:
+    paths:
+      - 'services/highcountry-economy/src/canonical-social-gateway.js'
+      - 'services/highcountry-economy/src/social-http.js'
+      - 'services/highcountry-economy/src/runtime-service.js'
+      - 'services/highcountry-economy/test/canonical-social-gateway.test.js'
+      - 'services/highcountry-economy/migrations/007-social-operations.sql'
+      - 'clients/highcountry-access-v1/src/social-http-gateway.js'
+      - '.github/workflows/highcountry-social-gateway.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  gateway:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Exact SHA
+        env:
+          SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Node module syntax
+        run: |
+          node --check services/highcountry-economy/src/canonical-social-gateway.js
+          node --check services/highcountry-economy/src/social-http.js
+          node --check services/highcountry-economy/src/runtime-service.js
+          node --check clients/highcountry-access-v1/src/social-http-gateway.js
+      - name: Canonical gateway adversarial tests
+        run: node --test services/highcountry-economy/test/canonical-social-gateway.test.js
+      - name: Retained social browser tests
+        run: node --test clients/highcountry-access-v1/test/social-economy.test.js

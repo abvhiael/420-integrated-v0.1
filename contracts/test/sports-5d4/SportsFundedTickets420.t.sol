@@ -279,6 +279,7 @@ contract HostileSportsToken420 {
         balanceOf[from] -= amount;
         uint256 credited = mode == 2 ? amount - 1 : amount;
         balanceOf[to] += credited;
+        if (mode == 4) { assembly { return(0, 0) } }
         if (mode == 3 && !nested) {
             nested = true;
             (bool ok,) = target.call(attack);
@@ -320,6 +321,12 @@ contract SportsHostileToken420Test is SportsFundedTickets420Test {
         _hostileSetup(2);
         _fails(CONTROL, address(vault), abi.encodeCall(vault.deposit, (hostileMarket, 100)));
         require(vault.collateral(hostileMarket) == 0 && hostile.balanceOf(address(vault)) == 0, "fee token collateral");
+    }
+
+    function testMissingReturnCannotMintCollateral() public {
+        _hostileSetup(4);
+        _fails(CONTROL, address(vault), abi.encodeCall(vault.deposit, (hostileMarket, 100)));
+        require(vault.collateral(hostileMarket) == 0 && hostile.balanceOf(address(vault)) == 0, "missing return collateral");
     }
 
     function testHostileReentryCannotModifyVaultLedger() public {

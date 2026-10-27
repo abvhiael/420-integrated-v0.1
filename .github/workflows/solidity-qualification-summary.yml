@@ -80,9 +80,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: |
-            contracts/out
-            contracts/cache
-          key: sol02-${{ runner.os }}-foundry-stable-${{ matrix.group }}-${{ needs.plan.outputs.sha }}-${{ hashFiles('contracts/foundry.toml') }}
+            contracts/out-sol02-${{ matrix.group }}
+            contracts/cache-sol02-${{ matrix.group }}
+          key: sol02-${{ runner.os }}-foundry-stable-${{ matrix.group }}-${{ needs.plan.outputs.sha }}-${{ hashFiles('contracts/foundry.toml') }}-${{ github.event_name == 'pull_request' && 'pr' || 'ci' }}
       - name: Compile bounded group once and execute retained test targets
         working-directory: contracts
         env:

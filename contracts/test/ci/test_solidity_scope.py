@@ -5,7 +5,7 @@ import tempfile
 import unittest
 import importlib.util
 
-ROOT = pathlib.Path(__file__).resolve().parents[1]
+ROOT = pathlib.Path(__file__).resolve().parents[2]
 spec = importlib.util.spec_from_file_location("scope", ROOT / "scripts/select-solidity-scope.py")
 scope = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(scope)

@@ -12,7 +12,7 @@ function fixture(){
   season:async id=>seasons.get(id),category:async(c,v)=>policies.get(c+':'+v),
   event:async id=>events.get(id),lockEvent:async id=>events.get(id),
   insertEvent:async e=>{events.set(e.eventId,e);},
-  entry:async(e,a)=>entries.has(key(e,a)),entryCount:async e=>[...entries].filter(v=>v.startsWith(e+':')).length,
+  entry:async(e,a)=>entries.has(key(e,a)),entryCount:async e=>[...entries.keys()].filter(v=>v.startsWith(e+':')).length,
   insertEntry:async(e,a)=>{entries.set(key(e,a),true);},
   result:async(e,a)=>results.get(key(e,a)),harvestClaim:async(e,h)=>claims.has(key(e,h)),
   insertResult:async r=>{results.set(key(r.eventId,r.accountId),r);claims.add(key(r.eventId,r.harvestId));},

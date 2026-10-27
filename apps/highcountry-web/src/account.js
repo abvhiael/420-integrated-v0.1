@@ -32,6 +32,30 @@ export function mountAccountPanel({document,main,runtime,authenticate,storage=gl
  const sessionAction=async()=>{session=await client.session();cloudRevision=session.revision;
   status.textContent=session.registered?'Registered profile available. Cloud revision '+cloudRevision:'Authenticated issuer account; register a game profile to activate cloud save.';};
  button('Check secure sign-in',()=>sessionAction().catch(report));
+ // HC-NEXT-7.2 ordinary exhibitions require registered issuer accounts, never a wallet.
+ const ordinaryEvent=field('Ordinary exhibition ID');
+ const ordinaryHarvest=field('Verified FLOWER harvest ID');
+ const exhibitionStatus=paragraph('Ordinary exhibitions require an authenticated registered game profile; no wallet is needed.');
+ exhibitionStatus.setAttribute('role','status');exhibitionStatus.setAttribute('aria-live','polite');
+ let exhibitionBusy=false;
+ const exhibitionAction=(label,action,args)=>button(label,async()=>{
+  if(exhibitionBusy)return;exhibitionBusy=true;
+  try{
+   session=await client.session();
+   if(!session.registered)throw Error('registered-game-profile-required');
+   const result=await client.ordinaryExhibition(action,args());
+   exhibitionStatus.textContent=action==='status'?
+    'Exhibition '+result.eventId+': '+(result.finalized?'finalized':'pending')+
+      (result.finalized?' winner '+(result.winner??'none')+', quality '+result.winnerScore:''):
+    'Ordinary exhibition '+action+' accepted. No wallet or token settlement required.';
+  }catch(e){exhibitionStatus.textContent='Exhibition action denied: '+e.message;}
+  finally{exhibitionBusy=false;}
+ });
+ exhibitionAction('View ordinary exhibition','status',()=>({eventId:ordinaryEvent.value}));
+ exhibitionAction('Register for ordinary exhibition','enter',()=>({eventId:ordinaryEvent.value}));
+ exhibitionAction('Submit verified exhibition harvest','submit',()=>({eventId:ordinaryEvent.value,
+  harvestId:ordinaryHarvest.value}));
+
  const profileId=field('New game profile ID (not an account credential)');
  const rulesetId=field('Approved game ruleset ID');
  button('Register optional game profile',async()=>{try{const v=await client.register({profileId:profileId.value,rulesetId:rulesetId.value});status.textContent='Game profile registered: '+v.profileId;await sessionAction();}catch(e){report(e);}});

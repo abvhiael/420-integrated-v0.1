@@ -30,5 +30,5 @@ test('placement preflight fails closed on ownership, anchor, terrain, collision,
 });
 test('distribution build includes the imported catalogue',()=>{
  const script=readFileSync(fileURLToPath(new URL('../scripts/build.mjs',import.meta.url)),'utf8');
- assert.match(script,/['"]fire-gathering-catalogue\\.js['"]/);
+ assert.ok(script.includes("'fire-gathering-catalogue.js'"));
 });

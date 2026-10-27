@@ -1,0 +1,93 @@
+// HC-PLACE-03-B.1: verified, deterministic individual-unit custody records.
+// Deliberately NOT wired to placement or marketplace mutation paths until B.2/B.3.
+import {createHash} from 'node:crypto';
+const token=v=>typeof v==='string'&&/^[A-Za-z0-9:_-]{1,128}$/.test(v);
+const count=v=>Number.isSafeInteger(v)&&v>0&&v<=10000;
+const reject=s=>{throw new Error('hc-custody:'+s)};
+const key=(owner,asset)=>JSON.stringify([owner,asset]);
+const clone=x=>structuredClone(x);
+export const CUSTODY_SCHEMA='highcountry-custody-v1';
+export const CUSTODY_STATES=Object.freeze(['available','listed','placed','other_reserved']);
+export function custodyUnitId(receiptId,index){
+ if(!token(receiptId)||!Number.isSafeInteger(index)||index<0)reject('invalid-unit-source');
+ return 'hcu_'+createHash('sha256').update(JSON.stringify([CUSTODY_SCHEMA,receiptId,index])).digest('hex');
+}
+export function custodyState(s){
+ if(!(s?.custodyUnits instanceof Map)||!(s.custodyReceipts instanceof Map)||!(s.custodyReservations instanceof Map)||!(s.assets instanceof Map)||!(s.importedAssets instanceof Set))reject('unprovisioned-state');
+ return s;
+}
+export function auditCustody(s,{strictAggregate=false}={}){
+ custodyState(s);
+ const seen=new Set(),totals=new Map(),active=new Map();
+ for(const [uid,u] of s.custodyUnits){
+  if(!token(uid)||uid!==custodyUnitId(u.receiptId,u.unitIndex)||u.schemaVersion!==CUSTODY_SCHEMA||!token(u.owner)||!token(u.assetId)||!token(u.receiptId)||!Number.isSafeInteger(u.unitIndex)||u.unitIndex<0||!Number.isSafeInteger(u.revision)||u.revision<1||!CUSTODY_STATES.includes(u.state))reject('invalid-unit');
+  const rec=s.custodyReceipts.get(u.receiptId);
+  if(!rec||rec.owner!==u.owner||rec.assetId!==u.assetId||!count(rec.quantity)||u.unitIndex>=rec.quantity||!s.importedAssets.has(u.receiptId))reject('unbacked-unit');
+  if(seen.has(uid))reject('duplicate-unit');
+  seen.add(uid);
+  const reservation=s.custodyReservations.get(uid);
+  if(u.state==='available'){
+   if(reservation!==undefined||u.reservationId!==null)reject('available-unit-reserved');
+  }else{
+   if(!reservation||reservation.unitId!==uid||reservation.owner!==u.owner||reservation.assetId!==u.assetId||reservation.kind!==u.state||!token(reservation.reservationId)||reservation.reservationId!==u.reservationId)reject('invalid-reservation');
+   if(active.has(reservation.reservationId))reject('reused-reservation');
+   active.set(reservation.reservationId,uid);
+  }
+  const k=key(u.owner,u.assetId),t=totals.get(k)??{available:0,reserved:0};
+  if(u.state==='available')t.available++;else t.reserved++;
+  totals.set(k,t);
+ }
+ for(const [receiptId,receipt] of s.custodyReceipts){
+  if(!token(receiptId)||!token(receipt.owner)||!token(receipt.assetId)||!count(receipt.quantity)||!s.importedAssets.has(receiptId))reject('invalid-receipt');
+  for(let i=0;i<receipt.quantity;i++)if(!seen.has(custodyUnitId(receiptId,i)))reject('missing-unit');
+ }
+ for(const [uid] of s.custodyReservations)if(!seen.has(uid))reject('orphan-reservation');
+ if(strictAggregate)for(const [k,t] of totals){
+  const a=s.assets.get(k);
+  if(!a||a.available!==t.available||a.reserved!==t.reserved)reject('aggregate-divergence');
+ }
+ return {units:seen.size,receipts:s.custodyReceipts.size,reservations:active.size,totals};
+}
+export class HighCountryCustodyRegistry {
+ constructor(store,authority){
+  if(typeof store?.transact!=='function'||typeof authority?.requireAssetIssuer!=='function'||typeof authority?.verifyAssetReceipt!=='function')reject('trusted-dependencies-required');
+  this.store=store;this.authority=authority;
+ }
+ // A verified receipt is the only way to instantiate deterministic custody units.
+ // Returns no entitlement until the receipt and every unit are committed together.
+ async admit(session,receipt){
+  await this.authority.requireAssetIssuer(session);
+  if(!receipt||!token(receipt.receiptId)||!token(receipt.owner)||!token(receipt.asset)||!count(receipt.quantity))reject('malformed-receipt');
+  if(await this.authority.verifyAssetReceipt(receipt)!==true)reject('unverified-receipt');
+  const input=clone(receipt);
+  return this.store.transact(s=>{
+   custodyState(s);
+   if(s.importedAssets.has(input.receiptId)||s.custodyReceipts.has(input.receiptId))reject('duplicate-receipt');
+   const k=key(input.owner,input.asset),balance=s.assets.get(k)??{available:0,reserved:0};
+   if(!Number.isSafeInteger(balance.available)||balance.available<0||!Number.isSafeInteger(balance.reserved)||balance.reserved<0||balance.available>Number.MAX_SAFE_INTEGER-input.quantity)reject('invalid-balance');
+   const lineage=s.assetSources.get(k);
+   if(lineage&&lineage!==input.receiptId)reject('mixed-provenance-requires-migration');
+   const units=[];
+   for(let i=0;i<input.quantity;i++){
+    const unitId=custodyUnitId(input.receiptId,i);
+    if(s.custodyUnits.has(unitId)||s.custodyReservations.has(unitId))reject('unit-already-issued');
+    units.push([unitId,{schemaVersion:CUSTODY_SCHEMA,unitId,receiptId:input.receiptId,unitIndex:i,owner:input.owner,assetId:input.asset,state:'available',reservationId:null,revision:1}]);
+   }
+   s.custodyReceipts.set(input.receiptId,{owner:input.owner,assetId:input.asset,quantity:input.quantity,schemaVersion:CUSTODY_SCHEMA});
+   for(const [unitId,unit] of units)s.custodyUnits.set(unitId,unit);
+   s.importedAssets.add(input.receiptId);
+   s.assetSources.set(k,input.receiptId);
+   s.assets.set(k,{available:balance.available+input.quantity,reserved:balance.reserved});
+   auditCustody(s);
+   return {receiptId:input.receiptId,unitIds:units.map(([id])=>id)};
+  });
+ }
+ // No guest-controlled allocate/reserve/release API in B.1. Transactional
+ // exclusive reservation transitions require B.2/B.3 integration.
+ async readOwned(session,principal){
+  if(typeof this.authority.registeredPrincipal!=='function')reject('principal-authority-required');
+  const who=await this.authority.registeredPrincipal(session);
+  if(!token(who)||who!==principal)reject('unauthorized-read');
+  return this.store.transact(s=>{custodyState(s);return [...s.custodyUnits.values()].filter(u=>u.owner===who).map(clone);});
+ }
+}

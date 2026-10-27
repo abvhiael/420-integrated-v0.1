@@ -7,7 +7,7 @@ import {CloudSaveLifecycle420} from './cloud-save-lifecycle.js';
 const fail=x=>{throw Object.assign(new Error(x),{code:x});};
 const opaque=x=>typeof x==='string'&&/^[A-Za-z0-9:_-]{1,128}$/.test(x);
 const dec=x=>typeof x==='string'&&/^(0|[1-9][0-9]*)$/.test(x)&&x.length<=20;
-export function createHighCountryCloudHttp420({authority,poolForPrincipal,provider,schemaVersion=1,origin}={}){
+export function createHighCountryCloudHttp420({authority,poolForPrincipal,provider,schemaVersion=1,origin,ordinaryExhibitions=null}={}){
  if(typeof authority?.verifyToken!=='function'||typeof authority?.registeredPrincipal!=='function'||
  !/^0x[0-9a-fA-F]{64}$/.test(authority.gameId||'')||typeof poolForPrincipal!=='function'||
  typeof provider?.put!=='function'||typeof provider?.get!=='function'||typeof provider?.delete!=='function'||
@@ -35,7 +35,21 @@ export function createHighCountryCloudHttp420({authority,poolForPrincipal,provid
    }
    const lifecycle=new CloudSaveLifecycle420({repository:scoped,provider,schemaVersion});
    let result;
-   if(req.method==='GET'&&url.pathname==='/highcountry/session'){
+   if(ordinaryExhibitions&&url.pathname.startsWith('/highcountry/exhibitions/')){
+    const action=url.pathname.slice('/highcountry/exhibitions/'.length);
+    // Identity, registeredPrincipal and game scope have already been checked above.
+    if(!['create','enter','submit','reject','finalize'].includes(action)||req.method!=='POST')
+     return send(404,{error:'not-found'});
+    const allowed={
+     create:['eventId','seasonId','category','version','rulesHash','opensAt','closesAt','challengeUntil'],
+     enter:['eventId'],submit:['eventId','harvestId'],
+     reject:['eventId','accountId','reasonHash'],finalize:['eventId']
+    }[action];
+    if(Object.keys(body).some(k=>!allowed.includes(k))||allowed.some(k=>!Object.hasOwn(body,k)))
+     fail('invalid-request');
+    // Finalization is public-liveness, but still requires an authenticated registered player.
+    result=await ordinaryExhibitions[action]({...body,...(action==='finalize'?{}:{token})});
+   }else if(req.method==='GET'&&url.pathname==='/highcountry/session'){
     const p=await scoped.transaction(tx=>tx.profile());
     result={authenticated:true,registered:!!p,profileId:p?.profile_id??null,rulesetId:p?.ruleset_id??null,revision:String(p?.save_revision??'0')};
    }else if(req.method==='POST'&&url.pathname==='/highcountry/register'){

@@ -1,0 +1,23 @@
+name: HighCountry Port Alder Map & Milestone Level 1
+on:
+  pull_request:
+    paths:
+      - 'deployments/highcountry/hc-world-map-catalogue.v1.json'
+      - 'deployments/highcountry/hc-world-port-alder-artwork-hitboxes.v2.json'
+      - 'apps/highcountry-web/src/port-alder-*'
+      - 'apps/highcountry-web/src/app.js'
+      - 'apps/highcountry-web/server.mjs'
+      - 'apps/highcountry-web/scripts/build.mjs'
+      - 'scripts/highcountry/hc-world-port-alder-map-stage.test.mjs'
+      - '.github/workflows/highcountry-port-alder-map-stage-l1.yml'
+  workflow_dispatch:
+jobs:
+  port-alder-map-l1:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test scripts/highcountry/hc-world-port-alder-map-stage.test.mjs scripts/highcountry/hc-world-06-port-alder-navigation.test.mjs
+      - run: node --check apps/highcountry-web/src/app.js && node --check apps/highcountry-web/src/port-alder-navigation.js && node --check apps/highcountry-web/src/port-alder-map-stage.js && node --check apps/highcountry-web/server.mjs

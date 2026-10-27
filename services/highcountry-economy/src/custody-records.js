@@ -48,6 +48,44 @@ export function auditCustody(s,{strictAggregate=false}={}){
  }
  return {units:seen.size,receipts:s.custodyReceipts.size,reservations:active.size,totals};
 }
+
+/** Internal-only synchronous mutation helpers; caller MUST hold PostgresBudsStore's locked transaction. */
+export function reservePlacementUnit(s,{owner,assetId,instanceId}){
+ custodyState(s);
+ if(!token(owner)||!token(assetId)||!token(instanceId))reject('invalid-placement-reference');
+ // Legacy balances are not source-backed units. Never allocate them implicitly.
+ const ids=[...s.custodyUnits.values()].filter(u=>u.owner===owner&&u.assetId===assetId&&u.state==='available')
+   .sort((a,b)=>a.unitId.localeCompare(b.unitId,'en'));
+ if(!ids.length)reject('verified-unit-unavailable');
+ const keyName=key(owner,assetId),balance=s.assets.get(keyName);
+ if(!balance||!Number.isSafeInteger(balance.available)||balance.available<1||!Number.isSafeInteger(balance.reserved)||balance.reserved<0||balance.reserved===Number.MAX_SAFE_INTEGER)reject('inventory-unavailable');
+ const reservationId='place:'+instanceId;
+ if([...s.custodyReservations.values()].some(r=>r.reservationId===reservationId))reject('duplicate-instance-reservation');
+ const u=ids[0];
+ if(s.custodyReservations.has(u.unitId))reject('unit-already-reserved');
+ s.custodyUnits.set(u.unitId,{...u,state:'placed',reservationId,revision:u.revision+1});
+ s.custodyReservations.set(u.unitId,{unitId:u.unitId,owner,assetId,kind:'placed',reservationId,instanceId});
+ s.assets.set(keyName,{...balance,available:balance.available-1,reserved:balance.reserved+1});
+ auditCustody(s);
+ return {unitId:u.unitId,reservationId};
+}
+export function releasePlacementUnit(s,{owner,assetId,instanceId}){
+ custodyState(s);
+ if(!token(owner)||!token(assetId)||!token(instanceId))reject('invalid-placement-reference');
+ const reservationId='place:'+instanceId;
+ const reservations=[...s.custodyReservations.values()].filter(r=>r.reservationId===reservationId);
+ if(reservations.length!==1)reject('placement-reservation-missing');
+ const reservation=reservations[0],u=s.custodyUnits.get(reservation.unitId);
+ if(!u||u.owner!==owner||u.assetId!==assetId||u.state!=='placed'||u.reservationId!==reservationId||reservation.owner!==owner||reservation.assetId!==assetId||reservation.kind!=='placed'||reservation.instanceId!==instanceId)reject('placement-reservation-corrupt');
+ const keyName=key(owner,assetId),balance=s.assets.get(keyName);
+ if(!balance||!Number.isSafeInteger(balance.available)||balance.available<0||balance.available===Number.MAX_SAFE_INTEGER||!Number.isSafeInteger(balance.reserved)||balance.reserved<1)reject('inventory-reservation-corrupt');
+ s.custodyReservations.delete(u.unitId);
+ s.custodyUnits.set(u.unitId,{...u,state:'available',reservationId:null,revision:u.revision+1});
+ s.assets.set(keyName,{...balance,available:balance.available+1,reserved:balance.reserved-1});
+ auditCustody(s);
+ return {unitId:u.unitId,reservationId};
+}
+
 export class HighCountryCustodyRegistry {
  constructor(store,authority){
   if(typeof store?.transact!=='function'||typeof authority?.requireAssetIssuer!=='function'||typeof authority?.verifyAssetReceipt!=='function')reject('trusted-dependencies-required');

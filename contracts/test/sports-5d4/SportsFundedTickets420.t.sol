@@ -15,7 +15,7 @@ contract SportsFundedTickets420Test is SportsBetAcceptance420Test {
 
     function setUp() public override {
         super.setUp();
-        cert = new SportsOutcomeCertification420(REPORT_A, REPORT_B, JUDGE, 1 hours);
+        cert = new SportsOutcomeCertification420(address(markets), REPORT_A, REPORT_B, JUDGE, 1 hours);
         vault = new SportsFundedTickets420(address(auth), address(acceptance), address(cert));
         _grant(CONTROL, vault.RESOLVE(), vault.scope(market));
         fundingVm.deal(CONTROL, 1 ether);
@@ -111,6 +111,7 @@ contract SportsFundedTickets420Test is SportsBetAcceptance420Test {
         _submit(_quote(1));
         _call(CONTROL, address(vault), abi.encodeCall(vault.deposit, (market, 2000)));
         bytes32 id = _fund(500);
+        vm.warp(markets.get(market).config.cutoff + 1);
         bytes32 ev = keccak256("feed-A");
         vm.prank(REPORT_A);
         cert.attest(market, chosen, ev);

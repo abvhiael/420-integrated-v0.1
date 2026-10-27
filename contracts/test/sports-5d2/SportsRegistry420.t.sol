@@ -50,7 +50,7 @@ contract SportsRegistry420Test {
         );
     }
 
-    function setUp() public {
+    function setUp() public virtual {
         vm.warp(1_800_000_000);
         cap = new CapabilityRegistry420();
         cap.registerProtocolComponent(keccak256("420.BET.CORE"), address(this));

@@ -28,3 +28,32 @@ test('invalid missing qualified geometry fails without inventory mutation',async
 test('03-A: changed world evidence fails under transaction lock without inventory mutation',async()=>{const s=setup();s.get().placementAuthorityRevisions.set('parcel-a',{revision:2,evidenceId:'revoked-world',geometryQualificationId:'test-fixture-only'});await assert.rejects(s.engine.execute('alice',s.place('a','new-op')),/authority-changed-or-denied/);assert.deepEqual([...s.get().assets.values()],[{available:2,reserved:0}]);});
 test('03-A: revoked geometry qualification fails closed',async()=>{const s=setup();s.get().placementAuthorityRevisions.set('parcel-a',{revision:1,evidenceId:'fixture-world',geometryQualificationId:'revoked'});await assert.rejects(s.engine.execute('alice',s.place('a','new-op')),/authority-changed-or-denied/);assert.equal(s.get().placementInstances.size,0);});
 test('03-A: unprovisioned world authority denied',async()=>{const s=setup();s.get().placementAuthorityRevisions.clear();await assert.rejects(s.engine.execute('alice',s.place('a','new-op')),/authority-not-provisioned/);});
+
+test('03-B.2 exact custody unit is reserved and released across placement lifecycle',async()=>{
+ const s=setup();const a=await s.engine.execute('alice',s.place('a','custody-a'));
+ assert.equal(a.custody.unitId,custodyUnitId('fixture-receipt',0));
+ const unit=s.get().custodyUnits.get(a.custody.unitId);
+ assert.equal(unit.state,'placed');assert.equal(unit.reservationId,'place:a');assert.equal(unit.revision,2);
+ const removed=await s.engine.execute('alice',{operation:'custody-remove',action:'remove',instanceId:'a',assetId:asset,expectedRevision:1,expectedSceneRevision:1});
+ assert.equal(removed.custody.unitId,a.custody.unitId);
+ assert.equal(s.get().custodyUnits.get(a.custody.unitId).state,'available');
+ assert.equal(s.get().custodyReservations.size,0);
+});
+test('03-B.2 no double allocation across separate non-overlapping positions',async()=>{
+ const s=setup();const a=await s.engine.execute('alice',s.place('a','first'));
+ const second=await s.engine.execute('alice',s.place('b','second',1,5));
+ assert.notEqual(a.custody.unitId,second.custody.unitId);
+ await assert.rejects(s.engine.execute('alice',s.place('c','third',2,10)),/verified-unit-unavailable/);
+ assert.equal(s.get().placementInstances.size,2);assert.equal(s.get().custodyReservations.size,2);
+});
+test('03-B.2 wrong-reservation release fails and rolls back world state',async()=>{
+ const s=setup();const a=await s.engine.execute('alice',s.place('a','reservation'));
+ const unitId=a.custody.unitId;s.get().custodyReservations.get(unitId).instanceId='attacker';
+ await assert.rejects(s.engine.execute('alice',{operation:'bad-release',action:'remove',instanceId:'a',assetId:asset,expectedRevision:1,expectedSceneRevision:1}),/placement-reservation-corrupt/);
+ assert.equal(s.get().placementInstances.get('a').state,'placed');
+});
+test('03-B.2 prevents phantom placement from unsourced aggregate inventory',async()=>{
+ const s=setup();s.get().custodyUnits.clear();s.get().custodyReceipts.clear();s.get().importedAssets.clear();
+ await assert.rejects(s.engine.execute('alice',s.place('a','phantom')),/verified-unit-unavailable/);
+ assert.equal(s.get().assets.values().next().value.available,2);
+});

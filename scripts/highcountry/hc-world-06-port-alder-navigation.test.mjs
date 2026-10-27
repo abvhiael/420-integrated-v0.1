@@ -1,0 +1,15 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {validatePortAlderNavigation,districtTarget} from './hc-world-06-port-alder-navigation.mjs';
+const m=JSON.parse(readFileSync(new URL('../../deployments/highcountry/hc-world-06-port-alder-district-navigation.v1.json',import.meta.url)));
+const clone=()=>structuredClone(m);
+test('all 13 district labels, IDs, graph routes and county exits qualify',()=>assert.deepEqual(validatePortAlderNavigation(m),{districts:13,connected:13,exits:5,status:'DESIGN_GEOMETRY_PENDING_TERRAIN_ALIGNMENT'}));
+test('visible district label resolves to immutable scene route',()=>{const t=districtTarget(m,'HC-EC-S01-D07');assert.equal(t.sceneId,'HC-EC-S01-OLD_TOWN');assert.equal(t.route,'/port-alder/district/HC-EC-S01-D07')});
+test('duplicate districts rejected',()=>{const a=clone();a.districts[1].id=a.districts[0].id;assert.throws(()=>validatePortAlderNavigation(a))});
+test('entrance outside polygon rejected',()=>{const a=clone();a.districts[0].entrance=[-1,-1];assert.throws(()=>validatePortAlderNavigation(a),/entrance/)});
+test('municipal geometry overlaps rejected',()=>{const a=clone();a.districts[1].polygon=a.districts[0].polygon;a.districts[1].entrance=a.districts[0].entrance;assert.throws(()=>validatePortAlderNavigation(a),/overlap/)});
+test('asymmetric neighbour rejected',()=>{const a=clone();a.districts[0].neighbours=[];assert.throws(()=>validatePortAlderNavigation(a),/neighbour/)});
+test('missing county exit reference rejected',()=>{const a=clone();a.countryExits[0].districtId='UNKNOWN';assert.throws(()=>validatePortAlderNavigation(a),/county exit/)});
+test('public heritage disclosure refused',()=>{const a=clone();a.heritageVisibility='PUBLIC';assert.throws(()=>validatePortAlderNavigation(a),/heritage/)});
+test('design navigation may not assert land ownership authority',()=>{const a=clone();a.ownershipAuthority='ISSUER';assert.throws(()=>validatePortAlderNavigation(a),/land authority/)});
+test('unregistered destinations refused',()=>assert.throws(()=>districtTarget(m,'HC-EC-S01-D99'),/unknown district/));

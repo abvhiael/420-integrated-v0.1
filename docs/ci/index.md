@@ -80,6 +80,7 @@ The runner flushes stage start/run/pass/fail messages so GitHub Actions output r
 
 - [DOC-12 coverage audit](coverage-audit.md) — audited corpus coverage, self-test scope, fail-closed rules, deliberate exclusions and non-goals.
 - [Documentation qualification contract](qualification-contract.md) — scope, authority, deterministic stage order, exit codes and failure ownership.
+- [Solidity qualification boundaries](SOLIDITY-QUALIFICATION-BOUNDARIES.md) — change-aware Foundry scope selection, runner termination diagnostics, and preserved qualification evidence.
 - [DOC-12 documentation CI roadmap](DOC-12-ROADMAP.md) — DOC-12.1 through DOC-12.10 implementation and closeout.
 
 ## Design rule

@@ -1,0 +1,5 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {generate} from './hc-world-02-cadastre.mjs';import {validateGeographicSurvey} from './hc-world-02-geography-gate.mjs';
+const inventory=generate();
+test('schematic inventory fails closed without approved map',()=>assert.throws(()=>validateGeographicSurvey(inventory,null),/approved terrain survey/));
+test('unapproved overlay fails closed',()=>assert.throws(()=>validateGeographicSurvey(inventory,{schema:'HC.WORLD.TERRAIN.SURVEY.V1',status:'DRAFT'}),/approved terrain survey/));
+test('approved metadata alone cannot certify unsurveyed parcels',()=>{const atlas={schema:'HC.WORLD.TERRAIN.SURVEY.V1',status:'OWNER_APPROVED_TERRAIN_SURVEY',regions:[1,2,3].map(id=>({id,sourceAssetSHA256:'a'.repeat(64),allocatablePolygons:[{bounds:[0,0,16000,10000]}],exclusions:[],accessCorridors:[],heritageBuffers:[{bounds:[15990,9990,16000,10000]}]}))};assert.throws(()=>validateGeographicSurvey(inventory,atlas),/schematic parcel geometry/);});

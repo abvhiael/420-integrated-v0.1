@@ -1,0 +1,32 @@
+name: HC-ART-04-D Garden Ornaments Level 1
+on:
+  pull_request:
+    paths:
+      - 'apps/highcountry-web/src/garden-ornament-catalogue.js'
+      - 'apps/highcountry-web/src/marketplace.js'
+      - 'apps/highcountry-web/scripts/build.mjs'
+      - 'apps/highcountry-web/test/garden-ornament-catalogue.test.mjs'
+      - '.github/workflows/hc-art-04-d-garden-ornaments.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  scoped-garden-ornaments:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Scoped marketplace and placement checks
+        working-directory: apps/highcountry-web
+        run: |
+          node --check src/garden-ornament-catalogue.js
+          node --check src/marketplace.js
+          node --test test/garden-ornament-catalogue.test.mjs test/water-wildlife-catalogue.test.mjs test/outdoor-structure-catalogue.test.mjs test/hc-next-4-4-marketplace.test.mjs test/r064-market.test.mjs
+      - name: Verify browser bundle
+        working-directory: apps/highcountry-web
+        run: |
+          npm run build
+          test -s dist/src/garden-ornament-catalogue.js
+          node --check dist/src/garden-ornament-catalogue.js

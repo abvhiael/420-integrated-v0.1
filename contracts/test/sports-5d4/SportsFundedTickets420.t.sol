@@ -254,3 +254,77 @@ contract SportsFundedTickets420Test is SportsBetAcceptance420Test {
         require(!ok && vault.reserved(market) == 0, "no stale quote funding");
     }
 }
+
+contract HostileSportsToken420 {
+    mapping(address => uint256) public balanceOf;
+    mapping(address => mapping(address => uint256)) public allowance;
+    uint8 public mode; // 1 false return; 2 transfer fee; 3 reenter target during transfer
+    address public target;
+    bytes public attack;
+    bool public nested;
+    function mint(address to, uint256 amount) external { balanceOf[to] += amount; }
+    function approve(address spender, uint256 amount) external returns (bool) {
+        allowance[msg.sender][spender] = amount;
+        return true;
+    }
+    function configure(uint8 mode_, address target_, bytes calldata attack_) external {
+        mode = mode_;
+        target = target_;
+        attack = attack_;
+    }
+    function transferFrom(address from, address to, uint256 amount) external returns (bool) {
+        if (mode == 1) return false;
+        require(allowance[from][msg.sender] >= amount && balanceOf[from] >= amount);
+        allowance[from][msg.sender] -= amount;
+        balanceOf[from] -= amount;
+        uint256 credited = mode == 2 ? amount - 1 : amount;
+        balanceOf[to] += credited;
+        if (mode == 3 && !nested) {
+            nested = true;
+            (bool ok,) = target.call(attack);
+            require(!ok, "reentrancy unexpectedly succeeded");
+            nested = false;
+        }
+        return true;
+    }
+    function transfer(address to, uint256 amount) external returns (bool) {
+        require(balanceOf[msg.sender] >= amount);
+        balanceOf[msg.sender] -= amount;
+        balanceOf[to] += amount;
+        return true;
+    }
+}
+
+contract SportsHostileToken420Test is SportsFundedTickets420Test {
+    HostileSportsToken420 hostile;
+    bytes32 hostileMarket;
+
+    function _hostileSetup(uint8 mode) internal {
+        hostile = new HostileSportsToken420();
+        SportsTypes420.MarketConfig memory cfg = _marketConfig(template, 0);
+        cfg.asset = address(hostile);
+        hostileMarket = _newMarket(cfg);
+        hostile.mint(CONTROL, 10000);
+        vm.prank(CONTROL);
+        hostile.approve(address(vault), type(uint256).max);
+        hostile.configure(mode, address(vault), abi.encodeCall(vault.deposit, (hostileMarket, 100)));
+    }
+
+    function testHostileFalseReturnTokenCannotMintCollateral() public {
+        _hostileSetup(1);
+        _fails(CONTROL, address(vault), abi.encodeCall(vault.deposit, (hostileMarket, 100)));
+        require(vault.collateral(hostileMarket) == 0 && hostile.balanceOf(address(vault)) == 0, "false return collateral");
+    }
+
+    function testHostileFeeOnTransferCannotMintCollateral() public {
+        _hostileSetup(2);
+        _fails(CONTROL, address(vault), abi.encodeCall(vault.deposit, (hostileMarket, 100)));
+        require(vault.collateral(hostileMarket) == 0 && hostile.balanceOf(address(vault)) == 0, "fee token collateral");
+    }
+
+    function testHostileReentryCannotModifyVaultLedger() public {
+        _hostileSetup(3);
+        _call(CONTROL, address(vault), abi.encodeCall(vault.deposit, (hostileMarket, 100)));
+        require(vault.collateral(hostileMarket) == 100 && hostile.balanceOf(address(vault)) == 100, "reentry changed ledger");
+    }
+}

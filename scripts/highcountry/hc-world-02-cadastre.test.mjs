@@ -1,0 +1,12 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {generate,validate} from './hc-world-02-cadastre.mjs';
+const m=generate();
+test('31,260 unique parcels and all three region allocations',()=>assert.equal(validate(m),true));
+test('regional rural class mix is exact',()=>{for(const r of m.regions){for(const [name,count] of [['HOMESTEAD',4200],['SMALLHOLDING',2500],['ESTATE',1250],['RANCH',350]])assert.equal(r.parcels.filter(p=>p.parcelClass===name&&p.kind==='R').length,count)}});
+test('urban and commercial footprint sizes obey approved classes',()=>{const d={U:{COMPACT:[16,20],STANDARD:[24,24],LARGE:[32,32]},C:{COMPACT:[24,24],STANDARD:[32,32],LARGE:[48,48]}};for(const r of m.regions)for(const p of r.parcels.filter(x=>x.kind!=='R')){const b=p.bounds,dim=d[p.kind][p.parcelClass];assert.deepEqual([b[2]-b[0],b[3]-b[1]],dim)}});
+test('repeat generation is deterministic',()=>assert.deepEqual(generate(),m));
+test('tampered parcel overlap rejected',()=>{const x=structuredClone(m);x.regions[0].parcels[1].bounds=[...x.regions[0].parcels[0].bounds];assert.throws(()=>validate(x),/overlap/)});
+test('duplicate title ID rejected',()=>{const x=structuredClone(m);x.regions[1].parcels[0].id=x.regions[0].parcels[0].id;assert.throws(()=>validate(x),/duplicate ID/)});
+test('modified area budget rejected',()=>{const x=structuredClone(m);x.regions[0].zoning[0].areaTiles++;assert.throws(()=>validate(x),/budget/)});
+test('unapproved commercial title rejected',()=>{const x=structuredClone(m);x.regions[0].parcels.pop();assert.throws(()=>validate(x),/count/)});

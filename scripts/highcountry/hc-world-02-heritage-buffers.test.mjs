@@ -1,0 +1,2 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {generateHeritageBuffers} from './hc-world-02-heritage-buffers.mjs';
+test('all 64 canonical discovery sites receive unique draft buffer polygons',()=>{const m=generateHeritageBuffers();assert.equal(m.sites.length,64);assert.equal(new Set(m.sites.map(x=>x.id)).size,64);for(const s of m.sites){assert.equal(s.bufferStatus,'DRAFT_PROTECTED_RESERVATION_NOT_FIELD_SURVEYED');assert.equal(s.bounds[2]-s.bounds[0],32);assert.equal(s.bounds[3]-s.bounds[1],32)}});

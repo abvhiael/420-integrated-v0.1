@@ -33,3 +33,7 @@ The following tests are local deterministic qualification, **not independent ope
 **Operational verification cannot be simulated:** independent source ownership, contractual rights, adjudicator operational independence, confirmed real-game outcomes, transaction-failure recovery on a deployed chain and legally required controls require external evidence. They remain testnet/operations dependencies and must not be reported as complete.
 
 `BET-5D4-TN-01..07` are release gates, not discretionary suggestions. PR merge must not imply live-betting authorization.
+
+## Aggregate solvency implementation (pre-testnet)
+
+`SportsFundedTickets420` now records nominal per-token total liabilities, collateral, unresolved stakes and accrued player credits. Both funding and withdrawals compare observed ERC-20 balance with the entire token's expected aggregate liability, not merely one market. This prevents another market sharing the same asset from silently subsidizing a shortfall and rejects negative or positive rebase drift. Multi-market collateral isolation and fuzzed accounting conservation tests were added. Rebased funds are deliberately fail-closed, including withdrawal; operational asset allowlisting and recovery policy still require review. These aggregate invariants cover nominal deposits and liabilities; cross-market correlated payouts and independently verified oracle outcomes remain a separate economic-risk and testnet qualification gate.

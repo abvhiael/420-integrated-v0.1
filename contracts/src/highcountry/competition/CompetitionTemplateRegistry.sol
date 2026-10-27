@@ -32,6 +32,7 @@ contract CompetitionTemplateRegistry {
         categoryVersionTemplate[id][version] = id;
         emit TemplateRegistered(id, version, rulesHash, entitlementScope);
     }
+
     /// @notice New revisions receive fresh immutable IDs; existing events retain their policy.
     function registerCategoryVersion(
         bytes32 id,

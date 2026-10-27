@@ -94,7 +94,6 @@ contract SportsOddsIngestion420Test is SportsRegistry420Test {
         _call(CONTROL, address(markets), abi.encodeCall(markets.suspend, (market)));
         (, bool usable) = odds.current(market);
         require(!usable, "suspended quote still usable");
-        _observe(true);
         _call(CONTROL, address(markets), abi.encodeCall(markets.resume, (market)));
         (, usable) = odds.current(market);
         require(!usable, "old quote reused after resume");

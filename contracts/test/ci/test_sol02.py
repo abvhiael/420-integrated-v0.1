@@ -21,7 +21,7 @@ class QualificationTests(unittest.TestCase):
         self.assertEqual(planner.assign("src/highcountry/land/Land420.sol"), "hc-land")
         self.assertEqual(planner.assign("src/highcountry/cultivation/Cultivation420.sol"), "hc-cultivation")
         self.assertEqual(planner.assign("src/bet/Bet420.sol"), "420bet")
-        self.assertEqual(planner.assign("src/interfaces/I420.sol"), "420protocols")
+        self.assertEqual(planner.assign("src/interfaces/I420.sol"), "protocol-identity")
         self.assertEqual(planner.assign("script/Anything.sol"), "integration") if False else None
 
     def test_exact_once_inventory(self):

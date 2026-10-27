@@ -244,6 +244,42 @@ contract SportsFundedTickets420Test is SportsBetAcceptance420Test {
         _assertSingleMarketSolvent();
     }
 
+    function _assertAssetConservation() internal view {
+        uint256 amount = vault.assetLiability(address(token));
+        require(token.balanceOf(address(vault)) == amount, "aggregate asset undercollateralized");
+        require(amount == vault.assetCollateral(address(token)) + vault.assetPendingStake(address(token))
+            + vault.assetPlayerCredit(address(token)), "component sum");
+    }
+
+    function testTwoMarketsShareTokenWithoutDoubleCountingCollateral() public {
+        bytes32 spreadTemplate = _newTemplate(_templateConfig(SportsTypes420.Kind.SPREAD));
+        bytes32 second = _newMarket(_marketConfig(spreadTemplate, -7));
+        _call(CONTROL, address(vault), abi.encodeCall(vault.deposit, (market, 1200)));
+        _call(CONTROL, address(vault), abi.encodeCall(vault.deposit, (second, 800)));
+        _assertAssetConservation();
+        require(vault.assetLiability(address(token)) == 2000, "two market accounting");
+        require(vault.collateral(market) == 1200 && vault.collateral(second) == 800, "market isolation");
+        _fails(CONTROL, address(vault), abi.encodeCall(vault.withdrawCollateral, (second, 801)));
+        _call(CONTROL, address(vault), abi.encodeCall(vault.withdrawCollateral, (market, 700)));
+        _assertAssetConservation();
+        require(vault.assetLiability(address(token)) == 1300 && vault.collateral(second) == 800, "isolated withdraw");
+        _call(CONTROL, address(vault), abi.encodeCall(vault.withdrawCollateral, (second, 800)));
+        _assertAssetConservation();
+    }
+
+    function testFuzzAssetConservationAcrossDepositsAndWithdrawals(uint16 a, uint16 b) public {
+        uint256 first = uint256(a) % 2000 + 1;
+        uint256 second = uint256(b) % 2000 + 1;
+        _call(CONTROL, address(vault), abi.encodeCall(vault.deposit, (market, first)));
+        _assertAssetConservation();
+        _call(CONTROL, address(vault), abi.encodeCall(vault.deposit, (market, second)));
+        _assertAssetConservation();
+        _call(CONTROL, address(vault), abi.encodeCall(vault.withdrawCollateral, (market, first)));
+        _assertAssetConservation();
+        _call(CONTROL, address(vault), abi.encodeCall(vault.withdrawCollateral, (market, second)));
+        _assertAssetConservation();
+    }
+
     function testStaleQuoteCannotBeFunded() public {
         _submit(_quote(1));
         _call(CONTROL, address(vault), abi.encodeCall(vault.deposit, (market, 2000)));
@@ -263,6 +299,8 @@ contract HostileSportsToken420 {
     bytes public attack;
     bool public nested;
     function mint(address to, uint256 amount) external { balanceOf[to] += amount; }
+    function rebaseDown(address who, uint256 amount) external { balanceOf[who] -= amount; }
+    function rebaseUp(address who, uint256 amount) external { balanceOf[who] += amount; }
     function approve(address spender, uint256 amount) external returns (bool) {
         allowance[msg.sender][spender] = amount;
         return true;
@@ -327,6 +365,22 @@ contract SportsHostileToken420Test is SportsFundedTickets420Test {
         _hostileSetup(4);
         _fails(CONTROL, address(vault), abi.encodeCall(vault.deposit, (hostileMarket, 100)));
         require(vault.collateral(hostileMarket) == 0 && hostile.balanceOf(address(vault)) == 0, "missing return collateral");
+    }
+
+    function testNegativeRebaseBlocksCollateralRelease() public {
+        _hostileSetup(0);
+        _call(CONTROL, address(vault), abi.encodeCall(vault.deposit, (hostileMarket, 100)));
+        hostile.rebaseDown(address(vault), 1);
+        _fails(CONTROL, address(vault), abi.encodeCall(vault.withdrawCollateral, (hostileMarket, 1)));
+        require(vault.collateral(hostileMarket) == 100 && vault.assetLiability(address(hostile)) == 100, "rebase mutated ledger");
+    }
+
+    function testPositiveRebaseBlocksCollateralRelease() public {
+        _hostileSetup(0);
+        _call(CONTROL, address(vault), abi.encodeCall(vault.deposit, (hostileMarket, 100)));
+        hostile.rebaseUp(address(vault), 1);
+        _fails(CONTROL, address(vault), abi.encodeCall(vault.withdrawCollateral, (hostileMarket, 1)));
+        require(vault.collateral(hostileMarket) == 100 && vault.assetLiability(address(hostile)) == 100, "positive drift bypass");
     }
 
     function testHostileReentryCannotModifyVaultLedger() public {

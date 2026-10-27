@@ -11,7 +11,7 @@ const snapshot=s=>({instances:[...s.placementInstances.values()].map(structuredC
 const map=s=>{if(!(s.placementInstances instanceof Map)||!(s.placementOperations instanceof Map)||!(s.placementScenes instanceof Map)||!(s.assets instanceof Map))fail('missing-durable-state');};
 export class HighCountryPlacementTransactions {
  constructor({store,authority,resolveGeometry,resolveAssets,clock=()=>Date.now()}={}){
-  if(typeof store?.transact!=='function'||typeof authority?.registeredPrincipal!=='function'||typeof authority?.canPlaceOnParcel!=='function'||typeof authority?.validateWorld!=='function'||typeof resolveGeometry!=='function'||typeof resolveAssets!=='function')fail('trusted-dependencies-required');
+  if(typeof store?.transact!=='function'||typeof authority?.registeredPrincipal!=='function'||typeof authority?.canPlaceOnParcel!=='function'||typeof authority?.validateWorld!=='function'||typeof authority?.verifyAtCommit!=='function'||typeof resolveGeometry!=='function'||typeof resolveAssets!=='function')fail('trusted-dependencies-required');
   this.store=store;this.auth=authority;this.geometry=resolveGeometry;this.assets=resolveAssets;this.clock=clock;
  }
  async snapshot(session){
@@ -38,9 +38,21 @@ export class HighCountryPlacementTransactions {
   if(!(snapshotData instanceof Map))fail('invalid-geometry-snapshot');
   for(const [asset,g] of snapshotData)geometryRegistry.set(asset,structuredClone(g));
   if(!geometryRegistry.has(command.assetId))fail('geometry-not-in-snapshot');
+  // Exact geometry identity is pinned to the qualified server snapshot, not a mutable catalogue lookup.
+  const pinned=geometryRegistry.get(command.assetId);
+  if(JSON.stringify(pinned)!==JSON.stringify(geometry))fail('geometry-snapshot-mismatch');
   const input=structuredClone(command),payload=digest({who,input});
   return this.store.transact(s=>{
    map(s);
+   // Fail closed under the SAME serializable row lock as inventory, object and scene writes.
+   // This callback must be synchronous, and must validate current authoritative state,
+   // including principal, parcel, scene/world revision, and qualified geometry digest.
+   if(!(s.placementAuthorityRevisions instanceof Map))fail('missing-authority-revisions');
+   const currentAuthority=s.placementAuthorityRevisions.get(command.record?.parcelId??s.placementInstances.get(command.instanceId)?.parcelId);
+   if(!currentAuthority||!Number.isSafeInteger(currentAuthority.revision)||currentAuthority.revision<1||!id(currentAuthority.evidenceId)||!id(currentAuthority.geometryQualificationId))fail('authority-not-provisioned');
+   const commitProof=this.auth.verifyAtCommit({principal:who,command:input,world,geometry:pinned,geometryRegistry,assetIds,authoritative:structuredClone(currentAuthority),state:s});
+   if(commitProof?.then)fail('async-authority-forbidden');
+   if(commitProof!==true)fail('authority-changed-or-denied');
    const opKey=key(who,command.operation),previous=s.placementOperations.get(opKey);
    if(previous){if(previous.payload!==payload)fail('replay-payload-conflict');return structuredClone(previous.result);}
    const old=s.placementInstances.get(command.instanceId);

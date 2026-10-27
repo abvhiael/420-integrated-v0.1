@@ -1,0 +1,106 @@
+{
+  "schema": "420.ci.sol02.v1",
+  "groups": {
+    "hc-competition": {
+      "source": [
+        "src/highcountry/competition/"
+      ],
+      "tests": [
+        "test/highcountry/unit/competition/"
+      ]
+    },
+    "hc-land": {
+      "source": [
+        "src/highcountry/land/",
+        "src/highcountry/rights/"
+      ],
+      "tests": [
+        "test/highcountry/unit/land/"
+      ]
+    },
+    "hc-cultivation": {
+      "source": [
+        "src/highcountry/cultivation/",
+        "src/highcountry/genetics/"
+      ],
+      "tests": [
+        "test/highcountry/unit/cultivation/"
+      ]
+    },
+    "hc-economy": {
+      "source": [
+        "src/highcountry/economy/",
+        "src/highcountry/market/"
+      ],
+      "tests": [
+        "test/highcountry/unit/economy/"
+      ]
+    },
+    "hc-treasury": {
+      "source": [
+        "src/highcountry/treasury/"
+      ],
+      "tests": [
+        "test/highcountry/unit/treasury/"
+      ]
+    },
+    "hc-other": {
+      "source": [
+        "src/highcountry/"
+      ],
+      "tests": [
+        "test/highcountry/"
+      ]
+    },
+    "420bet": {
+      "source": [
+        "src/bet/"
+      ],
+      "tests": [
+        "test/Bet",
+        "test/sports-",
+        "test/tournament-"
+      ]
+    },
+    "420treasury": {
+      "source": [
+        "src/treasury/",
+        "src/vault/",
+        "src/revenue/"
+      ],
+      "tests": [
+        "test/Treasury",
+        "test/Vault",
+        "test/Revenue"
+      ]
+    },
+    "420compute": {
+      "source": [
+        "src/compute/"
+      ],
+      "tests": [
+        "test/Compute"
+      ]
+    },
+    "420protocols": {
+      "source": [
+        "src/"
+      ],
+      "tests": [
+        "test/"
+      ]
+    },
+    "integration": {
+      "source": [],
+      "tests": []
+    }
+  },
+  "shared_roots": [
+    "src/interfaces/",
+    "src/libraries/",
+    "src/system/",
+    "src/governance/",
+    "src/trust/"
+  ],
+  "mode": "strict-fail-closed"
+}

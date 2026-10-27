@@ -185,6 +185,65 @@ contract SportsFundedTickets420Test is SportsBetAcceptance420Test {
         require(vault.credit(PLAYER, address(token)) == 500, "timeout preserves player stake");
     }
 
+    /// @notice Bookkeeping must exactly explain vault custody while claims are pending.
+    function _assertSingleMarketSolvent() internal view {
+        uint256 accounted = vault.collateral(market) + vault.pendingStake(market)
+            + vault.credit(PLAYER, address(token));
+        require(token.balanceOf(address(vault)) == accounted, "unbacked claim / unallocated custody");
+        require(vault.reserved(market) <= vault.collateral(market), "overdrawn collateral");
+        require(vault.marketProfitExposure(market) == vault.reserved(market), "reservation mismatch");
+    }
+
+    function testAccountingInvariantAcrossAdmissionWinAndClaim() public {
+        _submit(_quote(1));
+        _call(CONTROL, address(vault), abi.encodeCall(vault.deposit, (market, 2000)));
+        _assertSingleMarketSolvent();
+        bytes32 id = _fund(500);
+        _assertSingleMarketSolvent();
+        vm.warp(markets.get(market).config.cutoff + 1);
+        _certifyWinner();
+        _call(CONTROL, address(vault), abi.encodeCall(vault.resolve, (id, true)));
+        _assertSingleMarketSolvent();
+        vm.prank(PLAYER);
+        vault.claim(address(token));
+        _assertSingleMarketSolvent();
+    }
+
+    function testAccountingInvariantAcrossLossAndCollateralWithdrawal() public {
+        _submit(_quote(1));
+        _call(CONTROL, address(vault), abi.encodeCall(vault.deposit, (market, 2000)));
+        bytes32 id = _fund(500);
+        _assertSingleMarketSolvent();
+        vm.warp(markets.get(market).config.cutoff + 1);
+        bytes32 evidence = keccak256("independent-losing-result");
+        bytes32[] memory options = markets.selections(market);
+        bytes32 other = options[1];
+        vm.prank(REPORT_A);
+        cert.attest(market, other, evidence);
+        vm.prank(REPORT_B);
+        cert.attest(market, other, evidence);
+        vm.warp(block.timestamp + 1 hours);
+        cert.finalize(market);
+        _call(CONTROL, address(vault), abi.encodeCall(vault.resolve, (id, false)));
+        _assertSingleMarketSolvent();
+        _call(CONTROL, address(vault), abi.encodeCall(vault.withdrawCollateral, (market, 2500)));
+        _assertSingleMarketSolvent();
+    }
+
+    function testFuzzRefundAccounting(uint16 rawStake) public {
+        uint256 stake = 100 + uint256(rawStake) % 901;
+        _submit(_quote(1));
+        _call(CONTROL, address(vault), abi.encodeCall(vault.deposit, (market, 2000)));
+        bytes32 id = _fund(stake);
+        _assertSingleMarketSolvent();
+        vm.warp(markets.get(market).config.cutoff + 86400);
+        vault.refund(id);
+        _assertSingleMarketSolvent();
+        vm.prank(PLAYER);
+        vault.claim(address(token));
+        _assertSingleMarketSolvent();
+    }
+
     function testStaleQuoteCannotBeFunded() public {
         _submit(_quote(1));
         _call(CONTROL, address(vault), abi.encodeCall(vault.deposit, (market, 2000)));

@@ -31,7 +31,7 @@ test('03-A: unprovisioned world authority denied',async()=>{const s=setup();s.ge
 
 test('03-B.2 exact custody unit is reserved and released across placement lifecycle',async()=>{
  const s=setup();const a=await s.engine.execute('alice',s.place('a','custody-a'));
- assert.equal(a.custody.unitId,custodyUnitId('fixture-receipt',0));
+ assert.equal(a.custody.unitId,[custodyUnitId('fixture-receipt',0),custodyUnitId('fixture-receipt',1)].sort((a,b)=>a.localeCompare(b,'en'))[0]);
  const unit=s.get().custodyUnits.get(a.custody.unitId);
  assert.equal(unit.state,'placed');assert.equal(unit.reservationId,'place:a');assert.equal(unit.revision,2);
  const removed=await s.engine.execute('alice',{operation:'custody-remove',action:'remove',instanceId:'a',assetId:asset,expectedRevision:1,expectedSceneRevision:1});

@@ -1,0 +1,29 @@
+name: High Country Ordinary Exhibitions HC-NEXT-7.2 Level 1
+on:
+  pull_request:
+    paths:
+      - 'services/420-gaming-player-profile/src/highcountry-ordinary-exhibitions.js'
+      - 'services/420-gaming-player-profile/test/highcountry-ordinary-exhibitions.test.js'
+      - 'docs/highcountry/HC-NEXT-7.2-ORDINARY-EXHIBITIONS.md'
+      - '.github/workflows/highcountry-ordinary-exhibitions-next-7-2.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  ordinary-exhibitions:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact commit
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Account-only exhibition adversarial qualification
+        working-directory: services/420-gaming-player-profile
+        run: node --test test/highcountry-ordinary-exhibitions.test.js

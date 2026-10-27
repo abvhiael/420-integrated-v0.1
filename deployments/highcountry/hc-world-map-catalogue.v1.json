@@ -1,0 +1,46 @@
+{
+  "schema": "HC.WORLD.MAP.CATALOGUE.V1",
+  "status": "ILLUSTRATIVE_NON_CADASTRAL",
+  "regionId": 1,
+  "regionCode": "EC",
+  "townId": "HC-EC-S01",
+  "maps": {
+    "region": {
+      "id": "HC-EC-MAP-COUNTY",
+      "src": "/assets/highcountry/maps/emerald-coast/emerald-coast-county-concept-v1.png.png",
+      "navigation": [
+        {
+          "id": "HC-EC-S01",
+          "label": "Port Alder",
+          "href": "/port-alder",
+          "position": [
+            450,
+            355
+          ]
+        }
+      ]
+    },
+    "town": {
+      "id": "HC-EC-S01-MAP",
+      "genesisSrc": "/assets/highcountry/maps/emerald-coast/port-alder/port-alder-genesis-overview-v1.png.png",
+      "developed50Src": "/assets/highcountry/maps/emerald-coast/port-alder/port-alder-developed-50-v1.png",
+      "districtContract": "/assets/highcountry/maps/hc-world-06-port-alder-district-navigation.v1.json",
+      "artworkHitboxes": "/assets/highcountry/maps/hc-world-port-alder-artwork-hitboxes.v2.json",
+      "releaseRule": {
+        "schema": "HC.WORLD.PURCHASE.MILESTONE.V1",
+        "thresholdNumerator": 1,
+        "thresholdDenominator": 2,
+        "qualifyingKinds": [
+          "URBAN_RESIDENTIAL",
+          "COMMERCIAL"
+        ],
+        "requiredAuthority": "SERVER_ATTESTED_CANONICAL_SETTLED_TITLE_CURRENT_OWNER",
+        "fallback": "GENESIS_WHEN_UNVERIFIED"
+      }
+    }
+  },
+  "privacy": {
+    "heritageLocationsPublic": false
+  },
+  "caveat": "Asset names reflect original GitHub uploads, including doubled .png extension; physical hitboxes provisional, route pointers not surveyed"
+}

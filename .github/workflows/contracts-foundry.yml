@@ -46,6 +46,7 @@ jobs:
       organization_only: ${{ steps.scope.outputs.organization_only }}
       cooperative_only: ${{ steps.scope.outputs.cooperative_only }}
       competition_only: ${{ steps.scope.outputs.competition_only }}
+      sports_5d3_only: ${{ steps.scope.outputs.sports_5d3_only }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -66,10 +67,19 @@ jobs:
           organization_only=true
           cooperative_only=true
           competition_only=true
+          sports_5d3_only=true
+          sports_5d3_changed=false
           competition_changed=false
           cooperative_changed=false
           organization_changed=false
           while IFS= read -r file; do
+            case "$file" in
+              contracts/src/bet/sports/SportsOddsIngestion420.sol|contracts/test/sports-5d3/*|contracts/test/sports-5d2/SportsRegistry420.t.sol) sports_5d3_changed=true ;;
+            esac
+            case "$file" in
+              contracts/src/bet/sports/SportsOddsIngestion420.sol|contracts/test/sports-5d3/*|contracts/test/sports-5d2/SportsRegistry420.t.sol|docs/bet/BET-AUDIT-5D.3-ODDS-INGESTION-PROVENANCE.md|.github/workflows/420bet-sports-5d3.yml|.github/workflows/contracts-foundry.yml) ;;
+              *) sports_5d3_only=false ;;
+            esac
             case "$file" in
               contracts/src/highcountry/competition/*|contracts/test/highcountry/unit/competition/*) competition_changed=true ;;
             esac
@@ -114,10 +124,12 @@ jobs:
           if [[ "$organization_changed" != true ]]; then organization_only=false; fi
           if [[ "$cooperative_changed" != true ]]; then cooperative_only=false; fi
           if [[ "$competition_changed" != true ]]; then competition_only=false; fi
+          if [[ "$sports_5d3_changed" != true ]]; then sports_5d3_only=false; fi
           echo "compute_only=$compute_only" >> "$GITHUB_OUTPUT"
           echo "organization_only=$organization_only" >> "$GITHUB_OUTPUT"
           echo "cooperative_only=$cooperative_only" >> "$GITHUB_OUTPUT"
           echo "competition_only=$competition_only" >> "$GITHUB_OUTPUT"
+          echo "sports_5d3_only=$sports_5d3_only" >> "$GITHUB_OUTPUT"
 
   compute-fast:
     needs: classify-pr
@@ -236,10 +248,12 @@ jobs:
           forge lint src/highcountry/competition --severity high med low
           forge test --match-path 'test/highcountry/unit/competition/*.t.sol' -vv
 
+  # Scoped 5D.3 changes retain their dedicated exact-head Foundry qualification.
+  # Mixed changes always retain the full shard inventory.
   # Non-Compute or mixed Solidity PRs still qualify the complete inventory.
   pr-shards:
     needs: classify-pr
-    if: github.event_name == 'pull_request' && github.head_ref != 'qualification/bnb-phase3-level3-20261013' && github.head_ref != 'qualification/highcountry-r04-level3-main-20261013' && needs.classify-pr.outputs.compute_only != 'true' && needs.classify-pr.outputs.organization_only != 'true' && needs.classify-pr.outputs.cooperative_only != 'true' && needs.classify-pr.outputs.competition_only != 'true' && (!(startsWith(github.head_ref, 'audit/') || contains(github.head_ref, '-audit-')) || github.head_ref == 'audit/420launchpad-remediation' || github.head_ref == 'audit/420verify-20261003' || github.head_ref == 'audit/420token-complete-20261004' || github.head_ref == 'audit/420town-complete-20261004' || github.head_ref == 'audit/420media-complete-20261006' || github.head_ref == 'audit/doobtube-baseline-20261006')
+    if: github.event_name == 'pull_request' && github.head_ref != 'qualification/bnb-phase3-level3-20261013' && github.head_ref != 'qualification/highcountry-r04-level3-main-20261013' && needs.classify-pr.outputs.compute_only != 'true' && needs.classify-pr.outputs.organization_only != 'true' && needs.classify-pr.outputs.cooperative_only != 'true' && needs.classify-pr.outputs.competition_only != 'true' && needs.classify-pr.outputs.sports_5d3_only != 'true' && (!(startsWith(github.head_ref, 'audit/') || contains(github.head_ref, '-audit-')) || github.head_ref == 'audit/420launchpad-remediation' || github.head_ref == 'audit/420verify-20261003' || github.head_ref == 'audit/420token-complete-20261004' || github.head_ref == 'audit/420town-complete-20261004' || github.head_ref == 'audit/420media-complete-20261006' || github.head_ref == 'audit/doobtube-baseline-20261006')
     runs-on: ubuntu-latest
     timeout-minutes: 60
     strategy:

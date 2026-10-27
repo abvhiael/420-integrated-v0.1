@@ -1,0 +1,30 @@
+name: 420Bet Sports 5D.3 odds ingestion scoped qualification
+on:
+  push:
+    branches: ['bet/5d3-odds-provenance']
+  pull_request:
+    paths:
+      - 'contracts/src/bet/sports/**'
+      - 'contracts/test/sports-5d3/**'
+      - 'contracts/test/sports-5d2/SportsRegistry420.t.sol'
+      - '.github/workflows/420bet-sports-5d3.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: sports-5d3-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  signed-odds:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.8.6
+      - name: Run bounded odds qualification and inherited integration fixtures
+        working-directory: contracts
+        run: forge test --match-contract SportsOddsIngestion420Test -vvv

@@ -1,0 +1,19 @@
+name: HighCountry HC-WORLD-06 Port Alder District Navigation Level 1
+on:
+  pull_request:
+    paths:
+      - 'scripts/highcountry/hc-world-06-port-alder-*'
+      - 'deployments/highcountry/hc-world-06-port-alder-*'
+      - 'docs/highcountry/HC-WORLD-06-PORT-ALDER-*'
+      - '.github/workflows/highcountry-hc-world-06-port-alder-l1.yml'
+  workflow_dispatch:
+jobs:
+  district-navigation-l1:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify Port Alder district topology, entrances, routing and security
+        run: node --test scripts/highcountry/hc-world-06-port-alder-navigation.test.mjs

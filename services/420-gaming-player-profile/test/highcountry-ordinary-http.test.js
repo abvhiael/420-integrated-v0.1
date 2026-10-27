@@ -9,7 +9,7 @@ test('HC-NEXT-7.2 account-only HTTP rejects spoofing and invokes approved servic
   status:async input=>({eventId:input.eventId,finalized:false}),
  };
  const authority={gameId:game,
-  verifyToken:async token=>{if(token!=='valid')throw Error('invalid-token');return {sub:'alice',game};},
+  verifyToken:token=>{if(token!=='valid')throw Error('invalid-token');return {sub:'alice',game,epoch:0,iss:'issuer'};},
   registeredPrincipal:async token=>token==='valid'?'alice':null};
  const poolForPrincipal=async()=>({connect:async()=>{throw Error('not-expected');}});
  const provider={put:async()=>null,get:async()=>null,delete:async()=>null};

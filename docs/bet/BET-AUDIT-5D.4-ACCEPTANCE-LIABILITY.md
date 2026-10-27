@@ -1,16 +1,16 @@
-# 420Bet 5D.4 — Bet acceptance, odds locking and liability
+# 420Bet 5D.4 — Funded admission and liability
 
-## Status: PARTIAL IMPLEMENTATION, NOT QUALIFIED
+## Status: funded admission implementation candidate; scoped CI pending; production qualification incomplete
 
-The bounded admission preview uses 5D.3's current, scoped signer-authorized quote and 5D.2's live market readiness checks. It rejects expired or replaced quote digests, noncanonical selections, excessive stake, excessive exposure, expired offer deadlines and returns outside the bettor's price bounds. Decimal odds use integer 1e6 scaling and gross return is floor(stake × decimal odds / 1e6); profit liability is gross minus stake. Risk limits are scoped to canonical market IDs.
+The preview module SportsBetAcceptance420 retains immutable price bounds, quote-digest checks and market risk configuration. SportsFundedTickets420 is the new actual funded ticket authority. Direct player transactions transfer the *exact* token stake into a guarded vault, with strict before/after balance verification; a hash supplied by the caller is **not** treated as a funding receipt. Operator account collateral is separately transferred to the vault and profit exposure is reserved on the same atomic admission transaction. Per-player, per-selection and per-market exposure caps are evaluated before accepting each bet. Replays reuse the player's nonce and fail. Tickets record locked gross returns, profit, quote digest, epoch and market terms.
 
-**Critical release barrier:** No wager may be accepted without atomic custody proof, an asset/amount-authoritative funding adapter, per-ticket immutable funding confirmation, replay-safe token receipt consumption, operator collateral checks, independent account/signature authorization, settlement and deterministic refund rights. A caller-supplied hash does not prove funding. `accept()` therefore deliberately reverts. Preview is informational only, not a reservation of capital and not a funded bet.
+Payouts use pull credits and a nonreentrant withdrawal, with a unique terminal state. Winnings consume the reserved operator profit; losing stakes become operator collateral; refunds after the registered policy delay return the exact stake and release profit reservations. Operators cannot withdraw reserved collateral. Revoked/stale quotes or unavailable markets reject new admissions; existing ticket payout rights do not depend on continued market opening.
 
-## Required additional 5D.4 qualification
-- Genuine stake custody and atomic funding verification with actual ERC-20 transfer and fee-on-transfer/reentrancy defenses, or an independently attested treasury integration.
-- Operator collateral inventory and worst-case correlated exposure accounting, dynamic reservation and release (including per-outcome aggregation, voids, rollback and global caps).
-- Authenticated player consent/nonce replay protection, quote slippage, ticket uniqueness, idempotent retry and front-run protection.
-- Complete life-cycle rights for locked tickets, cancellation/dispute/payout/refund integration; fail-closed event postponement, stale source, emergency halt and operator revocation.
-- Funded adversarial integration, independent model/replay, compiler/lint/static analysis, exact-SHA CI evidence, external data/source authority and legal release gates.
+## Mandatory remaining release barriers
 
-No wager acceptance, liability reservation, solvency, fund safety or full 5D.4 qualification is claimed.
+- The **outcome authority**: RESOLVE permission is a capability gate, not independent proof of the sporting outcome. Production deployment must attach dispute, oracle finality, challenge and appeal controls, and prove independent source rights before authorizing any resolver. Timeout refunds are the fail-safe; do not grant RESOLVE in production before its later-phase controls qualify.
+- Regulatory, identity, jurisdiction, anti-abuse, wallet screening, asset allowlist and operator solvency beyond one isolated market must be evaluated. No live sportsbook or legal authorization is asserted.
+- Independent adversarial qualification: test false-return, fee-on-transfer, reentrant and malicious tokens; altered market/quote statuses; correlated market exposures; insolvency; front-run intent and denial of service; refunds and withdrawals; exact-SHA compile, deployment-size and static security analysis. These are required to certify 5D.4.
+- A suitable final audited ERC20 custody asset and operator economic risk policy must be explicitly approved before release.
+
+The new vault is not a deployment authorization. The old acceptance.accept deliberately remains disabled to avoid mistakenly treating the preview adapter as a custody vault. Use SportsFundedTickets420.fund only in controlled integration tests until the above release gates are met.

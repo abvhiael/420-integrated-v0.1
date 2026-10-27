@@ -1,0 +1,32 @@
+name: HC-ART-04-F Recreation Level 1
+on:
+  pull_request:
+    paths:
+      - 'apps/highcountry-web/src/recreation-catalogue.js'
+      - 'apps/highcountry-web/src/marketplace.js'
+      - 'apps/highcountry-web/scripts/build.mjs'
+      - 'apps/highcountry-web/test/recreation-catalogue.test.mjs'
+      - '.github/workflows/hc-art-04-f-recreation.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  scoped-recreation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Scoped tests and syntax
+        working-directory: apps/highcountry-web
+        run: |
+          node --check src/recreation-catalogue.js
+          node --check src/marketplace.js
+          node --test test/recreation-catalogue.test.mjs test/water-wildlife-catalogue.test.mjs test/outdoor-structure-catalogue.test.mjs test/hc-next-4-4-marketplace.test.mjs test/r064-market.test.mjs
+      - name: Browser bundle verification
+        working-directory: apps/highcountry-web
+        run: |
+          npm run build
+          test -s dist/src/recreation-catalogue.js
+          node --check dist/src/recreation-catalogue.js

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
+import "./SportsMarketRegistry420.sol";
 
 /// @notice Two distinct independent evidence signers and a separately designated adjudicator.
 /// @dev Governance must verify organizational independence off-chain; address checks are necessary, not sufficient.
@@ -13,6 +14,7 @@ contract SportsOutcomeCertification420 {
         address first;
         address second;
     }
+    SportsMarketRegistry420 public immutable markets;
     address public immutable reporterA;
     address public immutable reporterB;
     address public immutable adjudicator;
@@ -26,7 +28,9 @@ contract SportsOutcomeCertification420 {
     error Unauthorized();
     error Conflict();
 
-    constructor(address a, address b, address judge, uint64 period) {
+    constructor(address registry, address a, address b, address judge, uint64 period) {
+        if (registry.code.length == 0) revert Invalid();
+        markets = SportsMarketRegistry420(registry);
         if (a == address(0) || b == address(0) || judge == address(0)
             || a == b || a == judge || b == judge || period < 1 hours) revert Invalid();
         reporterA = a;
@@ -39,6 +43,7 @@ contract SportsOutcomeCertification420 {
 
     function attest(bytes32 marketId, bytes32 selection, bytes32 evidence) external {
         if (msg.sender != reporterA && msg.sender != reporterB) revert Unauthorized();
+        if (block.timestamp < markets.get(marketId).config.cutoff) revert Invalid();
         if (marketId == 0 || selection == 0 || evidence == 0 || reports[marketId][msg.sender] != 0
             || results[marketId].status != Status.NONE) revert Conflict();
         bytes32 claim = keccak256(abi.encode(block.chainid, address(this), marketId, selection, evidence));

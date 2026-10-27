@@ -222,6 +222,31 @@ contract R0412CompetitionTest {
         require(engine.winners(ev) == address(0), "revoked optional entry won");
     }
 
+    function testVersionedCategoriesAndImmutableRules() public {
+        bytes32 category = keccak256("flower-exhibition");
+        bytes32 second = keccak256("flower-v2");
+        bytes32 rules = keccak256("flower-v2-rules");
+        templates.registerCategoryVersion(second, category, 2, rules, bytes32(0));
+        require(templates.categoryOf(second) == category, "category not recorded");
+        require(templates.categoryVersionTemplate(category, 2) == second, "revision missing");
+        engine.create(keccak256("revision-event"), SEASON, second, opens, closes, challenge);
+        (bool duplicate,) = address(templates).call(
+            abi.encodeCall(templates.registerCategoryVersion, (keccak256("different"), category, 2, rules, bytes32(0)))
+        );
+        require(!duplicate, "category revision overwritten");
+    }
+
+    function testPreEventHarvestCannotBeEnteredAsFreshCompetitionEvidence() public {
+        _start();
+        alice.enter(engine, EVENT);
+        bytes32 harvest = keccak256("old-harvest");
+        evidence.approve(harvest, address(alice), 10000, opens - 1);
+        (bool ok,) = address(alice).call(
+            abi.encodeCall(alice.submit, (engine, EVENT, harvest, 10000, opens - 1))
+        );
+        require(!ok, "pre-event harvest scored");
+    }
+
     function testLifecycleBoundaries() public {
         (bool early,) = address(alice).call(abi.encodeCall(alice.enter, (engine, EVENT)));
         require(!early, "early entry");

@@ -1,0 +1,39 @@
+name: High Country Competition HC-NEXT-7.1 Level 1
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/highcountry/competition/**'
+      - 'contracts/test/highcountry/unit/competition/**'
+      - '.github/workflows/highcountry-competition-next-7-1.yml'
+      - 'docs/highcountry/HC-NEXT-7.1-COMPETITION-FOUNDATIONS.md'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  competition-level-1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      FOUNDRY_SRC: src/highcountry
+      FOUNDRY_TEST: test/highcountry
+      FOUNDRY_SCRIPT: script/highcountry
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact head
+        env:
+          SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$SHA"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Competition compilation
+        working-directory: contracts
+        run: forge build src/highcountry/competition --sizes
+      - name: Static analysis
+        working-directory: contracts
+        run: forge lint src/highcountry/competition --severity high med low
+      - name: Season, competition, dispute and revision adversarial tests
+        working-directory: contracts
+        run: forge test --match-path 'test/highcountry/unit/competition/*.t.sol' -vv

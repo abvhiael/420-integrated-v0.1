@@ -1,0 +1,210 @@
+{
+  "collection": "HC-ART-04-D",
+  "notes": "Decorative-only extracted sprites; validate visual edges and placement collision separately. Tall illustration dimensions do not themselves authorize ground footprint.",
+  "assets": [
+    {
+      "filename": "hc-outdoor-decor-happy-grower-gnome.png",
+      "region": "universal",
+      "collection": "HC-ART-04-D",
+      "layer": "outdoor_decor",
+      "footprintTiles": [
+        1,
+        1
+      ],
+      "canvasPx": [
+        320,
+        320
+      ],
+      "sha256": "4e5a39cddbe19eed08692a1cb2ceacf1db470c65b8b336a9f848f8f1adbf9419",
+      "repositoryPath": "apps/highcountry-web/public/assets/cultivation/props/outdoor-leisure/04-d-garden-ornaments/hc-outdoor-decor-happy-grower-gnome.png",
+      "publicUrl": "/assets/cultivation/props/outdoor-leisure/04-d-garden-ornaments/hc-outdoor-decor-happy-grower-gnome.png"
+    },
+    {
+      "filename": "hc-outdoor-decor-woodland-guardian-owl.png",
+      "region": "universal",
+      "collection": "HC-ART-04-D",
+      "layer": "outdoor_decor",
+      "footprintTiles": [
+        1,
+        1
+      ],
+      "canvasPx": [
+        320,
+        320
+      ],
+      "sha256": "69cbdf2b5e2ce8c03222d08d2671d929c9abff316147a5930b527f709b6a0ae8",
+      "repositoryPath": "apps/highcountry-web/public/assets/cultivation/props/outdoor-leisure/04-d-garden-ornaments/hc-outdoor-decor-woodland-guardian-owl.png",
+      "publicUrl": "/assets/cultivation/props/outdoor-leisure/04-d-garden-ornaments/hc-outdoor-decor-woodland-guardian-owl.png"
+    },
+    {
+      "filename": "hc-outdoor-decor-copper-leaf-wind-spinner.png",
+      "region": "universal",
+      "collection": "HC-ART-04-D",
+      "layer": "outdoor_decor",
+      "footprintTiles": [
+        1,
+        2
+      ],
+      "canvasPx": [
+        320,
+        640
+      ],
+      "sha256": "ad2b4f708ea9e2ba7bc3bec323a6b37b77fa0c75961780d6eed87acae25205c1",
+      "repositoryPath": "apps/highcountry-web/public/assets/cultivation/props/outdoor-leisure/04-d-garden-ornaments/hc-outdoor-decor-copper-leaf-wind-spinner.png",
+      "publicUrl": "/assets/cultivation/props/outdoor-leisure/04-d-garden-ornaments/hc-outdoor-decor-copper-leaf-wind-spinner.png"
+    },
+    {
+      "filename": "hc-outdoor-decor-riverstone-cairn.png",
+      "region": "universal",
+      "collection": "HC-ART-04-D",
+      "layer": "outdoor_decor",
+      "footprintTiles": [
+        1,
+        1
+      ],
+      "canvasPx": [
+        320,
+        320
+      ],
+      "sha256": "d1b6d076a3b979a8ec9877be0bceb00f4f5d1bcb07c33d3cf66b8ba15fab17bc",
+      "repositoryPath": "apps/highcountry-web/public/assets/cultivation/props/outdoor-leisure/04-d-garden-ornaments/hc-outdoor-decor-riverstone-cairn.png",
+      "publicUrl": "/assets/cultivation/props/outdoor-leisure/04-d-garden-ornaments/hc-outdoor-decor-riverstone-cairn.png"
+    },
+    {
+      "filename": "hc-outdoor-decor-crooked-garden-signpost.png",
+      "region": "universal",
+      "collection": "HC-ART-04-D",
+      "layer": "outdoor_decor",
+      "footprintTiles": [
+        1,
+        2
+      ],
+      "canvasPx": [
+        320,
+        640
+      ],
+      "sha256": "c359a1c6b587e2ad773a7c83f34be92131c2afa001d716b4bd9d4fefeebde2fa",
+      "repositoryPath": "apps/highcountry-web/public/assets/cultivation/props/outdoor-leisure/04-d-garden-ornaments/hc-outdoor-decor-crooked-garden-signpost.png",
+      "publicUrl": "/assets/cultivation/props/outdoor-leisure/04-d-garden-ornaments/hc-outdoor-decor-crooked-garden-signpost.png"
+    },
+    {
+      "filename": "hc-outdoor-decor-enchanted-mushroom-cluster.png",
+      "region": "universal",
+      "collection": "HC-ART-04-D",
+      "layer": "outdoor_decor",
+      "footprintTiles": [
+        2,
+        2
+      ],
+      "canvasPx": [
+        640,
+        640
+      ],
+      "sha256": "3d60bd95ca105d50bfb5c59f1edd9d5dfde65198f2dda685fc3ba1fc63985e43",
+      "repositoryPath": "apps/highcountry-web/public/assets/cultivation/props/outdoor-leisure/04-d-garden-ornaments/hc-outdoor-decor-enchanted-mushroom-cluster.png",
+      "publicUrl": "/assets/cultivation/props/outdoor-leisure/04-d-garden-ornaments/hc-outdoor-decor-enchanted-mushroom-cluster.png"
+    },
+    {
+      "filename": "hc-outdoor-decor-emerald-driftwood-salmon.png",
+      "region": "emerald-coast",
+      "collection": "HC-ART-04-D",
+      "layer": "outdoor_decor",
+      "footprintTiles": [
+        2,
+        1
+      ],
+      "canvasPx": [
+        640,
+        320
+      ],
+      "sha256": "2c59e8aa430529d0be3f9ff0bcbf177e47548cccdc5dba083169ccb34f57d438",
+      "repositoryPath": "apps/highcountry-web/public/assets/cultivation/props/outdoor-leisure/04-d-garden-ornaments/hc-outdoor-decor-emerald-driftwood-salmon.png",
+      "publicUrl": "/assets/cultivation/props/outdoor-leisure/04-d-garden-ornaments/hc-outdoor-decor-emerald-driftwood-salmon.png"
+    },
+    {
+      "filename": "hc-outdoor-decor-emerald-cedar-wind-chimes.png",
+      "region": "emerald-coast",
+      "collection": "HC-ART-04-D",
+      "layer": "outdoor_decor",
+      "footprintTiles": [
+        1,
+        2
+      ],
+      "canvasPx": [
+        320,
+        640
+      ],
+      "sha256": "686d4f786ecb549566d1280aee371ba7b87cb34cf0df6968664b3a6d0a3f5b50",
+      "repositoryPath": "apps/highcountry-web/public/assets/cultivation/props/outdoor-leisure/04-d-garden-ornaments/hc-outdoor-decor-emerald-cedar-wind-chimes.png",
+      "publicUrl": "/assets/cultivation/props/outdoor-leisure/04-d-garden-ornaments/hc-outdoor-decor-emerald-cedar-wind-chimes.png"
+    },
+    {
+      "filename": "hc-outdoor-decor-prairie-wagon-wheel.png",
+      "region": "golden-prairie",
+      "collection": "HC-ART-04-D",
+      "layer": "outdoor_decor",
+      "footprintTiles": [
+        2,
+        2
+      ],
+      "canvasPx": [
+        640,
+        640
+      ],
+      "sha256": "ce5c39953cb41a4ee141dd7aa087f3557e7f1271923bbd8691bb7f408589e19f",
+      "repositoryPath": "apps/highcountry-web/public/assets/cultivation/props/outdoor-leisure/04-d-garden-ornaments/hc-outdoor-decor-prairie-wagon-wheel.png",
+      "publicUrl": "/assets/cultivation/props/outdoor-leisure/04-d-garden-ornaments/hc-outdoor-decor-prairie-wagon-wheel.png"
+    },
+    {
+      "filename": "hc-outdoor-decor-prairie-rooster-weathervane.png",
+      "region": "golden-prairie",
+      "collection": "HC-ART-04-D",
+      "layer": "outdoor_decor",
+      "footprintTiles": [
+        1,
+        2
+      ],
+      "canvasPx": [
+        320,
+        640
+      ],
+      "sha256": "d8c432269fda7456ccea12645eb3901a985936eaf670d53f2ce9de83f3efc358",
+      "repositoryPath": "apps/highcountry-web/public/assets/cultivation/props/outdoor-leisure/04-d-garden-ornaments/hc-outdoor-decor-prairie-rooster-weathervane.png",
+      "publicUrl": "/assets/cultivation/props/outdoor-leisure/04-d-garden-ornaments/hc-outdoor-decor-prairie-rooster-weathervane.png"
+    },
+    {
+      "filename": "hc-outdoor-decor-mesa-terracotta-sun-totem.png",
+      "region": "red-mesa",
+      "collection": "HC-ART-04-D",
+      "layer": "outdoor_decor",
+      "footprintTiles": [
+        2,
+        2
+      ],
+      "canvasPx": [
+        640,
+        640
+      ],
+      "sha256": "493aca971e1f771336a2cbe706e4bcf22df314b316ea8475d5de2b9ef90e0a43",
+      "repositoryPath": "apps/highcountry-web/public/assets/cultivation/props/outdoor-leisure/04-d-garden-ornaments/hc-outdoor-decor-mesa-terracotta-sun-totem.png",
+      "publicUrl": "/assets/cultivation/props/outdoor-leisure/04-d-garden-ornaments/hc-outdoor-decor-mesa-terracotta-sun-totem.png"
+    },
+    {
+      "filename": "hc-outdoor-decor-mesa-coyote-silhouette.png",
+      "region": "red-mesa",
+      "collection": "HC-ART-04-D",
+      "layer": "outdoor_decor",
+      "footprintTiles": [
+        2,
+        2
+      ],
+      "canvasPx": [
+        640,
+        640
+      ],
+      "sha256": "27acf40cc0484278bf157e25aea74a796aae6a3d8dc99ca98306ecb31c23ab86",
+      "repositoryPath": "apps/highcountry-web/public/assets/cultivation/props/outdoor-leisure/04-d-garden-ornaments/hc-outdoor-decor-mesa-coyote-silhouette.png",
+      "publicUrl": "/assets/cultivation/props/outdoor-leisure/04-d-garden-ornaments/hc-outdoor-decor-mesa-coyote-silhouette.png"
+    }
+  ]
+}

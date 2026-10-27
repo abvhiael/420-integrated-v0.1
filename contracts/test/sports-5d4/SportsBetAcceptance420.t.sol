@@ -18,7 +18,6 @@ contract SportsBetAcceptance420Test is SportsOddsIngestion420Test {
                 100, 1000, 2000, 1200, 1500, true
             ))
         ));
-        _submit(_quote(1));
     }
 
     function _offer(uint256 stake) internal view returns (SportsBetAcceptance420.Offer memory o) {
@@ -30,11 +29,13 @@ contract SportsBetAcceptance420Test is SportsOddsIngestion420Test {
     }
 
     function testPreviewLocksExactQuoteAndCalculatesProfitLiability() public {
+        _submit(_quote(1));
         (uint256 gross, uint256 liability, bool ok) = acceptance.preview(_offer(1000), PLAYER);
         require(ok && gross == 1850 && liability == 850, "locked odds / profit liability");
     }
 
     function testLimitsAndSelectionReject() public {
+        _submit(_quote(1));
         (, , bool ok) = acceptance.preview(_offer(99), PLAYER);
         require(!ok, "minimum stake");
         (, , ok) = acceptance.preview(_offer(1001), PLAYER);
@@ -50,6 +51,7 @@ contract SportsBetAcceptance420Test is SportsOddsIngestion420Test {
     }
 
     function testStaleLockedQuoteFailsClosed() public {
+        _submit(_quote(1));
         SportsBetAcceptance420.Offer memory o = _offer(500);
         _submit(_quote(2));
         (, , bool ok) = acceptance.preview(o, PLAYER);
@@ -57,6 +59,7 @@ contract SportsBetAcceptance420Test is SportsOddsIngestion420Test {
     }
 
     function testSuspensionFailsClosed() public {
+        _submit(_quote(1));
         SportsBetAcceptance420.Offer memory o = _offer(500);
         _call(CONTROL, address(markets), abi.encodeCall(markets.suspend, (market)));
         (, , bool ok) = acceptance.preview(o, PLAYER);
@@ -64,6 +67,7 @@ contract SportsBetAcceptance420Test is SportsOddsIngestion420Test {
     }
 
     function testUnfundedAcceptanceIsDisabled() public {
+        _submit(_quote(1));
         SportsBetAcceptance420.Offer memory o = _offer(500);
         (bool ok,) = address(acceptance).call(abi.encodeCall(acceptance.accept, (o, PLAYER)));
         require(!ok, "synthetic funding receipt must not mint wager");

@@ -148,7 +148,8 @@ contract SportsFundedTickets420 is SportsAuthority420 {
         if (t.state != TicketState.FUNDED) revert State();
         SportsMarketRegistry420.Record memory m = markets.get(t.marketId);
         uint256 delay = markets.getTemplate(m.config.templateId).config.refundSeconds;
-        if (certification.result(t.marketId).status != SportsOutcomeCertification420.Status.VOID && block.timestamp < uint256(m.config.cutoff) + delay) revert State();
+        SportsOutcomeCertification420.Result memory outcome = certification.result(t.marketId);
+        if (outcome.status != SportsOutcomeCertification420.Status.VOID && block.timestamp < uint256(m.config.cutoff) + delay) revert State();
         _close(id, TicketState.REFUNDED, t.stake);
     }
 

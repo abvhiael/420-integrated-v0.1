@@ -125,6 +125,13 @@ jobs:
           if [[ "$cooperative_changed" != true ]]; then cooperative_only=false; fi
           if [[ "$competition_changed" != true ]]; then competition_only=false; fi
           if [[ "$sports_5d3_changed" != true ]]; then sports_5d3_only=false; fi
+          # Versioned functional dependency map overrides only competition scope.
+          # Any mixed, shared-security, closeout or unrecognized change falls
+          # through to the retained mandatory Level 3 shard inventory.
+          bounded_scope="$(python3 contracts/scripts/select-solidity-scope.py "$scope_files" contracts/config/solidity-qualification-scopes.json)"
+          if [[ "$bounded_scope" == competition ]]; then
+            competition_only=true
+          fi
           echo "compute_only=$compute_only" >> "$GITHUB_OUTPUT"
           echo "organization_only=$organization_only" >> "$GITHUB_OUTPUT"
           echo "cooperative_only=$cooperative_only" >> "$GITHUB_OUTPUT"
@@ -236,6 +243,13 @@ jobs:
       - uses: foundry-rs/foundry-toolchain@v1
         with:
           version: stable
+      - name: Cache competition Foundry compilation artifacts
+        uses: actions/cache@v4
+        with:
+          path: |
+            contracts/out
+            contracts/cache
+          key: foundry-competition-${{ runner.os }}-stable-pr-${{ github.event.pull_request.head.sha }}
       - name: Compile, format, lint and run retained competition adversarial suite
         working-directory: contracts
         env:
@@ -287,6 +301,21 @@ jobs:
           set -euo pipefail
           mkdir -p ../artifacts/contracts
           bash scripts/qualify-foundry-shard.sh '${{ matrix.shard }}' '4' 2>&1 | tee '../artifacts/contracts/shard-${{ matrix.shard }}.log'
+      - name: Record runner termination and compilation diagnostics
+        if: failure()
+        shell: bash
+        run: |
+          mkdir -p artifacts/contracts
+          {
+            echo "sha=${{ github.event.pull_request.head.sha || github.sha }}"
+            echo "job=pr-shards-${{ matrix.shard }}"
+            echo "runner=${{ runner.os }}"
+            echo "termination=inspect preceding logs; exit 143 indicates SIGTERM, not proven OOM"
+            date -u '+finished_utc=%Y-%m-%dT%H:%M:%SZ'
+            free -m || true
+            df -h . || true
+            ulimit -a || true
+          } > "artifacts/contracts/shard-${{ matrix.shard }}-runner.txt"
       - name: Upload per-shard diagnostics
         if: always()
         uses: actions/upload-artifact@v4
@@ -295,6 +324,7 @@ jobs:
           path: |
             artifacts/contracts/shard-${{ matrix.shard }}.log
             artifacts/contracts/shard-${{ matrix.shard }}-targets.txt
+            artifacts/contracts/shard-${{ matrix.shard }}-runner.txt
           if-no-files-found: warn
           retention-days: 30
 

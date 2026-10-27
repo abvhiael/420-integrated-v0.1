@@ -26,8 +26,9 @@ contract SportsFundedTickets420Test is SportsBetAcceptance420Test {
     }
 
     function _fund(uint256 amount) internal returns (bytes32 id) {
+        SportsBetAcceptance420.Offer memory offer = _offer(amount);
         vm.prank(PLAYER);
-        id = vault.fund(_offer(amount));
+        id = vault.fund(offer);
     }
 
     function testFundedTicketLockedAndCollateralReserved() public {
@@ -38,8 +39,9 @@ contract SportsFundedTickets420Test is SportsBetAcceptance420Test {
         require(t.player == PLAYER && t.gross == 925 && t.profit == 425, "immutable locked ticket");
         require(uint256(t.state) == 1 && vault.reserved(market) == 425, "reserved liability");
         require(token.balanceOf(address(vault)) == 2500, "atomic escrow custody");
+        SportsBetAcceptance420.Offer memory duplicate = _offer(500);
         vm.prank(PLAYER);
-        (bool ok,) = address(vault).call(abi.encodeCall(vault.fund, (_offer(500))));
+        (bool ok,) = address(vault).call(abi.encodeCall(vault.fund, (duplicate)));
         require(!ok, "nonce replay");
         _fails(CONTROL, address(vault), abi.encodeCall(vault.withdrawCollateral, (market, 1600)));
     }

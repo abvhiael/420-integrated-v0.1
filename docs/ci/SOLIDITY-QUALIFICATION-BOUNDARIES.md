@@ -1,3 +1,13 @@
+---
+title: Solidity qualification boundaries
+audience:
+  - developer
+  - operator
+category: contributing
+status: current
+version: current
+---
+
 # Solidity qualification architecture — bounded PR selection (October 2026)
 
 ## Root cause and observed evidence

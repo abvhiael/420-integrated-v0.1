@@ -5,6 +5,7 @@ on:
       - 'scripts/highcountry/hc-world-02-*'
       - 'deployments/highcountry/hc-world-02-*'
       - '.github/workflows/highcountry-hc-world-02-l1.yml'
+      - 'deployments/highcountry/hc-world-county-atlases.draft.v1.json'
   workflow_dispatch:
 jobs:
   cadastral-l1:
@@ -15,6 +16,6 @@ jobs:
         with:
           node-version: '22'
       - name: Qualify 31,260 cadastral reservation records
-        run: node --test scripts/highcountry/hc-world-02-cadastre.test.mjs scripts/highcountry/hc-world-02-geography-gate.test.mjs
+        run: node --test scripts/highcountry/hc-world-02-cadastre.test.mjs scripts/highcountry/hc-world-02-geography-gate.test.mjs scripts/highcountry/hc-world-02-atlas-draft.test.mjs
       - name: Generate survey inventory reproducibly
         run: node scripts/highcountry/hc-world-02-cadastre.mjs /tmp/hc-world-02-cadastre.json

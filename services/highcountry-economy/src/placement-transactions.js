@@ -30,6 +30,14 @@ export class HighCountryPlacementTransactions {
   if(!(assetIds instanceof Set))fail('catalogue-unavailable');
   const geometry=await this.geometry(command.assetId);
   if(!geometry)fail('geometry-unavailable');
+  const geometryRegistry=new Map();
+  // Resolve every potentially colliding geometry BEFORE the locked transaction, then pin snapshots.
+  // No stale result may authorize collision: production must supply immutable registry revisions.
+  if(typeof this.auth.qualifiedGeometrySnapshot!=='function')fail('trusted-geometry-snapshot-required');
+  const snapshotData=await this.auth.qualifiedGeometrySnapshot(who,command);
+  if(!(snapshotData instanceof Map))fail('invalid-geometry-snapshot');
+  for(const [asset,g] of snapshotData)geometryRegistry.set(asset,structuredClone(g));
+  if(!geometryRegistry.has(command.assetId))fail('geometry-not-in-snapshot');
   const input=structuredClone(command),payload=digest({who,input});
   return this.store.transact(s=>{
    map(s);
@@ -67,7 +75,7 @@ export class HighCountryPlacementTransactions {
     if(other.instanceId===checked.instanceId||other.state!=='placed'||sceneKey(other)!==target)continue;
     if(checked.parentInstanceId!==null&&other.parentInstanceId===checked.parentInstanceId&&other.slotId===checked.slotId)fail('slot-occupied');
     if(tiles.length){
-     const mask=this.geometrySync(other.assetId);
+     const mask=geometryRegistry.get(other.assetId);if(!mask)fail('unqualified-existing-object');
      const overlap=rotatedCells(mask,other.orientation).some(p=>tiles.includes([p.x+other.gridX,p.y+other.gridY].join(':')));
      if(overlap)fail('occupied');
     }
@@ -89,6 +97,4 @@ export class HighCountryPlacementTransactions {
    return structuredClone(result);
   });
  }
- // Production geometry registry must be synchronously pinned during atomic transaction.
- geometrySync(assetId){if(typeof this._geometrySnapshot?.get!=='function')fail('geometry-not-pinned');const g=this._geometrySnapshot.get(assetId);if(!g)fail('geometry-not-pinned');return g;}
 }

@@ -2,6 +2,7 @@
 pragma solidity ^0.8.24;
 
 import "./SportsBetAcceptance420.sol";
+import "./SportsOutcomeCertification420.sol";
 
 interface ISportsToken420 {
     function balanceOf(address) external view returns (uint256);
@@ -16,6 +17,7 @@ contract SportsFundedTickets420 is SportsAuthority420 {
     SportsBetAcceptance420 public immutable admission;
     SportsMarketRegistry420 public immutable markets;
     SportsOddsIngestion420 public immutable odds;
+    SportsOutcomeCertification420 public immutable certification;
     bytes32 public constant RESOLVE = keccak256("BET_SPORT_TICKET_RESOLVE");
     uint256 private entered;
 
@@ -57,8 +59,9 @@ contract SportsFundedTickets420 is SportsAuthority420 {
         entered = 0;
     }
 
-    constructor(address auth, address acceptance_) SportsAuthority420(auth) {
-        if (acceptance_.code.length == 0) revert Invalid();
+    constructor(address auth, address acceptance_, address certification_) SportsAuthority420(auth) {
+        if (acceptance_.code.length == 0 || certification_.code.length == 0) revert Invalid();
+        certification = SportsOutcomeCertification420(certification_);
         admission = SportsBetAcceptance420(acceptance_);
         markets = admission.markets();
         odds = admission.odds();
@@ -134,6 +137,8 @@ contract SportsFundedTickets420 is SportsAuthority420 {
         if (t.state != TicketState.FUNDED) revert State();
         _auth(RESOLVE, t.marketId);
         if (block.timestamp < markets.get(t.marketId).config.cutoff) revert State();
+        SportsOutcomeCertification420.Result memory r = certification.result(t.marketId);
+        if (r.status != SportsOutcomeCertification420.Status.FINAL || won != (r.selection == t.selection)) revert State();
         _close(id, won ? TicketState.WON : TicketState.LOST, won ? t.gross : 0);
     }
 
@@ -143,7 +148,7 @@ contract SportsFundedTickets420 is SportsAuthority420 {
         if (t.state != TicketState.FUNDED) revert State();
         SportsMarketRegistry420.Record memory m = markets.get(t.marketId);
         uint256 delay = markets.getTemplate(m.config.templateId).config.refundSeconds;
-        if (block.timestamp < uint256(m.config.cutoff) + delay) revert State();
+        if (certification.result(t.marketId).status != SportsOutcomeCertification420.Status.VOID && block.timestamp < uint256(m.config.cutoff) + delay) revert State();
         _close(id, TicketState.REFUNDED, t.stake);
     }
 

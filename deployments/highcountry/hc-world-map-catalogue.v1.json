@@ -35,8 +35,12 @@
           "COMMERCIAL"
         ],
         "requiredAuthority": "SERVER_ATTESTED_CANONICAL_SETTLED_TITLE_CURRENT_OWNER",
-        "fallback": "GENESIS_WHEN_UNVERIFIED"
-      }
+        "fallback": "GENESIS_WHEN_UNVERIFIED",
+        "fullDevelopmentThresholdNumerator": 3,
+        "fullDevelopmentThresholdDenominator": 4
+      },
+      "developed75Src": "/assets/highcountry/maps/emerald-coast/port-alder/port-alder-developed-75-v1.png",
+      "developed75AssetReady": false
     }
   },
   "privacy": {

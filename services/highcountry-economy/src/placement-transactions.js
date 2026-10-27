@@ -1,0 +1,94 @@
+// HC-PLACE-03: server-only durable world transactions. No HTTP exposure or gameplay enablement.
+import {createHash} from 'node:crypto';
+import {definePlacedObject,rotatedCells} from './placement-contract.js';
+const fail=s=>{throw Error('hc-place-03:'+s);};
+const id=v=>typeof v==='string'&&/^[A-Za-z0-9:_-]{1,128}$/.test(v);
+const valid=v=>Number.isSafeInteger(v)&&v>=0;
+const key=(p,a)=>JSON.stringify([p,a]);
+const sceneKey=r=>JSON.stringify([r.regionId,r.parcelId,r.buildingId,r.roomId]);
+const digest=o=>createHash('sha256').update(JSON.stringify(o)).digest('hex');
+const snapshot=s=>({instances:[...s.placementInstances.values()].map(structuredClone),scenes:[...s.placementScenes.entries()].map(([scene,revision])=>({scene,revision}))});
+const map=s=>{if(!(s.placementInstances instanceof Map)||!(s.placementOperations instanceof Map)||!(s.placementScenes instanceof Map)||!(s.assets instanceof Map))fail('missing-durable-state');};
+export class HighCountryPlacementTransactions {
+ constructor({store,authority,resolveGeometry,resolveAssets,clock=()=>Date.now()}={}){
+  if(typeof store?.transact!=='function'||typeof authority?.registeredPrincipal!=='function'||typeof authority?.canPlaceOnParcel!=='function'||typeof authority?.validateWorld!=='function'||typeof resolveGeometry!=='function'||typeof resolveAssets!=='function')fail('trusted-dependencies-required');
+  this.store=store;this.auth=authority;this.geometry=resolveGeometry;this.assets=resolveAssets;this.clock=clock;
+ }
+ async snapshot(session){
+  const who=await this.auth.registeredPrincipal(session);if(!id(who))fail('unauthenticated');
+  return this.store.transact(s=>{map(s);return snapshot(s);});
+ }
+ async execute(session,command){
+  const who=await this.auth.registeredPrincipal(session);
+  if(!id(who)||!command||!id(command.operation)||!['place','move','rotate','remove','attach','detach'].includes(command.action)||!id(command.instanceId)||!valid(command.expectedRevision)||!valid(command.expectedSceneRevision))fail('invalid-request');
+  // Authenticated admission and trusted geometry obtained before database transaction.
+  const permitted=await this.auth.canPlaceOnParcel(who,command);
+  if(permitted!==true)fail('parcel-authority-denied');
+  const world=await this.auth.validateWorld(who,command);
+  if(world?.qualified!==true||!id(world.evidenceId))fail('world-evidence-unqualified');
+  const assetIds=await this.assets();
+  if(!(assetIds instanceof Set))fail('catalogue-unavailable');
+  const geometry=await this.geometry(command.assetId);
+  if(!geometry)fail('geometry-unavailable');
+  const input=structuredClone(command),payload=digest({who,input});
+  return this.store.transact(s=>{
+   map(s);
+   const opKey=key(who,command.operation),previous=s.placementOperations.get(opKey);
+   if(previous){if(previous.payload!==payload)fail('replay-payload-conflict');return structuredClone(previous.result);}
+   const old=s.placementInstances.get(command.instanceId);
+   const creating=command.action==='place';
+   if(creating===Boolean(old))fail('instance-exists-or-missing');
+   if(old&&old.ownerPrincipal!==who)fail('owner-denied');
+   if(old&&old.revision!==command.expectedRevision)fail('stale-instance');
+   if(creating&&command.expectedRevision!==0)fail('expected-zero-revision');
+   if(command.action!=='place'&&old.state!=='placed')fail('instance-not-placed');
+   const source=old&&sceneKey(old);
+   const next={...old,...command.record};
+   if(!creating){
+    if(command.action==='remove')next.state='stored';
+    if(command.action==='rotate')next.orientation=command.orientation;
+    if(command.action==='move'){next.gridX=command.gridX;next.gridY=command.gridY;}
+    if(command.action==='attach'){next.surface=command.surface;next.layer=command.layer;next.parentInstanceId=command.parentInstanceId;next.slotId=command.slotId;}
+    if(command.action==='detach')fail('detach-target-required'); // HC-PLACE-06 will define typed detach semantics.
+    next.revision=old.revision+1;next.updatedAt=this.clock();
+    next.history=[...old.history,command.operation];
+   }
+   if(creating){if(!command.record||command.record.instanceId!==command.instanceId||command.record.ownerPrincipal!==who||command.record.state!=='placed'||command.record.revision!==1)fail('invalid-new-instance');Object.assign(next,command.record);}
+   if(next.ownerPrincipal!==who||next.instanceId!==command.instanceId||next.assetId!==command.assetId)fail('immutable-identity');
+   const checked=definePlacedObject(next,{assetIds,geometry});
+   const target=sceneKey(checked);
+   const currentScene=s.placementScenes.get(target)??0;
+   if(currentScene!==command.expectedSceneRevision)fail('stale-scene');
+   if(source&&source!==target)fail('cross-scene-migration-unsupported');
+   if(!creating&&old.parentInstanceId!==null&&command.action==='remove')fail('attached-remove-policy-pending');
+   if(command.action==='remove'&&[...s.placementInstances.values()].some(x=>x.parentInstanceId===old.instanceId&&x.state==='placed'))fail('support-has-children');
+   const tiles=checked.state==='placed'?rotatedCells(geometry,checked.orientation).map(p=>[p.x+checked.gridX,p.y+checked.gridY].join(':')):[];
+   for(const other of s.placementInstances.values()){
+    if(other.instanceId===checked.instanceId||other.state!=='placed'||sceneKey(other)!==target)continue;
+    if(checked.parentInstanceId!==null&&other.parentInstanceId===checked.parentInstanceId&&other.slotId===checked.slotId)fail('slot-occupied');
+    if(tiles.length){
+     const mask=this.geometrySync(other.assetId);
+     const overlap=rotatedCells(mask,other.orientation).some(p=>tiles.includes([p.x+other.gridX,p.y+other.gridY].join(':')));
+     if(overlap)fail('occupied');
+    }
+   }
+   if(creating){
+    const k=key(who,checked.assetId),inventory=s.assets.get(k);
+    if(!inventory||!valid(inventory.available)||!valid(inventory.reserved)||inventory.available<1)fail('inventory-unavailable');
+    inventory.available--;inventory.reserved++;s.assets.set(k,inventory);
+   }
+   if(command.action==='remove'){
+    const k=key(who,checked.assetId),inventory=s.assets.get(k);
+    if(!inventory||!valid(inventory.reserved)||inventory.reserved<1||!valid(inventory.available))fail('inventory-reservation-corrupt');
+    inventory.reserved--;inventory.available++;s.assets.set(k,inventory);
+   }
+   s.placementInstances.set(checked.instanceId,checked);
+   s.placementScenes.set(target,currentScene+1);
+   const result={instance:structuredClone(checked),sceneRevision:currentScene+1};
+   s.placementOperations.set(opKey,{payload,result});
+   return structuredClone(result);
+  });
+ }
+ // Production geometry registry must be synchronously pinned during atomic transaction.
+ geometrySync(assetId){if(typeof this._geometrySnapshot?.get!=='function')fail('geometry-not-pinned');const g=this._geometrySnapshot.get(assetId);if(!g)fail('geometry-not-pinned');return g;}
+}

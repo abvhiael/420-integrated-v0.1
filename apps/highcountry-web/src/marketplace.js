@@ -1,3 +1,4 @@
+import {outdoorStructureCatalogue,getOutdoorStructure} from './outdoor-structure-catalogue.js';
 import {regionalMemorabiliaCatalogue,getRegionalMemorabilia} from './regional-memorabilia-catalogue.js';
 import {premiumFurnitureCatalogue,getPremiumFurniture} from './premium-furniture-catalogue.js';
 // HC-NEXT-4.4 player experience. All balances, ownership and settlement states are server-derived.
@@ -89,9 +90,17 @@ export function mountMarketplace({document,main,runtime,authenticate,fetchImpl=f
    item.append(img,el('p',asset.name+' · '+asset.region+' · '+asset.placement.layer+' · '+asset.footprint.width+'×'+asset.footprint.height));
    memorabilia.append(item);
   }
+  const outdoor=section('Garden structures & shade');
+  outdoor.append(el('p','Visual catalogue only. Ownership, BUDS prices and stock require authenticated server records. Placement requires qualified structure collision geometry.'));
+  for(const asset of outdoorStructureCatalogue){
+   const entry=el('article'),img=document.createElement('img');
+   img.src=asset.assetUrl;img.alt=asset.name;img.width=110;img.height=110;img.loading='lazy';
+   img.addEventListener('error',()=>{img.hidden=true;});
+   entry.append(img,el('p',asset.name+' · '+asset.footprint.width+'×'+asset.footprint.height+' · '+asset.originRegion));outdoor.append(entry);
+  }
   const inventory=section('My verified inventory');
   if(!data.inventory.length)inventory.append(el('p','No tradeable registered inventory. Local guest harvests cannot be listed.'));
-  for(const item of data.inventory)inventory.append(el('p',(getPremiumFurniture(item.asset)?.name||getRegionalMemorabilia(item.asset)?.name||item.asset)+' · available '+item.available+' · reserved '+item.reserved));
+  for(const item of data.inventory)inventory.append(el('p',(getOutdoorStructure(item.asset)?.name||getPremiumFurniture(item.asset)?.name||getRegionalMemorabilia(item.asset)?.name||item.asset)+' · available '+item.available+' · reserved '+item.reserved));
   if(data.mode==='ordinary'){
    const list=section('Create a listing');
    const asset=formField(list,'Verified asset ID');
@@ -109,7 +118,7 @@ export function mountMarketplace({document,main,runtime,authenticate,fetchImpl=f
   const browse=section('Browse available listings');
   if(!data.browse.length)browse.append(el('p','No available listings.'));
   for(const item of data.browse){
-   const row=el('article');row.append(el('p',(getPremiumFurniture(item.asset)?.name||getRegionalMemorabilia(item.asset)?.name||item.asset)+' · '+item.quantity+' units · '+item.price+' BUDS · seller '+item.seller));
+   const row=el('article');row.append(el('p',(getOutdoorStructure(item.asset)?.name||getPremiumFurniture(item.asset)?.name||getRegionalMemorabilia(item.asset)?.name||item.asset)+' · '+item.quantity+' units · '+item.price+' BUDS · seller '+item.seller));
    row.append(el('p','Listing '+item.listing+' · expires '+new Date(item.expiresAt).toLocaleString()));
    if(data.mode==='ordinary'){
     button(row,'Purchase for '+item.price+' BUDS',()=>{
@@ -126,7 +135,7 @@ export function mountMarketplace({document,main,runtime,authenticate,fetchImpl=f
   const history=section('My listings and trade history');
   if(!data.history.length)history.append(el('p','No trade history on this registered profile.'));
   for(const item of data.history){
-   const row=el('article');row.append(el('p',(getPremiumFurniture(item.asset)?.name||getRegionalMemorabilia(item.asset)?.name||item.asset)+' · '+item.quantity+' units · '+item.price+' BUDS · '+item.status));
+   const row=el('article');row.append(el('p',(getOutdoorStructure(item.asset)?.name||getPremiumFurniture(item.asset)?.name||getRegionalMemorabilia(item.asset)?.name||item.asset)+' · '+item.quantity+' units · '+item.price+' BUDS · '+item.status));
    row.append(el('p','Listing '+item.listing+' · '+(item.seller===data.principal?'I am the seller':'I am the buyer')));
    if(data.mode==='ordinary'&&item.seller===data.principal&&item.status==='active')
     button(row,'Cancel listing',()=>run(()=>client.cancel({operation:operationId(),listing:item.listing}),

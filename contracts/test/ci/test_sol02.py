@@ -28,6 +28,33 @@ class QualificationTests(unittest.TestCase):
         inventory, groups = planner.inventory()
         self.assertEqual(sorted(v for items in groups.values() for v in items), inventory)
 
+    def test_protocol_family_split(self):
+        cases = {
+            "src/exchange/Exchange420.sol": "protocol-defi",
+            "test/ExchangeRouter420.t.sol": "protocol-defi",
+            "src/media/Media420.sol": "protocol-creative",
+            "test/MediaPhase1Protocol420.t.sol": "protocol-creative",
+            "src/oracle/Oracle420.sol": "protocol-services",
+            "test/Oracle420.t.sol": "protocol-services",
+            "src/governance/Governance420.sol": "protocol-identity",
+            "test/GovernanceAudit420.t.sol": "protocol-identity",
+            "src/gaming/Gaming420.sol": "protocol-infrastructure",
+            "test/GamingProtocol420.t.sol": "protocol-infrastructure",
+            "src/unknown/Unknown.sol": "protocol-misc",
+            "test/UnknownSuite.t.sol": "protocol-misc",
+        }
+        for path, group in cases.items():
+            with self.subTest(path=path):
+                self.assertEqual(planner.assign(path), group)
+
+    def test_retained_inventory_after_protocol_split(self):
+        inventory, groups = planner.inventory()
+        self.assertNotIn("420protocols", groups)
+        self.assertEqual(set(inventory), set(p for targets in groups.values() for p in targets))
+        self.assertEqual(len(inventory), sum(map(len, groups.values())))
+        self.assertTrue(all(p in inventory for p in groups["protocol-defi"]))
+        self.assertTrue(groups["protocol-misc"], "unknown primary owners must remain covered")
+
     def test_shared_security_change_expands_scope(self):
         inventory, groups = planner.inventory()
         selected=planner.choose(inventory,groups,["contracts/src/interfaces/IRegistry.sol"],False)

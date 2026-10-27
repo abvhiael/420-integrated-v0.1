@@ -1,0 +1,53 @@
+{
+  "schema": "HC.WORLD.RURAL.CLASS.ALLOCATION.V1",
+  "status": "OWNER_APPROVED_DESIGN_INPUT_NOT_SURVEYED_OR_ISSUED",
+  "approvedDate": "2026-10-26",
+  "scope": "HC-WORLD-02",
+  "appliesIdenticallyToRegionIds": [
+    1,
+    2,
+    3
+  ],
+  "classes": [
+    {
+      "class": "HOMESTEAD",
+      "widthTiles": 48,
+      "heightTiles": 48,
+      "parcelsPerRegion": 4200,
+      "tilesPerParcel": 2304,
+      "totalTilesPerRegion": 9676800
+    },
+    {
+      "class": "SMALLHOLDING",
+      "widthTiles": 80,
+      "heightTiles": 80,
+      "parcelsPerRegion": 2500,
+      "tilesPerParcel": 6400,
+      "totalTilesPerRegion": 16000000
+    },
+    {
+      "class": "ESTATE",
+      "widthTiles": 144,
+      "heightTiles": 144,
+      "parcelsPerRegion": 1250,
+      "tilesPerParcel": 20736,
+      "totalTilesPerRegion": 25920000
+    },
+    {
+      "class": "RANCH",
+      "widthTiles": 256,
+      "heightTiles": 256,
+      "parcelsPerRegion": 350,
+      "tilesPerParcel": 65536,
+      "totalTilesPerRegion": 22937600
+    }
+  ],
+  "ruralParcelsPerRegion": 8300,
+  "ruralSceneTilesPerRegion": 74534400,
+  "ruralSceneTilesAcrossThreeRegions": 223603200,
+  "notes": [
+    "These are logical property scene tile footprints, not surveyed atlas land areas.",
+    "Do not assert the 65% purchasable cadastral land budget from these scene-tile sums without a defined world-to-parcel area mapping.",
+    "Urban and commercial lot sizes remain pending approval; no Genesis parcels are issued."
+  ]
+}

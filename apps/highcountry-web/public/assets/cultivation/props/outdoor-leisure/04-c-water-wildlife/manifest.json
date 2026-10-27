@@ -1,0 +1,211 @@
+{
+  "collection": "HC-ART-04-C",
+  "tileSourcePixels": 320,
+  "tileGamePixels": 64,
+  "items": [
+    {
+      "id": "hc-outdoor-water-heritage-stone-birdbath",
+      "filename": "hc-outdoor-water-heritage-stone-birdbath.png",
+      "region": "universal",
+      "footprintTiles": {
+        "width": 1,
+        "height": 1
+      },
+      "canvasPixels": {
+        "width": 320,
+        "height": 320
+      },
+      "layer": "outdoor_feature",
+      "category": "cosmetic-water",
+      "sha256": "d1c1b0bb88c7d0ba661b94bd96d3390360ec073835ef4182f09b41b3ba7a3e5d",
+      "repoPath": "apps/highcountry-web/public/assets/cultivation/props/outdoor-leisure/04-c-water-wildlife/hc-outdoor-water-heritage-stone-birdbath.png"
+    },
+    {
+      "id": "hc-outdoor-water-botanical-tiered-fountain",
+      "filename": "hc-outdoor-water-botanical-tiered-fountain.png",
+      "region": "universal",
+      "footprintTiles": {
+        "width": 2,
+        "height": 2
+      },
+      "canvasPixels": {
+        "width": 640,
+        "height": 640
+      },
+      "layer": "outdoor_feature",
+      "category": "cosmetic-water",
+      "sha256": "1f1586675e92a030eee8a03eb34273a309ff4db4856bb9065478d125ae3d5626",
+      "repoPath": "apps/highcountry-web/public/assets/cultivation/props/outdoor-leisure/04-c-water-wildlife/hc-outdoor-water-botanical-tiered-fountain.png"
+    },
+    {
+      "id": "hc-outdoor-water-lily-dragonfly-pond",
+      "filename": "hc-outdoor-water-lily-dragonfly-pond.png",
+      "region": "universal",
+      "footprintTiles": {
+        "width": 3,
+        "height": 3
+      },
+      "canvasPixels": {
+        "width": 960,
+        "height": 960
+      },
+      "layer": "outdoor_feature",
+      "category": "cosmetic-water",
+      "sha256": "8fc8f66fc3096e6b2be1a06d96fc8cd59487f0367f7eab251073b7ebcbc61df8",
+      "repoPath": "apps/highcountry-web/public/assets/cultivation/props/outdoor-leisure/04-c-water-wildlife/hc-outdoor-water-lily-dragonfly-pond.png"
+    },
+    {
+      "id": "hc-outdoor-water-heritage-rain-barrel",
+      "filename": "hc-outdoor-water-heritage-rain-barrel.png",
+      "region": "universal",
+      "footprintTiles": {
+        "width": 1,
+        "height": 1
+      },
+      "canvasPixels": {
+        "width": 320,
+        "height": 320
+      },
+      "layer": "outdoor_feature",
+      "category": "cosmetic-water",
+      "sha256": "3893959617b73338a2a482fe1a33c0f3f1eb8f4bbc7efdc5b139b3c28977a3e8",
+      "repoPath": "apps/highcountry-web/public/assets/cultivation/props/outdoor-leisure/04-c-water-wildlife/hc-outdoor-water-heritage-rain-barrel.png"
+    },
+    {
+      "id": "hc-outdoor-wildlife-woodland-bird-feeding-station",
+      "filename": "hc-outdoor-wildlife-woodland-bird-feeding-station.png",
+      "region": "universal",
+      "footprintTiles": {
+        "width": 2,
+        "height": 1
+      },
+      "canvasPixels": {
+        "width": 640,
+        "height": 320
+      },
+      "layer": "outdoor_feature",
+      "category": "cosmetic-wildlife",
+      "sha256": "4b98117ca9223cbde45d4f5e90d42ae748704d5c11fe903fa87569071e9e3cfb",
+      "repoPath": "apps/highcountry-web/public/assets/cultivation/props/outdoor-leisure/04-c-water-wildlife/hc-outdoor-wildlife-woodland-bird-feeding-station.png"
+    },
+    {
+      "id": "hc-outdoor-wildlife-pollinator-sanctuary",
+      "filename": "hc-outdoor-wildlife-pollinator-sanctuary.png",
+      "region": "universal",
+      "footprintTiles": {
+        "width": 2,
+        "height": 2
+      },
+      "canvasPixels": {
+        "width": 640,
+        "height": 640
+      },
+      "layer": "outdoor_feature",
+      "category": "cosmetic-wildlife",
+      "sha256": "644d998792883b8cc8f34a0238c31420c267c32de441d8a5c14e16b85930a198",
+      "repoPath": "apps/highcountry-web/public/assets/cultivation/props/outdoor-leisure/04-c-water-wildlife/hc-outdoor-wildlife-pollinator-sanctuary.png"
+    },
+    {
+      "id": "hc-outdoor-water-emerald-mossy-waterfall",
+      "filename": "hc-outdoor-water-emerald-mossy-waterfall.png",
+      "region": "emerald-coast",
+      "footprintTiles": {
+        "width": 3,
+        "height": 3
+      },
+      "canvasPixels": {
+        "width": 960,
+        "height": 960
+      },
+      "layer": "outdoor_feature",
+      "category": "cosmetic-water",
+      "sha256": "ea7ddf20d26abea0b99bae114e705e2dc19f0669188d1dfed638cedea2e7b5cd",
+      "repoPath": "apps/highcountry-web/public/assets/cultivation/props/outdoor-leisure/04-c-water-wildlife/hc-outdoor-water-emerald-mossy-waterfall.png"
+    },
+    {
+      "id": "hc-outdoor-water-emerald-driftwood-fountain",
+      "filename": "hc-outdoor-water-emerald-driftwood-fountain.png",
+      "region": "emerald-coast",
+      "footprintTiles": {
+        "width": 2,
+        "height": 2
+      },
+      "canvasPixels": {
+        "width": 640,
+        "height": 640
+      },
+      "layer": "outdoor_feature",
+      "category": "cosmetic-water",
+      "sha256": "5f7b1e2d02a5833b933fef10bc70c1c9df8b2feb2093f415c15338f0423c7bfc",
+      "repoPath": "apps/highcountry-web/public/assets/cultivation/props/outdoor-leisure/04-c-water-wildlife/hc-outdoor-water-emerald-driftwood-fountain.png"
+    },
+    {
+      "id": "hc-outdoor-water-prairie-homestead-pump",
+      "filename": "hc-outdoor-water-prairie-homestead-pump.png",
+      "region": "golden-prairie",
+      "footprintTiles": {
+        "width": 2,
+        "height": 2
+      },
+      "canvasPixels": {
+        "width": 640,
+        "height": 640
+      },
+      "layer": "outdoor_feature",
+      "category": "cosmetic-water",
+      "sha256": "f02b95da94f260f14f2e20b791ee9199865d386010a73a4be26f86221d30aab7",
+      "repoPath": "apps/highcountry-web/public/assets/cultivation/props/outdoor-leisure/04-c-water-wildlife/hc-outdoor-water-prairie-homestead-pump.png"
+    },
+    {
+      "id": "hc-outdoor-water-prairie-butterfly-garden",
+      "filename": "hc-outdoor-water-prairie-butterfly-garden.png",
+      "region": "golden-prairie",
+      "footprintTiles": {
+        "width": 3,
+        "height": 2
+      },
+      "canvasPixels": {
+        "width": 960,
+        "height": 640
+      },
+      "layer": "outdoor_feature",
+      "category": "cosmetic-water",
+      "sha256": "9e0c57c595a3d44a78168121521ea977b223e7d6d93a76ad0fcc513cdea90276",
+      "repoPath": "apps/highcountry-web/public/assets/cultivation/props/outdoor-leisure/04-c-water-wildlife/hc-outdoor-water-prairie-butterfly-garden.png"
+    },
+    {
+      "id": "hc-outdoor-water-mesa-hacienda-fountain",
+      "filename": "hc-outdoor-water-mesa-hacienda-fountain.png",
+      "region": "red-mesa",
+      "footprintTiles": {
+        "width": 2,
+        "height": 2
+      },
+      "canvasPixels": {
+        "width": 640,
+        "height": 640
+      },
+      "layer": "outdoor_feature",
+      "category": "cosmetic-water",
+      "sha256": "36db7a4c9e8c20207d42caeaba368ca9ea3eef4fd8b79c48aad5604a377439f4",
+      "repoPath": "apps/highcountry-web/public/assets/cultivation/props/outdoor-leisure/04-c-water-wildlife/hc-outdoor-water-mesa-hacienda-fountain.png"
+    },
+    {
+      "id": "hc-outdoor-water-mesa-wildlife-oasis",
+      "filename": "hc-outdoor-water-mesa-wildlife-oasis.png",
+      "region": "red-mesa",
+      "footprintTiles": {
+        "width": 3,
+        "height": 3
+      },
+      "canvasPixels": {
+        "width": 960,
+        "height": 960
+      },
+      "layer": "outdoor_feature",
+      "category": "cosmetic-water",
+      "sha256": "218457af712fad5df53b43e5d38c89830d72ab2d90d0c10c6c97566134dc740a",
+      "repoPath": "apps/highcountry-web/public/assets/cultivation/props/outdoor-leisure/04-c-water-wildlife/hc-outdoor-water-mesa-wildlife-oasis.png"
+    }
+  ]
+}

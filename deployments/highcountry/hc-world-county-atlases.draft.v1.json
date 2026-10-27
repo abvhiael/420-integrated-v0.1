@@ -1,0 +1,639 @@
+{
+  "schema": "HC.WORLD.COUNTY.ATLAS.DRAFT.V1",
+  "status": "DESIGN_DRAFT_PENDING_OWNER_APPROVAL",
+  "coordinateReference": "HC.WORLD.INTEGER.TILE.V1",
+  "canvas": [
+    16000,
+    10000
+  ],
+  "source": "HC-WORLD-01 approved regional geography and approved settlement lore",
+  "regions": [
+    {
+      "regionId": 1,
+      "code": "EC",
+      "name": "Emerald Coast",
+      "terrainZones": [
+        {
+          "id": "EC-WESTERN-COAST",
+          "type": "coast",
+          "bounds": [
+            0,
+            0,
+            2800,
+            10000
+          ]
+        },
+        {
+          "id": "EC-NORTHERN-FOREST",
+          "type": "forest",
+          "bounds": [
+            2800,
+            0,
+            12800,
+            2800
+          ]
+        },
+        {
+          "id": "EC-CENTRAL-RIVER",
+          "type": "river_valley",
+          "bounds": [
+            2800,
+            2800,
+            12800,
+            6800
+          ]
+        },
+        {
+          "id": "EC-SOUTHERN-VALLEYS",
+          "type": "agricultural_valley",
+          "bounds": [
+            2800,
+            6800,
+            16000,
+            10000
+          ]
+        },
+        {
+          "id": "EC-EASTERN-HIGHLANDS",
+          "type": "highlands",
+          "bounds": [
+            12800,
+            0,
+            16000,
+            6800
+          ]
+        }
+      ],
+      "protectedFeatures": [
+        {
+          "id": "EC-OCEAN",
+          "type": "ocean",
+          "bounds": [
+            0,
+            0,
+            600,
+            10000
+          ]
+        },
+        {
+          "id": "EC-ALDER-RIVER",
+          "type": "navigable_river",
+          "centerline": [
+            [
+              14600,
+              800
+            ],
+            [
+              12400,
+              2300
+            ],
+            [
+              10800,
+              3700
+            ],
+            [
+              8300,
+              4600
+            ],
+            [
+              5600,
+              5400
+            ],
+            [
+              1800,
+              6500
+            ],
+            [
+              600,
+              7000
+            ]
+          ],
+          "bufferTiles": 80
+        },
+        {
+          "id": "EC-EASTERN-CLIFFS",
+          "type": "impassable_highland",
+          "bounds": [
+            15100,
+            0,
+            16000,
+            4300
+          ]
+        }
+      ],
+      "namedAnchors": {
+        "Port Alder": [
+          1600,
+          6900
+        ],
+        "Moss Landing": [
+          5300,
+          5450
+        ],
+        "Greyhaven": [
+          9700,
+          7300
+        ],
+        "Cedar Hollow": [
+          14300,
+          2300
+        ],
+        "Bracken Falls": [
+          12300,
+          8300
+        ],
+        "Fernwick": [
+          6000,
+          1700
+        ],
+        "Tidewatch": [
+          1100,
+          3300
+        ],
+        "Driftwood Point": [
+          1100,
+          1800
+        ],
+        "Rainshadow": [
+          13800,
+          4800
+        ],
+        "Blackfern Crossing": [
+          8000,
+          4900
+        ],
+        "Otter Creek": [
+          10500,
+          3100
+        ],
+        "Silvermist": [
+          13300,
+          3600
+        ],
+        "Old Mill": [
+          4400,
+          1800
+        ],
+        "Foxglove Ridge": [
+          9200,
+          1500
+        ],
+        "Southbank": [
+          6500,
+          8700
+        ]
+      },
+      "routeCorridors": [
+        [
+          "Port Alder",
+          "Moss Landing",
+          "Greyhaven"
+        ],
+        [
+          "Moss Landing",
+          "Blackfern Crossing",
+          "Cedar Hollow"
+        ],
+        [
+          "Greyhaven",
+          "Bracken Falls",
+          "Southbank"
+        ],
+        [
+          "Tidewatch",
+          "Port Alder",
+          "Driftwood Point"
+        ],
+        [
+          "Fernwick",
+          "Old Mill",
+          "Foxglove Ridge",
+          "Otter Creek"
+        ],
+        [
+          "Cedar Hollow",
+          "Silvermist",
+          "Rainshadow"
+        ],
+        [
+          "Moss Landing",
+          "Otter Creek"
+        ]
+      ]
+    },
+    {
+      "regionId": 2,
+      "code": "GP",
+      "name": "Golden Prairie",
+      "terrainZones": [
+        {
+          "id": "GP-CENTRAL-RAIL",
+          "type": "railway_corridor",
+          "bounds": [
+            4000,
+            2600,
+            12000,
+            6000
+          ]
+        },
+        {
+          "id": "GP-EASTERN-GRAIN-BELT",
+          "type": "grain_agriculture",
+          "bounds": [
+            11000,
+            0,
+            16000,
+            9500
+          ]
+        },
+        {
+          "id": "GP-SOUTHERN-RIVERLANDS",
+          "type": "river_valley",
+          "bounds": [
+            0,
+            7100,
+            13000,
+            10000
+          ]
+        },
+        {
+          "id": "GP-WESTERN-DRYLANDS",
+          "type": "dryland_ranching",
+          "bounds": [
+            0,
+            0,
+            4000,
+            7100
+          ]
+        },
+        {
+          "id": "GP-NORTHERN-SHELTERBELT",
+          "type": "shelterbelts",
+          "bounds": [
+            4000,
+            0,
+            11000,
+            2600
+          ]
+        }
+      ],
+      "protectedFeatures": [
+        {
+          "id": "GP-RIVER",
+          "type": "river",
+          "centerline": [
+            [
+              0,
+              8300
+            ],
+            [
+              3000,
+              7900
+            ],
+            [
+              6000,
+              8550
+            ],
+            [
+              9000,
+              8150
+            ],
+            [
+              12000,
+              8900
+            ],
+            [
+              15999,
+              8700
+            ]
+          ],
+          "bufferTiles": 48
+        },
+        {
+          "id": "GP-RAIL",
+          "type": "rail",
+          "centerline": [
+            [
+              1000,
+              4400
+            ],
+            [
+              4500,
+              4750
+            ],
+            [
+              8500,
+              4800
+            ],
+            [
+              12500,
+              4500
+            ],
+            [
+              15999,
+              4300
+            ]
+          ],
+          "bufferTiles": 24
+        }
+      ],
+      "namedAnchors": {
+        "Harvest Junction": [
+          8200,
+          4700
+        ],
+        "Stonebridge": [
+          12400,
+          4700
+        ],
+        "Prairie Crossing": [
+          13500,
+          6200
+        ],
+        "Dry Gulch": [
+          1800,
+          5300
+        ],
+        "Willow Creek": [
+          7500,
+          8350
+        ],
+        "Sunfield": [
+          14000,
+          2800
+        ],
+        "Ironwood Flats": [
+          2700,
+          6900
+        ],
+        "Last Chance": [
+          4400,
+          4700
+        ],
+        "Blue Horizon": [
+          14500,
+          1500
+        ],
+        "Three Willows": [
+          4800,
+          8400
+        ],
+        "Rust Creek": [
+          6500,
+          1500
+        ],
+        "Highgrass": [
+          1800,
+          2700
+        ],
+        "Amber Hollow": [
+          10500,
+          8400
+        ],
+        "Rail's End": [
+          1500,
+          4300
+        ],
+        "Windbreak": [
+          7800,
+          1200
+        ]
+      },
+      "routeCorridors": [
+        [
+          "Rail's End",
+          "Last Chance",
+          "Harvest Junction",
+          "Stonebridge",
+          "Prairie Crossing"
+        ],
+        [
+          "Harvest Junction",
+          "Willow Creek",
+          "Three Willows"
+        ],
+        [
+          "Dry Gulch",
+          "Ironwood Flats",
+          "Highgrass"
+        ],
+        [
+          "Harvest Junction",
+          "Rust Creek",
+          "Windbreak"
+        ],
+        [
+          "Stonebridge",
+          "Sunfield",
+          "Blue Horizon"
+        ],
+        [
+          "Willow Creek",
+          "Amber Hollow"
+        ],
+        [
+          "Dry Gulch",
+          "Last Chance"
+        ]
+      ]
+    },
+    {
+      "regionId": 3,
+      "code": "RM",
+      "name": "Red Mesa",
+      "terrainZones": [
+        {
+          "id": "RM-CENTRAL-TRADE",
+          "type": "desert_basin",
+          "bounds": [
+            3400,
+            2600,
+            12000,
+            7200
+          ]
+        },
+        {
+          "id": "RM-NORTHERN-MINING",
+          "type": "mining_highlands",
+          "bounds": [
+            3000,
+            0,
+            15000,
+            2600
+          ]
+        },
+        {
+          "id": "RM-SOUTHERN-OASES",
+          "type": "spring_agriculture",
+          "bounds": [
+            4000,
+            7200,
+            12500,
+            10000
+          ]
+        },
+        {
+          "id": "RM-WESTERN-PLATEAU",
+          "type": "mesa_ranching",
+          "bounds": [
+            0,
+            0,
+            3400,
+            10000
+          ]
+        },
+        {
+          "id": "RM-EASTERN-CANYONS",
+          "type": "canyon_frontier",
+          "bounds": [
+            12500,
+            2600,
+            16000,
+            10000
+          ]
+        }
+      ],
+      "protectedFeatures": [
+        {
+          "id": "RM-GRAND-WASH",
+          "type": "seasonal_flood_wash",
+          "centerline": [
+            [
+              1000,
+              1000
+            ],
+            [
+              4500,
+              2600
+            ],
+            [
+              7200,
+              4600
+            ],
+            [
+              9800,
+              7300
+            ],
+            [
+              11700,
+              9999
+            ]
+          ],
+          "bufferTiles": 80
+        },
+        {
+          "id": "RM-EASTERN-CLIFF",
+          "type": "impassable_canyon",
+          "bounds": [
+            15400,
+            3200,
+            16000,
+            9200
+          ]
+        }
+      ],
+      "namedAnchors": {
+        "Cinder Springs": [
+          8200,
+          5300
+        ],
+        "Copper Ridge": [
+          7400,
+          1600
+        ],
+        "Solstice Wells": [
+          9500,
+          8500
+        ],
+        "Dusthaven": [
+          1700,
+          6000
+        ],
+        "Mesa Verde": [
+          5600,
+          8400
+        ],
+        "Sundown Gulch": [
+          11000,
+          2000
+        ],
+        "Redstone Crossing": [
+          11900,
+          5100
+        ],
+        "Ash Hollow": [
+          14000,
+          6500
+        ],
+        "Coyote Flats": [
+          2000,
+          3800
+        ],
+        "Copper Wash": [
+          4900,
+          1800
+        ],
+        "Broken Spur": [
+          5100,
+          5000
+        ],
+        "Sunscar": [
+          2400,
+          7600
+        ],
+        "White Cactus": [
+          11200,
+          8700
+        ],
+        "Black Mesa": [
+          14500,
+          3400
+        ],
+        "Last Light": [
+          14600,
+          8300
+        ]
+      },
+      "routeCorridors": [
+        [
+          "Cinder Springs",
+          "Copper Ridge",
+          "Sundown Gulch"
+        ],
+        [
+          "Cinder Springs",
+          "Solstice Wells",
+          "Mesa Verde"
+        ],
+        [
+          "Cinder Springs",
+          "Redstone Crossing",
+          "Last Light"
+        ],
+        [
+          "Dusthaven",
+          "Coyote Flats",
+          "Sunscar"
+        ],
+        [
+          "Copper Ridge",
+          "Copper Wash"
+        ],
+        [
+          "Redstone Crossing",
+          "Ash Hollow",
+          "Black Mesa"
+        ],
+        [
+          "Cinder Springs",
+          "Broken Spur",
+          "Dusthaven"
+        ],
+        [
+          "Solstice Wells",
+          "White Cactus"
+        ]
+      ]
+    }
+  ]
+}

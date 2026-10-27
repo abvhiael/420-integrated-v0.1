@@ -1,0 +1,32 @@
+name: HC-ART-04-C Water Wildlife Level 1
+on:
+  pull_request:
+    paths:
+      - 'apps/highcountry-web/src/water-wildlife-catalogue.js'
+      - 'apps/highcountry-web/src/marketplace.js'
+      - 'apps/highcountry-web/scripts/build.mjs'
+      - 'apps/highcountry-web/test/water-wildlife-catalogue.test.mjs'
+      - '.github/workflows/hc-art-04-c-water-wildlife.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  scoped-water-wildlife:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax and scoped tests
+        working-directory: apps/highcountry-web
+        run: |
+          node --check src/water-wildlife-catalogue.js
+          node --check src/marketplace.js
+          node --test test/water-wildlife-catalogue.test.mjs test/outdoor-structure-catalogue.test.mjs test/hc-next-4-4-marketplace.test.mjs test/r064-market.test.mjs
+      - name: Verify browser distribution
+        working-directory: apps/highcountry-web
+        run: |
+          npm run build
+          test -s dist/src/water-wildlife-catalogue.js
+          node --check dist/src/water-wildlife-catalogue.js

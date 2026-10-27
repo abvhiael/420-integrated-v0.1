@@ -1,0 +1,236 @@
+{
+  "collection": "HC-ART-04-B",
+  "tileSizePx": 64,
+  "sourcePixelsPerTile": 320,
+  "assets": [
+    {
+      "filename": "hc-outdoor-feature-fieldstone-fire-pit.png",
+      "publicUrl": "/assets/cultivation/props/outdoor-leisure/04-b-fire-gathering/hc-outdoor-feature-fieldstone-fire-pit.png",
+      "repositoryPath": "apps/highcountry-web/public/assets/cultivation/props/outdoor-leisure/04-b-fire-gathering/hc-outdoor-feature-fieldstone-fire-pit.png",
+      "collection": "HC-ART-04-B",
+      "region": "universal",
+      "layer": "outdoor_feature",
+      "footprintTiles": {
+        "width": 2,
+        "height": 2
+      },
+      "canvasPx": {
+        "width": 640,
+        "height": 640
+      },
+      "sourceGridPosition": 0,
+      "sourceSheet": "universal",
+      "sha256": "684a4a3e40adca3f8572d1bbaa51d7c9d77d55d07b023927d4fe85a08122a78b"
+    },
+    {
+      "filename": "hc-outdoor-feature-cast-iron-fire-bowl.png",
+      "publicUrl": "/assets/cultivation/props/outdoor-leisure/04-b-fire-gathering/hc-outdoor-feature-cast-iron-fire-bowl.png",
+      "repositoryPath": "apps/highcountry-web/public/assets/cultivation/props/outdoor-leisure/04-b-fire-gathering/hc-outdoor-feature-cast-iron-fire-bowl.png",
+      "collection": "HC-ART-04-B",
+      "region": "universal",
+      "layer": "outdoor_feature",
+      "footprintTiles": {
+        "width": 2,
+        "height": 2
+      },
+      "canvasPx": {
+        "width": 640,
+        "height": 640
+      },
+      "sourceGridPosition": 1,
+      "sourceSheet": "universal",
+      "sha256": "6c996e803fca60f9b073d71aceb93b218941f71e685a28fff74258c7fbf4c3b0"
+    },
+    {
+      "filename": "hc-outdoor-feature-botanical-chiminea.png",
+      "publicUrl": "/assets/cultivation/props/outdoor-leisure/04-b-fire-gathering/hc-outdoor-feature-botanical-chiminea.png",
+      "repositoryPath": "apps/highcountry-web/public/assets/cultivation/props/outdoor-leisure/04-b-fire-gathering/hc-outdoor-feature-botanical-chiminea.png",
+      "collection": "HC-ART-04-B",
+      "region": "universal",
+      "layer": "outdoor_feature",
+      "footprintTiles": {
+        "width": 2,
+        "height": 2
+      },
+      "canvasPx": {
+        "width": 640,
+        "height": 640
+      },
+      "sourceGridPosition": 2,
+      "sourceSheet": "universal",
+      "sha256": "7005c7dd8745ee0bc90e11bd3756688bef0fa526953153418fa2dda52374c315"
+    },
+    {
+      "filename": "hc-outdoor-feature-heritage-brick-fireplace.png",
+      "publicUrl": "/assets/cultivation/props/outdoor-leisure/04-b-fire-gathering/hc-outdoor-feature-heritage-brick-fireplace.png",
+      "repositoryPath": "apps/highcountry-web/public/assets/cultivation/props/outdoor-leisure/04-b-fire-gathering/hc-outdoor-feature-heritage-brick-fireplace.png",
+      "collection": "HC-ART-04-B",
+      "region": "universal",
+      "layer": "outdoor_feature",
+      "footprintTiles": {
+        "width": 3,
+        "height": 2
+      },
+      "canvasPx": {
+        "width": 960,
+        "height": 640
+      },
+      "sourceGridPosition": 3,
+      "sourceSheet": "universal",
+      "sha256": "c0ce3b7659f853b60cd70e41eec4059afb92394818c7eb0510b404f53e8202d8"
+    },
+    {
+      "filename": "hc-outdoor-feature-campfire-kettle-tripod.png",
+      "publicUrl": "/assets/cultivation/props/outdoor-leisure/04-b-fire-gathering/hc-outdoor-feature-campfire-kettle-tripod.png",
+      "repositoryPath": "apps/highcountry-web/public/assets/cultivation/props/outdoor-leisure/04-b-fire-gathering/hc-outdoor-feature-campfire-kettle-tripod.png",
+      "collection": "HC-ART-04-B",
+      "region": "universal",
+      "layer": "outdoor_feature",
+      "footprintTiles": {
+        "width": 2,
+        "height": 2
+      },
+      "canvasPx": {
+        "width": 640,
+        "height": 640
+      },
+      "sourceGridPosition": 4,
+      "sourceSheet": "universal",
+      "sha256": "d79fc90273e97f7cc706f61c9d1233304d8cba6f0ddebc438a982a761dd6da8b"
+    },
+    {
+      "filename": "hc-outdoor-feature-communal-campfire-circle.png",
+      "publicUrl": "/assets/cultivation/props/outdoor-leisure/04-b-fire-gathering/hc-outdoor-feature-communal-campfire-circle.png",
+      "repositoryPath": "apps/highcountry-web/public/assets/cultivation/props/outdoor-leisure/04-b-fire-gathering/hc-outdoor-feature-communal-campfire-circle.png",
+      "collection": "HC-ART-04-B",
+      "region": "universal",
+      "layer": "outdoor_feature",
+      "footprintTiles": {
+        "width": 3,
+        "height": 3
+      },
+      "canvasPx": {
+        "width": 960,
+        "height": 960
+      },
+      "sourceGridPosition": 5,
+      "sourceSheet": "universal",
+      "sha256": "76f007b73d561a21d9c620f70c9fcce3df38f1ca80686cf3941a12aaaaff5695"
+    },
+    {
+      "filename": "hc-outdoor-feature-emerald-driftwood-hearth.png",
+      "publicUrl": "/assets/cultivation/props/outdoor-leisure/04-b-fire-gathering/hc-outdoor-feature-emerald-driftwood-hearth.png",
+      "repositoryPath": "apps/highcountry-web/public/assets/cultivation/props/outdoor-leisure/04-b-fire-gathering/hc-outdoor-feature-emerald-driftwood-hearth.png",
+      "collection": "HC-ART-04-B",
+      "region": "emerald-coast",
+      "layer": "outdoor_feature",
+      "footprintTiles": {
+        "width": 2,
+        "height": 2
+      },
+      "canvasPx": {
+        "width": 640,
+        "height": 640
+      },
+      "sourceGridPosition": 0,
+      "sourceSheet": "regional",
+      "sha256": "3733f130dbd794b47c84a2477fdc213172a0bb4d05e725e46b5cdb6d06097944"
+    },
+    {
+      "filename": "hc-outdoor-feature-emerald-cedar-hearth-station.png",
+      "publicUrl": "/assets/cultivation/props/outdoor-leisure/04-b-fire-gathering/hc-outdoor-feature-emerald-cedar-hearth-station.png",
+      "repositoryPath": "apps/highcountry-web/public/assets/cultivation/props/outdoor-leisure/04-b-fire-gathering/hc-outdoor-feature-emerald-cedar-hearth-station.png",
+      "collection": "HC-ART-04-B",
+      "region": "emerald-coast",
+      "layer": "outdoor_feature",
+      "footprintTiles": {
+        "width": 3,
+        "height": 2
+      },
+      "canvasPx": {
+        "width": 960,
+        "height": 640
+      },
+      "sourceGridPosition": 1,
+      "sourceSheet": "regional",
+      "sha256": "955d5c011ea5a62d3b2230e8909a0da37868c2249ef8a9b6cb82ca086127706c"
+    },
+    {
+      "filename": "hc-outdoor-feature-prairie-horseshoe-fire-pit.png",
+      "publicUrl": "/assets/cultivation/props/outdoor-leisure/04-b-fire-gathering/hc-outdoor-feature-prairie-horseshoe-fire-pit.png",
+      "repositoryPath": "apps/highcountry-web/public/assets/cultivation/props/outdoor-leisure/04-b-fire-gathering/hc-outdoor-feature-prairie-horseshoe-fire-pit.png",
+      "collection": "HC-ART-04-B",
+      "region": "golden-prairie",
+      "layer": "outdoor_feature",
+      "footprintTiles": {
+        "width": 3,
+        "height": 2
+      },
+      "canvasPx": {
+        "width": 960,
+        "height": 640
+      },
+      "sourceGridPosition": 2,
+      "sourceSheet": "regional",
+      "sha256": "88016801c9f88dff5abf794ebee09760669693c1029a0ccdeaf64da8c0caeb05"
+    },
+    {
+      "filename": "hc-outdoor-feature-prairie-heritage-fire-barrel.png",
+      "publicUrl": "/assets/cultivation/props/outdoor-leisure/04-b-fire-gathering/hc-outdoor-feature-prairie-heritage-fire-barrel.png",
+      "repositoryPath": "apps/highcountry-web/public/assets/cultivation/props/outdoor-leisure/04-b-fire-gathering/hc-outdoor-feature-prairie-heritage-fire-barrel.png",
+      "collection": "HC-ART-04-B",
+      "region": "golden-prairie",
+      "layer": "outdoor_feature",
+      "footprintTiles": {
+        "width": 2,
+        "height": 2
+      },
+      "canvasPx": {
+        "width": 640,
+        "height": 640
+      },
+      "sourceGridPosition": 3,
+      "sourceSheet": "regional",
+      "sha256": "5c646f786c351f3186b198495fa3c27a24c468448e5676bd585281546a842e3e"
+    },
+    {
+      "filename": "hc-outdoor-feature-mesa-adobe-kiva-fireplace.png",
+      "publicUrl": "/assets/cultivation/props/outdoor-leisure/04-b-fire-gathering/hc-outdoor-feature-mesa-adobe-kiva-fireplace.png",
+      "repositoryPath": "apps/highcountry-web/public/assets/cultivation/props/outdoor-leisure/04-b-fire-gathering/hc-outdoor-feature-mesa-adobe-kiva-fireplace.png",
+      "collection": "HC-ART-04-B",
+      "region": "red-mesa",
+      "layer": "outdoor_feature",
+      "footprintTiles": {
+        "width": 3,
+        "height": 2
+      },
+      "canvasPx": {
+        "width": 960,
+        "height": 640
+      },
+      "sourceGridPosition": 4,
+      "sourceSheet": "regional",
+      "sha256": "fcc7da654d81c0d460db42d14cf8969d591346d4b10085f90305ea943c6d575e"
+    },
+    {
+      "filename": "hc-outdoor-feature-mesa-sandstone-fire-circle.png",
+      "publicUrl": "/assets/cultivation/props/outdoor-leisure/04-b-fire-gathering/hc-outdoor-feature-mesa-sandstone-fire-circle.png",
+      "repositoryPath": "apps/highcountry-web/public/assets/cultivation/props/outdoor-leisure/04-b-fire-gathering/hc-outdoor-feature-mesa-sandstone-fire-circle.png",
+      "collection": "HC-ART-04-B",
+      "region": "red-mesa",
+      "layer": "outdoor_feature",
+      "footprintTiles": {
+        "width": 3,
+        "height": 3
+      },
+      "canvasPx": {
+        "width": 960,
+        "height": 960
+      },
+      "sourceGridPosition": 5,
+      "sourceSheet": "regional",
+      "sha256": "6f73dee79ec4917241ec6718af445309c661c03ae530c7647870416b6d6b773c"
+    }
+  ],
+  "notes": "Decorative graphic exports; mechanical collision, fire clearance and gameplay effects require independent qualification."
+}

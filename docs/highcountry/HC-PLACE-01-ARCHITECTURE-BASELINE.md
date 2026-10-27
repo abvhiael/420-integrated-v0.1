@@ -1,6 +1,6 @@
 # HC-PLACE-01 — placement architecture baseline and authority contract
 
-Status: **FOUNDATION DOCUMENTED; LEVEL 1 NOT YET QUALIFIED**. Read against main `d135b6954684b4ac29dc597510fdb9c2d4724a81` on 2026-10-27. Do not treat client catalogue guards as placement authority.
+Status: **FOUNDATION AND BOUNDED TESTS COMMITTED; EXACT-SHA CI VERIFICATION PENDING**. Read against main `d135b6954684b4ac29dc597510fdb9c2d4724a81` on 2026-10-27. Do not treat client catalogue guards as placement authority.
 
 ## Existing implementation and classification
 
@@ -10,7 +10,7 @@ Status: **FOUNDATION DOCUMENTED; LEVEL 1 NOT YET QUALIFIED**. Read against main 
 | Asset placement metadata | HC-ART-03 and HC-ART-04 catalogue source/tests, several still in open PRs | Catalogue/preview only; guards fail closed pending geometry, ownership and authoritative server validation. |
 | Ordinary BUDS / market serializable storage | `services/highcountry-economy/src/postgres-store.js`, `src/market.js` | Existing SERIALIZABLE, row-locked economy transaction authority. Reuse or integrate; do not duplicate balances/inventory. Existing schema does not demonstrate placed-object state. |
 | Terrain and parcel access | `scripts/highcountry/hc-world-02-parcel-access.mjs`; `docs/highcountry/HC-WORLD-02-PARCEL-TERRAIN-ACCESS-VALIDATION.md` | Bounded fail-closed road, frontage/easement and parcel admission merged via #876. Real owner-approved terrain and full 31,260 parcel admission remain outstanding. |
-| Exhaustive survey evidence | PR #878, reconciliation PR #882 | Pending; do not claim complete physical survey or merge/modify its files here. |
+| Exhaustive survey evidence | PR #878 reconciled and merged through #882 on main `d3a0919f35b96c40ea6800759049ba42bfa8a193` | Verifier merged; no complete owner-approved 31,260-parcel physical survey claimed. |
 | Movement, collision, wall/tabletop slots | Existing client catalogue claims only observed | Authoritative durability and integrated enforcement **unverified/absent in audited paths**; require source-backed confirmation before promotion. |
 
 ## Contract: `highcountry-placement-v1` (proposed; no runtime enabled)
@@ -37,14 +37,14 @@ Placement state, inventory reservations, occupancy/slots, revisions and operatio
 
 ## Active-PR isolation
 
-At this baseline, open PRs include #859 (04-A), #872 (04-B), #877 (04-D), #879 (04-E), #881 (04-F), #853/#855/#856 (wall/tabletop catalogue), and #878/#882 (terrain survey). Several touch shared `marketplace.js` and asset source. **No shared application or CI file should be changed from this branch** without first checking each PR diff and latest main. No marketplace ID, price, owner, or inventory semantics are changed here.
+At this baseline, open PRs include #859 (04-A), #872 (04-B), #877 (04-D), #879 (04-E), #881 (04-F), #853/#855/#856 (wall/tabletop catalogue), and #878/#882 (terrain survey, now merged to main). Several touch shared `marketplace.js` and asset source. **No shared application or CI file should be changed from this branch** without first checking each PR diff and latest main. No marketplace ID, price, owner, or inventory semantics are changed here.
 
-## Level 1 exit gate (NOT MET)
+## Level 1 exit gate (CI evidence pending)
 
 - Verify current main and all applicable PR SHAs at qualification time.
 - Inventory all placement, terrain, economy, browser, persistence, movement and spatial policy implementations from current source.
-- Add executable bounded contract tests confirming 64px semantics, no client authority, no unqualified placement, and explicit ownership/transaction boundaries.
+- Bounded test suite added at `scripts/highcountry/hc-place-01-contract.test.mjs`, dispatched by `.github/workflows/highcountry-hc-place-01-l1.yml`. Verifies static source/contract invariants, not runtime placement authorization.
 - Obtain successful scoped Level 1 workflow at exact resulting SHA; preserve passing unrelated CI without manual reruns.
 - Record workflow/run/job IDs and hashes in follow-up evidence, and reconcile any pending catalogue/terrain conflicts before authorizing HC-PLACE-02.
 
-No production placement endpoint or client behavior is enabled by this architecture document.
+No production placement endpoint or client behavior is enabled by this architecture document. Four unrelated passing workflows were retained on initial documentation SHA `41bd9b91fe26e3cc0eaeee4cd32d27e8e5821624` (runs 40460380763, 40460371867, 40460371747, 40460371731). These are historical evidence and do not qualify the revised source SHA.

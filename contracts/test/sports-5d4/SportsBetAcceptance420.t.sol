@@ -8,7 +8,7 @@ contract SportsBetAcceptance420Test is SportsOddsIngestion420Test {
     address constant PLAYER = address(0xBEEF);
     bytes32 chosen;
 
-    function setUp() public override {
+    function setUp() public virtual override {
         super.setUp();
         acceptance = new SportsBetAcceptance420(address(auth), address(odds));
         _grant(CONTROL, acceptance.CONFIGURE(), acceptance.scope(market));

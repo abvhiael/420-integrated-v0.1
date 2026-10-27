@@ -16,7 +16,7 @@ echo "CI-SOL-02 group=$group profile=$FOUNDRY_PROFILE targets=${#targets[@]}"
 forge build "${targets[@]}"
 mapfile -t tests < <(printf '%s\n' "${targets[@]}" | grep '^test/.*\.sol$' || true)
 for target in "${tests[@]}"; do
-  forge test --no-compile --match-path "$target" -vv
+  forge test --match-path "$target" -vv
 done
 python3 - "$plan" "$group" <<'PY'
 import json,sys

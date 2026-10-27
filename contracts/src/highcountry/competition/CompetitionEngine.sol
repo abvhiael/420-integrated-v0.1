@@ -142,8 +142,8 @@ contract CompetitionEngine is R04EmergencyConsumer {
         EventData memory e = events[id];
         if (
             !entered[id][msg.sender] || e.cancelled || !_seasonNotCancelled(e.season) || block.timestamp >= e.closes
-                || block.timestamp < e.opens || harvestId == bytes32(0) || qualityBps > 10000
-                || finalizedAt < e.opens || finalizedAt > block.timestamp || results[id][msg.sender].exists || harvested[id][harvestId]
+                || block.timestamp < e.opens || harvestId == bytes32(0) || qualityBps > 10000 || finalizedAt < e.opens
+                || finalizedAt > block.timestamp || results[id][msg.sender].exists || harvested[id][harvestId]
         ) revert Unauthorized();
         (,, bytes32 scope) = _template(e.templateId);
         if (scope != bytes32(0) && !entitlements.eligible(msg.sender, scope)) revert Unauthorized();

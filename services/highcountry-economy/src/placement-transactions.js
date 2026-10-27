@@ -16,7 +16,7 @@ export class HighCountryPlacementTransactions {
  }
  async snapshot(session){
   const who=await this.auth.registeredPrincipal(session);if(!id(who))fail('unauthenticated');
-  return this.store.transact(s=>{map(s);return snapshot(s);});
+  return this.store.transact(s=>{map(s);return {instances:[...s.placementInstances.values()].filter(x=>x.ownerPrincipal===who).map(structuredClone)};});
  }
  async execute(session,command){
   const who=await this.auth.registeredPrincipal(session);

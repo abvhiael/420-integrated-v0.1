@@ -1,0 +1,51 @@
+name: 420Bet Sports 5D.2 registry Level 1 and integration Level 2
+on:
+  push:
+    branches: ['bet/5d2-sports-registry']
+  pull_request:
+    paths:
+      - 'contracts/src/bet/**'
+      - 'contracts/src/system/CapabilityRegistry420.sol'
+      - 'contracts/src/interfaces/**'
+      - 'contracts/src/exchange/Wrapped420.sol'
+      - 'contracts/test/sports-5d2/**'
+      - 'contracts/foundry.toml'
+      - 'scripts/bet/*sports-5d2.py'
+      - 'docs/bet/SPORTS-5D.2-CATALOG.json'
+      - '.github/workflows/420bet-sports-5d2-level2.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: sports-5d2-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  registry-qualification:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.8.6
+      - name: Install pinned analyzer and compiler
+        run: |
+          python -m pip install slither-analyzer==0.11.6
+          solc-select install 0.8.30
+          solc-select use 0.8.30
+      - name: Qualify actual committed registry implementation
+        run: python scripts/bet/qualify-sports-5d2.py --output artifacts/sports-5d2
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sports-5d2-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            artifacts/sports-5d2/*.json
+            artifacts/sports-5d2/*.log
+          if-no-files-found: error

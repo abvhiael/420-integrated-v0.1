@@ -7,11 +7,16 @@ interface SportsFundingVm { function deal(address,uint256) external; }
 
 contract SportsFundedTickets420Test is SportsBetAcceptance420Test {
     SportsFundedTickets420 vault;
+    SportsOutcomeCertification420 cert;
+    address constant REPORT_A = address(0xABCD);
+    address constant REPORT_B = address(0xBCDE);
+    address constant JUDGE = address(0xCDEF);
     SportsFundingVm constant fundingVm = SportsFundingVm(address(uint160(uint256(keccak256("hevm cheat code")))));
 
     function setUp() public override {
         super.setUp();
-        vault = new SportsFundedTickets420(address(auth), address(acceptance));
+        cert = new SportsOutcomeCertification420(REPORT_A, REPORT_B, JUDGE, 1 hours);
+        vault = new SportsFundedTickets420(address(auth), address(acceptance), address(cert));
         _grant(CONTROL, vault.RESOLVE(), vault.scope(market));
         fundingVm.deal(CONTROL, 1 ether);
         fundingVm.deal(PLAYER, 1 ether);
@@ -76,18 +81,59 @@ contract SportsFundedTickets420Test is SportsBetAcceptance420Test {
         require(vault.credit(PLAYER, address(token)) == 0, "single withdrawal");
     }
 
+    function _certifyWinner() internal {
+        bytes32 evidence = keccak256("feed-evidence");
+        vm.prank(REPORT_A);
+        cert.attest(market, chosen, evidence);
+        vm.prank(REPORT_B);
+        cert.attest(market, chosen, evidence);
+        vm.warp(block.timestamp + 1 hours);
+        cert.finalize(market);
+    }
+
     function testWinnerCreditsProfitAndDoesNotDoublePay() public {
         _submit(_quote(1));
         _call(CONTROL, address(vault), abi.encodeCall(vault.deposit, (market, 2000)));
         bytes32 id = _fund(500);
         _fails(CONTROL, address(vault), abi.encodeCall(vault.resolve, (id, true)));
         vm.warp(markets.get(market).config.cutoff + 1);
+        _fails(CONTROL, address(vault), abi.encodeCall(vault.resolve, (id, true)));
+        _certifyWinner();
         _call(CONTROL, address(vault), abi.encodeCall(vault.resolve, (id, true)));
         require(vault.credit(PLAYER, address(token)) == 925 && vault.collateral(market) == 1575, "profit collateral used");
         _fails(CONTROL, address(vault), abi.encodeCall(vault.resolve, (id, false)));
         vm.prank(PLAYER);
         vault.claim(address(token));
         require(token.balanceOf(PLAYER) == 10425, "gross payout exactly once");
+    }
+
+    function testDisputePreventsSettlementAndVoidRefunds() public {
+        _submit(_quote(1));
+        _call(CONTROL, address(vault), abi.encodeCall(vault.deposit, (market, 2000)));
+        bytes32 id = _fund(500);
+        bytes32 ev = keccak256("feed-A");
+        vm.prank(REPORT_A);
+        cert.attest(market, chosen, ev);
+        vm.prank(REPORT_B);
+        (bool mismatch,) = address(cert).call(abi.encodeCall(cert.attest, (market, chosen, keccak256("feed-B"))));
+        require(!mismatch, "source mismatch must reject");
+        vm.prank(REPORT_B);
+        cert.attest(market, chosen, ev);
+        cert.challenge(market, keccak256("player-evidence"));
+        vm.warp(markets.get(market).config.cutoff + 1 days);
+        _fails(CONTROL, address(vault), abi.encodeCall(vault.resolve, (id, true)));
+        (bool early,) = address(cert).call(abi.encodeCall(cert.finalize, (market)));
+        require(!early, "challenged finality bypass");
+        vm.prank(JUDGE);
+        cert.decide(market, true, keccak256("review-evidence"));
+        vault.refund(id);
+        require(vault.credit(PLAYER, address(token)) == 500, "void refund");
+    }
+
+    function testOperatorCannotForgeAttestation() public {
+        vm.prank(CONTROL);
+        (bool ok,) = address(cert).call(abi.encodeCall(cert.attest, (market, chosen, keccak256("fake"))));
+        require(!ok, "operator not independent certifier");
     }
 
     function testStaleQuoteCannotBeFunded() public {

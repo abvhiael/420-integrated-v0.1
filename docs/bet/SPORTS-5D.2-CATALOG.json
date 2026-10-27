@@ -1,0 +1,237 @@
+{
+  "schema": "420bet-sports-5d2-catalog-v1",
+  "scopeAgreed": "2026-10-26",
+  "collegeBoundary": "Initial local configuration: FBS football; Division I basketball. Additional divisions need versioned catalog extension.",
+  "deferred": [
+    "golf",
+    "cricket",
+    "rugby"
+  ],
+  "competitions": [
+    {
+      "ordinal": 1,
+      "catalog": "NHL",
+      "testSuffix": "NHL",
+      "sport": "hockey",
+      "category": "men",
+      "localMarketTypes": [
+        "MONEYLINE_TWO",
+        "SPREAD",
+        "TOTAL"
+      ],
+      "soccerCoverage": null,
+      "liveSourceQualified": false,
+      "productionEnabled": false
+    },
+    {
+      "ordinal": 2,
+      "catalog": "PWHL",
+      "testSuffix": "PWHL",
+      "sport": "hockey",
+      "category": "women",
+      "localMarketTypes": [
+        "MONEYLINE_TWO",
+        "SPREAD",
+        "TOTAL"
+      ],
+      "soccerCoverage": null,
+      "liveSourceQualified": false,
+      "productionEnabled": false
+    },
+    {
+      "ordinal": 3,
+      "catalog": "NFL",
+      "testSuffix": "NFL",
+      "sport": "american-football",
+      "category": "men",
+      "localMarketTypes": [
+        "MONEYLINE_TWO",
+        "SPREAD",
+        "TOTAL"
+      ],
+      "soccerCoverage": null,
+      "liveSourceQualified": false,
+      "productionEnabled": false
+    },
+    {
+      "ordinal": 4,
+      "catalog": "NCAA_FBS",
+      "testSuffix": "NCAAFBS",
+      "sport": "american-football",
+      "category": "men",
+      "localMarketTypes": [
+        "MONEYLINE_TWO",
+        "SPREAD",
+        "TOTAL"
+      ],
+      "soccerCoverage": null,
+      "liveSourceQualified": false,
+      "productionEnabled": false
+    },
+    {
+      "ordinal": 5,
+      "catalog": "MLB",
+      "testSuffix": "MLB",
+      "sport": "baseball",
+      "category": "men",
+      "localMarketTypes": [
+        "MONEYLINE_TWO",
+        "SPREAD",
+        "TOTAL"
+      ],
+      "soccerCoverage": null,
+      "liveSourceQualified": false,
+      "productionEnabled": false
+    },
+    {
+      "ordinal": 6,
+      "catalog": "NBA",
+      "testSuffix": "NBA",
+      "sport": "basketball",
+      "category": "men",
+      "localMarketTypes": [
+        "MONEYLINE_TWO",
+        "SPREAD",
+        "TOTAL"
+      ],
+      "soccerCoverage": null,
+      "liveSourceQualified": false,
+      "productionEnabled": false
+    },
+    {
+      "ordinal": 7,
+      "catalog": "WNBA",
+      "testSuffix": "WNBA",
+      "sport": "basketball",
+      "category": "women",
+      "localMarketTypes": [
+        "MONEYLINE_TWO",
+        "SPREAD",
+        "TOTAL"
+      ],
+      "soccerCoverage": null,
+      "liveSourceQualified": false,
+      "productionEnabled": false
+    },
+    {
+      "ordinal": 8,
+      "catalog": "NCAA_MEN_D1",
+      "testSuffix": "NCAAMenD1",
+      "sport": "basketball",
+      "category": "men",
+      "localMarketTypes": [
+        "MONEYLINE_TWO",
+        "SPREAD",
+        "TOTAL"
+      ],
+      "soccerCoverage": null,
+      "liveSourceQualified": false,
+      "productionEnabled": false
+    },
+    {
+      "ordinal": 9,
+      "catalog": "NCAA_WOMEN_D1",
+      "testSuffix": "NCAAWomenD1",
+      "sport": "basketball",
+      "category": "women",
+      "localMarketTypes": [
+        "MONEYLINE_TWO",
+        "SPREAD",
+        "TOTAL"
+      ],
+      "soccerCoverage": null,
+      "liveSourceQualified": false,
+      "productionEnabled": false
+    },
+    {
+      "ordinal": 10,
+      "catalog": "UEFA_CHAMPIONS",
+      "testSuffix": "ChampionsLeague",
+      "sport": "soccer",
+      "category": "men",
+      "localMarketTypes": [
+        "MONEYLINE_THREE",
+        "SPREAD",
+        "TOTAL"
+      ],
+      "soccerCoverage": "regulation-plus-stoppage-only",
+      "liveSourceQualified": false,
+      "productionEnabled": false
+    },
+    {
+      "ordinal": 11,
+      "catalog": "UEFA_EUROPA",
+      "testSuffix": "EuropaLeague",
+      "sport": "soccer",
+      "category": "men",
+      "localMarketTypes": [
+        "MONEYLINE_THREE",
+        "SPREAD",
+        "TOTAL"
+      ],
+      "soccerCoverage": "regulation-plus-stoppage-only",
+      "liveSourceQualified": false,
+      "productionEnabled": false
+    },
+    {
+      "ordinal": 12,
+      "catalog": "MLS",
+      "testSuffix": "MLS",
+      "sport": "soccer",
+      "category": "men",
+      "localMarketTypes": [
+        "MONEYLINE_THREE",
+        "SPREAD",
+        "TOTAL"
+      ],
+      "soccerCoverage": "regulation-plus-stoppage-only",
+      "liveSourceQualified": false,
+      "productionEnabled": false
+    },
+    {
+      "ordinal": 13,
+      "catalog": "CENTRAL_AMERICAN_CUP",
+      "testSuffix": "CentralAmericanCup",
+      "sport": "soccer",
+      "category": "men",
+      "localMarketTypes": [
+        "MONEYLINE_THREE",
+        "SPREAD",
+        "TOTAL"
+      ],
+      "soccerCoverage": "regulation-plus-stoppage-only",
+      "liveSourceQualified": false,
+      "productionEnabled": false
+    },
+    {
+      "ordinal": 14,
+      "catalog": "BRAZIL_SERIE_A",
+      "testSuffix": "BrazilSerieA",
+      "sport": "soccer",
+      "category": "men",
+      "localMarketTypes": [
+        "MONEYLINE_THREE",
+        "SPREAD",
+        "TOTAL"
+      ],
+      "soccerCoverage": "regulation-plus-stoppage-only",
+      "liveSourceQualified": false,
+      "productionEnabled": false
+    },
+    {
+      "ordinal": 15,
+      "catalog": "LIBERTADORES",
+      "testSuffix": "Libertadores",
+      "sport": "soccer",
+      "category": "men",
+      "localMarketTypes": [
+        "MONEYLINE_THREE",
+        "SPREAD",
+        "TOTAL"
+      ],
+      "soccerCoverage": "regulation-plus-stoppage-only",
+      "liveSourceQualified": false,
+      "productionEnabled": false
+    }
+  ]
+}

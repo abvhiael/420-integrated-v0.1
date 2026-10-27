@@ -1,0 +1,26 @@
+name: Solidity Qualification Scope Safety
+on:
+  pull_request:
+    paths:
+      - 'contracts/config/solidity-qualification-scopes.json'
+      - 'contracts/scripts/select-solidity-scope.py'
+      - 'contracts/test/ci/test_solidity_scope.py'
+      - '.github/workflows/contracts-foundry.yml'
+      - '.github/workflows/solidity-scope-safety.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  fail-closed-classification:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Exact SHA
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"
+      - name: Validate dependency-map boundary and adversarial fixtures
+        run: python3 -m unittest discover -s contracts/test/ci -p 'test_solidity_scope.py' -v

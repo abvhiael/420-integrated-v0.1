@@ -41,8 +41,10 @@ contract CompetitionTemplateRegistry {
         bytes32 entitlementScope
     ) external {
         if (msg.sender != registrar) revert Unauthorized();
-        if (id == bytes32(0) || category == bytes32(0) || rulesHash == bytes32(0) || version == 0
-            || templates[id].exists || categoryVersionTemplate[category][version] != bytes32(0)) revert Invalid();
+        if (
+            id == bytes32(0) || category == bytes32(0) || rulesHash == bytes32(0) || version == 0
+                || templates[id].exists || categoryVersionTemplate[category][version] != bytes32(0)
+        ) revert Invalid();
         templates[id] = Template(rulesHash, entitlementScope, version, true);
         categoryOf[id] = category;
         categoryVersionTemplate[category][version] = id;

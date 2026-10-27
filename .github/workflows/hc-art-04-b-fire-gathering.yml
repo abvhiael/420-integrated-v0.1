@@ -1,0 +1,32 @@
+name: HC-ART-04-B Fire Gathering Level 1
+on:
+  pull_request:
+    paths:
+      - 'apps/highcountry-web/src/fire-gathering-catalogue.js'
+      - 'apps/highcountry-web/src/marketplace.js'
+      - 'apps/highcountry-web/scripts/build.mjs'
+      - 'apps/highcountry-web/test/fire-gathering-catalogue.test.mjs'
+      - '.github/workflows/hc-art-04-b-fire-gathering.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  scoped-fire-and-marketplace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax and scoped qualification
+        working-directory: apps/highcountry-web
+        run: |
+          node --check src/fire-gathering-catalogue.js
+          node --check src/marketplace.js
+          node --test test/fire-gathering-catalogue.test.mjs test/outdoor-structure-catalogue.test.mjs test/hc-next-4-4-marketplace.test.mjs test/r064-market.test.mjs
+      - name: Build and verify browser module
+        working-directory: apps/highcountry-web
+        run: |
+          npm run build
+          test -s dist/src/fire-gathering-catalogue.js
+          node --check dist/src/fire-gathering-catalogue.js

@@ -9,6 +9,8 @@ on:
       - 'apps/highcountry-web/server.mjs'
       - 'apps/highcountry-web/scripts/build.mjs'
       - 'scripts/highcountry/hc-world-port-alder-map-stage.test.mjs'
+      - 'scripts/highcountry/hc-world-port-alder-milestone-authority.test.mjs'
+      - 'services/highcountry-economy/src/port-alder-purchase-milestone.js'
       - '.github/workflows/highcountry-port-alder-map-stage-l1.yml'
   workflow_dispatch:
 jobs:
@@ -19,5 +21,5 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: node --test scripts/highcountry/hc-world-port-alder-map-stage.test.mjs scripts/highcountry/hc-world-06-port-alder-navigation.test.mjs
+      - run: node --test scripts/highcountry/hc-world-port-alder-map-stage.test.mjs scripts/highcountry/hc-world-port-alder-milestone-authority.test.mjs scripts/highcountry/hc-world-06-port-alder-navigation.test.mjs
       - run: node --check apps/highcountry-web/src/app.js && node --check apps/highcountry-web/src/port-alder-navigation.js && node --check apps/highcountry-web/src/port-alder-map-stage.js && node --check apps/highcountry-web/server.mjs

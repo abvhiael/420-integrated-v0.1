@@ -1,6 +1,7 @@
 // HC-PLACE-03: server-only durable world transactions. No HTTP exposure or gameplay enablement.
 import {createHash} from 'node:crypto';
 import {definePlacedObject,rotatedCells} from './placement-contract.js';
+import {reservePlacementUnit,releasePlacementUnit} from './custody-records.js';
 const fail=s=>{throw Error('hc-place-03:'+s);};
 const id=v=>typeof v==='string'&&/^[A-Za-z0-9:_-]{1,128}$/.test(v);
 const valid=v=>Number.isSafeInteger(v)&&v>=0;
@@ -93,19 +94,14 @@ export class HighCountryPlacementTransactions {
      if(overlap)fail('occupied');
     }
    }
-   if(creating){
-    const k=key(who,checked.assetId),inventory=s.assets.get(k);
-    if(!inventory||!valid(inventory.available)||!valid(inventory.reserved)||inventory.available<1)fail('inventory-unavailable');
-    inventory.available--;inventory.reserved++;s.assets.set(k,inventory);
-   }
-   if(command.action==='remove'){
-    const k=key(who,checked.assetId),inventory=s.assets.get(k);
-    if(!inventory||!valid(inventory.reserved)||inventory.reserved<1||!valid(inventory.available))fail('inventory-reservation-corrupt');
-    inventory.reserved--;inventory.available++;s.assets.set(k,inventory);
-   }
+   // Reserve/release the *specific* canonical unit under the same SERIALIZABLE lock.
+   // Unsourced aggregate balances may not authorize new placement.
+   let custody=null;
+   if(creating)custody=reservePlacementUnit(s,{owner:who,assetId:checked.assetId,instanceId:checked.instanceId});
+   if(command.action==='remove')custody=releasePlacementUnit(s,{owner:who,assetId:checked.assetId,instanceId:checked.instanceId});
    s.placementInstances.set(checked.instanceId,checked);
    s.placementScenes.set(target,currentScene+1);
-   const result={instance:structuredClone(checked),sceneRevision:currentScene+1};
+   const result={instance:structuredClone(checked),sceneRevision:currentScene+1,...(custody?{custody}: {})};
    s.placementOperations.set(opKey,{payload,result});
    return structuredClone(result);
   });

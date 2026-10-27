@@ -13,6 +13,8 @@ contract SportsOutcomeCertification420 {
         Status status;
         address first;
         address second;
+        address challenger;
+        bytes32 challengeEvidence;
     }
     SportsMarketRegistry420 public immutable markets;
     address public immutable reporterA;
@@ -52,7 +54,7 @@ contract SportsOutcomeCertification420 {
         address other = msg.sender == reporterA ? reporterB : reporterA;
         if (reports[marketId][other] != 0) {
             if (reports[marketId][other] != claim) revert Conflict();
-            results[marketId] = Result(selection, evidence, uint64(block.timestamp), Status.PROPOSED, reporterA, reporterB);
+            results[marketId] = Result(selection, evidence, uint64(block.timestamp), Status.PROPOSED, reporterA, reporterB, address(0), bytes32(0));
         }
     }
 
@@ -60,6 +62,8 @@ contract SportsOutcomeCertification420 {
         Result storage r = results[marketId];
         if (r.status != Status.PROPOSED || evidence == 0 || block.timestamp >= uint256(r.proposedAt) + challengePeriod) revert Invalid();
         r.status = Status.CHALLENGED;
+        r.challenger = msg.sender;
+        r.challengeEvidence = evidence;
         emit Challenged(marketId, msg.sender, evidence);
     }
 

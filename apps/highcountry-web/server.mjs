@@ -13,7 +13,7 @@ export function createHighCountryServer({config,distRoot=root}={}){
   let path;
   try{path=new URL(req.url,'http://localhost').pathname;}catch{return send(400,'Bad path');}
   if(path==='/runtime-config.json')return send(200,JSON.stringify(config),'application/json');
-  if(path==='/port-alder'||/^\/port-alder\/district\/HC-EC-S01-D(?:0[1-9]|1[0-3])$/.test(path)||path==='/'||['/play','/account','/settings','/about','/archive','/marketplace','/skills','/seeds'].includes(path))path='/index.html';
+  if(path==='/emerald-coast'||path==='/port-alder'||/^\/port-alder\/district\/HC-EC-S01-D(?:0[1-9]|1[0-3])$/.test(path)||path==='/'||['/play','/account','/settings','/about','/archive','/marketplace','/skills','/seeds'].includes(path))path='/index.html';
   const resolved=resolve(distRoot,'.'+decodeURIComponent(path));
   if(resolved!==distRoot&&!resolved.startsWith(distRoot+sep))return send(403,'Forbidden');
   try{

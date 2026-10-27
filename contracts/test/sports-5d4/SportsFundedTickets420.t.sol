@@ -137,6 +137,54 @@ contract SportsFundedTickets420Test is SportsBetAcceptance420Test {
         require(!ok, "operator not independent certifier");
     }
 
+    function testPrematureCertificationAndWrongWinnerAreRejected() public {
+        _submit(_quote(1));
+        _call(CONTROL, address(vault), abi.encodeCall(vault.deposit, (market, 2000)));
+        bytes32 id = _fund(500);
+        vm.prank(REPORT_A);
+        (bool premature,) = address(cert).call(abi.encodeCall(cert.attest, (market, chosen, keccak256("early"))));
+        require(!premature, "premature certification");
+        vm.warp(markets.get(market).config.cutoff + 1);
+        _certifyWinner();
+        _fails(CONTROL, address(vault), abi.encodeCall(vault.resolve, (id, false)));
+        _call(CONTROL, address(vault), abi.encodeCall(vault.resolve, (id, true)));
+    }
+
+    function testChallengeCannotBeSilentlyDismissedOrRepeated() public {
+        vm.warp(markets.get(market).config.cutoff + 1);
+        bytes32 ev = keccak256("two-source-evidence");
+        vm.prank(REPORT_A);
+        cert.attest(market, chosen, ev);
+        vm.prank(REPORT_B);
+        cert.attest(market, chosen, ev);
+        cert.challenge(market, keccak256("challenge-A"));
+        (bool repeated,) = address(cert).call(abi.encodeCall(cert.challenge, (market, keccak256("challenge-B"))));
+        require(!repeated, "one review state");
+        vm.prank(CONTROL);
+        (bool forged,) = address(cert).call(abi.encodeCall(cert.decide, (market, false, keccak256("forged"))));
+        require(!forged, "unauthorized arbitrator");
+        vm.warp(block.timestamp + 2 hours);
+        (bool finalizeBypass,) = address(cert).call(abi.encodeCall(cert.finalize, (market)));
+        require(!finalizeBypass, "appeal freezes automatic finality");
+        vm.prank(JUDGE);
+        cert.decide(market, false, keccak256("reviewed"));
+        SportsOutcomeCertification420.Result memory r = cert.result(market);
+        require(r.status == SportsOutcomeCertification420.Status.FINAL, "review complete");
+        vm.prank(JUDGE);
+        (bool again,) = address(cert).call(abi.encodeCall(cert.decide, (market, true, keccak256("revised"))));
+        require(!again, "no second finalization");
+    }
+
+    function testNonFinalOutcomeTriggersTimeoutRefund() public {
+        _submit(_quote(1));
+        _call(CONTROL, address(vault), abi.encodeCall(vault.deposit, (market, 2000)));
+        bytes32 id = _fund(500);
+        vm.warp(markets.get(market).config.cutoff + 86400);
+        _fails(CONTROL, address(vault), abi.encodeCall(vault.resolve, (id, true)));
+        vault.refund(id);
+        require(vault.credit(PLAYER, address(token)) == 500, "timeout preserves player stake");
+    }
+
     function testStaleQuoteCannotBeFunded() public {
         _submit(_quote(1));
         _call(CONTROL, address(vault), abi.encodeCall(vault.deposit, (market, 2000)));

@@ -1,0 +1,26 @@
+name: CI-SOL-02 Level 1 Selector
+on:
+  pull_request:
+    paths:
+      - 'contracts/config/sol02-groups.json'
+      - 'contracts/scripts/sol02-*.py'
+      - 'contracts/scripts/sol02-run-group.sh'
+      - 'contracts/test/ci/test_sol02.py'
+      - '.github/workflows/solidity-qualification-summary.yml'
+      - '.github/workflows/sol02-selector-level1.yml'
+permissions:
+  contents: read
+jobs:
+  selector:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: Validate exact SHA
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"
+      - name: Run module-selection and forged-evidence security tests
+        run: python3 -m unittest discover -s contracts/test/ci -p 'test_sol02.py' -v

@@ -79,6 +79,10 @@ contract SportsBetAcceptance420 is SportsAuthority420 {
             config.maxMarketLiability, config.maxSelectionLiability, config.maxPlayerStake, config.active);
     }
 
+    function getRisk(bytes32 marketId) external view returns (Risk memory) {
+        return risk[marketId];
+    }
+
     /// @notice Read-only quote preview; never promises execution or funding.
     function preview(Offer calldata offer, address player)
         external view returns (uint256 gross, uint256 liability, bool admissible)

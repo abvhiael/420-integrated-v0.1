@@ -1,0 +1,20 @@
+name: HighCountry HC-WORLD-02 cadastral Level 1
+on:
+  pull_request:
+    paths:
+      - 'scripts/highcountry/hc-world-02-*'
+      - 'deployments/highcountry/hc-world-02-*'
+      - '.github/workflows/highcountry-hc-world-02-l1.yml'
+  workflow_dispatch:
+jobs:
+  cadastral-l1:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Qualify 31,260 cadastral reservation records
+        run: node --test scripts/highcountry/hc-world-02-cadastre.test.mjs
+      - name: Generate survey inventory reproducibly
+        run: node scripts/highcountry/hc-world-02-cadastre.mjs /tmp/hc-world-02-cadastre.json

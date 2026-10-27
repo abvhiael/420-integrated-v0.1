@@ -1,0 +1,490 @@
+{
+  "schema": "HC.WORLD.PORT.ALDER.DISTRICT.NAV.V1",
+  "status": "DESIGN_GEOMETRY_PENDING_TERRAIN_ALIGNMENT",
+  "regionId": 1,
+  "settlementId": "HC-EC-S01",
+  "coordinateSpace": "HC-EC-S01.LOCAL.TILE.V1",
+  "bounds": [
+    0,
+    0,
+    1200,
+    780
+  ],
+  "mapView": {
+    "width": 1200,
+    "height": 780
+  },
+  "districts": [
+    {
+      "id": "HC-EC-S01-D01",
+      "label": "Cliffside",
+      "slug": "CLIFFSIDE",
+      "polygon": [
+        [
+          0,
+          0
+        ],
+        [
+          240,
+          0
+        ],
+        [
+          240,
+          260
+        ],
+        [
+          0,
+          260
+        ]
+      ],
+      "entrance": [
+        120,
+        130
+      ],
+      "sceneId": "HC-EC-S01-CLIFFSIDE",
+      "neighbours": [
+        "HC-EC-S01-D02",
+        "HC-EC-S01-D06"
+      ],
+      "mapLabelVisible": true
+    },
+    {
+      "id": "HC-EC-S01-D02",
+      "label": "North Ridge",
+      "slug": "NORTH_RIDGE",
+      "polygon": [
+        [
+          240,
+          0
+        ],
+        [
+          480,
+          0
+        ],
+        [
+          480,
+          260
+        ],
+        [
+          240,
+          260
+        ]
+      ],
+      "entrance": [
+        360,
+        130
+      ],
+      "sceneId": "HC-EC-S01-NORTH_RIDGE",
+      "neighbours": [
+        "HC-EC-S01-D01",
+        "HC-EC-S01-D03",
+        "HC-EC-S01-D07"
+      ],
+      "mapLabelVisible": true
+    },
+    {
+      "id": "HC-EC-S01-D03",
+      "label": "Cedar Heights",
+      "slug": "CEDAR_HEIGHTS",
+      "polygon": [
+        [
+          480,
+          0
+        ],
+        [
+          720,
+          0
+        ],
+        [
+          720,
+          260
+        ],
+        [
+          480,
+          260
+        ]
+      ],
+      "entrance": [
+        600,
+        130
+      ],
+      "sceneId": "HC-EC-S01-CEDAR_HEIGHTS",
+      "neighbours": [
+        "HC-EC-S01-D02",
+        "HC-EC-S01-D04",
+        "HC-EC-S01-D08"
+      ],
+      "mapLabelVisible": true
+    },
+    {
+      "id": "HC-EC-S01-D04",
+      "label": "Westwood",
+      "slug": "WESTWOOD",
+      "polygon": [
+        [
+          720,
+          0
+        ],
+        [
+          960,
+          0
+        ],
+        [
+          960,
+          260
+        ],
+        [
+          720,
+          260
+        ]
+      ],
+      "entrance": [
+        840,
+        130
+      ],
+      "sceneId": "HC-EC-S01-WESTWOOD",
+      "neighbours": [
+        "HC-EC-S01-D03",
+        "HC-EC-S01-D05",
+        "HC-EC-S01-D09"
+      ],
+      "mapLabelVisible": true
+    },
+    {
+      "id": "HC-EC-S01-D05",
+      "label": "Eastward",
+      "slug": "EASTWARD",
+      "polygon": [
+        [
+          960,
+          0
+        ],
+        [
+          1200,
+          0
+        ],
+        [
+          1200,
+          260
+        ],
+        [
+          960,
+          260
+        ]
+      ],
+      "entrance": [
+        1080,
+        130
+      ],
+      "sceneId": "HC-EC-S01-EASTWARD",
+      "neighbours": [
+        "HC-EC-S01-D04",
+        "HC-EC-S01-D10"
+      ],
+      "mapLabelVisible": true
+    },
+    {
+      "id": "HC-EC-S01-D06",
+      "label": "Harbour Heights",
+      "slug": "HARBOUR_HEIGHTS",
+      "polygon": [
+        [
+          0,
+          260
+        ],
+        [
+          240,
+          260
+        ],
+        [
+          240,
+          520
+        ],
+        [
+          0,
+          520
+        ]
+      ],
+      "entrance": [
+        120,
+        390
+      ],
+      "sceneId": "HC-EC-S01-HARBOUR_HEIGHTS",
+      "neighbours": [
+        "HC-EC-S01-D01",
+        "HC-EC-S01-D07"
+      ],
+      "mapLabelVisible": true
+    },
+    {
+      "id": "HC-EC-S01-D07",
+      "label": "Old Town",
+      "slug": "OLD_TOWN",
+      "polygon": [
+        [
+          240,
+          260
+        ],
+        [
+          480,
+          260
+        ],
+        [
+          480,
+          520
+        ],
+        [
+          240,
+          520
+        ]
+      ],
+      "entrance": [
+        360,
+        390
+      ],
+      "sceneId": "HC-EC-S01-OLD_TOWN",
+      "neighbours": [
+        "HC-EC-S01-D02",
+        "HC-EC-S01-D06",
+        "HC-EC-S01-D08",
+        "HC-EC-S01-D11"
+      ],
+      "mapLabelVisible": true
+    },
+    {
+      "id": "HC-EC-S01-D08",
+      "label": "Civic District",
+      "slug": "CIVIC_DISTRICT",
+      "polygon": [
+        [
+          480,
+          260
+        ],
+        [
+          720,
+          260
+        ],
+        [
+          720,
+          520
+        ],
+        [
+          480,
+          520
+        ]
+      ],
+      "entrance": [
+        600,
+        390
+      ],
+      "sceneId": "HC-EC-S01-CIVIC_DISTRICT",
+      "neighbours": [
+        "HC-EC-S01-D03",
+        "HC-EC-S01-D07",
+        "HC-EC-S01-D09",
+        "HC-EC-S01-D12"
+      ],
+      "mapLabelVisible": true
+    },
+    {
+      "id": "HC-EC-S01-D09",
+      "label": "Market District",
+      "slug": "MARKET_DISTRICT",
+      "polygon": [
+        [
+          720,
+          260
+        ],
+        [
+          960,
+          260
+        ],
+        [
+          960,
+          520
+        ],
+        [
+          720,
+          520
+        ]
+      ],
+      "entrance": [
+        840,
+        390
+      ],
+      "sceneId": "HC-EC-S01-MARKET_DISTRICT",
+      "neighbours": [
+        "HC-EC-S01-D04",
+        "HC-EC-S01-D08",
+        "HC-EC-S01-D10"
+      ],
+      "mapLabelVisible": true
+    },
+    {
+      "id": "HC-EC-S01-D10",
+      "label": "Riverside",
+      "slug": "RIVERSIDE",
+      "polygon": [
+        [
+          960,
+          260
+        ],
+        [
+          1200,
+          260
+        ],
+        [
+          1200,
+          520
+        ],
+        [
+          960,
+          520
+        ]
+      ],
+      "entrance": [
+        1080,
+        390
+      ],
+      "sceneId": "HC-EC-S01-RIVERSIDE",
+      "neighbours": [
+        "HC-EC-S01-D05",
+        "HC-EC-S01-D09",
+        "HC-EC-S01-D13"
+      ],
+      "mapLabelVisible": true
+    },
+    {
+      "id": "HC-EC-S01-D11",
+      "label": "Port District",
+      "slug": "PORT_DISTRICT",
+      "polygon": [
+        [
+          240,
+          520
+        ],
+        [
+          480,
+          520
+        ],
+        [
+          480,
+          780
+        ],
+        [
+          240,
+          780
+        ]
+      ],
+      "entrance": [
+        360,
+        650
+      ],
+      "sceneId": "HC-EC-S01-PORT_DISTRICT",
+      "neighbours": [
+        "HC-EC-S01-D07",
+        "HC-EC-S01-D12"
+      ],
+      "mapLabelVisible": true
+    },
+    {
+      "id": "HC-EC-S01-D12",
+      "label": "Industrial Yard",
+      "slug": "INDUSTRIAL_YARD",
+      "polygon": [
+        [
+          480,
+          520
+        ],
+        [
+          720,
+          520
+        ],
+        [
+          720,
+          780
+        ],
+        [
+          480,
+          780
+        ]
+      ],
+      "entrance": [
+        600,
+        650
+      ],
+      "sceneId": "HC-EC-S01-INDUSTRIAL_YARD",
+      "neighbours": [
+        "HC-EC-S01-D08",
+        "HC-EC-S01-D11"
+      ],
+      "mapLabelVisible": true
+    },
+    {
+      "id": "HC-EC-S01-D13",
+      "label": "South Point",
+      "slug": "SOUTH_POINT",
+      "polygon": [
+        [
+          960,
+          520
+        ],
+        [
+          1200,
+          520
+        ],
+        [
+          1200,
+          780
+        ],
+        [
+          960,
+          780
+        ]
+      ],
+      "entrance": [
+        1080,
+        650
+      ],
+      "sceneId": "HC-EC-S01-SOUTH_POINT",
+      "neighbours": [
+        "HC-EC-S01-D10"
+      ],
+      "mapLabelVisible": true
+    }
+  ],
+  "countryExits": [
+    {
+      "districtId": "HC-EC-S01-D01",
+      "exitId": "COASTAL_ROAD",
+      "targetId": "HC-EC-S08",
+      "status": "ROUTE_CONTRACT_PENDING_PHYSICAL_CONNECTION"
+    },
+    {
+      "districtId": "HC-EC-S01-D04",
+      "exitId": "NORTH_COUNTY_ROAD",
+      "targetId": "HC-EC-S04",
+      "status": "ROUTE_CONTRACT_PENDING_PHYSICAL_CONNECTION"
+    },
+    {
+      "districtId": "HC-EC-S01-D05",
+      "exitId": "EAST_COUNTY_ROAD",
+      "targetId": "HC-EC-S02",
+      "status": "ROUTE_CONTRACT_PENDING_PHYSICAL_CONNECTION"
+    },
+    {
+      "districtId": "HC-EC-S01-D13",
+      "exitId": "SOUTH_COUNTY_ROAD",
+      "targetId": "HC-EC-RURAL-SOUTH",
+      "status": "ROUTE_CONTRACT_PENDING_PHYSICAL_CONNECTION"
+    },
+    {
+      "districtId": "HC-EC-S01-D11",
+      "exitId": "FERRY_DOCK",
+      "targetId": "HC-EC-RURAL-COAST",
+      "status": "ROUTE_CONTRACT_PENDING_PHYSICAL_CONNECTION"
+    }
+  ],
+  "heritageVisibility": "SERVER_GATED_DISCOVERY_AND_CLAIM_ONLY",
+  "ownershipAuthority": "NONE_NAVIGATION_ONLY"
+}

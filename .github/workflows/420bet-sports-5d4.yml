@@ -1,0 +1,29 @@
+name: 420Bet Sports 5D.4 bounded acceptance and liability
+on:
+  push:
+    branches: ['bet/5d4-acceptance-liability']
+  pull_request:
+    paths:
+      - 'contracts/src/bet/sports/**'
+      - 'contracts/test/sports-5d4/**'
+      - '.github/workflows/420bet-sports-5d4.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: sports-5d4-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  liability:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.8.6
+      - name: Scoped acceptance and inherited adversarial qualification
+        working-directory: contracts
+        run: forge test --match-path 'test/sports-5d4/*.t.sol' -vvv

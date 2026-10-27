@@ -5,6 +5,10 @@ on:
       - 'scripts/highcountry/hc-world-06-port-alder-*'
       - 'deployments/highcountry/hc-world-06-port-alder-*'
       - 'docs/highcountry/HC-WORLD-06-PORT-ALDER-*'
+      - 'apps/highcountry-web/src/port-alder-navigation.js'
+      - 'apps/highcountry-web/src/app.js'
+      - 'apps/highcountry-web/scripts/build.mjs'
+      - 'apps/highcountry-web/server.mjs'
       - '.github/workflows/highcountry-hc-world-06-port-alder-l1.yml'
   workflow_dispatch:
 jobs:
@@ -17,3 +21,5 @@ jobs:
           node-version: '22'
       - name: Verify Port Alder district topology, entrances, routing and security
         run: node --test scripts/highcountry/hc-world-06-port-alder-navigation.test.mjs
+      - name: Validate browser route and build script syntax
+        run: node --check apps/highcountry-web/src/app.js && node --check apps/highcountry-web/src/port-alder-navigation.js && node --check apps/highcountry-web/server.mjs && node --check apps/highcountry-web/scripts/build.mjs

@@ -30,7 +30,7 @@ jobs:
           node-version: '22'
       - name: Install economy dependencies
         working-directory: services/highcountry-economy
-        run: npm ci --ignore-scripts
+        run: npm install --ignore-scripts --no-package-lock --no-save
       - name: Provision isolated test table
         run: psql "$HC_PLACE_TEST_DATABASE_URL" -v ON_ERROR_STOP=1 -c 'CREATE TABLE highcountry_buds_state (namespace text PRIMARY KEY, state jsonb NOT NULL)'
       - name: Run real PostgreSQL 03-A authority integration tests

@@ -340,9 +340,13 @@ contract SportsHostileToken420Test is SportsFundedTickets420Test {
 
     function _hostileSetup(uint8 mode) internal {
         hostile = new HostileSportsToken420();
-        SportsTypes420.MarketConfig memory cfg = _marketConfig(template, 0);
+        // Proposition identity deliberately ignores the token address. A second
+        // MONEYLINE_TWO fixture would conflict with the existing live market.
+        bytes32 hostileTemplate = _newTemplate(_templateConfig(SportsTypes420.Kind.SPREAD));
+        SportsTypes420.MarketConfig memory cfg = _marketConfig(hostileTemplate, -7);
         cfg.asset = address(hostile);
         hostileMarket = _newMarket(cfg);
+        require(hostileMarket != market && markets.idFor(cfg) == hostileMarket, "distinct hostile proposition");
         hostile.mint(CONTROL, 10000);
         vm.prank(CONTROL);
         hostile.approve(address(vault), type(uint256).max);

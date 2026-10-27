@@ -19,7 +19,7 @@ contract SportsFundedTickets420 is SportsAuthority420 {
     bytes32 public constant RESOLVE = keccak256("BET_SPORT_TICKET_RESOLVE");
     uint256 private entered;
 
-    enum State { NONE, FUNDED, WON, LOST, REFUNDED }
+    enum TicketState { NONE, FUNDED, WON, LOST, REFUNDED }
     struct Ticket {
         address player;
         bytes32 marketId;
@@ -32,7 +32,7 @@ contract SportsFundedTickets420 is SportsAuthority420 {
         uint256 profit;
         uint64 quoteEpoch;
         uint64 quoteSequence;
-        State state;
+        TicketState state;
     }
     mapping(bytes32 => Ticket) private tickets;
     mapping(bytes32 => bool) public consumedIntent;
@@ -46,7 +46,7 @@ contract SportsFundedTickets420 is SportsAuthority420 {
     event CollateralAdded(bytes32 indexed marketId, address indexed operator, uint256 amount);
     event CollateralRemoved(bytes32 indexed marketId, address indexed operator, uint256 amount);
     event TicketFunded(bytes32 indexed id, bytes32 indexed marketId, address indexed player, bytes32 oddsDigest, uint256 stake, uint256 gross);
-    event TicketFinalized(bytes32 indexed id, State state, uint256 playerCredit);
+    event TicketFinalized(bytes32 indexed id, TicketState state, uint256 playerCredit);
     event Withdrawal(address indexed player, address indexed token, uint256 amount);
     error Transfer();
 
@@ -70,7 +70,7 @@ contract SportsFundedTickets420 is SportsAuthority420 {
     }
 
     function get(bytes32 id) external view returns (Ticket memory) {
-        if (tickets[id].state == State.NONE) revert Missing();
+        if (tickets[id].state == TicketState.NONE) revert Missing();
         return tickets[id];
     }
 
@@ -114,7 +114,7 @@ contract SportsFundedTickets420 is SportsAuthority420 {
         SportsMarketRegistry420.Record memory m = markets.get(offer.marketId);
         if (!usable || q.digest != offer.quoteDigest || q.quoteEpoch != m.quoteEpoch) revert State();
         id = keccak256(abi.encode("420.SPORT.FUNDED.TICKET.V1", block.chainid, address(this), msg.sender, offer));
-        if (tickets[id].state != State.NONE) revert Conflict();
+        if (tickets[id].state != TicketState.NONE) revert Conflict();
         consumedIntent[intent] = true;
         reserved[offer.marketId] += profit;
         pendingStake[offer.marketId] += offer.stake;
@@ -122,7 +122,7 @@ contract SportsFundedTickets420 is SportsAuthority420 {
         selectionProfitExposure[offer.marketId][offer.selection] += profit;
         playerExposure[offer.marketId][msg.sender] += offer.stake;
         tickets[id] = Ticket(msg.sender, offer.marketId, offer.selection, q.digest, m.termsHash,
-            offer.nonce, offer.stake, gross, profit, q.quoteEpoch, q.sequence, State.FUNDED);
+            offer.nonce, offer.stake, gross, profit, q.quoteEpoch, q.sequence, TicketState.FUNDED);
         _receive(m.config.asset, msg.sender, offer.stake);
         emit TicketFunded(id, offer.marketId, msg.sender, q.digest, offer.stake, gross);
     }
@@ -131,23 +131,23 @@ contract SportsFundedTickets420 is SportsAuthority420 {
     /// No raw source reports are independently validated by this contract.
     function resolve(bytes32 id, bool won) external guarded {
         Ticket storage t = tickets[id];
-        if (t.state != State.FUNDED) revert State();
+        if (t.state != TicketState.FUNDED) revert State();
         _auth(RESOLVE, t.marketId);
         if (block.timestamp < markets.get(t.marketId).config.cutoff) revert State();
-        _close(id, won ? State.WON : State.LOST, won ? t.gross : 0);
+        _close(id, won ? TicketState.WON : TicketState.LOST, won ? t.gross : 0);
     }
 
     /// @notice Permissionless refund after the immutable market policy timeout.
     function refund(bytes32 id) external guarded {
         Ticket storage t = tickets[id];
-        if (t.state != State.FUNDED) revert State();
+        if (t.state != TicketState.FUNDED) revert State();
         SportsMarketRegistry420.Record memory m = markets.get(t.marketId);
         uint256 delay = markets.getTemplate(m.config.templateId).config.refundSeconds;
         if (block.timestamp < uint256(m.config.cutoff) + delay) revert State();
-        _close(id, State.REFUNDED, t.stake);
+        _close(id, TicketState.REFUNDED, t.stake);
     }
 
-    function _close(bytes32 id, State outcome, uint256 payout) private {
+    function _close(bytes32 id, TicketState outcome, uint256 payout) private {
         Ticket storage t = tickets[id];
         t.state = outcome;
         reserved[t.marketId] -= t.profit;
@@ -155,8 +155,8 @@ contract SportsFundedTickets420 is SportsAuthority420 {
         marketProfitExposure[t.marketId] -= t.profit;
         selectionProfitExposure[t.marketId][t.selection] -= t.profit;
         playerExposure[t.marketId][t.player] -= t.stake;
-        if (outcome == State.WON) collateral[t.marketId] -= t.profit;
-        if (outcome == State.LOST) collateral[t.marketId] += t.stake;
+        if (outcome == TicketState.WON) collateral[t.marketId] -= t.profit;
+        if (outcome == TicketState.LOST) collateral[t.marketId] += t.stake;
         if (payout != 0) credit[t.player][_asset(t.marketId)] += payout;
         emit TicketFinalized(id, outcome, payout);
     }

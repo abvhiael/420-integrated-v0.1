@@ -72,7 +72,8 @@ contract PremiumCompetition73Test {
         issuer.set(address(alice),G,true);
         alice.enter(engine,P);
         bob.enter(engine,B);
-        bytes32 h1=keccak256("a"),h2=keccak256("b");
+        bytes32 h1=keccak256("a");
+        bytes32 h2=keccak256("b");
         evidence.set(h1,address(alice),5000,opens);
         evidence.set(h2,address(bob),9000,opens);
         alice.submit(engine,B,h1,5000,opens);

@@ -82,17 +82,133 @@
         "test/Compute"
       ]
     },
-    "420protocols": {
+    "integration": {
+      "source": [],
+      "tests": []
+    },
+    "protocol-identity": {
+      "source": [
+        "src/accounts/",
+        "src/apps/",
+        "src/governance/",
+        "src/trust/",
+        "src/system/",
+        "src/interfaces/",
+        "src/libraries/"
+      ],
+      "tests": [
+        "test/Account",
+        "test/AppStore",
+        "test/Application",
+        "test/Governance",
+        "test/Identity",
+        "test/Registry",
+        "test/Names",
+        "test/Trust",
+        "test/Validator",
+        "test/Verify",
+        "test/System"
+      ]
+    },
+    "protocol-defi": {
+      "source": [
+        "src/exchange/",
+        "src/swap/",
+        "src/bridge/",
+        "src/market/",
+        "src/token/",
+        "src/pay/"
+      ],
+      "tests": [
+        "test/Exchange",
+        "test/Swap",
+        "test/Bridge",
+        "test/Token",
+        "test/Market",
+        "test/Pay",
+        "test/Payment",
+        "test/Aave",
+        "test/AudioBridge",
+        "test/Tron",
+        "test/UniBridge",
+        "test/Usdt",
+        "test/Xrpl",
+        "test/VaultSlither"
+      ]
+    },
+    "protocol-creative": {
+      "source": [
+        "src/creative/",
+        "src/rights/",
+        "src/media/",
+        "src/messenger/",
+        "src/town/",
+        "src/attention/",
+        "src/review/"
+      ],
+      "tests": [
+        "test/Creative",
+        "test/Rights",
+        "test/Media",
+        "test/Messenger",
+        "test/Town",
+        "test/Attention",
+        "test/Review",
+        "test/Doob",
+        "test/Recording",
+        "test/Remix"
+      ]
+    },
+    "protocol-services": {
+      "source": [
+        "src/ai/",
+        "src/oracle/",
+        "src/randomness/",
+        "src/interop/",
+        "src/grants/",
+        "src/launchpad/",
+        "src/arbitration/"
+      ],
+      "tests": [
+        "test/AI",
+        "test/Oracle",
+        "test/Randomness",
+        "test/Interop",
+        "test/Grants",
+        "test/Launchpad",
+        "test/Arbitration",
+        "test/Grant"
+      ]
+    },
+    "protocol-infrastructure": {
+      "source": [
+        "src/commons/",
+        "src/bonggoggles/",
+        "src/gaming/",
+        "src/pulse/",
+        "src/resource/",
+        "src/rewards/",
+        "src/vpn/",
+        "src/testnet/"
+      ],
+      "tests": [
+        "test/Commons",
+        "test/Gaming",
+        "test/Pulse",
+        "test/Resource",
+        "test/Rewards",
+        "test/VPN",
+        "test/Bong",
+        "test/Testnet"
+      ]
+    },
+    "protocol-misc": {
       "source": [
         "src/"
       ],
       "tests": [
         "test/"
       ]
-    },
-    "integration": {
-      "source": [],
-      "tests": []
     }
   },
   "shared_roots": [

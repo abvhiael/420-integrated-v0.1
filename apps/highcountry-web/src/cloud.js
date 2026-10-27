@@ -25,6 +25,16 @@ export function createCloudClient({apiUrl,authenticate,fetchImpl=fetch,gameId}={
  }
  return Object.freeze({
   session:()=>request('GET','/highcountry/session'),
+  ordinaryExhibition:(action,fields)=>{
+   const shapes={create:['eventId','seasonId','category','version','rulesHash','opensAt','closesAt','challengeUntil'],
+    enter:['eventId'],submit:['eventId','harvestId'],reject:['eventId','accountId','reasonHash'],
+    finalize:['eventId'],status:['eventId']};
+   const allowed=shapes[action];
+   if(!allowed||!fields||typeof fields!=='object'||Array.isArray(fields)||
+      Object.keys(fields).length!==allowed.length||allowed.some(k=>!Object.hasOwn(fields,k)))
+      fail('cloud-request-invalid');
+   return request('POST','/highcountry/exhibitions/'+action,fields);
+  },
   register:({profileId,rulesetId})=>{if(!/^[A-Za-z0-9:_-]{1,128}$/.test(profileId)||!/^0x[0-9a-f]{64}$/.test(rulesetId))fail('cloud-request-invalid');return request('POST','/highcountry/register',{profileId,rulesetId});},
   read:()=>request('GET','/highcountry/save'),
   consent:({policyHash,accepted})=>{if(!/^0x[0-9a-f]{64}$/.test(policyHash)||accepted!==true)fail('cloud-request-invalid');return request('POST','/highcountry/consent',{policyHash,accepted});},

@@ -1,3 +1,4 @@
+import {mountPortAlderNavigation} from './port-alder-navigation.js';
 import {mountSeedCatalogue} from './seed-catalogue.js';
 import {mountOriginalSixteenGallery} from './archive-gallery.js';
 import {cultivationStageArt,cultivationSceneArt,CULTIVATION_REGIONS,CULTIVATION_ENVIRONMENTS} from './cultivation-art.js';
@@ -8,8 +9,8 @@ import {mountMissions} from './missions.js';
 import {mountDiscovery} from './discovery.js';
 import {validateHighCountryRuntime,detectHighCountryNetwork} from './runtime.js';
 import {newGuest,loadGuest,saveGuest,plant,setEnvironment,advance,stage,harvest} from './guest.js';
-const pages=Object.freeze({'/':'Home','/play':'Play','/account':'Account','/settings':'Settings','/about':'About','/archive':'Archive','/marketplace':'Marketplace','/skills':'Skills & Research','/missions':'Missions','/discovery':'Discovery','/seeds':'Seed Catalogue'});
-export function resolveRoute(path){return Object.hasOwn(pages,path)?path:'/not-found';}
+const pages=Object.freeze({'/':'Home','/play':'Play','/account':'Account','/settings':'Settings','/about':'About','/archive':'Archive','/marketplace':'Marketplace','/skills':'Skills & Research','/missions':'Missions','/discovery':'Discovery','/seeds':'Seed Catalogue','/port-alder':'Port Alder'});
+export function resolveRoute(path){return path.startsWith('/port-alder/district/')?'/port-alder':Object.hasOwn(pages,path)?path:'/not-found';}
 export function createHighCountryApp({document,location,config,fetchImpl,storage=globalThis.localStorage,authenticate=globalThis.highCountryAuth?.getToken,localAuth=globalThis.highCountryLocalAuth,walletProvider=globalThis.ethereum}){
  const runtime=validateHighCountryRuntime(config),root=document.getElementById('app');if(!root)throw Error('missing-game-root');
  let guest=null,error='';
@@ -23,7 +24,7 @@ export function createHighCountryApp({document,location,config,fetchImpl,storage
   const head=el('header','');const brand=el('a','');brand.href='/';brand.className='brand';brand.setAttribute('aria-label','High Country home');const mark=el('img','');mark.src='/assets/highcountry-logo.svg';mark.alt='High Country';mark.width=320;mark.height=96;brand.append(mark);head.append(brand,el('h1','High Country'));const nav=el('nav','');nav.setAttribute('aria-label','Main navigation');
   for(const [route,label] of Object.entries(pages)){const link=el('a',label);link.href=route;if(route===path)link.setAttribute('aria-current','page');nav.append(link);}
   const main=el('main','');main.id='main';main.append(el('h2',pages[path]||'Page not found'));
-  if(path==='/seeds'){mountSeedCatalogue({document,main,runtime,authenticate:localAuth?()=>localAuth.getToken():authenticate,fetchImpl});}else if(path==='/discovery'){mountDiscovery({document,main,runtime,authenticate:localAuth?()=>localAuth.getToken():authenticate,fetchImpl});}else if(path==='/missions'){mountMissions({document,main,runtime,authenticate:localAuth?()=>localAuth.getToken():authenticate,fetchImpl});}else if(path==='/skills'){mountSkills({document,main,runtime,authenticate:localAuth?()=>localAuth.getToken():authenticate,fetchImpl});}else if(path==='/play'){
+  if(path==='/port-alder'){mountPortAlderNavigation({document,main,pathname:location.pathname,fetchImpl});}else if(path==='/seeds'){mountSeedCatalogue({document,main,runtime,authenticate:localAuth?()=>localAuth.getToken():authenticate,fetchImpl});}else if(path==='/discovery'){mountDiscovery({document,main,runtime,authenticate:localAuth?()=>localAuth.getToken():authenticate,fetchImpl});}else if(path==='/missions'){mountMissions({document,main,runtime,authenticate:localAuth?()=>localAuth.getToken():authenticate,fetchImpl});}else if(path==='/skills'){mountSkills({document,main,runtime,authenticate:localAuth?()=>localAuth.getToken():authenticate,fetchImpl});}else if(path==='/play'){
    main.append(el('p','Local guest play only. Saves remain on this device. No account, wallet, BUDS, or canonical assets are created.'));
    if(error){const p=el('p','Save error: '+error);p.setAttribute('role','alert');main.append(p);}
 

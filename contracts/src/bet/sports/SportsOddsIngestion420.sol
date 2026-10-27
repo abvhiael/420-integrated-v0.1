@@ -65,10 +65,12 @@ contract SportsOddsIngestion420 is SportsAuthority420 {
     }
 
     function digest(Odds calldata q) public view returns (bytes32) {
+        uint256[] memory encodedPrices = new uint256[](q.prices.length);
+        for (uint256 i; i < q.prices.length; ++i) encodedPrices[i] = q.prices[i];
         bytes32 structHash = keccak256(abi.encode(
             TYPEHASH, q.marketId, q.termsHash, q.quoteEpoch, q.sequence,
             q.observedAt, q.validUntil, q.sourceDigest, q.evidenceDigest,
-            keccak256(abi.encodePacked(q.prices))
+            keccak256(abi.encodePacked(encodedPrices))
         ));
         return keccak256(abi.encodePacked(bytes2(0x1901), domainSeparator(), structHash));
     }

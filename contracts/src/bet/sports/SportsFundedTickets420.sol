@@ -45,6 +45,11 @@ contract SportsFundedTickets420 is SportsAuthority420 {
     mapping(bytes32 => mapping(bytes32 => uint256)) public selectionProfitExposure;
     mapping(bytes32 => mapping(address => uint256)) public playerExposure;
     mapping(address => mapping(address => uint256)) public credit;
+    /// @dev Aggregate nominal obligations across every market and beneficiary per asset.
+    mapping(address => uint256) public assetLiability;
+    mapping(address => uint256) public assetCollateral;
+    mapping(address => uint256) public assetPendingStake;
+    mapping(address => uint256) public assetPlayerCredit;
     event CollateralAdded(bytes32 indexed marketId, address indexed operator, uint256 amount);
     event CollateralRemoved(bytes32 indexed marketId, address indexed operator, uint256 amount);
     event TicketFunded(bytes32 indexed id, bytes32 indexed marketId, address indexed player, bytes32 oddsDigest, uint256 stake, uint256 gross);
@@ -88,15 +93,21 @@ contract SportsFundedTickets420 is SportsAuthority420 {
 
     function deposit(bytes32 marketId, uint256 amount) external guarded {
         if (_operator(marketId) != msg.sender || amount == 0) revert Unauthorized();
-        _receive(_asset(marketId), msg.sender, amount);
+        address asset = _asset(marketId);
+        assetLiability[asset] += amount;
+        assetCollateral[asset] += amount;
         collateral[marketId] += amount;
+        _receive(asset, msg.sender, amount);
         emit CollateralAdded(marketId, msg.sender, amount);
     }
 
     function withdrawCollateral(bytes32 marketId, uint256 amount) external guarded {
         if (_operator(marketId) != msg.sender || amount == 0 || amount > collateral[marketId] - reserved[marketId]) revert Unauthorized();
+        address asset = _asset(marketId);
         collateral[marketId] -= amount;
-        _send(_asset(marketId), msg.sender, amount);
+        assetCollateral[asset] -= amount;
+        assetLiability[asset] -= amount;
+        _send(asset, msg.sender, amount);
         emit CollateralRemoved(marketId, msg.sender, amount);
     }
 
@@ -121,6 +132,8 @@ contract SportsFundedTickets420 is SportsAuthority420 {
         consumedIntent[intent] = true;
         reserved[offer.marketId] += profit;
         pendingStake[offer.marketId] += offer.stake;
+        assetLiability[m.config.asset] += offer.stake;
+        assetPendingStake[m.config.asset] += offer.stake;
         marketProfitExposure[offer.marketId] += profit;
         selectionProfitExposure[offer.marketId][offer.selection] += profit;
         playerExposure[offer.marketId][msg.sender] += offer.stake;
@@ -158,12 +171,14 @@ contract SportsFundedTickets420 is SportsAuthority420 {
         t.state = outcome;
         reserved[t.marketId] -= t.profit;
         pendingStake[t.marketId] -= t.stake;
+        address asset = _asset(t.marketId);
+        assetPendingStake[asset] -= t.stake;
         marketProfitExposure[t.marketId] -= t.profit;
         selectionProfitExposure[t.marketId][t.selection] -= t.profit;
         playerExposure[t.marketId][t.player] -= t.stake;
-        if (outcome == TicketState.WON) collateral[t.marketId] -= t.profit;
-        if (outcome == TicketState.LOST) collateral[t.marketId] += t.stake;
-        if (payout != 0) credit[t.player][_asset(t.marketId)] += payout;
+        if (outcome == TicketState.WON) { collateral[t.marketId] -= t.profit; assetCollateral[asset] -= t.profit; }
+        if (outcome == TicketState.LOST) { collateral[t.marketId] += t.stake; assetCollateral[asset] += t.stake; }
+        if (payout != 0) { credit[t.player][asset] += payout; assetPlayerCredit[asset] += payout; }
         emit TicketFinalized(id, outcome, payout);
     }
 
@@ -171,18 +186,22 @@ contract SportsFundedTickets420 is SportsAuthority420 {
         uint256 amount = credit[msg.sender][token];
         if (amount == 0) revert Missing();
         credit[msg.sender][token] = 0;
+        assetPlayerCredit[token] -= amount;
+        assetLiability[token] -= amount;
         _send(token, msg.sender, amount);
         emit Withdrawal(msg.sender, token, amount);
     }
 
     function _receive(address token, address from, uint256 amount) private {
         uint256 balance = ISportsToken420(token).balanceOf(address(this));
+        if (balance != assetLiability[token] - amount) revert Transfer();
         if (!ISportsToken420(token).transferFrom(from, address(this), amount)
             || ISportsToken420(token).balanceOf(address(this)) != balance + amount) revert Transfer();
     }
 
     function _send(address token, address to, uint256 amount) private {
         uint256 balance = ISportsToken420(token).balanceOf(address(this));
+        if (balance != assetLiability[token] + amount) revert Transfer();
         if (!ISportsToken420(token).transfer(to, amount)
             || ISportsToken420(token).balanceOf(address(this)) + amount != balance) revert Transfer();
     }

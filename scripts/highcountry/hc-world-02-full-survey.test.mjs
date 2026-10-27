@@ -1,0 +1,11 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {generate} from './hc-world-02-cadastre.mjs';
+import {verifyWorldSurvey,verifyRegionalSurvey} from './hc-world-02-full-survey.mjs';
+const baseline=generate();
+const draft=()=>({schema:'HC.WORLD.REGIONAL.SURVEY.V1',status:'DRAFT',regionId:1,sourceTerrainSHA256:'a'.repeat(64),approvalEvidence:null,parcels:[],allocatable:[],zoning:[],exclusions:[],heritage:[],roads:[],junctions:[],edges:[],roadRoot:'root',access:[]});
+test('three missing physical surveys fail closed',()=>assert.throws(()=>verifyWorldSurvey({schema:'HC.WORLD.ALL.REGIONS.SURVEY.V1',regions:[]}),/three regional surveys/));
+test('no owners approval cannot certify generated world',()=>assert.throws(()=>verifyRegionalSurvey(draft(),baseline.regions[0]),/owner-approved/));
+test('empty cadastral masks cannot certify county',()=>assert.throws(()=>verifyRegionalSurvey(draft(),baseline.regions[0],{requireApproval:false}),/zero allocatable area/));
+test('source terrain provenance must be SHA-256',()=>{const s=draft();s.sourceTerrainSHA256='invented';assert.throws(()=>verifyRegionalSurvey(s,baseline.regions[0],{requireApproval:false}),/terrain hash/)});
+test('real generated inventory remains unissued, without surveyed access evidence',()=>{assert.equal(baseline.regions.reduce((n,r)=>n+r.parcels.length,0),31260);assert.equal(baseline.regions.flatMap(r=>r.parcels).filter(p=>p.issuance==='RESERVED_UNISSUED'&&p.owner===null).length,31260)});

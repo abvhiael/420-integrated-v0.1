@@ -105,7 +105,7 @@ contract SportsFundedTickets420 is SportsAuthority420 {
         if (!ok) revert State();
         bytes32 intent = keccak256(abi.encode(msg.sender, offer.nonce));
         if (consumedIntent[intent]) revert Conflict();
-        SportsBetAcceptance420.Risk memory r = admission.risk(offer.marketId);
+        SportsBetAcceptance420.Risk memory r = admission.getRisk(offer.marketId);
         if (marketProfitExposure[offer.marketId] + profit > r.maxMarketLiability
             || selectionProfitExposure[offer.marketId][offer.selection] + profit > r.maxSelectionLiability
             || playerExposure[offer.marketId][msg.sender] + offer.stake > r.maxPlayerStake

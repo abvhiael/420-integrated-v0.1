@@ -19,7 +19,7 @@ const layerSurface=Object.freeze({
  outdoor_recreation:['outdoor_ground'],wall_decor:['wall_slot'],
  tabletop_decor:['tabletop_slot'],shelf_decor:['shelf_slot']
 });
-const sortedUnique=c=>Array.isArray(c)&&c.every(id)&&new Set(c).size===c.length;
+const sortedUnique=c=>Array.isArray(c)&&new Set(c).size===c.length;
 const dimensions=d=>exact(d,['width','height'])&&positive(d.width)&&positive(d.height)&&d.width<=256&&d.height<=256;
 const anchor=a=>exact(a,['x','y'])&&int(a.x)&&int(a.y)&&Math.abs(a.x)<=1048576&&Math.abs(a.y)<=1048576;
 const cells=c=>Array.isArray(c)&&c.length>0&&c.length<=65536&&c.every(p=>exact(p,['x','y'])&&int(p.x)&&int(p.y)&&p.x>=0&&p.y>=0&&p.x<256&&p.y<256)&&new Set(c.map(p=>p.x+':'+p.y)).size===c.length;

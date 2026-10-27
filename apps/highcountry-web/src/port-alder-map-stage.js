@@ -11,8 +11,12 @@ export function selectPortAlderArtwork(catalogue, snapshot){
  !Number.isSafeInteger(snapshot.revision)||snapshot.revision<0||
  typeof snapshot.canonicalSnapshotId!=='string'||!/^HC-EC-S01:[A-Za-z0-9_-]{8,}$/.test(snapshot.canonicalSnapshotId))
  return base;
+ const is75=snapshot.qualifyingPurchased*4>=snapshot.eligibleTitles*3;
  const is50=snapshot.qualifyingPurchased*2>=snapshot.eligibleTitles;
- return {stage:is50?'DEVELOPED_50':'GENESIS',src:is50?images.developed50Src:images.genesisSrc,verified:true};
+ // Keep the already uploaded 50% artwork until the full-capacity PNG is committed.
+ const fullAssetReady=images.developed75AssetReady===true&&typeof images.developed75Src==='string';
+ const stage=is75&&fullAssetReady?'DEVELOPED_75':is50?'DEVELOPED_50':'GENESIS';
+ return {stage,src:stage==='DEVELOPED_75'?images.developed75Src:stage==='DEVELOPED_50'?images.developed50Src:images.genesisSrc,verified:true};
 }
 export async function requestPortAlderStage({runtime,fetchImpl=fetch,authenticate}={}){
  if(runtime?.mode!=='connected'||typeof authenticate!=='function')return null;

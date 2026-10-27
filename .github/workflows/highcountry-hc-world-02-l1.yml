@@ -16,6 +16,6 @@ jobs:
         with:
           node-version: '22'
       - name: Qualify 31,260 cadastral reservation records
-        run: node --test scripts/highcountry/hc-world-02-cadastre.test.mjs scripts/highcountry/hc-world-02-geography-gate.test.mjs scripts/highcountry/hc-world-02-atlas-draft.test.mjs scripts/highcountry/hc-world-02-heritage-buffers.test.mjs
+        run: node --test scripts/highcountry/hc-world-02-cadastre.test.mjs scripts/highcountry/hc-world-02-geography-gate.test.mjs scripts/highcountry/hc-world-02-atlas-draft.test.mjs scripts/highcountry/hc-world-02-heritage-buffers.test.mjs scripts/highcountry/hc-world-02-parcel-access.test.mjs
       - name: Generate survey inventory reproducibly
         run: node scripts/highcountry/hc-world-02-cadastre.mjs /tmp/hc-world-02-cadastre.json

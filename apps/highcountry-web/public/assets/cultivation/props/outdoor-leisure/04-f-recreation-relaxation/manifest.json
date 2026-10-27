@@ -1,0 +1,223 @@
+{
+  "collection": "HC-ART-04-F",
+  "assetCount": 12,
+  "notes": "Cosmetic assets only; footprint and actual interaction/collision geometry independently qualified.",
+  "assets": [
+    {
+      "number": 1,
+      "filename": "hc-outdoor-recreation-heritage-cornhole-game.png",
+      "region": "universal",
+      "footprintTiles": [
+        2,
+        2
+      ],
+      "canvasPx": [
+        640,
+        640
+      ],
+      "sha256": "723c3603dfc53d3cf4825d0e739aabcf465664acd34f07ed8adaf7723e335bdc",
+      "repositoryPath": "apps/highcountry-web/public/assets/cultivation/props/outdoor-leisure/04-f-recreation-relaxation/hc-outdoor-recreation-heritage-cornhole-game.png",
+      "publicUrl": "/assets/cultivation/props/outdoor-leisure/04-f-recreation-relaxation/hc-outdoor-recreation-heritage-cornhole-game.png",
+      "placementLayer": "outdoor_recreation",
+      "classification": "cosmetic"
+    },
+    {
+      "number": 2,
+      "filename": "hc-outdoor-recreation-rustic-horseshoe-pitch.png",
+      "region": "universal",
+      "footprintTiles": [
+        3,
+        2
+      ],
+      "canvasPx": [
+        960,
+        640
+      ],
+      "sha256": "bcd72f4ca4d8453564661804397f580d23e6a111954674527070bfd506760958",
+      "repositoryPath": "apps/highcountry-web/public/assets/cultivation/props/outdoor-leisure/04-f-recreation-relaxation/hc-outdoor-recreation-rustic-horseshoe-pitch.png",
+      "publicUrl": "/assets/cultivation/props/outdoor-leisure/04-f-recreation-relaxation/hc-outdoor-recreation-rustic-horseshoe-pitch.png",
+      "placementLayer": "outdoor_recreation",
+      "classification": "cosmetic"
+    },
+    {
+      "number": 3,
+      "filename": "hc-outdoor-recreation-giant-stacking-blocks.png",
+      "region": "universal",
+      "footprintTiles": [
+        1,
+        1
+      ],
+      "canvasPx": [
+        320,
+        320
+      ],
+      "sha256": "35350e825dd24a08f30ed2d9a8d593bbd80d978e1322c9bb1d1a85a61eaa978d",
+      "repositoryPath": "apps/highcountry-web/public/assets/cultivation/props/outdoor-leisure/04-f-recreation-relaxation/hc-outdoor-recreation-giant-stacking-blocks.png",
+      "publicUrl": "/assets/cultivation/props/outdoor-leisure/04-f-recreation-relaxation/hc-outdoor-recreation-giant-stacking-blocks.png",
+      "placementLayer": "outdoor_recreation",
+      "classification": "cosmetic"
+    },
+    {
+      "number": 4,
+      "filename": "hc-outdoor-recreation-botanical-meditation-platform.png",
+      "region": "universal",
+      "footprintTiles": [
+        2,
+        2
+      ],
+      "canvasPx": [
+        640,
+        640
+      ],
+      "sha256": "02180b1377aaf140c0d077b74b88fc5326da5d80621ee66217318d4f78ff1d19",
+      "repositoryPath": "apps/highcountry-web/public/assets/cultivation/props/outdoor-leisure/04-f-recreation-relaxation/hc-outdoor-recreation-botanical-meditation-platform.png",
+      "publicUrl": "/assets/cultivation/props/outdoor-leisure/04-f-recreation-relaxation/hc-outdoor-recreation-botanical-meditation-platform.png",
+      "placementLayer": "outdoor_recreation",
+      "classification": "cosmetic"
+    },
+    {
+      "number": 5,
+      "filename": "hc-outdoor-recreation-heritage-croquet-set.png",
+      "region": "universal",
+      "footprintTiles": [
+        2,
+        1
+      ],
+      "canvasPx": [
+        640,
+        320
+      ],
+      "sha256": "3985d00ef32154c37f77eb7e03b6f81cd099cafebf9741b2cb4231ed7e11353e",
+      "repositoryPath": "apps/highcountry-web/public/assets/cultivation/props/outdoor-leisure/04-f-recreation-relaxation/hc-outdoor-recreation-heritage-croquet-set.png",
+      "publicUrl": "/assets/cultivation/props/outdoor-leisure/04-f-recreation-relaxation/hc-outdoor-recreation-heritage-croquet-set.png",
+      "placementLayer": "outdoor_recreation",
+      "classification": "cosmetic"
+    },
+    {
+      "number": 6,
+      "filename": "hc-outdoor-recreation-garden-chess-table.png",
+      "region": "universal",
+      "footprintTiles": [
+        2,
+        2
+      ],
+      "canvasPx": [
+        640,
+        640
+      ],
+      "sha256": "9a6d1e0fa270f10a902fdc05af8c653b5641511a818ef68b9cbf4d7b7a342e49",
+      "repositoryPath": "apps/highcountry-web/public/assets/cultivation/props/outdoor-leisure/04-f-recreation-relaxation/hc-outdoor-recreation-garden-chess-table.png",
+      "publicUrl": "/assets/cultivation/props/outdoor-leisure/04-f-recreation-relaxation/hc-outdoor-recreation-garden-chess-table.png",
+      "placementLayer": "outdoor_recreation",
+      "classification": "cosmetic"
+    },
+    {
+      "number": 7,
+      "filename": "hc-outdoor-recreation-emerald-cedar-hammock.png",
+      "region": "emerald-coast",
+      "footprintTiles": [
+        3,
+        2
+      ],
+      "canvasPx": [
+        960,
+        640
+      ],
+      "sha256": "e4727e4864fd374eef6fec3c55c5a168ad98afe325115c7bad35b866fd517211",
+      "repositoryPath": "apps/highcountry-web/public/assets/cultivation/props/outdoor-leisure/04-f-recreation-relaxation/hc-outdoor-recreation-emerald-cedar-hammock.png",
+      "publicUrl": "/assets/cultivation/props/outdoor-leisure/04-f-recreation-relaxation/hc-outdoor-recreation-emerald-cedar-hammock.png",
+      "placementLayer": "outdoor_recreation",
+      "classification": "cosmetic"
+    },
+    {
+      "number": 8,
+      "filename": "hc-outdoor-recreation-emerald-driftwood-ring-toss.png",
+      "region": "emerald-coast",
+      "footprintTiles": [
+        2,
+        1
+      ],
+      "canvasPx": [
+        640,
+        320
+      ],
+      "sha256": "f76e893086909cf4bb8c7da9117f377a06d81e893276166240d4fa6f302159fb",
+      "repositoryPath": "apps/highcountry-web/public/assets/cultivation/props/outdoor-leisure/04-f-recreation-relaxation/hc-outdoor-recreation-emerald-driftwood-ring-toss.png",
+      "publicUrl": "/assets/cultivation/props/outdoor-leisure/04-f-recreation-relaxation/hc-outdoor-recreation-emerald-driftwood-ring-toss.png",
+      "placementLayer": "outdoor_recreation",
+      "classification": "cosmetic"
+    },
+    {
+      "number": 9,
+      "filename": "hc-outdoor-recreation-prairie-homestead-swing.png",
+      "region": "golden-prairie",
+      "footprintTiles": [
+        3,
+        2
+      ],
+      "canvasPx": [
+        960,
+        640
+      ],
+      "sha256": "e58ae04d721c8f4d0b306f73e2501c91941aeec924c0ed1c04498bc4b352f943",
+      "repositoryPath": "apps/highcountry-web/public/assets/cultivation/props/outdoor-leisure/04-f-recreation-relaxation/hc-outdoor-recreation-prairie-homestead-swing.png",
+      "publicUrl": "/assets/cultivation/props/outdoor-leisure/04-f-recreation-relaxation/hc-outdoor-recreation-prairie-homestead-swing.png",
+      "placementLayer": "outdoor_recreation",
+      "classification": "cosmetic"
+    },
+    {
+      "number": 10,
+      "filename": "hc-outdoor-recreation-prairie-putting-green.png",
+      "region": "golden-prairie",
+      "footprintTiles": [
+        3,
+        3
+      ],
+      "canvasPx": [
+        960,
+        960
+      ],
+      "sha256": "5415230e9925472c50023f25c35898b4bbdfecdc046b144b742fc2b35687a107",
+      "repositoryPath": "apps/highcountry-web/public/assets/cultivation/props/outdoor-leisure/04-f-recreation-relaxation/hc-outdoor-recreation-prairie-putting-green.png",
+      "publicUrl": "/assets/cultivation/props/outdoor-leisure/04-f-recreation-relaxation/hc-outdoor-recreation-prairie-putting-green.png",
+      "placementLayer": "outdoor_recreation",
+      "classification": "cosmetic"
+    },
+    {
+      "number": 11,
+      "filename": "hc-outdoor-recreation-mesa-bocce-court.png",
+      "region": "red-mesa",
+      "footprintTiles": [
+        3,
+        2
+      ],
+      "canvasPx": [
+        960,
+        640
+      ],
+      "sha256": "2a17132ef7f4d8d4fcc7fbb66466a3faa45a07bf5778c8c844b0591e2679ea2e",
+      "repositoryPath": "apps/highcountry-web/public/assets/cultivation/props/outdoor-leisure/04-f-recreation-relaxation/hc-outdoor-recreation-mesa-bocce-court.png",
+      "publicUrl": "/assets/cultivation/props/outdoor-leisure/04-f-recreation-relaxation/hc-outdoor-recreation-mesa-bocce-court.png",
+      "placementLayer": "outdoor_recreation",
+      "classification": "cosmetic"
+    },
+    {
+      "number": 12,
+      "filename": "hc-outdoor-recreation-mesa-desert-daybed.png",
+      "region": "red-mesa",
+      "footprintTiles": [
+        3,
+        2
+      ],
+      "canvasPx": [
+        960,
+        640
+      ],
+      "sha256": "69040c318c52a1ec46f6a08eaea50a07e1cbc042f6e48287a33f0538501367aa",
+      "repositoryPath": "apps/highcountry-web/public/assets/cultivation/props/outdoor-leisure/04-f-recreation-relaxation/hc-outdoor-recreation-mesa-desert-daybed.png",
+      "publicUrl": "/assets/cultivation/props/outdoor-leisure/04-f-recreation-relaxation/hc-outdoor-recreation-mesa-desert-daybed.png",
+      "placementLayer": "outdoor_recreation",
+      "classification": "cosmetic"
+    }
+  ]
+}

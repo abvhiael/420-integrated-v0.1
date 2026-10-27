@@ -25,7 +25,7 @@ The following tests are local deterministic qualification, **not independent ope
 - Confirm market profit exposure and reserved collateral agree for the isolated fixture market.
 
 **Outstanding pre-testnet work (blocking complete adversarial qualification):**
-- Malicious ERC20 fixtures exercising fee-on-transfer, false-return, missing-return, reentrant callback, rebasing and asset substitution with a market registered against those tokens.
+- Malicious ERC20 **remaining** scenarios: missing-return, rebasing, asset substitution, callback permutations, withdrawal manipulation. False-return, fee-on-transfer and reentrant collateral callbacks now have dedicated adversarial fixtures, pending exact-SHA evidence.
 - Multi-market same-token aggregate solvency and correlated exposure limits; bounded invariants cannot substitute for a shared risk model.
 - Replay and finality tests with actual provider attestations and robust cryptographic provenance, challenge bonds, evidence availability, appeals and arbiter accountability.
 - External security review and frozen exact-SHA acceptance evidence.

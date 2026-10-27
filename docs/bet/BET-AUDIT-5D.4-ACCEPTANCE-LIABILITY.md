@@ -14,3 +14,20 @@ Payouts use pull credits and a nonreentrant withdrawal, with a unique terminal s
 - A suitable final audited ERC20 custody asset and operator economic risk policy must be explicitly approved before release.
 
 The new vault is not a deployment authorization. The old acceptance.accept deliberately remains disabled to avoid mistakenly treating the preview adapter as a custody vault. Use SportsFundedTickets420.fund only in controlled integration tests until the above release gates are met.
+
+
+## 5D.4 outcome certification and disputes (pre-testnet)
+
+`SportsOutcomeCertification420` requires two distinct designated source-reporting accounts to submit identical market-selection/evidence commitments. Mismatch is fail-closed. The configured challenge period is at least one hour; anyone can challenge a proposed result before its deadline. A challenged result cannot auto-finalize. The separate adjudicator may only uphold the originally attested selection or void it. The funded vault accepts only FINAL results, with a matching ticket selection, for payout; VOID supports stake refunds. No unilateral operator-generated result is accepted in the new vault.
+
+**Security limitation:** Separate Ethereum addresses do not prove independent beneficial ownership, different data origin or independent verification. Reporters are currently trusted role keys rather than independently proven sports-data publishers. The adjudicator is trusted to review external evidence, and challenge evidence is emitted but not cryptographically verified. There are no appeal tiers, committed evidence blobs or enforceable challenge bonds. Timeout refunds provide a fallback. More extensive property/fuzz tests, malicious-token tests, multi-market collateral insolvency analysis, token allowlist, atomic credential checks and formal review remain outstanding. Do not interpret a green unit test as adversarial Level 3 qualification.
+
+## Deferred to testnet roadmap (BET-5D.4-TN)
+
+1. Provision separate, operationally independent reporting organizations and attest evidence provenance, licensing and source finality over real scheduled fixtures.
+2. Run funded W420/$420 end-to-end admission, chain reorganization and provider downtime tests, ERC20 funding reconciliation and bridge/wallet confirmation tests on active testnet.
+3. Exercise real challenge and arbitration operating procedures, withholding and collusion simulations, finality deadlines, false data and cross-chain replay.
+4. Validate risk utilization across correlated markets and treasury/operator solvency with live testnet balances and concurrent wagering.
+5. Confirm compliance, regional eligibility, identity, dispute notices and refunds before any production deployment.
+
+These tasks are intentionally *not* represented as passed or fulfilled on a non-running testnet.

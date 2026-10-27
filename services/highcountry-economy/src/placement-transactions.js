@@ -25,7 +25,7 @@ export class HighCountryPlacementTransactions {
   const permitted=await this.auth.canPlaceOnParcel(who,command);
   if(permitted!==true)fail('parcel-authority-denied');
   const world=await this.auth.validateWorld(who,command);
-  if(world?.qualified!==true||!id(world.evidenceId))fail('world-evidence-unqualified');
+  if(world?.qualified!==true||!id(world.evidenceId)||!Number.isSafeInteger(world.revision)||world.revision<1||!id(world.geometryQualificationId))fail('world-evidence-unqualified');
   const assetIds=await this.assets();
   if(!(assetIds instanceof Set))fail('catalogue-unavailable');
   const geometry=await this.geometry(command.assetId);
@@ -50,6 +50,7 @@ export class HighCountryPlacementTransactions {
    if(!(s.placementAuthorityRevisions instanceof Map))fail('missing-authority-revisions');
    const currentAuthority=s.placementAuthorityRevisions.get(command.record?.parcelId??s.placementInstances.get(command.instanceId)?.parcelId);
    if(!currentAuthority||!Number.isSafeInteger(currentAuthority.revision)||currentAuthority.revision<1||!id(currentAuthority.evidenceId)||!id(currentAuthority.geometryQualificationId))fail('authority-not-provisioned');
+   if(currentAuthority.revision!==world.revision||currentAuthority.evidenceId!==world.evidenceId||currentAuthority.geometryQualificationId!==world.geometryQualificationId||pinned.qualificationRef!==world.geometryQualificationId)fail('authority-changed-or-denied');
    const commitProof=this.auth.verifyAtCommit({principal:who,command:input,world,geometry:pinned,geometryRegistry,assetIds,authoritative:structuredClone(currentAuthority),state:s});
    if(commitProof?.then)fail('async-authority-forbidden');
    if(commitProof!==true)fail('authority-changed-or-denied');

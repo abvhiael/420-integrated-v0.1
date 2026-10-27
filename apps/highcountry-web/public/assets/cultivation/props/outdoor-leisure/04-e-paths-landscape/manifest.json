@@ -1,0 +1,226 @@
+{
+  "collection": "HC-ART-04-E",
+  "source": "a_clean_png_style_sprite_sheet_game_asset_sheet.png",
+  "sourceGrid": "3 columns x 4 rows",
+  "tileSizePx": 64,
+  "sourcePixelsPerTile": 320,
+  "placementNote": "Visual catalogue only; path connectivity, collision, road access and authoritative economy are not qualified",
+  "assets": [
+    {
+      "id": 1,
+      "name": "Heritage Flagstone Stepping Path",
+      "filename": "hc-outdoor-landscape-heritage-flagstone-path.png",
+      "region": "universal",
+      "placementSubtype": "outdoor_path",
+      "footprintTiles": [
+        2,
+        1
+      ],
+      "canvasPx": [
+        640,
+        320
+      ],
+      "sha256": "0c3865915d042e7d9d53c65a822e72aa4ce3d2ec99c7c50d701ba56fb8c8dec2",
+      "repositoryPath": "apps/highcountry-web/public/assets/cultivation/props/outdoor-leisure/04-e-paths-landscape/hc-outdoor-landscape-heritage-flagstone-path.png",
+      "publicUrl": "/assets/cultivation/props/outdoor-leisure/04-e-paths-landscape/hc-outdoor-landscape-heritage-flagstone-path.png"
+    },
+    {
+      "id": 2,
+      "name": "Rustic Timber Garden Border",
+      "filename": "hc-outdoor-landscape-rustic-timber-border.png",
+      "region": "universal",
+      "placementSubtype": "landscape_border",
+      "footprintTiles": [
+        2,
+        1
+      ],
+      "canvasPx": [
+        640,
+        320
+      ],
+      "sha256": "aaae6b6b36d279c5a0219355e48d1e5ab812345b018e0bb9e0da962ef8a15a3b",
+      "repositoryPath": "apps/highcountry-web/public/assets/cultivation/props/outdoor-leisure/04-e-paths-landscape/hc-outdoor-landscape-rustic-timber-border.png",
+      "publicUrl": "/assets/cultivation/props/outdoor-leisure/04-e-paths-landscape/hc-outdoor-landscape-rustic-timber-border.png"
+    },
+    {
+      "id": 3,
+      "name": "River Pebble Mosaic",
+      "filename": "hc-outdoor-landscape-river-pebble-mosaic.png",
+      "region": "universal",
+      "placementSubtype": "ground_ornament",
+      "footprintTiles": [
+        2,
+        2
+      ],
+      "canvasPx": [
+        640,
+        640
+      ],
+      "sha256": "caa38858c52f2dd09ee01d6d9394ec5032936ed3dc70f858dcda2e03258eff99",
+      "repositoryPath": "apps/highcountry-web/public/assets/cultivation/props/outdoor-leisure/04-e-paths-landscape/hc-outdoor-landscape-river-pebble-mosaic.png",
+      "publicUrl": "/assets/cultivation/props/outdoor-leisure/04-e-paths-landscape/hc-outdoor-landscape-river-pebble-mosaic.png"
+    },
+    {
+      "id": 4,
+      "name": "Dry-Stack Fieldstone Wall",
+      "filename": "hc-outdoor-landscape-dry-stack-fieldstone-wall.png",
+      "region": "universal",
+      "placementSubtype": "landscape_border",
+      "footprintTiles": [
+        2,
+        1
+      ],
+      "canvasPx": [
+        640,
+        320
+      ],
+      "sha256": "9d69efae848e3dd4e461be7bbec9cbd79cee63f5fae182833b4c4847a84bf803",
+      "repositoryPath": "apps/highcountry-web/public/assets/cultivation/props/outdoor-leisure/04-e-paths-landscape/hc-outdoor-landscape-dry-stack-fieldstone-wall.png",
+      "publicUrl": "/assets/cultivation/props/outdoor-leisure/04-e-paths-landscape/hc-outdoor-landscape-dry-stack-fieldstone-wall.png"
+    },
+    {
+      "id": 5,
+      "name": "Gravel & Timber Walkway",
+      "filename": "hc-outdoor-landscape-gravel-timber-walkway.png",
+      "region": "universal",
+      "placementSubtype": "outdoor_path",
+      "footprintTiles": [
+        3,
+        1
+      ],
+      "canvasPx": [
+        960,
+        320
+      ],
+      "sha256": "6d7718d514faedecb0c94c5e3f3f317830a2a09238d09d3b8b443dd5e9771126",
+      "repositoryPath": "apps/highcountry-web/public/assets/cultivation/props/outdoor-leisure/04-e-paths-landscape/hc-outdoor-landscape-gravel-timber-walkway.png",
+      "publicUrl": "/assets/cultivation/props/outdoor-leisure/04-e-paths-landscape/hc-outdoor-landscape-gravel-timber-walkway.png"
+    },
+    {
+      "id": 6,
+      "name": "Botanical Brick Garden Edging",
+      "filename": "hc-outdoor-landscape-botanical-brick-edging.png",
+      "region": "universal",
+      "placementSubtype": "landscape_border",
+      "footprintTiles": [
+        2,
+        2
+      ],
+      "canvasPx": [
+        640,
+        640
+      ],
+      "sha256": "f9cc4d2522afd7451dca3d540507dd4b68c0631efd94611baa366787e4555164",
+      "repositoryPath": "apps/highcountry-web/public/assets/cultivation/props/outdoor-leisure/04-e-paths-landscape/hc-outdoor-landscape-botanical-brick-edging.png",
+      "publicUrl": "/assets/cultivation/props/outdoor-leisure/04-e-paths-landscape/hc-outdoor-landscape-botanical-brick-edging.png"
+    },
+    {
+      "id": 7,
+      "name": "Emerald Moss & Slate Path",
+      "filename": "hc-outdoor-landscape-emerald-moss-slate-path.png",
+      "region": "emerald-coast",
+      "placementSubtype": "outdoor_path",
+      "footprintTiles": [
+        3,
+        2
+      ],
+      "canvasPx": [
+        960,
+        640
+      ],
+      "sha256": "b66b84e419943277e1d8617bf30bf7f05078441162fe441d9e0f253362445197",
+      "repositoryPath": "apps/highcountry-web/public/assets/cultivation/props/outdoor-leisure/04-e-paths-landscape/hc-outdoor-landscape-emerald-moss-slate-path.png",
+      "publicUrl": "/assets/cultivation/props/outdoor-leisure/04-e-paths-landscape/hc-outdoor-landscape-emerald-moss-slate-path.png"
+    },
+    {
+      "id": 8,
+      "name": "Coastal Driftwood Border",
+      "filename": "hc-outdoor-landscape-emerald-driftwood-border.png",
+      "region": "emerald-coast",
+      "placementSubtype": "landscape_border",
+      "footprintTiles": [
+        2,
+        1
+      ],
+      "canvasPx": [
+        640,
+        320
+      ],
+      "sha256": "02834908c1dc46d45a47660a97aef08b8f382cdf6e99dc30a829cfeb99ed2517",
+      "repositoryPath": "apps/highcountry-web/public/assets/cultivation/props/outdoor-leisure/04-e-paths-landscape/hc-outdoor-landscape-emerald-driftwood-border.png",
+      "publicUrl": "/assets/cultivation/props/outdoor-leisure/04-e-paths-landscape/hc-outdoor-landscape-emerald-driftwood-border.png"
+    },
+    {
+      "id": 9,
+      "name": "Prairie Homestead Brick Path",
+      "filename": "hc-outdoor-landscape-prairie-homestead-brick-path.png",
+      "region": "golden-prairie",
+      "placementSubtype": "outdoor_path",
+      "footprintTiles": [
+        3,
+        2
+      ],
+      "canvasPx": [
+        960,
+        640
+      ],
+      "sha256": "b5253116b169fb8aac1b85fd6d72a4a2082cddad3376a994c0687a34791186fa",
+      "repositoryPath": "apps/highcountry-web/public/assets/cultivation/props/outdoor-leisure/04-e-paths-landscape/hc-outdoor-landscape-prairie-homestead-brick-path.png",
+      "publicUrl": "/assets/cultivation/props/outdoor-leisure/04-e-paths-landscape/hc-outdoor-landscape-prairie-homestead-brick-path.png"
+    },
+    {
+      "id": 10,
+      "name": "Prairie Railway-Timber Border",
+      "filename": "hc-outdoor-landscape-prairie-railway-timber-border.png",
+      "region": "golden-prairie",
+      "placementSubtype": "landscape_border",
+      "footprintTiles": [
+        2,
+        1
+      ],
+      "canvasPx": [
+        640,
+        320
+      ],
+      "sha256": "2c6f327b0416565d70933ecdcae2d409f1f6530b9806c511c119bccf8cef335b",
+      "repositoryPath": "apps/highcountry-web/public/assets/cultivation/props/outdoor-leisure/04-e-paths-landscape/hc-outdoor-landscape-prairie-railway-timber-border.png",
+      "publicUrl": "/assets/cultivation/props/outdoor-leisure/04-e-paths-landscape/hc-outdoor-landscape-prairie-railway-timber-border.png"
+    },
+    {
+      "id": 11,
+      "name": "Red Mesa Terracotta Tile Path",
+      "filename": "hc-outdoor-landscape-mesa-terracotta-tile-path.png",
+      "region": "red-mesa",
+      "placementSubtype": "outdoor_path",
+      "footprintTiles": [
+        3,
+        2
+      ],
+      "canvasPx": [
+        960,
+        640
+      ],
+      "sha256": "4f95d6376f5096c7aa4e92be6085d8391d8a3114e5c56becbc893af3f4e5c58f",
+      "repositoryPath": "apps/highcountry-web/public/assets/cultivation/props/outdoor-leisure/04-e-paths-landscape/hc-outdoor-landscape-mesa-terracotta-tile-path.png",
+      "publicUrl": "/assets/cultivation/props/outdoor-leisure/04-e-paths-landscape/hc-outdoor-landscape-mesa-terracotta-tile-path.png"
+    },
+    {
+      "id": 12,
+      "name": "Red Mesa Sandstone Garden Edge",
+      "filename": "hc-outdoor-landscape-mesa-sandstone-garden-edge.png",
+      "region": "red-mesa",
+      "placementSubtype": "landscape_border",
+      "footprintTiles": [
+        2,
+        1
+      ],
+      "canvasPx": [
+        640,
+        320
+      ],
+      "sha256": "737d7a3f707225da7b0df1f8ccf070650e6f190b2ba934dd59ffded074b4e0f1",
+      "repositoryPath": "apps/highcountry-web/public/assets/cultivation/props/outdoor-leisure/04-e-paths-landscape/hc-outdoor-landscape-mesa-sandstone-garden-edge.png",
+      "publicUrl": "/assets/cultivation/props/outdoor-leisure/04-e-paths-landscape/hc-outdoor-landscape-mesa-sandstone-garden-edge.png"
+    }
+  ]
+}

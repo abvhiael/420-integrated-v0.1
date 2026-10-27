@@ -1,3 +1,4 @@
+import {custodyUnitId,CUSTODY_SCHEMA} from '../src/custody-records.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {HighCountryPlacementTransactions} from '../src/placement-transactions.js';
@@ -8,6 +9,8 @@ const record=(instanceId='a',gridX=0)=>({schemaVersion:CONTRACT_VERSION,instance
 const balance=()=>({available:2,reserved:0});
 function setup(){
  let state={assets:new Map([[JSON.stringify(['alice',asset]),balance()]]),placementInstances:new Map(),placementOperations:new Map(),placementScenes:new Map(),placementAuthorityRevisions:new Map([['parcel-a',{revision:1,evidenceId:'fixture-world',geometryQualificationId:'test-fixture-only'}]])};
+ const units=new Map(Array.from({length:2},(_,i)=>{const id=custodyUnitId('fixture-receipt',i);return [id,{schemaVersion:CUSTODY_SCHEMA,unitId:id,receiptId:'fixture-receipt',unitIndex:i,owner:'alice',assetId:asset,state:'available',reservationId:null,revision:1}]}));
+ state.custodyUnits=units;state.custodyReceipts=new Map([['fixture-receipt',{owner:'alice',assetId:asset,quantity:2,schemaVersion:CUSTODY_SCHEMA}]]);state.custodyReservations=new Map();state.importedAssets=new Set(['fixture-receipt']);state.assetSources=new Map([[JSON.stringify(['alice',asset]),'fixture-receipt']]);
  let tail=Promise.resolve();
  const store={transact(fn){const running=tail.then(()=>{const copy=structuredClone(state);const out=fn(copy);if(out?.then)throw Error('callback-not-sync');state=copy;return out;});tail=running.then(()=>{},()=>{});return running;}};
  const authority={registeredPrincipal:async s=>s,canPlaceOnParcel:async who=>who==='alice',validateWorld:async()=>({qualified:true,evidenceId:'fixture-world',revision:1,geometryQualificationId:'test-fixture-only'}),qualifiedGeometrySnapshot:async()=>new Map([[asset,geometry]]),verifyAtCommit:({principal,command,world,geometry:mask,authoritative})=>principal==='alice'&&command.record?.parcelId!=='wrong-parcel'&&authoritative.revision===1&&authoritative.evidenceId===world.evidenceId&&authoritative.geometryQualificationId===mask.qualificationRef};

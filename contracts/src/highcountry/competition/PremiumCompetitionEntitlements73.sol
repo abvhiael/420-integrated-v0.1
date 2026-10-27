@@ -15,6 +15,7 @@ contract PremiumCompetitionEntitlements73 {
     error Unauthorized();
     error Invalid();
     address public immutable registrar;
+
     struct Gate {
         address verifier;
         bool active;

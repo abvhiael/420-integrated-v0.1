@@ -16,3 +16,20 @@
 **Pre-testnet scope:** deterministic Solidity unit, adversarial and fuzz tests; exact-SHA CI; per-market funds invariants; audit findings. The prototype certifier requires agreement from two configured reporting addresses but it cannot demonstrate operational independence or independently prove external sporting facts. An appointed arbiter may uphold the report or void it. A dispute carries evidence but does not supply cryptographic data-provider proof.
 
 **Do not grant production resolver capability or operate real-money wagering until all release dependencies are independently qualified.**
+
+## Qualification boundary and evidence policy
+
+The following tests are local deterministic qualification, **not independent operational verification**:
+- Test vault balance conservation before/after funded admission, winner payouts, loser-to-collateral accounting, and claim withdrawals.
+- Fuzz test stake-sized admission and timeout refunds against exact custody accounting.
+- Confirm market profit exposure and reserved collateral agree for the isolated fixture market.
+
+**Outstanding pre-testnet work (blocking complete adversarial qualification):**
+- Malicious ERC20 fixtures exercising fee-on-transfer, false-return, missing-return, reentrant callback, rebasing and asset substitution with a market registered against those tokens.
+- Multi-market same-token aggregate solvency and correlated exposure limits; bounded invariants cannot substitute for a shared risk model.
+- Replay and finality tests with actual provider attestations and robust cryptographic provenance, challenge bonds, evidence availability, appeals and arbiter accountability.
+- External security review and frozen exact-SHA acceptance evidence.
+
+**Operational verification cannot be simulated:** independent source ownership, contractual rights, adjudicator operational independence, confirmed real-game outcomes, transaction-failure recovery on a deployed chain and legally required controls require external evidence. They remain testnet/operations dependencies and must not be reported as complete.
+
+`BET-5D4-TN-01..07` are release gates, not discretionary suggestions. PR merge must not imply live-betting authorization.

@@ -8,8 +8,10 @@ const base=()=>({schema:'HC.WORLD.PHYSICAL.SURVEY.V1',status:'OWNER_APPROVED_TER
 test('connected frontage and protected-site clearance pass in isolated unit fixture',()=>assert.equal(validateParcelAccessAndTerrain(region,base()).verifiedParcels,1));
 test('schematic 31,260 reservations are all refused for release',()=>{const x=auditUnsurveyedReservations(generate());assert.equal(x.total,31260);assert.equal(x.blocked,31260);assert.match(x.admission,/DENIED/)});
 test('no owner approval fails closed',()=>{const s=base();s.status='DRAFT';assert.throws(()=>validateParcelAccessAndTerrain(region,s),/approved physical/)});
-test('protected canyon or river intersections block a parcel',()=>{const s=base();s.exclusions=[{bounds:[15,15,25,25]}];assert.throws(()=>validateParcelAccessAndTerrain(region,s),/excluded terrain/)});
-test('founder protected heritage exclusion blocks parcel',()=>{const s=base();s.heritageBuffers=[{bounds:[15,15,21,21]}];assert.throws(()=>validateParcelAccessAndTerrain(region,s),/heritage buffer/)});
+test('protected canyon or river intersections block a parcel',()=>{const s=base();s.exclusions=[{bounds:[15,15,19,19]}];assert.throws(()=>validateParcelAccessAndTerrain(region,s),/excluded terrain/)});
+test('founder protected heritage exclusion blocks parcel',()=>{const s=base();s.heritageBuffers=[{bounds:[15,15,19,19]}];assert.throws(()=>validateParcelAccessAndTerrain(region,s),/heritage buffer/)});
+test('road crossing terrain exclusion is rejected before parcel admission',()=>{const s=base();s.exclusions=[{bounds:[20,12,21,19]}];assert.throws(()=>validateParcelAccessAndTerrain(region,s),/road intersects protected area/)});
+test('road crossing founder heritage buffer is rejected',()=>{const s=base();s.heritageBuffers=[{bounds:[20,12,21,19]}];assert.throws(()=>validateParcelAccessAndTerrain(region,s),/road intersects protected area/)});
 test('diagonal corner access is not legal road frontage',()=>{const s=base();s.roadSurfaces[0].bounds=[20,20,22,24];assert.throws(()=>validateParcelAccessAndTerrain(region,s),/frontage/)});
 test('isolated road segment cannot provide access',()=>{const s=base();s.roadEdges=[];assert.throws(()=>validateParcelAccessAndTerrain(region,s),/disconnected/)});
 test('missing per-parcel frontage evidence is rejected',()=>{const s=base();s.accessEvidence=[];assert.throws(()=>validateParcelAccessAndTerrain(region,s),/incomplete parcel access/)});

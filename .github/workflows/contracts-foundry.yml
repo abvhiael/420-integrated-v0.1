@@ -80,7 +80,7 @@ jobs:
               contracts/src/bet/sports/SportsBetAcceptance420.sol|contracts/test/sports-5d4/*) sports_5d4_changed=true ;;
             esac
             case "$file" in
-              contracts/src/bet/sports/SportsBetAcceptance420.sol|contracts/test/sports-5d4/*|docs/bet/BET-AUDIT-5D.4-ACCEPTANCE-LIABILITY.md|.github/workflows/420bet-sports-5d4.yml|.github/workflows/contracts-foundry.yml) ;;
+              contracts/src/bet/sports/SportsBetAcceptance420.sol|contracts/test/sports-5d4/*|contracts/test/sports-5d3/SportsOddsIngestion420.t.sol|docs/bet/BET-AUDIT-5D.4-ACCEPTANCE-LIABILITY.md|.github/workflows/420bet-sports-5d4.yml|.github/workflows/contracts-foundry.yml) ;;
               *) sports_5d4_only=false ;;
             esac
             case "$file" in

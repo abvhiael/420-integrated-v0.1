@@ -1,0 +1,18 @@
+name: HighCountry HC-PLACE-01 Architecture Level 1
+on:
+  pull_request:
+    paths:
+      - 'docs/highcountry/HC-PLACE-01-*'
+      - 'scripts/highcountry/hc-place-01-*'
+      - '.github/workflows/highcountry-hc-place-01-l1.yml'
+  workflow_dispatch:
+jobs:
+  architecture-l1:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run bounded placement architecture tests
+        run: node --test scripts/highcountry/hc-place-01-contract.test.mjs

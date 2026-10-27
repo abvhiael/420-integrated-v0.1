@@ -18,6 +18,18 @@ export function createOrdinaryExhibitions420({repository,identity,harvest,clock=
  const transaction=fn=>repository.transaction(fn,{isolation:'serializable'});
  const snapshot=x=>structuredClone(x);
  return Object.freeze({
+  async status({token,eventId}){
+   await actor(token);
+   if(!id(eventId))fail('invalid-event');
+   return transaction(async tx=>{
+    const event=await tx.event(eventId);
+    if(!event)fail('event-not-found');
+    return snapshot({eventId:event.eventId,seasonId:event.seasonId,category:event.category,
+      version:event.version,rulesHash:event.rulesHash,opensAt:event.opensAt,closesAt:event.closesAt,
+      challengeUntil:event.challengeUntil,finalized:event.finalized,cancelled:event.cancelled,
+      winner:event.finalized?event.winner:null,winnerScore:event.finalized?event.winnerScore:null});
+   });
+  },
   async create({token,eventId,seasonId,category,version,rulesHash,opensAt,closesAt,challengeUntil}){
    const accountId=await actor(token),t=now();
    if(!id(eventId)||!id(seasonId)||!id(category)||!integer(version)||version<1||

@@ -1,0 +1,36 @@
+name: High Country HC-NEXT-7.3 Premium Entitlements Level 1
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/highcountry/competition/**'
+      - 'contracts/test/highcountry/unit/competition/**'
+      - '.github/workflows/highcountry-premium-next-7-3.yml'
+      - 'docs/highcountry/HC-NEXT-7.3-PREMIUM-EVENTS.md'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  premium-level-1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact qualification commit
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Premium and retained ordinary competition source tests
+        working-directory: contracts
+        env:
+          FOUNDRY_SRC: src/highcountry
+          FOUNDRY_TEST: test/highcountry
+          FOUNDRY_SCRIPT: script/highcountry
+        run: |
+          forge build src/highcountry/competition --sizes
+          forge lint src/highcountry/competition --severity high med low
+          forge test --match-path 'test/highcountry/unit/competition/*.t.sol' -vv

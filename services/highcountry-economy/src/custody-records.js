@@ -7,6 +7,7 @@ const reject=s=>{throw new Error('hc-custody:'+s)};
 const key=(owner,asset)=>JSON.stringify([owner,asset]);
 const clone=x=>structuredClone(x);
 export const CUSTODY_SCHEMA='highcountry-custody-v1';
+const listingUnitReservation=(listingId,unitId)=>'list_'+createHash('sha256').update(JSON.stringify([CUSTODY_SCHEMA,listingId,unitId])).digest('hex');
 export const CUSTODY_STATES=Object.freeze(['available','listed','placed','other_reserved','exited']);
 export function custodyUnitId(receiptId,index){
  if(!token(receiptId)||!Number.isSafeInteger(index)||index<0)reject('invalid-unit-source');
@@ -100,7 +101,7 @@ export function reserveListedUnits(s,{owner,assetId,listingId,quantity}){
  if([...s.custodyReservations.values()].some(v=>v.reservationId===reservationId))reject('reused-listing-reservation');
  const selected=eligible.slice(0,quantity);
  for(const u of selected){
-  const reservationId='list:'+listingId+':'+u.unitId;
+  const reservationId=listingUnitReservation(listingId,u.unitId);
   if(s.custodyReservations.has(u.unitId))reject('reservation-conflict');
   s.custodyUnits.set(u.unitId,{...u,state:'listed',reservationId,revision:u.revision+1});
   s.custodyReservations.set(u.unitId,{unitId:u.unitId,owner,assetId,kind:'listed',reservationId,listingId});
@@ -114,7 +115,7 @@ export function settleListedUnits(s,{listing,buyer=null,exit=false}){
  if(!listing||!token(listing.seller)||!token(listing.asset)||!token(listing.listingId)||!count(listing.quantity)||!Array.isArray(listing.unitIds)||listing.unitIds.length!==listing.quantity)reject('invalid-listing-binding');
  if(new Set(listing.unitIds).size!==listing.quantity)reject('duplicate-listing-unit');
  const units=listing.unitIds.map(uid=>{
-  const u=s.custodyUnits.get(uid),r=s.custodyReservations.get(uid),reservationId='list:'+listing.listingId+':'+uid;
+  const u=s.custodyUnits.get(uid),r=s.custodyReservations.get(uid),reservationId=listingUnitReservation(listing.listingId,uid);
   if(!u||u.owner!==listing.seller||u.assetId!==listing.asset||u.state!=='listed'||u.reservationId!==reservationId||!r||r.reservationId!==reservationId||r.listingId!==listing.listingId||r.owner!==listing.seller||r.kind!=='listed')reject('listing-custody-corrupt');
   return u;
  });

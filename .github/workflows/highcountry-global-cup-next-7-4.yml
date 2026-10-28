@@ -50,5 +50,5 @@ jobs:
       - name: Test strict finalized Cup projection and adversarial cases
         working-directory: services/420-gaming-player-profile
         run: |
-          node --test test/highcountry-global-cup.test.js test/highcountry-cup-integration.test.js
+          node --test test/highcountry-global-cup.test.js test/highcountry-cup-integration.test.js test/highcountry-cup-http.test.js
           node --test test/highcountry-cup-postgres.integration.mjs

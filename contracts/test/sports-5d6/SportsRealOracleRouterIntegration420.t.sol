@@ -41,7 +41,7 @@ contract SportsRealOracleRouterIntegration420Test is SportsFundedTickets420Test 
         _grant(CONTROL, vault.BIND_ORACLE(), vault.scope(market));
         _call(CONTROL, address(vault), abi.encodeCall(vault.bindOracle, (market, address(gate))));
         _call(CONTROL, address(vault),
-            abi.encodeCall(vault.bindRiskGroup, (market, keccak256("match"), 1000)));
+            abi.encodeCall(vault.bindRiskGroup, (market, vault.correlationGroupFor(market), 1000)));
         _grant(CONTROL, vault.BIND_ORACLE(), vault.scope(bytes32(0)));
         _call(CONTROL, address(vault), abi.encodeCall(vault.enableOracleOnlyFunding, ()));
         _grant(address(gate), vault.RESOLVE(), vault.scope(market));
@@ -88,7 +88,7 @@ contract SportsRealOracleRouterIntegration420Test is SportsFundedTickets420Test 
         _fails(CONTROL, address(vault), abi.encodeCall(vault.resolve, (id, true)));
         gate.settle(id, true);
         require(vault.credit(PLAYER, address(token)) == 925, "real router payout");
-        require(vault.riskGroupOutstanding(keccak256("match")) == 0, "exposure not closed");
+        require(vault.riskGroupOutstanding(vault.correlationGroupFor(market)) == 0, "exposure not closed");
     }
 
     function testRealRouterRejectsRevokedProvider() public {
@@ -116,7 +116,7 @@ contract SportsRealOracleRouterIntegration420Test is SportsFundedTickets420Test 
         vm.warp(markets.get(market).config.cutoff + 4 days);
         vault.refund(id);
         require(vault.credit(PLAYER, address(token)) == 500, "timeout refund");
-        require(vault.riskGroupOutstanding(keccak256("match")) == 0, "refund exposure");
+        require(vault.riskGroupOutstanding(vault.correlationGroupFor(market)) == 0, "refund exposure");
     }
 
     function testRealRouterConflictingPublishersReject() public {
@@ -149,7 +149,7 @@ contract SportsRealOracleRouterIntegration420Test is SportsFundedTickets420Test 
         bytes32 second = _newMarket(_marketConfig(spreadTemplate, -7));
         _grant(CONTROL, vault.BIND_ORACLE(), vault.scope(market));
         _grant(CONTROL, vault.BIND_ORACLE(), vault.scope(second));
-        bytes32 group = keccak256("correlated-fixture");
+        bytes32 group = vault.correlationGroupFor(market);
         _call(CONTROL, address(vault), abi.encodeCall(vault.bindRiskGroup, (market, group, 500)));
         _call(CONTROL, address(vault), abi.encodeCall(vault.bindRiskGroup, (second, group, 500)));
         _grant(CONTROL, acceptance.CONFIGURE(), acceptance.scope(second));

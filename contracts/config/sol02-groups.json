@@ -209,6 +209,81 @@
       "tests": [
         "test/"
       ]
+    },
+    "protocol-account-security": {
+      "source": [
+        "src/IRewardController.sol",
+        "src/IValidatorRegistry.sol"
+      ],
+      "tests": [
+        "test/SmartAccount",
+        "test/EntryPoint",
+        "test/Paymaster",
+        "test/GasSponsor",
+        "test/P256",
+        "test/Rip7212",
+        "test/Sponsorship",
+        "test/DomainNonce",
+        "test/ReplayProtection",
+        "test/EmergencyControls",
+        "test/VerifierRotation",
+        "test/MalformedProof",
+        "test/CapabilityRegistry",
+        "test/ConsensusSystem",
+        "test/Stake",
+        "test/SettlementRouter",
+        "test/RefundManager"
+      ]
+    },
+    "protocol-bridges-adapters": {
+      "source": [],
+      "tests": [
+        "test/BitcoinBridge",
+        "test/BnbBridge",
+        "test/CrossAdapter",
+        "test/CurecoinBridge",
+        "test/DobbscoinBridge",
+        "test/DogecoinBridge",
+        "test/EthereumBridge",
+        "test/EurcBridge",
+        "test/LinkBridge",
+        "test/LitecoinBridge",
+        "test/NativeAdapter",
+        "test/PirateChainBridge",
+        "test/PotcoinBridge",
+        "test/QcadBridge",
+        "test/RaySolanaBridge",
+        "test/SolanaBridge"
+      ]
+    },
+    "protocol-registries": {
+      "source": [],
+      "tests": [
+        "test/Catalog",
+        "test/Civic",
+        "test/Storage",
+        "test/InvoiceRegistry",
+        "test/Notifications",
+        "test/SearchGenesis",
+        "test/DevelopmentCompensation",
+        "test/CanonicalConstantProduct"
+      ]
+    },
+    "protocol-fantasy": {
+      "source": [],
+      "tests": [
+        "test/fantasy/",
+        "test/fantasy-oracle/",
+        "test/fantasy-approved/"
+      ]
+    },
+    "protocol-playback": {
+      "source": [],
+      "tests": [
+        "test/Playback",
+        "test/VideoPoker",
+        "test/PokerEvaluation"
+      ]
     }
   },
   "shared_roots": [

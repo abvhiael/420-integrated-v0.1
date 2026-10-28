@@ -4,6 +4,10 @@ on:
     paths:
       - 'services/420-gaming-player-profile/src/highcountry-global-cup.js'
       - 'services/420-gaming-player-profile/test/highcountry-global-cup.test.js'
+      - 'services/420-gaming-player-profile/src/highcountry-cup-*.js'
+      - 'services/420-gaming-player-profile/test/highcountry-cup-*.test.js'
+      - 'services/420-gaming-player-profile/src/highcountry-cloud-http.js'
+      - 'services/420-gaming-player-profile/migrations/011_highcountry_cup_achievements.up.sql'
       - '.github/workflows/highcountry-global-cup-next-7-4.yml'
   workflow_dispatch:
 permissions:
@@ -25,4 +29,4 @@ jobs:
           node-version: '22'
       - name: Test strict finalized Cup projection and adversarial cases
         working-directory: services/420-gaming-player-profile
-        run: node --test test/highcountry-global-cup.test.js
+        run: node --test test/highcountry-global-cup.test.js test/highcountry-cup-integration.test.js

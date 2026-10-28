@@ -1,0 +1,40 @@
+name: 420Bet Sports 5D.6 pretestnet hardening
+on:
+  push:
+    branches: ['bet/5d6-pretestnet-hardening']
+  pull_request:
+    paths:
+      - 'contracts/src/bet/sports/SportsFundedTickets420.sol'
+      - 'contracts/test/sports-5d6/**'
+      - 'contracts/config/bet/sports-5d6-pretestnet-manifest.v1.json'
+      - 'scripts/verify-sports-5d6-deployment.py'
+      - '.github/workflows/420bet-sports-5d6-hardening.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: sports-5d6-hardening-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  hardening:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.8.6
+      - name: Prelaunch manifest schema verification
+        run: python3 scripts/verify-sports-5d6-deployment.py --mode prelaunch
+      - name: Bounded Oracle hardening, real-router integration and inherited regression
+        working-directory: contracts
+        run: forge test --match-path 'test/sports-5d6/*.t.sol' -vvv
+      - name: Assert production gate rejects incomplete prelaunch manifest
+        shell: bash
+        run: |
+          if python3 scripts/verify-sports-5d6-deployment.py --mode production; then
+            echo "ERROR: incomplete testnet deployment manifest was approved"
+            exit 1
+          fi

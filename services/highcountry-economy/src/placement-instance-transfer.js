@@ -7,7 +7,7 @@ const assetKey=(p,a)=>JSON.stringify([p,a]);
 export class HighCountryStoredInstanceTransfer {
  constructor({store,authority}={}){
   if(typeof store?.transact!=='function'||typeof authority?.registeredPrincipal!=='function'
-    ||typeof authority?.verifyTransferConsent!=='function'||typeof authority?.verifyAtCommit!=='function')fail('trusted-dependencies-required');
+    ||typeof authority?.verifyTransferConsent!=='function'||typeof authority?.verifyTransferAtCommit!=='function')fail('trusted-dependencies-required');
   Object.assign(this,{store,authority});
  }
  async transfer(senderSession,recipientSession,{operation,instanceId,expectedRevision,consent}={}){
@@ -18,7 +18,7 @@ export class HighCountryStoredInstanceTransfer {
   return this.store.transact(s=>{
    custodyState(s);
    if(!(s.placementInstances instanceof Map)||!(s.placementOperations instanceof Map)||!(s.assetSources instanceof Map))fail('unprovisioned-state');
-   if(this.authority.verifyAtCommit({senderSession,recipientSession,from,to,state:s,consent,envelope})!==true)fail('revoked-or-expired-authority');
+   if(this.authority.verifyTransferAtCommit({senderSession,recipientSession,from,to,state:s,consent,envelope})!==true)fail('revoked-or-expired-authority');
    const key=assetKey(from,operation),oldOp=s.placementOperations.get(key);
    if(oldOp)fail('transfer-operation-replayed');
    const obj=s.placementInstances.get(instanceId);

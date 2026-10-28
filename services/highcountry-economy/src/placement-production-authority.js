@@ -16,11 +16,23 @@ export class HighCountryProductionPlacementAuthority {
   const p=await this.runtime.registeredPrincipal(session),claims=this.runtime.verifyToken(session);
   if(!id(parcelId)||this.runtime.issuers[claims.iss]?.operators?.[p]?.[this.operatorRole]!==true)fail('operator-denied');
  }
- async verifyWorldEvidence(evidence){return this.world.verifyEvidence(evidence)===true || await this.world.verifyEvidence(evidence)===true}
+ async verifyWorldEvidence(evidence){return await this.world.verifyEvidence(evidence)===true}
  async verifyWorldAuthorityEvent(event){return await this.world.verifyEvent(event)===true}
  async canPlaceOnParcel(principal,command){return await this.world.canPlace(principal,command)===true}
  async validateWorld(principal,command){return this.world.validate(principal,command)}
  async qualifiedGeometrySnapshot(principal,command){return this.world.geometrySnapshot(principal,command)}
+ // Transfer gate uses BOTH authenticated principals' current durable epochs.
+ verifyTransferAtCommit({senderSession,recipientSession,from,to,state,envelope,consent}){
+  if(!state)return false;
+  runtimeState(state);
+  for(const [session,p] of [[senderSession,from],[recipientSession,to]]){
+   let c;try{c=this.runtime.verifyToken(session)}catch{return false}
+   if(c.sub!==p||state.runtimeAccounts.get(p)?.issuer!==c.iss
+      ||(state.runtimeEpochs.get(p)??0)!==c.epoch)return false;
+  }
+  if(typeof this.world.verifyTransferAtCommit!=='function')return false;
+  return this.world.verifyTransferAtCommit({from,to,state,envelope,consent})===true;
+ }
  // Commit checks MUST be synchronous and read the locked durable runtime epoch,
  // registration state, world revision and independent authorization snapshot.
  verifyAtCommit({principal,command,authoritative,state,session,world,...rest}){

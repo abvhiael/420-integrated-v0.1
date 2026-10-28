@@ -7,7 +7,7 @@ function setup(){
  const instance={instanceId:'item',assetId:asset,ownerPrincipal:'alice',state:'stored',revision:2,updatedAt:2,history:[]};
  let state={assets:new Map([[key('alice'),{available:1,reserved:0}]]),custodyUnits:new Map([[id,{schemaVersion:CUSTODY_SCHEMA,unitId:id,receiptId:'receipt',unitIndex:0,owner:'alice',assetId:asset,state:'available',reservationId:null,revision:3}]]),custodyReceipts:new Map([['receipt',{quantity:1,owner:'alice',assetId:asset}]]),custodyReservations:new Map(),importedAssets:new Set(['receipt']),assetSources:new Map([[key('alice'),'receipt']]),placementInstances:new Map([['item',instance]]),placementOperations:new Map([[JSON.stringify(['alice','place']),{result:{instance:{instanceId:'item'},custody:{unitId:id}}}]])};
  const store={async transact(fn){const s=structuredClone(state),result=fn(s);state=s;return result;}};
- const authority={registeredPrincipal:async x=>x,verifyTransferConsent:async({consent})=>consent==='both-signed',verifyAtCommit:({state})=>state.placementAuthorityRevisions?.get('parcel')?.revoked!==true};
+ const authority={registeredPrincipal:async x=>x,verifyTransferConsent:async({consent})=>consent==='both-signed',verifyTransferAtCommit:({state})=>state.placementAuthorityRevisions?.get('parcel')?.revoked!==true};
  return {service:new HighCountryStoredInstanceTransfer({store,authority}),get:()=>state};
 }
 const req={operation:'transfer-1',instanceId:'item',expectedRevision:2,consent:'both-signed'};

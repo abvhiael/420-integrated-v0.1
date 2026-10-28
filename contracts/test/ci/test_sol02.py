@@ -55,6 +55,24 @@ class QualificationTests(unittest.TestCase):
         self.assertTrue(all(p in inventory for p in groups["protocol-defi"]))
         self.assertTrue(groups["protocol-misc"], "unknown primary owners must remain covered")
 
+    def test_import_closure_bounded_primary_partitions(self):
+        original, owners = planner.inventory()
+        bounded = planner.bounded_groups(owners)
+        flattened = [p for targets in bounded.values() for p in targets]
+        self.assertEqual(sorted(flattened), original)
+        self.assertEqual(len(flattened), len(set(flattened)))
+        for name, targets in bounded.items():
+            with self.subTest(group=name):
+                self.assertLessEqual(len(targets), planner.MAX_PRIMARY_TARGETS)
+                closure = set().union(*(planner.dependency_closure(p) for p in targets))
+                self.assertLessEqual(len(closure), planner.MAX_IMPORT_GRAPH_FILES)
+
+    def test_import_parser_resolves_actual_local_sources(self):
+        path = next(p for p in planner.inventory()[0] if p.startswith("src/") and planner.direct_imports(p))
+        closure = planner.dependency_closure(path)
+        self.assertIn(path, closure)
+        self.assertTrue(all((planner.ROOT / p).is_file() for p in closure))
+
     def test_shared_security_change_expands_scope(self):
         inventory, groups = planner.inventory()
         selected=planner.choose(inventory,groups,["contracts/src/interfaces/IRegistry.sol"],False)

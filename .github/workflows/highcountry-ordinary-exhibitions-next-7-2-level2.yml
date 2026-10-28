@@ -1,0 +1,82 @@
+name: High Country HC-NEXT-7.2-7.3 Competition Level 2
+on:
+  pull_request:
+    paths:
+      - 'services/420-gaming-player-profile/**'
+      - 'apps/highcountry-web/src/account.js'
+      - 'apps/highcountry-web/src/cloud.js'
+      - 'contracts/src/highcountry/competition/**'
+      - 'contracts/test/highcountry/unit/competition/**'
+      - '.github/workflows/highcountry-ordinary-exhibitions-next-7-2-level2.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  account-issuer-postgres:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: test-only
+          POSTGRES_DB: hc_exhibition_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d hc_exhibition_ci"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      HIGHCOUNTRY_EXHIBITIONS_POSTGRES_TEST_URL: postgresql://postgres:test-only@127.0.0.1:5432/hc_exhibition_ci
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact SHA
+        env:
+          SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install service dependencies
+        working-directory: services/420-gaming-player-profile
+        run: npm ci --ignore-scripts
+      - name: Test account authorization, HTTP spoofing, concurrency and durable PostgreSQL
+        working-directory: services/420-gaming-player-profile
+        run: |
+          node --test test/highcountry-ordinary-exhibitions.test.js test/highcountry-ordinary-http.test.js test/highcountry-premium-authorization.test.js test/highcountry-premium-rpc.test.js test/highcountry-premium-http.test.js test/wallet-link.test.js
+          node --test test/highcountry-ordinary-postgres.integration.mjs
+  canonical-competition:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Qualify ordinary and premium contract gate with retained scoring tests
+        working-directory: contracts
+        env:
+          FOUNDRY_SRC: src/highcountry
+          FOUNDRY_TEST: test/highcountry
+          FOUNDRY_SCRIPT: script/highcountry
+        run: |
+          forge test --match-path test/highcountry/unit/competition/HCNext73Premium.t.sol -vv
+          forge test --match-path test/highcountry/unit/competition/R0412Competition.t.sol -vv
+  summary:
+    name: HC-NEXT-7.2-7.3 Competition Level 2 Summary
+    if: always()
+    needs: [account-issuer-postgres, canonical-competition]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Exact-SHA scoped qualification gates
+        env:
+          ACCOUNT: ${{ needs.account-issuer-postgres.result }}
+          CONTRACT: ${{ needs.canonical-competition.result }}
+        run: |
+          test "$ACCOUNT" = success
+          test "$CONTRACT" = success

@@ -1,0 +1,165 @@
+{
+  "schema": "HC.ART.PORT_ALDER.OLD_TOWN.WAREHOUSE_ROW.V1",
+  "type": "UNIQUE_PROPERTY_BOUND_EXTERIORS",
+  "status": "ARTWORK_EXPORTED_PENDING_GAMEPLAY_AND_PLACEMENT_REVIEW",
+  "sourceMaster": "Waterfront Warehouse Pier Collection(1).png",
+  "count": 5,
+  "assetPolicy": "Unique existing properties offered through realtor only; never standalone marketplace architecture.",
+  "approvedCommercialLotFootprintTiles": [
+    32,
+    32
+  ],
+  "interiorGridStatus": "PROPOSAL_NOT_QUALIFIED",
+  "files": [
+    {
+      "id": "WH-01",
+      "name": "The Baked Bouy Boatworks",
+      "filename": "HC-EC-S01-D07-wh-01-the-baked-bouy-boatworks-exterior.png",
+      "repositoryPath": "apps/highcountry-web/public/assets/highcountry/old-town/warehouse-row-unique/HC-EC-S01-D07-wh-01-the-baked-bouy-boatworks-exterior.png",
+      "canvasPixels": [
+        1024,
+        1024
+      ],
+      "lotFootprintTiles": [
+        32,
+        32
+      ],
+      "interiorGridProposal": [
+        8,
+        6
+      ],
+      "sha256": "6d6a30dd5b79b5cfa0b7f329d104473ac0582e2e8f531fdf18ad9d364e76c47c",
+      "bytes": 915491,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sourceBoundsPixels": [
+        148,
+        5,
+        891,
+        455
+      ]
+    },
+    {
+      "id": "WH-02",
+      "name": "Hook, Line & Sativa",
+      "filename": "HC-EC-S01-D07-wh-02-hook-line-and-sativa-exterior.png",
+      "repositoryPath": "apps/highcountry-web/public/assets/highcountry/old-town/warehouse-row-unique/HC-EC-S01-D07-wh-02-hook-line-and-sativa-exterior.png",
+      "canvasPixels": [
+        1024,
+        1024
+      ],
+      "lotFootprintTiles": [
+        32,
+        32
+      ],
+      "interiorGridProposal": [
+        8,
+        6
+      ],
+      "sha256": "9534bc445243d2cc994fa346d33b6ed628e97c332bc557d3db8c1347998d4529",
+      "bytes": 995764,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sourceBoundsPixels": [
+        923,
+        13,
+        1622,
+        463
+      ]
+    },
+    {
+      "id": "WH-03",
+      "name": "Arctic Haze Refrigeration",
+      "filename": "HC-EC-S01-D07-wh-03-arctic-haze-refrigeration-exterior.png",
+      "repositoryPath": "apps/highcountry-web/public/assets/highcountry/old-town/warehouse-row-unique/HC-EC-S01-D07-wh-03-arctic-haze-refrigeration-exterior.png",
+      "canvasPixels": [
+        1024,
+        1024
+      ],
+      "lotFootprintTiles": [
+        32,
+        32
+      ],
+      "interiorGridProposal": [
+        8,
+        6
+      ],
+      "sha256": "5865e286a317c20703d201d5f2f0975e4d1010213afd76b06e2d0e5453d181ca",
+      "bytes": 1095677,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sourceBoundsPixels": [
+        2,
+        422,
+        605,
+        869
+      ]
+    },
+    {
+      "id": "WH-04",
+      "name": "The Green Dragon Distillery",
+      "filename": "HC-EC-S01-D07-wh-04-the-green-dragon-distillery-exterior.png",
+      "repositoryPath": "apps/highcountry-web/public/assets/highcountry/old-town/warehouse-row-unique/HC-EC-S01-D07-wh-04-the-green-dragon-distillery-exterior.png",
+      "canvasPixels": [
+        1024,
+        1024
+      ],
+      "lotFootprintTiles": [
+        32,
+        32
+      ],
+      "interiorGridProposal": [
+        8,
+        6
+      ],
+      "sha256": "dc53c459bad05c6a05e08c019f325a185e03fe1a770326e7fe76daf2686c03c0",
+      "bytes": 1069767,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sourceBoundsPixels": [
+        600,
+        428,
+        1205,
+        887
+      ]
+    },
+    {
+      "id": "WH-05",
+      "name": "Blunt Force Shipping",
+      "filename": "HC-EC-S01-D07-wh-05-blunt-force-shipping-exterior.png",
+      "repositoryPath": "apps/highcountry-web/public/assets/highcountry/old-town/warehouse-row-unique/HC-EC-S01-D07-wh-05-blunt-force-shipping-exterior.png",
+      "canvasPixels": [
+        1024,
+        1024
+      ],
+      "lotFootprintTiles": [
+        32,
+        32
+      ],
+      "interiorGridProposal": [
+        8,
+        6
+      ],
+      "sha256": "1ed748911b116dfc62752822fde922c92639be98d576a7a955b85c7adae82781",
+      "bytes": 1154396,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sourceBoundsPixels": [
+        1204,
+        432,
+        1774,
+        883
+      ]
+    }
+  ]
+}

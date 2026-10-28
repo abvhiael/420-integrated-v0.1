@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import pg from 'pg';
 import {PostgresBudsStore} from '../src/postgres-store.js';
 import {HighCountryPlacementAuthorityRegistry} from '../src/placement-authority-registry.js';
+import {HighCountryStoredInstanceTransfer} from '../src/placement-instance-transfer.js';
 import {HighCountryPlacementTransactions} from '../src/placement-transactions.js';
 import {CONTRACT_VERSION} from '../src/placement-contract.js';
 const pool=new pg.Pool({connectionString:process.env.HC_PLACE_TEST_DATABASE_URL,max:5});
@@ -35,5 +36,27 @@ test('03-C real PostgreSQL: operator revocation and monotonic reprovision block 
  const row=(await pool.query("SELECT state FROM highcountry_buds_state WHERE namespace='hc-place-03-a'")).rows[0].state;
  assert.equal(row.assets[0][1].reserved,1);
  assert.equal(row.placementAuthorityRevisions[0][1].revision,3);
+});
+test('03-C PostgreSQL stored instance transfer has atomic exact-unit ownership and replay protections',async()=>{
+ await reset();
+ const service=engine();const placed=await service.execute(owner,place('a','create-a'));
+ await service.execute(owner,{operation:'remove-a',action:'remove',instanceId:'a',assetId:asset,expectedRevision:1,expectedSceneRevision:1});
+ const lineage=JSON.stringify([owner,asset]);
+ await pool.query("UPDATE highcountry_buds_state SET state=jsonb_set(state,'{assetSources}', $2::jsonb) WHERE namespace=$1",['hc-place-03-a',JSON.stringify([[lineage,'fixture-receipt']])]);
+ const transferAuthority={registeredPrincipal:async x=>x,
+  verifyTransferConsent:async ({consent})=>consent==='both-signed',
+  verifyTransferAtCommit:({state})=>state.placementAuthorityRevisions.get('parcel-a')?.revoked!==true};
+ const xfer=new HighCountryStoredInstanceTransfer({store:new PostgresBudsStore(pool,'hc-place-03-a'),authority:transferAuthority});
+ const command={operation:'transfer-a',instanceId:'a',expectedRevision:2,consent:'both-signed'};
+ await assert.rejects(xfer.transfer('alice','bob',{...command,consent:'forged'}),/consent-denied/);
+ const out=await xfer.transfer('alice','bob',command);
+ assert.equal(out.custodyUnitId,placed.custody.unitId);
+ assert.equal(out.instance.ownerPrincipal,'bob');
+ await assert.rejects(xfer.transfer('alice','bob',command),/transfer-operation-replayed/);
+ const db=(await pool.query("SELECT state FROM highcountry_buds_state WHERE namespace='hc-place-03-a'")).rows[0].state;
+ assert.equal(db.custodyUnits.find(([id])=>id===out.custodyUnitId)[1].owner,'bob');
+ assert.equal(db.assets.find(([key])=>key===JSON.stringify(['bob',asset]))[1].available,1);
+ assert.equal(db.assets.find(([key])=>key===JSON.stringify(['alice',asset]))[1].available,1);
+ assert.equal(db.placementInstances.find(([id])=>id==='a')[1].ownerPrincipal,'bob');
 });
 test.after(async()=>pool.end());

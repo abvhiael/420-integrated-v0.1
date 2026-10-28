@@ -21,7 +21,7 @@ export class HighCountryPlacementTransactions {
  }
  async execute(session,command){
   const who=await this.auth.registeredPrincipal(session);
-  if(!id(who)||!command||!id(command.operation)||!['place','move','rotate','remove','attach','detach'].includes(command.action)||!id(command.instanceId)||!valid(command.expectedRevision)||!valid(command.expectedSceneRevision))fail('invalid-request');
+  if(!id(who)||!command||!id(command.operation)||!['place','move','rotate','remove','restore','attach','detach'].includes(command.action)||!id(command.instanceId)||!valid(command.expectedRevision)||!valid(command.expectedSceneRevision))fail('invalid-request');
   // Authenticated admission and trusted geometry obtained before database transaction.
   const permitted=await this.auth.canPlaceOnParcel(who,command);
   if(permitted!==true)fail('parcel-authority-denied');
@@ -63,11 +63,13 @@ export class HighCountryPlacementTransactions {
    if(old&&old.ownerPrincipal!==who)fail('owner-denied');
    if(old&&old.revision!==command.expectedRevision)fail('stale-instance');
    if(creating&&command.expectedRevision!==0)fail('expected-zero-revision');
-   if(command.action!=='place'&&old.state!=='placed')fail('instance-not-placed');
+   if(command.action==='restore'?old.state!=='stored':command.action!=='place'&&old.state!=='placed')fail('invalid-instance-state');
+   if(old&&command.record!==undefined)fail('existing-instance-record-override');
    const source=old&&sceneKey(old);
    const next={...old,...command.record};
    if(!creating){
     if(command.action==='remove')next.state='stored';
+    if(command.action==='restore')next.state='placed';
     if(command.action==='rotate')next.orientation=command.orientation;
     if(command.action==='move'){next.gridX=command.gridX;next.gridY=command.gridY;}
     if(command.action==='attach'){next.surface=command.surface;next.layer=command.layer;next.parentInstanceId=command.parentInstanceId;next.slotId=command.slotId;}
@@ -98,6 +100,14 @@ export class HighCountryPlacementTransactions {
    // Unsourced aggregate balances may not authorize new placement.
    let custody=null;
    if(creating)custody=reservePlacementUnit(s,{owner:who,assetId:checked.assetId,instanceId:checked.instanceId});
+   if(command.action==='restore'){
+    // A stored instance may only reclaim its ORIGINAL exact custody unit. A later
+    // sale or reservation of that unit invalidates restoration, even if fungible
+    // inventory of the same asset remains available.
+    const bindings=[...s.placementOperations.values()].filter(v=>v.result?.instance?.instanceId===checked.instanceId&&v.result?.custody?.unitId).map(v=>v.result.custody.unitId);
+    if(!bindings.length||new Set(bindings).size!==1)fail('missing-or-ambiguous-instance-custody');
+    custody=reservePlacementUnit(s,{owner:who,assetId:checked.assetId,instanceId:checked.instanceId,unitId:bindings[0]});
+   }
    if(command.action==='remove')custody=releasePlacementUnit(s,{owner:who,assetId:checked.assetId,instanceId:checked.instanceId});
    s.placementInstances.set(checked.instanceId,checked);
    s.placementScenes.set(target,currentScene+1);

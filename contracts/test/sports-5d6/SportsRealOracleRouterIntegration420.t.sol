@@ -172,7 +172,8 @@ contract SportsRealOracleRouterIntegration420Test is SportsFundedTickets420Test 
         require(vault.riskGroupOutstanding(group) == firstProfit, "first market exposure lost");
         SportsBetAcceptance420.Offer memory secondOffer = _offer(secondStake);
         secondOffer.marketId = second;
-        secondOffer.selection = markets.selections(second)[0];
+        bytes32[] memory secondSelections = markets.selections(second);
+        secondOffer.selection = secondSelections[0];
         (SportsOddsIngestion420.Latest memory latest,) = odds.current(second);
         secondOffer.quoteDigest = latest.digest;
         secondOffer.nonce = keccak256("second-market-nonce");

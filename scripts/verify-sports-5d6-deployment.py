@@ -130,6 +130,37 @@ def check(manifest, production=False, rpc=None):
                                          m["feed_id"], "--rpc-url", rpc), 0)
                     require(heartbeat <= policy["max_age_seconds"] and heartbeat > 0,
                             f"live: market[{i}] heartbeat too permissive", errors)
+                    expected_mode = cast("keccak",
+                        "0x" + b"420/ORACLE/AGGREGATION/QUORUM_EQUAL/V1".hex())
+                    expected_type = cast("keccak",
+                        "0x" + b"420/ORACLE/FEED/OUTCOME/V1".hex())
+                    mode = cast("call", feeds, "aggregationModeOf(bytes32)(bytes32)",
+                                m["feed_id"], "--rpc-url", rpc)
+                    kind = cast("call", feeds, "feedTypeOf(bytes32)(bytes32)",
+                                m["feed_id"], "--rpc-url", rpc)
+                    require(mode.lower() == expected_mode.lower() and
+                            kind.lower() == expected_type.lower(),
+                            f"live: market[{i}] oracle result feed type/mode", errors)
+                    active_sources = 0
+                    total_sources = int(cast("call", feeds, "sourceCount(bytes32)(uint256)",
+                                             m["feed_id"], "--rpc-url", rpc).split()[0], 0)
+                    for j in range(min(total_sources, 16)):
+                        provider_id = cast("call", feeds, "sourceAt(bytes32,uint256)(bytes32)",
+                                           m["feed_id"], str(j), "--rpc-url", rpc)
+                        active = cast("call", feeds, "sourceActive(bytes32,bytes32)(bool)",
+                                      m["feed_id"], provider_id, "--rpc-url", rpc)
+                        active_sources += active.lower().startswith("true")
+                    require(active_sources >= policy["minimum_sources"],
+                            f"live: market[{i}] active independent provider IDs", errors)
+                    risk_address = artifacts["risk_policy"]["address"]
+                    risk_values = cast("call", risk_address,
+                        "policy(bytes32)(uint16,uint16,bool,bool)", m["feed_id"],
+                        "--rpc-url", rpc).split()
+                    require(len(risk_values) >= 4 and
+                            int(risk_values[0], 0) >= policy["minimum_confidence_bps"] and
+                            risk_values[2].lower() == "false" and
+                            risk_values[3].lower() == "true",
+                            f"live: market[{i}] risk policy not configured or halted", errors)
             except (RuntimeError, subprocess.TimeoutExpired, FileNotFoundError) as e:
                 errors.append(f"live: binding check: {e}")
     if production and not rpc:

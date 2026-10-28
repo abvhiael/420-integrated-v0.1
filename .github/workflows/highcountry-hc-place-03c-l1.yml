@@ -3,6 +3,7 @@ on:
   pull_request:
     paths:
       - 'services/highcountry-economy/src/placement-transactions.js'
+      - 'services/highcountry-economy/src/runtime-service.js'
       - 'services/highcountry-economy/src/custody-records.js'
       - 'services/highcountry-economy/src/placement-authority-registry.js'
       - 'services/highcountry-economy/src/placement-production-authority.js'
@@ -27,4 +28,5 @@ jobs:
       - run: node --check services/highcountry-economy/src/placement-transactions.js
       - run: node --check services/highcountry-economy/src/placement-instance-transfer.js
       - run: node --check services/highcountry-economy/src/placement-production-authority.js
+      - run: node --check services/highcountry-economy/src/runtime-service.js
       - run: node --test services/highcountry-economy/test/placement-authority-registry.test.mjs services/highcountry-economy/test/placement-transactions.test.mjs services/highcountry-economy/test/placement-instance-transfer.test.mjs services/highcountry-economy/test/placement-production-authority.test.mjs

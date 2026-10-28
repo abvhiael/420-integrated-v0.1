@@ -33,12 +33,12 @@ def check(manifest, production=False, rpc=None):
     policy = manifest.get("policy", {})
     require(policy.get("oracle_only_funding") is True, "oracle-only fuse required", errors)
     require(policy.get("aggregation_mode") == "AGGREGATION_QUORUM_EQUAL", "result quorum mode", errors)
-    require(isinstance(policy.get("minimum_sources"), int) and
+    require(type(policy.get("minimum_sources")) is int and
         2 <= policy["minimum_sources"] <= 16, "minimum oracle quorum 2..16", errors)
-    require(isinstance(policy.get("minimum_confidence_bps"), int) and
-        1 <= policy["minimum_confidence_bps"] <= 10000, "confidence basis points", errors)
-    require(isinstance(policy.get("max_age_seconds"), int) and
-        0 < policy["max_age_seconds"] <= 86400, "bounded max-age", errors)
+    require(type(policy.get("minimum_confidence_bps")) is int and
+        9000 <= policy["minimum_confidence_bps"] <= 10000, "confidence basis points", errors)
+    require(type(policy.get("max_age_seconds")) is int and
+        0 < policy["max_age_seconds"] <= 7200, "bounded max-age", errors)
     require(policy.get("risk_policy_halted") is False, "halted policy", errors)
 
     artifacts = manifest.get("artifacts", {})
@@ -97,6 +97,12 @@ def check(manifest, production=False, rpc=None):
                 require(fuse.lower().startswith("true"), "live: oracle-only fuse OFF", errors)
                 linked = cast("call", gate, "vault()(address)", "--rpc-url", rpc)
                 require(linked.lower() == vault.lower(), "live: gate points to wrong vault", errors)
+                gate_quorum = int(cast("call", gate, "minAgreeingSources()(uint16)", "--rpc-url", rpc).split()[0], 0)
+                gate_confidence = int(cast("call", gate, "minConfidenceBps()(uint16)", "--rpc-url", rpc).split()[0], 0)
+                gate_age = int(cast("call", gate, "maxAge()(uint64)", "--rpc-url", rpc).split()[0], 0)
+                require(gate_quorum >= policy["minimum_sources"], "live: weak gate quorum", errors)
+                require(gate_confidence >= policy["minimum_confidence_bps"], "live: weak gate confidence", errors)
+                require(0 < gate_age <= policy["max_age_seconds"], "live: weak gate freshness", errors)
                 oracle = artifacts["oracle_router"]["address"]
                 certification = artifacts["certification"]["address"]
                 require(cast("call", gate, "oracle()(address)", "--rpc-url", rpc).lower() ==

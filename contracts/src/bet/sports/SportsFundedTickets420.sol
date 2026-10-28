@@ -249,7 +249,14 @@ contract SportsFundedTickets420 is SportsAuthority420 {
             || eventStatus == SportsTypes420.EventStatus.ABANDONED
             || eventStatus == SportsTypes420.EventStatus.POSTPONED) revert State();
         SportsOutcomeCertification420.Result memory r = certification.result(t.marketId);
-        if (r.status != SportsOutcomeCertification420.Status.FINAL || won != (r.selection == t.selection)) revert State();
+        if (r.status != SportsOutcomeCertification420.Status.FINAL) revert State();
+        // An unregistered result selection cannot be treated as a losing bet.
+        bytes32[] memory eligibleSelections = markets.selections(t.marketId);
+        bool knownSelection;
+        for (uint256 i; i < eligibleSelections.length; ++i) {
+            if (eligibleSelections[i] == r.selection) { knownSelection = true; break; }
+        }
+        if (!knownSelection || won != (r.selection == t.selection)) revert State();
         _close(id, won ? TicketState.WON : TicketState.LOST, won ? t.gross : 0, r.evidence);
     }
 

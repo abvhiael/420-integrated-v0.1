@@ -57,7 +57,7 @@ export function createHighCountryCupRpc420({endpoint,chainId,cupAddress,engineAd
   const resultCommitment=word(await read(cupAddress,selectors.resultCommitment,[cupId],block),0);
   const resultsCurrent=bool(word(await read(cupAddress,selectors.resultsCurrent,[cupId],block),0));
   const rounds=[];
-  for(const eventId of [semiA,semiB,finalEvent]){
+  for(const [roundIndex,eventId] of [semiA,semiB,finalEvent].entries()){
    const raw=await read(engineAddress,selectors.events,[eventId],block);
    // CompetitionEngine Event getter: seasonId, templateId, organizer, opensAt, closesAt, challengeUntil, entrants, closed, cancelled.
    if(addr(word(raw,2))!==organizer||!bool(word(raw,7))||bool(word(raw,8)))fail('cup-rpc-event-invalid');
@@ -68,7 +68,7 @@ export function createHighCountryCupRpc420({endpoint,chainId,cupAddress,engineAd
    const winner=addr(word(await read(engineAddress,selectors.winners,[eventId],block),0));
    const winnerScore=number(word(await read(engineAddress,selectors.winnerScore,[eventId],block),0));
    const current=await Promise.all(entrants.map(async player=>bool(word(await read(engineAddress,selectors.resultIsCurrent,[eventId,uint(BigInt(player))],block),0))));
-   rounds.push({eventId,finalized:true,current:current.every(Boolean),entrants,winner,winnerScore});
+   // R04.13 checks semifinal winners and both final entrants; a losing semi entrant\n   // may have been validly rejected without invalidating the winning advancement.\n   const accepted=roundIndex===2?current.every(Boolean):current[entrants.findIndex(a=>a===winner)]===true;\n   rounds.push({eventId,finalized:true,current:accepted,entrants,winner,winnerScore});
   }
   const issued=bool(word(await read(cupAddress,selectors.isIssued,[cupId,uint(BigInt(champion)),scope],block),0));
   const again=await call('eth_getBlockByHash',[block,false]);

@@ -27,7 +27,9 @@ contract SportsFundedTickets420 is SportsAuthority420 {
     // capability alone cannot settle an Oracle-protected ticket.
     bytes32 public constant BIND_ORACLE = keccak256("BET_SPORT_TICKET_BIND_ORACLE");
     mapping(bytes32 => address) public marketOracleGate;
+    bool public oracleOnlyFunding;
     event MarketOracleBound(bytes32 indexed marketId, address indexed gate);
+    event OracleOnlyFundingEnabled();
 
     uint256 private entered;
 
@@ -126,7 +128,7 @@ contract SportsFundedTickets420 is SportsAuthority420 {
     /// (not that value) proves stake custody. The player must approve this vault.
     function fund(SportsBetAcceptance420.Offer calldata offer) external guarded returns (bytes32 id) {
         (uint256 gross, uint256 profit, bool ok) = admission.preview(offer, msg.sender);
-        if (!ok) revert State();
+        if (!ok || (oracleOnlyFunding && marketOracleGate[offer.marketId] == address(0))) revert State();
         bytes32 intent = keccak256(abi.encode(msg.sender, offer.nonce));
         if (consumedIntent[intent]) revert Conflict();
         SportsBetAcceptance420.Risk memory r = admission.getRisk(offer.marketId);
@@ -156,6 +158,14 @@ contract SportsFundedTickets420 is SportsAuthority420 {
     /// @notice The independently approved outcome resolver must hold market-scoped capability.
     /// No raw source reports are independently validated by this contract.
     /// @dev The gate must be wired to this exact vault; binding cannot be replaced.
+    /// @notice Irreversible funding fuse; must be activated prior to launch.
+    function enableOracleOnlyFunding() external {
+        _auth(BIND_ORACLE, bytes32(0));
+        if (oracleOnlyFunding) revert State();
+        oracleOnlyFunding = true;
+        emit OracleOnlyFundingEnabled();
+    }
+
     function bindOracle(bytes32 marketId, address gate) external {
         _auth(BIND_ORACLE, marketId);
         if (gate.code.length == 0 || marketOracleGate[marketId] != address(0)) revert State();

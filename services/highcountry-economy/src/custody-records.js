@@ -100,6 +100,7 @@ export function reserveListedUnits(s,{owner,assetId,listingId,quantity}){
  if([...s.custodyReservations.values()].some(v=>v.reservationId===reservationId))reject('reused-listing-reservation');
  const selected=eligible.slice(0,quantity);
  for(const u of selected){
+  const reservationId='list:'+listingId+':'+u.unitId;
   if(s.custodyReservations.has(u.unitId))reject('reservation-conflict');
   s.custodyUnits.set(u.unitId,{...u,state:'listed',reservationId,revision:u.revision+1});
   s.custodyReservations.set(u.unitId,{unitId:u.unitId,owner,assetId,kind:'listed',reservationId,listingId});
@@ -111,10 +112,9 @@ export function reserveListedUnits(s,{owner,assetId,listingId,quantity}){
 export function settleListedUnits(s,{listing,buyer=null,exit=false}){
  custodyState(s);
  if(!listing||!token(listing.seller)||!token(listing.asset)||!token(listing.listingId)||!count(listing.quantity)||!Array.isArray(listing.unitIds)||listing.unitIds.length!==listing.quantity)reject('invalid-listing-binding');
- const reservationId='list:'+listing.listingId;
  if(new Set(listing.unitIds).size!==listing.quantity)reject('duplicate-listing-unit');
  const units=listing.unitIds.map(uid=>{
-  const u=s.custodyUnits.get(uid),r=s.custodyReservations.get(uid);
+  const u=s.custodyUnits.get(uid),r=s.custodyReservations.get(uid),reservationId='list:'+listing.listingId+':'+uid;
   if(!u||u.owner!==listing.seller||u.assetId!==listing.asset||u.state!=='listed'||u.reservationId!==reservationId||!r||r.reservationId!==reservationId||r.listingId!==listing.listingId||r.owner!==listing.seller||r.kind!=='listed')reject('listing-custody-corrupt');
   return u;
  });

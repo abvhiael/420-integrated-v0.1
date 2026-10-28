@@ -1,6 +1,6 @@
 # HC-NEXT-7.4 — Global 420 Cup integration ledger
 
-**Status: IN PROGRESS — NOT QUALIFIED.** Canonical owner: HC-NEXT-7.4; existing R04.13 `Global420Cup` remains the on-chain Cup result and scoped issuance authority, with R04.12 `CompetitionEngine` retaining canonical harvest scoring and result finality. Do not create a conflicting local champion or fabricate chain grants.
+**Status: IN PROGRESS — NOT QUALIFIED (expanded service/RPC implementation; pending scoped exact-SHA qualification).** Canonical owner: HC-NEXT-7.4; existing R04.13 `Global420Cup` remains the on-chain Cup result and scoped issuance authority, with R04.12 `CompetitionEngine` retaining canonical harvest scoring and result finality. Do not create a conflicting local champion or fabricate chain grants.
 
 ## Canonical boundaries
 
@@ -15,6 +15,13 @@
 `services/420-gaming-player-profile/src/highcountry-global-cup.js` is an optional read-only projection consuming a separately configured canonical finalized Cup source. It validates exact chain/code hash, block hash, current result status, round/event identities, winners and finalist consistency and suppresses unissued/revoked prestige. It performs no issuance, transfer, prize payout, or authoritative local result mutation.
 
 `test/highcountry-global-cup.test.js` exercises the projection using an injected fixture. This is **unit evidence**, not proof of actual EVM verification. The scoped workflow is `.github/workflows/highcountry-global-cup-next-7-4.yml`.
+
+## Additional implementation committed after initial slice
+
+- `highcountry-cup-rpc.js` performs real JSON-RPC chain-ID, independently pinned deployed bytecode, finalized/canonical-block witness, and EIP-1898 state reads for the exact Cup/CompetitionEngine. Required selectors and expected runtime bytecode are deployment inputs; no unverified deployed address is invented. It rechecks block canonicality after reads and rejects mismatched authority.
+- `highcountry-cloud-http.js` exposes optional authenticated POST `/highcountry/cup/standings` with the exact `cupId` field, issuer verification, game scope and final session recheck. No client-submitted champion, address or entitlement is accepted.
+- `highcountry-cup-achievements.js` provides serializable PostgreSQL upsert and append-only historical observations. Persisted snapshots are never independently trusted: `current` rechecks finalized chain state and returns `current:false` if the durable view is stale. `migrations/011_highcountry_cup_achievements.up.sql` and migrator-role-only `highcountry-cup-migrations.js` define an additive, least-privilege schema and drift checks. Migration/worker deployment is explicitly operator-owned; HTTP cannot execute DDL.
+- `highcountry-cup-integration.test.js` adds RPC adversarial and transaction/reverification scenarios. These injected RPC and pool tests are not live EVM or real PostgreSQL acceptance; do not claim production qualification from fixture results.
 
 ## Missing pre-testnet implementation — cannot defer
 

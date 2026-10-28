@@ -1,0 +1,29 @@
+name: 420Bet Sports 5D.6 oracle outcomes
+on:
+  push:
+    branches: ['bet/5d6-oracle-outcomes']
+  pull_request:
+    paths:
+      - 'contracts/src/bet/sports/**'
+      - 'contracts/test/sports-5d6/**'
+      - '.github/workflows/420bet-sports-5d6.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: sports-5d6-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  oracle-outcomes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.8.6
+      - name: Oracle outcome and inherited funded-ticket qualification
+        working-directory: contracts
+        run: forge test --match-contract SportsOracleOutcomeGate420Test -vvv

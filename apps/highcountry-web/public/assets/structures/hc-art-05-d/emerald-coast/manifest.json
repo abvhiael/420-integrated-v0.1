@@ -1,0 +1,201 @@
+{
+  "collection": "HC-ART-05-D",
+  "region": "emerald-coast",
+  "source_master": "HC-ART-05-D-Emerald-Coast-12-transparent-separated-master.png",
+  "tile_source_pixels": 320,
+  "directory": "apps/highcountry-web/public/assets/structures/hc-art-05-d/emerald-coast/",
+  "assets": [
+    {
+      "id": 1,
+      "name": "Coastal Cedar Barn",
+      "canonical_filename": "hc-structure-coastal-cedar-barn.png",
+      "footprint_tiles": [
+        6,
+        5
+      ],
+      "canvas_px": [
+        1920,
+        1600
+      ],
+      "repository_path": "apps/highcountry-web/public/assets/structures/hc-art-05-d/emerald-coast/hc-structure-coastal-cedar-barn.png",
+      "sha256": "d920848bcf5e17966e255b3cf388b36f7acc8f7d67b375f721fb5959771c8ba1",
+      "fully_transparent_fraction": 0.474
+    },
+    {
+      "id": 2,
+      "name": "Harbor Equipment Shed",
+      "canonical_filename": "hc-structure-harbor-equipment-shed.png",
+      "footprint_tiles": [
+        5,
+        4
+      ],
+      "canvas_px": [
+        1600,
+        1280
+      ],
+      "repository_path": "apps/highcountry-web/public/assets/structures/hc-art-05-d/emerald-coast/hc-structure-harbor-equipment-shed.png",
+      "sha256": "6080776b9edec955b378b6691a4c1a970bb5301cbba1081943043cbb929470ed",
+      "fully_transparent_fraction": 0.4891
+    },
+    {
+      "id": 3,
+      "name": "Forest Hay Loft",
+      "canonical_filename": "hc-structure-forest-hay-loft.png",
+      "footprint_tiles": [
+        5,
+        4
+      ],
+      "canvas_px": [
+        1600,
+        1280
+      ],
+      "repository_path": "apps/highcountry-web/public/assets/structures/hc-art-05-d/emerald-coast/hc-structure-forest-hay-loft.png",
+      "sha256": "621ae1ea842ba5faf15b35377bff052dca16dcfcf762f2a0b7f4d45f960b792a",
+      "fully_transparent_fraction": 0.4901
+    },
+    {
+      "id": 4,
+      "name": "Mill Grain Storage",
+      "canonical_filename": "hc-structure-mill-grain-storage.png",
+      "footprint_tiles": [
+        5,
+        4
+      ],
+      "canvas_px": [
+        1600,
+        1280
+      ],
+      "repository_path": "apps/highcountry-web/public/assets/structures/hc-art-05-d/emerald-coast/hc-structure-mill-grain-storage.png",
+      "sha256": "e18753d4ca6a09650eed6d2e96260884d6918871d1340a08ee3266bba5558fd3",
+      "fully_transparent_fraction": 0.4603
+    },
+    {
+      "id": 5,
+      "name": "Timber Livestock Shelter",
+      "canonical_filename": "hc-structure-timber-livestock-shelter.png",
+      "footprint_tiles": [
+        5,
+        4
+      ],
+      "canvas_px": [
+        1600,
+        1280
+      ],
+      "repository_path": "apps/highcountry-web/public/assets/structures/hc-art-05-d/emerald-coast/hc-structure-timber-livestock-shelter.png",
+      "sha256": "1e9c8d667e388dbd53e44cc7b367e7c68583f17117da807b3c5c5a83772e111d",
+      "fully_transparent_fraction": 0.5155
+    },
+    {
+      "id": 6,
+      "name": "Coastal Stable",
+      "canonical_filename": "hc-structure-coastal-stable.png",
+      "footprint_tiles": [
+        6,
+        4
+      ],
+      "canvas_px": [
+        1920,
+        1280
+      ],
+      "repository_path": "apps/highcountry-web/public/assets/structures/hc-art-05-d/emerald-coast/hc-structure-coastal-stable.png",
+      "sha256": "915728f2d0c54474b3de69fbd5eee0ac2489122ebfa508cb9263ee43637cd8f9",
+      "fully_transparent_fraction": 0.5334
+    },
+    {
+      "id": 7,
+      "name": "Boatworks Maintenance",
+      "canonical_filename": "hc-structure-boatworks-maintenance.png",
+      "footprint_tiles": [
+        4,
+        4
+      ],
+      "canvas_px": [
+        1280,
+        1280
+      ],
+      "repository_path": "apps/highcountry-web/public/assets/structures/hc-art-05-d/emerald-coast/hc-structure-boatworks-maintenance.png",
+      "sha256": "99767261b62f9a3996115342ace59a82ff6e38ab6c468296cabd1652ef90b135",
+      "fully_transparent_fraction": 0.5933
+    },
+    {
+      "id": 8,
+      "name": "Fishery Storage Warehouse",
+      "canonical_filename": "hc-structure-fishery-storage-warehouse.png",
+      "footprint_tiles": [
+        5,
+        4
+      ],
+      "canvas_px": [
+        1600,
+        1280
+      ],
+      "repository_path": "apps/highcountry-web/public/assets/structures/hc-art-05-d/emerald-coast/hc-structure-fishery-storage-warehouse.png",
+      "sha256": "86b20304b137ca3b8fcd1fe0f55e799dffe1ccac7004250630425db2757bffb4",
+      "fully_transparent_fraction": 0.4949
+    },
+    {
+      "id": 9,
+      "name": "Coastal Homestead House",
+      "canonical_filename": "hc-structure-coastal-homestead-house.png",
+      "footprint_tiles": [
+        6,
+        5
+      ],
+      "canvas_px": [
+        1920,
+        1600
+      ],
+      "repository_path": "apps/highcountry-web/public/assets/structures/hc-art-05-d/emerald-coast/hc-structure-coastal-homestead-house.png",
+      "sha256": "2facc72139b2b665a2f2889df4ae9cb62371a2784424dfb69342a5f26b7e4758",
+      "fully_transparent_fraction": 0.4478
+    },
+    {
+      "id": 10,
+      "name": "Harbor Worker Bunkhouse",
+      "canonical_filename": "hc-structure-harbor-worker-bunkhouse.png",
+      "footprint_tiles": [
+        5,
+        4
+      ],
+      "canvas_px": [
+        1600,
+        1280
+      ],
+      "repository_path": "apps/highcountry-web/public/assets/structures/hc-art-05-d/emerald-coast/hc-structure-harbor-worker-bunkhouse.png",
+      "sha256": "644b17ce45355fa19e49825fd4887186e028dc43ed9d27020b84861aa86c5355",
+      "fully_transparent_fraction": 0.4749
+    },
+    {
+      "id": 11,
+      "name": "Ranger Field Office",
+      "canonical_filename": "hc-structure-ranger-field-office.png",
+      "footprint_tiles": [
+        4,
+        4
+      ],
+      "canvas_px": [
+        1280,
+        1280
+      ],
+      "repository_path": "apps/highcountry-web/public/assets/structures/hc-art-05-d/emerald-coast/hc-structure-ranger-field-office.png",
+      "sha256": "06b70fa744aab341c47f830f7fcc41c4d8ca9b6afa4b5378e2efbcd17a5b58c8",
+      "fully_transparent_fraction": 0.5586
+    },
+    {
+      "id": 12,
+      "name": "Seafood Packing Processing",
+      "canonical_filename": "hc-structure-seafood-packing-processing.png",
+      "footprint_tiles": [
+        5,
+        4
+      ],
+      "canvas_px": [
+        1600,
+        1280
+      ],
+      "repository_path": "apps/highcountry-web/public/assets/structures/hc-art-05-d/emerald-coast/hc-structure-seafood-packing-processing.png",
+      "sha256": "5848d1201f5cf23bc4c360f04ad6632b5813b5916d2f97283a9da92a32418095",
+      "fully_transparent_fraction": 0.3834
+    }
+  ]
+}

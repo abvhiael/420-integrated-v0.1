@@ -13,7 +13,7 @@ contract SportsFundedTickets420Test is SportsBetAcceptance420Test {
     address constant JUDGE = address(0xCDEF);
     SportsFundingVm constant fundingVm = SportsFundingVm(address(uint160(uint256(keccak256("hevm cheat code")))));
 
-    function setUp() public override {
+    function setUp() public virtual override {
         super.setUp();
         cert = new SportsOutcomeCertification420(address(markets), REPORT_A, REPORT_B, JUDGE, 1 hours);
         vault = new SportsFundedTickets420(address(auth), address(acceptance), address(cert));

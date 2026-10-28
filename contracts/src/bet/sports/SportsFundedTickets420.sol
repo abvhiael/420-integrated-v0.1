@@ -42,7 +42,7 @@ contract SportsFundedTickets420 is SportsAuthority420 {
 
     uint256 private entered;
 
-    enum TicketState { NONE, FUNDED, WON, LOST, REFUNDED }
+    enum TicketState { NONE, FUNDED, WON, LOST, REFUNDED, PUSH, NO_ACTION, DEAD_HEAT }
     struct Ticket {
         address player;
         bytes32 marketId;
@@ -260,6 +260,39 @@ contract SportsFundedTickets420 is SportsAuthority420 {
         _close(id, won ? TicketState.WON : TicketState.LOST, won ? t.gross : 0, r.evidence);
     }
 
+    /// @notice Certified special market resolution. The Oracle gate verifies the
+    /// special marker and evidence before calling this function on gated markets.
+    function resolveSpecial(bytes32 id) external guarded {
+        Ticket storage t = tickets[id];
+        if (t.state != TicketState.FUNDED) revert State();
+        _auth(RESOLVE, t.marketId);
+        address gate = marketOracleGate[t.marketId];
+        if (gate != address(0) && msg.sender != gate) revert Unauthorized();
+        SportsMarketRegistry420.Record memory m = markets.get(t.marketId);
+        if (block.timestamp < m.config.cutoff) revert State();
+        SportsOutcomeCertification420.Result memory r = certification.result(t.marketId);
+        if (r.status != SportsOutcomeCertification420.Status.FINAL) revert State();
+        SportsOutcomeCertification420.SpecialOutcome memory special = certification.specialOutcome(t.marketId);
+        uint256 payout;
+        TicketState terminal;
+        if (special.kind == SportsOutcomeCertification420.SpecialKind.PUSH) {
+            if (r.selection != certification.PUSH_RESULT()) revert State();
+            terminal = TicketState.PUSH;
+            payout = t.stake;
+        } else if (special.kind == SportsOutcomeCertification420.SpecialKind.NO_ACTION) {
+            if (r.selection != certification.NO_ACTION_RESULT()) revert State();
+            terminal = TicketState.NO_ACTION;
+            payout = t.stake;
+        } else if (special.kind == SportsOutcomeCertification420.SpecialKind.DEAD_HEAT) {
+            if (r.selection != certification.DEAD_HEAT_RESULT()) revert State();
+            terminal = TicketState.DEAD_HEAT;
+            if (t.selection == special.firstSelection || t.selection == special.secondSelection) {
+                payout = t.gross / 2;
+            }
+        } else revert State();
+        _close(id, terminal, payout, r.evidence);
+    }
+
     /// @notice Permissionless refund after the immutable market policy timeout.
     function refund(bytes32 id) external guarded {
         Ticket storage t = tickets[id];
@@ -290,8 +323,19 @@ contract SportsFundedTickets420 is SportsAuthority420 {
         marketProfitExposure[t.marketId] -= t.profit;
         selectionProfitExposure[t.marketId][t.selection] -= t.profit;
         playerExposure[t.marketId][t.player] -= t.stake;
-        if (outcome == TicketState.WON) { collateral[t.marketId] -= t.profit; assetCollateral[asset] -= t.profit; }
-        if (outcome == TicketState.LOST) { collateral[t.marketId] += t.stake; assetCollateral[asset] += t.stake; }
+        // Every settlement conserves stake + collateral = credit + collateral.
+        // Dead heats may return less than stake, unlike ordinary gross winners.
+        if (outcome == TicketState.WON || outcome == TicketState.LOST || outcome == TicketState.DEAD_HEAT) {
+            if (payout > t.stake) {
+                uint256 delta = payout - t.stake;
+                collateral[t.marketId] -= delta;
+                assetCollateral[asset] -= delta;
+            } else {
+                uint256 delta = t.stake - payout;
+                collateral[t.marketId] += delta;
+                assetCollateral[asset] += delta;
+            }
+        }
         if (payout != 0) { credit[t.player][asset] += payout; assetPlayerCredit[asset] += payout; }
         emit TicketFinalized(id, outcome, payout);
     }

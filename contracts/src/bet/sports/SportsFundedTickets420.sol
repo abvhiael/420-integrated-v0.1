@@ -149,7 +149,13 @@ contract SportsFundedTickets420 is SportsAuthority420 {
         Ticket storage t = tickets[id];
         if (t.state != TicketState.FUNDED) revert State();
         _auth(RESOLVE, t.marketId);
-        if (block.timestamp < markets.get(t.marketId).config.cutoff) revert State();
+        SportsMarketRegistry420.Record memory marketRecord = markets.get(t.marketId);
+        if (block.timestamp < marketRecord.config.cutoff) revert State();
+        SportsTypes420.EventStatus eventStatus =
+            markets.eventsRegistry().get(marketRecord.config.eventId).status;
+        if (eventStatus == SportsTypes420.EventStatus.CANCELLED
+            || eventStatus == SportsTypes420.EventStatus.ABANDONED
+            || eventStatus == SportsTypes420.EventStatus.POSTPONED) revert State();
         SportsOutcomeCertification420.Result memory r = certification.result(t.marketId);
         if (r.status != SportsOutcomeCertification420.Status.FINAL || won != (r.selection == t.selection)) revert State();
         _close(id, won ? TicketState.WON : TicketState.LOST, won ? t.gross : 0);
@@ -162,7 +168,12 @@ contract SportsFundedTickets420 is SportsAuthority420 {
         SportsMarketRegistry420.Record memory m = markets.get(t.marketId);
         uint256 delay = markets.getTemplate(m.config.templateId).config.refundSeconds;
         SportsOutcomeCertification420.Result memory outcome = certification.result(t.marketId);
-        if (outcome.status != SportsOutcomeCertification420.Status.VOID && block.timestamp < uint256(m.config.cutoff) + delay) revert State();
+        SportsTypes420.EventStatus eventStatus = markets.eventsRegistry().get(m.config.eventId).status;
+        bool disrupted = eventStatus == SportsTypes420.EventStatus.CANCELLED
+            || eventStatus == SportsTypes420.EventStatus.ABANDONED
+            || eventStatus == SportsTypes420.EventStatus.POSTPONED;
+        if (!disrupted && outcome.status != SportsOutcomeCertification420.Status.VOID
+            && block.timestamp < uint256(m.config.cutoff) + delay) revert State();
         _close(id, TicketState.REFUNDED, t.stake);
     }
 

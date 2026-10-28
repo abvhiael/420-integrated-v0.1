@@ -44,9 +44,24 @@ export function auditCustody(s,{strictAggregate=false}={}){
   for(let i=0;i<receipt.quantity;i++)if(!seen.has(custodyUnitId(receiptId,i)))reject('missing-unit');
  }
  for(const [uid] of s.custodyReservations)if(!seen.has(uid))reject('orphan-reservation');
- if(strictAggregate)for(const [k,t] of totals){
-  const a=s.assets.get(k);
-  if(!a||a.available!==t.available||a.reserved!==t.reserved)reject('aggregate-divergence');
+ if(strictAggregate){
+  // Check the union, not only recorded custody buckets: phantom aggregate assets
+  // and reserved inventory must not pass merely because no corresponding unit exists.
+  const keys=new Set([...totals.keys(),...s.assets.keys()]);
+  for(const k of keys){
+   const a=s.assets.get(k),t=totals.get(k)??{available:0,reserved:0};
+   if(!a||!Number.isSafeInteger(a.available)||!Number.isSafeInteger(a.reserved)
+       ||a.available<0||a.reserved<0||a.available!==t.available||a.reserved!==t.reserved)
+      reject('aggregate-divergence');
+  }
+  for(const [uid,reservation] of s.custodyReservations){
+   if(reservation.kind==='listed'){
+    const listing=s.listings?.get(reservation.listingId);
+    if(!listing||!['active','settling'].includes(listing.status)||listing.seller!==reservation.owner
+       ||listing.asset!==reservation.assetId||!Array.isArray(listing.unitIds)
+       ||!listing.unitIds.includes(uid))reject('listing-reservation-divergence');
+   }
+  }
  }
  return {units:seen.size,receipts:s.custodyReceipts.size,reservations:active.size,totals};
 }

@@ -4,6 +4,10 @@ pragma solidity ^0.8.24;
 import "./SportsBetAcceptance420.sol";
 import "./SportsOutcomeCertification420.sol";
 
+interface ISportsOracleGateBinding420 {
+    function vault() external view returns (address);
+}
+
 interface ISportsToken420 {
     function balanceOf(address) external view returns (uint256);
     function transferFrom(address, address, uint256) external returns (bool);
@@ -19,6 +23,12 @@ contract SportsFundedTickets420 is SportsAuthority420 {
     SportsOddsIngestion420 public immutable odds;
     SportsOutcomeCertification420 public immutable certification;
     bytes32 public constant RESOLVE = keccak256("BET_SPORT_TICKET_RESOLVE");
+    // A market's Oracle gate is irreversible once installed. A legacy RESOLVE
+    // capability alone cannot settle an Oracle-protected ticket.
+    bytes32 public constant BIND_ORACLE = keccak256("BET_SPORT_TICKET_BIND_ORACLE");
+    mapping(bytes32 => address) public marketOracleGate;
+    event MarketOracleBound(bytes32 indexed marketId, address indexed gate);
+
     uint256 private entered;
 
     enum TicketState { NONE, FUNDED, WON, LOST, REFUNDED }
@@ -145,10 +155,22 @@ contract SportsFundedTickets420 is SportsAuthority420 {
 
     /// @notice The independently approved outcome resolver must hold market-scoped capability.
     /// No raw source reports are independently validated by this contract.
+    /// @dev The gate must be wired to this exact vault; binding cannot be replaced.
+    function bindOracle(bytes32 marketId, address gate) external {
+        _auth(BIND_ORACLE, marketId);
+        if (gate.code.length == 0 || marketOracleGate[marketId] != address(0)) revert State();
+        if (ISportsOracleGateBinding420(gate).vault() != address(this)) revert Invalid();
+        markets.get(marketId);
+        marketOracleGate[marketId] = gate;
+        emit MarketOracleBound(marketId, gate);
+    }
+
     function resolve(bytes32 id, bool won) external guarded {
         Ticket storage t = tickets[id];
         if (t.state != TicketState.FUNDED) revert State();
         _auth(RESOLVE, t.marketId);
+        address gate = marketOracleGate[t.marketId];
+        if (gate != address(0) && msg.sender != gate) revert Unauthorized();
         SportsMarketRegistry420.Record memory marketRecord = markets.get(t.marketId);
         if (block.timestamp < marketRecord.config.cutoff) revert State();
         SportsTypes420.EventStatus eventStatus =

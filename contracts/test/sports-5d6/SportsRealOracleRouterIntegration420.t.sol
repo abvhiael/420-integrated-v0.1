@@ -152,6 +152,7 @@ contract SportsRealOracleRouterIntegration420Test is SportsFundedTickets420Test 
         bytes32 group = keccak256("correlated-fixture");
         _call(CONTROL, address(vault), abi.encodeCall(vault.bindRiskGroup, (market, group, 500)));
         _call(CONTROL, address(vault), abi.encodeCall(vault.bindRiskGroup, (second, group, 500)));
+        _grant(CONTROL, acceptance.CONFIGURE(), acceptance.scope(second));
         _call(CONTROL, address(acceptance), abi.encodeCall(
             acceptance.configure, (second, SportsBetAcceptance420.Risk(
                 100, 1000, 2000, 1200, 1500, true

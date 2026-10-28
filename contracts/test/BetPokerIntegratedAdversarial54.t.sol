@@ -287,7 +287,7 @@ contract BetPokerIntegratedFundedAdversarial54Test is PokerWS8ProductionFixture5
         bytes32[3] memory roots=_roots();
         (uint256[8] memory proof,uint256[5] memory pub)=abi.decode(_proof("WS8Initial"),(uint256[8],uint256[5]));
         // A completed first hand does not waive the configured deal-request interval.
-        cheat54.warp(uint256(abuse.lastDealAt(TABLE)) + uint256(60) + 1);
+        cheat54.warp(block.timestamp + 61);
         bytes32 snapshot=deal.snapshotFor(TABLE,3);
         cheat54.prank(ADMIN);bytes32 target=deal.begin(TABLE,2,uint64(block.timestamp+3600),keccak256("WS8.SECOND.HAND"),snapshot,3);
         cheat54.prank(PROVIDER_A);deal.commit(target,keccak256("WS8.SECOND.A"));

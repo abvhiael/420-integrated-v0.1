@@ -37,3 +37,19 @@ The following tests are local deterministic qualification, **not independent ope
 ## Aggregate solvency implementation (pre-testnet)
 
 `SportsFundedTickets420` now records nominal per-token total liabilities, collateral, unresolved stakes and accrued player credits. Both funding and withdrawals compare observed ERC-20 balance with the entire token's expected aggregate liability, not merely one market. This prevents another market sharing the same asset from silently subsidizing a shortfall and rejects negative or positive rebase drift. Multi-market collateral isolation and fuzzed accounting conservation tests were added. Rebased funds are deliberately fail-closed, including withdrawal; operational asset allowlisting and recovery policy still require review. These aggregate invariants cover nominal deposits and liabilities; cross-market correlated payouts and independently verified oracle outcomes remain a separate economic-risk and testnet qualification gate.
+
+## BET-5D6 — Oracle-gated settlement and real-provider acceptance (additional gates)
+
+These items supplement—not supersede—BET-5D4-TN-01..07. Contract and tooling pretestnet evidence is documented in `BET-5D6-PRETESTNET-HARDENING.md`. All items below require explicit independently verifiable live or external records before production.
+
+| ID | Live/external dependency | Required acceptance proof |
+| --- | --- | --- |
+| BET-5D6-TN-01 | Approved fresh vault and Oracle gate on running chain | Exact chain ID, deployment transactions, runtime bytecode hashes, constructor dependencies and immutable market binding; irreversible Oracle-only fuse activated before any wagers |
+| BET-5D6-TN-02 | Production capability registry | Prove Oracle gate exclusively resolves each market; demonstrate that previously authorized operator and legacy resolver principals cannot bypass it even with stale grants; record revocation transactions and governance evidence |
+| BET-5D6-TN-03 | Live canonical result feeds | Confirm feed identity, FEED_OUTCOME/QUORUM_EQUAL mode, heartbeat, quorum, confidence, risk circuit breaker and safe restart; record provider and source epoch evidence |
+| BET-5D6-TN-04 | Separate independent sports reporting organizations | Licensed original evidence, beneficial ownership and key custody proof; independently approved adjudicator and documented revocation/rotation procedure |
+| BET-5D6-TN-05 | Live reorgs, outages and events | Disagreement, withheld data, late corrections, cancellation, abandonment, staleness, chain reorganization and transaction retry evidence with no unauthorized payout or lost refund |
+| BET-5D6-TN-06 | Live correlated markets and custody | Same-event cross-market liability conservation, collateral balances, grouped cap enforcement, payout/refund idempotence and chain-finalized accounting after restart |
+| BET-5D6-TN-07 | Independent deployment and regulatory review | Completed audits, vulnerability disposition, approved operator/territory restrictions, signed manifest, external acceptance and release authorization |
+
+The prelaunch manifest intentionally contains unresolved addresses and code hashes. Its production verifier must reject incomplete configuration, and its success is never evidence of publisher independence or legal authorization by itself. Do not represent these tasks as complete before a deployed chain and authorized independent counterparties provide the evidence.

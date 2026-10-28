@@ -83,10 +83,10 @@ jobs:
           organization_changed=false
           while IFS= read -r file; do
             case "$file" in
-              contracts/src/bet/sports/SportsOracleOutcomeGate420.sol|contracts/test/sports-5d6/*) sports_5d6_changed=true ;;
+              contracts/src/bet/sports/SportsOracleOutcomeGate420.sol|contracts/src/bet/sports/SportsFundedTickets420.sol|contracts/test/sports-5d6/*) sports_5d6_changed=true ;;
             esac
             case "$file" in
-              contracts/src/bet/sports/SportsOracleOutcomeGate420.sol|contracts/test/sports-5d6/*|contracts/test/sports-5d4/SportsFundedTickets420.t.sol|docs/bet/BET-AUDIT-5D.6-ORACLE-OUTCOMES.md|.github/workflows/420bet-sports-5d6.yml|.github/workflows/contracts-foundry.yml) ;;
+              contracts/src/bet/sports/SportsOracleOutcomeGate420.sol|contracts/src/bet/sports/SportsFundedTickets420.sol|contracts/test/sports-5d6/*|contracts/test/sports-5d4/SportsFundedTickets420.t.sol|contracts/config/bet/sports-5d6-pretestnet-manifest.v1.json|scripts/verify-sports-5d6-deployment.py|scripts/test_verify_sports_5d6_deployment.py|docs/bet/BET-5D6-PRETESTNET-HARDENING.md|docs/bet/BET-5D4-TESTNET-ROADMAP.md|docs/bet/BET-AUDIT-5D.6-ORACLE-OUTCOMES.md|.github/workflows/420bet-sports-5d6-hardening.yml|.github/workflows/420bet-sports-5d6.yml|.github/workflows/contracts-foundry.yml) ;;
               *) sports_5d6_only=false ;;
             esac
             case "$file" in

@@ -111,4 +111,112 @@ contract SportsOracleOutcomeGate420Test is SportsFundedTickets420Test {
     function _badOracle() external {
         new SportsOracleOutcomeGate420(address(0x1234), address(vault), 1 hours, 9000, 2);
     }
+
+    function _bindGate() internal {
+        _grant(CONTROL, vault.BIND_ORACLE(), vault.scope(market));
+        _call(CONTROL, address(vault), abi.encodeCall(vault.bindOracle, (market, address(gate))));
+        require(vault.marketOracleGate(market) == address(gate), "oracle gate binding missing");
+    }
+
+    function testOracleBindingRejectsLegacyResolverEvenWhenAuthorized() public {
+        _bindGate();
+        bytes32 id = _ticket();
+        _verified();
+        _fails(CONTROL, address(vault), abi.encodeCall(vault.resolve, (id, true)));
+        require(uint256(vault.get(id).state) == 1, "unauthorized resolver closed ticket");
+        gate.settle(id, true);
+        require(vault.credit(PLAYER, address(token)) == 925, "oracle-only payout");
+    }
+
+    function testOracleBindingIsIrreversibleAndRequiresAuthority() public {
+        _fails(PLAYER, address(vault), abi.encodeCall(vault.bindOracle, (market, address(gate))));
+        _bindGate();
+        _fails(CONTROL, address(vault), abi.encodeCall(vault.bindOracle, (market, address(gate))));
+        _fails(CONTROL, address(vault), abi.encodeCall(vault.bindOracle, (market, address(0))));
+    }
+
+    function testOracleOnlyFundingFuseRejectsUnboundMarkets() public {
+        _grant(CONTROL, vault.BIND_ORACLE(), vault.scope(bytes32(0)));
+        _call(CONTROL, address(vault), abi.encodeCall(vault.enableOracleOnlyFunding, ()));
+        require(vault.oracleOnlyFunding(), "production funding fuse missing");
+        _fails(CONTROL, address(vault), abi.encodeCall(vault.enableOracleOnlyFunding, ()));
+        _submit(_quote(1));
+        _call(CONTROL, address(vault), abi.encodeCall(vault.deposit, (market, 2000)));
+        SportsBetAcceptance420.Offer memory o = _offer(500);
+        _fails(PLAYER, address(vault), abi.encodeCall(vault.fund, (o)));
+        _bindGate();
+        _call(CONTROL, address(vault), abi.encodeCall(vault.bindRiskGroup, (market, vault.correlationGroupFor(market), 1000)));
+        vm.prank(PLAYER);
+        bytes32 id = vault.fund(o);
+        require(uint256(vault.get(id).state) == 1, "oracle-only funding failed");
+    }
+
+    function testOracleOnlyFundingFuseRequiresAuthority() public {
+        _fails(PLAYER, address(vault), abi.encodeCall(vault.enableOracleOnlyFunding, ()));
+        require(!vault.oracleOnlyFunding(), "unauthorized activation");
+    }
+
+    function testRiskGroupMustNotBeAssignedByUnauthorizedActor() public {
+        _fails(PLAYER, address(vault),
+            abi.encodeCall(vault.bindRiskGroup, (market, keccak256("group"), 1000)));
+        require(vault.marketRiskGroup(market) == bytes32(0), "unauthorized risk group");
+    }
+
+    function testRiskGroupExposureConservationAcrossRefund() public {
+        _grant(CONTROL, vault.BIND_ORACLE(), vault.scope(market));
+        bytes32 group = vault.correlationGroupFor(market);
+        _call(CONTROL, address(vault), abi.encodeCall(vault.bindRiskGroup, (market, group, 500)));
+        _submit(_quote(1));
+        _call(CONTROL, address(vault), abi.encodeCall(vault.deposit, (market, 2000)));
+        bytes32 id = _fund(500);
+        require(vault.riskGroupOutstanding(group) == 425, "group liability missed");
+        _fails(CONTROL, address(vault),
+            abi.encodeCall(vault.bindRiskGroup, (market, group, 500)));
+        vm.warp(markets.get(market).config.cutoff + 4 days);
+        vault.refund(id);
+        require(vault.riskGroupOutstanding(group) == 0, "refund group debt remained");
+    }
+
+    function testOracleGateRejectsWrongVaultBinding() public {
+        SportsFundedTickets420 unrelated =
+            new SportsFundedTickets420(address(auth), address(acceptance), address(cert));
+        SportsOracleOutcomeGate420 impostor =
+            new SportsOracleOutcomeGate420(address(oracle), address(unrelated), 2 hours, 9000, 2);
+        _grant(CONTROL, vault.BIND_ORACLE(), vault.scope(market));
+        _fails(CONTROL, address(vault), abi.encodeCall(vault.bindOracle, (market, address(impostor))));
+        require(vault.marketOracleGate(market) == address(0), "incorrect gate accepted");
+    }
+
+    function testOracleFuseCannotActivateAfterFunding() public {
+        _submit(_quote(1));
+        _call(CONTROL, address(vault), abi.encodeCall(vault.deposit, (market, 2000)));
+        bytes32 id = _fund(500);
+        require(uint256(vault.get(id).state) == 1, "fixture unfunded");
+        _grant(CONTROL, vault.BIND_ORACLE(), vault.scope(bytes32(0)));
+        _fails(CONTROL, address(vault), abi.encodeCall(vault.enableOracleOnlyFunding, ()));
+        require(!vault.oracleOnlyFunding(), "late fuse applied");
+    }
+
+    function testLegacyResolverWithValidCapabilityCannotBypassOracle() public {
+        _bindGate();
+        bytes32 id = _ticket();
+        _grant(PLAYER, vault.RESOLVE(), vault.scope(market));
+        _fails(PLAYER, address(vault), abi.encodeCall(vault.resolve, (id, true)));
+        _fails(CONTROL, address(vault), abi.encodeCall(vault.resolve, (id, true)));
+        require(uint256(vault.get(id).state) == 1, "legacy bypass mutated ticket");
+        _verified();
+        gate.settle(id, true);
+    }
+
+    function testOracleOutageAllowsTimedStakeRefundNotUnverifiedPayout() public {
+        _bindGate();
+        bytes32 id = _ticket();
+        oracle.halt(true);
+        _fails(CONTROL, address(vault), abi.encodeCall(vault.resolve, (id, true)));
+        _fails(CONTROL, address(gate), abi.encodeCall(gate.settle, (id, true)));
+        vm.warp(markets.get(market).config.cutoff + 4 days);
+        vault.refund(id);
+        require(vault.credit(PLAYER, address(token)) == 500, "stake not refunded");
+        require(vault.reserved(market) == 0, "refund did not release exposure");
+    }
 }

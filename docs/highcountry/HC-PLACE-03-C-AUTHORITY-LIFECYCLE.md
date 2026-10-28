@@ -1,0 +1,7 @@
+# HC-PLACE-03-C — Production authority and canonical instance lifecycle
+
+Operator-gated world authority provisioning and revocation are persisted under the exact same serializable economy namespace lock as placement transactions. An external independent authority must authenticate the operator and verify the signed world evidence; without both dependencies, provisioning fails closed. Revision rollback and stale concurrent provisioning are rejected. Revoked parcels prohibit placement writes, including replay. Re-provisioning requires a greater revision and independently verified evidence.
+
+Placement records retain strict HC-PLACE-02 record shape; original canonical custody-unit identity is anchored to the immutable placement operation receipts rather than a client-supplied field. Restoring an existing stored instance requires the exact original custody unit remain available and owned by the same principal, and occurs within one atomic reservation, placement and scene update. Sold or otherwise reserved original units cannot be substituted by fungible inventory. Unsupported intentional transfers remain fail closed; no browser or production API is enabled.
+
+Outstanding production acceptance: integration of real independent operator, world-signature and ACL/geometry services with deployment credentials and revocation event synchronization; external verification and phase-wide API/attachment controls are not represented by local fixtures. Independent live acceptance remains a release gate.

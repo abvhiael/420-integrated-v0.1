@@ -57,3 +57,26 @@ test('03-B.2 prevents phantom placement from unsourced aggregate inventory',asyn
  await assert.rejects(s.engine.execute('alice',s.place('a','phantom')),/verified-unit-unavailable/);
  assert.equal(s.get().assets.values().next().value.available,2);
 });
+
+test('03-C restore reclaims only the exact original canonical unit, with replay and scene revision',async()=>{
+ const s=setup(),placed=await s.engine.execute('alice',s.place('a','place-c'));
+ await s.engine.execute('alice',{operation:'remove-c',action:'remove',instanceId:'a',assetId:asset,expectedRevision:1,expectedSceneRevision:1});
+ const restored=await s.engine.execute('alice',{operation:'restore-c',action:'restore',instanceId:'a',assetId:asset,expectedRevision:2,expectedSceneRevision:2});
+ assert.equal(restored.instance.state,'placed');assert.equal(restored.custody.unitId,placed.custody.unitId);
+ assert.deepEqual(await s.engine.execute('alice',{operation:'restore-c',action:'restore',instanceId:'a',assetId:asset,expectedRevision:2,expectedSceneRevision:2}),restored);
+ await assert.rejects(s.engine.execute('alice',{operation:'restore-again',action:'restore',instanceId:'a',assetId:asset,expectedRevision:3,expectedSceneRevision:3}),/invalid-instance-state/);
+});
+test('03-C displaced canonical entitlement cannot be replaced by a different fungible unit',async()=>{
+ const s=setup(),a=await s.engine.execute('alice',s.place('a','first-c'));
+ await s.engine.execute('alice',{operation:'remove-c',action:'remove',instanceId:'a',assetId:asset,expectedRevision:1,expectedSceneRevision:1});
+ const u=s.get().custodyUnits.get(a.custody.unitId);s.get().custodyUnits.set(u.unitId,{...u,owner:'bob'});
+ const kA=JSON.stringify(['alice',asset]),kB=JSON.stringify(['bob',asset]);
+ s.get().assets.get(kA).available--;s.get().assets.set(kB,{available:1,reserved:0});
+ await assert.rejects(s.engine.execute('alice',{operation:'restore-c',action:'restore',instanceId:'a',assetId:asset,expectedRevision:2,expectedSceneRevision:2}),/bound-unit-unavailable/);
+ assert.equal(s.get().placementInstances.get('a').state,'stored');
+});
+test('03-C stored placement cannot be reissued as a new instance ID or mutated by record override',async()=>{
+ const s=setup();await s.engine.execute('alice',s.place('a','first-c'));
+ await assert.rejects(s.engine.execute('alice',{operation:'mutate-c',action:'move',instanceId:'a',assetId:asset,expectedRevision:1,expectedSceneRevision:1,record:{ownerPrincipal:'bob'}}),/existing-instance-record-override/);
+ assert.equal(s.get().placementInstances.get('a').ownerPrincipal,'alice');
+});

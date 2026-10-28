@@ -69,7 +69,7 @@ contract SportsSpecialSettlement420Test is SportsFundedTickets420Test {
         bytes32 second = selections[0] < selections[1] ? selections[1] : selections[0];
         _special(SportsOutcomeCertification420.SpecialKind.DEAD_HEAT, first, second);
         _call(CONTROL, address(vault), abi.encodeCall(vault.resolveSpecial, (id)));
-        uint256 expected = 925 / 2;
+        uint256 expected = uint256(925) / 2;
         require(vault.get(id).state == SportsFundedTickets420.TicketState.DEAD_HEAT, "heat state");
         require(vault.credit(PLAYER, address(token)) == expected, "dead-heat return");
         require(vault.collateral(market) == 2000 + 500 - expected, "dead-heat collateral");

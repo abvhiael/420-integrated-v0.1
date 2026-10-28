@@ -97,6 +97,12 @@ def check(manifest, production=False, rpc=None):
                 require(fuse.lower().startswith("true"), "live: oracle-only fuse OFF", errors)
                 linked = cast("call", gate, "vault()(address)", "--rpc-url", rpc)
                 require(linked.lower() == vault.lower(), "live: gate points to wrong vault", errors)
+                oracle = artifacts["oracle_router"]["address"]
+                certification = artifacts["certification"]["address"]
+                require(cast("call", gate, "oracle()(address)", "--rpc-url", rpc).lower() ==
+                        oracle.lower(), "live: gate Oracle mismatch", errors)
+                require(cast("call", gate, "certification()(address)", "--rpc-url", rpc).lower() ==
+                        certification.lower(), "live: certifier mismatch", errors)
                 for i, m in enumerate(manifest.get("markets", [])):
                     market_id = m.get("market_id")
                     if not isinstance(market_id, str) or not HASH.fullmatch(market_id):
@@ -104,6 +110,26 @@ def check(manifest, production=False, rpc=None):
                     actual = cast("call", vault, "marketOracleGate(bytes32)(address)",
                                   market_id, "--rpc-url", rpc)
                     require(actual.lower() == gate.lower(), f"live: market[{i}] gate mismatch", errors)
+                    group = cast("call", vault, "marketRiskGroup(bytes32)(bytes32)",
+                                 market_id, "--rpc-url", rpc)
+                    require(group.lower() == m["risk_group_id"].lower(),
+                            f"live: market[{i}] risk group mismatch", errors)
+                    expected_feed = cast("call", gate, "feedFor(bytes32)(bytes32)",
+                                         market_id, "--rpc-url", rpc)
+                    require(expected_feed.lower() == m["feed_id"].lower(),
+                            f"live: market[{i}] oracle feed mismatch", errors)
+                    feeds = artifacts["feed_registry"]["address"]
+                    active = cast("call", feeds, "feedActive(bytes32)(bool)", m["feed_id"],
+                                  "--rpc-url", rpc)
+                    require(active.lower().startswith("true"), f"live: market[{i}] feed inactive", errors)
+                    source_count = int(cast("call", feeds, "minSourcesOf(bytes32)(uint8)",
+                                            m["feed_id"], "--rpc-url", rpc), 0)
+                    require(source_count >= policy["minimum_sources"],
+                            f"live: market[{i}] insufficient source configuration", errors)
+                    heartbeat = int(cast("call", feeds, "heartbeatOf(bytes32)(uint32)",
+                                         m["feed_id"], "--rpc-url", rpc), 0)
+                    require(heartbeat <= policy["max_age_seconds"] and heartbeat > 0,
+                            f"live: market[{i}] heartbeat too permissive", errors)
             except (RuntimeError, subprocess.TimeoutExpired, FileNotFoundError) as e:
                 errors.append(f"live: binding check: {e}")
     if production and not rpc:

@@ -145,7 +145,7 @@ contract SportsOracleOutcomeGate420Test is SportsFundedTickets420Test {
         SportsBetAcceptance420.Offer memory o = _offer(500);
         _fails(PLAYER, address(vault), abi.encodeCall(vault.fund, (o)));
         _bindGate();
-        _call(CONTROL, address(vault), abi.encodeCall(vault.bindRiskGroup, (market, keccak256("match-1"), 1000)));
+        _call(CONTROL, address(vault), abi.encodeCall(vault.bindRiskGroup, (market, vault.correlationGroupFor(market), 1000)));
         vm.prank(PLAYER);
         bytes32 id = vault.fund(o);
         require(uint256(vault.get(id).state) == 1, "oracle-only funding failed");
@@ -164,7 +164,7 @@ contract SportsOracleOutcomeGate420Test is SportsFundedTickets420Test {
 
     function testRiskGroupExposureConservationAcrossRefund() public {
         _grant(CONTROL, vault.BIND_ORACLE(), vault.scope(market));
-        bytes32 group = keccak256("match-1");
+        bytes32 group = vault.correlationGroupFor(market);
         _call(CONTROL, address(vault), abi.encodeCall(vault.bindRiskGroup, (market, group, 500)));
         _submit(_quote(1));
         _call(CONTROL, address(vault), abi.encodeCall(vault.deposit, (market, 2000)));

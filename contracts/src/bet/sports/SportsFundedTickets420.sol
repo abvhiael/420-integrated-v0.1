@@ -28,8 +28,14 @@ contract SportsFundedTickets420 is SportsAuthority420 {
     bytes32 public constant BIND_ORACLE = keccak256("BET_SPORT_TICKET_BIND_ORACLE");
     mapping(bytes32 => address) public marketOracleGate;
     bool public oracleOnlyFunding;
+    uint256 public fundedCount;
+    mapping(bytes32 => bytes32) public marketRiskGroup;
+    mapping(bytes32 => address) public riskGroupAsset;
+    mapping(bytes32 => uint256) public riskGroupLimit;
+    mapping(bytes32 => uint256) public riskGroupOutstanding;
     event MarketOracleBound(bytes32 indexed marketId, address indexed gate);
     event OracleOnlyFundingEnabled();
+    event RiskGroupBound(bytes32 indexed marketId, bytes32 indexed groupId, address asset, uint256 limit);
 
     uint256 private entered;
 
@@ -128,7 +134,9 @@ contract SportsFundedTickets420 is SportsAuthority420 {
     /// (not that value) proves stake custody. The player must approve this vault.
     function fund(SportsBetAcceptance420.Offer calldata offer) external guarded returns (bytes32 id) {
         (uint256 gross, uint256 profit, bool ok) = admission.preview(offer, msg.sender);
-        if (!ok || (oracleOnlyFunding && marketOracleGate[offer.marketId] == address(0))) revert State();
+        if (!ok || (oracleOnlyFunding &&
+            (marketOracleGate[offer.marketId] == address(0) || marketRiskGroup[offer.marketId] == bytes32(0))))
+            revert State();
         bytes32 intent = keccak256(abi.encode(msg.sender, offer.nonce));
         if (consumedIntent[intent]) revert Conflict();
         SportsBetAcceptance420.Risk memory r = admission.getRisk(offer.marketId);
@@ -136,12 +144,16 @@ contract SportsFundedTickets420 is SportsAuthority420 {
             || selectionProfitExposure[offer.marketId][offer.selection] + profit > r.maxSelectionLiability
             || playerExposure[offer.marketId][msg.sender] + offer.stake > r.maxPlayerStake
             || reserved[offer.marketId] + profit > collateral[offer.marketId]) revert State();
+        bytes32 group = marketRiskGroup[offer.marketId];
+        if (group != bytes32(0) && riskGroupOutstanding[group] + profit > riskGroupLimit[group]) revert State();
         (SportsOddsIngestion420.Latest memory q, bool usable) = odds.current(offer.marketId);
         SportsMarketRegistry420.Record memory m = markets.get(offer.marketId);
         if (!usable || q.digest != offer.quoteDigest || q.quoteEpoch != m.quoteEpoch) revert State();
         id = keccak256(abi.encode("420.SPORT.FUNDED.TICKET.V1", block.chainid, address(this), msg.sender, offer));
         if (tickets[id].state != TicketState.NONE) revert Conflict();
         consumedIntent[intent] = true;
+        ++fundedCount;
+        if (group != bytes32(0)) riskGroupOutstanding[group] += profit;
         reserved[offer.marketId] += profit;
         pendingStake[offer.marketId] += offer.stake;
         assetLiability[m.config.asset] += offer.stake;
@@ -161,9 +173,26 @@ contract SportsFundedTickets420 is SportsAuthority420 {
     /// @notice Irreversible funding fuse; must be activated prior to launch.
     function enableOracleOnlyFunding() external {
         _auth(BIND_ORACLE, bytes32(0));
-        if (oracleOnlyFunding) revert State();
+        if (oracleOnlyFunding || fundedCount != 0) revert State();
         oracleOnlyFunding = true;
         emit OracleOnlyFundingEnabled();
+    }
+
+    /// @notice Immutable per-market assignment, conservatively sums *all* open
+    /// profit exposure in the group (independent of outcome correlation).
+    function bindRiskGroup(bytes32 marketId, bytes32 group, uint256 limit) external {
+        _auth(BIND_ORACLE, marketId);
+        SportsMarketRegistry420.Record memory m = markets.get(marketId);
+        if (group == bytes32(0) || limit == 0 || marketRiskGroup[marketId] != bytes32(0)
+            || marketProfitExposure[marketId] != 0) revert State();
+        if (riskGroupAsset[group] == address(0)) {
+            riskGroupAsset[group] = m.config.asset;
+            riskGroupLimit[group] = limit;
+        } else if (riskGroupAsset[group] != m.config.asset || riskGroupLimit[group] != limit) {
+            revert State();
+        }
+        marketRiskGroup[marketId] = group;
+        emit RiskGroupBound(marketId, group, m.config.asset, limit);
     }
 
     function bindOracle(bytes32 marketId, address gate) external {
@@ -212,6 +241,8 @@ contract SportsFundedTickets420 is SportsAuthority420 {
     function _close(bytes32 id, TicketState outcome, uint256 payout) private {
         Ticket storage t = tickets[id];
         t.state = outcome;
+        bytes32 group = marketRiskGroup[t.marketId];
+        if (group != bytes32(0)) riskGroupOutstanding[group] -= t.profit;
         reserved[t.marketId] -= t.profit;
         pendingStake[t.marketId] -= t.stake;
         address asset = _asset(t.marketId);

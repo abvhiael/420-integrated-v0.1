@@ -8,7 +8,7 @@ export class HighCountryProductionPlacementAuthority {
   if(typeof runtime?.verifyToken!=='function'||typeof runtime?.registeredPrincipal!=='function'
     ||typeof world?.verifyEvidence!=='function'||typeof world?.verifyEvent!=='function'
     ||typeof world?.canPlace!=='function'||typeof world?.validate!=='function'
-    ||typeof world?.geometrySnapshot!=='function'||typeof world?.verifyTransferConsent!=='function')fail('missing-independent-authorities');
+    ||typeof world?.geometrySnapshot!=='function'||typeof world?.verifyTransferConsent!=='function'||typeof world?.verifyOrdinaryCustodyAtCommit!=='function')fail('missing-independent-authorities');
   Object.assign(this,{runtime,world,operatorRole});
  }
  async registeredPrincipal(session){return this.runtime.registeredPrincipal(session)}
@@ -26,6 +26,7 @@ export class HighCountryProductionPlacementAuthority {
      ||await this.runtime.registeredPrincipal(recipientSession)!==envelope.to)return false;
   return await this.world.verifyTransferConsent({consent,envelope})===true;
  }
+ verifyOrdinaryCustodyAtCommit(context){return this.world.verifyOrdinaryCustodyAtCommit(context)===true}
  // Transfer gate uses BOTH authenticated principals' current durable epochs.
  verifyTransferAtCommit({senderSession,recipientSession,from,to,state,envelope,consent}){
   if(!state)return false;

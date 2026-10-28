@@ -4,7 +4,7 @@ import {HighCountryProductionPlacementAuthority} from '../src/placement-producti
 const session='signed';
 const claims={sub:'alice',iss:'issuer',epoch:0};
 const runtime={registeredPrincipal:async()=> 'alice',verifyToken:()=>claims,issuers:{issuer:{operators:{alice:{worldAuthority:true}}}}};
-const world={verifyEvidence:async()=>true,verifyEvent:async()=>true,canPlace:async()=>true,validate:async()=>({qualified:true}),geometrySnapshot:async()=>new Map(),verifyTransferConsent:async()=>true,verifyTransferAtCommit:()=>true,verifyAtCommit:()=>true};
+const world={verifyEvidence:async()=>true,verifyEvent:async()=>true,canPlace:async()=>true,validate:async()=>({qualified:true}),geometrySnapshot:async()=>new Map(),verifyTransferConsent:async()=>true,verifyOrdinaryCustodyAtCommit:()=>true,verifyTransferAtCommit:()=>true,verifyAtCommit:()=>true};
 test('production placement authority binds operator to runtime issuer and denies unprovisioned components',async()=>{
  assert.throws(()=>new HighCountryProductionPlacementAuthority({runtime,world:{}}),/missing-independent-authorities/);
  const a=new HighCountryProductionPlacementAuthority({runtime,world});await a.requireWorldAuthorityOperator(session,'parcel');

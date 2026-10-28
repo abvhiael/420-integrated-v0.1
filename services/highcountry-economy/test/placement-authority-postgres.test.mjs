@@ -45,7 +45,7 @@ test('03-C PostgreSQL stored instance transfer has atomic exact-unit ownership a
  await pool.query("UPDATE highcountry_buds_state SET state=jsonb_set(state,'{assetSources}', $2::jsonb) WHERE namespace=$1",['hc-place-03-a',JSON.stringify([[lineage,'fixture-receipt']])]);
  const transferAuthority={registeredPrincipal:async x=>x,
   verifyTransferConsent:async ({consent})=>consent==='both-signed',
-  verifyTransferAtCommit:({state})=>state.placementAuthorityRevisions.get('parcel-a')?.revoked!==true};
+  verifyOrdinaryCustodyAtCommit:()=>true,verifyTransferAtCommit:({state})=>state.placementAuthorityRevisions.get('parcel-a')?.revoked!==true};
  const xfer=new HighCountryStoredInstanceTransfer({store:new PostgresBudsStore(pool,'hc-place-03-a'),authority:transferAuthority});
  const command={operation:'transfer-a',instanceId:'a',expectedRevision:2,consent:'both-signed'};
  await assert.rejects(xfer.transfer('alice','bob',{...command,consent:'forged'}),/consent-denied/);

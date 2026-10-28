@@ -7,7 +7,7 @@ const assetKey=(p,a)=>JSON.stringify([p,a]);
 export class HighCountryStoredInstanceTransfer {
  constructor({store,authority}={}){
   if(typeof store?.transact!=='function'||typeof authority?.registeredPrincipal!=='function'
-    ||typeof authority?.verifyTransferConsent!=='function'||typeof authority?.verifyTransferAtCommit!=='function')fail('trusted-dependencies-required');
+    ||typeof authority?.verifyTransferConsent!=='function'||typeof authority?.verifyTransferAtCommit!=='function'||typeof authority?.verifyOrdinaryCustodyAtCommit!=='function')fail('trusted-dependencies-required');
   Object.assign(this,{store,authority});
  }
  async transfer(senderSession,recipientSession,{operation,instanceId,expectedRevision,consent}={}){
@@ -33,6 +33,7 @@ export class HighCountryStoredInstanceTransfer {
    if(!sender||!Number.isSafeInteger(sender.available)||sender.available<1||!Number.isSafeInteger(recipient.available)||recipient.available>=Number.MAX_SAFE_INTEGER)fail('balance-invalid');
    const source=s.assetSources.get(senderKey),targetSource=s.assetSources.get(recipientKey);
    if(!source||source!==unit.receiptId||(targetSource&&targetSource!==source))fail('provenance-conflict');
+   if(this.authority.verifyOrdinaryCustodyAtCommit({state:s,unit,receiptId:source,assetId:obj.assetId,from,to})!==true)fail('canonical-transfer-requires-finality');
    // Multiple source receipts with the same asset may be present through resale;
    // the record for the exact unit remains the authoritative provenance.
    s.assets.set(senderKey,{...sender,available:sender.available-1});

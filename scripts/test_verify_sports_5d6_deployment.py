@@ -38,8 +38,10 @@ class SportsDeploymentGateTests(unittest.TestCase):
     def test_result_mode_and_quorum_cannot_be_relaxed(self):
         for changes in ({"minimum_sources": 1},
                         {"minimum_confidence_bps": 0},
+                        {"minimum_confidence_bps": 8999},
                         {"aggregation_mode": "AGGREGATION_MEDIAN_NUMERIC"},
                         {"max_age_seconds": 0},
+                        {"max_age_seconds": 7201},
                         {"risk_policy_halted": True}):
             payload = json.loads(json.dumps(self.template))
             payload["policy"].update(changes)

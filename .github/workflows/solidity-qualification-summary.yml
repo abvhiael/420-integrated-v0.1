@@ -96,9 +96,34 @@ jobs:
           name: sol02-evidence-${{ matrix.group }}-${{ needs.plan.outputs.sha }}
           path: artifacts/sol02/sol02-*.json
           if-no-files-found: warn
+  level2-integration:
+    needs: plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.plan.outputs.sha }}
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - uses: actions/cache@v4
+        with:
+          path: |
+            contracts/out-sol02-level2
+            contracts/cache-sol02-level2
+          key: sol02-level2-${{ runner.os }}-foundry-stable-pr-${{ needs.plan.outputs.sha }}-${{ hashFiles('contracts/foundry.toml') }}
+      - name: Run retained cross-module integration tests
+        working-directory: contracts
+        run: bash scripts/sol02-level2.sh '${{ needs.plan.outputs.sha }}'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sol02-l2-${{ needs.plan.outputs.sha }}
+          path: artifacts/sol02/sol02-level2.json
+          if-no-files-found: error
   summary:
     name: Solidity Qualification Summary
-    needs: [plan, bounded-groups]
+    needs: [plan, bounded-groups, level2-integration]
     if: always()
     runs-on: ubuntu-latest
     steps:
@@ -114,9 +139,11 @@ jobs:
         env:
           PLAN_RESULT: ${{ needs.plan.result }}
           GROUP_RESULT: ${{ needs.bounded-groups.result }}
+          L2_RESULT: ${{ needs.level2-integration.result }}
         run: |
           set -euo pipefail
           test "$PLAN_RESULT" = success
+          test "$L2_RESULT" = success
           python3 - <<'PY'
           import json
           from pathlib import Path
@@ -130,4 +157,16 @@ jobs:
           else
             test "$GROUP_RESULT" = success
           fi
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          plan=json.loads(Path('artifacts/sol02/plan.json').read_text())
+          files=list(Path('artifacts/sol02/all').rglob('sol02-level2.json'))
+          assert len(files)==1, files
+          result=json.loads(files[0].read_text())
+          assert result['schema']=='420.ci.sol02.level2.v1'
+          assert result['sha']==plan['sha'] and result['passed'] is True
+          assert result['profile']=='pr'
+          assert len(result['tests'])==len(set(result['tests'])) and len(result['tests'])>=4
+          PY
           python3 contracts/scripts/sol02-aggregate.py artifacts/sol02/plan.json artifacts/sol02/all

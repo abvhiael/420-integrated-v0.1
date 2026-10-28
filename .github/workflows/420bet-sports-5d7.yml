@@ -4,6 +4,8 @@ on:
     paths:
       - 'contracts/test/sports-5d7/**'
       - 'contracts/src/bet/sports/SportsFundedTickets420.sol'
+      - 'contracts/src/bet/sports/SportsOutcomeCertification420.sol'
+      - 'contracts/src/bet/sports/SportsOracleOutcomeGate420.sol'
   workflow_dispatch:
 permissions:
   contents: read

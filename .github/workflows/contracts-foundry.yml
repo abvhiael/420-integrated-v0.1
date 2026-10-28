@@ -86,10 +86,10 @@ jobs:
           organization_changed=false
           while IFS= read -r file; do
             case "$file" in
-              contracts/src/bet/sports/SportsFundedTickets420.sol|contracts/test/sports-5d7/*) sports_5d7_changed=true ;;
+              contracts/src/bet/sports/SportsFundedTickets420.sol|contracts/src/bet/sports/SportsOutcomeCertification420.sol|contracts/src/bet/sports/SportsOracleOutcomeGate420.sol|contracts/test/sports-5d7/*) sports_5d7_changed=true ;;
             esac
             case "$file" in
-              contracts/src/bet/sports/SportsFundedTickets420.sol|contracts/test/sports-5d7/*|docs/bet/BET-AUDIT-5D.7-SETTLEMENT.md|.github/workflows/420bet-sports-5d7.yml|.github/workflows/contracts-foundry.yml) ;;
+              contracts/src/bet/sports/SportsFundedTickets420.sol|contracts/src/bet/sports/SportsOutcomeCertification420.sol|contracts/src/bet/sports/SportsOracleOutcomeGate420.sol|contracts/test/sports-5d7/*|docs/bet/BET-AUDIT-5D.7-SETTLEMENT.md|.github/workflows/420bet-sports-5d7.yml|.github/workflows/contracts-foundry.yml) ;;
               *) sports_5d7_only=false ;;
             esac
             case "$file" in

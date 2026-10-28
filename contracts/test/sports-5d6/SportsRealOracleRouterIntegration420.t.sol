@@ -141,4 +141,55 @@ contract SportsRealOracleRouterIntegration420Test is SportsFundedTickets420Test 
         require(!ok, "provider spoof");
         _reject(id);
     }
+
+    function testFuzzTwoMarketCorrelatedExposureLimit(uint16 a, uint16 b) public {
+        uint256 firstStake = 100 + uint256(a) % 301;
+        uint256 secondStake = 100 + uint256(b) % 301;
+        bytes32 spreadTemplate = _newTemplate(_templateConfig(SportsTypes420.Kind.SPREAD));
+        bytes32 second = _newMarket(_marketConfig(spreadTemplate, -7));
+        _grant(CONTROL, vault.BIND_ORACLE(), vault.scope(market));
+        _grant(CONTROL, vault.BIND_ORACLE(), vault.scope(second));
+        bytes32 group = keccak256("correlated-fixture");
+        _call(CONTROL, address(vault), abi.encodeCall(vault.bindRiskGroup, (market, group, 500)));
+        _call(CONTROL, address(vault), abi.encodeCall(vault.bindRiskGroup, (second, group, 500)));
+        _call(CONTROL, address(acceptance), abi.encodeCall(
+            acceptance.configure, (second, SportsBetAcceptance420.Risk(
+                100, 1000, 2000, 1200, 1500, true
+            ))
+        ));
+        _grant(signer, odds.SIGN(), odds.scope(second));
+        _submit(_quote(1));
+        SportsOddsIngestion420.Odds memory q = _quote(1);
+        q.marketId = second;
+        q.termsHash = markets.get(second).termsHash;
+        q.quoteEpoch = markets.get(second).quoteEpoch;
+        _submit(q);
+        _call(CONTROL, address(vault), abi.encodeCall(vault.deposit, (market, 2000)));
+        _call(CONTROL, address(vault), abi.encodeCall(vault.deposit, (second, 2000)));
+        bytes32 firstTicket = _fund(firstStake);
+        uint256 firstProfit = vault.get(firstTicket).profit;
+        require(vault.riskGroupOutstanding(group) == firstProfit, "first market exposure lost");
+        SportsBetAcceptance420.Offer memory secondOffer = _offer(secondStake);
+        secondOffer.marketId = second;
+        secondOffer.selection = markets.selections(second)[0];
+        (SportsOddsIngestion420.Latest memory latest,) = odds.current(second);
+        secondOffer.quoteDigest = latest.digest;
+        secondOffer.nonce = keccak256("second-market-nonce");
+        vm.prank(PLAYER);
+        (bool ok, bytes memory returned) = address(vault).call(abi.encodeCall(vault.fund, (secondOffer)));
+        uint256 secondProfit = (secondStake * 1_850_000 / 1_000_000) - secondStake;
+        if (firstProfit + secondProfit > 500) {
+            require(!ok, "correlated exposure cap bypassed");
+            require(vault.riskGroupOutstanding(group) == firstProfit, "failed ticket changed group");
+        } else {
+            require(ok, "safe correlated funding rejected");
+            bytes32 secondTicket = abi.decode(returned, (bytes32));
+            require(vault.get(secondTicket).profit == secondProfit, "incorrect profit");
+            require(vault.riskGroupOutstanding(group) == firstProfit + secondProfit,
+                "cross-market exposure not conserved");
+        }
+        require(vault.assetLiability(address(token)) ==
+            vault.assetCollateral(address(token)) + vault.assetPendingStake(address(token))
+                + vault.assetPlayerCredit(address(token)), "nominal token obligations");
+    }
 }

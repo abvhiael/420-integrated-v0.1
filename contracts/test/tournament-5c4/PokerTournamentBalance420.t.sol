@@ -12,7 +12,7 @@ contract SeatingMechanicsHarness420 {
     }
     function seal(bytes32 seed)external{s.seal(seed);}
     function person(uint256 id)external view returns(PokerTournamentTableBalance420.Player memory){return s.people[bytes32(id)];}
-    function tableOf(uint32 id)external view returns(PokerTournamentTableBalance420.Table memory){return s.tables[id];}
+    function readTable(uint32 id)external view returns(PokerTournamentTableBalance420.Table memory){return s.tables[id];}
     function at(uint32 id,uint8 seat)external view returns(bytes32){return s.seats[id][seat];}
     function size()external view returns(uint256){return s.open.length;}
     function revision()external view returns(uint64){return s.revision;}
@@ -38,19 +38,19 @@ contract TournamentTableBalance420Test {
     function zero(uint256 id)private {h.simulatedZero(id);h.remove(id,h.revision());}
     function zeroSeat(uint32 id,uint8 seat)private{bytes32 p=h.at(id,seat);require(p!=0);zero(uint256(p));}
     function testInitialAssignmentsWithinOneAndUnique()public{setup(9,3,20);(uint8 lo,uint8 hi,,)=h.bounds();require(lo==6&&hi==7);for(uint256 i=1;i<=20;i++){PokerTournamentTableBalance420.Player memory p=h.person(i);require(p.chips==1000&&p.generation==1&&h.at(p.table,p.seat)==bytes32(i));}}
-    function testSixtyFourTablesAnd576Players()public{setup(9,64,576);require(h.size()==64&&h.players()==576);(uint8 lo,uint8 hi,,)=h.bounds();require(lo==9&&hi==9);for(uint32 i=1;i<=64;i++)require(h.tableOf(i).mask==511);}
+    function testSixtyFourTablesAnd576Players()public{setup(9,64,576);require(h.size()==64&&h.players()==576);(uint8 lo,uint8 hi,,)=h.bounds();require(lo==9&&hi==9);for(uint32 i=1;i<=64;i++)require(h.readTable(i).mask==511);}
     function testCapacityBeyond64Rejected()public{reject(abi.encodeCall(h.init,(uint8(9),uint32(65),uint32(585),uint32(2))));}
     function testTwoSeatMultiTableRejected()public{reject(abi.encodeCall(h.init,(uint8(2),uint32(2),uint32(4),uint32(4))));}
-    function testTwoSeatSingleTableWorks()public{setup(2,1,2);require(h.tableOf(1).mask==3);}
+    function testTwoSeatSingleTableWorks()public{setup(2,1,2);require(h.readTable(1).mask==3);}
     function testInitialReplayAndSkippedIndexRejected()public{h.init(9,2,18,10);reject(abi.encodeCall(h.initial,(uint32(1),uint32(1))));h.initial(0,10);reject(abi.encodeCall(h.initial,(uint32(0),uint32(1))));h.seal(SEED);reject(abi.encodeCall(h.seal,(SEED)));}
     function testSealRequiresCompleteRosterAndNonzeroSeed()public{h.init(9,2,18,10);h.initial(0,1);reject(abi.encodeCall(h.seal,(SEED)));h.initial(1,9);reject(abi.encodeCall(h.seal,(bytes32(0))));}
     function testBalancedDoesNotMutateRevision()public{setup(9,2,17);uint64 r=h.revision();(PokerTournamentTableBalance420.Result result,)=h.balance(r);require(result==PokerTournamentTableBalance420.Result.BALANCED&&h.revision()==r);}
     function testStaleRevisionRejected()public{setup(9,2,17);reject(abi.encodeCall(h.balance,(uint64(1))));}
     function imbalanced()private{setup(9,2,18);zeroSeat(2,0);zeroSeat(2,1);}
     function testBalanceMovesNextDueBBAndPreservesAccounting()public{
-        imbalanced();PokerTournamentTableBalance420.Table memory source=h.tableOf(1);bytes32 due=h.at(1,source.nextBB);h.simulatedHistory(uint256(due),55,3);
+        imbalanced();PokerTournamentTableBalance420.Table memory source=h.readTable(1);bytes32 due=h.at(1,source.nextBB);h.simulatedHistory(uint256(due),55,3);
         PokerTournamentTableBalance420.Player memory before_=h.person(uint256(due));
-        (bool legal,uint8 worst)=h.worst(h.tableOf(2).mask,h.tableOf(2).button,9);require(legal);
+        (bool legal,uint8 worst)=h.worst(h.readTable(2).mask,h.readTable(2).button,9);require(legal);
         (PokerTournamentTableBalance420.Result result,PokerTournamentTableBalance420.Move memory m)=h.balance(h.revision());require(result==PokerTournamentTableBalance420.Result.MOVED&&m.person==due&&m.toSeat==worst);
         PokerTournamentTableBalance420.Player memory p=h.person(uint256(due));require(p.chips==before_.chips&&p.receipt==before_.receipt&&p.nonce==before_.nonce&&p.generation==before_.generation&&p.blindHistory==55&&p.blindObligations==3&&p.placementEpoch==before_.placementEpoch+1);
         (uint8 lo,uint8 hi,,)=h.bounds();require(lo==8&&hi==8);
@@ -62,9 +62,9 @@ contract TournamentTableBalance420Test {
     function testBusyZeroStackCannotBeRemoved()public{setup(9,2,18);h.simulatedZero(1);h.lock(1,keccak256("hand"),h.revision());reject(abi.encodeCall(h.remove,(uint256(1),h.revision())));}
     function breakable()private{setup(9,3,20);zeroSeat(1,0);zeroSeat(2,0);}
     function testSurplusTablesMustBreakBeforeBalancing()public{breakable();(PokerTournamentTableBalance420.Result result,)=h.balance(h.revision());require(result==PokerTournamentTableBalance420.Result.NEEDS_BREAK);}
-    function testHighestTableClosesAndConsolidates()public{breakable();(PokerTournamentTableBalance420.Result result,PokerTournamentTableBalance420.Move[] memory moves)=h.breakTable(SEED,h.revision());require(result==PokerTournamentTableBalance420.Result.MOVED&&h.size()==2&&h.tableOf(3).mask==0&&moves.length==6);for(uint256 i;i<moves.length;i++)require(moves[i].from==3&&moves[i].to<3&&h.person(uint256(moves[i].person)).chips==1000);(uint8 lo,uint8 hi,,)=h.bounds();require(lo==9&&hi==9);}
+    function testHighestTableClosesAndConsolidates()public{breakable();(PokerTournamentTableBalance420.Result result,PokerTournamentTableBalance420.Move[] memory moves)=h.breakTable(SEED,h.revision());require(result==PokerTournamentTableBalance420.Result.MOVED&&h.size()==2&&h.readTable(3).mask==0&&moves.length==6);for(uint256 i;i<moves.length;i++)require(moves[i].from==3&&moves[i].to<3&&h.person(uint256(moves[i].person)).chips==1000);(uint8 lo,uint8 hi,,)=h.bounds();require(lo==9&&hi==9);}
     function testBreakBusyHighestWaitsAtomically()public{breakable();h.lock(3,keccak256("hand"),h.revision());uint64 r=h.revision();(PokerTournamentTableBalance420.Result result,)=h.breakTable(SEED,r);require(result==PokerTournamentTableBalance420.Result.WAIT_HAND&&h.revision()==r&&h.size()==3);}
-    function testBreakInsufficientIdleVacanciesWaitsAtomically()public{breakable();h.lock(1,keccak256("hand"),h.revision());uint64 r=h.revision();uint16 mask=h.tableOf(3).mask;(PokerTournamentTableBalance420.Result result,)=h.breakTable(SEED,r);require(result==PokerTournamentTableBalance420.Result.WAIT_HAND&&h.revision()==r&&h.tableOf(3).mask==mask);}
+    function testBreakInsufficientIdleVacanciesWaitsAtomically()public{breakable();h.lock(1,keccak256("hand"),h.revision());uint64 r=h.revision();uint16 mask=h.readTable(3).mask;(PokerTournamentTableBalance420.Result result,)=h.breakTable(SEED,r);require(result==PokerTournamentTableBalance420.Result.WAIT_HAND&&h.revision()==r&&h.readTable(3).mask==mask);}
     function testNoOptionalRedrawAfterClosure()public{breakable();h.breakTable(SEED,h.revision());reject(abi.encodeCall(h.breakTable,(SEED,h.revision())));}
     function testConsolidatesToOneFinalTable()public{setup(9,2,10);zeroSeat(2,0);h.breakTable(SEED,h.revision());require(h.size()==1&&h.players()==9);}
     function testNewAdmissionUsesFreeCapacityAndFreshReceipt()public{setup(9,2,10);h.admit(99,99,1,PokerTournamentTableBalance420.Purchase.NEW_PLAYER,SEED,h.revision());require(h.person(99).seated&&h.players()==11);reject(abi.encodeCall(h.admit,(uint256(100),uint64(99),uint64(1),PokerTournamentTableBalance420.Purchase.NEW_PLAYER,SEED,h.revision())));}

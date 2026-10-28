@@ -157,25 +157,25 @@
       "id": "HC-EC-S01-D07-LM-05",
       "name": "St. Brigid's Chapel",
       "entrancePixel": [
-        1210,
-        272
+        1119,
+        285
       ],
       "polygon": [
         [
-          1165,
-          244
+          1093,
+          264
         ],
         [
-          1257,
-          244
+          1145,
+          264
         ],
         [
-          1257,
-          304
+          1145,
+          311
         ],
         [
-          1165,
-          304
+          1093,
+          311
         ]
       ],
       "href": "/port-alder/district/HC-EC-S01-D07/landmark/LM-05",

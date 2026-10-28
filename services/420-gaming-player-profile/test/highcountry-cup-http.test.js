@@ -5,7 +5,7 @@ const game='0x'+'a'.repeat(64),cupId='0x'+'b'.repeat(64);
 test('Global Cup HTTP verifies issuer scope, origin and field whitelist before canonical read',async()=>{
  const calls=[];
  const authority={gameId:game,
-  verifyToken:async t=>{if(t!=='valid')throw Error('unauthorized');return {sub:'alice',game,epoch:0,iss:'issuer-test'};},
+  verifyToken:t=>{if(t!=='valid')throw Error('unauthorized');return {sub:'alice',game,epoch:0,iss:'issuer-test'};},
   registeredPrincipal:async t=>t==='valid'?'alice':null};
  const server=createHighCountryCloudHttp420({
   authority,poolForPrincipal:async()=>({connect:async()=>{throw Error('unexpected db');}}),

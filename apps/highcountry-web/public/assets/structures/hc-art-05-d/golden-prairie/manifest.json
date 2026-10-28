@@ -1,0 +1,236 @@
+{
+  "collection": "HC-ART-05-D",
+  "region": "golden-prairie",
+  "source": "HC-ART-05-D-Golden-Prairie-01-12-transparent-master-revised.png",
+  "version": "revised-01-12",
+  "assets": [
+    {
+      "id": 1,
+      "name": "Prairie Barn",
+      "filename": "hc-structure-prairie-barn.png",
+      "footprint_tiles": {
+        "width": 6,
+        "height": 5
+      },
+      "canvas_px": {
+        "width": 1920,
+        "height": 1600
+      },
+      "github_path": "apps/highcountry-web/public/assets/structures/hc-art-05-d/golden-prairie/hc-structure-prairie-barn.png",
+      "sha256": "22a299b6c64cadc40f131192e0a6c07467c1f3d44641129598bed68f5091de7b",
+      "source_cell": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Equipment Shed",
+      "filename": "hc-structure-equipment-shed.png",
+      "footprint_tiles": {
+        "width": 5,
+        "height": 4
+      },
+      "canvas_px": {
+        "width": 1600,
+        "height": 1280
+      },
+      "github_path": "apps/highcountry-web/public/assets/structures/hc-art-05-d/golden-prairie/hc-structure-equipment-shed.png",
+      "sha256": "851326b9e0c857123e7d3e4b72370e56c0f07161728a50fccf2e26142ef185ca",
+      "source_cell": [
+        0,
+        1
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Hay Loft",
+      "filename": "hc-structure-hay-loft.png",
+      "footprint_tiles": {
+        "width": 5,
+        "height": 4
+      },
+      "canvas_px": {
+        "width": 1600,
+        "height": 1280
+      },
+      "github_path": "apps/highcountry-web/public/assets/structures/hc-art-05-d/golden-prairie/hc-structure-hay-loft.png",
+      "sha256": "ed0c36f6fd9e2f31358f30d4b014f15ea171ca82c37057495da10f4a58a55aab",
+      "source_cell": [
+        0,
+        2
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Grain Storage",
+      "filename": "hc-structure-grain-storage.png",
+      "footprint_tiles": {
+        "width": 5,
+        "height": 4
+      },
+      "canvas_px": {
+        "width": 1600,
+        "height": 1280
+      },
+      "github_path": "apps/highcountry-web/public/assets/structures/hc-art-05-d/golden-prairie/hc-structure-grain-storage.png",
+      "sha256": "023da7e391331acd33b8e7e4ace87e02f2a54703039ddd731ddb8ac5b00def6f",
+      "source_cell": [
+        0,
+        3
+      ]
+    },
+    {
+      "id": 5,
+      "name": "Livestock Shelter",
+      "filename": "hc-structure-livestock-shelter.png",
+      "footprint_tiles": {
+        "width": 5,
+        "height": 4
+      },
+      "canvas_px": {
+        "width": 1600,
+        "height": 1280
+      },
+      "github_path": "apps/highcountry-web/public/assets/structures/hc-art-05-d/golden-prairie/hc-structure-livestock-shelter.png",
+      "sha256": "e5fd2bb81ff03c66b51d52cc7d696340f934778d15ae833102357aecbc0a3e5e",
+      "source_cell": [
+        1,
+        0
+      ]
+    },
+    {
+      "id": 6,
+      "name": "Stable",
+      "filename": "hc-structure-stable.png",
+      "footprint_tiles": {
+        "width": 6,
+        "height": 4
+      },
+      "canvas_px": {
+        "width": 1920,
+        "height": 1280
+      },
+      "github_path": "apps/highcountry-web/public/assets/structures/hc-art-05-d/golden-prairie/hc-structure-stable.png",
+      "sha256": "b7e0ca3d327e6b44c9a1c3529b1a399171db308e9cfafbd4a0d36c299985b560",
+      "source_cell": [
+        1,
+        1
+      ]
+    },
+    {
+      "id": 7,
+      "name": "Workshop Maintenance",
+      "filename": "hc-structure-workshop-maintenance.png",
+      "footprint_tiles": {
+        "width": 4,
+        "height": 4
+      },
+      "canvas_px": {
+        "width": 1280,
+        "height": 1280
+      },
+      "github_path": "apps/highcountry-web/public/assets/structures/hc-art-05-d/golden-prairie/hc-structure-workshop-maintenance.png",
+      "sha256": "65a268e1b580adf8909dea993d9c9862f43c7c2e55d6fca05655c578ec39f789",
+      "source_cell": [
+        1,
+        2
+      ]
+    },
+    {
+      "id": 8,
+      "name": "Storage Warehouse",
+      "filename": "hc-structure-storage-warehouse.png",
+      "footprint_tiles": {
+        "width": 5,
+        "height": 4
+      },
+      "canvas_px": {
+        "width": 1600,
+        "height": 1280
+      },
+      "github_path": "apps/highcountry-web/public/assets/structures/hc-art-05-d/golden-prairie/hc-structure-storage-warehouse.png",
+      "sha256": "78a825331ce26382089c2f8cbcfc17ff00aab414f91bfc40fa4e6a8c2c0300e2",
+      "source_cell": [
+        1,
+        3
+      ]
+    },
+    {
+      "id": 9,
+      "name": "Prairie Farmhouse",
+      "filename": "hc-structure-prairie-farmhouse.png",
+      "footprint_tiles": {
+        "width": 6,
+        "height": 5
+      },
+      "canvas_px": {
+        "width": 1920,
+        "height": 1600
+      },
+      "github_path": "apps/highcountry-web/public/assets/structures/hc-art-05-d/golden-prairie/hc-structure-prairie-farmhouse.png",
+      "sha256": "881a2eba8256eed671de8579192a8b363a5631bfe6412404c629f9444198708a",
+      "source_cell": [
+        2,
+        0
+      ]
+    },
+    {
+      "id": 10,
+      "name": "Worker Bunkhouse",
+      "filename": "hc-structure-worker-bunkhouse.png",
+      "footprint_tiles": {
+        "width": 5,
+        "height": 4
+      },
+      "canvas_px": {
+        "width": 1600,
+        "height": 1280
+      },
+      "github_path": "apps/highcountry-web/public/assets/structures/hc-art-05-d/golden-prairie/hc-structure-worker-bunkhouse.png",
+      "sha256": "b7ac3cd96234b5495df3fd31d223585df1c647152db8672caaee63e6afa51c17",
+      "source_cell": [
+        2,
+        1
+      ]
+    },
+    {
+      "id": 11,
+      "name": "Field Office",
+      "filename": "hc-structure-field-office.png",
+      "footprint_tiles": {
+        "width": 4,
+        "height": 4
+      },
+      "canvas_px": {
+        "width": 1280,
+        "height": 1280
+      },
+      "github_path": "apps/highcountry-web/public/assets/structures/hc-art-05-d/golden-prairie/hc-structure-field-office.png",
+      "sha256": "d00b2564ced6b077fb85fdd7e789690acf56b47764fbc663b7fc42e25729f833",
+      "source_cell": [
+        2,
+        2
+      ]
+    },
+    {
+      "id": 12,
+      "name": "Packing Processing",
+      "filename": "hc-structure-packing-processing.png",
+      "footprint_tiles": {
+        "width": 5,
+        "height": 4
+      },
+      "canvas_px": {
+        "width": 1600,
+        "height": 1280
+      },
+      "github_path": "apps/highcountry-web/public/assets/structures/hc-art-05-d/golden-prairie/hc-structure-packing-processing.png",
+      "sha256": "3e03f19b3204d9c4831763815c5eb1de4d966087c0a5be9c13867da9f950fa8a",
+      "source_cell": [
+        2,
+        3
+      ]
+    }
+  ]
+}

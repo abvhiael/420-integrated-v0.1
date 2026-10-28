@@ -46,7 +46,7 @@ jobs:
       - name: Test account authorization, HTTP spoofing, concurrency and durable PostgreSQL
         working-directory: services/420-gaming-player-profile
         run: |
-          node --test test/highcountry-ordinary-exhibitions.test.js test/highcountry-ordinary-http.test.js test/highcountry-premium-authorization.test.js test/wallet-link.test.js
+          node --test test/highcountry-ordinary-exhibitions.test.js test/highcountry-ordinary-http.test.js test/highcountry-premium-authorization.test.js test/highcountry-premium-http.test.js test/wallet-link.test.js
           node --test test/highcountry-ordinary-postgres.integration.mjs
   canonical-competition:
     runs-on: ubuntu-latest

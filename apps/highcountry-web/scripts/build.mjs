@@ -4,7 +4,7 @@ import {join,resolve} from 'node:path';
 import {buildScopedA06Manifest} from '../../../services/highcountry-archive/src/scoped-a06.mjs';
 const root=resolve(import.meta.dirname,'..');const dist=join(root,'dist');
 await mkdir(dist,{recursive:true});await cp(join(root,'public'),dist,{recursive:true,force:true});await mkdir(join(dist,'src'),{recursive:true});
-for(const name of ['seed-packs.js','premium-furniture-catalogue.js','regional-memorabilia-catalogue.js','outdoor-structure-catalogue.js','water-wildlife-catalogue.js','seed-catalogue.js','app.js','port-alder-navigation.js','archive-gallery.js','cultivation-art.js','runtime.js','main.js','guest.js','cloud.js','account.js','local-auth.js','wallet.js','market.js','marketplace.js','skills.js','missions.js','discovery.js','transaction.js','routine.js'])await writeFile(join(dist,'src',name),await readFile(join(root,'src',name),'utf8'));
+for(const name of ['seed-packs.js','premium-furniture-catalogue.js','regional-memorabilia-catalogue.js','outdoor-structure-catalogue.js','water-wildlife-catalogue.js','seed-catalogue.js','app.js','port-alder-navigation.js','old-town-landmarks.js','archive-gallery.js','cultivation-art.js','runtime.js','main.js','guest.js','cloud.js','account.js','local-auth.js','wallet.js','market.js','marketplace.js','skills.js','missions.js','discovery.js','transaction.js','routine.js'])await writeFile(join(dist,'src',name),await readFile(join(root,'src',name),'utf8'));
 console.log('High Country static bundle built without substituting runtime values');
 
 // Copy only manifest-verified immediate-scope assets; never package deferred visuals.
@@ -24,3 +24,8 @@ await writePublicSeedCatalogue(new URL('../dist/assets/highcountry/seed-catalogu
 const townMap=resolve(repo,'deployments/highcountry/hc-world-06-port-alder-district-navigation.v1.json');
 const townMapDst=join(dist,'assets/highcountry/maps/hc-world-06-port-alder-district-navigation.v1.json');
 await mkdir(resolve(townMapDst,'..'),{recursive:true});await cp(townMap,townMapDst);
+
+// Public landmark metadata: no O16 coordinates, private ownership or future quests.
+const lmFile=resolve(repo,'deployments/highcountry/hc-world-pa-oldtown-landmark-hitboxes.v1.json');
+const lmDst=join(dist,'assets/highcountry/maps/hc-world-pa-oldtown-landmark-hitboxes.v1.json');
+await mkdir(resolve(lmDst,'..'),{recursive:true});await cp(lmFile,lmDst);

@@ -111,4 +111,47 @@ contract SportsOracleOutcomeGate420Test is SportsFundedTickets420Test {
     function _badOracle() external {
         new SportsOracleOutcomeGate420(address(0x1234), address(vault), 1 hours, 9000, 2);
     }
+
+    function _bindGate() internal {
+        _grant(CONTROL, vault.BIND_ORACLE(), vault.scope(market));
+        _call(CONTROL, address(vault), abi.encodeCall(vault.bindOracle, (market, address(gate))));
+        require(vault.marketOracleGate(market) == address(gate), "oracle gate binding missing");
+    }
+
+    function testOracleBindingRejectsLegacyResolverEvenWhenAuthorized() public {
+        _bindGate();
+        bytes32 id = _ticket();
+        _verified();
+        _fails(CONTROL, address(vault), abi.encodeCall(vault.resolve, (id, true)));
+        require(uint256(vault.get(id).state) == 1, "unauthorized resolver closed ticket");
+        gate.settle(id, true);
+        require(vault.credit(PLAYER, address(token)) == 925, "oracle-only payout");
+    }
+
+    function testOracleBindingIsIrreversibleAndRequiresAuthority() public {
+        _fails(PLAYER, address(vault), abi.encodeCall(vault.bindOracle, (market, address(gate))));
+        _bindGate();
+        _fails(CONTROL, address(vault), abi.encodeCall(vault.bindOracle, (market, address(gate))));
+        _fails(CONTROL, address(vault), abi.encodeCall(vault.bindOracle, (market, address(0))));
+    }
+
+    function testOracleOnlyFundingFuseRejectsUnboundMarkets() public {
+        _grant(CONTROL, vault.BIND_ORACLE(), vault.scope(bytes32(0)));
+        _call(CONTROL, address(vault), abi.encodeCall(vault.enableOracleOnlyFunding, ()));
+        require(vault.oracleOnlyFunding(), "production funding fuse missing");
+        _fails(CONTROL, address(vault), abi.encodeCall(vault.enableOracleOnlyFunding, ()));
+        _submit(_quote(1));
+        _call(CONTROL, address(vault), abi.encodeCall(vault.deposit, (market, 2000)));
+        SportsBetAcceptance420.Offer memory o = _offer(500);
+        _fails(PLAYER, address(vault), abi.encodeCall(vault.fund, (o)));
+        _bindGate();
+        vm.prank(PLAYER);
+        bytes32 id = vault.fund(o);
+        require(uint256(vault.get(id).state) == 1, "oracle-only funding failed");
+    }
+
+    function testOracleOnlyFundingFuseRequiresAuthority() public {
+        _fails(PLAYER, address(vault), abi.encodeCall(vault.enableOracleOnlyFunding, ()));
+        require(!vault.oracleOnlyFunding(), "unauthorized activation");
+    }
 }

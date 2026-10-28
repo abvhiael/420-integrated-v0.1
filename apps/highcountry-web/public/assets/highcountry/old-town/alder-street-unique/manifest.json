@@ -1,0 +1,274 @@
+{
+  "schema": "HC.ART.OLDTOWN.CROSSROADS.UNIQUE.V1",
+  "status": "ART_APPROVAL_PENDING",
+  "sourceMaster": "a_clean_high_detail_digital_illustration_asset_sh.png",
+  "buildings": 6,
+  "assets": 12,
+  "definition": "Six unique existing titled properties, each provided as 1024 exterior and 512 listing thumbnail. Not twelve distinct buildings. No standalone marketplace inventory.",
+  "assetsList": [
+    {
+      "id": "HC-EC-S01-D07-CR-01",
+      "name": "MaryJanes Corner Cafe",
+      "role": "exterior",
+      "filename": "HC-EC-S01-D07-cr-01-maryjanes-corner-cafe-exterior.png",
+      "canvas": [
+        1024,
+        1024
+      ],
+      "sha256": "9cdafd3fa60ddc783b492e22de148575ca7b0ec315a7650ea2e766ad0b71f820",
+      "repositoryPath": "apps/highcountry-web/public/assets/highcountry/old-town/alder-street-unique/HC-EC-S01-D07-cr-01-maryjanes-corner-cafe-exterior.png",
+      "uniqueExistingProperty": true,
+      "standaloneMarketplaceItem": false,
+      "lotFootprintTiles": [
+        24,
+        24
+      ],
+      "proposedInteriorGrid": [
+        6,
+        6
+      ]
+    },
+    {
+      "id": "HC-EC-S01-D07-CR-01",
+      "name": "MaryJanes Corner Cafe",
+      "role": "listing-thumbnail",
+      "filename": "HC-EC-S01-D07-cr-01-maryjanes-corner-cafe-listing-thumbnail.png",
+      "canvas": [
+        512,
+        512
+      ],
+      "sha256": "9bd8965658b3ff1edf2d1d55fef50f50e9d5e1f836e56ebebd2aaa563d177377",
+      "repositoryPath": "apps/highcountry-web/public/assets/highcountry/old-town/alder-street-unique/HC-EC-S01-D07-cr-01-maryjanes-corner-cafe-listing-thumbnail.png",
+      "uniqueExistingProperty": true,
+      "standaloneMarketplaceItem": false,
+      "lotFootprintTiles": [
+        24,
+        24
+      ],
+      "proposedInteriorGrid": [
+        6,
+        6
+      ]
+    },
+    {
+      "id": "HC-EC-S01-D07-CR-02",
+      "name": "Alder St General Store",
+      "role": "exterior",
+      "filename": "HC-EC-S01-D07-cr-02-alder-st-general-store-exterior.png",
+      "canvas": [
+        1024,
+        1024
+      ],
+      "sha256": "4e1f023c3dc8802280938c12256db30b418eec30bbfd70234808f964160263ae",
+      "repositoryPath": "apps/highcountry-web/public/assets/highcountry/old-town/alder-street-unique/HC-EC-S01-D07-cr-02-alder-st-general-store-exterior.png",
+      "uniqueExistingProperty": true,
+      "standaloneMarketplaceItem": false,
+      "lotFootprintTiles": [
+        24,
+        24
+      ],
+      "proposedInteriorGrid": [
+        6,
+        6
+      ]
+    },
+    {
+      "id": "HC-EC-S01-D07-CR-02",
+      "name": "Alder St General Store",
+      "role": "listing-thumbnail",
+      "filename": "HC-EC-S01-D07-cr-02-alder-st-general-store-listing-thumbnail.png",
+      "canvas": [
+        512,
+        512
+      ],
+      "sha256": "4ffb3a9a504c506f386b08a01ed3a5acd30e451bd0b058339d5fa9f4d86c6387",
+      "repositoryPath": "apps/highcountry-web/public/assets/highcountry/old-town/alder-street-unique/HC-EC-S01-D07-cr-02-alder-st-general-store-listing-thumbnail.png",
+      "uniqueExistingProperty": true,
+      "standaloneMarketplaceItem": false,
+      "lotFootprintTiles": [
+        24,
+        24
+      ],
+      "proposedInteriorGrid": [
+        6,
+        6
+      ]
+    },
+    {
+      "id": "HC-EC-S01-D07-CR-03",
+      "name": "Leafy Cauldron Apothecary",
+      "role": "exterior",
+      "filename": "HC-EC-S01-D07-cr-03-leafy-cauldron-apothecary-exterior.png",
+      "canvas": [
+        1024,
+        1024
+      ],
+      "sha256": "25f588a803b3b1f2d27fc8e6f7951ff37a9b52579513883bbdb358c18f1f6804",
+      "repositoryPath": "apps/highcountry-web/public/assets/highcountry/old-town/alder-street-unique/HC-EC-S01-D07-cr-03-leafy-cauldron-apothecary-exterior.png",
+      "uniqueExistingProperty": true,
+      "standaloneMarketplaceItem": false,
+      "lotFootprintTiles": [
+        24,
+        24
+      ],
+      "proposedInteriorGrid": [
+        6,
+        6
+      ]
+    },
+    {
+      "id": "HC-EC-S01-D07-CR-03",
+      "name": "Leafy Cauldron Apothecary",
+      "role": "listing-thumbnail",
+      "filename": "HC-EC-S01-D07-cr-03-leafy-cauldron-apothecary-listing-thumbnail.png",
+      "canvas": [
+        512,
+        512
+      ],
+      "sha256": "5205fd476dcaa1cd62089e1bb07e4495028b2bba537946627aeaa8ca26ee7156",
+      "repositoryPath": "apps/highcountry-web/public/assets/highcountry/old-town/alder-street-unique/HC-EC-S01-D07-cr-03-leafy-cauldron-apothecary-listing-thumbnail.png",
+      "uniqueExistingProperty": true,
+      "standaloneMarketplaceItem": false,
+      "lotFootprintTiles": [
+        24,
+        24
+      ],
+      "proposedInteriorGrid": [
+        6,
+        6
+      ]
+    },
+    {
+      "id": "HC-EC-S01-D07-CR-04",
+      "name": "Port Alder Bookshop",
+      "role": "exterior",
+      "filename": "HC-EC-S01-D07-cr-04-port-alder-bookshop-exterior.png",
+      "canvas": [
+        1024,
+        1024
+      ],
+      "sha256": "f96a03120272b9867a8f8d81f5d3b9efb84956da52e45f7bde0b4ba90f1501ff",
+      "repositoryPath": "apps/highcountry-web/public/assets/highcountry/old-town/alder-street-unique/HC-EC-S01-D07-cr-04-port-alder-bookshop-exterior.png",
+      "uniqueExistingProperty": true,
+      "standaloneMarketplaceItem": false,
+      "lotFootprintTiles": [
+        24,
+        24
+      ],
+      "proposedInteriorGrid": [
+        6,
+        6
+      ]
+    },
+    {
+      "id": "HC-EC-S01-D07-CR-04",
+      "name": "Port Alder Bookshop",
+      "role": "listing-thumbnail",
+      "filename": "HC-EC-S01-D07-cr-04-port-alder-bookshop-listing-thumbnail.png",
+      "canvas": [
+        512,
+        512
+      ],
+      "sha256": "266a0a0bbe3eb821e3a8d21c8929b4ab384800ccb7c34cf27ad7c8a027cef232",
+      "repositoryPath": "apps/highcountry-web/public/assets/highcountry/old-town/alder-street-unique/HC-EC-S01-D07-cr-04-port-alder-bookshop-listing-thumbnail.png",
+      "uniqueExistingProperty": true,
+      "standaloneMarketplaceItem": false,
+      "lotFootprintTiles": [
+        24,
+        24
+      ],
+      "proposedInteriorGrid": [
+        6,
+        6
+      ]
+    },
+    {
+      "id": "HC-EC-S01-D07-CR-05",
+      "name": "The Rusty Bong Tavern",
+      "role": "exterior",
+      "filename": "HC-EC-S01-D07-cr-05-rusty-bong-tavern-exterior.png",
+      "canvas": [
+        1024,
+        1024
+      ],
+      "sha256": "84bf3259c90567193a4c0cdcc0ca0056c530d6732c6175ef7787cb33464490f2",
+      "repositoryPath": "apps/highcountry-web/public/assets/highcountry/old-town/alder-street-unique/HC-EC-S01-D07-cr-05-rusty-bong-tavern-exterior.png",
+      "uniqueExistingProperty": true,
+      "standaloneMarketplaceItem": false,
+      "lotFootprintTiles": [
+        24,
+        24
+      ],
+      "proposedInteriorGrid": [
+        6,
+        6
+      ]
+    },
+    {
+      "id": "HC-EC-S01-D07-CR-05",
+      "name": "The Rusty Bong Tavern",
+      "role": "listing-thumbnail",
+      "filename": "HC-EC-S01-D07-cr-05-rusty-bong-tavern-listing-thumbnail.png",
+      "canvas": [
+        512,
+        512
+      ],
+      "sha256": "c71447ea9376a13c010f8645feee1500918875a4242a1e58e6d0ea8ef059b5f3",
+      "repositoryPath": "apps/highcountry-web/public/assets/highcountry/old-town/alder-street-unique/HC-EC-S01-D07-cr-05-rusty-bong-tavern-listing-thumbnail.png",
+      "uniqueExistingProperty": true,
+      "standaloneMarketplaceItem": false,
+      "lotFootprintTiles": [
+        24,
+        24
+      ],
+      "proposedInteriorGrid": [
+        6,
+        6
+      ]
+    },
+    {
+      "id": "HC-EC-S01-D07-CR-06",
+      "name": "Kush & Cargo Trading Post",
+      "role": "exterior",
+      "filename": "HC-EC-S01-D07-cr-06-kush-and-cargo-trading-post-exterior.png",
+      "canvas": [
+        1024,
+        1024
+      ],
+      "sha256": "9940c1743a72dbfd1c7b7c0a8ec27601dc6d4fe09f1e0d5cbb85500fb796015c",
+      "repositoryPath": "apps/highcountry-web/public/assets/highcountry/old-town/alder-street-unique/HC-EC-S01-D07-cr-06-kush-and-cargo-trading-post-exterior.png",
+      "uniqueExistingProperty": true,
+      "standaloneMarketplaceItem": false,
+      "lotFootprintTiles": [
+        24,
+        24
+      ],
+      "proposedInteriorGrid": [
+        6,
+        6
+      ]
+    },
+    {
+      "id": "HC-EC-S01-D07-CR-06",
+      "name": "Kush & Cargo Trading Post",
+      "role": "listing-thumbnail",
+      "filename": "HC-EC-S01-D07-cr-06-kush-and-cargo-trading-post-listing-thumbnail.png",
+      "canvas": [
+        512,
+        512
+      ],
+      "sha256": "9d5674ebbc73cc973b73e45aa00c76ad03368428e0f46ef23be6a76f9004c382",
+      "repositoryPath": "apps/highcountry-web/public/assets/highcountry/old-town/alder-street-unique/HC-EC-S01-D07-cr-06-kush-and-cargo-trading-post-listing-thumbnail.png",
+      "uniqueExistingProperty": true,
+      "standaloneMarketplaceItem": false,
+      "lotFootprintTiles": [
+        24,
+        24
+      ],
+      "proposedInteriorGrid": [
+        6,
+        6
+      ]
+    }
+  ]
+}

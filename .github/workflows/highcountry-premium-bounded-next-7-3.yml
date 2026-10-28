@@ -1,0 +1,35 @@
+name: High Country HC-NEXT-7.3 Bounded Solidity Level 2
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/highcountry/competition/**'
+      - 'contracts/test/highcountry/unit/competition/**'
+      - '.github/workflows/highcountry-premium-bounded-next-7-3.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  premium-bounded:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Pin candidate SHA
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Qualify changed competition source and adversarial tests only
+        working-directory: contracts
+        env:
+          FOUNDRY_SRC: src/highcountry
+          FOUNDRY_TEST: test/highcountry
+          FOUNDRY_SCRIPT: script/highcountry
+        run: |
+          forge fmt --check src/highcountry/competition/PremiumCompetitionEntitlements73.sol test/highcountry/unit/competition/HCNext73Premium.t.sol
+          forge test --match-path 'test/highcountry/unit/competition/HCNext73Premium.t.sol' -vv
+          forge test --match-path 'test/highcountry/unit/competition/R0412Competition.t.sol' -vv

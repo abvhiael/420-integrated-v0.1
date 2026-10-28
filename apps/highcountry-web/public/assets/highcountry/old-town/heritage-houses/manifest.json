@@ -1,0 +1,145 @@
+{
+  "schema": "HC.HIGHCOUNTRY.PORT_ALDER.OLD_TOWN.HERITAGE_HOUSES.V1",
+  "status": "ARTWORK_EXPORT_REVIEW_PENDING",
+  "masterSource": "a_clean_png_illustration_art_sheet_style_image_on.png",
+  "canvasPixels": [
+    1024,
+    1024
+  ],
+  "lotFootprintTiles": [
+    16,
+    20
+  ],
+  "interiorProposal": {
+    "groundGrid": [
+      4,
+      5
+    ],
+    "basementGrid": [
+      4,
+      5
+    ]
+  },
+  "notes": [
+    "Single-storey gameplay is intended; roof dormers in artwork are decorative and do not authorize a second storey.",
+    "PNG assets contain exterior and immediate landscaping only; private land parcel and game state remain separate.",
+    "All five are purchasable house designs, not five additional title issuances."
+  ],
+  "assets": [
+    {
+      "id": "HC-EC-S01-D07-HL-01",
+      "name": "Cedar Cottage",
+      "filename": "HC-EC-S01-D07-hl-01-cedar-cottage-exterior.png",
+      "repositoryPath": "apps/highcountry-web/public/assets/highcountry/old-town/heritage-houses/HC-EC-S01-D07-hl-01-cedar-cottage-exterior.png",
+      "canvasPixels": [
+        1024,
+        1024
+      ],
+      "lotFootprintTiles": [
+        16,
+        20
+      ],
+      "sourceCropXYWH": [
+        411,
+        26,
+        624,
+        353
+      ],
+      "checksumSHA256": "d485debb5421ce112bf220f9aec80b9ad97c96fec459c3ce70ec1378243663b6",
+      "category": "PURCHASABLE_RESIDENTIAL_BUILDING_DESIGN",
+      "backgroundTransparent": true
+    },
+    {
+      "id": "HC-EC-S01-D07-HL-02",
+      "name": "Harbour Home",
+      "filename": "HC-EC-S01-D07-hl-02-harbour-home-exterior.png",
+      "repositoryPath": "apps/highcountry-web/public/assets/highcountry/old-town/heritage-houses/HC-EC-S01-D07-hl-02-harbour-home-exterior.png",
+      "canvasPixels": [
+        1024,
+        1024
+      ],
+      "lotFootprintTiles": [
+        16,
+        20
+      ],
+      "sourceCropXYWH": [
+        1096,
+        0,
+        617,
+        378
+      ],
+      "checksumSHA256": "a09885b309e58d0549c59d976fb5b335b9b35d279ac0c84b219509dc6958c58b",
+      "category": "PURCHASABLE_RESIDENTIAL_BUILDING_DESIGN",
+      "backgroundTransparent": true
+    },
+    {
+      "id": "HC-EC-S01-D07-HL-03",
+      "name": "Maple Bungalow",
+      "filename": "HC-EC-S01-D07-hl-03-maple-bungalow-exterior.png",
+      "repositoryPath": "apps/highcountry-web/public/assets/highcountry/old-town/heritage-houses/HC-EC-S01-D07-hl-03-maple-bungalow-exterior.png",
+      "canvasPixels": [
+        1024,
+        1024
+      ],
+      "lotFootprintTiles": [
+        16,
+        20
+      ],
+      "sourceCropXYWH": [
+        44,
+        360,
+        629,
+        351
+      ],
+      "checksumSHA256": "a04c0fbd0db99159a591857807e3d742cc2c2acb78b877e597ac6e6fd6a4fde3",
+      "category": "PURCHASABLE_RESIDENTIAL_BUILDING_DESIGN",
+      "backgroundTransparent": true
+    },
+    {
+      "id": "HC-EC-S01-D07-HL-04",
+      "name": "Garden House",
+      "filename": "HC-EC-S01-D07-hl-04-garden-house-exterior.png",
+      "repositoryPath": "apps/highcountry-web/public/assets/highcountry/old-town/heritage-houses/HC-EC-S01-D07-hl-04-garden-house-exterior.png",
+      "canvasPixels": [
+        1024,
+        1024
+      ],
+      "lotFootprintTiles": [
+        16,
+        20
+      ],
+      "sourceCropXYWH": [
+        764,
+        348,
+        641,
+        364
+      ],
+      "checksumSHA256": "3d8689cdc7c78c488fb0521c6d0b84d9bfb7d5fcebc944de645cf3ca2d10250f",
+      "category": "PURCHASABLE_RESIDENTIAL_BUILDING_DESIGN",
+      "backgroundTransparent": true
+    },
+    {
+      "id": "HC-EC-S01-D07-HL-05",
+      "name": "Squareside Home",
+      "filename": "HC-EC-S01-D07-hl-05-squareside-home-exterior.png",
+      "repositoryPath": "apps/highcountry-web/public/assets/highcountry/old-town/heritage-houses/HC-EC-S01-D07-hl-05-squareside-home-exterior.png",
+      "canvasPixels": [
+        1024,
+        1024
+      ],
+      "lotFootprintTiles": [
+        16,
+        20
+      ],
+      "sourceCropXYWH": [
+        1521,
+        296,
+        631,
+        411
+      ],
+      "checksumSHA256": "ebe8428943991016a0f704404cc26622df58775fff8c60590f72493afe8b2b92",
+      "category": "PURCHASABLE_RESIDENTIAL_BUILDING_DESIGN",
+      "backgroundTransparent": true
+    }
+  ]
+}

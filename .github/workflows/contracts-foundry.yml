@@ -49,6 +49,7 @@ jobs:
       sports_5d3_only: ${{ steps.scope.outputs.sports_5d3_only }}
       sports_5d4_only: ${{ steps.scope.outputs.sports_5d4_only }}
       sports_5d5_only: ${{ steps.scope.outputs.sports_5d5_only }}
+      sports_5d6_only: ${{ steps.scope.outputs.sports_5d6_only }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -75,10 +76,19 @@ jobs:
           sports_5d4_changed=false
           sports_5d5_only=true
           sports_5d5_changed=false
+          sports_5d6_only=true
+          sports_5d6_changed=false
           competition_changed=false
           cooperative_changed=false
           organization_changed=false
           while IFS= read -r file; do
+            case "$file" in
+              contracts/src/bet/sports/SportsOracleOutcomeGate420.sol|contracts/src/bet/sports/SportsFundedTickets420.sol|contracts/test/sports-5d6/*) sports_5d6_changed=true ;;
+            esac
+            case "$file" in
+              contracts/src/bet/sports/SportsOracleOutcomeGate420.sol|contracts/src/bet/sports/SportsFundedTickets420.sol|contracts/test/sports-5d6/*|contracts/test/sports-5d4/SportsFundedTickets420.t.sol|contracts/config/bet/sports-5d6-pretestnet-manifest.v1.json|scripts/verify-sports-5d6-deployment.py|scripts/test_verify_sports_5d6_deployment.py|docs/bet/BET-5D6-PRETESTNET-HARDENING.md|docs/bet/BET-5D4-TESTNET-ROADMAP.md|docs/bet/BET-AUDIT-5D.6-ORACLE-OUTCOMES.md|.github/workflows/420bet-sports-5d6-hardening.yml|.github/workflows/420bet-sports-5d6.yml|.github/workflows/contracts-foundry.yml) ;;
+              *) sports_5d6_only=false ;;
+            esac
             case "$file" in
               contracts/src/bet/sports/SportsFundedTickets420.sol|contracts/test/sports-5d5/*) sports_5d5_changed=true ;;
             esac
@@ -153,7 +163,9 @@ jobs:
           echo "sports_5d3_only=$sports_5d3_only" >> "$GITHUB_OUTPUT"
           if [[ "$sports_5d5_changed" != true ]]; then sports_5d5_only=false; fi
           echo "sports_5d4_only=$sports_5d4_only" >> "$GITHUB_OUTPUT"
+          if [[ "$sports_5d6_changed" != true ]]; then sports_5d6_only=false; fi
           echo "sports_5d5_only=$sports_5d5_only" >> "$GITHUB_OUTPUT"
+          echo "sports_5d6_only=$sports_5d6_only" >> "$GITHUB_OUTPUT"
 
   compute-fast:
     needs: classify-pr
@@ -277,7 +289,7 @@ jobs:
   # Non-Compute or mixed Solidity PRs still qualify the complete inventory.
   pr-shards:
     needs: classify-pr
-    if: github.event_name == 'pull_request' && github.head_ref != 'qualification/bnb-phase3-level3-20261013' && github.head_ref != 'qualification/highcountry-r04-level3-main-20261013' && needs.classify-pr.outputs.compute_only != 'true' && needs.classify-pr.outputs.organization_only != 'true' && needs.classify-pr.outputs.cooperative_only != 'true' && needs.classify-pr.outputs.competition_only != 'true' && needs.classify-pr.outputs.sports_5d3_only != 'true' && needs.classify-pr.outputs.sports_5d4_only != 'true' && needs.classify-pr.outputs.sports_5d5_only != 'true' && (!(startsWith(github.head_ref, 'audit/') || contains(github.head_ref, '-audit-')) || github.head_ref == 'audit/420launchpad-remediation' || github.head_ref == 'audit/420verify-20261003' || github.head_ref == 'audit/420token-complete-20261004' || github.head_ref == 'audit/420town-complete-20261004' || github.head_ref == 'audit/420media-complete-20261006' || github.head_ref == 'audit/doobtube-baseline-20261006')
+    if: github.event_name == 'pull_request' && github.head_ref != 'qualification/bnb-phase3-level3-20261013' && github.head_ref != 'qualification/highcountry-r04-level3-main-20261013' && needs.classify-pr.outputs.compute_only != 'true' && needs.classify-pr.outputs.organization_only != 'true' && needs.classify-pr.outputs.cooperative_only != 'true' && needs.classify-pr.outputs.competition_only != 'true' && needs.classify-pr.outputs.sports_5d3_only != 'true' && needs.classify-pr.outputs.sports_5d4_only != 'true' && needs.classify-pr.outputs.sports_5d5_only != 'true' && needs.classify-pr.outputs.sports_5d6_only != 'true' && (!(startsWith(github.head_ref, 'audit/') || contains(github.head_ref, '-audit-')) || github.head_ref == 'audit/420launchpad-remediation' || github.head_ref == 'audit/420verify-20261003' || github.head_ref == 'audit/420token-complete-20261004' || github.head_ref == 'audit/420town-complete-20261004' || github.head_ref == 'audit/420media-complete-20261006' || github.head_ref == 'audit/doobtube-baseline-20261006')
     runs-on: ubuntu-latest
     timeout-minutes: 60
     strategy:

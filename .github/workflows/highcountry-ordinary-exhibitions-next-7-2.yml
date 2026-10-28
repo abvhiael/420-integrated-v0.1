@@ -1,0 +1,56 @@
+name: High Country Ordinary Exhibitions HC-NEXT-7.2 Level 1
+on:
+  pull_request:
+    paths:
+      - 'services/420-gaming-player-profile/src/highcountry-ordinary-exhibitions.js'
+      - 'services/420-gaming-player-profile/test/highcountry-ordinary-exhibitions.test.js'
+      - 'services/420-gaming-player-profile/src/highcountry-ordinary-postgres.js'
+      - 'services/420-gaming-player-profile/src/highcountry-ordinary-migrations.js'
+      - 'services/420-gaming-player-profile/test/highcountry-ordinary-postgres.integration.mjs'
+      - 'services/420-gaming-player-profile/src/highcountry-cloud-http.js'
+      - 'services/420-gaming-player-profile/migrations/010_highcountry_ordinary_exhibitions.up.sql'
+      - 'apps/highcountry-web/src/cloud.js'
+      - 'apps/highcountry-web/src/account.js'
+      - 'docs/highcountry/HC-NEXT-7.2-ORDINARY-EXHIBITIONS.md'
+      - '.github/workflows/highcountry-ordinary-exhibitions-next-7-2.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  ordinary-exhibitions:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: test-only
+          POSTGRES_DB: hc_exhibition_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d hc_exhibition_ci"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      HIGHCOUNTRY_EXHIBITIONS_POSTGRES_TEST_URL: postgresql://postgres:test-only@127.0.0.1:5432/hc_exhibition_ci
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact commit
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install locked service dependencies
+        working-directory: services/420-gaming-player-profile
+        run: npm ci --ignore-scripts
+      - name: Account-only exhibition and retained profile-service adversarial tests
+        working-directory: services/420-gaming-player-profile
+        run: node --test test/*.test.js
+      - name: Real PostgreSQL SERIALIZABLE and migration qualification
+        working-directory: services/420-gaming-player-profile
+        run: node --test test/highcountry-ordinary-postgres.integration.mjs

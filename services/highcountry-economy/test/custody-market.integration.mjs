@@ -84,11 +84,25 @@ test('placed unit cannot be listed, and listed unit cannot be placed',async()=>{
  const t=setup();await imported(t);
  const reservation=await t.store.transact(s=>reservePlacementUnit(s,{owner:'alice',assetId:'desk',instanceId:'desk-room'}));
  assert.equal(t.store.state.custodyUnits.get(reservation.unitId).state,'placed');
- await assert.rejects(t.market.list('seller','over-list','over','desk',3,20,999),/verified-units-unavailable/);
+ const beforeRejectedList=structuredClone(t.store.state);
+ await assert.rejects(t.market.list('seller','over-list','over','desk',3,20,999),/inventory unavailable|verified-units-unavailable/);
+ assert.deepEqual(t.store.state,beforeRejectedList,'rejected listing must not alter balances, reservations or operations');
  await t.market.list('seller','list','listing','desk',2,20,999);
  await assert.rejects(t.store.transact(s=>reservePlacementUnit(s,{owner:'alice',assetId:'desk',instanceId:'another'})),/verified-unit-unavailable/);
  const before=auditCustody(t.store.state,{strictAggregate:true});
  assert.equal(before.reservations,3);
  await t.store.transact(s=>releasePlacementUnit(s,{owner:'alice',assetId:'desk',instanceId:'desk-room'}));
  assert.equal(auditCustody(t.store.state,{strictAggregate:true}).reservations,2);
+});
+
+test('canonical chain-sized listing IDs produce bounded, collision-free per-unit reservations',async()=>{
+ const t=setup();await imported(t);
+ const listing='0x'+'ab'.repeat(32);
+ await t.market.list('seller','chain-sized-list',listing,'desk',3,20,999);
+ const ids=t.store.state.listings.get(listing).unitIds;
+ assert.equal(ids.length,3);
+ const reservations=ids.map(uid=>t.store.state.custodyReservations.get(uid).reservationId);
+ assert.equal(new Set(reservations).size,3);
+ assert.ok(reservations.every(id=>id.length<=128));
+ assert.equal(auditCustody(t.store.state,{strictAggregate:true}).reservations,3);
 });

@@ -3,6 +3,7 @@
 // Only a finalized, independently verified R04.1 transfer receipt authorizes BUDS payout.
 // Every canonical transfer uses deterministic operation identity so crash/retry cannot pay twice.
 import {BudsLedger,SettlementError} from './buds-ledger.js';
+import {settleListedUnits} from './custody-records.js';
 const id=x=>{if(typeof x!=='string'||!/^[a-zA-Z0-9:_-]{1,128}$/.test(x))throw new SettlementError('invalid identity');return x;};
 export class CanonicalMarketSettlement {
  constructor(store,authority,clock=()=>Date.now()){
@@ -33,11 +34,11 @@ export class CanonicalMarketSettlement {
    const funds=this.buds.get(s,buyer);
    if(funds.available<l.price)throw new SettlementError('insufficient BUDS');
    const asset=s.assets.get(JSON.stringify([l.seller,l.asset]));
-   if(!asset||asset.reserved<l.quantity)throw new SettlementError('missing inventory');
+   if(!asset||asset.reserved<l.quantity||!Array.isArray(l.unitIds)||l.unitIds.length!==l.quantity)throw new SettlementError('missing canonical custody');
    funds.available-=l.price;funds.reserved+=l.price;
    l.status='settling';
    const intent={transferOp,listingId,buyer,seller:l.seller,asset:l.asset,
-    quantity:l.quantity,price:l.price,sourceReceiptId:l.sourceReceiptId||null,canonicalParties,status:'prepared'};
+    quantity:l.quantity,price:l.price,unitIds:[...l.unitIds],sourceReceiptId:l.sourceReceiptId||null,canonicalParties,status:'prepared'};
    s.transferIntents.set(transferOp,intent);
    return {...intent};
   });
@@ -61,14 +62,14 @@ export class CanonicalMarketSettlement {
      throw new SettlementError('BUDS settlement unavailable');
    const sellerKey=JSON.stringify([t.seller,t.asset]);
    const sender=s.assets.get(sellerKey);
-   if(!sender||sender.reserved<t.quantity)throw new SettlementError('inventory mismatch');
+   if(!sender||sender.reserved<t.quantity||JSON.stringify(t.unitIds)!==JSON.stringify(l.unitIds))throw new SettlementError('inventory mismatch');
    const buyerKey=JSON.stringify([t.buyer,t.asset]),receiver=s.assets.get(buyerKey)||{available:0,reserved:0};
    if(receiver.available>Number.MAX_SAFE_INTEGER-t.quantity)throw new SettlementError('asset overflow');
    buyer.reserved-=t.price;seller.available+=t.price;
-   sender.reserved-=t.quantity;
+   settleListedUnits(s,{listing:l,buyer:this.authority.canonicalSettlementRequired===true?null:t.buyer,exit:this.authority.canonicalSettlementRequired===true});
    // Canonical delivery is already in the buyer's on-chain InventoryRegistry balance.
    // Do not create a second spendable off-chain admission; resale requires a new independently verified escrow receipt.
-   if(this.authority.canonicalSettlementRequired!==true){receiver.available+=t.quantity;s.assets.set(buyerKey,receiver);}
+   // Unit custody and aggregate balances were updated together above.
    t.status='finalized';l.status='sold';l.buyer=t.buyer;
    return {...t};
   });
@@ -92,7 +93,7 @@ export class CanonicalMarketSettlement {
    buyer.reserved-=t.price;buyer.available+=t.price;
    const sender=s.assets.get(JSON.stringify([t.seller,t.asset]));
    if(!sender||sender.reserved<t.quantity)throw new SettlementError('missing original escrow');
-   sender.reserved-=t.quantity;
+   settleListedUnits(s,{listing:l,exit:this.authority.canonicalSettlementRequired===true});
    l.status='cancelled';t.status='cancelled';
    return {...t};
   });
@@ -107,7 +108,7 @@ export class CanonicalMarketSettlement {
    if(!l||l.status!=='active')throw new SettlementError('listing not closable');
    const sender=s.assets.get(JSON.stringify([l.seller,l.asset]));
    if(!sender||sender.reserved<l.quantity)throw new SettlementError('escrow mirror mismatch');
-   sender.reserved-=l.quantity;
+   settleListedUnits(s,{listing:l,exit:this.authority.canonicalSettlementRequired===true});
    l.status='cancelled';
   });
  }

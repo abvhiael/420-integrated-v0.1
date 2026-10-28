@@ -27,6 +27,9 @@ export async function mountOldTownLandmark({document,main,pathname,fetchImpl=fet
  main.append(el('p','Select a permanent public landmark. Entrance coordinates are provisional until map-art alignment is approved.'));
  const nav=el('nav','');nav.setAttribute('aria-label','Old Town public landmarks');
  for(const l of data.landmarks){const p=el('p','');p.append(a(l.name,l.href));nav.append(p)}main.append(nav);
- const map=el('img','');map.src='/assets/highcountry/maps/emerald-coast/port-alder/old-town-genesis-master-v1.png';map.alt='Old Town map — pending repository artwork upload';map.style.width='100%';map.addEventListener('error',()=>{map.hidden=true});main.append(map);
- // Accessible links work even if old town image is absent; no misleading empty overlays.
+ const map=el('img','');map.src='/assets/highcountry/maps/emerald-coast/port-alder/old-town-genesis-master-v1.png';map.alt='Old Town map — pending repository artwork upload';map.style.width='100%';map.addEventListener('error',()=>{map.hidden=true});const frame=el('div','');frame.style.position='relative';frame.append(map);
+ const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('viewBox','0 0 1536 1024');svg.setAttribute('aria-label','Old Town landmark entrances');svg.style.cssText='position:absolute;inset:0;width:100%;height:100%;';
+ for(const l of data.landmarks){const link=document.createElementNS('http://www.w3.org/2000/svg','a');link.setAttribute('href',l.href);link.setAttribute('aria-label','Enter '+l.name);const shape=document.createElementNS('http://www.w3.org/2000/svg','polygon');shape.setAttribute('points',l.polygon.map(p=>p.join(',')).join(' '));shape.setAttribute('fill','transparent');shape.setAttribute('stroke','transparent');link.append(shape);svg.append(link)}
+ map.addEventListener('load',()=>{svg.hidden=false});map.addEventListener('error',()=>{svg.hidden=true});svg.hidden=true;frame.append(svg);main.append(frame);
+ // If map image has not been uploaded, accessible landmark links still work.
 }

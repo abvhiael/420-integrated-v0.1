@@ -26,3 +26,16 @@ test('03-C concurrent provisioning admits one winner and never rewinds revision'
  assert.equal(outcomes.filter(x=>x.status==='fulfilled').length,1);
  assert.equal(s.get().placementAuthorityRevisions.get('parcel').revision,2);
 });
+
+test('03-C independently signed event sequence, replay and privilege revocation',async()=>{
+ const s=setup();s.registry.authority.verifyWorldAuthorityEvent=async event=>event.signature==='valid';
+ const event=(revision,action)=>({parcelId:'parcel',revision,action,eventId:'event-'+revision,evidenceId:'world-'+revision,geometryQualificationId:'geometry',signature:'valid'});
+ await assert.rejects(s.registry.synchronize({...event(1,'grant'),signature:'forged'}),/unverified-authority-event/);
+ await s.registry.synchronize(event(1,'grant'));
+ await assert.rejects(s.registry.synchronize(event(1,'grant')),/authority-event-order/);
+ await assert.rejects(s.registry.synchronize(event(3,'revoke')),/authority-event-order/);
+ await s.registry.synchronize(event(2,'revoke'));
+ assert.equal(s.get().placementAuthorityRevisions.get('parcel').revoked,true);
+ await s.registry.synchronize(event(3,'grant'));
+ assert.equal(s.get().placementAuthorityRevisions.get('parcel').revoked,false);
+});

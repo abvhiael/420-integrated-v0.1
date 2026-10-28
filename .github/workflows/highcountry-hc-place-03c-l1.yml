@@ -5,8 +5,11 @@ on:
       - 'services/highcountry-economy/src/placement-transactions.js'
       - 'services/highcountry-economy/src/custody-records.js'
       - 'services/highcountry-economy/src/placement-authority-registry.js'
+      - 'services/highcountry-economy/src/placement-production-authority.js'
+      - 'services/highcountry-economy/src/placement-instance-transfer.js'
       - 'services/highcountry-economy/test/placement-transactions.test.mjs'
       - 'services/highcountry-economy/test/placement-authority-registry.test.mjs'
+      - 'services/highcountry-economy/test/placement-instance-transfer.test.mjs'
       - '.github/workflows/highcountry-hc-place-03c-l1.yml'
   workflow_dispatch:
 permissions:
@@ -21,4 +24,6 @@ jobs:
           node-version: '22'
       - run: node --check services/highcountry-economy/src/placement-authority-registry.js
       - run: node --check services/highcountry-economy/src/placement-transactions.js
-      - run: node --test services/highcountry-economy/test/placement-authority-registry.test.mjs services/highcountry-economy/test/placement-transactions.test.mjs
+      - run: node --check services/highcountry-economy/src/placement-instance-transfer.js
+      - run: node --check services/highcountry-economy/src/placement-production-authority.js
+      - run: node --test services/highcountry-economy/test/placement-authority-registry.test.mjs services/highcountry-economy/test/placement-transactions.test.mjs services/highcountry-economy/test/placement-instance-transfer.test.mjs

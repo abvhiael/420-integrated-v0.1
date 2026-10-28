@@ -52,7 +52,7 @@ export class HighCountryPlacementTransactions {
    const currentAuthority=s.placementAuthorityRevisions.get(command.record?.parcelId??s.placementInstances.get(command.instanceId)?.parcelId);
    if(!currentAuthority||currentAuthority.revoked===true||!Number.isSafeInteger(currentAuthority.revision)||currentAuthority.revision<1||!id(currentAuthority.evidenceId)||!id(currentAuthority.geometryQualificationId))fail('authority-not-provisioned');
    if(currentAuthority.revision!==world.revision||currentAuthority.evidenceId!==world.evidenceId||currentAuthority.geometryQualificationId!==world.geometryQualificationId||pinned.qualificationRef!==world.geometryQualificationId)fail('authority-changed-or-denied');
-   const commitProof=this.auth.verifyAtCommit({principal:who,command:input,world,geometry:pinned,geometryRegistry,assetIds,authoritative:structuredClone(currentAuthority),state:s});
+   const commitProof=this.auth.verifyAtCommit({principal:who,session,command:input,world,geometry:pinned,geometryRegistry,assetIds,authoritative:structuredClone(currentAuthority),state:s});
    if(commitProof?.then)fail('async-authority-forbidden');
    if(commitProof!==true)fail('authority-changed-or-denied');
    const opKey=key(who,command.operation),previous=s.placementOperations.get(opKey);

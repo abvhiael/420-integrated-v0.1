@@ -183,10 +183,17 @@ contract SportsFundedTickets420 is SportsAuthority420 {
 
     /// @notice Immutable per-market assignment, conservatively sums *all* open
     /// profit exposure in the group (independent of outcome correlation).
+    /// @dev All propositions on the same event and asset share one risk ceiling;
+    /// arbitrary subgroups cannot evade the same-event exposure bound.
+    function correlationGroupFor(bytes32 marketId) public view returns (bytes32) {
+        SportsMarketRegistry420.Record memory m = markets.get(marketId);
+        return keccak256(abi.encode("420.BET.SPORT.EVENT.RISK.V1", m.config.eventId, m.config.asset));
+    }
+
     function bindRiskGroup(bytes32 marketId, bytes32 group, uint256 limit) external {
         _auth(BIND_ORACLE, marketId);
         SportsMarketRegistry420.Record memory m = markets.get(marketId);
-        if (group == bytes32(0) || limit == 0 || marketRiskGroup[marketId] != bytes32(0)
+        if (group != correlationGroupFor(marketId) || limit == 0 || marketRiskGroup[marketId] != bytes32(0)
             || marketProfitExposure[marketId] != 0) revert State();
         if (riskGroupAsset[group] == address(0)) {
             riskGroupAsset[group] = m.config.asset;

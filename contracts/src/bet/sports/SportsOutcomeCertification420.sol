@@ -89,6 +89,9 @@ contract SportsOutcomeCertification420 {
         } else if (kind == SpecialKind.NO_ACTION) {
             if (first != bytes32(0) || second != bytes32(0)) revert Invalid();
         } else if (kind == SpecialKind.DEAD_HEAT) {
+            SportsTypes420.Kind k = markets.getTemplate(m.config.templateId).config.kind;
+            if (k != SportsTypes420.Kind.MONEYLINE_TWO && k != SportsTypes420.Kind.MONEYLINE_THREE)
+                revert Invalid();
             if (first == bytes32(0) || second == bytes32(0) || first >= second) revert Invalid();
             bool foundFirst;
             bool foundSecond;

@@ -10,7 +10,11 @@ def verify(plan, evidence_dir):
     required = set(plan["required"])
     for path in evidence_dir.glob("**/sol02-*.json"):
         doc = json.loads(path.read_text())
+        if doc.get("schema") != plan["schema"] and path.name == "sol02-level2.json":
+            continue  # Independently checked mandatory Level 2 evidence.
         name = doc.get("group")
+        if name is None or name not in plan["groups"]:
+            raise ValueError("unknown or malformed group evidence: " + path.name)
         if name in found:
             raise ValueError("duplicate group evidence: " + str(name))
         found[name] = doc

@@ -6,6 +6,9 @@ import "./SportsOutcomeCertification420.sol";
 
 interface ISportsOracleGateBinding420 {
     function vault() external view returns (address);
+    function oracle() external view returns (address);
+    function certification() external view returns (address);
+    function markets() external view returns (address);
 }
 
 interface ISportsToken420 {
@@ -198,7 +201,10 @@ contract SportsFundedTickets420 is SportsAuthority420 {
     function bindOracle(bytes32 marketId, address gate) external {
         _auth(BIND_ORACLE, marketId);
         if (gate.code.length == 0 || marketOracleGate[marketId] != address(0)) revert State();
-        if (ISportsOracleGateBinding420(gate).vault() != address(this)) revert Invalid();
+        if (ISportsOracleGateBinding420(gate).vault() != address(this)
+            || ISportsOracleGateBinding420(gate).markets() != address(markets)
+            || ISportsOracleGateBinding420(gate).certification() != address(certification)
+            || ISportsOracleGateBinding420(gate).oracle().code.length == 0) revert Invalid();
         markets.get(marketId);
         marketOracleGate[marketId] = gate;
         emit MarketOracleBound(marketId, gate);

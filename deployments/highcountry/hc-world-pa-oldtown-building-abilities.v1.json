@@ -1,0 +1,244 @@
+{
+  "schema": "HC.WORLD.PA.OLDTOWN.BUILDINGS.ABILITIES.V1",
+  "status": "DESIGN_LOCK_BALANCE_UNQUALIFIED",
+  "regionId": "HC-EC",
+  "settlementId": "HC-EC-S01",
+  "districtId": "HC-EC-S01-D07",
+  "assets": [
+    {
+      "id": "HL-01",
+      "name": "Cedar Cottage",
+      "category": "REPRODUCIBLE_MARKETPLACE_HOUSE",
+      "primary": {
+        "metric": "household_storage_capacity",
+        "percent": 10
+      },
+      "secondary": {
+        "metric": "primary_home_inventory_organization",
+        "percent": 2
+      },
+      "balanceStatus": "V1_INITIAL_TARGET_PENDING_GAMEPLAY_QUALIFICATION"
+    },
+    {
+      "id": "HL-02",
+      "name": "Harbour Home",
+      "category": "REPRODUCIBLE_MARKETPLACE_HOUSE",
+      "primary": {
+        "metric": "basement_water_use_reduction",
+        "percent": 10
+      },
+      "secondary": {
+        "metric": "primary_home_water_use_reduction",
+        "percent": 2
+      },
+      "balanceStatus": "V1_INITIAL_TARGET_PENDING_GAMEPLAY_QUALIFICATION"
+    },
+    {
+      "id": "HL-03",
+      "name": "Maple Bungalow",
+      "category": "REPRODUCIBLE_MARKETPLACE_HOUSE",
+      "primary": {
+        "metric": "basement_environment_energy_reduction",
+        "percent": 10
+      },
+      "secondary": {
+        "metric": "primary_home_energy_use_reduction",
+        "percent": 2
+      },
+      "balanceStatus": "V1_INITIAL_TARGET_PENDING_GAMEPLAY_QUALIFICATION"
+    },
+    {
+      "id": "HL-04",
+      "name": "Garden House",
+      "category": "REPRODUCIBLE_MARKETPLACE_HOUSE",
+      "primary": {
+        "metric": "basement_cultivation_experience",
+        "percent": 5
+      },
+      "secondary": {
+        "metric": "primary_home_gardening_experience",
+        "percent": 2
+      },
+      "balanceStatus": "V1_INITIAL_TARGET_PENDING_GAMEPLAY_QUALIFICATION"
+    },
+    {
+      "id": "HL-05",
+      "name": "Squareside Home",
+      "category": "REPRODUCIBLE_MARKETPLACE_HOUSE",
+      "primary": {
+        "metric": "household_furnishing_comfort",
+        "percent": 10
+      },
+      "secondary": {
+        "metric": "primary_home_community_reputation",
+        "percent": 2
+      },
+      "balanceStatus": "V1_INITIAL_TARGET_PENDING_GAMEPLAY_QUALIFICATION"
+    },
+    {
+      "id": "CR-01",
+      "name": "MaryJanes Corner Cafe",
+      "category": "UNIQUE_TITLE_BOUND_STOREFRONT",
+      "primary": {
+        "metric": "food_service_capacity",
+        "percent": 10
+      },
+      "secondary": {
+        "metric": "food_service_experience",
+        "percent": 5
+      },
+      "balanceStatus": "V1_INITIAL_TARGET_PENDING_GAMEPLAY_QUALIFICATION"
+    },
+    {
+      "id": "CR-02",
+      "name": "Alder St General Store",
+      "category": "UNIQUE_TITLE_BOUND_STOREFRONT",
+      "primary": {
+        "metric": "retail_stock_slots",
+        "percent": 10
+      },
+      "secondary": {
+        "metric": "merchandise_handling_capacity",
+        "percent": 5
+      },
+      "balanceStatus": "V1_INITIAL_TARGET_PENDING_GAMEPLAY_QUALIFICATION"
+    },
+    {
+      "id": "CR-03",
+      "name": "Leafy Cauldron Apothecary",
+      "category": "UNIQUE_TITLE_BOUND_STOREFRONT",
+      "primary": {
+        "metric": "botanical_processing_throughput",
+        "percent": 10
+      },
+      "secondary": {
+        "metric": "herbal_research_experience",
+        "percent": 5
+      },
+      "balanceStatus": "V1_INITIAL_TARGET_PENDING_GAMEPLAY_QUALIFICATION"
+    },
+    {
+      "id": "CR-04",
+      "name": "Port Alder Bookshop",
+      "category": "UNIQUE_TITLE_BOUND_STOREFRONT",
+      "primary": {
+        "metric": "educational_display_capacity",
+        "percent": 10
+      },
+      "secondary": {
+        "metric": "research_experience",
+        "percent": 5
+      },
+      "balanceStatus": "V1_INITIAL_TARGET_PENDING_GAMEPLAY_QUALIFICATION"
+    },
+    {
+      "id": "CR-05",
+      "name": "The Rusty Bong Tavern",
+      "category": "UNIQUE_TITLE_BOUND_STOREFRONT",
+      "primary": {
+        "metric": "social_venue_capacity",
+        "percent": 10
+      },
+      "secondary": {
+        "metric": "community_event_experience",
+        "percent": 5
+      },
+      "balanceStatus": "V1_INITIAL_TARGET_PENDING_GAMEPLAY_QUALIFICATION"
+    },
+    {
+      "id": "CR-06",
+      "name": "Kush & Cargo Trading Post",
+      "category": "UNIQUE_TITLE_BOUND_STOREFRONT",
+      "primary": {
+        "metric": "trade_inventory_slots",
+        "percent": 10
+      },
+      "secondary": {
+        "metric": "packing_dispatch_capacity",
+        "percent": 5
+      },
+      "balanceStatus": "V1_INITIAL_TARGET_PENDING_GAMEPLAY_QUALIFICATION"
+    },
+    {
+      "id": "WH-01",
+      "name": "The Baked Bouy Boatworks",
+      "category": "UNIQUE_TITLE_BOUND_WAREHOUSE",
+      "primary": {
+        "metric": "marine_workstation_capacity",
+        "percent": 15
+      },
+      "secondary": {
+        "metric": "verified_repair_material_reduction",
+        "percent": 5
+      },
+      "balanceStatus": "V1_INITIAL_TARGET_PENDING_GAMEPLAY_QUALIFICATION"
+    },
+    {
+      "id": "WH-02",
+      "name": "Hook, Line & Sativa",
+      "category": "UNIQUE_TITLE_BOUND_WAREHOUSE",
+      "primary": {
+        "metric": "fishing_supply_storage",
+        "percent": 15
+      },
+      "secondary": {
+        "metric": "fishing_supply_preparation_throughput",
+        "percent": 5
+      },
+      "balanceStatus": "V1_INITIAL_TARGET_PENDING_GAMEPLAY_QUALIFICATION"
+    },
+    {
+      "id": "WH-03",
+      "name": "Arctic Haze Refrigeration",
+      "category": "UNIQUE_TITLE_BOUND_WAREHOUSE",
+      "primary": {
+        "metric": "temperature_controlled_storage",
+        "percent": 20
+      },
+      "secondary": {
+        "metric": "eligible_spoilage_reduction",
+        "percent": 10
+      },
+      "balanceStatus": "V1_INITIAL_TARGET_PENDING_GAMEPLAY_QUALIFICATION"
+    },
+    {
+      "id": "WH-04",
+      "name": "The Green Dragon Distillery",
+      "category": "UNIQUE_TITLE_BOUND_WAREHOUSE",
+      "primary": {
+        "metric": "compatible_processing_workstations",
+        "percent": 15
+      },
+      "secondary": {
+        "metric": "eligible_processing_energy_reduction",
+        "percent": 5
+      },
+      "balanceStatus": "V1_INITIAL_TARGET_PENDING_GAMEPLAY_QUALIFICATION"
+    },
+    {
+      "id": "WH-05",
+      "name": "Blunt Force Shipping",
+      "category": "UNIQUE_TITLE_BOUND_WAREHOUSE",
+      "primary": {
+        "metric": "shipment_staging_capacity",
+        "percent": 20
+      },
+      "secondary": {
+        "metric": "authorized_dispatch_throughput",
+        "percent": 10
+      },
+      "balanceStatus": "V1_INITIAL_TARGET_PENDING_GAMEPLAY_QUALIFICATION"
+    }
+  ],
+  "rules": {
+    "primaryHome": "ONE_ACTIVE_PER_PLAYER",
+    "crossPropertyEffect": "PRIMARY_HOME_ONLY_NOT_MULTIPLICATIVELY_STACKABLE",
+    "titleBoundUniqueness": "NO_ARCHITECTURE_DUPLICATION_OR_STANDALONE_MARKETPLACE_SALES_FOR_CR_WH",
+    "verification": "VERIFIED_OWNERSHIP_OPERATIONAL_EQUIPMENT_AUTHORIZATION_REQUIRED",
+    "basement": "SEPARATE_AUTHORIZED_CULTIVATION_SCENE",
+    "bonuses": "NO_UNVERIFIED_GUEST_REWARDS_OR_BLOCKCHAIN_FINALITY_MODIFICATIONS",
+    "pricing": "LAND_PLUS_VERIFIED_USABLE_INTERIOR_PLUS_CONDITION",
+    "percentages": "DESIGN_TARGETS_ONLY"
+  },
+  "realtyIntegration": "DEFERRED"
+}

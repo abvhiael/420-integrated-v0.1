@@ -32,6 +32,26 @@ contract SportsSpecialSettlement420Test is SportsFundedTickets420Test {
         _fails(CONTROL, address(vault), abi.encodeCall(vault.refund, (id)));
     }
 
+    function testCanonicalSpreadPushReturnsStakeWithoutProfit() public {
+        bytes32 spreadTemplate = _newTemplate(_templateConfig(SportsTypes420.Kind.SPREAD));
+        market = _newMarket(_marketConfig(spreadTemplate, -7));
+        bytes32[] memory allowed = markets.selections(market);
+        chosen = allowed[0];
+        _grant(CONTROL, acceptance.CONFIGURE(), acceptance.scope(market));
+        _call(CONTROL, address(acceptance), abi.encodeCall(
+            acceptance.configure, (market, SportsBetAcceptance420.Risk(
+                100, 1000, 2000, 1200, 1500, true))));
+        _grant(signer, odds.SIGN(), odds.scope(market));
+        _grant(CONTROL, vault.RESOLVE(), vault.scope(market));
+        bytes32 id = _funded();
+        _special(SportsOutcomeCertification420.SpecialKind.PUSH, bytes32(0), bytes32(0));
+        _call(CONTROL, address(vault), abi.encodeCall(vault.resolveSpecial, (id)));
+        require(vault.get(id).state == SportsFundedTickets420.TicketState.PUSH, "push state");
+        require(vault.credit(PLAYER, address(token)) == 500, "push exact stake");
+        require(vault.collateral(market) == 2000, "push must not transfer profits");
+        _assertAssetConservation();
+    }
+
     function testPushRejectsMoneylineMarkets() public {
         bytes32 id = _funded();
         vm.prank(REPORT_A);

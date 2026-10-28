@@ -109,7 +109,7 @@ export async function createOrdinaryRuntime({pool,namespace,authority:authConfig
  return composeOrdinaryMarketRuntime({store,identity,rewards,inventoryAuthority,signerRpc,clock,progression,missions,discovery,landRights,social,seedCatalogue,seedPacks,seedOpenings,seedPurchases,placement});
 }
 // Separate ordinary market composition. The canonical runtime above remains chain-settlement-only.
-export function composeOrdinaryMarketRuntime({store,identity,rewards,inventoryAuthority,signerRpc,clock,progression,missions,discovery,landRights,social,seedCatalogue,seedPacks,seedOpenings,seedPurchases}) {
+export function composeOrdinaryMarketRuntime({store,identity,rewards,inventoryAuthority,signerRpc,clock,progression,missions,discovery,landRights,social,seedCatalogue,seedPacks,seedOpenings,seedPurchases,placement}) {
  if(typeof store?.transact!=='function'||identity?.store!==store
    ||typeof identity?.registeredPrincipal!=='function'
    ||typeof identity?.requireTrustedIssuer!=='function'

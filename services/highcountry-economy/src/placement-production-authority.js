@@ -8,7 +8,7 @@ export class HighCountryProductionPlacementAuthority {
   if(typeof runtime?.verifyToken!=='function'||typeof runtime?.registeredPrincipal!=='function'
     ||typeof world?.verifyEvidence!=='function'||typeof world?.verifyEvent!=='function'
     ||typeof world?.canPlace!=='function'||typeof world?.validate!=='function'
-    ||typeof world?.geometrySnapshot!=='function')fail('missing-independent-authorities');
+    ||typeof world?.geometrySnapshot!=='function'||typeof world?.verifyTransferConsent!=='function')fail('missing-independent-authorities');
   Object.assign(this,{runtime,world,operatorRole});
  }
  async registeredPrincipal(session){return this.runtime.registeredPrincipal(session)}
@@ -21,6 +21,11 @@ export class HighCountryProductionPlacementAuthority {
  async canPlaceOnParcel(principal,command){return await this.world.canPlace(principal,command)===true}
  async validateWorld(principal,command){return this.world.validate(principal,command)}
  async qualifiedGeometrySnapshot(principal,command){return this.world.geometrySnapshot(principal,command)}
+ async verifyTransferConsent({consent,envelope,senderSession,recipientSession}){
+  if(await this.runtime.registeredPrincipal(senderSession)!==envelope.from
+     ||await this.runtime.registeredPrincipal(recipientSession)!==envelope.to)return false;
+  return await this.world.verifyTransferConsent({consent,envelope})===true;
+ }
  // Transfer gate uses BOTH authenticated principals' current durable epochs.
  verifyTransferAtCommit({senderSession,recipientSession,from,to,state,envelope,consent}){
   if(!state)return false;

@@ -15,7 +15,7 @@ contract SportsOddsIngestion420Test is SportsRegistry420Test {
     uint256 constant KEY = 0x123456;
     address signer;
 
-    function setUp() public override {
+    function setUp() public virtual override {
         super.setUp();
         odds = new SportsOddsIngestion420(address(auth), address(markets));
         signer = signerVm.addr(KEY);

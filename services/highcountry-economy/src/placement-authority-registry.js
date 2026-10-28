@@ -22,6 +22,26 @@ export class HighCountryPlacementAuthorityRegistry {
    return structuredClone(revision);
   });
  }
+ // Independently signed authority events: monotonically applied under the same
+ // transaction lock as placement. Duplicates fail closed; no caller-supplied ACL.
+ async synchronize(event){
+  if(!event||!id(event.parcelId)||!Number.isSafeInteger(event.revision)||event.revision<1
+    ||!['grant','revoke'].includes(event.action)||!id(event.eventId))fail('invalid-authority-event');
+  if(typeof this.authority.verifyWorldAuthorityEvent!=='function'
+    ||await this.authority.verifyWorldAuthorityEvent(event)!==true)fail('unverified-authority-event');
+  return this.store.transact(s=>{
+   if(!(s.placementAuthorityRevisions instanceof Map))fail('authority-state-missing');
+   const prior=s.placementAuthorityRevisions.get(event.parcelId);
+   if(event.revision!==(prior?.revision??0)+1)fail('authority-event-order');
+   if(event.action==='grant'&&(!id(event.evidenceId)||!id(event.geometryQualificationId)))fail('invalid-grant-evidence');
+   const next={revision:event.revision,evidenceId:event.action==='grant'?event.evidenceId:prior?.evidenceId,
+    geometryQualificationId:event.action==='grant'?event.geometryQualificationId:prior?.geometryQualificationId,
+    revoked:event.action==='revoke',sourceEventId:event.eventId};
+   if(event.action==='revoke'&&!prior)fail('authority-not-provisioned');
+   s.placementAuthorityRevisions.set(event.parcelId,next);
+   return structuredClone(next);
+  });
+ }
  async revoke(session,parcelId,expectedRevision){
   if(!id(parcelId)||!Number.isSafeInteger(expectedRevision)||expectedRevision<1||expectedRevision===Number.MAX_SAFE_INTEGER)fail('invalid-revocation');
   await this.authority.requireWorldAuthorityOperator(session,parcelId);

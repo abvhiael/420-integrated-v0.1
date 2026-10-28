@@ -4,7 +4,7 @@ import {createHighCountryCloudHttp420} from '../src/highcountry-cloud-http.js';
 const game='0x'+'a'.repeat(64),scope='0x'+'b'.repeat(64);
 test('premium HTTP requires live issuer and never accepts caller wallet/account or bypasses bridge',async()=>{
  const calls=[];
- const authority={gameId:game,verifyToken:async t=>{if(t!=='valid')throw Error('invalid');return {sub:'alice',game};},
+ const authority={gameId:game,verifyToken:async t=>{if(t!=='valid')throw Error('invalid');return {sub:'alice',game,epoch:0,iss:'issuer-test'};},
   registeredPrincipal:async t=>t==='valid'?'alice':null};
  const server=createHighCountryCloudHttp420({authority,
   poolForPrincipal:async()=>({connect:async()=>{throw Error('unexpected database');}}),

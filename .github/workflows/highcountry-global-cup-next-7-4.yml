@@ -1,0 +1,28 @@
+name: High Country HC-NEXT-7.4 Cup Projection Level 1
+on:
+  pull_request:
+    paths:
+      - 'services/420-gaming-player-profile/src/highcountry-global-cup.js'
+      - 'services/420-gaming-player-profile/test/highcountry-global-cup.test.js'
+      - '.github/workflows/highcountry-global-cup-next-7-4.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  cup-projection:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Confirm exact implementation SHA
+        env:
+          TARGET: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$TARGET"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Test strict finalized Cup projection and adversarial cases
+        working-directory: services/420-gaming-player-profile
+        run: node --test test/highcountry-global-cup.test.js

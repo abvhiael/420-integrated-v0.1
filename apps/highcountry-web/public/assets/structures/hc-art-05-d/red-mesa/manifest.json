@@ -1,0 +1,217 @@
+{
+  "collection": "HC-ART-05-D",
+  "region": "red-mesa",
+  "source_master": "a_clean_png_style_isometric_concept_art_sheet_on_a.png",
+  "layout": "4 columns \u00d7 3 rows",
+  "notes": [
+    "Source has native semi-transparent alpha. Crop boundaries divide closely spaced silhouette regions; visual review of fine details recommended.",
+    "Canvas dimensions are export sizes, not authoritative collision geometry.",
+    "All assets share the same flat GitHub directory."
+  ],
+  "assets": [
+    {
+      "id": "01",
+      "name": "Red Mesa Heritage Barn",
+      "filename": "hc-structure-red-mesa-heritage-barn.png",
+      "footprint_tiles": [
+        6,
+        5
+      ],
+      "canvas_px": [
+        1920,
+        1600
+      ],
+      "repo_path": "apps/highcountry-web/public/assets/structures/hc-art-05-d/red-mesa/hc-structure-red-mesa-heritage-barn.png",
+      "sha256": "b271b53b03b0ff77c7fd1ed78a007a3ae6170840375d57b354831122c2f2851c",
+      "bytes": 2610600,
+      "alpha_zero_fraction": 0.4255
+    },
+    {
+      "id": "02",
+      "name": "Desert Ranch Equipment Shelter",
+      "filename": "hc-structure-desert-ranch-equipment-shelter.png",
+      "footprint_tiles": [
+        5,
+        4
+      ],
+      "canvas_px": [
+        1600,
+        1280
+      ],
+      "repo_path": "apps/highcountry-web/public/assets/structures/hc-art-05-d/red-mesa/hc-structure-desert-ranch-equipment-shelter.png",
+      "sha256": "fe4b84a7359df7012f210dc6b294af22fa2a9df3a21a9702749b4e6c708160f9",
+      "bytes": 1838813,
+      "alpha_zero_fraction": 0.4606
+    },
+    {
+      "id": "03",
+      "name": "Mesa Hay Storage Barn",
+      "filename": "hc-structure-mesa-hay-storage-barn.png",
+      "footprint_tiles": [
+        5,
+        4
+      ],
+      "canvas_px": [
+        1600,
+        1280
+      ],
+      "repo_path": "apps/highcountry-web/public/assets/structures/hc-art-05-d/red-mesa/hc-structure-mesa-hay-storage-barn.png",
+      "sha256": "74a7aa7b15ee1e56ad6d6f6b127141e4be8a199654d08da27999f6cd20e40de0",
+      "bytes": 1828654,
+      "alpha_zero_fraction": 0.4582
+    },
+    {
+      "id": "04",
+      "name": "Desert Grain Silo House",
+      "filename": "hc-structure-desert-grain-silo-house.png",
+      "footprint_tiles": [
+        5,
+        4
+      ],
+      "canvas_px": [
+        1600,
+        1280
+      ],
+      "repo_path": "apps/highcountry-web/public/assets/structures/hc-art-05-d/red-mesa/hc-structure-desert-grain-silo-house.png",
+      "sha256": "aa916936f6a489bbb84aa8dfdfbe02eb6380a143834bdd1d37bbef67b058aeb2",
+      "bytes": 1936614,
+      "alpha_zero_fraction": 0.4576
+    },
+    {
+      "id": "05",
+      "name": "Mesa Livestock Corral",
+      "filename": "hc-structure-mesa-livestock-corral.png",
+      "footprint_tiles": [
+        5,
+        4
+      ],
+      "canvas_px": [
+        1600,
+        1280
+      ],
+      "repo_path": "apps/highcountry-web/public/assets/structures/hc-art-05-d/red-mesa/hc-structure-mesa-livestock-corral.png",
+      "sha256": "14ceb0a1af4191637b8eaa88faa0e2ed76f1a3f96849975fc807635bb031f5a0",
+      "bytes": 1861174,
+      "alpha_zero_fraction": 0.4563
+    },
+    {
+      "id": "06",
+      "name": "Red Mesa Ranch Stable",
+      "filename": "hc-structure-red-mesa-ranch-stable.png",
+      "footprint_tiles": [
+        6,
+        4
+      ],
+      "canvas_px": [
+        1920,
+        1280
+      ],
+      "repo_path": "apps/highcountry-web/public/assets/structures/hc-art-05-d/red-mesa/hc-structure-red-mesa-ranch-stable.png",
+      "sha256": "2fcc185506ac231c60f23c4b43295cf7ed6cb13826382c40d7440ea683831dca",
+      "bytes": 1691267,
+      "alpha_zero_fraction": 0.5904
+    },
+    {
+      "id": "07",
+      "name": "Desert Ranch Maintenance Shop",
+      "filename": "hc-structure-desert-ranch-maintenance-shop.png",
+      "footprint_tiles": [
+        4,
+        4
+      ],
+      "canvas_px": [
+        1280,
+        1280
+      ],
+      "repo_path": "apps/highcountry-web/public/assets/structures/hc-art-05-d/red-mesa/hc-structure-desert-ranch-maintenance-shop.png",
+      "sha256": "ece80b5e02314dc58d2b7242551f5baef2e53d43825394ca72c4a532f9aba1f1",
+      "bytes": 1360472,
+      "alpha_zero_fraction": 0.5374
+    },
+    {
+      "id": "08",
+      "name": "Sandstone Storage Warehouse",
+      "filename": "hc-structure-sandstone-storage-warehouse.png",
+      "footprint_tiles": [
+        5,
+        4
+      ],
+      "canvas_px": [
+        1600,
+        1280
+      ],
+      "repo_path": "apps/highcountry-web/public/assets/structures/hc-art-05-d/red-mesa/hc-structure-sandstone-storage-warehouse.png",
+      "sha256": "e6901848e7a059eb6d9fa464c604cecb9fa117e2e5fb2ab6003a523c4beceed8",
+      "bytes": 1573573,
+      "alpha_zero_fraction": 0.5521
+    },
+    {
+      "id": "09",
+      "name": "Mesa Adobe Homestead",
+      "filename": "hc-structure-mesa-adobe-homestead.png",
+      "footprint_tiles": [
+        6,
+        5
+      ],
+      "canvas_px": [
+        1920,
+        1600
+      ],
+      "repo_path": "apps/highcountry-web/public/assets/structures/hc-art-05-d/red-mesa/hc-structure-mesa-adobe-homestead.png",
+      "sha256": "b05eccafdc800a2f49a13dfc5b71131565a5bd92dc41230bcdb07388b7d20834",
+      "bytes": 2871989,
+      "alpha_zero_fraction": 0.3516
+    },
+    {
+      "id": "10",
+      "name": "Desert Ranch Bunkhouse",
+      "filename": "hc-structure-desert-ranch-bunkhouse.png",
+      "footprint_tiles": [
+        5,
+        4
+      ],
+      "canvas_px": [
+        1600,
+        1280
+      ],
+      "repo_path": "apps/highcountry-web/public/assets/structures/hc-art-05-d/red-mesa/hc-structure-desert-ranch-bunkhouse.png",
+      "sha256": "cd7f7c6ccc03967b38761d39f4a391eae1ca334c5106aed519816ae569e810c9",
+      "bytes": 1827941,
+      "alpha_zero_fraction": 0.4507
+    },
+    {
+      "id": "11",
+      "name": "Red Mesa Field Office",
+      "filename": "hc-structure-red-mesa-field-office.png",
+      "footprint_tiles": [
+        4,
+        4
+      ],
+      "canvas_px": [
+        1280,
+        1280
+      ],
+      "repo_path": "apps/highcountry-web/public/assets/structures/hc-art-05-d/red-mesa/hc-structure-red-mesa-field-office.png",
+      "sha256": "facf9343094eff5b9de4a917cf86fcef1627dc06e86f3ec3de8c7b8a0b75d58d",
+      "bytes": 1353537,
+      "alpha_zero_fraction": 0.5378
+    },
+    {
+      "id": "12",
+      "name": "Desert Harvest Packing House",
+      "filename": "hc-structure-desert-harvest-packing-house.png",
+      "footprint_tiles": [
+        5,
+        4
+      ],
+      "canvas_px": [
+        1600,
+        1280
+      ],
+      "repo_path": "apps/highcountry-web/public/assets/structures/hc-art-05-d/red-mesa/hc-structure-desert-harvest-packing-house.png",
+      "sha256": "9a6ad7cabc98783daf572f9a0fccb3b97f27a521285ee278fbbdd5e41468e808",
+      "bytes": 1911737,
+      "alpha_zero_fraction": 0.4405
+    }
+  ]
+}

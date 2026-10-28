@@ -1,6 +1,6 @@
 # 420Bet 5D.7 — Settlement, payouts, voids and refunds
 
-This candidate preserves the previously qualified funded admission, market-gated final settlement, certified winner/loss evaluation, pull-based player claims, dispute/VOID outcomes and permissionless timeout refunds. It adds immutable terminal settlement receipts, including state, payout amount, certification/void evidence, executor and terminal timestamp. Failed or repeated terminal transitions cannot overwrite a receipt because the vault only closes FUNDED tickets.
+This candidate preserves the previously qualified funded admission, market-gated final settlement, certified winner/loss evaluation, pull-based player claims, dispute/VOID outcomes and permissionless timeout refunds. It rejects noncanonical result selections before settlement, preventing an unknown certified selection from being treated as a losing bet. It adds immutable terminal settlement receipts, including state, payout amount, certification/void evidence, executor and terminal timestamp. Failed or repeated terminal transitions cannot overwrite a receipt because the vault only closes FUNDED tickets.
 
 ## Scope and remaining canonical decisions
 

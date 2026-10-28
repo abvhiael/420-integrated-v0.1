@@ -13,6 +13,11 @@ mapfile -t targets < <(python3 -c 'import json,sys; p=json.load(open(sys.argv[1]
 export FOUNDRY_OUT="out-sol02-$group"
 export FOUNDRY_CACHE_PATH="cache-sol02-$group"
 echo "CI-SOL-02 group=$group profile=$FOUNDRY_PROFILE targets=${#targets[@]}"
+# Multiplayer proofs are retained as a checksum-pinned archive, not loose Git files.
+# Restore and verify authentic artifacts only for the group that executes 6.10.
+if [[ "$group" == "420bet--01" ]]; then
+  python3 ../scripts/bet/package-poker-5a10-evidence.py --verify
+fi
 forge build "${targets[@]}"
 mapfile -t tests < <(printf '%s\n' "${targets[@]}" | grep '^test/.*\.sol$' || true)
 for target in "${tests[@]}"; do

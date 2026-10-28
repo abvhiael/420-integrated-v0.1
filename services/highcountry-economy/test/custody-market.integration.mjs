@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {HighCountryMarket} from '../src/market.js';
 import {CanonicalMarketSettlement} from '../src/canonical-settlement.js';
 import {MemoryTransactionFixture,BudsLedger} from '../src/buds-ledger.js';
-import {auditCustody,settleListedUnits} from '../src/custody-records.js';
+import {auditCustody,reservePlacementUnit,releasePlacementUnit} from '../src/custody-records.js';
 const key=(owner,asset='desk')=>JSON.stringify([owner,asset]);
 function setup(){
  const store=new MemoryTransactionFixture(),state={finalized:false,cancelled:false};
@@ -78,4 +78,17 @@ test('canonical unfinalized abort requires independent cancellation and exits es
  assert.equal([...t.store.state.custodyUnits.values()].filter(x=>x.state==='exited').length,2);
  assert.equal(t.store.state.balances.get('bob').available,100);
  await assert.rejects(t.canonical.abort('again','transfer:desk'));
+});
+
+test('placed unit cannot be listed, and listed unit cannot be placed',async()=>{
+ const t=setup();await imported(t);
+ const reservation=await t.store.transact(s=>reservePlacementUnit(s,{owner:'alice',assetId:'desk',instanceId:'desk-room'}));
+ assert.equal(t.store.state.custodyUnits.get(reservation.unitId).state,'placed');
+ await assert.rejects(t.market.list('seller','over-list','over','desk',3,20,999),/verified-units-unavailable/);
+ await t.market.list('seller','list','listing','desk',2,20,999);
+ await assert.rejects(t.store.transact(s=>reservePlacementUnit(s,{owner:'alice',assetId:'desk',instanceId:'another'})),/verified-unit-unavailable/);
+ const before=auditCustody(t.store.state,{strictAggregate:true});
+ assert.equal(before.reservations,3);
+ await t.store.transact(s=>releasePlacementUnit(s,{owner:'alice',assetId:'desk',instanceId:'desk-room'}));
+ assert.equal(auditCustody(t.store.state,{strictAggregate:true}).reservations,2);
 });

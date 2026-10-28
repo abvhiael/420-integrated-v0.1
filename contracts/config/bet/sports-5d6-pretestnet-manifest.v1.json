@@ -1,0 +1,59 @@
+{
+  "schema": "420.bet.sports.5d6.deployment.v1",
+  "status": "PRETESTNET",
+  "chain_id": null,
+  "artifacts": {
+    "vault": {
+      "address": null,
+      "code_hash": null
+    },
+    "oracle_gate": {
+      "address": null,
+      "code_hash": null
+    },
+    "oracle_router": {
+      "address": null,
+      "code_hash": null
+    },
+    "feed_registry": {
+      "address": null,
+      "code_hash": null
+    },
+    "provider_registry": {
+      "address": null,
+      "code_hash": null
+    },
+    "risk_policy": {
+      "address": null,
+      "code_hash": null
+    },
+    "certification": {
+      "address": null,
+      "code_hash": null
+    }
+  },
+  "policy": {
+    "oracle_only_funding": true,
+    "minimum_sources": 2,
+    "minimum_confidence_bps": 9000,
+    "max_age_seconds": 7200,
+    "aggregation_mode": "AGGREGATION_QUORUM_EQUAL",
+    "risk_policy_halted": false
+  },
+  "markets": [],
+  "reporter_governance": {
+    "independent_organizations_verified": false,
+    "source_rights_verified": false,
+    "key_custody_verified": false,
+    "adjudicator_separation_verified": false,
+    "revocation_drill_passed": false
+  },
+  "attestation": {
+    "exact_implementation_sha": null,
+    "source_commit_hash": null,
+    "approved_by": null,
+    "independent_review_hash": null,
+    "live_chain_verified": false,
+    "external_acceptance": false
+  }
+}

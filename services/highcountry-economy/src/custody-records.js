@@ -67,18 +67,19 @@ export function auditCustody(s,{strictAggregate=false}={}){
 }
 
 /** Internal-only synchronous mutation helpers; caller MUST hold PostgresBudsStore's locked transaction. */
-export function reservePlacementUnit(s,{owner,assetId,instanceId}){
+export function reservePlacementUnit(s,{owner,assetId,instanceId,unitId=null}){
  custodyState(s);
  if(!token(owner)||!token(assetId)||!token(instanceId))reject('invalid-placement-reference');
  // Legacy balances are not source-backed units. Never allocate them implicitly.
  const ids=[...s.custodyUnits.values()].filter(u=>u.owner===owner&&u.assetId===assetId&&u.state==='available')
    .sort((a,b)=>a.unitId.localeCompare(b.unitId,'en'));
+ if(unitId!==null&&(!token(unitId)||!ids.some(u=>u.unitId===unitId)))reject('bound-unit-unavailable');
  if(!ids.length)reject('verified-unit-unavailable');
  const keyName=key(owner,assetId),balance=s.assets.get(keyName);
  if(!balance||!Number.isSafeInteger(balance.available)||balance.available<1||!Number.isSafeInteger(balance.reserved)||balance.reserved<0||balance.reserved===Number.MAX_SAFE_INTEGER)reject('inventory-unavailable');
  const reservationId='place:'+instanceId;
  if([...s.custodyReservations.values()].some(r=>r.reservationId===reservationId))reject('duplicate-instance-reservation');
- const u=ids[0];
+ const u=unitId===null?ids[0]:ids.find(x=>x.unitId===unitId);
  if(s.custodyReservations.has(u.unitId))reject('unit-already-reserved');
  s.custodyUnits.set(u.unitId,{...u,state:'placed',reservationId,revision:u.revision+1});
  s.custodyReservations.set(u.unitId,{unitId:u.unitId,owner,assetId,kind:'placed',reservationId,instanceId});

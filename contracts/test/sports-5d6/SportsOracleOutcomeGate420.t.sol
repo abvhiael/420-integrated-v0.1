@@ -176,4 +176,47 @@ contract SportsOracleOutcomeGate420Test is SportsFundedTickets420Test {
         vault.refund(id);
         require(vault.riskGroupOutstanding(group) == 0, "refund group debt remained");
     }
+
+    function testOracleGateRejectsWrongVaultBinding() public {
+        SportsFundedTickets420 unrelated =
+            new SportsFundedTickets420(address(auth), address(acceptance), address(cert));
+        SportsOracleOutcomeGate420 impostor =
+            new SportsOracleOutcomeGate420(address(oracle), address(unrelated), 2 hours, 9000, 2);
+        _grant(CONTROL, vault.BIND_ORACLE(), vault.scope(market));
+        _fails(CONTROL, address(vault), abi.encodeCall(vault.bindOracle, (market, address(impostor))));
+        require(vault.marketOracleGate(market) == address(0), "incorrect gate accepted");
+    }
+
+    function testOracleFuseCannotActivateAfterFunding() public {
+        _submit(_quote(1));
+        _call(CONTROL, address(vault), abi.encodeCall(vault.deposit, (market, 2000)));
+        bytes32 id = _fund(500);
+        require(uint256(vault.get(id).state) == 1, "fixture unfunded");
+        _grant(CONTROL, vault.BIND_ORACLE(), vault.scope(bytes32(0)));
+        _fails(CONTROL, address(vault), abi.encodeCall(vault.enableOracleOnlyFunding, ()));
+        require(!vault.oracleOnlyFunding(), "late fuse applied");
+    }
+
+    function testLegacyResolverWithValidCapabilityCannotBypassOracle() public {
+        _bindGate();
+        bytes32 id = _ticket();
+        _grant(PLAYER, vault.RESOLVE(), vault.scope(market));
+        _fails(PLAYER, address(vault), abi.encodeCall(vault.resolve, (id, true)));
+        _fails(CONTROL, address(vault), abi.encodeCall(vault.resolve, (id, true)));
+        require(uint256(vault.get(id).state) == 1, "legacy bypass mutated ticket");
+        _verified();
+        gate.settle(id, true);
+    }
+
+    function testOracleOutageAllowsTimedStakeRefundNotUnverifiedPayout() public {
+        _bindGate();
+        bytes32 id = _ticket();
+        oracle.halt(true);
+        _fails(CONTROL, address(vault), abi.encodeCall(vault.resolve, (id, true)));
+        _fails(CONTROL, address(gate), abi.encodeCall(gate.settle, (id, true)));
+        vm.warp(markets.get(market).config.cutoff + 4 days);
+        vault.refund(id);
+        require(vault.credit(PLAYER, address(token)) == 500, "stake not refunded");
+        require(vault.reserved(market) == 0, "refund did not release exposure");
+    }
 }

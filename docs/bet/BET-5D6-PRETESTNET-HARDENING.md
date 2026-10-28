@@ -12,7 +12,7 @@
 
 ## Conservative exposure
 
-Markets can be assigned once to one immutable risk group by scoped authority with `bindRiskGroup`. Group identity binds a single token and a fixed maximum outstanding **sum** of profit liabilities. Group exposure increments atomically with funding and decrements on winning, losing or refunding. The sum-of-open-profits bound covers correlated simultaneous wins without guessing correlation coefficients; it is deliberately conservative. Once group membership has begun, the risk group cannot be relabeled or its cap silently raised. Group limits are **not capital guarantees** without funded operator collateral, which remains independently checked on admission.
+Markets can be assigned once to one immutable risk group by scoped authority with `bindRiskGroup`. The required group ID is derived on-chain as `keccak256(abi.encode("420.BET.SPORT.EVENT.RISK.V1", eventId, asset))` so every proposition on the same sporting event and token shares one cap; arbitrary subgroup identities are rejected. Group identity binds a single token and a fixed maximum outstanding **sum** of profit liabilities. Group exposure increments atomically with funding and decrements on winning, losing or refunding. The sum-of-open-profits bound covers correlated simultaneous wins without guessing correlation coefficients; it is deliberately conservative. Once group membership has begun, the risk group cannot be relabeled or its cap silently raised. Group limits are **not capital guarantees** without funded operator collateral, which remains independently checked on admission.
 
 ## Canonical oracle policy
 

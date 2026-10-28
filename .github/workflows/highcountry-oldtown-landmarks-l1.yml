@@ -1,0 +1,20 @@
+name: HighCountry Old Town Landmarks Level 1
+on:
+  pull_request:
+    paths:
+      - 'deployments/highcountry/hc-world-pa-oldtown-landmark-hitboxes.v1.json'
+      - 'apps/highcountry-web/src/old-town-landmarks.js'
+      - 'apps/highcountry-web/src/app.js'
+      - 'apps/highcountry-web/scripts/build.mjs'
+      - 'apps/highcountry-web/server.mjs'
+      - 'scripts/highcountry/hc-world-pa-oldtown-landmarks.test.mjs'
+      - '.github/workflows/highcountry-oldtown-landmarks-l1.yml'
+jobs:
+  oldtown-landmarks-l1:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - run: node --test scripts/highcountry/hc-world-pa-oldtown-landmarks.test.mjs
+      - run: node --check apps/highcountry-web/src/app.js && node --check apps/highcountry-web/src/old-town-landmarks.js && node --check apps/highcountry-web/server.mjs

@@ -1,0 +1,28 @@
+name: HighCountry HC-PLACE-03-B3 Exact Custody Level 1
+on:
+  pull_request:
+    paths:
+      - 'services/highcountry-economy/src/market.js'
+      - 'services/highcountry-economy/src/canonical-settlement.js'
+      - 'services/highcountry-economy/src/custody-records.js'
+      - 'services/highcountry-economy/src/buds-ledger.js'
+      - 'services/highcountry-economy/test/custody-market.integration.mjs'
+      - '.github/workflows/highcountry-hc-place-03b3-l1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  market-custody:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax and bounded marketplace custody tests
+        run: |
+          node --check services/highcountry-economy/src/custody-records.js
+          node --check services/highcountry-economy/src/market.js
+          node --check services/highcountry-economy/src/canonical-settlement.js
+          node --test services/highcountry-economy/test/custody-market.integration.mjs services/highcountry-economy/test/market.test.js services/highcountry-economy/test/canonical-settlement.test.js services/highcountry-economy/test/custody-records.test.mjs services/highcountry-economy/test/placement-transactions.test.mjs

@@ -22,8 +22,7 @@ contract SportsRealOracleRouterIntegration420Test is SportsFundedTickets420Test 
     SportsOracleOutcomeGate420 gate;
     bytes32 feed;
 
-    function setUp() public override {
-        super.setUp();
+    function _configureRealRouter() internal {
         providers = new OracleProviderRegistry420(address(this));
         providers.setProvider(PROVIDER_A, A, keccak256("independent-a-fixture"), bytes32(0), true);
         providers.setProvider(PROVIDER_B, B, keccak256("independent-b-fixture"), bytes32(0), true);
@@ -49,6 +48,7 @@ contract SportsRealOracleRouterIntegration420Test is SportsFundedTickets420Test 
     }
 
     function _ticket() internal returns (bytes32 id) {
+        _configureRealRouter();
         _submit(_quote(1));
         _call(CONTROL, address(vault), abi.encodeCall(vault.deposit, (market, 2000)));
         id = _fund(500);

@@ -1,0 +1,192 @@
+{
+  "schema": "HC.WORLD.PA.OLDTOWN.LANDMARK.HITBOXES.V1",
+  "status": "PROVISIONAL_UNTIL_ARTWORK_APPROVAL",
+  "image": {
+    "width": 1536,
+    "height": 1024,
+    "source": "OWNER_APPROVED_CONVERSATION_OLD_TOWN_MAP",
+    "repoPath": null,
+    "sha256": null
+  },
+  "districtId": "HC-EC-S01-D07",
+  "notCadastral": true,
+  "privateTitleSaleEnabled": false,
+  "heritageDiscoveryPublished": false,
+  "landmarks": [
+    {
+      "id": "HC-EC-S01-D07-LM-01",
+      "name": "Harbourview Hotel",
+      "entrancePixel": [
+        230,
+        300
+      ],
+      "polygon": [
+        [
+          185,
+          265
+        ],
+        [
+          292,
+          265
+        ],
+        [
+          292,
+          335
+        ],
+        [
+          185,
+          335
+        ]
+      ],
+      "href": "/port-alder/district/HC-EC-S01-D07/landmark/LM-01",
+      "exterior": "/assets/highcountry/old-town/permanent-landmarks/HC-EC-S01-D07-lm-01-harbourview-hotel-permanent-exterior.png",
+      "services": [
+        "Lobby & visitor information",
+        "Public restaurant information",
+        "Local stories"
+      ],
+      "availability": "PUBLIC_INFORMATION_ONLY",
+      "questRewardsEnabled": false
+    },
+    {
+      "id": "HC-EC-S01-D07-LM-02",
+      "name": "Founders' Square & Clock Tower",
+      "entrancePixel": [
+        763,
+        198
+      ],
+      "polygon": [
+        [
+          719,
+          175
+        ],
+        [
+          806,
+          175
+        ],
+        [
+          806,
+          242
+        ],
+        [
+          719,
+          242
+        ]
+      ],
+      "href": "/port-alder/district/HC-EC-S01-D07/landmark/LM-02",
+      "exterior": "/assets/highcountry/old-town/permanent-landmarks/HC-EC-S01-D07-lm-02-founders-square-clock-tower-permanent-exterior.png",
+      "services": [
+        "Town history",
+        "Community noticeboard",
+        "Public events information"
+      ],
+      "availability": "PUBLIC_INFORMATION_ONLY",
+      "questRewardsEnabled": false
+    },
+    {
+      "id": "HC-EC-S01-D07-LM-03",
+      "name": "Old Cannery",
+      "entrancePixel": [
+        714,
+        587
+      ],
+      "polygon": [
+        [
+          680,
+          558
+        ],
+        [
+          751,
+          558
+        ],
+        [
+          751,
+          624
+        ],
+        [
+          680,
+          624
+        ]
+      ],
+      "href": "/port-alder/district/HC-EC-S01-D07/landmark/LM-03",
+      "exterior": "/assets/highcountry/old-town/permanent-landmarks/HC-EC-S01-D07-lm-03-old-cannery-permanent-exterior.png",
+      "services": [
+        "Cannery heritage museum",
+        "Restoration information",
+        "Industrial archives"
+      ],
+      "availability": "PUBLIC_INFORMATION_ONLY",
+      "questRewardsEnabled": false
+    },
+    {
+      "id": "HC-EC-S01-D07-LM-04",
+      "name": "The Sail Loft",
+      "entrancePixel": [
+        1210,
+        777
+      ],
+      "polygon": [
+        [
+          1168,
+          747
+        ],
+        [
+          1252,
+          747
+        ],
+        [
+          1252,
+          816
+        ],
+        [
+          1168,
+          816
+        ]
+      ],
+      "href": "/port-alder/district/HC-EC-S01-D07/landmark/LM-04",
+      "exterior": "/assets/highcountry/old-town/permanent-landmarks/HC-EC-S01-D07-lm-04-the-sail-loft-permanent-exterior.png",
+      "services": [
+        "Maritime information",
+        "Boatbuilding exhibits",
+        "Equipment guidance"
+      ],
+      "availability": "PUBLIC_INFORMATION_ONLY",
+      "questRewardsEnabled": false
+    },
+    {
+      "id": "HC-EC-S01-D07-LM-05",
+      "name": "St. Brigid's Chapel",
+      "entrancePixel": [
+        1210,
+        272
+      ],
+      "polygon": [
+        [
+          1165,
+          244
+        ],
+        [
+          1257,
+          244
+        ],
+        [
+          1257,
+          304
+        ],
+        [
+          1165,
+          304
+        ]
+      ],
+      "href": "/port-alder/district/HC-EC-S01-D07/landmark/LM-05",
+      "exterior": "/assets/highcountry/old-town/permanent-landmarks/HC-EC-S01-D07-lm-05-st-brigids-chapel-permanent-exterior.png",
+      "services": [
+        "Community history",
+        "Memorial records",
+        "Restoration information"
+      ],
+      "availability": "PUBLIC_INFORMATION_ONLY",
+      "questRewardsEnabled": false
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {canonicalPortAlderMilestone} from '../../services/highcountry-economy/src/port-alder-purchase-milestone.js';
+const owner='registered-player';
+const identity={registeredPrincipal:async()=>owner};
+const eligibleTitleIds=Array.from({length:4},(_,i)=>'HC-EC-U-'+String(i+1).padStart(6,'0'));
+const make=(count)=>({settlementId:'HC-EC-S01',finalized:true,revision:3,snapshotId:'finalized99',eligibleTitleIds,settledTitleIds:eligibleTitleIds.slice(0,count).map(titleId=>({titleId,finalized:true,currentOwner:'player1',status:'ISSUED_SETTLED'}))});
+const invoke=(result,id=identity)=>canonicalPortAlderMilestone({reader:{finalizedPortAlderTitles:async()=>result},session:'token',identity:id});
+test('server computes exact denominator and settled purchases',async()=>{const s=await invoke(make(3));assert.equal(s.qualifyingPurchased,3);assert.equal(s.eligibleTitles,4);assert.equal(s.canonicalSnapshotId,'HC-EC-S01:finalized99')});
+test('no client-side counts can influence outcome',async()=>{const s=await canonicalPortAlderMilestone({reader:{finalizedPortAlderTitles:async()=>make(2)},session:{qualifyingPurchased:5000},identity});assert.equal(s.qualifyingPurchased,2)});
+test('unissued reserve title cannot count',async()=>{const a=make(3);a.settledTitleIds[0].currentOwner='420CORP';await assert.rejects(invoke(a),/invalid settled/)});
+test('duplicated settled evidence rejected',async()=>{const a=make(1);a.settledTitleIds.push(a.settledTitleIds[0]);await assert.rejects(invoke(a),/invalid settled/)});
+test('unfinalized snapshot rejected',async()=>await assert.rejects(invoke({...make(3),finalized:false}),/unfinalized/));
+test('unknown title ID rejected',async()=>{const a=make(1);a.settledTitleIds[0].titleId='HC-EC-U-999999';await assert.rejects(invoke(a),/invalid settled/)});
+test('missing authentication rejected',async()=>await assert.rejects(invoke(make(3),{registeredPrincipal:async()=>null}),/unauthenticated/));

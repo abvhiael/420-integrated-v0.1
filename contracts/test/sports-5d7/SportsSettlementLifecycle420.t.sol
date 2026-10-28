@@ -100,4 +100,24 @@ contract SportsSettlementLifecycle420Test is SportsFundedTickets420Test {
         require(vault.credit(PLAYER, address(token)) == stake, "credit changed stake");
         _assertAssetConservation();
     }
+
+    function testUnknownCertifiedSelectionCannotConfiscateStake() public {
+        bytes32 id = _funded();
+        vm.warp(markets.get(market).config.cutoff + 1);
+        bytes32 unapproved = keccak256("unapproved-result-selection");
+        bytes32 evidence = keccak256("unknown-selection-evidence");
+        vm.prank(REPORT_A);
+        cert.attest(market, unapproved, evidence);
+        vm.prank(REPORT_B);
+        cert.attest(market, unapproved, evidence);
+        vm.warp(block.timestamp + 1 hours);
+        cert.finalize(market);
+        _fails(CONTROL, address(vault), abi.encodeCall(vault.resolve, (id, false)));
+        require(vault.get(id).state == SportsFundedTickets420.TicketState.FUNDED,
+            "unknown selection closed ticket");
+        _assertAssetConservation();
+        vm.warp(uint256(markets.get(market).config.cutoff) + 86400);
+        vault.refund(id);
+        require(vault.credit(PLAYER, address(token)) == 500, "stake inaccessible");
+    }
 }

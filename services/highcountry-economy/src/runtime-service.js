@@ -94,7 +94,7 @@ export async function createRuntime({pool,namespace,authority:authConfig,rpc:rpc
 }
 // Production entrypoint for a wallet-optional, registered-player ordinary economy.
 // Never silently repurpose the canonical on-chain escrow settlement runtime.
-export async function createOrdinaryRuntime({pool,namespace,authority:authConfig,rpc:rpcConfig,sources,inventoryAuthority,signerRpc,clock,progression,missions,discovery,landRights,social,seedCatalogue,seedPacks,seedOpenings,seedPurchases}) {
+export async function createOrdinaryRuntime({pool,namespace,authority:authConfig,rpc:rpcConfig,sources,inventoryAuthority,signerRpc,clock,progression,missions,discovery,landRights,social,seedCatalogue,seedPacks,seedOpenings,seedPurchases,placement}) {
  await requireLeastPrivilegeRuntimeRole(pool,namespace);
  if(!inventoryAuthority||typeof inventoryAuthority.verifyAssetReceipt!=='function'
     ||typeof inventoryAuthority.requireMarketOpen!=='function')

@@ -1,0 +1,191 @@
+{
+  "collection": "HC-ART-05-F",
+  "category": "420Corp-owned government landmark",
+  "region": "universal",
+  "ownership": "420Corp",
+  "placement": "single founder-selected map instance; not player purchasable",
+  "tile_size_px": 64,
+  "artwork_pixels_per_tile": 320,
+  "assets": [
+    {
+      "id": "U01",
+      "name": "Heritage Town Clocktower",
+      "filename": "hc-structure-heritage-town-clocktower.png",
+      "footprint_tiles": {
+        "width": 4,
+        "height": 4
+      },
+      "canvas_px": {
+        "width": 1280,
+        "height": 1280
+      },
+      "sha256": "88f4d2da838f45722287071b51949d83a4a150c0bd2c6dd9cd0634cef2308437",
+      "repository_path": "apps/highcountry-web/public/assets/structures/hc-art-05-f/universal/hc-structure-heritage-town-clocktower.png"
+    },
+    {
+      "id": "U02",
+      "name": "Founders' Heritage Archive",
+      "filename": "hc-structure-founders-heritage-archive.png",
+      "footprint_tiles": {
+        "width": 5,
+        "height": 4
+      },
+      "canvas_px": {
+        "width": 1600,
+        "height": 1280
+      },
+      "sha256": "c20b49a69e78aaf17e522f30aec47503f16fb5563d7b3634f2555b2952ee93b1",
+      "repository_path": "apps/highcountry-web/public/assets/structures/hc-art-05-f/universal/hc-structure-founders-heritage-archive.png"
+    },
+    {
+      "id": "U03",
+      "name": "Old Settlers' Assembly Hall",
+      "filename": "hc-structure-old-settlers-assembly-hall.png",
+      "footprint_tiles": {
+        "width": 6,
+        "height": 5
+      },
+      "canvas_px": {
+        "width": 1920,
+        "height": 1600
+      },
+      "sha256": "b4ba0eb15b8cf71795e6bf5332a2915828512421910ad55faaabe4d8a415d47a",
+      "repository_path": "apps/highcountry-web/public/assets/structures/hc-art-05-f/universal/hc-structure-old-settlers-assembly-hall.png"
+    },
+    {
+      "id": "U04",
+      "name": "Heritage Artisan Foundry",
+      "filename": "hc-structure-heritage-artisan-foundry.png",
+      "footprint_tiles": {
+        "width": 5,
+        "height": 4
+      },
+      "canvas_px": {
+        "width": 1600,
+        "height": 1280
+      },
+      "sha256": "ffae80d5653999443b553a92abad6436a3368216272ff3938cad990ac8fdccb6",
+      "repository_path": "apps/highcountry-web/public/assets/structures/hc-art-05-f/universal/hc-structure-heritage-artisan-foundry.png"
+    },
+    {
+      "id": "U05",
+      "name": "Founders' Memorial Garden",
+      "filename": "hc-structure-founders-memorial-garden.png",
+      "footprint_tiles": {
+        "width": 5,
+        "height": 4
+      },
+      "canvas_px": {
+        "width": 1600,
+        "height": 1280
+      },
+      "sha256": "8f26f19b27a39007f08a69d9e4bc767205fcd69de6782865debd1eca611832c5",
+      "repository_path": "apps/highcountry-web/public/assets/structures/hc-art-05-f/universal/hc-structure-founders-memorial-garden.png"
+    },
+    {
+      "id": "U06",
+      "name": "Botanical Heritage Museum",
+      "filename": "hc-structure-botanical-heritage-museum.png",
+      "footprint_tiles": {
+        "width": 6,
+        "height": 5
+      },
+      "canvas_px": {
+        "width": 1920,
+        "height": 1600
+      },
+      "sha256": "1a0467c1a89ea34bd53589a0e97320637c41fc53a9c5560206d3a44bf5420ebb",
+      "repository_path": "apps/highcountry-web/public/assets/structures/hc-art-05-f/universal/hc-structure-botanical-heritage-museum.png"
+    },
+    {
+      "id": "U07",
+      "name": "Historic Town Hall & Records Office",
+      "filename": "hc-structure-historic-town-hall-records-office.png",
+      "footprint_tiles": {
+        "width": 6,
+        "height": 5
+      },
+      "canvas_px": {
+        "width": 1920,
+        "height": 1600
+      },
+      "sha256": "114e3a21b9f1f71bac734b9150a226c1466334dfec23803538017f854ad0610f",
+      "repository_path": "apps/highcountry-web/public/assets/structures/hc-art-05-f/universal/hc-structure-historic-town-hall-records-office.png"
+    },
+    {
+      "id": "U08",
+      "name": "Old Stone Heritage Library",
+      "filename": "hc-structure-old-stone-heritage-library.png",
+      "footprint_tiles": {
+        "width": 5,
+        "height": 4
+      },
+      "canvas_px": {
+        "width": 1600,
+        "height": 1280
+      },
+      "sha256": "810e50c71ceb019f43a4d1300bf369c06f609fad63653d3eedc58eb91f628792",
+      "repository_path": "apps/highcountry-web/public/assets/structures/hc-art-05-f/universal/hc-structure-old-stone-heritage-library.png"
+    },
+    {
+      "id": "U09",
+      "name": "Pioneer Printing Press & Newspaper House",
+      "filename": "hc-structure-pioneer-printing-press-newspaper-house.png",
+      "footprint_tiles": {
+        "width": 5,
+        "height": 4
+      },
+      "canvas_px": {
+        "width": 1600,
+        "height": 1280
+      },
+      "sha256": "45cb06f39457227f24945efbf6a14a051b7d97c2da6fbc25337cc60e421a5175",
+      "repository_path": "apps/highcountry-web/public/assets/structures/hc-art-05-f/universal/hc-structure-pioneer-printing-press-newspaper-house.png"
+    },
+    {
+      "id": "U10",
+      "name": "Historic Apothecary & Botanical Dispensary",
+      "filename": "hc-structure-historic-apothecary-botanical-dispensary.png",
+      "footprint_tiles": {
+        "width": 5,
+        "height": 4
+      },
+      "canvas_px": {
+        "width": 1600,
+        "height": 1280
+      },
+      "sha256": "50de39be3af1bd3c372b7e28059234d6bb9fa507c90dc07ee0b2122f202a09a3",
+      "repository_path": "apps/highcountry-web/public/assets/structures/hc-art-05-f/universal/hc-structure-historic-apothecary-botanical-dispensary.png"
+    },
+    {
+      "id": "U11",
+      "name": "Heritage Courtyard & Public Fountain",
+      "filename": "hc-structure-heritage-courtyard-public-fountain.png",
+      "footprint_tiles": {
+        "width": 5,
+        "height": 4
+      },
+      "canvas_px": {
+        "width": 1600,
+        "height": 1280
+      },
+      "sha256": "f687eeddefc9ba4fccdbc5ad871b59856ae21a840d6fe2b04a7ae713dfb73072",
+      "repository_path": "apps/highcountry-web/public/assets/structures/hc-art-05-f/universal/hc-structure-heritage-courtyard-public-fountain.png"
+    },
+    {
+      "id": "U12",
+      "name": "Old World Cartographer's Guildhall",
+      "filename": "hc-structure-old-world-cartographers-guildhall.png",
+      "footprint_tiles": {
+        "width": 5,
+        "height": 4
+      },
+      "canvas_px": {
+        "width": 1600,
+        "height": 1280
+      },
+      "sha256": "528ccd7c176a9a7d4f1c34cd75a158ad77afd774f4b31301ce1bff6dbcf277b7",
+      "repository_path": "apps/highcountry-web/public/assets/structures/hc-art-05-f/universal/hc-structure-old-world-cartographers-guildhall.png"
+    }
+  ]
+}

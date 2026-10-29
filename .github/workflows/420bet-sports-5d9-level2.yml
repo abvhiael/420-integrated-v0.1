@@ -6,29 +6,26 @@ on:
       - 'contracts/test/sports-5d6/**'
       - 'contracts/src/bet/sports/**'
       - '.github/workflows/420bet-sports-5d9-level2.yml'
+      - '.github/workflows/reusable-scoped-foundry.yml'
   workflow_dispatch:
 permissions:
   contents: read
 jobs:
-  funded-integration:
-    runs-on: ubuntu-latest
-    timeout-minutes: 45
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
-      - uses: foundry-rs/foundry-toolchain@v1
-        with:
-          version: v1.8.6
-      - name: Independently configured OracleRouter and funded integration
-        working-directory: contracts
-        run: forge test --match-path 'test/sports-5d6/SportsRealOracleRouterIntegration420.t.sol' -vv
-      - name: Event cancellation, postponement, market suspension and authority regressions
-        working-directory: contracts
-        run: forge test --match-path 'test/sports-5d5/SportsMarketLifecycle420.t.sol' -vv
-      - name: Signed quote expiry, revocation, source freshness and market epoch
-        working-directory: contracts
-        run: forge test --match-path 'test/sports-5d3/SportsOddsIngestion420.t.sol' -vv
-      - name: Adversarial risk and emergency regression
-        working-directory: contracts
-        run: forge test --match-path 'test/sports-5d9/*.t.sol' -vv
+  real-oracle-funded:
+    uses: ./.github/workflows/reusable-scoped-foundry.yml
+    with:
+      suite_name: real-oracle-funded
+      match_path: test/sports-5d6/SportsRealOracleRouterIntegration420.t.sol
+  market-lifecycle:
+    uses: ./.github/workflows/reusable-scoped-foundry.yml
+    with:
+      suite_name: market-lifecycle
+      match_path: test/sports-5d5/SportsMarketLifecycle420.t.sol
+  signed-odds:
+    uses: ./.github/workflows/reusable-scoped-foundry.yml
+    with:
+      suite_name: signed-odds
+      match_path: test/sports-5d3/SportsOddsIngestion420.t.sol
+  # 5D.9 adversarial tests remain owned by the separate exact-head workflow.
+  # A successful prior run is historical evidence; require success on this head
+  # as an independently enforced PR check rather than repeating its compilation.

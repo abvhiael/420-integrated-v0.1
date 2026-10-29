@@ -65,6 +65,12 @@ export class HighCountryPlacementTransactions {
    if(creating&&command.expectedRevision!==0)fail('expected-zero-revision');
    if(command.action==='restore'?old.state!=='stored':command.action!=='place'&&old.state!=='placed')fail('invalid-instance-state');
    if(old&&command.record!==undefined)fail('existing-instance-record-override');
+   // Check existing live dependencies before validating a proposed support transform.
+   // This prevents invalid client-supplied attachment fields from obscuring the
+   // authoritative support-lifecycle denial; the locked write remains atomic.
+   if(old&&['move','rotate','remove','detach','attach'].includes(command.action)
+      &&[...s.placementInstances.values()].some(child=>child.parentInstanceId===old.instanceId&&child.state==='placed'))
+     fail('support-has-children');
    const source=old&&sceneKey(old);
    const next={...old,...command.record};
    if(!creating){
@@ -137,7 +143,7 @@ export class HighCountryPlacementTransactions {
     if(!bindings.length||new Set(bindings).size!==1)fail('missing-or-ambiguous-instance-custody');
     custody=reservePlacementUnit(s,{owner:who,assetId:checked.assetId,instanceId:checked.instanceId,unitId:bindings[0]});
    }
-   if(command.action==='remove')custody=releasePlacementUnit(s,{owner:who,assetId:checked.assetId,instanceId:checked.instanceId});
+   if(command.action==='remove'||command.action==='detach')custody=releasePlacementUnit(s,{owner:who,assetId:checked.assetId,instanceId:checked.instanceId});
    s.placementInstances.set(checked.instanceId,checked);
    s.placementScenes.set(target,currentScene+1);
    const result={instance:structuredClone(checked),sceneRevision:currentScene+1,...(custody?{custody}: {})};

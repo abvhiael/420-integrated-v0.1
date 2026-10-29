@@ -17,6 +17,8 @@ echo "CI-SOL-02 group=$group profile=$FOUNDRY_PROFILE targets=${#targets[@]}"
 # Restore and verify authentic artifacts only for the group that executes 6.10.
 if [[ "$group" == "420bet--01" ]]; then
   python3 ../scripts/bet/package-poker-5a10-evidence.py --verify
+  # Restore only checksum-manifested canonical tournament proofs for inherited 5C.5 tests.
+  python3 ../scripts/bet/unpack-poker-5c5-evidence.py
 fi
 forge build "${targets[@]}"
 mapfile -t tests < <(printf '%s\n' "${targets[@]}" | grep '^test/.*\.sol$' || true)

@@ -81,3 +81,36 @@ test('durable achievement writes are idempotent and revalidate source before rea
  assert.equal((await ledger.current({cupId:cup})).current,false);
  assert.equal(operations.filter(x=>x.includes('INSERT INTO highcountry_cup.history')).length,2);
 });
+
+test('SERIALIZABLE conflicts retry entire transaction with fresh canonical witness and rollback',async()=>{
+ let attempts=0,rollbacks=0,reads=0,commits=0;
+ const pool={connect:async()=>{attempts++;return {
+  query:async sql=>{
+   if(sql==='ROLLBACK'){rollbacks++;return {rows:[]};}
+   if(sql==='COMMIT'){commits++;if(attempts===1)throw Object.assign(Error('serialization'),{code:'40001'});}
+   return {rows:[]};
+  },release(){}
+ };}};
+ const store=createPostgresCupAchievements420({pool,gameId:h('f',64),
+  projection:{standings:async()=>{reads++;return {cupId:cup,chainId:420,cupAddress:A,
+    blockHash:h('1',64),champion:A,resultCommitment:h('2',64),scope:h('3',64),achievement:null};}}});
+ await store.synchronize({cupId:cup});
+ assert.equal(attempts,2);assert.equal(rollbacks,1);assert.equal(commits,2);
+ assert.equal(reads,2,'do not reuse stale chain witness on retry');
+});
+test('bounded retry exhausts after three failures and does not retry unrelated errors',async()=>{
+ for(const [errorCode,expected,limit] of [['40P01','cup-retry-required',3],['23505','duplicate',1]]){
+  let attempts=0,rollbacks=0;
+  const pool={connect:async()=>{attempts++;return {
+   query:async sql=>{if(sql==='ROLLBACK'){rollbacks++;return {rows:[]};}
+    if(sql.startsWith('INSERT INTO highcountry_cup.achievements'))
+     throw Object.assign(Error(expected==='duplicate'?expected:'transient'),{code:errorCode});
+    return {rows:[]};},release(){}
+  };}};
+  const store=createPostgresCupAchievements420({pool,gameId:h('f',64),
+   projection:{standings:async()=>({cupId:cup,chainId:420,cupAddress:A,blockHash:block,
+    champion:A,resultCommitment:h('6',64),scope:h('5',64),achievement:null})}});
+  await assert.rejects(store.synchronize({cupId:cup}),e=>expected==='duplicate'?e.code===errorCode:e.code===expected);
+  assert.equal(attempts,limit);assert.equal(rollbacks,limit);
+ }
+});

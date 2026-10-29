@@ -26,3 +26,9 @@ At `94d0ee5f2dff2d70d596b8eb0e6debc2e94e5880`:
 - Independently provisioned live operator keys, event feeds, chain finality/reorg handling, TLS Postgres recovery and deployment-code hashes remain testnet release gates under `HIGHCOUNTRY-TESTNET-WORK-ROADMAP.md`.
 
 Preserve 64px logical grid, approved footprints, authoritative surveyed coordinates, existing asset IDs and prices, HC-WORLD-02, immutability, inventory conservation and sole-owner governance. No production placement permission is authorized.
+
+## Package 1 — parent/child transaction-side lifecycle (qualification pending)
+
+The HC-PLACE-03 transaction engine now verifies, inside the same serializable custody transaction, that an attachment references an existing parent of the same owner and scene, that active attachments have a placed parent, and that traversed ancestry is acyclic. It rejects support movement, rotation, removal or reattachment while placed descendants depend on the support. It rejects duplicate occupied sibling slots and validates parent-first restore ordering. Typed `detachTarget: 'storage'` moves an attached child into durable stored state, releases its exact reserved unit, and retains its immutable parent/slot association for authorized restoration. Detach-to-floor, dynamic reparenting and wall/tabletop geometry remain fail-closed pending their canonical HC-PLACE-05/06 implementations. Stored descendants also prevent ownership transfer of their support; transferred ownership cannot leave an orphaned different-owner child. All transitions share atomic idempotent operation receipts.
+
+Scoped fixture tests added for parent support mutation rollback, unsupported detach, missing support, actual attached-child storage/restore and exact-unit recovery. **No new exact-SHA CI pass is claimed until completed.** Existing passing runs on the previous reconciliation SHA remain historical evidence.

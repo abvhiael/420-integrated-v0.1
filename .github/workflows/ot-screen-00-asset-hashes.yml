@@ -5,6 +5,7 @@ on:
       - ot-screen-00-baseline-lock-20261029
     paths:
       - '.github/workflows/ot-screen-00-asset-hashes.yml'
+      - 'deployments/highcountry/old-town-genesis-assets.json'
   workflow_dispatch:
 permissions:
   contents: read
@@ -42,6 +43,8 @@ jobs:
           pathlib.Path('ot-screen-00-canonical-sha256-evidence.json').write_text(json.dumps(out,indent=2)+chr(10))
           assert len(set(x['id'] for x in records))==20
           PY
+      - name: Run scoped OT-SCREEN-00 Level 1 tests
+        run: node --test scripts/highcountry/ot-screen-00-baseline.test.mjs scripts/highcountry/ot-screen-00-asset-hashes.mjs
       - name: Upload exact-SHA evidence
         if: always()
         uses: actions/upload-artifact@v4

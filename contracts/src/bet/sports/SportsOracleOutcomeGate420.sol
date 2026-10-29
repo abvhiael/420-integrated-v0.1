@@ -46,6 +46,26 @@ contract SportsOracleOutcomeGate420 {
 
     /// @notice Relayers need no asset authority. Vault checks the gate's scoped
     /// RESOLVE capability; this gate checks independently verified oracle data.
+    /// @notice Special outcomes require the same independent Oracle commitment as winners.
+    function settleSpecial(bytes32 ticketId) external {
+        SportsFundedTickets420.Ticket memory ticket = vault.get(ticketId);
+        if (ticket.state != SportsFundedTickets420.TicketState.FUNDED) revert Invalid();
+        SportsOutcomeCertification420.Result memory outcome = certification.result(ticket.marketId);
+        if (outcome.status != SportsOutcomeCertification420.Status.FINAL) revert Unverified();
+        SportsOutcomeCertification420.SpecialOutcome memory special = certification.specialOutcome(ticket.marketId);
+        if (special.kind == SportsOutcomeCertification420.SpecialKind.NONE) revert Unverified();
+        bytes32 feed = feedFor(ticket.marketId);
+        IOracle420.ResultRead memory read = oracle.readResult(feed);
+        if (read.updatedAt == 0 || read.updatedAt > block.timestamp
+            || block.timestamp - read.updatedAt > maxAge
+            || read.agreeingSources < minAgreeingSources
+            || read.confidenceBps < minConfidenceBps
+            || read.resultHash != commitment(ticket.marketId, outcome.selection, outcome.evidence))
+            revert Unverified();
+        vault.resolveSpecial(ticketId);
+        emit OracleTicketResolved(ticketId, ticket.marketId, feed, read.resultHash);
+    }
+
     function settle(bytes32 ticketId, bool won) external {
         SportsFundedTickets420.Ticket memory ticket = vault.get(ticketId);
         if (ticket.state != SportsFundedTickets420.TicketState.FUNDED) revert Invalid();

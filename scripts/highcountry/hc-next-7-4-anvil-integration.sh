@@ -21,10 +21,59 @@ readFixture(){
 }
 warp(){
   # Anvil's timestamp RPC requires an Ethereum hex quantity, not a decimal token.
-  local timestamp="$1"
-  [[ "$timestamp" =~ ^[0-9]+$ ]] || { echo "invalid Anvil timestamp" >&2; return 1; }
-  local quantity
-  printf -v quantity '0x%x' "$timestamp"
+  # cast call may return a decimal integer with an ABI type suffix such as "[uint64]".
+  # Accept only a complete uint value (optionally followed by a recognized type annotation).
+  local raw="$1" timestamp quantity
+  raw="${raw//
+  cast rpc --rpc-url "$HIGHCOUNTRY_CUP_ANVIL_RPC" evm_setNextBlockTimestamp "$quantity" > /dev/null
+}
+sendFixture(){
+  cast send "$fixture" "$1" --rpc-url "$HIGHCOUNTRY_CUP_ANVIL_RPC" --private-key "$ANVIL_DEV_KEY" > /dev/null
+}
+warp "$(readFixture 'openA()(uint64)')"
+sendFixture 'scoreSemis()'
+warp "$(($(readFixture 'closeA()(uint64)') + 100))"
+sendFixture 'finalizeSemis()'
+warp "$(readFixture 'openF()(uint64)')"
+sendFixture 'scoreFinal()'
+warp "$(($(readFixture 'closeF()(uint64)') + 100))"
+sendFixture 'finalizeCup()'
+export HIGHCOUNTRY_CUP_ANVIL_CUP=$(readFixture 'cup()(address)')
+export HIGHCOUNTRY_CUP_ANVIL_ENGINE=$(readFixture 'engine()(address)')
+export HIGHCOUNTRY_CUP_ANVIL_ID=$(readFixture 'CUP()(bytes32)')
+cd services/420-gaming-player-profile
+node --test test/highcountry-cup-anvil.integration.mjs
+\\r'/}"
+  raw="${raw//
+  cast rpc --rpc-url "$HIGHCOUNTRY_CUP_ANVIL_RPC" evm_setNextBlockTimestamp "$quantity" > /dev/null
+}
+sendFixture(){
+  cast send "$fixture" "$1" --rpc-url "$HIGHCOUNTRY_CUP_ANVIL_RPC" --private-key "$ANVIL_DEV_KEY" > /dev/null
+}
+warp "$(readFixture 'openA()(uint64)')"
+sendFixture 'scoreSemis()'
+warp "$(($(readFixture 'closeA()(uint64)') + 100))"
+sendFixture 'finalizeSemis()'
+warp "$(readFixture 'openF()(uint64)')"
+sendFixture 'scoreFinal()'
+warp "$(($(readFixture 'closeF()(uint64)') + 100))"
+sendFixture 'finalizeCup()'
+export HIGHCOUNTRY_CUP_ANVIL_CUP=$(readFixture 'cup()(address)')
+export HIGHCOUNTRY_CUP_ANVIL_ENGINE=$(readFixture 'engine()(address)')
+export HIGHCOUNTRY_CUP_ANVIL_ID=$(readFixture 'CUP()(bytes32)')
+cd services/420-gaming-player-profile
+node --test test/highcountry-cup-anvil.integration.mjs
+\\n'/}"
+  if [[ "$raw" =~ ^[[:space:]]*(0x[0-9a-fA-F]+|[0-9]+)([[:space:]]*\\[[[:space:]]*uint(8|16|32|64|128|256)[[:space:]]*\\])?[[:space:]]*$ ]]; then
+    timestamp="${BASH_REMATCH[1]}"
+  else
+    echo "invalid Anvil timestamp" >&2; return 1
+  fi
+  if [[ "$timestamp" == 0x* ]]; then
+    quantity="$timestamp"
+  else
+    printf -v quantity '0x%x' "$timestamp"
+  fi
   cast rpc --rpc-url "$HIGHCOUNTRY_CUP_ANVIL_RPC" evm_setNextBlockTimestamp "$quantity" > /dev/null
 }
 sendFixture(){

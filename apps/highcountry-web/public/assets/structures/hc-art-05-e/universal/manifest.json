@@ -1,0 +1,111 @@
+{
+  "collection": "HC-ART-05-E",
+  "subcollection": "U2",
+  "group": "Garden Pavilions & Outdoor Living",
+  "region": "universal",
+  "source_master": "a_clean_compositing_asset_sheet_style_image_with_a.png",
+  "notes": [
+    "Extracted from approved U07-U12 master sheet.",
+    "Background removed algorithmically and centered on transparent canvases.",
+    "Canvas dimensions are export sizes, not authoritative collision geometry.",
+    "Flat-folder asset organization; no per-building subdirectories."
+  ],
+  "assets": [
+    {
+      "id": "U07",
+      "name": "Heritage Garden Pavilion",
+      "filename": "hc-structure-heritage-garden-pavilion.png",
+      "footprint_tiles": [
+        5,
+        4
+      ],
+      "canvas_px": [
+        1600,
+        1280
+      ],
+      "repo_path": "apps/highcountry-web/public/assets/structures/hc-art-05-e/universal/hc-structure-heritage-garden-pavilion.png",
+      "sha256": "1a29409630019a341415f2cbb3f76bce1f7acad816093d38bf905171d870d622",
+      "bytes": 1748444
+    },
+    {
+      "id": "U08",
+      "name": "Botanical Tea House",
+      "filename": "hc-structure-botanical-tea-house.png",
+      "footprint_tiles": [
+        4,
+        4
+      ],
+      "canvas_px": [
+        1280,
+        1280
+      ],
+      "repo_path": "apps/highcountry-web/public/assets/structures/hc-art-05-e/universal/hc-structure-botanical-tea-house.png",
+      "sha256": "a428e46f7c8dad1ff30ffe4253039d7fb656c4929fd2d074c7a9a599605ef8ca",
+      "bytes": 1717393
+    },
+    {
+      "id": "U09",
+      "name": "Covered Outdoor Dining Hall",
+      "filename": "hc-structure-covered-outdoor-dining-hall.png",
+      "footprint_tiles": [
+        6,
+        5
+      ],
+      "canvas_px": [
+        1920,
+        1600
+      ],
+      "repo_path": "apps/highcountry-web/public/assets/structures/hc-art-05-e/universal/hc-structure-covered-outdoor-dining-hall.png",
+      "sha256": "65260b4105a31dedabd2dad89cdc9decc85e974a9bf67a53d4302148f2f8337b",
+      "bytes": 2541633
+    },
+    {
+      "id": "U10",
+      "name": "Garden Music Pavilion",
+      "filename": "hc-structure-garden-music-pavilion.png",
+      "footprint_tiles": [
+        5,
+        4
+      ],
+      "canvas_px": [
+        1600,
+        1280
+      ],
+      "repo_path": "apps/highcountry-web/public/assets/structures/hc-art-05-e/universal/hc-structure-garden-music-pavilion.png",
+      "sha256": "ceca3f65a2e2598731ed30ce935d7551570e868cb7d3f47e2fd9d4ea75bc7964",
+      "bytes": 1872258
+    },
+    {
+      "id": "U11",
+      "name": "Rustic Reading Pavilion",
+      "filename": "hc-structure-rustic-reading-pavilion.png",
+      "footprint_tiles": [
+        4,
+        4
+      ],
+      "canvas_px": [
+        1280,
+        1280
+      ],
+      "repo_path": "apps/highcountry-web/public/assets/structures/hc-art-05-e/universal/hc-structure-rustic-reading-pavilion.png",
+      "sha256": "cd9517a0bba7d57bc37176a1baaaeed15b557eee30c63219b2415bce70e08045",
+      "bytes": 1516563
+    },
+    {
+      "id": "U12",
+      "name": "Open-Air Celebration Pavilion",
+      "filename": "hc-structure-open-air-celebration-pavilion.png",
+      "footprint_tiles": [
+        6,
+        5
+      ],
+      "canvas_px": [
+        1920,
+        1600
+      ],
+      "repo_path": "apps/highcountry-web/public/assets/structures/hc-art-05-e/universal/hc-structure-open-air-celebration-pavilion.png",
+      "sha256": "5105776351123071db470326252577314bf58e3bed1b30caa252c4082e2a65dd",
+      "bytes": 2960798
+    }
+  ]
+}

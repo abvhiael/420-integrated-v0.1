@@ -1,0 +1,22 @@
+name: 420Bet Sports 5D.7 settlement
+on:
+  pull_request:
+    paths:
+      - 'contracts/test/sports-5d7/**'
+      - 'contracts/src/bet/sports/SportsFundedTickets420.sol'
+      - 'contracts/src/bet/sports/SportsOutcomeCertification420.sol'
+      - 'contracts/src/bet/sports/SportsOracleOutcomeGate420.sol'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  settlement:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.8.6
+      - name: Run bounded settlement tests
+        working-directory: contracts
+        run: forge test --match-path 'test/sports-5d7/*.t.sol' -vvv

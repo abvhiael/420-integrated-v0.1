@@ -89,9 +89,25 @@ test('real EVM→canonical RPC→Cup projection→authenticated HTTP→PostgreSQ
   assert.equal((await request({cupId},'invalid')).status,403);
   const good=await request({cupId});assert.equal(good.status,200);
   assert.equal((await good.json()).champion.toLowerCase(),standing.champion.toLowerCase());
-  const receipt=await rpc('eth_sendTransaction',[{from:account,to:fixtureAddress,data:'0x'+selector('revokeFinalEvidence()')}]);
-  const tx=await rpc('eth_getTransactionReceipt',[receipt]);
-  assert.equal(tx.status,'0x1');
+  const submittedHash=await rpc('eth_sendTransaction',[{from:account,to:fixtureAddress,data:'0x'+selector('revokeFinalEvidence()')}]);
+  assert.match(submittedHash,/^0x[0-9a-f]{64}$/i,'revocation transaction hash invalid');
+  // Anvil may return a hash before mining its transaction. Mine explicitly,
+  // then bound receipt polling; do not infer success from the submitted hash.
+  await rpc('evm_mine');
+  let tx=null;
+  for(let attempt=0;attempt<20;attempt++){
+   tx=await rpc('eth_getTransactionReceipt',[submittedHash]);
+   if(tx)break;
+   await new Promise(resolve=>setTimeout(resolve,100));
+  }
+  assert.ok(tx,'revocation transaction receipt unavailable after bounded polling');
+  assert.equal(tx.transactionHash.toLowerCase(),submittedHash.toLowerCase(),'revocation receipt belongs to another transaction');
+  assert.equal(tx.to?.toLowerCase(),fixtureAddress.toLowerCase(),'revocation receipt destination mismatch');
+  assert.equal(tx.status,'0x1','revocation transaction reverted');
+  assert.match(tx.blockHash||'',/^0x[0-9a-f]{64}$/i,'revocation block hash missing');
+  // Advance the local EVM finalized tag beyond the revocation before querying
+  // canonical finalized state. No production/testnet finality is asserted here.
+  await rpc('anvil_mine',['0x80']);
   await assert.rejects(runtime.standings({cupId}),/cup-not-finalized/);
   await assert.rejects(runtime.historyStatus({cupId}),/cup-not-finalized/);
   assert.equal((await request({cupId})).status,503);

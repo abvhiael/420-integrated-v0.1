@@ -4,23 +4,34 @@ const fail=c=>{throw Object.assign(new Error(c),{code:c});};
 const hex=(x,n)=>typeof x==='string'&&new RegExp('^0x[0-9a-f]{'+n+'}$').test(x);
 export function createPostgresCupAchievements420({pool,gameId,projection}={}){
  if(typeof pool?.connect!=='function'||!hex(gameId,64)||typeof projection?.standings!=='function')fail('cup-achievement-config-invalid');
+ const retryable=new Set(['40001','40P01','55P03']);
+ const maxAttempts=3;
  async function transaction(fn){
-  const c=await pool.connect();let opened=false;
-  try{
-   await c.query('BEGIN ISOLATION LEVEL SERIALIZABLE');opened=true;
-   await c.query("SET LOCAL lock_timeout='5s'");
-   const value=await fn(c);
-   await c.query('COMMIT');opened=false;return value;
-  }catch(e){if(opened)try{await c.query('ROLLBACK');}catch{}if(['40001','40P01','55P03'].includes(e?.code))fail('cup-retry-required');throw e}
-  finally{c.release();}
+  // Each attempt owns a fresh connection and SERIALIZABLE transaction. A failed
+  // transaction is rolled back before any retry; no partial award can escape.
+  for(let attempt=1;attempt<=maxAttempts;attempt++){
+   const c=await pool.connect();let opened=false;
+   try{
+    await c.query('BEGIN ISOLATION LEVEL SERIALIZABLE');opened=true;
+    await c.query("SET LOCAL lock_timeout='5s'");
+    const value=await fn(c);
+    await c.query('COMMIT');opened=false;return value;
+   }catch(e){
+    if(opened){try{await c.query('ROLLBACK');}catch{fail('cup-rollback-failed');}}
+    if(!retryable.has(e?.code))throw e;
+    if(attempt===maxAttempts)fail('cup-retry-required');
+   }finally{c.release();}
+  }
  }
  return Object.freeze({
   async synchronize({cupId}){
    // RPC and DB cannot be atomic. Source is checked again on every read;
    // stored snapshots are never accepted as authorization or current proof.
-   const current=await projection.standings({cupId});
    return transaction(async c=>{
     await c.query('SELECT pg_advisory_xact_lock(hashtext($1),hashtext($2))',[gameId,cupId]);
+    // A retry must not reuse a stale canonical witness after a failed commit.
+    // Reading the authoritative source happens separately on EVERY attempt.
+    const current=await projection.standings({cupId});
     await c.query(`INSERT INTO highcountry_cup.achievements
       (game_id,cup_id,chain_id,cup_address,block_hash,champion,commitment,scope,prestige)
       VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)

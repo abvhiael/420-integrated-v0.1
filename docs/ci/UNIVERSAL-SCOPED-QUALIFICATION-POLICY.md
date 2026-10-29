@@ -1,3 +1,8 @@
+---
+title: Universal Scoped Qualification Policy
+status: active
+---
+
 # Universal CI qualification isolation policy
 
 Status: implemented reusable Foundry workflow; broader-workflow migration is opt-in and requires a per-workflow evidence audit.

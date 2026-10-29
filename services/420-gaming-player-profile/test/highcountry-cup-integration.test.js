@@ -29,7 +29,7 @@ function mockRpc({badChain=false,badCode=false,orphan=false,stale=false,badCommi
      BigInt(h('3',64)),BigInt(h('4',64)),BigInt(h('5',64)),1n,BigInt(A));
    else if(selector===S.finalResultCommitment)result=pack(BigInt(badCommitment?h('6',64):expectedCommitment));
    else if(selector===S.resultsCurrent||selector===S.isIssued||selector===S.resultIsCurrent)result=pack(stale?0n:1n);
-   else if(selector===S.events)result=pack(BigInt(badSeason&&index===2?h('6',64):h('7',64))),BigInt(h('2',64)),BigInt(A),
+   else if(selector===S.events)result=pack(BigInt(badSeason&&index===2?h('6',64):h('7',64)),BigInt(h('2',64)),BigInt(A),
      1n,2n,3n,2n,1n,0n);
    else if(selector===S.winners)result=pack(BigInt(winners[index]));
    else if(selector===S.winnerScore)result=pack(BigInt(scores[index]));

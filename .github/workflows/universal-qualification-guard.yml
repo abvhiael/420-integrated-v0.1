@@ -1,0 +1,35 @@
+name: Universal Qualification Policy Guard
+on:
+  pull_request:
+    paths:
+      - 'scripts/qualification-policy/**'
+      - '.github/workflows/universal-qualification-guard.yml'
+      - '.github/workflows/**'
+      - '.qualification/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validate-policy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Confirm exact SHA
+        env:
+          SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$SHA"
+      - name: Verify self tests
+        run: python3 -m unittest discover -s scripts/qualification-policy -p 'test_*.py' -v
+      - name: Check preflight contract for opted-in candidate
+        if: hashFiles('.qualification/preflight.json') != ''
+        env:
+          BASE_REF: ${{ github.base_ref || 'main' }}
+          CANDIDATE: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          git fetch --no-tags origin "+refs/heads/$BASE_REF:refs/remotes/origin/$BASE_REF"
+          python3 scripts/qualification-policy/preflight.py --manifest .qualification/preflight.json --base "origin/$BASE_REF" --head "$CANDIDATE"

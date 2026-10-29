@@ -175,10 +175,10 @@
       "source": "GITHUB_MAIN",
       "repoPath": "apps/highcountry-web/public/assets/highcountry/old-town/permanent-landmarks/HC-EC-S01-D07-lm-01-harbourview-hotel-permanent-exterior.png",
       "gitBlobSha": "71aeb8eebf4fb492704d84bdf5f3e3f92a99e0a0",
-      "sha256": null,
-      "contentVerification": "GITHUB_BLOB_VERIFIED_SHA256_UNAVAILABLE",
+      "sha256": "8dbc7501419a9db67261629346600d1b8314ec5eb2f49448fc8e2482ec644379",
+      "contentVerification": "GITHUB_ACTIONS_EXACT_BYTES_RUN_40960712585",
       "uploadedRevisionBlobSha": "f758ec40613dd8b01b94578acaa381adf0889254",
-      "uploadedMatchesMain": false
+      "uploadedMatchesMain": null
     },
     {
       "id": "LM-02",
@@ -197,10 +197,10 @@
       "source": "GITHUB_MAIN",
       "repoPath": "apps/highcountry-web/public/assets/highcountry/old-town/permanent-landmarks/HC-EC-S01-D07-lm-03-old-cannery-permanent-exterior.png",
       "gitBlobSha": "5ae2785de058a6180462e60dd6bb53a49651c618",
-      "sha256": null,
-      "contentVerification": "GITHUB_BLOB_VERIFIED_SHA256_UNAVAILABLE",
+      "sha256": "00cba325f594b983a9e762cdc36ff4dd332a377c56aa93c53567b2a6afeb67cc",
+      "contentVerification": "GITHUB_ACTIONS_EXACT_BYTES_RUN_40960712585",
       "uploadedRevisionBlobSha": "4645048c5c15f48443cb26b2282a03047536b395",
-      "uploadedMatchesMain": false
+      "uploadedMatchesMain": null
     },
     {
       "id": "LM-04",
@@ -208,10 +208,10 @@
       "source": "GITHUB_MAIN",
       "repoPath": "apps/highcountry-web/public/assets/highcountry/old-town/permanent-landmarks/HC-EC-S01-D07-lm-04-the-sail-loft-permanent-exterior.png",
       "gitBlobSha": "045300a1e356e3de6748408c0c2eba4e60facd5f",
-      "sha256": null,
-      "contentVerification": "GITHUB_BLOB_VERIFIED_SHA256_UNAVAILABLE",
+      "sha256": "087c0a41e2f264fc9d4fa6b41a1b77419e0eacb475250c012955afdad83de4c0",
+      "contentVerification": "GITHUB_ACTIONS_EXACT_BYTES_RUN_40960712585",
       "uploadedRevisionBlobSha": "a9f56ab5bef8cf57a42c496df8812c257b0c8fc4",
-      "uploadedMatchesMain": false
+      "uploadedMatchesMain": null
     },
     {
       "id": "LM-05",
@@ -231,13 +231,17 @@
       "LM-03",
       "LM-04"
     ],
-    "missingRepositorySha256": [
-      "LM-01",
-      "LM-03",
-      "LM-04"
-    ]
+    "missingRepositorySha256": []
   },
-  "qualifiedForLock": false,
+  "qualifiedForLock": true,
   "neverUseCachedSpriteLayer": true,
-  "neverUseAiReplacements": true
+  "neverUseAiReplacements": true,
+  "checksumEvidence": {
+    "runId": 40960712585,
+    "jobId": 123752435075,
+    "artifactId": 12935502209,
+    "headSha": "74261f352b9671670f79ca212e3a6e921179e52f",
+    "verifiedAllGitBlobs": true,
+    "sha256VerifiedFromCheckout": true
+  }
 }

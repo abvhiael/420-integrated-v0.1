@@ -32,3 +32,13 @@
 5. Reconcile all step requirements, affected workflows and documentation against current main and run the appropriate complete Level 1/Level 2 gate on the frozen exact implementation SHA.
 
 **External testnet gate retained:** deployed addresses and code hashes, real issuer and authorization keys, finalized chain evidence, live revocation/reorg/recovery, independent security and operational signoff. Follow `docs/highcountry/HIGHCOUNTRY-TESTNET-WORK-ROADMAP.md`. Do not treat a mocked source as acceptance.
+
+## Integration hardening and acceptance evidence — October 28, 2026
+
+- The finalized-block reader now validates exact selectors against the retained Solidity public ABI, independently computes Keccak-256 of the pinned Cup runtime bytes, verifies deployed Cup/engine bytecode at one EIP-1898 canonical finalized block, checks a common nonzero season for all three matches, and independently recomputes the exact R04.13 `abi.encode` commitment from chain ID, Cup address, registered events, scopes, winners and scores. An RPC-returned commitment alone is not sufficient.
+- Scoped tests include malformed selectors, mismatched bytecode, incorrect commitment, mixed seasons, issuer/origin/request spoofing, result revocation, durable database replay and idempotency, bounded serializable transaction retries and a composed RPC→projection→database test.
+- The dedicated Cup workflow now also includes the retained real Foundry R04.13 contract tests. This qualifies the **on-chain contract in an isolated EVM test** and the separate service adapter tests. It does **not** assert that a live deployed JSON-RPC node was integrated with Foundry's EVM state.
+- Earlier exact SHA `df116d4596c029d4243b3908059625b08a68304b` passed Cup Level 1 run `40799204211` and Gaming Player Profile run `40799204007`. These remain historical passing evidence, **not qualification for later commits**.
+- Full closeout is blocked until the latest exact-SHA scoped tests pass, a single combined real-EVM-node→adapter→authenticated service→real PostgreSQL integration is verified, the issuer-owned account↔wallet binding is independently validated where claimed, and current main plus docs/testnet deferrals are reconciled. No testnet deployment address, code hash, signer or live-chain evidence is manufactured.
+
+**Closeout request disposition: NOT READY.** Keep PR #899 draft/unmerged until those mandatory local integration gates have exact-SHA PASS evidence. Do not silently defer pre-testnet EVM/service acceptance to testnet.

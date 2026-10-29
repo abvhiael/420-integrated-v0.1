@@ -105,3 +105,35 @@ test('03-P1: placement rejects missing parent and self-parent inside same transa
  assert.equal(s.get().placementInstances.size,0);
  assert.equal(s.get().custodyReservations.size,0);
 });
+
+test('03-P1: attached child requires existing placed same-owner same-scene parent and can be stored then restored',async()=>{
+ const s=setup();
+ await s.engine.execute('alice',s.place('support','support'));
+ const attachedAsset='hc-fixture-attached';
+ const g={...geometry,assetId:attachedAsset,geometryId:'fixture-attachment',surface:'tabletop_slot',layer:'tabletop_decor',occupancy:{kind:'none'}};
+ const akey=JSON.stringify(['alice',attachedAsset]),uid=custodyUnitId('attachment-receipt',0);
+ s.get().assets.set(akey,{available:1,reserved:0});
+ s.get().custodyReceipts.set('attachment-receipt',{owner:'alice',assetId:attachedAsset,quantity:1,schemaVersion:CUSTODY_SCHEMA});
+ s.get().custodyUnits.set(uid,{schemaVersion:CUSTODY_SCHEMA,unitId:uid,receiptId:'attachment-receipt',unitIndex:0,owner:'alice',assetId:attachedAsset,state:'available',reservationId:null,revision:1});
+ s.get().importedAssets.add('attachment-receipt');s.get().assetSources.set(akey,'attachment-receipt');
+ // Trusted dependency overrides are fixture-only: no client catalogue is consulted.
+ s.engine.assets=async()=>new Set([asset,attachedAsset]);s.engine.geometry=async id=>id===attachedAsset?g:geometry;
+ s.engine.auth.qualifiedGeometrySnapshot=async()=>new Map([[asset,geometry],[attachedAsset,g]]);
+ const child={...record('child',4),assetId:attachedAsset,geometryId:'fixture-attachment',surface:'tabletop_slot',layer:'tabletop_decor',parentInstanceId:'support',slotId:'slot-a'};
+ const cmd=(operation,record,revision,scene,action='place')=>({operation,action,instanceId:'child',assetId:attachedAsset,expectedRevision:revision,expectedSceneRevision:scene,...(record?{record}:{})});
+ const bad=structuredClone(child);bad.parentInstanceId='missing';
+ await assert.rejects(s.engine.execute('alice',cmd('bad-parent',bad,0,1)),/parent-authority-or-scene/);
+ assert.equal(s.get().placementInstances.size,1);
+ const placed=await s.engine.execute('alice',cmd('child-place',child,0,1));
+ assert.equal(placed.instance.parentInstanceId,'support');
+ await assert.rejects(s.engine.execute('alice',{operation:'parent-removal',action:'remove',instanceId:'support',assetId:asset,expectedRevision:1,expectedSceneRevision:2}),/support-has-children/);
+ const detached=await s.engine.execute('alice',{...cmd('child-detach',null,1,2,'detach'),detachTarget:'storage'});
+ assert.equal(detached.instance.state,'stored');
+ await s.engine.execute('alice',{operation:'parent-store',action:'remove',instanceId:'support',assetId:asset,expectedRevision:1,expectedSceneRevision:3});
+ await assert.rejects(s.engine.execute('alice',cmd('child-restore-denied',null,2,4,'restore')),/parent-not-placed/);
+ await s.engine.execute('alice',{operation:'parent-restore',action:'restore',instanceId:'support',assetId:asset,expectedRevision:2,expectedSceneRevision:4});
+ const restored=await s.engine.execute('alice',cmd('child-restore',null,2,5,'restore'));
+ assert.equal(restored.instance.parentInstanceId,'support');
+ assert.equal(restored.custody.unitId,placed.custody.unitId);
+ assert.equal(s.get().custodyReservations.size,2);
+});

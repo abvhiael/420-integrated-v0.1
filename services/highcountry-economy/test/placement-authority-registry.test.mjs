@@ -32,7 +32,7 @@ test('03-C independently signed event sequence, replay and privilege revocation'
  const event=(revision,action)=>({parcelId:'parcel',revision,action,eventId:'event-'+revision,evidenceId:'world-'+revision,geometryQualificationId:'geometry',signature:'valid'});
  await assert.rejects(s.registry.synchronize({...event(1,'grant'),signature:'forged'}),/unverified-authority-event/);
  await s.registry.synchronize(event(1,'grant'));
- await assert.rejects(s.registry.synchronize(event(1,'grant')),/authority-event-order/);
+ await assert.rejects(s.registry.synchronize(event(1,'grant')),/authority-event-replayed/);
  await assert.rejects(s.registry.synchronize(event(3,'revoke')),/authority-event-order/);
  await s.registry.synchronize(event(2,'revoke'));
  assert.equal(s.get().placementAuthorityRevisions.get('parcel').revoked,true);

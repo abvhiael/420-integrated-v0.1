@@ -71,7 +71,7 @@ class PolicyGuardTests(unittest.TestCase):
     def test_unsafe_path(self):
         self.data["scope"] = ["../secret"]
         with self.assertRaisesRegex(ValueError, "unsafe"):
-            self.check()
+            mod.check_manifest(self.data, ["../secret"], self.sha, self.base)
 
     def test_unregistered_workflow(self):
         self.data["required_workflows"] = [".github/workflows/missing.yml"]

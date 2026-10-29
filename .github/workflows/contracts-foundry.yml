@@ -95,7 +95,7 @@ jobs:
               contracts/test/sports-5d9/*) sports_5d9_changed=true ;;
             esac
             case "$file" in
-              contracts/test/sports-5d9/*|docs/bet/BET-AUDIT-5D.9-ADVERSARIAL-QUALIFICATION.md|.github/workflows/420bet-sports-5d9.yml|.github/workflows/420bet-sports-5d9-level2.yml|.github/workflows/contracts-foundry.yml) ;;
+              contracts/test/sports-5d9/*|docs/bet/BET-AUDIT-5D.9-ADVERSARIAL-QUALIFICATION.md|.github/workflows/420bet-sports-5d9.yml|.github/workflows/420bet-sports-5d9-level2.yml|.github/workflows/reusable-scoped-foundry.yml|.github/workflows/contracts-foundry.yml) ;;
               *) sports_5d9_only=false ;;
             esac
             case "$file" in

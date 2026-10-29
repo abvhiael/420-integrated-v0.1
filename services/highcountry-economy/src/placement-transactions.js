@@ -73,7 +73,12 @@ export class HighCountryPlacementTransactions {
     if(command.action==='rotate')next.orientation=command.orientation;
     if(command.action==='move'){next.gridX=command.gridX;next.gridY=command.gridY;}
     if(command.action==='attach'){next.surface=command.surface;next.layer=command.layer;next.parentInstanceId=command.parentInstanceId;next.slotId=command.slotId;}
-    if(command.action==='detach')fail('detach-target-required'); // HC-PLACE-06 will define typed detach semantics.
+    if(command.action==='detach'){
+     // The only HC-PLACE-03 detach target is durable storage. HC-PLACE-05/06
+     // own geometric reparenting, and must qualify any future detach-to-floor.
+     if(command.detachTarget!=='storage'||old.parentInstanceId===null)fail('detach-target-unsupported');
+     next.state='stored';
+    }
     next.revision=old.revision+1;next.updatedAt=this.clock();
     next.history=[...old.history,command.operation];
    }
@@ -84,8 +89,32 @@ export class HighCountryPlacementTransactions {
    const currentScene=s.placementScenes.get(target)??0;
    if(currentScene!==command.expectedSceneRevision)fail('stale-scene');
    if(source&&source!==target)fail('cross-scene-migration-unsupported');
-   if(!creating&&old.parentInstanceId!==null&&command.action==='remove')fail('attached-remove-policy-pending');
-   if(command.action==='remove'&&[...s.placementInstances.values()].some(x=>x.parentInstanceId===old.instanceId&&x.state==='placed'))fail('support-has-children');
+   // Parent/child graph admission is evaluated under the same locked write as custody.
+   // Stored attachments retain their immutable support identity for verified restore.
+   if(checked.parentInstanceId!==null){
+    if(checked.parentInstanceId===checked.instanceId)fail('parent-cycle');
+    const parent=s.placementInstances.get(checked.parentInstanceId);
+    if(!parent||parent.ownerPrincipal!==who||sceneKey(parent)!==target)fail('parent-authority-or-scene');
+    if(checked.state==='placed'&&parent.state!=='placed')fail('parent-not-placed');
+    const visited=new Set([checked.instanceId]);let cursor=parent;
+    while(cursor){
+     if(visited.has(cursor.instanceId))fail('parent-cycle');
+     visited.add(cursor.instanceId);
+     if(cursor.parentInstanceId===null)break;
+     cursor=s.placementInstances.get(cursor.parentInstanceId);
+     if(!cursor)fail('parent-chain-corrupt');
+    }
+   }
+   const children=[...s.placementInstances.values()].filter(x=>x.parentInstanceId===checked.instanceId);
+   // A support cannot be stored, moved, rotated or structurally mutated while
+   // active descendants depend on its transform or physical support.
+   if(children.some(x=>x.state==='placed')&&['move','rotate','remove','detach','attach'].includes(command.action))fail('support-has-children');
+   if(checked.state==='placed'&&checked.parentInstanceId!==null){
+    for(const sibling of s.placementInstances.values()){
+     if(sibling.instanceId!==checked.instanceId&&sibling.state==='placed'&&sibling.parentInstanceId===checked.parentInstanceId&&sibling.slotId===checked.slotId)fail('slot-occupied');
+    }
+   }
+   if(command.action==='detach'&&checked.state!=='stored')fail('detach-state');
    const tiles=checked.state==='placed'?rotatedCells(geometry,checked.orientation).map(p=>[p.x+checked.gridX,p.y+checked.gridY].join(':')):[];
    for(const other of s.placementInstances.values()){
     if(other.instanceId===checked.instanceId||other.state!=='placed'||sceneKey(other)!==target)continue;

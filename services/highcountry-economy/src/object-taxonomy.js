@@ -87,7 +87,8 @@ export function defineModifierPolicy(value,type){
  // This rejects distorted creator-defined ranges at catalogue registration.
  if(value.origin==='creator'&&value.maxModifiers>0){
    const minimum=value.effects.map(e=>e.minBps).sort((a,b)=>a-b).slice(0,value.maxModifiers).reduce((a,b)=>a+b,0);
-   if(minimum>300||worst<200)fail('ordinary-average-band');
+   const midpoint=Math.round((minimum+worst)/2);
+   if(midpoint<200||midpoint>300)fail('ordinary-average-band');
  }
  return freeze(clone(value));
 }

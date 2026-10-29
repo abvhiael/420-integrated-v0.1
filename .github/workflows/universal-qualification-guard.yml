@@ -6,7 +6,6 @@ on:
       - '.github/workflows/universal-qualification-guard.yml'
       - '.github/workflows/**'
       - '.qualification/**'
-  workflow_dispatch:
 permissions:
   contents: read
 jobs:
@@ -25,8 +24,7 @@ jobs:
         run: test "$(git rev-parse HEAD)" = "$SHA"
       - name: Verify self tests
         run: python3 -m unittest discover -s scripts/qualification-policy -p 'test_*.py' -v
-      - name: Check preflight contract for opted-in candidate
-        if: hashFiles('.qualification/preflight.json') != ''
+      - name: Enforce mandatory candidate preflight
         env:
           BASE_REF: ${{ github.base_ref || 'main' }}
           CANDIDATE: ${{ github.event.pull_request.head.sha || github.sha }}

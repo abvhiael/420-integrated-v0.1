@@ -31,3 +31,11 @@ test('canonical or unknown custody domain can never use ordinary stored transfer
  assert.equal(t.get().custodyUnits.get(id).owner,'alice');
  assert.equal(t.get().assets.get(key('alice')).available,1);
 });
+
+test('support with stored dependent child cannot transfer custody or ownership',async()=>{
+ const t=setup();
+ t.get().placementInstances.set('stored-child',{instanceId:'stored-child',parentInstanceId:'item',ownerPrincipal:'alice',state:'stored'});
+ const before=structuredClone(t.get());
+ await assert.rejects(t.service.transfer('alice','bob',req),/instance-has-dependent-children/);
+ assert.deepEqual(t.get(),before);
+});

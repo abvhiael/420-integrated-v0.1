@@ -1,0 +1,58 @@
+{
+  "schema": "HC.OLD_TOWN.GEOMETRY_AUTHORITY.OT_SCREEN_00.V1",
+  "district": "HC-EC-S01-D07",
+  "lockedDesign": {
+    "projection": "2:1",
+    "tilePixels": [
+      64,
+      32
+    ],
+    "logicalChunk": [
+      16,
+      16
+    ],
+    "inputWorldBoundsTiles": [
+      800,
+      560
+    ],
+    "parkId": "B22",
+    "clickToOpenWithoutDoorSurvey": true
+  },
+  "layers": [
+    {
+      "id": "phase_c_block_local_tiles",
+      "authority": "PROVISIONAL_LOCAL_REVIEW_UNCOMMITTED",
+      "issuanceEligible": false
+    },
+    {
+      "id": "phase_c_59_site_registry",
+      "authority": "PROVISIONAL_LOCAL_REVIEW_UNCOMMITTED",
+      "issuanceEligible": false
+    },
+    {
+      "id": "iso_02_roads",
+      "authority": "PROVISIONAL_NONAUTHORITATIVE",
+      "approvedWidthsButUnverifiedCenterlines": true,
+      "issuanceEligible": false
+    },
+    {
+      "id": "iso_02_coastline",
+      "authority": "SCHEMATIC_ONLY",
+      "issuanceEligible": false
+    },
+    {
+      "id": "iso_02b_footpaths",
+      "authority": "CANDIDATE_NOT_REQUIRED_FOR_CLICK_TO_OPEN",
+      "issuanceEligible": false
+    },
+    {
+      "id": "b22_public_park",
+      "authority": "APPROVED_PUBLIC_USE_PROVISIONAL_PERIMETER",
+      "issuanceEligible": false
+    }
+  ],
+  "issuanceAuthorized": false,
+  "hiddenOriginalSixteenCoordinatesPublished": false,
+  "roadmapSource": "docs/highcountry/HC-WORLD-OLD-TOWN-NEIGHBOURHOOD-SCREEN-ROADMAP-V1.md",
+  "warning": "Coordinate rows are source-traced to local Phase C review artifacts, not a certified repository survey. Do not silently upgrade."
+}

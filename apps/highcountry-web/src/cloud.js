@@ -25,6 +25,10 @@ export function createCloudClient({apiUrl,authenticate,fetchImpl=fetch,gameId}={
  }
  return Object.freeze({
   session:()=>request('GET','/highcountry/session'),
+  globalCupStandings:({cupId})=>{
+   if(typeof cupId!=='string'||!/^0x[0-9a-f]{64}$/.test(cupId))fail('cloud-request-invalid');
+   return request('POST','/highcountry/cup/standings',{cupId});
+  },
   ordinaryExhibition:(action,fields)=>{
    const shapes={create:['eventId','seasonId','category','version','rulesHash','opensAt','closesAt','challengeUntil'],
     enter:['eventId'],submit:['eventId','harvestId'],reject:['eventId','accountId','reasonHash'],

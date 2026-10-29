@@ -7,7 +7,7 @@ import {CloudSaveLifecycle420} from './cloud-save-lifecycle.js';
 const fail=x=>{throw Object.assign(new Error(x),{code:x});};
 const opaque=x=>typeof x==='string'&&/^[A-Za-z0-9:_-]{1,128}$/.test(x);
 const dec=x=>typeof x==='string'&&/^(0|[1-9][0-9]*)$/.test(x)&&x.length<=20;
-export function createHighCountryCloudHttp420({authority,poolForPrincipal,provider,schemaVersion=1,origin,ordinaryExhibitions=null,premiumAuthorization=null}={}){
+export function createHighCountryCloudHttp420({authority,poolForPrincipal,provider,schemaVersion=1,origin,ordinaryExhibitions=null,premiumAuthorization=null,globalCup=null}={}){
  if(typeof authority?.verifyToken!=='function'||typeof authority?.registeredPrincipal!=='function'||
  !/^0x[0-9a-fA-F]{64}$/.test(authority.gameId||'')||typeof poolForPrincipal!=='function'||
  typeof provider?.put!=='function'||typeof provider?.get!=='function'||typeof provider?.delete!=='function'||
@@ -35,7 +35,11 @@ export function createHighCountryCloudHttp420({authority,poolForPrincipal,provid
    }
    const lifecycle=new CloudSaveLifecycle420({repository:scoped,provider,schemaVersion});
    let result;
-   if(url.pathname==='/highcountry/premium/eligibility'){
+   if(url.pathname==='/highcountry/cup/standings'){
+    if(!globalCup||typeof globalCup.standings!=='function')fail('cup-unavailable');
+    if(req.method!=='POST'||Object.keys(body).length!==1||typeof body.cupId!=='string')fail('invalid-request');
+    result=await globalCup.standings({cupId:body.cupId});
+   }else if(url.pathname==='/highcountry/premium/eligibility'){
     if(!premiumAuthorization||typeof premiumAuthorization.eligible!=='function')fail('premium-unavailable');
     if(req.method!=='POST'||Object.keys(body).length!==1||typeof body.scopeId!=='string')fail('invalid-request');
     result=await premiumAuthorization.eligible({token,scopeId:body.scopeId});

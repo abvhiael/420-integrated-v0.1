@@ -56,6 +56,22 @@ export function mountAccountPanel({document,main,runtime,authenticate,storage=gl
  exhibitionAction('Submit verified exhibition harvest','submit',()=>({eventId:ordinaryEvent.value,
   harvestId:ordinaryHarvest.value}));
 
+ // HC-NEXT-7.4: never submit client-side winners, trophies, account IDs or prestige.
+ const cupId=field('Canonical Global 420 Cup ID (0x + 64 hex)');
+ const cupStatus=paragraph('Cup standings are shown only when an independently verified canonical final result is available.');
+ cupStatus.setAttribute('role','status');cupStatus.setAttribute('aria-live','polite');
+ button('View verified Global 420 Cup',async()=>{
+  try{
+   const view=await client.globalCupStandings({cupId:cupId.value});
+   cupStatus.textContent='Champion: '+view.champion+
+    '; semifinal winners: '+view.rounds[0].winner+' and '+view.rounds[1].winner+
+    '; final score: '+view.rounds[2].winnerScore+
+    '; canonical result: '+view.resultCommitment+
+    (view.achievement?'; scoped prestige verified':'; no active scoped prestige')+
+    '. Display trophy only; no funded prize or gameplay advantage.';
+  }catch(e){cupStatus.textContent='Canonical Cup status unavailable: '+e.message;}
+ });
+
  const profileId=field('New game profile ID (not an account credential)');
  const rulesetId=field('Approved game ruleset ID');
  button('Register optional game profile',async()=>{try{const v=await client.register({profileId:profileId.value,rulesetId:rulesetId.value});status.textContent='Game profile registered: '+v.profileId;await sessionAction();}catch(e){report(e);}});

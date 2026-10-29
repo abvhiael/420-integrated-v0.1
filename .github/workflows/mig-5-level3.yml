@@ -1,11 +1,7 @@
 name: MIG-5 Migration Level 3 Bounded Closeout
 on:
-  pull_request:
-    paths:
-      - '.github/workflows/mig-5-level3.yml'
-      - 'scripts/migration/verify-mig-5-level3.mjs'
-      - 'docs/migration/MIG-5-closeout-manifest.json'
   workflow_dispatch:
+
 jobs:
   bounded-closeout:
     runs-on: ubuntu-latest

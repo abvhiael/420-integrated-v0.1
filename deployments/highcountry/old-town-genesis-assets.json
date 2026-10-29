@@ -1,0 +1,247 @@
+{
+  "schema": "HC.OLD_TOWN.GENESIS_ASSETS.OT_SCREEN_00.V1",
+  "commitContext": "main as checked 2026-10-29; branch snapshot may advance",
+  "expectedCount": 20,
+  "assetAuthority": "GITHUB_MAIN",
+  "assets": [
+    {
+      "id": "HL-01",
+      "siteId": "HL-01",
+      "source": "GITHUB_MAIN",
+      "repoPath": "apps/highcountry-web/public/assets/highcountry/old-town/heritage-houses/HC-EC-S01-D07-hl-01-cedar-cottage-exterior.png",
+      "gitBlobSha": "f15f268103b9c18eb76f621471e3577f9559b7a8",
+      "sha256": "d485debb5421ce112bf220f9aec80b9ad97c96fec459c3ce70ec1378243663b6",
+      "contentVerification": "REPO_BLOB_AND_PREVIOUS_HASH_RECORDED",
+      "uploadedRevisionBlobSha": null,
+      "uploadedMatchesMain": null
+    },
+    {
+      "id": "HL-02",
+      "siteId": "HL-02",
+      "source": "GITHUB_MAIN",
+      "repoPath": "apps/highcountry-web/public/assets/highcountry/old-town/heritage-houses/HC-EC-S01-D07-hl-02-harbour-home-exterior.png",
+      "gitBlobSha": "e67528ef9a44cf96759dc49fb6f8faff5081c5bf",
+      "sha256": "a09885b309e58d0549c59d976fb5b335b9b35d279ac0c84b219509dc6958c58b",
+      "contentVerification": "REPO_BLOB_AND_PREVIOUS_HASH_RECORDED",
+      "uploadedRevisionBlobSha": null,
+      "uploadedMatchesMain": null
+    },
+    {
+      "id": "HL-03",
+      "siteId": "HL-03",
+      "source": "GITHUB_MAIN",
+      "repoPath": "apps/highcountry-web/public/assets/highcountry/old-town/heritage-houses/HC-EC-S01-D07-hl-03-maple-bungalow-exterior.png",
+      "gitBlobSha": "2afd73444ed013eb0628c219d95d2f5392a12ea6",
+      "sha256": "a04c0fbd0db99159a591857807e3d742cc2c2acb78b877e597ac6e6fd6a4fde3",
+      "contentVerification": "REPO_BLOB_AND_PREVIOUS_HASH_RECORDED",
+      "uploadedRevisionBlobSha": null,
+      "uploadedMatchesMain": null
+    },
+    {
+      "id": "HL-04",
+      "siteId": "HL-04",
+      "source": "GITHUB_MAIN",
+      "repoPath": "apps/highcountry-web/public/assets/highcountry/old-town/heritage-houses/HC-EC-S01-D07-hl-04-garden-house-exterior.png",
+      "gitBlobSha": "a3d818afdeb968e04918d2ed0f5cb2f910a0bdff",
+      "sha256": "3d8689cdc7c78c488fb0521c6d0b84d9bfb7d5fcebc944de645cf3ca2d10250f",
+      "contentVerification": "REPO_BLOB_AND_PREVIOUS_HASH_RECORDED",
+      "uploadedRevisionBlobSha": null,
+      "uploadedMatchesMain": null
+    },
+    {
+      "id": "CR-01",
+      "siteId": "CR-01",
+      "source": "GITHUB_MAIN",
+      "repoPath": "apps/highcountry-web/public/assets/highcountry/old-town/alder-street-unique/HC-EC-S01-D07-cr-01-maryjanes-corner-cafe-exterior.png",
+      "gitBlobSha": "a412ab390dab6c70ee0019f8caea91af401aeaca",
+      "sha256": "9cdafd3fa60ddc783b492e22de148575ca7b0ec315a7650ea2e766ad0b71f820",
+      "contentVerification": "REPO_BLOB_AND_PREVIOUS_HASH_RECORDED",
+      "uploadedRevisionBlobSha": null,
+      "uploadedMatchesMain": null
+    },
+    {
+      "id": "CR-02",
+      "siteId": "CR-02",
+      "source": "GITHUB_MAIN",
+      "repoPath": "apps/highcountry-web/public/assets/highcountry/old-town/alder-street-unique/HC-EC-S01-D07-cr-02-alder-st-general-store-exterior.png",
+      "gitBlobSha": "f193a861b6fbf90ff057d633473e052eb377f8d7",
+      "sha256": "4e1f023c3dc8802280938c12256db30b418eec30bbfd70234808f964160263ae",
+      "contentVerification": "REPO_BLOB_AND_PREVIOUS_HASH_RECORDED",
+      "uploadedRevisionBlobSha": null,
+      "uploadedMatchesMain": null
+    },
+    {
+      "id": "CR-03",
+      "siteId": "CR-03",
+      "source": "GITHUB_MAIN",
+      "repoPath": "apps/highcountry-web/public/assets/highcountry/old-town/alder-street-unique/HC-EC-S01-D07-cr-03-leafy-cauldron-apothecary-exterior.png",
+      "gitBlobSha": "c6cd2f91560a763b216443b2f1fa01dc798d77fd",
+      "sha256": "25f588a803b3b1f2d27fc8e6f7951ff37a9b52579513883bbdb358c18f1f6804",
+      "contentVerification": "REPO_BLOB_AND_PREVIOUS_HASH_RECORDED",
+      "uploadedRevisionBlobSha": null,
+      "uploadedMatchesMain": null
+    },
+    {
+      "id": "CR-04",
+      "siteId": "CR-04",
+      "source": "GITHUB_MAIN",
+      "repoPath": "apps/highcountry-web/public/assets/highcountry/old-town/alder-street-unique/HC-EC-S01-D07-cr-04-port-alder-bookshop-exterior.png",
+      "gitBlobSha": "9d5fce4cee7a24dd9f34a0a3a91511cfdd4941de",
+      "sha256": "f96a03120272b9867a8f8d81f5d3b9efb84956da52e45f7bde0b4ba90f1501ff",
+      "contentVerification": "REPO_BLOB_AND_PREVIOUS_HASH_RECORDED",
+      "uploadedRevisionBlobSha": null,
+      "uploadedMatchesMain": null
+    },
+    {
+      "id": "CR-05",
+      "siteId": "CR-05",
+      "source": "GITHUB_MAIN",
+      "repoPath": "apps/highcountry-web/public/assets/highcountry/old-town/alder-street-unique/HC-EC-S01-D07-cr-05-rusty-bong-tavern-exterior.png",
+      "gitBlobSha": "8db05e1a0b617bb573e9ad9de095986ae8395b2b",
+      "sha256": "84bf3259c90567193a4c0cdcc0ca0056c530d6732c6175ef7787cb33464490f2",
+      "contentVerification": "REPO_BLOB_AND_PREVIOUS_HASH_RECORDED",
+      "uploadedRevisionBlobSha": null,
+      "uploadedMatchesMain": null
+    },
+    {
+      "id": "CR-06",
+      "siteId": "CR-06",
+      "source": "GITHUB_MAIN",
+      "repoPath": "apps/highcountry-web/public/assets/highcountry/old-town/alder-street-unique/HC-EC-S01-D07-cr-06-kush-and-cargo-trading-post-exterior.png",
+      "gitBlobSha": "b04b15e30220ef0cd9409af39ab79e299b6709cd",
+      "sha256": "9940c1743a72dbfd1c7b7c0a8ec27601dc6d4fe09f1e0d5cbb85500fb796015c",
+      "contentVerification": "REPO_BLOB_AND_PREVIOUS_HASH_RECORDED",
+      "uploadedRevisionBlobSha": null,
+      "uploadedMatchesMain": null
+    },
+    {
+      "id": "WH-01",
+      "siteId": "WH-01",
+      "source": "GITHUB_MAIN",
+      "repoPath": "apps/highcountry-web/public/assets/highcountry/old-town/warehouse-row-unique/HC-EC-S01-D07-wh-01-the-baked-bouy-boatworks-exterior.png",
+      "gitBlobSha": "3f0558be3ab86ff3882e6721381ad78619a4573c",
+      "sha256": "6d6a30dd5b79b5cfa0b7f329d104473ac0582e2e8f531fdf18ad9d364e76c47c",
+      "contentVerification": "REPO_BLOB_AND_PREVIOUS_HASH_RECORDED",
+      "uploadedRevisionBlobSha": null,
+      "uploadedMatchesMain": null
+    },
+    {
+      "id": "WH-02",
+      "siteId": "WH-02",
+      "source": "GITHUB_MAIN",
+      "repoPath": "apps/highcountry-web/public/assets/highcountry/old-town/warehouse-row-unique/HC-EC-S01-D07-wh-02-hook-line-and-sativa-exterior.png",
+      "gitBlobSha": "097bec80ba07122feb7eb6a76800afb6b24c8ddf",
+      "sha256": "9534bc445243d2cc994fa346d33b6ed628e97c332bc557d3db8c1347998d4529",
+      "contentVerification": "REPO_BLOB_AND_PREVIOUS_HASH_RECORDED",
+      "uploadedRevisionBlobSha": null,
+      "uploadedMatchesMain": null
+    },
+    {
+      "id": "WH-03",
+      "siteId": "WH-03",
+      "source": "GITHUB_MAIN",
+      "repoPath": "apps/highcountry-web/public/assets/highcountry/old-town/warehouse-row-unique/HC-EC-S01-D07-wh-03-arctic-haze-refrigeration-exterior.png",
+      "gitBlobSha": "3b0bbcd18a372b6c16e4172260f024829d767381",
+      "sha256": "5865e286a317c20703d201d5f2f0975e4d1010213afd76b06e2d0e5453d181ca",
+      "contentVerification": "REPO_BLOB_AND_PREVIOUS_HASH_RECORDED",
+      "uploadedRevisionBlobSha": null,
+      "uploadedMatchesMain": null
+    },
+    {
+      "id": "WH-04",
+      "siteId": "WH-04",
+      "source": "GITHUB_MAIN",
+      "repoPath": "apps/highcountry-web/public/assets/highcountry/old-town/warehouse-row-unique/HC-EC-S01-D07-wh-04-the-green-dragon-distillery-exterior.png",
+      "gitBlobSha": "3d8d8aa2390beb2898194b71cd241c3c7b70b9f1",
+      "sha256": "dc53c459bad05c6a05e08c019f325a185e03fe1a770326e7fe76daf2686c03c0",
+      "contentVerification": "REPO_BLOB_AND_PREVIOUS_HASH_RECORDED",
+      "uploadedRevisionBlobSha": null,
+      "uploadedMatchesMain": null
+    },
+    {
+      "id": "WH-05",
+      "siteId": "WH-05",
+      "source": "GITHUB_MAIN",
+      "repoPath": "apps/highcountry-web/public/assets/highcountry/old-town/warehouse-row-unique/HC-EC-S01-D07-wh-05-blunt-force-shipping-exterior.png",
+      "gitBlobSha": "89819e115b4aab6ea73ac6e1101d1c4784ff2490",
+      "sha256": "1ed748911b116dfc62752822fde922c92639be98d576a7a955b85c7adae82781",
+      "contentVerification": "REPO_BLOB_AND_PREVIOUS_HASH_RECORDED",
+      "uploadedRevisionBlobSha": null,
+      "uploadedMatchesMain": null
+    },
+    {
+      "id": "LM-01",
+      "siteId": "LM-01",
+      "source": "GITHUB_MAIN",
+      "repoPath": "apps/highcountry-web/public/assets/highcountry/old-town/permanent-landmarks/HC-EC-S01-D07-lm-01-harbourview-hotel-permanent-exterior.png",
+      "gitBlobSha": "71aeb8eebf4fb492704d84bdf5f3e3f92a99e0a0",
+      "sha256": "8dbc7501419a9db67261629346600d1b8314ec5eb2f49448fc8e2482ec644379",
+      "contentVerification": "GITHUB_ACTIONS_EXACT_BYTES_RUN_40960712585",
+      "uploadedRevisionBlobSha": "f758ec40613dd8b01b94578acaa381adf0889254",
+      "uploadedMatchesMain": null
+    },
+    {
+      "id": "LM-02",
+      "siteId": "LM-02",
+      "source": "GITHUB_MAIN",
+      "repoPath": "apps/highcountry-web/public/assets/highcountry/old-town/permanent-landmarks/HC-EC-S01-D07-lm-02-founders-square-clock-tower-permanent-exterior.png",
+      "gitBlobSha": "cd8792871bc17113ff6c39fd6473ac1db07833a1",
+      "sha256": "2f4844dddd72faf05e0ca1029ba0b0607157a7e9f66082a62c2c0c94d0cf17f7",
+      "contentVerification": "REPO_BLOB_AND_PREVIOUS_HASH_RECORDED",
+      "uploadedRevisionBlobSha": "cd8792871bc17113ff6c39fd6473ac1db07833a1",
+      "uploadedMatchesMain": true
+    },
+    {
+      "id": "LM-03",
+      "siteId": "LM-03",
+      "source": "GITHUB_MAIN",
+      "repoPath": "apps/highcountry-web/public/assets/highcountry/old-town/permanent-landmarks/HC-EC-S01-D07-lm-03-old-cannery-permanent-exterior.png",
+      "gitBlobSha": "5ae2785de058a6180462e60dd6bb53a49651c618",
+      "sha256": "00cba325f594b983a9e762cdc36ff4dd332a377c56aa93c53567b2a6afeb67cc",
+      "contentVerification": "GITHUB_ACTIONS_EXACT_BYTES_RUN_40960712585",
+      "uploadedRevisionBlobSha": "4645048c5c15f48443cb26b2282a03047536b395",
+      "uploadedMatchesMain": null
+    },
+    {
+      "id": "LM-04",
+      "siteId": "LM-04",
+      "source": "GITHUB_MAIN",
+      "repoPath": "apps/highcountry-web/public/assets/highcountry/old-town/permanent-landmarks/HC-EC-S01-D07-lm-04-the-sail-loft-permanent-exterior.png",
+      "gitBlobSha": "045300a1e356e3de6748408c0c2eba4e60facd5f",
+      "sha256": "087c0a41e2f264fc9d4fa6b41a1b77419e0eacb475250c012955afdad83de4c0",
+      "contentVerification": "GITHUB_ACTIONS_EXACT_BYTES_RUN_40960712585",
+      "uploadedRevisionBlobSha": "a9f56ab5bef8cf57a42c496df8812c257b0c8fc4",
+      "uploadedMatchesMain": null
+    },
+    {
+      "id": "LM-05",
+      "siteId": "LM-05",
+      "source": "GITHUB_MAIN",
+      "repoPath": "apps/highcountry-web/public/assets/highcountry/old-town/permanent-landmarks/HC-EC-S01-D07-lm-05-st-brigids-chapel-permanent-exterior.png",
+      "gitBlobSha": "fa3b802c119f4a8afa887332107005c2ecbb5f99",
+      "sha256": "1f987882e0d79b971d6c250c73acf4cf73301ec933bf986c45f371be513089a4",
+      "contentVerification": "REPO_BLOB_AND_PREVIOUS_HASH_RECORDED",
+      "uploadedRevisionBlobSha": "fa3b802c119f4a8afa887332107005c2ecbb5f99",
+      "uploadedMatchesMain": true
+    }
+  ],
+  "blockers": {
+    "updatedUserImagesNotOnMain": [
+      "LM-01",
+      "LM-03",
+      "LM-04"
+    ],
+    "missingRepositorySha256": []
+  },
+  "qualifiedForLock": true,
+  "neverUseCachedSpriteLayer": true,
+  "neverUseAiReplacements": true,
+  "checksumEvidence": {
+    "runId": 40960712585,
+    "jobId": 123752435075,
+    "artifactId": 12935502209,
+    "headSha": "74261f352b9671670f79ca212e3a6e921179e52f",
+    "verifiedAllGitBlobs": true,
+    "sha256VerifiedFromCheckout": true
+  }
+}

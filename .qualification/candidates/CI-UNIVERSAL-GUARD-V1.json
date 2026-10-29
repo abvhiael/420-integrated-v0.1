@@ -1,0 +1,34 @@
+{
+  "step": "CI-UNIVERSAL-QUALIFICATION-GUARD-V1",
+  "roadmap": "docs/ci/universal-qualification-policy.md",
+  "level": "L1",
+  "base_sha": "2d67f3f8e75ba0931fe5959cce09d3a0716ce51f",
+  "candidate_sha": "HEAD",
+  "classification": "ci-infrastructure",
+  "scope": [
+    "scripts/qualification-policy/preflight.py",
+    "scripts/qualification-policy/test_preflight.py",
+    ".github/workflows/universal-qualification-guard.yml",
+    "docs/ci/universal-qualification-policy.md",
+    ".qualification/candidates/CI-UNIVERSAL-GUARD-V1.json",
+    "docs/ci/index.md"
+  ],
+  "tests": [
+    {
+      "command": "python3 -m unittest discover -s scripts/qualification-policy -p 'test_*.py' -v",
+      "owner": "CI universal qualification policy"
+    }
+  ],
+  "required_workflows": [
+    ".github/workflows/universal-qualification-guard.yml"
+  ],
+  "exit_criteria": [
+    "Versioned universal qualification and frozen-input preflight rejects incomplete evidence",
+    "Scoped policy self-tests and exact-SHA CI pass",
+    "Existing workflow and branch protection limitations documented without false universal enforcement claims"
+  ],
+  "frozen_inputs": {},
+  "external_gates": [
+    "Repository admin must require policy check in branch protection and migrate heavyweight workflow dependencies before full universal blocking"
+  ]
+}

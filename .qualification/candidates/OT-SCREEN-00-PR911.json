@@ -1,0 +1,36 @@
+{
+  "step": "OT-SCREEN-00",
+  "roadmap": "docs/highcountry/HC-WORLD-LOCKED-MASTER-ROADMAP-V1.md",
+  "level": "L1",
+  "base_sha": "0815b4268049c8de4e08204a71baeeb99a47edaa",
+  "candidate_sha": "HEAD",
+  "classification": "implementation",
+  "scope": [
+    ".github/workflows/ot-screen-00-asset-hashes.yml",
+    "deployments/highcountry/old-town-genesis-assets.json",
+    "deployments/highcountry/old-town-geo-authority-status.json",
+    "deployments/highcountry/old-town-ot-screen-00-preflight-evidence.json",
+    "deployments/highcountry/old-town-site-registry.json",
+    "scripts/highcountry/ot-screen-00-asset-hashes.mjs",
+    "scripts/highcountry/ot-screen-00-baseline.test.mjs",
+    ".qualification/candidates/OT-SCREEN-00-PR911.json"
+  ],
+  "tests": [
+    {
+      "command": "node --test scripts/highcountry/ot-screen-00-baseline.test.mjs scripts/highcountry/ot-screen-00-asset-hashes.mjs",
+      "owner": "OT-SCREEN-00 isolated checksum workflow"
+    }
+  ],
+  "required_workflows": [
+    ".github/workflows/ot-screen-00-asset-hashes.yml"
+  ],
+  "exit_criteria": [
+    "20 canonical original GitHub PNG SHA256 and blob identities verified in run 40965872712",
+    "59 distinct sites including 54 private 5 public and B22 protected",
+    "Exactly 20 Genesis buildings with no HL-05",
+    "Provisional geographic authority explicitly flagged; no land issuance",
+    "Scoped 9 of 9 Level 1 tests passed at f3852e13065df1212984c5f9d3a7734c2572c2fe"
+  ],
+  "frozen_inputs": {},
+  "external_gates": []
+}

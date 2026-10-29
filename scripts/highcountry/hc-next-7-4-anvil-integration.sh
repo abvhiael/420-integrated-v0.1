@@ -19,81 +19,35 @@ fixture="$HIGHCOUNTRY_CUP_ANVIL_FIXTURE"
 readFixture(){
   cast call "$fixture" "$1" --rpc-url "$HIGHCOUNTRY_CUP_ANVIL_RPC"
 }
+readTimestamp(){
+  # cast call can print "1793255487 [1.793e9]"; reject anything except a
+  # complete unsigned integer with an optional numeric display annotation.
+  local raw timestamp
+  raw="$(readFixture "$1")"
+  if [[ "$raw" =~ ^[[:space:]]*([0-9]+)([[:space:]]+\\[[0-9]+([.][0-9]+)?([eE][+-]?[0-9]+)?\\])?[[:space:]]*$ ]]; then
+    timestamp="${BASH_REMATCH[1]}"
+  else
+    echo "invalid cast timestamp: $raw" >&2
+    return 1
+  fi
+  printf '%s\\n' "$timestamp"
+}
 warp(){
-  # cast may show a decimal number with a human-readable annotation, e.g. 123 [1.23e2].
-  # Normalize without trusting arbitrary text or passing decimals directly to Anvil.
-  local raw="$1" timestamp quantity
-  if [[ "$raw" =~ ^[[:space:]]*(0x[0-9a-fA-F]+|[0-9]+)([[:space:]]*\[[[:space:]]*([0-9]+([.][0-9]+)?([eE][+-]?[0-9]+)?|uint(8|16|32|64|128|256))[[:space:]]*\])?[[:space:]]*$ ]]; then
-    timestamp="${BASH_REMATCH[1]}"
-  else
-    echo "invalid Anvil timestamp: $raw" >&2; return 1
-  fi
-  if [[ "$timestamp" == 0x* ]]; then
-    quantity="$timestamp"
-  else
-    printf -v quantity '0x%x' "$timestamp"
-  fi
-  cast rpc --rpc-url "$HIGHCOUNTRY_CUP_ANVIL_RPC" evm_setNextBlockTimestamp "$quantity" > /dev/null
+  local timestamp="$1" quantity
+  [[ "$timestamp" =~ ^[0-9]+$ ]] || { echo "invalid Anvil timestamp" >&2; return 1; }
+  printf -v quantity '0x%x' "$timestamp"
+  cast rpc --rpc-url "$HIGHCOUNTRY_CUP_ANVIL_RPC" evm_setNextBlockTimestamp "$quantity" >/dev/null
 }
 sendFixture(){
-  cast send "$fixture" "$1" --rpc-url "$HIGHCOUNTRY_CUP_ANVIL_RPC" --private-key "$ANVIL_DEV_KEY" > /dev/null
+  cast send "$fixture" "$1" --rpc-url "$HIGHCOUNTRY_CUP_ANVIL_RPC" --private-key "$ANVIL_DEV_KEY" >/dev/null
 }
-warp "$(readFixture 'openA()(uint64)')"
+warp "$(readTimestamp 'openA()(uint64)')"
 sendFixture 'scoreSemis()'
-warp "$(($(readFixture 'closeA()(uint64)') + 100))"
+warp "$(( $(readTimestamp 'closeA()(uint64)') + 100 ))"
 sendFixture 'finalizeSemis()'
-warp "$(readFixture 'openF()(uint64)')"
+warp "$(readTimestamp 'openF()(uint64)')"
 sendFixture 'scoreFinal()'
-warp "$(($(readFixture 'closeF()(uint64)') + 100))"
-sendFixture 'finalizeCup()'
-export HIGHCOUNTRY_CUP_ANVIL_CUP=$(readFixture 'cup()(address)')
-export HIGHCOUNTRY_CUP_ANVIL_ENGINE=$(readFixture 'engine()(address)')
-export HIGHCOUNTRY_CUP_ANVIL_ID=$(readFixture 'CUP()(bytes32)')
-cd services/420-gaming-player-profile
-node --test test/highcountry-cup-anvil.integration.mjs
-\\r'/}"
-  raw="${raw//
-  cast rpc --rpc-url "$HIGHCOUNTRY_CUP_ANVIL_RPC" evm_setNextBlockTimestamp "$quantity" > /dev/null
-}
-sendFixture(){
-  cast send "$fixture" "$1" --rpc-url "$HIGHCOUNTRY_CUP_ANVIL_RPC" --private-key "$ANVIL_DEV_KEY" > /dev/null
-}
-warp "$(readFixture 'openA()(uint64)')"
-sendFixture 'scoreSemis()'
-warp "$(($(readFixture 'closeA()(uint64)') + 100))"
-sendFixture 'finalizeSemis()'
-warp "$(readFixture 'openF()(uint64)')"
-sendFixture 'scoreFinal()'
-warp "$(($(readFixture 'closeF()(uint64)') + 100))"
-sendFixture 'finalizeCup()'
-export HIGHCOUNTRY_CUP_ANVIL_CUP=$(readFixture 'cup()(address)')
-export HIGHCOUNTRY_CUP_ANVIL_ENGINE=$(readFixture 'engine()(address)')
-export HIGHCOUNTRY_CUP_ANVIL_ID=$(readFixture 'CUP()(bytes32)')
-cd services/420-gaming-player-profile
-node --test test/highcountry-cup-anvil.integration.mjs
-\\n'/}"
-  if [[ "$raw" =~ ^[[:space:]]*(0x[0-9a-fA-F]+|[0-9]+)([[:space:]]*\\[[[:space:]]*uint(8|16|32|64|128|256)[[:space:]]*\\])?[[:space:]]*$ ]]; then
-    timestamp="${BASH_REMATCH[1]}"
-  else
-    echo "invalid Anvil timestamp" >&2; return 1
-  fi
-  if [[ "$timestamp" == 0x* ]]; then
-    quantity="$timestamp"
-  else
-    printf -v quantity '0x%x' "$timestamp"
-  fi
-  cast rpc --rpc-url "$HIGHCOUNTRY_CUP_ANVIL_RPC" evm_setNextBlockTimestamp "$quantity" > /dev/null
-}
-sendFixture(){
-  cast send "$fixture" "$1" --rpc-url "$HIGHCOUNTRY_CUP_ANVIL_RPC" --private-key "$ANVIL_DEV_KEY" > /dev/null
-}
-warp "$(readFixture 'openA()(uint64)')"
-sendFixture 'scoreSemis()'
-warp "$(($(readFixture 'closeA()(uint64)') + 100))"
-sendFixture 'finalizeSemis()'
-warp "$(readFixture 'openF()(uint64)')"
-sendFixture 'scoreFinal()'
-warp "$(($(readFixture 'closeF()(uint64)') + 100))"
+warp "$(( $(readTimestamp 'closeF()(uint64)') + 100 ))"
 sendFixture 'finalizeCup()'
 export HIGHCOUNTRY_CUP_ANVIL_CUP=$(readFixture 'cup()(address)')
 export HIGHCOUNTRY_CUP_ANVIL_ENGINE=$(readFixture 'engine()(address)')

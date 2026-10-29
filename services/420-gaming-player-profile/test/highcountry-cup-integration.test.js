@@ -1,6 +1,7 @@
 import {keccak256,selector} from '../../../packages/420-gaming-sdk/src/keccak.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {createHighCountryCupRuntime420} from '../src/highcountry-cup-runtime.js';
 import {createHighCountryCupRpc420} from '../src/highcountry-cup-rpc.js';
 import {createPostgresCupAchievements420} from '../src/highcountry-cup-achievements.js';
 const h=(x,n)=>'0x'+x.repeat(n), cup=h('1',64),A=h('a',40),B=h('b',40),C=h('c',40),D=h('d',40);
@@ -41,7 +42,7 @@ function mockRpc({badChain=false,badCode=false,orphan=false,stale=false,badCommi
  };
  const rpc=createHighCountryCupRpc420({endpoint:'https://rpc.example.org',chainId:420,
   cupAddress:A,engineAddress:B,cupCode:sourceCode,engineCode:sourceCode,codeHash:hash,selectors:S,fetchImpl});
- return {rpc,requests};
+ return {rpc,requests,fetchImpl};
 }
 const args={cupId:cup,chainId:420,cupAddress:A,codeHash:hash};
 test('finalized EIP-1898 Cup/engine reads produce authoritative bracket and provenance',async()=>{
@@ -124,4 +125,30 @@ test('bounded retry exhausts after three failures and does not retry unrelated e
   await assert.rejects(store.synchronize({cupId:cup}),e=>expected==='duplicate'?e.code===errorCode:e.code===expected);
   assert.equal(attempts,limit);assert.equal(rollbacks,limit);
  }
+});
+
+test('fully composed chain RPC, Cup projection and durable storage reject stale canonical source',async()=>{
+ let row=null;
+ const pool={connect:async()=>({
+  query:async(sql,args=[])=>{
+   if(sql.includes('INSERT INTO highcountry_cup.achievements'))
+    row={block_hash:args[4],commitment:args[6],champion:args[5],prestige:args[8]};
+   return {rows:sql.includes('SELECT * FROM highcountry_cup.achievements')?(row?[row]:[]):[]};
+  },release(){}
+ })};
+ const configure=opts=>createHighCountryCupRuntime420({
+  endpoint:'https://rpc.example.org',chainId:420,cupAddress:A,engineAddress:B,
+  cupCode:sourceCode,engineCode:sourceCode,codeHash:hash,selectors:S,
+  pool,gameId:h('e',64),fetchImpl:mockRpc(opts).fetchImpl});
+ const valid=configure();
+ const standings=await valid.standings({cupId:cup});
+ assert.equal(standings.champion,A);
+ assert.equal(standings.rounds.length,3);
+ assert.equal(standings.prizesFunded,false);
+ await valid.synchronize({cupId:cup});
+ assert.equal((await valid.historyStatus({cupId:cup})).current,true);
+ const withdrawn=configure({stale:true});
+ await assert.rejects(withdrawn.standings({cupId:cup}),{code:'cup-not-finalized'});
+ await assert.rejects(withdrawn.historyStatus({cupId:cup}),{code:'cup-not-finalized'});
+ assert.equal(row.champion,A,'stored record remains history only; cannot confer current award');
 });

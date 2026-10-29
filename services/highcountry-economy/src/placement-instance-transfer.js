@@ -23,7 +23,7 @@ export class HighCountryStoredInstanceTransfer {
    if(oldOp)fail('transfer-operation-replayed');
    const obj=s.placementInstances.get(instanceId);
    if(!obj||obj.state!=='stored'||obj.ownerPrincipal!==from||obj.revision!==expectedRevision)fail('not-owned-stored-instance');
-   if([...s.placementInstances.values()].some(v=>v.parentInstanceId===instanceId&&v.state==='placed'))fail('instance-has-live-children');
+   if([...s.placementInstances.values()].some(v=>v.parentInstanceId===instanceId&&v.state!=='removed'))fail('instance-has-dependent-children');
    const ids=[...s.placementOperations.values()].filter(v=>v.result?.instance?.instanceId===instanceId&&v.result?.custody?.unitId).map(v=>v.result.custody.unitId);
    if(!ids.length||new Set(ids).size!==1)fail('ambiguous-custody-provenance');
    const unit=s.custodyUnits.get(ids[0]);

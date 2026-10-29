@@ -33,7 +33,7 @@ contract SportsAdversarialQualification420Test is SportsRiskEmergency420Test {
         _assertAssetConservation();
     }
 
-    function testFailedOracleReportsNeverConsumeTicketsOrRisk() public {
+    function testRejectedOracleReportsNeverConsumeTicketsOrRisk() public {
         _enableProductionRisk(425);
         _submit(_quote(1));
         _call(CONTROL, address(vault), abi.encodeCall(vault.deposit, (market, 2000)));

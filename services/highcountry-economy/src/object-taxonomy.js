@@ -4,7 +4,10 @@
 import {createHash} from 'node:crypto';
 import {SURFACES,LAYERS} from './placement-contract.js';
 export const TAXONOMY_VERSION='HC.ECON.TAXONOMY.V1';
-export const POLICY_VERSION='HC.ECON.MODIFIERS.V1';
+export const POLICY_VERSION='HC.ECON.MODIFIERS.V2';
+export const ORDINARY_MAX_BPS=500;
+export const ORDINARY_TARGET_AVERAGE_BPS=250;
+export const ORIGINS=Object.freeze(['creator','developer','quest']);
 const fail=(code)=>{throw new TypeError('hc-econ-01:'+code);};
 const id=x=>typeof x==='string'&&/^[a-z][a-z0-9_-]{1,63}$/.test(x);
 const plain=x=>x!==null&&typeof x==='object'&&!Array.isArray(x)&&Object.getPrototypeOf(x)===Object.prototype;
@@ -24,8 +27,8 @@ export const EFFECT_ROLES=freeze({
  heritage_preservation:['heritage','preservation']
 });
 export const ROLE_STACK_CAP_BPS=freeze({
- comfort:1500,hospitality:1200,storage:1200,crafting:1000,
- preservation:1200,cultivation:1000,environment:1000,display:1200,heritage:800
+ comfort:500,hospitality:500,storage:500,crafting:500,
+ preservation:500,cultivation:500,environment:500,display:500,heritage:500
 });
 const LAYER_SURFACE=freeze({
  furniture:['floor'],cultivation:['floor','outdoor_ground'],outdoor_structure:['outdoor_ground'],
@@ -55,12 +58,12 @@ export function eligibleEffects(type){
 export function defineModifierPolicy(value,type){
  const t=defineObjectType(type);
  if(!t.qualified)fail('type-unqualified');
- if(!exact(value,['schemaVersion','policyId','typeId','revision','maxModifiers','perItemCapBps','effects','qualified','qualificationRef']))fail('policy-shape');
+ if(!exact(value,['schemaVersion','policyId','typeId','revision','origin','maxModifiers','perItemCapBps','effects','qualified','qualificationRef']))fail('policy-shape');
  if(value.schemaVersion!==POLICY_VERSION||!id(value.policyId)||value.typeId!==t.typeId||
- !integer(value.revision)||value.revision<1||typeof value.qualified!=='boolean')fail('policy-identity');
+ !integer(value.revision)||value.revision<1||!ORIGINS.includes(value.origin)||typeof value.qualified!=='boolean')fail('policy-identity');
  if(value.qualified?!id(value.qualificationRef):value.qualificationRef!==null)fail('policy-qualification');
  if(!integer(value.maxModifiers)||value.maxModifiers<0||value.maxModifiers>3||
- !integer(value.perItemCapBps)||value.perItemCapBps<0||value.perItemCapBps>1000)fail('power-budget');
+ !integer(value.perItemCapBps)||value.perItemCapBps<0||value.perItemCapBps>(value.origin==='quest'?10000:ORDINARY_MAX_BPS))fail('power-budget');
  if(!Array.isArray(value.effects)||value.effects.length>20||
  (value.effects.length===0)!==(value.maxModifiers===0))fail('pool-size');
  const permitted=new Set(eligibleEffects(t));
@@ -71,7 +74,7 @@ export function defineModifierPolicy(value,type){
       !permitted.has(effect.effectId)||keys.has(effect.effectId))fail('effect-ineligible');
    keys.add(effect.effectId);
    if(!integer(effect.minBps)||!integer(effect.maxBps)||effect.minBps<1||
-      effect.maxBps<effect.minBps||effect.maxBps>500||
+      effect.maxBps<effect.minBps||effect.maxBps>(value.origin==='quest'?10000:ORDINARY_MAX_BPS)||
       !integer(effect.weight)||effect.weight<1||effect.weight>10000)fail('effect-bounds');
    totalWeight+=effect.weight;
  }
@@ -79,6 +82,13 @@ export function defineModifierPolicy(value,type){
  if(value.maxModifiers>value.effects.length)fail('insufficient-effects');
  const worst=value.effects.map(e=>e.maxBps).sort((a,b)=>b-a).slice(0,value.maxModifiers).reduce((a,b)=>a+b,0);
  if(worst>value.perItemCapBps)fail('item-budget-exceeded');
+ if(value.origin==='developer'&&(value.effects.some(e=>e.minBps!==e.maxBps)||value.maxModifiers!==value.effects.length))fail('developer-locked-modifier');
+ // Ordinary creator pools have a 2–3% expected aggregate target (2.5% default).
+ // This rejects distorted creator-defined ranges at catalogue registration.
+ if(value.origin==='creator'&&value.maxModifiers>0){
+   const minimum=value.effects.map(e=>e.minBps).sort((a,b)=>a-b).slice(0,value.maxModifiers).reduce((a,b)=>a+b,0);
+   if(minimum>300||worst<200)fail('ordinary-average-band');
+ }
  return freeze(clone(value));
 }
 export function defineTaxonomyCatalog({types,policies}={}){
@@ -113,7 +123,7 @@ export function validateModifierOutcome(certified,outcome){
    if(!integer(effect.bps)||effect.bps<range.minBps||effect.bps>range.maxBps)fail('outcome-bounds');
    sum+=effect.bps;
  }
- if(sum>policy.perItemCapBps)fail('outcome-budget');
+ if(sum>policy.perItemCapBps|| (policy.origin!=='quest'&&sum>ORDINARY_MAX_BPS))fail('outcome-budget');
  // This checks bounds only: HC-ECON-02 must verify entropy and the draw.
  return freeze({valid:true,totalBps:sum});
 }
@@ -121,8 +131,12 @@ export function checkStacking(type,items){
  const t=defineObjectType(type);
  if(!t.qualified||!Array.isArray(items)||items.length>1000)fail('stack-shape');
  const totals=Object.fromEntries(t.roles.map(role=>[role,0]));
+ const developerSeen=new Set();
  for(const item of items){
-   if(!plain(item)||!Array.isArray(item.effects))fail('stack-item');
+   if(!plain(item)||!Array.isArray(item.effects)||!ORIGINS.includes(item.origin))fail('stack-item');
+   if(item.origin==='developer'){
+     for(const e of item.effects){if(developerSeen.has(e.effectId))fail('developer-nonstackable');developerSeen.add(e.effectId);}
+   }
    for(const e of item.effects){
      if(!exact(e,['effectId','bps'])||!integer(e.bps)||e.bps<0||
        !Object.hasOwn(EFFECT_ROLES,e.effectId)||!EFFECT_ROLES[e.effectId].some(r=>t.roles.includes(r)))fail('stack-effect');
@@ -132,4 +146,13 @@ export function checkStacking(type,items){
    }
  }
  return freeze({totals,applied:Object.fromEntries(Object.entries(totals).map(([k,v])=>[k,Math.min(v,ROLE_STACK_CAP_BPS[k])]))});
+}
+
+// Entitlement verification and weighted entropy remain with HC-ECON-02. This
+// boundary explicitly prohibits a caller from requesting an ordinary reveal
+// before a canonical, finalized purchase acceptance has been supplied.
+export function assertRevealEligible({origin,purchaseFinalized,issuerAuthorized}={}){
+ if(!ORIGINS.includes(origin)||issuerAuthorized!==true)fail('reveal-authority');
+ if(origin==='creator'&&purchaseFinalized!==true)fail('purchase-not-finalized');
+ return true;
 }

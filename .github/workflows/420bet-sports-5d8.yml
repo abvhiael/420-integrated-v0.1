@@ -1,0 +1,24 @@
+name: 420Bet Sports 5D.8 exposure and emergency
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/bet/sports/SportsFundedTickets420.sol'
+      - 'contracts/test/sports-5d8/**'
+      - '.github/workflows/420bet-sports-5d8.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  sports-risk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.8.6
+      - name: Scoped exposure, emergency and inherited regression
+        working-directory: contracts
+        run: forge test --match-path 'test/sports-5d8/*.t.sol' -vvv

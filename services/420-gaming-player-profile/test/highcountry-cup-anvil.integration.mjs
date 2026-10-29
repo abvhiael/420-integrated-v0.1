@@ -10,11 +10,11 @@ import {createHighCountryCupRuntime420} from '../src/highcountry-cup-runtime.js'
 import {createHighCountryCloudHttp420} from '../src/highcountry-cloud-http.js';
 const endpoint=process.env.HIGHCOUNTRY_CUP_ANVIL_RPC;
 const postgres=process.env.HIGHCOUNTRY_CUP_POSTGRES_TEST_URL;
-const cupAddress=process.env.HIGHCOUNTRY_CUP_ANVIL_CUP;
-const engineAddress=process.env.HIGHCOUNTRY_CUP_ANVIL_ENGINE;
-const fixtureAddress=process.env.HIGHCOUNTRY_CUP_ANVIL_FIXTURE;
+const cupAddress=process.env.HIGHCOUNTRY_CUP_ANVIL_CUP?.toLowerCase();
+const engineAddress=process.env.HIGHCOUNTRY_CUP_ANVIL_ENGINE?.toLowerCase();
+const fixtureAddress=process.env.HIGHCOUNTRY_CUP_ANVIL_FIXTURE?.toLowerCase();
 const cupId=process.env.HIGHCOUNTRY_CUP_ANVIL_ID;
-const account=process.env.HIGHCOUNTRY_CUP_ANVIL_SENDER;
+const account=process.env.HIGHCOUNTRY_CUP_ANVIL_SENDER?.toLowerCase();
 if(!/^http:\/\/127\.0\.0\.1:[0-9]+$/.test(endpoint||'')||
  !postgres||new URL(postgres).pathname!=='/hc_cup_ci'||!
  [cupAddress,engineAddress,fixtureAddress,account].every(x=>/^0x[0-9a-fA-F]{40}$/.test(x||''))||

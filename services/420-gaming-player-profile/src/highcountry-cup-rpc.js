@@ -80,10 +80,10 @@ export function createHighCountryCupRpc420({endpoint,chainId,cupAddress,engineAd
    rounds.push({eventId,finalized:true,current:accepted,entrants,winner,winnerScore});
   }
   // Recompute the exact Solidity abi.encode commitment; an RPC value alone is insufficient.
-  const [a,b,f]=rounds;
+  const [semiRoundA,semiRoundB,finalRound]=rounds;
   const claimedCommitment=commitment([uint(chainId),uint(BigInt(cupAddress)),cupId,rulesHash,prizeRulesHash,scope,
-   semiA,semiB,finalEvent,uint(BigInt(a.winner)),uint(BigInt(b.winner)),uint(BigInt(champion)),
-   uint(a.winnerScore),uint(b.winnerScore),uint(f.winnerScore)]);
+   semiA,semiB,finalEvent,uint(BigInt(semiRoundA.winner)),uint(BigInt(semiRoundB.winner)),uint(BigInt(champion)),
+   uint(semiRoundA.winnerScore),uint(semiRoundB.winnerScore),uint(finalRound.winnerScore)]);
   if(lower(resultCommitment)!==claimedCommitment)fail('cup-rpc-commitment-mismatch');
   const issued=bool(word(await read(cupAddress,selectors.isIssued,[cupId,uint(BigInt(champion)),scope],block),0));
   const again=await call('eth_getBlockByHash',[block,false]);

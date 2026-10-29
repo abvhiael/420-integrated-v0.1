@@ -52,3 +52,25 @@ jobs:
         run: |
           node --test test/highcountry-global-cup.test.js test/highcountry-cup-integration.test.js test/highcountry-cup-http.test.js
           node --test test/highcountry-cup-postgres.integration.mjs
+
+  cup-contract-boundary:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      FOUNDRY_SRC: src/highcountry
+      FOUNDRY_TEST: test/highcountry
+      FOUNDRY_SCRIPT: script/highcountry
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Confirm exact implementation SHA
+        env:
+          TARGET: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$TARGET"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Retained real-EVM R04.13 Cup and R04.12 competition assertions
+        working-directory: contracts
+        run: forge test --match-path 'test/highcountry/unit/cup/*.t.sol' -vv

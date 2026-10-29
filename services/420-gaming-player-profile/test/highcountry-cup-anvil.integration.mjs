@@ -42,11 +42,21 @@ test('real EVM→canonical RPC→Cup projection→authenticated HTTP→PostgreSQ
   await root.query('GRANT gaming_datastore_runtime TO hc_cup_ci_runtime');
   const runtimeUrl=new URL(postgres);runtimeUrl.username='hc_cup_ci_runtime';runtimeUrl.password='test-only';
   pool=new Pool({connectionString:runtimeUrl.toString()});
-  const cupCode=await rpc('eth_getCode',[cupAddress,'finalized']);
-  const engineCode=await rpc('eth_getCode',[engineAddress,'finalized']);
-  assert(/^0x[0-9a-f]{100,}$/i.test(cupCode));
-  assert(/^0x[0-9a-f]{100,}$/i.test(engineCode));
+  const finalizedBlock=await rpc('eth_getBlockByNumber',['finalized',false]);
+  assert.match(finalizedBlock?.hash||'',/^0x[0-9a-f]{64}$/i);
+  const blockRef={blockHash:finalizedBlock.hash,requireCanonical:true};
+  const cupCode=await rpc('eth_getCode',[cupAddress,blockRef]);
+  const engineCode=await rpc('eth_getCode',[engineAddress,blockRef]);
+  const cupLatest=await rpc('eth_getCode',[cupAddress,'latest']);
+  const engineLatest=await rpc('eth_getCode',[engineAddress,'latest']);
+  assert.match(cupCode,/^0x[0-9a-f]{100,}$/i,'finalized Cup deployment bytecode missing');
+  assert.match(engineCode,/^0x[0-9a-f]{100,}$/i,'finalized Engine deployment bytecode missing');
+  assert.equal(cupCode.toLowerCase(),cupLatest.toLowerCase(),'Cup finalized/latest bytecode mismatch');
+  assert.equal(engineCode.toLowerCase(),engineLatest.toLowerCase(),'Engine finalized/latest bytecode mismatch');
   const codeHash=keccak256(Buffer.from(cupCode.slice(2),'hex'));
+  const engineCodeHash=keccak256(Buffer.from(engineCode.slice(2),'hex'));
+  assert.match(codeHash,/^0x[0-9a-f]{64}$/i);
+  assert.match(engineCodeHash,/^0x[0-9a-f]{64}$/i);
   // These dynamic fixture bytes are isolated-test credentials, not a production code-hash pin.
   const runtime=createHighCountryCupRuntime420({endpoint,chainId:420,cupAddress,engineAddress,
    cupCode,engineCode,codeHash,selectors,pool,gameId});

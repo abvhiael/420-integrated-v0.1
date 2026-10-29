@@ -2,7 +2,7 @@
 title: Universal Scoped Qualification Policy
 status: active
 category: contributing
-version: 1.0.0
+version: current
 ---
 
 # Universal CI qualification isolation policy

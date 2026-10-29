@@ -138,6 +138,9 @@ E01–E30 are 30 distinct nonblank requirement IDs, each with a named functional
 
 This audit is **exhaustive for the committed tree path enumeration** and covers the identified open HighCountry PR changed-file inventories. It is not a line-by-line security review or an assertion that future branches cannot conflict. Re-check current main and the final exact SHA before merge; tests from an older head are historical evidence, not automatic final-head qualification.
 
+### Concurrent main movement verified after tree audit
+At final inventory review, `main` advanced five commits beyond the audited branch's earlier base. A second **untruncated** recursive tree read of current `main` returned tree SHA `b7d35d94e8bfc2e41fb9878d7b4311fcc9fedba3`, **13,512 entries and 12,224 file blobs**. Compared to the audited branch-era commit `b76efdd3`, the changed-path report contains new `HC-ART-05-E` regional structure PNGs and manifest entries under `apps/highcountry-web/public/assets/structures/hc-art-05-e/` (including Emerald Coast and Golden Prairie locations). None modifies the HC-ECON-00 specification path. These new assets remain under their originating art workstream; no implied certification, gameplay modifier or placement authority. Reconcile against the latest main commit before merge and retain all asset files.
+
 ## HC-ECON-00 exit checklist
 - [x] Enumerated the approved creator, fee, moderation, edition, modifiers, manufacturing, pricing, brand, NPC, quest and O16 requirements.
 - [x] Mapped each to functional owner, proposed API, proposed data contract and mandatory acceptance test (E01-E30).

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {createHighCountryCupRpc420} from '../src/highcountry-cup-rpc.js';
 import {createPostgresCupAchievements420} from '../src/highcountry-cup-achievements.js';
 const h=(x,n)=>'0x'+x.repeat(n), cup=h('1',64),A=h('a',40),B=h('b',40),C=h('c',40),D=h('d',40);
-const S={cups:h('1',8),resultCommitment:h('2',8),resultsCurrent:h('3',8),isIssued:h('4',8),
+const S={cups:h('1',8),finalResultCommitment:h('2',8),resultsCurrent:h('3',8),isIssued:h('4',8),
 events:h('5',8),winners:h('6',8),winnerScore:h('7',8),entrantAt:h('8',8),resultIsCurrent:h('9',8)};
 const w=x=>BigInt(x).toString(16).padStart(64,'0');
 const pack=(...args)=>'0x'+args.map(x=>w(x)).join('');
@@ -25,7 +25,7 @@ function mockRpc({badChain=false,badCode=false,orphan=false,stale=false}={}){
    const index=rounds.findIndex(x=>x===a0);
    if(selector===S.cups)result=pack(BigInt(A),BigInt(rounds[0]),BigInt(rounds[1]),BigInt(rounds[2]),
      BigInt(h('3',64)),BigInt(h('4',64)),BigInt(h('5',64)),1n,BigInt(A));
-   else if(selector===S.resultCommitment)result=pack(BigInt(h('6',64)));
+   else if(selector===S.finalResultCommitment)result=pack(BigInt(h('6',64)));
    else if(selector===S.resultsCurrent||selector===S.isIssued||selector===S.resultIsCurrent)result=pack(stale?0n:1n);
    else if(selector===S.events)result=pack(BigInt(h('7',64)),BigInt(h('2',64)),BigInt(A),
      1n,2n,3n,2n,1n,0n);

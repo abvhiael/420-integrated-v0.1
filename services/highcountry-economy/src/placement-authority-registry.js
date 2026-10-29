@@ -50,6 +50,7 @@ export class HighCountryPlacementAuthorityRegistry {
   await this.authority.requireWorldAuthorityOperator(session,parcelId);
   return this.store.transact(s=>{
    if(!(s.placementAuthorityRevisions instanceof Map))fail('authority-state-missing');
+   if(this.authority.verifyOperatorAtCommit({session,parcelId,state:s})!==true)fail('operator-revoked-at-commit');
    const prior=s.placementAuthorityRevisions.get(parcelId);
    if(!prior||prior.revision!==expectedRevision||prior.revoked===true)fail('stale-or-revoked-authority');
    const next={...prior,revision:expectedRevision+1,revoked:true};

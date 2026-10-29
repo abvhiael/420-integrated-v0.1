@@ -1,6 +1,8 @@
 ---
 title: Universal Scoped Qualification Policy
 status: active
+category: engineering
+version: 1.0.0
 ---
 
 # Universal CI qualification isolation policy

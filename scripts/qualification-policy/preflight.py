@@ -129,6 +129,44 @@ def audit_triggers(paths):
         fail("; ".join(failures))
 
 
+def audit_unwanted_level3(changed):
+    """Reject L1/L2 candidates whose changed paths trigger heavyweight Level 3."""
+    directory = ROOT / ".github/workflows"
+    for workflow in sorted(directory.glob("*.y*ml")):
+        name = workflow.name.lower()
+        if not (("level3" in name or "level-3" in name) and "preflight" not in name):
+            continue
+        lines = workflow.read_text().splitlines()
+        start = next((i for i, line in enumerate(lines) if line.strip() == "pull_request:"), None)
+        if start is None:
+            continue
+        body = []
+        for line in lines[start + 1:]:
+            # End at the next sibling trigger, or at a top-level key.
+            if line and not line[0].isspace():
+                break
+            if re.match(r"^  [A-Za-z_][A-Za-z0-9_-]*:", line):
+                break
+            body.append(line)
+        filters = []
+        in_paths = False
+        for line in body:
+            if line.startswith("    paths:"):
+                in_paths = True
+                continue
+            if line.startswith("    ") and not line.startswith("      "):
+                in_paths = False
+            if in_paths and line.startswith("      - "):
+                pattern = line.split("- ", 1)[1].strip().strip(chr(39) + chr(34))
+                if pattern:
+                    filters.append(pattern)
+        if not filters:
+            fail("Level 3 auto-trigger without scoped paths: " + workflow.name)
+        for path in changed:
+            if any(fnmatch.fnmatchcase(path, pattern) for pattern in filters):
+                fail("unauthorized automatic Level 3 trigger: " + workflow.name + " for " + path)
+
+
 def main():
     a = argparse.ArgumentParser()
     a.add_argument("--manifest", required=True)
@@ -144,6 +182,8 @@ def main():
     changed = diff_names(base, head)
     audit_triggers(changed)
     manifest = json.loads((ROOT / safe_path(args.manifest)).read_text())
+    if manifest.get('level') in ('L1', 'L2'):
+        audit_unwanted_level3(changed)
     certificate = check_manifest(manifest, changed, head, base)
     encoded = json.dumps(certificate, sort_keys=True, indent=2) + "\n"
     if args.output:

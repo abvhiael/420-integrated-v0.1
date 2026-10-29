@@ -73,6 +73,14 @@ class PolicyGuardTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "unsafe"):
             mod.check_manifest(self.data, ["../secret"], self.sha, self.base)
 
+    def test_unapproved_level3_trigger_is_detected(self):
+        heavy = mod.ROOT / ".github/workflows/app-level3.yml"
+        heavy.write_text("name: expensive\\non:\\n  pull_request:\\n    paths:\\n      - 'services/product/**'\\n  workflow_dispatch:\\n")
+        with self.assertRaisesRegex(ValueError, "unauthorized automatic Level 3"):
+            mod.audit_unwanted_level3(self.changed)
+        heavy.write_text("name: expensive\\non:\\n  workflow_dispatch:\\n")
+        mod.audit_unwanted_level3(self.changed)
+
     def test_unregistered_workflow(self):
         self.data["required_workflows"] = [".github/workflows/missing.yml"]
         with self.assertRaisesRegex(ValueError, "registered"):

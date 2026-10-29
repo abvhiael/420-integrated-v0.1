@@ -24,3 +24,5 @@ B. Add a canonical signed or reviewed per-step preflight manifest and make the g
 C. Inventory and harden existing expensive workflow triggers and dependencies without deleting test inventories.
 D. Enable repository ruleset / required check after existing PR compatibility is addressed.
 E. Record CI run IDs, exact SHAs, and actual required-check status in the evidence ledger.
+
+The preflight now audits ALL existing Level 3 PR path filters against the candidate diff. For Level 1/2 it rejects any changed path that would automatically trigger a heavy Level 3 workflow, preventing an avoidable PR creation while the owner migrates its trigger or scope. This is an offline preflight control; it does not retroactively stop GitHub Actions already queued before the preflight ran.

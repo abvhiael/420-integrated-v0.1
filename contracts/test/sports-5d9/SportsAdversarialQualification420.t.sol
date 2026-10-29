@@ -77,4 +77,26 @@ contract SportsAdversarialQualification420Test is SportsRiskEmergency420Test {
         require(vault.credit(PLAYER, address(token)) == 0, "refund paid twice");
         _assertAssetConservation();
     }
+    function testFuzzUnauthorizedResolverAndCrossDomainOracleNeverReleaseRisk(uint16 seed) public {
+        _enableProductionRisk(425);
+        _submit(_quote(1));
+        _call(CONTROL, address(vault), abi.encodeCall(vault.deposit, (market, 2000)));
+        bytes32 id = _fund(500);
+        vm.warp(markets.get(market).config.cutoff + 1);
+        _certifyWinner();
+        SportsOutcomeCertification420.Result memory result_ = cert.result(market);
+        _feed(uint64(block.timestamp), 2, 9500,
+            gate.commitment(bytes32(uint256(seed) + 1), result_.selection, result_.evidence));
+        (bool ok,) = address(gate).call(abi.encodeCall(gate.settle, (id, true)));
+        require(!ok, "cross-domain oracle reported success");
+        _fails(PLAYER, address(vault), abi.encodeCall(vault.resolve, (id, true)));
+        require(vault.assetProfitExposure(address(token)) == 425, "unauthorized risk release");
+        require(vault.credit(PLAYER, address(token)) == 0, "unauthorized credit");
+        require(vault.get(id).state == SportsFundedTickets420.TicketState.FUNDED, "mutated ticket");
+        _verified();
+        gate.settle(id, true);
+        require(vault.assetProfitExposure(address(token)) == 0, "settlement risk leak");
+        _assertAssetConservation();
+    }
+
 }

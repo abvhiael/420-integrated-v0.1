@@ -11,6 +11,7 @@ contract CupAnvilEvidence is ICompetitionEvidenceR0412 {
     function certify(bytes32 id,address player,uint16 quality,uint64 time) external {
         records[id]=keccak256(abi.encode(player,quality,time));
     }
+    function revoke(bytes32 id) external {delete records[id];}
     function verifiedFlower(bytes32 id,address player,uint16 quality,uint64 time) external view returns(bool){
         return records[id]!=bytes32(0)&&records[id]==keccak256(abi.encode(player,quality,time));
     }
@@ -92,6 +93,7 @@ contract CupHttpAnvilFixture {
         _score(a,F,keccak256("a-final"),9800,openF);
         _score(c,F,keccak256("c-final"),9700,openF);
     }
+    function revokeFinalEvidence() external {evidence.revoke(keccak256('a-final'));}
     function finalizeCup() external {
         require(block.timestamp>=closeF+100,"wrong-window");
         engine.finalize(F);cup.finalize(CUP);cup.issueCrossGame(CUP);

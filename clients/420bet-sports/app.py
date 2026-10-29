@@ -88,9 +88,10 @@ class SportsbookClient:
         self.deployment.verify(self.rpc)
         if not nonzero_hex(player, 20) or now < 0:
             raise AdmissionRejected("invalid player/time")
-        if not callable(self.verifier):
-            raise AdmissionRejected("no independent source verifier")
-        ev = self.verifier(source_report)
+        from source_verifier import SourceVerifier
+        if not isinstance(self.verifier, SourceVerifier):
+            raise AdmissionRejected("untrusted source verifier")
+        ev = self.verifier.verify(source_report, now=now)
         if not isinstance(ev, VerifiedEvidence) or not all((
             nonzero_hex(ev.source_digest, 32), nonzero_hex(ev.evidence_digest, 32),
             nonzero_hex(ev.market_id, 32), ev.provider,

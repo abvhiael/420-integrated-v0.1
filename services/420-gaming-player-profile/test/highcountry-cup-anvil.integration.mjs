@@ -60,7 +60,7 @@ test('real EVM→canonical RPC→Cup projection→authenticated HTTP→PostgreSQ
   await runtime.synchronize({cupId});
   assert.equal((await runtime.historyStatus({cupId})).current,true);
   assert.equal(Number((await pool.query('SELECT count(*) AS n FROM highcountry_cup.history')).rows[0].n),1);
-  const authority={gameId,verifyToken:token=>{if(token!=='valid')throw Error('invalid-token');
+  const authority={gameId,verifyToken:token=>{if(token!=='valid')throw Error('authentication-denied');
    return {sub:'alice',game:gameId,epoch:0,iss:'issuer-acceptance'};},
    registeredPrincipal:async token=>token==='valid'?'alice':null};
   server=createHighCountryCloudHttp420({authority,
@@ -71,7 +71,7 @@ test('real EVM→canonical RPC→Cup projection→authenticated HTTP→PostgreSQ
   const request=(payload,token='valid')=>fetch(url,{method:'POST',headers:{
    authorization:'Bearer '+token,origin:'https://cup.example.org','content-type':'application/json'},
    body:JSON.stringify(payload)});
-  assert.equal((await request({cupId,winner:account})).status,503);
+  assert.equal((await request({cupId,winner:account})).status,400);
   assert.equal((await request({cupId},'invalid')).status,403);
   const good=await request({cupId});assert.equal(good.status,200);
   assert.equal((await good.json()).champion.toLowerCase(),standing.champion.toLowerCase());

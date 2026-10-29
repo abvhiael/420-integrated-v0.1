@@ -7,6 +7,7 @@ import sys
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 WORKFLOWS = (
  "420compliance-c08-5-level3.yml", "420hz-gca-17-level3.yml",
+ "explorer-exp-1-9.yml", "explorer-exp-1-10.yml",
  "contracts-foundry.yml", "contracts-genesis.yml", "genesis-address-authority.yml",
  "highcountry-r06-level3.yml", "liftd-l02-13-level3.yml",
  "mig-5-level3.yml", "qualification.yml",
@@ -48,7 +49,7 @@ def main():
         after = (ROOT / path).read_text()
         check(before, after, name)
         print("PASS", name, "manual-only; identical job inventory")
-    print("PASS: all nine heavy workflows are explicitly dispatched without implicit triggers")
+    print("PASS: all eleven heavy workflows are explicitly dispatched without implicit triggers")
 
 if __name__ == "__main__":
     try:

@@ -4,6 +4,8 @@ on:
     paths:
       - '.github/workflows/420compliance-c08-5-level3.yml'
       - '.github/workflows/420hz-gca-17-level3.yml'
+      - '.github/workflows/explorer-exp-1-9.yml'
+      - '.github/workflows/explorer-exp-1-10.yml'
       - '.github/workflows/contracts-foundry.yml'
       - '.github/workflows/contracts-genesis.yml'
       - '.github/workflows/genesis-address-authority.yml'
@@ -30,7 +32,7 @@ jobs:
         env:
           EXPECTED_SHA: ${{ github.event.pull_request.head.sha }}
         run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
-      - name: Assert nine complete retained inventories with no implicit triggers
+      - name: Assert eleven complete retained inventories with no implicit triggers
         env:
           RECONCILIATION_BASE: ${{ github.event.pull_request.base.sha }}
         run: |

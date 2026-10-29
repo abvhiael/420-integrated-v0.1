@@ -2,7 +2,7 @@
 
 Status: locally verifiable repository policy candidate. No claim of installed GitHub ruleset.
 
-All nine canonical full-phase/global workflows identified by the trigger audit are changed to **workflow_dispatch only**. Their `jobs:` sections remain byte-for-byte identical to the previous `main` base, including security/adversarial tests, job timeouts, coverage, fixtures, and retained integration checks. This prevents ordinary PRs and pushes from queuing expensive qualification automatically, but explicitly authorized phase closeouts still run using GitHub Actions **Run workflow**, provided the operator selects the intended branch.
+All eleven canonical full-phase/global workflows identified by the trigger audit are changed to **workflow_dispatch only**. Their `jobs:` sections remain byte-for-byte identical to the previous `main` base, including security/adversarial tests, job timeouts, coverage, fixtures, and retained integration checks. This prevents ordinary PRs and pushes from queuing expensive qualification automatically, but explicitly authorized phase closeouts still run using GitHub Actions **Run workflow**, provided the operator selects the intended branch.
 
 ## Trigger boundaries
 
@@ -20,4 +20,4 @@ Still mandatory: protect `main` with required check **Universal Qualification Po
 
 ## Legacy workflows
 
-No tests, fixtures, data, or commands were removed. Direct `workflow_dispatch` is retained for authorized phase closeout. Other workflows not in the nine critical inventories must be examined independently before claiming the entire historical CI catalog has no expensive automatic triggers.
+No tests, fixtures, data, or commands were removed. Direct `workflow_dispatch` is retained for authorized phase closeout. Other workflows not in the eleven critical inventories must be examined independently before claiming the entire historical CI catalog has no expensive automatic triggers.

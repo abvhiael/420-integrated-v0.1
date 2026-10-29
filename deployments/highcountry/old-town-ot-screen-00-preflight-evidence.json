@@ -68,9 +68,9 @@
     "siteOverlaps": []
   },
   "blockingInputs": [
-    "3 updated LM files not matching main",
-    "Exact SHA256 not available for current GitHub LM-01, LM-03, LM-04 blobs",
-    "Phase C survey coordinates not adopted as authoritative"
+    "Exact SHA-256 unavailable for canonical main LM-01, LM-03 and LM-04 blobs; current connector refuses binary reads",
+    "Mandatory original-source hash gate added in scripts/highcountry/ot-screen-00-asset-hashes.mjs and must pass against actual repository files before lock",
+    "Phase C survey coordinates remain provisional; not a blocker to a visual-only lock if flagged"
   ],
   "preflightPass": false,
   "formalCI": "NOT_STARTED",
@@ -131,6 +131,8 @@
       "Docs",
       "Level 3"
     ],
-    "formalCI": "BLOCKED until preflight PASS"
-  }
+    "formalCI": "NOT_STARTED - exact SHA256 inputs unresolved; do not falsely pass preflight",
+    "scopedExactBytes": "node --test scripts/highcountry/ot-screen-00-asset-hashes.mjs"
+  },
+  "assetReconciliationPolicy": "Keep current main Git blob versions canonical until owner authorizes a different image revision. Uploaded copies that differ are not automatically substituted; no PNG assets modified."
 }

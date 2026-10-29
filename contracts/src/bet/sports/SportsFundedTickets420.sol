@@ -182,7 +182,7 @@ contract SportsFundedTickets420 is SportsAuthority420 {
             || reserved[offer.marketId] + profit > collateral[offer.marketId]) revert State();
         address riskAsset = markets.get(offer.marketId).config.asset;
         uint256 assetCap = assetProfitCap[riskAsset];
-        if (assetCap == 0 || profit > assetCap || assetProfitExposure[riskAsset] > assetCap - profit) revert State();
+        if (oracleOnlyFunding && (assetCap == 0 || profit > assetCap || assetProfitExposure[riskAsset] > assetCap - profit)) revert State();
         bytes32 group = marketRiskGroup[offer.marketId];
         if (group != bytes32(0) && riskGroupOutstanding[group] + profit > riskGroupLimit[group]) revert State();
         (SportsOddsIngestion420.Latest memory q, bool usable) = odds.current(offer.marketId);

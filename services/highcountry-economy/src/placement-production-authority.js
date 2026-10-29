@@ -8,13 +8,20 @@ export class HighCountryProductionPlacementAuthority {
   if(typeof runtime?.verifyToken!=='function'||typeof runtime?.registeredPrincipal!=='function'
     ||typeof world?.verifyEvidence!=='function'||typeof world?.verifyEvent!=='function'
     ||typeof world?.canPlace!=='function'||typeof world?.validate!=='function'
-    ||typeof world?.geometrySnapshot!=='function'||typeof world?.verifyTransferConsent!=='function'||typeof world?.verifyOrdinaryCustodyAtCommit!=='function')fail('missing-independent-authorities');
+    ||typeof world?.geometrySnapshot!=='function'||typeof world?.verifyTransferConsent!=='function'||typeof world?.verifyOrdinaryCustodyAtCommit!=='function'||typeof world?.verifyAtCommit!=='function'||typeof world?.verifyTransferAtCommit!=='function')fail('missing-independent-authorities');
   Object.assign(this,{runtime,world,operatorRole});
  }
  async registeredPrincipal(session){return this.runtime.registeredPrincipal(session)}
  async requireWorldAuthorityOperator(session,parcelId){
   const p=await this.runtime.registeredPrincipal(session),claims=this.runtime.verifyToken(session);
-  if(!id(parcelId)||this.runtime.issuers[claims.iss]?.operators?.[p]?.[this.operatorRole]!==true)fail('operator-denied');
+  if(!id(parcelId)||claims?.sub!==p||this.runtime.issuers?.[claims.iss]?.operators?.[p]?.[this.operatorRole]!==true)fail('operator-denied');
+ }
+ verifyOperatorAtCommit({session,parcelId,state}){
+  if(!id(parcelId)||!state)return false;
+  let c;try{c=this.runtime.verifyToken(session)}catch{return false}
+  runtimeState(state);
+  if(!id(c?.sub)||state.runtimeAccounts.get(c.sub)?.issuer!==c.iss||(state.runtimeEpochs.get(c.sub)??-1)!==c.epoch)return false;
+  return this.runtime.issuers?.[c.iss]?.operators?.[c.sub]?.[this.operatorRole]===true;
  }
  async verifyWorldEvidence(evidence){return await this.world.verifyEvidence(evidence)===true}
  async verifyWorldAuthorityEvent(event){return await this.world.verifyEvent(event)===true}

@@ -18,3 +18,7 @@ The authority registry accepts independently verified grant/revoke events in con
 Pre-testnet tests cover operator event ordering, stale/revoked session epochs, forged consent, exact-unit inventory, replay and PostgreSQL transfer persistence. A fixture PASS does not establish live signer, parcel or chain acceptance.
 
 Canonical or unclassified receipt sources are denied by `verifyOrdinaryCustodyAtCommit`; any canonical owner transfer must use the separately qualified escrow and finalized-chain receipt path. An unverified source cannot be declared ordinary by the browser. This check is mandatory for the production composition and tested as a negative case.
+
+## Package 2 — locally qualified security requirements (pending exact-SHA evidence)
+
+Authority operator actions are revalidated synchronously at commit against the durable registered account, session epoch and configured issuer permission. Verified grant/revoke event IDs are retained across restarts in the serializable PostgreSQL state and rejected for reuse across parcels or later revisions. Production composition requires synchronous world commit and transfer verification methods. Negative tests cover replays, revoked operators, missing verifiers and preservation of existing custody/transfer restrictions. External signer provenance, deployed event delivery and finality remain recorded testnet acceptance gates; no public placement routes are enabled. Pending scoped exact-SHA qualification; do not report production-ready.

@@ -20,7 +20,7 @@ test('real PostgreSQL serializable transaction: stale authority cannot reserve i
 test('real PostgreSQL: concurrent writers serialized, replay survives fresh engine',async()=>{await reset();const first=engine(),second=engine();const results=await Promise.allSettled([first.execute(owner,place('a','op-1')),second.execute(owner,place('b','op-2'))]);assert.equal(results.filter(x=>x.status==='fulfilled').length,1);const receipt=results.find(x=>x.status==='fulfilled').value;const operation=receipt.instance.instanceId==='a'?place('a','op-1'):place('b','op-2');assert.deepEqual(await engine().execute(owner,operation),receipt);const row=(await pool.query("SELECT state FROM highcountry_buds_state WHERE namespace='hc-place-03-a'")).rows[0].state;assert.equal(row.placementInstances.length,1);assert.equal(row.assets[0][1].available,1);assert.equal(row.assets[0][1].reserved,1);});
 test('03-C real PostgreSQL: operator revocation and monotonic reprovision block stale admission and preserve inventory',async()=>{
  await reset();
- const trusted={requireWorldAuthorityOperator:async principal=>{if(principal!=='operator')throw Error('operator-denied')},verifyWorldEvidence:async evidence=>evidence.signed===true};
+ const trusted={requireWorldAuthorityOperator:async principal=>{if(principal!=='operator')throw Error('operator-denied')},verifyWorldEvidence:async evidence=>evidence.signed===true,verifyOperatorAtCommit:({session})=>session==='operator'};
  const registry=new HighCountryPlacementAuthorityRegistry({store:new PostgresBudsStore(pool,'hc-place-03-a'),authority:trusted});
  await assert.rejects(registry.revoke('guest','parcel-a',1),/operator-denied/);
  const revoked=await registry.revoke('operator','parcel-a',1);

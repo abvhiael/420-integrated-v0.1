@@ -33,3 +33,18 @@ test('dual-party transfer commit gate rejects revoked recipient and expired call
   s.runtimeEpochs.set('bob',0);s.runtimeAccounts.delete('bob');assert.equal(a.verifyTransferAtCommit(args),false);
  }finally{runtime.verifyToken=previous}
 });
+
+test('operator commit gate rejects epoch, account and privilege revocation',()=>{
+ const auth=new HighCountryProductionPlacementAuthority({runtime,world});
+ const state={runtimeAccounts:new Map([['alice',{issuer:'issuer'}]]),runtimeEpochs:new Map([['alice',0]])};
+ const args={session,parcelId:'parcel',state};
+ assert.equal(auth.verifyOperatorAtCommit(args),true);
+ state.runtimeEpochs.set('alice',1);assert.equal(auth.verifyOperatorAtCommit(args),false);
+ state.runtimeEpochs.set('alice',0);state.runtimeAccounts.delete('alice');assert.equal(auth.verifyOperatorAtCommit(args),false);
+ state.runtimeAccounts.set('alice',{issuer:'issuer'});runtime.issuers.issuer.operators.alice.worldAuthority=false;
+ try{assert.equal(auth.verifyOperatorAtCommit(args),false)}finally{runtime.issuers.issuer.operators.alice.worldAuthority=true}
+});
+test('commit-time independent verifiers mandatory at composition',()=>{
+ assert.throws(()=>new HighCountryProductionPlacementAuthority({runtime,world:{...world,verifyAtCommit:undefined}}),/missing-independent-authorities/);
+ assert.throws(()=>new HighCountryProductionPlacementAuthority({runtime,world:{...world,verifyTransferAtCommit:undefined}}),/missing-independent-authorities/);
+});

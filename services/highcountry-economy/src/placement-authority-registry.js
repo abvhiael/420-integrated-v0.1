@@ -5,7 +5,7 @@ const fail=x=>{throw Error('hc-place-authority:'+x)};
 const id=x=>typeof x==='string'&&/^[A-Za-z0-9:_-]{1,128}$/.test(x);
 export class HighCountryPlacementAuthorityRegistry {
  constructor({store,authority}={}){
-  if(typeof store?.transact!=='function'||typeof authority?.requireWorldAuthorityOperator!=='function'||typeof authority?.verifyWorldEvidence!=='function')fail('trusted-dependencies-required');
+  if(typeof store?.transact!=='function'||typeof authority?.requireWorldAuthorityOperator!=='function'||typeof authority?.verifyWorldEvidence!=='function'||typeof authority?.verifyOperatorAtCommit!=='function')fail('trusted-dependencies-required');
   this.store=store;this.authority=authority;
  }
  async provision(session,parcelId,evidence,expectedRevision=0){
@@ -14,6 +14,7 @@ export class HighCountryPlacementAuthorityRegistry {
   if(await this.authority.verifyWorldEvidence(evidence)!==true)fail('unverified-world-evidence');
   return this.store.transact(s=>{
    if(!(s.placementAuthorityRevisions instanceof Map))fail('authority-state-missing');
+   if(this.authority.verifyOperatorAtCommit({session,parcelId,state:s})!==true)fail('operator-revoked-at-commit');
    const prior=s.placementAuthorityRevisions.get(parcelId);
    if((prior?.revision??0)!==expectedRevision)fail('stale-authority-revision');
    if(prior&&evidence.revision<=prior.revision)fail('non-monotonic-authority');
@@ -30,7 +31,8 @@ export class HighCountryPlacementAuthorityRegistry {
   if(typeof this.authority.verifyWorldAuthorityEvent!=='function'
     ||await this.authority.verifyWorldAuthorityEvent(event)!==true)fail('unverified-authority-event');
   return this.store.transact(s=>{
-   if(!(s.placementAuthorityRevisions instanceof Map))fail('authority-state-missing');
+   if(!(s.placementAuthorityRevisions instanceof Map)||!(s.placementAuthorityEventIds instanceof Map))fail('authority-state-missing');
+   if(s.placementAuthorityEventIds.has(event.eventId))fail('authority-event-replayed');
    const prior=s.placementAuthorityRevisions.get(event.parcelId);
    if(event.revision!==(prior?.revision??0)+1)fail('authority-event-order');
    if(event.action==='grant'&&(!id(event.evidenceId)||!id(event.geometryQualificationId)))fail('invalid-grant-evidence');
@@ -39,6 +41,7 @@ export class HighCountryPlacementAuthorityRegistry {
     revoked:event.action==='revoke',sourceEventId:event.eventId};
    if(event.action==='revoke'&&!prior)fail('authority-not-provisioned');
    s.placementAuthorityRevisions.set(event.parcelId,next);
+   s.placementAuthorityEventIds.set(event.eventId,{parcelId:event.parcelId,revision:event.revision,action:event.action});
    return structuredClone(next);
   });
  }

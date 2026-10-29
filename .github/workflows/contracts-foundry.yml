@@ -2,35 +2,6 @@
 name: Solidity Contracts
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - "contracts/**"
-      - "scripts/setup-foundry.sh"
-      - ".github/workflows/contracts-foundry.yml"
-      - "docs/audit/420LAUNCHPAD-PHASE-CLOSEOUT.md"
-      - "docs/audit/420VERIFY-PHASE-CLOSEOUT.md"
-      - "docs/puffbuddies/PB-0.20-PHASE-CLOSEOUT.md"
-      - "docs/puffbuddies/PB-1.14-PHASE-CLOSEOUT.md"
-      - "docs/puffbuddies/PB-2.14-PHASE-CLOSEOUT.md"
-      - "docs/audit/420MEDIA-PHASE-CLOSEOUT.md"
-      - "docs/audit/DOOBTUBE-PHASE-CLOSEOUT.md"
-      - "docs/audit/DOOBR-PHASE-CLOSEOUT.md"
-      - "docs/bnb/BNB-3.12-PHASE3-LEVEL3-CLOSEOUT.md"
-  pull_request:
-    paths:
-      - "contracts/**"
-      - ".github/workflows/contracts-foundry.yml"
-      - "docs/audit/420LAUNCHPAD-PHASE-CLOSEOUT.md"
-      - "docs/audit/420VERIFY-PHASE-CLOSEOUT.md"
-      - "docs/puffbuddies/PB-0.20-PHASE-CLOSEOUT.md"
-      - "docs/puffbuddies/PB-1.14-PHASE-CLOSEOUT.md"
-      - "docs/puffbuddies/PB-2.14-PHASE-CLOSEOUT.md"
-      - "docs/audit/420MEDIA-PHASE-CLOSEOUT.md"
-      - "docs/audit/DOOBTUBE-PHASE-CLOSEOUT.md"
-      - "docs/audit/DOOBR-PHASE-CLOSEOUT.md"
-      - "docs/bnb/BNB-3.12-PHASE3-LEVEL3-CLOSEOUT.md"
   workflow_dispatch:
 
 concurrency:

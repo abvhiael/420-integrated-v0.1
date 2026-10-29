@@ -1,10 +1,7 @@
 name: LIFTd L02 Phase Level 3 Retained
 on:
-  pull_request:
-    paths:
-      - 'rideshare/**'
-      - '.github/workflows/liftd-l02-13-level3.yml'
   workflow_dispatch:
+
 permissions:
   contents: read
 jobs:

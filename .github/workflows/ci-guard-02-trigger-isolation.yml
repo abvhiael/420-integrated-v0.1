@@ -1,0 +1,38 @@
+name: CI-GUARD-02 Expensive Workflow Trigger Isolation
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/420compliance-c08-5-level3.yml'
+      - '.github/workflows/420hz-gca-17-level3.yml'
+      - '.github/workflows/contracts-foundry.yml'
+      - '.github/workflows/contracts-genesis.yml'
+      - '.github/workflows/genesis-address-authority.yml'
+      - '.github/workflows/highcountry-r06-level3.yml'
+      - '.github/workflows/liftd-l02-13-level3.yml'
+      - '.github/workflows/mig-5-level3.yml'
+      - '.github/workflows/qualification.yml'
+      - 'scripts/qualification-policy/verify-trigger-isolation.py'
+      - 'scripts/qualification-policy/test_trigger_isolation.py'
+      - '.github/workflows/ci-guard-02-trigger-isolation.yml'
+permissions:
+  contents: read
+jobs:
+  trigger-inventory:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Exact candidate SHA
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - name: Assert nine complete retained inventories with no implicit triggers
+        env:
+          RECONCILIATION_BASE: ${{ github.event.pull_request.base.sha }}
+        run: |
+          python3 -m unittest scripts/qualification-policy/test_trigger_isolation.py -v
+          python3 scripts/qualification-policy/verify-trigger-isolation.py "$RECONCILIATION_BASE"

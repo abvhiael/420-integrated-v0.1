@@ -23,6 +23,12 @@ jobs:
       - name: Independently configured OracleRouter and funded integration
         working-directory: contracts
         run: forge test --match-path 'test/sports-5d6/SportsRealOracleRouterIntegration420.t.sol' -vv
+      - name: Event cancellation, postponement, market suspension and authority regressions
+        working-directory: contracts
+        run: forge test --match-path 'test/sports-5d5/SportsMarketLifecycle420.t.sol' -vv
+      - name: Signed quote expiry, revocation, source freshness and market epoch
+        working-directory: contracts
+        run: forge test --match-path 'test/sports-5d3/SportsOddsIngestion420.t.sol' -vv
       - name: Adversarial risk and emergency regression
         working-directory: contracts
         run: forge test --match-path 'test/sports-5d9/*.t.sol' -vv

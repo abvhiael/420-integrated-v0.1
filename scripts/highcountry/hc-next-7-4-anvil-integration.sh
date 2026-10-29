@@ -24,13 +24,13 @@ readTimestamp(){
   # complete unsigned integer with an optional numeric display annotation.
   local raw timestamp
   raw="$(readFixture "$1")"
-  if [[ "$raw" =~ ^[[:space:]]*([0-9]+)([[:space:]]+\\[[0-9]+([.][0-9]+)?([eE][+-]?[0-9]+)?\\])?[[:space:]]*$ ]]; then
+  if [[ "$raw" =~ ^[[:space:]]*([0-9]+)([[:space:]]+\[[0-9]+([.][0-9]+)?([eE][+-]?[0-9]+)?\])?[[:space:]]*$ ]]; then
     timestamp="${BASH_REMATCH[1]}"
   else
     echo "invalid cast timestamp: $raw" >&2
     return 1
   fi
-  printf '%s\\n' "$timestamp"
+  printf '%s\n' "$timestamp"
 }
 warp(){
   local timestamp="$1" quantity

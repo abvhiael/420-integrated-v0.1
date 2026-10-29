@@ -1,0 +1,28 @@
+name: 420Bet Sports 5D.9 Level 2 funded integration
+on:
+  pull_request:
+    paths:
+      - 'contracts/test/sports-5d9/**'
+      - 'contracts/test/sports-5d6/**'
+      - 'contracts/src/bet/sports/**'
+      - '.github/workflows/420bet-sports-5d9-level2.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  funded-integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.8.6
+      - name: Independently configured OracleRouter and funded integration
+        working-directory: contracts
+        run: forge test --match-path 'test/sports-5d6/SportsRealOracleRouterIntegration420.t.sol' -vv
+      - name: Adversarial risk and emergency regression
+        working-directory: contracts
+        run: forge test --match-path 'test/sports-5d9/*.t.sol' -vv

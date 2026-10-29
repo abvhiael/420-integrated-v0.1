@@ -10,7 +10,7 @@ test('20 original canonical exterior PNGs match recorded blob identities and SHA
  assert.equal(registry.assets.length,20);
  for(const a of registry.assets){
   const bytes=readFileSync(new URL(a.repoPath,root));
-  const blob=createHash('sha1').update('blob '+bytes.length+'\\0').update(bytes).digest('hex');
+  const blob=createHash('sha1').update('blob '+bytes.length+'\0').update(bytes).digest('hex');
   const sha=createHash('sha256').update(bytes).digest('hex');
   assert.equal(blob,a.gitBlobSha,a.id+' source blob changed');
   assert.match(a.sha256??'',/^[a-f0-9]{64}$/,a.id+' missing canonical SHA-256');

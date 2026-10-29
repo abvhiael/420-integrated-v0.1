@@ -14,7 +14,7 @@ const bool=w=>{if(BigInt(w)>1n)fail('cup-rpc-result-invalid');return BigInt(w)==
 export function createHighCountryCupRpc420({endpoint,chainId,cupAddress,engineAddress,cupCode,engineCode,selectors,fetchImpl=globalThis.fetch,timeoutMs=10000}={}){
  if(typeof endpoint!=='string'||!/^https:\/\/[^?#]+$/.test(endpoint)||!Number.isSafeInteger(chainId)||chainId<=0||
   !isAddress(cupAddress)||!isAddress(engineAddress)||!bytes(cupCode)||!bytes(engineCode)||
-  !selectors||!['cups','resultCommitment','resultsCurrent','isIssued','events','winners','winnerScore','entrantAt','resultIsCurrent'].every(x=>hex(selectors[x],8))||
+  !selectors||!['cups','finalResultCommitment','resultsCurrent','isIssued','events','winners','winnerScore','entrantAt','resultIsCurrent'].every(x=>hex(selectors[x],8))||
   typeof fetchImpl!=='function'||!Number.isInteger(timeoutMs)||timeoutMs<1000||timeoutMs>30000)fail('cup-rpc-config-invalid');
  let requestId=0;
  const call=async(method,params=[])=>{
@@ -53,14 +53,16 @@ export function createHighCountryCupRpc420({endpoint,chainId,cupAddress,engineAd
   const organizer=addr(word(c,0)),semiA=word(c,1),semiB=word(c,2),finalEvent=word(c,3);
   const rulesHash=word(c,4),prizeRulesHash=word(c,5),scope=word(c,6);
   const cupFinalized=bool(word(c,7)),champion=addr(word(c,8));
-  if(!isAddress(organizer)||new Set([semiA,semiB,finalEvent]).size!==3)fail('cup-rpc-result-invalid');
-  const resultCommitment=word(await read(cupAddress,selectors.resultCommitment,[cupId],block),0);
+  if(!isAddress(organizer)||[semiA,semiB,finalEvent,rulesHash,prizeRulesHash,scope].some(x=>BigInt(x)===0n)||new Set([semiA,semiB,finalEvent]).size!==3)fail('cup-rpc-result-invalid');
+  const resultCommitment=word(await read(cupAddress,selectors.finalResultCommitment,[cupId],block),0);
   const resultsCurrent=bool(word(await read(cupAddress,selectors.resultsCurrent,[cupId],block),0));
-  const rounds=[];
+  const rounds=[];let season=null;
   for(const [roundIndex,eventId] of [semiA,semiB,finalEvent].entries()){
    const raw=await read(engineAddress,selectors.events,[eventId],block);
    // CompetitionEngine Event getter: seasonId, templateId, organizer, opensAt, closesAt, challengeUntil, entrants, closed, cancelled.
    if(addr(word(raw,2))!==organizer||!bool(word(raw,7))||bool(word(raw,8)))fail('cup-rpc-event-invalid');
+   if(season===null)season=word(raw,0);
+   if(BigInt(season)===0n||word(raw,0)!==season)fail('cup-rpc-season-mismatch');
    const count=number(word(raw,6));
    if(count!==2)fail('cup-rpc-event-invalid');
    const entrants=[];

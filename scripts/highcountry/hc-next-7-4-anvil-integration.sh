@@ -20,11 +20,19 @@ readFixture(){
   cast call "$fixture" "$1" --rpc-url "$HIGHCOUNTRY_CUP_ANVIL_RPC"
 }
 warp(){
-  # Anvil's timestamp RPC requires an Ethereum hex quantity, not a decimal token.
-  # cast call may return a decimal integer with an ABI type suffix such as "[uint64]".
-  # Accept only a complete uint value (optionally followed by a recognized type annotation).
+  # cast may show a decimal number with a human-readable annotation, e.g. 123 [1.23e2].
+  # Normalize without trusting arbitrary text or passing decimals directly to Anvil.
   local raw="$1" timestamp quantity
-  raw="${raw//
+  if [[ "$raw" =~ ^[[:space:]]*(0x[0-9a-fA-F]+|[0-9]+)([[:space:]]*\[[[:space:]]*([0-9]+([.][0-9]+)?([eE][+-]?[0-9]+)?|uint(8|16|32|64|128|256))[[:space:]]*\])?[[:space:]]*$ ]]; then
+    timestamp="${BASH_REMATCH[1]}"
+  else
+    echo "invalid Anvil timestamp: $raw" >&2; return 1
+  fi
+  if [[ "$timestamp" == 0x* ]]; then
+    quantity="$timestamp"
+  else
+    printf -v quantity '0x%x' "$timestamp"
+  fi
   cast rpc --rpc-url "$HIGHCOUNTRY_CUP_ANVIL_RPC" evm_setNextBlockTimestamp "$quantity" > /dev/null
 }
 sendFixture(){

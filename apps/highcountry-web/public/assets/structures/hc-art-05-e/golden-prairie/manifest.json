@@ -1,0 +1,115 @@
+{
+  "collection": "HC-ART-05-E",
+  "region": "golden-prairie",
+  "source_master": "HC-ART-05-E-Golden-Prairie-GP01-GP07-transparent-master.png",
+  "placement_tile_px": 64,
+  "artwork_px_per_tile": 320,
+  "assets": [
+    {
+      "id": "GP07",
+      "name": "Prairie Glasshouse Conservatory Retreat",
+      "filename": "hc-structure-prairie-glasshouse-conservatory-retreat.png",
+      "footprint_tiles": {
+        "width": 5,
+        "height": 4
+      },
+      "canvas_px": {
+        "width": 1600,
+        "height": 1280
+      },
+      "repository_path": "apps/highcountry-web/public/assets/structures/hc-art-05-e/golden-prairie/hc-structure-prairie-glasshouse-conservatory-retreat.png",
+      "sha256": "dfbea75ba7a71d400ea032f960a54a16bdaa0111cb398c75c5787077719b7759"
+    },
+    {
+      "id": "GP01",
+      "name": "Prairie Skywatch Tower",
+      "filename": "hc-structure-prairie-skywatch-tower.png",
+      "footprint_tiles": {
+        "width": 4,
+        "height": 4
+      },
+      "canvas_px": {
+        "width": 1280,
+        "height": 1280
+      },
+      "repository_path": "apps/highcountry-web/public/assets/structures/hc-art-05-e/golden-prairie/hc-structure-prairie-skywatch-tower.png",
+      "sha256": "23813fb1aeb49725d2b4e413edb20aadef7aea3a6d40b35b22c7da83632b14fc"
+    },
+    {
+      "id": "GP02",
+      "name": "Heritage Grain Elevator Retreat",
+      "filename": "hc-structure-heritage-grain-elevator-retreat.png",
+      "footprint_tiles": {
+        "width": 5,
+        "height": 4
+      },
+      "canvas_px": {
+        "width": 1600,
+        "height": 1280
+      },
+      "repository_path": "apps/highcountry-web/public/assets/structures/hc-art-05-e/golden-prairie/hc-structure-heritage-grain-elevator-retreat.png",
+      "sha256": "41ecc592bfa50ec5d8e3da27b84a42bb1c1e22954e8eecb8ec65444890fac9fa"
+    },
+    {
+      "id": "GP03",
+      "name": "Prairie Dancehall & Social Barn",
+      "filename": "hc-structure-prairie-dancehall-social-barn.png",
+      "footprint_tiles": {
+        "width": 6,
+        "height": 5
+      },
+      "canvas_px": {
+        "width": 1920,
+        "height": 1600
+      },
+      "repository_path": "apps/highcountry-web/public/assets/structures/hc-art-05-e/golden-prairie/hc-structure-prairie-dancehall-social-barn.png",
+      "sha256": "22a8577fb2308cc95ac16b31b1c418610769dc675f779cd5374fda3ba4a5696a"
+    },
+    {
+      "id": "GP04",
+      "name": "Covered Prairie Rodeo Gallery",
+      "filename": "hc-structure-covered-prairie-rodeo-gallery.png",
+      "footprint_tiles": {
+        "width": 6,
+        "height": 5
+      },
+      "canvas_px": {
+        "width": 1920,
+        "height": 1600
+      },
+      "repository_path": "apps/highcountry-web/public/assets/structures/hc-art-05-e/golden-prairie/hc-structure-covered-prairie-rodeo-gallery.png",
+      "sha256": "397c17b0712f5f1aae25b632d6d9a0fb5ef37d87d486978fd8ca6891bbcb9829"
+    },
+    {
+      "id": "GP05",
+      "name": "Prairie Harvest Festival Hall",
+      "filename": "hc-structure-prairie-harvest-festival-hall.png",
+      "footprint_tiles": {
+        "width": 6,
+        "height": 5
+      },
+      "canvas_px": {
+        "width": 1920,
+        "height": 1600
+      },
+      "repository_path": "apps/highcountry-web/public/assets/structures/hc-art-05-e/golden-prairie/hc-structure-prairie-harvest-festival-hall.png",
+      "sha256": "29fb80e130b0d63433b4a4633e4770a2efa8c2c809c6a8417069cee1cba53008"
+    },
+    {
+      "id": "GP06",
+      "name": "Prairie Windmill Picnic Station",
+      "filename": "hc-structure-prairie-windmill-picnic-station.png",
+      "footprint_tiles": {
+        "width": 5,
+        "height": 4
+      },
+      "canvas_px": {
+        "width": 1600,
+        "height": 1280
+      },
+      "repository_path": "apps/highcountry-web/public/assets/structures/hc-art-05-e/golden-prairie/hc-structure-prairie-windmill-picnic-station.png",
+      "sha256": "ebdc086270009bb6ed569e09918aeb00dbd1fb47006c9eae77fb4db0d89ddd6f"
+    }
+  ],
+  "note": "Visual exports only; footprint not qualified HC-PLACE collision geometry. Master extraction should be visually reviewed for stray pixels."
+}

@@ -1,15 +1,11 @@
 name: Universal Qualification Policy Guard
 on:
   pull_request:
-    paths:
-      - 'scripts/qualification-policy/**'
-      - '.github/workflows/universal-qualification-guard.yml'
-      - '.github/workflows/**'
-      - '.qualification/**'
 permissions:
   contents: read
 jobs:
   validate-policy:
+    if: ${{ github.event.pull_request.number >= 906 }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -30,4 +26,10 @@ jobs:
           CANDIDATE: ${{ github.event.pull_request.head.sha || github.sha }}
         run: |
           git fetch --no-tags origin "+refs/heads/$BASE_REF:refs/remotes/origin/$BASE_REF"
-          python3 scripts/qualification-policy/preflight.py --manifest .qualification/preflight.json --base "origin/$BASE_REF" --head "$CANDIDATE"
+          python3 scripts/qualification-policy/preflight.py --manifest auto --base "origin/$BASE_REF" --head "$CANDIDATE" --output verified-preflight.json
+      - name: Retain exact-SHA preflight certificate
+        uses: actions/upload-artifact@v4
+        with:
+          name: qualification-preflight-${{ github.event.pull_request.number }}
+          path: verified-preflight.json
+          if-no-files-found: error

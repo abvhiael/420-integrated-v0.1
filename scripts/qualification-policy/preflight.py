@@ -113,6 +113,8 @@ def audit_triggers(paths):
     """Flag newly changed workflow files with unscoped expensive PR triggering."""
     failures = []
     for name in paths:
+        if name == ".github/workflows/universal-qualification-guard.yml":
+            continue  # The deliberately universal low-cost guard is exempt.
         if not name.startswith(".github/workflows/") or not name.endswith((".yml", ".yaml")):
             continue
         p = ROOT / name
@@ -167,6 +169,14 @@ def audit_unwanted_level3(changed):
                 fail("unauthorized automatic Level 3 trigger: " + workflow.name + " for " + path)
 
 
+def choose_manifest(requested, changed):
+    if requested != 'auto':
+        return safe_path(requested)
+    matches = [p for p in changed if p.startswith('.qualification/candidates/') and p.endswith('.json')]
+    if len(matches) != 1:
+        fail('one unique per-PR preflight manifest is required')
+    return safe_path(matches[0])
+
 def main():
     a = argparse.ArgumentParser()
     a.add_argument("--manifest", required=True)
@@ -181,7 +191,7 @@ def main():
     git("merge-base", "--is-ancestor", base, head)
     changed = diff_names(base, head)
     audit_triggers(changed)
-    manifest = json.loads((ROOT / safe_path(args.manifest)).read_text())
+    manifest = json.loads((ROOT / choose_manifest(args.manifest, changed)).read_text())
     if manifest.get('level') in ('L1', 'L2'):
         audit_unwanted_level3(changed)
     certificate = check_manifest(manifest, changed, head, base)

@@ -81,6 +81,14 @@ class PolicyGuardTests(unittest.TestCase):
         heavy.write_text("name: expensive\\non:\\n  workflow_dispatch:\\n")
         mod.audit_unwanted_level3(self.changed)
 
+    def test_unique_manifest_per_pr(self):
+        path = '.qualification/candidates/APP-01.json'
+        self.assertEqual(mod.choose_manifest('auto', self.changed + [path]), path)
+        with self.assertRaisesRegex(ValueError, 'unique'):
+            mod.choose_manifest('auto', self.changed)
+        with self.assertRaisesRegex(ValueError, 'unique'):
+            mod.choose_manifest('auto', self.changed + [path, '.qualification/candidates/APP-02.json'])
+
     def test_unregistered_workflow(self):
         self.data["required_workflows"] = [".github/workflows/missing.yml"]
         with self.assertRaisesRegex(ValueError, "registered"):

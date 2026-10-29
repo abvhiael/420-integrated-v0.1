@@ -10,7 +10,7 @@
     "scripts/qualification-policy/test_preflight.py",
     ".github/workflows/universal-qualification-guard.yml",
     "docs/ci/universal-qualification-policy.md",
-    ".qualification/preflight.json"
+    ".qualification/candidates/CI-UNIVERSAL-GUARD-V1.json"
   ],
   "tests": [
     {

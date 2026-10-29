@@ -20,7 +20,12 @@ readFixture(){
   cast call "$fixture" "$1" --rpc-url "$HIGHCOUNTRY_CUP_ANVIL_RPC"
 }
 warp(){
-  cast rpc --rpc-url "$HIGHCOUNTRY_CUP_ANVIL_RPC" evm_setNextBlockTimestamp "$1" > /dev/null
+  # Anvil's timestamp RPC requires an Ethereum hex quantity, not a decimal token.
+  local timestamp="$1"
+  [[ "$timestamp" =~ ^[0-9]+$ ]] || { echo "invalid Anvil timestamp" >&2; return 1; }
+  local quantity
+  printf -v quantity '0x%x' "$timestamp"
+  cast rpc --rpc-url "$HIGHCOUNTRY_CUP_ANVIL_RPC" evm_setNextBlockTimestamp "$quantity" > /dev/null
 }
 sendFixture(){
   cast send "$fixture" "$1" --rpc-url "$HIGHCOUNTRY_CUP_ANVIL_RPC" --private-key "$ANVIL_DEV_KEY" > /dev/null

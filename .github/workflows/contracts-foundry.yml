@@ -92,7 +92,7 @@ jobs:
               contracts/src/bet/sports/SportsFundedTickets420.sol|contracts/test/sports-5d8/*) sports_5d8_changed=true ;;
             esac
             case "$file" in
-              contracts/src/bet/sports/SportsFundedTickets420.sol|contracts/test/sports-5d8/*|docs/bet/BET-AUDIT-5D.8-RISK-EMERGENCY.md|.github/workflows/420bet-sports-5d8.yml|.github/workflows/contracts-foundry.yml) ;;
+              contracts/src/bet/sports/SportsFundedTickets420.sol|contracts/test/sports-5d8/*|contracts/test/sports-5d6/SportsOracleOutcomeGate420.t.sol|contracts/test/sports-5d6/SportsRealOracleRouterIntegration420.t.sol|docs/bet/BET-AUDIT-5D.8-RISK-EMERGENCY.md|.github/workflows/420bet-sports-5d8.yml|.github/workflows/contracts-foundry.yml) ;;
               *) sports_5d8_only=false ;;
             esac
             case "$file" in

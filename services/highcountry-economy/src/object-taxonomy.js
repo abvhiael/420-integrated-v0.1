@@ -133,7 +133,7 @@ export function checkStacking(type,items){
  if(!t.qualified||!Array.isArray(items)||items.length>1000)fail('stack-shape');
  const totals=Object.fromEntries(t.roles.map(role=>[role,0]));
  const questTotals=Object.fromEntries(t.roles.map(role=>[role,0]));
- const developerSeen=new Set();
+ const developerSeen=new Set(),developerRoles=new Set(),roleCounts=Object.fromEntries(t.roles.map(role=>[role,0]));
  for(const item of items){
    if(!plain(item)||!Array.isArray(item.effects)||!ORIGINS.includes(item.origin))fail('stack-item');
    if(item.origin==='developer'){
@@ -144,12 +144,15 @@ export function checkStacking(type,items){
        !Object.hasOwn(EFFECT_ROLES,e.effectId)||!EFFECT_ROLES[e.effectId].some(r=>t.roles.includes(r)))fail('stack-effect');
      for(const role of EFFECT_ROLES[e.effectId]){
        if(Object.hasOwn(totals,role)){
+         roleCounts[role]++;
+         if(item.origin==='developer')developerRoles.add(role);
          if(item.origin==='quest')questTotals[role]+=e.bps;
          else totals[role]+=e.bps;
        }
      }
    }
  }
+ if([...developerRoles].some(role=>roleCounts[role]>1))fail('developer-role-nonstackable');
  return freeze({totals,questTotals,applied:Object.fromEntries(Object.entries(totals).map(([k,v])=>[k,Math.min(v,ROLE_STACK_CAP_BPS[k])+questTotals[k]]))});
 }
 

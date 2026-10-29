@@ -1,0 +1,40 @@
+# Reusable, independently reported Foundry qualification unit.
+# Each caller job is isolated; cancelled jobs do not erase successful sibling jobs.
+name: Reusable scoped Foundry qualification
+on:
+  workflow_call:
+    inputs:
+      suite_name:
+        required: true
+        type: string
+      match_path:
+        required: true
+        type: string
+permissions:
+  contents: read
+jobs:
+  qualify:
+    name: ${{ inputs.suite_name }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout exact PR or dispatch head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact head
+        shell: bash
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.8.6
+      - name: Run bounded Foundry suite
+        working-directory: contracts
+        env:
+          MATCH_PATH: ${{ inputs.match_path }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          forge test --match-path "$MATCH_PATH" -vv

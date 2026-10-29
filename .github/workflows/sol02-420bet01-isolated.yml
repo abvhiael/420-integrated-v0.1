@@ -1,0 +1,61 @@
+name: CI-SOL-02 isolated 420bet--01 tournament qualification
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/sol02-420bet01-isolated.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: sol02-420bet01-isolated-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+jobs:
+  tournament-5c5:
+    name: Isolated 420bet--01 canonical tournament
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.27.3'
+          cache-dependency-path: clients/420bet-poker/zkshuffle/go.sum
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.8.6
+      - name: Verify canonical tournament evidence and exact SHA
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
+          python3 scripts/bet/package-poker-5a10-evidence.py --verify
+          python3 scripts/bet/unpack-poker-5c5-evidence.py
+          cd clients/420bet-poker/zkshuffle
+          go test -mod=readonly -count=1 -timeout 20m -run '^TestTournament5C5CommittedCryptographicEvidence$' -v . | tee "$RUNNER_TEMP/groth16-proof-verification.log"
+          test "$(grep -c 'verified committed genuine proof ' "$RUNNER_TEMP/groth16-proof-verification.log")" -eq 454
+          grep -q -- '--- PASS: TestTournament5C5CommittedCryptographicEvidence' "$RUNNER_TEMP/groth16-proof-verification.log"
+      - name: Isolated tournament compiler diagnostics and full inherited funded suite
+        shell: bash
+        working-directory: contracts
+        env:
+          FOUNDRY_PROFILE: tournament5c5
+          FOUNDRY_OUT: out-sol02-420bet01-isolated
+          FOUNDRY_CACHE_PATH: cache-sol02-420bet01-isolated
+          FOUNDRY_SOLC_VERSION: '0.8.30'
+        run: |
+          set -euo pipefail
+          mkdir -p ../artifacts/sol02-isolated
+          echo 'Compiling only tournament-5c5 fixture/test dependency closure with canonical Solidity 0.8.30.'
+          forge build --no-dynamic-test-linking test/tournament-5c5/PokerTournamentElimination420.t.sol -vvv 2>&1 | tee ../artifacts/sol02-isolated/compile.log
+          forge test --no-dynamic-test-linking --match-path 'test/tournament-5c5/PokerTournamentElimination420.t.sol' -vvv 2>&1 | tee ../artifacts/sol02-isolated/test.log
+          printf '{"schema":"420.ci.sol02.420bet01.isolated.v1","sha":"%s","passed":true,"canonicalProofs":454}\n' "$(git rev-parse HEAD)" > ../artifacts/sol02-isolated/result.json
+      - name: Preserve diagnostics regardless of outcome
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sol02-420bet01-isolated-${{ github.event.pull_request.head.sha || github.sha }}
+          path: artifacts/sol02-isolated/**
+          if-no-files-found: warn

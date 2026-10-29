@@ -1,0 +1,176 @@
+{
+  "collection": "HC-ART-05-E-U1",
+  "region": "universal",
+  "source_master": "HC-ART-05-E-U1-01-06-transparent-separated-master.png",
+  "tile_source_pixels": 320,
+  "placement_grid_pixels": 64,
+  "repository_directory": "apps/highcountry-web/public/assets/structures/hc-art-05-e/universal/",
+  "notes": [
+    "Artwork canvas dimensions are not qualified placement collision geometry.",
+    "Transparent sprites extracted from approved six-asset sheet; no artwork redrawing."
+  ],
+  "assets": [
+    {
+      "id": "U01",
+      "name": "Heritage Woodland Cabin",
+      "filename": "hc-structure-heritage-woodland-cabin.png",
+      "footprint_tiles": {
+        "width": 5,
+        "height": 4
+      },
+      "canvas_px": {
+        "width": 1600,
+        "height": 1280
+      },
+      "repository_path": "apps/highcountry-web/public/assets/structures/hc-art-05-e/universal/hc-structure-heritage-woodland-cabin.png",
+      "sha256": "a68d0bcea1c8d664386a46404ff83b2eb4861e00902babc5ea7d7b92b6014dd8",
+      "bytes": 2098349,
+      "source_cell": [
+        0,
+        0
+      ],
+      "source_crop_bbox": [
+        52,
+        68,
+        556,
+        533
+      ],
+      "alpha_zero_fraction": 0.5094
+    },
+    {
+      "id": "U02",
+      "name": "Rustic A-Frame Retreat",
+      "filename": "hc-structure-rustic-a-frame-retreat.png",
+      "footprint_tiles": {
+        "width": 5,
+        "height": 4
+      },
+      "canvas_px": {
+        "width": 1600,
+        "height": 1280
+      },
+      "repository_path": "apps/highcountry-web/public/assets/structures/hc-art-05-e/universal/hc-structure-rustic-a-frame-retreat.png",
+      "sha256": "34061a8622fc3dbec4845e7a8838a44efa44aa3532a865ecb0d4844aa673b095",
+      "bytes": 2034455,
+      "source_cell": [
+        0,
+        1
+      ],
+      "source_crop_bbox": [
+        44,
+        75,
+        556,
+        535
+      ],
+      "alpha_zero_fraction": 0.5185
+    },
+    {
+      "id": "U03",
+      "name": "Lakeside Guest Cottage",
+      "filename": "hc-structure-lakeside-guest-cottage.png",
+      "footprint_tiles": {
+        "width": 5,
+        "height": 4
+      },
+      "canvas_px": {
+        "width": 1600,
+        "height": 1280
+      },
+      "repository_path": "apps/highcountry-web/public/assets/structures/hc-art-05-e/universal/hc-structure-lakeside-guest-cottage.png",
+      "sha256": "26d7d6ed3fdf9a012fe9e13e7e6273a5eb88edff4a5f5f444f3ca0e7f4cc596c",
+      "bytes": 2289696,
+      "source_cell": [
+        0,
+        2
+      ],
+      "source_crop_bbox": [
+        44,
+        82,
+        556,
+        553
+      ],
+      "alpha_zero_fraction": 0.4672
+    },
+    {
+      "id": "U04",
+      "name": "Garden Guesthouse",
+      "filename": "hc-structure-garden-guesthouse.png",
+      "footprint_tiles": {
+        "width": 5,
+        "height": 4
+      },
+      "canvas_px": {
+        "width": 1600,
+        "height": 1280
+      },
+      "repository_path": "apps/highcountry-web/public/assets/structures/hc-art-05-e/universal/hc-structure-garden-guesthouse.png",
+      "sha256": "54a5821691a29a828a342b750cdfcffc3a05be40c2bae1a1d66fbd99e0d8c2af",
+      "bytes": 2213311,
+      "source_cell": [
+        1,
+        0
+      ],
+      "source_crop_bbox": [
+        51,
+        75,
+        556,
+        512
+      ],
+      "alpha_zero_fraction": 0.4746
+    },
+    {
+      "id": "U05",
+      "name": "Timber Family Holiday Lodge",
+      "filename": "hc-structure-timber-family-holiday-lodge.png",
+      "footprint_tiles": {
+        "width": 6,
+        "height": 5
+      },
+      "canvas_px": {
+        "width": 1920,
+        "height": 1600
+      },
+      "repository_path": "apps/highcountry-web/public/assets/structures/hc-art-05-e/universal/hc-structure-timber-family-holiday-lodge.png",
+      "sha256": "0b30a791adffa308c597107799297590b043771ec965a99527333ffa5fb6f8a0",
+      "bytes": 3264014,
+      "source_cell": [
+        1,
+        1
+      ],
+      "source_crop_bbox": [
+        44,
+        59,
+        556,
+        524
+      ],
+      "alpha_zero_fraction": 0.4369
+    },
+    {
+      "id": "U06",
+      "name": "Artist's Retreat Cabin",
+      "filename": "hc-structure-artists-retreat-cabin.png",
+      "footprint_tiles": {
+        "width": 4,
+        "height": 4
+      },
+      "canvas_px": {
+        "width": 1280,
+        "height": 1280
+      },
+      "repository_path": "apps/highcountry-web/public/assets/structures/hc-art-05-e/universal/hc-structure-artists-retreat-cabin.png",
+      "sha256": "98ca10ba43148bfffd4ef5c3832573098690d593e1fa5234b6945e49cc06e162",
+      "bytes": 1761612,
+      "source_cell": [
+        1,
+        2
+      ],
+      "source_crop_bbox": [
+        44,
+        62,
+        550,
+        519
+      ],
+      "alpha_zero_fraction": 0.5013
+    }
+  ]
+}

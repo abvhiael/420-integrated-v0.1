@@ -1,6 +1,6 @@
 {
   "schema": "HC.OT_SCREEN_00.EVIDENCE.V1",
-  "status": "PREFLIGHT_BLOCKED_NO_CI",
+  "status": "SCOPED_LEVEL1_PASS",
   "requirements": [
     [
       "Roadmap & parent navigation checked",
@@ -14,8 +14,8 @@
     ],
     [
       "GitHub SHA256 all 20",
-      "BLOCKED",
-      "Three updated landmark files mismatch GitHub main; no binary fetch to hash current repo files"
+      "PASS",
+      "20 checked-out exact-byte SHA256 records on run #40965872712"
     ],
     [
       "59 sites incl. 54 private and 5 LM",
@@ -67,14 +67,10 @@
     "vacant": 39,
     "siteOverlaps": []
   },
-  "blockingInputs": [
-    "Exact SHA-256 unavailable for canonical main LM-01, LM-03 and LM-04 blobs; current connector refuses binary reads",
-    "Mandatory original-source hash gate added in scripts/highcountry/ot-screen-00-asset-hashes.mjs and must pass against actual repository files before lock",
-    "Phase C survey coordinates remain provisional; not a blocker to a visual-only lock if flagged"
-  ],
-  "preflightPass": false,
-  "formalCI": "NOT_STARTED",
-  "implementationFreeze": "BLOCKED_PENDING_SOURCE_RECONCILIATION",
+  "blockingInputs": [],
+  "preflightPass": true,
+  "formalCI": "PASS_RUN_40965872712_EXACT_SHA_f3852e13065df1212984c5f9d3a7734c2572c2fe",
+  "implementationFreeze": "f3852e13065df1212984c5f9d3a7734c2572c2fe",
   "appIntegrationBoundary": {
     "current": "apps/highcountry-web/src/port-alder-navigation.js currently presents accessible district labels / neighbourhood placeholders; app.js routes /port-alder and district subpaths",
     "build": "apps/highcountry-web/scripts/build.mjs copies public assets and district navigation contract",
@@ -107,17 +103,20 @@
     {
       "id": "LM-01",
       "repoBlob": "71aeb8eebf4fb492704d84bdf5f3e3f92a99e0a0",
-      "uploadedBlob": "f758ec40613dd8b01b94578acaa381adf0889254"
+      "uploadedBlob": "f758ec40613dd8b01b94578acaa381adf0889254",
+      "resolution": "Canonical existing GitHub main blob retained; SHA256 verified by checkout on run 40965872712; uploaded revision is not substituted"
     },
     {
       "id": "LM-03",
       "repoBlob": "5ae2785de058a6180462e60dd6bb53a49651c618",
-      "uploadedBlob": "4645048c5c15f48443cb26b2282a03047536b395"
+      "uploadedBlob": "4645048c5c15f48443cb26b2282a03047536b395",
+      "resolution": "Canonical existing GitHub main blob retained; SHA256 verified by checkout on run 40965872712; uploaded revision is not substituted"
     },
     {
       "id": "LM-04",
       "repoBlob": "045300a1e356e3de6748408c0c2eba4e60facd5f",
-      "uploadedBlob": "a9f56ab5bef8cf57a42c496df8812c257b0c8fc4"
+      "uploadedBlob": "a9f56ab5bef8cf57a42c496df8812c257b0c8fc4",
+      "resolution": "Canonical existing GitHub main blob retained; SHA256 verified by checkout on run 40965872712; uploaded revision is not substituted"
     }
   ],
   "testOwnership": {
@@ -131,8 +130,18 @@
       "Docs",
       "Level 3"
     ],
-    "formalCI": "NOT_STARTED - exact SHA256 inputs unresolved; do not falsely pass preflight",
+    "formalCI": "PASS 9/9 at f3852e13065df1212984c5f9d3a7734c2572c2fe",
     "scopedExactBytes": "node --test scripts/highcountry/ot-screen-00-asset-hashes.mjs"
   },
-  "assetReconciliationPolicy": "Keep current main Git blob versions canonical until owner authorizes a different image revision. Uploaded copies that differ are not automatically substituted; no PNG assets modified."
+  "assetReconciliationPolicy": "Keep current main Git blob versions canonical until owner authorizes a different image revision. Uploaded copies that differ are not automatically substituted; no PNG assets modified.",
+  "evidenceOnlyCloseout": {
+    "sourceSha": "f3852e13065df1212984c5f9d3a7734c2572c2fe",
+    "workflowRunId": 40965872712,
+    "jobId": 123770108014,
+    "artifactId": 12937318232,
+    "testsPassed": 9,
+    "testsFailed": 0,
+    "checksums": 20,
+    "assetCodeUnchanged": true
+  }
 }

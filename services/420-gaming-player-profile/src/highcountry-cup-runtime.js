@@ -6,7 +6,7 @@ import {createPostgresCupAchievements420} from './highcountry-cup-achievements.j
 export function createHighCountryCupRuntime420({endpoint,chainId,cupAddress,engineAddress,
  cupCode,engineCode,codeHash,selectors,pool,gameId,fetchImpl}={}){
  const source=createHighCountryCupRpc420({endpoint,chainId,cupAddress,engineAddress,
-  cupCode,engineCode,selectors,fetchImpl});
+  cupCode,engineCode,codeHash,selectors,fetchImpl});
  const projection=createGlobalCupProjection420({source,chainId,cupAddress,codeHash});
  const storage=createPostgresCupAchievements420({pool,gameId,projection});
  return Object.freeze({

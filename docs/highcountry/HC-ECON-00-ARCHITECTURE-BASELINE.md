@@ -116,12 +116,34 @@ GitHub open-PR discovery for `highcountry` reported parallel work affecting HC-E
 ## HC-ECON-00 traceability audit result
 E01–E30 are 30 distinct nonblank requirement IDs, each with a named functional owner, proposed API/integration, proposed durable data contract and mandatory acceptance-test identifier. The audit verifies **design coverage**, not that E01–E30 endpoints or tests already exist. The implementation owner must replace each proposed reference with actual code paths and exact-SHA evidence in its assigned milestone. The read-back and coverage audit apply to this branch document; the unrelated PRs are observed to avoid premature cross-branch merge.
 
+## Exhaustive repository tree and concurrent PR inventory — 2026-10-29
+**Audited source SHA:** `b76efdd37bdc9c2228e63dc3ddd9dfe3fb946427`. Evidence source: GitHub REST recursive Git tree `GET /repos/abvhiael/420-integrated-v0.1/git/trees/<SHA>?recursive=1`. GitHub returned the matching tree SHA and **`truncated=false`**. This is a complete Git tree path enumeration for that commit (not an assertion that all 12,209 files received individual semantic review).
+
+- **13,495 tree entries:** 12,209 file/blob entries and 1,286 tree/directory entries.
+- **2,445 file paths** match HighCountry naming variants (case-insensitive `highcountry`, `high-country`, `high_country`); name matching alone does not delimit the entire game's dependency closure.
+- **1,578 paths** match the targeted HC documentation, app, service, contract, deployment, script and workflow source prefixes used by this review.
+- Representative repository file counts by top-level folder: `docs` 2,772; `contracts` 1,610; `apps` 932; `assets` 719; `services` 672; `scripts` 651; `clients` 615; `.github` 496.
+- Relevant direct-path coverage includes `contracts/src/highcountry` 97 files; `services/highcountry-economy/src` 43; `services/highcountry-economy/test` 44; `apps/highcountry-web/src` 24; `apps/highcountry-web/test` 23; and `apps/highcountry-web/public` 879. Seven `services/highcountry-economy/migrations` files are also enumerated.
+- Other ecosystem dependencies (gaming service, wallet, payment, indexer, randomness and infrastructure) are not owned by HC-ECON and cannot be declared absent solely because their paths lack an HC prefix. Their boundaries are traced via the established authority documents and each later integration milestone.
+
+**Concurrent PR source-path audit:** GitHub's paginated changed-filename endpoint was examined for 33 relevant existing open PRs: #887, #803, #893, #890, #852, #856, #811, #786, #899, #611, #618, #617, #613, #615, #610, #612, #619, #635, #642, #643, #641, #637, #640, #639, #638, #636, #627, #878, #625, #622, #623, #624, #626; and for #903 itself. Key findings:
+- #887 writes placement/custody and cross-module persistence contracts, requiring explicit HC-PLACE-03 ownership for placed-item lifecycle; do not enable unqualified placement routes.
+- #803 changes canonical settlement/indexer/runtime behavior; do not confuse that chain market with the ordinary internal BUDS market.
+- #852 and #856 both change `apps/highcountry-web/src/marketplace.js` (and declare other artwork branches); HC-ECON must not overwrite or silently merge competing catalogues.
+- #811 changes missions, service ledger and app; its signed-evidence non-economic reward boundary remains authoritative until reviewed extension.
+- #786 modifies equipment registry/class powers; #890/#893 define proposed building/workshop benefits; compatibility must reconcile all three.
+- #611 and #618 change inventories/manufacturing/market persistence; consumption, escrow, and ordinary settlement remain canonical responsibilities.
+- #899, #617, #615, #625, #627 and other R04/R05 work touch achievements, skills, quests, rights and canonical persistence. None is adopted from an unmerged branch merely by describing it here.
+- #903 changes precisely this specification document and has no source-path overlap with these examined implementation PRs.
+
+This audit is **exhaustive for the committed tree path enumeration** and covers the identified open HighCountry PR changed-file inventories. It is not a line-by-line security review or an assertion that future branches cannot conflict. Re-check current main and the final exact SHA before merge; tests from an older head are historical evidence, not automatic final-head qualification.
+
 ## HC-ECON-00 exit checklist
 - [x] Enumerated the approved creator, fee, moderation, edition, modifiers, manufacturing, pricing, brand, NPC, quest and O16 requirements.
 - [x] Mapped each to functional owner, proposed API, proposed data contract and mandatory acceptance test (E01-E30).
 - [x] Recorded existing authority boundaries, risk of collisions, lifecycle/state invariants and implementation ordering.
 - [x] Distinguished current sources from proposed APIs/data and future testnet requirements.
-- [x] Audited indexed source boundaries and relevant concurrent open HighCountry PR descriptions; complete repository-wide independent file enumeration is not established.
+- [x] Enumerated the complete, untruncated recursive repository tree at audited SHA b76efdd3; inspected relevant source prefixes and paginated changed filenames across 33 concurrent open PRs.
 - [x] Verified 30 distinct E01–E30 mapped requirements by exact-branch readback; observed passing 420Docs Actions on initial SHA 797bfc1, but this revised SHA requires new verification.
 - [x] Recorded non-merged concurrent PR conflict boundaries and compared this branch to main; only this documentation path changes.
-**Status discipline:** Requirements coverage is documented, but comprehensive repository tree enumeration and revised exact-SHA CI evidence still require confirmation before unconditional full certification.
+**Status discipline:** Complete tree enumeration and concurrent PR changed-file review are recorded. Final exact-SHA CI qualification, current main reconciliation, and formal merge remain outstanding after this audit-evidence commit.

@@ -1,0 +1,78 @@
+{
+  "schema": "HC.OT_SCREEN_00.EVIDENCE.V1",
+  "status": "PREFLIGHT_BLOCKED_NO_CI",
+  "requirements": [
+    [
+      "Roadmap & parent navigation checked",
+      "EVIDENCED",
+      "HC-WORLD master and OT screen roadmap on PR #909"
+    ],
+    [
+      "20 GitHub exterior names and blob SHA",
+      "EVIDENCED",
+      "GitHub contents listing 4 source directories"
+    ],
+    [
+      "GitHub SHA256 all 20",
+      "BLOCKED",
+      "Three updated landmark files mismatch GitHub main; no binary fetch to hash current repo files"
+    ],
+    [
+      "59 sites incl. 54 private and 5 LM",
+      "PROVISIONAL",
+      "Phase C local register (not in main)"
+    ],
+    [
+      "30 residential, 24 commercial",
+      "EVIDENCED_FROM_PROVISIONAL_DATA",
+      "Counted in site list"
+    ],
+    [
+      "B22 non-saleable park",
+      "EVIDENCED_DESIGN_PROVISIONAL_PERIMETER",
+      "Owner decision + V7 candidate"
+    ],
+    [
+      "No HL05 Genesis spawn, no invented buildings",
+      "EVIDENCED",
+      "20 Genesis asset/site IDs"
+    ],
+    [
+      "Geometry surveyed and legally issued",
+      "NOT_CLAIMED",
+      "ISO-02 visual-only"
+    ],
+    [
+      "Preflight CI workflow filters",
+      "REVIEWED",
+      "HC-WORLD-06 L1 workflow not triggered by old-town-*; docs-qualify on docs/**; avoid formal CI before preflight"
+    ],
+    [
+      "Runtime import and integration boundary",
+      "DEFERRED_TO_OT_SCREEN_01",
+      "No app runtime or UI modification in OT-SCREEN-00"
+    ],
+    [
+      "External testnet authorization",
+      "NOT_REQUIRED",
+      "Data-only baseline lock; Genesis issuance deferred"
+    ]
+  ],
+  "localDataChecks": {
+    "privateTotal": 54,
+    "residential": 30,
+    "commercial": 24,
+    "genesisPrivate": 15,
+    "landmarks": 5,
+    "vacant": 39,
+    "siteOverlaps": []
+  },
+  "blockingInputs": [
+    "3 updated LM files not matching main",
+    "Exact SHA256 not available for current GitHub LM-01, LM-03, LM-04 blobs",
+    "Phase C survey coordinates not adopted as authoritative"
+  ],
+  "preflightPass": false,
+  "formalCI": "NOT_STARTED",
+  "implementationFreeze": "BLOCKED_PENDING_SOURCE_RECONCILIATION"
+}

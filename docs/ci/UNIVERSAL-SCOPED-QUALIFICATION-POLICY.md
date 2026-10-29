@@ -1,7 +1,7 @@
 ---
 title: Universal Scoped Qualification Policy
 status: active
-category: engineering
+category: contributing
 version: 1.0.0
 ---
 

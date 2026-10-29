@@ -58,8 +58,12 @@ test('real EVM→canonical RPC→Cup projection→authenticated HTTP→PostgreSQ
   assert.match(codeHash,/^0x[0-9a-f]{64}$/i);
   assert.match(engineCodeHash,/^0x[0-9a-f]{64}$/i);
   // These dynamic fixture bytes are isolated-test credentials, not a production code-hash pin.
-  const runtime=createHighCountryCupRuntime420({endpoint,chainId:420,cupAddress,engineAddress,
-   cupCode,engineCode,codeHash,selectors,pool,gameId});
+  // Production requires HTTPS; only this isolated local Anvil test injects a transport
+  // which forwards the validated HTTPS configuration to the loopback-only test node.
+  const transport=async (_validatedUrl,options)=>fetch(endpoint,options);
+  const runtime=createHighCountryCupRuntime420({
+   endpoint:'https://cup-anvil.invalid',chainId:420,cupAddress,engineAddress,
+   cupCode,engineCode,codeHash,selectors,pool,gameId,fetchImpl:transport});
   const standing=await runtime.standings({cupId});
   assert.equal(standing.rounds.length,3);
   assert.equal(standing.rounds[0].winner.toLowerCase(),standing.rounds[2].winner.toLowerCase());

@@ -93,3 +93,10 @@ test('creator modifier reveal must follow finalized purchase and verified issuer
  bad(()=>assertRevealEligible({origin:'creator',purchaseFinalized:true,issuerAuthorized:false}));
  assert.equal(assertRevealEligible({origin:'creator',purchaseFinalized:true,issuerAuthorized:true}),true);
 });
+
+test('authorized quest bonuses retain values above ordinary stack cap',()=>{
+ const out=checkStacking(type(),[{origin:'creator',effects:[{effectId:'crafting_efficiency',bps:400}]},{origin:'quest',effects:[{effectId:'crafting_efficiency',bps:900}]}]);
+ assert.equal(out.totals.crafting,400);
+ assert.equal(out.questTotals.crafting,900);
+ assert.equal(out.applied.crafting,1300);
+});

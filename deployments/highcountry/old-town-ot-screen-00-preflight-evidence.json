@@ -74,5 +74,63 @@
   ],
   "preflightPass": false,
   "formalCI": "NOT_STARTED",
-  "implementationFreeze": "BLOCKED_PENDING_SOURCE_RECONCILIATION"
+  "implementationFreeze": "BLOCKED_PENDING_SOURCE_RECONCILIATION",
+  "appIntegrationBoundary": {
+    "current": "apps/highcountry-web/src/port-alder-navigation.js currently presents accessible district labels / neighbourhood placeholders; app.js routes /port-alder and district subpaths",
+    "build": "apps/highcountry-web/scripts/build.mjs copies public assets and district navigation contract",
+    "nextStep": "OT-SCREEN-01 renderer integration",
+    "runtimeChangesHere": false
+  },
+  "concurrentPRs": [
+    {
+      "number": 891,
+      "state": "open",
+      "area": "Port Alder staged map, route/build code, artwork hitboxes"
+    },
+    {
+      "number": 895,
+      "state": "open",
+      "area": "Old Town ability and landmark design contracts"
+    },
+    {
+      "number": 896,
+      "state": "open",
+      "area": "Old Town landmark browser public screens, route code and hitboxes"
+    },
+    {
+      "number": 909,
+      "state": "open",
+      "area": "Approved Old Town screen roadmap and parent amendment; dependency for canonical source"
+    }
+  ],
+  "assetMismatchDetails": [
+    {
+      "id": "LM-01",
+      "repoBlob": "71aeb8eebf4fb492704d84bdf5f3e3f92a99e0a0",
+      "uploadedBlob": "f758ec40613dd8b01b94578acaa381adf0889254"
+    },
+    {
+      "id": "LM-03",
+      "repoBlob": "5ae2785de058a6180462e60dd6bb53a49651c618",
+      "uploadedBlob": "4645048c5c15f48443cb26b2282a03047536b395"
+    },
+    {
+      "id": "LM-04",
+      "repoBlob": "045300a1e356e3de6748408c0c2eba4e60facd5f",
+      "uploadedBlob": "a9f56ab5bef8cf57a42c496df8812c257b0c8fc4"
+    }
+  ],
+  "testOwnership": {
+    "scopedLocal": "scripts/highcountry/ot-screen-00-baseline.test.mjs",
+    "level": "L1",
+    "workflow": "No existing matching path-filtered workflow for scripts/highcountry/ot-screen-00-baseline.test.mjs; node --test locally required before formal CI",
+    "avoid": [
+      "Global Foundry",
+      "Genesis",
+      "Integrated",
+      "Docs",
+      "Level 3"
+    ],
+    "formalCI": "BLOCKED until preflight PASS"
+  }
 }

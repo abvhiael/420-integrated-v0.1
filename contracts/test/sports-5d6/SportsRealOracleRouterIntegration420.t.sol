@@ -43,6 +43,8 @@ contract SportsRealOracleRouterIntegration420Test is SportsFundedTickets420Test 
         _call(CONTROL, address(vault),
             abi.encodeCall(vault.bindRiskGroup, (market, vault.correlationGroupFor(market), 1000)));
         _grant(CONTROL, vault.BIND_ORACLE(), vault.scope(bytes32(0)));
+        _grant(CONTROL, vault.SET_ASSET_RISK(), vault.scope(bytes32(0)));
+        _call(CONTROL, address(vault), abi.encodeCall(vault.setAssetProfitCap, (address(token), 5000)));
         _call(CONTROL, address(vault), abi.encodeCall(vault.enableOracleOnlyFunding, ()));
         _grant(address(gate), vault.RESOLVE(), vault.scope(market));
     }

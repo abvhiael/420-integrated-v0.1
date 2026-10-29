@@ -1,0 +1,17 @@
+# 420Bet 5D.8 — Exposure management, risk controls and emergency handling
+
+## Repository discovery and control boundaries
+5D.4 already implements per-market and per-selection profit caps, per-player stake limits, exact locked quote/stake limits, collateral reservation, asset-wide nominal custody accounting and replay protection. 5D.6 adds immutable canonical same-event/same-asset correlation groups with exposure caps and Oracle-only funding. 5D.7 preserves one terminal settlement outcome, with moneyline win/loss, push, no-action, two-way dead-heat, disputed VOID and timed refund handling. `BetEmergencyState420` and `SportsMarketRegistry420.eligible()` already prospectively halt new wagering for global, market, game and vault domains. Emergency controls never cancel valid customer claims, settlements or refunds.
+
+## Additional 5D.8 enforcement
+- `SportsFundedTickets420.SET_ASSET_RISK` is a separate capability checked against global sportsbook scope; only a properly authorized controller may update an asset profit cap.
+- `assetProfitExposure[token]` conservatively sums *all* unresolved ticket profit liabilities for that asset, including cross-market and cross-event exposure. On every funded admission it increases once and on every terminal outcome decreases once; independent of event outcomes, market variants and group assignment.
+- After the pre-funding `oracleOnlyFunding` production fuse is enabled, admission fails closed until the relevant token has a nonzero asset cap and the proposed profit fits the remaining asset allowance. The cap does not replace per-market, per-selection, per-player, same-event group or actual collateral checks; all apply.
+- Authorized controllers may lower a positive cap only to or above current exposure. Zero is an immediate, prospective per-asset circuit breaker even when exposure remains outstanding. Restoration requires fresh authority. Frozen assets still permit previously funded ticket resolution, dispute, refund and credit withdrawal.
+- Legacy unfused fixtures retain their historical preproduction admission semantics and are not represented as production-approved. Activating the fuse is irreversible and cannot occur after any ticket has been funded.
+
+## Qualification and acceptance
+App-specific Level 1: `contracts/test/sports-5d8/SportsRiskEmergency420.t.sol` covers missing cap, unauthorized configuration, limit changes, zero-cap shutdown, group exposure conservation, winner settlement/refund through freeze, exact asset custody and fuzzed exposure. Its inherited 5D.6/5D.4 tests preserve authorization and settlement regressions. The dedicated bounded workflow is `420bet-sports-5d8.yml`; affected 5D.6 and 5D.7 workflows remain regression owners. Do not report passing evidence until all required exact-head runs complete.
+
+## Pending risk-policy governance and live acceptance
+A chain-wide book cap across **different** collateral assets requires a deterministic, approved cross-asset conversion/price-risk authority; nominal token quantities are not fungible. No cross-token collateral netting or FX-risk assumption is implemented here. Operational cap numbers, independent insurer/treasury solvency approval, sports-data licenses, live jurisdictional compliance, Oracle provider outages and finality/reorganization are external/testnet requirements. Preserve the existing BET-5D4-TN and BET-5D6-TN gates and prevent production activation without audited asset caps, independently verified feeds and jurisdictional approval.

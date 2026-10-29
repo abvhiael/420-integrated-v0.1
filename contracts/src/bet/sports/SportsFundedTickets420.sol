@@ -32,6 +32,21 @@ contract SportsFundedTickets420 is SportsAuthority420 {
     mapping(bytes32 => address) public marketOracleGate;
     bool public oracleOnlyFunding;
     uint256 public fundedCount;
+    // Aggregate prospective payout profit risk across markets sharing one token.
+    // Existing live exposure cannot be erased by changing the admission limit.
+    bytes32 public constant SET_ASSET_RISK = keccak256("BET_SPORT_ASSET_RISK_CONFIGURE");
+    mapping(address => uint256) public assetProfitExposure;
+    mapping(address => uint256) public assetProfitCap;
+    event AssetProfitCapSet(address indexed asset, uint256 cap, uint256 outstanding);
+
+    function setAssetProfitCap(address asset, uint256 cap) external {
+        _auth(SET_ASSET_RISK, bytes32(0));
+        if (asset.code.length == 0 || (cap != 0 && cap < assetProfitExposure[asset])) revert State();
+        // Zero cap is an emergency admission freeze; outstanding exposure remains intact.
+        assetProfitCap[asset] = cap;
+        emit AssetProfitCapSet(asset, cap, assetProfitExposure[asset]);
+    }
+
     mapping(bytes32 => bytes32) public marketRiskGroup;
     mapping(bytes32 => address) public riskGroupAsset;
     mapping(bytes32 => uint256) public riskGroupLimit;
@@ -165,6 +180,9 @@ contract SportsFundedTickets420 is SportsAuthority420 {
             || selectionProfitExposure[offer.marketId][offer.selection] + profit > r.maxSelectionLiability
             || playerExposure[offer.marketId][msg.sender] + offer.stake > r.maxPlayerStake
             || reserved[offer.marketId] + profit > collateral[offer.marketId]) revert State();
+        address riskAsset = markets.get(offer.marketId).config.asset;
+        uint256 assetCap = assetProfitCap[riskAsset];
+        if (oracleOnlyFunding && (assetCap == 0 || profit > assetCap || assetProfitExposure[riskAsset] > assetCap - profit)) revert State();
         bytes32 group = marketRiskGroup[offer.marketId];
         if (group != bytes32(0) && riskGroupOutstanding[group] + profit > riskGroupLimit[group]) revert State();
         (SportsOddsIngestion420.Latest memory q, bool usable) = odds.current(offer.marketId);
@@ -174,6 +192,7 @@ contract SportsFundedTickets420 is SportsAuthority420 {
         if (tickets[id].state != TicketState.NONE) revert Conflict();
         consumedIntent[intent] = true;
         ++fundedCount;
+        assetProfitExposure[riskAsset] += profit;
         if (group != bytes32(0)) riskGroupOutstanding[group] += profit;
         reserved[offer.marketId] += profit;
         pendingStake[offer.marketId] += offer.stake;
@@ -316,6 +335,7 @@ contract SportsFundedTickets420 is SportsAuthority420 {
         emit TicketSettlementRecorded(id, t.marketId, outcome, payout, evidence, msg.sender);
         bytes32 group = marketRiskGroup[t.marketId];
         if (group != bytes32(0)) riskGroupOutstanding[group] -= t.profit;
+        assetProfitExposure[_asset(t.marketId)] -= t.profit;
         reserved[t.marketId] -= t.profit;
         pendingStake[t.marketId] -= t.stake;
         address asset = _asset(t.marketId);

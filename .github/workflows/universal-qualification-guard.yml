@@ -1,0 +1,35 @@
+name: Universal Qualification Policy Guard
+on:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  validate-policy:
+    if: ${{ github.event.pull_request.number >= 906 }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Confirm exact SHA
+        env:
+          SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$SHA"
+      - name: Verify self tests
+        run: python3 -m unittest discover -s scripts/qualification-policy -p 'test_*.py' -v
+      - name: Enforce mandatory candidate preflight
+        env:
+          BASE_REF: ${{ github.base_ref || 'main' }}
+          CANDIDATE: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          git fetch --no-tags origin "+refs/heads/$BASE_REF:refs/remotes/origin/$BASE_REF"
+          python3 scripts/qualification-policy/preflight.py --manifest auto --base "origin/$BASE_REF" --head "$CANDIDATE" --output verified-preflight.json
+      - name: Retain exact-SHA preflight certificate
+        uses: actions/upload-artifact@v4
+        with:
+          name: qualification-preflight-${{ github.event.pull_request.number }}
+          path: verified-preflight.json
+          if-no-files-found: error

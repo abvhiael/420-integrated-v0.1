@@ -80,3 +80,28 @@ test('03-C stored placement cannot be reissued as a new instance ID or mutated b
  await assert.rejects(s.engine.execute('alice',{operation:'mutate-c',action:'move',instanceId:'a',assetId:asset,expectedRevision:1,expectedSceneRevision:1,record:{ownerPrincipal:'bob'}}),/existing-instance-record-override/);
  assert.equal(s.get().placementInstances.get('a').ownerPrincipal,'alice');
 });
+
+test('03-P1: support mutation and removal reject live descendants without releasing custody',async()=>{
+ const s=setup();await s.engine.execute('alice',s.place('support','support-op'));
+ // A persisted, qualified attachment from a later attachment lane must still be
+ // protected by HC-PLACE-03 transaction-side support rules.
+ s.get().placementInstances.set('child',{...record('child'),surface:'tabletop_slot',layer:'tabletop_decor',parentInstanceId:'support',slotId:'slot-one',gridX:0});
+ const before=structuredClone(s.get());
+ for(const action of ['move','rotate','remove','attach']){
+  await assert.rejects(s.engine.execute('alice',{operation:'reject-'+action,action,instanceId:'support',assetId:asset,expectedRevision:1,expectedSceneRevision:1,...(action==='move'?{gridX:3,gridY:0}:{}),...(action==='rotate'?{orientation:90}:{})}),/support-has-children|geometry-incompatible/);
+ }
+ assert.deepEqual(s.get(),before);
+});
+test('03-P1: unsupported detach target rejects atomically',async()=>{
+ const s=setup();await s.engine.execute('alice',s.place('support','support-op'));
+ const before=structuredClone(s.get());
+ await assert.rejects(s.engine.execute('alice',{operation:'detach-no-target',action:'detach',instanceId:'support',assetId:asset,expectedRevision:1,expectedSceneRevision:1,detachTarget:'floor'}),/detach-target-unsupported/);
+ assert.deepEqual(s.get(),before);
+});
+test('03-P1: placement rejects missing parent and self-parent inside same transaction',async()=>{
+ const s=setup();const q=s.place('child','orphan');
+ q.record={...q.record,surface:'tabletop_slot',layer:'tabletop_decor',parentInstanceId:'missing',slotId:'slot-a'};
+ await assert.rejects(s.engine.execute('alice',q),/geometry-incompatible/);
+ assert.equal(s.get().placementInstances.size,0);
+ assert.equal(s.get().custodyReservations.size,0);
+});

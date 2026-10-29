@@ -89,6 +89,18 @@ class PolicyGuardTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'unique'):
             mod.choose_manifest('auto', self.changed + [path, '.qualification/candidates/APP-02.json'])
 
+    def test_changed_governed_docs_require_frontmatter(self):
+        directory = mod.ROOT / 'docs/ci'
+        directory.mkdir(parents=True)
+        (directory / 'frontmatter-policy.json').write_text(
+            '{"governed_roots":["docs/ci"],"required_fields":["title","category","status","version"]}')
+        document = directory / 'example.md'
+        document.write_text('# Invalid')
+        with self.assertRaisesRegex(ValueError, 'frontmatter'):
+            mod.audit_governed_docs(['docs/ci/example.md'])
+        document.write_text('---\ntitle: Example\ncategory: contributing\nstatus: current\nversion: current\n---\n')
+        mod.audit_governed_docs(['docs/ci/example.md'])
+
     def test_unregistered_workflow(self):
         self.data["required_workflows"] = [".github/workflows/missing.yml"]
         with self.assertRaisesRegex(ValueError, "registered"):

@@ -1,3 +1,13 @@
+---
+title: Universal qualification execution policy
+audience:
+  - developer
+  - operator
+category: contributing
+status: current
+version: current
+---
+
 # Universal Qualification Execution Policy — v1
 
 This is a **repository-checkable contract**, not a declaration that CI path filters or branch-protection permissions have already been changed.

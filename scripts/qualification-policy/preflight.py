@@ -131,6 +131,27 @@ def audit_triggers(paths):
         fail("; ".join(failures))
 
 
+def audit_governed_docs(changed):
+    policy = json.loads((ROOT / 'docs/ci/frontmatter-policy.json').read_text())
+    roots = tuple(root.rstrip('/') + '/' for root in policy['governed_roots'])
+    for name in changed:
+        if not name.endswith('.md') or not name.startswith(roots):
+            continue
+        if name in policy.get('legacy_exceptions', []):
+            continue
+        if any(fnmatch.fnmatchcase(name, pattern) for pattern in policy.get('legacy_exception_globs', [])):
+            continue
+        p = ROOT / safe_path(name)
+        if not p.is_file():
+            continue  # Deletion cannot introduce an invalid document.
+        lines = p.read_text().splitlines()
+        if not lines or lines[0] != '---' or '---' not in lines[1:]:
+            fail('missing governed docs frontmatter: ' + name)
+        header = lines[1:lines.index('---', 1)]
+        for field in policy['required_fields']:
+            if not any(line.startswith(field + ':') and line.split(':', 1)[1].strip() for line in header):
+                fail('missing governed docs field ' + field + ': ' + name)
+
 def audit_unwanted_level3(changed):
     """Reject L1/L2 candidates whose changed paths trigger heavyweight Level 3."""
     directory = ROOT / ".github/workflows"
@@ -190,6 +211,7 @@ def main():
         fail("checked-out HEAD differs from target SHA")
     git("merge-base", "--is-ancestor", base, head)
     changed = diff_names(base, head)
+    audit_governed_docs(changed)
     audit_triggers(changed)
     manifest = json.loads((ROOT / choose_manifest(args.manifest, changed)).read_text())
     if manifest.get('level') in ('L1', 'L2'):

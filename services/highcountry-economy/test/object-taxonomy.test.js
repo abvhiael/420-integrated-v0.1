@@ -79,6 +79,8 @@ test('developer-made items have locked fixed policy values and do not stack',()=
  const dev={origin:'developer',effects:[{effectId:'crafting_efficiency',bps:300}]};
  assert.equal(checkStacking(type(),[dev]).applied.crafting,300);
  bad(()=>checkStacking(type(),[dev,dev]));
+ bad(()=>checkStacking(type(),[dev,{origin:'creator',effects:[{effectId:'material_conservation',bps:150}]}]));
+ bad(()=>checkStacking(type(),[dev,{origin:'quest',effects:[{effectId:'material_conservation',bps:900}]}]));
 });
 test('only quest-origin policy can exceed five percent; no ordinary override',()=>{
  const quest=defineModifierPolicy(policy({origin:'quest',maxModifiers:1,perItemCapBps:2000,effects:[{effectId:'crafting_efficiency',minBps:900,maxBps:900,weight:1}]}),type());

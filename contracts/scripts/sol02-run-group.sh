@@ -19,6 +19,9 @@ if [[ "$group" == "420bet--01" ]]; then
   python3 ../scripts/bet/package-poker-5a10-evidence.py --verify
   # Restore only checksum-manifested canonical tournament proofs for inherited 5C.5 tests.
   python3 ../scripts/bet/unpack-poker-5c5-evidence.py
+  # Tournament 5C.5 context commitments were generated under canonical solc 0.8.30.
+  # Keep the proof and address commitments exact; do not rewrite fixture witnesses.
+  export FOUNDRY_SOLC_VERSION="0.8.30"
 fi
 forge build "${targets[@]}"
 mapfile -t tests < <(printf '%s\n' "${targets[@]}" | grep '^test/.*\.sol$' || true)

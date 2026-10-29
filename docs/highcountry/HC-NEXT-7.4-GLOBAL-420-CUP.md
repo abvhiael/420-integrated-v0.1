@@ -1,6 +1,6 @@
 # HC-NEXT-7.4 — Global 420 Cup integration ledger
 
-**Status: IN PROGRESS — NOT QUALIFIED (expanded service/RPC implementation; pending scoped exact-SHA qualification).** Canonical owner: HC-NEXT-7.4; existing R04.13 `Global420Cup` remains the on-chain Cup result and scoped issuance authority, with R04.12 `CompetitionEngine` retaining canonical harvest scoring and result finality. Do not create a conflicting local champion or fabricate chain grants.
+**Status: PRE-TESTNET LEVEL 2 QUALIFIED on implementation SHA `d179dda303af1e1cd0f79f7843716fc18326ef46` (2026-10-29); operational/testnet acceptance and complete milestone closeout remain OPEN.** Canonical owner: HC-NEXT-7.4; existing R04.13 `Global420Cup` remains the on-chain Cup result and scoped issuance authority, with R04.12 `CompetitionEngine` retaining canonical harvest scoring and result finality. Do not create a conflicting local champion or fabricate chain grants.
 
 ## Canonical boundaries
 
@@ -42,3 +42,12 @@
 - Full closeout is blocked until the latest exact-SHA scoped tests pass, a single combined real-EVM-node→adapter→authenticated service→real PostgreSQL integration is verified, the issuer-owned account↔wallet binding is independently validated where claimed, and current main plus docs/testnet deferrals are reconciled. No testnet deployment address, code hash, signer or live-chain evidence is manufactured.
 
 **Closeout request disposition: NOT READY.** Keep PR #899 draft/unmerged until those mandatory local integration gates have exact-SHA PASS evidence. Do not silently defer pre-testnet EVM/service acceptance to testnet.
+
+## Pre-testnet Level 2 qualification — 2026-10-29
+
+- **Qualified executable SHA:** `d179dda303af1e1cd0f79f7843716fc18326ef46` (the subsequent ledger update is documentation-only).
+- **Real Anvil EVM → canonical finalized RPC → Cup projection → authenticated HTTP → PostgreSQL and revocation:** PASS, [run 40945265767](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/40945265767), job `123698854244`. The isolated harness deploys real Cup/CompetitionEngine contracts, verifies the fixture deployment receipt, compares deployed code at latest/finalized, verifies transaction identity/success, and rejects revoked final evidence. Local `evm_mine` and bounded receipt polling are deterministic local-chain synchronization, **not proof of independent validator consensus**.
+- **Cup projection Level 1 and scoped Foundry contract boundary:** PASS, [run 40945266297](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/40945266297), jobs `123698855666` and `123698856196`.
+- **Gaming Player Profile Service:** PASS, [run 40945266303](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/40945266303), job `123698855700`.
+- **Disposition:** The previously blocking *local real-EVM/PostgreSQL Level 2 integration qualification* is complete on the recorded SHA. Do not claim independently audited deployment bytecode, externally controlled issuer/wallet-link authority, deployed multi-instance recovery or live-network finality from isolated Anvil. Remaining separate pre-testnet milestone requirements in this ledger, if not evidenced elsewhere, remain OPEN. No Level 3/merge claim is implied by Level 2 PASS.
+- **Testnet-specific acceptance remains OPEN:** deploy to the actual 420 Integrated testnet with approved immutable chain ID/address/code-hash/selector manifests and authorization keys; verify independent validator consensus, authentic finalized receipts and reorg/recovery, external RPC agreement, operational issuer/wallet-link lifecycle and multi-instance deployment/security signoff. Record results under `HIGHCOUNTRY-TESTNET-WORK-ROADMAP.md` rather than rerunning local Anvil tests as substitutes.

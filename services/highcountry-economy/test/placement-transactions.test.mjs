@@ -129,6 +129,9 @@ test('03-P1: attached child requires existing placed same-owner same-scene paren
  await assert.rejects(s.engine.execute('alice',{operation:'parent-removal',action:'remove',instanceId:'support',assetId:asset,expectedRevision:1,expectedSceneRevision:2}),/support-has-children/);
  const detached=await s.engine.execute('alice',{...cmd('child-detach',null,1,2,'detach'),detachTarget:'storage'});
  assert.equal(detached.instance.state,'stored');
+ assert.equal(detached.custody.unitId,placed.custody.unitId);
+ assert.equal(s.get().custodyUnits.get(placed.custody.unitId).state,'available');
+ assert.equal(s.get().custodyReservations.has(placed.custody.unitId),false);
  await s.engine.execute('alice',{operation:'parent-store',action:'remove',instanceId:'support',assetId:asset,expectedRevision:1,expectedSceneRevision:3});
  await assert.rejects(s.engine.execute('alice',cmd('child-restore-denied',null,2,4,'restore')),/parent-not-placed/);
  await s.engine.execute('alice',{operation:'parent-restore',action:'restore',instanceId:'support',assetId:asset,expectedRevision:2,expectedSceneRevision:4});

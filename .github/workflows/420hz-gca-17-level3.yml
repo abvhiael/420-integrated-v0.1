@@ -1,17 +1,7 @@
 name: 420Hz HZ-GCA-17 Level 3 exact-SHA qualification
 on:
-  pull_request:
-    paths:
-      - '.github/workflows/420hz-gca-17-level3.yml'
-      - 'hz/generate/**'
-      - 'hz/web/**'
-      - 'hz/config/gca-*.json'
-      - 'scripts/verify-420hz-*.py'
-      - 'services/420ai-provider/**'
-      - 'services/compute-api/**'
-      - 'packages/420-sdk/**'
-      - '420-indexer/**'
   workflow_dispatch:
+
 permissions:
   contents: read
 jobs:

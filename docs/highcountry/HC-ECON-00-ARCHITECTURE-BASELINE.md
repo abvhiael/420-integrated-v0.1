@@ -101,12 +101,27 @@ Create deployment pin/code-hash evidence, actual production-price oracle freshne
 ## Open specification parameters, not license to improvise implementation
 Reviewer QA and appeal deadlines, exceptional fee refunds, quote lifetime and rounding dust, royalty/commission policy for player sales, shop price-floor snapshot/expiration, per-account quotas/epoch lengths, exact item modifier power budgets and stacking caps, NPC order prices/budgets, and source-event trust roots need separately approved versioned values before production activation. No developer or reviewer can quietly set random outcomes.
 
+
+## Concurrent open-PR reconciliation (2026-10-28; advisory, not merged authority)
+GitHub open-PR discovery for `highcountry` reported parallel work affecting HC-ECON: #887 (HC-PLACE-03 serializable placement, custody, server-only adapter; still disabled for production); #803 (canonical wallet-linked market, distinct from ordinary R04.8); #893/#890 (workshop/building abilities, must populate the compatibility registry after approval); #852/#856 (framed art/memorabilia slot catalogues, wall/tabletop restrictions and mutually overlapping marketplace.js branches); #811 (ordinary signed missions, non-economic rewards); #786 (five equipment classes and equipment lifecycle); #899 (Cup projection and achievement persistence); #611 (manufacturing recipe and atomic inventory); #618 (ordinary zero-fee fixed-price BUDS market). Other open R04/R05 PRs include authority, land rights, skills, data durability, chain finality and migrations. Open PR descriptions are **unmerged candidate evidence**, not established active main implementation. Before a dependent HC-ECON milestone begins, diff its authoritative source against main plus all affected open branches and preserve each branch's ownership.
+
+| Potential overlapping work | Do-not-regress rule | Next owner |
+| --- | --- | --- |
+| #887 HC-PLACE-03 | Do not bypass placement transaction/land custody, authorize child geometry, or enable disabled production routes | HC-PLACE with HC-ECON-03 |
+| #890/#893 and #786 | Equipment effects must be expressed by reviewed building/equipment compatibility without retroactively changing qualified class powers | HC-ECON-01/03 |
+| #852/#856 and other HC-ART PRs | Marketplace UI catalogue is not issuance or authoritative placement; never overwrite competing artwork catalogues | HC-ECON-04/13 |
+| #611 and #618 | Reuse atomic reservation and fixed-price ordinary market; keep canonical market #803 separately authorized | HC-ECON-08/12/13 |
+| #811 and #899 | Preserve non-economic ordinary missions and Cup achievement provenance; separately authorize economic quest awards | HC-ECON-14/16 |
+
+## HC-ECON-00 traceability audit result
+E01–E30 are 30 distinct nonblank requirement IDs, each with a named functional owner, proposed API/integration, proposed durable data contract and mandatory acceptance-test identifier. The audit verifies **design coverage**, not that E01–E30 endpoints or tests already exist. The implementation owner must replace each proposed reference with actual code paths and exact-SHA evidence in its assigned milestone. The read-back and coverage audit apply to this branch document; the unrelated PRs are observed to avoid premature cross-branch merge.
+
 ## HC-ECON-00 exit checklist
 - [x] Enumerated the approved creator, fee, moderation, edition, modifiers, manufacturing, pricing, brand, NPC, quest and O16 requirements.
 - [x] Mapped each to functional owner, proposed API, proposed data contract and mandatory acceptance test (E01-E30).
 - [x] Recorded existing authority boundaries, risk of collisions, lifecycle/state invariants and implementation ordering.
 - [x] Distinguished current sources from proposed APIs/data and future testnet requirements.
-- [ ] Independently verified complete current-repository file inventory and latest open-PR changes against this baseline.
-- [ ] Run exact-SHA document schema/coverage verifier and review current targeted CI results.
-- [ ] Reconcile with concurrent main/active development without overwriting outstanding work.
-**Status discipline:** The checked boxes are specification coverage only; HC-ECON-00 is not fully qualified until all exit checks and exact-SHA evidence pass.
+- [x] Audited indexed source boundaries and relevant concurrent open HighCountry PR descriptions; complete repository-wide independent file enumeration is not established.
+- [x] Verified 30 distinct E01–E30 mapped requirements by exact-branch readback; observed passing 420Docs Actions on initial SHA 797bfc1, but this revised SHA requires new verification.
+- [x] Recorded non-merged concurrent PR conflict boundaries and compared this branch to main; only this documentation path changes.
+**Status discipline:** Requirements coverage is documented, but comprehensive repository tree enumeration and revised exact-SHA CI evidence still require confirmation before unconditional full certification.

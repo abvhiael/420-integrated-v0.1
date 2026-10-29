@@ -41,7 +41,7 @@ contract SportsFundedTickets420 is SportsAuthority420 {
 
     function setAssetProfitCap(address asset, uint256 cap) external {
         _auth(SET_ASSET_RISK, bytes32(0));
-        if (asset.code.length == 0 || cap < assetProfitExposure[asset]) revert State();
+        if (asset.code.length == 0 || (cap != 0 && cap < assetProfitExposure[asset])) revert State();
         // Zero cap is an emergency admission freeze; outstanding exposure remains intact.
         assetProfitCap[asset] = cap;
         emit AssetProfitCapSet(asset, cap, assetProfitExposure[asset]);

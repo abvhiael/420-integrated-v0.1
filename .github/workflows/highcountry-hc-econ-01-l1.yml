@@ -1,0 +1,21 @@
+name: HighCountry HC-ECON-01 Level 1
+on:
+  pull_request:
+    paths:
+      - 'services/highcountry-economy/src/object-taxonomy.js'
+      - 'services/highcountry-economy/src/placement-contract.js'
+      - 'services/highcountry-economy/test/object-taxonomy.test.js'
+      - '.github/workflows/highcountry-hc-econ-01-l1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  taxonomy-level1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test services/highcountry-economy/test/object-taxonomy.test.js

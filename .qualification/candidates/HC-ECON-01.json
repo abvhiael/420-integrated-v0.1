@@ -1,0 +1,42 @@
+{
+  "step": "HC-ECON-01",
+  "roadmap": "docs/highcountry/HC-ECON-00-ARCHITECTURE-BASELINE.md",
+  "level": "L1",
+  "base_sha": "ca9059112c839cf965c8af2b7e69bc998880e85f",
+  "candidate_sha": "HEAD",
+  "classification": "implementation",
+  "scope": [
+    ".github/workflows/highcountry-hc-econ-01-l1.yml",
+    "docs/highcountry/HC-ECON-01-TAXONOMY-MODIFIERS.md",
+    "services/highcountry-economy/src/object-taxonomy.js",
+    "services/highcountry-economy/test/object-taxonomy.test.js",
+    ".qualification/candidates/HC-ECON-01.json"
+  ],
+  "tests": [
+    {
+      "command": "node --test services/highcountry-economy/test/object-taxonomy.test.js",
+      "owner": "HighCountry economy Level 1"
+    },
+    {
+      "command": "python scripts/qualify-documentation.py",
+      "owner": "420Docs qualification"
+    }
+  ],
+  "required_workflows": [
+    ".github/workflows/highcountry-hc-econ-01-l1.yml",
+    ".github/workflows/universal-qualification-guard.yml"
+  ],
+  "exit_criteria": [
+    "Universal object type and qualified modifier-policy taxonomy is versioned and fail closed",
+    "Ordinary marketplace modifiers capped at 500 basis points with 2–3 percent target",
+    "420Corp developer modifiers fixed and nonstackable",
+    "Quest-origin modifier exceptions separately bounded and recorded",
+    "Post-purchase modifier reveal gate, with actual settlement/entropy proof deferred to HC-ECON-02",
+    "Earlier exact-SHA passing Level 1 and Docs evidence retained, and final reconciled SHA qualified",
+    "PR #905 is merged into main without changes to unrelated work"
+  ],
+  "frozen_inputs": {},
+  "external_gates": [
+    "Actual settlement proof and verifiable randomness belong to HC-ECON-02, not enabled by HC-ECON-01"
+  ]
+}

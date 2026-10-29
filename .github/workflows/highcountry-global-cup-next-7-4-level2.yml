@@ -1,0 +1,55 @@
+name: High Country HC-NEXT-7.4 Real EVM/Postgres Level 2
+on:
+  pull_request:
+    paths:
+      - 'contracts/test/highcountry/integration/cup/CupHttpAnvilFixture.sol'
+      - 'services/420-gaming-player-profile/src/highcountry-cup-*.js'
+      - 'services/420-gaming-player-profile/src/highcountry-global-cup.js'
+      - 'services/420-gaming-player-profile/src/highcountry-cloud-http.js'
+      - 'services/420-gaming-player-profile/test/highcountry-cup-anvil.integration.mjs'
+      - 'services/420-gaming-player-profile/migrations/011_highcountry_cup_achievements.up.sql'
+      - 'scripts/highcountry/hc-next-7-4-anvil-integration.sh'
+      - '.github/workflows/highcountry-global-cup-next-7-4-level2.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  real-cup-level2:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: test-only
+          POSTGRES_DB: hc_cup_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d hc_cup_ci"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      HIGHCOUNTRY_CUP_POSTGRES_TEST_URL: postgresql://postgres:test-only@127.0.0.1:5432/hc_cup_ci
+      FOUNDRY_SRC: src/highcountry
+      FOUNDRY_TEST: test/highcountry
+      FOUNDRY_SCRIPT: script/highcountry
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Pin exact implementation SHA
+        env:
+          TARGET: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$TARGET"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install scoped service dependencies
+        working-directory: services/420-gaming-player-profile
+        run: npm ci --ignore-scripts
+      - name: Deploy actual tournament, finish cup, verify service and revoked evidence
+        run: bash scripts/highcountry/hc-next-7-4-anvil-integration.sh

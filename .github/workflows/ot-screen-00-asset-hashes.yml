@@ -1,0 +1,51 @@
+name: OT-SCREEN-00 canonical PNG checksum evidence
+on:
+  push:
+    branches:
+      - ot-screen-00-baseline-lock-20261029
+    paths:
+      - '.github/workflows/ot-screen-00-asset-hashes.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ot-screen-00-hash-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  hashes:
+    name: Exact repository bytes (20 PNG only)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact SHA
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Prove checked-out SHA
+        run: test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+      - name: Compute canonical source SHA-256 evidence
+        run: |
+          python3 - <<'PY'
+          import json,hashlib,pathlib,subprocess
+          registry=json.loads(pathlib.Path('deployments/highcountry/old-town-genesis-assets.json').read_text())
+          assert len(registry['assets'])==20
+          records=[]
+          for a in registry['assets']:
+              p=pathlib.Path(a['repoPath'])
+              assert p.is_file(),f"missing {a['id']}: {p}"
+              buf=p.read_bytes()
+              blob=hashlib.sha1(f'blob {len(buf)}\\0'.encode()+buf).hexdigest()
+              sha=hashlib.sha256(buf).hexdigest()
+              assert blob==a['gitBlobSha'],f"wrong Git blob for {a['id']}: {blob} != {a['gitBlobSha']}"
+              records.append({'id':a['id'],'repoPath':str(p),'gitBlobSha':blob,'sha256':sha,'registrySha256':a['sha256'],'sha256MatchesRegistry':sha==a['sha256']})
+              print(f"{a['id']} git={blob} sha256={sha} registry_match={sha==a['sha256']}",flush=True)
+          out={'headSha':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),'count':len(records),'assets':records}
+          pathlib.Path('ot-screen-00-canonical-sha256-evidence.json').write_text(json.dumps(out,indent=2)+'\\n')
+          assert len(set(x['id'] for x in records))==20
+          PY
+      - name: Upload exact-SHA evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ot-screen-00-canonical-sha256
+          path: ot-screen-00-canonical-sha256-evidence.json
+          if-no-files-found: warn

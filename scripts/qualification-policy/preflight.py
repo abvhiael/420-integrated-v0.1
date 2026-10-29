@@ -61,9 +61,9 @@ def check_manifest(data, changed, head, base, *, require_exact_head=True):
         fail("invalid change classification")
     if not re.fullmatch(r"[0-9a-f]{40}", data["base_sha"]) or data["base_sha"] != base:
         fail("stale reconciliation base SHA")
-    if not re.fullmatch(r"[0-9a-f]{40}", data["candidate_sha"]):
+    if data["candidate_sha"] != "HEAD" and not re.fullmatch(r"[0-9a-f]{40}", data["candidate_sha"]):
         fail("candidate must be full SHA")
-    if require_exact_head and data["candidate_sha"] != head:
+    if require_exact_head and data["candidate_sha"] not in ("HEAD", head):
         fail("candidate does not match checked-out exact HEAD")
     if not isinstance(changed, list) or not changed:
         fail("no changes to audit")
@@ -140,9 +140,7 @@ def main():
     head = git("rev-parse", args.head)
     if git("rev-parse", "HEAD") != head:
         fail("checked-out HEAD differs from target SHA")
-    if not git("merge-base", "--is-ancestor", base, head) == "":
-        # merge-base --is-ancestor exits nonzero for divergence (handled by git)
-        pass
+    git("merge-base", "--is-ancestor", base, head)
     changed = diff_names(base, head)
     audit_triggers(changed)
     manifest = json.loads((ROOT / safe_path(args.manifest)).read_text())

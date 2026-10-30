@@ -19,7 +19,11 @@ contract R0412Evidence is ICompetitionEvidenceR0412 {
     mapping(bytes32 => bytes32) public qualified;
     bool public unavailable;
 
-    function setUnavailable(bool state) external { unavailable = state; }
+    function setUnavailable(
+        bool state
+    ) external {
+        unavailable = state;
+    }
 
     function approve(
         bytes32 id,
@@ -251,7 +255,6 @@ contract R0412CompetitionTest {
         (bool ok,) = address(alice).call(abi.encodeCall(alice.submit, (engine, EVENT, harvest, 10000, opens - 1)));
         require(!ok, "pre-event harvest scored");
     }
-
 
     function testRevocationAfterFinalizationInvalidatesCurrentResultWithoutRewritingHistory() public {
         _enterBoth();

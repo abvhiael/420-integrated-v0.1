@@ -1,0 +1,28 @@
+name: HighCountry HC-ECON-02 Level 1
+on:
+  pull_request:
+    paths:
+      - 'services/highcountry-economy/src/item-issuance.js'
+      - 'services/highcountry-economy/src/postgres-store.js'
+      - 'services/highcountry-economy/test/item-issuance.test.js'
+      - '.github/workflows/highcountry-hc-econ-02-l1.yml'
+permissions:
+  contents: read
+jobs:
+  item-issuance-level1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - name: Assert exact candidate
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Targeted issuance, policy and durable-state qualification
+        run: node --test services/highcountry-economy/test/item-issuance.test.js services/highcountry-economy/test/object-taxonomy.test.js services/highcountry-economy/test/postgres-store.test.js

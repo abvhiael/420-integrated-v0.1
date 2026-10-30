@@ -29,6 +29,21 @@ export function validateOldTownScene({sites,assets,geo,geometry,anchors}){
  return anchors.anchors.map(a=>({...a,site:siteById.get(a.id),asset:assetById.get(a.id)})).sort(depthSort);
 }
 const occupied=id=>id.startsWith('HL-')?[11,14]:id.startsWith('CR-')?[17,17]:id.startsWith('WH-')?[22,22]:({'LM-01':[34,34],'LM-02':[45,45],'LM-03':[34,34],'LM-04':[34,34],'LM-05':[22,34]}[id]||null);
+// Fit opaque isometric art to its world footprint while retaining all transparent pixels.
+export function spriteFit(anchor, footprint, imageSize, alphaBounds){
+ const [aw,ad]=footprint,[iw,ih]=imageSize,[left,top,right,bottom]=alphaBounds;
+ if(![aw,ad,iw,ih,left,top,right,bottom].every(Number.isFinite)||aw<=0||ad<=0||iw<=0||ih<=0||right<left||bottom<top)throw Error('invalid sprite geometry');
+ const scale=((aw+ad)*32)/(right-left+1);
+ return {x:anchor[0]-(left+right+1)*scale/2,y:anchor[1]-(bottom+1)*scale,width:iw*scale,height:ih*scale};
+}
+function spriteAlphaBounds(source,document){
+ const canvas=document.createElement('canvas');canvas.width=source.naturalWidth;canvas.height=source.naturalHeight;
+ const context=canvas.getContext('2d',{willReadFrequently:true});context.drawImage(source,0,0);
+ const pixels=context.getImageData(0,0,canvas.width,canvas.height).data;
+ let left=canvas.width,top=canvas.height,right=-1,bottom=-1;
+ for(let y=0;y<canvas.height;y++)for(let x=0;x<canvas.width;x++)if(pixels[(y*canvas.width+x)*4+3]>20){left=Math.min(left,x);right=Math.max(right,x);top=Math.min(top,y);bottom=Math.max(bottom,y);}
+ if(right<left)throw Error('transparent building sprite');return [left,top,right,bottom];
+}
 export async function mountOldTownScene({document,main,fetchImpl=fetch}){
  const status=document.createElement('p');status.setAttribute('role','status');status.textContent='Loading canonical Old Town geometry and original Genesis PNGs…';main.append(status);
  const urls=['old-town-site-registry.json','old-town-genesis-assets.json','old-town-geo-authority-status.json','old-town-provisional-geometry.geojson','old-town-render-anchors.v1.json'].map(x=>'/assets/highcountry/maps/'+x);
@@ -52,10 +67,14 @@ export async function mountOldTownScene({document,main,fetchImpl=fetch}){
    if(!fp||!a.asset.repoPath.startsWith('apps/highcountry-web/public/assets/highcountry/old-town/')||!a.asset.repoPath.endsWith('.png'))throw Error('old-town-asset-path');
    const group=svgElement(document,'g',{'data-site-id':a.id,'data-ground-anchor':a.groundAnchorTiles.join(','),'data-depth':a.groundAnchorTiles[0]+a.groundAnchorTiles[1]});
    const url='/'+a.asset.repoPath.replace('apps/highcountry-web/public/','');
-   const image=svgElement(document,'image',{href:url,x:x-w/2,y:y-w,width:w,height:w,preserveAspectRatio:'xMidYMax meet','data-sha256':a.asset.sha256});
-   // Use the actual PNG dimensions, never a guessed sprite aspect ratio. Retain full transparent padding.
+   const image=svgElement(document,'image',{href:url,'data-sha256':a.asset.sha256});
+   // Full-resolution PNG geometry: fit visible alpha to occupied isometric footprint.
    const ImageCtor=document.defaultView?.Image;
-   if(ImageCtor){const source=new ImageCtor();source.onload=()=>{if(source.naturalWidth>0&&source.naturalHeight>0){const h=w*source.naturalHeight/source.naturalWidth;image.setAttribute('y',String(y-h));image.setAttribute('height',String(h));}};source.src=url;}
+   if(ImageCtor){const source=new ImageCtor();source.onload=()=>{try{
+     const bounds=spriteAlphaBounds(source,document);
+     const fit=spriteFit([x,y],fp,[source.naturalWidth,source.naturalHeight],bounds);
+     for(const [key,value]of Object.entries(fit))image.setAttribute(key,String(value));
+    }catch(error){group.setAttribute('data-sprite-error',String(error.message));}};source.src=url;}
    const label=svgElement(document,'text',{x,y:y+110,'text-anchor':'middle',fill:'#faf4d9','font-size':'90',stroke:'#1b2b26','stroke-width':'12','paint-order':'stroke'});label.textContent=a.id;
    group.append(image,label);spriteLayer.append(group);
   }

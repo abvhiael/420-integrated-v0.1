@@ -48,10 +48,14 @@ export async function mountOldTownScene({document,main,fetchImpl=fetch}){
   const park=sites.park.rect;ground.append(svgElement(document,'path',{d:geometryPath({type:'Polygon',coordinates:[[[park[0],park[1]],[park[2],park[1]],[park[2],park[3]],[park[0],park[3]],[park[0],park[1]]]]}),fill:'#348252',stroke:'#b4cc79','stroke-width':'7','data-public-park':'B22'}));
   const spriteLayer=svgElement(document,'g',{'data-layer':'canonical-genesis-sprites'});
   for(const a of buildings){
-   const [x,y]=sceneAnchor(a),fp=occupied(a.id),w=(fp[0]+fp[1])*32,h=w*1.12;
+   const [x,y]=sceneAnchor(a),fp=occupied(a.id),w=(fp[0]+fp[1])*32;
    if(!fp||!a.asset.repoPath.startsWith('apps/highcountry-web/public/assets/highcountry/old-town/')||!a.asset.repoPath.endsWith('.png'))throw Error('old-town-asset-path');
    const group=svgElement(document,'g',{'data-site-id':a.id,'data-ground-anchor':a.groundAnchorTiles.join(','),'data-depth':a.groundAnchorTiles[0]+a.groundAnchorTiles[1]});
-   const image=svgElement(document,'image',{href:'/'+a.asset.repoPath.replace('apps/highcountry-web/public/',''),x:x-w/2,y:y-h,width:w,height:h,preserveAspectRatio:'xMidYMax meet','data-sha256':a.asset.sha256});
+   const url='/'+a.asset.repoPath.replace('apps/highcountry-web/public/','');
+   const image=svgElement(document,'image',{href:url,x:x-w/2,y:y-w,width:w,height:w,preserveAspectRatio:'xMidYMax meet','data-sha256':a.asset.sha256});
+   // Use the actual PNG dimensions, never a guessed sprite aspect ratio. Retain full transparent padding.
+   const ImageCtor=document.defaultView?.Image;
+   if(ImageCtor){const source=new ImageCtor();source.onload=()=>{if(source.naturalWidth>0&&source.naturalHeight>0){const h=w*source.naturalHeight/source.naturalWidth;image.setAttribute('y',String(y-h));image.setAttribute('height',String(h));}};source.src=url;}
    const label=svgElement(document,'text',{x,y:y+110,'text-anchor':'middle',fill:'#faf4d9','font-size':'90',stroke:'#1b2b26','stroke-width':'12','paint-order':'stroke'});label.textContent=a.id;
    group.append(image,label);spriteLayer.append(group);
   }

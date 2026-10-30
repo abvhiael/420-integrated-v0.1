@@ -138,7 +138,7 @@ export class EconFees {
   if(!id(assetId)||!id(transferId)||!['development','community'].includes(leg))err('distribution');
   const row=await this.store.transact(s=>{state(s);this.guard(s,session,'fee-distribute',actor);
    const row=s.econFeeSubmissions.get(assetId);
-   if(!row||!['accepted','forfeited','reviewer-paid'].includes(row.status)||[...s.econFeeTransfers.values()].some(t=>t.assetId===assetId&&t.type===leg)||s.econFeeTransfers.has(transferId))err('distribution-denied');
+   if(!row||!['accepted','forfeited','reviewer-paid'].includes(row.status)||!s.econFeeReviewQA.get(assetId)?.valid||[...s.econFeeTransfers.values()].some(t=>t.assetId===assetId&&t.type===leg)||s.econFeeTransfers.has(transferId))err('distribution-denied');
    return copy(row);
   });
   const units=row.allocation[leg];
@@ -147,7 +147,7 @@ export class EconFees {
   if(receipt?.verified!==true||receipt.transferId!==transferId||receipt.recipient!==leg||receipt.units!==units||!id(receipt.finalizedReceiptId))err('distribution-unverified');
   return this.store.transact(s=>{state(s);this.guard(s,session,'fee-distribute',actor);
    const current=s.econFeeSubmissions.get(assetId);
-   if(!current||!['accepted','forfeited','reviewer-paid'].includes(current.status)||s.econFeeTransfers.has(transferId)||
+   if(!current||!['accepted','forfeited','reviewer-paid'].includes(current.status)||!s.econFeeReviewQA.get(assetId)?.valid||s.econFeeTransfers.has(transferId)||
     [...s.econFeeTransfers.values()].some(t=>t.finalizedReceiptId===receipt.finalizedReceiptId||t.assetId===assetId&&t.type===leg))err('distribution-race');
    s.econFeeTransfers.set(transferId,{type:leg,assetId,units,finalizedReceiptId:receipt.finalizedReceiptId,at:now});
    audit(s,'distributed-'+leg,assetId,now);return {assetId,leg,units};
@@ -157,7 +157,8 @@ export class EconFees {
   const actor=await this.actor(session),now=this.clock();if(!id(assetId)||!id(transferId))err('release');
   const row=await this.store.transact(s=>{state(s);this.guard(s,session,'fee-release',actor);const row=s.econFeeSubmissions.get(assetId),cert=s.econCertificates?.get(row?.certificateId);
    if(!row||!['accepted','forfeited'].includes(row.status)||!s.econFeeReviewQA.get(assetId)?.valid||s.econFeeReviewQA.get(assetId)?.reviewerId!==row.reviewerId||
-   (row.status==='accepted'&&(!cert||cert.status!=='approved'||cert.disputed||cert.reviewerId!==row.reviewerId))||s.econFeeTransfers.has(transferId)||[...s.econFeeTransfers.values()].some(t=>t.assetId===assetId&&t.type==='reviewer'))err('release-denied');
+   (row.status==='accepted'&&(!cert||cert.status!=='approved'||cert.disputed||cert.reviewerId!==row.reviewerId))||
+   s.econReviewers?.get(row.reviewerId)?.status!=='active'||s.econReviewers.get(row.reviewerId).expiresAt<=now||s.econFeeTransfers.has(transferId)||[...s.econFeeTransfers.values()].some(t=>t.assetId===assetId&&t.type==='reviewer'))err('release-denied');
    if(row.status==='accepted')assertCertifiedForIssuance(s,{origin:'creator',designId:assetId,certificationRef:row.certificateId,creator:row.actor});
    return copy(row);
   });
@@ -166,7 +167,8 @@ export class EconFees {
   if(receipt?.verified!==true||receipt.transferId!==transferId||receipt.recipient!==row.reviewerId||receipt.units!==p.reviewer||!id(receipt.finalizedReceiptId))err('payout-unverified');
   return this.store.transact(s=>{state(s);this.guard(s,session,'fee-release',actor);const current=s.econFeeSubmissions.get(assetId),cert=s.econCertificates?.get(current?.certificateId);
    if(!current||!['accepted','forfeited'].includes(current.status)||!s.econFeeReviewQA.get(assetId)?.valid||s.econFeeReviewQA.get(assetId)?.reviewerId!==current.reviewerId||
-    (current.status==='accepted'&&(!cert||cert.status!=='approved'||cert.disputed||cert.reviewerId!==current.reviewerId))||s.econFeeTransfers.has(transferId)||[...s.econFeeTransfers.values()].some(x=>x.finalizedReceiptId===receipt.finalizedReceiptId||x.assetId===assetId&&x.type==='reviewer'))err('release-race');
+    (current.status==='accepted'&&(!cert||cert.status!=='approved'||cert.disputed||cert.reviewerId!==current.reviewerId))||
+    s.econReviewers?.get(current.reviewerId)?.status!=='active'||s.econReviewers.get(current.reviewerId).expiresAt<=now||s.econFeeTransfers.has(transferId)||[...s.econFeeTransfers.values()].some(x=>x.finalizedReceiptId===receipt.finalizedReceiptId||x.assetId===assetId&&x.type==='reviewer'))err('release-race');
    if(current.status==='accepted')assertCertifiedForIssuance(s,{origin:'creator',designId:assetId,certificationRef:current.certificateId,creator:current.actor});
    current.status='reviewer-paid';s.econFeeTransfers.set(transferId,{type:'reviewer',assetId,units:p.reviewer,finalizedReceiptId:receipt.finalizedReceiptId,at:now});
    audit(s,'reviewer-paid',assetId,now);return copy(current);

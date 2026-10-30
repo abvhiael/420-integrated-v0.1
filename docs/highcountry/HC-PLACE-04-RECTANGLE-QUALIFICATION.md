@@ -1,6 +1,6 @@
 # HC-PLACE-04 — canonical rectangular footprint scope
 
-The following **36** assets have an explicit canonical 64px footprint on main and a supported ground/floor layer: HC-ART-02-G premium furniture (12), HC-ART-04-A outdoor structures (12), and HC-ART-04-C water/wildlife (12). The reviewed full-rectangle policy deliberately blocks the entire approved footprint, even where an illustration suggests openings. No walkthrough, road connectivity, equipment ability or water-edge exception is implied.
+The following **84** assets have an explicit canonical 64px footprint on main and a supported ground/floor layer: HC-ART-02-G premium furniture (12), HC-ART-04-A outdoor structures (12), HC-ART-04-C water/wildlife (12), and source-preserved HC-ART-04-B/D/E/F catalogues (48). The reviewed full-rectangle policy deliberately blocks the entire approved footprint, even where an illustration suggests openings. No walkthrough, road connectivity, equipment ability or water-edge exception is implied.
 
 The exported server-only registry is `services/highcountry-economy/src/placement-canonical-rectangles.js`. It binds asset ID, source collection, PNG path, exact approved dimensions and layer/surface to a SHA-256 qualified identifier, provides immutable snapshots/copies and verifies all four rotations. It is wired into existing placement composition via `createCanonicalRectanglePlacementConfig(world)`; the independently configured world authority still has to validate the parcel, independent geometry snapshot and commit. Production HTTP placement routes stay disabled.
 
@@ -76,3 +76,9 @@ The outer rectangular tile mask is deliberately conservative. Production gamepla
 - `hc-outdoor-recreation-mesa-bocce-court`
 - `hc-outdoor-recreation-mesa-desert-daybed`
 
+
+## Reconciliation update
+
+The four original catalogue source modules from PRs #872, #877, #879 and #881 are now copied **verbatim** into this HC-PLACE-04 integration branch. This does not merge or close their separate PRs or alter marketplace.js. The 48 IDs listed above now have conservative source-derived rectangle masks in the registry (84 total). Prior references to those 48 as missing on this branch describe only the earlier main-only state. Their **world-policy gates remain unqualified**: fire clearance, terrain, path network semantics, and recreation interaction clearances cannot be inferred from a rectangle. Qualification of occupancy is not activation of those behaviors.
+
+HC-ART-05-E remains blocked by unsupported structural layer and unqualified entrance evidence. HC-ART-03-F remains blocked by canonical typed attachment/parent slots. No placement authorization for these 18 IDs is granted. The required remedy is independent surveyed entrances for buildings and versioned approved parent-slot geometry for memorabilia, respectively; no pixel reconstruction or silent layer substitution is permitted.

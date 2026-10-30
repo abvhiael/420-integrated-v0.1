@@ -2,6 +2,10 @@ name: HC-PLACE-04 Canonical Rectangles Level 1
 on:
   pull_request:
     paths:
+      - 'apps/highcountry-web/src/fire-gathering-catalogue.js'
+      - 'apps/highcountry-web/src/garden-ornament-catalogue.js'
+      - 'apps/highcountry-web/src/landscape-catalogue.js'
+      - 'apps/highcountry-web/src/recreation-catalogue.js'
       - 'services/highcountry-economy/src/placement-canonical-rectangles.js'
       - 'services/highcountry-economy/test/placement-canonical-rectangles.test.mjs'
       - '.github/workflows/highcountry-hc-place-04-rectangles-l1.yml'

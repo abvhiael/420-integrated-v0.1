@@ -56,27 +56,32 @@ export class CloudSaveLifecycle420 {
    throw e;
   }
  }
- async read(revision=null){
+ async #readVerified(revision=null){
   const ref=await this.#repo.transaction(tx=>tx.saveReference(revision));
   if(!ref)return null;
-  const bytes=await this.#provider.get({providerId:ref.provider_id,objectRef:ref.object_ref});
-  if(!(bytes instanceof Uint8Array)||bytes.length!==Number(ref.byte_length))
+  const source=await this.#provider.get({providerId:ref.provider_id,objectRef:ref.object_ref});
+  if(!(source instanceof Uint8Array))fail('save-provider-corruption');
+  // Own the exact bytes that were verified; a provider may reuse or mutate its buffer.
+  const bytes=Uint8Array.from(source);
+  if(bytes.length!==Number(ref.byte_length))
    fail('save-provider-corruption');
   const digest='0x'+createHash('sha256').update(bytes).digest('hex');
   if(digest!==ref.state_hash)fail('save-integrity-mismatch');
   const local=parseLocalSave420({bytes,schemaVersion:this.#schema});
   if(local.rulesetId!==ref.ruleset_id)fail('save-ruleset-conflict');
-  return Object.freeze({revision:String(ref.revision),local});
+  return Object.freeze({revision:String(ref.revision),local,bytes});
+ }
+ async read(revision=null){
+  const verified=await this.#readVerified(revision);
+  return verified?Object.freeze({revision:verified.revision,local:verified.local}):null;
  }
  async restore({backupRevision,expectedHead,consentId,schemaLabel}){
   if(!uint(backupRevision)||backupRevision==='0'||!uint(expectedHead)||
    !opaque(consentId)||!opaque(schemaLabel))fail('save-invalid-restore');
   // Never overwrite history; restoration creates a new monotonically increasing revision.
-  const snapshot=await this.read(backupRevision);
+  const snapshot=await this.#readVerified(backupRevision);
   if(!snapshot)fail('save-backup-not-found');
-  const ref=await this.#repo.transaction(tx=>tx.saveReference(backupRevision));
-  const bytes=await this.#provider.get({providerId:ref.provider_id,objectRef:ref.object_ref});
-  const published=await this.publish({expectedRevision:expectedHead,consentId,schemaLabel,bytes});
+  const published=await this.publish({expectedRevision:expectedHead,consentId,schemaLabel,bytes:snapshot.bytes});
   return Object.freeze({...published,restoredFrom:backupRevision});
  }
  async restoreBackup({backupId,expectedHead,consentId,schemaLabel}){

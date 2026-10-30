@@ -81,7 +81,7 @@ test('one correction per paid submission and developer 72h review',async()=>{
  await assert.rejects(f.fees.adjudicate('reviewer',{assetId:'art_0',forfeit:true,reason:'self reward'}),/developer-review-expired/);
  f.at(f.now()+REVIEW_WINDOW_MS);
  assert.deepEqual(await f.fees.deadlines('operator'),['art_0']);
- assert.equal(s.econFeeSubmissions.get('art_0').status,'refund-due');
+ assert.equal(f.store.state.econFeeSubmissions.get('art_0').status,'refund-due');
 });
 test('approved certified work can pay reviewer exactly once, forged transfer refused',async()=>{
  const f=setup();await f.q();await f.pay();

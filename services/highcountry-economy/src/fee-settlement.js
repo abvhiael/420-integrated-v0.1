@@ -1,4 +1,5 @@
 import {createPublicKey,verify as verifySignature} from 'node:crypto';
+import {assertCertifiedForIssuance} from './reviewer-certification.js';
 // HC-ECON-06: authoritative quote, paid submission and reviewer escrow ledger.
 // $420 smallest units are BigInt throughout. Never treat BUDS as $420.
 // A trusted deployment adapter must independently authenticate price, finality and payouts.
@@ -81,6 +82,7 @@ export class EconFees {
    if(decision==='approve'){
     const cert=s.econCertificates?.get(certificateId);
     if(!id(certificateId)||!cert||cert.assetId!==assetId||cert.revision!==row.revision||cert.reviewerId!==actor||cert.status!=='approved'||cert.disputed)err('unapproved-certificate');
+    assertCertifiedForIssuance(s,{origin:'creator',designId:assetId,certificationRef:certificateId,creator:row.actor});
     row.certificateId=certificateId;row.status='accepted';
    }else if(decision==='correction')row.status='correction-requested';
    else if(decision==='fraud'){row.status='developer-review';row.developerDeadline=now+REVIEW_WINDOW_MS;}
@@ -125,6 +127,7 @@ export class EconFees {
    if(row.status==='accepted'){
     const c=s.econCertificates?.get(row.certificateId);
     if(!c||c.status!=='approved'||c.disputed||c.reviewerId!==row.reviewerId||c.qaBy===row.reviewerId)err('qa-certificate-invalid');
+    assertCertifiedForIssuance(s,{origin:'creator',designId:assetId,certificationRef:row.certificateId,creator:row.actor});
    }else if(!((row.lastDecision==='reject'&&row.corrections===1)||row.lastDecision==='fraud'))err('qa-rejection-invalid');
    const record={assetId,reviewerId:row.reviewerId,valid,qaBy:actor,reason,at:now};
    s.econFeeReviewQA.set(assetId,record);audit(s,'review-qa',assetId,now,{valid,qaBy:actor});return copy(record);
@@ -155,6 +158,7 @@ export class EconFees {
   const row=await this.store.transact(s=>{state(s);this.guard(s,session,'fee-release',actor);const row=s.econFeeSubmissions.get(assetId),cert=s.econCertificates?.get(row?.certificateId);
    if(!row||!['accepted','forfeited'].includes(row.status)||!s.econFeeReviewQA.get(assetId)?.valid||s.econFeeReviewQA.get(assetId)?.reviewerId!==row.reviewerId||
    (row.status==='accepted'&&(!cert||cert.status!=='approved'||cert.disputed||cert.reviewerId!==row.reviewerId))||s.econFeeTransfers.has(transferId)||[...s.econFeeTransfers.values()].some(t=>t.assetId===assetId&&t.type==='reviewer'))err('release-denied');
+   if(row.status==='accepted')assertCertifiedForIssuance(s,{origin:'creator',designId:assetId,certificationRef:row.certificateId,creator:row.actor});
    return copy(row);
   });
   // A payout is only acknowledged after independent finalized transfer verification.
@@ -163,6 +167,7 @@ export class EconFees {
   return this.store.transact(s=>{state(s);this.guard(s,session,'fee-release',actor);const current=s.econFeeSubmissions.get(assetId),cert=s.econCertificates?.get(current?.certificateId);
    if(!current||!['accepted','forfeited'].includes(current.status)||!s.econFeeReviewQA.get(assetId)?.valid||s.econFeeReviewQA.get(assetId)?.reviewerId!==current.reviewerId||
     (current.status==='accepted'&&(!cert||cert.status!=='approved'||cert.disputed||cert.reviewerId!==current.reviewerId))||s.econFeeTransfers.has(transferId)||[...s.econFeeTransfers.values()].some(x=>x.finalizedReceiptId===receipt.finalizedReceiptId||x.assetId===assetId&&x.type==='reviewer'))err('release-race');
+   if(current.status==='accepted')assertCertifiedForIssuance(s,{origin:'creator',designId:assetId,certificationRef:current.certificateId,creator:current.actor});
    current.status='reviewer-paid';s.econFeeTransfers.set(transferId,{type:'reviewer',assetId,units:p.reviewer,finalizedReceiptId:receipt.finalizedReceiptId,at:now});
    audit(s,'reviewer-paid',assetId,now);return copy(current);
   });

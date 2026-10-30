@@ -248,6 +248,57 @@ contract R0412CompetitionTest {
         require(!ok, "pre-event harvest scored");
     }
 
+
+    function testRevocationAfterFinalizationInvalidatesCurrentResultWithoutRewritingHistory() public {
+        _enterBoth();
+        bytes32 harvest = keccak256("post-final-reorg");
+        evidence.approve(harvest, address(alice), 9100, opens);
+        alice.submit(engine, EVENT, harvest, 9100, opens);
+        vm.warp(challenge);
+        engine.finalize(EVENT);
+        require(engine.resultIsCurrent(EVENT, address(alice)), "valid result not current");
+        evidence.revoke(harvest);
+        require(!engine.resultIsCurrent(EVENT, address(alice)), "revoked result remained current");
+        require(engine.winners(EVENT) == address(alice), "immutable historical winner rewritten");
+        require(engine.winnerScore(EVENT) == 9100, "immutable historical score rewritten");
+        (bool retry,) = address(engine).call(abi.encodeCall(engine.finalize, (EVENT)));
+        require(!retry, "re-finalization after revocation");
+    }
+
+    function testForgedGrowerQualityAndFutureTimestampFailClosed() public {
+        _enterBoth();
+        bytes32 h = keccak256("tamper");
+        evidence.approve(h, address(alice), 7700, opens);
+        (bool wrongGrower,) = address(bob).call(abi.encodeCall(bob.submit, (engine, EVENT, h, 7700, opens)));
+        require(!wrongGrower, "foreign identity accepted");
+        (bool wrongScore,) = address(alice).call(abi.encodeCall(alice.submit, (engine, EVENT, h, 10000, opens)));
+        require(!wrongScore, "tampered quality accepted");
+        (bool future,) = address(alice).call(abi.encodeCall(alice.submit, (engine, EVENT, h, 7700, opens + 1)));
+        require(!future, "future harvest accepted");
+        alice.submit(engine, EVENT, h, 7700, opens);
+        evidence.approve(h, address(alice), 10000, opens);
+        vm.warp(challenge);
+        engine.finalize(EVENT);
+        require(engine.winners(EVENT) == address(0), "mutated evidence retained winner");
+    }
+
+    function testRevokedEntitlementAfterFinalizationInvalidatesCurrentRecognition() public {
+        bytes32 ev = keccak256("post-final-entitlement");
+        engine.create(ev, SEASON, OPTIONAL, opens, closes, challenge);
+        entitlement.permit(address(alice), SCOPE, true);
+        _start();
+        alice.enter(engine, ev);
+        bytes32 harvest = keccak256("qualified");
+        evidence.approve(harvest, address(alice), 8500, opens);
+        alice.submit(engine, ev, harvest, 8500, opens);
+        vm.warp(challenge);
+        engine.finalize(ev);
+        require(engine.resultIsCurrent(ev, address(alice)), "qualified candidate not current");
+        entitlement.permit(address(alice), SCOPE, false);
+        require(!engine.resultIsCurrent(ev, address(alice)), "revoked entitlement retained recognition");
+        require(engine.winners(ev) == address(alice), "finalized winner should remain historical");
+    }
+
     function testLifecycleBoundaries() public {
         (bool early,) = address(alice).call(abi.encodeCall(alice.enter, (engine, EVENT)));
         require(!early, "early entry");

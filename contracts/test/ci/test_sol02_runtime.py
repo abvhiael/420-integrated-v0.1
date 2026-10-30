@@ -14,7 +14,7 @@ aggregate=load('sol02-aggregate.py')
 
 class RuntimeEvidenceTests(unittest.TestCase):
     def test_discovery_execution_exact_set(self):
-        names={'test/Foo.t.sol:FooTest':['testA()','testB(uint256)']}
+        names={'test/Foo.t.sol':{'FooTest':['testA()','testB(uint256)']}}
         rows={'test/Foo.t.sol:FooTest':{'test_results':{
             'testA()':{'status':'Success'},'testB(uint256)':{'status':'Success'}}}}
         self.assertEqual(execution.flatten_list(names),set(execution.flatten_results(rows)))
@@ -23,7 +23,7 @@ class RuntimeEvidenceTests(unittest.TestCase):
             execution.flatten_results({'test/Foo.t.sol:FooTest':{'test_results':{'testA()':{'status':'Failure'}}}})
     def test_reject_duplicate_discovery(self):
         with self.assertRaisesRegex(ValueError,'Duplicate'):
-            execution.flatten_list({'Foo':['testA()','testA()']})
+            execution.flatten_list({'test/Foo.t.sol':{'Foo':['testA()','testA()']}})
     def test_reject_no_runtime_for_suite(self):
         with self.assertRaisesRegex(ValueError,'Missing runtime'):
             execution.flatten_results({'Foo':{'different':{}}})

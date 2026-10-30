@@ -1,3 +1,4 @@
+import {createPublicKey,verify as verifySignature} from 'node:crypto';
 // HC-ECON-06: authoritative quote, paid submission and reviewer escrow ledger.
 // $420 smallest units are BigInt throughout. Never treat BUDS as $420.
 // A trusted deployment adapter must independently authenticate price, finality and payouts.
@@ -180,3 +181,31 @@ export class EconFees {
  }
 }
 
+
+// Operator-pinned Ed25519 price authority. Signed exact fields prevent client-rate tampering.
+// Rate is USD microcents expressed as micro-USD per whole native $420.
+// Native $420 follows EVM 18-decimal account-value denomination.
+export class Signed420PriceOracle {
+ constructor(publicKey){
+  const key=createPublicKey(publicKey);
+  if(key.asymmetricKeyType!=='ed25519')err('oracle-key');
+  this.key=key;
+ }
+ async verifyQuote(intent,evidence){
+  const p=evidence?.attestation;
+  if(!p||!id(p.quoteId)||!id(p.actor)||!id(p.sourceId)||!id(p.attestationId)||
+   typeof p.usdCents!=='string'||typeof p.usdMicrosPer420!=='string'||
+   !Number.isSafeInteger(p.observedAt)||!Number.isSafeInteger(p.expiresAt)||
+   typeof evidence.signature!=='string'||!/^[A-Za-z0-9+/]+={0,2}$/.test(evidence.signature))return {authentic:false};
+  const payload={version:'HC.ECON.ORACLE.PRICE.V1',quoteId:p.quoteId,actor:p.actor,usdCents:p.usdCents,sourceId:p.sourceId,attestationId:p.attestationId,observedAt:p.observedAt,expiresAt:p.expiresAt,usdMicrosPer420:p.usdMicrosPer420};
+  try{
+   if(p.version!==payload.version||p.quoteId!==intent.quoteId||p.actor!==intent.actor||p.usdCents!==intent.usdCents||
+    !verifySignature(null,Buffer.from(JSON.stringify(payload)),this.key,Buffer.from(evidence.signature,'base64')))return {authentic:false};
+   const rate=big(p.usdMicrosPer420),usd=big(p.usdCents);
+   if(rate===0n||usd===0n) return {authentic:false};
+   const raw=usd*10000n*10n**18n;
+   const units=(raw+rate-1n)/rate;
+   return {...payload,authentic:true,units:units.toString()};
+  }catch{return {authentic:false};}
+ }
+}

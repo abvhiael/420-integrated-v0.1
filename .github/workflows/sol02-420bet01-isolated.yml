@@ -1,4 +1,4 @@
-name: CI-SOL-02 isolated 420bet--01 tournament qualification
+name: CI-SOL-02 isolated complete 420bet--01 qualification
 on:
   pull_request:
     paths:
@@ -10,10 +10,10 @@ concurrency:
   group: sol02-420bet01-isolated-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: false
 jobs:
-  tournament-5c5:
-    name: Isolated 420bet--01 canonical tournament
+  poker-inventory:
+    name: Isolated 420bet--01 full canonical inventory
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 360
     steps:
       - uses: actions/checkout@v4
         with:
@@ -26,36 +26,111 @@ jobs:
       - uses: foundry-rs/foundry-toolchain@v1
         with:
           version: v1.8.6
-      - name: Verify canonical tournament evidence and exact SHA
+      - name: Verify genuine canonical evidence and preserve SHA
         shell: bash
         run: |
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
+          mkdir -p artifacts/sol02-isolated
           python3 scripts/bet/package-poker-5a10-evidence.py --verify
           python3 scripts/bet/unpack-poker-5c5-evidence.py
-          cd clients/420bet-poker/zkshuffle
-          go test -mod=readonly -count=1 -timeout 20m -run '^TestTournament5C5CommittedCryptographicEvidence$' -v . | tee "$RUNNER_TEMP/groth16-proof-verification.log"
-          test "$(grep -c 'verified committed genuine proof ' "$RUNNER_TEMP/groth16-proof-verification.log")" -eq 454
-          grep -q -- '--- PASS: TestTournament5C5CommittedCryptographicEvidence' "$RUNNER_TEMP/groth16-proof-verification.log"
-      - name: Isolated tournament compiler diagnostics and full inherited funded suite
+          ( cd clients/420bet-poker/zkshuffle && go test -mod=readonly -count=1 -timeout 20m -run '^TestTournament5C5CommittedCryptographicEvidence$' -v . ) | tee artifacts/sol02-isolated/groth16.log
+          test "$(grep -c 'verified committed genuine proof ' artifacts/sol02-isolated/groth16.log)" -eq 454
+          grep -q -- '--- PASS: TestTournament5C5CommittedCryptographicEvidence' artifacts/sol02-isolated/groth16.log
+      - name: Reconstruct exact historical 60-target inventory without broad jobs
         shell: bash
-        working-directory: contracts
-        env:
-          FOUNDRY_PROFILE: tournament5c5
-          FOUNDRY_OUT: out-sol02-420bet01-isolated
-          FOUNDRY_CACHE_PATH: cache-sol02-420bet01-isolated
-          FOUNDRY_SOLC_VERSION: '0.8.30'
         run: |
           set -euo pipefail
-          mkdir -p ../artifacts/sol02-isolated
-          echo 'Compiling only tournament-5c5 fixture/test dependency closure with canonical Solidity 0.8.30.'
-          forge build --no-dynamic-test-linking test/tournament-5c5/PokerTournamentElimination420.t.sol -vvv 2>&1 | tee ../artifacts/sol02-isolated/compile.log
-          forge test --no-dynamic-test-linking --match-path 'test/tournament-5c5/PokerTournamentElimination420.t.sol' -vvv 2>&1 | tee ../artifacts/sol02-isolated/test.log
-          printf '{"schema":"420.ci.sol02.420bet01.isolated.v1","sha":"%s","passed":true,"canonicalProofs":454}\n' "$(git rev-parse HEAD)" > ../artifacts/sol02-isolated/result.json
-      - name: Preserve diagnostics regardless of outcome
+          python3 - <<'PY'
+          import importlib.util,hashlib,json,subprocess
+          from pathlib import Path
+          path=Path('contracts/scripts/sol02-plan.py')
+          spec=importlib.util.spec_from_file_location('sol02_plan',path)
+          module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
+          _,original=module.inventory()
+          groups=module.bounded_groups(original)
+          target=groups['420bet--01']
+          expected='37438478e706168baabca8505a4236b11c7dd56ece33817041c950d1fe97d058'
+          digest=hashlib.sha256(('\n'.join(target)+'\n').encode()).hexdigest()
+          assert len(target)==60 and digest==expected,('Historical 60-target inventory changed',len(target),digest)
+          assert len([p for p in target if p.startswith('src/')])==36
+          assert len([p for p in target if p.startswith('test/')])==24
+          Path('artifacts/sol02-isolated/target-inventory.json').write_text(json.dumps({'historical_run':40903425562,'historical_sha':'c305598584d6994dda35b2acdbbd86f04af262df','sha':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),'inventory_sha256':digest,'targets':target},indent=2)+'\n')
+          PY
+      - name: Compile and execute each bounded Poker ownership scope
+        shell: bash
+        working-directory: contracts
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json,os,pathlib,re,subprocess,sys
+          root=pathlib.Path('../artifacts/sol02-isolated')
+          inventory=json.loads((root/'target-inventory.json').read_text())
+          paths=inventory['targets']
+          def partition(p):
+              if p.startswith('test/tournament-') or p.startswith('src/bet/tournament/'):
+                  if '/purchases/' in p or '/PokerTournamentPurchases' in p or '/PokerTournamentPurchase' in p or '/PokerTournamentQueuedAdmissions' in p:
+                      return '5c6'
+                  if '/settlement/' in p:return '5c7'
+                  if '/recovery/' in p:return '5c8'
+                  if p.startswith('test/tournament-'):return p.split('/')[1].split('-')[1]
+                  return '5c5'
+              return 'core'
+          parts={k:[] for k in ['core','5c4','5c5','5c6','5c7','5c8']}
+          for p in paths:parts[partition(p)].append(p)
+          # Sources are primary inventory entries. Compiler dependency closure may overlap partitions.
+          assert sorted(sum(parts.values(),[]))==sorted(paths)
+          result={'schema':'420.ci.sol02.420bet01.full.v1','sha':inventory['sha'],'historical_inventory_sha256':inventory['inventory_sha256'],'targets':{},'partitions':{},'passed':False}
+          def save(): (root/'result.json').write_text(json.dumps(result,sort_keys=True,indent=2)+'\n')
+          save()
+          for group,targets in parts.items():
+              if not targets:continue
+              tests=[p for p in targets if p.startswith('test/')]
+              env=dict(os.environ)
+              env.update(FOUNDRY_PROFILE=('tournament'+group if group in ['5c5','5c6','5c7','5c8'] else 'pr'),
+                         FOUNDRY_SOLC_VERSION=('0.8.24' if group=='core' else '0.8.30'),
+                         FOUNDRY_OUT='out-sol02-isolated-'+group,
+                         FOUNDRY_CACHE_PATH='cache-sol02-isolated-'+group,
+                         FOUNDRY_SCRIPT='script/__empty__')
+              if group!='core':
+                  env['FOUNDRY_SRC']='src/bet/tournament'
+                  env['FOUNDRY_TEST']='test/tournament-'+group
+              else:
+                  env['FOUNDRY_SRC']='src/bet'
+              command=['forge','build','--no-dynamic-test-linking',*targets]
+              result['partitions'][group]={'profile':env['FOUNDRY_PROFILE'],'solc':env['FOUNDRY_SOLC_VERSION'],'targets':targets,'commands':[command],'passed':False}
+              save()
+              with (root/(group+'-compile.log')).open('w') as log:
+                  p=subprocess.run(command,env=env,stdout=log,stderr=subprocess.STDOUT,text=True)
+              if p.returncode:raise RuntimeError(f'{group} compile failed; read retained log')
+              for target in targets:result['targets'][target]={'compiled':True,'executed':False}
+              save()
+              for target in tests:
+                  if not target.endswith('.t.sol') or not re.search(r'function\s+test\w*\s*\(',pathlib.Path(target).read_text()):
+                      result['targets'][target]['execution']='support-only (compiled)'
+                      continue
+                  command=['forge','test','--no-dynamic-test-linking','--match-path',target,'-vv']
+                  result['partitions'][group]['commands'].append(command)
+                  label=target.replace('/','_').replace('.sol','')
+                  with (root/(label+'.log')).open('w') as log:
+                      p=subprocess.run(command,env=env,stdout=log,stderr=subprocess.STDOUT,text=True)
+                  log=(root/(label+'.log')).read_text(errors='replace')
+                  if p.returncode or not re.search(r'\b[1-9][0-9]* tests? passed, 0 failed, 0 skipped\b',log):
+                      save();raise RuntimeError(f'{target} failed or produced no passing test summary')
+                  result['targets'][target]['executed']=True
+                  result['targets'][target]['execution']='passed'
+                  save()
+              result['partitions'][group]['passed']=True
+              save()
+          assert set(result['targets'])==set(paths)
+          assert all(p['passed'] for p in result['partitions'].values())
+          result['passed']=True
+          save()
+          PY
+      - name: Preserve all diagnostics, including failures
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: sol02-420bet01-isolated-${{ github.event.pull_request.head.sha || github.sha }}
+          name: sol02-420bet01-full-${{ github.event.pull_request.head.sha || github.sha }}
           path: artifacts/sol02-isolated/**
           if-no-files-found: warn

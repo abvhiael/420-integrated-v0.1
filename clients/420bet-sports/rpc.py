@@ -24,7 +24,7 @@ class Web3SportsRPC:
         return bytes(self.web3.eth.get_code(address))
     def contract(self, address):
         abi = self.abi_by_address.get(address.lower())
-        if not abi:
+        if abi is None:
             raise AdmissionRejected("missing approved ABI")
         return self.web3.eth.contract(address=address, abi=abi)
     def read(self, address, name, *args):

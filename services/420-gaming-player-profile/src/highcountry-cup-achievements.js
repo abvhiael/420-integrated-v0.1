@@ -5,7 +5,13 @@ const hex=(x,n)=>typeof x==='string'&&new RegExp('^0x[0-9a-f]{'+n+'}$').test(x);
 export function createPostgresCupAchievements420({pool,gameId,projection}={}){
  if(typeof pool?.connect!=='function'||!hex(gameId,64)||typeof projection?.standings!=='function')fail('cup-achievement-config-invalid');
  const retryable=new Set(['40001','40P01','55P03']);
- const maxAttempts=3;
+ const maxAttempts=6;
+ const checked=async cupId=>{
+  if(!hex(cupId,64))fail('cup-id-invalid');
+  const witness=await projection.standings({cupId});
+  if(witness?.cupId!==cupId)fail('cup-identity-mismatch');
+  return witness;
+ };
  async function transaction(fn){
   // Each attempt owns a fresh connection and SERIALIZABLE transaction. A failed
   // transaction is rolled back before any retry; no partial award can escape.
@@ -20,6 +26,8 @@ export function createPostgresCupAchievements420({pool,gameId,projection}={}){
     if(opened){try{await c.query('ROLLBACK');}catch{fail('cup-rollback-failed');}}
     if(!retryable.has(e?.code))throw e;
     if(attempt===maxAttempts)fail('cup-retry-required');
+    // Yield to competing writers; preserve bounded fail-closed retry semantics.
+    await new Promise(resolve=>setTimeout(resolve,Math.min(100,5*(2**(attempt-1)))));
    }finally{c.release();}
   }
  }
@@ -31,7 +39,7 @@ export function createPostgresCupAchievements420({pool,gameId,projection}={}){
     await c.query('SELECT pg_advisory_xact_lock(hashtext($1),hashtext($2))',[gameId,cupId]);
     // A retry must not reuse a stale canonical witness after a failed commit.
     // Reading the authoritative source happens separately on EVERY attempt.
-    const current=await projection.standings({cupId});
+    const current=await checked(cupId);
     await c.query(`INSERT INTO highcountry_cup.achievements
       (game_id,cup_id,chain_id,cup_address,block_hash,champion,commitment,scope,prestige)
       VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)
@@ -49,7 +57,7 @@ export function createPostgresCupAchievements420({pool,gameId,projection}={}){
    });
   },
   async current({cupId}){
-   const verified=await projection.standings({cupId});
+   const verified=await checked(cupId);
    const c=await pool.connect();
    try{
     const row=(await c.query(`SELECT * FROM highcountry_cup.achievements

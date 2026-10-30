@@ -34,6 +34,15 @@ test('real PostgreSQL SERIALIZABLE Cup snapshots, idempotency, isolation, revoca
   await store.synchronize({cupId});
   assert.equal((await store.current({cupId})).current,true);
   assert.equal(Number((await runtime.query('SELECT count(*) AS count FROM highcountry_cup.history')).rows[0].count),2);
+  const restarted=createPostgresCupAchievements420({pool:runtime,gameId:game,projection});
+  await Promise.all(Array.from({length:5},()=>restarted.synchronize({cupId})));
+  assert.equal((await restarted.current({cupId})).current,true);
+  assert.equal(Number((await runtime.query('SELECT count(*) AS count FROM highcountry_cup.history')).rows[0].count),2);
+  const wrong=createPostgresCupAchievements420({pool:runtime,gameId:game,
+   projection:{standings:async()=>({...canonical,cupId:second})}});
+  await assert.rejects(wrong.synchronize({cupId}),{code:'cup-identity-mismatch'});
+  await assert.rejects(wrong.current({cupId}),{code:'cup-identity-mismatch'});
+  assert.equal(Number((await runtime.query('SELECT count(*) AS count FROM highcountry_cup.history')).rows[0].count),2);
   const another=createPostgresCupAchievements420({pool:runtime,gameId:second,projection});
   assert.equal((await another.current({cupId})).recorded,false);
  }finally{

@@ -15,7 +15,7 @@ const make=()=>{
  const design={designId:'design',certificationRef:'cert_1',creator:'creator',origin:'creator'};
  return {store,reviews,authority,automation,pair,cert,design,block:x=>blocked.add(x)};
 };
-async function prepared(f){await f.reviews.register('operator',{reviewerId:'reviewer',publicKey:f.pair.publicKey.export({format:'pem',type:'spki'})});await f.reviews.assign('operator',{assignmentId:'assign_1',reviewerId:'reviewer',assetId:'design',revision:1});}
+async function prepared(f){await f.reviews.register('operator',{reviewerId:'reviewer',publicKey:f.pair.publicKey.export({format:'pem',type:'spki'}),expiresAt:Date.now()+86400000});await f.reviews.assign('operator',{assignmentId:'assign_1',reviewerId:'reviewer',assetId:'design',revision:1});}
 test('real Ed25519 certificate, exact revision, QA separation and durable audit',async()=>{
  const f=make();await prepared(f);await assert.rejects(f.reviews.certify('reviewer',f.cert(),{approved:false}),/automation-rejected/);
  const signed=await f.reviews.certify('reviewer',f.cert(),{approved:true});assert.equal(signed.status,'pending-qa');
@@ -47,6 +47,9 @@ test('suspension, revocation, disputes, appeals and scoped authority deny new is
  assert.throws(()=>assertCertifiedForIssuance(f.store.state,f.design),/not-authorized/);
  await assert.rejects(f.reviews.resolve('creator','appeal_1','restore','invalid appeal'),/appeal-denied/);
  await f.reviews.resolve('qa','appeal_1','restore','claim not substantiated');assert.equal(assertCertifiedForIssuance(f.store.state,f.design),true);
+ f.store.state.econReviewers.get('reviewer').expiresAt=1;
+ assert.throws(()=>assertCertifiedForIssuance(f.store.state,f.design),/not-authorized/);
+ f.store.state.econReviewers.get('reviewer').expiresAt=Date.now()+86400000;
  await f.reviews.discipline('operator','reviewer','revoke','proven fraud');
  assert.throws(()=>assertCertifiedForIssuance(f.store.state,f.design),/not-authorized/);
 });

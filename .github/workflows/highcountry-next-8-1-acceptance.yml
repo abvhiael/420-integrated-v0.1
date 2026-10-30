@@ -1,0 +1,45 @@
+name: High Country HC-NEXT-8.1 Account and Cloud Save Acceptance
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/highcountry-next-8-1-acceptance.yml'
+      - 'scripts/highcountry/hc-next-8-1-acceptance.sh'
+      - 'docs/highcountry/HC-NEXT-8.1-ACCOUNT-CLOUD-ACCEPTANCE.md'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  account-cloud-save:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: hc_ci_only
+          POSTGRES_DB: r063_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d r063_ci"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    env:
+      HIGHCOUNTRY_R063_POSTGRES_TEST_URL: postgres://postgres:hc_ci_only@127.0.0.1:5432/r063_ci
+      GAMING_SAVE_TEST_URL: postgres://postgres:hc_ci_only@127.0.0.1:5432/r055_ci
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Check exact commit SHA
+        env:
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$HEAD_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install locked service dependencies
+        working-directory: services/420-gaming-player-profile
+        run: npm ci --ignore-scripts
+      - name: Complete account session and cloud persistence acceptance
+        run: bash scripts/highcountry/hc-next-8-1-acceptance.sh

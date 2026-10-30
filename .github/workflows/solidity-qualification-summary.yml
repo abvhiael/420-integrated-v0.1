@@ -116,10 +116,16 @@ jobs:
       - name: Run retained cross-module integration tests
         working-directory: contracts
         run: bash scripts/sol02-level2.sh '${{ needs.plan.outputs.sha }}'
+      - name: Execute canonical Decision #10 fixture and verify legacy equivalence
+        working-directory: contracts
+        run: python3 scripts/sol02-fixture.py
       - uses: actions/upload-artifact@v4
         with:
           name: sol02-l2-${{ needs.plan.outputs.sha }}
-          path: artifacts/sol02/sol02-level2.json
+          path: |
+            artifacts/sol02/sol02-level2.json
+            artifacts/sol02/sol02-fixture.json
+            artifacts/contracts/creative-kernel-v1.fixture.json
           if-no-files-found: error
   summary:
     name: Solidity Qualification Summary
@@ -164,9 +170,21 @@ jobs:
           files=list(Path('artifacts/sol02/all').rglob('sol02-level2.json'))
           assert len(files)==1, files
           result=json.loads(files[0].read_text())
-          assert result['schema']=='420.ci.sol02.level2.v1'
+          assert result['schema']=='420.ci.sol02.level2.v2'
           assert result['sha']==plan['sha'] and result['passed'] is True
           assert result['profile']=='pr'
           assert len(result['tests'])==len(set(result['tests'])) and len(result['tests'])>=4
+          assert {r['target'] for r in result['runtime']}==set(result['tests'])
+          assert result['executedTests']==sum(len(r['executed']) for r in result['runtime'])>0
+          assert all(r['executed'] and r['discovered']==r['executed'] for r in result['runtime'])
+          assert all(len(set(v))>=2 for v in result['sourceFamilies'].values())
+          assert set(result['sourceFamilies'])==set(result['tests'])
+          fixtures=list(Path('artifacts/sol02/all').rglob('sol02-fixture.json'))
+          assert len(fixtures)==1, fixtures
+          fixture=json.loads(fixtures[0].read_text())
+          assert fixture['schema']=='420.ci.sol02.fixture-equivalence.v1'
+          assert fixture['sha']==plan['sha'] and fixture['passed'] is True
+          assert fixture['actual']==fixture['legacyContract']
+          assert len(fixture['harnessSHA256'])==64 and len(fixture['fixtureSHA256'])==64
           PY
           python3 contracts/scripts/sol02-aggregate.py artifacts/sol02/plan.json artifacts/sol02/all

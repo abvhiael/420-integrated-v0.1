@@ -29,7 +29,23 @@ class Web3SportsRPC:
         return self.web3.eth.contract(address=address, abi=abi)
     def read(self, address, name, *args):
         try:
-            return getattr(self.contract(address).functions, name)(*args).call()
+            result = getattr(self.contract(address).functions, name)(*args).call()
+            def hx(v):
+                return "0x" + bytes(v).hex() if isinstance(v, (bytes, bytearray)) else v
+            if name == "current" and isinstance(result, (tuple, list)) and len(result) == 2:
+                fields = ("digest", "priorDigest", "sourceDigest", "evidenceDigest", "signer",
+                          "sequence", "observedAt", "validUntil", "quoteEpoch", "prices")
+                if len(result[0]) != len(fields):
+                    raise AdmissionRejected("unexpected odds ABI")
+                return dict(zip(fields, (hx(v) for v in result[0]))), result[1]
+            if name == "get" and isinstance(result, (tuple, list)) and len(result) == 12:
+                fields = ("player", "marketId", "selection", "oddsDigest", "termsHash", "nonce",
+                          "stake", "gross", "profit", "quoteEpoch", "quoteSequence", "state")
+                return dict(zip(fields, (hx(v) for v in result)))
+            if name == "settlementReceipt" and isinstance(result, (tuple, list)) and len(result) == 5:
+                fields = ("outcome", "payout", "evidence", "finalizedAt", "executor")
+                return dict(zip(fields, (hx(v) for v in result)))
+            return result
         except Exception as exc:
             raise AdmissionRejected("RPC read failed") from exc
     def finalized_receipt(self, tx_hash: str):
@@ -61,6 +77,15 @@ class Web3SportsRPC:
         if gas_limit <= 0:
             raise AdmissionRejected("invalid gas limit")
         try:
+            offer = transaction["arguments"][0]
+            asset = transaction.get("asset")
+            if not asset:
+                raise AdmissionRejected("missing approved asset")
+            stake = offer["stake"]
+            allowance = self.read(asset, "allowance", sender, transaction["to"])
+            balance = self.read(asset, "balanceOf", sender)
+            if allowance < stake or balance < stake:
+                raise AdmissionRejected("insufficient approved canonical stake balance")
             function = self.contract(transaction["to"]).functions.fund(*transaction["arguments"])
             nonce = self.web3.eth.get_transaction_count(sender, "pending")
             chain_id = self.chain_id()

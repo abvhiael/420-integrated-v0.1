@@ -1,0 +1,27 @@
+name: HighCountry HC-ECON-03 Building Compatibility Level 1
+on:
+  pull_request:
+    paths:
+      - 'services/highcountry-economy/src/building-compatibility.js'
+      - 'services/highcountry-economy/test/building-compatibility.test.js'
+      - '.github/workflows/highcountry-hc-econ-03-l1.yml'
+permissions:
+  contents: read
+jobs:
+  building-compatibility-level1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: HC-ECON-03 T-BLD-01 and HC-PLACE-02 integration contracts
+        run: node --test services/highcountry-economy/test/building-compatibility.test.js services/highcountry-economy/test/object-taxonomy.test.js services/highcountry-economy/test/placement-contract.test.mjs
+      - name: Verify exact candidate
+        env:
+          SHA: ${{ github.event.pull_request.head.sha }}
+        run: test "$(git rev-parse HEAD)" = "$SHA"

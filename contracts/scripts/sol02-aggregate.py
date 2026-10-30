@@ -29,6 +29,29 @@ def verify(plan, evidence_dir):
         expected = sorted(plan["groups"][group])
         if sorted(d.get("targets", [])) != expected or not d.get("passed", False):
             raise ValueError(group + ": target set mismatch or failed tests")
+        records=d.get("runtime")
+        expected_tests={t for t in expected if t.startswith("test/") and t.endswith(".sol")}
+        if not isinstance(records,list) or {r.get("target") for r in records}!=expected_tests:
+            raise ValueError(group + ": runtime target inventory mismatch")
+        seen=set()
+        for record in records:
+            discovered=record.get("discovered")
+            executed=record.get("executed")
+            if not isinstance(discovered,list) or not isinstance(executed,list):
+                raise ValueError(group + ": missing runtime identities")
+            ids=[(x.get("contract"),x.get("test")) for x in executed]
+            expected_ids=[(x.get("contract"),x.get("test")) for x in discovered]
+            if ids!=expected_ids or len(ids)!=len(set(ids)):
+                raise ValueError(group + ": executed/discovered runtime mismatch")
+            if record.get("supportOnly") != (not bool(ids)):
+                raise ValueError(group + ": invalid support-only marker")
+            for identity in ids:
+                if identity in seen or not all(isinstance(x,str) and x for x in identity):
+                    raise ValueError(group + ": duplicate or malformed runtime identity")
+                seen.add(identity)
+        if len(seen)!=d.get("runtimeTestCount") or not seen:
+            raise ValueError(group + ": runtime count mismatch")
+
     if plan["level3"]:
         if set(found) != required:
             raise ValueError("Level 3 group inventory mismatch")

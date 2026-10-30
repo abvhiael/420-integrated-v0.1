@@ -20,6 +20,6 @@ jobs:
           EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
       - name: Install source-verification dependency
-        run: python3 -m pip install 'cryptography>=42,<47'
+        run: python3 -m pip install 'cryptography>=42,<47' 'eth-abi>=5,<6' 'eth-utils>=5,<6'
       - name: Local application boundary and adversarial recovery
         run: python3 -m unittest discover -s clients/420bet-sports -p 'test_*.py' -v

@@ -1,0 +1,27 @@
+name: HighCountry HC-ECON-06 Fees and Settlement Level 1
+on:
+  pull_request:
+    paths:
+      - 'services/highcountry-economy/src/fee-settlement.js'
+      - 'services/highcountry-economy/test/fee-settlement.test.js'
+      - '.github/workflows/highcountry-hc-econ-06-l1.yml'
+permissions:
+  contents: read
+jobs:
+  fees-level1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Test exact fee accounting, escrow and deadlines
+        run: node --test services/highcountry-economy/test/fee-settlement.test.js
+      - name: Verify exact candidate SHA
+        env:
+          SHA: ${{ github.event.pull_request.head.sha }}
+        run: test "$(git rev-parse HEAD)" = "$SHA"

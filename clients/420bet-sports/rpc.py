@@ -87,7 +87,7 @@ class Web3SportsRPC:
         event_parser = self.contract(vault).events.TicketFunded()
         events = event_parser.process_receipt(receipt)
         matched = [event for event in events if event["address"].lower() == vault.lower()
-                   and event["args"]["id"].hex().lower() == ticket_id.lower().removeprefix("0x")]
+                   and event["args"]["id"].hex().lower().removeprefix("0x") == ticket_id.lower().removeprefix("0x")]
         if len(matched) != 1:
             raise AdmissionRejected("missing or duplicate funded event")
         return {"success":True,"finalized":True,"orphaned":False,"to":vault,

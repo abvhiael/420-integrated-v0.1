@@ -36,5 +36,5 @@ for target in expected:
 data={'schema':'420.ci.sol02.level2.v2','sha':sys.argv[1],'profile':'pr',
       'tests':expected,'runtime':records,'sourceFamilies':closures,
       'executedTests':sum(len(r['executed']) for r in records),'passed':True}
-Path('../artifacts/sol02/sol02-level2.json').write_text(json.dumps(data,sort_keys=True,indent=2)+'\\n')
+Path('../artifacts/sol02/sol02-level2.json').write_text(json.dumps(data,sort_keys=True,indent=2)+'\n')
 PY

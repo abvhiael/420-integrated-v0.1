@@ -112,6 +112,9 @@ test('independently QA-validated rejection earns compensation without published 
  await f.fees.adjudicate('developer',{assetId:'art_0',forfeit:true,reason:'documented second failure'});
  await assert.rejects(f.fees.release('developer',{assetId:'art_0',transferId:'review_pay',evidence:{}}),/release-denied/);
  await f.fees.qaWork('qa',{assetId:'art_0',valid:true,reason:'review accurately documented'});
+ f.store.state.econReviewers.get('reviewer').status='suspended';
+ await assert.rejects(f.fees.release('developer',{assetId:'art_0',transferId:'review_pay',evidence:{}}),/release-denied/);
+ f.store.state.econReviewers.get('reviewer').status='active';
  await f.fees.release('developer',{assetId:'art_0',transferId:'review_pay',evidence:{}});
  await assert.rejects(f.fees.release('developer',{assetId:'art_0',transferId:'review_pay_again',evidence:{}}),/release-denied/);
  assert.equal(f.store.state.econFeeTransfers.size,1);

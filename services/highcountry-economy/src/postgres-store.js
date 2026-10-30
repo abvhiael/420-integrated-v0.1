@@ -55,22 +55,36 @@ export class PostgresBudsStore {
     this.pool=pool;this.namespace=namespace;
   }
   async transact(callback) {
-    const client=await this.pool.connect();
-    let began=false,committing=false,discard=false;
-    try {
-      await client.query('BEGIN ISOLATION LEVEL SERIALIZABLE');began=true;
-      // Namespace must be provisioned by authenticated operator migration, not a guest request.
-      const r=await client.query('SELECT state FROM highcountry_buds_state WHERE namespace = $1 FOR UPDATE',[this.namespace]);
-      if(r.rows.length!==1)throw new SettlementError('unprovisioned economy namespace');
-      const state=decode(r.rows[0].state);
-      const result=callback(state);
-      if(result && typeof result.then==='function')throw new SettlementError('async callback forbidden in lock');
-      await client.query('UPDATE highcountry_buds_state SET state = $2::jsonb WHERE namespace = $1',[this.namespace,encode(state)]);
-      committing=true;await client.query('COMMIT');committing=false;return result;
-    } catch(e) {
-      if(committing){discard=true;const unknown=new SettlementError('transaction commit outcome unknown');unknown.code='HC_COMMIT_UNKNOWN';unknown.cause=e;throw unknown;}
-      if(began) { try { await client.query('ROLLBACK'); } catch { /* preserve original failure */ } }
-      throw e;
-    } finally {client.release(discard?new Error('uncertain commit connection'):undefined);}
+    // A serialization failure invalidates the entire PostgreSQL transaction.
+    // Re-enter on a new snapshot and connection; do not retry a lost COMMIT ACK.
+    const maxAttempts=6;
+    for(let attempt=1;attempt<=maxAttempts;attempt++){
+      const client=await this.pool.connect();
+      let began=false,committing=false,discard=false;
+      try {
+        await client.query('BEGIN ISOLATION LEVEL SERIALIZABLE');began=true;
+        // Namespace must be provisioned by authenticated operator migration, not a guest request.
+        const r=await client.query('SELECT state FROM highcountry_buds_state WHERE namespace = $1 FOR UPDATE',[this.namespace]);
+        if(r.rows.length!==1)throw new SettlementError('unprovisioned economy namespace');
+        const state=decode(r.rows[0].state);
+        const result=callback(state);
+        if(result && typeof result.then==='function')throw new SettlementError('async callback forbidden in lock');
+        await client.query('UPDATE highcountry_buds_state SET state = $2::jsonb WHERE namespace = $1',[this.namespace,encode(state)]);
+        committing=true;await client.query('COMMIT');committing=false;return result;
+      } catch(e) {
+        if(committing){discard=true;const unknown=new SettlementError('transaction commit outcome unknown');unknown.code='HC_COMMIT_UNKNOWN';unknown.cause=e;throw unknown;}
+        if(began){
+          try{await client.query('ROLLBACK');}
+          catch(rollbackError){discard=true;throw new SettlementError('transaction rollback unconfirmed',{cause:rollbackError});}
+        }
+        if(e?.code==='40001'&&attempt<maxAttempts){
+          // Retry only a confirmed aborted transaction; callbacks must be synchronous.
+          // Yield before reacquiring a fresh SERIALIZABLE snapshot under contention.
+          await new Promise(resolve=>setTimeout(resolve,Math.min(10*attempt,50)));
+          continue;
+        }
+        throw e;
+      } finally {client.release(discard?new Error('unusable transaction connection'):undefined);}
+    }
   }
 }

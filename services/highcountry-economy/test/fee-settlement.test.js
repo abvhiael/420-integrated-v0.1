@@ -1,7 +1,8 @@
+import {generateKeyPairSync,sign} from 'node:crypto';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {MemoryTransactionFixture} from '../src/buds-ledger.js';
-import {EconFees,feeAllocation,REVIEW_WINDOW_MS} from '../src/fee-settlement.js';
+import {EconFees,feeAllocation,REVIEW_WINDOW_MS,Signed420PriceOracle} from '../src/fee-settlement.js';
 function setup(){
  const store=new MemoryTransactionFixture();let now=1000000,verified=true,settled=true;
  const authority={principal:async x=>x,guardState:()=>true};
@@ -127,4 +128,18 @@ test('PostgreSQL codec retains one confirmed receipt and allocations across rest
  await assert.rejects(make().confirm('alice',{quoteId:'q',paymentId:'p2',evidence:{}}),/expired-quote/);
  assert.equal(persisted.econFeePayments[0][1].allocation.reviewer,'500');
  assert.equal(persisted.econFeeSubmissions[0][1].actor,'alice');
+});
+
+test('Ed25519 oracle: exact native 420 conversion, tampering and forged rate rejected',async()=>{
+ const pair=generateKeyPairSync('ed25519'),oracle=new Signed420PriceOracle(pair.publicKey.export({format:'pem',type:'spki'}));
+ const intent={quoteId:'quote_1',actor:'alice',usdCents:'42'};
+ const attestation={version:'HC.ECON.ORACLE.PRICE.V1',quoteId:'quote_1',actor:'alice',usdCents:'42',sourceId:'oracle_main',attestationId:'observation_1',observedAt:1000,expiresAt:2000,usdMicrosPer420:'1000000'};
+ const signed=att=>({attestation:att,signature:sign(null,Buffer.from(JSON.stringify(att)),pair.privateKey).toString('base64')});
+ const v=await oracle.verifyQuote(intent,signed(attestation));
+ assert.equal(v.authentic,true);assert.equal(v.units,'420000000000000000');
+ assert.equal((await oracle.verifyQuote(intent,signed({...attestation,usdMicrosPer420:'2000000'}))).units,'210000000000000000');
+ assert.equal((await oracle.verifyQuote(intent,{...signed(attestation),attestation:{...attestation,usdMicrosPer420:'1'}})).authentic,false);
+ assert.equal((await oracle.verifyQuote({...intent,actor:'bob'},signed(attestation))).authentic,false);
+ const forged=generateKeyPairSync('ed25519');
+ assert.equal((await oracle.verifyQuote(intent,{attestation,signature:sign(null,Buffer.from(JSON.stringify(attestation)),forged.privateKey).toString('base64')})).authentic,false);
 });

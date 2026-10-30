@@ -5,6 +5,7 @@ Any unverified dependency fails closed; this is not a replacement contract.
 from app import AdmissionRejected, SportsbookClient
 from identity import PlayerBinding
 from rpc import Web3SportsRPC
+from quote_bridge import validate_quote
 
 class FundedSportsSession:
     def __init__(self, client: SportsbookClient, identity: PlayerBinding):
@@ -23,6 +24,11 @@ class FundedSportsSession:
         asset = config[6] if isinstance(config, (tuple, list)) else config["asset"]
         self.identity.verify(rpc, player, asset, app.deployment.asset)
         planned = app.prepare(player, offer, source_report, now)
+        evidence = app.verifier.verify(source_report, now=now)
+        sources = rpc.canonical_source_config(app.deployment.markets, offer["marketId"])
+        canonical_digest = validate_quote(rpc,app.deployment,offer["marketId"],evidence,sources)
+        if canonical_digest.lower() != offer["quoteDigest"].lower():
+            raise AdmissionRejected("client quote differs from authenticated EIP-712 terms")
         # Never send if player declined the precise locked terms.
         if not wallet.confirm_terms(planned["consent"]):
             raise AdmissionRejected("player declined terms")

@@ -46,12 +46,12 @@ export function createHighCountryCloudHttp420({authority,poolForPrincipal,provid
    }else if(ordinaryExhibitions&&url.pathname.startsWith('/highcountry/exhibitions/')){
     const action=url.pathname.slice('/highcountry/exhibitions/'.length);
     // Identity, registeredPrincipal and game scope have already been checked above.
-    if(!['create','enter','submit','reject','finalize','status'].includes(action)||req.method!=='POST')
+    if(!['create','enter','submit','reject','review','adjudicationHistory','finalize','status'].includes(action)||req.method!=='POST')
      return send(404,{error:'not-found'});
     const allowed={
      create:['eventId','seasonId','category','version','rulesHash','opensAt','closesAt','challengeUntil'],
      enter:['eventId'],submit:['eventId','harvestId'],status:['eventId'],
-     reject:['eventId','accountId','reasonHash'],finalize:['eventId']
+     reject:['eventId','accountId','reasonHash'],review:['eventId','accountId','reasonHash'],adjudicationHistory:['eventId'],finalize:['eventId']
     }[action];
     if(Object.keys(body).some(k=>!allowed.includes(k))||allowed.some(k=>!Object.hasOwn(body,k)))
      fail('invalid-request');

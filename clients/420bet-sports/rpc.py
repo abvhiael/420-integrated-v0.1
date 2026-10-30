@@ -109,7 +109,10 @@ class Web3SportsRPC:
             built = function.build_transaction(params)
             if built["to"].lower() != transaction["to"].lower() or built["from"].lower() != sender.lower():
                 raise AdmissionRejected("unexpected transaction destination or sender")
-            signed = wallet.sign_transaction(built)
+            # Account.sign_transaction accepts signed fields, not the RPC-only from key.
+            signing_payload = dict(built)
+            signing_payload.pop('from', None)
+            signed = wallet.sign_transaction(signing_payload)
             raw = getattr(signed, "raw_transaction", None)
             if raw is None:
                 raw = signed.rawTransaction

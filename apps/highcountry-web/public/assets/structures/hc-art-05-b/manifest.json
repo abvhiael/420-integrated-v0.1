@@ -1,0 +1,186 @@
+{
+  "collection": "HC-ART-05-B",
+  "provenance": "existing exact GitHub main branch PNG, immutable filename/path, no regeneration",
+  "assets": [
+    {
+      "id": "source-01",
+      "name": "coastal boatwright workshop",
+      "filename": "hc-structure-emerald-coastal-boatwright-workshop.png",
+      "repository_path": "apps/highcountry-web/public/assets/structures/hc-art-05-b/emerald-coast/coastal-boatwright-workshop/hc-structure-emerald-coastal-boatwright-workshop.png",
+      "git_blob_sha": "53e1639c3ded18c754858afb6058aa554acab691",
+      "byte_length": 3625877,
+      "source": "main:exact-merged-png",
+      "region": "emerald-coast"
+    },
+    {
+      "id": "source-02",
+      "name": "coastal glassworks",
+      "filename": "hc-structure-emerald-coastal-glassworks.png",
+      "repository_path": "apps/highcountry-web/public/assets/structures/hc-art-05-b/emerald-coast/coastal-glassworks/hc-structure-emerald-coastal-glassworks.png",
+      "git_blob_sha": "1b9be8e35f71ab348d707f74052f1bb9debe2eff",
+      "byte_length": 2417727,
+      "source": "main:exact-merged-png",
+      "region": "emerald-coast"
+    },
+    {
+      "id": "source-03",
+      "name": "driftwood carving studio",
+      "filename": "hc-structure-emerald-driftwood-carving-studio.png",
+      "repository_path": "apps/highcountry-web/public/assets/structures/hc-art-05-b/emerald-coast/driftwood-carving-studio/hc-structure-emerald-driftwood-carving-studio.png",
+      "git_blob_sha": "52cdef5fd328e65c41d2b91f039b5e2800acfc17",
+      "byte_length": 1703664,
+      "source": "main:exact-merged-png",
+      "region": "emerald-coast"
+    },
+    {
+      "id": "source-04",
+      "name": "woodland fiber workshop",
+      "filename": "hc-structure-emerald-woodland-fiber-workshop.png",
+      "repository_path": "apps/highcountry-web/public/assets/structures/hc-art-05-b/emerald-coast/woodland-fiber-workshop/hc-structure-emerald-woodland-fiber-workshop.png",
+      "git_blob_sha": "14d8e1fb30ae18d75590f9520d4d0cbb0bbaa753",
+      "byte_length": 2823179,
+      "source": "main:exact-merged-png",
+      "region": "emerald-coast"
+    },
+    {
+      "id": "source-05",
+      "name": "harvest supply barn",
+      "filename": "hc-structure-prairie-harvest-supply-barn.png",
+      "repository_path": "apps/highcountry-web/public/assets/structures/hc-art-05-b/golden-prairie/harvest-supply-barn/hc-structure-prairie-harvest-supply-barn.png",
+      "git_blob_sha": "3a8543be90dcc54e96582da01571bdcfa9ef4a1a",
+      "byte_length": 2785724,
+      "source": "main:exact-merged-png",
+      "region": "golden-prairie"
+    },
+    {
+      "id": "source-06",
+      "name": "machinery service barn",
+      "filename": "hc-structure-prairie-machinery-service-barn.png",
+      "repository_path": "apps/highcountry-web/public/assets/structures/hc-art-05-b/golden-prairie/machinery-service-barn/hc-structure-prairie-machinery-service-barn.png",
+      "git_blob_sha": "511977a769f3f9d7d064f7b6e2902b630f34d41c",
+      "byte_length": 2518201,
+      "source": "main:exact-merged-png",
+      "region": "golden-prairie"
+    },
+    {
+      "id": "source-07",
+      "name": "propagation workshop",
+      "filename": "hc-structure-prairie-propagation-workshop.png",
+      "repository_path": "apps/highcountry-web/public/assets/structures/hc-art-05-b/golden-prairie/propagation-workshop/hc-structure-prairie-propagation-workshop.png",
+      "git_blob_sha": "1a6fd277f87a18f07c6ad2293ad05a49f2151b27",
+      "byte_length": 2145637,
+      "source": "main:exact-merged-png",
+      "region": "golden-prairie"
+    },
+    {
+      "id": "source-08",
+      "name": "renewable utility workshop",
+      "filename": "hc-structure-prairie-renewable-utility-workshop.png",
+      "repository_path": "apps/highcountry-web/public/assets/structures/hc-art-05-b/golden-prairie/renewable-utility-workshop/hc-structure-prairie-renewable-utility-workshop.png",
+      "git_blob_sha": "b46bc9cf876c6bb1b0821554434f427a6475f0f1",
+      "byte_length": 2307278,
+      "source": "main:exact-merged-png",
+      "region": "golden-prairie"
+    },
+    {
+      "id": "source-09",
+      "name": "mesa botanical processing house",
+      "filename": "hc-structure-mesa-botanical-processing-house.png",
+      "repository_path": "apps/highcountry-web/public/assets/structures/hc-art-05-b/mesa-botanical-processing-house/hc-structure-mesa-botanical-processing-house.png",
+      "git_blob_sha": "30287832552915d940a17bc153bcd1ef1724f619",
+      "byte_length": 2081574,
+      "source": "main:exact-merged-png",
+      "region": "mesa-botanical-processing-house"
+    },
+    {
+      "id": "source-10",
+      "name": "mesa blacksmith forge",
+      "filename": "hc-structure-mesa-blacksmith-forge.png",
+      "repository_path": "apps/highcountry-web/public/assets/structures/hc-art-05-b/red-mesa/mesa-blacksmith-forge/hc-structure-mesa-blacksmith-forge.png",
+      "git_blob_sha": "a6dd14e654326cc6141fa4b873a247f422f46daf",
+      "byte_length": 2091110,
+      "source": "main:exact-merged-png",
+      "region": "red-mesa"
+    },
+    {
+      "id": "source-11",
+      "name": "mesa pottery kiln house",
+      "filename": "hc-structure-mesa-pottery-kiln-house.png",
+      "repository_path": "apps/highcountry-web/public/assets/structures/hc-art-05-b/red-mesa/mesa-pottery-kiln-house/hc-structure-mesa-pottery-kiln-house.png",
+      "git_blob_sha": "69c53f5a680b8205e2efdeea619a7da46e878b29",
+      "byte_length": 1977475,
+      "source": "main:exact-merged-png",
+      "region": "red-mesa"
+    },
+    {
+      "id": "source-12",
+      "name": "mesa stonecarvers yard",
+      "filename": "hc-structure-mesa-stonecarvers-yard.png",
+      "repository_path": "apps/highcountry-web/public/assets/structures/hc-art-05-b/red-mesa/mesa-stonecarvers-yard/hc-structure-mesa-stonecarvers-yard.png",
+      "git_blob_sha": "41bcc8d6d533cee92a6f9bd2d3717ddf135426be",
+      "byte_length": 2874716,
+      "source": "main:exact-merged-png",
+      "region": "red-mesa"
+    },
+    {
+      "id": "source-13",
+      "name": "artisan textile studio",
+      "filename": "hc-structure-universal-artisan-textile-studio.png",
+      "repository_path": "apps/highcountry-web/public/assets/structures/hc-art-05-b/universal/artisan-textile-studio/hc-structure-universal-artisan-textile-studio.png",
+      "git_blob_sha": "a5a84f4f7ace0d727aacf20603c280e2186c8ba1",
+      "byte_length": 1969495,
+      "source": "main:exact-merged-png",
+      "region": "universal"
+    },
+    {
+      "id": "source-14",
+      "name": "botanical craft laboratory",
+      "filename": "hc-structure-universal-botanical-craft-laboratory.png",
+      "repository_path": "apps/highcountry-web/public/assets/structures/hc-art-05-b/universal/botanical-craft-laboratory/hc-structure-universal-botanical-craft-laboratory.png",
+      "git_blob_sha": "b7d7f0cd340fce8aefeb520585df1f91fd276326",
+      "byte_length": 2805137,
+      "source": "main:exact-merged-png",
+      "region": "universal"
+    },
+    {
+      "id": "source-15",
+      "name": "botanical drying house",
+      "filename": "hc-structure-universal-botanical-drying-house.png",
+      "repository_path": "apps/highcountry-web/public/assets/structures/hc-art-05-b/universal/botanical-drying-house/hc-structure-universal-botanical-drying-house.png",
+      "git_blob_sha": "a7d82072925cb26dc09b36636e8879c8c9a6deb3",
+      "byte_length": 2627161,
+      "source": "main:exact-merged-png",
+      "region": "universal"
+    },
+    {
+      "id": "source-16",
+      "name": "heritage woodworking shop",
+      "filename": "hc-structure-universal-heritage-woodworking-shop.png",
+      "repository_path": "apps/highcountry-web/public/assets/structures/hc-art-05-b/universal/heritage-woodworking-shop/hc-structure-universal-heritage-woodworking-shop.png",
+      "git_blob_sha": "d05e4c757038370ff0a23dcf0c58ae0a42894089",
+      "byte_length": 2690837,
+      "source": "main:exact-merged-png",
+      "region": "universal"
+    },
+    {
+      "id": "source-17",
+      "name": "rural repair workshop",
+      "filename": "hc-structure-universal-rural-repair-workshop.png",
+      "repository_path": "apps/highcountry-web/public/assets/structures/hc-art-05-b/universal/rural-repair-workshop/hc-structure-universal-rural-repair-workshop.png",
+      "git_blob_sha": "709143fb46fc989a03bfdbc6e5dfa587772a6a07",
+      "byte_length": 4290023,
+      "source": "main:exact-merged-png",
+      "region": "universal"
+    },
+    {
+      "id": "source-18",
+      "name": "village blacksmith forge",
+      "filename": "hc-structure-universal-village-blacksmith-forge.png",
+      "repository_path": "apps/highcountry-web/public/assets/structures/hc-art-05-b/universal/village-blacksmith-forge/hc-structure-universal-village-blacksmith-forge.png",
+      "git_blob_sha": "d47104cd3da1dc048fa5a709b3413b871121978f",
+      "byte_length": 2356793,
+      "source": "main:exact-merged-png",
+      "region": "universal"
+    }
+  ]
+}

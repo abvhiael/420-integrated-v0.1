@@ -7,7 +7,7 @@ function setup(){
  const authority={principal:async x=>x,guardState:()=>true};
  const pricing={verifyQuote:async (intent,e)=>verified?{authentic:true,quoteId:intent.quoteId,actor:intent.actor,usdCents:intent.usdCents,sourceId:'oracle_1',attestationId:'attest_'+intent.quoteId,observedAt:now,expiresAt:now+60000,units:e?.units??'1000'}:{authentic:false}};
  const payments={verifyFinalized:async intent=>settled?{verified:true,quoteId:intent.quoteId,paymentId:intent.paymentId,actor:intent.actor,units:intent.units,finalizedReceiptId:'receipt_'+intent.paymentId}:{verified:false}};
- const payouts={verifyFinalized:async intent=>settled?{verified:true,transferId:intent.transferId,finalizedReceiptId:'chain_'+intent.transferId}:{verified:false}};
+ const payouts={verifyFinalized:async intent=>settled?{verified:true,transferId:intent.transferId,finalizedReceiptId:'chain_'+intent.transferId,recipient:intent.recipient,units:intent.units}:{verified:false}};
  const fees=new EconFees({store,authority,pricing,payments,payouts,clock:()=>now});
  const assetIds=Array.from({length:24},(_,i)=>'art_'+i);
  const q=(kind='single',ids=['art_0'],units='1000')=>fees.quote('alice',{quoteId:'quote_'+kind,kind,assetIds:ids,priceEvidence:{units}});

@@ -56,17 +56,17 @@ test('reviewer 72h timeout produces refund entitlement; confirmed refund is sing
 });
 test('one correction per paid submission and developer 72h review',async()=>{
  const f=setup();await f.q();await f.pay();
- const s=f.store.state;s.econReviewers=new Map([['reviewer',{status:'active',expiresAt:f.now()+REVIEW_WINDOW_MS*8}]]);
- s.econAssignments=new Map([['first',{reviewerId:'reviewer',assetId:'art_0',revision:1,status:'assigned'}]]);
+ f.store.state.econReviewers=new Map([['reviewer',{status:'active',expiresAt:f.now()+REVIEW_WINDOW_MS*8}]]);
+ f.store.state.econAssignments=new Map([['first',{reviewerId:'reviewer',assetId:'art_0',revision:1,status:'assigned'}]]);
  await f.fees.assign('operator',{assetId:'art_0',reviewerId:'reviewer',assignmentId:'first'});
  await f.fees.review('reviewer',{assetId:'art_0',decision:'correction',reason:'fix alpha'});
- s.econCreatorAssets=new Map([[JSON.stringify(['art_0',2]),{assetId:'art_0',revision:2}]]);
+ f.store.state.econCreatorAssets=new Map([[JSON.stringify(['art_0',2]),{assetId:'art_0',revision:2}]]);
  await f.fees.correction('alice',{assetId:'art_0',revision:2});
  await assert.rejects(f.fees.correction('alice',{assetId:'art_0',revision:3}),/correction-invalid/);
- s.econAssignments.set('second',{reviewerId:'reviewer',assetId:'art_0',revision:2,status:'assigned'});
+ f.store.state.econAssignments.set('second',{reviewerId:'reviewer',assetId:'art_0',revision:2,status:'assigned'});
  await f.fees.assign('operator',{assetId:'art_0',reviewerId:'reviewer',assignmentId:'second'});
  await f.fees.review('reviewer',{assetId:'art_0',decision:'reject',reason:'still invalid'});
- assert.equal(s.econFeeSubmissions.get('art_0').status,'developer-review');
+ assert.equal(f.store.state.econFeeSubmissions.get('art_0').status,'developer-review');
  await assert.rejects(f.fees.adjudicate('reviewer',{assetId:'art_0',forfeit:true,reason:'self reward'}),/developer-review-expired/);
  f.at(f.now()+REVIEW_WINDOW_MS);
  assert.deepEqual(await f.fees.deadlines('operator'),['art_0']);

@@ -1,0 +1,36 @@
+{
+  "step": "HC-ECON-03",
+  "roadmap": "docs/highcountry/HC-ECON-00-ARCHITECTURE-BASELINE.md",
+  "level": "L1",
+  "base_sha": "af198765870256278831ea38b78aebe4a1df58b2",
+  "candidate_sha": "HEAD",
+  "classification": "implementation",
+  "scope": [
+    "services/highcountry-economy/src/building-compatibility.js",
+    "services/highcountry-economy/test/building-compatibility.test.js",
+    ".github/workflows/highcountry-hc-econ-03-l1.yml",
+    ".qualification/HC-ECON-03-COMPATIBILITY.md",
+    ".qualification/candidates/HC-ECON-03.json"
+  ],
+  "tests": [
+    {
+      "command": "node --test services/highcountry-economy/test/building-compatibility.test.js services/highcountry-economy/test/object-taxonomy.test.js services/highcountry-economy/test/placement-contract.test.mjs",
+      "owner": "HC-ECON-03 building compatibility and directly dependent HC-ECON-01/HC-PLACE-02 contract"
+    }
+  ],
+  "required_workflows": [
+    ".github/workflows/highcountry-hc-econ-03-l1.yml"
+  ],
+  "exit_criteria": [
+    "E15 T-BLD-01 reviewed versioned building functions and exact permitted equipment type registry",
+    "Qualified equipment and slot compatibility with HC-PLACE canonical geometry, ownership and equipment revision constraints",
+    "HC-ECON-01 bounded modifiers and developer nonstacking enforced",
+    "Fail-closed authenticated server reader; no fabricated production authority",
+    "Targeted negative/positive tests and exact-head Level 1 qualification",
+    "No unrelated CI manual runs, no changes to HC-PLACE mutation authority"
+  ],
+  "frozen_inputs": {},
+  "external_gates": [
+    "Production placement reader, live building IDs and independently authorized custody/asset verification remain HC-PLACE/runtime activation dependencies, not asserted by this read-only contract"
+  ]
+}

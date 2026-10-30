@@ -1,0 +1,38 @@
+{
+  "step": "HC-ECON-02",
+  "roadmap": "docs/highcountry/HC-ECON-00-ARCHITECTURE-BASELINE.md",
+  "level": "L1",
+  "base_sha": "616e7cdde7d1edda59e6b73dcef01a62c5f18cd5",
+  "candidate_sha": "HEAD",
+  "classification": "implementation",
+  "scope": [
+    "services/highcountry-economy/src/item-issuance.js",
+    "services/highcountry-economy/test/item-issuance.test.js",
+    "services/highcountry-economy/src/postgres-store.js",
+    ".github/workflows/highcountry-hc-econ-02-l1.yml",
+    ".qualification/HC-ECON-02-ISSUANCE.md",
+    ".qualification/candidates/HC-ECON-02.json"
+  ],
+  "tests": [
+    {
+      "command": "node --test services/highcountry-economy/test/item-issuance.test.js services/highcountry-economy/test/object-taxonomy.test.js services/highcountry-economy/test/postgres-store.test.js",
+      "owner": "HighCountry edition-issuance, taxonomy and durable economy store"
+    }
+  ],
+  "required_workflows": [
+    ".github/workflows/highcountry-hc-econ-02-l1.yml",
+    ".github/workflows/universal-qualification-guard.yml"
+  ],
+  "exit_criteria": [
+    "E10: immutable per-design edition cap 1..420 and durable issued-ever accounting",
+    "E11: committed per-copy unbiased weighted draw with independent finalized source and randomness verification, 5 percent ordinary maximum and 2-3 percent actual expected mean",
+    "Developer 420Corp assets have locked nonrandom modifier and no stacking through HC-ECON-01 policy",
+    "E12: burn/cancel never return issued-ever credits or source receipts; one-time replay-resistant receipts",
+    "E14: separately approved quest-origin modifiers, nontransferable quest rewards and burnability",
+    "Independent proof verification, session revocation, source deduplication, transactional persistence and adversarial tests"
+  ],
+  "frozen_inputs": {},
+  "external_gates": [
+    "Live finalized randomness deployment/code hashes, independent purchase/quest verifier and signed issuer authority require HC-ECON-TN qualification before enabling production routes; no mock production activation"
+  ]
+}

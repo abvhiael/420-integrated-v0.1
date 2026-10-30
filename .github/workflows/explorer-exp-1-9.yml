@@ -1,42 +1,7 @@
 name: EXP-1.9 CI Qualification Automation
 
 on:
-  pull_request:
-    paths:
-      - '.github/workflows/420indexer.yml'
-      - '.github/workflows/docs-qualify.yml'
-      - '.github/workflows/qualification.yml'
-      - '.github/workflows/explorer-exp-1-6.yml'
-      - '.github/workflows/explorer-exp-1-7.yml'
-      - '.github/workflows/explorer-exp-1-8.yml'
-      - '.github/workflows/explorer-exp-1-9.yml'
-      - 'scripts/verify-exp-1-1-runtime-authority.py'
-      - 'scripts/verify-exp-1-2-rpc-binding.py'
-      - 'scripts/verify-exp-1-3-canonical-indexing.py'
-      - 'scripts/verify-exp-1-4-indexer-runtime.py'
-      - 'scripts/verify-exp-1-5-consensus-provider.py'
-      - 'scripts/verify-exp-1-6-historical-producer.py'
-      - 'scripts/verify-exp-1-7-cross-layer-traceability.py'
-      - 'scripts/verify-exp-1-8-runtime-negative-divergence.py'
-      - 'scripts/verify-exp-1-9-ci-automation.py'
-      - 'docs/audit/EXP-1.9-ci-qualification-automation.*'
-      - 'config/420indexer-v1.json'
-      - 'testnet/public-services/indexer/readiness.json'
-
-
-  push:
-    branches:
-      - main
-      - 'audit/bnb-phase4-bnb-4-1-baseline-20261013'
-    paths:
-      - '.github/workflows/420indexer.yml'
-      - '.github/workflows/docs-qualify.yml'
-      - '.github/workflows/qualification.yml'
-      - '.github/workflows/explorer-exp-1-9.yml'
-      - 'scripts/verify-exp-1-9-ci-automation.py'
-      - 'docs/audit/EXP-1.9-ci-qualification-automation.*'
-      - 'config/420indexer-v1.json'
-      - 'testnet/public-services/indexer/readiness.json'
+  workflow_dispatch:
 
 concurrency:
   group: exp-1-9-${{ github.event.pull_request.number || github.ref }}

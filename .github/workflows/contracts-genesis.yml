@@ -1,15 +1,6 @@
 name: 420 Genesis Contract Verification
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - "contracts/**"
-      - "scripts/contracts-*.sh"
-      - "scripts/export-contract-manifest.py"
-      - ".github/workflows/contracts-genesis.yml"
-      - "Dockerfile.contracts"
   workflow_dispatch:
 
 concurrency:

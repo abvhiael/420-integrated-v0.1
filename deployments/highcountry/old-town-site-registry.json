@@ -1,0 +1,796 @@
+{
+  "schema": "HC.OLD_TOWN.SITE_REGISTRY.OT_SCREEN_00.V1",
+  "district": "HC-EC-S01-D07",
+  "coordinateAuthority": "PROVISIONAL_LOCAL_PHASE_C",
+  "dataSource": "Phase C local review CSV 2026-10-29 (not present on main); must be reconciled with independently approved survey before issuance",
+  "census": {
+    "privateTotal": 54,
+    "residential": 30,
+    "commercial": 24,
+    "genesisPrivate": 15,
+    "landmarks": 5,
+    "vacant": 39
+  },
+  "sites": [
+    {
+      "id": "HL-01",
+      "block": "B01",
+      "titleClass": "compact_residential",
+      "status": "genesis",
+      "rect": [
+        164,
+        110,
+        180,
+        130
+      ],
+      "authority": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+    },
+    {
+      "id": "RC-05",
+      "block": "B01",
+      "titleClass": "compact_residential",
+      "status": "vacant",
+      "rect": [
+        148,
+        50,
+        164,
+        70
+      ],
+      "authority": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+    },
+    {
+      "id": "RC-06",
+      "block": "B01",
+      "titleClass": "compact_residential",
+      "status": "vacant",
+      "rect": [
+        112,
+        110,
+        128,
+        130
+      ],
+      "authority": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+    },
+    {
+      "id": "RS-01",
+      "block": "B01",
+      "titleClass": "standard_residential",
+      "status": "vacant",
+      "rect": [
+        84,
+        50,
+        108,
+        74
+      ],
+      "authority": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+    },
+    {
+      "id": "HL-02",
+      "block": "B02",
+      "titleClass": "compact_residential",
+      "status": "genesis",
+      "rect": [
+        272,
+        110,
+        288,
+        130
+      ],
+      "authority": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+    },
+    {
+      "id": "RC-07",
+      "block": "B02",
+      "titleClass": "compact_residential",
+      "status": "vacant",
+      "rect": [
+        256,
+        50,
+        272,
+        70
+      ],
+      "authority": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+    },
+    {
+      "id": "RC-08",
+      "block": "B02",
+      "titleClass": "compact_residential",
+      "status": "vacant",
+      "rect": [
+        220,
+        110,
+        236,
+        130
+      ],
+      "authority": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+    },
+    {
+      "id": "RS-02",
+      "block": "B02",
+      "titleClass": "standard_residential",
+      "status": "vacant",
+      "rect": [
+        192,
+        50,
+        216,
+        74
+      ],
+      "authority": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+    },
+    {
+      "id": "HL-03",
+      "block": "B04",
+      "titleClass": "compact_residential",
+      "status": "genesis",
+      "rect": [
+        504,
+        110,
+        520,
+        130
+      ],
+      "authority": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+    },
+    {
+      "id": "LM-05",
+      "block": "B04",
+      "titleClass": "public_landmark",
+      "status": "permanent_public",
+      "rect": [
+        424,
+        82,
+        456,
+        130
+      ],
+      "authority": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+    },
+    {
+      "id": "RC-09",
+      "block": "B04",
+      "titleClass": "compact_residential",
+      "status": "vacant",
+      "rect": [
+        472,
+        110,
+        488,
+        130
+      ],
+      "authority": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+    },
+    {
+      "id": "RS-03",
+      "block": "B04",
+      "titleClass": "standard_residential",
+      "status": "vacant",
+      "rect": [
+        484,
+        50,
+        508,
+        74
+      ],
+      "authority": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+    },
+    {
+      "id": "HL-04",
+      "block": "B05",
+      "titleClass": "compact_residential",
+      "status": "genesis",
+      "rect": [
+        532,
+        110,
+        548,
+        130
+      ],
+      "authority": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+    },
+    {
+      "id": "RC-10",
+      "block": "B05",
+      "titleClass": "compact_residential",
+      "status": "vacant",
+      "rect": [
+        532,
+        50,
+        548,
+        70
+      ],
+      "authority": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+    },
+    {
+      "id": "RS-04",
+      "block": "B05",
+      "titleClass": "standard_residential",
+      "status": "vacant",
+      "rect": [
+        604,
+        50,
+        628,
+        74
+      ],
+      "authority": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+    },
+    {
+      "id": "RC-11",
+      "block": "B06",
+      "titleClass": "compact_residential",
+      "status": "vacant",
+      "rect": [
+        164,
+        202,
+        180,
+        222
+      ],
+      "authority": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+    },
+    {
+      "id": "RC-12",
+      "block": "B06",
+      "titleClass": "compact_residential",
+      "status": "vacant",
+      "rect": [
+        148,
+        142,
+        164,
+        162
+      ],
+      "authority": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+    },
+    {
+      "id": "RS-05",
+      "block": "B06",
+      "titleClass": "standard_residential",
+      "status": "vacant",
+      "rect": [
+        84,
+        142,
+        108,
+        166
+      ],
+      "authority": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+    },
+    {
+      "id": "RC-13",
+      "block": "B07",
+      "titleClass": "compact_residential",
+      "status": "vacant",
+      "rect": [
+        260,
+        142,
+        276,
+        162
+      ],
+      "authority": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+    },
+    {
+      "id": "RL-01",
+      "block": "B07",
+      "titleClass": "large_residential",
+      "status": "vacant",
+      "rect": [
+        192,
+        142,
+        224,
+        174
+      ],
+      "authority": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+    },
+    {
+      "id": "RS-06",
+      "block": "B07",
+      "titleClass": "standard_residential",
+      "status": "vacant",
+      "rect": [
+        264,
+        198,
+        288,
+        222
+      ],
+      "authority": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+    },
+    {
+      "id": "RC-14",
+      "block": "B09",
+      "titleClass": "compact_residential",
+      "status": "vacant",
+      "rect": [
+        492,
+        142,
+        508,
+        162
+      ],
+      "authority": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+    },
+    {
+      "id": "RL-02",
+      "block": "B09",
+      "titleClass": "large_residential",
+      "status": "vacant",
+      "rect": [
+        424,
+        142,
+        456,
+        174
+      ],
+      "authority": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+    },
+    {
+      "id": "RS-07",
+      "block": "B09",
+      "titleClass": "standard_residential",
+      "status": "vacant",
+      "rect": [
+        496,
+        198,
+        520,
+        222
+      ],
+      "authority": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+    },
+    {
+      "id": "RC-15",
+      "block": "B10",
+      "titleClass": "compact_residential",
+      "status": "vacant",
+      "rect": [
+        600,
+        142,
+        616,
+        162
+      ],
+      "authority": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+    },
+    {
+      "id": "RL-03",
+      "block": "B10",
+      "titleClass": "large_residential",
+      "status": "vacant",
+      "rect": [
+        532,
+        142,
+        564,
+        174
+      ],
+      "authority": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+    },
+    {
+      "id": "RS-08",
+      "block": "B10",
+      "titleClass": "standard_residential",
+      "status": "vacant",
+      "rect": [
+        604,
+        198,
+        628,
+        222
+      ],
+      "authority": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+    },
+    {
+      "id": "LM-01",
+      "block": "B11",
+      "titleClass": "public_landmark",
+      "status": "permanent_public",
+      "rect": [
+        132,
+        266,
+        180,
+        314
+      ],
+      "authority": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+    },
+    {
+      "id": "CL-01",
+      "block": "B12",
+      "titleClass": "large_commercial",
+      "status": "vacant",
+      "rect": [
+        256,
+        234,
+        288,
+        266
+      ],
+      "authority": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+    },
+    {
+      "id": "CS-01",
+      "block": "B12",
+      "titleClass": "standard_commercial",
+      "status": "vacant",
+      "rect": [
+        256,
+        290,
+        280,
+        314
+      ],
+      "authority": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+    },
+    {
+      "id": "CX-01",
+      "block": "B12",
+      "titleClass": "extra_large_commercial",
+      "status": "vacant",
+      "rect": [
+        192,
+        234,
+        240,
+        282
+      ],
+      "authority": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+    },
+    {
+      "id": "LM-02",
+      "block": "B13",
+      "titleClass": "public_landmark",
+      "status": "permanent_public",
+      "rect": [
+        324,
+        234,
+        388,
+        298
+      ],
+      "authority": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+    },
+    {
+      "id": "CS-02",
+      "block": "B14",
+      "titleClass": "standard_commercial",
+      "status": "vacant",
+      "rect": [
+        424,
+        234,
+        448,
+        258
+      ],
+      "authority": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+    },
+    {
+      "id": "CS-03",
+      "block": "B14",
+      "titleClass": "standard_commercial",
+      "status": "vacant",
+      "rect": [
+        496,
+        290,
+        520,
+        314
+      ],
+      "authority": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+    },
+    {
+      "id": "RC-16",
+      "block": "B15",
+      "titleClass": "compact_residential",
+      "status": "vacant",
+      "rect": [
+        532,
+        294,
+        548,
+        314
+      ],
+      "authority": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+    },
+    {
+      "id": "RL-04",
+      "block": "B15",
+      "titleClass": "large_residential",
+      "status": "vacant",
+      "rect": [
+        532,
+        234,
+        564,
+        266
+      ],
+      "authority": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+    },
+    {
+      "id": "RS-09",
+      "block": "B15",
+      "titleClass": "standard_residential",
+      "status": "vacant",
+      "rect": [
+        604,
+        290,
+        628,
+        314
+      ],
+      "authority": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+    },
+    {
+      "id": "RS-10",
+      "block": "B15",
+      "titleClass": "standard_residential",
+      "status": "vacant",
+      "rect": [
+        596,
+        234,
+        620,
+        258
+      ],
+      "authority": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+    },
+    {
+      "id": "CS-04",
+      "block": "B16",
+      "titleClass": "standard_commercial",
+      "status": "vacant",
+      "rect": [
+        192,
+        326,
+        216,
+        350
+      ],
+      "authority": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+    },
+    {
+      "id": "LM-03",
+      "block": "B16",
+      "titleClass": "public_landmark",
+      "status": "permanent_public",
+      "rect": [
+        240,
+        358,
+        288,
+        406
+      ],
+      "authority": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+    },
+    {
+      "id": "CL-02",
+      "block": "B17",
+      "titleClass": "large_commercial",
+      "status": "vacant",
+      "rect": [
+        300,
+        326,
+        332,
+        358
+      ],
+      "authority": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+    },
+    {
+      "id": "CR-01",
+      "block": "B17",
+      "titleClass": "standard_commercial",
+      "status": "genesis",
+      "rect": [
+        372,
+        382,
+        396,
+        406
+      ],
+      "authority": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+    },
+    {
+      "id": "CS-05",
+      "block": "B17",
+      "titleClass": "standard_commercial",
+      "status": "vacant",
+      "rect": [
+        364,
+        326,
+        388,
+        350
+      ],
+      "authority": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+    },
+    {
+      "id": "CR-02",
+      "block": "B18",
+      "titleClass": "standard_commercial",
+      "status": "genesis",
+      "rect": [
+        424,
+        382,
+        448,
+        406
+      ],
+      "authority": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+    },
+    {
+      "id": "CR-03",
+      "block": "B18",
+      "titleClass": "standard_commercial",
+      "status": "genesis",
+      "rect": [
+        496,
+        382,
+        520,
+        406
+      ],
+      "authority": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+    },
+    {
+      "id": "CR-04",
+      "block": "B18",
+      "titleClass": "standard_commercial",
+      "status": "genesis",
+      "rect": [
+        496,
+        358,
+        520,
+        382
+      ],
+      "authority": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+    },
+    {
+      "id": "CS-06",
+      "block": "B18",
+      "titleClass": "standard_commercial",
+      "status": "vacant",
+      "rect": [
+        424,
+        326,
+        448,
+        350
+      ],
+      "authority": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+    },
+    {
+      "id": "CL-03",
+      "block": "B19",
+      "titleClass": "large_commercial",
+      "status": "vacant",
+      "rect": [
+        596,
+        326,
+        628,
+        358
+      ],
+      "authority": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+    },
+    {
+      "id": "CS-07",
+      "block": "B19",
+      "titleClass": "standard_commercial",
+      "status": "vacant",
+      "rect": [
+        596,
+        382,
+        620,
+        406
+      ],
+      "authority": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+    },
+    {
+      "id": "CX-02",
+      "block": "B19",
+      "titleClass": "extra_large_commercial",
+      "status": "vacant",
+      "rect": [
+        532,
+        326,
+        580,
+        374
+      ],
+      "authority": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+    },
+    {
+      "id": "WH-04",
+      "block": "B20",
+      "titleClass": "large_commercial",
+      "status": "genesis",
+      "rect": [
+        640,
+        374,
+        672,
+        406
+      ],
+      "authority": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+    },
+    {
+      "id": "CR-05",
+      "block": "B21",
+      "titleClass": "standard_commercial",
+      "status": "genesis",
+      "rect": [
+        300,
+        418,
+        324,
+        442
+      ],
+      "authority": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+    },
+    {
+      "id": "CR-06",
+      "block": "B21",
+      "titleClass": "standard_commercial",
+      "status": "genesis",
+      "rect": [
+        356,
+        458,
+        380,
+        482
+      ],
+      "authority": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+    },
+    {
+      "id": "CS-08",
+      "block": "B21",
+      "titleClass": "standard_commercial",
+      "status": "vacant",
+      "rect": [
+        340,
+        418,
+        364,
+        442
+      ],
+      "authority": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+    },
+    {
+      "id": "WH-01",
+      "block": "B24",
+      "titleClass": "large_commercial",
+      "status": "genesis",
+      "rect": [
+        532,
+        450,
+        564,
+        482
+      ],
+      "authority": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+    },
+    {
+      "id": "WH-02",
+      "block": "B24",
+      "titleClass": "large_commercial",
+      "status": "genesis",
+      "rect": [
+        532,
+        418,
+        564,
+        450
+      ],
+      "authority": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+    },
+    {
+      "id": "WH-03",
+      "block": "B24",
+      "titleClass": "large_commercial",
+      "status": "genesis",
+      "rect": [
+        580,
+        450,
+        612,
+        482
+      ],
+      "authority": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+    },
+    {
+      "id": "WH-05",
+      "block": "B24",
+      "titleClass": "large_commercial",
+      "status": "genesis",
+      "rect": [
+        580,
+        418,
+        612,
+        450
+      ],
+      "authority": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+    },
+    {
+      "id": "LM-04",
+      "block": "B25",
+      "titleClass": "public_landmark",
+      "status": "permanent_public",
+      "rect": [
+        664,
+        418,
+        712,
+        466
+      ],
+      "authority": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+    }
+  ],
+  "park": {
+    "block": "B22",
+    "titleClass": "public_park",
+    "saleable": false,
+    "rect": [
+      386,
+      426,
+      410,
+      474
+    ],
+    "authority": "PROVISIONAL_V7_CANDIDATE"
+  },
+  "approvedGenesisCount": 20
+}

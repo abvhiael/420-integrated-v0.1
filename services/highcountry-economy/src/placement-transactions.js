@@ -2,6 +2,7 @@
 import {createHash} from 'node:crypto';
 import {definePlacedObject,rotatedCells} from './placement-contract.js';
 import {reservePlacementUnit,releasePlacementUnit} from './custody-records.js';
+import {validatePlacementRecoveryState} from './placement-recovery.js';
 const fail=s=>{throw Error('hc-place-03:'+s);};
 const id=v=>typeof v==='string'&&/^[A-Za-z0-9:_-]{1,128}$/.test(v);
 const valid=v=>Number.isSafeInteger(v)&&v>=0;
@@ -14,6 +15,15 @@ export class HighCountryPlacementTransactions {
  constructor({store,authority,resolveGeometry,resolveAssets,clock=()=>Date.now()}={}){
   if(typeof store?.transact!=='function'||typeof authority?.registeredPrincipal!=='function'||typeof authority?.canPlaceOnParcel!=='function'||typeof authority?.validateWorld!=='function'||typeof authority?.verifyAtCommit!=='function'||typeof resolveGeometry!=='function'||typeof resolveAssets!=='function')fail('trusted-dependencies-required');
   this.store=store;this.auth=authority;this.geometry=resolveGeometry;this.assets=resolveAssets;this.clock=clock;
+ }
+ async recover(session){
+  const who=await this.auth.registeredPrincipal(session);
+  if(!id(who))fail('unauthenticated');
+  const assetIds=await this.assets();
+  if(!(assetIds instanceof Set))fail('catalogue-unavailable');
+  const geometryRegistry=await this.auth.qualifiedGeometrySnapshot(who,{action:'recover'});
+  if(!(geometryRegistry instanceof Map))fail('invalid-geometry-snapshot');
+  return this.store.transact(s=>validatePlacementRecoveryState(s,{assetIds,geometryRegistry}));
  }
  async snapshot(session){
   const who=await this.auth.registeredPrincipal(session);if(!id(who))fail('unauthenticated');
@@ -43,7 +53,7 @@ export class HighCountryPlacementTransactions {
   const pinned=geometryRegistry.get(command.assetId);
   if(JSON.stringify(pinned)!==JSON.stringify(geometry))fail('geometry-snapshot-mismatch');
   const input=structuredClone(command),payload=digest({who,input});
-  return this.store.transact(s=>{
+  try{return await this.store.transact(s=>{
    map(s);
    // Fail closed under the SAME serializable row lock as inventory, object and scene writes.
    // This callback must be synchronous, and must validate current authoritative state,
@@ -149,6 +159,15 @@ export class HighCountryPlacementTransactions {
    const result={instance:structuredClone(checked),sceneRevision:currentScene+1,...(custody?{custody}: {})};
    s.placementOperations.set(opKey,{payload,result});
    return structuredClone(result);
-  });
+  });}catch(e){
+   if(e?.code!=='HC_COMMIT_UNKNOWN')throw e;
+   return this.store.transact(s=>{
+    map(s);
+    const receipt=s.placementOperations.get(key(who,command.operation));
+    if(!receipt)fail('commit-outcome-unresolved');
+    if(receipt.payload!==payload)fail('replay-payload-conflict');
+    return structuredClone(receipt.result);
+   });
+  }
  }
 }

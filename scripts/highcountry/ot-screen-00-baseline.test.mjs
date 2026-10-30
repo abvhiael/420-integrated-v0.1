@@ -1,0 +1,13 @@
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {test} from 'node:test';
+const read=(name)=>JSON.parse(readFileSync(new URL('../../deployments/highcountry/'+name,import.meta.url),'utf8'));
+const sites=read('old-town-site-registry.json'), assets=read('old-town-genesis-assets.json'),geo=read('old-town-geo-authority-status.json');
+test('59 distinct sites, 54 titles, 5 public heritage, 39 vacant',()=>{assert.equal(sites.sites.length,59);assert.equal(new Set(sites.sites.map(s=>s.id)).size,59);assert.deepEqual(sites.census,{privateTotal:54,residential:30,commercial:24,genesisPrivate:15,landmarks:5,vacant:39});});
+test('20 Genesis images, no HL05 and independent chapel/Maple',()=>{assert.equal(assets.assets.length,20);assert.equal(new Set(assets.assets.map(x=>x.id)).size,20);assert(!assets.assets.some(x=>x.id==='HL-05'));assert.notDeepEqual(sites.sites.find(x=>x.id==='LM-05').rect,sites.sites.find(x=>x.id==='HL-03').rect);});
+test('Sail Loft public heritage and B22 always non-saleable',()=>{assert.equal(sites.sites.find(x=>x.id==='LM-04').status,'permanent_public');assert.equal(sites.park.saleable,false);assert.equal(sites.park.block,'B22');});
+test('property rectangles valid and overlap-free within block',()=>{for(const s of sites.sites){const a=s.rect;assert(a[2]>a[0]&&a[3]>a[1]);for(const t of sites.sites){if(s.id>=t.id||s.block!==t.block)continue;const b=t.rect;assert(!(a[0]<b[2]&&b[0]<a[2]&&a[1]<b[3]&&b[1]<a[3]),s.id+' overlaps '+t.id);}}});
+test('all assets use same repo original exterior path and immutable blobs',()=>{for(const a of assets.assets){assert.match(a.gitBlobSha,/^[a-f0-9]{40}$/);assert(a.repoPath.startsWith('apps/highcountry-web/public/assets/highcountry/old-town/'));assert(a.repoPath.endsWith('-exterior.png'));}});
+test('fail closed: absence of all matching SHA-256s blocks final lock',()=>{const ready=assets.assets.every(x=>/^[a-f0-9]{64}$/.test(x.sha256??'') && x.uploadedMatchesMain!==false);assert.equal(assets.qualifiedForLock,ready);});
+test('no false survey authority or title issuance',()=>{assert.equal(geo.issuanceAuthorized,false);assert(geo.layers.every(x=>x.issuanceEligible===false));assert.equal(geo.hiddenOriginalSixteenCoordinatesPublished,false);});
+test('negative: duplicate IDs and unauthorized B22 conversion rejected',()=>{const copy=structuredClone(sites);copy.sites.push(copy.sites[0]);assert.notEqual(new Set(copy.sites.map(x=>x.id)).size,copy.sites.length);copy.park.saleable=true;assert.notEqual(copy.park.saleable,sites.park.saleable);});

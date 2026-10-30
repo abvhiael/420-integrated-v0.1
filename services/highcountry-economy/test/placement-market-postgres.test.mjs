@@ -66,4 +66,39 @@ test('real PostgreSQL: two buyers and cancel against purchase cannot double sett
  const s=await snapshot();conserved(s);assert.equal(s.audit.reservations,0);
  const listing=s.listings.find(([id])=>id==='listing')[1];assert.ok(['sold','cancelled'].includes(listing.status));
 });
+
+test('03-D PostgreSQL restart reconstruction and exact custody',async()=>{
+ await reset();const q=place('desk-a','recover-a');
+ const accepted=await engine().execute('alice',q);
+ const recovered=await engine().recover('alice');
+ assert.equal(recovered.validated,true);assert.equal(recovered.placed,1);assert.equal(recovered.occupiedTiles,2);
+ assert.deepEqual(await engine().execute('alice',q),accepted);
+ await assert.rejects(engine().execute('alice',place('desk-b','occupied-b',1,0)),/occupied/);
+ conserved(await snapshot());
+});
+test('03-D PostgreSQL recovery rejects corrupted geometry without mutation',async()=>{
+ await reset();await engine().execute('alice',place('desk-a','recover-a'));
+ await pool.query("UPDATE highcountry_buds_state SET state=jsonb_set(state,'{placementInstances,0,1,geometryVersion}','999'::jsonb) WHERE namespace=$1",[ns]);
+ await assert.rejects(engine().recover('alice'),/geometry-incompatible/);
+ const row=(await pool.query('SELECT state FROM highcountry_buds_state WHERE namespace=$1',[ns])).rows[0].state;
+ assert.equal(row.placementInstances[0][1].geometryVersion,999);
+});
+test('03-D PostgreSQL unknown COMMIT resolves only matching durable operation receipt',async()=>{
+ await reset();let once=true;const base=store();
+ const uncertain={transact:async fn=>{const result=await base.transact(fn);
+  if(once){once=false;const e=Error('acknowledgement lost');e.code='HC_COMMIT_UNKNOWN';throw e;}
+  return result;}};
+ const e=new HighCountryPlacementTransactions({store:uncertain,authority:placementAuthority,resolveGeometry:async()=>geometry,resolveAssets:async()=>new Set([asset]),clock:()=>10});
+ const q=place('desk-a','unknown-commit');const result=await e.execute('alice',q);
+ assert.deepEqual(result,await engine().execute('alice',q));
+ const s=await snapshot();conserved(s);assert.equal(s.operations.length,1);assert.equal(s.placements.length,1);
+});
+test('03-D PostgreSQL concurrent independent workers accept one canonical idempotent operation',async()=>{
+ await reset();const q=place('desk-a','multi-worker');
+ const results=await Promise.allSettled(Array.from({length:5},()=>engine().execute('alice',q)));
+ assert.equal(results.filter(x=>x.status==='fulfilled').length,5);
+ for(const result of results)assert.deepEqual(result.value,results[0].value);
+ const s=await snapshot();conserved(s);assert.equal(s.operations.length,1);assert.equal(s.placements.length,1);
+});
+
 test.after(async()=>{try{await pool.query('DELETE FROM highcountry_buds_state WHERE namespace=$1',[ns]);}finally{await pool.end();}});

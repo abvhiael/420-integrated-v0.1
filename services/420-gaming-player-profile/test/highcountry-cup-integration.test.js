@@ -81,7 +81,7 @@ test('durable achievement writes are idempotent and revalidate source before rea
  const pool={connect:async()=>({
   query:async(sql,args=[])=>{
    operations.push(sql);
-   if(sql.includes('INSERT INTO highcountry_cup.achievements'))stored={block_hash:args[4],commitment:args[6],champion:args[5],prestige:args[8]};
+   if(sql.includes('INSERT INTO highcountry_cup.achievements'))stored={chain_id:args[2],cup_address:args[3],scope:args[7],block_hash:args[4],commitment:args[6],champion:args[5],prestige:args[8]};
    if(sql.includes('SELECT * FROM highcountry_cup.achievements'))return {rows:stored?[stored]:[]};
    return {rows:[]};
   },release(){}
@@ -132,7 +132,7 @@ test('fully composed chain RPC, Cup projection and durable storage reject stale 
  const pool={connect:async()=>({
   query:async(sql,args=[])=>{
    if(sql.includes('INSERT INTO highcountry_cup.achievements'))
-    row={block_hash:args[4],commitment:args[6],champion:args[5],prestige:args[8]};
+    row={chain_id:args[2],cup_address:args[3],scope:args[7],block_hash:args[4],commitment:args[6],champion:args[5],prestige:args[8]};
    return {rows:sql.includes('SELECT * FROM highcountry_cup.achievements')?(row?[row]:[]):[]};
   },release(){}
  })};
@@ -168,4 +168,20 @@ test('Cup identity replay cannot write or read an award from another Cup',async(
  await assert.rejects(store.current({cupId:cup}),{code:'cup-identity-mismatch'});
  assert.equal(writes,0);assert.equal(reads,0);
  await assert.rejects(store.current({cupId:'wrong'}),{code:'cup-id-invalid'});
+});
+
+test('scoped nonfinancial award never accepts historical chain, contract or scope replay',async()=>{
+ const canonical={cupId:cup,chainId:420,cupAddress:A,blockHash:block,champion:A,
+  resultCommitment:h('6',64),scope:h('5',64),achievement:{kind:'prestige'}};
+ let stored={chain_id:420,cup_address:A,scope:canonical.scope,block_hash:block,
+  champion:A,commitment:canonical.resultCommitment,prestige:true};
+ const pool={connect:async()=>({query:async sql=>({rows:sql.includes('SELECT * FROM highcountry_cup.achievements')?[stored]:[]}),release(){}})};
+ const store=createPostgresCupAchievements420({pool,gameId:h('f',64),projection:{standings:async()=>canonical}});
+ assert.equal((await store.current({cupId:cup})).current,true);
+ for(const changes of [{chain_id:421},{cup_address:B},{scope:h('4',64)}]){
+  stored={...stored,...changes};
+  assert.equal((await store.current({cupId:cup})).current,false,'cross-context recognition must not be current');
+  stored={chain_id:420,cup_address:A,scope:canonical.scope,block_hash:block,
+   champion:A,commitment:canonical.resultCommitment,prestige:true};
+ }
 });

@@ -5,6 +5,12 @@ on:
       - ci/sol02-runtime-fixture-l2-acceptance
     paths:
       - '.github/workflows/sol02-acceptance-isolated.yml'
+      - 'contracts/scripts/sol02-execution.py'
+      - 'contracts/scripts/sol02-aggregate.py'
+      - 'contracts/scripts/sol02-level2.sh'
+      - 'contracts/scripts/sol02-fixture.py'
+      - 'contracts/scripts/sol02-run-group.sh'
+      - 'contracts/test/ci/test_sol02_runtime.py'
   workflow_dispatch:
 permissions:
   contents: read

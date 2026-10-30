@@ -1,0 +1,297 @@
+{
+  "schema": "420.ci.sol02.v1",
+  "groups": {
+    "hc-competition": {
+      "source": [
+        "src/highcountry/competition/"
+      ],
+      "tests": [
+        "test/highcountry/unit/competition/"
+      ]
+    },
+    "hc-land": {
+      "source": [
+        "src/highcountry/land/",
+        "src/highcountry/rights/"
+      ],
+      "tests": [
+        "test/highcountry/unit/land/"
+      ]
+    },
+    "hc-cultivation": {
+      "source": [
+        "src/highcountry/cultivation/",
+        "src/highcountry/genetics/"
+      ],
+      "tests": [
+        "test/highcountry/unit/cultivation/"
+      ]
+    },
+    "hc-economy": {
+      "source": [
+        "src/highcountry/economy/",
+        "src/highcountry/market/"
+      ],
+      "tests": [
+        "test/highcountry/unit/economy/"
+      ]
+    },
+    "hc-treasury": {
+      "source": [
+        "src/highcountry/treasury/"
+      ],
+      "tests": [
+        "test/highcountry/unit/treasury/"
+      ]
+    },
+    "hc-other": {
+      "source": [
+        "src/highcountry/"
+      ],
+      "tests": [
+        "test/highcountry/"
+      ]
+    },
+    "420bet": {
+      "source": [
+        "src/bet/"
+      ],
+      "tests": [
+        "test/Bet",
+        "test/sports-",
+        "test/tournament-"
+      ]
+    },
+    "420treasury": {
+      "source": [
+        "src/treasury/",
+        "src/vault/",
+        "src/revenue/"
+      ],
+      "tests": [
+        "test/Treasury",
+        "test/Vault",
+        "test/Revenue"
+      ]
+    },
+    "420compute": {
+      "source": [
+        "src/compute/"
+      ],
+      "tests": [
+        "test/Compute"
+      ]
+    },
+    "integration": {
+      "source": [],
+      "tests": []
+    },
+    "protocol-identity": {
+      "source": [
+        "src/accounts/",
+        "src/apps/",
+        "src/governance/",
+        "src/trust/",
+        "src/system/",
+        "src/interfaces/",
+        "src/libraries/"
+      ],
+      "tests": [
+        "test/Account",
+        "test/AppStore",
+        "test/Application",
+        "test/Governance",
+        "test/Identity",
+        "test/Registry",
+        "test/Names",
+        "test/Trust",
+        "test/Validator",
+        "test/Verify",
+        "test/System"
+      ]
+    },
+    "protocol-defi": {
+      "source": [
+        "src/exchange/",
+        "src/swap/",
+        "src/bridge/",
+        "src/market/",
+        "src/token/",
+        "src/pay/"
+      ],
+      "tests": [
+        "test/Exchange",
+        "test/Swap",
+        "test/Bridge",
+        "test/Token",
+        "test/Market",
+        "test/Pay",
+        "test/Payment",
+        "test/Aave",
+        "test/AudioBridge",
+        "test/Tron",
+        "test/UniBridge",
+        "test/Usdt",
+        "test/Xrpl",
+        "test/VaultSlither"
+      ]
+    },
+    "protocol-creative": {
+      "source": [
+        "src/creative/",
+        "src/rights/",
+        "src/media/",
+        "src/messenger/",
+        "src/town/",
+        "src/attention/",
+        "src/review/"
+      ],
+      "tests": [
+        "test/Creative",
+        "test/Rights",
+        "test/Media",
+        "test/Messenger",
+        "test/Town",
+        "test/Attention",
+        "test/Review",
+        "test/Doob",
+        "test/Recording",
+        "test/Remix"
+      ]
+    },
+    "protocol-services": {
+      "source": [
+        "src/ai/",
+        "src/oracle/",
+        "src/randomness/",
+        "src/interop/",
+        "src/grants/",
+        "src/launchpad/",
+        "src/arbitration/"
+      ],
+      "tests": [
+        "test/AI",
+        "test/Oracle",
+        "test/Randomness",
+        "test/Interop",
+        "test/Grants",
+        "test/Launchpad",
+        "test/Arbitration",
+        "test/Grant"
+      ]
+    },
+    "protocol-infrastructure": {
+      "source": [
+        "src/commons/",
+        "src/bonggoggles/",
+        "src/gaming/",
+        "src/pulse/",
+        "src/resource/",
+        "src/rewards/",
+        "src/vpn/",
+        "src/testnet/"
+      ],
+      "tests": [
+        "test/Commons",
+        "test/Gaming",
+        "test/Pulse",
+        "test/Resource",
+        "test/Rewards",
+        "test/VPN",
+        "test/Bong",
+        "test/Testnet"
+      ]
+    },
+    "protocol-misc": {
+      "source": [
+        "src/"
+      ],
+      "tests": [
+        "test/"
+      ]
+    },
+    "protocol-account-security": {
+      "source": [
+        "src/IRewardController.sol",
+        "src/IValidatorRegistry.sol"
+      ],
+      "tests": [
+        "test/SmartAccount",
+        "test/EntryPoint",
+        "test/Paymaster",
+        "test/GasSponsor",
+        "test/P256",
+        "test/Rip7212",
+        "test/Sponsorship",
+        "test/DomainNonce",
+        "test/ReplayProtection",
+        "test/EmergencyControls",
+        "test/VerifierRotation",
+        "test/MalformedProof",
+        "test/CapabilityRegistry",
+        "test/ConsensusSystem",
+        "test/Stake",
+        "test/SettlementRouter",
+        "test/RefundManager"
+      ]
+    },
+    "protocol-bridges-adapters": {
+      "source": [],
+      "tests": [
+        "test/BitcoinBridge",
+        "test/BnbBridge",
+        "test/CrossAdapter",
+        "test/CurecoinBridge",
+        "test/DobbscoinBridge",
+        "test/DogecoinBridge",
+        "test/EthereumBridge",
+        "test/EurcBridge",
+        "test/LinkBridge",
+        "test/LitecoinBridge",
+        "test/NativeAdapter",
+        "test/PirateChainBridge",
+        "test/PotcoinBridge",
+        "test/QcadBridge",
+        "test/RaySolanaBridge",
+        "test/SolanaBridge"
+      ]
+    },
+    "protocol-registries": {
+      "source": [],
+      "tests": [
+        "test/Catalog",
+        "test/Civic",
+        "test/Storage",
+        "test/InvoiceRegistry",
+        "test/Notifications",
+        "test/SearchGenesis",
+        "test/DevelopmentCompensation",
+        "test/CanonicalConstantProduct"
+      ]
+    },
+    "protocol-fantasy": {
+      "source": [],
+      "tests": [
+        "test/fantasy/",
+        "test/fantasy-oracle/",
+        "test/fantasy-approved/"
+      ]
+    },
+    "protocol-playback": {
+      "source": [],
+      "tests": [
+        "test/Playback",
+        "test/VideoPoker",
+        "test/PokerEvaluation"
+      ]
+    }
+  },
+  "shared_roots": [
+    "src/interfaces/",
+    "src/libraries/",
+    "src/system/",
+    "src/governance/",
+    "src/trust/"
+  ],
+  "mode": "strict-fail-closed"
+}

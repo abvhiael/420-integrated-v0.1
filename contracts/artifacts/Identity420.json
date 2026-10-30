@@ -880,7 +880,7 @@
   "canonicalAddress": "0x0000000000000000000000000000000000000436",
   "compiler": {
     "evmVersion": "cancun",
-    "foundryConfigBlobSha1": "3768be4e992feb9d6439ce47692e2f7247a139a6",
+    "foundryConfigBlobSha1": "c020ec1fd9251e64895d48ccd85dd6fef9ae4e8c",
     "optimizer": true,
     "optimizerRuns": 200,
     "solidity": "0.8.24",

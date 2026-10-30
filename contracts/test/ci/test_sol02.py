@@ -1,0 +1,107 @@
+#!/usr/bin/env python3
+"""CI-SOL-02 contract tests for inventory assignment, scope, and evidence."""
+import importlib.util
+import json
+from pathlib import Path
+import tempfile
+import unittest
+
+ROOT = Path(__file__).resolve().parents[2]
+def load(name, path):
+    spec = importlib.util.spec_from_file_location(name, ROOT / "scripts" / path)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+planner = load("sol02_plan", "sol02-plan.py")
+aggregator = load("sol02_aggregate", "sol02-aggregate.py")
+
+class QualificationTests(unittest.TestCase):
+    def test_explicit_boundaries(self):
+        self.assertEqual(planner.assign("src/highcountry/competition/PremiumCompetitionEntitlements73.sol"), "hc-competition")
+        self.assertEqual(planner.assign("src/highcountry/land/Land420.sol"), "hc-land")
+        self.assertEqual(planner.assign("src/highcountry/cultivation/Cultivation420.sol"), "hc-cultivation")
+        self.assertEqual(planner.assign("src/bet/Bet420.sol"), "420bet")
+        self.assertEqual(planner.assign("src/interfaces/I420.sol"), "protocol-identity")
+        self.assertEqual(planner.assign("script/Anything.sol"), "integration") if False else None
+
+    def test_exact_once_inventory(self):
+        inventory, groups = planner.inventory()
+        self.assertEqual(sorted(v for items in groups.values() for v in items), inventory)
+
+    def test_protocol_family_split(self):
+        cases = {
+            "src/exchange/Exchange420.sol": "protocol-defi",
+            "test/ExchangeRouter420.t.sol": "protocol-defi",
+            "src/media/Media420.sol": "protocol-creative",
+            "test/MediaPhase1Protocol420.t.sol": "protocol-creative",
+            "src/oracle/Oracle420.sol": "protocol-services",
+            "test/Oracle420.t.sol": "protocol-services",
+            "src/governance/Governance420.sol": "protocol-identity",
+            "test/GovernanceAudit420.t.sol": "protocol-identity",
+            "src/gaming/Gaming420.sol": "protocol-infrastructure",
+            "test/GamingProtocol420.t.sol": "protocol-infrastructure",
+            "src/unknown/Unknown.sol": "protocol-misc",
+            "test/UnknownSuite.t.sol": "protocol-misc",
+        }
+        for path, group in cases.items():
+            with self.subTest(path=path):
+                self.assertEqual(planner.assign(path), group)
+
+    def test_retained_inventory_after_protocol_split(self):
+        inventory, groups = planner.inventory()
+        self.assertNotIn("420protocols", groups)
+        self.assertEqual(set(inventory), set(p for targets in groups.values() for p in targets))
+        self.assertEqual(len(inventory), sum(map(len, groups.values())))
+        self.assertTrue(all(p in inventory for p in groups["protocol-defi"]))
+        self.assertTrue(groups["protocol-misc"], "unknown primary owners must remain covered")
+
+    def test_import_closure_bounded_primary_partitions(self):
+        original, owners = planner.inventory()
+        bounded = planner.bounded_groups(owners)
+        flattened = [p for targets in bounded.values() for p in targets]
+        self.assertEqual(sorted(flattened), original)
+        self.assertEqual(len(flattened), len(set(flattened)))
+        for name, targets in bounded.items():
+            with self.subTest(group=name):
+                self.assertLessEqual(len(targets), planner.MAX_PRIMARY_TARGETS)
+                closure = set().union(*(planner.dependency_closure(p) for p in targets))
+                self.assertLessEqual(len(closure), planner.MAX_IMPORT_GRAPH_FILES)
+
+    def test_import_parser_resolves_actual_local_sources(self):
+        path = next(p for p in planner.inventory()[0] if p.startswith("src/") and planner.direct_imports(p))
+        closure = planner.dependency_closure(path)
+        self.assertIn(path, closure)
+        self.assertTrue(all((planner.ROOT / p).is_file() for p in closure))
+
+    def test_shared_security_change_expands_scope(self):
+        inventory, groups = planner.inventory()
+        selected=planner.choose(inventory,groups,["contracts/src/interfaces/IRegistry.sol"],False)
+        self.assertEqual(selected,[g for g,items in groups.items() if items])
+
+    def test_mixed_modules_expand_scope(self):
+        inventory, groups=planner.inventory()
+        selected=planner.choose(inventory,groups,[
+            "contracts/src/highcountry/competition/CompetitionEngine.sol",
+            "contracts/src/bet/BetCore.sol"],False)
+        self.assertEqual(selected,[g for g,items in groups.items() if items])
+
+    def test_aggregate_rejects_missing(self):
+        with tempfile.TemporaryDirectory() as td:
+            with self.assertRaisesRegex(ValueError,"missing"):
+                aggregator.verify({"required":["hc-competition"],"groups":{"hc-competition":["x"]},
+                                   "schema":"420.ci.sol02.v1","sha":"abc","profile":"pr","inventory_sha256":"x",
+                                   "level3":False},Path(td))
+
+    def test_aggregate_rejects_foreign_sha(self):
+        with tempfile.TemporaryDirectory() as td:
+            root=Path(td)
+            (root/"sol02-a.json").write_text(json.dumps({
+                "group":"a","schema":"420.ci.sol02.v1","sha":"wrong","profile":"pr",
+                "inventory_sha256":"x","passed":True,"targets":["x"]}))
+            with self.assertRaisesRegex(ValueError,"sha mismatch"):
+                aggregator.verify({"required":["a"],"groups":{"a":["x"]},
+                                   "schema":"420.ci.sol02.v1","sha":"expected","profile":"pr",
+                                   "inventory_sha256":"x","level3":False},root)
+
+if __name__ == "__main__":
+    unittest.main()

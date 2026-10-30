@@ -283,8 +283,11 @@ contract BetPokerIntegratedFundedAdversarial54Test is PokerWS8ProductionFixture5
         require(msg.sender==address(this));_signed(id,0,PokerNLHEStorage420.Move.CALL,10,WS8_PLAYER_KEY);
     }
     function testCrossHandReplay() public {
-        bytes32 id=_funded();_independent();bytes32[3] memory roots=_roots();
+        bytes32 id=_ready();_showdown(id);_settle(id);
+        bytes32[3] memory roots=_roots();
         (uint256[8] memory proof,uint256[5] memory pub)=abi.decode(_proof("WS8Initial"),(uint256[8],uint256[5]));
+        // A completed first hand does not waive the configured deal-request interval.
+        cheat54.warp(block.timestamp + 61);
         bytes32 snapshot=deal.snapshotFor(TABLE,3);
         cheat54.prank(ADMIN);bytes32 target=deal.begin(TABLE,2,uint64(block.timestamp+3600),keccak256("WS8.SECOND.HAND"),snapshot,3);
         cheat54.prank(PROVIDER_A);deal.commit(target,keccak256("WS8.SECOND.A"));
@@ -296,8 +299,8 @@ contract BetPokerIntegratedFundedAdversarial54Test is PokerWS8ProductionFixture5
         pub[1]=uint256(ws8Initial.statement(target,roots[0]))%WS8_FR;
         pub[2]=uint256(target)%WS8_FR;bytes memory forged=abi.encode(proof,pub);
         cheat54.expectRevert(PokerInitialEncryptedDeck420.InvalidProof.selector);ws8Initial.submit(target,roots[0],forged);
-        require(ws8Initial.rootOf(target)==0,"replayed initial deck persisted");_escrowUnchanged(id);
-        _publishAndInitial(id);_stages(id);_deliver(id);ws8Engine.start(id,0,60);_showdown(id);_settle(id);
+        require(ws8Initial.rootOf(target)==0,"replayed initial deck persisted");
+        require(ledger.handConsumed(id)&&ws8Engine.handSettled(id),"first hand settlement remains final");
     }
     function testPrematureReveal() public {
         bytes32 id=_ready();uint256[8] memory points=abi.decode(_data("WS8Partial150.points"),(uint256[8]));bytes memory proof=_proof("WS8Partial150");

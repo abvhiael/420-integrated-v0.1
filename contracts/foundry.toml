@@ -39,6 +39,13 @@ quote_style = "double"
 # `hardening` profiles remain the merge/closeout qualification gates.
 [profile.pr]
 fuzz = { runs = 2500, max_test_rejects = 65536, seed = "0x420" }
+# Canonical tournament verifier keys are read-only, matching the isolated tournament profile.
+fs_permissions = [
+  { access = "read-write", path = "./out" },
+  { access = "read-write", path = "../artifacts/contracts" },
+  { access = "read", path = "../clients/420bet-poker/zkshuffle/fixtures/ws8" },
+  { access = "read", path = "../clients/420bet-poker/zkshuffle/fixtures/tournament-5c5" }
+]
 
 [profile.pr.invariant]
 runs = 128

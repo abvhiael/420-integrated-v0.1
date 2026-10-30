@@ -68,14 +68,7 @@ contract FantasySportradarOracle420Test is FantasyDisputeFixture420 {
         _resolve();bytes32 digest=book.statDigest(v.slate,_statReport());
         _send(OP_A,PA,digest,3);_send(OP_B,PB,digest,4);book.verifyStats(v.slate,_statReport());
     }
-    function testVerifiedProviderStatisticsReachCanonicalOracleAndScorer() public {
-        _accept();require(router.readResult(DATA_FEED).agreeingSources==2,"real quorum");
-        for(uint256 i;i<v.ids.length;i++){
-            require(scorer.score(v.stats[i],v.positions[i]==16)==v.points[i],"independent score");
-            uint32[7] memory ids;FantasyTypes420.Stats[7] memory stats;bytes32[][7] memory proofs;
-            for(uint256 j;j<7;j++){ids[j]=v.ids[i];stats[j]=v.stats[i];proofs[j]=v.proofs[i];}
-            require(scorer.calculate(address(book),v.slate,1,v.root,ids,abi.encode(stats,proofs))==v.points[i]*7,"every leaf proof");
-        }
+    function _assertPositionLineup() internal {
         // Exercise actual proof verification through a valid position-based lineup.
         uint8[7] memory wanted=[uint8(1),2,4,8,8,16,1];
         uint32[7] memory lineup;FantasyTypes420.Stats[7] memory statistics;bytes32[][7] memory proof;int256 expected;
@@ -88,6 +81,16 @@ contract FantasySportradarOracle420Test is FantasyDisputeFixture420 {
             require(found,"position inventory");
         }
         require(scorer.calculate(address(book),v.slate,1,v.root,lineup,abi.encode(statistics,proof))==expected,"real Merkle scoring");
+    }
+    function testVerifiedProviderStatisticsReachCanonicalOracleAndScorer() public {
+        _accept();require(router.readResult(DATA_FEED).agreeingSources==2,"real quorum");
+        for(uint256 i;i<v.ids.length;i++){
+            require(scorer.score(v.stats[i],v.positions[i]==16)==v.points[i],"independent score");
+            uint32[7] memory ids;FantasyTypes420.Stats[7] memory stats;bytes32[][7] memory proofs;
+            for(uint256 j;j<7;j++){ids[j]=v.ids[i];stats[j]=v.stats[i];proofs[j]=v.proofs[i];}
+            require(scorer.calculate(address(book),v.slate,1,v.root,ids,abi.encode(stats,proofs))==v.points[i]*7,"every leaf proof");
+        }
+        _assertPositionLineup();
         bytes32 rd=book.resultDigest(v.slate,_results(),v.evidence);bytes32 sd=book.statDigest(v.slate,_statReport());
         emit Identity(keccak256("FantasySlateBook420"),address(book),address(book).codehash,address(book).code.length);
         emit Identity(keccak256("OracleRouter420"),address(router),address(router).codehash,address(router).code.length);

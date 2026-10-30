@@ -1,0 +1,172 @@
+name: Solidity Qualification Summary
+on:
+  pull_request:
+    paths:
+      - 'contracts/**'
+      - '.github/workflows/solidity-qualification-summary.yml'
+  workflow_dispatch:
+    inputs:
+      full_level3:
+        type: boolean
+        required: true
+        default: true
+  push:
+    branches: [main]
+    paths:
+      - 'contracts/**'
+      - '.github/workflows/solidity-qualification-summary.yml'
+permissions:
+  contents: read
+concurrency:
+  group: sol02-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      groups: ${{ steps.select.outputs.groups }}
+      sha: ${{ steps.select.outputs.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - name: Generate exact-head primary inventory and qualification selection
+        id: select
+        shell: bash
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          BASE_REF: ${{ github.base_ref }}
+          EVENT_NAME: ${{ github.event_name }}
+          FULL_LEVEL3: ${{ inputs.full_level3 }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          mkdir -p artifacts/sol02
+          if [[ "$EVENT_NAME" == pull_request ]]; then
+            git fetch --no-tags origin "+refs/heads/${BASE_REF}:refs/remotes/origin/${BASE_REF}"
+            python3 contracts/scripts/sol02-plan.py --base "origin/${BASE_REF}" --output artifacts/sol02/plan.json
+          else
+            python3 contracts/scripts/sol02-plan.py --level3 --output artifacts/sol02/plan.json
+          fi
+          echo "groups=$(python3 -c 'import json; print(json.dumps(json.load(open("artifacts/sol02/plan.json"))["required"], separators=(",",":")))' )" >> "$GITHUB_OUTPUT"
+          echo "sha=$EXPECTED_SHA" >> "$GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sol02-plan-${{ steps.select.outputs.sha }}
+          path: artifacts/sol02/plan.json
+          if-no-files-found: error
+  bounded-groups:
+    needs: plan
+    if: needs.plan.outputs.groups != '[]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        group: ${{ fromJson(needs.plan.outputs.groups) }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.plan.outputs.sha }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: sol02-plan-${{ needs.plan.outputs.sha }}
+          path: artifacts/sol02
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Cache exact-SHA/profile/group Foundry artifacts
+        uses: actions/cache@v4
+        with:
+          path: |
+            contracts/out-sol02-${{ matrix.group }}
+            contracts/cache-sol02-${{ matrix.group }}
+          key: sol02-${{ runner.os }}-foundry-stable-${{ matrix.group }}-${{ needs.plan.outputs.sha }}-${{ hashFiles('contracts/foundry.toml') }}-${{ github.event_name == 'pull_request' && 'pr' || 'ci' }}
+      - name: Compile bounded group once and execute retained test targets
+        working-directory: contracts
+        env:
+          GROUP: ${{ matrix.group }}
+          EXPECTED_SHA: ${{ needs.plan.outputs.sha }}
+        run: bash scripts/sol02-run-group.sh ../artifacts/sol02/plan.json "$GROUP"
+      - name: Retain qualification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sol02-evidence-${{ matrix.group }}-${{ needs.plan.outputs.sha }}
+          path: artifacts/sol02/sol02-*.json
+          if-no-files-found: warn
+  level2-integration:
+    needs: plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.plan.outputs.sha }}
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - uses: actions/cache@v4
+        with:
+          path: |
+            contracts/out-sol02-level2
+            contracts/cache-sol02-level2
+          key: sol02-level2-${{ runner.os }}-foundry-stable-pr-${{ needs.plan.outputs.sha }}-${{ hashFiles('contracts/foundry.toml') }}
+      - name: Run retained cross-module integration tests
+        working-directory: contracts
+        run: bash scripts/sol02-level2.sh '${{ needs.plan.outputs.sha }}'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sol02-l2-${{ needs.plan.outputs.sha }}
+          path: artifacts/sol02/sol02-level2.json
+          if-no-files-found: error
+  summary:
+    name: Solidity Qualification Summary
+    needs: [plan, bounded-groups, level2-integration]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: sol02-*
+          path: artifacts/sol02/all
+          merge-multiple: true
+      - name: Check dependency jobs and exact-SHA complete evidence
+        env:
+          PLAN_RESULT: ${{ needs.plan.result }}
+          GROUP_RESULT: ${{ needs.bounded-groups.result }}
+          L2_RESULT: ${{ needs.level2-integration.result }}
+        run: |
+          set -euo pipefail
+          test "$PLAN_RESULT" = success
+          test "$L2_RESULT" = success
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          paths=list(Path('artifacts/sol02/all').rglob('plan.json'))
+          assert len(paths)==1, paths
+          p=json.loads(paths[0].read_text())
+          Path('artifacts/sol02/plan.json').write_text(json.dumps(p))
+          PY
+          if python3 -c 'import json; exit(bool(json.load(open("artifacts/sol02/plan.json"))["required"]))'; then
+            test "$GROUP_RESULT" = skipped
+          else
+            test "$GROUP_RESULT" = success
+          fi
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          plan=json.loads(Path('artifacts/sol02/plan.json').read_text())
+          files=list(Path('artifacts/sol02/all').rglob('sol02-level2.json'))
+          assert len(files)==1, files
+          result=json.loads(files[0].read_text())
+          assert result['schema']=='420.ci.sol02.level2.v1'
+          assert result['sha']==plan['sha'] and result['passed'] is True
+          assert result['profile']=='pr'
+          assert len(result['tests'])==len(set(result['tests'])) and len(result['tests'])>=4
+          PY
+          python3 contracts/scripts/sol02-aggregate.py artifacts/sol02/plan.json artifacts/sol02/all

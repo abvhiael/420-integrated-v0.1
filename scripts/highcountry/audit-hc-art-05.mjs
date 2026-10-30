@@ -48,11 +48,8 @@ for(const [code,n] of Object.entries(expected)){
    const filename=a.filename??a.canonical_filename;
    const location=a.repository_path??a.repo_path??a.github_path??(filename?join(manifestPath,'..',filename):null);
    if(!location)continue;
-   const abs=resolve(location.startsWith('apps/')?resolve(base,'../../../../'):join(manifestPath,'..'),location);
-   const actual=location.startsWith('apps/')?resolve(base,'../../../../',location):abs;
-   // Repository-root paths are resolved relative to project root, never to an artwork directory.
-   const rootPath=resolve(base,'../../../../');
-   const p=location.startsWith('apps/')?resolve(rootPath,location):actual;
+   const projectRoot=resolve(base,'../../../../../');
+   const p=location.startsWith('apps/')?resolve(projectRoot,location):resolve(manifestPath,'..',location);
    recorded.add(p);
    if(!pngs.includes(p)){result.manifestReconciliation.push({kind:'stale-manifest-path',path:relative(base,manifestPath),record:a.id,asset:location});continue;}
    if(a.sha256){

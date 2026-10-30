@@ -140,3 +140,21 @@ test('transfer receipt replay is rejected across ownership roundtrips',async()=>
  await f.issuer.transfer('bob','creator_item','alice',{receiptId:'receipt_transfer_2'});
  await assert.rejects(f.issuer.transfer('alice','creator_item','bob',{receiptId:'receipt_transfer_1'}),/transfer-replay/);
 });
+test('HC-ECON-05: unsigned, rejected and revoked certificates cannot publish, reserve or issue',async()=>{
+ const f=fixtures();
+ f.store.state.econCertificates.delete('signed_cert');
+ await assert.rejects(f.issuer.publish('admin',f.design('creator')),/certification-not-authorized/);
+ seedValidCreatorCertificate(f.store.state);
+ f.store.state.econCertificates.get('signed_cert').status='pending-qa';
+ await assert.rejects(f.issuer.publish('admin',f.design('creator')),/certification-not-authorized/);
+ f.store.state.econCertificates.get('signed_cert').status='approved';
+ await f.issuer.publish('admin',f.design('creator'));
+ f.store.state.econReviewers.get('reviewer').status='suspended';
+ await assert.rejects(f.reserve('creator'),/certification-not-authorized/);
+ f.store.state.econReviewers.get('reviewer').status='active';
+ await f.reserve('creator');f.paid();
+ f.store.state.econCertificates.get('signed_cert').status='revoked';
+ await assert.rejects(f.issuer.issue('alice',{itemId:'creator_item',evidence:f.evidence('creator')}),/certification-not-authorized/);
+ assert.equal(f.store.state.econItems.size,0);
+ assert.equal(f.store.state.econDesigns.get('creator_design').issuedEver,0);
+});

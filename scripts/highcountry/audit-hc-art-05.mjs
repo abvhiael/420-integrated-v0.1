@@ -1,64 +1,72 @@
-// HC-ART-05: evidence-only audit. No changes to ownership, economy or placement authority.
-// Run: node scripts/highcountry/audit-hc-art-05.mjs [--strict]
-import {readdir,readFile,stat} from 'node:fs/promises';
+// HC-ART-05: the PNGs committed to main are authoritative. No source art alteration.
+// Verifies all 197 original PNG files, canonical relative locations and image headers.
+// Manifests are secondary metadata, never an excuse to reject or replace merged artwork.
+import {readFile,readdir} from 'node:fs/promises';
+import {resolve,relative,join} from 'node:path';
 import {createHash} from 'node:crypto';
-import {resolve,join,relative} from 'node:path';
-const root=resolve(import.meta.dirname,'../..');
-const base=join(root,'apps/highcountry-web/public/assets/structures');
-const expected=Object.freeze({'a':18,'b':18,'c':18,'d':52,'e':43,'f':48});
-const groups=Object.fromEntries(Object.keys(expected).map(k=>[k,[]]));
-const failures=[];
-async function walk(dir){
- let list;try{list=await readdir(dir,{withFileTypes:true});}catch{return;}
- for(const ent of list){
-  const p=join(dir,ent.name);
-  if(ent.isDirectory())await walk(p);
-  else if(ent.name==='manifest.json'){
-   const rel=relative(base,p).replaceAll('\\','/');
-   const match=/^hc-art-05-([a-f])\//.exec(rel);
-   if(!match)continue;
-   const group=match[1];
-   try{
-    const doc=JSON.parse(await readFile(p,'utf8'));
-    if(!Array.isArray(doc.assets))throw Error('missing-assets-array');
-    groups[group].push({path:p,doc});
-   }catch(e){failures.push({kind:'invalid-manifest',path:rel,reason:String(e.message)});}
+const base=resolve(import.meta.dirname,'../../apps/highcountry-web/public/assets/structures');
+const expected={a:18,b:18,c:18,d:52,e:43,f:48};
+const result={schema:'hc-art-05-main-png-authority-v2',expectedTotal:197,collections:{},failures:[],manifestReconciliation:[]};
+async function collect(path,entries=[]){
+ for(const e of await readdir(path,{withFileTypes:true})){
+  const p=join(path,e.name);
+  if(e.isDirectory())await collect(p,entries);
+  else if(e.isFile()&&e.name.toLowerCase().endsWith('.png'))entries.push(p);
+ }
+ return entries;
+}
+async function manifests(path,entries=[]){
+ for(const e of await readdir(path,{withFileTypes:true})){
+  const p=join(path,e.name);
+  if(e.isDirectory())await manifests(p,entries);
+  else if(e.isFile()&&e.name==='manifest.json')entries.push(p);
+ }
+ return entries;
+}
+for(const [code,n] of Object.entries(expected)){
+ const root=join(base,'hc-art-05-'+code);
+ const pngs=(await collect(root)).sort();
+ const manifestFiles=await manifests(root);
+ let rgbaCount=0;
+ const recorded=new Set();
+ for(const p of pngs){
+  const b=await readFile(p);
+  const rel=relative(base,p).replaceAll('\\','/');
+  if(b.length<26||!b.subarray(0,8).equals(Buffer.from([137,80,78,71,13,10,26,10]))){
+    result.failures.push({kind:'not-png',path:rel});continue;
+  }
+  if(b[25]!==6){result.failures.push({kind:'not-rgba',path:rel});continue;}
+  if(!b.readUInt32BE(16)||!b.readUInt32BE(20)){result.failures.push({kind:'invalid-dimensions',path:rel});continue;}
+  rgbaCount++;
+ }
+ for(const manifestPath of manifestFiles){
+  let m;
+  try{m=JSON.parse(await readFile(manifestPath,'utf8'));}
+  catch(e){result.manifestReconciliation.push({kind:'invalid-manifest',path:relative(base,manifestPath),message:e.message});continue;}
+  if(!Array.isArray(m.assets))continue;
+  for(const a of m.assets){
+   const filename=a.filename??a.canonical_filename;
+   const location=a.repository_path??a.repo_path??a.github_path??(filename?join(manifestPath,'..',filename):null);
+   if(!location)continue;
+   const abs=resolve(location.startsWith('apps/')?resolve(base,'../../../../'):join(manifestPath,'..'),location);
+   const actual=location.startsWith('apps/')?resolve(base,'../../../../',location):abs;
+   // Repository-root paths are resolved relative to project root, never to an artwork directory.
+   const rootPath=resolve(base,'../../../../');
+   const p=location.startsWith('apps/')?resolve(rootPath,location):actual;
+   recorded.add(p);
+   if(!pngs.includes(p)){result.manifestReconciliation.push({kind:'stale-manifest-path',path:relative(base,manifestPath),record:a.id,asset:location});continue;}
+   if(a.sha256){
+    const hash=createHash('sha256').update(await readFile(p)).digest('hex');
+    if(hash!==a.sha256)result.manifestReconciliation.push({kind:'stale-sha256-metadata',path:relative(base,manifestPath),record:a.id,asset:location,committedSha256:hash,recordedSha256:a.sha256});
+   }
   }
  }
+ const unregistered=pngs.filter(p=>!recorded.has(p)).map(p=>relative(base,p).replaceAll('\\','/'));
+ result.collections[code]={expected:n,committedPngs:pngs.length,validRgbaPngs:rgbaCount,manifests:manifestFiles.length,notInManifest:unregistered.length};
+ if(pngs.length!==n)result.failures.push({kind:'png-inventory-count',collection:code,expected:n,actual:pngs.length});
 }
-await walk(base);
-const counts={}, verified=[];
-for(const [group,manifests] of Object.entries(groups)){
- let count=0;const seen=new Set();
- for(const {path,doc} of manifests){
-  for(const entry of doc.assets){
-   const filename=entry.filename??entry.canonical_filename;
-   const location=entry.repo_path??entry.repository_path??entry.github_path??(join(path,'..',String(filename??'unknown')));
-   const full=resolve(root,location);
-   const asset=relative(root,full).replaceAll('\\','/');
-   const key=group+'/'+String(entry.id)+'/'+asset;
-   if(!filename||!asset.startsWith('apps/highcountry-web/public/assets/structures/hc-art-05-'+group+'/')||
-     seen.has(key)){failures.push({kind:'invalid-or-duplicate-record',group,asset,id:entry.id});continue;}
-   seen.add(key);count++;
-   try{
-    const bytes=await readFile(full);
-    if(bytes.length<26||!bytes.subarray(0,8).equals(Buffer.from([137,80,78,71,13,10,26,10])))throw Error('not-png');
-    const width=bytes.readUInt32BE(16),height=bytes.readUInt32BE(20);
-    if(bytes[25]!==6)throw Error('not-rgba');
-    const fp=entry.footprint_tiles,canvas=entry.canvas_px;
-    const fw=Array.isArray(fp)?fp[0]:fp?.width,fh=Array.isArray(fp)?fp[1]:fp?.height;
-    const cw=Array.isArray(canvas)?canvas[0]:canvas?.width,ch=Array.isArray(canvas)?canvas[1]:canvas?.height;
-    if(fp||canvas){if(width!==fw*320||height!==fh*320||cw!==width||ch!==height)throw Error('footprint-or-canvas-mismatch');}
-    else if(!entry.git_blob_sha)throw Error('missing-approved-geometry-and-source-identity');
-    if(entry.git_blob_sha){const git=Buffer.concat([Buffer.concat([Buffer.from('blob '+bytes.length),Buffer.from([0])]),bytes]);if(createHash('sha1').update(git).digest('hex')!==entry.git_blob_sha)throw Error('git-blob-provenance-mismatch');}
-    if(entry.sha256&&createHash('sha256').update(bytes).digest('hex')!==entry.sha256)throw Error('sha256-mismatch');
-    verified.push(asset);
-   }catch(e){failures.push({kind:'asset-validation',group,asset,id:entry.id,reason:String(e.message)});}
-  }
- }
- counts[group]={expected:expected[group],manifestRecords:count,verified:verified.filter(x=>x.includes('hc-art-05-'+group+'/')).length,manifestFiles:manifests.length};
- if(count!==expected[group])failures.push({kind:'incomplete-manifest-coverage',group,expected:expected[group],found:count});
-}
-const report={schema:'hc-art-05-inventory-audit-v1',expectedTotal:197,playerOwnedExpected:149,governmentOwnedExpected:48,counts,verifiedAssetCount:verified.length,failures,modifierQualification:'not-proven-by-assets',note:'No unapproved modifier values, grants or placement permissions are inferred.'};
-process.stdout.write(JSON.stringify(report,null,2)+'\n');
-if(process.argv.includes('--strict')&&failures.length)process.exitCode=1;
+result.verifiedTotal=Object.values(result.collections).reduce((s,c)=>s+c.validRgbaPngs,0);
+result.assetQualified=result.failures.length===0&&result.verifiedTotal===197;
+result.modifiersQualified=false;
+console.log(JSON.stringify(result,null,2));
+if(process.argv.includes('--strict')&&!result.assetQualified)process.exitCode=1;

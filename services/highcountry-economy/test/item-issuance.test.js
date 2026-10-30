@@ -1,4 +1,5 @@
 import test from 'node:test';
+import {generateKeyPairSync,sign} from 'node:crypto';
 import assert from 'node:assert/strict';
 import {MemoryTransactionFixture} from '../src/buds-ledger.js';
 import {TAXONOMY_VERSION,POLICY_VERSION,defineTaxonomyCatalog} from '../src/object-taxonomy.js';
@@ -7,8 +8,19 @@ const type={schemaVersion:TAXONOMY_VERSION,typeId:'artisan_bench',family:'equipm
 const policy=(origin)=>({schemaVersion:POLICY_VERSION,policyId:origin+'_policy',typeId:'artisan_bench',revision:1,origin,maxModifiers:origin==='developer'?1:2,perItemCapBps:origin==='quest'?2000:500,effects:origin==='developer'?[{effectId:'crafting_efficiency',minBps:250,maxBps:250,weight:1}]:origin==='quest'?[{effectId:'crafting_efficiency',minBps:400,maxBps:500,weight:1},{effectId:'material_conservation',minBps:400,maxBps:500,weight:1}]:[{effectId:'crafting_efficiency',minBps:70,maxBps:180,weight:2},{effectId:'material_conservation',minBps:70,maxBps:180,weight:1}],qualified:true,qualificationRef:'reviewed_policy'});
 const catalog=defineTaxonomyCatalog({types:[type],policies:['creator','developer','quest'].map(policy)});
 const entropy='0x'+'ab'.repeat(32);
+const reviewerKeys=generateKeyPairSync('ed25519');
+function seedValidCreatorCertificate(s,assetId='creator_design',certificationRef='signed_cert'){
+ const asset={assetId,revision:1,creatorId:'alice',sha256:'a'.repeat(64),metadataHash:'b'.repeat(64),publicationStatus:'unpublished'};
+ const p={version:'HC.ECON.CERT.V1',certificateId:certificationRef,assignmentId:'assigned_creator',reviewerId:'reviewer',assetId,revision:1,sha256:asset.sha256,metadataHash:asset.metadataHash,description:'Qualified original isometric illustration',issuedAt:111};
+ const signature=sign(null,Buffer.from(JSON.stringify(p)),reviewerKeys.privateKey).toString('base64');
+ s.econCreatorAssets=new Map([[JSON.stringify([assetId,1]),asset]]);
+ s.econReviewers=new Map([['reviewer',{reviewerId:'reviewer',publicKey:reviewerKeys.publicKey.export({format:'pem',type:'spki'}),keyVersion:1,status:'active'}]]);
+ s.econAssignments=new Map([['assigned_creator',{assignmentId:'assigned_creator',reviewerId:'reviewer',assetId,revision:1,status:'completed'}]]);
+ s.econCertificates=new Map([[certificationRef,{...p,signature,keyVersion:1,automatedValidationId:'verified_png',status:'approved',qaBy:'qa',disputed:false}]]);
+}
+
 const fixtures=()=>{
- const store=new MemoryTransactionFixture();let paid=false,quest=false,random=true,verified=0,revoked=false,tamperedRequest=false;
+ const store=new MemoryTransactionFixture();seedValidCreatorCertificate(store.state);let paid=false,quest=false,random=true,verified=0,revoked=false,tamperedRequest=false;
  const authority={principal:async session=>session,issuer:async()=>true,guardState:()=>!revoked,verifyPurchase:async()=>paid,verifyQuest:async()=>quest,verifyTransfer:async()=>true,verifyCancellation:async()=>true};
  const entropyReader={verifyFinalized:async intent=>{verified++;return random?{verified:true,context:intent.context,entropy,requestId:tamperedRequest?'different_request':intent.randomnessRequestId,anchor:'finalized_block_77'}:{verified:false,context:intent.context,entropy,requestId:tamperedRequest?'different_request':intent.randomnessRequestId,anchor:'finalized_block_77'};}};
  const issuer=new ItemIssuance({store,catalog,authority,entropyReader,clock:()=>111});
@@ -94,6 +106,8 @@ test('creator policy expected mean is evaluated with actual weights not mere mid
 test('PostgreSQL JSONB transaction serialization retains cap and receipts across store recreation',async()=>{
  const {PostgresBudsStore}=await import('../src/postgres-store.js');
  let persisted={schema:1,balances:[],operations:[],claims:[],sourceIssued:[],issued:0,burned:0};
+ const seeded={};seedValidCreatorCertificate(seeded,'durable_design','cert_reviewed');
+ for(const key of ['econCreatorAssets','econReviewers','econAssignments','econCertificates'])persisted[key]=[...seeded[key]];
  const pool={connect:async()=>({query:async(sql,args)=>{
    if(sql.startsWith('SELECT state'))return {rows:[{state:structuredClone(persisted)}]};
    if(sql.startsWith('UPDATE highcountry_buds_state')){persisted=JSON.parse(args[1]);return {rowCount:1};}

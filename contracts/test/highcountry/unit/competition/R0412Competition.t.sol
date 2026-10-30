@@ -17,6 +17,9 @@ interface VmR0412 {
 
 contract R0412Evidence is ICompetitionEvidenceR0412 {
     mapping(bytes32 => bytes32) public qualified;
+    bool public unavailable;
+
+    function setUnavailable(bool state) external { unavailable = state; }
 
     function approve(
         bytes32 id,
@@ -39,6 +42,7 @@ contract R0412Evidence is ICompetitionEvidenceR0412 {
         uint16 q,
         uint64 at
     ) external view returns (bool) {
+        if (unavailable) revert("provider unavailable");
         return qualified[id] != bytes32(0) && qualified[id] == keccak256(abi.encode(who, q, at));
     }
 }
@@ -297,6 +301,18 @@ contract R0412CompetitionTest {
         entitlement.permit(address(alice), SCOPE, false);
         require(!engine.resultIsCurrent(ev, address(alice)), "revoked entitlement retained recognition");
         require(engine.winners(ev) == address(alice), "finalized winner should remain historical");
+    }
+
+    function testMaliciousUnavailableVerifierFailsClosedAtFinalization() public {
+        _enterBoth();
+        bytes32 harvest = keccak256("provider-outage");
+        evidence.approve(harvest, address(alice), 9500, opens);
+        alice.submit(engine, EVENT, harvest, 9500, opens);
+        evidence.setUnavailable(true);
+        vm.warp(challenge);
+        engine.finalize(EVENT);
+        require(engine.winners(EVENT) == address(0), "unavailable provider invented winner");
+        require(!engine.resultIsCurrent(EVENT, address(alice)), "outage accepted as current result");
     }
 
     function testLifecycleBoundaries() public {

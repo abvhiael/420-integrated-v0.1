@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {HighCountryProductionPlacementAuthority} from '../src/placement-production-authority.js';
+import {composeOrdinaryMarketRuntime,runtimeHttpServer} from '../src/runtime-service.js';
 const session='signed';
 const claims={sub:'alice',iss:'issuer',epoch:0};
 const runtime={registeredPrincipal:async()=> 'alice',verifyToken:()=>claims,issuers:{issuer:{operators:{alice:{worldAuthority:true}}}}};
@@ -47,4 +48,42 @@ test('operator commit gate rejects epoch, account and privilege revocation',()=>
 test('commit-time independent verifiers mandatory at composition',()=>{
  assert.throws(()=>new HighCountryProductionPlacementAuthority({runtime,world:{...world,verifyAtCommit:undefined}}),/missing-independent-authorities/);
  assert.throws(()=>new HighCountryProductionPlacementAuthority({runtime,world:{...world,verifyTransferAtCommit:undefined}}),/missing-independent-authorities/);
+});
+
+test('03 Package 4: ordinary runtime placement uses identical store and identity; fail closed without independent world authority',()=>{
+ const store={transact:fn=>fn({})};
+ const identity={store,registeredPrincipal:async()=> 'alice',requireTrustedIssuer:async()=>true,
+  verifyToken:()=>({sub:'alice',iss:'issuer',epoch:0}),
+  issuers:{issuer:{operators:{alice:{worldAuthority:true}}}}};
+ const inventoryAuthority={verifyAssetReceipt:async()=>true,requireMarketOpen:async()=>true};
+ const args={store,identity,inventoryAuthority,clock:()=>10};
+ assert.equal(composeOrdinaryMarketRuntime(args).placement,null);
+ const qualified={world:{...world},resolveGeometry:async()=>({}),resolveAssets:async()=>new Set()};
+ const integrated=composeOrdinaryMarketRuntime({...args,placement:qualified});
+ assert.equal(integrated.placement.transactions.store,store);
+ assert.equal(integrated.placement.registry.store,store);
+ assert.equal(integrated.placement.transfer.store,store);
+ assert.equal(integrated.placement.transactions.auth.runtime,identity);
+ assert.equal(integrated.market.store,store);
+ assert.equal(integrated.marketView.store,store);
+ assert.ok(Object.isFrozen(integrated.placement));
+ assert.throws(()=>composeOrdinaryMarketRuntime({...args,placement:{...qualified,world:{...world,verifyAtCommit:undefined}}}),/missing-independent-authorities/);
+ assert.throws(()=>composeOrdinaryMarketRuntime({...args,placement:{...qualified,world:{...world,verifyTransferAtCommit:undefined}}}),/unqualified placement authority wiring/);
+ assert.throws(()=>composeOrdinaryMarketRuntime({...args,placement:{...qualified,resolveGeometry:null}}),/unqualified placement authority wiring/);
+ assert.throws(()=>composeOrdinaryMarketRuntime({...args,identity:{...identity,store:{transact:store.transact}},placement:qualified}),/ordinary market trusted dependencies missing/);
+});
+test('03 Package 4: internal placement composition does not expose HTTP placement routes',async t=>{
+ const store={transact:fn=>fn({})};
+ const identity={store,registeredPrincipal:async()=> 'alice',requireTrustedIssuer:async()=>true,
+  verifyToken:()=>({sub:'alice',iss:'issuer',epoch:0}),
+  issuers:{issuer:{operators:{alice:{worldAuthority:true}}}}};
+ const placement={world:{...world},resolveGeometry:async()=>({}),resolveAssets:async()=>new Set()};
+ const runtime=composeOrdinaryMarketRuntime({store,identity,inventoryAuthority:{verifyAssetReceipt:async()=>true,requireMarketOpen:async()=>true},placement});
+ const server=runtimeHttpServer(runtime,{origin:'https://hc.example'});
+ await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
+ t.after(()=>server.close());
+ const response=await fetch('http://127.0.0.1:'+server.address().port+'/placement/execute',{
+  method:'POST',headers:{'content-type':'application/json',origin:'https://hc.example',authorization:'Bearer signed'},
+  body:JSON.stringify({operation:'unauthorized',action:'place'})});
+ assert.equal(response.status,403);
 });

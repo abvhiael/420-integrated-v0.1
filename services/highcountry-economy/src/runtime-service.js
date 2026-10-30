@@ -34,6 +34,7 @@ import {GameplayLicensing} from './gameplay-licensing.js';
 // routes remain disabled and no placement capability is constructed.
 function composePlacement({store,identity,placement}){
  if(!placement)return null;
+ if(!store||identity?.store!==store)throw new SettlementError('placement store identity mismatch');
  if(typeof placement.world?.verifyTransferAtCommit!=='function'
     ||typeof placement.resolveGeometry!=='function'||typeof placement.resolveAssets!=='function')
    throw new SettlementError('unqualified placement authority wiring');

@@ -32,3 +32,19 @@ Preserve 64px logical grid, approved footprints, authoritative surveyed coordina
 The HC-PLACE-03 transaction engine now verifies, inside the same serializable custody transaction, that an attachment references an existing parent of the same owner and scene, that active attachments have a placed parent, and that traversed ancestry is acyclic. It rejects support movement, rotation, removal or reattachment while placed descendants depend on the support. It rejects duplicate occupied sibling slots and validates parent-first restore ordering. Typed `detachTarget: 'storage'` moves an attached child into durable stored state, releases its exact reserved unit, and retains its immutable parent/slot association for authorized restoration. Detach-to-floor, dynamic reparenting and wall/tabletop geometry remain fail-closed pending their canonical HC-PLACE-05/06 implementations. Stored descendants also prevent ownership transfer of their support; transferred ownership cannot leave an orphaned different-owner child. All transitions share atomic idempotent operation receipts.
 
 Scoped fixture tests added for parent support mutation rollback, unsupported detach, missing support, actual attached-child storage/restore and exact-unit recovery. **No new exact-SHA CI pass is claimed until completed.** Existing passing runs on the previous reconciliation SHA remain historical evidence.
+
+## Package 4 — internal runtime composition and integration
+
+The optional production/ordinary server composition carries placement only through the trusted
+`store` and `identity` instance already used by the market. It rejects a mismatched
+identity datastore, missing independent world verifiers, and incomplete geometry/asset
+resolver wiring. Its registry, transactions and stored-instance transfer services share the
+same durable store and signed runtime authority; no secondary placement ledger or client
+permission source is created. An omitted placement configuration keeps the capability absent.
+
+The targeted authority-lifecycle Level 1 integration assertions cover the shared store,
+runtime identity, negative wiring and route non-exposure. The established runtime HTTP
+server continues to reject direct placement mutation endpoints; HC-PLACE-11 owns any
+future authenticated placement transport. This is not a claim of production enablement.
+Qualification evidence belongs to the exact resulting SHA; Package 3's passing
+B5 PostgreSQL evidence remains on its original SHA.

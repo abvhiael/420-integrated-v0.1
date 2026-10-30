@@ -152,3 +152,7 @@ DOC-12 CI does not determine whether prose is persuasive, architecture is well d
 - [DOC-12 roadmap](DOC-12-ROADMAP.md)
 - [Generated reference](../reference/index.md)
 - [Troubleshooting registry contract](../troubleshooting/registry-contract.md)
+
+## Scoped qualification policy
+
+The [universal scoped qualification policy](UNIVERSAL-SCOPED-QUALIFICATION-POLICY.md) governs independent exact-SHA test jobs, retained passing evidence and targeted retries without treating skipped full-inventory jobs as complete certification.

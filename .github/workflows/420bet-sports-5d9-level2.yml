@@ -1,0 +1,31 @@
+name: 420Bet Sports 5D.9 Level 2 funded integration
+on:
+  pull_request:
+    paths:
+      - 'contracts/test/sports-5d9/**'
+      - 'contracts/test/sports-5d6/**'
+      - 'contracts/src/bet/sports/**'
+      - '.github/workflows/420bet-sports-5d9-level2.yml'
+      - '.github/workflows/reusable-scoped-foundry.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  real-oracle-funded:
+    uses: ./.github/workflows/reusable-scoped-foundry.yml
+    with:
+      suite_name: real-oracle-funded
+      match_path: test/sports-5d6/SportsRealOracleRouterIntegration420.t.sol
+  market-lifecycle:
+    uses: ./.github/workflows/reusable-scoped-foundry.yml
+    with:
+      suite_name: market-lifecycle
+      match_path: test/sports-5d5/SportsMarketLifecycle420.t.sol
+  signed-odds:
+    uses: ./.github/workflows/reusable-scoped-foundry.yml
+    with:
+      suite_name: signed-odds
+      match_path: test/sports-5d3/SportsOddsIngestion420.t.sol
+  # 5D.9 adversarial tests remain owned by the separate exact-head workflow.
+  # A successful prior run is historical evidence; require success on this head
+  # as an independently enforced PR check rather than repeating its compilation.

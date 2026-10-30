@@ -5,6 +5,12 @@ on:
     branches:
       - 'audit/oracle-interface-layer-*'
   pull_request:
+    paths:
+      - 'contracts/src/oracle/**'
+      - 'contracts/test/Oracle420DeploymentBinding.t.sol'
+      - 'scripts/verify-420oracle-audit.py'
+      - 'scripts/verify-genesis-interface-layer.py'
+      - '.github/workflows/420oracle-audit.yml'
   workflow_dispatch:
 
 permissions:

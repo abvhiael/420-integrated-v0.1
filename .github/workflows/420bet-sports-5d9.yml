@@ -1,0 +1,24 @@
+name: 420Bet Sports 5D.9 adversarial qualification
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/bet/sports/**'
+      - 'contracts/test/sports-5d9/**'
+      - '.github/workflows/420bet-sports-5d9.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  adversarial:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.8.6
+      - name: 5D.4–5D.9 funded lifecycle and adversarial inheritance
+        working-directory: contracts
+        run: forge test --match-path 'test/sports-5d9/*.t.sol' -vvv

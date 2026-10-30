@@ -14,7 +14,7 @@ function seedValidCreatorCertificate(s,assetId='creator_design',certificationRef
  const p={version:'HC.ECON.CERT.V1',certificateId:certificationRef,assignmentId:'assigned_creator',reviewerId:'reviewer',assetId,revision:1,sha256:asset.sha256,metadataHash:asset.metadataHash,description:'Qualified original isometric illustration',issuedAt:111};
  const signature=sign(null,Buffer.from(JSON.stringify(p)),reviewerKeys.privateKey).toString('base64');
  s.econCreatorAssets=new Map([[JSON.stringify([assetId,1]),asset]]);
- s.econReviewers=new Map([['reviewer',{reviewerId:'reviewer',publicKey:reviewerKeys.publicKey.export({format:'pem',type:'spki'}),keyVersion:1,status:'active'}]]);
+ s.econReviewers=new Map([['reviewer',{reviewerId:'reviewer',publicKey:reviewerKeys.publicKey.export({format:'pem',type:'spki'}),keyVersion:1,expiresAt:Date.now()+86400000,status:'active'}]]);
  s.econAssignments=new Map([['assigned_creator',{assignmentId:'assigned_creator',reviewerId:'reviewer',assetId,revision:1,status:'completed'}]]);
  s.econCertificates=new Map([[certificationRef,{...p,signature,keyVersion:1,automatedValidationId:'verified_png',status:'approved',qaBy:'qa',disputed:false}]]);
 }

@@ -69,7 +69,7 @@ class SessionTests(unittest.TestCase):
         self.assertEqual(self.app.rpc.sent,1)
     def test_declined_consent_is_not_broadcast(self):
         with self.assertRaises(AdmissionRejected):
-            self.session.admit(Wallet(self.chain.player,False),{"marketId":H(1)},{},100,gas_limit=500000)
+            self.session.admit(Wallet(self.chain.player,False),{"marketId":H(1),"quoteDigest":H(11)},{},100,gas_limit=500000)
         self.assertEqual(self.app.rpc.sent,0)
     def test_wrong_wallet_revoked_issuer_and_credential_fail_closed(self):
         for changed in ("player","issuer_active","valid","active","credentials_ok"):

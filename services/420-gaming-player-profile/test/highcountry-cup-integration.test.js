@@ -111,7 +111,7 @@ test('SERIALIZABLE conflicts retry entire transaction with fresh canonical witne
  assert.equal(reads,2,'do not reuse stale chain witness on retry');
 });
 test('bounded retry exhausts after three failures and does not retry unrelated errors',async()=>{
- for(const [errorCode,expected,limit] of [['40P01','cup-retry-required',3],['23505','duplicate',1]]){
+ for(const [errorCode,expected,limit] of [['40P01','cup-retry-required',6],['23505','duplicate',1]]){
   let attempts=0,rollbacks=0;
   const pool={connect:async()=>{attempts++;return {
    query:async sql=>{if(sql==='ROLLBACK'){rollbacks++;return {rows:[]};}

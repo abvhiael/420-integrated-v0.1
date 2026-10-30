@@ -1,0 +1,32 @@
+name: HighCountry HC-PLACE-03-C Authority Lifecycle Level 1
+on:
+  pull_request:
+    paths:
+      - 'services/highcountry-economy/src/placement-transactions.js'
+      - 'services/highcountry-economy/src/runtime-service.js'
+      - 'services/highcountry-economy/src/custody-records.js'
+      - 'services/highcountry-economy/src/placement-authority-registry.js'
+      - 'services/highcountry-economy/src/placement-production-authority.js'
+      - 'services/highcountry-economy/src/placement-instance-transfer.js'
+      - 'services/highcountry-economy/test/placement-transactions.test.mjs'
+      - 'services/highcountry-economy/test/placement-authority-registry.test.mjs'
+      - 'services/highcountry-economy/test/placement-instance-transfer.test.mjs'
+      - 'services/highcountry-economy/test/placement-production-authority.test.mjs'
+      - '.github/workflows/highcountry-hc-place-03c-l1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  authority-lifecycle:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check services/highcountry-economy/src/placement-authority-registry.js
+      - run: node --check services/highcountry-economy/src/placement-transactions.js
+      - run: node --check services/highcountry-economy/src/placement-instance-transfer.js
+      - run: node --check services/highcountry-economy/src/placement-production-authority.js
+      - run: node --check services/highcountry-economy/src/runtime-service.js
+      - run: node --test services/highcountry-economy/test/placement-authority-registry.test.mjs services/highcountry-economy/test/placement-transactions.test.mjs services/highcountry-economy/test/placement-instance-transfer.test.mjs services/highcountry-economy/test/placement-production-authority.test.mjs

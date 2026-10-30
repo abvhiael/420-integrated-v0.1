@@ -2,6 +2,7 @@
 // An asset is admitted only by trusted authoritative inventory reconciliation.
 // All market and BUDS state MUST share one serializable transaction.
 import {BudsLedger,SettlementError} from './buds-ledger.js';
+import {custodyUnitId,CUSTODY_SCHEMA,custodyState,reserveListedUnits,settleListedUnits} from './custody-records.js';
 const id = x => {if(typeof x!=='string'||!/^[a-zA-Z0-9:_-]{1,128}$/.test(x))throw new SettlementError('invalid market id');return x;};
 const amount = x => {if(!Number.isSafeInteger(x)||x<=0)throw new SettlementError('invalid market units');return x;};
 const key=(owner,asset)=>JSON.stringify([id(owner),id(asset)]);
@@ -25,6 +26,12 @@ export class HighCountryMarket {
      if(s.assetSources.has(k)&&s.assetSources.get(k)!==receipt.receiptId)
        throw new SettlementError('mixed escrow provenance');
      if(b.available>Number.MAX_SAFE_INTEGER-quantity)throw new SettlementError('asset overflow');
+     custodyState(s);
+     const receiptId=id(receipt.receiptId);
+     if(quantity>10000)throw new SettlementError('custody receipt too large');
+     if(s.custodyReceipts.has(receiptId))throw new SettlementError('duplicate custody receipt');
+     for(let i=0;i<quantity;i++){const unitId=custodyUnitId(receiptId,i);if(s.custodyUnits.has(unitId))throw new SettlementError('duplicate custody unit');s.custodyUnits.set(unitId,{schemaVersion:CUSTODY_SCHEMA,unitId,receiptId,unitIndex:i,owner,assetId:asset,state:'available',reservationId:null,revision:1});}
+     s.custodyReceipts.set(receiptId,{schemaVersion:CUSTODY_SCHEMA,owner,assetId:asset,quantity});
      b.available+=quantity;s.assets.set(k,b);s.importedAssets.add(receipt.receiptId);
      s.assetSources.set(k,id(receipt.receiptId));
    });
@@ -40,8 +47,8 @@ export class HighCountryMarket {
      if(this.authority.canonicalSettlementRequired===true&&s.assetSources.get(k)!==listingId)
        throw new SettlementError('canonical listing must match escrow receipt');
      if(b.available<quantity)throw new SettlementError('inventory unavailable');
-     b.available-=quantity;b.reserved+=quantity;s.assets.set(k,b);
-     s.listings.set(listingId,{seller,asset,quantity,price,expiresAt,status:'active',
+     const unitIds=reserveListedUnits(s,{owner:seller,assetId:asset,listingId,quantity});
+     s.listings.set(listingId,{listingId,unitIds,seller,asset,quantity,price,expiresAt,status:'active',
        sourceReceiptId:s.assetSources.get(k)||null});
    });
  }
@@ -64,11 +71,7 @@ export class HighCountryMarket {
      this._return(s,l);l.status='expired';
    });
  }
- _return(s,l){
-   const b=s.assets.get(key(l.seller,l.asset));
-   if(!b||b.reserved<l.quantity)throw new SettlementError('broken reservation');
-   b.reserved-=l.quantity;b.available+=l.quantity;
- }
+ _return(s,l){settleListedUnits(s,{listing:l});}
  async buy(session,op,listingId){
    if(this.authority.requireMarketOpen)await this.authority.requireMarketOpen();
    if(this.authority.canonicalSettlementRequired===true)
@@ -89,9 +92,8 @@ export class HighCountryMarket {
      const provenance=s.assetSources.get(receivingKey);
      if(!l.sourceReceiptId||(provenance&&provenance!==l.sourceReceiptId))
        throw new SettlementError('conflicting inventory provenance');
+     settleListedUnits(s,{listing:l,buyer});
      buyerBuds.available-=l.price;sellerBuds.available+=l.price;
-     sellerAssets.reserved-=l.quantity;buyerAssets.available+=l.quantity;
-     s.assets.set(receivingKey,buyerAssets);
      s.assetSources.set(receivingKey,l.sourceReceiptId);
      l.status='sold';l.buyer=buyer;
      return {buyer,seller:l.seller,asset:l.asset,quantity:l.quantity,price:l.price,fee:0};

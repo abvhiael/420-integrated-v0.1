@@ -20,7 +20,7 @@ class FundedSportsSession:
         # Web3 tuple response is decoded by ABI as a tuple; market config is
         # the first element of SportsMarketRegistry420.Record.
         config = market[0]
-        asset = config[4] if isinstance(config, (tuple, list)) else config["asset"]
+        asset = config[6] if isinstance(config, (tuple, list)) else config["asset"]
         self.identity.verify(rpc, player, asset, app.deployment.asset)
         planned = app.prepare(player, offer, source_report, now)
         # Never send if player declined the precise locked terms.

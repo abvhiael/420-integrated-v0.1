@@ -1,0 +1,64 @@
+name: CI-SOL-02 focused runtime, fixture and Level 2 acceptance
+on:
+  push:
+    branches:
+      - ci/sol02-runtime-fixture-l2-acceptance
+    paths:
+      - '.github/workflows/sol02-acceptance-isolated.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: sol02-focused-acceptance-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  focused-acceptance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - name: Checkout exact implementation SHA
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - name: Verify exact SHA
+        run: test "$(git rev-parse HEAD)" = "${{ github.sha }}"
+      - name: Validate changed Python and shell helpers
+        run: |
+          set -euo pipefail
+          python3 -m py_compile contracts/scripts/sol02-execution.py contracts/scripts/sol02-aggregate.py contracts/scripts/sol02-fixture.py
+          bash -n contracts/scripts/sol02-level2.sh contracts/scripts/sol02-run-group.sh
+          python3 -m unittest discover -s contracts/test/ci -p 'test_sol02*.py' -v
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Genuine Level 2 cross-owner runtime qualification
+        working-directory: contracts
+        run: bash scripts/sol02-level2.sh "${{ github.sha }}"
+      - name: Canonical Decision 10 legacy harness parity
+        working-directory: contracts
+        run: python3 scripts/sol02-fixture.py
+      - name: Verify retained exact-SHA acceptance evidence
+        env:
+          EXPECTED_SHA: ${{ github.sha }}
+        run: |
+          python3 - <<'PY'
+          import json,os
+          from pathlib import Path
+          sha=os.environ['EXPECTED_SHA']
+          l2=json.loads(Path('artifacts/sol02/sol02-level2.json').read_text())
+          f=json.loads(Path('artifacts/sol02/sol02-fixture.json').read_text())
+          assert l2['sha']==f['sha']==sha
+          assert l2['passed'] and f['passed']
+          assert l2['executedTests']>0 and all(r['executed']==r['discovered'] for r in l2['runtime'])
+          assert len(l2['tests'])==len(l2['sourceFamilies'])==4
+          assert f['actual']==f['legacyContract']
+          PY
+      - name: Retain diagnostics regardless of result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sol02-focused-acceptance-${{ github.sha }}
+          path: |
+            artifacts/sol02/**
+            artifacts/contracts/creative-kernel-v1.fixture.json
+          if-no-files-found: warn

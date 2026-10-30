@@ -12,6 +12,7 @@ const safeInt=x=>Number.isSafeInteger(x);
 const object=x=>x!==null&&typeof x==='object'&&!Array.isArray(x)&&Object.getPrototypeOf(x)===Object.prototype;
 const exact=(o,keys)=>object(o)&&Object.keys(o).length===keys.length&&keys.every(k=>Object.hasOwn(o,k));
 const hex=x=>createHash('sha256').update(x).digest('hex');
+const stable=x=>JSON.stringify(x,(_key,value)=>object(value)?Object.fromEntries(Object.keys(value).sort().map(k=>[k,value[k]])):value);
 const deep=x=>structuredClone(x);
 const freeze=x=>{if(x&&typeof x==='object'){for(const v of Object.values(x))freeze(v);Object.freeze(x);}return x;};
 const signature=Buffer.from([137,80,78,71,13,10,26,10]);
@@ -86,7 +87,7 @@ export function validateStudioAsset(bytes,metadata){
  if(geometry.renderAnchorPx.x<0||geometry.renderAnchorPx.x>=pixels.width||geometry.renderAnchorPx.y<0||geometry.renderAnchorPx.y>=pixels.height)err('anchor-outside-canvas');
  // Qualified geometry occupancy is versioned separately from sprite pixel dimensions.
  // Style is a review requirement; a creator's attestation alone never authorizes publish.
- const sha256=hex(bytes),metadataHash=hex(JSON.stringify(metadata));
+ const sha256=hex(bytes),metadataHash=hex(stable(metadata));
  return freeze({schemaVersion:STUDIO_VERSION,assetId:metadata.assetId,revision:metadata.revision,creatorId:metadata.creatorId,sha256,metadataHash,byteLength:bytes.length,mimeType:'image/png',pixels,geometryId:geometry.geometryId,geometryVersion:geometry.geometryVersion,templateId:template.templateId,styleStatus:'human-review-required',publicationStatus:'unpublished'});
 }
 export class CreatorStudio {

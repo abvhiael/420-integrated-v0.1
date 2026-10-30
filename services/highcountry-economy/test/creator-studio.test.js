@@ -14,7 +14,9 @@ const meta=()=>({schemaVersion:STUDIO_VERSION,assetId:'asset_1',revision:1,templ
 const denied=fn=>assert.throws(fn,/hc-econ-04:|hc-place-02:/);
 test('reproducible PNG and geometry provenance with explicit nonapproval',()=>{
  const a=validateStudioAsset(png(),meta()),b=validateStudioAsset(png(),meta());
- assert.deepEqual(a,b);assert.equal(a.publicationStatus,'unpublished');assert.equal(a.styleStatus,'human-review-required');
+ assert.deepEqual(a,b);
+ assert.equal(validateStudioAsset(png(),Object.fromEntries(Object.entries(meta()).reverse())).metadataHash,a.metadataHash);
+ assert.equal(a.publicationStatus,'unpublished');assert.equal(a.styleStatus,'human-review-required');
  assert.equal(a.pixels.nontransparentPixels,14*14);assert.equal(creatorTemplates().length,5);
  assert.equal(a.sha256.length,64);
 });

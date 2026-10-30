@@ -2,7 +2,7 @@
   "step": "HC-ECON-04",
   "roadmap": "docs/highcountry/HC-ECON-00-ARCHITECTURE-BASELINE.md",
   "level": "L1",
-  "base_sha": "f31102862b44f74717556b65951aba4d7aa2b086",
+  "base_sha": "224efca0b638204e2383d5ff0f79227f44400eaa",
   "candidate_sha": "HEAD",
   "classification": "implementation",
   "scope": [
@@ -11,7 +11,8 @@
     "services/highcountry-economy/src/postgres-store.js",
     ".github/workflows/highcountry-hc-econ-04-l1.yml",
     ".qualification/HC-ECON-04-CREATOR-STUDIO.md",
-    ".qualification/candidates/HC-ECON-04.json"
+    ".qualification/candidates/HC-ECON-04.json",
+    "services/highcountry-economy/test/postgres-store.test.js"
   ],
   "tests": [
     {

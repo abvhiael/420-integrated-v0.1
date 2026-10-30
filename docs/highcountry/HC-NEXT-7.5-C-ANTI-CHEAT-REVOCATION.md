@@ -1,0 +1,20 @@
+# HC-NEXT-7.5-C — Anti-cheat and revocation reconciliation
+
+This package preserves the existing canonical R04.12/R04.13 authorities and adds focused adversarial regression coverage. No new score authority, exception to immutable finalization, or unverified client result is introduced.
+
+## Enforcement map
+
+- **Identity and provenance:** `CompetitionEngine.submit` uses `msg.sender` plus exact harvest, player, quality, and time through `ICompetitionEvidenceR0412.verifiedFlower`. `CanonicalCompetitionEvidence` checks `HarvestProductRegistry`'s immutable product, bound grower, harvest time, quality, and committed product hash. Forged grower, quality, timestamp and product identifier fail. The real-product and source-block forged-hash checks remain in `R04CanonicalCompetition.t.sol`.
+- **Timing:** enrollment and submission require the configured event interval; accepted harvest time must be at/after opening and not in the future. A challenge is accepted only before the deadline. Cancellation before a season opens prevents participation; cancelled events cannot finalize.
+- **Revocation:** evidence revocation is limited to the configured adjudicator; optional entitlement is validated on entry, submission, finalization and later via `resultIsCurrent`. The immutable historical winner remains recorded but is not a currently valid result after evidence/entitlement revocation.
+- **Adversarial provider:** when evidence verification reverts or becomes unavailable, `CompetitionEngine._candidateValid` catches the error and excludes the claimant at finalization. The canonical RPC/Cup projection independently requires valid finalized chain, bytecode and current bracket evidence; the prior HC-NEXT-7.4 integration already tests these boundaries. Provider failure is not grounds to fabricate an alternative champion.
+- **Ordinary issuer accounts:** wallet-free `highcountry-ordinary-exhibitions.js` obtains account identity from the independently authorized issuer and exact canonical finalized FLOWER evidence from the configured harvest verifier. It rejects guest/revoked identities, wrong account, bad quality/timestamps, and invalid or revoked proof at finalization. Independent production issuer and finality deployment remain testnet/operational gates and are not claimed by unit fixtures.
+- **Financial boundary:** score remains verified quality basis points. No wallet/perk stat advantage, payout, or monetary treasury/custody is introduced.
+
+## Regression coverage and existing proof
+
+New `R0412Competition.t.sol` cases exercise post-final harvest revocation without historical rewrite, forged claimant/score/future time and mutated evidence, entitlement revoked after finalization, and unavailable external verifier. Previously retained tests exercise cancelled season, pre-event harvest, challenged result, revoked entitlement before finalization, unauthorized submission, and duplicate harvest; `R04CanonicalCompetition.t.sol` exercises the actual HarvestProductRegistry verifier, source-block hash, Cup recognition and revoked cross-game eligibility. The real Cup RPC/HTTP/PostgreSQL boundaries retain qualified HC-NEXT-7.4 evidence: runs `40945265767`, `40945266297`, `40945266303`. HC-NEXT-7.5-B qualified run `40981739706` and `40981739667` and merge `af198765870256278831ea38b78aebe4a1df58b2` remain historical.
+
+**Targeted qualification:** the changed Solidity competition unit test is owned by `.github/workflows/highcountry-r04-12.yml`. Verify its actual required job conclusion and exact SHA; no mandatory Level 2/Level 3/global rerun when no production contract, service, RPC or datastore changed. Do not claim new live validator consensus or real issuer credentials from the isolated runner.
+
+**Disposition:** this document records test ownership and boundary for 7.5-C only. HC-NEXT-7.5-D handles separate auditable dispute/correction recovery; 7.5-E handles durable recognition reconciliation; 7.5-F must prove the complete player journey. No premature declaration that overall 7.5 exit criterion is satisfied.

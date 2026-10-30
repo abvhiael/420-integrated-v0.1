@@ -38,3 +38,74 @@ test('04: geometry is accepted by original versioned placement record contract',
  assert.equal(definePlacedObject(record,{geometry:g,assetIds:ids}).instanceId,'example');
  assert.throws(()=>definePlacedObject({...record,geometryVersion:2},{geometry:g,assetIds:ids}),/geometry-incompatible/);
 });
+
+import {HighCountryPlacementTransactions} from '../src/placement-transactions.js';
+import {custodyUnitId,CUSTODY_SCHEMA} from '../src/custody-records.js';
+function integration(){
+ const assetId='hc-prop-premium-emerald-writing-desk';
+ const ref='receipt-qualified-rectangle';
+ const units=new Map(Array.from({length:2},(_,i)=>{
+  const unitId=custodyUnitId(ref,i);
+  return [unitId,{schemaVersion:CUSTODY_SCHEMA,unitId,receiptId:ref,unitIndex:i,owner:'alice',assetId,state:'available',reservationId:null,revision:1}];
+ }));
+ let state={placementInstances:new Map(),placementOperations:new Map(),placementScenes:new Map(),
+  placementAuthorityRevisions:new Map(),assets:new Map([[JSON.stringify(['alice',assetId]),{available:2,reserved:0}]]),
+  custodyUnits:units,custodyReceipts:new Map([[ref,{schemaVersion:CUSTODY_SCHEMA,owner:'alice',assetId,quantity:2}]]),
+  custodyReservations:new Map(),assetSources:new Map([[JSON.stringify(['alice',assetId]),ref]]),
+  importedAssets:new Set([ref])};
+ let tail=Promise.resolve();
+ const store={transact(fn){const result=tail.then(()=>{
+  const copy=structuredClone(state),out=fn(copy);
+  if(out?.then)throw Error('async-transaction-forbidden');
+  state=copy;return out;
+ });tail=result.then(()=>{},()=>{});return result;}};
+ let approved;
+ const authority={
+  registeredPrincipal:async session=>session,
+  canPlaceOnParcel:async principal=>principal==='alice',
+  validateWorld:async()=>({qualified:true,evidenceId:'world-signed-fixture',revision:1,geometryQualificationId:approved.qualificationRef}),
+  qualifiedGeometrySnapshot:canonicalGeometrySnapshot,
+  verifyAtCommit:({principal,authoritative,world,geometry})=>principal==='alice'&&authoritative.revision===1
+   &&authoritative.evidenceId===world.evidenceId&&geometry.qualificationRef===approved.qualificationRef
+ };
+ const engine=new HighCountryPlacementTransactions({store,authority,resolveGeometry:resolveCanonicalGeometry,resolveAssets:resolveCanonicalAssets,clock:()=>100});
+ const record=(instanceId,x,orientation=0)=>({
+  schemaVersion:CONTRACT_VERSION,instanceId,assetId,ownerPrincipal:'alice',parcelId:'parcel-fixture',
+  buildingId:null,roomId:null,regionId:'emerald-coast',surface:'floor',layer:'furniture',
+  gridX:x,gridY:0,orientation,renderAnchor:{x:0,y:0},geometryId:'rectangle-'+assetId,
+  geometryVersion:1,parentInstanceId:null,slotId:null,revision:1,createdAt:1,updatedAt:1,
+  history:[],state:'placed',validationVersion:1
+ });
+ const place=(instanceId,operation,x,expectedSceneRevision,orientation=0)=>({
+  action:'place',operation,instanceId,assetId,expectedRevision:0,expectedSceneRevision,
+  record:record(instanceId,x,orientation)
+ });
+ return {engine,place,get:()=>state,async ready(){
+  approved=await resolveCanonicalGeometry(assetId);
+  state.placementAuthorityRevisions.set('parcel-fixture',{
+   revision:1,evidenceId:'world-signed-fixture',geometryQualificationId:approved.qualificationRef
+  });return approved;
+ }};
+}
+test('04: canonical 2x1 desk placement, rotated overlap, custody and atomic rollback',async()=>{
+ const q=integration(),g=await q.ready();
+ assert.deepEqual(g.occupancy,{kind:'rectangle',width:2,height:1});
+ const a=await q.engine.execute('alice',q.place('a','place-a',0,0));
+ assert.equal(a.sceneRevision,1);
+ assert.equal(q.get().assets.get(JSON.stringify(['alice',g.assetId])).reserved,1);
+ const before=structuredClone(q.get());
+ await assert.rejects(q.engine.execute('alice',q.place('b','overlap-b',1,1,90)),/occupied/);
+ assert.deepEqual(q.get(),before);
+ const b=await q.engine.execute('alice',q.place('b','place-b',4,1,90));
+ assert.equal(b.sceneRevision,2);
+ assert.notEqual(a.custody.unitId,b.custody.unitId);
+ const competing=await Promise.allSettled([
+  q.engine.execute('alice',{action:'move',operation:'move-a',instanceId:'a',assetId:g.assetId,expectedRevision:1,expectedSceneRevision:2,gridX:4,gridY:0}),
+  q.engine.execute('alice',{action:'rotate',operation:'rotate-b',instanceId:'b',assetId:g.assetId,expectedRevision:1,expectedSceneRevision:2,orientation:180})
+ ]);
+ assert.equal(competing.filter(x=>x.status==='fulfilled').length,1);
+ const removed=await q.engine.execute('alice',{action:'remove',operation:'remove-a',instanceId:'a',assetId:g.assetId,expectedRevision:1,expectedSceneRevision:3});
+ assert.equal(removed.instance.state,'stored');
+ assert.equal(q.get().assets.get(JSON.stringify(['alice',g.assetId])).reserved,1);
+ assert.deepEqual(await q.engine.execute('alice',{action:'remove',operation:'remove-a',instanceId:'a',assetId:g.assetId,expectedRevision:1,expectedSceneRevision:3}),removed);
+});

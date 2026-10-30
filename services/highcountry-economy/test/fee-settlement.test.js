@@ -15,6 +15,15 @@ function setup(){
  const pay=(kind='single')=>fees.confirm('alice',{quoteId:'quote_'+kind,paymentId:'pay_'+kind,evidence:{}});
  return {store,fees,q,pay,assetIds,at:n=>{now=n;},now:()=>now,disablePricing:()=>{verified=false;},disableSettlement:()=>{settled=false}};
 }
+function seedSignedCertification(f){
+ const pair=generateKeyPairSync('ed25519'),sha256='a'.repeat(64),metadataHash='b'.repeat(64);
+ const payload={version:'HC.ECON.CERT.V1',certificateId:'cert',assignmentId:'cert_assignment',reviewerId:'reviewer',assetId:'art_0',revision:1,sha256,metadataHash,description:'Verified original object artwork',issuedAt:1000000};
+ f.store.state.econCreatorAssets=new Map([[JSON.stringify(['art_0',1]),{assetId:'art_0',revision:1,creatorId:'alice',sha256,metadataHash,publicationStatus:'unpublished'}]]);
+ f.store.state.econReviewers.set('reviewer',{reviewerId:'reviewer',status:'active',expiresAt:Date.now()+86400000,keyVersion:1,publicKey:pair.publicKey.export({type:'spki',format:'pem'})});
+ f.store.state.econAssignments.set('cert_assignment',{assignmentId:'cert_assignment',reviewerId:'reviewer',assetId:'art_0',revision:1,status:'completed'});
+ f.store.state.econCertificates=new Map([['cert',{...payload,signature:sign(null,Buffer.from(JSON.stringify(payload)),pair.privateKey).toString('base64'),keyVersion:1,automatedValidationId:'verified_automated_png',status:'approved',qaBy:'qa',disputed:false}]]);
+}
+
 test('exact integer allocation conserves across rounding and 10/40/50 percentages',()=>{
  for(const n of ['1','2','3','10','11','1000','999999999999999999999999']){
   const a=feeAllocation(n),total=BigInt(n);
@@ -79,7 +88,7 @@ test('approved certified work can pay reviewer exactly once, forged transfer ref
  f.store.state.econReviewers=new Map([['reviewer',{status:'active',expiresAt:f.now()+REVIEW_WINDOW_MS*3}]]);
  f.store.state.econAssignments=new Map([['assignment',{reviewerId:'reviewer',assetId:'art_0',revision:1,status:'assigned'}]]);
  await f.fees.assign('operator',{assetId:'art_0',reviewerId:'reviewer',assignmentId:'assignment'});
- f.store.state.econCertificates=new Map([['cert',{assetId:'art_0',revision:1,reviewerId:'reviewer',status:'approved',disputed:false}]]);
+ seedSignedCertification(f);
  await f.fees.review('reviewer',{assetId:'art_0',decision:'approve',reason:'valid work',certificateId:'cert'});
  await f.fees.qaWork('qa',{assetId:'art_0',valid:true,reason:'independent acceptance'});
  await f.fees.distribute('operator',{assetId:'art_0',leg:'development',transferId:'dev_1',evidence:{}});

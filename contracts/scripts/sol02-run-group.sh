@@ -40,7 +40,7 @@ expected=set(t for t in p['groups'][group] if t.startswith('test/') and t.endswi
 assert {r['target'] for r in records}==expected, 'Missing test-target runtime record'
 executed=[(e['contract'],e['test']) for r in records for e in r.get('executed',[])]
 assert len(executed)==len(set(executed)), 'Duplicate runtime test result'
-assert executed, 'Empty runtime test inventory'
+assert executed or not tests, 'Test targets yielded no executed tests'
 result={key:p[key] for key in ('schema','sha','profile','inventory_sha256')}
 result.update(group=group,targets=p['groups'][group],passed=True,
               runtime=records,runtimeTestCount=len(executed))

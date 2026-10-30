@@ -33,7 +33,7 @@ class EventProcessor:
     def process_receipt(self,receipt):return self.events
 class Events:
     def __init__(self,c):self.c=c
-    def TicketFunded(self):return EventProcessor(self.c.events)
+    def TicketFunded(self):return EventProcessor(self.c.event_records)
 class Contract:
     def __init__(self,address):
         self.address=address;self.allowance=999;self.balance=999
@@ -43,7 +43,7 @@ class Contract:
         self.ticket=(A(7),bytes.fromhex(H(5)[2:]),bytes.fromhex(H(6)[2:]),bytes.fromhex(H(1)[2:]),
             bytes.fromhex(H(2)[2:]),bytes.fromhex(H(3)[2:]),100,185,85,1,1,1)
         self.receipt=(2,185,bytes.fromhex(H(4)[2:]),120,A(9))
-        self.events=[]
+        self.event_records=[]
 class Eth:
     def __init__(self):
         self.chain_id=420;self.gas_price=1000000000;self.block_number=20
@@ -109,7 +109,7 @@ class RuntimeTests(unittest.TestCase):
         ticket=H(71)
         self.w3.eth.transaction={"to":self.vault,"from":self.wallet.address,"blockHash":self.w3.eth.block_hash}
         vault=self.w3.eth.contract(self.vault,[])
-        vault.events.c.events=[{"address":self.vault,"args":{"id":bytes.fromhex(ticket[2:])}}]
+        vault.event_records=[{"address":self.vault,"args":{"id":bytes.fromhex(ticket[2:])}}]
         self.assertEqual(self.rpc.reconcile_funding(self.w3.to_hex(self.w3.eth.tx_hash),ticket,
                     self.vault,self.wallet.address)["ticketFunded"]["id"],ticket)
         self.w3.eth.block_number=17

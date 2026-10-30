@@ -6,7 +6,7 @@ export const REVIEW_WINDOW_MS=72*60*60*1000;
 const err=m=>{throw new Error('hc-econ-06:'+m);};
 const id=x=>typeof x==='string'&&/^[a-zA-Z0-9:_-]{1,128}$/.test(x);
 const cents={single:42n,bundle24:420n};
-const state=s=>{for(const k of ['econFeeQuotes','econFeePayments','econFeeSubmissions','econFeeTransfers','econFeeAudit'])s[k]??=new Map();};
+const state=s=>{for(const k of ['econFeeQuotes','econFeePayments','econFeeSubmissions','econFeeTransfers','econFeeAudit','econFeeReviewQA'])s[k]??=new Map();};
 const big=x=>{if(typeof x!=='string'||!/^(0|[1-9][0-9]{0,77})$/.test(x))err('amount');return BigInt(x);};
 const copy=x=>structuredClone(x);
 const audit=(s,type,target,at,details={})=>s.econFeeAudit.set(String(s.econFeeAudit.size+1),{type,target,at,...copy(details)});
@@ -49,10 +49,14 @@ export class EconFees {
    current.status='paid';s.econFeePayments.set(paymentId,record);
    // One fee per submitted design; bundle is apportioned without rounding loss.
    const amount=big(q.units),count=BigInt(q.assetIds.length),base=amount/count,extra=amount%count;
+   let allocated=0n;
    for(let i=0;i<q.assetIds.length;i++){
     const assetId=q.assetIds[i];if(s.econFeeSubmissions.has(assetId))err('already-paid-asset');
     const share=base+(BigInt(i)<extra?1n:0n);
-    s.econFeeSubmissions.set(assetId,{assetId,paymentId,actor,paidUnits:share.toString(),revision:1,corrections:0,status:'awaiting-assignment',deadline:null,reviewerId:null,certificateId:null,updatedAt:now});
+    const before=portions(allocated),after=portions(allocated+share);
+    const part={development:(BigInt(after.development)-BigInt(before.development)).toString(),community:(BigInt(after.community)-BigInt(before.community)).toString(),reviewer:(BigInt(after.reviewer)-BigInt(before.reviewer)).toString()};
+    allocated+=share;
+    s.econFeeSubmissions.set(assetId,{assetId,paymentId,actor,paidUnits:share.toString(),allocation:part,revision:1,corrections:0,status:'awaiting-assignment',deadline:null,reviewerId:null,certificateId:null,updatedAt:now});
    }
    audit(s,'paid',paymentId,now,{allocation});return copy(record);
   });
@@ -80,7 +84,7 @@ export class EconFees {
    }else if(decision==='correction')row.status='correction-requested';
    else if(row.corrections===0)row.status='correction-requested';
    else {row.status='developer-review';row.developerDeadline=now+REVIEW_WINDOW_MS;}
-   row.updatedAt=now;audit(s,'review-'+decision,assetId,now,{reason});return copy(row);
+   row.lastDecision=decision;row.lastDecisionAt=now;row.updatedAt=now;audit(s,'review-'+decision,assetId,now,{reason});return copy(row);
   });
  }
  async correction(session,{assetId,revision}){
@@ -110,17 +114,53 @@ export class EconFees {
    }return changed;
   });
  }
+ async qaWork(session,{assetId,valid,reason}){
+  const actor=await this.actor(session),now=this.clock();
+  if(!id(assetId)||typeof valid!=='boolean'||typeof reason!=='string'||reason.trim().length<3)err('qa-work-input');
+  return this.store.transact(s=>{state(s);this.guard(s,session,'fee-review-qa',actor);
+   const row=s.econFeeSubmissions.get(assetId),prior=s.econFeeReviewQA.get(assetId);
+   if(!row||!['accepted','forfeited'].includes(row.status)||actor===row.reviewerId||prior)err('qa-work-denied');
+   if(row.status==='accepted'){
+    const c=s.econCertificates?.get(row.certificateId);
+    if(!c||c.status!=='approved'||c.disputed||c.reviewerId!==row.reviewerId||c.qaBy===row.reviewerId)err('qa-certificate-invalid');
+   }else if(row.lastDecision!=='reject'||row.corrections!==1)err('qa-rejection-invalid');
+   const record={assetId,reviewerId:row.reviewerId,valid,qaBy:actor,reason,at:now};
+   s.econFeeReviewQA.set(assetId,record);audit(s,'review-qa',assetId,now,{valid,qaBy:actor});return copy(record);
+  });
+ }
+ async distribute(session,{assetId,leg,transferId,evidence}){
+  const actor=await this.actor(session),now=this.clock();
+  if(!id(assetId)||!id(transferId)||!['development','community'].includes(leg))err('distribution');
+  const row=await this.store.transact(s=>{state(s);this.guard(s,session,'fee-distribute',actor);
+   const row=s.econFeeSubmissions.get(assetId);
+   if(!row||!['accepted','forfeited','reviewer-paid'].includes(row.status)||[...s.econFeeTransfers.values()].some(t=>t.assetId===assetId&&t.type===leg)||s.econFeeTransfers.has(transferId))err('distribution-denied');
+   return copy(row);
+  });
+  const units=row.allocation[leg];
+  if(big(units)===0n)err('zero-allocation');
+  const receipt=await this.payouts.verifyFinalized({assetId,transferId,recipient:leg,units},evidence);
+  if(receipt?.verified!==true||receipt.transferId!==transferId||receipt.recipient!==leg||receipt.units!==units||!id(receipt.finalizedReceiptId))err('distribution-unverified');
+  return this.store.transact(s=>{state(s);this.guard(s,session,'fee-distribute',actor);
+   const current=s.econFeeSubmissions.get(assetId);
+   if(!current||!['accepted','forfeited','reviewer-paid'].includes(current.status)||s.econFeeTransfers.has(transferId)||
+    [...s.econFeeTransfers.values()].some(t=>t.finalizedReceiptId===receipt.finalizedReceiptId||t.assetId===assetId&&t.type===leg))err('distribution-race');
+   s.econFeeTransfers.set(transferId,{type:leg,assetId,units,finalizedReceiptId:receipt.finalizedReceiptId,at:now});
+   audit(s,'distributed-'+leg,assetId,now);return {assetId,leg,units};
+  });
+ }
  async release(session,{assetId,transferId,evidence}){
   const actor=await this.actor(session),now=this.clock();if(!id(assetId)||!id(transferId))err('release');
   const row=await this.store.transact(s=>{state(s);this.guard(s,session,'fee-release',actor);const row=s.econFeeSubmissions.get(assetId),cert=s.econCertificates?.get(row?.certificateId);
-   if(!row||row.status!=='accepted'||!cert||cert.status!=='approved'||cert.disputed||cert.reviewerId!==row.reviewerId||s.econFeeTransfers.has(transferId))err('release-denied');
+   if(!row||!['accepted','forfeited'].includes(row.status)||!s.econFeeReviewQA.get(assetId)?.valid||s.econFeeReviewQA.get(assetId)?.reviewerId!==row.reviewerId||
+   (row.status==='accepted'&&(!cert||cert.status!=='approved'||cert.disputed||cert.reviewerId!==row.reviewerId))||s.econFeeTransfers.has(transferId)||[...s.econFeeTransfers.values()].some(t=>t.assetId===assetId&&t.type==='reviewer'))err('release-denied');
    return copy(row);
   });
   // A payout is only acknowledged after independent finalized transfer verification.
-  const p=dueFromRecord(row);const receipt=await this.payouts.verifyFinalized({transferId,assetId,recipient:row.reviewerId,units:p.reviewer},evidence);
-  if(receipt?.verified!==true||receipt.transferId!==transferId||!id(receipt.finalizedReceiptId))err('payout-unverified');
+  const p=row.allocation;const receipt=await this.payouts.verifyFinalized({transferId,assetId,recipient:row.reviewerId,units:p.reviewer},evidence);
+  if(receipt?.verified!==true||receipt.transferId!==transferId||receipt.recipient!==row.reviewerId||receipt.units!==p.reviewer||!id(receipt.finalizedReceiptId))err('payout-unverified');
   return this.store.transact(s=>{state(s);this.guard(s,session,'fee-release',actor);const current=s.econFeeSubmissions.get(assetId),cert=s.econCertificates?.get(current?.certificateId);
-   if(!current||current.status!=='accepted'||!cert||cert.status!=='approved'||cert.disputed||s.econFeeTransfers.has(transferId)||[...s.econFeeTransfers.values()].some(x=>x.finalizedReceiptId===receipt.finalizedReceiptId))err('release-race');
+   if(!current||!['accepted','forfeited'].includes(current.status)||!s.econFeeReviewQA.get(assetId)?.valid||s.econFeeReviewQA.get(assetId)?.reviewerId!==current.reviewerId||
+    (current.status==='accepted'&&(!cert||cert.status!=='approved'||cert.disputed||cert.reviewerId!==current.reviewerId))||s.econFeeTransfers.has(transferId)||[...s.econFeeTransfers.values()].some(x=>x.finalizedReceiptId===receipt.finalizedReceiptId||x.assetId===assetId&&x.type==='reviewer'))err('release-race');
    current.status='reviewer-paid';s.econFeeTransfers.set(transferId,{type:'reviewer',assetId,units:p.reviewer,finalizedReceiptId:receipt.finalizedReceiptId,at:now});
    audit(s,'reviewer-paid',assetId,now);return copy(current);
   });
@@ -131,7 +171,7 @@ export class EconFees {
    if(!row||row.status!=='refund-due'||s.econFeeTransfers.has(transferId))err('refund-denied');return copy(row);
   });
   const receipt=await this.payouts.verifyFinalized({transferId,assetId,recipient:row.actor,units:row.paidUnits},evidence);
-  if(receipt?.verified!==true||receipt.transferId!==transferId||!id(receipt.finalizedReceiptId))err('refund-unverified');
+  if(receipt?.verified!==true||receipt.transferId!==transferId||receipt.recipient!==row.actor||receipt.units!==row.paidUnits||!id(receipt.finalizedReceiptId))err('refund-unverified');
   return this.store.transact(s=>{state(s);this.guard(s,session,'fee-refund',actor);const current=s.econFeeSubmissions.get(assetId);
    if(!current||current.status!=='refund-due'||s.econFeeTransfers.has(transferId)||[...s.econFeeTransfers.values()].some(x=>x.finalizedReceiptId===receipt.finalizedReceiptId))err('refund-race');
    current.status='refunded';s.econFeeTransfers.set(transferId,{type:'refund',assetId,units:row.paidUnits,finalizedReceiptId:receipt.finalizedReceiptId,at:now});
@@ -139,4 +179,4 @@ export class EconFees {
   });
  }
 }
-function dueFromRecord(row){return portions(big(row.paidUnits));}
+

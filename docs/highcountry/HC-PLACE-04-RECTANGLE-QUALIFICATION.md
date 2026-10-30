@@ -1,0 +1,15 @@
+# HC-PLACE-04 — canonical rectangular footprint scope
+
+The following **36** assets have an explicit canonical 64px footprint on main and a supported ground/floor layer: HC-ART-02-G premium furniture (12), HC-ART-04-A outdoor structures (12), and HC-ART-04-C water/wildlife (12). The reviewed full-rectangle policy deliberately blocks the entire approved footprint, even where an illustration suggests openings. No walkthrough, road connectivity, equipment ability or water-edge exception is implied.
+
+The exported server-only registry is `services/highcountry-economy/src/placement-canonical-rectangles.js`. It binds asset ID, source collection, PNG path, exact approved dimensions and layer/surface to a SHA-256 qualified identifier, provides immutable snapshots/copies and verifies all four rotations. It is wired into existing placement composition via `createCanonicalRectanglePlacementConfig(world)`; the independently configured world authority still has to validate the parcel, independent geometry snapshot and commit. Production HTTP placement routes stay disabled.
+
+`visualPx` and `renderAnchorPx` are nominal *logical grid projection* values needed for the existing placement contract. They are NOT PNG pixel measurements or render anchors, and are never used to authorize physics or change artwork.
+
+## Explicitly ineligible current-main items
+
+- HC-ART-05-E Red Mesa leisure: all 6 IDs `hc-art-05-e-rm01` through `hc-art-05-e-rm06`. Their canonical placement layer is `structure`, which is not in the approved HC-PLACE-02 layer contract, and entrances remain unqualified. **Fix:** qualify a separate supported structural layer, derive real entrance and terrain evidence from authoritative building metadata, and then add their reviewed geometry; do not silently recast them as outdoor decorations.
+- HC-ART-03-F regional memorabilia: 12 IDs from `regionalMemorabiliaCatalogue`. Their current source uses UI surfaces `wall` and `furniture`, whereas the transaction contract requires typed `wall_slot` and `tabletop_slot`; attachment geometry and supporting parents belong to HC-PLACE-05/06. **Fix:** qualify the canonical parent/slot contract, convert the attachment catalogue using explicit approved slot evidence, and use `occupancy:{kind:'none'}` without inventing floor rectangles.
+- HC-ART-04-B/D/E/F, currently in open PRs #872/#877/#879/#881 (48 additional asset records): not present in approved current-main canonical catalogue modules. **Fix:** merge their independently reviewed asset/catalogue source first, verify all required footprints and PNG paths in that source, then extend this version-pinned registry with explicit approved surface/layer mappings. No synthetic or missing-source geometry is qualified.
+
+The outer rectangular tile mask is deliberately conservative. Production gameplay access and any terrain or fire/water interaction remain deferred to their original authoritative world-validation and later HC-PLACE steps. Existing market and custody operations remain unchanged.

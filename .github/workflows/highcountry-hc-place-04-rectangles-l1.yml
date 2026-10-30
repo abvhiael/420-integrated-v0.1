@@ -1,0 +1,21 @@
+name: HC-PLACE-04 Canonical Rectangles Level 1
+on:
+  pull_request:
+    paths:
+      - 'services/highcountry-economy/src/placement-canonical-rectangles.js'
+      - 'services/highcountry-economy/test/placement-canonical-rectangles.test.mjs'
+      - '.github/workflows/highcountry-hc-place-04-rectangles-l1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  canonical-rectangle-qualification:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check services/highcountry-economy/src/placement-canonical-rectangles.js
+      - run: node --test services/highcountry-economy/test/placement-canonical-rectangles.test.mjs

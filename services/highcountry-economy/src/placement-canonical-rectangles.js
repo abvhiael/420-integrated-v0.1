@@ -4,9 +4,13 @@ import {createHash} from 'node:crypto';
 import {premiumFurnitureCatalogue} from '../../../apps/highcountry-web/src/premium-furniture-catalogue.js';
 import {outdoorStructureCatalogue} from '../../../apps/highcountry-web/src/outdoor-structure-catalogue.js';
 import {waterWildlifeCatalogue} from '../../../apps/highcountry-web/src/water-wildlife-catalogue.js';
+import {fireGatheringCatalogue} from '../../../apps/highcountry-web/src/fire-gathering-catalogue.js';
+import {gardenOrnamentCatalogue} from '../../../apps/highcountry-web/src/garden-ornament-catalogue.js';
+import {landscapeCatalogue} from '../../../apps/highcountry-web/src/landscape-catalogue.js';
+import {recreationCatalogue} from '../../../apps/highcountry-web/src/recreation-catalogue.js';
 import {CONTRACT_VERSION,TILE_SIZE_PX,defineGeometry,rotatedCells} from './placement-contract.js';
 
-const sources=Object.freeze([...premiumFurnitureCatalogue,...outdoorStructureCatalogue,...waterWildlifeCatalogue]);
+const sources=Object.freeze([...premiumFurnitureCatalogue,...outdoorStructureCatalogue,...waterWildlifeCatalogue,...fireGatheringCatalogue,...gardenOrnamentCatalogue,...landscapeCatalogue,...recreationCatalogue]);
 const identifier=x=>typeof x==='string'&&/^[A-Za-z0-9:_-]{1,128}$/.test(x);
 const approved=new Map();
 for(const item of sources){
@@ -15,7 +19,7 @@ for(const item of sources){
     ||width<1||height<1||width>256||height>256||tileSizePx!==TILE_SIZE_PX)
   throw Error('hc-place-04:invalid-canonical-footprint');
  if(!['floor','outdoor_ground'].includes(item.placement?.surface)
-    ||!['furniture','outdoor_structure','outdoor_feature'].includes(item.placement?.layer))
+    ||!['furniture','outdoor_structure','outdoor_feature','outdoor_decor','outdoor_recreation'].includes(item.placement?.layer))
   throw Error('hc-place-04:unsupported-catalogue-surface');
  // Identifier is bound to the exact canonical source metadata; changes produce a new ref.
  const canonical=JSON.stringify([item.id,item.collection,item.assetUrl,item.footprint,item.placement.surface,item.placement.layer]);

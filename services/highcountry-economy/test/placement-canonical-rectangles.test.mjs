@@ -3,12 +3,12 @@ import assert from 'node:assert/strict';
 import {canonicalRectangleAssetIds,canonicalRectangleEvidence,resolveCanonicalGeometry,resolveCanonicalAssets,canonicalGeometrySnapshot,createCanonicalRectanglePlacementConfig} from '../src/placement-canonical-rectangles.js';
 import {rotatedCells,definePlacedObject,CONTRACT_VERSION} from '../src/placement-contract.js';
 test('04: all present approved rectangle catalogues are unique and strictly versioned',async()=>{
- assert.equal(canonicalRectangleAssetIds.length,36);
- assert.equal(new Set(canonicalRectangleAssetIds).size,36);
- assert.equal(canonicalRectangleEvidence.length,36);
- const ids=await resolveCanonicalAssets();assert.equal(ids.size,36);
+ assert.equal(canonicalRectangleAssetIds.length,84);
+ assert.equal(new Set(canonicalRectangleAssetIds).size,84);
+ assert.equal(canonicalRectangleEvidence.length,84);
+ const ids=await resolveCanonicalAssets();assert.equal(ids.size,84);
  assert.equal(await resolveCanonicalGeometry('forged-client-asset'),null);
- assert.equal((await canonicalGeometrySnapshot()).size,36);
+ assert.equal((await canonicalGeometrySnapshot()).size,84);
 });
 test('04: every approved rotated footprint conserves cells and dimensions',async()=>{
  for(const assetId of canonicalRectangleAssetIds){
@@ -108,4 +108,15 @@ test('04: canonical 2x1 desk placement, rotated overlap, custody and atomic roll
  assert.equal(removed.instance.state,'stored');
  assert.equal(q.get().assets.get(JSON.stringify(['alice',g.assetId])).reserved,1);
  assert.deepEqual(await q.engine.execute('alice',{action:'remove',operation:'remove-a',instanceId:'a',assetId:g.assetId,expectedRevision:1,expectedSceneRevision:3}),removed);
+});
+
+test('04: collections with independently pending world policies stay world-gated',async()=>{
+ const ids=await resolveCanonicalAssets();
+ for(const prefix of ['hc-outdoor-feature-fieldstone-fire-pit','hc-outdoor-decor-happy-grower-gnome','hc-outdoor-landscape-heritage-flagstone-path','hc-outdoor-recreation-heritage-cornhole-game']){
+  assert.equal(ids.has(prefix),true);
+  assert.equal((await resolveCanonicalGeometry(prefix)).qualified,true);
+ }
+ // Geometry approval alone does not grant terrain, fire, water, path or interaction policy.
+ assert.equal(await resolveCanonicalGeometry('hc-art-05-e-rm01'),null);
+ assert.equal(await resolveCanonicalGeometry('hc-memorabilia-emerald-heritage-pennant'),null);
 });

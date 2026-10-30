@@ -3,12 +3,12 @@ import assert from 'node:assert/strict';
 import {canonicalRectangleAssetIds,canonicalRectangleEvidence,resolveCanonicalGeometry,resolveCanonicalAssets,canonicalGeometrySnapshot,createCanonicalRectanglePlacementConfig} from '../src/placement-canonical-rectangles.js';
 import {rotatedCells,definePlacedObject,CONTRACT_VERSION} from '../src/placement-contract.js';
 test('04: all present approved rectangle catalogues are unique and strictly versioned',async()=>{
- assert.equal(canonicalRectangleAssetIds.length,84);
- assert.equal(new Set(canonicalRectangleAssetIds).size,84);
- assert.equal(canonicalRectangleEvidence.length,84);
- const ids=await resolveCanonicalAssets();assert.equal(ids.size,84);
+ assert.equal(canonicalRectangleAssetIds.length,90);
+ assert.equal(new Set(canonicalRectangleAssetIds).size,90);
+ assert.equal(canonicalRectangleEvidence.length,90);
+ const ids=await resolveCanonicalAssets();assert.equal(ids.size,90);
  assert.equal(await resolveCanonicalGeometry('forged-client-asset'),null);
- assert.equal((await canonicalGeometrySnapshot()).size,84);
+ assert.equal((await canonicalGeometrySnapshot()).size,90);
 });
 test('04: every approved rotated footprint conserves cells and dimensions',async()=>{
  for(const assetId of canonicalRectangleAssetIds){
@@ -117,6 +117,14 @@ test('04: collections with independently pending world policies stay world-gated
   assert.equal((await resolveCanonicalGeometry(prefix)).qualified,true);
  }
  // Geometry approval alone does not grant terrain, fire, water, path or interaction policy.
- assert.equal(await resolveCanonicalGeometry('hc-art-05-e-rm01'),null);
+ for(let i=1;i<=6;i++){
+  const id='hc-art-05-e-rm'+String(i).padStart(2,'0');
+  const geometry=await resolveCanonicalGeometry(id);
+  assert.ok(geometry,id);
+  assert.equal(geometry.layer,'structure');
+  assert.equal(geometry.surface,'outdoor_ground');
+  assert.deepEqual(geometry.occupancy,{kind:'rectangle',width:i===3||i===6?5:6,height:i===3||i===6?4:5});
+  assert.equal(rotatedCells(geometry,90).length,geometry.occupancy.width*geometry.occupancy.height);
+}
  assert.equal(await resolveCanonicalGeometry('hc-memorabilia-emerald-heritage-pennant'),null);
 });

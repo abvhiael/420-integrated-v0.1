@@ -88,7 +88,38 @@ export function createOrdinaryExhibitions420({repository,identity,harvest,clock=
     const event=await tx.lockEvent(eventId),r=await tx.result(eventId,accountId);
     if(!event||event.finalized||event.cancelled||t>=event.challengeUntil||!r||r.rejected)fail('dispute-closed');
     await tx.rejectResult(eventId,accountId,reasonHash);
+    await tx.recordAdjudication({eventId,accountId,adjudicator,harvestId:r.harvestId,reasonHash,
+      disposition:'PRE_FINAL_REJECTION',originalWinner:null,originalScore:null,decidedAt:t});
     return {eventId,accountId,rejected:true,reasonHash};
+   });
+  },
+  // A finalized result is immutable. Review records evidence status only, never a replacement winner.
+  async review({token,eventId,accountId,reasonHash}){
+   const adjudicator=await actor(token),t=now();
+   if(!id(eventId)||!id(accountId)||!digest(reasonHash))fail('invalid-dispute');
+   return transaction(async tx=>{
+    if(!await tx.isAdjudicator(adjudicator))fail('adjudicator-denied');
+    const event=await tx.lockEvent(eventId),r=await tx.result(eventId,accountId);
+    if(!event?.finalized||event.cancelled||!r)fail('review-unavailable');
+    // Recheck all original fields; a provider failure aborts the transaction, never
+    // creates a terminal false conviction or substitutes an unverified winner.
+    const proof=await harvest.verifyFinalizedFlower({accountId,harvestId:r.harvestId});
+    const valid=!r.rejected&&!!proof&&proof.accountId===accountId&&proof.harvestId===r.harvestId&&
+      proof.qualityBps===r.qualityBps&&proof.finalizedAt===r.finalizedAt&&
+      proof.provenanceHash===r.provenanceHash;
+    const disposition=valid?'POST_FINAL_VALID':'POST_FINAL_INVALID';
+    await tx.recordAdjudication({eventId,accountId,adjudicator,harvestId:r.harvestId,reasonHash,
+      disposition,originalWinner:event.winner,originalScore:event.winnerScore,decidedAt:t});
+    return {eventId,accountId,disposition,originalWinner:event.winner,originalScore:event.winnerScore};
+   });
+  },
+  async adjudicationHistory({token,eventId}){
+   const principal=await actor(token);
+   if(!id(eventId))fail('invalid-event');
+   return transaction(async tx=>{
+    if(!await tx.isAdjudicator(principal))fail('adjudicator-denied');
+    if(!await tx.event(eventId))fail('event-not-found');
+    return snapshot(await tx.adjudicationHistory(eventId));
    });
   },
   async finalize({eventId}){

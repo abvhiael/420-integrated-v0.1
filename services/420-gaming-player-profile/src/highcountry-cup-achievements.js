@@ -63,7 +63,8 @@ export function createPostgresCupAchievements420({pool,gameId,projection}={}){
     const row=(await c.query(`SELECT * FROM highcountry_cup.achievements
       WHERE game_id=$1 AND cup_id=$2`,[gameId,cupId])).rows[0];
     // A stale row never returns its persisted trophy, even if a chain rollback occurs.
-    if(!row||row.block_hash!==verified.blockHash||row.commitment!==verified.resultCommitment||
+    if(!row||Number(row.chain_id)!==verified.chainId||row.cup_address!==verified.cupAddress||
+       row.scope!==verified.scope||row.block_hash!==verified.blockHash||row.commitment!==verified.resultCommitment||
        row.champion!==verified.champion||row.prestige!==!!verified.achievement)
       return {current:false,standings:verified,recorded:false};
     return {current:true,standings:verified,recorded:true};

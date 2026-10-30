@@ -2,6 +2,7 @@
 // Independent finalized receipt/entropy validation is supplied by an authoritative
 // adapter; this service never trusts browser purchase, issuer, or randomness flags.
 import {createHash} from 'node:crypto';
+import {assertCertifiedForIssuance} from './reviewer-certification.js';
 import {resolveCertifiedPolicy,validateModifierOutcome} from './object-taxonomy.js';
 export const ITEM_SCHEMA='HC.ECON.ITEMS.V1';
 const fail=m=>{throw new Error('hc-econ-02:'+m);};
@@ -87,7 +88,7 @@ export class ItemIssuance {
   if(!policy.policy.qualified||(design.origin==='creator'&&(expectedCreatorModifierBps(policy.policy)<200||expectedCreatorModifierBps(policy.policy)>300))||policy.policy.origin!==design.origin||!['creator','developer','quest'].includes(design.origin))fail('design-policy');
   if(await this.authority.issuer(session,'publish',design)!==true)fail('publisher-denied');
   return this.store.transact(s=>{
-   state(s);if(this.authority.guardState(s,session,'publish',design)!==true)fail('issuer-revoked');if(s.econDesigns.has(design.designId))fail('design-already-published');
+   state(s);if(this.authority.guardState(s,session,'publish',design)!==true)fail('issuer-revoked');if(s.econDesigns.has(design.designId))fail('design-already-published');assertCertifiedForIssuance(s,design);
    const record={...copy(design),catalogSha256:this.catalog.sha256,issuedEver:0,createdAt:this.clock()};
    s.econDesigns.set(design.designId,record);return copy(record);
   });
@@ -99,7 +100,7 @@ export class ItemIssuance {
   if(!ident(owner))fail('owner');
   return this.store.transact(s=>{
    state(s);if(this.authority.guardState(s,session,'reserve',owner)!==true)fail('session-revoked');const d=s.econDesigns.get(designId);
-   if(!d||d.catalogSha256!==this.catalog.sha256||d.issuedEver>=d.editionCap)fail('edition-unavailable');
+   if(!d||d.catalogSha256!==this.catalog.sha256||d.issuedEver>=d.editionCap)fail('edition-unavailable');assertCertifiedForIssuance(s,d);
    if(s.econItemIntents.has(itemId)||s.econItems.has(itemId)||s.econConsumedSources.has(sourceId)||[...s.econItemIntents.values()].some(v=>v.sourceId===sourceId))fail('replay');
    // Count pending reservations to prevent optimistic cap oversubscription.
    const held=[...s.econItemIntents.values()].filter(v=>v.designId===designId&&v.status==='pending').length;
@@ -136,7 +137,7 @@ export class ItemIssuance {
   return this.store.transact(s=>{
    state(s);if(this.authority.guardState(s,session,'issue',owner)!==true)fail('session-revoked');const existing=s.econItems.get(itemId);if(existing){if(existing.context!==intent.context)fail('item-conflict');return copy(existing);}
    const current=s.econItemIntents.get(itemId),d=s.econDesigns.get(design.designId);
-   if(!same(current,intent)||!same(d,design)||s.econConsumedSources.has(intent.sourceId)||d.issuedEver>=d.editionCap)fail('issuance-race-or-replay');
+   if(!same(current,intent)||!same(d,design)||s.econConsumedSources.has(intent.sourceId)||d.issuedEver>=d.editionCap)fail('issuance-race-or-replay');assertCertifiedForIssuance(s,d);
    d.issuedEver++;current.status='issued';
    s.econConsumedSources.set(intent.sourceId,itemId);s.econItems.set(itemId,issued);
    return copy(issued);

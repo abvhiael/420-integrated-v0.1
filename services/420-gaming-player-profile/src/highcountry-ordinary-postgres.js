@@ -37,6 +37,14 @@ export function createPostgresOrdinaryExhibitionRepository420({pool,gameId}={}){
     results:async e=>(await query('SELECT * FROM highcountry_exhibitions.results WHERE game_id=$1 AND event_id=$2 ORDER BY account_id',args(e))).rows.map(mapResult),
     isAdjudicator:async a=>!!await one('SELECT 1 FROM highcountry_exhibitions.adjudicators WHERE game_id=$1 AND account_id=$2 AND active=true',args(a)),
     rejectResult:async(e,a,h)=>query('UPDATE highcountry_exhibitions.results SET rejected=true,reason_hash=$4 WHERE game_id=$1 AND event_id=$2 AND account_id=$3 AND rejected=false',args(e,a,h)),
+    recordAdjudication:async o=>query(`INSERT INTO highcountry_exhibitions.adjudication_history
+      (game_id,event_id,account_id,adjudicator,harvest_id,reason_hash,disposition,original_winner,original_score,decided_at)
+      VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`,
+      args(o.eventId,o.accountId,o.adjudicator,o.harvestId,o.reasonHash,o.disposition,
+       o.originalWinner,o.originalScore,o.decidedAt)),
+    adjudicationHistory:async(eventId)=>(await query(
+      'SELECT event_id,account_id,adjudicator,harvest_id,reason_hash,disposition,original_winner,original_score,decided_at FROM highcountry_exhibitions.adjudication_history WHERE game_id=$1 AND event_id=$2 ORDER BY decided_at,account_id',
+      args(eventId))).rows,
     finalizeEvent:async o=>query('UPDATE highcountry_exhibitions.events SET finalized=true,winner=$3,winner_score=$4,finalized_at=$5,evidence_digest=$6 WHERE game_id=$1 AND event_id=$2 AND finalized=false',
       args(o.eventId,o.winner,o.winnerScore,o.finalizedAt,o.evidenceDigest))
    });

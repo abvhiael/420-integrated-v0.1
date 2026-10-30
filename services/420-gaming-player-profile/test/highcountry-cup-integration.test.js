@@ -152,3 +152,20 @@ test('fully composed chain RPC, Cup projection and durable storage reject stale 
  await assert.rejects(withdrawn.historyStatus({cupId:cup}),{code:'cup-not-finalized'});
  assert.equal(row.champion,A,'stored record remains history only; cannot confer current award');
 });
+
+test('Cup identity replay cannot write or read an award from another Cup',async()=>{
+ let writes=0,reads=0;
+ const canonical={cupId:h('2',64),chainId:420,cupAddress:A,blockHash:block,champion:A,
+  resultCommitment:h('6',64),scope:h('5',64),achievement:{kind:'prestige'}};
+ const pool={connect:async()=>({query:async sql=>{
+  if(sql.startsWith('INSERT'))writes++;
+  if(sql.includes('SELECT * FROM highcountry_cup.achievements'))reads++;
+  return {rows:[]};
+ },release(){}})};
+ const store=createPostgresCupAchievements420({pool,gameId:h('f',64),
+  projection:{standings:async()=>canonical}});
+ await assert.rejects(store.synchronize({cupId:cup}),{code:'cup-identity-mismatch'});
+ await assert.rejects(store.current({cupId:cup}),{code:'cup-identity-mismatch'});
+ assert.equal(writes,0);assert.equal(reads,0);
+ await assert.rejects(store.current({cupId:'wrong'}),{code:'cup-id-invalid'});
+});

@@ -143,3 +143,18 @@ test('Ed25519 oracle: exact native 420 conversion, tampering and forged rate rej
  const forged=generateKeyPairSync('ed25519');
  assert.equal((await oracle.verifyQuote(intent,{attestation,signature:sign(null,Buffer.from(JSON.stringify(attestation)),forged.privateKey).toString('base64')})).authentic,false);
 });
+
+test('fraud bypasses free correction, requires independent developer review, and expiry refunds',async()=>{
+ const f=setup();await f.q();await f.pay();
+ f.store.state.econReviewers=new Map([['reviewer',{status:'active',expiresAt:f.now()+REVIEW_WINDOW_MS*3}]]);
+ f.store.state.econAssignments=new Map([['assign',{reviewerId:'reviewer',assetId:'art_0',revision:1,status:'assigned'}]]);
+ await f.fees.assign('operator',{assetId:'art_0',reviewerId:'reviewer',assignmentId:'assign'});
+ await f.fees.review('reviewer',{assetId:'art_0',decision:'fraud',reason:'forged artwork claim'});
+ assert.equal(f.store.state.econFeeSubmissions.get('art_0').corrections,0);
+ await assert.rejects(f.fees.correction('alice',{assetId:'art_0',revision:2}),/correction-invalid/);
+ f.at(f.now()+REVIEW_WINDOW_MS);
+ await f.fees.refund('operator',{assetId:'art_0',transferId:'expiry_refund',evidence:{}});
+ assert.equal(f.store.state.econFeeSubmissions.get('art_0').artworkOutcome,'rejected');
+ assert.equal(f.store.state.econFeeSubmissions.get('art_0').status,'refunded');
+ await assert.rejects(f.fees.adjudicate('developer',{assetId:'art_0',forfeit:true,reason:'too late'}),/developer-review-expired/);
+});

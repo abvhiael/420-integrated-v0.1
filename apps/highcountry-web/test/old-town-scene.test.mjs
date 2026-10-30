@@ -1,7 +1,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {projectTile,chunkOf,geometryPath,depthSort,validateOldTownScene} from '../src/old-town-scene.js';
+import {projectTile,chunkOf,geometryPath,depthSort,validateOldTownScene,spriteFit} from '../src/old-town-scene.js';
 const data=name=>JSON.parse(readFileSync(new URL('../../../deployments/highcountry/'+name,import.meta.url),'utf8'));
 const scene={sites:data('old-town-site-registry.json'),assets:data('old-town-genesis-assets.json'),geo:data('old-town-geo-authority-status.json'),geometry:data('old-town-provisional-geometry.geojson'),anchors:data('old-town-render-anchors.v1.json')};
 test('2:1 64x32 deterministic isometric projection and 16x16 chunk identity',()=>{
@@ -35,4 +35,13 @@ test('provisional authority and anchors fail closed on mutation',()=>{
  const copy=structuredClone(scene);
  copy.anchors.anchors[0].groundAnchorTiles[0]++;
  assert.throws(()=>validateOldTownScene(copy),/anchor-drift/);
+});
+
+test('canonical sprite fit uses opaque alpha and preserves aspect and ground contact',()=>{
+ const fit=spriteFit([500,800],[17,17],[1024,1024],[100,150,899,949]);
+ assert.equal(fit.width,1024*(1088/800));
+ assert.equal(fit.height,fit.width);
+ assert.equal(fit.x+(100+899+1)*(1088/800)/2,500);
+ assert.equal(fit.y+(949+1)*(1088/800),800);
+ assert.throws(()=>spriteFit([0,0],[11,14],[1024,1024],[100,200,50,600]),/invalid/);
 });

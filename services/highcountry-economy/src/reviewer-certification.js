@@ -16,7 +16,7 @@ function requiredAsset(s,assetId,revision){const a=s.econCreatorAssets?.get(JSON
 function valid(s,cert,design){
  if(!cert||cert.status!=='approved'||cert.version!==CERT_VERSION||!verifyCertificateSignature(cert, s.econReviewers.get(cert.reviewerId)?.publicKey))return false;
  const reviewer=s.econReviewers.get(cert.reviewerId),assignment=s.econAssignments.get(cert.assignmentId);
- if(!reviewer||reviewer.status!=='active'||reviewer.keyVersion!==cert.keyVersion||!assignment||assignment.reviewerId!==cert.reviewerId||assignment.assetId!==cert.assetId||assignment.revision!==cert.revision||assignment.status!=='completed')return false;
+ if(!reviewer||reviewer.status!=='active'||!Number.isSafeInteger(reviewer.expiresAt)||reviewer.expiresAt<=Date.now()||cert.issuedAt>reviewer.expiresAt||reviewer.keyVersion!==cert.keyVersion||!assignment||assignment.reviewerId!==cert.reviewerId||assignment.assetId!==cert.assetId||assignment.revision!==cert.revision||assignment.status!=='completed')return false;
  const asset=s.econCreatorAssets?.get(JSON.stringify([cert.assetId,cert.revision]));
  if(!asset||asset.sha256!==cert.sha256||asset.metadataHash!==cert.metadataHash||asset.creatorId!==design.creator)return false;
  if(cert.assetId!==design.designId||cert.certificateId!==design.certificationRef||!cert.automatedValidationId||!id(cert.qaBy)||cert.qaBy===cert.reviewerId||cert.disputed===true)return false;
@@ -35,11 +35,11 @@ export class ReviewerCertification {
  }
  async actor(session){const p=await this.authority.principal(session);if(!id(p))fail('principal');return p;}
  guard(s,session,scope,principal){if(this.authority.guardState(s,session,scope,principal)!==true)fail('authority-revoked');}
- async register(session,{reviewerId,publicKey}){
-  const actor=await this.actor(session);if(!id(reviewerId)||typeof publicKey!=='string')fail('registration');
+ async register(session,{reviewerId,publicKey,expiresAt}){
+  const actor=await this.actor(session);if(!id(reviewerId)||typeof publicKey!=='string'||!Number.isSafeInteger(expiresAt)||expiresAt<=Date.now())fail('registration');
   let key;try{key=createPublicKey(publicKey);if(key.asymmetricKeyType!=='ed25519')fail('key-type');}catch{fail('key-invalid');}
   return this.store.transact(s=>{state(s);this.guard(s,session,'reviewer-register',actor);if(s.econReviewers.has(reviewerId))fail('registered');
-   const row={reviewerId,publicKey:key.export({type:'spki',format:'pem'}),keyVersion:1,status:'active',warnings:0,registeredAt:this.clock()};
+   const row={reviewerId,publicKey:key.export({type:'spki',format:'pem'}),keyVersion:1,expiresAt,status:'active',warnings:0,registeredAt:this.clock()};
    s.econReviewers.set(reviewerId,row);audit(s,'registered',actor,reviewerId,this.clock());return clone(row);
   });
  }
@@ -47,7 +47,7 @@ export class ReviewerCertification {
   const actor=await this.actor(session);if(![assignmentId,reviewerId,assetId].every(id)||!Number.isSafeInteger(revision)||revision<1)fail('assignment');
   return this.store.transact(s=>{state(s);this.guard(s,session,'review-assign',actor);
    const reviewer=s.econReviewers.get(reviewerId),asset=requiredAsset(s,assetId,revision);
-   if(!reviewer||reviewer.status!=='active'||reviewerId===asset.creatorId||s.econAssignments.has(assignmentId))fail('assignment-denied');
+   if(!reviewer||reviewer.status!=='active'||reviewer.expiresAt<=Date.now()||reviewerId===asset.creatorId||s.econAssignments.has(assignmentId))fail('assignment-denied');
    const row={assignmentId,reviewerId,assetId,revision,sha256:asset.sha256,metadataHash:asset.metadataHash,status:'assigned',assignedBy:actor,assignedAt:this.clock()};
    s.econAssignments.set(assignmentId,row);audit(s,'assigned',actor,assignmentId,this.clock());return clone(row);
   });
@@ -62,7 +62,7 @@ export class ReviewerCertification {
   if(verified?.valid!==true||!id(verified.evidenceId))fail('automation-rejected');
   return this.store.transact(s=>{state(s);this.guard(s,session,'review-certify',actor);
    const assignment=s.econAssignments.get(certificate.assignmentId),reviewer=s.econReviewers.get(actor),asset=requiredAsset(s,certificate.assetId,certificate.revision);
-   if(!reviewer||reviewer.status!=='active'||!assignment||assignment.status!=='assigned'||assignment.reviewerId!==actor||assignment.assetId!==certificate.assetId||
+   if(!reviewer||reviewer.status!=='active'||reviewer.expiresAt<=Date.now()||certificate.issuedAt>reviewer.expiresAt||!assignment||assignment.status!=='assigned'||assignment.reviewerId!==actor||assignment.assetId!==certificate.assetId||
      assignment.revision!==certificate.revision||assignment.sha256!==certificate.sha256||assignment.metadataHash!==certificate.metadataHash||
      asset.sha256!==certificate.sha256||asset.metadataHash!==certificate.metadataHash||s.econCertificates.has(certificate.certificateId)||
      [...s.econCertificates.values()].some(c=>c.assignmentId===certificate.assignmentId))fail('certificate-conflict');
@@ -101,7 +101,7 @@ export class ReviewerCertification {
   return this.store.transact(s=>{state(s);this.guard(s,session,'review-appeal',actor);const a=s.econReviewAppeals.get(appealId),c=s.econCertificates.get(a?.certificateId);
    if(!a||a.status!=='open'||!c||actor===c.reviewerId||actor===a.actor)fail('appeal-denied');
    a.status='resolved';a.decision=decision;a.decidedBy=actor;a.decidedAt=this.clock();
-   if(decision==='uphold')c.status='revoked';else if(c.status==='approved')c.disputed=false;
+   if(decision==='uphold')c.status='revoked';else {if(!['approved','revoked'].includes(c.status)||![...s.econReviewAudit.values()].some(e=>e.type==='qa-approve'&&e.target===c.certificateId))fail('appeal-not-previously-approved');c.status='approved';c.disputed=false;}
    audit(s,'appeal-'+decision,actor,a.certificateId,this.clock(),{appealId,reason});return clone(a);
   });
  }

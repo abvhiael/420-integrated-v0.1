@@ -1,0 +1,186 @@
+{
+  "collection": "HC-ART-05-A",
+  "provenance": "existing exact GitHub main branch PNG, immutable filename/path, no regeneration",
+  "assets": [
+    {
+      "id": "source-01",
+      "name": "cedarwood storage lodge",
+      "filename": "hc-structure-emerald-cedarwood-storage-lodge.png",
+      "repository_path": "apps/highcountry-web/public/assets/structures/hc-art-05-a/emerald-coast/cedarwood-storage-lodge/hc-structure-emerald-cedarwood-storage-lodge.png",
+      "git_blob_sha": "dfc92ca0753df347fc8ed4696c6740c0ee618a95",
+      "byte_length": 2308978,
+      "source": "main:exact-merged-png",
+      "region": "emerald-coast"
+    },
+    {
+      "id": "source-02",
+      "name": "coastal rain collector",
+      "filename": "hc-structure-emerald-coastal-rain-collector.png",
+      "repository_path": "apps/highcountry-web/public/assets/structures/hc-art-05-a/emerald-coast/coastal-rain-collector/hc-structure-emerald-coastal-rain-collector.png",
+      "git_blob_sha": "c7b869aff5315750a7f93983cb349fd6a95425e8",
+      "byte_length": 1745361,
+      "source": "main:exact-merged-png",
+      "region": "emerald-coast"
+    },
+    {
+      "id": "source-03",
+      "name": "driftwood equipment shack",
+      "filename": "hc-structure-emerald-driftwood-equipment-shack.png",
+      "repository_path": "apps/highcountry-web/public/assets/structures/hc-art-05-a/emerald-coast/driftwood-equipment-shack/hc-structure-emerald-driftwood-equipment-shack.png",
+      "git_blob_sha": "4ed3e56bd25fd94c8a7ff011700323c8d39e64e3",
+      "byte_length": 1588820,
+      "source": "main:exact-merged-png",
+      "region": "emerald-coast"
+    },
+    {
+      "id": "source-04",
+      "name": "woodland keepers outbuilding",
+      "filename": "hc-structure-emerald-woodland-keepers-outbuilding.png",
+      "repository_path": "apps/highcountry-web/public/assets/structures/hc-art-05-a/emerald-coast/woodland-keepers-outbuilding/hc-structure-emerald-woodland-keepers-outbuilding.png",
+      "git_blob_sha": "6dda02e07ecfabb523701308e9e272684653e719",
+      "byte_length": 3271297,
+      "source": "main:exact-merged-png",
+      "region": "emerald-coast"
+    },
+    {
+      "id": "source-05",
+      "name": "equipment barn",
+      "filename": "hc-structure-prairie-13-equipment-barn.png",
+      "repository_path": "apps/highcountry-web/public/assets/structures/hc-art-05-a/golden-prairie/equipment-barn/hc-structure-prairie-13-equipment-barn.png",
+      "git_blob_sha": "2302132c5799020d57e835347a6cfbd1246c59a1",
+      "byte_length": 1661625,
+      "source": "main:exact-merged-png",
+      "region": "golden-prairie"
+    },
+    {
+      "id": "source-06",
+      "name": "field store",
+      "filename": "hc-structure-prairie-11-field-store.png",
+      "repository_path": "apps/highcountry-web/public/assets/structures/hc-art-05-a/golden-prairie/field-store/hc-structure-prairie-11-field-store.png",
+      "git_blob_sha": "8ef936716faca5992b4543b47c68b858a3ab807d",
+      "byte_length": 2399515,
+      "source": "main:exact-merged-png",
+      "region": "golden-prairie"
+    },
+    {
+      "id": "source-07",
+      "name": "greenhouse shed",
+      "filename": "hc-structure-prairie-12-greenhouse-shed.png",
+      "repository_path": "apps/highcountry-web/public/assets/structures/hc-art-05-a/golden-prairie/greenhouse-shed/hc-structure-prairie-12-greenhouse-shed.png",
+      "git_blob_sha": "994976a675724041a17cf6fdea55d797843a2c54",
+      "byte_length": 1699742,
+      "source": "main:exact-merged-png",
+      "region": "golden-prairie"
+    },
+    {
+      "id": "source-08",
+      "name": "utility shack",
+      "filename": "hc-structure-prairie-14-utility-shack.png",
+      "repository_path": "apps/highcountry-web/public/assets/structures/hc-art-05-a/golden-prairie/utility-shack/hc-structure-prairie-14-utility-shack.png",
+      "git_blob_sha": "06cb1a6f9f93afc50698d80a7ad2454a78bcb5a3",
+      "byte_length": 3327537,
+      "source": "main:exact-merged-png",
+      "region": "golden-prairie"
+    },
+    {
+      "id": "source-09",
+      "name": "storage shelter",
+      "filename": "hc-structure-redmesa-18-storage-shelter.png",
+      "repository_path": "apps/highcountry-web/public/assets/structures/hc-art-05-a/red-mesa/storage-shelter/hc-structure-redmesa-18-storage-shelter.png",
+      "git_blob_sha": "19d4543f86a02bc095990e7d5969b99bf310614f",
+      "byte_length": 3200851,
+      "source": "main:exact-merged-png",
+      "region": "red-mesa"
+    },
+    {
+      "id": "source-10",
+      "name": "supply shed",
+      "filename": "hc-structure-redmesa-15-supply-shed.png",
+      "repository_path": "apps/highcountry-web/public/assets/structures/hc-art-05-a/red-mesa/supply-shed/hc-structure-redmesa-15-supply-shed.png",
+      "git_blob_sha": "95c4dacf7931b1d1a1c16eb926af5968acda0d49",
+      "byte_length": 2480582,
+      "source": "main:exact-merged-png",
+      "region": "red-mesa"
+    },
+    {
+      "id": "source-11",
+      "name": "water house",
+      "filename": "hc-structure-redmesa-16-water-house.png",
+      "repository_path": "apps/highcountry-web/public/assets/structures/hc-art-05-a/red-mesa/water-house/hc-structure-redmesa-16-water-house.png",
+      "git_blob_sha": "4bbd73f177f126601a77a530c91de7c21c6146ad",
+      "byte_length": 1678731,
+      "source": "main:exact-merged-png",
+      "region": "red-mesa"
+    },
+    {
+      "id": "source-12",
+      "name": "workshop",
+      "filename": "hc-structure-redmesa-17-workshop.png",
+      "repository_path": "apps/highcountry-web/public/assets/structures/hc-art-05-a/red-mesa/workshop/hc-structure-redmesa-17-workshop.png",
+      "git_blob_sha": "35a6400a5ef9e4f0a7d480ac6638e65cb82a6da9",
+      "byte_length": 1613363,
+      "source": "main:exact-merged-png",
+      "region": "red-mesa"
+    },
+    {
+      "id": "source-13",
+      "name": "botanical potting shed",
+      "filename": "hc-structure-universal-botanical-potting-shed.png",
+      "repository_path": "apps/highcountry-web/public/assets/structures/hc-art-05-a/universal/botanical-potting-shed/hc-structure-universal-botanical-potting-shed.png",
+      "git_blob_sha": "e09c9f01ebd0ba0a35bfd1e4a4ac1fdb8f6119bb",
+      "byte_length": 1886248,
+      "source": "main:exact-merged-png",
+      "region": "universal"
+    },
+    {
+      "id": "source-14",
+      "name": "equipment barnlet",
+      "filename": "hc-structure-universal-equipment-barnlet.png",
+      "repository_path": "apps/highcountry-web/public/assets/structures/hc-art-05-a/universal/equipment-barnlet/hc-structure-universal-equipment-barnlet.png",
+      "git_blob_sha": "316c820362f931f70c98c36edd9ff6b473ad230e",
+      "byte_length": 2315276,
+      "source": "main:exact-merged-png",
+      "region": "universal"
+    },
+    {
+      "id": "source-15",
+      "name": "heritage seed storehouse",
+      "filename": "hc-structure-universal-heritage-seed-storehouse.png",
+      "repository_path": "apps/highcountry-web/public/assets/structures/hc-art-05-a/universal/heritage-seed-storehouse/hc-structure-universal-heritage-seed-storehouse.png",
+      "git_blob_sha": "7ec1c1e97269e1635d12118bcfee89a5949c29d1",
+      "byte_length": 1801737,
+      "source": "main:exact-merged-png",
+      "region": "universal"
+    },
+    {
+      "id": "source-16",
+      "name": "heritage tool shed",
+      "filename": "hc-structure-universal-heritage-tool-shed.png",
+      "repository_path": "apps/highcountry-web/public/assets/structures/hc-art-05-a/universal/heritage-tool-shed/hc-structure-universal-heritage-tool-shed.png",
+      "git_blob_sha": "da2234c8bb4eb5d5578b91bfa05dc04a5149479f",
+      "byte_length": 1291111,
+      "source": "main:exact-merged-png",
+      "region": "universal"
+    },
+    {
+      "id": "source-17",
+      "name": "offgrid utility cabin",
+      "filename": "hc-structure-universal-offgrid-utility-cabin.png",
+      "repository_path": "apps/highcountry-web/public/assets/structures/hc-art-05-a/universal/offgrid-utility-cabin/hc-structure-universal-offgrid-utility-cabin.png",
+      "git_blob_sha": "4402034a1b11be9beb0759e52a3eb6656d35bb83",
+      "byte_length": 1321739,
+      "source": "main:exact-merged-png",
+      "region": "universal"
+    },
+    {
+      "id": "source-18",
+      "name": "rainwater utility house",
+      "filename": "hc-structure-universal-rainwater-utility-house.png",
+      "repository_path": "apps/highcountry-web/public/assets/structures/hc-art-05-a/universal/rainwater-utility-house/hc-structure-universal-rainwater-utility-house.png",
+      "git_blob_sha": "5838b722572be93abc0bd6eb8cea1e4dde4865ed",
+      "byte_length": 1267365,
+      "source": "main:exact-merged-png",
+      "region": "universal"
+    }
+  ]
+}

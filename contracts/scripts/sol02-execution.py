@@ -21,21 +21,24 @@ def run_json(command, log):
         raise RuntimeError("Foundry did not return JSON: "+" ".join(command)) from exc
 
 def flatten_list(doc):
-    """Foundry --list --json yields suite => tests (array or object)."""
+    """Foundry --list --json: source path => contract name => test signatures."""
     if not isinstance(doc,dict):
         raise ValueError("Malformed Foundry discovery")
     inventory=set()
-    for suite,entries in doc.items():
-        if not isinstance(suite,str) or not isinstance(entries,(dict,list)):
-            raise ValueError("Malformed Foundry discovery suite")
-        names=entries.keys() if isinstance(entries,dict) else entries
-        for name in names:
-            if not isinstance(name,str) or not name:
-                raise ValueError("Malformed Foundry discovered test")
-            identity=(suite,name)
-            if identity in inventory:
-                raise ValueError("Duplicate discovered test")
-            inventory.add(identity)
+    for path,contracts in doc.items():
+        if not isinstance(path,str) or not isinstance(contracts,dict):
+            raise ValueError("Malformed Foundry discovery file")
+        for contract,names in contracts.items():
+            if not isinstance(contract,str) or not isinstance(names,(dict,list)):
+                raise ValueError("Malformed Foundry discovery contract")
+            signatures=names.keys() if isinstance(names,dict) else names
+            for name in signatures:
+                if not isinstance(name,str) or not name:
+                    raise ValueError("Malformed Foundry discovered test")
+                identity=(path+":"+contract,name)
+                if identity in inventory:
+                    raise ValueError("Duplicate discovered test")
+                inventory.add(identity)
     return inventory
 
 def flatten_results(doc):

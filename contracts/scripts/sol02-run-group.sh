@@ -24,16 +24,25 @@ if [[ "$group" == "420bet--01" ]]; then
   export FOUNDRY_SOLC_VERSION="0.8.30"
 fi
 forge build "${targets[@]}"
-mapfile -t tests < <(printf '%s\n' "${targets[@]}" | grep '^test/.*\.sol$' || true)
+mapfile -t tests < <(printf '%s\\n' "${targets[@]}" | grep '^test/.*\\.sol$' || true)
+mkdir -p ../artifacts/sol02/runtime-"$group"
 for target in "${tests[@]}"; do
-  forge test --match-path "$target" -vv
+  id="$(printf '%s' "$target" | sha256sum | cut -c1-16)"
+  python3 scripts/sol02-execution.py --target "$target" --output "../artifacts/sol02/runtime-$group/$id.json"
 done
 python3 - "$plan" "$group" <<'PY'
-import json,sys
+import hashlib,json,sys
 from pathlib import Path
 p=json.loads(Path(sys.argv[1]).read_text())
 group=sys.argv[2]
-result={key:p[key] for key in ("schema","sha","profile","inventory_sha256")}
-result.update(group=group,targets=p["groups"][group],passed=True,tests=sum(t.startswith("test/") for t in p["groups"][group]))
-Path("../artifacts/sol02/sol02-"+group+".json").write_text(json.dumps(result,sort_keys=True,indent=2)+"\n")
+records=[json.loads(f.read_text()) for f in sorted(Path('../artifacts/sol02/runtime-'+group).glob('*.json'))]
+expected=set(t for t in p['groups'][group] if t.startswith('test/') and t.endswith('.sol'))
+assert {r['target'] for r in records}==expected, 'Missing test-target runtime record'
+executed=[(e['contract'],e['test']) for r in records for e in r.get('executed',[])]
+assert len(executed)==len(set(executed)), 'Duplicate runtime test result'
+assert executed, 'Empty runtime test inventory'
+result={key:p[key] for key in ('schema','sha','profile','inventory_sha256')}
+result.update(group=group,targets=p['groups'][group],passed=True,
+              runtime=records,runtimeTestCount=len(executed))
+Path('../artifacts/sol02/sol02-'+group+'.json').write_text(json.dumps(result,sort_keys=True,indent=2)+'\\n')
 PY

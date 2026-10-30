@@ -48,6 +48,20 @@ class Web3SportsRPC:
             return result
         except Exception as exc:
             raise AdmissionRejected("RPC read failed") from exc
+    def canonical_source_config(self, markets_address, market_id):
+        market = self.read(markets_address, "get", market_id)
+        event_id = market[0][0]
+        events = self.read(markets_address, "eventsRegistry")
+        competitions = self.read(markets_address, "competitions")
+        competition_id = self.read(events, "competitionOf", event_id)
+        record = self.read(competitions, "get", competition_id)
+        if record[4] != 2:
+            raise AdmissionRejected("competition source authority not approved")
+        config = record[0]
+        if config[4] <= 0:
+            raise AdmissionRejected("source freshness policy absent")
+        return (config[2], config[3], config[1])
+
     def finalized_receipt(self, tx_hash: str):
         try:
             receipt = self.web3.eth.get_transaction_receipt(tx_hash)

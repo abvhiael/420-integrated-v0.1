@@ -122,6 +122,6 @@ export class BuildingCompatibilityService {
   const snapshot=await this.reader.readAuthorizedBuilding(session,buildingId);
   if(!snapshot||snapshot.buildingId!==buildingId||!id(snapshot.ownerPrincipal))fail('unauthorized-building');
   if(await this.reader.verifyPlacedEquipment(session,snapshot)!==true)fail('equipment-authority-unverified');
-  return checkBuildingEquipment({registry:this.registry,catalog:this.catalog,...snapshot});
+  return checkBuildingEquipment({...snapshot,registry:this.registry,catalog:this.catalog});
  }
 }

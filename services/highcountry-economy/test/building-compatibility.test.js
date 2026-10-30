@@ -53,6 +53,9 @@ test('server-only compatibility read rejects absent or revoked placement authori
  };
  const service=new BuildingCompatibilityService({catalog,registry,reader});
  assert.equal((await service.compatibility('session_a','building_1')).functions.crafting.effectiveBps,250);
+ snapshot.registry={...registry,sha256:'0'.repeat(64)};
+ snapshot.catalog={...catalog,sha256:'0'.repeat(64)};
+ assert.equal((await service.compatibility('session_a','building_1')).registrySha256,registry.sha256);
  trusted=false;
  await assert.rejects(service.compatibility('session_a','building_1'),/hc-econ-03:equipment-authority-unverified/);
  await assert.rejects(service.compatibility('expired','building_1'),/hc-econ-03:unauthorized-building/);

@@ -48,7 +48,9 @@ for(const [group,manifests] of Object.entries(groups)){
     const fp=entry.footprint_tiles,canvas=entry.canvas_px;
     const fw=Array.isArray(fp)?fp[0]:fp?.width,fh=Array.isArray(fp)?fp[1]:fp?.height;
     const cw=Array.isArray(canvas)?canvas[0]:canvas?.width,ch=Array.isArray(canvas)?canvas[1]:canvas?.height;
-    if(width!==fw*320||height!==fh*320||cw!==width||ch!==height)throw Error('footprint-or-canvas-mismatch');
+    if(fp||canvas){if(width!==fw*320||height!==fh*320||cw!==width||ch!==height)throw Error('footprint-or-canvas-mismatch');}
+    else if(!entry.git_blob_sha)throw Error('missing-approved-geometry-and-source-identity');
+    if(entry.git_blob_sha){const git=Buffer.concat([Buffer.from('blob '+bytes.length+'\\0'),bytes]);if(createHash('sha1').update(git).digest('hex')!==entry.git_blob_sha)throw Error('git-blob-provenance-mismatch');}
     if(entry.sha256&&createHash('sha256').update(bytes).digest('hex')!==entry.sha256)throw Error('sha256-mismatch');
     verified.push(asset);
    }catch(e){failures.push({kind:'asset-validation',group,asset,id:entry.id,reason:String(e.message)});}

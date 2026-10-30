@@ -32,3 +32,12 @@ After new Level 1 selector, Level 2 cross-module tests and all Level 3 coverage/
 
 ## Protocol split evidence (2026-10-27)
 The former `420protocols` catch-all hit a GitHub runner termination (exit 143) on PR #888 run `40571561243`. This changes only primary assignment, not the full canonical inventory: separate identity, DeFi, creative, services and infrastructure groups are checked alongside a conservative protocol-misc remainder. Level 1 regression fixtures ensure distinct source/test ownership and no file loss. Passing groups on the prior SHA `ce8111f7009804b1f3548b8010c20b2a380d63c1` remain historical evidence and do not qualify this changed SHA. The separate 420BET bounded job also failed, but its job log endpoint returned a GitHub artifact 404 (`BlobNotFound`) when investigated; without those logs its exact cause is unconfirmed, and no 420BET assertions were modified.
+
+## Candidate runtime evidence and Decision #10 parity (pending qualification)
+The isolated acceptance implementation records individual Foundry-discovered and executed test identifiers for every selected test file. The evidence aggregator rejects missing, failed, duplicated, or mismatched runtime identities and preserves source-only partition records without inventing test passes. Target-count-only declarations are no longer sufficient.
+
+The Level 2 runner executes the original four cross-module Solidity test files under a pinned SHA, captures their real Foundry results and records the independent Solidity source-family import closures. A source import alone is not proof that every interaction occurred; runtime test success remains mandatory.
+
+The Decision #10 parity step reuses the **same** `Decision10DeploySeed420` harness and the canonical fixture assertions from the legacy `contracts-foundry.yml` workflow, and saves the fixture and source hashes. This checks canonical harness/semantic equivalence; it does not assert byte-identical outputs against an unrelated legacy commit. The original mandatory Level 3 coverage instrumentation and branch protection remain unchanged until exact-SHA group coverage is qualified and reconciled to the canonical legacy coverage baseline.
+
+Use the branch-specific isolated acceptance workflow for Level 1 and the affected Level 2/Decision #10 qualification. Do not infer release qualification from a passing helper-unit-test run.

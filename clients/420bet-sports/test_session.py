@@ -6,7 +6,9 @@ sys.path.insert(0,str(Path(__file__).parent))
 from app import AdmissionRejected
 from identity import PlayerBinding
 from rpc import Web3SportsRPC, FinalityPolicy
+import session as session_module
 from session import FundedSportsSession
+from unittest.mock import patch
 
 A=lambda n:"0x"+format(n,"040x")
 H=lambda n:"0x"+format(n,"064x")
@@ -37,6 +39,7 @@ class Runtime(Web3SportsRPC):
             return (config,)
         return self.chain.read(address,name,*args)
     def code(self,address):return self.chain.code(address)
+    def canonical_source_config(self,markets,market_id):return (H(1),H(2),H(3))
     def submit_player_funding(self,planned,wallet,*,gas_limit):
         self.sent+=1
         if planned["method"]!="fund" or planned["from"]!=wallet.address:raise AdmissionRejected("invalid funding intent")
@@ -45,6 +48,7 @@ class App:
     def __init__(self,chain):
         self.deployment=type("D",(),{"markets":A(9),"vault":A(10),"asset":chain.asset,"verify":lambda self,rpc:None})()
         self.rpc=Runtime(chain);self.chain=chain
+        self.verifier=type("V",(),{"verify":lambda self,source,now:object()})()
     def prepare(self,player,offer,source,now):
         return {"to":self.deployment.vault,"from":player,"method":"fund",
                 "arguments":[offer],"consent":{"oddsDigest":H(11),"stake":100,"gross":190}}
@@ -54,8 +58,11 @@ class SessionTests(unittest.TestCase):
     def setUp(self):
         self.chain=Chain();self.app=App(self.chain)
         self.session=FundedSportsSession(self.app,self.chain.binding())
+        self.quote_patch=patch.object(session_module,"validate_quote",return_value=H(11))
+        self.quote_patch.start()
+        self.addCleanup(self.quote_patch.stop)
     def test_authorized_wallet_funds_once(self):
-        self.assertEqual(self.session.admit(Wallet(self.chain.player),{"marketId":H(1)},{},100,gas_limit=500000),H(99))
+        self.assertEqual(self.session.admit(Wallet(self.chain.player),{"marketId":H(1),"quoteDigest":H(11)},{},100,gas_limit=500000),H(99))
         self.assertEqual(self.app.rpc.sent,1)
     def test_declined_consent_is_not_broadcast(self):
         with self.assertRaises(AdmissionRejected):

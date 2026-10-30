@@ -26,6 +26,7 @@ class FundedSportsSession:
         # Never send if player declined the precise locked terms.
         if not wallet.confirm_terms(planned["consent"]):
             raise AdmissionRejected("player declined terms")
+        planned["asset"] = self.identity.canonical_asset
         return rpc.submit_player_funding(planned, wallet, gas_limit=gas_limit)
 
     def receipt(self, tx_hash, ticket_id, player):

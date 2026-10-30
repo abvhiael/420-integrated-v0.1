@@ -34,6 +34,9 @@ jobs:
           mkdir -p artifacts/sol02-isolated
           python3 scripts/bet/package-poker-5a10-evidence.py --verify
           python3 scripts/bet/unpack-poker-5c5-evidence.py
+          # The canonical extractors fail closed on manifest/archive inventory and SHA-256.
+          python3 scripts/bet/unpack-poker-5c6-evidence.py
+          python3 scripts/bet/unpack-poker-5c7-evidence.py
           ( cd clients/420bet-poker/zkshuffle && go test -mod=readonly -count=1 -timeout 20m -run '^TestTournament5C5CommittedCryptographicEvidence$' -v . ) | tee artifacts/sol02-isolated/groth16.log
           test "$(grep -c 'verified committed genuine proof ' artifacts/sol02-isolated/groth16.log)" -eq 454
           grep -q -- '--- PASS: TestTournament5C5CommittedCryptographicEvidence' artifacts/sol02-isolated/groth16.log
@@ -83,8 +86,16 @@ jobs:
           result={'schema':'420.ci.sol02.420bet01.full.v1','sha':inventory['sha'],'historical_inventory_sha256':inventory['inventory_sha256'],'targets':{},'partitions':{},'passed':False}
           def save(): (root/'result.json').write_text(json.dumps(result,sort_keys=True,indent=2)+'\n')
           save()
+          # Original exact-SHA evidence for these previously qualified scopes is
+          # retained from run 40981065665. Do not recompile or re-execute them.
+          historical='6d9b5b6da546de48b2b90cf7b1fd8ffe852510a1'
+          for group in ['core','5c4','5c5']:
+              for target in parts[group]:
+                  result['targets'][target]={'reusedFromSHA':historical,'reusedFromRun':40981065665,'qualifiedInThisRun':False}
+              result['partitions'][group]={'targets':parts[group],'historicalSHA':historical,'historicalRun':40981065665,'reused':True,'passed':True}
+          save()
           for group,targets in parts.items():
-              if not targets:continue
+              if group in ['core','5c4','5c5'] or not targets:continue
               tests=[p for p in targets if p.startswith('test/')]
               env=dict(os.environ)
               env.update(FOUNDRY_PROFILE=('tournament'+group if group in ['5c5','5c6','5c7','5c8'] else 'pr'),

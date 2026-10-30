@@ -5,7 +5,7 @@ const hex=(x,n)=>typeof x==='string'&&new RegExp('^0x[0-9a-f]{'+n+'}$').test(x);
 export function createPostgresCupAchievements420({pool,gameId,projection}={}){
  if(typeof pool?.connect!=='function'||!hex(gameId,64)||typeof projection?.standings!=='function')fail('cup-achievement-config-invalid');
  const retryable=new Set(['40001','40P01','55P03']);
- const maxAttempts=3;
+ const maxAttempts=6;
  const checked=async cupId=>{
   if(!hex(cupId,64))fail('cup-id-invalid');
   const witness=await projection.standings({cupId});
@@ -26,6 +26,8 @@ export function createPostgresCupAchievements420({pool,gameId,projection}={}){
     if(opened){try{await c.query('ROLLBACK');}catch{fail('cup-rollback-failed');}}
     if(!retryable.has(e?.code))throw e;
     if(attempt===maxAttempts)fail('cup-retry-required');
+    // Yield to competing writers; preserve bounded fail-closed retry semantics.
+    await new Promise(resolve=>setTimeout(resolve,Math.min(100,5*(2**(attempt-1)))));
    }finally{c.release();}
   }
  }

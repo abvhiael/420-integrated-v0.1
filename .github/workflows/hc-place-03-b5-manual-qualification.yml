@@ -1,0 +1,38 @@
+name: HC-PLACE-03 B5 Manual Exact-SHA Qualification
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  b5-postgres:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: highcountry_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 10s --health-timeout 5s --health-retries 5
+    env:
+      HC_PLACE_TEST_DATABASE_URL: postgres://postgres:postgres@localhost:5432/highcountry_test
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: af404735c08bd971c980955ce3ae8b120d6fa5e3
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify exact PR candidate
+        run: test "$(git rev-parse HEAD)" = "af404735c08bd971c980955ce3ae8b120d6fa5e3"
+      - name: Install bounded economy dependencies
+        working-directory: services/highcountry-economy
+        run: npm install --ignore-scripts --no-package-lock --no-save
+      - name: Create isolated database table
+        run: psql "$HC_PLACE_TEST_DATABASE_URL" -v ON_ERROR_STOP=1 -c 'CREATE TABLE highcountry_buds_state (namespace text PRIMARY KEY, state jsonb NOT NULL)'
+      - name: PostgreSQL B5 cross-module acceptance only
+        run: node --test services/highcountry-economy/test/placement-market-postgres.test.mjs

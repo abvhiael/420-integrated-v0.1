@@ -61,3 +61,25 @@ test('serial assignment collision, QA revocation, guarded roles and retained his
  assert.equal(f.store.state.econCertificates.get('cert_1').status,'approved');
  assert.equal(f.store.state.econReviewAudit.size,4);
 });
+
+test('PostgreSQL JSONB persistence retains signed certification, QA and revocation across independent service recreation',async()=>{
+ const f=make(),asset=[...f.store.state.econCreatorAssets];
+ let persisted={schema:1,balances:[],operations:[],claims:[],sourceIssued:[],issued:0,burned:0,econCreatorAssets:asset};
+ const pool={connect:async()=>({query:async(sql,args)=>{
+  if(sql.startsWith('SELECT state'))return {rows:[{state:structuredClone(persisted)}]};
+  if(sql.startsWith('UPDATE highcountry_buds_state')){persisted=JSON.parse(args[1]);return {rowCount:1};}
+  return {rows:[]};
+ },release(){}})};
+ const {PostgresBudsStore}=await import('../src/postgres-store.js');
+ const factory=()=>new ReviewerCertification({store:new PostgresBudsStore(pool,'cert_game'),authority:f.authority,automation:f.automation,clock:()=>100});
+ await factory().register('operator',{reviewerId:'reviewer',publicKey:f.pair.publicKey.export({format:'pem',type:'spki'}),expiresAt:Date.now()+86400000});
+ await factory().assign('operator',{assignmentId:'assign_1',reviewerId:'reviewer',assetId:'design',revision:1});
+ await factory().certify('reviewer',f.cert(),{approved:true});
+ await factory().qa('qa','cert_1','approve','checked artwork');
+ const store=new PostgresBudsStore(pool,'cert_game');
+ assert.equal(await store.transact(s=>assertCertifiedForIssuance(s,f.design)),true);
+ await factory().discipline('operator','reviewer','revoke','confirmed fraud');
+ await assert.rejects(store.transact(s=>assertCertifiedForIssuance(s,f.design)),/certification-not-authorized/);
+ assert.deepEqual(persisted.econReviewAudit.map(([,row])=>row.type),['registered','assigned','signed','qa-approve','discipline-revoke']);
+ assert.equal(persisted.econCertificates[0][1].status,'approved');
+});

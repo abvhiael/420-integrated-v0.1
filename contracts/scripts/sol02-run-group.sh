@@ -24,7 +24,7 @@ if [[ "$group" == "420bet--01" ]]; then
   export FOUNDRY_SOLC_VERSION="0.8.30"
 fi
 forge build "${targets[@]}"
-mapfile -t tests < <(printf '%s\\n' "${targets[@]}" | grep '^test/.*\\.sol$' || true)
+mapfile -t tests < <(printf '%s\n' "${targets[@]}" | grep '^test/.*\.sol$' || true)
 mkdir -p ../artifacts/sol02/runtime-"$group"
 for target in "${tests[@]}"; do
   id="$(printf '%s' "$target" | sha256sum | cut -c1-16)"
@@ -44,5 +44,5 @@ assert executed, 'Empty runtime test inventory'
 result={key:p[key] for key in ('schema','sha','profile','inventory_sha256')}
 result.update(group=group,targets=p['groups'][group],passed=True,
               runtime=records,runtimeTestCount=len(executed))
-Path('../artifacts/sol02/sol02-'+group+'.json').write_text(json.dumps(result,sort_keys=True,indent=2)+'\\n')
+Path('../artifacts/sol02/sol02-'+group+'.json').write_text(json.dumps(result,sort_keys=True,indent=2)+'\n')
 PY

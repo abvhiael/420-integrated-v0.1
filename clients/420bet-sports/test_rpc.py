@@ -109,7 +109,7 @@ class RuntimeTests(unittest.TestCase):
         ticket=H(71)
         self.w3.eth.transaction={"to":self.vault,"from":self.wallet.address,"blockHash":self.w3.eth.block_hash}
         vault=self.w3.eth.contract(self.vault,[])
-        vault.events=[{"address":self.vault,"args":{"id":bytes.fromhex(ticket[2:])}}]
+        vault.events.c.events=[{"address":self.vault,"args":{"id":bytes.fromhex(ticket[2:])}}]
         self.assertEqual(self.rpc.reconcile_funding(self.w3.to_hex(self.w3.eth.tx_hash),ticket,
                     self.vault,self.wallet.address)["ticketFunded"]["id"],ticket)
         self.w3.eth.block_number=17

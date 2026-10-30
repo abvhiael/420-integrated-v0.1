@@ -34,6 +34,14 @@ test('real PostgreSQL SERIALIZABLE Cup snapshots, idempotency, isolation, revoca
   await store.synchronize({cupId});
   assert.equal((await store.current({cupId})).current,true);
   assert.equal(Number((await runtime.query('SELECT count(*) AS count FROM highcountry_cup.history')).rows[0].count),2);
+  // A historical row never authorizes another chain, Cup contract or issuance scope.
+  for(const [column,wrongValue] of [['chain_id',421],['cup_address',hex('f',40)],['scope',hex('7',64)]]){
+   await root.query('UPDATE highcountry_cup.achievements SET '+column+'=$1 WHERE game_id=$2 AND cup_id=$3',
+    [wrongValue,game,cupId]);
+   assert.equal((await store.current({cupId})).current,false,'context replay: '+column);
+   await store.synchronize({cupId});
+   assert.equal((await store.current({cupId})).current,true);
+  }
   const restarted=createPostgresCupAchievements420({pool:runtime,gameId:game,projection});
   await Promise.all(Array.from({length:5},()=>restarted.synchronize({cupId})));
   assert.equal((await restarted.current({cupId})).current,true);

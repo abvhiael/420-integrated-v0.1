@@ -1,5 +1,6 @@
 """Bounded session acceptance tests; no self-declared network qualification."""
 import unittest
+from hashlib import sha256
 from pathlib import Path
 import sys
 sys.path.insert(0,str(Path(__file__).parent))
@@ -19,6 +20,8 @@ class Chain:
         self.active=True;self.issuer_active=True;self.valid=True;self.credentials_ok=True
     def code(self,address):return b"valid" if address==self.identity else b""
     def read(self,address,name,*args):
+        if name=="symbol":return "W420"
+        if name=="decimals":return 18
         if name=="profiles":return (self.player,A(0),H(1),H(1),1,1,self.active)
         if name=="issuers":return (self.issuer,H(1),2,self.issuer_active)
         if name=="credentials":return (bytes.fromhex(self.issuer_id[2:]),bytes.fromhex(self.profile[2:]),bytes.fromhex(self.ctype[2:]),H(1),1,1000,0,False)
@@ -26,7 +29,7 @@ class Chain:
         if name=="hasValidCredential":return self.credentials_ok
         raise AssertionError(name)
     def binding(self):
-        return PlayerBinding(self.identity,self.profile,self.cred,self.ctype,self.issuer_id,self.asset,self.issuer)
+        return PlayerBinding(self.identity,self.profile,self.cred,self.ctype,self.issuer_id,self.asset,self.issuer, "0x"+sha256(b"valid").hexdigest())
 class Wallet:
     def __init__(self,address,consent=True):self.address=address;self.consent=consent
     def confirm_terms(self,terms):return self.consent

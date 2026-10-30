@@ -35,6 +35,7 @@ test('24 submissions distribute fee without undercount, independent correction a
  assert.equal(rows.length,24);
  assert.equal(rows.reduce((n,r)=>n+BigInt(r.paidUnits),0n),1001n);
  assert.equal(new Set(rows.map(r=>r.assetId)).size,24);
+ for(const leg of ['development','community','reviewer'])assert.equal(rows.reduce((n,r)=>n+BigInt(r.allocation[leg]),0n),BigInt(f.store.state.econFeePayments.get('pay_bundle24').allocation[leg]));
 });
 test('stale quote and forged payment refuse financial state',async()=>{
  const f=setup();f.disablePricing();await assert.rejects(f.q(),/price-unverified/);
@@ -79,6 +80,51 @@ test('approved certified work can pay reviewer exactly once, forged transfer ref
  await f.fees.assign('operator',{assetId:'art_0',reviewerId:'reviewer',assignmentId:'assignment'});
  f.store.state.econCertificates=new Map([['cert',{assetId:'art_0',revision:1,reviewerId:'reviewer',status:'approved',disputed:false}]]);
  await f.fees.review('reviewer',{assetId:'art_0',decision:'approve',reason:'valid work',certificateId:'cert'});
+ await f.fees.qaWork('qa',{assetId:'art_0',valid:true,reason:'independent acceptance'});
+ await f.fees.distribute('operator',{assetId:'art_0',leg:'development',transferId:'dev_1',evidence:{}});
+ await f.fees.distribute('operator',{assetId:'art_0',leg:'community',transferId:'community_1',evidence:{}});
+ await assert.rejects(f.fees.distribute('operator',{assetId:'art_0',leg:'community',transferId:'community_2',evidence:{}}),/distribution-denied/);
  f.disableSettlement();await assert.rejects(f.fees.release('qa',{assetId:'art_0',transferId:'reviewer_pay',evidence:{}}),/payout-unverified/);
- assert.equal(f.store.state.econFeeTransfers?.size??0,0);
+ assert.equal(f.store.state.econFeeTransfers?.size??0,2);
+});
+
+test('independently QA-validated rejection earns compensation without published artwork',async()=>{
+ const f=setup();await f.q();await f.pay();
+ f.store.state.econReviewers=new Map([['reviewer',{status:'active',expiresAt:f.now()+REVIEW_WINDOW_MS*8}]]);
+ f.store.state.econAssignments=new Map([['first',{reviewerId:'reviewer',assetId:'art_0',revision:1,status:'assigned'}]]);
+ await f.fees.assign('operator',{assetId:'art_0',reviewerId:'reviewer',assignmentId:'first'});
+ await f.fees.review('reviewer',{assetId:'art_0',decision:'correction',reason:'wrong image'});
+ f.store.state.econCreatorAssets=new Map([[JSON.stringify(['art_0',2]),{assetId:'art_0',revision:2}]]);
+ await f.fees.correction('alice',{assetId:'art_0',revision:2});
+ f.store.state.econAssignments.set('second',{reviewerId:'reviewer',assetId:'art_0',revision:2,status:'assigned'});
+ await f.fees.assign('operator',{assetId:'art_0',reviewerId:'reviewer',assignmentId:'second'});
+ await f.fees.review('reviewer',{assetId:'art_0',decision:'reject',reason:'still fraudulent'});
+ await f.fees.adjudicate('developer',{assetId:'art_0',forfeit:true,reason:'documented second failure'});
+ await assert.rejects(f.fees.release('developer',{assetId:'art_0',transferId:'review_pay',evidence:{}}),/release-denied/);
+ await f.fees.qaWork('qa',{assetId:'art_0',valid:true,reason:'review accurately documented'});
+ await f.fees.release('developer',{assetId:'art_0',transferId:'review_pay',evidence:{}});
+ await assert.rejects(f.fees.release('developer',{assetId:'art_0',transferId:'review_pay_again',evidence:{}}),/release-denied/);
+ assert.equal(f.store.state.econFeeTransfers.size,1);
+});
+test('PostgreSQL codec retains one confirmed receipt and allocations across restart',async()=>{
+ const {PostgresBudsStore}=await import('../src/postgres-store.js');
+ let persisted={schema:1,balances:[],operations:[],claims:[],sourceIssued:[],issued:0,burned:0};
+ const pool={connect:async()=>({query:async(sql,args)=>{
+  if(sql.startsWith('SELECT state'))return {rows:[{state:structuredClone(persisted)}]};
+  if(sql.startsWith('UPDATE highcountry_buds_state')){persisted=JSON.parse(args[1]);return {rowCount:1};}
+  return {rows:[]};
+ },release(){}})};
+ let now=1000000;
+ const make=()=>new EconFees({
+  store:new PostgresBudsStore(pool,'fee_game'),
+  clock:()=>now,authority:{principal:async x=>x,guardState:()=>true},
+  pricing:{verifyQuote:async x=>({authentic:true,quoteId:x.quoteId,actor:x.actor,usdCents:x.usdCents,sourceId:'oracle',attestationId:'attest',observedAt:now,expiresAt:now+10000,units:'1000'})},
+  payments:{verifyFinalized:async x=>({verified:true,paymentId:x.paymentId,quoteId:x.quoteId,actor:x.actor,units:x.units,finalizedReceiptId:'chain_receipt'})},
+  payouts:{verifyFinalized:async()=>({verified:false})}
+ });
+ await make().quote('alice',{quoteId:'q',kind:'single',assetIds:['art'],priceEvidence:{}});
+ await make().confirm('alice',{quoteId:'q',paymentId:'p',evidence:{}});
+ await assert.rejects(make().confirm('alice',{quoteId:'q',paymentId:'p2',evidence:{}}),/expired-quote/);
+ assert.equal(persisted.econFeePayments[0][1].allocation.reviewer,'500');
+ assert.equal(persisted.econFeeSubmissions[0][1].actor,'alice');
 });

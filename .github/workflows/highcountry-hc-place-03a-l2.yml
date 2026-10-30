@@ -1,0 +1,37 @@
+name: HighCountry HC-PLACE-03-A Authority Level 2
+on:
+  pull_request:
+    paths:
+      - 'services/highcountry-economy/src/placement-transactions.js'
+      - 'services/highcountry-economy/src/postgres-store.js'
+      - 'services/highcountry-economy/test/placement-authority-postgres.test.mjs'
+      - 'services/highcountry-economy/test/placement-transactions.test.mjs'
+      - '.github/workflows/highcountry-hc-place-03a-l2.yml'
+  workflow_dispatch:
+jobs:
+  authority-l2:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: highcountry_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 10s --health-timeout 5s --health-retries 5
+    env:
+      HC_PLACE_TEST_DATABASE_URL: postgres://postgres:postgres@localhost:5432/highcountry_test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install economy dependencies
+        working-directory: services/highcountry-economy
+        run: npm install --ignore-scripts --no-package-lock --no-save
+      - name: Provision isolated test table
+        run: psql "$HC_PLACE_TEST_DATABASE_URL" -v ON_ERROR_STOP=1 -c 'CREATE TABLE highcountry_buds_state (namespace text PRIMARY KEY, state jsonb NOT NULL)'
+      - name: Run real PostgreSQL 03-A authority integration tests
+        run: node --test services/highcountry-economy/test/placement-authority-postgres.test.mjs

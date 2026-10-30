@@ -1,0 +1,20 @@
+name: HighCountry HC-PLACE-03 Transactions Level 1
+on:
+  pull_request:
+    paths:
+      - 'services/highcountry-economy/src/placement-transactions.js'
+      - 'services/highcountry-economy/src/postgres-store.js'
+      - 'services/highcountry-economy/test/placement-transactions.test.mjs'
+      - 'docs/highcountry/HC-PLACE-03-*'
+      - '.github/workflows/highcountry-hc-place-03-l1.yml'
+  workflow_dispatch:
+jobs:
+  transactions-l1:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run bounded transaction/replay tests
+        run: node --test services/highcountry-economy/test/placement-transactions.test.mjs

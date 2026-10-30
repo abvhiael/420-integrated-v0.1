@@ -22,6 +22,8 @@ function decode(raw) {
   const assets=mapEntries(raw.assets ?? []);
   const assetSources=mapEntries(raw.assetSources ?? []);
   const listings=mapEntries(raw.listings ?? []);
+  const placementInstances=mapEntries(raw.placementInstances ?? []),placementOperations=mapEntries(raw.placementOperations ?? []),placementScenes=mapEntries(raw.placementScenes ?? []),placementAuthorityRevisions=mapEntries(raw.placementAuthorityRevisions ?? []),placementAuthorityEventIds=mapEntries(raw.placementAuthorityEventIds ?? []);
+  const custodyUnits=mapEntries(raw.custodyUnits ?? []),custodyReceipts=mapEntries(raw.custodyReceipts ?? []),custodyReservations=mapEntries(raw.custodyReservations ?? []);
   const transferIntents=mapEntries(raw.transferIntents ?? []);
   const settlementJobs=mapEntries(raw.settlementJobs ?? []);
   const importedAssets=new Set(raw.importedAssets ?? []);
@@ -44,10 +46,10 @@ function decode(raw) {
   for(const b of balances.values())if(!safe(b.available)||!safe(b.reserved))throw new SettlementError('corrupt balance');
   for(const v of sourceIssued.values())if(!safe(v))throw new SettlementError('corrupt issuance');
   for(const b of assets.values())if(!safe(b.available)||!safe(b.reserved))throw new SettlementError('corrupt asset');
-  return {...runtime,...seedIssuance,...itemState,econCreatorAssets,...certification,seedDiscoveries,seedHarvestCards,seedHarvestClaims,balances,operations,claims,sourceIssued,assets,assetSources,listings,transferIntents,settlementJobs,marketDisputes,skillResearch,skillResearchProofs,missions,missionProofs,missionRewards,discoveryFragments,discoveryEntitlements,discoveryEvents,discoveryAudit,landRentAccounts,landRentAudit,landRentEvents,importedAssets,issued:raw.issued,burned:raw.burned};
+  return {...runtime,...seedIssuance,...itemState,econCreatorAssets,...certification,seedDiscoveries,seedHarvestCards,seedHarvestClaims,balances,operations,claims,sourceIssued,assets,assetSources,listings,placementInstances,placementOperations,placementScenes,placementAuthorityRevisions,placementAuthorityEventIds,custodyUnits,custodyReceipts,custodyReservations,transferIntents,settlementJobs,marketDisputes,skillResearch,skillResearchProofs,missions,missionProofs,missionRewards,discoveryFragments,discoveryEntitlements,discoveryEvents,discoveryAudit,landRentAccounts,landRentAudit,landRentEvents,importedAssets,issued:raw.issued,burned:raw.burned};
 }
 const encode = s => JSON.stringify({schema:1,...Object.fromEntries(['seedPacks','seedPackSources','seedStarterGrants','seedSupply','seedLotIntents','seedLotIds','seedIssuanceJobs','seedStarterWalletClaims','seedOpenings','seedOpeningHolds','seedOpeningJobs','seedPurchases','seedPurchaseHolds'].map(k=>[k,[...(s[k]??new Map())]])),seedDiscoveries:[...(s.seedDiscoveries??new Map())],seedHarvestCards:[...(s.seedHarvestCards??new Map())],seedHarvestClaims:[...(s.seedHarvestClaims??new Map())],...Object.fromEntries(['runtimeAccounts','runtimeWallets','runtimeWalletOwners','runtimeNonces','runtimeEpochs','runtimeSourceEpochs'].map(k=>[k,[...(s[k]??new Map())]])),balances:[...s.balances],operations:[...s.operations],
-  ...Object.fromEntries(["econDesigns","econItemIntents","econItems","econTransferReceipts","econConsumedSources"].map(k=>[k,[...(s[k]??new Map())]])),econCreatorAssets:[...(s.econCreatorAssets??new Map())],...Object.fromEntries(['econReviewers','econAssignments','econCertificates','econReviewAudit','econReviewAppeals'].map(k=>[k,[...(s[k]??new Map())]])),claims:[...s.claims],sourceIssued:[...s.sourceIssued],assets:[...s.assets],assetSources:[...s.assetSources],listings:[...s.listings],transferIntents:[...s.transferIntents],settlementJobs:[...s.settlementJobs],marketDisputes:[...(s.marketDisputes??new Map())],skillResearch:[...(s.skillResearch??new Map())],skillResearchProofs:[...(s.skillResearchProofs??new Set())],missions:[...(s.missions??new Map())],missionProofs:[...(s.missionProofs??new Set())],missionRewards:[...(s.missionRewards??new Map())],discoveryFragments:[...(s.discoveryFragments??new Map())],discoveryEntitlements:[...(s.discoveryEntitlements??new Map())],discoveryEvents:[...(s.discoveryEvents??new Set())],discoveryAudit:[...(s.discoveryAudit??new Map())],landRentAccounts:[...(s.landRentAccounts??new Map())],landRentAudit:[...(s.landRentAudit??new Map())],landRentEvents:[...(s.landRentEvents??new Set())],importedAssets:[...s.importedAssets],issued:s.issued,burned:s.burned});
+  ...Object.fromEntries(["econDesigns","econItemIntents","econItems","econTransferReceipts","econConsumedSources"].map(k=>[k,[...(s[k]??new Map())]])),econCreatorAssets:[...(s.econCreatorAssets??new Map())],...Object.fromEntries(['econReviewers','econAssignments','econCertificates','econReviewAudit','econReviewAppeals'].map(k=>[k,[...(s[k]??new Map())]])),claims:[...s.claims],sourceIssued:[...s.sourceIssued],assets:[...s.assets],assetSources:[...s.assetSources],listings:[...s.listings],placementInstances:[...(s.placementInstances??new Map())],placementOperations:[...(s.placementOperations??new Map())],placementScenes:[...(s.placementScenes??new Map())],placementAuthorityRevisions:[...(s.placementAuthorityRevisions??new Map())],placementAuthorityEventIds:[...(s.placementAuthorityEventIds??new Map())],custodyUnits:[...(s.custodyUnits??new Map())],custodyReceipts:[...(s.custodyReceipts??new Map())],custodyReservations:[...(s.custodyReservations??new Map())],transferIntents:[...s.transferIntents],settlementJobs:[...s.settlementJobs],marketDisputes:[...(s.marketDisputes??new Map())],skillResearch:[...(s.skillResearch??new Map())],skillResearchProofs:[...(s.skillResearchProofs??new Set())],missions:[...(s.missions??new Map())],missionProofs:[...(s.missionProofs??new Set())],missionRewards:[...(s.missionRewards??new Map())],discoveryFragments:[...(s.discoveryFragments??new Map())],discoveryEntitlements:[...(s.discoveryEntitlements??new Map())],discoveryEvents:[...(s.discoveryEvents??new Set())],discoveryAudit:[...(s.discoveryAudit??new Map())],landRentAccounts:[...(s.landRentAccounts??new Map())],landRentAudit:[...(s.landRentAudit??new Map())],landRentEvents:[...(s.landRentEvents??new Set())],importedAssets:[...s.importedAssets],issued:s.issued,burned:s.burned});
 export class PostgresBudsStore {
   constructor(pool, namespace) {
     if(typeof pool?.connect!=='function'||typeof namespace!=='string'
@@ -55,21 +57,36 @@ export class PostgresBudsStore {
     this.pool=pool;this.namespace=namespace;
   }
   async transact(callback) {
-    const client=await this.pool.connect();
-    let began=false;
-    try {
-      await client.query('BEGIN ISOLATION LEVEL SERIALIZABLE');began=true;
-      // Namespace must be provisioned by authenticated operator migration, not a guest request.
-      const r=await client.query('SELECT state FROM highcountry_buds_state WHERE namespace = $1 FOR UPDATE',[this.namespace]);
-      if(r.rows.length!==1)throw new SettlementError('unprovisioned economy namespace');
-      const state=decode(r.rows[0].state);
-      const result=callback(state);
-      if(result && typeof result.then==='function')throw new SettlementError('async callback forbidden in lock');
-      await client.query('UPDATE highcountry_buds_state SET state = $2::jsonb WHERE namespace = $1',[this.namespace,encode(state)]);
-      await client.query('COMMIT');return result;
-    } catch(e) {
-      if(began) { try { await client.query('ROLLBACK'); } catch { /* preserve original failure */ } }
-      throw e;
-    } finally {client.release();}
+    // A serialization failure invalidates the entire PostgreSQL transaction.
+    // Re-enter on a new snapshot and connection; do not retry a lost COMMIT ACK.
+    const maxAttempts=6;
+    for(let attempt=1;attempt<=maxAttempts;attempt++){
+      const client=await this.pool.connect();
+      let began=false,committing=false,discard=false;
+      try {
+        await client.query('BEGIN ISOLATION LEVEL SERIALIZABLE');began=true;
+        // Namespace must be provisioned by authenticated operator migration, not a guest request.
+        const r=await client.query('SELECT state FROM highcountry_buds_state WHERE namespace = $1 FOR UPDATE',[this.namespace]);
+        if(r.rows.length!==1)throw new SettlementError('unprovisioned economy namespace');
+        const state=decode(r.rows[0].state);
+        const result=callback(state);
+        if(result && typeof result.then==='function')throw new SettlementError('async callback forbidden in lock');
+        await client.query('UPDATE highcountry_buds_state SET state = $2::jsonb WHERE namespace = $1',[this.namespace,encode(state)]);
+        committing=true;await client.query('COMMIT');committing=false;return result;
+      } catch(e) {
+        if(committing){discard=true;const unknown=new SettlementError('transaction commit outcome unknown');unknown.code='HC_COMMIT_UNKNOWN';unknown.cause=e;throw unknown;}
+        if(began){
+          try{await client.query('ROLLBACK');}
+          catch(rollbackError){discard=true;throw new SettlementError('transaction rollback unconfirmed',{cause:rollbackError});}
+        }
+        if(e?.code==='40001'&&attempt<maxAttempts){
+          // Retry only a confirmed aborted transaction; callbacks must be synchronous.
+          // Yield before reacquiring a fresh SERIALIZABLE snapshot under contention.
+          await new Promise(resolve=>setTimeout(resolve,Math.min(10*attempt,50)));
+          continue;
+        }
+        throw e;
+      } finally {client.release(discard?new Error('unusable transaction connection'):undefined);}
+    }
   }
 }

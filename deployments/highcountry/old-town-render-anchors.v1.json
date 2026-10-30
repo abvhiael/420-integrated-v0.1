@@ -1,0 +1,307 @@
+{
+  "schema": "HC.OLD_TOWN.RECOVERED_RENDER_ANCHORS.V1",
+  "source": "Old Town Phase C genesis placement manifest and genesis-anchor-entrance-audit.csv (user library)",
+  "authority": "PROVISIONAL_VISUAL_ONLY_NOT_TITLE_OR_BUILDING_SURVEY",
+  "anchors": [
+    {
+      "id": "CR-01",
+      "lot": [
+        372,
+        382,
+        396,
+        406
+      ],
+      "groundAnchorTiles": [
+        384,
+        406
+      ],
+      "source": "Phase C genesis-anchor-entrance-audit.csv:lot_ground_anchor_world",
+      "approval": "PROVISIONAL_VISUAL_ONLY"
+    },
+    {
+      "id": "CR-02",
+      "lot": [
+        424,
+        382,
+        448,
+        406
+      ],
+      "groundAnchorTiles": [
+        436,
+        406
+      ],
+      "source": "Phase C genesis-anchor-entrance-audit.csv:lot_ground_anchor_world",
+      "approval": "PROVISIONAL_VISUAL_ONLY"
+    },
+    {
+      "id": "CR-03",
+      "lot": [
+        496,
+        382,
+        520,
+        406
+      ],
+      "groundAnchorTiles": [
+        508,
+        406
+      ],
+      "source": "Phase C genesis-anchor-entrance-audit.csv:lot_ground_anchor_world",
+      "approval": "PROVISIONAL_VISUAL_ONLY"
+    },
+    {
+      "id": "CR-04",
+      "lot": [
+        496,
+        358,
+        520,
+        382
+      ],
+      "groundAnchorTiles": [
+        508,
+        382
+      ],
+      "source": "Phase C genesis-anchor-entrance-audit.csv:lot_ground_anchor_world",
+      "approval": "PROVISIONAL_VISUAL_ONLY"
+    },
+    {
+      "id": "CR-05",
+      "lot": [
+        300,
+        418,
+        324,
+        442
+      ],
+      "groundAnchorTiles": [
+        312,
+        442
+      ],
+      "source": "Phase C genesis-anchor-entrance-audit.csv:lot_ground_anchor_world",
+      "approval": "PROVISIONAL_VISUAL_ONLY"
+    },
+    {
+      "id": "CR-06",
+      "lot": [
+        356,
+        458,
+        380,
+        482
+      ],
+      "groundAnchorTiles": [
+        368,
+        482
+      ],
+      "source": "Phase C genesis-anchor-entrance-audit.csv:lot_ground_anchor_world",
+      "approval": "PROVISIONAL_VISUAL_ONLY"
+    },
+    {
+      "id": "HL-01",
+      "lot": [
+        164,
+        110,
+        180,
+        130
+      ],
+      "groundAnchorTiles": [
+        172,
+        130
+      ],
+      "source": "Phase C genesis-anchor-entrance-audit.csv:lot_ground_anchor_world",
+      "approval": "PROVISIONAL_VISUAL_ONLY"
+    },
+    {
+      "id": "HL-02",
+      "lot": [
+        272,
+        110,
+        288,
+        130
+      ],
+      "groundAnchorTiles": [
+        280,
+        130
+      ],
+      "source": "Phase C genesis-anchor-entrance-audit.csv:lot_ground_anchor_world",
+      "approval": "PROVISIONAL_VISUAL_ONLY"
+    },
+    {
+      "id": "HL-03",
+      "lot": [
+        504,
+        110,
+        520,
+        130
+      ],
+      "groundAnchorTiles": [
+        512,
+        130
+      ],
+      "source": "Phase C genesis-anchor-entrance-audit.csv:lot_ground_anchor_world",
+      "approval": "PROVISIONAL_VISUAL_ONLY"
+    },
+    {
+      "id": "HL-04",
+      "lot": [
+        532,
+        110,
+        548,
+        130
+      ],
+      "groundAnchorTiles": [
+        540,
+        130
+      ],
+      "source": "Phase C genesis-anchor-entrance-audit.csv:lot_ground_anchor_world",
+      "approval": "PROVISIONAL_VISUAL_ONLY"
+    },
+    {
+      "id": "LM-01",
+      "lot": [
+        132,
+        266,
+        180,
+        314
+      ],
+      "groundAnchorTiles": [
+        156,
+        314
+      ],
+      "source": "Phase C genesis-anchor-entrance-audit.csv:lot_ground_anchor_world",
+      "approval": "PROVISIONAL_VISUAL_ONLY"
+    },
+    {
+      "id": "LM-02",
+      "lot": [
+        324,
+        234,
+        388,
+        298
+      ],
+      "groundAnchorTiles": [
+        356,
+        298
+      ],
+      "source": "Phase C genesis-anchor-entrance-audit.csv:lot_ground_anchor_world",
+      "approval": "PROVISIONAL_VISUAL_ONLY"
+    },
+    {
+      "id": "LM-03",
+      "lot": [
+        240,
+        358,
+        288,
+        406
+      ],
+      "groundAnchorTiles": [
+        264,
+        406
+      ],
+      "source": "Phase C genesis-anchor-entrance-audit.csv:lot_ground_anchor_world",
+      "approval": "PROVISIONAL_VISUAL_ONLY"
+    },
+    {
+      "id": "LM-04",
+      "lot": [
+        664,
+        418,
+        712,
+        466
+      ],
+      "groundAnchorTiles": [
+        688,
+        466
+      ],
+      "source": "Phase C genesis-anchor-entrance-audit.csv:lot_ground_anchor_world",
+      "approval": "PROVISIONAL_VISUAL_ONLY"
+    },
+    {
+      "id": "LM-05",
+      "lot": [
+        424,
+        82,
+        456,
+        130
+      ],
+      "groundAnchorTiles": [
+        440,
+        130
+      ],
+      "source": "Phase C genesis-anchor-entrance-audit.csv:lot_ground_anchor_world",
+      "approval": "PROVISIONAL_VISUAL_ONLY"
+    },
+    {
+      "id": "WH-01",
+      "lot": [
+        532,
+        450,
+        564,
+        482
+      ],
+      "groundAnchorTiles": [
+        548,
+        482
+      ],
+      "source": "Phase C genesis-anchor-entrance-audit.csv:lot_ground_anchor_world",
+      "approval": "PROVISIONAL_VISUAL_ONLY"
+    },
+    {
+      "id": "WH-02",
+      "lot": [
+        532,
+        418,
+        564,
+        450
+      ],
+      "groundAnchorTiles": [
+        548,
+        450
+      ],
+      "source": "Phase C genesis-anchor-entrance-audit.csv:lot_ground_anchor_world",
+      "approval": "PROVISIONAL_VISUAL_ONLY"
+    },
+    {
+      "id": "WH-03",
+      "lot": [
+        580,
+        450,
+        612,
+        482
+      ],
+      "groundAnchorTiles": [
+        596,
+        482
+      ],
+      "source": "Phase C genesis-anchor-entrance-audit.csv:lot_ground_anchor_world",
+      "approval": "PROVISIONAL_VISUAL_ONLY"
+    },
+    {
+      "id": "WH-04",
+      "lot": [
+        640,
+        374,
+        672,
+        406
+      ],
+      "groundAnchorTiles": [
+        656,
+        406
+      ],
+      "source": "Phase C genesis-anchor-entrance-audit.csv:lot_ground_anchor_world",
+      "approval": "PROVISIONAL_VISUAL_ONLY"
+    },
+    {
+      "id": "WH-05",
+      "lot": [
+        580,
+        418,
+        612,
+        450
+      ],
+      "groundAnchorTiles": [
+        596,
+        450
+      ],
+      "source": "Phase C genesis-anchor-entrance-audit.csv:lot_ground_anchor_world",
+      "approval": "PROVISIONAL_VISUAL_ONLY"
+    }
+  ]
+}

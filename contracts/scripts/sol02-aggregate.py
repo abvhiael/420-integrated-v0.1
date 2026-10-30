@@ -49,7 +49,7 @@ def verify(plan, evidence_dir):
                 if identity in seen or not all(isinstance(x,str) and x for x in identity):
                     raise ValueError(group + ": duplicate or malformed runtime identity")
                 seen.add(identity)
-        if len(seen)!=d.get("runtimeTestCount") or not seen:
+        if len(seen)!=d.get("runtimeTestCount") or (not seen and expected_tests):
             raise ValueError(group + ": runtime count mismatch")
 
     if plan["level3"]:

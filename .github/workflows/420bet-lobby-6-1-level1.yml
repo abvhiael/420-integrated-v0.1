@@ -1,0 +1,28 @@
+name: BET-AUDIT-6.1 targeted Level 1 lobby
+on:
+  push:
+    branches: ['bet/audit-6-1-unified-lobby']
+    paths:
+      - 'clients/420bet-lobby/**'
+      - '.github/workflows/420bet-lobby-6-1-level1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  lobby-level1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install isolated lobby dependencies
+        working-directory: clients/420bet-lobby
+        run: npm install --no-audit --no-fund
+      - name: Run only lobby Level 1 cases
+        working-directory: clients/420bet-lobby
+        run: npm test
+      - name: Compile lobby shell
+        working-directory: clients/420bet-lobby
+        run: npm run build

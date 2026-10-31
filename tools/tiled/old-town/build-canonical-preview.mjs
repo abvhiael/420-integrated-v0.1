@@ -14,7 +14,7 @@ if(assets.assets.length!==20||sites.sites.length!==59)throw Error('canonical ass
 const byId=new Map(sites.sites.map(s=>[s.id,s]));
 const esc=x=>String(x).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
 const props=o=>Object.entries(o).map(([name,value])=>({name,type:typeof value==='boolean'?'bool':typeof value==='number'?'int':'string',value}));
-let tiles='',objects=[],nextId=map.nextobjectid;
+let tiles='',objects=[],nextId=map.nextobjectid,maxWidth=0,maxHeight=0;
 for(const [i,a] of assets.assets.entries()){
  const site=byId.get(a.siteId);if(!site)throw Error('missing canonical site: '+a.siteId);
  const file=resolve(root,a.repoPath);
@@ -24,6 +24,7 @@ for(const [i,a] of assets.assets.entries()){
  if(bytes.toString('hex',0,8)!=='89504e470d0a1a0a')throw Error('not a PNG: '+a.id);
  const width=bytes.readUInt32BE(16),height=bytes.readUInt32BE(20);
  if(!width||!height||width>16384||height>16384)throw Error('invalid PNG dimensions: '+a.id);
+ maxWidth=Math.max(maxWidth,width);maxHeight=Math.max(maxHeight,height);
  const src=relative(folder,file).replaceAll('\\','/');
  tiles+=`  <tile id="${i}"><image source="${esc(src)}" width="${width}" height="${height}"/></tile>\n`;
  const [x0,y0,x1,y1]=site.rect;
@@ -37,7 +38,7 @@ for(const [i,a] of assets.assets.entries()){
   properties:props({site_id:a.siteId,asset_id:a.id,canonical_repo_path:a.repoPath,canonical_sha256:sha,source_width_px:width,source_height_px:height,
    foundation_verified:false,placement_qualified:false,preview_canvas_fit_only:true})});
 }
-const tileset='<?xml version="1.0" encoding="UTF-8"?>\n<tileset version="1.10" tiledversion="1.11.2" name="HighCountry Old Town canonical originals" tilewidth="0" tileheight="0" tilecount="20" columns="0">\n'+tiles+'</tileset>\n';
+const tileset='<?xml version="1.0" encoding="UTF-8"?>\n<tileset version="1.10" tiledversion="1.11.2" name="HighCountry Old Town canonical originals" tilewidth="'+maxWidth+'" tileheight="'+maxHeight+'" tilecount="20" columns="0">\n'+tiles+'</tileset>\n';
 await writeFile(resolve(folder,'old-town-canonical-originals.tsx'),tileset,'utf8');
 map.tilesets=[{firstgid:1,source:'old-town-canonical-originals.tsx'}];
 map.layers=map.layers.filter(l=>l.name!=='Canonical artwork — PREVIEW ONLY');

@@ -1,0 +1,23 @@
+name: HighCountry HC-PLACE-03-B4 Economic Invariants Level 1
+on:
+  pull_request:
+    paths:
+      - 'services/highcountry-economy/src/custody-records.js'
+      - 'services/highcountry-economy/test/custody-economic-invariants.test.mjs'
+      - '.github/workflows/highcountry-hc-place-03b4-l1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  economic-invariants:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Bounded custody economic and adversarial invariants
+        run: |
+          node --check services/highcountry-economy/src/custody-records.js
+          node --test services/highcountry-economy/test/custody-economic-invariants.test.mjs services/highcountry-economy/test/custody-market.integration.mjs services/highcountry-economy/test/custody-records.test.mjs services/highcountry-economy/test/placement-transactions.test.mjs

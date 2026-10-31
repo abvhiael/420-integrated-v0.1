@@ -1,13 +1,7 @@
 name: High Country R06 Phase Level 3 Retained
 on:
-  pull_request:
-    paths:
-      - '.github/workflows/highcountry-r06-level3.yml'
-      - '.github/workflows/contracts-foundry.yml'
-      - 'apps/highcountry-web/**'
-      - 'services/420-gaming-player-profile/**'
-      - 'docs/highcountry/**'
   workflow_dispatch:
+
 permissions:
   contents: read
 concurrency:

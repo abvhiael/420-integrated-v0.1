@@ -1,0 +1,190 @@
+{
+  "collection": "HC-ART-05-F",
+  "region": "red-mesa",
+  "source": "High Country Red Mesa Asset Sheet(1).png",
+  "note": "Source illustration identities do not match the previously approved RM01\u2013RM12 HC-ART-05-F roster. Exported faithfully by source captions; review only, not yet accepted as canonical production art.",
+  "tile_size_px": 64,
+  "source_canvas_px_per_tile": 320,
+  "assets": [
+    {
+      "id": "RM01",
+      "name": "Mesa Heritage Railway Station",
+      "filename": "hc-structure-mesa-heritage-railway-station.png",
+      "footprint_tiles": {
+        "width": 6,
+        "height": 5
+      },
+      "canvas_px": {
+        "width": 1920,
+        "height": 1600
+      },
+      "repo_path": "apps/highcountry-web/public/assets/structures/hc-art-05-f/red-mesa/hc-structure-mesa-heritage-railway-station.png",
+      "sha256": "6fa9dad37764517e9f439d14542b6e3da3667b45a2b36d223f60b28e488bea3f"
+    },
+    {
+      "id": "RM02",
+      "name": "Red Mesa Seed Registry",
+      "filename": "hc-structure-red-mesa-seed-registry.png",
+      "footprint_tiles": {
+        "width": 5,
+        "height": 4
+      },
+      "canvas_px": {
+        "width": 1600,
+        "height": 1280
+      },
+      "repo_path": "apps/highcountry-web/public/assets/structures/hc-art-05-f/red-mesa/hc-structure-red-mesa-seed-registry.png",
+      "sha256": "c9e58caa9edcf9b82049cf613f1c854ae02e305ed6637a86ee59b8e4a55984b5"
+    },
+    {
+      "id": "RM03",
+      "name": "Mesa Pioneers Monument",
+      "filename": "hc-structure-mesa-pioneers-monument.png",
+      "footprint_tiles": {
+        "width": 4,
+        "height": 4
+      },
+      "canvas_px": {
+        "width": 1280,
+        "height": 1280
+      },
+      "repo_path": "apps/highcountry-web/public/assets/structures/hc-art-05-f/red-mesa/hc-structure-mesa-pioneers-monument.png",
+      "sha256": "186791e99b5fba9f82d128c4ebf1258d8f558533e7955ee4160a4ec8a8ec7960"
+    },
+    {
+      "id": "RM04",
+      "name": "Frontier Agricultural Museum",
+      "filename": "hc-structure-frontier-agricultural-museum.png",
+      "footprint_tiles": {
+        "width": 6,
+        "height": 5
+      },
+      "canvas_px": {
+        "width": 1920,
+        "height": 1600
+      },
+      "repo_path": "apps/highcountry-web/public/assets/structures/hc-art-05-f/red-mesa/hc-structure-frontier-agricultural-museum.png",
+      "sha256": "65b66311dd482ac1fe78ae99e8f533c91c069513329bea29eb2c6c90d4ab922e"
+    },
+    {
+      "id": "RM05",
+      "name": "Mesa Pioneer Schoolhouse",
+      "filename": "hc-structure-mesa-pioneer-schoolhouse.png",
+      "footprint_tiles": {
+        "width": 5,
+        "height": 4
+      },
+      "canvas_px": {
+        "width": 1600,
+        "height": 1280
+      },
+      "repo_path": "apps/highcountry-web/public/assets/structures/hc-art-05-f/red-mesa/hc-structure-mesa-pioneer-schoolhouse.png",
+      "sha256": "716a895145f05d864975ee327f3066eb4841655f49c7149fb1cbbcf1c6df7a06"
+    },
+    {
+      "id": "RM06",
+      "name": "Red Mesa Post & Telegraph Office",
+      "filename": "hc-structure-red-mesa-post-telegraph-office.png",
+      "footprint_tiles": {
+        "width": 5,
+        "height": 4
+      },
+      "canvas_px": {
+        "width": 1600,
+        "height": 1280
+      },
+      "repo_path": "apps/highcountry-web/public/assets/structures/hc-art-05-f/red-mesa/hc-structure-red-mesa-post-telegraph-office.png",
+      "sha256": "1cced0f0261ac73459faa9f61f4b7a5f5acc1a7d36d881223496ea20d5948f97"
+    },
+    {
+      "id": "RM07",
+      "name": "Mesa Flour Mill",
+      "filename": "hc-structure-mesa-flour-mill.png",
+      "footprint_tiles": {
+        "width": 6,
+        "height": 5
+      },
+      "canvas_px": {
+        "width": 1920,
+        "height": 1600
+      },
+      "repo_path": "apps/highcountry-web/public/assets/structures/hc-art-05-f/red-mesa/hc-structure-mesa-flour-mill.png",
+      "sha256": "1b224a247e7cc9fb7c1f39ef3c7de2f969d89aa1fdb83e20399c495eaed8e222"
+    },
+    {
+      "id": "RM08",
+      "name": "Mesa Land Surveyors Office",
+      "filename": "hc-structure-mesa-land-surveyors-office.png",
+      "footprint_tiles": {
+        "width": 5,
+        "height": 4
+      },
+      "canvas_px": {
+        "width": 1600,
+        "height": 1280
+      },
+      "repo_path": "apps/highcountry-web/public/assets/structures/hc-art-05-f/red-mesa/hc-structure-mesa-land-surveyors-office.png",
+      "sha256": "305d9711d6a384f9aece9da3cc9ed8621396b3deef23a82ce5b7fc18c7ef04df"
+    },
+    {
+      "id": "RM09",
+      "name": "Mesa Water Tower",
+      "filename": "hc-structure-mesa-water-tower.png",
+      "footprint_tiles": {
+        "width": 4,
+        "height": 4
+      },
+      "canvas_px": {
+        "width": 1280,
+        "height": 1280
+      },
+      "repo_path": "apps/highcountry-web/public/assets/structures/hc-art-05-f/red-mesa/hc-structure-mesa-water-tower.png",
+      "sha256": "062effbc55048d1b8af35f61f96b096f2c2e107f6ea20cdb13827f70e70a225d"
+    },
+    {
+      "id": "RM10",
+      "name": "Mesa Agricultural Exhibition Pavilion",
+      "filename": "hc-structure-mesa-agricultural-exhibition-pavilion.png",
+      "footprint_tiles": {
+        "width": 6,
+        "height": 5
+      },
+      "canvas_px": {
+        "width": 1920,
+        "height": 1600
+      },
+      "repo_path": "apps/highcountry-web/public/assets/structures/hc-art-05-f/red-mesa/hc-structure-mesa-agricultural-exhibition-pavilion.png",
+      "sha256": "f1a263ebf57753dbe79ce8446cfd02198a1a3b57526a771ea813b58c95e48a8d"
+    },
+    {
+      "id": "RM11",
+      "name": "Mesa Railway Roundhouse Museum",
+      "filename": "hc-structure-mesa-railway-roundhouse-museum.png",
+      "footprint_tiles": {
+        "width": 6,
+        "height": 5
+      },
+      "canvas_px": {
+        "width": 1920,
+        "height": 1600
+      },
+      "repo_path": "apps/highcountry-web/public/assets/structures/hc-art-05-f/red-mesa/hc-structure-mesa-railway-roundhouse-museum.png",
+      "sha256": "3cec3a3ab05abeb7ce64438499e4145c021cf02bdca9f2926fadf83ca6f54fc0"
+    },
+    {
+      "id": "RM12",
+      "name": "Mesa Seed Preservation Vault",
+      "filename": "hc-structure-mesa-seed-preservation-vault.png",
+      "footprint_tiles": {
+        "width": 5,
+        "height": 4
+      },
+      "canvas_px": {
+        "width": 1600,
+        "height": 1280
+      },
+      "repo_path": "apps/highcountry-web/public/assets/structures/hc-art-05-f/red-mesa/hc-structure-mesa-seed-preservation-vault.png",
+      "sha256": "ca13b8d6726b5c08a85c2fdd0bc5249a1b47df2706e65f6c77b23dd435d8b345"
+    }
+  ]
+}

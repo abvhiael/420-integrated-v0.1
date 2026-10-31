@@ -1,0 +1,50 @@
+{
+  "step": "CI-GUARD-02",
+  "roadmap": "docs/ci/universal-qualification-policy.md",
+  "level": "L1",
+  "base_sha": "70e8d6968033d8889bd77ef09c634627afda7c0f",
+  "candidate_sha": "HEAD",
+  "classification": "ci-infrastructure",
+  "scope": [
+    ".github/workflows/420compliance-c08-5-level3.yml",
+    ".github/workflows/420hz-gca-17-level3.yml",
+    ".github/workflows/contracts-foundry.yml",
+    ".github/workflows/contracts-genesis.yml",
+    ".github/workflows/genesis-address-authority.yml",
+    ".github/workflows/highcountry-r06-level3.yml",
+    ".github/workflows/liftd-l02-13-level3.yml",
+    ".github/workflows/mig-5-level3.yml",
+    ".github/workflows/qualification.yml",
+    "scripts/qualification-policy/verify-trigger-isolation.py",
+    "scripts/qualification-policy/test_trigger_isolation.py",
+    ".qualification/CI-GUARD-02-TRIGGER-ISOLATION.md",
+    ".qualification/candidates/CI-GUARD-02.json",
+    ".github/workflows/ci-guard-02-trigger-isolation.yml",
+    ".github/workflows/explorer-exp-1-9.yml",
+    ".github/workflows/explorer-exp-1-10.yml"
+  ],
+  "tests": [
+    {
+      "command": "python3 -m unittest discover -s scripts/qualification-policy -p 'test_*.py' -v",
+      "owner": "Universal Policy Guard"
+    },
+    {
+      "command": "python3 scripts/qualification-policy/verify-trigger-isolation.py 70e8d6968033d8889bd77ef09c634627afda7c0f",
+      "owner": "CI-GUARD-02 retained inventory verifier"
+    }
+  ],
+  "required_workflows": [
+    ".github/workflows/universal-qualification-guard.yml",
+    ".github/workflows/ci-guard-02-trigger-isolation.yml"
+  ],
+  "exit_criteria": [
+    "All eleven expensive canonical workflows are explicitly dispatched rather than auto-triggered",
+    "All eleven retained job inventories remain byte-identical",
+    "Required-merge check protection is configured by an authorized administrator",
+    "Failure-path PR and authorized phase closeout verification are preserved in evidence"
+  ],
+  "frozen_inputs": {},
+  "external_gates": [
+    "GitHub branch ruleset admin mutation/read and actual merge-blocking proof require authorization not provided by current GitHub integration"
+  ]
+}

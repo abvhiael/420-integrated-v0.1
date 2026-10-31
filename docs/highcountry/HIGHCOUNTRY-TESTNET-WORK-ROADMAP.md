@@ -336,3 +336,17 @@ These gates require an actual independently authorized live network/deployment. 
 6. Verify testnet environment manifests, secure operator grants, monitoring/alerts, incident/rollback operations, signer/key rotation, outage/reorg recovery, external security approval and exact-SHA Level 3/release documentation. Mark **TESTNET READY** only after independent evidence from the deployed chain and services.
 
 **Activation rule:** The optional premium HTTP eligibility endpoint is a read-only UI/service convenience, **not an on-chain grant or portable authorization token**. The actual on-chain event still requires direct verification by the registered gate. Never claim a production-grade integrated deployment until these live acceptance steps pass. If an RPC does not support canonical EIP-1898 block-hash state reads, it must fail closed rather than silently fall back to `latest`.
+
+## HC-NEXT-7.4 — Global 420 Cup, live network-consensus acceptance (2026-10-29)
+
+**Local pre-testnet Level 2: PASS** on executable SHA `d179dda303af1e1cd0f79f7843716fc18326ef46` (real Anvil EVM, finalized-block Cup reader, authenticated HTTP, PostgreSQL, successful revocation receipt and stale-evidence rejection). Evidence: [Level 2 run 40945265767](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/40945265767); independent Cup Level 1/Foundry and gaming-service passes: runs `40945266297`, `40945266303`. These are **not** live testnet-consensus evidence.
+
+**Deferred strictly to actual testnet, OPEN:**
+
+1. Deploy approved Cup and CompetitionEngine implementations on the named 420 Integrated testnet. Verify actual chain ID, immutable address mappings, transaction receipts, reproducible compiled runtime bytecode hashes, canonical ABI selectors and versioned signed deployment configuration. No fabricated production addresses or hash pins.
+2. Exercise **independent validators and canonical finality** using actual network RPC operators, including confirmation delays, competing RPC providers, noncanonical/reorganized blocks, stale reads, revoked results and fail-closed recovery. Local Anvil `anvil_mine` does not qualify this gate.
+3. Connect independently governed issuer and account-to-wallet proof authority (where premium recognition requires it), scoped authorization and revocation, operator key custody and rotation. Demonstrate authentication, link/unlink/relink, expiry, replay resistance and denial of browser-supplied champion authority.
+4. Qualify deployed service/API/client and migration-controlled PostgreSQL roles under secret-managed TLS, actual restricted permissions, crash/restart, multiple instances, recovery/backup and independent monitoring/alerting. Preserve nonfinancial trophy behavior and prohibit payout claims from prize-rule commitments.
+5. Retain external security/operational approval, rollback/reorg incident evidence and exact deployed-SHA/code-hash audit before enabling live Cup features. Record a separate testnet acceptance outcome; a local Level 2 PASS alone never marks these requirements complete.
+
+**Boundary:** Do not defer repository-testable Cup logic or rerun unrelated Level 1/Foundry/gaming-service checks to substitute for any live-network acceptance.

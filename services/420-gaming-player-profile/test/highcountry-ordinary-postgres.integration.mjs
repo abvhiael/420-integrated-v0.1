@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {Pool} from 'pg';
 import {bootstrapDatastoreRoles} from '../src/schema-migrations.js';
 import {migrateOrdinaryExhibitions420} from '../src/highcountry-ordinary-migrations.js';
+import {migrateExhibitionRecovery420} from '../src/highcountry-exhibition-recovery-migrations.js';
 import {createPostgresOrdinaryExhibitionRepository420} from '../src/highcountry-ordinary-postgres.js';
 import {createOrdinaryExhibitions420} from '../src/highcountry-ordinary-exhibitions.js';
 const url=process.env.HIGHCOUNTRY_EXHIBITIONS_POSTGRES_TEST_URL;
@@ -14,6 +15,8 @@ test('HC-NEXT-7.2 real SERIALIZABLE PostgreSQL registration, unique claims, rest
   await bootstrapDatastoreRoles(root);
   const first=await migrateOrdinaryExhibitions420(root);
   assert.equal(first.version,1);assert.equal((await migrateOrdinaryExhibitions420(root)).changed,false);
+  assert.equal((await migrateExhibitionRecovery420(root)).changed,true);
+  assert.equal((await migrateExhibitionRecovery420(root)).changed,false);
   await root.query("INSERT INTO highcountry_exhibitions.seasons(game_id,season_id,organizer,opens_at,closes_at) VALUES($1,'s','organizer',1100,3000)",[game]);
   await root.query("INSERT INTO highcountry_exhibitions.categories(game_id,category,version,rules_hash,wallet_required) VALUES($1,'flower',1,$2,false)",[game,hash]);
   await root.query("INSERT INTO highcountry_exhibitions.adjudicators(game_id,account_id) VALUES($1,'judge')",[game]);
@@ -43,10 +46,23 @@ test('HC-NEXT-7.2 real SERIALIZABLE PostgreSQL registration, unique claims, rest
   const other=createPostgresOrdinaryExhibitionRepository420({pool:runtime,gameId:otherGame});
   assert.equal(await other.transaction(tx=>tx.event('e'),{isolation:'serializable'}),null);
   // Reorged canonical proof is no longer eligible even though the DB result is immutable.
+  t=2000;
+  await assert.rejects(service.reject({token:'alice',eventId:'e',accountId:'alice',reasonHash:hash}),/adjudicator-denied/);
+  await service.reject({token:'judge',eventId:'e',accountId:'alice',reasonHash:hash});
+  assert.equal(Number((await runtime.query('SELECT count(*) AS count FROM highcountry_exhibitions.adjudication_history')).rows[0].count),1);
   proofs.delete('harvest-a');t=2200;
   assert.equal((await service.finalize({eventId:'e'})).winner,null);
   await assert.rejects(service.finalize({eventId:'e'}),/finalization-denied/);
   assert.equal((await service.status({token:'alice',eventId:'e'})).finalized,true);
+  const restart=createOrdinaryExhibitions420({repository:createPostgresOrdinaryExhibitionRepository420({pool:runtime,gameId:game}),
+    clock:()=>t,identity:{verify:async token=>({accountId:token,registered:true,revoked:false})},
+    harvest:{verifyFinalizedFlower:async({accountId,harvestId})=>proofs.get(harvestId)??null}});
+  const review=await restart.review({token:'judge',eventId:'e',accountId:'alice',reasonHash:hash});
+  assert.equal(review.disposition,'POST_FINAL_INVALID');
+  await assert.rejects(restart.review({token:'judge',eventId:'e',accountId:'alice',reasonHash:hash}),/exhibition-conflict/);
+  assert.equal((await restart.adjudicationHistory({token:'judge',eventId:'e'})).length,2);
+  await assert.rejects(runtime.query("UPDATE highcountry_exhibitions.adjudication_history SET disposition='POST_FINAL_VALID'"));
+  assert.equal((await restart.status({token:'alice',eventId:'e'})).winner,null);
  }finally{
   if(runtime)await runtime.end();
   await root.query('DROP SCHEMA IF EXISTS highcountry_exhibitions CASCADE').catch(()=>{});

@@ -1,0 +1,48 @@
+name: HC-ART-05-E Red Mesa Catalogue Level 1
+on:
+  pull_request:
+    paths:
+      - 'apps/highcountry-web/src/red-mesa-leisure-catalogue.js'
+      - 'apps/highcountry-web/src/marketplace.js'
+      - 'apps/highcountry-web/scripts/build.mjs'
+      - 'apps/highcountry-web/test/red-mesa-leisure-catalogue.test.mjs'
+      - 'apps/highcountry-web/public/assets/structures/hc-art-05-e/red-mesa/**'
+      - '.github/workflows/hc-art-05-e-red-mesa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  red-mesa-scoped:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify Red Mesa source and static build
+        run: |
+          node --check apps/highcountry-web/src/red-mesa-leisure-catalogue.js
+          node --check apps/highcountry-web/src/marketplace.js
+          cd apps/highcountry-web
+          npm run build
+          test -s dist/src/red-mesa-leisure-catalogue.js
+      - name: Execute exact Red Mesa qualification
+        working-directory: apps/highcountry-web
+        run: node --test test/red-mesa-leisure-catalogue.test.mjs
+      - name: Verify canonical art files are real PNGs at exact canvas dimensions
+        working-directory: apps/highcountry-web
+        run: |
+          node --input-type=module <<'NODE'
+          import {readFileSync} from 'node:fs';
+          import assert from 'node:assert/strict';
+          import {redMesaLeisureCatalogue as catalog} from './src/red-mesa-leisure-catalogue.js';
+          for (const x of catalog) {
+            const path='./public'+x.assetUrl;
+            const bytes=readFileSync(path);
+            assert.ok(bytes.subarray(0,8).equals(Buffer.from([137,80,78,71,13,10,26,10])),path+' invalid PNG');
+            assert.equal(bytes.readUInt32BE(16),x.artworkCanvas.width,path+' width');
+            assert.equal(bytes.readUInt32BE(20),x.artworkCanvas.height,path+' height');
+            assert.equal(bytes[25],6,path+' must use RGBA');
+            console.log('PASS',x.regionalId,path);
+          }
+          NODE

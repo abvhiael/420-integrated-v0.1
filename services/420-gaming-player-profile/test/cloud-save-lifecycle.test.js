@@ -86,3 +86,23 @@ test('R05.5 backup revoked between provider read and save commit cannot resurrec
   consentId:'c1',schemaLabel:'hc-v7'}),/save-backup-revoked/);
  assert.equal(f.head.revision,'1');
 });
+
+test('HC-NEXT-8.1 restore publishes only bytes verified against immutable source digest',async()=>{
+ const f=fixture();
+ await f.save.publish({expectedRevision:'0',consentId:'c1',schemaLabel:'hc-v7',bytes:bytes({original:1})});
+ await f.save.publish({expectedRevision:'1',consentId:'c1',schemaLabel:'hc-v7',bytes:bytes({newer:2})});
+ const originalGet=f.provider.get;
+ let reads=0;
+ f.provider.get=async ref=>{
+  if(ref.objectRef==='o1'){
+   reads++;
+   if(reads>1)return bytes({forged:999});
+  }
+  return originalGet(ref);
+ };
+ const restored=await f.save.restore({backupRevision:'1',expectedHead:'2',
+  consentId:'c1',schemaLabel:'hc-v7'});
+ assert.equal(restored.revision,'3');
+ assert.equal(reads,1,'restore must not perform an unchecked second provider fetch');
+ assert.deepEqual((await f.save.read()).local.state,{original:1});
+});

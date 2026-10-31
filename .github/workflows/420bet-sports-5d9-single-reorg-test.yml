@@ -1,0 +1,22 @@
+name: 420Bet 5D.9 - Single receipt reorg regression
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  single-reorg-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out corrected PR 902 commit
+        uses: actions/checkout@v4
+        with:
+          ref: 7d3fdcc0d5a5a94e2fde1c0f6746c7b88cdc5668
+          persist-credentials: false
+      - name: Verify immutable target commit
+        run: test "$(git rev-parse HEAD)" = "7d3fdcc0d5a5a94e2fde1c0f6746c7b88cdc5668"
+      - name: Install test dependencies
+        run: python3 -m pip install 'cryptography>=42,<47' 'eth-abi>=5,<6' 'eth-utils>=5,<6' 'eth-account>=0.13,<0.14'
+      - name: Run exactly one receipt and reorg test
+        working-directory: clients/420bet-sports
+        run: python3 -m unittest test_rpc.RuntimeTests.test_finality_reorg_and_event_reconciliation -v

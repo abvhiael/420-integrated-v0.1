@@ -37,3 +37,15 @@ test('durable transaction rollback on malformed state',async()=>{
  await assert.rejects(ledger.earn('one','alice','bad','bad',1));
  assert.equal(fake.commits(),0);assert.equal(fake.rollbacks(),1);
 });
+
+test('HC-ECON-04 creator asset revisions persist through PostgreSQL namespace serialization',async()=>{
+ const fake=db(),store=new PostgresBudsStore(fake.pool,'hc:registered');
+ await store.transact(state=>{
+  state.econCreatorAssets.set(JSON.stringify(['art_1',1]),{creatorId:'artist',revision:1,sha256:'abc',publicationStatus:'unpublished'});
+ });
+ const reopened=new PostgresBudsStore(fake.pool,'hc:registered');
+ const copy=await reopened.transact(state=>state.econCreatorAssets.get(JSON.stringify(['art_1',1])));
+ assert.equal(copy.creatorId,'artist');
+ assert.equal(copy.publicationStatus,'unpublished');
+ assert.equal(fake.state().econCreatorAssets.length,1);
+});

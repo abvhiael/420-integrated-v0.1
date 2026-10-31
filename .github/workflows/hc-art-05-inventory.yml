@@ -1,0 +1,20 @@
+name: HC-ART-05 exact inventory evidence
+on:
+  pull_request:
+    paths:
+      - 'scripts/highcountry/audit-hc-art-05.mjs'
+      - 'apps/highcountry-web/public/assets/structures/hc-art-05-*/**'
+      - '.github/workflows/hc-art-05-inventory.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  inventory:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Exact HC-ART-05 asset completeness, integrity and dimensions
+        run: node scripts/highcountry/audit-hc-art-05.mjs --strict

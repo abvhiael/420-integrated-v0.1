@@ -1,0 +1,25 @@
+name: 420Bet Sports 5D.9 Application Level 1
+on:
+  pull_request:
+    paths:
+      - 'clients/420bet-sports/**'
+      - '.github/workflows/420bet-sports-5d9-app.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  security-boundary:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact commit
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - name: Install source-verification dependency
+        run: python3 -m pip install 'cryptography>=42,<47' 'eth-abi>=5,<6' 'eth-utils>=5,<6' 'eth-account>=0.13,<0.14'
+      - name: Local application boundary and adversarial recovery
+        run: python3 -m unittest discover -s clients/420bet-sports -p 'test_*.py' -v

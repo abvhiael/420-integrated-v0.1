@@ -8,14 +8,16 @@ const statusText={'coming-soon':'Coming Soon',preview:'Preview',testing:'Testing
 function node(tag,cls,text){const e=document.createElement(tag);if(cls)e.className=cls;if(text!==undefined)e.textContent=text;return e;}
 function button(label,fn,cls=''){const b=node('button',cls,label);b.type='button';b.addEventListener('click',fn);return b;}
 function close(){active=null;history.replaceState(null,'',location.pathname);render();}
-function launch(game){if(!game.route)return;active=game;history.replaceState(null,'',location.pathname+'#game='+encodeURIComponent(game.id));render();}
+function launch(game){active=game;history.replaceState(null,'',location.pathname+'#game='+encodeURIComponent(game.id));render();}
 function render(){
   app.replaceChildren();
   if(active){
     const main=node('main','immersive');const bar=node('header','gamebar');
     bar.append(button('← Return to Lobby',close,'return'),node('strong','',active.title));
     const note=node('span','game-status',statusText[active.status]);bar.append(note);main.append(bar);
-    const frame=node('iframe','gameframe');frame.title=active.title+' game';frame.src=active.route;frame.setAttribute('allow','fullscreen');main.append(frame);app.append(main);return;
+    if(active.route){const frame=node('iframe','gameframe');frame.title=active.title+' game';frame.src=active.route;frame.setAttribute('allow','fullscreen');main.append(frame);}
+    else {const preview=node('section','preview-screen');preview.append(node('p','eyebrow','420BET GAME PREVIEW'),node('div','preview-glyph',({'Casino':'✦','Poker':'♠','Fantasy':'★','Sportsbook':'◆'})[active.category]),node('h1','',active.title),node('p','','This game screen is being prepared. Its dedicated interface is not yet connected.'),node('p','preview-warning','Viewing only — wagering, wallet transactions and payouts are not enabled here.'));preview.append(button('Return to Lobby',close,'return'));main.append(preview);}
+    app.append(main);return;
   }
   const header=node('header','top');const brand=node('a','brand','♣ 420BET');brand.href='/';header.append(brand,node('span','strap','THE GAME LOBBY'));app.append(header);
   const main=node('main','lobby');const hero=node('section','hero');hero.append(node('p','eyebrow','WELCOME TO 420BET'),node('h1','', 'Pick your game. Find your groove.'),node('p','','Casino classics, poker, fantasy and sports — all in one place.'));main.append(hero);
@@ -32,7 +34,7 @@ function updateGrid(){
   matched.forEach(g=>{
     const card=node('article','card');const art=node('div','art art-'+g.category.toLowerCase().replace(' ','-'));art.setAttribute('aria-hidden','true');art.textContent=({'Casino':'✦','Poker':'♠','Fantasy':'★','Sportsbook':'◆'})[g.category];card.append(art);
     const details=node('div','details');details.append(node('small','category',g.category),node('h2','',g.title),node('span','status',statusText[g.status]));
-    details.append(g.route?button('Enter fullscreen',()=>launch(g),'open'):node('p','disabled-note','Not available to launch'));card.append(details);grid.append(card);
+    details.append(button(g.route?'Enter game':'View preview',()=>launch(g),'open'));card.append(details);grid.append(card);
   });
 }
 window.addEventListener('keydown',e=>{if(e.key==='Escape'&&active)close();});

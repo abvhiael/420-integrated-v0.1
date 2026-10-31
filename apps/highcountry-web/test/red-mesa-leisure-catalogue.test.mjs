@@ -16,6 +16,9 @@ test('six canonical Red Mesa buildings have unique assets and locked dimensions'
   assert.equal(x.marketplace.price,null);
   assert.equal(x.marketplace.noClientPurchaseOrIssuance,true);
   assert.equal(x.placement.placementWithoutCollisionMask,'deny');
+  assert.equal(x.placement.clickableBuilding,true);
+  assert.equal(x.placement.requiresFlatTerrain,undefined);
+  assert.equal(x.placement.entranceStatus,undefined);
   assert.equal(x.bonuses.serverAuthorityRequired,true);
   assert.equal(x.bonuses.primary.amount,null);
   assert.equal(x.bonuses.secondary.amount,null);
@@ -26,9 +29,9 @@ test('six canonical Red Mesa buildings have unique assets and locked dimensions'
 });
 test('placement fails closed for unqualified, unauthorized, unowned or blocked buildings',()=>{
  const id=redMesaLeisureCatalogue[0].id;
- const ok={id,region:'red-mesa',owned:true,serverAuthorized:true,hasGroundAnchor:true,flatTerrain:true,collisionMaskQualified:true,entranceQualified:true,overlapsExisting:false};
+ const ok={id,region:'red-mesa',owned:true,serverAuthorized:true,hasGroundAnchor:true,collisionMaskQualified:true,overlapsExisting:false};
  assert.equal(canPlaceRedMesaLeisureBuilding(ok),true);
- for(const field of ['owned','serverAuthorized','hasGroundAnchor','flatTerrain','collisionMaskQualified','entranceQualified'])
+ for(const field of ['owned','serverAuthorized','hasGroundAnchor','collisionMaskQualified'])
   assert.equal(canPlaceRedMesaLeisureBuilding({...ok,[field]:false}),false,field);
  assert.equal(canPlaceRedMesaLeisureBuilding({...ok,region:'golden-prairie'}),false);
  assert.equal(canPlaceRedMesaLeisureBuilding({...ok,overlapsExisting:true}),false);

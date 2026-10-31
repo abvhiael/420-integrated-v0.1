@@ -1,0 +1,28 @@
+name: HC-PLACE-04 Canonical Rectangles Level 1
+on:
+  pull_request:
+    paths:
+      - 'apps/highcountry-web/src/red-mesa-leisure-catalogue.js'
+      - 'apps/highcountry-web/test/red-mesa-leisure-catalogue.test.mjs'
+      - 'services/highcountry-economy/src/placement-contract.js'
+      - 'apps/highcountry-web/src/fire-gathering-catalogue.js'
+      - 'apps/highcountry-web/src/garden-ornament-catalogue.js'
+      - 'apps/highcountry-web/src/landscape-catalogue.js'
+      - 'apps/highcountry-web/src/recreation-catalogue.js'
+      - 'services/highcountry-economy/src/placement-canonical-rectangles.js'
+      - 'services/highcountry-economy/test/placement-canonical-rectangles.test.mjs'
+      - '.github/workflows/highcountry-hc-place-04-rectangles-l1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  canonical-rectangle-qualification:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check services/highcountry-economy/src/placement-canonical-rectangles.js
+      - run: node --test services/highcountry-economy/test/placement-canonical-rectangles.test.mjs apps/highcountry-web/test/red-mesa-leisure-catalogue.test.mjs

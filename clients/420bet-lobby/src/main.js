@@ -1,6 +1,6 @@
 import './style.css';
 import {createNativePreview} from './previews.js';
-import {categories,resolveCatalogue} from './catalogue.js';
+import {categories,resolveCatalogue,filterGames} from './catalogue.js';
 const app=document.querySelector('#app');
 const config=window.BET_LOBBY_CONFIG || {};
 const catalogue=resolveCatalogue(config);
@@ -30,7 +30,7 @@ function render(){
 }
 function updateGrid(){
   const grid=document.querySelector('#game-grid');if(!grid)return;grid.replaceChildren();
-  const matched=catalogue.filter(g=>(filter==='All Games'||g.category===filter)&&g.title.toLowerCase().includes(term.trim().toLowerCase()));
+  const matched=filterGames(catalogue,filter,term);
   if(!matched.length){grid.append(node('p','empty','No games match your search.'));return;}
   matched.forEach(g=>{
     const card=node('article','card');const art=node('div','art art-'+g.category.toLowerCase().replace(' ','-'));art.setAttribute('aria-hidden','true');art.textContent=({'Casino':'✦','Poker':'♠','Fantasy':'★','Sportsbook':'◆'})[g.category];card.append(art);

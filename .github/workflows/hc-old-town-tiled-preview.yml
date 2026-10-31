@@ -1,6 +1,12 @@
 name: HC Old Town Tiled canonical PNG preview package
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - hc-tiled-old-town-canonical-artwork
+    paths:
+      - tools/tiled/old-town/**
+      - .github/workflows/hc-old-town-tiled-preview.yml
 jobs:
   generate:
     runs-on: ubuntu-latest

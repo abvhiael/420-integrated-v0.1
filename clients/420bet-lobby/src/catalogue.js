@@ -22,3 +22,5 @@ export function resolveCatalogue(config={}) {
     return {...game,status:validStatus,route:launchable?route:null};
   });
 }
+
+export function filterGames(items,category='All Games',query=''){const q=query.trim().toLowerCase();return items.filter(g=>(category==='All Games'||g.category===category)&&g.title.toLowerCase().includes(q));}

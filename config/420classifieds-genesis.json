@@ -1,0 +1,128 @@
+{
+  "schema": "420-classifieds-genesis-v1",
+  "phase": "GEN-SVC-4",
+  "status": "IMPLEMENTATION_BASELINE",
+  "serviceId": "420/service/classifieds/v1",
+  "name": "420Classifieds",
+  "authority": "REPLACEABLE_APPLICATION",
+  "dependencies": {
+    "identity": "420 Identity",
+    "messenger": "420 Messenger",
+    "search": "420 Search",
+    "notifications": "420 Notifications",
+    "pay": "420 Pay",
+    "arbitration": "420 Arbitration",
+    "reputation": "420/service/reputation/v1",
+    "location": "420/service/location/v1"
+  },
+  "listing": {
+    "required_fields": ["listing_id","seller_id","title","description","category","condition","price_amount","price_asset","location_mode","delivery_modes","status","created_at","updated_at"],
+    "optional_fields": ["place_id","approximate_location","service_radius_meters","photos","shipping_terms","digital_delivery_terms","metadata_uri"],
+    "statuses": ["DRAFT","ACTIVE","RESERVED","SOLD","CANCELLED","REMOVED"],
+    "conditions": ["NEW","LIKE_NEW","GOOD","FAIR","POOR","NOT_APPLICABLE"],
+    "delivery_modes": ["LOCAL_PICKUP","LOCAL_DELIVERY","SHIPPING","DIGITAL_DELIVERY"],
+    "price_asset": "native 420 or explicitly supported asset/reference",
+    "rules": [
+      "listing content is application data and is not canonical protocol state",
+      "private residential coordinates are not required for public listings",
+      "seller ownership and listing visibility are application-scoped",
+      "marking SOLD does not itself prove payment settlement"
+    ]
+  },
+  "discovery": {
+    "filters": ["TEXT","CATEGORY","CONDITION","PRICE_RANGE","REGION","RADIUS","DELIVERY_MODE","SELLER"],
+    "sorts": ["RELEVANCE","NEWEST","PRICE_ASC","PRICE_DESC","DISTANCE"],
+    "location_source": "420Location",
+    "search_source": "420 Search",
+    "alerts": "420 Notifications",
+    "public_index_only": true
+  },
+  "offers": {
+    "states": ["OPEN","COUNTERED","ACCEPTED","DECLINED","WITHDRAWN","EXPIRED"],
+    "messaging_transport": "420 Messenger",
+    "price_mutation_rule": "accepted offer creates a transaction intent; it does not bypass payment authorization",
+    "idempotency_required": true
+  },
+  "transactions": {
+    "modes": {
+      "IN_PERSON": {
+        "onchain_payment_required": false,
+        "escrow_default": false
+      },
+      "REMOTE_SHIPPING": {
+        "onchain_payment_required": false,
+        "escrow_supported": true
+      },
+      "DIGITAL_DELIVERY": {
+        "onchain_payment_required": false,
+        "escrow_supported": true
+      }
+    },
+    "pay_integration": "optional 420Pay settlement/escrow",
+    "arbitration_integration": "supported only where an authoritative escrow/dispute flow exists",
+    "rules": [
+      "classifieds never custody wallet keys",
+      "classifieds UI cannot release/refund escrow without authoritative payment/escrow authorization",
+      "local cash/in-person transactions may remain completely off-chain",
+      "review eligibility may use verified interaction evidence when settlement or explicit completion proof exists"
+    ]
+  },
+  "reputation": {
+    "domain": "CLASSIFIEDS",
+    "seller_profiles": true,
+    "verified_review_support": true,
+    "subjective_rating_storage": "OFF_CHAIN",
+    "objective_evidence_source": "420Reputation/420Trust exact metrics where available"
+  },
+  "safety": {
+    "reporting": true,
+    "seller_blocking": true,
+    "fraud_flags": true,
+    "prohibited_category_policy": "jurisdiction_and_platform_policy",
+    "exact_home_location_public": false,
+    "high_risk_categories_fail_closed": true
+  },
+  "jurisdiction": {
+    "category_rules": true,
+    "region_rules": true,
+    "age_restriction_metadata_supported": true,
+    "policy": "application-level availability controls do not replace legal/compliance review"
+  },
+  "ui": {
+    "routes": [
+      "/classifieds",
+      "/classifieds/search",
+      "/classifieds/listing/:listing_id",
+      "/classifieds/create",
+      "/classifieds/edit/:listing_id",
+      "/classifieds/seller/:seller_id",
+      "/classifieds/messages",
+      "/classifieds/offers"
+    ],
+    "components": [
+      "LISTING_CARD",
+      "LISTING_DETAIL",
+      "LISTING_COMPOSER",
+      "SELLER_PROFILE",
+      "LOCATION_FILTER",
+      "DELIVERY_BADGES",
+      "OFFER_COMPOSER",
+      "OFFER_THREAD",
+      "ESCROW_STATUS",
+      "REPORT_ACTION",
+      "REVIEW_COMPOSER"
+    ]
+  },
+  "qualification_journeys": [
+    "POST_TO_SEARCH",
+    "SEARCH_TO_MESSAGE",
+    "MESSAGE_TO_OFFER",
+    "OFFER_TO_ACCEPT",
+    "ACCEPT_TO_IN_PERSON_COMPLETE",
+    "ACCEPT_TO_ESCROW_SETTLEMENT",
+    "COMPLETE_TO_REVIEW",
+    "PRIVATE_LOCATION_NOT_EXPOSED",
+    "PROHIBITED_CATEGORY_FAILS_CLOSED",
+    "DUPLICATE_SETTLEMENT_ACTION_REJECTED"
+  ]
+}

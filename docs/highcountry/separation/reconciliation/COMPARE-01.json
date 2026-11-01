@@ -1,0 +1,548 @@
+[
+  {
+    "pr": 932,
+    "head": "41a09b0fda41cafd401f620086620df6e895440c",
+    "status": "diverged",
+    "ahead": 7,
+    "behind": 58,
+    "mergeBase": "9694914f4100383830e9f7b6d63f93269637eb8a",
+    "tooLarge": null,
+    "files": [
+      {
+        "path": ".github/workflows/hc-old-town-tiled-preview.yml",
+        "status": "added",
+        "changes": 29
+      },
+      {
+        "path": "tools/tiled/old-town/CANONICAL-PNG-PREVIEW.md",
+        "status": "added",
+        "changes": 15
+      },
+      {
+        "path": "tools/tiled/old-town/README.md",
+        "status": "added",
+        "changes": 28
+      },
+      {
+        "path": "tools/tiled/old-town/build-canonical-preview.mjs",
+        "status": "added",
+        "changes": 50
+      },
+      {
+        "path": "tools/tiled/old-town/port-alder-old-town-review.tmj",
+        "status": "added",
+        "changes": 4449
+      }
+    ]
+  },
+  {
+    "pr": 931,
+    "head": "343b74582e1747ed2e7d3990cd708f3b5e2f1c55",
+    "status": "diverged",
+    "ahead": 2,
+    "behind": 58,
+    "mergeBase": "9694914f4100383830e9f7b6d63f93269637eb8a",
+    "tooLarge": null,
+    "files": [
+      {
+        "path": "tools/tiled/old-town/README.md",
+        "status": "added",
+        "changes": 28
+      },
+      {
+        "path": "tools/tiled/old-town/port-alder-old-town-review.tmj",
+        "status": "added",
+        "changes": 4449
+      }
+    ]
+  },
+  {
+    "pr": 930,
+    "head": "91f94e0c95fe94f78d501255218de34da46b1cfa",
+    "status": "diverged",
+    "ahead": 2,
+    "behind": 58,
+    "mergeBase": "9694914f4100383830e9f7b6d63f93269637eb8a",
+    "tooLarge": null,
+    "files": [
+      {
+        "path": "tools/tiled/README.md",
+        "status": "added",
+        "changes": 18
+      },
+      {
+        "path": "tools/tiled/highcountry-world-template.tmj",
+        "status": "added",
+        "changes": 105
+      }
+    ]
+  },
+  {
+    "pr": 929,
+    "head": "f7396b2fc38340e7f5edcb691c233599df701031",
+    "status": "diverged",
+    "ahead": 4,
+    "behind": 58,
+    "mergeBase": "9694914f4100383830e9f7b6d63f93269637eb8a",
+    "tooLarge": null,
+    "files": [
+      {
+        "path": "services/highcountry-economy/src/heritage-tool-shed-placement.js",
+        "status": "added",
+        "changes": 60
+      },
+      {
+        "path": "services/highcountry-economy/test/heritage-tool-shed-placement.test.mjs",
+        "status": "added",
+        "changes": 24
+      }
+    ]
+  },
+  {
+    "pr": 928,
+    "head": "236f0915645aa4420538a1ad63f7436178cadadc",
+    "status": "diverged",
+    "ahead": 7,
+    "behind": 98,
+    "mergeBase": "696386bb9aff1b48fe1a53351067f0aec08be172",
+    "tooLarge": null,
+    "files": [
+      {
+        "path": ".github/workflows/highcountry-hc-place-04-rectangles-l1.yml",
+        "status": "added",
+        "changes": 28
+      },
+      {
+        "path": "apps/highcountry-web/src/fire-gathering-catalogue.js",
+        "status": "added",
+        "changes": 20
+      },
+      {
+        "path": "apps/highcountry-web/src/garden-ornament-catalogue.js",
+        "status": "added",
+        "changes": 18
+      },
+      {
+        "path": "apps/highcountry-web/src/landscape-catalogue.js",
+        "status": "added",
+        "changes": 19
+      },
+      {
+        "path": "apps/highcountry-web/src/recreation-catalogue.js",
+        "status": "added",
+        "changes": 19
+      },
+      {
+        "path": "apps/highcountry-web/src/red-mesa-leisure-catalogue.js",
+        "status": "modified",
+        "changes": 9
+      },
+      {
+        "path": "apps/highcountry-web/test/red-mesa-leisure-catalogue.test.mjs",
+        "status": "modified",
+        "changes": 7
+      },
+      {
+        "path": "docs/highcountry/HC-PLACE-04-RECTANGLE-QUALIFICATION.md",
+        "status": "added",
+        "changes": 84
+      },
+      {
+        "path": "services/highcountry-economy/src/placement-canonical-rectangles.js",
+        "status": "added",
+        "changes": 55
+      },
+      {
+        "path": "services/highcountry-economy/src/placement-contract.js",
+        "status": "modified",
+        "changes": 4
+      },
+      {
+        "path": "services/highcountry-economy/test/placement-canonical-rectangles.test.mjs",
+        "status": "added",
+        "changes": 130
+      }
+    ]
+  },
+  {
+    "pr": 917,
+    "head": "3d06e8872b7d3696350b515bde9424eb53a110e2",
+    "status": "diverged",
+    "ahead": 3,
+    "behind": 231,
+    "mergeBase": "accfdb157470b3ca0f49d609e871b59cd000f9f0",
+    "tooLarge": null,
+    "files": [
+      {
+        "path": "apps/highcountry-web/scripts/build.mjs",
+        "status": "modified",
+        "changes": 2
+      },
+      {
+        "path": "apps/highcountry-web/src/red-mesa-heritage-review-catalogue.js",
+        "status": "added",
+        "changes": 108
+      },
+      {
+        "path": "apps/highcountry-web/test/red-mesa-heritage-review-catalogue.test.mjs",
+        "status": "added",
+        "changes": 25
+      }
+    ]
+  },
+  {
+    "pr": 913,
+    "head": "0ef6e8fe013c601e73b947ea2619f388394eda05",
+    "status": "diverged",
+    "ahead": 11,
+    "behind": 235,
+    "mergeBase": "616e7cdde7d1edda59e6b73dcef01a62c5f18cd5",
+    "tooLarge": null,
+    "files": [
+      {
+        "path": ".github/workflows/highcountry-ot-screen-01-l2.yml",
+        "status": "added",
+        "changes": 29
+      },
+      {
+        "path": "apps/highcountry-web/package.json",
+        "status": "modified",
+        "changes": 2
+      },
+      {
+        "path": "apps/highcountry-web/scripts/build.mjs",
+        "status": "modified",
+        "changes": 8
+      },
+      {
+        "path": "apps/highcountry-web/src/old-town-scene.js",
+        "status": "added",
+        "changes": 85
+      },
+      {
+        "path": "apps/highcountry-web/src/port-alder-navigation.js",
+        "status": "modified",
+        "changes": 4
+      },
+      {
+        "path": "apps/highcountry-web/test/old-town-scene.test.mjs",
+        "status": "added",
+        "changes": 47
+      },
+      {
+        "path": "deployments/highcountry/old-town-provisional-geometry.geojson",
+        "status": "added",
+        "changes": 1848
+      },
+      {
+        "path": "deployments/highcountry/old-town-render-anchors.v1.json",
+        "status": "added",
+        "changes": 307
+      }
+    ]
+  },
+  {
+    "pr": 909,
+    "head": "6d772c3608434180393d8b3715625f531cd3295c",
+    "status": "diverged",
+    "ahead": 2,
+    "behind": 270,
+    "mergeBase": "70e8d6968033d8889bd77ef09c634627afda7c0f",
+    "tooLarge": null,
+    "files": [
+      {
+        "path": "docs/highcountry/HC-WORLD-LOCKED-MASTER-ROADMAP-V1.md",
+        "status": "modified",
+        "changes": 16
+      },
+      {
+        "path": "docs/highcountry/HC-WORLD-OLD-TOWN-NEIGHBOURHOOD-SCREEN-ROADMAP-V1.md",
+        "status": "added",
+        "changes": 64
+      }
+    ]
+  },
+  {
+    "pr": 900,
+    "head": "c67a4906581b3066ff27c0d6170258de277985b2",
+    "status": "diverged",
+    "ahead": 5,
+    "behind": 394,
+    "mergeBase": "4ba1e73df41dca875caa876f537772e3261387b3",
+    "tooLarge": null,
+    "files": [
+      {
+        "path": "apps/highcountry-web/scripts/build.mjs",
+        "status": "modified",
+        "changes": 2
+      },
+      {
+        "path": "apps/highcountry-web/src/agricultural-building-catalogue.js",
+        "status": "added",
+        "changes": 683
+      },
+      {
+        "path": "apps/highcountry-web/src/marketplace.js",
+        "status": "modified",
+        "changes": 14
+      },
+      {
+        "path": "apps/highcountry-web/test/agricultural-building-catalogue.test.mjs",
+        "status": "added",
+        "changes": 17
+      },
+      {
+        "path": "docs/highcountry/HC-ART-05-D-52-BUILDING-ABILITIES-CONTRACT-V1.md",
+        "status": "added",
+        "changes": 62
+      }
+    ]
+  },
+  {
+    "pr": 896,
+    "head": "3a65af61cf3cb3d1b48faf811bb129eba4b2c9ab",
+    "status": "diverged",
+    "ahead": 10,
+    "behind": 497,
+    "mergeBase": "7d8639b85a84ff1611478844147103432b69b3e1",
+    "tooLarge": null,
+    "files": [
+      {
+        "path": ".github/workflows/highcountry-oldtown-landmarks-l1.yml",
+        "status": "added",
+        "changes": 20
+      },
+      {
+        "path": "apps/highcountry-web/scripts/build.mjs",
+        "status": "modified",
+        "changes": 7
+      },
+      {
+        "path": "apps/highcountry-web/server.mjs",
+        "status": "modified",
+        "changes": 2
+      },
+      {
+        "path": "apps/highcountry-web/src/app.js",
+        "status": "modified",
+        "changes": 3
+      },
+      {
+        "path": "apps/highcountry-web/src/old-town-landmarks.js",
+        "status": "added",
+        "changes": 35
+      },
+      {
+        "path": "deployments/highcountry/hc-world-pa-oldtown-landmark-hitboxes.v1.json",
+        "status": "added",
+        "changes": 192
+      },
+      {
+        "path": "docs/highcountry/HC-WORLD-PA-OLDTOWN-LANDMARK-INTERACTIONS-V1.md",
+        "status": "added",
+        "changes": 11
+      },
+      {
+        "path": "scripts/highcountry/hc-world-pa-oldtown-landmarks.test.mjs",
+        "status": "added",
+        "changes": 7
+      }
+    ]
+  },
+  {
+    "pr": 895,
+    "head": "38ffa3b8fa531e9ddb8ee57e8656608e284b79eb",
+    "status": "diverged",
+    "ahead": 3,
+    "behind": 507,
+    "mergeBase": "000e7284db39b3c788458e894d1d90d87065aea2",
+    "tooLarge": null,
+    "files": [
+      {
+        "path": "deployments/highcountry/hc-world-pa-oldtown-building-abilities.v1.json",
+        "status": "added",
+        "changes": 244
+      },
+      {
+        "path": "deployments/highcountry/hc-world-pa-oldtown-permanent-landmarks.v1.json",
+        "status": "added",
+        "changes": 112
+      },
+      {
+        "path": "docs/highcountry/HC-WORLD-06-PA-OLDTOWN-V1-ABILITY-AND-LANDMARK-LOCK.md",
+        "status": "added",
+        "changes": 20
+      }
+    ]
+  },
+  {
+    "pr": 893,
+    "head": "e2089864fa87ee8b20f62afa2e52ce3c73b5eb40",
+    "status": "diverged",
+    "ahead": 1,
+    "behind": 531,
+    "mergeBase": "238f27489c112cbfb0ee59cfb253a80dce8147c1",
+    "tooLarge": null,
+    "files": [
+      {
+        "path": "docs/highcountry/HC-ART-05-B-WORKSHOP-ABILITIES-CONTRACT-V1.md",
+        "status": "added",
+        "changes": 55
+      }
+    ]
+  },
+  {
+    "pr": 891,
+    "head": "b7da804fd2fac6c96ea97dbdee3cea5b3e7f8a39",
+    "status": "diverged",
+    "ahead": 16,
+    "behind": 596,
+    "mergeBase": "36457d785b9837789160e3ebce51f522bda30b6c",
+    "tooLarge": null,
+    "files": [
+      {
+        "path": ".github/workflows/highcountry-port-alder-map-stage-l1.yml",
+        "status": "added",
+        "changes": 25
+      },
+      {
+        "path": "apps/highcountry-web/scripts/build.mjs",
+        "status": "modified",
+        "changes": 8
+      },
+      {
+        "path": "apps/highcountry-web/server.mjs",
+        "status": "modified",
+        "changes": 2
+      },
+      {
+        "path": "apps/highcountry-web/src/app.js",
+        "status": "modified",
+        "changes": 4
+      },
+      {
+        "path": "apps/highcountry-web/src/port-alder-map-stage.js",
+        "status": "added",
+        "changes": 33
+      },
+      {
+        "path": "apps/highcountry-web/src/port-alder-navigation.js",
+        "status": "modified",
+        "changes": 84
+      },
+      {
+        "path": "deployments/highcountry/hc-world-map-catalogue.v1.json",
+        "status": "added",
+        "changes": 50
+      },
+      {
+        "path": "deployments/highcountry/hc-world-port-alder-artwork-hitboxes.v2.json",
+        "status": "added",
+        "changes": 438
+      },
+      {
+        "path": "docs/highcountry/HC-WORLD-PORT-ALDER-MAP-CATALOGUE-STAGE.md",
+        "status": "added",
+        "changes": 11
+      },
+      {
+        "path": "scripts/highcountry/hc-world-port-alder-map-stage.test.mjs",
+        "status": "added",
+        "changes": 17
+      },
+      {
+        "path": "scripts/highcountry/hc-world-port-alder-milestone-authority.test.mjs",
+        "status": "added",
+        "changes": 14
+      },
+      {
+        "path": "services/highcountry-economy/src/port-alder-purchase-milestone.js",
+        "status": "added",
+        "changes": 25
+      }
+    ]
+  },
+  {
+    "pr": 890,
+    "head": "323590eda35403b47967f981b9abfd87fac3a5d4",
+    "status": "diverged",
+    "ahead": 1,
+    "behind": 613,
+    "mergeBase": "8530a4cf81686544ec261eb46af44e97d5b7e60e",
+    "tooLarge": null,
+    "files": [
+      {
+        "path": "docs/highcountry/HC-ART-05-BUILDING-ECONOMY-ABILITIES-CONTRACT-V1.md",
+        "status": "added",
+        "changes": 60
+      }
+    ]
+  },
+  {
+    "pr": 885,
+    "head": "e717c368508204a38ca5b6ff14224a7a70794c9e",
+    "status": "diverged",
+    "ahead": 4,
+    "behind": 658,
+    "mergeBase": "d3a0919f35b96c40ea6800759049ba42bfa8a193",
+    "tooLarge": null,
+    "files": [
+      {
+        "path": ".github/workflows/highcountry-hc-world-02-l1.yml",
+        "status": "modified",
+        "changes": 2
+      },
+      {
+        "path": "docs/highcountry/HC-WORLD-02-SURVEY-SOURCE-CUSTODY.md",
+        "status": "added",
+        "changes": 22
+      },
+      {
+        "path": "scripts/highcountry/hc-world-02-survey-custody.mjs",
+        "status": "added",
+        "changes": 51
+      },
+      {
+        "path": "scripts/highcountry/hc-world-02-survey-custody.test.mjs",
+        "status": "added",
+        "changes": 30
+      }
+    ]
+  },
+  {
+    "pr": 881,
+    "head": "c32f45dce6ceb69c5e3efd07e63c8276554a466b",
+    "status": "diverged",
+    "ahead": 5,
+    "behind": 660,
+    "mergeBase": "eab401fed96aa798f7591e499e5fc4415b245f1b",
+    "tooLarge": null,
+    "files": [
+      {
+        "path": ".github/workflows/hc-art-04-f-recreation.yml",
+        "status": "added",
+        "changes": 32
+      },
+      {
+        "path": "apps/highcountry-web/scripts/build.mjs",
+        "status": "modified",
+        "changes": 2
+      },
+      {
+        "path": "apps/highcountry-web/src/marketplace.js",
+        "status": "modified",
+        "changes": 13
+      },
+      {
+        "path": "apps/highcountry-web/src/recreation-catalogue.js",
+        "status": "added",
+        "changes": 19
+      },
+      {
+        "path": "apps/highcountry-web/test/recreation-catalogue.test.mjs",
+        "status": "added",
+        "changes": 35
+      }
+    ]
+  }
+]

@@ -113,3 +113,18 @@
 .nk-cannabis-hit{position:absolute;top:-8px;right:-7px;width:22px;height:22px;overflow:visible;color:#b6ff53;filter:drop-shadow(0 0 4px #63ff20);pointer-events:none}
 .nk-ball.matched .nk-cannabis-hit{color:#68ff48}
 @media(max-width:680px){.nk-cannabis-hit{width:17px;height:17px;top:-6px;right:-6px}}
+
+/* Plinko practice: a true twelve-row peg field and thirteen visible buckets. */
+.plinko-neon{max-width:1450px;margin:0 auto;padding:clamp(16px,3vw,38px);background:radial-gradient(ellipse at 25% 18%,#20642a50,transparent 65%),linear-gradient(145deg,#03190e,#001107 75%);color:#f5fff1}
+.plinko-heading{text-align:center;margin-bottom:24px}.plinko-heading h1{font-size:clamp(3.5rem,7vw,6rem);letter-spacing:.04em;margin:7px 0;color:#d9ffb9;text-shadow:0 0 35px #69ff42aa}.plinko-heading p:last-child{color:#c9dfc4}
+.plinko-machine{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(270px,.75fr);gap:24px;align-items:start}
+.plinko-stage,.plinko-info{background:linear-gradient(150deg,#092818,#03150c);border:1px solid #cbaa4b;border-radius:22px;padding:clamp(12px,2vw,28px);box-shadow:0 0 30px #78ff242a,inset 0 0 30px #57eb2220}
+.plinko-svg{display:block;width:100%;height:auto;max-height:610px;overflow:visible}
+.plinko-peg{fill:#b8ff74;stroke:#edffce;stroke-width:1.1;filter:drop-shadow(0 0 6px #6fff2d)}
+.plinko-trace{stroke:#ffc749;stroke-width:7;filter:drop-shadow(0 0 8px #ffcf41);stroke-linecap:round}
+.plinko-ball{fill:#f9ffae;stroke:#fffce3;stroke-width:3;filter:drop-shadow(0 0 9px #c4ff35)}
+.plinko-buckets{display:grid;grid-template-columns:repeat(13,minmax(0,1fr));gap:3px;margin-top:2px}
+.plinko-bucket{padding:12px 0;min-width:0;text-align:center;border:1px solid #4f8351;border-radius:5px 5px 12px 12px;background:#17412b;color:#d1f8c3;font-weight:900;font-size:clamp(.58rem,1vw,.88rem)}
+.plinko-bucket.landed{background:linear-gradient(#fff0a1,#ffb92f);color:#301e05;border-color:#fff8ad;box-shadow:0 0 19px #ffc743}
+.plinko-info h2{font-size:1.55rem;margin:0 0 15px}.plinko-info>p{color:#d1e1d0;line-height:1.5}.plinko-stat-label{font-size:.75rem;letter-spacing:.08em;font-weight:900;color:#bcdea9;margin-top:24px}.plinko-stat{font-size:clamp(3.8rem,6vw,6rem);color:#aaff72;font-weight:950;text-shadow:0 0 26px #65ff4180}.plinko-drop{border:1px solid #bfff8a;border-radius:100px;background:linear-gradient(#c2ff8a,#63e92a 60%,#21ac1d);padding:17px 25px;width:100%;color:#09200a;font-weight:950;box-shadow:0 0 22px #61ff4160}.plinko-safe{font-size:.79rem;color:#dccc94}
+@media(max-width:920px){.plinko-machine{grid-template-columns:1fr}.plinko-info{padding:20px}}@media(max-width:560px){.plinko-neon{padding:10px}.plinko-bucket{font-size:.54rem;padding:8px 0}.plinko-stage{padding:9px}}

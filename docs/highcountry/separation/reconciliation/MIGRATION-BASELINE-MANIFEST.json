@@ -1,0 +1,1193 @@
+{
+  "schema": "HC_SEP_01_B_RECONCILED_MIGRATION_BASELINE_V1",
+  "sourceRepo": "abvhiael/420-integrated-v0.1",
+  "targetRepo": "abvhiael/HighCountry",
+  "frozenMain": "78a4befa01bd08693aabfd576a6fe8fba2e2677b",
+  "baselineType": "MANIFEST_ONLY_NOT_EXECUTABLE_MERGED_TREE",
+  "strategy": "Extract the frozen HighCountry-owned source from the fixed commit; retain shared 420 Gaming Protocol in integrated repo; add only reviewed unique changes from archived heads respecting dependencies and resolving collisions by diff. No automatic PR merges.",
+  "prs": [
+    {
+      "pr": 932,
+      "head": "41a09b0fda41cafd401f620086620df6e895440c",
+      "base": "main",
+      "archive": "hc-separation/archive/pr-932-20261031",
+      "ahead": 7,
+      "behind": 58,
+      "mergeBase": "9694914f4100383830e9f7b6d63f93269637eb8a",
+      "disposition": "PRESERVE_PROTOTYPE_NOT_AUTHORITATIVE",
+      "ownershipClasses": [
+        "BOUNDARY_REVIEW",
+        "HIGHCOUNTRY_CANDIDATE"
+      ],
+      "changes": [
+        ".github/workflows/hc-old-town-tiled-preview.yml",
+        "tools/tiled/old-town/CANONICAL-PNG-PREVIEW.md",
+        "tools/tiled/old-town/README.md",
+        "tools/tiled/old-town/build-canonical-preview.mjs",
+        "tools/tiled/old-town/port-alder-old-town-review.tmj"
+      ],
+      "qualification": "PRESERVE_EXISTING_EVIDENCE_NO_RERUN"
+    },
+    {
+      "pr": 931,
+      "head": "343b74582e1747ed2e7d3990cd708f3b5e2f1c55",
+      "base": "main",
+      "archive": "hc-separation/archive/pr-931-20261031",
+      "ahead": 2,
+      "behind": 58,
+      "mergeBase": "9694914f4100383830e9f7b6d63f93269637eb8a",
+      "disposition": "PRESERVE_PROTOTYPE_NOT_AUTHORITATIVE",
+      "ownershipClasses": [
+        "HIGHCOUNTRY_CANDIDATE"
+      ],
+      "changes": [
+        "tools/tiled/old-town/README.md",
+        "tools/tiled/old-town/port-alder-old-town-review.tmj"
+      ],
+      "qualification": "PRESERVE_EXISTING_EVIDENCE_NO_RERUN"
+    },
+    {
+      "pr": 930,
+      "head": "91f94e0c95fe94f78d501255218de34da46b1cfa",
+      "base": "main",
+      "archive": "hc-separation/archive/pr-930-20261031",
+      "ahead": 2,
+      "behind": 58,
+      "mergeBase": "9694914f4100383830e9f7b6d63f93269637eb8a",
+      "disposition": "PRESERVE_PROTOTYPE_NOT_AUTHORITATIVE",
+      "ownershipClasses": [
+        "HIGHCOUNTRY_CANDIDATE"
+      ],
+      "changes": [
+        "tools/tiled/README.md",
+        "tools/tiled/highcountry-world-template.tmj"
+      ],
+      "qualification": "PRESERVE_EXISTING_EVIDENCE_NO_RERUN"
+    },
+    {
+      "pr": 929,
+      "head": "f7396b2fc38340e7f5edcb691c233599df701031",
+      "base": "main",
+      "archive": "hc-separation/archive/pr-929-20261031",
+      "ahead": 4,
+      "behind": 58,
+      "mergeBase": "9694914f4100383830e9f7b6d63f93269637eb8a",
+      "disposition": "SELECTIVE_MIGRATION_REVIEW",
+      "ownershipClasses": [
+        "HIGHCOUNTRY_CANDIDATE"
+      ],
+      "changes": [
+        "services/highcountry-economy/src/heritage-tool-shed-placement.js",
+        "services/highcountry-economy/test/heritage-tool-shed-placement.test.mjs"
+      ],
+      "qualification": "PRESERVE_EXISTING_EVIDENCE_NO_RERUN"
+    },
+    {
+      "pr": 928,
+      "head": "236f0915645aa4420538a1ad63f7436178cadadc",
+      "base": "main",
+      "archive": "hc-separation/archive/pr-928-20261031",
+      "ahead": 7,
+      "behind": 98,
+      "mergeBase": "696386bb9aff1b48fe1a53351067f0aec08be172",
+      "disposition": "SELECTIVE_MIGRATION_REVIEW",
+      "ownershipClasses": [
+        "BOUNDARY_REVIEW",
+        "HIGHCOUNTRY_CANDIDATE"
+      ],
+      "changes": [
+        ".github/workflows/highcountry-hc-place-04-rectangles-l1.yml",
+        "apps/highcountry-web/src/fire-gathering-catalogue.js",
+        "apps/highcountry-web/src/garden-ornament-catalogue.js",
+        "apps/highcountry-web/src/landscape-catalogue.js",
+        "apps/highcountry-web/src/recreation-catalogue.js",
+        "apps/highcountry-web/src/red-mesa-leisure-catalogue.js",
+        "apps/highcountry-web/test/red-mesa-leisure-catalogue.test.mjs",
+        "docs/highcountry/HC-PLACE-04-RECTANGLE-QUALIFICATION.md",
+        "services/highcountry-economy/src/placement-canonical-rectangles.js",
+        "services/highcountry-economy/src/placement-contract.js",
+        "services/highcountry-economy/test/placement-canonical-rectangles.test.mjs"
+      ],
+      "qualification": "PRESERVE_EXISTING_EVIDENCE_NO_RERUN"
+    },
+    {
+      "pr": 917,
+      "head": "3d06e8872b7d3696350b515bde9424eb53a110e2",
+      "base": "main",
+      "archive": "hc-separation/archive/pr-917-20261031",
+      "ahead": 3,
+      "behind": 231,
+      "mergeBase": "accfdb157470b3ca0f49d609e871b59cd000f9f0",
+      "disposition": "RECONCILE_OVERLAPPING_IMPLEMENTATIONS",
+      "ownershipClasses": [
+        "HIGHCOUNTRY_CANDIDATE"
+      ],
+      "changes": [
+        "apps/highcountry-web/scripts/build.mjs",
+        "apps/highcountry-web/src/red-mesa-heritage-review-catalogue.js",
+        "apps/highcountry-web/test/red-mesa-heritage-review-catalogue.test.mjs"
+      ],
+      "qualification": "PRESERVE_EXISTING_EVIDENCE_NO_RERUN"
+    },
+    {
+      "pr": 913,
+      "head": "0ef6e8fe013c601e73b947ea2619f388394eda05",
+      "base": "main",
+      "archive": "hc-separation/archive/pr-913-20261031",
+      "ahead": 11,
+      "behind": 235,
+      "mergeBase": "616e7cdde7d1edda59e6b73dcef01a62c5f18cd5",
+      "disposition": "RECONCILE_OVERLAPPING_IMPLEMENTATIONS",
+      "ownershipClasses": [
+        "BOUNDARY_REVIEW",
+        "HIGHCOUNTRY_CANDIDATE"
+      ],
+      "changes": [
+        ".github/workflows/highcountry-ot-screen-01-l2.yml",
+        "apps/highcountry-web/package.json",
+        "apps/highcountry-web/scripts/build.mjs",
+        "apps/highcountry-web/src/old-town-scene.js",
+        "apps/highcountry-web/src/port-alder-navigation.js",
+        "apps/highcountry-web/test/old-town-scene.test.mjs",
+        "deployments/highcountry/old-town-provisional-geometry.geojson",
+        "deployments/highcountry/old-town-render-anchors.v1.json"
+      ],
+      "qualification": "PRESERVE_EXISTING_EVIDENCE_NO_RERUN"
+    },
+    {
+      "pr": 909,
+      "head": "6d772c3608434180393d8b3715625f531cd3295c",
+      "base": "main",
+      "archive": "hc-separation/archive/pr-909-20261031",
+      "ahead": 2,
+      "behind": 270,
+      "mergeBase": "70e8d6968033d8889bd77ef09c634627afda7c0f",
+      "disposition": "SELECTIVE_MIGRATION_REVIEW",
+      "ownershipClasses": [
+        "HIGHCOUNTRY_CANDIDATE"
+      ],
+      "changes": [
+        "docs/highcountry/HC-WORLD-LOCKED-MASTER-ROADMAP-V1.md",
+        "docs/highcountry/HC-WORLD-OLD-TOWN-NEIGHBOURHOOD-SCREEN-ROADMAP-V1.md"
+      ],
+      "qualification": "PRESERVE_EXISTING_EVIDENCE_NO_RERUN"
+    },
+    {
+      "pr": 900,
+      "head": "c67a4906581b3066ff27c0d6170258de277985b2",
+      "base": "main",
+      "archive": "hc-separation/archive/pr-900-20261031",
+      "ahead": 5,
+      "behind": 394,
+      "mergeBase": "4ba1e73df41dca875caa876f537772e3261387b3",
+      "disposition": "RECONCILE_OVERLAPPING_IMPLEMENTATIONS",
+      "ownershipClasses": [
+        "HIGHCOUNTRY_CANDIDATE"
+      ],
+      "changes": [
+        "apps/highcountry-web/scripts/build.mjs",
+        "apps/highcountry-web/src/agricultural-building-catalogue.js",
+        "apps/highcountry-web/src/marketplace.js",
+        "apps/highcountry-web/test/agricultural-building-catalogue.test.mjs",
+        "docs/highcountry/HC-ART-05-D-52-BUILDING-ABILITIES-CONTRACT-V1.md"
+      ],
+      "qualification": "PRESERVE_EXISTING_EVIDENCE_NO_RERUN"
+    },
+    {
+      "pr": 896,
+      "head": "3a65af61cf3cb3d1b48faf811bb129eba4b2c9ab",
+      "base": "main",
+      "archive": "hc-separation/archive/pr-896-20261031",
+      "ahead": 10,
+      "behind": 497,
+      "mergeBase": "7d8639b85a84ff1611478844147103432b69b3e1",
+      "disposition": "RECONCILE_OVERLAPPING_IMPLEMENTATIONS",
+      "ownershipClasses": [
+        "BOUNDARY_REVIEW",
+        "HIGHCOUNTRY_CANDIDATE"
+      ],
+      "changes": [
+        ".github/workflows/highcountry-oldtown-landmarks-l1.yml",
+        "apps/highcountry-web/scripts/build.mjs",
+        "apps/highcountry-web/server.mjs",
+        "apps/highcountry-web/src/app.js",
+        "apps/highcountry-web/src/old-town-landmarks.js",
+        "deployments/highcountry/hc-world-pa-oldtown-landmark-hitboxes.v1.json",
+        "docs/highcountry/HC-WORLD-PA-OLDTOWN-LANDMARK-INTERACTIONS-V1.md",
+        "scripts/highcountry/hc-world-pa-oldtown-landmarks.test.mjs"
+      ],
+      "qualification": "PRESERVE_EXISTING_EVIDENCE_NO_RERUN"
+    },
+    {
+      "pr": 895,
+      "head": "38ffa3b8fa531e9ddb8ee57e8656608e284b79eb",
+      "base": "main",
+      "archive": "hc-separation/archive/pr-895-20261031",
+      "ahead": 3,
+      "behind": 507,
+      "mergeBase": "000e7284db39b3c788458e894d1d90d87065aea2",
+      "disposition": "SELECTIVE_MIGRATION_REVIEW",
+      "ownershipClasses": [
+        "HIGHCOUNTRY_CANDIDATE"
+      ],
+      "changes": [
+        "deployments/highcountry/hc-world-pa-oldtown-building-abilities.v1.json",
+        "deployments/highcountry/hc-world-pa-oldtown-permanent-landmarks.v1.json",
+        "docs/highcountry/HC-WORLD-06-PA-OLDTOWN-V1-ABILITY-AND-LANDMARK-LOCK.md"
+      ],
+      "qualification": "PRESERVE_EXISTING_EVIDENCE_NO_RERUN"
+    },
+    {
+      "pr": 893,
+      "head": "e2089864fa87ee8b20f62afa2e52ce3c73b5eb40",
+      "base": "main",
+      "archive": "hc-separation/archive/pr-893-20261031",
+      "ahead": 1,
+      "behind": 531,
+      "mergeBase": "238f27489c112cbfb0ee59cfb253a80dce8147c1",
+      "disposition": "SELECTIVE_MIGRATION_REVIEW",
+      "ownershipClasses": [
+        "HIGHCOUNTRY_CANDIDATE"
+      ],
+      "changes": [
+        "docs/highcountry/HC-ART-05-B-WORKSHOP-ABILITIES-CONTRACT-V1.md"
+      ],
+      "qualification": "PRESERVE_EXISTING_EVIDENCE_NO_RERUN"
+    },
+    {
+      "pr": 891,
+      "head": "b7da804fd2fac6c96ea97dbdee3cea5b3e7f8a39",
+      "base": "main",
+      "archive": "hc-separation/archive/pr-891-20261031",
+      "ahead": 16,
+      "behind": 596,
+      "mergeBase": "36457d785b9837789160e3ebce51f522bda30b6c",
+      "disposition": "RECONCILE_OVERLAPPING_IMPLEMENTATIONS",
+      "ownershipClasses": [
+        "BOUNDARY_REVIEW",
+        "HIGHCOUNTRY_CANDIDATE"
+      ],
+      "changes": [
+        ".github/workflows/highcountry-port-alder-map-stage-l1.yml",
+        "apps/highcountry-web/scripts/build.mjs",
+        "apps/highcountry-web/server.mjs",
+        "apps/highcountry-web/src/app.js",
+        "apps/highcountry-web/src/port-alder-map-stage.js",
+        "apps/highcountry-web/src/port-alder-navigation.js",
+        "deployments/highcountry/hc-world-map-catalogue.v1.json",
+        "deployments/highcountry/hc-world-port-alder-artwork-hitboxes.v2.json",
+        "docs/highcountry/HC-WORLD-PORT-ALDER-MAP-CATALOGUE-STAGE.md",
+        "scripts/highcountry/hc-world-port-alder-map-stage.test.mjs",
+        "scripts/highcountry/hc-world-port-alder-milestone-authority.test.mjs",
+        "services/highcountry-economy/src/port-alder-purchase-milestone.js"
+      ],
+      "qualification": "PRESERVE_EXISTING_EVIDENCE_NO_RERUN"
+    },
+    {
+      "pr": 890,
+      "head": "323590eda35403b47967f981b9abfd87fac3a5d4",
+      "base": "main",
+      "archive": "hc-separation/archive/pr-890-20261031",
+      "ahead": 1,
+      "behind": 613,
+      "mergeBase": "8530a4cf81686544ec261eb46af44e97d5b7e60e",
+      "disposition": "SELECTIVE_MIGRATION_REVIEW",
+      "ownershipClasses": [
+        "HIGHCOUNTRY_CANDIDATE"
+      ],
+      "changes": [
+        "docs/highcountry/HC-ART-05-BUILDING-ECONOMY-ABILITIES-CONTRACT-V1.md"
+      ],
+      "qualification": "PRESERVE_EXISTING_EVIDENCE_NO_RERUN"
+    },
+    {
+      "pr": 885,
+      "head": "e717c368508204a38ca5b6ff14224a7a70794c9e",
+      "base": "main",
+      "archive": "hc-separation/archive/pr-885-20261031",
+      "ahead": 4,
+      "behind": 658,
+      "mergeBase": "d3a0919f35b96c40ea6800759049ba42bfa8a193",
+      "disposition": "SELECTIVE_MIGRATION_REVIEW",
+      "ownershipClasses": [
+        "BOUNDARY_REVIEW",
+        "HIGHCOUNTRY_CANDIDATE"
+      ],
+      "changes": [
+        ".github/workflows/highcountry-hc-world-02-l1.yml",
+        "docs/highcountry/HC-WORLD-02-SURVEY-SOURCE-CUSTODY.md",
+        "scripts/highcountry/hc-world-02-survey-custody.mjs",
+        "scripts/highcountry/hc-world-02-survey-custody.test.mjs"
+      ],
+      "qualification": "PRESERVE_EXISTING_EVIDENCE_NO_RERUN"
+    },
+    {
+      "pr": 881,
+      "head": "c32f45dce6ceb69c5e3efd07e63c8276554a466b",
+      "base": "main",
+      "archive": "hc-separation/archive/pr-881-20261031",
+      "ahead": 5,
+      "behind": 660,
+      "mergeBase": "eab401fed96aa798f7591e499e5fc4415b245f1b",
+      "disposition": "RECONCILE_OVERLAPPING_IMPLEMENTATIONS",
+      "ownershipClasses": [
+        "BOUNDARY_REVIEW",
+        "HIGHCOUNTRY_CANDIDATE"
+      ],
+      "changes": [
+        ".github/workflows/hc-art-04-f-recreation.yml",
+        "apps/highcountry-web/scripts/build.mjs",
+        "apps/highcountry-web/src/marketplace.js",
+        "apps/highcountry-web/src/recreation-catalogue.js",
+        "apps/highcountry-web/test/recreation-catalogue.test.mjs"
+      ],
+      "qualification": "PRESERVE_EXISTING_EVIDENCE_NO_RERUN"
+    },
+    {
+      "pr": 879,
+      "head": "119bf6967f9359d7c10837c9c62ab0ecf26f0053",
+      "base": "main",
+      "archive": "hc-separation/archive/pr-879-20261031",
+      "ahead": 5,
+      "behind": 672,
+      "mergeBase": "0811010308f338a3e6a4e64cf0fb81a1ff9d15c9",
+      "disposition": "RECONCILE_OVERLAPPING_IMPLEMENTATIONS",
+      "ownershipClasses": [
+        "BOUNDARY_REVIEW",
+        "HIGHCOUNTRY_CANDIDATE"
+      ],
+      "changes": [
+        ".github/workflows/hc-art-04-e-paths-landscape.yml",
+        "apps/highcountry-web/scripts/build.mjs",
+        "apps/highcountry-web/src/landscape-catalogue.js",
+        "apps/highcountry-web/src/marketplace.js",
+        "apps/highcountry-web/test/landscape-catalogue.test.mjs"
+      ],
+      "qualification": "PRESERVE_EXISTING_EVIDENCE_NO_RERUN"
+    },
+    {
+      "pr": 878,
+      "head": "1e8132bfbb8f182b9999b349ad08a81c83e89c9a",
+      "base": "main",
+      "archive": "hc-separation/archive/pr-878-20261031",
+      "ahead": 9,
+      "behind": 678,
+      "mergeBase": "d4e0887138deebc8bbf54c1969a9704802129703",
+      "disposition": "SELECTIVE_MIGRATION_REVIEW",
+      "ownershipClasses": [
+        "BOUNDARY_REVIEW",
+        "HIGHCOUNTRY_CANDIDATE"
+      ],
+      "changes": [
+        ".github/workflows/highcountry-hc-world-02-l1.yml",
+        "docs/highcountry/HC-WORLD-02-EXHAUSTIVE-SURVEY-VERIFICATION.md",
+        "docs/highcountry/HC-WORLD-02-PARCEL-TERRAIN-ACCESS-VALIDATION.md",
+        "scripts/highcountry/hc-world-02-full-survey.mjs",
+        "scripts/highcountry/hc-world-02-full-survey.test.mjs",
+        "scripts/highcountry/hc-world-02-parcel-access.mjs",
+        "scripts/highcountry/hc-world-02-parcel-access.test.mjs"
+      ],
+      "qualification": "PRESERVE_EXISTING_EVIDENCE_NO_RERUN"
+    },
+    {
+      "pr": 877,
+      "head": "34b714d793d0418c479370b3970f2fd0afc5ba47",
+      "base": "main",
+      "archive": "hc-separation/archive/pr-877-20261031",
+      "ahead": 5,
+      "behind": 674,
+      "mergeBase": "b472753767c7f75ab0a663bd119d085ce9fc8827",
+      "disposition": "RECONCILE_OVERLAPPING_IMPLEMENTATIONS",
+      "ownershipClasses": [
+        "BOUNDARY_REVIEW",
+        "HIGHCOUNTRY_CANDIDATE"
+      ],
+      "changes": [
+        ".github/workflows/hc-art-04-d-garden-ornaments.yml",
+        "apps/highcountry-web/scripts/build.mjs",
+        "apps/highcountry-web/src/garden-ornament-catalogue.js",
+        "apps/highcountry-web/src/marketplace.js",
+        "apps/highcountry-web/test/garden-ornament-catalogue.test.mjs"
+      ],
+      "qualification": "PRESERVE_EXISTING_EVIDENCE_NO_RERUN"
+    },
+    {
+      "pr": 872,
+      "head": "69c4f2e561c5219ab8aa9b9cd36dce1ab886c1b6",
+      "base": "main",
+      "archive": "hc-separation/archive/pr-872-20261031",
+      "ahead": 6,
+      "behind": 693,
+      "mergeBase": "fc757d7aa84287dd4fabaa37700db81000daa17f",
+      "disposition": "RECONCILE_OVERLAPPING_IMPLEMENTATIONS",
+      "ownershipClasses": [
+        "BOUNDARY_REVIEW",
+        "HIGHCOUNTRY_CANDIDATE"
+      ],
+      "changes": [
+        ".github/workflows/hc-art-04-b-fire-gathering.yml",
+        "apps/highcountry-web/scripts/build.mjs",
+        "apps/highcountry-web/src/fire-gathering-catalogue.js",
+        "apps/highcountry-web/src/marketplace.js",
+        "apps/highcountry-web/test/fire-gathering-catalogue.test.mjs"
+      ],
+      "qualification": "PRESERVE_EXISTING_EVIDENCE_NO_RERUN"
+    },
+    {
+      "pr": 859,
+      "head": "f40c1984a2a951834912e88b40774cfa45965222",
+      "base": "main",
+      "archive": "hc-separation/archive/pr-859-20261031",
+      "ahead": 3,
+      "behind": 735,
+      "mergeBase": "03d7bcd6d39eb95f3394cf7f050c079cb6d46c1d",
+      "disposition": "RECONCILE_OVERLAPPING_IMPLEMENTATIONS",
+      "ownershipClasses": [
+        "HIGHCOUNTRY_CANDIDATE"
+      ],
+      "changes": [
+        "apps/highcountry-web/src/marketplace.js",
+        "apps/highcountry-web/src/outdoor-structure-catalogue.js",
+        "apps/highcountry-web/test/outdoor-structure-catalogue.test.mjs"
+      ],
+      "qualification": "PRESERVE_EXISTING_EVIDENCE_NO_RERUN"
+    },
+    {
+      "pr": 856,
+      "head": "c4a7df908d6fca4e89c5831962cb9d970bae97f9",
+      "base": "main",
+      "archive": "hc-separation/archive/pr-856-20261031",
+      "ahead": 3,
+      "behind": 740,
+      "mergeBase": "f22c8463bcdd7cd4031db4a688e07d667e64bb33",
+      "disposition": "RECONCILE_OVERLAPPING_IMPLEMENTATIONS",
+      "ownershipClasses": [
+        "HIGHCOUNTRY_CANDIDATE"
+      ],
+      "changes": [
+        "apps/highcountry-web/src/marketplace.js",
+        "apps/highcountry-web/src/regional-memorabilia-catalogue.js",
+        "apps/highcountry-web/test/regional-memorabilia-catalogue.test.mjs"
+      ],
+      "qualification": "PRESERVE_EXISTING_EVIDENCE_NO_RERUN"
+    },
+    {
+      "pr": 855,
+      "head": "d6a4ca34ddf4d84232c7c8f55ae1ba400b077cbd",
+      "base": "main",
+      "archive": "hc-separation/archive/pr-855-20261031",
+      "ahead": 3,
+      "behind": 747,
+      "mergeBase": "d03921330fd2dcbaaccb8cadc540856954506353",
+      "disposition": "RECONCILE_OVERLAPPING_IMPLEMENTATIONS",
+      "ownershipClasses": [
+        "HIGHCOUNTRY_CANDIDATE"
+      ],
+      "changes": [
+        "apps/highcountry-web/src/marketplace.js",
+        "apps/highcountry-web/src/small-decor-catalogue.js",
+        "apps/highcountry-web/test/small-decor-catalogue.test.mjs"
+      ],
+      "qualification": "PRESERVE_EXISTING_EVIDENCE_NO_RERUN"
+    },
+    {
+      "pr": 853,
+      "head": "ee1dc4fef36ead72b1259e7a51d40594cc96a934",
+      "base": "main",
+      "archive": "hc-separation/archive/pr-853-20261031",
+      "ahead": 3,
+      "behind": 749,
+      "mergeBase": "c66a160ff82c042edf45f965ee4462c0e6782bb6",
+      "disposition": "RECONCILE_OVERLAPPING_IMPLEMENTATIONS",
+      "ownershipClasses": [
+        "HIGHCOUNTRY_CANDIDATE"
+      ],
+      "changes": [
+        "apps/highcountry-web/src/marketplace.js",
+        "apps/highcountry-web/src/mounted-decor-catalogue.js",
+        "apps/highcountry-web/test/mounted-decor-catalogue.test.mjs"
+      ],
+      "qualification": "PRESERVE_EXISTING_EVIDENCE_NO_RERUN"
+    },
+    {
+      "pr": 852,
+      "head": "21783211b93658ff042ad83ff01435865cfe5684",
+      "base": "main",
+      "archive": "hc-separation/archive/pr-852-20261031",
+      "ahead": 3,
+      "behind": 766,
+      "mergeBase": "86f4808f640420a24b035d94321b79786f5a5e09",
+      "disposition": "RECONCILE_OVERLAPPING_IMPLEMENTATIONS",
+      "ownershipClasses": [
+        "HIGHCOUNTRY_CANDIDATE"
+      ],
+      "changes": [
+        "apps/highcountry-web/src/framed-art-catalogue.js",
+        "apps/highcountry-web/src/marketplace.js",
+        "apps/highcountry-web/test/framed-art-catalogue.test.mjs"
+      ],
+      "qualification": "PRESERVE_EXISTING_EVIDENCE_NO_RERUN"
+    },
+    {
+      "pr": 851,
+      "head": "e548eb79f7cba1a8283d7ff7987157897d3c7ead",
+      "base": "main",
+      "archive": "hc-separation/archive/pr-851-20261031",
+      "ahead": 3,
+      "behind": 768,
+      "mergeBase": "33de6d5c5736faecc68d92f4ce88c6aaf3c21f0b",
+      "disposition": "RECONCILE_OVERLAPPING_IMPLEMENTATIONS",
+      "ownershipClasses": [
+        "HIGHCOUNTRY_CANDIDATE"
+      ],
+      "changes": [
+        "apps/highcountry-web/src/marketplace.js",
+        "apps/highcountry-web/src/signs-plaques-catalogue.js",
+        "apps/highcountry-web/test/signs-plaques-catalogue.test.mjs"
+      ],
+      "qualification": "PRESERVE_EXISTING_EVIDENCE_NO_RERUN"
+    },
+    {
+      "pr": 849,
+      "head": "6eb0ddbda0cd22a3c1b2c345747d76165a335d3c",
+      "base": "main",
+      "archive": "hc-separation/archive/pr-849-20261031",
+      "ahead": 4,
+      "behind": 789,
+      "mergeBase": "a8ff8296493ae509c111c624739afe0efbfdd02f",
+      "disposition": "RECONCILE_OVERLAPPING_IMPLEMENTATIONS",
+      "ownershipClasses": [
+        "HIGHCOUNTRY_CANDIDATE"
+      ],
+      "changes": [
+        "apps/highcountry-web/src/marketplace.js",
+        "apps/highcountry-web/src/poster-catalogue.js",
+        "apps/highcountry-web/test/poster-catalogue.test.mjs"
+      ],
+      "qualification": "PRESERVE_EXISTING_EVIDENCE_NO_RERUN"
+    },
+    {
+      "pr": 845,
+      "head": "975b9d2c9185596d93aec0696a5567e538d1693d",
+      "base": "main",
+      "archive": "hc-separation/archive/pr-845-20261031",
+      "ahead": 3,
+      "behind": 816,
+      "mergeBase": "c375cc649c7190e6463f1e8b4b5509c28636eaa4",
+      "disposition": "RECONCILE_OVERLAPPING_IMPLEMENTATIONS",
+      "ownershipClasses": [
+        "HIGHCOUNTRY_CANDIDATE"
+      ],
+      "changes": [
+        "apps/highcountry-web/src/entertainment-catalogue.js",
+        "apps/highcountry-web/src/marketplace.js",
+        "apps/highcountry-web/test/entertainment-catalogue.test.mjs"
+      ],
+      "qualification": "PRESERVE_EXISTING_EVIDENCE_NO_RERUN"
+    },
+    {
+      "pr": 843,
+      "head": "ba60134ee0c77a731e7387c55e7a1798e06e005b",
+      "base": "main",
+      "archive": "hc-separation/archive/pr-843-20261031",
+      "ahead": 3,
+      "behind": 863,
+      "mergeBase": "59dee8dd90440678b6498b070f256feedf6620af",
+      "disposition": "RECONCILE_OVERLAPPING_IMPLEMENTATIONS",
+      "ownershipClasses": [
+        "HIGHCOUNTRY_CANDIDATE"
+      ],
+      "changes": [
+        "apps/highcountry-web/src/marketplace.js",
+        "apps/highcountry-web/src/textile-catalogue.js",
+        "apps/highcountry-web/test/textile-catalogue.test.js"
+      ],
+      "qualification": "PRESERVE_EXISTING_EVIDENCE_NO_RERUN"
+    },
+    {
+      "pr": 839,
+      "head": "5ce38b3b27d7e44f9f7fb5f7bd97864df0f6deee",
+      "base": "main",
+      "archive": "hc-separation/archive/pr-839-20261031",
+      "ahead": 20,
+      "behind": 897,
+      "mergeBase": "4ebf282e528876daba2c566c2d1710de10d0e9d5",
+      "disposition": "RECONCILE_OVERLAPPING_IMPLEMENTATIONS",
+      "ownershipClasses": [
+        "HIGHCOUNTRY_CANDIDATE"
+      ],
+      "changes": [
+        "apps/highcountry-web/public/assets/cultivation/props/comfort-furniture/tables-desks/universal/hc-prop-furniture-communal-project-table.png",
+        "apps/highcountry-web/public/assets/cultivation/props/comfort-furniture/tables-desks/universal/hc-prop-furniture-compact-end-table.png",
+        "apps/highcountry-web/public/assets/cultivation/props/comfort-furniture/tables-desks/universal/hc-prop-furniture-corner-workstation.png",
+        "apps/highcountry-web/public/assets/cultivation/props/comfort-furniture/tables-desks/universal/hc-prop-furniture-growers-planning-desk.png",
+        "apps/highcountry-web/public/assets/cultivation/props/comfort-furniture/tables-desks/universal/hc-prop-furniture-narrow-console-table.png",
+        "apps/highcountry-web/public/assets/cultivation/props/comfort-furniture/tables-desks/universal/hc-prop-furniture-personal-secretary-desk.png",
+        "apps/highcountry-web/public/assets/cultivation/props/comfort-furniture/tables-desks/universal/hc-prop-furniture-round-coffee-table.png",
+        "apps/highcountry-web/public/assets/cultivation/props/comfort-furniture/tables-desks/universal/hc-prop-furniture-rustic-coffee-table.png",
+        "apps/highcountry-web/public/assets/cultivation/props/comfort-furniture/tables-desks/universal/hc-prop-furniture-storage-sideboard.png",
+        "apps/highcountry-web/public/assets/cultivation/props/comfort-furniture/tables-desks/universal/hc-prop-furniture-writing-desk.png",
+        "apps/highcountry-web/public/assets/cultivation/props/comfort-furniture/tables-desks/universal/readme.md",
+        "apps/highcountry-web/public/styles.css",
+        "apps/highcountry-web/scripts/build.mjs",
+        "apps/highcountry-web/src/furniture-rules.js",
+        "apps/highcountry-web/src/greenhouse-lounge-catalog.js",
+        "apps/highcountry-web/src/marketplace.js",
+        "apps/highcountry-web/src/outdoor-seating-catalog.js",
+        "apps/highcountry-web/src/seating-design-catalog.js",
+        "apps/highcountry-web/src/support-catalog.js",
+        "apps/highcountry-web/src/tables-desks-catalog.js",
+        "apps/highcountry-web/test/hc-art-01a-catalog.test.mjs",
+        "apps/highcountry-web/test/hc-art-02-furniture.test.mjs",
+        "apps/highcountry-web/test/hc-art-02b-greenhouse-lounge.test.mjs",
+        "apps/highcountry-web/test/hc-art-02c-outdoor-seating.test.mjs",
+        "apps/highcountry-web/test/hc-art-02d-tables-desks.test.mjs",
+        "apps/highcountry-web/test/hc-next-4-4-marketplace.test.mjs",
+        "docs/highcountry/HC-ART-02-D-TABLES-DESKS.md",
+        "docs/highcountry/art/HC-ART-02/COMFORT-FURNITURE-DESIGN-V1.md",
+        "docs/highcountry/art/HC-ART-02/GREENHOUSE-LOUNGE-ASSETS-V1.md",
+        "docs/highcountry/art/HC-ART-02/OUTDOOR-SEATING-ASSETS-V1.md"
+      ],
+      "qualification": "PRESERVE_EXISTING_EVIDENCE_NO_RERUN"
+    },
+    {
+      "pr": 833,
+      "head": "97e381ba5a06088d7517d87e3537488217268b03",
+      "base": "main",
+      "archive": "hc-separation/archive/pr-833-20261031",
+      "ahead": 10,
+      "behind": 945,
+      "mergeBase": "269262583f86d996935afc8ee1a4a3064123c630",
+      "disposition": "RECONCILE_OVERLAPPING_IMPLEMENTATIONS",
+      "ownershipClasses": [
+        "HIGHCOUNTRY_CANDIDATE"
+      ],
+      "changes": [
+        "apps/highcountry-web/e2e/r068-browser.spec.mjs",
+        "apps/highcountry-web/public/styles.css",
+        "apps/highcountry-web/scripts/build.mjs",
+        "apps/highcountry-web/src/app.js",
+        "apps/highcountry-web/src/cultivation-scene-layout.js",
+        "apps/highcountry-web/test/hc-gfx-214-layout.test.mjs",
+        "docs/highcountry/HC-GFX-2.1.4-COORDINATE-CONTRACT.md"
+      ],
+      "qualification": "PRESERVE_EXISTING_EVIDENCE_NO_RERUN"
+    },
+    {
+      "pr": 811,
+      "head": "56c361baa3693243566dd7d8e9d553de9a8bea67",
+      "base": "main",
+      "archive": "hc-separation/archive/pr-811-20261031",
+      "ahead": 28,
+      "behind": 1103,
+      "mergeBase": "a782ff18bb72a665700029f5b012064ffb7679b7",
+      "disposition": "RECONCILE_OVERLAPPING_IMPLEMENTATIONS",
+      "ownershipClasses": [
+        "BOUNDARY_REVIEW",
+        "HIGHCOUNTRY_CANDIDATE"
+      ],
+      "changes": [
+        ".github/workflows/highcountry-next-5-2.yml",
+        "apps/highcountry-web/e2e/r068-browser.spec.mjs",
+        "apps/highcountry-web/scripts/build.mjs",
+        "apps/highcountry-web/server.mjs",
+        "apps/highcountry-web/src/app.js",
+        "apps/highcountry-web/src/missions.js",
+        "apps/highcountry-web/test/hc-next-5-2-missions.test.mjs",
+        "docs/highcountry/HC-NEXT-5.2-MISSIONS.md",
+        "services/highcountry-economy/src/buds-ledger.js",
+        "services/highcountry-economy/src/mission-catalog-v1.js",
+        "services/highcountry-economy/src/missions.js",
+        "services/highcountry-economy/src/postgres-store.js",
+        "services/highcountry-economy/src/runtime-service.js",
+        "services/highcountry-economy/src/signed-mission-evidence.js",
+        "services/highcountry-economy/src/skill-research.js",
+        "services/highcountry-economy/src/start-runtime.js",
+        "services/highcountry-economy/test/missions-http.test.js",
+        "services/highcountry-economy/test/missions.test.js",
+        "services/highcountry-economy/test/postgres-live.integration.mjs",
+        "services/highcountry-economy/test/signed-mission-evidence.test.js"
+      ],
+      "qualification": "PRESERVE_EXISTING_EVIDENCE_NO_RERUN"
+    },
+    {
+      "pr": 803,
+      "head": "4c7a08d842a2d338a83735516d6ab80de9a54f28",
+      "base": "main",
+      "archive": "hc-separation/archive/pr-803-20261031",
+      "ahead": 23,
+      "behind": 1195,
+      "mergeBase": "6ad21aeaa07228701fabb580a309e45e3000779e",
+      "disposition": "SELECTIVE_MIGRATION_REVIEW",
+      "ownershipClasses": [
+        "BOUNDARY_REVIEW",
+        "HIGHCOUNTRY_CANDIDATE"
+      ],
+      "changes": [
+        ".github/workflows/highcountry-hc-next-4-3-deployed-acceptance.yml",
+        "docs/highcountry/HC-NEXT-4.3-CANONICAL-MARKETPLACE.md",
+        "services/highcountry-economy/src/canonical-http-indexer.js",
+        "services/highcountry-economy/src/canonical-indexer-reconciler.js",
+        "services/highcountry-economy/src/canonical-settlement-worker.js",
+        "services/highcountry-economy/src/runtime-service.js",
+        "services/highcountry-economy/src/settlement-runtime.js",
+        "services/highcountry-economy/test/canonical-http-indexer.test.js",
+        "services/highcountry-economy/test/canonical-indexer-reconciler.test.js",
+        "services/highcountry-economy/test/canonical-settlement-worker.test.js",
+        "services/highcountry-economy/test/deployed-canonical-acceptance.mjs",
+        "services/highcountry-economy/test/runtime-canonical.integration.mjs"
+      ],
+      "qualification": "PRESERVE_EXISTING_EVIDENCE_NO_RERUN"
+    },
+    {
+      "pr": 796,
+      "head": "5877c682038e127302d3c76a66306c6aea72e61a",
+      "base": "main",
+      "archive": "hc-separation/archive/pr-796-20261031",
+      "ahead": 19,
+      "behind": 1224,
+      "mergeBase": "6b13e491b7088c113f4be0abd5826509053ed3bb",
+      "disposition": "SELECTIVE_MIGRATION_REVIEW",
+      "ownershipClasses": [
+        "BOUNDARY_REVIEW",
+        "HIGHCOUNTRY_CANDIDATE"
+      ],
+      "changes": [
+        "contracts/test/highcountry/unit/market/CanonicalMarketEscrow.t.sol",
+        "docs/highcountry/HC-NEXT-4.1-AUTHENTICATED-BUDS.md",
+        "services/highcountry-economy/src/authenticated-service.js",
+        "services/highcountry-economy/src/buds-ledger.js",
+        "services/highcountry-economy/src/postgres-store.js",
+        "services/highcountry-economy/src/runtime-integration.js",
+        "services/highcountry-economy/test/authenticated-service.test.js",
+        "services/highcountry-economy/test/canonical-settlement.test.js",
+        "services/highcountry-economy/test/postgres-live.integration.mjs",
+        "services/highcountry-economy/test/postgres-store.test.js",
+        "services/highcountry-economy/test/runtime-integration.test.js"
+      ],
+      "qualification": "PRESERVE_EXISTING_EVIDENCE_NO_RERUN"
+    },
+    {
+      "pr": 790,
+      "head": "c76f7ef6f4abc7751f1bfb75ece753c16f380743",
+      "base": "main",
+      "archive": "hc-separation/archive/pr-790-20261031",
+      "ahead": 3,
+      "behind": 1266,
+      "mergeBase": "483255c8f7ad112ed4864de8a706f038d44de371",
+      "disposition": "SELECTIVE_MIGRATION_REVIEW",
+      "ownershipClasses": [
+        "HIGHCOUNTRY_CANDIDATE",
+        "BOUNDARY_REVIEW"
+      ],
+      "changes": [
+        "contracts/src/highcountry/equipment/EquipmentCultivationBridge.sol",
+        "contracts/test/highcountry/integration/R04EquipmentEmergency.t.sol"
+      ],
+      "qualification": "PRESERVE_EXISTING_EVIDENCE_NO_RERUN"
+    },
+    {
+      "pr": 789,
+      "head": "9da4af4cb22fd815918cde4a538a6a72939577de",
+      "base": "main",
+      "archive": "hc-separation/archive/pr-789-20261031",
+      "ahead": 4,
+      "behind": 1266,
+      "mergeBase": "483255c8f7ad112ed4864de8a706f038d44de371",
+      "disposition": "SELECTIVE_MIGRATION_REVIEW",
+      "ownershipClasses": [
+        "HIGHCOUNTRY_CANDIDATE",
+        "BOUNDARY_REVIEW"
+      ],
+      "changes": [
+        "contracts/src/highcountry/manufacturing/ManufacturingEngine.sol",
+        "contracts/test/highcountry/unit/manufacturing/ManufacturingEngine.t.sol",
+        "docs/highcountry/HC-NEXT-3.2-MANUFACTURING-RECOVERY.md"
+      ],
+      "qualification": "PRESERVE_EXISTING_EVIDENCE_NO_RERUN"
+    },
+    {
+      "pr": 786,
+      "head": "3bbc2c3eeb13d65d1a4edb5500cddcb94352695b",
+      "base": "main",
+      "archive": "hc-separation/archive/pr-786-20261031",
+      "ahead": 29,
+      "behind": 1272,
+      "mergeBase": "d539720de90a78523470b4c210a773ba18119e70",
+      "disposition": "SELECTIVE_MIGRATION_REVIEW",
+      "ownershipClasses": [
+        "HIGHCOUNTRY_CANDIDATE",
+        "BOUNDARY_REVIEW"
+      ],
+      "changes": [
+        "contracts/src/highcountry/equipment/EquipmentClassCatalogueV1.sol",
+        "contracts/src/highcountry/equipment/EquipmentCultivationBridge.sol",
+        "contracts/src/highcountry/equipment/EquipmentLifecycleEngine.sol",
+        "contracts/src/highcountry/equipment/EquipmentRegistry.sol",
+        "contracts/src/highcountry/equipment/ManufacturedEquipmentIssuer.sol",
+        "contracts/test/highcountry/integration/R04EquipmentEmergency.t.sol",
+        "contracts/test/highcountry/unit/equipment/EquipmentLifecycleEngine.t.sol",
+        "docs/highcountry/HC-NEXT-3.1-EQUIPMENT-CLASSES.md"
+      ],
+      "qualification": "PRESERVE_EXISTING_EVIDENCE_NO_RERUN"
+    },
+    {
+      "pr": 781,
+      "head": "71748e58d38fce746196e83a1ff896a399e2d9a9",
+      "base": "main",
+      "archive": "hc-separation/archive/pr-781-20261031",
+      "ahead": 1,
+      "behind": 1319,
+      "mergeBase": "7d13ba075bbbabf5255987f65478a8b2028ebfd0",
+      "disposition": "SELECTIVE_MIGRATION_REVIEW",
+      "ownershipClasses": [
+        "BOUNDARY_REVIEW"
+      ],
+      "changes": [
+        "contracts/test/highcountry/unit/cultivation/CultivationEngine.t.sol"
+      ],
+      "qualification": "PRESERVE_EXISTING_EVIDENCE_NO_RERUN"
+    },
+    {
+      "pr": 778,
+      "head": "d0d3ef7f6b834af2519524d0e8c05d95386abf1d",
+      "base": "main",
+      "archive": "hc-separation/archive/pr-778-20261031",
+      "ahead": 2,
+      "behind": 1342,
+      "mergeBase": "3d6f8dded2dc8a272c2ff04b144d014b564c0dd0",
+      "disposition": "SELECTIVE_MIGRATION_REVIEW",
+      "ownershipClasses": [
+        "BOUNDARY_REVIEW"
+      ],
+      "changes": [
+        "contracts/test/highcountry/integration/PhenotypeProvenance.t.sol"
+      ],
+      "qualification": "PRESERVE_EXISTING_EVIDENCE_NO_RERUN"
+    },
+    {
+      "pr": 777,
+      "head": "1ff0fc04cfc1b7bcc2ab1329853e847c637da507",
+      "base": "main",
+      "archive": "hc-separation/archive/pr-777-20261031",
+      "ahead": 3,
+      "behind": 1378,
+      "mergeBase": "e30f67830bcc088234e30d7c212d457287316a13",
+      "disposition": "SELECTIVE_MIGRATION_REVIEW",
+      "ownershipClasses": [
+        "BOUNDARY_REVIEW"
+      ],
+      "changes": [
+        "contracts/test/highcountry/integration/PlantSourceConsumption.t.sol"
+      ],
+      "qualification": "PRESERVE_EXISTING_EVIDENCE_NO_RERUN"
+    },
+    {
+      "pr": 643,
+      "head": "89ee344fba8f580964e4aec7eec842dd9e55f44d",
+      "base": "audit/highcountry-r05-8-sdk-transports-20261014",
+      "archive": "hc-separation/archive/pr-643-20261031",
+      "ahead": 0,
+      "behind": 3440,
+      "mergeBase": "89ee344fba8f580964e4aec7eec842dd9e55f44d",
+      "disposition": "ALREADY_ANCESTRAL_TO_FROZEN_MAIN_ARCHIVE_EVIDENCE",
+      "ownershipClasses": [],
+      "changes": [],
+      "qualification": "PRESERVE_EXISTING_EVIDENCE_NO_RERUN"
+    },
+    {
+      "pr": 642,
+      "head": "58538396fb7028d0cd449ef52d640d0fb55616f3",
+      "base": "audit/highcountry-r05-7-canonical-finality-20261014",
+      "archive": "hc-separation/archive/pr-642-20261031",
+      "ahead": 0,
+      "behind": 3457,
+      "mergeBase": "58538396fb7028d0cd449ef52d640d0fb55616f3",
+      "disposition": "ALREADY_ANCESTRAL_TO_FROZEN_MAIN_ARCHIVE_EVIDENCE",
+      "ownershipClasses": [],
+      "changes": [],
+      "qualification": "PRESERVE_EXISTING_EVIDENCE_NO_RERUN"
+    },
+    {
+      "pr": 641,
+      "head": "5cc1f58bc3f9c9935bfe661be4e21cc960906cd7",
+      "base": "audit/highcountry-r05-6-events-20261013",
+      "archive": "hc-separation/archive/pr-641-20261031",
+      "ahead": 0,
+      "behind": 3465,
+      "mergeBase": "5cc1f58bc3f9c9935bfe661be4e21cc960906cd7",
+      "disposition": "ALREADY_ANCESTRAL_TO_FROZEN_MAIN_ARCHIVE_EVIDENCE",
+      "ownershipClasses": [],
+      "changes": [],
+      "qualification": "PRESERVE_EXISTING_EVIDENCE_NO_RERUN"
+    },
+    {
+      "pr": 640,
+      "head": "f2dceb4fbcd3fb623e2fed6d051ae70af914c7ba",
+      "base": "audit/highcountry-r05-5-save-lifecycle-20261013",
+      "archive": "hc-separation/archive/pr-640-20261031",
+      "ahead": 0,
+      "behind": 3487,
+      "mergeBase": "f2dceb4fbcd3fb623e2fed6d051ae70af914c7ba",
+      "disposition": "ALREADY_ANCESTRAL_TO_FROZEN_MAIN_ARCHIVE_EVIDENCE",
+      "ownershipClasses": [],
+      "changes": [],
+      "qualification": "PRESERVE_EXISTING_EVIDENCE_NO_RERUN"
+    },
+    {
+      "pr": 639,
+      "head": "d494c52aa9c9a8e8031e3201197fb0c6afb98f87",
+      "base": "audit/highcountry-r05-4-gameclaims-20261013",
+      "archive": "hc-separation/archive/pr-639-20261031",
+      "ahead": 0,
+      "behind": 3540,
+      "mergeBase": "d494c52aa9c9a8e8031e3201197fb0c6afb98f87",
+      "disposition": "ALREADY_ANCESTRAL_TO_FROZEN_MAIN_ARCHIVE_EVIDENCE",
+      "ownershipClasses": [],
+      "changes": [],
+      "qualification": "PRESERVE_EXISTING_EVIDENCE_NO_RERUN"
+    },
+    {
+      "pr": 638,
+      "head": "1dbe72cfbb09debba188ff80e4be2e7c7674827d",
+      "base": "audit/highcountry-r05-3-durable-migration-20261013",
+      "archive": "hc-separation/archive/pr-638-20261031",
+      "ahead": 0,
+      "behind": 3582,
+      "mergeBase": "1dbe72cfbb09debba188ff80e4be2e7c7674827d",
+      "disposition": "ALREADY_ANCESTRAL_TO_FROZEN_MAIN_ARCHIVE_EVIDENCE",
+      "ownershipClasses": [],
+      "changes": [],
+      "qualification": "PRESERVE_EXISTING_EVIDENCE_NO_RERUN"
+    },
+    {
+      "pr": 637,
+      "head": "034c6b9e9fe4a7d123e88b83a21f810fde88ed2e",
+      "base": "audit/highcountry-r05-2-auth-wallet-20261013",
+      "archive": "hc-separation/archive/pr-637-20261031",
+      "ahead": 0,
+      "behind": 3607,
+      "mergeBase": "034c6b9e9fe4a7d123e88b83a21f810fde88ed2e",
+      "disposition": "ALREADY_ANCESTRAL_TO_FROZEN_MAIN_ARCHIVE_EVIDENCE",
+      "ownershipClasses": [],
+      "changes": [],
+      "qualification": "PRESERVE_EXISTING_EVIDENCE_NO_RERUN"
+    },
+    {
+      "pr": 636,
+      "head": "d6f6bd282636a6c9c8ac3bf17198580840fee37f",
+      "base": "audit/highcountry-r05-1-datastore-20261013",
+      "archive": "hc-separation/archive/pr-636-20261031",
+      "ahead": 0,
+      "behind": 3621,
+      "mergeBase": "d6f6bd282636a6c9c8ac3bf17198580840fee37f",
+      "disposition": "ALREADY_ANCESTRAL_TO_FROZEN_MAIN_ARCHIVE_EVIDENCE",
+      "ownershipClasses": [],
+      "changes": [],
+      "qualification": "PRESERVE_EXISTING_EVIDENCE_NO_RERUN"
+    },
+    {
+      "pr": 635,
+      "head": "6b716762962b5a08e0d191a6cfbede1b5f33d757",
+      "base": "qualification/highcountry-r04-level3-main-20261013",
+      "archive": "hc-separation/archive/pr-635-20261031",
+      "ahead": 0,
+      "behind": 3646,
+      "mergeBase": "6b716762962b5a08e0d191a6cfbede1b5f33d757",
+      "disposition": "ALREADY_ANCESTRAL_TO_FROZEN_MAIN_ARCHIVE_EVIDENCE",
+      "ownershipClasses": [],
+      "changes": [],
+      "qualification": "PRESERVE_EXISTING_EVIDENCE_NO_RERUN"
+    },
+    {
+      "pr": 627,
+      "head": "1cd1a94eec5783e8cd59f3671efbc99d13c0560a",
+      "base": "audit/highcountry-r04-14-upgrade-security",
+      "archive": "hc-separation/archive/pr-627-20261031",
+      "ahead": 0,
+      "behind": 4617,
+      "mergeBase": "1cd1a94eec5783e8cd59f3671efbc99d13c0560a",
+      "disposition": "ALREADY_ANCESTRAL_TO_FROZEN_MAIN_ARCHIVE_EVIDENCE",
+      "ownershipClasses": [],
+      "changes": [],
+      "qualification": "PRESERVE_EXISTING_EVIDENCE_NO_RERUN"
+    },
+    {
+      "pr": 626,
+      "head": "7cbd375079a6187aa03bea8b79c8d131762456de",
+      "base": "audit/highcountry-r04-13-global420cup",
+      "archive": "hc-separation/archive/pr-626-20261031",
+      "ahead": 0,
+      "behind": 4638,
+      "mergeBase": "7cbd375079a6187aa03bea8b79c8d131762456de",
+      "disposition": "ALREADY_ANCESTRAL_TO_FROZEN_MAIN_ARCHIVE_EVIDENCE",
+      "ownershipClasses": [],
+      "changes": [],
+      "qualification": "PRESERVE_EXISTING_EVIDENCE_NO_RERUN"
+    },
+    {
+      "pr": 625,
+      "head": "f91e9900262058130a48f180bb3a8d709c7e3d79",
+      "base": "audit/highcountry-r04-12-seasons",
+      "archive": "hc-separation/archive/pr-625-20261031",
+      "ahead": 0,
+      "behind": 4649,
+      "mergeBase": "f91e9900262058130a48f180bb3a8d709c7e3d79",
+      "disposition": "ALREADY_ANCESTRAL_TO_FROZEN_MAIN_ARCHIVE_EVIDENCE",
+      "ownershipClasses": [],
+      "changes": [],
+      "qualification": "PRESERVE_EXISTING_EVIDENCE_NO_RERUN"
+    },
+    {
+      "pr": 624,
+      "head": "6813ff3109f0251dafeefab3ce0dac7b29c1278f",
+      "base": "audit/highcountry-r04-11-cooperatives",
+      "archive": "hc-separation/archive/pr-624-20261031",
+      "ahead": 0,
+      "behind": 4657,
+      "mergeBase": "6813ff3109f0251dafeefab3ce0dac7b29c1278f",
+      "disposition": "ALREADY_ANCESTRAL_TO_FROZEN_MAIN_ARCHIVE_EVIDENCE",
+      "ownershipClasses": [],
+      "changes": [],
+      "qualification": "PRESERVE_EXISTING_EVIDENCE_NO_RERUN"
+    },
+    {
+      "pr": 623,
+      "head": "2b889f425e4576b536d212c257a0a4ac401c8e09",
+      "base": "audit/highcountry-r04-10-organization",
+      "archive": "hc-separation/archive/pr-623-20261031",
+      "ahead": 0,
+      "behind": 4674,
+      "mergeBase": "2b889f425e4576b536d212c257a0a4ac401c8e09",
+      "disposition": "ALREADY_ANCESTRAL_TO_FROZEN_MAIN_ARCHIVE_EVIDENCE",
+      "ownershipClasses": [],
+      "changes": [],
+      "qualification": "PRESERVE_EXISTING_EVIDENCE_NO_RERUN"
+    },
+    {
+      "pr": 622,
+      "head": "2ce093f2dd7df54b888cf6635e47b239e67050ce",
+      "base": "audit/highcountry-r04-9-rights",
+      "archive": "hc-separation/archive/pr-622-20261031",
+      "ahead": 0,
+      "behind": 4689,
+      "mergeBase": "2ce093f2dd7df54b888cf6635e47b239e67050ce",
+      "disposition": "ALREADY_ANCESTRAL_TO_FROZEN_MAIN_ARCHIVE_EVIDENCE",
+      "ownershipClasses": [],
+      "changes": [],
+      "qualification": "PRESERVE_EXISTING_EVIDENCE_NO_RERUN"
+    },
+    {
+      "pr": 619,
+      "head": "9bab4c97d5c063a500e2bc4a72ace5e73a2ec8a8",
+      "base": "audit/highcountry-r04-8-market",
+      "archive": "hc-separation/archive/pr-619-20261031",
+      "ahead": 0,
+      "behind": 4717,
+      "mergeBase": "9bab4c97d5c063a500e2bc4a72ace5e73a2ec8a8",
+      "disposition": "ALREADY_ANCESTRAL_TO_FROZEN_MAIN_ARCHIVE_EVIDENCE",
+      "ownershipClasses": [],
+      "changes": [],
+      "qualification": "PRESERVE_EXISTING_EVIDENCE_NO_RERUN"
+    },
+    {
+      "pr": 618,
+      "head": "54ba9ea5ce7abc60dea62b93e5dcf9bcc29958f3",
+      "base": "audit/highcountry-r04-7-missions",
+      "archive": "hc-separation/archive/pr-618-20261031",
+      "ahead": 0,
+      "behind": 4787,
+      "mergeBase": "54ba9ea5ce7abc60dea62b93e5dcf9bcc29958f3",
+      "disposition": "ALREADY_ANCESTRAL_TO_FROZEN_MAIN_ARCHIVE_EVIDENCE",
+      "ownershipClasses": [],
+      "changes": [],
+      "qualification": "PRESERVE_EXISTING_EVIDENCE_NO_RERUN"
+    },
+    {
+      "pr": 617,
+      "head": "36cc621a82e66dc79254dae4426822010c8d80dc",
+      "base": "audit/highcountry-r04-6-progression",
+      "archive": "hc-separation/archive/pr-617-20261031",
+      "ahead": 0,
+      "behind": 4856,
+      "mergeBase": "36cc621a82e66dc79254dae4426822010c8d80dc",
+      "disposition": "ALREADY_ANCESTRAL_TO_FROZEN_MAIN_ARCHIVE_EVIDENCE",
+      "ownershipClasses": [],
+      "changes": [],
+      "qualification": "PRESERVE_EXISTING_EVIDENCE_NO_RERUN"
+    },
+    {
+      "pr": 615,
+      "head": "221437e59b9d0af7463d3093546ddbaae5a4e95e",
+      "base": "audit/highcountry-r04-5-buds-settlement",
+      "archive": "hc-separation/archive/pr-615-20261031",
+      "ahead": 0,
+      "behind": 4863,
+      "mergeBase": "221437e59b9d0af7463d3093546ddbaae5a4e95e",
+      "disposition": "ALREADY_ANCESTRAL_TO_FROZEN_MAIN_ARCHIVE_EVIDENCE",
+      "ownershipClasses": [],
+      "changes": [],
+      "qualification": "PRESERVE_EXISTING_EVIDENCE_NO_RERUN"
+    },
+    {
+      "pr": 613,
+      "head": "dde04b463b02478730bcdd350dd5a5d50f9e6cc3",
+      "base": "audit/highcountry-r04-4-equipment-lifecycle",
+      "archive": "hc-separation/archive/pr-613-20261031",
+      "ahead": 0,
+      "behind": 4869,
+      "mergeBase": "dde04b463b02478730bcdd350dd5a5d50f9e6cc3",
+      "disposition": "ALREADY_ANCESTRAL_TO_FROZEN_MAIN_ARCHIVE_EVIDENCE",
+      "ownershipClasses": [],
+      "changes": [],
+      "qualification": "PRESERVE_EXISTING_EVIDENCE_NO_RERUN"
+    },
+    {
+      "pr": 612,
+      "head": "5f8bc642bf7b7e2d07b549ca48af7c4e34a1d4b2",
+      "base": "audit/highcountry-r04-3-manufacturing",
+      "archive": "hc-separation/archive/pr-612-20261031",
+      "ahead": 0,
+      "behind": 4892,
+      "mergeBase": "5f8bc642bf7b7e2d07b549ca48af7c4e34a1d4b2",
+      "disposition": "ALREADY_ANCESTRAL_TO_FROZEN_MAIN_ARCHIVE_EVIDENCE",
+      "ownershipClasses": [],
+      "changes": [],
+      "qualification": "PRESERVE_EXISTING_EVIDENCE_NO_RERUN"
+    },
+    {
+      "pr": 611,
+      "head": "d397dfcdf11f2da94849ee8557a779877f4df818",
+      "base": "audit/highcountry-r04-2-equipment",
+      "archive": "hc-separation/archive/pr-611-20261031",
+      "ahead": 0,
+      "behind": 4901,
+      "mergeBase": "d397dfcdf11f2da94849ee8557a779877f4df818",
+      "disposition": "ALREADY_ANCESTRAL_TO_FROZEN_MAIN_ARCHIVE_EVIDENCE",
+      "ownershipClasses": [],
+      "changes": [],
+      "qualification": "PRESERVE_EXISTING_EVIDENCE_NO_RERUN"
+    },
+    {
+      "pr": 610,
+      "head": "5f9152e20efdfdf4d04394b3f8e6072bd8bdaba6",
+      "base": "audit/highcountry-r04-1-inventory-ledger",
+      "archive": "hc-separation/archive/pr-610-20261031",
+      "ahead": 0,
+      "behind": 4910,
+      "mergeBase": "5f9152e20efdfdf4d04394b3f8e6072bd8bdaba6",
+      "disposition": "ALREADY_ANCESTRAL_TO_FROZEN_MAIN_ARCHIVE_EVIDENCE",
+      "ownershipClasses": [],
+      "changes": [],
+      "qualification": "PRESERVE_EXISTING_EVIDENCE_NO_RERUN"
+    }
+  ],
+  "remainingGates": [
+    "No isolated executable migrated repo tree yet",
+    "Patch-equivalence review for divergent PRs pending",
+    "Indirect shared dependencies must be adapterized before standalone build",
+    "Exact Actions run records not independently retrieved; preserve existing evidence",
+    "All binary asset hash/byte validation remains outstanding"
+  ],
+  "sharedOwnership": "Core 420 Gaming Protocol, wallet identity, shared player-profile and Genesis config remain in integrated repo unless a narrowly reviewed interface change is essential."
+}

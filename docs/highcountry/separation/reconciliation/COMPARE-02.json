@@ -1,0 +1,708 @@
+[
+  {
+    "pr": 879,
+    "head": "119bf6967f9359d7c10837c9c62ab0ecf26f0053",
+    "status": "diverged",
+    "ahead": 5,
+    "behind": 672,
+    "mergeBase": "0811010308f338a3e6a4e64cf0fb81a1ff9d15c9",
+    "tooLarge": null,
+    "files": [
+      {
+        "path": ".github/workflows/hc-art-04-e-paths-landscape.yml",
+        "status": "added",
+        "changes": 32
+      },
+      {
+        "path": "apps/highcountry-web/scripts/build.mjs",
+        "status": "modified",
+        "changes": 2
+      },
+      {
+        "path": "apps/highcountry-web/src/landscape-catalogue.js",
+        "status": "added",
+        "changes": 19
+      },
+      {
+        "path": "apps/highcountry-web/src/marketplace.js",
+        "status": "modified",
+        "changes": 13
+      },
+      {
+        "path": "apps/highcountry-web/test/landscape-catalogue.test.mjs",
+        "status": "added",
+        "changes": 36
+      }
+    ]
+  },
+  {
+    "pr": 878,
+    "head": "1e8132bfbb8f182b9999b349ad08a81c83e89c9a",
+    "status": "diverged",
+    "ahead": 9,
+    "behind": 678,
+    "mergeBase": "d4e0887138deebc8bbf54c1969a9704802129703",
+    "tooLarge": null,
+    "files": [
+      {
+        "path": ".github/workflows/highcountry-hc-world-02-l1.yml",
+        "status": "modified",
+        "changes": 2
+      },
+      {
+        "path": "docs/highcountry/HC-WORLD-02-EXHAUSTIVE-SURVEY-VERIFICATION.md",
+        "status": "added",
+        "changes": 19
+      },
+      {
+        "path": "docs/highcountry/HC-WORLD-02-PARCEL-TERRAIN-ACCESS-VALIDATION.md",
+        "status": "added",
+        "changes": 22
+      },
+      {
+        "path": "scripts/highcountry/hc-world-02-full-survey.mjs",
+        "status": "added",
+        "changes": 88
+      },
+      {
+        "path": "scripts/highcountry/hc-world-02-full-survey.test.mjs",
+        "status": "added",
+        "changes": 11
+      },
+      {
+        "path": "scripts/highcountry/hc-world-02-parcel-access.mjs",
+        "status": "added",
+        "changes": 61
+      },
+      {
+        "path": "scripts/highcountry/hc-world-02-parcel-access.test.mjs",
+        "status": "added",
+        "changes": 21
+      }
+    ]
+  },
+  {
+    "pr": 877,
+    "head": "34b714d793d0418c479370b3970f2fd0afc5ba47",
+    "status": "diverged",
+    "ahead": 5,
+    "behind": 674,
+    "mergeBase": "b472753767c7f75ab0a663bd119d085ce9fc8827",
+    "tooLarge": null,
+    "files": [
+      {
+        "path": ".github/workflows/hc-art-04-d-garden-ornaments.yml",
+        "status": "added",
+        "changes": 32
+      },
+      {
+        "path": "apps/highcountry-web/scripts/build.mjs",
+        "status": "modified",
+        "changes": 2
+      },
+      {
+        "path": "apps/highcountry-web/src/garden-ornament-catalogue.js",
+        "status": "added",
+        "changes": 18
+      },
+      {
+        "path": "apps/highcountry-web/src/marketplace.js",
+        "status": "modified",
+        "changes": 13
+      },
+      {
+        "path": "apps/highcountry-web/test/garden-ornament-catalogue.test.mjs",
+        "status": "added",
+        "changes": 35
+      }
+    ]
+  },
+  {
+    "pr": 872,
+    "head": "69c4f2e561c5219ab8aa9b9cd36dce1ab886c1b6",
+    "status": "diverged",
+    "ahead": 6,
+    "behind": 693,
+    "mergeBase": "fc757d7aa84287dd4fabaa37700db81000daa17f",
+    "tooLarge": null,
+    "files": [
+      {
+        "path": ".github/workflows/hc-art-04-b-fire-gathering.yml",
+        "status": "added",
+        "changes": 32
+      },
+      {
+        "path": "apps/highcountry-web/scripts/build.mjs",
+        "status": "modified",
+        "changes": 2
+      },
+      {
+        "path": "apps/highcountry-web/src/fire-gathering-catalogue.js",
+        "status": "added",
+        "changes": 20
+      },
+      {
+        "path": "apps/highcountry-web/src/marketplace.js",
+        "status": "modified",
+        "changes": 13
+      },
+      {
+        "path": "apps/highcountry-web/test/fire-gathering-catalogue.test.mjs",
+        "status": "added",
+        "changes": 34
+      }
+    ]
+  },
+  {
+    "pr": 859,
+    "head": "f40c1984a2a951834912e88b40774cfa45965222",
+    "status": "diverged",
+    "ahead": 3,
+    "behind": 735,
+    "mergeBase": "03d7bcd6d39eb95f3394cf7f050c079cb6d46c1d",
+    "tooLarge": null,
+    "files": [
+      {
+        "path": "apps/highcountry-web/src/marketplace.js",
+        "status": "modified",
+        "changes": 15
+      },
+      {
+        "path": "apps/highcountry-web/src/outdoor-structure-catalogue.js",
+        "status": "added",
+        "changes": 20
+      },
+      {
+        "path": "apps/highcountry-web/test/outdoor-structure-catalogue.test.mjs",
+        "status": "added",
+        "changes": 30
+      }
+    ]
+  },
+  {
+    "pr": 856,
+    "head": "c4a7df908d6fca4e89c5831962cb9d970bae97f9",
+    "status": "diverged",
+    "ahead": 3,
+    "behind": 740,
+    "mergeBase": "f22c8463bcdd7cd4031db4a688e07d667e64bb33",
+    "tooLarge": null,
+    "files": [
+      {
+        "path": "apps/highcountry-web/src/marketplace.js",
+        "status": "modified",
+        "changes": 15
+      },
+      {
+        "path": "apps/highcountry-web/src/regional-memorabilia-catalogue.js",
+        "status": "added",
+        "changes": 21
+      },
+      {
+        "path": "apps/highcountry-web/test/regional-memorabilia-catalogue.test.mjs",
+        "status": "added",
+        "changes": 31
+      }
+    ]
+  },
+  {
+    "pr": 855,
+    "head": "d6a4ca34ddf4d84232c7c8f55ae1ba400b077cbd",
+    "status": "diverged",
+    "ahead": 3,
+    "behind": 747,
+    "mergeBase": "d03921330fd2dcbaaccb8cadc540856954506353",
+    "tooLarge": null,
+    "files": [
+      {
+        "path": "apps/highcountry-web/src/marketplace.js",
+        "status": "modified",
+        "changes": 15
+      },
+      {
+        "path": "apps/highcountry-web/src/small-decor-catalogue.js",
+        "status": "added",
+        "changes": 18
+      },
+      {
+        "path": "apps/highcountry-web/test/small-decor-catalogue.test.mjs",
+        "status": "added",
+        "changes": 30
+      }
+    ]
+  },
+  {
+    "pr": 853,
+    "head": "ee1dc4fef36ead72b1259e7a51d40594cc96a934",
+    "status": "diverged",
+    "ahead": 3,
+    "behind": 749,
+    "mergeBase": "c66a160ff82c042edf45f965ee4462c0e6782bb6",
+    "tooLarge": null,
+    "files": [
+      {
+        "path": "apps/highcountry-web/src/marketplace.js",
+        "status": "modified",
+        "changes": 15
+      },
+      {
+        "path": "apps/highcountry-web/src/mounted-decor-catalogue.js",
+        "status": "added",
+        "changes": 18
+      },
+      {
+        "path": "apps/highcountry-web/test/mounted-decor-catalogue.test.mjs",
+        "status": "added",
+        "changes": 32
+      }
+    ]
+  },
+  {
+    "pr": 852,
+    "head": "21783211b93658ff042ad83ff01435865cfe5684",
+    "status": "diverged",
+    "ahead": 3,
+    "behind": 766,
+    "mergeBase": "86f4808f640420a24b035d94321b79786f5a5e09",
+    "tooLarge": null,
+    "files": [
+      {
+        "path": "apps/highcountry-web/src/framed-art-catalogue.js",
+        "status": "added",
+        "changes": 18
+      },
+      {
+        "path": "apps/highcountry-web/src/marketplace.js",
+        "status": "modified",
+        "changes": 15
+      },
+      {
+        "path": "apps/highcountry-web/test/framed-art-catalogue.test.mjs",
+        "status": "added",
+        "changes": 30
+      }
+    ]
+  },
+  {
+    "pr": 851,
+    "head": "e548eb79f7cba1a8283d7ff7987157897d3c7ead",
+    "status": "diverged",
+    "ahead": 3,
+    "behind": 768,
+    "mergeBase": "33de6d5c5736faecc68d92f4ce88c6aaf3c21f0b",
+    "tooLarge": null,
+    "files": [
+      {
+        "path": "apps/highcountry-web/src/marketplace.js",
+        "status": "modified",
+        "changes": 15
+      },
+      {
+        "path": "apps/highcountry-web/src/signs-plaques-catalogue.js",
+        "status": "added",
+        "changes": 18
+      },
+      {
+        "path": "apps/highcountry-web/test/signs-plaques-catalogue.test.mjs",
+        "status": "added",
+        "changes": 29
+      }
+    ]
+  },
+  {
+    "pr": 849,
+    "head": "6eb0ddbda0cd22a3c1b2c345747d76165a335d3c",
+    "status": "diverged",
+    "ahead": 4,
+    "behind": 789,
+    "mergeBase": "a8ff8296493ae509c111c624739afe0efbfdd02f",
+    "tooLarge": null,
+    "files": [
+      {
+        "path": "apps/highcountry-web/src/marketplace.js",
+        "status": "modified",
+        "changes": 16
+      },
+      {
+        "path": "apps/highcountry-web/src/poster-catalogue.js",
+        "status": "added",
+        "changes": 18
+      },
+      {
+        "path": "apps/highcountry-web/test/poster-catalogue.test.mjs",
+        "status": "added",
+        "changes": 33
+      }
+    ]
+  },
+  {
+    "pr": 845,
+    "head": "975b9d2c9185596d93aec0696a5567e538d1693d",
+    "status": "diverged",
+    "ahead": 3,
+    "behind": 816,
+    "mergeBase": "c375cc649c7190e6463f1e8b4b5509c28636eaa4",
+    "tooLarge": null,
+    "files": [
+      {
+        "path": "apps/highcountry-web/src/entertainment-catalogue.js",
+        "status": "added",
+        "changes": 22
+      },
+      {
+        "path": "apps/highcountry-web/src/marketplace.js",
+        "status": "modified",
+        "changes": 15
+      },
+      {
+        "path": "apps/highcountry-web/test/entertainment-catalogue.test.mjs",
+        "status": "added",
+        "changes": 24
+      }
+    ]
+  },
+  {
+    "pr": 843,
+    "head": "ba60134ee0c77a731e7387c55e7a1798e06e005b",
+    "status": "diverged",
+    "ahead": 3,
+    "behind": 863,
+    "mergeBase": "59dee8dd90440678b6498b070f256feedf6620af",
+    "tooLarge": null,
+    "files": [
+      {
+        "path": "apps/highcountry-web/src/marketplace.js",
+        "status": "modified",
+        "changes": 15
+      },
+      {
+        "path": "apps/highcountry-web/src/textile-catalogue.js",
+        "status": "added",
+        "changes": 22
+      },
+      {
+        "path": "apps/highcountry-web/test/textile-catalogue.test.js",
+        "status": "added",
+        "changes": 33
+      }
+    ]
+  },
+  {
+    "pr": 839,
+    "head": "5ce38b3b27d7e44f9f7fb5f7bd97864df0f6deee",
+    "status": "diverged",
+    "ahead": 20,
+    "behind": 897,
+    "mergeBase": "4ebf282e528876daba2c566c2d1710de10d0e9d5",
+    "tooLarge": null,
+    "files": [
+      {
+        "path": "apps/highcountry-web/public/assets/cultivation/props/comfort-furniture/tables-desks/universal/hc-prop-furniture-communal-project-table.png",
+        "status": "added",
+        "changes": 0
+      },
+      {
+        "path": "apps/highcountry-web/public/assets/cultivation/props/comfort-furniture/tables-desks/universal/hc-prop-furniture-compact-end-table.png",
+        "status": "added",
+        "changes": 0
+      },
+      {
+        "path": "apps/highcountry-web/public/assets/cultivation/props/comfort-furniture/tables-desks/universal/hc-prop-furniture-corner-workstation.png",
+        "status": "added",
+        "changes": 0
+      },
+      {
+        "path": "apps/highcountry-web/public/assets/cultivation/props/comfort-furniture/tables-desks/universal/hc-prop-furniture-growers-planning-desk.png",
+        "status": "added",
+        "changes": 0
+      },
+      {
+        "path": "apps/highcountry-web/public/assets/cultivation/props/comfort-furniture/tables-desks/universal/hc-prop-furniture-narrow-console-table.png",
+        "status": "added",
+        "changes": 0
+      },
+      {
+        "path": "apps/highcountry-web/public/assets/cultivation/props/comfort-furniture/tables-desks/universal/hc-prop-furniture-personal-secretary-desk.png",
+        "status": "added",
+        "changes": 0
+      },
+      {
+        "path": "apps/highcountry-web/public/assets/cultivation/props/comfort-furniture/tables-desks/universal/hc-prop-furniture-round-coffee-table.png",
+        "status": "added",
+        "changes": 0
+      },
+      {
+        "path": "apps/highcountry-web/public/assets/cultivation/props/comfort-furniture/tables-desks/universal/hc-prop-furniture-rustic-coffee-table.png",
+        "status": "added",
+        "changes": 0
+      },
+      {
+        "path": "apps/highcountry-web/public/assets/cultivation/props/comfort-furniture/tables-desks/universal/hc-prop-furniture-storage-sideboard.png",
+        "status": "added",
+        "changes": 0
+      },
+      {
+        "path": "apps/highcountry-web/public/assets/cultivation/props/comfort-furniture/tables-desks/universal/hc-prop-furniture-writing-desk.png",
+        "status": "added",
+        "changes": 0
+      },
+      {
+        "path": "apps/highcountry-web/public/assets/cultivation/props/comfort-furniture/tables-desks/universal/readme.md",
+        "status": "added",
+        "changes": 1
+      },
+      {
+        "path": "apps/highcountry-web/public/styles.css",
+        "status": "modified",
+        "changes": 7
+      },
+      {
+        "path": "apps/highcountry-web/scripts/build.mjs",
+        "status": "modified",
+        "changes": 2
+      },
+      {
+        "path": "apps/highcountry-web/src/furniture-rules.js",
+        "status": "added",
+        "changes": 47
+      },
+      {
+        "path": "apps/highcountry-web/src/greenhouse-lounge-catalog.js",
+        "status": "added",
+        "changes": 236
+      },
+      {
+        "path": "apps/highcountry-web/src/marketplace.js",
+        "status": "modified",
+        "changes": 81
+      },
+      {
+        "path": "apps/highcountry-web/src/outdoor-seating-catalog.js",
+        "status": "added",
+        "changes": 259
+      },
+      {
+        "path": "apps/highcountry-web/src/seating-design-catalog.js",
+        "status": "added",
+        "changes": 305
+      },
+      {
+        "path": "apps/highcountry-web/src/support-catalog.js",
+        "status": "added",
+        "changes": 227
+      },
+      {
+        "path": "apps/highcountry-web/src/tables-desks-catalog.js",
+        "status": "added",
+        "changes": 206
+      },
+      {
+        "path": "apps/highcountry-web/test/hc-art-01a-catalog.test.mjs",
+        "status": "added",
+        "changes": 31
+      },
+      {
+        "path": "apps/highcountry-web/test/hc-art-02-furniture.test.mjs",
+        "status": "added",
+        "changes": 38
+      },
+      {
+        "path": "apps/highcountry-web/test/hc-art-02b-greenhouse-lounge.test.mjs",
+        "status": "added",
+        "changes": 27
+      },
+      {
+        "path": "apps/highcountry-web/test/hc-art-02c-outdoor-seating.test.mjs",
+        "status": "added",
+        "changes": 28
+      },
+      {
+        "path": "apps/highcountry-web/test/hc-art-02d-tables-desks.test.mjs",
+        "status": "added",
+        "changes": 61
+      },
+      {
+        "path": "apps/highcountry-web/test/hc-next-4-4-marketplace.test.mjs",
+        "status": "modified",
+        "changes": 5
+      },
+      {
+        "path": "docs/highcountry/HC-ART-02-D-TABLES-DESKS.md",
+        "status": "added",
+        "changes": 19
+      },
+      {
+        "path": "docs/highcountry/art/HC-ART-02/COMFORT-FURNITURE-DESIGN-V1.md",
+        "status": "added",
+        "changes": 21
+      },
+      {
+        "path": "docs/highcountry/art/HC-ART-02/GREENHOUSE-LOUNGE-ASSETS-V1.md",
+        "status": "added",
+        "changes": 24
+      },
+      {
+        "path": "docs/highcountry/art/HC-ART-02/OUTDOOR-SEATING-ASSETS-V1.md",
+        "status": "added",
+        "changes": 26
+      }
+    ]
+  },
+  {
+    "pr": 833,
+    "head": "97e381ba5a06088d7517d87e3537488217268b03",
+    "status": "diverged",
+    "ahead": 10,
+    "behind": 945,
+    "mergeBase": "269262583f86d996935afc8ee1a4a3064123c630",
+    "tooLarge": null,
+    "files": [
+      {
+        "path": "apps/highcountry-web/e2e/r068-browser.spec.mjs",
+        "status": "modified",
+        "changes": 21
+      },
+      {
+        "path": "apps/highcountry-web/public/styles.css",
+        "status": "modified",
+        "changes": 6
+      },
+      {
+        "path": "apps/highcountry-web/scripts/build.mjs",
+        "status": "modified",
+        "changes": 2
+      },
+      {
+        "path": "apps/highcountry-web/src/app.js",
+        "status": "modified",
+        "changes": 12
+      },
+      {
+        "path": "apps/highcountry-web/src/cultivation-scene-layout.js",
+        "status": "added",
+        "changes": 63
+      },
+      {
+        "path": "apps/highcountry-web/test/hc-gfx-214-layout.test.mjs",
+        "status": "added",
+        "changes": 37
+      },
+      {
+        "path": "docs/highcountry/HC-GFX-2.1.4-COORDINATE-CONTRACT.md",
+        "status": "added",
+        "changes": 16
+      }
+    ]
+  },
+  {
+    "pr": 811,
+    "head": "56c361baa3693243566dd7d8e9d553de9a8bea67",
+    "status": "diverged",
+    "ahead": 28,
+    "behind": 1103,
+    "mergeBase": "a782ff18bb72a665700029f5b012064ffb7679b7",
+    "tooLarge": null,
+    "files": [
+      {
+        "path": ".github/workflows/highcountry-next-5-2.yml",
+        "status": "added",
+        "changes": 43
+      },
+      {
+        "path": "apps/highcountry-web/e2e/r068-browser.spec.mjs",
+        "status": "modified",
+        "changes": 8
+      },
+      {
+        "path": "apps/highcountry-web/scripts/build.mjs",
+        "status": "modified",
+        "changes": 2
+      },
+      {
+        "path": "apps/highcountry-web/server.mjs",
+        "status": "modified",
+        "changes": 2
+      },
+      {
+        "path": "apps/highcountry-web/src/app.js",
+        "status": "modified",
+        "changes": 5
+      },
+      {
+        "path": "apps/highcountry-web/src/missions.js",
+        "status": "added",
+        "changes": 68
+      },
+      {
+        "path": "apps/highcountry-web/test/hc-next-5-2-missions.test.mjs",
+        "status": "added",
+        "changes": 43
+      },
+      {
+        "path": "docs/highcountry/HC-NEXT-5.2-MISSIONS.md",
+        "status": "added",
+        "changes": 35
+      },
+      {
+        "path": "services/highcountry-economy/src/buds-ledger.js",
+        "status": "modified",
+        "changes": 2
+      },
+      {
+        "path": "services/highcountry-economy/src/mission-catalog-v1.js",
+        "status": "added",
+        "changes": 7
+      },
+      {
+        "path": "services/highcountry-economy/src/missions.js",
+        "status": "added",
+        "changes": 142
+      },
+      {
+        "path": "services/highcountry-economy/src/postgres-store.js",
+        "status": "modified",
+        "changes": 6
+      },
+      {
+        "path": "services/highcountry-economy/src/runtime-service.js",
+        "status": "modified",
+        "changes": 40
+      },
+      {
+        "path": "services/highcountry-economy/src/signed-mission-evidence.js",
+        "status": "added",
+        "changes": 28
+      },
+      {
+        "path": "services/highcountry-economy/src/skill-research.js",
+        "status": "modified",
+        "changes": 3
+      },
+      {
+        "path": "services/highcountry-economy/src/start-runtime.js",
+        "status": "modified",
+        "changes": 12
+      },
+      {
+        "path": "services/highcountry-economy/test/missions-http.test.js",
+        "status": "added",
+        "changes": 30
+      },
+      {
+        "path": "services/highcountry-economy/test/missions.test.js",
+        "status": "added",
+        "changes": 83
+      },
+      {
+        "path": "services/highcountry-economy/test/postgres-live.integration.mjs",
+        "status": "modified",
+        "changes": 24
+      },
+      {
+        "path": "services/highcountry-economy/test/signed-mission-evidence.test.js",
+        "status": "added",
+        "changes": 27
+      }
+    ]
+  }
+]

@@ -25,3 +25,11 @@
 @media(max-width:950px){.nd-dice-art{opacity:.36}.nd-board{grid-template-columns:1fr}.nd-hero{min-height:125px}.nd-mode{top:auto;right:0;bottom:-10px}.nd-result{min-height:235px}.nd-bottom{flex-direction:column}.nd-history,.nd-rules{width:100%;max-width:none}}
 @media(max-width:560px){.neon-dice-page{padding:14px}.nd-dice-art{width:150px;left:-30px;top:-25px}.nd-hero{padding-top:65px;min-height:210px}.nd-mode{bottom:auto;top:0;right:0;font-size:.61rem}.nd-intro h1{font-size:3.6rem}.nd-stats{grid-template-columns:1fr}.nd-board{padding:14px;gap:14px}.nd-threshold-number{font-size:1.2rem;min-width:85px}.nd-choice{font-size:.86rem}.nd-big-number{font-size:3.8rem}}
 @media(prefers-reduced-motion:reduce){.nd-roll{transition:none}}
+
+/* Canonical 420Bet identity — one user-approved artwork everywhere. */
+.brand,.game-brand,.footer-brand{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;flex-shrink:0;line-height:0}
+.brand-logo{display:block;width:clamp(110px,13vw,160px);height:auto;max-height:92px;object-fit:contain;filter:drop-shadow(0 0 8px #62ec3433)}
+.game-brand .brand-logo{width:105px;max-height:65px}
+.site-footer,.game-footer{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:18px;padding:18px 26px;border-top:1px solid #396044;background:#06130b;color:#bed4bd;font-size:.85rem}
+.site-footer .brand-logo,.game-footer .brand-logo{width:110px;max-height:75px}
+@media(max-width:650px){.brand .brand-logo{width:110px;max-height:80px}.game-brand .brand-logo{width:75px;max-height:50px}.gamebar{flex-wrap:wrap}.site-footer,.game-footer{gap:8px;padding:12px}}

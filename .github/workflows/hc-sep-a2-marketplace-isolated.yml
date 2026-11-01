@@ -1,0 +1,24 @@
+name: HC-SEP-A2 marketplace consolidation isolated
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'apps/highcountry-web/test/a2-marketplace-consolidation.test.mjs'
+jobs:
+  marketplace:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Relevant isolated marketplace qualification
+        working-directory: apps/highcountry-web
+        run: |
+          node --check src/marketplace.js
+          node --test test/a2-marketplace-consolidation.test.mjs
+      - name: Qualify actual static build
+        working-directory: apps/highcountry-web
+        run: node scripts/build.mjs

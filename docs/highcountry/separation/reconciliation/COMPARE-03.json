@@ -1,0 +1,365 @@
+[
+  {
+    "pr": 803,
+    "head": "4c7a08d842a2d338a83735516d6ab80de9a54f28",
+    "status": "diverged",
+    "ahead": 23,
+    "behind": 1195,
+    "mergeBase": "6ad21aeaa07228701fabb580a309e45e3000779e",
+    "tooLarge": null,
+    "files": [
+      {
+        "path": ".github/workflows/highcountry-hc-next-4-3-deployed-acceptance.yml",
+        "status": "added",
+        "changes": 32
+      },
+      {
+        "path": "docs/highcountry/HC-NEXT-4.3-CANONICAL-MARKETPLACE.md",
+        "status": "added",
+        "changes": 41
+      },
+      {
+        "path": "services/highcountry-economy/src/canonical-http-indexer.js",
+        "status": "added",
+        "changes": 33
+      },
+      {
+        "path": "services/highcountry-economy/src/canonical-indexer-reconciler.js",
+        "status": "added",
+        "changes": 59
+      },
+      {
+        "path": "services/highcountry-economy/src/canonical-settlement-worker.js",
+        "status": "modified",
+        "changes": 23
+      },
+      {
+        "path": "services/highcountry-economy/src/runtime-service.js",
+        "status": "modified",
+        "changes": 6
+      },
+      {
+        "path": "services/highcountry-economy/src/settlement-runtime.js",
+        "status": "modified",
+        "changes": 40
+      },
+      {
+        "path": "services/highcountry-economy/test/canonical-http-indexer.test.js",
+        "status": "added",
+        "changes": 37
+      },
+      {
+        "path": "services/highcountry-economy/test/canonical-indexer-reconciler.test.js",
+        "status": "added",
+        "changes": 55
+      },
+      {
+        "path": "services/highcountry-economy/test/canonical-settlement-worker.test.js",
+        "status": "modified",
+        "changes": 66
+      },
+      {
+        "path": "services/highcountry-economy/test/deployed-canonical-acceptance.mjs",
+        "status": "added",
+        "changes": 82
+      },
+      {
+        "path": "services/highcountry-economy/test/runtime-canonical.integration.mjs",
+        "status": "modified",
+        "changes": 34
+      }
+    ]
+  },
+  {
+    "pr": 796,
+    "head": "5877c682038e127302d3c76a66306c6aea72e61a",
+    "status": "diverged",
+    "ahead": 19,
+    "behind": 1224,
+    "mergeBase": "6b13e491b7088c113f4be0abd5826509053ed3bb",
+    "tooLarge": null,
+    "files": [
+      {
+        "path": "contracts/test/highcountry/unit/market/CanonicalMarketEscrow.t.sol",
+        "status": "modified",
+        "changes": 13
+      },
+      {
+        "path": "docs/highcountry/HC-NEXT-4.1-AUTHENTICATED-BUDS.md",
+        "status": "added",
+        "changes": 19
+      },
+      {
+        "path": "services/highcountry-economy/src/authenticated-service.js",
+        "status": "modified",
+        "changes": 10
+      },
+      {
+        "path": "services/highcountry-economy/src/buds-ledger.js",
+        "status": "modified",
+        "changes": 11
+      },
+      {
+        "path": "services/highcountry-economy/src/postgres-store.js",
+        "status": "modified",
+        "changes": 22
+      },
+      {
+        "path": "services/highcountry-economy/src/runtime-integration.js",
+        "status": "modified",
+        "changes": 13
+      },
+      {
+        "path": "services/highcountry-economy/test/authenticated-service.test.js",
+        "status": "modified",
+        "changes": 11
+      },
+      {
+        "path": "services/highcountry-economy/test/canonical-settlement.test.js",
+        "status": "modified",
+        "changes": 36
+      },
+      {
+        "path": "services/highcountry-economy/test/postgres-live.integration.mjs",
+        "status": "modified",
+        "changes": 35
+      },
+      {
+        "path": "services/highcountry-economy/test/postgres-store.test.js",
+        "status": "modified",
+        "changes": 8
+      },
+      {
+        "path": "services/highcountry-economy/test/runtime-integration.test.js",
+        "status": "modified",
+        "changes": 8
+      }
+    ]
+  },
+  {
+    "pr": 790,
+    "head": "c76f7ef6f4abc7751f1bfb75ece753c16f380743",
+    "status": "diverged",
+    "ahead": 3,
+    "behind": 1266,
+    "mergeBase": "483255c8f7ad112ed4864de8a706f038d44de371",
+    "tooLarge": null,
+    "files": [
+      {
+        "path": "contracts/src/highcountry/equipment/EquipmentCultivationBridge.sol",
+        "status": "modified",
+        "changes": 67
+      },
+      {
+        "path": "contracts/test/highcountry/integration/R04EquipmentEmergency.t.sol",
+        "status": "modified",
+        "changes": 52
+      }
+    ]
+  },
+  {
+    "pr": 789,
+    "head": "9da4af4cb22fd815918cde4a538a6a72939577de",
+    "status": "diverged",
+    "ahead": 4,
+    "behind": 1266,
+    "mergeBase": "483255c8f7ad112ed4864de8a706f038d44de371",
+    "tooLarge": null,
+    "files": [
+      {
+        "path": "contracts/src/highcountry/manufacturing/ManufacturingEngine.sol",
+        "status": "modified",
+        "changes": 46
+      },
+      {
+        "path": "contracts/test/highcountry/unit/manufacturing/ManufacturingEngine.t.sol",
+        "status": "modified",
+        "changes": 58
+      },
+      {
+        "path": "docs/highcountry/HC-NEXT-3.2-MANUFACTURING-RECOVERY.md",
+        "status": "added",
+        "changes": 11
+      }
+    ]
+  },
+  {
+    "pr": 786,
+    "head": "3bbc2c3eeb13d65d1a4edb5500cddcb94352695b",
+    "status": "diverged",
+    "ahead": 29,
+    "behind": 1272,
+    "mergeBase": "d539720de90a78523470b4c210a773ba18119e70",
+    "tooLarge": null,
+    "files": [
+      {
+        "path": "contracts/src/highcountry/equipment/EquipmentClassCatalogueV1.sol",
+        "status": "added",
+        "changes": 84
+      },
+      {
+        "path": "contracts/src/highcountry/equipment/EquipmentCultivationBridge.sol",
+        "status": "modified",
+        "changes": 4
+      },
+      {
+        "path": "contracts/src/highcountry/equipment/EquipmentLifecycleEngine.sol",
+        "status": "modified",
+        "changes": 82
+      },
+      {
+        "path": "contracts/src/highcountry/equipment/EquipmentRegistry.sol",
+        "status": "modified",
+        "changes": 111
+      },
+      {
+        "path": "contracts/src/highcountry/equipment/ManufacturedEquipmentIssuer.sol",
+        "status": "modified",
+        "changes": 22
+      },
+      {
+        "path": "contracts/test/highcountry/integration/R04EquipmentEmergency.t.sol",
+        "status": "modified",
+        "changes": 69
+      },
+      {
+        "path": "contracts/test/highcountry/unit/equipment/EquipmentLifecycleEngine.t.sol",
+        "status": "modified",
+        "changes": 244
+      },
+      {
+        "path": "docs/highcountry/HC-NEXT-3.1-EQUIPMENT-CLASSES.md",
+        "status": "added",
+        "changes": 106
+      }
+    ]
+  },
+  {
+    "pr": 781,
+    "head": "71748e58d38fce746196e83a1ff896a399e2d9a9",
+    "status": "diverged",
+    "ahead": 1,
+    "behind": 1319,
+    "mergeBase": "7d13ba075bbbabf5255987f65478a8b2028ebfd0",
+    "tooLarge": null,
+    "files": [
+      {
+        "path": "contracts/test/highcountry/unit/cultivation/CultivationEngine.t.sol",
+        "status": "modified",
+        "changes": 16
+      }
+    ]
+  },
+  {
+    "pr": 778,
+    "head": "d0d3ef7f6b834af2519524d0e8c05d95386abf1d",
+    "status": "diverged",
+    "ahead": 2,
+    "behind": 1342,
+    "mergeBase": "3d6f8dded2dc8a272c2ff04b144d014b564c0dd0",
+    "tooLarge": null,
+    "files": [
+      {
+        "path": "contracts/test/highcountry/integration/PhenotypeProvenance.t.sol",
+        "status": "modified",
+        "changes": 24
+      }
+    ]
+  },
+  {
+    "pr": 777,
+    "head": "1ff0fc04cfc1b7bcc2ab1329853e847c637da507",
+    "status": "diverged",
+    "ahead": 3,
+    "behind": 1378,
+    "mergeBase": "e30f67830bcc088234e30d7c212d457287316a13",
+    "tooLarge": null,
+    "files": [
+      {
+        "path": "contracts/test/highcountry/integration/PlantSourceConsumption.t.sol",
+        "status": "modified",
+        "changes": 28
+      }
+    ]
+  },
+  {
+    "pr": 643,
+    "head": "89ee344fba8f580964e4aec7eec842dd9e55f44d",
+    "status": "behind",
+    "ahead": 0,
+    "behind": 3440,
+    "mergeBase": "89ee344fba8f580964e4aec7eec842dd9e55f44d",
+    "tooLarge": null,
+    "files": []
+  },
+  {
+    "pr": 642,
+    "head": "58538396fb7028d0cd449ef52d640d0fb55616f3",
+    "status": "behind",
+    "ahead": 0,
+    "behind": 3457,
+    "mergeBase": "58538396fb7028d0cd449ef52d640d0fb55616f3",
+    "tooLarge": null,
+    "files": []
+  },
+  {
+    "pr": 641,
+    "head": "5cc1f58bc3f9c9935bfe661be4e21cc960906cd7",
+    "status": "behind",
+    "ahead": 0,
+    "behind": 3465,
+    "mergeBase": "5cc1f58bc3f9c9935bfe661be4e21cc960906cd7",
+    "tooLarge": null,
+    "files": []
+  },
+  {
+    "pr": 640,
+    "head": "f2dceb4fbcd3fb623e2fed6d051ae70af914c7ba",
+    "status": "behind",
+    "ahead": 0,
+    "behind": 3487,
+    "mergeBase": "f2dceb4fbcd3fb623e2fed6d051ae70af914c7ba",
+    "tooLarge": null,
+    "files": []
+  },
+  {
+    "pr": 639,
+    "head": "d494c52aa9c9a8e8031e3201197fb0c6afb98f87",
+    "status": "behind",
+    "ahead": 0,
+    "behind": 3540,
+    "mergeBase": "d494c52aa9c9a8e8031e3201197fb0c6afb98f87",
+    "tooLarge": null,
+    "files": []
+  },
+  {
+    "pr": 638,
+    "head": "1dbe72cfbb09debba188ff80e4be2e7c7674827d",
+    "status": "behind",
+    "ahead": 0,
+    "behind": 3582,
+    "mergeBase": "1dbe72cfbb09debba188ff80e4be2e7c7674827d",
+    "tooLarge": null,
+    "files": []
+  },
+  {
+    "pr": 637,
+    "head": "034c6b9e9fe4a7d123e88b83a21f810fde88ed2e",
+    "status": "behind",
+    "ahead": 0,
+    "behind": 3607,
+    "mergeBase": "034c6b9e9fe4a7d123e88b83a21f810fde88ed2e",
+    "tooLarge": null,
+    "files": []
+  },
+  {
+    "pr": 636,
+    "head": "d6f6bd282636a6c9c8ac3bf17198580840fee37f",
+    "status": "behind",
+    "ahead": 0,
+    "behind": 3621,
+    "mergeBase": "d6f6bd282636a6c9c8ac3bf17198580840fee37f",
+    "tooLarge": null,
+    "files": []
+  }
+]

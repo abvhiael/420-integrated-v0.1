@@ -1,0 +1,57 @@
+{
+  "comparison": "actual content identities and static import signatures, not full per-line patch equivalence",
+  "versions": [
+    {
+      "tag": "main",
+      "ref": "78a4befa01bd08693aabfd576a6fe8fba2e2677b",
+      "gitBlobSHA": "287ca8a9f402994fc5e55644e46e8dd345c1a19d",
+      "imports": [
+        "import {waterWildlifeCatalogue,getWaterWildlifeFeature} from './water-wildlife-catalogue.js';",
+        "import {outdoorStructureCatalogue,getOutdoorStructure} from './outdoor-structure-catalogue.js';",
+        "import {redMesaLeisureCatalogue,getRedMesaLeisureBuilding} from './red-mesa-leisure-catalogue.js';",
+        "import {regionalMemorabiliaCatalogue,getRegionalMemorabilia} from './regional-memorabilia-catalogue.js';",
+        "import {premiumFurnitureCatalogue,getPremiumFurniture} from './premium-furniture-catalogue.js';"
+      ],
+      "sourceLength": 13816
+    },
+    {
+      "tag": "900",
+      "ref": "c67a4906581b3066ff27c0d6170258de277985b2",
+      "gitBlobSHA": "997635b38ff852b987bbf460f114b24b6be33dbe",
+      "imports": [
+        "import {agriculturalBuildingCatalogue,getAgriculturalBuilding} from './agricultural-building-catalogue.js';",
+        "import {waterWildlifeCatalogue,getWaterWildlifeFeature} from './water-wildlife-catalogue.js';",
+        "import {outdoorStructureCatalogue,getOutdoorStructure} from './outdoor-structure-catalogue.js';",
+        "import {regionalMemorabiliaCatalogue,getRegionalMemorabilia} from './regional-memorabilia-catalogue.js';",
+        "import {premiumFurnitureCatalogue,getPremiumFurniture} from './premium-furniture-catalogue.js';"
+      ],
+      "sourceLength": 13825
+    },
+    {
+      "tag": "881",
+      "ref": "c32f45dce6ceb69c5e3efd07e63c8276554a466b",
+      "gitBlobSHA": "8348a96c0b1a4d9d2326e4709bb7603e445d6473",
+      "imports": [
+        "import {recreationCatalogue,getRecreationAsset} from './recreation-catalogue.js';",
+        "import {waterWildlifeCatalogue,getWaterWildlifeFeature} from './water-wildlife-catalogue.js';",
+        "import {outdoorStructureCatalogue,getOutdoorStructure} from './outdoor-structure-catalogue.js';",
+        "import {regionalMemorabiliaCatalogue,getRegionalMemorabilia} from './regional-memorabilia-catalogue.js';",
+        "import {premiumFurnitureCatalogue,getPremiumFurniture} from './premium-furniture-catalogue.js';"
+      ],
+      "sourceLength": 13717
+    },
+    {
+      "tag": "879",
+      "ref": "119bf6967f9359d7c10837c9c62ab0ecf26f0053",
+      "gitBlobSHA": "00c45d1367fe6f3fab619dd4547c2eaee608cd91",
+      "imports": [
+        "import {landscapeCatalogue,getLandscapeAsset} from './landscape-catalogue.js';",
+        "import {waterWildlifeCatalogue,getWaterWildlifeFeature} from './water-wildlife-catalogue.js';",
+        "import {outdoorStructureCatalogue,getOutdoorStructure} from './outdoor-structure-catalogue.js';",
+        "import {regionalMemorabiliaCatalogue,getRegionalMemorabilia} from './regional-memorabilia-catalogue.js';",
+        "import {premiumFurnitureCatalogue,getPremiumFurniture} from './premium-furniture-catalogue.js';"
+      ],
+      "sourceLength": 13734
+    }
+  ]
+}

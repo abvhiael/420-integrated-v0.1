@@ -107,3 +107,9 @@
 .nk-paytable h2{font-size:1.04rem;letter-spacing:.06em;margin:0 0 10px}.nk-pay-warning{font-size:.8rem;line-height:1.5;color:#f0cb78;margin:0 0 15px}.nk-pay-grid{width:100%;border-collapse:collapse;font-size:.85rem}.nk-pay-grid th{text-align:left;color:#b6daab;font-size:.75rem;padding:9px 8px;border-bottom:1px solid #406343}.nk-pay-grid td{padding:9px 8px;border-bottom:1px solid #32513a}.nk-pay-grid td:last-child{text-align:right}.nk-pay-grid th:last-child{text-align:right}.nk-pay-grid .nk-pay-current{background:#2c5227;color:#deffa7;font-weight:900}.nk-pay-zero{display:grid;grid-template-columns:1fr auto;gap:10px;padding:14px;margin-top:13px;border:1px solid #477344;border-radius:12px;color:#cee3c6}.nk-pay-zero strong{color:#a5ff55}
 
 .nk-pay-status{font-size:.75rem;font-weight:900;letter-spacing:.04em;color:#f4cb74;border-top:1px solid #5b6845;padding-top:12px}.nk-number.match,.nk-ball.matched{font-size:clamp(.7rem,1.0vw,1rem);white-space:nowrap}.nk-ball.matched{font-size:clamp(.68rem,1.15vw,1rem)}
+
+/* A real seven-leaflet SVG, not a platform-dependent generic leaf emoji. */
+.nk-number.match,.nk-ball.matched{position:relative}
+.nk-cannabis-hit{position:absolute;top:-8px;right:-7px;width:22px;height:22px;overflow:visible;color:#b6ff53;filter:drop-shadow(0 0 4px #63ff20);pointer-events:none}
+.nk-ball.matched .nk-cannabis-hit{color:#68ff48}
+@media(max-width:680px){.nk-cannabis-hit{width:17px;height:17px;top:-6px;right:-6px}}

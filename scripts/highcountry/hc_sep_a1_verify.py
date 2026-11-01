@@ -2,7 +2,7 @@
 """Hash actual HighCountry Git blob bytes at frozen main and archived PR heads."""
 import argparse, collections, hashlib, json, pathlib, re, subprocess, sys
 EXT={'.png','.jpg','.jpeg','.webp','.gif','.svg','.avif','.bmp','.tif','.tiff','.ico','.ase','.aseprite','.psd','.kra','.xcf','.tsx','.tmx','.tmj','.tsj','.glb','.gltf','.fbx','.obj','.mtl','.wav','.ogg','.mp3','.flac','.mp4','.webm','.woff','.woff2','.ttf','.otf'}
-PREFIX=('apps/highcountry-web/public/','assets/highcountry/','deployments/highcountry/','tools/tiled/','services/highcountry-archive/')
+PREFIX=('apps/highcountry-web/public/','assets/highcountry/','deployments/highcountry/','tools/tiled/','services/highcountry-archive/','services/highcountry-economy/','services/highcountry-cultivar-governance/','contracts/src/highcountry/','docs/highcountry/','scripts/highcountry/')
 def cmd(*args):
  p=subprocess.run(['git',*args],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
  if p.returncode: raise RuntimeError('git '+repr(args)+': '+p.stderr.decode(errors='replace')[:300])

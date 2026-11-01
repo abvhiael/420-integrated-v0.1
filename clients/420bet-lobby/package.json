@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "test": "node --test tests/*.test.mjs"
+    "test": "node --test tests/*.test.mjs",
+    "serve:history": "node server/serve.mjs"
   },
   "devDependencies": {
     "vite": "8.2.2",

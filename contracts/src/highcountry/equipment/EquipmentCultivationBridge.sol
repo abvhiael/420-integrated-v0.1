@@ -44,10 +44,10 @@ contract EquipmentCultivationBridge is R04EmergencyConsumer {
                 || equipment.retired(itemId)
         ) revert InvalidEquipmentUse();
         lifecycle.recordUse(itemId);
-        int16[6] memory delta = equipment.equipmentType(item.typeId).effects;
+        int256[6] memory delta = equipment.activeItemEffects(itemId);
         uint16[6] memory input = [base.temperature, base.humidity, base.light, base.water, base.nutrients, base.airflow];
         for (uint256 i; i < 6; i++) {
-            int256 n = int256(uint256(input[i])) + (equipment.disabled(itemId) ? int256(0) : int256(delta[i]));
+            int256 n = int256(uint256(input[i])) + (equipment.disabled(itemId) ? int256(0) : delta[i]);
             if (n < 0 || n > int256(uint256(type(uint16).max))) revert InvalidEquipmentUse();
             input[i] = uint16(uint256(n));
         }

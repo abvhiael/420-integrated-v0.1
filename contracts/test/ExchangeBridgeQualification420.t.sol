@@ -81,7 +81,10 @@ contract BridgeQualificationRoutes420 {
         bool outboundEnabled;
     }
     mapping(bytes32 => Route) public routes;
-    function set(bytes32 id, Route calldata r) external { routes[id] = r; }
+    mapping(bytes32 => bool) public current;
+    function set(bytes32 id, Route calldata r) external { routes[id] = r; current[id] = true; }
+    function setCurrent(bytes32 id, bool value) external { current[id] = value; }
+    function routeChainsCurrent(bytes32 id) external view returns (bool) { return current[id]; }
 }
 
 contract BridgeQualificationGateway420 {
@@ -169,6 +172,12 @@ contract ExchangeBridgeQualification420Test {
         qualification.setQualification(EXCHANGE_ASSET, BRIDGE_ASSET, ROUTE, ADAPTER, PROVENANCE, true, true, true);
         _setRoute(true, false, ADAPTER, address(token));
         require(!qualification.isQualified(EXCHANGE_ASSET), "closed outbound accepted");
+    }
+
+    function testQualificationFailsWhenRouteChainBindingBecomesStale() public {
+        qualification.setQualification(EXCHANGE_ASSET, BRIDGE_ASSET, ROUTE, ADAPTER, PROVENANCE, true, true, true);
+        routes.setCurrent(ROUTE, false);
+        require(!qualification.isQualified(EXCHANGE_ASSET), "stale route chain binding accepted");
     }
 
     function testQualificationFailsWhenCanonicalPairChanges() public {

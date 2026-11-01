@@ -16,6 +16,7 @@ library BridgeIds420 {
     bytes32 internal constant ACTION_INBOUND = keccak256("420/BRIDGE/ACTION/INBOUND");
     bytes32 internal constant ACTION_OUTBOUND = keccak256("420/BRIDGE/ACTION/OUTBOUND");
     bytes32 internal constant ACTION_RECONCILE = keccak256("420/BRIDGE/ACTION/RECONCILE");
+    bytes32 internal constant ACTION_WITHDRAWAL_RECOVERY = keccak256("420/BRIDGE/ACTION/WITHDRAWAL_RECOVERY");
     bytes32 internal constant LIMIT_HOURLY_IN = keccak256("420/BRIDGE/LIMIT/HOURLY_IN");
     bytes32 internal constant LIMIT_HOURLY_OUT = keccak256("420/BRIDGE/LIMIT/HOURLY_OUT");
 }

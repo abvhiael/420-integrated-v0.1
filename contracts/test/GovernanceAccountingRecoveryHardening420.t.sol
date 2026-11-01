@@ -124,6 +124,28 @@ contract GovernanceAccountingRecoveryHardening420Test {
         require(observedAt == nowTs && evidence == keccak256("newer") && !healthy, "state drifted");
     }
 
+    function testReplayedEvidenceCannotRestoreHealthEvenAtNewerTimestamp() public {
+        uint64 first = uint64(vm.getBlockTimestamp());
+        bytes32 evidence = keccak256("replayed-mismatch");
+        accounting.applyReconciliation(ASSET, 4_200, 4_199, first, evidence);
+        require(!accounting.movementHealthy(ASSET), "mismatch healthy");
+
+        vm.warp(uint256(first) + 1);
+        uint64 second = uint64(vm.getBlockTimestamp());
+        (bool ok,) = address(accounting).call(abi.encodeCall(
+            accounting.applyReconciliation,
+            (ASSET, 4_200, 4_200, second, evidence)
+        ));
+        require(!ok, "replayed evidence restored health");
+        require(!accounting.movementHealthy(ASSET), "replay changed health");
+    }
+
+    function testUnknownAccountingStateFailsClosedForMovementHealth() public view {
+        bytes32 unknown = keccak256("unobserved-canonical");
+        require(accounting.healthState(unknown) == BridgeAccountingRegistry.HealthState.UNKNOWN, "unknown state");
+        require(!accounting.movementHealthy(unknown), "unknown movement healthy");
+    }
+
     function testNewerEvidenceRecoversUnhealthyState() public {
         uint64 first = uint64(vm.getBlockTimestamp());
         accounting.applyReconciliation(ASSET, 4_200, 4_199, first, keccak256("unhealthy"));

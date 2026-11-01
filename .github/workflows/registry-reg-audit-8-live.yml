@@ -1,0 +1,50 @@
+name: 420Registry REG-AUDIT-8 Live Testnet
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_candidate_sha:
+        description: Exact Git SHA deployed to the production-equivalent chain-420 testnet
+        required: true
+        type: string
+      canonical_rpc_url:
+        description: Approved non-placeholder HTTPS archive-capable chain-420 RPC
+        required: true
+        type: string
+      live_evidence_url:
+        description: Immutable HTTPS REG-AUDIT-8 live evidence JSON
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout exact release candidate
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.release_candidate_sha }}
+          fetch-depth: 0
+      - name: Verify exact release candidate checkout
+        run: test "$(git rev-parse HEAD)" = "${{ inputs.release_candidate_sha }}"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify REG-AUDIT-8 production-equivalent live evidence
+        env:
+          REG_AUDIT_8_RELEASE_SHA: ${{ inputs.release_candidate_sha }}
+          REG_AUDIT_8_RPC_URL: ${{ inputs.canonical_rpc_url }}
+          REG_AUDIT_8_EVIDENCE_URL: ${{ inputs.live_evidence_url }}
+        run: python3 scripts/verify-reg-audit-8-live.py
+      - name: Upload live verification transcript
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reg-audit-8-live-testnet
+          path: reg-audit-8-live-evidence/
+          if-no-files-found: error
+          retention-days: 90

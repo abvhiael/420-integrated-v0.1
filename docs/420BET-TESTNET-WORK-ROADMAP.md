@@ -177,3 +177,16 @@ The remaining tournament network work is consolidated below. This supersedes the
 | TN-LOBBY-6.2-06 — independent acceptance | Obtain eligibility/legal, responsible-play, economic/risk and release authority sign-offs, deployment/configuration digest, rollback/monitoring evidence and explicit go/no-go under universal release gates. Testnet PASS is not production authorization. |
 
 **Exit:** record exact deployment/release SHAs, approved chain and contract identities, real transaction/block hashes, indexer checkpoint/finality and reorg proofs, signed approvals, run IDs/URLs and final acceptance disposition. Missing infrastructure or external authorization remains OPEN, not simulated or marked complete. The 6.2 implementation and passing local evidence stay closed and unchanged.
+
+## TN-LOBBY-6.3 — Eight casino frontends: official-network acceptance
+
+**Locally qualified and merged:** BET-AUDIT-6.3, [PR #936](https://github.com/abvhiael/420-integrated-v0.1/pull/936), `main` merge `30d971057289d4131265aafeb8f3d5f4be4fc506`. The eight browser-only practice modes are non-transactional simulations, not substitutes for canonical on-chain resolver or paytable execution. Targeted Level 1 [run #41270016670](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/41270016670) passed 33/33 tests plus production build on exact SHA `34da6c8311b9ebb5aa52171ed657e1126b543fae`. Preserve this evidence.
+
+**Deferred only where official live testnet or external authority is required:**
+
+- Verify approved, correctly versioned chain deployment and qualified browser adapters for Dice, Keno, Plinko, Reference Slots, Roulette, Blackjack, Mines and Crash, including canonical contract/ruleset bindings and no unauthorized wager routes.
+- With authorized official-testnet wallets, verify real game-specific wager/signature/session capability paths, receipt and finalized event provenance, RNG/oracle delivery, result computation and settlement/void/refund behavior. Preserve exact deployment SHA, run IDs, transaction hashes, receipts and independent result checks for each game. Follow each game's existing product-specific gates above.
+- Verify funded-session navigation and recovery when players return to the lobby, disconnect or switch accounts/chains; do not permit unsafe iframe teardown with unsettled funds.
+- Obtain independent eligibility, jurisdiction, responsible-play, economics, reserve/liability and deployment sign-offs under the universal release gate before enabling funded gameplay. No demonstration result or testnet success is production approval.
+
+**Exit:** real official-network proofs and independent acceptance for every activated game. Missing official network, funding, runtime addresses or approvals remain OPEN; do not rerun passing local practice tests to substitute for them.

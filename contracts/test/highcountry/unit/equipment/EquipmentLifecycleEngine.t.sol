@@ -3,6 +3,7 @@ pragma solidity ^0.8.24;
 import { bindRetainedR04Emergency, retainedR04AuthorizationRoot } from "../../mocks/R04EmergencyFixture.sol";
 
 import { EquipmentRegistry } from "../../../../src/highcountry/equipment/EquipmentRegistry.sol";
+import { EquipmentClassCatalogueV1 } from "../../../../src/highcountry/equipment/EquipmentClassCatalogueV1.sol";
 import { EquipmentLifecycleEngine } from "../../../../src/highcountry/equipment/EquipmentLifecycleEngine.sol";
 import { InventoryRegistry } from "../../../../src/highcountry/inventory/InventoryRegistry.sol";
 import { HarvestProductRegistry } from "../../../../src/highcountry/harvest/HarvestProductRegistry.sol";
@@ -61,6 +62,29 @@ contract R044Land {
         address operator
     ) external {
         i.setInventoryOperator(operator, true);
+    }
+
+    function offer(
+        EquipmentRegistry e,
+        bytes32 id,
+        address buyer,
+        uint64 expiry
+    ) external {
+        e.offerTransfer(id, buyer, expiry);
+    }
+
+    function cancel(
+        EquipmentRegistry e,
+        bytes32 id
+    ) external {
+        e.cancelTransfer(id);
+    }
+
+    function accept(
+        EquipmentRegistry e,
+        bytes32 id
+    ) external {
+        e.acceptTransfer(id);
     }
 }
 
@@ -168,5 +192,225 @@ contract EquipmentLifecycleR044Test {
             );
         require(!overwrite, "rewrote policy");
         require(lifecycle.condition(ID).durability == 10, "default condition");
+    }
+
+    function testLifecyclePolicyMustMatchImmutableEquipmentCatalogueVersion() public {
+        bytes32 nextType = keccak256("EQUIPMENT-VERSION-2");
+        int16[6] memory effects;
+        effects[2] = 125;
+        equipment.registerType(nextType, bytes32(uint256(2)), 1, effects);
+        (bool mismatch,) = address(lifecycle)
+            .call(
+                abi.encodeCall(
+                    lifecycle.registerPolicy,
+                    (
+                        nextType,
+                        bytes32(uint256(1)),
+                        uint32(10),
+                        uint32(5),
+                        uint32(5),
+                        REPAIR,
+                        uint256(2),
+                        uint32(6),
+                        RECYCLE,
+                        uint256(3)
+                    )
+                )
+            );
+        require(!mismatch, "mismatched equipment and lifecycle rules admitted");
+        lifecycle.registerPolicy(nextType, bytes32(uint256(2)), 10, 5, 5, REPAIR, 2, 6, RECYCLE, 3);
+        require(lifecycle.policy(nextType).version == bytes32(uint256(2)), "matched ruleset version lost");
+    }
+
+    function testOperatingInputConservationBreakageAndFailedRetry() public {
+        bytes32 fuel = keccak256("EQUIPMENT-FUEL");
+        bytes32 type2 = keccak256("EQUIPMENT-WITH-FUEL");
+        bytes32 item2 = keccak256("EQUIPMENT-WITH-FUEL-1");
+        inventory.registerResource(fuel, InventoryRegistry.Unit.COUNT);
+        inventory.acquire(bytes32(uint256(102)), fuel, address(player), 4);
+        int16[6] memory effects;
+        effects[3] = 100;
+        equipment.registerType(type2, bytes32(uint256(3)), 1, effects);
+        equipment.issue(item2, type2, address(player), bytes32(uint256(3)));
+        lifecycle.registerPolicyWithInput(
+            type2,
+            EquipmentLifecycleEngine.Policy({
+                version: bytes32(uint256(3)),
+                maximum: 10,
+                degradeBelow: 5,
+                useCost: 5,
+                repairResource: REPAIR,
+                repairCost: 2,
+                repairRestore: 6,
+                recycleResource: RECYCLE,
+                recycleOutput: 3,
+                operatingResource: fuel,
+                operatingCost: 2,
+                exists: true
+            })
+        );
+        player.place(equipment, item2);
+        lifecycle.recordUse(item2);
+        require(ledger.balance(fuel, address(player)).available == 2, "first use not charged");
+        require(ledger.balance(fuel, address(player)).consumed == 2, "first use not burned");
+        lifecycle.recordUse(item2);
+        require(equipment.disabled(item2), "broken item effects active");
+        require(ledger.balance(fuel, address(player)).consumed == 4, "second use not charged");
+        require(lifecycle.condition(item2).usages == 2, "use count wrong");
+        player.repair(lifecycle, item2);
+        require(!equipment.disabled(item2), "repair failed");
+        (bool exhausted,) = address(lifecycle).call(abi.encodeCall(lifecycle.recordUse, (item2)));
+        require(!exhausted, "unfunded use accepted");
+        require(lifecycle.condition(item2).usages == 2, "failed use advanced time");
+        require(ledger.consumed(fuel) == 4, "failed use changed consumed stock");
+        require(equipment.effectiveEffects(1, address(player))[3] == 100, "failed use altered effects");
+    }
+
+    function testEquipmentOwnershipHandoffPreservesProvenanceAndRecycling() public {
+        R044Land buyer = new R044Land();
+        player.place(equipment, ID);
+        (bool placed,) = address(player)
+            .call(abi.encodeCall(player.offer, (equipment, ID, address(buyer), uint64(block.timestamp + 2 days))));
+        require(!placed, "placed item transfer offered");
+        player.remove(equipment, ID);
+        (bool expiredOffer,) =
+            address(player).call(abi.encodeCall(player.offer, (equipment, ID, address(buyer), uint64(block.timestamp))));
+        require(!expiredOffer, "expired transfer offered");
+        player.offer(equipment, ID, address(buyer), uint64(block.timestamp + 2 days));
+        player.cancel(equipment, ID);
+        (bool cancelled,) = address(buyer).call(abi.encodeCall(buyer.accept, (equipment, ID)));
+        require(!cancelled, "cancelled offer accepted");
+        player.offer(equipment, ID, address(buyer), uint64(block.timestamp + 2 days));
+        (bool unauthorized,) = address(equipment).call(abi.encodeCall(equipment.acceptTransfer, (ID)));
+        require(!unauthorized, "uninvited transferee accepted");
+        (bool blockedPlace,) = address(player).call(abi.encodeCall(player.place, (equipment, ID)));
+        require(!blockedPlace, "offered item placed");
+        buyer.accept(equipment, ID);
+        require(equipment.equipment(ID).owner == address(buyer), "owner not transferred");
+        require(equipment.equipment(ID).earningRef == bytes32(uint256(1)), "earning provenance replaced");
+        require(lifecycle.condition(ID).durability == 10, "transfer reset wear");
+        (bool replay,) = address(buyer).call(abi.encodeCall(buyer.accept, (equipment, ID)));
+        require(!replay, "transfer replay");
+        (bool oldOwner,) = address(player).call(abi.encodeCall(player.retire, (lifecycle, ID)));
+        require(!oldOwner, "seller still owns item");
+        buyer.retire(lifecycle, ID);
+        buyer.recycle(lifecycle, ID);
+        require(ledger.balance(RECYCLE, address(buyer)).available == 3, "buyer did not receive salvage");
+        require(ledger.balance(RECYCLE, address(player)).available == 0, "seller received salvage");
+    }
+
+    function testDegradedEffectsAndRepairRestoreCanonicalParcelTotals() public {
+        bytes32 type3 = keccak256("EQUIPMENT-DEGRADE");
+        bytes32 item3 = keccak256("EQUIPMENT-DEGRADE-INSTANCE");
+        int16[6] memory effects;
+        effects[0] = 101;
+        equipment.registerType(type3, bytes32(uint256(4)), 1, effects);
+        equipment.issue(item3, type3, address(player), bytes32(uint256(4)));
+        lifecycle.registerPolicy(type3, bytes32(uint256(4)), 12, 8, 5, REPAIR, 2, 6, RECYCLE, 3);
+        player.place(equipment, item3);
+        require(equipment.effectiveEffects(1, address(player))[0] == 101, "full effect absent");
+        lifecycle.recordUse(item3);
+        require(lifecycle.condition(item3).state == EquipmentLifecycleEngine.State.DEGRADED, "degradation absent");
+        require(equipment.degraded(item3), "degradation flag absent");
+        require(equipment.effectiveEffects(1, address(player))[0] == 50, "degraded effect not halved");
+        require(equipment.activeItemEffects(item3)[0] == 50, "bridge item effect not halved");
+        lifecycle.recordUse(item3);
+        lifecycle.recordUse(item3);
+        require(equipment.disabled(item3), "broken equipment still active");
+        require(equipment.effectiveEffects(1, address(player))[0] == 0, "broken effect still in totals");
+        player.repair(lifecycle, item3);
+        require(!equipment.disabled(item3), "repair left equipment disabled");
+        require(equipment.effectiveEffects(1, address(player))[0] == 50, "degraded repair restored full effect");
+        player.repair(lifecycle, item3);
+        require(lifecycle.condition(item3).state == EquipmentLifecycleEngine.State.FUNCTIONAL, "full repair state");
+        require(equipment.effectiveEffects(1, address(player))[0] == 101, "full repair failed totals");
+        player.remove(equipment, item3);
+        require(equipment.occupiedSlots(1) == 0, "removal did not release capacity");
+        require(equipment.effectiveEffects(1, address(player))[0] == 0, "removal left phantom effects");
+    }
+
+    function testFiveCatalogueClassesAndUpgradesUseVersionPinnedRealInputs() public {
+        EquipmentClassCatalogueV1 catalogue = new EquipmentClassCatalogueV1();
+        bytes32 power = catalogue.POWER_UNITS();
+        bytes32 water = catalogue.WATER_UNITS();
+        bytes32 nutrients = catalogue.NUTRIENT_UNITS();
+        bytes32 parts = catalogue.REPAIR_PARTS();
+        bytes32 scrap = catalogue.RECYCLED_SCRAP();
+        inventory.registerResource(power, InventoryRegistry.Unit.COUNT);
+        inventory.registerResource(water, InventoryRegistry.Unit.COUNT);
+        inventory.registerResource(nutrients, InventoryRegistry.Unit.COUNT);
+        inventory.registerResource(parts, InventoryRegistry.Unit.COUNT);
+        inventory.registerResource(scrap, InventoryRegistry.Unit.COUNT);
+        for (uint8 category; category < 5; ++category) {
+            for (uint8 tier; tier < 2; ++tier) {
+                EquipmentClassCatalogueV1.Definition memory d = catalogue.definition(category, tier);
+                require(d.version == catalogue.CATALOGUE_VERSION(), "version drift");
+                require(d.operatingResource != bytes32(0) && d.operatingCost != 0, "missing per-use input");
+                require(d.craftParts != 0 && d.craftOperatingInput != 0, "missing acquisition costs");
+                require(d.repairCost != 0 && d.recycleOutput != 0, "missing lifecycle costs");
+                equipment.registerType(d.typeId, d.version, d.slots, d.effects);
+                if (category == 0 && tier == 0) {
+                    try lifecycle.registerPolicy(
+                        d.typeId,
+                        d.version,
+                        d.maximum,
+                        d.degradeBelow,
+                        d.useCost,
+                        d.repairResource,
+                        d.repairCost,
+                        d.repairRestore,
+                        d.recycleResource,
+                        d.recycleOutput
+                    ) {
+                        revert("v1 class accepted policy without operating materials");
+                    } catch { }
+                }
+                lifecycle.registerPolicyWithInput(
+                    d.typeId,
+                    EquipmentLifecycleEngine.Policy({
+                        version: d.version,
+                        maximum: d.maximum,
+                        degradeBelow: d.degradeBelow,
+                        useCost: d.useCost,
+                        repairResource: d.repairResource,
+                        repairCost: d.repairCost,
+                        repairRestore: d.repairRestore,
+                        recycleResource: d.recycleResource,
+                        recycleOutput: d.recycleOutput,
+                        operatingResource: d.operatingResource,
+                        operatingCost: d.operatingCost,
+                        exists: true
+                    })
+                );
+                require(lifecycle.policy(d.typeId).version == d.version, "class policy mismatch");
+                require(equipment.equipmentType(d.typeId).catalogueVersion == d.version, "class effect mismatch");
+                bytes32 item = keccak256(abi.encode("HC.CATALOGUE.TEST.ITEM", category, tier));
+                bytes32 earning = keccak256(abi.encode("HC.CATALOGUE.TEST.EARNING", category, tier));
+                equipment.issue(item, d.typeId, address(player), earning);
+                uint256 previouslyConsumed = ledger.consumed(d.operatingResource);
+                inventory.acquire(
+                    keccak256(abi.encode("HC.CATALOGUE.TEST.FUND", category, tier)),
+                    d.operatingResource,
+                    address(player),
+                    d.operatingCost
+                );
+                player.place(equipment, item);
+                lifecycle.recordUse(item);
+                require(
+                    ledger.consumed(d.operatingResource) == previouslyConsumed + d.operatingCost,
+                    "class use did not burn authoritative materials"
+                );
+                int256[6] memory actual = equipment.effectiveEffects(1, address(player));
+                for (uint256 control; control < 6; ++control) {
+                    require(actual[control] == d.effects[control], "class effect mismatch");
+                }
+                player.remove(equipment, item);
+                actual = equipment.effectiveEffects(1, address(player));
+                for (uint256 control; control < 6; ++control) {
+                    require(actual[control] == 0, "class removal left phantom effect");
+                }
+                require(equipment.occupiedSlots(1) == 0, "class removal did not release slots");
+            }
+        }
     }
 }

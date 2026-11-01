@@ -7,6 +7,7 @@ import { HarvestProductRegistry } from "../../../src/highcountry/harvest/Harvest
 import { InventoryRegistry } from "../../../src/highcountry/inventory/InventoryRegistry.sol";
 import { ResourceLedger } from "../../../src/highcountry/inventory/ResourceLedger.sol";
 import { EquipmentRegistry } from "../../../src/highcountry/equipment/EquipmentRegistry.sol";
+import { EquipmentClassCatalogueV1 } from "../../../src/highcountry/equipment/EquipmentClassCatalogueV1.sol";
 import { EquipmentLifecycleEngine } from "../../../src/highcountry/equipment/EquipmentLifecycleEngine.sol";
 import { EquipmentCultivationBridge } from "../../../src/highcountry/equipment/EquipmentCultivationBridge.sol";
 import { ManufacturedEquipmentIssuer } from "../../../src/highcountry/equipment/ManufacturedEquipmentIssuer.sol";
@@ -368,5 +369,73 @@ contract R04EquipmentEmergencyTest is PublicPlantCapacityFixture {
         require(!stale, "stale land operator");
         equipment.remove(ITEM);
         require(equipment.occupiedSlots(1) == 0, "owner recovery denied");
+    }
+
+    function testV1CatalogueManufacturingRequiresApprovedInputsAndBurnsOperatingFuel() public {
+        EquipmentClassCatalogueV1.Definition memory d = earnedIssuer.catalogue().definition(0, 0);
+        inventory.registerResource(d.repairResource, InventoryRegistry.Unit.COUNT);
+        inventory.registerResource(d.operatingResource, InventoryRegistry.Unit.COUNT);
+        inventory.registerResource(d.craftOutput, InventoryRegistry.Unit.COUNT);
+        equipment.registerType(d.typeId, d.version, d.slots, d.effects);
+        lifecycle.registerPolicyWithInput(
+            d.typeId,
+            EquipmentLifecycleEngine.Policy({
+                version: d.version,
+                maximum: d.maximum,
+                degradeBelow: d.degradeBelow,
+                useCost: d.useCost,
+                repairResource: d.repairResource,
+                repairCost: d.repairCost,
+                repairRestore: d.repairRestore,
+                recycleResource: d.recycleResource,
+                recycleOutput: d.recycleOutput,
+                operatingResource: d.operatingResource,
+                operatingCost: d.operatingCost,
+                exists: true
+            })
+        );
+        bytes32[2] memory ins;
+        bytes32[2] memory outs;
+        uint256[2] memory amounts;
+        uint256[2] memory produced;
+        ins[0] = RAW;
+        amounts[0] = 1;
+        outs[0] = d.craftOutput;
+        produced[0] = 1;
+        bytes32 invalidRecipe = keccak256("v1-equipment-invalid-recipe");
+        manufacturing.registerRecipe(invalidRecipe, d.version, ins, amounts, outs, produced, 1, 0);
+        try earnedIssuer.bindRecipe(invalidRecipe, d.typeId, d.craftOutput, 1) {
+            revert("unapproved recipe acquired v1 equipment");
+        } catch {}
+        ins[0] = d.repairResource;
+        ins[1] = d.operatingResource;
+        amounts[0] = d.craftParts;
+        amounts[1] = d.craftOperatingInput;
+        bytes32 recipeId = keccak256("v1-equipment-approved-recipe");
+        manufacturing.registerRecipe(recipeId, d.version, ins, amounts, outs, produced, 1, 0);
+        earnedIssuer.bindRecipe(recipeId, d.typeId, d.craftOutput, 1);
+        inventory.acquire(keccak256("v1-equipment-craft-parts"), d.repairResource, address(this), d.craftParts);
+        inventory.acquire(
+            keccak256("v1-equipment-craft-fuel"),
+            d.operatingResource,
+            address(this),
+            d.craftOperatingInput + d.operatingCost
+        );
+        bytes32 job = manufacturing.start(recipeId);
+        vm.warp(block.timestamp + 1);
+        manufacturing.complete(job);
+        bytes32 item = earnedIssuer.issueFromManufacturing(job);
+        require(equipment.equipment(item).typeId == d.typeId, "manufactured wrong equipment class");
+        require(inventory.ledger().balance(d.repairResource, address(this)).consumed == d.craftParts, "craft parts");
+        equipment.remove(ITEM);
+        equipment.place(item, 1);
+        bridge.applyEnvironment(1, item, environment());
+        require(cultivation.getState(1).environment.light == 7600, "real v1 light effect");
+        require(
+            inventory.ledger().balance(d.operatingResource, address(this)).consumed
+                == d.craftOperatingInput + d.operatingCost,
+            "manufacturing and operation materials unconserved"
+        );
+        require(lifecycle.condition(item).usages == 1, "real equipment usage not tracked");
     }
 }

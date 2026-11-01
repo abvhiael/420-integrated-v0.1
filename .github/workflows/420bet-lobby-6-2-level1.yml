@@ -1,0 +1,27 @@
+name: BET-AUDIT-6.2 targeted Level 1 wallet-history
+on:
+  pull_request:
+    paths:
+      - 'clients/420bet-lobby/**'
+      - '.github/workflows/420bet-lobby-6-2-level1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  lobby-wallet-level1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install scoped dependencies
+        working-directory: clients/420bet-lobby
+        run: npm install --no-audit --no-fund
+      - name: Run affected wallet and lobby regression tests
+        working-directory: clients/420bet-lobby
+        run: npm test
+      - name: Build affected web shell
+        working-directory: clients/420bet-lobby
+        run: npm run build

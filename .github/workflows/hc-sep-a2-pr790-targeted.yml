@@ -4,6 +4,8 @@ on:
   push:
     paths:
       - '.github/workflows/hc-sep-a2-pr790-targeted.yml'
+      - 'contracts/src/highcountry/equipment/EquipmentCultivationBridge.sol'
+      - 'contracts/test/highcountry/integration/R04EquipmentEmergency.t.sol'
 permissions:
   contents: read
 jobs:

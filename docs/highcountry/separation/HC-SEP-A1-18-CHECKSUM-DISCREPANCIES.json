@@ -1,0 +1,180 @@
+{
+  "auditRun": "41269129395",
+  "frozenMain": "78a4befa01bd08693aabfd576a6fe8fba2e2677b",
+  "classification": "18 FROZEN-MAIN MANIFEST HASH DRIFTS, ZERO ARCHIVED-PR-ONLY",
+  "evidence": "Direct Git object SHA-256 report from completed GitHub Action, plus frozen manifest values; historical source originals not independently available",
+  "modificationPolicy": "DO NOT replace canonical PNGs or re-write recorded historical hashes; transfer exact current frozen-main bytes.",
+  "items": [
+    {
+      "path": "apps/highcountry-web/public/assets/cultivation/environments/hc-env-emerald-coast-greenhouse-background.png",
+      "recordedSha256": "751fe511e98042a021331d4845598776811ef1cd5b98cd3c4d145fabdcbb5519",
+      "recordedBytes": 4431394,
+      "manifest": "apps/highcountry-web/public/assets/cultivation/environments/manifest.json",
+      "actualSha256": "109ef8e39e40b6198e70572387cccd033ae5b91ba9e9785093a9557de1e2a417",
+      "actualBytes": 3237369,
+      "reason": "frozen-main bytes and archived PR bytes disagree with recorded historical checksum",
+      "disposition": "preserve current bytes and original manifest; require provenance review before editing registry"
+    },
+    {
+      "path": "apps/highcountry-web/public/assets/cultivation/environments/hc-env-emerald-coast-indoor-background.png",
+      "recordedSha256": "6e2fd3b6a1f8cc0f134b0b5ce6724d889af03449314142dbf50dff5b6e3c6c58",
+      "recordedBytes": 3293907,
+      "manifest": "apps/highcountry-web/public/assets/cultivation/environments/manifest.json",
+      "actualSha256": "453fbbe7502b2eb819ffce5db30d23ea6ee9873db8dab02bcaa12ad563a8dc80",
+      "actualBytes": 2388934,
+      "reason": "frozen-main bytes and archived PR bytes disagree with recorded historical checksum",
+      "disposition": "preserve current bytes and original manifest; require provenance review before editing registry"
+    },
+    {
+      "path": "apps/highcountry-web/public/assets/cultivation/environments/hc-env-emerald-coast-outdoor-background.png",
+      "recordedSha256": "262836b824d65f5547f99196fd45f7ebb38265ed98b57c7fb6aa0a5595b09951",
+      "recordedBytes": 4498983,
+      "manifest": "apps/highcountry-web/public/assets/cultivation/environments/manifest.json",
+      "actualSha256": "020ece57a345eee825a7919c0a7c8600baa79ff923fb40c4e37ffc720daecd09",
+      "actualBytes": 3674592,
+      "reason": "frozen-main bytes and archived PR bytes disagree with recorded historical checksum",
+      "disposition": "preserve current bytes and original manifest; require provenance review before editing registry"
+    },
+    {
+      "path": "apps/highcountry-web/public/assets/cultivation/environments/hc-env-golden-prairie-greenhouse-background.png",
+      "recordedSha256": "34d9decc4766557f28e68eea7a5bceb93ad96c5c21152e244af32d1a4bc6b794",
+      "recordedBytes": 4397341,
+      "manifest": "apps/highcountry-web/public/assets/cultivation/environments/manifest.json",
+      "actualSha256": "7d407f750e88febf988afc132384d59578b3ccfc9c7fbf6196f98a3210ab264f",
+      "actualBytes": 3184858,
+      "reason": "frozen-main bytes and archived PR bytes disagree with recorded historical checksum",
+      "disposition": "preserve current bytes and original manifest; require provenance review before editing registry"
+    },
+    {
+      "path": "apps/highcountry-web/public/assets/cultivation/environments/hc-env-golden-prairie-indoor-background.png",
+      "recordedSha256": "3a49853f49d581aadf9ec0aab013408cabeac018c7d60a040641f58913bda6a9",
+      "recordedBytes": 3263743,
+      "manifest": "apps/highcountry-web/public/assets/cultivation/environments/manifest.json",
+      "actualSha256": "a2e53fd5a1f8a833a752c49c80712f64258d80b28560f213455c4bfc7d23f427",
+      "actualBytes": 2485229,
+      "reason": "frozen-main bytes and archived PR bytes disagree with recorded historical checksum",
+      "disposition": "preserve current bytes and original manifest; require provenance review before editing registry"
+    },
+    {
+      "path": "apps/highcountry-web/public/assets/cultivation/environments/hc-env-golden-prairie-outdoor-background.png",
+      "recordedSha256": "8e0c9bc255485b52cac0bab8086e98b92b08b66685155a2d3572f009b40e3d79",
+      "recordedBytes": 4187030,
+      "manifest": "apps/highcountry-web/public/assets/cultivation/environments/manifest.json",
+      "actualSha256": "d0a69f51abfb16de215740117938c21c0f46da9239636a4e5f5415ec8fbefb49",
+      "actualBytes": 3395422,
+      "reason": "frozen-main bytes and archived PR bytes disagree with recorded historical checksum",
+      "disposition": "preserve current bytes and original manifest; require provenance review before editing registry"
+    },
+    {
+      "path": "apps/highcountry-web/public/assets/cultivation/environments/hc-env-red-mesa-greenhouse-background.png",
+      "recordedSha256": "2a66525330b778082d78ffef371b5f4650d7a621588cae16294f67114d9cc3e1",
+      "recordedBytes": 4321000,
+      "manifest": "apps/highcountry-web/public/assets/cultivation/environments/manifest.json",
+      "actualSha256": "aeb9813097eb686ff89739b965797cb6be6e3c9f5572c7b4e047e817b58361b4",
+      "actualBytes": 3078840,
+      "reason": "frozen-main bytes and archived PR bytes disagree with recorded historical checksum",
+      "disposition": "preserve current bytes and original manifest; require provenance review before editing registry"
+    },
+    {
+      "path": "apps/highcountry-web/public/assets/cultivation/environments/hc-env-red-mesa-indoor-background.png",
+      "recordedSha256": "685cdacdff854f1b4bd60990aae80180aebfa1db66b5eeaff61ea8329d4380bb",
+      "recordedBytes": 3234376,
+      "manifest": "apps/highcountry-web/public/assets/cultivation/environments/manifest.json",
+      "actualSha256": "9ab45ce20673e91025b02e2a87e4103535c52ada58a786ff2f8d6f35525a4bdc",
+      "actualBytes": 2447000,
+      "reason": "frozen-main bytes and archived PR bytes disagree with recorded historical checksum",
+      "disposition": "preserve current bytes and original manifest; require provenance review before editing registry"
+    },
+    {
+      "path": "apps/highcountry-web/public/assets/cultivation/environments/hc-env-red-mesa-outdoor-background.png",
+      "recordedSha256": "a045ef469c399e55866e38a6bb1d8979d844a6b80c3b130398978e755cf39621",
+      "recordedBytes": 4357077,
+      "manifest": "apps/highcountry-web/public/assets/cultivation/environments/manifest.json",
+      "actualSha256": "d68dff46286157bea96ab5276b8b74a6db5056230b1d5aa61c0615cc29253077",
+      "actualBytes": 3423397,
+      "reason": "frozen-main bytes and archived PR bytes disagree with recorded historical checksum",
+      "disposition": "preserve current bytes and original manifest; require provenance review before editing registry"
+    },
+    {
+      "path": "apps/highcountry-web/public/assets/cultivation/props/outdoor-leisure/04-c-water-wildlife/hc-outdoor-water-botanical-tiered-fountain.png",
+      "recordedSha256": "1f1586675e92a030eee8a03eb34273a309ff4db4856bb9065478d125ae3d5626",
+      "manifest": "apps/highcountry-web/public/assets/cultivation/props/outdoor-leisure/04-c-water-wildlife/manifest.json",
+      "actualSha256": "65249f5901eb369cfdf081d7d89ba26d0c56c03c2f7ba2a9f104e3ca5284c49d",
+      "actualBytes": 485205,
+      "reason": "frozen-main bytes and archived PR bytes disagree with recorded historical checksum",
+      "disposition": "preserve current bytes and original manifest; require provenance review before editing registry"
+    },
+    {
+      "path": "apps/highcountry-web/public/assets/cultivation/props/outdoor-leisure/04-c-water-wildlife/hc-outdoor-water-emerald-mossy-waterfall.png",
+      "recordedSha256": "ea7ddf20d26abea0b99bae114e705e2dc19f0669188d1dfed638cedea2e7b5cd",
+      "manifest": "apps/highcountry-web/public/assets/cultivation/props/outdoor-leisure/04-c-water-wildlife/manifest.json",
+      "actualSha256": "75302f9cc14d5c3f9c5dd97063b5de6a8f449e1d0b9ca6eb7d583e20bf4e30f5",
+      "actualBytes": 1357432,
+      "reason": "frozen-main bytes and archived PR bytes disagree with recorded historical checksum",
+      "disposition": "preserve current bytes and original manifest; require provenance review before editing registry"
+    },
+    {
+      "path": "apps/highcountry-web/public/assets/cultivation/props/outdoor-leisure/04-c-water-wildlife/hc-outdoor-water-heritage-stone-birdbath.png",
+      "recordedSha256": "d1c1b0bb88c7d0ba661b94bd96d3390360ec073835ef4182f09b41b3ba7a3e5d",
+      "manifest": "apps/highcountry-web/public/assets/cultivation/props/outdoor-leisure/04-c-water-wildlife/manifest.json",
+      "actualSha256": "d70e3f2fc1f752cfff4e14620c1d2ef49c9eed20f736211996f3ed630e665141",
+      "actualBytes": 179067,
+      "reason": "frozen-main bytes and archived PR bytes disagree with recorded historical checksum",
+      "disposition": "preserve current bytes and original manifest; require provenance review before editing registry"
+    },
+    {
+      "path": "apps/highcountry-web/public/assets/cultivation/props/outdoor-leisure/04-c-water-wildlife/hc-outdoor-water-lily-dragonfly-pond.png",
+      "recordedSha256": "8fc8f66fc3096e6b2be1a06d96fc8cd59487f0367f7eab251073b7ebcbc61df8",
+      "manifest": "apps/highcountry-web/public/assets/cultivation/props/outdoor-leisure/04-c-water-wildlife/manifest.json",
+      "actualSha256": "3c8d57c6c5d105031037bf70133379d60ddaf39f26457c2d0d4e24ae97368f60",
+      "actualBytes": 1226408,
+      "reason": "frozen-main bytes and archived PR bytes disagree with recorded historical checksum",
+      "disposition": "preserve current bytes and original manifest; require provenance review before editing registry"
+    },
+    {
+      "path": "apps/highcountry-web/public/assets/cultivation/props/outdoor-leisure/04-c-water-wildlife/hc-outdoor-water-mesa-wildlife-oasis.png",
+      "recordedSha256": "218457af712fad5df53b43e5d38c89830d72ab2d90d0c10c6c97566134dc740a",
+      "manifest": "apps/highcountry-web/public/assets/cultivation/props/outdoor-leisure/04-c-water-wildlife/manifest.json",
+      "actualSha256": "7f5f68a2d0d551e5eb4f142b8b0d4320fbf6cf319f5e0624a2e4bfdec901394a",
+      "actualBytes": 1325025,
+      "reason": "frozen-main bytes and archived PR bytes disagree with recorded historical checksum",
+      "disposition": "preserve current bytes and original manifest; require provenance review before editing registry"
+    },
+    {
+      "path": "apps/highcountry-web/public/assets/cultivation/props/outdoor-leisure/04-c-water-wildlife/hc-outdoor-water-prairie-butterfly-garden.png",
+      "recordedSha256": "9e0c57c595a3d44a78168121521ea977b223e7d6d93a76ad0fcc513cdea90276",
+      "manifest": "apps/highcountry-web/public/assets/cultivation/props/outdoor-leisure/04-c-water-wildlife/manifest.json",
+      "actualSha256": "57f01e8ad415a001af0a862f91f6073924080b69703f0a516c6124e4db03b571",
+      "actualBytes": 1130415,
+      "reason": "frozen-main bytes and archived PR bytes disagree with recorded historical checksum",
+      "disposition": "preserve current bytes and original manifest; require provenance review before editing registry"
+    },
+    {
+      "path": "apps/highcountry-web/public/assets/cultivation/props/outdoor-leisure/04-c-water-wildlife/hc-outdoor-water-prairie-homestead-pump.png",
+      "recordedSha256": "f02b95da94f260f14f2e20b791ee9199865d386010a73a4be26f86221d30aab7",
+      "manifest": "apps/highcountry-web/public/assets/cultivation/props/outdoor-leisure/04-c-water-wildlife/manifest.json",
+      "actualSha256": "4b84487c1d1ede74f4df4a63a6f31d0eb51d70856670b127ea03df64532ff646",
+      "actualBytes": 475502,
+      "reason": "frozen-main bytes and archived PR bytes disagree with recorded historical checksum",
+      "disposition": "preserve current bytes and original manifest; require provenance review before editing registry"
+    },
+    {
+      "path": "apps/highcountry-web/public/assets/cultivation/props/outdoor-leisure/04-c-water-wildlife/hc-outdoor-wildlife-pollinator-sanctuary.png",
+      "recordedSha256": "644d998792883b8cc8f34a0238c31420c267c32de441d8a5c14e16b85930a198",
+      "manifest": "apps/highcountry-web/public/assets/cultivation/props/outdoor-leisure/04-c-water-wildlife/manifest.json",
+      "actualSha256": "e33cee5cec08ba68db0e9eda26d508625973910b4f08b86183d8ec45c52a2be2",
+      "actualBytes": 533166,
+      "reason": "frozen-main bytes and archived PR bytes disagree with recorded historical checksum",
+      "disposition": "preserve current bytes and original manifest; require provenance review before editing registry"
+    },
+    {
+      "path": "apps/highcountry-web/public/assets/cultivation/props/outdoor-leisure/04-c-water-wildlife/hc-outdoor-wildlife-woodland-bird-feeding-station.png",
+      "recordedSha256": "4b98117ca9223cbde45d4f5e90d42ae748704d5c11fe903fa87569071e9e3cfb",
+      "manifest": "apps/highcountry-web/public/assets/cultivation/props/outdoor-leisure/04-c-water-wildlife/manifest.json",
+      "actualSha256": "c74180cfa85b358897a5b876054d0f21243b4a668ccf1a99078275a9976bda71",
+      "actualBytes": 191579,
+      "reason": "frozen-main bytes and archived PR bytes disagree with recorded historical checksum",
+      "disposition": "preserve current bytes and original manifest; require provenance review before editing registry"
+    }
+  ]
+}

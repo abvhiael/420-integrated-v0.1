@@ -1,0 +1,145 @@
+[
+  {
+    "n": 643,
+    "head": "89ee344fba8f580964e4aec7eec842dd9e55f44d",
+    "base": "audit/highcountry-r05-8-sdk-transports-20261014",
+    "files": [
+      ".github/workflows/highcountry-r05-9.yml",
+      "docs/highcountry/HIGHCOUNTRY-TESTNET-WORK-ROADMAP.md",
+      "docs/highcountry/qualification/R05.9-EXACT-SHA-LEVEL1.md",
+      "services/420-gaming-player-profile/migrations/006_abuse_operations.up.sql",
+      "services/420-gaming-player-profile/src/gaming-event-http.js",
+      "services/420-gaming-player-profile/src/r059-schema-migrations.js",
+      "services/420-gaming-player-profile/src/r059-security-operations.js",
+      "services/420-gaming-player-profile/test/r059-postgres.integration.mjs",
+      "services/420-gaming-player-profile/test/r059-security-operations.test.js"
+    ],
+    "reviewThreads": []
+  },
+  {
+    "n": 642,
+    "head": "58538396fb7028d0cd449ef52d640d0fb55616f3",
+    "base": "audit/highcountry-r05-7-canonical-finality-20261014",
+    "files": [
+      ".github/workflows/highcountry-r05-8.yml",
+      "docs/highcountry/HIGHCOUNTRY-TESTNET-WORK-ROADMAP.md",
+      "docs/highcountry/qualification/R05.8-EXACT-SHA-LEVEL1.md",
+      "packages/420-gaming-sdk/src/abi-bindings.js",
+      "packages/420-gaming-sdk/src/index.js",
+      "packages/420-gaming-sdk/src/transports.js",
+      "packages/420-gaming-sdk/test/r05-8-transports.test.js"
+    ],
+    "reviewThreads": []
+  },
+  {
+    "n": 641,
+    "head": "5cc1f58bc3f9c9935bfe661be4e21cc960906cd7",
+    "base": "audit/highcountry-r05-6-events-20261013",
+    "files": [
+      ".github/workflows/highcountry-r05-7.yml",
+      "docs/highcountry/HIGHCOUNTRY-TESTNET-WORK-ROADMAP.md",
+      "docs/highcountry/qualification/R05.7-EXACT-SHA-LEVEL1.md",
+      "services/420-gaming-player-profile/src/canonical-gaming-finality.js",
+      "services/420-gaming-player-profile/src/independent-finality-witness.js",
+      "services/420-gaming-player-profile/src/r057-migration-finality-hooks.js",
+      "services/420-gaming-player-profile/test/canonical-gaming-finality.test.js",
+      "services/420-gaming-player-profile/test/independent-finality-witness.test.js",
+      "services/420-gaming-player-profile/test/r057-migration-finality-hooks.test.js"
+    ],
+    "reviewThreads": []
+  },
+  {
+    "n": 640,
+    "head": "f2dceb4fbcd3fb623e2fed6d051ae70af914c7ba",
+    "base": "audit/highcountry-r05-5-save-lifecycle-20261013",
+    "files": [
+      ".github/workflows/highcountry-r05-6.yml",
+      "docs/highcountry/HIGHCOUNTRY-TESTNET-WORK-ROADMAP.md",
+      "docs/highcountry/qualification/R05.6-EXACT-SHA-LEVEL1.md",
+      "services/420-gaming-player-profile/migrations/005_event_ingestion.up.sql",
+      "services/420-gaming-player-profile/src/durable-gaming-event-indexer.js",
+      "services/420-gaming-player-profile/src/event-ingestion-migrations.js",
+      "services/420-gaming-player-profile/src/gaming-event-abi.js",
+      "services/420-gaming-player-profile/src/gaming-event-http.js",
+      "services/420-gaming-player-profile/src/gaming-event-scope-resolver.js",
+      "services/420-gaming-player-profile/src/pinned-gaming-event-rpc.js",
+      "services/420-gaming-player-profile/test/events-anvil.integration.mjs",
+      "services/420-gaming-player-profile/test/events-postgres.integration.mjs",
+      "services/420-gaming-player-profile/test/gaming-event-abi.test.js",
+      "services/420-gaming-player-profile/test/gaming-event-http.test.js",
+      "services/420-gaming-player-profile/test/pinned-gaming-event-rpc.test.js"
+    ],
+    "reviewThreads": []
+  },
+  {
+    "n": 639,
+    "head": "d494c52aa9c9a8e8031e3201197fb0c6afb98f87",
+    "base": "audit/highcountry-r05-4-gameclaims-20261013",
+    "files": [
+      ".github/workflows/highcountry-r05-5.yml",
+      "docs/highcountry/HIGHCOUNTRY-TESTNET-WORK-ROADMAP.md",
+      "docs/highcountry/qualification/R05.5-EXACT-SHA-LEVEL1.md",
+      "services/420-gaming-player-profile/migrations/004_save_lifecycle.up.sql",
+      "services/420-gaming-player-profile/src/cloud-save-lifecycle.js",
+      "services/420-gaming-player-profile/src/encrypted-local-save-provider.js",
+      "services/420-gaming-player-profile/src/postgres-repository.js",
+      "services/420-gaming-player-profile/src/save-lifecycle-migrations.js",
+      "services/420-gaming-player-profile/src/save-retention-worker.js",
+      "services/420-gaming-player-profile/test/cloud-save-lifecycle.test.js",
+      "services/420-gaming-player-profile/test/encrypted-local-save-provider.test.js",
+      "services/420-gaming-player-profile/test/save-postgres.integration.mjs"
+    ],
+    "reviewThreads": []
+  },
+  {
+    "n": 638,
+    "head": "1dbe72cfbb09debba188ff80e4be2e7c7674827d",
+    "base": "audit/highcountry-r05-3-durable-migration-20261013",
+    "files": [
+      ".github/workflows/highcountry-r05-4.yml",
+      "contracts/test/highcountry/integration/R05MigrationDeployment.sol",
+      "docs/highcountry/HIGHCOUNTRY-TESTNET-WORK-ROADMAP.md",
+      "docs/highcountry/R05.4-GAMECLAIMS-ADAPTER-STATUS.md",
+      "docs/highcountry/qualification/R05.4-EXACT-SHA-QUALIFICATION.md",
+      "services/420-gaming-player-profile/src/gameclaims-adapter.js",
+      "services/420-gaming-player-profile/src/gameclaims-coordinator-bridge.js",
+      "services/420-gaming-player-profile/test/gameclaims-adapter.test.js",
+      "services/420-gaming-player-profile/test/gameclaims-anvil.integration.mjs",
+      "services/420-gaming-player-profile/test/gameclaims-coordinator-bridge.test.js"
+    ],
+    "reviewThreads": []
+  },
+  {
+    "n": 637,
+    "head": "034c6b9e9fe4a7d123e88b83a21f810fde88ed2e",
+    "base": "audit/highcountry-r05-2-auth-wallet-20261013",
+    "files": [
+      ".github/workflows/highcountry-r05-3-level2.yml",
+      ".github/workflows/highcountry-r05-3.yml",
+      "docs/highcountry/R05.3-DURABLE-MIGRATION-AND-OUTBOX.md",
+      "docs/highcountry/qualification/R05.3-EXACT-SHA-LEVEL1-LEVEL2.json",
+      "services/420-gaming-player-profile/migrations/003_migration_runtime.up.sql",
+      "services/420-gaming-player-profile/src/migration-coordinator.js",
+      "services/420-gaming-player-profile/src/migration-runtime-migrations.js",
+      "services/420-gaming-player-profile/test/migration-postgres.integration.mjs",
+      "services/420-gaming-player-profile/test/migration-worker-child.mjs"
+    ],
+    "reviewThreads": []
+  },
+  {
+    "n": 636,
+    "head": "d6f6bd282636a6c9c8ac3bf17198580840fee37f",
+    "base": "audit/highcountry-r05-1-datastore-20261013",
+    "files": [
+      ".github/workflows/highcountry-r05-2.yml",
+      "docs/highcountry/qualification/R05.2-EXACT-SHA-LEVEL1.md",
+      "services/420-gaming-player-profile/migrations/002_wallet_links.up.sql",
+      "services/420-gaming-player-profile/src/postgres-repository.js",
+      "services/420-gaming-player-profile/src/wallet-link-migrations.js",
+      "services/420-gaming-player-profile/src/wallet-link-service.js",
+      "services/420-gaming-player-profile/test/wallet-link.test.js",
+      "services/420-gaming-player-profile/test/wallet-postgres.integration.mjs"
+    ],
+    "reviewThreads": []
+  }
+]

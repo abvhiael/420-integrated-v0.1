@@ -615,6 +615,16 @@ contract CultivationEngineTest is PlantSourcesFixture {
         uint32 privateBefore = plants.privatePlantsByParcel(11);
         harvest.acceptHarvest(plantId);
         bytes32 productId = products.registerHarvestProduct(plantId);
+        HarvestEngine.HarvestAcceptance memory accepted = harvest.getHarvest(plantId);
+        HarvestScoring.Result memory score = harvest.getHarvestScore(plantId);
+        HarvestProductRegistry.Product memory product = products.getProduct(productId);
+        require(accepted.accepted && accepted.grower == address(this), "noncanonical harvest owner");
+        require(accepted.rulesetId == approvedRulesetId && accepted.rulesetContentHash != bytes32(0), "ruleset lost");
+        require(product.grower == accepted.grower && product.genomeId == accepted.genomeId, "product owner/genome");
+        require(product.expressionHash == accepted.expressionHash, "product expression");
+        require(product.rulesetId == accepted.rulesetId, "product ruleset");
+        require(product.quantityGrams == score.yieldGrams && product.grade == score.grade, "product score");
+        require(product.qualityBps == score.qualityBps && score.qualityBps <= 10000, "quality bounds");
         uint256 gramsBefore = products.totalIssuedGrams();
         uint64 countBefore = products.totalRegisteredProducts();
 
@@ -635,6 +645,12 @@ contract CultivationEngineTest is PlantSourcesFixture {
         require(products.getProduct(productId).plantId == plantId, "product provenance changed");
         require(products.totalIssuedGrams() == gramsBefore, "termination changed product issuance");
         require(products.totalRegisteredProducts() == countBefore, "termination duplicated product");
+        (bool replayHarvest,) = address(harvest).call(abi.encodeCall(harvest.acceptHarvest, (plantId)));
+        require(!replayHarvest, "post-release duplicate harvest accepted");
+        (bool replayProduct,) = address(products).call(abi.encodeCall(products.registerHarvestProduct, (plantId)));
+        require(!replayProduct, "post-release product replay accepted");
+        require(products.totalIssuedGrams() == gramsBefore, "replay duplicated grams");
+        require(products.totalRegisteredProducts() == countBefore, "replay duplicated receipts");
     }
 
     function testR035AcceptedUnregisteredHarvestSettlesAfterTermination() public {

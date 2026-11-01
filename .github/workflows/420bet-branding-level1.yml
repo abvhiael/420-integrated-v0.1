@@ -1,0 +1,30 @@
+name: 420Bet canonical branding targeted Level 1
+on:
+  pull_request:
+    paths:
+      - 'clients/420bet-lobby/src/main.js'
+      - 'clients/420bet-lobby/index.html'
+      - 'clients/420bet-lobby/src/style.css'
+      - 'clients/420bet-lobby/tests/navigation.test.mjs'
+      - '.github/workflows/420bet-branding-level1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  branding-level1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install scoped dependencies
+        working-directory: clients/420bet-lobby
+        run: npm install --no-audit --no-fund
+      - name: Run affected lobby navigation branding tests
+        working-directory: clients/420bet-lobby
+        run: node --test tests/navigation.test.mjs
+      - name: Build website
+        working-directory: clients/420bet-lobby
+        run: npm run build

@@ -39,3 +39,14 @@ The eight casino tiles now open interactive, full-screen browser-only practice r
 **Practice is intentionally not the canonical resolver.** It uses independent simulated entropy and simplified presentation without importing approved paytables, wager hashes, payout calculations, resolved chain randomness or game economy. Visible results are clearly simulated. Treat no practice outcome, balance, win/loss assertion, or animation as proof of published on-chain behavior, precise RTP or winning stake. The canonical contract rules and parameters remain in `contracts/src/bet/*V1420.sol`; operator-controlled real gameplay must use independently qualified clients/canonical contracts and existing testnet approvals. Dice's existing transaction-capable client remains unchanged and can be integrated behind appropriate session and safe-exit gates later. This change does not activate any testnet transaction route.
 
 Affected qualification: `npm test`, `npm run build` in `clients/420bet-lobby`; tests cover all eight practice state machines, dimensions and controls, no-wallet/no-transaction constraints, and existing lobby navigation. External official testnet/browser-provider/custody and funded wagers stay on the canonical 420Bet testnet work roadmap, not in the practice game mode.
+
+## Neon Dice visual refresh
+
+The Dice practice page now has an isolated cinematic UI layer (`src/dice-neon.js` plus scoped CSS in `src/style.css`). The page retains the canonical 0000–9999 practice-roll range, threshold controls, win-side feedback, recent simulated rolls, and **no transaction or wallet calls**. The lobby wordmark is text-only rather than using the provisional clover logo.
+
+Two artwork assets belong in these **exact repository paths**:
+
+- `clients/420bet-lobby/public/assets/420bet/dice/neon-smoke-wallpaper.webp` (1920×1080 full-screen smoke wallpaper)
+- `clients/420bet-lobby/public/assets/420bet/dice/neon-dice.png` (transparent-edged two-dice overlay)
+
+The UI uses a CSS gradient fallback until assets are committed. Uploading these exact files is an artwork-only change and does not activate any game economy or transaction route. Neither file is present in this PR until verified; do not claim asset integration complete before upload. Rendering and viewport tests should be rechecked once the PNG/WebP assets are committed.

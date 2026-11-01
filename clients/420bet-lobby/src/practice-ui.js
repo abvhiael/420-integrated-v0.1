@@ -1,7 +1,8 @@
+import {createNeonDice} from './dice-neon.js';
 import {initial,next,PRACTICE_GAMES} from './practice-engine.js';
 const names={dice:'Dice',keno:'Keno',plinko:'Plinko',slots:'Slots',roulette:'Roulette',blackjack:'Blackjack',mines:'Mines',crash:'Crash'};
 const el=(doc,tag,cls,label)=>{const e=doc.createElement(tag);e.className=cls||'';if(label!==undefined)e.textContent=label;return e;};
-export function createPractice(id,doc=globalThis.document){if(!PRACTICE_GAMES.includes(id))return null;let state=initial(id);const root=el(doc,'section','practice');root.dataset.practiceGame=id;
+export function createPractice(id,doc=globalThis.document){if(!PRACTICE_GAMES.includes(id))return null;if(id==='dice')return createNeonDice(doc);let state=initial(id);const root=el(doc,'section','practice');root.dataset.practiceGame=id;
 const rerender=()=>{root.replaceChildren();root.append(el(doc,'p','practice-label','SIMULATED PRACTICE • NO WALLET • NO WAGERS • NO REWARDS'),el(doc,'h1','',names[id]),el(doc,'p','practice-message',state.message));const panel=el(doc,'div','practice-board');
 const action=(label,type,value)=>{const b=el(doc,'button','practice-button',label);b.type='button';b.addEventListener('click',()=>{state=next(state,{type,value});rerender();});return b;};
 const select=(label,options,type,value)=>{const wrap=el(doc,'label','practice-field',label);const picker=el(doc,'select','');picker.setAttribute('aria-label',label);for(const [v,txt] of options){const o=el(doc,'option','',txt);o.value=String(v);if(String(v)===String(value))o.setAttribute('selected','');picker.append(o);}picker.addEventListener('change',()=>{state=next(state,{type,value:picker.value});rerender();});wrap.append(picker);return wrap;};

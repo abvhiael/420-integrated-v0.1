@@ -1,0 +1,28 @@
+name: BET-AUDIT-6.3 casino practice Level 1
+on:
+  pull_request:
+    paths:
+      - 'clients/420bet-lobby/src/practice-*.js'
+      - 'clients/420bet-lobby/tests/practice.test.mjs'
+      - '.github/workflows/420bet-lobby-6-3-level1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  casino-practice-level1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install affected lobby dependencies
+        working-directory: clients/420bet-lobby
+        run: npm install --no-audit --no-fund
+      - name: Run affected frontend and lobby tests
+        working-directory: clients/420bet-lobby
+        run: npm test
+      - name: Build browser frontend
+        working-directory: clients/420bet-lobby
+        run: npm run build

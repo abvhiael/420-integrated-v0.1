@@ -5,6 +5,10 @@ on:
     paths:
       - 'clients/420bet-lobby/**'
       - '.github/workflows/420bet-lobby-6-2-level1.yml'
+  pull_request:
+    paths:
+      - 'clients/420bet-lobby/**'
+      - '.github/workflows/420bet-lobby-6-2-level1.yml'
   workflow_dispatch:
 permissions:
   contents: read

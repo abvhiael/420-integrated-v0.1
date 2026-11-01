@@ -10,13 +10,13 @@ const fail=reason=>{throw new TypeError('hc-place-02:'+reason);};
 const own=(x,k)=>Object.hasOwn(x,k);
 const exact=(x,keys)=>object(x)&&Object.keys(x).length===keys.length&&keys.every(k=>own(x,k));
 export const SURFACES=Object.freeze(['floor','outdoor_ground','wall_slot','tabletop_slot','shelf_slot']);
-export const LAYERS=Object.freeze(['furniture','cultivation','outdoor_structure','outdoor_feature','outdoor_decor','outdoor_path','outdoor_recreation','wall_decor','tabletop_decor','shelf_decor']);
+export const LAYERS=Object.freeze(['furniture','cultivation','outdoor_structure','outdoor_feature','outdoor_decor','outdoor_path','outdoor_recreation','structure','wall_decor','tabletop_decor','shelf_decor']);
 export const ORIENTATIONS=Object.freeze([0,90,180,270]);
 export const STATES=Object.freeze(['stored','placed','removed']);
 const layerSurface=Object.freeze({
  furniture:['floor'],cultivation:['floor','outdoor_ground'],outdoor_structure:['outdoor_ground'],
  outdoor_feature:['outdoor_ground'],outdoor_decor:['outdoor_ground'],outdoor_path:['outdoor_ground'],
- outdoor_recreation:['outdoor_ground'],wall_decor:['wall_slot'],
+ outdoor_recreation:['outdoor_ground'],structure:['outdoor_ground'],wall_decor:['wall_slot'],
  tabletop_decor:['tabletop_slot'],shelf_decor:['shelf_slot']
 });
 const sortedUnique=c=>Array.isArray(c)&&new Set(c).size===c.length;

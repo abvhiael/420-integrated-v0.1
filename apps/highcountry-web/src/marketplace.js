@@ -1,3 +1,8 @@
+import {fireGatheringCatalogue,getFireGatheringFeature} from './fire-gathering-catalogue.js';
+import {gardenOrnamentCatalogue,getGardenOrnament} from './garden-ornament-catalogue.js';
+import {landscapeCatalogue,getLandscapeAsset} from './landscape-catalogue.js';
+import {recreationCatalogue,getRecreationAsset} from './recreation-catalogue.js';
+import {agriculturalBuildingCatalogue,getAgriculturalBuilding} from './agricultural-building-catalogue.js';
 import {waterWildlifeCatalogue,getWaterWildlifeFeature} from './water-wildlife-catalogue.js';
 import {outdoorStructureCatalogue,getOutdoorStructure} from './outdoor-structure-catalogue.js';
 import {redMesaLeisureCatalogue,getRedMesaLeisureBuilding} from './red-mesa-leisure-catalogue.js';
@@ -114,9 +119,40 @@ export function mountMarketplace({document,main,runtime,authenticate,fetchImpl=f
    const entry=el('article'),img=document.createElement('img');img.src=asset.assetUrl;img.alt=asset.name;img.width=110;img.height=110;img.loading='lazy';img.addEventListener('error',()=>{img.hidden=true;});
    entry.append(img,el('p',asset.name+' · '+asset.footprint.width+'×'+asset.footprint.height+' · '+asset.originRegion));waterWildlife.append(entry);
   }
+  const agricultural=section('Barns, agricultural buildings & homesteads');
+  agricultural.append(el('p','Visual catalogue only. Prices, BUDS purchases and ownership require authenticated server records. Placement requires independent qualified HC-PLACE collision geometry.'));
+  for(const asset of agriculturalBuildingCatalogue){
+   const entry=el('article'),img=document.createElement('img');img.src=asset.assetUrl;img.alt=asset.name;img.width=110;img.height=110;img.loading='lazy';
+   img.addEventListener('error',()=>{img.hidden=true;});
+   entry.append(img,el('p',asset.name+' · '+asset.footprint.width+'×'+asset.footprint.height+' · '+asset.originRegion));agricultural.append(entry);
+  }
+  const recreation=section('Recreation & relaxation');
+  recreation.append(el('p','Cosmetic previews only. Pricing and ownership require authenticated server records. Interactions and clearance geometry remain unqualified.'));
+  for(const asset of recreationCatalogue){
+   const entry=el('article'),img=document.createElement('img');img.src=asset.assetUrl;img.alt=asset.name;img.width=110;img.height=110;img.loading='lazy';img.addEventListener('error',()=>{img.hidden=true;});
+   entry.append(img,el('p',asset.name+' · '+asset.footprint.width+'×'+asset.footprint.height+' · '+asset.originRegion));recreation.append(entry);
+  }
+  const landscaping=section('Paths, borders & landscape details');
+  landscaping.append(el('p','Cosmetic catalogue: BUDS prices and ownership are authenticated server records. Decorative paths do not establish parcel access or road connectivity.'));
+  for(const asset of landscapeCatalogue){
+   const entry=el('article'),img=document.createElement('img');img.src=asset.assetUrl;img.alt=asset.name;img.width=110;img.height=110;img.loading='lazy';img.addEventListener('error',()=>{img.hidden=true;});
+   entry.append(img,el('p',asset.name+' · '+asset.footprint.width+'×'+asset.footprint.height+' · '+asset.originRegion));landscaping.append(entry);
+  }
+  const gardenDecor=section('Garden ornaments & yard art');
+  gardenDecor.append(el('p','Cosmetic preview only. BUDS prices and inventory must be returned by the authenticated marketplace. Placement remains restricted pending collision qualification.'));
+  for(const asset of gardenOrnamentCatalogue){
+   const entry=el('article'),img=document.createElement('img');img.src=asset.assetUrl;img.alt=asset.name;img.width=110;img.height=110;img.loading='lazy';img.addEventListener('error',()=>{img.hidden=true;});
+   entry.append(img,el('p',asset.name+' · '+asset.footprint.width+'×'+asset.footprint.height+' · '+asset.originRegion));gardenDecor.append(entry);
+  }
+  const fire=section('Fire pits & outdoor gathering');
+  fire.append(el('p','Visual catalogue only. Prices, stock, purchase and ownership require authenticated server records. Structure collisions and fire clearances remain unqualified.'));
+  for(const asset of fireGatheringCatalogue){
+   const entry=el('article'),img=document.createElement('img');img.src=asset.assetUrl;img.alt=asset.name;img.width=110;img.height=110;img.loading='lazy';img.addEventListener('error',()=>{img.hidden=true;});
+   entry.append(img,el('p',asset.name+' · '+asset.footprint.width+'×'+asset.footprint.height+' · '+asset.originRegion));fire.append(entry);
+  }
   const inventory=section('My verified inventory');
   if(!data.inventory.length)inventory.append(el('p','No tradeable registered inventory. Local guest harvests cannot be listed.'));
-  for(const item of data.inventory)inventory.append(el('p',(getWaterWildlifeFeature(item.asset)?.name||getOutdoorStructure(item.asset)?.name||getRedMesaLeisureBuilding(item.asset)?.name||getPremiumFurniture(item.asset)?.name||getRegionalMemorabilia(item.asset)?.name||item.asset)+' · available '+item.available+' · reserved '+item.reserved));
+  for(const item of data.inventory)inventory.append(el('p',(getAgriculturalBuilding(item.asset)?.name||getRecreationAsset(item.asset)?.name||getLandscapeAsset(item.asset)?.name||getGardenOrnament(item.asset)?.name||getFireGatheringFeature(item.asset)?.name||getWaterWildlifeFeature(item.asset)?.name||getOutdoorStructure(item.asset)?.name||getRedMesaLeisureBuilding(item.asset)?.name||getPremiumFurniture(item.asset)?.name||getRegionalMemorabilia(item.asset)?.name||item.asset)+' · available '+item.available+' · reserved '+item.reserved));
   if(data.mode==='ordinary'){
    const list=section('Create a listing');
    const asset=formField(list,'Verified asset ID');

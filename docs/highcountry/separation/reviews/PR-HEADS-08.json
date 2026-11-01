@@ -1,0 +1,122 @@
+[
+  {
+    "n": 618,
+    "head": "54ba9ea5ce7abc60dea62b93e5dcf9bcc29958f3",
+    "base": "audit/highcountry-r04-7-missions",
+    "files": [
+      ".github/workflows/highcountry-r04-5-r04-8-level2.yml",
+      ".github/workflows/highcountry-r04-8.yml",
+      "contracts/src/highcountry/inventory/InventoryRegistry.sol",
+      "contracts/src/highcountry/inventory/ResourceLedger.sol",
+      "contracts/src/highcountry/market/CanonicalMarketEscrow.sol",
+      "contracts/test/highcountry/unit/inventory/InventoryRegistry.t.sol",
+      "contracts/test/highcountry/unit/market/CanonicalMarketEscrow.t.sol",
+      "docs/highcountry/HIGHCOUNTRY-TESTNET-WORK-ROADMAP.md",
+      "docs/highcountry/R04.8-MARKET.md",
+      "docs/highcountry/R04.8-PRODUCTION-DEPENDENCY-RECONCILIATION.md",
+      "docs/highcountry/qualification/R04.8-CANONICAL-CUSTODY-AND-ECONOMIC-LEVEL2-EXACT-SHA.md",
+      "docs/highcountry/qualification/R04.8-LEVEL1-AND-ECONOMIC-LEVEL2-EXACT-SHA.md",
+      "services/highcountry-economy/package.json",
+      "services/highcountry-economy/src/buds-ledger.js",
+      "services/highcountry-economy/src/canonical-escrow-reader.js",
+      "services/highcountry-economy/src/canonical-settlement-worker.js",
+      "services/highcountry-economy/src/canonical-settlement.js",
+      "services/highcountry-economy/src/inventory-escrow-authority.js",
+      "services/highcountry-economy/src/market.js",
+      "services/highcountry-economy/src/postgres-store.js",
+      "services/highcountry-economy/test/canonical-escrow-reader.test.js",
+      "services/highcountry-economy/test/canonical-settlement-worker.test.js",
+      "services/highcountry-economy/test/canonical-settlement.test.js",
+      "services/highcountry-economy/test/inventory-escrow-authority.test.js",
+      "services/highcountry-economy/test/market.test.js",
+      "services/highcountry-economy/test/postgres-live.integration.mjs"
+    ],
+    "reviewThreads": []
+  },
+  {
+    "n": 617,
+    "head": "36cc621a82e66dc79254dae4426822010c8d80dc",
+    "base": "audit/highcountry-r04-6-progression",
+    "files": [
+      ".github/workflows/highcountry-r04-7.yml",
+      "contracts/src/highcountry/missions/MissionEngine.sol",
+      "contracts/test/highcountry/unit/missions/MissionEngine.t.sol",
+      "docs/highcountry/R04.7-MISSION-ENGINE.md"
+    ],
+    "reviewThreads": []
+  },
+  {
+    "n": 615,
+    "head": "221437e59b9d0af7463d3093546ddbaae5a4e95e",
+    "base": "audit/highcountry-r04-5-buds-settlement",
+    "files": [
+      ".github/workflows/highcountry-r04-6.yml",
+      "contracts/src/highcountry/progression/ProgressionRegistries.sol",
+      "contracts/test/highcountry/unit/progression/ProgressionRegistries.t.sol",
+      "docs/highcountry/R04.6-SKILL-RESEARCH-DISCOVERY.md"
+    ],
+    "reviewThreads": []
+  },
+  {
+    "n": 613,
+    "head": "dde04b463b02478730bcdd350dd5a5d50f9e6cc3",
+    "base": "audit/highcountry-r04-4-equipment-lifecycle",
+    "files": [
+      ".github/workflows/highcountry-r04-5.yml",
+      "docs/highcountry/HIGHCOUNTRY-TESTNET-WORK-ROADMAP.md",
+      "docs/highcountry/R04.5-BUDS-AND-ECONOMIC-SETTLEMENT.md",
+      "docs/highcountry/qualification/R04.5-LEVEL1-EXACT-SHA.md",
+      "services/highcountry-economy/migrations/001_buds_state.sql",
+      "services/highcountry-economy/package.json",
+      "services/highcountry-economy/src/authenticated-service.js",
+      "services/highcountry-economy/src/buds-ledger.js",
+      "services/highcountry-economy/src/postgres-store.js",
+      "services/highcountry-economy/src/reviewed-catalog.js",
+      "services/highcountry-economy/test/authenticated-service.test.js",
+      "services/highcountry-economy/test/buds-ledger.test.js",
+      "services/highcountry-economy/test/postgres-store.test.js",
+      "services/highcountry-economy/test/reviewed-catalog.test.js"
+    ],
+    "reviewThreads": []
+  },
+  {
+    "n": 612,
+    "head": "5f8bc642bf7b7e2d07b549ca48af7c4e34a1d4b2",
+    "base": "audit/highcountry-r04-3-manufacturing",
+    "files": [
+      ".github/workflows/highcountry-r04-4.yml",
+      ".github/workflows/highcountry-r04-milestone-2.yml",
+      "contracts/src/highcountry/equipment/EquipmentLifecycleEngine.sol",
+      "contracts/src/highcountry/equipment/EquipmentRegistry.sol",
+      "contracts/test/highcountry/unit/equipment/EquipmentLifecycleEngine.t.sol",
+      "docs/highcountry/R04.4-EQUIPMENT-LIFECYCLE.md"
+    ],
+    "reviewThreads": []
+  },
+  {
+    "n": 611,
+    "head": "d397dfcdf11f2da94849ee8557a779877f4df818",
+    "base": "audit/highcountry-r04-2-equipment",
+    "files": [
+      ".github/workflows/highcountry-r04-3.yml",
+      "contracts/src/highcountry/inventory/InventoryRegistry.sol",
+      "contracts/src/highcountry/manufacturing/ManufacturingEngine.sol",
+      "contracts/test/highcountry/unit/manufacturing/ManufacturingEngine.t.sol",
+      "docs/highcountry/R04.3-MANUFACTURING-ENGINE.md",
+      "docs/highcountry/qualification/R04.3-LEVEL1-EXACT-SHA.md"
+    ],
+    "reviewThreads": []
+  },
+  {
+    "n": 610,
+    "head": "5f9152e20efdfdf4d04394b3f8e6072bd8bdaba6",
+    "base": "audit/highcountry-r04-1-inventory-ledger",
+    "files": [
+      ".github/workflows/highcountry-r04-2.yml",
+      "contracts/src/highcountry/equipment/EquipmentRegistry.sol",
+      "contracts/test/highcountry/unit/equipment/EquipmentRegistry.t.sol",
+      "docs/highcountry/R04.2-EQUIPMENT-REGISTRY.md"
+    ],
+    "reviewThreads": []
+  }
+]

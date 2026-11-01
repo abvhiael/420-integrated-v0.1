@@ -1,0 +1,20 @@
+name: HC-SEP-A2 PR781 targeted harvest provenance
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/hc-sep-a2-pr781-targeted.yml'
+permissions:
+  contents: read
+jobs:
+  exact-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Exact PR781 regression only
+        working-directory: contracts
+        run: forge test --match-path 'test/highcountry/unit/cultivation/CultivationEngine.t.sol' --match-test testR034HarvestCapacityReleaseConservesProductIssuance -vv

@@ -22,4 +22,7 @@ jobs:
         run: forge fmt --check src/highcountry/equipment/EquipmentCultivationBridge.sol test/highcountry/integration/R04EquipmentEmergency.t.sol
       - name: Affected equipment integration regression
         working-directory: contracts
-        run: forge test --match-path 'test/highcountry/integration/R04EquipmentEmergency.t.sol' -vv
+        run: forge test --match-path 'test/highcountry/integration/R04EquipmentEmergency.t.sol' --match-test testV1CatalogueManufacturingRequiresApprovedInputsAndBurnsOperatingFuel -vv
+      - name: PR786 equipment lifecycle unit qualification
+        working-directory: contracts
+        run: forge test --match-path 'test/highcountry/unit/equipment/EquipmentLifecycleEngine.t.sol' -vv

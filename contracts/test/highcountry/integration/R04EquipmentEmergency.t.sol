@@ -128,7 +128,9 @@ contract R04EquipmentEmergencyTest is PublicPlantCapacityFixture {
         inventory.setIssuer(address(this), true);
         inventory.acquire(keccak256("earned-raw"), RAW, address(this), 20);
         inventory.acquire(keccak256("funded-water"), keccak256("HC.UTILITY.WATER.CAPACITY.V1"), address(this), 100);
-        inventory.acquire(keccak256("funded-power"), keccak256("HC.UTILITY.ELECTRICITY.CAPACITY.V1"), address(this), 100);
+        inventory.acquire(
+            keccak256("funded-power"), keccak256("HC.UTILITY.ELECTRICITY.CAPACITY.V1"), address(this), 100
+        );
         equipment = new EquipmentRegistry(address(auth), address(land));
         bind(equipment);
         int16[6] memory effects;
@@ -458,7 +460,7 @@ contract R04EquipmentEmergencyTest is PublicPlantCapacityFixture {
         manufacturing.registerRecipe(invalidRecipe, d.version, ins, amounts, outs, produced, 1, 0);
         try earnedIssuer.bindRecipe(invalidRecipe, d.typeId, d.craftOutput, 1) {
             revert("unapproved recipe acquired v1 equipment");
-        } catch {}
+        } catch { }
         ins[0] = d.repairResource;
         ins[1] = d.operatingResource;
         amounts[0] = d.craftParts;

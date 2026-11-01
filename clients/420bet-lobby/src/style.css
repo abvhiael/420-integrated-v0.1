@@ -136,3 +136,10 @@
 .plinko-bucket.landed{animation:plinko-impact .42s ease-out}
 @keyframes plinko-impact{0%{transform:translateY(-7px);filter:brightness(2.2)}60%{transform:translateY(3px)}100%{transform:translateY(0)}}
 @media(prefers-reduced-motion:reduce){.plinko-bucket.landed{animation:none}}
+
+/* Plinko: label all thirteen buckets using the versioned test fixture only. */
+.plinko-bucket{font-size:clamp(.55rem,.9vw,.8rem);font-weight:950;white-space:nowrap}
+.plinko-financials{display:grid;gap:8px;margin:12px 0 16px;padding:14px;border:1px solid #46744b;border-radius:13px;background:#08271a}
+.plinko-financial-row{display:flex;justify-content:space-between;gap:12px;font-size:.88rem;color:#c4d7c1}
+.plinko-financial-row strong{color:#aaff72;font-weight:900;font-size:1.05rem}
+.plinko-schedule-warning{font-size:.8rem;line-height:1.5;color:#f3cd80;border-left:3px solid #e6b64c;padding:10px 12px;background:#392c0b40}

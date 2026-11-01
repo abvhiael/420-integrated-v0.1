@@ -2,7 +2,10 @@ name: BET-AUDIT-6.2 targeted Level 1 wallet-history
 on:
   pull_request:
     paths:
-      - 'clients/420bet-lobby/**'
+      - 'clients/420bet-lobby/src/wallet.js'
+      - 'clients/420bet-lobby/server/**'
+      - 'clients/420bet-lobby/tests/wallet.test.mjs'
+      - 'clients/420bet-lobby/tests/history-service.test.mjs'
       - '.github/workflows/420bet-lobby-6-2-level1.yml'
   workflow_dispatch:
 permissions:

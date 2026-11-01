@@ -15,6 +15,7 @@ nav:
       - Overview: users/index.md
       - Applications:
           - Genesis Application Manuals: apps/index.md
+          - 420Hz: apps/420hz/index.md
           - 420 Wallet:
               - Overview: apps/wallet/index.md
               - Getting Started: apps/wallet/getting-started.md

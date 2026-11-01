@@ -16,6 +16,11 @@ This package implements the first Decision #10 kernel for the 420 Creative Proto
 10. `economics/RoyaltyScheduleRegistry420.sol`
 11. `economics/RoyaltyVault420.sol`
 12. `economics/RoyaltyRouter420.sol`
+13. `catalog/CatalogRegistry420.sol`, `CatalogMetadataRegistry420.sol`
+14. `media/MediaManifestRegistry420.sol`, `StorageSourceRegistry420.sol`, `PlaybackResolver420.sol`, `PlaybackAccounting420.sol`
+15. `economics/StreamingSettlementEpoch420.sol`
+16. `economics/StreamingRevenueAllocator420.sol`
+17. `economics/StreamingRoyaltySettlement420.sol`
 
 ## Kernel invariants implemented
 
@@ -64,6 +69,10 @@ forge script script/Decision10DeploySeed420.s.sol:Decision10DeploySeed420 --sig 
 
 The generated manifest contains public accounts, deployed contract addresses, Creator/Work/Recording/License/transfer IDs, contributor-credit IDs, settlement IDs, version numbers and expected economic state. It deliberately excludes all private keys. CI executes the same harness, validates the critical fixture fields and uploads the JSON as the `creative-kernel-v1-fixture` artifact.
 
-## Deliberately deferred from the kernel
+## Post-kernel layers now present
 
-The package does not yet implement the later production layers for disputes, streaming Merkle settlement, AI provider execution, Awards, creator economy, DDEX/interop adapters, archival operators, or full governance migration. Those modules attach to these stable kernel boundaries after the Decision #10 acceptance harness passes.
+The repository now includes the HZ-2 catalog layer, HZ-3 provider-neutral media/playback layer, and HZ-4 streaming settlement/allocation adapter. HZ-4 consumes finalized HZ-3 playback aggregates and routes only `RevenueType.STREAM` through the existing RoyaltyRouter420/RoyaltyVault420 stack rather than introducing a second royalty authority.
+
+## Still deferred from the production application
+
+The repository does not yet implement the complete production 420Hz user application, live RPC/reorg-capable indexer runtime, public API/SDK, production storage-provider runtime, AI Studio/provider execution, Awards, DDEX/interop adapters, full application-level ecosystem bindings, or production deployment/operations. See `docs/apps/420hz/index.md` and `docs/audit/420HZ-AUDIT-REMEDIATION-ROADMAP.md`.

@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - 'apps/highcountry-web/test/a2-marketplace-consolidation.test.mjs'
+      - '.github/workflows/hc-sep-a2-marketplace-isolated.yml'
 jobs:
   marketplace:
     runs-on: ubuntu-latest

@@ -483,6 +483,7 @@ contract R04EquipmentEmergencyTest is PublicPlantCapacityFixture {
         require(inventory.ledger().balance(d.repairResource, address(this)).consumed == d.craftParts, "craft parts");
         equipment.remove(ITEM);
         equipment.place(item, 1);
+        bridge.registerUtilityPolicy(d.typeId, keccak256("v1-utility-cost-v1"), 7, 11);
         bridge.applyEnvironment(1, item, environment());
         require(cultivation.getState(1).environment.light == 7600, "real v1 light effect");
         require(

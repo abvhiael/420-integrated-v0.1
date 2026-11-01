@@ -128,3 +128,11 @@
 .plinko-bucket.landed{background:linear-gradient(#fff0a1,#ffb92f);color:#301e05;border-color:#fff8ad;box-shadow:0 0 19px #ffc743}
 .plinko-info h2{font-size:1.55rem;margin:0 0 15px}.plinko-info>p{color:#d1e1d0;line-height:1.5}.plinko-stat-label{font-size:.75rem;letter-spacing:.08em;font-weight:900;color:#bcdea9;margin-top:24px}.plinko-stat{font-size:clamp(3.8rem,6vw,6rem);color:#aaff72;font-weight:950;text-shadow:0 0 26px #65ff4180}.plinko-drop{border:1px solid #bfff8a;border-radius:100px;background:linear-gradient(#c2ff8a,#63e92a 60%,#21ac1d);padding:17px 25px;width:100%;color:#09200a;font-weight:950;box-shadow:0 0 22px #61ff4160}.plinko-safe{font-size:.79rem;color:#dccc94}
 @media(max-width:920px){.plinko-machine{grid-template-columns:1fr}.plinko-info{padding:20px}}@media(max-width:560px){.plinko-neon{padding:10px}.plinko-bucket{font-size:.54rem;padding:8px 0}.plinko-stage{padding:9px}}
+
+/* Plinko: animated emerald ball, transient peg flashes and bucket impact */
+.plinko-ball{fill:#69ed45;stroke:#ecffc9;stroke-width:3;filter:drop-shadow(0 0 13px #74ff3b) drop-shadow(0 0 7px #daff9b)}
+.plinko-flash{fill:#dfff9b;filter:drop-shadow(0 0 10px #b8ff4c);pointer-events:none}
+.plinko-peg.plinko-peg-flash{fill:#fff2aa;stroke:#fff;filter:drop-shadow(0 0 12px #ffee58)}
+.plinko-bucket.landed{animation:plinko-impact .42s ease-out}
+@keyframes plinko-impact{0%{transform:translateY(-7px);filter:brightness(2.2)}60%{transform:translateY(3px)}100%{transform:translateY(0)}}
+@media(prefers-reduced-motion:reduce){.plinko-bucket.landed{animation:none}}

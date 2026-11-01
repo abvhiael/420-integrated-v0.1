@@ -1,0 +1,242 @@
+{
+  "schema": "HC_SEP_A2_INCOMPLETE_COLLISION_ASSESSMENT",
+  "frozenMain": "78a4befa01bd08693aabfd576a6fe8fba2e2677b",
+  "ancestralPRs": [
+    643,
+    642,
+    641,
+    640,
+    639,
+    638,
+    637,
+    636,
+    635,
+    627,
+    626,
+    625,
+    624,
+    623,
+    622,
+    619,
+    618,
+    617,
+    615,
+    613,
+    612,
+    611,
+    610
+  ],
+  "divergentPRs": [
+    932,
+    931,
+    930,
+    929,
+    928,
+    917,
+    913,
+    909,
+    900,
+    896,
+    895,
+    893,
+    891,
+    890,
+    885,
+    881,
+    879,
+    878,
+    877,
+    872,
+    859,
+    856,
+    855,
+    853,
+    852,
+    851,
+    849,
+    845,
+    843,
+    839,
+    833,
+    811,
+    803,
+    796,
+    790,
+    789,
+    786,
+    781,
+    778,
+    777
+  ],
+  "overlapPaths": [
+    {
+      "path": "apps/highcountry-web/src/marketplace.js",
+      "prs": [
+        900,
+        881,
+        879,
+        877,
+        872,
+        859,
+        856,
+        855,
+        853,
+        852,
+        851,
+        849,
+        845,
+        843,
+        839
+      ]
+    },
+    {
+      "path": "apps/highcountry-web/scripts/build.mjs",
+      "prs": [
+        917,
+        913,
+        900,
+        896,
+        891,
+        881,
+        879,
+        877,
+        872,
+        839,
+        833,
+        811
+      ]
+    },
+    {
+      "path": "apps/highcountry-web/src/app.js",
+      "prs": [
+        896,
+        891,
+        833,
+        811
+      ]
+    },
+    {
+      "path": "apps/highcountry-web/server.mjs",
+      "prs": [
+        896,
+        891,
+        811
+      ]
+    },
+    {
+      "path": "tools/tiled/old-town/README.md",
+      "prs": [
+        932,
+        931
+      ]
+    },
+    {
+      "path": "tools/tiled/old-town/port-alder-old-town-review.tmj",
+      "prs": [
+        932,
+        931
+      ]
+    },
+    {
+      "path": "apps/highcountry-web/src/fire-gathering-catalogue.js",
+      "prs": [
+        928,
+        872
+      ]
+    },
+    {
+      "path": "apps/highcountry-web/src/garden-ornament-catalogue.js",
+      "prs": [
+        928,
+        877
+      ]
+    },
+    {
+      "path": "apps/highcountry-web/src/landscape-catalogue.js",
+      "prs": [
+        928,
+        879
+      ]
+    },
+    {
+      "path": "apps/highcountry-web/src/recreation-catalogue.js",
+      "prs": [
+        928,
+        881
+      ]
+    },
+    {
+      "path": "apps/highcountry-web/src/port-alder-navigation.js",
+      "prs": [
+        913,
+        891
+      ]
+    },
+    {
+      "path": ".github/workflows/highcountry-hc-world-02-l1.yml",
+      "prs": [
+        885,
+        878
+      ]
+    },
+    {
+      "path": "apps/highcountry-web/public/styles.css",
+      "prs": [
+        839,
+        833
+      ]
+    },
+    {
+      "path": "apps/highcountry-web/e2e/r068-browser.spec.mjs",
+      "prs": [
+        833,
+        811
+      ]
+    },
+    {
+      "path": "services/highcountry-economy/src/buds-ledger.js",
+      "prs": [
+        811,
+        796
+      ]
+    },
+    {
+      "path": "services/highcountry-economy/src/postgres-store.js",
+      "prs": [
+        811,
+        796
+      ]
+    },
+    {
+      "path": "services/highcountry-economy/src/runtime-service.js",
+      "prs": [
+        811,
+        803
+      ]
+    },
+    {
+      "path": "services/highcountry-economy/test/postgres-live.integration.mjs",
+      "prs": [
+        811,
+        796
+      ]
+    },
+    {
+      "path": "contracts/src/highcountry/equipment/EquipmentCultivationBridge.sol",
+      "prs": [
+        790,
+        786
+      ]
+    },
+    {
+      "path": "contracts/test/highcountry/integration/R04EquipmentEmergency.t.sol",
+      "prs": [
+        790,
+        786
+      ]
+    }
+  ],
+  "findings": "Twenty overlapping paths and 40 divergent heads remain semantically unresolved. Existing per-PR file inventories are NOT equivalent to merged code. Preserve heads without merging or deprecating any unique implementation.",
+  "actionRequired": "Review all overlapping code and patch-equivalence against current main; merge additive behavior in standalone target with tests. No code migration has been implemented or qualified by this file.",
+  "status": "INCOMPLETE"
+}

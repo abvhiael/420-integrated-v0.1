@@ -1,0 +1,23 @@
+name: HC-SEP-A2 PR790 equipment utility reconciliation
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/hc-sep-a2-pr790-targeted.yml'
+permissions:
+  contents: read
+jobs:
+  equipment-utilities:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Equipment utility source format
+        working-directory: contracts
+        run: forge fmt --check src/highcountry/equipment/EquipmentCultivationBridge.sol test/highcountry/integration/R04EquipmentEmergency.t.sol
+      - name: Affected equipment integration regression
+        working-directory: contracts
+        run: forge test --match-path 'test/highcountry/integration/R04EquipmentEmergency.t.sol' -vv

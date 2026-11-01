@@ -1,9 +1,5 @@
 name: Global Level 3 Artifact Preflight
 on:
-  pull_request:
-    paths:
-      - '.github/workflows/**'
-      - '.github/scripts/verify-level3-artifact-paths.py'
   workflow_dispatch:
 permissions:
   contents: read

@@ -1,11 +1,10 @@
 name: Universal Qualification Policy Guard
 on:
-  pull_request:
+  workflow_dispatch:
 permissions:
   contents: read
 jobs:
   validate-policy:
-    if: ${{ github.event.pull_request.number >= 906 }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:

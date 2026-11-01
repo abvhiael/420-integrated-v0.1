@@ -1,0 +1,1848 @@
+{
+  "type": "FeatureCollection",
+  "name": "HC-WORLD-ISO-02 recovered provisional geometries",
+  "properties": {
+    "source": "HC-WORLD-ISO-02 V5 + V7 B22",
+    "issuanceAuthorized": false,
+    "tilePixels": [
+      64,
+      32
+    ],
+    "logicalChunkTiles": 16
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              180,
+              50
+            ],
+            [
+              180,
+              130
+            ],
+            [
+              84,
+              130
+            ],
+            [
+              84,
+              50
+            ],
+            [
+              180,
+              50
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "layer": "block",
+        "block_id": "B01",
+        "zone": "residential",
+        "survey_status": "provisional_unverified"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              288,
+              50
+            ],
+            [
+              288,
+              130
+            ],
+            [
+              192,
+              130
+            ],
+            [
+              192,
+              50
+            ],
+            [
+              288,
+              50
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "layer": "block",
+        "block_id": "B02",
+        "zone": "residential",
+        "survey_status": "provisional_unverified"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              412,
+              50
+            ],
+            [
+              412,
+              130
+            ],
+            [
+              300,
+              130
+            ],
+            [
+              300,
+              50
+            ],
+            [
+              412,
+              50
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "layer": "block",
+        "block_id": "B03",
+        "zone": "unassigned_public",
+        "survey_status": "provisional_unverified"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              520,
+              50
+            ],
+            [
+              520,
+              130
+            ],
+            [
+              424,
+              130
+            ],
+            [
+              424,
+              50
+            ],
+            [
+              520,
+              50
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "layer": "block",
+        "block_id": "B04",
+        "zone": "residential",
+        "survey_status": "provisional_unverified"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              628,
+              50
+            ],
+            [
+              628,
+              130
+            ],
+            [
+              532,
+              130
+            ],
+            [
+              532,
+              50
+            ],
+            [
+              628,
+              50
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "layer": "block",
+        "block_id": "B05",
+        "zone": "residential",
+        "survey_status": "provisional_unverified"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              180,
+              142
+            ],
+            [
+              180,
+              222
+            ],
+            [
+              84,
+              222
+            ],
+            [
+              84,
+              142
+            ],
+            [
+              180,
+              142
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "layer": "block",
+        "block_id": "B06",
+        "zone": "residential",
+        "survey_status": "provisional_unverified"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              288,
+              142
+            ],
+            [
+              288,
+              222
+            ],
+            [
+              192,
+              222
+            ],
+            [
+              192,
+              142
+            ],
+            [
+              288,
+              142
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "layer": "block",
+        "block_id": "B07",
+        "zone": "residential",
+        "survey_status": "provisional_unverified"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              412,
+              142
+            ],
+            [
+              412,
+              222
+            ],
+            [
+              300,
+              222
+            ],
+            [
+              300,
+              142
+            ],
+            [
+              412,
+              142
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "layer": "block",
+        "block_id": "B08",
+        "zone": "unassigned_public",
+        "survey_status": "provisional_unverified"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              520,
+              142
+            ],
+            [
+              520,
+              222
+            ],
+            [
+              424,
+              222
+            ],
+            [
+              424,
+              142
+            ],
+            [
+              520,
+              142
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "layer": "block",
+        "block_id": "B09",
+        "zone": "residential",
+        "survey_status": "provisional_unverified"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              628,
+              142
+            ],
+            [
+              628,
+              222
+            ],
+            [
+              532,
+              222
+            ],
+            [
+              532,
+              142
+            ],
+            [
+              628,
+              142
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "layer": "block",
+        "block_id": "B10",
+        "zone": "residential",
+        "survey_status": "provisional_unverified"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              180,
+              234
+            ],
+            [
+              180,
+              314
+            ],
+            [
+              84,
+              314
+            ],
+            [
+              84,
+              234
+            ],
+            [
+              180,
+              234
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "layer": "block",
+        "block_id": "B11",
+        "zone": "unassigned_public",
+        "survey_status": "provisional_unverified"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              288,
+              234
+            ],
+            [
+              288,
+              314
+            ],
+            [
+              192,
+              314
+            ],
+            [
+              192,
+              234
+            ],
+            [
+              288,
+              234
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "layer": "block",
+        "block_id": "B12",
+        "zone": "commercial",
+        "survey_status": "provisional_unverified"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              412,
+              234
+            ],
+            [
+              412,
+              314
+            ],
+            [
+              300,
+              314
+            ],
+            [
+              300,
+              234
+            ],
+            [
+              412,
+              234
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "layer": "block",
+        "block_id": "B13",
+        "zone": "unassigned_public",
+        "survey_status": "provisional_unverified"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              520,
+              234
+            ],
+            [
+              520,
+              314
+            ],
+            [
+              424,
+              314
+            ],
+            [
+              424,
+              234
+            ],
+            [
+              520,
+              234
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "layer": "block",
+        "block_id": "B14",
+        "zone": "commercial",
+        "survey_status": "provisional_unverified"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              628,
+              234
+            ],
+            [
+              628,
+              314
+            ],
+            [
+              532,
+              314
+            ],
+            [
+              532,
+              234
+            ],
+            [
+              628,
+              234
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "layer": "block",
+        "block_id": "B15",
+        "zone": "residential",
+        "survey_status": "provisional_unverified"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              288,
+              326
+            ],
+            [
+              288,
+              406
+            ],
+            [
+              192,
+              406
+            ],
+            [
+              192,
+              326
+            ],
+            [
+              288,
+              326
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "layer": "block",
+        "block_id": "B16",
+        "zone": "commercial",
+        "survey_status": "provisional_unverified"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              396,
+              326
+            ],
+            [
+              396,
+              406
+            ],
+            [
+              300,
+              406
+            ],
+            [
+              300,
+              326
+            ],
+            [
+              396,
+              326
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "layer": "block",
+        "block_id": "B17",
+        "zone": "commercial",
+        "survey_status": "provisional_unverified"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              520,
+              326
+            ],
+            [
+              520,
+              406
+            ],
+            [
+              424,
+              406
+            ],
+            [
+              424,
+              326
+            ],
+            [
+              520,
+              326
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "layer": "block",
+        "block_id": "B18",
+        "zone": "commercial",
+        "survey_status": "provisional_unverified"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              628,
+              326
+            ],
+            [
+              628,
+              406
+            ],
+            [
+              532,
+              406
+            ],
+            [
+              532,
+              326
+            ],
+            [
+              628,
+              326
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "layer": "block",
+        "block_id": "B19",
+        "zone": "commercial",
+        "survey_status": "provisional_unverified"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              712,
+              326
+            ],
+            [
+              712,
+              406
+            ],
+            [
+              640,
+              406
+            ],
+            [
+              640,
+              326
+            ],
+            [
+              712,
+              326
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "layer": "block",
+        "block_id": "B20",
+        "zone": "industrial",
+        "survey_status": "provisional_unverified"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              380,
+              418
+            ],
+            [
+              380,
+              482
+            ],
+            [
+              300,
+              482
+            ],
+            [
+              300,
+              418
+            ],
+            [
+              380,
+              418
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "layer": "block",
+        "block_id": "B21",
+        "zone": "commercial",
+        "survey_status": "provisional_unverified"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              504,
+              418
+            ],
+            [
+              504,
+              482
+            ],
+            [
+              424,
+              482
+            ],
+            [
+              424,
+              418
+            ],
+            [
+              504,
+              418
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "layer": "block",
+        "block_id": "B23",
+        "zone": "unassigned_public",
+        "survey_status": "provisional_unverified"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              612,
+              418
+            ],
+            [
+              612,
+              482
+            ],
+            [
+              532,
+              482
+            ],
+            [
+              532,
+              418
+            ],
+            [
+              612,
+              418
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "layer": "block",
+        "block_id": "B24",
+        "zone": "industrial",
+        "survey_status": "provisional_unverified"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              712,
+              418
+            ],
+            [
+              712,
+              482
+            ],
+            [
+              640,
+              482
+            ],
+            [
+              640,
+              418
+            ],
+            [
+              712,
+              418
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "layer": "block",
+        "block_id": "B25",
+        "zone": "unassigned_public",
+        "survey_status": "provisional_unverified"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              191,
+              39
+            ],
+            [
+              181,
+              39
+            ],
+            [
+              83,
+              39
+            ],
+            [
+              76,
+              39
+            ],
+            [
+              73,
+              39
+            ],
+            [
+              73,
+              495
+            ],
+            [
+              76,
+              495
+            ],
+            [
+              76,
+              499
+            ],
+            [
+              720,
+              499
+            ],
+            [
+              720,
+              495
+            ],
+            [
+              723,
+              495
+            ],
+            [
+              723,
+              39
+            ],
+            [
+              720,
+              39
+            ],
+            [
+              713,
+              39
+            ],
+            [
+              639,
+              39
+            ],
+            [
+              629,
+              39
+            ],
+            [
+              531,
+              39
+            ],
+            [
+              521,
+              39
+            ],
+            [
+              423,
+              39
+            ],
+            [
+              413,
+              39
+            ],
+            [
+              299,
+              39
+            ],
+            [
+              289,
+              39
+            ],
+            [
+              191,
+              39
+            ]
+          ],
+          [
+            [
+              713,
+              315
+            ],
+            [
+              639,
+              315
+            ],
+            [
+              639,
+              233
+            ],
+            [
+              713,
+              233
+            ],
+            [
+              713,
+              315
+            ]
+          ],
+          [
+            [
+              639,
+              489
+            ],
+            [
+              639,
+              485
+            ],
+            [
+              713,
+              485
+            ],
+            [
+              713,
+              489
+            ],
+            [
+              639,
+              489
+            ]
+          ],
+          [
+            [
+              639,
+              141
+            ],
+            [
+              713,
+              141
+            ],
+            [
+              713,
+              223
+            ],
+            [
+              639,
+              223
+            ],
+            [
+              639,
+              141
+            ]
+          ],
+          [
+            [
+              639,
+              49
+            ],
+            [
+              713,
+              49
+            ],
+            [
+              713,
+              131
+            ],
+            [
+              639,
+              131
+            ],
+            [
+              639,
+              49
+            ]
+          ],
+          [
+            [
+              640,
+              418
+            ],
+            [
+              712,
+              418
+            ],
+            [
+              712,
+              482
+            ],
+            [
+              640,
+              482
+            ],
+            [
+              640,
+              418
+            ]
+          ],
+          [
+            [
+              640,
+              326
+            ],
+            [
+              712,
+              326
+            ],
+            [
+              712,
+              406
+            ],
+            [
+              640,
+              406
+            ],
+            [
+              640,
+              326
+            ]
+          ],
+          [
+            [
+              629,
+              489
+            ],
+            [
+              531,
+              489
+            ],
+            [
+              531,
+              485
+            ],
+            [
+              615,
+              485
+            ],
+            [
+              615,
+              417
+            ],
+            [
+              629,
+              417
+            ],
+            [
+              629,
+              489
+            ]
+          ],
+          [
+            [
+              532,
+              50
+            ],
+            [
+              628,
+              50
+            ],
+            [
+              628,
+              130
+            ],
+            [
+              532,
+              130
+            ],
+            [
+              532,
+              50
+            ]
+          ],
+          [
+            [
+              532,
+              326
+            ],
+            [
+              628,
+              326
+            ],
+            [
+              628,
+              406
+            ],
+            [
+              532,
+              406
+            ],
+            [
+              532,
+              326
+            ]
+          ],
+          [
+            [
+              532,
+              234
+            ],
+            [
+              628,
+              234
+            ],
+            [
+              628,
+              314
+            ],
+            [
+              532,
+              314
+            ],
+            [
+              532,
+              234
+            ]
+          ],
+          [
+            [
+              532,
+              222
+            ],
+            [
+              532,
+              142
+            ],
+            [
+              628,
+              142
+            ],
+            [
+              628,
+              222
+            ],
+            [
+              532,
+              222
+            ]
+          ],
+          [
+            [
+              532,
+              418
+            ],
+            [
+              612,
+              418
+            ],
+            [
+              612,
+              482
+            ],
+            [
+              532,
+              482
+            ],
+            [
+              532,
+              418
+            ]
+          ],
+          [
+            [
+              521,
+              489
+            ],
+            [
+              423,
+              489
+            ],
+            [
+              423,
+              485
+            ],
+            [
+              507,
+              485
+            ],
+            [
+              507,
+              417
+            ],
+            [
+              521,
+              417
+            ],
+            [
+              521,
+              489
+            ]
+          ],
+          [
+            [
+              424,
+              130
+            ],
+            [
+              424,
+              50
+            ],
+            [
+              520,
+              50
+            ],
+            [
+              520,
+              130
+            ],
+            [
+              424,
+              130
+            ]
+          ],
+          [
+            [
+              424,
+              406
+            ],
+            [
+              424,
+              326
+            ],
+            [
+              520,
+              326
+            ],
+            [
+              520,
+              406
+            ],
+            [
+              424,
+              406
+            ]
+          ],
+          [
+            [
+              424,
+              234
+            ],
+            [
+              520,
+              234
+            ],
+            [
+              520,
+              314
+            ],
+            [
+              424,
+              314
+            ],
+            [
+              424,
+              234
+            ]
+          ],
+          [
+            [
+              424,
+              142
+            ],
+            [
+              520,
+              142
+            ],
+            [
+              520,
+              222
+            ],
+            [
+              424,
+              222
+            ],
+            [
+              424,
+              142
+            ]
+          ],
+          [
+            [
+              424,
+              482
+            ],
+            [
+              424,
+              418
+            ],
+            [
+              504,
+              418
+            ],
+            [
+              504,
+              482
+            ],
+            [
+              424,
+              482
+            ]
+          ],
+          [
+            [
+              413,
+              417
+            ],
+            [
+              413,
+              489
+            ],
+            [
+              299,
+              489
+            ],
+            [
+              299,
+              485
+            ],
+            [
+              383,
+              485
+            ],
+            [
+              383,
+              417
+            ],
+            [
+              413,
+              417
+            ]
+          ],
+          [
+            [
+              413,
+              325
+            ],
+            [
+              413,
+              407
+            ],
+            [
+              399,
+              407
+            ],
+            [
+              399,
+              325
+            ],
+            [
+              413,
+              325
+            ]
+          ],
+          [
+            [
+              300,
+              234
+            ],
+            [
+              412,
+              234
+            ],
+            [
+              412,
+              314
+            ],
+            [
+              300,
+              314
+            ],
+            [
+              300,
+              234
+            ]
+          ],
+          [
+            [
+              300,
+              142
+            ],
+            [
+              412,
+              142
+            ],
+            [
+              412,
+              222
+            ],
+            [
+              300,
+              222
+            ],
+            [
+              300,
+              142
+            ]
+          ],
+          [
+            [
+              300,
+              50
+            ],
+            [
+              412,
+              50
+            ],
+            [
+              412,
+              130
+            ],
+            [
+              300,
+              130
+            ],
+            [
+              300,
+              50
+            ]
+          ],
+          [
+            [
+              300,
+              326
+            ],
+            [
+              396,
+              326
+            ],
+            [
+              396,
+              406
+            ],
+            [
+              300,
+              406
+            ],
+            [
+              300,
+              326
+            ]
+          ],
+          [
+            [
+              300,
+              418
+            ],
+            [
+              380,
+              418
+            ],
+            [
+              380,
+              482
+            ],
+            [
+              300,
+              482
+            ],
+            [
+              300,
+              418
+            ]
+          ],
+          [
+            [
+              289,
+              417
+            ],
+            [
+              289,
+              489
+            ],
+            [
+              191,
+              489
+            ],
+            [
+              191,
+              417
+            ],
+            [
+              289,
+              417
+            ]
+          ],
+          [
+            [
+              192,
+              406
+            ],
+            [
+              192,
+              326
+            ],
+            [
+              288,
+              326
+            ],
+            [
+              288,
+              406
+            ],
+            [
+              192,
+              406
+            ]
+          ],
+          [
+            [
+              192,
+              234
+            ],
+            [
+              288,
+              234
+            ],
+            [
+              288,
+              314
+            ],
+            [
+              192,
+              314
+            ],
+            [
+              192,
+              234
+            ]
+          ],
+          [
+            [
+              192,
+              142
+            ],
+            [
+              288,
+              142
+            ],
+            [
+              288,
+              222
+            ],
+            [
+              192,
+              222
+            ],
+            [
+              192,
+              142
+            ]
+          ],
+          [
+            [
+              192,
+              50
+            ],
+            [
+              288,
+              50
+            ],
+            [
+              288,
+              130
+            ],
+            [
+              192,
+              130
+            ],
+            [
+              192,
+              50
+            ]
+          ],
+          [
+            [
+              181,
+              417
+            ],
+            [
+              181,
+              489
+            ],
+            [
+              83,
+              489
+            ],
+            [
+              83,
+              417
+            ],
+            [
+              181,
+              417
+            ]
+          ],
+          [
+            [
+              181,
+              325
+            ],
+            [
+              181,
+              407
+            ],
+            [
+              83,
+              407
+            ],
+            [
+              83,
+              325
+            ],
+            [
+              181,
+              325
+            ]
+          ],
+          [
+            [
+              84,
+              130
+            ],
+            [
+              84,
+              50
+            ],
+            [
+              180,
+              50
+            ],
+            [
+              180,
+              130
+            ],
+            [
+              84,
+              130
+            ]
+          ],
+          [
+            [
+              84,
+              314
+            ],
+            [
+              84,
+              234
+            ],
+            [
+              180,
+              234
+            ],
+            [
+              180,
+              314
+            ],
+            [
+              84,
+              314
+            ]
+          ],
+          [
+            [
+              84,
+              222
+            ],
+            [
+              84,
+              142
+            ],
+            [
+              180,
+              142
+            ],
+            [
+              180,
+              222
+            ],
+            [
+              84,
+              222
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "layer": "public_road_polygon",
+        "survey_status": "provisional_unverified"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              800,
+              508
+            ],
+            [
+              800,
+              560
+            ],
+            [
+              0,
+              560
+            ],
+            [
+              0,
+              508
+            ],
+            [
+              800,
+              508
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "layer": "water_schematic",
+        "survey_status": "provisional_unverified"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              386,
+              426
+            ],
+            [
+              410,
+              426
+            ],
+            [
+              410,
+              474
+            ],
+            [
+              386,
+              474
+            ],
+            [
+              386,
+              426
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "layer": "public_park",
+        "block_id": "B22",
+        "survey_status": "provisional_v7_candidate"
+      }
+    }
+  ]
+}

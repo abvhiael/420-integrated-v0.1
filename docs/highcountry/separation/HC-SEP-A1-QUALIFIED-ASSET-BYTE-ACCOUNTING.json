@@ -1,0 +1,55 @@
+{
+  "schema": "HC-SEP-A1-QUALIFICATION-V1",
+  "scope": "HighCountry frozen-main plus 63 exact archived PR heads; asset bytes from git cat-file, no substitutions",
+  "frozenMain": "78a4befa01bd08693aabfd576a6fe8fba2e2677b",
+  "currentIntegratedMainObserved": "e1667f7e7ca0d4bcd45f051508c5a93423e80532",
+  "currentMainComparison": {
+    "aheadBy": 77,
+    "filesReported": 24,
+    "changedAssetOrTiledFiles": 0
+  },
+  "sourceAudit": {
+    "runId": 41269129395,
+    "workflowConclusion": "failure (18 historical manifest SHA-256 mismatches, not hash execution failure)",
+    "artifactId": 13068751183,
+    "artifactUrl": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/41269129395/artifacts/13068751183",
+    "assetVersions": 1553,
+    "uniquePaths": 1542,
+    "rawGitBlobsByteHashed": 1296,
+    "frozenMainAssetPaths": 1540,
+    "archivedPRVersionVariants": 13,
+    "uniquePRPaths": 2,
+    "missingRegisteredPaths": 0,
+    "historicalManifestMismatches": 18,
+    "matchedRegisteredMain": 23,
+    "unregisteredMain": 1499,
+    "duplicateContentGroups": 209,
+    "pathsWithHistoricalVersionVariants": 11
+  },
+  "historicalMismatchDisposition": "Nine background images differ in both hash and size; nine water/wildlife images differ in hash. All 18 current frozen-main bytes are valid audited bytes, not PR-only historical versions. Historical registry values deliberately preserved, and discrepancies individually logged in HC-SEP-A1-18-CHECKSUM-DISCREPANCIES.json. Do not falsely report historical manifest equivalence.",
+  "archivedUniquePaths": [
+    {
+      "path": "tools/tiled/highcountry-world-template.tmj",
+      "source": "PR-930",
+      "sha256": "ed5fee41b97a5b0b38649d56df6cec35312146bc6418978d856b9320c04830ce"
+    },
+    {
+      "path": "tools/tiled/old-town/port-alder-old-town-review.tmj",
+      "source": "PR-931 and PR-932",
+      "sha256": "dba6f7baea0d77fbbfbac23f07e4af1c0d1b3659cd57b47ea7235b6c0deb0d35"
+    }
+  ],
+  "destinationTransfer": {
+    "repository": "abvhiael/HighCountry",
+    "runId": 41270766133,
+    "conclusion": "success",
+    "sourceCommit": "78a4befa01bd08693aabfd576a6fe8fba2e2677b",
+    "destinationCommit": "ad899746423b83de4453fbe2ce752cd0f4ae0570",
+    "assetCount": 1540,
+    "sourceDestinationHashCheck": "PASS for every transferred frozen-main asset",
+    "manifestPath": "docs/highcountry/separation/CANONICAL-ASSET-BYTE-TRANSFER.json"
+  },
+  "interpretation": "100% of enumerated frozen-main and archived-PR asset versions had independently recalculated SHA-256. Historical stored hashes are not universally equal to current bytes; 18 mismatches are recorded instead of erased. Two PR-only Tiled files are preserved in archived heads and have independently verified SHA-256; these are not part of the 1540 frozen-main transfer. No images replaced.",
+  "tests": "Only dedicated source A1 audit run 41269129395 (18 expected historical registry drifts reported as failure) and dedicated transfer run 41270766133 (PASS); no gameplay qualification rerun.",
+  "next": "A2 — divergent PR reconciliation"
+}

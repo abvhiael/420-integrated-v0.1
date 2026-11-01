@@ -29,6 +29,8 @@ contract EquipmentLifecycleEngine is R04EmergencyConsumer {
         uint32 repairRestore;
         bytes32 recycleResource;
         uint256 recycleOutput;
+        bytes32 operatingResource;
+        uint256 operatingCost;
         bool exists;
     }
 
@@ -76,7 +78,7 @@ contract EquipmentLifecycleEngine is R04EmergencyConsumer {
         administrator = msg.sender;
     }
 
-    /// @notice Immutable policy for an earned equipment type; cannot rewrite existing item costs.
+    /// @notice Legacy immutable policies have durability wear but no separate operating material debit.
     function registerPolicy(
         bytes32 typeId,
         bytes32 version,
@@ -89,26 +91,53 @@ contract EquipmentLifecycleEngine is R04EmergencyConsumer {
         bytes32 recycleResource,
         uint256 recycleOutput
     ) external onlyAdmin {
-        if (
-            typeId == bytes32(0) || version == bytes32(0) || _policies[typeId].exists || maximum == 0
-                || degradeBelow == 0 || degradeBelow >= maximum || useCost == 0 || useCost > maximum
-                || repairRestore == 0 || repairRestore > maximum || repairResource == bytes32(0) || repairCost == 0
-                || recycleResource == bytes32(0) || recycleOutput == 0
-        ) revert HCInvalidState();
-        equipment.equipmentType(typeId);
-        _policies[typeId] = Policy(
-            version,
-            maximum,
-            degradeBelow,
-            useCost,
-            repairResource,
-            repairCost,
-            repairRestore,
-            recycleResource,
-            recycleOutput,
-            true
+        _registerPolicy(
+            typeId,
+            Policy(
+                version,
+                maximum,
+                degradeBelow,
+                useCost,
+                repairResource,
+                repairCost,
+                repairRestore,
+                recycleResource,
+                recycleOutput,
+                bytes32(0),
+                0,
+                true
+            )
         );
-        emit PolicyRegistered(typeId, version);
+    }
+
+    /// @notice Version-pinned policy with real inventory input consumed on each verified use.
+    /// @dev The approved catalogue and per-use cost must both be immutable before equipment use.
+    function registerPolicyWithInput(
+        bytes32 typeId,
+        Policy calldata proposed
+    ) external onlyAdmin {
+        if (proposed.operatingResource == bytes32(0) || proposed.operatingCost == 0) revert HCInvalidState();
+        _registerPolicy(typeId, proposed);
+    }
+
+    function _registerPolicy(
+        bytes32 typeId,
+        Policy memory proposed
+    ) private {
+        if (
+            typeId == bytes32(0) || proposed.version == bytes32(0) || _policies[typeId].exists || proposed.maximum == 0
+                || proposed.degradeBelow == 0 || proposed.degradeBelow >= proposed.maximum || proposed.useCost == 0
+                || proposed.useCost > proposed.maximum || proposed.repairRestore == 0
+                || proposed.repairRestore > proposed.maximum || proposed.repairResource == bytes32(0)
+                || proposed.repairCost == 0 || proposed.recycleResource == bytes32(0) || proposed.recycleOutput == 0
+                || !proposed.exists || (proposed.operatingResource == bytes32(0)) != (proposed.operatingCost == 0)
+        ) revert HCInvalidState();
+        if (equipment.equipmentType(typeId).catalogueVersion != proposed.version) revert HCInvalidState();
+        if (proposed.version == keccak256("HC.EQUIPMENT.CATALOGUE.V1") && proposed.operatingCost == 0) {
+            revert HCInvalidState();
+        }
+        _policies[typeId] = proposed;
+        emit PolicyRegistered(typeId, proposed.version);
     }
 
     function setUseVerifier(
@@ -160,11 +189,22 @@ contract EquipmentLifecycleEngine is R04EmergencyConsumer {
         if (c.state != State.FUNCTIONAL && c.state != State.DEGRADED) revert HCInvalidState();
         if (item.parcelId == 0 || equipment.retired(id)) revert HCInvalidState();
         if (equipment.land().effectiveOperator(item.parcelId) != item.owner) revert HCInvalidState();
+        if (p.operatingCost != 0) {
+            bytes32 op = keccak256(abi.encode("HC.EQUIPMENT.OPERATE.V1", block.chainid, address(this), id, c.usages));
+            inventory.reserveFor(op, p.operatingResource, item.owner, p.operatingCost);
+            inventory.consumeReservedFor(
+                keccak256(abi.encode(op, "CONSUME")), p.operatingResource, item.owner, p.operatingCost
+            );
+        }
         c.durability = c.durability > p.useCost ? c.durability - p.useCost : 0;
         ++c.usages;
         State next =
             c.durability == 0 ? State.BROKEN : c.durability < p.degradeBelow ? State.DEGRADED : State.FUNCTIONAL;
-        if (next == State.BROKEN) equipment.setLifecycleDisabled(id, true);
+        if (next == State.BROKEN) {
+            equipment.setLifecycleDisabled(id, true);
+        } else if (next == State.DEGRADED && c.state != State.DEGRADED) {
+            equipment.setLifecycleDegraded(id, true);
+        }
         c.state = next;
         emit ConditionUpdated(id, next, c.durability);
     }
@@ -185,6 +225,8 @@ contract EquipmentLifecycleEngine is R04EmergencyConsumer {
             uint256(c.durability) + p.repairRestore > p.maximum ? p.maximum : uint256(c.durability) + p.repairRestore
         );
         State next = c.durability < p.degradeBelow ? State.DEGRADED : State.FUNCTIONAL;
+        bool shouldDegrade = next == State.DEGRADED;
+        if (equipment.degraded(id) != shouldDegrade) equipment.setLifecycleDegraded(id, shouldDegrade);
         if (c.state == State.BROKEN) equipment.setLifecycleDisabled(id, false);
         c.state = next;
         emit ConditionUpdated(id, next, c.durability);

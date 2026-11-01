@@ -4,7 +4,8 @@ import { EquipmentRegistry } from "./EquipmentRegistry.sol";
 import { EquipmentLifecycleEngine } from "./EquipmentLifecycleEngine.sol";
 import { CultivationEngine } from "../cultivation/CultivationEngine.sol";
 import { PlantRegistry } from "../cultivation/PlantRegistry.sol";
-import { InventoryRegistry } from "../inventory/InventoryRegistry.sol";import { R04EmergencyConsumer } from "../security/R04EmergencyConsumer.sol";
+import { InventoryRegistry } from "../inventory/InventoryRegistry.sol";
+import { R04EmergencyConsumer } from "../security/R04EmergencyConsumer.sol";
 import { EmergencyDomains } from "../constants/EmergencyDomains.sol";
 
 contract EquipmentCultivationBridge is R04EmergencyConsumer {

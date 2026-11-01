@@ -1,0 +1,105 @@
+[
+  {
+    "n": 803,
+    "head": "4c7a08d842a2d338a83735516d6ab80de9a54f28",
+    "base": "main",
+    "files": [
+      ".github/workflows/highcountry-hc-next-4-3-deployed-acceptance.yml",
+      "docs/highcountry/HC-NEXT-4.3-CANONICAL-MARKETPLACE.md",
+      "services/highcountry-economy/src/canonical-http-indexer.js",
+      "services/highcountry-economy/src/canonical-indexer-reconciler.js",
+      "services/highcountry-economy/src/canonical-settlement-worker.js",
+      "services/highcountry-economy/src/runtime-service.js",
+      "services/highcountry-economy/src/settlement-runtime.js",
+      "services/highcountry-economy/test/canonical-http-indexer.test.js",
+      "services/highcountry-economy/test/canonical-indexer-reconciler.test.js",
+      "services/highcountry-economy/test/canonical-settlement-worker.test.js",
+      "services/highcountry-economy/test/deployed-canonical-acceptance.mjs",
+      "services/highcountry-economy/test/runtime-canonical.integration.mjs"
+    ],
+    "reviewThreads": []
+  },
+  {
+    "n": 796,
+    "head": "5877c682038e127302d3c76a66306c6aea72e61a",
+    "base": "main",
+    "files": [
+      "contracts/test/highcountry/unit/market/CanonicalMarketEscrow.t.sol",
+      "docs/highcountry/HC-NEXT-4.1-AUTHENTICATED-BUDS.md",
+      "services/highcountry-economy/src/authenticated-service.js",
+      "services/highcountry-economy/src/buds-ledger.js",
+      "services/highcountry-economy/src/postgres-store.js",
+      "services/highcountry-economy/src/runtime-integration.js",
+      "services/highcountry-economy/test/authenticated-service.test.js",
+      "services/highcountry-economy/test/canonical-settlement.test.js",
+      "services/highcountry-economy/test/postgres-live.integration.mjs",
+      "services/highcountry-economy/test/postgres-store.test.js",
+      "services/highcountry-economy/test/runtime-integration.test.js"
+    ],
+    "reviewThreads": []
+  },
+  {
+    "n": 790,
+    "head": "c76f7ef6f4abc7751f1bfb75ece753c16f380743",
+    "base": "main",
+    "files": [
+      "contracts/src/highcountry/equipment/EquipmentCultivationBridge.sol",
+      "contracts/test/highcountry/integration/R04EquipmentEmergency.t.sol"
+    ],
+    "reviewThreads": []
+  },
+  {
+    "n": 789,
+    "head": "9da4af4cb22fd815918cde4a538a6a72939577de",
+    "base": "main",
+    "files": [
+      "contracts/src/highcountry/manufacturing/ManufacturingEngine.sol",
+      "contracts/test/highcountry/unit/manufacturing/ManufacturingEngine.t.sol",
+      "docs/highcountry/HC-NEXT-3.2-MANUFACTURING-RECOVERY.md"
+    ],
+    "reviewThreads": []
+  },
+  {
+    "n": 786,
+    "head": "3bbc2c3eeb13d65d1a4edb5500cddcb94352695b",
+    "base": "main",
+    "files": [
+      "contracts/src/highcountry/equipment/EquipmentClassCatalogueV1.sol",
+      "contracts/src/highcountry/equipment/EquipmentCultivationBridge.sol",
+      "contracts/src/highcountry/equipment/EquipmentLifecycleEngine.sol",
+      "contracts/src/highcountry/equipment/EquipmentRegistry.sol",
+      "contracts/src/highcountry/equipment/ManufacturedEquipmentIssuer.sol",
+      "contracts/test/highcountry/integration/R04EquipmentEmergency.t.sol",
+      "contracts/test/highcountry/unit/equipment/EquipmentLifecycleEngine.t.sol",
+      "docs/highcountry/HC-NEXT-3.1-EQUIPMENT-CLASSES.md"
+    ],
+    "reviewThreads": []
+  },
+  {
+    "n": 781,
+    "head": "71748e58d38fce746196e83a1ff896a399e2d9a9",
+    "base": "main",
+    "files": [
+      "contracts/test/highcountry/unit/cultivation/CultivationEngine.t.sol"
+    ],
+    "reviewThreads": []
+  },
+  {
+    "n": 778,
+    "head": "d0d3ef7f6b834af2519524d0e8c05d95386abf1d",
+    "base": "main",
+    "files": [
+      "contracts/test/highcountry/integration/PhenotypeProvenance.t.sol"
+    ],
+    "reviewThreads": []
+  },
+  {
+    "n": 777,
+    "head": "1ff0fc04cfc1b7bcc2ab1329853e847c637da507",
+    "base": "main",
+    "files": [
+      "contracts/test/highcountry/integration/PlantSourceConsumption.t.sol"
+    ],
+    "reviewThreads": []
+  }
+]

@@ -1,0 +1,2334 @@
+{
+  "sourceCommit": "78a4befa01bd08693aabfd576a6fe8fba2e2677b",
+  "inventory": {
+    "profile": {
+      "truncated": false,
+      "count": 109,
+      "files": [
+        {
+          "path": "migrations/007_highcountry_r066_routine.up.sql",
+          "sha": "fd17a44f27522f26153601a48bf9559a4b95a764",
+          "size": 1183
+        },
+        {
+          "path": "migrations/010_highcountry_ordinary_exhibitions.up.sql",
+          "sha": "284a63f2bb8d92f06185b6880ad68d35e92956c2",
+          "size": 3482
+        },
+        {
+          "path": "migrations/011_highcountry_cup_achievements.up.sql",
+          "sha": "425aa850afd2c3ee2401c1e41dec2a14a99a3e7f",
+          "size": 1410
+        },
+        {
+          "path": "migrations/012_highcountry_exhibition_recovery.up.sql",
+          "sha": "2207042da1c73813146e56091e46076af0f50437",
+          "size": 1253
+        },
+        {
+          "path": "src/canonical-gaming-finality.js",
+          "sha": "ccdc925d46209afc9fb52647735d0e81d0b9742b",
+          "size": 12314
+        },
+        {
+          "path": "src/durable-gaming-event-indexer.js",
+          "sha": "71613a21060c8521cdad92836d15a47d1d8f2cde",
+          "size": 16458
+        },
+        {
+          "path": "src/gaming-event-abi.js",
+          "sha": "d9964bc91d789ba1b188dca4fdc272650d39cb32",
+          "size": 4960
+        },
+        {
+          "path": "src/gaming-event-http.js",
+          "sha": "efb4ba3d80cc85bea45ab79fedd1fa056d12dfed",
+          "size": 3694
+        },
+        {
+          "path": "src/gaming-event-scope-resolver.js",
+          "sha": "51ee3b1814f455439a54a7f62066640aae80db84",
+          "size": 4099
+        },
+        {
+          "path": "src/highcountry-cloud-http.js",
+          "sha": "d1b2727f12ce9d81794f99c056276f5a9ce47b65",
+          "size": 8358
+        },
+        {
+          "path": "src/highcountry-cup-achievements.js",
+          "sha": "b7fb925ae59efd6f814533a6cc6352c66d71d0a5",
+          "size": 4001
+        },
+        {
+          "path": "src/highcountry-cup-migrations.js",
+          "sha": "dddee76421a8a208fe81aeeac297a0967a1180b4",
+          "size": 2038
+        },
+        {
+          "path": "src/highcountry-cup-rpc.js",
+          "sha": "3d0a6ceb3bcb2a2d7a89652533a681fb75153cbe",
+          "size": 7824
+        },
+        {
+          "path": "src/highcountry-cup-runtime.js",
+          "sha": "fd3ea04647c95b338c3bc4689038ea3ec6a442b9",
+          "size": 1121
+        },
+        {
+          "path": "src/highcountry-exhibition-recovery-migrations.js",
+          "sha": "e09d894ce83d4cbaee5fd9429af2394278974142",
+          "size": 2081
+        },
+        {
+          "path": "src/highcountry-global-cup.js",
+          "sha": "48e6275a72a0832c3497638193a3731781dfeaf4",
+          "size": 3798
+        },
+        {
+          "path": "src/highcountry-local-auth-http.js",
+          "sha": "c300e6f9afa3ba54440bc22f552dafef320aa429",
+          "size": 2280
+        },
+        {
+          "path": "src/highcountry-local-issuer.js",
+          "sha": "ff0ff0ba806eeaa8e0ac21ed8c31407b8f0fef8a",
+          "size": 3298
+        },
+        {
+          "path": "src/highcountry-ordinary-exhibitions.js",
+          "sha": "8141c0b4c66bbc97fd1b0759f65fd704a0d30e15",
+          "size": 8650
+        },
+        {
+          "path": "src/highcountry-ordinary-migrations.js",
+          "sha": "c816200a952fd1444df0a2c1f55de0f262d7fba9",
+          "size": 2041
+        },
+        {
+          "path": "src/highcountry-ordinary-postgres.js",
+          "sha": "9269614ead4b283ddab9ac02fe601b9a10a18d60",
+          "size": 5534
+        },
+        {
+          "path": "src/highcountry-premium-authorization.js",
+          "sha": "3592f20e67621c12f4e74d2b59eafe57a5116436",
+          "size": 3199
+        },
+        {
+          "path": "src/highcountry-premium-rpc.js",
+          "sha": "eac22e2050d29c8f85df838757f6c05c72854430",
+          "size": 3838
+        },
+        {
+          "path": "src/highcountry-r064-feature-http.js",
+          "sha": "b50f1719ded87297e713c71c9d61eaf1a67666c9",
+          "size": 6119
+        },
+        {
+          "path": "src/highcountry-r066-routine-authority.js",
+          "sha": "aa2e9be931c081331994ce5b06ac7b8c890d1d76",
+          "size": 3088
+        },
+        {
+          "path": "src/highcountry-r066-routine-http.js",
+          "sha": "500b98820ba165cdd0bd4ee18bd46028eb3e57a3",
+          "size": 1933
+        },
+        {
+          "path": "src/highcountry-r066-routine-journal.js",
+          "sha": "92b782f5c18ae7304ebed10be283c086a70810bb",
+          "size": 1014
+        },
+        {
+          "path": "src/pinned-gaming-event-rpc.js",
+          "sha": "3a2edb4f04b808ce617a45e155b053fbdc1107a4",
+          "size": 3433
+        },
+        {
+          "path": "test/canonical-gaming-finality.test.js",
+          "sha": "8ea2469a90605251b4f91f93f70ea338fc7d211c",
+          "size": 9521
+        },
+        {
+          "path": "test/gaming-event-abi.test.js",
+          "sha": "85d0c65a6c699553837e0404e7fd933e85c0a7dc",
+          "size": 4693
+        },
+        {
+          "path": "test/gaming-event-http.test.js",
+          "sha": "360a515952f346a5456ab5ab85fcd9dfe1b0ef35",
+          "size": 2289
+        },
+        {
+          "path": "test/highcountry-cloud-http.test.js",
+          "sha": "d32206429e6f8281a02e01e786393a27d0e4d83b",
+          "size": 1618
+        },
+        {
+          "path": "test/highcountry-cup-anvil.integration.mjs",
+          "sha": "8b006a251927f035834e9c4f872292ba85a59eaa",
+          "size": 8211
+        },
+        {
+          "path": "test/highcountry-cup-http.test.js",
+          "sha": "2de1085c1456dfa7bc63ef3d4a7edbd6085af5f6",
+          "size": 1720
+        },
+        {
+          "path": "test/highcountry-cup-integration.test.js",
+          "sha": "d710a47c96269c2f0977763615b5cb938eb1c84b",
+          "size": 12013
+        },
+        {
+          "path": "test/highcountry-cup-postgres.integration.mjs",
+          "sha": "5db60e3442d9fd49649fb7ccded4b27abf54c032",
+          "size": 4233
+        },
+        {
+          "path": "test/highcountry-global-cup.test.js",
+          "sha": "45f551f6fbbf7d00bd9ba15ac960e144f9681a70",
+          "size": 3291
+        },
+        {
+          "path": "test/highcountry-local-auth-http.test.js",
+          "sha": "a61d58fd23ffae66b99cb5bb3ec5d186268fb335",
+          "size": 1549
+        },
+        {
+          "path": "test/highcountry-local-issuer.test.js",
+          "sha": "1ab892f66d42290eb339c00df65e3151f652d22b",
+          "size": 1561
+        },
+        {
+          "path": "test/highcountry-ordinary-exhibitions.test.js",
+          "sha": "82cad0a6ba5cf1525abc0e32b814928974054359",
+          "size": 7000
+        },
+        {
+          "path": "test/highcountry-ordinary-http.test.js",
+          "sha": "975c54ad4182530f0c691d172e8c425b1d7fbcc3",
+          "size": 2008
+        },
+        {
+          "path": "test/highcountry-ordinary-postgres.integration.mjs",
+          "sha": "d501f915e717b37041275eedd3c9f96a43435bf1",
+          "size": 5707
+        },
+        {
+          "path": "test/highcountry-premium-authorization.test.js",
+          "sha": "0e8bba7430d56054d9e27873c94ef527629d3fa9",
+          "size": 3047
+        },
+        {
+          "path": "test/highcountry-premium-http.test.js",
+          "sha": "9e77e9c8200919095729bd281e93d90c32b0ca0b",
+          "size": 1789
+        },
+        {
+          "path": "test/highcountry-premium-rpc.test.js",
+          "sha": "368cbfde53316e881d79dcdfcc80f13881cd4b55",
+          "size": 2885
+        },
+        {
+          "path": "test/highcountry-r063-postgres.integration.mjs",
+          "sha": "e68de21ac02727497438a1dcc5003ccc4f4e308a",
+          "size": 7664
+        },
+        {
+          "path": "test/highcountry-r064-feature-http.test.js",
+          "sha": "6b0f326ce7cacad0cb023b4f331bdd1e5753ad51",
+          "size": 1402
+        },
+        {
+          "path": "test/highcountry-r064-postgres.integration.mjs",
+          "sha": "41ae1310308c81773ee3b13c76f1c4009cee2f01",
+          "size": 4569
+        },
+        {
+          "path": "test/highcountry-r064-wallet-http.test.js",
+          "sha": "6583a7a00a9b0eb49c4430f0cb2b699a8cc929d5",
+          "size": 1391
+        },
+        {
+          "path": "test/highcountry-r066-postgres.integration.mjs",
+          "sha": "c0be89e44bce475d92fbecca837d80f7c30b97a2",
+          "size": 2195
+        },
+        {
+          "path": "test/highcountry-r066-revocation.test.js",
+          "sha": "efe14def780704d02ae6a72db8449675a0da188f",
+          "size": 3222
+        },
+        {
+          "path": "test/highcountry-r066-routine-authority.test.js",
+          "sha": "3d386ef0e792f9ce1a20b93baa6ac2c4ff4d9c49",
+          "size": 2391
+        },
+        {
+          "path": "test/highcountry-r066-routine-http.test.js",
+          "sha": "9a2c7e46e437e9a8689936b1c2dfa7ff72cbd3d3",
+          "size": 2024
+        },
+        {
+          "path": "test/highcountry-r066-routine-journal.test.js",
+          "sha": "5973cdedecdc09dfb8ee85acbdb2c473d94aeb49",
+          "size": 908
+        },
+        {
+          "path": "test/pinned-gaming-event-rpc.test.js",
+          "sha": "2f8a0f98fe61dfd31dc607aff6ae3e96a04a93e0",
+          "size": 1956
+        }
+      ]
+    },
+    "workflows": {
+      "truncated": false,
+      "count": 522,
+      "files": [
+        {
+          "path": "contracts-genesis.yml",
+          "sha": "57600049c04e02749b15e3164ae9d81b4890995c",
+          "size": 1118
+        },
+        {
+          "path": "gaming-client-hardening.yml",
+          "sha": "9b83425b58fd99971ba19b7600a87545b47f0ce6",
+          "size": 838
+        },
+        {
+          "path": "gaming-cross-game-qualification.yml",
+          "sha": "1420f190a3e359a0980881a1fc03c0834884f3eb",
+          "size": 750
+        },
+        {
+          "path": "gaming-four-game-e2e.yml",
+          "sha": "5ed27b9f23928cc532828bfc691fa54b4b05e1b6",
+          "size": 835
+        },
+        {
+          "path": "gaming-live-testnet.yml",
+          "sha": "c49cc298974071e4b53c90ca2de6cc5675cf5738",
+          "size": 2293
+        },
+        {
+          "path": "gaming-player-profile-service.yml",
+          "sha": "97fa505cb9b51fe371e1e4b7fa04aa11d2118679",
+          "size": 757
+        },
+        {
+          "path": "gaming-query.yml",
+          "sha": "e89905bfb0120b89cb5100538a4ad6412197f17b",
+          "size": 489
+        },
+        {
+          "path": "gaming-runtime.yml",
+          "sha": "7fe9c2980cd2c782bac3addac526edabd104e992",
+          "size": 613
+        },
+        {
+          "path": "gaming-sdk.yml",
+          "sha": "859372999a20200cfea6932da86146d1a783a353",
+          "size": 741
+        },
+        {
+          "path": "gaming-security-hardening.yml",
+          "sha": "0566428cef9dfefb7ea861a60b9e4cf1f4d2e21b",
+          "size": 1991
+        },
+        {
+          "path": "genesis-address-authority.yml",
+          "sha": "dfd7c6bcb6fb4eeab639d03d32ec675b372b9e7d",
+          "size": 3064
+        },
+        {
+          "path": "genesis-arcade-deferral-reconcile.yml",
+          "sha": "344ae8184751372ffff0e2617fd628bcd18c8b30",
+          "size": 641
+        },
+        {
+          "path": "hc-art-04-a-outdoor-structures.yml",
+          "sha": "5d93bfa9995ce287c8f1ef3f5e86a0736af527f3",
+          "size": 1287
+        },
+        {
+          "path": "hc-art-04-c-water-wildlife.yml",
+          "sha": "6963b06ae032692d0745cf435ed725e2c1881841",
+          "size": 1205
+        },
+        {
+          "path": "hc-art-05-e-red-mesa.yml",
+          "sha": "ee6749d1a45cae9a206cd76dcaac67d2860ce819",
+          "size": 2100
+        },
+        {
+          "path": "hc-art-05-inventory.yml",
+          "sha": "25de37154bd6eab66bf00b0232227e2e40afb744",
+          "size": 608
+        },
+        {
+          "path": "hc-place-03-b5-manual-qualification.yml",
+          "sha": "d9a274e137d94e58449eac0a8700dd40161367dd",
+          "size": 1487
+        },
+        {
+          "path": "highcountry-a06-scoped.yml",
+          "sha": "999284635f195028e59c0f151e5ea263f7d11580",
+          "size": 1147
+        },
+        {
+          "path": "highcountry-archive-discovery.yml",
+          "sha": "49c06e0c566ac486a71ada6899b90777ba31a130",
+          "size": 607
+        },
+        {
+          "path": "highcountry-competition-next-7-1.yml",
+          "sha": "8f203ef13e5ad2b3e934545ca1d815188d6b8d55",
+          "size": 1432
+        },
+        {
+          "path": "highcountry-cooperatives-next-6-4.yml",
+          "sha": "aea824090765068918f6f9096a217e73c0606876",
+          "size": 1569
+        },
+        {
+          "path": "highcountry-cultivar-escrow.yml",
+          "sha": "ced5d5714cfdb487ba413ab2c383d0017d696b81",
+          "size": 738
+        },
+        {
+          "path": "highcountry-cultivar-governance-service.yml",
+          "sha": "71e16e61b8243a84ab7558b63ea3fb5ad58e8535",
+          "size": 566
+        },
+        {
+          "path": "highcountry-cultivar-moderation.yml",
+          "sha": "6dbd54718684bfa5208da7e61c437de5c96fea50",
+          "size": 1126
+        },
+        {
+          "path": "highcountry-discovery.yml",
+          "sha": "6258c6bbebe6e97ec9156f502147a66ed3bf1363",
+          "size": 1086
+        },
+        {
+          "path": "highcountry-global-cup-next-7-4-level2.yml",
+          "sha": "e6fe0cf7f923226f32d9b3480b938acf0d9329be",
+          "size": 2202
+        },
+        {
+          "path": "highcountry-global-cup-next-7-4.yml",
+          "sha": "000ca836db50cebf626b55c3bc9bcced396d43b9",
+          "size": 3085
+        },
+        {
+          "path": "highcountry-hc-econ-01-l1.yml",
+          "sha": "625fb8659a629761369977614d4e7cf04d99071a",
+          "size": 655
+        },
+        {
+          "path": "highcountry-hc-econ-02-l1.yml",
+          "sha": "dfa3de01c5e83332874e05f0bad93f1a91e9f307",
+          "size": 1092
+        },
+        {
+          "path": "highcountry-hc-econ-03-l1.yml",
+          "sha": "b24e05ccac0d7ab24d1487a60506eae2d2225288",
+          "size": 1085
+        },
+        {
+          "path": "highcountry-hc-econ-04-l1.yml",
+          "sha": "1072cee42f210f53c5f7776d586957f084624de1",
+          "size": 1102
+        },
+        {
+          "path": "highcountry-hc-econ-05-l1.yml",
+          "sha": "ee2fc519b2e66976a4a0f3c3a68335cdb81ac2fd",
+          "size": 1267
+        },
+        {
+          "path": "highcountry-hc-econ-06-l1.yml",
+          "sha": "b1a3b8fdf15ece6fa553cb729c726b63ec2591b3",
+          "size": 914
+        },
+        {
+          "path": "highcountry-hc-place-01-l1.yml",
+          "sha": "37020a991fc8454ca99afe23ff9ef6333fc06f9f",
+          "size": 553
+        },
+        {
+          "path": "highcountry-hc-place-02-l1.yml",
+          "sha": "0ebae56cc802e42c6263c4ea1e2dc47aadb21eff",
+          "size": 658
+        },
+        {
+          "path": "highcountry-hc-place-03-l1.yml",
+          "sha": "6dceb4a00dca9e469505522ba068c0515d51a0e8",
+          "size": 727
+        },
+        {
+          "path": "highcountry-hc-place-03a-l2.yml",
+          "sha": "bc586276c0c17e20a280e0ad6ad2f3fe587257b7",
+          "size": 1577
+        },
+        {
+          "path": "highcountry-hc-place-03b1-l1.yml",
+          "sha": "5f38a84b8ce08ef39b970d64405542f3466d431d",
+          "size": 720
+        },
+        {
+          "path": "highcountry-hc-place-03b3-l1.yml",
+          "sha": "fec4f972f6b7050a85d9d8d95ed08a4c660e9a52",
+          "size": 1331
+        },
+        {
+          "path": "highcountry-hc-place-03b4-l1.yml",
+          "sha": "9ddf397766fd9e6cf0b74902f72540fd1a071f93",
+          "size": 990
+        },
+        {
+          "path": "highcountry-hc-place-03b5-l2.yml",
+          "sha": "cc1160801764c3706970ebc2a671d1bcce480e98",
+          "size": 1710
+        },
+        {
+          "path": "highcountry-hc-place-03c-l1.yml",
+          "sha": "14d095c7424f41979bc79ded0a4927522dd9ae44",
+          "size": 1869
+        },
+        {
+          "path": "highcountry-hc-world-01-l1.yml",
+          "sha": "fe9fea97d01d698588f4d6cdbad50139863340dd",
+          "size": 727
+        },
+        {
+          "path": "highcountry-hc-world-02-l1.yml",
+          "sha": "c15208ac3756fee8fc511903749610f516bc8b17",
+          "size": 1052
+        },
+        {
+          "path": "highcountry-hc-world-06-port-alder-l1.yml",
+          "sha": "41270b26bce2af59952d04f117b3cd605ead134a",
+          "size": 1192
+        },
+        {
+          "path": "highcountry-land-leases.yml",
+          "sha": "073e9b1df6d9112a392077dff0cf79887d94a1e6",
+          "size": 911
+        },
+        {
+          "path": "highcountry-licensing-rights.yml",
+          "sha": "8af304a1b2fcf80d450d8d3d6b81d02699f32132",
+          "size": 950
+        },
+        {
+          "path": "highcountry-missions.yml",
+          "sha": "6b90f115c0de33d6284c43abe6c1648824824f83",
+          "size": 690
+        },
+        {
+          "path": "highcountry-next-7-5-f-acceptance.yml",
+          "sha": "be1d59a947af3c2e19fc08d64af20f4099e27907",
+          "size": 2145
+        },
+        {
+          "path": "highcountry-next-8-1-acceptance.yml",
+          "sha": "f99c98eed8c2ce4d7fa071a4654031ddabcacc36",
+          "size": 1638
+        },
+        {
+          "path": "highcountry-ordinary-exhibitions-next-7-2-level2.yml",
+          "sha": "87f3b7629044992f3a451ee7578ad8623a5ed6ff",
+          "size": 3275
+        },
+        {
+          "path": "highcountry-ordinary-exhibitions-next-7-2.yml",
+          "sha": "c85a9e72353ed6b31c51c199176a5cc54322e7ee",
+          "size": 2505
+        },
+        {
+          "path": "highcountry-organizations-next-6-3.yml",
+          "sha": "34c4f15c75326545572885e2f1058bc9e7ccecf0",
+          "size": 1568
+        },
+        {
+          "path": "highcountry-premium-bounded-next-7-3.yml",
+          "sha": "a40cdfb7e3c657c4fc1ce38d759cd5e3dcac49aa",
+          "size": 1392
+        },
+        {
+          "path": "highcountry-premium-next-7-3.yml",
+          "sha": "f1a046fa622c5af369f885316d3c8fc42fd29e22",
+          "size": 1325
+        },
+        {
+          "path": "highcountry-r02-10.yml",
+          "sha": "da9ffeae6549f23b6daa64291e2acf65e58a06c3",
+          "size": 3381
+        },
+        {
+          "path": "highcountry-r02-11.yml",
+          "sha": "aa938ad2343c22c527f4103d68ba0e0519aeb279",
+          "size": 3388
+        },
+        {
+          "path": "highcountry-r02-12.yml",
+          "sha": "79b96cf2aa7ba749ec2d4d860449494d321678db",
+          "size": 3669
+        },
+        {
+          "path": "highcountry-r02-13.yml",
+          "sha": "04b92816786f200a9254b9c9bb21da028d32d25f",
+          "size": 3922
+        },
+        {
+          "path": "highcountry-r02-4.yml",
+          "sha": "4f2e28ee71c9a7e1c64bc279d6d3e0d043f1cbdd",
+          "size": 4133
+        },
+        {
+          "path": "highcountry-r02-5.yml",
+          "sha": "d82b726f6009eaed7a7f90855dc745d152e896a4",
+          "size": 4795
+        },
+        {
+          "path": "highcountry-r02-6.yml",
+          "sha": "e75324ad910142317ae4aacde42b157f9a7882e4",
+          "size": 5220
+        },
+        {
+          "path": "highcountry-r02-7.yml",
+          "sha": "ef858c4c841d2f9ed5febb63d5432b55c46299a2",
+          "size": 5603
+        },
+        {
+          "path": "highcountry-r02-8.yml",
+          "sha": "68e284d383e568e9592555382fbba1e1430f0543",
+          "size": 2387
+        },
+        {
+          "path": "highcountry-r02-9.yml",
+          "sha": "3c009e576240c42d730e72a8c000a30bdd122210",
+          "size": 2712
+        },
+        {
+          "path": "highcountry-r02-level2.yml",
+          "sha": "88e27530276a39cc12303229cf0e8f421dd536ad",
+          "size": 1703
+        },
+        {
+          "path": "highcountry-r03-1.yml",
+          "sha": "f3e3a19f508b3c0558604a661c4d9ebd0eaa99a2",
+          "size": 2355
+        },
+        {
+          "path": "highcountry-r03-2.yml",
+          "sha": "9bf03ed3216b574c8b1e6f929316e65900198a5d",
+          "size": 2016
+        },
+        {
+          "path": "highcountry-r03-3.yml",
+          "sha": "23dfcd5d890b177c8127c50687e9a80c25ca86b6",
+          "size": 2459
+        },
+        {
+          "path": "highcountry-r03-4.yml",
+          "sha": "2a418d701501b119eb5f3a02b1706d64e50ace6b",
+          "size": 2041
+        },
+        {
+          "path": "highcountry-r03-5.yml",
+          "sha": "cf80a71d4653254eedce424668c999a5d8249bb9",
+          "size": 1996
+        },
+        {
+          "path": "highcountry-r04-1.yml",
+          "sha": "a3cfbed189ea16b198ec09a8e1f7f49f5fb201d0",
+          "size": 2712
+        },
+        {
+          "path": "highcountry-r04-10.yml",
+          "sha": "d5323945eaa9850a290856dd68ace754eafb331f",
+          "size": 1732
+        },
+        {
+          "path": "highcountry-r04-11.yml",
+          "sha": "7fbe69fecde064211dd4b0e205a45e233ca932d8",
+          "size": 1738
+        },
+        {
+          "path": "highcountry-r04-12.yml",
+          "sha": "b0af8c979ef9e7fe1ec9f513843aacb812ff0a60",
+          "size": 1744
+        },
+        {
+          "path": "highcountry-r04-13.yml",
+          "sha": "803ce3cf7ae77d2b23da9664de051023821c675c",
+          "size": 1655
+        },
+        {
+          "path": "highcountry-r04-14.yml",
+          "sha": "e8c7fcd0904554605f3b6059490253c96c298ef9",
+          "size": 2034
+        },
+        {
+          "path": "highcountry-r04-2.yml",
+          "sha": "d0b4219ed3ede02c7a48c27c5e3f00bac8649e43",
+          "size": 2396
+        },
+        {
+          "path": "highcountry-r04-3.yml",
+          "sha": "4b93ee70d77198f897ac638bd4119a7cb52e0e7b",
+          "size": 2941
+        },
+        {
+          "path": "highcountry-r04-4.yml",
+          "sha": "a0af25d29d9c5e84b13691af527ecece264c86bf",
+          "size": 2665
+        },
+        {
+          "path": "highcountry-r04-5-r04-8-level2.yml",
+          "sha": "557a40e56e35b67b7df418e3ccf3859905969854",
+          "size": 4121
+        },
+        {
+          "path": "highcountry-r04-5.yml",
+          "sha": "8988421eb88c79ac072a6248894c4be41cc6aa60",
+          "size": 1162
+        },
+        {
+          "path": "highcountry-r04-6.yml",
+          "sha": "efe4700f71838e5e24eb1bfb0cf3e6846266594a",
+          "size": 1705
+        },
+        {
+          "path": "highcountry-r04-7.yml",
+          "sha": "3ed2a4086fcfdc2adec767984749d120903fbb99",
+          "size": 1677
+        },
+        {
+          "path": "highcountry-r04-8.yml",
+          "sha": "4fb9ab84e78987a138079dd3b81bae6fbef82522",
+          "size": 1394
+        },
+        {
+          "path": "highcountry-r04-9.yml",
+          "sha": "9563f30a54f90932ea5724b5d2faeb52cdbe8e4a",
+          "size": 2612
+        },
+        {
+          "path": "highcountry-r04-level2.yml",
+          "sha": "51d4cbea3f285ae1ae4e128e91536759d3709c99",
+          "size": 8054
+        },
+        {
+          "path": "highcountry-r04-milestone-2.yml",
+          "sha": "ac5da1aaaa901150196397a913d27217afa1367c",
+          "size": 2470
+        },
+        {
+          "path": "highcountry-r05-1.yml",
+          "sha": "81451fa6a1e4a3f572dedfcf0d47412671e2ac37",
+          "size": 2129
+        },
+        {
+          "path": "highcountry-r05-2.yml",
+          "sha": "75a354614c6c7e9de5a465fc7d3bb5abc977ae30",
+          "size": 2708
+        },
+        {
+          "path": "highcountry-r05-3-level2.yml",
+          "sha": "15234a77f7c1f6c99b78451cfd521e8f84e97449",
+          "size": 2256
+        },
+        {
+          "path": "highcountry-r05-3.yml",
+          "sha": "6539f01c00dce91ffda32ad7e5b70166434be029",
+          "size": 2988
+        },
+        {
+          "path": "highcountry-r05-4.yml",
+          "sha": "afff8b90e4ce7769d1c496fbf9e9a874f4ed7ca9",
+          "size": 4390
+        },
+        {
+          "path": "highcountry-r05-5.yml",
+          "sha": "0d8957772786ec8fb0048e3c917baa5c58537259",
+          "size": 2434
+        },
+        {
+          "path": "highcountry-r05-6.yml",
+          "sha": "2c45b3250038c2b8778411ff8e1dff5a0b2f0854",
+          "size": 4342
+        },
+        {
+          "path": "highcountry-r05-7.yml",
+          "sha": "8ae320bad9e37a9cfd0d53931f2dee64cb7ffe6e",
+          "size": 1959
+        },
+        {
+          "path": "highcountry-r05-8.yml",
+          "sha": "b72ae377cb9b1d49b7ac5e46ead1d60fcdb24d29",
+          "size": 1879
+        },
+        {
+          "path": "highcountry-r05-9.yml",
+          "sha": "f442fe6faa9ee16d07303a38e4fcf10790bc1ce1",
+          "size": 2599
+        },
+        {
+          "path": "highcountry-r06-1.yml",
+          "sha": "db0bb7f74920dac42aefb5fbd9aeea50cee29ba3",
+          "size": 1882
+        },
+        {
+          "path": "highcountry-r06-2.yml",
+          "sha": "657597143d25373667e4f2c651052f04d8381c7f",
+          "size": 1477
+        },
+        {
+          "path": "highcountry-r06-3-local-identity.yml",
+          "sha": "9fa458bcc79bf84d20ddc09e2b4308abd8fe0d85",
+          "size": 1455
+        },
+        {
+          "path": "highcountry-r06-3-postgres.yml",
+          "sha": "c1e37f7e293781551f9c9bf79587b94890fc4380",
+          "size": 2002
+        },
+        {
+          "path": "highcountry-r06-3-service.yml",
+          "sha": "b87d8e80f9bb41c5ced6bf83ee4aa0904ce254f3",
+          "size": 1273
+        },
+        {
+          "path": "highcountry-r06-3.yml",
+          "sha": "dc1a51e48c931c430bd8d2d3b253c0e3da6b1cf5",
+          "size": 1034
+        },
+        {
+          "path": "highcountry-r06-4.yml",
+          "sha": "841a1058609b1a82f1980b859c10c2e2287e27c9",
+          "size": 2791
+        },
+        {
+          "path": "highcountry-r06-5.yml",
+          "sha": "56336508e003e45f0accbc7e70650e924e5909a9",
+          "size": 1587
+        },
+        {
+          "path": "highcountry-r06-6.yml",
+          "sha": "41326d79c50e2e5dd1d1b7d70b1c483181ecc003",
+          "size": 3219
+        },
+        {
+          "path": "highcountry-r06-7.yml",
+          "sha": "a4f7d3595a56809c37dad693fc01dabcfa71fcd4",
+          "size": 1544
+        },
+        {
+          "path": "highcountry-r06-8.yml",
+          "sha": "367745ab98b65bebda264509a8b6c175fd920cd3",
+          "size": 1847
+        },
+        {
+          "path": "highcountry-r06-level3.yml",
+          "sha": "63f3060671431e0176ab4337c1846ee5eee253b9",
+          "size": 3998
+        },
+        {
+          "path": "highcountry-r07-1.yml",
+          "sha": "bdd4e79f208ac973595b67b5dce0e3651c2370ed",
+          "size": 1423
+        },
+        {
+          "path": "highcountry-r07-2-real-contract.yml",
+          "sha": "16fccabf21ccf94935ed14995dd614801f4e0a85",
+          "size": 800
+        },
+        {
+          "path": "highcountry-r07-2-rehearsal.yml",
+          "sha": "9e9fd46cb62ffe6294f4d6ba260e7a20e17d6641",
+          "size": 1288
+        },
+        {
+          "path": "highcountry-r07-2.yml",
+          "sha": "382e55e043f4867448c148ebc10706d0217006ed",
+          "size": 983
+        },
+        {
+          "path": "highcountry-r07-expansion-utilities.yml",
+          "sha": "b3b895ef62224a1d44167659a9a5dfc997729b1e",
+          "size": 985
+        },
+        {
+          "path": "highcountry-region-expansion-integration.yml",
+          "sha": "50938fce9dd1b13da719d599f53a25babd5b1882",
+          "size": 1604
+        },
+        {
+          "path": "highcountry-rewards.yml",
+          "sha": "2b5c402249e7a3cbee02a299f52de560736f6c51",
+          "size": 844
+        },
+        {
+          "path": "highcountry-seed-catalog.yml",
+          "sha": "317f1a2e8d629d699494b4c2394f4183460a77de",
+          "size": 666
+        },
+        {
+          "path": "highcountry-seed-catalogue.yml",
+          "sha": "8e5ba1cb0ad5e8a733cb1d02279fe311a4104229",
+          "size": 2689
+        },
+        {
+          "path": "highcountry-seed-closeout.yml",
+          "sha": "3217f2997fa5be3c83229297d599c9ea7cb7b91c",
+          "size": 7325
+        },
+        {
+          "path": "highcountry-seed-genomes.yml",
+          "sha": "fe2e45b0b5f382a99cb20a0f6fff763e5ade9f5d",
+          "size": 2746
+        },
+        {
+          "path": "highcountry-seed-openings.yml",
+          "sha": "68ff67d3ab2375eab5ab20e7b3e3f2e1db14878c",
+          "size": 4566
+        },
+        {
+          "path": "highcountry-seed-packs.yml",
+          "sha": "dd0939231247d1cdc1d62580471796ce7816a599",
+          "size": 3502
+        },
+        {
+          "path": "highcountry-seed-purchases.yml",
+          "sha": "f7cb96b40300dc6e9b7ccec75085e4eb8608b2e6",
+          "size": 4668
+        },
+        {
+          "path": "highcountry-seed-rare.yml",
+          "sha": "9d0f2d2f5799f8c7c236b07008ff5e8b9108fa16",
+          "size": 2793
+        },
+        {
+          "path": "highcountry-seed-research.yml",
+          "sha": "db9827aefc8cf37dccdaa743438f933e77a8e984",
+          "size": 1054
+        },
+        {
+          "path": "highcountry-soc-5b.yml",
+          "sha": "6f9d40d57f74110c5aef47e14b9b6781d23369ea",
+          "size": 3001
+        },
+        {
+          "path": "highcountry-soc-5c.yml",
+          "sha": "226c1a9dcbf746446d687082f21a54806bb1bfbd",
+          "size": 3370
+        },
+        {
+          "path": "highcountry-soc-5d.yml",
+          "sha": "f2bcf1060ba58c3cd7e04189901a342792aeb8ca",
+          "size": 3820
+        },
+        {
+          "path": "highcountry-social-chain-adapter.yml",
+          "sha": "4a0e3ad50cc019e81a8dcd04a9449f389bc4cfc0",
+          "size": 2572
+        },
+        {
+          "path": "highcountry-social-economy-next-6-5.yml",
+          "sha": "57fedcb43e182223b1a1daad1a5070ea83375605",
+          "size": 1343
+        },
+        {
+          "path": "highcountry-social-gateway.yml",
+          "sha": "92efe22d81914337429c1358ab2116ab53c53d76",
+          "size": 1667
+        }
+      ]
+    },
+    "contracts": {
+      "truncated": false,
+      "count": 1784,
+      "files": [
+        {
+          "path": "artifacts/GenesisDEXFactory.json",
+          "sha": "f9df19a3ec616c55b069be624bd56854eb17b2ab",
+          "size": 18403
+        },
+        {
+          "path": "config/420analytics-genesis.json",
+          "sha": "01601fcd8e0c38cb3b6bae0dcd6227e4dec15616",
+          "size": 2040
+        },
+        {
+          "path": "config/420appstore-genesis.json",
+          "sha": "b74d8e987d256e8d284cce093666c6eefbcf0dcf",
+          "size": 5322
+        },
+        {
+          "path": "config/420arbitration-genesis.json",
+          "sha": "6572ef79d9573735386eced4bd281141cdfcd14d",
+          "size": 3581
+        },
+        {
+          "path": "config/420attention-genesis.json",
+          "sha": "62922aed1addabced18a8692751e8724df88c5d2",
+          "size": 1824
+        },
+        {
+          "path": "config/420bundler-genesis.json",
+          "sha": "e8ad6b51a1bb4d98e7ee72e637677c2b7be79529",
+          "size": 1691
+        },
+        {
+          "path": "config/420explorer-genesis.json",
+          "sha": "b1fea479b0af04f9bd4ad96a47cb2b4c7b3873c0",
+          "size": 4179
+        },
+        {
+          "path": "config/420gamingprotocol-genesis.json",
+          "sha": "4bfa465246a9cd5653e34f46e9c1e738108c2900",
+          "size": 2418
+        },
+        {
+          "path": "config/420grants-genesis.json",
+          "sha": "df38c3f98f827d6d389ff1db01349155752688c4",
+          "size": 4439
+        },
+        {
+          "path": "config/420is-genesis.json",
+          "sha": "1b7cfc9591823daa1af0d11d9067552ed5d8f9ca",
+          "size": 1964
+        },
+        {
+          "path": "config/420launchpad-genesis.json",
+          "sha": "53c3e8876c6e0606ba5d415d515336d96c0c81dc",
+          "size": 1137
+        },
+        {
+          "path": "config/420messenger-genesis.json",
+          "sha": "ab92f2d9dabaef0da3880986ceecdb828a724844",
+          "size": 1686
+        },
+        {
+          "path": "config/420notifications-genesis.json",
+          "sha": "13f74ad9ba300f457c7cbb8b344bd39455bb8e27",
+          "size": 5963
+        },
+        {
+          "path": "config/420oracle-genesis.json",
+          "sha": "a13700af2525c62debae206deccfdc4bb1e1a00c",
+          "size": 2471
+        },
+        {
+          "path": "config/420pay-genesis-wiring-check.md",
+          "sha": "a37126db95390ed6a483f60f1ec7aaba284cc4b3",
+          "size": 1865
+        },
+        {
+          "path": "config/420pay-genesis-wiring.json",
+          "sha": "4bf76fd262101c813df15334bdbd1e1f43bbe084",
+          "size": 4840
+        },
+        {
+          "path": "config/420registry-genesis.json",
+          "sha": "f9668b23a243fd2dbe2351a41e39de2072ac2649",
+          "size": 2347
+        },
+        {
+          "path": "config/420resource-genesis.json",
+          "sha": "931a3c65e3fea4e33e0aced34f0590953feadb23",
+          "size": 3246
+        },
+        {
+          "path": "config/420rights-genesis.json",
+          "sha": "88f8e5c9ab849f3125f41da48f37f7c38986b9b5",
+          "size": 2888
+        },
+        {
+          "path": "config/420search-genesis.json",
+          "sha": "84ce7c88807fa524eb6c0f6f2638fcdb62c4f2a1",
+          "size": 4189
+        },
+        {
+          "path": "config/420status-genesis.json",
+          "sha": "ab4655fac57026af9b5fe87b2b88bdd458394738",
+          "size": 2021
+        },
+        {
+          "path": "config/420token-genesis.json",
+          "sha": "c4167fc57fad9f17fdcf7f81a9a818d1114974d0",
+          "size": 3763
+        },
+        {
+          "path": "config/420treasury-genesis.json",
+          "sha": "ba68374e9388a3ea8010cce4a9c4856d0817fe7e",
+          "size": 2409
+        },
+        {
+          "path": "config/420verify-genesis.json",
+          "sha": "2ef7d6fc1e7b48b47d2c300305c9c221f18386b4",
+          "size": 5965
+        },
+        {
+          "path": "config/420wallet-genesis.json",
+          "sha": "b79a24eed40eaa7748a39b77b0c8d722a0ddfc7b",
+          "size": 5213
+        },
+        {
+          "path": "config/accounts/genesis-account-decision-1.json",
+          "sha": "1cd4fee4452d54fd132a6569f9ffc7decce020cd",
+          "size": 1672
+        },
+        {
+          "path": "config/genesis-address-namespace.json",
+          "sha": "d9c40056db30513c0445f0c341d261b63dc6a1a5",
+          "size": 14927
+        },
+        {
+          "path": "config/genesis-canonical-addresses.json",
+          "sha": "6ea5ffd37bee347e51e8141bbea000d008a52781",
+          "size": 7336
+        },
+        {
+          "path": "config/genesis-config-commitment.json",
+          "sha": "c8537f6c984ba7d4965e8b51aaefc26c6e2e1cd5",
+          "size": 2294
+        },
+        {
+          "path": "config/genesis-dapp-contract-map.json",
+          "sha": "097c90c34d77c70464f2b6cb7f695d26a6566cb3",
+          "size": 13734
+        },
+        {
+          "path": "config/genesis-dapp-verification.json",
+          "sha": "4d9348469c1ca434d596938d94dd58688318144a",
+          "size": 83
+        },
+        {
+          "path": "config/interfaces/genesis-interface-layer.json",
+          "sha": "e5fc64b454dcaca4bbf112b1488986377d711128",
+          "size": 3920
+        },
+        {
+          "path": "config/predeploy/GenesisDEXFactory-predeploy-state.json",
+          "sha": "17c4859e0b960f1243606cc14daf652050ba9640",
+          "size": 13129
+        },
+        {
+          "path": "config/predeploy/stake-genesis-config-v1.json",
+          "sha": "f56abb959b32228c3f4719f0f0705ed21ca20775",
+          "size": 2100
+        },
+        {
+          "path": "config/security/genesis-suite-registry.json",
+          "sha": "8f3e37e0ebe422eada88e194762bfbe31ee904e7",
+          "size": 1542
+        },
+        {
+          "path": "src/gaming/CrossGameRegistry420.sol",
+          "sha": "f8fceef2c8c5d0c0d21555763d3fb361db1c0bdf",
+          "size": 3365
+        },
+        {
+          "path": "src/gaming/GameClaims420.sol",
+          "sha": "9c6171ed9384818abed3287f52fe97524493cf30",
+          "size": 3848
+        },
+        {
+          "path": "src/gaming/GameEntitlements420.sol",
+          "sha": "50e4c5ad9c12a8d90528101d57c03e67917befbd",
+          "size": 3393
+        },
+        {
+          "path": "src/gaming/GameIdentity420.sol",
+          "sha": "4a5684ae7ec28a33aa5770fe00b5c32358afc074",
+          "size": 2367
+        },
+        {
+          "path": "src/gaming/GameRegistry420.sol",
+          "sha": "bee2d4e5941caef399846cb22cc2839d05b13ae1",
+          "size": 3238
+        },
+        {
+          "path": "src/gaming/GamingAuthorization420.sol",
+          "sha": "d45235674f5c909abc921783abe6aea2bc3d4e6c",
+          "size": 1356
+        },
+        {
+          "path": "src/gaming/GamingIds420.sol",
+          "sha": "312d664bd5a2d26070de08ff1c0275e045a3f0ce",
+          "size": 1018
+        },
+        {
+          "path": "src/gaming/access/ProgressiveGamingTypes.sol",
+          "sha": "806278091fb083603992d65e697373ad4f766887",
+          "size": 887
+        },
+        {
+          "path": "src/highcountry/access/GuestProfileMigration.sol",
+          "sha": "8dae5729a17ea30c356d157f775c06f48c836774",
+          "size": 7046
+        },
+        {
+          "path": "src/highcountry/access/HighCountryAccessPolicy.sol",
+          "sha": "ed1a56cdfe4d3454433fab7a1733ba877f3cf493",
+          "size": 3036
+        },
+        {
+          "path": "src/highcountry/auth/HighCountryAuthorization.sol",
+          "sha": "f302d6028079c92aea73dcebf3893b2800a8e7ad",
+          "size": 2796
+        },
+        {
+          "path": "src/highcountry/breeding/BreedingEngine.sol",
+          "sha": "5b8a56963f676b08552f0e07cce1282af7a3bc67",
+          "size": 10122
+        },
+        {
+          "path": "src/highcountry/breeding/README.md",
+          "sha": "bd85ae81b9348524161cfcb70b43dcf56ffa3dd3",
+          "size": 1257
+        },
+        {
+          "path": "src/highcountry/competition/CanonicalCompetitionEntitlement.sol",
+          "sha": "19d1e33583a2bfcbbde3b8cd6f2e14fde13cc76f",
+          "size": 1750
+        },
+        {
+          "path": "src/highcountry/competition/CanonicalCompetitionEvidence.sol",
+          "sha": "f5b92489c9a5eab345b2d923f5861f3813c850d3",
+          "size": 3194
+        },
+        {
+          "path": "src/highcountry/competition/CompetitionEngine.sol",
+          "sha": "674a2fa9b323f4fdb0e30a004c417d68d7a2a07b",
+          "size": 9753
+        },
+        {
+          "path": "src/highcountry/competition/CompetitionTemplateRegistry.sol",
+          "sha": "8d79f3def7bb2ab5cf2462673a86f6854f4b2fc0",
+          "size": 2289
+        },
+        {
+          "path": "src/highcountry/competition/PremiumCompetitionEntitlements73.sol",
+          "sha": "8827a1162528f5aae086281aefdb0937fe708126",
+          "size": 2363
+        },
+        {
+          "path": "src/highcountry/competition/SeasonRegistry.sol",
+          "sha": "b6e8a37f5c05b1d910da496a2bae28d4ea250018",
+          "size": 1575
+        },
+        {
+          "path": "src/highcountry/constants/ActionIds.sol",
+          "sha": "797aff3df7ed61ec3d091d4796750cfc60091b3a",
+          "size": 7049
+        },
+        {
+          "path": "src/highcountry/constants/EmergencyDomains.sol",
+          "sha": "1822b050829600988bb5574424e953c579065e5a",
+          "size": 1226
+        },
+        {
+          "path": "src/highcountry/constants/ModuleIds.sol",
+          "sha": "36c10fdec7e128bf80c1be2d4dbcd3d4586006ae",
+          "size": 4533
+        },
+        {
+          "path": "src/highcountry/constants/RandomDomains.sol",
+          "sha": "e82f46a3386c570d044ad8f86fe31ba27092b784",
+          "size": 430
+        },
+        {
+          "path": "src/highcountry/cooperative/CooperativeGovernance.sol",
+          "sha": "f6e8f7eea99ad4a48b65e84f12be967f9a146af1",
+          "size": 7334
+        },
+        {
+          "path": "src/highcountry/cooperative/CooperativeRegistry.sol",
+          "sha": "908e8a53c2b3dd4df89f0717883ffc2b82ec4bef",
+          "size": 3199
+        },
+        {
+          "path": "src/highcountry/cooperative/GovernanceExecutor.sol",
+          "sha": "892e265875b5700efca8f3e15a9bb3fe988433ac",
+          "size": 1529
+        },
+        {
+          "path": "src/highcountry/cultivation/CultivationEngine.sol",
+          "sha": "47c2b5af77dcea6415e3f3d10bc8ea491ba0e738",
+          "size": 11576
+        },
+        {
+          "path": "src/highcountry/cultivation/PlantRegistry.sol",
+          "sha": "3041959ade3d0e016bcace5c62611aebd5579f73",
+          "size": 19857
+        },
+        {
+          "path": "src/highcountry/cultivation/README.md",
+          "sha": "4ce596d965c887ac7fecb46d8ddb3a391e823057",
+          "size": 2855
+        },
+        {
+          "path": "src/highcountry/cup/CanonicalCupAttestationConsumer.sol",
+          "sha": "c4ec5e2c55f812b1dd63ace4b2169c83d28a025d",
+          "size": 1802
+        },
+        {
+          "path": "src/highcountry/cup/Global420Cup.sol",
+          "sha": "2e9f8a3c859480610bad58a9c8faef52e29ed637",
+          "size": 7295
+        },
+        {
+          "path": "src/highcountry/equipment/EquipmentCultivationBridge.sol",
+          "sha": "7810b250d6a6c7d985d352d497da341452ad7268",
+          "size": 2814
+        },
+        {
+          "path": "src/highcountry/equipment/EquipmentLifecycleEngine.sol",
+          "sha": "7c9b6b61fec5bf7427970ae4401a169cb4310301",
+          "size": 8526
+        },
+        {
+          "path": "src/highcountry/equipment/EquipmentRegistry.sol",
+          "sha": "3613cc307bdf92d423ad802bcb19b22be1b1875d",
+          "size": 9422
+        },
+        {
+          "path": "src/highcountry/equipment/ManufacturedEquipmentIssuer.sol",
+          "sha": "41174676c2d98cb2b722c3958f6d79911670ea0e",
+          "size": 3834
+        },
+        {
+          "path": "src/highcountry/errors/HighCountryErrors.sol",
+          "sha": "a5028420af897700e3c61bde40a91e1d5bb7712e",
+          "size": 919
+        },
+        {
+          "path": "src/highcountry/genesis/GenesisRegistry.sol",
+          "sha": "5f357e22a6965ec5bc94e2e79e73e6b86e675c70",
+          "size": 3683
+        },
+        {
+          "path": "src/highcountry/genetics/CloneRegistry.sol",
+          "sha": "71a01d5656159b2207cb4e73ca8824fd7fde8a3e",
+          "size": 9093
+        },
+        {
+          "path": "src/highcountry/genetics/CultivarModerationRegistry.sol",
+          "sha": "32d4a85d5f2da20291aeaed3d9d1c910413ef272",
+          "size": 4466
+        },
+        {
+          "path": "src/highcountry/genetics/CultivarNamingEscrow.sol",
+          "sha": "6885a1be0c4417a771e99492e5308dbdaf335bde",
+          "size": 4754
+        },
+        {
+          "path": "src/highcountry/genetics/FoundingGenetics.sol",
+          "sha": "725cf9016728a1a803197a67aff7bb9046293bef",
+          "size": 433
+        },
+        {
+          "path": "src/highcountry/genetics/GenomeRegistry.sol",
+          "sha": "0a2fa2b23c6a02d47952a9e273bcf6232afeb819",
+          "size": 4277
+        },
+        {
+          "path": "src/highcountry/genetics/MotherRegistry.sol",
+          "sha": "36bf5d709e706382c57cd136e303266eefd5fd83",
+          "size": 6864
+        },
+        {
+          "path": "src/highcountry/genetics/PhenotypeRegistry.sol",
+          "sha": "c85b854010384128d66fb21973032a526470af2a",
+          "size": 5886
+        },
+        {
+          "path": "src/highcountry/genetics/README.md",
+          "sha": "2382513aa788cc60e60415f9323f3ea554c2b344",
+          "size": 1598
+        },
+        {
+          "path": "src/highcountry/genetics/SeedRegistry.sol",
+          "sha": "6b3d777b93fd0f360c2c4a89398cb7e5da5e97db",
+          "size": 8634
+        },
+        {
+          "path": "src/highcountry/harvest/HarvestEngine.sol",
+          "sha": "17d8e8972b80d55606ba77acc4b39d9a240f1de8",
+          "size": 6951
+        },
+        {
+          "path": "src/highcountry/harvest/HarvestProductRegistry.sol",
+          "sha": "1d2154620bc705e5feee497ac4d13f2a0333a853",
+          "size": 4282
+        },
+        {
+          "path": "src/highcountry/harvest/HarvestScoring.sol",
+          "sha": "cc98f53600557eabd58328e107beb93b01111a57",
+          "size": 1799
+        },
+        {
+          "path": "src/highcountry/interfaces/IEmergencyState.sol",
+          "sha": "94b38ed3a2aecc84518ee3b9d0e3cad0ef4df18f",
+          "size": 507
+        },
+        {
+          "path": "src/highcountry/interfaces/IGenesisRegistry.sol",
+          "sha": "730b3543db79543e27286051c719e9dbf2285723",
+          "size": 768
+        },
+        {
+          "path": "src/highcountry/interfaces/IHighCountryAuthorization.sol",
+          "sha": "80ac2d3df300d7f91aed81ef5e9bc4a4dd8ba15b",
+          "size": 448
+        },
+        {
+          "path": "src/highcountry/interfaces/IHighCountryModule.sol",
+          "sha": "c0fa7ef0cd7f241b31b44f3a7d2d33fd89062cc8",
+          "size": 213
+        },
+        {
+          "path": "src/highcountry/interfaces/IHighCountryModuleIdentity.sol",
+          "sha": "11da796ce7897c9090b6adc3a6adce6da137c8f6",
+          "size": 360
+        },
+        {
+          "path": "src/highcountry/interfaces/IModuleRegistry.sol",
+          "sha": "cf129a6ff4e5250b1ec671fa8e0a7937b8b54708",
+          "size": 1194
+        },
+        {
+          "path": "src/highcountry/interfaces/IPlantSourceConsumer.sol",
+          "sha": "0867e8bc2ecfe222a7a078935941c1d632c9cf3d",
+          "size": 630
+        },
+        {
+          "path": "src/highcountry/interfaces/IRulesetRegistry.sol",
+          "sha": "2f2b1332d138cf6e5407d527622f8ca231058376",
+          "size": 857
+        },
+        {
+          "path": "src/highcountry/interfaces/IRulesetRouter.sol",
+          "sha": "fa67f6948f5aa4d93f5aa8c0c2e469ef38618f6b",
+          "size": 351
+        },
+        {
+          "path": "src/highcountry/inventory/InventoryRegistry.sol",
+          "sha": "56acdf0e1f425ce678c471fc3c15e76af28bb4ab",
+          "size": 10767
+        },
+        {
+          "path": "src/highcountry/inventory/ResourceLedger.sol",
+          "sha": "a674c96dfe8b4bdd9a85b8a9682e81ffe7bc8cd4",
+          "size": 8821
+        },
+        {
+          "path": "src/highcountry/land/LandRegistry.sol",
+          "sha": "b4a76e5c78657fd9e5337cf5bf4f3ec3f912e025",
+          "size": 11512
+        },
+        {
+          "path": "src/highcountry/land/PublicCultivationAccess.sol",
+          "sha": "f7d88a5a801a43365f1938662bf9d334893b936a",
+          "size": 7084
+        },
+        {
+          "path": "src/highcountry/manufacturing/ManufacturingEngine.sol",
+          "sha": "fbbd05e0ab21c9b832168a62f0f3b39d4e69158a",
+          "size": 8706
+        },
+        {
+          "path": "src/highcountry/market/CanonicalMarketEscrow.sol",
+          "sha": "cf1f26462c02b21b550d46f5b8ad03d0b91e14be",
+          "size": 5415
+        },
+        {
+          "path": "src/highcountry/missions/MissionEngine.sol",
+          "sha": "930120243fa3c8ae547b628237714dcc1f9d05ea",
+          "size": 6252
+        },
+        {
+          "path": "src/highcountry/organization/CanonicalOrganizationTreasuryGateway.sol",
+          "sha": "e2757db5a988d1b4c774b0dc4197cb0ca19fde3c",
+          "size": 3664
+        },
+        {
+          "path": "src/highcountry/organization/OrganizationAuthority.sol",
+          "sha": "92047e9399727e7a97949b8529645df4d6fd149a",
+          "size": 4667
+        },
+        {
+          "path": "src/highcountry/organization/OrganizationRegistry.sol",
+          "sha": "3d45192535bc1c854a087a730aca53975300754b",
+          "size": 9543
+        },
+        {
+          "path": "src/highcountry/organization/OrganizationTreasuryPermissions.sol",
+          "sha": "ad2b8845f88b60996ce70f6d5a9657114b7bb804",
+          "size": 5240
+        },
+        {
+          "path": "src/highcountry/player/GrowerProfileRegistry.sol",
+          "sha": "82788529cfdb92e357ebd2a47e7b7904ecb35a7a",
+          "size": 3089
+        },
+        {
+          "path": "src/highcountry/player/HighCountryCrossGame420.sol",
+          "sha": "95b33581f4a00eb57ecefc6c2cb04ae5af6f2aaf",
+          "size": 5225
+        },
+        {
+          "path": "src/highcountry/player/HighCountryGamingBridge420.sol",
+          "sha": "cf8b4000f8a8aceff954215bc08f078f3351e243",
+          "size": 13290
+        },
+        {
+          "path": "src/highcountry/player/HighCountryGamingIds.sol",
+          "sha": "f1fdcd21038631574a8c69d3cb5b07eae54cf4b9",
+          "size": 1022
+        },
+        {
+          "path": "src/highcountry/player/HighCountryMigration420.sol",
+          "sha": "b8ca9322232bd9a35cd404552f898b0ecd506733",
+          "size": 5900
+        },
+        {
+          "path": "src/highcountry/player/HighCountrySessionAccess420.sol",
+          "sha": "2be14c377b0179782528a1d82c36b94e6bff5b61",
+          "size": 12569
+        },
+        {
+          "path": "src/highcountry/player/IHighCountryGamingAccess420.sol",
+          "sha": "f0df78a9476af7a4bf3873ec4d390fa98d37b93f",
+          "size": 1407
+        },
+        {
+          "path": "src/highcountry/player/OptionalCompetitionAccess420.sol",
+          "sha": "c2ad60e2b71b0cb79edc161ef059c419190de666",
+          "size": 4468
+        },
+        {
+          "path": "src/highcountry/progression/ProgressionRegistries.sol",
+          "sha": "88112df4679c54193045a425c264e3d0d1ac2467",
+          "size": 5122
+        },
+        {
+          "path": "src/highcountry/random/CanonicalBreedingRandomnessAdapter.sol",
+          "sha": "d2ac19c48ede7a935199e8f9ecc7803ffee318e7",
+          "size": 5975
+        },
+        {
+          "path": "src/highcountry/random/RandomnessCoordinator.sol",
+          "sha": "712b26da5dbbc7f1564e5b8b07c8ff4dde03049d",
+          "size": 6189
+        },
+        {
+          "path": "src/highcountry/rights/CanonicalLandPlantGate.sol",
+          "sha": "767a7059f13c6c325d105fffe2cd855a072c85d1",
+          "size": 3463
+        },
+        {
+          "path": "src/highcountry/rights/LeaseRegistry.sol",
+          "sha": "ae509b0df18e116843518be4c9357bbde33fc25a",
+          "size": 10314
+        },
+        {
+          "path": "src/highcountry/rights/LicenseRegistry.sol",
+          "sha": "b11f915d66cb7c72fb31d0f0f1f3b04a730833d6",
+          "size": 5409
+        },
+        {
+          "path": "src/highcountry/rights/RightsRegistry.sol",
+          "sha": "133fa4a5ee460969b7e7168667834493a7177e86",
+          "size": 4186
+        },
+        {
+          "path": "src/highcountry/rules/RulesetRegistry.sol",
+          "sha": "ee04ce126a0b62802794bc024af51c126de2b79e",
+          "size": 2420
+        },
+        {
+          "path": "src/highcountry/rules/RulesetRouter.sol",
+          "sha": "6188bf11fcc64f934be14e44b5dceeef93cc4517",
+          "size": 1896
+        },
+        {
+          "path": "src/highcountry/security/EmergencyState.sol",
+          "sha": "756ffa74269aaac44abb503d72a83fddad02b6ca",
+          "size": 2663
+        },
+        {
+          "path": "src/highcountry/security/R04EmergencyConsumer.sol",
+          "sha": "bf11628d3ab0024ec00c88b1e0f248f0e7222986",
+          "size": 2623
+        },
+        {
+          "path": "src/highcountry/security/SecurityCouncilController.sol",
+          "sha": "f21d1fa388c2801a450d7d6bd0a3dc3b18babd70",
+          "size": 3082
+        },
+        {
+          "path": "src/highcountry/seeds/SeedPackOpening.sol",
+          "sha": "452fa1c182dc07486e1daf5fb4f66230fa5e9aa9",
+          "size": 8680
+        },
+        {
+          "path": "src/highcountry/seeds/SeedPackPayments.sol",
+          "sha": "499c53bc53870fa92e0914b17c4e817f32220dbe",
+          "size": 4309
+        },
+        {
+          "path": "src/highcountry/types/HighCountryEnums.sol",
+          "sha": "08fb5435aab011252145aec06b235c6cf90bd2d7",
+          "size": 1706
+        },
+        {
+          "path": "src/highcountry/types/HighCountryTypes.sol",
+          "sha": "c81fa7289db46f4bc92884d104f8aaf191f7e0ca",
+          "size": 1862
+        },
+        {
+          "path": "src/highcountry/upgrades/ModuleExecutionGateway.sol",
+          "sha": "8ad9fbd37f1d9e329c9ec5701c1e7708d028d2b9",
+          "size": 1985
+        },
+        {
+          "path": "src/highcountry/upgrades/ModuleRegistry.sol",
+          "sha": "35a0a2da6ca62b925d1205322562b233ea23eb64",
+          "size": 10648
+        },
+        {
+          "path": "src/highcountry/upgrades/UpgradeCoordinator.sol",
+          "sha": "5eb329cc19f56cbadb07909c46e8c0e3507e54e2",
+          "size": 3804
+        },
+        {
+          "path": "src/highcountry/world/BonusRegionAccess420.sol",
+          "sha": "4d0f57f24dd76f390fdfa3a9e981a02f6d893a09",
+          "size": 4154
+        },
+        {
+          "path": "src/highcountry/world/CompositeRegionMembership.sol",
+          "sha": "e01e21018ab3803aef98c2100ef25d060e12fd7e",
+          "size": 1163
+        },
+        {
+          "path": "src/highcountry/world/FoundingRegions.sol",
+          "sha": "038c483dc3ed7dd1881155d7a73a06badeb6ad49",
+          "size": 1034
+        },
+        {
+          "path": "src/highcountry/world/RegionExpansionRegistry.sol",
+          "sha": "2c90aca4934f32d1e3b9d0df77b245a60a839777",
+          "size": 3347
+        },
+        {
+          "path": "src/highcountry/world/RegionRegistry.sol",
+          "sha": "3288c015ac76bc6c5b27d1c6d6eb309adeffff28",
+          "size": 3239
+        },
+        {
+          "path": "src/highcountry/world/RegionalClimatePolicy.sol",
+          "sha": "50d0f27c654166664a55e4701b028438ebf2052b",
+          "size": 1139
+        },
+        {
+          "path": "src/highcountry/world/RegionalEnvironmentSettlement.sol",
+          "sha": "1b6000f433b88ddcc4d5b39ae5841b9ed3019a04",
+          "size": 2603
+        },
+        {
+          "path": "src/highcountry/world/RegionalUtilities.sol",
+          "sha": "0413e2a8f1113a0f09d79a8a1817692df026c487",
+          "size": 5016
+        },
+        {
+          "path": "src/highcountry/world/WorldGenesisReadiness.sol",
+          "sha": "7f342cc8e6dd90285b4a98961892de3b8b349124",
+          "size": 944
+        },
+        {
+          "path": "src/interfaces/genesis/Errors420.sol",
+          "sha": "6eea3a73baa8455e82060e1d242d6e3dd8096a75",
+          "size": 877
+        },
+        {
+          "path": "src/interfaces/genesis/IAccounting420.sol",
+          "sha": "d1df0cb0d51a1959780199e5d7c22f4395eab7a6",
+          "size": 358
+        },
+        {
+          "path": "src/interfaces/genesis/IAssetCapabilities420.sol",
+          "sha": "672c4ed914a97615f7ef2eea1e3204a033cb78f2",
+          "size": 507
+        },
+        {
+          "path": "src/interfaces/genesis/ICanonicalAssetRegistry420.sol",
+          "sha": "eb479b0a34f8e3123b5534efbf92558e805a941f",
+          "size": 716
+        },
+        {
+          "path": "src/interfaces/genesis/ICapabilityRegistry420.sol",
+          "sha": "266f4003c86fafb74e7bcbc869bed1df39f28cfb",
+          "size": 947
+        },
+        {
+          "path": "src/interfaces/genesis/ICapabilityRegistryExtended420.sol",
+          "sha": "5b00a3c274d043d17c1af23d7be2016c23f8fb2c",
+          "size": 2330
+        },
+        {
+          "path": "src/interfaces/genesis/IChainContext420.sol",
+          "sha": "6957b819f3044b210ebfb1d2996a1a3cbaadd62d",
+          "size": 368
+        },
+        {
+          "path": "src/interfaces/genesis/ICustodyVault420.sol",
+          "sha": "d76e8cd6804fe43c900075c57a0e32ec8b571cdf",
+          "size": 900
+        },
+        {
+          "path": "src/interfaces/genesis/IExternalDependencyRegistry420.sol",
+          "sha": "9a552b84d260ad8224ccf03adf6ca4d66d6fbe6a",
+          "size": 504
+        },
+        {
+          "path": "src/interfaces/genesis/IFeeQuote420.sol",
+          "sha": "354f04d279afe496ee39e154789e13aa3ee3803f",
+          "size": 398
+        },
+        {
+          "path": "src/interfaces/genesis/IGenesisInitializable420.sol",
+          "sha": "ab78f42c30fa13eab7b68f3e6fbea07b2220299b",
+          "size": 398
+        },
+        {
+          "path": "src/interfaces/genesis/IGenesisResident420.sol",
+          "sha": "4b16d2915d2f183e39a1de56dfb39600c752e212",
+          "size": 317
+        },
+        {
+          "path": "src/interfaces/genesis/IGovernanceAuthority420.sol",
+          "sha": "baa8cf11b2a670281e99699c12bf483a9b24f727",
+          "size": 492
+        },
+        {
+          "path": "src/interfaces/genesis/IHealthRegistry420.sol",
+          "sha": "e8f37c32c51196dcda526537b1336c42f032b299",
+          "size": 460
+        },
+        {
+          "path": "src/interfaces/genesis/IIdentityCredential420.sol",
+          "sha": "a7ce3526f15a70727800ab3f43dda7f0160ea37d",
+          "size": 518
+        },
+        {
+          "path": "src/interfaces/genesis/IMetadataCommitment420.sol",
+          "sha": "934f30843426a09d2986899741f8dc2fc2e18621",
+          "size": 360
+        },
+        {
+          "path": "src/interfaces/genesis/IMigration420.sol",
+          "sha": "9c49405f0a233969b1e858034bfccd344448168d",
+          "size": 999
+        },
+        {
+          "path": "src/interfaces/genesis/INames420.sol",
+          "sha": "bf0342d23d2d2e2cd2862e41198fae7ec911d358",
+          "size": 947
+        },
+        {
+          "path": "src/interfaces/genesis/IOracle420.sol",
+          "sha": "8450a0801f10ba754ba59cf8a7ae1fe4a75fdced",
+          "size": 774
+        },
+        {
+          "path": "src/interfaces/genesis/IPauseRegistry420.sol",
+          "sha": "7c04463e4a524b54bf2f835804afc88b030eb828",
+          "size": 416
+        },
+        {
+          "path": "src/interfaces/genesis/IProtocolRegistry420.sol",
+          "sha": "0bf0a597fa2c6956b48acb0891beb4d0f57d25db",
+          "size": 841
+        },
+        {
+          "path": "src/interfaces/genesis/IReplayConsumer420.sol",
+          "sha": "1dee1850bb0d9fffd65b9f02efc48602691e1b7f",
+          "size": 418
+        },
+        {
+          "path": "src/interfaces/genesis/IReplayProtection420.sol",
+          "sha": "a6337df8b89117e4ee629d4b72bfcc349e51d395",
+          "size": 325
+        },
+        {
+          "path": "src/interfaces/genesis/IRiskLimits420.sol",
+          "sha": "d9abe9c424db06c82fab9ab348fa9a07aa45d005",
+          "size": 376
+        },
+        {
+          "path": "src/interfaces/genesis/ISettlementHealth420.sol",
+          "sha": "a0d561a85663918b05389f0fb8eafab2985592e5",
+          "size": 327
+        },
+        {
+          "path": "src/interfaces/genesis/ISignedEnvelope420.sol",
+          "sha": "580747354c7fb91fffcdff7155d216dba80d4a84",
+          "size": 511
+        },
+        {
+          "path": "src/interfaces/genesis/ISigningDomain420.sol",
+          "sha": "bcebe6f857027d2a9a178727a156c43231c36d8c",
+          "size": 260
+        },
+        {
+          "path": "src/interfaces/genesis/ISystemSafety420.sol",
+          "sha": "6e05c25a8c702b94484c3e66cc2ee0dc19d7763a",
+          "size": 604
+        },
+        {
+          "path": "src/interfaces/genesis/Types420.sol",
+          "sha": "b9c4578b0fd0029c913dcd890b8d498c4ee357db",
+          "size": 953
+        },
+        {
+          "path": "src/libraries/GenesisInterfaceIds420.sol",
+          "sha": "4ce94439faaf6a66aa72772b5caa415f85150e4e",
+          "size": 970
+        },
+        {
+          "path": "src/swap/GenesisDEXFactory.sol",
+          "sha": "70f996054cae7dc1c8620cffa40628a4ceb930cd",
+          "size": 2618
+        },
+        {
+          "path": "src/system/GenesisResidentAccess420.sol",
+          "sha": "82013ad0e8d08ad310b02e569e5c4bc5a367da7c",
+          "size": 6744
+        },
+        {
+          "path": "test/AppStoreGenesis420.t.sol",
+          "sha": "6a8e30d0f1cc84d36c0d3211e5368c9468f64d82",
+          "size": 401
+        },
+        {
+          "path": "test/ArbitrationGenesis420.t.sol",
+          "sha": "27276f3f4639a89175b2741aafb558160728cff6",
+          "size": 6688
+        },
+        {
+          "path": "test/AttentionGenesis420.t.sol",
+          "sha": "3bdba0ec39e1196968fd57131a173967cca3f80d",
+          "size": 6011
+        },
+        {
+          "path": "test/BridgeGenesisIntegration420.t.sol",
+          "sha": "30ff4302545bad190e7d75429d97a11615f1c772",
+          "size": 6746
+        },
+        {
+          "path": "test/DevelopmentCompensationGenesis420.t.sol",
+          "sha": "2e6d3605785b01f4314fa705fde645a7255019d2",
+          "size": 497
+        },
+        {
+          "path": "test/GamingProtocol420.t.sol",
+          "sha": "62994970674d8d73851b474b4fbb38acb88f6a55",
+          "size": 5827
+        },
+        {
+          "path": "test/GamingProtocol420AuthorityIsolation.t.sol",
+          "sha": "76fc50bce3add5bfade219ad4d65b8daf4ef6ab0",
+          "size": 8835
+        },
+        {
+          "path": "test/GamingProtocol420Hardening.t.sol",
+          "sha": "48ba49936ac6c8f88c2a01097aa1b9ab8c2868b1",
+          "size": 11763
+        },
+        {
+          "path": "test/GrantsGenesis420.t.sol",
+          "sha": "e360a701686b87cc488f54af41177c8c45d5a393",
+          "size": 28233
+        },
+        {
+          "path": "test/InteropGenesis420.t.sol",
+          "sha": "1a4bc2704f0c86f1bc81f3e08256fc8b6dd809fb",
+          "size": 5923
+        },
+        {
+          "path": "test/LaunchpadGenesis420.t.sol",
+          "sha": "aefd8a5c1e72319a6ce6db311b66fef31caaaee1",
+          "size": 5098
+        },
+        {
+          "path": "test/MessengerGenesis420.t.sol",
+          "sha": "048b6cc6cc75f9bf18006a669c8946f6ab1c9411",
+          "size": 5499
+        },
+        {
+          "path": "test/NotificationsGenesis420.t.sol",
+          "sha": "4e6f013ffbbadf95e55dece2abbcb31af5967b0a",
+          "size": 455
+        },
+        {
+          "path": "test/PaySwapBridgeGenesisIntegration420.t.sol",
+          "sha": "6afa95e4d15587f79180805cb999270778bc6eaa",
+          "size": 5960
+        },
+        {
+          "path": "test/PaySwapGenesisIntegration420.t.sol",
+          "sha": "bcf3958f9d95db4daa8cbe2f01b71c77acb80ee3",
+          "size": 6050
+        },
+        {
+          "path": "test/PaymentGenesisIntegration420.t.sol",
+          "sha": "fd49069e6dab69121d3bc2a14b6bacfe2b34474a",
+          "size": 6677
+        },
+        {
+          "path": "test/RegistryGenesis420.t.sol",
+          "sha": "a0b24f2bb331abeb2dbfbc1ac00988a35ac12eee",
+          "size": 6157
+        },
+        {
+          "path": "test/ResourceGenesis420.t.sol",
+          "sha": "0190a72e726e937020676c2fce145d6a5e73e95d",
+          "size": 11487
+        },
+        {
+          "path": "test/RightsGenesis420.t.sol",
+          "sha": "d731b906a571af3458aa834123958bed38adfe4b",
+          "size": 5855
+        },
+        {
+          "path": "test/SearchGenesis420.t.sol",
+          "sha": "7eab8f9a9183243458f59934e156dbc0c3726a3c",
+          "size": 393
+        },
+        {
+          "path": "test/StakeValidatorGenesis420.t.sol",
+          "sha": "462221de257872d11c3680c60e638d8169dcaed4",
+          "size": 28385
+        },
+        {
+          "path": "test/SwapGenesisDEXFactory420.t.sol",
+          "sha": "cb1a7a51e15d5726e1d76e455226d75b5293ec15",
+          "size": 6743
+        },
+        {
+          "path": "test/SwapGenesisIntegration420.t.sol",
+          "sha": "0cc28264894fe698f75e92d9a962e54f3fd00f31",
+          "size": 3543
+        },
+        {
+          "path": "test/TokenGenesis420.t.sol",
+          "sha": "93755b6c17c0faa07257caf24de91f38ffd217a9",
+          "size": 4205
+        },
+        {
+          "path": "test/TreasuryGenesis420.t.sol",
+          "sha": "0061e1be7f5fea500eab3234fc0f08d904dd889e",
+          "size": 10725
+        },
+        {
+          "path": "test/VerifyGenesis420.t.sol",
+          "sha": "c245357f5e1855849013323e672a584721b1fbdd",
+          "size": 393
+        },
+        {
+          "path": "test/helpers/GenesisMocks420.sol",
+          "sha": "26604c60c87ee0e6f6ee06a4dffd280d2fd602cd",
+          "size": 12003
+        },
+        {
+          "path": "test/highcountry/BaseHighCountryTest.t.sol",
+          "sha": "1492a4b888e2b876425bf8e0c786d6b358a457df",
+          "size": 687
+        },
+        {
+          "path": "test/highcountry/integration/CanonicalBreedingRandomnessAdapter.t.sol",
+          "sha": "3da5b1c1b155ec9271370f110dcee0bd2bb23da1",
+          "size": 7772
+        },
+        {
+          "path": "test/highcountry/integration/EmergencyEnforcement.t.sol",
+          "sha": "db3f4f4b53440f4afc8fe1c88cfba00db4319030",
+          "size": 5100
+        },
+        {
+          "path": "test/highcountry/integration/MotherCloneConsumption.t.sol",
+          "sha": "61e74accba46898ce127b582c3ba4b04566db57b",
+          "size": 4617
+        },
+        {
+          "path": "test/highcountry/integration/PhenotypeProvenance.t.sol",
+          "sha": "822a6c03934b2e325f8f6ea0ee4972ceb1595898",
+          "size": 11512
+        },
+        {
+          "path": "test/highcountry/integration/PlantSourceConsumption.t.sol",
+          "sha": "ff4152d55b7528b532f75dae09bad2240499d45c",
+          "size": 22892
+        },
+        {
+          "path": "test/highcountry/integration/PublicPlantCapacity.t.sol",
+          "sha": "ad879a2d231a269e430c0d0fd036d70376d58dbd",
+          "size": 32838
+        },
+        {
+          "path": "test/highcountry/integration/R04AuthorityIntegration.t.sol",
+          "sha": "03ef62c583055fe045b707fef1ff5dabf5bbeed7",
+          "size": 8277
+        },
+        {
+          "path": "test/highcountry/integration/R04CanonicalCompetition.t.sol",
+          "sha": "8dd6795d6a4e6cf5e17ce9c46dde11127e5d9ad8",
+          "size": 16427
+        },
+        {
+          "path": "test/highcountry/integration/R04EquipmentEmergency.t.sol",
+          "sha": "e17e91896036ed630d54ce697873bc604b18858d",
+          "size": 19874
+        },
+        {
+          "path": "test/highcountry/integration/R04RuntimeDeployment.sol",
+          "sha": "f68d2bb1d6cfac035bbb3d10c9efbf3ae5df7899",
+          "size": 6926
+        },
+        {
+          "path": "test/highcountry/integration/R04TreasuryIdentity.t.sol",
+          "sha": "8532de84231be8d8165ad72554d4a8f8a0471423",
+          "size": 8049
+        },
+        {
+          "path": "test/highcountry/integration/R05MigrationDeployment.sol",
+          "sha": "dc7549619c79965fdd412ba6945b16b75138c7f0",
+          "size": 4201
+        },
+        {
+          "path": "test/highcountry/integration/R072CultivarModeration.t.sol",
+          "sha": "a6fc94210403323d273adb8febbbf5b2085c36da",
+          "size": 3638
+        },
+        {
+          "path": "test/highcountry/integration/R072ExpansionUtilityIntegration.t.sol",
+          "sha": "d67877c829024503f3bbba145ea181a621f0ade6",
+          "size": 5338
+        },
+        {
+          "path": "test/highcountry/integration/R072NamingEscrow.t.sol",
+          "sha": "df653c761af1872324a97e23a63eeebb55022112",
+          "size": 1723
+        },
+        {
+          "path": "test/highcountry/integration/R072RealContractPrefinalization.t.sol",
+          "sha": "71d1349ae701b7cd56f52ce092bcf4f0d75195ad",
+          "size": 6494
+        },
+        {
+          "path": "test/highcountry/integration/R072SettlementAtomic.t.sol",
+          "sha": "282398422db062ce46b9b9376877df641ea2b6ab",
+          "size": 3389
+        },
+        {
+          "path": "test/highcountry/integration/RealCapabilityBudgetPolicy.t.sol",
+          "sha": "a0e5b3ab3848264433510f03f05b94b0c92fa660",
+          "size": 5085
+        },
+        {
+          "path": "test/highcountry/integration/RealCapabilityGenesis.t.sol",
+          "sha": "dd4629fd22dc7e2db73fa1adbcc57a0c2a45d894",
+          "size": 12568
+        },
+        {
+          "path": "test/highcountry/integration/cup/CupHttpAnvilFixture.sol",
+          "sha": "b714a1fb2f2482cd5795163e6b80aecf5aa1881f",
+          "size": 4971
+        },
+        {
+          "path": "test/highcountry/invariant/BreedingRandomnessInvariant.t.sol",
+          "sha": "5cd6046fe4f6b5a5e0f1a6977c53feae7e4aca6e",
+          "size": 8729
+        },
+        {
+          "path": "test/highcountry/invariant/ContentEntitlementInvariant.t.sol",
+          "sha": "774b9bb610c42009485ef01a90fbe0ceb907761a",
+          "size": 3163
+        },
+        {
+          "path": "test/highcountry/invariant/CultivationInvariant.t.sol",
+          "sha": "34a881f528c0fe2165cbcae6758fac21ff600e38",
+          "size": 15991
+        },
+        {
+          "path": "test/highcountry/invariant/GenesisRegistryInvariant.t.sol",
+          "sha": "3e4f9338a97743c11ea5489eaf8ad4c73d5c18b9",
+          "size": 4883
+        },
+        {
+          "path": "test/highcountry/invariant/GeneticsAssetsInvariant.t.sol",
+          "sha": "9046a4ce288acf84099007a68595c56db99f4008",
+          "size": 13021
+        },
+        {
+          "path": "test/highcountry/invariant/GenomeRegistryInvariant.t.sol",
+          "sha": "7d561b391268ebab6b7efe8240e6a18fc2795a58",
+          "size": 5640
+        },
+        {
+          "path": "test/highcountry/invariant/LandAccessInvariant.t.sol",
+          "sha": "aa39a720bdd528aec33c6616889ea4300130bd86",
+          "size": 9731
+        },
+        {
+          "path": "test/highcountry/invariant/ModuleRegistryInvariant.t.sol",
+          "sha": "88976044e5937e0a1f6fa43fc3fbf9e5fad2d294",
+          "size": 5932
+        },
+        {
+          "path": "test/highcountry/invariant/ProgressiveAccessInvariant.t.sol",
+          "sha": "294cb123f73db64244b204927a106f813217d216",
+          "size": 6235
+        },
+        {
+          "path": "test/highcountry/invariant/ProgressiveSessionAccessInvariant.t.sol",
+          "sha": "2a62a89e5b075a48a7195aec53293feb1d34b301",
+          "size": 4132
+        },
+        {
+          "path": "test/highcountry/invariant/PublicPlantCapacityInvariant.t.sol",
+          "sha": "59502dad6dc3453305830f08b1aa8de2c3544c24",
+          "size": 5691
+        },
+        {
+          "path": "test/highcountry/invariant/WorldGenesisInvariant.t.sol",
+          "sha": "3612fd53c4f1d56bf15e08a03fea59d222d5717f",
+          "size": 6577
+        },
+        {
+          "path": "test/highcountry/mocks/Mock420SmartAccount.sol",
+          "sha": "d75556e002171a69c6662c90d933ea34af48f6b8",
+          "size": 535
+        },
+        {
+          "path": "test/highcountry/mocks/MockCanonicalPhenotypeSources.sol",
+          "sha": "ac777880dc5e5ab57fe1f746ff331b81ffc79361",
+          "size": 1360
+        },
+        {
+          "path": "test/highcountry/mocks/MockCapabilityRegistry.sol",
+          "sha": "fd17140a884830a3bf74f88bf1e0cd58d309a199",
+          "size": 2870
+        },
+        {
+          "path": "test/highcountry/mocks/PlantSourcesFixture.sol",
+          "sha": "0c2f100f8e2bb474145fd874fe2405b322317eaa",
+          "size": 3374
+        },
+        {
+          "path": "test/highcountry/mocks/R04EmergencyFixture.sol",
+          "sha": "197f70ed93ea7f0ab1f3d8b14d7fda735e2e3bdc",
+          "size": 1936
+        },
+        {
+          "path": "test/highcountry/unit/access/GuestProfileMigration.t.sol",
+          "sha": "369c3fffb3bdfff2080eb876ddb196507124a73b",
+          "size": 5730
+        },
+        {
+          "path": "test/highcountry/unit/access/HighCountryAccessPolicy.t.sol",
+          "sha": "6fa85e2650c3b826063cf90f94824c0d13a81538",
+          "size": 5077
+        },
+        {
+          "path": "test/highcountry/unit/auth/HighCountryAuthorization.t.sol",
+          "sha": "e8107c40a59d392e25ac0f6521c1582e407b4cc8",
+          "size": 4909
+        },
+        {
+          "path": "test/highcountry/unit/breeding/BreedingEngine.t.sol",
+          "sha": "f98b954d36a6b9f1a4ed776cb45767191fb34a29",
+          "size": 15932
+        },
+        {
+          "path": "test/highcountry/unit/competition/HCNext73Premium.t.sol",
+          "sha": "acaf00b6aa31284ab1fa045392bee6fdbb743a02",
+          "size": 6517
+        },
+        {
+          "path": "test/highcountry/unit/competition/R0412Competition.t.sol",
+          "sha": "57f1dff18d4e760a006977873893e4c39e44db87",
+          "size": 13480
+        },
+        {
+          "path": "test/highcountry/unit/cooperative/R0411Governance.t.sol",
+          "sha": "4e610e1c10107438e9e7f90965c0b993d5e7ca67",
+          "size": 7351
+        },
+        {
+          "path": "test/highcountry/unit/cultivation/CultivationEngine.t.sol",
+          "sha": "fea980f50c5546f9f3ecc8d9671e5e91ada06910",
+          "size": 44788
+        },
+        {
+          "path": "test/highcountry/unit/cultivation/HarvestScoring.t.sol",
+          "sha": "c87244bd5d3da1ba8bcf93e2bf543cf4821caac0",
+          "size": 2883
+        },
+        {
+          "path": "test/highcountry/unit/cup/R0413GlobalCup.t.sol",
+          "sha": "8b3c1028fc951b6b7b26a2a90321d5ac7dce489a",
+          "size": 7069
+        },
+        {
+          "path": "test/highcountry/unit/equipment/EquipmentLifecycleEngine.t.sol",
+          "sha": "6aa23abb67c041bcd370898dd2681bc6a9c4334e",
+          "size": 6578
+        },
+        {
+          "path": "test/highcountry/unit/equipment/EquipmentRegistry.t.sol",
+          "sha": "b67c896fcb3b495d87c29ea3bcfa94b634d607f2",
+          "size": 6534
+        },
+        {
+          "path": "test/highcountry/unit/genesis/GenesisRegistry.t.sol",
+          "sha": "fc9d7d53c014ea2fa33f684639cd60cfba67ec0b",
+          "size": 4628
+        },
+        {
+          "path": "test/highcountry/unit/genetics/GeneticsAssets.t.sol",
+          "sha": "4214dccd24bc82522f1c743ccee78060ecf3d17e",
+          "size": 11401
+        },
+        {
+          "path": "test/highcountry/unit/genetics/GenomeRegistry.t.sol",
+          "sha": "480dc1dafd3ca21c1e70ee8a0d6dde23580bdebf",
+          "size": 6543
+        },
+        {
+          "path": "test/highcountry/unit/inventory/InventoryRegistry.t.sol",
+          "sha": "225828cb2224e88d640dbd9b901f33e40c2fc742",
+          "size": 10888
+        },
+        {
+          "path": "test/highcountry/unit/land/LandRegistry.t.sol",
+          "sha": "d6d6077bc169b4d5cfac013bdf957ae09bddf574",
+          "size": 12876
+        },
+        {
+          "path": "test/highcountry/unit/land/PublicCultivationAccess.t.sol",
+          "sha": "a1cd2f4a56e6ebc50fd696e4b1c914ad540afa9e",
+          "size": 6833
+        },
+        {
+          "path": "test/highcountry/unit/manufacturing/ManufacturingEngine.t.sol",
+          "sha": "cb80fe31fda6c08e7c75b3832c3afda8e0920f3f",
+          "size": 6765
+        },
+        {
+          "path": "test/highcountry/unit/market/CanonicalMarketEscrow.t.sol",
+          "sha": "495ebf0c2ef7c5527cdd7ac30e739bec5c8c50d8",
+          "size": 8071
+        },
+        {
+          "path": "test/highcountry/unit/missions/MissionEngine.t.sol",
+          "sha": "38f3cfe5f5dd3276cc40505179f30fd442a41dc3",
+          "size": 2870
+        },
+        {
+          "path": "test/highcountry/unit/organization/R0410Organization.t.sol",
+          "sha": "0a4498d5e4d6e39fbfa2e3f8059c7c72b2619ce4",
+          "size": 13146
+        },
+        {
+          "path": "test/highcountry/unit/player/HighCountryCrossGame420.t.sol",
+          "sha": "a20f995dace5fa6ba2696328943dfc0455466f52",
+          "size": 5449
+        },
+        {
+          "path": "test/highcountry/unit/player/HighCountryGamingBridge420.t.sol",
+          "sha": "b1b21686b6cefc5bfdb365329f4e40da279c1255",
+          "size": 12999
+        },
+        {
+          "path": "test/highcountry/unit/player/HighCountryMigration420.t.sol",
+          "sha": "7c6119536d95011833dbbdb36ff6758244c6e30d",
+          "size": 6998
+        },
+        {
+          "path": "test/highcountry/unit/player/HighCountrySessionAccess420.t.sol",
+          "sha": "4f2f4e27bfb0a9b4e387117cce8033e14ca40484",
+          "size": 18560
+        },
+        {
+          "path": "test/highcountry/unit/player/IHighCountryGamingAccess420Compile.t.sol",
+          "sha": "7266a608325e03fb09bcaa141cf9bb226f225c3b",
+          "size": 767
+        },
+        {
+          "path": "test/highcountry/unit/player/OptionalCompetitionAccess420.t.sol",
+          "sha": "03e66b2bb8daa4db74750f995e698260564baa52",
+          "size": 5820
+        },
+        {
+          "path": "test/highcountry/unit/progression/ProgressionRegistries.t.sol",
+          "sha": "1a3b16eb3cb4dc0196dd424f3343dc5021c992fd",
+          "size": 4062
+        },
+        {
+          "path": "test/highcountry/unit/rights/CanonicalLandPlantGate.t.sol",
+          "sha": "02d8e76d1e9748a2b63581494d45850fb9b3bdc8",
+          "size": 6557
+        },
+        {
+          "path": "test/highcountry/unit/rights/R049Rights.t.sol",
+          "sha": "12a3c4cb21b733be25ec4578c0dbf9112d0c89b5",
+          "size": 8791
+        },
+        {
+          "path": "test/highcountry/unit/rules/RulesetRegistry.t.sol",
+          "sha": "7bf5a4d8fe4bfe2e8b97a0c4e2915415abb859d1",
+          "size": 2882
+        },
+        {
+          "path": "test/highcountry/unit/rules/RulesetRouter.t.sol",
+          "sha": "0d14b468d324e6ec9fa9e99983ea8dbe6fdffea3",
+          "size": 3890
+        },
+        {
+          "path": "test/highcountry/unit/security/EmergencyState.t.sol",
+          "sha": "b37c7f45ba87305785a60b0c7121a70576fe98e9",
+          "size": 5782
+        },
+        {
+          "path": "test/highcountry/unit/security/R0414Authority.t.sol",
+          "sha": "a8bed491d859cb72fdffdb34e56332f2bc06029b",
+          "size": 6389
+        },
+        {
+          "path": "test/highcountry/unit/upgrades/ModuleRegistry.t.sol",
+          "sha": "1ecbf8710c2639c0eaf9708befda98f527e670b0",
+          "size": 15382
+        },
+        {
+          "path": "test/highcountry/unit/world/BonusRegionAccess420.t.sol",
+          "sha": "a8dc2a6e26249b3b1d4ada2946f4e666d412fe65",
+          "size": 5945
+        },
+        {
+          "path": "test/highcountry/unit/world/HC2WorldGenesis.t.sol",
+          "sha": "bc297c2ba74b08c57426e6ecfab2025117031cc8",
+          "size": 8258
+        }
+      ]
+    }
+  },
+  "sharedServiceMigrationWarning": "These paths coexist with other gaming consumers; do not bulk-delete. Match imports, deployments and test coverage first."
+}

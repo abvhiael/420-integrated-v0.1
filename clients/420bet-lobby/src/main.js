@@ -1,3 +1,4 @@
+import {createPractice} from './practice-ui.js';
 import {WalletIdentity,loadHistory} from './wallet.js';
 import './style.css';
 import {createNativePreview} from './previews.js';
@@ -22,7 +23,8 @@ function render(){
     const main=node('main','immersive');const bar=node('header','gamebar');
     bar.append(button('← Return to Lobby',close,'return'),node('strong','',active.title));
     const note=node('span','game-status',statusText[active.status]);bar.append(note);main.append(bar);
-    if(active.route){const frame=node('iframe','gameframe');frame.title=active.title+' game';frame.src=active.route;frame.setAttribute('allow','fullscreen');main.append(frame);}
+    if(active.category==='Casino'){const practice=createPractice(active.id,document);const wrap=node('div','view-scroll');wrap.append(practice);main.append(wrap);}
+    else if(active.route){const frame=node('iframe','gameframe');frame.title=active.title+' game';frame.src=active.route;frame.setAttribute('allow','fullscreen');main.append(frame);}
     else {const nativePreview=createNativePreview(active.id);if(nativePreview){const wrap=node('div','view-scroll');wrap.append(nativePreview);main.append(wrap);}else{const preview=node('section','preview-screen');preview.append(node('p','eyebrow','420BET GAME PREVIEW'),node('div','preview-glyph',({'Casino':'✦','Poker':'♠','Fantasy':'★','Sportsbook':'◆'})[active.category]),node('h1','',active.title),node('p','','This game screen is being prepared. Its dedicated interface is not yet connected.'),node('p','preview-warning','Viewing only — wagering, wallet transactions and payouts are not enabled here.'));preview.append(button('Return to Lobby',close,'return'));main.append(preview);}}
     app.append(main);return;
   }

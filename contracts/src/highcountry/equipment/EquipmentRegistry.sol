@@ -43,9 +43,27 @@ contract EquipmentRegistry is R04EmergencyConsumer {
     mapping(uint64 => address) public placementOperator;
     mapping(uint64 => int256[6]) private _totals;
     uint256 public issuedCount;
+
+    /// @notice Explicit owner offer + recipient acceptance, not payment or market escrow.
+    struct TransferOffer {
+        address recipient;
+        uint64 expiresAt;
+    }
+    mapping(bytes32 => TransferOffer) public pendingTransfers;
+    uint64 public constant MAX_TRANSFER_OFFER_DURATION = 30 days;
+    event EquipmentTransferOffered(
+        bytes32 indexed equipmentId, address indexed owner, address indexed recipient, uint64 expiresAt
+    );
+    event EquipmentTransferCancelled(bytes32 indexed equipmentId, address indexed owner);
+    event EquipmentOwnershipTransferred(
+        bytes32 indexed equipmentId, address indexed previousOwner, address indexed newOwner
+    );
+
     address public lifecycleController;
     mapping(bytes32 => bool) public disabled;
+    mapping(bytes32 => bool) public degraded;
     mapping(bytes32 => bool) public retired;
+    event EquipmentDegradationStatus(bytes32 indexed equipmentId, bool degraded);
 
     event LifecycleControllerSet(address indexed controller);
     event EquipmentEffectStatus(bytes32 indexed equipmentId, bool disabled);
@@ -135,6 +153,50 @@ contract EquipmentRegistry is R04EmergencyConsumer {
         emit EquipmentEarned(equipmentId, typeId, owner, earningRef);
     }
 
+    /// @notice Proposed owner-controlled custody transfer. Payment settlement is not implied.
+    /// @dev Placed or retired equipment cannot be transferred; the existing condition/provenance follows the item.
+    function offerTransfer(
+        bytes32 equipmentId,
+        address recipient,
+        uint64 expiresAt
+    ) external r04Unrestricted(EmergencyDomains.MARKET) {
+        Equipment storage item = _equipment[equipmentId];
+        if (
+            !item.exists || item.owner != msg.sender || item.parcelId != 0 || retired[equipmentId]
+                || recipient == address(0) || recipient == msg.sender || expiresAt <= block.timestamp
+                || uint256(expiresAt) > block.timestamp + MAX_TRANSFER_OFFER_DURATION
+        ) revert HCInvalidState();
+        pendingTransfers[equipmentId] = TransferOffer(recipient, expiresAt);
+        emit EquipmentTransferOffered(equipmentId, msg.sender, recipient, expiresAt);
+    }
+
+    /// @notice Cancellation remains available even when marketplace ingress is paused.
+    function cancelTransfer(
+        bytes32 equipmentId
+    ) external {
+        Equipment storage item = _equipment[equipmentId];
+        if (!item.exists || item.owner != msg.sender || pendingTransfers[equipmentId].recipient == address(0)) {
+            revert HCInvalidState();
+        }
+        delete pendingTransfers[equipmentId];
+        emit EquipmentTransferCancelled(equipmentId, msg.sender);
+    }
+
+    function acceptTransfer(
+        bytes32 equipmentId
+    ) external r04Unrestricted(EmergencyDomains.MARKET) {
+        Equipment storage item = _equipment[equipmentId];
+        TransferOffer memory offer = pendingTransfers[equipmentId];
+        if (
+            !item.exists || retired[equipmentId] || item.parcelId != 0 || offer.recipient != msg.sender
+                || block.timestamp > offer.expiresAt
+        ) revert HCInvalidState();
+        address previous = item.owner;
+        delete pendingTransfers[equipmentId];
+        item.owner = msg.sender;
+        emit EquipmentOwnershipTransferred(equipmentId, previous, msg.sender);
+    }
+
     /// @notice Lifecycle authority is bound once, permanently, to prevent arbitrary status toggles.
     function bindLifecycleController(
         address controller
@@ -144,6 +206,46 @@ contract EquipmentRegistry is R04EmergencyConsumer {
         }
         lifecycleController = controller;
         emit LifecycleControllerSet(controller);
+    }
+
+    /// @notice Degraded equipment contributes half its signed effect, rounded toward zero.
+    /// @dev Disabled equipment has zero active contribution; state still follows the equipment.
+    function activeItemEffects(
+        bytes32 equipmentId
+    ) external view returns (int256[6] memory values) {
+        Equipment storage item = _equipment[equipmentId];
+        if (!item.exists) revert HCInvalidState();
+        if (disabled[equipmentId] || retired[equipmentId]) return values;
+        for (uint256 i; i < 6; ++i) {
+            values[i] = _effect(equipmentId, i, degraded[equipmentId]);
+        }
+    }
+
+    function _effect(
+        bytes32 equipmentId,
+        uint256 index,
+        bool degraded_
+    ) private view returns (int256) {
+        int256 base = _types[_equipment[equipmentId].typeId].effects[index];
+        return degraded_ ? base / 2 : base;
+    }
+
+    /// @notice Only the fixed lifecycle authority may apply deterministic degradation.
+    function setLifecycleDegraded(
+        bytes32 equipmentId,
+        bool isDegraded
+    ) external {
+        if (msg.sender != lifecycleController || retired[equipmentId]) revert HCInvalidState();
+        Equipment storage item = _equipment[equipmentId];
+        if (!item.exists || degraded[equipmentId] == isDegraded) revert HCInvalidState();
+        if (item.parcelId != 0 && !disabled[equipmentId]) {
+            for (uint256 i; i < 6; ++i) {
+                _totals[item.parcelId][i] += _effect(equipmentId, i, isDegraded)
+                - _effect(equipmentId, i, degraded[equipmentId]);
+            }
+        }
+        degraded[equipmentId] = isDegraded;
+        emit EquipmentDegradationStatus(equipmentId, isDegraded);
     }
 
     function setLifecycleDisabled(
@@ -156,7 +258,7 @@ contract EquipmentRegistry is R04EmergencyConsumer {
         if (item.parcelId != 0) {
             int256 direction = isDisabled ? int256(-1) : int256(1);
             for (uint256 i; i < 6; ++i) {
-                _totals[item.parcelId][i] += direction * _types[item.typeId].effects[i];
+                _totals[item.parcelId][i] += direction * _effect(equipmentId, i, degraded[equipmentId]);
             }
         }
         disabled[equipmentId] = isDisabled;
@@ -175,6 +277,7 @@ contract EquipmentRegistry is R04EmergencyConsumer {
             occupiedSlots[parcelId] -= _types[item.typeId].slotCost;
             if (occupiedSlots[parcelId] == 0) placementOperator[parcelId] = address(0);
         }
+        delete pendingTransfers[equipmentId];
         retired[equipmentId] = true;
         emit EquipmentRetired(equipmentId);
     }
@@ -187,7 +290,7 @@ contract EquipmentRegistry is R04EmergencyConsumer {
         Equipment storage item = _equipment[equipmentId];
         if (
             !item.exists || retired[equipmentId] || disabled[equipmentId] || item.owner != msg.sender
-                || item.parcelId != 0 || parcelId == 0
+                || item.parcelId != 0 || parcelId == 0 || pendingTransfers[equipmentId].recipient != address(0)
         ) {
             revert HCInvalidState();
         }
@@ -199,7 +302,7 @@ contract EquipmentRegistry is R04EmergencyConsumer {
         item.parcelId = parcelId;
         occupiedSlots[parcelId] += kind.slotCost;
         for (uint256 i; i < 6; ++i) {
-            _totals[parcelId][i] += kind.effects[i];
+            _totals[parcelId][i] += _effect(equipmentId, i, degraded[equipmentId]);
         }
         emit EquipmentPlaced(equipmentId, parcelId, msg.sender);
     }
@@ -215,7 +318,7 @@ contract EquipmentRegistry is R04EmergencyConsumer {
         occupiedSlots[parcelId] -= kind.slotCost;
         if (occupiedSlots[parcelId] == 0) placementOperator[parcelId] = address(0);
         for (uint256 i; i < 6; ++i) {
-            if (!disabled[equipmentId]) _totals[parcelId][i] -= kind.effects[i];
+            if (!disabled[equipmentId]) _totals[parcelId][i] -= _effect(equipmentId, i, degraded[equipmentId]);
         }
         emit EquipmentRemoved(equipmentId, parcelId);
     }

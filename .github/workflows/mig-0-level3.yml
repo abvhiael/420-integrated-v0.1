@@ -1,0 +1,18 @@
+name: MIG-0 Level 3 Closeout
+on:
+  pull_request:
+    paths:
+      - 'docs/migration/MIG-0-source-file-provenance.json'
+      - 'docs/migration/MIG-0-level3-evidence.json'
+      - 'scripts/migration/verify-mig-0-level3.mjs'
+      - '.github/workflows/mig-0-level3.yml'
+  workflow_dispatch:
+jobs:
+  level3-source-closeout:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node scripts/migration/verify-mig-0-level3.mjs

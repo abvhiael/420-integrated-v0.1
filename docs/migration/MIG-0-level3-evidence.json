@@ -1,0 +1,177 @@
+{
+  "schema": "420-mig-0-level3-evidence-v1",
+  "step": "MIG-0",
+  "scope": "inventory-freeze-and-handoff",
+  "qualification": {
+    "level": 3,
+    "status": "CANDIDATE_PENDING_EXACT_SHA_CI",
+    "notClaimed": [
+      "SDK external publication",
+      "game extraction",
+      "complete off-GitHub artwork",
+      "full cross-repo runtime release"
+    ]
+  },
+  "canonicalSourceTrees": {
+    "abvhiael/420-integrated": "2c79a8990969beef026acee659d19763702cada2",
+    "abvhiael/MadBuds-Godot": "babda3859a10e77f3c362d97acd18f170ae2fda6",
+    "abvhiael/420-integrated-v0.1": "1a4d3454757d23f61ee1dcf4fcf17702e7c09b57"
+  },
+  "preservedEvidence": [
+    {
+      "milestone": "MIG-0.1",
+      "run": 40065907626,
+      "sha": "16da1d0f47d6a405d6cbda099df92c53701bbd50"
+    },
+    {
+      "milestone": "MIG-0.2",
+      "run": 40067994481,
+      "sha": "5bf07f61f502e2a4f8a64587dee98026a5440270"
+    },
+    {
+      "milestone": "MIG-0.3",
+      "run": 40103626441,
+      "sha": "c43e282bca3610687570a697da8e79031dd7f2b9"
+    },
+    {
+      "milestone": "MIG-0.4",
+      "run": 40110361380,
+      "sha": "f7b6204dfac06e2392a143e1c8624af07edb433a"
+    },
+    {
+      "milestone": "MIG-0.5",
+      "run": 40113005615,
+      "sha": "813429a55c2c44f765b8b800b1e3b02f07559a91"
+    },
+    {
+      "milestone": "Godot-binary-and-runtime",
+      "run": 40108948204,
+      "sha": "0562825a51b6193d0936e18f3bd8e9937220ee16"
+    }
+  ],
+  "prs": [
+    {
+      "number": 151,
+      "state": "open",
+      "merged": false,
+      "headSha": "a43eb3d56735a35c95e709ac163bb526851957cc",
+      "baseSha": "0131d30ada583a793d2c5adbe0be1e3bae3e85c6",
+      "title": "feat(green-road): begin TGR-1.1 reusable scene engine"
+    },
+    {
+      "number": 561,
+      "state": "open",
+      "merged": false,
+      "headSha": "5633265cbdd0bd55c84872765be79e77816b5adb",
+      "baseSha": "c8e8b58d818611276f7a9bb2b8d2241004450d97",
+      "title": "audit(budtender): repository-grounded qualification and remediation"
+    },
+    {
+      "number": 621,
+      "state": "open",
+      "merged": false,
+      "headSha": "be62acd8a68c4eed13cee35cacd6fa95348544ac",
+      "baseSha": "bc0faa5dafecda3de0620a9581f9953b89cd95fb",
+      "title": "feat(budtender): register Phase 3.15 expansion seams and preview modules"
+    },
+    {
+      "number": 715,
+      "state": "open",
+      "merged": false,
+      "headSha": "2428ffa6626e9b442c06652272d21714fb21a97f",
+      "baseSha": "010f21d9f190d90faf44b745a679ea5c32c40f55",
+      "title": "Budtender BUD-CHAR-01 — canonical roadmap and 01.1 art direction draft"
+    },
+    {
+      "number": 734,
+      "state": "open",
+      "merged": false,
+      "headSha": "804d6686c05a86db8d381b615acf73b080e9d1f6",
+      "baseSha": "733d087aad67bd97abebeca0d0ba171cf8d19e24",
+      "title": "Genesis Application Decision #2 — expanded 51-app catalog and release-readiness boundaries"
+    },
+    {
+      "number": 771,
+      "state": "open",
+      "merged": false,
+      "headSha": "ade0268f0b507e5912181e278c6f25923a3472d8",
+      "baseSha": "a8d40eff26f464d4f32251a852edbffcf41a6d5d",
+      "title": "Sativa Steve Phase E — animation preparation and rigging specification"
+    },
+    {
+      "number": 780,
+      "state": "open",
+      "merged": false,
+      "headSha": "969732595513691ce55c2a2c49a0d9871f577c58",
+      "baseSha": "6da29d73153e0771caeecc2b739f763ca414651d",
+      "title": "Mad Buds MB-3.1 — portable character contract and Unity source boundary"
+    },
+    {
+      "number": 788,
+      "state": "open",
+      "merged": false,
+      "headSha": "0856af94932faef763b03cf1b76e97fbdea439e8",
+      "baseSha": "483255c8f7ad112ed4864de8a706f038d44de371",
+      "title": "DOCS: register 420Arcade's contract-free Genesis inventory owner"
+    },
+    {
+      "number": 791,
+      "state": "open",
+      "merged": false,
+      "headSha": "16da1d0f47d6a405d6cbda099df92c53701bbd50",
+      "baseSha": "483255c8f7ad112ed4864de8a706f038d44de371",
+      "title": "MIG-0.1 — classify game repository ownership with scoped Level 1 gate"
+    },
+    {
+      "number": 792,
+      "state": "open",
+      "merged": false,
+      "headSha": "5bf07f61f502e2a4f8a64587dee98026a5440270",
+      "baseSha": "483255c8f7ad112ed4864de8a706f038d44de371",
+      "title": "MIG-0.2 — audit shared SDK and gaming integration boundaries"
+    },
+    {
+      "number": 794,
+      "state": "open",
+      "merged": false,
+      "headSha": "c43e282bca3610687570a697da8e79031dd7f2b9",
+      "baseSha": "483255c8f7ad112ed4864de8a706f038d44de371",
+      "title": "MIG-0.3 — disposition active game PRs and Genesis catalog conflicts"
+    },
+    {
+      "number": 795,
+      "state": "closed",
+      "merged": true,
+      "headSha": "f7b6204dfac06e2392a143e1c8624af07edb433a",
+      "baseSha": "6b13e491b7088c113f4be0abd5826509053ed3bb",
+      "title": "MIG-0.4 — reconcile MadBuds source ownership, legacy Unity and Godot boundaries"
+    },
+    {
+      "number": 799,
+      "state": "closed",
+      "merged": true,
+      "headSha": "813429a55c2c44f765b8b800b1e3b02f07559a91",
+      "baseSha": "bd99570733556139db9d9df84cf436e64cd66da0",
+      "title": "MIG-0.5 — consolidate qualified audit inventories and closeout gates"
+    }
+  ],
+  "decisions": [
+    "420 Gaming Protocol and High Country remain Genesis-owned",
+    "MadBuds Godot canonical primary runtime; older Unity source preserved as legacy",
+    "All deferred games retain optional-wallet game IDs and entitlements",
+    "PR #734 and #788 may not override arcade deferral without explicit catalog amendment",
+    "Do not copy or delete game sources in MIG-0",
+    "Untracked or external graphics require separately verified artifact manifests before MIG-2 transfer"
+  ],
+  "handoffToMIG1": [
+    "publish/version-lock Gaming SDK; remove source-relative imports",
+    "define external cross-repository authentication/claims fixtures and CI compatibility contract",
+    "resolve Genesis catalog owner decision #2 conflicts"
+  ],
+  "handoffToMIG2": [
+    "carry all 1609 tracked files in inventory to classified destination or retain disposition, never auto-delete",
+    "re-verify external asset ZIPs/PNGs not tracked in source repository",
+    "preserve 13 PR source refs and review any new heads before cutover"
+  ],
+  "archivePolicy": "This freezes tracked Git objects at observed tree SHAs, not untracked local files."
+}

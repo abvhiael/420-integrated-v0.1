@@ -7,7 +7,7 @@ export function createNeonDice(doc=globalThis.document){
  const render=()=>{
   root.replaceChildren();
   const hero=el('div','nd-hero');const art=el('img','nd-dice-art');art.src='/assets/420bet/dice/neon-dice.png';art.alt='Two glowing emerald glass dice';art.loading='lazy';hero.append(art);
-  const intro=el('div','nd-intro');intro.append(el('div','nd-kicker','420BET CASINO'),el('h1','','Dice'),el('p','','Pick a side. Set your threshold. Roll the neon.'));hero.append(intro);hero.append(el('div','nd-mode','✦ PRACTICE MODE · NO WAGERS'));root.append(hero);
+  const intro=el('div','nd-intro');intro.append(el('div','nd-kicker','420BET CASINO'),el('h1','','Dice'),el('p','','Pick a side. Set your threshold. Roll the neon.'));hero.append(intro);hero.append(el('div','nd-mode','✦ PRACTICE MODE · NO WALLET · NO WAGERS'));root.append(hero);
   const board=el('div','nd-board'),left=el('div','nd-controls'),right=el('div','nd-result');
   const toggle=el('div','nd-toggle');for(const [key,label] of [['under','Roll Under ↓'],['over','Roll Over ↑']]){const btn=el('button',state.choice===key?'nd-choice active':'nd-choice',label);btn.type='button';btn.setAttribute('aria-pressed',String(state.choice===key));btn.addEventListener('click',()=>{state=next(state,{type:'choice',value:key});render();});toggle.append(btn);}left.append(toggle);
   const thresholdLabel=el('label','nd-threshold-label','Threshold');thresholdLabel.setAttribute('for','nd-threshold');const thresholdValue=el('output','nd-threshold-number',state.threshold.toLocaleString('en-US'));left.append(thresholdLabel,thresholdValue);
@@ -18,7 +18,7 @@ export function createNeonDice(doc=globalThis.document){
   right.append(el('div','nd-result-heading','LAST PRACTICE ROLL'));right.append(el('div','nd-big-number',state.result.length?String(state.result[0]).padStart(4,'0'):'—'));right.append(el('div',state.result.length?(rolls[0]?.win?'nd-win':'nd-lose'):'nd-wait',state.result.length?(rolls[0]?.win?'✓ WINNING SIDE':'× OTHER SIDE'):'AWAITING ROLL'));right.append(el('p','nd-result-sub','Simulated result · no credits or payouts'));
   board.append(left,right);root.append(board);
   const bottom=el('div','nd-bottom');const history=el('div','nd-history');history.append(el('h2','','↻ Recent Practice Rolls'));const pills=el('div','nd-pills');if(!rolls.length)pills.append(el('p','','Your simulated rolls will appear here.'));for(const item of rolls)pills.append(el('span',item.win?'nd-pill win':'nd-pill lose',String(item.value).padStart(4,'0')+(item.win?' ✓':' ×')));history.append(pills);bottom.append(history);const rules=el('details','nd-rules');rules.append(el('summary','','ⓘ Game Rules & Info'),el('p','','Dice practice draws one simulated result from 0000 to 9999. Under wins below the selected threshold; Over wins at or above it. Real games use separately qualified contracts and cannot be activated here.'));bottom.append(rules);root.append(bottom);
-  root.append(el('p','nd-disclaimer','Browser-only simulation. No wallet connection, money, actual wagers, canonical randomness, or payouts.'));
+  root.append(el('p','nd-disclaimer','Browser-only simulation. No funds, wallet connection, actual wagers, canonical randomness, or payouts.'));
  };
  render();return root;
 }

@@ -4,6 +4,7 @@ import { R04EmergencyConsumer } from "../security/R04EmergencyConsumer.sol";
 import { EmergencyDomains } from "../constants/EmergencyDomains.sol";
 import { ManufacturingEngine } from "../manufacturing/ManufacturingEngine.sol";
 import { EquipmentRegistry } from "./EquipmentRegistry.sol";
+import { EquipmentClassCatalogueV1 } from "./EquipmentClassCatalogueV1.sol";
 import { InventoryRegistry } from "../inventory/InventoryRegistry.sol";
 
 /// @notice Converts one actual completed manufacturing output into one catalogue-pinned earned item.
@@ -18,6 +19,7 @@ contract ManufacturedEquipmentIssuer is R04EmergencyConsumer {
     }
     ManufacturingEngine public immutable manufacturing;
     EquipmentRegistry public immutable equipment;
+    EquipmentClassCatalogueV1 public immutable catalogue;
     InventoryRegistry public immutable inventory;
     address public immutable administrator;
     mapping(bytes32 => Rule) public rules;
@@ -33,6 +35,7 @@ contract ManufacturedEquipmentIssuer is R04EmergencyConsumer {
         if (manufacturing_.code.length == 0 || equipment_.code.length == 0) revert InvalidManufacturedEquipment();
         manufacturing = ManufacturingEngine(manufacturing_);
         equipment = EquipmentRegistry(equipment_);
+        catalogue = new EquipmentClassCatalogueV1();
         if (manufacturing.r04AuthorizationRoot() != root || equipment.r04AuthorizationRoot() != root) {
             revert InvalidManufacturedEquipment();
         }
@@ -50,7 +53,24 @@ contract ManufacturedEquipmentIssuer is R04EmergencyConsumer {
             revert InvalidManufacturedEquipment();
         }
         ManufacturingEngine.Recipe memory r = manufacturing.recipe(recipe);
-        equipment.equipmentType(typeId);
+        if (equipment.equipmentType(typeId).catalogueVersion != r.version) revert InvalidManufacturedEquipment();
+        if (r.version == catalogue.CATALOGUE_VERSION()) {
+            bool validClass;
+            for (uint8 category; category < 5; ++category) {
+                for (uint8 tier; tier < 2; ++tier) {
+                    EquipmentClassCatalogueV1.Definition memory d = catalogue.definition(category, tier);
+                    if (d.typeId != typeId) continue;
+                    if (
+                        r.inputs[0] != d.repairResource || r.inputAmounts[0] != d.craftParts
+                            || r.inputs[1] != d.operatingResource || r.inputAmounts[1] != d.craftOperatingInput
+                            || r.outputs[0] != d.craftOutput || r.outputAmounts[0] != 1 || r.outputs[1] != bytes32(0)
+                            || r.outputAmounts[1] != 0 || resource != d.craftOutput || quantity != 1
+                    ) revert InvalidManufacturedEquipment();
+                    validClass = true;
+                }
+            }
+            if (!validClass) revert InvalidManufacturedEquipment();
+        }
         bool matchOutput;
         for (uint256 i; i < 2; i++) {
             if (r.outputs[i] == resource && r.outputAmounts[i] == quantity) matchOutput = true;

@@ -6,7 +6,7 @@ export function createNeonDice(doc=globalThis.document){
  const el=(tag,cls,txt)=>{const n=doc.createElement(tag);if(cls)n.className=cls;if(txt!==undefined)n.textContent=txt;return n;};
  const render=()=>{
   root.replaceChildren();
-  const hero=el('div','nd-hero');const art=el('img','nd-dice-art');art.src='/assets/420bet/dice/neon-dice.png';art.alt='Two glowing emerald glass dice';art.loading='lazy';hero.append(art);
+  const hero=el('div','nd-hero');const art=el('img','nd-dice-art');art.src='/assets/420bet/dice/420bet-neon-dice.png';art.alt='Two glowing emerald glass dice';art.loading='lazy';hero.append(art);
   const intro=el('div','nd-intro');intro.append(el('div','nd-kicker','420BET CASINO'),el('h1','','Dice'),el('p','','Pick a side. Set your threshold. Roll the neon.'));hero.append(intro);hero.append(el('div','nd-mode','✦ PRACTICE MODE · NO WALLET · NO WAGERS'));root.append(hero);
   const board=el('div','nd-board'),left=el('div','nd-controls'),right=el('div','nd-result');
   const toggle=el('div','nd-toggle');for(const [key,label] of [['under','Roll Under ↓'],['over','Roll Over ↑']]){const btn=el('button',state.choice===key?'nd-choice active':'nd-choice',label);btn.type='button';btn.setAttribute('aria-pressed',String(state.choice===key));btn.addEventListener('click',()=>{state=next(state,{type:'choice',value:key});render();});toggle.append(btn);}left.append(toggle);

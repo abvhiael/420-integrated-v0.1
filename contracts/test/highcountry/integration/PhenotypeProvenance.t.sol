@@ -222,4 +222,27 @@ contract PhenotypeProvenanceTest is PublicPlantCapacityFixture {
             HCInvalidState.selector
         );
     }
+    function testCultivationRegisteredIdentityOfflineCatchupAndBoundedExpression() public {
+        PlantRegistry.PlantRecord memory original = plants.getPlant(1);
+        require(original.grower == address(this), "registered grower mismatch");
+        require(original.genomeId == GENOME && original.landParcelId == 1, "registered provenance mismatch");
+        CultivationEngine.EnvironmentSnapshot memory env =
+            CultivationEngine.EnvironmentSnapshot(2400, 6000, 7000, 6000, 6500, 5000);
+        cultivation.updateEnvironment(1, env);
+        CultivationEngine.CultivationState memory beforeGrowth = cultivation.getState(1);
+        require(beforeGrowth.stressBps <= 10000 && beforeGrowth.qualityBps <= 10000, "unbounded scores");
+        require(uint256(beforeGrowth.stressBps) + beforeGrowth.qualityBps == 10000, "score conservation");
+        _grant(address(this), ModuleIds.PLANT_REGISTRY, ActionIds.PLANT_ADVANCE, bytes32(uint256(1)));
+        vm.warp(uint256(original.plantedAt) + 17 days);
+        (PlantRegistry.PlantStage stage, uint8 advanced) = plants.syncOfflineGrowth(1);
+        require(stage == PlantRegistry.PlantStage.READY && advanced == 4, "offline progression mismatch");
+        require(plants.getPlant(1).lastAdvancedAt == original.plantedAt + 17 days, "offline timestamp drift");
+        (stage, advanced) = plants.syncOfflineGrowth(1);
+        require(stage == PlantRegistry.PlantStage.READY && advanced == 0, "offline catchup replay");
+        bytes32 expression = cultivation.expressPhenotype(1, GENOME, approvedRulesetId);
+        require(expression != bytes32(0), "expression missing");
+        require(cultivation.sealedRulesetId(1) == approvedRulesetId, "versioned ruleset lost");
+        require(cultivation.getState(1).expressionLocked, "canonical expression unsealed");
+        _reject(address(cultivation), abi.encodeCall(cultivation.updateEnvironment, (1, env)), HCInvalidState.selector);
+    }
 }

@@ -52,3 +52,38 @@
 @media(max-width:560px){
  .nd-dice-art{left:-16px;top:12px;width:160px;height:180px;opacity:.60}
 }
+
+/* Dice desktop composition: separate the large art and functional board into
+   different horizontal zones. Do not shrink the approved dice image. */
+@media(min-width:1200px){
+  .neon-dice-page{
+    width:min(1460px,calc(100vw - 64px));
+    max-width:none;
+    margin-left:50%;
+    transform:translateX(-50%);
+    overflow:visible;
+  }
+  .nd-hero{z-index:2}
+  .nd-dice-art{
+    left:8px;
+    top:82px;
+    width:clamp(395px,29vw,480px);
+    height:clamp(485px,40vw,620px);
+    max-width:none;
+    object-fit:contain;
+    object-position:top left;
+    opacity:1;
+    pointer-events:none;
+    mix-blend-mode:screen;
+  }
+  .nd-board,.nd-bottom{
+    margin-left:clamp(390px,31vw,485px);
+    width:calc(100% - clamp(390px,31vw,485px));
+    position:relative;
+    z-index:1;
+  }
+}
+@media(min-width:951px) and (max-width:1199px){
+  .nd-dice-art{left:-95px;top:48px;width:290px;height:380px;opacity:.7}
+  .nd-board,.nd-bottom{margin-left:150px;width:calc(100% - 150px)}
+}

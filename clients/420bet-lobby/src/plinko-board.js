@@ -1,3 +1,4 @@
+import {plinkoMultiplierLabel,plinkoPracticeGrossPayout,PLINKO_PRACTICE_WAGER} from './plinko-practice-paytable.js';
 import {initial,next} from './practice-engine.js';
 const ROWS=12, DURATION=3600, NS='http://www.w3.org/2000/svg';
 export function plinkoWaypoints(bits){
@@ -54,10 +55,11 @@ export function createPlinkoBoard(doc=globalThis.document){
   machine.append(svg);
   const buckets=el('div','plinko-buckets');buckets.setAttribute('aria-label','Thirteen Plinko landing buckets');
   const bucketNumber=state.result.reduce((a,x)=>a+x,0);
-  for(let n=0;n<=ROWS;n++){const bucket=el('span','plinko-bucket'+(landed&&n===bucketNumber?' landed':''),String(n));bucket.title='Landing bucket '+n;buckets.append(bucket);}machine.append(buckets);frame.append(machine);
-  const panel=el('aside','plinko-info');panel.append(el('h2','','Practice Drop'),el('p','','Watch the ball travel through 12 rows of luminous pegs into one of 13 buckets.'),el('div','plinko-stat-label','LAST LANDING BUCKET'),el('div','plinko-stat',landed?String(bucketNumber):'—'),el('p','practice-message',animating?'Ball dropping through the pegs…':landed?state.message:'Practice mode. No funds or payouts.'));
+  for(let n=0;n<=ROWS;n++){const bucket=el('span','plinko-bucket'+(landed&&n===bucketNumber?' landed':''),plinkoMultiplierLabel(n));bucket.title='Bucket '+n+' · test fixture '+plinkoMultiplierLabel(n);buckets.append(bucket);}machine.append(buckets);frame.append(machine);
+  const panel=el('aside','plinko-info');panel.append(el('h2','','Practice Drop'),el('p','','Watch the ball travel through 12 rows of luminous pegs into one of 13 buckets.'),el('div','plinko-stat-label','LAST LANDING BUCKET'),el('div','plinko-stat',landed?String(bucketNumber):'—'),el('div','plinko-financials'),el('p','practice-message',animating?'Ball dropping through the pegs…':landed?state.message:'Practice mode. No funds or payouts.'));
+  const finance=panel.querySelector('.plinko-financials');for(const [label,value] of [['Practice wager',String(PLINKO_PRACTICE_WAGER)],['Landed multiplier',landed?plinkoMultiplierLabel(bucketNumber):'—'],['Practice payout',landed?String(plinkoPracticeGrossPayout(bucketNumber)):'—']]){const row=el('div','plinko-financial-row');row.append(el('span','',label),el('strong','',value));finance.append(row);}panel.append(el('p','plinko-schedule-warning','Multipliers shown are the repository integration-test fixture, NOT an approved live payout schedule.'));
   const button=el('button','plinko-drop',animating?'BALL IN MOTION…':'✦ DROP PRACTICE BALL');button.type='button';button.disabled=animating;button.addEventListener('click',draw);
-  panel.append(button,el('p','plinko-safe','Browser-only simulated path. No wager, wallet request, canonical randomness, multiplier or payout.'));frame.append(panel);root.append(frame);
+  panel.append(button,el('p','plinko-safe','Browser-only simulated path. No wager, wallet request, canonical randomness or real payout.'));frame.append(panel);root.append(frame);
  };
  root.stopAnimation=()=>{animating=false;if(frameId!==null&&cancel)cancel(frameId);frameId=null;};
  render();return root;

@@ -1,10 +1,5 @@
 name: BET-AUDIT-6.2 targeted Level 1 wallet-history
 on:
-  push:
-    branches: ['bet/audit-6-2-wallet-history']
-    paths:
-      - 'clients/420bet-lobby/**'
-      - '.github/workflows/420bet-lobby-6-2-level1.yml'
   pull_request:
     paths:
       - 'clients/420bet-lobby/**'

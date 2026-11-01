@@ -162,3 +162,18 @@ The remaining tournament network work is consolidated below. This supersedes the
 | TN-TOUR-03-L6 — frozen-candidate release decision | Reconcile with then-current main, preserve valid source-matched evidence, complete applicable Level 3/release gates and explicit authorized go/no-go, promotion/change control and post-deployment smoke. Production privileges and wagering stay disabled until all applicable approvals and live gates pass. Testnet success alone is not production authorization. |
 
 **Exit evidence:** for every task retain status, responsible authority, exact release SHA, approved network/deployment lineage, run URL/ID, finalized transaction/block references, artifact hashes and independent verification result. Missing official infrastructure, signing custody or external approval remains an explicit open gate; none is marked passed by moving it here. This handoff does not expand the opening fantasy format or change the separate sportsbook/product roadmaps.
+
+## TN-LOBBY-6.2 — Live wallet, transaction and player-history acceptance
+
+**Deferred: official testnet and authorized deployments required.** Repository-side BET-AUDIT-6.2 is merged via PR #935 (main `13593162c5fc9d4576efca513771133a2bb5dfd7`). Preserve 22/22 passing Level 1 cases and build at exact tested SHA `fcdeb2dbbcfd81660b6d6f321f50724996240ce6`, [run #41268851851](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/41268851851); do not rerun these tests without a relevant change.
+
+| Gate | Remaining live-testnet work and evidence |
+| --- | --- |
+| TN-LOBBY-6.2-01 — identity and configuration | Verify official chain ID, deployed code hashes, independent game-specific contract bindings and signed/approved versioned configuration. A shared router address does not establish game attribution. |
+| TN-LOBBY-6.2-02 — live indexed service | Deploy/configure canonical 420Indexer and the same-origin read-only `/api/420bet/player-history` service; verify real indexed chain receipts, block provenance, safe-head/finality, reorg recovery, config hashes and service readiness. |
+| TN-LOBBY-6.2-03 — wallet/browser | With a real wallet on official testnet verify user-initiated connection, rejection, account/chain switches, disconnect, wallet-session changes and guest browsing. Connection never grants spending or wagering authority. |
+| TN-LOBBY-6.2-04 — history evidence | Correlate genuine transaction/receipt/block IDs to the correct game, account and chain; exercise success, reverted, missing, reorged, pending, wrong-chain/game/account, stale and outage cases and verify recovery. Record immutable references and test run IDs. |
+| TN-LOBBY-6.2-05 — funded lifecycle | Through qualified **game clients**, not lobby signing, demonstrate authorized testnet wager, refunds/voids, settlement, safe exit/session recovery and wallet transaction history. Retain authorization, custody, funding, liability and receipt proofs; never substitute projected history for canonical settlement. |
+| TN-LOBBY-6.2-06 — independent acceptance | Obtain eligibility/legal, responsible-play, economic/risk and release authority sign-offs, deployment/configuration digest, rollback/monitoring evidence and explicit go/no-go under universal release gates. Testnet PASS is not production authorization. |
+
+**Exit:** record exact deployment/release SHAs, approved chain and contract identities, real transaction/block hashes, indexer checkpoint/finality and reorg proofs, signed approvals, run IDs/URLs and final acceptance disposition. Missing infrastructure or external authorization remains OPEN, not simulated or marked complete. The 6.2 implementation and passing local evidence stay closed and unchanged.

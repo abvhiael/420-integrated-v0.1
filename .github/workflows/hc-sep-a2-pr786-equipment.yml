@@ -1,0 +1,28 @@
+name: HC-SEP-A2 PR786 equipment isolated qualification
+on:
+  push:
+    paths:
+      - '.github/workflows/hc-sep-a2-pr786-equipment.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  equipment:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Pin qualification SHA
+        run: git rev-parse HEAD
+      - name: Targeted equipment source format
+        working-directory: contracts
+        run: forge fmt --check src/highcountry/equipment/EquipmentClassCatalogueV1.sol src/highcountry/equipment/EquipmentCultivationBridge.sol src/highcountry/equipment/EquipmentLifecycleEngine.sol src/highcountry/equipment/EquipmentRegistry.sol src/highcountry/equipment/ManufacturedEquipmentIssuer.sol test/highcountry/unit/equipment/EquipmentLifecycleEngine.t.sol test/highcountry/integration/R04EquipmentEmergency.t.sol
+      - name: Equipment lifecycle unit regression
+        working-directory: contracts
+        run: forge test --match-path 'test/highcountry/unit/equipment/EquipmentLifecycleEngine.t.sol' -vv
+      - name: Equipment emergency and manufacturing integration
+        working-directory: contracts
+        run: forge test --match-path 'test/highcountry/integration/R04EquipmentEmergency.t.sol' -vv

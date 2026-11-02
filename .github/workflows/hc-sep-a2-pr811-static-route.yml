@@ -1,0 +1,19 @@
+name: HC-SEP-A2 PR811 missions static route check
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/hc-sep-a2-pr811-static-route.yml'
+permissions:
+  contents: read
+jobs:
+  missions-route:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: PR811 affected static mission route
+        run: node --test apps/highcountry-web/test/hc-next-5-2-server.test.mjs

@@ -143,3 +143,15 @@
 .plinko-financial-row{display:flex;justify-content:space-between;gap:12px;font-size:.88rem;color:#c4d7c1}
 .plinko-financial-row strong{color:#aaff72;font-weight:900;font-size:1.05rem}
 .plinko-schedule-warning{font-size:.8rem;line-height:1.5;color:#f3cd80;border-left:3px solid #e6b64c;padding:10px 12px;background:#392c0b40}
+
+/* 420Bet Plinko: Dice smoke artwork reused; dark masks preserve peg contrast. */
+.plinko-neon{background:linear-gradient(115deg,rgba(0,15,7,.81),rgba(0,19,10,.68)),url('/assets/420bet/dice/420Bet_Dice_Wallpaper_FRESH_2026-11-01.webp') center/cover fixed,linear-gradient(150deg,#072514,#001207)}
+.plinko-stage{background:radial-gradient(ellipse at 50% 25%,rgba(31,95,43,.28),transparent 68%),linear-gradient(150deg,rgba(4,28,16,.83),rgba(1,15,8,.9));backdrop-filter:blur(4px)}
+.plinko-info{background:linear-gradient(145deg,rgba(6,30,17,.92),rgba(1,16,9,.94));backdrop-filter:blur(5px)}
+.plinko-ball{filter:drop-shadow(0 0 8px #a2ff65) drop-shadow(0 0 5px #e8ffb5);pointer-events:none}
+.plinko-medallion-halo{fill:#76fa5b;fill-opacity:.17;stroke:#83ff6a;stroke-opacity:.34;stroke-width:2}
+.plinko-medallion-base{fill:#063b21;stroke:#efff9b;stroke-width:2}
+.plinko-medallion-rim{fill:none;stroke:#a3ed55;stroke-width:1.4}
+.plinko-medallion-leaf{fill:#a8ff69;stroke:#184716;stroke-width:.25}
+.plinko-medallion-leaf .plinko-leaf-stem{fill:none;stroke:#a8ff69;stroke-width:1.4}
+@media(max-width:720px){.plinko-neon{background-attachment:scroll}}

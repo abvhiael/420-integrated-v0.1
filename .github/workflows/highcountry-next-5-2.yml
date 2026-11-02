@@ -1,0 +1,43 @@
+name: High Country HC-NEXT-5.2 Missions Level 1
+on:
+  pull_request:
+    paths:
+      - 'services/highcountry-economy/src/missions.js'
+      - 'services/highcountry-economy/src/signed-mission-evidence.js'
+      - 'services/highcountry-economy/src/mission-catalog-v1.js'
+      - 'services/highcountry-economy/test/missions*.test.js'
+      - 'services/highcountry-economy/test/signed-mission-evidence.test.js'
+      - 'apps/highcountry-web/src/missions.js'
+      - 'apps/highcountry-web/test/hc-next-5-2-missions.test.mjs'
+      - '.github/workflows/highcountry-next-5-2.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  mission:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Exact qualified SHA
+        env:
+          CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+      - name: Mission implementation and security syntax
+        run: |
+          node --check services/highcountry-economy/src/missions.js
+          node --check services/highcountry-economy/src/signed-mission-evidence.js
+          node --check services/highcountry-economy/src/mission-catalog-v1.js
+          node --check apps/highcountry-web/src/missions.js
+      - name: Missions Level 1 lifecycle and adversarial tests
+        working-directory: services/highcountry-economy
+        run: node --test test/missions.test.js test/missions-http.test.js test/signed-mission-evidence.test.js
+      - name: Wallet-free browser mission state tests
+        run: node --test apps/highcountry-web/test/hc-next-5-2-missions.test.mjs
+      - name: Diff integrity
+        run: git diff --check

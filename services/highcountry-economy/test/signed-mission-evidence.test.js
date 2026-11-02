@@ -1,7 +1,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {generateKeyPairSync,sign} from 'node:crypto';
-import {createSignedMissionEvidence} from '../src/signed-mission-evidence.js';
+import {createSignedMissionEvidence} from '../src/signed-mission-evidence-pr811.js';
 test('signed mission evidence rejects forgery, wrong game, wrong objective, expiry and private key',async()=>{
  const keys=generateKeyPairSync('ed25519'),gameId='0x'+'11'.repeat(32);let now=1000;
  const args={publicKey:keys.publicKey,issuer:'approved-missions',gameId,chainId:420,clock:()=>now};

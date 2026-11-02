@@ -1,3 +1,4 @@
+import {BASE_REELS,FEATURE_REELS,visibleGrid,chooseStops,awardedFreeSpins,scatterReelCount} from './emerald-v2-strips.js';
 import {practiceCreditSnapshot,practiceCreditRound,resetPracticeCredits} from './practice-credits.js';
 import {demoSlotBreakdown,DEMO_STAKE} from './emerald-practice-paytable.js';
 import {EMERALD_ASSETS} from './emerald-slots-assets.js';
@@ -17,7 +18,7 @@ export function slotWays(board){
  }
  return wins;
 }
-export function slotFeatureEligible(board){return board.filter(v=>v===6).length>=3;}
+export function slotFeatureEligible(board){return scatterReelCount(board)>=3;}
 
 // Visual-only BIG WIN cue. Not a financial win: practice payouts remain zero.
 export function emeraldCelebration(wins,scatterTriggered){
@@ -26,7 +27,7 @@ export function emeraldCelebration(wins,scatterTriggered){
  return null;
 }
 export function createEmeraldSlots(doc=globalThis.document){
- let state=initial('slots'),spinning=false,freeRemaining=0,freeAwarded=0,lastWins=[],featureMessage='',shown=Array(20).fill(-1),timer=null,celebration=null,overlayTimer=null,lastBreakdown=null,lastCreditRound=null,spinFree=false;
+ let state=initial('slots'),spinning=false,freeRemaining=0,freeAwarded=0,lastWins=[],featureMessage='',shown=Array(20).fill(-1),stops=null,timer=null,celebration=null,overlayTimer=null,lastBreakdown=null,lastCreditRound=null,spinFree=false;
  const view=doc.defaultView||{},root=doc.createElement('section');root.className='practice emerald-slots';root.dataset.practiceGame='slots';
  const node=(tag,cls,content)=>{const n=doc.createElement(tag);if(cls)n.className=cls;if(content!==undefined)n.textContent=content;return n;};
  const clearOverlay=()=>{if(overlayTimer!==null){view.clearTimeout?.(overlayTimer);overlayTimer=null;}celebration=null;};
@@ -59,7 +60,7 @@ export function createEmeraldSlots(doc=globalThis.document){
   const spin=node('button','es-spin',spinning?'SPINNING…':freeRemaining?'FREE SPIN ✦':'✦ SPIN ✦');spin.type='button';spin.disabled=spinning;spin.addEventListener('click',play);controls.append(stats);cabinet.append(controls);stage.append(spin);root.append(cabinet);
   const details=node('section','es-details');details.append(node('p','es-notice','PRACTICE ONLY · NO WALLET · NO REAL WAGERS · NO CREDITS · NO PAYOUTS · No funds involved'));
   const detailsText=spinning?'Reels spinning…':lastWins.length?'Simulated ways: '+lastWins.map(w=>SLOT_SYMBOLS[w.symbol]+' '+w.reels+' reels / '+w.ways+' ways').join(' · '):'No winning ways displayed on this spin.';
-  details.append(node('p','es-outcome',detailsText),node('p','es-disclaimer','Visual practice preview. Symbol draws are not canonical reel-strip outcomes; free-spin demonstration is not a certified paytable or RTP.'));
+  details.append(node('p','es-outcome',detailsText),node('p','es-disclaimer','Visual practice preview using provisional 42-position circular reels. The candidate strip order and demo paytable are not certified production odds or RTP.'));
   const accounting=node('div','es-credit-panel');
   accounting.append(node('h3','','Practice credit breakdown · sample values only'));
   const rows=lastBreakdown?.lines||[];
@@ -73,12 +74,13 @@ export function createEmeraldSlots(doc=globalThis.document){
   root.append(details);
  };
  const finish=()=>{
-  shown=[...state.result];spinning=false;lastWins=slotWays(shown);
+  shown=visibleGrid(spinFree?FEATURE_REELS:BASE_REELS,stops);spinning=false;lastWins=slotWays(shown);
   lastBreakdown=demoSlotBreakdown(shown,lastWins,{freeSpin:spinFree});
   lastCreditRound=practiceCreditRound({stake:spinFree?0:DEMO_STAKE,payout:lastBreakdown.payout});
-  const triggered=slotFeatureEligible(shown);
-  if(triggered){if(freeAwarded===0){freeRemaining+=6;freeAwarded=1;}else if(freeAwarded<3){freeRemaining+=3;freeAwarded++;}freeRemaining=Math.min(12,freeRemaining);featureMessage='✦ FREE SPINS FEATURE ✦ '+freeRemaining+' REMAINING · 2× FEATURE (PREVIEW)';}
-  else if(freeRemaining>0){featureMessage='✦ FREE SPINS ✦ '+freeRemaining+' REMAINING · 2× FEATURE (PREVIEW)';}
+  const awarded=spinFree?0:awardedFreeSpins(shown);
+  const triggered=awarded>0;
+  if(triggered){freeRemaining=awarded;featureMessage='✦ FREE SPINS FEATURE ✦ '+freeRemaining+' SPINS · 4.20× MULTIPLIER (PREVIEW)';}
+  else if(freeRemaining>0){featureMessage='✦ FREE SPINS ✦ '+freeRemaining+' REMAINING · 4.20× MULTIPLIER (PREVIEW)';}
   else featureMessage=lastWins.length?'✦ MATCHING WAYS ✦':'';
   celebration=emeraldCelebration(lastWins,triggered);
   draw();
@@ -92,10 +94,11 @@ export function createEmeraldSlots(doc=globalThis.document){
   spinFree=freeRemaining>0;
   if(!spinFree&&practiceCreditSnapshot().balance<DEMO_STAKE){featureMessage='Not enough practice credits. Reset to continue.';draw();return;}
   if(spinFree)freeRemaining--;else freeAwarded=0;
-  state=next(state,{type:'play'});spinning=true;lastWins=[];featureMessage='';
+  stops=chooseStops();spinning=true;lastWins=[];featureMessage='';
   let tick=0;
   const animate=()=>{if(!spinning)return;tick++;
-   shown=Array.from({length:20},()=>Math.floor(Math.random()*7));draw();
+   const strips=spinFree?FEATURE_REELS:BASE_REELS;
+   shown=visibleGrid(strips,stops.map((stop,reel)=>(stop+((12-tick)*3)+reel)%42));draw();
    if(tick<12){timer=view.setTimeout?.(animate,95+tick*15)??null;}else{timer=null;finish();}
   };
   if(view.matchMedia?.('(prefers-reduced-motion: reduce)').matches||!view.setTimeout){finish();return;}

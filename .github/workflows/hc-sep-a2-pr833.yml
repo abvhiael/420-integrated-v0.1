@@ -1,0 +1,26 @@
+name: HC-SEP-A2 PR833 regional scene coordinate qualification
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/hc-sep-a2-pr833.yml'
+permissions:
+  contents: read
+jobs:
+  regional-scene:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Affected scene module syntax
+        run: |
+          node --check apps/highcountry-web/src/cultivation-scene-layout.js
+          node --check apps/highcountry-web/src/app.js
+      - name: PR833 scene coordinate and anchor tests
+        run: node --test apps/highcountry-web/test/hc-gfx-214-layout.test.mjs
+      - name: Affected HighCountry web static build
+        working-directory: apps/highcountry-web
+        run: node scripts/build.mjs

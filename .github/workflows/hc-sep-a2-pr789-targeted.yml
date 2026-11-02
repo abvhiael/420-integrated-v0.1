@@ -1,0 +1,25 @@
+name: HC-SEP-A2 PR789 manufacturing recovery qualification
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/hc-sep-a2-pr789-targeted.yml'
+permissions:
+  contents: read
+jobs:
+  manufacturing-recovery:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Exact implementation SHA
+        run: git rev-parse HEAD
+      - name: Focused manufacturing source formatting
+        working-directory: contracts
+        run: forge fmt --check src/highcountry/manufacturing/ManufacturingEngine.sol test/highcountry/unit/manufacturing/ManufacturingEngine.t.sol
+      - name: Manufacturing recovery unit tests
+        working-directory: contracts
+        run: forge test --match-path 'test/highcountry/unit/manufacturing/ManufacturingEngine.t.sol' -vv

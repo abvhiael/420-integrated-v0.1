@@ -17,11 +17,18 @@ export function slotWays(board){
 }
 export function slotFeatureEligible(board){return board.filter(v=>v===6).length>=3;}
 
+// Visual-only BIG WIN cue. Not a financial win: practice payouts remain zero.
+export function emeraldCelebration(wins,scatterTriggered){
+ if(scatterTriggered)return 'freeSpins';
+ if(wins.some(w=>w.reels>=5&&w.ways>=4))return 'bigWin';
+ return null;
+}
 export function createEmeraldSlots(doc=globalThis.document){
- let state=initial('slots'),spinning=false,freeRemaining=0,freeAwarded=0,lastWins=[],featureMessage='',shown=Array(20).fill(-1),timer=null;
+ let state=initial('slots'),spinning=false,freeRemaining=0,freeAwarded=0,lastWins=[],featureMessage='',shown=Array(20).fill(-1),timer=null,celebration=null,overlayTimer=null;
  const view=doc.defaultView||{},root=doc.createElement('section');root.className='practice emerald-slots';root.dataset.practiceGame='slots';
  const node=(tag,cls,content)=>{const n=doc.createElement(tag);if(cls)n.className=cls;if(content!==undefined)n.textContent=content;return n;};
- const stop=()=>{if(timer!==null){view.clearTimeout?.(timer);timer=null;}spinning=false;};
+ const clearOverlay=()=>{if(overlayTimer!==null){view.clearTimeout?.(overlayTimer);overlayTimer=null;}celebration=null;};
+ const stop=()=>{if(timer!==null){view.clearTimeout?.(timer);timer=null;}clearOverlay();spinning=false;};
  root.stopAnimation=stop;
  const draw=()=>{
   root.replaceChildren();
@@ -34,7 +41,17 @@ export function createEmeraldSlots(doc=globalThis.document){
    if(value>=0){const art=node('img','es-symbol-image');art.src=EMERALD_ASSETS.symbols[value];art.alt=symbol;art.draggable=false;tile.append(art);}else{tile.append(node('span','es-symbol-mark','✳'));}if(!spinning&&lastWins.some(w=>w.positions.includes(i))){tile.append(node('span','es-win-spark'));}
    grid.append(tile);
   }
-  stage.append(grid);const frameArt=node('img','es-cabinet-art');frameArt.src=EMERALD_ASSETS.cabinet;frameArt.alt='';frameArt.draggable=false;stage.append(frameArt);const banner=node('div','es-feature-banner',featureMessage);banner.setAttribute('aria-live','polite');stage.append(banner);inner.append(stage);cabinet.append(inner);
+  stage.append(grid);const frameArt=node('img','es-cabinet-art');frameArt.src=EMERALD_ASSETS.cabinet;frameArt.alt='';frameArt.draggable=false;stage.append(frameArt);const banner=node('div','es-feature-banner',featureMessage);banner.setAttribute('aria-live','polite');stage.append(banner);
+  if(celebration){const overlay=node('div','es-celebration es-celebration-'+celebration);
+   overlay.setAttribute('role','status');overlay.setAttribute('aria-live','polite');
+   const art=node('img','es-celebration-art');
+   art.src=celebration==='bigWin'?EMERALD_ASSETS.bigWin:EMERALD_ASSETS.freeSpins;
+   art.alt=celebration==='bigWin'?'BIG WIN visual preview':'FREE SPINS feature preview';
+   art.draggable=false;overlay.append(art);
+   overlay.append(node('span','es-celebration-label',celebration==='bigWin'?'Practice visual celebration · no payout':'Free spins preview · no wager'));
+   stage.append(overlay);
+  }
+  inner.append(stage);cabinet.append(inner);
   const controls=node('div','es-controls'),stats=node('div','es-stats');
   for(const [label,value] of [['WAGER','0'],['PAYOUT','0'],['FREE SPINS',String(freeRemaining)],['PRACTICE BALANCE','—']]){const item=node('div','es-stat');item.append(node('small','',label),node('strong','',value));stats.append(item);}
   const spin=node('button','es-spin',spinning?'SPINNING…':freeRemaining?'FREE SPIN ✦':'✦ SPIN ✦');spin.type='button';spin.disabled=spinning;spin.addEventListener('click',play);controls.append(stats);cabinet.append(controls);stage.append(spin);root.append(cabinet);
@@ -49,10 +66,15 @@ export function createEmeraldSlots(doc=globalThis.document){
   if(triggered){if(freeAwarded===0){freeRemaining+=6;freeAwarded=1;}else if(freeAwarded<3){freeRemaining+=3;freeAwarded++;}freeRemaining=Math.min(12,freeRemaining);featureMessage='✦ FREE SPINS FEATURE ✦ '+freeRemaining+' REMAINING · 2× FEATURE (PREVIEW)';}
   else if(freeRemaining>0){featureMessage='✦ FREE SPINS ✦ '+freeRemaining+' REMAINING · 2× FEATURE (PREVIEW)';}
   else featureMessage=lastWins.length?'✦ MATCHING WAYS ✦':'';
+  celebration=emeraldCelebration(lastWins,triggered);
   draw();
+  if(celebration&&view.setTimeout&&!view.matchMedia?.('(prefers-reduced-motion: reduce)').matches){
+   overlayTimer=view.setTimeout(()=>{overlayTimer=null;celebration=null;draw();},2600);
+  }
  };
  const play=()=>{
   if(spinning)return;
+  clearOverlay();
   if(freeRemaining>0)freeRemaining--;else freeAwarded=0;
   state=next(state,{type:'play'});spinning=true;lastWins=[];featureMessage='';
   let tick=0;

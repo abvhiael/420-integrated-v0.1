@@ -216,3 +216,12 @@
 @keyframes es-celebration-enter{0%{opacity:0;transform:scale(.3) rotate(-5deg)}55%{opacity:1;transform:scale(1.08) rotate(2deg)}100%{opacity:1;transform:scale(1) rotate(0)}}
 @keyframes es-celebration-glow{from{filter:drop-shadow(0 0 8px #8aff4f) brightness(.95)}to{filter:drop-shadow(0 0 25px #fbd35e) brightness(1.17)}}
 @media(prefers-reduced-motion:reduce){.es-celebration,.es-celebration-art{animation:none}}
+
+/* Educational, wallet-free practice credit ledger, separate from wager authority. */
+.es-credit-panel{max-width:780px;margin:14px auto 0;padding:18px;text-align:left;background:#082918e8;border:1px solid #d2ac55;border-radius:16px}
+.es-credit-panel h3{font-size:1.1rem;color:#ffe08f;margin:0 0 10px}
+.es-credit-line{color:#e4f6cf;font-variant-numeric:tabular-nums;margin:6px 0}
+.es-credit-total{padding:10px 0;border-top:1px solid #76914d;font-weight:900;color:#abff74}
+.es-credit-reset{border:1px solid #d5b85c;border-radius:10px;background:#143d20;color:#f1dda7;padding:10px 16px;cursor:pointer}
+.es-credit-reset:focus-visible{outline:3px solid #baff79}
+.es-credit-disclosure{font-size:.8rem;max-width:780px;margin:14px auto;color:#e0bb75}

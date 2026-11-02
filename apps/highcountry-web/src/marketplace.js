@@ -1,3 +1,4 @@
+import {getTextileAsset,textileCatalogue} from './textile-catalogue.js';
 import {TABLES_DESKS_DESIGNS} from './tables-desks-catalog.js';
 import {OUTDOOR_SEATING_DESIGNS} from './outdoor-seating-catalog.js';
 import {GREENHOUSE_LOUNGE_DESIGNS} from './greenhouse-lounge-catalog.js';
@@ -230,6 +231,14 @@ export function mountMarketplace({document,main,runtime,authenticate,fetchImpl=f
   for(const asset of fireGatheringCatalogue){
    const entry=el('article'),img=document.createElement('img');img.src=asset.assetUrl;img.alt=asset.name;img.width=110;img.height=110;img.loading='lazy';img.addEventListener('error',()=>{img.hidden=true;});
    entry.append(img,el('p',asset.name+' · '+asset.footprint.width+'×'+asset.footprint.height+' · '+asset.originRegion));fire.append(entry);
+  }
+  const decorations=section('Decorative furnishings · HC-ART-02-E');
+  decorations.append(el('p','Artwork catalogue only. BUDS prices, ownership and purchase eligibility require authenticated marketplace records.'));
+  for(const asset of textileCatalogue){
+   const row=el('article');
+   const img=document.createElement('img');img.src=asset.assetUrl;img.alt=asset.name;img.width=96;img.height=96;img.loading='lazy';row.append(img);
+   row.append(el('p',asset.name+' · '+asset.footprint.width+'×'+asset.footprint.height+' · '+asset.placement.layer.replaceAll('_',' ')));
+   decorations.append(row);
   }
   const inventory=section('My verified inventory');
   if(!data.inventory.length)inventory.append(el('p','No tradeable registered inventory. Local guest harvests cannot be listed.'));

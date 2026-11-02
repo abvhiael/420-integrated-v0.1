@@ -38,7 +38,7 @@ export function createPlinkoBoard(doc=globalThis.document){
    if(lastConnected&&!root.isConnected){animating=false;frameId=null;return;}
    if(started===null)started=time;
    const t=Math.min(1,Math.max(0,(time-started)/DURATION)),position=plinkoPosition(points,t);
-   ball.setAttribute('cx',position.x.toFixed(2));ball.setAttribute('cy',position.y.toFixed(2));
+   ball.setAttribute('transform',`translate(${position.x.toFixed(2)} ${position.y.toFixed(2)}) rotate(${(Math.sin(t*ROWS*Math.PI)*11 + t*155).toFixed(2)})`);
    const row=Math.min(ROWS-1,Math.floor(t*(ROWS+1))-1);
    if(row>=0&&row!==lastRow){if(lastRow>=0){pegs.forEach(p=>p.classList.remove('plinko-peg-flash'));}const targetY=42+row*47;const targetX=points[row+1].x;const target=pegs.find(p=>Number(p.getAttribute('cy'))===targetY&&Math.abs(Number(p.getAttribute('cx'))-targetX)<24);if(target)target.classList.add('plinko-peg-flash');lastRow=row;}
    flash.setAttribute('cx',position.x.toFixed(2));flash.setAttribute('cy',position.y.toFixed(2));flash.setAttribute('opacity',row>=0&&t<1?'0.28':'0');
@@ -51,7 +51,17 @@ export function createPlinkoBoard(doc=globalThis.document){
   const frame=el('div','plinko-machine'),machine=el('div','plinko-stage');machine.setAttribute('aria-label','12-row Plinko pegboard with 13 landing buckets');
   const svg=svgNode('svg',{viewBox:'0 0 720 690',role:'img','aria-label':'Plinko pegboard with 12 rows of luminous pegs',class:'plinko-svg'});
   for(let row=0;row<ROWS;row++)for(let col=0;col<=row;col++)svg.append(svgNode('circle',{cx:360+(col-row/2)*43,cy:42+row*47,r:7,class:'plinko-peg'}));
-  if(animating||landed){const points=plinkoWaypoints(state.result),last=landed?points.at(-1):points[0];svg.append(svgNode('circle',{cx:last.x,cy:last.y,r:22,class:'plinko-flash',opacity:0}));svg.append(svgNode('circle',{cx:last.x,cy:last.y,r:12,class:'plinko-ball'}));}
+  if(animating||landed){const points=plinkoWaypoints(state.result),last=landed?points.at(-1):points[0];svg.append(svgNode('circle',{cx:last.x,cy:last.y,r:22,class:'plinko-flash',opacity:0}));const chip=svgNode('g',{class:'plinko-ball',transform:`translate(${last.x} ${last.y})`,'aria-label':'Glowing cannabis leaf medallion'});
+  chip.append(svgNode('circle',{cx:0,cy:0,r:14,class:'plinko-medallion-halo'}));
+  chip.append(svgNode('circle',{cx:0,cy:0,r:11.5,class:'plinko-medallion-base'}));
+  chip.append(svgNode('circle',{cx:0,cy:0,r:10,class:'plinko-medallion-rim'}));
+  const leaf=svgNode('g',{class:'plinko-medallion-leaf'});
+  for(const [angle,len] of [[-65,10],[-43,12],[-22,14],[0,16],[22,14],[43,12],[65,10]]){
+   const w=len*.22;
+   leaf.append(svgNode('path',{d:`M0 4 Q${-w} ${4-len*.5} 0 ${4-len} Q${w} ${4-len*.5} 0 4 Z`,transform:`rotate(${angle} 0 4)`}));
+  }
+  leaf.append(svgNode('path',{d:'M0 4 L0 9',class:'plinko-leaf-stem'}));
+  chip.append(leaf);svg.append(chip);}
   machine.append(svg);
   const buckets=el('div','plinko-buckets');buckets.setAttribute('aria-label','Thirteen Plinko landing buckets');
   const bucketNumber=state.result.reduce((a,x)=>a+x,0);

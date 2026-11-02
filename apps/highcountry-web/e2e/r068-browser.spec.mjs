@@ -117,3 +117,11 @@ test('HC-GFX-2.1.2: failed background fetch leaves local cultivation usable',asy
  await page.getByRole('button',{name:'Plant locally'}).click();
  await expect(page.getByText('Plant stage: germination')).toBeVisible();
 });
+
+test('real Chromium: registered missions route is bundled and offline players cannot claim',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto(origin+'/missions');
+ await expect(page.getByRole('heading',{name:'Missions'})).toBeVisible();
+ await expect(page.getByText(/Missions require a registered player account/)).toBeVisible();
+ expect(errors).toEqual([]);
+});

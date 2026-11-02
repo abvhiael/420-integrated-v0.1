@@ -2,8 +2,8 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {runtimeHttpServer} from '../src/runtime-service.js';
 import {MemoryTransactionFixture,SettlementError} from '../src/buds-ledger.js';
-import {MissionService} from '../src/missions.js';
-import {HIGHCOUNTRY_MISSIONS_V1} from '../src/mission-catalog-v1.js';
+import {MissionService} from '../src/missions-pr811.js';
+import {HIGHCOUNTRY_MISSIONS_V1} from '../src/mission-catalog-pr811.js';
 test('registered HTTP mission lifecycle rejects owner override and cannot mint BUDS',async t=>{
  const store=new MemoryTransactionFixture(),identity={
   registeredPrincipal:async token=>{if(token!=='alice-token')throw new SettlementError('unregistered');return 'alice';}

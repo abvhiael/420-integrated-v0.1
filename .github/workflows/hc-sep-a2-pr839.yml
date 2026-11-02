@@ -1,0 +1,22 @@
+name: HC-SEP-A2 PR839 art catalogue isolated
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/hc-sep-a2-pr839.yml'
+permissions:
+  contents: read
+jobs:
+  art-marketplace:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Affected art catalogue and marketplace tests
+        run: node --test apps/highcountry-web/test/hc-art-01a-catalog.test.mjs apps/highcountry-web/test/hc-art-02-furniture.test.mjs apps/highcountry-web/test/hc-art-02b-greenhouse-lounge.test.mjs apps/highcountry-web/test/hc-art-02c-outdoor-seating.test.mjs apps/highcountry-web/test/hc-art-02d-tables-desks.test.mjs apps/highcountry-web/test/hc-next-4-4-marketplace.test.mjs
+      - name: Affected static web build
+        working-directory: apps/highcountry-web
+        run: node scripts/build.mjs

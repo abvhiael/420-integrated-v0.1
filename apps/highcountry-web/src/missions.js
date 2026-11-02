@@ -1,13 +1,13 @@
 // Registered-only mission viewer; guest state never becomes trusted evidence.
 export function mountMissions({document,main,runtime,authenticate,fetchImpl=fetch}){
  const el=(tag,t='')=>{const x=document.createElement(tag);x.textContent=t;return x;};
- const status=el('p',runtime.mode==='connected'?'Loading verified missions…':'Missions require registered gameplay. Guest missions do not award shared rewards.');
+ const status=el('p',runtime.mode==='connected'?'Loading verified missions…':'Missions require a registered player account. Offline guest play remains available. Guest missions do not award shared rewards.');
  status.setAttribute('role','status');main.append(status);
  if(runtime.mode!=='connected'||typeof authenticate!=='function')return;
  const pane=el('section');main.append(pane);
  const post=async(path,body)=>{
   const token=await authenticate();
-  if(typeof token!=='string'||!token||token.length>4096||/\s/.test(token))throw Error('registration required');
+  if(typeof token!=='string'||!token||token.length>4096||/\s/.test(token))throw Error('registered-session-required');
   const r=await fetchImpl(new URL(path,runtime.apiUrl+'/'),{method:'POST',cache:'no-store',credentials:'omit',
    headers:{authorization:'Bearer '+token,'content-type':'application/json'},body:JSON.stringify(body)});
   const result=await r.json();if(!r.ok||result?.ok!==true)throw Error('mission request denied');
@@ -24,12 +24,14 @@ export function mountMissions({document,main,runtime,authenticate,fetchImpl=fetc
   pane.replaceChildren();
   pane.append(el('p','Version '+s.version+' · Rewards are ordinary nontransferable gameplay records.'));
   for(const m of s.missions){
-   const a=el('article');a.append(el('h3',m.id),el('p',m.objective+' · '+m.state+' · '+m.progress+'/'+m.target));
-   a.append(el('p','Prerequisites: '+(m.prerequisites.join(', ')||'none')+
-    ' · reward: '+m.reward.amount+' '+m.reward.type));
+   const state=m.state??m.status;
+   const prereqs=Array.isArray(m.prerequisites)?m.prerequisites:(m.prerequisite?[m.prerequisite]:[]);
+   const reward=m.reward?m.reward.amount+' '+m.reward.type:(m.badgeId??'nontransferable badge');
+   const a=el('article');a.append(el('h3',m.id),el('p',m.objective+' · '+state+' · '+m.progress+'/'+m.target));
+   a.append(el('p','Prerequisites: '+(prereqs.join(', ')||'none')+' · reward: '+reward));
    if(m.deadline!==null)a.append(el('p','Deadline: '+new Date(m.deadline).toLocaleString()));
-   if(m.state==='available')button(a,'Activate mission',()=>post('/missions/activate',{id:m.id,operation:operation()}));
-   if(m.state==='active'){
+   if(state==='available')button(a,'Activate mission',()=>post('/missions/activate',{missionId:m.id,operation:operation()}));
+   if(state==='active'){
     const field=el('label','Signed gameplay evidence ');
     const input=el('input');input.type='text';input.maxLength=8192;field.append(input);a.append(field);
     const countLabel=el('label','Verified units ');
@@ -38,12 +40,12 @@ export function mountMissions({document,main,runtime,authenticate,fetchImpl=fetc
     button(a,'Submit progress',async()=>{
      const amount=Number(count.value);
      if(!Number.isSafeInteger(amount)||amount<1||amount>m.target-m.progress||!input.value)throw Error('invalid signed evidence');
-     await post('/missions/progress',{id:m.id,operation:operation(),evidence:input.value,amount});
+     await post('/missions/progress',{missionId:m.id,operation:operation(),evidence:input.value,amount});
     });
     button(a,'Cancel mission',()=>post('/missions/cancel',{id:m.id,operation:operation()}));
    }
-   if(m.state==='complete')button(a,'Claim reward',()=>post('/missions/claim',{id:m.id,operation:operation()}));
-   if(m.state==='expired')button(a,'Finalize expiry',()=>post('/missions/expire',{id:m.id,operation:operation()}));
+   if(state==='complete')button(a,'Claim reward',()=>post('/missions/claim',{id:m.id,operation:operation()}));
+   if(state==='expired')button(a,'Finalize expiry',()=>post('/missions/expire',{id:m.id,operation:operation()}));
    pane.append(a);
   }
  }

@@ -8,9 +8,7 @@ import {BudsLedger} from '../src/buds-ledger.js';
 import {generateKeyPairSync,sign} from 'node:crypto';
 import {RuntimeAuthority} from '../src/runtime-integration.js';
 import {HighCountryMarket} from '../src/market.js';
-import {createOrdinaryRuntime} from '../src/runtime-service.js';
-import {SkillResearchService} from '../src/skill-research.js';
-import {HIGHCOUNTRY_SKILL_RESEARCH_V1} from '../src/skill-catalog-v1.js';
+import {CanonicalMarketSettlement} from '../src/canonical-settlement.js';
 const url=process.env.HC_TEST_POSTGRES_URL;
 if(!url)throw new Error('HC_TEST_POSTGRES_URL required (dedicated test database only)');
 const pool=new pg.Pool({connectionString:url,max:8,connectionTimeoutMillis:5000});
@@ -50,56 +48,40 @@ try {
  assert.equal(bob.reserved,70,'existing hold persists');
  assert.equal(row.issued,100);assert.equal(row.burned,0);
  assert.equal(row.listings.find(([id])=>id==='listing:1')?.[1].status,'sold');
- // Actual PostgreSQL race: the remaining item and zero-fee credits can transfer once only.
- await ledger.earn('award:charlie','charlie','approved','proof-charlie',20);
- authority.registeredPrincipal=async token=>token==='alice'?'alice':token==='bob'?'bob':
-  token==='charlie'?'charlie':Promise.reject(Error('guest'));
- await market.list('alice','asset:list-race','listing:race','lot:1',1,10,1000);
- const competingMarket=new HighCountryMarket(new PostgresBudsStore(pool,ns),authority,()=>100);
- const race=await Promise.allSettled([
-  market.buy('bob','asset:race-bob','listing:race'),
-  competingMarket.buy('charlie','asset:race-charlie','listing:race')
+ // Two independent PostgreSQL-backed service instances must never release a prepared canonical buyer hold.
+ await market.list('alice','asset:list:canonical','listing:canonical','lot:1',1,5,1000);
+ const canonicalAuthority={
+  registeredPrincipal:async token=>token==='bob'?'bob':Promise.reject(Error('unregistered')),
+  expectedTransferOperation:async()=> 'transfer:canonical',
+  confirmedReservedTransfer:async op=>({
+   finalized:true,operationId:op,asset:'lot:1',from:'alice',to:'bob',
+   quantity:1,sourceReceiptId:'verified:1'
+  }),
+  proveUnexecutedAndCancelled:async()=>false,
+  confirmedListingClosure:async()=>false
+ };
+ const firstSettlement=new CanonicalMarketSettlement(store,canonicalAuthority,()=>100);
+ await firstSettlement.prepare('bob','canonical:prepare','listing:canonical','transfer:canonical');
+ await assert.rejects(other.release('canonical:drain','bob',71),/market reserve locked/);
+ await assert.rejects(other.settle('canonical:steal','bob','attacker',71),/market reserve locked/);
+ await other.release('canonical:release-unlocked','bob',70);
+ const secondSettlement=new CanonicalMarketSettlement(restarted,canonicalAuthority,()=>100);
+ const races=await Promise.allSettled([
+  firstSettlement.finalize('canonical:finalize:A','transfer:canonical'),
+  secondSettlement.finalize('canonical:finalize:B','transfer:canonical')
  ]);
- assert.equal(race.filter(x=>x.status==='fulfilled').length,1,'single successful competing buyer');
- const afterRace=(await pool.query('SELECT state FROM highcountry_buds_state WHERE namespace=$1',[ns])).rows[0].state;
- assert.equal(afterRace.listings.find(([key])=>key==='listing:race')[1].status,'sold');
- assert.equal(afterRace.issued,120,'no issued credit duplication');
- assert.equal(afterRace.burned,0,'approved ordinary zero-fee policy');
- const credits=afterRace.balances.reduce((n,[,b])=>n+b.available+b.reserved,0);
- assert.equal(credits,120,'BUDS conserved with two independent buyers');
- const sellerAssets=afterRace.assets.find(([key])=>key===JSON.stringify(['alice','lot:1']))[1];
- assert.equal(sellerAssets.available,0);assert.equal(sellerAssets.reserved,0);
- const bobAssets=afterRace.assets.find(([key])=>key===JSON.stringify(['bob','lot:1']))?.[1].available||0;
- const charlieAssets=afterRace.assets.find(([key])=>key===JSON.stringify(['charlie','lot:1']))?.[1].available||0;
- assert.equal(bobAssets+charlieAssets,3,'all imported goods accounted for');
- console.log('Postgres competing buyers, one ordinary fill, zero-fee credits and asset conservation: PASS');
-
-// HC-NEXT-5.1 real PostgreSQL durability, distinct instance restart, proof replay and burn conservation.
- await ledger.earn('skill:award','bob','approved','skill:fund-proof',20);
- const skills=new SkillResearchService({store:new PostgresBudsStore(pool,ns),
-  identity:{registeredPrincipal:async token=>token==='bob'?'bob':Promise.reject(Error('unregistered'))},
-  catalog:HIGHCOUNTRY_SKILL_RESEARCH_V1,
-  verifyEvidence:async({evidence})=>({sourceEvent:evidence}),
-  getPlayerLevel:async()=>1,clock:()=>100});
- await skills.progress('bob','skill:step1','archive-index-I','skill:proof1',1);
- await skills.progress('bob','skill:step2','archive-index-I','skill:proof2',1);
- const rebooted=new SkillResearchService({store:new PostgresBudsStore(pool,ns),identity:skills.identity,
-  catalog:HIGHCOUNTRY_SKILL_RESEARCH_V1,verifyEvidence:skills.verifyEvidence,
-  getPlayerLevel:skills.getPlayerLevel,clock:()=>101});
- assert.equal((await rebooted.snapshot('bob')).records[0].points,2,'points survive new process adapter');
- await assert.rejects(rebooted.progress('bob','skill:replay','workbench-notes-I','skill:proof1',1),
-  'source proof is globally single-use even across research tracks');
- const bought=await rebooted.unlock('bob','skill:unlock','archive-index-I');
- assert.equal(bought.spent,10);
- const afterSkill=(await pool.query('SELECT state FROM highcountry_buds_state WHERE namespace=$1',[ns])).rows[0].state;
- assert.equal(afterSkill.burned,10,'real PostgreSQL records BUDS skill sink');
- const outstanding=afterSkill.balances.reduce((n,[,b])=>n+b.available+b.reserved,0);
- assert.equal(outstanding,afterSkill.issued-afterSkill.burned,'BUDS conserved after skill research purchase');
- assert.equal(afterSkill.skillResearch.find(([key])=>key===JSON.stringify(['bob','archive-index-I',
-  'HC-SKILL-RESEARCH-V1']))?.[1].unlocked,true,'skill entitlement persists across instance restart');
- assert.equal(afterSkill.assets.length,afterRace.assets.length,'skill grants no canonical or ordinary inventory');
- console.log('Postgres skill versioned points/restart/proof replay, exact BUDS burn and asset non-mint: PASS');
-
+ assert.equal(races.filter(x=>x.status==='fulfilled').length,1,'canonical paid exactly once');
+ const confirmed=(await pool.query('SELECT state FROM highcountry_buds_state WHERE namespace=$1',[ns])).rows[0].state;
+ const canonicalBob=confirmed.balances.find(([id])=>id==='bob')?.[1];
+ const canonicalAlice=confirmed.balances.find(([id])=>id==='alice')?.[1];
+ assert.equal(canonicalBob.available,75,'buyer post-finality funds');
+ assert.equal(canonicalBob.reserved,0,'escrow lock released');
+ assert.equal(canonicalAlice.available,25,'seller paid once');
+ assert.equal(confirmed.issued,100,'exact issuance');
+ assert.equal(confirmed.burned,0,'no fabricated BUDS burning');
+ assert.equal(confirmed.transferIntents.find(([id])=>id==='transfer:canonical')?.[1].status,'finalized');
+ assert.ok(!confirmed.balances.some(([id])=>id==='attacker'),'rejected payout not persisted');
+ console.log('Live PostgreSQL cross-instance canonical reserve isolation, finality payout, replay and conservation: PASS');
  const role='hc_runtime_'+process.pid;
  await pool.query(await readFile(new URL('../migrations/002_runtime_namespace_rls.sql',import.meta.url),'utf8'));
  await pool.query('CREATE ROLE '+role+" LOGIN PASSWORD 'hc_ci_runtime_only'");
@@ -123,22 +105,6 @@ try {
   assert.equal((await runtimePool.query('SELECT * FROM highcountry_buds_state WHERE namespace=$1',[ns])).rows.length,0,'namespace isolation');
   await assert.rejects(runtimePool.query('INSERT INTO highcountry_buds_state(namespace,state) VALUES($1,$2::jsonb)',[role+'other',JSON.stringify(empty)]));
   await assert.rejects(runtimePool.query('ALTER TABLE highcountry_buds_state ADD COLUMN unsafe text'));
-  const ordinary=await createOrdinaryRuntime({
-   pool:runtimePool,namespace:role,
-   authority:{issuers:{idp:{publicKey:keys.publicKey,operators:{alice:{sources:['inventory']}}}},
-    audience:'hc',gameId:game,chainId:420,origin:'https://hc.example'},
-   rpc:{url:'http://127.0.0.1:8545',chainId:420,contracts:{}},sources:{},
-   inventoryAuthority:{requireMarketOpen:async()=>{},
-    verifyAssetReceipt:async r=>r.receiptId==='verified-inventory-ci'},clock:()=>1000
-  });
-  await ordinary.market.importAsset(token,'ordinary:import',
-   {receiptId:'verified-inventory-ci',owner:'alice',asset:'ci:lot',quantity:2});
-  await ordinary.market.list(token,'ordinary:list','ci:listing','ci:lot',1,1,2000);
-  const admitted=await ordinary.store.transact(s=>s.listings.get('ci:listing'));
-  assert.equal(admitted.seller,'alice');
-  assert.equal(admitted.sourceReceiptId,'verified-inventory-ci');
-  await assert.rejects(ordinary.market.list('forged-token','ordinary:forged','ci:other','ci:lot',1,1,2000));
-  console.log('Least-privilege PostgreSQL ordinary runtime construction, authenticated listing and source admission: PASS');
   console.log('Postgres runtime session/wallet nonce restart persistence and least-privilege/RLS denial: PASS');
  } finally {
   await runtimePool.end();

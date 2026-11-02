@@ -10,12 +10,29 @@ permissions:
 jobs:
   mission-tests:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: highcountry
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Install minimal economy dependencies
+        working-directory: services/highcountry-economy
+        run: npm install --ignore-scripts --no-audit --no-fund
       - name: Verify integrated mission source syntax
         run: |
           node --check services/highcountry-economy/src/missions.js
@@ -23,9 +40,14 @@ jobs:
           node --check apps/highcountry-web/src/missions.js
       - name: Original consolidated mission behavior
         working-directory: services/highcountry-economy
-        run: node --test test/missions.test.js
+        run: node --test test/missions.test.js test/missions-pr811.test.js
       - name: PR811 evidence and HTTP regression
         working-directory: services/highcountry-economy
         run: node --test test/missions-http.test.js test/signed-mission-evidence.test.js
+      - name: PR811 live durable mission state
+        working-directory: services/highcountry-economy
+        env:
+          HC_TEST_POSTGRES_URL: postgresql://postgres:postgres@localhost:5432/highcountry
+        run: node --test test/missions-pr811-postgres.integration.mjs
       - name: PR811 browser state
         run: node --test apps/highcountry-web/test/hc-next-5-2-missions.test.mjs

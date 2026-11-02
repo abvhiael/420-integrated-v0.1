@@ -27,7 +27,7 @@ export function emeraldCelebration(wins,scatterTriggered){
  return null;
 }
 export function createEmeraldSlots(doc=globalThis.document){
- let state=initial('slots'),spinning=false,freeRemaining=0,freeAwarded=0,lastWins=[],featureMessage='',shown=Array(20).fill(-1),stops=null,timer=null,celebration=null,overlayTimer=null,lastBreakdown=null,lastCreditRound=null,spinFree=false,sessionGrossUnits=0,sessionAwardedUnits=0,sessionStake=REFERENCE_STAKE;
+ let state=initial('slots'),spinning=false,freeRemaining=0,freeAwarded=0,lastWins=[],featureMessage='',shown=Array(20).fill(-1),stops=null,timer=null,celebration=null,overlayTimer=null,lastBreakdown=null,lastCreditRound=null,spinFree=false,sessionGrossUnits=0,sessionAwardedUnits=0,sessionStake=REFERENCE_STAKE,selectedStake=REFERENCE_STAKE;
  const view=doc.defaultView||{},root=doc.createElement('section');root.className='practice emerald-slots';root.dataset.practiceGame='slots';
  const node=(tag,cls,content)=>{const n=doc.createElement(tag);if(cls)n.className=cls;if(content!==undefined)n.textContent=content;return n;};
  const clearOverlay=()=>{if(overlayTimer!==null){view.clearTimeout?.(overlayTimer);overlayTimer=null;}celebration=null;};
@@ -56,9 +56,10 @@ export function createEmeraldSlots(doc=globalThis.document){
   }
   inner.append(stage);cabinet.append(inner);
   const controls=node('div','es-controls'),stats=node('div','es-stats');
-  for(const [label,value] of [['DEMO STAKE',spinFree?'0 (FREE)':String(REFERENCE_STAKE)],['DEMO WIN',String(lastBreakdown?creditAmount(lastBreakdown.grossUnits):0)],['FREE SPINS',String(freeRemaining)],['PRACTICE CREDITS',String(practiceCreditSnapshot().balance)]]){const item=node('div','es-stat');item.append(node('small','',label),node('strong','',value));stats.append(item);}
+  for(const [label,value] of [['DEMO STAKE',spinFree?'0 (FREE)':String(selectedStake)],['DEMO WIN',String(lastBreakdown?creditAmount(lastBreakdown.grossUnits):0)],['FREE SPINS',String(freeRemaining)],['PRACTICE CREDITS',String(practiceCreditSnapshot().balance)]]){const item=node('div','es-stat');item.append(node('small','',label),node('strong','',value));stats.append(item);}
+  const stakeLabel=node('label','es-stake-label','Practice wager (credits)');const stakePicker=node('select','es-stake-select');stakePicker.disabled=spinning||freeRemaining>0;for(const amount of [1,5,10,25,50]){const choice=node('option','',String(amount));choice.value=String(amount);choice.selected=amount===selectedStake;stakePicker.append(choice);}stakePicker.addEventListener('change',()=>{selectedStake=Number(stakePicker.value);draw();});stakeLabel.append(stakePicker);controls.append(stakeLabel);
   const spin=node('button','es-spin',spinning?'SPINNING…':freeRemaining?'FREE SPIN ✦':'✦ SPIN ✦');spin.type='button';spin.disabled=spinning;spin.addEventListener('click',play);controls.append(stats);cabinet.append(controls);stage.append(spin);root.append(cabinet);
-  const details=node('section','es-details');details.append(node('p','es-notice','PRACTICE ONLY · NO WALLET · NO REAL WAGERS · NO CREDITS · NO PAYOUTS · No funds involved'));
+  const details=node('section','es-details');details.append(node('p','es-notice','PRACTICE ONLY · NO WALLET · NO REAL WAGERS · NO CASH-VALUED CREDITS · NO REAL PAYOUTS · No funds involved'));
   const detailsText=spinning?'Reels spinning…':lastWins.length?'Simulated ways: '+lastWins.map(w=>SLOT_SYMBOLS[w.symbol]+' '+w.reels+' reels / '+w.ways+' ways').join(' · '):'No winning ways displayed on this spin.';
   details.append(node('p','es-outcome',detailsText),node('p','es-disclaimer','Visual practice preview using provisional 42-position circular reels. The candidate strip order and demo paytable are not certified production odds or RTP.'));
   const accounting=node('div','es-credit-panel');
@@ -97,8 +98,8 @@ export function createEmeraldSlots(doc=globalThis.document){
   if(spinning)return;
   clearOverlay();
   spinFree=freeRemaining>0;
-  if(!spinFree&&practiceCreditSnapshot().balance<REFERENCE_STAKE){featureMessage='Not enough practice credits. Reset to continue.';draw();return;}
-  if(spinFree)freeRemaining--;else{sessionStake=REFERENCE_STAKE;sessionGrossUnits=0;sessionAwardedUnits=0;freeAwarded=0;}
+  if(!spinFree&&practiceCreditSnapshot().balance<selectedStake){featureMessage='Not enough practice credits. Reset to continue.';draw();return;}
+  if(spinFree)freeRemaining--;else{sessionStake=selectedStake;sessionGrossUnits=0;sessionAwardedUnits=0;freeAwarded=0;}
   stops=chooseStops();spinning=true;lastWins=[];featureMessage='';
   let tick=0;
   const animate=()=>{if(!spinning)return;tick++;

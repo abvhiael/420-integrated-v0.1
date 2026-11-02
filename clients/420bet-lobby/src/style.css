@@ -155,3 +155,31 @@
 .plinko-medallion-leaf{fill:#a8ff69;stroke:#184716;stroke-width:.25}
 .plinko-medallion-leaf .plinko-leaf-stem{fill:none;stroke:#a8ff69;stroke-width:1.4}
 @media(max-width:720px){.plinko-neon{background-attachment:scroll}}
+
+/* Emerald Harvest: first 1024-ways video-slot practice cabinet */
+.emerald-slots{min-height:80vh;padding:clamp(14px,3vw,36px);color:#fff2bd;background:linear-gradient(180deg,#001b0dcc,#001307eb),url('/assets/420bet/dice/420Bet_Dice_Wallpaper_FRESH_2026-11-01.webp') center/cover fixed,#06170d;text-align:center}
+.es-header{margin:0 auto 20px;text-shadow:0 2px 18px #10ff4980}
+.es-brand{font-size:clamp(2.5rem,5vw,4.8rem);font-weight:1000;font-style:italic;color:#a0ff54;letter-spacing:-.06em;line-height:1}
+.es-subtitle{font-size:clamp(1.4rem,3vw,2.4rem);color:#ffd36b;font-weight:900;letter-spacing:.14em}
+.es-ways{display:inline-block;padding:8px 42px;background:linear-gradient(#114820,#031e10);border:2px solid #d7ae48;border-radius:30px;color:#ffe1a0;letter-spacing:.12em;font-weight:900}
+.es-cabinet{max-width:1170px;margin:auto;border:8px ridge #d9a83f;border-radius:45px 45px 26px 26px;background:linear-gradient(125deg,#b27c22,#ffe399 7%,#79511c 10%,#07321b 14%,#051b10 85%,#aa7625 94%,#ffe69e);padding:clamp(10px,2.2vw,28px);box-shadow:0 0 25px #adff3e88,0 0 70px #ffc3442f,inset 0 0 28px #f7d86c70}
+.es-inner{padding:12px;border:3px solid #967128;border-radius:21px;background:linear-gradient(145deg,#04160d,#102d16)}
+.es-reels{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));grid-template-rows:repeat(4,minmax(75px,1fr));gap:4px;overflow:hidden;background:#010d07;border:3px solid #d6b45d;border-radius:12px;padding:5px}
+.es-symbol{position:relative;min-width:0;min-height:clamp(76px,10vw,125px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background:radial-gradient(ellipse at 50% 20%,#1c6c3480,#06150c 78%);border:1px solid #225b31;color:#e4ffc2}
+.es-symbol-mark{font-family:Georgia,serif;font-size:clamp(2rem,5vw,4.2rem);line-height:1;color:#b9f46a;text-shadow:0 0 10px #58ff43,0 0 30px #23f944}
+.es-symbol-name{font-size:clamp(.53rem,.95vw,.85rem);letter-spacing:.08em;color:#f1d785;font-weight:900}
+.es-wild{background:radial-gradient(#4e932b80,#082814 70%)}.es-wild .es-symbol-mark,.es-scatter .es-symbol-mark{color:#ffe782;text-shadow:0 0 16px #f8b43b}
+.es-scatter{background:radial-gradient(#78521577,#231b09 70%)}
+.es-winning{z-index:1;outline:3px solid #ffed67;outline-offset:-3px;box-shadow:inset 0 0 30px #e1ff2180,0 0 19px #e3ff47;animation:es-win-pulse .75s ease-in-out infinite alternate}
+.es-spinning .es-symbol-mark{filter:blur(5px);transform:scaleY(1.2);opacity:.7}
+@keyframes es-win-pulse{to{filter:brightness(1.6);box-shadow:inset 0 0 44px #f2ff4d,0 0 25px #f9cd47}}
+.es-feature-banner{min-height:27px;margin-top:10px;color:#ffe08b;font-weight:900;text-shadow:0 0 15px #effc41;font-size:clamp(.8rem,2vw,1.4rem)}
+.es-controls{display:flex;gap:22px;align-items:center;justify-content:space-between;padding:20px 8px 0}
+.es-stats{display:flex;flex:1;gap:10px;flex-wrap:wrap;justify-content:space-around}
+.es-stat{display:flex;flex-direction:column;gap:5px;min-width:110px;padding:7px 13px;border:1px solid #b99138;border-radius:12px;background:linear-gradient(#00190b,#123820)}
+.es-stat small{font-size:.7rem;color:#d4be80;letter-spacing:.08em}.es-stat strong{font-size:1.25rem;color:#fbebbb}
+.es-spin{cursor:pointer;min-width:130px;width:145px;height:80px;border:5px ridge #f8db67;border-radius:50%;background:radial-gradient(#3eac14,#005820 65%,#07351b);color:#fff0ba;text-shadow:0 0 9px #161;font-weight:1000;font-size:1.25rem;box-shadow:0 0 22px #70ff39}
+.es-spin:disabled{opacity:.7;cursor:progress}
+.es-details{max-width:1150px;margin:16px auto 0;color:#ecf5d8}.es-notice{color:#f5d47e;font-size:.82rem;letter-spacing:.1em;font-weight:900}.es-outcome{font-weight:800;color:#c9ff99}.es-disclaimer{font-size:.8rem;color:#e2c991}
+@media(max-width:770px){.emerald-slots{padding:8px;background-attachment:scroll}.es-cabinet{border-width:4px;border-radius:24px;padding:7px}.es-inner{padding:4px}.es-reels{gap:2px;padding:2px}.es-symbol{min-height:65px}.es-symbol-mark{font-size:1.8rem}.es-symbol-name{font-size:.49rem;letter-spacing:0}.es-controls{flex-direction:column-reverse;gap:10px}.es-spin{height:65px;width:140px}.es-stat{min-width:65px;padding:6px}.es-stat strong{font-size:.95rem}}
+@media(prefers-reduced-motion:reduce){.es-winning{animation:none}}

@@ -22,6 +22,8 @@ function decode(raw) {
   const custodyUnits=mapEntries(raw.custodyUnits ?? []);
   const custodyReceipts=mapEntries(raw.custodyReceipts ?? []);
   const custodyReservations=mapEntries(raw.custodyReservations ?? []);
+  const skillResearch=mapEntries(raw.skillResearch ?? []);
+  const skillResearchProofs=new Set(raw.skillResearchProofs ?? []);
   const missions=mapEntries(raw.missions ?? []);
   const missionProofs=new Set(raw.missionProofs ?? []);
   const missionRewards=mapEntries(raw.missionRewards ?? []);
@@ -37,7 +39,7 @@ function decode(raw) {
   if(total!==raw.issued-raw.burned)throw new SettlementError('durable BUDS conservation mismatch');
   for(const v of sourceIssued.values())if(!safe(v))throw new SettlementError('corrupt issuance');
   for(const b of assets.values())if(!safe(b.available)||!safe(b.reserved))throw new SettlementError('corrupt asset');
-  return {...runtime,balances,operations,claims,sourceIssued,assets,assetSources,listings,transferIntents,settlementJobs,custodyUnits,custodyReceipts,custodyReservations,missions,missionProofs,missionRewards,importedAssets,issued:raw.issued,burned:raw.burned};
+  return {...runtime,balances,operations,claims,sourceIssued,assets,assetSources,listings,transferIntents,settlementJobs,custodyUnits,custodyReceipts,custodyReservations,skillResearch,skillResearchProofs,missions,missionProofs,missionRewards,importedAssets,issued:raw.issued,burned:raw.burned};
 }
 const encode = s => {
   let total=0;
@@ -51,7 +53,7 @@ const encode = s => {
     ||s.issued<s.burned||total!==s.issued-s.burned)
     throw new SettlementError('durable BUDS conservation mismatch');
   return JSON.stringify({schema:1,...Object.fromEntries(['runtimeAccounts','runtimeWallets','runtimeWalletOwners','runtimeNonces','runtimeEpochs','runtimeSourceEpochs'].map(k=>[k,[...(s[k]??new Map())]])),balances:[...s.balances],operations:[...s.operations],
-  claims:[...s.claims],sourceIssued:[...s.sourceIssued],assets:[...s.assets],assetSources:[...s.assetSources],listings:[...s.listings],transferIntents:[...s.transferIntents],settlementJobs:[...s.settlementJobs],custodyUnits:[...s.custodyUnits],custodyReceipts:[...s.custodyReceipts],custodyReservations:[...s.custodyReservations],missions:[...(s.missions??new Map())],missionProofs:[...(s.missionProofs??new Set())],missionRewards:[...(s.missionRewards??new Map())],importedAssets:[...s.importedAssets],issued:s.issued,burned:s.burned});
+  claims:[...s.claims],sourceIssued:[...s.sourceIssued],assets:[...s.assets],assetSources:[...s.assetSources],listings:[...s.listings],transferIntents:[...s.transferIntents],settlementJobs:[...s.settlementJobs],custodyUnits:[...s.custodyUnits],custodyReceipts:[...s.custodyReceipts],custodyReservations:[...s.custodyReservations],skillResearch:[...(s.skillResearch??new Map())],skillResearchProofs:[...(s.skillResearchProofs??new Set())],missions:[...(s.missions??new Map())],missionProofs:[...(s.missionProofs??new Set())],missionRewards:[...(s.missionRewards??new Map())],importedAssets:[...s.importedAssets],issued:s.issued,burned:s.burned});
 };
 export class PostgresBudsStore {
   constructor(pool, namespace) {

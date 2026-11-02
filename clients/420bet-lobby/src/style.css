@@ -208,3 +208,11 @@
 .es-controls .es-stat{min-width:100px}
 @media(max-width:770px){.es-art-stage .es-reels{left:13.2%;top:24.4%;width:73.7%;height:53.8%}.es-controls .es-stat{min-width:65px}.es-symbol-image{object-fit:contain}}
 @media(prefers-reduced-motion:reduce){.es-win-spark,.es-art-stage .es-symbol.es-winning{animation:none}}
+
+/* Independently animated, transparent BIG WIN and FREE SPINS presentation layers. */
+.es-celebration{position:absolute;left:9%;top:30%;width:82%;height:42%;z-index:4;display:flex;align-items:center;justify-content:center;pointer-events:none;animation:es-celebration-enter .55s cubic-bezier(.18,1.4,.34,1) both}
+.es-celebration-art{display:block;width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 0 19px #adff47) drop-shadow(0 0 30px #f5c340);animation:es-celebration-glow .8s ease-in-out infinite alternate}
+.es-celebration-label{position:absolute;top:96%;font-size:clamp(9px,1vw,13px);font-weight:900;letter-spacing:.07em;color:#fff3b0;text-shadow:0 0 9px #00190e}
+@keyframes es-celebration-enter{0%{opacity:0;transform:scale(.3) rotate(-5deg)}55%{opacity:1;transform:scale(1.08) rotate(2deg)}100%{opacity:1;transform:scale(1) rotate(0)}}
+@keyframes es-celebration-glow{from{filter:drop-shadow(0 0 8px #8aff4f) brightness(.95)}to{filter:drop-shadow(0 0 25px #fbd35e) brightness(1.17)}}
+@media(prefers-reduced-motion:reduce){.es-celebration,.es-celebration-art{animation:none}}

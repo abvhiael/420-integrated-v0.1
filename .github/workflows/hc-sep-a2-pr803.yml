@@ -1,0 +1,25 @@
+name: HC-SEP-A2 PR803 canonical marketplace isolated
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/hc-sep-a2-pr803.yml'
+permissions:
+  contents: read
+jobs:
+  focused-canonical:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Pin source SHA
+        run: git rev-parse HEAD
+      - name: Install service dependencies
+        working-directory: services/highcountry-economy
+        run: npm ci --ignore-scripts
+      - name: PR803 canonical indexer and dispatch regression
+        working-directory: services/highcountry-economy
+        run: node --test test/canonical-http-indexer.test.js test/canonical-indexer-reconciler.test.js test/canonical-settlement-worker.test.js

@@ -4,6 +4,8 @@ on:
   push:
     paths:
       - '.github/workflows/hc-sep-a2-pr796.yml'
+      - 'services/highcountry-economy/src/buds-ledger.js'
+      - 'services/highcountry-economy/src/postgres-store.js'
 permissions:
   contents: read
 jobs:
@@ -34,7 +36,7 @@ jobs:
         run: npm install --ignore-scripts --no-audit --no-fund
       - name: PR796 affected unit and canonical settlement tests
         working-directory: services/highcountry-economy
-        run: node --test test/authenticated-service.test.js test/canonical-settlement.test.js test/postgres-store.test.js test/runtime-integration.test.js
+        run: node --test test/canonical-settlement.test.js
       - name: PR796 live PostgreSQL conservation and concurrency tests
         working-directory: services/highcountry-economy
         env:

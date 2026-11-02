@@ -183,3 +183,28 @@
 .es-details{max-width:1150px;margin:16px auto 0;color:#ecf5d8}.es-notice{color:#f5d47e;font-size:.82rem;letter-spacing:.1em;font-weight:900}.es-outcome{font-weight:800;color:#c9ff99}.es-disclaimer{font-size:.8rem;color:#e2c991}
 @media(max-width:770px){.emerald-slots{padding:8px;background-attachment:scroll}.es-cabinet{border-width:4px;border-radius:24px;padding:7px}.es-inner{padding:4px}.es-reels{gap:2px;padding:2px}.es-symbol{min-height:65px}.es-symbol-mark{font-size:1.8rem}.es-symbol-name{font-size:.49rem;letter-spacing:0}.es-controls{flex-direction:column-reverse;gap:10px}.es-spin{height:65px;width:140px}.es-stat{min-width:65px;padding:6px}.es-stat strong{font-size:.95rem}}
 @media(prefers-reduced-motion:reduce){.es-winning{animation:none}}
+
+/* Emerald Harvest production image composition. Repo artwork is authoritative. */
+.emerald-slots{background:linear-gradient(#00150954,#0013099e),url('/assets/420bet/backgrounds/420bet_slots_wallpaper.png') center center/cover no-repeat fixed,#03160a}
+.es-header{display:none}
+.es-cabinet{width:min(100%,1100px);max-width:1100px;padding:0;border:0;border-radius:0;background:none;box-shadow:none}
+.es-inner{padding:0;background:none;border:0;border-radius:0}
+.es-art-stage{position:relative;width:100%;aspect-ratio:1424/1080;isolation:isolate}
+.es-cabinet-art{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;pointer-events:none;z-index:3;user-select:none}
+.es-art-stage .es-reels{position:absolute;left:13.2%;top:24.4%;width:73.7%;height:53.8%;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));grid-template-rows:repeat(4,minmax(0,1fr));gap:0;padding:0;border:0;border-radius:0;background:#07190e;overflow:hidden;z-index:2}
+.es-art-stage .es-symbol{min-height:0;height:100%;border:1px solid #285936;background:radial-gradient(#123b20,#020e08);overflow:hidden}
+.es-symbol-image{display:block;width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 0 5px #62cf3b66);user-select:none;pointer-events:none}
+.es-art-stage .es-spinning .es-symbol-image{filter:blur(6px) drop-shadow(0 0 8px #7fff58);transform:translateY(12%) scaleY(1.12)}
+.es-art-stage .es-symbol.es-winning{z-index:2;outline:3px solid #fbef7c;outline-offset:-4px;background:radial-gradient(#447e295e,#021108);animation:es-win-pulse .68s ease-in-out infinite alternate}
+.es-win-spark{position:absolute;inset:0;pointer-events:none;border:3px solid #fff5a7;border-radius:7px;box-shadow:0 0 10px #eaff5a,inset 0 0 15px #9bff61;animation:es-spark 1.05s ease-out infinite}
+@keyframes es-spark{0%{opacity:.3;transform:scale(.95)}45%{opacity:1;transform:scale(1)}100%{opacity:.4;transform:scale(.96)}}
+.es-art-stage .es-spin{position:absolute;z-index:5;left:43.3%;top:82.2%;width:13.8%;height:14.5%;min-width:0;margin:0;border:0;border-radius:50%;background:transparent;color:transparent;text-shadow:none;font-size:0;box-shadow:none;cursor:pointer}
+.es-art-stage .es-spin:focus-visible{outline:4px solid #faff9b;outline-offset:2px;box-shadow:0 0 20px #faff7d}
+.es-art-stage .es-spin:hover:not(:disabled){background:#9bff3433;box-shadow:0 0 17px #aaff5b88}
+.es-art-stage .es-spin:disabled{cursor:wait;background:#aaff2430}
+.es-art-stage .es-feature-banner{position:absolute;z-index:4;left:14%;right:14%;top:38%;min-height:0;margin:0;padding:0;color:#fff0a5;font-size:clamp(12px,2.3vw,27px);pointer-events:none;text-shadow:0 0 8px #002,0 0 18px #f2d952}
+.es-controls{padding:0}
+.es-stats{justify-content:center}
+.es-controls .es-stat{min-width:100px}
+@media(max-width:770px){.es-art-stage .es-reels{left:13.2%;top:24.4%;width:73.7%;height:53.8%}.es-controls .es-stat{min-width:65px}.es-symbol-image{object-fit:contain}}
+@media(prefers-reduced-motion:reduce){.es-win-spark,.es-art-stage .es-symbol.es-winning{animation:none}}

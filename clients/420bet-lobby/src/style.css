@@ -225,3 +225,5 @@
 .es-credit-reset{border:1px solid #d5b85c;border-radius:10px;background:#143d20;color:#f1dda7;padding:10px 16px;cursor:pointer}
 .es-credit-reset:focus-visible{outline:3px solid #baff79}
 .es-credit-disclosure{font-size:.8rem;max-width:780px;margin:14px auto;color:#e0bb75}
+
+.es-stake-label{display:flex;gap:10px;align-items:center;justify-content:center;color:#f4d78a;font-weight:800;margin:auto;padding:9px}.es-stake-select{background:#0b2b17;border:1px solid #d4a74a;border-radius:8px;color:#fff0bd;padding:8px}.es-stake-select:disabled{opacity:.6}

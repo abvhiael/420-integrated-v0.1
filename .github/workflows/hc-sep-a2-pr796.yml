@@ -31,7 +31,7 @@ jobs:
           node-version: '22'
       - name: Install economy service dependencies
         working-directory: services/highcountry-economy
-        run: npm ci --ignore-scripts
+        run: npm install --ignore-scripts --no-audit --no-fund
       - name: PR796 affected unit and canonical settlement tests
         working-directory: services/highcountry-economy
         run: node --test test/authenticated-service.test.js test/canonical-settlement.test.js test/postgres-store.test.js test/runtime-integration.test.js

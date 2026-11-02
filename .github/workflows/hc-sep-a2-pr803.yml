@@ -19,7 +19,7 @@ jobs:
         run: git rev-parse HEAD
       - name: Install service dependencies
         working-directory: services/highcountry-economy
-        run: npm ci --ignore-scripts
+        run: npm install --ignore-scripts --no-audit --no-fund
       - name: PR803 canonical indexer and dispatch regression
         working-directory: services/highcountry-economy
         run: node --test test/canonical-http-indexer.test.js test/canonical-indexer-reconciler.test.js test/canonical-settlement-worker.test.js

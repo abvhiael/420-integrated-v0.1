@@ -23,13 +23,14 @@ export function mountMissions({document,main,runtime,authenticate,fetchImpl=fetc
   if(!Array.isArray(s?.missions))throw Error('invalid mission response');
   pane.replaceChildren();
   pane.append(el('p','Version '+s.version+' · Rewards are ordinary nontransferable gameplay records.'));
+  pane.append(el('p','Mission progress comes only from authenticated server verification.'));
   for(const m of s.missions){
    const state=m.state??m.status;
    const prereqs=Array.isArray(m.prerequisites)?m.prerequisites:(m.prerequisite?[m.prerequisite]:[]);
    const reward=m.reward?m.reward.amount+' '+m.reward.type:(m.badgeId??'nontransferable badge');
    const a=el('article');a.append(el('h3',m.id),el('p',m.objective+' · '+state+' · '+m.progress+'/'+m.target));
    a.append(el('p','Prerequisites: '+(prereqs.join(', ')||'none')+' · reward: '+reward));
-   if(m.deadline!==null)a.append(el('p','Deadline: '+new Date(m.deadline).toLocaleString()));
+   if(state==='active'&&m.deadline!=null)a.append(el('p','Deadline: '+new Date(m.deadline).toLocaleString()));
    if(state==='available')button(a,'Activate mission',()=>post('/missions/activate',{missionId:m.id,operation:operation()}));
    if(state==='active'){
     const field=el('label','Signed gameplay evidence ');
@@ -44,7 +45,7 @@ export function mountMissions({document,main,runtime,authenticate,fetchImpl=fetc
     });
     button(a,'Cancel mission',()=>post('/missions/cancel',{id:m.id,operation:operation()}));
    }
-   if(state==='complete')button(a,'Claim reward',()=>post('/missions/claim',{id:m.id,operation:operation()}));
+   if(state==='complete')button(a,'Claim completed mission',()=>post('/missions/claim',{id:m.id,operation:operation()}));
    if(state==='expired')button(a,'Finalize expiry',()=>post('/missions/expire',{id:m.id,operation:operation()}));
    pane.append(a);
   }

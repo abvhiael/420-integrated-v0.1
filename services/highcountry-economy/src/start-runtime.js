@@ -8,6 +8,8 @@ import {HIGHCOUNTRY_SKILL_RESEARCH_V1} from './skill-catalog-v1.js';
 import {createSignedProgressionEvidence} from './signed-progression-evidence.js';
 import {createSignedPlayerLevelProvider} from './signed-player-level.js';
 import {HIGHCOUNTRY_MISSIONS_V1} from './mission-catalog-v1.js';
+import {HIGHCOUNTRY_MISSIONS_V1 as PR811_MISSIONS} from './mission-catalog-pr811.js';
+import {createSignedMissionEvidence as createPr811MissionEvidence} from './signed-mission-evidence-pr811.js';
 import {createSignedMissionEvidence} from './signed-mission-evidence.js';
 import {readFile as readCatalog} from 'node:fs/promises';
 const required=name=>{const x=process.env[name];if(!x)throw Error(name+' required');return x;};
@@ -37,8 +39,10 @@ try {
  if(config.missions){
   const m=config.missions;
   if(m.catalogVersion!==HIGHCOUNTRY_MISSIONS_V1.version)throw Error('unapproved mission catalogue version');
-  missions={catalog:HIGHCOUNTRY_MISSIONS_V1,
-   verifyEvidence:createSignedMissionEvidence({publicKey:m.evidencePublicKey,
+  const pr811=m.catalogFormat==='templates';
+  if(m.catalogFormat!==undefined&&!['templates','missions'].includes(m.catalogFormat))throw Error('invalid approved mission catalogue format');
+  missions={catalog:pr811?PR811_MISSIONS:HIGHCOUNTRY_MISSIONS_V1,
+   verifyEvidence:(pr811?createPr811MissionEvidence:createSignedMissionEvidence)({publicKey:m.evidencePublicKey,
     issuer:m.evidenceIssuer,gameId:config.authority.gameId,chainId:config.authority.chainId})};
  }
  let discovery;

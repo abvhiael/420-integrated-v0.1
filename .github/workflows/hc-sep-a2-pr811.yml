@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - '.github/workflows/hc-sep-a2-pr811.yml'
+      - 'services/highcountry-economy/src/buds-ledger.js'
 permissions:
   contents: read
 jobs:

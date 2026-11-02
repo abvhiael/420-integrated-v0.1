@@ -4,13 +4,13 @@
 // Prior 400k-sample 250x-fitted values; quantized to exactly represent 1..50-credit wagers.
 export const UNITS=10_000_000;
 export const WAY_UNITS=Object.freeze([
- Object.freeze([58197,174590,581967]),
- Object.freeze([116393,290983,931147]),
- Object.freeze([116393,407377,1396720]),
- Object.freeze([174590,581967,2327867]),
- Object.freeze([290983,872950,3491801])
+ Object.freeze([58200,174590,581965]),
+ Object.freeze([116395,290985,931145]),
+ Object.freeze([116395,407375,1396720]),
+ Object.freeze([174590,581965,2327865]),
+ Object.freeze([290985,872950,3491800])
 ]);
-export const SCATTER_UNITS=Object.freeze({3:290983,4:872950,5:2327867});
+export const SCATTER_UNITS=Object.freeze({3:290985,4:872950,5:2327865});
 export const FEATURE_NUMERATOR=42,FEATURE_DENOMINATOR=10;
 export const REFERENCE_STAKE=10,MAX_STAKE=50;
 export const CANDIDATE_CAPS=Object.freeze([50,100,250,500]);

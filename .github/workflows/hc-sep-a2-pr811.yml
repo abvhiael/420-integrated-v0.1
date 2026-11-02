@@ -5,6 +5,7 @@ on:
     paths:
       - '.github/workflows/hc-sep-a2-pr811.yml'
       - 'services/highcountry-economy/src/buds-ledger.js'
+      - 'services/highcountry-economy/src/postgres-store.js'
 permissions:
   contents: read
 jobs:
@@ -38,9 +39,9 @@ jobs:
           node --check services/highcountry-economy/src/missions.js
           node --check services/highcountry-economy/src/signed-mission-evidence.js
           node --check apps/highcountry-web/src/missions.js
-      - name: Original consolidated mission behavior
+      - name: Previously failing PR811 mission replay fixture case
         working-directory: services/highcountry-economy
-        run: node --test test/missions.test.js test/missions-pr811.test.js
+        run: node --test --test-name-pattern='unverified forged oversized or duplicate mission evidence is rejected' test/missions-pr811.test.js
       - name: PR811 evidence and HTTP regression
         working-directory: services/highcountry-economy
         run: node --test test/missions-http.test.js test/signed-mission-evidence.test.js

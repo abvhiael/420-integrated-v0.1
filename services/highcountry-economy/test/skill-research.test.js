@@ -107,3 +107,11 @@ test('catalogue revision preserves historical purchased record but never silentl
  assert.equal(snapshot.history[0].unlocked,true);
  assert.equal(x.store.state.burned,10);
 });
+
+test('PR811 mission source events cannot be replayed into skill progression',async()=>{
+ const x=setup();
+ x.store.state.missionProofs.add('mission:already-used');
+ await assert.rejects(x.engine.progress('alice-token','mission-to-skill','archive-index','mission:already-used',1),/replayed progression evidence/);
+ assert.equal(x.store.state.skillResearch.size,0);
+ assert.equal(x.store.state.operations.has('mission-to-skill'),false);
+});

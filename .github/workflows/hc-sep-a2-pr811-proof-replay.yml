@@ -1,0 +1,19 @@
+name: HC-SEP-A2 PR811 mission-skill replay targeted
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/hc-sep-a2-pr811-proof-replay.yml'
+permissions:
+  contents: read
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: PR811 mission-to-skill single replay regression
+        run: node --test --test-name-pattern='PR811 mission source events cannot be replayed into skill progression' services/highcountry-economy/test/skill-research.test.js

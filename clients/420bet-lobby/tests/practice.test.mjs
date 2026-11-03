@@ -119,6 +119,6 @@ test('Emerald AUTO PLAY can be cancelled, and does not access wallets',()=>{
  assert(root.querySelector('.es-bet-up').disabled);
  root.querySelector('.es-auto-toggle').dispatchEvent(new window.Event('click'));
  assert.match(root.querySelector('.es-auto-toggle').textContent,/AUTO PLAY/);
- assert.equal(root.querySelector('.es-bet-up').disabled,false);
+ assert.equal(root.querySelector('.es-bet-up').disabled,true); // reel still spinning, though auto is off
  root.stopAnimation();
 });

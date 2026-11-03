@@ -14,8 +14,8 @@ export function validateMaryJaneModel(){
  for(const [mode,reels] of [['base',BASE_REELS],['bonus',BONUS_REELS]])for(let r=0;r<5;r++){
   const a=reels[r],count=symbol=>a.filter(s=>s===symbol).length,starts=prefix=>a.filter(s=>s.startsWith(prefix)).length;
   if(a.length!==60||starts('H')!==(mode==='base'?18:19)||starts('L')!==(mode==='base'?36:38)||count('WILD')!==3)throw Error('Invalid reel quota '+mode+' '+r);
-  for(let p=0;p<60;p++)for(const s of ['WILD','SCATTER'])if(a.slice(0,0).length===0&&Array.from({length:4},(_,i)=>a[(p+i)%60]).filter(v=>v===s).length>1)throw Error('Overlapping '+s+' '+mode+' '+r);
-  const p=a.indexOf('H01A');if(p<0||'ABCD'.some((part,i)=>a[(p+i)%60]!=='H01'+part))throw Error('Portrait broken '+mode+' '+r);
+  for(let p=0;p<60;p++)for(const s of ['WILD','SCATTER'])if(Array.from({length:4},(_,i)=>a[(p+i)%60]).filter(v=>v===s).length>1)throw Error('Overlapping '+s+' '+mode+' '+r);
+  const p=a.indexOf('H01A');if(p<0||[...'ABCD'].some((part,i)=>a[(p+i)%60]!=='H01'+part))throw Error('Portrait broken '+mode+' '+r);
   if(mode==='base'&&(count('SCATTER')!==(r%2===0?2:0)||count('COIN')!==(r%2===0?1:3)))throw Error('Base special quota');
   if(mode==='bonus'&&(count('SCATTER')||count('COIN')))throw Error('Bonus specials');
  }

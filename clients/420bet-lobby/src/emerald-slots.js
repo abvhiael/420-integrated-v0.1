@@ -75,8 +75,8 @@ export function createEmeraldSlots(doc=globalThis.document){
   betDisplay.classList.add('es-bet-display');
   betDisplay.append(node('strong','es-sr-only',String(selectedStake))); // retained accessible test hook
   const creditedThisSpin=lastCreditRound?.payout??0;
-  display('win',creditAmount(Math.round(creditedThisSpin*UNITS)).toFixed(4).replace(/0+$/,'').replace(/\\.$/,'')||'0','Most recent spin credited in practice credits');
-  display('balance',practiceCreditSnapshot().balance.toFixed(4).replace(/0+$/,'').replace(/\\.$/,'')||'0','Available practice credits');
+  display('win',String(Number(creditedThisSpin.toFixed(4))),'Most recent spin credited in practice credits');
+  display('balance',String(Number(practiceCreditSnapshot().balance.toFixed(4))),'Available practice credits');
   hotspot('autoplay',control('es-auto-toggle'+(autoEnabled?' es-control-active':''),autoEnabled?'AUTO ON · '+autoLeft:'AUTO PLAY',()=>{
    if(autoEnabled){haltAuto();draw();return;}
    if(spinning)return;

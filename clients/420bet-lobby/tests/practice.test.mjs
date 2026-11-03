@@ -1,3 +1,4 @@
+import {CABINET_HOTSPOTS,CABINET_WIDTH,CABINET_HEIGHT,cabinetArea,assertCabinetHotspots} from '../src/emerald-cabinet-hotspots.js';
 import {v2Evaluate,v2Ways,capV2Payout,UNITS,WAY_UNITS} from '../src/emerald-v2-payout.js';
 import {BASE_REELS,FEATURE_REELS,visibleGrid,chooseStops,scatterReelCount,awardedFreeSpins,validateReels} from '../src/emerald-v2-strips.js';
 import {practiceCreditSnapshot,practiceCreditRound,resetPracticeCredits} from '../src/practice-credits.js';
@@ -68,7 +69,7 @@ test('Emerald clean symbol paytable is exact and linked to INFO menu',()=>{
  assert.deepEqual(WAY_UNITS,[[50000,200000,600000],[100000,300000,1000000],[100000,300000,1000000],[200000,600000,2500000],[300000,1000000,3500000]]);
  const {document,window}=parseHTML('<html><body></body></html>');
  const root=createPractice('slots',document);
- const info=[...root.querySelectorAll('.es-console-button')].find(n=>n.textContent==='INFO');
+ const info=root.querySelector('[data-hotspot="info"]');
  assert(info);
  info.dispatchEvent(new window.Event('click'));
  const table=root.querySelector('.es-paytable');
@@ -81,25 +82,25 @@ test('Emerald clean symbol paytable is exact and linked to INFO menu',()=>{
 test('Emerald console bet stepper changes stake within 1–50 and locks during feature',()=>{
  const {document,window}=parseHTML('<html><body></body></html>');
  const root=createPractice('slots',document);
- const click=label=>{const btn=[...root.querySelectorAll('.es-console-button')].find(n=>n.textContent===label);assert(btn,label);btn.dispatchEvent(new window.Event('click'));};
+ const click=label=>{const names={'+':'increase','−':'decrease','MENU':'menu'};const btn=root.querySelector('[data-hotspot="'+names[label]+'"]');assert(btn,label);btn.dispatchEvent(new window.Event('click'));};
  assert.equal(root.querySelector('.es-bet-display strong').textContent,'10');
  click('+');assert.equal(root.querySelector('.es-bet-display strong').textContent,'11');
  click('−');assert.equal(root.querySelector('.es-bet-display strong').textContent,'10');
  for(let i=0;i<55;i++)click('+');
  assert.equal(root.querySelector('.es-bet-display strong').textContent,'50');
- assert.equal([...root.querySelectorAll('.es-console-button')].find(n=>n.textContent==='+').disabled,true);
+ assert.equal(root.querySelector('[data-hotspot="increase"]').disabled,true);
  for(let i=0;i<55;i++)click('−');
  assert.equal(root.querySelector('.es-bet-display strong').textContent,'1');
- assert.equal([...root.querySelectorAll('.es-console-button')].find(n=>n.textContent==='−').disabled,true);
+ assert.equal(root.querySelector('[data-hotspot="decrease"]').disabled,true);
  click('MENU');assert.match(root.querySelector('.es-console-panel').textContent,/AUTO PLAY/);
 });
 test('Emerald turbo toggle changes only presentation speed, not the reel math',()=>{
  const {document,window}=parseHTML('<html><body></body></html>');
  const root=createPractice('slots',document);const original=WAY_UNITS.map(x=>[...x]);
- const turbo=[...root.querySelectorAll('.es-console-button')].find(n=>n.textContent.includes('TURBO'));
+ const turbo=root.querySelector('[data-hotspot="turbo"]');
  assert(turbo);
  turbo.dispatchEvent(new window.Event('click'));
- assert.match(root.querySelector('.es-turbo-toggle').textContent,/ON/);
+ assert.match(root.querySelector('.es-turbo-toggle').getAttribute('aria-label'),/ON/);
  assert.deepEqual(WAY_UNITS,original);
  root.querySelector('.es-turbo-toggle').dispatchEvent(new window.Event('click'));
  assert.doesNotMatch(root.querySelector('.es-turbo-toggle').textContent,/ON/);
@@ -112,12 +113,38 @@ test('Emerald AUTO PLAY can be cancelled, and does not access wallets',()=>{
  window.clearTimeout=()=>{};
  const root=createPractice('slots',document);
  const auto=root.querySelector('.es-auto-toggle');
- assert.match(auto.textContent,/AUTO PLAY/);
+ assert.match(auto.getAttribute('aria-label'),/AUTO PLAY/);
  auto.dispatchEvent(new window.Event('click'));
- assert.match(root.querySelector('.es-auto-toggle').textContent,/AUTO ON/);
+ assert.match(root.querySelector('.es-auto-toggle').getAttribute('aria-label'),/AUTO ON/);
  assert(root.querySelector('.es-bet-up').disabled);
  root.querySelector('.es-auto-toggle').dispatchEvent(new window.Event('click'));
  assert.match(root.querySelector('.es-auto-toggle').textContent,/AUTO PLAY/);
  assert.equal(root.querySelector('.es-bet-up').disabled,true); // reel still spinning, though auto is off
  root.stopAnimation();
+});
+
+test('Emerald canonical image hotspots map precisely within 1448×1086, without overlap',()=>{
+ assert.equal(CABINET_WIDTH,1448);assert.equal(CABINET_HEIGHT,1086);
+ assert.equal(assertCabinetHotspots(),true);
+ assert.deepEqual(Object.keys(CABINET_HOTSPOTS),['info','menu','decrease','increase','spin','autoplay','turbo','betPerWay','totalBet','win','balance']);
+ const {document,window}=parseHTML('<html><body></body></html>');
+ const root=createPractice('slots',document);
+ for(const name of Object.keys(CABINET_HOTSPOTS)){
+  const el=root.querySelector('[data-hotspot="'+name+'"]');
+  assert(el,'missing mapped hotspot '+name);
+  const expected=cabinetArea(name);
+  assert.equal(el.style.left,expected.left);
+  assert.equal(el.style.top,expected.top);
+  assert.equal(el.style.width,expected.width);
+  assert.equal(el.style.height,expected.height);
+ }
+ for(const name of ['info','menu','decrease','increase','spin','autoplay','turbo']){
+  assert.equal(root.querySelector('[data-hotspot="'+name+'"]').tagName,'BUTTON');
+  assert(root.querySelector('[data-hotspot="'+name+'"]').getAttribute('aria-label'));
+ }
+ assert.match(root.querySelector('[data-hotspot="betPerWay"]').textContent,/0\.009766/);
+ assert.equal(root.querySelector('[data-hotspot="balance"]').textContent,'1000');
+ const css=readFileSync(new URL('../src/style.css',import.meta.url),'utf8');
+ assert.match(css,/aspect-ratio:1448\/1086/);
+ assert.match(css,/\.es-art-stage \.es-cabinet-hotspot/);
 });

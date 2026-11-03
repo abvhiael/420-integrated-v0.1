@@ -103,7 +103,7 @@ test('Emerald turbo toggle changes only presentation speed, not the reel math',(
  assert.match(root.querySelector('.es-turbo-toggle').getAttribute('aria-label'),/ON/);
  assert.deepEqual(WAY_UNITS,original);
  root.querySelector('.es-turbo-toggle').dispatchEvent(new window.Event('click'));
- assert.doesNotMatch(root.querySelector('.es-turbo-toggle').textContent,/ON/);
+ assert.doesNotMatch(root.querySelector('.es-turbo-toggle').getAttribute('aria-label'),/ON/);
 });
 test('Emerald AUTO PLAY can be cancelled, and does not access wallets',()=>{
  const {document,window}=parseHTML('<html><body></body></html>');
@@ -118,7 +118,7 @@ test('Emerald AUTO PLAY can be cancelled, and does not access wallets',()=>{
  assert.match(root.querySelector('.es-auto-toggle').getAttribute('aria-label'),/AUTO ON/);
  assert(root.querySelector('.es-bet-up').disabled);
  root.querySelector('.es-auto-toggle').dispatchEvent(new window.Event('click'));
- assert.match(root.querySelector('.es-auto-toggle').textContent,/AUTO PLAY/);
+ assert.match(root.querySelector('.es-auto-toggle').getAttribute('aria-label'),/AUTO PLAY/);
  assert.equal(root.querySelector('.es-bet-up').disabled,true); // reel still spinning, though auto is off
  root.stopAnimation();
 });

@@ -82,6 +82,7 @@ export function createMaryJanePractice(doc=globalThis.document){
   const scene=make(doc,'div','mj-scene');
   scene.setAttribute('role','group');
   scene.setAttribute('aria-label',"Mary Jane's Sticky Wilds interactive slot cabinet");
+  scene.append(make(doc,'span','mj-assistive','MAX WIN '+MAX_PAYOUT_X+'× TOTAL BET'));
   const board=state.lastStops?state.lastBoard:visibleMaryJaneReels(BASE_REELS,[0,9,17,30,42]);
   const reels=make(doc,'div','mj-reels');
   for(let r=0;r<5;r++){

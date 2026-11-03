@@ -1,0 +1,4449 @@
+{
+  "type": "map",
+  "version": "1.10",
+  "tiledversion": "1.11.2",
+  "orientation": "isometric",
+  "renderorder": "right-down",
+  "width": 736,
+  "height": 500,
+  "tilewidth": 64,
+  "tileheight": 32,
+  "infinite": false,
+  "nextlayerid": 7,
+  "nextobjectid": 81,
+  "layers": [
+    {
+      "id": 1,
+      "name": "Terrain",
+      "type": "objectgroup",
+      "draworder": "topdown",
+      "objects": [],
+      "opacity": 1,
+      "visible": true,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "id": 2,
+      "name": "Roads and paths",
+      "type": "objectgroup",
+      "draworder": "topdown",
+      "objects": [],
+      "opacity": 1,
+      "visible": true,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "id": 3,
+      "name": "Parcel boundaries",
+      "type": "objectgroup",
+      "draworder": "topdown",
+      "objects": [
+        {
+          "id": 1,
+          "name": "HL-01",
+          "type": "HC.OLD_TOWN.SITE",
+          "rotation": 0,
+          "visible": true,
+          "x": 5248,
+          "y": 3520,
+          "width": 512,
+          "height": 640,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "HL-01"
+            },
+            {
+              "name": "block",
+              "type": "string",
+              "value": "B01"
+            },
+            {
+              "name": "status",
+              "type": "string",
+              "value": "genesis"
+            },
+            {
+              "name": "title_class",
+              "type": "string",
+              "value": "compact_residential"
+            },
+            {
+              "name": "authority",
+              "type": "string",
+              "value": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+            },
+            {
+              "name": "rect_x0",
+              "type": "int",
+              "value": 164
+            },
+            {
+              "name": "rect_y0",
+              "type": "int",
+              "value": 110
+            },
+            {
+              "name": "rect_x1",
+              "type": "int",
+              "value": 180
+            },
+            {
+              "name": "rect_y1",
+              "type": "int",
+              "value": 130
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "name": "RC-05",
+          "type": "HC.OLD_TOWN.SITE",
+          "rotation": 0,
+          "visible": true,
+          "x": 4736,
+          "y": 1600,
+          "width": 512,
+          "height": 640,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "RC-05"
+            },
+            {
+              "name": "block",
+              "type": "string",
+              "value": "B01"
+            },
+            {
+              "name": "status",
+              "type": "string",
+              "value": "vacant"
+            },
+            {
+              "name": "title_class",
+              "type": "string",
+              "value": "compact_residential"
+            },
+            {
+              "name": "authority",
+              "type": "string",
+              "value": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+            },
+            {
+              "name": "rect_x0",
+              "type": "int",
+              "value": 148
+            },
+            {
+              "name": "rect_y0",
+              "type": "int",
+              "value": 50
+            },
+            {
+              "name": "rect_x1",
+              "type": "int",
+              "value": 164
+            },
+            {
+              "name": "rect_y1",
+              "type": "int",
+              "value": 70
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "name": "RC-06",
+          "type": "HC.OLD_TOWN.SITE",
+          "rotation": 0,
+          "visible": true,
+          "x": 3584,
+          "y": 3520,
+          "width": 512,
+          "height": 640,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "RC-06"
+            },
+            {
+              "name": "block",
+              "type": "string",
+              "value": "B01"
+            },
+            {
+              "name": "status",
+              "type": "string",
+              "value": "vacant"
+            },
+            {
+              "name": "title_class",
+              "type": "string",
+              "value": "compact_residential"
+            },
+            {
+              "name": "authority",
+              "type": "string",
+              "value": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+            },
+            {
+              "name": "rect_x0",
+              "type": "int",
+              "value": 112
+            },
+            {
+              "name": "rect_y0",
+              "type": "int",
+              "value": 110
+            },
+            {
+              "name": "rect_x1",
+              "type": "int",
+              "value": 128
+            },
+            {
+              "name": "rect_y1",
+              "type": "int",
+              "value": 130
+            }
+          ]
+        },
+        {
+          "id": 4,
+          "name": "RS-01",
+          "type": "HC.OLD_TOWN.SITE",
+          "rotation": 0,
+          "visible": true,
+          "x": 2688,
+          "y": 1600,
+          "width": 768,
+          "height": 768,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "RS-01"
+            },
+            {
+              "name": "block",
+              "type": "string",
+              "value": "B01"
+            },
+            {
+              "name": "status",
+              "type": "string",
+              "value": "vacant"
+            },
+            {
+              "name": "title_class",
+              "type": "string",
+              "value": "standard_residential"
+            },
+            {
+              "name": "authority",
+              "type": "string",
+              "value": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+            },
+            {
+              "name": "rect_x0",
+              "type": "int",
+              "value": 84
+            },
+            {
+              "name": "rect_y0",
+              "type": "int",
+              "value": 50
+            },
+            {
+              "name": "rect_x1",
+              "type": "int",
+              "value": 108
+            },
+            {
+              "name": "rect_y1",
+              "type": "int",
+              "value": 74
+            }
+          ]
+        },
+        {
+          "id": 5,
+          "name": "HL-02",
+          "type": "HC.OLD_TOWN.SITE",
+          "rotation": 0,
+          "visible": true,
+          "x": 8704,
+          "y": 3520,
+          "width": 512,
+          "height": 640,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "HL-02"
+            },
+            {
+              "name": "block",
+              "type": "string",
+              "value": "B02"
+            },
+            {
+              "name": "status",
+              "type": "string",
+              "value": "genesis"
+            },
+            {
+              "name": "title_class",
+              "type": "string",
+              "value": "compact_residential"
+            },
+            {
+              "name": "authority",
+              "type": "string",
+              "value": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+            },
+            {
+              "name": "rect_x0",
+              "type": "int",
+              "value": 272
+            },
+            {
+              "name": "rect_y0",
+              "type": "int",
+              "value": 110
+            },
+            {
+              "name": "rect_x1",
+              "type": "int",
+              "value": 288
+            },
+            {
+              "name": "rect_y1",
+              "type": "int",
+              "value": 130
+            }
+          ]
+        },
+        {
+          "id": 6,
+          "name": "RC-07",
+          "type": "HC.OLD_TOWN.SITE",
+          "rotation": 0,
+          "visible": true,
+          "x": 8192,
+          "y": 1600,
+          "width": 512,
+          "height": 640,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "RC-07"
+            },
+            {
+              "name": "block",
+              "type": "string",
+              "value": "B02"
+            },
+            {
+              "name": "status",
+              "type": "string",
+              "value": "vacant"
+            },
+            {
+              "name": "title_class",
+              "type": "string",
+              "value": "compact_residential"
+            },
+            {
+              "name": "authority",
+              "type": "string",
+              "value": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+            },
+            {
+              "name": "rect_x0",
+              "type": "int",
+              "value": 256
+            },
+            {
+              "name": "rect_y0",
+              "type": "int",
+              "value": 50
+            },
+            {
+              "name": "rect_x1",
+              "type": "int",
+              "value": 272
+            },
+            {
+              "name": "rect_y1",
+              "type": "int",
+              "value": 70
+            }
+          ]
+        },
+        {
+          "id": 7,
+          "name": "RC-08",
+          "type": "HC.OLD_TOWN.SITE",
+          "rotation": 0,
+          "visible": true,
+          "x": 7040,
+          "y": 3520,
+          "width": 512,
+          "height": 640,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "RC-08"
+            },
+            {
+              "name": "block",
+              "type": "string",
+              "value": "B02"
+            },
+            {
+              "name": "status",
+              "type": "string",
+              "value": "vacant"
+            },
+            {
+              "name": "title_class",
+              "type": "string",
+              "value": "compact_residential"
+            },
+            {
+              "name": "authority",
+              "type": "string",
+              "value": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+            },
+            {
+              "name": "rect_x0",
+              "type": "int",
+              "value": 220
+            },
+            {
+              "name": "rect_y0",
+              "type": "int",
+              "value": 110
+            },
+            {
+              "name": "rect_x1",
+              "type": "int",
+              "value": 236
+            },
+            {
+              "name": "rect_y1",
+              "type": "int",
+              "value": 130
+            }
+          ]
+        },
+        {
+          "id": 8,
+          "name": "RS-02",
+          "type": "HC.OLD_TOWN.SITE",
+          "rotation": 0,
+          "visible": true,
+          "x": 6144,
+          "y": 1600,
+          "width": 768,
+          "height": 768,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "RS-02"
+            },
+            {
+              "name": "block",
+              "type": "string",
+              "value": "B02"
+            },
+            {
+              "name": "status",
+              "type": "string",
+              "value": "vacant"
+            },
+            {
+              "name": "title_class",
+              "type": "string",
+              "value": "standard_residential"
+            },
+            {
+              "name": "authority",
+              "type": "string",
+              "value": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+            },
+            {
+              "name": "rect_x0",
+              "type": "int",
+              "value": 192
+            },
+            {
+              "name": "rect_y0",
+              "type": "int",
+              "value": 50
+            },
+            {
+              "name": "rect_x1",
+              "type": "int",
+              "value": 216
+            },
+            {
+              "name": "rect_y1",
+              "type": "int",
+              "value": 74
+            }
+          ]
+        },
+        {
+          "id": 9,
+          "name": "HL-03",
+          "type": "HC.OLD_TOWN.SITE",
+          "rotation": 0,
+          "visible": true,
+          "x": 16128,
+          "y": 3520,
+          "width": 512,
+          "height": 640,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "HL-03"
+            },
+            {
+              "name": "block",
+              "type": "string",
+              "value": "B04"
+            },
+            {
+              "name": "status",
+              "type": "string",
+              "value": "genesis"
+            },
+            {
+              "name": "title_class",
+              "type": "string",
+              "value": "compact_residential"
+            },
+            {
+              "name": "authority",
+              "type": "string",
+              "value": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+            },
+            {
+              "name": "rect_x0",
+              "type": "int",
+              "value": 504
+            },
+            {
+              "name": "rect_y0",
+              "type": "int",
+              "value": 110
+            },
+            {
+              "name": "rect_x1",
+              "type": "int",
+              "value": 520
+            },
+            {
+              "name": "rect_y1",
+              "type": "int",
+              "value": 130
+            }
+          ]
+        },
+        {
+          "id": 10,
+          "name": "LM-05",
+          "type": "HC.OLD_TOWN.SITE",
+          "rotation": 0,
+          "visible": true,
+          "x": 13568,
+          "y": 2624,
+          "width": 1024,
+          "height": 1536,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "LM-05"
+            },
+            {
+              "name": "block",
+              "type": "string",
+              "value": "B04"
+            },
+            {
+              "name": "status",
+              "type": "string",
+              "value": "permanent_public"
+            },
+            {
+              "name": "title_class",
+              "type": "string",
+              "value": "public_landmark"
+            },
+            {
+              "name": "authority",
+              "type": "string",
+              "value": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+            },
+            {
+              "name": "rect_x0",
+              "type": "int",
+              "value": 424
+            },
+            {
+              "name": "rect_y0",
+              "type": "int",
+              "value": 82
+            },
+            {
+              "name": "rect_x1",
+              "type": "int",
+              "value": 456
+            },
+            {
+              "name": "rect_y1",
+              "type": "int",
+              "value": 130
+            }
+          ]
+        },
+        {
+          "id": 11,
+          "name": "RC-09",
+          "type": "HC.OLD_TOWN.SITE",
+          "rotation": 0,
+          "visible": true,
+          "x": 15104,
+          "y": 3520,
+          "width": 512,
+          "height": 640,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "RC-09"
+            },
+            {
+              "name": "block",
+              "type": "string",
+              "value": "B04"
+            },
+            {
+              "name": "status",
+              "type": "string",
+              "value": "vacant"
+            },
+            {
+              "name": "title_class",
+              "type": "string",
+              "value": "compact_residential"
+            },
+            {
+              "name": "authority",
+              "type": "string",
+              "value": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+            },
+            {
+              "name": "rect_x0",
+              "type": "int",
+              "value": 472
+            },
+            {
+              "name": "rect_y0",
+              "type": "int",
+              "value": 110
+            },
+            {
+              "name": "rect_x1",
+              "type": "int",
+              "value": 488
+            },
+            {
+              "name": "rect_y1",
+              "type": "int",
+              "value": 130
+            }
+          ]
+        },
+        {
+          "id": 12,
+          "name": "RS-03",
+          "type": "HC.OLD_TOWN.SITE",
+          "rotation": 0,
+          "visible": true,
+          "x": 15488,
+          "y": 1600,
+          "width": 768,
+          "height": 768,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "RS-03"
+            },
+            {
+              "name": "block",
+              "type": "string",
+              "value": "B04"
+            },
+            {
+              "name": "status",
+              "type": "string",
+              "value": "vacant"
+            },
+            {
+              "name": "title_class",
+              "type": "string",
+              "value": "standard_residential"
+            },
+            {
+              "name": "authority",
+              "type": "string",
+              "value": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+            },
+            {
+              "name": "rect_x0",
+              "type": "int",
+              "value": 484
+            },
+            {
+              "name": "rect_y0",
+              "type": "int",
+              "value": 50
+            },
+            {
+              "name": "rect_x1",
+              "type": "int",
+              "value": 508
+            },
+            {
+              "name": "rect_y1",
+              "type": "int",
+              "value": 74
+            }
+          ]
+        },
+        {
+          "id": 13,
+          "name": "HL-04",
+          "type": "HC.OLD_TOWN.SITE",
+          "rotation": 0,
+          "visible": true,
+          "x": 17024,
+          "y": 3520,
+          "width": 512,
+          "height": 640,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "HL-04"
+            },
+            {
+              "name": "block",
+              "type": "string",
+              "value": "B05"
+            },
+            {
+              "name": "status",
+              "type": "string",
+              "value": "genesis"
+            },
+            {
+              "name": "title_class",
+              "type": "string",
+              "value": "compact_residential"
+            },
+            {
+              "name": "authority",
+              "type": "string",
+              "value": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+            },
+            {
+              "name": "rect_x0",
+              "type": "int",
+              "value": 532
+            },
+            {
+              "name": "rect_y0",
+              "type": "int",
+              "value": 110
+            },
+            {
+              "name": "rect_x1",
+              "type": "int",
+              "value": 548
+            },
+            {
+              "name": "rect_y1",
+              "type": "int",
+              "value": 130
+            }
+          ]
+        },
+        {
+          "id": 14,
+          "name": "RC-10",
+          "type": "HC.OLD_TOWN.SITE",
+          "rotation": 0,
+          "visible": true,
+          "x": 17024,
+          "y": 1600,
+          "width": 512,
+          "height": 640,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "RC-10"
+            },
+            {
+              "name": "block",
+              "type": "string",
+              "value": "B05"
+            },
+            {
+              "name": "status",
+              "type": "string",
+              "value": "vacant"
+            },
+            {
+              "name": "title_class",
+              "type": "string",
+              "value": "compact_residential"
+            },
+            {
+              "name": "authority",
+              "type": "string",
+              "value": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+            },
+            {
+              "name": "rect_x0",
+              "type": "int",
+              "value": 532
+            },
+            {
+              "name": "rect_y0",
+              "type": "int",
+              "value": 50
+            },
+            {
+              "name": "rect_x1",
+              "type": "int",
+              "value": 548
+            },
+            {
+              "name": "rect_y1",
+              "type": "int",
+              "value": 70
+            }
+          ]
+        },
+        {
+          "id": 15,
+          "name": "RS-04",
+          "type": "HC.OLD_TOWN.SITE",
+          "rotation": 0,
+          "visible": true,
+          "x": 19328,
+          "y": 1600,
+          "width": 768,
+          "height": 768,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "RS-04"
+            },
+            {
+              "name": "block",
+              "type": "string",
+              "value": "B05"
+            },
+            {
+              "name": "status",
+              "type": "string",
+              "value": "vacant"
+            },
+            {
+              "name": "title_class",
+              "type": "string",
+              "value": "standard_residential"
+            },
+            {
+              "name": "authority",
+              "type": "string",
+              "value": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+            },
+            {
+              "name": "rect_x0",
+              "type": "int",
+              "value": 604
+            },
+            {
+              "name": "rect_y0",
+              "type": "int",
+              "value": 50
+            },
+            {
+              "name": "rect_x1",
+              "type": "int",
+              "value": 628
+            },
+            {
+              "name": "rect_y1",
+              "type": "int",
+              "value": 74
+            }
+          ]
+        },
+        {
+          "id": 16,
+          "name": "RC-11",
+          "type": "HC.OLD_TOWN.SITE",
+          "rotation": 0,
+          "visible": true,
+          "x": 5248,
+          "y": 6464,
+          "width": 512,
+          "height": 640,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "RC-11"
+            },
+            {
+              "name": "block",
+              "type": "string",
+              "value": "B06"
+            },
+            {
+              "name": "status",
+              "type": "string",
+              "value": "vacant"
+            },
+            {
+              "name": "title_class",
+              "type": "string",
+              "value": "compact_residential"
+            },
+            {
+              "name": "authority",
+              "type": "string",
+              "value": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+            },
+            {
+              "name": "rect_x0",
+              "type": "int",
+              "value": 164
+            },
+            {
+              "name": "rect_y0",
+              "type": "int",
+              "value": 202
+            },
+            {
+              "name": "rect_x1",
+              "type": "int",
+              "value": 180
+            },
+            {
+              "name": "rect_y1",
+              "type": "int",
+              "value": 222
+            }
+          ]
+        },
+        {
+          "id": 17,
+          "name": "RC-12",
+          "type": "HC.OLD_TOWN.SITE",
+          "rotation": 0,
+          "visible": true,
+          "x": 4736,
+          "y": 4544,
+          "width": 512,
+          "height": 640,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "RC-12"
+            },
+            {
+              "name": "block",
+              "type": "string",
+              "value": "B06"
+            },
+            {
+              "name": "status",
+              "type": "string",
+              "value": "vacant"
+            },
+            {
+              "name": "title_class",
+              "type": "string",
+              "value": "compact_residential"
+            },
+            {
+              "name": "authority",
+              "type": "string",
+              "value": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+            },
+            {
+              "name": "rect_x0",
+              "type": "int",
+              "value": 148
+            },
+            {
+              "name": "rect_y0",
+              "type": "int",
+              "value": 142
+            },
+            {
+              "name": "rect_x1",
+              "type": "int",
+              "value": 164
+            },
+            {
+              "name": "rect_y1",
+              "type": "int",
+              "value": 162
+            }
+          ]
+        },
+        {
+          "id": 18,
+          "name": "RS-05",
+          "type": "HC.OLD_TOWN.SITE",
+          "rotation": 0,
+          "visible": true,
+          "x": 2688,
+          "y": 4544,
+          "width": 768,
+          "height": 768,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "RS-05"
+            },
+            {
+              "name": "block",
+              "type": "string",
+              "value": "B06"
+            },
+            {
+              "name": "status",
+              "type": "string",
+              "value": "vacant"
+            },
+            {
+              "name": "title_class",
+              "type": "string",
+              "value": "standard_residential"
+            },
+            {
+              "name": "authority",
+              "type": "string",
+              "value": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+            },
+            {
+              "name": "rect_x0",
+              "type": "int",
+              "value": 84
+            },
+            {
+              "name": "rect_y0",
+              "type": "int",
+              "value": 142
+            },
+            {
+              "name": "rect_x1",
+              "type": "int",
+              "value": 108
+            },
+            {
+              "name": "rect_y1",
+              "type": "int",
+              "value": 166
+            }
+          ]
+        },
+        {
+          "id": 19,
+          "name": "RC-13",
+          "type": "HC.OLD_TOWN.SITE",
+          "rotation": 0,
+          "visible": true,
+          "x": 8320,
+          "y": 4544,
+          "width": 512,
+          "height": 640,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "RC-13"
+            },
+            {
+              "name": "block",
+              "type": "string",
+              "value": "B07"
+            },
+            {
+              "name": "status",
+              "type": "string",
+              "value": "vacant"
+            },
+            {
+              "name": "title_class",
+              "type": "string",
+              "value": "compact_residential"
+            },
+            {
+              "name": "authority",
+              "type": "string",
+              "value": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+            },
+            {
+              "name": "rect_x0",
+              "type": "int",
+              "value": 260
+            },
+            {
+              "name": "rect_y0",
+              "type": "int",
+              "value": 142
+            },
+            {
+              "name": "rect_x1",
+              "type": "int",
+              "value": 276
+            },
+            {
+              "name": "rect_y1",
+              "type": "int",
+              "value": 162
+            }
+          ]
+        },
+        {
+          "id": 20,
+          "name": "RL-01",
+          "type": "HC.OLD_TOWN.SITE",
+          "rotation": 0,
+          "visible": true,
+          "x": 6144,
+          "y": 4544,
+          "width": 1024,
+          "height": 1024,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "RL-01"
+            },
+            {
+              "name": "block",
+              "type": "string",
+              "value": "B07"
+            },
+            {
+              "name": "status",
+              "type": "string",
+              "value": "vacant"
+            },
+            {
+              "name": "title_class",
+              "type": "string",
+              "value": "large_residential"
+            },
+            {
+              "name": "authority",
+              "type": "string",
+              "value": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+            },
+            {
+              "name": "rect_x0",
+              "type": "int",
+              "value": 192
+            },
+            {
+              "name": "rect_y0",
+              "type": "int",
+              "value": 142
+            },
+            {
+              "name": "rect_x1",
+              "type": "int",
+              "value": 224
+            },
+            {
+              "name": "rect_y1",
+              "type": "int",
+              "value": 174
+            }
+          ]
+        },
+        {
+          "id": 21,
+          "name": "RS-06",
+          "type": "HC.OLD_TOWN.SITE",
+          "rotation": 0,
+          "visible": true,
+          "x": 8448,
+          "y": 6336,
+          "width": 768,
+          "height": 768,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "RS-06"
+            },
+            {
+              "name": "block",
+              "type": "string",
+              "value": "B07"
+            },
+            {
+              "name": "status",
+              "type": "string",
+              "value": "vacant"
+            },
+            {
+              "name": "title_class",
+              "type": "string",
+              "value": "standard_residential"
+            },
+            {
+              "name": "authority",
+              "type": "string",
+              "value": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+            },
+            {
+              "name": "rect_x0",
+              "type": "int",
+              "value": 264
+            },
+            {
+              "name": "rect_y0",
+              "type": "int",
+              "value": 198
+            },
+            {
+              "name": "rect_x1",
+              "type": "int",
+              "value": 288
+            },
+            {
+              "name": "rect_y1",
+              "type": "int",
+              "value": 222
+            }
+          ]
+        },
+        {
+          "id": 22,
+          "name": "RC-14",
+          "type": "HC.OLD_TOWN.SITE",
+          "rotation": 0,
+          "visible": true,
+          "x": 15744,
+          "y": 4544,
+          "width": 512,
+          "height": 640,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "RC-14"
+            },
+            {
+              "name": "block",
+              "type": "string",
+              "value": "B09"
+            },
+            {
+              "name": "status",
+              "type": "string",
+              "value": "vacant"
+            },
+            {
+              "name": "title_class",
+              "type": "string",
+              "value": "compact_residential"
+            },
+            {
+              "name": "authority",
+              "type": "string",
+              "value": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+            },
+            {
+              "name": "rect_x0",
+              "type": "int",
+              "value": 492
+            },
+            {
+              "name": "rect_y0",
+              "type": "int",
+              "value": 142
+            },
+            {
+              "name": "rect_x1",
+              "type": "int",
+              "value": 508
+            },
+            {
+              "name": "rect_y1",
+              "type": "int",
+              "value": 162
+            }
+          ]
+        },
+        {
+          "id": 23,
+          "name": "RL-02",
+          "type": "HC.OLD_TOWN.SITE",
+          "rotation": 0,
+          "visible": true,
+          "x": 13568,
+          "y": 4544,
+          "width": 1024,
+          "height": 1024,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "RL-02"
+            },
+            {
+              "name": "block",
+              "type": "string",
+              "value": "B09"
+            },
+            {
+              "name": "status",
+              "type": "string",
+              "value": "vacant"
+            },
+            {
+              "name": "title_class",
+              "type": "string",
+              "value": "large_residential"
+            },
+            {
+              "name": "authority",
+              "type": "string",
+              "value": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+            },
+            {
+              "name": "rect_x0",
+              "type": "int",
+              "value": 424
+            },
+            {
+              "name": "rect_y0",
+              "type": "int",
+              "value": 142
+            },
+            {
+              "name": "rect_x1",
+              "type": "int",
+              "value": 456
+            },
+            {
+              "name": "rect_y1",
+              "type": "int",
+              "value": 174
+            }
+          ]
+        },
+        {
+          "id": 24,
+          "name": "RS-07",
+          "type": "HC.OLD_TOWN.SITE",
+          "rotation": 0,
+          "visible": true,
+          "x": 15872,
+          "y": 6336,
+          "width": 768,
+          "height": 768,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "RS-07"
+            },
+            {
+              "name": "block",
+              "type": "string",
+              "value": "B09"
+            },
+            {
+              "name": "status",
+              "type": "string",
+              "value": "vacant"
+            },
+            {
+              "name": "title_class",
+              "type": "string",
+              "value": "standard_residential"
+            },
+            {
+              "name": "authority",
+              "type": "string",
+              "value": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+            },
+            {
+              "name": "rect_x0",
+              "type": "int",
+              "value": 496
+            },
+            {
+              "name": "rect_y0",
+              "type": "int",
+              "value": 198
+            },
+            {
+              "name": "rect_x1",
+              "type": "int",
+              "value": 520
+            },
+            {
+              "name": "rect_y1",
+              "type": "int",
+              "value": 222
+            }
+          ]
+        },
+        {
+          "id": 25,
+          "name": "RC-15",
+          "type": "HC.OLD_TOWN.SITE",
+          "rotation": 0,
+          "visible": true,
+          "x": 19200,
+          "y": 4544,
+          "width": 512,
+          "height": 640,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "RC-15"
+            },
+            {
+              "name": "block",
+              "type": "string",
+              "value": "B10"
+            },
+            {
+              "name": "status",
+              "type": "string",
+              "value": "vacant"
+            },
+            {
+              "name": "title_class",
+              "type": "string",
+              "value": "compact_residential"
+            },
+            {
+              "name": "authority",
+              "type": "string",
+              "value": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+            },
+            {
+              "name": "rect_x0",
+              "type": "int",
+              "value": 600
+            },
+            {
+              "name": "rect_y0",
+              "type": "int",
+              "value": 142
+            },
+            {
+              "name": "rect_x1",
+              "type": "int",
+              "value": 616
+            },
+            {
+              "name": "rect_y1",
+              "type": "int",
+              "value": 162
+            }
+          ]
+        },
+        {
+          "id": 26,
+          "name": "RL-03",
+          "type": "HC.OLD_TOWN.SITE",
+          "rotation": 0,
+          "visible": true,
+          "x": 17024,
+          "y": 4544,
+          "width": 1024,
+          "height": 1024,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "RL-03"
+            },
+            {
+              "name": "block",
+              "type": "string",
+              "value": "B10"
+            },
+            {
+              "name": "status",
+              "type": "string",
+              "value": "vacant"
+            },
+            {
+              "name": "title_class",
+              "type": "string",
+              "value": "large_residential"
+            },
+            {
+              "name": "authority",
+              "type": "string",
+              "value": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+            },
+            {
+              "name": "rect_x0",
+              "type": "int",
+              "value": 532
+            },
+            {
+              "name": "rect_y0",
+              "type": "int",
+              "value": 142
+            },
+            {
+              "name": "rect_x1",
+              "type": "int",
+              "value": 564
+            },
+            {
+              "name": "rect_y1",
+              "type": "int",
+              "value": 174
+            }
+          ]
+        },
+        {
+          "id": 27,
+          "name": "RS-08",
+          "type": "HC.OLD_TOWN.SITE",
+          "rotation": 0,
+          "visible": true,
+          "x": 19328,
+          "y": 6336,
+          "width": 768,
+          "height": 768,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "RS-08"
+            },
+            {
+              "name": "block",
+              "type": "string",
+              "value": "B10"
+            },
+            {
+              "name": "status",
+              "type": "string",
+              "value": "vacant"
+            },
+            {
+              "name": "title_class",
+              "type": "string",
+              "value": "standard_residential"
+            },
+            {
+              "name": "authority",
+              "type": "string",
+              "value": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+            },
+            {
+              "name": "rect_x0",
+              "type": "int",
+              "value": 604
+            },
+            {
+              "name": "rect_y0",
+              "type": "int",
+              "value": 198
+            },
+            {
+              "name": "rect_x1",
+              "type": "int",
+              "value": 628
+            },
+            {
+              "name": "rect_y1",
+              "type": "int",
+              "value": 222
+            }
+          ]
+        },
+        {
+          "id": 28,
+          "name": "LM-01",
+          "type": "HC.OLD_TOWN.SITE",
+          "rotation": 0,
+          "visible": true,
+          "x": 4224,
+          "y": 8512,
+          "width": 1536,
+          "height": 1536,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "LM-01"
+            },
+            {
+              "name": "block",
+              "type": "string",
+              "value": "B11"
+            },
+            {
+              "name": "status",
+              "type": "string",
+              "value": "permanent_public"
+            },
+            {
+              "name": "title_class",
+              "type": "string",
+              "value": "public_landmark"
+            },
+            {
+              "name": "authority",
+              "type": "string",
+              "value": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+            },
+            {
+              "name": "rect_x0",
+              "type": "int",
+              "value": 132
+            },
+            {
+              "name": "rect_y0",
+              "type": "int",
+              "value": 266
+            },
+            {
+              "name": "rect_x1",
+              "type": "int",
+              "value": 180
+            },
+            {
+              "name": "rect_y1",
+              "type": "int",
+              "value": 314
+            }
+          ]
+        },
+        {
+          "id": 29,
+          "name": "CL-01",
+          "type": "HC.OLD_TOWN.SITE",
+          "rotation": 0,
+          "visible": true,
+          "x": 8192,
+          "y": 7488,
+          "width": 1024,
+          "height": 1024,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "CL-01"
+            },
+            {
+              "name": "block",
+              "type": "string",
+              "value": "B12"
+            },
+            {
+              "name": "status",
+              "type": "string",
+              "value": "vacant"
+            },
+            {
+              "name": "title_class",
+              "type": "string",
+              "value": "large_commercial"
+            },
+            {
+              "name": "authority",
+              "type": "string",
+              "value": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+            },
+            {
+              "name": "rect_x0",
+              "type": "int",
+              "value": 256
+            },
+            {
+              "name": "rect_y0",
+              "type": "int",
+              "value": 234
+            },
+            {
+              "name": "rect_x1",
+              "type": "int",
+              "value": 288
+            },
+            {
+              "name": "rect_y1",
+              "type": "int",
+              "value": 266
+            }
+          ]
+        },
+        {
+          "id": 30,
+          "name": "CS-01",
+          "type": "HC.OLD_TOWN.SITE",
+          "rotation": 0,
+          "visible": true,
+          "x": 8192,
+          "y": 9280,
+          "width": 768,
+          "height": 768,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "CS-01"
+            },
+            {
+              "name": "block",
+              "type": "string",
+              "value": "B12"
+            },
+            {
+              "name": "status",
+              "type": "string",
+              "value": "vacant"
+            },
+            {
+              "name": "title_class",
+              "type": "string",
+              "value": "standard_commercial"
+            },
+            {
+              "name": "authority",
+              "type": "string",
+              "value": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+            },
+            {
+              "name": "rect_x0",
+              "type": "int",
+              "value": 256
+            },
+            {
+              "name": "rect_y0",
+              "type": "int",
+              "value": 290
+            },
+            {
+              "name": "rect_x1",
+              "type": "int",
+              "value": 280
+            },
+            {
+              "name": "rect_y1",
+              "type": "int",
+              "value": 314
+            }
+          ]
+        },
+        {
+          "id": 31,
+          "name": "CX-01",
+          "type": "HC.OLD_TOWN.SITE",
+          "rotation": 0,
+          "visible": true,
+          "x": 6144,
+          "y": 7488,
+          "width": 1536,
+          "height": 1536,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "CX-01"
+            },
+            {
+              "name": "block",
+              "type": "string",
+              "value": "B12"
+            },
+            {
+              "name": "status",
+              "type": "string",
+              "value": "vacant"
+            },
+            {
+              "name": "title_class",
+              "type": "string",
+              "value": "extra_large_commercial"
+            },
+            {
+              "name": "authority",
+              "type": "string",
+              "value": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+            },
+            {
+              "name": "rect_x0",
+              "type": "int",
+              "value": 192
+            },
+            {
+              "name": "rect_y0",
+              "type": "int",
+              "value": 234
+            },
+            {
+              "name": "rect_x1",
+              "type": "int",
+              "value": 240
+            },
+            {
+              "name": "rect_y1",
+              "type": "int",
+              "value": 282
+            }
+          ]
+        },
+        {
+          "id": 32,
+          "name": "LM-02",
+          "type": "HC.OLD_TOWN.SITE",
+          "rotation": 0,
+          "visible": true,
+          "x": 10368,
+          "y": 7488,
+          "width": 2048,
+          "height": 2048,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "LM-02"
+            },
+            {
+              "name": "block",
+              "type": "string",
+              "value": "B13"
+            },
+            {
+              "name": "status",
+              "type": "string",
+              "value": "permanent_public"
+            },
+            {
+              "name": "title_class",
+              "type": "string",
+              "value": "public_landmark"
+            },
+            {
+              "name": "authority",
+              "type": "string",
+              "value": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+            },
+            {
+              "name": "rect_x0",
+              "type": "int",
+              "value": 324
+            },
+            {
+              "name": "rect_y0",
+              "type": "int",
+              "value": 234
+            },
+            {
+              "name": "rect_x1",
+              "type": "int",
+              "value": 388
+            },
+            {
+              "name": "rect_y1",
+              "type": "int",
+              "value": 298
+            }
+          ]
+        },
+        {
+          "id": 33,
+          "name": "CS-02",
+          "type": "HC.OLD_TOWN.SITE",
+          "rotation": 0,
+          "visible": true,
+          "x": 13568,
+          "y": 7488,
+          "width": 768,
+          "height": 768,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "CS-02"
+            },
+            {
+              "name": "block",
+              "type": "string",
+              "value": "B14"
+            },
+            {
+              "name": "status",
+              "type": "string",
+              "value": "vacant"
+            },
+            {
+              "name": "title_class",
+              "type": "string",
+              "value": "standard_commercial"
+            },
+            {
+              "name": "authority",
+              "type": "string",
+              "value": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+            },
+            {
+              "name": "rect_x0",
+              "type": "int",
+              "value": 424
+            },
+            {
+              "name": "rect_y0",
+              "type": "int",
+              "value": 234
+            },
+            {
+              "name": "rect_x1",
+              "type": "int",
+              "value": 448
+            },
+            {
+              "name": "rect_y1",
+              "type": "int",
+              "value": 258
+            }
+          ]
+        },
+        {
+          "id": 34,
+          "name": "CS-03",
+          "type": "HC.OLD_TOWN.SITE",
+          "rotation": 0,
+          "visible": true,
+          "x": 15872,
+          "y": 9280,
+          "width": 768,
+          "height": 768,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "CS-03"
+            },
+            {
+              "name": "block",
+              "type": "string",
+              "value": "B14"
+            },
+            {
+              "name": "status",
+              "type": "string",
+              "value": "vacant"
+            },
+            {
+              "name": "title_class",
+              "type": "string",
+              "value": "standard_commercial"
+            },
+            {
+              "name": "authority",
+              "type": "string",
+              "value": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+            },
+            {
+              "name": "rect_x0",
+              "type": "int",
+              "value": 496
+            },
+            {
+              "name": "rect_y0",
+              "type": "int",
+              "value": 290
+            },
+            {
+              "name": "rect_x1",
+              "type": "int",
+              "value": 520
+            },
+            {
+              "name": "rect_y1",
+              "type": "int",
+              "value": 314
+            }
+          ]
+        },
+        {
+          "id": 35,
+          "name": "RC-16",
+          "type": "HC.OLD_TOWN.SITE",
+          "rotation": 0,
+          "visible": true,
+          "x": 17024,
+          "y": 9408,
+          "width": 512,
+          "height": 640,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "RC-16"
+            },
+            {
+              "name": "block",
+              "type": "string",
+              "value": "B15"
+            },
+            {
+              "name": "status",
+              "type": "string",
+              "value": "vacant"
+            },
+            {
+              "name": "title_class",
+              "type": "string",
+              "value": "compact_residential"
+            },
+            {
+              "name": "authority",
+              "type": "string",
+              "value": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+            },
+            {
+              "name": "rect_x0",
+              "type": "int",
+              "value": 532
+            },
+            {
+              "name": "rect_y0",
+              "type": "int",
+              "value": 294
+            },
+            {
+              "name": "rect_x1",
+              "type": "int",
+              "value": 548
+            },
+            {
+              "name": "rect_y1",
+              "type": "int",
+              "value": 314
+            }
+          ]
+        },
+        {
+          "id": 36,
+          "name": "RL-04",
+          "type": "HC.OLD_TOWN.SITE",
+          "rotation": 0,
+          "visible": true,
+          "x": 17024,
+          "y": 7488,
+          "width": 1024,
+          "height": 1024,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "RL-04"
+            },
+            {
+              "name": "block",
+              "type": "string",
+              "value": "B15"
+            },
+            {
+              "name": "status",
+              "type": "string",
+              "value": "vacant"
+            },
+            {
+              "name": "title_class",
+              "type": "string",
+              "value": "large_residential"
+            },
+            {
+              "name": "authority",
+              "type": "string",
+              "value": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+            },
+            {
+              "name": "rect_x0",
+              "type": "int",
+              "value": 532
+            },
+            {
+              "name": "rect_y0",
+              "type": "int",
+              "value": 234
+            },
+            {
+              "name": "rect_x1",
+              "type": "int",
+              "value": 564
+            },
+            {
+              "name": "rect_y1",
+              "type": "int",
+              "value": 266
+            }
+          ]
+        },
+        {
+          "id": 37,
+          "name": "RS-09",
+          "type": "HC.OLD_TOWN.SITE",
+          "rotation": 0,
+          "visible": true,
+          "x": 19328,
+          "y": 9280,
+          "width": 768,
+          "height": 768,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "RS-09"
+            },
+            {
+              "name": "block",
+              "type": "string",
+              "value": "B15"
+            },
+            {
+              "name": "status",
+              "type": "string",
+              "value": "vacant"
+            },
+            {
+              "name": "title_class",
+              "type": "string",
+              "value": "standard_residential"
+            },
+            {
+              "name": "authority",
+              "type": "string",
+              "value": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+            },
+            {
+              "name": "rect_x0",
+              "type": "int",
+              "value": 604
+            },
+            {
+              "name": "rect_y0",
+              "type": "int",
+              "value": 290
+            },
+            {
+              "name": "rect_x1",
+              "type": "int",
+              "value": 628
+            },
+            {
+              "name": "rect_y1",
+              "type": "int",
+              "value": 314
+            }
+          ]
+        },
+        {
+          "id": 38,
+          "name": "RS-10",
+          "type": "HC.OLD_TOWN.SITE",
+          "rotation": 0,
+          "visible": true,
+          "x": 19072,
+          "y": 7488,
+          "width": 768,
+          "height": 768,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "RS-10"
+            },
+            {
+              "name": "block",
+              "type": "string",
+              "value": "B15"
+            },
+            {
+              "name": "status",
+              "type": "string",
+              "value": "vacant"
+            },
+            {
+              "name": "title_class",
+              "type": "string",
+              "value": "standard_residential"
+            },
+            {
+              "name": "authority",
+              "type": "string",
+              "value": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+            },
+            {
+              "name": "rect_x0",
+              "type": "int",
+              "value": 596
+            },
+            {
+              "name": "rect_y0",
+              "type": "int",
+              "value": 234
+            },
+            {
+              "name": "rect_x1",
+              "type": "int",
+              "value": 620
+            },
+            {
+              "name": "rect_y1",
+              "type": "int",
+              "value": 258
+            }
+          ]
+        },
+        {
+          "id": 39,
+          "name": "CS-04",
+          "type": "HC.OLD_TOWN.SITE",
+          "rotation": 0,
+          "visible": true,
+          "x": 6144,
+          "y": 10432,
+          "width": 768,
+          "height": 768,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "CS-04"
+            },
+            {
+              "name": "block",
+              "type": "string",
+              "value": "B16"
+            },
+            {
+              "name": "status",
+              "type": "string",
+              "value": "vacant"
+            },
+            {
+              "name": "title_class",
+              "type": "string",
+              "value": "standard_commercial"
+            },
+            {
+              "name": "authority",
+              "type": "string",
+              "value": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+            },
+            {
+              "name": "rect_x0",
+              "type": "int",
+              "value": 192
+            },
+            {
+              "name": "rect_y0",
+              "type": "int",
+              "value": 326
+            },
+            {
+              "name": "rect_x1",
+              "type": "int",
+              "value": 216
+            },
+            {
+              "name": "rect_y1",
+              "type": "int",
+              "value": 350
+            }
+          ]
+        },
+        {
+          "id": 40,
+          "name": "LM-03",
+          "type": "HC.OLD_TOWN.SITE",
+          "rotation": 0,
+          "visible": true,
+          "x": 7680,
+          "y": 11456,
+          "width": 1536,
+          "height": 1536,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "LM-03"
+            },
+            {
+              "name": "block",
+              "type": "string",
+              "value": "B16"
+            },
+            {
+              "name": "status",
+              "type": "string",
+              "value": "permanent_public"
+            },
+            {
+              "name": "title_class",
+              "type": "string",
+              "value": "public_landmark"
+            },
+            {
+              "name": "authority",
+              "type": "string",
+              "value": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+            },
+            {
+              "name": "rect_x0",
+              "type": "int",
+              "value": 240
+            },
+            {
+              "name": "rect_y0",
+              "type": "int",
+              "value": 358
+            },
+            {
+              "name": "rect_x1",
+              "type": "int",
+              "value": 288
+            },
+            {
+              "name": "rect_y1",
+              "type": "int",
+              "value": 406
+            }
+          ]
+        },
+        {
+          "id": 41,
+          "name": "CL-02",
+          "type": "HC.OLD_TOWN.SITE",
+          "rotation": 0,
+          "visible": true,
+          "x": 9600,
+          "y": 10432,
+          "width": 1024,
+          "height": 1024,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "CL-02"
+            },
+            {
+              "name": "block",
+              "type": "string",
+              "value": "B17"
+            },
+            {
+              "name": "status",
+              "type": "string",
+              "value": "vacant"
+            },
+            {
+              "name": "title_class",
+              "type": "string",
+              "value": "large_commercial"
+            },
+            {
+              "name": "authority",
+              "type": "string",
+              "value": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+            },
+            {
+              "name": "rect_x0",
+              "type": "int",
+              "value": 300
+            },
+            {
+              "name": "rect_y0",
+              "type": "int",
+              "value": 326
+            },
+            {
+              "name": "rect_x1",
+              "type": "int",
+              "value": 332
+            },
+            {
+              "name": "rect_y1",
+              "type": "int",
+              "value": 358
+            }
+          ]
+        },
+        {
+          "id": 42,
+          "name": "CR-01",
+          "type": "HC.OLD_TOWN.SITE",
+          "rotation": 0,
+          "visible": true,
+          "x": 11904,
+          "y": 12224,
+          "width": 768,
+          "height": 768,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "CR-01"
+            },
+            {
+              "name": "block",
+              "type": "string",
+              "value": "B17"
+            },
+            {
+              "name": "status",
+              "type": "string",
+              "value": "genesis"
+            },
+            {
+              "name": "title_class",
+              "type": "string",
+              "value": "standard_commercial"
+            },
+            {
+              "name": "authority",
+              "type": "string",
+              "value": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+            },
+            {
+              "name": "rect_x0",
+              "type": "int",
+              "value": 372
+            },
+            {
+              "name": "rect_y0",
+              "type": "int",
+              "value": 382
+            },
+            {
+              "name": "rect_x1",
+              "type": "int",
+              "value": 396
+            },
+            {
+              "name": "rect_y1",
+              "type": "int",
+              "value": 406
+            }
+          ]
+        },
+        {
+          "id": 43,
+          "name": "CS-05",
+          "type": "HC.OLD_TOWN.SITE",
+          "rotation": 0,
+          "visible": true,
+          "x": 11648,
+          "y": 10432,
+          "width": 768,
+          "height": 768,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "CS-05"
+            },
+            {
+              "name": "block",
+              "type": "string",
+              "value": "B17"
+            },
+            {
+              "name": "status",
+              "type": "string",
+              "value": "vacant"
+            },
+            {
+              "name": "title_class",
+              "type": "string",
+              "value": "standard_commercial"
+            },
+            {
+              "name": "authority",
+              "type": "string",
+              "value": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+            },
+            {
+              "name": "rect_x0",
+              "type": "int",
+              "value": 364
+            },
+            {
+              "name": "rect_y0",
+              "type": "int",
+              "value": 326
+            },
+            {
+              "name": "rect_x1",
+              "type": "int",
+              "value": 388
+            },
+            {
+              "name": "rect_y1",
+              "type": "int",
+              "value": 350
+            }
+          ]
+        },
+        {
+          "id": 44,
+          "name": "CR-02",
+          "type": "HC.OLD_TOWN.SITE",
+          "rotation": 0,
+          "visible": true,
+          "x": 13568,
+          "y": 12224,
+          "width": 768,
+          "height": 768,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "CR-02"
+            },
+            {
+              "name": "block",
+              "type": "string",
+              "value": "B18"
+            },
+            {
+              "name": "status",
+              "type": "string",
+              "value": "genesis"
+            },
+            {
+              "name": "title_class",
+              "type": "string",
+              "value": "standard_commercial"
+            },
+            {
+              "name": "authority",
+              "type": "string",
+              "value": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+            },
+            {
+              "name": "rect_x0",
+              "type": "int",
+              "value": 424
+            },
+            {
+              "name": "rect_y0",
+              "type": "int",
+              "value": 382
+            },
+            {
+              "name": "rect_x1",
+              "type": "int",
+              "value": 448
+            },
+            {
+              "name": "rect_y1",
+              "type": "int",
+              "value": 406
+            }
+          ]
+        },
+        {
+          "id": 45,
+          "name": "CR-03",
+          "type": "HC.OLD_TOWN.SITE",
+          "rotation": 0,
+          "visible": true,
+          "x": 15872,
+          "y": 12224,
+          "width": 768,
+          "height": 768,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "CR-03"
+            },
+            {
+              "name": "block",
+              "type": "string",
+              "value": "B18"
+            },
+            {
+              "name": "status",
+              "type": "string",
+              "value": "genesis"
+            },
+            {
+              "name": "title_class",
+              "type": "string",
+              "value": "standard_commercial"
+            },
+            {
+              "name": "authority",
+              "type": "string",
+              "value": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+            },
+            {
+              "name": "rect_x0",
+              "type": "int",
+              "value": 496
+            },
+            {
+              "name": "rect_y0",
+              "type": "int",
+              "value": 382
+            },
+            {
+              "name": "rect_x1",
+              "type": "int",
+              "value": 520
+            },
+            {
+              "name": "rect_y1",
+              "type": "int",
+              "value": 406
+            }
+          ]
+        },
+        {
+          "id": 46,
+          "name": "CR-04",
+          "type": "HC.OLD_TOWN.SITE",
+          "rotation": 0,
+          "visible": true,
+          "x": 15872,
+          "y": 11456,
+          "width": 768,
+          "height": 768,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "CR-04"
+            },
+            {
+              "name": "block",
+              "type": "string",
+              "value": "B18"
+            },
+            {
+              "name": "status",
+              "type": "string",
+              "value": "genesis"
+            },
+            {
+              "name": "title_class",
+              "type": "string",
+              "value": "standard_commercial"
+            },
+            {
+              "name": "authority",
+              "type": "string",
+              "value": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+            },
+            {
+              "name": "rect_x0",
+              "type": "int",
+              "value": 496
+            },
+            {
+              "name": "rect_y0",
+              "type": "int",
+              "value": 358
+            },
+            {
+              "name": "rect_x1",
+              "type": "int",
+              "value": 520
+            },
+            {
+              "name": "rect_y1",
+              "type": "int",
+              "value": 382
+            }
+          ]
+        },
+        {
+          "id": 47,
+          "name": "CS-06",
+          "type": "HC.OLD_TOWN.SITE",
+          "rotation": 0,
+          "visible": true,
+          "x": 13568,
+          "y": 10432,
+          "width": 768,
+          "height": 768,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "CS-06"
+            },
+            {
+              "name": "block",
+              "type": "string",
+              "value": "B18"
+            },
+            {
+              "name": "status",
+              "type": "string",
+              "value": "vacant"
+            },
+            {
+              "name": "title_class",
+              "type": "string",
+              "value": "standard_commercial"
+            },
+            {
+              "name": "authority",
+              "type": "string",
+              "value": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+            },
+            {
+              "name": "rect_x0",
+              "type": "int",
+              "value": 424
+            },
+            {
+              "name": "rect_y0",
+              "type": "int",
+              "value": 326
+            },
+            {
+              "name": "rect_x1",
+              "type": "int",
+              "value": 448
+            },
+            {
+              "name": "rect_y1",
+              "type": "int",
+              "value": 350
+            }
+          ]
+        },
+        {
+          "id": 48,
+          "name": "CL-03",
+          "type": "HC.OLD_TOWN.SITE",
+          "rotation": 0,
+          "visible": true,
+          "x": 19072,
+          "y": 10432,
+          "width": 1024,
+          "height": 1024,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "CL-03"
+            },
+            {
+              "name": "block",
+              "type": "string",
+              "value": "B19"
+            },
+            {
+              "name": "status",
+              "type": "string",
+              "value": "vacant"
+            },
+            {
+              "name": "title_class",
+              "type": "string",
+              "value": "large_commercial"
+            },
+            {
+              "name": "authority",
+              "type": "string",
+              "value": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+            },
+            {
+              "name": "rect_x0",
+              "type": "int",
+              "value": 596
+            },
+            {
+              "name": "rect_y0",
+              "type": "int",
+              "value": 326
+            },
+            {
+              "name": "rect_x1",
+              "type": "int",
+              "value": 628
+            },
+            {
+              "name": "rect_y1",
+              "type": "int",
+              "value": 358
+            }
+          ]
+        },
+        {
+          "id": 49,
+          "name": "CS-07",
+          "type": "HC.OLD_TOWN.SITE",
+          "rotation": 0,
+          "visible": true,
+          "x": 19072,
+          "y": 12224,
+          "width": 768,
+          "height": 768,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "CS-07"
+            },
+            {
+              "name": "block",
+              "type": "string",
+              "value": "B19"
+            },
+            {
+              "name": "status",
+              "type": "string",
+              "value": "vacant"
+            },
+            {
+              "name": "title_class",
+              "type": "string",
+              "value": "standard_commercial"
+            },
+            {
+              "name": "authority",
+              "type": "string",
+              "value": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+            },
+            {
+              "name": "rect_x0",
+              "type": "int",
+              "value": 596
+            },
+            {
+              "name": "rect_y0",
+              "type": "int",
+              "value": 382
+            },
+            {
+              "name": "rect_x1",
+              "type": "int",
+              "value": 620
+            },
+            {
+              "name": "rect_y1",
+              "type": "int",
+              "value": 406
+            }
+          ]
+        },
+        {
+          "id": 50,
+          "name": "CX-02",
+          "type": "HC.OLD_TOWN.SITE",
+          "rotation": 0,
+          "visible": true,
+          "x": 17024,
+          "y": 10432,
+          "width": 1536,
+          "height": 1536,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "CX-02"
+            },
+            {
+              "name": "block",
+              "type": "string",
+              "value": "B19"
+            },
+            {
+              "name": "status",
+              "type": "string",
+              "value": "vacant"
+            },
+            {
+              "name": "title_class",
+              "type": "string",
+              "value": "extra_large_commercial"
+            },
+            {
+              "name": "authority",
+              "type": "string",
+              "value": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+            },
+            {
+              "name": "rect_x0",
+              "type": "int",
+              "value": 532
+            },
+            {
+              "name": "rect_y0",
+              "type": "int",
+              "value": 326
+            },
+            {
+              "name": "rect_x1",
+              "type": "int",
+              "value": 580
+            },
+            {
+              "name": "rect_y1",
+              "type": "int",
+              "value": 374
+            }
+          ]
+        },
+        {
+          "id": 51,
+          "name": "WH-04",
+          "type": "HC.OLD_TOWN.SITE",
+          "rotation": 0,
+          "visible": true,
+          "x": 20480,
+          "y": 11968,
+          "width": 1024,
+          "height": 1024,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "WH-04"
+            },
+            {
+              "name": "block",
+              "type": "string",
+              "value": "B20"
+            },
+            {
+              "name": "status",
+              "type": "string",
+              "value": "genesis"
+            },
+            {
+              "name": "title_class",
+              "type": "string",
+              "value": "large_commercial"
+            },
+            {
+              "name": "authority",
+              "type": "string",
+              "value": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+            },
+            {
+              "name": "rect_x0",
+              "type": "int",
+              "value": 640
+            },
+            {
+              "name": "rect_y0",
+              "type": "int",
+              "value": 374
+            },
+            {
+              "name": "rect_x1",
+              "type": "int",
+              "value": 672
+            },
+            {
+              "name": "rect_y1",
+              "type": "int",
+              "value": 406
+            }
+          ]
+        },
+        {
+          "id": 52,
+          "name": "CR-05",
+          "type": "HC.OLD_TOWN.SITE",
+          "rotation": 0,
+          "visible": true,
+          "x": 9600,
+          "y": 13376,
+          "width": 768,
+          "height": 768,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "CR-05"
+            },
+            {
+              "name": "block",
+              "type": "string",
+              "value": "B21"
+            },
+            {
+              "name": "status",
+              "type": "string",
+              "value": "genesis"
+            },
+            {
+              "name": "title_class",
+              "type": "string",
+              "value": "standard_commercial"
+            },
+            {
+              "name": "authority",
+              "type": "string",
+              "value": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+            },
+            {
+              "name": "rect_x0",
+              "type": "int",
+              "value": 300
+            },
+            {
+              "name": "rect_y0",
+              "type": "int",
+              "value": 418
+            },
+            {
+              "name": "rect_x1",
+              "type": "int",
+              "value": 324
+            },
+            {
+              "name": "rect_y1",
+              "type": "int",
+              "value": 442
+            }
+          ]
+        },
+        {
+          "id": 53,
+          "name": "CR-06",
+          "type": "HC.OLD_TOWN.SITE",
+          "rotation": 0,
+          "visible": true,
+          "x": 11392,
+          "y": 14656,
+          "width": 768,
+          "height": 768,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "CR-06"
+            },
+            {
+              "name": "block",
+              "type": "string",
+              "value": "B21"
+            },
+            {
+              "name": "status",
+              "type": "string",
+              "value": "genesis"
+            },
+            {
+              "name": "title_class",
+              "type": "string",
+              "value": "standard_commercial"
+            },
+            {
+              "name": "authority",
+              "type": "string",
+              "value": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+            },
+            {
+              "name": "rect_x0",
+              "type": "int",
+              "value": 356
+            },
+            {
+              "name": "rect_y0",
+              "type": "int",
+              "value": 458
+            },
+            {
+              "name": "rect_x1",
+              "type": "int",
+              "value": 380
+            },
+            {
+              "name": "rect_y1",
+              "type": "int",
+              "value": 482
+            }
+          ]
+        },
+        {
+          "id": 54,
+          "name": "CS-08",
+          "type": "HC.OLD_TOWN.SITE",
+          "rotation": 0,
+          "visible": true,
+          "x": 10880,
+          "y": 13376,
+          "width": 768,
+          "height": 768,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "CS-08"
+            },
+            {
+              "name": "block",
+              "type": "string",
+              "value": "B21"
+            },
+            {
+              "name": "status",
+              "type": "string",
+              "value": "vacant"
+            },
+            {
+              "name": "title_class",
+              "type": "string",
+              "value": "standard_commercial"
+            },
+            {
+              "name": "authority",
+              "type": "string",
+              "value": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+            },
+            {
+              "name": "rect_x0",
+              "type": "int",
+              "value": 340
+            },
+            {
+              "name": "rect_y0",
+              "type": "int",
+              "value": 418
+            },
+            {
+              "name": "rect_x1",
+              "type": "int",
+              "value": 364
+            },
+            {
+              "name": "rect_y1",
+              "type": "int",
+              "value": 442
+            }
+          ]
+        },
+        {
+          "id": 55,
+          "name": "WH-01",
+          "type": "HC.OLD_TOWN.SITE",
+          "rotation": 0,
+          "visible": true,
+          "x": 17024,
+          "y": 14400,
+          "width": 1024,
+          "height": 1024,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "WH-01"
+            },
+            {
+              "name": "block",
+              "type": "string",
+              "value": "B24"
+            },
+            {
+              "name": "status",
+              "type": "string",
+              "value": "genesis"
+            },
+            {
+              "name": "title_class",
+              "type": "string",
+              "value": "large_commercial"
+            },
+            {
+              "name": "authority",
+              "type": "string",
+              "value": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+            },
+            {
+              "name": "rect_x0",
+              "type": "int",
+              "value": 532
+            },
+            {
+              "name": "rect_y0",
+              "type": "int",
+              "value": 450
+            },
+            {
+              "name": "rect_x1",
+              "type": "int",
+              "value": 564
+            },
+            {
+              "name": "rect_y1",
+              "type": "int",
+              "value": 482
+            }
+          ]
+        },
+        {
+          "id": 56,
+          "name": "WH-02",
+          "type": "HC.OLD_TOWN.SITE",
+          "rotation": 0,
+          "visible": true,
+          "x": 17024,
+          "y": 13376,
+          "width": 1024,
+          "height": 1024,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "WH-02"
+            },
+            {
+              "name": "block",
+              "type": "string",
+              "value": "B24"
+            },
+            {
+              "name": "status",
+              "type": "string",
+              "value": "genesis"
+            },
+            {
+              "name": "title_class",
+              "type": "string",
+              "value": "large_commercial"
+            },
+            {
+              "name": "authority",
+              "type": "string",
+              "value": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+            },
+            {
+              "name": "rect_x0",
+              "type": "int",
+              "value": 532
+            },
+            {
+              "name": "rect_y0",
+              "type": "int",
+              "value": 418
+            },
+            {
+              "name": "rect_x1",
+              "type": "int",
+              "value": 564
+            },
+            {
+              "name": "rect_y1",
+              "type": "int",
+              "value": 450
+            }
+          ]
+        },
+        {
+          "id": 57,
+          "name": "WH-03",
+          "type": "HC.OLD_TOWN.SITE",
+          "rotation": 0,
+          "visible": true,
+          "x": 18560,
+          "y": 14400,
+          "width": 1024,
+          "height": 1024,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "WH-03"
+            },
+            {
+              "name": "block",
+              "type": "string",
+              "value": "B24"
+            },
+            {
+              "name": "status",
+              "type": "string",
+              "value": "genesis"
+            },
+            {
+              "name": "title_class",
+              "type": "string",
+              "value": "large_commercial"
+            },
+            {
+              "name": "authority",
+              "type": "string",
+              "value": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+            },
+            {
+              "name": "rect_x0",
+              "type": "int",
+              "value": 580
+            },
+            {
+              "name": "rect_y0",
+              "type": "int",
+              "value": 450
+            },
+            {
+              "name": "rect_x1",
+              "type": "int",
+              "value": 612
+            },
+            {
+              "name": "rect_y1",
+              "type": "int",
+              "value": 482
+            }
+          ]
+        },
+        {
+          "id": 58,
+          "name": "WH-05",
+          "type": "HC.OLD_TOWN.SITE",
+          "rotation": 0,
+          "visible": true,
+          "x": 18560,
+          "y": 13376,
+          "width": 1024,
+          "height": 1024,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "WH-05"
+            },
+            {
+              "name": "block",
+              "type": "string",
+              "value": "B24"
+            },
+            {
+              "name": "status",
+              "type": "string",
+              "value": "genesis"
+            },
+            {
+              "name": "title_class",
+              "type": "string",
+              "value": "large_commercial"
+            },
+            {
+              "name": "authority",
+              "type": "string",
+              "value": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+            },
+            {
+              "name": "rect_x0",
+              "type": "int",
+              "value": 580
+            },
+            {
+              "name": "rect_y0",
+              "type": "int",
+              "value": 418
+            },
+            {
+              "name": "rect_x1",
+              "type": "int",
+              "value": 612
+            },
+            {
+              "name": "rect_y1",
+              "type": "int",
+              "value": 450
+            }
+          ]
+        },
+        {
+          "id": 59,
+          "name": "LM-04",
+          "type": "HC.OLD_TOWN.SITE",
+          "rotation": 0,
+          "visible": true,
+          "x": 21248,
+          "y": 13376,
+          "width": 1536,
+          "height": 1536,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "LM-04"
+            },
+            {
+              "name": "block",
+              "type": "string",
+              "value": "B25"
+            },
+            {
+              "name": "status",
+              "type": "string",
+              "value": "permanent_public"
+            },
+            {
+              "name": "title_class",
+              "type": "string",
+              "value": "public_landmark"
+            },
+            {
+              "name": "authority",
+              "type": "string",
+              "value": "PHASE_C_LOCAL_PROVISIONAL_UNCOMMITTED"
+            },
+            {
+              "name": "rect_x0",
+              "type": "int",
+              "value": 664
+            },
+            {
+              "name": "rect_y0",
+              "type": "int",
+              "value": 418
+            },
+            {
+              "name": "rect_x1",
+              "type": "int",
+              "value": 712
+            },
+            {
+              "name": "rect_y1",
+              "type": "int",
+              "value": 466
+            }
+          ]
+        },
+        {
+          "id": 60,
+          "name": "B22-PARK",
+          "type": "HC.OLD_TOWN.SITE",
+          "rotation": 0,
+          "visible": true,
+          "x": 12352,
+          "y": 13632,
+          "width": 768,
+          "height": 1536,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "B22-PARK"
+            },
+            {
+              "name": "block",
+              "type": "string",
+              "value": "B22"
+            },
+            {
+              "name": "status",
+              "type": "string",
+              "value": "permanent_public"
+            },
+            {
+              "name": "title_class",
+              "type": "string",
+              "value": "public_park"
+            },
+            {
+              "name": "authority",
+              "type": "string",
+              "value": "PROVISIONAL_V7_CANDIDATE"
+            },
+            {
+              "name": "rect_x0",
+              "type": "int",
+              "value": 386
+            },
+            {
+              "name": "rect_y0",
+              "type": "int",
+              "value": 426
+            },
+            {
+              "name": "rect_x1",
+              "type": "int",
+              "value": 410
+            },
+            {
+              "name": "rect_y1",
+              "type": "int",
+              "value": 474
+            }
+          ]
+        }
+      ],
+      "opacity": 1,
+      "visible": true,
+      "x": 0,
+      "y": 0,
+      "color": "#20c997"
+    },
+    {
+      "id": 4,
+      "name": "Structures",
+      "type": "objectgroup",
+      "draworder": "topdown",
+      "objects": [
+        {
+          "id": 61,
+          "name": "HL-01 — HC-EC-S01-D07-hl-01-cedar-cottage-exterior",
+          "type": "HC.OLD_TOWN.GENESIS_ASSET_MARKER",
+          "rotation": 0,
+          "visible": true,
+          "point": true,
+          "x": 5504,
+          "y": 3840,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "HL-01"
+            },
+            {
+              "name": "asset_id",
+              "type": "string",
+              "value": "HL-01"
+            },
+            {
+              "name": "canonical_repo_path",
+              "type": "string",
+              "value": "apps/highcountry-web/public/assets/highcountry/old-town/heritage-houses/HC-EC-S01-D07-hl-01-cedar-cottage-exterior.png"
+            },
+            {
+              "name": "canonical_sha256",
+              "type": "string",
+              "value": "d485debb5421ce112bf220f9aec80b9ad97c96fec459c3ce70ec1378243663b6"
+            },
+            {
+              "name": "placement_status",
+              "type": "string",
+              "value": "UNQUALIFIED_SPRITE_FOUNDATION"
+            },
+            {
+              "name": "do_not_use_marker_as_sprite_anchor",
+              "type": "bool",
+              "value": true
+            }
+          ]
+        },
+        {
+          "id": 62,
+          "name": "HL-02 — HC-EC-S01-D07-hl-02-harbour-home-exterior",
+          "type": "HC.OLD_TOWN.GENESIS_ASSET_MARKER",
+          "rotation": 0,
+          "visible": true,
+          "point": true,
+          "x": 8960,
+          "y": 3840,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "HL-02"
+            },
+            {
+              "name": "asset_id",
+              "type": "string",
+              "value": "HL-02"
+            },
+            {
+              "name": "canonical_repo_path",
+              "type": "string",
+              "value": "apps/highcountry-web/public/assets/highcountry/old-town/heritage-houses/HC-EC-S01-D07-hl-02-harbour-home-exterior.png"
+            },
+            {
+              "name": "canonical_sha256",
+              "type": "string",
+              "value": "a09885b309e58d0549c59d976fb5b335b9b35d279ac0c84b219509dc6958c58b"
+            },
+            {
+              "name": "placement_status",
+              "type": "string",
+              "value": "UNQUALIFIED_SPRITE_FOUNDATION"
+            },
+            {
+              "name": "do_not_use_marker_as_sprite_anchor",
+              "type": "bool",
+              "value": true
+            }
+          ]
+        },
+        {
+          "id": 63,
+          "name": "HL-03 — HC-EC-S01-D07-hl-03-maple-bungalow-exterior",
+          "type": "HC.OLD_TOWN.GENESIS_ASSET_MARKER",
+          "rotation": 0,
+          "visible": true,
+          "point": true,
+          "x": 16384,
+          "y": 3840,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "HL-03"
+            },
+            {
+              "name": "asset_id",
+              "type": "string",
+              "value": "HL-03"
+            },
+            {
+              "name": "canonical_repo_path",
+              "type": "string",
+              "value": "apps/highcountry-web/public/assets/highcountry/old-town/heritage-houses/HC-EC-S01-D07-hl-03-maple-bungalow-exterior.png"
+            },
+            {
+              "name": "canonical_sha256",
+              "type": "string",
+              "value": "a04c0fbd0db99159a591857807e3d742cc2c2acb78b877e597ac6e6fd6a4fde3"
+            },
+            {
+              "name": "placement_status",
+              "type": "string",
+              "value": "UNQUALIFIED_SPRITE_FOUNDATION"
+            },
+            {
+              "name": "do_not_use_marker_as_sprite_anchor",
+              "type": "bool",
+              "value": true
+            }
+          ]
+        },
+        {
+          "id": 64,
+          "name": "HL-04 — HC-EC-S01-D07-hl-04-garden-house-exterior",
+          "type": "HC.OLD_TOWN.GENESIS_ASSET_MARKER",
+          "rotation": 0,
+          "visible": true,
+          "point": true,
+          "x": 17280,
+          "y": 3840,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "HL-04"
+            },
+            {
+              "name": "asset_id",
+              "type": "string",
+              "value": "HL-04"
+            },
+            {
+              "name": "canonical_repo_path",
+              "type": "string",
+              "value": "apps/highcountry-web/public/assets/highcountry/old-town/heritage-houses/HC-EC-S01-D07-hl-04-garden-house-exterior.png"
+            },
+            {
+              "name": "canonical_sha256",
+              "type": "string",
+              "value": "3d8689cdc7c78c488fb0521c6d0b84d9bfb7d5fcebc944de645cf3ca2d10250f"
+            },
+            {
+              "name": "placement_status",
+              "type": "string",
+              "value": "UNQUALIFIED_SPRITE_FOUNDATION"
+            },
+            {
+              "name": "do_not_use_marker_as_sprite_anchor",
+              "type": "bool",
+              "value": true
+            }
+          ]
+        },
+        {
+          "id": 65,
+          "name": "CR-01 — HC-EC-S01-D07-cr-01-maryjanes-corner-cafe-exterior",
+          "type": "HC.OLD_TOWN.GENESIS_ASSET_MARKER",
+          "rotation": 0,
+          "visible": true,
+          "point": true,
+          "x": 12288,
+          "y": 12608,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "CR-01"
+            },
+            {
+              "name": "asset_id",
+              "type": "string",
+              "value": "CR-01"
+            },
+            {
+              "name": "canonical_repo_path",
+              "type": "string",
+              "value": "apps/highcountry-web/public/assets/highcountry/old-town/alder-street-unique/HC-EC-S01-D07-cr-01-maryjanes-corner-cafe-exterior.png"
+            },
+            {
+              "name": "canonical_sha256",
+              "type": "string",
+              "value": "9cdafd3fa60ddc783b492e22de148575ca7b0ec315a7650ea2e766ad0b71f820"
+            },
+            {
+              "name": "placement_status",
+              "type": "string",
+              "value": "UNQUALIFIED_SPRITE_FOUNDATION"
+            },
+            {
+              "name": "do_not_use_marker_as_sprite_anchor",
+              "type": "bool",
+              "value": true
+            }
+          ]
+        },
+        {
+          "id": 66,
+          "name": "CR-02 — HC-EC-S01-D07-cr-02-alder-st-general-store-exterior",
+          "type": "HC.OLD_TOWN.GENESIS_ASSET_MARKER",
+          "rotation": 0,
+          "visible": true,
+          "point": true,
+          "x": 13952,
+          "y": 12608,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "CR-02"
+            },
+            {
+              "name": "asset_id",
+              "type": "string",
+              "value": "CR-02"
+            },
+            {
+              "name": "canonical_repo_path",
+              "type": "string",
+              "value": "apps/highcountry-web/public/assets/highcountry/old-town/alder-street-unique/HC-EC-S01-D07-cr-02-alder-st-general-store-exterior.png"
+            },
+            {
+              "name": "canonical_sha256",
+              "type": "string",
+              "value": "4e1f023c3dc8802280938c12256db30b418eec30bbfd70234808f964160263ae"
+            },
+            {
+              "name": "placement_status",
+              "type": "string",
+              "value": "UNQUALIFIED_SPRITE_FOUNDATION"
+            },
+            {
+              "name": "do_not_use_marker_as_sprite_anchor",
+              "type": "bool",
+              "value": true
+            }
+          ]
+        },
+        {
+          "id": 67,
+          "name": "CR-03 — HC-EC-S01-D07-cr-03-leafy-cauldron-apothecary-exterior",
+          "type": "HC.OLD_TOWN.GENESIS_ASSET_MARKER",
+          "rotation": 0,
+          "visible": true,
+          "point": true,
+          "x": 16256,
+          "y": 12608,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "CR-03"
+            },
+            {
+              "name": "asset_id",
+              "type": "string",
+              "value": "CR-03"
+            },
+            {
+              "name": "canonical_repo_path",
+              "type": "string",
+              "value": "apps/highcountry-web/public/assets/highcountry/old-town/alder-street-unique/HC-EC-S01-D07-cr-03-leafy-cauldron-apothecary-exterior.png"
+            },
+            {
+              "name": "canonical_sha256",
+              "type": "string",
+              "value": "25f588a803b3b1f2d27fc8e6f7951ff37a9b52579513883bbdb358c18f1f6804"
+            },
+            {
+              "name": "placement_status",
+              "type": "string",
+              "value": "UNQUALIFIED_SPRITE_FOUNDATION"
+            },
+            {
+              "name": "do_not_use_marker_as_sprite_anchor",
+              "type": "bool",
+              "value": true
+            }
+          ]
+        },
+        {
+          "id": 68,
+          "name": "CR-04 — HC-EC-S01-D07-cr-04-port-alder-bookshop-exterior",
+          "type": "HC.OLD_TOWN.GENESIS_ASSET_MARKER",
+          "rotation": 0,
+          "visible": true,
+          "point": true,
+          "x": 16256,
+          "y": 11840,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "CR-04"
+            },
+            {
+              "name": "asset_id",
+              "type": "string",
+              "value": "CR-04"
+            },
+            {
+              "name": "canonical_repo_path",
+              "type": "string",
+              "value": "apps/highcountry-web/public/assets/highcountry/old-town/alder-street-unique/HC-EC-S01-D07-cr-04-port-alder-bookshop-exterior.png"
+            },
+            {
+              "name": "canonical_sha256",
+              "type": "string",
+              "value": "f96a03120272b9867a8f8d81f5d3b9efb84956da52e45f7bde0b4ba90f1501ff"
+            },
+            {
+              "name": "placement_status",
+              "type": "string",
+              "value": "UNQUALIFIED_SPRITE_FOUNDATION"
+            },
+            {
+              "name": "do_not_use_marker_as_sprite_anchor",
+              "type": "bool",
+              "value": true
+            }
+          ]
+        },
+        {
+          "id": 69,
+          "name": "CR-05 — HC-EC-S01-D07-cr-05-rusty-bong-tavern-exterior",
+          "type": "HC.OLD_TOWN.GENESIS_ASSET_MARKER",
+          "rotation": 0,
+          "visible": true,
+          "point": true,
+          "x": 9984,
+          "y": 13760,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "CR-05"
+            },
+            {
+              "name": "asset_id",
+              "type": "string",
+              "value": "CR-05"
+            },
+            {
+              "name": "canonical_repo_path",
+              "type": "string",
+              "value": "apps/highcountry-web/public/assets/highcountry/old-town/alder-street-unique/HC-EC-S01-D07-cr-05-rusty-bong-tavern-exterior.png"
+            },
+            {
+              "name": "canonical_sha256",
+              "type": "string",
+              "value": "84bf3259c90567193a4c0cdcc0ca0056c530d6732c6175ef7787cb33464490f2"
+            },
+            {
+              "name": "placement_status",
+              "type": "string",
+              "value": "UNQUALIFIED_SPRITE_FOUNDATION"
+            },
+            {
+              "name": "do_not_use_marker_as_sprite_anchor",
+              "type": "bool",
+              "value": true
+            }
+          ]
+        },
+        {
+          "id": 70,
+          "name": "CR-06 — HC-EC-S01-D07-cr-06-kush-and-cargo-trading-post-exterior",
+          "type": "HC.OLD_TOWN.GENESIS_ASSET_MARKER",
+          "rotation": 0,
+          "visible": true,
+          "point": true,
+          "x": 11776,
+          "y": 15040,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "CR-06"
+            },
+            {
+              "name": "asset_id",
+              "type": "string",
+              "value": "CR-06"
+            },
+            {
+              "name": "canonical_repo_path",
+              "type": "string",
+              "value": "apps/highcountry-web/public/assets/highcountry/old-town/alder-street-unique/HC-EC-S01-D07-cr-06-kush-and-cargo-trading-post-exterior.png"
+            },
+            {
+              "name": "canonical_sha256",
+              "type": "string",
+              "value": "9940c1743a72dbfd1c7b7c0a8ec27601dc6d4fe09f1e0d5cbb85500fb796015c"
+            },
+            {
+              "name": "placement_status",
+              "type": "string",
+              "value": "UNQUALIFIED_SPRITE_FOUNDATION"
+            },
+            {
+              "name": "do_not_use_marker_as_sprite_anchor",
+              "type": "bool",
+              "value": true
+            }
+          ]
+        },
+        {
+          "id": 71,
+          "name": "WH-01 — HC-EC-S01-D07-wh-01-the-baked-bouy-boatworks-exterior",
+          "type": "HC.OLD_TOWN.GENESIS_ASSET_MARKER",
+          "rotation": 0,
+          "visible": true,
+          "point": true,
+          "x": 17536,
+          "y": 14912,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "WH-01"
+            },
+            {
+              "name": "asset_id",
+              "type": "string",
+              "value": "WH-01"
+            },
+            {
+              "name": "canonical_repo_path",
+              "type": "string",
+              "value": "apps/highcountry-web/public/assets/highcountry/old-town/warehouse-row-unique/HC-EC-S01-D07-wh-01-the-baked-bouy-boatworks-exterior.png"
+            },
+            {
+              "name": "canonical_sha256",
+              "type": "string",
+              "value": "6d6a30dd5b79b5cfa0b7f329d104473ac0582e2e8f531fdf18ad9d364e76c47c"
+            },
+            {
+              "name": "placement_status",
+              "type": "string",
+              "value": "UNQUALIFIED_SPRITE_FOUNDATION"
+            },
+            {
+              "name": "do_not_use_marker_as_sprite_anchor",
+              "type": "bool",
+              "value": true
+            }
+          ]
+        },
+        {
+          "id": 72,
+          "name": "WH-02 — HC-EC-S01-D07-wh-02-hook-line-and-sativa-exterior",
+          "type": "HC.OLD_TOWN.GENESIS_ASSET_MARKER",
+          "rotation": 0,
+          "visible": true,
+          "point": true,
+          "x": 17536,
+          "y": 13888,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "WH-02"
+            },
+            {
+              "name": "asset_id",
+              "type": "string",
+              "value": "WH-02"
+            },
+            {
+              "name": "canonical_repo_path",
+              "type": "string",
+              "value": "apps/highcountry-web/public/assets/highcountry/old-town/warehouse-row-unique/HC-EC-S01-D07-wh-02-hook-line-and-sativa-exterior.png"
+            },
+            {
+              "name": "canonical_sha256",
+              "type": "string",
+              "value": "9534bc445243d2cc994fa346d33b6ed628e97c332bc557d3db8c1347998d4529"
+            },
+            {
+              "name": "placement_status",
+              "type": "string",
+              "value": "UNQUALIFIED_SPRITE_FOUNDATION"
+            },
+            {
+              "name": "do_not_use_marker_as_sprite_anchor",
+              "type": "bool",
+              "value": true
+            }
+          ]
+        },
+        {
+          "id": 73,
+          "name": "WH-03 — HC-EC-S01-D07-wh-03-arctic-haze-refrigeration-exterior",
+          "type": "HC.OLD_TOWN.GENESIS_ASSET_MARKER",
+          "rotation": 0,
+          "visible": true,
+          "point": true,
+          "x": 19072,
+          "y": 14912,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "WH-03"
+            },
+            {
+              "name": "asset_id",
+              "type": "string",
+              "value": "WH-03"
+            },
+            {
+              "name": "canonical_repo_path",
+              "type": "string",
+              "value": "apps/highcountry-web/public/assets/highcountry/old-town/warehouse-row-unique/HC-EC-S01-D07-wh-03-arctic-haze-refrigeration-exterior.png"
+            },
+            {
+              "name": "canonical_sha256",
+              "type": "string",
+              "value": "5865e286a317c20703d201d5f2f0975e4d1010213afd76b06e2d0e5453d181ca"
+            },
+            {
+              "name": "placement_status",
+              "type": "string",
+              "value": "UNQUALIFIED_SPRITE_FOUNDATION"
+            },
+            {
+              "name": "do_not_use_marker_as_sprite_anchor",
+              "type": "bool",
+              "value": true
+            }
+          ]
+        },
+        {
+          "id": 74,
+          "name": "WH-04 — HC-EC-S01-D07-wh-04-the-green-dragon-distillery-exterior",
+          "type": "HC.OLD_TOWN.GENESIS_ASSET_MARKER",
+          "rotation": 0,
+          "visible": true,
+          "point": true,
+          "x": 20992,
+          "y": 12480,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "WH-04"
+            },
+            {
+              "name": "asset_id",
+              "type": "string",
+              "value": "WH-04"
+            },
+            {
+              "name": "canonical_repo_path",
+              "type": "string",
+              "value": "apps/highcountry-web/public/assets/highcountry/old-town/warehouse-row-unique/HC-EC-S01-D07-wh-04-the-green-dragon-distillery-exterior.png"
+            },
+            {
+              "name": "canonical_sha256",
+              "type": "string",
+              "value": "dc53c459bad05c6a05e08c019f325a185e03fe1a770326e7fe76daf2686c03c0"
+            },
+            {
+              "name": "placement_status",
+              "type": "string",
+              "value": "UNQUALIFIED_SPRITE_FOUNDATION"
+            },
+            {
+              "name": "do_not_use_marker_as_sprite_anchor",
+              "type": "bool",
+              "value": true
+            }
+          ]
+        },
+        {
+          "id": 75,
+          "name": "WH-05 — HC-EC-S01-D07-wh-05-blunt-force-shipping-exterior",
+          "type": "HC.OLD_TOWN.GENESIS_ASSET_MARKER",
+          "rotation": 0,
+          "visible": true,
+          "point": true,
+          "x": 19072,
+          "y": 13888,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "WH-05"
+            },
+            {
+              "name": "asset_id",
+              "type": "string",
+              "value": "WH-05"
+            },
+            {
+              "name": "canonical_repo_path",
+              "type": "string",
+              "value": "apps/highcountry-web/public/assets/highcountry/old-town/warehouse-row-unique/HC-EC-S01-D07-wh-05-blunt-force-shipping-exterior.png"
+            },
+            {
+              "name": "canonical_sha256",
+              "type": "string",
+              "value": "1ed748911b116dfc62752822fde922c92639be98d576a7a955b85c7adae82781"
+            },
+            {
+              "name": "placement_status",
+              "type": "string",
+              "value": "UNQUALIFIED_SPRITE_FOUNDATION"
+            },
+            {
+              "name": "do_not_use_marker_as_sprite_anchor",
+              "type": "bool",
+              "value": true
+            }
+          ]
+        },
+        {
+          "id": 76,
+          "name": "LM-01 — HC-EC-S01-D07-lm-01-harbourview-hotel-permanent-exterior",
+          "type": "HC.OLD_TOWN.GENESIS_ASSET_MARKER",
+          "rotation": 0,
+          "visible": true,
+          "point": true,
+          "x": 4992,
+          "y": 9280,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "LM-01"
+            },
+            {
+              "name": "asset_id",
+              "type": "string",
+              "value": "LM-01"
+            },
+            {
+              "name": "canonical_repo_path",
+              "type": "string",
+              "value": "apps/highcountry-web/public/assets/highcountry/old-town/permanent-landmarks/HC-EC-S01-D07-lm-01-harbourview-hotel-permanent-exterior.png"
+            },
+            {
+              "name": "canonical_sha256",
+              "type": "string",
+              "value": "8dbc7501419a9db67261629346600d1b8314ec5eb2f49448fc8e2482ec644379"
+            },
+            {
+              "name": "placement_status",
+              "type": "string",
+              "value": "UNQUALIFIED_SPRITE_FOUNDATION"
+            },
+            {
+              "name": "do_not_use_marker_as_sprite_anchor",
+              "type": "bool",
+              "value": true
+            }
+          ]
+        },
+        {
+          "id": 77,
+          "name": "LM-02 — HC-EC-S01-D07-lm-02-founders-square-clock-tower-permanent-exterior",
+          "type": "HC.OLD_TOWN.GENESIS_ASSET_MARKER",
+          "rotation": 0,
+          "visible": true,
+          "point": true,
+          "x": 11392,
+          "y": 8512,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "LM-02"
+            },
+            {
+              "name": "asset_id",
+              "type": "string",
+              "value": "LM-02"
+            },
+            {
+              "name": "canonical_repo_path",
+              "type": "string",
+              "value": "apps/highcountry-web/public/assets/highcountry/old-town/permanent-landmarks/HC-EC-S01-D07-lm-02-founders-square-clock-tower-permanent-exterior.png"
+            },
+            {
+              "name": "canonical_sha256",
+              "type": "string",
+              "value": "2f4844dddd72faf05e0ca1029ba0b0607157a7e9f66082a62c2c0c94d0cf17f7"
+            },
+            {
+              "name": "placement_status",
+              "type": "string",
+              "value": "UNQUALIFIED_SPRITE_FOUNDATION"
+            },
+            {
+              "name": "do_not_use_marker_as_sprite_anchor",
+              "type": "bool",
+              "value": true
+            }
+          ]
+        },
+        {
+          "id": 78,
+          "name": "LM-03 — HC-EC-S01-D07-lm-03-old-cannery-permanent-exterior",
+          "type": "HC.OLD_TOWN.GENESIS_ASSET_MARKER",
+          "rotation": 0,
+          "visible": true,
+          "point": true,
+          "x": 8448,
+          "y": 12224,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "LM-03"
+            },
+            {
+              "name": "asset_id",
+              "type": "string",
+              "value": "LM-03"
+            },
+            {
+              "name": "canonical_repo_path",
+              "type": "string",
+              "value": "apps/highcountry-web/public/assets/highcountry/old-town/permanent-landmarks/HC-EC-S01-D07-lm-03-old-cannery-permanent-exterior.png"
+            },
+            {
+              "name": "canonical_sha256",
+              "type": "string",
+              "value": "00cba325f594b983a9e762cdc36ff4dd332a377c56aa93c53567b2a6afeb67cc"
+            },
+            {
+              "name": "placement_status",
+              "type": "string",
+              "value": "UNQUALIFIED_SPRITE_FOUNDATION"
+            },
+            {
+              "name": "do_not_use_marker_as_sprite_anchor",
+              "type": "bool",
+              "value": true
+            }
+          ]
+        },
+        {
+          "id": 79,
+          "name": "LM-04 — HC-EC-S01-D07-lm-04-the-sail-loft-permanent-exterior",
+          "type": "HC.OLD_TOWN.GENESIS_ASSET_MARKER",
+          "rotation": 0,
+          "visible": true,
+          "point": true,
+          "x": 22016,
+          "y": 14144,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "LM-04"
+            },
+            {
+              "name": "asset_id",
+              "type": "string",
+              "value": "LM-04"
+            },
+            {
+              "name": "canonical_repo_path",
+              "type": "string",
+              "value": "apps/highcountry-web/public/assets/highcountry/old-town/permanent-landmarks/HC-EC-S01-D07-lm-04-the-sail-loft-permanent-exterior.png"
+            },
+            {
+              "name": "canonical_sha256",
+              "type": "string",
+              "value": "087c0a41e2f264fc9d4fa6b41a1b77419e0eacb475250c012955afdad83de4c0"
+            },
+            {
+              "name": "placement_status",
+              "type": "string",
+              "value": "UNQUALIFIED_SPRITE_FOUNDATION"
+            },
+            {
+              "name": "do_not_use_marker_as_sprite_anchor",
+              "type": "bool",
+              "value": true
+            }
+          ]
+        },
+        {
+          "id": 80,
+          "name": "LM-05 — HC-EC-S01-D07-lm-05-st-brigids-chapel-permanent-exterior",
+          "type": "HC.OLD_TOWN.GENESIS_ASSET_MARKER",
+          "rotation": 0,
+          "visible": true,
+          "point": true,
+          "x": 14080,
+          "y": 3392,
+          "properties": [
+            {
+              "name": "site_id",
+              "type": "string",
+              "value": "LM-05"
+            },
+            {
+              "name": "asset_id",
+              "type": "string",
+              "value": "LM-05"
+            },
+            {
+              "name": "canonical_repo_path",
+              "type": "string",
+              "value": "apps/highcountry-web/public/assets/highcountry/old-town/permanent-landmarks/HC-EC-S01-D07-lm-05-st-brigids-chapel-permanent-exterior.png"
+            },
+            {
+              "name": "canonical_sha256",
+              "type": "string",
+              "value": "1f987882e0d79b971d6c250c73acf4cf73301ec933bf986c45f371be513089a4"
+            },
+            {
+              "name": "placement_status",
+              "type": "string",
+              "value": "UNQUALIFIED_SPRITE_FOUNDATION"
+            },
+            {
+              "name": "do_not_use_marker_as_sprite_anchor",
+              "type": "bool",
+              "value": true
+            }
+          ]
+        }
+      ],
+      "opacity": 1,
+      "visible": true,
+      "x": 0,
+      "y": 0,
+      "color": "#ffcd39"
+    },
+    {
+      "id": 5,
+      "name": "Entrances and access",
+      "type": "objectgroup",
+      "draworder": "topdown",
+      "objects": [],
+      "opacity": 1,
+      "visible": true,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "id": 6,
+      "name": "Landmarks and annotations",
+      "type": "objectgroup",
+      "draworder": "topdown",
+      "objects": [],
+      "opacity": 1,
+      "visible": true,
+      "x": 0,
+      "y": 0
+    }
+  ],
+  "tilesets": [],
+  "properties": [
+    {
+      "name": "schema",
+      "type": "string",
+      "value": "HC.TILED.OLD_TOWN.REVIEW.V1"
+    },
+    {
+      "name": "district",
+      "type": "string",
+      "value": "HC-EC-S01-D07"
+    },
+    {
+      "name": "coordinateAuthority",
+      "type": "string",
+      "value": "PROVISIONAL_LOCAL_PHASE_C"
+    },
+    {
+      "name": "sourceSiteBlob",
+      "type": "string",
+      "value": "5ba800f1220e459971e13a16fce198610c632b68"
+    },
+    {
+      "name": "sourceAssetBlob",
+      "type": "string",
+      "value": "b6904cc9e60fe3a134af7f25e1f7555576b85201"
+    },
+    {
+      "name": "authoritativeForOwnership",
+      "type": "bool",
+      "value": false
+    },
+    {
+      "name": "artworkSpritesPlaced",
+      "type": "bool",
+      "value": false
+    },
+    {
+      "name": "sourceRectScalePx",
+      "type": "int",
+      "value": 32
+    }
+  ]
+}

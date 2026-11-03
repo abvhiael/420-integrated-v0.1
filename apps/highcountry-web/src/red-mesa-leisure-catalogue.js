@@ -14,9 +14,9 @@ export const redMesaLeisureCatalogue=frozen(specs.map(([id,slug,name,width,heigh
   category:'leisure-retreat',assetUrl:'/assets/structures/hc-art-05-e/red-mesa/hc-structure-'+slug+'.png',
   footprint:frozen({width,height,tileSizePx:64}),artworkCanvas:frozen({width:width*320,height:height*320}),
   placement:frozen({layer:'structure',surface:'outdoor_ground',requiresGroundAnchor:true,
-   requiresFlatTerrain:true,regionRestriction:'red-mesa',collisionMaskStatus:'pending-qualified-geometry',
+   clickableBuilding:true,regionRestriction:'red-mesa',collisionMaskStatus:'pending-qualified-geometry',
    placementWithoutCollisionMask:'deny',requiresAuthoritativeOwnership:true,
-   requiresServerAuthorization:true,entranceStatus:'pending-qualified-entrance'}),
+   requiresServerAuthorization:true}),
   marketplace:frozen({category:'regional-leisure-buildings',currency:'BUDS',price:null,
    inventoryPolicy:'authenticated-server-owned',listingStatus:'catalogue-only',
    noClientPurchaseOrIssuance:true}),
@@ -28,9 +28,8 @@ export const redMesaLeisureCatalogue=frozen(specs.map(([id,slug,name,width,heigh
 const byId=new Map(redMesaLeisureCatalogue.map(x=>[x.id,x]));
 export function getRedMesaLeisureBuilding(id){return byId.get(id)??null;}
 export function canPlaceRedMesaLeisureBuilding({id,owned=false,serverAuthorized=false,region,
- hasGroundAnchor=false,flatTerrain=false,collisionMaskQualified=false,entranceQualified=false,
+ hasGroundAnchor=false,collisionMaskQualified=false,
  overlapsExisting=true}={}){
  return byId.has(id)&&owned===true&&serverAuthorized===true&&region==='red-mesa'&&
- hasGroundAnchor===true&&flatTerrain===true&&collisionMaskQualified===true&&
- entranceQualified===true&&overlapsExisting===false;
+ hasGroundAnchor===true&&collisionMaskQualified===true&&overlapsExisting===false;
 }

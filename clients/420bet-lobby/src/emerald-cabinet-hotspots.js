@@ -1,21 +1,21 @@
 // Measured from canonical /assets/420bet/cabinet/420bet_slots_cabinet_empty.png.
 // Source image is 1448 x 1086 RGBA pixels. Console centers and readouts
-// recalibrated against the 1920x1080 live-site screenshot (Nov 2, 2026). Never stretch the hotspot geometry separately
+// recalibrated against the Nov 2 live-site screenshot: clickable icons match\n// the painted centers; console readouts sit inside the lower windows. Never stretch separately
 // from its cabinet background; normalized percentages follow responsive scaling.
 export const CABINET_WIDTH=1448;
 export const CABINET_HEIGHT=1086;
 export const CABINET_HOTSPOTS=Object.freeze({
- info:Object.freeze([112,927,60,65]),
- menu:Object.freeze([179,927,60,65]),
- decrease:Object.freeze([247,941,48,53]),
- increase:Object.freeze([388,941,49,53]),
- spin:Object.freeze([637,868,179,179]),
- autoplay:Object.freeze([1190,931,98,62]),
- turbo:Object.freeze([1292,925,60,72]),
- betPerWay:Object.freeze([298,968,85,30]),
- totalBet:Object.freeze([446,964,133,35]),
- win:Object.freeze([870,964,146,35]),
- balance:Object.freeze([1030,964,146,35])
+ info:Object.freeze([53,927,65,65]),
+ menu:Object.freeze([126,927,66,66]),
+ decrease:Object.freeze([198,941,49,53]),
+ increase:Object.freeze([347,941,52,53]),
+ spin:Object.freeze([625,868,179,179]),
+ autoplay:Object.freeze([1235,931,99,62]),
+ turbo:Object.freeze([1340,925,61,72]),
+ betPerWay:Object.freeze([271,979,74,29]),
+ totalBet:Object.freeze([446,976,133,35]),
+ win:Object.freeze([870,976,146,35]),
+ balance:Object.freeze([1030,976,146,35])
 });
 export function cabinetArea(name){
  const rect=CABINET_HOTSPOTS[name];

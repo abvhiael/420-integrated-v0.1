@@ -249,3 +249,19 @@
 .es-paytable th,.es-paytable td{padding:8px 6px;border-bottom:1px solid #315a37;text-align:right;font-size:.83rem}
 .es-paytable th:first-child{text-align:left}
 @media(max-width:680px){.es-console{gap:4px}.es-console-button{min-width:60px;padding:7px;font-size:.73rem}.es-bet-display{min-width:72px}.es-paytable th,.es-paytable td{font-size:.71rem;padding:6px 3px}}
+
+
+/* Canonical 1448×1086 Emerald cabinet: semantic controls aligned to artwork pixels. */
+.es-art-stage{aspect-ratio:1448/1086}
+.es-art-stage .es-cabinet-hotspot{position:absolute;z-index:8;display:block;min-width:0;min-height:0;width:auto;height:auto;margin:0;padding:0;border:0;border-radius:999px;background:transparent;color:transparent;font-size:0;box-shadow:none;outline:none;cursor:pointer;touch-action:manipulation}
+.es-art-stage .es-cabinet-hotspot:hover:not(:disabled){background:rgba(207,255,91,.15);box-shadow:inset 0 0 12px rgba(194,255,86,.55),0 0 12px rgba(194,255,86,.45)}
+.es-art-stage .es-cabinet-hotspot:focus-visible{outline:3px solid #f6ff9f;outline-offset:2px;background:rgba(207,255,91,.16)}
+.es-art-stage .es-cabinet-hotspot:disabled{opacity:.48;cursor:not-allowed}
+.es-art-stage .es-cabinet-hotspot.es-control-active{background:rgba(193,255,105,.21);box-shadow:inset 0 0 12px #e5ff8e,0 0 12px #a0f862}
+.es-art-stage .es-cabinet-display{position:absolute;z-index:7;display:flex;align-items:center;justify-content:center;white-space:nowrap;overflow:hidden;padding:0 3px;box-sizing:border-box;color:#d3ffa5;text-shadow:0 0 8px #85e947,0 1px 1px #001;font:800 clamp(7px,1.5vw,21px)/1.1 system-ui,sans-serif;font-variant-numeric:tabular-nums;pointer-events:none}
+.es-art-stage .es-cabinet-display .es-sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.es-art-stage .es-spin{border-radius:50%}
+.es-art-stage .es-spin:focus-visible{outline:4px solid #faff9b;outline-offset:2px}
+.emerald-slots .es-controls{border:0;border-radius:0;background:transparent;padding:0 10px 12px}
+.emerald-slots .es-console-panel{margin:10px auto 0;max-width:900px}
+@media(max-width:650px){.es-art-stage .es-cabinet-display{font-size:clamp(6px,1.55vw,11px)}.es-art-stage .es-cabinet-hotspot:focus-visible{outline-width:2px}}

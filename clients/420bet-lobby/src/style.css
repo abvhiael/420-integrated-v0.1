@@ -303,3 +303,63 @@
 .slots-machine-play{display:inline-block;padding:11px 16px;border-radius:9px;background:#b7ee6a;color:#102317;font-weight:900}
 .slots-machine-link:hover .slots-machine-play,.slots-machine-link:focus-visible .slots-machine-play{background:#e3f99e}
 @media(prefers-reduced-motion:reduce){.slots-machine-art img{transition:none}}
+
+/* Mary Jane's Sticky Wilds — independent neon retro-Vegas practice cabinet. */
+.mary-jane-game{--mj-gold:#f5c768;--mj-pink:#ff66b5;--mj-green:#a8f777;position:relative;min-height:100%;padding:20px clamp(8px,2vw,30px) 24px;color:#fff3d8;background:radial-gradient(ellipse at 50% 13%,#70284d 0%,#2d1340 35%,#0a0b1c 75%);font-family:system-ui,Arial,sans-serif;box-sizing:border-box}
+.mary-jane-game *{box-sizing:border-box}
+.mj-head{text-align:center;margin:0 auto 14px}
+.mj-logo{font:italic 900 clamp(2rem,4.8vw,4.7rem)/1.1 Georgia,serif;letter-spacing:-.04em;margin:0;color:#ffe58c;text-shadow:0 3px 0 #8b1455,0 5px 0 #52102c,0 0 23px #ff5aa4,0 0 35px #ffc165}
+.mj-tagline{margin:9px 0 3px;color:#b7ff91;letter-spacing:.15em;font-size:clamp(.65rem,.95vw,.9rem);font-weight:900}
+.mj-cabinet{max-width:1450px;margin:0 auto;padding:clamp(8px,1.4vw,20px);border:9px ridge #f9c66a;border-radius:35px;background:linear-gradient(135deg,#521337,#130a24 52%,#4d1931);box-shadow:0 0 0 4px #8d4331,0 0 45px #ff4b9950,inset 0 0 40px #e49d6338}
+.mj-layout{display:grid;grid-template-columns:minmax(120px,.7fr) minmax(0,3.4fr) minmax(155px,.85fr);align-items:stretch;gap:12px;min-height:410px}
+.mj-character{min-width:0;position:relative;overflow:hidden;border:4px solid #e6b65a;border-radius:18px;background:linear-gradient(#601c47,#180a27);box-shadow:0 0 18px #ff6eb65c;max-height:560px}
+.mj-character img{display:block;width:100%;height:100%;object-fit:cover;object-position:center top}
+.mj-reels{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px;min-width:0;padding:6px;background:#2c102b;border:8px ridge #f1b956;border-radius:17px;box-shadow:inset 0 0 25px #000b,0 0 20px #f6a75656}
+.mj-reel{display:grid;grid-template-rows:repeat(4,minmax(0,1fr));gap:4px;min-width:0}
+.mj-cell{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:0;min-height:85px;overflow:hidden;border:2px solid #a3656b;border-radius:9px;background:radial-gradient(circle at 50% 35%,#66244e 0%,#2b1038 57%,#170b24 100%);box-shadow:inset 0 0 8px #c1669470}
+.mj-cell.mj-framed,.mj-cell.mj-sticky{border:4px solid #ffe15c;box-shadow:inset 0 0 15px #ffc75188,0 0 14px #f8bb5a;z-index:1}
+.mj-cell.mj-converted{background:radial-gradient(#a83c79,#5d174d);box-shadow:0 0 18px #ffdd72,inset 0 0 18px #ffd56d}
+.mj-cell.mj-wild{background:radial-gradient(#961b55,#2d0d31)}
+.mj-cell.mj-coin{background:radial-gradient(#80601e,#251325)}
+.mj-cell.mj-scatter{background:radial-gradient(#256d4a,#250b34)}
+.mj-glyph{color:#ffe69c;font:900 clamp(1.3rem,3vw,3.9rem)/1 Georgia,serif;text-align:center;text-shadow:0 0 9px #ff77ae,0 3px 2px #321;white-space:nowrap}
+.mj-coin .mj-glyph{display:grid;place-items:center;width:clamp(36px,5vw,69px);height:clamp(36px,5vw,69px);border:5px ridge #ffe48c;border-radius:50%;color:#71e363;background:linear-gradient(135deg,#e9b54b,#90540d);font-size:clamp(1.3rem,2.8vw,2.9rem)}
+.mj-scatter .mj-glyph{padding:6px;border:4px dotted #ffe294;border-radius:50%;color:#b0ff7e;background:#5f1347;font-size:clamp(1rem,2.1vw,2.3rem)}
+.mj-wild .mj-glyph{color:#ff598c}
+.mj-symbol-label{display:block;margin-top:4px;padding:1px 2px;color:#ffdf8b;max-width:100%;font-size:clamp(.52rem,.67vw,.74rem);font-weight:900;text-align:center;text-shadow:1px 1px 3px #000;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mj-portrait-part{position:relative;width:100%;height:100%;overflow:hidden}
+.mj-portrait-part img{position:absolute;left:0;width:100%;height:400%;object-fit:fill;max-width:none}
+.mj-status{display:flex;flex-direction:column;align-items:center;gap:12px;padding:22px 9px;text-align:center;border:5px ridge #e3ae5d;border-radius:18px;background:radial-gradient(#551e41,#1c0d2c);min-width:0}
+.mj-status h3{font-size:clamp(.72rem,1.15vw,1.1rem);line-height:1.25;margin:12px 0 2px;color:#ffe89a;text-shadow:0 0 8px #ef8e3a}
+.mj-cycle{padding:12px 8px;border:2px solid #eabf62;border-radius:12px;background:#2e1331;color:#ffc78c;font-weight:950;font-size:clamp(.8rem,1.35vw,1.2rem)}
+.mj-buzz{display:grid;place-items:center;min-width:95px;min-height:80px;padding:12px 18px;border:6px ridge #f5be54;border-radius:28px;background:radial-gradient(#337b4e,#133020);color:#b8ff79;font-size:clamp(2rem,3vw,3.7rem);text-shadow:0 0 14px #79ed59}
+.mj-frames,.mj-cap{font-size:.78rem;font-weight:800;color:#ffcf8a;line-height:1.5}
+.mj-message{min-height:35px;margin:9px 0 7px;text-align:center;color:#c9ff9d;font-weight:900;letter-spacing:.06em;text-shadow:0 0 8px #37e25d}
+.mj-console{display:flex;align-items:center;justify-content:space-evenly;flex-wrap:wrap;gap:9px;border:5px ridge #deaa51;border-radius:24px;background:linear-gradient(#43143b,#1c1029);padding:12px}
+.mj-console button{font-family:inherit;cursor:pointer}
+.mj-control,.mj-action{padding:10px 12px;border:2px solid #e2b45d;border-radius:12px;background:linear-gradient(#4f2646,#2b183a);color:#ffe5a9;font-size:clamp(.7rem,.9vw,.9rem);font-weight:900;white-space:nowrap}
+.mj-control:hover:not(:disabled),.mj-control:focus-visible{background:#6d2a57;outline:2px solid #e9d16c}
+.mj-control:disabled,.mj-spin:disabled{opacity:.45;cursor:not-allowed}
+.mj-spin{width:110px;height:86px;border:7px ridge #ffe689;border-radius:50%;background:radial-gradient(circle at 35% 25%,#8aea69,#156a35 65%,#0c371c);box-shadow:0 0 18px #f9c55e;color:#ffe99b;font:900 1.45rem Georgia,serif;cursor:pointer;text-shadow:0 2px 3px #07260d}
+.mj-spin:hover:not(:disabled){filter:brightness(1.25)}
+.mj-wager{display:flex;align-items:center;gap:8px}
+.mj-small-label{color:#f8d382;font-size:.75rem;font-weight:900;line-height:1.1}
+.mj-wager strong{min-width:27px;text-align:center;color:#fff}
+.mj-readout{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:83px}
+.mj-readout span{font-size:.65rem;color:#f4d17c;font-weight:900}
+.mj-readout strong{font-size:1.35rem;color:#d3ffba;font-variant-numeric:tabular-nums}
+.mj-legal{text-align:center;margin:13px 0 0;color:#e4c69d;font-size:.72rem;font-weight:800;letter-spacing:.08em}
+.mj-overlay{z-index:1200}
+.mj-modal{position:relative;width:min(850px,100%);max-height:88dvh;overflow-y:auto;padding:24px clamp(16px,3vw,34px);border:5px ridge #e3b65c;border-radius:22px;background:linear-gradient(145deg,#39143e,#100d23);color:#f9ebcf;box-shadow:0 0 50px #000c}
+.mj-modal h2,.mj-modal h3{color:#ffe292;font-family:Georgia,serif}
+.mj-modal h2{padding-right:42px}.mj-modal h3{margin:24px 0 6px}.mj-modal p{line-height:1.6}
+.mj-close{position:absolute;right:14px;top:14px;border:2px solid #f6ca72;border-radius:50%;background:#4f2045;color:#fff;width:41px;height:41px;cursor:pointer;font-size:1.6rem}
+.mj-paytable{border-collapse:collapse;min-width:620px;width:100%;font-size:.77rem}
+.mj-modal:has(.mj-paytable){overflow-x:auto}
+.mj-paytable th,.mj-paytable td{padding:7px 5px;border-bottom:1px solid #78556c;text-align:right;white-space:nowrap}
+.mj-paytable th:first-child{text-align:left}
+.mj-line-list{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;font-size:.75rem}
+.mj-line-list span{padding:5px;border:1px solid #825f4d;border-radius:5px;color:#cbff95}
+.mj-disclaimer{color:#e4c37b;font-size:.85rem}
+@media(max-width:950px){.mj-layout{grid-template-columns:minmax(0,3.4fr) minmax(140px,.8fr)}.mj-character{display:none}.mj-cell{min-height:68px}.mj-status{padding:10px 5px}.mj-console{gap:6px}}
+@media(max-width:680px){.mary-jane-game{padding:10px 4px}.mj-cabinet{border-width:5px;border-radius:18px;padding:5px}.mj-layout{grid-template-columns:minmax(0,1fr)}.mj-status{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:3px;padding:5px}.mj-status h3{font-size:.65rem}.mj-status .mj-buzz{font-size:1.4rem;min-height:50px;min-width:0}.mj-status .mj-cycle{padding:5px;font-size:.7rem}.mj-status .mj-cap,.mj-status .mj-frames{font-size:.6rem}.mj-reels{padding:3px;border-width:4px;gap:2px}.mj-reel{gap:2px}.mj-cell{min-height:64px;border-radius:4px}.mj-glyph{font-size:1.5rem}.mj-symbol-label{font-size:.48rem}.mj-coin .mj-glyph{height:34px;width:34px;border-width:3px}.mj-console{padding:6px}.mj-control{padding:8px 7px}.mj-spin{height:65px;width:80px;font-size:1.05rem}.mj-line-list{grid-template-columns:repeat(2,minmax(0,1fr))}}

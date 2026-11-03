@@ -1,0 +1,42 @@
+/* Mary Jane's Sticky Wilds: original generated concept artwork is the cabinet.
+   The engine owns every result, balance and feature; the raster is decorative only.
+   Coordinates are percentages of the canonical 1672×941 concept image. */
+.mary-jane-game.mj-concept{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;min-height:100%;padding:0 0 9px;background:radial-gradient(ellipse at 50% 30%,#42163c,#10051e 75%);color:#ffe6bd}
+.mj-concept .mj-scene{position:relative;width:min(100%,1672px);min-width:830px;aspect-ratio:1672/941;flex:none;background:url('/assets/420bet/mary-jane/mj-concept-cabinet.webp') 50% 50%/100% 100% no-repeat;isolation:isolate}
+.mj-concept .mj-reels{position:absolute;z-index:2;left:19.7%;top:17.5%;width:61.15%;height:64.7%;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:.55%;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none;min-height:0}
+.mj-concept .mj-reel{display:grid;grid-template-rows:repeat(4,minmax(0,1fr));gap:.45%;min-height:0;min-width:0}
+.mj-concept .mj-cell{position:relative;min-width:0;min-height:0;width:100%;height:100%;overflow:hidden;display:block;border:clamp(1px,.16vw,3px) solid #c98439;border-radius:5px;background:radial-gradient(ellipse at 50% 40%,#4a154d 0%,#20082b 74%,#0d061e 100%);box-shadow:inset 0 0 14px #03000bcc,0 0 4px #ffb44d73}
+.mj-concept .mj-cell.mj-framed,.mj-concept .mj-cell.mj-sticky{z-index:3;border:clamp(2px,.31vw,5px) solid #ffe07a;box-shadow:inset 0 0 15px #ffc34caa,0 0 17px #ffd76bd9}
+.mj-concept .mj-cell.mj-converted{border-color:#ffdd76;box-shadow:inset 0 0 19px #ff7fa5,0 0 19px #ffe361}
+.mj-concept .mj-symbol-art{position:absolute;inset:0;display:block;background-image:url('/assets/420bet/mary-jane/mj-symbol-atlas.webp');background-repeat:no-repeat;background-size:400% 400%;background-color:#260a32}
+.mj-concept .mj-portrait-part{position:relative;display:block;width:100%;height:100%;overflow:hidden;background:#380c37}
+.mj-concept .mj-portrait-part img{position:absolute;left:0;max-width:none;width:100%;height:400%;object-fit:fill;display:block}
+.mj-concept .mj-live{position:absolute;z-index:5;display:flex;align-items:center;justify-content:center;white-space:nowrap;line-height:1.06;min-height:0;min-width:0;font-family:Georgia,'Times New Roman',serif;font-variant-numeric:tabular-nums;font-weight:900;text-align:center;color:#fff2bc;text-shadow:0 2px 2px #000,0 0 10px #c97c3e}
+.mj-concept .mj-live-cycle{left:85.2%;top:31.6%;width:11.4%;height:7.4%;padding:1%;border:2px solid #f8c66b;border-radius:10%;background:linear-gradient(165deg,#54152d,#2e0829);color:#ffe88d;font-size:clamp(11px,1.58vw,27px);box-shadow:inset 0 0 11px #ff93648c}
+.mj-concept .mj-live-buzz{left:86.3%;top:48.2%;width:10.6%;height:10.1%;background:radial-gradient(ellipse at 50% 30%,#2c915c,#124227 75%);border:3px ridge #ffd470;border-radius:22%;font-size:clamp(23px,3.3vw,60px);color:#aeff64;text-shadow:0 0 10px #59ed43,0 2px 3px #061e17}
+.mj-concept .mj-live-bet{left:21.0%;top:89.4%;width:7.45%;height:5.8%;background:#260d2c;border-radius:7px;font-size:clamp(12px,1.7vw,28px)}
+.mj-concept .mj-live-total{left:32.7%;top:89.1%;width:10.7%;height:6.15%;background:#280e2f;border-radius:9px;font-size:clamp(12px,1.8vw,29px)}
+.mj-concept .mj-live-win{left:75.1%;top:88.9%;width:8.6%;height:6.1%;background:#280d2c;border-radius:8px;font-size:clamp(12px,1.85vw,30px)}
+.mj-concept .mj-live-balance{left:84.6%;top:88.9%;width:11.1%;height:6.1%;background:#280d2c;border-radius:8px;font-size:clamp(12px,1.85vw,30px)}
+.mj-concept .mj-scene>.mj-message{position:absolute;z-index:5;left:38.6%;top:81.5%;width:25.9%;height:4.1%;min-height:0;margin:0;padding:3px 7px;border:1px solid #ffd66d77;border-radius:12px;background:#230a2be5;box-shadow:0 0 14px #ffdd6847;color:#caff8e;font:900 clamp(9px,1vw,17px)/1.15 system-ui,Arial,sans-serif;text-align:center;letter-spacing:0;white-space:normal;overflow:hidden;text-shadow:0 0 8px #35d761}
+.mj-concept .mj-hit{position:absolute;z-index:8;display:block;padding:0;margin:0;border:0;border-radius:999px;background:transparent;cursor:pointer;color:transparent;font-size:0;touch-action:manipulation}
+.mj-concept .mj-hit:focus-visible{outline:3px solid #d8ff83;outline-offset:2px;box-shadow:0 0 18px #d2ff72}
+.mj-concept .mj-hit:hover:not(:disabled){background:#ffe9741f;box-shadow:inset 0 0 9px #ffe57b99}
+.mj-concept .mj-hit:disabled{cursor:not-allowed}
+.mj-concept .mj-hit-menu{left:3.4%;top:87.3%;width:3.8%;height:8.5%}
+.mj-concept .mj-hit-info{left:7.7%;top:87.3%;width:3.9%;height:8.5%}
+.mj-concept .mj-hit-sound{left:11.75%;top:87.3%;width:3.9%;height:8.5%}
+.mj-concept .mj-hit-minus{left:17.9%;top:87.8%;width:3.8%;height:7.2%}
+.mj-concept .mj-hit-plus{left:28.0%;top:87.8%;width:3.8%;height:7.2%}
+.mj-concept .mj-hit-spin{left:45.0%;top:79.9%;width:9.6%;height:19.4%;border-radius:50%;min-width:0;min-height:0;box-shadow:none}
+.mj-concept .mj-hit-spin:not(:disabled):hover{background:#a7ff5030;box-shadow:0 0 26px #afff78}
+.mj-concept .mj-hit-auto{left:55.1%;top:88.1%;width:7.3%;height:8.1%;border-radius:13%}
+.mj-concept .mj-hit-turbo{left:63.8%;top:88.1%;width:7.3%;height:8.1%;border-radius:13%}
+.mj-concept .mj-hit.mj-activated{background:#a5ff6460;box-shadow:0 0 15px #bfff6ca6,inset 0 0 12px #ffe68b}
+.mj-concept .mj-legal{margin:5px 0 0;padding:4px 8px;text-align:center;color:#e7d39d;font-size:clamp(9px,.7vw,12px);font-weight:800;letter-spacing:.05em}
+.mj-concept .mj-modal{font-size:15px}
+.mj-concept .mj-overlay{position:fixed;z-index:1300}
+@media(max-width:850px){.mj-concept .mj-scene{min-width:830px}.mary-jane-game.mj-concept{align-items:flex-start}.mj-concept .mj-legal{min-width:830px}}
+@media(prefers-reduced-motion:reduce){.mj-concept .mj-hit,.mj-concept .mj-live{animation:none!important;transition:none!important}}
+
+.mj-concept .mj-assistive{position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}

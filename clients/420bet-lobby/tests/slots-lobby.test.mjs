@@ -10,7 +10,7 @@ test('Slots lobby lists the completed Emerald Harvest machine with its own cabin
  assert.equal(SLOT_MACHINES[0].id,'emerald-harvest');
  assert.equal(SLOT_MACHINES[0].art,EMERALD_ASSETS.cabinet);
  assert.equal(SLOT_MACHINES[1].id,'mary-jane-sticky-wilds');
- assert.match(SLOT_MACHINES[1].art,/mary-jane-lobby\.svg$/);
+ assert.match(SLOT_MACHINES[1].art,/mj-concept-cabinet\.webp$/);
  const {document,window}=parseHTML('<html><body></body></html>');
  let chosen=null;
  const lobby=createSlotsLobby(document,machine=>{chosen=machine;});

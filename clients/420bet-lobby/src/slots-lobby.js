@@ -3,7 +3,7 @@ import {EMERALD_ASSETS} from './emerald-slots-assets.js';
 // Slot-machine discovery only. Each machine keeps its own separate implementation.
 export const SLOT_MACHINES=Object.freeze([
  Object.freeze({id:'emerald-harvest',title:'Emerald Harvest',subtitle:'1,024 Ways to Win',description:'Five reels, four rows, Wilds, Scatters and free-spin bonuses.',art:EMERALD_ASSETS.cabinet,status:'Practice available'}),
- Object.freeze({id:'mary-jane-sticky-wilds',title:"Mary Jane's Sticky Wilds",subtitle:'20 Lines · Gold Leaf Frames',description:'A boho Vegas slot with 10-spin frames, ×10 Buzz, and Sticky Wild Free Spins.',art:'/assets/420bet/mary-jane/mary-jane-lobby.svg',status:'Practice available'})
+ Object.freeze({id:'mary-jane-sticky-wilds',title:"Mary Jane's Sticky Wilds",subtitle:'20 Lines · Gold Leaf Frames',description:'A boho Vegas slot with 10-spin frames, ×10 Buzz, and Sticky Wild Free Spins.',art:'/assets/420bet/mary-jane/mj-concept-cabinet.webp',status:'Practice available'})
 ]);
 export const slotMachinePath=id=>'#game=slots&machine='+encodeURIComponent(id);
 export function slotMachineFromHash(hash=''){

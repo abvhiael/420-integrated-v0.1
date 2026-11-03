@@ -24,18 +24,22 @@ export function createMaryJanePractice(doc=globalThis.document){
   try{state=spinMaryJane(state);}catch(error){auto=false;autoLeft=0;state={...state,message:error.message};}
   render();autoContinue();
  }
+ const ART_INDEX=Object.freeze({H02:0,H03:1,H04:2,H05:3,H06:4,L01:5,L02:6,L03:7,L04:8,L05:9,L06:10,WILD:11,COIN:12,SCATTER:13});
  function symbolCell(symbol,reel,row,mask,converted,sticky){
   const normalized=symbol?.startsWith('H01')?'H01':symbol;
-  const classes='mj-cell'+(mask?' mj-framed':'')+(converted?' mj-converted':'')+(sticky?' mj-sticky':'')+(normalized==='WILD'?' mj-wild':'')+(normalized==='COIN'?' mj-coin':'')+(normalized==='SCATTER'?' mj-scatter':'');
-  const cell=make(doc,'div',classes);cell.setAttribute('aria-label','Reel '+(reel+1)+' row '+(row+1)+': '+(SYMBOL_NAMES[normalized]||'Empty'));
+  const cell=make(doc,'div','mj-cell'+(mask?' mj-framed':'')+(converted?' mj-converted':'')+(sticky?' mj-sticky':''));
+  cell.setAttribute('role','img');
+  cell.setAttribute('aria-label','Reel '+(reel+1)+' row '+(row+1)+': '+(SYMBOL_NAMES[normalized]||'Empty'));
   if(symbol?.startsWith('H01')){
-   const frame=make(doc,'div','mj-portrait-part');const img=make(doc,'img');img.src=ART_ROOT+'mary-jane-portrait.svg';img.alt='';
-   img.style.top='-'+('ABCD'.indexOf(symbol.at(-1))*100)+'%';frame.append(img);cell.append(frame);
-  }else if(symbol){
-   const art=make(doc,'span','mj-glyph',GLYPHS[normalized]||'✦');
-   const name=make(doc,'span','mj-symbol-label',normalized==='SCATTER'?'SCATTER':normalized==='WILD'?'WILD':normalized==='COIN'?'GOLD COIN':SYMBOL_NAMES[normalized]);
-   cell.append(art,name);
-  }else cell.append(make(doc,'span','mj-glyph','✦'));
+   const slice=make(doc,'div','mj-portrait-part');
+   const img=make(doc,'img');img.src=ART_ROOT+'mj-portrait-art.webp';img.alt='';
+   img.style.top='-'+('ABCD'.indexOf(symbol.at(-1))*100)+'%';slice.append(img);cell.append(slice);
+  }else if(normalized&&ART_INDEX[normalized]!==undefined){
+   const i=ART_INDEX[normalized],art=make(doc,'span','mj-symbol-art');
+   art.setAttribute('aria-hidden','true');
+   art.style.backgroundPosition=((i%4)*100/3)+'% '+(Math.floor(i/4)*100/3)+'%';
+   cell.append(art);
+  }
   return cell;
  }
  function showInfo(){
@@ -74,38 +78,64 @@ export function createMaryJanePractice(doc=globalThis.document){
  function render(){
   if(destroyed)return;
   root.replaceChildren();
-  const header=make(doc,'header','mj-head');const title=make(doc,'h1','mj-logo',"Mary Jane's Sticky Wilds");const subtitle=make(doc,'p','mj-tagline','GOLD LEAF FRAMES · PLAYFUL RETRO VEGAS · 20 LINES');
-  header.append(title,subtitle);root.append(header);
-  const cabinet=make(doc,'div','mj-cabinet');const stage=make(doc,'div','mj-layout');
-  const left=make(doc,'aside','mj-character');
-  const pimg=make(doc,'img');pimg.src=ART_ROOT+'mary-jane-portrait.svg';pimg.alt='Mary Jane, glamorous bohemian pin-up character';left.append(pimg);
-  const reels=make(doc,'div','mj-reels');
+  root.classList.add('mj-concept');
+  const scene=make(doc,'div','mj-scene');
+  scene.setAttribute('role','group');
+  scene.setAttribute('aria-label',"Mary Jane's Sticky Wilds interactive slot cabinet");
+  scene.append(make(doc,'span','mj-assistive','MAX WIN '+MAX_PAYOUT_X+'× TOTAL BET'));
   const board=state.lastStops?state.lastBoard:visibleMaryJaneReels(BASE_REELS,[0,9,17,30,42]);
-  for(let r=0;r<5;r++){const reel=make(doc,'div','mj-reel');for(let row=0;row<4;row++)reel.append(symbolCell(board[r][row],r,row,state.lastStops?state.lastFrames[r][row]:false,state.lastConverted[r][row],state.mode==='bonus'&&state.sticky[r][row]));reels.append(reel);}
-  const right=make(doc,'aside','mj-status');
-  right.append(make(doc,'h3','',state.mode==='bonus'?'STICKY WILD FREE SPINS':'GOLD LEAF FRAMES'));
-  right.append(make(doc,'div','mj-cycle',state.mode==='bonus'?'FREE SPINS '+state.freeRemaining+' LEFT':'SPIN '+(state.cycle===0?10:state.cycle)+' OF 10'));
-  right.append(make(doc,'h3','','BUZZ MULTIPLIER'));
-  right.append(make(doc,'strong','mj-buzz','×'+(state.mode==='bonus'?state.bonusBuzz:state.buzz)));
-  right.append(make(doc,'p','mj-frames','GOLD FRAMES: '+state.frames.flat().filter(Boolean).length+' / 20'));
-  right.append(make(doc,'p','mj-cap','MAX WIN '+MAX_PAYOUT_X+'× TOTAL BET'));
-  stage.append(left,reels,right);cabinet.append(stage);
-  const msg=make(doc,'div','mj-message',state.message);msg.setAttribute('role','status');cabinet.append(msg);
-  const console=make(doc,'div','mj-console');
-  console.append(button('ⓘ INFO','mj-control',()=>{activePanel='info';render();}),button('☰ MENU','mj-control',()=>{activePanel='menu';render();}));
-  const wager=make(doc,'div','mj-wager');const minus=button('−','mj-control',()=>{state=setMaryJaneStake(state,state.stake-1);render();});minus.disabled=state.stake<=1||state.mode==='bonus'||auto;
-  const plus=button('+','mj-control',()=>{state=setMaryJaneStake(state,state.stake+1);render();});plus.disabled=state.stake>=50||state.mode==='bonus'||auto;
-  wager.append(make(doc,'span','mj-small-label','TOTAL BET'),minus,make(doc,'strong','',String(state.stake)),plus);console.append(wager);
-  const spin=button(state.mode==='bonus'?'FREE SPIN':'SPIN','mj-spin',step);spin.disabled=(state.mode==='base'&&state.balanceMicros<state.stake*1000000)||auto;
-  console.append(spin);
-  const autoBtn=button(auto?'AUTO ON '+autoLeft:'AUTO PLAY','mj-control',()=>{auto=!auto;autoLeft=auto?25:0;stopTimer();render();if(auto)autoContinue();});console.append(autoBtn);
-  console.append(button(turbo?'⚡ TURBO ON':'⚡ TURBO','mj-control',()=>{turbo=!turbo;render();}));
-  const win=make(doc,'div','mj-readout');win.append(make(doc,'span','','LAST WIN'),make(doc,'strong','',creditText(state.lastWinMicros)));console.append(win);
-  const balance=make(doc,'div','mj-readout');balance.append(make(doc,'span','','BALANCE'),make(doc,'strong','',creditText(state.balanceMicros)));console.append(balance);
-  cabinet.append(console);root.append(cabinet);
-  const foot=make(doc,'p','mj-legal','PRACTICE CREDITS ONLY · NO WALLET · NO REAL WAGERING · NOT CERTIFIED PRODUCTION ODDS');root.append(foot);
+  const reels=make(doc,'div','mj-reels');
+  for(let r=0;r<5;r++){
+   const reel=make(doc,'div','mj-reel');
+   for(let row=0;row<4;row++)
+    reel.append(symbolCell(board[r][row],r,row,state.lastStops?state.lastFrames[r][row]:false,state.lastConverted[r][row],state.mode==='bonus'&&state.sticky[r][row]));
+   reels.append(reel);
+  }
+  scene.append(reels);
+  const positionText=(cls,value,label)=>{
+   const el=make(doc,'div','mj-live '+cls,value);
+   if(label)el.setAttribute('aria-label',label);
+   scene.append(el);return el;
+  };
+  positionText('mj-live-cycle',state.mode==='bonus'?'FREE '+state.freeRemaining+' OF 10':'SPIN '+(state.cycle===0?10:state.cycle)+' OF 10','Gold Leaf Frames progress');
+  positionText('mj-live-buzz','×'+(state.mode==='bonus'?state.bonusBuzz:state.buzz),'Buzz Multiplier');
+  positionText('mj-live-bet',(state.stake/20).toFixed(2),'Practice bet per payline');
+  positionText('mj-live-total',state.stake.toFixed(2),'Total practice bet');
+  positionText('mj-live-win',creditText(state.lastWinMicros),'Last practice win');
+  positionText('mj-live-balance',creditText(state.balanceMicros),'Practice-credit balance');
+  const message=positionText('mj-message',state.message);
+  message.setAttribute('role','status');
+  const hit=(cls,label,fn)=>{
+   const b=button('','mj-hit mj-control '+cls,fn);
+   b.setAttribute('aria-label',label);b.setAttribute('title',label);
+   scene.append(b);return b;
+  };
+  hit('mj-hit-info','Open gameplay, bonuses and paytable',()=>{activePanel='info';render();});
+  hit('mj-hit-menu','Open practice game menu',()=>{activePanel='menu';render();});
+  const sound=hit('mj-hit-sound','Audio unavailable in this practice version',()=>{});
+  sound.disabled=true;
+  const minus=hit('mj-hit-minus','Decrease total bet',()=>{state=setMaryJaneStake(state,state.stake-1);render();});
+  minus.disabled=state.stake<=1||state.mode==='bonus'||auto;
+  const plus=hit('mj-hit-plus','Increase total bet',()=>{state=setMaryJaneStake(state,state.stake+1);render();});
+  plus.disabled=state.stake>=50||state.mode==='bonus'||auto;
+  const spin=button('','mj-hit mj-spin mj-hit-spin',step);
+  spin.setAttribute('aria-label',state.mode==='bonus'?'Advance free spin':'Spin Mary Jane reels');
+  spin.setAttribute('title',state.mode==='bonus'?'Advance free spin':'Spin');
+  spin.disabled=(state.mode==='base'&&state.balanceMicros<state.stake*1000000)||auto;
+  scene.append(spin);
+  const autoButton=hit('mj-hit-auto','Auto play 25 paid spins',()=>{
+   auto=!auto;autoLeft=auto?25:0;stopTimer();render();if(auto)autoContinue();
+  });autoButton.setAttribute('aria-pressed',String(auto));
+  if(auto)autoButton.classList.add('mj-activated');
+  const turboButton=hit('mj-hit-turbo','Toggle turbo spin speed',()=>{turbo=!turbo;render();});
+  turboButton.setAttribute('aria-pressed',String(turbo));
+  if(turbo)turboButton.classList.add('mj-activated');
+  root.append(scene);
+  const legal=make(doc,'p','mj-legal','PRACTICE CREDITS ONLY · NO WALLET · NO REAL WAGERING · NOT CERTIFIED PRODUCTION ODDS');
+  legal.setAttribute('aria-label','Practice credits only; no real money or wallet transactions');root.append(legal);
   if(activePanel)showInfo();
  }
+
  render();
  return root;
 }

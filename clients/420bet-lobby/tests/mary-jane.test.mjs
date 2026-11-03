@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {parseHTML} from 'linkedom';
+import {existsSync,readFileSync} from 'node:fs';
 import {BASE_REELS,BONUS_REELS,PAYLINES,BASE_PAYTABLE,BONUS_PAYTABLE,validateMaryJaneModel,MAX_PAYOUT_X} from '../src/mary-jane-model.js';
 import {initialMaryJaneState,setMaryJaneStake,spinMaryJane,evaluateMaryJane,visibleMaryJaneReels,creditText,validatePracticeSession} from '../src/mary-jane-engine.js';
 import {createMaryJanePractice} from '../src/mary-jane-ui.js';
@@ -102,7 +103,14 @@ test('Mary Jane cabinet, artwork tile, controls, INFO table and payline guide re
  const root=createMaryJanePractice(document);
  assert.equal(root.querySelectorAll('.mj-cell').length,20);
  assert.equal(root.querySelectorAll('.mj-reel').length,5);
- assert(root.querySelector('.mj-character img').getAttribute('src').endsWith('mary-jane-portrait.svg'));
+ assert(root.classList.contains('mj-concept'));
+ assert(root.querySelector('.mj-scene'));
+ assert(root.querySelectorAll('.mj-symbol-art').length>0);
+ assert(root.querySelector('.mj-live-buzz'));
+ assert(root.querySelector('.mj-hit-spin'));
+ assert(root.querySelector('.mj-hit-info'));
+ assert.equal(root.querySelector('.mj-live-total').textContent,'10.00');
+ assert.equal(root.querySelector('.mj-live-bet').textContent,'0.50');
  assert(root.textContent.includes('MAX WIN 1000× TOTAL BET'));
  root.querySelector('.mj-control').dispatchEvent(new window.Event('click'));
  const info=root.querySelector('[role="dialog"]');assert(info);
@@ -114,4 +122,22 @@ test('Mary Jane cabinet, artwork tile, controls, INFO table and payline guide re
  assert.equal(root.querySelector('[role="dialog"]'),null);
  assert(root.querySelector('.mj-spin'));
  root.stopAnimation();
+});
+
+test('Mary Jane generated concept cabinet and symbol atlas are committed and loaded as presentation-only assets',()=>{
+ const css=readFileSync(new URL('../src/mary-jane-concept.css',import.meta.url),'utf8');
+ const artDir=new URL('../public/assets/420bet/mary-jane/',import.meta.url);
+ for(const file of ['mj-concept-cabinet.webp','mj-symbol-atlas.webp','mj-portrait-art.webp'])
+  assert(existsSync(new URL(file,artDir)),'missing committed concept artwork '+file);
+ assert.match(css,/mj-concept-cabinet\.webp/);
+ assert.match(css,/mj-symbol-atlas\.webp/);
+ assert.match(css,/\.mj-hit-info/);
+ const {document,window}=parseHTML('<html><body></body></html>');
+ const game=createMaryJanePractice(document);
+ const before=game.querySelector('.mj-live-total').textContent;
+ game.querySelector('.mj-hit-plus').dispatchEvent(new window.Event('click'));
+ assert.notEqual(game.querySelector('.mj-live-total').textContent,before);
+ game.querySelector('.mj-hit-info').dispatchEvent(new window.Event('click'));
+ assert(game.querySelector('[role="dialog"]'));
+ game.stopAnimation();
 });

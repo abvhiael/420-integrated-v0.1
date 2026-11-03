@@ -1,3 +1,4 @@
+import {WAY_UNITS} from '../src/emerald-v2-payout.js';
 import {v2Evaluate,v2Ways,capV2Payout,UNITS,WAY_UNITS} from '../src/emerald-v2-payout.js';
 import {BASE_REELS,FEATURE_REELS,visibleGrid,chooseStops,scatterReelCount,awardedFreeSpins,validateReels} from '../src/emerald-v2-strips.js';
 import {practiceCreditSnapshot,practiceCreditRound,resetPracticeCredits} from '../src/practice-credits.js';
@@ -63,3 +64,61 @@ test('Five independent stops are selected, not twenty random symbols',()=>{asser
 test('V2 has separate 3/4/5 awards and exact 4.20x integer credit units',()=>{assert.equal(WAY_UNITS.length,5);for(const rates of WAY_UNITS){assert.equal(rates.length,3);assert(rates[0]<rates[1]&&rates[1]<rates[2]);}const board=Array(20).fill(6);board[0]=0;board[1]=0;board[2]=0;const base=v2Evaluate(board,1);assert.equal(base.lines[0].reels,3);assert.equal(base.lines[0].units,WAY_UNITS[0][0]);const featureBoard=Array(20).fill(1);const x=v2Evaluate(featureBoard,1,{feature:true});const y=v2Evaluate(featureBoard,1);assert.equal(x.grossUnits,y.grossUnits*42/10);assert(Number.isSafeInteger(x.grossUnits));});
 test('V2 stake scaling 1 to 50 is exact, cap applies across full wager',()=>{const b=Array(20).fill(0);const one=v2Evaluate(b,1).grossUnits,ten=v2Evaluate(b,10).grossUnits,fifty=v2Evaluate(b,50).grossUnits;assert.equal(ten,one*10);assert.equal(fifty,one*50);assert.equal(capV2Payout(9999*UNITS,50,100),5000*UNITS);});
 test('V2 all-Wild combination is paid only once at premium eligible tier',()=>{const b=Array(20).fill(6);for(let r=0;r<5;r++)b[r]=5;const x=v2Evaluate(b,10);assert.equal(x.lines.length,1);assert.equal(x.lines[0].symbol,4);assert.equal(x.lines[0].reels,5);assert.equal(x.lines[0].ways,1);});
+
+test('Emerald clean symbol paytable is exact and linked to INFO menu',()=>{
+ assert.deepEqual(WAY_UNITS,[[50000,200000,600000],[100000,300000,1000000],[100000,300000,1000000],[200000,600000,2500000],[300000,1000000,3500000]]);
+ const {document,window}=parseHTML('<html><body></body></html>');
+ const root=createPractice('slots',document);
+ const info=[...root.querySelectorAll('.es-console-button')].find(n=>n.textContent==='INFO');
+ assert(info);
+ info.dispatchEvent(new window.Event('click'));
+ const table=root.querySelector('.es-paytable');
+ assert(table);
+ assert.equal(table.querySelectorAll('tr').length,6);
+ assert.match(table.textContent,/0.05/);
+ assert.match(table.textContent,/3.50/);
+ assert.match(root.querySelector('.es-console-panel').textContent,/250×/);
+});
+test('Emerald console bet stepper changes stake within 1–50 and locks during feature',()=>{
+ const {document,window}=parseHTML('<html><body></body></html>');
+ const root=createPractice('slots',document);
+ const click=label=>{const btn=[...root.querySelectorAll('.es-console-button')].find(n=>n.textContent===label);assert(btn,label);btn.dispatchEvent(new window.Event('click'));};
+ assert.equal(root.querySelector('.es-bet-display strong').textContent,'10');
+ click('+');assert.equal(root.querySelector('.es-bet-display strong').textContent,'11');
+ click('−');assert.equal(root.querySelector('.es-bet-display strong').textContent,'10');
+ for(let i=0;i<55;i++)click('+');
+ assert.equal(root.querySelector('.es-bet-display strong').textContent,'50');
+ assert.equal([...root.querySelectorAll('.es-console-button')].find(n=>n.textContent==='+').disabled,true);
+ for(let i=0;i<55;i++)click('−');
+ assert.equal(root.querySelector('.es-bet-display strong').textContent,'1');
+ assert.equal([...root.querySelectorAll('.es-console-button')].find(n=>n.textContent==='−').disabled,true);
+ click('MENU');assert.match(root.querySelector('.es-console-panel').textContent,/AUTO PLAY/);
+});
+test('Emerald turbo toggle changes only presentation speed, not the reel math',()=>{
+ const {document,window}=parseHTML('<html><body></body></html>');
+ const root=createPractice('slots',document);const original=WAY_UNITS.map(x=>[...x]);
+ const turbo=[...root.querySelectorAll('.es-console-button')].find(n=>n.textContent.includes('TURBO'));
+ assert(turbo);
+ turbo.dispatchEvent(new window.Event('click'));
+ assert.match(root.querySelector('.es-turbo-toggle').textContent,/ON/);
+ assert.deepEqual(WAY_UNITS,original);
+ root.querySelector('.es-turbo-toggle').dispatchEvent(new window.Event('click'));
+ assert.doesNotMatch(root.querySelector('.es-turbo-toggle').textContent,/ON/);
+});
+test('Emerald AUTO PLAY can be cancelled, and does not access wallets',()=>{
+ const {document,window}=parseHTML('<html><body></body></html>');
+ window.matchMedia=()=>({matches:false});
+ const callbacks=[];
+ window.setTimeout=(cb)=>{callbacks.push(cb);return callbacks.length};
+ window.clearTimeout=()=>{};
+ const root=createPractice('slots',document);
+ const auto=root.querySelector('.es-auto-toggle');
+ assert.match(auto.textContent,/AUTO PLAY/);
+ auto.dispatchEvent(new window.Event('click'));
+ assert.match(root.querySelector('.es-auto-toggle').textContent,/AUTO ON/);
+ assert(root.querySelector('.es-bet-up').disabled);
+ root.querySelector('.es-auto-toggle').dispatchEvent(new window.Event('click'));
+ assert.match(root.querySelector('.es-auto-toggle').textContent,/AUTO PLAY/);
+ assert.equal(root.querySelector('.es-bet-up').disabled,false);
+ root.stopAnimation();
+});

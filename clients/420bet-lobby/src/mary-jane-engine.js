@@ -33,7 +33,7 @@ export function evaluateMaryJane(board,stakeCredits,buzz=1,bonus=false){
 }
 export function initialMaryJaneState(balanceCredits=1000){
  if(!Number.isInteger(balanceCredits)||balanceCredits<1)throw Error('Invalid practice credits');
- return {mode:'base',stake:10,balanceMicros:balanceCredits*CREDIT_MICROS,cycle:0,buzz:1,frames:freshMask(),sticky:freshMask(),freeRemaining:0,bonusAwardMicros:0,sessionCapRemaining:0,lastWinMicros:0,lastGrossMicros:0,lastLines:[],lastBoard:Array.from({length:5},()=>Array(4).fill(null)),lastStops:null,lastFrames:freshMask(),lastConverted:freshMask(),lastScatter:false,message:'Collect Gold Leaf Frames for the tenth-spin Wild reveal.',rounds:0,freeRounds:0};
+ return {mode:'base',stake:10,balanceMicros:balanceCredits*CREDIT_MICROS,cycle:0,buzz:1,bonusBuzz:1,frames:freshMask(),sticky:freshMask(),freeRemaining:0,bonusAwardMicros:0,sessionCapRemaining:0,lastWinMicros:0,lastGrossMicros:0,lastLines:[],lastBoard:Array.from({length:5},()=>Array(4).fill(null)),lastStops:null,lastFrames:freshMask(),lastConverted:freshMask(),lastScatter:false,message:'Collect Gold Leaf Frames for the tenth-spin Wild reveal.',rounds:0,freeRounds:0};
 }
 export function setMaryJaneStake(state,stake){
  if(state.mode==='bonus'||!Number.isInteger(stake)||stake<1||stake>50)throw Error('Stake locked or out of range');
@@ -64,7 +64,8 @@ export function spinMaryJane(state,stops=Array.from({length:5},()=>Math.floor(Ma
   trigger=board.flat().filter(s=>s==='SCATTER').length===3;
   next.sessionCapRemaining=MAX_PAYOUT_X*next.stake*CREDIT_MICROS;
  }
- const evaluated=evaluateMaryJane(board,next.stake,next.buzz,feature);
+ const awardBuzz=next.buzz;
+ const evaluated=evaluateMaryJane(board,next.stake,feature?next.bonusBuzz:next.buzz,feature);
  const awarded=Math.min(evaluated.grossMicros,next.sessionCapRemaining);
  next.sessionCapRemaining-=awarded;
  next.balanceMicros+=awarded;
@@ -84,7 +85,7 @@ export function spinMaryJane(state,stops=Array.from({length:5},()=>Math.floor(Ma
  }else{
   next.rounds++;
   if(next.cycle===CYCLE_LENGTH){next.frames=freshMask();next.cycle=0;next.buzz=1;}
-  if(trigger){next.mode='bonus';next.freeRemaining=BONUS_SPINS;next.bonusAwardMicros=0;next.sticky=freshMask();next.message='420 SCATTERS! 10 STICKY WILD FREE SPINS';}
+  if(trigger){next.bonusBuzz=awardBuzz;next.mode='bonus';next.freeRemaining=BONUS_SPINS;next.bonusAwardMicros=0;next.sticky=freshMask();next.message='420 SCATTERS! 10 STICKY WILD FREE SPINS';}
   else next.message=next.lastConverted.flat().some(Boolean)?'GOLD LEAF FRAMES → MARY JANE WILDS!':evaluated.lines.length?'WINNING PAYLINES: '+evaluated.lines.map(x=>x.line).join(', '):'Collect Gold Leaf Frames!';
  }
  return next;

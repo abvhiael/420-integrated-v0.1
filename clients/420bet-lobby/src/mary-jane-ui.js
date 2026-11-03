@@ -35,9 +35,9 @@ export function createMaryJanePractice(doc=globalThis.document){
    const img=make(doc,'img');img.src=ART_ROOT+'mj-portrait-art.webp';img.alt='';
    img.style.top='-'+('ABCD'.indexOf(symbol.at(-1))*100)+'%';slice.append(img);cell.append(slice);
   }else if(normalized&&ART_INDEX[normalized]!==undefined){
-   const i=ART_INDEX[normalized],art=make(doc,'span','mj-symbol-art');
+   const i=ART_INDEX[normalized],art=make(doc,'span',normalized==='L03'?'mj-symbol-art mj-roachclip-art':'mj-symbol-art');
    art.setAttribute('aria-hidden','true');
-   art.style.backgroundPosition=((i%4)*100/3)+'% '+(Math.floor(i/4)*100/3)+'%';
+   if(normalized!=='L03')art.style.backgroundPosition=((i%4)*100/3)+'% '+(Math.floor(i/4)*100/3)+'%';
    cell.append(art);
   }
   return cell;

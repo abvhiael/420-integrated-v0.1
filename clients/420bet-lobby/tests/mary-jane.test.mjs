@@ -159,3 +159,19 @@ test('Mary Jane concept fits the available viewport and scales controls with the
  assert.match(css,/\.mj-concept \.mj-hit-spin\{left:45\.0%;top:79\.9%/);
  assert.match(css,/\.mj-concept \.mj-reels\{position:absolute;z-index:2;left:19\.7%;top:17\.5%/);
 });
+
+
+test('approved feathered roach clip replaces L03 and all reel art is centered and inset',()=>{
+ const css=readFileSync(new URL('../src/mary-jane-concept.css',import.meta.url),'utf8');
+ const ui=readFileSync(new URL('../src/mary-jane-ui.js',import.meta.url),'utf8');
+ const asset=new URL('../public/assets/420bet/mary-jane/mj-feather-roachclip.webp',import.meta.url);
+ assert(existsSync(asset),'the approved feathered roach clip artwork must be committed');
+ assert.match(css,/\.mj-concept \.mj-cell \.mj-symbol-art\s*\{[^}]*inset:9% 9%/);
+ assert.match(css,/\.mj-concept \.mj-cell \.mj-symbol-art\.mj-roachclip-art\s*\{[^}]*inset:5% 6%/);
+ assert.match(css,/mj-feather-roachclip\.webp/);
+ assert.match(css,/background-size:contain/);
+ assert.match(ui,/normalized==='L03'\?'mj-symbol-art mj-roachclip-art'/);
+ assert.match(ui,/if\(normalized!=='L03'\)art\.style\.backgroundPosition/);
+ // The H01 four-part portrait must retain its full-height image treatment.
+ assert.match(css,/\.mj-concept \.mj-portrait-part img\{[^}]*height:400%/);
+});

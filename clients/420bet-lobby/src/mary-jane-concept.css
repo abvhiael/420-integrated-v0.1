@@ -67,3 +67,22 @@
  #app:has(.mary-jane-game.mj-concept)>.game-footer .brand-logo{max-height:28px;width:45px}
  .mj-concept .mj-legal{font-size:8px}
 }
+
+
+/* Approved symbol-art calibration (Nov 3, 2026): keep the painted cabinet
+   unchanged and give the individual reel objects consistent breathing room.
+   Percentage insets scale with the original 1672x941 scene at every size. */
+.mj-concept .mj-cell .mj-symbol-art{
+  inset:9% 9%;
+  background-color:transparent;
+  background-size:400% 400%;
+}
+.mj-concept .mj-cell .mj-symbol-art.mj-roachclip-art{
+  inset:5% 6%;
+  background-image:url('/assets/420bet/mary-jane/mj-feather-roachclip.webp');
+  background-size:contain;
+  background-position:center;
+  background-repeat:no-repeat;
+  background-color:transparent;
+  filter:drop-shadow(0 0 4px #ec78b688);
+}

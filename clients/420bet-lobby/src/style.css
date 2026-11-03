@@ -227,3 +227,25 @@
 .es-credit-disclosure{font-size:.8rem;max-width:780px;margin:14px auto;color:#e0bb75}
 
 .es-stake-label{display:flex;gap:10px;align-items:center;justify-content:center;color:#f4d78a;font-weight:800;margin:auto;padding:9px}.es-stake-select{background:#0b2b17;border:1px solid #d4a74a;border-radius:8px;color:#fff0bd;padding:8px}.es-stake-select:disabled{opacity:.6}
+
+
+/* Emerald Harvest interactive console: separate semantic controls over the canonical artwork. */
+.emerald-slots .es-controls{width:min(100%,1100px);margin:0 auto;display:flex;flex-direction:column;align-items:stretch;gap:8px;padding:8px 10px 14px;background:linear-gradient(145deg,#0a2c1a,#06170f);border:1px solid #96743c;border-radius:0 0 18px 18px}
+.es-console{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;align-items:center}
+.es-console-button{min-height:42px;min-width:74px;border:1px solid #d3a44d;border-radius:9px;background:linear-gradient(#235331,#0c2717);color:#ffe29b;font:800 .87rem/1.2 system-ui,sans-serif;letter-spacing:.04em;padding:8px 12px;cursor:pointer}
+.es-console-button:hover:not(:disabled){background:#346e3c;box-shadow:0 0 10px #b4f44c59}
+.es-console-button:focus-visible{outline:3px solid #dbff9e;outline-offset:2px}
+.es-console-button:disabled{opacity:.44;cursor:not-allowed}
+.es-console-button.es-control-active{background:linear-gradient(#bcca53,#5c842b);border-color:#edeb83;color:#06180a}
+.es-bet-group{display:flex;align-items:stretch;gap:4px;border:1px solid #6c753d;border-radius:10px;padding:3px}
+.es-bet-group .es-console-button{min-width:42px;font-size:1.2rem;padding:7px}
+.es-bet-display{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:90px;color:#f8e3a0;font-variant-numeric:tabular-nums}
+.es-bet-display small{font-size:.56rem;letter-spacing:.1em}
+.es-bet-display strong{font-size:1.35rem;line-height:1.1;color:#b7ff80}
+.es-console-panel{background:#092317;border:1px solid #bc9752;border-radius:12px;padding:15px;color:#e3edce;text-align:left;width:100%;line-height:1.5}
+.es-console-panel h3{margin:0 0 9px;color:#f8d789;font-size:1.15rem}
+.es-console-panel p{margin:9px 0;font-size:.86rem}
+.es-paytable{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+.es-paytable th,.es-paytable td{padding:8px 6px;border-bottom:1px solid #315a37;text-align:right;font-size:.83rem}
+.es-paytable th:first-child{text-align:left}
+@media(max-width:680px){.es-console{gap:4px}.es-console-button{min-width:60px;padding:7px;font-size:.73rem}.es-bet-display{min-width:72px}.es-paytable th,.es-paytable td{font-size:.71rem;padding:6px 3px}}

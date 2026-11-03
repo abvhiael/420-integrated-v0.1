@@ -37,7 +37,7 @@ export function createMaryJanePractice(doc=globalThis.document){
   }else if(normalized&&ART_INDEX[normalized]!==undefined){
    const i=ART_INDEX[normalized],art=make(doc,'span',normalized==='L03'?'mj-symbol-art mj-roachclip-art':'mj-symbol-art');
    art.setAttribute('aria-hidden','true');
-   art.style.backgroundPosition=((i%4)*100/3)+'% '+(Math.floor(i/4)*100/3)+'%';
+   if(normalized!=='L03')art.style.backgroundPosition=((i%4)*100/3)+'% '+(Math.floor(i/4)*100/3)+'%';
    cell.append(art);
   }
   return cell;

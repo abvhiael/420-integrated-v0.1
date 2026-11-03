@@ -1,0 +1,29 @@
+name: HC-WORLD Old Town OT-SCREEN-01 Scoped Level 2
+on:
+  pull_request:
+    paths:
+      - 'apps/highcountry-web/src/old-town-scene.js'
+      - 'apps/highcountry-web/src/port-alder-navigation.js'
+      - 'apps/highcountry-web/scripts/build.mjs'
+      - 'apps/highcountry-web/package.json'
+      - 'apps/highcountry-web/test/old-town-scene.test.mjs'
+      - 'deployments/highcountry/old-town-*'
+      - '.github/workflows/highcountry-ot-screen-01-l2.yml'
+  workflow_dispatch:
+jobs:
+  old-town-renderer-l2:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Prove deterministic geometry and Genesis anchor contracts
+        run: node --test apps/highcountry-web/test/old-town-scene.test.mjs scripts/highcountry/hc-world-06-port-alder-navigation.test.mjs
+      - name: Check changed runtime syntax
+        run: node --check apps/highcountry-web/src/old-town-scene.js && node --check apps/highcountry-web/src/port-alder-navigation.js && node --check apps/highcountry-web/scripts/build.mjs
+      - name: Assemble real HighCountry application bundle
+        run: node apps/highcountry-web/scripts/build.mjs
+      - name: Verify public scene assets exist in emitted application
+        run: |
+          node -e "const fs=require('fs');const root='apps/highcountry-web/dist/assets/highcountry/maps/';for(const f of ['old-town-site-registry.json','old-town-genesis-assets.json','old-town-geo-authority-status.json','old-town-provisional-geometry.geojson','old-town-render-anchors.v1.json']){if(!fs.existsSync(root+f))throw Error('missing '+f)}"

@@ -141,3 +141,21 @@ test('Mary Jane generated concept cabinet and symbol atlas are committed and loa
  assert(game.querySelector('[role="dialog"]'));
  game.stopAnimation();
 });
+
+
+test('Mary Jane concept fits the available viewport and scales controls with the cabinet',()=>{
+ const css=readFileSync(new URL('../src/mary-jane-concept.css',import.meta.url),'utf8');
+ assert.match(css,/#app:has\(\.mary-jane-game\.mj-concept\)\{height:100dvh/);
+ assert.match(css,/\.view-scroll:has\(\.mary-jane-game\.mj-concept\)\{[^}]*container-type:size/);
+ assert.match(css,/width:min\(100%,1672px,calc\(\(100cqh - 30px\)\*1\.776833\)\)/);
+ assert.match(css,/\.mj-concept \.mj-scene\{min-width:0\}/);
+ const aspect=1672/941;
+ for(const [width,height] of [[1440,610],[1280,720],[960,490],[800,400],[380,660]]){
+   const fitted=Math.min(width,1672,Math.max(0,height-30)*1.776833);
+   assert(fitted<=width,'cabinet exceeds available width');
+   assert(fitted/aspect<=height-29.99,'cabinet clips available height');
+ }
+ // The original percentage-based hotspots and reels remain relative to the scene.
+ assert.match(css,/\.mj-concept \.mj-hit-spin\{left:45\.0%;top:79\.9%/);
+ assert.match(css,/\.mj-concept \.mj-reels\{position:absolute;z-index:2;left:19\.7%;top:17\.5%/);
+});

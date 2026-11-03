@@ -38,3 +38,5 @@
 .mj-concept .mj-overlay{position:fixed;z-index:1300}
 @media(max-width:850px){.mj-concept .mj-scene{min-width:830px}.mary-jane-game.mj-concept{align-items:flex-start}.mj-concept .mj-legal{min-width:830px}}
 @media(prefers-reduced-motion:reduce){.mj-concept .mj-hit,.mj-concept .mj-live{animation:none!important;transition:none!important}}
+
+.mj-concept .mj-assistive{position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}

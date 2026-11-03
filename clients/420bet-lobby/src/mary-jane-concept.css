@@ -40,3 +40,30 @@
 @media(prefers-reduced-motion:reduce){.mj-concept .mj-hit,.mj-concept .mj-live{animation:none!important;transition:none!important}}
 
 .mj-concept .mj-assistive{position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+
+
+/* Viewport-fit qualification: the entire 1672x941 cabinet, including its
+   painted controls, stays in the available game viewport. A single responsive
+   scene scales the background, reel masks, readouts and clickable hotspots
+   together; no independent transforms or coordinate offsets. */
+#app:has(.mary-jane-game.mj-concept){height:100dvh;min-height:0;display:flex;flex-direction:column;overflow:hidden}
+#app:has(.mary-jane-game.mj-concept)>.immersive{flex:1 1 auto;height:auto;min-height:0}
+#app:has(.mary-jane-game.mj-concept)>.game-footer{flex:0 0 auto;padding:7px 18px;gap:10px}
+#app:has(.mary-jane-game.mj-concept)>.game-footer .brand-logo{width:64px;height:auto;max-height:40px;object-fit:contain}
+.immersive .view-scroll:has(.mary-jane-game.mj-concept){flex:1 1 auto;min-height:0;min-width:0;container-type:size;display:flex;align-items:center;justify-content:center;overflow:auto}
+.mary-jane-game.mj-concept{height:100%;min-height:0;width:100%;flex:0 0 auto;box-sizing:border-box;display:flex;justify-content:center;align-items:center;gap:3px;padding:2px 6px;overflow:visible}
+.mj-concept .mj-scene{width:min(100%,1672px,calc((100dvh - 190px)*1.776833));min-width:0;max-width:100%;height:auto;aspect-ratio:1672/941;flex:0 0 auto}
+@supports (width: 1cqh){
+  .mj-concept .mj-scene{width:min(100%,1672px,calc((100cqh - 30px)*1.776833))}
+}
+.mj-concept .mj-legal{flex:0 0 auto;min-width:0;max-width:100%;margin:0;padding:2px 4px;font-size:clamp(8px,.65vw,11px);line-height:1.15}
+@media(max-width:850px){
+ .mj-concept .mj-scene{min-width:0}
+ .mary-jane-game.mj-concept{align-items:center}
+ .mj-concept .mj-legal{min-width:0}
+}
+@media(max-height:600px){
+ #app:has(.mary-jane-game.mj-concept)>.game-footer{padding:3px 10px}
+ #app:has(.mary-jane-game.mj-concept)>.game-footer .brand-logo{max-height:28px;width:45px}
+ .mj-concept .mj-legal{font-size:8px}
+}

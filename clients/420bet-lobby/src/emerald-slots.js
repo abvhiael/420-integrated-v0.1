@@ -1,3 +1,4 @@
+import {cabinetArea} from './emerald-cabinet-hotspots.js';
 import {BASE_REELS,FEATURE_REELS,visibleGrid,chooseStops,awardedFreeSpins,scatterReelCount} from './emerald-v2-strips.js';
 import {practiceCreditSnapshot,practiceCreditRoundUnits,resetPracticeCredits} from './practice-credits.js';
 import {v2Evaluate,capV2Payout,creditAmount,UNITS,REFERENCE_STAKE,MAX_STAKE,WAY_UNITS,SCATTER_UNITS} from './emerald-v2-payout.js';
@@ -58,25 +59,31 @@ export function createEmeraldSlots(doc=globalThis.document){
   inner.append(stage);cabinet.append(inner);
   const controls=node('div','es-controls'),stats=node('div','es-stats');
   for(const [label,value] of [['DEMO STAKE',spinFree?'0 (FREE)':String(selectedStake)],['DEMO WIN',String(lastBreakdown?creditAmount(lastBreakdown.grossUnits):0)],['FREE SPINS',String(freeRemaining)],['PRACTICE CREDITS',String(practiceCreditSnapshot().balance)]]){const item=node('div','es-stat');item.append(node('small','',label),node('strong','',value));stats.append(item);}
-  // Real accessible controls adjacent to the canonical cabinet art. The PNG remains unchanged.
-  const consoleBar=node('div','es-console');
-  const control=(cls,label,handler,disabled=false)=>{const el=node('button','es-console-button '+cls,label);el.type='button';el.disabled=disabled;el.addEventListener('click',handler);return el;};
+  // Semantically active transparent controls exactly over the existing painted buttons.
+  // Pixel rectangles were measured on the authoritative 1448x1086 cabinet PNG.
+  const control=(cls,label,handler,disabled=false)=>{const el=node('button','es-console-button '+cls,'');el.type='button';el.disabled=disabled;el.setAttribute('aria-label',label);el.setAttribute('title',label);el.addEventListener('click',handler);return el;};
+  const hotspot=(name,el)=>{el.classList.add('es-cabinet-hotspot');el.dataset.hotspot=name;Object.assign(el.style,cabinetArea(name));stage.append(el);return el;};
+  const display=(name,text,label)=>{const el=node('div','es-cabinet-display',text);el.dataset.hotspot=name;el.setAttribute('role','status');el.setAttribute('aria-label',label+': '+text);Object.assign(el.style,cabinetArea(name));stage.append(el);return el;};
   const panelButton=(name)=>control('es-panel-button',name.toUpperCase(),()=>{activePanel=activePanel===name?null:name;draw();});
-  consoleBar.append(panelButton('info'),panelButton('menu'));
-  const betGroup=node('div','es-bet-group');
-  betGroup.append(control('es-bet-down','−',()=>{selectedStake=Math.max(1,selectedStake-1);draw();},spinning||freeRemaining>0||autoEnabled||selectedStake===1));
-  const betDisplay=node('div','es-bet-display');
-  betDisplay.append(node('small','','TOTAL BET'),node('strong','',String(selectedStake)),node('small','','CREDITS'));
-  betGroup.append(betDisplay);
-  betGroup.append(control('es-bet-up','+',()=>{selectedStake=Math.min(MAX_STAKE,selectedStake+1);draw();},spinning||freeRemaining>0||autoEnabled||selectedStake===MAX_STAKE));
-  consoleBar.append(betGroup);
-  consoleBar.append(control('es-auto-toggle'+(autoEnabled?' es-control-active':''),autoEnabled?'AUTO ON · '+autoLeft:'AUTO PLAY',()=>{
+  hotspot('info',panelButton('info'));
+  hotspot('menu',panelButton('menu'));
+  hotspot('decrease',control('es-bet-down','Decrease total bet',()=>{selectedStake=Math.max(1,selectedStake-1);draw();},spinning||freeRemaining>0||autoEnabled||selectedStake===1));
+  hotspot('increase',control('es-bet-up','Increase total bet',()=>{selectedStake=Math.min(MAX_STAKE,selectedStake+1);draw();},spinning||freeRemaining>0||autoEnabled||selectedStake===MAX_STAKE));
+  // In a ways game, total stake is distributed over 1,024 ways. Show both values.
+  display('betPerWay',(selectedStake/1024).toFixed(6),'Approximate bet per way in credits');
+  const betDisplay=display('totalBet',String(selectedStake),'Total bet in credits');
+  betDisplay.classList.add('es-bet-display');
+  betDisplay.append(node('strong','es-sr-only',String(selectedStake))); // retained accessible test hook
+  const creditedThisSpin=lastCreditRound?.payout??0;
+  display('win',creditAmount(Math.round(creditedThisSpin*UNITS)).toFixed(4).replace(/0+$/,'').replace(/\\.$/,'')||'0','Most recent spin credited in practice credits');
+  display('balance',practiceCreditSnapshot().balance.toFixed(4).replace(/0+$/,'').replace(/\\.$/,'')||'0','Available practice credits');
+  hotspot('autoplay',control('es-auto-toggle'+(autoEnabled?' es-control-active':''),autoEnabled?'AUTO ON · '+autoLeft:'AUTO PLAY',()=>{
    if(autoEnabled){haltAuto();draw();return;}
-   if(spinning||(!freeRemaining&&practiceCreditSnapshot().balance<selectedStake)){featureMessage='Not enough practice credits for AUTO PLAY.';draw();return;}
+   if(spinning)return;
+   if(!freeRemaining&&practiceCreditSnapshot().balance<selectedStake){featureMessage='Not enough practice credits for AUTO PLAY.';draw();return;}
    autoEnabled=true;autoLeft=25;activePanel=null;draw();play();
   }));
-  consoleBar.append(control('es-turbo-toggle'+(turbo?' es-control-active':''),turbo?'⚡ TURBO ON':'⚡ TURBO',()=>{turbo=!turbo;draw();}));
-  controls.append(consoleBar);
+  hotspot('turbo',control('es-turbo-toggle'+(turbo?' es-control-active':''),turbo?'TURBO ON':'TURBO',()=>{turbo=!turbo;draw();}));
   if(activePanel){
    const panel=node('section','es-console-panel');panel.setAttribute('aria-label',activePanel==='info'?'Emerald Harvest paytable':'Emerald Harvest menu');
    panel.append(node('h3','',activePanel==='info'?'EMERALD HARVEST · PAYTABLE':'PRACTICE GAME MENU'));
@@ -99,7 +106,9 @@ export function createEmeraldSlots(doc=globalThis.document){
    }
    controls.append(panel);
   }
-  const spin=node('button','es-spin',spinning?'SPINNING…':freeRemaining?'FREE SPIN ✦':'✦ SPIN ✦');spin.type='button';spin.disabled=spinning;spin.addEventListener('click',play);controls.append(stats);cabinet.append(controls);stage.append(spin);root.append(cabinet);
+  const spin=node('button','es-spin',spinning?'SPINNING…':freeRemaining?'FREE SPIN ✦':'✦ SPIN ✦');spin.type='button';spin.disabled=spinning;spin.setAttribute('aria-label',spinning?'Reels spinning':freeRemaining?'Play free spin':'Spin reels');spin.addEventListener('click',play);
+  Object.assign(spin.style,cabinetArea('spin'));spin.dataset.hotspot='spin';
+  controls.append(stats);cabinet.append(controls);stage.append(spin);root.append(cabinet);
   const details=node('section','es-details');details.append(node('p','es-notice','PRACTICE ONLY · NO WALLET · NO REAL WAGERS · NO CASH-VALUED CREDITS · NO REAL PAYOUTS · No funds involved'));
   const detailsText=spinning?'Reels spinning…':lastWins.length?'Simulated ways: '+lastWins.map(w=>SLOT_SYMBOLS[w.symbol]+' '+w.reels+' reels / '+w.ways+' ways').join(' · '):'No winning ways displayed on this spin.';
   details.append(node('p','es-outcome',detailsText),node('p','es-disclaimer','Visual practice preview using provisional 42-position circular reels. The candidate strip order and demo paytable are not certified production odds or RTP.'));

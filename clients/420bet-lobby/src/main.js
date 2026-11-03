@@ -1,4 +1,5 @@
 import {createPractice} from './practice-ui.js';
+import {createMaryJanePractice} from './mary-jane-ui.js';
 import {createSlotsLobby,slotMachineFromHash,slotMachinePath} from './slots-lobby.js';
 import {WalletIdentity,loadHistory} from './wallet.js';
 import './style.css';
@@ -43,7 +44,7 @@ function render(){
     const note=node('span','game-status',active.id==='slots'?'Practice available':statusText[active.status]);bar.append(note);main.append(bar);
     if(active.id==='slots'){
       const wrap=node('div','view-scroll');
-      if(selectedSlotMachine){activePractice=createPractice('slots',document);wrap.append(activePractice);}
+      if(selectedSlotMachine){activePractice=selectedSlotMachine.id==='mary-jane-sticky-wilds'?createMaryJanePractice(document):createPractice('slots',document);wrap.append(activePractice);}
       else wrap.append(createSlotsLobby(document,launchSlotMachine));
       main.append(wrap);
     }

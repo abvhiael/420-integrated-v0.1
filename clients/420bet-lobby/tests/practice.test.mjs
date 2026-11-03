@@ -169,3 +169,18 @@ test('Emerald INFO opens a gameplay and bonus dialog with paytable, and closes w
  assert.equal(root.querySelector('[role="dialog"]'),null);
  assert.equal(root.querySelectorAll('.es-symbol').length,before);
 });
+
+test('Emerald cabinet screenshot calibration keeps INFO over painted icon and readouts below captions',()=>{
+ assert.deepEqual(CABINET_HOTSPOTS.info,[53,927,65,65]);
+ assert.deepEqual(CABINET_HOTSPOTS.betPerWay,[271,979,74,29]);
+ for(const name of ['betPerWay','totalBet','win','balance']){
+  assert(CABINET_HOTSPOTS[name][1]>=976,'readout must be lower on cabinet: '+name);
+ }
+ assert(CABINET_HOTSPOTS.betPerWay[0]+CABINET_HOTSPOTS.betPerWay[2] <= CABINET_HOTSPOTS.increase[0]);
+ assert.equal(assertCabinetHotspots(),true);
+ const {document,window}=parseHTML('<html><body></body></html>');
+ const root=createPractice('slots',document);
+ root.querySelector('[data-hotspot="info"]').dispatchEvent(new window.Event('click'));
+ assert.match(root.querySelector('[role="dialog"]').textContent,/HOW TO PLAY/);
+ assert(root.querySelector('.es-paytable'));
+});

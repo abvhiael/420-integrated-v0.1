@@ -88,6 +88,13 @@ export function createEmeraldSlots(doc=globalThis.document){
    const panel=node('section','es-console-panel');panel.setAttribute('aria-label',activePanel==='info'?'Emerald Harvest paytable':'Emerald Harvest menu');
    panel.append(node('h3','',activePanel==='info'?'EMERALD HARVEST · PAYTABLE':'PRACTICE GAME MENU'));
    if(activePanel==='info'){
+    panel.append(node('h4','','HOW TO PLAY'));
+    panel.append(node('p','','Emerald Harvest has five reels and four visible positions on each reel (1,024 possible ways). Choose TOTAL BET from 1 to 50 practice credits with − / +, then press SPIN. Matching regular symbols or Wild substitutes on at least three consecutive reels from the left create winning ways. Multiple symbols on a reel multiply the number of ways; awards scale with your selected TOTAL BET.'));
+    panel.append(node('p','','BET PER WAY shows TOTAL BET divided by 1,024. WIN shows the credits earned on the latest spin. BALANCE is your practice-credit total. AUTO runs up to 25 paid spins and can be stopped with AUTO; TURBO speeds up the reel animation only.'));
+    panel.append(node('h4','','BONUSES & SPECIAL SYMBOLS'));
+    panel.append(node('p','','WILD substitutes for BUD, GRINDER, LIGHTER, BONG, or CHIPS. All-Wild combinations are paid once at the highest eligible symbol rate. SCATTER symbols count on separate reels and can award free spins regardless of regular winning ways.'));
+    panel.append(node('p','','Three SCATTER reels award 6 free spins; four award 15; five award 25. Free spins run with the initiating wager locked and use a 4.20× multiplier on regular ways awards. SCATTER symbols are replaced by WILD symbols on feature reels.'));
+    panel.append(node('h4','','PAYTABLE'));
     panel.append(node('p','','1,024 ways · awards shown per winning way at a 10-credit wager; every payout scales with TOTAL BET.'));
     const table=node('table','es-paytable');const head=node('tr','');
     for(const label of ['SYMBOL','3 REELS','4 REELS','5 REELS'])head.append(node('th','',label));table.append(head);
@@ -104,7 +111,18 @@ export function createEmeraldSlots(doc=globalThis.document){
     panel.append(node('p','','AUTO PLAY runs up to 25 paid spins, plays any awarded free spins, stops when cancelled or when practice credits are insufficient. TURBO shortens animations only; odds and awards stay unchanged.'));
     panel.append(control('es-menu-reset','RESET PRACTICE CREDITS',()=>{haltAuto();resetPracticeCredits();lastBreakdown=null;lastCreditRound=null;featureMessage='Practice credits reset.';draw();},spinning||freeRemaining>0));
    }
-   controls.append(panel);
+   if(activePanel==='info'){
+    const overlay=node('div','es-info-overlay');
+    const dialog=node('section','es-console-dialog');dialog.setAttribute('role','dialog');dialog.setAttribute('aria-modal','true');dialog.setAttribute('aria-label','Emerald Harvest gameplay, bonuses and paytable');
+    const close=control('es-info-close','Close game information',()=>{activePanel=null;draw();});
+    close.textContent='×';close.setAttribute('title','Close');
+    panel.insertBefore(close,panel.firstChild);
+    dialog.append(panel);overlay.append(dialog);
+    overlay.addEventListener('click',e=>{if(e.target===overlay){activePanel=null;draw();}});
+    overlay.addEventListener('keydown',e=>{if(e.key==='Escape'){activePanel=null;draw();}});
+    root.append(overlay);
+    close.focus?.();
+   }else controls.append(panel);
   }
   const spin=node('button','es-spin',spinning?'SPINNING…':freeRemaining?'FREE SPIN ✦':'✦ SPIN ✦');spin.type='button';spin.disabled=spinning;spin.setAttribute('aria-label',spinning?'Reels spinning':freeRemaining?'Play free spin':'Spin reels');spin.addEventListener('click',play);
   Object.assign(spin.style,cabinetArea('spin'));spin.dataset.hotspot='spin';

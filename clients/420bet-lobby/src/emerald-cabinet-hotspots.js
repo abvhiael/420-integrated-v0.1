@@ -11,7 +11,7 @@ export const CABINET_HOTSPOTS=Object.freeze({
  spin:Object.freeze([616,868,179,179]),
  autoplay:Object.freeze([1204,931,99,62]),
  turbo:Object.freeze([1308,925,61,72]),
- betPerWay:Object.freeze([245,943,110,49]),
+ betPerWay:Object.freeze([250,947,95,43]),
  totalBet:Object.freeze([408,943,145,49]),
  win:Object.freeze([858,943,161,49]),
  balance:Object.freeze([1031,943,161,49])

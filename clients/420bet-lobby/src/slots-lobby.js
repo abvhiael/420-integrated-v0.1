@@ -33,7 +33,7 @@ export function createSlotsLobby(doc=globalThis.document,onSelect=()=>{}){
   const description=doc.createElement('p');description.textContent=machine.description;
   const play=doc.createElement('span');play.className='slots-machine-play';play.textContent='Enter Emerald Harvest →';
   body.append(status,heading,subtitle,description,play);link.append(art,body);
-  link.addEventListener('click',event=>{if(event.defaultPrevented||event.button!==0||event.ctrlKey||event.metaKey||event.shiftKey||event.altKey)return;event.preventDefault();onSelect(machine);});
+  link.addEventListener('click',event=>{if(event.defaultPrevented||(event.button!==undefined&&event.button!==0)||event.ctrlKey||event.metaKey||event.shiftKey||event.altKey)return;event.preventDefault();onSelect(machine);});
   card.append(link);grid.append(card);
  }
  root.append(grid);return root;

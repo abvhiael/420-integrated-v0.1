@@ -1,0 +1,112 @@
+{
+  "schema": "HC.WORLD.PA.OLDTOWN.PERMANENT.LANDMARKS.V1",
+  "status": "DESIGN_LOCK_INTERACTION_GEOMETRY_PENDING_ARTWORK_REGISTRATION",
+  "settlementId": "HC-EC-S01",
+  "districtId": "HC-EC-S01-D07",
+  "publicMapPolicy": "NO_UNDISCOVERED_HERITAGE_MARKERS",
+  "propertyPolicy": "NOT_ISSUED_AS_PURCHASABLE_PRIVATE_TITLES",
+  "trigger": "CLICK_OR_KEYBOARD_ACTIVATION_OF_PUBLIC_ENTRANCE_HITBOX",
+  "geometry": {
+    "coordinateSpace": "OLDTOWN_MASTER_IMAGE_PIXELS",
+    "sourceArtworkSha256": null,
+    "hotspots": "PENDING_EXACT_IMAGE_ANCHOR_VALIDATION",
+    "noInventedCoordinates": true
+  },
+  "landmarks": [
+    {
+      "id": "PA-OT-LM-01",
+      "name": "Harbourview Hotel",
+      "interaction": "Hotel lobby",
+      "services": [
+        "regional visitors and rumours",
+        "lodging and rest hub",
+        "quest-giver conversations"
+      ],
+      "story": [
+        "traveller correspondence",
+        "coastal trading stories"
+      ],
+      "titleStatus": "PUBLIC_PERMANENT_NOT_FOR_SALE",
+      "screenId": "HC-EC-S01-D07-PA-OT-LM-01-SCREEN",
+      "hitboxStatus": "PENDING_OWNER_REVIEW",
+      "questAvailability": "FUTURE_VERSION_GATED",
+      "rewardAuthority": "SERVER_VALIDATED_NOT_DECORATIVE_CLICK"
+    },
+    {
+      "id": "PA-OT-LM-02",
+      "name": "Founders' Square and Clock Tower",
+      "interaction": "Public square",
+      "services": [
+        "community gatherings",
+        "town achievement ceremonies",
+        "historic civic noticeboard"
+      ],
+      "story": [
+        "settlement founding timeline",
+        "seasonal public events"
+      ],
+      "titleStatus": "PUBLIC_PERMANENT_NOT_FOR_SALE",
+      "screenId": "HC-EC-S01-D07-PA-OT-LM-02-SCREEN",
+      "hitboxStatus": "PENDING_OWNER_REVIEW",
+      "questAvailability": "FUTURE_VERSION_GATED",
+      "rewardAuthority": "SERVER_VALIDATED_NOT_DECORATIVE_CLICK"
+    },
+    {
+      "id": "PA-OT-LM-03",
+      "name": "Old Cannery",
+      "interaction": "Cannery museum entrance",
+      "services": [
+        "industrial heritage exhibits",
+        "restoration projects",
+        "craft history research"
+      ],
+      "story": [
+        "archival production records",
+        "supply-chain restoration quests"
+      ],
+      "titleStatus": "PUBLIC_PERMANENT_NOT_FOR_SALE",
+      "screenId": "HC-EC-S01-D07-PA-OT-LM-03-SCREEN",
+      "hitboxStatus": "PENDING_OWNER_REVIEW",
+      "questAvailability": "FUTURE_VERSION_GATED",
+      "rewardAuthority": "SERVER_VALIDATED_NOT_DECORATIVE_CLICK"
+    },
+    {
+      "id": "PA-OT-LM-04",
+      "name": "The Sail Loft",
+      "interaction": "Sail loft entrance",
+      "services": [
+        "maritime commissions",
+        "navigation tutorials",
+        "equipment service information"
+      ],
+      "story": [
+        "harbour routes and coastal trade histories",
+        "repair and expedition missions"
+      ],
+      "titleStatus": "PUBLIC_PERMANENT_NOT_FOR_SALE",
+      "screenId": "HC-EC-S01-D07-PA-OT-LM-04-SCREEN",
+      "hitboxStatus": "PENDING_OWNER_REVIEW",
+      "questAvailability": "FUTURE_VERSION_GATED",
+      "rewardAuthority": "SERVER_VALIDATED_NOT_DECORATIVE_CLICK"
+    },
+    {
+      "id": "PA-OT-LM-05",
+      "name": "St. Brigid's Chapel",
+      "interaction": "Chapel doorway",
+      "services": [
+        "community history archive",
+        "restoration donations",
+        "quiet social space"
+      ],
+      "story": [
+        "town records",
+        "intergenerational community quests"
+      ],
+      "titleStatus": "PUBLIC_PERMANENT_NOT_FOR_SALE",
+      "screenId": "HC-EC-S01-D07-PA-OT-LM-05-SCREEN",
+      "hitboxStatus": "PENDING_OWNER_REVIEW",
+      "questAvailability": "FUTURE_VERSION_GATED",
+      "rewardAuthority": "SERVER_VALIDATED_NOT_DECORATIVE_CLICK"
+    }
+  ]
+}

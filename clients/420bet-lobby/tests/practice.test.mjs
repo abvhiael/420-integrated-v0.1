@@ -1,4 +1,3 @@
-import {WAY_UNITS} from '../src/emerald-v2-payout.js';
 import {v2Evaluate,v2Ways,capV2Payout,UNITS,WAY_UNITS} from '../src/emerald-v2-payout.js';
 import {BASE_REELS,FEATURE_REELS,visibleGrid,chooseStops,scatterReelCount,awardedFreeSpins,validateReels} from '../src/emerald-v2-strips.js';
 import {practiceCreditSnapshot,practiceCreditRound,resetPracticeCredits} from '../src/practice-credits.js';

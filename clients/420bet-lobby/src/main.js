@@ -3,6 +3,7 @@ import {createMaryJanePractice} from './mary-jane-ui.js';
 import {createSlotsLobby,slotMachineFromHash,slotMachinePath} from './slots-lobby.js';
 import {WalletIdentity,loadHistory} from './wallet.js';
 import './style.css';
+import './mary-jane-concept.css';
 import {createNativePreview} from './previews.js';
 import {categories,resolveCatalogue,filterGames} from './catalogue.js';
 const app=document.querySelector('#app');

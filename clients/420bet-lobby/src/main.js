@@ -40,7 +40,7 @@ function render(){
   if(active){
     const main=node('main','immersive');const bar=node('header','gamebar');
     bar.append(button(selectedSlotMachine?'← Slots Lobby':'← Return to Lobby',close,'return'),brandLink('game-brand'),node('strong','',selectedSlotMachine?.title??active.title));
-    const note=node('span','game-status',statusText[active.status]);bar.append(note);main.append(bar);
+    const note=node('span','game-status',active.id==='slots'?'Practice available':statusText[active.status]);bar.append(note);main.append(bar);
     if(active.id==='slots'){
       const wrap=node('div','view-scroll');
       if(selectedSlotMachine){activePractice=createPractice('slots',document);wrap.append(activePractice);}
@@ -67,8 +67,8 @@ function updateGrid(){
   if(!matched.length){grid.append(node('p','empty','No games match your search.'));return;}
   matched.forEach(g=>{
     const card=node('article','card');const art=node('div','art art-'+g.category.toLowerCase().replace(' ','-'));art.setAttribute('aria-hidden','true');art.textContent=({'Casino':'✦','Poker':'♠','Fantasy':'★','Sportsbook':'◆'})[g.category];card.append(art);
-    const details=node('div','details');details.append(node('small','category',g.category),node('h2','',g.title),node('span','status',statusText[g.status]));
-    details.append(button(g.route?'Enter game':'View preview',()=>launch(g),'open'));card.append(details);grid.append(card);
+    const details=node('div','details');details.append(node('small','category',g.category),node('h2','',g.title),node('span','status',g.id==='slots'?'Practice available':statusText[g.status]));
+    details.append(button(g.id==='slots'?'Browse Slots':g.route?'Enter game':'View preview',()=>launch(g),'open'));card.append(details);grid.append(card);
   });
 }
 window.addEventListener('keydown',e=>{if(e.key==='Escape'&&active&&!document.querySelector('.es-info-overlay'))close();});

@@ -1,14 +1,14 @@
 // EXPERIMENTAL V2 calibration candidate. NOT a certified 96% RTP or a live-terms authority.
 // One credit has 10,000,000 indivisible calculation units; 1 $420 = 10 credits is a separate proposed conversion.
 // Each coefficient is a number of micro-ten-millionth credits per ONE credit staked, per winning way.
-// Prior 400k-sample 250x-fitted values; quantized to exactly represent 1..50-credit wagers.
+// User-selected clean symbol payouts at 10-credit reference stake. Existing Scatter fixture unchanged. Preliminary cap-aware RTP bound approximately 96.421–96.437% at 250x, NOT a certification.
 export const UNITS=10_000_000;
 export const WAY_UNITS=Object.freeze([
- Object.freeze([58200,174590,581965]),
- Object.freeze([116395,290985,931145]),
- Object.freeze([116395,407375,1396720]),
- Object.freeze([174590,581965,2327865]),
- Object.freeze([290985,872950,3491800])
+ Object.freeze([50000,200000,600000]),       // Bud: 0.05, 0.20, 0.60 at 10 credits
+ Object.freeze([100000,300000,1000000]),     // Grinder: 0.10, 0.30, 1.00
+ Object.freeze([100000,300000,1000000]),     // Lighter: 0.10, 0.30, 1.00
+ Object.freeze([200000,600000,2500000]),     // Bong: 0.20, 0.60, 2.50
+ Object.freeze([300000,1000000,3500000])     // Chips: 0.30, 1.00, 3.50
 ]);
 export const SCATTER_UNITS=Object.freeze({3:290985,4:872950,5:2327865});
 export const FEATURE_NUMERATOR=42,FEATURE_DENOMINATOR=10;

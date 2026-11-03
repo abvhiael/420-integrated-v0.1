@@ -148,3 +148,24 @@ test('Emerald canonical image hotspots map precisely within 1448×1086, without 
  assert.match(css,/aspect-ratio:1448\/1086/);
  assert.match(css,/\.es-art-stage \.es-cabinet-hotspot/);
 });
+
+test('Emerald INFO opens a gameplay and bonus dialog with paytable, and closes without changing reels',()=>{
+ const {document,window}=parseHTML('<html><body></body></html>');
+ const root=createPractice('slots',document);
+ const before=root.querySelectorAll('.es-symbol').length;
+ root.querySelector('[data-hotspot="info"]').dispatchEvent(new window.Event('click'));
+ const dialog=root.querySelector('[role="dialog"]');
+ assert(dialog);
+ assert.equal(dialog.getAttribute('aria-modal'),'true');
+ assert.match(dialog.textContent,/HOW TO PLAY/);
+ assert.match(dialog.textContent,/BONUSES & SPECIAL SYMBOLS/);
+ assert.match(dialog.textContent,/WILD/);
+ assert.match(dialog.textContent,/SCATTER/);
+ assert.match(dialog.textContent,/4\.20×/);
+ assert.match(dialog.textContent,/PAYTABLE/);
+ assert.equal(dialog.querySelectorAll('.es-paytable tr').length,6);
+ assert.equal(root.querySelectorAll('.es-symbol').length,before);
+ dialog.querySelector('.es-info-close').dispatchEvent(new window.Event('click'));
+ assert.equal(root.querySelector('[role="dialog"]'),null);
+ assert.equal(root.querySelectorAll('.es-symbol').length,before);
+});

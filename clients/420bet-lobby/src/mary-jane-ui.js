@@ -86,7 +86,7 @@ export function createMaryJanePractice(doc=globalThis.document){
   right.append(make(doc,'h3','',state.mode==='bonus'?'STICKY WILD FREE SPINS':'GOLD LEAF FRAMES'));
   right.append(make(doc,'div','mj-cycle',state.mode==='bonus'?'FREE SPINS '+state.freeRemaining+' LEFT':'SPIN '+(state.cycle===0?10:state.cycle)+' OF 10'));
   right.append(make(doc,'h3','','BUZZ MULTIPLIER'));
-  right.append(make(doc,'strong','mj-buzz','×'+state.buzz));
+  right.append(make(doc,'strong','mj-buzz','×'+(state.mode==='bonus'?state.bonusBuzz:state.buzz)));
   right.append(make(doc,'p','mj-frames','GOLD FRAMES: '+state.frames.flat().filter(Boolean).length+' / 20'));
   right.append(make(doc,'p','mj-cap','MAX WIN '+MAX_PAYOUT_X+'× TOTAL BET'));
   stage.append(left,reels,right);cabinet.append(stage);

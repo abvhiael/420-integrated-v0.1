@@ -8,14 +8,14 @@ export function createCannabisRoulette(doc=globalThis.document,options={}){
  const view=doc.defaultView||globalThis;
  const setTimer=options.setTimeout??((fn,ms)=>view.setTimeout(fn,ms));
  const clearTimer=options.clearTimeout??(id=>view.clearTimeout(id));
- let balance=STARTING_CREDITS,chip=10,bets=[],lastBets=[],last=null,recent=[],spinning=false,timer=null,rotation=0,spinStart=0,spinCount=0,destroyed=false,message='Choose a chip, then place practice bets on the table.';
+ let balance=STARTING_CREDITS,chip=10,bets=[],lastBets=[],last=null,recent=[],showPayout=false,spinning=false,timer=null,rotation=0,spinStart=0,spinCount=0,destroyed=false,message='Choose a chip, then place practice bets on the table.';
  root.stopAnimation=()=>{destroyed=true;spinning=false;if(timer!==null)clearTimer(timer);timer=null;};
  const sum=()=>rouletteTotal(bets);
  const button=(text,cls,handler)=>{const el=make(doc,'button',cls,text);el.type='button';el.addEventListener('click',handler);return el;};
  const betTotals=()=>{const totals=new Map();for(const bet of bets)totals.set(bet.key,(totals.get(bet.key)||0)+bet.amount);return totals;};
  function place(key){
   if(spinning||sum()+chip>balance){message='Not enough practice credits for that chip.';render();return;}
-  bets=[...bets,{key,amount:chip}];message='Practice bet placed. Press SPIN when ready.';render();
+  bets=[...bets,{key,amount:chip}];showPayout=false;message='Practice bet placed. Press SPIN when ready.';render();
  }
  const betButton=(label,key,cls,totals)=>{
   const el=button(label,'cr-bet '+cls,()=>place(key));
@@ -47,7 +47,7 @@ export function createCannabisRoulette(doc=globalThis.document,options={}){
   render();
   timer=setTimer(()=>{
    timer=null;if(destroyed)return;
-   balance+=result.returned;last=result;recent=[result.pocket,...recent].slice(0,7);
+   balance+=result.returned;last=result;showPayout=true;recent=[result.pocket,...recent].slice(0,7);
    spinning=false;
    message=result.returned?'WINNING SPIN · Pocket '+result.pocket+' · Paid '+money(result.returned)+' credits · Net '+(result.net>=0?'+':'')+money(result.net):'Pocket '+result.pocket+' · No winning bets · Lost '+money(result.stake)+' credits';
    render();
@@ -57,7 +57,7 @@ export function createCannabisRoulette(doc=globalThis.document,options={}){
   if(spinning||!lastBets.length)return;
   const previous=lastBets.map(b=>({...b}));
   if(rouletteTotal(previous)>balance){message='Insufficient practice credits to repeat the previous bet.';render();return;}
-  bets=previous;message='Previous practice bets restored.';render();
+  bets=previous;showPayout=false;message='Previous practice bets restored.';render();
  }
  function render(){
   if(destroyed)return;
@@ -116,7 +116,7 @@ export function createCannabisRoulette(doc=globalThis.document,options={}){
   if(!recent.length)recentRow.append(make(doc,'small','','No spins yet'));
   else for(const p of recent)recentRow.append(make(doc,'span','cr-recent-pocket cr-'+rouletteColor(p),p));
   resultPanel.append(recentRow);
-  const payout=make(doc,'div','cr-payout '+(!last?'cr-payout-idle':last.returned?'cr-payout-win':'cr-payout-loss'));
+  const payout=make(doc,'div','cr-payout '+(!last||!showPayout?'cr-payout-idle':last.returned?'cr-payout-win':'cr-payout-loss'));
   payout.setAttribute('role','status');payout.setAttribute('aria-live','polite');
   payout.append(make(doc,'div','cr-payout-title',!last?'✦ SPIN PAYOUT ✦':last.returned?'✦ WINNER! ✦':'✦ SPIN RESULT ✦'));
   const payoutAmount=make(doc,'strong','cr-payout-amount',last?money(last.returned):'—');

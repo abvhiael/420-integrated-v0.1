@@ -156,3 +156,37 @@ test('branded wheel has an actual roulette-specific wallpaper, shared axis, and 
  assert(svg.includes('id="scroll"'));
  root.stopAnimation();
 });
+
+test('reference-style casino cabinet has one authoritative wheel layout and visible wallpaper',()=>{
+ const css=readFileSync(new URL('../src/roulette.css',import.meta.url),'utf8');
+ assert.equal((css.match(/\.cr-wheel-stage\s*\{/g)||[]).length,1,'wheel stage must have exactly one base declaration');
+ assert.equal((css.match(/\.cr-wheel\s*\{/g)||[]).length,1,'wheel must not use accumulated competing rules');
+ assert.equal((css.match(/\.cr-game\s*\{/g)||[]).length,1,'cabinet must have a single base style');
+ assert.match(css,/\.cr-wheel\s*\{[^}]*left:50%;top:50%/s);
+ assert.match(css,/\.cr-ball-orbit\s*\{[^}]*left:50%;top:50%/s);
+ assert(css.includes('translate(-50%,-50%) scaleY(.62)'),'wheel must center before perspective squash');
+ assert(css.includes("url('/assets/420bet/roulette/emerald-gold-wallpaper.svg')"));
+ assert(css.includes('.cr-table-area'));
+ assert(css.includes('.cr-header::before,.cr-header::after'));
+ assert(css.includes('.cr-payout-win'));
+});
+test('wheel animation begins at previous resting angle after repeated spins',()=>{
+ const {document}=parseHTML('<html><body></body></html>');
+ const finishers=[];
+ let pocket='17';
+ const root=createCannabisRoulette(document,{pickPocket:()=>pocket,setTimeout:fn=>{finishers.push(fn);return finishers.length;}});
+ document.body.append(root);
+ root.querySelector('[data-bet="red"]').click();
+ root.querySelector('.cr-spin').click();
+ const first=root.querySelector('.cr-wheel-disc');
+ assert.equal(first.style.getPropertyValue('--cr-spin-from'),'0deg');
+ const firstTo=first.style.getPropertyValue('--cr-spin-to');
+ finishers.shift()();
+ root.querySelector('[data-bet="red"]').click();
+ pocket='25';
+ root.querySelector('.cr-spin').click();
+ const second=root.querySelector('.cr-wheel-disc');
+ assert.equal(second.style.getPropertyValue('--cr-spin-from'),firstTo);
+ assert.notEqual(second.style.getPropertyValue('--cr-spin-to'),firstTo);
+ root.stopAnimation();
+});

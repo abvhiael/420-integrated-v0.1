@@ -83,8 +83,8 @@ export function createMaryJanePractice(doc=globalThis.document,options={}){
    panel.append(make(doc,'p','mj-disclaimer',"RTP ~95% is a v4 Monte Carlo estimate, NOT certified exact theoretical RTP. Practice credits cannot be deposited, withdrawn or exchanged."));
   }else{
    panel.append(make(doc,'p','',"AUTO PLAY runs up to 25 paid spins but pauses for a triggered bonus. Every free spin must be initiated with SPIN. TURBO shortens reel animations only. Change stakes with −/+ between paid spins."));
-   const reset=button('RESET PRACTICE CREDITS','mj-action',()=>{if(state.mode==='bonus')return;stopTimer();auto=false;autoLeft=0;state=initialMaryJaneState();activePanel=null;render();});
-   reset.disabled=state.mode==='bonus';panel.append(reset);
+   const reset=button('RESET PRACTICE CREDITS','mj-action',()=>{if(state.mode==='bonus')return;clearTimers();auto=false;autoLeft=0;state=initialMaryJaneState();activePanel=null;render();});
+   reset.disabled=spinning||state.mode==='bonus';panel.append(reset);
   }
   overlay.append(panel);
   overlay.addEventListener('click',e=>{if(e.target===overlay){activePanel=null;render();}});
@@ -153,7 +153,7 @@ export function createMaryJanePractice(doc=globalThis.document,options={}){
   spin.disabled=spinning||(state.mode==='base'&&state.balanceMicros<state.stake*1000000)||auto;
   scene.append(spin);
   const autoButton=hit('mj-hit-auto','Auto play up to 25 paid spins; bonus spins are manual',()=>{
-   auto=!auto;autoLeft=auto?25:0;stopTimer();render();if(auto)autoContinue();
+   auto=!auto;autoLeft=auto?25:0;clearTimers();render();if(auto)autoContinue();
   });autoButton.disabled=spinning||state.mode==='bonus';autoButton.setAttribute('aria-pressed',String(auto));
   if(auto)autoButton.classList.add('mj-activated');
   const turboButton=hit('mj-hit-turbo','Toggle turbo spin speed',()=>{turbo=!turbo;render();});

@@ -212,3 +212,73 @@
 .roulette-immersive .gamebar .return:hover,.roulette-immersive .gamebar .return:focus-visible{opacity:1}
 .roulette-immersive .view-scroll{flex:1;display:flex;align-items:flex-start;justify-content:center;overflow:auto;background:#00190a}
 .roulette-immersive .game-footer{display:none}
+
+/* FINAL REFERENCE-SKIN LAYER: the owner's exact image IS the rendered game.
+   All betting hit targets remain interactive above the artwork, and only
+   dynamic state (balance, placed chips, result and spin) is composited. */
+section.cr-game[data-practice-game="roulette"]{
+ background:#00210e url('/assets/420bet/roulette/reference-cabinet.svg') center/100% 100% no-repeat;
+}
+section.cr-game .cr-header{background:none;border:0;box-shadow:none;opacity:0;pointer-events:none}
+section.cr-game .cr-header::before,section.cr-game .cr-header::after{display:none}
+section.cr-game .cr-wheel-stage{left:28.65%;top:7.5%}
+section.cr-game .cr-wheel-shadow{display:none}
+section.cr-game .cr-wheel{
+ width:27.7cqw;height:27.7cqw;max-width:none;
+ border:0;box-shadow:none;background:transparent;overflow:visible;
+ transform:translate(-50%,-50%) scaleY(.52);
+}
+section.cr-game .cr-wheel-rim{position:absolute;inset:0;border:0;background:transparent;box-shadow:none}
+section.cr-game .cr-wheel-disc{
+ position:absolute;inset:0;border:0;box-shadow:none;
+ background-image:url('/assets/420bet/roulette/reference-wheel-rotor.svg')!important;
+ background-size:100% 100%!important;background-repeat:no-repeat;
+ background-color:transparent;
+}
+section.cr-game .cr-wheel-hub,section.cr-game .cr-wheel-ornament,section.cr-game .cr-pointer{display:none}
+section.cr-game .cr-ball-orbit{width:27.7cqw;height:27.7cqw;transform:translate(-50%,-50%) scaleY(.52) rotate(var(--cr-ball-angle,0deg))}
+section.cr-game .cr-ball-orbiting{animation:cr-reference-ball 4s cubic-bezier(.12,.75,.17,1) both}
+@keyframes cr-reference-ball{from{transform:translate(-50%,-50%) scaleY(.52) rotate(0deg)}to{transform:translate(-50%,-50%) scaleY(.52) rotate(-1900deg)}}
+section.cr-game .cr-credits,section.cr-game .cr-current-bet{
+ border:0;background:none;box-shadow:none;
+}
+section.cr-game .cr-ledger-title,section.cr-game .cr-ledger-caption{visibility:hidden}
+section.cr-game .cr-credits strong{position:relative;top:.45cqw;margin:0;padding:.1cqw .7cqw;
+ background:#002412;color:#fcf19d;font-size:3cqw}
+section.cr-game .cr-current-bet strong{position:relative;left:0;top:.1cqw;padding:.2cqw;
+ background:#002f19;color:#ffed8a}
+section.cr-game .cr-add-credits{opacity:0;border:none;background:none;box-shadow:none}
+section.cr-game .cr-add-credits:hover,section.cr-game .cr-add-credits:focus-visible{opacity:.55}
+section.cr-game .cr-chips{border:0;background:none;box-shadow:none}
+section.cr-game .cr-chips h2,section.cr-game .cr-chips p{visibility:hidden}
+section.cr-game .cr-chip{background:transparent;border:0;box-shadow:none;color:transparent;text-shadow:none}
+section.cr-game .cr-chip-selected{outline:.22cqw solid #b4ff61;outline-offset:-.3cqw;filter:drop-shadow(0 0 .7cqw #52ff20)}
+section.cr-game .cr-chip:hover:not(:disabled){outline:.25cqw solid #fff58a;outline-offset:-.3cqw}
+section.cr-game .cr-table{border:0;background:none;box-shadow:none}
+section.cr-game .cr-number,section.cr-game .cr-zero,section.cr-game .cr-column,
+section.cr-game .cr-dozens .cr-bet,section.cr-game .cr-outside .cr-bet{
+ border:0;background:transparent;color:transparent;text-shadow:none;
+}
+section.cr-game .cr-number::before{display:none}
+section.cr-game .cr-face-label{visibility:hidden}
+section.cr-game .cr-number:hover:not(:disabled),section.cr-game .cr-zero:hover:not(:disabled),
+section.cr-game .cr-column:hover:not(:disabled),section.cr-game .cr-dozens .cr-bet:hover:not(:disabled),
+section.cr-game .cr-outside .cr-bet:hover:not(:disabled){
+ background:#e6ff4b33;outline:.17cqw solid #d1ff82;outline-offset:-.18cqw
+}
+section.cr-game .cr-zero-extras{opacity:.02}
+section.cr-game .cr-zero-extras:hover,section.cr-game .cr-zero-extras:focus-within{opacity:1}
+section.cr-game .cr-actions{background:none}
+section.cr-game .cr-actions .cr-spin,section.cr-game .cr-actions .cr-action{
+ border:0;background:transparent;box-shadow:none;color:transparent!important;text-shadow:none;
+}
+section.cr-game .cr-actions .cr-spin:hover:not(:disabled),section.cr-game .cr-actions .cr-action:hover:not(:disabled){
+ box-shadow:inset 0 0 1.1cqw #9aff5a,0 0 1.4cqw #36ff27;
+}
+section.cr-game .cr-actions button:disabled{filter:none;opacity:.58}
+section.cr-game .cr-last{background:linear-gradient(#002710f7,#001a0cfa);box-shadow:inset 0 0 .55cqw #69fc3b66;border:.22cqw ridge #f0ce6a}
+section.cr-game .cr-last .cr-ledger-title{visibility:visible}
+section.cr-game .cr-payout{z-index:15}
+section.cr-game .cr-footer .cr-disclosure{background:none;border:0;box-shadow:none;color:transparent}
+section.cr-game .cr-footer .cr-disclosure::before,section.cr-game .cr-footer .cr-disclosure::after{display:none}
+section.cr-game .cr-footer .cr-status{background:#00320fcf;border-radius:.25cqw;padding:.2cqw;color:#e3fac5}

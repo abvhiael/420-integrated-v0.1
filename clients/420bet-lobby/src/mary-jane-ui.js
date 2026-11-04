@@ -56,6 +56,7 @@ export function createMaryJanePractice(doc=globalThis.document,options={}){
    // Specific optical sizing for oversized artwork; keep the atlas tile's
    // backgroundPosition calculated below (never reset it to center).
    const artClass=normalized==='L03'?'mj-roachclip-art':
+    normalized==='H03'?'mj-art-neon420':
     normalized==='H06'?'mj-art-bar':
     normalized==='L05'?'mj-art-joint':
     normalized==='H05'?'mj-art-bong':

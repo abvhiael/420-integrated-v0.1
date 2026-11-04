@@ -227,6 +227,6 @@ test('visual regression: centered wheel and outside-bet rows have separate selec
  assert(css.includes('.cr-table > .cr-outside{grid-template-columns:repeat(6,minmax(0,1fr))}'));
  assert(css.includes('.cr-table > .cr-dozens,.cr-table > .cr-outside{display:grid'));
  assert(!css.includes('.cr-dozens,.cr-outside{display:grid'));
- assert(!css.includes('.cr-outside{grid-template-columns:repeat(6,'));
+ assert(!/(^|,|\})\s*\.cr-outside\{grid-template-columns:repeat\(6,/.test(css));
  assert(css.includes('white-space:nowrap'),'outside bet labels must stay on one line');
 });

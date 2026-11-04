@@ -81,6 +81,7 @@ export function createCannabisRoulette(doc=globalThis.document,options={}){
    return color+' '+(i*sector).toFixed(5)+'deg '+((i+1)*sector).toFixed(5)+'deg';
   }).join(',')+')';
   disc.style.transform='rotate('+rotation+'deg)';
+  disc.style.setProperty('--cr-spin-to',rotation+'deg');
   ROULETTE_WHEEL.forEach((n,i)=>{
    const label=make(doc,'span','cr-wheel-number',n);
    label.style.setProperty('--a',(i+.5)*sector+'deg');

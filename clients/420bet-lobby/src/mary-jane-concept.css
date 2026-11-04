@@ -156,3 +156,23 @@
  .mj-concept .mj-cell.mj-framed,.mj-concept .mj-cell.mj-sticky,
  .mj-concept .mj-reel.mj-reel-moving .mj-cell{animation:none!important}
 }
+
+/* True reel movement: the UI advances consecutive symbols from each 60-stop
+   strip during the staggered stop interval. This styling creates the vertical
+   motion feel while the engine's single chosen outcome stays authoritative. */
+.mj-concept .mj-reel.mj-reel-moving{position:relative;isolation:isolate}
+.mj-concept .mj-reel.mj-reel-moving .mj-cell:not(.mj-sticky){
+ filter:blur(1.1px) brightness(.88);
+ animation:mj-symbol-scroll .11s linear infinite;
+}
+.mj-concept .mj-reel.mj-reel-moving::after{
+ content:"";position:absolute;inset:0;z-index:7;pointer-events:none;
+ background:linear-gradient(to bottom,#2106288c 0%,transparent 16%,transparent 82%,#18062099 100%);
+}
+@keyframes mj-symbol-scroll{
+ from{transform:translateY(-9%)}
+ to{transform:translateY(9%)}
+}
+@media(prefers-reduced-motion:reduce){
+ .mj-concept .mj-reel.mj-reel-moving .mj-cell:not(.mj-sticky){animation:none!important;filter:none}
+}

@@ -1,4 +1,4 @@
-import {BASE_REELS,PAYLINES,PAY_SYMBOLS,BASE_PAYTABLE,BONUS_PAYTABLE,SYMBOL_NAMES,MAX_PAYOUT_X,MAX_BUZZ,CYCLE_LENGTH} from './mary-jane-model.js';
+import {BASE_REELS,BONUS_REELS,PAYLINES,PAY_SYMBOLS,BASE_PAYTABLE,BONUS_PAYTABLE,SYMBOL_NAMES,MAX_PAYOUT_X,MAX_BUZZ,CYCLE_LENGTH} from './mary-jane-model.js';
 import {initialMaryJaneState,spinMaryJane,setMaryJaneStake,visibleMaryJaneReels,creditText} from './mary-jane-engine.js';
 
 const ART_ROOT='/assets/420bet/mary-jane/';
@@ -6,7 +6,7 @@ const GLYPHS={H02:'★',H03:'420',H04:'💍',H05:'◉',H06:'THC BAR',L01:'🌿',
 const make=(doc,tag,cls='',txt)=>{const e=doc.createElement(tag);if(cls)e.className=cls;if(txt!==undefined)e.textContent=txt;return e;};
 export function createMaryJanePractice(doc=globalThis.document,options={}){
  let state=initialMaryJaneState(),activePanel=null,auto=false,autoLeft=0,destroyed=false,turbo=false;
- let spinning=false,pendingState=null,settledReels=0;
+ let spinning=false,pendingState=null,settledReels=0,previewStops=[0,9,17,30,42];
  const view=doc.defaultView||globalThis;
  const timers=new Set();
  const setTimer=options.setTimeout??((fn,delay)=>view.setTimeout(fn,delay));
@@ -28,12 +28,14 @@ export function createMaryJanePractice(doc=globalThis.document,options={}){
   if(state.mode==='base'&&auto&&autoLeft>0)autoLeft--;
   try{pendingState=spinMaryJane(state,options.pickStops?.(state));}
   catch(error){auto=false;autoLeft=0;pendingState=null;state={...state,message:error.message};render();return;}
+  previewStops=state.lastStops?[...state.lastStops]:[0,9,17,30,42];
   spinning=true;settledReels=0;render();
+  schedule(animateReels,turbo?60:85);
   const firstStop=turbo?250:600,stagger=turbo?250:500;
   for(let r=0;r<5;r++)schedule(()=>{
    settledReels=r+1;
    if(r===4){
-    state=pendingState;pendingState=null;spinning=false;
+    state=pendingState;pendingState=null;spinning=false;clearTimers();
     if(state.mode==='bonus'){auto=false;autoLeft=0;}
     render();autoContinue();
    }else render();
@@ -58,6 +60,28 @@ export function createMaryJanePractice(doc=globalThis.document,options={}){
    cell.append(art);
   }
   return cell;
+ }
+ // The engine resolves one immutable result. Only these visible interim
+ // symbols advance through the actual 60-position strips while a reel rolls.
+ // No additional RNG calls or changes to the payout/feature state are made.
+ function movingSymbols(reelIndex){
+  const reels=state.mode==='bonus'?BONUS_REELS:BASE_REELS;
+  const symbols=visibleMaryJaneReels(reels,previewStops)[reelIndex];
+  return symbols.map((symbol,row)=>state.mode==='bonus'&&state.sticky[reelIndex][row]?'WILD':symbol);
+ }
+ function animateReels(){
+  if(!spinning||destroyed)return;
+  const advance=turbo?2:1;
+  for(let r=settledReels;r<5;r++){
+   previewStops[r]=(previewStops[r]+advance)%60;
+   const reel=root.querySelector('.mj-reel[data-reel="'+r+'"]');
+   if(!reel)continue;
+   const symbols=movingSymbols(r);
+   reel.replaceChildren(...symbols.map((symbol,row)=>symbolCell(
+    symbol,r,row,!!state.lastFrames[r][row],false,state.mode==='bonus'&&!!state.sticky[r][row]
+   )));
+  }
+  schedule(animateReels,turbo?60:85);
  }
  function showInfo(){
   const overlay=make(doc,'div','es-info-overlay mj-overlay');
@@ -101,10 +125,11 @@ export function createMaryJanePractice(doc=globalThis.document,options={}){
   scene.setAttribute('aria-label',"Mary Jane's Sticky Wilds interactive slot cabinet");
   scene.append(make(doc,'span','mj-assistive','MAX WIN '+MAX_PAYOUT_X+'× TOTAL BET'));
   const restingBoard=state.lastStops?state.lastBoard:visibleMaryJaneReels(BASE_REELS,[0,9,17,30,42]);
-  const board=spinning?restingBoard.map((reel,r)=>r<settledReels?pendingState.lastBoard[r]:reel):restingBoard;
+  const board=spinning?restingBoard.map((reel,r)=>r<settledReels?pendingState.lastBoard[r]:movingSymbols(r)):restingBoard;
   const reels=make(doc,'div','mj-reels');
   for(let r=0;r<5;r++){
    const reel=make(doc,'div','mj-reel'+(spinning&&r>=settledReels?' mj-reel-moving':'')+(spinning&&r===settledReels?' mj-reel-next':''));
+   reel.dataset.reel=String(r);
    for(let row=0;row<4;row++){
     const settled=!spinning||r<settledReels;
     const mask=settled?(spinning?pendingState.lastFrames:state.lastFrames):state.lastFrames;

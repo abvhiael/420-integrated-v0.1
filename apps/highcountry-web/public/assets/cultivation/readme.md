@@ -1,1 +1,0 @@
-HighCountry cultivation assets

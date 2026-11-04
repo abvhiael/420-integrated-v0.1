@@ -21,7 +21,7 @@
  box-shadow:inset 0 -.4cqw #c28b27,inset 0 .45cqw #f7d279,0 .5cqw 1.1cqw #000b,0 0 .9cqw #ffe45c;
  text-align:center;display:flex;flex-direction:column;justify-content:center;align-items:center
 }
-.cr-header::before,.cr-header::after{content:"☘";position:absolute;top:18%;font-size:3.1cqw;color:#8dff45;text-shadow:0 0 .9cqw #57fb2c}
+.cr-header::before,.cr-header::after{content:"";position:absolute;top:16%;width:4.2cqw;height:4.2cqw;background:url('/assets/420bet/roulette/cannabis-hub.svg') center/contain no-repeat;filter:drop-shadow(0 0 .7cqw #72ff43)}
 .cr-header::before{left:5%}.cr-header::after{right:5%}
 .cr-brand{display:none}
 .cr-header h1{margin:0;color:#ffdd75;font:italic bold 4.0cqw/1 Georgia,serif;text-shadow:.15cqw .18cqw .25cqw #130e03,0 0 .6cqw #ffd84e}
@@ -113,7 +113,7 @@
  border:.35cqw ridge #ffce66;border-radius:3cqw;background:linear-gradient(130deg,#00532be8,#002514fa 65%,#004424eb);
  box-shadow:inset 0 0 1cqw #37f6438a,0 0 1cqw #00fa3a7a;padding:1.2cqw .9cqw}
 .cr-chips h2{font:bold 2cqw/1 Georgia,serif;margin:0;color:#fff1be}
-.cr-chips h2::before,.cr-chips h2::after{content:" ✦ ";color:#9afb4d}
+.cr-chips h2::before,.cr-chips h2::after{content:"";display:inline-block;width:1.7cqw;height:1.7cqw;margin:0 .5cqw;vertical-align:middle;background:url('/assets/420bet/roulette/cannabis-hub.svg') center/contain no-repeat}
 .cr-chips p{display:none}
 .cr-chip-grid{width:100%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(3,1fr);gap:1cqw}
 .cr-chip{aspect-ratio:1;border-radius:50%;padding:0;border:.68cqw dashed #fffef3;
@@ -156,7 +156,14 @@
 .cr-dozens .cr-bet,.cr-outside .cr-bet{display:grid;place-items:center;white-space:nowrap;overflow:hidden;font-size:1.85cqw;line-height:1;border:.13cqw solid #f6d081}
 .cr-outside .cr-red,.cr-outside .cr-black{font-size:1.9cqw;text-shadow:0 0 .2cqw #fff}
 .cr-outside .cr-red{background:radial-gradient(ellipse,#e43735,#7d0010)}
-.cr-outside .cr-black{background:radial-gradient(ellipse,#484848,#050807)}
+.cr-outside .cr-black{background:#004d28}
+.cr-outside .cr-red{background:#004d28}
+.cr-diamond-label{position:relative;display:grid;place-items:center;width:92%;height:96%;margin:auto;
+ clip-path:polygon(50% 0%,100% 50%,50% 100%,0% 50%);
+ border:0;background:radial-gradient(ellipse,#ff473b 0%,#c90016 49%,#790010 85%);
+ color:#fff6dd;text-shadow:0 .12cqw .18cqw #000;font:bold 1.8cqw/1 Georgia,serif}
+.cr-outside .cr-black .cr-diamond-label{background:radial-gradient(ellipse,#777,#101010 75%,#000)}
+.cr-outside .cr-red .cr-diamond-label{background:radial-gradient(ellipse,#ff4d3a,#c60012 68%,#6e0013)}
 .cr-inside-spots{position:absolute;inset:0;pointer-events:none;overflow:visible;z-index:5}
 .cr-intersection.cr-bet{position:absolute;width:1.5cqw;height:1.5cqw;min-width:0;min-height:0;padding:0;
  border:.12cqw solid #ffe8a1;border-radius:50%;background:#23a737;color:#fff;

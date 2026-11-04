@@ -68,3 +68,62 @@
 @media(max-width:960px){.cr-table-area{grid-template-columns:1fr;border-radius:30px;padding:10px}.cr-chips{flex-direction:row;justify-content:space-around;flex-wrap:wrap}.cr-chip-grid{display:flex;max-width:none;width:auto}.cr-chip{width:45px}.cr-actions{flex-direction:row;flex-wrap:wrap}.cr-actions button{flex:1}.cr-odds{width:100%}}
 @media(max-width:650px){.cr-top{grid-template-columns:1fr 1fr}.cr-wheel-stage{grid-column:1/-1;grid-row:1;width:min(90%,310px)}.cr-account{grid-column:1}.cr-last{grid-column:2}.cr-game{padding:8px}.cr-table{overflow-x:auto;padding:14px 4px}.cr-inside,.cr-dozens,.cr-outside{min-width:460px}.cr-wheel-number{font-size:10px}}
 @media(prefers-reduced-motion:reduce){.cr-wheel-spinning .cr-wheel-disc,.cr-ball-orbiting{animation-duration:.01ms!important}}
+
+/* Reference-led classic casino layout: shallow brass roulette wheel above wide felt betting apron. */
+.cr-game{max-width:1500px;padding:9px 16px 13px;background:radial-gradient(ellipse at 48% 28%,#26472c 0%,#092419 60%,#07180f 100%);border:3px solid #a58646;border-radius:12px}
+.cr-header{padding:1px 4px 5px;border-bottom:1px solid #c5a45b;background:transparent}
+.cr-header .cr-brand{font-size:10px;letter-spacing:.25em}
+.cr-header h1{font-size:clamp(23px,2.7vw,35px);line-height:1.12;margin:2px 0;text-shadow:0 2px 0 #241106,0 0 12px #dfc16488}
+.cr-header p{font-size:9px;letter-spacing:.12em}
+.cr-top{grid-template-columns:minmax(145px,1fr) minmax(300px,1.6fr) minmax(145px,1fr);height:237px;gap:8px;padding:1px 9px 3px}
+.cr-account{gap:7px}
+.cr-ledger,.cr-last{padding:7px 10px;border-radius:8px;background:linear-gradient(135deg,#0b1f16,#0b2b1c);border:1px solid #ab914b}
+.cr-ledger-title{font-size:10px}
+.cr-ledger strong{font-size:clamp(23px,2.4vw,30px);line-height:1.15}
+.cr-ledger-caption{font-size:9px}
+.cr-wheel-stage{width:310px;max-width:100%;height:230px;aspect-ratio:auto;overflow:visible;filter:drop-shadow(0 8px 8px #000b)}
+.cr-wheel{width:300px;height:300px;max-width:100%;left:50%;top:-33px;inset:auto;transform:translateX(-50%) scaleY(.71);transform-origin:50% 50%;border:15px ridge #c3983e;box-shadow:inset 0 0 0 8px #39240e,0 0 0 4px #b48b43,0 0 0 8px #1b180b,0 0 25px #e9b34f44}
+.cr-wheel-disc{inset:8%;border:5px solid #e3bc5a;box-shadow:inset 0 0 0 8px #49301c,inset 0 0 0 11px #eac374}
+.cr-wheel-number{font-size:11px}
+.cr-wheel-hub{inset:36%;border:9px ridge #cda359;font-size:34px}
+.cr-ball-orbit{width:285px;height:285px;max-width:96%;left:50%;top:-26px;inset:auto;transform:translateX(-50%) scaleY(.71);transform-origin:center}
+.cr-ball-orbiting{animation:cr-ball-spin-flat 4s cubic-bezier(.12,.75,.17,1) both}
+@keyframes cr-ball-spin-flat{from{transform:translateX(-50%) scaleY(.71) rotate(0deg)}to{transform:translateX(-50%) scaleY(.71) rotate(-1900deg)}}
+.cr-pointer{top:0;font-size:28px}
+.cr-result-line{margin:7px 0 9px;gap:8px}
+.cr-result-pocket{width:39px;height:39px;font-size:18px}
+.cr-recent-pocket{width:25px;height:25px;font-size:11px}
+.cr-recent{margin-top:5px}
+.cr-table-area{grid-template-columns:minmax(125px,.68fr) minmax(0,4.6fr) minmax(115px,.85fr);gap:13px;padding:14px 15px 12px;border-radius:65px 65px 12px 12px;border:3px solid #d1a752;background:radial-gradient(ellipse at top,#166143 0%,#06432b 66%,#042d20 100%)}
+.cr-chips{gap:7px;justify-content:flex-start;padding-top:12px}
+.cr-chips h2{font-size:18px}
+.cr-chip-grid{grid-template-columns:repeat(3,minmax(32px,1fr));gap:9px;max-width:190px}
+.cr-chip{width:clamp(34px,4.2vw,58px);font-size:13px;border-width:4px}
+.cr-chip-note{max-width:140px}
+.cr-table{padding-top:0;overflow:visible}
+.cr-number-grid{grid-template-rows:repeat(3,minmax(45px,1fr));gap:2px}
+.cr-inside{grid-template-columns:minmax(29px,.65fr) minmax(0,12fr) minmax(27px,.68fr)}
+.cr-number-stage{position:relative;min-width:0}
+.cr-inside-spots{position:absolute;inset:0;pointer-events:none;overflow:visible;z-index:5}
+.cr-intersection.cr-bet{position:absolute;pointer-events:auto;z-index:5;display:grid;place-items:center;min-width:0;min-height:0;width:15px;height:15px;padding:0;border:1.5px solid #e6cc85;border-radius:50%;background:#0b6037e8;color:#fff6ce;transform:translate(-50%,-50%);font:bold 16px/1 system-ui,sans-serif;text-shadow:none;box-shadow:0 1px 2px #000b;opacity:.83}
+.cr-intersection.cr-bet:hover:not(:disabled),.cr-intersection.cr-has-bet{background:#f4d17b;color:#1a3220;opacity:1;z-index:11;outline:2px solid #fff3ba}
+.cr-intersection.cr-bet .cr-placed-chip{right:-18px;top:-15px}
+.cr-intersection.cr-spot-street,.cr-intersection.cr-spot-sixline{width:16px;height:16px;top:100%}
+.cr-intersection.cr-spot-sixline{background:#8c5a22}
+.cr-zero-extras{display:flex;flex-wrap:wrap;justify-content:center;gap:3px;margin:8px 0 0;padding:0}
+.cr-zero-special{position:relative;padding:3px 7px;color:#e9daae!important;font:bold 10px system-ui,sans-serif!important;background:#0c5a35;border:1px solid #e0c379;border-radius:4px}
+.cr-zero-special.cr-has-bet{background:#ba993f;color:#0f261b!important}
+.cr-zero-special .cr-placed-chip{top:-18px;right:-8px}
+.cr-bet{font-size:clamp(11px,1vw,15px)}
+.cr-outside .cr-bet{font-size:clamp(10px,.8vw,13px)}
+.cr-dozens,.cr-outside{margin:5px 5% 0 4%}
+.cr-actions{gap:7px}
+.cr-spin{font-size:20px!important;padding:13px 7px}
+.cr-action{font-size:11px!important;padding:9px 4px}
+.cr-odds{font-size:10px;line-height:1.5}
+.cr-footer{margin-top:5px;font-size:12px}
+.cr-status{margin:4px 0}
+.cr-disclosure{margin:5px 0 0;font-size:9px}
+@media(max-width:1100px){.cr-table-area{grid-template-columns:1fr;gap:9px;border-radius:36px}.cr-chips{flex-direction:row;justify-content:center;flex-wrap:wrap;padding:1px}.cr-chip-grid{display:flex;max-width:none;width:auto;gap:8px}.cr-chip{width:42px}.cr-actions{flex-direction:row;flex-wrap:wrap;align-items:center}.cr-actions button{flex:1;min-width:120px}.cr-odds{width:100%;margin:0}}
+@media(max-width:680px){.cr-game{padding:6px}.cr-top{height:auto;grid-template-columns:1fr 1fr;gap:6px;padding:2px 2px 8px}.cr-wheel-stage{grid-column:1/-1;grid-row:1;height:220px;width:290px}.cr-account{grid-column:1;grid-row:2}.cr-last{grid-column:2;grid-row:2}.cr-table{overflow-x:auto;padding:16px 5px 5px}.cr-inside,.cr-dozens,.cr-outside{min-width:480px}.cr-number-stage{min-width:0}.cr-chip{width:36px}.cr-table-area{padding:8px}.cr-header h1{font-size:24px}}
+@media(prefers-reduced-motion:reduce){.cr-ball-orbiting{animation-duration:.01ms!important}}

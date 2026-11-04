@@ -6,6 +6,29 @@ const RED=new Set(RED_NUMBERS);
 export const ROULETTE_CHIPS=Object.freeze([1,5,10,25,100,500]);
 export const STARTING_CREDITS=10000;
 const isStraight=key=>/^straight:(00|0|[1-9]|[12][0-9]|3[0-6])$/.test(key);
+export function rouletteInsideKey(type,numbers){
+ if(!['split','street','corner','sixline','trio','basket'].includes(type)||!Array.isArray(numbers))throw Error('Invalid inside bet');
+ return type+':'+[...numbers].map(String).sort((a,b)=>a==='00'?-1:b==='00'?1:Number(a)-Number(b)).join(',');
+}
+const THREE_ROWS=Array.from({length:3},(_,r)=>Array.from({length:12},(_,c)=>c*3+3-r));
+const insideBets=()=>{
+ const keys=[];
+ const add=(kind,values)=>keys.push(rouletteInsideKey(kind,values));
+ for(let r=0;r<3;r++)for(let c=0;c<12;c++){
+  if(c<11)add('split',[THREE_ROWS[r][c],THREE_ROWS[r][c+1]]);
+  if(r<2)add('split',[THREE_ROWS[r][c],THREE_ROWS[r+1][c]]);
+  if(r<2&&c<11)add('corner',[THREE_ROWS[r][c],THREE_ROWS[r+1][c],THREE_ROWS[r][c+1],THREE_ROWS[r+1][c+1]]);
+ }
+ for(let c=0;c<12;c++)add('street',[1+c*3,2+c*3,3+c*3]);
+ for(let c=0;c<11;c++)add('sixline',[1+c*3,2+c*3,3+c*3,4+c*3,5+c*3,6+c*3]);
+ // American double-zero end of table.
+ add('split',['0','00']);add('split',['0','1']);add('split',['0','2']);add('split',['00','2']);add('split',['00','3']);
+ add('trio',['0','1','2']);add('trio',['00','2','3']);
+ add('basket',['0','00','1','2','3']);
+ return keys;
+};
+const INSIDE_KEYS=Object.freeze(insideBets());
+const INSIDE_ODDS=Object.freeze({split:17,street:11,corner:8,sixline:5,trio:11,basket:6});
 export function rouletteColor(number){
  const value=String(number);
  if(value==='0'||value==='00')return 'green';
@@ -13,17 +36,18 @@ export function rouletteColor(number){
 }
 export function rouletteBetKeys(){
  return ['0','00',...Array.from({length:36},(_,i)=>String(i+1))].map(n=>'straight:'+n)
- .concat(['dozen:1','dozen:2','dozen:3','column:1','column:2','column:3','low','high','even','odd','red','black']);
+ .concat(['dozen:1','dozen:2','dozen:3','column:1','column:2','column:3','low','high','even','odd','red','black'],INSIDE_KEYS);
 }
 const ALLOWED=new Set(rouletteBetKeys());
 export function rouletteProfitOdds(key){
  if(!ALLOWED.has(key))throw Error('Invalid roulette bet');
- return isStraight(key)?35:key.startsWith('dozen:')||key.startsWith('column:')?2:1;
+ return isStraight(key)?35:INSIDE_ODDS[key.split(':')[0]]??(key.startsWith('dozen:')||key.startsWith('column:')?2:1);
 }
 export function rouletteBetWins(key,pocket){
  if(!ALLOWED.has(key)||!ROULETTE_WHEEL.includes(String(pocket)))throw Error('Invalid roulette bet or pocket');
  const n=Number(pocket);
  if(key.startsWith('straight:'))return key.slice(9)===String(pocket);
+ if(INSIDE_ODDS[key.split(':')[0]]!==undefined)return key.slice(key.indexOf(':')+1).split(',').includes(String(pocket));
  if(pocket==='0'||pocket==='00')return false;
  if(key.startsWith('dozen:'))return Math.ceil(n/12)===Number(key.slice(6));
  if(key.startsWith('column:'))return ((n-1)%3)+1===Number(key.slice(7));

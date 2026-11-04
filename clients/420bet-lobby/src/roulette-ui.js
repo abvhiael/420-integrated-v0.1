@@ -1,4 +1,4 @@
-import {ROULETTE_WHEEL,ROULETTE_CHIPS,STARTING_CREDITS,rouletteColor,rouletteTotal,rouletteSettle,rouletteRandomPocket} from './roulette-model.js';
+import {ROULETTE_WHEEL,ROULETTE_CHIPS,STARTING_CREDITS,rouletteColor,rouletteTotal,rouletteSettle,rouletteRandomPocket,rouletteInsideKey} from './roulette-model.js';
 
 const make=(doc,tag,cls='',value)=>{const el=doc.createElement(tag);if(cls)el.className=cls;if(value!==undefined)el.textContent=value;return el;};
 const money=n=>Number(n).toLocaleString('en-US');
@@ -120,16 +120,51 @@ export function createCannabisRoulette(doc=globalThis.document,options={}){
   const inside=make(doc,'div','cr-inside');
   const zeros=make(doc,'div','cr-zeros');
   zeros.append(betButton('00','straight:00','cr-zero',totals),betButton('0','straight:0','cr-zero',totals));
+  const zeroExtras=make(doc,'div','cr-zero-extras');
+  for(const [kind,values,label] of [
+   ['split',['0','00'],'0–00'],
+   ['split',['0','1'],'0–1'],['split',['0','2'],'0–2'],
+   ['split',['00','2'],'00–2'],['split',['00','3'],'00–3'],
+   ['trio',['0','1','2'],'0–1–2'],['trio',['00','2','3'],'00–2–3'],
+   ['basket',['0','00','1','2','3'],'Top 5']]){
+   const spot=betButton(label,rouletteInsideKey(kind,values),'cr-zero-special',totals);
+   spot.title=kind.toUpperCase()+' '+values.join(' / ');
+   zeroExtras.append(spot);
+  }
   inside.append(zeros);
   const numbers=make(doc,'div','cr-number-grid');
   for(let row=0;row<3;row++)for(let col=0;col<12;col++){
    const n=(col*3)+(3-row);
    numbers.append(betButton(String(n),'straight:'+n,'cr-number cr-'+rouletteColor(n),totals));
   }
-  inside.append(numbers);
+  // Standard casino placements: line intersections are their own clickable betting spots.
+  // Straight-up bets remain the square interiors; edges place splits and streets;
+  // four-square intersections place corners, and two-street joins place six-lines.
+  const stage=make(doc,'div','cr-number-stage');
+  const spots=make(doc,'div','cr-inside-spots');
+  const gridNumber=(row,col)=>(col*3)+(3-row);
+  const addSpot=(kind,values,x,y)=>{
+   const key=rouletteInsideKey(kind,values),label=kind.toUpperCase()+' '+values.join(' / ');
+   const spot=betButton('·',key,'cr-intersection cr-spot-'+kind,totals);
+   spot.setAttribute('aria-label',label+' practice bet');
+   spot.title=label;
+   spot.style.left=x+'%';spot.style.top=y+'%';
+   spots.append(spot);
+  };
+  for(let row=0;row<3;row++)for(let col=0;col<12;col++){
+   if(col<11)addSpot('split',[gridNumber(row,col),gridNumber(row,col+1)],(col+1)*100/12,(row+.5)*100/3);
+   if(row<2)addSpot('split',[gridNumber(row,col),gridNumber(row+1,col)],(col+.5)*100/12,(row+1)*100/3);
+   if(row<2&&col<11)addSpot('corner',[gridNumber(row,col),gridNumber(row+1,col),gridNumber(row,col+1),gridNumber(row+1,col+1)],(col+1)*100/12,(row+1)*100/3);
+  }
+  for(let col=0;col<12;col++){
+   const start=1+col*3;
+   addSpot('street',[start,start+1,start+2],(col+.5)*100/12,100);
+   if(col<11)addSpot('sixline',[start,start+1,start+2,start+3,start+4,start+5],(col+1)*100/12,100);
+  }
+  stage.append(numbers,spots);inside.append(stage);
   const columns=make(doc,'div','cr-columns');
   for(let row=0;row<3;row++)columns.append(betButton('2 TO 1',columnKey(row),'cr-column',totals));
-  inside.append(columns);table.append(inside);
+  inside.append(columns);table.append(inside,zeroExtras);
   const dozens=make(doc,'div','cr-dozens');
   [1,2,3].forEach(n=>dozens.append(betButton(n===1?'1st 12':n===2?'2nd 12':'3rd 12','dozen:'+n,'cr-outside',totals)));
   table.append(dozens);
@@ -145,7 +180,7 @@ export function createCannabisRoulette(doc=globalThis.document,options={}){
   repeatButton.disabled=spinning||!lastBets.length;actions.append(repeatButton);
   const clearButton=button('▤ Clear Bet','cr-action',()=>{bets=[];message='Practice bets cleared.';render();});
   clearButton.disabled=spinning||!bets.length;actions.append(clearButton);
-  actions.append(make(doc,'p','cr-odds','Straight 35:1 · Dozens/columns 2:1 · Even-money 1:1'));
+  actions.append(make(doc,'p','cr-odds','Straight 35:1 · Split 17:1 · Street/Trio 11:1 · Corner 8:1 · Six-line 5:1 · Top five 6:1'));
   bottom.append(chipPanel,table,actions);root.append(bottom);
   const footer=make(doc,'footer','cr-footer');
   const status=make(doc,'p','cr-status',message);status.setAttribute('role','status');status.setAttribute('aria-live','polite');

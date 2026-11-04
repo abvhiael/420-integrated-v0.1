@@ -150,7 +150,7 @@
 .cr-zero:first-child{border-radius:1.5cqw 0 0 0}
 .cr-zero:last-child{border-radius:0 0 0 1.5cqw}
 .cr-column{writing-mode:vertical-rl;font:bold 1.25cqw Georgia,serif;border:.15cqw solid #d8ae5e;background:#003f25}
-.cr-dozens,.cr-outside{display:grid;gap:0;margin:0 4.5% 0 7.6%;height:18%}
+.cr-table > .cr-dozens,.cr-table > .cr-outside{display:grid;gap:0;margin:0 4.5% 0 7.6%;height:18%}
 .cr-dozens{grid-template-columns:repeat(3,minmax(0,1fr))}
 .cr-outside{grid-template-columns:repeat(6,minmax(0,1fr))}
 .cr-dozens .cr-bet,.cr-outside .cr-bet{display:grid;place-items:center;white-space:nowrap;overflow:hidden;font-size:1.85cqw;line-height:1;border:.13cqw solid #f6d081}

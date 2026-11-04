@@ -1,0 +1,30 @@
+name: Roulette practice targeted Level 1
+on:
+  pull_request:
+    paths:
+      - 'clients/420bet-lobby/src/roulette-*.js'
+      - 'clients/420bet-lobby/src/roulette.css'
+      - 'clients/420bet-lobby/src/main.js'
+      - 'clients/420bet-lobby/tests/roulette.test.mjs'
+      - '.github/workflows/roulette-level1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  roulette-level1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install scoped lobby dependencies
+        working-directory: clients/420bet-lobby
+        run: npm install --no-audit --no-fund
+      - name: Test only roulette mechanics and interface
+        working-directory: clients/420bet-lobby
+        run: node --test tests/roulette.test.mjs
+      - name: Build affected 420Bet lobby
+        working-directory: clients/420bet-lobby
+        run: npm run build

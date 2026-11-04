@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {parseHTML} from 'linkedom';
 import {existsSync,readFileSync} from 'node:fs';
-import {BASE_REELS,BONUS_REELS,PAYLINES,BASE_PAYTABLE,BONUS_PAYTABLE,validateMaryJaneModel,MAX_PAYOUT_X} from '../src/mary-jane-model.js';
+import {BASE_REELS,BONUS_REELS,PAYLINES,BASE_PAYTABLE,BONUS_PAYTABLE,SYMBOL_NAMES,validateMaryJaneModel,MAX_PAYOUT_X} from '../src/mary-jane-model.js';
 import {initialMaryJaneState,setMaryJaneStake,spinMaryJane,evaluateMaryJane,visibleMaryJaneReels,creditText,validatePracticeSession} from '../src/mary-jane-engine.js';
 import {createMaryJanePractice} from '../src/mary-jane-ui.js';
 import {createSlotsLobby,slotMachineFromHash,SLOT_MACHINES} from '../src/slots-lobby.js';
@@ -239,4 +239,58 @@ test('highlighted Gold Leaf Frames and art sizing are distinct; scatter explaine
  assert.match(trigger.getAttribute('aria-label'),/Vegas 420 Scatter signs/);
  assert(trigger.querySelector('.mj-scatter-trigger-icon'));
  game.stopAnimation();
+});
+
+test('spinning reels visibly cycle consecutive 60-stop symbols before staggered settlement',()=>{
+ const {document,window}=parseHTML('<html><body></body></html>');
+ let now=0,id=0;const pending=new Map();
+ const clock={
+  setTimeout(fn,delay){const key=++id;pending.set(key,{at:now+delay,fn});return key;},
+  clearTimeout(key){pending.delete(key);},
+  advance(ms){const end=now+ms;while(true){
+   const due=[...pending].filter(([,task])=>task.at<=end).sort((a,b)=>a[1].at-b[1].at)[0];
+   if(!due)break;now=due[1].at;pending.delete(due[0]);due[1].fn();
+  }now=end;}
+ };
+ const stops=[0,9,17,30,42];
+ const game=createMaryJanePractice(document,{...clock,pickStops:()=>stops});
+ const labels=reel=>[...game.querySelectorAll('.mj-reel[data-reel="'+reel+'"] .mj-cell')]
+   .map(cell=>cell.getAttribute('aria-label'));
+ const initial=labels(0);
+ const originalBalance=game.querySelector('.mj-live-balance').textContent;
+ game.querySelector('.mj-hit-spin').dispatchEvent(new window.Event('click'));
+ assert.equal(game.querySelectorAll('.mj-reel-moving').length,5);
+ clock.advance(85);
+ assert.notDeepEqual(labels(0),initial,'reel one must actually change displayed symbols');
+ assert.equal(game.querySelector('.mj-live-balance').textContent,originalBalance,'stake settles only after reel 5');
+ const beforeSecondTick=labels(0);
+ clock.advance(85);
+ assert.notDeepEqual(labels(0),beforeSecondTick,'symbols must continue advancing while spinning');
+ clock.advance(430); // 600 ms: reel one stops
+ assert.equal(game.querySelectorAll('.mj-reel-moving').length,4);
+ assert.deepEqual(labels(0),stops.map((_,r)=>BASE_REELS[0][(stops[0]+r)%60]).map((sym,row)=>
+   'Reel 1 row '+(row+1)+': '+(sym.startsWith('H01')?'Mary Jane':SYMBOL_NAMES[sym])));
+ const firstStopped=labels(0),secondBefore=labels(1);
+ clock.advance(170);
+ assert.deepEqual(labels(0),firstStopped,'settled reel must not animate');
+ assert.notDeepEqual(labels(1),secondBefore,'next reel must keep advancing');
+ clock.advance(1830);
+ assert.equal(game.querySelectorAll('.mj-reel-moving').length,0);
+ assert.equal(pending.size,0,'all animation tick timers must be cleared at final reel stop');
+ assert.equal(game.querySelectorAll('.mj-cell').length,20);
+ game.stopAnimation();
+});
+
+test('leaving a spinning Mary Jane machine cancels all pending reel animation tasks',()=>{
+ const {document,window}=parseHTML('<html><body></body></html>');
+ let next=1;const pending=new Map();
+ const game=createMaryJanePractice(document,{
+  setTimeout(fn,delay){const id=next++;pending.set(id,{fn,delay});return id;},
+  clearTimeout(id){pending.delete(id);},
+  pickStops:()=>[0,9,17,30,42]
+ });
+ game.querySelector('.mj-hit-spin').dispatchEvent(new window.Event('click'));
+ assert(pending.size>=6,'expected five staggered stops and a symbol ticker');
+ game.stopAnimation();
+ assert.equal(pending.size,0);
 });

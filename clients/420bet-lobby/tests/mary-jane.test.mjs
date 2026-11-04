@@ -294,3 +294,47 @@ test('leaving a spinning Mary Jane machine cancels all pending reel animation ta
  game.stopAnimation();
  assert.equal(pending.size,0);
 });
+
+test('oversized THC BAR, joint, bong and lighter have dedicated centered art without atlas remapping',()=>{
+ const css=readFileSync(new URL('../src/mary-jane-concept.css',import.meta.url),'utf8');
+ const ui=readFileSync(new URL('../src/mary-jane-ui.js',import.meta.url),'utf8');
+ for(const name of ['bar','joint','bong','lighter']){
+  const re=new RegExp('\\.mj-symbol-art\\.mj-art-'+name+'\\s*\\{([^}]*)\\}');
+  const match=css.match(re);
+  assert(match,'missing per-symbol CSS for '+name);
+  assert.match(match[1],/inset:\\d+% \\d+% \\d+% \\d+%/);
+  assert.match(match[1],/transform:translate\\(/);
+  assert.doesNotMatch(match[1],/background-position/i,'sprite atlas must not be recentered to another symbol');
+ }
+ for(const id of ['H06','L05','H05','L04'])
+  assert(ui.includes("normalized==='"+id+"'"),'missing explicit symbol class '+id);
+ assert(ui.includes("art.style.backgroundPosition=((i%4)*100/3)"),'keep precise sprite coordinates');
+ // Verify the DOM class is assigned to its matching symbol, not just CSS.
+ const {document,window}=parseHTML('<html><body></body></html>');
+ let now=0,id=0;const jobs=new Map();
+ const timers={
+  setTimeout(fn,delay){const key=++id;jobs.set(key,{at:now+delay,fn});return key;},
+  clearTimeout(key){jobs.delete(key);},
+  advance(ms){const end=now+ms;while(true){
+   const due=[...jobs].filter(([,job])=>job.at<=end).sort((a,b)=>a[1].at-b[1].at)[0];
+   if(!due)break;now=due[1].at;jobs.delete(due[0]);due[1].fn();
+  }now=end;}
+ };
+ let chosen='H06';
+ const game=createMaryJanePractice(document,{...timers,pickStops:()=>BASE_REELS.map((reel,r)=>r===0?reel.indexOf(chosen):0)});
+ for(const [symbol,cls] of [['H06','bar'],['L05','joint'],['H05','bong'],['L04','lighter']]){
+  chosen=symbol;
+  game.querySelector('.mj-hit-spin').dispatchEvent(new window.Event('click'));
+  timers.advance(2600);
+  const cells=[...game.querySelectorAll('.mj-reel[data-reel="0"] .mj-cell')];
+  const selected=cells.find(cell=>cell.getAttribute('aria-label')?.endsWith(
+   ({H06:'THC BAR',L05:'Joint',H05:'Glass Bong',L04:'Lighter'})[symbol]
+  ));
+  assert(selected,'missing rendered '+symbol);
+  const art=selected.querySelector('.mj-symbol-art.mj-art-'+cls);
+  assert(art,'wrong class for '+symbol);
+  assert(art.style.backgroundPosition,'atlas coordinates missing for '+symbol);
+  assert.equal(jobs.size,0,'spin animation must complete');
+ }
+ game.stopAnimation();
+});

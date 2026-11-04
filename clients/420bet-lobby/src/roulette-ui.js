@@ -48,7 +48,7 @@ export function createCannabisRoulette(doc=globalThis.document,options={}){
    timer=null;if(destroyed)return;
    balance+=result.returned;last=result;recent=[result.pocket,...recent].slice(0,7);
    spinning=false;
-   message='Pocket '+result.pocket+' · '+result.color.toUpperCase()+' · '+(result.returned?'Returned '+money(result.returned)+' practice credits':'No winning practice bets');
+   message=result.returned?'WINNING SPIN · Pocket '+result.pocket+' · Paid '+money(result.returned)+' credits · Net '+(result.net>=0?'+':'')+money(result.net):'Pocket '+result.pocket+' · No winning bets · Lost '+money(result.stake)+' credits';
    render();
   },4000);
  }
@@ -63,7 +63,7 @@ export function createCannabisRoulette(doc=globalThis.document,options={}){
   root.replaceChildren();
   const totals=betTotals();
   const header=make(doc,'header','cr-header');
-  header.append(make(doc,'div','cr-brand','✦ 420Bet ✦'),make(doc,'h1','','420Bet Roulette'),make(doc,'p','','AMERICAN ROULETTE · CANNABIS CASINO · PRACTICE ONLY'));
+  header.append(make(doc,'div','cr-brand','✦ 420Bet · HIGH ROLLER CLUB ✦'),make(doc,'h1','','420Bet Roulette'),make(doc,'p','','AMERICAN DOUBLE ZERO · GREEN FELT CASINO · PRACTICE ONLY'));
   root.append(header);
   const top=make(doc,'div','cr-top');
   const credits=make(doc,'div','cr-ledger cr-credits');
@@ -72,7 +72,11 @@ export function createCannabisRoulette(doc=globalThis.document,options={}){
   total.append(make(doc,'span','cr-ledger-title','❋ Current Bet'),make(doc,'strong','',money(sum())),make(doc,'span','cr-ledger-caption','Selected chip: '+money(chip)));
   const account=make(doc,'div','cr-account');account.append(credits,total);
   const wheelBox=make(doc,'div','cr-wheel-stage');
+  wheelBox.setAttribute('aria-label','Centered brass-and-emerald cannabis roulette wheel');
+  const wheelShadow=make(doc,'div','cr-wheel-shadow');wheelBox.append(wheelShadow);
   const wheel=make(doc,'div','cr-wheel'+(spinning?' cr-wheel-spinning':''));
+  wheel.append(make(doc,'div','cr-wheel-ornament','✦ 420 ✦'));
+  const rim=make(doc,'div','cr-wheel-rim');
   wheel.setAttribute('role','img');wheel.setAttribute('aria-label','Animated American roulette wheel with 38 pockets, zero and double zero');
   const disc=make(doc,'div','cr-wheel-disc');
   const sector=360/ROULETTE_WHEEL.length;
@@ -84,14 +88,18 @@ export function createCannabisRoulette(doc=globalThis.document,options={}){
   disc.style.setProperty('--cr-spin-to',rotation+'deg');
   ROULETTE_WHEEL.forEach((n,i)=>{
    const label=make(doc,'span','cr-wheel-number',n);
-   label.style.setProperty('--a',(i+.5)*sector+'deg');
+   const a=(i+.5)*sector*Math.PI/180;
+   label.style.left=(50+43*Math.sin(a))+'%';
+   label.style.top=(50-43*Math.cos(a))+'%';
+   label.style.transform='translate(-50%,-50%) rotate('+((i+.5)*sector)+'deg)';
    disc.append(label);
   });
-  const hub=make(doc,'div','cr-wheel-hub','✦');hub.append(make(doc,'span','','❋'));
-  wheel.append(disc,hub);
+  const hub=make(doc,'div','cr-wheel-hub');
+  hub.append(make(doc,'span','cr-hub-leaf','🌿'),make(doc,'strong','cr-hub-brand','420BET'));
+  rim.append(disc,hub);wheel.append(rim);
   const pointer=make(doc,'div','cr-pointer','▼');pointer.setAttribute('aria-hidden','true');
   const ball=make(doc,'div','cr-ball-orbit'+(spinning?' cr-ball-orbiting':''));
-  if(!spinning)ball.style.transform='rotate('+(((rotation%360)+360)%360)+'deg)';
+  if(!spinning)ball.style.setProperty('--cr-ball-angle',(((rotation%360)+360)%360)+'deg');
   ball.append(make(doc,'span','cr-ball','●'));
   wheelBox.append(wheel,ball,pointer);
   const resultPanel=make(doc,'div','cr-last');
@@ -104,6 +112,14 @@ export function createCannabisRoulette(doc=globalThis.document,options={}){
   if(!recent.length)recentRow.append(make(doc,'small','','No spins yet'));
   else for(const p of recent)recentRow.append(make(doc,'span','cr-recent-pocket cr-'+rouletteColor(p),p));
   resultPanel.append(recentRow);
+  const payout=make(doc,'div','cr-payout '+(!last?'cr-payout-idle':last.returned?'cr-payout-win':'cr-payout-loss'));
+  payout.setAttribute('role','status');payout.setAttribute('aria-live','polite');
+  payout.append(make(doc,'div','cr-payout-title',!last?'✦ SPIN PAYOUT ✦':last.returned?'✦ WINNER! ✦':'✦ SPIN RESULT ✦'));
+  const payoutAmount=make(doc,'strong','cr-payout-amount',last?money(last.returned):'—');
+  payout.append(payoutAmount,make(doc,'div','cr-payout-caption',last?'TOTAL RETURN · INCLUDES STAKE':'PRACTICE CREDITS'));
+  const net=make(doc,'div','cr-payout-net',!last?'Net result shown after each spin':last.net>=0?'NET WIN +'+money(last.net):'NET LOSS −'+money(-last.net));
+  payout.append(net);
+  resultPanel.append(payout);
   top.append(account,wheelBox,resultPanel);root.append(top);
   const bottom=make(doc,'div','cr-table-area');
   const chipPanel=make(doc,'aside','cr-chips');

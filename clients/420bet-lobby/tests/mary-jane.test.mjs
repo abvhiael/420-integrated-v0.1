@@ -268,7 +268,7 @@ test('spinning reels visibly cycle consecutive 60-stop symbols before staggered 
  assert.notDeepEqual(labels(0),beforeSecondTick,'symbols must continue advancing while spinning');
  clock.advance(430); // 600 ms: reel one stops
  assert.equal(game.querySelectorAll('.mj-reel-moving').length,4);
- assert.deepEqual(labels(0),stops.map((_,r)=>BASE_REELS[0][(stops[0]+r)%60]).map((sym,row)=>
+ assert.deepEqual(labels(0),Array.from({length:4},(_,r)=>BASE_REELS[0][(stops[0]+r)%60]).map((sym,row)=>
    'Reel 1 row '+(row+1)+': '+(sym.startsWith('H01')?'Mary Jane':SYMBOL_NAMES[sym])));
  const firstStopped=labels(0),secondBefore=labels(1);
  clock.advance(170);

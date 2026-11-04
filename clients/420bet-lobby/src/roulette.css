@@ -217,7 +217,7 @@
    All betting hit targets remain interactive above the artwork, and only
    dynamic state (balance, placed chips, result and spin) is composited. */
 section.cr-game[data-practice-game="roulette"]{
- background:#00210e url('/assets/420bet/roulette/reference-cabinet.svg') center/100% 100% no-repeat;
+ background:#00210e url('/assets/420bet/roulette/reference-no-painted-ball.webp') center/100% 100% no-repeat;
 }
 section.cr-game .cr-header{background:none;border:0;box-shadow:none;opacity:0;pointer-events:none}
 section.cr-game .cr-header::before,section.cr-game .cr-header::after{display:none}
@@ -290,7 +290,7 @@ section.cr-game .cr-chips .cr-chip-grid{
   transform:translateY(-2.5cqw);
 }
 section.cr-game .cr-table{
-  transform:translate(-0.25cqw,1.25cqw);
+  transform:translate(0.20cqw,1.25cqw);
 }
 /* Move only the Repeat Bet target lower, keeping Spin and Clear in place. */
 section.cr-game .cr-actions .cr-action:nth-of-type(2){
@@ -333,4 +333,26 @@ section.cr-game .cr-table .cr-bet.cr-has-bet .cr-placed-chip{
 section.cr-game .cr-payout.cr-payout-idle{
   display:none;
   pointer-events:none;
+}
+
+/* User-requested luminous REAL ball. The original painted ball is removed in
+   reference-no-painted-ball.webp; keep only this animated DOM element. */
+section.cr-game .cr-ball{
+ display:block;
+ position:absolute;
+ left:50%;
+ top:9.3%;
+ width:2.3cqw;
+ height:2.3cqw;
+ padding:0;
+ border:.12cqw solid #fff9d9;
+ border-radius:50%;
+ transform:translate(-50%,-50%);
+ background:radial-gradient(circle at 32% 28%,#ffffff 0%,#fffef3 26%,#ffe7a0 55%,#ffcc3b 77%,#a36c0b 100%);
+ box-shadow:0 0 .38cqw #fff,0 0 .85cqw #fff9bd,0 0 1.5cqw #faff958c;
+ filter:drop-shadow(0 0 .45cqw #ffffdc);
+ color:transparent;
+ font-size:0;
+ pointer-events:none;
+ z-index:12;
 }

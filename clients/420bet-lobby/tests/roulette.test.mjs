@@ -219,3 +219,14 @@ test('reference-composition has interactive exact-position green casino board an
  assert.equal(root.querySelector('.cr-credits strong').textContent,'11,000');
  root.stopAnimation();
 });
+
+test('visual regression: centered wheel and outside-bet rows have separate selectors',()=>{
+ const css=readFileSync(new URL('../src/roulette.css',import.meta.url),'utf8');
+ assert(!/\.cr-wheel\s*\{[^}]*inset:auto/.test(css),'inset:auto must not reset wheel left/top');
+ assert(!/\.cr-ball-orbit\s*\{[^}]*inset:auto/.test(css),'inset:auto must not reset ball axis');
+ assert(css.includes('.cr-table > .cr-outside{grid-template-columns:repeat(6,minmax(0,1fr))}'));
+ assert(css.includes('.cr-table > .cr-dozens,.cr-table > .cr-outside{display:grid'));
+ assert(!css.includes('.cr-dozens,.cr-outside{display:grid'));
+ assert(!css.includes('.cr-outside{grid-template-columns:repeat(6,'));
+ assert(css.includes('white-space:nowrap'),'outside bet labels must stay on one line');
+});

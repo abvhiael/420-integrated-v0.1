@@ -290,7 +290,7 @@ section.cr-game .cr-chips .cr-chip-grid{
   transform:translateY(-2.5cqw);
 }
 section.cr-game .cr-table{
-  transform:translate(-0.75cqw,1.25cqw);
+  transform:translate(-0.25cqw,1.25cqw);
 }
 /* Move only the Repeat Bet target lower, keeping Spin and Clear in place. */
 section.cr-game .cr-actions .cr-action:nth-of-type(2){

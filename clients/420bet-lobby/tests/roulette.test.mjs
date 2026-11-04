@@ -273,7 +273,7 @@ test('reference-art hotspot calibration moves chips up, board left/down and Repe
  assert(css.includes('section.cr-game .cr-chips .cr-chip-grid{'));
  assert(css.includes('transform:translateY(-2.5cqw)'));
  assert(css.includes('section.cr-game .cr-table{'));
- assert(css.includes('transform:translate(-0.75cqw,1.25cqw)'));
+ assert(css.includes('transform:translate(-0.25cqw,1.25cqw)'));
  assert(css.includes('section.cr-game .cr-actions .cr-action:nth-of-type(2){'));
  assert(css.includes('transform:translateY(1.3cqw)'));
  assert(css.includes('section.cr-game .cr-payout.cr-payout-idle{'));

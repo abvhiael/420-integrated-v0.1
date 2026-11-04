@@ -230,3 +230,51 @@ test('visual regression: centered wheel and outside-bet rows have separate selec
  assert(!/(^|,|\})\s*\.cr-outside\{grid-template-columns:repeat\(6,/.test(css));
  assert(css.includes('white-space:nowrap'),'outside bet labels must stay on one line');
 });
+
+test('betting the next round hides prior payout immediately, including repeat bets',()=>{
+ const {document}=parseHTML('<html><body></body></html>');
+ let finish;
+ const root=createCannabisRoulette(document,{pickPocket:()=> '17',setTimeout:fn=>{finish=fn;return 8;}});
+ document.body.append(root);
+ root.querySelector('[data-bet="straight:17"]').click();
+ root.querySelector('.cr-spin').click();
+ finish();
+ assert(root.querySelector('.cr-payout').classList.contains('cr-payout-win'));
+ assert.equal(root.querySelector('.cr-payout-amount').textContent,'360');
+ // A fresh straight-up wager must not leave the payout overlay over the numbers.
+ root.querySelector('[data-bet="straight:33"]').click();
+ assert(root.querySelector('.cr-payout').classList.contains('cr-payout-idle'));
+ assert.equal(root.querySelector('.cr-current-bet strong').textContent,'10');
+ root.querySelector('.cr-action:nth-of-type(3)').click();
+ assert(root.querySelector('.cr-payout').classList.contains('cr-payout-idle'));
+ root.querySelector('.cr-action:nth-of-type(2)').click();
+ assert(root.querySelector('.cr-payout').classList.contains('cr-payout-idle'));
+ assert.equal(root.querySelector('.cr-current-bet strong').textContent,'10');
+ root.stopAnimation();
+});
+test('placed chips stay in the DOM and visually above all roulette artwork',()=>{
+ const {document}=parseHTML('<html><body></body></html>');
+ const root=createCannabisRoulette(document);
+ root.querySelector('[data-bet="straight:33"]').click();
+ const marker=root.querySelector('[data-bet="straight:33"] .cr-placed-chip');
+ assert(marker,'selected number must retain a rendered stake marker');
+ assert.equal(marker.textContent,'10');
+ root.querySelector('[data-bet="corner:1,2,4,5"]').click();
+ assert(root.querySelector('[data-bet="corner:1,2,4,5"] .cr-placed-chip'));
+ const css=readFileSync(new URL('../src/roulette.css',import.meta.url),'utf8');
+ assert(css.includes('section.cr-game .cr-table .cr-bet.cr-has-bet .cr-placed-chip'));
+ assert(css.includes('visibility:visible'));
+ assert(css.includes('pointer-events:none'));
+ assert(css.includes('z-index:20'));
+ root.stopAnimation();
+});
+test('reference-art hotspot calibration moves chips up, board left/down and Repeat Bet down',()=>{
+ const css=readFileSync(new URL('../src/roulette.css',import.meta.url),'utf8');
+ assert(css.includes('section.cr-game .cr-chips .cr-chip-grid{'));
+ assert(css.includes('transform:translateY(-2.5cqw)'));
+ assert(css.includes('section.cr-game .cr-table{'));
+ assert(css.includes('transform:translate(-1.35cqw,1.25cqw)'));
+ assert(css.includes('section.cr-game .cr-actions .cr-action:nth-of-type(2){'));
+ assert(css.includes('transform:translateY(1.3cqw)'));
+ assert(css.includes('section.cr-game .cr-payout.cr-payout-idle{'));
+});

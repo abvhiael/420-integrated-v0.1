@@ -282,3 +282,55 @@ section.cr-game .cr-payout{z-index:15}
 section.cr-game .cr-footer .cr-disclosure{background:none;border:0;box-shadow:none;color:transparent}
 section.cr-game .cr-footer .cr-disclosure::before,section.cr-game .cr-footer .cr-disclosure::after{display:none}
 section.cr-game .cr-footer .cr-status{background:#00320fcf;border-radius:.25cqw;padding:.2cqw;color:#e3fac5}
+
+/* User-tested hotspot calibration against the exact 1672×941 reference image.
+   Adjust interactive layers only; never move or repaint the reference artwork. */
+section.cr-game .cr-chips .cr-chip-grid{
+  position:relative;
+  transform:translateY(-2.5cqw);
+}
+section.cr-game .cr-table{
+  transform:translate(-1.35cqw,1.25cqw);
+}
+/* Move only the Repeat Bet target lower, keeping Spin and Clear in place. */
+section.cr-game .cr-actions .cr-action:nth-of-type(2){
+  transform:translateY(1.3cqw);
+}
+/* Retain a real, unmistakable wagering token on the chosen betting position.
+   The reference artwork is only a background: these chips must be above it. */
+section.cr-game .cr-table .cr-bet.cr-has-bet{
+  z-index:8;
+}
+section.cr-game .cr-table .cr-intersection.cr-has-bet{
+  opacity:1;
+  z-index:11;
+}
+section.cr-game .cr-table .cr-bet.cr-has-bet .cr-placed-chip{
+  display:grid;
+  place-items:center;
+  position:absolute;
+  top:50%;
+  left:50%;
+  right:auto;
+  width:auto;
+  min-width:2.45cqw;
+  min-height:2.45cqw;
+  padding:.2cqw;
+  border:.25cqw dashed #fff9d6;
+  border-radius:50%;
+  transform:translate(-50%,-50%);
+  background:radial-gradient(circle at 35% 25%,#fff5b6 0%,#efc753 48%,#895c16 100%);
+  box-shadow:0 0 .35cqw #ffffc7,0 .2cqw .35cqw #00190d;
+  color:#172c15;
+  font:900 1.05cqw/1 Arial,sans-serif;
+  text-shadow:0 1px #fff9ca;
+  opacity:1;
+  visibility:visible;
+  pointer-events:none;
+  z-index:20;
+}
+/* A spin result is displayed until a new bet begins; never cover 33 or 36. */
+section.cr-game .cr-payout.cr-payout-idle{
+  display:none;
+  pointer-events:none;
+}

@@ -363,3 +363,39 @@
 .mj-disclaimer{color:#e4c37b;font-size:.85rem}
 @media(max-width:950px){.mj-layout{grid-template-columns:minmax(0,3.4fr) minmax(140px,.8fr)}.mj-character{display:none}.mj-cell{min-height:68px}.mj-status{padding:10px 5px}.mj-console{gap:6px}}
 @media(max-width:680px){.mary-jane-game{padding:10px 4px}.mj-cabinet{border-width:5px;border-radius:18px;padding:5px}.mj-layout{grid-template-columns:minmax(0,1fr)}.mj-status{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:3px;padding:5px}.mj-status h3{font-size:.65rem}.mj-status .mj-buzz{font-size:1.4rem;min-height:50px;min-width:0}.mj-status .mj-cycle{padding:5px;font-size:.7rem}.mj-status .mj-cap,.mj-status .mj-frames{font-size:.6rem}.mj-reels{padding:3px;border-width:4px;gap:2px}.mj-reel{gap:2px}.mj-cell{min-height:64px;border-radius:4px}.mj-glyph{font-size:1.5rem}.mj-symbol-label{font-size:.48rem}.mj-coin .mj-glyph{height:34px;width:34px;border-width:3px}.mj-console{padding:6px}.mj-control{padding:8px 7px}.mj-spin{height:65px;width:80px;font-size:1.05rem}.mj-line-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* Emerald Harvest lobby: assemble the actual playable cabinet composition
+   with a fixed real reel-strip outcome instead of the empty cabinet PNG. */
+.slots-machine-art .slots-emerald-preview{
+ position:relative;display:block;width:min(100%,350px);aspect-ratio:1448/1086;
+ flex:none;isolation:isolate;overflow:hidden;
+ filter:drop-shadow(0 0 15px #3cfa6170);
+}
+.slots-machine-art .slots-emerald-reel-grid{
+ position:absolute;z-index:1;left:13.2%;top:24.4%;width:73.7%;height:53.8%;
+ display:grid;grid-template-columns:repeat(5,minmax(0,1fr));
+ grid-template-rows:repeat(4,minmax(0,1fr));
+ background:#07190e;overflow:hidden;gap:0;
+}
+.slots-machine-art .slots-emerald-symbol{
+ display:grid;place-items:center;min-width:0;min-height:0;overflow:hidden;
+ background:radial-gradient(ellipse,#163b23,#041008 85%);
+ border:1px solid #285936;
+}
+.slots-machine-art .slots-emerald-symbol img{
+ width:86%;height:86%;object-fit:contain;object-position:center;
+ max-width:none;max-height:none;filter:none;transform:none;
+ pointer-events:none;user-select:none;
+}
+.slots-machine-art .slots-emerald-cabinet{
+ position:absolute;z-index:2;inset:0;width:100%;height:100%;
+ max-width:none;max-height:none;object-fit:fill;
+ filter:none;transform:none;pointer-events:none;
+}
+.slots-machine-link:hover .slots-emerald-preview,.slots-machine-link:focus-visible .slots-emerald-preview{
+ filter:drop-shadow(0 0 19px #76ec72a0);
+}
+.slots-machine-link:hover .slots-emerald-preview img,.slots-machine-link:focus-visible .slots-emerald-preview img{
+ transform:none;
+}
+@media(max-width:440px){.slots-machine-art .slots-emerald-preview{width:100%;}}

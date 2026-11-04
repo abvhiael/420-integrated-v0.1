@@ -1,9 +1,11 @@
 import {createPractice} from './practice-ui.js';
+import {createCannabisRoulette} from './roulette-ui.js';
 import {createMaryJanePractice} from './mary-jane-ui.js';
 import {createSlotsLobby,slotMachineFromHash,slotMachinePath} from './slots-lobby.js';
 import {WalletIdentity,loadHistory} from './wallet.js';
 import './style.css';
 import './mary-jane-concept.css';
+import './roulette.css';
 import {createNativePreview} from './previews.js';
 import {categories,resolveCatalogue,filterGames} from './catalogue.js';
 const app=document.querySelector('#app');
@@ -49,7 +51,7 @@ function render(){
       else wrap.append(createSlotsLobby(document,launchSlotMachine));
       main.append(wrap);
     }
-    else if(active.category==='Casino'){activePractice=createPractice(active.id,document);const wrap=node('div','view-scroll');wrap.append(activePractice);main.append(wrap);}
+    else if(active.category==='Casino'){activePractice=active.id==='roulette'?createCannabisRoulette(document):createPractice(active.id,document);const wrap=node('div','view-scroll');wrap.append(activePractice);main.append(wrap);}
     else if(active.route){const frame=node('iframe','gameframe');frame.title=active.title+' game';frame.src=active.route;frame.setAttribute('allow','fullscreen');main.append(frame);}
     else {const nativePreview=createNativePreview(active.id);if(nativePreview){const wrap=node('div','view-scroll');wrap.append(nativePreview);main.append(wrap);}else{const preview=node('section','preview-screen');preview.append(node('p','eyebrow','420BET GAME PREVIEW'),node('div','preview-glyph',({'Casino':'✦','Poker':'♠','Fantasy':'★','Sportsbook':'◆'})[active.category]),node('h1','',active.title),node('p','','This game screen is being prepared. Its dedicated interface is not yet connected.'),node('p','preview-warning','Viewing only — wagering, wallet transactions and payouts are not enabled here.'));preview.append(button('Return to Lobby',close,'return'));main.append(preview);}}
     const foot=node('footer','game-footer');foot.append(brandLink('footer-brand'),node('span','','420Bet · Practice and previews only — no wagering enabled.'));app.append(main,foot);return;

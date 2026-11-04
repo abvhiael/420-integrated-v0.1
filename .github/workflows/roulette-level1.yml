@@ -28,3 +28,20 @@ jobs:
       - name: Build affected 420Bet lobby
         working-directory: clients/420bet-lobby
         run: npm run build
+      - name: Capture actual Roulette at reference viewport
+        working-directory: clients/420bet-lobby
+        run: |
+          npm run dev -- --host 127.0.0.1 > /tmp/roulette-vite.log 2>&1 &
+          for i in 1 2 3 4 5 6 7 8 9 10; do
+            if curl -fsS http://127.0.0.1:5173/ > /dev/null; then break; fi
+            sleep 1
+          done
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          test -n "$CHROME"
+          "$CHROME" --headless --no-sandbox --disable-gpu --hide-scrollbars --virtual-time-budget=1200 --window-size=1672,1000 --screenshot="$PWD/roulette-desktop.png" "http://127.0.0.1:5173/#game=roulette"
+          test -s roulette-desktop.png
+      - uses: actions/upload-artifact@v4
+        with:
+          name: roulette-reference-viewport
+          path: clients/420bet-lobby/roulette-desktop.png
+          retention-days: 7

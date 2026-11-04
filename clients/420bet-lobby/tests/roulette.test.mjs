@@ -149,24 +149,29 @@ test('branded wheel has an actual roulette-specific wallpaper, shared axis, and 
  assert(root.querySelector('.cr-wheel-rim .cr-hub-brand').textContent==='420BET');
  assert(root.querySelector('.cr-wheel-stage .cr-ball-orbit'));
  const css=readFileSync(new URL('../src/roulette.css',import.meta.url),'utf8');
- assert(css.includes("url('/assets/420bet/roulette/emerald-gold-wallpaper.svg')"));
+ assert(css.includes("url('/assets/420bet/roulette/neon-vegas-wallpaper.svg')"));
  assert(css.includes('left:50%;top:50%'));
- const svg=readFileSync(new URL('../public/assets/420bet/roulette/emerald-gold-wallpaper.svg',import.meta.url),'utf8');
+ const svg=readFileSync(new URL('../public/assets/420bet/roulette/neon-vegas-wallpaper.svg',import.meta.url),'utf8');
  assert(svg.includes('id="leaf"'));
- assert(svg.includes('id="scroll"'));
+ assert(svg.includes('id="city"'));
+ assert(svg.includes('id="smoke"'));
+ assert(svg.includes('420Bet'));
+ const hub=readFileSync(new URL('../public/assets/420bet/roulette/cannabis-hub.svg',import.meta.url),'utf8');
+ assert(hub.includes('viewBox'));
+
  root.stopAnimation();
 });
 
 test('reference-style casino cabinet has one authoritative wheel layout and visible wallpaper',()=>{
  const css=readFileSync(new URL('../src/roulette.css',import.meta.url),'utf8');
- const baseCss=css.split('@media(max-width:900px)')[0];
+ const baseCss=css.split('@media(max-width:750px)')[0];
  assert.equal((baseCss.match(/\.cr-wheel-stage\s*\{/g)||[]).length,1,'wheel stage must have exactly one base declaration');
  assert.equal((baseCss.match(/\.cr-wheel\s*\{/g)||[]).length,1,'wheel must not use accumulated competing rules');
  assert.equal((baseCss.match(/\.cr-game\s*\{/g)||[]).length,1,'cabinet must have a single base style');
  assert.match(css,/\.cr-wheel\s*\{[^}]*left:50%;top:50%/s);
  assert.match(css,/\.cr-ball-orbit\s*\{[^}]*left:50%;top:50%/s);
  assert(css.includes('translate(-50%,-50%) scaleY(.62)'),'wheel must center before perspective squash');
- assert(css.includes("url('/assets/420bet/roulette/emerald-gold-wallpaper.svg')"));
+ assert(css.includes("url('/assets/420bet/roulette/neon-vegas-wallpaper.svg')"));
  assert(css.includes('.cr-table-area'));
  assert(css.includes('.cr-header::before,.cr-header::after'));
  assert(css.includes('.cr-payout-win'));
@@ -190,4 +195,38 @@ test('wheel animation begins at previous resting angle after repeated spins',()=
  assert.equal(second.style.getPropertyValue('--cr-spin-from'),firstTo);
  assert.notEqual(second.style.getPropertyValue('--cr-spin-to'),firstTo);
  root.stopAnimation();
+});
+
+test('reference-composition has interactive exact-position green casino board and refill',()=>{
+ const {document}=parseHTML('<html><body></body></html>');
+ const root=createCannabisRoulette(document);
+ const css=readFileSync(new URL('../src/roulette.css',import.meta.url),'utf8');
+ const main=readFileSync(new URL('../src/main.js',import.meta.url),'utf8');
+ assert.equal(root.querySelectorAll('.cr-number .cr-face-label').length,36);
+ assert.equal(root.querySelectorAll('.cr-chip').length,6);
+ assert.equal(root.querySelectorAll('.cr-spot-corner').length,22);
+ assert.equal(root.querySelectorAll('.cr-spot-split').length,57);
+ assert.equal(root.querySelectorAll('.cr-zero-special[data-bet^="split:"]').length,5);
+ assert.equal(root.querySelector('.cr-header h1').textContent,'420Bet Roulette');
+ assert.equal(root.querySelector('[data-bet="red"]').textContent,'Red');
+ assert.equal(root.querySelector('[data-bet="black"]').textContent,'Black');
+ assert(css.includes("url('/assets/420bet/roulette/neon-vegas-wallpaper.svg')"));
+ assert(css.includes('left:29.5%;top:8.1%;width:41%;height:37.8%'));
+ assert(css.includes('left:15.2%;top:.5%;width:69.4%;height:97%'));
+ assert(main.includes('immersive roulette-immersive'));
+ assert(main.includes("active.id==='slots'||active.id==='roulette'?'Practice available'"));
+ root.querySelector('.cr-add-credits').click();
+ assert.equal(root.querySelector('.cr-credits strong').textContent,'11,000');
+ root.stopAnimation();
+});
+
+test('visual regression: centered wheel and outside-bet rows have separate selectors',()=>{
+ const css=readFileSync(new URL('../src/roulette.css',import.meta.url),'utf8');
+ assert(!/\.cr-wheel\s*\{[^}]*inset:auto/.test(css),'inset:auto must not reset wheel left/top');
+ assert(!/\.cr-ball-orbit\s*\{[^}]*inset:auto/.test(css),'inset:auto must not reset ball axis');
+ assert(css.includes('.cr-table > .cr-outside{grid-template-columns:repeat(6,minmax(0,1fr))}'));
+ assert(css.includes('.cr-table > .cr-dozens,.cr-table > .cr-outside{display:grid'));
+ assert(!css.includes('.cr-dozens,.cr-outside{display:grid'));
+ assert(!/(^|,|\})\s*\.cr-outside\{grid-template-columns:repeat\(6,/.test(css));
+ assert(css.includes('white-space:nowrap'),'outside bet labels must stay on one line');
 });

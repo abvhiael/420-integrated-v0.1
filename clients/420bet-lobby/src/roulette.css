@@ -51,7 +51,7 @@
 .cr-wheel-stage{position:absolute;left:29.5%;top:8.1%;width:41%;height:37.8%;margin:0;filter:drop-shadow(0 .5cqw .7cqw #001c06);z-index:2}
 .cr-wheel-shadow{position:absolute;left:50%;top:55%;width:96%;height:70%;transform:translate(-50%,-50%);
  background:radial-gradient(ellipse,#000b 29%,#0000 71%);border-radius:50%;filter:blur(.8cqw)}
-.cr-wheel{position:absolute;left:50%;top:50%;inset:auto;width:96%;aspect-ratio:1;height:auto;
+.cr-wheel{position:absolute;left:50%;top:50%;width:96%;aspect-ratio:1;height:auto;
  border:1.9cqw ridge #f9cb6a;border-radius:50%;
  transform:translate(-50%,-50%) scaleY(.62);transform-origin:50% 50%;
  background:repeating-conic-gradient(from 0deg,#b98127 0deg 5deg,#ffe3a0 5deg 7deg,#8b4d0e 7deg 13deg,#e7aa3c 13deg 15deg);
@@ -78,7 +78,7 @@
 .cr-hub-leaf{display:block;width:7cqw;height:6cqw;background:url('/assets/420bet/roulette/cannabis-hub.svg') center/contain no-repeat;font-size:0;filter:drop-shadow(0 0 .5cqw #65ff28)}
 .cr-hub-brand{font:bold 1.2cqw Georgia,serif;color:#062e14;text-shadow:0 .1cqw #ffed98}
 .cr-pointer{position:absolute;top:2%;left:50%;transform:translateX(-50%);z-index:10;color:#ffe58b;text-shadow:0 0 .6cqw #fff189;font-size:2.7cqw}
-.cr-ball-orbit{position:absolute;left:50%;top:50%;inset:auto;width:96%;aspect-ratio:1;height:auto;
+.cr-ball-orbit{position:absolute;left:50%;top:50%;width:96%;aspect-ratio:1;height:auto;
  transform:translate(-50%,-50%) scaleY(.62) rotate(var(--cr-ball-angle,0deg));transform-origin:center;z-index:9;pointer-events:none}
 .cr-ball{position:absolute;left:50%;top:11%;transform:translate(-50%,-50%);font-size:2cqw;color:white;text-shadow:0 0 .6cqw white,0 0 .2cqw white}
 .cr-ball-orbiting{animation:cr-ball-spin 4s cubic-bezier(.12,.75,.17,1) both}
@@ -153,8 +153,8 @@
 .cr-dozens,.cr-outside{display:grid;gap:0;margin:0 4.5% 0 7.6%;height:18%}
 .cr-dozens{grid-template-columns:repeat(3,minmax(0,1fr))}
 .cr-outside{grid-template-columns:repeat(6,minmax(0,1fr))}
-.cr-dozens .cr-bet,.cr-outside .cr-bet{font-size:2.2cqw;border:.13cqw solid #f6d081}
-.cr-outside .cr-red,.cr-outside .cr-black{font-size:2.5cqw;text-shadow:0 0 .2cqw #fff}
+.cr-dozens .cr-bet,.cr-outside .cr-bet{display:grid;place-items:center;white-space:nowrap;overflow:hidden;font-size:1.85cqw;line-height:1;border:.13cqw solid #f6d081}
+.cr-outside .cr-red,.cr-outside .cr-black{font-size:1.9cqw;text-shadow:0 0 .2cqw #fff}
 .cr-outside .cr-red{background:radial-gradient(ellipse,#e43735,#7d0010)}
 .cr-outside .cr-black{background:radial-gradient(ellipse,#484848,#050807)}
 .cr-inside-spots{position:absolute;inset:0;pointer-events:none;overflow:visible;z-index:5}

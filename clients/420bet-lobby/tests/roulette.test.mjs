@@ -171,7 +171,7 @@ test('reference-style casino cabinet has one authoritative wheel layout and visi
  assert.match(css,/\.cr-wheel\s*\{[^}]*left:50%;top:50%/s);
  assert.match(css,/\.cr-ball-orbit\s*\{[^}]*left:50%;top:50%/s);
  assert(css.includes('translate(-50%,-50%) scaleY(.62)'),'wheel must center before perspective squash');
- assert(css.includes("url('/assets/420bet/roulette/emerald-gold-wallpaper.svg')"));
+ assert(css.includes("url('/assets/420bet/roulette/neon-vegas-wallpaper.svg')"));
  assert(css.includes('.cr-table-area'));
  assert(css.includes('.cr-header::before,.cr-header::after'));
  assert(css.includes('.cr-payout-win'));
@@ -205,7 +205,8 @@ test('reference-composition has interactive exact-position green casino board an
  assert.equal(root.querySelectorAll('.cr-number .cr-face-label').length,36);
  assert.equal(root.querySelectorAll('.cr-chip').length,6);
  assert.equal(root.querySelectorAll('.cr-spot-corner').length,22);
- assert.equal(root.querySelectorAll('.cr-spot-split').length,62);
+ assert.equal(root.querySelectorAll('.cr-spot-split').length,57);
+ assert.equal(root.querySelectorAll('.cr-zero-special[data-bet^="split:"]').length,5);
  assert.equal(root.querySelector('.cr-header h1').textContent,'420Bet Roulette');
  assert.equal(root.querySelector('[data-bet="red"]').textContent,'Red');
  assert.equal(root.querySelector('[data-bet="black"]').textContent,'Black');

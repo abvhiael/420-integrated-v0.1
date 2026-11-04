@@ -170,8 +170,73 @@ test('approved feathered roach clip replaces L03 and all reel art is centered an
  assert.match(css,/\.mj-concept \.mj-cell \.mj-symbol-art\.mj-roachclip-art\s*\{[^}]*inset:5% 6%/);
  assert.match(css,/mj-feather-roachclip\.webp/);
  assert.match(css,/background-size:contain/);
- assert.match(ui,/normalized==='L03'\?'mj-symbol-art mj-roachclip-art'/);
+ assert.match(ui,/normalized==='L03'\?'mj-roachclip-art'/);
  assert.match(ui,/if\(normalized!=='L03'\)art\.style\.backgroundPosition/);
  // The H01 four-part portrait must retain its full-height image treatment.
  assert.match(css,/\.mj-concept \.mj-portrait-part img\{[^}]*height:400%/);
+});
+
+
+test('reels settle 500 ms apart and bonus is initiated one SPIN at a time',()=>{
+ const {document,window}=parseHTML('<html><body></body></html>');
+ let now=0,nextId=1;const jobs=new Map();
+ const clock={
+  setTimeout(fn,delay){const id=nextId++;jobs.set(id,{at:now+delay,fn});return id;},
+  clearTimeout(id){jobs.delete(id);},
+  advance(ms){
+   const target=now+ms;
+   while(true){
+    const due=[...jobs].filter(([,v])=>v.at<=target).sort((a,b)=>a[1].at-b[1].at)[0];
+    if(!due)break;
+    now=due[1].at;jobs.delete(due[0]);due[1].fn();
+   }
+   now=target;
+  }
+ };
+ const game=createMaryJanePractice(document,{
+  ...clock,
+  pickStops:state=>state.mode==='bonus'?
+   BONUS_REELS.map(reel=>reel.indexOf('WILD')):
+   BASE_REELS.map((reel,r)=>r%2===0?reel.indexOf('SCATTER'):0)
+ });
+ const click=selector=>game.querySelector(selector).dispatchEvent(new window.Event('click'));
+ const moving=()=>game.querySelectorAll('.mj-reel-moving').length;
+ click('.mj-hit-spin');
+ assert.equal(moving(),5);
+ assert(game.querySelector('.mj-hit-spin').disabled,'spin should lock while reels settle');
+ clock.advance(599);assert.equal(moving(),5);
+ clock.advance(1);assert.equal(moving(),4);
+ for(let left=3;left>=1;left--){clock.advance(500);assert.equal(moving(),left);}
+ clock.advance(500);assert.equal(moving(),0);
+ assert.match(game.querySelector('.mj-message').textContent,/PRESS SPIN/);
+ assert.match(game.querySelector('.mj-live-cycle').textContent,/FREE 10 OF 10/);
+ assert(game.querySelector('.mj-hit-auto').disabled,'auto must stop for free spins');
+ assert.equal(jobs.size,0,'bonus must not self-advance');
+ clock.advance(5000);
+ assert.match(game.querySelector('.mj-live-cycle').textContent,/FREE 10 OF 10/);
+ click('.mj-hit-spin');
+ assert.equal(moving(),5);
+ clock.advance(2600);
+ assert.match(game.querySelector('.mj-live-cycle').textContent,/FREE 9 OF 10/);
+ assert.match(game.querySelector('.mj-message').textContent,/PRESS SPIN/);
+ assert.equal(jobs.size,0);
+ game.stopAnimation();
+});
+
+test('highlighted Gold Leaf Frames and art sizing are distinct; scatter explainer uses actual sign',()=>{
+ const css=readFileSync(new URL('../src/mary-jane-concept.css',import.meta.url),'utf8');
+ assert.match(css,/\.mj-cell\.mj-framed::after/);
+ assert.match(css,/mj-gold-leaf-glow/);
+ assert.match(css,/\.mj-symbol-art\.mj-art-wide/);
+ assert.match(css,/\.mj-symbol-art\.mj-art-tall/);
+ assert.match(css,/\.mj-symbol-art\.mj-art-compact/);
+ assert.match(css,/\.mj-scatter-trigger-icon/);
+ assert.match(css,/background-position:33\.333% 100%/);
+ const {document}=parseHTML('<html><body></body></html>');
+ const game=createMaryJanePractice(document);
+ const trigger=game.querySelector('.mj-bonus-trigger');
+ assert(trigger);
+ assert.match(trigger.getAttribute('aria-label'),/Vegas 420 Scatter signs/);
+ assert(trigger.querySelector('.mj-scatter-trigger-icon'));
+ game.stopAnimation();
 });

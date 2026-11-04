@@ -42,9 +42,9 @@ function restoreRoute(){
 function render(){
   app.replaceChildren();
   if(active){
-    const main=node('main','immersive');const bar=node('header','gamebar');
+    const main=node('main',active.id==='roulette'?'immersive roulette-immersive':'immersive');const bar=node('header','gamebar');
     bar.append(button(selectedSlotMachine?'← Slots Lobby':'← Return to Lobby',close,'return'),brandLink('game-brand'),node('strong','',selectedSlotMachine?.title??active.title));
-    const note=node('span','game-status',active.id==='slots'?'Practice available':statusText[active.status]);bar.append(note);main.append(bar);
+    const note=node('span','game-status',active.id==='slots'||active.id==='roulette'?'Practice available':statusText[active.status]);bar.append(note);main.append(bar);
     if(active.id==='slots'){
       const wrap=node('div','view-scroll');
       if(selectedSlotMachine){activePractice=selectedSlotMachine.id==='mary-jane-sticky-wilds'?createMaryJanePractice(document):createPractice('slots',document);wrap.append(activePractice);}

@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="950" viewBox="0 0 1600 950">
+<defs>
+<radialGradient id="background"><stop stop-color="#38221b"/><stop offset=".55" stop-color="#160f14"/><stop offset="1" stop-color="#06090a"/></radialGradient>
+<radialGradient id="felt" cx=".48" cy=".38"><stop stop-color="#b02137"/><stop offset=".65" stop-color="#7e0b24"/><stop offset="1" stop-color="#350717"/></radialGradient>
+<linearGradient id="gold"><stop stop-color="#5b2c05"/><stop offset=".15" stop-color="#ffde85"/><stop offset=".34" stop-color="#ac6f20"/><stop offset=".52" stop-color="#ffe7a5"/><stop offset=".78" stop-color="#ae6e21"/><stop offset="1" stop-color="#57320d"/></linearGradient>
+<radialGradient id="light"><stop stop-color="#31ff73" stop-opacity=".5"/><stop offset="1" stop-color="#1bd652" stop-opacity="0"/></radialGradient>
+<filter id="haze"><feGaussianBlur stdDeviation="32"/></filter>
+<filter id="neon"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+<pattern id="stitches" width="18" height="18" patternUnits="userSpaceOnUse"><path d="M0 0h3M9 9h2" stroke="#fff" stroke-opacity=".04"/></pattern>
+<g id="flourish" stroke="url(#gold)" stroke-width="4" fill="none">
+<path d="M0 20Q40 -26 90 25T170 14Q200 -7 217 15T202 46Q188 56 177 39Q172 19 195 17"/>
+<path d="M20 36Q60 9 80 47T140 41Q165 19 189 49"/>
+</g>
+<g id="cannabis" fill="#44cd52" stroke="#b7ff91" stroke-width="1">
+<path d="M0 0Q-17 -29 0 -81Q17 -29 0 0Z"/><path d="M0 0Q-38 -15 -42 -57Q-15 -49 0 0Z"/><path d="M0 0Q38 -15 42 -57Q15 -49 0 0Z"/><path d="M0 5Q-53 -5 -60 -28Q-26 -27 0 5Z"/><path d="M0 5Q53 -5 60 -28Q26 -27 0 5Z"/><path d="M0 5Q-30 7 -36 27Q-11 23 0 5Z"/><path d="M0 5Q30 7 36 27Q11 23 0 5Z"/><path d="M-2 0L0 40L2 0Z"/>
+</g>
+</defs>
+<rect width="1600" height="950" fill="url(#background)"/>
+<g filter="url(#haze)" opacity=".63">
+ <path d="M-45 70Q170 310 30 385T110 800" fill="none" stroke="#3bea78" stroke-width="64"/>
+ <path d="M1650 0Q1400 205 1560 415T1460 820" fill="none" stroke="#68e86f" stroke-width="55"/>
+ <ellipse cx="800" cy="125" rx="690" ry="170" fill="url(#light)"/>
+</g>
+<path d="M85 980V600C85 224 335 132 800 132S1515 224 1515 600V980Z" fill="#1c1110" stroke="#714c2c" stroke-width="54"/>
+<path d="M85 980V600C85 224 335 132 800 132S1515 224 1515 600V980Z" fill="none" stroke="url(#gold)" stroke-width="27"/>
+<path d="M118 980V607C118 254 347 166 800 166S1482 254 1482 607V980Z" fill="url(#felt)" stroke="#efd38c" stroke-width="5"/>
+<path d="M118 980V607C118 254 347 166 800 166S1482 254 1482 607V980Z" fill="url(#stitches)"/>
+<path d="M177 948V622C177 295 387 235 800 235S1423 295 1423 622V948" fill="none" stroke="#e4b963" stroke-width="5" opacity=".38"/>
+<path d="M224 933V630C224 356 410 289 800 289S1376 356 1376 630V933" fill="none" stroke="#e4b963" stroke-width="3" stroke-dasharray="12 12" opacity=".4"/>
+<g opacity=".52"><use href="#flourish" transform="translate(255 340)"/><use href="#flourish" transform="translate(1345 340) scale(-1 1)"/><use href="#flourish" transform="translate(220 792) scale(.6 .6)"/><use href="#flourish" transform="translate(1380 792) scale(-.6 .6)"/></g>
+<g filter="url(#neon)" opacity=".35">
+ <use href="#cannabis" transform="translate(300 590) scale(.75)"/>
+ <use href="#cannabis" transform="translate(1300 590) scale(.75)"/>
+</g>
+<path d="M410 610Q800 450 1190 610" fill="none" stroke="#e2ad5d" stroke-width="4" opacity=".6"/>
+<text x="800" y="485" fill="#f9d488" text-anchor="middle" font-family="Georgia" font-weight="bold" font-size="39" letter-spacing="2">BLACKJACK PAYS 3 TO 2</text>
+<text x="800" y="528" fill="#f6dfaa" text-anchor="middle" font-family="Georgia" font-size="22" letter-spacing="2">DEALER STANDS ON ALL 17s</text>
+<text x="800" y="575" fill="#a2f28a" text-anchor="middle" font-family="Georgia" font-size="17" letter-spacing="4">420BET  ·  PRACTICE TABLE</text>
+<use href="#flourish" transform="translate(500 91) scale(.75)"/>
+<use href="#flourish" transform="translate(1100 91) scale(-.75 .75)"/>
+</svg>

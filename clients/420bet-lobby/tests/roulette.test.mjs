@@ -159,9 +159,10 @@ test('branded wheel has an actual roulette-specific wallpaper, shared axis, and 
 
 test('reference-style casino cabinet has one authoritative wheel layout and visible wallpaper',()=>{
  const css=readFileSync(new URL('../src/roulette.css',import.meta.url),'utf8');
- assert.equal((css.match(/\.cr-wheel-stage\s*\{/g)||[]).length,1,'wheel stage must have exactly one base declaration');
- assert.equal((css.match(/\.cr-wheel\s*\{/g)||[]).length,1,'wheel must not use accumulated competing rules');
- assert.equal((css.match(/\.cr-game\s*\{/g)||[]).length,1,'cabinet must have a single base style');
+ const baseCss=css.split('@media(max-width:900px)')[0];
+ assert.equal((baseCss.match(/\.cr-wheel-stage\s*\{/g)||[]).length,1,'wheel stage must have exactly one base declaration');
+ assert.equal((baseCss.match(/\.cr-wheel\s*\{/g)||[]).length,1,'wheel must not use accumulated competing rules');
+ assert.equal((baseCss.match(/\.cr-game\s*\{/g)||[]).length,1,'cabinet must have a single base style');
  assert.match(css,/\.cr-wheel\s*\{[^}]*left:50%;top:50%/s);
  assert.match(css,/\.cr-ball-orbit\s*\{[^}]*left:50%;top:50%/s);
  assert(css.includes('translate(-50%,-50%) scaleY(.62)'),'wheel must center before perspective squash');

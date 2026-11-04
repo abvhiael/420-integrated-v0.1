@@ -8,7 +8,7 @@ export function createCannabisRoulette(doc=globalThis.document,options={}){
  const view=doc.defaultView||globalThis;
  const setTimer=options.setTimeout??((fn,ms)=>view.setTimeout(fn,ms));
  const clearTimer=options.clearTimeout??(id=>view.clearTimeout(id));
- let balance=STARTING_CREDITS,chip=10,bets=[],lastBets=[],last=null,recent=[],spinning=false,timer=null,rotation=0,spinCount=0,destroyed=false,message='Choose a chip, then place practice bets on the table.';
+ let balance=STARTING_CREDITS,chip=10,bets=[],lastBets=[],last=null,recent=[],spinning=false,timer=null,rotation=0,spinStart=0,spinCount=0,destroyed=false,message='Choose a chip, then place practice bets on the table.';
  root.stopAnimation=()=>{destroyed=true;spinning=false;if(timer!==null)clearTimer(timer);timer=null;};
  const sum=()=>rouletteTotal(bets);
  const button=(text,cls,handler)=>{const el=make(doc,'button',cls,text);el.type='button';el.addEventListener('click',handler);return el;};
@@ -41,6 +41,7 @@ export function createCannabisRoulette(doc=globalThis.document,options={}){
   const wheelIndex=ROULETTE_WHEEL.indexOf(result.pocket);
   const desired=((360-((wheelIndex+.5)*360/38))%360+360)%360;
   const current=((rotation%360)+360)%360;
+  spinStart=rotation;
   rotation+=360*6+((desired-current+360)%360);
   message='No more bets · wheel spinning…';
   render();
@@ -85,6 +86,7 @@ export function createCannabisRoulette(doc=globalThis.document,options={}){
    return color+' '+(i*sector).toFixed(5)+'deg '+((i+1)*sector).toFixed(5)+'deg';
   }).join(',')+')';
   disc.style.transform='rotate('+rotation+'deg)';
+  disc.style.setProperty('--cr-spin-from',spinStart+'deg');
   disc.style.setProperty('--cr-spin-to',rotation+'deg');
   ROULETTE_WHEEL.forEach((n,i)=>{
    const label=make(doc,'span','cr-wheel-number',n);

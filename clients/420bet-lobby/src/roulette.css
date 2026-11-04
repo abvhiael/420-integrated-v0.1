@@ -127,3 +127,87 @@
 @media(max-width:1100px){.cr-table-area{grid-template-columns:1fr;gap:9px;border-radius:36px}.cr-chips{flex-direction:row;justify-content:center;flex-wrap:wrap;padding:1px}.cr-chip-grid{display:flex;max-width:none;width:auto;gap:8px}.cr-chip{width:42px}.cr-actions{flex-direction:row;flex-wrap:wrap;align-items:center}.cr-actions button{flex:1;min-width:120px}.cr-odds{width:100%;margin:0}}
 @media(max-width:680px){.cr-game{padding:6px}.cr-top{height:auto;grid-template-columns:1fr 1fr;gap:6px;padding:2px 2px 8px}.cr-wheel-stage{grid-column:1/-1;grid-row:1;height:220px;width:290px}.cr-account{grid-column:1;grid-row:2}.cr-last{grid-column:2;grid-row:2}.cr-table{overflow-x:auto;padding:16px 5px 5px}.cr-inside,.cr-dozens,.cr-outside{min-width:480px}.cr-number-stage{min-width:0}.cr-chip{width:36px}.cr-table-area{padding:8px}.cr-header h1{font-size:24px}}
 @media(prefers-reduced-motion:reduce){.cr-ball-orbiting{animation-duration:.01ms!important}}
+
+/* Third-pass visual qualification: dedicated illustrated wallpaper and geometrically centred wheel.
+   Keep the old, independently qualified betting grid/hit areas unchanged. */
+.cr-game{
+  --gold:#f4d881;--cream:#fff6d7;
+  position:relative;isolation:isolate;
+  width:min(1530px,100%);max-width:1530px;
+  background:
+    linear-gradient(90deg,#041610d9,#092819b3 26%,#071d14b0 72%,#03130ccf),
+    url('/assets/420bet/roulette/emerald-gold-wallpaper.svg') center top/cover no-repeat;
+  border:4px double #daba6e;border-radius:14px;
+  box-shadow:0 20px 65px #000e,inset 0 0 38px #cfb65b21
+}
+.cr-game::before{content:"";position:absolute;inset:9px;border:1px solid #e9c87857;border-radius:9px;pointer-events:none;z-index:-1}
+.cr-header{padding:4px 6px 9px;border-bottom:1px solid #d8b666a6;background:radial-gradient(ellipse at 50% 0%,#b8a34c26,transparent 70%)}
+.cr-header .cr-brand{font:700 11px Georgia,serif;letter-spacing:.35em;color:#e9cd7b}
+.cr-header h1{font-family:Georgia,serif;color:#ffe7a0;text-shadow:0 2px 2px #030a06,0 0 18px #d6a04b99;font-size:clamp(25px,3vw,39px)}
+.cr-top{grid-template-columns:minmax(180px,1fr) minmax(315px,1.1fr) minmax(210px,1fr);height:278px;padding:4px 20px 10px;gap:18px}
+.cr-ledger,.cr-last{background:linear-gradient(145deg,#03140ede,#0e3020d9);border:2px ridge #a88641;box-shadow:inset 0 0 16px #000b,0 0 13px #d4b45b22}
+.cr-ledger strong{color:#ffeab2}
+.cr-wheel-stage{position:relative;display:block;width:360px;max-width:100%;height:250px;aspect-ratio:auto;margin:0 auto;overflow:visible;filter:drop-shadow(0 10px 10px #000d)}
+.cr-wheel-shadow{position:absolute;left:50%;top:53%;width:min(100%,345px);height:192px;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(ellipse at center,#010b08 36%,#0c0d08 61%,#c39840 69%,#492c11 76%,transparent 80%);filter:blur(6px);pointer-events:none}
+.cr-wheel{
+  position:absolute;left:50%;top:50%;inset:auto;
+  width:330px;height:330px;max-width:95%;
+  transform:translate(-50%,-50%) scaleY(.72);transform-origin:center center;
+  border:16px ridge #dbac53;border-radius:50%;
+  background:radial-gradient(circle at 33% 28%,#e3c56e 0%,#956423 63%,#291806 83%,#bb8b38 100%);
+  box-shadow:inset 0 0 0 6px #3d260b,inset 0 0 0 12px #e5ba60,0 0 0 4px #221707,0 0 0 8px #ac823a,0 12px 20px #000e;
+  overflow:hidden
+}
+.cr-wheel-ornament{position:absolute;inset:0;display:grid;place-items:start center;padding-top:3%;font:bold 13px Georgia,serif;letter-spacing:.3em;color:#fff3b3;text-shadow:0 1px 3px #000;z-index:3;pointer-events:none}
+.cr-wheel-rim{position:absolute;inset:10.5%;border-radius:50%;border:5px ridge #efc875;background:radial-gradient(circle,#6c491e 0%,#c99c40 65%,#38200c 100%);box-shadow:inset 0 0 0 8px #51301b,0 0 0 6px #4e2c12}
+.cr-wheel-disc{position:absolute;inset:6%;border-radius:50%;border:4px solid #d6b469;box-shadow:inset 0 0 0 3px #160c08,inset 0 0 0 7px #e6c77a;transition:none;will-change:transform}
+.cr-wheel-number{position:absolute;height:auto;width:auto;margin:0;padding:0;font:900 10px/1 Georgia,serif;color:#fff7d2;transform-origin:center;text-shadow:0 1px 1px #000}
+.cr-wheel-hub{position:absolute;inset:34%;border-radius:50%;border:7px ridge #f9d987;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;background:radial-gradient(circle at 38% 20%,#c7aa5d,#816028 61%,#322310);box-shadow:0 3px 9px #000c,inset 0 0 0 2px #4e300d;z-index:2}
+.cr-hub-leaf{font-size:29px;line-height:1}
+.cr-hub-brand{font:900 10px/1.1 Georgia,serif;color:#113e29;text-shadow:0 1px #f4d88a}
+.cr-pointer{top:-5px;left:50%;z-index:9;transform:translateX(-50%);color:#fce79a;font-size:27px;text-shadow:0 2px 3px #000}
+.cr-ball-orbit{
+  position:absolute;left:50%;top:50%;inset:auto;
+  width:330px;height:330px;max-width:95%;
+  transform:translate(-50%,-50%) scaleY(.72) rotate(var(--cr-ball-angle,0deg));
+  transform-origin:center;pointer-events:none;z-index:8
+}
+.cr-ball{position:absolute;top:8%;left:50%;transform:translate(-50%,-50%);font-size:17px;color:#fff4d4;text-shadow:0 0 10px white,0 0 5px white}
+.cr-wheel-spinning .cr-wheel-disc{animation:cr-wheel-turn 4s cubic-bezier(.12,.76,.12,1) both}
+.cr-ball-orbiting{animation:cr-ball-branded 4s cubic-bezier(.12,.75,.17,1) both}
+@keyframes cr-ball-branded{from{transform:translate(-50%,-50%) scaleY(.72) rotate(0deg)}to{transform:translate(-50%,-50%) scaleY(.72) rotate(-1900deg)}}
+.cr-last{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:8px 12px}
+.cr-result-line{margin:4px 0 7px}
+.cr-recent{margin:3px 0 5px}
+.cr-payout{width:100%;padding:10px 6px;text-align:center;border:2px solid #ab8a49;border-radius:9px;background:linear-gradient(#132e1ac9,#041710ed);box-shadow:inset 0 0 15px #0008}
+.cr-payout-title{font:800 12px Georgia,serif;letter-spacing:.13em;color:#f2d47a}
+.cr-payout-amount{display:block;font:900 clamp(22px,2.8vw,36px)/1.15 system-ui,sans-serif;color:#f5e7ad;text-shadow:0 0 11px #f9d36c55}
+.cr-payout-caption{font:700 9px system-ui,sans-serif;letter-spacing:.12em;color:#c7cbb0}
+.cr-payout-net{margin-top:5px;font:900 13px system-ui,sans-serif;color:#d7d5ad}
+.cr-payout-win{border-color:#ffe49a;background:linear-gradient(130deg,#1e6435e8,#103f27e8);box-shadow:0 0 16px #a8ee6690,inset 0 0 17px #bde67d30;animation:cr-win-flash .75s ease-out 2 alternate}
+.cr-payout-win .cr-payout-amount{color:#fff4b5;font-size:clamp(28px,3.2vw,43px);text-shadow:0 0 18px #ffe373aa}
+.cr-payout-win .cr-payout-net{color:#b9ff8e}
+.cr-payout-loss .cr-payout-net{color:#f4a6a5}
+@keyframes cr-win-flash{from{box-shadow:0 0 6px #f5dd8666}to{box-shadow:0 0 23px #d9ed81af}}
+.cr-table-area{border:4px ridge #d8b866;background:linear-gradient(#0a533be8,#043c2d 89%),url('/assets/420bet/roulette/emerald-gold-wallpaper.svg') center/cover;border-radius:56px 56px 17px 17px;box-shadow:inset 0 0 34px #0006,0 10px 18px #0008}
+.cr-chip{border-color:#f5dc94;box-shadow:inset 0 0 0 2px #fff8,0 2px 8px #000b}
+.cr-spin{background:linear-gradient(#f8e5a0,#a97d30);border:3px ridge #fff2b9}
+.cr-bet{border-color:#d8ca8e}
+.cr-intersection.cr-bet{border:1px solid #fff3ca}
+@media(max-width:920px){
+ .cr-top{height:auto;grid-template-columns:1fr 1fr;gap:7px;padding:3px 6px 8px}
+ .cr-wheel-stage{grid-column:1/-1;grid-row:1;height:250px}
+ .cr-account{grid-column:1;grid-row:2}
+ .cr-last{grid-column:2;grid-row:2}
+ .cr-table-area{grid-template-columns:1fr}
+}
+@media(max-width:570px){
+ .cr-top{grid-template-columns:1fr;gap:8px}
+ .cr-wheel-stage{grid-column:1;grid-row:1;width:310px;height:230px}
+ .cr-wheel{width:290px;height:290px}
+ .cr-ball-orbit{width:290px;height:290px}
+ .cr-account{grid-column:1;grid-row:2}
+ .cr-last{grid-column:1;grid-row:3}
+ .cr-game{padding:6px}
+}
+@media(prefers-reduced-motion:reduce){.cr-ball-orbiting,.cr-payout-win{animation-duration:.01ms!important}}

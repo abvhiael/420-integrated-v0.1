@@ -60,6 +60,10 @@ test('Roulette screen places chips, animates a fixed result, settles only on fin
  scheduled();
  assert.equal(root.querySelector('.cr-credits strong').textContent,'10,350');
  assert.equal(root.querySelector('.cr-result-pocket').textContent,'17');
+ assert(root.querySelector('.cr-payout').classList.contains('cr-payout-win'));
+ assert.equal(root.querySelector('.cr-payout-amount').textContent,'360');
+ assert.match(root.querySelector('.cr-payout-net').textContent,/NET WIN \+350/);
+ assert.match(root.querySelector('.cr-status').textContent,/Paid 360 credits/);
  root.querySelector('.cr-action').click();
  assert.equal(root.querySelector('.cr-current-bet strong').textContent,'10');
  const buttons=Array.from(root.querySelectorAll('.cr-action'));
@@ -120,5 +124,35 @@ test('clicking four-number junction places one corner bet, can repeat, and pays 
  assert.equal(root.querySelector('.cr-credits strong').textContent,'10,080');
  const winning=root.querySelector('[data-bet="corner:1,2,4,5"]');
  assert(winning.classList.contains('cr-winner'));
+ root.stopAnimation();
+});
+
+test('losing spin shows clear zero payout and net loss, not a misleading win',()=>{
+ const {document}=parseHTML('<html><body></body></html>');
+ let finish;
+ const root=createCannabisRoulette(document,{pickPocket:()=> '00',setTimeout:fn=>{finish=fn;return 1;}});
+ document.body.append(root);
+ root.querySelector('[data-bet="red"]').click();
+ root.querySelector('.cr-spin').click();
+ finish();
+ assert(root.querySelector('.cr-payout').classList.contains('cr-payout-loss'));
+ assert.equal(root.querySelector('.cr-payout-amount').textContent,'0');
+ assert.match(root.querySelector('.cr-payout-net').textContent,/NET LOSS/);
+ assert.equal(root.querySelector('.cr-credits strong').textContent,'9,990');
+ root.stopAnimation();
+});
+test('branded wheel has an actual roulette-specific wallpaper, shared axis, and central brand',()=>{
+ const {document}=parseHTML('<html><body></body></html>');
+ const root=createCannabisRoulette(document);
+ assert(root.querySelector('.cr-wheel-shadow'));
+ assert(root.querySelector('.cr-wheel-rim .cr-wheel-disc'));
+ assert(root.querySelector('.cr-wheel-rim .cr-hub-brand').textContent==='420BET');
+ assert(root.querySelector('.cr-wheel-stage .cr-ball-orbit'));
+ const css=readFileSync(new URL('../src/roulette.css',import.meta.url),'utf8');
+ assert(css.includes("url('/assets/420bet/roulette/emerald-gold-wallpaper.svg')"));
+ assert(css.includes('left:50%;top:50%'));
+ const svg=readFileSync(new URL('../public/assets/420bet/roulette/emerald-gold-wallpaper.svg',import.meta.url),'utf8');
+ assert(svg.includes('id="leaf"'));
+ assert(svg.includes('id="scroll"'));
  root.stopAnimation();
 });

@@ -86,3 +86,73 @@
   background-color:transparent;
   filter:drop-shadow(0 0 4px #ec78b688);
 }
+
+
+/* Reel polish: consistent optical center with per-shape padding. The 4x4
+   atlas continues to use the same coordinates; image and reels scale together. */
+.mj-concept .mj-cell .mj-symbol-art{inset:13% 13%;background-color:transparent}
+.mj-concept .mj-cell .mj-symbol-art.mj-art-compact{inset:15% 15%}
+.mj-concept .mj-cell .mj-symbol-art.mj-art-wide{inset:18% 8%}
+.mj-concept .mj-cell .mj-symbol-art.mj-art-tall{inset:8% 19%}
+.mj-concept .mj-cell .mj-symbol-art.mj-roachclip-art{
+ inset:9% 11%;
+ background-image:url('/assets/420bet/mary-jane/mj-feather-roachclip.webp');
+ background-position:center;background-size:contain;background-repeat:no-repeat;
+}
+/* A framed position is a persistent gold-leaf slot, not an ordinary
+   payline border. Distinct inner rim, corner jewel and alternating glow. */
+.mj-concept .mj-cell.mj-framed,.mj-concept .mj-cell.mj-sticky{
+ border:clamp(3px,.42vw,7px) solid #ffed8b;
+ outline:2px solid #b97615;
+ outline-offset:-8px;
+ box-shadow:inset 0 0 0 3px #fbcf54,inset 0 0 18px 5px #ffdb6b91,
+ 0 0 11px 3px #ffd86bcc,0 0 23px #fdb744b0;
+ animation:mj-gold-leaf-glow 1.35s ease-in-out infinite alternate;
+}
+.mj-concept .mj-cell.mj-framed::after,.mj-concept .mj-cell.mj-sticky::after{
+ content:"";position:absolute;z-index:5;inset:3%;pointer-events:none;
+ border:2px solid #fff3b9;border-radius:5px;
+ box-shadow:0 0 5px #ffe686, inset 0 0 6px #ffe686;
+}
+.mj-concept .mj-cell.mj-framed::before,.mj-concept .mj-cell.mj-sticky::before{
+ content:"✦";position:absolute;top:0;right:1%;z-index:6;pointer-events:none;
+ color:#fff5bb;font:900 clamp(9px,1.15vw,19px)/1 Georgia,serif;
+ text-shadow:0 0 5px #ffe26a,0 0 12px #ffb62e;
+}
+@keyframes mj-gold-leaf-glow{
+ from{filter:brightness(1);box-shadow:inset 0 0 0 3px #fbcf54,inset 0 0 12px #ffd86a8c,0 0 9px #ffca63bb}
+ to{filter:brightness(1.14);box-shadow:inset 0 0 0 3px #ffeb9a,inset 0 0 22px 5px #ffdf9dc4,0 0 16px 5px #ffe47c,0 0 30px #ffca54}
+}
+/* Every reel stops independently. The animated movement and soft blur apply
+   only to reels which have not reached their precomputed stop. */
+.mj-concept .mj-reel.mj-reel-moving{overflow:hidden}
+.mj-concept .mj-reel.mj-reel-moving .mj-cell{
+ filter:blur(1.7px) brightness(.78);
+ animation:mj-reel-rolling .14s linear infinite;
+}
+.mj-concept .mj-reel.mj-reel-next{box-shadow:0 0 12px #ffe2a5a6}
+@keyframes mj-reel-rolling{
+ 0%{transform:translateY(-6%)}50%{transform:translateY(6%)}100%{transform:translateY(-6%)}
+}
+/* Cover the text-only 420 in the painted bottom-right help panel with
+   the exact Vegas 420 Scatter symbol from the existing symbol atlas. */
+.mj-concept .mj-bonus-trigger{
+ position:absolute;z-index:6;left:87.0%;top:68.3%;width:9.3%;height:5.1%;
+ display:flex;align-items:center;justify-content:center;gap:2%;
+ border-radius:9px;background:linear-gradient(125deg,#4d0b46,#5b104b 55%,#4c0947);
+ color:#ffef92;font:900 clamp(10px,1.35vw,23px)/1 Georgia,serif;
+ text-shadow:0 1px 2px #000,0 0 6px #f7c353;
+ pointer-events:none;
+}
+.mj-concept .mj-bonus-three{flex:0 0 auto}
+.mj-concept .mj-scatter-trigger-icon{
+ display:block;width:62%;height:100%;
+ background-image:url('/assets/420bet/mary-jane/mj-symbol-atlas.webp');
+ background-size:400% 400%;background-position:33.333% 100%;
+ background-repeat:no-repeat;background-color:transparent;
+ filter:drop-shadow(0 0 3px #ffc15b);
+}
+@media(prefers-reduced-motion:reduce){
+ .mj-concept .mj-cell.mj-framed,.mj-concept .mj-cell.mj-sticky,
+ .mj-concept .mj-reel.mj-reel-moving .mj-cell{animation:none!important}
+}

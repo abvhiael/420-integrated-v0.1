@@ -293,7 +293,7 @@ section.cr-game .cr-table{
   transform:translate(-1.35cqw,1.25cqw);
 }
 /* Move only the Repeat Bet target lower, keeping Spin and Clear in place. */
-section.cr-game .cr-actions .cr-action:first-of-type{
+section.cr-game .cr-actions .cr-action:nth-of-type(2){
   transform:translateY(1.3cqw);
 }
 /* Retain a real, unmistakable wagering token on the chosen betting position.

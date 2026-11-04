@@ -192,11 +192,15 @@ export function createCannabisRoulette(doc=globalThis.document,options={}){
   [1,2,3].forEach(n=>dozens.append(betButton(n===1?'1st 12':n===2?'2nd 12':'3rd 12','dozen:'+n,'cr-outside',totals)));
   table.append(dozens);
   const outside=make(doc,'div','cr-outside');
-  [['1 to 18','low',''],['Even','even',''],['Red','red','cr-red'],['Black','black','cr-black'],['Odd','odd',''],['19 to 36','high','']].forEach(([label,key,cls])=>
-   outside.append(betButton(label,key,'cr-outside '+cls,totals)));
+  [['1 to 18','low',''],['Even','even',''],['Red','red','cr-red'],['Black','black','cr-black'],['Odd','odd',''],['19 to 36','high','']].forEach(([label,key,cls])=>{
+   const bet=betButton(cls?'':label,key,'cr-outside '+cls,totals);
+   if(cls)bet.prepend(make(doc,'span','cr-diamond-label',label));
+   bet.setAttribute('aria-label',label+' practice bet');
+   outside.append(bet);
+  });
   table.append(outside);
   const actions=make(doc,'div','cr-actions');
-  const spinButton=button(spinning?'SPINNING…':'▶ SPIN','cr-spin',spin);
+  const spinButton=button(spinning?'SPINNING…':'▶ Spin','cr-spin',spin);
   spinButton.disabled=spinning||!bets.length||sum()>balance;
   actions.append(spinButton);
   const repeatButton=button('↻ Repeat Bet','cr-action',repeat);

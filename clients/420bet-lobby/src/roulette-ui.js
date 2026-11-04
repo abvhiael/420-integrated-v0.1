@@ -64,13 +64,15 @@ export function createCannabisRoulette(doc=globalThis.document,options={}){
   root.replaceChildren();
   const totals=betTotals();
   const header=make(doc,'header','cr-header');
-  header.append(make(doc,'div','cr-brand','✦ 420Bet · HIGH ROLLER CLUB ✦'),make(doc,'h1','','420Bet Roulette'),make(doc,'p','','AMERICAN DOUBLE ZERO · GREEN FELT CASINO · PRACTICE ONLY'));
+  header.append(make(doc,'div','cr-brand','420Bet'),make(doc,'h1','','420Bet Roulette'),make(doc,'p','','AMERICAN DOUBLE ZERO · PRACTICE ONLY'));
   root.append(header);
   const top=make(doc,'div','cr-top');
   const credits=make(doc,'div','cr-ledger cr-credits');
-  credits.append(make(doc,'span','cr-ledger-title','✦ Practice Credits'),make(doc,'strong','',money(balance)),make(doc,'span','cr-ledger-caption','No real money · no wallet'));
+  credits.append(make(doc,'span','cr-ledger-title','Practice Credits'),make(doc,'strong','',money(balance)),make(doc,'span','cr-ledger-caption','Practice only'));
+  const addCredits=button('+','cr-add-credits',()=>{if(spinning)return;balance+=1000;message='Added 1,000 free practice credits.';render();});
+  addCredits.setAttribute('aria-label','Add 1,000 free practice credits');addCredits.disabled=spinning;credits.append(addCredits);
   const total=make(doc,'div','cr-ledger cr-current-bet');
-  total.append(make(doc,'span','cr-ledger-title','❋ Current Bet'),make(doc,'strong','',money(sum())),make(doc,'span','cr-ledger-caption','Selected chip: '+money(chip)));
+  total.append(make(doc,'span','cr-ledger-title','Current Bet'),make(doc,'strong','',money(sum())),make(doc,'span','cr-ledger-caption','Selected chip: '+money(chip)));
   const account=make(doc,'div','cr-account');account.append(credits,total);
   const wheelBox=make(doc,'div','cr-wheel-stage');
   wheelBox.setAttribute('aria-label','Centered brass-and-emerald cannabis roulette wheel');
@@ -97,7 +99,7 @@ export function createCannabisRoulette(doc=globalThis.document,options={}){
    disc.append(label);
   });
   const hub=make(doc,'div','cr-wheel-hub');
-  hub.append(make(doc,'span','cr-hub-leaf','🌿'),make(doc,'strong','cr-hub-brand','420BET'));
+  hub.append(make(doc,'span','cr-hub-leaf','🍃'),make(doc,'strong','cr-hub-brand','420BET'));
   rim.append(disc,hub);wheel.append(rim);
   const pointer=make(doc,'div','cr-pointer','▼');pointer.setAttribute('aria-hidden','true');
   const ball=make(doc,'div','cr-ball-orbit'+(spinning?' cr-ball-orbiting':''));
@@ -125,7 +127,7 @@ export function createCannabisRoulette(doc=globalThis.document,options={}){
   top.append(account,wheelBox,resultPanel);root.append(top);
   const bottom=make(doc,'div','cr-table-area');
   const chipPanel=make(doc,'aside','cr-chips');
-  chipPanel.append(make(doc,'h2','','❋ Bet Chips'),make(doc,'p','','Choose a chip'));
+  chipPanel.append(make(doc,'h2','','Bet Chips'),make(doc,'p','','Choose a chip'));
   const chipGrid=make(doc,'div','cr-chip-grid');
   ROULETTE_CHIPS.forEach((denom,i)=>{
    const el=button(String(denom),'cr-chip cr-chip-'+i+(chip===denom?' cr-chip-selected':''),()=>{chip=denom;render();});
@@ -153,7 +155,10 @@ export function createCannabisRoulette(doc=globalThis.document,options={}){
   const numbers=make(doc,'div','cr-number-grid');
   for(let row=0;row<3;row++)for(let col=0;col<12;col++){
    const n=(col*3)+(3-row);
-   numbers.append(betButton(String(n),'straight:'+n,'cr-number cr-'+rouletteColor(n),totals));
+   const square=betButton('','straight:'+n,'cr-number cr-'+rouletteColor(n),totals);
+   square.setAttribute('aria-label',n+' straight-up practice bet');
+   square.prepend(make(doc,'span','cr-face-label',String(n)));
+   numbers.append(square);
   }
   // Standard casino placements: line intersections are their own clickable betting spots.
   // Straight-up bets remain the square interiors; edges place splits and streets;
@@ -187,7 +192,7 @@ export function createCannabisRoulette(doc=globalThis.document,options={}){
   [1,2,3].forEach(n=>dozens.append(betButton(n===1?'1st 12':n===2?'2nd 12':'3rd 12','dozen:'+n,'cr-outside',totals)));
   table.append(dozens);
   const outside=make(doc,'div','cr-outside');
-  [['1 to 18','low',''],['Even','even',''],['◆','red','cr-red'],['◆','black','cr-black'],['Odd','odd',''],['19 to 36','high','']].forEach(([label,key,cls])=>
+  [['1 to 18','low',''],['Even','even',''],['Red','red','cr-red'],['Black','black','cr-black'],['Odd','odd',''],['19 to 36','high','']].forEach(([label,key,cls])=>
    outside.append(betButton(label,key,'cr-outside '+cls,totals)));
   table.append(outside);
   const actions=make(doc,'div','cr-actions');
@@ -202,7 +207,7 @@ export function createCannabisRoulette(doc=globalThis.document,options={}){
   bottom.append(chipPanel,table,actions);root.append(bottom);
   const footer=make(doc,'footer','cr-footer');
   const status=make(doc,'p','cr-status',message);status.setAttribute('role','status');status.setAttribute('aria-live','polite');
-  footer.append(status,make(doc,'p','cr-disclosure','PRACTICE CREDITS ONLY · NO REAL WAGERING · NO WALLET · RESULTS ARE SIMULATED · NOT CERTIFIED PRODUCTION ODDS'));
+  footer.append(status,make(doc,'p','cr-disclosure','Practice credits only - no real wagering enabled.'));
   root.append(footer);
  }
  render();return root;

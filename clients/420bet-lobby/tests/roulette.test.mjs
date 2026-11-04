@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {parseHTML} from 'linkedom';
 import {readFileSync} from 'node:fs';
-import {ROULETTE_WHEEL,ROULETTE_CHIPS,STARTING_CREDITS,rouletteBetKeys,rouletteBetWins,rouletteColor,rouletteProfitOdds,rouletteSettle,rouletteRandomPocket} from '../src/roulette-model.js';
+import {ROULETTE_WHEEL,ROULETTE_CHIPS,STARTING_CREDITS,rouletteBetKeys,rouletteBetWins,rouletteColor,rouletteProfitOdds,rouletteSettle,rouletteRandomPocket,rouletteInsideKey} from '../src/roulette-model.js';
 import {createCannabisRoulette} from '../src/roulette-ui.js';
 
 test('American wheel contains exactly 38 unique pockets, 18 red, 18 black and two green',()=>{
@@ -13,7 +13,7 @@ test('American wheel contains exactly 38 unique pockets, 18 red, 18 black and tw
  assert.deepEqual(ROULETTE_CHIPS,[1,5,10,25,100,500]);
 });
 test('All straight, column, dozen and even-money bet definitions pay the correct outcomes',()=>{
- assert.equal(rouletteBetKeys().length,50);
+ assert.equal(rouletteBetKeys().length,160);
  for(const key of rouletteBetKeys()){
   const winning=ROULETTE_WHEEL.filter(p=>rouletteBetWins(key,p));
   if(key.startsWith('straight:')){assert.equal(winning.length,1);assert.equal(rouletteProfitOdds(key),35);}
@@ -71,4 +71,50 @@ test('Route and dedicated roulette style are imported without changing slots pat
  assert(main.includes("selectedSlotMachine.id==='mary-jane-sticky-wilds'"));
  assert(css.includes('.cr-wheel-spinning'));
  assert(css.includes('.cr-table-area'));
+});
+
+test('all inside placements follow casino intersection rules with correct odds and coverage',()=>{
+ const fixtures=[
+  ['split',[1,2],17,2],
+  ['split',[1,4],17,2],
+  ['street',[1,2,3],11,3],
+  ['corner',[1,2,4,5],8,4],
+  ['sixline',[1,2,3,4,5,6],5,6],
+  ['trio',['0',1,2],11,3],
+  ['basket',['0','00',1,2,3],6,5]
+ ];
+ for(const [kind,numbers,odds,coverage] of fixtures){
+  const key=rouletteInsideKey(kind,numbers);
+  assert(rouletteBetKeys().includes(key),key);
+  assert.equal(rouletteProfitOdds(key),odds);
+  assert.equal(ROULETTE_WHEEL.filter(n=>rouletteBetWins(key,n)).length,coverage);
+  assert.equal(rouletteSettle([{key,amount:10}],String(numbers[0]),100).returned,10*(odds+1));
+ }
+ const corner=rouletteInsideKey('corner',[1,2,4,5]);
+ assert.equal(corner,'corner:1,2,4,5');
+ assert(!rouletteBetWins(corner,'3'));
+ assert.equal(rouletteBetWins(corner,'5'),true);
+ assert.throws(()=>rouletteSettle([{key:'corner:1,2,4,6',amount:10}],'1',100));
+});
+test('clicking four-number junction places one corner bet, can repeat, and pays 8:1',()=>{
+ const {document}=parseHTML('<html><body></body></html>');
+ let finish;
+ const root=createCannabisRoulette(document,{pickPocket:()=> '5',setTimeout:fn=>{finish=fn;return 10;}});
+ document.body.append(root);
+ assert.equal(root.querySelectorAll('.cr-spot-corner').length,22);
+ assert.equal(root.querySelectorAll('.cr-spot-street').length,12);
+ assert.equal(root.querySelectorAll('.cr-spot-sixline').length,11);
+ assert.equal(root.querySelectorAll('.cr-zero-special').length,8);
+ const corner=root.querySelector('[data-bet="corner:1,2,4,5"]');
+ assert(corner,'expected playable intersection at 1/2/4/5');
+ assert.equal(corner.style.left,(100/12)+'%');
+ assert.equal(corner.style.top,(200/3)+'%');
+ corner.click();
+ assert.equal(root.querySelector('.cr-current-bet strong').textContent,'10');
+ root.querySelector('.cr-spin').click();
+ finish();
+ assert.equal(root.querySelector('.cr-credits strong').textContent,'10,080');
+ const winning=root.querySelector('[data-bet="corner:1,2,4,5"]');
+ assert(winning.classList.contains('cr-winner'));
+ root.stopAnimation();
 });

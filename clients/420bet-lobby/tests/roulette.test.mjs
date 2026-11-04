@@ -18,6 +18,10 @@ test('All straight, column, dozen and even-money bet definitions pay the correct
   const winning=ROULETTE_WHEEL.filter(p=>rouletteBetWins(key,p));
   if(key.startsWith('straight:')){assert.equal(winning.length,1);assert.equal(rouletteProfitOdds(key),35);}
   else if(key.startsWith('column:')||key.startsWith('dozen:')){assert.equal(winning.length,12);assert.equal(rouletteProfitOdds(key),2);}
+  else if(['split','street','corner','sixline','trio','basket'].includes(key.split(':')[0])){
+   const odds={split:17,street:11,corner:8,sixline:5,trio:11,basket:6}[key.split(':')[0]];
+   assert.equal(winning.length,key.split(':')[1].split(',').length);assert.equal(rouletteProfitOdds(key),odds);
+  }
   else{assert.equal(winning.length,18);assert.equal(rouletteProfitOdds(key),1);}
  }
  assert.equal(rouletteBetWins('red','0'),false);

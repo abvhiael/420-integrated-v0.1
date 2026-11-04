@@ -152,7 +152,7 @@
 .cr-column{writing-mode:vertical-rl;font:bold 1.25cqw Georgia,serif;border:.15cqw solid #d8ae5e;background:#003f25}
 .cr-table > .cr-dozens,.cr-table > .cr-outside{display:grid;gap:0;margin:0 4.5% 0 7.6%;height:18%}
 .cr-dozens{grid-template-columns:repeat(3,minmax(0,1fr))}
-.cr-outside{grid-template-columns:repeat(6,minmax(0,1fr))}
+.cr-table > .cr-outside{grid-template-columns:repeat(6,minmax(0,1fr))}
 .cr-dozens .cr-bet,.cr-outside .cr-bet{display:grid;place-items:center;white-space:nowrap;overflow:hidden;font-size:1.85cqw;line-height:1;border:.13cqw solid #f6d081}
 .cr-outside .cr-red,.cr-outside .cr-black{font-size:1.9cqw;text-shadow:0 0 .2cqw #fff}
 .cr-outside .cr-red{background:radial-gradient(ellipse,#e43735,#7d0010)}

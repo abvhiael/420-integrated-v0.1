@@ -273,8 +273,22 @@ test('reference-art hotspot calibration moves chips up, board left/down and Repe
  assert(css.includes('section.cr-game .cr-chips .cr-chip-grid{'));
  assert(css.includes('transform:translateY(-2.5cqw)'));
  assert(css.includes('section.cr-game .cr-table{'));
- assert(css.includes('transform:translate(-0.25cqw,1.25cqw)'));
+ assert(css.includes('transform:translate(0.20cqw,1.25cqw)'));
  assert(css.includes('section.cr-game .cr-actions .cr-action:nth-of-type(2){'));
  assert(css.includes('transform:translateY(1.3cqw)'));
  assert(css.includes('section.cr-game .cr-payout.cr-payout-idle{'));
+});
+
+test('live ball is a large luminous circle and the baked-in ball is removed from the wallpaper',()=>{
+ const css=readFileSync(new URL('../src/roulette.css',import.meta.url),'utf8');
+ assert(css.includes("url('/assets/420bet/roulette/reference-no-painted-ball.webp')"));
+ assert(css.includes('section.cr-game .cr-ball{'));
+ assert(css.includes('width:2.3cqw'));
+ assert(css.includes('height:2.3cqw'));
+ assert(css.includes('radial-gradient(circle at 32% 28%,#ffffff'));
+ assert(css.includes('filter:drop-shadow(0 0 .45cqw #ffffdc)'));
+ const {document}=parseHTML('<html><body></body></html>');
+ const root=createCannabisRoulette(document);
+ assert(root.querySelector('.cr-wheel-stage .cr-ball-orbit .cr-ball'));
+ root.stopAnimation();
 });

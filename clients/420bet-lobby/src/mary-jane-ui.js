@@ -53,7 +53,14 @@ export function createMaryJanePractice(doc=globalThis.document,options={}){
    img.style.top='-'+('ABCD'.indexOf(symbol.at(-1))*100)+'%';slice.append(img);cell.append(slice);
   }else if(normalized&&ART_INDEX[normalized]!==undefined){
    const i=ART_INDEX[normalized];
-   const artClass=normalized==='L03'?'mj-roachclip-art':(['L02','H06','SCATTER','L05'].includes(normalized)?'mj-art-wide':(['L04','H05'].includes(normalized)?'mj-art-tall':'mj-art-compact'));
+   // Specific optical sizing for oversized artwork; keep the atlas tile's
+   // backgroundPosition calculated below (never reset it to center).
+   const artClass=normalized==='L03'?'mj-roachclip-art':
+    normalized==='H06'?'mj-art-bar':
+    normalized==='L05'?'mj-art-joint':
+    normalized==='H05'?'mj-art-bong':
+    normalized==='L04'?'mj-art-lighter':
+    ['L02','SCATTER'].includes(normalized)?'mj-art-wide':'mj-art-compact';
    const art=make(doc,'span','mj-symbol-art '+artClass);
    art.setAttribute('aria-hidden','true');
    if(normalized!=='L03')art.style.backgroundPosition=((i%4)*100/3)+'% '+(Math.floor(i/4)*100/3)+'%';

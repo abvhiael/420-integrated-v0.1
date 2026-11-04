@@ -176,3 +176,26 @@
 @media(prefers-reduced-motion:reduce){
  .mj-concept .mj-reel.mj-reel-moving .mj-cell:not(.mj-sticky){animation:none!important;filter:none}
 }
+
+/* Four artwork-specific optical corrections. These inset boxes are measured
+   against the actual 4x4 approved symbol atlas and share the scene's scaling.
+   NEVER override background-position: JS supplies the precise atlas tile
+   coordinates for each symbol. Only the box size/offset is adjusted. */
+.mj-concept .mj-cell .mj-symbol-art.mj-art-bar{
+ inset:21% 13% 21% 13%;
+ transform:translate(1.5%,1.5%);
+}
+.mj-concept .mj-cell .mj-symbol-art.mj-art-joint{
+ inset:23% 14% 22% 14%;
+ transform:translate(2%,1.5%);
+}
+.mj-concept .mj-cell .mj-symbol-art.mj-art-bong{
+ inset:13% 23% 14% 23%;
+ transform:translate(-2%,1.5%);
+}
+.mj-concept .mj-cell .mj-symbol-art.mj-art-lighter{
+ inset:14% 24% 14% 24%;
+ transform:translate(2%,1%);
+}
+/* While the reel is moving, retain existing blur/scroll animation. The
+   optical offsets apply consistently to moving and settled symbol cells. */

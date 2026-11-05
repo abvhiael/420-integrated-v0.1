@@ -1,0 +1,47 @@
+/* BUZZKILL! — scoped responsive retro-psychedelic Crash practice presentation. */
+.bz-game{--bz-green:#99ff39;--bz-violet:#ed64ff;--bz-gold:#ffd65b;position:relative;max-width:1470px;margin:0 auto;padding:14px;color:#fff2d9;border:3px solid #fbc94a;border-radius:20px;background:radial-gradient(ellipse at 50% -10%,#6d2285,#180e28 68%,#080a1a);box-shadow:inset 0 0 30px #c24aee72,0 12px 40px #000d;font-family:system-ui,sans-serif;overflow:hidden}
+.bz-game *{box-sizing:border-box}
+.bz-game button,.bz-game input{font:inherit}
+.bz-game button{cursor:pointer}
+.bz-game button:disabled{cursor:not-allowed;opacity:.46}
+.bz-game button:focus-visible,.bz-game input:focus-visible{outline:3px solid #ffffa5;outline-offset:3px}
+.bz-header,.bz-top{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.bz-header{padding:5px 15px 12px;color:#b5ff5c;font:900 13px system-ui;letter-spacing:.17em}
+.bz-practice{color:#eac8ff;font-size:10px;letter-spacing:.06em}
+.bz-top{align-items:flex-end;padding:0 20px 10px}
+.bz-title h1{margin:0;font:italic 1000 clamp(48px,6.8vw,105px)/.95 system-ui,sans-serif;letter-spacing:-.075em;color:#ffc843;-webkit-text-stroke:2px #7e1760;text-shadow:3px 5px #5a166f,0 0 18px #fe8b40}
+.bz-title p{margin:8px 0 0;font:900 clamp(12px,1.7vw,20px) system-ui;letter-spacing:.04em;color:#f4e2aa}
+.bz-balance{flex:none;padding:10px 14px;border:2px solid #ad58e0;border-radius:12px;background:#111126e6;font-weight:900;color:#abff6a;box-shadow:0 0 15px #8e32ba6e}
+.bz-stage{position:relative;aspect-ratio:1200/675;min-height:340px;border:4px solid #d078ff;border-radius:17px;overflow:hidden;background:linear-gradient(#1b082c44,#180c2e33),url('/assets/420bet/buzzkill/bedroom.svg') center/100% 100% no-repeat;box-shadow:0 0 0 2px #5ffc779c,0 0 25px #e35ffa8c,inset 0 0 32px #300d47}
+.bz-scene{width:100%;height:100%;position:absolute;inset:0}
+.bz-scene canvas{display:block!important}
+.bz-fallback{position:absolute;inset:0;display:grid;place-items:center}
+.bz-fallback-kevin{font:900 120px Georgia;color:#a8ef75;text-shadow:0 0 19px #8ef6b6}
+.bz-mult-wrap{pointer-events:none;position:absolute;left:50%;top:10%;transform:translateX(-50%);z-index:10;display:flex;flex-direction:column;align-items:center;text-align:center;gap:0;padding:5px 24px;background:#11091d99;border:2px solid #d381f555;border-radius:28px;backdrop-filter:blur(3px)}
+.bz-mult{font:1000 clamp(40px,6.5vw,98px)/1 system-ui,sans-serif;color:#b5ff52;text-shadow:4px 6px #331447,0 0 20px #89f54abf;-webkit-text-stroke:1px #193723}
+.bz-mood{font:900 clamp(10px,1.2vw,16px) system-ui;letter-spacing:.16em;color:#ffeaa1}
+.bz-bust{position:absolute;inset:0;display:grid;place-items:center;background:#240b39c9;z-index:12;pointer-events:none;opacity:0;transition:opacity .22s;font:italic 1000 clamp(25px,5.5vw,70px) system-ui;color:#ffd36f;-webkit-text-stroke:2px #8e1a62;text-shadow:4px 6px #190c1c,0 0 24px #e95d89}
+.bz-bust.bz-show{opacity:1;background:#240b3944}
+.bz-controls{display:grid;grid-template-columns:1fr 1fr 1.4fr auto;gap:10px;align-items:stretch;margin:14px 0 4px}
+.bz-wager,.bz-auto{min-width:0;padding:10px 12px;border:2px solid #b64ce4;border-radius:15px;background:linear-gradient(165deg,#160c29,#070b18);box-shadow:inset 0 0 11px #be5ce851}
+.bz-wager label,.bz-auto label{display:block;text-align:center;font:900 11px system-ui;color:#f6e4ac;letter-spacing:.08em;margin-bottom:5px}
+.bz-wager{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between}
+.bz-wager label{width:100%}
+.bz-wager strong{font:900 clamp(19px,2.1vw,29px) system-ui;color:#fff3cc}
+.bz-step{width:40px;height:38px;border:2px solid #b2ff7d;border-radius:8px;background:linear-gradient(#4ea737,#0d4b25);color:#ebffad;font-size:26px!important;font-weight:900!important;box-shadow:0 0 10px #77ff56ab}
+.bz-auto-row{display:flex;align-items:center;justify-content:center;gap:14px}
+.bz-auto-row input[type=checkbox]{width:25px;height:25px;accent-color:#8cff40;cursor:pointer}
+.bz-target{width:min(100%,110px);padding:7px;background:#0b1423;border:1px solid #a761e0;border-radius:8px;color:#f4ecff;font-weight:900;text-align:center}
+.bz-cash{border:3px ridge #e5ff8b;border-radius:20px;background:linear-gradient(#b2ff3e,#5ad51b 67%,#1f8420);color:#0f290b;font:1000 clamp(17px,2.4vw,32px) system-ui!important;box-shadow:inset 0 0 11px #e5ffb2aa,0 0 20px #6eff4c96;text-shadow:0 1px #cff4a5}
+.bz-cash:hover:not(:disabled){filter:brightness(1.15)}
+.bz-refill{padding:10px;border:2px solid #aa72d9;border-radius:13px;color:#f9eebc;font:800 11px system-ui!important;background:linear-gradient(#46315b,#170d2b)}
+.bz-bottom{display:grid;gap:5px;padding:5px 8px 0}
+.bz-feedback{margin:5px 0;font:800 13px system-ui;color:#fff4ca}
+.bz-history{display:flex;flex-wrap:wrap;gap:7px}
+.bz-history-pill{background:#5b273d;color:#ffc1c4;border:1px solid #bb5871;border-radius:30px;padding:4px 11px;font-size:12px;font-weight:800}
+.bz-history-pill.bz-win{background:#245b27;color:#abff85;border-color:#63e45c}
+.bz-disclaimer{margin:8px 0 0;color:#ccbdde;font:700 11px/1.5 system-ui}
+.art-buzzkill{background:linear-gradient(145deg,#2a125b44,#20102499),url('/assets/420bet/buzzkill/bedroom.svg') center/cover!important;color:#ffff8b!important;text-shadow:0 0 12px #c93ae5,2px 3px #2b1735}
+@media(max-width:1050px){.bz-controls{grid-template-columns:1fr 1fr}.bz-game{padding:9px}.bz-stage{min-height:250px}.bz-title h1{font-size:60px}}
+@media(max-width:600px){.bz-header{font-size:10px;padding:4px 8px}.bz-practice{font-size:8px;text-align:right}.bz-top{flex-direction:column;align-items:flex-start;padding:0 5px 10px}.bz-balance{padding:5px 9px;font-size:12px}.bz-title h1{font-size:52px}.bz-title p{font-size:11px}.bz-stage{min-height:200px}.bz-mult{font-size:38px}.bz-mult-wrap{top:5%;padding:3px 10px}.bz-mood{font-size:9px}.bz-controls{grid-template-columns:1fr 1fr;gap:6px}.bz-cash{grid-column:1/-1;min-height:60px}.bz-refill{grid-column:1/-1}.bz-wager,.bz-auto{padding:8px 6px}.bz-step{width:31px;height:32px}.bz-wager strong{font-size:19px}.bz-bust{font-size:28px}}
+@media(prefers-reduced-motion:reduce){.bz-game *{animation:none!important;transition:none!important}}

@@ -13,7 +13,7 @@ export function createPestControlTable(doc=globalThis.document,options={}){
  function render(){
   root.replaceChildren();
   const title=el(doc,'header','pc-title');
-  const heading=el(doc,'div','pc-heading');heading.append(el(doc,'small','','420BET ORIGINALS · PRACTICE ONLY'),el(doc,'h1','','PEST CONTROL'),el(doc,'p','','BUDDY BLOOM’S GROW ROOM · SAVE THE CROP!'));
+  const heading=el(doc,'div','pc-heading');const logo=el(doc,'img','pc-logo');logo.src=asset+'logo-concept.webp';logo.alt='420Bet Originals Pest Control — Buddy Bloom’s Grow Room';logo.decoding='async';heading.append(logo,el(doc,'h1','pc-visually-hidden','PEST CONTROL'),el(doc,'p','','PRACTICE ONLY · SAVE THE CROP!'));
   title.append(heading,stat('PRACTICE CREDITS',money(state.balance)));
   root.append(title);
   const layout=el(doc,'div','pc-layout'),left=el(doc,'aside','pc-side pc-left');

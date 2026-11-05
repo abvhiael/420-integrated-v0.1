@@ -1,6 +1,7 @@
 // Phaser 4 scene — animation is presentation only, never a source of outcome.
 import * as Phaser from 'phaser';
 const ASSETS='/assets/420bet/buzzkill/';
+const ART=ASSETS+'gameplay-v1/';
 const W=1200,H=675;
 const colors=[0xffd849,0xff7a53,0xf349c6,0x9b60ff,0x53ecff,0x8dff64];
 export function mountBuzzkillScene(parent,{reducedMotion=false}={}){
@@ -11,10 +12,20 @@ export function mountBuzzkillScene(parent,{reducedMotion=false}={}){
    this.load.svg('buzz-room',ASSETS+'bedroom.svg',{width:W,height:H});
    this.load.svg('buzz-kevin',ASSETS+'kevin.svg',{width:420,height:470});
    this.load.svg('buzz-mom',ASSETS+'mom.svg',{width:320,height:530});
+   // Browser-optimized cropped illustration assets from the approved concept.
+   this.load.image('buzz-room-art',ART+'bedroom-base.webp');
+   this.load.image('buzz-kevin-lift1',ART+'kevin-lift1.webp');
+   this.load.image('buzz-kevin-lift2',ART+'kevin-lift2.webp');
+   this.load.image('buzz-kevin-lift3',ART+'kevin-lift3.webp');
+   this.load.image('buzz-mom-entry',ART+'mom-entry.webp');
+   this.load.image('buzz-mom-buzzkill',ART+'mom-buzzkill.webp');
+   this.load.image('buzz-fx-flowers',ART+'fx-flowers.webp');
+   this.load.image('buzz-fx-clouds',ART+'fx-clouds.webp');
   }
   create(){
    sceneRef=this;
-   this.add.image(W/2,H/2,'buzz-room').setDisplaySize(W,H);
+   const use=(illustrated,fallback)=>this.textures.exists(illustrated)?illustrated:fallback;
+   this.add.image(W/2,H/2,use('buzz-room-art','buzz-room')).setDisplaySize(W,H);
    this.ambient=this.add.graphics().setDepth(1);
    this.rainbow=this.add.graphics().setDepth(2);
    this.smoke=this.add.graphics().setDepth(3);
@@ -26,8 +37,10 @@ export function mountBuzzkillScene(parent,{reducedMotion=false}={}){
      this.flowers.push({flower,x,y,phase:i*.84});
    });
    this.cloud=this.add.graphics().setDepth(4);
-   this.kevin=this.add.image(570,478,'buzz-kevin').setDisplaySize(310,347).setDepth(5);
-   this.mom=this.add.image(1320,355,'buzz-mom').setDisplaySize(275,455).setDepth(9);
+   this.cloudIllustration=this.textures.exists('buzz-fx-clouds')?this.add.image(570,480,'buzz-fx-clouds').setDisplaySize(360,270).setAlpha(0).setDepth(4):null;
+   this.flowerIllustration=this.textures.exists('buzz-fx-flowers')?this.add.image(250,315,'buzz-fx-flowers').setDisplaySize(260,260).setAlpha(0).setDepth(4):null;
+   this.kevin=this.add.image(570,478,use('buzz-kevin-lift1','buzz-kevin')).setDisplaySize(310,347).setDepth(5);
+   this.mom=this.add.image(1320,355,use('buzz-mom-entry','buzz-mom')).setDisplaySize(275,455).setDepth(9);
    this.mom.setVisible(false);
    this.doorGlow=this.add.rectangle(1070,315,178,448,0xffedb6,0).setDepth(8);
    this.crashText=this.add.text(600,220,'BUZZKILL!',{fontFamily:'Arial Black, Impact, sans-serif',fontSize:'100px',fontStyle:'italic',color:'#ffbd2b',stroke:'#6f164c',strokeThickness:15,shadow:{offsetX:5,offsetY:7,color:'#1a0a24',blur:12}}).setOrigin(.5).setAlpha(0).setDepth(11);
@@ -41,7 +54,13 @@ export function mountBuzzkillScene(parent,{reducedMotion=false}={}){
    const intensity=crashed?0:Phaser.Math.Clamp(Math.log2(Math.max(1,level))/3.4,0,1);
    const lift=crashed?0:Math.min(198,Math.log(Math.max(1,level))*79);
    const bob=!reducedMotion&&!crashed?Math.sin(t*1.5)*7:0;
-   if(!crashed){this.kevin.y=472-lift+bob;this.kevin.angle=reducedMotion?0:Math.sin(t*.65)*2;}
+   if(!crashed){
+     const pose=level>=4.2?'buzz-kevin-lift3':level>=2?'buzz-kevin-lift2':'buzz-kevin-lift1';
+     if(this.textures.exists(pose)&&this.kevin.texture.key!==pose)this.kevin.setTexture(pose);
+     this.kevin.y=472-lift+bob;this.kevin.angle=reducedMotion?0:Math.sin(t*.65)*2;
+   }
+   if(this.cloudIllustration){this.cloudIllustration.y=this.kevin.y+117;this.cloudIllustration.alpha=crashed?0:Phaser.Math.Clamp(intensity*.58,0,.58);}
+   if(this.flowerIllustration){this.flowerIllustration.alpha=crashed?0:Phaser.Math.Clamp((intensity-.30)*.75,0,.62);this.flowerIllustration.rotation=reducedMotion?0:Math.sin(t*.35)*.06;}
    this.ambient.clear();
    this.ambient.fillStyle(0xa52fed,0.09+intensity*.16);this.ambient.fillRect(0,0,W,H);
    this.ambient.fillStyle(0x56fda9,intensity*.06);this.ambient.fillEllipse(600,310,900,470);
@@ -75,11 +94,12 @@ export function mountBuzzkillScene(parent,{reducedMotion=false}={}){
  game=new Phaser.Game({type:Phaser.AUTO,parent,width:W,height:H,backgroundColor:'#1e1232',antialias:true,render:{pixelArt:false},scale:{mode:Phaser.Scale.FIT,autoCenter:Phaser.Scale.CENTER_BOTH},scene:[BuzzkillScene]});
  const api={
   setLevel(mult){level=Number.isFinite(mult)?Math.max(1,mult):1;},
-  reset(){level=1;crashed=false;if(!sceneRef)return;sceneRef.mom.setVisible(false);sceneRef.mom.x=1320;sceneRef.doorGlow.alpha=0;sceneRef.crashText.setAlpha(0);sceneRef.momQuote.setAlpha(0);sceneRef.kevin.setAlpha(1);},
+  reset(){level=1;crashed=false;if(!sceneRef)return;sceneRef.tweens.killAll();sceneRef.mom.setVisible(false);sceneRef.mom.x=1320;sceneRef.mom.setTexture(sceneRef.textures.exists('buzz-mom-entry')?'buzz-mom-entry':'buzz-mom');sceneRef.doorGlow.alpha=0;sceneRef.crashText.setAlpha(0);sceneRef.momQuote.setAlpha(0);sceneRef.kevin.setAlpha(1);sceneRef.kevin.setTexture(sceneRef.textures.exists('buzz-kevin-lift1')?'buzz-kevin-lift1':'buzz-kevin');sceneRef.kevin.angle=0;sceneRef.kevin.y=472;},
   bust(){if(crashed)return;crashed=true;if(!sceneRef)return;const s=sceneRef;s.mom.setVisible(true);
+   s.mom.setTexture(s.textures.exists('buzz-mom-entry')?'buzz-mom-entry':'buzz-mom');
    s.doorGlow.setAlpha(.6);
-   if(reducedMotion){s.mom.x=1058;s.crashText.setAlpha(1);s.momQuote.setAlpha(1);s.kevin.y=475;return;}
-   s.tweens.add({targets:s.mom,x:1050,duration:250,ease:'Back.Out'});
+   if(reducedMotion){s.mom.x=1058;s.mom.setTexture(s.textures.exists('buzz-mom-buzzkill')?'buzz-mom-buzzkill':'buzz-mom');s.crashText.setAlpha(1);s.momQuote.setAlpha(1);s.kevin.y=475;return;}
+   s.tweens.add({targets:s.mom,x:1050,duration:250,ease:'Back.Out',onComplete:()=>{if(s.textures.exists('buzz-mom-buzzkill'))s.mom.setTexture('buzz-mom-buzzkill');}});
    s.tweens.add({targets:s.doorGlow,alpha:0,duration:400,delay:190});
    s.tweens.add({targets:s.kevin,y:481,angle:-12,duration:380,ease:'Bounce.Out'});
    s.tweens.add({targets:[s.crashText,s.momQuote],alpha:1,duration:180,delay:290});

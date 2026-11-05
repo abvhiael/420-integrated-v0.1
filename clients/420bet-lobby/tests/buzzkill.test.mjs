@@ -125,17 +125,41 @@ test('Mom completes her entry and speech, then pauses exactly 500ms before BUZZK
  assert.equal(crashVisualPhase(0),'entry');
  assert.equal(crashVisualPhase(949),'entry');
  assert.equal(crashVisualPhase(950),'lecture');
- assert.equal(crashVisualPhase(2449),'lecture');
- assert.equal(crashVisualPhase(2450),'pause');
- assert.equal(crashVisualPhase(2949),'pause');
- assert.equal(crashVisualPhase(2950),'splash');
- assert.equal(crashVisualPhase(4500),'complete');
+ assert.equal(crashVisualPhase(4449),'lecture');
+ assert.equal(crashVisualPhase(4450),'pause');
+ assert.equal(crashVisualPhase(4949),'pause');
+ assert.equal(crashVisualPhase(4950),'splash');
+ assert.equal(crashVisualPhase(6500),'complete');
  assert.equal(momPoseAt(0),0);
- assert.equal(momPoseAt(2200),5);
+ assert.equal(momPoseAt(2200),4);
  assert(BUZZ_MOM_LINES.length>=4);
  const ui=readFileSync(new URL('../src/buzzkill-ui.js',import.meta.url),'utf8');
  assert(ui.includes('cinematicActive=true'));
  assert(ui.includes('onSplash:'));
  assert(ui.includes('onComplete:'));
  assert(ui.includes("bust.classList.toggle('bz-show',splashShown)"));
+});
+
+test('BUZZKILL visibility recovery holds full-body character in stage and door fully in frame',async()=>{
+ const {BUZZ_CINEMATIC}=await import('../src/buzzkill-cinematic.js');
+ assert.equal(BUZZ_CINEMATIC.lectureEndMs-BUZZ_CINEMATIC.lectureBeginMs,3500);
+ assert.equal(BUZZ_CINEMATIC.splashAtMs-BUZZ_CINEMATIC.lectureEndMs,500);
+ assert(BUZZ_CINEMATIC.completeMs>BUZZ_CINEMATIC.splashAtMs+1000);
+ const scene=readFileSync(new URL('../src/buzzkill-scene.js',import.meta.url),'utf8');
+ // Broken concept cut-outs must not be substituted for the visible full-body SVG.
+ assert(scene.includes("this.kevin=this.add.image(570,540,'buzz-kevin')"));
+ assert(scene.includes("this.kevin.setVisible(true).setAlpha(1)"));
+ assert(scene.includes("if(this.kevin.texture.key!=='buzz-kevin')this.kevin.setTexture('buzz-kevin')"));
+ assert(scene.includes("s.kevin.setTexture('buzz-kevin')"));
+ assert(scene.includes("this.mom=this.add.image(1130,540,'buzz-mom')"));
+ assert(scene.includes("s.mom.setTexture('buzz-mom')"));
+ assert(scene.includes("s.doorPanel.setAlpha(1)"));
+ assert(scene.includes("s.mom.setPosition(1042,540)"));
+ assert(scene.includes("s.bubbleText.setText(say).setAlpha(1)"));
+ assert(scene.includes("schedule(BUZZ_CINEMATIC.lectureEndMs"));
+ assert(scene.includes("schedule(BUZZ_CINEMATIC.splashAtMs"));
+ assert(scene.includes("schedule(BUZZ_CINEMATIC.completeMs"));
+ // 1200-wide stage: max Mom x 1145 + half sprite width 127.5 would clip
+ // at the first frame, so her fully visible start x must remain <=1072.
+ assert.match(scene,/s\.mom\.setVisible\(true\)/);
 });

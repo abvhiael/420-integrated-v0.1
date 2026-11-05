@@ -133,7 +133,11 @@ test('Reference-layout skin keeps centered tray art, visible wallpaper, betting 
  assert.match(wallpaper,/<svg/);
  assert.match(wallpaper,/id="lamp"/);
  assert.match(wallpaper,/id="grow"/);
- assert(css.includes("grow-room-wallpaper-v2.svg"));
+ assert(css.includes("grow-room-wallpaper-illustrated.webp"));
+ const wallpaperWebp=readFileSync(new URL('../public/assets/420bet/pest-control/grow-room-wallpaper-illustrated.webp',import.meta.url));
+ assert(wallpaperWebp.length>200000,'Detailed wallpaper must not be a small placeholder');
+ assert.equal(wallpaperWebp.toString('ascii',0,4),'RIFF');
+ assert.equal(wallpaperWebp.toString('ascii',8,12),'WEBP');
  assert(css.includes(".pc-game .pc-board .pc-tile .pc-icon"));
  assert(css.includes("object-fit:contain;object-position:center"));
  assert(css.includes(".pc-game .pc-settings"));

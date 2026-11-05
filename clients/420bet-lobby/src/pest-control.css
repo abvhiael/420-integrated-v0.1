@@ -33,3 +33,18 @@
 .pc-mood-nervous::after{background-position:50% center}
 .pc-mood-infested::after{background-position:75% center}
 .pc-mood-harvest::after{background-position:100% center}
+
+/* Crop from the approved master-art illustration: 4 columns x 2 rows.
+   This is one optimized texture, not eight browser requests. */
+.pc-game .pc-tile{background-image:url('/assets/420bet/pest-control/tiles-concept-strip.webp');background-size:400% 200%;background-repeat:no-repeat;background-color:#161020;overflow:hidden}
+.pc-game .pc-tile-closed{background-position:0% 0%}
+.pc-game .pc-tile-closed:enabled:hover{background-position:33.3333% 0%;box-shadow:0 0 18px #7eff4caa}
+.pc-game .pc-tile-safe{background-position:100% 0%}
+.pc-game .pc-tile-bust.pc-hazard-spider-mites{background-position:0% 100%}
+.pc-game .pc-tile-bust.pc-hazard-aphids{background-position:33.3333% 100%}
+.pc-game .pc-tile-bust.pc-hazard-powdery-mildew{background-position:66.6667% 100%}
+.pc-game .pc-tile-bust.pc-hazard-bud-rot{background-position:100% 100%}
+.pc-game .pc-tile-closed .pc-leaf,.pc-game .pc-tile-safe .pc-icon,
+.pc-game .pc-tile-bust:not(.pc-hazard-fungus-gnats) .pc-icon{visibility:hidden}
+.pc-game .pc-tile-bust.pc-hazard-fungus-gnats{background:radial-gradient(circle,#8d1727,#230e19);border-color:#fa5552}
+.pc-game .pc-tile-disclosed{filter:grayscale(.3) brightness(.65)}

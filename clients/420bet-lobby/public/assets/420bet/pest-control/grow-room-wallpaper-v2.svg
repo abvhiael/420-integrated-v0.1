@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
+<defs>
+<linearGradient id="wall" x2="0" y2="1"><stop stop-color="#090915"/><stop offset=".4" stop-color="#271039"/><stop offset=".78" stop-color="#10261b"/><stop offset="1" stop-color="#06130d"/></linearGradient>
+<radialGradient id="purple"><stop stop-color="#ed63ff" stop-opacity=".85"/><stop offset=".4" stop-color="#b32fe8" stop-opacity=".25"/><stop offset="1" stop-color="#7114cb" stop-opacity="0"/></radialGradient>
+<radialGradient id="emerald"><stop stop-color="#36e663" stop-opacity=".35"/><stop offset="1" stop-color="#0d331d" stop-opacity="0"/></radialGradient>
+<linearGradient id="floor" x2="0" y2="1"><stop stop-color="#26162d"/><stop offset="1" stop-color="#090a11"/></linearGradient>
+<pattern id="mesh" width="100" height="100" patternUnits="userSpaceOnUse"><path d="M0 0H100V100" stroke="#ca68e6" stroke-opacity=".13" fill="none"/></pattern>
+<g id="branch" stroke="#194f20" stroke-width="7" stroke-linecap="round"><path d="M0 0v-130"/><path d="M0-45q-105-78-96-110Q-30-153 0-45ZM0-65q92-113 122-109Q101-109 0-65ZM0-105q-55-85-40-123Q3-187 0-105ZM0-115q75-80 64-127Q4-204 0-115Z" fill="#2e892e" stroke="#85de48" stroke-width="3"/><path d="M0-155q-40-49-22-77Q0-205 0-155ZM0-165q40-40 33-72Q5-211 0-165Z" fill="#88c839" stroke="#a8fd69" stroke-width="2"/></g>
+<g id="grow"><rect x="-58" y="-18" width="116" height="56" rx="7" fill="#161d22" stroke="#7a3c91" stroke-width="5"/><rect x="-48" y="-30" width="96" height="15" fill="#1f4b31"/><use href="#branch" transform="translate(0,-28) scale(.6)"/></g>
+<g id="lamp"><path d="M-100-20h200l-12 50h-176Z" fill="#292135" stroke="#b67ed2" stroke-width="7"/><path d="M-90 8H90" stroke="#f2adff" stroke-width="14"/><g fill="#f4b4ff"><rect x="-70" width="24" height="11"/><rect x="-28" width="24" height="11"/><rect x="14" width="24" height="11"/><rect x="55" width="24" height="11"/></g></g>
+</defs>
+<rect width="1600" height="900" fill="url(#wall)"/>
+<path d="M0 0h1600v620H0Z" fill="url(#mesh)"/>
+<g stroke="#8c499d" stroke-opacity=".35" stroke-width="9"><path d="M0 70h1600M0 480h1600M200 0v610M650 0v610M1120 0v610M1510 0v610"/></g>
+<g stroke="#65486d" stroke-width="12" fill="none"><path d="M-50 160q150-45 330 0t360-20t450 0t550 0"/><path d="M0 262h1600"/></g>
+<g opacity=".8"><ellipse cx="320" cy="200" rx="490" ry="430" fill="url(#purple)"/><ellipse cx="1260" cy="180" rx="500" ry="450" fill="url(#purple)"/><ellipse cx="800" cy="700" rx="800" ry="300" fill="url(#emerald)"/></g>
+<g><path d="M0 590h1600v310H0Z" fill="url(#floor)"/><g stroke="#914bb5" stroke-width="3" opacity=".36"><path d="M0 710h1600M0 830h1600M300 590 0 900M650 590 500 900M950 590 1100 900M1300 590 1600 900"/></g></g>
+<g><use href="#lamp" transform="translate(270 115) scale(1.2)"/><use href="#lamp" transform="translate(800 75) scale(1.25)"/><use href="#lamp" transform="translate(1325 115) scale(1.2)"/></g>
+<g opacity=".85"><use href="#grow" transform="translate(100 680) scale(1.6)"/><use href="#grow" transform="translate(295 710) scale(1.35)"/><use href="#grow" transform="translate(510 700) scale(1.35)"/><use href="#grow" transform="translate(1100 700) scale(1.35)"/><use href="#grow" transform="translate(1330 710) scale(1.35)"/><use href="#grow" transform="translate(1520 680) scale(1.6)"/></g>
+<g opacity=".8"><use href="#branch" transform="translate(28 810) scale(1.9)"/><use href="#branch" transform="translate(220 875) scale(1.55)"/><use href="#branch" transform="translate(1420 890) scale(1.55)"/><use href="#branch" transform="translate(1570 795) scale(1.9)"/></g>
+<g opacity=".4" stroke="#a354dd" fill="none"><circle cx="1520" cy="280" r="78" stroke-width="12"/><circle cx="1520" cy="280" r="57" stroke-width="5"/><path d="m1520 220 20 50-20 10-10-60m60 80-50-20m-12 60 12-60" stroke-width="9"/></g>
+</svg>

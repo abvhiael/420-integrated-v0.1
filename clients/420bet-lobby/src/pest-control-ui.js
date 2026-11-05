@@ -7,7 +7,7 @@ const hazards=['spider-mites','aphids','powdery-mildew','bud-rot','fungus-gnats'
 const buddies={ready:'idle',active:'nervous',infested:'infested',harvest:'harvest',cancelled:'idle'};
 export function createPestControlTable(doc=globalThis.document,options={}){
  const state=createPestControl(options),root=el(doc,'section','pc-game');
- root.dataset.practiceGame='pest-control';let showInfo=false,autoPicks=0;
+ root.dataset.practiceGame='pest-control';let showInfo=false;
  function button(label,cls,fn,disabled=false){const b=el(doc,'button',cls,label);b.type='button';b.disabled=disabled;b.addEventListener('click',fn);return b;}
  function stat(label,value,cls=''){const s=el(doc,'div','pc-stat '+cls);s.append(el(doc,'span','pc-stat-label',label),el(doc,'strong','',value));return s;}
  function render(){
@@ -36,6 +36,7 @@ export function createPestControlTable(doc=globalThis.document,options={}){
   const actions=el(doc,'div','pc-actions');
   if(state.phase==='active'){
    actions.append(button('🌿 HARVEST NOW','pc-primary pc-harvest',()=>{pestAction(state,'harvest');render()},!state.picks.length));
+   actions.append(button('🎲 AUTO PICK ONE TRAY','pc-secondary',()=>{pestAction(state,'auto-pick');render()}));
    actions.append(button('CANCEL GROW','pc-secondary',()=>{pestAction(state,'cancel');render()},state.picks.length!==0));
   }else actions.append(button(state.phase==='finished'?'▶ NEW ROUND':'▶ START GROWING','pc-primary',()=>{pestAction(state,'start');render()},state.balance<state.bet));
   actions.append(button('+ 1,000 PRACTICE CREDITS','pc-secondary',()=>{pestAction(state,'refill');render()},state.phase==='active'));
@@ -46,7 +47,7 @@ export function createPestControlTable(doc=globalThis.document,options={}){
   for(let i=0;i<25;i++){
    const opened=state.picks.includes(i),finished=state.phase==='finished',hazard=state.hazardTiles.has(i);
    const show=opened||finished;const bust=show&&hazard;
-   const card=button('', 'pc-tile '+(show?(bust?'pc-tile-bust':'pc-tile-safe'):'pc-tile-closed')+(finished&&!opened?' pc-tile-disclosed':''),()=>{if(pestAction(state,'pick',i)){if(state.phase==='active'&&autoPicks>0&&state.picks.length>=autoPicks)pestAction(state,'harvest');render()}},state.phase!=='active'||opened);
+   const card=button('', 'pc-tile '+(show?(bust?'pc-tile-bust':'pc-tile-safe'):'pc-tile-closed')+(finished&&!opened?' pc-tile-disclosed':''),()=>{if(pestAction(state,'pick',i))render()},state.phase!=='active'||opened);
    card.dataset.tile=String(i);
    card.setAttribute('aria-label',show?(hazard?'Infested tray':'Healthy bud'):'Unopened grow tray '+(i+1));
    if(show){if(hazard){const img=el(doc,'img','pc-icon');img.src=asset+hazards[i%hazards.length]+'.svg';img.alt='';card.append(img);}

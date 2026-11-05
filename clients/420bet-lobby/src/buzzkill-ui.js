@@ -5,7 +5,7 @@ const moods=[{at:1,name:'JUST CHILLIN\'',desc:'Everything is mellow.'},{at:2,nam
 export function createBuzzkillPractice(doc=globalThis.document,options={}){
  const state=createBuzzkill(options),root=make(doc,'section','bz-game');
  root.dataset.practiceGame='buzzkill';root.gameState=state;
- let scene=null,raf=null,startAt=0,dead=false,loading=false;
+ let scene=null,raf=null,startAt=0,dead=false,loading=false,cinematicActive=false,splashShown=false;
  const head=make(doc,'header','bz-header');
  head.append(make(doc,'div','bz-brand','420BET ORIGINALS'),make(doc,'span','bz-practice','PRACTICE ONLY · NO WALLET · NO REAL WAGERS'));
  const top=make(doc,'div','bz-top');
@@ -23,7 +23,7 @@ export function createBuzzkillPractice(doc=globalThis.document,options={}){
  const mult=make(doc,'strong','bz-mult','1.00×');
  const mood=make(doc,'span','bz-mood','JUST CHILLIN\'');
  hud.append(mult,mood);
- const bust=make(doc,'div','bz-bust');bust.setAttribute('role','status');bust.textContent='BUZZKILL! MOM\'S HOME!';
+ const bust=make(doc,'div','bz-bust');bust.setAttribute('role','status');bust.textContent='BUZZKILLED!';
  stage.append(mount,hud,bust);
  const below=make(doc,'div','bz-controls');
  const wager=make(doc,'div','bz-wager');
@@ -53,9 +53,9 @@ export function createBuzzkillPractice(doc=globalThis.document,options={}){
   feedback.textContent=state.notice+(state.cashedAt?' · Cashed out '+state.cashedAt.toFixed(2)+'× · +'+fmt(state.return)+' credits':'');
   const lock=state.phase==='running';minus.disabled=lock||state.bet<=1;plus.disabled=lock||state.bet>=100;check.disabled=lock;target.disabled=lock;
   check.checked=state.autoEnabled;
-  cash.disabled=lock&&state.settled||state.phase!=='running'&&state.balance<state.bet;
-  cash.textContent=state.phase==='running'?(state.settled?'✓ CASHED OUT':'CASH OUT · '+fmt(state.bet*state.multiplier)):state.phase==='bust'?'▶ NEW ROUND':'▶ START ROUND';
-  bust.classList.toggle('bz-show',state.phase==='bust');
+  cash.disabled=cinematicActive||(lock&&state.settled)||(state.phase!=='running'&&state.balance<state.bet);
+  cash.textContent=cinematicActive?'MOM’S HERE…':state.phase==='running'?(state.settled?'✓ CASHED OUT':'CASH OUT · '+fmt(state.bet*state.multiplier)):state.phase==='bust'?'▶ NEW ROUND':'▶ START ROUND';
+  bust.classList.toggle('bz-show',splashShown);
   if(state.phase==='bust'){
    history.replaceChildren();
    for(const row of state.history.slice(0,6))history.append(make(doc,'span','bz-history-pill'+(row.cashedAt?' bz-win':''),row.crash.toFixed(2)+'×'));
@@ -77,14 +77,21 @@ export function createBuzzkillPractice(doc=globalThis.document,options={}){
   if(dead||state.phase!=='running')return;
   buzzAction(state,'tick',Math.max(state.elapsed,now()-startAt));
   scene?.setLevel(state.multiplier);
-  if(state.phase==='bust')scene?.bust();
+  if(state.phase==='bust'){
+   cinematicActive=true;
+   if(scene)scene.bust({
+    onSplash:()=>{if(dead)return;splashShown=true;update();},
+    onComplete:()=>{if(dead)return;cinematicActive=false;update();}
+   });
+   else{cinematicActive=false;splashShown=true;}
+  }
   update();
   if(state.phase==='running')raf=requestFrame(loop);
   else raf=null;
  }
  function start(){
   if(!buzzAction(state,'start'))return;
-  scene?.reset();scene?.setLevel(1);startAt=now();update();raf=requestFrame(loop);
+  cinematicActive=false;splashShown=false;scene?.reset();scene?.setLevel(1);startAt=now();update();raf=requestFrame(loop);
  }
  cash.addEventListener('click',()=>{
   if(state.phase==='running'){if(buzzAction(state,'cashout'))update();}
@@ -96,6 +103,7 @@ export function createBuzzkillPractice(doc=globalThis.document,options={}){
    const {mountBuzzkillScene}=await import('./buzzkill-scene.js');
    if(dead)return;
    scene=mountBuzzkillScene(mount,{reducedMotion:!!w.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches});
+   root.classList.add('bz-has-scene');
    fallback.remove();
   }catch(error){
    state.notice='Animated scene unavailable; practice game controls are still playable.';

@@ -149,7 +149,7 @@ export function mountBuzzkillScene(parent,{reducedMotion=false}={}){
    // Hold both characters in the frame. Never put a baked-in door image offstage.
    s.kevin.setVisible(true).setAlpha(1);
    s.mom.setTexture('buzz-mom').setOrigin(.5,1).setDisplaySize(255,435)
-     .setVisible(true).setAlpha(1).setPosition(1145,540);
+     .setVisible(true).setAlpha(1).setPosition(1065,540);
    s.doorPanel.setAlpha(1).setScale(1,1);
    s.doorShadow.setAlpha(.93);s.doorGlow.setAlpha(.42);
    s.bubble.setAlpha(0);s.bubbleText.setAlpha(0).setText('');
@@ -157,10 +157,10 @@ export function mountBuzzkillScene(parent,{reducedMotion=false}={}){
    s.crashText.setAlpha(0);
    if(reducedMotion){
      s.doorPanel.setScale(.18,1);
-     s.mom.setPosition(1042,540);
+     s.mom.setPosition(1005,540);
    }else{
      s.tweens.add({targets:s.doorPanel,scaleX:.18,duration:BUZZ_CINEMATIC.doorOpenMs,ease:'Cubic.Out'});
-     s.tweens.add({targets:s.mom,x:1042,duration:BUZZ_CINEMATIC.enterCompleteMs,ease:'Cubic.Out'});
+     s.tweens.add({targets:s.mom,x:1005,duration:BUZZ_CINEMATIC.enterCompleteMs,ease:'Cubic.Out'});
    }
    schedule(BUZZ_CINEMATIC.enterCompleteMs,()=>{
      s.mom.setPosition(1042,540);

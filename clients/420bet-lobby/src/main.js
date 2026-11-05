@@ -1,6 +1,7 @@
 import {createPractice} from './practice-ui.js';
 import {createCannabisRoulette} from './roulette-ui.js';
 import {createBlackjackTable} from './blackjack-ui.js';
+import {createPestControlTable} from './pest-control-ui.js';
 import {createMaryJanePractice} from './mary-jane-ui.js';
 import {createSlotsLobby,slotMachineFromHash,slotMachinePath} from './slots-lobby.js';
 import {WalletIdentity,loadHistory} from './wallet.js';
@@ -8,6 +9,7 @@ import './style.css';
 import './mary-jane-concept.css';
 import './roulette.css';
 import './blackjack.css';
+import './pest-control.css';
 import {createNativePreview} from './previews.js';
 import {categories,resolveCatalogue,filterGames} from './catalogue.js';
 const app=document.querySelector('#app');
@@ -46,14 +48,14 @@ function render(){
   if(active){
     const main=node('main',active.id==='roulette'?'immersive roulette-immersive':active.id==='blackjack'?'immersive blackjack-immersive':'immersive');const bar=node('header','gamebar');
     bar.append(button(selectedSlotMachine?'← Slots Lobby':'← Return to Lobby',close,'return'),brandLink('game-brand'),node('strong','',selectedSlotMachine?.title??active.title));
-    const note=node('span','game-status',['slots','roulette','blackjack'].includes(active.id)?'Practice available':statusText[active.status]);bar.append(note);main.append(bar);
+    const note=node('span','game-status',['slots','roulette','blackjack','mines'].includes(active.id)?'Practice available':statusText[active.status]);bar.append(note);main.append(bar);
     if(active.id==='slots'){
       const wrap=node('div','view-scroll');
       if(selectedSlotMachine){activePractice=selectedSlotMachine.id==='mary-jane-sticky-wilds'?createMaryJanePractice(document):createPractice('slots',document);wrap.append(activePractice);}
       else wrap.append(createSlotsLobby(document,launchSlotMachine));
       main.append(wrap);
     }
-    else if(active.category==='Casino'){activePractice=active.id==='roulette'?createCannabisRoulette(document):active.id==='blackjack'?createBlackjackTable(document):createPractice(active.id,document);const wrap=node('div','view-scroll');wrap.append(activePractice);main.append(wrap);}
+    else if(active.category==='Casino'){activePractice=active.id==='roulette'?createCannabisRoulette(document):active.id==='blackjack'?createBlackjackTable(document):active.id==='mines'?createPestControlTable(document):createPractice(active.id,document);const wrap=node('div','view-scroll');wrap.append(activePractice);main.append(wrap);}
     else if(active.route){const frame=node('iframe','gameframe');frame.title=active.title+' game';frame.src=active.route;frame.setAttribute('allow','fullscreen');main.append(frame);}
     else {const nativePreview=createNativePreview(active.id);if(nativePreview){const wrap=node('div','view-scroll');wrap.append(nativePreview);main.append(wrap);}else{const preview=node('section','preview-screen');preview.append(node('p','eyebrow','420BET GAME PREVIEW'),node('div','preview-glyph',({'Casino':'✦','Poker':'♠','Fantasy':'★','Sportsbook':'◆'})[active.category]),node('h1','',active.title),node('p','','This game screen is being prepared. Its dedicated interface is not yet connected.'),node('p','preview-warning','Viewing only — wagering, wallet transactions and payouts are not enabled here.'));preview.append(button('Return to Lobby',close,'return'));main.append(preview);}}
     const foot=node('footer','game-footer');foot.append(brandLink('footer-brand'),node('span','','420Bet · Practice and previews only — no wagering enabled.'));app.append(main,foot);return;

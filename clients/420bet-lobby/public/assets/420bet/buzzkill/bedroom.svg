@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675">
+<defs>
+<linearGradient id="wall" x2="0" y2="1"><stop stop-color="#311448"/><stop offset=".65" stop-color="#633373"/><stop offset="1" stop-color="#331a41"/></linearGradient>
+<linearGradient id="floor" x2="0" y2="1"><stop stop-color="#a85076"/><stop offset="1" stop-color="#3b153f"/></linearGradient>
+<radialGradient id="lamp"><stop stop-color="#ffc35e"/><stop offset=".45" stop-color="#fa70ad"/><stop offset="1" stop-color="#7628be" stop-opacity="0"/></radialGradient>
+<radialGradient id="rug"><stop stop-color="#eecf4c"/><stop offset=".43" stop-color="#ed57a4"/><stop offset=".76" stop-color="#693cc1"/><stop offset="1" stop-color="#0a6351"/></radialGradient>
+<pattern id="planks" width="120" height="32" patternUnits="userSpaceOnUse"><path d="M0 0h120M60 0v32" stroke="#e9929c" stroke-width="2" opacity=".18"/></pattern>
+<pattern id="stars" width="140" height="110" patternUnits="userSpaceOnUse"><path d="M24 18v18m-9-9h18" stroke="#ffd758" stroke-width="2" opacity=".42"/><circle cx="95" cy="68" r="3" fill="#ffd481" opacity=".45"/></pattern>
+<g id="leaf" fill="#7ded5c" stroke="#144f2e" stroke-width="3"><path d="M0 0 Q-14-32 0-82 Q14-32 0 0 M0 0 Q-44-18-53-61 Q-18-54 0 0 M0 0 Q35-30 53-61 Q27-21 0 0 M0 0 Q-43 2-55-16 Q-24-18 0 0 M0 0 Q37 5 55-16 Q25-17 0 0"/></g>
+<g id="flower"><circle r="15" fill="#ffcc3e"/><g fill="#fd91ed" stroke="#762768" stroke-width="3"><ellipse cx="0" cy="-27" rx="15" ry="23"/><ellipse cx="0" cy="27" rx="15" ry="23"/><ellipse cx="-27" cy="0" rx="23" ry="15"/><ellipse cx="27" cy="0" rx="23" ry="15"/></g><circle r="13" fill="#fff27d" stroke="#99571c" stroke-width="3"/></g>
+</defs>
+<rect width="1200" height="675" fill="#13091f"/><path d="M0 0h1200v515H0Z" fill="url(#wall)"/><path d="M0 0h1200v515H0Z" fill="url(#stars)" opacity=".55"/>
+<path d="M0 485H1200V675H0Z" fill="url(#floor)"/><path d="M0 505H1200V675H0Z" fill="url(#planks)"/>
+<g stroke="#d783b0" stroke-opacity=".55" stroke-width="7"><path d="M0 57H1200M0 491H1200M0 0V498M1200 0V498"/></g>
+<!-- retro ceiling pendants -->
+<path d="M222 0v71M853 0v61" stroke="#221029" stroke-width="10"/>
+<path d="M166 77q56-67 111 0l-14 24H181Z" fill="#ee8c46" stroke="#58234b" stroke-width="7"/><circle cx="222" cy="101" r="112" fill="url(#lamp)"/>
+<path d="M798 65q57-69 115 0l-16 30h-83Z" fill="#d781de" stroke="#58234b" stroke-width="7"/><circle cx="854" cy="103" r="104" fill="url(#lamp)"/>
+<!-- left wall paintings -->
+<rect x="30" y="105" width="165" height="204" rx="7" fill="#25162f" stroke="#fcb968" stroke-width="11"/>
+<rect x="44" y="117" width="139" height="181" fill="#431d70"/>
+<circle cx="115" cy="203" r="62" fill="none" stroke="#fbac38" stroke-width="11"/>
+<path d="M115 141v124M115 204l-42 42M115 204l43 42" stroke="#fbac38" stroke-width="10"/>
+<rect x="244" y="122" width="143" height="175" rx="6" fill="#112c35" stroke="#f09c64" stroke-width="9"/>
+<path d="M258 278q55-80 115-143" stroke="#f88ccc" stroke-width="13" fill="none"/>
+<circle cx="313" cy="201" r="35" fill="#ffcd4c"/><g transform="translate(313 201) scale(.65)"><use href="#flower"/></g>
+<!-- window -->
+<rect x="717" y="137" width="213" height="203" rx="10" fill="#241530" stroke="#f6a15a" stroke-width="14"/>
+<rect x="735" y="155" width="178" height="165" fill="#170f36"/>
+<path d="M824 155v165M735 228h178" stroke="#ca75d7" stroke-width="12"/>
+<circle cx="875" cy="197" r="28" fill="#edbd74"/><g fill="#fce6aa" opacity=".8"><circle cx="766" cy="175" r="2"/><circle cx="792" cy="263" r="2"/><circle cx="895" cy="284" r="3"/></g>
+<path d="M721 131q-36 119 0 220l20-8q-15-117 6-208M927 131q36 119 0 220l-20-8q15-117-6-208" fill="#8b35b9" stroke="#e774b8" stroke-width="7"/>
+<!-- dresser / lava lamp -->
+<rect x="58" y="381" width="241" height="116" rx="9" fill="#a86b3c" stroke="#4a2337" stroke-width="9"/>
+<g stroke="#724124" stroke-width="4"><path d="M70 412H287M70 447H287"/></g>
+<g fill="#f9cd61"><circle cx="151" cy="430" r="5"/><circle cx="151" cy="462" r="5"/></g>
+<path d="M97 380l17-135h39l18 135Z" fill="#e88ce5" stroke="#54336a" stroke-width="6"/>
+<g fill="#ffc86c"><circle cx="131" cy="310" r="14"/><circle cx="123" cy="343" r="9"/><circle cx="139" cy="270" r="8"/></g>
+<path d="M108 242h44l-6-14h-32Z" fill="#e2c5ac"/>
+<!-- retro bed -->
+<rect x="5" y="506" width="327" height="76" rx="20" fill="#503677" stroke="#ef9b75" stroke-width="8"/>
+<path d="M18 483Q151 447 316 484V536H18Z" fill="#ee815c" stroke="#fccc87" stroke-width="8"/>
+<path d="M24 489q70-48 132 0t145-5" stroke="#fcd75c" stroke-width="16" fill="none"/>
+<path d="M19 517q84-46 156 0t125 0" stroke="#8533aa" stroke-width="13" fill="none"/>
+<!-- door on right, stays stationary until the interruption -->
+<rect x="982" y="92" width="171" height="415" rx="6" fill="#2a1b35" stroke="#e9a36f" stroke-width="14"/>
+<rect x="997" y="108" width="141" height="391" fill="#b36d4e" stroke="#57344b" stroke-width="7"/>
+<rect x="1012" y="124" width="108" height="150" rx="7" fill="#cc8a5a" stroke="#80506c" stroke-width="7"/>
+<rect x="1012" y="290" width="108" height="170" rx="7" fill="#c78a5a" stroke="#80506c" stroke-width="7"/>
+<circle cx="1020" cy="320" r="9" fill="#fce282" stroke="#513e36" stroke-width="3"/>
+<g transform="translate(1063 205) scale(.48)"><use href="#flower"/></g>
+<!-- record player + crate -->
+<rect x="796" y="433" width="161" height="72" rx="7" fill="#b57854" stroke="#3e293a" stroke-width="8"/>
+<rect x="807" y="423" width="142" height="24" rx="3" fill="#19202a" stroke="#d4a978" stroke-width="5"/>
+<circle cx="858" cy="435" r="37" fill="#191c27" stroke="#af7d83" stroke-width="3"/><circle cx="858" cy="435" r="12" fill="#e66acb"/><path d="M914 411l-22 37" stroke="#d4daaa" stroke-width="7"/>
+<!-- carpet, framing empty center for Kevin -->
+<ellipse cx="575" cy="588" rx="260" ry="81" fill="#32104b" stroke="#f8bd48" stroke-width="13"/>
+<ellipse cx="575" cy="588" rx="227" ry="63" fill="url(#rug)" stroke="#7228ac" stroke-width="8"/>
+<ellipse cx="575" cy="588" rx="120" ry="37" fill="none" stroke="#fff0a4" stroke-width="11"/>
+<ellipse cx="575" cy="588" rx="68" ry="21" fill="#3a2274"/>
+<!-- foreground pot plants -->
+<g transform="translate(74 608) scale(1.25)"><path d="M-26-17h52l-9 58h-35Z" fill="#ad6143" stroke="#5c2937" stroke-width="6"/><use href="#leaf" transform="translate(0,-12) scale(1.5)"/><use href="#leaf" transform="translate(-22,-49) rotate(-25) scale(.8)"/></g>
+<g transform="translate(1136 605) scale(1.35)"><path d="M-26-17h52l-9 58h-35Z" fill="#ad6143" stroke="#5c2937" stroke-width="6"/><use href="#leaf" transform="translate(0,-12) scale(1.6)"/><use href="#leaf" transform="translate(-28,-50) rotate(-20) scale(.8)"/></g>
+<rect width="1200" height="675" fill="none" stroke="#341342" stroke-width="16"/>
+</svg>

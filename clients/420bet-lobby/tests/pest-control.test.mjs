@@ -126,3 +126,28 @@ test('Individual HD concept illustrations render for Buddy, all trays and hazard
  assert(root.querySelector('.pc-mascot-art').src.endsWith('/hd/buddy-infested.webp'));
  assert(root.querySelector('.pc-tile-bust'));
 });
+
+test('Reference-layout skin keeps centered tray art, visible wallpaper, betting and harvest panels',()=>{
+ const css=readFileSync(new URL('../src/pest-control.css',import.meta.url),'utf8');
+ const wallpaper=readFileSync(new URL('../public/assets/420bet/pest-control/grow-room-wallpaper-v2.svg',import.meta.url),'utf8');
+ assert.match(wallpaper,/<svg/);
+ assert.match(wallpaper,/id="lamp"/);
+ assert.match(wallpaper,/id="grow"/);
+ assert(css.includes("grow-room-wallpaper-v2.svg"));
+ assert(css.includes(".pc-game .pc-board .pc-tile .pc-icon"));
+ assert(css.includes("object-fit:contain;object-position:center"));
+ assert(css.includes(".pc-game .pc-settings"));
+ assert(css.includes(".pc-game .pc-odds-row"));
+ const {document}=parseHTML('<html><body></body></html>');
+ const root=createPestControlTable(document,{rng,balance:100});
+ assert.equal(root.querySelectorAll('.pc-tile').length,25);
+ assert(root.querySelector('.pc-left .pc-logo'),'Illustrated logo belongs in left game column');
+ assert(root.querySelector('.pc-settings .pc-stepper'));
+ assert(root.querySelector('.pc-right h2').textContent.includes('HARVEST STATUS'));
+ assert.equal(root.querySelectorAll('.pc-odds-row .pc-odds').length,2);
+ root.querySelector('.pc-primary').click();
+ const safe=Array.from({length:25},(_,i)=>i).find(i=>!root.gameState.hazardTiles.has(i));
+ root.querySelector('[data-tile="'+safe+'"]').click();
+ assert(root.querySelector('.pc-harvest'),'Harvest action remains available');
+ assert(root.querySelector('.pc-tile-safe .pc-icon'),'Safe reveal art remains wired');
+});

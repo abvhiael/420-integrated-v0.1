@@ -25,7 +25,7 @@ export function mountBuzzkillScene(parent,{reducedMotion=false}={}){
    this.load.image('buzz-fx-clouds',ART+'fx-clouds.webp');
    for(let i=1;i<=8;i++)this.load.image('buzz-kevin-frame-'+i,CIN+'kevin-levitate-'+String(i).padStart(2,'0')+'.webp');
    for(let i=1;i<=6;i++)this.load.image('buzz-mom-pose-'+i,CIN+'mom-pose-'+String(i).padStart(2,'0')+'.webp');
-   this.load.image('buzz-crash-splash',CIN+'buzzkilled-splash.webp');
+   this.load.svg('buzz-crash-splash',CIN+'buzzkilled-action-splash.svg',{width:1200,height:530});
   }
   create(){
    sceneRef=this;

@@ -9,12 +9,12 @@ export function secureUniform(){
   return (bits+0.5)/9007199254740992;
 }
 // 4% instant bust, otherwise survival P(C >= m) = 0.96/m (m>1).
-// Round DOWN to hundredth so the display and settlement share the same crossing.
+// Keep the true continuous crash point for exact crossing; round only the display.
 export function sampleCrashPoint(rng=secureUniform){
   const u=rng();
   if(!valid(u,0,1)||u===1)throw new RangeError('Entropy must be in [0,1)');
   if(u>=BUZZ_RULES.rtp)return 1;
-  return Math.max(1.01,Math.floor((BUZZ_RULES.rtp/Math.max(u,Number.MIN_VALUE))*100)/100);
+  return Math.min(1000000,BUZZ_RULES.rtp/Math.max(u,Number.EPSILON/2));
 }
 export function multiplierAt(ms){if(!Number.isFinite(ms)||ms<0)throw new RangeError('Invalid elapsed time');return Math.max(1,Math.exp(BUZZ_RULES.rate*ms/1000));}
 export function tickDuration(target){if(!Number.isFinite(target)||target<1)throw new RangeError('Invalid target');return Math.log(target)/BUZZ_RULES.rate*1000;}
@@ -33,14 +33,19 @@ export function buzzAction(s,action,value){
   }
   if(action==='cashout'&&s.phase==='running'&&!s.settled){
     // A cashout is allowed only while the visual/current multiplier is below the hidden crash point.
-    if(s.multiplier>=s.crashPoint)return buzzAction(s,'tick',s.elapsed);
+    if(s.crashPoint<=1||s.multiplier>=s.crashPoint)return buzzAction(s,'tick',s.elapsed);
     s.cashedAt=s.multiplier;s.return=cents(s.bet*s.multiplier);s.balance=cents(s.balance+s.return);s.settled=true;
     s.notice='Peace, love and perfect timing! Kevin stays groovy.';return true;
   }
   if(action==='tick'&&s.phase==='running'&&Number.isFinite(value)&&value>=s.elapsed){
     s.elapsed=value;
     const raw=multiplierAt(value);
-    // Crossing the crash point is settled before any requested auto or manual cash-out.
+    // Auto-target crossing happens at its exact threshold even if a slow frame skips past both
+    // target and crash. A target at/above crash is never eligible.
+    if(s.autoEnabled&&!s.settled&&s.autoTarget<s.crashPoint&&raw>=s.autoTarget){
+      s.cashedAt=s.autoTarget;s.return=cents(s.bet*s.autoTarget);s.balance=cents(s.balance+s.return);s.settled=true;
+      s.notice='Auto cash-out secured at '+s.autoTarget.toFixed(2)+'×.';
+    }
     if(raw>=s.crashPoint){
       s.multiplier=s.crashPoint;s.phase='bust';s.notice='BUZZKILL! Mom opened the door.';
       s.history.unshift({round:s.round,crash:s.crashPoint,cashedAt:s.cashedAt,return:s.return});
@@ -48,10 +53,6 @@ export function buzzAction(s,action,value){
     }
     // The floor-to-cent display never indicates a value beyond the hidden boundary.
     s.multiplier=Math.max(1,Math.floor(raw*100)/100);
-    if(s.autoEnabled&&!s.settled&&s.autoTarget<s.crashPoint&&raw>=s.autoTarget){
-      s.cashedAt=s.autoTarget;s.return=cents(s.bet*s.autoTarget);s.balance=cents(s.balance+s.return);s.settled=true;
-      s.notice='Auto cash-out secured at '+s.autoTarget.toFixed(2)+'×.';
-    }
     return true;
   }
   return false;

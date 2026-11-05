@@ -154,12 +154,13 @@ test('BUZZKILL visibility recovery holds full-body character in stage and door f
  assert(scene.includes("this.mom=this.add.image(1130,540,'buzz-mom')"));
  assert(scene.includes("s.mom.setTexture('buzz-mom')"));
  assert(scene.includes("s.doorPanel.setAlpha(1)"));
- assert(scene.includes("s.mom.setPosition(1042,540)"));
+ assert(scene.includes("s.mom.setPosition(1005,540)"));
  assert(scene.includes("s.bubbleText.setText(say).setAlpha(1)"));
  assert(scene.includes("schedule(BUZZ_CINEMATIC.lectureEndMs"));
  assert(scene.includes("schedule(BUZZ_CINEMATIC.splashAtMs"));
  assert(scene.includes("schedule(BUZZ_CINEMATIC.completeMs"));
  // 1200-wide stage: max Mom x 1145 + half sprite width 127.5 would clip
  // at the first frame, so her fully visible start x must remain <=1072.
- assert.match(scene,/s\.mom\.setVisible\(true\)/);
+ assert(scene.includes("setVisible(true).setAlpha(1).setPosition(1065,540)"));
+ assert(1065 + 255/2 < 1200, 'Door-entry art must not clip on right');
 });

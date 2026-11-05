@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="530" viewBox="0 0 1200 530">
+<defs>
+<filter id="shadow" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="8"/></filter>
+<linearGradient id="blast" x1="0" x2=".2" y1="0" y2="1"><stop stop-color="#fff98c"/><stop offset=".45" stop-color="#ffdd20"/><stop offset="1" stop-color="#ff6714"/></linearGradient>
+<linearGradient id="words" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#ff7251"/><stop offset=".58" stop-color="#f41f22"/><stop offset="1" stop-color="#bf071b"/></linearGradient>
+</defs>
+<g transform="translate(22 24)" filter="url(#shadow)"><path d="M585 0 666 90 790 22 821 136 992 66 961 198 1180 236 984 287 1099 422 896 394 831 504 707 425 581 500 504 411 331 479 296 380 95 424 176 302 0 256 185 195 107 69 333 135 402 25 497 108Z" fill="#210927"/></g>
+<path d="M585 12 661 98 788 34 818 143 974 81 942 201 1159 244 969 291 1083 408 883 382 825 493 700 415 585 489 510 400 336 470 299 371 105 410 183 302 19 256 195 193 123 87 338 144 407 39 500 118Z" fill="#8b1863" stroke="#300e38" stroke-width="14"/>
+<path d="M581 45 641 139 780 81 791 179 922 133 903 222 1064 248 921 291 999 365 843 353 811 442 690 376 582 448 524 365 368 426 333 346 177 376 224 291 111 256 235 215 188 141 361 181 418 87 511 163Z" fill="url(#blast)" stroke="#fff391" stroke-width="11"/>
+<path d="M584 94 636 166 754 116 761 202 865 174 851 234 957 255 859 291 922 341 806 329 775 391 686 347 585 403 528 347 400 389 379 324 268 340 319 286 222 258 341 232 296 178 428 205 469 132 530 187Z" fill="#ffeb38" stroke="#ff8100" stroke-width="11"/>
+<g fill="#fffaf0" stroke="#492043" stroke-width="6">
+<path d="M90 151q-32-58 18-75q52-8 62 38q56-21 73 34q7 43-50 47H109q-42-5-19-44Z"/>
+<path d="M998 349q-25-55 19-72q43-6 53 29q44-9 52 29q9 41-41 47h-62q-36-2-21-33Z"/>
+</g>
+<g fill="#fce0a2" stroke="#842b73" stroke-width="4"><path d="m186 74 9 17 18 2-13 14 3 18-17-8-16 8 3-18-13-14 18-2Z"/><path d="m1000 93 11 22 25 5-18 18 4 25-22-11-22 11 4-25-19-18 26-5Z"/></g>
+<g transform="translate(604 283) rotate(-5)">
+<text x="12" y="26" font-family="'Arial Black','Impact',sans-serif" font-size="126" font-style="italic" font-weight="1000" text-anchor="middle" letter-spacing="-8" stroke="#230b27" stroke-width="26" paint-order="stroke" fill="#250923">BUZZKILLED!</text>
+<text x="0" y="13" font-family="'Arial Black','Impact',sans-serif" font-size="126" font-style="italic" font-weight="1000" text-anchor="middle" letter-spacing="-8" stroke="#fff5a4" stroke-width="15" paint-order="stroke" fill="url(#words)">BUZZKILLED!</text>
+<text x="0" y="13" font-family="'Arial Black','Impact',sans-serif" font-size="126" font-style="italic" font-weight="1000" text-anchor="middle" letter-spacing="-8" fill="url(#words)">BUZZKILLED!</text>
+</g></svg>

@@ -156,7 +156,7 @@ test('Dealer and all seats use uploaded PNG card faces; only dealer hole card sh
  assert(allFaces.some(n=>n.src.includes('JH_snoop_dogg.png')));
  assert(allFaces.some(n=>n.src.includes('AD_ace_diamonds.png')));
  assert(allFaces.some(n=>n.src.includes('KC_tommy_chong.png')));
- assert(allFaces.some(n=>n.src.includes('QS_miley_cyrus.png'))===false);
+ assert(allFaces.some(n=>n.src.includes('QS_miley_cyrus.png')));
  for(const image of allFaces)assert(image.alt.includes(' of '));
  const css=readFileSync(new URL('../src/blackjack.css',import.meta.url),'utf8');
  assert(css.includes('object-fit:fill'));

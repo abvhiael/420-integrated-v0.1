@@ -48,3 +48,9 @@
 .pc-game .pc-tile-bust:not(.pc-hazard-fungus-gnats) .pc-icon{visibility:hidden}
 .pc-game .pc-tile-bust.pc-hazard-fungus-gnats{background:radial-gradient(circle,#8d1727,#230e19);border-color:#fa5552}
 .pc-game .pc-tile-disclosed{filter:grayscale(.3) brightness(.65)}
+
+/* Composite logo artwork, visually rendered at original wide proportions. */
+.pc-heading .pc-logo{display:block;width:clamp(245px,34vw,560px);max-width:100%;aspect-ratio:2.6/1;object-fit:contain;border-radius:8px;filter:drop-shadow(0 0 14px #67e82d66)}
+.pc-heading .pc-visually-hidden{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+.pc-heading p{margin:2px 0 0;font-weight:900}
+@media(max-width:530px){.pc-heading .pc-logo{width:min(100%,340px)}}

@@ -21,3 +21,6 @@
 @media(max-width:800px){.pc-layout{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.pc-center{grid-column:1/-1;grid-row:1}.pc-left{grid-column:1}.pc-right{grid-column:2}.pc-board{max-width:510px}.pc-mascot{min-height:120px}.pc-mascot-art{height:140px}.pc-title{flex-wrap:wrap}}
 @media(max-width:530px){.pc-game{padding:8px;min-height:0}.pc-layout{display:flex;flex-direction:column}.pc-center{order:0}.pc-right{order:1}.pc-left{order:2}.pc-board{gap:4px;padding:5px}.pc-tile{border-width:2px;border-radius:6px}.pc-side,.pc-center{padding:8px}.pc-right{display:grid;grid-template-columns:1fr 1fr;gap:6px}.pc-right h2,.pc-right h3,.pc-log{grid-column:1/-1}.pc-stat{margin:0;padding:7px}.pc-stat strong{font-size:19px}.pc-multiplier strong{font-size:22px}.pc-title{padding:5px}.pc-heading h1{font-size:34px}.pc-heading p{font-size:9px}.pc-mascot{min-height:140px}.pc-actions{position:sticky;bottom:0;z-index:2;background:#0d171c;padding:5px}.pc-setting{padding:6px}}
 @media(prefers-reduced-motion:reduce){.pc-game *{transition:none!important;animation:none!important}}
+
+/* Lobby discovery art uses Pest Control's own grow-room artwork. */
+.art-pest-control{background:linear-gradient(90deg,#15101e88,#0a211588),url('/assets/420bet/pest-control/grow-room.svg') center/cover!important;color:#acff6d!important;text-shadow:0 0 14px #a8ff50,3px 3px #160b24}

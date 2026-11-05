@@ -93,3 +93,20 @@ test('Auto pick chooses one unopened tray without leaking hazard contents',()=>{
  const accepted=pestAction(g,'auto-pick');assert.equal(accepted,wasActive);
  assert.equal(g.picks.length,prior+(wasActive?1:0));
 });
+
+test('Approved concept illustration sprites are wired without changing practice rules',()=>{
+ const css=readFileSync(new URL('../src/pest-control.css',import.meta.url),'utf8');
+ assert(css.includes('buddy-concept-strip.webp'));
+ assert(css.includes('tiles-concept-strip.webp'));
+ assert(css.includes('logo-concept.webp')===false); // Logo is a semantic image, not a CSS background.
+ const {document}=parseHTML('<html><body></body></html>');
+ const root=createPestControlTable(document,{rng,balance:100});
+ assert(root.querySelector('.pc-logo').src.endsWith('/pest-control/logo-concept.webp'));
+ assert(root.querySelectorAll('.pc-tile').length===25);
+ root.querySelector('.pc-primary').click();
+ const safe=Array.from({length:25},(_,i)=>i).find(i=>!root.gameState.hazardTiles.has(i));
+ root.querySelector('[data-tile="'+safe+'"]').click();
+ assert(root.querySelector('.pc-mascot').className.includes('pc-mood-happy'));
+ assert(root.querySelector('.pc-tile-safe'));
+ assert.equal(root.gameState.balance,90);
+});

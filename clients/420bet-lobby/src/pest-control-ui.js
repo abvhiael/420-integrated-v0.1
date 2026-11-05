@@ -17,7 +17,7 @@ export function createPestControlTable(doc=globalThis.document,options={}){
   title.append(heading,stat('PRACTICE CREDITS',money(state.balance)));
   root.append(title);
   const layout=el(doc,'div','pc-layout'),left=el(doc,'aside','pc-side pc-left');
-  const mood=state.phase==='finished'?buddies[state.result]:buddies[state.phase];
+  const mood=state.phase==='finished'?buddies[state.result]:state.phase==='active'&&state.picks.length?(nextPickProbability(state.hazards,state.picks.length)<0.65?'nervous':'happy'):buddies[state.phase];
   const mascot=el(doc,'div','pc-mascot pc-mood-'+mood);mascot.setAttribute('aria-label','Buddy Bloom '+mood);
   const portrait=el(doc,'img','pc-mascot-art');portrait.src=asset+'buddy-bloom.svg';portrait.alt='Buddy Bloom, friendly cartoon cannabis grower';mascot.append(portrait);
   const sayings={ready:'Let’s inspect these trays!',active:'Careful... pests could be hiding!',infested:'NOOO! The pests got in!',harvest:'CROP SAVED! Nice work!',cancelled:'We’ll grow another day!'};
@@ -47,7 +47,7 @@ export function createPestControlTable(doc=globalThis.document,options={}){
   for(let i=0;i<25;i++){
    const opened=state.picks.includes(i),finished=state.phase==='finished',hazard=state.hazardTiles.has(i);
    const show=opened||finished;const bust=show&&hazard;
-   const card=button('', 'pc-tile '+(show?(bust?'pc-tile-bust':'pc-tile-safe'):'pc-tile-closed')+(finished&&!opened?' pc-tile-disclosed':''),()=>{if(pestAction(state,'pick',i))render()},state.phase!=='active'||opened);
+   const card=button('', 'pc-tile '+(show?(bust?'pc-tile-bust pc-hazard-'+hazards[i%hazards.length]:'pc-tile-safe'):'pc-tile-closed')+(finished&&!opened?' pc-tile-disclosed':''),()=>{if(pestAction(state,'pick',i))render()},state.phase!=='active'||opened);
    card.dataset.tile=String(i);
    card.setAttribute('aria-label',show?(hazard?'Infested tray':'Healthy bud'):'Unopened grow tray '+(i+1));
    if(show){if(hazard){const img=el(doc,'img','pc-icon');img.src=asset+hazards[i%hazards.length]+'.svg';img.alt='';card.append(img);}

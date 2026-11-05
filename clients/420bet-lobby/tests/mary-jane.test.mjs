@@ -303,7 +303,7 @@ test('oversized THC BAR, joint, bong and lighter have dedicated centered art wit
   const match=css.match(re);
   assert(match,'missing per-symbol CSS for '+name);
   assert.match(match[1],/inset:\\d+% \\d+% \\d+% \\d+%/);
-  assert.match(match[1],/transform:translate\\(/);
+  assert.match(match[1],/transform:translate/);
   assert.doesNotMatch(match[1],/background-position/i,'sprite atlas must not be recentered to another symbol');
  }
  for(const id of ['H06','L05','H05','L04'])

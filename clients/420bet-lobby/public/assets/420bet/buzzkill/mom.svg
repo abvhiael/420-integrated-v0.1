@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="530" viewBox="0 0 320 530">
+<defs><linearGradient id="robe" x2="1" y2="1"><stop stop-color="#ffbbd1"/><stop offset=".55" stop-color="#e84f9e"/><stop offset="1" stop-color="#862683"/></linearGradient></defs>
+<g stroke="#2c1b33" stroke-width="7" stroke-linejoin="round" stroke-linecap="round">
+<!-- slippers and legs -->
+<path d="M107 460l-8 49H61Q47 527 84 526h49l21-70M201 462l10 46h42q36 18 1 18h-64l-19-60" fill="#f9b5a5"/>
+<!-- robe skirt -->
+<path d="M117 223Q62 232 58 322L42 483Q160 504 287 478L252 317Q249 238 201 222Z" fill="url(#robe)"/>
+<g fill="#fce18e" stroke="#eeafbd" stroke-width="3"><path d="M81 302l12-10 12 10-12 11Z"/><path d="M215 302l12-10 12 10-12 11Z"/><circle cx="140" cy="390" r="15"/><circle cx="229" cy="419" r="14"/><circle cx="79" cy="434" r="14"/></g>
+<!-- arm left pointing finger -->
+<path d="M109 252Q82 250 55 219L21 188Q4 186 14 167Q25 155 37 175L54 188L45 157Q45 137 57 144L76 191Q93 202 128 214Z" fill="#f4b8a2"/>
+<!-- right hand on hip -->
+<path d="M220 240Q271 232 281 301L279 355Q266 369 252 361Q239 357 247 338L239 295Q224 285 210 277Z" fill="#f4b8a2"/>
+<!-- collar -->
+<path d="M113 230l49 76 43-79-26-22h-51Z" fill="#ffcfdf"/>
+<path d="M162 302v175" stroke="#f2b3d9" stroke-width="7"/>
+<path d="M160 290Q121 320 105 355Q157 386 225 356Q204 321 160 290Z" fill="none" stroke="#fac2d8" stroke-width="11"/>
+<!-- neck/head -->
+<path d="M130 207l-4 40q36 43 72 1l-8-44" fill="#eeb39a"/>
+<path d="M93 118Q91 60 157 60Q223 59 234 112L222 184Q208 228 165 229Q111 222 101 180Z" fill="#efb59f"/>
+<path d="M112 142q13-13 33-8m40-1q19-11 33 4" stroke="#6f3041" stroke-width="11" fill="none"/>
+<!-- eyes glasses -->
+<rect x="104" y="134" width="57" height="39" rx="16" fill="#faeff5" stroke="#36273d" stroke-width="8"/>
+<rect x="172" y="134" width="57" height="39" rx="16" fill="#faeff5" stroke="#36273d" stroke-width="8"/>
+<path d="M161 143h10" stroke="#36273d" stroke-width="9"/>
+<circle cx="138" cy="153" r="7" fill="#1e1b2a"/><circle cx="198" cy="153" r="7" fill="#1e1b2a"/>
+<!-- angry mouth -->
+<path d="M143 193Q166 178 199 195L190 210Q169 227 152 213Z" fill="#49182b" stroke="#8e4050" stroke-width="5"/>
+<!-- hair rollers -->
+<path d="M94 119Q70 80 103 55Q122 6 170 29Q229 15 239 64Q258 103 227 126Q224 55 159 57Q104 60 94 119Z" fill="#5e3451"/>
+<g fill="#ef75c6" stroke="#5e2b59" stroke-width="6">
+<rect x="87" y="60" width="43" height="34" rx="14" transform="rotate(-25 108 77)"/>
+<rect x="125" y="24" width="47" height="36" rx="15" transform="rotate(-12 148 42)"/>
+<rect x="170" y="26" width="47" height="36" rx="15" transform="rotate(13 193 44)"/>
+<rect x="214" y="55" width="40" height="35" rx="15" transform="rotate(28 234 72)"/>
+</g><g stroke="#ffd8f1" stroke-width="6"><path d="M104 66l12 18m29-46 8 15m37-13 6 16m34 12 10 14"/></g>
+</g>
+</svg>

@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="420" height="470" viewBox="0 0 420 470">
+<defs><linearGradient id="shirt" x2=".8" y2="1"><stop stop-color="#f8e540"/><stop offset=".22" stop-color="#fd7e3e"/><stop offset=".5" stop-color="#e73c9d"/><stop offset=".76" stop-color="#7947df"/><stop offset="1" stop-color="#39cba3"/></linearGradient>
+<linearGradient id="denim" x2="1" y2="1"><stop stop-color="#446caf"/><stop offset="1" stop-color="#162957"/></linearGradient>
+<filter id="glow"><feGaussianBlur stdDeviation="4"/></filter></defs>
+<g stroke="#201124" stroke-width="8" stroke-linejoin="round" stroke-linecap="round">
+<!-- long wavy hair -->
+<path d="M132 138Q109 96 142 55Q164 14 226 30Q300 16 305 88Q320 127 296 180L314 232Q290 251 268 211Q234 237 217 201Q159 250 125 213L148 177Z" fill="#793722"/>
+<path d="M124 108q-16 80 18 113m152-130q33 81-3 120m-135-157q-40 55-18 97m151-89q21 62-9 110" fill="none" stroke="#c46a31" stroke-width="9"/>
+<!-- neck -->
+<path d="M180 178h77l12 65-92 8Z" fill="#f5a96d"/>
+<!-- legs cross-legged -->
+<path d="M158 327Q63 319 31 388Q15 430 111 444Q190 443 213 406Q248 457 344 443Q413 432 378 387Q352 332 256 330Z" fill="url(#denim)"/>
+<path d="M94 386q87 25 112 23m44-1q48 3 105-24" fill="none" stroke="#8f9fd3" stroke-width="6"/>
+<path d="M50 414q5-27 55-25q53 4 63 31q-49 32-118 10Z" fill="#ecf0b9"/>
+<path d="M256 423q25-40 95-32q48 6 48 34q-66 25-143-2Z" fill="#e5eab8"/>
+<!-- shoulders and shirt -->
+<path d="M177 210Q136 214 105 255L93 334Q115 385 216 386Q313 379 324 334L313 264Q291 218 253 211Q233 242 210 242Q186 239 177 210Z" fill="url(#shirt)"/>
+<!-- arms -->
+<path d="M119 262Q84 284 76 332Q69 355 113 367Q132 371 155 350L182 322L168 299L119 322Q136 287 151 276Z" fill="#efa468"/>
+<path d="M300 258Q334 277 349 316L361 337Q379 353 372 372Q364 390 339 377L310 350Q292 339 275 304Z" fill="#f3a76c"/>
+<!-- left open hand -->
+<path d="M77 329Q57 304 51 308Q46 316 61 336Q42 313 37 321Q31 330 58 352Q42 341 35 350Q34 361 75 373Q102 376 119 354Z" fill="#efad7c"/>
+<!-- right hand peace sign -->
+<path d="M344 342L347 284Q345 268 352 267Q361 268 360 287L366 314L379 267Q386 257 394 267Q397 275 389 295L378 336Q406 325 407 338Q407 347 375 369L357 378Q341 373 344 342Z" fill="#f1a66c"/>
+<!-- peace emblem -->
+<circle cx="210" cy="309" r="53" fill="#fde34b" stroke="#8b287b" stroke-width="10"/>
+<path d="M210 259V356m0-47-35 32m35-32 35 32" stroke="#7931aa" stroke-width="8" fill="none"/>
+<!-- head -->
+<path d="M150 102Q150 50 213 48Q274 46 279 113L273 166Q247 202 212 204Q169 195 152 157Z" fill="#efa76a"/>
+<path d="M180 164q28 17 62 1q-20 35-62-1Z" fill="#fff1c9" stroke-width="5"/>
+<path d="M170 185q42 35 83-1" fill="none" stroke="#7d3729" stroke-width="10"/>
+<!-- nose -->
+<path d="M209 112q-9 29 0 32l15 1" fill="none" stroke="#ab5b41" stroke-width="6"/>
+<!-- shades -->
+<path d="M148 109Q183 99 203 111Q220 104 240 107Q265 106 282 112" fill="none" stroke="#29152b" stroke-width="9"/>
+<ellipse cx="177" cy="125" rx="30" ry="22" fill="#b847cd" stroke="#2a1d40" stroke-width="8"/>
+<ellipse cx="248" cy="124" rx="29" ry="22" fill="#a93ad2" stroke="#2a1d40" stroke-width="8"/>
+<path d="M162 114q8-9 20-9m53-1q7-9 18-8" stroke="#f8c2f5" stroke-width="5" opacity=".75"/>
+<!-- flower headband -->
+<path d="M143 83q59-40 139-4" fill="none" stroke="#efce3f" stroke-width="18"/>
+<path d="M149 82q66-33 134-3" fill="none" stroke="#e45fbc" stroke-width="8"/>
+<circle cx="151" cy="77" r="15" fill="#f5dc4d" stroke="#a83d7c" stroke-width="5"/>
+<!-- joint held casually near shoulder -->
+<path d="M108 311l-29-40" stroke="#eee9a5" stroke-width="8"/>
+<circle cx="78" cy="267" r="5" fill="#ed7342" stroke="none"/>
+</g></svg>

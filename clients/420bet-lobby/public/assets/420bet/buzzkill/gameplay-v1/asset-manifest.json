@@ -1,0 +1,61 @@
+{
+  "schema": "420bet.buzzkill.gameplay-art.v1",
+  "stage": {
+    "width": 1200,
+    "height": 675,
+    "fixed": true
+  },
+  "source": "Approved BUZZKILL! illustrated master concept sheet, exported into individual art assets",
+  "licenseNote": "Original project artwork; extracted from composite image",
+  "quality": "First-pass gameplay cutouts from composite; replace with separately illustrated source for closeup production quality",
+  "artwork": {
+    "background": {
+      "file": "bedroom-base.webp",
+      "nativeSize": [
+        1920,
+        1080
+      ],
+      "layer": 0
+    },
+    "kevin": {
+      "states": {
+        "1x": "kevin-lift1.webp",
+        "2x": "kevin-lift2.webp",
+        "4.2x": "kevin-lift3.webp"
+      },
+      "nativeFrame": [
+        512,
+        512
+      ],
+      "anchor": [
+        0.5,
+        1
+      ],
+      "layer": 5
+    },
+    "mom": {
+      "entry": "mom-entry.webp",
+      "buzzkill": "mom-buzzkill.webp",
+      "nativeFrame": [
+        512,
+        512
+      ],
+      "layer": 9
+    },
+    "effects": {
+      "flowers": "fx-flowers.webp",
+      "clouds": "fx-clouds.webp",
+      "layer": 4
+    }
+  },
+  "rules": {
+    "visualsOnly": true,
+    "crashPointPreselected": true,
+    "practiceOnly": true
+  },
+  "fallback": {
+    "bedroom": "../bedroom.svg",
+    "kevin": "../kevin.svg",
+    "mom": "../mom.svg"
+  }
+}

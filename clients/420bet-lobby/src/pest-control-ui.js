@@ -16,9 +16,10 @@ export function createPestControlTable(doc=globalThis.document,options={}){
   root.replaceChildren();
   const title=el(doc,'header','pc-title');
   const heading=el(doc,'div','pc-heading');const logo=el(doc,'img','pc-logo');logo.src=hd+'pest-control-logo.webp';logo.addEventListener('error',()=>{logo.src=asset+'logo-concept.webp';});logo.alt='420Bet Originals Pest Control — Buddy Bloom’s Grow Room';logo.decoding='async';heading.append(logo,el(doc,'h1','pc-visually-hidden','PEST CONTROL'),el(doc,'p','','PRACTICE ONLY · SAVE THE CROP!'));
-  title.append(heading,stat('PRACTICE CREDITS',money(state.balance)));
+  title.append(el(doc,'span','pc-brand-label','✦ 420BET ORIGINALS · PRACTICE ONLY'),stat('PRACTICE CREDITS',money(state.balance)));
   root.append(title);
   const layout=el(doc,'div','pc-layout'),left=el(doc,'aside','pc-side pc-left');
+  left.append(heading);
   const mood=state.phase==='finished'?buddies[state.result]:state.phase==='active'&&state.picks.length?(nextPickProbability(state.hazards,state.picks.length)<0.65?'nervous':'happy'):buddies[state.phase];
   const mascot=el(doc,'div','pc-mascot pc-mood-'+mood);mascot.setAttribute('aria-label','Buddy Bloom '+mood);
   const portrait=el(doc,'img','pc-mascot-art');portrait.src=hd+'buddy-'+mood+'.webp';portrait.alt='Buddy Bloom, '+mood+' expression';portrait.addEventListener('error',()=>{portrait.src=asset+'buddy-bloom.svg';});mascot.append(portrait);
@@ -77,8 +78,11 @@ export function createPestControlTable(doc=globalThis.document,options={}){
   right.append(stat('CURRENT MULTIPLIER',picks?multi.toFixed(4)+'×':'—','pc-multiplier'));
   right.append(stat('HARVEST VALUE',state.phase==='active'&&picks?money(state.bet*multi):state.result==='harvest'?money(state.return):'—','pc-value'));
   right.append(stat('SAFE PICKS',picks+' / '+(25-state.hazards)));
-  right.append(stat('NEXT SAFE CHANCE',next===null?'—':pct(next),'pc-odds'));
-  right.append(stat('NEXT PEST CHANCE',next===null?'—':pct(1-next)));
+  const odds=el(doc,'div','pc-odds-row');
+  odds.append(stat('SAFE',next===null?'—':pct(next),'pc-odds pc-odds-safe'));
+  odds.append(stat('HAZARD',next===null?'—':pct(1-next),'pc-odds pc-odds-danger'));
+  const oddsHeading=el(doc,'h3','pc-odds-heading','NEXT PICK ODDS');
+  right.append(oddsHeading,odds);
   right.append(el(doc,'h3','','GROW LOG'));
   const log=el(doc,'ol','pc-log');for(const msg of state.log.slice(0,5))log.append(el(doc,'li','',msg));right.append(log);
   layout.append(left,center,right);root.append(layout);

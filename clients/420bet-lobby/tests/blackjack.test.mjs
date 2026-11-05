@@ -4,6 +4,7 @@ import {parseHTML} from 'linkedom';
 import {readFileSync} from 'node:fs';
 import {BLACKJACK_RULES,SUITS,RANKS,makeDeck,handTotal,canSplit,createBlackjackGame,blackjackAction,blackjackAvailable} from '../src/blackjack-engine.js';
 import {createBlackjackTable} from '../src/blackjack-ui.js';
+import {blackjackCardArt,blackjackCardBack,COURT_ART,CARD_ART_ROOT} from '../src/blackjack-card-art.js';
 const card=(rank,suit='♠')=>({rank,suit});
 test('Deck uses four ordinary suits, 52 unique cards and standard ace scoring',()=>{
  assert.equal(makeDeck().length,52);
@@ -116,5 +117,49 @@ test('Practice table displays 3 seats, card back, all actions and credit-only st
  assert(css.includes('card-back.svg'));
  const main=readFileSync(new URL('../src/main.js',import.meta.url),'utf8');
  assert(main.includes("active.id==='blackjack'?createBlackjackTable(document)"));
+ root.stopAnimation();
+});
+
+test('Uploaded 420Bet deck map has 52 unique face images and the exact approved court assignments',()=>{
+ const deck=makeDeck();
+ const paths=deck.map(blackjackCardArt);
+ assert.equal(deck.length,52);
+ assert.equal(new Set(paths).size,52);
+ assert(paths.every(p=>p.startsWith(CARD_ART_ROOT+'/')));
+ assert.equal(paths.filter(p=>p.includes('/aces/')).length,4);
+ assert.equal(paths.filter(p=>p.includes('/numbered/')).length,36);
+ assert.equal(paths.filter(p=>p.includes('/courts/')).length,12);
+ assert.equal(blackjackCardArt(card('K','♥')),'/assets/420bet/blackjack/cards/courts/KH_willie_nelson.png');
+ assert.equal(blackjackCardArt(card('Q','♦')),'/assets/420bet/blackjack/cards/courts/QD_sarah_silverman.png');
+ assert.equal(blackjackCardArt(card('J','♠')),'/assets/420bet/blackjack/cards/courts/JS_woody_harrelson.png');
+ assert.equal(blackjackCardArt(card('A','♣')),'/assets/420bet/blackjack/cards/aces/AC_ace_clubs.png');
+ assert.equal(blackjackCardArt(card('10','♠')),'/assets/420bet/blackjack/cards/numbered/10S_spades.png');
+ assert.equal(Object.keys(COURT_ART).length,12);
+ assert.equal(blackjackCardBack(),'/assets/420bet/blackjack/card-back.svg');
+});
+test('Dealer and all seats use uploaded PNG card faces; only dealer hole card shows the custom back',()=>{
+ const {document}=parseHTML('<html><body></body></html>');
+ const root=createBlackjackTable(document,{shoe:[
+  card('J','♥'),card('A','♦'),card('K','♣'),card('9','♠'),
+  card('2','♣'),card('Q','♠'),card('7','♥'),card('6','♦'),
+  card('4','♥'),card('3','♦'),card('5','♠')
+ ]});
+ document.body.append(root);
+ // Three seats, each with one of our face types: court, ace, numbered.
+ root.querySelector('[data-seat="0"] .bj-seat-toggle').click();
+ root.querySelector('[data-seat="2"] .bj-seat-toggle').click();
+ root.querySelector('.bj-button-deal').click();
+ const allFaces=Array.from(root.querySelectorAll('.bj-card-art'));
+ assert.equal(allFaces.length,7);
+ assert(root.querySelector('.bj-card-back'));
+ assert.equal(root.querySelectorAll('.bj-dealer .bj-card-art').length,1);
+ assert(allFaces.some(n=>n.src.includes('JH_snoop_dogg.png')));
+ assert(allFaces.some(n=>n.src.includes('AD_ace_diamonds.png')));
+ assert(allFaces.some(n=>n.src.includes('KC_tommy_chong.png')));
+ assert(allFaces.some(n=>n.src.includes('QS_miley_cyrus.png'))===false);
+ for(const image of allFaces)assert(image.alt.includes(' of '));
+ const css=readFileSync(new URL('../src/blackjack.css',import.meta.url),'utf8');
+ assert(css.includes('object-fit:fill'));
+ assert(css.includes('.bj-card-custom.bj-card-art-missing'));
  root.stopAnimation();
 });

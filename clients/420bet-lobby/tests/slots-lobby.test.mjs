@@ -7,7 +7,7 @@ import {BASE_REELS,visibleGrid} from '../src/emerald-v2-strips.js';
 import {readFileSync} from 'node:fs';
 
 test('Slots lobby lists the completed Emerald Harvest machine with its own cabinet artwork',()=>{
- assert.equal(SLOT_MACHINES.length,2);
+ assert.equal(SLOT_MACHINES.length,3);
  assert.equal(SLOT_MACHINES[0].id,'emerald-harvest');
  assert.equal(SLOT_MACHINES[0].art,EMERALD_ASSETS.cabinet);
  assert.equal(SLOT_MACHINES[1].id,'mary-jane-sticky-wilds');
@@ -61,7 +61,11 @@ test('Emerald Harvest lobby preview shows a legitimate deterministic 5x4 gamepla
  assert.match(css,/\.slots-machine-art \.slots-emerald-cabinet\{/);
  const lobby=createSlotsLobby(document);
  const cards=[...lobby.querySelectorAll('.slots-machine-card')];
- assert.equal(cards.length,2);
+ assert.equal(cards.length,3);
+ assert.equal(cards.filter(card=>!card.hidden).length,3);
+ assert.equal(SLOT_MACHINES[2].id,'dads-secret-stash');
+ assert.equal(slotMachineFromHash('#game=slots&machine=dads-secret-stash')?.id,'dads-secret-stash');
+ assert.match(cards[2].querySelector('img').src,/dads-secret-stash\\/lobby\\.svg$/);
  assert(cards[0].querySelector('.slots-emerald-reel-grid'));
  assert.equal(cards[1].querySelector('.slots-emerald-reel-grid'),null,'Mary Jane art remains untouched');
 });

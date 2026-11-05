@@ -268,3 +268,17 @@
  .pc-game .pc-actions{position:static;background:none;padding:0}
  .pc-game .pc-right{display:flex}
 }
+
+/* PC-SCALE-03: 20% smaller tray + all contained artwork; centered in each fixed grid cell.
+   Preserve the 5×5 board/frame and full button hit targets via the grid-cell wrapper size. */
+.pc-game .pc-board .pc-tile{
+  width:80%;
+  height:auto;
+  justify-self:center;
+  align-self:center;
+  aspect-ratio:1;
+  margin-inline:auto;
+}
+@media(max-width:530px){
+  .pc-game .pc-board .pc-tile{width:80%;margin-inline:auto}
+}

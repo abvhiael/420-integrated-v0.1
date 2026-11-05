@@ -1,0 +1,32 @@
+name: BUZZKILL Phaser practice targeted Level 1
+on:
+  pull_request:
+    paths:
+      - 'clients/420bet-lobby/src/buzzkill-*'
+      - 'clients/420bet-lobby/public/assets/420bet/buzzkill/**'
+      - 'clients/420bet-lobby/tests/buzzkill.test.mjs'
+      - 'clients/420bet-lobby/src/main.js'
+      - 'clients/420bet-lobby/src/catalogue.js'
+      - 'clients/420bet-lobby/package.json'
+      - '.github/workflows/buzzkill-level1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  buzzkill-level1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install lobby dependencies (Phaser 4)
+        working-directory: clients/420bet-lobby
+        run: npm install --no-audit --no-fund
+      - name: BUZZKILL targeted state-machine and UI qualification
+        working-directory: clients/420bet-lobby
+        run: node --test tests/buzzkill.test.mjs
+      - name: Build lobby with lazy-loaded Phaser scene
+        working-directory: clients/420bet-lobby
+        run: npm run build

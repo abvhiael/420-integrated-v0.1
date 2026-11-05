@@ -1,4 +1,5 @@
 import {createBlackjackGame,blackjackAction,blackjackAvailable,handTotal} from './blackjack-engine.js';
+import {blackjackCardArt} from './blackjack-card-art.js';
 const el=(doc,tag,cls,text)=>{const n=doc.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n;};
 const number=n=>n.toLocaleString('en-US',{maximumFractionDigits:1});
 const red=suit=>suit==='♥'||suit==='♦';
@@ -10,15 +11,25 @@ export function createBlackjackTable(doc=globalThis.document,options={}){
   const b=el(doc,'button',cls,label);b.type='button';b.disabled=disabled;b.addEventListener('click',onClick);return b;
  }
  function playingCard(card,hidden=false){
-  const n=el(doc,'div','bj-card'+(hidden?' bj-card-back':red(card.suit)?' bj-card-red':' bj-card-black'));
+  const n=el(doc,'div','bj-card bj-card-custom'+(hidden?' bj-card-back':red(card.suit)?' bj-card-red':' bj-card-black'));
   if(hidden){n.setAttribute('aria-label','Dealer hole card');return n;}
-  n.setAttribute('aria-label',card.rank+' of '+({'♠':'spades','♥':'hearts','♦':'diamonds','♣':'clubs'})[card.suit]);
-  const face=el(doc,'div','bj-card-face');
-  face.append(el(doc,'span','bj-corner bj-corner-top',card.rank+' '+card.suit));
-  face.append(el(doc,'span','bj-center-symbol bj-'+(card.rank==='A'?'ace':(['J','Q','K'].includes(card.rank)?'court':'pip')),['J','Q','K'].includes(card.rank)?{J:'♞',Q:'♛',K:'♚'}[card.rank]:card.suit));
-  face.append(el(doc,'span','bj-corner bj-corner-bottom',card.rank+' '+card.suit));
-  n.append(face);return n;
+  const label=card.rank+' of '+({'♠':'spades','♥':'hearts','♦':'diamonds','♣':'clubs'})[card.suit];
+  n.setAttribute('aria-label',label);
+  n.dataset.card=card.rank+card.suit;
+  const img=el(doc,'img','bj-card-art');
+  img.src=blackjackCardArt(card);
+  img.alt=label;
+  img.decoding='async';img.draggable=false;
+  // If a file is moved or missing, keep its rank and suit visible.
+  img.addEventListener('error',()=>{
+   n.classList.add('bj-card-art-missing');
+  });
+  n.append(img);
+  const fallback=el(doc,'span','bj-card-fallback',card.rank+' '+card.suit);
+  n.append(fallback);
+  return n;
  }
+
  const render=()=>{
   root.replaceChildren();
   const header=el(doc,'header','bj-top');

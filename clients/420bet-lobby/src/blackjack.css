@@ -71,3 +71,49 @@
 @media(max-width:1050px){.bj-console{grid-template-columns:1fr 1fr}.bj-turn{grid-column:1/-1}.bj-felt{min-height:470px}.bj-seats{left:8%;width:84%}.bj-dealer{top:10%}.bj-marquee h1{font-size:27px}.bj-ledger{font-size:10px}.bj-ledger strong{font-size:18px}}
 @media(max-width:640px){.bj-casino{min-height:0;padding:7px}.bj-top{display:flex;flex-wrap:wrap;justify-content:center;margin:0 3px}.bj-marquee{padding:8px 12px}.bj-marquee h1{font-size:23px}.bj-side-decoration{font-size:17px}.bj-ledger{justify-content:center}.bj-tag{font-size:9px;order:3;width:100%}.bj-felt{min-height:610px;aspect-ratio:auto;background-size:auto 100%}.bj-dealer{left:20%;width:60%;top:10%}.bj-seats{left:4%;width:92%;height:49%;bottom:10%;gap:1.5%}.bj-seat{padding:5px 2px;height:95%;border-radius:13px}.bj-seat-header{font-size:11px;gap:3px}.bj-seat-header span{font-size:8px}.bj-seat-toggle{font-size:9px!important;padding:2px 4px}.bj-hands{min-height:170px;flex-direction:column;align-items:center}.bj-hand{width:100%;max-width:140px}.bj-player-cards{min-height:60px}.bj-player-cards .bj-card{width:40px}.bj-card+.bj-card{margin-left:-22px}.bj-wager{flex-wrap:wrap;font-size:9px;bottom:2px}.bj-bet-adjust{height:20px;width:20px}.bj-felt-brand{left:8%;right:8%;bottom:3%}.bj-console{grid-template-columns:1fr;margin:0;padding:8px}.bj-turn{grid-column:auto}.bj-chip{width:40px;height:40px;font-size:12px!important}.bj-controls{gap:5px}.bj-button{min-width:67px;font-size:12px!important}.bj-disclosure{font-size:9px}}
 @media(prefers-reduced-motion:reduce){.bj-casino button{transition:none!important}}
+
+/* Individual uploaded 420Bet face-card art. Preserve physical aspect ratio without cropping.
+   Applies to dealer, all 3 seats and both split hands. */
+.bj-casino .bj-card-custom{
+  width:clamp(43px,5.4vw,77px);
+  aspect-ratio:298 / 390;
+  height:auto;
+  overflow:hidden;
+  padding:0;
+  background:#f6f0df;
+  border:1px solid #d9ba6a;
+  border-radius:5px;
+  display:block;
+}
+.bj-casino .bj-player-cards .bj-card-custom{
+  width:clamp(36px,4.5vw,64px);
+}
+.bj-casino .bj-card-custom .bj-card-art{
+  position:absolute;
+  inset:0;
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:fill;
+  background:#fbf5e9;
+  pointer-events:none;
+  user-select:none;
+}
+.bj-casino .bj-card-custom .bj-card-fallback{
+  position:absolute;
+  left:5px;
+  top:5px;
+  display:none;
+  font:bold 15px Georgia,serif;
+  color:#171717;
+}
+.bj-casino .bj-card-custom.bj-card-red .bj-card-fallback{color:#b81327}
+.bj-casino .bj-card-custom.bj-card-art-missing .bj-card-fallback{display:block}
+.bj-casino .bj-card-custom.bj-card-art-missing .bj-card-art{display:none}
+.bj-casino .bj-card-custom.bj-card-back{
+  background:#052b1d url('/assets/420bet/blackjack/card-back.svg') center/100% 100% no-repeat;
+}
+.bj-casino .bj-card-custom.bj-card-back::after{content:none}
+@media(max-width:640px){
+  .bj-casino .bj-player-cards .bj-card-custom{width:40px}
+}

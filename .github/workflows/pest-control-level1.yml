@@ -1,0 +1,32 @@
+name: Pest Control practice targeted Level 1
+on:
+  pull_request:
+    paths:
+      - 'clients/420bet-lobby/src/pest-control-*.js'
+      - 'clients/420bet-lobby/src/pest-control.css'
+      - 'clients/420bet-lobby/src/main.js'
+      - 'clients/420bet-lobby/src/catalogue.js'
+      - 'clients/420bet-lobby/public/assets/420bet/pest-control/**'
+      - 'clients/420bet-lobby/tests/pest-control.test.mjs'
+      - '.github/workflows/pest-control-level1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  pest-control-level1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install scoped lobby dependencies
+        working-directory: clients/420bet-lobby
+        run: npm install --no-audit --no-fund
+      - name: Run Pest Control practice qualification
+        working-directory: clients/420bet-lobby
+        run: node --test tests/pest-control.test.mjs
+      - name: Build 420Bet game lobby
+        working-directory: clients/420bet-lobby
+        run: npm run build

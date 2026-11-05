@@ -3,6 +3,8 @@ const el=(d,t,c='',txt)=>{const n=d.createElement(t);if(c)n.className=c;if(txt!=
 const money=n=>n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
 const pct=n=>(n*100).toFixed(2)+'%';
 const asset='/assets/420bet/pest-control/';
+const hd=asset+'hd/';
+const art=(doc,cls,filename,fallback)=>{const img=el(doc,'img',cls);img.src=hd+filename;img.alt='';img.decoding='async';img.draggable=false;if(fallback)img.addEventListener('error',()=>{img.src=fallback;});return img;};
 const hazards=['spider-mites','aphids','powdery-mildew','bud-rot','fungus-gnats'];
 const buddies={ready:'idle',active:'nervous',infested:'infested',harvest:'harvest',cancelled:'idle'};
 export function createPestControlTable(doc=globalThis.document,options={}){
@@ -13,13 +15,13 @@ export function createPestControlTable(doc=globalThis.document,options={}){
  function render(){
   root.replaceChildren();
   const title=el(doc,'header','pc-title');
-  const heading=el(doc,'div','pc-heading');const logo=el(doc,'img','pc-logo');logo.src=asset+'logo-concept.webp';logo.alt='420Bet Originals Pest Control — Buddy Bloom’s Grow Room';logo.decoding='async';heading.append(logo,el(doc,'h1','pc-visually-hidden','PEST CONTROL'),el(doc,'p','','PRACTICE ONLY · SAVE THE CROP!'));
+  const heading=el(doc,'div','pc-heading');const logo=el(doc,'img','pc-logo');logo.src=hd+'pest-control-logo.webp';logo.addEventListener('error',()=>{logo.src=asset+'logo-concept.webp';});logo.alt='420Bet Originals Pest Control — Buddy Bloom’s Grow Room';logo.decoding='async';heading.append(logo,el(doc,'h1','pc-visually-hidden','PEST CONTROL'),el(doc,'p','','PRACTICE ONLY · SAVE THE CROP!'));
   title.append(heading,stat('PRACTICE CREDITS',money(state.balance)));
   root.append(title);
   const layout=el(doc,'div','pc-layout'),left=el(doc,'aside','pc-side pc-left');
   const mood=state.phase==='finished'?buddies[state.result]:state.phase==='active'&&state.picks.length?(nextPickProbability(state.hazards,state.picks.length)<0.65?'nervous':'happy'):buddies[state.phase];
   const mascot=el(doc,'div','pc-mascot pc-mood-'+mood);mascot.setAttribute('aria-label','Buddy Bloom '+mood);
-  const portrait=el(doc,'img','pc-mascot-art');portrait.src=asset+'buddy-bloom.svg';portrait.alt='Buddy Bloom, friendly cartoon cannabis grower';mascot.append(portrait);
+  const portrait=el(doc,'img','pc-mascot-art');portrait.src=hd+'buddy-'+mood+'.webp';portrait.alt='Buddy Bloom, '+mood+' expression';portrait.addEventListener('error',()=>{portrait.src=asset+'buddy-bloom.svg';});mascot.append(portrait);
   const sayings={ready:'Let’s inspect these trays!',active:'Careful... pests could be hiding!',infested:'NOOO! The pests got in!',harvest:'CROP SAVED! Nice work!',cancelled:'We’ll grow another day!'};
   mascot.append(el(doc,'div','pc-speech',sayings[state.phase==='finished'?state.result:state.phase]));left.append(mascot);
   const settings=el(doc,'div','pc-settings');
@@ -50,9 +52,16 @@ export function createPestControlTable(doc=globalThis.document,options={}){
    const card=button('', 'pc-tile '+(show?(bust?'pc-tile-bust pc-hazard-'+hazards[i%hazards.length]:'pc-tile-safe'):'pc-tile-closed')+(finished&&!opened?' pc-tile-disclosed':''),()=>{if(pestAction(state,'pick',i))render()},state.phase!=='active'||opened);
    card.dataset.tile=String(i);
    card.setAttribute('aria-label',show?(hazard?'Infested tray':'Healthy bud'):'Unopened grow tray '+(i+1));
-   if(show){if(hazard){const img=el(doc,'img','pc-icon');img.src=asset+hazards[i%hazards.length]+'.svg';img.alt='';card.append(img);}
-    else{const img=el(doc,'img','pc-icon');img.src=asset+'healthy-bud.svg';img.alt='';card.append(img);}}
-   else{card.append(el(doc,'span','pc-leaf','✦'));}
+   if(show){if(hazard){
+     const type=hazards[i%hazards.length];
+     const img=type==='fungus-gnats'?el(doc,'img','pc-icon'):art(doc,'pc-icon',type+'.webp',asset+type+'.svg');
+     if(type==='fungus-gnats')img.src=asset+'fungus-gnats.svg';
+     img.alt='';card.append(img);
+    }else card.append(art(doc,'pc-icon','revealed-safe.webp',asset+'healthy-bud.svg'));}
+   else{
+    card.append(art(doc,'pc-tile-image pc-closed-art','closed-tray.webp',asset+'healthy-bud.svg'));
+    card.append(art(doc,'pc-tile-image pc-hover-art','hover-tray.webp',asset+'healthy-bud.svg'));
+   }
    board.append(card);
   }
   center.append(board);

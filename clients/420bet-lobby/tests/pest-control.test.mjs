@@ -65,7 +65,7 @@ test('UI displays full 25-tile playfield, practice controls and authored art',()
  assert.equal(root.querySelectorAll('.pc-tile').length,25);
  assert.match(root.textContent,/PEST CONTROL/);
  assert.match(root.textContent,/PRACTICE ONLY/);
- assert(root.querySelector('.pc-mascot-art').src.includes('buddy-bloom.svg'));
+ assert(root.querySelector('.pc-mascot-art').src.includes('/hd/buddy-idle.webp'));
  assert(root.querySelector('.pc-primary'));
  const main=readFileSync(new URL('../src/main.js',import.meta.url),'utf8');
  assert(main.includes("active.id==='mines'?createPestControlTable(document)"));
@@ -94,19 +94,35 @@ test('Auto pick chooses one unopened tray without leaking hazard contents',()=>{
  assert.equal(g.picks.length,prior+(wasActive?1:0));
 });
 
-test('Approved concept illustration sprites are wired without changing practice rules',()=>{
+test('Individual HD concept illustrations render for Buddy, all trays and hazards',()=>{
  const css=readFileSync(new URL('../src/pest-control.css',import.meta.url),'utf8');
- assert(css.includes('buddy-concept-strip.webp'));
- assert(css.includes('tiles-concept-strip.webp'));
- assert(css.includes('logo-concept.webp')===false); // Logo is a semantic image, not a CSS background.
+ assert(!css.includes('buddy-concept-strip.webp'));
+ assert(!css.includes('tiles-concept-strip.webp'));
+ const files=['buddy-idle','buddy-happy','buddy-nervous','buddy-infested','buddy-harvest',
+  'healthy-bud','spider-mites','aphids','powdery-mildew','bud-rot','closed-tray','hover-tray',
+  'revealed-safe','harvest-jar','pest-control-logo'];
+ for(const filename of files){
+  const bytes=readFileSync(new URL('../public/assets/420bet/pest-control/hd/'+filename+'.webp',import.meta.url));
+  assert(bytes.length>10000,filename+' art is unexpectedly small');
+  assert.equal(bytes.toString('ascii',0,4),'RIFF');
+  assert.equal(bytes.toString('ascii',8,12),'WEBP');
+ }
  const {document}=parseHTML('<html><body></body></html>');
  const root=createPestControlTable(document,{rng,balance:100});
- assert(root.querySelector('.pc-logo').src.endsWith('/pest-control/logo-concept.webp'));
- assert(root.querySelectorAll('.pc-tile').length===25);
+ assert(root.querySelector('.pc-logo').src.endsWith('/hd/pest-control-logo.webp'));
+ assert(root.querySelector('.pc-mascot-art').src.endsWith('/hd/buddy-idle.webp'));
+ assert.equal(root.querySelectorAll('.pc-closed-art').length,25);
+ assert.equal(root.querySelectorAll('.pc-hover-art').length,25);
  root.querySelector('.pc-primary').click();
  const safe=Array.from({length:25},(_,i)=>i).find(i=>!root.gameState.hazardTiles.has(i));
  root.querySelector('[data-tile="'+safe+'"]').click();
  assert(root.querySelector('.pc-mascot').className.includes('pc-mood-happy'));
- assert(root.querySelector('.pc-tile-safe'));
+ assert(root.querySelector('.pc-mascot-art').src.endsWith('/hd/buddy-happy.webp'));
+ assert(root.querySelector('.pc-tile-safe .pc-icon').src.endsWith('/hd/revealed-safe.webp'));
  assert.equal(root.gameState.balance,90);
+ const hazard=[...root.gameState.hazardTiles][0];
+ root.querySelector('[data-tile="'+hazard+'"]').click();
+ assert.equal(root.gameState.result,'infested');
+ assert(root.querySelector('.pc-mascot-art').src.endsWith('/hd/buddy-infested.webp'));
+ assert(root.querySelector('.pc-tile-bust'));
 });

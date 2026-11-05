@@ -58,3 +58,213 @@
 @media(max-width:800px){.pc-game .pc-mascot .pc-mascot-art{height:140px}}
 @media(max-width:530px){.pc-game .pc-mascot .pc-mascot-art{height:140px}}
 @media(prefers-reduced-motion:reduce){.pc-game .pc-tile-closed .pc-tile-image{transition:none}}
+
+/* PC-VISUAL-02: reference-faithful casino composition.
+   Keep every override scoped to Pest Control; no rule or payout changes. */
+.pc-game{
+ --pc-neon:#a3ff34;--pc-violet:#e65aff;--pc-glass:#0a0715dc;
+ max-width:1580px;min-height:0;padding:12px 16px 18px;
+ border:3px solid #e2b65b;border-radius:15px;
+ background:
+   linear-gradient(180deg,#07030e3d 0%,#09031222 43%,#08080bb0 100%),
+   url('/assets/420bet/pest-control/grow-room-wallpaper-v2.svg') center center / cover no-repeat,
+   #0b0b14;
+ box-shadow:inset 0 0 0 2px #af3fd488,inset 0 0 32px #e13fff77,0 12px 35px #000a;
+}
+.pc-game::before{content:none}
+.pc-game .pc-title{
+ min-height:47px;margin:0 0 10px;padding:5px 13px;
+ display:flex;align-items:center;justify-content:space-between;
+ border:2px solid #ba79d5;border-radius:12px;
+ background:linear-gradient(100deg,#090b16f5,#1c142cdb 55%,#070b15f5);
+ box-shadow:0 0 16px #cb5aff55,inset 0 0 13px #7124ad35;
+}
+.pc-game .pc-brand-label{font:900 clamp(11px,1.2vw,16px) system-ui,sans-serif;letter-spacing:.1em;color:#e5ffb4;text-shadow:0 0 7px #6cff65}
+.pc-game .pc-title .pc-stat{display:flex;align-items:center;gap:11px;padding:5px 10px;margin:0;min-width:0;border-color:#61d453;background:#09271bd9}
+.pc-game .pc-title .pc-stat strong{font-size:clamp(14px,1.3vw,20px);color:#fff7d2}
+.pc-game .pc-title .pc-stat-label{font-size:10px}
+.pc-game .pc-layout{grid-template-columns:minmax(210px,25fr) minmax(320px,49fr) minmax(190px,26fr);gap:10px;align-items:stretch}
+.pc-game .pc-side,.pc-game .pc-center{
+ border:2px solid #cd76f5;border-radius:17px;padding:12px;
+ background:linear-gradient(145deg,#130a21c9,#09091bc5);
+ box-shadow:inset 0 0 0 1px #fcaeff38,0 0 13px #e34dff85,inset 0 0 28px #3e185f66;
+ backdrop-filter:blur(2px);
+}
+.pc-game .pc-left{gap:8px;justify-content:start}
+.pc-game .pc-heading{display:flex;flex-direction:column;align-items:center;gap:0}
+.pc-game .pc-heading .pc-logo{
+ width:100%;max-width:340px;height:auto;aspect-ratio:1890 / 704;object-fit:contain;
+ border-radius:0;filter:drop-shadow(0 0 9px #a1fa4f99);
+}
+.pc-game .pc-heading p{margin:0;text-align:center;font-size:10px;letter-spacing:.08em;color:#e8db9c}
+.pc-game .pc-mascot{
+ flex:none;min-height:220px;height:clamp(200px,20vw,285px);
+ margin-top:0;border:0;border-radius:12px;
+ background:radial-gradient(ellipse at 50% 90%,#72fa4d42,transparent 70%),linear-gradient(#3f194b3c,#0d141631);
+ box-shadow:inset 0 -12px 19px #080c14b9;overflow:hidden;
+}
+.pc-game .pc-mascot .pc-mascot-art{
+ height:100%;max-height:100%;max-width:100%;width:100%;
+ object-fit:contain;object-position:center bottom;
+ filter:drop-shadow(0 7px 8px #020308bc);
+}
+.pc-game .pc-speech{top:auto;bottom:8px;right:6px;max-width:59%;padding:5px 8px;font-size:11px;line-height:1.2;background:#fff8dd;border:2px solid #50385a}
+.pc-game .pc-settings{
+ gap:0;border:2px solid #a55ddb;border-radius:16px;
+ background:linear-gradient(160deg,#080e16ef,#171020f5);
+ padding:8px;box-shadow:inset 0 0 12px #ec59ff34,0 0 13px #aa42ef77;
+}
+.pc-game .pc-setting{
+ border:0;border-bottom:1px solid #8b4ec17d;border-radius:0;
+ background:transparent;padding:7px 5px 8px;text-align:center;
+}
+.pc-game .pc-setting:last-of-type{border-bottom:0}
+.pc-game .pc-setting label{
+ color:#fff4ce;font:900 12px system-ui,sans-serif;
+ text-shadow:0 1px 3px #000;letter-spacing:.04em;
+}
+.pc-game .pc-stepper{gap:6px}
+.pc-game .pc-stepper strong{
+ flex:1;min-width:0;border-radius:6px;padding:6px 0;
+ font:900 clamp(17px,1.8vw,25px) system-ui,sans-serif;
+ color:#fff6df;background:linear-gradient(#10151e,#111824);
+ border:1px solid #524862;
+ box-shadow:inset 0 0 9px #000b;
+}
+.pc-game .pc-adjust{
+ flex:none;width:36px;height:34px;
+ border:1px solid #abfc6b;border-radius:6px;
+ background:linear-gradient(#258340,#064020);color:#e8ffb2;
+ text-shadow:0 1px 2px #001300;box-shadow:inset 0 1px 7px #88ff6566,0 0 6px #47e23944;
+}
+.pc-game .pc-setting-note{
+ margin:5px auto;font-size:12px;color:#ebffc7;
+}
+.pc-game .pc-actions{
+ margin-top:4px;gap:7px;
+}
+.pc-game .pc-primary{
+ background:linear-gradient(180deg,#a4ff24,#4dc820 65%,#107b18);
+ border:3px ridge #f8f592;border-radius:24px;min-height:48px;
+ font-size:clamp(12px,1.2vw,17px)!important;color:#101d05;
+ box-shadow:0 0 12px #96ff42ab,inset 0 2px 7px #edffb0a1;
+}
+.pc-game .pc-harvest{background:linear-gradient(#ffeb64,#dda72c 70%,#835214);color:#221502;box-shadow:0 0 15px #ffd9539c}
+.pc-game .pc-secondary{min-height:35px;padding:7px;font-weight:850!important;border:1px solid #a66dd9;background:linear-gradient(#38294e,#111320);color:#e8d7fe}
+.pc-game .pc-center{
+ gap:8px;align-items:center;justify-content:center;
+ background:linear-gradient(#190d29a8,#0f0c1bc0);
+}
+.pc-game .pc-board-title{margin:0;font:900 13px system-ui;letter-spacing:.11em;color:#dcffb4;text-shadow:0 0 8px #6cff90}
+.pc-game .pc-board{
+ width:min(100%,520px);max-width:520px;margin-inline:auto;
+ padding:12px;gap:7px;
+ border:4px ridge #a768cd;border-radius:18px;
+ background:linear-gradient(150deg,#190d2af0,#090e19fa);
+ box-shadow:0 0 0 2px #7bff5860,0 0 23px #de4efa8c,inset 0 0 23px #731c9d9c;
+}
+.pc-game .pc-board .pc-tile{
+ min-width:0;width:100%;aspect-ratio:1;
+ display:grid;place-items:center;padding:0;
+ border:2px solid #a06abb;border-radius:9px;
+ background:linear-gradient(140deg,#27182f,#080c18);
+ box-shadow:inset 0 0 0 1px #d9adfc55,0 3px 5px #000a;
+ overflow:hidden;
+}
+.pc-game .pc-board .pc-tile .pc-tile-image{
+ position:absolute;inset:50% auto auto 50%;
+ transform:translate(-50%,-50%);
+ width:89%;height:89%;
+ object-fit:contain;object-position:center;
+ border-radius:5px;
+}
+.pc-game .pc-board .pc-tile .pc-icon{
+ width:88%;height:88%;max-height:88%;max-width:88%;
+ object-fit:contain;object-position:center;margin:auto;
+}
+.pc-game .pc-board .pc-tile-safe{border-color:#71fc5a;box-shadow:0 0 10px #8eff70b8,inset 0 0 5px #31c64166}
+.pc-game .pc-board .pc-tile-bust{border-color:#f6616a;box-shadow:0 0 12px #ff4966c5}
+.pc-game .pc-board .pc-tile:enabled:hover,.pc-game .pc-board .pc-tile:enabled:focus-visible{
+ transform:none;border-color:#c4ff91;box-shadow:0 0 13px #94ff4b;
+}
+.pc-game .pc-board-legend{font-size:11px;color:#f1dfd5}
+.pc-game .pc-right{
+ gap:0;display:flex;flex-direction:column;align-items:stretch;
+ padding:12px 10px;background:linear-gradient(160deg,#0b0d19eb,#090818eb);
+}
+.pc-game .pc-right h2{
+ margin:0 0 7px;padding:8px 4px 10px;
+ color:#baff36;font:italic 900 clamp(16px,1.7vw,23px) Georgia,serif;
+ text-shadow:1px 2px #000,0 0 12px #88f94a;
+ border-bottom:2px solid #d253f0;
+}
+.pc-game .pc-right .pc-stat{
+ display:flex;justify-content:space-between;align-items:center;
+ gap:8px;padding:10px 6px;margin:0;border:0;border-bottom:1px solid #864ea8a6;
+ border-radius:0;background:transparent;min-height:54px;
+}
+.pc-game .pc-right .pc-stat-label{
+ color:#fff3e3;font-weight:800;font-size:clamp(10px,1vw,13px);
+ letter-spacing:0;
+}
+.pc-game .pc-right .pc-stat strong{
+ text-align:right;color:#e3ff94;font-size:clamp(16px,1.8vw,24px);
+ text-shadow:0 0 10px #72e95277;
+}
+.pc-game .pc-right .pc-multiplier strong{color:#83ff4c;font-size:clamp(19px,2.1vw,30px)}
+.pc-game .pc-right .pc-value strong{color:#ffe07e}
+.pc-game .pc-right h3{margin:12px 0 8px;font-size:12px}
+.pc-game .pc-right .pc-odds-heading{margin:13px 0 5px;color:#f5e5ad;font-size:12px;text-align:left;letter-spacing:.05em}
+.pc-game .pc-odds-row{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.pc-game .pc-right .pc-odds{
+ min-width:0;min-height:60px;margin:0;padding:6px 4px;
+ border:2px solid #aaff87;border-radius:9px;
+ display:flex;flex-direction:column-reverse;justify-content:center;gap:2px;
+ background:linear-gradient(#35c349,#075b23);
+ box-shadow:inset 0 0 10px #c6ff8a8c,0 0 8px #56ed4799;
+}
+.pc-game .pc-right .pc-odds-danger{
+ border-color:#ff8b7c;background:linear-gradient(#c23850,#761328);
+ box-shadow:inset 0 0 10px #ff777c99,0 0 9px #ff435777;
+}
+.pc-game .pc-right .pc-odds .pc-stat-label{color:#fff;font-size:11px;text-align:center}
+.pc-game .pc-right .pc-odds strong{color:#fff;font-size:clamp(14px,1.5vw,20px);text-align:center;text-shadow:0 2px #0008}
+.pc-game .pc-log{
+ border-color:#a96bd2;border-radius:9px;background:#070b14b8;
+ box-shadow:inset 0 0 12px #5b1b8e66;
+}
+.pc-game .pc-foot{color:#def2c2}
+@media(max-width:1100px){
+ .pc-game .pc-layout{grid-template-columns:minmax(170px,26fr) minmax(265px,48fr) minmax(170px,26fr);gap:8px}
+ .pc-game .pc-side,.pc-game .pc-center{padding:8px}
+ .pc-game .pc-mascot{height:205px;min-height:185px}
+ .pc-game .pc-board{max-width:455px;padding:8px;gap:5px}
+ .pc-game .pc-right .pc-stat{min-height:45px;padding:7px 3px}
+ .pc-game .pc-heading .pc-logo{max-width:245px}
+}
+@media(max-width:800px){
+ .pc-game .pc-layout{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+ .pc-game .pc-center{grid-column:1/-1;grid-row:1}
+ .pc-game .pc-left{grid-column:1;grid-row:2}
+ .pc-game .pc-right{grid-column:2;grid-row:2}
+ .pc-game .pc-board{max-width:530px}
+ .pc-game .pc-mascot{min-height:175px}
+}
+@media(max-width:530px){
+ .pc-game{padding:7px;background-position:50% 0}
+ .pc-game .pc-layout{display:flex;flex-direction:column}
+ .pc-game .pc-center{order:0}
+ .pc-game .pc-left{order:1}
+ .pc-game .pc-right{order:2}
+ .pc-game .pc-board{width:100%;max-width:100%;padding:6px;gap:4px}
+ .pc-game .pc-board .pc-tile{border-width:1px;border-radius:6px}
+ .pc-game .pc-board .pc-tile .pc-tile-image{width:92%;height:92%}
+ .pc-game .pc-board .pc-tile .pc-icon{width:90%;height:90%}
+ .pc-game .pc-title{padding:5px 7px}
+ .pc-game .pc-brand-label{font-size:10px}
+ .pc-game .pc-title .pc-stat-label{display:none}
+ .pc-game .pc-heading .pc-logo{max-width:340px}
+ .pc-game .pc-mascot{height:200px}
+ .pc-game .pc-actions{position:static;background:none;padding:0}
+ .pc-game .pc-right{display:flex}
+}

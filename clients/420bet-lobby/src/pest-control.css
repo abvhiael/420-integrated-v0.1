@@ -302,3 +302,14 @@
   .pc-game .pc-board .pc-tile .pc-tile-image{width:73.6%;height:73.6%}
   .pc-game .pc-board .pc-tile .pc-icon{width:72%;height:72%;max-width:72%;max-height:72%}
 }
+
+/* PC-ALIGN-05: shift ONLY the inner illustrations 4% up and left;
+   keep tray frames and the reduced artwork dimensions unchanged. */
+.pc-game .pc-board .pc-tile .pc-tile-image,
+.pc-game .pc-board .pc-tile .pc-icon{
+  position:absolute;
+  top:46%;
+  left:46%;
+  transform:translate(-50%,-50%);
+  margin:0;
+}

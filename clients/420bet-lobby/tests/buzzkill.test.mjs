@@ -102,3 +102,40 @@ test('BUZZKILL first illustrated gameplay asset pack is integrated and valid Web
  assert(scene.includes("buzz-fx-clouds"));
  assert(scene.includes("this.textures.exists"));
 });
+
+test('Kevin's eight production cut-outs and Mom's six full-body poses are valid WebP sprites',()=>{
+ for(const name of [...Array.from({length:8},(_,i)=>'kevin-levitate-'+String(i+1).padStart(2,'0')),...Array.from({length:6},(_,i)=>'mom-pose-'+String(i+1).padStart(2,'0')),'buzzkilled-splash']){
+  const bytes=readFileSync(new URL('../public/assets/420bet/buzzkill/cinematic-v2/'+name+'.webp',import.meta.url));
+  assert(bytes.length>3000,name+' sprite too small');
+  assert.equal(bytes.toString('ascii',0,4),'RIFF');
+  assert.equal(bytes.toString('ascii',8,12),'WEBP');
+ }
+ const scene=readFileSync(new URL('../src/buzzkill-scene.js',import.meta.url),'utf8');
+ assert(scene.includes('buzz-kevin-frame-'));
+ assert(scene.includes('buzz-mom-pose-'));
+ assert(scene.includes('buzz-crash-splash'));
+ assert(scene.includes('this.doorPanel'));
+});
+test('Mom completes her entry and speech, then pauses exactly 500ms before BUZZKILLED',async()=>{
+ const {BUZZ_CINEMATIC,crashVisualPhase,momPoseAt,BUZZ_MOM_LINES}=await import('../src/buzzkill-cinematic.js');
+ assert.equal(BUZZ_CINEMATIC.splashAtMs-BUZZ_CINEMATIC.lectureEndMs,500);
+ assert(BUZZ_CINEMATIC.doorOpenMs<BUZZ_CINEMATIC.enterCompleteMs);
+ assert(BUZZ_CINEMATIC.enterCompleteMs<BUZZ_CINEMATIC.lectureEndMs);
+ assert(BUZZ_CINEMATIC.splashAtMs<BUZZ_CINEMATIC.completeMs);
+ assert.equal(crashVisualPhase(0),'entry');
+ assert.equal(crashVisualPhase(949),'entry');
+ assert.equal(crashVisualPhase(950),'lecture');
+ assert.equal(crashVisualPhase(2449),'lecture');
+ assert.equal(crashVisualPhase(2450),'pause');
+ assert.equal(crashVisualPhase(2949),'pause');
+ assert.equal(crashVisualPhase(2950),'splash');
+ assert.equal(crashVisualPhase(4500),'complete');
+ assert.equal(momPoseAt(0),0);
+ assert.equal(momPoseAt(2200),5);
+ assert(BUZZ_MOM_LINES.length>=4);
+ const ui=readFileSync(new URL('../src/buzzkill-ui.js',import.meta.url),'utf8');
+ assert(ui.includes('cinematicActive=true'));
+ assert(ui.includes('onSplash:'));
+ assert(ui.includes('onComplete:'));
+ assert(ui.includes("bust.classList.toggle('bz-show',splashShown)"));
+});

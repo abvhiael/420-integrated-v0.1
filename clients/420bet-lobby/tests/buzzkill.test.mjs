@@ -103,7 +103,7 @@ test('BUZZKILL first illustrated gameplay asset pack is integrated and valid Web
  assert(scene.includes("this.textures.exists"));
 });
 
-test('Kevin's eight production cut-outs and Mom's six full-body poses are valid WebP sprites',()=>{
+test("Kevin's eight production cut-outs and Mom's six full-body poses are valid WebP sprites",()=>{
  for(const name of [...Array.from({length:8},(_,i)=>'kevin-levitate-'+String(i+1).padStart(2,'0')),...Array.from({length:6},(_,i)=>'mom-pose-'+String(i+1).padStart(2,'0')),'buzzkilled-splash']){
   const bytes=readFileSync(new URL('../public/assets/420bet/buzzkill/cinematic-v2/'+name+'.webp',import.meta.url));
   assert(bytes.length>3000,name+' sprite too small');

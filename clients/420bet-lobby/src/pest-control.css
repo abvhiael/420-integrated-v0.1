@@ -24,3 +24,12 @@
 
 /* Lobby discovery art uses Pest Control's own grow-room artwork. */
 .art-pest-control{background:linear-gradient(90deg,#15101e88,#0a211588),url('/assets/420bet/pest-control/grow-room.svg') center/cover!important;color:#acff6d!important;text-shadow:0 0 14px #a8ff50,3px 3px #160b24}
+
+/* Approved Buddy Bloom concept artwork: five expression frames, one WebP sprite. */
+.pc-mascot .pc-mascot-art{display:none}
+.pc-mascot::after{content:"";display:block;flex:none;width:min(62%,160px);aspect-ratio:1;background:url('/assets/420bet/pest-control/buddy-concept-strip.webp') left center/500% 100% no-repeat;filter:drop-shadow(0 8px 9px #000a);image-rendering:auto}
+.pc-mood-idle::after{background-position:0% center}
+.pc-mood-happy::after{background-position:25% center}
+.pc-mood-nervous::after{background-position:50% center}
+.pc-mood-infested::after{background-position:75% center}
+.pc-mood-harvest::after{background-position:100% center}

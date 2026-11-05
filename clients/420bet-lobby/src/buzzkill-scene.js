@@ -44,13 +44,18 @@ export function mountBuzzkillScene(parent,{reducedMotion=false}={}){
    this.cloud=this.add.graphics().setDepth(4);
    this.cloudIllustration=this.textures.exists('buzz-fx-clouds')?this.add.image(570,480,'buzz-fx-clouds').setDisplaySize(360,270).setAlpha(0).setDepth(4):null;
    this.flowerIllustration=this.textures.exists('buzz-fx-flowers')?this.add.image(250,315,'buzz-fx-flowers').setDisplaySize(260,260).setAlpha(0).setDepth(4):null;
-   this.kevin=this.add.image(570,478,use('buzz-kevin-frame-1',use('buzz-kevin-lift1','buzz-kevin'))).setDisplaySize(350,350).setDepth(5);
-   this.mom=this.add.image(1230,352,use('buzz-mom-pose-1',use('buzz-mom-entry','buzz-mom'))).setDisplaySize(330,440).setDepth(9);
+   // The high-res concept cutouts contain problematic transparent padding: show the
+   // verified full-body SVG until their alpha bounds are requalified in a browser.
+   // Anchor at the bottom to keep Kevin fully visible throughout levitation.
+   this.kevin=this.add.image(570,540,'buzz-kevin').setOrigin(.5,.88).setDisplaySize(330,390).setAlpha(1).setVisible(true).setDepth(5);
+   // Keep the door separate from Mom. Composite concept poses have a baked-in
+   // partial door and can clip at the right edge of the camera.
+   this.mom=this.add.image(1130,540,'buzz-mom').setOrigin(.5,1).setDisplaySize(255,435).setAlpha(1).setDepth(9);
    this.mom.setVisible(false);
    this.doorGlow=this.add.rectangle(1070,315,178,448,0xffedb6,0).setDepth(8);
    // The door is a separate articulated prop; the fixed room never pans or scales.
-   this.doorShadow=this.add.rectangle(1075,304,154,393,0x170b20,.0).setDepth(7);
-   this.doorPanel=this.add.container(1145,106).setDepth(8);
+   this.doorShadow=this.add.rectangle(1067,302,154,393,0x170b20,.0).setDepth(7);
+   this.doorPanel=this.add.container(1144,106).setDepth(8);
    const panel=this.add.rectangle(-75,192,150,385,0x98553c,1).setStrokeStyle(8,0x562b36,1);
    const upper=this.add.rectangle(-75,105,113,150,0xc77e52,1).setStrokeStyle(6,0x673b47,1);
    const lower=this.add.rectangle(-75,281,113,171,0xc77e52,1).setStrokeStyle(6,0x673b47,1);
@@ -58,10 +63,10 @@ export function mountBuzzkillScene(parent,{reducedMotion=false}={}){
    this.doorPanel.add([panel,upper,lower,knob]);this.doorPanel.setAlpha(0);
    this.bubble=this.add.graphics().setDepth(10).setAlpha(0);
    this.bubble.fillStyle(0xfff3d9,1);
-   this.bubble.fillRoundedRect(615,95,450,152,36);
-   this.bubble.fillTriangle(941,232,1002,232,992,273);
-   this.bubble.lineStyle(7,0x2f143b,1);this.bubble.strokeRoundedRect(615,95,450,152,36);
-   this.bubbleText=this.add.text(840,171,'',{fontFamily:'Arial Black, sans-serif',fontSize:'29px',color:'#241021',align:'center',fontStyle:'bold',wordWrap:{width:410}}).setOrigin(.5).setAlpha(0).setDepth(11);
+   this.bubble.fillRoundedRect(610,110,454,170,33);
+   this.bubble.fillTriangle(934,267,1011,267,1002,301);
+   this.bubble.lineStyle(8,0x2f143b,1);this.bubble.strokeRoundedRect(610,110,454,170,33);
+   this.bubbleText=this.add.text(837,194,'',{fontFamily:'Arial Black, sans-serif',fontSize:'29px',color:'#241021',align:'center',fontStyle:'bold',lineSpacing:5,wordWrap:{width:395}}).setOrigin(.5).setAlpha(0).setDepth(11);
    this.crashSplash=this.textures.exists('buzz-crash-splash')?this.add.image(600,345,'buzz-crash-splash').setAlpha(0).setDepth(12):null;
    if(this.crashSplash)this.crashSplash.setDisplaySize(850,365);
    this.crashText=this.add.text(600,220,'BUZZKILLED!',{fontFamily:'Arial Black, Impact, sans-serif',fontSize:'100px',fontStyle:'italic',color:'#ffbd2b',stroke:'#6f164c',strokeThickness:15,shadow:{offsetX:5,offsetY:7,color:'#1a0a24',blur:12}}).setOrigin(.5).setAlpha(0).setDepth(11);
@@ -75,13 +80,14 @@ export function mountBuzzkillScene(parent,{reducedMotion=false}={}){
    this.timeCounter+=Math.min(dt,55)/1000;
    const t=this.timeCounter;
    const intensity=cinematicEffectsOff?0:Phaser.Math.Clamp(Math.log2(Math.max(1,level))/3.4,0,1);
-   const lift=crashed?0:Math.min(198,Math.log(Math.max(1,level))*79);
+   const lift=crashed?0:Math.min(165,Math.log(Math.max(1,level))*66);
    const bob=!reducedMotion&&!crashed?Math.sin(t*1.5)*7:0;
    if(!crashed){
-     const index=level>=10?8:level>=7?7:level>=4.2?6:level>=3.4?5:level>=2.4?4:level>=1.8?3:level>=1.35?2:1;
-     const pose=this.textures.exists('buzz-kevin-frame-'+index)?'buzz-kevin-frame-'+index:level>=4.2?'buzz-kevin-lift3':level>=2?'buzz-kevin-lift2':'buzz-kevin-lift1';
-     if(this.textures.exists(pose)&&this.kevin.texture.key!==pose)this.kevin.setTexture(pose);
-     this.kevin.y=472-lift+bob;this.kevin.angle=reducedMotion?0:Math.sin(t*.65)*2;
+     // Visibility-first production fallback. Keep the verified full-body texture
+     // stable even as the multiplier changes; never swap to an invisible cutout.
+     this.kevin.setVisible(true).setAlpha(1);
+     if(this.kevin.texture.key!=='buzz-kevin')this.kevin.setTexture('buzz-kevin');
+     this.kevin.setPosition(570,540-lift+bob).setAngle(reducedMotion?0:Math.sin(t*.65)*2);
    }
    if(this.cloudIllustration){this.cloudIllustration.y=this.kevin.y+117;this.cloudIllustration.alpha=cinematicEffectsOff?0:Phaser.Math.Clamp(intensity*.58,0,.58);}
    if(this.flowerIllustration){this.flowerIllustration.alpha=cinematicEffectsOff?0:Phaser.Math.Clamp((intensity-.30)*.75,0,.62);this.flowerIllustration.rotation=reducedMotion?0:Math.sin(t*.35)*.06;}
@@ -97,7 +103,7 @@ export function mountBuzzkillScene(parent,{reducedMotion=false}={}){
     }
    }
    this.cloud.clear();this.cloud.fillStyle(0xdac4ff,.35+intensity*.23);
-   const cy=this.kevin.y+126;
+   const cy=this.kevin.y+40;
    for(let i=0;i<6;i++){const px=520+i*20,py=cy+(reducedMotion?0:Math.sin(t*1.8+i)*5);this.cloud.fillEllipse(px,py,80,36);}
    this.smoke.clear();
    for(let i=0;i<18;i++){
@@ -122,15 +128,15 @@ export function mountBuzzkillScene(parent,{reducedMotion=false}={}){
    crashGeneration++;level=1;crashed=false;cinematicEffectsOff=false;
    if(!sceneRef)return;
    const s=sceneRef;s.tweens.killAll();
-   s.mom.setVisible(false).setPosition(1230,352).setAlpha(1);
-   s.mom.setTexture(s.textures.exists('buzz-mom-pose-1')?'buzz-mom-pose-1':s.textures.exists('buzz-mom-entry')?'buzz-mom-entry':'buzz-mom');
+   s.mom.setVisible(false).setPosition(1130,540).setAlpha(1).setOrigin(.5,1).setDisplaySize(255,435);
+   s.mom.setTexture('buzz-mom');
    s.doorPanel.setAlpha(0).setScale(1,1);
    s.doorShadow.setAlpha(0);s.doorGlow.setAlpha(0);
    s.bubble.setAlpha(0);s.bubbleText.setAlpha(0);s.bubbleText.setText('');
    s.crashText.setAlpha(0);s.momQuote.setAlpha(0);
    if(s.crashSplash)s.crashSplash.setAlpha(0);
-   s.kevin.setAlpha(1).setAngle(0).setPosition(570,472);
-   s.kevin.setTexture(s.textures.exists('buzz-kevin-frame-1')?'buzz-kevin-frame-1':s.textures.exists('buzz-kevin-lift1')?'buzz-kevin-lift1':'buzz-kevin');
+   s.kevin.setTexture('buzz-kevin').setOrigin(.5,.88).setDisplaySize(330,390)
+    .setVisible(true).setAlpha(1).setAngle(0).setPosition(570,540);
   },
   bust({onSplash=()=>{},onComplete=()=>{}}={}){
    if(crashed)return;
@@ -138,37 +144,47 @@ export function mountBuzzkillScene(parent,{reducedMotion=false}={}){
    if(!sceneRef){onSplash();onComplete();return;}
    const s=sceneRef,gen=++crashGeneration;
    const schedule=(ms,fn)=>s.time.delayedCall(ms,()=>{if(!disposed&&gen===crashGeneration)fn();});
-   const pose=i=>{const key='buzz-mom-pose-'+i;if(s.textures.exists(key))s.mom.setTexture(key);};
-   s.mom.setVisible(true).setAlpha(0).setPosition(1215,353);
-   s.doorPanel.setAlpha(1).setScale(1,1);s.doorShadow.setAlpha(.93);s.doorGlow.setAlpha(.6);
-   s.tweens.add({targets:s.doorPanel,scaleX:.15,duration:BUZZ_CINEMATIC.doorOpenMs,ease:'Cubic.Out'});
-   s.tweens.add({targets:s.mom,x:1030,alpha:1,duration:BUZZ_CINEMATIC.enterCompleteMs,ease:'Cubic.Out'});
-   schedule(280,()=>pose(2));schedule(600,()=>pose(3));
+   const say=BUZZ_MOM_LINES[(s.roundVisualSeed||0)%BUZZ_MOM_LINES.length];
+   s.roundVisualSeed=(s.roundVisualSeed||0)+1;
+   // Hold both characters in the frame. Never put a baked-in door image offstage.
+   s.kevin.setVisible(true).setAlpha(1);
+   s.mom.setTexture('buzz-mom').setOrigin(.5,1).setDisplaySize(255,435)
+     .setVisible(true).setAlpha(1).setPosition(1065,540);
+   s.doorPanel.setAlpha(1).setScale(1,1);
+   s.doorShadow.setAlpha(.93);s.doorGlow.setAlpha(.42);
+   s.bubble.setAlpha(0);s.bubbleText.setAlpha(0).setText('');
+   if(s.crashSplash)s.crashSplash.setAlpha(0);
+   s.crashText.setAlpha(0);
+   if(reducedMotion){
+     s.doorPanel.setScale(.18,1);
+     s.mom.setPosition(1005,540);
+   }else{
+     s.tweens.add({targets:s.doorPanel,scaleX:.18,duration:BUZZ_CINEMATIC.doorOpenMs,ease:'Cubic.Out'});
+     s.tweens.add({targets:s.mom,x:1005,duration:BUZZ_CINEMATIC.enterCompleteMs,ease:'Cubic.Out'});
+   }
    schedule(BUZZ_CINEMATIC.enterCompleteMs,()=>{
-    pose(4);
-    const line=BUZZ_MOM_LINES[(s.roundVisualSeed||0)%BUZZ_MOM_LINES.length];
-    s.roundVisualSeed=(s.roundVisualSeed||0)+1;
-    s.bubbleText.setText(line);
-    s.bubble.setAlpha(1);s.bubbleText.setAlpha(1);
+     s.mom.setPosition(1042,540);
+     s.bubbleText.setText(say).setAlpha(1);
+     s.bubble.setAlpha(1);
    });
-   schedule(1475,()=>pose(5));
-   schedule(1925,()=>pose(6));
+   // Give the entire speech balloon a real 3.5 seconds to be read.
    schedule(BUZZ_CINEMATIC.lectureEndMs,()=>{
-    s.bubble.setAlpha(0);s.bubbleText.setAlpha(0);
-    cinematicEffectsOff=true;
-    s.tweens.add({targets:s.kevin,y:476,angle:-7,duration:BUZZ_CINEMATIC.pauseMs,ease:'Cubic.Out'});
-    s.doorGlow.setAlpha(0);
+     s.bubble.setAlpha(0);s.bubbleText.setAlpha(0);
+     cinematicEffectsOff=true;
+     s.doorGlow.setAlpha(0);
+     if(!reducedMotion)s.tweens.add({targets:s.kevin,y:540,angle:-7,duration:BUZZ_CINEMATIC.pauseMs,ease:'Cubic.Out'});
    });
-   // The half-second pause begins AFTER the lecture and dialogue have ended.
+   // A clean half-second hold occurs AFTER the balloon disappears.
    schedule(BUZZ_CINEMATIC.splashAtMs,()=>{
-    if(s.crashSplash){
-     s.crashSplash.setAlpha(1).setScale(.7);
-     s.tweens.add({targets:s.crashSplash,scale:1.0,duration:235,ease:'Back.Out'});
-    }else s.crashText.setAlpha(1);
-    onSplash();
-    if(!reducedMotion)s.cameras.main.shake(180,.005);
+     if(s.crashSplash){
+       s.crashSplash.setAlpha(1).setScale(.7);
+       if(!reducedMotion)s.tweens.add({targets:s.crashSplash,scale:1,duration:235,ease:'Back.Out'});
+       else s.crashSplash.setScale(1);
+     }else s.crashText.setAlpha(1);
+     onSplash();
+     if(!reducedMotion)s.cameras.main.shake(180,.005);
    });
-   schedule(BUZZ_CINEMATIC.completeMs,()=>{onComplete();});
+   schedule(BUZZ_CINEMATIC.completeMs,()=>onComplete());
   },
   destroy(){if(disposed)return;disposed=true;sceneRef=null;game?.destroy(true);game=null;}
  };

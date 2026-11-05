@@ -3,11 +3,11 @@ export const BUZZ_CINEMATIC=Object.freeze({
  doorOpenMs:420,
  enterCompleteMs:950,
  lectureBeginMs:950,
- lectureEndMs:2450,
+ lectureEndMs:4450,
  pauseMs:500,
- splashAtMs:2950,
+ splashAtMs:4950,
  splashDurationMs:1550,
- completeMs:4500,
+ completeMs:6500,
 });
 export const BUZZ_MOM_LINES=Object.freeze([
  'KEVIN! WHAT THE HELL\nARE YOU DOING IN HERE?!',
@@ -21,8 +21,8 @@ export function momPoseAt(ms){
  if(ms<280)return 0;
  if(ms<600)return 1;
  if(ms<950)return 2;
- if(ms<1475)return 3;
- if(ms<1925)return 4;
+ if(ms<2000)return 3;
+ if(ms<3400)return 4;
  return 5;
 }
 export function crashVisualPhase(ms){

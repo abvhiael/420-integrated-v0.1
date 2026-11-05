@@ -79,3 +79,26 @@ test('Practice-only controls, routes and fixed room assets',()=>{
   assert.match(content,/<svg/);
  }
 });
+
+
+test('BUZZKILL first illustrated gameplay asset pack is integrated and valid WebP',()=>{
+ const names=['bedroom-base','kevin-lift1','kevin-lift2','kevin-lift3','mom-entry','mom-buzzkill','fx-flowers','fx-clouds'];
+ const manifest=JSON.parse(readFileSync(new URL('../public/assets/420bet/buzzkill/gameplay-v1/asset-manifest.json',import.meta.url),'utf8'));
+ assert.equal(manifest.stage.fixed,true);
+ assert.equal(manifest.rules.practiceOnly,true);
+ for(const name of names){
+  const bytes=readFileSync(new URL('../public/assets/420bet/buzzkill/gameplay-v1/'+name+'.webp',import.meta.url));
+  assert(bytes.length>1000,name+' unexpectedly small');
+  assert.equal(bytes.toString('ascii',0,4),'RIFF');
+  assert.equal(bytes.toString('ascii',8,12),'WEBP');
+ }
+ const scene=readFileSync(new URL('../src/buzzkill-scene.js',import.meta.url),'utf8');
+ assert(scene.includes("ART+'bedroom-base.webp'"));
+ assert(scene.includes("buzz-kevin-lift1"));
+ assert(scene.includes("buzz-kevin-lift2"));
+ assert(scene.includes("buzz-kevin-lift3"));
+ assert(scene.includes("buzz-mom-buzzkill"));
+ assert(scene.includes("buzz-fx-flowers"));
+ assert(scene.includes("buzz-fx-clouds"));
+ assert(scene.includes("this.textures.exists"));
+});

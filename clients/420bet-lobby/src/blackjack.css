@@ -75,7 +75,7 @@
 /* Individual uploaded 420Bet face-card art. Preserve physical aspect ratio without cropping.
    Applies to dealer, all 3 seats and both split hands. */
 .bj-casino .bj-card-custom{
-  width:clamp(43px,5.4vw,77px);
+  width:clamp(64.5px,8.1vw,115.5px); /* 150% of previous dealer card size */
   aspect-ratio:298 / 390;
   height:auto;
   overflow:hidden;
@@ -86,7 +86,7 @@
   display:block;
 }
 .bj-casino .bj-player-cards .bj-card-custom{
-  width:clamp(36px,4.5vw,64px);
+  width:clamp(54px,6.75vw,96px); /* 150% of previous player card size */
 }
 .bj-casino .bj-card-custom .bj-card-art{
   position:absolute;
@@ -115,5 +115,17 @@
 }
 .bj-casino .bj-card-custom.bj-card-back::after{content:none}
 @media(max-width:640px){
-  .bj-casino .bj-player-cards .bj-card-custom{width:40px}
+  .bj-casino .bj-player-cards .bj-card-custom{width:60px} /* 150% of previous mobile size */
+}
+
+/* Accommodate the 50% larger card artwork without covering hand totals or controls. */
+.bj-casino .bj-dealer-cards{min-height:155px}
+.bj-casino .bj-player-cards{min-height:138px}
+.bj-casino .bj-hands{min-height:187px}
+.bj-casino .bj-dealer-cards .bj-card-custom + .bj-card-custom{margin-left:-25.5px}
+.bj-casino .bj-player-cards .bj-card-custom + .bj-card-custom{margin-left:-30px}
+@media(max-width:640px){
+  .bj-casino .bj-player-cards{min-height:82px}
+  .bj-casino .bj-hands{min-height:192px}
+  .bj-casino .bj-player-cards .bj-card-custom + .bj-card-custom{margin-left:-33px}
 }

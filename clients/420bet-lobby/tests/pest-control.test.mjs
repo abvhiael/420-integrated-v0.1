@@ -89,5 +89,7 @@ test('Auto pick chooses one unopened tray without leaking hazard contents',()=>{
  assert(pestAction(g,'auto-pick'));
  assert.equal(g.picks.length,1);
  assert.equal(new Set(g.picks).size,1);
- assert.equal(pestAction(g,'auto-pick'),g.phase==='active');
+ const prior=g.picks.length;const wasActive=g.phase==='active';
+ const accepted=pestAction(g,'auto-pick');assert.equal(accepted,wasActive);
+ assert.equal(g.picks.length,prior+(wasActive?1:0));
 });

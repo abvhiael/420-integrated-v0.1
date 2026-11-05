@@ -49,6 +49,12 @@ export function pestAction(game,type,value){
   game.balance=roundCents(game.balance-game.bet);game.hazardTiles=tiles;game.picks=[];game.return=0;game.result=null;game.phase='active';game.round++;
   game.log=['Grow started — '+game.hazards+' pests hidden.'];return true;
  }
+ if(type==='auto-pick'){
+  if(game.phase!=='active')return false;
+  const available=Array.from({length:25},(_,i)=>i).filter(i=>!game.picks.includes(i));
+  if(!available.length)return false;
+  return pestAction(game,'pick',available[secureIndex(available.length,game.rng)]);
+ }
  if(type==='pick'){
   if(game.phase!=='active'||!validInt(value,0,24)||game.picks.includes(value))return false;
   game.picks.push(value);

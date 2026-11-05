@@ -82,3 +82,12 @@ test('UI displays full 25-tile playfield, practice controls and authored art',()
  assert.equal(root.gameState.result,'harvest');
  root.stopAnimation();
 });
+
+test('Auto pick chooses one unopened tray without leaking hazard contents',()=>{
+ const g=createPestControl({rng,balance:100});
+ pestAction(g,'start');
+ assert(pestAction(g,'auto-pick'));
+ assert.equal(g.picks.length,1);
+ assert.equal(new Set(g.picks).size,1);
+ assert.equal(pestAction(g,'auto-pick'),g.phase==='active');
+});

@@ -93,7 +93,16 @@ export function freeBonus(rng){
 export function mow(grid,rng){
  // Five visually complete mower cascades. Existing non-cleared symbols are
  // preserved; only the cut positions receive fresh symbols.
- let current=grid.slice(),total=0;const boards=[];
+ // Triggering lawnmowers are removed BEFORE cascade 1. They cannot
+ // remain as stationary blocker symbols for any of the five paid cascades.
+ const mowerIndices=grid.flatMap((symbol,i)=>symbol==='mower'?[i]:[]);
+ const currentStart=grid.map(symbol=>{
+  if(symbol!=='mower')return symbol;
+  let replacement;
+  do{replacement=draw(rng);}while(replacement==='mower');
+  return replacement;
+ });
+ let current=currentStart.slice(),total=0;const boards=[];
  for(let n=0;n<5;n++){
   let hit=current.map((symbol,i)=>LOW.has(symbol)?i:-1).filter(i=>i>=0);
   // On a depleted board, cut a few non-special positions so all five
@@ -110,7 +119,7 @@ export function mow(grid,rng){
   const units=evaluate(current).units;total+=units;
   boards.push({grid:current.slice(),before,removed,units});
  }
- return {label:'MOW THE LAWN',boards,units:Math.round(total*100)/100};
+ return {label:'MOW THE LAWN',initialGrid:currentStart,mowerIndices,boards,units:Math.round(total*100)/100};
 }
 // TEMPORARY PRACTICE QA HOOK — preview only. This builds real feature event data
 // without creating a paid spin, changing any balance, or crediting the win.

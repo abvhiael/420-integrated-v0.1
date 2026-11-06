@@ -111,7 +111,7 @@ export function createSinCityPractice(doc=globalThis.document,options={}){
   const qaSelect=el(doc,'select','sc-qa-select');qaSelect.setAttribute('aria-label','Select bonus to test');
   for(const feature of SIN_CITY_BONUS_PREVIEWS){const choice=el(doc,'option','',feature.label);choice.setAttribute('value',feature.id);choice.selected=feature.id===qaSelection;qaSelect.append(choice);}
   qaSelect.disabled=busy||qaPriorState!==null;
-  qaSelect.addEventListener('change',()=>{const selected=[...qaSelect.querySelectorAll('option')].find(option=>option.selected);qaSelection=selected?.getAttribute('value')??'puff';});
+  qaSelect.addEventListener('change',()=>{const selected=[...qaSelect.querySelectorAll('option')].filter(option=>option.selected).at(-1);qaSelection=selected?.getAttribute('value')??'puff';});
   const qaButton=button('▶ TEST SELECTED BONUS','sc-qa-button',startBonusTest);qaButton.disabled=busy||qaPriorState!==null;
   const endButton=button('■ END BONUS TEST','sc-qa-end',endBonusTest);endButton.disabled=qaPriorState===null;
   qa.append(qaTitle,qaNote,qaSelect,qaButton,endButton);

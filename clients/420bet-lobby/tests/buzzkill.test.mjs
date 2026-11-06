@@ -111,7 +111,7 @@ test("Kevin's eight production cut-outs and Mom's six full-body poses are valid 
   assert.equal(bytes.toString('ascii',8,12),'WEBP');
  }
  const scene=readFileSync(new URL('../src/buzzkill-scene.js',import.meta.url),'utf8');
- assert(scene.includes('buzz-kevin-frame-'));
+ assert(scene.includes("'buzz-kevin-clean'"));
  assert(scene.includes('buzz-mom-pose-'));
  assert(scene.includes('buzz-crash-splash'));
  assert(scene.includes('this.doorPanel'));

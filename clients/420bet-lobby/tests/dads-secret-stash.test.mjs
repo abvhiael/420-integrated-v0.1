@@ -1,7 +1,7 @@
 import test from 'node:test';import assert from 'node:assert/strict';import {parseHTML} from 'linkedom';
 import {existsSync,readFileSync} from 'node:fs';
 import {SLOT_MACHINES,createSlotsLobby,slotMachineFromHash} from '../src/slots-lobby.js';
-import {newGame,qualify,triggerCharacters,modifier,inspection,spin,evaluate,stashBonus} from '../src/dads-secret-stash-engine.js';
+import {newGame,qualify,triggerCharacters,modifier,inspection,spin,evaluate,stashBonus,freeBonus,mow} from '../src/dads-secret-stash-engine.js';
 import {createDadsSecretStash,DSS_BONUS_PRESENTATION} from '../src/dads-secret-stash-ui.js';
 import {DSS_SYMBOL_ART,DSS_CAST_ART,DSS_TRANSITION_ART,DSS_BACKGROUND_ART,DSS_FEATURE_ART,DSS_LARRY_ART} from '../src/dads-secret-stash-assets.js';
 import {SYMBOLS} from '../src/dads-secret-stash-engine.js';
@@ -208,7 +208,7 @@ test('Secret Stash UI has independent 5x4 bonus board, not a summary-only popup'
  const source=readFileSync(new URL('../src/dads-secret-stash-ui.js',import.meta.url),'utf8');
  assert.match(source,/if\(event\.type==='stash'\)\{playStashBonus\(event\);return;\}/);
  assert.match(source,/schedule\(advance,950\)/);
- assert.match(source,/schedule\(\(\)=>\{holdWin\.hidden=true;reels\.hidden=false;nextEvent\(\);\},1800\)/);
+ assert(source.includes("showFeatureResult(event,()=>{holdWin.hidden=true;reels.hidden=false;bonusHeader.hidden=true;nextEvent();})"));
  game.stopAnimation();
 });
 
@@ -248,5 +248,57 @@ test('Actual 3+ Stash spin enters a playable Hold & Win scene and returns only a
  assert.equal(reels.hidden,false,'Base reels return after all feature steps');
  assert.equal(game.querySelector('.dss-larry-panel').dataset.mode,'main');
  assert(game.getState().last.win>0);
+ game.stopAnimation();
+});
+
+test('Free spins expose sticky Wild timeline, multiplier, and win totals for each animated round',()=>{
+ const bonus=freeBonus(()=>.976);
+ assert.equal(bonus.boards.length,bonus.spins);
+ assert(bonus.boards.every(x=>x.grid.length===20&&Array.isArray(x.sticky)&&Array.isArray(x.previous)&&x.mult>=1&&x.mult<=5));
+ const held=new Set();
+ for(const step of bonus.boards){
+  for(const i of held)assert.equal(step.grid[i],'wild');
+  for(const i of step.newWilds)held.add(i);
+ }
+ assert.equal(bonus.units,Math.round(bonus.boards.reduce((s,x)=>s+x.units,0)*100)/100);
+});
+test('HOA inspection exposes locked positions and newly locked premiums for each respin',()=>{
+ const grid=board();grid[0]='gary';
+ const bonus=inspection(grid,()=>.8);
+ assert.equal(bonus.boards.length,bonus.spins);
+ const held=new Set([0]);
+ for(const step of bonus.boards){
+  assert(step.locked.includes(0));
+  assert.equal(step.grid[0],'gary');
+  for(const i of step.newLocks)assert(!held.has(i));
+  for(const i of step.newLocks)held.add(i);
+  assert.deepEqual([...held].sort((a,b)=>a-b),step.locked.slice().sort((a,b)=>a-b));
+ }
+});
+test('Lawn cascades record removed positions and before/after boards for falling symbol effects',()=>{
+ const bonus=mow(Array(20).fill('A'),()=>.85);
+ assert(bonus.boards.length>=1);
+ for(const step of bonus.boards){
+  assert.equal(step.grid.length,20);
+  assert.equal(step.before.length,20);
+  assert(step.removed.length>=3);
+  assert(step.removed.every(i=>step.before[i]==='A'||['A','K','Q','J','10','papers','lighter','pizza'].includes(step.before[i])));
+  for(let i=0;i<20;i++)if(!step.removed.includes(i))assert.equal(step.grid[i],step.before[i]);
+ }
+});
+test('All bonus modes have animated steps and visible final results; Larry can overlap the title',()=>{
+ const {document}=parseHTML('<html><body></body></html>');
+ const game=createDadsSecretStash(document);
+ assert(game.querySelector('.dss-feature-result'));
+ assert(game.querySelector('.dss-bonus-hud'));
+ const source=readFileSync(new URL('../src/dads-secret-stash-ui.js',import.meta.url),'utf8');
+ for(const name of ['showBonusHud','showFeatureResult','animateBonusGrid','dss-clearing','dss-dropping','dss-sticky','dss-new-lock'])
+  assert(source.includes(name),'Missing bonus presentation step '+name);
+ const css=readFileSync(new URL('../src/dads-secret-stash.css',import.meta.url),'utf8');
+ const overlay=css.slice(css.lastIndexOf('/* Preserve Larry'));
+ assert(overlay.includes('.dss-larry-panel[data-mode="main"]{overflow:visible!important;z-index:8'));
+ assert(overlay.includes('.dss-header{position:relative;z-index:1}'));
+ assert(overlay.includes('.dss-scene{position:relative;z-index:3;overflow:visible'));
+ assert(overlay.includes('.dss-feature-result'));
  game.stopAnimation();
 });

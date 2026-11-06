@@ -1,0 +1,30 @@
+name: Cannabis Cowboy M2 targeted Level 1
+on:
+  pull_request:
+    paths:
+      - 'clients/420bet-lobby/src/cannabis-cowboy-ui.js'
+      - 'clients/420bet-lobby/src/cannabis-cowboy.css'
+      - 'clients/420bet-lobby/src/main.js'
+      - 'clients/420bet-lobby/tests/cannabis-cowboy-m2.test.mjs'
+      - '.github/workflows/420bet-cannabis-cowboy-m2-level1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  cowboy-m2-level1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install isolated lobby dependencies
+        working-directory: clients/420bet-lobby
+        run: npm install --no-audit --no-fund
+      - name: Run only Cannabis Cowboy M2 tests
+        working-directory: clients/420bet-lobby
+        run: node --test tests/cannabis-cowboy-m2.test.mjs
+      - name: Verify Vite build
+        working-directory: clients/420bet-lobby
+        run: npm run build

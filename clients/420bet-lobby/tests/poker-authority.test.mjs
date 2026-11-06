@@ -99,3 +99,52 @@ test('Live Poker route uses authoritative client rather than demo samples',()=>{
  assert(!file.includes('new WebSocket'));
  assert(file.includes('root.stopAnimation='));
 });
+
+test('awaiting-reveal phases never admit cards before their canonical street',()=>{
+ const a=auth();
+ for(const phase of ['AWAIT_FLOP','AWAIT_TURN','AWAIT_RIVER']){
+  const board=phase==='AWAIT_FLOP'?[]:phase==='AWAIT_TURN'?hand().table.community:
+   [...hand().table.community,{rank:'9',suit:'♣'}];
+  assert.equal(parsePokerTable(hand({phase,community:board}),a,'garden').phase,phase);
+  const forbidden=[...board,{rank:'3',suit:'♠'}];
+  assert.throws(()=>parsePokerTable(hand({phase,community:forbidden}),a,'garden'),/premature community/i);
+ }
+ assert.equal(parsePokerTable(hand({phase:'UNCONTESTED'}),a,'garden').phase,'UNCONTESTED');
+});
+
+test('Read-only wallet login verifies exact host, chain, nonce and never signs a poker action',async()=>{
+ const origin='https://420bet.420integrated.org',address='0x'+'2'.repeat(40),chainId=1;
+ const nonce='x'.repeat(43);
+ const message=[
+  '420bet.420integrated.org requests a read-only 420Bet poker session:',
+  address,'','URI: '+origin+'/api/420bet/poker/v1','Version: 1','Chain ID: 1',
+  'Nonce: '+nonce,'Issued At: '+new Date(Date.now()).toISOString(),
+  'Expiration Time: '+new Date(Date.now()+120000).toISOString(),
+  'Statement: Read-only poker tables; no wagers, signing of actions, or withdrawals.'
+ ].join('\n');
+ const requests=[];
+ const wallet={request:async({method,params})=>{
+  requests.push({method,params});
+  if(method==='eth_requestAccounts')return[address];
+  if(method==='eth_chainId')return '0x1';
+  if(method==='personal_sign'){assert.equal(params[0],message);return '0x'+'1'.repeat(130);}
+  throw Error('unexpected wallet method');
+ }};
+ const fetcher=async(url,opts)=>{
+  requests.push({url,opts});
+  let data;
+  if(url.endsWith('/auth/challenge'))data={message,nonce,chainId,expiresAt:Date.now()+120000};
+  else if(url.endsWith('/auth/verify'))data={authenticated:true,scope:'poker:read'};
+  else data=session();
+  return{ok:true,headers:{get:()=> 'application/json'},json:async()=>data};
+ };
+ const client=createPokerReadOnlyClient({base:'/api/420bet/poker/v1',fetcher});
+ const auth=await client.loginWallet(wallet,origin);
+ assert.equal(auth.viewerId,'test-player');
+ assert.deepEqual(requests.filter(x=>x.method).map(x=>x.method),[
+  'eth_requestAccounts','eth_chainId','personal_sign'
+ ]);
+ assert(requests.filter(x=>x.opts).every(x=>x.opts.credentials==='same-origin'));
+ assert(!requests.some(x=>x.method==='eth_sendTransaction'||x.method==='eth_signTransaction'));
+ client.dispose();
+});

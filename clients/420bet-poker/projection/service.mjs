@@ -3,7 +3,7 @@
 import {createHmac,timingSafeEqual,createHash} from 'node:crypto';
 const HASH=/^0x[0-9a-f]{64}$/i,ADDR=/^0x[0-9a-f]{40}$/i;
 const ID=/^0x[0-9a-f]{64}$/i;
-const allowedPhases=new Set(['TABLE_OPEN','SEATED','HAND_COMMITTED','PREFLOP','FLOP','TURN','RIVER','SHOWDOWN','SETTLED','ABORTED','REFUNDED','DISPUTED']);
+const allowedPhases=new Set(['TABLE_OPEN','SEATED','HAND_COMMITTED','PREFLOP','AWAIT_FLOP','FLOP','AWAIT_TURN','TURN','AWAIT_RIVER','RIVER','SHOWDOWN','UNCONTESTED','SETTLED','ABORTED','REFUNDED','DISPUTED']);
 const safeInt=(v,max=Number.MAX_SAFE_INTEGER)=>Number.isSafeInteger(v)&&v>=0&&v<=max;
 const fail=(message)=>{throw Error(message)};
 const bytes=(s)=>Buffer.from(s,'base64url');
@@ -38,8 +38,8 @@ export function projectCanonicalTable(raw,session,manifest,now=Date.now()){
  if(!raw||raw.verified!==true||raw.chainId!==manifest.chainId||
     raw.tableId!==manifest.tableId||!int(raw.blockNumber)||
     raw.blockNumber<1||!int(raw.sequence)||!int(raw.tableVersion)||
-    raw.tableVersion<1||!int(raw.ledgerVersion)||
-    !raw.finalized||raw.finalityBlock<raw.blockNumber)
+    raw.tableVersion!==manifest.tableVersion||raw.tableVersion<1||!int(raw.ledgerVersion)||
+    !int(raw.finalityBlock)||!raw.finalized||raw.finalityBlock<raw.blockNumber)
     fail('unverified canonical chain state');
  const hash=checkedRoot(raw.stateHash);
  const config=raw.config;
@@ -106,7 +106,10 @@ export function createPokerProjection({manifest,reader,secret,clock=()=>Date.now
  const byId=new Map();
  for(const m of manifest.tables){
   if(!m||!ID.test(m.tableId)||!HASH.test(m.configHash)||
-     typeof m.name!=='string'||m.name.length>64||byId.has(m.tableId))fail('invalid table manifest');
+     typeof m.name!=='string'||!m.name.length||m.name.length>64||
+     !safeInt(m.smallBlind)||!safeInt(m.bigBlind)||m.bigBlind<m.smallBlind||
+     !safeInt(m.tableVersion)||m.tableVersion<1||byId.has(m.tableId))
+     fail('invalid table manifest');
   byId.set(m.tableId,m);
  }
  async function sessionFrom(req){

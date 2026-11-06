@@ -3,7 +3,7 @@
 // context, validate signatures/proofs, and redact all other players' hole cards.
 // An EIP-1193 address, websocket payload or HTTP 200 alone is never authority.
 export const POKER_SOURCE='canonical-poker-projection-v1';
-export const POKER_PHASES=Object.freeze(['TABLE_OPEN','SEATED','HAND_COMMITTED','PREFLOP','FLOP','TURN','RIVER','SHOWDOWN','SETTLED','ABORTED','REFUNDED','DISPUTED']);
+export const POKER_PHASES=Object.freeze(['TABLE_OPEN','SEATED','HAND_COMMITTED','PREFLOP','AWAIT_FLOP','FLOP','AWAIT_TURN','TURN','AWAIT_RIVER','RIVER','SHOWDOWN','UNCONTESTED','SETTLED','ABORTED','REFUNDED','DISPUTED']);
 const ids=/^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,79}$/;
 const hash=/^0x[0-9a-fA-F]{64}$/;
 const address=/^0x[0-9a-fA-F]{40}$/;
@@ -57,7 +57,7 @@ export function parsePokerTable(data,session,requestedTableId,previous=null){
  one(Array.isArray(t.community)&&t.community.length<=5&&t.community.every(card),'invalid community cards');
  const communitySeen=new Set(t.community.map(c=>String(c.rank)+c.suit));
  one(communitySeen.size===t.community.length,'duplicate community cards');
- const maxCommunity=({PREFLOP:0,FLOP:3,TURN:4,RIVER:5,SHOWDOWN:5})[t.phase];
+ const maxCommunity=({PREFLOP:0,AWAIT_FLOP:0,FLOP:3,AWAIT_TURN:3,TURN:4,AWAIT_RIVER:4,RIVER:5,SHOWDOWN:5})[t.phase];
  if(maxCommunity!==undefined)one(t.community.length<=maxCommunity,'premature community reveal');
  one(Array.isArray(t.seats)&&t.seats.length===t.seatCount,'invalid seat array');
  const seats=t.seats.map((s,i)=>{
@@ -112,6 +112,46 @@ export function createPokerReadOnlyClient({base,fetcher=globalThis.fetch,clock=(
  async function authenticate(){
   session=null;const data=await request('/session');session=parsePokerSession(data,clock());return session;
  }
+ async function loginWallet(provider,origin=globalThis.location?.origin){
+  one(provider&&typeof provider.request==='function','wallet provider unavailable');
+  one(typeof origin==='string'&&/^https?:\/\/[^/]+$/.test(origin),'invalid login origin');
+  const current=epoch;
+  const [accounts,chainHex]=await Promise.all([
+   provider.request({method:'eth_requestAccounts'}),provider.request({method:'eth_chainId'})
+  ]);
+  one(!disposed&&current===epoch,'connection reset');
+  const address=Array.isArray(accounts)?accounts[0]:null;
+  const chainId=typeof chainHex==='string'&&/^0x[0-9a-f]+$/i.test(chainHex)?Number.parseInt(chainHex,16):null;
+  one(typeof address==='string'&&/^0x[0-9a-f]{40}$/i.test(address),'invalid wallet address');
+  one(Number.isSafeInteger(chainId)&&chainId>0,'invalid wallet network');
+  async function post(route,body){
+   const res=await fetcher(path+route,{method:'POST',credentials:'same-origin',mode:'same-origin',
+    cache:'no-store',redirect:'error',headers:{'Content-Type':'application/json',Accept:'application/json'},
+    body:JSON.stringify(body)});
+   one(!disposed&&current===epoch&&res?.ok,'wallet authentication failed');
+   one(/^application\/json(?:;|$)/i.test(res.headers?.get?.('content-type')||''),'invalid auth response');
+   return res.json();
+  }
+  const challenge=await post('/auth/challenge',{address,chainId});
+  one(challenge&&challenge.chainId===chainId&&typeof challenge.message==='string'&&
+    typeof challenge.nonce==='string'&&/^[A-Za-z0-9_-]{40,60}$/.test(challenge.nonce),'invalid server challenge');
+  const expectedDomain=origin.replace(/^https?:\/\//,'');
+  one(challenge.message.startsWith(expectedDomain+' requests a read-only 420Bet poker session:\n'),
+    'challenge domain mismatch');
+  one(challenge.message.includes('\nChain ID: '+chainId+'\nNonce: '+challenge.nonce+'\n'),
+    'challenge chain/nonce mismatch');
+  one(challenge.message.includes('\nURI: '+origin+path+'\n'),'challenge URI mismatch');
+  one(challenge.message.includes('\nStatement: Read-only poker tables; no wagers, signing of actions, or withdrawals.'),
+    'unexpected wallet signing purpose');
+  one(Number.isSafeInteger(challenge.expiresAt)&&challenge.expiresAt>clock()&&challenge.expiresAt<=clock()+180000,
+    'expired challenge');
+  one(challenge.message.includes('\n'+address.toLowerCase()+'\n'),'challenge wallet mismatch');
+  const signature=await provider.request({method:'personal_sign',params:[challenge.message,address]});
+  one(typeof signature==='string'&&/^0x[a-f0-9]{130,}$/i.test(signature),'invalid wallet signature');
+  await post('/auth/verify',{nonce:challenge.nonce,signature});
+  one(!disposed&&current===epoch,'connection reset');
+  return authenticate();
+ }
  function authorized(){one(session&&clock()<session.expiresAt&&!disposed,'poker session expired');return session;}
  async function discover(){const auth=authorized();return parsePokerTables(await request('/tables'),auth);}
  async function readTable(tableId,previous=null){
@@ -120,5 +160,5 @@ export function createPokerReadOnlyClient({base,fetcher=globalThis.fetch,clock=(
   return parsePokerTable(await request('/tables/'+encodeURIComponent(tableId)+'/snapshot'),auth,tableId,previous);
  }
  function disconnect(){epoch++;session=null;}
- return Object.freeze({authenticate,discover,readTable,disconnect,dispose(){disposed=true;disconnect();}});
+ return Object.freeze({authenticate,loginWallet,discover,readTable,disconnect,dispose(){disposed=true;disconnect();}});
 }

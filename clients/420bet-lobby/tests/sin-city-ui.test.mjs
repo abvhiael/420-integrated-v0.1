@@ -149,7 +149,7 @@ test('Info popup includes the progressive 3-to-20-gem Hotbox payout table',()=>{
   assert.equal(table.querySelectorAll('tr').length,19);
   assert.match(table.textContent,/100×/);
   assert.match(root.textContent,/EVERY Wild that lands/);
-  assert.match(root.textContent,/ANY one Lowrider/);
+  assert.match(root.textContent,/ANY natural Lowrider/);
  }finally{root.stopAnimation();}
 });
 test('Neon way trace reaches reel five, distinguishing non-paying continuation',async()=>{
@@ -189,7 +189,8 @@ test('Hotbox payouts display beside the grid and only the initial entry shows a 
 });
 test('marked sticky Wild displays its permanently assigned multiplier on stationary and spinning reel',()=>{
  const held=[1,5,11],multipliers={'5':4};
- const {root,click}=setup({initialState:{...initialState(),mode:'free',freeRemaining:3,sticky:held,wildMultipliers:multipliers}});
+ const game=initialState();game.lastBoard[1][1]='WILD';
+ const {root,click}=setup({initialState:{...game,mode:'free',freeRemaining:3,sticky:held,wildMultipliers:multipliers}});
  try{
   assert.ok(root.querySelector('.sc-symbol .sc-wild-multiplier'));
   assert.equal(root.querySelector('.sc-symbol .sc-wild-multiplier').textContent,'4×');

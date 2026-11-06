@@ -90,10 +90,18 @@ export function freeBonus(rng){
  }
  return {spins,boards,units:Math.round(total*100)/100,label:'FIVE MINUTES OF PEACE'};
 }
+export const MOW_PAYOUT_FACTOR=0.65;
 export function mow(grid,rng){
  // Five visually complete mower cascades. Existing non-cleared symbols are
  // preserved; only the cut positions receive fresh symbols.
- let current=grid.slice(),total=0;const boards=[];
+ // Triggering lawnmowers are removed BEFORE cascade 1. They cannot
+ // remain as stationary blocker symbols for any of the five paid cascades.
+ const mowerIndices=grid.flatMap((symbol,i)=>symbol==='mower'?[i]:[]);
+ // A mower may not land again as a cascade replacement. Using a
+ // deterministic fallback also prevents infinite loops with fixed test RNGs.
+ const ordinaryDraw=()=>{const symbol=draw(rng);return symbol==='mower'?'A':symbol;};
+ const currentStart=grid.map(symbol=>symbol==='mower'?ordinaryDraw():symbol);
+ let current=currentStart.slice(),total=0;const boards=[];
  for(let n=0;n<5;n++){
   let hit=current.map((symbol,i)=>LOW.has(symbol)?i:-1).filter(i=>i>=0);
   // On a depleted board, cut a few non-special positions so all five
@@ -106,11 +114,11 @@ export function mow(grid,rng){
   // 1,024-ways matches, but do not guarantee a win or alter awards after spin.
   const candidate=choose(rng,['A','K','Q','jar','bong']);
   current=current.map((symbol,i)=>removed.includes(i)?
-   (rand(rng)<.65?candidate:draw(rng)):symbol);
-  const units=evaluate(current).units;total+=units;
+   (rand(rng)<.65?candidate:ordinaryDraw()):symbol);
+  const units=Math.round(evaluate(current).units*MOW_PAYOUT_FACTOR*100)/100;total+=units;
   boards.push({grid:current.slice(),before,removed,units});
  }
- return {label:'MOW THE LAWN',boards,units:Math.round(total*100)/100};
+ return {label:'MOW THE LAWN',initialGrid:currentStart,mowerIndices,boards,units:Math.round(total*100)/100};
 }
 // TEMPORARY PRACTICE QA HOOK — preview only. This builds real feature event data
 // without creating a paid spin, changing any balance, or crediting the win.

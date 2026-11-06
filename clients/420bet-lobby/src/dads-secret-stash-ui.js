@@ -1,4 +1,4 @@
-import {newGame,spin,evaluate,makeBonusPreview,BONUS_PREVIEW_TYPES,SYMBOLS,MAX_WIN_MULTIPLIER} from './dads-secret-stash-engine.js';
+import {newGame,spin,evaluate,makeBonusPreview,BONUS_PREVIEW_TYPES,SYMBOLS,MAX_WIN_MULTIPLIER,MOW_PAYOUT_FACTOR} from './dads-secret-stash-engine.js';
 import {DSS_SYMBOL_ART,DSS_SYMBOL_LABELS,DSS_CAST_ART,DSS_TRANSITION_ART,DSS_FEATURE_ART,DSS_BACKGROUND_ART,DSS_LARRY_ART} from './dads-secret-stash-assets.js';
 const GLYPHS={gary:'😎',jen:'👩',tyler:'🎧',emma:'💜',keller:'📋',bud:'🐕',jar:'🫙',bong:'⚗️',pizza:'🍕',lighter:'🔥',papers:'📜',A:'A',K:'K',Q:'Q',J:'J','10':'10',wild:'🌿',scatter:'☮',stash:'📦',mower:'🚜'};
 const FEATURE_TITLES={jen:"OH SHIT, SHE'S HOME!",family:'FAMILY CHAOS!',keller:'HOA INSPECTION!',bud:'GOOD BOY BONUS!',free:'FIVE MINUTES OF PEACE!',stash:"DAD'S SECRET STASH!",mow:'MOW THE LAWN!'};
@@ -75,7 +75,7 @@ export function createDadsSecretStash(doc=globalThis.document,options={}){
  const balance=el(doc,'span','dss-stat'),betLabel=el(doc,'span','dss-stat'),winLabel=el(doc,'span','dss-stat'),round=el(doc,'span','dss-stat');
  function btn(txt,fn,cls=''){const b=el(doc,'button','dss-button '+cls,txt);b.type='button';b.addEventListener('click',fn);return b;}
  const lower=btn('− BET',()=>{state.bet=Math.max(1,state.bet-1);refresh();}),higher=btn('+ BET',()=>{state.bet=Math.min(50,state.bet+1);refresh();});
- const play=btn('🌿 SPIN',()=>start(),'dss-spin'),autoBtn=btn('AUTO ×10',()=>{if(auto){auto=false;autoLeft=0;autoBtn.textContent='AUTO ×10';return;}auto=true;autoLeft=10;autoBtn.textContent='STOP AUTO';if(!busy)start();}),info=btn('INFO',()=>{infoPanel.hidden=!infoPanel.hidden;});
+ const play=btn('SPIN',()=>start(),'dss-spin'),autoBtn=btn('AUTO ×10',()=>{if(auto){auto=false;autoLeft=0;autoBtn.textContent='AUTO ×10';return;}auto=true;autoLeft=10;autoBtn.textContent='STOP AUTO';if(!busy)start();}),info=btn('INFO',()=>{infoPanel.hidden=!infoPanel.hidden;});
  controls.append(balance,lower,betLabel,higher,play,winLabel,round,autoBtn,info);
  // TEMPORARY BONUS QA PANEL. This is intentionally practice-only and removable
  // as a single panel/function once bonus presentation qualification is done.
@@ -522,6 +522,25 @@ export function createDadsSecretStash(doc=globalThis.document,options={}){
    showFeatureResult(event,nextEvent);return;
   }
   let step=0,accumulated=0;
+  const begin=()=>{
+   if(event.type!=='mow'||!event.initialGrid){advance();return;}
+   showBonusHud('mow','CLEARING LAWNMOWERS','THEN 5 CASCADES');
+   setFeature('mow','Replacing lawnmowers before the first cascade','5 CASCADES');
+   const indices=event.mowerIndices??[];
+   indices.forEach(i=>cells[i].cell.classList.add('dss-mower-replacing'));
+   status.textContent='REPLACING TRIGGERING LAWNMOWERS';
+   schedule(()=>{
+    showGrid(event.initialGrid);
+    indices.forEach(i=>{
+     cells[i].cell.classList.remove('dss-mower-replacing');
+     cells[i].cell.classList.add('dss-dropping');
+    });
+    schedule(()=>{
+     indices.forEach(i=>cells[i].cell.classList.remove('dss-dropping'));
+     advance();
+    },550);
+   },180);
+  };
   const advance=()=>{
    if(step>=boards.length){
     showFeatureResult(event,()=>{
@@ -541,10 +560,14 @@ export function createDadsSecretStash(doc=globalThis.document,options={}){
    animateBonusGrid(entry,event.type,()=>{
     accumulated+=entry.units;
     status.textContent='FEATURE WIN '+money(entry.units*state.last.stake)+' · TOTAL '+money(accumulated*state.last.stake)+' PRACTICE CREDITS';
-    showWinningWays(entry.grid,evaluate(entry.grid),()=>{step++;schedule(advance,500);});
+    const winEvaluation=evaluate(entry.grid);
+    const displayEvaluation=event.type==='mow'?
+     {...winEvaluation,wins:winEvaluation.wins.map(win=>({...win,amount:win.amount*MOW_PAYOUT_FACTOR}))}:
+     winEvaluation;
+    showWinningWays(entry.grid,displayEvaluation,()=>{step++;schedule(advance,500);});
    });
   };
-  advance();
+  begin();
  }
  function nextEvent(){
   if(destroyed)return;

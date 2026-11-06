@@ -1,5 +1,5 @@
-import {createCannabisCowboyShell,COWBOY_SYMBOLS} from './cannabis-cowboy-ui.js';
-import {BET_CHOICES,createPracticeSession,playPracticeRound} from './cannabis-cowboy-engine.js';
+import {createCannabisCowboyShell,COWBOY_SYMBOLS,cowboySymbolImage} from './cannabis-cowboy-ui.js';
+import {BET_CHOICES,CLUSTER_PAYS,createPracticeSession,playPracticeRound} from './cannabis-cowboy-engine.js';
 import {createRoadTrip,chooseRoadCase} from './cannabis-cowboy-road-trip.js';
 import {createReelSequence,drawClusterPaths,clearClusterPaths} from './cannabis-cowboy-reels.js';
 const format=n=>Number(n).toLocaleString('en-US');
@@ -25,6 +25,17 @@ export function createCannabisCowboyPractice(doc=globalThis.document,options={})
  labels[0].textContent='BET · DEMO CREDITS';
  labels[1].textContent='BALANCE · DEMO CREDITS';
  labels[2].textContent='WIN · DEMO CREDITS';
+ const paytableBody=root.querySelector('.cc-paytable-table tbody');
+ const fmtFactor=x=>Number(x.toFixed(3)).toString();
+ CLUSTER_PAYS.forEach((pays,index)=>{
+  const tr=doc.createElement('tr');
+  const label=doc.createElement('th');label.scope='row';
+  const image=cowboySymbolImage(doc,index);label.append(image,doc.createTextNode(COWBOY_SYMBOLS[index].name));tr.append(label);
+  pays.forEach(value=>{const td=doc.createElement('td');td.textContent=fmtFactor(value)+'×';tr.append(td);});
+  paytableBody.append(tr);
+ });
+ const payNote=doc.createElement('p');payNote.className='cc-paytable-note';payNote.textContent='Base cluster values shown before Smoke Ring ×2 and Growing Harvest multipliers. Actual demo wins follow engine rounding.';
+ root.querySelector('.cc-paytable').append(payNote);
  const info=root.querySelector('.cc-info-panel');
  info.setAttribute('aria-label','High Country Clusters practice rules');
  const infoCopy=info.querySelector('p');
@@ -39,7 +50,7 @@ export function createCannabisCowboyPractice(doc=globalThis.document,options={})
  consoleBar.after(status);
  const setSymbol=(cell,id)=>{
   const sym=COWBOY_SYMBOLS[id];cell.className='cc-cell cc-symbol-'+sym.kind;cell.dataset.symbol=sym.kind;
-  cell.replaceChildren();const glyph=doc.createElement('span');glyph.className='cc-cell-glyph';glyph.textContent=sym.glyph;glyph.setAttribute('aria-hidden','true');cell.append(glyph);
+  cell.replaceChildren();cell.append(cowboySymbolImage(doc,id));
   if(sym.kind==='smoke-wild'){const wild=doc.createElement('span');wild.className='cc-wild-tag';wild.textContent='WILD ×2';cell.append(wild);}
   if(sym.kind==='scatter'){const scatter=doc.createElement('span');scatter.className='cc-scatter-tag';scatter.textContent='SCATTER';cell.append(scatter);}
   if(sym.kind==='road-ticket'){const ticket=doc.createElement('span');ticket.className='cc-scatter-tag';ticket.textContent='ROAD TRIP';cell.append(ticket);}
@@ -58,6 +69,7 @@ export function createCannabisCowboyPractice(doc=globalThis.document,options={})
   });
  };
  let busy=false,dead=false,handle=null,queue=[],lastWin=0;
+ let bonusPreview=false,previewLastWin=0;
  let reelSequence=null,pendingRoad=null,roadPicks=[],roadStarted=false;
  let lastWinningClusters=[],lastWinningBoard=null,reviewDismissed=false;
  let pendingFeature=null,featurePhase='none',bonusIndex=0,bonusSpins=[],bonusWin=0,currentSpin=null,finishedBonus=false,displayedSticky=[];
@@ -86,6 +98,8 @@ export function createCannabisCowboyPractice(doc=globalThis.document,options={})
   stopReels();status.textContent='REELS SPINNING · SIX COLUMNS';
   reelSequence=createReelSequence({doc,cells:grid,board,locked,schedule:tick,reducedMotion,done:()=>{reelSequence=null;if(!dead)callback();},onStop:col=>{status.textContent='REEL '+(col+1)+' STOPPED / 6';}});
  };
+ const bonusSelect=root.querySelector('.cc-bonus-select');
+ const bonusButton=root.querySelector('.cc-bonus-preview-button');
  const sync=()=>{
   bet.textContent=format(session.bet);
   balance.textContent=format(session.credits);
@@ -93,7 +107,9 @@ export function createCannabisCowboyPractice(doc=globalThis.document,options={})
   minus.disabled=busy||session.bet===BET_CHOICES[0];
   plus.disabled=busy||session.bet===BET_CHOICES[BET_CHOICES.length-1];
   spin.disabled=busy||session.credits<session.bet;
-  spin.textContent=busy?'···':'SPIN';
+  spin.textContent='SPIN';
+  spin.setAttribute('aria-label',busy?'Spin in progress':'Spin');
+  bonusSelect.disabled=busy;bonusButton.disabled=busy;
  };
  const tick=(fn,ms)=>{
   handle=schedule(()=>{handle=null;if(!dead)fn();},ms);
@@ -112,7 +128,8 @@ export function createCannabisCowboyPractice(doc=globalThis.document,options={})
   bonusCounter.hidden=true;phase('none');
   root.querySelector('.cc-board-readonly').textContent='BASE-GAME PRACTICE';
   showBoard(session.board);sync();
-  status.textContent=reviewDismissed?'TOTAL WIN · '+format(lastWin)+' DEMO CREDITS':finishedBonus?'ENDLESS HARVEST COMPLETE · '+format(lastWin)+' total demo credits':lastWin?'HARVEST COMPLETE · '+format(lastWin)+' demo credits won':'No more clusters · Spin again';
+  status.textContent=reviewDismissed?'TOTAL WIN · '+format(lastWin)+(bonusPreview?' PREVIEW CREDITS':' DEMO CREDITS'):finishedBonus?'ENDLESS HARVEST COMPLETE · '+format(lastWin)+' total demo credits':lastWin?'HARVEST COMPLETE · '+format(lastWin)+' demo credits won':'No more clusters · Spin again';
+  if(bonusPreview){status.textContent+=' · TEST ONLY · BALANCE UNCHANGED';bonusPreview=false;}
  };
  const advance=()=>{
   if(dead)return;
@@ -215,7 +232,7 @@ export function createCannabisCowboyPractice(doc=globalThis.document,options={})
      if(choice.done){
       const grand=choice.total;
       if(!Number.isSafeInteger(session.credits+grand))throw Error('Unsafe Road Trip credits');
-      session={...session,credits:session.credits+grand};
+      if(!bonusPreview)session={...session,credits:session.credits+grand};
       lastWin+=grand;pendingRoad=null;roadPanel.hidden=true;
       status.textContent='ROAD TRIP COMPLETE · '+format(grand)+' DEMO CREDITS';
       showFeature('ON THE ROAD AGAIN COMPLETE',format(grand)+' DEMO CREDITS ACROSS FIVE STOPS');
@@ -242,16 +259,25 @@ export function createCannabisCowboyPractice(doc=globalThis.document,options={})
   status.textContent='TOTAL WIN · '+format(lastWin)+' DEMO CREDITS';
   finish();
  });
- const play=()=>{
-  if(busy||dead||session.credits<session.bet)return;
+ const play=(testKind=null)=>{
+  if(busy||dead||(!testKind&&session.credits<session.bet))return;
+  // Bonus testing uses the same authoritative local practice resolver and
+  // actual presentation, but neither debits nor credits the session.
+  const trial=!!testKind;
+  const fixture=Array.from({length:48},(_,i)=>(Math.floor(i/6)*3+i%6)%8);
+  if(testKind==='free')for(const p of [0,1,2])fixture[p]=9;
+  if(testKind==='road')for(const p of [0,1,2])fixture[p]=10;
+  const trialOptions=trial?{baseBoard:fixture}:options.roundOptions??{};
   let result;
-  try{result=playPracticeRound(session,rng,options.roundOptions??{});}
+  try{result=playPracticeRound(session,rng,trialOptions);}
   catch(error){status.textContent='Round could not finish safely; no credits changed';return;}
   if(!result.accepted){status.textContent='Insufficient practice credits';return;}
   // Generate all five Road Trip case offerings before debiting practice credits.
   let road=null;
   try{if(result.outcome.roadTripTriggered)road=createRoadTrip(session.bet,rng);}catch(error){status.textContent='Road Trip could not begin safely; no credits changed';return;}
-  session=result.state;lastWin=result.outcome.total;busy=true;
+  bonusPreview=trial;
+  if(!trial)session=result.state;
+  lastWin=result.outcome.total;busy=true;
   pendingRoad=road;roadPicks=[];roadStarted=false;reviewDismissed=false;
   lastWinningClusters=[];lastWinningBoard=null;reviewPanel.hidden=true;roadPanel.hidden=true;
   pendingFeature=result.outcome.feature??null;bonusSpins=[];currentSpin=null;
@@ -270,7 +296,8 @@ export function createCannabisCowboyPractice(doc=globalThis.document,options={})
   const i=BET_CHOICES.indexOf(session.bet),next=BET_CHOICES[i+delta];
   if(next!==undefined){session={...session,bet:next};sync();}
  };
- spin.disabled=false;spin.addEventListener('click',play);
+ spin.disabled=false;spin.addEventListener('click',()=>play());
+ bonusButton.addEventListener('click',()=>play(bonusSelect.value==='road'?'road':'free'));
  minus.disabled=false;minus.addEventListener('click',()=>betChange(-1));
  plus.disabled=false;plus.addEventListener('click',()=>betChange(1));
  // Existing menu and auto remain disabled until their M4+ implementation.
@@ -278,6 +305,6 @@ export function createCannabisCowboyPractice(doc=globalThis.document,options={})
  auto.title='Autoplay unavailable in this practice build';
  showBoard(session.board);sync();
  root.stopAnimation=()=>{dead=true;busy=false;queue=[];pendingFeature=null;pendingRoad=null;stopReels();roadPanel.hidden=true;reviewPanel.hidden=true;hideFeature();hideEffects();if(handle!==null){cancel(handle);handle=null;}};
- root.getPracticeState=()=>({credits:session.credits,bet:session.bet,round:session.round,busy,lastWin,featurePhase,bonusIndex,bonusWin,freeSpinCount:bonusSpins.length,roadStopsCompleted:roadPicks.length,roadActive:roadStarted&&!!pendingRoad});
+ root.getPracticeState=()=>({credits:session.credits,bet:session.bet,round:session.round,busy,lastWin,featurePhase,bonusIndex,bonusWin,freeSpinCount:bonusSpins.length,roadStopsCompleted:roadPicks.length,roadActive:roadStarted&&!!pendingRoad,bonusPreview});
  return root;
 }

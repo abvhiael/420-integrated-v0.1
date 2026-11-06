@@ -23,7 +23,9 @@ export function createPokerRoomLive(doc=globalThis.document,options={}){
  sidebar.append(make(doc,'h2','','AUTHORITATIVE TABLES'),make(doc,'p','pr-sidebar-sub','Only tables returned by the verified poker projection service are listed.'));
  const tableList=make(doc,'div','pr-table-list');
  const refresh=make(doc,'button','pr-table-choice','REFRESH TABLES');refresh.type='button';
- sidebar.append(tableList,refresh);
+ const login=make(doc,'button','pr-table-choice pr-wallet-login','CONNECT WALLET · READ ONLY');
+ login.type='button';
+ sidebar.append(tableList,login,refresh);
  const stage=make(doc,'section','pr-stage');
  const heading=make(doc,'header','pr-table-heading');
  const headingName=make(doc,'div','','');const freshness=make(doc,'span','pr-status','NOT VERIFIED');
@@ -130,6 +132,17 @@ export function createPokerRoomLive(doc=globalThis.document,options={}){
    connection.textContent='OFFLINE · UNVERIFIED';
   }
  }
+ login.addEventListener('click',async()=>{
+  login.disabled=true;login.textContent='SIGNING READ-ONLY SESSION…';
+  try{
+   await client.loginWallet(options.wallet||win.ethereum,win.location?.origin);
+   if(!disposed){login.textContent='SESSION CONNECTED · READ ONLY';await discover();}
+  }catch(e){
+   if(!disposed){login.textContent='CONNECT WALLET · READ ONLY';
+    stale();root.liveState.error=String(e?.message||'Wallet authentication failed');
+    connection.textContent='WALLET LOGIN UNAVAILABLE';}
+  }finally{if(!disposed)login.disabled=false;}
+ });
  refresh.addEventListener('click',()=>{client.disconnect();void discover();});
  root.stopAnimation=()=>{disposed=true;version++;stale();client.dispose?.();};
  root.refreshPoker=()=>discover();

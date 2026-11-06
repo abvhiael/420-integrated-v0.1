@@ -25,7 +25,7 @@ jobs:
       - name: Install client dependencies without lifecycle scripts
         run: npm install --ignore-scripts --no-package-lock --no-audit --no-fund
       - name: Targeted Sin City engine and controls
-        run: node --test tests/sin-city-*.test.mjs
+        run: node --test tests/sin-city-*.test.mjs tests/slots-lobby.test.mjs
       - name: Vite production build
         run: npm run build
       - name: Check asset paths and valid PNG headers
@@ -52,3 +52,5 @@ jobs:
             console.log(path+' '+w+'x'+h);
           }
           NODE
+      - name: Confirm fifth lobby cabinet art exists
+        run: test -s public/assets/420bet/slots-lobby/sin-city-high-rollers-lobby-cabinet.png

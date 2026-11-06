@@ -4,6 +4,7 @@ import {createBlackjackTable} from './blackjack-ui.js';
 import {createRoyalKushTable} from './royal-kush-ui.js';
 import {createPokerRoomPreview} from './poker-room-ui.js';
 import {createPokerRoomLive} from './poker-live-ui.js';
+import {createPokerTournamentsPreview} from './poker-tournaments-ui.js';
 import {createPestControlTable} from './pest-control-ui.js';
 import {createBuzzkillPractice} from './buzzkill-ui.js';
 import {createMaryJanePractice} from './mary-jane-ui.js';
@@ -20,6 +21,7 @@ import './roulette.css';
 import './blackjack.css';
 import './royal-kush.css';
 import './poker-room.css';
+import './poker-tournaments.css';
 import './pest-control.css';
 import './buzzkill.css';
 import './sin-city.css';
@@ -62,7 +64,7 @@ function render(){
   if(active){
     const main=node('main',active.id==='roulette'?'immersive roulette-immersive':active.id==='blackjack'?'immersive blackjack-immersive':active.id==='video-poker'?'immersive royal-kush-immersive':'immersive');const bar=node('header','gamebar');
     bar.append(button(selectedSlotMachine?'← Slots Lobby':'← Return to Lobby',close,'return'),brandLink('game-brand'),node('strong','',selectedSlotMachine?.title??active.title));
-    const note=node('span','game-status',selectedSlotMachine?.practiceBeta?'Base game · Practice beta':selectedSlotMachine?.preview?'Preview · In development':active.id==='live-poker'?'Verified state required':['slots','roulette','blackjack','mines','crash','video-poker'].includes(active.id)?'Practice available':statusText[active.status]);bar.append(note);main.append(bar);
+    const note=node('span','game-status',selectedSlotMachine?.practiceBeta?'Base game · Practice beta':selectedSlotMachine?.preview?'Preview · In development':active.id==='live-poker'?'Verified state required':active.id==='poker-tournaments'?'Testnet preview · no registration':['slots','roulette','blackjack','mines','crash','video-poker'].includes(active.id)?'Practice available':statusText[active.status]);bar.append(note);main.append(bar);
     if(active.id==='slots'){
       const wrap=node('div','view-scroll');
       if(selectedSlotMachine?.id==='cannabis-cowboy'){
@@ -72,6 +74,7 @@ function render(){
       else wrap.append(createSlotsLobby(document,launchSlotMachine));
       main.append(wrap);
     }
+    else if(active.id==='poker-tournaments'){activePractice=createPokerTournamentsPreview(document);const wrap=node('div','view-scroll');wrap.append(activePractice);main.append(wrap);}
     else if(active.id==='live-poker'){activePractice=createPokerRoomLive(document,{base:config.pokerApiBase??'/api/420bet/poker/v1'});const wrap=node('div','view-scroll');wrap.append(activePractice);main.append(wrap);}
     else if(active.id==='video-poker'){activePractice=createRoyalKushTable(document);const wrap=node('div','view-scroll');wrap.append(activePractice);main.append(wrap);}
     else if(active.category==='Casino'){activePractice=active.id==='roulette'?createCannabisRoulette(document):active.id==='blackjack'?createBlackjackTable(document):active.id==='mines'?createPestControlTable(document):active.id==='crash'?createBuzzkillPractice(document):createPractice(active.id,document);const wrap=node('div','view-scroll');wrap.append(activePractice);main.append(wrap);}
@@ -93,9 +96,9 @@ function updateGrid(){
   const matched=filterGames(catalogue,filter,term);
   if(!matched.length){grid.append(node('p','empty','No games match your search.'));return;}
   matched.forEach(g=>{
-    const card=node('article','card');const art=node('div','art art-'+g.category.toLowerCase().replace(' ','-')+(g.id==='mines'?' art-pest-control':g.id==='crash'?' art-buzzkill':g.id==='video-poker'?' art-royal-kush':g.id==='live-poker'?' art-live-poker':''));art.setAttribute('aria-hidden','true');art.textContent=g.id==='mines'?'🌿':g.id==='crash'?'☮':g.id==='video-poker'?'♛':g.id==='live-poker'?'♠':({'Casino':'✦','Poker':'♠','Fantasy':'★','Sportsbook':'◆'})[g.category];card.append(art);
-    const details=node('div','details');details.append(node('small','category',g.category),node('h2','',g.title),node('span','status',['slots','mines','crash','video-poker'].includes(g.id)?'Practice available':statusText[g.status]));
-    details.append(button(g.id==='slots'?'Browse Slots':g.id==='mines'?'Play Pest Control':g.id==='crash'?'Play BUZZKILL!':g.id==='video-poker'?'Play Royal Kush':g.id==='live-poker'?'View Poker Room':g.route?'Enter game':'View preview',()=>launch(g),'open'));card.append(details);grid.append(card);
+    const card=node('article','card');const art=node('div','art art-'+g.category.toLowerCase().replace(' ','-')+(g.id==='mines'?' art-pest-control':g.id==='crash'?' art-buzzkill':g.id==='video-poker'?' art-royal-kush':g.id==='live-poker'?' art-live-poker':g.id==='poker-tournaments'?' art-poker-tournaments':''));art.setAttribute('aria-hidden','true');art.textContent=g.id==='mines'?'🌿':g.id==='crash'?'☮':g.id==='video-poker'?'♛':g.id==='live-poker'?'♠':g.id==='poker-tournaments'?'♛':({'Casino':'✦','Poker':'♠','Fantasy':'★','Sportsbook':'◆'})[g.category];card.append(art);
+    const details=node('div','details');details.append(node('small','category',g.category),node('h2','',g.title),node('span','status',['slots','mines','crash','video-poker'].includes(g.id)?'Practice available':g.id==='poker-tournaments'?'Testnet preview':statusText[g.status]));
+    details.append(button(g.id==='slots'?'Browse Slots':g.id==='mines'?'Play Pest Control':g.id==='crash'?'Play BUZZKILL!':g.id==='video-poker'?'Play Royal Kush':g.id==='live-poker'?'View Poker Room':g.id==='poker-tournaments'?'Explore Tournaments':g.route?'Enter game':'View preview',()=>launch(g),'open'));card.append(details);grid.append(card);
   });
 }
 window.addEventListener('keydown',e=>{if(e.key==='Escape'&&active&&!document.querySelector('.es-info-overlay'))close();});

@@ -26,7 +26,7 @@ test('smoke wild joins 4 normal paying symbols orthogonally and pays exactly onc
  assert.equal(result.steps[0].clusters[0].wildCount,1);
  assert.equal(result.steps[0].clusters[0].smokeMultiplier,2);
  assert.equal(result.steps[0].clusters[0].multiplier,2);
- assert.equal(result.steps[0].clusters[0].payout,result.steps[0].clusters[0].base*2);
+ assert.equal(result.steps[0].clusters[0].payout,Math.round(result.steps[0].clusters[0].rawBase*2*result.steps[0].clusters[0].scale));
 });
 test('wild-only groups are not wins and a shared smoke ring is never claimed twice',()=>{
  const board=Array(CELL_COUNT).fill(WILD_SYMBOL);

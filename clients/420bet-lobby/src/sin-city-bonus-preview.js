@@ -26,6 +26,7 @@ export function makeSinCityBonusPreview(type,prior=initialState()){
  if(matching!==feature.reels)throw Error('QA preview does not match its trigger');
  const state={
   ...prior,
+  balance:Math.max(prior.balance,prior.stake+100),
   mode:type==='lowrider'?'free':'base',
   freeRemaining:type==='lowrider'?3:0,
   freePlayed:0,freeMultiplier:1,

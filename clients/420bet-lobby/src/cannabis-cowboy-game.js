@@ -185,6 +185,63 @@ export function createCannabisCowboyPractice(doc=globalThis.document,options={})
   status.textContent='ENDLESS HARVEST · '+pendingFeature.initialSpins+' FREE SPINS';
   tick(()=>{hideFeature();beginFreeSpin();},reducedMotion?0:1800);
  };
+ const showRoadStop=()=>{
+  if(!pendingRoad||dead)return;
+  const index=roadPicks.length,stop=pendingRoad.stops[index];
+  roadPanel.replaceChildren();roadPanel.hidden=false;phase('road-trip');
+  const heading=doc.createElement('h2');heading.className='cc-road-location';
+  heading.textContent=stop.scene+'  STOP '+(index+1)+' / 5 · '+stop.name.toUpperCase();
+  const description=doc.createElement('p');description.className='cc-road-description';description.textContent=stop.description;
+  const subtotal=doc.createElement('p');subtotal.className='cc-road-total';
+  subtotal.textContent='ROAD TRIP WIN: '+format(roadPicks.reduce((n,p)=>n+p.award,0))+' DEMO CREDITS';
+  const cases=doc.createElement('div');cases.className='cc-road-cases';
+  for(let c=0;c<3;c++){
+   const button=doc.createElement('button');button.type='button';button.className='cc-road-case';
+   button.textContent='🎸 GUITAR CASE '+(c+1);button.setAttribute('aria-label','Pick guitar case '+(c+1));button.dataset.index=String(c);
+   button.addEventListener('click',()=>{
+    if(dead||!pendingRoad||roadPicks.length!==index||button.disabled)return;
+    const choice=chooseRoadCase(pendingRoad,roadPicks,c);roadPicks=choice.picks;
+    for(const other of [...cases.querySelectorAll('button')]){
+     other.disabled=true;
+     other.textContent='CASE · '+format(stop.caseValues[Number(other.dataset.index)])+' CREDITS';
+    }
+    button.classList.add('cc-road-chosen');
+    const message=doc.createElement('p');message.className='cc-road-award';
+    message.textContent='CASE '+(c+1)+' WINS '+format(choice.award)+' · ROAD TOTAL '+format(choice.total);
+    const next=doc.createElement('button');next.type='button';next.className='cc-road-next';
+    next.textContent=choice.done?'FINISH THE ROAD TRIP':'NEXT STOP →';
+    next.addEventListener('click',()=>{
+     if(next.disabled||dead)return;next.disabled=true;
+     if(choice.done){
+      const grand=choice.total;
+      if(!Number.isSafeInteger(session.credits+grand))throw Error('Unsafe Road Trip credits');
+      session={...session,credits:session.credits+grand};
+      lastWin+=grand;pendingRoad=null;roadPanel.hidden=true;
+      status.textContent='ROAD TRIP COMPLETE · '+format(grand)+' DEMO CREDITS';
+      showFeature('ON THE ROAD AGAIN COMPLETE',format(grand)+' DEMO CREDITS ACROSS FIVE STOPS');
+      sync();tick(()=>{hideFeature();finish();},reducedMotion?0:1500);
+     }else showRoadStop();
+    });
+    roadPanel.append(message,next);
+   });
+   cases.append(button);
+  }
+  roadPanel.append(heading,description,subtotal,cases);
+ };
+ const startRoadTrip=()=>{
+  if(!pendingRoad||roadStarted)return;
+  roadStarted=true;phase('road-trip');
+  showFeature('ON THE ROAD AGAIN!','FIVE STOPS · PICK ONE GUITAR CASE AT EACH');
+  status.textContent='ROAD TRIP BONUS TRIGGERED · FIVE STOPS';
+  tick(()=>{hideFeature();showRoadStop();},reducedMotion?0:1900);
+ };
+ root.addEventListener('click',()=>{
+  if(root.dataset.featurePhase!=='win-review'||reviewDismissed)return;
+  reviewDismissed=true;reviewPanel.hidden=true;
+  clearClusterPaths(root.querySelector('.cc-symbol-grid'));
+  status.textContent='TOTAL WIN · '+format(lastWin)+' DEMO CREDITS';
+  finish();
+ });
  const play=()=>{
   if(busy||dead||session.credits<session.bet)return;
   let result;

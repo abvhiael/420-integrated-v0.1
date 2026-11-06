@@ -280,3 +280,16 @@
  .cc-game .cc-readout strong{font-size:1rem}
  .cc-game .cc-console{padding:4px}
 }
+
+/* M7 viewport screenshot correction: mobile flex sizing must not compress
+   an eight-row board below a readable minimum. */
+@media(max-width:700px){
+ .cc-game .cc-stage{flex:0 0 auto;min-height:0;height:auto}
+ .cc-game .cc-middle{height:auto;min-height:0;flex:0 0 auto}
+ .cc-game .cc-symbol-grid{
+   flex:0 0 auto;
+   height:clamp(310px,42dvh,410px);
+   min-height:310px;
+   max-height:none;
+ }
+}

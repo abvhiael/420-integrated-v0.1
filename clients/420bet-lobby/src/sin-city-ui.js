@@ -210,6 +210,16 @@ export function createSinCityPractice(doc=globalThis.document,options={}){
   if(qaPriorState!==null)qa.append(el(doc,'span','sc-qa-active','TEST MODE · NO REAL CREDIT CHANGES · '+qaSelection.toUpperCase()));
   root.append(qa);
   if(phase==='win'){scene.classList.add('sc-click-to-total');scene.addEventListener('click',event=>{if(event.target.closest?.('button'))return;showTotalWin();});}
+  if(phase==='free-complete'){
+   const complete=el(doc,'div','sc-free-complete');complete.setAttribute('role','button');complete.setAttribute('tabindex','0');complete.setAttribute('aria-label','Free spins complete. Click to continue.');
+   const chips=el(doc,'div','sc-complete-chips');
+   const picture=el(doc,'img','sc-complete-chip-art');picture.src=art('symbols',FILES.CHIPS);picture.alt='Gold and purple casino chips';chips.append(picture);
+   chips.append(el(doc,'strong','sc-complete-chip-face','FREE SPINS COMPLETE'));
+   complete.append(chips,el(doc,'div','sc-free-complete-value',(state.freeCompletedTotal??state.freeSessionWin).toFixed(2)+' PRACTICE CREDITS'),el(doc,'p','sc-free-complete-click','CLICK TO CONTINUE'));
+   complete.addEventListener('click',acknowledgeFreeComplete);
+   complete.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();acknowledgeFreeComplete();}});
+   root.append(complete);
+  }
   if(showBanner){const overlay=el(doc,'div','sc-feature-overlay');overlay.setAttribute('role','status');const picture=el(doc,'img');picture.src=art('features',showBanner);picture.alt=state.lastMessage;overlay.append(picture);root.append(overlay);}
   if(panel)showPanel();
  }
@@ -234,8 +244,8 @@ export function createSinCityPractice(doc=globalThis.document,options={}){
  }
 
  const bannerFiles={
-  puff:'banner_puff_puff_pass.png','hotbox-start':'banner_hotbox_respins.png',hotbox:'banner_hotbox_respins.png',
-  'hotbox-end':'banner_hotbox_respins.png','free-start':'banner_chronic_sessions_free_spins.png',
+  puff:'banner_puff_puff_pass.png','hotbox-start':'banner_hotbox_respins.png',
+  'free-start':'banner_chronic_sessions_free_spins.png',
   'free-retrigger':'banner_chronic_sessions_free_spins.png',lowrider:'banner_drop_it_like_its_hot.png'
  };
  function representativePath(board,win){
@@ -243,7 +253,7 @@ export function createSinCityPractice(doc=globalThis.document,options={}){
   let hasNatural=false;
   for(let r=0;r<win.length;r++){
    const reel=board[r];
-   const matches=reel.map((symbol,row)=>({symbol,row})).filter(x=>win.symbol==='WILD'?x.symbol==='WILD':x.symbol===win.symbol||x.symbol==='WILD');
+   const matches=reel.map((symbol,row)=>({symbol,row})).filter(x=>win.symbol==='WILD'?x.symbol==='WILD':x.symbol===win.symbol||(x.symbol==='WILD'&&!(spinningMode==='free'&&['ASH','CAR'].includes(win.symbol))));
    const chosen=win.symbol==='WILD'?matches[0]:(matches.find(x=>x.symbol===win.symbol)||matches[0]);
    if(!chosen)return [];
    if(chosen.symbol===win.symbol)hasNatural=true;
@@ -256,11 +266,25 @@ export function createSinCityPractice(doc=globalThis.document,options={}){
   for(let reel=path.length;reel<5;reel++)tail.push([reel,path[path.length-1][1]]);
   return {matched:path,tail};
  }
+ function acknowledgeFreeComplete(){
+  if(dead||phase!=='free-complete')return;
+  clear();phase='idle';busy=false;showBanner='';winPaths=[];highlightCells=[];visualBoard=null;
+  state={...state,lastFeature:'',lastMessage:'PRESS SPIN TO PLAY',sticky:[],wildMultipliers:{},freeCompletedTotal:null};
+  render();
+ }
+ function showFreeComplete(){
+  if(dead)return;
+  clear();phase='free-complete';busy=true;showBanner='';winPaths=[];highlightCells=[];visualBoard=null;auto=false;autoLeft=0;
+  render();
+ }
+ function finishWinPresentation(){
+  if(state.lastFeature==='free-end'){showFreeComplete();return;}
+  phase='total';winPaths=[];highlightCells=[];showBanner='';busy=false;render();
+  if(auto&&state.mode==='base'&&autoLeft>0)later(autoContinue,turbo?650:1500);
+ }
  function showTotalWin(){
   if(dead||!['win','total'].includes(phase))return;
-  phase='total';winPaths=[];highlightCells=[];showBanner='';
-  busy=false;render();
-  if(auto&&state.mode==='base'&&autoLeft>0)later(autoContinue,turbo?650:1500);
+  finishWinPresentation();
  }
  function presentWins(){
   showBanner='';visualBoard=null;highlightCells=[];
@@ -275,10 +299,7 @@ export function createSinCityPractice(doc=globalThis.document,options={}){
   }
   later(next,1100);
  }
- function showTotalWinFromFeature(){
-  phase='total';busy=false;render();
-  if(auto&&state.mode==='base'&&autoLeft>0)later(autoContinue,turbo?650:1500);
- }
+ function showTotalWinFromFeature(){finishWinPresentation();}
  function revealChanges(){
   if(dead)return;
   phase='transform';showBanner='';

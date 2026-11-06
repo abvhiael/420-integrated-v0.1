@@ -7,7 +7,7 @@ import {BASE_REELS,visibleGrid} from '../src/emerald-v2-strips.js';
 import {readFileSync} from 'node:fs';
 
 test('Slots lobby lists the completed Emerald Harvest machine with its own cabinet artwork',()=>{
- assert.equal(SLOT_MACHINES.length,3);
+ assert.equal(SLOT_MACHINES.length,5);
  assert.equal(SLOT_MACHINES[0].id,'emerald-harvest');
  assert.equal(SLOT_MACHINES[0].art,'/assets/420bet/slots-lobby/emerald-harvest-lobby-cabinet.png');
  assert.equal(SLOT_MACHINES[1].id,'mary-jane-sticky-wilds');
@@ -61,7 +61,7 @@ test('Emerald Harvest lobby preview shows a legitimate deterministic 5x4 gamepla
  assert.match(css,/\.slots-machine-art \.slots-emerald-cabinet\{/);
  const lobby=createSlotsLobby(document);
  const cards=[...lobby.querySelectorAll('.slots-machine-card')];
- assert.equal(cards.length,3);
+ assert.equal(cards.length,5);
  assert.equal(cards.filter(card=>!card.hidden).length,3);
  assert.equal(SLOT_MACHINES[2].id,'dads-secret-stash');
  assert.equal(slotMachineFromHash('#game=slots&machine=dads-secret-stash')?.id,'dads-secret-stash');
@@ -70,4 +70,27 @@ test('Emerald Harvest lobby preview shows a legitimate deterministic 5x4 gamepla
  assert.equal(cards[0].querySelector('img').getAttribute('src'),SLOT_MACHINES[0].art);
  assert.equal(cards[1].querySelector('img').getAttribute('src'),SLOT_MACHINES[1].art);
  assert.equal(cards[1].querySelector('.slots-emerald-reel-grid'),null,'Mary Jane art remains untouched');
+});
+
+test('Sin City High Rollers is slot #5, with its approved lobby cabinet and dedicated practice route',()=>{
+ assert.deepEqual(SLOT_MACHINES.map(m=>m.id),['emerald-harvest','mary-jane-sticky-wilds','dads-secret-stash','cannabis-cowboy','sin-city-high-rollers']);
+ assert.equal(SLOT_MACHINES[4].art,'/assets/420bet/slots-lobby/sin-city-high-rollers-lobby-cabinet.png');
+ assert.equal(SLOT_MACHINES[3].preview,true);
+ assert.equal(SLOT_MACHINES[4].preview,undefined);
+ assert.equal(slotMachineFromHash('#game=slots&machine=sin-city-high-rollers')?.id,'sin-city-high-rollers');
+ const {document,window}=parseHTML('<html><body></body></html>');
+ const lobby=createSlotsLobby(document);
+ const cards=[...lobby.querySelectorAll('.slots-machine-card')],arrows=lobby.querySelectorAll('.slots-carousel-arrow');
+ const visible=()=>cards.filter(c=>!c.hidden).sort((a,b)=>Number(a.style.order)-Number(b.style.order)).map(c=>c.querySelector('h2').textContent);
+ assert.deepEqual(visible(),SLOT_MACHINES.slice(0,3).map(m=>m.title));
+ arrows[1].dispatchEvent(new window.Event('click',{bubbles:true}));
+ arrows[1].dispatchEvent(new window.Event('click',{bubbles:true}));
+ assert.deepEqual(visible(),SLOT_MACHINES.slice(2,5).map(m=>m.title));
+ assert.equal(cards[4].querySelector('img').getAttribute('src'),SLOT_MACHINES[4].art);
+ for(let i=0;i<5;i++)arrows[1].dispatchEvent(new window.Event('click',{bubbles:true}));
+ assert.deepEqual(visible(),SLOT_MACHINES.slice(2,5).map(m=>m.title));
+ arrows[0].dispatchEvent(new window.Event('click',{bubbles:true}));
+ assert.equal(visible()[0],SLOT_MACHINES[1].title);
+ const main=readFileSync(new URL('../src/main.js',import.meta.url),'utf8');
+ assert.match(main,/createSinCityPractice\(document\)/);
 });

@@ -164,3 +164,14 @@ test('Supporting cast stays visible through slide-in and full-second result anno
  assert.match(source,/DSS_BONUS_PRESENTATION\.characterMs\);/);
  assert.match(source,/DSS_BONUS_PRESENTATION\.resultMs\);/);
 });
+
+test('Regular-play Larry uses a chair-height crop anchored at his face rather than full-body fit',()=>{
+ const css=readFileSync(new URL('../src/dads-secret-stash.css',import.meta.url),'utf8');
+ const block=css.slice(css.lastIndexOf('/* Regular-play Larry:'));
+ assert.match(block,/data-mode="main"/);
+ assert.match(block,/width:200%;\s*height:145%/);
+ assert.match(block,/top:-6%;\s*bottom:auto/);
+ assert.match(block,/object-position:50% 0%/);
+ assert(!block.includes('[data-mode="free"]'), 'Do not change free-spins sizing without visual evidence');
+ assert(!block.includes('[data-mode="stash"]'), 'Do not change stash sizing without visual evidence');
+});

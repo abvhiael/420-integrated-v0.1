@@ -1,0 +1,32 @@
+name: Poker canonical browser projection Level 1
+on:
+  pull_request:
+    paths:
+      - 'clients/420bet-lobby/src/poker-authority-client.js'
+      - 'clients/420bet-lobby/src/poker-live-ui.js'
+      - 'clients/420bet-lobby/src/poker-room.css'
+      - 'clients/420bet-lobby/src/main.js'
+      - 'clients/420bet-lobby/tests/poker-authority.test.mjs'
+      - 'docs/bet/POKER-BROWSER-AUTHORITATIVE-PROJECTION.md'
+      - '.github/workflows/poker-authority-browser-level1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  poker-authority-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install lobby dependencies
+        working-directory: clients/420bet-lobby
+        run: npm install --no-audit --no-fund
+      - name: Canonical poker projection security and UI tests
+        working-directory: clients/420bet-lobby
+        run: node --test tests/poker-authority.test.mjs tests/poker-room.test.mjs
+      - name: Build lobby
+        working-directory: clients/420bet-lobby
+        run: npm run build

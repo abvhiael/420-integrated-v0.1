@@ -610,7 +610,7 @@ test('The header owns feature progress and modifier captions, leaving reel row o
 
 test('Free spins use lighter Wild strips and bounded sticky accumulation without altering 8/15/22 feature lengths',()=>{
  assert.equal(FREE_WEIGHTS.length,20);
- assert.equal(FREE_WEIGHTS[SYMBOLS.indexOf('wild')],2);
+ assert.equal(FREE_WEIGHTS[SYMBOLS.indexOf('wild')],1.526);
  assert.equal(FREE_STICKY_LIMIT,6);
  assert.deepEqual(FREE_MULTIPLIER_STAGES,[1,2,4]);
  for(const seed of [.001,.499,.999]){

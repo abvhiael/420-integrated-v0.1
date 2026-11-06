@@ -26,6 +26,8 @@ export function createCannabisCowboyPractice(doc=globalThis.document,options={})
  labels[1].textContent='BALANCE · DEMO CREDITS';
  labels[2].textContent='WIN · DEMO CREDITS';
  const info=root.querySelector('.cc-info-panel');
+ const infoCopy=info.querySelector('p');
+ if(infoCopy)infoCopy.textContent+=' On the Road Again: 3 Road Trip tickets on the base spin trigger a five-stop guitar-case pick bonus. Pick one case per stop; its predetermined practice-credit value is revealed, and the five awards are paid once on completion. The six columns spin with staggered stops, and neon lines trace winning clusters. Click the game screen after winning-cluster review to reveal your TOTAL WIN.';
  info.setAttribute('aria-label','High Country Clusters practice rules');
  const infoCopy=info.querySelector('p');
  if(infoCopy)infoCopy.textContent='Practice only: 5 or more adjacent paying symbols form a cluster. Each tumble clears matches and refills the 6×8 board. Growing Harvest cells progress ×2→×32 and Smoke Ring Wilds substitute for paying symbols. Landing 3, 4, 5 or 6+ tour bus scatters awards 8, 12, 16 or 20 Endless Harvest free spins. Harvest multipliers and up to 8 sticky wilds persist throughout the feature. Retriggers are capped at 100 total free spins. Demo credits only; no wallet transactions or real wagering. Bonus paytables are not yet RTP certified.';
@@ -112,7 +114,7 @@ export function createCannabisCowboyPractice(doc=globalThis.document,options={})
   bonusCounter.hidden=true;phase('none');
   root.querySelector('.cc-board-readonly').textContent='BASE-GAME PRACTICE';
   showBoard(session.board);sync();
-  status.textContent=finishedBonus?'ENDLESS HARVEST COMPLETE · '+format(lastWin)+' total demo credits':lastWin?'HARVEST COMPLETE · '+format(lastWin)+' demo credits won':'No more clusters · Spin again';
+  status.textContent=reviewDismissed?'TOTAL WIN · '+format(lastWin)+' DEMO CREDITS':finishedBonus?'ENDLESS HARVEST COMPLETE · '+format(lastWin)+' total demo credits':lastWin?'HARVEST COMPLETE · '+format(lastWin)+' demo credits won':'No more clusters · Spin again';
  };
  const advance=()=>{
   if(dead)return;

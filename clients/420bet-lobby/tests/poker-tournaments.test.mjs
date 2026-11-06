@@ -15,7 +15,7 @@ test('Tournament preview offers approved scheduled, sit-and-go, rebuy and prefun
  for(const [i,id] of TOURNAMENT_FORMATS.map(x=>x.id).entries()){
   const choice=root.querySelectorAll('.pt-choice')[i];
   choice.click();
-  assert.equal(choice.getAttribute('aria-pressed'),'true');
+  assert.equal(root.querySelectorAll('.pt-choice')[i].getAttribute('aria-pressed'),'true');
   assert.equal(root.querySelector('.pt-detail-title h2').textContent,TOURNAMENT_FORMATS[i].name);
   assert.equal(root.querySelectorAll('.pt-feature-pill').length,4);
   assert.equal(root.querySelector('.pt-tag').textContent,TOURNAMENT_FORMATS[i].tag);

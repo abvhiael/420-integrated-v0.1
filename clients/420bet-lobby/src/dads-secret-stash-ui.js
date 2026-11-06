@@ -447,7 +447,9 @@ export function createDadsSecretStash(doc=globalThis.document,options={}){
      }else{
       for(let row=0;row<4;row++){
        const i=row*5+reel,{value}=holdCells[i];
-       if(previous[i]===null)value.textContent=tick%4===0?'?':'';
+       // Visual spin is the moving leaf and streaked tile backdrop. Do not
+       // flicker question marks over the moving symbol artwork.
+       if(previous[i]===null)value.textContent='';
       }
      }
     }

@@ -569,13 +569,21 @@ test('Hold and Win displays a seven-leaflet vector leaf instead of emoji and sto
  advance(3700);
  assert.equal(hold.hidden,false);
  const tiles=[...hold.querySelectorAll('.dss-hold-cell')];
- assert(tiles.some(x=>x.classList.contains('dss-hold-cycling')),'Unfilled slots visually cycle during respins');
+ assert(tiles.some(x=>x.classList.contains('dss-hold-cycling')),'Unfilled slots visibly spin during respins');
+ assert(tiles.filter(x=>x.classList.contains('dss-hold-locked')).every(x=>!x.classList.contains('dss-hold-cycling')),'Previously collected prizes stay completely stationary');
+ assert(tiles.filter(x=>x.classList.contains('dss-hold-cycling')).every(x=>x.querySelector('.dss-hold-value').textContent===''),'Animated empty slots show unobstructed moving leaf artwork instead of flashing question marks');
  const start=hold.querySelector('.dss-hold-tiles').dataset.lastStoppedReel;
  assert.equal(start,undefined);
  const stopTimes=[4650,5150,5650,6150,6650];
  for(let i=0;i<5;i++){
   advance(stopTimes[i]);
   assert.equal(hold.querySelector('.dss-hold-tiles').dataset.lastStoppedReel,String(i+1),'Stop reel '+(i+1));
+  for(const tile of tiles.filter((_,index)=>index%5===i)){
+   assert(!tile.classList.contains('dss-hold-cycling'),'Stopped reel positions no longer animate');
+  }
+  for(const tile of tiles.filter((tile,index)=>index%5>i&&!tile.classList.contains('dss-hold-locked'))){
+   assert(tile.classList.contains('dss-hold-cycling'),'Unstopped columns continue animating');
+  }
  }
  advance(25000);
  assert.equal(hold.hidden,true);
@@ -724,7 +732,8 @@ test('Hold & Win empty cells show a recognizable large seven-tip cannabis leaf i
  assert(blades.every(x=>x.getAttribute('d').split(' L').length>=30),'Each leaflet should have separated serrated contours');
  const css=readFileSync(new URL('../src/dads-secret-stash.css',import.meta.url),'utf8');
  assert.match(css,/\.dss-cannabis-leaf\{[^}]*width:72%;height:86%;max-width:114px/);
- assert.match(css,/\.dss-hold-cycling \.dss-cannabis-leaf\{animation:none;transform:none;/);
+ assert.match(css,/\.dss-hold-cell\.dss-hold-cycling \.dss-cannabis-leaf\{[^}]*animation:dss-leaf-reel-cycle \.18s linear infinite;/);
+ assert.match(css,/@keyframes dss-hold-reel-backdrop/);
  assert.match(css,/\.dss-hold-locked \.dss-cannabis-leaf\{display:none\}/);
  game.stopAnimation();
 });

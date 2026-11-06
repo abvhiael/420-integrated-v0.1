@@ -40,7 +40,7 @@ try{
   const track=await page.evaluate(()=>({count:document.querySelectorAll('.sc-spin-track').length,animation:getComputedStyle(document.querySelector('.sc-spin-track')).animationName}));
   assert.equal(track.count,5,'All five reels show their own continuous track');
   assert.match(track.animation,/sc-smooth-scroll/,'Rolling animation must use GPU-transformed track');
-  await page.waitForTimeout?.(930);
+  await new Promise(resolve=>setTimeout(resolve,960));
   const stopCount=await page.evaluate(()=>document.querySelectorAll('.sc-reel-spinning').length);
   assert.equal(stopCount,4,'Only first reel should settle before next 750ms stop');
   await page.waitForFunction(()=>!document.querySelector('.sc-reel-spinning'),{timeout:5000});

@@ -317,3 +317,59 @@ test('Larry remains above the header but behind reel frame and bonus board',()=>
  assert(game.querySelector('.dss-scene .dss-reels'));
  game.stopAnimation();
 });
+
+test('Balance bar renders above Larry and reel modifiers get visible transformation phases',()=>{
+ const css=readFileSync(new URL('../src/dads-secret-stash.css',import.meta.url),'utf8');
+ const stack=css.slice(css.lastIndexOf('/* Larry stays between wallpaper'));
+ assert.match(stack,/\.dss-controls,\.dss-status,\.dss-message\{position:relative;z-index:30\}/);
+ assert.match(stack,/\.dss-cell\.dss-transforming/);
+ assert.match(stack,/\.dss-cell\.dss-transformed/);
+ const {document}=parseHTML('<html><body></body></html>');
+ const game=createDadsSecretStash(document);
+ assert(game.querySelector('.dss-modifier-action'));
+ assert.equal(game.querySelector('.dss-modifier-action').hidden,true);
+ assert(game.querySelector('.dss-controls .dss-stat'));
+ game.stopAnimation();
+});
+test('Family Chaos Wild Graffiti visibly changes the board before the win popup',()=>{
+ const {document,window}=parseHTML('<html><body></body></html>');
+ let now=0,id=0,r=0;const jobs=[];
+ const rngValues=[.06,.09,...Array(18).fill(.51),.01,.3,.5,.5,.5,.5];
+ const clock={
+  rng:()=>rngValues[r++]??.51,
+  setTimeout:(fn,ms)=>{const task={id:++id,when:now+ms,fn,done:false};jobs.push(task);return task.id;},
+  clearTimeout:key=>{const task=jobs.find(x=>x.id===key);if(task)task.done=true;}
+ };
+ const advance=target=>{
+  let guard=0;
+  while(true){
+   if(guard++>1500)throw Error('Modifier animation did not settle');
+   jobs.sort((a,b)=>a.when-b.when);
+   const task=jobs.find(x=>!x.done&&x.when<=target);
+   if(!task)break;
+   task.done=true;now=task.when;task.fn();
+  }
+  now=target;
+ };
+ const game=createDadsSecretStash(document,clock);
+ const button=[...game.querySelectorAll('button')].find(x=>x.textContent.includes('SPIN'));
+ button.dispatchEvent(new window.Event('click',{bubbles:true}));
+ const event=game.getState().last.events[0];
+ assert.equal(event.type,'family');
+ assert.equal(event.label,'WILD GRAFFITI');
+ const initial=game.getState().last.grid;
+ const cells=[...game.querySelectorAll('.dss-cell')];
+ advance(6250);
+ assert.equal(game.querySelector('.dss-modifier-action').hidden,false);
+ assert.deepEqual(cells.map(x=>x.dataset.symbol),initial,'Original reel symbols visible before graffiti');
+ advance(7600);
+ assert(cells.some((x,i)=>x.dataset.symbol!==initial[i]),'At least one reel symbol transforms before the result');
+ assert.equal(game.querySelector('.dss-feature-result').hidden,true,'Win popup must not obscure transformations');
+ advance(9700);
+ assert.deepEqual(cells.map(x=>x.dataset.symbol),event.grid,'All changed reel positions should match calculated result');
+ advance(11000);
+ assert.equal(game.querySelector('.dss-feature-result').hidden,false,'Final win screen appears only after animation');
+ advance(14000);
+ assert.equal(game.querySelector('.dss-feature-result').hidden,true);
+ game.stopAnimation();
+});

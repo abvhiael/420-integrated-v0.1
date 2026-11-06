@@ -6,6 +6,9 @@ export const BET_CHOICES=Object.freeze([10,20,30,40,50]); // local demo credits 
 export const START_CREDITS=10000;
 export const WILD_SYMBOL=8;
 export const SCATTER_SYMBOL=9;
+export const ROAD_SYMBOL=10;
+export const ROAD_CHANCE=0.008;
+export const ROAD_TRIGGER_COUNT=3;
 export const MAX_FREE_SPINS=100;
 export const MAX_STICKY_WILDS=8;
 export const SCATTER_CHANCE=0.012; // per position, base/feature stops only
@@ -24,7 +27,7 @@ export const CLUSTER_PAYS=Object.freeze([
  Object.freeze([.1,.2,.6,2,6]), // rolling papers
  Object.freeze([.5,1,3,10,40]) // Cole portrait
 ]);
-const validBoard=board=>Array.isArray(board)&&board.length===CELL_COUNT&&board.every(v=>Number.isInteger(v)&&v>=0&&v<=SCATTER_SYMBOL);
+const validBoard=board=>Array.isArray(board)&&board.length===CELL_COUNT&&board.every(v=>Number.isInteger(v)&&v>=0&&v<=ROAD_SYMBOL);
 const assertBoard=board=>{if(!validBoard(board))throw new Error('A complete 48-symbol board is required');};
 const bracket=size=>size>=20?4:size>=15?3:size>=10?2:size>=7?1:0;
 export function clusterPayout(symbol,size,bet){
@@ -47,9 +50,11 @@ export function makeScatterBoard(rng=Math.random){
   const roll=rng();
   if(!Number.isFinite(roll)||roll<0||roll>=1)throw new Error('Invalid scatter RNG');
   if(roll>1-SCATTER_CHANCE)board[p]=SCATTER_SYMBOL;
+  else if(roll>1-SCATTER_CHANCE-ROAD_CHANCE)board[p]=ROAD_SYMBOL;
  }
  return board;
 }
+export function countRoadTickets(board){assertBoard(board);return board.filter(x=>x===ROAD_SYMBOL).length;}
 export function countScatters(board){assertBoard(board);return board.filter(x=>x===SCATTER_SYMBOL).length;}
 export function awardedFreeSpins(count){return count>=6?20:FREE_SPIN_AWARDS[count]??0;}
 // A smoke ring substitutes for one paying symbol. Candidate groups are ranked by
@@ -210,6 +215,8 @@ export function playPracticeRound(state,rng=Math.random,options={}){
  outcome.baseTotal=outcome.total;
  outcome.scatterCount=scatterCount;
  outcome.freeSpinsAwarded=freeSpins;
+ outcome.roadTicketCount=countRoadTickets(generated);
+ outcome.roadTripTriggered=outcome.roadTicketCount>=ROAD_TRIGGER_COUNT;
  if(freeSpins){
   const feature=resolveEndlessHarvest(freeSpins,state.bet,rng,options.featureOptions??{});
   if(!Number.isSafeInteger(outcome.total+feature.total))throw new Error('Unsafe combined credits');

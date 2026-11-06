@@ -618,8 +618,8 @@ test('Free spins use lighter Wild strips and bounded sticky accumulation without
 test('Recalibrated Stash prizes, Family Graffiti and Bud conversions preserve their features',()=>{
  const stash=stashBonus(()=>.975);
  assert.equal(stash.steps.length,4);
- assert(stash.prizes.every(x=>x<=6));
- assert.equal(stash.units,18);
+ assert(stash.prizes.every(x=>x<=6.6));
+ assert.equal(stash.units,19.8);
  const familyGrid=Array(20).fill('A');familyGrid[0]='tyler';familyGrid[1]='emma';
  const graffiti=modifier(familyGrid,'family',()=>.3);
  assert.equal(graffiti.label,'WILD GRAFFITI');
@@ -629,4 +629,64 @@ test('Recalibrated Stash prizes, Family Graffiti and Bud conversions preserve th
  assert.equal(fetch.grid.filter(x=>x==='wild').length,3);
  assert.equal(inspection(Array(20).fill('A'),()=>.3).spins,5);
  assert.equal(mow(Array(20).fill('A'),()=>.3).boards.length,5);
+});
+
+test('Free-spin reels stop at 1000/1500/2000/2500/3000ms and preserve all previously sticky Wilds',()=>{
+ const {document,window}=parseHTML('<html><body></body></html>');
+ let now=0,id=0;const jobs=[];
+ const clock={
+  rng:()=>.976,
+  setTimeout:(fn,ms)=>{const job={id:++id,at:now+ms,fn,done:false};jobs.push(job);return job.id;},
+  clearTimeout:(key)=>{const job=jobs.find(x=>x.id===key);if(job)job.done=true;}
+ };
+ const advance=(until)=>{
+  let guard=0;
+  while(true){
+   if(guard++>10000)throw Error('Free-spin sequence did not settle');
+   jobs.sort((a,b)=>a.at-b.at);
+   const job=jobs.find(x=>!x.done&&x.at<=until);
+   if(!job)break;job.done=true;now=job.at;job.fn();
+  }
+  now=until;
+ };
+ const game=createDadsSecretStash(document,clock);
+ game.querySelector('.dss-preview-select option[value="free"]').setAttribute('selected','');
+ game.querySelector('.dss-preview-button').dispatchEvent(new window.Event('click',{bubbles:true}));
+ const reels=[...game.querySelectorAll('.dss-reel')];
+ const original=game.getState().last.events[0].boards[0];
+ assert.equal(game.getState().rounds,0,'Preview does not place a paid or practice wager');
+ advance(2800); // 1600ms introduction + 1200ms outcome announcement
+ assert(reels.every(reel=>reel.classList.contains('dss-free-spinning')),'All reels start spinning together');
+ for(let reel=0;reel<5;reel++){
+  advance(2800+1000+reel*500-50);
+  assert(reels[reel].classList.contains('dss-spinning'),'Reel '+(reel+1)+' must continue spinning');
+  advance(2800+1000+reel*500);
+  assert.equal(reels[reel].dataset.freeStop,String(1000+reel*500));
+  assert(!reels[reel].classList.contains('dss-spinning'),'Reel '+(reel+1)+' stops');
+  assert(reels.slice(reel+1).every(x=>x.classList.contains('dss-spinning')),'Later reels continue spinning');
+  const symbols=[...reels[reel].querySelectorAll('.dss-cell')].map(x=>x.dataset.symbol);
+  assert.deepEqual(symbols,original.grid.slice(reel*4,reel*4+4));
+ }
+ assert.equal(game.querySelector('.dss-larry-panel').dataset.mode,'free');
+ assert.equal(game.querySelector('.dss-bonus-hud').hidden,false);
+ // The second spin must retain all sticky positions from the first.
+ advance(2800+3000+680+500+300);
+ const second=game.getState().last.events[0].boards[1];
+ const past=original.sticky;
+ for(const i of past){
+  const symbol=game.querySelectorAll('.dss-cell')[i];
+  assert.equal(symbol.dataset.symbol,'wild');
+  assert(second.previous.includes(i));
+ }
+ assert.equal(game.getState().rounds,0);
+ game.stopAnimation();
+});
+test('A ten-percent prize-only RTP adjustment leaves all other bonus mechanics untouched',()=>{
+ const rng=()=>.975;
+ const bonus=stashBonus(rng);
+ assert.deepEqual(bonus.prizes,[6.6,6.6,6.6]);
+ assert.equal(bonus.units,19.8);
+ assert.equal(bonus.steps.length,4);
+ assert.equal(inspection(Array(20).fill('A'),rng).spins,5);
+ assert.equal(mow(Array(20).fill('A'),rng).boards.length,5);
 });

@@ -12,7 +12,7 @@ export const BASE_STRIPS=Object.freeze(Array.from({length:REELS},(_,r)=>{
  return Object.freeze(arr);
 }));
 // Free-spin strips retain scarce Wilds. GEM becomes a regular symbol, not a Wild.
-export const FREE_STRIPS=Object.freeze(BASE_STRIPS.map((reel,r)=>Object.freeze(reel.map(symbol=>symbol==='GEM'?'ASH':symbol))));
+export const FREE_STRIPS=Object.freeze(BASE_STRIPS.map((reel,r)=>Object.freeze(reel.map(symbol=>symbol==='GEM'?'BUD':symbol))));
 export const PAYTABLE=Object.freeze({
  BOBBY:[.3,1,4.2],DOLLAR:[.25,.8,3],CAR:[.2,.6,2],MIC:[.15,.4,1.5],
  CHIPS:[.15,.4,1.5],BONG:[.15,.4,1.5],JAR:[.1,.25,.8],
@@ -117,7 +117,9 @@ export function nextRound(previous,rng=Math.random,forcedStops){
    }
    s.sticky.sort((a,b)=>a-b);
   }
-  const puff=puffPuffPass(board,rng);
+  // Puff wild conversions belong to the base feature. Free spins keep only
+  // their bounded sticky-Wild mechanic; do not spread extra Wilds every spin.
+  const puff=isFree?{board,changed:[]}:puffPuffPass(board,rng);
   board=puff.board;
   changed=puff.changed;
   const regular=waysWins(board,s.roundStake);

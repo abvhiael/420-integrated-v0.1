@@ -1,4 +1,5 @@
 import test from 'node:test';
+import {makeSinCityBonusPreview} from '../src/sin-city-bonus-preview.js';
 import assert from 'node:assert/strict';
 import {BASE_STRIPS,FREE_STRIPS,STRIP_LENGTH,ROWS,REELS,initialState,nextRound,visibleBoard,awardFreeSpins,waysWins,puffPuffPass,MAX_MULTIPLIER,HOTBOX_PAYS,hotboxPayout,count,PAYTABLE,FREE_PAYTABLE,BASE_WAYS_SCALE,FREE_WAYS_SCALE} from '../src/sin-city-engine.js';
 
@@ -113,7 +114,6 @@ test('Chronic Sessions starting awards and retriggers expose exact quantities',(
  assert.match(state.lastMessage,/8 FREE SPINS AWARDED/);
 });
 test('Lowrider practice fixture never accidentally retriggers Chronic Sessions',async()=>{
- const {makeSinCityBonusPreview}=await import('../src/sin-city-bonus-preview.js');
  const fixture=makeSinCityBonusPreview('lowrider');
  const state=nextRound(fixture.state,()=>.3,fixture.stops);
  assert.equal(state.lastFeature,'lowrider');
@@ -179,4 +179,54 @@ test('calibrated strip frequency preserves three-gem entry while reducing natura
  const stops=BASE_STRIPS.map(strip=>strip.findIndex(s=>s==='GEM'));
  const triggering=nextRound(initialState(),()=>.2,stops);
  assert.equal(triggering.mode,'hotbox');
+});
+
+test('Wilds do not substitute as Ashtrays or Lowriders during free-spin ways',()=>{
+ const board=[
+  ['ASH','CAR','WILD','BUD'],['WILD','BUD','WILD','J'],['WILD','WILD','K','BUD'],
+  ['BONG','J','Q','K'],['J','Q','K','BUD']
+ ];
+ const regular=waysWins(board,2,FREE_PAYTABLE);
+ const excluded=waysWins(board,2,FREE_PAYTABLE,{wildExcludes:['ASH','CAR']});
+ assert.ok(regular.wins.some(win=>win.symbol==='ASH'));
+ assert.ok(regular.wins.some(win=>win.symbol==='CAR'));
+ assert.ok(!excluded.wins.some(win=>win.symbol==='ASH'||win.symbol==='CAR'));
+ assert.ok(excluded.wins.some(win=>win.symbol==='BUD'),'Wild must still substitute for ordinary symbols');
+ const natural=[['ASH','CAR','BUD','J'],['ASH','CAR','Q','K'],['ASH','CAR','BUD','K'],['Q','K','BUD','J'],['BUD','J','K','Q']];
+ const naturalWins=waysWins(natural,2,FREE_PAYTABLE,{wildExcludes:['ASH','CAR']});
+ assert.ok(naturalWins.wins.some(win=>win.symbol==='ASH'));
+ assert.ok(naturalWins.wins.some(win=>win.symbol==='CAR'));
+});
+test('Lowrider multiplier is attached to a specific Wild and remains active on later free spins',()=>{
+ const fixture=makeSinCityBonusPreview('lowrider');
+ let state=nextRound(fixture.state,()=>.4,fixture.stops);
+ assert.equal(state.lastFeature,'lowrider');
+ assert.equal(Object.keys(state.wildMultipliers).length,1);
+ const key=Number(Object.keys(state.wildMultipliers)[0]);
+ const awarded=state.wildMultipliers[key];
+ assert.ok([2,3,4,5].includes(awarded));
+ assert.ok(state.sticky.includes(key));
+ assert.equal(state.lastMultiplier,awarded);
+ const noCar=FREE_STRIPS.map(strip=>{
+  for(let i=0;i<42;i++)if(!Array.from({length:4},(_,row)=>strip[(i+row)%42]).includes('CAR'))return i;
+  throw Error('No Lowrider-free reel stop');
+ });
+ state=nextRound(state,()=>.5,noCar);
+ assert.equal(state.lastMultiplier,awarded);
+ assert.equal(state.wildMultipliers[key],awarded);
+ assert.equal(state.lastBoard[Math.floor(key/4)][key%4],'WILD');
+});
+test('free-spin completion records only the free-round total and retains last multipliers for reveal',()=>{
+ const fixture=makeSinCityBonusPreview('lowrider');
+ let state={...fixture.state,freeRemaining:1};
+ const end=nextRound(state,()=>.1,fixture.stops);
+ assert.equal(end.mode,'base');
+ assert.equal(end.lastFeature,'free-end');
+ assert.equal(end.freeCompletedTotal,end.lastWin);
+ assert.equal(end.freeSessionWin,end.lastWin);
+ assert.ok(Object.keys(end.wildMultipliers).length>0);
+ assert.ok(end.sticky.length>0);
+ const fresh=nextRound({...end,balance:10000},()=>.1,[0,4,8,12,16]);
+ assert.deepEqual(fresh.wildMultipliers,{});
+ assert.equal(fresh.freeCompletedTotal,null);
 });

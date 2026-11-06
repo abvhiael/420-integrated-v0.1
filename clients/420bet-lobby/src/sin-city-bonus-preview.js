@@ -30,7 +30,7 @@ export function makeSinCityBonusPreview(type,prior=initialState()){
   mode:type==='lowrider'?'free':'base',
   freeRemaining:type==='lowrider'?3:0,
   freePlayed:0,freeMultiplier:1,
-  sticky:[],locked:[],respins:0,respinReturn:'base',
+  sticky:[],wildMultipliers:{},freeSessionWin:0,freeCompletedTotal:null,locked:[],respins:0,respinReturn:'base',
   roundGross:0,roundStake:prior.stake,
   lastFeature:'',lastWins:[],lastReveal:null
  };

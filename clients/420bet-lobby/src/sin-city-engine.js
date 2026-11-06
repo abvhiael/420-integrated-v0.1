@@ -36,18 +36,18 @@ export function awardFreeSpins(board){
  const reels=board.filter(reel=>reel.includes('SCATTER')).length;
  return reels>=5?20:reels===4?12:reels===3?8:0;
 }
-export function waysWins(board,stake,table=PAYTABLE){
+export function waysWins(board,stake,table=PAYTABLE,{wildExcludes=[]}={}){
  const wins=[];let total=0;
  // Only count all-Wild ways once, at the highest available pay tier.
  for(const [symbol,pays] of Object.entries(table)){
   let ways=1,wildOnly=1,length=0;
   for(const reel of board){
-   const matches=reel.filter(s=>s===symbol||s==='WILD').length;
+   const matches=reel.filter(s=>s===symbol||(!wildExcludes.includes(symbol)&&s==='WILD')).length;
    if(!matches)break;
    ways*=matches;wildOnly*=reel.filter(s=>s==='WILD').length;length++;
   }
   if(length>=3){
-   const distinctWays=ways-wildOnly;
+   const distinctWays=ways-(wildExcludes.includes(symbol)?0:wildOnly);
    if(distinctWays>0){
     const amount=round(stake*distinctWays*pays[length-3]);
     wins.push({symbol,length,ways:distinctWays,amount});total+=amount;
@@ -82,14 +82,14 @@ export function puffPuffPass(board,rng=Math.random){
 }
 export function initialState(){
  return {balance:1000,stake:2,mode:'base',freeRemaining:0,freePlayed:0,freeMultiplier:1,
-  locked:[],respins:0,respinReturn:'base',sticky:[],lastWin:0,lastMessage:'PRESS SPIN TO PLAY',lastBoard:visibleBoard(BASE_STRIPS,[0,8,16,24,32]),lastStops:null,lastFeature:'',lastWins:[],lastReveal:null,lastAwardedSpins:0,lastRetriggeredSpins:0,lastMultiplier:1,roundGross:0,roundStake:2};
+  locked:[],respins:0,respinReturn:'base',sticky:[],wildMultipliers:{},freeSessionWin:0,freeCompletedTotal:null,lastWin:0,lastMessage:'PRESS SPIN TO PLAY',lastBoard:visibleBoard(BASE_STRIPS,[0,8,16,24,32]),lastStops:null,lastFeature:'',lastWins:[],lastReveal:null,lastAwardedSpins:0,lastRetriggeredSpins:0,lastMultiplier:1,roundGross:0,roundStake:2};
 }
-const copy=s=>({...s,locked:[...s.locked],sticky:[...s.sticky],lastBoard:s.lastBoard.map(reel=>[...reel])});
+const copy=s=>({...s,locked:[...s.locked],sticky:[...s.sticky],wildMultipliers:{...(s.wildMultipliers||{})},lastBoard:s.lastBoard.map(reel=>[...reel])});
 const lockKey=(r,row)=>r*ROWS+row;
 export function nextRound(previous,rng=Math.random,forcedStops){
  const s=copy(previous);const isFree=s.mode==='free',isRespin=s.mode==='hotbox';
  if(!isFree&&!isRespin&&s.balance<s.stake)return {...s,lastMessage:'NOT ENOUGH PRACTICE CREDITS'};
- if(!isFree&&!isRespin){s.balance=round(s.balance-s.stake);s.roundGross=0;s.roundStake=s.stake;s.freeMultiplier=1;s.sticky=[];}
+ if(!isFree&&!isRespin){s.balance=round(s.balance-s.stake);s.roundGross=0;s.roundStake=s.stake;s.freeMultiplier=1;s.sticky=[];s.wildMultipliers={};s.freeSessionWin=0;s.freeCompletedTotal=null;}
  const stops=forcedStops??randomStops(rng);
  let board=visibleBoard(isFree?FREE_STRIPS:BASE_STRIPS,stops);
  const before=board.map(reel=>[...reel]);
@@ -134,22 +134,39 @@ export function nextRound(previous,rng=Math.random,forcedStops){
   const puff=isFree?{board,changed:[]}:puffPuffPass(board,rng);
   board=puff.board;
   changed=puff.changed;
-  const regular=waysWins(board,s.roundStake,isFree?FREE_PAYTABLE:PAYTABLE);
-  lastWins=regular.wins;
-  payout=regular.total;
   if(puff.changed.length)feature='puff';
-  // Any Lowrider on the visible free-spin grid triggers its multiplier.
+  // The Lowrider itself is always a natural symbol. Its multiplier is marked
+  // on an individual Wild, and persists in that Wild's position.
   if(isFree&&count(board,'CAR')>=1){
-   const mult=[2,3,4,5][Math.floor(Math.min(.9999999,Math.max(0,rng()))*4)];
-   s.freeMultiplier=mult;s.lastMultiplier=mult;payout=round(payout*mult);feature='lowrider';
+   const choose=items=>items[Math.floor(Math.min(.999999999,Math.max(0,rng()))*items.length)];
+   const availableWild=[],allWild=[],availableConversion=[];
+   for(let r=0;r<REELS;r++)for(let row=0;row<ROWS;row++){
+    const key=lockKey(r,row),symbol=board[r][row];
+    if(symbol==='WILD'){allWild.push(key);if(!s.wildMultipliers[key])availableWild.push(key);}
+    if(!['CAR','ASH','SCATTER','WILD'].includes(symbol)&&!s.sticky.includes(key))availableConversion.push(key);
+   }
+   const key=availableWild.length?choose(availableWild):availableConversion.length?choose(availableConversion):allWild.length?choose(allWild):null;
+   if(key!==null){
+    const r=Math.floor(key/ROWS),row=key%ROWS;
+    if(board[r][row]!=='WILD'){board[r][row]='WILD';s.sticky.push(key);s.sticky.sort((a,b)=>a-b);changed.push([r,row]);}
+    const rolled=[2,3,4,5][Math.floor(Math.min(.999999999,Math.max(0,rng()))*4)];
+    s.wildMultipliers[key]=Math.max(rolled,s.wildMultipliers[key]||1);
+    feature='lowrider';
+   }
   }
+  const regular=waysWins(board,s.roundStake,isFree?FREE_PAYTABLE:PAYTABLE,isFree?{wildExcludes:['ASH','CAR']}:{});
+  lastWins=regular.wins;
+  const activeMults=Object.values(s.wildMultipliers).filter(Number.isFinite);
+  const currentMult=isFree&&activeMults.length?Math.max(...activeMults):1;
+  s.freeMultiplier=currentMult;s.lastMultiplier=currentMult;
+  payout=round(regular.total*currentMult);
   if(isFree){
    const extra=awardFreeSpins(board);
    if(extra&&s.freePlayed+s.freeRemaining<50){const awarded=Math.min(5,50-s.freePlayed-s.freeRemaining);s.freeRemaining+=awarded;s.lastRetriggeredSpins=awarded;feature=feature==='lowrider'?'lowrider':'free-retrigger';}
-   if(!s.freeRemaining){s.mode='base';s.sticky=[];feature=feature||'free-end';}
+   if(!s.freeRemaining){s.mode='base';feature='free-end';}
   }else{
    const scatters=awardFreeSpins(board);
-   if(scatters){s.mode='free';s.freeRemaining=scatters;s.freePlayed=0;s.lastAwardedSpins=scatters;feature='free-start';}
+   if(scatters){s.mode='free';s.freeRemaining=scatters;s.freePlayed=0;s.freeSessionWin=0;s.freeCompletedTotal=null;s.wildMultipliers={};s.sticky=[];s.lastAwardedSpins=scatters;feature='free-start';}
    else if(count(board,'GEM')>=3){
     s.mode='hotbox';s.respinReturn='base';s.respins=3;
     s.locked=[];
@@ -163,6 +180,7 @@ export function nextRound(previous,rng=Math.random,forcedStops){
  // Strict cap per initiating paid round including its entire bonus sequence.
  const available=Math.max(0,round(s.roundStake*MAX_MULTIPLIER-s.roundGross));
  payout=round(Math.min(payout,available));
+ if(isFree){s.freeSessionWin=round(s.freeSessionWin+payout);if(s.mode==='base'){s.freeCompletedTotal=s.freeSessionWin;}}
  s.roundGross=round(s.roundGross+payout);
  s.balance=round(s.balance+payout);
  s.lastWin=payout;s.lastStops=[...stops];s.lastBoard=board;s.lastFeature=feature;
@@ -175,7 +193,7 @@ export function nextRound(previous,rng=Math.random,forcedStops){
  feature==='free-retrigger'?'+'+s.lastRetriggeredSpins+' EXTRA FREE SPINS · '+s.freeRemaining+' REMAINING':
  feature==='hotbox'?'HOTBOX · '+s.locked.length+' LOCKED GEMS · '+s.respins+' RESPINS LEFT':
  feature==='hotbox-end'?'HOTBOX COLLECTION COMPLETE · WIN '+payout.toFixed(2):
- feature==='free-end'?'FREE SPINS COMPLETE':
+ feature==='free-end'?'FREE SPINS COMPLETE · TOTAL '+s.freeCompletedTotal.toFixed(2):
  payout>0?'PRACTICE WIN '+payout.toFixed(2):'NO WIN — TRY AGAIN';
  return s;
 }

@@ -192,3 +192,35 @@ main.immersive .view-scroll:has(.sc-game){background:transparent}
 .sc-win-continuation{stroke-dasharray:10 9;stroke-width:4;opacity:.8;filter:drop-shadow(0 0 7px #59ff35);animation:sc-win-tail .6s ease-out both}
 @keyframes sc-win-tail{from{opacity:0}to{opacity:.8}}
 .sc-hotbox-paytable{max-width:420px}
+
+/* Hotbox payouts appear directly to the right of the real five-reel playtable. */
+.sc-game .sc-play-area{display:grid;grid-template-columns:minmax(0,1fr);align-items:stretch;gap:8px;min-width:0}
+.sc-game .sc-play-area:has(.sc-hotbox-side){grid-template-columns:minmax(0,1fr) clamp(138px,14vw,178px)}
+.sc-game .sc-play-area .sc-reels{width:100%;min-width:0;height:clamp(320px,43dvh,420px);margin:6px 0 0}
+.sc-game .sc-hotbox-side{min-width:0;max-height:420px;overflow:hidden;display:flex;flex-direction:column;gap:4px;margin:6px 0 0;padding:7px;background:linear-gradient(180deg,#36133a,#160c25);border:2px solid #e2aa38;border-radius:9px;box-shadow:inset 0 0 15px #6c2879;color:#fff0aa}
+.sc-game .sc-hotbox-heading{text-align:center;font-weight:1000;font-size:14px;letter-spacing:.03em;color:#ffe170;text-shadow:0 0 8px #e2ab41}
+.sc-game .sc-hotbox-side>small{text-align:center;font-size:9px;color:#b5ffa0}
+.sc-game .sc-hotbox-payout-list{display:grid;grid-template-columns:1fr;gap:1px;overflow-y:auto;min-height:0;scrollbar-width:thin;flex:1}
+.sc-game .sc-hotbox-tier{display:flex;align-items:center;justify-content:space-between;gap:5px;min-height:17px;padding:1px 4px;border-bottom:1px solid #75527f;font-size:11px;font-variant-numeric:tabular-nums}
+.sc-game .sc-hotbox-tier>b{color:#9cff79}
+.sc-game .sc-hotbox-current{background:#456322aa;color:#fff;outline:1px solid #adfd75;outline-offset:-1px}
+/* Mark the specific Wild holding a persistent Lowrider award. */
+.sc-game .sc-symbol,.sc-game .sc-held-cell{position:relative}
+.sc-game .sc-wild-multiplier{position:absolute;z-index:7;right:2px;top:2px;min-width:30px;text-align:center;padding:2px 4px;border:2px solid #fce88e;border-radius:15px;background:linear-gradient(#f7c53b,#a35304);color:#230d24;font-size:clamp(12px,1.4vw,20px);line-height:1.2;font-weight:1000;text-shadow:0 1px #ffec90;box-shadow:0 0 9px #fcd545,0 2px 5px #000}
+/* Click-to-return completion splash uses the approved casino-chips symbol. */
+.sc-game .sc-free-complete{position:absolute;z-index:20;inset:0;min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:32px;background:radial-gradient(ellipse at center,#470d68ec,#13051ef8 68%,#050109fa);border:3px solid #dca63e;border-radius:14px;cursor:pointer;text-align:center;color:#fff2bc;box-shadow:inset 0 0 65px #a148c8}
+.sc-game .sc-free-complete:focus-visible{outline:4px solid #b9ff86;outline-offset:-4px}
+.sc-game .sc-complete-chips{position:relative;display:grid;place-items:center;width:min(40vw,340px);height:min(33vw,270px);max-width:100%}
+.sc-game .sc-complete-chip-art{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 9px 20px #000)}
+.sc-game .sc-complete-chip-face{position:absolute;bottom:12%;left:4%;right:4%;display:block;padding:7px 12px;background:linear-gradient(130deg,#efbe55,#b0761e,#efbe55);border:3px ridge #fbe3a1;border-radius:30px;font-size:clamp(14px,2vw,25px);font-weight:1000;color:#310c3a;text-shadow:0 1px 1px #fff3b4;box-shadow:0 5px 17px #000}
+.sc-game .sc-free-complete-value{font-size:clamp(24px,4.2vw,48px);font-weight:1000;text-shadow:0 0 20px #b4fc82,0 3px 6px #000;color:#b4ff83;font-variant-numeric:tabular-nums}
+.sc-game .sc-free-complete-click{font-size:clamp(15px,2vw,23px);font-weight:900;letter-spacing:.1em;color:#ffe69a;animation:sc-continue-pulse 1.8s ease-in-out infinite}
+@keyframes sc-continue-pulse{50%{opacity:.55}}
+@media(max-width:760px){
+ .sc-game .sc-play-area:has(.sc-hotbox-side){grid-template-columns:1fr}
+ .sc-game .sc-hotbox-side{max-height:155px}
+ .sc-game .sc-hotbox-payout-list{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .sc-game .sc-hotbox-tier{font-size:10px}
+ .sc-game .sc-complete-chips{width:70vw;height:52vw}
+}
+@media(prefers-reduced-motion:reduce){.sc-game .sc-free-complete-click{animation:none}}

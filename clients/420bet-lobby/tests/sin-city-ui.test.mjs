@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {parseHTML} from 'linkedom';
 import {createSinCityPractice} from '../src/sin-city-ui.js';
-import {initialState,BASE_STRIPS} from '../src/sin-city-engine.js';
+import {initialState,BASE_STRIPS,FREE_STRIPS} from '../src/sin-city-engine.js';
 
 const setup=(options={})=>{
  const {document,window}=parseHTML('<html><body></body></html>');
@@ -149,7 +149,7 @@ test('Info popup includes the progressive 3-to-20-gem Hotbox payout table',()=>{
   assert.equal(table.querySelectorAll('tr').length,19);
   assert.match(table.textContent,/100×/);
   assert.match(root.textContent,/EVERY Wild that lands/);
-  assert.match(root.textContent,/ANY one Lowrider/);
+  assert.match(root.textContent,/ANY natural Lowrider/);
  }finally{root.stopAnimation();}
 });
 test('Neon way trace reaches reel five, distinguishing non-paying continuation',async()=>{
@@ -173,5 +173,57 @@ test('Neon way trace reaches reel five, distinguishing non-paying continuation',
    assert.ok(last.getAttribute('points').includes('450,'),'Win animation must reach reel 5');
    if(tail)assert.ok(tail.getAttribute('class').includes('sc-win-continuation'));
   }else assert.equal(root.getPresentationState().phase,'total');
+ }finally{root.stopAnimation();}
+});
+
+test('Hotbox payouts display beside the grid and only the initial entry shows a splash',()=>{
+ const {root}=setup({initialState:{...initialState(),mode:'hotbox',respins:3,locked:[0,5,8]}});
+ try{
+  const panel=root.querySelector('.sc-hotbox-side');
+  assert.ok(panel);
+  assert.equal(panel.querySelectorAll('.sc-hotbox-tier').length,18);
+  assert.ok(root.querySelector('.sc-play-area .sc-reels'));
+  assert.ok(root.querySelector('.sc-play-area .sc-hotbox-side'));
+  assert.match(panel.textContent,/20 GEMS/);
+ }finally{root.stopAnimation();}
+});
+test('marked sticky Wild displays its permanently assigned multiplier on stationary and spinning reel',()=>{
+ const held=[1,5,11],multipliers={'5':4};
+ const game=initialState();game.lastBoard[1][1]='WILD';
+ const {root,click}=setup({initialState:{...game,mode:'free',freeRemaining:3,sticky:held,wildMultipliers:multipliers}});
+ try{
+  assert.ok(root.querySelector('.sc-symbol .sc-wild-multiplier'));
+  assert.equal(root.querySelector('.sc-symbol .sc-wild-multiplier').textContent,'4×');
+  click('FREE SPIN');
+  const tagged=root.querySelector('.sc-reel[data-reel="1"] .sc-held-wild .sc-wild-multiplier');
+  assert.ok(tagged);
+  assert.equal(tagged.textContent,'4×');
+ }finally{root.stopAnimation();}
+});
+test('Free Spins Complete remains on screen until explicitly clicked and shows whole feature winnings',async()=>{
+ const noBonus=FREE_STRIPS.map(strip=>{
+  for(let stop=0;stop<42;stop++){
+   const symbols=Array.from({length:4},(_,i)=>strip[(stop+i)%42]);
+   if(!symbols.includes('CAR')&&!symbols.includes('SCATTER'))return stop;
+  }
+  throw Error('No free completion fixture');
+ });
+ const {root,click,window}=setup({rng:()=>.4,initialState:{...initialState(),mode:'free',freeRemaining:1,freeSessionWin:12},pickStops:()=>noBonus});
+ try{
+  click('FREE SPIN');
+  for(let i=0;i<100&&root.getPresentationState().phase!=='free-complete';i++)await new Promise(resolve=>setTimeout(resolve,100));
+  assert.equal(root.getPresentationState().phase,'free-complete');
+  assert.ok(root.querySelector('.sc-complete-chip-art'));
+  assert.match(root.querySelector('.sc-complete-chip-face').textContent,/FREE SPINS COMPLETE/);
+  assert.match(root.querySelector('.sc-free-complete-value').textContent,/PRACTICE CREDITS/);
+  assert.match(root.querySelector('.sc-free-complete-click').textContent,/CLICK TO CONTINUE/);
+  const amount=root.getPresentationState().freeCompletedTotal;
+  assert.ok(amount>=12);
+  await new Promise(resolve=>setTimeout(resolve,450));
+  assert.equal(root.getPresentationState().phase,'free-complete','Completion must not auto-dismiss');
+  root.querySelector('.sc-free-complete').dispatchEvent(new window.Event('click',{bubbles:true}));
+  assert.equal(root.getPresentationState().phase,'idle');
+  assert.equal(root.querySelector('.sc-free-complete'),null);
+  assert.equal(root.getPresentationState().mode,'base');
  }finally{root.stopAnimation();}
 });

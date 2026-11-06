@@ -154,8 +154,19 @@ export function makeBonusPreview(requestedType,rng=Math.random){
 }
 export function newGame(){return {balance:1000,bet:1,rounds:0,last:null,history:[],message:'Gary needs five minutes in his garage.',mode:'practice'};}
 export function spin(state,rng=Math.random){if(!Number.isFinite(state.bet)||state.bet<=0||state.bet>50||state.bet>state.balance)throw Error('Invalid practice stake');const grid=board(rng),base=evaluate(grid),flags=triggerCharacters(grid,rng),events=[];let units=base.units;
-for(const type of ['jen','family','keller','bud']){if(!flags[type])continue;if(type==='keller'){const event=inspection(grid,rng);units+=event.units;events.push({type,...event});}else{const event=modifier(grid,type,rng);event.units=evaluate(event.grid).units*event.multiplier;units+=event.units;events.push({type,...event});}}
-if(count(grid,'scatter')>=3){const event=freeBonus(rng);units+=event.units;events.push({type:'free',...event});}
+ // A Family Chaos Scatter Scramble is part of the completed spin outcome:
+ // added scatters count toward the normal 3+ scatter free-spin trigger.
+ // Evaluate that transformed board once, never issue duplicate free bonuses.
+ let freeTriggerGrid=grid,freeTriggerSource='base';
+for(const type of ['jen','family','keller','bud']){if(!flags[type])continue;if(type==='keller'){const event=inspection(grid,rng);units+=event.units;events.push({type,...event});}else{const event=modifier(grid,type,rng);event.units=evaluate(event.grid).units*event.multiplier;
+ if(type==='family'&&event.label==='SCATTER SCRAMBLE'&&count(event.grid,'scatter')>=3){
+  freeTriggerGrid=event.grid;
+  freeTriggerSource='family-scatter-scramble';
+  event.awardedFreeSpins=true;
+  event.scatterCount=count(event.grid,'scatter');
+ }
+ units+=event.units;events.push({type,...event});}}
+if(count(freeTriggerGrid,'scatter')>=3){const event=freeBonus(rng);units+=event.units;events.push({type:'free',...event,triggerSource:freeTriggerSource,triggerScatterCount:count(freeTriggerGrid,'scatter')});}
 if(count(grid,'stash')>=3){const event=stashBonus(rng);units+=event.units;events.push({type:'stash',...event});}
 if(count(grid,'mower')>=3){const event=mow(grid,rng);units+=event.units;events.push({type:'mow',...event});}
 const win=Math.min(MAX_WIN_MULTIPLIER*state.bet,Math.round(units*state.bet*100)/100);

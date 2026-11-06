@@ -293,3 +293,9 @@
    max-height:none;
  }
 }
+
+/* Seamless 12-symbol reel strip. First six symbols exactly repeat, so
+   the translateY(-50%) wrap has no discontinuity or jitter. */
+.cc-game .cc-reel-track{height:1200%;animation:cc-reel-loop .7s linear infinite}
+@keyframes cc-reel-loop{from{transform:translate3d(0,0,0)}to{transform:translate3d(0,-50%,0)}}
+@media(prefers-reduced-motion:reduce){.cc-game .cc-reel-track{animation:none!important}}

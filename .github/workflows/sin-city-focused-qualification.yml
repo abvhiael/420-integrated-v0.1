@@ -6,6 +6,7 @@ on:
     paths:
       - 'clients/420bet-lobby/src/sin-city-*'
       - 'clients/420bet-lobby/src/main.js'
+      - 'clients/420bet-lobby/public/assets/420bet/slots-lobby/sin-city-high-rollers-lobby-cabinet.png'
       - 'clients/420bet-lobby/src/slots-lobby.js'
       - 'clients/420bet-lobby/tests/sin-city-*'
       - '.github/workflows/sin-city-focused-qualification.yml'

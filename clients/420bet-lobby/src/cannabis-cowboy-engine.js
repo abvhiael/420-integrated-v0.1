@@ -166,12 +166,13 @@ export function resolveRound(initialBoard,bet,rng=Math.random,options={}){
    const harvestMultiplier=bonuses.length?Math.min(MAX_CLUSTER_MULTIPLIER,bonuses.reduce((a,b)=>a+b,0)):1;
    const smokeMultiplier=cluster.wildCount?SMOKE_RING_MULTIPLIER:1;
    const multiplier=Math.min(MAX_CLUSTER_MULTIPLIER,harvestMultiplier*smokeMultiplier);
+   const rawBase=CLUSTER_PAYS[cluster.symbol][bracket(cluster.size)]*bet;
    const base=clusterPayout(cluster.symbol,cluster.size,bet);
-   const unscaled=base*multiplier;
+   const unscaled=rawBase*multiplier;
    const scaled=Math.round(unscaled*(options.bonusMode?FEATURE_PAY_SCALE:BASE_PAY_SCALE));
    const payout=Math.min(scaled,Math.max(0,payoutCeiling-total-cascadeWin));
    if(!Number.isSafeInteger(payout)||payout<0)throw new Error('Unsafe payout');
-   paid.push({...cluster,multiplier,harvestMultiplier,smokeMultiplier,base,scale:options.bonusMode?FEATURE_PAY_SCALE:BASE_PAY_SCALE,payout});
+   paid.push({...cluster,multiplier,harvestMultiplier,smokeMultiplier,base,rawBase,scale:options.bonusMode?FEATURE_PAY_SCALE:BASE_PAY_SCALE,payout});
    cascadeWin+=payout;
    for(const p of cluster.positions)if(!sticky.has(p))removed.add(p);
    if(options.bonusMode)for(const p of cluster.wildPositions??[])if(sticky.has(p))spentSticky.add(p);

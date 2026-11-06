@@ -13,7 +13,7 @@ export const BASE_STRIPS=Object.freeze(Array.from({length:REELS},(_,r)=>{
 }));
 // Free-spin strips retain scarce Wilds. GEM becomes a regular symbol, not a Wild.
 export const FREE_STRIPS=Object.freeze(BASE_STRIPS.map((reel,r)=>Object.freeze(reel.map(symbol=>symbol==='GEM'?'BUD':symbol))));
-export const BASE_WAYS_SCALE=0.322;
+export const BASE_WAYS_SCALE=0.310;
 export const FREE_WAYS_SCALE=0.075;
 const UNCALIBRATED_PAYTABLE=Object.freeze({
  BOBBY:[.3,1,4.2],DOLLAR:[.25,.8,3],CAR:[.2,.6,2],MIC:[.15,.4,1.5],

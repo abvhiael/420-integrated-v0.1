@@ -581,7 +581,7 @@ test('Hold and Win displays a seven-leaflet vector leaf instead of emoji and sto
   for(const tile of tiles.filter((_,index)=>index%5===i)){
    assert(!tile.classList.contains('dss-hold-cycling'),'Stopped reel positions no longer animate');
   }
-  for(const tile of tiles.filter((_,index)=>index%5>i&&!tile.classList.contains('dss-hold-locked'))){
+  for(const tile of tiles.filter((tile,index)=>index%5>i&&!tile.classList.contains('dss-hold-locked'))){
    assert(tile.classList.contains('dss-hold-cycling'),'Unstopped columns continue animating');
   }
  }

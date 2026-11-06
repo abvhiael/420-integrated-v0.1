@@ -99,3 +99,15 @@ test('Live Poker route uses authoritative client rather than demo samples',()=>{
  assert(!file.includes('new WebSocket'));
  assert(file.includes('root.stopAnimation='));
 });
+
+test('awaiting-reveal phases never admit cards before their canonical street',()=>{
+ const a=auth();
+ for(const phase of ['AWAIT_FLOP','AWAIT_TURN','AWAIT_RIVER']){
+  const board=phase==='AWAIT_FLOP'?[]:phase==='AWAIT_TURN'?hand().table.community:
+   [...hand().table.community,{rank:'9',suit:'♣'}];
+  assert.equal(parsePokerTable(hand({phase,community:board}),a,'garden').phase,phase);
+  const forbidden=[...board,{rank:'3',suit:'♠'}];
+  assert.throws(()=>parsePokerTable(hand({phase,community:forbidden}),a,'garden'),/premature community/i);
+ }
+ assert.equal(parsePokerTable(hand({phase:'UNCONTESTED'}),a,'garden').phase,'UNCONTESTED');
+});

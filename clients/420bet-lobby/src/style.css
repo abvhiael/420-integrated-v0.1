@@ -399,3 +399,17 @@
  transform:none;
 }
 @media(max-width:440px){.slots-machine-art .slots-emerald-preview{width:100%;}}
+
+/* M1: three-cabinet looping gallery, using approved cabinet PNG assets. */
+.slots-carousel{display:flex;align-items:center;justify-content:center;gap:clamp(5px,1vw,16px);max-width:1190px;margin:0 auto}
+.slots-carousel-arrow{flex:0 0 clamp(32px,4vw,48px);height:64px;border:2px solid #d4b457;border-radius:14px;background:#102e1b;color:#f4dc94;font-size:2.5rem;cursor:pointer}
+.slots-carousel-arrow:hover:not(:disabled),.slots-carousel-arrow:focus-visible{background:#245638;outline:2px solid #f4dc94;outline-offset:3px}
+.slots-carousel-arrow:disabled{opacity:.4;cursor:not-allowed}
+.slots-carousel .slots-machine-grid{flex:1;min-width:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(8px,1.6vw,22px);max-width:none}
+.slots-carousel .slots-machine-card[hidden]{display:none!important}
+.cowboy-preview-page{max-width:850px;margin:30px auto;padding:clamp(24px,5vw,66px);border:5px ridge #b78b46;border-radius:22px;background:radial-gradient(ellipse at 50% 0%,#724260,#213e32 48%,#0c2418 95%);color:#f5e6c4;text-align:center}
+.cowboy-preview-page h1{margin:9px 0;font:900 clamp(2.4rem,6vw,5rem)/1 Georgia,serif;color:#ffd67a;text-shadow:2px 4px #4a2310}
+.cowboy-preview-page h2{color:#9de78b;font:800 clamp(1.2rem,3vw,2rem) Georgia,serif}
+.cowboy-preview-page p{line-height:1.7}
+@media(max-width:760px){.slots-carousel .slots-machine-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.slots-carousel .slots-machine-card[data-carousel-position="2"]{display:none}.slots-machine-art{min-height:185px}.slots-machine-body{padding:13px}.slots-machine-body h2{font-size:1.25rem}}
+@media(max-width:520px){.slots-carousel .slots-machine-grid{grid-template-columns:minmax(0,1fr)}.slots-carousel .slots-machine-card[data-carousel-position="1"]{display:none}.slots-carousel-arrow{flex-basis:32px;height:55px}}

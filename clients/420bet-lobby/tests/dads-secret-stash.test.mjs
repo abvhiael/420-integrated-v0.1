@@ -1,7 +1,7 @@
 import test from 'node:test';import assert from 'node:assert/strict';import {parseHTML} from 'linkedom';
 import {existsSync,readFileSync} from 'node:fs';
 import {SLOT_MACHINES,createSlotsLobby,slotMachineFromHash} from '../src/slots-lobby.js';
-import {newGame,qualify,triggerCharacters,modifier,inspection,spin,evaluate,stashBonus,freeBonus,mow,makeBonusPreview,BONUS_PREVIEW_TYPES} from '../src/dads-secret-stash-engine.js';
+import {newGame,qualify,triggerCharacters,modifier,inspection,spin,evaluate,stashBonus,freeBonus,mow,makeBonusPreview,BONUS_PREVIEW_TYPES,FREE_WEIGHTS,FREE_STICKY_LIMIT,FREE_MULTIPLIER_STAGES} from '../src/dads-secret-stash-engine.js';
 import {createDadsSecretStash,DSS_BONUS_PRESENTATION} from '../src/dads-secret-stash-ui.js';
 import {DSS_SYMBOL_ART,DSS_CAST_ART,DSS_TRANSITION_ART,DSS_BACKGROUND_ART,DSS_FEATURE_ART,DSS_LARRY_ART} from '../src/dads-secret-stash-assets.js';
 import {SYMBOLS} from '../src/dads-secret-stash-engine.js';
@@ -592,4 +592,41 @@ test('The header owns feature progress and modifier captions, leaving reel row o
  assert(featureCss.includes('.dss-larry-panel[data-mode="mow"]'));
  assert(featureCss.includes('.dss-portrait[hidden]{display:none!important}'));
  game.stopAnimation();
+});
+
+test('Free spins use lighter Wild strips and bounded sticky accumulation without altering 8/15/22 feature lengths',()=>{
+ assert.equal(FREE_WEIGHTS.length,20);
+ assert.equal(FREE_WEIGHTS[SYMBOLS.indexOf('wild')],2);
+ assert.equal(FREE_STICKY_LIMIT,6);
+ assert.deepEqual(FREE_MULTIPLIER_STAGES,[1,2,4]);
+ for(const seed of [.001,.499,.999]){
+  const bonus=freeBonus(()=>seed);
+  assert([8,15,22].includes(bonus.spins));
+  assert.equal(bonus.boards.length,bonus.spins);
+  let previous=[];
+  for(let i=0;i<bonus.boards.length;i++){
+   const step=bonus.boards[i];
+   assert(step.sticky.length<=6,'Sticky Wild positions may never exceed six');
+   assert(step.grid.filter(x=>x==='wild').length<=6,'All Wilds on free board must honor cap');
+   for(const index of previous)assert.equal(step.grid[index],'wild','Existing Sticky Wild must remain');
+   previous=step.sticky;
+   assert.equal(step.mult,i<6?1:i<12?2:4);
+  }
+  assert.equal(bonus.units,Math.round(bonus.boards.reduce((sum,step)=>sum+step.units,0)*100)/100);
+ }
+});
+test('Recalibrated Stash prizes, Family Graffiti and Bud conversions preserve their features',()=>{
+ const stash=stashBonus(()=>.975);
+ assert.equal(stash.steps.length,4);
+ assert(stash.prizes.every(x=>x<=6));
+ assert.equal(stash.units,18);
+ const familyGrid=Array(20).fill('A');familyGrid[0]='tyler';familyGrid[1]='emma';
+ const graffiti=modifier(familyGrid,'family',()=>.3);
+ assert.equal(graffiti.label,'WILD GRAFFITI');
+ assert.equal(graffiti.grid.filter(x=>x==='wild').length,2);
+ const fetch=modifier(Array(20).fill('A'),'bud',()=>.5);
+ assert.equal(fetch.label,'FETCH WILD!');
+ assert.equal(fetch.grid.filter(x=>x==='wild').length,3);
+ assert.equal(inspection(Array(20).fill('A'),()=>.3).spins,5);
+ assert.equal(mow(Array(20).fill('A'),()=>.3).boards.length,5);
 });

@@ -55,3 +55,10 @@ export const DSS_SYMBOL_LABELS=Object.freeze({
  jar:'Stash Jar',bong:'Glass Bong',pizza:'Pizza',lighter:'Lighter',papers:'Rolling Papers',
  A:'A',K:'K',Q:'Q',J:'J','10':'10',wild:'Gary Wild',scatter:'Scatter',stash:'Secret Stash',mower:'Lawnmower'
 });
+
+export const DSS_LARRY_ART=Object.freeze({
+ main:path('characters/gary_main.png'),
+ stash:path('characters/gary_hold_win.png'),
+ free:path('characters/gary_free_spins.png'),
+ mow:path('characters/gary_mow_the_lawn.png')
+});

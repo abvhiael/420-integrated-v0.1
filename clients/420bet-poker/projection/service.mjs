@@ -106,7 +106,10 @@ export function createPokerProjection({manifest,reader,secret,clock=()=>Date.now
  const byId=new Map();
  for(const m of manifest.tables){
   if(!m||!ID.test(m.tableId)||!HASH.test(m.configHash)||
-     typeof m.name!=='string'||m.name.length>64||byId.has(m.tableId))fail('invalid table manifest');
+     typeof m.name!=='string'||!m.name.length||m.name.length>64||
+     !safeInt(m.smallBlind)||!safeInt(m.bigBlind)||m.bigBlind<m.smallBlind||
+     !safeInt(m.tableVersion)||m.tableVersion<1||byId.has(m.tableId))
+     fail('invalid table manifest');
   byId.set(m.tableId,m);
  }
  async function sessionFrom(req){

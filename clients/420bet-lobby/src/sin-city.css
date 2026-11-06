@@ -171,3 +171,24 @@ main.immersive .view-scroll:has(.sc-game){background:transparent}
  .sc-game .sc-mascot{position:relative}
  .sc-game .sc-bobby{width:56%;max-height:155px}
 }
+
+/* Fixed-position Hold-and-Win gems and Chronic Sessions Wilds stay on top
+   of the independently scrolling strips, including throughout reel stops. */
+.sc-game .sc-reel{isolation:isolate}
+.sc-game .sc-spin-window{z-index:2}
+.sc-game .sc-held-overlay{position:absolute;inset:0;z-index:4;display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:repeat(4,minmax(0,1fr));gap:3px;pointer-events:none}
+.sc-game .sc-held-cell{min-width:0;min-height:0;display:grid;place-items:center}
+.sc-game .sc-held-active{border:2px solid #eecb4c;border-radius:5px;background:radial-gradient(ellipse,#36144c 30%,#0e101b 96%);box-shadow:inset 0 0 14px #55f24c,0 0 10px #e8ab2b}
+.sc-game .sc-held-cell img{display:block;width:84%;height:84%;max-width:100%;max-height:100%;object-fit:contain;min-width:0;min-height:0}
+.sc-game .sc-held-wild{border-color:#83fb51;box-shadow:0 0 13px #51fa37,inset 0 0 12px #7cf85c}
+.sc-game .sc-held-gem{border-color:#e6b54c;box-shadow:0 0 11px #e4ba4a,inset 0 0 12px #4cfacc}
+/* A reel strip's asset is strictly constrained to one of FOUR visible rows.
+   Percentage sizing on CSS-grid tracks had allowed intrinsic image height to
+   enlarge individual cells during the scrolling animation. */
+.sc-game .sc-spin-window{contain:layout paint}
+.sc-game .sc-spin-track{height:400%;display:grid;grid-template-rows:repeat(16,minmax(0,1fr));min-height:0;max-width:100%;overflow:visible}
+.sc-game .sc-spin-tile{position:relative;display:block;min-width:0;min-height:0;max-height:100%;overflow:hidden}
+.sc-game .sc-spin-tile img{position:absolute;inset:10%;display:block;width:80%;height:80%;min-width:0;min-height:0;max-width:80%;max-height:80%;object-fit:contain;object-position:center;filter:drop-shadow(0 1px 2px #000)}
+.sc-win-continuation{stroke-dasharray:10 9;stroke-width:4;opacity:.8;filter:drop-shadow(0 0 7px #59ff35);animation:sc-win-tail .6s ease-out both}
+@keyframes sc-win-tail{from{opacity:0}to{opacity:.8}}
+.sc-hotbox-paytable{max-width:420px}

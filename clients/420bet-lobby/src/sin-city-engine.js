@@ -21,6 +21,10 @@ export const PAYTABLE=Object.freeze({
  '10':[.05,.15,.5],J:[.05,.15,.5],Q:[.05,.15,.5],K:[.05,.15,.5],A:[.05,.15,.5]
 });
 const round=value=>Math.round((value+Number.EPSILON)*100)/100;
+// Candidate final Hotbox awards in multiples of the initiating total stake.
+// Paid once at the end of the collection feature.
+export const HOTBOX_PAYS=Object.freeze([0,0,0,1,2,3,4,5,7,9,12,16,20,25,30,40,50,60,75,90,100]);
+export const hotboxPayout=(gems,stake)=>round(stake*HOTBOX_PAYS[Math.max(0,Math.min(20,gems))]);
 export function randomStops(rng=Math.random){return Array.from({length:REELS},()=>Math.floor(Math.min(.999999999,Math.max(0,rng()))*STRIP_LENGTH));}
 export function visibleBoard(strips,stops){return strips.map((strip,r)=>Array.from({length:ROWS},(_,row)=>strip[(stops[r]+row)%strip.length]));}
 export function count(board,symbol){return board.flat().filter(s=>s===symbol).length;}
@@ -90,6 +94,10 @@ export function nextRound(previous,rng=Math.random,forcedStops){
  if(isRespin){
   s.respins--;
   const locked=new Set(s.locked);
+  for(const key of locked){
+   const r=Math.floor(key/ROWS),row=key%ROWS;
+   before[r][row]='GEM';
+  }
   for(let r=0;r<REELS;r++)for(let row=0;row<ROWS;row++){
    const key=lockKey(r,row);
    if(locked.has(key)){board[r][row]='GEM';continue;}
@@ -98,8 +106,7 @@ export function nextRound(previous,rng=Math.random,forcedStops){
   }
   s.locked=[...locked].sort((a,b)=>a-b);
   changed=s.locked.filter(key=>!previous.locked.includes(key)).map(key=>[Math.floor(key/ROWS),key%ROWS]);
-  if(s.locked.length===20)payout=100*s.roundStake;
-  else if(s.respins===0)payout=round(s.locked.length*s.roundStake*.2);
+  if(s.locked.length===20||s.respins===0)payout=hotboxPayout(s.locked.length,s.roundStake);
   if(s.locked.length===20||s.respins===0){
    s.mode=s.respinReturn;s.respins=0;s.locked=[];
    feature='hotbox-end';
@@ -107,13 +114,14 @@ export function nextRound(previous,rng=Math.random,forcedStops){
  }else{
   if(isFree){
    s.freeRemaining--;s.freePlayed++;
-   for(const key of s.sticky){const r=Math.floor(key/ROWS),row=key%ROWS;board[r][row]='WILD';}
-   // Three maximum sticky Wild positions, adding no more than one per free spin.
-   if(s.sticky.length<3){
-    outer:for(let r=0;r<REELS;r++)for(let row=0;row<ROWS;row++){
-     const key=lockKey(r,row);
-     if(board[r][row]==='WILD'&&!s.sticky.includes(key)){s.sticky.push(key);break outer;}
-    }
+   // Every previously held Wild remains fixed, and every new Wild locks for
+   // the remainder of the feature. All twenty cells may eventually lock.
+   for(const key of s.sticky){
+    const r=Math.floor(key/ROWS),row=key%ROWS;
+    before[r][row]='WILD';board[r][row]='WILD';
+   }
+   for(let r=0;r<REELS;r++)for(let row=0;row<ROWS;row++){
+    if(board[r][row]==='WILD'&&!s.sticky.includes(lockKey(r,row)))s.sticky.push(lockKey(r,row));
    }
    s.sticky.sort((a,b)=>a-b);
   }
@@ -126,7 +134,8 @@ export function nextRound(previous,rng=Math.random,forcedStops){
   lastWins=regular.wins;
   payout=regular.total;
   if(puff.changed.length)feature='puff';
-  if(isFree&&board.filter(reel=>reel.includes('CAR')).length>=3){
+  // Any Lowrider on the visible free-spin grid triggers its multiplier.
+  if(isFree&&count(board,'CAR')>=1){
    const mult=[2,3,4,5][Math.floor(Math.min(.9999999,Math.max(0,rng()))*4)];
    s.freeMultiplier=mult;s.lastMultiplier=mult;payout=round(payout*mult);feature='lowrider';
   }
@@ -161,7 +170,7 @@ export function nextRound(previous,rng=Math.random,forcedStops){
  feature==='puff'?'PUFF PUFF PASS — WILDS SPREAD!':
  feature==='free-retrigger'?'+'+s.lastRetriggeredSpins+' EXTRA FREE SPINS · '+s.freeRemaining+' REMAINING':
  feature==='hotbox'?'HOTBOX · '+s.locked.length+' LOCKED GEMS · '+s.respins+' RESPINS LEFT':
- feature==='hotbox-end'?'HOTBOX BONUS COMPLETE':
+ feature==='hotbox-end'?'HOTBOX COLLECTION COMPLETE · WIN '+payout.toFixed(2):
  feature==='free-end'?'FREE SPINS COMPLETE':
  payout>0?'PRACTICE WIN '+payout.toFixed(2):'NO WIN — TRY AGAIN';
  return s;

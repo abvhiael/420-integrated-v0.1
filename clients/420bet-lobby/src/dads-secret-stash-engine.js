@@ -2,6 +2,11 @@
 export const ROWS=4, COLS=5, MAX_WIN_MULTIPLIER=10000;
 export const SYMBOLS=Object.freeze(['gary','jen','tyler','emma','keller','bud','jar','bong','pizza','lighter','papers','A','K','Q','J','10','wild','scatter','stash','mower']);
 const WEIGHTS=Object.freeze([3,4,5,5,4,5,7,7,10,12,12,14,14,14,14,14,3,2,3,2]);
+// A separate low-Wild strip distribution applies only to free spins. The
+// main reel weights and primary paytable stay unchanged during calibration.
+export const FREE_WEIGHTS=Object.freeze(WEIGHTS.map((weight,i)=>SYMBOLS[i]==='wild'?2:weight));
+export const FREE_STICKY_LIMIT=6;
+export const FREE_MULTIPLIER_STAGES=Object.freeze([1,2,4]);
 export const PAY=Object.freeze({gary:[0,.3,1,4],jen:[0,.25,.8,3],tyler:[0,.2,.65,2.5],emma:[0,.2,.65,2.5],keller:[0,.2,.65,2.5],bud:[0,.2,.65,2.5],jar:[0,.16,.5,2],bong:[0,.16,.5,2],pizza:[0,.1,.3,1],lighter:[0,.08,.25,.8],papers:[0,.08,.25,.8],A:[0,.05,.16,.5],K:[0,.05,.16,.5],Q:[0,.05,.16,.5],J:[0,.05,.16,.5],'10':[0,.05,.16,.5]});
 export const CHARACTERS=Object.freeze({jen:{min:3},family:{min:1},keller:{min:3},bud:{min:3}});
 const PREMIUM=new Set(['gary','jen','tyler','emma','keller','bud','jar','bong']);
@@ -9,16 +14,20 @@ const LOW=new Set(['A','K','Q','J','10','papers','lighter','pizza']);
 const rand=(rng)=>{const value=rng();if(!(value>=0&&value<1))throw Error('RNG must return a number in [0,1)');return value;};
 const integer=(rng,n)=>Math.floor(rand(rng)*n);
 export function choose(rng,items){return items[integer(rng,items.length)];}
-export function draw(rng){let n=integer(rng,WEIGHTS.reduce((a,b)=>a+b,0));for(let i=0;i<SYMBOLS.length;i++){n-=WEIGHTS[i];if(n<0)return SYMBOLS[i];}return '10';}
+function weightedDraw(rng,weights){let n=integer(rng,weights.reduce((a,b)=>a+b,0));for(let i=0;i<SYMBOLS.length;i++){n-=weights[i];if(n<0)return SYMBOLS[i];}return '10';}
+export function draw(rng){return weightedDraw(rng,WEIGHTS);}
 export function board(rng){return Array.from({length:ROWS*COLS},()=>draw(rng));}
+const freeDraw=rng=>weightedDraw(rng,FREE_WEIGHTS);
+const freeBoard=rng=>Array.from({length:ROWS*COLS},()=>freeDraw(rng));
+const freeNonWild=rng=>{let symbol;do{symbol=freeDraw(rng);}while(symbol==='wild');return symbol;};
 export function count(grid,symbol){return grid.filter(s=>s===symbol).length;}
 export function qualify(grid){return {jen:count(grid,'jen')>=3,family:count(grid,'tyler')>0&&count(grid,'emma')>0,keller:count(grid,'keller')>=3,bud:count(grid,'bud')>=3};}
 export function triggerCharacters(grid,rng){const flags=qualify(grid);return Object.fromEntries(Object.keys(flags).map(k=>[k,flags[k]&&rand(rng)<.25]));}
 export function evaluate(grid){if(grid.length!==20)throw Error('Expected five reels, four rows');let units=0;const wins=[];for(const [symbol,pay] of Object.entries(PAY)){let ways=1,matched=0;for(let reel=0;reel<COLS;reel++){const hits=grid.slice(reel*ROWS,reel*ROWS+ROWS).filter(x=>x===symbol||x==='wild').length;if(!hits)break;ways*=hits;matched++;}if(matched>=3){const multiplier=pay[matched-2];const amount=ways*multiplier;units+=amount;wins.push({symbol,matched,ways,amount});}}return {units,wins};}
 export function replaceRandom(grid,rng,eligible,replacement,n){const out=grid.slice(),available=out.map((s,i)=>eligible(s,i)?i:-1).filter(i=>i>=0);for(let k=0;k<n&&available.length;k++){const p=integer(rng,available.length);out[available.splice(p,1)[0]]=replacement;}return out;}
 export function modifier(grid,type,rng){let out=grid.slice(),label='';if(type==='jen'){const event=choose(rng,['HIDE THE STASH','PANIC WILDS','GARAGE CLEANUP','CAUGHT RED-HANDED']);label=event;if(event==='HIDE THE STASH')out=replaceRandom(out,rng,s=>s!=='scatter'&&s!=='stash','stash',2+integer(rng,4));if(event==='PANIC WILDS')out=replaceRandom(out,rng,s=>s!=='scatter'&&s!=='wild','wild',2+integer(rng,3));if(event==='GARAGE CLEANUP')out=out.map(s=>LOW.has(s)?choose(rng,[...PREMIUM]):s);return {grid:out,label,multiplier:event==='CAUGHT RED-HANDED'?2+integer(rng,2):1};}
-if(type==='family'){const event=choose(rng,['LOW SYMBOL UPGRADE','WILD GRAFFITI','SCATTER SCRAMBLE','GARAGE MAYHEM']);label=event;if(event==='LOW SYMBOL UPGRADE')out=out.map(s=>LOW.has(s)?choose(rng,[...PREMIUM]):s);if(event==='WILD GRAFFITI')out=replaceRandom(out,rng,s=>s!=='scatter'&&s!=='stash','wild',2+integer(rng,3));if(event==='SCATTER SCRAMBLE')out=replaceRandom(out,rng,s=>s!=='scatter','scatter',1+integer(rng,2));if(event==='GARAGE MAYHEM')out=replaceRandom(out,rng,s=>LOW.has(s),choose(rng,[...PREMIUM]),3+integer(rng,3));return {grid:out,label,multiplier:1};}
-if(type==='bud')return {grid:replaceRandom(out,rng,s=>s!=='wild'&&s!=='scatter'&&s!=='stash','wild',2+integer(rng,4)),label:'FETCH WILD!',multiplier:1};
+if(type==='family'){const event=choose(rng,['LOW SYMBOL UPGRADE','WILD GRAFFITI','SCATTER SCRAMBLE','GARAGE MAYHEM']);label=event;if(event==='LOW SYMBOL UPGRADE')out=out.map(s=>LOW.has(s)?choose(rng,[...PREMIUM]):s);if(event==='WILD GRAFFITI')out=replaceRandom(out,rng,s=>s!=='scatter'&&s!=='stash','wild',3);if(event==='SCATTER SCRAMBLE')out=replaceRandom(out,rng,s=>s!=='scatter','scatter',1+integer(rng,2));if(event==='GARAGE MAYHEM')out=replaceRandom(out,rng,s=>LOW.has(s),choose(rng,[...PREMIUM]),3+integer(rng,3));return {grid:out,label,multiplier:1};}
+if(type==='bud')return {grid:replaceRandom(out,rng,s=>s!=='wild'&&s!=='scatter'&&s!=='stash','wild',3),label:'FETCH WILD!',multiplier:1};
 throw Error('Unknown modifier');}
 export function inspection(grid,rng){
  const spins=5;
@@ -38,7 +47,7 @@ export function inspection(grid,rng){
 // replenish the respins. The complete generated timeline determines the award;
 // the UI must replay every snapshot before returning to the base reels.
 export function stashBonus(rng){
- const slots=Array(ROWS*COLS).fill(null),values=[.2,.5,1,1.5,2,3,5,10];
+ const slots=Array(ROWS*COLS).fill(null),values=[.12,.3,.6,.9,1.2,1.8,3,6];
  const start=[];
  for(let i=0;i<3;i++){
   const free=slots.map((v,k)=>v===null?k:-1).filter(k=>k>=0);
@@ -49,7 +58,7 @@ export function stashBonus(rng){
  while(remaining>0&&number<40&&slots.some(v=>v===null)){
   number++;const added=[];
   for(let i=0;i<slots.length;i++){
-   if(slots[i]===null&&rand(rng)<.085){slots[i]=choose(rng,values);added.push(i);}
+   if(slots[i]===null&&rand(rng)<.075){slots[i]=choose(rng,values);added.push(i);}
   }
   remaining=added.length?3:remaining-1;
   steps.push({board:slots.slice(),newIndices:added,remaining,kind:'respin',number});
@@ -60,14 +69,22 @@ export function stashBonus(rng){
   completed:prizes.length===slots.length,label:'SECRET STASH HOLD & WIN'};
 }
 export function freeBonus(rng){
+ // 8/15/22 free spins stay intact. Sticky positions persist but can accumulate
+ // at most six Wilds across the 5×4 board, preventing 1,024-ways saturation.
+ // The initial free-spin strips are lighter on Wilds than the base game.
  const spins=8+integer(rng,3)*7;let total=0;
  const sticky=new Map(),boards=[];
  for(let spin=0;spin<spins;spin++){
-  const grid=board(rng),previous=[...sticky.keys()];
+  const grid=freeBoard(rng),previous=[...sticky.keys()];
   for(const [i,s] of sticky)grid[i]=s;
   const newWilds=[];
-  grid.forEach((s,i)=>{if(s==='wild'&&!sticky.has(i)){sticky.set(i,'wild');newWilds.push(i);}});
-  const mult=Math.min(5,1+Math.floor(spin/4));
+  grid.forEach((symbol,i)=>{
+   if(symbol!=='wild'||sticky.has(i))return;
+   if(sticky.size<FREE_STICKY_LIMIT){sticky.set(i,'wild');newWilds.push(i);}
+   else grid[i]=freeNonWild(rng);
+  });
+  const mult=spin<6?FREE_MULTIPLIER_STAGES[0]:
+   spin<12?FREE_MULTIPLIER_STAGES[1]:FREE_MULTIPLIER_STAGES[2];
   const units=evaluate(grid).units*mult;total+=units;
   boards.push({grid,units,mult,sticky:[...sticky.keys()],newWilds,previous});
  }

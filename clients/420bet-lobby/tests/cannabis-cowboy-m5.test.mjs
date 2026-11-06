@@ -14,7 +14,7 @@ const withScatters=(n)=>{const board=patterned();for(let i=0;i<n;i++)board[i]=SC
 test('scatter is tenth symbol: never pays clusters, and awards 8/12/16/20 free spins',()=>{
  assert.equal(SCATTER_SYMBOL,9);
  assert.equal(COWBOY_SYMBOLS[9].kind,'scatter');
- assert.equal(SCATTER_CHANCE,0.03);
+ assert.equal(SCATTER_CHANCE,0.012);
  assert.deepEqual(FREE_SPIN_AWARDS,{3:8,4:12,5:16,6:20});
  for(const [count,want] of [[0,0],[1,0],[2,0],[3,8],[4,12],[5,16],[6,20],[15,20]]){
   assert.equal(countScatters(withScatters(count)),count);

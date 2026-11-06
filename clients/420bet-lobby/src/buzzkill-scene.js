@@ -26,7 +26,7 @@ export function mountBuzzkillScene(parent,{reducedMotion=false}={}){
    this.load.image('buzz-fx-clouds',ART+'fx-clouds.webp');
    // Approved illustrated artwork, re-extracted with verified opacity.
    this.load.spritesheet('buzz-kevin-clean',CIN+'kevin-clean-atlas.webp',{frameWidth:444,frameHeight:444});
-   for(let i=1;i<=6;i++)this.load.image('buzz-mom-pose-'+i,CIN+'mom-pose-'+String(i).padStart(2,'0')+'.webp');
+   this.load.spritesheet('buzz-mom-mirrored',ASSETS+'cinematic-v3/mom-mirrored-12f.webp',{frameWidth:200,frameHeight:300});
    this.load.svg('buzz-crash-splash',CIN+'buzzkilled-action-splash.svg',{width:1200,height:530});
   }
   create(){
@@ -48,50 +48,16 @@ export function mountBuzzkillScene(parent,{reducedMotion=false}={}){
    // Never lay those images over Kevin; only procedural text-free FX may render.
    this.cloudIllustration=null;
    this.flowerIllustration=null;
-   // Trim giant transparent margins from the approved illustrated Mom poses.
-   // The source images can have >300 empty rows; displaying the full image
-   // creates jumpy transitions and apparent head/door clipping.
-   this.momPoseKeys=new Map();
-   for(let i=1;i<=6;i++){
-     const key='buzz-mom-pose-'+i;
-     if(!this.textures.exists(key))continue;
-     try{
-       const source=this.textures.get(key).getSourceImage();
-       const w=source.width,h=source.height;
-       const scan=document.createElement('canvas');scan.width=w;scan.height=h;
-       const context=scan.getContext('2d',{willReadFrequently:true});
-       context.drawImage(source,0,0);
-       const pixels=context.getImageData(0,0,w,h).data;
-       let left=w,top=h,right=-1,bottom=-1;
-       for(let y=0;y<h;y++)for(let x=0;x<w;x++){
-         if(pixels[(y*w+x)*4+3]>48){
-           if(x<left)left=x;if(x>right)right=x;
-           if(y<top)top=y;if(y>bottom)bottom=y;
-         }
-       }
-       if(right<left||bottom<top)continue;
-       const pad=8;
-       left=Math.max(0,left-pad);top=Math.max(0,top-pad);
-       right=Math.min(w-1,right+pad);bottom=Math.min(h-1,bottom+pad);
-       const crop=document.createElement('canvas');
-       crop.width=right-left+1;crop.height=bottom-top+1;
-       crop.getContext('2d').drawImage(source,left,top,crop.width,crop.height,0,0,crop.width,crop.height);
-       const croppedKey=key+'-trimmed';
-       this.textures.addCanvas(croppedKey,crop);
-       this.momPoseKeys.set(i,croppedKey);
-     }catch(_err){this.momPoseKeys.set(i,key);}
-   }
+   // Mom's new approved mirrored sprite atlas has 12 true transparent fixed-size
+   // frames. No runtime alpha trimming or duplicate character/door artwork.
    // Use clean real illustrated poses, never the crude vector placement graphics.
    this.kevin=this.add.sprite(BUZZ_STAGE.kevinX,BUZZ_STAGE.kevinFloorY,use('buzz-kevin-clean','buzz-kevin-lift1'))
      .setOrigin(.5,.88).setDisplaySize(BUZZ_STAGE.kevinWidth,BUZZ_STAGE.kevinHeight)
      .setAlpha(1).setVisible(true).setDepth(5);
-   this.mom=this.add.image(BUZZ_STAGE.momDoorX,BUZZ_STAGE.momFloorY,this.momPoseKeys.get(1)||use('buzz-mom-pose-1','buzz-mom-entry'))
-     .setOrigin(.5,1).setAlpha(1).setDepth(9);
-   const initialMomWidth=Math.min(BUZZ_STAGE.momWidth,BUZZ_STAGE.momHeight*this.mom.width/Math.max(1,this.mom.height));
-   this.mom.setDisplaySize(initialMomWidth,BUZZ_STAGE.momHeight);
-   // Pose-to-pose crossfade, not abrupt frame swapping.
-   this.momOverlay=this.add.image(BUZZ_STAGE.momDoorX,BUZZ_STAGE.momFloorY,this.mom.texture.key)
-     .setOrigin(.5,1).setDisplaySize(initialMomWidth,BUZZ_STAGE.momHeight)
+   this.mom=this.add.sprite(BUZZ_STAGE.momDoorX,BUZZ_STAGE.momFloorY,'buzz-mom-mirrored',0)
+     .setOrigin(.5,1).setDisplaySize(BUZZ_STAGE.momWidth,BUZZ_STAGE.momHeight).setAlpha(1).setDepth(9);
+   this.momOverlay=this.add.sprite(BUZZ_STAGE.momDoorX,BUZZ_STAGE.momFloorY,'buzz-mom-mirrored',0)
+     .setOrigin(.5,1).setDisplaySize(BUZZ_STAGE.momWidth,BUZZ_STAGE.momHeight)
      .setVisible(false).setAlpha(0).setDepth(9.2);
    this.mom.setVisible(false);
    this.doorGlow=this.add.rectangle(1070,315,178,448,0xffedb6,0).setDepth(8);
@@ -188,9 +154,8 @@ export function mountBuzzkillScene(parent,{reducedMotion=false}={}){
    s.mom.setVisible(false).setPosition(BUZZ_STAGE.momDoorX,BUZZ_STAGE.momFloorY).setAlpha(1).setOrigin(.5,1);
    s.tweens.killTweensOf(s.momOverlay);
    s.momOverlay.setVisible(false).setAlpha(0);
-   const first=s.momPoseKeys.get(1)||'buzz-mom-pose-1';
-   if(s.textures.exists(first))s.mom.setTexture(first);
-   s.mom.setDisplaySize(Math.min(BUZZ_STAGE.momWidth,BUZZ_STAGE.momHeight*s.mom.width/Math.max(1,s.mom.height)),BUZZ_STAGE.momHeight);
+   s.mom.setTexture('buzz-mom-mirrored').setFrame(0)
+     .setDisplaySize(BUZZ_STAGE.momWidth,BUZZ_STAGE.momHeight);
    s.doorPanel.setAlpha(0).setScale(1,1);
    s.doorShadow.setAlpha(0);s.doorGlow.setAlpha(0);
    s.bubble.setAlpha(0);s.bubbleText.setAlpha(0);s.bubbleText.setText('');
@@ -211,34 +176,31 @@ export function mountBuzzkillScene(parent,{reducedMotion=false}={}){
    s.roundVisualSeed=(s.roundVisualSeed||0)+1;
    s.kevin.setVisible(true).setAlpha(1); // Freeze Kevin at the crash altitude.
    s.mom.setVisible(true).setAlpha(1).setPosition(BUZZ_STAGE.momDoorX,BUZZ_STAGE.momFloorY);
-   s.doorPanel.setAlpha(1).setScale(1,1);s.doorShadow.setAlpha(.93);s.doorGlow.setAlpha(.42);
+   // The twelve approved mirrored frames already include Mom AND the wooden
+   // door. Never paint a second Phaser door on top of the illustrated doorway.
+   s.doorPanel.setAlpha(0);s.doorShadow.setAlpha(0);s.doorGlow.setAlpha(0);
    s.bubble.setAlpha(0);s.bubbleText.setAlpha(0).setText('');
    if(s.crashSplash)s.crashSplash.setAlpha(0);
    s.crashText.setAlpha(0);
    function pose(index){
-     const key=s.momPoseKeys.get(index)||'buzz-mom-pose-'+index;
-     if(!s.textures.exists(key)||s.mom.texture.key===key)return;
-     const commit=()=>{
-       s.mom.setTexture(key).setOrigin(.5,1);
-       s.mom.setDisplaySize(Math.min(BUZZ_STAGE.momWidth,BUZZ_STAGE.momHeight*s.mom.width/Math.max(1,s.mom.height)),BUZZ_STAGE.momHeight);
-     };
+     const frame=Math.max(0,Math.min(11,index-1));
+     if(s.mom.frame.name===frame)return;
+     const commit=()=>s.mom.setFrame(frame).setDisplaySize(BUZZ_STAGE.momWidth,BUZZ_STAGE.momHeight);
      if(reducedMotion){commit();return;}
      s.tweens.killTweensOf(s.momOverlay);
-     s.momOverlay.setTexture(key).setOrigin(.5,1);
-     s.momOverlay.setDisplaySize(Math.min(BUZZ_STAGE.momWidth,BUZZ_STAGE.momHeight*s.momOverlay.width/Math.max(1,s.momOverlay.height)),BUZZ_STAGE.momHeight);
-     s.momOverlay.setPosition(s.mom.x,s.mom.y).setVisible(true).setAlpha(0);
-     s.tweens.add({targets:s.momOverlay,alpha:1,duration:105,ease:'Sine.InOut',onComplete:()=>{
+     s.momOverlay.setFrame(frame).setDisplaySize(BUZZ_STAGE.momWidth,BUZZ_STAGE.momHeight)
+       .setPosition(s.mom.x,s.mom.y).setVisible(true).setAlpha(0);
+     s.tweens.add({targets:s.momOverlay,alpha:1,duration:145,ease:'Sine.InOut',onComplete:()=>{
        if(disposed||gen!==crashGeneration)return;
        commit();s.momOverlay.setVisible(false).setAlpha(0);
      }});
    }
    pose(1);
    if(reducedMotion){
-     s.doorPanel.setScale(.18,1);
-     s.mom.setX(BUZZ_STAGE.momInX);
+     s.mom.setX(BUZZ_STAGE.momInX).setFrame(11);
    }else{
-     s.tweens.add({targets:s.doorPanel,scaleX:.18,duration:BUZZ_CINEMATIC.doorOpenMs,ease:'Sine.InOut'});
-     // Twelve illustrated key beats, eased between six approved Mom poses.
+     // Slow, non-looping frame progression. Positions are eased between poses
+     // so the 12 illustrated frames feel like one staged entrance.
      MOM_ENTRY_BEATS.forEach((beat,i)=>{
        schedule(beat.ms,()=>{
          pose(beat.pose);
@@ -251,11 +213,9 @@ export function mountBuzzkillScene(parent,{reducedMotion=false}={}){
    }
    schedule(BUZZ_CINEMATIC.enterCompleteMs,()=>{
      s.mom.setX(BUZZ_STAGE.momInX);
-     pose(4);
+     pose(9);
      s.bubbleText.setText(say).setAlpha(1);s.bubble.setAlpha(1);
    });
-   schedule(2000,()=>pose(5));
-   schedule(3400,()=>pose(6));
    schedule(BUZZ_CINEMATIC.lectureEndMs,()=>{
      s.bubble.setAlpha(0);s.bubbleText.setAlpha(0);
      cinematicEffectsOff=true;s.doorGlow.setAlpha(0);

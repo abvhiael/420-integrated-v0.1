@@ -2,7 +2,7 @@
 export const BUZZ_STAGE=Object.freeze({
  width:1200,height:675,kevinX:570,kevinFloorY:558,
  kevinWidth:320,kevinHeight:320,maxLift:78,hover:3,
- momDoorX:1062,momInX:1004,momFloorY:558,momHeight:405,momWidth:260,
+ momDoorX:1058,momInX:1004,momFloorY:558,momHeight:420,momWidth:280,
 });
 // Kevin never loops back to a lower animation frame within a round.
 // Every selected frame is part of one 4x2, 444px-cell production atlas.
@@ -24,20 +24,20 @@ export function kevinYForMultiplier(multiplier,bob=0){
  const hover=Math.max(-BUZZ_STAGE.hover,Math.min(BUZZ_STAGE.hover,Number.isFinite(bob)?bob:0));
  return Math.max(475,BUZZ_STAGE.kevinFloorY-kevinLiftForMultiplier(multiplier)+hover);
 }
-// The 12 beats interpolate the six fully illustrated Mom key poses.
-// Pose index is 1-based and never cycles; 0.5s final pause comes after speech.
+// Every beat is its OWN illustrated frame (F01 to F12 in fixed order).
+// The source is already mirrored: no code-side flip or frame loop.
 export const MOM_ENTRY_BEATS=Object.freeze([
- {ms:0,pose:1,x:1062},
- {ms:120,pose:1,x:1058},
- {ms:230,pose:2,x:1054},
- {ms:340,pose:2,x:1040},
- {ms:460,pose:3,x:1026},
- {ms:580,pose:3,x:1016},
- {ms:700,pose:4,x:1008},
- {ms:830,pose:4,x:1004},
- {ms:950,pose:4,x:1004},
- {ms:1550,pose:5,x:1004},
- {ms:2770,pose:5,x:1004},
- {ms:3550,pose:6,x:1004},
+ {ms:0,pose:1,x:1058},
+ {ms:230,pose:2,x:1053},
+ {ms:470,pose:3,x:1045},
+ {ms:720,pose:4,x:1037},
+ {ms:980,pose:5,x:1028},
+ {ms:1250,pose:6,x:1020},
+ {ms:1520,pose:7,x:1012},
+ {ms:1870,pose:8,x:1004},
+ {ms:2200,pose:9,x:1004},
+ {ms:3150,pose:10,x:1004},
+ {ms:4200,pose:11,x:1004},
+ {ms:5100,pose:12,x:1004},
 ]);
 export function readableMomLine(line){return String(line).replace(/\n/g,' ').trim();}

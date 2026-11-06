@@ -1,13 +1,13 @@
 // BUZZKILL! visual-only crash choreography. Never controls payout or crash timing.
 export const BUZZ_CINEMATIC=Object.freeze({
- doorOpenMs:420,
- enterCompleteMs:950,
- lectureBeginMs:950,
- lectureEndMs:4450,
+ doorOpenMs:1000,
+ enterCompleteMs:2200,
+ lectureBeginMs:2200,
+ lectureEndMs:5700,
  pauseMs:500,
- splashAtMs:4950,
+ splashAtMs:6200,
  splashDurationMs:1550,
- completeMs:6500,
+ completeMs:7750,
 });
 export const BUZZ_MOM_LINES=Object.freeze([
  'KEVIN! WHAT THE HELL\nARE YOU DOING IN HERE?!',
@@ -18,12 +18,10 @@ export const BUZZ_MOM_LINES=Object.freeze([
 ]);
 export function momPoseAt(ms){
  if(!Number.isFinite(ms)||ms<0)throw new RangeError('Invalid cinematic time');
- if(ms<280)return 0;
- if(ms<600)return 1;
- if(ms<950)return 2;
- if(ms<2000)return 3;
- if(ms<3400)return 4;
- return 5;
+ const times=[0,230,470,720,980,1250,1520,1870,2200,3150,4200,5100];
+ let index=0;
+ for(let i=1;i<times.length;i++)if(ms>=times[i])index=i;
+ return index;
 }
 export function crashVisualPhase(ms){
  if(!Number.isFinite(ms)||ms<0)throw new RangeError('Invalid cinematic time');

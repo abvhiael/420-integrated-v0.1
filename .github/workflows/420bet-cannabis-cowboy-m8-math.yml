@@ -31,6 +31,12 @@ jobs:
           node scripts/cannabis-cowboy-m8-audit.mjs --samples 200000 --seed 7654321 --bet 10 --output artifacts/cannabis-cowboy-m8/rtp-bet10.json
           node scripts/cannabis-cowboy-m8-audit.mjs --samples 200000 --seed 7654321 --bet 20 --output artifacts/cannabis-cowboy-m8/rtp-bet20.json
           node scripts/cannabis-cowboy-m8-audit.mjs --samples 200000 --seed 7654321 --bet 50 --output artifacts/cannabis-cowboy-m8/rtp-bet50.json
+      - name: Exact-trigger weighted RTP and bonus-tail qualification
+        working-directory: clients/420bet-lobby
+        run: |
+          node scripts/cannabis-cowboy-m8-stratified.mjs --base 200000 --feature3 30000 --feature4 6000 --feature5 1500 --feature6 500 --seed 7654321 --bet 10 --output artifacts/cannabis-cowboy-m8/stratified-bet10.json
+          node scripts/cannabis-cowboy-m8-stratified.mjs --base 200000 --feature3 30000 --feature4 6000 --feature5 1500 --feature6 500 --seed 7654321 --bet 20 --output artifacts/cannabis-cowboy-m8/stratified-bet20.json
+          node scripts/cannabis-cowboy-m8-stratified.mjs --base 200000 --feature3 30000 --feature4 6000 --feature5 1500 --feature6 500 --seed 7654321 --bet 50 --output artifacts/cannabis-cowboy-m8/stratified-bet50.json
       - uses: actions/upload-artifact@v4
         if: always()
         with:

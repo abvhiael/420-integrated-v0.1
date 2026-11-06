@@ -141,3 +141,18 @@ test('Larry has four valid canonical sprite images and the base game renders the
  assert.match(source,/showScene\(\['free','stash','mow'\]/,'Feature announcements must switch backgrounds');
  game.stopAnimation();
 });
+
+test('Larry uses enlarged foreground art anchored to the recliner, with a ground-level lawnmower variant',()=>{
+ const css=readFileSync(new URL('../src/dads-secret-stash.css',import.meta.url),'utf8');
+ const sizing=css.slice(css.indexOf("/* Larry's full-body art was constrained"));
+ assert(sizing.includes('.dss-larry-panel .dss-larry'));
+ assert.match(sizing,/width:148%;\s*height:148%/);
+ assert.match(sizing,/bottom:-26%/);
+ assert.match(sizing,/data-mode="mow"/);
+ assert.match(sizing,/bottom:-8%/);
+ assert.match(sizing,/max-width:none/);
+ const {document}=parseHTML('<html><body></body></html>');
+ const game=createDadsSecretStash(document);
+ assert(game.querySelector('.dss-larry-panel img.dss-larry'));
+ game.stopAnimation();
+});

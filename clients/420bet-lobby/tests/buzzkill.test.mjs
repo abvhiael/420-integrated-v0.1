@@ -177,6 +177,8 @@ test('BUZZKILL render uses only the cleaned atlas and trims Mom before display',
  assert(scene.includes('this.textures.addCanvas(croppedKey,crop)'));
  assert(scene.includes('s.mom.setDisplaySize')||scene.includes('s.mom.setDisplaySize('));
  assert(scene.includes('MOM_ENTRY_BEATS.forEach'));
+ assert(scene.includes("s.momOverlay.setTexture(key)"));
+ assert(scene.includes("duration:105,ease:'Sine.InOut'"));
  assert(scene.includes("s.bubbleText.setText(say).setAlpha(1)"));
  assert(scene.includes('schedule(BUZZ_CINEMATIC.lectureEndMs'));
  assert(scene.includes('schedule(BUZZ_CINEMATIC.splashAtMs'));

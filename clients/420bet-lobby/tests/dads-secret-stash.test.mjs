@@ -167,7 +167,7 @@ test('Supporting cast stays visible through slide-in and full-second result anno
 
 test('Regular-play Larry uses a chair-height crop anchored at his face rather than full-body fit',()=>{
  const css=readFileSync(new URL('../src/dads-secret-stash.css',import.meta.url),'utf8');
- const block=css.slice(css.lastIndexOf('/* Regular-play Larry:'));
+ const block=css.slice(css.lastIndexOf('/* Regular-play Larry:'),css.indexOf('/* Real Secret Stash feature board:'));
  assert.match(block,/data-mode="main"/);
  assert.match(block,/width:200%;\s*height:145%/);
  assert.match(block,/top:-6%;\s*bottom:auto/);
@@ -207,7 +207,8 @@ test('Secret Stash UI has independent 5x4 bonus board, not a summary-only popup'
  assert.equal(game.querySelector('.dss-hold-win').hidden,true);
  const source=readFileSync(new URL('../src/dads-secret-stash-ui.js',import.meta.url),'utf8');
  assert.match(source,/if\(event\.type==='stash'\)\{playStashBonus\(event\);return;\}/);
- assert.match(source,/schedule\(advance,950\)/);
+ assert.match(source,/schedule\(advance,850\)/);
+ assert.match(source,/tick===20\+reel\*10/);
  assert(source.includes("showFeatureResult(event,()=>{holdWin.hidden=true;reels.hidden=false;bonusHeader.hidden=true;nextEvent();})"));
  game.stopAnimation();
 });

@@ -94,4 +94,4 @@ const pooledVariance=results.reduce((sum,r)=>{
 const pooledSE=100*Math.sqrt(pooledVariance/combinedSpins);
 combined.normal95Pct=[combined.rtpPct-1.96*pooledSE,combined.rtpPct+1.96*pooledSE];
 combined.standardErrorPct=pooledSE;
-console.log('RTP_AUDIT_RESULT '+JSON.stringify({status:'uncalibrated-practice-engine',method:'seeded sequential Monte Carlo; full bonus episodes and 5000x cap',baseStripLengths:BASE_STRIPS.map(r=>r.length),freeStripLengths:FREE_STRIPS.map(r=>r.length),hotboxPays:HOTBOX_PAYS,combined,seeds:results}));
+console.log('RTP_AUDIT_RESULT '+JSON.stringify({status:'provisional-calibrated-practice-engine',method:'seeded sequential Monte Carlo; full bonus episodes and 5000x cap',baseStripLengths:BASE_STRIPS.map(r=>r.length),freeStripLengths:FREE_STRIPS.map(r=>r.length),hotboxPays:HOTBOX_PAYS,combined,seeds:results}));

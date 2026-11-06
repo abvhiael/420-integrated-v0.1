@@ -113,7 +113,7 @@ test('Concept-accurate composition has prominent Larry, reel symbol breathing ro
  assert.equal(scene.querySelectorAll('.dss-cell').length,20);
  assert(scene.querySelector('.dss-feature-panel'));
  assert.match(scene.querySelector('.dss-feature-panel').textContent,/GARAGE FEATURES/);
- assert.match(scene.querySelector('.dss-feature-panel').textContent,/HOLD & WIN/);
+ assert.match(scene.querySelector('.dss-feature-panel').textContent,/Hold & Win/i);
  assert.match(scene.querySelector('.dss-feature-panel').textContent,/Free Spins/);
  assert.match(scene.querySelector('.dss-feature-panel').textContent,/Cascades/);
  const css=readFileSync(new URL('../src/dads-secret-stash.css',import.meta.url),'utf8');

@@ -1,0 +1,33 @@
+name: Sin City RTP Monte Carlo qualification
+on:
+  push:
+    branches:
+      - audit/sin-city-rtp-qualification
+    paths:
+      - 'clients/420bet-lobby/tests/sin-city-rtp-audit.mjs'
+      - '.github/workflows/sin-city-rtp-audit.yml'
+  workflow_dispatch:
+jobs:
+  rtp-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: clients/420bet-lobby
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run seeded full-feature RTP Monte Carlo against unchanged engine
+        env:
+          SPINS_PER_SEED: '150000'
+          RTP_SEEDS: '420,1337,20261106'
+        run: node tests/sin-city-rtp-audit.mjs | tee /tmp/sin-city-rtp-audit.log
+      - name: Save RTP evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sin-city-rtp-evidence
+          path: /tmp/sin-city-rtp-audit.log
+          if-no-files-found: ignore

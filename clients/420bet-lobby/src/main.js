@@ -96,9 +96,9 @@ function updateGrid(){
   const matched=filterGames(catalogue,filter,term);
   if(!matched.length){grid.append(node('p','empty','No games match your search.'));return;}
   matched.forEach(g=>{
-    const card=node('article','card');const art=node('div','art art-'+g.category.toLowerCase().replace(' ','-')+(g.id==='mines'?' art-pest-control':g.id==='crash'?' art-buzzkill':g.id==='video-poker'?' art-royal-kush':g.id==='live-poker'?' art-live-poker':''));art.setAttribute('aria-hidden','true');art.textContent=g.id==='mines'?'🌿':g.id==='crash'?'☮':g.id==='video-poker'?'♛':g.id==='live-poker'?'♠':({'Casino':'✦','Poker':'♠','Fantasy':'★','Sportsbook':'◆'})[g.category];card.append(art);
-    const details=node('div','details');details.append(node('small','category',g.category),node('h2','',g.title),node('span','status',['slots','mines','crash','video-poker'].includes(g.id)?'Practice available':statusText[g.status]));
-    details.append(button(g.id==='slots'?'Browse Slots':g.id==='mines'?'Play Pest Control':g.id==='crash'?'Play BUZZKILL!':g.id==='video-poker'?'Play Royal Kush':g.id==='live-poker'?'View Poker Room':g.route?'Enter game':'View preview',()=>launch(g),'open'));card.append(details);grid.append(card);
+    const card=node('article','card');const art=node('div','art art-'+g.category.toLowerCase().replace(' ','-')+(g.id==='mines'?' art-pest-control':g.id==='crash'?' art-buzzkill':g.id==='video-poker'?' art-royal-kush':g.id==='live-poker'?' art-live-poker':g.id==='poker-tournaments'?' art-poker-tournaments':''));art.setAttribute('aria-hidden','true');art.textContent=g.id==='mines'?'🌿':g.id==='crash'?'☮':g.id==='video-poker'?'♛':g.id==='live-poker'?'♠':g.id==='poker-tournaments'?'♛':({'Casino':'✦','Poker':'♠','Fantasy':'★','Sportsbook':'◆'})[g.category];card.append(art);
+    const details=node('div','details');details.append(node('small','category',g.category),node('h2','',g.title),node('span','status',['slots','mines','crash','video-poker'].includes(g.id)?'Practice available':g.id==='poker-tournaments'?'Testnet preview':statusText[g.status]));
+    details.append(button(g.id==='slots'?'Browse Slots':g.id==='mines'?'Play Pest Control':g.id==='crash'?'Play BUZZKILL!':g.id==='video-poker'?'Play Royal Kush':g.id==='live-poker'?'View Poker Room':g.id==='poker-tournaments'?'Explore Tournaments':g.route?'Enter game':'View preview',()=>launch(g),'open'));card.append(details);grid.append(card);
   });
 }
 window.addEventListener('keydown',e=>{if(e.key==='Escape'&&active&&!document.querySelector('.es-info-overlay'))close();});

@@ -15,13 +15,20 @@ try{
   const initial=await page.evaluate(()=>{
    const rect=sel=>{const node=document.querySelector(sel);if(!node)throw Error('Missing '+sel);const r=node.getBoundingClientRect();return {x:r.x,y:r.y,w:r.width,h:r.height,right:r.right,bottom:r.bottom};};
    const images=[...document.querySelectorAll('.sc-game img')].map(img=>({src:img.getAttribute('src'),loaded:img.complete&&img.naturalWidth>0,width:img.naturalWidth,height:img.naturalHeight}));
-   return {reels:rect('.sc-reels'),bobby:rect('.sc-mascot'),logo:rect('.sc-logo'),cabinet:rect('.sc-cabinet'),images,cellCount:document.querySelectorAll('.sc-symbol').length,columns:document.querySelectorAll('.sc-reel').length,bodyScroll:document.documentElement.scrollWidth,wallpaper:getComputedStyle(document.querySelector('main.immersive')).backgroundImage,headerBackground:getComputedStyle(document.querySelector('.gamebar')).backgroundColor};
+   return {reels:rect('.sc-reels'),bobby:rect('.sc-mascot'),portrait:rect('.sc-bobby'),logo:rect('.sc-logo'),cabinet:rect('.sc-cabinet'),cells:[...document.querySelectorAll('.sc-reel')].map(col=>[...col.querySelectorAll('.sc-symbol')].map(cell=>{const r=cell.getBoundingClientRect();return {y:r.y,bottom:r.bottom,height:r.height};})),images,cellCount:document.querySelectorAll('.sc-symbol').length,columns:document.querySelectorAll('.sc-reel').length,bodyScroll:document.documentElement.scrollWidth,wallpaper:getComputedStyle(document.querySelector('main.immersive')).backgroundImage,headerBackground:getComputedStyle(document.querySelector('.gamebar')).backgroundColor};
   });
   assert.equal(initial.cellCount,20,'Must render exactly 20 positions');
   assert.equal(initial.columns,5);
+  assert.ok(initial.cells.every(col=>col.length===4),'Each reel must show four rows');
+  for(const col of initial.cells){
+   assert.ok(col.every(cell=>cell.height>=30),'Collapsed symbol row: '+JSON.stringify(col));
+   assert.ok(col[0].y>=initial.reels.y-4,'Top symbol escapes reel grid');
+   assert.ok(col[3].bottom<=initial.reels.bottom+4,'Fourth row must be fully visible, not cropped');
+  }
   assert.ok(initial.reels.w>200&&initial.reels.h>150,'Reels must be visible');
   assert.ok(initial.bobby.w>80&&initial.bobby.h>(name==='mobile'?90:140),'Bobby character panel must be visible');
-  assert.ok(initial.logo.w>100,'Title must be visible');
+  assert.ok(initial.logo.w>(name==='desktop'?370:100),'Title must be rendered large');
+  if(name==='desktop')assert.ok(initial.portrait.w>=300,'Bobby must be the large dominant character illustration');
   assert.ok(initial.images.every(x=>x.loaded),'All artwork must load: '+JSON.stringify(initial.images.filter(x=>!x.loaded)));
   // Both desktop side-by-side and narrow stacked layouts must not overlap.
   const horizontalOverlap=Math.min(initial.bobby.right,initial.reels.right)-Math.max(initial.bobby.x,initial.reels.x);

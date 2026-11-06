@@ -126,3 +126,48 @@ main.immersive .view-scroll:has(.sc-game){background:transparent}
  .sc-game .sc-control,.sc-game .sc-spin{min-height:38px}
 }
 @media(prefers-reduced-motion:reduce){.sc-spin-track{animation:none!important}}
+
+/* Screenshot 482 acceptance: a REAL 5x4 playable grid, dramatic character
+ * and title assets. These override earlier viewport compression rules. */
+@media(min-width:761px){
+ main.immersive:has(.sc-game){overflow-y:auto;overflow-x:hidden;height:100dvh;isolation:isolate}
+ main.immersive .view-scroll:has(.sc-game){flex:0 0 auto;overflow:visible;min-height:0}
+ main.immersive:has(.sc-game)>.gamebar{z-index:1;flex:0 0 46px;height:46px;min-height:46px;padding-top:5px;padding-bottom:5px}
+ .sc-game{overflow:visible}
+ .sc-game .sc-scene{position:relative;isolation:isolate;overflow:visible;padding:0 clamp(12px,2vw,25px) 6px}
+ .sc-game .sc-masthead{position:relative;z-index:4;height:112px;min-height:112px;max-width:1260px;gap:12px;justify-content:center;pointer-events:none}
+ .sc-game .sc-logo{width:min(48vw,580px);height:152px;max-height:none;object-fit:contain;align-self:flex-start;margin-top:-37px;filter:drop-shadow(0 0 13px #e39629) drop-shadow(0 5px 5px #1a002d)}
+ .sc-game .sc-ways{position:absolute;right:3%;top:40px;box-shadow:0 0 14px #ea9e44;pointer-events:none}
+ .sc-game .sc-machine{position:relative;z-index:2;max-width:1260px;width:100%;margin:-2px auto 0;display:grid;grid-template-columns:minmax(240px,29%) minmax(0,71%);gap:0;align-items:stretch}
+ .sc-game .sc-mascot{z-index:5;position:relative;overflow:visible;border:0;background:transparent;box-shadow:none;max-height:none;height:100%;min-height:0;display:flex;flex-direction:column;justify-content:flex-end;align-items:stretch}
+ .sc-game .sc-bobby{position:relative;z-index:5;flex:0 1 auto;min-height:0;max-height:none;width:133%;height:min(69dvh,660px);margin-left:-22%;margin-top:-105px;object-position:bottom center;object-fit:contain;filter:drop-shadow(0 0 7px #f7ba34) drop-shadow(0 7px 14px #1a032a);pointer-events:none}
+ .sc-game .sc-host-name{position:relative;z-index:6;align-self:stretch;flex:0 0 auto;width:100%;padding:8px 3px;white-space:nowrap;font-size:clamp(16px,1.9vw,24px);background:linear-gradient(90deg,#43073d,#3d123d,#43073d);border:3px ridge #e5a83e;border-radius:11px;text-shadow:0 1px #2a0750,0 0 8px #edb158}
+ .sc-game .sc-cabinet{position:relative;z-index:2;min-width:0;padding:7px;border:4px ridge #e4a83a;border-radius:15px;background:linear-gradient(115deg,#290c38,#110816 42%,#341046);box-shadow:0 0 20px #d65ef374,inset 0 0 16px #280327}
+ .sc-game .sc-cabinet-top{min-height:30px}
+ .sc-game .sc-reels{height:clamp(320px,43dvh,420px);min-height:320px;max-height:420px;overflow:hidden;grid-template-columns:repeat(5,minmax(0,1fr));grid-template-rows:minmax(0,1fr);align-items:stretch;gap:4px;padding:6px;margin:6px 0 0}
+ .sc-game .sc-reel{display:grid;grid-template-rows:repeat(4,minmax(0,1fr));grid-template-columns:minmax(0,1fr);height:100%;min-height:0;max-height:100%;min-width:0;overflow:hidden;gap:3px}
+ .sc-game .sc-symbol{display:flex;align-items:center;justify-content:center;aspect-ratio:auto;min-height:0;max-height:100%;height:auto;width:100%;padding:0;overflow:hidden}
+ .sc-game .sc-symbol img{display:block;width:94%;height:94%;max-height:100%;max-width:100%;object-fit:contain}
+ .sc-game .sc-spin-window{inset:0}
+ .sc-game .sc-bonus-hud{padding:4px 8px}
+ .sc-game .sc-result{min-height:29px}
+ .sc-game .sc-metrics{margin:5px 0}
+ .sc-game .sc-disclaimer{margin:5px 0}
+}
+@media(min-width:761px) and (max-height:760px){
+ .sc-game .sc-masthead{height:82px;min-height:82px}
+ .sc-game .sc-logo{height:116px;margin-top:-30px}
+ .sc-game .sc-ways{top:26px}
+ .sc-game .sc-reels{height:clamp(280px,42dvh,345px);min-height:280px}
+ .sc-game .sc-bobby{height:min(68dvh,530px);margin-top:-75px}
+ .sc-game .sc-control,.sc-game .sc-spin{min-height:34px}
+}
+@media(max-width:760px){
+ .sc-game .sc-reels{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));grid-template-rows:minmax(0,1fr);align-items:stretch;overflow:hidden;height:clamp(210px,37dvh,300px)}
+ .sc-game .sc-reel{height:100%;min-height:0;max-height:100%;display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:repeat(4,minmax(0,1fr));overflow:hidden}
+ .sc-game .sc-symbol{height:auto;max-height:100%;min-height:0;aspect-ratio:auto;overflow:hidden}
+ .sc-game .sc-symbol img{height:92%;width:96%;max-height:100%;max-width:100%;object-fit:contain}
+ .sc-game .sc-logo{width:74%;max-height:90px}
+ .sc-game .sc-mascot{position:relative}
+ .sc-game .sc-bobby{width:56%;max-height:155px}
+}

@@ -78,3 +78,51 @@
 .sc-qa-choice-active{color:#12260c;background:#a0ff69;border-color:#efffc7;box-shadow:0 0 13px #79fb4c}
 .sc-qa-choice:disabled{opacity:.55;cursor:not-allowed}
 .sc-qa-choice:focus-visible,.sc-qa-button:focus-visible,.sc-qa-end:focus-visible{outline:3px solid white;outline-offset:2px}
+
+/* Smooth, continuous image-strip scroll. No per-frame rebuilding or shaking tiles. */
+.sc-game .sc-reel-spinning .sc-symbol{animation:none!important;transform:none!important;filter:none!important}
+.sc-spin-window{position:absolute;inset:0;overflow:hidden;z-index:3;background:#220d30;pointer-events:none;border-radius:6px}
+.sc-spin-track{display:grid;grid-template-rows:repeat(16,minmax(0,1fr));height:400%;will-change:transform;backface-visibility:hidden;animation:sc-smooth-scroll .9s linear infinite}
+.sc-spin-tile{display:grid;place-items:center;min-width:0;min-height:0;background:radial-gradient(circle,#502468,#1e0c2a 76%);border-bottom:1px solid #754a85}
+.sc-spin-tile img{width:92%;height:92%;object-fit:contain;display:block;filter:drop-shadow(0 1px 3px #000)}
+@keyframes sc-smooth-scroll{from{transform:translate3d(0,0,0)}to{transform:translate3d(0,-50%,0)}}
+.sc-game .sc-reel-stopped{animation:sc-soft-stop .17s ease-out}
+@keyframes sc-soft-stop{from{filter:brightness(1.4)}to{filter:brightness(1)}}
+/* Full-bleed wallpaper remains visible through the 420Bet title/header bar. */
+main.immersive:has(.sc-game){background:linear-gradient(#0d071550,#14071c68),url('/assets/420bet/sin-city-high-rollers/backgrounds/bg_las_vegas_strip.png') center top/cover no-repeat}
+main.immersive:has(.sc-mode-free){background-image:linear-gradient(#12091a66,#100b1c66),url('/assets/420bet/sin-city-high-rollers/backgrounds/bg_sunset_skyline.png')}
+main.immersive:has(.sc-mode-hotbox){background-image:linear-gradient(#07171170,#1b052370),url('/assets/420bet/sin-city-high-rollers/backgrounds/bg_vip_lounge.png')}
+main.immersive:has(.sc-game)>.gamebar{background:#100b1cb5;backdrop-filter:blur(4px);position:relative;z-index:2}
+main.immersive .view-scroll:has(.sc-game){background:transparent}
+.sc-game{width:100%;max-width:none}
+.sc-game .sc-scene{padding:8px clamp(10px,1.5vw,22px) 10px;background:linear-gradient(#15071f22,#10061833);box-shadow:none;border:0;border-radius:0}
+.sc-game .sc-masthead{min-height:68px;max-width:1190px;margin:auto;gap:12px}
+.sc-game .sc-logo{width:min(44%,450px);max-height:76px}
+.sc-game .sc-ways{padding:5px 10px;font-size:14px}
+.sc-game .sc-machine{max-width:1190px;margin:4px auto 0;grid-template-columns:minmax(160px,24%) minmax(0,1fr);gap:12px}
+.sc-game .sc-mascot{max-height:520px}
+.sc-game .sc-bobby{max-height:445px}
+.sc-game .sc-host-name{padding:5px}
+.sc-game .sc-cabinet{padding:6px;border-width:3px}
+.sc-game .sc-cabinet-top{padding:6px 9px}
+.sc-game .sc-reels{height:clamp(245px,39dvh,380px);margin:6px 0 0;gap:3px;padding:5px}
+.sc-game .sc-reel{gap:3px}
+.sc-game .sc-symbol{aspect-ratio:auto;height:100%}
+.sc-game .sc-result{min-height:30px;padding:4px}
+.sc-game .sc-metrics{margin:5px 0;gap:5px}
+.sc-game .sc-metric{padding:4px 3px}
+.sc-game .sc-metric strong{font-size:clamp(14px,1.6vw,21px)}
+.sc-game .sc-control,.sc-game .sc-spin{min-height:37px;padding:4px 2px}
+.sc-game .sc-disclaimer{margin:8px auto 0}
+.sc-bonus-hud{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;padding:5px 9px;background:#0a1119dc;border:1px solid #b7853b;color:#a2ff82;font-weight:750;font-size:clamp(10px,1.05vw,13px)}
+.sc-bonus-hud span{color:#f3d895}
+@media(max-width:760px){
+ .sc-game .sc-machine{grid-template-columns:1fr;gap:7px}
+ .sc-game .sc-mascot{min-height:95px;max-height:130px}
+ .sc-game .sc-bobby{max-height:125px}
+ .sc-game .sc-masthead{min-height:55px}
+ .sc-game .sc-logo{width:58%;max-height:65px}
+ .sc-game .sc-reels{height:clamp(200px,38dvh,290px)}
+ .sc-game .sc-control,.sc-game .sc-spin{min-height:38px}
+}
+@media(prefers-reduced-motion:reduce){.sc-spin-track{animation:none!important}}

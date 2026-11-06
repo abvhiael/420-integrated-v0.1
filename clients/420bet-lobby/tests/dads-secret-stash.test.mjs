@@ -184,7 +184,7 @@ test('Secret Stash Hold & Win has 20 locks, three-respin reset and exact awarded
  assert.equal(empty.steps.length,4);
  assert.deepEqual(empty.steps.slice(1).map(x=>x.remaining),[2,1,0]);
  assert.equal(empty.filled,3);
- assert.equal(empty.units,empty.prizes.reduce((a,b)=>a+b,0));
+ assert.equal(empty.units,Math.round(empty.prizes.reduce((a,b)=>a+b,0)*100)/100);
  // Alternating low/high RNG forces a lock on eligible places and resets the timer.
  let n=0;const alternating=stashBonus(()=>[.02,.98,.02,.98,.02,.98][n++%6]);
  assert(alternating.steps.length>=2);

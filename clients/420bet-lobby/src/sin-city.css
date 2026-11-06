@@ -54,7 +54,7 @@
 @keyframes sc-roll{0%{transform:translateY(-12%)}100%{transform:translateY(12%)}}
 @keyframes sc-stop{0%{transform:translateY(-8%);filter:brightness(1.8)}100%{transform:translateY(0);filter:brightness(1)}}
 .sc-win-lines{position:absolute;inset:7px;width:calc(100% - 14px);height:calc(100% - 14px);pointer-events:none;overflow:visible;z-index:4}
-.sc-win-polyline{fill:none;stroke:#5dff36;stroke-width:7;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke;filter:drop-shadow(0 0 3px #caff98) drop-shadow(0 0 9px #28ff00);stroke-dasharray:2000;stroke-dashoffset:2000;animation:sc-win-trace .65s ease-out forwards}
+.sc-win-polyline{fill:none;stroke:#5dff36;stroke-width:7;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke;filter:drop-shadow(0 0 3px #caff98) drop-shadow(0 0 9px #28ff00);stroke-dasharray:100;stroke-dashoffset:100;animation:sc-win-trace .65s ease-out forwards}
 @keyframes sc-win-trace{to{stroke-dashoffset:0}}
 .sc-changing{animation:sc-transform .35s ease-out;outline:3px solid #91ff26;outline-offset:-3px;box-shadow:0 0 26px #63f72b,inset 0 0 20px #75fc47}
 @keyframes sc-transform{0%{transform:scale(.75);filter:brightness(3)}65%{transform:scale(1.12);filter:brightness(2)}100%{transform:scale(1);filter:brightness(1)}}

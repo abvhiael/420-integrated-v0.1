@@ -225,6 +225,16 @@ export function createDadsSecretStash(doc=globalThis.document,options={}){
     const index=options[0],row=index%4;
     route.push((50+reel*100)+','+(50+row*100));
    }
+   // Run the neon trace across the full physical five-reel playfield, even
+   // when the award is for 3 or 4 consecutive matching reels. The bright
+   // path follows true paying symbols, then continues at the last winning
+   // row to the right edge; only actual contributing cells are highlighted.
+   const firstY=route[0].split(',')[1],lastY=route[route.length-1].split(',')[1];
+   route.unshift('0,'+firstY);
+   for(let reel=win.matched;reel<5;reel++){
+    route.push((50+reel*100)+','+lastY);
+   }
+   route.push('500,'+lastY);
    winSvg.replaceChildren();
    const addPath=(cls)=>{
     const path=doc.createElementNS('http://www.w3.org/2000/svg','polyline');

@@ -416,7 +416,13 @@ test('Neon winning ways trace follows real matching positions and never replaces
  assert.equal(trace.hidden,false,'Winning route must be visible after reel stop');
  const polyline=trace.querySelector('.dss-win-line');
  assert(polyline);
- assert(polyline.getAttribute('points').split(' ').length>=3);
+ const points=polyline.getAttribute('points').split(' ');
+ assert(points.length>=7,'Full-width trace spans all five reel columns and both edges');
+ assert.equal(points[0].split(',')[0],'0','Neon must begin at the left edge');
+ assert.equal(points.at(-1).split(',')[0],'500','Neon must reach the right edge');
+ for(const reelCenter of [50,150,250,350,450]){
+  assert(points.some(point=>Number(point.split(',')[0])===reelCenter),'Trace crosses reel '+((reelCenter-50)/100+1));
+ }
  assert.match(game.querySelector('.dss-win-label').textContent,/WAYS/);
  assert(game.querySelectorAll('.dss-paying-symbol').length>=3);
  advance(5100);
@@ -721,4 +727,14 @@ test('Hold & Win empty cells show a recognizable large seven-tip cannabis leaf i
  assert.match(css,/\.dss-hold-cycling \.dss-cannabis-leaf\{animation:none;transform:none;/);
  assert.match(css,/\.dss-hold-locked \.dss-cannabis-leaf\{display:none\}/);
  game.stopAnimation();
+});
+
+test('Full-width neon route geometry matches the complete five-reel SVG canvas',()=>{
+ const css=readFileSync(new URL('../src/dads-secret-stash.css',import.meta.url),'utf8');
+ const canvas=css.slice(css.indexOf('.dss-win-svg{'),css.indexOf('.dss-win-svg polyline{'));
+ assert.match(canvas,/inset:0;width:100%;height:100%/);
+ const source=readFileSync(new URL('../src/dads-secret-stash-ui.js',import.meta.url),'utf8');
+ assert.match(source,/route\.unshift\('0,'\+firstY\)/);
+ assert.match(source,/for\(let reel=win\.matched;reel<5;reel\+\+\)/);
+ assert.match(source,/route\.push\('500,'\+lastY\)/);
 });

@@ -9,8 +9,14 @@ export function createDadsSecretStash(doc=globalThis.document,options={}){
  let state=newGame(),destroyed=false,busy=false,auto=false,autoLeft=0,currentTimer=null,events=[],eventIndex=0,spinTick=0;
  const root=el(doc,'section','dss-game');root.dataset.practiceGame='dads-secret-stash';
  const shell=el(doc,'div','dss-shell'),hero=el(doc,'header','dss-header');
- const logo=el(doc,'img','dss-logo');logo.src='/assets/420bet/dads-secret-stash/lobby.svg';logo.alt="Dad's Secret Stash — Gary in his recliner";
- hero.append(logo,el(doc,'p','dss-tag','SUBURBAN SURVIVAL. ONE JOINT AT A TIME.'));
+ const logo=el(doc,'img','dss-logo');logo.src='/assets/420bet/dads-secret-stash/title_bar.png';logo.alt="Dad's Secret Stash — Dad reclining with a joint beside the neon-green and orange title";
+ const alternative=el(doc,'div','dss-title-composite');
+ const dadPortrait=el(doc,'img','dss-title-dad');dadPortrait.src='/assets/420bet/dads-secret-stash/characters/gary_main.png';dadPortrait.alt='';
+ const wordmark=el(doc,'div','dss-title-wordmark');
+ for(const [word,cls] of [["DAD'S",'dss-word-dad'],['SECRET','dss-word-secret'],['STASH','dss-word-stash']])wordmark.append(el(doc,'span',cls,word));
+ alternative.append(dadPortrait,wordmark);alternative.hidden=true;
+ logo.addEventListener('error',()=>{logo.hidden=true;alternative.hidden=false;});
+ hero.append(logo,alternative,el(doc,'p','dss-tag','SUBURBAN SURVIVAL. ONE JOINT AT A TIME.'));
  const scene=el(doc,'div','dss-scene'),reels=el(doc,'div','dss-reels');reels.setAttribute('aria-label','Five reels, four rows');
  const reelEls=Array.from({length:5},(_,i)=>{const column=el(doc,'div','dss-reel');column.dataset.reel=String(i);reels.append(column);return column;});
  const cells=Array.from({length:20},(_,i)=>{

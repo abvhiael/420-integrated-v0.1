@@ -367,10 +367,15 @@ test('Family Chaos Wild Graffiti visibly changes the board before the win popup'
  assert.equal(game.querySelector('.dss-feature-result').hidden,true,'Win popup must not obscure transformations');
  advance(9700);
  assert.deepEqual(cells.map(x=>x.dataset.symbol),event.grid,'All changed reel positions should match calculated result');
- advance(11000);
- assert.equal(game.querySelector('.dss-feature-result').hidden,false,'Final win screen appears only after animation');
- advance(14000);
- assert.equal(game.querySelector('.dss-feature-result').hidden,true);
+ let sawTrace=false,sawResult=false;
+ for(let time=9800;time<=26000;time+=100){
+  advance(time);
+  sawTrace ||= !game.querySelector('.dss-win-trace').hidden;
+  sawResult ||= !game.querySelector('.dss-feature-result').hidden;
+ }
+ assert(sawTrace,'Winning ways must be traced after the graffiti transformation');
+ assert(sawResult,'Final win screen appears after symbols and winning route are shown');
+ assert.equal(game.querySelector('.dss-feature-result').hidden,true,'Feature result eventually finishes');
  game.stopAnimation();
 });
 

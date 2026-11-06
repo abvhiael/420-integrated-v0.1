@@ -27,7 +27,28 @@ export function createDadsSecretStash(doc=globalThis.document,options={}){
   cell.append(image,face);reelEls[Math.floor(i/4)].append(cell);return {cell,image,face};
  });
  const larryPanel=el(doc,'aside','dss-larry-panel');
- const larry=el(doc,'img','dss-larry');larry.src='/assets/420bet/dads-secret-stash/characters/gary_main.png';larry.alt='Larry relaxing in his garage';larry.draggable=false;
+ const larry=el(doc,'img','dss-larry');
+ const larryArtwork=Object.freeze({
+  main:'/assets/420bet/dads-secret-stash/characters/gary_main.png',
+  stash:'/assets/420bet/dads-secret-stash/characters/gary_hold_win.png',
+  free:'/assets/420bet/dads-secret-stash/characters/gary_free_spins.png',
+  mow:'/assets/420bet/dads-secret-stash/characters/gary_mow_the_lawn.png'
+ });
+ const larryDescriptions=Object.freeze({
+  main:'Larry sitting in his garage recliner, enjoying a joint',
+  stash:'Larry excitedly pointing toward his secret stash prizes',
+  free:'Larry relaxing in his recliner with headphones',
+  mow:'Larry mowing the suburban lawn'
+ });
+ const setLarryMode=(mode='main')=>{
+  const next=Object.hasOwn(larryArtwork,mode)?mode:'main';
+  larryPanel.dataset.mode=next;
+  const url=larryArtwork[next];
+  if(larry.getAttribute('src')!==url)larry.src=url;
+  larry.alt=larryDescriptions[next];
+ };
+ larry.addEventListener('error',()=>{if(larryPanel.dataset.mode!=='main')setLarryMode('main');});
+ setLarryMode('main');larry.draggable=false;
  const larryCaption=el(doc,'div','dss-larry-caption','JUST FIVE MORE MINUTES…');
  larryPanel.append(larry,larryCaption);
  const featurePanel=el(doc,'aside','dss-feature-panel');
@@ -69,8 +90,10 @@ export function createDadsSecretStash(doc=globalThis.document,options={}){
    loadArt(backdrop,DSS_TRANSITION_ART[type]);loadArt(titleArt,DSS_FEATURE_ART[type]);
  }
  function showScene(type='main'){
- scene.dataset.mode=type;shell.dataset.mode=type;
- shell.style.setProperty('--dss-active-wallpaper',`url("${DSS_BACKGROUND_ART[type]??DSS_BACKGROUND_ART.main}")`);
+ const sceneMode=Object.hasOwn(DSS_BACKGROUND_ART,type)?type:'main';
+ scene.dataset.mode=sceneMode;shell.dataset.mode=sceneMode;
+ setLarryMode(sceneMode);
+ shell.style.setProperty('--dss-active-wallpaper',`url("${DSS_BACKGROUND_ART[sceneMode]}")`);
 }
  showScene();
  scene.append(larryPanel,reels,featurePanel,overlay);shell.append(hero,scene,status,message,controls,infoPanel);root.append(shell);

@@ -1,4 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';import {parseHTML} from 'linkedom';
+import {existsSync,readFileSync} from 'node:fs';
 import {SLOT_MACHINES,createSlotsLobby,slotMachineFromHash} from '../src/slots-lobby.js';
 import {newGame,qualify,triggerCharacters,modifier,inspection,spin,evaluate} from '../src/dads-secret-stash-engine.js';
 import {createDadsSecretStash} from '../src/dads-secret-stash-ui.js';
@@ -31,4 +32,19 @@ test('Game creates image-backed reels and individual PNG character layer for sli
  assert.equal(game.querySelector('.dss-bubble').hidden,true);
  assert.match(game.querySelector('.dss-scene').getAttribute('style'),/garage_main\.png/);
  game.stopAnimation();
+});
+
+test('Approved PNG sources exist in the assembled PR and have real PNG signatures',()=>{
+ const urls=new Set([
+  ...Object.values(DSS_SYMBOL_ART),...Object.values(DSS_BACKGROUND_ART),
+  ...Object.values(DSS_TRANSITION_ART),...Object.values(DSS_FEATURE_ART),
+  ...Object.values(DSS_CAST_ART).flat()
+ ]);
+ for(const url of urls){
+  const file=new URL('../public'+url,import.meta.url);
+  assert(existsSync(file),'Missing approved asset '+url);
+  const signature=readFileSync(file).subarray(0,8);
+  assert.deepEqual([...signature],[137,80,78,71,13,10,26,10],'Not a PNG: '+url);
+ }
+ assert(urls.size>=33);
 });

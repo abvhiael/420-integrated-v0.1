@@ -22,8 +22,8 @@ jobs:
           node-version: '22'
       - name: Run seeded full-feature RTP Monte Carlo against unchanged engine
         env:
-          SPINS_PER_SEED: '75000'
-          RTP_SEEDS: '420,1337,20261106'
+          SPINS_PER_SEED: '500000'
+          RTP_SEEDS: '420,1337,20261106,314159,271828'
         run: node tests/sin-city-rtp-audit.mjs | tee /tmp/sin-city-rtp-audit.log
       - name: Save RTP evidence
         if: always()

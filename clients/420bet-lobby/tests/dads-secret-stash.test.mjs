@@ -30,7 +30,7 @@ test('Game creates image-backed reels and individual PNG character layer for sli
  assert(game.querySelector('.dss-transition-backdrop'));
  assert(game.querySelector('.dss-feature-title-art'));
  assert.equal(game.querySelector('.dss-bubble').hidden,true);
- assert.match(game.querySelector('.dss-scene').getAttribute('style'),/garage_main\.png/);
+ assert.match(game.querySelector('.dss-shell').getAttribute('style'),/garage_main\.png/);
  game.stopAnimation();
 });
 

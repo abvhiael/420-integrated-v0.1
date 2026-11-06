@@ -9,7 +9,7 @@ export function createDadsSecretStash(doc=globalThis.document,options={}){
  let state=newGame(),destroyed=false,busy=false,auto=false,autoLeft=0,currentTimer=null,events=[],eventIndex=0,spinTick=0;
  const root=el(doc,'section','dss-game');root.dataset.practiceGame='dads-secret-stash';
  const shell=el(doc,'div','dss-shell'),hero=el(doc,'header','dss-header');
- const logo=el(doc,'img','dss-logo');logo.src='/assets/420bet/dads-secret-stash/title_bar.png';logo.alt="Dad's Secret Stash — Dad reclining with a joint beside the neon-green and orange title";
+ const logo=el(doc,'img','dss-logo');logo.src='/assets/420bet/dads-secret-stash/dads_secret_stash_title_bar.png';logo.alt="Dad's Secret Stash — Dad reclining with a joint beside the neon-green and orange title";
  const alternative=el(doc,'div','dss-title-composite');
  const dadPortrait=el(doc,'img','dss-title-dad');dadPortrait.src='/assets/420bet/dads-secret-stash/characters/gary_main.png';dadPortrait.alt='';
  const wordmark=el(doc,'div','dss-title-wordmark');

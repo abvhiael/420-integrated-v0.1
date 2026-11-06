@@ -179,7 +179,7 @@ export function nextRound(previous,rng=Math.random,forcedStops){
  // Strict cap per initiating paid round including its entire bonus sequence.
  const available=Math.max(0,round(s.roundStake*MAX_MULTIPLIER-s.roundGross));
  payout=round(Math.min(payout,available));
- if(isFree){s.freeSessionWin=round(s.freeSessionWin+payout);if(s.mode==='base'){s.freeCompletedTotal=s.freeSessionWin;s.sticky=[];s.wildMultipliers={};}}
+ if(isFree){s.freeSessionWin=round(s.freeSessionWin+payout);if(s.mode==='base'){s.freeCompletedTotal=s.freeSessionWin;}}
  s.roundGross=round(s.roundGross+payout);
  s.balance=round(s.balance+payout);
  s.lastWin=payout;s.lastStops=[...stops];s.lastBoard=board;s.lastFeature=feature;

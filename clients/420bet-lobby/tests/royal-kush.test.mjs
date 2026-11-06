@@ -70,3 +70,16 @@ test('Royal Kush uses blackjack artwork and dedicated lobby route',()=>{
  const svg=readFileSync(new URL('../public/assets/420bet/royal-kush/royal-kush-wallpaper.svg',import.meta.url),'utf8');
  assert(svg.includes('<svg'));
 });
+
+test('Royal Kush compact full-width wallpaper extends through its header without affecting other games',()=>{
+ const main=readFileSync(new URL('../src/main.js',import.meta.url),'utf8');
+ const css=readFileSync(new URL('../src/royal-kush.css',import.meta.url),'utf8');
+ assert(main.includes("active.id==='video-poker'?'immersive royal-kush-immersive'"));
+ assert(css.includes('.royal-kush-immersive .gamebar'));
+ assert(css.includes('.royal-kush-immersive .view-scroll'));
+ assert(css.includes('.royal-kush-immersive .rk-shell'));
+ assert(css.includes("royal-kush-wallpaper.webp"));
+ assert(css.includes('.royal-kush-immersive .rk-card-board'));
+ assert(css.includes('@media(min-width:951px) and (max-height:850px)'));
+ assert(css.includes('.royal-kush-immersive .rk-title-stack'));
+});

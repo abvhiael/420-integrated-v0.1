@@ -70,9 +70,11 @@ test('free-spin tester plays an actual feature without modifying credits or paid
  assert.equal(h.root.getPracticeState().credits,before.credits);
  assert.equal(h.root.getPracticeState().round,before.round);
  h.drain();
+ if(h.root.dataset.featurePhase==='win-review')h.root.querySelector('.cc-symbol-grid').dispatchEvent(new h.window.Event('click',{bubbles:true}));
+ h.drain();
  assert.equal(h.root.getPracticeState().credits,before.credits);
  assert.equal(h.root.getPracticeState().round,before.round);
- assert.equal(h.root.getPracticeState().busy,false,'feature preview must release spin controls');
+ assert.equal(h.root.getPracticeState().busy,false,'feature preview must release spin controls after total win is acknowledged');
  h.root.stopAnimation();
 });
 test('five-stop Road Trip tester reveals selectable cases but never credits the balance',()=>{

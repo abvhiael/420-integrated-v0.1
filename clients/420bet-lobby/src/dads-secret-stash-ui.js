@@ -142,19 +142,32 @@ export function createDadsSecretStash(doc=globalThis.document,options={}){
  // Reusable stylized seven-leaflet cannabis silhouette for every unfilled tile.
  // Never use emoji placeholders, which vary by platform and look like blobs.
  const svgNS='http://www.w3.org/2000/svg';
+ // One centered silhouette assembled from seven DISTINCT, sharply pointed
+ // serrated leaflets. Every tip is spatially separated, unlike the previous
+ // overlapping/rotated blade graphic that resembled a Brussels sprout.
+ const CANNABIS_LEAFLET_PATHS=[
+ "M50.0,79.0 L48.5,77.0 L46.9,75.2 L44.9,74.2 L43.6,71.9 L41.8,70.3 L39.4,70.1 L38.2,67.5 L36.4,66.3 L33.7,66.6 L32.5,64.1 L30.4,63.1 L27.6,63.7 L26.2,61.5 L24.1,60.9 L21.3,61.4 L19.6,59.9 L17.3,59.5 L14.6,59.7 L12.5,59.0 L10.0,59.0 L10.0,59.0 L11.5,61.0 L13.4,62.3 L14.7,64.5 L16.4,66.1 L18.7,66.6 L19.9,69.1 L21.8,70.5 L24.4,70.3 L25.6,72.9 L27.5,73.9 L30.3,73.4 L31.6,75.7 L33.8,76.5 L36.6,75.9 L38.2,77.7 L40.4,78.1 L43.1,77.8 L45.1,78.8 L47.5,79.0 L50.0,79.0 Z",
+ "M50.0,79.0 L49.0,75.9 L47.8,73.0 L45.7,71.0 L45.0,67.6 L43.5,65.0 L40.7,63.7 L40.3,60.0 L38.5,57.7 L35.1,57.0 L34.6,53.4 L32.5,51.4 L28.8,51.0 L28.0,47.7 L25.6,46.0 L21.9,45.6 L20.4,43.0 L17.8,41.5 L14.4,40.8 L12.1,39.0 L9.0,38.0 L9.0,38.0 L10.0,41.1 L11.8,43.4 L12.5,46.8 L14.0,49.4 L16.6,50.9 L17.0,54.6 L18.7,57.0 L22.0,57.8 L22.4,61.5 L24.4,63.6 L28.0,64.1 L28.7,67.5 L31.0,69.3 L34.7,69.7 L36.0,72.5 L38.6,74.0 L42.0,74.7 L44.0,76.8 L46.9,78.0 L50.0,79.0 Z",
+ "M50.0,79.0 L50.2,75.2 L50.1,71.5 L48.8,68.3 L49.5,64.3 L49.0,60.8 L46.5,58.0 L47.6,53.9 L46.7,50.5 L43.4,48.1 L44.4,44.0 L43.0,40.8 L39.4,38.6 L39.8,34.7 L38.0,31.7 L34.4,29.4 L33.9,25.9 L31.7,23.1 L28.5,20.6 L26.8,17.6 L24.0,15.0 L24.0,15.0 L23.8,18.8 L24.7,22.2 L24.1,26.1 L24.5,29.7 L26.6,32.6 L25.6,36.7 L26.4,40.1 L29.4,42.6 L28.4,46.8 L29.6,50.0 L33.2,52.3 L32.5,56.3 L34.2,59.3 L37.9,61.6 L38.0,65.2 L40.1,68.1 L43.4,70.5 L44.7,73.7 L47.2,76.4 L50.0,79.0 Z",
+ "M50.0,79.0 L52.1,75.3 L53.7,71.5 L53.6,67.8 L56.4,64.0 L57.4,60.3 L55.8,56.5 L59.1,52.8 L59.6,49.0 L56.9,45.3 L60.0,41.5 L59.9,37.8 L56.7,34.0 L59.1,30.3 L58.4,26.5 L55.2,22.8 L56.4,19.0 L55.1,15.3 L52.6,11.5 L52.1,7.8 L50.0,4.0 L50.0,4.0 L47.9,7.8 L47.4,11.5 L44.9,15.3 L43.6,19.0 L44.8,22.8 L41.6,26.5 L40.9,30.3 L43.3,34.0 L40.1,37.8 L40.0,41.5 L43.1,45.3 L40.4,49.0 L40.9,52.8 L44.2,56.5 L42.6,60.3 L43.6,64.0 L46.4,67.8 L46.3,71.5 L47.9,75.3 L50.0,79.0 Z",
+ "M50.0,79.0 L52.8,76.4 L55.3,73.7 L56.6,70.5 L59.9,68.1 L62.0,65.2 L62.1,61.6 L65.8,59.3 L67.5,56.3 L66.8,52.3 L70.4,50.0 L71.6,46.8 L70.6,42.6 L73.6,40.1 L74.4,36.7 L73.4,32.6 L75.5,29.7 L75.9,26.1 L75.3,22.2 L76.2,18.8 L76.0,15.0 L76.0,15.0 L73.2,17.6 L71.5,20.6 L68.3,23.1 L66.1,25.9 L65.6,29.4 L62.0,31.7 L60.2,34.7 L60.6,38.6 L57.0,40.8 L55.6,44.0 L56.6,48.1 L53.3,50.5 L52.4,53.9 L53.5,58.0 L51.0,60.8 L50.5,64.3 L51.2,68.3 L49.9,71.5 L49.8,75.2 L50.0,79.0 Z",
+ "M50.0,79.0 L53.1,78.0 L56.0,76.8 L58.0,74.7 L61.4,74.0 L64.0,72.5 L65.3,69.7 L69.0,69.3 L71.3,67.5 L72.0,64.1 L75.6,63.6 L77.6,61.5 L78.0,57.8 L81.3,57.0 L83.0,54.6 L83.4,50.9 L86.0,49.4 L87.5,46.8 L88.2,43.4 L90.0,41.1 L91.0,38.0 L91.0,38.0 L87.9,39.0 L85.6,40.8 L82.2,41.5 L79.6,43.0 L78.1,45.6 L74.4,46.0 L72.0,47.7 L71.2,51.0 L67.5,51.4 L65.4,53.4 L64.9,57.0 L61.5,57.7 L59.7,60.0 L59.3,63.7 L56.5,65.0 L55.0,67.6 L54.3,71.0 L52.2,73.0 L51.0,75.9 L50.0,79.0 Z",
+ "M50.0,79.0 L52.5,79.0 L54.9,78.8 L56.9,77.8 L59.6,78.1 L61.8,77.7 L63.4,75.9 L66.2,76.5 L68.4,75.7 L69.7,73.4 L72.5,73.9 L74.4,72.9 L75.6,70.3 L78.2,70.5 L80.1,69.1 L81.3,66.6 L83.6,66.1 L85.3,64.5 L86.6,62.3 L88.5,61.0 L90.0,59.0 L90.0,59.0 L87.5,59.0 L85.4,59.7 L82.7,59.5 L80.4,59.9 L78.7,61.4 L75.9,60.9 L73.8,61.5 L72.4,63.7 L69.6,63.1 L67.5,64.1 L66.3,66.6 L63.6,66.3 L61.8,67.5 L60.6,70.1 L58.2,70.3 L56.4,71.9 L55.1,74.2 L53.1,75.2 L51.5,77.0 L50.0,79.0 Z"
+];
  function cannabisLeaf(){
   const svg=doc.createElementNS(svgNS,'svg');
   svg.setAttribute('class','dss-cannabis-leaf');
   svg.setAttribute('viewBox','0 0 100 100');
   svg.setAttribute('aria-hidden','true');
-  const stalk=doc.createElementNS(svgNS,'path');
-  stalk.setAttribute('d','M50 94 L50 68');
-  stalk.setAttribute('class','dss-leaf-stem');svg.append(stalk);
-  for(const [angle,scale] of [[-59,.65],[-39,.8],[-20,.93],[0,1.08],[20,.93],[39,.8],[59,.65]]){
-   const path=doc.createElementNS(svgNS,'path');
-   path.setAttribute('d','M0 0 L-4 -11 L-12 -15 L-7 -21 L-15 -28 L-7 -32 L-10 -41 L-3 -44 L0 -68 L3 -44 L10 -41 L7 -32 L15 -28 L7 -21 L12 -15 L4 -11 Z');
-   path.setAttribute('transform','translate(50 81) rotate('+angle+') scale('+scale+')');
-   path.setAttribute('class','dss-leaf-blade');svg.append(path);
+  const stem=doc.createElementNS(svgNS,'path');
+  stem.setAttribute('d','M50 77 Q50 87 50 96');
+  stem.setAttribute('class','dss-leaf-stem');
+  svg.append(stem);
+  for(const d of CANNABIS_LEAFLET_PATHS){
+   const leaflet=doc.createElementNS(svgNS,'path');
+   leaflet.setAttribute('d',d);
+   leaflet.setAttribute('class','dss-leaf-blade');
+   svg.append(leaflet);
   }
   return svg;
  }

@@ -84,6 +84,12 @@ test('Cannabis Cowboy is the fourth independently routed, preview-only machine',
  arrows[1].dispatchEvent(new window.Event('click',{bubbles:true}));
  assert.equal(card.hidden,false);
  assert.equal(card.querySelector('.slots-cowboy-teaser')!==null,true);
+ const cabinet=card.querySelector('img.slots-cowboy-cabinet');
+ assert.equal(cabinet.getAttribute('src'),'/assets/420bet/slots/cannabis-cowboy/lobby-cabinet.png');
+ assert.equal(cabinet.hidden,true,'teaser remains while image is loading');
+ cabinet.dispatchEvent(new window.Event('load'));
+ assert.equal(cabinet.hidden,false,'approved cabinet shown after load');
+ assert.equal(card.querySelector('.slots-cowboy-teaser').hidden,true);
  const link=card.querySelector('a');
  assert.match(link.getAttribute('aria-label'),/Preview/);
  link.dispatchEvent(new window.Event('click',{bubbles:true,cancelable:true}));

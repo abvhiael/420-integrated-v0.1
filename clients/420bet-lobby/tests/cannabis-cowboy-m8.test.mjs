@@ -11,9 +11,9 @@ const seed=(initial=123)=>{let s=initial>>>0;return ()=>((s=(Math.imul(1664525,s
 const patterned=()=>Array.from({length:CELL_COUNT},(_,i)=>(Math.floor(i/6)*3+i%6)%8);
 const withScatters=n=>{const b=patterned();for(let i=0;i<n;i++)b[i]=SCATTER_SYMBOL;return b;};
 test('M8 discloses fixed bonus pay scale and finite bonus cascade cap',()=>{
- assert.equal(FEATURE_PAY_SCALE,0.078);
+ assert.equal(FEATURE_PAY_SCALE,0.024);
  assert.equal(MAX_BONUS_CASCADES,20);
- assert.equal(MAX_FEATURE_PAYOUT_BETS,5000);
+ assert.equal(MAX_FEATURE_PAYOUT_BETS,500);
  assert.equal(MAX_STICKY_WILDS,8);
 });
 test('bonus never awards the same pinned smoke-ring wild twice during a free-spin cascade chain',()=>{

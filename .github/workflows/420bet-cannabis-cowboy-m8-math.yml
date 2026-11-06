@@ -1,0 +1,33 @@
+name: Cannabis Cowboy M8 math audit
+on:
+  pull_request:
+    paths:
+      - 'clients/420bet-lobby/src/cannabis-cowboy-engine.js'
+      - 'clients/420bet-lobby/src/cannabis-cowboy-road-trip.js'
+      - 'clients/420bet-lobby/scripts/cannabis-cowboy-m8-*.mjs'
+      - 'clients/420bet-lobby/tests/cannabis-cowboy-m8.test.mjs'
+      - '.github/workflows/420bet-cannabis-cowboy-m8-math.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  cowboy-m8-math:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install isolated dependencies
+        working-directory: clients/420bet-lobby
+        run: npm install --no-audit --no-fund
+      - name: Run deterministic M8 audit (first-pass calibration)
+        working-directory: clients/420bet-lobby
+        run: node scripts/cannabis-cowboy-m8-audit.mjs --samples 4000 --seed 1234567 --output artifacts/cannabis-cowboy-m8/diagnostic.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cowboy-m8-math-diagnostic
+          path: clients/420bet-lobby/artifacts/cannabis-cowboy-m8/
+          retention-days: 14

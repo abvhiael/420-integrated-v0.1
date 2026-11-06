@@ -90,6 +90,7 @@ export function freeBonus(rng){
  }
  return {spins,boards,units:Math.round(total*100)/100,label:'FIVE MINUTES OF PEACE'};
 }
+export const MOW_PAYOUT_FACTOR=0.65;
 export function mow(grid,rng){
  // Five visually complete mower cascades. Existing non-cleared symbols are
  // preserved; only the cut positions receive fresh symbols.
@@ -114,7 +115,7 @@ export function mow(grid,rng){
   const candidate=choose(rng,['A','K','Q','jar','bong']);
   current=current.map((symbol,i)=>removed.includes(i)?
    (rand(rng)<.65?candidate:ordinaryDraw()):symbol);
-  const units=evaluate(current).units;total+=units;
+  const units=Math.round(evaluate(current).units*MOW_PAYOUT_FACTOR*100)/100;total+=units;
   boards.push({grid:current.slice(),before,removed,units});
  }
  return {label:'MOW THE LAWN',initialGrid:currentStart,mowerIndices,boards,units:Math.round(total*100)/100};

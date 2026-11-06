@@ -1,4 +1,4 @@
-import {initialState,nextRound,SYMBOLS,PAYTABLE,awardFreeSpins} from './sin-city-engine.js';
+import {initialState,nextRound,PAYTABLE,BASE_STRIPS,FREE_STRIPS,visibleBoard} from './sin-city-engine.js';
 const ROOT='/assets/420bet/sin-city-high-rollers/';
 const FILES={
  BUD:'sym_bud.png',JAR:'sym_jar.png',ASH:'sym_ashtray.png',GRINDER:'sym_grinder.png',
@@ -13,11 +13,12 @@ export function createSinCityPractice(doc=globalThis.document,options={}){
  const view=doc.defaultView||globalThis;
  const reduced=!!view.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
  const root=el(doc,'section','sc-game');root.dataset.practiceGame='sin-city-high-rollers';
- let state=initialState(),panel='',auto=false,autoLeft=0,turbo=false,muted=false,busy=false,dead=false,showBanner='',overlayTimer=null;
+ let state=initialState(),panel='',auto=false,autoLeft=0,turbo=false,muted=true,busy=false,dead=false,showBanner='',visualBoard=null,audioContext=null;
  const timers=new Set();
+ const playCue=()=>{if(muted||dead)return;try{const Constructor=view.AudioContext||view.webkitAudioContext;if(!Constructor)return;audioContext??=new Constructor();const tone=audioContext.createOscillator(),gain=audioContext.createGain();tone.type='sine';tone.frequency.value=520;gain.gain.value=.025;tone.connect(gain);gain.connect(audioContext.destination);tone.start();tone.stop(audioContext.currentTime+.11);}catch{}};
  const later=(fn,ms)=>{if(dead)return;const id=view.setTimeout?.(()=>{timers.delete(id);if(!dead)fn();},ms);if(id!==undefined)timers.add(id);else fn();};
- const clear=()=>{for(const id of timers)view.clearTimeout?.(id);timers.clear();overlayTimer=null;};
- root.stopAnimation=()=>{dead=true;auto=false;busy=false;clear();};
+ const clear=()=>{for(const id of timers)view.clearTimeout?.(id);timers.clear();};
+ root.stopAnimation=()=>{dead=true;auto=false;busy=false;clear();void audioContext?.close?.();};
  const button=(label,cls,action)=>{const b=el(doc,'button',cls,label);b.type='button';b.addEventListener('click',action);return b;};
  function showPanel(){
   const scrim=el(doc,'div','sc-modal-backdrop'),modal=el(doc,'section','sc-modal');
@@ -63,7 +64,7 @@ export function createSinCityPractice(doc=globalThis.document,options={}){
   cabinet.append(top);
   const reels=el(doc,'div','sc-reels');reels.setAttribute('role','group');reels.setAttribute('aria-label','Five reels with four symbols each');
   for(let r=0;r<5;r++){const col=el(doc,'div','sc-reel'+(busy?' sc-reel-spinning':''));for(let row=0;row<4;row++){
-   const symbol=state.lastBoard[r][row],cell=el(doc,'div','sc-symbol'+(symbol==='WILD'?' sc-wild':'')+(symbol==='GEM'?' sc-gem':''));
+   const symbol=(visualBoard||state.lastBoard)[r][row],cell=el(doc,'div','sc-symbol'+(symbol==='WILD'?' sc-wild':'')+(symbol==='GEM'?' sc-gem':''));
    cell.setAttribute('role','img');cell.setAttribute('aria-label','Reel '+(r+1)+' row '+(row+1)+': '+(symbol||'Empty'));
    if(FILES[symbol]){const img=el(doc,'img','');img.src=art('symbols',FILES[symbol]);img.alt='';img.draggable=false;cell.append(img);}
    if(state.mode==='free'&&state.sticky.includes(r*4+row))cell.classList.add('sc-sticky');
@@ -87,8 +88,8 @@ export function createSinCityPractice(doc=globalThis.document,options={}){
    auto=!auto;autoLeft=auto?10:0;render();if(auto)later(autoContinue,250);
   });autoBtn.disabled=busy||state.mode!=='base';
   const turboBtn=button('TURBO '+(turbo?'ON':'OFF'),'sc-control'+(turbo?' sc-selected':''),()=>{turbo=!turbo;render();});turboBtn.disabled=busy;
-  const sound=button(muted?'SOUND OFF':'SOUND ON','sc-control',()=>{muted=!muted;render();});
-  sound.title='Audio cues not installed; this controls future sounds only';sound.disabled=true;
+  const sound=button(muted?'SOUND OFF':'SOUND ON','sc-control',()=>{muted=!muted;playCue();render();});
+  sound.setAttribute('aria-pressed',String(!muted));
   controls.append(info,menu,minus,spin,plus,autoBtn,turboBtn,sound);
   cabinet.append(controls);content.append(cabinet);scene.append(content);
   const footer=el(doc,'p','sc-disclaimer','PRACTICE CREDITS ONLY · NO REAL WAGERS · NO CASH VALUE · PROVISIONAL UNVERIFIED ODDS');scene.append(footer);
@@ -105,10 +106,20 @@ export function createSinCityPractice(doc=globalThis.document,options={}){
   if(dead||busy)return;
   if(state.mode==='base'&&state.balance<state.stake){auto=false;render();return;}
   if(showBanner)showBanner='';
-  busy=true;render();
+  busy=true;playCue();render();
+  if(!reduced){
+   const baseStops=state.lastStops||[0,8,16,24,32];
+   const count=turbo?3:6;
+   for(let i=1;i<=count;i++)later(()=>{
+    if(!busy)return;
+    const stops=baseStops.map((stop,reel)=>(stop+i*(reel+3))%42);
+    visualBoard=visibleBoard(state.mode==='free'?FREE_STRIPS:BASE_STRIPS,stops);
+    render();
+   },i*(turbo?50:100));
+  }
   later(()=>{
    const next=nextRound(state,options.rng);
-   state=next;busy=false;
+   state=next;busy=false;visualBoard=null;playCue();
    const banners={
     'puff':'banner_puff_puff_pass.png','hotbox-start':'banner_hotbox_respins.png','hotbox':'banner_hotbox_respins.png',
     'free-start':'banner_chronic_sessions_free_spins.png','free-retrigger':'banner_chronic_sessions_free_spins.png',

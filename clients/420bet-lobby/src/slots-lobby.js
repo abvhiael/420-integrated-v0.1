@@ -3,8 +3,8 @@ import {BASE_REELS as EMERALD_REELS,visibleGrid} from './emerald-v2-strips.js';
 
 // Slot-machine discovery only. Each machine keeps its own separate implementation.
 export const SLOT_MACHINES=Object.freeze([
- Object.freeze({id:'emerald-harvest',title:'Emerald Harvest',subtitle:'1,024 Ways to Win',description:'Five reels, four rows, Wilds, Scatters and free-spin bonuses.',art:EMERALD_ASSETS.cabinet,status:'Practice available'}),
- Object.freeze({id:'mary-jane-sticky-wilds',title:"Mary Jane's Sticky Wilds",subtitle:'20 Lines · Gold Leaf Frames',description:'A boho Vegas slot with 10-spin frames, ×10 Buzz, and Sticky Wild Free Spins.',art:'/assets/420bet/mary-jane/mj-concept-cabinet.webp',status:'Practice available'}),
+ Object.freeze({id:'emerald-harvest',title:'Emerald Harvest',subtitle:'1,024 Ways to Win',description:'Five reels, four rows, Wilds, Scatters and free-spin bonuses.',art:'/assets/420bet/slots-lobby/emerald-harvest-lobby-cabinet.png',status:'Practice available'}),
+ Object.freeze({id:'mary-jane-sticky-wilds',title:"Mary Jane's Sticky Wilds",subtitle:'20 Lines · Gold Leaf Frames',description:'A boho Vegas slot with 10-spin frames, ×10 Buzz, and Sticky Wild Free Spins.',art:'/assets/420bet/slots-lobby/mary-janes-sticky-wilds-lobby-cabinet.png',status:'Practice available'}),
  Object.freeze({id:'dads-secret-stash',title:"Dad's Secret Stash",subtitle:'1,024 Ways · Suburban Chaos',description:'Gary and the family, mystery modifiers, locked respins, Fetch Wilds and the garage stash.',art:'/assets/420bet/dads-secret-stash/lobby.svg',status:'Practice available'})
 ]);
 // A fixed, genuine 5×4 outcome from the Emerald Harvest reel strips is used
@@ -49,8 +49,8 @@ export function createSlotsLobby(doc=globalThis.document,onSelect=()=>{}){
   const link=doc.createElement('a');link.className='slots-machine-link';link.href=slotMachinePath(machine.id);
   link.setAttribute('aria-label','Play '+machine.title+' in practice mode');
   const art=doc.createElement('div');art.className='slots-machine-art';
-  const image=machine.id==='emerald-harvest'?createEmeraldLobbyPreview(doc):doc.createElement('img');
-  if(machine.id!=='emerald-harvest'){image.src=machine.art;image.alt=machine.title+' slot cabinet';image.loading='eager';image.decoding='async';}
+  const image=doc.createElement('img');
+  image.src=machine.art;image.alt=machine.title+' slot cabinet';image.loading='eager';image.decoding='async';
   const artTitle=doc.createElement('span');artTitle.className='slots-machine-art-title';artTitle.textContent=machine.title;
   art.append(image,artTitle);
   const body=doc.createElement('div');body.className='slots-machine-body';

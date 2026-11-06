@@ -121,7 +121,7 @@ test('Read-only wallet login verifies exact host, chain, nonce and never signs a
   'Nonce: '+nonce,'Issued At: '+new Date(Date.now()).toISOString(),
   'Expiration Time: '+new Date(Date.now()+120000).toISOString(),
   'Statement: Read-only poker tables; no wagers, signing of actions, or withdrawals.'
- ].join('\\n');
+ ].join('\n');
  const requests=[];
  const wallet={request:async({method,params})=>{
   requests.push({method,params});

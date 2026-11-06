@@ -72,3 +72,14 @@ test('Reels cycle independently and stop at 1000, 1500, 2000, 2500, 3000 ms in o
  }
  game.stopAnimation();
 });
+
+test('Game title loads the approved uploaded PNG rather than the placeholder',()=>{
+ const {document}=parseHTML('<html><body></body></html>');
+ const game=createDadsSecretStash(document);
+ const logo=game.querySelector('img.dss-logo');
+ assert.equal(logo.getAttribute('src'),'/assets/420bet/dads-secret-stash/dads_secret_stash_title_bar.png');
+ const source=new URL('../public'+logo.getAttribute('src'),import.meta.url);
+ assert(existsSync(source),'Approved title PNG must exist at the exact rendered URL');
+ assert.deepEqual([...readFileSync(source).subarray(0,8)],[137,80,78,71,13,10,26,10]);
+ game.stopAnimation();
+});

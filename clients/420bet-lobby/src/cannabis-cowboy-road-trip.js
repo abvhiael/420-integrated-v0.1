@@ -1,0 +1,30 @@
+// Cannabis Cowboy M6: interactive, five-stop, practice-only road trip.
+// The 3 cases at each stop are drawn before the user chooses. No wallet access.
+export const ROAD_STOPS=Object.freeze([
+ Object.freeze({name:'Sunset Ridge',scene:'🌄',description:'Take the high road into the mountains'}),
+ Object.freeze({name:'Pine Creek',scene:'🌲',description:'Where the river meets the green valley'}),
+ Object.freeze({name:'Emerald Ranch',scene:'🌿',description:'A bountiful stop in the high country'}),
+ Object.freeze({name:'Old Music Hall',scene:'🎸',description:'Play a tune for the travelling crowd'}),
+ Object.freeze({name:'Last Light Lookout',scene:'🌅',description:'Bring the harvest home'})
+]);
+export const ROAD_CASE_MULTIPLIERS=Object.freeze([0,0.5,1,1.5,2,3,4.2]);
+export const ROAD_CASE_COUNT=3;
+const sample=(rng)=>{const v=rng();if(!Number.isFinite(v)||v<0||v>=1)throw Error('Road Trip RNG outside [0,1)');return v;};
+export function createRoadTrip(bet,rng=Math.random){
+ if(!Number.isSafeInteger(bet)||bet<=0)throw Error('Invalid Road Trip practice bet');
+ return {stops:ROAD_STOPS.map((stop,index)=>({
+  ...stop,index,caseValues:Array.from({length:ROAD_CASE_COUNT},()=>Math.round(bet*ROAD_CASE_MULTIPLIERS[Math.floor(sample(rng)*ROAD_CASE_MULTIPLIERS.length)]))
+ })),bet};
+}
+export function chooseRoadCase(trip,previous,caseIndex){
+ if(!trip||!Array.isArray(trip.stops)||trip.stops.length!==5)throw Error('Invalid Road Trip');
+ if(!Number.isInteger(caseIndex)||caseIndex<0||caseIndex>=ROAD_CASE_COUNT)throw Error('Invalid case choice');
+ if(!Array.isArray(previous)||previous.length>=trip.stops.length)throw Error('Invalid Road Trip progress');
+ const stop=trip.stops[previous.length];
+ if(!Array.isArray(stop.caseValues)||stop.caseValues.length!==ROAD_CASE_COUNT||stop.caseValues.some(x=>!Number.isSafeInteger(x)||x<0))throw Error('Invalid case prizes');
+ const award=stop.caseValues[caseIndex];
+ const picks=[...previous.map(p=>({...p})),{stop:previous.length,caseIndex,award}];
+ const total=picks.reduce((n,p)=>n+p.award,0);
+ if(!Number.isSafeInteger(total))throw Error('Unsafe road trip total');
+ return {picks,total,done:picks.length===trip.stops.length,award};
+}

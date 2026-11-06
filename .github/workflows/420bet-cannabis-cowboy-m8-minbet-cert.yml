@@ -1,0 +1,30 @@
+name: Cannabis Cowboy M8 minimum-bet statistical certification
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/420bet-cannabis-cowboy-m8-minbet-cert.yml'
+permissions:
+  contents: read
+jobs:
+  certify-bet10:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install isolated lobby dependencies
+        working-directory: clients/420bet-lobby
+        run: npm install --no-audit --no-fund
+      - name: Qualify the remaining 10-credit confidence interval
+        working-directory: clients/420bet-lobby
+        run: |
+          node scripts/cannabis-cowboy-m8-stratified.mjs --base 2000000 --feature3 2000000 --feature4 320000 --feature5 64000 --feature6 16000 --seed 7654321 --bet 10 --output artifacts/cannabis-cowboy-m8/certified-bet10.json
+          node --input-type=module -e "import {readFileSync} from 'node:fs'; const r=JSON.parse(readFileSync('artifacts/cannabis-cowboy-m8/certified-bet10.json')); console.log('FINAL BET 10 RTP',r.expected.totalRtp,'95%CI',r.expected.ci95,'REJECTIONS',r.rejections); if(!r.qualified)process.exitCode=1;"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cowboy-m8-minbet-certification
+          path: clients/420bet-lobby/artifacts/cannabis-cowboy-m8/certified-bet10.json
+          retention-days: 14

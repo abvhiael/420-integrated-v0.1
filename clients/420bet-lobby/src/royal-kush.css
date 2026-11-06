@@ -70,3 +70,27 @@ box-shadow:inset 0 0 0 2px #31fd8c7c,inset 0 0 40px #9330ed59,0 15px 45px #0009;
  .rk-card-board{gap:4px;margin-top:0}.rk-hold-tag{height:24px;font-size:9px;padding:4px 0}.rk-card{border-width:2px;border-radius:6px}.rk-card-fallback{font-size:19px}
  .rk-stats{gap:4px;margin-top:7px}.rk-stat{min-height:36px;font-size:9px;gap:4px}.rk-stat strong{font-size:16px}.rk-credit{border-width:1px}.rk-controls{grid-template-columns:repeat(3,minmax(0,1fr));gap:4px}.rk-btn{min-height:46px;border-width:2px;border-radius:11px;font-size:11px}.rk-deal{font-size:22px!important}.rk-bet-number{min-width:28px;padding:0 4px;font-size:18px;border-width:2px}.rk-message{font-size:11px}.rk-footer{font-size:8px}
 }
+
+/* Approved screenshot-derived original Royal Kush title and atmospheric wallpaper.
+   Only the real illustration is in these files — no baked-in cards/paytable/controls. */
+.rk-casino .rk-shell{
+ background:
+   linear-gradient(180deg,#0718111a 0%,#06170a08 48%,#030c0a89 100%),
+   url('/assets/420bet/royal-kush/royal-kush-wallpaper.webp') center center / cover no-repeat,
+   #062a1d;
+}
+.rk-casino .rk-title{height:160px;margin-bottom:-9px}
+.rk-casino .rk-title-stack{
+  flex:none;width:min(75%,760px);height:155px;
+  background:url('/assets/420bet/royal-kush/royal-kush-title.webp') center center /contain no-repeat;
+}
+.rk-casino .rk-title-stack>*{visibility:hidden}
+.rk-casino .rk-title .rk-leaf{display:none}
+@media(max-width:950px){
+ .rk-casino .rk-title{height:132px}
+ .rk-casino .rk-title-stack{width:min(88%,720px);height:126px}
+}
+@media(max-width:550px){
+ .rk-casino .rk-title{height:87px}
+ .rk-casino .rk-title-stack{width:100%;height:86px}
+}

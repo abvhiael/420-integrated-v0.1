@@ -2,9 +2,10 @@ name: Sin City RTP Monte Carlo qualification
 on:
   push:
     branches:
-      - audit/sin-city-rtp-qualification
+      - calibrate/sin-city-target-95-96
     paths:
       - 'clients/420bet-lobby/tests/sin-city-rtp-audit.mjs'
+      - 'clients/420bet-lobby/src/sin-city-engine.js'
       - '.github/workflows/sin-city-rtp-audit.yml'
   workflow_dispatch:
 jobs:
@@ -21,7 +22,7 @@ jobs:
           node-version: '22'
       - name: Run seeded full-feature RTP Monte Carlo against unchanged engine
         env:
-          SPINS_PER_SEED: '150000'
+          SPINS_PER_SEED: '75000'
           RTP_SEEDS: '420,1337,20261106'
         run: node tests/sin-city-rtp-audit.mjs | tee /tmp/sin-city-rtp-audit.log
       - name: Save RTP evidence

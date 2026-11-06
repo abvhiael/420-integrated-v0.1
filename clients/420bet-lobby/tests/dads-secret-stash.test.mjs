@@ -359,16 +359,17 @@ test('Family Chaos Wild Graffiti visibly changes the board before the win popup'
  assert.equal(event.label,'WILD GRAFFITI');
  const initial=game.getState().last.grid;
  const cells=[...game.querySelectorAll('.dss-cell')];
- advance(6250);
+ // Base-game winning ways now play for 1.5s before Family Chaos starts.
+ advance(7800);
  assert.equal(game.querySelector('.dss-modifier-action').hidden,false);
  assert.deepEqual(cells.map(x=>x.dataset.symbol),initial,'Original reel symbols visible before graffiti');
- advance(7600);
+ advance(9250);
  assert(cells.some((x,i)=>x.dataset.symbol!==initial[i]),'At least one reel symbol transforms before the result');
  assert.equal(game.querySelector('.dss-feature-result').hidden,true,'Win popup must not obscure transformations');
- advance(9700);
+ advance(11500);
  assert.deepEqual(cells.map(x=>x.dataset.symbol),event.grid,'All changed reel positions should match calculated result');
  let sawTrace=false,sawResult=false;
- for(let time=9800;time<=26000;time+=100){
+ for(let time=11600;time<=30000;time+=100){
   advance(time);
   sawTrace ||= !game.querySelector('.dss-win-trace').hidden;
   sawResult ||= !game.querySelector('.dss-feature-result').hidden;

@@ -359,17 +359,67 @@ test('Family Chaos Wild Graffiti visibly changes the board before the win popup'
  assert.equal(event.label,'WILD GRAFFITI');
  const initial=game.getState().last.grid;
  const cells=[...game.querySelectorAll('.dss-cell')];
- advance(6250);
+ // Base-game winning ways now play for 1.5s before Family Chaos starts.
+ advance(7800);
  assert.equal(game.querySelector('.dss-modifier-action').hidden,false);
  assert.deepEqual(cells.map(x=>x.dataset.symbol),initial,'Original reel symbols visible before graffiti');
- advance(7600);
+ advance(9250);
  assert(cells.some((x,i)=>x.dataset.symbol!==initial[i]),'At least one reel symbol transforms before the result');
  assert.equal(game.querySelector('.dss-feature-result').hidden,true,'Win popup must not obscure transformations');
- advance(9700);
+ advance(11500);
  assert.deepEqual(cells.map(x=>x.dataset.symbol),event.grid,'All changed reel positions should match calculated result');
- advance(11000);
- assert.equal(game.querySelector('.dss-feature-result').hidden,false,'Final win screen appears only after animation');
- advance(14000);
- assert.equal(game.querySelector('.dss-feature-result').hidden,true);
+ let sawTrace=false,sawResult=false;
+ for(let time=11600;time<=30000;time+=100){
+  advance(time);
+  sawTrace ||= !game.querySelector('.dss-win-trace').hidden;
+  sawResult ||= !game.querySelector('.dss-feature-result').hidden;
+ }
+ assert(sawTrace,'Winning ways must be traced after the graffiti transformation');
+ assert(sawResult,'Final win screen appears after symbols and winning route are shown');
+ assert.equal(game.querySelector('.dss-feature-result').hidden,true,'Feature result eventually finishes');
+ game.stopAnimation();
+});
+
+test('Neon winning ways trace follows real matching positions and never replaces payout maths',()=>{
+ const grid=Array(20).fill('Q');
+ grid.splice(0,4,'A','wild','Q','Q');
+ grid.splice(4,4,'Q','A','Q','Q');
+ grid.splice(8,4,'Q','Q','A','Q');
+ grid.splice(12,4,'Q','Q','Q','Q');
+ const result=evaluate(grid);
+ const winning=result.wins.find(x=>x.symbol==='A');
+ assert(winning&&winning.matched===3&&winning.ways===2);
+ const {document,window}=parseHTML('<html><body></body></html>');
+ let elapsed=0,id=0;const jobs=[];
+ const game=createDadsSecretStash(document,{
+  rng:()=>.55,
+  setTimeout:(fn,ms)=>{const job={id:++id,at:elapsed+ms,fn,done:false};jobs.push(job);return job.id;},
+  clearTimeout:key=>{const job=jobs.find(x=>x.id===key);if(job)job.done=true;}
+ });
+ const advance=target=>{
+  let guard=0;
+  while(true){
+   if(guard++>1500)throw Error('Win trace did not settle');
+   jobs.sort((a,b)=>a.at-b.at);
+   const job=jobs.find(x=>!x.done&&x.at<=target);
+   if(!job)break;
+   job.done=true;elapsed=job.at;job.fn();
+  }
+  elapsed=target;
+ };
+ const spinButton=[...game.querySelectorAll('button')].find(x=>x.textContent.includes('SPIN'));
+ spinButton.dispatchEvent(new window.Event('click',{bubbles:true}));
+ assert(game.getState().last.base.wins.length>0);
+ advance(3300);
+ const trace=game.querySelector('.dss-win-trace');
+ assert.equal(trace.hidden,false,'Winning route must be visible after reel stop');
+ const polyline=trace.querySelector('.dss-win-line');
+ assert(polyline);
+ assert(polyline.getAttribute('points').split(' ').length>=3);
+ assert.match(game.querySelector('.dss-win-label').textContent,/WAYS/);
+ assert(game.querySelectorAll('.dss-paying-symbol').length>=3);
+ advance(5100);
+ assert.equal(trace.hidden,true,'Clear neon trace before next round or feature');
+ assert.equal(game.querySelectorAll('.dss-paying-symbol').length,0);
  game.stopAnimation();
 });

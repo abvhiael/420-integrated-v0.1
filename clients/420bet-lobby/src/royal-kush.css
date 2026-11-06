@@ -94,3 +94,185 @@ box-shadow:inset 0 0 0 2px #31fd8c7c,inset 0 0 40px #9330ed59,0 15px 45px #0009;
  .rk-casino .rk-title{height:87px}
  .rk-casino .rk-title-stack{width:100%;height:86px}
 }
+
+/* ROYAL KUSH LAYOUT 02 — Reference wallpaper runs edge-to-edge through the
+   gamebar/title; controls remain independent clickable HTML above it.
+   Keep this scoped to video poker so other 420Bet games are unaffected. */
+.royal-kush-immersive{
+  background:#03170f url('/assets/420bet/royal-kush/royal-kush-wallpaper.webp')
+    center top / cover no-repeat;
+}
+.royal-kush-immersive .gamebar{
+  position:relative;
+  z-index:2;
+  flex:none;
+  height:48px;
+  min-height:48px;
+  background:linear-gradient(90deg,#051b16dc,#032219aa,#061414d9);
+  border-bottom:1px solid #d7ad4a7c;
+  backdrop-filter:blur(2px);
+}
+.royal-kush-immersive .view-scroll{
+  min-height:0;
+  overflow-y:auto;
+  overflow-x:hidden;
+  background:transparent;
+}
+.royal-kush-immersive .rk-casino{
+  position:relative;
+  width:100%;
+  max-width:none;
+  padding:0;
+  margin:0 auto;
+  color:#fff9d9;
+  background:transparent;
+}
+.royal-kush-immersive .rk-shell{
+  min-height:0;
+  border:0;
+  border-radius:0;
+  padding:4px clamp(8px,3vw,38px) 8px;
+  background:linear-gradient(180deg,#03180b25,#06160b06 40%,#020c0a59),
+    url('/assets/420bet/royal-kush/royal-kush-wallpaper.webp')
+      center center / 100% 100% no-repeat,#032015;
+  box-shadow:none;
+  overflow:visible;
+}
+.royal-kush-immersive .rk-title{
+  position:relative;
+  z-index:4;
+  height:106px;
+  margin:-7px auto -1px;
+  padding:0;
+}
+.royal-kush-immersive .rk-title-stack{
+  position:relative;
+  z-index:5;
+  height:105px;
+  width:min(76%,690px);
+  background-position:center center;
+}
+.royal-kush-immersive .rk-paytable{
+  max-width:1400px;
+  padding:4px 9px 5px;
+  border-width:5px;
+  border-radius:23px;
+}
+.royal-kush-immersive .rk-pay-grid{border-width:1px}
+.royal-kush-immersive .rk-pay-header{
+  min-height:25px;
+  font-size:clamp(10px,1vw,15px);
+}
+.royal-kush-immersive .rk-pay-row{
+  min-height:22px;
+  font-size:clamp(11px,1.15vw,17px);
+  line-height:1.03;
+}
+.royal-kush-immersive .rk-pay-label{
+  padding:1px 6px 1px 13px;
+  letter-spacing:.02em;
+}
+.royal-kush-immersive .rk-pay-value,
+.royal-kush-immersive .rk-pay-col{padding:2px 3px}
+.royal-kush-immersive .rk-card-board{
+  max-width:min(940px,83vw);
+  gap:clamp(6px,1.2vw,15px);
+  margin:4px auto 0;
+}
+.royal-kush-immersive .rk-card-slot{gap:0}
+.royal-kush-immersive .rk-hold-tag{
+  height:24px;
+  padding:1px 4px;
+  font-size:clamp(10px,1.2vw,16px);
+}
+.royal-kush-immersive .rk-card{
+  aspect-ratio:.75;
+  border-width:4px;
+  border-radius:12px;
+}
+.royal-kush-immersive .rk-stats{
+  max-width:1190px;
+  gap:9px;
+  margin:8px auto 2px;
+}
+.royal-kush-immersive .rk-stat{
+  min-height:33px;
+  gap:9px;
+  font-size:clamp(11px,1.1vw,16px);
+}
+.royal-kush-immersive .rk-stat strong{
+  font-size:clamp(19px,2vw,29px);
+}
+.royal-kush-immersive .rk-controls{
+  grid-template-columns:.8fr 1.1fr 1.1fr 1fr 1fr 1.7fr;
+  gap:clamp(5px,.8vw,11px);
+  margin:8px 0 0;
+}
+.royal-kush-immersive .rk-btn{
+  min-height:50px;
+  padding:3px 7px;
+  font-size:clamp(11px,1.25vw,19px);
+  border-width:3px;
+  border-radius:18px;
+}
+.royal-kush-immersive .rk-deal{
+  min-height:50px;
+  font-size:clamp(22px,2.9vw,40px)!important;
+  border-radius:54px;
+}
+.royal-kush-immersive .rk-bet-number{
+  min-width:46px;
+  border-width:3px;
+  font-size:clamp(20px,2vw,29px);
+}
+.royal-kush-immersive .rk-message{
+  min-height:18px;
+  margin:5px auto 0;
+  font-size:12px;
+}
+.royal-kush-immersive .rk-footer{
+  margin-top:2px;
+  font-size:9px;
+}
+/* More constrained laptop viewports: scale card footprint and title further
+   without modifying the wager/hold hit targets or casino calculations. */
+@media(min-width:951px) and (max-height:850px){
+  .royal-kush-immersive .rk-title{height:88px}
+  .royal-kush-immersive .rk-title-stack{height:88px}
+  .royal-kush-immersive .rk-card-board{max-width:min(800px,76vw)}
+  .royal-kush-immersive .rk-pay-row{min-height:20px;font-size:clamp(10px,1vw,15px)}
+  .royal-kush-immersive .rk-pay-header{min-height:22px}
+  .royal-kush-immersive .rk-controls{margin-top:5px}
+  .royal-kush-immersive .rk-btn{min-height:45px}
+  .royal-kush-immersive .rk-deal{min-height:45px}
+}
+@media(max-width:950px){
+  .royal-kush-immersive .rk-title{height:100px;margin-top:0}
+  .royal-kush-immersive .rk-title-stack{height:98px;width:min(90%,700px)}
+  .royal-kush-immersive .rk-card-board{max-width:850px;gap:7px}
+  .royal-kush-immersive .rk-controls{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .royal-kush-immersive .rk-deal{grid-column:3}
+  .royal-kush-immersive .rk-btn{font-size:14px;min-height:48px}
+}
+@media(max-width:550px){
+  .royal-kush-immersive .gamebar{height:auto;min-height:48px}
+  .royal-kush-immersive .rk-shell{padding:5px 4px 9px}
+  .royal-kush-immersive .rk-title{height:75px;margin:0 auto}
+  .royal-kush-immersive .rk-title-stack{height:75px;width:100%}
+  .royal-kush-immersive .rk-paytable{padding:3px;border-width:3px;border-radius:12px}
+  .royal-kush-immersive .rk-pay-header{min-height:23px;font-size:9px}
+  .royal-kush-immersive .rk-pay-row{min-height:22px;font-size:8px}
+  .royal-kush-immersive .rk-pay-label{padding:2px}
+  .royal-kush-immersive .rk-pay-value,
+  .royal-kush-immersive .rk-pay-col{padding:2px 0}
+  .royal-kush-immersive .rk-card-board{max-width:100%;gap:4px}
+  .royal-kush-immersive .rk-hold-tag{height:23px;font-size:9px}
+  .royal-kush-immersive .rk-card{border-width:2px;border-radius:6px}
+  .royal-kush-immersive .rk-stats{gap:4px;margin-top:6px}
+  .royal-kush-immersive .rk-stat{min-height:33px;gap:3px;font-size:9px}
+  .royal-kush-immersive .rk-stat strong{font-size:16px}
+  .royal-kush-immersive .rk-controls{gap:4px;margin-top:5px}
+  .royal-kush-immersive .rk-btn{min-height:45px;font-size:11px;border-width:2px}
+  .royal-kush-immersive .rk-deal{font-size:22px!important;min-height:45px}
+  .royal-kush-immersive .rk-bet-number{min-width:29px;font-size:18px;border-width:2px}
+}

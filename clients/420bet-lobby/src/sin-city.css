@@ -72,3 +72,9 @@
 .sc-qa-end{background:#61233c;border-color:#f5ad69}
 .sc-qa-button:disabled,.sc-qa-end:disabled{opacity:.45;cursor:not-allowed}
 .sc-qa-active{flex-basis:100%;text-align:center;color:#b4ff74;font-weight:900;font-size:12px}
+
+.sc-qa-choices{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;flex-basis:100%}
+.sc-qa-choice{padding:8px 12px;border:1px solid #a56cba;border-radius:7px;color:#f5d7ff;background:#22112f;cursor:pointer;font-weight:750}
+.sc-qa-choice-active{color:#12260c;background:#a0ff69;border-color:#efffc7;box-shadow:0 0 13px #79fb4c}
+.sc-qa-choice:disabled{opacity:.55;cursor:not-allowed}
+.sc-qa-choice:focus-visible,.sc-qa-button:focus-visible,.sc-qa-end:focus-visible{outline:3px solid white;outline-offset:2px}

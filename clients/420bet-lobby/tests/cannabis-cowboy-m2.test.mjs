@@ -22,7 +22,7 @@ test('M2 disables all round and bet controls and never presents credits as spend
  const {document,window}=parseHTML('<html><body></body></html>');
  const root=createCannabisCowboyShell(document);
  const controls=[...root.querySelectorAll('.cc-console button')];
- assert.equal(controls.length,7);
+ assert.equal(controls.length,6);
  assert.equal(controls.filter(b=>!b.disabled).length,1,'only information dialog can open');
  assert.equal(root.querySelector('.cc-spin').disabled,true);
  assert.equal(root.querySelector('.cc-readout strong').textContent,'$4.00');

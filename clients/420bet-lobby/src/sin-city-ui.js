@@ -251,29 +251,34 @@ export function createSinCityPractice(doc=globalThis.document,options={}){
    visualBoard=null;presentWins();
   }
  }
- function spinTick(){
-  if(dead||phase!=='spinning')return;
-  frame++;
-  const strips=state.mode==='free'?FREE_STRIPS:BASE_STRIPS;
-  const previous=state.lastStops||[0,8,16,24,32];
-  visualBoard=Array.from({length:5},(_,r)=>{
-   if(r<stopped)return [...pending.lastReveal.before[r]];
-   const stop=(previous[r]+frame*3+r*11)%strips[r].length;
-   return visibleBoard(strips,Array.from({length:5},(_,i)=>i===r?stop:0))[r];
-  });
-  render();later(spinTick,85);
- }
  function stopReel(reel){
   if(dead||phase!=='spinning')return;
   stopped=reel+1;playCue();
-  visualBoard[reel]=[...pending.lastReveal.before[reel]];
-  render();
-  if(stopped===5)later(resolveSpin,150);
+  // Only settle the current column; other reel tracks keep spinning uninterrupted.
+  const symbols=pending.lastReveal.before[reel];
+  const column=root.querySelector('.sc-reel[data-reel="'+reel+'"]');
+  if(column){
+   column.classList.remove('sc-reel-spinning');
+   column.classList.add('sc-reel-stopped');
+   column.querySelector('.sc-spin-window')?.remove();
+   const cells=[...column.querySelectorAll('.sc-symbol')];
+   for(let row=0;row<4;row++){
+    const cell=cells[row],symbol=symbols[row];
+    cell.setAttribute('aria-label','Reel '+(reel+1)+' row '+(row+1)+': '+symbol);
+    cell.replaceChildren();
+    if(FILES[symbol]){const img=el(doc,'img');img.src=art('symbols',FILES[symbol]);img.alt='';img.draggable=false;cell.append(img);}
+    cell.classList.toggle('sc-wild',symbol==='WILD');
+    cell.classList.toggle('sc-gem',symbol==='GEM');
+   }
+  }
+  const status=root.querySelector('.sc-result');
+  if(status)status.textContent='REELS SPINNING · '+stopped+' OF 5 STOPPED';
+  if(stopped===5)later(resolveSpin,180);
  }
  function step(){
   if(dead||busy)return;
   if(state.mode==='base'&&state.balance<state.stake){auto=false;render();return;}
-  clear();showBanner='';winPaths=[];highlightCells=[];frame=0;stopped=0;changedCount=0;winIndex=0;
+  clear();showBanner='';winPaths=[];highlightCells=[];stopped=0;changedCount=0;winIndex=0;
   spinningMode=state.mode;previousBalance=state.balance;
   const forced=qaForcedStops??options.pickStops?.(state);
   qaForcedStops=null;
@@ -282,11 +287,10 @@ export function createSinCityPractice(doc=globalThis.document,options={}){
   if(qaPriorState!==null)pending.balance=state.balance;
   busy=true;phase='spinning';playCue();
   visualBoard=state.lastBoard.map(reel=>[...reel]);render();
-  // Reel one settles at 0.75 s; each following reel exactly 0.5 s later.
-  // Turbo accelerates only the preliminary spin, not the 500 ms stop cadence.
-  spinTick();
-  const first=reduced?150:turbo?350:750;
-  for(let r=0;r<5;r++)later(()=>stopReel(r),first+500*r);
+  // Seamless GPU scrolling; no JS frame-by-frame DOM replacement.
+  // Every reel after the first stops exactly 750 ms later, Turbo included.
+  const first=reduced?150:turbo?400:850;
+  for(let r=0;r<5;r++)later(()=>stopReel(r),first+750*r);
  }
  render();return root;
 }

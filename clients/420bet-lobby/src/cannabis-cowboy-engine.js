@@ -3,7 +3,7 @@
 export const COLUMNS=6, ROWS=8, CELL_COUNT=48;
 export const MAX_CASCADES=200;
 export const MAX_BONUS_CASCADES=20; // deterministic feature safety exit, not a player-facing crash
-export const BASE_PAY_SCALE=2.75; // fixed paytable-scale multiplier, applied before rounding
+export const BASE_PAY_SCALE=2.70; // fixed paytable-scale multiplier, applied before rounding
 export const FEATURE_PAY_SCALE=0.024; // independent free-spin win factor, applied before rounding
 export const MAX_FEATURE_PAYOUT_BETS=500; // full Endless Harvest aggregate, including retriggers
 export const BET_CHOICES=Object.freeze([10,20,30,40,50]); // local demo credits only

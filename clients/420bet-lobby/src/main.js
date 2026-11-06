@@ -52,10 +52,14 @@ function render(){
   if(active){
     const main=node('main',active.id==='roulette'?'immersive roulette-immersive':active.id==='blackjack'?'immersive blackjack-immersive':'immersive');const bar=node('header','gamebar');
     bar.append(button(selectedSlotMachine?'← Slots Lobby':'← Return to Lobby',close,'return'),brandLink('game-brand'),node('strong','',selectedSlotMachine?.title??active.title));
-    const note=node('span','game-status',['slots','roulette','blackjack','mines','crash'].includes(active.id)?'Practice available':statusText[active.status]);bar.append(note);main.append(bar);
+    const note=node('span','game-status',selectedSlotMachine?.preview?'Preview · In development':['slots','roulette','blackjack','mines','crash'].includes(active.id)?'Practice available':statusText[active.status]);bar.append(note);main.append(bar);
     if(active.id==='slots'){
       const wrap=node('div','view-scroll');
-      if(selectedSlotMachine){activePractice=selectedSlotMachine.id==='dads-secret-stash'?createDadsSecretStash(document):selectedSlotMachine.id==='mary-jane-sticky-wilds'?createMaryJanePractice(document):createPractice('slots',document);wrap.append(activePractice);}
+      if(selectedSlotMachine?.preview){
+        const preview=node('section','cowboy-preview-page');
+        preview.append(node('p','eyebrow','420BET · SLOT #4 · PREVIEW'),node('h1','','The Cannabis Cowboy'),node('h2','','High Country Clusters'),node('p','','Cole Haze rides into the sunset with a 6×8 cluster-pays game, growing harvest multipliers, smoke-ring wilds and road-trip bonuses.'),node('p','preview-warning','This machine is in development. Practice gameplay, wagering and payouts are not enabled.'));
+        wrap.append(preview);
+      }else if(selectedSlotMachine){activePractice=selectedSlotMachine.id==='dads-secret-stash'?createDadsSecretStash(document):selectedSlotMachine.id==='mary-jane-sticky-wilds'?createMaryJanePractice(document):createPractice('slots',document);wrap.append(activePractice);}
       else wrap.append(createSlotsLobby(document,launchSlotMachine));
       main.append(wrap);
     }

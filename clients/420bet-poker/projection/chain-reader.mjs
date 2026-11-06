@@ -49,7 +49,7 @@ const revealABI=[abiFn('slotOf',[['handId','bytes32'],['pos','uint8']],[{type:'t
  C('shareA','bool'),C('shareB','bool'),C('opened','bool'),C('card','uint8')])}])];
 const operatorABI=[abiFn('isActive',[['id','bytes32']],[A('bool')])];
 const ZERO='0x'+'0'.repeat(64),ZERO_ADDR='0x'+'0'.repeat(40);
-const PHASES=['NONE','PREFLOP','HAND_COMMITTED','FLOP','HAND_COMMITTED','TURN','HAND_COMMITTED','RIVER','SHOWDOWN','SETTLED'];
+export const NATIVE_PHASES=Object.freeze(['NONE','PREFLOP','AWAIT_FLOP','FLOP','AWAIT_TURN','TURN','AWAIT_RIVER','RIVER','SHOWDOWN','UNCONTESTED']);
 const safe=v=>{const n=typeof v==='bigint'?Number(v):v;if(!Number.isSafeInteger(n)||n<0)throw Error('unsafe chain integer');return n;};
 const addr=s=>typeof s==='string'&&/^0x[a-f0-9]{40}$/i.test(s)&&s.toLowerCase()!==ZERO_ADDR;
 const hex=s=>typeof s==='string'&&/^0x[a-f0-9]{64}$/i.test(s)&&s.toLowerCase()!==ZERO;
@@ -142,11 +142,12 @@ export function createCanonicalPokerReader({rpcUrl,chainId,contracts,clientOverr
    const count=Array.from({length:9},(_,i)=>(safe(g.seatsMask)>>i)&1).reduce((a,b)=>a+b,0);
    if(count<2||count>r.config.seats)throw Error('invalid verified participant mask');
    const start=2*count;
-   const phase=PHASES[safe(g.phase)];
+   const phase=NATIVE_PHASES[safe(g.phase)];
    if(!phase||phase==='NONE')throw Error('unsupported canonical phase');
-   const positions=phase==='PREFLOP'?[]:phase==='FLOP'?[start+1,start+2,start+3]:
-    phase==='TURN'?[start+1,start+2,start+3,start+5]:
+   const positions=phase==='FLOP'||phase==='AWAIT_TURN'?[start+1,start+2,start+3]:
+    phase==='TURN'||phase==='AWAIT_RIVER'?[start+1,start+2,start+3,start+5]:
     phase==='RIVER'||phase==='SHOWDOWN'?[start+1,start+2,start+3,start+5,start+7]:[];
+   // UNCONTESTED does not imply that all streets were publicly revealed.
    // Waiting-for-reveal phases cannot leak hidden card slots.
    const community=[];
    for(const pos of positions){
@@ -166,7 +167,7 @@ export function createCanonicalPokerReader({rpcUrl,chainId,contracts,clientOverr
    if(contributed!==safe(g.pot))throw Error('native pot mismatch');
    hand={nonce:safe(d.nonce),actionNonce:safe(g.nonce),pot:safe(g.pot),
      deadline:safe(g.deadline)*1000,turnSeat:safe(g.toAct),dealerSeat:safe(g.button),
-     community,phase:phase==='HAND_COMMITTED'?'HAND_COMMITTED':phase};
+     community,phase};
    stateHash=g.stateRoot;
    dealProofVerified=seatEpochVerified=revealsVerified=engineVerified=tableVersionVerified=true;
    deckRoot=s.finalDeckRoot;

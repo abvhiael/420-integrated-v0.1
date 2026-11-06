@@ -2,7 +2,7 @@
 export const BUZZ_STAGE=Object.freeze({
  width:1200,height:675,kevinX:570,kevinFloorY:558,
  kevinWidth:320,kevinHeight:320,maxLift:78,hover:3,
- momDoorX:1060,momInX:1004,momFloorY:558,momHeight:420,momWidth:280,
+ momDoorX:1058,momInX:1004,momFloorY:558,momHeight:420,momWidth:280,
 });
 // Kevin never loops back to a lower animation frame within a round.
 // Every selected frame is part of one 4x2, 444px-cell production atlas.
@@ -27,7 +27,7 @@ export function kevinYForMultiplier(multiplier,bob=0){
 // Every beat is its OWN illustrated frame (F01 to F12 in fixed order).
 // The source is already mirrored: no code-side flip or frame loop.
 export const MOM_ENTRY_BEATS=Object.freeze([
- {ms:0,pose:1,x:1060},
+ {ms:0,pose:1,x:1058},
  {ms:230,pose:2,x:1053},
  {ms:470,pose:3,x:1045},
  {ms:720,pose:4,x:1037},

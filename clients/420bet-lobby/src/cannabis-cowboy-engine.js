@@ -3,8 +3,9 @@
 export const COLUMNS=6, ROWS=8, CELL_COUNT=48;
 export const MAX_CASCADES=200;
 export const MAX_BONUS_CASCADES=20; // deterministic feature safety exit, not a player-facing crash
-export const FEATURE_PAY_SCALE=0.078; // preliminary M8 calibration — must qualify across wagers
-export const MAX_FEATURE_PAYOUT_BETS=5000; // feature aggregate, independent of presentation
+export const BASE_PAY_SCALE=2.75; // fixed paytable-scale multiplier, applied before rounding
+export const FEATURE_PAY_SCALE=0.024; // independent free-spin win factor, applied before rounding
+export const MAX_FEATURE_PAYOUT_BETS=500; // full Endless Harvest aggregate, including retriggers
 export const BET_CHOICES=Object.freeze([10,20,30,40,50]); // local demo credits only
 export const START_CREDITS=10000;
 export const WILD_SYMBOL=8;
@@ -167,10 +168,10 @@ export function resolveRound(initialBoard,bet,rng=Math.random,options={}){
    const multiplier=Math.min(MAX_CLUSTER_MULTIPLIER,harvestMultiplier*smokeMultiplier);
    const base=clusterPayout(cluster.symbol,cluster.size,bet);
    const unscaled=base*multiplier;
-   const scaled=options.bonusMode?Math.round(unscaled*FEATURE_PAY_SCALE):unscaled;
+   const scaled=Math.round(unscaled*(options.bonusMode?FEATURE_PAY_SCALE:BASE_PAY_SCALE));
    const payout=Math.min(scaled,Math.max(0,payoutCeiling-total-cascadeWin));
    if(!Number.isSafeInteger(payout)||payout<0)throw new Error('Unsafe payout');
-   paid.push({...cluster,multiplier,harvestMultiplier,smokeMultiplier,base,scale:options.bonusMode?FEATURE_PAY_SCALE:1,payout});
+   paid.push({...cluster,multiplier,harvestMultiplier,smokeMultiplier,base,scale:options.bonusMode?FEATURE_PAY_SCALE:BASE_PAY_SCALE,payout});
    cascadeWin+=payout;
    for(const p of cluster.positions)if(!sticky.has(p))removed.add(p);
    if(options.bonusMode)for(const p of cluster.wildPositions??[])if(sticky.has(p))spentSticky.add(p);

@@ -3,6 +3,8 @@
 export const COLUMNS=6, ROWS=8, CELL_COUNT=48;
 export const MAX_CASCADES=200;
 export const MAX_BONUS_CASCADES=20; // deterministic feature safety exit, not a player-facing crash
+export const FEATURE_PAY_SCALE=0.078; // preliminary M8 calibration — must qualify across wagers
+export const MAX_FEATURE_PAYOUT_BETS=5000; // feature aggregate, independent of presentation
 export const BET_CHOICES=Object.freeze([10,20,30,40,50]); // local demo credits only
 export const START_CREDITS=10000;
 export const WILD_SYMBOL=8;
@@ -140,6 +142,8 @@ export function resolveRound(initialBoard,bet,rng=Math.random,options={}){
  assertBoard(initialBoard);
  if(!BET_CHOICES.includes(bet))throw new Error('Unsupported practice wager');
  const stored=options.initialFertile??Array(CELL_COUNT).fill(0);
+ const payoutCeiling=options.maxPayout??Number.MAX_SAFE_INTEGER;
+ if(!Number.isSafeInteger(payoutCeiling)||payoutCeiling<0)throw new Error('Invalid payout ceiling');
  if(!Array.isArray(stored)||stored.length!==CELL_COUNT||stored.some(n=>n!==0&&![2,4,8,16,32].includes(n)))throw new Error('Invalid fertile positions');
  let board=initialBoard.slice(),fertile=stored.slice(),total=0;
  const sticky=new Set(options.lockedWilds??[]);
@@ -162,9 +166,11 @@ export function resolveRound(initialBoard,bet,rng=Math.random,options={}){
    const smokeMultiplier=cluster.wildCount?SMOKE_RING_MULTIPLIER:1;
    const multiplier=Math.min(MAX_CLUSTER_MULTIPLIER,harvestMultiplier*smokeMultiplier);
    const base=clusterPayout(cluster.symbol,cluster.size,bet);
-   const payout=Math.round(base*multiplier);
+   const unscaled=base*multiplier;
+   const scaled=options.bonusMode?Math.round(unscaled*FEATURE_PAY_SCALE):unscaled;
+   const payout=Math.min(scaled,Math.max(0,payoutCeiling-total-cascadeWin));
    if(!Number.isSafeInteger(payout)||payout<0)throw new Error('Unsafe payout');
-   paid.push({...cluster,multiplier,harvestMultiplier,smokeMultiplier,base,payout});
+   paid.push({...cluster,multiplier,harvestMultiplier,smokeMultiplier,base,scale:options.bonusMode?FEATURE_PAY_SCALE:1,payout});
    cascadeWin+=payout;
    for(const p of cluster.positions)if(!sticky.has(p))removed.add(p);
    if(options.bonusMode)for(const p of cluster.wildPositions??[])if(sticky.has(p))spentSticky.add(p);
@@ -201,7 +207,7 @@ export function resolveEndlessHarvest(initialSpins,bet,rng=Math.random,options={
   const retrigger=Math.min(possible,limit-awarded);
   awarded+=retrigger;
   const initialFertile=fertile.slice(),stickyBefore=sticky.slice();
-  const outcome=resolveRound(board,bet,rng,{bonusMode:true,initialFertile,lockedWilds:stickyBefore});
+  const outcome=resolveRound(board,bet,rng,{bonusMode:true,initialFertile,lockedWilds:stickyBefore,maxPayout:Math.max(0,bet*MAX_FEATURE_PAYOUT_BETS-total)});
   if(!Number.isSafeInteger(total+outcome.total))throw new Error('Unsafe feature credits');
   total+=outcome.total;
   fertile=outcome.fertile.slice();sticky=outcome.lockedWilds.slice();

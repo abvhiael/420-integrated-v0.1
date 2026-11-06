@@ -747,3 +747,74 @@ test('Full-width neon route geometry matches the complete five-reel SVG canvas',
  assert.match(source,/for\(let reel=win\.matched;reel<5;reel\+\+\)/);
  assert.match(source,/route\.push\('500,'\+lastY\)/);
 });
+
+test('Gold textured 3D SPIN artwork replaces the old emoji button without changing click semantics',()=>{
+ const {document,window}=parseHTML('<html><body></body></html>');
+ const game=createDadsSecretStash(document,{rng:()=>.55});
+ const spinButton=game.querySelector('.dss-button.dss-spin');
+ assert(spinButton);
+ assert.equal(spinButton.textContent,'SPIN');
+ assert.equal(spinButton.getAttribute('type'),'button');
+ const svgPath=new URL('../public/assets/420bet/dads-secret-stash/spin-button-gold.svg',import.meta.url);
+ assert(existsSync(svgPath),'Textured spin image must be committed');
+ const svg=readFileSync(svgPath,'utf8');
+ assert.match(svg,/data:image\/webp;base64,/);
+ assert(svg.length>5500,'Rasterized gold button art must be embedded, not empty flat vector');
+ const css=readFileSync(new URL('../src/dads-secret-stash.css',import.meta.url),'utf8');
+ assert(css.includes("spin-button-gold.svg"));
+ assert(css.includes('.dss-controls .dss-button.dss-spin:hover:not(:disabled)'));
+ assert(css.includes('.dss-controls .dss-button.dss-spin:active:not(:disabled)'));
+ spinButton.dispatchEvent(new window.Event('click',{bubbles:true}));
+ assert.equal(game.getState().rounds,1,'Gold button must invoke same real practice spin');
+ game.stopAnimation();
+});
+test('Mow replaces every triggering mower on the board before the first of five cascades',()=>{
+ const original=Array(20).fill('A');
+ for(const i of [0,4,9,16])original[i]='mower';
+ const bonus=mow(original,()=>.55);
+ assert.deepEqual(bonus.mowerIndices,[0,4,9,16]);
+ assert.equal(bonus.initialGrid.length,20);
+ assert(bonus.mowerIndices.every(i=>bonus.initialGrid[i]!=='mower'));
+ for(let i=0;i<20;i++)if(original[i]!=='mower')assert.equal(bonus.initialGrid[i],original[i]);
+ assert.equal(bonus.boards.length,5);
+ assert.deepEqual(bonus.boards[0].before,bonus.initialGrid);
+ for(const entry of bonus.boards){
+  assert(!entry.before.includes('mower'),'Cascades must never resurrect triggering mowers');
+  assert(!entry.grid.includes('mower'),'Cascades must remain free of triggering mowers');
+ }
+});
+test('Mow preview visibly removes all mower symbols and only then starts cascading',()=>{
+ const {document,window}=parseHTML('<html><body></body></html>');
+ let now=0,id=0;const timers=[];
+ const game=createDadsSecretStash(document,{
+  rng:()=>.55,
+  setTimeout:(fn,ms)=>{const job={id:++id,when:now+ms,fn,done:false};timers.push(job);return job.id;},
+  clearTimeout:key=>{const job=timers.find(x=>x.id===key);if(job)job.done=true;}
+ });
+ const advance=time=>{
+  let guard=0;
+  while(true){
+   if(guard++>2000)throw Error('Mower sequence did not finish');
+   timers.sort((a,b)=>a.when-b.when);
+   const job=timers.find(x=>!x.done&&x.when<=time);
+   if(!job)break;
+   job.done=true;now=job.when;job.fn();
+  }
+  now=time;
+ };
+ game.querySelector('.dss-preview-select option[value="mow"]').setAttribute('selected','');
+ game.querySelector('.dss-preview-button').dispatchEvent(new window.Event('click',{bubbles:true}));
+ const event=game.getState().last.events[0];
+ assert.equal(event.type,'mow');
+ assert.equal(event.mowerIndices.length,3);
+ advance(2800);
+ assert(event.mowerIndices.every(i=>game.querySelectorAll('.dss-cell')[i].dataset.symbol==='mower'),'Trigger symbols show during opening');
+ assert.equal(game.querySelectorAll('.dss-mower-replacing').length,3);
+ advance(2980);
+ assert(event.mowerIndices.every(i=>game.querySelectorAll('.dss-cell')[i].dataset.symbol!=='mower'),'Remove all mowers before cascade 1');
+ assert.equal(game.querySelectorAll('.dss-clearing').length,0,'First cascade has not started');
+ advance(3530);
+ assert(game.querySelectorAll('.dss-clearing').length>0,'Only after mower replacement does first cascade start');
+ assert.equal(game.getState().rounds,0,'Bonus test does not count as a real spin');
+ game.stopAnimation();
+});

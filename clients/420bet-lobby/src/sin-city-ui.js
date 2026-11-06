@@ -14,7 +14,7 @@ export function createSinCityPractice(doc=globalThis.document,options={}){
  const reduced=!!view.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
  const root=el(doc,'section','sc-game');root.dataset.practiceGame='sin-city-high-rollers';
  let state=initialState(),panel='',auto=false,autoLeft=0,turbo=false,muted=true,busy=false,dead=false,showBanner='',visualBoard=null,audioContext=null;
- let phase='idle',pending=null,stopped=0,frame=0,changedCount=0,winIndex=0,highlightCells=[],winPaths=[];
+ let phase='idle',pending=null,stopped=0,frame=0,changedCount=0,winIndex=0,highlightCells=[],winPaths=[],spinningMode='base',previousBalance=1000;
  const timers=new Set();
  const playCue=()=>{if(muted||dead)return;try{const Constructor=view.AudioContext||view.webkitAudioContext;if(!Constructor)return;audioContext??=new Constructor();const tone=audioContext.createOscillator(),gain=audioContext.createGain();tone.type='sine';tone.frequency.value=520;gain.gain.value=.025;tone.connect(gain);gain.connect(audioContext.destination);tone.start();tone.stop(audioContext.currentTime+.11);}catch{}};
  const later=(fn,ms)=>{if(dead)return;const id=view.setTimeout?.(()=>{timers.delete(id);if(!dead)fn();},ms);if(id!==undefined)timers.add(id);else fn();};
@@ -81,7 +81,7 @@ export function createSinCityPractice(doc=globalThis.document,options={}){
   }
   const result=el(doc,'div','sc-result',phase==='spinning'?'REELS SPINNING · '+stopped+' OF 5 STOPPED':phase==='announce'?state.lastMessage:phase==='transform'?'BONUS IN ACTION — WATCH THE SYMBOLS CHANGE':phase==='win'?'WINNING WAY '+(winIndex+1)+' OF '+winPaths.length+' · CLICK SCREEN FOR TOTAL':phase==='total'?'TOTAL WIN '+state.lastWin.toFixed(2)+' PRACTICE CREDITS':state.lastMessage);result.setAttribute('role','status');result.setAttribute('aria-live','polite');cabinet.append(result);
   const metrics=el(doc,'div','sc-metrics');
-  for(const [caption,value] of [['BALANCE',state.balance.toFixed(2)],['TOTAL BET',state.stake.toFixed(2)],['LAST WIN',state.lastWin.toFixed(2)]]){const cell=el(doc,'div','sc-metric');cell.append(el(doc,'small','',caption),el(doc,'strong','',value));metrics.append(cell);}
+  for(const [caption,value] of [['BALANCE',(['announce','transform','win'].includes(phase)?previousBalance:state.balance).toFixed(2)],['TOTAL BET',state.stake.toFixed(2)],['LAST WIN',['announce','transform','win'].includes(phase)?'—':state.lastWin.toFixed(2)]]){const cell=el(doc,'div','sc-metric');cell.append(el(doc,'small','',caption),el(doc,'strong','',value));metrics.append(cell);}
   cabinet.append(metrics);
   const controls=el(doc,'div','sc-controls');
   const info=button('INFO','sc-control',()=>{panel='info';render();});
@@ -182,7 +182,9 @@ export function createSinCityPractice(doc=globalThis.document,options={}){
   if(dead)return;
   state=pending;pending=null;phase='announce';visualBoard=state.lastReveal?.before?.map(reel=>[...reel])||state.lastBoard;
   playCue();
-  showBanner=bannerFiles[state.lastFeature]||'';
+  const reveal=state.lastReveal;
+  const changedInFree=spinningMode==='free'&&reveal?.before?.some((reel,r)=>reel.some((v,row)=>v!==reveal.after[r][row]));
+  showBanner=bannerFiles[state.lastFeature]||(changedInFree?'banner_chronic_sessions_free_spins.png':'');
   if(state.mode!=='base'){auto=false;autoLeft=0;}
   render();
   if(showBanner){
@@ -215,6 +217,7 @@ export function createSinCityPractice(doc=globalThis.document,options={}){
   if(dead||busy)return;
   if(state.mode==='base'&&state.balance<state.stake){auto=false;render();return;}
   clear();showBanner='';winPaths=[];highlightCells=[];frame=0;stopped=0;changedCount=0;winIndex=0;
+  spinningMode=state.mode;previousBalance=state.balance;
   pending=nextRound(state,options.rng,options.pickStops?.(state));
   busy=true;phase='spinning';playCue();
   visualBoard=state.lastBoard.map(reel=>[...reel]);render();

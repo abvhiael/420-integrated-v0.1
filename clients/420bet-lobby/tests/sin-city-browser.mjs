@@ -47,6 +47,16 @@ try{
   const track=await page.evaluate(()=>({count:document.querySelectorAll('.sc-spin-track').length,animation:getComputedStyle(document.querySelector('.sc-spin-track')).animationName}));
   assert.equal(track.count,5,'All five reels show their own continuous track');
   assert.match(track.animation,/sc-smooth-scroll/,'Rolling animation must use GPU-transformed track');
+  const rollingGeometry=await page.evaluate(()=>{
+   const box=node=>{const r=node.getBoundingClientRect();return {width:r.width,height:r.height};};
+   const reel=document.querySelector('.sc-reel-spinning');
+   return {cell:box(reel.querySelector('.sc-symbol')),tile:box(reel.querySelector('.sc-spin-tile')),image:box(reel.querySelector('.sc-spin-tile img'))};
+  });
+  assert.ok(rollingGeometry.tile.height<=rollingGeometry.cell.height+3,'Each spinning tile must fit one symbol frame');
+  assert.ok(rollingGeometry.image.height<=rollingGeometry.cell.height,'Spinning art is taller than the frame');
+  assert.ok(rollingGeometry.image.width<=rollingGeometry.cell.width,'Spinning art is wider than the frame');
+  await page.screenshot({path:'qualification/sin-city/'+name+'-spinning.png',fullPage:true});
+
   await new Promise(resolve=>setTimeout(resolve,960));
   const stopCount=await page.evaluate(()=>document.querySelectorAll('.sc-reel-spinning').length);
   assert.equal(stopCount,4,'Only first reel should settle before next 750ms stop');

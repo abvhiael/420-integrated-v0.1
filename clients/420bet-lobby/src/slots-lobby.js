@@ -6,7 +6,7 @@ export const SLOT_MACHINES=Object.freeze([
  Object.freeze({id:'emerald-harvest',title:'Emerald Harvest',subtitle:'1,024 Ways to Win',description:'Five reels, four rows, Wilds, Scatters and free-spin bonuses.',art:EMERALD_ASSETS.cabinet,status:'Practice available'}),
  Object.freeze({id:'mary-jane-sticky-wilds',title:"Mary Jane's Sticky Wilds",subtitle:'20 Lines · Gold Leaf Frames',description:'A boho Vegas slot with 10-spin frames, ×10 Buzz, and Sticky Wild Free Spins.',art:'/assets/420bet/mary-jane/mj-concept-cabinet.webp',status:'Practice available'}),
  Object.freeze({id:'dads-secret-stash',title:"Dad's Secret Stash",subtitle:'1,024 Ways · Suburban Chaos',description:'Gary and the family, mystery modifiers, locked respins, Fetch Wilds and the garage stash.',art:'/assets/420bet/dads-secret-stash/lobby.svg',status:'Practice available'}),
- Object.freeze({id:'cannabis-cowboy',title:'The Cannabis Cowboy',subtitle:'High Country Clusters · 6×8',description:'Cole Haze and his mountain ranch: growing harvest multipliers, smoke-ring wilds and road-trip bonuses.',art:null,status:'Coming soon · Preview',preview:true})
+ Object.freeze({id:'cannabis-cowboy',title:'The Cannabis Cowboy',subtitle:'High Country Clusters · 6×8',description:'Cole Haze and his mountain ranch: growing harvest multipliers, smoke-ring wilds and road-trip bonuses.',art:'/assets/420bet/slots/cannabis-cowboy/lobby-cabinet.png',status:'Coming soon · Preview',preview:true})
 ]);
 // A fixed, genuine 5×4 outcome from the Emerald Harvest reel strips is used
 // for visual discovery. It never awards credits or runs a game round.
@@ -61,6 +61,14 @@ export function createSlotsLobby(doc=globalThis.document,onSelect=()=>{}){
    const label=doc.createElement('small');label.textContent='SLOT #4 · PREVIEW';
    image.append(sunset,sign,strap,label);
   }else{image=doc.createElement('img');image.src=machine.art;image.alt=machine.title+' slot cabinet';image.loading='eager';image.decoding='async';}
+  if(machine.id==='cannabis-cowboy'){
+   const cabinet=doc.createElement('img');cabinet.className='slots-cowboy-cabinet';
+   cabinet.src=machine.art;cabinet.alt='The Cannabis Cowboy High Country Clusters — approved lobby cabinet art';
+   cabinet.loading='eager';cabinet.decoding='async';
+   cabinet.addEventListener('load',()=>{image.hidden=true;cabinet.hidden=false;});
+   cabinet.addEventListener('error',()=>{cabinet.hidden=true;image.hidden=false;});
+   cabinet.hidden=true;art.append(cabinet);
+  }
   const artTitle=doc.createElement('span');artTitle.className='slots-machine-art-title';artTitle.textContent=machine.title;
   art.append(image,artTitle);
   const body=doc.createElement('div');body.className='slots-machine-body';

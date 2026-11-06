@@ -45,3 +45,20 @@
 .sc-note{font-size:12px;color:#ebd8af}.sc-reset{padding:12px;background:#682d7d;color:white;border:1px solid #efba48;cursor:pointer}
 @media(max-width:760px){.sc-machine{grid-template-columns:1fr}.sc-mascot{min-height:160px;max-height:220px;flex-direction:row;align-items:end;justify-content:space-around}.sc-bobby{max-height:220px;width:50%}.sc-host-name{align-self:end;width:50%}.sc-logo{width:65%}.sc-ways{padding:5px}.sc-controls{grid-template-columns:repeat(4,minmax(0,1fr))}.sc-control,.sc-spin{min-height:42px;font-size:12px}}
 @media(prefers-reduced-motion:reduce){.sc-reel-spinning .sc-symbol,.sc-feature-overlay{animation:none!important}}
+
+/* Sequential reel spin and neon-green representative winning ways. */
+.sc-reels{position:relative;overflow:hidden}
+.sc-reel{position:relative}
+.sc-reel-spinning .sc-symbol{animation:sc-roll .085s linear infinite;filter:blur(1.5px) brightness(1.12)}
+.sc-reel-stopped{animation:sc-stop .24s cubic-bezier(.15,.8,.3,1)}
+@keyframes sc-roll{0%{transform:translateY(-12%)}100%{transform:translateY(12%)}}
+@keyframes sc-stop{0%{transform:translateY(-8%);filter:brightness(1.8)}100%{transform:translateY(0);filter:brightness(1)}}
+.sc-win-lines{position:absolute;inset:7px;width:calc(100% - 14px);height:calc(100% - 14px);pointer-events:none;overflow:visible;z-index:4}
+.sc-win-polyline{fill:none;stroke:#5dff36;stroke-width:7;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke;filter:drop-shadow(0 0 3px #caff98) drop-shadow(0 0 9px #28ff00);stroke-dasharray:2000;stroke-dashoffset:2000;animation:sc-win-trace .65s ease-out forwards}
+@keyframes sc-win-trace{to{stroke-dashoffset:0}}
+.sc-changing{animation:sc-transform .35s ease-out;outline:3px solid #91ff26;outline-offset:-3px;box-shadow:0 0 26px #63f72b,inset 0 0 20px #75fc47}
+@keyframes sc-transform{0%{transform:scale(.75);filter:brightness(3)}65%{transform:scale(1.12);filter:brightness(2)}100%{transform:scale(1);filter:brightness(1)}}
+.sc-click-to-total{cursor:pointer}
+.sc-click-to-total .sc-result{color:#b3ff97;text-decoration:underline;text-decoration-color:#50ff37}
+.sc-feature-overlay{z-index:5}
+@media(prefers-reduced-motion:reduce){.sc-reel-spinning .sc-symbol,.sc-reel-stopped,.sc-win-polyline,.sc-changing{animation:none!important;transform:none!important;filter:none!important}.sc-win-polyline{stroke-dasharray:none;stroke-dashoffset:0}}

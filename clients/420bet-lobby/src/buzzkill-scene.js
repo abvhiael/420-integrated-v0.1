@@ -1,6 +1,7 @@
 // Phaser 4 scene — animation is presentation only, never a source of outcome.
 import * as Phaser from 'phaser';
-import {BUZZ_CINEMATIC,BUZZ_MOM_LINES,momPoseAt} from './buzzkill-cinematic.js';
+import {BUZZ_CINEMATIC,BUZZ_MOM_LINES} from './buzzkill-cinematic.js';
+import {BUZZ_STAGE,kevinFrameForMultiplier,kevinYForMultiplier,MOM_ENTRY_BEATS} from './buzzkill-stage.js';
 const ASSETS='/assets/420bet/buzzkill/';
 const ART=ASSETS+'gameplay-v1/';
 const CIN=ASSETS+'cinematic-v2/';
@@ -43,13 +44,55 @@ export function mountBuzzkillScene(parent,{reducedMotion=false}={}){
      this.flowers.push({flower,x,y,phase:i*.84});
    });
    this.cloud=this.add.graphics().setDepth(4);
-   this.cloudIllustration=this.textures.exists('buzz-fx-clouds')?this.add.image(570,480,'buzz-fx-clouds').setDisplaySize(360,270).setAlpha(0).setDepth(4):null;
-   this.flowerIllustration=this.textures.exists('buzz-fx-flowers')?this.add.image(250,315,'buzz-fx-flowers').setDisplaySize(260,260).setAlpha(0).setDepth(4):null;
+   // Previous FX exports contained stray character heads and source-sheet labels.
+   // Never lay those images over Kevin; only procedural text-free FX may render.
+   this.cloudIllustration=null;
+   this.flowerIllustration=null;
+   // Trim giant transparent margins from the approved illustrated Mom poses.
+   // The source images can have >300 empty rows; displaying the full image
+   // creates jumpy transitions and apparent head/door clipping.
+   this.momPoseKeys=new Map();
+   for(let i=1;i<=6;i++){
+     const key='buzz-mom-pose-'+i;
+     if(!this.textures.exists(key))continue;
+     try{
+       const source=this.textures.get(key).getSourceImage();
+       const w=source.width,h=source.height;
+       const scan=document.createElement('canvas');scan.width=w;scan.height=h;
+       const context=scan.getContext('2d',{willReadFrequently:true});
+       context.drawImage(source,0,0);
+       const pixels=context.getImageData(0,0,w,h).data;
+       let left=w,top=h,right=-1,bottom=-1;
+       for(let y=0;y<h;y++)for(let x=0;x<w;x++){
+         if(pixels[(y*w+x)*4+3]>48){
+           if(x<left)left=x;if(x>right)right=x;
+           if(y<top)top=y;if(y>bottom)bottom=y;
+         }
+       }
+       if(right<left||bottom<top)continue;
+       const pad=8;
+       left=Math.max(0,left-pad);top=Math.max(0,top-pad);
+       right=Math.min(w-1,right+pad);bottom=Math.min(h-1,bottom+pad);
+       const crop=document.createElement('canvas');
+       crop.width=right-left+1;crop.height=bottom-top+1;
+       crop.getContext('2d').drawImage(source,left,top,crop.width,crop.height,0,0,crop.width,crop.height);
+       const croppedKey=key+'-trimmed';
+       this.textures.addCanvas(croppedKey,crop);
+       this.momPoseKeys.set(i,croppedKey);
+     }catch(_err){this.momPoseKeys.set(i,key);}
+   }
    // Use clean real illustrated poses, never the crude vector placement graphics.
-   this.kevin=this.add.sprite(570,540,use('buzz-kevin-clean','buzz-kevin-lift1'))
-     .setOrigin(.5,.88).setDisplaySize(430,430).setAlpha(1).setVisible(true).setDepth(5);
-   this.mom=this.add.image(1065,540,use('buzz-mom-pose-1','buzz-mom-entry'))
-     .setOrigin(.5,1).setDisplaySize(340,435).setAlpha(1).setDepth(9);
+   this.kevin=this.add.sprite(BUZZ_STAGE.kevinX,BUZZ_STAGE.kevinFloorY,use('buzz-kevin-clean','buzz-kevin-lift1'))
+     .setOrigin(.5,.88).setDisplaySize(BUZZ_STAGE.kevinWidth,BUZZ_STAGE.kevinHeight)
+     .setAlpha(1).setVisible(true).setDepth(5);
+   this.mom=this.add.image(BUZZ_STAGE.momDoorX,BUZZ_STAGE.momFloorY,this.momPoseKeys.get(1)||use('buzz-mom-pose-1','buzz-mom-entry'))
+     .setOrigin(.5,1).setAlpha(1).setDepth(9);
+   const initialMomWidth=Math.min(BUZZ_STAGE.momWidth,BUZZ_STAGE.momHeight*this.mom.width/Math.max(1,this.mom.height));
+   this.mom.setDisplaySize(initialMomWidth,BUZZ_STAGE.momHeight);
+   // Pose-to-pose crossfade, not abrupt frame swapping.
+   this.momOverlay=this.add.image(BUZZ_STAGE.momDoorX,BUZZ_STAGE.momFloorY,this.mom.texture.key)
+     .setOrigin(.5,1).setDisplaySize(initialMomWidth,BUZZ_STAGE.momHeight)
+     .setVisible(false).setAlpha(0).setDepth(9.2);
    this.mom.setVisible(false);
    this.doorGlow=this.add.rectangle(1070,315,178,448,0xffedb6,0).setDepth(8);
    // The door is a separate articulated prop; the fixed room never pans or scales.
@@ -62,10 +105,13 @@ export function mountBuzzkillScene(parent,{reducedMotion=false}={}){
    this.doorPanel.add([panel,upper,lower,knob]);this.doorPanel.setAlpha(0);
    this.bubble=this.add.graphics().setDepth(10).setAlpha(0);
    this.bubble.fillStyle(0xfff3d9,1);
-   this.bubble.fillRoundedRect(610,110,454,170,33);
-   this.bubble.fillTriangle(934,267,1011,267,1002,301);
-   this.bubble.lineStyle(8,0x2f143b,1);this.bubble.strokeRoundedRect(610,110,454,170,33);
-   this.bubbleText=this.add.text(837,194,'',{fontFamily:'Arial Black, sans-serif',fontSize:'29px',color:'#241021',align:'center',fontStyle:'bold',lineSpacing:5,wordWrap:{width:395}}).setOrigin(.5).setAlpha(0).setDepth(11);
+   // Entire speech balloon lives LEFT of Mom and below neither sprite nor HUD.
+   this.bubble.fillRoundedRect(565,55,355,175,30);
+   this.bubble.fillTriangle(850,220,918,220,902,267);
+   this.bubble.lineStyle(7,0x2f143b,1);this.bubble.strokeRoundedRect(565,55,355,175,30);
+   this.bubbleText=this.add.text(742,139,'',{fontFamily:'Arial Black, sans-serif',fontSize:'25px',
+     color:'#241021',align:'center',fontStyle:'bold',lineSpacing:6,wordWrap:{width:310}})
+     .setOrigin(.5).setAlpha(0).setDepth(11);
    this.crashSplash=this.textures.exists('buzz-crash-splash')?this.add.image(600,345,'buzz-crash-splash').setAlpha(0).setDepth(12):null;
    if(this.crashSplash)this.crashSplash.setDisplaySize(850,365);
    this.crashText=this.add.text(600,220,'BUZZKILLED!',{fontFamily:'Arial Black, Impact, sans-serif',fontSize:'100px',fontStyle:'italic',color:'#ffbd2b',stroke:'#6f164c',strokeThickness:15,shadow:{offsetX:5,offsetY:7,color:'#1a0a24',blur:12}}).setOrigin(.5).setAlpha(0).setDepth(11);
@@ -78,17 +124,22 @@ export function mountBuzzkillScene(parent,{reducedMotion=false}={}){
    if(!sceneRef||disposed)return;
    this.timeCounter+=Math.min(dt,55)/1000;
    const t=this.timeCounter;
+   if(this.momOverlay?.visible){
+     this.momOverlay.setPosition(this.mom.x,this.mom.y);
+   }
    const intensity=cinematicEffectsOff?0:Phaser.Math.Clamp(Math.log2(Math.max(1,level))/3.4,0,1);
-   const lift=crashed?0:Math.min(165,Math.log(Math.max(1,level))*66);
-   const bob=!reducedMotion&&!crashed?Math.sin(t*1.5)*7:0;
+   const bob=!reducedMotion&&!crashed?Math.sin(t*1.5)*BUZZ_STAGE.hover:0;
    if(!crashed){
-     const index=level>=10?7:level>=7?6:level>=4.2?5:level>=3.4?4:level>=2.4?3:level>=1.8?2:level>=1.35?1:0;
+     // This frame index is monotonic within each round, never an animation loop.
+     const index=kevinFrameForMultiplier(level);
      if(this.textures.exists('buzz-kevin-clean')){
        if(this.kevin.texture.key!=='buzz-kevin-clean')this.kevin.setTexture('buzz-kevin-clean');
-       this.kevin.setFrame(index);
+       if(this.kevin.frame.name!==index)this.kevin.setFrame(index);
      }
-     this.kevin.setVisible(true).setAlpha(1).setDisplaySize(430,430)
-       .setPosition(570,540-lift+bob).setAngle(reducedMotion?0:Math.sin(t*.65)*2);
+     this.kevin.setVisible(true).setAlpha(1)
+       .setDisplaySize(BUZZ_STAGE.kevinWidth,BUZZ_STAGE.kevinHeight)
+       .setPosition(BUZZ_STAGE.kevinX,kevinYForMultiplier(level,bob))
+       .setAngle(reducedMotion?0:Math.sin(t*.65)*1);
    }
    if(this.cloudIllustration){this.cloudIllustration.y=this.kevin.y+117;this.cloudIllustration.alpha=cinematicEffectsOff?0:Phaser.Math.Clamp(intensity*.58,0,.58);}
    if(this.flowerIllustration){this.flowerIllustration.alpha=cinematicEffectsOff?0:Phaser.Math.Clamp((intensity-.30)*.75,0,.62);this.flowerIllustration.rotation=reducedMotion?0:Math.sin(t*.35)*.06;}
@@ -104,8 +155,13 @@ export function mountBuzzkillScene(parent,{reducedMotion=false}={}){
     }
    }
    this.cloud.clear();this.cloud.fillStyle(0xdac4ff,.35+intensity*.23);
-   const cy=this.kevin.y+40;
-   for(let i=0;i<6;i++){const px=520+i*20,py=cy+(reducedMotion?0:Math.sin(t*1.8+i)*5);this.cloud.fillEllipse(px,py,80,36);}
+   // Kevin's approved frames already contain their own purple smoke cloud.
+   // Do not paint a second sprite/loop below his body.
+   const cy=this.kevin.y+8;
+   if(!crashed&&level>1.4)for(let i=0;i<5;i++){
+     const px=535+i*18,py=cy+(reducedMotion?0:Math.sin(t*1.2+i)*3);
+     this.cloud.fillEllipse(px,py,62,22);
+   }
    this.smoke.clear();
    for(let i=0;i<18;i++){
     const tt=(t*(reducedMotion?.10:1.1)+i*.63);
@@ -129,8 +185,12 @@ export function mountBuzzkillScene(parent,{reducedMotion=false}={}){
    crashGeneration++;level=1;crashed=false;cinematicEffectsOff=false;
    if(!sceneRef)return;
    const s=sceneRef;s.tweens.killAll();
-   s.mom.setVisible(false).setPosition(1065,540).setAlpha(1).setOrigin(.5,1).setDisplaySize(340,435);
-   s.mom.setTexture(s.textures.exists('buzz-mom-pose-1')?'buzz-mom-pose-1':'buzz-mom-entry');
+   s.mom.setVisible(false).setPosition(BUZZ_STAGE.momDoorX,BUZZ_STAGE.momFloorY).setAlpha(1).setOrigin(.5,1);
+   s.tweens.killTweensOf(s.momOverlay);
+   s.momOverlay.setVisible(false).setAlpha(0);
+   const first=s.momPoseKeys.get(1)||'buzz-mom-pose-1';
+   if(s.textures.exists(first))s.mom.setTexture(first);
+   s.mom.setDisplaySize(Math.min(BUZZ_STAGE.momWidth,BUZZ_STAGE.momHeight*s.mom.width/Math.max(1,s.mom.height)),BUZZ_STAGE.momHeight);
    s.doorPanel.setAlpha(0).setScale(1,1);
    s.doorShadow.setAlpha(0);s.doorGlow.setAlpha(0);
    s.bubble.setAlpha(0);s.bubbleText.setAlpha(0);s.bubbleText.setText('');
@@ -138,8 +198,8 @@ export function mountBuzzkillScene(parent,{reducedMotion=false}={}){
    if(s.crashSplash)s.crashSplash.setAlpha(0);
    if(s.textures.exists('buzz-kevin-clean'))s.kevin.setTexture('buzz-kevin-clean').setFrame(0);
    else s.kevin.setTexture('buzz-kevin-lift1');
-   s.kevin.setOrigin(.5,.88).setDisplaySize(430,430)
-     .setVisible(true).setAlpha(1).setAngle(0).setPosition(570,540);
+   s.kevin.setOrigin(.5,.88).setDisplaySize(BUZZ_STAGE.kevinWidth,BUZZ_STAGE.kevinHeight)
+     .setVisible(true).setAlpha(1).setAngle(0).setPosition(BUZZ_STAGE.kevinX,BUZZ_STAGE.kevinFloorY);
   },
   bust({onSplash=()=>{},onComplete=()=>{}}={}){
    if(crashed)return;
@@ -149,47 +209,62 @@ export function mountBuzzkillScene(parent,{reducedMotion=false}={}){
    const schedule=(ms,fn)=>s.time.delayedCall(ms,()=>{if(!disposed&&gen===crashGeneration)fn();});
    const say=BUZZ_MOM_LINES[(s.roundVisualSeed||0)%BUZZ_MOM_LINES.length];
    s.roundVisualSeed=(s.roundVisualSeed||0)+1;
-   // Hold both characters in the frame. Never put a baked-in door image offstage.
-   s.kevin.setVisible(true).setAlpha(1);
-   const pose=i=>{const key='buzz-mom-pose-'+i;if(s.textures.exists(key))s.mom.setTexture(key);};
-   pose(1);
-   s.mom.setOrigin(.5,1).setDisplaySize(340,435)
-     .setVisible(true).setAlpha(1).setPosition(1065,540);
-   s.doorPanel.setAlpha(1).setScale(1,1);
-   s.doorShadow.setAlpha(.93);s.doorGlow.setAlpha(.42);
+   s.kevin.setVisible(true).setAlpha(1); // Freeze Kevin at the crash altitude.
+   s.mom.setVisible(true).setAlpha(1).setPosition(BUZZ_STAGE.momDoorX,BUZZ_STAGE.momFloorY);
+   s.doorPanel.setAlpha(1).setScale(1,1);s.doorShadow.setAlpha(.93);s.doorGlow.setAlpha(.42);
    s.bubble.setAlpha(0);s.bubbleText.setAlpha(0).setText('');
    if(s.crashSplash)s.crashSplash.setAlpha(0);
    s.crashText.setAlpha(0);
+   function pose(index){
+     const key=s.momPoseKeys.get(index)||'buzz-mom-pose-'+index;
+     if(!s.textures.exists(key)||s.mom.texture.key===key)return;
+     const commit=()=>{
+       s.mom.setTexture(key).setOrigin(.5,1);
+       s.mom.setDisplaySize(Math.min(BUZZ_STAGE.momWidth,BUZZ_STAGE.momHeight*s.mom.width/Math.max(1,s.mom.height)),BUZZ_STAGE.momHeight);
+     };
+     if(reducedMotion){commit();return;}
+     s.tweens.killTweensOf(s.momOverlay);
+     s.momOverlay.setTexture(key).setOrigin(.5,1);
+     s.momOverlay.setDisplaySize(Math.min(BUZZ_STAGE.momWidth,BUZZ_STAGE.momHeight*s.momOverlay.width/Math.max(1,s.momOverlay.height)),BUZZ_STAGE.momHeight);
+     s.momOverlay.setPosition(s.mom.x,s.mom.y).setVisible(true).setAlpha(0);
+     s.tweens.add({targets:s.momOverlay,alpha:1,duration:105,ease:'Sine.InOut',onComplete:()=>{
+       if(disposed||gen!==crashGeneration)return;
+       commit();s.momOverlay.setVisible(false).setAlpha(0);
+     }});
+   }
+   pose(1);
    if(reducedMotion){
      s.doorPanel.setScale(.18,1);
-     s.mom.setPosition(1005,540);
+     s.mom.setX(BUZZ_STAGE.momInX);
    }else{
-     s.tweens.add({targets:s.doorPanel,scaleX:.18,duration:BUZZ_CINEMATIC.doorOpenMs,ease:'Cubic.Out'});
-     s.tweens.add({targets:s.mom,x:1005,duration:BUZZ_CINEMATIC.enterCompleteMs,ease:'Cubic.Out'});
+     s.tweens.add({targets:s.doorPanel,scaleX:.18,duration:BUZZ_CINEMATIC.doorOpenMs,ease:'Sine.InOut'});
+     // Twelve illustrated key beats, eased between six approved Mom poses.
+     MOM_ENTRY_BEATS.forEach((beat,i)=>{
+       schedule(beat.ms,()=>{
+         pose(beat.pose);
+         if(i<MOM_ENTRY_BEATS.length-1){
+           const next=MOM_ENTRY_BEATS[i+1];
+           if(next.x!==beat.x)s.tweens.add({targets:s.mom,x:next.x,duration:next.ms-beat.ms,ease:'Sine.InOut'});
+         }
+       });
+     });
    }
-   schedule(280,()=>pose(2));
-   schedule(600,()=>pose(3));
    schedule(BUZZ_CINEMATIC.enterCompleteMs,()=>{
-     s.mom.setPosition(1005,540);
+     s.mom.setX(BUZZ_STAGE.momInX);
      pose(4);
-     s.bubbleText.setText(say).setAlpha(1);
-     s.bubble.setAlpha(1);
+     s.bubbleText.setText(say).setAlpha(1);s.bubble.setAlpha(1);
    });
    schedule(2000,()=>pose(5));
    schedule(3400,()=>pose(6));
-   // Give the entire speech balloon a real 3.5 seconds to be read.
    schedule(BUZZ_CINEMATIC.lectureEndMs,()=>{
      s.bubble.setAlpha(0);s.bubbleText.setAlpha(0);
-     cinematicEffectsOff=true;
-     s.doorGlow.setAlpha(0);
-     if(!reducedMotion)s.tweens.add({targets:s.kevin,y:540,angle:-7,duration:BUZZ_CINEMATIC.pauseMs,ease:'Cubic.Out'});
+     cinematicEffectsOff=true;s.doorGlow.setAlpha(0);
    });
-   // A clean half-second hold occurs AFTER the balloon disappears.
+   // 3.5s readable speech, then 500ms silent hold, then illustrated splash.
    schedule(BUZZ_CINEMATIC.splashAtMs,()=>{
      if(s.crashSplash){
-       s.crashSplash.setAlpha(1).setScale(.7);
+       s.crashSplash.setAlpha(1).setScale(reducedMotion?1:.7);
        if(!reducedMotion)s.tweens.add({targets:s.crashSplash,scale:1,duration:235,ease:'Back.Out'});
-       else s.crashSplash.setScale(1);
      }else s.crashText.setAlpha(1);
      onSplash();
      if(!reducedMotion)s.cameras.main.shake(180,.005);

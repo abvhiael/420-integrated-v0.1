@@ -72,3 +72,8 @@
  pointer-events:none;
 }
 @media(prefers-reduced-motion:reduce){.bz-game .bz-bust{transition:none;transform:none}}
+
+/* Mom's dialogue must never sit behind the giant multiplier overlay. */
+.bz-game.bz-cinematic .bz-mult-wrap{opacity:0;visibility:hidden;transition:opacity .12s ease-out}
+.bz-game.bz-cinematic .bz-stage{isolation:isolate}
+@media(prefers-reduced-motion:reduce){.bz-game.bz-cinematic .bz-mult-wrap{transition:none}}

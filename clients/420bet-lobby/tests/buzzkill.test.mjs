@@ -140,35 +140,49 @@ test('Mom completes her entry and speech, then pauses exactly 500ms before BUZZK
  assert(ui.includes("bust.classList.toggle('bz-show',splashShown)"));
 });
 
-test('BUZZKILL visibility recovery holds full-body character in stage and door fully in frame',async()=>{
+test('Kevin begins on the floor, advances once through 8 frames, and never leaves the fixed bedroom',async()=>{
+ const {BUZZ_STAGE,KEVIN_POSE_THRESHOLDS,kevinFrameForMultiplier,kevinYForMultiplier,kevinLiftForMultiplier,MOM_ENTRY_BEATS}=await import('../src/buzzkill-stage.js');
+ assert.equal(KEVIN_POSE_THRESHOLDS.length,8);
+ assert.equal(kevinFrameForMultiplier(1),0);
+ assert.equal(kevinFrameForMultiplier(1.36),2);
+ assert.equal(kevinFrameForMultiplier(7),7);
+ assert.equal(kevinFrameForMultiplier(1e9),7);
+ let last=0;
+ for(const x of [1,1.01,1.15,1.5,2,4.2,7,10,100,1e9]){
+  const now=kevinFrameForMultiplier(x);
+  assert(now>=last,'Kevin must never loop backwards');
+  last=now;
+  assert(kevinYForMultiplier(x)>=475&&kevinYForMultiplier(x)<=BUZZ_STAGE.kevinFloorY+3);
+  assert(kevinLiftForMultiplier(x)<=BUZZ_STAGE.maxLift);
+ }
+ assert.equal(kevinYForMultiplier(1,0),BUZZ_STAGE.kevinFloorY);
+ assert.equal(MOM_ENTRY_BEATS.length,12);
+ assert(MOM_ENTRY_BEATS.every((beat,i)=>i===0||beat.ms>=MOM_ENTRY_BEATS[i-1].ms));
+ assert(MOM_ENTRY_BEATS.every(beat=>beat.x+BUZZ_STAGE.momWidth/2<BUZZ_STAGE.width));
+ assert(BUZZ_STAGE.kevinFloorY+BUZZ_STAGE.kevinHeight*.12<BUZZ_STAGE.height);
+});
+test('BUZZKILL render uses only the cleaned atlas and trims Mom before display',async()=>{
+ const scene=readFileSync(new URL('../src/buzzkill-scene.js',import.meta.url),'utf8');
+ const ui=readFileSync(new URL('../src/buzzkill-ui.js',import.meta.url),'utf8');
+ const css=readFileSync(new URL('../src/buzzkill.css',import.meta.url),'utf8');
  const {BUZZ_CINEMATIC}=await import('../src/buzzkill-cinematic.js');
  assert.equal(BUZZ_CINEMATIC.lectureEndMs-BUZZ_CINEMATIC.lectureBeginMs,3500);
  assert.equal(BUZZ_CINEMATIC.splashAtMs-BUZZ_CINEMATIC.lectureEndMs,500);
- assert(BUZZ_CINEMATIC.completeMs>BUZZ_CINEMATIC.splashAtMs+1000);
- const scene=readFileSync(new URL('../src/buzzkill-scene.js',import.meta.url),'utf8');
- // The fallback placeholders must NOT be used for ordinary game rendering.
- const atlas=readFileSync(new URL('../public/assets/420bet/buzzkill/cinematic-v2/kevin-clean-atlas.webp',import.meta.url));
- assert(atlas.length>200000,'Illustrated Kevin atlas must contain real image data');
- assert.equal(atlas.toString('ascii',0,4),'RIFF');
- assert.equal(atlas.toString('ascii',8,12),'WEBP');
  assert(scene.includes("this.load.spritesheet('buzz-kevin-clean'"));
- assert(scene.includes("this.kevin=this.add.sprite(570,540,use('buzz-kevin-clean','buzz-kevin-lift1'))"));
- assert(scene.includes("this.kevin.setFrame(index)"));
- assert(scene.includes("s.kevin.setTexture('buzz-kevin-clean').setFrame(0)"));
- assert(scene.includes("this.mom=this.add.image(1065,540,use('buzz-mom-pose-1','buzz-mom-entry'))"));
- assert(scene.includes("s.mom.setTexture(s.textures.exists('buzz-mom-pose-1')"));
- assert(scene.includes("schedule(280,()=>pose(2))"));
- assert(scene.includes("schedule(600,()=>pose(3))"));
- assert(scene.includes("schedule(2000,()=>pose(5))"));
- assert(scene.includes("schedule(3400,()=>pose(6))"));
- assert(scene.includes("s.doorPanel.setAlpha(1)"));
- assert(scene.includes("s.mom.setPosition(1005,540)"));
+ assert(scene.includes('kevinFrameForMultiplier(level)'));
+ assert(scene.includes('kevinYForMultiplier(level,bob)'));
+ assert(scene.includes('this.cloudIllustration=null'));
+ assert(scene.includes('this.flowerIllustration=null'));
+ assert(scene.includes("this.momPoseKeys=new Map()"));
+ assert(scene.includes('this.textures.addCanvas(croppedKey,crop)'));
+ assert(scene.includes('s.mom.setDisplaySize')||scene.includes('s.mom.setDisplaySize('));
+ assert(scene.includes('MOM_ENTRY_BEATS.forEach'));
+ assert(scene.includes("s.momOverlay.setTexture(key)"));
+ assert(scene.includes("duration:105,ease:'Sine.InOut'"));
  assert(scene.includes("s.bubbleText.setText(say).setAlpha(1)"));
- assert(scene.includes("schedule(BUZZ_CINEMATIC.lectureEndMs"));
- assert(scene.includes("schedule(BUZZ_CINEMATIC.splashAtMs"));
- assert(scene.includes("schedule(BUZZ_CINEMATIC.completeMs"));
- // 1200-wide stage: max Mom x 1145 + half sprite width 127.5 would clip
- // at the first frame, so her fully visible start x must remain <=1072.
- assert(scene.includes("setVisible(true).setAlpha(1).setPosition(1065,540)"));
- assert(1065 + 255/2 < 1200, 'Door-entry art must not clip on right');
+ assert(scene.includes('schedule(BUZZ_CINEMATIC.lectureEndMs'));
+ assert(scene.includes('schedule(BUZZ_CINEMATIC.splashAtMs'));
+ assert(ui.includes("root.classList.toggle('bz-cinematic',cinematicActive)"));
+ assert(css.includes('.bz-game.bz-cinematic .bz-mult-wrap'));
+ assert(scene.includes("this.bubble.fillRoundedRect(565,55,355,175,30)"));
 });

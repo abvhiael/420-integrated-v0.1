@@ -114,7 +114,7 @@ export function createPokerReadOnlyClient({base,fetcher=globalThis.fetch,clock=(
  }
  async function loginWallet(provider,origin=globalThis.location?.origin){
   one(provider&&typeof provider.request==='function','wallet provider unavailable');
-  one(typeof origin==='string'&&/^https?:\\/\\/[^/]+$/.test(origin),'invalid login origin');
+  one(typeof origin==='string'&&/^https?:\/\/[^/]+$/.test(origin),'invalid login origin');
   const current=epoch;
   const [accounts,chainHex]=await Promise.all([
    provider.request({method:'eth_requestAccounts'}),provider.request({method:'eth_chainId'})
@@ -129,23 +129,23 @@ export function createPokerReadOnlyClient({base,fetcher=globalThis.fetch,clock=(
     cache:'no-store',redirect:'error',headers:{'Content-Type':'application/json',Accept:'application/json'},
     body:JSON.stringify(body)});
    one(!disposed&&current===epoch&&res?.ok,'wallet authentication failed');
-   one(/^application\\/json(?:;|$)/i.test(res.headers?.get?.('content-type')||''),'invalid auth response');
+   one(/^application\/json(?:;|$)/i.test(res.headers?.get?.('content-type')||''),'invalid auth response');
    return res.json();
   }
   const challenge=await post('/auth/challenge',{address,chainId});
   one(challenge&&challenge.chainId===chainId&&typeof challenge.message==='string'&&
     typeof challenge.nonce==='string'&&/^[A-Za-z0-9_-]{40,60}$/.test(challenge.nonce),'invalid server challenge');
-  const expectedDomain=origin.replace(/^https?:\\/\\//,'');
-  one(challenge.message.startsWith(expectedDomain+' requests a read-only 420Bet poker session:\\n'),
+  const expectedDomain=origin.replace(/^https?:\/\//,'');
+  one(challenge.message.startsWith(expectedDomain+' requests a read-only 420Bet poker session:\n'),
     'challenge domain mismatch');
-  one(challenge.message.includes('\\nChain ID: '+chainId+'\\nNonce: '+challenge.nonce+'\\n'),
+  one(challenge.message.includes('\nChain ID: '+chainId+'\nNonce: '+challenge.nonce+'\n'),
     'challenge chain/nonce mismatch');
-  one(challenge.message.includes('\\nURI: '+origin+path+'\\n'),'challenge URI mismatch');
-  one(challenge.message.includes('\\nStatement: Read-only poker tables; no wagers, signing of actions, or withdrawals.'),
+  one(challenge.message.includes('\nURI: '+origin+path+'\n'),'challenge URI mismatch');
+  one(challenge.message.includes('\nStatement: Read-only poker tables; no wagers, signing of actions, or withdrawals.'),
     'unexpected wallet signing purpose');
   one(Number.isSafeInteger(challenge.expiresAt)&&challenge.expiresAt>clock()&&challenge.expiresAt<=clock()+180000,
     'expired challenge');
-  one(challenge.message.includes('\\n'+address.toLowerCase()+'\\n'),'challenge wallet mismatch');
+  one(challenge.message.includes('\n'+address.toLowerCase()+'\n'),'challenge wallet mismatch');
   const signature=await provider.request({method:'personal_sign',params:[challenge.message,address]});
   one(typeof signature==='string'&&/^0x[a-f0-9]{130,}$/i.test(signature),'invalid wallet signature');
   await post('/auth/verify',{nonce:challenge.nonce,signature});

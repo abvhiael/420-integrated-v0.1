@@ -1,7 +1,7 @@
 import test from 'node:test';import assert from 'node:assert/strict';import {parseHTML} from 'linkedom';
 import {existsSync,readFileSync} from 'node:fs';
 import {SLOT_MACHINES,createSlotsLobby,slotMachineFromHash} from '../src/slots-lobby.js';
-import {newGame,qualify,triggerCharacters,modifier,inspection,spin,evaluate,stashBonus,freeBonus,mow,makeBonusPreview,BONUS_PREVIEW_TYPES,FREE_WEIGHTS,FREE_STICKY_LIMIT,FREE_MULTIPLIER_STAGES} from '../src/dads-secret-stash-engine.js';
+import {newGame,qualify,triggerCharacters,modifier,inspection,spin,evaluate,stashBonus,freeBonus,mow,makeBonusPreview,BONUS_PREVIEW_TYPES,FREE_WEIGHTS,FREE_STICKY_LIMIT,FREE_MULTIPLIER_STAGES,MOW_PAYOUT_FACTOR} from '../src/dads-secret-stash-engine.js';
 import {createDadsSecretStash,DSS_BONUS_PRESENTATION} from '../src/dads-secret-stash-ui.js';
 import {DSS_SYMBOL_ART,DSS_CAST_ART,DSS_TRANSITION_ART,DSS_BACKGROUND_ART,DSS_FEATURE_ART,DSS_LARRY_ART} from '../src/dads-secret-stash-assets.js';
 import {SYMBOLS} from '../src/dads-secret-stash-engine.js';
@@ -782,6 +782,17 @@ test('Mow replaces every triggering mower on the board before the first of five 
   assert(!entry.before.includes('mower'),'Cascades must never resurrect triggering mowers');
   assert(!entry.grid.includes('mower'),'Cascades must remain free of triggering mowers');
  }
+});
+test('Lawn payout scaling matches actual cascade awards and displayed neon routes',()=>{
+ assert.equal(MOW_PAYOUT_FACTOR,0.65);
+ const original=Array(20).fill('A');for(const i of [2,7,17])original[i]='mower';
+ const game=mow(original,()=>.55);
+ assert.equal(game.boards.length,5);
+ for(const step of game.boards){
+  assert.equal(step.units,Math.round(evaluate(step.grid).units*MOW_PAYOUT_FACTOR*100)/100);
+ }
+ const ui=readFileSync(new URL('../src/dads-secret-stash-ui.js',import.meta.url),'utf8');
+ assert.match(ui,/amount:win\.amount\*MOW_PAYOUT_FACTOR/);
 });
 test('Mow preview visibly removes all mower symbols and only then starts cascading',()=>{
  const {document,window}=parseHTML('<html><body></body></html>');

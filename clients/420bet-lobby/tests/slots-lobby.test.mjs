@@ -7,7 +7,7 @@ import {BASE_REELS,visibleGrid} from '../src/emerald-v2-strips.js';
 import {readFileSync} from 'node:fs';
 
 test('Slots lobby lists the completed Emerald Harvest machine with its own cabinet artwork',()=>{
- assert.equal(SLOT_MACHINES.length,4);
+ assert.equal(SLOT_MACHINES.length,5);
  assert.equal(SLOT_MACHINES[0].id,'emerald-harvest');
  assert.equal(SLOT_MACHINES[0].art,'/assets/420bet/slots-lobby/emerald-harvest-lobby-cabinet.png');
  assert.equal(SLOT_MACHINES[1].id,'mary-jane-sticky-wilds');
@@ -61,7 +61,7 @@ test('Emerald Harvest lobby preview shows a legitimate deterministic 5x4 gamepla
  assert.match(css,/\.slots-machine-art \.slots-emerald-cabinet\{/);
  const lobby=createSlotsLobby(document);
  const cards=[...lobby.querySelectorAll('.slots-machine-card')];
- assert.equal(cards.length,4);
+ assert.equal(cards.length,5);
  assert.equal(cards.filter(card=>!card.hidden).length,3);
  assert.equal(SLOT_MACHINES[2].id,'dads-secret-stash');
  assert.equal(slotMachineFromHash('#game=slots&machine=dads-secret-stash')?.id,'dads-secret-stash');
@@ -106,10 +106,28 @@ test('Carousel wraps to the correct three cabinets in both directions',()=>{
  assert.equal(arrows[0].disabled,false);
  assert.equal(arrows[1].disabled,false);
  arrows[0].dispatchEvent(new window.Event('click',{bubbles:true}));
- assert.deepEqual(visible(),[titles[3],titles[0],titles[1]]);
+ assert.deepEqual(visible(),[titles[4],titles[0],titles[1]]);
  arrows[1].dispatchEvent(new window.Event('click',{bubbles:true}));
  assert.deepEqual(visible(),titles.slice(0,3));
  for(let i=0;i<5;i++)arrows[1].dispatchEvent(new window.Event('click',{bubbles:true}));
- assert.deepEqual(visible(),[titles[1],titles[2],titles[3]]);
+ assert.deepEqual(visible(),titles.slice(0,3));
  assert.equal(cards.filter(c=>!c.hidden).length,3);
+});
+
+test('Sin City High Rollers is slot #5 with the approved cabinet and isolated practice route',()=>{
+ assert.deepEqual(SLOT_MACHINES.map(m=>m.id),['emerald-harvest','mary-jane-sticky-wilds','dads-secret-stash','cannabis-cowboy','sin-city-high-rollers']);
+ assert.equal(SLOT_MACHINES[4].art,'/assets/420bet/slots-lobby/sin-city-high-rollers-lobby-cabinet.png');
+ assert.equal(SLOT_MACHINES[3].preview,true);
+ assert.equal(SLOT_MACHINES[4].preview,undefined);
+ assert.equal(slotMachineFromHash('#game=slots&machine=sin-city-high-rollers')?.id,'sin-city-high-rollers');
+ const {document,window}=parseHTML('<html><body></body></html>');
+ const lobby=createSlotsLobby(document);
+ const cards=[...lobby.querySelectorAll('.slots-machine-card')];
+ const next=lobby.querySelectorAll('.slots-carousel-arrow')[1];
+ next.dispatchEvent(new window.Event('click',{bubbles:true}));
+ next.dispatchEvent(new window.Event('click',{bubbles:true}));
+ assert.equal(cards[4].hidden,false);
+ assert.equal(cards[4].querySelector('img').getAttribute('src'),SLOT_MACHINES[4].art);
+ const main=readFileSync(new URL('../src/main.js',import.meta.url),'utf8');
+ assert.match(main,/createSinCityPractice\(document\)/);
 });

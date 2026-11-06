@@ -441,7 +441,7 @@ export function createDadsSecretStash(doc=globalThis.document,options={}){
  }
  function startBonusPreview(){
   if(destroyed||busy||auto||state.mode!=='practice')return;
-  const selected=[...previewSelect.querySelectorAll('option')].find(x=>x.hasAttribute('selected'))?.value??previewSelect.value;
+  const selected=[...previewSelect.querySelectorAll('option')].find(x=>x.hasAttribute('selected'))?.value||previewSelect.value||previewSelect.querySelector('option')?.value;
   const {grid,event}=makeBonusPreview(selected,rng);
   clearWinTrace();
   previewPriorState=state;

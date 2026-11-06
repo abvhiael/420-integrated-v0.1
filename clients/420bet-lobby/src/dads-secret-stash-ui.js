@@ -1,4 +1,4 @@
-import {newGame,spin,SYMBOLS,MAX_WIN_MULTIPLIER} from './dads-secret-stash-engine.js';
+import {newGame,spin,evaluate,SYMBOLS,MAX_WIN_MULTIPLIER} from './dads-secret-stash-engine.js';
 import {DSS_SYMBOL_ART,DSS_SYMBOL_LABELS,DSS_CAST_ART,DSS_TRANSITION_ART,DSS_FEATURE_ART,DSS_BACKGROUND_ART,DSS_LARRY_ART} from './dads-secret-stash-assets.js';
 const GLYPHS={gary:'😎',jen:'👩',tyler:'🎧',emma:'💜',keller:'📋',bud:'🐕',jar:'🫙',bong:'⚗️',pizza:'🍕',lighter:'🔥',papers:'📜',A:'A',K:'K',Q:'Q',J:'J','10':'10',wild:'🌿',scatter:'☮',stash:'📦',mower:'🚜'};
 const FEATURE_TITLES={jen:"OH SHIT, SHE'S HOME!",family:'FAMILY CHAOS!',keller:'HOA INSPECTION!',bud:'GOOD BOY BONUS!',free:'FIVE MINUTES OF PEACE!',stash:"DAD'S SECRET STASH!",mow:'MOW THE LAWN!'};
@@ -28,6 +28,17 @@ export function createDadsSecretStash(doc=globalThis.document,options={}){
   image.addEventListener('error',()=>{image.hidden=true;face.hidden=false;});
   cell.append(image,face);reelEls[Math.floor(i/4)].append(cell);return {cell,image,face};
  });
+ // The slot uses 1,024 ways, not fixed paylines. Trace a representative
+ // symbol-matched route and spotlight every contributing symbol.
+ const winTrace=el(doc,'div','dss-win-trace');winTrace.hidden=true;
+ const winSvg=doc.createElementNS('http://www.w3.org/2000/svg','svg');
+ winSvg.setAttribute('class','dss-win-svg');
+ winSvg.setAttribute('viewBox','0 0 500 400');
+ winSvg.setAttribute('preserveAspectRatio','none');
+ winSvg.setAttribute('aria-hidden','true');
+ const winLabel=el(doc,'div','dss-win-label');
+ winTrace.append(winSvg,winLabel);
+ reels.append(winTrace);
  const larryPanel=el(doc,'aside','dss-larry-panel');
  const larry=el(doc,'img','dss-larry');
  const larryDescriptions=Object.freeze({
@@ -123,6 +134,52 @@ export function createDadsSecretStash(doc=globalThis.document,options={}){
  cell.face.hidden=false;cell.image.hidden=true;cell.image.src=DSS_SYMBOL_ART[s]??'';
 }
  function showGrid(grid){grid.forEach((s,i)=>setCell(i,s));}
+ function clearWinTrace(){
+  winTrace.hidden=true;
+  winSvg.replaceChildren();
+  winLabel.textContent='';
+  cells.forEach(({cell})=>cell.classList.remove('dss-paying-symbol'));
+ }
+ function showWinningWays(grid,winData,done){
+  const wins=(winData?.wins??[]).filter(win=>win.amount>0&&win.matched>=3);
+  if(!wins.length){clearWinTrace();done();return;}
+  let displayed=0;
+  const show=()=>{
+   if(displayed>=wins.length){
+    clearWinTrace();done();return;
+   }
+   const win=wins[displayed++];
+   const indices=[],route=[];
+   for(let reel=0;reel<win.matched;reel++){
+    const options=[];
+    for(let row=0;row<4;row++){
+     const i=reel*4+row;
+     if(grid[i]===win.symbol||grid[i]==='wild')options.push(i);
+    }
+    if(!options.length)throw Error('Win display mismatch: '+win.symbol);
+    indices.push(...options);
+    // The actual win can contain many ways; choose the first displayed route.
+    const index=options[0],row=index%4;
+    route.push((50+reel*100)+','+(50+row*100));
+   }
+   winSvg.replaceChildren();
+   const addPath=(cls)=>{
+    const path=doc.createElementNS('http://www.w3.org/2000/svg','polyline');
+    path.setAttribute('class',cls);
+    path.setAttribute('points',route.join(' '));
+    winSvg.append(path);
+   };
+   addPath('dss-win-glow');addPath('dss-win-line');
+   const hits=new Set(indices);
+   cells.forEach(({cell},i)=>cell.classList.toggle('dss-paying-symbol',hits.has(i)));
+   winLabel.textContent=win.symbol.toUpperCase()+' · '+win.matched+' REELS · '+win.ways+
+    (win.ways===1?' WAY':' WAYS')+' · '+money(win.amount*state.last.stake)+' CREDITS';
+   winTrace.hidden=false;
+   status.textContent='WINNING WAYS: '+winLabel.textContent;
+   schedule(show,1500);
+  };
+  show();
+ }
  // Visual cycling never uses the outcome RNG or changes the already-resolved result.
  // Each of the five reel columns runs together; reel stops are exactly 500ms apart.
  function animateSpin(finalGrid){
@@ -146,7 +203,7 @@ export function createDadsSecretStash(doc=globalThis.document,options={}){
    else{
     reelEls.forEach(reel=>reel.classList.remove('dss-stopping'));
     status.textContent='REELS STOPPED — SIMULATED RESULT';
-    schedule(nextEvent,150);
+    schedule(()=>showWinningWays(finalGrid,state.last.base,nextEvent),150);
    }
   };
   schedule(tick,50);
@@ -162,7 +219,7 @@ export function createDadsSecretStash(doc=globalThis.document,options={}){
 }
  function refresh(){balance.textContent='BALANCE '+money(state.balance);betLabel.textContent='BET '+money(state.bet);winLabel.textContent='WIN '+money(state.last?.win??0);round.textContent='SPINS '+state.rounds;message.textContent=state.message;lower.disabled=busy;higher.disabled=busy;play.disabled=busy||state.balance<state.bet;autoBtn.disabled=state.balance<state.bet&&!busy;}
  function schedule(fn,ms){currentTimer=setTimer(()=>{currentTimer=null;if(!destroyed)fn();},ms);}
- function finish(){busy=false;overlay.hidden=true;modifierAction.hidden=true;resultScreen.hidden=true;bonusHeader.hidden=true;scene.removeAttribute('data-bonus');cells.forEach(({cell})=>cell.classList.remove('dss-sticky','dss-locked','dss-new-lock','dss-clearing','dss-dropping','dss-win-flash','dss-transforming','dss-transformed'));holdWin.hidden=true;reels.hidden=false;showGrid(state.last?.grid??Array(20).fill('jar'));showScene('main');setFeature('main',state.last?.message??'Watch for 3 scatters, stash crates or lawnmowers.','5 REELS · 1,024 WAYS');refresh();if(auto&&autoLeft>0&&state.balance>=state.bet){autoLeft--;schedule(start,400);}else{auto=false;autoLeft=0;autoBtn.textContent='AUTO ×10';}}
+ function finish(){busy=false;clearWinTrace();overlay.hidden=true;modifierAction.hidden=true;resultScreen.hidden=true;bonusHeader.hidden=true;scene.removeAttribute('data-bonus');cells.forEach(({cell})=>cell.classList.remove('dss-sticky','dss-locked','dss-new-lock','dss-clearing','dss-dropping','dss-win-flash','dss-transforming','dss-transformed'));holdWin.hidden=true;reels.hidden=false;showGrid(state.last?.grid??Array(20).fill('jar'));showScene('main');setFeature('main',state.last?.message??'Watch for 3 scatters, stash crates or lawnmowers.','5 REELS · 1,024 WAYS');refresh();if(auto&&autoLeft>0&&state.balance>=state.bet){autoLeft--;schedule(start,400);}else{auto=false;autoLeft=0;autoBtn.textContent='AUTO ×10';}}
  function showFeatureResult(event,done){
   const title=FEATURE_TITLES[event.type]??event.label??'FEATURE COMPLETE';
   resultTitle.textContent=title;
@@ -278,14 +335,14 @@ export function createDadsSecretStash(doc=globalThis.document,options={}){
       '×'+event.multiplier+' MULTIPLIER APPLIED':
       changed.length+' SYMBOL'+(changed.length===1?'':'S')+' TRANSFORMED';
      status.textContent='FEATURE APPLIED: '+modifierActionTitle.textContent;
-     // Leave the final transformed board visible before the full result.
-     schedule(()=>{
+     // Show how transformed positions form winning routes before results.
+     schedule(()=>showWinningWays(final,evaluate(final),()=>{
       modifierAction.hidden=true;bonusHeader.hidden=true;
       showFeatureResult(event,()=>{
        cells.forEach(({cell})=>cell.classList.remove('dss-transforming','dss-transformed'));
        nextEvent();
       });
-     },1400);
+     }),1400);
      return;
     }
     const i=changed[index],cell=cells[i].cell;
@@ -330,13 +387,14 @@ export function createDadsSecretStash(doc=globalThis.document,options={}){
    animateBonusGrid(entry,event.type,()=>{
     accumulated+=entry.units;
     status.textContent='FEATURE WIN '+money(entry.units*state.last.stake)+' · TOTAL '+money(accumulated*state.last.stake)+' PRACTICE CREDITS';
-    step++;schedule(advance,600);
+    showWinningWays(entry.grid,evaluate(entry.grid),()=>{step++;schedule(advance,500);});
    });
   };
   advance();
  }
  function nextEvent(){
   if(destroyed)return;
+  clearWinTrace();
   cells.forEach(x=>x.cell.classList.remove('dss-locked'));
   if(eventIndex>=events.length){finish();return;}
   const event=events[eventIndex++];
@@ -354,8 +412,8 @@ export function createDadsSecretStash(doc=globalThis.document,options={}){
    },DSS_BONUS_PRESENTATION.resultMs);
   },DSS_BONUS_PRESENTATION.characterMs);
  }
- function start(){if(destroyed||busy)return;if(state.balance<state.bet){state.message='Insufficient practice credits — reset to continue.';refresh();return;}busy=true;refresh();status.textContent='SIMULATED SPIN — NO TRANSACTION';state=spin(state,rng);events=state.last.events;eventIndex=0;setFeature('main','Reels spinning…','GOOD LUCK!');animateSpin(state.last.grid);}
- const reset=btn('RESET PRACTICE CREDITS',()=>{if(busy)return;state=newGame();modifierAction.hidden=true;resultScreen.hidden=true;bonusHeader.hidden=true;showScene('main');setFeature('main','Watch for 3 bonus symbols.');showGrid(Array(20).fill('jar'));refresh();});controls.append(reset);
+ function start(){if(destroyed||busy)return;clearWinTrace();if(state.balance<state.bet){state.message='Insufficient practice credits — reset to continue.';refresh();return;}busy=true;refresh();status.textContent='SIMULATED SPIN — NO TRANSACTION';state=spin(state,rng);events=state.last.events;eventIndex=0;setFeature('main','Reels spinning…','GOOD LUCK!');animateSpin(state.last.grid);}
+ const reset=btn('RESET PRACTICE CREDITS',()=>{if(busy)return;state=newGame();clearWinTrace();modifierAction.hidden=true;resultScreen.hidden=true;bonusHeader.hidden=true;showScene('main');setFeature('main','Watch for 3 bonus symbols.');showGrid(Array(20).fill('jar'));refresh();});controls.append(reset);
  root.stopAnimation=()=>{destroyed=true;auto=false;if(currentTimer!==null)clearTimer(currentTimer);currentTimer=null;reelEls.forEach(reel=>reel.classList.remove('dss-spinning','dss-stopping'));};
  root.getState=()=>state;
  showGrid(Array(20).fill('jar'));setFeature('main','3 Stash crates unlock Hold & Win.');refresh();return root;

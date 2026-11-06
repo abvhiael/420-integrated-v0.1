@@ -485,10 +485,14 @@ export function createDadsSecretStash(doc=globalThis.document,options={}){
      showGrid(final);
      const transformed=new Set(changed);
      cells.forEach(({cell},i)=>cell.classList.toggle('dss-transformed',transformed.has(i)));
-     modifierActionDetail.textContent=(event.multiplier??1)>1?
-      '×'+event.multiplier+' MULTIPLIER APPLIED':
+     modifierActionDetail.textContent=event.awardedFreeSpins?
+      event.scatterCount+' SCATTERS — FREE SPINS UNLOCKED!':
+      (event.multiplier??1)>1?'×'+event.multiplier+' MULTIPLIER APPLIED':
       changed.length+' SYMBOL'+(changed.length===1?'':'S')+' TRANSFORMED';
-     status.textContent='FEATURE APPLIED: '+modifierActionTitle.textContent;
+     if(event.awardedFreeSpins){
+      cells.forEach(({cell},i)=>cell.classList.toggle('dss-trigger-scatter',final[i]==='scatter'));
+      status.textContent=event.scatterCount+' SCATTERS — FIVE MINUTES OF PEACE FREE SPINS AWARDED!';
+     }else status.textContent='FEATURE APPLIED: '+modifierActionTitle.textContent;
      // Show how transformed positions form winning routes before results.
      schedule(()=>showWinningWays(final,evaluate(final),()=>{
       modifierAction.hidden=true;bonusHeader.hidden=true;
@@ -572,7 +576,7 @@ export function createDadsSecretStash(doc=globalThis.document,options={}){
  function nextEvent(){
   if(destroyed)return;
   clearWinTrace();
-  cells.forEach(x=>x.cell.classList.remove('dss-locked'));
+  cells.forEach(x=>x.cell.classList.remove('dss-locked','dss-trigger-scatter'));
   if(eventIndex>=events.length){finish();return;}
   const event=events[eventIndex++];
   overlay.hidden=false;bubble.hidden=true;headline.textContent=FEATURE_TITLES[event.type]??event.label;

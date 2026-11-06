@@ -17,13 +17,33 @@ export function makeReelStrip(doc,seed=0){
  }
  mask.append(track);return mask;
 }
+// One composited overlay per column replaces forty-eight independently moving cell strips.
+export function makeColumnReelStrip(doc,seed=0){
+ const mask=doc.createElement('span');mask.className='cc-column-mask';mask.setAttribute('aria-hidden','true');
+ const track=doc.createElement('span');track.className='cc-column-track';
+ for(let n=0;n<16;n++){
+  const id=(seed+(n%8)*3)%SYMBOL_KINDS.length;
+  const tile=doc.createElement('span');tile.className='cc-column-token';
+  tile.append(cowboySymbolImage(doc,id));track.append(tile);
+ }
+ mask.append(track);return mask;
+}
 export function createReelSequence({doc,cells,board,locked=[],schedule,done,onStop=()=>{},reducedMotion=false}){
  if(!doc||cells?.length!==48||board?.length!==48||typeof schedule!=='function'||typeof done!=='function')throw Error('Invalid reel animation arguments');
  const lockedSet=new Set(locked),stopTimes=[],overlays=[];
+ const boardEl=cells[0]?.parentNode;
+ const wholeColumns=boardEl?.classList?.contains('cc-symbol-grid')&&lockedSet.size===0;
+ const columnMasks=[];
+ if(wholeColumns){
+  for(let col=0;col<6;col++){
+   const mask=makeColumnReelStrip(doc,col);mask.style.left=(col*100/6)+'%';
+   mask.style.width=100/6+'%';boardEl.append(mask);columnMasks.push(mask);
+  }
+ }
  cells.forEach((cell,p)=>{
   if(lockedSet.has(p))return;
   cell.classList.add('cc-reel-rolling');
-  const mask=makeReelStrip(doc,p%6);cell.append(mask);overlays.push([cell,mask]);
+  if(!wholeColumns){const mask=makeReelStrip(doc,p%6);cell.append(mask);overlays.push([cell,mask]);}
  });
  let reel=0,aborted=false;
  const step=()=>{
@@ -34,6 +54,7 @@ export function createReelSequence({doc,cells,board,locked=[],schedule,done,onSt
    cell.classList.remove('cc-reel-rolling');
    const mask=cell.querySelector('.cc-reel-mask');if(mask)mask.remove();
   }
+  if(wholeColumns)columnMasks[c].remove();
   stopTimes.push(REEL_STOP_TIMES[c]);
   onStop(c,stopTimes[c]);
   reel++;
@@ -41,7 +62,7 @@ export function createReelSequence({doc,cells,board,locked=[],schedule,done,onSt
   schedule(step,reducedMotion?0:REEL_STOP_DELAYS[reel]);
  };
  schedule(step,reducedMotion?0:REEL_STOP_DELAYS[0]);
- return {abort:()=>{aborted=true;for(const [cell,mask] of overlays){cell.classList.remove('cc-reel-rolling');mask.remove();}},stopTimes};
+ return {abort:()=>{aborted=true;for(const mask of columnMasks)mask.remove();for(const cell of cells)cell.classList.remove('cc-reel-rolling');for(const [cell,mask] of overlays){cell.classList.remove('cc-reel-rolling');mask.remove();}},stopTimes};
 }
 // Render individual neon connections along adjacent cells of qualifying clusters.
 // Clusters are geometries, not fixed twenty-line paylines.

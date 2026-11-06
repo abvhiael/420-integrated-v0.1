@@ -1,0 +1,45 @@
+name: Cannabis Cowboy M7 targeted layout qualification
+on:
+  pull_request:
+    paths:
+      - 'clients/420bet-lobby/src/cannabis-cowboy.css'
+      - 'clients/420bet-lobby/src/cannabis-cowboy-ui.js'
+      - 'clients/420bet-lobby/tests/cannabis-cowboy-m7.test.mjs'
+      - 'clients/420bet-lobby/scripts/qualify-m7-viewports.mjs'
+      - '.github/workflows/420bet-cannabis-cowboy-m7-level1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  cowboy-m7-layout:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install isolated lobby dependencies
+        working-directory: clients/420bet-lobby
+        run: npm install --no-audit --no-fund
+      - name: Verify M2-M7 gameplay and layout contracts
+        working-directory: clients/420bet-lobby
+        run: node --test tests/cannabis-cowboy-m2.test.mjs tests/cannabis-cowboy-m3.test.mjs tests/cannabis-cowboy-m4.test.mjs tests/cannabis-cowboy-m5.test.mjs tests/cannabis-cowboy-m6.test.mjs tests/cannabis-cowboy-m7.test.mjs
+      - name: Vite production build
+        working-directory: clients/420bet-lobby
+        run: npm run build
+      - name: Install headless Chromium for layout check
+        working-directory: clients/420bet-lobby
+        run: |
+          npm install --no-save --no-package-lock --no-audit --no-fund playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Check rendered viewports and bonus screen positioning
+        working-directory: clients/420bet-lobby
+        run: node scripts/qualify-m7-viewports.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cannabis-cowboy-m7-viewport-screens
+          path: clients/420bet-lobby/artifacts/cannabis-cowboy-m7/
+          if-no-files-found: ignore
+          retention-days: 7

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {BASE_STRIPS,FREE_STRIPS,STRIP_LENGTH,ROWS,REELS,initialState,nextRound,visibleBoard,awardFreeSpins,waysWins,puffPuffPass,MAX_MULTIPLIER} from '../src/sin-city-engine.js';
+import {BASE_STRIPS,FREE_STRIPS,STRIP_LENGTH,ROWS,REELS,initialState,nextRound,visibleBoard,awardFreeSpins,waysWins,puffPuffPass,MAX_MULTIPLIER,HOTBOX_PAYS,hotboxPayout,count} from '../src/sin-city-engine.js';
 
 test('all five circular reels contain 42 entries and never show duplicate scatters in the same four-high window',()=>{
  for(const strips of [BASE_STRIPS,FREE_STRIPS])for(const strip of strips){
@@ -86,14 +86,24 @@ test('Hotbox respins retain ordinary symbol artwork beside locked gems',()=>{
  assert.ok(result.lastBoard.flat().every(symbol=>symbol!==''),'no symbol becomes a blank placeholder');
  assert.ok(result.lastBoard.flat().some(symbol=>symbol!=='GEM'),'ordinary symbols remain visible');
 });
-test('Chronic Sessions limits sticky Wilds to three across repeated free spins and reports count',()=>{
- let state={...initialState(),mode:'free',freeRemaining:25,freePlayed:0};
- for(let i=0;i<22;i++){
-  const stop=i%42;
-  state=nextRound(state,()=>.21,Array(5).fill(stop));
-  assert.ok(state.sticky.length<=3,'sticky position cap violated on spin '+i);
-  assert.ok(state.lastBoard.flat().filter(symbol=>symbol==='WILD').length<=13,'wild fill is unbounded');
+test('every new Wild sticks and all earlier Wilds persist through subsequent free spins',()=>{
+ const picks=FREE_STRIPS.map(strip=>strip.findIndex(symbol=>symbol==='WILD'));
+ assert.ok(picks.every(stop=>stop>=0));
+ let state={...initialState(),mode:'free',freeRemaining:20,freePlayed:0};
+ state=nextRound(state,()=>.3,picks);
+ assert.ok(state.sticky.length>=5,'Wilds from every reel should accumulate on first free spin');
+ const original=[...state.sticky];
+ const more=FREE_STRIPS.map((strip,r)=>((picks[r]+20)%strip.length));
+ for(let i=0;i<3;i++){
+  state=nextRound(state,()=>.3,more);
+  for(const key of original){
+   assert.ok(state.sticky.includes(key),'Earlier sticky Wild has been lost');
+   const r=Math.floor(key/4),row=key%4;
+   assert.equal(state.lastBoard[r][row],'WILD','Earlier Wild must stay visible in its original position');
+   assert.equal(state.lastReveal.before[r][row],'WILD','Held Wild must be present before reel stop');
+  }
  }
+ assert.ok(state.sticky.length<=20);
 });
 test('Chronic Sessions starting awards and retriggers expose exact quantities',()=>{
  const stops=BASE_STRIPS.map((strip,r)=>r<3?strip.indexOf('SCATTER'):0);
@@ -110,4 +120,45 @@ test('Lowrider practice fixture never accidentally retriggers Chronic Sessions',
  assert.equal(state.lastRetriggeredSpins,0);
  assert.equal(state.freeRemaining,2);
  assert.match(state.lastMessage,/LOWRIDER ×/);
+});
+
+test('Hotbox payout ladder increases monotonically and pays at the end of respins',()=>{
+ for(let gems=3;gems<20;gems++){
+  assert.ok(HOTBOX_PAYS[gems]>0);
+  assert.ok(HOTBOX_PAYS[gems+1]>HOTBOX_PAYS[gems]);
+ }
+ assert.equal(hotboxPayout(3,2),2);
+ assert.equal(hotboxPayout(10,2),24);
+ assert.equal(hotboxPayout(20,2),200);
+ const state={...initialState(),mode:'hotbox',locked:[0,4,8,12,16],respins:1,roundStake:2};
+ const stops=BASE_STRIPS.map(strip=>strip.findIndex((v,i)=>!Array.from({length:4},(_,j)=>strip[(i+j)%42]).includes('GEM')));
+ const result=nextRound(state,()=>.42,stops);
+ assert.equal(result.mode,'base');
+ assert.equal(result.lastWin,hotboxPayout(5,2));
+});
+test('previously locked Hotbox gems stay in before/after reel frames',()=>{
+ const state={...initialState(),mode:'hotbox',locked:[0,2,7,12],respins:3};
+ const out=nextRound(state,()=>.4,[0,3,6,9,12]);
+ for(const key of state.locked){
+  const r=Math.floor(key/4),row=key%4;
+  assert.equal(out.lastReveal.before[r][row],'GEM');
+  assert.equal(out.lastReveal.after[r][row],'GEM');
+ }
+});
+test('one Lowrider triggers a multiplier, while zero Lowriders do not',()=>{
+ const picks=FREE_STRIPS.map((strip,r)=>{
+  for(let stop=0;stop<42;stop++){
+   const visible=Array.from({length:4},(_,j)=>strip[(stop+j)%42]);
+   if(r===0?visible.includes('CAR'):!visible.includes('CAR'))return stop;
+  }
+  throw Error('Missing selective fixture');
+ });
+ const board=visibleBoard(FREE_STRIPS,picks);
+ assert.equal(count(board,'CAR')>=1,true);
+ const one=nextRound({...initialState(),mode:'free',freeRemaining:5},()=>.1,picks);
+ assert.equal(one.lastFeature,'lowrider');
+ assert.equal(one.lastMultiplier,2);
+ const absent=picks.map((stop,r)=>r===0?FREE_STRIPS[r].findIndex((x,i)=>!Array.from({length:4},(_,j)=>FREE_STRIPS[r][(i+j)%42]).includes('CAR')):stop);
+ const none=nextRound({...initialState(),mode:'free',freeRemaining:5},()=>.1,absent);
+ assert.equal(none.lastMultiplier,1);
 });

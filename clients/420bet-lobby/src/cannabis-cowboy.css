@@ -70,3 +70,11 @@
 .cc-symbol-boots .cc-cell-glyph{background-position:70% 51.3%}
 .cc-symbol-horseshoe .cc-cell-glyph{background-position:32.9% 57.2%}
 .cc-symbol-papers .cc-cell-glyph{display:grid;place-items:center;font-size:clamp(1.3rem,3.1vw,2.9rem)}
+
+/* M3: actual base-game cluster highlighting and practice-only feedback. */
+.cc-game[data-mode="base-game-practice"] .cc-symbol-grid{position:relative}
+.cc-game .cc-cell.cc-winning{border:3px solid #97ff65;background:radial-gradient(circle at 50% 40%,#317d36,#124a22 80%);box-shadow:0 0 17px #8afb66,inset 0 0 13px #8bff61;z-index:2}
+.cc-game .cc-cell.cc-winning .cc-cell-glyph{filter:drop-shadow(0 0 8px #b3ff6c) brightness(1.2)}
+.cc-game .cc-control:not(:disabled):hover,.cc-game .cc-control:not(:disabled):focus-visible{filter:brightness(1.22);outline:2px solid #e1d66b;outline-offset:2px}
+.cc-round-status{max-width:1480px;margin:8px auto 0;text-align:center;min-height:26px;font-size:clamp(.8rem,1.2vw,1.05rem);font-weight:900;color:#baff89;text-shadow:0 2px 6px #061609}
+@media(prefers-reduced-motion:reduce){.cc-game .cc-cell.cc-winning{box-shadow:none}}

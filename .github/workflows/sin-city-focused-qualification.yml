@@ -2,7 +2,7 @@ name: Sin City High Rollers focused qualification
 on:
   push:
     branches:
-      - feat/sin-city-temporary-bonus-qa
+      - fix/sin-city-smooth-reels-bonus-clarity
     paths:
       - 'clients/420bet-lobby/src/sin-city-*'
       - 'clients/420bet-lobby/src/main.js'

@@ -38,8 +38,8 @@ export function projectCanonicalTable(raw,session,manifest,now=Date.now()){
  if(!raw||raw.verified!==true||raw.chainId!==manifest.chainId||
     raw.tableId!==manifest.tableId||!int(raw.blockNumber)||
     raw.blockNumber<1||!int(raw.sequence)||!int(raw.tableVersion)||
-    raw.tableVersion<1||!int(raw.ledgerVersion)||
-    !raw.finalized||raw.finalityBlock<raw.blockNumber)
+    raw.tableVersion!==manifest.tableVersion||raw.tableVersion<1||!int(raw.ledgerVersion)||
+    !int(raw.finalityBlock)||!raw.finalized||raw.finalityBlock<raw.blockNumber)
     fail('unverified canonical chain state');
  const hash=checkedRoot(raw.stateHash);
  const config=raw.config;

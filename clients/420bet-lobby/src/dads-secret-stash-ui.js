@@ -1,4 +1,4 @@
-import {newGame,spin,evaluate,makeBonusPreview,BONUS_PREVIEW_TYPES,SYMBOLS,MAX_WIN_MULTIPLIER} from './dads-secret-stash-engine.js';
+import {newGame,spin,evaluate,makeBonusPreview,BONUS_PREVIEW_TYPES,SYMBOLS,MAX_WIN_MULTIPLIER,MOW_PAYOUT_FACTOR} from './dads-secret-stash-engine.js';
 import {DSS_SYMBOL_ART,DSS_SYMBOL_LABELS,DSS_CAST_ART,DSS_TRANSITION_ART,DSS_FEATURE_ART,DSS_BACKGROUND_ART,DSS_LARRY_ART} from './dads-secret-stash-assets.js';
 const GLYPHS={gary:'😎',jen:'👩',tyler:'🎧',emma:'💜',keller:'📋',bud:'🐕',jar:'🫙',bong:'⚗️',pizza:'🍕',lighter:'🔥',papers:'📜',A:'A',K:'K',Q:'Q',J:'J','10':'10',wild:'🌿',scatter:'☮',stash:'📦',mower:'🚜'};
 const FEATURE_TITLES={jen:"OH SHIT, SHE'S HOME!",family:'FAMILY CHAOS!',keller:'HOA INSPECTION!',bud:'GOOD BOY BONUS!',free:'FIVE MINUTES OF PEACE!',stash:"DAD'S SECRET STASH!",mow:'MOW THE LAWN!'};
@@ -560,7 +560,11 @@ export function createDadsSecretStash(doc=globalThis.document,options={}){
    animateBonusGrid(entry,event.type,()=>{
     accumulated+=entry.units;
     status.textContent='FEATURE WIN '+money(entry.units*state.last.stake)+' · TOTAL '+money(accumulated*state.last.stake)+' PRACTICE CREDITS';
-    showWinningWays(entry.grid,evaluate(entry.grid),()=>{step++;schedule(advance,500);});
+    const winEvaluation=evaluate(entry.grid);
+    const displayEvaluation=event.type==='mow'?
+     {...winEvaluation,wins:winEvaluation.wins.map(win=>({...win,amount:win.amount*MOW_PAYOUT_FACTOR}))}:
+     winEvaluation;
+    showWinningWays(entry.grid,displayEvaluation,()=>{step++;schedule(advance,500);});
    });
   };
   begin();

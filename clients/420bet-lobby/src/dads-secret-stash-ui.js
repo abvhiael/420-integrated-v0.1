@@ -1,5 +1,5 @@
 import {newGame,spin,SYMBOLS,MAX_WIN_MULTIPLIER} from './dads-secret-stash-engine.js';
-import {DSS_SYMBOL_ART,DSS_SYMBOL_LABELS,DSS_CAST_ART,DSS_TRANSITION_ART,DSS_FEATURE_ART,DSS_BACKGROUND_ART} from './dads-secret-stash-assets.js';
+import {DSS_SYMBOL_ART,DSS_SYMBOL_LABELS,DSS_CAST_ART,DSS_TRANSITION_ART,DSS_FEATURE_ART,DSS_BACKGROUND_ART,DSS_LARRY_ART} from './dads-secret-stash-assets.js';
 const GLYPHS={gary:'😎',jen:'👩',tyler:'🎧',emma:'💜',keller:'📋',bud:'🐕',jar:'🫙',bong:'⚗️',pizza:'🍕',lighter:'🔥',papers:'📜',A:'A',K:'K',Q:'Q',J:'J','10':'10',wild:'🌿',scatter:'☮',stash:'📦',mower:'🚜'};
 const FEATURE_TITLES={jen:"OH SHIT, SHE'S HOME!",family:'FAMILY CHAOS!',keller:'HOA INSPECTION!',bud:'GOOD BOY BONUS!',free:'FIVE MINUTES OF PEACE!',stash:"DAD'S SECRET STASH!",mow:'MOW THE LAWN!'};
 const FEATURE_PERSON={jen:'JEN',family:'TYLER & EMMA',keller:'MR. KELLER',bud:'BUD',free:'GARY',stash:'GARY',mow:'GARY'};
@@ -28,12 +28,6 @@ export function createDadsSecretStash(doc=globalThis.document,options={}){
  });
  const larryPanel=el(doc,'aside','dss-larry-panel');
  const larry=el(doc,'img','dss-larry');
- const larryArtwork=Object.freeze({
-  main:'/assets/420bet/dads-secret-stash/characters/gary_main.png',
-  stash:'/assets/420bet/dads-secret-stash/characters/gary_hold_win.png',
-  free:'/assets/420bet/dads-secret-stash/characters/gary_free_spins.png',
-  mow:'/assets/420bet/dads-secret-stash/characters/gary_mow_the_lawn.png'
- });
  const larryDescriptions=Object.freeze({
   main:'Larry sitting in his garage recliner, enjoying a joint',
   stash:'Larry excitedly pointing toward his secret stash prizes',
@@ -41,9 +35,9 @@ export function createDadsSecretStash(doc=globalThis.document,options={}){
   mow:'Larry mowing the suburban lawn'
  });
  const setLarryMode=(mode='main')=>{
-  const next=Object.hasOwn(larryArtwork,mode)?mode:'main';
+  const next=Object.hasOwn(DSS_LARRY_ART,mode)?mode:'main';
   larryPanel.dataset.mode=next;
-  const url=larryArtwork[next];
+  const url=DSS_LARRY_ART[next];
   if(larry.getAttribute('src')!==url)larry.src=url;
   larry.alt=larryDescriptions[next];
  };

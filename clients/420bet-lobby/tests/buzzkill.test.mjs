@@ -146,13 +146,21 @@ test('BUZZKILL visibility recovery holds full-body character in stage and door f
  assert.equal(BUZZ_CINEMATIC.splashAtMs-BUZZ_CINEMATIC.lectureEndMs,500);
  assert(BUZZ_CINEMATIC.completeMs>BUZZ_CINEMATIC.splashAtMs+1000);
  const scene=readFileSync(new URL('../src/buzzkill-scene.js',import.meta.url),'utf8');
- // Broken concept cut-outs must not be substituted for the visible full-body SVG.
- assert(scene.includes("this.kevin=this.add.image(570,540,'buzz-kevin')"));
- assert(scene.includes("this.kevin.setVisible(true).setAlpha(1)"));
- assert(scene.includes("if(this.kevin.texture.key!=='buzz-kevin')this.kevin.setTexture('buzz-kevin')"));
- assert(scene.includes("s.kevin.setTexture('buzz-kevin')"));
- assert(scene.includes("this.mom=this.add.image(1130,540,'buzz-mom')"));
- assert(scene.includes("s.mom.setTexture('buzz-mom')"));
+ // The fallback placeholders must NOT be used for ordinary game rendering.
+ const atlas=readFileSync(new URL('../public/assets/420bet/buzzkill/cinematic-v2/kevin-clean-atlas.webp',import.meta.url));
+ assert(atlas.length>200000,'Illustrated Kevin atlas must contain real image data');
+ assert.equal(atlas.toString('ascii',0,4),'RIFF');
+ assert.equal(atlas.toString('ascii',8,12),'WEBP');
+ assert(scene.includes("this.load.spritesheet('buzz-kevin-clean'"));
+ assert(scene.includes("this.kevin=this.add.sprite(570,540,use('buzz-kevin-clean','buzz-kevin-lift1'))"));
+ assert(scene.includes("this.kevin.setFrame(index)"));
+ assert(scene.includes("s.kevin.setTexture('buzz-kevin-clean').setFrame(0)"));
+ assert(scene.includes("this.mom=this.add.image(1065,540,use('buzz-mom-pose-1','buzz-mom-entry'))"));
+ assert(scene.includes("s.mom.setTexture(s.textures.exists('buzz-mom-pose-1')"));
+ assert(scene.includes("schedule(280,()=>pose(2))"));
+ assert(scene.includes("schedule(600,()=>pose(3))"));
+ assert(scene.includes("schedule(2000,()=>pose(5))"));
+ assert(scene.includes("schedule(3400,()=>pose(6))"));
  assert(scene.includes("s.doorPanel.setAlpha(1)"));
  assert(scene.includes("s.mom.setPosition(1005,540)"));
  assert(scene.includes("s.bubbleText.setText(say).setAlpha(1)"));

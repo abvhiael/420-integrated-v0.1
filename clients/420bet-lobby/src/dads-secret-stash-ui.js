@@ -2,6 +2,8 @@ import {newGame,spin,SYMBOLS,MAX_WIN_MULTIPLIER} from './dads-secret-stash-engin
 import {DSS_SYMBOL_ART,DSS_SYMBOL_LABELS,DSS_CAST_ART,DSS_TRANSITION_ART,DSS_FEATURE_ART,DSS_BACKGROUND_ART,DSS_LARRY_ART} from './dads-secret-stash-assets.js';
 const GLYPHS={gary:'😎',jen:'👩',tyler:'🎧',emma:'💜',keller:'📋',bud:'🐕',jar:'🫙',bong:'⚗️',pizza:'🍕',lighter:'🔥',papers:'📜',A:'A',K:'K',Q:'Q',J:'J','10':'10',wild:'🌿',scatter:'☮',stash:'📦',mower:'🚜'};
 const FEATURE_TITLES={jen:"OH SHIT, SHE'S HOME!",family:'FAMILY CHAOS!',keller:'HOA INSPECTION!',bud:'GOOD BOY BONUS!',free:'FIVE MINUTES OF PEACE!',stash:"DAD'S SECRET STASH!",mow:'MOW THE LAWN!'};
+// Allow the 450ms slide-in to complete, then hold the character for over a full second.
+export const DSS_BONUS_PRESENTATION=Object.freeze({characterMs:1600,resultMs:1200});
 const FEATURE_PERSON={jen:'JEN',family:'TYLER & EMMA',keller:'MR. KELLER',bud:'BUD',free:'GARY',stash:'GARY',mow:'GARY'};
 function el(doc,tag,cls,txt){const x=doc.createElement(tag);if(cls)x.className=cls;if(txt!==undefined)x.textContent=txt;return x;}
 export function createDadsSecretStash(doc=globalThis.document,options={}){
@@ -183,8 +185,8 @@ export function createDadsSecretStash(doc=globalThis.document,options={}){
     overlay.hidden=true;
     status.textContent='FEATURE PLAYING: '+(event.label??event.type).toUpperCase();
     playFeatureSteps(event);
-   },500);
-  },700);
+   },DSS_BONUS_PRESENTATION.resultMs);
+  },DSS_BONUS_PRESENTATION.characterMs);
  }
  function start(){if(destroyed||busy)return;if(state.balance<state.bet){state.message='Insufficient practice credits — reset to continue.';refresh();return;}busy=true;refresh();status.textContent='SIMULATED SPIN — NO TRANSACTION';state=spin(state,rng);events=state.last.events;eventIndex=0;setFeature('main','Reels spinning…','GOOD LUCK!');animateSpin(state.last.grid);}
  const reset=btn('RESET PRACTICE CREDITS',()=>{if(busy)return;state=newGame();showScene('main');setFeature('main','Watch for 3 bonus symbols.');showGrid(Array(20).fill('jar'));refresh();});controls.append(reset);

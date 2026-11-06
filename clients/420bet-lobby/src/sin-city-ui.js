@@ -14,11 +14,13 @@ export function createSinCityPractice(doc=globalThis.document,options={}){
  const reduced=!!view.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
  const root=el(doc,'section','sc-game');root.dataset.practiceGame='sin-city-high-rollers';
  let state=initialState(),panel='',auto=false,autoLeft=0,turbo=false,muted=true,busy=false,dead=false,showBanner='',visualBoard=null,audioContext=null;
+ let phase='idle',pending=null,stopped=0,frame=0,changedCount=0,winIndex=0,highlightCells=[],winPaths=[],spinningMode='base',previousBalance=1000;
  const timers=new Set();
  const playCue=()=>{if(muted||dead)return;try{const Constructor=view.AudioContext||view.webkitAudioContext;if(!Constructor)return;audioContext??=new Constructor();const tone=audioContext.createOscillator(),gain=audioContext.createGain();tone.type='sine';tone.frequency.value=520;gain.gain.value=.025;tone.connect(gain);gain.connect(audioContext.destination);tone.start();tone.stop(audioContext.currentTime+.11);}catch{}};
  const later=(fn,ms)=>{if(dead)return;const id=view.setTimeout?.(()=>{timers.delete(id);if(!dead)fn();},ms);if(id!==undefined)timers.add(id);else fn();};
  const clear=()=>{for(const id of timers)view.clearTimeout?.(id);timers.clear();};
  root.stopAnimation=()=>{dead=true;auto=false;busy=false;clear();void audioContext?.close?.();};
+ root.getPresentationState=()=>({phase,stopped,winIndex,winCount:winPaths.length,changedCount});
  const button=(label,cls,action)=>{const b=el(doc,'button',cls,label);b.type='button';b.addEventListener('click',action);return b;};
  function showPanel(){
   const scrim=el(doc,'div','sc-modal-backdrop'),modal=el(doc,'section','sc-modal');
@@ -63,8 +65,9 @@ export function createSinCityPractice(doc=globalThis.document,options={}){
   top.append(el(doc,'span','','SIN CITY HIGH ROLLERS'),el(doc,'span','sc-mode-label',state.mode==='free'?'FREE SPINS '+state.freeRemaining:state.mode==='hotbox'?'RESPINS '+state.respins:'PRACTICE PLAY'));
   cabinet.append(top);
   const reels=el(doc,'div','sc-reels');reels.setAttribute('role','group');reels.setAttribute('aria-label','Five reels with four symbols each');
-  for(let r=0;r<5;r++){const col=el(doc,'div','sc-reel'+(busy?' sc-reel-spinning':''));for(let row=0;row<4;row++){
-   const symbol=(visualBoard||state.lastBoard)[r][row],cell=el(doc,'div','sc-symbol'+(symbol==='WILD'?' sc-wild':'')+(symbol==='GEM'?' sc-gem':''));
+  for(let r=0;r<5;r++){const rolling=phase==='spinning'&&r>=stopped;
+   const col=el(doc,'div','sc-reel'+(rolling?' sc-reel-spinning':'')+(phase==='spinning'&&!rolling?' sc-reel-stopped':''));col.dataset.reel=String(r);for(let row=0;row<4;row++){
+   const symbol=(visualBoard||state.lastBoard)[r][row],cell=el(doc,'div','sc-symbol'+(symbol==='WILD'?' sc-wild':'')+(symbol==='GEM'?' sc-gem':'')+(highlightCells.some(([c,y])=>c===r&&y===row)?' sc-changing':''));
    cell.setAttribute('role','img');cell.setAttribute('aria-label','Reel '+(r+1)+' row '+(row+1)+': '+(symbol||'Empty'));
    if(FILES[symbol]){const img=el(doc,'img','');img.src=art('symbols',FILES[symbol]);img.alt='';img.draggable=false;cell.append(img);}
    if(state.mode==='free'&&state.sticky.includes(r*4+row))cell.classList.add('sc-sticky');
@@ -72,9 +75,13 @@ export function createSinCityPractice(doc=globalThis.document,options={}){
    col.append(cell);
   }reels.append(col);}
   cabinet.append(reels);
-  const result=el(doc,'div','sc-result',busy?'REELS SPINNING…':state.lastMessage);result.setAttribute('role','status');result.setAttribute('aria-live','polite');cabinet.append(result);
+  if(phase==='win'&&winPaths.length){
+   const svg=doc.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('class','sc-win-lines');svg.setAttribute('viewBox','0 0 500 400');svg.setAttribute('preserveAspectRatio','none');svg.setAttribute('aria-label','Neon green winning way '+(winIndex+1)+' of '+winPaths.length);
+   const line=doc.createElementNS('http://www.w3.org/2000/svg','polyline');line.setAttribute('points',winPaths[winIndex].map(([r,row])=>(r*100+50)+','+(row*100+50)).join(' '));line.setAttribute('class','sc-win-polyline');line.setAttribute('pathLength','100');svg.append(line);reels.append(svg);
+  }
+  const result=el(doc,'div','sc-result',phase==='spinning'?'REELS SPINNING · '+stopped+' OF 5 STOPPED':phase==='announce'?state.lastMessage:phase==='transform'?'BONUS IN ACTION — WATCH THE SYMBOLS CHANGE':phase==='win'?'WINNING WAY '+(winIndex+1)+' OF '+winPaths.length+' · CLICK SCREEN FOR TOTAL':phase==='total'?'TOTAL WIN '+state.lastWin.toFixed(2)+' PRACTICE CREDITS':state.lastMessage);result.setAttribute('role','status');result.setAttribute('aria-live','polite');cabinet.append(result);
   const metrics=el(doc,'div','sc-metrics');
-  for(const [caption,value] of [['BALANCE',state.balance.toFixed(2)],['TOTAL BET',state.stake.toFixed(2)],['LAST WIN',state.lastWin.toFixed(2)]]){const cell=el(doc,'div','sc-metric');cell.append(el(doc,'small','',caption),el(doc,'strong','',value));metrics.append(cell);}
+  for(const [caption,value] of [['BALANCE',(['announce','transform','win'].includes(phase)?previousBalance:state.balance).toFixed(2)],['TOTAL BET',state.stake.toFixed(2)],['LAST WIN',['announce','transform','win'].includes(phase)?'—':state.lastWin.toFixed(2)]]){const cell=el(doc,'div','sc-metric');cell.append(el(doc,'small','',caption),el(doc,'strong','',value));metrics.append(cell);}
   cabinet.append(metrics);
   const controls=el(doc,'div','sc-controls');
   const info=button('INFO','sc-control',()=>{panel='info';render();});
@@ -94,6 +101,7 @@ export function createSinCityPractice(doc=globalThis.document,options={}){
   cabinet.append(controls);content.append(cabinet);scene.append(content);
   const footer=el(doc,'p','sc-disclaimer','PRACTICE CREDITS ONLY · NO REAL WAGERS · NO CASH VALUE · PROVISIONAL UNVERIFIED ODDS');scene.append(footer);
   root.append(scene);
+  if(phase==='win'){scene.classList.add('sc-click-to-total');scene.addEventListener('click',event=>{if(event.target.closest?.('button'))return;showTotalWin();});}
   if(showBanner){const overlay=el(doc,'div','sc-feature-overlay');overlay.setAttribute('role','status');const picture=el(doc,'img');picture.src=art('features',showBanner);picture.alt=state.lastMessage;overlay.append(picture);root.append(overlay);}
   if(panel)showPanel();
  }
@@ -102,35 +110,122 @@ export function createSinCityPractice(doc=globalThis.document,options={}){
   if(state.mode!=='base'||autoLeft<=0||state.balance<state.stake){auto=false;autoLeft=0;render();return;}
   autoLeft--;step();
  }
+
+ const bannerFiles={
+  puff:'banner_puff_puff_pass.png','hotbox-start':'banner_hotbox_respins.png',hotbox:'banner_hotbox_respins.png',
+  'hotbox-end':'banner_hotbox_respins.png','free-start':'banner_chronic_sessions_free_spins.png',
+  'free-retrigger':'banner_chronic_sessions_free_spins.png',lowrider:'banner_drop_it_like_its_hot.png'
+ };
+ function representativePath(board,win){
+  const path=[];
+  let hasNatural=false;
+  for(let r=0;r<win.length;r++){
+   const reel=board[r];
+   const matches=reel.map((symbol,row)=>({symbol,row})).filter(x=>win.symbol==='WILD'?x.symbol==='WILD':x.symbol===win.symbol||x.symbol==='WILD');
+   const chosen=win.symbol==='WILD'?matches[0]:(matches.find(x=>x.symbol===win.symbol)||matches[0]);
+   if(!chosen)return [];
+   if(chosen.symbol===win.symbol)hasNatural=true;
+   path.push([r,chosen.row]);
+  }
+  return path.length>=3&&(win.symbol==='WILD'||hasNatural)?path:[];
+ }
+ function showTotalWin(){
+  if(dead||!['win','total'].includes(phase))return;
+  phase='total';winPaths=[];highlightCells=[];showBanner='';
+  busy=false;render();
+  if(auto&&state.mode==='base'&&autoLeft>0)later(autoContinue,turbo?650:1500);
+ }
+ function presentWins(){
+  showBanner='';visualBoard=null;highlightCells=[];
+  winPaths=(state.lastWins||[]).map(win=>representativePath(state.lastBoard,win)).filter(p=>p.length>=3);
+  if(!winPaths.length){showTotalWinFromFeature();return;}
+  phase='win';winIndex=0;render();
+  function next(){
+   if(dead||phase!=='win')return;
+   winIndex++;
+   if(winIndex>=winPaths.length){showTotalWin();return;}
+   render();later(next,950);
+  }
+  later(next,1100);
+ }
+ function showTotalWinFromFeature(){
+  phase='total';busy=false;render();
+  if(auto&&state.mode==='base'&&autoLeft>0)later(autoContinue,turbo?650:1500);
+ }
+ function revealChanges(){
+  if(dead)return;
+  phase='transform';showBanner='';
+  const reveal=state.lastReveal;
+  const changes=reveal?.changed||[];
+  const before=reveal?.before?.map(reel=>[...reel])||state.lastBoard;
+  const after=reveal?.after||state.lastBoard;
+  visualBoard=before.map(reel=>[...reel]);changedCount=0;render();
+  // Show one reel/cell transformation at a time, including sticky Wild conversion.
+  const diff=[];
+  for(let r=0;r<5;r++)for(let row=0;row<4;row++){
+   if(before[r][row]!==after[r][row])diff.push([r,row]);
+  }
+  const cells=diff.length?diff:changes.length?changes:[];
+  if(!cells.length){
+   highlightCells=before.flatMap((reel,r)=>reel.map((symbol,row)=>symbol==='SCATTER'||symbol==='GEM'||symbol==='CAR'?[r,row]:null).filter(Boolean));
+   render();later(()=>{highlightCells=[];presentWins();},900);return;
+  }
+  const advance=index=>{
+   if(dead||phase!=='transform')return;
+   if(index>=cells.length){highlightCells=[];visualBoard=null;render();later(presentWins,500);return;}
+   const [r,row]=cells[index];visualBoard[r][row]=after[r][row];highlightCells=[[r,row]];
+   changedCount=index+1;playCue();render();later(()=>advance(index+1),350);
+  };
+  later(()=>advance(0),350);
+ }
+ function resolveSpin(){
+  if(dead)return;
+  state=pending;pending=null;phase='announce';visualBoard=state.lastReveal?.before?.map(reel=>[...reel])||state.lastBoard;
+  playCue();
+  const reveal=state.lastReveal;
+  const changedInFree=spinningMode==='free'&&reveal?.before?.some((reel,r)=>reel.some((v,row)=>v!==reveal.after[r][row]));
+  showBanner=bannerFiles[state.lastFeature]||(changedInFree?'banner_chronic_sessions_free_spins.png':'');
+  if(state.mode!=='base'){auto=false;autoLeft=0;}
+  render();
+  if(showBanner){
+   // Never skip the feature announcement; at least one full second is held.
+   later(revealChanges,1250);
+  }else{
+   visualBoard=null;presentWins();
+  }
+ }
+ function spinTick(){
+  if(dead||phase!=='spinning')return;
+  frame++;
+  const strips=state.mode==='free'?FREE_STRIPS:BASE_STRIPS;
+  const previous=state.lastStops||[0,8,16,24,32];
+  visualBoard=Array.from({length:5},(_,r)=>{
+   if(r<stopped)return [...pending.lastReveal.before[r]];
+   const stop=(previous[r]+frame*3+r*11)%strips[r].length;
+   return visibleBoard(strips,Array.from({length:5},(_,i)=>i===r?stop:0))[r];
+  });
+  render();later(spinTick,85);
+ }
+ function stopReel(reel){
+  if(dead||phase!=='spinning')return;
+  stopped=reel+1;playCue();
+  visualBoard[reel]=[...pending.lastReveal.before[reel]];
+  render();
+  if(stopped===5)later(resolveSpin,150);
+ }
  function step(){
   if(dead||busy)return;
   if(state.mode==='base'&&state.balance<state.stake){auto=false;render();return;}
-  if(showBanner)showBanner='';
-  busy=true;playCue();render();
-  if(!reduced){
-   const baseStops=state.lastStops||[0,8,16,24,32];
-   const count=turbo?3:6;
-   for(let i=1;i<=count;i++)later(()=>{
-    if(!busy)return;
-    const stops=baseStops.map((stop,reel)=>(stop+i*(reel+3))%42);
-    visualBoard=visibleBoard(state.mode==='free'?FREE_STRIPS:BASE_STRIPS,stops);
-    render();
-   },i*(turbo?50:100));
-  }
-  later(()=>{
-   const next=nextRound(state,options.rng);
-   state=next;busy=false;visualBoard=null;playCue();
-   const banners={
-    'puff':'banner_puff_puff_pass.png','hotbox-start':'banner_hotbox_respins.png','hotbox':'banner_hotbox_respins.png',
-    'free-start':'banner_chronic_sessions_free_spins.png','free-retrigger':'banner_chronic_sessions_free_spins.png',
-    'lowrider':'banner_drop_it_like_its_hot.png'
-   };
-   showBanner=banners[state.lastFeature]||(state.lastWin>=state.stake*10?'banner_big_win.png':'');
-   if(state.mode!=='base'){auto=false;autoLeft=0;}
-   render();
-   if(showBanner)later(()=>{showBanner='';render();},reduced?350:turbo?700:1600);
-   if(auto&&state.mode==='base'&&autoLeft>0)later(autoContinue,turbo?900:2400);
-  },reduced?0:turbo?220:780);
+  clear();showBanner='';winPaths=[];highlightCells=[];frame=0;stopped=0;changedCount=0;winIndex=0;
+  spinningMode=state.mode;previousBalance=state.balance;
+  pending=nextRound(state,options.rng,options.pickStops?.(state));
+  busy=true;phase='spinning';playCue();
+  visualBoard=state.lastBoard.map(reel=>[...reel]);render();
+  // Reel one settles at 0.75 s; each following reel exactly 0.5 s later.
+  // Turbo accelerates only the preliminary spin, not the 500 ms stop cadence.
+  spinTick();
+  const first=reduced?150:turbo?350:750;
+  for(let r=0;r<5;r++)later(()=>stopReel(r),first+500*r);
  }
  render();return root;
 }

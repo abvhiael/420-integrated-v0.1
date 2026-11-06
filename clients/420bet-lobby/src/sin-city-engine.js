@@ -73,7 +73,7 @@ export function puffPuffPass(board,rng=Math.random){
 }
 export function initialState(){
  return {balance:1000,stake:2,mode:'base',freeRemaining:0,freePlayed:0,freeMultiplier:1,
-  locked:[],respins:0,respinReturn:'base',sticky:[],lastWin:0,lastMessage:'PRESS SPIN TO PLAY',lastBoard:visibleBoard(BASE_STRIPS,[0,8,16,24,32]),lastStops:null,lastFeature:'',roundGross:0,roundStake:2};
+  locked:[],respins:0,respinReturn:'base',sticky:[],lastWin:0,lastMessage:'PRESS SPIN TO PLAY',lastBoard:visibleBoard(BASE_STRIPS,[0,8,16,24,32]),lastStops:null,lastFeature:'',lastWins:[],lastReveal:null,roundGross:0,roundStake:2};
 }
 const copy=s=>({...s,locked:[...s.locked],sticky:[...s.sticky],lastBoard:s.lastBoard.map(reel=>[...reel])});
 const lockKey=(r,row)=>r*ROWS+row;
@@ -83,7 +83,8 @@ export function nextRound(previous,rng=Math.random,forcedStops){
  if(!isFree&&!isRespin){s.balance=round(s.balance-s.stake);s.roundGross=0;s.roundStake=s.stake;s.freeMultiplier=1;s.sticky=[];}
  const stops=forcedStops??randomStops(rng);
  let board=visibleBoard(isFree?FREE_STRIPS:BASE_STRIPS,stops);
- let feature='',payout=0;
+ const before=board.map(reel=>[...reel]);
+ let feature='',payout=0,changed=[],lastWins=[];
  if(isRespin){
   s.respins--;
   const locked=new Set(s.locked);
@@ -94,6 +95,7 @@ export function nextRound(previous,rng=Math.random,forcedStops){
    else board[r][row]='';
   }
   s.locked=[...locked].sort((a,b)=>a-b);
+  changed=s.locked.filter(key=>!previous.locked.includes(key)).map(key=>[Math.floor(key/ROWS),key%ROWS]);
   if(s.locked.length===20)payout=100*s.roundStake;
   else if(s.respins===0)payout=round(s.locked.length*s.roundStake*.2);
   if(s.locked.length===20||s.respins===0){
@@ -109,7 +111,9 @@ export function nextRound(previous,rng=Math.random,forcedStops){
   }
   const puff=puffPuffPass(board,rng);
   board=puff.board;
+  changed=puff.changed;
   const regular=waysWins(board,s.roundStake);
+  lastWins=regular.wins;
   payout=regular.total;
   if(puff.changed.length)feature='puff';
   if(isFree&&board.filter(reel=>reel.includes('CAR')).length>=3){
@@ -139,6 +143,8 @@ export function nextRound(previous,rng=Math.random,forcedStops){
  s.roundGross=round(s.roundGross+payout);
  s.balance=round(s.balance+payout);
  s.lastWin=payout;s.lastStops=[...stops];s.lastBoard=board;s.lastFeature=feature;
+ s.lastWins=lastWins;
+ s.lastReveal={before,after:board.map(reel=>[...reel]),changed,feature,wins:lastWins,payout};
  s.lastMessage=feature==='free-start'?'CHRONIC SESSIONS — FREE SPINS!':
  feature==='hotbox-start'?'HOTBOX RESPINS — THREE RESPINS!':
  feature==='lowrider'?'LOWRIDER MULTIPLIER ×'+s.freeMultiplier:

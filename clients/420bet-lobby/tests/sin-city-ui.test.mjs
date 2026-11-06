@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {parseHTML} from 'linkedom';
 import {createSinCityPractice} from '../src/sin-city-ui.js';
+import {initialState,BASE_STRIPS} from '../src/sin-city-engine.js';
 
 const setup=(options={})=>{
  const {document,window}=parseHTML('<html><body></body></html>');
@@ -105,5 +106,72 @@ test('winning way draws actual green path and clicking game skips to total win',
   }else{
    assert.equal(state.phase,'total','a no-win round displays total directly');
   }
+ }finally{root.stopAnimation();}
+});
+
+test('Hotbox held gems remain visible as nonmoving overlays while all reels spin and settle',async()=>{
+ const held=[0,6,9,19];
+ const {root,click}=setup({initialState:{...initialState(),mode:'hotbox',locked:held,respins:3}});
+ try{
+  click('RESPIN');
+  assert.equal(root.querySelectorAll('.sc-spin-track').length,5);
+  assert.equal(root.querySelectorAll('.sc-held-gem').length,held.length);
+  assert.equal(root.querySelectorAll('.sc-held-overlay').length,5);
+  await new Promise(resolve=>setTimeout(resolve,1070));
+  assert.equal(root.querySelectorAll('.sc-held-gem').length,held.filter(k=>Math.floor(k/4)>=1).length);
+  for(const key of held.filter(k=>Math.floor(k/4)===0)){
+   const row=key%4;
+   assert.equal(root.querySelector('.sc-reel[data-reel="0"]').querySelectorAll('.sc-symbol')[row].getAttribute('aria-label'), 'Reel 1 row '+(row+1)+': GEM');
+  }
+ }finally{root.stopAnimation();}
+});
+test('Every previously sticky Wild remains fixed above scrolling free-spin strips',async()=>{
+ const held=[0,3,5,9,14,16,19];
+ const {root,click}=setup({initialState:{...initialState(),mode:'free',freeRemaining:8,sticky:held}});
+ try{
+  click('FREE SPIN');
+  assert.equal(root.querySelectorAll('.sc-held-wild').length,held.length);
+  for(const key of held){
+   const r=Math.floor(key/4),row=key%4;
+   const fixed=root.querySelector('.sc-reel[data-reel="'+r+'"] .sc-held-overlay').querySelectorAll('.sc-held-cell')[row];
+   assert.ok(fixed.classList.contains('sc-held-wild'),'Missing sticky Wild at '+key);
+  }
+  await new Promise(resolve=>setTimeout(resolve,1100));
+  assert.equal(root.querySelectorAll('.sc-held-wild').length,held.filter(k=>Math.floor(k/4)>=1).length);
+ }finally{root.stopAnimation();}
+});
+test('Info popup includes the progressive 3-to-20-gem Hotbox payout table',()=>{
+ const {root,click}=setup();
+ try{
+  click('INFO');
+  const table=root.querySelector('.sc-hotbox-paytable');
+  assert.ok(table);
+  assert.equal(table.querySelectorAll('tr').length,19);
+  assert.match(table.textContent,/100×/);
+  assert.match(root.textContent,/EVERY Wild that lands/);
+  assert.match(root.textContent,/ANY one Lowrider/);
+ }finally{root.stopAnimation();}
+});
+test('Neon way trace reaches reel five, distinguishing non-paying continuation',async()=>{
+ const stops=BASE_STRIPS.map((strip,reel)=>{
+  for(let i=0;i<42;i++){
+   const window=Array.from({length:4},(_,row)=>strip[(i+row)%42]);
+   if(window.includes('SCATTER')||window.includes('GEM'))continue;
+   if((reel<3&&window.includes('A'))||(reel>=3&&!window.includes('A')))return i;
+  }
+  throw Error('No deterministic A-way fixture for reel '+reel);
+ });
+ const {root,click}=setup({rng:()=>.5,pickStops:()=>stops});
+ try{
+  click('SPIN');
+  await new Promise(resolve=>setTimeout(resolve,4300));
+  if(root.getPresentationState().phase==='win'){
+   const solid=root.querySelector('.sc-win-polyline:not(.sc-win-continuation)');
+   const tail=root.querySelector('.sc-win-continuation');
+   assert.ok(solid,'Expected primary win line');
+   const last=tail??solid;
+   assert.ok(last.getAttribute('points').includes('450,'),'Win animation must reach reel 5');
+   if(tail)assert.ok(tail.getAttribute('class').includes('sc-win-continuation'));
+  }else assert.equal(root.getPresentationState().phase,'total');
  }finally{root.stopAnimation();}
 });

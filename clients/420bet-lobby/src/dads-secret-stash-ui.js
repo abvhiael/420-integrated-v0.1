@@ -75,7 +75,7 @@ export function createDadsSecretStash(doc=globalThis.document,options={}){
  const balance=el(doc,'span','dss-stat'),betLabel=el(doc,'span','dss-stat'),winLabel=el(doc,'span','dss-stat'),round=el(doc,'span','dss-stat');
  function btn(txt,fn,cls=''){const b=el(doc,'button','dss-button '+cls,txt);b.type='button';b.addEventListener('click',fn);return b;}
  const lower=btn('− BET',()=>{state.bet=Math.max(1,state.bet-1);refresh();}),higher=btn('+ BET',()=>{state.bet=Math.min(50,state.bet+1);refresh();});
- const play=btn('🌿 SPIN',()=>start(),'dss-spin'),autoBtn=btn('AUTO ×10',()=>{if(auto){auto=false;autoLeft=0;autoBtn.textContent='AUTO ×10';return;}auto=true;autoLeft=10;autoBtn.textContent='STOP AUTO';if(!busy)start();}),info=btn('INFO',()=>{infoPanel.hidden=!infoPanel.hidden;});
+ const play=btn('SPIN',()=>start(),'dss-spin'),autoBtn=btn('AUTO ×10',()=>{if(auto){auto=false;autoLeft=0;autoBtn.textContent='AUTO ×10';return;}auto=true;autoLeft=10;autoBtn.textContent='STOP AUTO';if(!busy)start();}),info=btn('INFO',()=>{infoPanel.hidden=!infoPanel.hidden;});
  controls.append(balance,lower,betLabel,higher,play,winLabel,round,autoBtn,info);
  // TEMPORARY BONUS QA PANEL. This is intentionally practice-only and removable
  // as a single panel/function once bonus presentation qualification is done.
@@ -522,6 +522,25 @@ export function createDadsSecretStash(doc=globalThis.document,options={}){
    showFeatureResult(event,nextEvent);return;
   }
   let step=0,accumulated=0;
+  const begin=()=>{
+   if(event.type!=='mow'||!event.initialGrid){advance();return;}
+   showBonusHud('mow','CLEARING LAWNMOWERS','THEN 5 CASCADES');
+   setFeature('mow','Replacing lawnmowers before the first cascade','5 CASCADES');
+   const indices=event.mowerIndices??[];
+   indices.forEach(i=>cells[i].cell.classList.add('dss-mower-replacing'));
+   status.textContent='REPLACING TRIGGERING LAWNMOWERS';
+   schedule(()=>{
+    showGrid(event.initialGrid);
+    indices.forEach(i=>{
+     cells[i].cell.classList.remove('dss-mower-replacing');
+     cells[i].cell.classList.add('dss-dropping');
+    });
+    schedule(()=>{
+     indices.forEach(i=>cells[i].cell.classList.remove('dss-dropping'));
+     advance();
+    },550);
+   },180);
+  };
   const advance=()=>{
    if(step>=boards.length){
     showFeatureResult(event,()=>{
@@ -544,7 +563,7 @@ export function createDadsSecretStash(doc=globalThis.document,options={}){
     showWinningWays(entry.grid,evaluate(entry.grid),()=>{step++;schedule(advance,500);});
    });
   };
-  advance();
+  begin();
  }
  function nextEvent(){
   if(destroyed)return;

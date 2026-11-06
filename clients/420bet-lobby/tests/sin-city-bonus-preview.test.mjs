@@ -29,7 +29,7 @@ test('temporary tester shows four choices and restores original state on End Tes
  const root=createSinCityPractice(document,{rng:()=>.25});document.body.append(root);
  try{
   const panel=root.querySelector('.sc-qa-panel');
-  assert.ok(panel);assert.equal(panel.querySelectorAll('option').length,4);
+  assert.ok(panel);assert.equal(panel.querySelectorAll('.sc-qa-choice').length,4);
   const originalBalance=root.querySelector('.sc-metric strong').textContent;
   const click=label=>{
    const btn=[...root.querySelectorAll('button')].find(b=>b.textContent.includes(label));
@@ -49,8 +49,8 @@ test('selector launches chosen feature and test mode remains active to manually 
  const {document,window}=parseHTML('<html><body></body></html>');
  const root=createSinCityPractice(document,{rng:()=>.25});document.body.append(root);
  try{
-  const select=root.querySelector('.sc-qa-select');for(const option of select.querySelectorAll('option'))option.selected=option.getAttribute('value')==='free';
-  select.dispatchEvent(new window.Event('change',{bubbles:true}));
+  const choice=[...root.querySelectorAll('.sc-qa-choice')].find(button=>button.textContent==='Chronic Sessions Free Spins');
+  assert.ok(choice);choice.dispatchEvent(new window.Event('click',{bubbles:true}));
   root.querySelector('.sc-qa-button').dispatchEvent(new window.Event('click',{bubbles:true}));
   assert.equal(root.getPresentationState().qaSelection,'free');
   assert.equal(root.getPresentationState().qaActive,true);

@@ -62,3 +62,13 @@
 .sc-click-to-total .sc-result{color:#b3ff97;text-decoration:underline;text-decoration-color:#50ff37}
 .sc-feature-overlay{z-index:5}
 @media(prefers-reduced-motion:reduce){.sc-reel-spinning .sc-symbol,.sc-reel-stopped,.sc-win-polyline,.sc-changing{animation:none!important;transform:none!important;filter:none!important}.sc-win-polyline{stroke-dasharray:none;stroke-dashoffset:0}}
+
+/* TEMPORARY QA feature launcher. Isolated from the production/practice spin controls. */
+.sc-qa-panel{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:10px;margin:14px 0 0;padding:12px;background:linear-gradient(100deg,#210b32,#101c17);border:1px dashed #aede51;border-radius:10px;box-shadow:0 0 12px #5bcf4944}
+.sc-qa-panel>strong{color:#bbff82;font-weight:900;letter-spacing:.04em}
+.sc-qa-panel>small{color:#e7d6b5;flex-basis:100%;text-align:center}
+.sc-qa-select{padding:10px;min-height:42px;background:#1b112d;color:#ffe8b0;border:1px solid #e9b75a;border-radius:7px;max-width:100%}
+.sc-qa-button,.sc-qa-end{min-height:42px;padding:8px 14px;border:2px solid #75fa52;border-radius:7px;background:#215d32;color:#fff;font-weight:900;cursor:pointer}
+.sc-qa-end{background:#61233c;border-color:#f5ad69}
+.sc-qa-button:disabled,.sc-qa-end:disabled{opacity:.45;cursor:not-allowed}
+.sc-qa-active{flex-basis:100%;text-align:center;color:#b4ff74;font-weight:900;font-size:12px}

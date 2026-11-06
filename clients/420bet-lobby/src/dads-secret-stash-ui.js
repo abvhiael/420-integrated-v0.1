@@ -36,8 +36,8 @@ export function createDadsSecretStash(doc=globalThis.document,options={}){
  winSvg.setAttribute('viewBox','0 0 500 400');
  winSvg.setAttribute('preserveAspectRatio','none');
  winSvg.setAttribute('aria-hidden','true');
- const winLabel=el(doc,'div','dss-win-label');
- winTrace.append(winSvg,winLabel);
+ const winWayLabel=el(doc,'div','dss-win-label');
+ winTrace.append(winSvg,winWayLabel);
  reels.append(winTrace);
  const larryPanel=el(doc,'aside','dss-larry-panel');
  const larry=el(doc,'img','dss-larry');
@@ -137,7 +137,7 @@ export function createDadsSecretStash(doc=globalThis.document,options={}){
  function clearWinTrace(){
   winTrace.hidden=true;
   winSvg.replaceChildren();
-  winLabel.textContent='';
+  winWayLabel.textContent='';
   cells.forEach(({cell})=>cell.classList.remove('dss-paying-symbol'));
  }
  function showWinningWays(grid,winData,done){
@@ -172,10 +172,10 @@ export function createDadsSecretStash(doc=globalThis.document,options={}){
    addPath('dss-win-glow');addPath('dss-win-line');
    const hits=new Set(indices);
    cells.forEach(({cell},i)=>cell.classList.toggle('dss-paying-symbol',hits.has(i)));
-   winLabel.textContent=win.symbol.toUpperCase()+' · '+win.matched+' REELS · '+win.ways+
+   winWayLabel.textContent=win.symbol.toUpperCase()+' · '+win.matched+' REELS · '+win.ways+
     (win.ways===1?' WAY':' WAYS')+' · '+money(win.amount*state.last.stake)+' CREDITS';
    winTrace.hidden=false;
-   status.textContent='WINNING WAYS: '+winLabel.textContent;
+   status.textContent='WINNING WAYS: '+winWayLabel.textContent;
    schedule(show,1500);
   };
   show();

@@ -24,8 +24,12 @@ export function createCannabisCowboyPractice(doc=globalThis.document,options={})
  labels[1].textContent='BALANCE · DEMO CREDITS';
  labels[2].textContent='WIN · DEMO CREDITS';
  const info=root.querySelector('.cc-info-panel');
+ info.setAttribute('aria-label','High Country Clusters practice rules');
+ const infoCopy=info.querySelector('p');
+ if(infoCopy)infoCopy.textContent='Practice only: 5 or more adjacent paying symbols form a cluster. Each tumble clears matches and refills the 6×8 board. Growing Harvest cells progress ×2→×32 and Smoke Ring Wilds substitute for paying symbols. Landing 3, 4, 5 or 6+ tour bus scatters awards 8, 12, 16 or 20 Endless Harvest free spins. Harvest multipliers and up to 8 sticky wilds persist throughout the feature. Retriggers are capped at 100 total free spins. Demo credits only; no wallet transactions or real wagering. Bonus paytables are not yet RTP certified.';
  const notice=root.querySelector('.cc-practice-notice');
  notice.textContent='PRACTICE ONLY · ENDLESS HARVEST FREE SPINS ACTIVE · NO REAL WAGERING';
+ consoleBar.setAttribute('aria-label','Practice-credit controls');
  root.querySelector('.cc-board-readonly').textContent='BASE-GAME PRACTICE';
  root.querySelector('.cc-board-foot').textContent='5+ ADJACENT · SMOKE RING WILD ×2 · GROWING HARVEST ×2→×32';
  const status=doc.createElement('p');status.className='cc-round-status';status.setAttribute('aria-live','polite');
@@ -81,7 +85,9 @@ export function createCannabisCowboyPractice(doc=globalThis.document,options={})
  };
  const finish=()=>{
   busy=false;queue=[];currentSpin=null;pendingFeature=null;bonusSpins=[];hideFeature();hideEffects();
-  bonusCounter.hidden=true;phase('none');showBoard(session.board);sync();
+  bonusCounter.hidden=true;phase('none');
+  root.querySelector('.cc-board-readonly').textContent='BASE-GAME PRACTICE';
+  showBoard(session.board);sync();
   status.textContent=finishedBonus?'ENDLESS HARVEST COMPLETE · '+format(lastWin)+' total demo credits':lastWin?'HARVEST COMPLETE · '+format(lastWin)+' demo credits won':'No more clusters · Spin again';
  };
  const advance=()=>{

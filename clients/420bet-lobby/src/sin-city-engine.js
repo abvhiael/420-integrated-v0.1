@@ -11,7 +11,8 @@ export const BASE_STRIPS=Object.freeze(Array.from({length:REELS},(_,r)=>{
  for(const [i,v] of special)arr[(i+r*5)%STRIP_LENGTH]=v;
  return Object.freeze(arr);
 }));
-export const FREE_STRIPS=Object.freeze(BASE_STRIPS.map((reel,r)=>Object.freeze(reel.map((symbol,i)=>symbol==='GEM'?'WILD':symbol==='ASH'&&i%2===0?'WILD':symbol))));
+// Free-spin strips retain scarce Wilds. GEM becomes a regular symbol, not a Wild.
+export const FREE_STRIPS=Object.freeze(BASE_STRIPS.map((reel,r)=>Object.freeze(reel.map(symbol=>symbol==='GEM'?'BUD':symbol))));
 export const PAYTABLE=Object.freeze({
  BOBBY:[.3,1,4.2],DOLLAR:[.25,.8,3],CAR:[.2,.6,2],MIC:[.15,.4,1.5],
  CHIPS:[.15,.4,1.5],BONG:[.15,.4,1.5],JAR:[.1,.25,.8],
@@ -73,7 +74,7 @@ export function puffPuffPass(board,rng=Math.random){
 }
 export function initialState(){
  return {balance:1000,stake:2,mode:'base',freeRemaining:0,freePlayed:0,freeMultiplier:1,
-  locked:[],respins:0,respinReturn:'base',sticky:[],lastWin:0,lastMessage:'PRESS SPIN TO PLAY',lastBoard:visibleBoard(BASE_STRIPS,[0,8,16,24,32]),lastStops:null,lastFeature:'',lastWins:[],lastReveal:null,roundGross:0,roundStake:2};
+  locked:[],respins:0,respinReturn:'base',sticky:[],lastWin:0,lastMessage:'PRESS SPIN TO PLAY',lastBoard:visibleBoard(BASE_STRIPS,[0,8,16,24,32]),lastStops:null,lastFeature:'',lastWins:[],lastReveal:null,lastAwardedSpins:0,lastRetriggeredSpins:0,lastMultiplier:1,roundGross:0,roundStake:2};
 }
 const copy=s=>({...s,locked:[...s.locked],sticky:[...s.sticky],lastBoard:s.lastBoard.map(reel=>[...reel])});
 const lockKey=(r,row)=>r*ROWS+row;
@@ -85,6 +86,7 @@ export function nextRound(previous,rng=Math.random,forcedStops){
  let board=visibleBoard(isFree?FREE_STRIPS:BASE_STRIPS,stops);
  const before=board.map(reel=>[...reel]);
  let feature='',payout=0,changed=[],lastWins=[];
+ s.lastAwardedSpins=0;s.lastRetriggeredSpins=0;s.lastMultiplier=1;
  if(isRespin){
   s.respins--;
   const locked=new Set(s.locked);
@@ -92,7 +94,7 @@ export function nextRound(previous,rng=Math.random,forcedStops){
    const key=lockKey(r,row);
    if(locked.has(key)){board[r][row]='GEM';continue;}
    if(board[r][row]==='GEM'){locked.add(key);s.respins=3;}
-   else board[r][row]='';
+   // Keep original symbols behind the collecting emerald gems.
   }
   s.locked=[...locked].sort((a,b)=>a-b);
   changed=s.locked.filter(key=>!previous.locked.includes(key)).map(key=>[Math.floor(key/ROWS),key%ROWS]);
@@ -106,10 +108,18 @@ export function nextRound(previous,rng=Math.random,forcedStops){
   if(isFree){
    s.freeRemaining--;s.freePlayed++;
    for(const key of s.sticky){const r=Math.floor(key/ROWS),row=key%ROWS;board[r][row]='WILD';}
-   for(let r=0;r<REELS;r++)for(let row=0;row<ROWS;row++)if(board[r][row]==='WILD'&&!s.sticky.includes(lockKey(r,row)))s.sticky.push(lockKey(r,row));
+   // Three maximum sticky Wild positions, adding no more than one per free spin.
+   if(s.sticky.length<3){
+    outer:for(let r=0;r<REELS;r++)for(let row=0;row<ROWS;row++){
+     const key=lockKey(r,row);
+     if(board[r][row]==='WILD'&&!s.sticky.includes(key)){s.sticky.push(key);break outer;}
+    }
+   }
    s.sticky.sort((a,b)=>a-b);
   }
-  const puff=puffPuffPass(board,rng);
+  // Puff wild conversions belong to the base feature. Free spins keep only
+  // their bounded sticky-Wild mechanic; do not spread extra Wilds every spin.
+  const puff=isFree?{board,changed:[]}:puffPuffPass(board,rng);
   board=puff.board;
   changed=puff.changed;
   const regular=waysWins(board,s.roundStake);
@@ -118,15 +128,15 @@ export function nextRound(previous,rng=Math.random,forcedStops){
   if(puff.changed.length)feature='puff';
   if(isFree&&board.filter(reel=>reel.includes('CAR')).length>=3){
    const mult=[2,3,4,5][Math.floor(Math.min(.9999999,Math.max(0,rng()))*4)];
-   s.freeMultiplier=mult;payout=round(payout*mult);feature='lowrider';
+   s.freeMultiplier=mult;s.lastMultiplier=mult;payout=round(payout*mult);feature='lowrider';
   }
   if(isFree){
    const extra=awardFreeSpins(board);
-   if(extra&&s.freePlayed+s.freeRemaining<50){s.freeRemaining+=Math.min(5,50-s.freePlayed-s.freeRemaining);feature='free-retrigger';}
+   if(extra&&s.freePlayed+s.freeRemaining<50){const awarded=Math.min(5,50-s.freePlayed-s.freeRemaining);s.freeRemaining+=awarded;s.lastRetriggeredSpins=awarded;feature=feature==='lowrider'?'lowrider':'free-retrigger';}
    if(!s.freeRemaining){s.mode='base';s.sticky=[];feature=feature||'free-end';}
   }else{
    const scatters=awardFreeSpins(board);
-   if(scatters){s.mode='free';s.freeRemaining=scatters;s.freePlayed=0;feature='free-start';}
+   if(scatters){s.mode='free';s.freeRemaining=scatters;s.freePlayed=0;s.lastAwardedSpins=scatters;feature='free-start';}
    else if(count(board,'GEM')>=3){
     s.mode='hotbox';s.respinReturn='base';s.respins=3;
     s.locked=[];
@@ -145,12 +155,12 @@ export function nextRound(previous,rng=Math.random,forcedStops){
  s.lastWin=payout;s.lastStops=[...stops];s.lastBoard=board;s.lastFeature=feature;
  s.lastWins=lastWins;
  s.lastReveal={before,after:board.map(reel=>[...reel]),changed,feature,wins:lastWins,payout};
- s.lastMessage=feature==='free-start'?'CHRONIC SESSIONS — FREE SPINS!':
+ s.lastMessage=feature==='free-start'?'CHRONIC SESSIONS · '+s.lastAwardedSpins+' FREE SPINS AWARDED!':
  feature==='hotbox-start'?'HOTBOX RESPINS — THREE RESPINS!':
- feature==='lowrider'?'LOWRIDER MULTIPLIER ×'+s.freeMultiplier:
+ feature==='lowrider'?'LOWRIDER ×'+s.freeMultiplier+' APPLIED TO WAYS WIN · '+s.freeRemaining+' FREE SPINS LEFT':
  feature==='puff'?'PUFF PUFF PASS — WILDS SPREAD!':
- feature==='free-retrigger'?'FIVE MORE FREE SPINS!':
- feature==='hotbox'?'LOCKED GEMS — '+s.respins+' RESPINS LEFT':
+ feature==='free-retrigger'?'+'+s.lastRetriggeredSpins+' EXTRA FREE SPINS · '+s.freeRemaining+' REMAINING':
+ feature==='hotbox'?'HOTBOX · '+s.locked.length+' LOCKED GEMS · '+s.respins+' RESPINS LEFT':
  feature==='hotbox-end'?'HOTBOX BONUS COMPLETE':
  feature==='free-end'?'FREE SPINS COMPLETE':
  payout>0?'PRACTICE WIN '+payout.toFixed(2):'NO WIN — TRY AGAIN';

@@ -15,7 +15,7 @@ export function createSinCityPractice(doc=globalThis.document,options={}){
  const reduced=!!view.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
  const root=el(doc,'section','sc-game');root.dataset.practiceGame='sin-city-high-rollers';
  let state=initialState(),panel='',auto=false,autoLeft=0,turbo=false,muted=true,busy=false,dead=false,showBanner='',visualBoard=null,audioContext=null;
- let phase='idle',pending=null,stopped=0,frame=0,changedCount=0,winIndex=0,highlightCells=[],winPaths=[],spinningMode='base',previousBalance=1000;
+ let phase='idle',pending=null,stopped=0,changedCount=0,winIndex=0,highlightCells=[],winPaths=[],spinningMode='base',previousBalance=1000;
  // TEMPORARY QA controls; all demo credits are isolated and the original state is restored.
  let qaSelection='puff',qaPriorState=null,qaForcedStops=null;
  const timers=new Set();
@@ -65,8 +65,19 @@ export function createSinCityPractice(doc=globalThis.document,options={}){
   const name=el(doc,'div','sc-host-name','BOBBY LAS VEGAS');mascot.append(portrait,name);content.append(mascot);
   const cabinet=el(doc,'div','sc-cabinet');
   const top=el(doc,'div','sc-cabinet-top');
-  top.append(el(doc,'span','','SIN CITY HIGH ROLLERS'),el(doc,'span','sc-mode-label',state.mode==='free'?'FREE SPINS '+state.freeRemaining:state.mode==='hotbox'?'RESPINS '+state.respins:'PRACTICE PLAY'));
+  const modeText=state.mode==='free'?'CHRONIC SESSIONS · '+state.freeRemaining+' FREE SPINS REMAINING':state.mode==='hotbox'?'HOTBOX · '+state.respins+' RESPINS LEFT · '+state.locked.length+' GEMS LOCKED':'PRACTICE PLAY';
+  top.append(el(doc,'span','','SIN CITY HIGH ROLLERS'),el(doc,'span','sc-mode-label',modeText));
   cabinet.append(top);
+  if(state.mode==='free'||state.mode==='hotbox'||state.lastFeature==='lowrider'||state.lastFeature==='free-start'){
+   const hud=el(doc,'div','sc-bonus-hud');
+   const heading=state.lastFeature==='lowrider'?'LOWRIDER ×'+state.lastMultiplier+' · MULTIPLIES WAYS WIN':
+     state.mode==='hotbox'?'HOTBOX · COLLECT GEMS; 3 RESPINS ON EACH NEW LOCK':
+     state.mode==='free'?'CHRONIC SESSIONS · MAXIMUM 3 STICKY WILDS':'BONUS COMPLETE';
+   const detail=state.mode==='free'?'SPINS LEFT: '+state.freeRemaining+' · STICKY WILDS: '+state.sticky.length+'/3'+(state.lastRetriggeredSpins?' · +'+state.lastRetriggeredSpins+' RETRIGGERED':''):
+      state.mode==='hotbox'?'RESPINS LEFT: '+state.respins+' · LOCKED GEMS: '+state.locked.length+'/20':
+      state.lastFeature==='free-start'?state.lastAwardedSpins+' FREE SPINS AWARDED':'MULTIPLIER APPLIED TO THIS SPIN';
+   hud.append(el(doc,'strong','',heading),el(doc,'span','',detail));cabinet.append(hud);
+  }
   const reels=el(doc,'div','sc-reels');reels.setAttribute('role','group');reels.setAttribute('aria-label','Five reels with four symbols each');
   for(let r=0;r<5;r++){const rolling=phase==='spinning'&&r>=stopped;
    const col=el(doc,'div','sc-reel'+(rolling?' sc-reel-spinning':'')+(phase==='spinning'&&!rolling?' sc-reel-stopped':''));col.dataset.reel=String(r);for(let row=0;row<4;row++){
@@ -76,7 +87,19 @@ export function createSinCityPractice(doc=globalThis.document,options={}){
    if(state.mode==='free'&&state.sticky.includes(r*4+row))cell.classList.add('sc-sticky');
    if(state.mode==='hotbox'&&state.locked.includes(r*4+row))cell.classList.add('sc-locked');
    col.append(cell);
-  }reels.append(col);}
+  }
+   if(rolling){
+    const window=el(doc,'div','sc-spin-window'),track=el(doc,'div','sc-spin-track');
+    const strip=(state.mode==='free'?FREE_STRIPS:BASE_STRIPS)[r];
+    const start=((state.lastStops?.[r]??r*7)+10)%strip.length;
+    for(let i=0;i<16;i++){
+     const tile=el(doc,'div','sc-spin-tile'),symbol=strip[(start+i%8)%strip.length];
+     if(FILES[symbol]){const image=el(doc,'img');image.src=art('symbols',FILES[symbol]);image.alt='';image.draggable=false;tile.append(image);}
+     track.append(tile);
+    }
+    window.append(track);col.append(window);
+   }
+   reels.append(col);}
   cabinet.append(reels);
   if(phase==='win'&&winPaths.length){
    const svg=doc.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('class','sc-win-lines');svg.setAttribute('viewBox','0 0 500 400');svg.setAttribute('preserveAspectRatio','none');svg.setAttribute('aria-label','Neon green winning way '+(winIndex+1)+' of '+winPaths.length);
@@ -89,6 +112,7 @@ export function createSinCityPractice(doc=globalThis.document,options={}){
   const controls=el(doc,'div','sc-controls');
   const info=button('INFO','sc-control',()=>{panel='info';render();});
   const menu=button('MENU','sc-control',()=>{panel='menu';render();});
+  info.disabled=menu.disabled=busy;
   const minus=button('−','sc-control',()=>{state={...state,stake:Math.max(1,state.stake-1)};render();});
   const plus=button('+','sc-control',()=>{state={...state,stake:Math.min(50,state.stake+1)};render();});
   const spin=button(state.mode==='base'?'SPIN':state.mode==='free'?'FREE SPIN':'RESPIN','sc-spin',step);
@@ -216,8 +240,8 @@ export function createSinCityPractice(doc=globalThis.document,options={}){
   state=pending;pending=null;phase='announce';visualBoard=state.lastReveal?.before?.map(reel=>[...reel])||state.lastBoard;
   playCue();
   const reveal=state.lastReveal;
-  const changedInFree=spinningMode==='free'&&reveal?.before?.some((reel,r)=>reel.some((v,row)=>v!==reveal.after[r][row]));
-  showBanner=bannerFiles[state.lastFeature]||(changedInFree?'banner_chronic_sessions_free_spins.png':'');
+  // Sticky Wild persistence alone never retriggers the Chronic Sessions banner.
+  showBanner=bannerFiles[state.lastFeature]||'';
   if(state.mode!=='base'){auto=false;autoLeft=0;}
   render();
   if(showBanner){
@@ -227,29 +251,34 @@ export function createSinCityPractice(doc=globalThis.document,options={}){
    visualBoard=null;presentWins();
   }
  }
- function spinTick(){
-  if(dead||phase!=='spinning')return;
-  frame++;
-  const strips=state.mode==='free'?FREE_STRIPS:BASE_STRIPS;
-  const previous=state.lastStops||[0,8,16,24,32];
-  visualBoard=Array.from({length:5},(_,r)=>{
-   if(r<stopped)return [...pending.lastReveal.before[r]];
-   const stop=(previous[r]+frame*3+r*11)%strips[r].length;
-   return visibleBoard(strips,Array.from({length:5},(_,i)=>i===r?stop:0))[r];
-  });
-  render();later(spinTick,85);
- }
  function stopReel(reel){
   if(dead||phase!=='spinning')return;
   stopped=reel+1;playCue();
-  visualBoard[reel]=[...pending.lastReveal.before[reel]];
-  render();
-  if(stopped===5)later(resolveSpin,150);
+  // Only settle the current column; other reel tracks keep spinning uninterrupted.
+  const symbols=pending.lastReveal.before[reel];
+  const column=root.querySelector('.sc-reel[data-reel="'+reel+'"]');
+  if(column){
+   column.classList.remove('sc-reel-spinning');
+   column.classList.add('sc-reel-stopped');
+   column.querySelector('.sc-spin-window')?.remove();
+   const cells=[...column.querySelectorAll('.sc-symbol')];
+   for(let row=0;row<4;row++){
+    const cell=cells[row],symbol=symbols[row];
+    cell.setAttribute('aria-label','Reel '+(reel+1)+' row '+(row+1)+': '+symbol);
+    cell.replaceChildren();
+    if(FILES[symbol]){const img=el(doc,'img');img.src=art('symbols',FILES[symbol]);img.alt='';img.draggable=false;cell.append(img);}
+    cell.classList.toggle('sc-wild',symbol==='WILD');
+    cell.classList.toggle('sc-gem',symbol==='GEM');
+   }
+  }
+  const status=root.querySelector('.sc-result');
+  if(status)status.textContent='REELS SPINNING · '+stopped+' OF 5 STOPPED';
+  if(stopped===5)later(resolveSpin,180);
  }
  function step(){
   if(dead||busy)return;
   if(state.mode==='base'&&state.balance<state.stake){auto=false;render();return;}
-  clear();showBanner='';winPaths=[];highlightCells=[];frame=0;stopped=0;changedCount=0;winIndex=0;
+  clear();showBanner='';winPaths=[];highlightCells=[];stopped=0;changedCount=0;winIndex=0;
   spinningMode=state.mode;previousBalance=state.balance;
   const forced=qaForcedStops??options.pickStops?.(state);
   qaForcedStops=null;
@@ -258,11 +287,10 @@ export function createSinCityPractice(doc=globalThis.document,options={}){
   if(qaPriorState!==null)pending.balance=state.balance;
   busy=true;phase='spinning';playCue();
   visualBoard=state.lastBoard.map(reel=>[...reel]);render();
-  // Reel one settles at 0.75 s; each following reel exactly 0.5 s later.
-  // Turbo accelerates only the preliminary spin, not the 500 ms stop cadence.
-  spinTick();
-  const first=reduced?150:turbo?350:750;
-  for(let r=0;r<5;r++)later(()=>stopReel(r),first+500*r);
+  // Seamless GPU scrolling; no JS frame-by-frame DOM replacement.
+  // Every reel after the first stops exactly 750 ms later, Turbo included.
+  const first=reduced?150:turbo?400:850;
+  for(let r=0;r<5;r++)later(()=>stopReel(r),first+750*r);
  }
  render();return root;
 }

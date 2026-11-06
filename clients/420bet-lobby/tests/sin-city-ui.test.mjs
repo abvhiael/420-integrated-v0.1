@@ -45,7 +45,7 @@ test('SPIN settles an independently evaluated round with debit and display updat
  click('TURBO OFF');
  click('SPIN');
  assert.match(txt(),/REELS SPINNING/);
- await new Promise(resolve=>setTimeout(resolve,3300));
+ await new Promise(resolve=>setTimeout(resolve,4600));
  assert.doesNotMatch(txt(),/REELS SPINNING/);
  assert.equal(root.querySelectorAll('.sc-symbol').length,20);
  assert.match(txt(),/BALANCE/);
@@ -54,7 +54,7 @@ test('SPIN settles an independently evaluated round with debit and display updat
  root.stopAnimation();
 });
 
-test('five reels stop individually in fixed half-second sequence',async()=>{
+test('five reels stop individually in fixed three-quarter-second sequence',async()=>{
  const {root,click}=setup({rng:()=>.4,pickStops:()=>[0,8,16,24,32]});
  try{
   click('SPIN');
@@ -62,13 +62,14 @@ test('five reels stop individually in fixed half-second sequence',async()=>{
   await new Promise(resolve=>setTimeout(resolve,900));
   assert.equal(root.getPresentationState().stopped,1);
   assert.equal(root.querySelectorAll('.sc-reel-spinning').length,4);
-  await new Promise(resolve=>setTimeout(resolve,550));
+  assert.equal(root.querySelectorAll('.sc-spin-track').length,4);
+  await new Promise(resolve=>setTimeout(resolve,800));
   assert.equal(root.getPresentationState().stopped,2);
-  await new Promise(resolve=>setTimeout(resolve,550));
+  await new Promise(resolve=>setTimeout(resolve,800));
   assert.equal(root.getPresentationState().stopped,3);
-  await new Promise(resolve=>setTimeout(resolve,550));
+  await new Promise(resolve=>setTimeout(resolve,800));
   assert.equal(root.getPresentationState().stopped,4);
-  await new Promise(resolve=>setTimeout(resolve,550));
+  await new Promise(resolve=>setTimeout(resolve,800));
   assert.equal(root.getPresentationState().stopped,5);
   assert.equal(root.querySelectorAll('.sc-reel-spinning').length,0);
  }finally{root.stopAnimation();}
@@ -79,12 +80,12 @@ test('feature announcement remains visible for at least one second before reel r
  const {root,click}=setup({rng:()=>.33,pickStops:()=>stops});
  try{
   click('SPIN');
-  await new Promise(resolve=>setTimeout(resolve,3150));
+  await new Promise(resolve=>setTimeout(resolve,4300));
   assert.equal(root.getPresentationState().phase,'announce');
   assert.ok(root.querySelector('.sc-feature-overlay'));
-  await new Promise(resolve=>setTimeout(resolve,650));
+  await new Promise(resolve=>setTimeout(resolve,500));
   assert.equal(root.getPresentationState().phase,'announce');
-  await new Promise(resolve=>setTimeout(resolve,850));
+  await new Promise(resolve=>setTimeout(resolve,950));
   assert.notEqual(root.getPresentationState().phase,'announce');
  }finally{root.stopAnimation();}
 });
@@ -92,7 +93,7 @@ test('winning way draws actual green path and clicking game skips to total win',
  const {root,click,window}=setup({rng:()=>.4,pickStops:()=>[0,0,0,0,0]});
  try{
   click('SPIN');
-  await new Promise(resolve=>setTimeout(resolve,3050));
+  await new Promise(resolve=>setTimeout(resolve,4600));
   const state=root.getPresentationState();
   if(state.phase==='win'){
    const line=root.querySelector('.sc-win-polyline');

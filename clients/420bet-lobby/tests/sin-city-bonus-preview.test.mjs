@@ -14,7 +14,7 @@ test('each QA scenario uses real visible reel strips and triggers its requested 
   if(preview.id==='puff')assert.equal(result.lastFeature,'puff');
   if(preview.id==='hotbox'){assert.equal(result.lastFeature,'hotbox-start');assert.equal(result.mode,'hotbox');assert.ok(result.locked.length>=3);}
   if(preview.id==='free'){assert.equal(result.lastFeature,'free-start');assert.equal(result.mode,'free');assert.equal(result.freeRemaining,8);}
-  if(preview.id==='lowrider'){assert.equal(result.lastFeature,'lowrider');assert.ok(result.freeMultiplier>=2);assert.ok(result.freeMultiplier<=5);}
+  if(preview.id==='lowrider'){assert.equal(result.lastFeature,'lowrider');assert.equal(result.lastRetriggeredSpins,0);assert.ok(result.freeMultiplier>=2);assert.ok(result.freeMultiplier<=5);}
  }
 });
 test('bonus QA preview can be initialized with zero credits without charging real credits',()=>{
@@ -54,7 +54,7 @@ test('selector launches chosen feature and test mode remains active to manually 
   root.querySelector('.sc-qa-button').dispatchEvent(new window.Event('click',{bubbles:true}));
   assert.equal(root.getPresentationState().qaSelection,'free');
   assert.equal(root.getPresentationState().qaActive,true);
-  await new Promise(resolve=>setTimeout(resolve,3150));
+  await new Promise(resolve=>setTimeout(resolve,4200));
   assert.equal(root.getPresentationState().mode,'free');
   assert.ok(root.getPresentationState().qaActive);
   const button=root.querySelector('.sc-spin');

@@ -9,10 +9,10 @@ export const SIN_CITY_BONUS_PREVIEWS=Object.freeze([
  Object.freeze({id:'lowrider',label:"Drop It Like It's Hot",symbol:'CAR',reels:3})
 ]);
 const visible=(strip,stop)=>Array.from({length:4},(_,row)=>strip[(stop+row)%strip.length]);
-const choose=(strip,symbol,required)=>{
+const choose=(strip,symbol,required,excludeScatter=false)=>{
  for(let stop=0;stop<strip.length;stop++){
   const symbols=visible(strip,stop);
-  if(symbols.includes(symbol)===required)return stop;
+  if(symbols.includes(symbol)===required&&(!excludeScatter||!symbols.includes('SCATTER')))return stop;
  }
  throw Error('Unable to create QA fixture for '+symbol);
 };
@@ -20,7 +20,7 @@ export function makeSinCityBonusPreview(type,prior=initialState()){
  const feature=SIN_CITY_BONUS_PREVIEWS.find(item=>item.id===type);
  if(!feature)throw new RangeError('Unknown Sin City bonus preview');
  const strips=type==='lowrider'?FREE_STRIPS:BASE_STRIPS;
- const stops=strips.map((strip,reel)=>choose(strip,feature.symbol,reel<feature.reels));
+ const stops=strips.map((strip,reel)=>choose(strip,feature.symbol,reel<feature.reels,type==='lowrider'));
  const board=visibleBoard(strips,stops);
  const matching=board.filter(reel=>reel.includes(feature.symbol)).length;
  if(matching!==feature.reels)throw Error('QA preview does not match its trigger');

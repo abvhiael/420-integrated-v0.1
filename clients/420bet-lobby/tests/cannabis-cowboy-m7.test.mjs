@@ -4,6 +4,7 @@ import {readFileSync} from 'node:fs';
 import {parseHTML} from 'linkedom';
 import {createCannabisCowboyShell} from '../src/cannabis-cowboy-ui.js';
 import {createCannabisCowboyPractice} from '../src/cannabis-cowboy-game.js';
+import {makeReelStrip,REEL_STOP_TIMES} from '../src/cannabis-cowboy-reels.js';
 
 const css=readFileSync(new URL('../src/cannabis-cowboy.css',import.meta.url),'utf8');
 const seed=(initial=37)=>{let s=initial>>>0;return ()=>((s=(Math.imul(1664525,s)+1013904223)>>>0)/4294967296)};
@@ -39,4 +40,16 @@ test('M7 preserves working practice controls, reel stop timing and info presenta
  info.querySelector('.cc-dismiss').dispatchEvent(new window.Event('click'));
  assert.equal(info.hidden,true);
  root.stopAnimation();
+});
+
+test('M7 reel animations have duplicate symbol cycles, never jolt on wrap',()=>{
+ const {document}=parseHTML('<html><body></body></html>');
+ const strip=makeReelStrip(document,2);
+ const tokens=[...strip.querySelectorAll('.cc-reel-token')];
+ assert.equal(tokens.length,12);
+ assert.deepEqual(tokens.slice(0,6).map(x=>x.className),tokens.slice(6).map(x=>x.className));
+ assert.deepEqual(tokens.slice(0,6).map(x=>x.textContent),tokens.slice(6).map(x=>x.textContent));
+ assert.deepEqual([...REEL_STOP_TIMES],[700,1200,1950,2700,3450,4200]);
+ assert.match(css,/height:1200%;animation:cc-reel-loop/);
+ assert.match(css,/translate3d\(0,-50%,0\)/);
 });

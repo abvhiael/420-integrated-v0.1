@@ -154,3 +154,109 @@
 .cc-game .cc-road-next:hover{filter:brightness(1.2)}
 @media(max-width:700px){.cc-game .cc-road-panel{top:5%;bottom:4%;border-width:4px}.cc-game .cc-road-case{min-height:60px;border-width:2px}.cc-game .cc-reel-token .cc-cell-glyph{font-size:1.1rem}.cc-game .cc-win-review{bottom:8%;padding:8px}}
 @media(prefers-reduced-motion:reduce){.cc-game .cc-reel-track,.cc-game .cc-win-path{animation:none!important}}
+
+/* M7 — viewport-aware layout, without altering reel/math contracts.
+   Reserve room for the existing 420Bet gamebar and keep all 8 rows visible. */
+.cc-game{
+  --cc-screen-height:calc(100dvh - 82px);
+  width:100%;max-width:100%;min-width:0;
+  display:grid;grid-template-rows:auto minmax(0,1fr) auto auto;
+  align-content:stretch;gap:clamp(4px,.85vh,11px);
+  padding:clamp(7px,1.15vw,18px);
+  overflow-x:clip;
+}
+.cc-game .cc-title-banner{
+  margin:0 auto;padding:clamp(3px,.65vh,9px) 12px clamp(5px,.9vh,12px);
+  width:100%;min-width:0;
+}
+.cc-game .cc-game-title{font-size:clamp(1.7rem,3.8vw,4.3rem);line-height:1.02}
+.cc-game .cc-game-subtitle{font-size:clamp(.78rem,1.55vw,1.4rem)}
+.cc-game .cc-stage{
+  min-width:0;min-height:0;
+  grid-template-columns:minmax(160px,.9fr) minmax(0,2.8fr) minmax(155px,.9fr);
+  gap:clamp(5px,.8vw,13px);
+  width:100%;max-width:1420px;
+}
+.cc-game .cc-middle{min-height:0;min-width:0;overflow:hidden;border-width:clamp(4px,.65vw,8px)}
+.cc-game .cc-board-header,.cc-game .cc-board-foot{flex:0 0 auto;min-height:22px;padding:3px 5px}
+.cc-game .cc-symbol-grid{
+  min-height:0;min-width:0;height:100%;
+  grid-template-columns:repeat(6,minmax(0,1fr));
+  grid-template-rows:repeat(8,minmax(0,1fr));
+  overflow:hidden;
+}
+.cc-game .cc-cell{min-width:0;min-height:0;position:relative}
+.cc-game .cc-cell-glyph{min-height:0;max-height:100%}
+.cc-game .cc-portrait{min-height:0;min-width:0;flex:1 1 auto}
+.cc-game .cc-approved-cabinet{
+  width:100%;height:100%;max-width:none;left:0;top:0;
+  object-fit:cover;object-position:23% 26%;
+  filter:saturate(1.12) contrast(1.04);
+}
+.cc-game .cc-left-rail,.cc-game .cc-right-rail{min-height:0;min-width:0}
+.cc-game .cc-panel{border-width:3px;padding:clamp(5px,.7vw,10px)}
+.cc-game .cc-panel-title{font-size:clamp(.72rem,1.08vw,1.05rem);margin-bottom:5px}
+.cc-game .cc-panel-line{font-size:clamp(.61rem,.78vw,.84rem);margin:3px 0}
+.cc-game .cc-console{
+  margin:0 auto;padding:clamp(5px,.7vw,10px);
+  border-width:clamp(3px,.45vw,6px);
+  gap:clamp(5px,.95vw,13px);
+  min-height:0;width:100%;
+}
+.cc-game .cc-control{min-width:40px;min-height:40px}
+.cc-game .cc-spin{height:54px;width:82px}
+.cc-game .cc-practice-notice,.cc-game .cc-round-status{margin:0 auto;min-height:0}
+.cc-game .cc-round-status{order:4;font-size:clamp(.69rem,1vw,.98rem);width:100%;max-width:1420px}
+.cc-game .cc-practice-notice{order:5;font-size:clamp(.55rem,.74vw,.7rem)}
+/* Put the status line immediately below the console without consuming a
+   separate full-screen section; these elements are appended in the game shell. */
+.cc-game .cc-effect-banner,.cc-game .cc-feature-overlay,.cc-game .cc-road-panel{
+  max-height:calc(100% - 20px);
+}
+.cc-game .cc-road-panel{overflow-y:auto;overscroll-behavior:contain}
+.cc-game .cc-feature-overlay{max-width:92%;margin:auto}
+.cc-game .cc-reel-track{backface-visibility:hidden;transform:translateZ(0)}
+.cc-game .cc-symbol-grid .cc-reel-mask{contain:paint}
+.cc-game .cc-win-review{z-index:26}
+.cc-game .cc-control:focus-visible,.cc-game .cc-road-case:focus-visible,.cc-game .cc-road-next:focus-visible{
+  outline:3px solid #c3ff89;outline-offset:3px;
+}
+/* Tall desktop viewports: all eight reel rows, title and console fit
+   within the browser's usable screen area. */
+@media (min-width:1051px) and (min-height:620px){
+ .cc-game{height:var(--cc-screen-height);min-height:0}
+ .cc-game .cc-stage{height:100%}
+ .cc-game .cc-symbol-grid{height:100%}
+ .cc-game .cc-portrait{max-height:none}
+}
+@media (min-width:701px) and (max-width:1050px){
+ .cc-game .cc-stage{grid-template-columns:minmax(0,2.8fr) minmax(130px,.9fr)}
+ .cc-game .cc-left-rail{display:none}
+ .cc-game .cc-symbol-grid{min-height:clamp(360px,48vh,600px)}
+ .cc-game .cc-right-rail{justify-content:center}
+}
+@media (max-height:619px) and (min-width:701px){
+ .cc-game{height:auto;min-height:620px}
+ .cc-game .cc-symbol-grid{min-height:400px}
+}
+/* Phone: prioritize the playable 6x8 grid, then controls. Optional feature
+   descriptions remain in the working INFO panel rather than forcing scroll. */
+@media (max-width:700px){
+ .cc-game{height:auto;min-height:0;display:flex;flex-direction:column;gap:6px;padding:7px}
+ .cc-game .cc-stage{display:block;width:100%;min-height:0}
+ .cc-game .cc-middle{width:100%;min-width:0}
+ .cc-game .cc-left-rail,.cc-game .cc-right-rail{display:none}
+ .cc-game .cc-symbol-grid{height:clamp(310px,50dvh,470px);min-height:0}
+ .cc-game .cc-title-banner{padding:4px}
+ .cc-game .cc-game-title{font-size:clamp(1.55rem,7.2vw,2.4rem)}
+ .cc-game .cc-game-subtitle{font-size:clamp(.69rem,2.8vw,1rem)}
+ .cc-game .cc-console{flex-wrap:wrap;gap:4px}
+ .cc-game .cc-readout{min-width:65px}
+ .cc-game .cc-road-panel{top:3%;bottom:3%;left:2%;right:2%}
+ .cc-game .cc-road-case{min-height:58px}
+ .cc-game .cc-practice-notice{font-size:.57rem}
+ .cc-game .cc-round-status{font-size:.78rem}
+}
+@media (prefers-reduced-motion:reduce){
+ .cc-game .cc-reel-track,.cc-game .cc-feature-overlay,.cc-game .cc-cell-glyph{animation:none!important;transition:none!important}
+}

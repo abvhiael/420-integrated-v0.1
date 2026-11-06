@@ -11,6 +11,7 @@ function picture(d,card){const el=make(d,'div','pr-card');const img=make(d,'img'
 const formatted=n=>Number(n).toLocaleString('en-US');
 export function createPokerRoomLive(doc=globalThis.document,options={}){
  const win=doc.defaultView||globalThis,client=options.client||createPokerReadOnlyClient({base:options.base});
+ const walletProvider=options.wallet||win.ethereum;
  const root=make(doc,'section','pr-room pr-room-live');
  root.dataset.practiceGame='live-poker';root.dataset.mode='authoritative-read-only';
  const intro=make(doc,'header','pr-intro');const ident=make(doc,'div','pr-identity');
@@ -118,7 +119,19 @@ export function createPokerRoomLive(doc=globalThis.document,options={}){
  async function discover(){
   const v=++version;stale();connection.textContent='AUTHENTICATING · READ ONLY';
   try{
-   await client.authenticate();
+   const currentSession=await client.authenticate();
+   // A signed web session for a different wallet must never expose its cards
+   // after the user switches accounts or chains in the EIP-1193 provider.
+   if(walletProvider?.request){
+    const [accounts,chainHex]=await Promise.all([
+     walletProvider.request({method:'eth_accounts'}),
+     walletProvider.request({method:'eth_chainId'})
+    ]);
+    const subject=Array.isArray(accounts)&&typeof accounts[0]==='string'?accounts[0].toLowerCase():null;
+    const network=typeof chainHex==='string'&&/^0x[0-9a-f]+$/i.test(chainHex)?Number.parseInt(chainHex,16):null;
+    if(subject!==currentSession.subject||network!==currentSession.chainId)
+     throw Error('Wallet account or chain does not match authenticated poker session');
+   }
    const list=await client.discover();
    if(disposed||v!==version)return;
    tables=list.tables;selection=tables.some(t=>t.id===selection)?selection:(tables[0]?.id??null);
@@ -144,7 +157,20 @@ export function createPokerRoomLive(doc=globalThis.document,options={}){
   }finally{if(!disposed)login.disabled=false;}
  });
  refresh.addEventListener('click',()=>{client.disconnect();void discover();});
- root.stopAnimation=()=>{disposed=true;version++;stale();client.dispose?.();};
+ const walletChanged=()=>{
+  if(disposed)return;
+  version++;client.disconnect();stale();
+  connection.textContent='WALLET CHANGED · SIGN IN AGAIN';
+ };
+ if(walletProvider?.on){
+  for(const event of ['accountsChanged','chainChanged','disconnect'])
+   walletProvider.on(event,walletChanged);
+ }
+ root.stopAnimation=()=>{
+  disposed=true;version++;stale();client.dispose?.();
+  for(const event of ['accountsChanged','chainChanged','disconnect'])
+   walletProvider?.removeListener?.(event,walletChanged);
+ };
  root.refreshPoker=()=>discover();
  root.ready=discover();
  return root;

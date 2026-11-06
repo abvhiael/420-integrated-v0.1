@@ -30,7 +30,7 @@ test('Game creates image-backed reels and individual PNG character layer for sli
  assert(game.querySelector('.dss-transition-backdrop'));
  assert(game.querySelector('.dss-feature-title-art'));
  assert.equal(game.querySelector('.dss-bubble').hidden,true);
- assert.match(game.querySelector('.dss-scene').getAttribute('style'),/garage_main\.png/);
+ assert.match(game.querySelector('.dss-shell').getAttribute('style'),/garage_main\.png/);
  game.stopAnimation();
 });
 
@@ -101,5 +101,26 @@ test('Slot #3 uses a panoramic viewport layout with wallpaper behind the logo an
  assert(game.querySelector('.dss-controls button')?.textContent);
  assert([...game.querySelectorAll('.dss-controls button')].some(x=>x.textContent==='RESET PRACTICE CREDITS'));
  assert.equal([...game.children].filter(x=>x.tagName==='BUTTON').length,0,'No detached reset control');
+ game.stopAnimation();
+});
+
+test('Concept-accurate composition has prominent Larry, reel symbol breathing room and visible feature rail',()=>{
+ const {document}=parseHTML('<html><body></body></html>');
+ const game=createDadsSecretStash(document);
+ const scene=game.querySelector('.dss-scene');
+ assert(scene.querySelector('.dss-larry-panel img.dss-larry'));
+ assert.equal(scene.querySelectorAll('.dss-reel').length,5);
+ assert.equal(scene.querySelectorAll('.dss-cell').length,20);
+ assert(scene.querySelector('.dss-feature-panel'));
+ assert.match(scene.querySelector('.dss-feature-panel').textContent,/GARAGE FEATURES/);
+ assert.match(scene.querySelector('.dss-feature-panel').textContent,/Hold & Win/i);
+ assert.match(scene.querySelector('.dss-feature-panel').textContent,/Free Spins/);
+ assert.match(scene.querySelector('.dss-feature-panel').textContent,/Cascades/);
+ const css=readFileSync(new URL('../src/dads-secret-stash.css',import.meta.url),'utf8');
+ const visual=css.slice(css.indexOf('/* Approved four-panel reference:'));
+ assert.match(visual,/grid-template-columns:minmax\(175px,23fr\) minmax\(0,57fr\) minmax\(165px,20fr\)/);
+ assert.match(visual,/\.dss-larry\s*\{[^}]*width:100%;height:calc\(100% - 33px\)/s);
+ assert.match(visual,/\.dss-symbol-image\s*\{[^}]*width:70%;height:70%/s);
+ assert.match(visual,/\.dss-feature-panel\s*\{/);
  game.stopAnimation();
 });

@@ -1,7 +1,7 @@
 import test from 'node:test';import assert from 'node:assert/strict';import {parseHTML} from 'linkedom';
 import {existsSync,readFileSync} from 'node:fs';
 import {SLOT_MACHINES,createSlotsLobby,slotMachineFromHash} from '../src/slots-lobby.js';
-import {newGame,qualify,triggerCharacters,modifier,inspection,spin,evaluate,stashBonus,freeBonus,mow,makeBonusPreview,BONUS_PREVIEW_TYPES,FREE_WEIGHTS,FREE_STICKY_LIMIT,FREE_MULTIPLIER_STAGES,MOW_PAYOUT_FACTOR} from '../src/dads-secret-stash-engine.js';
+import {newGame,draw,qualify,triggerCharacters,modifier,inspection,spin,evaluate,stashBonus,freeBonus,mow,makeBonusPreview,BONUS_PREVIEW_TYPES,FREE_WEIGHTS,FREE_STICKY_LIMIT,FREE_MULTIPLIER_STAGES,MOW_PAYOUT_FACTOR} from '../src/dads-secret-stash-engine.js';
 import {createDadsSecretStash,DSS_BONUS_PRESENTATION} from '../src/dads-secret-stash-ui.js';
 import {DSS_SYMBOL_ART,DSS_CAST_ART,DSS_TRANSITION_ART,DSS_BACKGROUND_ART,DSS_FEATURE_ART,DSS_LARRY_ART} from '../src/dads-secret-stash-assets.js';
 import {SYMBOLS} from '../src/dads-secret-stash-engine.js';
@@ -828,4 +828,61 @@ test('Mow preview visibly removes all mower symbols and only then starts cascadi
  assert(game.querySelectorAll('.dss-clearing').length>0,'Only after mower replacement does first cascade start');
  assert.equal(game.getState().rounds,0,'Bonus test does not count as a real spin');
  game.stopAnimation();
+});
+
+test('Family Chaos Scatter Scramble awards free spins on the final FOUR-scatter grid',()=>{
+ // Force the exact reported case: 2 scatters on the spin, then Family
+ // Chaos contributes another 2. RNG affects outcomes only through spin().
+ const symbolRng=symbol=>{
+  for(let i=0;i<2000;i++)if(draw(()=>i/2000)===symbol)return i/2000;
+  throw Error('No draw probability for '+symbol);
+ };
+ const grid=Array(20).fill('A');
+ grid[0]='scatter';grid[1]='scatter';grid[2]='tyler';grid[3]='emma';
+ const sequence=[...grid.map(symbolRng),.1,.6,.9,.2,.4];
+ const rng=()=>sequence.length?sequence.shift():.5;
+ const result=spin(newGame(),rng).last;
+ assert.equal(result.grid.filter(s=>s==='scatter').length,2);
+ const family=result.events.find(e=>e.type==='family');
+ assert(family,'Family Chaos should be triggered');
+ assert.equal(family.label,'SCATTER SCRAMBLE');
+ assert.equal(family.grid.filter(s=>s==='scatter').length,4);
+ assert.equal(family.awardedFreeSpins,true);
+ assert.equal(family.scatterCount,4);
+ const free=result.events.filter(e=>e.type==='free');
+ assert.equal(free.length,1,'Four scatters must award exactly one free-spin bonus');
+ assert.equal(free[0].triggerSource,'family-scatter-scramble');
+ assert.equal(free[0].triggerScatterCount,4);
+ assert([8,15,22].includes(free[0].spins));
+ assert(free[0].boards.length>0,'Free spins have genuine reel outcomes');
+ assert(result.events.indexOf(family)<result.events.indexOf(free[0]),'Show transformation before free spins');
+ const expected=result.base.units+result.events.reduce((sum,e)=>sum+e.units,0);
+ assert.equal(result.win,Math.min(10000,Math.round(expected*100)/100));
+});
+test('Family Scatter Scramble never grants duplicate free spins or premature triggers',()=>{
+ const pick=symbol=>{
+  for(let i=0;i<2000;i++)if(draw(()=>i/2000)===symbol)return i/2000;
+  throw Error('Cannot draw '+symbol);
+ };
+ const go=(originalScatters,newScatters)=>{
+  const grid=Array(20).fill('A');
+  for(let i=0;i<originalScatters;i++)grid[i]='scatter';
+  grid[4]='tyler';grid[5]='emma';
+  const rngs=[...grid.map(pick),.1,.6,newScatters===2?.9:.1,.2,.4];
+  return spin(newGame(),()=>rngs.length?rngs.shift():.5).last;
+ };
+ const baseQualified=go(3,2);
+ assert.equal(baseQualified.events.filter(x=>x.type==='free').length,1,'Base 3+ plus Family additions earns only one free feature');
+ const insufficient=go(1,1);
+ assert.equal(insufficient.events.filter(x=>x.type==='free').length,0,'Two scatters are not enough');
+ const transformed=insufficient.events.find(x=>x.type==='family');
+ assert.equal(transformed.awardedFreeSpins,undefined);
+});
+test('Family Chaos scatter award highlights matching symbols before the free-spin presentation',()=>{
+ const ui=readFileSync(new URL('../src/dads-secret-stash-ui.js',import.meta.url),'utf8');
+ assert(ui.includes('event.scatterCount+\' SCATTERS — FREE SPINS UNLOCKED!\''));
+ assert(ui.includes("cell.classList.toggle('dss-trigger-scatter',final[i]==='scatter')"));
+ assert(ui.includes("cell.classList.remove('dss-locked','dss-trigger-scatter')"));
+ const css=readFileSync(new URL('../src/dads-secret-stash.css',import.meta.url),'utf8');
+ assert.match(css,/\.dss-reel \.dss-cell\.dss-trigger-scatter/);
 });

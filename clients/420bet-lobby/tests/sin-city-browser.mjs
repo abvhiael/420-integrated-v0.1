@@ -5,7 +5,7 @@ const chrome=process.env.CHROME_BIN||'/usr/bin/google-chrome';
 const browser=await puppeteer.launch({headless:true,executablePath:chrome,args:['--no-sandbox','--disable-dev-shm-usage']});
 try{
  mkdirSync('qualification/sin-city',{recursive:true});
- for(const [name,width,height] of [['desktop',1440,1000],['mobile',390,844]]){
+ for(const [name,width,height] of [['desktop',1440,900],['mobile',390,844]]){
   const page=await browser.newPage();
   await page.setViewport({width,height,deviceScaleFactor:1});
   const errors=[];
@@ -15,7 +15,7 @@ try{
   const initial=await page.evaluate(()=>{
    const rect=sel=>{const node=document.querySelector(sel);if(!node)throw Error('Missing '+sel);const r=node.getBoundingClientRect();return {x:r.x,y:r.y,w:r.width,h:r.height,right:r.right,bottom:r.bottom};};
    const images=[...document.querySelectorAll('.sc-game img')].map(img=>({src:img.getAttribute('src'),loaded:img.complete&&img.naturalWidth>0,width:img.naturalWidth,height:img.naturalHeight}));
-   return {reels:rect('.sc-reels'),bobby:rect('.sc-mascot'),logo:rect('.sc-logo'),cabinet:rect('.sc-cabinet'),images,cellCount:document.querySelectorAll('.sc-symbol').length,columns:document.querySelectorAll('.sc-reel').length,bodyScroll:document.documentElement.scrollWidth};
+   return {reels:rect('.sc-reels'),bobby:rect('.sc-mascot'),logo:rect('.sc-logo'),cabinet:rect('.sc-cabinet'),images,cellCount:document.querySelectorAll('.sc-symbol').length,columns:document.querySelectorAll('.sc-reel').length,bodyScroll:document.documentElement.scrollWidth,wallpaper:getComputedStyle(document.querySelector('main.immersive')).backgroundImage,headerBackground:getComputedStyle(document.querySelector('.gamebar')).backgroundColor};
   });
   assert.equal(initial.cellCount,20,'Must render exactly 20 positions');
   assert.equal(initial.columns,5);
@@ -28,6 +28,8 @@ try{
   const verticalOverlap=Math.min(initial.bobby.bottom,initial.reels.bottom)-Math.max(initial.bobby.y,initial.reels.y);
   assert.ok(horizontalOverlap<=1||verticalOverlap<=1,'Bobby panel overlaps the reels');
   assert.ok(initial.bodyScroll<=width+3,'Unexpected horizontal overflow');
+  assert.match(initial.wallpaper,/bg_las_vegas_strip/,'Vegas wallpaper must extend behind title bar');
+  if(name==='desktop')assert.ok(initial.cabinet.bottom<=height,'Cabinet should fit vertically on a 900px desktop viewport: '+JSON.stringify(initial.cabinet));
   await page.screenshot({path:'qualification/sin-city/'+name+'.png',fullPage:true});
   await page.locator('button').count?.();
   await page.evaluate(()=>{const b=[...document.querySelectorAll('.sc-control')].find(b=>b.textContent.includes('INFO'));b?.click();});
@@ -35,6 +37,12 @@ try{
   await page.evaluate(()=>document.querySelector('.sc-modal-close')?.click());
   await page.evaluate(()=>{const b=[...document.querySelectorAll('.sc-control')].find(b=>b.textContent.includes('TURBO'));b?.click();});
   await page.evaluate(()=>document.querySelector('.sc-spin')?.click());
+  const track=await page.evaluate(()=>({count:document.querySelectorAll('.sc-spin-track').length,animation:getComputedStyle(document.querySelector('.sc-spin-track')).animationName}));
+  assert.equal(track.count,5,'All five reels show their own continuous track');
+  assert.match(track.animation,/sc-smooth-scroll/,'Rolling animation must use GPU-transformed track');
+  await page.waitForTimeout?.(930);
+  const stopCount=await page.evaluate(()=>document.querySelectorAll('.sc-reel-spinning').length);
+  assert.equal(stopCount,4,'Only first reel should settle before next 750ms stop');
   await page.waitForFunction(()=>!document.querySelector('.sc-reel-spinning'),{timeout:5000});
   assert.deepEqual(errors,[],'Browser JS errors');
   console.log(name,JSON.stringify({reels:initial.reels,bobby:initial.bobby,logo:initial.logo,artworks:initial.images.length}));

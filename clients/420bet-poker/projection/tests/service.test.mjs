@@ -6,7 +6,7 @@ import {createCanonicalPokerReader} from '../chain-reader.mjs';
 const address='0x'+'1'.repeat(40),other='0x'+'2'.repeat(40),zero='0x'+'0'.repeat(40),
  id='0x'+'a'.repeat(64),hash='0x'+'b'.repeat(64),secret=Buffer.alloc(32,9);
 const now=Date.now(),chainId=1337;
-const manifest={chainId,tables:[{tableId:id,configHash:hash,name:'Green Room',smallBlind:5,bigBlind:10}]};
+const manifest={chainId,tables:[{tableId:id,configHash:hash,name:'Green Room',smallBlind:5,bigBlind:10,tableVersion:1}]};
 const session={viewerId:'alice',subject:address,chainId,expiresAt:now+100000};
 const raw=()=>({verified:true,finalized:true,finalityBlock:100,blockNumber:100,sequence:100,
  chainId,tableId:id,stateHash:'0x'+'c'.repeat(64),tableVersion:1,ledgerVersion:3,

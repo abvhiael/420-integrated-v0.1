@@ -118,7 +118,7 @@ test('Hotbox held gems remain visible as nonmoving overlays while all reels spin
   assert.equal(root.querySelectorAll('.sc-held-gem').length,held.length);
   assert.equal(root.querySelectorAll('.sc-held-overlay').length,5);
   await new Promise(resolve=>setTimeout(resolve,1070));
-  assert.equal(root.querySelectorAll('.sc-held-gem').length,held.filter(k=>Math.floor(k/4)>=1).length);
+  assert.equal(root.querySelectorAll('.sc-held-gem').length,held.length);
   for(const key of held.filter(k=>Math.floor(k/4)===0)){
    const row=key%4;
    assert.equal(root.querySelector('.sc-reel[data-reel="0"]').querySelectorAll('.sc-symbol')[row].getAttribute('aria-label'), 'Reel 1 row '+(row+1)+': GEM');
@@ -137,7 +137,7 @@ test('Every previously sticky Wild remains fixed above scrolling free-spin strip
    assert.ok(fixed.classList.contains('sc-held-wild'),'Missing sticky Wild at '+key);
   }
   await new Promise(resolve=>setTimeout(resolve,1100));
-  assert.equal(root.querySelectorAll('.sc-held-wild').length,held.filter(k=>Math.floor(k/4)>=1).length);
+  assert.equal(root.querySelectorAll('.sc-held-wild').length,held.length);
  }finally{root.stopAnimation();}
 });
 test('Info popup includes the progressive 3-to-20-gem Hotbox payout table',()=>{
@@ -157,9 +157,9 @@ test('Neon way trace reaches reel five, distinguishing non-paying continuation',
   for(let i=0;i<42;i++){
    const window=Array.from({length:4},(_,row)=>strip[(i+row)%42]);
    if(window.includes('SCATTER')||window.includes('GEM'))continue;
-   if((reel<3&&window.includes('A'))||(reel>=3&&!window.includes('A')))return i;
+   if((reel<3&&window.includes('JAR'))||(reel>=3&&!window.includes('JAR')))return i;
   }
-  throw Error('No deterministic A-way fixture for reel '+reel);
+  throw Error('No deterministic JAR-way fixture for reel '+reel);
  });
  const {root,click}=setup({rng:()=>.5,pickStops:()=>stops});
  try{

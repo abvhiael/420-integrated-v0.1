@@ -78,3 +78,25 @@
 .cc-game .cc-control:not(:disabled):hover,.cc-game .cc-control:not(:disabled):focus-visible{filter:brightness(1.22);outline:2px solid #e1d66b;outline-offset:2px}
 .cc-round-status{max-width:1480px;margin:8px auto 0;text-align:center;min-height:26px;font-size:clamp(.8rem,1.2vw,1.05rem);font-weight:900;color:#baff89;text-shadow:0 2px 6px #061609}
 @media(prefers-reduced-motion:reduce){.cc-game .cc-cell.cc-winning{box-shadow:none}}
+
+/* M4 smoke-ring wilds, fertile-square progression and casino-style replay. */
+.cc-game .cc-middle{position:relative}
+.cc-game .cc-symbol-smoke-wild{position:relative;z-index:1;background:radial-gradient(circle,#376d47 0%,#142d27 42%,#070e12 90%);border:2px solid #b6d982;box-shadow:inset 0 0 12px #31ff9e,0 0 9px #66f2b3}
+.cc-game .cc-symbol-smoke-wild::before{content:'';position:absolute;inset:7%;border:4px solid #9af5ae;border-radius:50%;box-shadow:0 0 7px #70ffd8,inset 0 0 12px #60fab0;pointer-events:none;animation:cc-smoke-breathe 1.5s ease-in-out infinite alternate}
+.cc-game .cc-symbol-smoke-wild .cc-cell-glyph{display:grid;place-items:center;font-family:Georgia,serif;font-size:clamp(1.3rem,2.3vw,2.5rem);font-weight:900;color:#ceffe2;background:none;filter:drop-shadow(0 0 8px #60ffa1)}
+.cc-game .cc-wild-tag{position:absolute;bottom:0;left:0;right:0;font-size:clamp(.43rem,.7vw,.7rem);font-weight:950;letter-spacing:.01em;color:#ebffbf;text-shadow:1px 2px #103322;text-align:center;background:#07351fc7}
+.cc-game .cc-cell[data-harvest]{position:relative;box-shadow:inset 0 0 13px #a0fb70,0 0 8px #7aef5a8c;border-color:#64a841}
+.cc-game .cc-harvest-badge{position:absolute;top:1px;right:1px;padding:1px 4px;min-width:21px;text-align:center;border:1px solid #f4d57d;border-radius:9px;background:linear-gradient(#2b772b,#11411d);color:#ffe7a0;font-size:clamp(.47rem,.75vw,.75rem);font-weight:950;z-index:4;box-shadow:0 0 7px #8aff67}
+.cc-game .cc-cell.cc-harvest-upgrade .cc-harvest-badge{animation:cc-multiplier-grow .65s ease-out both}
+.cc-game .cc-cell[data-phase="cluster"].cc-winning{animation:cc-cluster-outline .42s ease-in-out infinite alternate}
+.cc-game .cc-cell[data-phase="burst"].cc-winning{animation:cc-harvest-burst .52s ease-in both}
+.cc-game .cc-cell[data-phase="drop"] .cc-cell-glyph{animation:cc-symbol-drop .42s cubic-bezier(.18,.75,.25,1.18) both}
+.cc-game .cc-effect-banner[hidden]{display:none!important}
+.cc-game .cc-effect-banner{position:absolute;z-index:12;left:8%;right:8%;top:44%;padding:16px 7px;border:4px ridge #ddba6e;border-radius:20px;text-align:center;font:900 clamp(.9rem,2.2vw,2rem)/1.2 Georgia,serif;letter-spacing:.045em;color:#f9db72;text-shadow:2px 3px #173219,0 0 13px #baff86;background:linear-gradient(125deg,#103d2eea,#392914ee,#13592ae7);box-shadow:0 0 22px #80fb72a8,inset 0 0 12px #ffe18755;pointer-events:none;animation:cc-banner-arrive .4s ease-out both}
+@keyframes cc-smoke-breathe{from{opacity:.55;transform:scale(.85) rotate(-12deg)}to{opacity:1;transform:scale(1.08) rotate(18deg)}}
+@keyframes cc-multiplier-grow{0%{transform:scale(.4);opacity:.2}60%{transform:scale(1.6)}100%{transform:scale(1);opacity:1}}
+@keyframes cc-cluster-outline{0%{border-color:#73ffa0;box-shadow:0 0 10px #3fff68}100%{border-color:#f4f378;box-shadow:0 0 23px #b7ff5d}}
+@keyframes cc-harvest-burst{0%{transform:scale(1);filter:brightness(1)}55%{transform:scale(1.13);filter:brightness(1.8)}100%{transform:scale(.15);opacity:.25}}
+@keyframes cc-symbol-drop{from{transform:translateY(-35%);opacity:.3}to{transform:translateY(0);opacity:1}}
+@keyframes cc-banner-arrive{from{transform:scale(.75);opacity:0}to{transform:scale(1);opacity:1}}
+@media(prefers-reduced-motion:reduce){.cc-game .cc-symbol-smoke-wild::before,.cc-game .cc-cell.cc-harvest-upgrade .cc-harvest-badge,.cc-game .cc-cell[data-phase="cluster"].cc-winning,.cc-game .cc-cell[data-phase="burst"].cc-winning,.cc-game .cc-cell[data-phase="drop"] .cc-cell-glyph,.cc-game .cc-effect-banner{animation:none!important}}

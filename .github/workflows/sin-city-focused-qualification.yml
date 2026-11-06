@@ -54,3 +54,21 @@ jobs:
           NODE
       - name: Confirm fifth lobby cabinet art exists
         run: test -s public/assets/420bet/slots-lobby/sin-city-high-rollers-lobby-cabinet.png
+      - name: Install headless Chrome driver for browser verification
+        run: npm install --no-save --ignore-scripts --no-audit --no-fund puppeteer-core
+      - name: Validate desktop/mobile artwork alignment and controls
+        run: |
+          npx vite preview --host 127.0.0.1 --port 4173 > /tmp/sin-city-vite.log 2>&1 &
+          APP_PID=$!
+          trap 'kill $APP_PID || true' EXIT
+          for i in {1..30}; do if curl -sf http://127.0.0.1:4173/ >/dev/null; then break; fi; sleep 1; done
+          CHROME_BIN=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          export CHROME_BIN
+          node tests/sin-city-browser.mjs
+      - name: Preserve cabinet screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sin-city-cabinet-layout
+          path: clients/420bet-lobby/qualification/sin-city/*.png
+          if-no-files-found: ignore

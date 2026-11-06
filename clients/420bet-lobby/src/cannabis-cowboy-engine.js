@@ -2,6 +2,7 @@
 // No wallet, server game service, tokens or gambling settlement dependencies.
 export const COLUMNS=6, ROWS=8, CELL_COUNT=48;
 export const MAX_CASCADES=200;
+export const MAX_BONUS_CASCADES=20; // deterministic feature safety exit, not a player-facing crash
 export const BET_CHOICES=Object.freeze([10,20,30,40,50]); // local demo credits only
 export const START_CREDITS=10000;
 export const WILD_SYMBOL=8;
@@ -145,9 +146,14 @@ export function resolveRound(initialBoard,bet,rng=Math.random,options={}){
  if([...sticky].some(p=>!Number.isInteger(p)||p<0||p>=CELL_COUNT||board[p]!==WILD_SYMBOL))throw new Error('Invalid sticky wilds');
  if(options.bonusMode)board.forEach((v,p)=>{if(v===WILD_SYMBOL&&sticky.size<MAX_STICKY_WILDS)sticky.add(p);});
  const steps=[];
- for(let i=0;i<MAX_CASCADES;i++){
-  const clusters=findClusters(board);
-  if(!clusters.length)return {startingBoard:initialBoard.slice(),board,steps,total,bet,won:total>0,fertile,lockedWilds:[...sticky].sort((a,b)=>a-b)};
+ const spentSticky=new Set();
+ const stepLimit=options.bonusMode?MAX_BONUS_CASCADES:MAX_CASCADES;
+ for(let i=0;i<stepLimit;i++){
+  // A sticky wild remains on screen but can award at most once in a cascade
+  // chain during each free spin. It becomes eligible again next free spin.
+  const qualifyingBoard=options.bonusMode?board.map((v,p)=>(v===WILD_SYMBOL&&spentSticky.has(p))?SCATTER_SYMBOL:v):board;
+  const clusters=findClusters(qualifyingBoard);
+  if(!clusters.length)return {startingBoard:initialBoard.slice(),board,steps,total,bet,won:total>0,fertile,lockedWilds:[...sticky].sort((a,b)=>a-b),bonusCascadeCapped:false};
   const paid=[],removed=new Set();
   let cascadeWin=0;
   for(const cluster of clusters){
@@ -161,6 +167,7 @@ export function resolveRound(initialBoard,bet,rng=Math.random,options={}){
    paid.push({...cluster,multiplier,harvestMultiplier,smokeMultiplier,base,payout});
    cascadeWin+=payout;
    for(const p of cluster.positions)if(!sticky.has(p))removed.add(p);
+   if(options.bonusMode)for(const p of cluster.wildPositions??[])if(sticky.has(p))spentSticky.add(p);
   }
   if(!Number.isSafeInteger(total+cascadeWin))throw new Error('Round exceeds safe credit accounting');
   total+=cascadeWin;
@@ -173,7 +180,9 @@ export function resolveRound(initialBoard,bet,rng=Math.random,options={}){
   steps.push({index:i+1,before:board.slice(),clusters:paid,removed:[...removed].sort((a,b)=>a-b),after:next.board.slice(),refills:next.refills.slice(),fertile:fertile.slice(),lockedWilds:[...sticky].sort((a,b)=>a-b),cascadeWin,total});
   board=next.board;
  }
- // Bounded execution: fail closed, do not debit/credit a non-terminating round.
+ // An expressly finite bonus chain ends after the disclosed maximum of 20
+ // tumbles. Base-game pathological RNG still fails closed without debit.
+ if(options.bonusMode)return {startingBoard:initialBoard.slice(),board,steps,total,bet,won:total>0,fertile,lockedWilds:[...sticky].sort((a,b)=>a-b),bonusCascadeCapped:true};
  throw new Error('Cascade safety bound reached: round rejected');
 }
 // A fully predetermined, finite feature ledger. The UI never rolls RNG or

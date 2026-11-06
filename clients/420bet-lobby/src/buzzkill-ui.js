@@ -55,6 +55,7 @@ export function createBuzzkillPractice(doc=globalThis.document,options={}){
   check.checked=state.autoEnabled;
   cash.disabled=cinematicActive||(lock&&state.settled)||(state.phase!=='running'&&state.balance<state.bet);
   cash.textContent=cinematicActive?'MOM’S HERE…':state.phase==='running'?(state.settled?'✓ CASHED OUT':'CASH OUT · '+fmt(state.bet*state.multiplier)):state.phase==='bust'?'▶ NEW ROUND':'▶ START ROUND';
+  root.classList.toggle('bz-cinematic',cinematicActive);
   bust.classList.toggle('bz-show',splashShown);
   if(state.phase==='bust'){
    history.replaceChildren();

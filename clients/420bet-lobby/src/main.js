@@ -4,10 +4,12 @@ import {createBlackjackTable} from './blackjack-ui.js';
 import {createPestControlTable} from './pest-control-ui.js';
 import {createBuzzkillPractice} from './buzzkill-ui.js';
 import {createMaryJanePractice} from './mary-jane-ui.js';
+import {createDadsSecretStash} from './dads-secret-stash-ui.js';
 import {createSlotsLobby,slotMachineFromHash,slotMachinePath} from './slots-lobby.js';
 import {WalletIdentity,loadHistory} from './wallet.js';
 import './style.css';
 import './mary-jane-concept.css';
+import './dads-secret-stash.css';
 import './roulette.css';
 import './blackjack.css';
 import './pest-control.css';
@@ -53,7 +55,7 @@ function render(){
     const note=node('span','game-status',['slots','roulette','blackjack','mines','crash'].includes(active.id)?'Practice available':statusText[active.status]);bar.append(note);main.append(bar);
     if(active.id==='slots'){
       const wrap=node('div','view-scroll');
-      if(selectedSlotMachine){activePractice=selectedSlotMachine.id==='mary-jane-sticky-wilds'?createMaryJanePractice(document):createPractice('slots',document);wrap.append(activePractice);}
+      if(selectedSlotMachine){activePractice=selectedSlotMachine.id==='dads-secret-stash'?createDadsSecretStash(document):selectedSlotMachine.id==='mary-jane-sticky-wilds'?createMaryJanePractice(document):createPractice('slots',document);wrap.append(activePractice);}
       else wrap.append(createSlotsLobby(document,launchSlotMachine));
       main.append(wrap);
     }

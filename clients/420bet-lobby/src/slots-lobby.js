@@ -4,7 +4,8 @@ import {BASE_REELS as EMERALD_REELS,visibleGrid} from './emerald-v2-strips.js';
 // Slot-machine discovery only. Each machine keeps its own separate implementation.
 export const SLOT_MACHINES=Object.freeze([
  Object.freeze({id:'emerald-harvest',title:'Emerald Harvest',subtitle:'1,024 Ways to Win',description:'Five reels, four rows, Wilds, Scatters and free-spin bonuses.',art:EMERALD_ASSETS.cabinet,status:'Practice available'}),
- Object.freeze({id:'mary-jane-sticky-wilds',title:"Mary Jane's Sticky Wilds",subtitle:'20 Lines · Gold Leaf Frames',description:'A boho Vegas slot with 10-spin frames, ×10 Buzz, and Sticky Wild Free Spins.',art:'/assets/420bet/mary-jane/mj-concept-cabinet.webp',status:'Practice available'})
+ Object.freeze({id:'mary-jane-sticky-wilds',title:"Mary Jane's Sticky Wilds",subtitle:'20 Lines · Gold Leaf Frames',description:'A boho Vegas slot with 10-spin frames, ×10 Buzz, and Sticky Wild Free Spins.',art:'/assets/420bet/mary-jane/mj-concept-cabinet.webp',status:'Practice available'}),
+ Object.freeze({id:'dads-secret-stash',title:"Dad's Secret Stash",subtitle:'1,024 Ways · Suburban Chaos',description:'Gary and the family, mystery modifiers, locked respins, Fetch Wilds and the garage stash.',art:'/assets/420bet/dads-secret-stash/lobby.svg',status:'Practice available'})
 ]);
 // A fixed, genuine 5×4 outcome from the Emerald Harvest reel strips is used
 // for visual discovery. It never awards credits or runs a game round.
@@ -38,7 +39,11 @@ export function createSlotsLobby(doc=globalThis.document,onSelect=()=>{}){
  const title=doc.createElement('h1');title.textContent='Slots Lobby';
  const note=doc.createElement('p');note.textContent='Choose your machine. Each slot has its own cabinet, rules and bonus features. Practice only — no real wagers or payouts.';
  intro.append(eyebrow,title,note);root.append(intro);
+ const carousel=doc.createElement('div');carousel.className='slots-carousel';
+ const prev=doc.createElement('button');prev.type='button';prev.className='slots-carousel-arrow';prev.textContent='‹';prev.setAttribute('aria-label','Previous slot cabinets');
+ const next=doc.createElement('button');next.type='button';next.className='slots-carousel-arrow';next.textContent='›';next.setAttribute('aria-label','Next slot cabinets');
  const grid=doc.createElement('div');grid.className='slots-machine-grid';
+ const cards=[];let offset=0;const pageSize=3;
  for(const machine of SLOT_MACHINES){
   const card=doc.createElement('article');card.className='slots-machine-card';
   const link=doc.createElement('a');link.className='slots-machine-link';link.href=slotMachinePath(machine.id);
@@ -56,7 +61,9 @@ export function createSlotsLobby(doc=globalThis.document,onSelect=()=>{}){
   const play=doc.createElement('span');play.className='slots-machine-play';play.textContent='Enter '+machine.title+' →';
   body.append(status,heading,subtitle,description,play);link.append(art,body);
   link.addEventListener('click',event=>{if(event.defaultPrevented||(event.button!==undefined&&event.button!==0)||event.ctrlKey||event.metaKey||event.shiftKey||event.altKey)return;event.preventDefault();onSelect(machine);});
-  card.append(link);grid.append(card);
+  card.append(link);grid.append(card);cards.push(card);
  }
- root.append(grid);return root;
+ function update(){const end=Math.min(SLOT_MACHINES.length,offset+pageSize);cards.forEach((card,i)=>{card.hidden=i<offset||i>=end;});prev.disabled=offset===0;next.disabled=offset+pageSize>=SLOT_MACHINES.length;carousel.setAttribute('aria-label', 'Showing slot cabinets '+(offset+1)+' through '+end+' of '+SLOT_MACHINES.length);}
+ prev.addEventListener('click',()=>{offset=Math.max(0,offset-1);update();});next.addEventListener('click',()=>{offset=Math.min(Math.max(0,cards.length-pageSize),offset+1);update();});
+ carousel.append(prev,grid,next);root.append(carousel);update();return root;
 }

@@ -211,3 +211,42 @@ test('Secret Stash UI has independent 5x4 bonus board, not a summary-only popup'
  assert.match(source,/schedule\(\(\)=>\{holdWin\.hidden=true;reels\.hidden=false;nextEvent\(\);\},1800\)/);
  game.stopAnimation();
 });
+
+test('Actual 3+ Stash spin enters a playable Hold & Win scene and returns only after award reveal',()=>{
+ const {document,window}=parseHTML('<html><body></body></html>');let now=0,id=0;
+ const jobs=[];
+ const game=createDadsSecretStash(document,{
+  rng:()=>.975,
+  setTimeout:(fn,ms)=>{const job={id:++id,time:now+ms,fn,cancelled:false};jobs.push(job);return job.id;},
+  clearTimeout:key=>{const job=jobs.find(x=>x.id===key);if(job)job.cancelled=true;}
+ });
+ const advance=until=>{
+  let guard=0;
+  while(true){
+   if(guard++>1500)throw Error('Bonus timeline did not settle');
+   jobs.sort((a,b)=>a.time-b.time);
+   const next=jobs.find(x=>!x.cancelled&&x.time<=until);
+   if(!next)break;
+   next.cancelled=true;now=next.time;next.fn();
+  }
+  now=until;
+ };
+ const button=[...game.querySelectorAll('button')].find(x=>x.textContent.includes('SPIN'));
+ button.dispatchEvent(new window.Event('click',{bubbles:true}));
+ assert.equal(game.getState().last.events.length,1);
+ assert.equal(game.getState().last.events[0].type,'stash');
+ advance(6000);
+ const bonus=game.querySelector('.dss-hold-win'),reels=game.querySelector('.dss-reels');
+ assert.equal(bonus.hidden,false,'Real bonus board displayed after splash');
+ assert.equal(reels.hidden,true,'Base reels must be replaced during Hold & Win');
+ assert.equal(bonus.querySelectorAll('.dss-hold-cell').length,20);
+ assert.match(game.querySelector('.dss-hold-count').textContent,/RESPINS REMAINING/);
+ advance(10000);
+ assert.equal(bonus.hidden,false,'Keep bonus scene visible through all respins and final result');
+ advance(12500);
+ assert.equal(bonus.hidden,true,'Bonus scene should exit after payout reveal');
+ assert.equal(reels.hidden,false,'Base reels return after all feature steps');
+ assert.equal(game.querySelector('.dss-larry-panel').dataset.mode,'main');
+ assert(game.getState().last.win>0);
+ game.stopAnimation();
+});

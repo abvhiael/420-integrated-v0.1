@@ -86,6 +86,38 @@ export function mow(grid,rng){
  }
  return {label:'MOW THE LAWN',boards,units:Math.round(total*100)/100};
 }
+// TEMPORARY PRACTICE QA HOOK — preview only. This builds real feature event data
+// without creating a paid spin, changing any balance, or crediting the win.
+// Remove with the UI test controls when bonus qualification is finished.
+export const BONUS_PREVIEW_TYPES=Object.freeze([
+ 'stash','free','mow','jen','family','family-graffiti','keller','bud'
+]);
+export function makeBonusPreview(requestedType,rng=Math.random){
+ if(!BONUS_PREVIEW_TYPES.includes(requestedType))throw Error('Unknown practice bonus preview');
+ const type=requestedType==='family-graffiti'?'family':requestedType;
+ const grid=Array.from({length:ROWS*COLS},(_,i)=>['A','K','Q','J','10'][i%5]);
+ if(type==='family'){grid[0]='tyler';grid[1]='emma';}
+ if(type==='jen'||type==='keller'||type==='bud'){
+  for(let i=0;i<3;i++)grid[i]=type;
+ }
+ if(type==='stash'||type==='free'||type==='mow'){
+  const symbol={stash:'stash',free:'scatter',mow:'mower'}[type];
+  for(let i=0;i<3;i++)grid[i]=symbol;
+ }
+ let event;
+ if(type==='stash')event={type,...stashBonus(rng)};
+ else if(type==='free')event={type,...freeBonus(rng)};
+ else if(type==='mow')event={type,...mow(grid,rng)};
+ else if(type==='keller')event={type,...inspection(grid,rng)};
+ else {
+  // The special choice deliberately selects the second family modifier
+  // while retaining the actual modifier engine and presentation sequence.
+  const eventRng=requestedType==='family-graffiti'?()=>.3:rng;
+  const effect=modifier(grid,type,eventRng);
+  event={type,...effect,units:evaluate(effect.grid).units*effect.multiplier};
+ }
+ return {grid,event};
+}
 export function newGame(){return {balance:1000,bet:1,rounds:0,last:null,history:[],message:'Gary needs five minutes in his garage.',mode:'practice'};}
 export function spin(state,rng=Math.random){if(!Number.isFinite(state.bet)||state.bet<=0||state.bet>50||state.bet>state.balance)throw Error('Invalid practice stake');const grid=board(rng),base=evaluate(grid),flags=triggerCharacters(grid,rng),events=[];let units=base.units;
 for(const type of ['jen','family','keller','bud']){if(!flags[type])continue;if(type==='keller'){const event=inspection(grid,rng);units+=event.units;events.push({type,...event});}else{const event=modifier(grid,type,rng);event.units=evaluate(event.grid).units*event.multiplier;units+=event.units;events.push({type,...event});}}

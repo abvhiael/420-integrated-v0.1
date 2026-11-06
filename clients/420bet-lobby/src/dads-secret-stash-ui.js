@@ -1,4 +1,4 @@
-import {newGame,spin,evaluate,SYMBOLS,MAX_WIN_MULTIPLIER} from './dads-secret-stash-engine.js';
+import {newGame,spin,evaluate,makeBonusPreview,BONUS_PREVIEW_TYPES,SYMBOLS,MAX_WIN_MULTIPLIER} from './dads-secret-stash-engine.js';
 import {DSS_SYMBOL_ART,DSS_SYMBOL_LABELS,DSS_CAST_ART,DSS_TRANSITION_ART,DSS_FEATURE_ART,DSS_BACKGROUND_ART,DSS_LARRY_ART} from './dads-secret-stash-assets.js';
 const GLYPHS={gary:'😎',jen:'👩',tyler:'🎧',emma:'💜',keller:'📋',bud:'🐕',jar:'🫙',bong:'⚗️',pizza:'🍕',lighter:'🔥',papers:'📜',A:'A',K:'K',Q:'Q',J:'J','10':'10',wild:'🌿',scatter:'☮',stash:'📦',mower:'🚜'};
 const FEATURE_TITLES={jen:"OH SHIT, SHE'S HOME!",family:'FAMILY CHAOS!',keller:'HOA INSPECTION!',bud:'GOOD BOY BONUS!',free:'FIVE MINUTES OF PEACE!',stash:"DAD'S SECRET STASH!",mow:'MOW THE LAWN!'};
@@ -8,7 +8,7 @@ const FEATURE_PERSON={jen:'JEN',family:'TYLER & EMMA',keller:'MR. KELLER',bud:'B
 function el(doc,tag,cls,txt){const x=doc.createElement(tag);if(cls)x.className=cls;if(txt!==undefined)x.textContent=txt;return x;}
 export function createDadsSecretStash(doc=globalThis.document,options={}){
  const rng=options.rng??Math.random,setTimer=options.setTimeout??setTimeout,clearTimer=options.clearTimeout??clearTimeout;
- let state=newGame(),destroyed=false,busy=false,auto=false,autoLeft=0,currentTimer=null,events=[],eventIndex=0,spinTick=0;
+ let state=newGame(),previewPriorState=null,destroyed=false,busy=false,auto=false,autoLeft=0,currentTimer=null,events=[],eventIndex=0,spinTick=0;
  const root=el(doc,'section','dss-game');root.dataset.practiceGame='dads-secret-stash';
  const shell=el(doc,'div','dss-shell'),hero=el(doc,'header','dss-header');
  const logo=el(doc,'img','dss-logo');logo.src='/assets/420bet/dads-secret-stash/dads_secret_stash_title_bar.png';logo.alt="Dad's Secret Stash — Dad reclining with a joint beside the neon-green and orange title";
@@ -77,6 +77,33 @@ export function createDadsSecretStash(doc=globalThis.document,options={}){
  const lower=btn('− BET',()=>{state.bet=Math.max(1,state.bet-1);refresh();}),higher=btn('+ BET',()=>{state.bet=Math.min(50,state.bet+1);refresh();});
  const play=btn('🌿 SPIN',()=>start(),'dss-spin'),autoBtn=btn('AUTO ×10',()=>{if(auto){auto=false;autoLeft=0;autoBtn.textContent='AUTO ×10';return;}auto=true;autoLeft=10;autoBtn.textContent='STOP AUTO';if(!busy)start();}),info=btn('INFO',()=>{infoPanel.hidden=!infoPanel.hidden;});
  controls.append(balance,lower,betLabel,higher,play,winLabel,round,autoBtn,info);
+ // TEMPORARY BONUS QA PANEL. This is intentionally practice-only and removable
+ // as a single panel/function once bonus presentation qualification is done.
+ const previewPanel=el(doc,'section','dss-preview-panel');
+ previewPanel.setAttribute('aria-label','Temporary bonus testing controls');
+ const previewDescription=el(doc,'span','dss-preview-note','TEST BONUS · PRACTICE DEMO ONLY — no credits awarded');
+ const previewSelect=el(doc,'select','dss-preview-select');
+ previewSelect.setAttribute('aria-label','Choose bonus to preview');
+ const previewNames={
+  stash:'SECRET STASH · HOLD & WIN',free:'FIVE MINUTES OF PEACE · FREE SPINS',
+  mow:'MOW THE LAWN · CASCADES',jen:"JEN · OH SHIT, SHE'S HOME!",
+  family:'FAMILY CHAOS · RANDOM EFFECT', 'family-graffiti':'FAMILY CHAOS · WILD GRAFFITI',
+  keller:'HOA INSPECTION · LOCKED RESPINS',bud:'BUD · FETCH WILD'
+ };
+ for(const type of BONUS_PREVIEW_TYPES){
+  const option=el(doc,'option','',previewNames[type]);option.value=type;previewSelect.append(option);
+ }
+ // Keep the selected option explicit so practice QA works with minimal DOM
+ // environments as well as ordinary browser select/change interactions.
+ previewSelect.addEventListener('change',()=>{
+  const selected=previewSelect.value;
+  for(const option of previewSelect.querySelectorAll('option')){
+   if(option.value===selected)option.setAttribute('selected','');
+   else option.removeAttribute('selected');
+  }
+ });
+  const previewButton=btn('▶ TEST SELECTED BONUS',()=>startBonusPreview(),'dss-preview-button');
+ previewPanel.append(previewDescription,previewSelect,previewButton);
  const infoPanel=el(doc,'section','dss-info');infoPanel.hidden=true;infoPanel.append(el(doc,'h2','',"How to play — Dad's Secret Stash"),el(doc,'p','', 'Practice-only 5×4 reels, 1,024 ways. Matching paying symbols from the left on 3–5 consecutive reels win. Gary Wild substitutes for paying symbols. Each qualifying cast event independently triggers with 25% probability.'),el(doc,'p','',"3+ Jen: random mystery modifier. Tyler + Emma: random Family Chaos. 3+ Mr. Keller: 2–5 locked-premium respins. 3+ Bud: Fetch Wild. 3+ Scatters: Five Minutes of Peace free spins. 3+ Stash: crate prizes. 3+ Mowers: cascading lawnmower feature. The simulated return is NOT calibrated or certified. Maximum per round: "+MAX_WIN_MULTIPLIER+"× stake."),btn('CLOSE',()=>{infoPanel.hidden=true;}));
  const overlay=el(doc,'div','dss-overlay');overlay.hidden=true;
  const backdrop=el(doc,'img','dss-transition-backdrop');backdrop.alt='';backdrop.hidden=true;
@@ -124,7 +151,7 @@ export function createDadsSecretStash(doc=globalThis.document,options={}){
  const resultTitle=el(doc,'h2','dss-feature-result-title'),resultAmount=el(doc,'strong','dss-feature-result-amount'),resultDetail=el(doc,'p','dss-feature-result-detail');
  resultScreen.append(resultTitle,resultAmount,resultDetail);
  holdWin.append(holdHeading,holdCount,holdTiles,holdTotal);
- scene.append(larryPanel,reels,holdWin,featurePanel,bonusHeader,modifierAction,overlay,resultScreen);shell.append(hero,scene,status,message,controls,infoPanel);root.append(shell);
+ scene.append(larryPanel,reels,holdWin,featurePanel,bonusHeader,modifierAction,overlay,resultScreen);shell.append(hero,scene,status,message,controls,previewPanel,infoPanel);root.append(shell);
  const money=n=>Number(n).toFixed(2);
  function setCell(i,s){
  const cell=cells[i];cell.cell.dataset.symbol=s;cell.cell.title=DSS_SYMBOL_LABELS[s]??s;
@@ -217,13 +244,13 @@ export function createDadsSecretStash(doc=globalThis.document,options={}){
  featureBanner.hidden=!banner;if(banner)featureBanner.src=banner;
  featurePanel.dataset.feature=type;
 }
- function refresh(){balance.textContent='BALANCE '+money(state.balance);betLabel.textContent='BET '+money(state.bet);winLabel.textContent='WIN '+money(state.last?.win??0);round.textContent='SPINS '+state.rounds;message.textContent=state.message;lower.disabled=busy;higher.disabled=busy;play.disabled=busy||state.balance<state.bet;autoBtn.disabled=state.balance<state.bet&&!busy;}
+ function refresh(){balance.textContent='BALANCE '+money(state.balance);betLabel.textContent='BET '+money(state.bet);winLabel.textContent='WIN '+money(state.last?.win??0);round.textContent='SPINS '+state.rounds;message.textContent=state.message;lower.disabled=busy;higher.disabled=busy;play.disabled=busy||state.balance<state.bet;autoBtn.disabled=state.balance<state.bet&&!busy;previewSelect.disabled=busy||auto;previewButton.disabled=busy||auto||state.mode!=='practice';}
  function schedule(fn,ms){currentTimer=setTimer(()=>{currentTimer=null;if(!destroyed)fn();},ms);}
- function finish(){busy=false;clearWinTrace();overlay.hidden=true;modifierAction.hidden=true;resultScreen.hidden=true;bonusHeader.hidden=true;scene.removeAttribute('data-bonus');cells.forEach(({cell})=>cell.classList.remove('dss-sticky','dss-locked','dss-new-lock','dss-clearing','dss-dropping','dss-win-flash','dss-transforming','dss-transformed'));holdWin.hidden=true;reels.hidden=false;showGrid(state.last?.grid??Array(20).fill('jar'));showScene('main');setFeature('main',state.last?.message??'Watch for 3 scatters, stash crates or lawnmowers.','5 REELS · 1,024 WAYS');refresh();if(auto&&autoLeft>0&&state.balance>=state.bet){autoLeft--;schedule(start,400);}else{auto=false;autoLeft=0;autoBtn.textContent='AUTO ×10';}}
+ function finish(){busy=false;if(previewPriorState){state=previewPriorState;previewPriorState=null;}clearWinTrace();overlay.hidden=true;modifierAction.hidden=true;resultScreen.hidden=true;bonusHeader.hidden=true;scene.removeAttribute('data-bonus');cells.forEach(({cell})=>cell.classList.remove('dss-sticky','dss-locked','dss-new-lock','dss-clearing','dss-dropping','dss-win-flash','dss-transforming','dss-transformed'));holdWin.hidden=true;reels.hidden=false;showGrid(state.last?.grid??Array(20).fill('jar'));showScene('main');setFeature('main',state.last?.message??'Watch for 3 scatters, stash crates or lawnmowers.','5 REELS · 1,024 WAYS');refresh();status.textContent='Practice only — simulated credits, no wallet or wagers';if(auto&&autoLeft>0&&state.balance>=state.bet){autoLeft--;schedule(start,400);}else{auto=false;autoLeft=0;autoBtn.textContent='AUTO ×10';}}
  function showFeatureResult(event,done){
   const title=FEATURE_TITLES[event.type]??event.label??'FEATURE COMPLETE';
   resultTitle.textContent=title;
-  resultAmount.textContent=money(event.units*state.last.stake)+' PRACTICE CREDITS';
+  resultAmount.textContent=previewPriorState?'DEMO · '+money(event.units*state.last.stake)+' POTENTIAL CREDITS':money(event.units*state.last.stake)+' PRACTICE CREDITS';
   resultDetail.textContent=event.type==='stash'?event.filled+' STASH PRIZES COLLECTED':
    event.type==='free'?event.spins+' FREE SPINS PLAYED':
    event.type==='keller'?event.spins+' HOA RESPINS COMPLETED':
@@ -297,7 +324,7 @@ export function createDadsSecretStash(doc=globalThis.document,options={}){
   const advance=()=>{
    if(index>=steps.length){
     holdCount.textContent=event.completed?'FULL STASH!':'HOLD & WIN COMPLETE';
-    holdTotal.textContent='TOTAL STASH WIN: '+money(event.units*state.last.stake)+' PRACTICE CREDITS';
+    holdTotal.textContent=(previewPriorState?'DEMO TOTAL (NOT AWARDED): ':'TOTAL STASH WIN: ')+money(event.units*state.last.stake)+' PRACTICE CREDITS';
     setFeature('stash',event.filled+' prizes collected','TOTAL '+event.units.toFixed(2)+'× BET');
     status.textContent='SECRET STASH BONUS AWARDED';
     showFeatureResult(event,()=>{holdWin.hidden=true;reels.hidden=false;bonusHeader.hidden=true;nextEvent();});
@@ -412,8 +439,22 @@ export function createDadsSecretStash(doc=globalThis.document,options={}){
    },DSS_BONUS_PRESENTATION.resultMs);
   },DSS_BONUS_PRESENTATION.characterMs);
  }
- function start(){if(destroyed||busy)return;clearWinTrace();if(state.balance<state.bet){state.message='Insufficient practice credits — reset to continue.';refresh();return;}busy=true;refresh();status.textContent='SIMULATED SPIN — NO TRANSACTION';state=spin(state,rng);events=state.last.events;eventIndex=0;setFeature('main','Reels spinning…','GOOD LUCK!');animateSpin(state.last.grid);}
- const reset=btn('RESET PRACTICE CREDITS',()=>{if(busy)return;state=newGame();clearWinTrace();modifierAction.hidden=true;resultScreen.hidden=true;bonusHeader.hidden=true;showScene('main');setFeature('main','Watch for 3 bonus symbols.');showGrid(Array(20).fill('jar'));refresh();});controls.append(reset);
+ function startBonusPreview(){
+  if(destroyed||busy||auto||state.mode!=='practice')return;
+  const selected=[...previewSelect.querySelectorAll('option')].find(x=>x.hasAttribute('selected'))?.value||previewSelect.value||previewSelect.querySelector('option')?.value;
+  const {grid,event}=makeBonusPreview(selected,rng);
+  clearWinTrace();
+  previewPriorState=state;
+  // UI needs a stake and a base grid for display; this temporary snapshot
+  // never goes through spin() and does not update rounds/history/balance.
+  state={...state,last:{grid,base:evaluate(grid),events:[event],stake:state.bet,win:0}};
+  events=[event];eventIndex=0;busy=true;
+  showGrid(grid);refresh();
+  status.textContent='BONUS TEST PREVIEW — NO CREDITS AWARDED';
+  nextEvent();
+ }
+ function start(){if(destroyed||busy||previewPriorState)return;clearWinTrace();if(state.balance<state.bet){state.message='Insufficient practice credits — reset to continue.';refresh();return;}busy=true;refresh();status.textContent='SIMULATED SPIN — NO TRANSACTION';state=spin(state,rng);events=state.last.events;eventIndex=0;setFeature('main','Reels spinning…','GOOD LUCK!');animateSpin(state.last.grid);}
+ const reset=btn('RESET PRACTICE CREDITS',()=>{if(busy)return;state=newGame();previewPriorState=null;clearWinTrace();modifierAction.hidden=true;resultScreen.hidden=true;bonusHeader.hidden=true;showScene('main');setFeature('main','Watch for 3 bonus symbols.');showGrid(Array(20).fill('jar'));refresh();});controls.append(reset);
  root.stopAnimation=()=>{destroyed=true;auto=false;if(currentTimer!==null)clearTimer(currentTimer);currentTimer=null;reelEls.forEach(reel=>reel.classList.remove('dss-spinning','dss-stopping'));};
  root.getState=()=>state;
  showGrid(Array(20).fill('jar'));setFeature('main','3 Stash crates unlock Hold & Win.');refresh();return root;

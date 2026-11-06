@@ -145,7 +145,7 @@ test('Larry has four valid canonical sprite images and the base game renders the
 test('Larry uses enlarged foreground art anchored to the recliner, with a ground-level lawnmower variant',()=>{
  const css=readFileSync(new URL('../src/dads-secret-stash.css',import.meta.url),'utf8');
  const sizing=css.slice(css.indexOf("/* Larry's full-body art was constrained"));
- assert.match(sizing,/\.dss-larry-panel \ .dss-larry/.source ? /dss-larry-panel\s+\.dss-larry/ : /dss-larry-panel/);
+ assert.match(sizing,/dss-larry-panel\\s+\\.dss-larry/);
  assert.match(sizing,/width:148%;\s*height:148%/);
  assert.match(sizing,/bottom:-26%/);
  assert.match(sizing,/data-mode="mow"/);

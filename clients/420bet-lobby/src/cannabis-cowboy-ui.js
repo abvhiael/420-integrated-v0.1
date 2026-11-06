@@ -127,7 +127,7 @@ export function createCannabisCowboyShell(doc=globalThis.document){
  }
  previewLabel.append(previewSelect);
  const previewButton=el(doc,'button','cc-bonus-preview-button','▶ TEST BONUS');
- previewButton.type='button';preview.append(previewLabel,previewButton);
+ previewButton.type='button';previewButton.disabled=true;preview.append(previewLabel,previewButton);
  controls.append(preview);
  const bal=el(doc,'div','cc-readout');bal.append(el(doc,'span','','BALANCE'),el(doc,'strong','','—'));
  controls.append(bal);

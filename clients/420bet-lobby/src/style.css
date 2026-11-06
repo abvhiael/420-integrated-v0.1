@@ -420,3 +420,7 @@
 @media(max-width:760px){.slots-carousel .slots-machine-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.slots-carousel .slots-machine-card[data-carousel-position="2"]{display:none}.slots-machine-art{min-height:185px}.slots-machine-body{padding:13px}.slots-machine-body h2{font-size:1.25rem}}
 @media(max-width:520px){.slots-carousel .slots-machine-grid{grid-template-columns:minmax(0,1fr)}.slots-carousel .slots-machine-card[data-carousel-position="1"]{display:none}.slots-carousel-arrow{flex-basis:32px;height:55px}.slots-cowboy-teaser{height:230px}}
 @media(prefers-reduced-motion:reduce){.slots-cowboy-teaser{animation:none}}
+
+/* Approved Slot #4 image is displayed only once it loads; never show a broken image. */
+.slots-machine-art .slots-cowboy-cabinet{width:100%;height:270px;max-width:100%;max-height:270px;object-fit:contain;object-position:center;filter:drop-shadow(0 0 15px #e0ac5990)}
+.slots-machine-art .slots-cowboy-cabinet[hidden],.slots-machine-art .slots-cowboy-teaser[hidden]{display:none!important}

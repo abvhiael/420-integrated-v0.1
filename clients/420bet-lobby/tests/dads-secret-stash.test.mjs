@@ -103,3 +103,24 @@ test('Slot #3 uses a panoramic viewport layout with wallpaper behind the logo an
  assert.equal([...game.children].filter(x=>x.tagName==='BUTTON').length,0,'No detached reset control');
  game.stopAnimation();
 });
+
+test('Concept-accurate composition has prominent Larry, reel symbol breathing room and visible feature rail',()=>{
+ const {document}=parseHTML('<html><body></body></html>');
+ const game=createDadsSecretStash(document);
+ const scene=game.querySelector('.dss-scene');
+ assert(scene.querySelector('.dss-larry-panel img.dss-larry'));
+ assert.equal(scene.querySelectorAll('.dss-reel').length,5);
+ assert.equal(scene.querySelectorAll('.dss-cell').length,20);
+ assert(scene.querySelector('.dss-feature-panel'));
+ assert.match(scene.querySelector('.dss-feature-panel').textContent,/GARAGE FEATURES/);
+ assert.match(scene.querySelector('.dss-feature-panel').textContent,/HOLD & WIN/);
+ assert.match(scene.querySelector('.dss-feature-panel').textContent,/Free Spins/);
+ assert.match(scene.querySelector('.dss-feature-panel').textContent,/Cascades/);
+ const css=readFileSync(new URL('../src/dads-secret-stash.css',import.meta.url),'utf8');
+ const visual=css.slice(css.indexOf('/* Approved four-panel reference:'));
+ assert.match(visual,/grid-template-columns:minmax\(175px,23fr\) minmax\(0,57fr\) minmax\(165px,20fr\)/);
+ assert.match(visual,/\.dss-larry\s*\{[^}]*width:100%;height:calc\(100% - 33px\)/s);
+ assert.match(visual,/\.dss-symbol-image\s*\{[^}]*width:70%;height:70%/s);
+ assert.match(visual,/\.dss-feature-panel\s*\{/);
+ game.stopAnimation();
+});

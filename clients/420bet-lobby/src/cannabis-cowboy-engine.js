@@ -7,7 +7,8 @@ export const START_CREDITS=10000;
 export const WILD_SYMBOL=8;
 export const SCATTER_SYMBOL=9;
 export const MAX_FREE_SPINS=100;
-export const SCATTER_CHANCE=0.03; // per position, base/feature stops only
+export const MAX_STICKY_WILDS=8;
+export const SCATTER_CHANCE=0.012; // per position, base/feature stops only
 export const FREE_SPIN_AWARDS=Object.freeze({3:8,4:12,5:16,6:20});
 export const SMOKE_RING_MULTIPLIER=2;
 export const MAX_CLUSTER_MULTIPLIER=500;
@@ -137,7 +138,7 @@ export function resolveRound(initialBoard,bet,rng=Math.random,options={}){
  let board=initialBoard.slice(),fertile=stored.slice(),total=0;
  const sticky=new Set(options.lockedWilds??[]);
  if([...sticky].some(p=>!Number.isInteger(p)||p<0||p>=CELL_COUNT||board[p]!==WILD_SYMBOL))throw new Error('Invalid sticky wilds');
- if(options.bonusMode)board.forEach((v,p)=>{if(v===WILD_SYMBOL)sticky.add(p);});
+ if(options.bonusMode)board.forEach((v,p)=>{if(v===WILD_SYMBOL&&sticky.size<MAX_STICKY_WILDS)sticky.add(p);});
  const steps=[];
  for(let i=0;i<MAX_CASCADES;i++){
   const clusters=findClusters(board);
@@ -163,7 +164,7 @@ export function resolveRound(initialBoard,bet,rng=Math.random,options={}){
   const awardedCells=new Set(paid.flatMap(c=>c.positions));
   for(const p of awardedCells)fertile[p]=fertile[p]===0?2:Math.min(32,fertile[p]*2);
   const next=dropAndRefill(board,removed,rng,{lockedWilds:[...sticky]});
-  if(options.bonusMode)next.board.forEach((v,p)=>{if(v===WILD_SYMBOL)sticky.add(p);});
+  if(options.bonusMode)next.board.forEach((v,p)=>{if(v===WILD_SYMBOL&&sticky.size<MAX_STICKY_WILDS)sticky.add(p);});
   steps.push({index:i+1,before:board.slice(),clusters:paid,removed:[...removed].sort((a,b)=>a-b),after:next.board.slice(),refills:next.refills.slice(),fertile:fertile.slice(),lockedWilds:[...sticky].sort((a,b)=>a-b),cascadeWin,total});
   board=next.board;
  }

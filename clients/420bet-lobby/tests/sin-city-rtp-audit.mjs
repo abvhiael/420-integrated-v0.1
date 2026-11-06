@@ -4,7 +4,8 @@ import {initialState,nextRound,MAX_MULTIPLIER,BASE_STRIPS,FREE_STRIPS,HOTBOX_PAY
 // episodes. Each paid initiating spin is exactly one statistical observation.
 const samples=Number(process.env.SPINS_PER_SEED||150000);
 const seeds=(process.env.RTP_SEEDS||'420,1337,20261106').split(',').map(Number);
-if(!Number.isSafeInteger(samples)||samples<1||seeds.some(seed=>!Number.isSafeInteger(seed)))throw Error('Invalid audit settings');
+const stake=Number(process.env.AUDIT_STAKE||2);
+if(!Number.isSafeInteger(samples)||samples<1||!Number.isFinite(stake)||stake<1||stake>50||seeds.some(seed=>!Number.isSafeInteger(seed)))throw Error('Invalid audit settings');
 const rngFromSeed=seed=>{let v=seed>>>0;return ()=>{v^=v<<13;v^=v>>>17;v^=v<<5;return (v>>>0)/4294967296;}};
 const one=seed=>{
  const rng=rngFromSeed(seed);
@@ -14,7 +15,7 @@ const one=seed=>{
  const largest=[];
  const distribution={hotboxGems:{},freeInitialSpins:{},featureSpins:{}};
  for(let i=0;i<samples;i++){
-  const begin=initialState();begin.balance=10000000;begin.stake=2;
+  const begin=initialState();begin.balance=10000000;begin.stake=stake;
   let s=nextRound(begin,rng),gross=s.lastWin,firstMode=s.mode,featureCount=0;
   base+=gross;
   if(firstMode==='hotbox')hotboxTriggers++;
@@ -44,7 +45,7 @@ const one=seed=>{
   }
   paid++;
   if(gross===0)zeroRounds++;
-  const x=gross/2;
+  const x=gross/stake;
   total+=gross;
   sumSq+=x*x;
   maxWin=Math.max(maxWin,x);
@@ -56,11 +57,11 @@ const one=seed=>{
   if(x>0&&largest.length<10){largest.push(x);largest.sort((a,b)=>b-a);}
   else if(x>largest[largest.length-1]){largest[largest.length-1]=x;largest.sort((a,b)=>b-a);}
   if(featureCount>0)distribution.featureSpins[Math.min(featureCount,100)]=(distribution.featureSpins[Math.min(featureCount,100)]||0)+1;
-  if((i+1)%50000===0)console.log('PROGRESS '+JSON.stringify({seed,paid:i+1,rtpPct:+(100*total/(2*(i+1))).toFixed(4),freeTriggers,hotboxTriggers,capHits:capped}));
+  if((i+1)%50000===0)console.log('PROGRESS '+JSON.stringify({seed,paid:i+1,rtpPct:+(100*total/(stake*(i+1))).toFixed(4),freeTriggers,hotboxTriggers,capHits:capped}));
  }
- const mean=total/(2*paid),variance=Math.max(0,sumSq/paid-mean*mean),se=Math.sqrt(variance/paid);
- return {seed,paidSpins:paid,stake:2,rtpPct:100*mean,normal95Pct:[100*(mean-1.96*se),100*(mean+1.96*se)],standardErrorPct:100*se,
-  baseRtpPct:100*base/(2*paid),freeRtpPct:100*free/(2*paid),hotboxRtpPct:100*hotbox/(2*paid),
+ const mean=total/(stake*paid),variance=Math.max(0,sumSq/paid-mean*mean),se=Math.sqrt(variance/paid);
+ return {seed,paidSpins:paid,stake,rtpPct:100*mean,normal95Pct:[100*(mean-1.96*se),100*(mean+1.96*se)],standardErrorPct:100*se,
+  baseRtpPct:100*base/(stake*paid),freeRtpPct:100*free/(stake*paid),hotboxRtpPct:100*hotbox/(stake*paid),
   freeTriggers,hotboxTriggers,freeRounds,hotboxRounds,lowriderRounds,retriggeredSpins:retriggers,freeSpinAwards,
   zeroRounds,cappedRounds:capped,over100x:upperTail100,over500x:upperTail500,over1000x:upperTail1000,
   maxWinX:maxWin,maxBonusSpins:maxFeatureSpins,maxHeldGems:lockedMax,maxStickyWilds:stickyMax,largestX:largest,distribution};
@@ -69,7 +70,7 @@ const results=seeds.map(one);
 const sum=(key)=>results.reduce((v,r)=>v+r[key],0);
 const combinedSpins=sum('paidSpins');
 const combined={
- paidSpins:combinedSpins,
+ paidSpins:combinedSpins,stake,
  rtpPct:results.reduce((v,r)=>v+r.rtpPct*r.paidSpins,0)/combinedSpins,
  baseRtpPct:results.reduce((v,r)=>v+r.baseRtpPct*r.paidSpins,0)/combinedSpins,
  freeRtpPct:results.reduce((v,r)=>v+r.freeRtpPct*r.paidSpins,0)/combinedSpins,
@@ -85,4 +86,12 @@ const combined={
  maxStickyWilds:Math.max(...results.map(r=>r.maxStickyWilds)),
  largestX:results.flatMap(r=>r.largestX).sort((a,b)=>b-a).slice(0,15)
 };
-console.log('RTP_AUDIT_RESULT '+JSON.stringify({status:'uncalibrated-practice-engine',method:'seeded sequential Monte Carlo; full bonus episodes and 5000x cap',baseStripLengths:BASE_STRIPS.map(r=>r.length),freeStripLengths:FREE_STRIPS.map(r=>r.length),hotboxPays:HOTBOX_PAYS,combined,seeds:results}));
+const pooledVariance=results.reduce((sum,r)=>{
+ const n=r.paidSpins,mean=r.rtpPct/100;
+ const within=Math.pow(r.standardErrorPct/100,2)*n*(n-1);
+ return sum+within+n*Math.pow(mean-combined.rtpPct/100,2);
+},0)/Math.max(1,combinedSpins-1);
+const pooledSE=100*Math.sqrt(pooledVariance/combinedSpins);
+combined.normal95Pct=[combined.rtpPct-1.96*pooledSE,combined.rtpPct+1.96*pooledSE];
+combined.standardErrorPct=pooledSE;
+console.log('RTP_AUDIT_RESULT '+JSON.stringify({status:'provisional-calibrated-practice-engine',method:'seeded sequential Monte Carlo; full bonus episodes and 5000x cap',baseStripLengths:BASE_STRIPS.map(r=>r.length),freeStripLengths:FREE_STRIPS.map(r=>r.length),hotboxPays:HOTBOX_PAYS,combined,seeds:results}));

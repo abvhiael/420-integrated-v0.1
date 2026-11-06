@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {BASE_STRIPS,FREE_STRIPS,STRIP_LENGTH,ROWS,REELS,initialState,nextRound,visibleBoard,awardFreeSpins,waysWins,puffPuffPass,MAX_MULTIPLIER,HOTBOX_PAYS,hotboxPayout,count} from '../src/sin-city-engine.js';
+import {BASE_STRIPS,FREE_STRIPS,STRIP_LENGTH,ROWS,REELS,initialState,nextRound,visibleBoard,awardFreeSpins,waysWins,puffPuffPass,MAX_MULTIPLIER,HOTBOX_PAYS,hotboxPayout,count,PAYTABLE,FREE_PAYTABLE,BASE_WAYS_SCALE,FREE_WAYS_SCALE} from '../src/sin-city-engine.js';
 
 test('all five circular reels contain 42 entries and never show duplicate scatters in the same four-high window',()=>{
  for(const strips of [BASE_STRIPS,FREE_STRIPS])for(const strip of strips){
@@ -18,7 +18,7 @@ test('five matching columns produce 1,024 ways, left to right',()=>{
  const board=Array.from({length:5},()=>Array(4).fill('BUD'));
  const result=waysWins(board,1),bud=result.wins.find(w=>w.symbol==='BUD');
  assert.equal(bud.ways,1024);assert.equal(bud.length,5);
- assert.equal(bud.amount,1024*.8);
+ assert.equal(bud.amount,Math.round(1024*PAYTABLE.BUD[2]*100)/100);
 });
 test('scatter bonus awards 8, 12 and 20 for three to five independent reels',()=>{
  for(const [n,award] of [[2,0],[3,8],[4,12],[5,20]]){
@@ -50,7 +50,7 @@ test('pure Wild ways are awarded once rather than for every paying symbol',()=>{
  assert.equal(r.wins.length,1);
  assert.equal(r.wins[0].symbol,'WILD');
  assert.equal(r.wins[0].ways,1024);
- assert.equal(r.total,4300.8);
+ assert.equal(r.total,Math.round(1024*PAYTABLE.BOBBY[2]*100)/100);
 });
 test('Hotbox carries all trigger gems into the first respin',()=>{
  const strips=BASE_STRIPS;
@@ -127,8 +127,8 @@ test('Hotbox payout ladder increases monotonically and pays at the end of respin
   assert.ok(HOTBOX_PAYS[gems]>0);
   assert.ok(HOTBOX_PAYS[gems+1]>HOTBOX_PAYS[gems]);
  }
- assert.equal(hotboxPayout(3,2),2);
- assert.equal(hotboxPayout(10,2),24);
+ assert.equal(hotboxPayout(3,2),.4);
+ assert.equal(hotboxPayout(10,2),4.8);
  assert.equal(hotboxPayout(20,2),200);
  const state={...initialState(),mode:'hotbox',locked:[0,4,8,12,16],respins:1,roundStake:2};
  const stops=BASE_STRIPS.map(strip=>strip.findIndex((v,i)=>!Array.from({length:4},(_,j)=>strip[(i+j)%42]).includes('GEM')));
@@ -161,4 +161,22 @@ test('one Lowrider triggers a multiplier, while zero Lowriders do not',()=>{
  const absent=picks.map((stop,r)=>r===0?FREE_STRIPS[r].findIndex((x,i)=>!Array.from({length:4},(_,j)=>FREE_STRIPS[r][(i+j)%42]).includes('CAR')):stop);
  const none=nextRound({...initialState(),mode:'free',freeRemaining:5},()=>.1,absent);
  assert.equal(none.lastMultiplier,1);
+});
+
+test('calibrated paytables are explicit and free-spin ways are not silently using base payouts',()=>{
+ assert.equal(BASE_WAYS_SCALE,.3125);
+ assert.equal(FREE_WAYS_SCALE,.075);
+ assert.ok(FREE_PAYTABLE.BOBBY[2]<PAYTABLE.BOBBY[2]);
+ const board=Array.from({length:5},()=>Array(4).fill('BUD'));
+ const base=waysWins(board,2,PAYTABLE);
+ const free=waysWins(board,2,FREE_PAYTABLE);
+ assert.ok(free.total<base.total);
+ assert.ok(base.total>0&&free.total>0);
+});
+test('calibrated strip frequency preserves three-gem entry while reducing natural gem density',()=>{
+ const gems=BASE_STRIPS.map(strip=>strip.filter(symbol=>symbol==='GEM').length);
+ assert.deepEqual(gems,[1,2,2,2,2]);
+ const stops=BASE_STRIPS.map(strip=>strip.findIndex(s=>s==='GEM'));
+ const triggering=nextRound(initialState(),()=>.2,stops);
+ assert.equal(triggering.mode,'hotbox');
 });

@@ -7,23 +7,27 @@ const ordinary=['BUD','JAR','ASH','GRINDER','LIGHTER','PAPERS','BONG','CAR','CHI
 // Spread special symbols so no reel can show two scatters in four rows.
 export const BASE_STRIPS=Object.freeze(Array.from({length:REELS},(_,r)=>{
  const arr=Array.from({length:STRIP_LENGTH},(_,i)=>ordinary[(i*7+Math.floor(i/3)+r*3)%ordinary.length]);
- const special=[[2,'SCATTER'],[10,'WILD'],[18,'GEM'],[26,'ASH'],[34,'WILD'],[39,'GEM']];
+ const special=[[2,'SCATTER'],[10,'WILD'],[18,'GEM'],[26,'ASH'],[34,'WILD'],[39,r===0?'BUD':'GEM']];
  for(const [i,v] of special)arr[(i+r*5)%STRIP_LENGTH]=v;
  return Object.freeze(arr);
 }));
 // Free-spin strips retain scarce Wilds. GEM becomes a regular symbol, not a Wild.
 export const FREE_STRIPS=Object.freeze(BASE_STRIPS.map((reel,r)=>Object.freeze(reel.map(symbol=>symbol==='GEM'?'BUD':symbol))));
-export const PAYTABLE=Object.freeze({
+export const BASE_WAYS_SCALE=0.3125;
+export const FREE_WAYS_SCALE=0.075;
+const UNCALIBRATED_PAYTABLE=Object.freeze({
  BOBBY:[.3,1,4.2],DOLLAR:[.25,.8,3],CAR:[.2,.6,2],MIC:[.15,.4,1.5],
  CHIPS:[.15,.4,1.5],BONG:[.15,.4,1.5],JAR:[.1,.25,.8],
  BUD:[.1,.25,.8],GRINDER:[.1,.25,.8],LIGHTER:[.1,.25,.8],
  PAPERS:[.05,.15,.5],ASH:[.05,.15,.5],
  '10':[.05,.15,.5],J:[.05,.15,.5],Q:[.05,.15,.5],K:[.05,.15,.5],A:[.05,.15,.5]
 });
+export const PAYTABLE=Object.freeze(Object.fromEntries(Object.entries(UNCALIBRATED_PAYTABLE).map(([symbol,pays])=>[symbol,Object.freeze(pays.map(value=>+(value*BASE_WAYS_SCALE).toFixed(6)))])));
+export const FREE_PAYTABLE=Object.freeze(Object.fromEntries(Object.entries(UNCALIBRATED_PAYTABLE).map(([symbol,pays])=>[symbol,Object.freeze(pays.map(value=>+(value*FREE_WAYS_SCALE).toFixed(6)))])));
 const round=value=>Math.round((value+Number.EPSILON)*100)/100;
 // Candidate final Hotbox awards in multiples of the initiating total stake.
 // Paid once at the end of the collection feature.
-export const HOTBOX_PAYS=Object.freeze([0,0,0,1,2,3,4,5,7,9,12,16,20,25,30,40,50,60,75,90,100]);
+export const HOTBOX_PAYS=Object.freeze([0,0,0,.2,.4,.6,.8,1,1.4,1.8,2.4,3.2,4,5,6,8,10,15,25,50,100]);
 export const hotboxPayout=(gems,stake)=>round(stake*HOTBOX_PAYS[Math.max(0,Math.min(20,gems))]);
 export function randomStops(rng=Math.random){return Array.from({length:REELS},()=>Math.floor(Math.min(.999999999,Math.max(0,rng()))*STRIP_LENGTH));}
 export function visibleBoard(strips,stops){return strips.map((strip,r)=>Array.from({length:ROWS},(_,row)=>strip[(stops[r]+row)%strip.length]));}
@@ -32,10 +36,10 @@ export function awardFreeSpins(board){
  const reels=board.filter(reel=>reel.includes('SCATTER')).length;
  return reels>=5?20:reels===4?12:reels===3?8:0;
 }
-export function waysWins(board,stake){
+export function waysWins(board,stake,table=PAYTABLE){
  const wins=[];let total=0;
  // Only count all-Wild ways once, at the highest available pay tier.
- for(const [symbol,pays] of Object.entries(PAYTABLE)){
+ for(const [symbol,pays] of Object.entries(table)){
   let ways=1,wildOnly=1,length=0;
   for(const reel of board){
    const matches=reel.filter(s=>s===symbol||s==='WILD').length;
@@ -57,7 +61,7 @@ export function waysWins(board,stake){
   pureWildWays*=matches;pureWildLength++;
  }
  if(pureWildLength>=3){
-  const amount=round(stake*pureWildWays*PAYTABLE.BOBBY[pureWildLength-3]);
+  const amount=round(stake*pureWildWays*table.BOBBY[pureWildLength-3]);
   wins.push({symbol:'WILD',length:pureWildLength,ways:pureWildWays,amount});
   total+=amount;
  }
@@ -130,7 +134,7 @@ export function nextRound(previous,rng=Math.random,forcedStops){
   const puff=isFree?{board,changed:[]}:puffPuffPass(board,rng);
   board=puff.board;
   changed=puff.changed;
-  const regular=waysWins(board,s.roundStake);
+  const regular=waysWins(board,s.roundStake,isFree?FREE_PAYTABLE:PAYTABLE);
   lastWins=regular.wins;
   payout=regular.total;
   if(puff.changed.length)feature='puff';

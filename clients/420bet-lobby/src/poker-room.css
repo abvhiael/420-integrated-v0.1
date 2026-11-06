@@ -1,0 +1,37 @@
+/* 420BET HIGH STAKES LOUNGE — read-only multiplayer poker room shell */
+.pr-room{max-width:1640px;margin:0 auto;padding:16px;min-height:calc(100dvh - 130px);color:#fff4c9;font-family:system-ui,Arial,sans-serif;background:radial-gradient(ellipse at 50% 15%,#3f14568a,#06261ee8 60%,#071011),url('/assets/420bet/royal-kush/royal-kush-wallpaper.webp') center/cover;border:2px solid #cf9b4e;border-radius:18px;box-shadow:inset 0 0 24px #762ca6aa,0 10px 35px #0007}
+.pr-room *{box-sizing:border-box}.pr-room button{font-family:inherit;cursor:pointer}.pr-room button:focus-visible{outline:3px solid #e9ef70;outline-offset:3px}
+.pr-intro{display:flex;align-items:center;justify-content:space-between;gap:20px;min-height:105px;padding:10px clamp(12px,2vw,34px);background:linear-gradient(90deg,#0a1819c9,#40174865,#071a18bc);border-bottom:2px solid #e3c369}
+.pr-identity small{font:900 13px Georgia;color:#9eff66;letter-spacing:.2em}.pr-identity h1{font:italic 1000 clamp(34px,4vw,67px) Georgia,serif;letter-spacing:-.05em;margin:1px 0;color:#ffe18b;-webkit-text-stroke:1px #8d541c;text-shadow:0 0 16px #bc6ee3,3px 4px #1c0d20}
+.pr-identity p{font:900 13px Georgia;letter-spacing:.17em;color:#e6b8f9;margin:3px 0}
+.pr-preview-pill{padding:10px 15px;border:1px solid #dd9fed;border-radius:22px;background:#36134c;color:#ffe6b5;white-space:nowrap;font-size:12px;font-weight:900}
+.pr-body{display:grid;grid-template-columns:minmax(245px,285px) minmax(0,1fr);gap:16px;margin-top:14px}
+.pr-sidebar{border:2px solid #8fbc56;border-radius:20px;background:linear-gradient(145deg,#092e29ef,#140e25ee);padding:16px;box-shadow:inset 0 0 17px #19e2742c}
+.pr-sidebar h2{font:900 23px Georgia;color:#fed56d;margin:0 0 8px}.pr-sidebar-sub{font-size:12px;color:#c1d9c9;line-height:1.6;margin:4px 0 15px}
+.pr-table-list{display:grid;gap:9px}.pr-table-choice{display:flex;flex-direction:column;align-items:flex-start;gap:5px;padding:12px;border:1px solid #4c9d65;border-radius:13px;background:#0b2b24;color:#f6eddd;text-align:left;transition:background .15s,box-shadow .15s}
+.pr-table-choice strong{font:900 18px Georgia;color:#e8dc95}.pr-table-choice span{font-size:13px;color:#e9d2fd}.pr-table-choice small{font-size:11px;color:#b2bfb5}
+.pr-table-choice:hover,.pr-choice-active{background:linear-gradient(#1a5031,#11332b);border-color:#afff69;box-shadow:0 0 15px #9bf85b50}
+.pr-sidebar-footer{display:grid;gap:4px;margin-top:30px;border-top:1px solid #779c72;padding-top:13px;font-weight:800;color:#b7ff7c;font-size:12px}.pr-sidebar-footer small{font-weight:500;color:#d8c8de}
+.pr-stage{min-width:0;border:2px solid #ae6cda;border-radius:20px;background:linear-gradient(160deg,#071d1be9,#180f29e8);overflow:hidden;box-shadow:0 0 22px #e37ef04d}
+.pr-table-heading{display:flex;justify-content:space-between;align-items:center;gap:15px;padding:13px 20px;background:linear-gradient(90deg,#154529d7,#241030ac);border-bottom:2px solid #c49c5a}
+.pr-table-heading>div{display:grid;gap:3px}.pr-table-heading strong{font:900 clamp(20px,2vw,29px) Georgia;color:#ffe187}.pr-table-heading small{font-size:11px;color:#f7e8b1;letter-spacing:.06em}
+.pr-status{color:#ffd48a;border:1px solid #b78d50;background:#35192b;border-radius:13px;padding:7px 10px;font-size:11px;font-weight:900}
+.pr-table-wrap{position:relative;min-height:460px;aspect-ratio:1.9;display:grid;place-items:center;padding:30px;background:radial-gradient(ellipse at 50% 60%,#521e7368,#042e2294 70%,#071117)}
+.pr-felt{position:relative;width:80%;height:72%;border-radius:48%;border:17px ridge #d4ad52;box-shadow:0 0 0 7px #281329,0 0 0 12px #a158ca,0 0 25px #ad62eb,inset 0 0 0 5px #9ddd70,inset 0 0 50px #061b16;background:radial-gradient(ellipse at center,#176a41,#0d4c35 65%,#072521);display:flex;flex-direction:column;justify-content:center;align-items:center;gap:8px}
+.pr-felt-logo{font:italic 1000 clamp(23px,2.6vw,41px) Georgia;color:#cef67a;text-shadow:2px 3px #092b19,0 0 17px #a5f475;display:grid;justify-items:center;opacity:.7}.pr-felt-logo span{font:900 13px Georgia;color:#ffd876;letter-spacing:.2em}
+.pr-pot{font:900 11px Georgia;color:#ffed99;background:#0a3d31;border:1px solid #ba8c50;padding:5px 12px;border-radius:30px;letter-spacing:.06em}
+.pr-community{display:flex;gap:clamp(3px,.6vw,9px);max-width:65%;height:clamp(48px,7vw,100px)}
+.pr-card{height:100%;aspect-ratio:.71;border:2px solid #edc36b;border-radius:7px;overflow:hidden;background:#fff7ce;box-shadow:0 0 8px #f3e27a9c}.pr-card img{width:100%;height:100%;object-fit:fill}.pr-card-alt{font:900 18px Georgia;color:#141b1b}
+.pr-seats{position:absolute;inset:0;pointer-events:none}.pr-seat{position:absolute;transform:translate(-50%,-50%);display:grid;justify-items:center;gap:3px;min-width:72px;z-index:1}.pr-avatar{width:43px;height:43px;border-radius:50%;display:grid;place-items:center;border:3px solid #e9cf68;background:linear-gradient(#592786,#124a41);color:#ffe9a7;box-shadow:0 0 10px #ce76de;font-size:15px;font-weight:900}
+.pr-hero-seat .pr-avatar{background:linear-gradient(#6bc331,#124f2b);color:#0b2a12;font-size:12px}
+.pr-seat-label{font:900 9px system-ui;color:#fff8ce;text-shadow:0 1px 5px #08060c;background:#05091bc9;border:1px solid #8a6ab6;padding:3px 7px;border-radius:20px;white-space:nowrap}
+.pr-button{position:absolute;top:0;right:0;transform:translateX(55%);border-radius:50%;padding:4px 7px;background:#f8db73;color:#183316;border:1px solid #fff;font-weight:900;font-size:10px}
+.pr-actions{padding:10px 18px 13px;border-top:2px solid #c49c5a;background:#081d1b}.pr-your-hand{font:900 12px Georgia;color:#f5e3aa;margin:0 0 9px;text-align:center;letter-spacing:.08em}
+.pr-action-buttons{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}.pr-action{min-height:44px;border:2px solid #a49363;border-radius:12px;font:900 18px Georgia;color:#ffebad;background:linear-gradient(#1f5137,#073021)}
+.pr-action:disabled{opacity:.55;cursor:not-allowed}.pr-fold{background:#562032}.pr-raise{background:#354f12}.pr-action-note{font-size:11px;color:#bbbcc6;margin-top:8px;text-align:center}
+.pr-disclosure{padding:10px 16px;background:#190d23cc;border-top:1px solid #61436f;text-align:center}.pr-disclosure strong{font-size:11px;color:#ffda73}.pr-disclosure p{font-size:11px;color:#d4c5dc;line-height:1.5;margin:6px 0}
+.pr-footer{text-align:center;padding:12px 0 0;font-size:11px;color:#c5d5ca;letter-spacing:.1em}
+@media(max-width:1000px){.pr-body{grid-template-columns:1fr}.pr-table-list{grid-template-columns:repeat(3,minmax(0,1fr))}.pr-sidebar-footer{margin-top:10px}.pr-table-wrap{min-height:390px}}
+@media(max-width:630px){.pr-room{padding:5px;border-width:1px}.pr-intro{flex-wrap:wrap;min-height:0;padding:8px}.pr-identity h1{font-size:34px}.pr-preview-pill{padding:6px;font-size:9px}.pr-table-list{grid-template-columns:1fr}.pr-sidebar{padding:10px}.pr-table-choice{padding:7px}.pr-table-choice strong{font-size:15px}.pr-table-wrap{min-height:300px;aspect-ratio:1.12;padding:14px}.pr-felt{width:87%;height:58%;border-width:8px}.pr-community{height:50px;max-width:85%}.pr-seat{min-width:45px}.pr-avatar{width:30px;height:30px;border-width:2px;font-size:11px}.pr-hero-seat .pr-avatar{font-size:10px}.pr-seat-label{font-size:7px;padding:2px 4px}.pr-table-heading{padding:10px;flex-wrap:wrap}.pr-action{min-height:39px;font-size:13px}.pr-disclosure p{font-size:10px}}
+
+.art-live-poker{background:linear-gradient(135deg,#06271a70,#51216b94),url('/assets/420bet/royal-kush/royal-kush-wallpaper.webp') center/cover!important;color:#ffd86b!important;text-shadow:0 0 16px #d99df9!important}

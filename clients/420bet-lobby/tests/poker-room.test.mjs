@@ -1,0 +1,46 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {parseHTML} from 'linkedom';
+import {readFileSync} from 'node:fs';
+import {createPokerRoomPreview,POKER_ROOM_DEMO_TABLES} from '../src/poker-room-ui.js';
+import {blackjackCardArt} from '../src/blackjack-card-art.js';
+test('Poker room provides 2/6/9-seat selectable preview layouts',()=>{
+ const {document}=parseHTML('<html><body></body></html>');
+ const root=createPokerRoomPreview(document);
+ assert.equal(root.dataset.practiceGame,'live-poker');
+ assert.equal(root.dataset.previewOnly,'true');
+ assert.equal(root.querySelectorAll('.pr-table-choice').length,3);
+ assert.deepEqual(POKER_ROOM_DEMO_TABLES.map(t=>t.seats),[6,9,2]);
+ assert.equal(root.querySelectorAll('.pr-seat').length,6);
+ const options=root.querySelectorAll('.pr-table-choice');
+ options[1].click();assert.equal(root.querySelectorAll('.pr-seat').length,9);
+ assert.equal(root.querySelector('.pr-table-heading strong').textContent,'Royal Garden');
+ options[2].click();assert.equal(root.querySelectorAll('.pr-seat').length,2);
+ assert.equal(root.querySelector('.pr-table-heading strong').textContent,'High Noon');
+ options[0].click();assert.equal(root.querySelectorAll('.pr-seat').length,6);
+});
+test('No fabricated live connectivity, seating or wager controls',()=>{
+ const {document}=parseHTML('<html><body></body></html>');
+ const root=createPokerRoomPreview(document);
+ assert.match(root.textContent,/NOT CONNECTED/);
+ assert.match(root.textContent,/PREVIEW ONLY/);
+ assert.match(root.textContent,/NO LIVE PLAYERS OR FUNDS/);
+ assert.match(root.textContent,/Sample seats/);
+ assert.equal(root.querySelectorAll('.pr-action').length,4);
+ for(const action of root.querySelectorAll('.pr-action'))assert.equal(action.disabled,true);
+ assert.equal(root.querySelectorAll('.pr-community .pr-card').length,5);
+ assert.equal(root.querySelector('.pr-community .pr-card img').getAttribute('src'),blackjackCardArt({rank:'A',suit:'♠'}));
+ const source=readFileSync(new URL('../src/poker-room-ui.js',import.meta.url),'utf8');
+ assert(!source.includes('WebSocket('));assert(!source.includes('fetch('));
+});
+test('Live Poker launch is dedicated and leaves tournament route unchanged',()=>{
+ const main=readFileSync(new URL('../src/main.js',import.meta.url),'utf8');
+ const catalogue=readFileSync(new URL('../src/catalogue.js',import.meta.url),'utf8');
+ assert(main.includes("active.id==='live-poker'"));
+ assert(main.includes('createPokerRoomPreview(document)'));
+ assert(catalogue.includes("['live-poker','Live Poker','Poker'"));
+ assert(catalogue.includes("['poker-tournaments','Poker Tournaments'"));
+ const css=readFileSync(new URL('../src/poker-room.css',import.meta.url),'utf8');
+ assert(css.includes('.pr-felt'));
+ assert(css.includes('@media(max-width:630px)'));
+});

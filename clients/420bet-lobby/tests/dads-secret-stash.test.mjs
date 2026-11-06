@@ -83,3 +83,23 @@ test('Game title loads the approved uploaded PNG rather than the placeholder',()
  assert.deepEqual([...readFileSync(source).subarray(0,8)],[137,80,78,71,13,10,26,10]);
  game.stopAnimation();
 });
+
+test('Slot #3 uses a panoramic viewport layout with wallpaper behind the logo and four fitted rows',()=>{
+ const css=readFileSync(new URL('../src/dads-secret-stash.css',import.meta.url),'utf8');
+ const layout=css.slice(css.indexOf('/* Slot #3 panoramic layout:'));
+ assert.match(layout,/\.dss-shell\s*\{[^}]*width:100%;height:100%;max-width:none/s);
+ assert.match(layout,/\.dss-shell\s*\{[^}]*background-image:/s);
+ assert.match(layout,/garage_main\.png/);
+ assert.match(layout,/\.dss-scene\s*\{[^}]*flex:1 1 0;min-height:0/s);
+ assert.match(layout,/\.dss-reels\s*\{[^}]*height:100%;max-width:100%;max-height:100%/s);
+ assert.match(layout,/\.dss-reel\s*\{[^}]*repeat\(4,minmax\(0,1fr\)\)/s);
+ assert.match(layout,/\.dss-reel \.dss-cell\s*\{[^}]*min-height:0/s);
+ const {document}=parseHTML('<html><body></body></html>');
+ const game=createDadsSecretStash(document);
+ assert.equal(game.querySelectorAll('.dss-reel').length,5);
+ assert.equal(game.querySelectorAll('.dss-cell').length,20);
+ assert(game.querySelector('.dss-controls button')?.textContent);
+ assert([...game.querySelectorAll('.dss-controls button')].some(x=>x.textContent==='RESET PRACTICE CREDITS'));
+ assert.equal([...game.children].filter(x=>x.tagName==='BUTTON').length,0,'No detached reset control');
+ game.stopAnimation();
+});

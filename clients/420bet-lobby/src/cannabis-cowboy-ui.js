@@ -2,6 +2,28 @@
 export const COWBOY_ART=Object.freeze({
   lobby:'/assets/420bet/slots-lobby/cannabis-cowboy-lobby-cabinet.png'
 });
+export const COWBOY_ASSET_ROOT='/assets/420bet/cannabis-cowboy/';
+export const COWBOY_SYMBOL_ART=Object.freeze([
+ 'cannabis-cowboy-cannabis-bud.png',
+ 'cannabis-cowboy-mason-jar.png',
+ 'cannabis-cowboy-guitar.png',
+ 'cannabis-cowboy-vinyl-record.png',
+ 'cannabis-cowboy-boots.png',
+ 'cannabis-cowboy-lucky-horseshoe.png',
+ 'cannabis-cowboy-rolling-papers.png',
+ 'cannabis-cowboy-cole-haze.png',
+ 'cannabis-cowboy-smoke-ring-wild.png',
+ 'cannabis-cowboy-tour-bus-scatter.png',
+ 'cannabis-cowboy-route-420-road-trip.png'
+]);
+export const COWBOY_BONUS_ART=COWBOY_ASSET_ROOT+'cannabis-cowboy-compass-bonus.png';
+export function cowboySymbolImage(doc,id){
+ const symbol=COWBOY_SYMBOLS[id];if(!symbol)throw Error('Invalid Cowboy symbol');
+ const image=doc.createElement('img');image.className='cc-symbol-image';
+ image.src=COWBOY_ASSET_ROOT+COWBOY_SYMBOL_ART[id];
+ image.alt='';image.setAttribute('aria-hidden','true');image.draggable=false;
+ return image;
+}
 export const COWBOY_LAYOUT=Object.freeze({columns:6,rows:8,positions:48});
 export const COWBOY_SYMBOLS=Object.freeze([
   Object.freeze({name:'Premium Bud',glyph:'🌿',kind:'bud'}),
@@ -71,9 +93,7 @@ export function createCannabisCowboyShell(doc=globalThis.document){
   const cell=el(doc,'div','cc-cell cc-symbol-'+symbol.kind);
   cell.dataset.position=String(i);
   cell.dataset.symbol=symbol.kind;
-  const glyph=el(doc,'span','cc-cell-glyph',symbol.glyph);
-  glyph.setAttribute('aria-hidden','true');
-  cell.append(glyph);
+  cell.append(cowboySymbolImage(doc,index));
   grid.append(cell);
  });
  const bottom=el(doc,'div','cc-board-foot','THE HARVEST BEGINS IN M3');
@@ -82,6 +102,15 @@ export function createCannabisCowboyShell(doc=globalThis.document){
  right.append(panel(doc,'ENDLESS HARVEST',['3 SCATTERS  →  8 FREE SPINS','4 SCATTERS  →  12 FREE SPINS','5 SCATTERS  →  16 FREE SPINS','6+ SCATTERS → 20 FREE SPINS'],'cc-feature-panel'));
  right.append(panel(doc,'SMOKE RING WILDS',['Growing emerald wild multipliers','Sticky during the free spins'],'cc-feature-panel'));
  right.append(panel(doc,'ON THE ROAD AGAIN',['3 Road Trip Tickets · five stops','Pick a guitar case at each stop'],'cc-feature-panel'));
+ const paytable=el(doc,'section','cc-panel cc-paytable');
+ paytable.append(el(doc,'h3','cc-panel-title','CLUSTER PAYTABLE'));
+ const help=el(doc,'p','cc-paytable-caption','Prize multiples of wager · 5+ connected symbols');
+ paytable.append(help);
+ const payoutTable=el(doc,'table','cc-paytable-table');
+ const headerRow=el(doc,'tr');for(const label of ['SYMBOL','5','7','10','15','20+'])headerRow.append(el(doc,'th','',label));
+ const thead=el(doc,'thead');thead.append(headerRow);payoutTable.append(thead);
+ const tbody=el(doc,'tbody');payoutTable.append(tbody);paytable.append(payoutTable);
+ right.append(paytable);
  cabinet.append(left,center,right);
  const controls=el(doc,'div','cc-console');
  controls.setAttribute('aria-label','Preview-only control console');
@@ -89,6 +118,17 @@ export function createCannabisCowboyShell(doc=globalThis.document){
  const bet=el(doc,'div','cc-readout');bet.append(el(doc,'span','','BET'),el(doc,'strong','','$4.00'));
  controls.append(readonlyButton(doc,'−','cc-minus'),bet,readonlyButton(doc,'+','cc-plus'));
  controls.append(readonlyButton(doc,'▶','cc-spin'));
+ const preview=el(doc,'div','cc-bonus-test');
+ const previewLabel=el(doc,'label','','TEST BONUS');
+ const previewSelect=el(doc,'select','cc-bonus-select');
+ previewSelect.setAttribute('aria-label','Choose a bonus to test');
+ for(const [value,label] of [['free','Endless Harvest'],['road','On the Road Again']]){
+  const option=el(doc,'option','',label);option.value=value;previewSelect.append(option);
+ }
+ previewLabel.append(previewSelect);
+ const previewButton=el(doc,'button','cc-bonus-preview-button','▶ TEST BONUS');
+ previewButton.type='button';previewButton.disabled=true;preview.append(previewLabel,previewButton);
+ controls.append(preview);
  const bal=el(doc,'div','cc-readout');bal.append(el(doc,'span','','BALANCE'),el(doc,'strong','','—'));
  controls.append(bal);
  const win=el(doc,'div','cc-readout');win.append(el(doc,'span','','WIN'),el(doc,'strong','','—'));

@@ -299,3 +299,86 @@
 .cc-game .cc-reel-track{height:1200%;animation:cc-reel-loop .7s linear infinite}
 @keyframes cc-reel-loop{from{transform:translate3d(0,0,0)}to{transform:translate3d(0,-50%,0)}}
 @media(prefers-reduced-motion:reduce){.cc-game .cc-reel-track{animation:none!important}}
+
+/* Approved individual transparent symbols, never crop the lobby cabinet. */
+.cc-game .cc-cell .cc-symbol-image,
+.cc-game .cc-reel-token .cc-symbol-image{
+ display:block;width:100%;height:100%;max-width:100%;max-height:100%;
+ object-fit:contain;object-position:center;
+ background:none;filter:drop-shadow(0 3px 4px #06150a90);
+ user-select:none;pointer-events:none;
+}
+.cc-game .cc-cell{display:grid;place-items:center}
+.cc-game .cc-symbol-image{padding:clamp(1px,.3vw,4px)}
+.cc-game .cc-symbol-bud .cc-symbol-image{filter:drop-shadow(0 0 8px #7bff4499)}
+.cc-game .cc-symbol-smoke-wild .cc-symbol-image{filter:drop-shadow(0 0 7px #88ffc6)}
+.cc-game .cc-symbol-scatter .cc-symbol-image,
+.cc-game .cc-symbol-road-ticket .cc-symbol-image{filter:drop-shadow(0 0 7px #f5cf76)}
+.cc-game .cc-cell.cc-reel-rolling>.cc-symbol-image{visibility:hidden}
+.cc-game .cc-reel-token{display:grid;place-items:center;min-width:0;min-height:0}
+.cc-game .cc-reel-token .cc-symbol-image{height:100%;width:100%;padding:0 2px}
+.cc-game .cc-reel-track{animation-duration:.8s;will-change:transform;transform:translate3d(0,0,0)}
+/* Same approved brushed-gold leaf SPIN face as Dad's Secret Stash. */
+.cc-game .cc-console .cc-spin{
+ flex:0 0 auto;width:clamp(85px,8vw,132px);height:clamp(52px,4.7vw,72px);
+ border:0;border-radius:999px;min-height:0;
+ background:transparent url('/assets/420bet/dads-secret-stash/spin-button-gold.svg') center/100% 100% no-repeat;
+ color:transparent;font-size:0;text-shadow:none;
+ transition:filter .15s ease,transform .15s ease;
+}
+.cc-game .cc-console .cc-spin:not(:disabled):hover{filter:brightness(1.15);transform:translateY(-2px)}
+.cc-game .cc-console .cc-spin:active:not(:disabled){transform:translateY(2px) scale(.98)}
+.cc-game .cc-console .cc-spin:disabled{filter:grayscale(.3) brightness(.75);opacity:.65}
+.cc-game .cc-bonus-test{display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:center}
+.cc-game .cc-bonus-test label{display:flex;flex-direction:column;gap:3px;font-size:.57rem;font-weight:850;letter-spacing:.07em;color:#f8d587}
+.cc-game .cc-bonus-select{min-width:120px;max-width:180px;padding:5px;border:1px solid #d8b05a;border-radius:6px;background:#153c28;color:#fff4bb;font-size:.72rem}
+.cc-game .cc-bonus-preview-button{padding:8px 10px;min-height:38px;border:2px solid #bdeb82;border-radius:9px;background:linear-gradient(#285e35,#133d26);color:#e7ffc3;font-weight:900;font-size:.75rem;cursor:pointer}
+.cc-game .cc-bonus-preview-button:disabled,.cc-game .cc-bonus-select:disabled{opacity:.55;cursor:not-allowed}
+/* Paytable is anchored inside the right rail with a compact scroll region. */
+.cc-game .cc-paytable{min-height:0;flex:1 1 0;overflow-y:auto;overscroll-behavior:contain}
+.cc-game .cc-paytable-caption,.cc-game .cc-paytable-note{font-size:clamp(.55rem,.65vw,.7rem);color:#dcf3b4;line-height:1.35;margin:4px 0 7px}
+.cc-game .cc-paytable-table{width:100%;border-collapse:collapse;table-layout:auto;font-variant-numeric:tabular-nums}
+.cc-game .cc-paytable-table th,.cc-game .cc-paytable-table td{padding:3px 1px;border-bottom:1px solid #7d634677;text-align:right;white-space:nowrap;font-size:clamp(.48rem,.59vw,.68rem)}
+.cc-game .cc-paytable-table thead th{position:sticky;top:0;background:#352718;color:#f5d480;z-index:2}
+.cc-game .cc-paytable-table th:first-child{text-align:left;white-space:normal;min-width:54px}
+.cc-game .cc-paytable-table tbody th{display:flex;align-items:center;gap:3px;line-height:1.1;font-weight:750}
+.cc-game .cc-paytable-table .cc-symbol-image{width:24px;height:27px;flex:0 0 auto;object-fit:contain}
+.cc-game .cc-paytable-table td{color:#e9f9d2}
+@media(max-width:1100px){
+ .cc-game .cc-paytable-table th,.cc-game .cc-paytable-table td{font-size:.55rem}
+ .cc-game .cc-paytable-table .cc-symbol-image{width:20px;height:23px}
+}
+@media(max-width:700px){
+ .cc-game .cc-console .cc-spin{width:82px;height:52px}
+ .cc-game .cc-paytable{display:none}
+ .cc-game .cc-bonus-test{width:100%;justify-content:center}
+}
+@media(prefers-reduced-motion:reduce){.cc-game .cc-reel-track{animation:none!important}}
+
+/* Six GPU-translated full-column reels (96 image tiles), not 48 independently
+   animated cell masks (576 image tiles). Each cycle repeats eight tiles. */
+.cc-game .cc-column-mask{
+ position:absolute;z-index:9;top:0;height:100%;overflow:hidden;
+ pointer-events:none;contain:paint;background:#10251b;
+ box-shadow:inset 0 0 8px #84d36f;
+}
+.cc-game .cc-column-track{
+ position:absolute;top:0;left:0;width:100%;height:200%;
+ display:flex;flex-direction:column;
+ will-change:transform;backface-visibility:hidden;
+ animation:cc-column-flow .95s linear infinite;
+}
+.cc-game .cc-column-token{
+ display:grid;place-items:center;flex:0 0 6.25%;height:6.25%;min-height:0;
+ background:radial-gradient(circle at center,#355338,#142b21);
+}
+.cc-game .cc-column-token .cc-symbol-image{
+ display:block;width:100%;height:100%;max-height:100%;max-width:100%;
+ object-fit:contain;object-position:center;padding:1px;
+ filter:drop-shadow(0 2px 3px #02120a);
+}
+@keyframes cc-column-flow{
+ from{transform:translate3d(0,0,0)}
+ to{transform:translate3d(0,-50%,0)}
+}
+@media(prefers-reduced-motion:reduce){.cc-game .cc-column-track{animation:none!important}}

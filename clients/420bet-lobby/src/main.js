@@ -3,6 +3,7 @@ import {createCannabisRoulette} from './roulette-ui.js';
 import {createBlackjackTable} from './blackjack-ui.js';
 import {createRoyalKushTable} from './royal-kush-ui.js';
 import {createPokerRoomPreview} from './poker-room-ui.js';
+import {createPokerRoomLive} from './poker-live-ui.js';
 import {createPestControlTable} from './pest-control-ui.js';
 import {createBuzzkillPractice} from './buzzkill-ui.js';
 import {createMaryJanePractice} from './mary-jane-ui.js';
@@ -61,7 +62,7 @@ function render(){
   if(active){
     const main=node('main',active.id==='roulette'?'immersive roulette-immersive':active.id==='blackjack'?'immersive blackjack-immersive':active.id==='video-poker'?'immersive royal-kush-immersive':'immersive');const bar=node('header','gamebar');
     bar.append(button(selectedSlotMachine?'← Slots Lobby':'← Return to Lobby',close,'return'),brandLink('game-brand'),node('strong','',selectedSlotMachine?.title??active.title));
-    const note=node('span','game-status',selectedSlotMachine?.practiceBeta?'Base game · Practice beta':selectedSlotMachine?.preview?'Preview · In development':active.id==='live-poker'?'Interface preview':['slots','roulette','blackjack','mines','crash','video-poker'].includes(active.id)?'Practice available':statusText[active.status]);bar.append(note);main.append(bar);
+    const note=node('span','game-status',selectedSlotMachine?.practiceBeta?'Base game · Practice beta':selectedSlotMachine?.preview?'Preview · In development':active.id==='live-poker'?'Verified state required':['slots','roulette','blackjack','mines','crash','video-poker'].includes(active.id)?'Practice available':statusText[active.status]);bar.append(note);main.append(bar);
     if(active.id==='slots'){
       const wrap=node('div','view-scroll');
       if(selectedSlotMachine?.id==='cannabis-cowboy'){
@@ -71,7 +72,7 @@ function render(){
       else wrap.append(createSlotsLobby(document,launchSlotMachine));
       main.append(wrap);
     }
-    else if(active.id==='live-poker'){activePractice=createPokerRoomPreview(document);const wrap=node('div','view-scroll');wrap.append(activePractice);main.append(wrap);}
+    else if(active.id==='live-poker'){activePractice=createPokerRoomLive(document,{base:config.pokerApiBase??'/api/420bet/poker/v1'});const wrap=node('div','view-scroll');wrap.append(activePractice);main.append(wrap);}
     else if(active.id==='video-poker'){activePractice=createRoyalKushTable(document);const wrap=node('div','view-scroll');wrap.append(activePractice);main.append(wrap);}
     else if(active.category==='Casino'){activePractice=active.id==='roulette'?createCannabisRoulette(document):active.id==='blackjack'?createBlackjackTable(document):active.id==='mines'?createPestControlTable(document):active.id==='crash'?createBuzzkillPractice(document):createPractice(active.id,document);const wrap=node('div','view-scroll');wrap.append(activePractice);main.append(wrap);}
     else if(active.route){const frame=node('iframe','gameframe');frame.title=active.title+' game';frame.src=active.route;frame.setAttribute('allow','fullscreen');main.append(frame);}

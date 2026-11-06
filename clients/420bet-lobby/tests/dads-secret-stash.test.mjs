@@ -48,3 +48,27 @@ test('Approved PNG sources exist in the assembled PR and have real PNG signature
  }
  assert(urls.size>=33);
 });
+
+test('Reels cycle independently and stop at 1000, 1500, 2000, 2500, 3000 ms in order',()=>{
+ const {document,window}=parseHTML('<html><body></body></html>');
+ const pending=[];let elapsed=0;let id=0;
+ const clock={setTimeout:(fn,ms)=>{const job={id:++id,at:elapsed+ms,fn,cancelled:false};pending.push(job);return job.id;},clearTimeout:(key)=>{const job=pending.find(x=>x.id===key);if(job)job.cancelled=true;}};
+ const game=createDadsSecretStash(document,{rng:()=>.55,...clock});
+ const reels=[...game.querySelectorAll('.dss-reel')];
+ assert.equal(reels.length,5);assert(reels.every(x=>x.querySelectorAll('.dss-cell').length===4));
+ const spinButton=[...game.querySelectorAll('button')].find(x=>x.textContent.includes('SPIN'));
+ spinButton.dispatchEvent(new window.Event('click',{bubbles:true,cancelable:true}));
+ assert(reels.every(x=>x.classList.contains('dss-spinning')));
+ assert.notEqual(game.querySelectorAll('.dss-cell')[0].dataset.symbol,game.getState().last.grid[0], 'outcome concealed while reels cycle');
+ const advance=target=>{while(true){pending.sort((a,b)=>a.at-b.at);const job=pending.find(x=>!x.cancelled&&x.at<=target);if(!job)break;job.cancelled=true;elapsed=job.at;job.fn();}elapsed=target;};
+ for(let i=0;i<5;i++){
+  const time=1000+i*500;advance(time-50);
+  assert(reels[i].classList.contains('dss-spinning'),'reel '+(i+1)+' still spinning');
+  advance(time);
+  assert(!reels[i].classList.contains('dss-spinning'),'reel '+(i+1)+' stopped');
+  assert(reels.slice(i+1).every(x=>x.classList.contains('dss-spinning')),'later reels still spinning');
+  const cells=[...reels[i].querySelectorAll('.dss-cell')];
+  assert.deepEqual(cells.map(x=>x.dataset.symbol),game.getState().last.grid.slice(i*4,i*4+4));
+ }
+ game.stopAnimation();
+});

@@ -65,7 +65,7 @@ test('screen uses six composited scrolling column overlays and retains staggered
 test('free-spin tester plays an actual feature without modifying credits or paid spin count',()=>{
  const h=makeHarness(),before=h.root.getPracticeState();
  const select=h.root.querySelector('.cc-bonus-select');
- select.value='free';
+ select.querySelector('option[value="free"]').setAttribute('selected','selected');
  h.root.querySelector('.cc-bonus-preview-button').dispatchEvent(new h.window.Event('click'));
  assert.equal(h.root.getPracticeState().credits,before.credits);
  assert.equal(h.root.getPracticeState().round,before.round);
@@ -77,7 +77,7 @@ test('free-spin tester plays an actual feature without modifying credits or paid
 });
 test('five-stop Road Trip tester reveals selectable cases but never credits the balance',()=>{
  const h=makeHarness(),before=h.root.getPracticeState();
- const select=h.root.querySelector('.cc-bonus-select');select.value='road';
+ const select=h.root.querySelector('.cc-bonus-select');select.querySelector('option[value="road"]').setAttribute('selected','selected');
  h.root.querySelector('.cc-bonus-preview-button').dispatchEvent(new h.window.Event('click'));
  h.drain();
  assert.equal(h.root.getPracticeState().roadActive,true);

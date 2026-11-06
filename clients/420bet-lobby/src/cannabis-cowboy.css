@@ -100,3 +100,20 @@
 @keyframes cc-symbol-drop{from{transform:translateY(-35%);opacity:.3}to{transform:translateY(0);opacity:1}}
 @keyframes cc-banner-arrive{from{transform:scale(.75);opacity:0}to{transform:scale(1);opacity:1}}
 @media(prefers-reduced-motion:reduce){.cc-game .cc-symbol-smoke-wild::before,.cc-game .cc-cell.cc-harvest-upgrade .cc-harvest-badge,.cc-game .cc-cell[data-phase="cluster"].cc-winning,.cc-game .cc-cell[data-phase="burst"].cc-winning,.cc-game .cc-cell[data-phase="drop"] .cc-cell-glyph,.cc-game .cc-effect-banner{animation:none!important}}
+
+/* M5 Endless Harvest: free-spin counter, sticky wilds, full-feature titles. */
+.cc-game .cc-symbol-scatter{position:relative;background:radial-gradient(circle at 45% 38%,#9d5176,#432d60 44%,#191c2c);border:2px solid #f6ca71;box-shadow:inset 0 0 15px #f0a6cf,0 0 9px #ffca7d}
+.cc-game .cc-symbol-scatter .cc-cell-glyph{display:grid;place-items:center;font-size:clamp(1.4rem,2.4vw,2.5rem);filter:drop-shadow(0 0 5px #fce0a3)}
+.cc-game .cc-scatter-tag{position:absolute;bottom:1px;right:1px;left:1px;text-align:center;font-size:clamp(.43rem,.6vw,.69rem);font-weight:950;letter-spacing:.06em;color:#e6f3aa;text-shadow:0 2px #32152c;background:#34263fc7}
+.cc-game .cc-symbol-smoke-wild.cc-sticky-wild{border:3px solid #ffe897;box-shadow:0 0 13px #fff38f,inset 0 0 19px #57ff8c}
+.cc-game .cc-symbol-smoke-wild.cc-sticky-wild::after{content:'STICKY';position:absolute;top:0;left:0;right:0;text-align:center;font-size:clamp(.45rem,.65vw,.65rem);font-weight:950;letter-spacing:.06em;color:#fff4bc;text-shadow:1px 2px #213421;background:#2d4927bb}
+.cc-game .cc-free-counter[hidden]{display:none!important}
+.cc-game .cc-free-counter{padding:5px 10px;border:1px solid #f5d46d;border-radius:11px;background:#133f25;color:#eaff8e;font-size:clamp(.63rem,.9vw,.88rem);box-shadow:0 0 8px #8ffa8c8a}
+.cc-game[data-feature-phase="intro"] .cc-middle,.cc-game[data-feature-phase="bonus-spin"] .cc-middle,.cc-game[data-feature-phase="outro"] .cc-middle{border-color:#b8ff84;box-shadow:0 0 25px #a7fc6d,inset 0 0 12px #61db5b}
+.cc-game .cc-feature-overlay[hidden]{display:none!important}
+.cc-game .cc-feature-overlay{position:absolute;z-index:23;inset:25% 4%;height:fit-content;min-height:30%;padding:clamp(15px,2vw,30px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;border:7px ridge #f4da79;border-radius:24px;text-align:center;background:radial-gradient(ellipse at 50% 30%,#4b7731f7,#172d2cf4 50%,#3e2535f5 100%);box-shadow:0 0 35px #f2f57b,inset 0 0 19px #f2d373a8;pointer-events:none;animation:cc-bonus-appear .5s ease both}
+.cc-game .cc-feature-title{font:900 clamp(1.4rem,3.3vw,3.5rem)/1.06 Georgia,serif;color:#ffdc77;text-shadow:2px 3px #51230d,0 0 15px #c5ff90;max-width:100%}
+.cc-game .cc-feature-message{font:900 clamp(.8rem,1.45vw,1.4rem)/1.4 Georgia,serif;letter-spacing:.03em;color:#cfffad;text-shadow:0 2px 5px #122816}
+@keyframes cc-bonus-appear{from{transform:scale(.7) rotate(-2deg);opacity:0}to{transform:scale(1) rotate(0);opacity:1}}
+@media(max-width:700px){.cc-game .cc-feature-overlay{inset:29% 3%;min-height:26%;padding:11px;border-width:4px}.cc-game .cc-feature-title{font-size:clamp(1.2rem,5vw,2.2rem)}.cc-game .cc-feature-message{font-size:clamp(.72rem,3vw,1.15rem)}}
+@media(prefers-reduced-motion:reduce){.cc-game .cc-feature-overlay{animation:none!important}}

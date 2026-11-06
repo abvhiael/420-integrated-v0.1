@@ -21,7 +21,7 @@ if(type==='family'){const event=choose(rng,['LOW SYMBOL UPGRADE','WILD GRAFFITI'
 if(type==='bud')return {grid:replaceRandom(out,rng,s=>s!=='wild'&&s!=='scatter'&&s!=='stash','wild',2+integer(rng,4)),label:'FETCH WILD!',multiplier:1};
 throw Error('Unknown modifier');}
 export function inspection(grid,rng){
- const spins=2+integer(rng,4);
+ const spins=5;
  const locked=new Map(grid.map((s,i)=>PREMIUM.has(s)?[i,s]:null).filter(Boolean));
  let total=0;const boards=[];
  for(let n=0;n<spins;n++){
@@ -74,13 +74,22 @@ export function freeBonus(rng){
  return {spins,boards,units:Math.round(total*100)/100,label:'FIVE MINUTES OF PEACE'};
 }
 export function mow(grid,rng){
+ // Five visually complete mower cascades. Existing non-cleared symbols are
+ // preserved; only the cut positions receive fresh symbols.
  let current=grid.slice(),total=0;const boards=[];
- for(let n=0;n<3;n++){
-  const hit=current.map((s,i)=>LOW.has(s)?i:-1).filter(i=>i>=0);
-  if(!hit.length)break;
-  const removed=hit.slice(0,Math.min(hit.length,3+integer(rng,3)));
+ for(let n=0;n<5;n++){
+  let hit=current.map((symbol,i)=>LOW.has(symbol)?i:-1).filter(i=>i>=0);
+  // On a depleted board, cut a few non-special positions so all five
+  // advertised cascades actually play; avoid bonus triggers and sticky Wilds.
+  if(!hit.length)hit=current.map((symbol,i)=>!['wild','scatter','stash','mower'].includes(symbol)?i:-1).filter(i=>i>=0);
+  if(!hit.length){boards.push({grid:current.slice(),before:current.slice(),removed:[],units:0});continue;}
+  const removed=hit.slice(0,Math.min(hit.length,4+integer(rng,3)));
   const before=current.slice();
-  current=current.map((s,i)=>removed.includes(i)?draw(rng):s);
+  // Introduce recurring symbols within a cascade to create opportunities for
+  // 1,024-ways matches, but do not guarantee a win or alter awards after spin.
+  const candidate=choose(rng,['A','K','Q','jar','bong']);
+  current=current.map((symbol,i)=>removed.includes(i)?
+   (rand(rng)<.65?candidate:draw(rng)):symbol);
   const units=evaluate(current).units;total+=units;
   boards.push({grid:current.slice(),before,removed,units});
  }

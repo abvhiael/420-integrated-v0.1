@@ -44,7 +44,7 @@ function readonlyButton(doc,label,klass=''){
 }
 export function createCannabisCowboyShell(doc=globalThis.document){
  const root=el(doc,'section','cc-game');root.dataset.view='cannabis-cowboy';
- root.dataset.mode='visual-preview';root.setAttribute('aria-label','Cannabis Cowboy High Country Clusters visual preview');
+ root.dataset.mode='visual-preview';root.setAttribute('aria-label','Cannabis Cowboy High Country Clusters 6 by 8 game screen');
  const scene=el(doc,'div','cc-ranch-wallpaper');scene.setAttribute('aria-hidden','true');
  const header=el(doc,'header','cc-title-banner');
  const eyebrow=el(doc,'span','cc-eyebrow','420BET · SLOT #4 · VISUAL PREVIEW');
@@ -58,14 +58,14 @@ export function createCannabisCowboyShell(doc=globalThis.document){
  approved.src=COWBOY_ART.lobby;approved.alt='Approved Cannabis Cowboy cabinet concept featuring Cole Haze with long silver hair, guitar, and mountain ranch';
  approved.loading='eager';approved.decoding='async';
  portrait.append(approved,el(doc,'span','cc-portrait-label','COLE HAZE'));
- left.append(portrait,panel(doc,'CLUSTER PAYS',['5+ matching adjacent symbols','Horizontal or vertical'], 'cc-feature-panel'));
+ left.append(portrait,panel(doc,'CLUSTER PAYS',['5+ matching adjacent symbols','Vertical and horizontal neighbors'], 'cc-feature-panel'));
  left.append(panel(doc,'GROWING HARVEST',['×2 · ×4 · ×8 · ×16 · ×32','Multipliers persist during free spins'], 'cc-feature-panel'));
  const center=el(doc,'main','cc-middle');
  const boardHeader=el(doc,'div','cc-board-header');
  boardHeader.append(el(doc,'span','','6 × 8 CLUSTER GRID'),el(doc,'span','cc-board-readonly','DISPLAY PREVIEW'));
  const grid=el(doc,'div','cc-symbol-grid');
- grid.setAttribute('role','img');
- grid.setAttribute('aria-label','Static 6 column by 8 row preview of Cannabis Cowboy themed symbols; no wins or credits are calculated');
+ grid.setAttribute('role','group');
+ grid.setAttribute('aria-label','Six-column, eight-row Cannabis Cowboy symbol grid; active clusters are traced with neon lines');
  COWBOY_PREVIEW_GRID.forEach((index,i)=>{
   const symbol=COWBOY_SYMBOLS[index];
   const cell=el(doc,'div','cc-cell cc-symbol-'+symbol.kind);
@@ -81,7 +81,7 @@ export function createCannabisCowboyShell(doc=globalThis.document){
  const right=el(doc,'aside','cc-right-rail');
  right.append(panel(doc,'ENDLESS HARVEST',['3 SCATTERS  →  8 FREE SPINS','4 SCATTERS  →  12 FREE SPINS','5 SCATTERS  →  16 FREE SPINS','6+ SCATTERS → 20 FREE SPINS'],'cc-feature-panel'));
  right.append(panel(doc,'SMOKE RING WILDS',['Growing emerald wild multipliers','Sticky during the free spins'],'cc-feature-panel'));
- right.append(panel(doc,'ON THE ROAD AGAIN',['Tour bus bonus · five stops','Pick a guitar case'],'cc-feature-panel'));
+ right.append(panel(doc,'ON THE ROAD AGAIN',['3 Road Trip Tickets · five stops','Pick a guitar case at each stop'],'cc-feature-panel'));
  cabinet.append(left,center,right);
  const controls=el(doc,'div','cc-console');
  controls.setAttribute('aria-label','Preview-only control console');

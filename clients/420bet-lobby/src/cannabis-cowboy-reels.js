@@ -6,11 +6,13 @@ const SYMBOL_KINDS=['bud','jar','guitar','vinyl','boots','horseshoe','papers','c
 export function makeReelStrip(doc,seed=0){
  const mask=doc.createElement('span');mask.className='cc-reel-mask';mask.setAttribute('aria-hidden','true');
  const track=doc.createElement('span');track.className='cc-reel-track';
- for(let j=0;j<6;j++){
-  const type=SYMBOL_KINDS[(seed+j*3)%SYMBOL_KINDS.length];
+ // Repeat an identical six-symbol sequence, so the CSS track wraps without
+ // a visible jump or the old rapid vibration at its loop boundary.
+ for(let j=0;j<12;j++){
+  const type=SYMBOL_KINDS[(seed+(j%6)*3)%SYMBOL_KINDS.length];
   const tile=doc.createElement('span');tile.className='cc-reel-token cc-symbol-'+type;
   const glyph=doc.createElement('span');glyph.className='cc-cell-glyph';
-  glyph.textContent=['🌿','🫙','🎸','💿','👢','♧','▤','🤠','◎','🚌','🎫'][(seed+j*3)%SYMBOL_KINDS.length];
+  glyph.textContent=['🌿','🫙','🎸','💿','👢','♧','▤','🤠','◎','🚌','🎫'][(seed+(j%6)*3)%SYMBOL_KINDS.length];
   tile.append(glyph);track.append(tile);
  }
  mask.append(track);return mask;

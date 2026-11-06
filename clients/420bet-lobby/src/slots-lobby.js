@@ -6,7 +6,8 @@ export const SLOT_MACHINES=Object.freeze([
  Object.freeze({id:'emerald-harvest',title:'Emerald Harvest',subtitle:'1,024 Ways to Win',description:'Five reels, four rows, Wilds, Scatters and free-spin bonuses.',art:'/assets/420bet/slots-lobby/emerald-harvest-lobby-cabinet.png',status:'Practice available'}),
  Object.freeze({id:'mary-jane-sticky-wilds',title:"Mary Jane's Sticky Wilds",subtitle:'20 Lines · Gold Leaf Frames',description:'A boho Vegas slot with 10-spin frames, ×10 Buzz, and Sticky Wild Free Spins.',art:'/assets/420bet/slots-lobby/mary-janes-sticky-wilds-lobby-cabinet.png',status:'Practice available'}),
  Object.freeze({id:'dads-secret-stash',title:"Dad's Secret Stash",subtitle:'1,024 Ways · Suburban Chaos',description:'Gary and the family, mystery modifiers, locked respins, Fetch Wilds and the garage stash.',art:'/assets/420bet/dads-secret-stash/lobby.svg',status:'Practice available'}),
- Object.freeze({id:'sin-city-high-rollers',title:'Sin City High Rollers',subtitle:'Bobby Las Vegas · 1,024 Ways',description:'Five reels, Puff Puff Pass, Hotbox Respins and Chronic Sessions Free Spins.',art:'/assets/420bet/sin-city-high-rollers/branding/logo_sin_city_high_rollers.png',status:'Practice available'})
+ Object.freeze({id:'cannabis-cowboy',title:'The Cannabis Cowboy',subtitle:'High Country Clusters',description:'Country-themed cluster slot. Cabinet preview; gameplay integration is separate.',art:'/assets/420bet/slots-lobby/cannabis-cowboy-lobby-cabinet.png',status:'Cabinet preview'}),
+ Object.freeze({id:'sin-city-high-rollers',title:'Sin City High Rollers',subtitle:'Bobby Las Vegas · 1,024 Ways',description:'Five reels, Puff Puff Pass, Hotbox Respins and Chronic Sessions Free Spins.',art:'/assets/420bet/slots-lobby/sin-city-high-rollers-lobby-cabinet.png',status:'Practice available'})
 ]);
 // A fixed, genuine 5×4 outcome from the Emerald Harvest reel strips is used
 // for visual discovery. It never awards credits or runs a game round.
@@ -67,4 +68,12 @@ export function createSlotsLobby(doc=globalThis.document,onSelect=()=>{}){
  function update(){const end=Math.min(SLOT_MACHINES.length,offset+pageSize);cards.forEach((card,i)=>{card.hidden=i<offset||i>=end;});prev.disabled=offset===0;next.disabled=offset+pageSize>=SLOT_MACHINES.length;carousel.setAttribute('aria-label', 'Showing slot cabinets '+(offset+1)+' through '+end+' of '+SLOT_MACHINES.length);}
  prev.addEventListener('click',()=>{offset=Math.max(0,offset-1);update();});next.addEventListener('click',()=>{offset=Math.min(Math.max(0,cards.length-pageSize),offset+1);update();});
  carousel.append(prev,grid,next);root.append(carousel);update();return root;
+}
+
+export function createCannabisCowboyLobbyPreview(doc=globalThis.document){
+ const root=doc.createElement('section');root.className='slots-cowboy-preview';
+ const title=doc.createElement('h2');title.textContent='The Cannabis Cowboy';
+ const note=doc.createElement('p');note.textContent='Cabinet art preview only — interactive practice gameplay is integrated separately.';
+ const img=doc.createElement('img');img.src='/assets/420bet/slots-lobby/cannabis-cowboy-lobby-cabinet.png';img.alt='The Cannabis Cowboy slot cabinet';img.style.cssText='display:block;margin:0 auto;max-width:min(100%,550px);height:auto';
+ root.append(title,note,img);root.stopAnimation=()=>{};return root;
 }

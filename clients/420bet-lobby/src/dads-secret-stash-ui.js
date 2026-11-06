@@ -140,7 +140,8 @@ export function createDadsSecretStash(doc=globalThis.document,options={}){
    const entry=boards[step];
    showGrid(entry.grid);
    if(event.type==='keller'){
-    const locked=new Set(event.locked??[]);
+    const premium=new Set(['gary','jen','tyler','emma','keller','bud','jar','bong']);
+    const locked=new Set(entry.grid.map((symbol,i)=>premium.has(symbol)?i:-1).filter(i=>i>=0));
     cells.forEach((x,i)=>x.cell.classList.toggle('dss-locked',locked.has(i)));
    }
    const detail=event.type==='free'?'Sticky Wild spins':event.type==='mow'?'New symbols fall into the cut positions':'Premium symbols stay locked';

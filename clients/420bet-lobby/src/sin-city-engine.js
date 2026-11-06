@@ -139,17 +139,18 @@ export function nextRound(previous,rng=Math.random,forcedStops){
   // on an individual Wild, and persists in that Wild's position.
   if(isFree&&count(board,'CAR')>=1){
    const choose=items=>items[Math.floor(Math.min(.999999999,Math.max(0,rng()))*items.length)];
-   const availableWild=[],availableConversion=[];
+   const availableWild=[],allWild=[],availableConversion=[];
    for(let r=0;r<REELS;r++)for(let row=0;row<ROWS;row++){
     const key=lockKey(r,row),symbol=board[r][row];
-    if(symbol==='WILD'&&!s.wildMultipliers[key])availableWild.push(key);
+    if(symbol==='WILD'){allWild.push(key);if(!s.wildMultipliers[key])availableWild.push(key);}
     if(!['CAR','ASH','SCATTER','WILD'].includes(symbol)&&!s.sticky.includes(key))availableConversion.push(key);
    }
-   const key=availableWild.length?choose(availableWild):availableConversion.length?choose(availableConversion):null;
+   const key=availableWild.length?choose(availableWild):availableConversion.length?choose(availableConversion):allWild.length?choose(allWild):null;
    if(key!==null){
     const r=Math.floor(key/ROWS),row=key%ROWS;
     if(board[r][row]!=='WILD'){board[r][row]='WILD';s.sticky.push(key);s.sticky.sort((a,b)=>a-b);changed.push([r,row]);}
-    s.wildMultipliers[key]=[2,3,4,5][Math.floor(Math.min(.999999999,Math.max(0,rng()))*4)];
+    const rolled=[2,3,4,5][Math.floor(Math.min(.999999999,Math.max(0,rng()))*4)];
+    s.wildMultipliers[key]=Math.max(rolled,s.wildMultipliers[key]||1);
     feature='lowrider';
    }
   }

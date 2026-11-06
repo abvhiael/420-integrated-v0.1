@@ -1,0 +1,31 @@
+name: Poker projection service targeted Level 1
+on:
+  pull_request:
+    paths:
+      - 'clients/420bet-poker/projection/**'
+      - 'docs/bet/POKER-PROJECTION-SERVER-RUNBOOK.md'
+      - '.github/workflows/poker-projection-service-level1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  poker-projection-service:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install targeted server dependencies
+        working-directory: clients/420bet-poker/projection
+        run: npm install --no-audit --no-fund
+      - name: Authenticated canonical projection security tests
+        working-directory: clients/420bet-poker/projection
+        run: npm test
+      - name: Parse server and canonical reader
+        working-directory: clients/420bet-poker/projection
+        run: |
+          node --check service.mjs
+          node --check chain-reader.mjs
+          node --check serve.mjs

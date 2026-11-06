@@ -55,7 +55,7 @@ export function createPestControlTable(doc=globalThis.document,options={}){
    card.setAttribute('aria-label',show?(hazard?'Infested tray':'Healthy bud'):'Unopened grow tray '+(i+1));
    if(show){if(hazard){
      const type=hazards[i%hazards.length];
-     const img=type==='fungus-gnats'?el(doc,'img','pc-icon'):art(doc,'pc-icon',type+'.webp',asset+type+'.svg');
+     const img=type==='fungus-gnats'?el(doc,'img','pc-icon'):art(doc,'pc-icon',type+'.webp',type==='aphids'||type==='powdery-mildew'?undefined:asset+type+'.svg');
      if(type==='fungus-gnats')img.src=asset+'fungus-gnats.svg';
      img.alt='';card.append(img);
     }else card.append(art(doc,'pc-icon','revealed-safe.webp',asset+'healthy-bud.svg'));}

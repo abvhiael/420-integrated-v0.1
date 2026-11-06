@@ -93,7 +93,16 @@ export function createDadsSecretStash(doc=globalThis.document,options={}){
  for(const type of BONUS_PREVIEW_TYPES){
   const option=el(doc,'option','',previewNames[type]);option.value=type;previewSelect.append(option);
  }
- const previewButton=btn('▶ TEST SELECTED BONUS',()=>startBonusPreview(),'dss-preview-button');
+ // Keep the selected option explicit so practice QA works with minimal DOM
+ // environments as well as ordinary browser select/change interactions.
+ previewSelect.addEventListener('change',()=>{
+  const selected=previewSelect.value;
+  for(const option of previewSelect.querySelectorAll('option')){
+   if(option.value===selected)option.setAttribute('selected','');
+   else option.removeAttribute('selected');
+  }
+ });
+  const previewButton=btn('▶ TEST SELECTED BONUS',()=>startBonusPreview(),'dss-preview-button');
  previewPanel.append(previewDescription,previewSelect,previewButton);
  const infoPanel=el(doc,'section','dss-info');infoPanel.hidden=true;infoPanel.append(el(doc,'h2','',"How to play — Dad's Secret Stash"),el(doc,'p','', 'Practice-only 5×4 reels, 1,024 ways. Matching paying symbols from the left on 3–5 consecutive reels win. Gary Wild substitutes for paying symbols. Each qualifying cast event independently triggers with 25% probability.'),el(doc,'p','',"3+ Jen: random mystery modifier. Tyler + Emma: random Family Chaos. 3+ Mr. Keller: 2–5 locked-premium respins. 3+ Bud: Fetch Wild. 3+ Scatters: Five Minutes of Peace free spins. 3+ Stash: crate prizes. 3+ Mowers: cascading lawnmower feature. The simulated return is NOT calibrated or certified. Maximum per round: "+MAX_WIN_MULTIPLIER+"× stake."),btn('CLOSE',()=>{infoPanel.hidden=true;}));
  const overlay=el(doc,'div','dss-overlay');overlay.hidden=true;
@@ -432,7 +441,8 @@ export function createDadsSecretStash(doc=globalThis.document,options={}){
  }
  function startBonusPreview(){
   if(destroyed||busy||auto||state.mode!=='practice')return;
-  const {grid,event}=makeBonusPreview(previewSelect.value,rng);
+  const selected=[...previewSelect.querySelectorAll('option')].find(x=>x.hasAttribute('selected'))?.value??previewSelect.value;
+  const {grid,event}=makeBonusPreview(selected,rng);
   clearWinTrace();
   previewPriorState=state;
   // UI needs a stake and a base grid for display; this temporary snapshot

@@ -267,14 +267,27 @@ export function createCannabisCowboyPractice(doc=globalThis.document,options={})
   const fixture=Array.from({length:48},(_,i)=>(Math.floor(i/6)*3+i%6)%8);
   if(testKind==='free')for(const p of [0,1,2])fixture[p]=9;
   if(testKind==='road')for(const p of [0,1,2])fixture[p]=10;
-  const trialOptions=trial?{baseBoard:fixture}:options.roundOptions??{};
+  // Repeatable QA feature boards avoid pathological RNG and do not use the
+  // normal wagering stream or mutate the player's round/credit balance.
+  let testSeed=0xC04207;
+  const testRng=()=>((testSeed=(Math.imul(1664525,testSeed)+1013904223)>>>0)/4294967296);
+  const previewFeatureBoard=(spinNo)=>{
+   const b=Array.from({length:48},(_,i)=>(Math.floor(i/6)*3+i%6)%8);
+   if(spinNo===1)for(const p of [0,1,6,7,12])b[p]=0;
+   return b;
+  };
+  const trialOptions=trial?{
+   baseBoard:fixture,
+   featureOptions:{boardFactory:previewFeatureBoard}
+  }:options.roundOptions??{};
+  const activeRng=trial?testRng:rng;
   let result;
-  try{result=playPracticeRound(session,rng,trialOptions);}
+  try{result=playPracticeRound(session,activeRng,trialOptions);}
   catch(error){status.textContent='Round could not finish safely; no credits changed';return;}
   if(!result.accepted){status.textContent='Insufficient practice credits';return;}
   // Generate all five Road Trip case offerings before debiting practice credits.
   let road=null;
-  try{if(result.outcome.roadTripTriggered)road=createRoadTrip(session.bet,rng);}catch(error){status.textContent='Road Trip could not begin safely; no credits changed';return;}
+  try{if(result.outcome.roadTripTriggered)road=createRoadTrip(session.bet,activeRng);}catch(error){status.textContent='Road Trip could not begin safely; no credits changed';return;}
   bonusPreview=trial;
   if(!trial)session=result.state;
   lastWin=result.outcome.total;busy=true;
@@ -297,6 +310,7 @@ export function createCannabisCowboyPractice(doc=globalThis.document,options={})
   if(next!==undefined){session={...session,bet:next};sync();}
  };
  spin.disabled=false;spin.addEventListener('click',()=>play());
+ bonusButton.disabled=false;
  bonusButton.addEventListener('click',()=>play(bonusSelect.value==='road'?'road':'free'));
  minus.disabled=false;minus.addEventListener('click',()=>betChange(-1));
  plus.disabled=false;plus.addEventListener('click',()=>betChange(1));

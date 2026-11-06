@@ -1,4 +1,4 @@
-import {initialState,nextRound,PAYTABLE,BASE_STRIPS,FREE_STRIPS,HOTBOX_PAYS,visibleBoard} from './sin-city-engine.js';
+import {initialState,nextRound,PAYTABLE,FREE_PAYTABLE,BASE_STRIPS,FREE_STRIPS,HOTBOX_PAYS,visibleBoard} from './sin-city-engine.js';
 import {SIN_CITY_BONUS_PREVIEWS,makeSinCityBonusPreview} from './sin-city-bonus-preview.js';
 const ROOT='/assets/420bet/sin-city-high-rollers/';
 const FILES={
@@ -38,9 +38,22 @@ export function createSinCityPractice(doc=globalThis.document,options={}){
     ['DROP IT LIKE IT\'S HOT','During free spins, ANY one Lowrider activates a random 2×, 3×, 4×, or 5× multiplier applied to ways wins. Every Wild remains sticky until free spins finish.']
    ];
    for(const [heading,copy] of headings)modal.append(el(doc,'h3','',heading),el(doc,'p','',copy));
-   const table=el(doc,'table','sc-paytable');const hr=el(doc,'tr');for(const head of ['SYMBOL','3','4','5'])hr.append(el(doc,'th','',head));table.append(hr);
-   for(const [key,values] of Object.entries(PAYTABLE)){const row=el(doc,'tr');row.append(el(doc,'td','',key));for(const value of values)row.append(el(doc,'td','',value.toFixed(2)+'×'));table.append(row);}
-   modal.append(table);
+   const showWaysTable=(name,tableValues,cls)=>{
+    modal.append(el(doc,'h3','',name));
+    const table=el(doc,'table','sc-paytable '+cls);
+    const hr=el(doc,'tr');
+    for(const head of ['SYMBOL','3','4','5'])hr.append(el(doc,'th','',head));
+    table.append(hr);
+    for(const [key,values] of Object.entries(tableValues)){
+     const row=el(doc,'tr');row.append(el(doc,'td','',key));
+     for(const value of values)row.append(el(doc,'td','',value.toFixed(5)+'×'));
+     table.append(row);
+    }
+    modal.append(table);
+   };
+   showWaysTable('BASE GAME · WAYS PAYOUTS',PAYTABLE,'sc-base-paytable');
+   showWaysTable('CHRONIC SESSIONS · FREE-SPIN WAYS PAYOUTS',FREE_PAYTABLE,'sc-free-paytable');
+   modal.append(el(doc,'p','sc-note','Free-spin ways use the separate lower feature paytable, then any Lowrider 2×–5× multiplier is applied. Every landed Wild stays locked for the rest of the feature.'));
    modal.append(el(doc,'h3','','HOTBOX COLLECTION PAYOUTS · MULTIPLIERS OF TOTAL BET'));
    const hotTable=el(doc,'table','sc-paytable sc-hotbox-paytable');
    const header=el(doc,'tr');header.append(el(doc,'th','','GEMS COLLECTED'),el(doc,'th','','TOTAL-BET AWARD'));hotTable.append(header);

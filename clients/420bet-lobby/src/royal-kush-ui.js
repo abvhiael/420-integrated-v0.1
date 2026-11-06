@@ -51,7 +51,7 @@ export function createRoyalKushTable(doc=globalThis.document,options={}){
  const controls=el(doc,'div','rk-controls');
  function action(label,cls,fn){const b=el(doc,'button',cls,label);b.type='button';b.addEventListener('click',fn);return b;}
  const help=action('? HELP','rk-btn rk-help',()=>{popup.hidden=false;});
- const collect=action('◉ COLLECT','rk-btn rk-collect',()=>{royalKushAction(game,'refill');draw();});
+ const collect=action('◉ COLLECT','rk-btn rk-collect',()=>{game.message='Practice wins are credited automatically. There is no real-money cash-out.';draw();});
  const minus=action('−','rk-btn rk-adjust',()=>{royalKushAction(game,'bet',Math.max(1,game.bet-1));draw();});
  const plus=action('+','rk-btn rk-adjust',()=>{royalKushAction(game,'bet',Math.min(5,game.bet+1));draw();});
  const betOne=action('BET ONE','rk-btn rk-bet-one',()=>{royalKushAction(game,'bet-one');draw();});
@@ -69,7 +69,8 @@ export function createRoyalKushTable(doc=globalThis.document,options={}){
  const popup=el(doc,'div','rk-help-overlay');popup.hidden=true;
  const dialog=el(doc,'section','rk-help-dialog');dialog.setAttribute('role','dialog');dialog.setAttribute('aria-label','Royal Kush rules');
  dialog.append(el(doc,'h2','','ROYAL KUSH · HOW TO PLAY'),
- el(doc,'p','','This is practice-only five-card Jacks or Better draw poker. Choose a bet of 1–5 credits and press DEAL. Select any cards to HOLD, then press DRAW to replace the rest. The paytable above lists credits returned for each winning hand. No wallet or real-money transactions are enabled.'),
+ el(doc,'p','','This is practice-only five-card Jacks or Better draw poker. Choose a bet of 1–5 credits and press DEAL. Select any cards to HOLD, then press DRAW to replace the rest. The paytable above lists credits returned for each winning hand. Wins are credited automatically; COLLECT does not withdraw anything. No wallet or real-money transactions are enabled.'),
+ action('+ 1,000 PRACTICE CREDITS','rk-btn rk-bet-one',()=>{if(royalKushAction(game,'refill')){draw();popup.hidden=true;}}),
  action('CLOSE','rk-btn rk-bet-one',()=>{popup.hidden=true;}));
  popup.append(dialog);popup.addEventListener('click',e=>{if(e.target===popup)popup.hidden=true;});
  shell.append(top,pay,board,stats,controls,status,disclaimer,popup);root.append(shell);

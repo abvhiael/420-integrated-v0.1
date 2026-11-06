@@ -1,4 +1,4 @@
-import {initialState,nextRound,PAYTABLE,BASE_STRIPS,FREE_STRIPS,visibleBoard} from './sin-city-engine.js';
+import {initialState,nextRound,PAYTABLE,BASE_STRIPS,FREE_STRIPS,HOTBOX_PAYS,visibleBoard} from './sin-city-engine.js';
 import {SIN_CITY_BONUS_PREVIEWS,makeSinCityBonusPreview} from './sin-city-bonus-preview.js';
 const ROOT='/assets/420bet/sin-city-high-rollers/';
 const FILES={
@@ -33,14 +33,21 @@ export function createSinCityPractice(doc=globalThis.document,options={}){
    modal.append(el(doc,'p','','5 reels × 4 rows · 1,024 always-active ways to win. Match three or more identical symbols from left to right; Wild substitutes for paying symbols, not scatters or gems.'));
    const headings=[
     ['PUFF PUFF PASS','Three or more ashtray symbols: one eligible symbol on each affected reel becomes a Wild for this result.'],
-    ['HOTBOX RESPINS','Three or more emerald gems activate three respins. Newly collected gems lock and reset the counter to three. Filling all twenty positions pays a 100× total-bet demonstration award.'],
-    ['CHRONIC SESSIONS','Scatter symbols across 3, 4, or 5 reels trigger 8, 12, or 20 free spins. Wilds stick for the feature. Three new scatters retrigger five spins, subject to a 50-spin limit.'],
-    ['DROP IT LIKE IT\'S HOT','During free spins, lowriders on three or more reels award a random 2×, 3×, 4×, or 5× multiplier to ordinary ways wins.']
+    ['HOTBOX RESPINS','Three or more emerald gems activate three respins. Every collected gem remains visible and locked while other symbols spin. New gems reset the counter to three. The collection pays once when the respins finish, with growing rewards from three gems through twenty.'],
+    ['CHRONIC SESSIONS','Scatter symbols across 3, 4, or 5 reels trigger 8, 12, or 20 free spins. EVERY Wild that lands stays visible and locked for the remainder of the feature, up to all twenty positions. New qualifying scatters may retrigger five more spins, subject to a 50-spin limit.'],
+    ['DROP IT LIKE IT\'S HOT','During free spins, ANY one Lowrider activates a random 2×, 3×, 4×, or 5× multiplier applied to ways wins. Every Wild remains sticky until free spins finish.']
    ];
    for(const [heading,copy] of headings)modal.append(el(doc,'h3','',heading),el(doc,'p','',copy));
    const table=el(doc,'table','sc-paytable');const hr=el(doc,'tr');for(const head of ['SYMBOL','3','4','5'])hr.append(el(doc,'th','',head));table.append(hr);
    for(const [key,values] of Object.entries(PAYTABLE)){const row=el(doc,'tr');row.append(el(doc,'td','',key));for(const value of values)row.append(el(doc,'td','',value.toFixed(2)+'×'));table.append(row);}
    modal.append(table);
+   modal.append(el(doc,'h3','','HOTBOX COLLECTION PAYOUTS · MULTIPLIERS OF TOTAL BET'));
+   const hotTable=el(doc,'table','sc-paytable sc-hotbox-paytable');
+   const header=el(doc,'tr');header.append(el(doc,'th','','GEMS COLLECTED'),el(doc,'th','','TOTAL-BET AWARD'));hotTable.append(header);
+   for(let gems=3;gems<=20;gems++){
+    const tr=el(doc,'tr');tr.append(el(doc,'td','',String(gems)),el(doc,'td','',HOTBOX_PAYS[gems]+'×'));hotTable.append(tr);
+   }
+   modal.append(hotTable);
    modal.append(el(doc,'p','sc-note','All awards are candidate practice-credit amounts. 5,000× total wager maximum across a paid spin and its feature. Reel strips and theoretical RTP are not certified.'));
   }else{
    modal.append(el(doc,'p','','All credits are fictional practice units with no cash value. AUTO plays up to 10 paid spins, then pauses when a bonus begins. TURBO changes animation speed only. No wallet, deposits or real-money settlement.'));
@@ -70,11 +77,11 @@ export function createSinCityPractice(doc=globalThis.document,options={}){
   cabinet.append(top);
   if(state.mode==='free'||state.mode==='hotbox'||state.lastFeature==='lowrider'||state.lastFeature==='free-start'){
    const hud=el(doc,'div','sc-bonus-hud');
-   const heading=state.lastFeature==='lowrider'?'LOWRIDER ×'+state.lastMultiplier+' · MULTIPLIES WAYS WIN':
+   const heading=state.lastFeature==='lowrider'?'LOWRIDER ×'+state.lastMultiplier+' · ANY CAR MULTIPLIES WAYS WIN':
      state.mode==='hotbox'?'HOTBOX · COLLECT GEMS; 3 RESPINS ON EACH NEW LOCK':
-     state.mode==='free'?'CHRONIC SESSIONS · MAXIMUM 3 STICKY WILDS':'BONUS COMPLETE';
-   const detail=state.mode==='free'?'SPINS LEFT: '+state.freeRemaining+' · STICKY WILDS: '+state.sticky.length+'/3'+(state.lastRetriggeredSpins?' · +'+state.lastRetriggeredSpins+' RETRIGGERED':''):
-      state.mode==='hotbox'?'RESPINS LEFT: '+state.respins+' · LOCKED GEMS: '+state.locked.length+'/20':
+     state.mode==='free'?'CHRONIC SESSIONS · EVERY WILD LOCKS':'BONUS COMPLETE';
+   const detail=state.mode==='free'?'SPINS LEFT: '+state.freeRemaining+' · STICKY WILDS: '+state.sticky.length+'/20'+(state.lastRetriggeredSpins?' · +'+state.lastRetriggeredSpins+' RETRIGGERED':''):
+      state.mode==='hotbox'?'RESPINS LEFT: '+state.respins+' · LOCKED GEMS: '+state.locked.length+'/20 · FINAL PAY: '+HOTBOX_PAYS[state.locked.length]+'×':
       state.lastFeature==='free-start'?state.lastAwardedSpins+' FREE SPINS AWARDED':'MULTIPLIER APPLIED TO THIS SPIN';
    hud.append(el(doc,'strong','',heading),el(doc,'span','',detail));cabinet.append(hud);
   }
@@ -84,8 +91,8 @@ export function createSinCityPractice(doc=globalThis.document,options={}){
    const symbol=(visualBoard||state.lastBoard)[r][row],cell=el(doc,'div','sc-symbol'+(symbol==='WILD'?' sc-wild':'')+(symbol==='GEM'?' sc-gem':'')+(highlightCells.some(([c,y])=>c===r&&y===row)?' sc-changing':''));
    cell.setAttribute('role','img');cell.setAttribute('aria-label','Reel '+(r+1)+' row '+(row+1)+': '+(symbol||'Empty'));
    if(FILES[symbol]){const img=el(doc,'img','');img.src=art('symbols',FILES[symbol]);img.alt='';img.draggable=false;cell.append(img);}
-   if(state.mode==='free'&&state.sticky.includes(r*4+row))cell.classList.add('sc-sticky');
-   if(state.mode==='hotbox'&&state.locked.includes(r*4+row))cell.classList.add('sc-locked');
+   if((phase==='spinning'?spinningMode:state.mode)==='free'&&state.sticky.includes(r*4+row))cell.classList.add('sc-sticky');
+   if((phase==='spinning'?spinningMode:state.mode)==='hotbox'&&state.locked.includes(r*4+row))cell.classList.add('sc-locked');
    col.append(cell);
   }
    if(rolling){
@@ -98,12 +105,41 @@ export function createSinCityPractice(doc=globalThis.document,options={}){
      track.append(tile);
     }
     window.append(track);col.append(window);
+    // Reuse the previous engine state for all anchored cells. Render the gems
+    // and Wilds over the scrolling reel strip, not below it or after the stop.
+    const held=spinningMode==='hotbox'?state.locked:spinningMode==='free'?state.sticky:[];
+    if(held.length){
+     const overlay=el(doc,'div','sc-held-overlay');
+     overlay.setAttribute('aria-label','Persistent locked positions on spinning reel '+(r+1));
+     for(let row=0;row<4;row++){
+      const key=r*4+row,heldCell=el(doc,'div','sc-held-cell');
+      if(held.includes(key)){
+       const symbol=spinningMode==='hotbox'?'GEM':'WILD';
+       heldCell.classList.add('sc-held-active',symbol==='GEM'?'sc-held-gem':'sc-held-wild');
+       const image=el(doc,'img');image.src=art('symbols',FILES[symbol]);image.alt='';
+       image.draggable=false;heldCell.append(image);
+       heldCell.setAttribute('aria-label',symbol+' locked in place');
+      }
+      overlay.append(heldCell);
+     }
+     col.append(overlay);
+    }
    }
    reels.append(col);}
   cabinet.append(reels);
   if(phase==='win'&&winPaths.length){
    const svg=doc.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('class','sc-win-lines');svg.setAttribute('viewBox','0 0 500 400');svg.setAttribute('preserveAspectRatio','none');svg.setAttribute('aria-label','Neon green winning way '+(winIndex+1)+' of '+winPaths.length);
-   const line=doc.createElementNS('http://www.w3.org/2000/svg','polyline');line.setAttribute('points',winPaths[winIndex].map(([r,row])=>(r*100+50)+','+(row*100+50)).join(' '));line.setAttribute('class','sc-win-polyline');line.setAttribute('pathLength','100');svg.append(line);reels.append(svg);
+   const path=winPaths[winIndex],points=cells=>cells.map(([r,row])=>(r*100+50)+','+(row*100+50)).join(' ');
+   const line=doc.createElementNS('http://www.w3.org/2000/svg','polyline');
+   line.setAttribute('points',points(path.matched));line.setAttribute('class','sc-win-polyline');
+   line.setAttribute('pathLength','100');svg.append(line);
+   if(path.tail.length){
+    const tail=doc.createElementNS('http://www.w3.org/2000/svg','polyline');
+    tail.setAttribute('points',points([path.matched[path.matched.length-1],...path.tail]));
+    tail.setAttribute('class','sc-win-polyline sc-win-continuation');
+    tail.setAttribute('pathLength','100');svg.append(tail);
+   }
+   reels.append(svg);
   }
   const result=el(doc,'div','sc-result',phase==='spinning'?'REELS SPINNING · '+stopped+' OF 5 STOPPED':phase==='announce'?state.lastMessage:phase==='transform'?'BONUS IN ACTION — WATCH THE SYMBOLS CHANGE':phase==='win'?'WINNING WAY '+(winIndex+1)+' OF '+winPaths.length+' · CLICK SCREEN FOR TOTAL':phase==='total'?'TOTAL WIN '+state.lastWin.toFixed(2)+' PRACTICE CREDITS':state.lastMessage);result.setAttribute('role','status');result.setAttribute('aria-live','polite');cabinet.append(result);
   const metrics=el(doc,'div','sc-metrics');
@@ -184,7 +220,12 @@ export function createSinCityPractice(doc=globalThis.document,options={}){
    if(chosen.symbol===win.symbol)hasNatural=true;
    path.push([r,chosen.row]);
   }
-  return path.length>=3&&(win.symbol==='WILD'||hasNatural)?path:[];
+  if(path.length<3||!(win.symbol==='WILD'||hasNatural))return null;
+  // The solid trace follows actual matched reels; a dotted tail projects
+  // through remaining reels so the animation always crosses all five columns.
+  const tail=[];
+  for(let reel=path.length;reel<5;reel++)tail.push([reel,path[path.length-1][1]]);
+  return {matched:path,tail};
  }
  function showTotalWin(){
   if(dead||!['win','total'].includes(phase))return;
@@ -194,7 +235,7 @@ export function createSinCityPractice(doc=globalThis.document,options={}){
  }
  function presentWins(){
   showBanner='';visualBoard=null;highlightCells=[];
-  winPaths=(state.lastWins||[]).map(win=>representativePath(state.lastBoard,win)).filter(p=>p.length>=3);
+  winPaths=(state.lastWins||[]).map(win=>representativePath(state.lastBoard,win)).filter(Boolean);
   if(!winPaths.length){showTotalWinFromFeature();return;}
   phase='win';winIndex=0;render();
   function next(){

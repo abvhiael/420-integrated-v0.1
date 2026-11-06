@@ -6,7 +6,7 @@ export const SLOT_MACHINES=Object.freeze([
  Object.freeze({id:'emerald-harvest',title:'Emerald Harvest',subtitle:'1,024 Ways to Win',description:'Five reels, four rows, Wilds, Scatters and free-spin bonuses.',art:'/assets/420bet/slots-lobby/emerald-harvest-lobby-cabinet.png',status:'Practice available'}),
  Object.freeze({id:'mary-jane-sticky-wilds',title:"Mary Jane's Sticky Wilds",subtitle:'20 Lines · Gold Leaf Frames',description:'A boho Vegas slot with 10-spin frames, ×10 Buzz, and Sticky Wild Free Spins.',art:'/assets/420bet/slots-lobby/mary-janes-sticky-wilds-lobby-cabinet.png',status:'Practice available'}),
  Object.freeze({id:'dads-secret-stash',title:"Dad's Secret Stash",subtitle:'1,024 Ways · Suburban Chaos',description:'Gary and the family, mystery modifiers, locked respins, Fetch Wilds and the garage stash.',art:'/assets/420bet/dads-secret-stash/lobby.svg',status:'Practice available'}),
- Object.freeze({id:'cannabis-cowboy',title:'The Cannabis Cowboy',subtitle:'High Country Clusters',description:'Country-themed cluster slot. Cabinet preview; gameplay integration is separate.',art:'/assets/420bet/slots-lobby/cannabis-cowboy-lobby-cabinet.png',status:'Cabinet preview'}),
+ Object.freeze({id:'cannabis-cowboy',title:'The Cannabis Cowboy',subtitle:'High Country Clusters',description:'Country-themed cluster slot. Cabinet preview; gameplay integration is separate.',art:'/assets/420bet/slots-lobby/cannabis-cowboy-lobby-cabinet.png',status:'Cabinet preview',preview:true}),
  Object.freeze({id:'sin-city-high-rollers',title:'Sin City High Rollers',subtitle:'Bobby Las Vegas · 1,024 Ways',description:'Five reels, Puff Puff Pass, Hotbox Respins and Chronic Sessions Free Spins.',art:'/assets/420bet/slots-lobby/sin-city-high-rollers-lobby-cabinet.png',status:'Practice available'})
 ]);
 // A fixed, genuine 5×4 outcome from the Emerald Harvest reel strips is used
@@ -49,7 +49,7 @@ export function createSlotsLobby(doc=globalThis.document,onSelect=()=>{}){
  for(const machine of SLOT_MACHINES){
   const card=doc.createElement('article');card.className='slots-machine-card';
   const link=doc.createElement('a');link.className='slots-machine-link';link.href=slotMachinePath(machine.id);
-  link.setAttribute('aria-label','Play '+machine.title+' in practice mode');
+  link.setAttribute('aria-label',machine.preview?'Preview '+machine.title+' cabinet':'Play '+machine.title+' in practice mode');
   const art=doc.createElement('div');art.className='slots-machine-art';
   const image=doc.createElement('img');
   image.src=machine.art;image.alt=machine.title+' slot cabinet';image.loading='eager';image.decoding='async';
@@ -65,8 +65,19 @@ export function createSlotsLobby(doc=globalThis.document,onSelect=()=>{}){
   link.addEventListener('click',event=>{if(event.defaultPrevented||(event.button!==undefined&&event.button!==0)||event.ctrlKey||event.metaKey||event.shiftKey||event.altKey)return;event.preventDefault();onSelect(machine);});
   card.append(link);grid.append(card);cards.push(card);
  }
- function update(){const end=Math.min(SLOT_MACHINES.length,offset+pageSize);cards.forEach((card,i)=>{card.hidden=i<offset||i>=end;});prev.disabled=offset===0;next.disabled=offset+pageSize>=SLOT_MACHINES.length;carousel.setAttribute('aria-label', 'Showing slot cabinets '+(offset+1)+' through '+end+' of '+SLOT_MACHINES.length);}
- prev.addEventListener('click',()=>{offset=Math.max(0,offset-1);update();});next.addEventListener('click',()=>{offset=Math.min(Math.max(0,cards.length-pageSize),offset+1);update();});
+ function update(){
+  const count=cards.length;
+  cards.forEach((card,i)=>{
+   const position=(i-offset+count)%count;
+   card.hidden=position>=pageSize;
+   card.style.order=String(position);
+  });
+  prev.disabled=next.disabled=false;
+  const labels=Array.from({length:Math.min(pageSize,count)},(_,i)=>SLOT_MACHINES[(offset+i)%count].title);
+  carousel.setAttribute('aria-label','Showing '+labels.join(', '));
+ }
+ prev.addEventListener('click',()=>{offset=(offset-1+cards.length)%cards.length;update();});
+ next.addEventListener('click',()=>{offset=(offset+1)%cards.length;update();});
  carousel.append(prev,grid,next);root.append(carousel);update();return root;
 }
 

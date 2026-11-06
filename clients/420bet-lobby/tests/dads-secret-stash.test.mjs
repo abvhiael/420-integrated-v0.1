@@ -702,3 +702,23 @@ test('Previously held Sticky Wilds are exempt from reel travel and stop shake',(
  assert.match(ui,/if\(!locked\.has\(i\)\)setCell\(i,SYMBOLS\[/,'Held Sticky Wilds must not be cycled by JS');
  assert.match(ui,/const locked=new Set\(entry\.previous\?\?\[\]\)/);
 });
+
+test('Hold & Win empty cells show a recognizable large seven-tip cannabis leaf instead of overlapping blades',()=>{
+ const {document}=parseHTML('<html><body></body></html>');
+ const game=createDadsSecretStash(document);
+ const leaves=[...game.querySelectorAll('.dss-hold-cell .dss-cannabis-leaf')];
+ assert.equal(leaves.length,20,'All twenty prize spaces use the leaf placeholder');
+ const leaf=leaves[0],blades=[...leaf.querySelectorAll('.dss-leaf-blade')];
+ assert.equal(blades.length,7);
+ assert.equal(leaf.getAttribute('viewBox'),'0 0 100 100');
+ assert.equal(leaf.querySelectorAll('.dss-leaf-stem').length,1);
+ const distinctPaths=new Set(blades.map(x=>x.getAttribute('d')));
+ assert.equal(distinctPaths.size,7,'Cannabis leaflets need distinct silhouettes');
+ assert(blades.every(x=>!x.hasAttribute('transform')),'Do not rotate the same blade onto itself');
+ assert(blades.every(x=>x.getAttribute('d').split(' L').length>=30),'Each leaflet should have separated serrated contours');
+ const css=readFileSync(new URL('../src/dads-secret-stash.css',import.meta.url),'utf8');
+ assert.match(css,/\.dss-cannabis-leaf\{[^}]*width:72%;height:86%;max-width:114px/);
+ assert.match(css,/\.dss-hold-cycling \.dss-cannabis-leaf\{animation:none;transform:none;/);
+ assert.match(css,/\.dss-hold-locked \.dss-cannabis-leaf\{display:none\}/);
+ game.stopAnimation();
+});

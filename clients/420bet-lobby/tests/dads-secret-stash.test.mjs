@@ -1,7 +1,7 @@
 import test from 'node:test';import assert from 'node:assert/strict';import {parseHTML} from 'linkedom';
 import {existsSync,readFileSync} from 'node:fs';
 import {SLOT_MACHINES,createSlotsLobby,slotMachineFromHash} from '../src/slots-lobby.js';
-import {newGame,qualify,triggerCharacters,modifier,inspection,spin,evaluate,stashBonus,freeBonus,mow} from '../src/dads-secret-stash-engine.js';
+import {newGame,qualify,triggerCharacters,modifier,inspection,spin,evaluate,stashBonus,freeBonus,mow,makeBonusPreview,BONUS_PREVIEW_TYPES} from '../src/dads-secret-stash-engine.js';
 import {createDadsSecretStash,DSS_BONUS_PRESENTATION} from '../src/dads-secret-stash-ui.js';
 import {DSS_SYMBOL_ART,DSS_CAST_ART,DSS_TRANSITION_ART,DSS_BACKGROUND_ART,DSS_FEATURE_ART,DSS_LARRY_ART} from '../src/dads-secret-stash-assets.js';
 import {SYMBOLS} from '../src/dads-secret-stash-engine.js';
@@ -421,5 +421,100 @@ test('Neon winning ways trace follows real matching positions and never replaces
  advance(5100);
  assert.equal(trace.hidden,true,'Clear neon trace before next round or feature');
  assert.equal(game.querySelectorAll('.dss-paying-symbol').length,0);
+ game.stopAnimation();
+});
+
+test('Dad cabinet uses the uploaded PNG rather than obsolete SVG',()=>{
+ const machine=SLOT_MACHINES.find(x=>x.id==='dads-secret-stash');
+ assert.equal(machine.art,'/assets/420bet/dads-secret-stash/lobby-cabinet.png');
+ const file=new URL('../public'+machine.art,import.meta.url);
+ assert(existsSync(file),'Uploaded lobby cabinet file missing');
+ assert.deepEqual([...readFileSync(file).subarray(0,8)],[137,80,78,71,13,10,26,10]);
+ const {document}=parseHTML('<html><body></body></html>');
+ const lobby=createSlotsLobby(document);
+ const card=[...lobby.querySelectorAll('.slots-machine-card')].find(x=>x.textContent.includes("Dad's Secret Stash"));
+ assert.equal(card.querySelector('.slots-machine-art img').getAttribute('src'),machine.art);
+});
+test('All temporary bonus preview fixtures use the real feature engine and reject unknown modes',()=>{
+ assert.deepEqual(BONUS_PREVIEW_TYPES,['stash','free','mow','jen','family','family-graffiti','keller','bud']);
+ for(const key of BONUS_PREVIEW_TYPES){
+  const {grid,event}=makeBonusPreview(key,()=>.6);
+  assert.equal(grid.length,20);
+  assert(event.units>=0);
+  assert.equal(event.type,key==='family-graffiti'?'family':key);
+  if(key==='family-graffiti')assert.equal(event.label,'WILD GRAFFITI');
+  if(key==='stash')assert(event.steps.length>=4);
+  if(key==='free')assert.equal(event.boards.length,event.spins);
+  if(key==='keller')assert.equal(event.boards.length,event.spins);
+ }
+ assert.throws(()=>makeBonusPreview('made-up-feature'),/Unknown practice bonus preview/);
+});
+test('Temporary bonus preview launches real Hold & Win with NO bet, win, round, or history mutation',()=>{
+ const {document,window}=parseHTML('<html><body></body></html>');
+ let now=0,id=0;const timers=[];
+ const game=createDadsSecretStash(document,{
+  rng:()=>.975,
+  setTimeout:(fn,ms)=>{const job={id:++id,at:now+ms,fn,done:false};timers.push(job);return job.id;},
+  clearTimeout:key=>{const job=timers.find(x=>x.id===key);if(job)job.done=true;}
+ });
+ const before=JSON.stringify(game.getState());
+ const selector=game.querySelector('.dss-preview-select');
+ const button=game.querySelector('.dss-preview-button');
+ assert(selector&&button);
+ selector.value='stash';
+ button.dispatchEvent(new window.Event('click',{bubbles:true}));
+ assert.equal(game.querySelector('.dss-overlay').hidden,false);
+ assert.equal(button.disabled,true);
+ assert.equal(game.getState().balance,1000);
+ assert.equal(game.getState().rounds,0);
+ const advance=target=>{
+  let guard=0;
+  while(true){
+   if(guard++>1000)throw Error('Preview did not finish');
+   timers.sort((a,b)=>a.at-b.at);
+   const next=timers.find(x=>!x.done&&x.at<=target);
+   if(!next)break;
+   next.done=true;now=next.at;next.fn();
+  }
+  now=target;
+ };
+ advance(3400);
+ assert.equal(game.querySelector('.dss-hold-win').hidden,false,'Hold & Win uses actual board');
+ advance(25000);
+ assert.equal(game.querySelector('.dss-hold-win').hidden,true);
+ assert.equal(button.disabled,false);
+ assert.equal(JSON.stringify(game.getState()),before,'QA previews must restore entire original state');
+ assert.match(game.querySelector('.dss-stat').textContent,/BALANCE 1000.00/);
+ game.stopAnimation();
+});
+test('Temporary Family Chaos Wild Graffiti preview shows transformations without rewarding credits',()=>{
+ const {document,window}=parseHTML('<html><body></body></html>');
+ let now=0,id=0;const timers=[];
+ const game=createDadsSecretStash(document,{
+  rng:()=>.5,
+  setTimeout:(fn,ms)=>{const job={id:++id,at:now+ms,fn,done:false};timers.push(job);return job.id;},
+  clearTimeout:key=>{const job=timers.find(x=>x.id===key);if(job)job.done=true;}
+ });
+ const before=JSON.stringify(game.getState());
+ game.querySelector('.dss-preview-select').value='family-graffiti';
+ game.querySelector('.dss-preview-button').dispatchEvent(new window.Event('click',{bubbles:true}));
+ const advance=target=>{
+  let guard=0;
+  while(true){
+   if(guard++>1500)throw Error('Preview timing failed');
+   timers.sort((a,b)=>a.at-b.at);
+   const job=timers.find(x=>!x.done&&x.at<=target);
+   if(!job)break;
+   job.done=true;now=job.at;job.fn();
+  }
+  now=target;
+ };
+ advance(3500);
+ assert.equal(game.querySelector('.dss-modifier-action').hidden,false);
+ assert.equal(game.querySelector('.dss-modifier-action').dataset.outcome,'WILD GRAFFITI');
+ advance(6800);
+ assert(game.querySelectorAll('.dss-transformed').length>=1);
+ advance(28000);
+ assert.equal(JSON.stringify(game.getState()),before);
  game.stopAnimation();
 });

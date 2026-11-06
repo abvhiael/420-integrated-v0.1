@@ -11,7 +11,8 @@ export const COWBOY_SYMBOLS=Object.freeze([
   Object.freeze({name:'Cowboy Boots',glyph:'👢',kind:'boots'}),
   Object.freeze({name:'Horseshoe',glyph:'♧',kind:'horseshoe'}),
   Object.freeze({name:'Rolling Papers',glyph:'▤',kind:'papers'}),
-  Object.freeze({name:'Cole Haze',glyph:'🤠',kind:'cole'})
+  Object.freeze({name:'Cole Haze',glyph:'🤠',kind:'cole'}),
+  Object.freeze({name:'Smoke Ring Wild',glyph:'◎',kind:'smoke-wild'})
 ]);
 // Deliberately fixed presentation, never a random outcome or representation of a paid spin.
 export const COWBOY_PREVIEW_GRID=Object.freeze([

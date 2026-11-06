@@ -1,5 +1,5 @@
 import {newGame,spin,SYMBOLS,MAX_WIN_MULTIPLIER} from './dads-secret-stash-engine.js';
-import {DSS_SYMBOL_ART,DSS_SYMBOL_LABELS,DSS_CAST_ART,DSS_TRANSITION_ART,DSS_FEATURE_ART,DSS_BACKGROUND_ART} from './dads-secret-stash-assets.js';
+import {DSS_SYMBOL_ART,DSS_SYMBOL_LABELS,DSS_CAST_ART,DSS_TRANSITION_ART,DSS_FEATURE_ART,DSS_BACKGROUND_ART,DSS_LARRY_ART} from './dads-secret-stash-assets.js';
 const GLYPHS={gary:'😎',jen:'👩',tyler:'🎧',emma:'💜',keller:'📋',bud:'🐕',jar:'🫙',bong:'⚗️',pizza:'🍕',lighter:'🔥',papers:'📜',A:'A',K:'K',Q:'Q',J:'J','10':'10',wild:'🌿',scatter:'☮',stash:'📦',mower:'🚜'};
 const FEATURE_TITLES={jen:"OH SHIT, SHE'S HOME!",family:'FAMILY CHAOS!',keller:'HOA INSPECTION!',bud:'GOOD BOY BONUS!',free:'FIVE MINUTES OF PEACE!',stash:"DAD'S SECRET STASH!",mow:'MOW THE LAWN!'};
 const FEATURE_PERSON={jen:'JEN',family:'TYLER & EMMA',keller:'MR. KELLER',bud:'BUD',free:'GARY',stash:'GARY',mow:'GARY'};
@@ -27,7 +27,22 @@ export function createDadsSecretStash(doc=globalThis.document,options={}){
   cell.append(image,face);reelEls[Math.floor(i/4)].append(cell);return {cell,image,face};
  });
  const larryPanel=el(doc,'aside','dss-larry-panel');
- const larry=el(doc,'img','dss-larry');larry.src='/assets/420bet/dads-secret-stash/characters/gary_main.png';larry.alt='Larry relaxing in his garage';larry.draggable=false;
+ const larry=el(doc,'img','dss-larry');
+ const larryDescriptions=Object.freeze({
+  main:'Larry sitting in his garage recliner, enjoying a joint',
+  stash:'Larry excitedly pointing toward his secret stash prizes',
+  free:'Larry relaxing in his recliner with headphones',
+  mow:'Larry mowing the suburban lawn'
+ });
+ const setLarryMode=(mode='main')=>{
+  const next=Object.hasOwn(DSS_LARRY_ART,mode)?mode:'main';
+  larryPanel.dataset.mode=next;
+  const url=DSS_LARRY_ART[next];
+  if(larry.getAttribute('src')!==url)larry.src=url;
+  larry.alt=larryDescriptions[next];
+ };
+ larry.addEventListener('error',()=>{if(larryPanel.dataset.mode!=='main')setLarryMode('main');});
+ setLarryMode('main');larry.draggable=false;
  const larryCaption=el(doc,'div','dss-larry-caption','JUST FIVE MORE MINUTES…');
  larryPanel.append(larry,larryCaption);
  const featurePanel=el(doc,'aside','dss-feature-panel');
@@ -69,8 +84,10 @@ export function createDadsSecretStash(doc=globalThis.document,options={}){
    loadArt(backdrop,DSS_TRANSITION_ART[type]);loadArt(titleArt,DSS_FEATURE_ART[type]);
  }
  function showScene(type='main'){
- scene.dataset.mode=type;shell.dataset.mode=type;
- shell.style.setProperty('--dss-active-wallpaper',`url("${DSS_BACKGROUND_ART[type]??DSS_BACKGROUND_ART.main}")`);
+ const sceneMode=Object.hasOwn(DSS_BACKGROUND_ART,type)?type:'main';
+ scene.dataset.mode=sceneMode;shell.dataset.mode=sceneMode;
+ setLarryMode(sceneMode);
+ shell.style.setProperty('--dss-active-wallpaper',`url("${DSS_BACKGROUND_ART[sceneMode]}")`);
 }
  showScene();
  scene.append(larryPanel,reels,featurePanel,overlay);shell.append(hero,scene,status,message,controls,infoPanel);root.append(shell);

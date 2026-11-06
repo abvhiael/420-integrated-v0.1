@@ -49,7 +49,7 @@ test('selector launches chosen feature and test mode remains active to manually 
  const {document,window}=parseHTML('<html><body></body></html>');
  const root=createSinCityPractice(document,{rng:()=>.25});document.body.append(root);
  try{
-  const select=root.querySelector('.sc-qa-select');for(const option of select.querySelectorAll('option'))option.selected=option.value==='free';
+  const select=root.querySelector('.sc-qa-select');for(const option of select.querySelectorAll('option'))option.selected=option.getAttribute('value')==='free';
   select.dispatchEvent(new window.Event('change',{bubbles:true}));
   root.querySelector('.sc-qa-button').dispatchEvent(new window.Event('click',{bubbles:true}));
   assert.equal(root.getPresentationState().qaSelection,'free');

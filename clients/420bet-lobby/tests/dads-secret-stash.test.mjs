@@ -2,7 +2,7 @@ import test from 'node:test';import assert from 'node:assert/strict';import {par
 import {existsSync,readFileSync} from 'node:fs';
 import {SLOT_MACHINES,createSlotsLobby,slotMachineFromHash} from '../src/slots-lobby.js';
 import {newGame,qualify,triggerCharacters,modifier,inspection,spin,evaluate} from '../src/dads-secret-stash-engine.js';
-import {createDadsSecretStash} from '../src/dads-secret-stash-ui.js';
+import {createDadsSecretStash,DSS_BONUS_PRESENTATION} from '../src/dads-secret-stash-ui.js';
 import {DSS_SYMBOL_ART,DSS_CAST_ART,DSS_TRANSITION_ART,DSS_BACKGROUND_ART,DSS_FEATURE_ART,DSS_LARRY_ART} from '../src/dads-secret-stash-assets.js';
 import {SYMBOLS} from '../src/dads-secret-stash-engine.js';
 const board=()=>Array(20).fill('A');const seq=(value)=>()=>value;
@@ -155,4 +155,12 @@ test('Larry uses enlarged foreground art anchored to the recliner, with a ground
  const game=createDadsSecretStash(document);
  assert(game.querySelector('.dss-larry-panel img.dss-larry'));
  game.stopAnimation();
+});
+
+test('Supporting cast stays visible through slide-in and full-second result announcement',()=>{
+ assert(DSS_BONUS_PRESENTATION.characterMs>=1450,'450ms slide plus at least 1000ms settled character');
+ assert(DSS_BONUS_PRESENTATION.resultMs>=1000,'Outcome balloon must remain at least one full second');
+ const source=readFileSync(new URL('../src/dads-secret-stash-ui.js',import.meta.url),'utf8');
+ assert.match(source,/DSS_BONUS_PRESENTATION\.characterMs\);/);
+ assert.match(source,/DSS_BONUS_PRESENTATION\.resultMs\);/);
 });

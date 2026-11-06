@@ -43,3 +43,36 @@ test('no funds can be spent when practice credits are exhausted',()=>{
  const empty={...initialState(),balance:0};const after=nextRound(empty,()=>0);
  assert.equal(after.balance,0);assert.equal(after.lastMessage,'NOT ENOUGH PRACTICE CREDITS');
 });
+
+test('pure Wild ways are awarded once rather than for every paying symbol',()=>{
+ const board=Array.from({length:5},()=>['WILD','WILD','WILD','WILD']);
+ const r=waysWins(board,1);
+ assert.equal(r.wins.length,1);
+ assert.equal(r.wins[0].symbol,'WILD');
+ assert.equal(r.wins[0].ways,1024);
+ assert.equal(r.total,4300.8);
+});
+test('Hotbox carries all trigger gems into the first respin',()=>{
+ const strips=BASE_STRIPS;
+ const stops=strips.map(strip=>{
+  for(let i=0;i<strip.length;i++)if(Array.from({length:4},(_,j)=>strip[(i+j)%strip.length]).includes('GEM'))return i;
+  throw new Error('No GEM on reel');
+ });
+ const state=nextRound(initialState(),()=>.3,stops);
+ assert.equal(state.mode,'hotbox');assert.ok(state.locked.length>=3);
+ for(const index of state.locked){
+  const r=Math.floor(index/4),row=index%4;
+  assert.equal(state.lastBoard[r][row],'GEM');
+ }
+ const follow=nextRound(state,()=>0,Array(5).fill(0));
+ assert.ok(follow.locked.length>=state.locked.length || follow.mode==='base');
+});
+test('free spin transition preserves balance without debit and decreases remaining spins',()=>{
+ const strips=BASE_STRIPS;
+ const stops=strips.map(strip=>strip.indexOf('SCATTER'));
+ const first=nextRound(initialState(),()=>.33,stops);
+ assert.equal(first.mode,'free');assert.equal(first.freeRemaining,20);
+ const before=first.balance;const after=nextRound(first,()=>.33,Array(5).fill(0));
+ assert.equal(after.freeRemaining,19);
+ assert.equal(after.balance,Math.round((before+after.lastWin)*100)/100);
+});

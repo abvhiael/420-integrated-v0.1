@@ -52,7 +52,8 @@ export function parsePokerTable(data,session,requestedTableId,previous=null){
  const t=e.table;
  one(int(t.tableVersion,1)&&int(t.seatCount,2,9)&&int(t.dealerSeat,0,t.seatCount-1),'invalid table configuration');
  one(POKER_PHASES.includes(t.phase)&&int(t.handNonce)&&int(t.actionNonce)&&int(t.ledgerVersion,0),'invalid hand ledger');
- one(int(t.pot,0)&&int(t.deadline,0)&&int(t.turnSeat,0,t.seatCount-1),'invalid pot or turn');
+ one(int(t.pot,0)&&int(t.deadline,0,4102444800000)&&int(t.turnSeat,0,t.seatCount-1),'invalid pot or turn');
+ one(!('deck' in t)&&!('holeCards' in t)&&!('privateCards' in t)&&!('shuffleSeed' in t),'hidden game state leaked');
  one(Array.isArray(t.community)&&t.community.length<=5&&t.community.every(card),'invalid community cards');
  const communitySeen=new Set(t.community.map(c=>String(c.rank)+c.suit));
  one(communitySeen.size===t.community.length,'duplicate community cards');
@@ -77,7 +78,9 @@ export function parsePokerTable(data,session,requestedTableId,previous=null){
  }
  if(previous){
   one(e.blockNumber>=previous.blockNumber,'chain block regression');
-  one(e.sequence>previous.sequence,'stale/replayed table snapshot');
+  one(e.sequence>=previous.sequence,'stale/replayed table snapshot');
+  if(e.sequence===previous.sequence)one(e.stateHash===previous.stateHash&&e.blockNumber===previous.blockNumber,
+    'same-version snapshot mutated');
   one(t.tableVersion===previous.tableVersion,'table version changed; resubscribe');
   one(t.handNonce>=previous.handNonce,'hand nonce regression');
   if(t.handNonce===previous.handNonce)one(t.actionNonce>=previous.actionNonce&&t.ledgerVersion>=previous.ledgerVersion,'action or ledger regression');

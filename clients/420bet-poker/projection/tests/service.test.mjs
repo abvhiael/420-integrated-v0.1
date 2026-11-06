@@ -99,3 +99,14 @@ test('Chain adapter requires complete pinned contract code hashes and network co
  assert.throws(()=>createCanonicalPokerReader({chainId,rpcUrl:'https://rpc.example',contracts:{}}),/contract/i);
  assert.throws(()=>createCanonicalPokerReader({chainId:0,contracts:{}}),/chain/i);
 });
+
+test('native hand phases preserve waiting-for-proof vs completed meaning',async()=>{
+ const {NATIVE_PHASES}=await import('../chain-reader.mjs');
+ assert.deepEqual(NATIVE_PHASES,[
+  'NONE','PREFLOP','AWAIT_FLOP','FLOP','AWAIT_TURN','TURN',
+  'AWAIT_RIVER','RIVER','SHOWDOWN','UNCONTESTED'
+ ]);
+ assert.notEqual(NATIVE_PHASES[9],'SETTLED','uncontested is not necessarily settled');
+ const r=raw();r.hand={...r.hand,phase:'AWAIT_FLOP'};
+ assert.equal(projectCanonicalTable(r,session,{...manifest.tables[0],chainId},now).table.phase,'AWAIT_FLOP');
+});

@@ -1,4 +1,5 @@
 import test from 'node:test';
+import {makeSinCityBonusPreview} from '../src/sin-city-bonus-preview.js';
 import assert from 'node:assert/strict';
 import {BASE_STRIPS,FREE_STRIPS,STRIP_LENGTH,ROWS,REELS,initialState,nextRound,visibleBoard,awardFreeSpins,waysWins,puffPuffPass,MAX_MULTIPLIER,HOTBOX_PAYS,hotboxPayout,count,PAYTABLE,FREE_PAYTABLE,BASE_WAYS_SCALE,FREE_WAYS_SCALE} from '../src/sin-city-engine.js';
 
@@ -113,7 +114,6 @@ test('Chronic Sessions starting awards and retriggers expose exact quantities',(
  assert.match(state.lastMessage,/8 FREE SPINS AWARDED/);
 });
 test('Lowrider practice fixture never accidentally retriggers Chronic Sessions',async()=>{
- const {makeSinCityBonusPreview}=await import('../src/sin-city-bonus-preview.js');
  const fixture=makeSinCityBonusPreview('lowrider');
  const state=nextRound(fixture.state,()=>.3,fixture.stops);
  assert.equal(state.lastFeature,'lowrider');
@@ -198,7 +198,6 @@ test('Wilds do not substitute as Ashtrays or Lowriders during free-spin ways',()
  assert.ok(naturalWins.wins.some(win=>win.symbol==='CAR'));
 });
 test('Lowrider multiplier is attached to a specific Wild and remains active on later free spins',()=>{
- const {makeSinCityBonusPreview}=await import('../src/sin-city-bonus-preview.js');
  const fixture=makeSinCityBonusPreview('lowrider');
  let state=nextRound(fixture.state,()=>.4,fixture.stops);
  assert.equal(state.lastFeature,'lowrider');
@@ -218,7 +217,6 @@ test('Lowrider multiplier is attached to a specific Wild and remains active on l
  assert.equal(state.lastBoard[Math.floor(key/4)][key%4],'WILD');
 });
 test('free-spin completion records only the free-round total and retains last multipliers for reveal',()=>{
- const {makeSinCityBonusPreview}=await import('../src/sin-city-bonus-preview.js');
  const fixture=makeSinCityBonusPreview('lowrider');
  let state={...fixture.state,freeRemaining:1};
  const end=nextRound(state,()=>.1,fixture.stops);

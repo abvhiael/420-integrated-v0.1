@@ -1,0 +1,96 @@
+/* ROYAL KUSH — pixel-inspired layout from approved 420Bet casino concept.
+   Fixed five-card stage, neon gold + emerald paytable, magenta max bet. */
+.rk-casino{--rk-gold:#fedb60;--rk-green:#84ff43;--rk-violet:#ed42f8;--rk-shadow:#070711;max-width:1680px;margin:0 auto;padding:0 3px 18px;font-family:system-ui,Arial,sans-serif;color:#fff9d9;}
+.rk-casino *{box-sizing:border-box}
+.rk-casino button{cursor:pointer;font-family:inherit}
+.rk-casino button:focus-visible{outline:3px solid #fff9a0;outline-offset:4px}
+.rk-casino button:disabled{cursor:default;opacity:.62}
+.rk-shell{position:relative;isolation:isolate;min-height:820px;padding:14px clamp(10px,2.5vw,45px) 19px;border:3px solid #b78c47;border-radius:18px;background:
+linear-gradient(180deg,#07181127 0%,#06170a2a 47%,#030c0ac4 100%),
+url('/assets/420bet/royal-kush/royal-kush-wallpaper.svg') center center / cover no-repeat,
+radial-gradient(ellipse at center,#06291e,#020d0f 78%);
+box-shadow:inset 0 0 0 2px #31fd8c7c,inset 0 0 40px #9330ed59,0 15px 45px #0009;overflow:hidden;}
+.rk-title{position:relative;display:flex;justify-content:center;align-items:center;gap:18px;height:162px;padding:0 0 4px;margin:0 auto -8px;z-index:2;text-align:center;}
+.rk-title-stack{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0}
+.rk-title-brand{font:italic 900 clamp(16px,2vw,29px) Georgia,serif;color:#d9ff76;text-shadow:2px 2px #071e0b,0 0 8px #88fa6d;transform:rotate(-6deg);align-self:flex-start}
+.rk-title h1{margin:-6px 0 -2px;font:italic 1000 clamp(53px,7vw,112px)/1.03 Georgia,'Times New Roman',serif;letter-spacing:-.075em;color:#fcef9a;-webkit-text-stroke:2px #77400c;text-shadow:0 3px #271124,0 6px #9c671c,0 0 15px #ffb22f,5px 9px #071509}
+.rk-title-ribbon{width:min(100%,480px);margin-top:-1px;padding:1px 18px 4px;border:4px ridge #e5bb5c;border-radius:45px;background:linear-gradient(100deg,#491044,#81127f,#310d52);box-shadow:0 0 14px #c455f3;letter-spacing:.32em;font:900 clamp(12px,1.65vw,25px) Georgia;color:#ffe37d;text-shadow:0 2px #26072b}
+.rk-leaf{font-size:clamp(38px,5.5vw,82px);color:#95ee46;text-shadow:0 0 22px #56ff37}
+.rk-paytable{position:relative;z-index:1;margin:0 auto;max-width:1390px;padding:8px 13px 10px;border:7px ridge #f4cb5b;border-radius:31px;background:linear-gradient(165deg,#063b26f2,#001c15f5 55%,#021b17f6);box-shadow:0 0 0 2px #3ef783d5,0 0 27px #6cfa8b87,inset 0 0 27px #004b2e}
+.rk-pay-grid{display:flex;flex-direction:column;gap:0;border:2px solid #dfc45a;border-radius:13px;overflow:hidden}
+.rk-pay-header,.rk-pay-row{display:grid;grid-template-columns:minmax(180px,2.7fr) repeat(5,minmax(48px,1fr));align-items:center;text-align:center}
+.rk-pay-header{font-weight:1000;min-height:32px;background:#073621dd;border-bottom:2px solid #dbc65b;color:#fbe06a;letter-spacing:.08em;font-size:clamp(10px,1.2vw,18px)}
+.rk-pay-header span:first-child{text-align:left;padding-left:17px}
+.rk-pay-row{min-height:29px;color:#ffea7f;line-height:1.15;font:900 clamp(11px,1.42vw,21px) system-ui,sans-serif;text-shadow:1px 2px #000}
+.rk-pay-row:nth-child(even){background:#06231669}
+.rk-pay-row:nth-child(odd){background:#002b207a}
+.rk-pay-label{text-align:left;white-space:nowrap;padding:2px 8px 2px 16px;letter-spacing:.035em;color:#f4f5dd}
+.rk-pay-value,.rk-pay-col{padding:3px 3px;border-left:1px solid #8fa23d9c}
+.rk-col5{background:linear-gradient(90deg,#431045e7,#8d117dec 60%,#2e1045e7);color:#fff07c;border-inline:1px solid #fe8dff}
+.rk-pay-grid .rk-active-pay{background:#8e138d;color:#fff59a;box-shadow:inset 0 0 16px #ed53ff,0 0 12px #ff6cff}
+.rk-pay-grid .rk-win-row{background:#2e6726ad;box-shadow:inset 0 0 12px #86fa48}
+.rk-card-board{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:clamp(8px,1.7vw,23px);max-width:1120px;margin:8px auto 0;align-items:end;justify-content:center}
+.rk-card-slot{min-width:0;display:flex;flex-direction:column;gap:1px;align-items:center}
+.rk-hold-tag{height:34px;min-width:65%;padding:4px 4px;border:2px solid transparent;border-radius:30px;text-align:center;color:transparent;font:900 clamp(12px,1.5vw,20px) Georgia;text-shadow:none}
+.rk-held .rk-hold-tag{color:#fff8d9;background:linear-gradient(#0d5d17,#06270a);border-color:#bbf652;box-shadow:0 0 12px #74ff3a;text-shadow:0 1px #03220b}
+.rk-card{display:flex;align-items:center;justify-content:center;position:relative;width:100%;aspect-ratio:.75;min-height:0;padding:0;border:5px ridge #ecc85a;border-radius:18px;background:#ffecb2;box-shadow:0 0 11px #f1c943a8,0 8px 15px #000a;overflow:hidden}
+.rk-card:not(:disabled):hover{transform:translateY(-4px);box-shadow:0 0 16px #a0ff37,0 7px 14px #000b}
+.rk-held .rk-card{border-color:#8ff866;box-shadow:0 0 21px #a4ff5be9,0 6px 12px #000a}
+.rk-card-art{width:100%;height:100%;object-fit:fill;object-position:center;display:block;background:linear-gradient(145deg,#fffde9,#faf0bd)}
+.rk-card-fallback{display:none;font-size:38px;font-weight:900;color:#21231b}
+.rk-card-missing .rk-card-art{display:none}.rk-card-missing .rk-card-fallback{display:block}
+.rk-stats{display:grid;grid-template-columns:1fr .7fr 1.2fr;align-items:center;gap:12px;max-width:1300px;margin:13px auto 4px}
+.rk-stat{display:flex;gap:13px;justify-content:center;align-items:center;min-height:46px;border-bottom:3px solid #b7f04f;background:linear-gradient(90deg,#0e1d12b0,#132d13ab,#0e1d12b0);text-shadow:0 2px #000;font:900 clamp(12px,1.25vw,19px) Georgia;letter-spacing:.035em}
+.rk-stat strong{font:1000 clamp(22px,2.5vw,38px) Georgia;color:#ffe566}
+.rk-win{color:#f8df6c;border-color:#ff69cf}.rk-credit{border:2px solid #9cff59;border-radius:45px;box-shadow:0 0 14px #6dff35a4;color:#fff9dc}
+.rk-controls{display:grid;grid-template-columns:.8fr 1.1fr 1.1fr 1fr 1fr 1.7fr;gap:clamp(5px,1vw,14px);align-items:stretch;margin:14px 0 0}
+.rk-btn{border:4px ridge #f6ca55;border-radius:24px;background:linear-gradient(#0f7427,#003c20 72%,#021d16);color:#ffe892;font:900 clamp(12px,1.55vw,23px) Georgia,serif;text-shadow:0 2px #0e100a;min-height:66px;box-shadow:inset 0 0 8px #66ef68,0 0 12px #7df94991;padding:5px 9px}
+.rk-btn:hover:not(:disabled){filter:brightness(1.18)}
+.rk-help{background:linear-gradient(#71118c,#33084f);border-color:#d75afc;color:#fff4b9}
+.rk-collect{color:#fff2b5}
+.rk-bet-adjust{display:flex;align-items:stretch;gap:2px}
+.rk-bet-adjust .rk-adjust{border-radius:13px;flex:1;min-width:0}
+.rk-bet-number{font:900 clamp(24px,2.7vw,40px) Georgia;color:#ffe08b;display:flex;justify-content:center;align-items:center;min-width:55px;padding:0 8px;border:4px ridge #daac44;border-radius:12px;background:#061a16}
+.rk-bet-max{color:#ffe06a}
+.rk-deal{background:linear-gradient(#a542d6,#72179b 68%,#3c0b66);border-color:#ffb556;border-radius:65px;color:#ffeeb0;font:1000 clamp(24px,3.6vw,52px) Georgia,serif!important;box-shadow:0 0 0 2px #a02cfb,0 0 23px #ef52f6,inset 0 0 17px #f78bff}
+.rk-message{min-height:28px;margin:11px auto 0;text-align:center;font:800 clamp(11px,1.1vw,15px) system-ui;color:#bdfa98;text-shadow:0 2px #000}
+.rk-footer{text-align:center;color:#9cbaa3;font-size:11px;letter-spacing:.1em}
+.rk-help-overlay{position:absolute;inset:0;z-index:12;display:grid;place-items:center;background:#070412dd;padding:12px}
+.rk-help-overlay[hidden]{display:none}
+.rk-help-dialog{max-width:650px;padding:26px;border:3px solid #ecc25e;border-radius:20px;background:linear-gradient(#0c432b,#081826);box-shadow:0 0 30px #d345ed;text-align:center}
+.rk-help-dialog h2{margin:0 0 12px;color:#fbd862}
+.rk-help-dialog p{line-height:1.65}.rk-help-dialog button{min-height:44px}
+.art-royal-kush{background:linear-gradient(30deg,#00391bbd,#56056cc2),url('/assets/420bet/royal-kush/royal-kush-wallpaper.svg') center/cover!important;color:#ffe782!important;text-shadow:0 0 15px #e988f6!important}
+@media(max-width:950px){
+ .rk-title{height:124px}.rk-shell{min-height:0}.rk-pay-row{min-height:26px;font-size:clamp(9px,1.48vw,15px)}.rk-pay-label{padding-left:6px}.rk-pay-header{font-size:12px}.rk-card-board{gap:7px}.rk-controls{grid-template-columns:repeat(3,1fr)}.rk-deal{grid-column:3}.rk-btn{min-height:51px;font-size:15px}.rk-title h1{font-size:65px}
+}
+@media(max-width:550px){
+ .rk-shell{padding:7px 5px 14px}.rk-title{height:108px;gap:2px}.rk-title h1{font-size:clamp(42px,11vw,55px);-webkit-text-stroke:1px #713a13}.rk-title-brand{font-size:12px}.rk-title-ribbon{font-size:12px;letter-spacing:.11em;border-width:2px}.rk-leaf{font-size:25px}
+ .rk-paytable{padding:4px;border-width:3px;border-radius:14px}.rk-pay-grid{border-width:1px}.rk-pay-header,.rk-pay-row{grid-template-columns:minmax(100px,2.5fr) repeat(5,minmax(0,1fr))}.rk-pay-header{font-size:9px;min-height:26px}.rk-pay-row{font-size:8px;min-height:23px}.rk-pay-value,.rk-pay-col{padding:3px 0}.rk-pay-label{padding:3px;letter-spacing:0}
+ .rk-card-board{gap:4px;margin-top:0}.rk-hold-tag{height:24px;font-size:9px;padding:4px 0}.rk-card{border-width:2px;border-radius:6px}.rk-card-fallback{font-size:19px}
+ .rk-stats{gap:4px;margin-top:7px}.rk-stat{min-height:36px;font-size:9px;gap:4px}.rk-stat strong{font-size:16px}.rk-credit{border-width:1px}.rk-controls{grid-template-columns:repeat(3,minmax(0,1fr));gap:4px}.rk-btn{min-height:46px;border-width:2px;border-radius:11px;font-size:11px}.rk-deal{font-size:22px!important}.rk-bet-number{min-width:28px;padding:0 4px;font-size:18px;border-width:2px}.rk-message{font-size:11px}.rk-footer{font-size:8px}
+}
+
+/* Approved screenshot-derived original Royal Kush title and atmospheric wallpaper.
+   Only the real illustration is in these files — no baked-in cards/paytable/controls. */
+.rk-casino .rk-shell{
+ background:
+   linear-gradient(180deg,#0718111a 0%,#06170a08 48%,#030c0a89 100%),
+   url('/assets/420bet/royal-kush/royal-kush-wallpaper.webp') center center / cover no-repeat,
+   #062a1d;
+}
+.rk-casino .rk-title{height:160px;margin-bottom:-9px}
+.rk-casino .rk-title-stack{
+  flex:none;width:min(75%,760px);height:155px;
+  background:url('/assets/420bet/royal-kush/royal-kush-title.webp') center center /contain no-repeat;
+}
+.rk-casino .rk-title-stack>*{visibility:hidden}
+.rk-casino .rk-title .rk-leaf{display:none}
+@media(max-width:950px){
+ .rk-casino .rk-title{height:132px}
+ .rk-casino .rk-title-stack{width:min(88%,720px);height:126px}
+}
+@media(max-width:550px){
+ .rk-casino .rk-title{height:87px}
+ .rk-casino .rk-title-stack{width:100%;height:86px}
+}

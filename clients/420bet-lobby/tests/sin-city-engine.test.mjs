@@ -76,3 +76,38 @@ test('free spin transition preserves balance without debit and decreases remaini
  assert.equal(after.freeRemaining,19);
  assert.equal(after.balance,Math.round((before+after.lastWin)*100)/100);
 });
+
+test('Hotbox respins retain ordinary symbol artwork beside locked gems',()=>{
+ const stops=BASE_STRIPS.map(strip=>strip.findIndex((symbol,i)=>symbol==='GEM'));
+ const triggered=nextRound(initialState(),()=>.33,stops);
+ assert.equal(triggered.mode,'hotbox');
+ const result=nextRound(triggered,()=>.21,[0,5,10,15,20]);
+ assert.equal(result.lastBoard.flat().length,20);
+ assert.ok(result.lastBoard.flat().every(symbol=>symbol!==''),'no symbol becomes a blank placeholder');
+ assert.ok(result.lastBoard.flat().some(symbol=>symbol!=='GEM'),'ordinary symbols remain visible');
+});
+test('Chronic Sessions limits sticky Wilds to three across repeated free spins and reports count',()=>{
+ let state={...initialState(),mode:'free',freeRemaining:25,freePlayed:0};
+ for(let i=0;i<22;i++){
+  const stop=i%42;
+  state=nextRound(state,()=>.21,Array(5).fill(stop));
+  assert.ok(state.sticky.length<=3,'sticky position cap violated on spin '+i);
+  assert.ok(state.lastBoard.flat().filter(symbol=>symbol==='WILD').length<=13,'wild fill is unbounded');
+ }
+});
+test('Chronic Sessions starting awards and retriggers expose exact quantities',()=>{
+ const stops=BASE_STRIPS.map((strip,r)=>r<3?strip.indexOf('SCATTER'):0);
+ const state=nextRound(initialState(),()=>.11,stops);
+ assert.equal(state.lastAwardedSpins,8);
+ assert.equal(state.freeRemaining,8);
+ assert.match(state.lastMessage,/8 FREE SPINS AWARDED/);
+});
+test('Lowrider practice fixture never accidentally retriggers Chronic Sessions',async()=>{
+ const {makeSinCityBonusPreview}=await import('../src/sin-city-bonus-preview.js');
+ const fixture=makeSinCityBonusPreview('lowrider');
+ const state=nextRound(fixture.state,()=>.3,fixture.stops);
+ assert.equal(state.lastFeature,'lowrider');
+ assert.equal(state.lastRetriggeredSpins,0);
+ assert.equal(state.freeRemaining,2);
+ assert.match(state.lastMessage,/LOWRIDER ×/);
+});

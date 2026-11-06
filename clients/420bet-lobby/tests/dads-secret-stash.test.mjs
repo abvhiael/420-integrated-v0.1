@@ -690,3 +690,15 @@ test('A ten-percent prize-only RTP adjustment leaves all other bonus mechanics u
  assert.equal(inspection(Array(20).fill('A'),rng).spins,5);
  assert.equal(mow(Array(20).fill('A'),rng).boards.length,5);
 });
+
+test('Previously held Sticky Wilds are exempt from reel travel and stop shake',()=>{
+ const css=readFileSync(new URL('../src/dads-secret-stash.css',import.meta.url),'utf8');
+ const override=css.slice(css.lastIndexOf('/* Collected Sticky Wilds must stay motionless'));
+ assert.match(override,/\.dss-reel\.dss-free-spinning \.dss-cell\.dss-sticky \.dss-symbol-image/);
+ assert.match(override,/\.dss-reel\.dss-spinning \.dss-cell\.dss-sticky \.dss-symbol-image/);
+ assert.match(override,/animation:none;\s*transform:none;\s*filter:drop-shadow/);
+ assert.match(override,/\.dss-reel\.dss-stopping \.dss-cell\.dss-sticky\s*\{\s*animation:none;\s*transform:none;/);
+ const ui=readFileSync(new URL('../src/dads-secret-stash-ui.js',import.meta.url),'utf8');
+ assert.match(ui,/if\(!locked\.has\(i\)\)setCell\(i,SYMBOLS\[/,'Held Sticky Wilds must not be cycled by JS');
+ assert.match(ui,/const locked=new Set\(entry\.previous\?\?\[\]\)/);
+});

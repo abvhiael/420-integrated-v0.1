@@ -105,11 +105,15 @@ export function createDadsSecretStash(doc=globalThis.document,options={}){
  const bonusHeader=el(doc,'div','dss-bonus-hud');bonusHeader.hidden=true;
  const bonusMode=el(doc,'strong','dss-bonus-mode'),bonusProgress=el(doc,'strong','dss-bonus-progress'),bonusMult=el(doc,'strong','dss-bonus-mult');
  bonusHeader.append(bonusMode,bonusProgress,bonusMult);
+ const modifierAction=el(doc,'div','dss-modifier-action');modifierAction.hidden=true;
+ const modifierActionTitle=el(doc,'strong','dss-modifier-title');
+ const modifierActionDetail=el(doc,'span','dss-modifier-detail');
+ modifierAction.append(modifierActionTitle,modifierActionDetail);
  const resultScreen=el(doc,'section','dss-feature-result');resultScreen.hidden=true;
  const resultTitle=el(doc,'h2','dss-feature-result-title'),resultAmount=el(doc,'strong','dss-feature-result-amount'),resultDetail=el(doc,'p','dss-feature-result-detail');
  resultScreen.append(resultTitle,resultAmount,resultDetail);
  holdWin.append(holdHeading,holdCount,holdTiles,holdTotal);
- scene.append(larryPanel,reels,holdWin,featurePanel,bonusHeader,overlay,resultScreen);shell.append(hero,scene,status,message,controls,infoPanel);root.append(shell);
+ scene.append(larryPanel,reels,holdWin,featurePanel,bonusHeader,modifierAction,overlay,resultScreen);shell.append(hero,scene,status,message,controls,infoPanel);root.append(shell);
  const money=n=>Number(n).toFixed(2);
  function setCell(i,s){
  const cell=cells[i];cell.cell.dataset.symbol=s;cell.cell.title=DSS_SYMBOL_LABELS[s]??s;
@@ -158,7 +162,7 @@ export function createDadsSecretStash(doc=globalThis.document,options={}){
 }
  function refresh(){balance.textContent='BALANCE '+money(state.balance);betLabel.textContent='BET '+money(state.bet);winLabel.textContent='WIN '+money(state.last?.win??0);round.textContent='SPINS '+state.rounds;message.textContent=state.message;lower.disabled=busy;higher.disabled=busy;play.disabled=busy||state.balance<state.bet;autoBtn.disabled=state.balance<state.bet&&!busy;}
  function schedule(fn,ms){currentTimer=setTimer(()=>{currentTimer=null;if(!destroyed)fn();},ms);}
- function finish(){busy=false;overlay.hidden=true;resultScreen.hidden=true;bonusHeader.hidden=true;scene.removeAttribute('data-bonus');cells.forEach(({cell})=>cell.classList.remove('dss-sticky','dss-locked','dss-new-lock','dss-clearing','dss-dropping','dss-win-flash'));holdWin.hidden=true;reels.hidden=false;showGrid(state.last?.grid??Array(20).fill('jar'));showScene('main');setFeature('main',state.last?.message??'Watch for 3 scatters, stash crates or lawnmowers.','5 REELS · 1,024 WAYS');refresh();if(auto&&autoLeft>0&&state.balance>=state.bet){autoLeft--;schedule(start,400);}else{auto=false;autoLeft=0;autoBtn.textContent='AUTO ×10';}}
+ function finish(){busy=false;overlay.hidden=true;modifierAction.hidden=true;resultScreen.hidden=true;bonusHeader.hidden=true;scene.removeAttribute('data-bonus');cells.forEach(({cell})=>cell.classList.remove('dss-sticky','dss-locked','dss-new-lock','dss-clearing','dss-dropping','dss-win-flash','dss-transforming','dss-transformed'));holdWin.hidden=true;reels.hidden=false;showGrid(state.last?.grid??Array(20).fill('jar'));showScene('main');setFeature('main',state.last?.message??'Watch for 3 scatters, stash crates or lawnmowers.','5 REELS · 1,024 WAYS');refresh();if(auto&&autoLeft>0&&state.balance>=state.bet){autoLeft--;schedule(start,400);}else{auto=false;autoLeft=0;autoBtn.textContent='AUTO ×10';}}
  function showFeatureResult(event,done){
   const title=FEATURE_TITLES[event.type]??event.label??'FEATURE COMPLETE';
   resultTitle.textContent=title;
@@ -246,7 +250,59 @@ export function createDadsSecretStash(doc=globalThis.document,options={}){
   };
   advance();
  }
+ function animateCastModifier(event){
+  // Base reel result must be shown before applying a modifier. The already
+  // calculated event.grid and event.units are authoritative; animations do not
+  // roll randomness or award chips independently.
+  const original=state.last.grid;
+  const final=event.grid??original;
+  const changed=final.map((symbol,i)=>symbol!==original[i]?i:-1).filter(i=>i>=0);
+  showGrid(original);
+  modifierAction.hidden=false;
+  modifierAction.dataset.type=event.type;
+  modifierAction.dataset.outcome=event.label??'';
+  modifierActionTitle.textContent=event.label??FEATURE_TITLES[event.type]??'MYSTERY MODIFIER';
+  modifierActionDetail.textContent=changed.length?
+   changed.length+' REEL SYMBOL'+(changed.length===1?'':'S')+' CHANGING':
+   (event.multiplier??1)>1?'×'+event.multiplier+' WIN MULTIPLIER':'REEL EFFECT ACTIVATED';
+  setFeature(event.type,'WATCH THE REELS TRANSFORM',modifierActionTitle.textContent);
+  showBonusHud(event.type,'MYSTERY MODIFIER',event.label??'');
+  // Give the player a clear view of the original grid and what will happen.
+  schedule(()=>{
+   const reveal=(index)=>{
+    if(index>=changed.length){
+     showGrid(final);
+     const transformed=new Set(changed);
+     cells.forEach(({cell},i)=>cell.classList.toggle('dss-transformed',transformed.has(i)));
+     modifierActionDetail.textContent=(event.multiplier??1)>1?
+      '×'+event.multiplier+' MULTIPLIER APPLIED':
+      changed.length+' SYMBOL'+(changed.length===1?'':'S')+' TRANSFORMED';
+     status.textContent='FEATURE APPLIED: '+modifierActionTitle.textContent;
+     // Leave the final transformed board visible before the full result.
+     schedule(()=>{
+      modifierAction.hidden=true;bonusHeader.hidden=true;
+      showFeatureResult(event,()=>{
+       cells.forEach(({cell})=>cell.classList.remove('dss-transforming','dss-transformed'));
+       nextEvent();
+      });
+     },1400);
+     return;
+    }
+    const i=changed[index],cell=cells[i].cell;
+    cell.classList.add('dss-transforming');
+    modifierActionDetail.textContent='TRANSFORMING '+(index+1)+' OF '+changed.length;
+    schedule(()=>{
+     setCell(i,final[i]);
+     cell.classList.remove('dss-transforming');
+     cell.classList.add('dss-transformed');
+     schedule(()=>reveal(index+1),220);
+    },260);
+   };
+   reveal(0);
+  },650);
+ }
  function playFeatureSteps(event){
+  if(['jen','family','bud'].includes(event.type)){animateCastModifier(event);return;}
   if(event.type==='stash'){playStashBonus(event);return;}
   const boards=event.boards??[];
   if(!boards.length){
@@ -299,7 +355,7 @@ export function createDadsSecretStash(doc=globalThis.document,options={}){
   },DSS_BONUS_PRESENTATION.characterMs);
  }
  function start(){if(destroyed||busy)return;if(state.balance<state.bet){state.message='Insufficient practice credits — reset to continue.';refresh();return;}busy=true;refresh();status.textContent='SIMULATED SPIN — NO TRANSACTION';state=spin(state,rng);events=state.last.events;eventIndex=0;setFeature('main','Reels spinning…','GOOD LUCK!');animateSpin(state.last.grid);}
- const reset=btn('RESET PRACTICE CREDITS',()=>{if(busy)return;state=newGame();resultScreen.hidden=true;bonusHeader.hidden=true;showScene('main');setFeature('main','Watch for 3 bonus symbols.');showGrid(Array(20).fill('jar'));refresh();});controls.append(reset);
+ const reset=btn('RESET PRACTICE CREDITS',()=>{if(busy)return;state=newGame();modifierAction.hidden=true;resultScreen.hidden=true;bonusHeader.hidden=true;showScene('main');setFeature('main','Watch for 3 bonus symbols.');showGrid(Array(20).fill('jar'));refresh();});controls.append(reset);
  root.stopAnimation=()=>{destroyed=true;auto=false;if(currentTimer!==null)clearTimer(currentTimer);currentTimer=null;reelEls.forEach(reel=>reel.classList.remove('dss-spinning','dss-stopping'));};
  root.getState=()=>state;
  showGrid(Array(20).fill('jar'));setFeature('main','3 Stash crates unlock Hold & Win.');refresh();return root;

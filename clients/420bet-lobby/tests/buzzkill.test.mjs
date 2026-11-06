@@ -161,7 +161,7 @@ test('Kevin begins on the floor, advances once through 8 frames, and never leave
  assert(MOM_ENTRY_BEATS.every(beat=>beat.x+BUZZ_STAGE.momWidth/2<BUZZ_STAGE.width));
  assert(BUZZ_STAGE.kevinFloorY+BUZZ_STAGE.kevinHeight*.12<BUZZ_STAGE.height);
 });
-test('BUZZKILL render uses only the cleaned atlas and trims Mom before display',async()=>{
+test('BUZZKILL render uses cleaned Kevin and approved mirrored Mom atlas',async()=>{
  const scene=readFileSync(new URL('../src/buzzkill-scene.js',import.meta.url),'utf8');
  const ui=readFileSync(new URL('../src/buzzkill-ui.js',import.meta.url),'utf8');
  const css=readFileSync(new URL('../src/buzzkill.css',import.meta.url),'utf8');
@@ -175,7 +175,7 @@ test('BUZZKILL render uses only the cleaned atlas and trims Mom before display',
  assert(scene.includes('this.flowerIllustration=null'));
  assert(scene.includes("this.load.spritesheet('buzz-mom-mirrored'"));
  assert(scene.includes(".setFrame(0)"));
- assert(scene.includes('s.mom.setDisplaySize')||scene.includes('s.mom.setDisplaySize('));
+ assert(scene.includes('.setDisplaySize(BUZZ_STAGE.momWidth,BUZZ_STAGE.momHeight)'));
  assert(scene.includes('MOM_ENTRY_BEATS.forEach'));
  assert(scene.includes("s.momOverlay.setFrame(frame)"));
  assert(scene.includes("duration:145,ease:'Sine.InOut'"));

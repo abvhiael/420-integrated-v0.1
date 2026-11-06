@@ -82,7 +82,7 @@ export function mow(grid,rng){
   // On a depleted board, cut a few non-special positions so all five
   // advertised cascades actually play; avoid bonus triggers and sticky Wilds.
   if(!hit.length)hit=current.map((symbol,i)=>!['wild','scatter','stash','mower'].includes(symbol)?i:-1).filter(i=>i>=0);
-  if(!hit.length){boards.push({grid:current.slice(),before:current.slice(),removed:[],units:evaluate(current).units});total+=boards[n].units;continue;}
+  if(!hit.length){boards.push({grid:current.slice(),before:current.slice(),removed:[],units:0});continue;}
   const removed=hit.slice(0,Math.min(hit.length,4+integer(rng,3)));
   const before=current.slice();
   // Introduce recurring symbols within a cascade to create opportunities for

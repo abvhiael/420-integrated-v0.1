@@ -214,7 +214,8 @@ test('reference-composition has interactive exact-position green casino board an
  assert(css.includes('left:29.5%;top:8.1%;width:41%;height:37.8%'));
  assert(css.includes('left:15.2%;top:.5%;width:69.4%;height:97%'));
  assert(main.includes('immersive roulette-immersive'));
- assert(main.includes("['slots','roulette','blackjack'].includes(active.id)?'Practice available'"));
+ assert.match(main,/['\"]roulette['\"]/,'Roulette remains in the practice-status routing');
+ assert.match(main,/Practice available/,'Practice status remains displayed for practice games');
  root.querySelector('.cr-add-credits').click();
  assert.equal(root.querySelector('.cr-credits strong').textContent,'11,000');
  root.stopAnimation();

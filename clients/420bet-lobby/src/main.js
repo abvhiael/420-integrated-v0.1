@@ -6,6 +6,7 @@ import {createBuzzkillPractice} from './buzzkill-ui.js';
 import {createMaryJanePractice} from './mary-jane-ui.js';
 import {createDadsSecretStash} from './dads-secret-stash-ui.js';
 import {createSlotsLobby,slotMachineFromHash,slotMachinePath} from './slots-lobby.js';
+import {createCannabisCowboyShell} from './cannabis-cowboy-ui.js';
 import {WalletIdentity,loadHistory} from './wallet.js';
 import './style.css';
 import './mary-jane-concept.css';
@@ -14,6 +15,7 @@ import './roulette.css';
 import './blackjack.css';
 import './pest-control.css';
 import './buzzkill.css';
+import './cannabis-cowboy.css';
 import {createNativePreview} from './previews.js';
 import {categories,resolveCatalogue,filterGames} from './catalogue.js';
 const app=document.querySelector('#app');
@@ -55,10 +57,8 @@ function render(){
     const note=node('span','game-status',selectedSlotMachine?.preview?'Preview · In development':['slots','roulette','blackjack','mines','crash'].includes(active.id)?'Practice available':statusText[active.status]);bar.append(note);main.append(bar);
     if(active.id==='slots'){
       const wrap=node('div','view-scroll');
-      if(selectedSlotMachine?.preview){
-        const preview=node('section','cowboy-preview-page');
-        preview.append(node('p','eyebrow','420BET · SLOT #4 · PREVIEW'),node('h1','','The Cannabis Cowboy'),node('h2','','High Country Clusters'),node('p','','Cole Haze rides into the sunset with a 6×8 cluster-pays game, growing harvest multipliers, smoke-ring wilds and road-trip bonuses.'),node('p','preview-warning','This machine is in development. Practice gameplay, wagering and payouts are not enabled.'));
-        wrap.append(preview);
+      if(selectedSlotMachine?.id==='cannabis-cowboy'){
+        wrap.append(createCannabisCowboyShell(document));
       }else if(selectedSlotMachine){activePractice=selectedSlotMachine.id==='dads-secret-stash'?createDadsSecretStash(document):selectedSlotMachine.id==='mary-jane-sticky-wilds'?createMaryJanePractice(document):createPractice('slots',document);wrap.append(activePractice);}
       else wrap.append(createSlotsLobby(document,launchSlotMachine));
       main.append(wrap);

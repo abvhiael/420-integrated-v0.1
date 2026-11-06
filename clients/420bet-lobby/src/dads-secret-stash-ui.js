@@ -174,7 +174,7 @@ export function createDadsSecretStash(doc=globalThis.document,options={}){
  const resultTitle=el(doc,'h2','dss-feature-result-title'),resultAmount=el(doc,'strong','dss-feature-result-amount'),resultDetail=el(doc,'p','dss-feature-result-detail');
  resultScreen.append(resultTitle,resultAmount,resultDetail);
  holdWin.append(holdHeading,holdCount,holdTiles,holdTotal);
- scene.append(larryPanel,reels,holdWin,featurePanel,modifierAction,overlay,resultScreen);hero.append(bonusHeader);shell.append(hero,scene,status,message,controls,previewPanel,infoPanel);root.append(shell);
+ scene.append(larryPanel,reels,holdWin,featurePanel,overlay,resultScreen);hero.append(bonusHeader,modifierAction);shell.append(hero,scene,status,message,controls,previewPanel,infoPanel);root.append(shell);
  const money=n=>Number(n).toFixed(2);
  function setCell(i,s){
  const cell=cells[i];cell.cell.dataset.symbol=s;cell.cell.title=DSS_SYMBOL_LABELS[s]??s;

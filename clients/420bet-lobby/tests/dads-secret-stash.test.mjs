@@ -3,7 +3,7 @@ import {existsSync,readFileSync} from 'node:fs';
 import {SLOT_MACHINES,createSlotsLobby,slotMachineFromHash} from '../src/slots-lobby.js';
 import {newGame,qualify,triggerCharacters,modifier,inspection,spin,evaluate} from '../src/dads-secret-stash-engine.js';
 import {createDadsSecretStash} from '../src/dads-secret-stash-ui.js';
-import {DSS_SYMBOL_ART,DSS_CAST_ART,DSS_TRANSITION_ART,DSS_BACKGROUND_ART,DSS_FEATURE_ART} from '../src/dads-secret-stash-assets.js';
+import {DSS_SYMBOL_ART,DSS_CAST_ART,DSS_TRANSITION_ART,DSS_BACKGROUND_ART,DSS_FEATURE_ART,DSS_LARRY_ART} from '../src/dads-secret-stash-assets.js';
 import {SYMBOLS} from '../src/dads-secret-stash-engine.js';
 const board=()=>Array(20).fill('A');const seq=(value)=>()=>value;
 test('Slot #3 routes to own page and lobby keeps three cabinets in view',()=>{assert.equal(SLOT_MACHINES.length,3);assert.equal(SLOT_MACHINES[2].id,'dads-secret-stash');assert.equal(slotMachineFromHash('#game=slots&machine=dads-secret-stash')?.title,"Dad's Secret Stash");const {document}=parseHTML('<html><body></body></html>');const lobby=createSlotsLobby(document);assert.equal(lobby.querySelectorAll('.slots-machine-card').length,3);assert.equal([...lobby.querySelectorAll('.slots-machine-card')].filter(x=>!x.hidden).length,3);assert.equal(lobby.querySelectorAll('.slots-carousel-arrow').length,2);});
@@ -122,5 +122,22 @@ test('Concept-accurate composition has prominent Larry, reel symbol breathing ro
  assert.match(visual,/\.dss-larry\s*\{[^}]*width:100%;height:calc\(100% - 33px\)/s);
  assert.match(visual,/\.dss-symbol-image\s*\{[^}]*width:70%;height:70%/s);
  assert.match(visual,/\.dss-feature-panel\s*\{/);
+ game.stopAnimation();
+});
+
+test('Larry has four valid canonical sprite images and the base game renders the seated sprite',()=>{
+ assert.deepEqual(Object.keys(DSS_LARRY_ART),['main','stash','free','mow']);
+ for(const [mode,url] of Object.entries(DSS_LARRY_ART)){
+  const file=new URL('../public'+url,import.meta.url);
+  assert(existsSync(file),'Missing Larry '+mode+' sprite at '+url);
+  assert.deepEqual([...readFileSync(file).subarray(0,8)],[137,80,78,71,13,10,26,10],'Invalid Larry PNG: '+mode);
+ }
+ const {document}=parseHTML('<html><body></body></html>');
+ const game=createDadsSecretStash(document);
+ assert.equal(game.querySelector('.dss-larry').getAttribute('src'),DSS_LARRY_ART.main);
+ assert.equal(game.querySelector('.dss-larry-panel').dataset.mode,'main');
+ const source=readFileSync(new URL('../src/dads-secret-stash-ui.js',import.meta.url),'utf8');
+ assert.match(source,/setLarryMode\(sceneMode\)/,'Background changes must also change Larry sprite');
+ assert.match(source,/showScene\(\['free','stash','mow'\]/,'Feature announcements must switch backgrounds');
  game.stopAnimation();
 });

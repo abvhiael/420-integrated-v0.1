@@ -3,7 +3,7 @@
 // context, validate signatures/proofs, and redact all other players' hole cards.
 // An EIP-1193 address, websocket payload or HTTP 200 alone is never authority.
 export const POKER_SOURCE='canonical-poker-projection-v1';
-export const POKER_PHASES=Object.freeze(['TABLE_OPEN','SEATED','HAND_COMMITTED','PREFLOP','FLOP','TURN','RIVER','SHOWDOWN','SETTLED','ABORTED','REFUNDED','DISPUTED']);
+export const POKER_PHASES=Object.freeze(['TABLE_OPEN','SEATED','HAND_COMMITTED','PREFLOP','AWAIT_FLOP','FLOP','AWAIT_TURN','TURN','AWAIT_RIVER','RIVER','SHOWDOWN','UNCONTESTED','SETTLED','ABORTED','REFUNDED','DISPUTED']);
 const ids=/^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,79}$/;
 const hash=/^0x[0-9a-fA-F]{64}$/;
 const address=/^0x[0-9a-fA-F]{40}$/;
@@ -57,7 +57,7 @@ export function parsePokerTable(data,session,requestedTableId,previous=null){
  one(Array.isArray(t.community)&&t.community.length<=5&&t.community.every(card),'invalid community cards');
  const communitySeen=new Set(t.community.map(c=>String(c.rank)+c.suit));
  one(communitySeen.size===t.community.length,'duplicate community cards');
- const maxCommunity=({PREFLOP:0,FLOP:3,TURN:4,RIVER:5,SHOWDOWN:5})[t.phase];
+ const maxCommunity=({PREFLOP:0,AWAIT_FLOP:0,FLOP:3,AWAIT_TURN:3,TURN:4,AWAIT_RIVER:4,RIVER:5,SHOWDOWN:5})[t.phase];
  if(maxCommunity!==undefined)one(t.community.length<=maxCommunity,'premature community reveal');
  one(Array.isArray(t.seats)&&t.seats.length===t.seatCount,'invalid seat array');
  const seats=t.seats.map((s,i)=>{

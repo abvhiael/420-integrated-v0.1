@@ -2,7 +2,7 @@
 export const BUZZ_STAGE=Object.freeze({
  width:1200,height:675,kevinX:570,kevinFloorY:558,
  kevinWidth:320,kevinHeight:320,maxLift:78,hover:3,
- momDoorX:1076,momInX:1004,momFloorY:558,momHeight:405,momWidth:260,
+ momDoorX:1062,momInX:1004,momFloorY:558,momHeight:405,momWidth:260,
 });
 // Kevin never loops back to a lower animation frame within a round.
 // Every selected frame is part of one 4x2, 444px-cell production atlas.
@@ -27,8 +27,8 @@ export function kevinYForMultiplier(multiplier,bob=0){
 // The 12 beats interpolate the six fully illustrated Mom key poses.
 // Pose index is 1-based and never cycles; 0.5s final pause comes after speech.
 export const MOM_ENTRY_BEATS=Object.freeze([
- {ms:0,pose:1,x:1076},
- {ms:120,pose:1,x:1069},
+ {ms:0,pose:1,x:1062},
+ {ms:120,pose:1,x:1058},
  {ms:230,pose:2,x:1054},
  {ms:340,pose:2,x:1040},
  {ms:460,pose:3,x:1026},

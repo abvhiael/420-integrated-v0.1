@@ -96,12 +96,10 @@ export function mow(grid,rng){
  // Triggering lawnmowers are removed BEFORE cascade 1. They cannot
  // remain as stationary blocker symbols for any of the five paid cascades.
  const mowerIndices=grid.flatMap((symbol,i)=>symbol==='mower'?[i]:[]);
- const currentStart=grid.map(symbol=>{
-  if(symbol!=='mower')return symbol;
-  let replacement;
-  do{replacement=draw(rng);}while(replacement==='mower');
-  return replacement;
- });
+ // A mower may not land again as a cascade replacement. Using a
+ // deterministic fallback also prevents infinite loops with fixed test RNGs.
+ const ordinaryDraw=()=>{const symbol=draw(rng);return symbol==='mower'?'A':symbol;};
+ const currentStart=grid.map(symbol=>symbol==='mower'?ordinaryDraw():symbol);
  let current=currentStart.slice(),total=0;const boards=[];
  for(let n=0;n<5;n++){
   let hit=current.map((symbol,i)=>LOW.has(symbol)?i:-1).filter(i=>i>=0);
@@ -115,7 +113,7 @@ export function mow(grid,rng){
   // 1,024-ways matches, but do not guarantee a win or alter awards after spin.
   const candidate=choose(rng,['A','K','Q','jar','bong']);
   current=current.map((symbol,i)=>removed.includes(i)?
-   (rand(rng)<.65?candidate:draw(rng)):symbol);
+   (rand(rng)<.65?candidate:ordinaryDraw()):symbol);
   const units=evaluate(current).units;total+=units;
   boards.push({grid:current.slice(),before,removed,units});
  }

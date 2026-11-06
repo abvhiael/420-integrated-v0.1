@@ -67,7 +67,7 @@ export function createSinCityPractice(doc=globalThis.document,options={}){
   const reels=el(doc,'div','sc-reels');reels.setAttribute('role','group');reels.setAttribute('aria-label','Five reels with four symbols each');
   for(let r=0;r<5;r++){const rolling=phase==='spinning'&&r>=stopped;
    const col=el(doc,'div','sc-reel'+(rolling?' sc-reel-spinning':'')+(phase==='spinning'&&!rolling?' sc-reel-stopped':''));col.dataset.reel=String(r);for(let row=0;row<4;row++){
-   const symbol=(visualBoard||state.lastBoard)[r][row],cell=el(doc,'div','sc-symbol'+(symbol==='WILD'?' sc-wild':'')+(symbol==='GEM'?' sc-gem:'')+(highlightCells.some(([c,y])=>c===r&&y===row)?' sc-changing':''));
+   const symbol=(visualBoard||state.lastBoard)[r][row],cell=el(doc,'div','sc-symbol'+(symbol==='WILD'?' sc-wild':'')+(symbol==='GEM'?' sc-gem':'')+(highlightCells.some(([c,y])=>c===r&&y===row)?' sc-changing':''));
    cell.setAttribute('role','img');cell.setAttribute('aria-label','Reel '+(r+1)+' row '+(row+1)+': '+(symbol||'Empty'));
    if(FILES[symbol]){const img=el(doc,'img','');img.src=art('symbols',FILES[symbol]);img.alt='';img.draggable=false;cell.append(img);}
    if(state.mode==='free'&&state.sticky.includes(r*4+row))cell.classList.add('sc-sticky');

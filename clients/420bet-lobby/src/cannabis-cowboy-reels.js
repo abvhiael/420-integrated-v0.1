@@ -1,8 +1,9 @@
+import {COWBOY_SYMBOLS,cowboySymbolImage} from './cannabis-cowboy-ui.js';
 // Visual reel scheduler shared by base spins and Endless Harvest.
 // 700 ms to first stop; 500 ms to reel 2; 750 ms between remaining columns.
 export const REEL_STOP_DELAYS=Object.freeze([700,500,750,750,750,750]);
 export const REEL_STOP_TIMES=Object.freeze(REEL_STOP_DELAYS.map((_,i)=>REEL_STOP_DELAYS.slice(0,i+1).reduce((a,b)=>a+b,0)));
-const SYMBOL_KINDS=['bud','jar','guitar','vinyl','boots','horseshoe','papers','cole','smoke-wild','scatter','road-ticket'];
+const SYMBOL_KINDS=COWBOY_SYMBOLS.map(x=>x.kind);
 export function makeReelStrip(doc,seed=0){
  const mask=doc.createElement('span');mask.className='cc-reel-mask';mask.setAttribute('aria-hidden','true');
  const track=doc.createElement('span');track.className='cc-reel-track';
@@ -11,9 +12,8 @@ export function makeReelStrip(doc,seed=0){
  for(let j=0;j<12;j++){
   const type=SYMBOL_KINDS[(seed+(j%6)*3)%SYMBOL_KINDS.length];
   const tile=doc.createElement('span');tile.className='cc-reel-token cc-symbol-'+type;
-  const glyph=doc.createElement('span');glyph.className='cc-cell-glyph';
-  glyph.textContent=['🌿','🫙','🎸','💿','👢','♧','▤','🤠','◎','🚌','🎫'][(seed+(j%6)*3)%SYMBOL_KINDS.length];
-  tile.append(glyph);track.append(tile);
+  tile.append(cowboySymbolImage(doc,(seed+(j%6)*3)%SYMBOL_KINDS.length));
+  track.append(tile);
  }
  mask.append(track);return mask;
 }

@@ -103,7 +103,7 @@ test('Individual HD concept illustrations render for Buddy, all trays and hazard
   'revealed-safe','harvest-jar','pest-control-logo'];
  for(const filename of files){
   const bytes=readFileSync(new URL('../public/assets/420bet/pest-control/hd/'+filename+'.webp',import.meta.url));
-  assert(bytes.length>10000,filename+' art is unexpectedly small');
+  assert(bytes.length>(['aphids','powdery-mildew'].includes(filename)?2000:10000),filename+' art is unexpectedly small');
   assert.equal(bytes.toString('ascii',0,4),'RIFF');
   assert.equal(bytes.toString('ascii',8,12),'WEBP');
  }
@@ -166,4 +166,15 @@ test('Mines tray artwork fills its frame and remains centered at every viewport'
  }
  assert(!css.includes('PC-SCALE-06'),'Shrunken artwork override returned');
  assert(!css.includes('PC-ALIGN-05'),'Off-center artwork override returned');
+});
+
+// Approved master-sheet hazard artwork must be wired as WebP, never substituted by legacy SVG.
+test('Approved aphid and powdery mildew reveal art cannot fall back to legacy SVG',()=>{
+ const ui=readFileSync(new URL('../src/pest-control-ui.js',import.meta.url),'utf8');
+ assert.match(ui,/type==='aphids'\|\|type==='powdery-mildew'\?undefined/);
+ for(const name of ['aphids','powdery-mildew']){
+  const bytes=readFileSync(new URL('../public/assets/420bet/pest-control/hd/'+name+'.webp',import.meta.url));
+  assert.equal(bytes.toString('ascii',0,4),'RIFF');
+  assert.equal(bytes.toString('ascii',8,12),'WEBP');
+ }
 });

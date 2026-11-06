@@ -3,7 +3,7 @@
 import {createHmac,timingSafeEqual,createHash} from 'node:crypto';
 const HASH=/^0x[0-9a-f]{64}$/i,ADDR=/^0x[0-9a-f]{40}$/i;
 const ID=/^0x[0-9a-f]{64}$/i;
-const allowedPhases=new Set(['TABLE_OPEN','SEATED','HAND_COMMITTED','PREFLOP','FLOP','TURN','RIVER','SHOWDOWN','SETTLED','ABORTED','REFUNDED','DISPUTED']);
+const allowedPhases=new Set(['TABLE_OPEN','SEATED','HAND_COMMITTED','PREFLOP','AWAIT_FLOP','FLOP','AWAIT_TURN','TURN','AWAIT_RIVER','RIVER','SHOWDOWN','UNCONTESTED','SETTLED','ABORTED','REFUNDED','DISPUTED']);
 const safeInt=(v,max=Number.MAX_SAFE_INTEGER)=>Number.isSafeInteger(v)&&v>=0&&v<=max;
 const fail=(message)=>{throw Error(message)};
 const bytes=(s)=>Buffer.from(s,'base64url');

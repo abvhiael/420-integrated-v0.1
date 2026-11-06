@@ -302,6 +302,51 @@ export function createDadsSecretStash(doc=globalThis.document,options={}){
    },500);
    return;
   }
+  if(type==='free'){
+   // The free-spin reel animation shares the main game's 50ms clock and
+   // 1.0/1.5/2.0/2.5/3.0-second stagger. Only previously sticky Wilds
+   // remain stationary; all other positions visibly roll until their reel stops.
+   // Use deterministic display symbols, never the payout RNG.
+   const locked=new Set(entry.previous??[]);
+   for(const i of locked)setCell(i,'wild');
+   const stopTicks=[20,30,40,50,60];
+   let tickNumber=0;
+   reelEls.forEach(reel=>{
+    reel.classList.remove('dss-stopping');
+    reel.classList.add('dss-spinning','dss-free-spinning');
+   });
+   const tick=()=>{
+    tickNumber++;
+    for(let reel=0;reel<5;reel++){
+     if(tickNumber>stopTicks[reel])continue;
+     if(tickNumber===stopTicks[reel]){
+      for(let row=0;row<4;row++){
+       const i=reel*4+row;
+       setCell(i,grid[i]);
+       cells[i].cell.classList.toggle('dss-sticky',(entry.sticky??[]).includes(i));
+       cells[i].cell.classList.toggle('dss-win-flash',(entry.newWilds??[]).includes(i));
+      }
+      reelEls[reel].classList.remove('dss-spinning','dss-free-spinning');
+      reelEls[reel].classList.add('dss-stopping');
+      reelEls[reel].dataset.freeStop=String(tickNumber*50);
+     }else{
+      for(let row=0;row<4;row++){
+       const i=reel*4+row;
+       if(!locked.has(i))setCell(i,SYMBOLS[(tickNumber*3+reel*7+row*5)%SYMBOLS.length]);
+      }
+     }
+    }
+    if(tickNumber<stopTicks[4]){schedule(tick,50);return;}
+    reelEls.forEach(reel=>reel.classList.remove('dss-stopping'));
+    status.textContent='FREE SPIN REELS STOPPED — '+(entry.newWilds??[]).length+' NEW STICKY WILDS';
+    schedule(()=>{
+     cells.forEach(({cell})=>cell.classList.remove('dss-win-flash'));
+     done();
+    },680);
+   };
+   schedule(tick,50);
+   return;
+  }
   // During free spins and HOA inspection, temporarily cycle only non-locked
   // positions, then snap to the predetermined engine result. Never reroll wins.
   const fixed=new Set(type==='free'?(entry.previous??[]):(entry.locked??[]).filter(i=>!(entry.newLocks??[]).includes(i)));
@@ -512,7 +557,7 @@ export function createDadsSecretStash(doc=globalThis.document,options={}){
  }
  function start(){if(destroyed||busy||previewPriorState)return;clearWinTrace();if(state.balance<state.bet){state.message='Insufficient practice credits — reset to continue.';refresh();return;}busy=true;refresh();status.textContent='SIMULATED SPIN — NO TRANSACTION';state=spin(state,rng);events=state.last.events;eventIndex=0;setFeature('main','Reels spinning…','GOOD LUCK!');animateSpin(state.last.grid);}
  const reset=btn('RESET PRACTICE CREDITS',()=>{if(busy)return;state=newGame();previewPriorState=null;clearWinTrace();modifierAction.hidden=true;resultScreen.hidden=true;bonusHeader.hidden=true;showScene('main');setFeature('main','Watch for 3 bonus symbols.');showGrid(Array(20).fill('jar'));refresh();});controls.append(reset);
- root.stopAnimation=()=>{destroyed=true;auto=false;if(currentTimer!==null)clearTimer(currentTimer);currentTimer=null;reelEls.forEach(reel=>reel.classList.remove('dss-spinning','dss-stopping'));};
+ root.stopAnimation=()=>{destroyed=true;auto=false;if(currentTimer!==null)clearTimer(currentTimer);currentTimer=null;reelEls.forEach(reel=>reel.classList.remove('dss-spinning','dss-stopping','dss-free-spinning'));};
  root.getState=()=>state;
  showGrid(Array(20).fill('jar'));setFeature('main','3 Stash crates unlock Hold & Win.');refresh();return root;
 }

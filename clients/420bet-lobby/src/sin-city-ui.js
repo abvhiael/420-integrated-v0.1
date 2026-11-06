@@ -23,7 +23,7 @@ export function createSinCityPractice(doc=globalThis.document,options={}){
  const later=(fn,ms)=>{if(dead)return;const id=view.setTimeout?.(()=>{timers.delete(id);if(!dead)fn();},ms);if(id!==undefined)timers.add(id);else fn();};
  const clear=()=>{for(const id of timers)view.clearTimeout?.(id);timers.clear();};
  root.stopAnimation=()=>{dead=true;auto=false;busy=false;clear();void audioContext?.close?.();};
- root.getPresentationState=()=>({phase,stopped,winIndex,winCount:winPaths.length,changedCount,qaActive:qaPriorState!==null,qaSelection,mode:state.mode});
+ root.getPresentationState=()=>({phase,stopped,winIndex,winCount:winPaths.length,changedCount,qaActive:qaPriorState!==null,qaSelection,mode:state.mode,freeCompletedTotal:state.freeCompletedTotal});
  const button=(label,cls,action)=>{const b=el(doc,'button',cls,label);b.type='button';b.addEventListener('click',action);return b;};
  function showPanel(){
   const scrim=el(doc,'div','sc-modal-backdrop'),modal=el(doc,'section','sc-modal');
@@ -35,7 +35,7 @@ export function createSinCityPractice(doc=globalThis.document,options={}){
     ['PUFF PUFF PASS','Three or more ashtray symbols: one eligible symbol on each affected reel becomes a Wild for this result.'],
     ['HOTBOX RESPINS','Three or more emerald gems activate three respins. Every collected gem remains visible and locked while other symbols spin. New gems reset the counter to three. The collection pays once when the respins finish, with growing rewards from three gems through twenty.'],
     ['CHRONIC SESSIONS','Scatter symbols across 3, 4, or 5 reels trigger 8, 12, or 20 free spins. EVERY Wild that lands stays visible and locked for the remainder of the feature, up to all twenty positions. New qualifying scatters may retrigger five more spins, subject to a 50-spin limit.'],
-    ['DROP IT LIKE IT\'S HOT','During free spins, ANY one Lowrider activates a random 2×, 3×, 4×, or 5× multiplier applied to ways wins. Every Wild remains sticky until free spins finish.']
+    ['DROP IT LIKE IT\'S HOT','During free spins, ANY natural Lowrider assigns a 2×, 3×, 4× or 5× multiplier to an individual Wild. Its badge stays visible and applies to later free-spin ways wins. Highest active badge applies; multipliers do not stack. Wilds never substitute for Lowriders or Ashtrays.']
    ];
    for(const [heading,copy] of headings)modal.append(el(doc,'h3','',heading),el(doc,'p','',copy));
    const showWaysTable=(name,tableValues,cls)=>{
@@ -98,12 +98,14 @@ export function createSinCityPractice(doc=globalThis.document,options={}){
       state.lastFeature==='free-start'?state.lastAwardedSpins+' FREE SPINS AWARDED':'MULTIPLIER APPLIED TO THIS SPIN';
    hud.append(el(doc,'strong','',heading),el(doc,'span','',detail));cabinet.append(hud);
   }
+  const playArea=el(doc,'div','sc-play-area');
   const reels=el(doc,'div','sc-reels');reels.setAttribute('role','group');reels.setAttribute('aria-label','Five reels with four symbols each');
   for(let r=0;r<5;r++){const rolling=phase==='spinning'&&r>=stopped;
    const col=el(doc,'div','sc-reel'+(rolling?' sc-reel-spinning':'')+(phase==='spinning'&&!rolling?' sc-reel-stopped':''));col.dataset.reel=String(r);for(let row=0;row<4;row++){
    const symbol=(visualBoard||state.lastBoard)[r][row],cell=el(doc,'div','sc-symbol'+(symbol==='WILD'?' sc-wild':'')+(symbol==='GEM'?' sc-gem':'')+(highlightCells.some(([c,y])=>c===r&&y===row)?' sc-changing':''));
    cell.setAttribute('role','img');cell.setAttribute('aria-label','Reel '+(r+1)+' row '+(row+1)+': '+(symbol||'Empty'));
    if(FILES[symbol]){const img=el(doc,'img','');img.src=art('symbols',FILES[symbol]);img.alt='';img.draggable=false;cell.append(img);}
+   if(symbol==='WILD'&&state.wildMultipliers?.[r*4+row])cell.append(el(doc,'b','sc-wild-multiplier',state.wildMultipliers[r*4+row]+'×'));
    if((phase==='spinning'?spinningMode:state.mode)==='free'&&state.sticky.includes(r*4+row))cell.classList.add('sc-sticky');
    if((phase==='spinning'?spinningMode:state.mode)==='hotbox'&&state.locked.includes(r*4+row))cell.classList.add('sc-locked');
    col.append(cell);
@@ -131,7 +133,8 @@ export function createSinCityPractice(doc=globalThis.document,options={}){
        heldCell.classList.add('sc-held-active',symbol==='GEM'?'sc-held-gem':'sc-held-wild');
        const image=el(doc,'img');image.src=art('symbols',FILES[symbol]);image.alt='';
        image.draggable=false;heldCell.append(image);
-       heldCell.setAttribute('aria-label',symbol+' locked in place');
+       if(symbol==='WILD'&&state.wildMultipliers?.[key])heldCell.append(el(doc,'b','sc-wild-multiplier',state.wildMultipliers[key]+'×'));
+       heldCell.setAttribute('aria-label',symbol+' locked in place'+(state.wildMultipliers?.[key]?' with '+state.wildMultipliers[key]+'x multiplier':''));
       }
       overlay.append(heldCell);
      }
@@ -139,7 +142,20 @@ export function createSinCityPractice(doc=globalThis.document,options={}){
     }
    }
    reels.append(col);}
-  cabinet.append(reels);
+  playArea.append(reels);
+  const hotboxVisible=state.mode==='hotbox'||(phase==='spinning'&&spinningMode==='hotbox')||state.lastFeature==='hotbox-start';
+  if(hotboxVisible){
+   const paybox=el(doc,'aside','sc-hotbox-side');paybox.setAttribute('aria-label','Hotbox Respins payout schedule');
+   paybox.append(el(doc,'strong','sc-hotbox-heading','HOTBOX PAYOUTS'),el(doc,'small','','COLLECT GEMS · WIN × TOTAL BET'));
+   const list=el(doc,'div','sc-hotbox-payout-list');
+   for(let gems=3;gems<=20;gems++){
+    const item=el(doc,'div','sc-hotbox-tier'+(state.locked.length===gems?' sc-hotbox-current':''));
+    item.append(el(doc,'span','',gems+' GEMS'),el(doc,'b','',HOTBOX_PAYS[gems]+'×'));
+    list.append(item);
+   }
+   paybox.append(list);playArea.append(paybox);
+  }
+  cabinet.append(playArea);
   if(phase==='win'&&winPaths.length){
    const svg=doc.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('class','sc-win-lines');svg.setAttribute('viewBox','0 0 500 400');svg.setAttribute('preserveAspectRatio','none');svg.setAttribute('aria-label','Neon green winning way '+(winIndex+1)+' of '+winPaths.length);
    const path=winPaths[winIndex],points=cells=>cells.map(([r,row])=>(r*100+50)+','+(row*100+50)).join(' ');

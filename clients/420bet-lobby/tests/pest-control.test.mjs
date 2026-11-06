@@ -155,3 +155,15 @@ test('Reference-layout skin keeps centered tray art, visible wallpaper, betting 
  assert(root.querySelector('.pc-harvest'),'Harvest action remains available');
  assert(root.querySelector('.pc-tile-safe .pc-icon'),'Safe reveal art remains wired');
 });
+
+test('Mines tray artwork fills its frame and remains centered at every viewport',()=>{
+ const css=readFileSync(new URL('../src/pest-control.css',import.meta.url),'utf8');
+ const fill=css.slice(css.lastIndexOf('/* PC-FRAME-FILL:'));
+ assert(fill.includes('.pc-tile .pc-tile-image'));
+ assert(fill.includes('.pc-tile .pc-icon'));
+ for(const rule of ['inset:0;','width:100%;','height:100%;','object-fit:cover;','object-position:center center;','transform:none;']){
+  assert(fill.includes(rule), 'Missing frame-fill rule: '+rule);
+ }
+ assert(!css.includes('PC-SCALE-06'),'Shrunken artwork override returned');
+ assert(!css.includes('PC-ALIGN-05'),'Off-center artwork override returned');
+});

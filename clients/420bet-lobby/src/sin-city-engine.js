@@ -29,14 +29,32 @@ export function awardFreeSpins(board){
 }
 export function waysWins(board,stake){
  const wins=[];let total=0;
+ // Only count all-Wild ways once, at the highest available pay tier.
  for(const [symbol,pays] of Object.entries(PAYTABLE)){
-  let ways=1,length=0;
+  let ways=1,wildOnly=1,length=0;
   for(const reel of board){
    const matches=reel.filter(s=>s===symbol||s==='WILD').length;
    if(!matches)break;
-   ways*=matches;length++;
+   ways*=matches;wildOnly*=reel.filter(s=>s==='WILD').length;length++;
   }
-  if(length>=3){const amount=round(stake*ways*pays[length-3]);wins.push({symbol,length,ways,amount});total+=amount;}
+  if(length>=3){
+   const distinctWays=ways-wildOnly;
+   if(distinctWays>0){
+    const amount=round(stake*distinctWays*pays[length-3]);
+    wins.push({symbol,length,ways:distinctWays,amount});total+=amount;
+   }
+  }
+ }
+ let pureWildWays=1,pureWildLength=0;
+ for(const reel of board){
+  const matches=reel.filter(s=>s==='WILD').length;
+  if(!matches)break;
+  pureWildWays*=matches;pureWildLength++;
+ }
+ if(pureWildLength>=3){
+  const amount=round(stake*pureWildWays*PAYTABLE.BOBBY[pureWildLength-3]);
+  wins.push({symbol:'WILD',length:pureWildLength,ways:pureWildWays,amount});
+  total+=amount;
  }
  return {wins,total:round(total)};
 }
@@ -106,7 +124,10 @@ export function nextRound(previous,rng=Math.random,forcedStops){
    const scatters=awardFreeSpins(board);
    if(scatters){s.mode='free';s.freeRemaining=scatters;s.freePlayed=0;feature='free-start';}
    else if(count(board,'GEM')>=3){
-    s.mode='hotbox';s.respinReturn='base';s.respins=3;s.locked=[];feature='hotbox-start';
+    s.mode='hotbox';s.respinReturn='base';s.respins=3;
+    s.locked=[];
+    for(let r=0;r<REELS;r++)for(let row=0;row<ROWS;row++)if(board[r][row]==='GEM')s.locked.push(lockKey(r,row));
+    feature='hotbox-start';
    }
    const scatterCount=board.filter(reel=>reel.includes('SCATTER')).length;
    payout=round(payout+s.roundStake*({3:.5,4:2,5:10}[scatterCount]||0));

@@ -1,7 +1,7 @@
 import test from 'node:test';import assert from 'node:assert/strict';import {parseHTML} from 'linkedom';
 import {existsSync,readFileSync} from 'node:fs';
 import {SLOT_MACHINES,createSlotsLobby,slotMachineFromHash} from '../src/slots-lobby.js';
-import {newGame,qualify,triggerCharacters,modifier,inspection,spin,evaluate} from '../src/dads-secret-stash-engine.js';
+import {newGame,qualify,triggerCharacters,modifier,inspection,spin,evaluate,stashBonus} from '../src/dads-secret-stash-engine.js';
 import {createDadsSecretStash,DSS_BONUS_PRESENTATION} from '../src/dads-secret-stash-ui.js';
 import {DSS_SYMBOL_ART,DSS_CAST_ART,DSS_TRANSITION_ART,DSS_BACKGROUND_ART,DSS_FEATURE_ART,DSS_LARRY_ART} from '../src/dads-secret-stash-assets.js';
 import {SYMBOLS} from '../src/dads-secret-stash-engine.js';
@@ -174,4 +174,40 @@ test('Regular-play Larry uses a chair-height crop anchored at his face rather th
  assert.match(block,/object-position:50% 0%/);
  assert(!block.includes('[data-mode="free"]'), 'Do not change free-spins sizing without visual evidence');
  assert(!block.includes('[data-mode="stash"]'), 'Do not change stash sizing without visual evidence');
+});
+
+test('Secret Stash Hold & Win has 20 locks, three-respin reset and exact awarded prizes',()=>{
+ // Constant high RNG: no new prizes on respins, exhausts exactly three turns.
+ const empty=stashBonus(()=>.975);
+ assert.equal(empty.steps[0].kind,'start');
+ assert.equal(empty.steps[0].board.filter(x=>x!==null).length,3);
+ assert.equal(empty.steps.length,4);
+ assert.deepEqual(empty.steps.slice(1).map(x=>x.remaining),[2,1,0]);
+ assert.equal(empty.filled,3);
+ assert.equal(empty.units,empty.prizes.reduce((a,b)=>a+b,0));
+ // Alternating low/high RNG forces a lock on eligible places and resets the timer.
+ let n=0;const alternating=stashBonus(()=>[.02,.98,.02,.98,.02,.98][n++%6]);
+ assert(alternating.steps.length>=2);
+ assert(alternating.steps.length<=41);
+ assert(alternating.steps.every(x=>x.board.length===20));
+ assert(alternating.steps.every(x=>x.remaining>=0&&x.remaining<=3));
+ for(let i=1;i<alternating.steps.length;i++){
+  const prev=alternating.steps[i-1].board,now=alternating.steps[i].board;
+  prev.forEach((p,k)=>{if(p!==null)assert.equal(now[k],p,'Hold & Win prizes must remain locked');});
+  assert.equal(alternating.steps[i].remaining,alternating.steps[i].newIndices.length?3:Math.max(0,alternating.steps[i-1].remaining-1));
+ }
+ assert.equal(alternating.units,Math.round(alternating.prizes.reduce((a,b)=>a+b,0)*100)/100);
+});
+test('Secret Stash UI has independent 5x4 bonus board, not a summary-only popup',()=>{
+ const {document}=parseHTML('<html><body></body></html>');
+ const game=createDadsSecretStash(document);
+ assert.equal(game.querySelectorAll('.dss-hold-cell').length,20);
+ assert(game.querySelector('.dss-hold-count'));
+ assert(game.querySelector('.dss-hold-total'));
+ assert.equal(game.querySelector('.dss-hold-win').hidden,true);
+ const source=readFileSync(new URL('../src/dads-secret-stash-ui.js',import.meta.url),'utf8');
+ assert.match(source,/if\(event\.type==='stash'\)\{playStashBonus\(event\);return;\}/);
+ assert.match(source,/schedule\(advance,950\)/);
+ assert.match(source,/schedule\(\(\)=>\{holdWin\.hidden=true;reels\.hidden=false;nextEvent\(\);\},1800\)/);
+ game.stopAnimation();
 });

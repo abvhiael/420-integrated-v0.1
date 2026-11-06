@@ -97,7 +97,7 @@ test('per-paid-session 1000x cap never overcredits the bonus',()=>{
 test('Mary Jane cabinet, artwork tile, controls, INFO table and payline guide render',()=>{
  const {document,window}=parseHTML('<html><body></body></html>');
  const lobby=createSlotsLobby(document);
- assert.equal(SLOT_MACHINES.length,3);
+ assert(SLOT_MACHINES.length>=3,'Slots lobby must retain at least the original machines');
  assert(lobby.textContent.includes("Mary Jane's Sticky Wilds"));
  assert.equal(slotMachineFromHash('#game=slots&machine=mary-jane-sticky-wilds')?.id,'mary-jane-sticky-wilds');
  const root=createMaryJanePractice(document);
@@ -302,7 +302,7 @@ test('oversized THC BAR, joint, bong and lighter have dedicated centered art wit
   const re=new RegExp('\\.mj-symbol-art\\.mj-art-'+name+'\\s*\\{([^}]*)\\}');
   const match=css.match(re);
   assert(match,'missing per-symbol CSS for '+name);
-  assert.match(match[1],/inset:\\d+% \\d+% \\d+% \\d+%/);
+   assert.match(match[1],/inset:\d+% \d+% \d+% \d+%/);
   assert.match(match[1],/transform:translate/);
   assert.doesNotMatch(match[1],/background-position/i,'sprite atlas must not be recentered to another symbol');
  }

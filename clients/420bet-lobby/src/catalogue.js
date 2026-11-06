@@ -4,7 +4,7 @@ export const games = Object.freeze([
   ['keno','Keno','Casino',null],['plinko','Plinko','Casino',null],
   ['slots','Slots','Casino',null],['roulette','Roulette','Casino',null],
   ['blackjack','Blackjack','Casino',null],['mines','Pest Control','Casino',null],
-  ['crash','BUZZKILL!','Casino',null],['video-poker','Video Poker','Poker',null],
+  ['crash','BUZZKILL!','Casino',null],['video-poker','Royal Kush Video Poker','Poker',null],
   ['live-poker','Live Poker','Poker','clients/420bet-poker'],
   ['poker-tournaments','Poker Tournaments','Poker','clients/420bet-poker'],
   ['fantasy','Fantasy Sports','Fantasy','clients/420bet-fantasy/daily'],

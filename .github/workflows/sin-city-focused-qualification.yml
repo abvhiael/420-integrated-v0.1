@@ -1,0 +1,75 @@
+name: Sin City High Rollers focused qualification
+on:
+  push:
+    branches:
+      - fix/sin-city-reel-sequence-bonus-reveals
+    paths:
+      - 'clients/420bet-lobby/src/sin-city-*'
+      - 'clients/420bet-lobby/src/main.js'
+      - 'clients/420bet-lobby/public/assets/420bet/slots-lobby/sin-city-high-rollers-lobby-cabinet.png'
+      - 'clients/420bet-lobby/src/slots-lobby.js'
+      - 'clients/420bet-lobby/tests/sin-city-*'
+      - '.github/workflows/sin-city-focused-qualification.yml'
+  workflow_dispatch:
+jobs:
+  sin-city-focused:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    defaults:
+      run:
+        working-directory: clients/420bet-lobby
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install client dependencies without lifecycle scripts
+        run: npm install --ignore-scripts --no-package-lock --no-audit --no-fund
+      - name: Targeted Sin City engine and controls
+        run: node --test tests/sin-city-*.test.mjs tests/slots-lobby.test.mjs
+      - name: Vite production build
+        run: npm run build
+      - name: Check asset paths and valid PNG headers
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const base='public/assets/420bet/sin-city-high-rollers';
+          const files=[
+            'branding/logo_sin_city_high_rollers.png',
+            'characters/char_bobby_las_vegas_smoking.png',
+            'characters/char_bobby_las_vegas_confident.png',
+            'characters/char_bobby_las_vegas_celebration.png',
+            ...['bud','jar','ashtray','grinder','lighter','papers','bong','lowrider','chips','mic','dollar_pendant','10','j','q','k','a','bobby_wild','wild_leaf','scatter_420','emerald_gem'].map(n=>'symbols/sym_'+n+'.png'),
+            ...['banner_puff_puff_pass','banner_hotbox_respins','banner_chronic_sessions_free_spins','banner_drop_it_like_its_hot','banner_big_win'].map(n=>'features/'+n+'.png'),
+            ...['bg_las_vegas_strip','bg_sunset_skyline','bg_vip_lounge'].map(n=>'backgrounds/'+n+'.png')
+          ];
+          for(const file of files){
+            const path=base+'/'+file;
+            if(!fs.existsSync(path))throw Error('Missing asset: '+path);
+            const data=fs.readFileSync(path);
+            if(data.subarray(0,8).toString('hex')!=='89504e470d0a1a0a')throw Error('Invalid PNG: '+path);
+            const w=data.readUInt32BE(16),h=data.readUInt32BE(20);
+            if(!w||!h)throw Error('Zero-size PNG: '+path);
+            console.log(path+' '+w+'x'+h);
+          }
+          NODE
+      - name: Confirm fifth lobby cabinet art exists
+        run: test -s public/assets/420bet/slots-lobby/sin-city-high-rollers-lobby-cabinet.png
+      - name: Install headless Chrome driver for browser verification
+        run: npm install --no-save --ignore-scripts --no-audit --no-fund puppeteer-core
+      - name: Validate desktop/mobile artwork alignment and controls
+        run: |
+          npx vite preview --host 127.0.0.1 --port 4173 > /tmp/sin-city-vite.log 2>&1 &
+          APP_PID=$!
+          trap 'kill $APP_PID || true' EXIT
+          for i in {1..30}; do if curl -sf http://127.0.0.1:4173/ >/dev/null; then break; fi; sleep 1; done
+          CHROME_BIN=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          export CHROME_BIN
+          node tests/sin-city-browser.mjs
+      - name: Preserve cabinet screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sin-city-cabinet-layout
+          path: clients/420bet-lobby/qualification/sin-city/*.png
+          if-no-files-found: ignore

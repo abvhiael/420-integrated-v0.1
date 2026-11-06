@@ -22,12 +22,15 @@ jobs:
       - name: Install isolated dependencies
         working-directory: clients/420bet-lobby
         run: npm install --no-audit --no-fund
+      - name: Qualify affected M3–M8 engine regressions
+        working-directory: clients/420bet-lobby
+        run: node --test tests/cannabis-cowboy-m3.test.mjs tests/cannabis-cowboy-m4.test.mjs tests/cannabis-cowboy-m5.test.mjs tests/cannabis-cowboy-m6.test.mjs tests/cannabis-cowboy-m8.test.mjs
       - name: Run deterministic RTP audits across wager levels
         working-directory: clients/420bet-lobby
         run: |
-          node scripts/cannabis-cowboy-m8-audit.mjs --samples 50000 --seed 1234567 --bet 10 --output artifacts/cannabis-cowboy-m8/rtp-bet10.json
-          node scripts/cannabis-cowboy-m8-audit.mjs --samples 50000 --seed 7654321 --bet 20 --output artifacts/cannabis-cowboy-m8/rtp-bet20.json
-          node scripts/cannabis-cowboy-m8-audit.mjs --samples 50000 --seed 44112233 --bet 50 --output artifacts/cannabis-cowboy-m8/rtp-bet50.json
+          node scripts/cannabis-cowboy-m8-audit.mjs --samples 200000 --seed 7654321 --bet 10 --output artifacts/cannabis-cowboy-m8/rtp-bet10.json
+          node scripts/cannabis-cowboy-m8-audit.mjs --samples 200000 --seed 7654321 --bet 20 --output artifacts/cannabis-cowboy-m8/rtp-bet20.json
+          node scripts/cannabis-cowboy-m8-audit.mjs --samples 200000 --seed 7654321 --bet 50 --output artifacts/cannabis-cowboy-m8/rtp-bet50.json
       - uses: actions/upload-artifact@v4
         if: always()
         with:

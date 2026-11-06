@@ -1,0 +1,28 @@
+name: Cannabis Cowboy approved asset and bonus QA
+on:
+  pull_request:
+    paths:
+      - 'clients/420bet-lobby/src/cannabis-cowboy-*'
+      - 'clients/420bet-lobby/tests/cannabis-cowboy-*.test.mjs'
+      - '.github/workflows/420bet-cowboy-art-bonus-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  cowboy-art-and-bonus-qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install isolated lobby dependencies
+        working-directory: clients/420bet-lobby
+        run: npm install --no-audit --no-fund
+      - name: Run focused Cowboy M2–M7 and art/bonus regressions
+        working-directory: clients/420bet-lobby
+        run: node --test tests/cannabis-cowboy-m2.test.mjs tests/cannabis-cowboy-m3.test.mjs tests/cannabis-cowboy-m4.test.mjs tests/cannabis-cowboy-m5.test.mjs tests/cannabis-cowboy-m6.test.mjs tests/cannabis-cowboy-m7.test.mjs tests/cannabis-cowboy-art-bonus-qa.test.mjs
+      - name: Verify Vite production build
+        working-directory: clients/420bet-lobby
+        run: npm run build

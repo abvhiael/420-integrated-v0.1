@@ -63,7 +63,7 @@ export function createPokerWalletAuth({origin,chainId,secret,clock=()=>Date.now(
     const issuedAt=clock(),expiresAt=issuedAt+challengeMs;
     const state={address,nonce,issuedAt,expiresAt};
     pending.set(nonce,state);
-    return send(res,200,{message:challengeMessage({...state,address:body.address}),nonce,chainId,expiresAt});
+    return send(res,200,{message:challengeMessage(state),nonce,chainId,expiresAt});
    }
    if(req.url==='/api/420bet/poker/v1/auth/verify'){
     const nonce=body.nonce;

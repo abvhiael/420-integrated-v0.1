@@ -65,7 +65,7 @@ export function createDadsSecretStash(doc=globalThis.document,options={}){
  const featureCounter=el(doc,'div','dss-feature-counter','5 REELS · 1,024 WAYS');
  const featureBanner=el(doc,'img','dss-feature-banner');featureBanner.src='/assets/420bet/dads-secret-stash/overlays/hold_and_win.png';featureBanner.alt='Dad’s Secret Stash Hold & Win';
  const featureList=el(doc,'div','dss-feature-list');
- for(const [label,description] of [['SECRET STASH','3 stash crates → Hold & Win'],['FIVE MINUTES OF PEACE','3 scatters → Free Spins'],['MOW THE LAWN','3 lawnmowers → Cascades'],['SURPRISE VISITORS','Jen · Kids · HOA · Bud']]){
+ for(const [label,description] of [['SECRET STASH','3 stash crates → Hold & Win'],['FIVE MINUTES OF PEACE','3 scatters → Free Spins'],['MOW THE LAWN','3 lawnmowers → 5 Cascades'],['SURPRISE VISITORS','Jen · Kids · HOA · Bud']]){
   const item=el(doc,'div','dss-feature-item');
   item.append(el(doc,'b','',label),el(doc,'span','',description));featureList.append(item);
  }
@@ -104,7 +104,7 @@ export function createDadsSecretStash(doc=globalThis.document,options={}){
  });
   const previewButton=btn('▶ TEST SELECTED BONUS',()=>startBonusPreview(),'dss-preview-button');
  previewPanel.append(previewDescription,previewSelect,previewButton);
- const infoPanel=el(doc,'section','dss-info');infoPanel.hidden=true;infoPanel.append(el(doc,'h2','',"How to play — Dad's Secret Stash"),el(doc,'p','', 'Practice-only 5×4 reels, 1,024 ways. Matching paying symbols from the left on 3–5 consecutive reels win. Gary Wild substitutes for paying symbols. Each qualifying cast event independently triggers with 25% probability.'),el(doc,'p','',"3+ Jen: random mystery modifier. Tyler + Emma: random Family Chaos. 3+ Mr. Keller: 2–5 locked-premium respins. 3+ Bud: Fetch Wild. 3+ Scatters: Five Minutes of Peace free spins. 3+ Stash: crate prizes. 3+ Mowers: cascading lawnmower feature. The simulated return is NOT calibrated or certified. Maximum per round: "+MAX_WIN_MULTIPLIER+"× stake."),btn('CLOSE',()=>{infoPanel.hidden=true;}));
+ const infoPanel=el(doc,'section','dss-info');infoPanel.hidden=true;infoPanel.append(el(doc,'h2','',"How to play — Dad's Secret Stash"),el(doc,'p','', 'Practice-only 5×4 reels, 1,024 ways. Matching paying symbols from the left on 3–5 consecutive reels win. Gary Wild substitutes for paying symbols. Each qualifying cast event independently triggers with 25% probability.'),el(doc,'p','',"3+ Jen: random mystery modifier. Tyler + Emma: random Family Chaos. 3+ Mr. Keller: 5 locked-premium respins. 3+ Bud: Fetch Wild. 3+ Scatters: Five Minutes of Peace free spins. 3+ Stash: crate prizes. 3+ Mowers: 5 cascading lawnmower rounds. The simulated return is NOT calibrated or certified. Maximum per round: "+MAX_WIN_MULTIPLIER+"× stake."),btn('CLOSE',()=>{infoPanel.hidden=true;}));
  const overlay=el(doc,'div','dss-overlay');overlay.hidden=true;
  const backdrop=el(doc,'img','dss-transition-backdrop');backdrop.alt='';backdrop.hidden=true;
  const bubble=el(doc,'div','dss-bubble');bubble.hidden=true;
@@ -120,6 +120,10 @@ export function createDadsSecretStash(doc=globalThis.document,options={}){
    for(const url of art){const image=el(doc,'img','dss-cast-image');image.src=url;image.alt='';
     image.addEventListener('error',()=>{image.hidden=true;});portrait.insertBefore(image,nameTag);}
    nameTag.textContent=FEATURE_PERSON[type]??'GARY';
+   // Feature screens already show Larry in his actual scene sprite. Do not
+   // float a cropped sitting portrait without the chair during transitions.
+   const scenery=['free','stash','mow'].includes(type);
+   portrait.hidden=scenery;overlay.dataset.scene=type;
    portrait.dataset.character=type;portrait.classList.toggle('dss-cast-pair',art.length>1);
    loadArt(backdrop,DSS_TRANSITION_ART[type]);loadArt(titleArt,DSS_FEATURE_ART[type]);
  }
@@ -135,9 +139,28 @@ export function createDadsSecretStash(doc=globalThis.document,options={}){
  const holdHeading=el(doc,'header','dss-hold-heading','DAD’S SECRET STASH · HOLD & WIN');
  const holdCount=el(doc,'div','dss-hold-count','RESPINS REMAINING: 3');
  const holdTiles=el(doc,'div','dss-hold-tiles');
+ // Reusable stylized seven-leaflet cannabis silhouette for every unfilled tile.
+ // Never use emoji placeholders, which vary by platform and look like blobs.
+ const svgNS='http://www.w3.org/2000/svg';
+ function cannabisLeaf(){
+  const svg=doc.createElementNS(svgNS,'svg');
+  svg.setAttribute('class','dss-cannabis-leaf');
+  svg.setAttribute('viewBox','0 0 100 100');
+  svg.setAttribute('aria-hidden','true');
+  const stalk=doc.createElementNS(svgNS,'path');
+  stalk.setAttribute('d','M50 94 L50 68');
+  stalk.setAttribute('class','dss-leaf-stem');svg.append(stalk);
+  for(const [angle,scale] of [[-59,.65],[-39,.8],[-20,.93],[0,1.08],[20,.93],[39,.8],[59,.65]]){
+   const path=doc.createElementNS(svgNS,'path');
+   path.setAttribute('d','M0 0 L-4 -11 L-12 -15 L-7 -21 L-15 -28 L-7 -32 L-10 -41 L-3 -44 L0 -68 L3 -44 L10 -41 L7 -32 L15 -28 L7 -21 L12 -15 L4 -11 Z');
+   path.setAttribute('transform','translate(50 81) rotate('+angle+') scale('+scale+')');
+   path.setAttribute('class','dss-leaf-blade');svg.append(path);
+  }
+  return svg;
+ }
  const holdCells=Array.from({length:20},()=>{
-  const tile=el(doc,'div','dss-hold-cell'),value=el(doc,'span','dss-hold-value');
-  tile.append(value);holdTiles.append(tile);return {tile,value};
+  const tile=el(doc,'div','dss-hold-cell'),leaf=cannabisLeaf(),value=el(doc,'span','dss-hold-value');
+  tile.append(leaf,value);holdTiles.append(tile);return {tile,leaf,value};
  });
  const holdTotal=el(doc,'div','dss-hold-total','COLLECTING STASH PRIZES…');
  const bonusHeader=el(doc,'div','dss-bonus-hud');bonusHeader.hidden=true;
@@ -151,7 +174,7 @@ export function createDadsSecretStash(doc=globalThis.document,options={}){
  const resultTitle=el(doc,'h2','dss-feature-result-title'),resultAmount=el(doc,'strong','dss-feature-result-amount'),resultDetail=el(doc,'p','dss-feature-result-detail');
  resultScreen.append(resultTitle,resultAmount,resultDetail);
  holdWin.append(holdHeading,holdCount,holdTiles,holdTotal);
- scene.append(larryPanel,reels,holdWin,featurePanel,bonusHeader,modifierAction,overlay,resultScreen);shell.append(hero,scene,status,message,controls,previewPanel,infoPanel);root.append(shell);
+ scene.append(larryPanel,reels,holdWin,featurePanel,modifierAction,overlay,resultScreen);hero.append(bonusHeader);shell.append(hero,scene,status,message,controls,previewPanel,infoPanel);root.append(shell);
  const money=n=>Number(n).toFixed(2);
  function setCell(i,s){
  const cell=cells[i];cell.cell.dataset.symbol=s;cell.cell.title=DSS_SYMBOL_LABELS[s]??s;
@@ -303,16 +326,19 @@ export function createDadsSecretStash(doc=globalThis.document,options={}){
   tick();
  }
  function playStashBonus(event){
-  // A distinct 5x4 feature board, not the base reels and not a summary toast.
   reels.hidden=true;holdWin.hidden=false;showBonusHud('stash','3 RESPINS','LOCK PRIZES');
   const steps=event.steps??[];let index=0;
-  const render=(snapshot)=>{
-   holdCells.forEach(({tile,value},i)=>{
+  const apply=(snapshot,lockedBefore=null,stoppedReel=null)=>{
+   holdCells.forEach(({tile,leaf,value},i)=>{
+    if(stoppedReel!==null&&i%5!==stoppedReel)return;
     const prize=snapshot.board[i],newly=snapshot.newIndices.includes(i);
     tile.classList.toggle('dss-hold-locked',prize!==null);
     tile.classList.toggle('dss-hold-new',newly);
-    value.textContent=prize===null?'🌿':prize.toFixed(2)+'×';
+    tile.classList.remove('dss-hold-cycling');
+    leaf.hidden=prize!==null;
+    value.textContent=prize===null?'':prize.toFixed(2)+'×';
    });
+   if(stoppedReel!==null)return;
    holdCount.textContent='RESPINS REMAINING: '+snapshot.remaining;
    showBonusHud('stash','RESPIN '+snapshot.number,'REMAINING '+snapshot.remaining);
    holdTotal.textContent=snapshot.kind==='start'?'3 STASH PRIZES LOCKED — FIND MORE!':
@@ -326,11 +352,42 @@ export function createDadsSecretStash(doc=globalThis.document,options={}){
     holdCount.textContent=event.completed?'FULL STASH!':'HOLD & WIN COMPLETE';
     holdTotal.textContent=(previewPriorState?'DEMO TOTAL (NOT AWARDED): ':'TOTAL STASH WIN: ')+money(event.units*state.last.stake)+' PRACTICE CREDITS';
     setFeature('stash',event.filled+' prizes collected','TOTAL '+event.units.toFixed(2)+'× BET');
-    status.textContent='SECRET STASH BONUS AWARDED';
+    status.textContent='SECRET STASH BONUS FINISHED';
     showFeatureResult(event,()=>{holdWin.hidden=true;reels.hidden=false;bonusHeader.hidden=true;nextEvent();});
     return;
    }
-   render(steps[index++]);schedule(advance,950);
+   const snapshot=steps[index++];
+   if(snapshot.kind==='start'){apply(snapshot);schedule(advance,850);return;}
+   // All five columns visually spin together. Reel 1 stops at 1.0 sec,
+   // reel 2 at 1.5 sec, continuing to reel 5 at 3.0 sec, exactly as base play.
+   const previous=steps[index-2]?.board??Array(20).fill(null);
+   for(const {tile} of holdCells)tile.classList.remove('dss-hold-new');
+   for(let i=0;i<20;i++){
+    const {tile,leaf,value}=holdCells[i];
+    if(previous[i]!==null)continue; // Prize remains locked across respins.
+    tile.classList.add('dss-hold-cycling');
+    leaf.hidden=false;value.textContent='';
+   }
+   let tick=0;
+   const spinTick=()=>{
+    tick++;
+    for(let reel=0;reel<5;reel++){
+     if(tick>20+reel*10)continue;
+     if(tick===20+reel*10){
+      apply(snapshot,previous,reel);
+      holdTiles.dataset.lastStoppedReel=String(reel+1);
+     }else{
+      for(let row=0;row<4;row++){
+       const i=row*5+reel,{value}=holdCells[i];
+       if(previous[i]===null)value.textContent=tick%4===0?'?':'';
+      }
+     }
+    }
+    if(tick<60){schedule(spinTick,50);return;}
+    apply(snapshot);
+    schedule(advance,850);
+   };
+   schedule(spinTick,50);
   };
   advance();
  }

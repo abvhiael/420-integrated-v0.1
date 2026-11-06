@@ -108,13 +108,16 @@ export function createSinCityPractice(doc=globalThis.document,options={}){
   const qa=el(doc,'section','sc-qa-panel');qa.setAttribute('aria-label','Temporary bonus testing controls');
   const qaTitle=el(doc,'strong','','BONUS TESTER · PRACTICE DEMO');
   const qaNote=el(doc,'small','','Runs the real bonus presentation; practice-credit balance is restored when you end the test.');
-  const qaSelect=el(doc,'select','sc-qa-select');qaSelect.setAttribute('aria-label','Select bonus to test');
-  for(const feature of SIN_CITY_BONUS_PREVIEWS){const choice=el(doc,'option','',feature.label);choice.setAttribute('value',feature.id);choice.selected=feature.id===qaSelection;qaSelect.append(choice);}
-  qaSelect.disabled=busy||qaPriorState!==null;
-  qaSelect.addEventListener('change',()=>{const selected=[...qaSelect.querySelectorAll('option')].filter(option=>option.selected).at(-1);qaSelection=selected?.getAttribute('value')??'puff';});
+  const qaChoices=el(doc,'div','sc-qa-choices');qaChoices.setAttribute('role','group');qaChoices.setAttribute('aria-label','Select bonus to test');
+  for(const feature of SIN_CITY_BONUS_PREVIEWS){
+   const choice=button(feature.label,'sc-qa-choice'+(qaSelection===feature.id?' sc-qa-choice-active':''),()=>{qaSelection=feature.id;render();});
+   choice.setAttribute('aria-pressed',String(qaSelection===feature.id));
+   choice.disabled=busy||qaPriorState!==null;
+   qaChoices.append(choice);
+  }
   const qaButton=button('▶ TEST SELECTED BONUS','sc-qa-button',startBonusTest);qaButton.disabled=busy||qaPriorState!==null;
   const endButton=button('■ END BONUS TEST','sc-qa-end',endBonusTest);endButton.disabled=qaPriorState===null;
-  qa.append(qaTitle,qaNote,qaSelect,qaButton,endButton);
+  qa.append(qaTitle,qaNote,qaChoices,qaButton,endButton);
   if(qaPriorState!==null)qa.append(el(doc,'span','sc-qa-active','TEST MODE · NO REAL CREDIT CHANGES · '+qaSelection.toUpperCase()));
   root.append(qa);
   if(phase==='win'){scene.classList.add('sc-click-to-total');scene.addEventListener('click',event=>{if(event.target.closest?.('button'))return;showTotalWin();});}

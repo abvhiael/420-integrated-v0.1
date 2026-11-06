@@ -89,6 +89,10 @@ export function mountBuzzkillScene(parent,{reducedMotion=false}={}){
      .setOrigin(.5,1).setAlpha(1).setDepth(9);
    const initialMomWidth=Math.min(BUZZ_STAGE.momWidth,BUZZ_STAGE.momHeight*this.mom.width/Math.max(1,this.mom.height));
    this.mom.setDisplaySize(initialMomWidth,BUZZ_STAGE.momHeight);
+   // Pose-to-pose crossfade, not abrupt frame swapping.
+   this.momOverlay=this.add.image(BUZZ_STAGE.momDoorX,BUZZ_STAGE.momFloorY,this.mom.texture.key)
+     .setOrigin(.5,1).setDisplaySize(initialMomWidth,BUZZ_STAGE.momHeight)
+     .setVisible(false).setAlpha(0).setDepth(9.2);
    this.mom.setVisible(false);
    this.doorGlow=this.add.rectangle(1070,315,178,448,0xffedb6,0).setDepth(8);
    // The door is a separate articulated prop; the fixed room never pans or scales.
@@ -120,6 +124,9 @@ export function mountBuzzkillScene(parent,{reducedMotion=false}={}){
    if(!sceneRef||disposed)return;
    this.timeCounter+=Math.min(dt,55)/1000;
    const t=this.timeCounter;
+   if(this.momOverlay?.visible){
+     this.momOverlay.setPosition(this.mom.x,this.mom.y);
+   }
    const intensity=cinematicEffectsOff?0:Phaser.Math.Clamp(Math.log2(Math.max(1,level))/3.4,0,1);
    const bob=!reducedMotion&&!crashed?Math.sin(t*1.5)*BUZZ_STAGE.hover:0;
    if(!crashed){
@@ -179,6 +186,8 @@ export function mountBuzzkillScene(parent,{reducedMotion=false}={}){
    if(!sceneRef)return;
    const s=sceneRef;s.tweens.killAll();
    s.mom.setVisible(false).setPosition(BUZZ_STAGE.momDoorX,BUZZ_STAGE.momFloorY).setAlpha(1).setOrigin(.5,1);
+   s.tweens.killTweensOf(s.momOverlay);
+   s.momOverlay.setVisible(false).setAlpha(0);
    const first=s.momPoseKeys.get(1)||'buzz-mom-pose-1';
    if(s.textures.exists(first))s.mom.setTexture(first);
    s.mom.setDisplaySize(Math.min(BUZZ_STAGE.momWidth,BUZZ_STAGE.momHeight*s.mom.width/Math.max(1,s.mom.height)),BUZZ_STAGE.momHeight);
@@ -208,11 +217,20 @@ export function mountBuzzkillScene(parent,{reducedMotion=false}={}){
    s.crashText.setAlpha(0);
    function pose(index){
      const key=s.momPoseKeys.get(index)||'buzz-mom-pose-'+index;
-     if(s.textures.exists(key)){
+     if(!s.textures.exists(key)||s.mom.texture.key===key)return;
+     const commit=()=>{
        s.mom.setTexture(key).setOrigin(.5,1);
-       // Preserve an equal on-screen HEIGHT, not each image's original empty margins.
        s.mom.setDisplaySize(Math.min(BUZZ_STAGE.momWidth,BUZZ_STAGE.momHeight*s.mom.width/Math.max(1,s.mom.height)),BUZZ_STAGE.momHeight);
-     }
+     };
+     if(reducedMotion){commit();return;}
+     s.tweens.killTweensOf(s.momOverlay);
+     s.momOverlay.setTexture(key).setOrigin(.5,1);
+     s.momOverlay.setDisplaySize(Math.min(BUZZ_STAGE.momWidth,BUZZ_STAGE.momHeight*s.momOverlay.width/Math.max(1,s.momOverlay.height)),BUZZ_STAGE.momHeight);
+     s.momOverlay.setPosition(s.mom.x,s.mom.y).setVisible(true).setAlpha(0);
+     s.tweens.add({targets:s.momOverlay,alpha:1,duration:105,ease:'Sine.InOut',onComplete:()=>{
+       if(disposed||gen!==crashGeneration)return;
+       commit();s.momOverlay.setVisible(false).setAlpha(0);
+     }});
    }
    pose(1);
    if(reducedMotion){

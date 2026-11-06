@@ -1,12 +1,12 @@
 import test from 'node:test';import assert from 'node:assert/strict';import {parseHTML} from 'linkedom';
 import {existsSync,readFileSync} from 'node:fs';
 import {SLOT_MACHINES,createSlotsLobby,slotMachineFromHash} from '../src/slots-lobby.js';
-import {newGame,qualify,triggerCharacters,modifier,inspection,spin,evaluate} from '../src/dads-secret-stash-engine.js';
+import {newGame,qualify,triggerCharacters,modifier,inspection,spin,evaluate,stashBonus} from '../src/dads-secret-stash-engine.js';
 import {createDadsSecretStash,DSS_BONUS_PRESENTATION} from '../src/dads-secret-stash-ui.js';
 import {DSS_SYMBOL_ART,DSS_CAST_ART,DSS_TRANSITION_ART,DSS_BACKGROUND_ART,DSS_FEATURE_ART,DSS_LARRY_ART} from '../src/dads-secret-stash-assets.js';
 import {SYMBOLS} from '../src/dads-secret-stash-engine.js';
 const board=()=>Array(20).fill('A');const seq=(value)=>()=>value;
-test('Slot #3 routes to own page and lobby keeps three cabinets in view',()=>{assert.equal(SLOT_MACHINES.length,3);assert.equal(SLOT_MACHINES[2].id,'dads-secret-stash');assert.equal(slotMachineFromHash('#game=slots&machine=dads-secret-stash')?.title,"Dad's Secret Stash");const {document}=parseHTML('<html><body></body></html>');const lobby=createSlotsLobby(document);assert.equal(lobby.querySelectorAll('.slots-machine-card').length,3);assert.equal([...lobby.querySelectorAll('.slots-machine-card')].filter(x=>!x.hidden).length,3);assert.equal(lobby.querySelectorAll('.slots-carousel-arrow').length,2);});
+test('Slot #3 routes to own page and lobby keeps three cabinets in view',()=>{assert(SLOT_MACHINES.length>=3);assert.equal(SLOT_MACHINES[2].id,'dads-secret-stash');assert.equal(slotMachineFromHash('#game=slots&machine=dads-secret-stash')?.title,"Dad's Secret Stash");const {document}=parseHTML('<html><body></body></html>');const lobby=createSlotsLobby(document);assert.equal(lobby.querySelectorAll('.slots-machine-card').length,SLOT_MACHINES.length);assert.equal([...lobby.querySelectorAll('.slots-machine-card')].filter(x=>!x.hidden).length,3);assert.equal(lobby.querySelectorAll('.slots-carousel-arrow').length,2);});
 test('Character conditions require exact thresholds',()=>{const jen=board();jen[0]=jen[1]=jen[2]='jen';assert.equal(qualify(jen).jen,true);jen[2]='A';assert.equal(qualify(jen).jen,false);const family=board();family[3]='tyler';family[4]='emma';assert.equal(qualify(family).family,true);const k=board();k[0]=k[1]=k[2]='keller';assert.equal(qualify(k).keller,true);const bud=board();bud[0]=bud[1]=bud[2]='bud';assert.equal(qualify(bud).bud,true);});
 test('25 percent conditional trigger independently applies to every feature',()=>{const grid=board();grid.splice(0,3,'jen','jen','jen');grid.splice(3,3,'keller','keller','keller');grid.splice(6,3,'bud','bud','bud');grid[9]='tyler';grid[10]='emma';assert.deepEqual(triggerCharacters(grid,seq(.249)),{jen:true,family:true,keller:true,bud:true});assert.deepEqual(triggerCharacters(grid,seq(.25)),{jen:false,family:false,keller:false,bud:false});});
 test('Jen outcome selectors and fetch wild preserve 5x4 grid',()=>{const grid=board();const jen=modifier(grid,'jen',seq(.3));assert.equal(jen.label,'PANIC WILDS');assert(jen.grid.filter(s=>s==='wild').length>=2);const bud=modifier(grid,'bud',seq(.5));assert.equal(bud.label,'FETCH WILD!');assert(bud.grid.filter(s=>s==='wild').length>=2);});
@@ -174,4 +174,79 @@ test('Regular-play Larry uses a chair-height crop anchored at his face rather th
  assert.match(block,/object-position:50% 0%/);
  assert(!block.includes('[data-mode="free"]'), 'Do not change free-spins sizing without visual evidence');
  assert(!block.includes('[data-mode="stash"]'), 'Do not change stash sizing without visual evidence');
+});
+
+test('Secret Stash Hold & Win has 20 locks, three-respin reset and exact awarded prizes',()=>{
+ // Constant high RNG: no new prizes on respins, exhausts exactly three turns.
+ const empty=stashBonus(()=>.975);
+ assert.equal(empty.steps[0].kind,'start');
+ assert.equal(empty.steps[0].board.filter(x=>x!==null).length,3);
+ assert.equal(empty.steps.length,4);
+ assert.deepEqual(empty.steps.slice(1).map(x=>x.remaining),[2,1,0]);
+ assert.equal(empty.filled,3);
+ assert.equal(empty.units,empty.prizes.reduce((a,b)=>a+b,0));
+ // Alternating low/high RNG forces a lock on eligible places and resets the timer.
+ let n=0;const alternating=stashBonus(()=>[.02,.98,.02,.98,.02,.98][n++%6]);
+ assert(alternating.steps.length>=2);
+ assert(alternating.steps.length<=41);
+ assert(alternating.steps.every(x=>x.board.length===20));
+ assert(alternating.steps.every(x=>x.remaining>=0&&x.remaining<=3));
+ for(let i=1;i<alternating.steps.length;i++){
+  const prev=alternating.steps[i-1].board,now=alternating.steps[i].board;
+  prev.forEach((p,k)=>{if(p!==null)assert.equal(now[k],p,'Hold & Win prizes must remain locked');});
+  assert.equal(alternating.steps[i].remaining,alternating.steps[i].newIndices.length?3:Math.max(0,alternating.steps[i-1].remaining-1));
+ }
+ assert.equal(alternating.units,Math.round(alternating.prizes.reduce((a,b)=>a+b,0)*100)/100);
+});
+test('Secret Stash UI has independent 5x4 bonus board, not a summary-only popup',()=>{
+ const {document}=parseHTML('<html><body></body></html>');
+ const game=createDadsSecretStash(document);
+ assert.equal(game.querySelectorAll('.dss-hold-cell').length,20);
+ assert(game.querySelector('.dss-hold-count'));
+ assert(game.querySelector('.dss-hold-total'));
+ assert.equal(game.querySelector('.dss-hold-win').hidden,true);
+ const source=readFileSync(new URL('../src/dads-secret-stash-ui.js',import.meta.url),'utf8');
+ assert.match(source,/if\(event\.type==='stash'\)\{playStashBonus\(event\);return;\}/);
+ assert.match(source,/schedule\(advance,950\)/);
+ assert.match(source,/schedule\(\(\)=>\{holdWin\.hidden=true;reels\.hidden=false;nextEvent\(\);\},1800\)/);
+ game.stopAnimation();
+});
+
+test('Actual 3+ Stash spin enters a playable Hold & Win scene and returns only after award reveal',()=>{
+ const {document,window}=parseHTML('<html><body></body></html>');let now=0,id=0;
+ const jobs=[];
+ const game=createDadsSecretStash(document,{
+  rng:()=>.975,
+  setTimeout:(fn,ms)=>{const job={id:++id,time:now+ms,fn,cancelled:false};jobs.push(job);return job.id;},
+  clearTimeout:key=>{const job=jobs.find(x=>x.id===key);if(job)job.cancelled=true;}
+ });
+ const advance=until=>{
+  let guard=0;
+  while(true){
+   if(guard++>1500)throw Error('Bonus timeline did not settle');
+   jobs.sort((a,b)=>a.time-b.time);
+   const next=jobs.find(x=>!x.cancelled&&x.time<=until);
+   if(!next)break;
+   next.cancelled=true;now=next.time;next.fn();
+  }
+  now=until;
+ };
+ const button=[...game.querySelectorAll('button')].find(x=>x.textContent.includes('SPIN'));
+ button.dispatchEvent(new window.Event('click',{bubbles:true}));
+ assert.equal(game.getState().last.events.length,1);
+ assert.equal(game.getState().last.events[0].type,'stash');
+ advance(6000);
+ const bonus=game.querySelector('.dss-hold-win'),reels=game.querySelector('.dss-reels');
+ assert.equal(bonus.hidden,false,'Real bonus board displayed after splash');
+ assert.equal(reels.hidden,true,'Base reels must be replaced during Hold & Win');
+ assert.equal(bonus.querySelectorAll('.dss-hold-cell').length,20);
+ assert.match(game.querySelector('.dss-hold-count').textContent,/RESPINS REMAINING/);
+ advance(10000);
+ assert.equal(bonus.hidden,false,'Keep bonus scene visible through all respins and final result');
+ advance(12500);
+ assert.equal(bonus.hidden,true,'Bonus scene should exit after payout reveal');
+ assert.equal(reels.hidden,false,'Base reels return after all feature steps');
+ assert.equal(game.querySelector('.dss-larry-panel').dataset.mode,'main');
+ assert(game.getState().last.win>0);
+ game.stopAnimation();
 });

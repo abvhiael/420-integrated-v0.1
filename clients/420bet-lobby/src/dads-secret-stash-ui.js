@@ -92,7 +92,18 @@ export function createDadsSecretStash(doc=globalThis.document,options={}){
  shell.style.setProperty('--dss-active-wallpaper',`url("${DSS_BACKGROUND_ART[sceneMode]}")`);
 }
  showScene();
- scene.append(larryPanel,reels,featurePanel,overlay);shell.append(hero,scene,status,message,controls,infoPanel);root.append(shell);
+ const holdWin=el(doc,'section','dss-hold-win');holdWin.hidden=true;
+ holdWin.setAttribute('aria-label','Secret Stash Hold and Win prize board');
+ const holdHeading=el(doc,'header','dss-hold-heading','DAD’S SECRET STASH · HOLD & WIN');
+ const holdCount=el(doc,'div','dss-hold-count','RESPINS REMAINING: 3');
+ const holdTiles=el(doc,'div','dss-hold-tiles');
+ const holdCells=Array.from({length:20},()=>{
+  const tile=el(doc,'div','dss-hold-cell'),value=el(doc,'span','dss-hold-value');
+  tile.append(value);holdTiles.append(tile);return {tile,value};
+ });
+ const holdTotal=el(doc,'div','dss-hold-total','COLLECTING STASH PRIZES…');
+ holdWin.append(holdHeading,holdCount,holdTiles,holdTotal);
+ scene.append(larryPanel,reels,holdWin,featurePanel,overlay);shell.append(hero,scene,status,message,controls,infoPanel);root.append(shell);
  const money=n=>Number(n).toFixed(2);
  function setCell(i,s){
  const cell=cells[i];cell.cell.dataset.symbol=s;cell.cell.title=DSS_SYMBOL_LABELS[s]??s;
@@ -141,8 +152,40 @@ export function createDadsSecretStash(doc=globalThis.document,options={}){
 }
  function refresh(){balance.textContent='BALANCE '+money(state.balance);betLabel.textContent='BET '+money(state.bet);winLabel.textContent='WIN '+money(state.last?.win??0);round.textContent='SPINS '+state.rounds;message.textContent=state.message;lower.disabled=busy;higher.disabled=busy;play.disabled=busy||state.balance<state.bet;autoBtn.disabled=state.balance<state.bet&&!busy;}
  function schedule(fn,ms){currentTimer=setTimer(()=>{currentTimer=null;if(!destroyed)fn();},ms);}
- function finish(){busy=false;overlay.hidden=true;showScene('main');setFeature('main',state.last?.message??'Watch for 3 scatters, stash crates or lawnmowers.','5 REELS · 1,024 WAYS');refresh();if(auto&&autoLeft>0&&state.balance>=state.bet){autoLeft--;schedule(start,400);}else{auto=false;autoLeft=0;autoBtn.textContent='AUTO ×10';}}
+ function finish(){busy=false;overlay.hidden=true;holdWin.hidden=true;reels.hidden=false;showGrid(state.last?.grid??Array(20).fill('jar'));showScene('main');setFeature('main',state.last?.message??'Watch for 3 scatters, stash crates or lawnmowers.','5 REELS · 1,024 WAYS');refresh();if(auto&&autoLeft>0&&state.balance>=state.bet){autoLeft--;schedule(start,400);}else{auto=false;autoLeft=0;autoBtn.textContent='AUTO ×10';}}
+ function playStashBonus(event){
+  // A distinct 5x4 feature board, not the base reels and not a summary toast.
+  reels.hidden=true;holdWin.hidden=false;
+  const steps=event.steps??[];let index=0;
+  const render=(snapshot)=>{
+   holdCells.forEach(({tile,value},i)=>{
+    const prize=snapshot.board[i],newly=snapshot.newIndices.includes(i);
+    tile.classList.toggle('dss-hold-locked',prize!==null);
+    tile.classList.toggle('dss-hold-new',newly);
+    value.textContent=prize===null?'🌿':prize.toFixed(2)+'×';
+   });
+   holdCount.textContent='RESPINS REMAINING: '+snapshot.remaining;
+   holdTotal.textContent=snapshot.kind==='start'?'3 STASH PRIZES LOCKED — FIND MORE!':
+    snapshot.newIndices.length?'NEW STASH FOUND! RESPINS RESET TO 3':'NO NEW PRIZE — RESPINS COUNT DOWN';
+   setFeature('stash','Locked prizes stay on the board as respins continue.',
+    'RESPINS '+snapshot.remaining+' · PRIZES '+snapshot.board.filter(v=>v!==null).length+'/20');
+   status.textContent='HOLD & WIN · RESPIN '+snapshot.number+' · '+snapshot.remaining+' REMAINING';
+  };
+  const advance=()=>{
+   if(index>=steps.length){
+    holdCount.textContent=event.completed?'FULL STASH!':'HOLD & WIN COMPLETE';
+    holdTotal.textContent='TOTAL STASH WIN: '+money(event.units*state.last.stake)+' PRACTICE CREDITS';
+    setFeature('stash',event.filled+' prizes collected','TOTAL '+event.units.toFixed(2)+'× BET');
+    status.textContent='SECRET STASH BONUS AWARDED';
+    schedule(()=>{holdWin.hidden=true;reels.hidden=false;nextEvent();},1800);
+    return;
+   }
+   render(steps[index++]);schedule(advance,950);
+  };
+  advance();
+ }
  function playFeatureSteps(event){
+  if(event.type==='stash'){playStashBonus(event);return;}
   const boards=event.boards??[];
   if(!boards.length){
    if(event.grid)showGrid(event.grid);

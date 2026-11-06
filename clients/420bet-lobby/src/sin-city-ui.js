@@ -1,4 +1,5 @@
 import {initialState,nextRound,PAYTABLE,BASE_STRIPS,FREE_STRIPS,visibleBoard} from './sin-city-engine.js';
+import {SIN_CITY_BONUS_PREVIEWS,makeSinCityBonusPreview} from './sin-city-bonus-preview.js';
 const ROOT='/assets/420bet/sin-city-high-rollers/';
 const FILES={
  BUD:'sym_bud.png',JAR:'sym_jar.png',ASH:'sym_ashtray.png',GRINDER:'sym_grinder.png',
@@ -15,12 +16,14 @@ export function createSinCityPractice(doc=globalThis.document,options={}){
  const root=el(doc,'section','sc-game');root.dataset.practiceGame='sin-city-high-rollers';
  let state=initialState(),panel='',auto=false,autoLeft=0,turbo=false,muted=true,busy=false,dead=false,showBanner='',visualBoard=null,audioContext=null;
  let phase='idle',pending=null,stopped=0,frame=0,changedCount=0,winIndex=0,highlightCells=[],winPaths=[],spinningMode='base',previousBalance=1000;
+ // TEMPORARY QA controls; all demo credits are isolated and the original state is restored.
+ let qaSelection='puff',qaPriorState=null,qaForcedStops=null;
  const timers=new Set();
  const playCue=()=>{if(muted||dead)return;try{const Constructor=view.AudioContext||view.webkitAudioContext;if(!Constructor)return;audioContext??=new Constructor();const tone=audioContext.createOscillator(),gain=audioContext.createGain();tone.type='sine';tone.frequency.value=520;gain.gain.value=.025;tone.connect(gain);gain.connect(audioContext.destination);tone.start();tone.stop(audioContext.currentTime+.11);}catch{}};
  const later=(fn,ms)=>{if(dead)return;const id=view.setTimeout?.(()=>{timers.delete(id);if(!dead)fn();},ms);if(id!==undefined)timers.add(id);else fn();};
  const clear=()=>{for(const id of timers)view.clearTimeout?.(id);timers.clear();};
  root.stopAnimation=()=>{dead=true;auto=false;busy=false;clear();void audioContext?.close?.();};
- root.getPresentationState=()=>({phase,stopped,winIndex,winCount:winPaths.length,changedCount});
+ root.getPresentationState=()=>({phase,stopped,winIndex,winCount:winPaths.length,changedCount,qaActive:qaPriorState!==null,qaSelection,mode:state.mode});
  const button=(label,cls,action)=>{const b=el(doc,'button',cls,label);b.type='button';b.addEventListener('click',action);return b;};
  function showPanel(){
   const scrim=el(doc,'div','sc-modal-backdrop'),modal=el(doc,'section','sc-modal');
@@ -41,7 +44,7 @@ export function createSinCityPractice(doc=globalThis.document,options={}){
    modal.append(el(doc,'p','sc-note','All awards are candidate practice-credit amounts. 5,000× total wager maximum across a paid spin and its feature. Reel strips and theoretical RTP are not certified.'));
   }else{
    modal.append(el(doc,'p','','All credits are fictional practice units with no cash value. AUTO plays up to 10 paid spins, then pauses when a bonus begins. TURBO changes animation speed only. No wallet, deposits or real-money settlement.'));
-   const reset=button('RESET 1,000 PRACTICE CREDITS','sc-reset',()=>{auto=false;autoLeft=0;state=initialState();panel='';clear();render();});
+   const reset=button('RESET 1,000 PRACTICE CREDITS','sc-reset',()=>{auto=false;autoLeft=0;qaPriorState=null;qaForcedStops=null;state=initialState();panel='';clear();render();});
    reset.disabled=busy||state.mode!=='base';modal.append(reset);
   }
   scrim.append(modal);scrim.addEventListener('click',e=>{if(e.target===scrim){panel='';render();}});
@@ -90,10 +93,10 @@ export function createSinCityPractice(doc=globalThis.document,options={}){
   const plus=button('+','sc-control',()=>{state={...state,stake:Math.min(50,state.stake+1)};render();});
   const spin=button(state.mode==='base'?'SPIN':state.mode==='free'?'FREE SPIN':'RESPIN','sc-spin',step);
   spin.disabled=busy||(!auto&&state.mode==='base'&&state.balance<state.stake);
-  minus.disabled=plus.disabled=busy||auto||state.mode!=='base';
+  minus.disabled=plus.disabled=busy||auto||state.mode!=='base'||qaPriorState!==null;
   const autoBtn=button('AUTO '+(auto?'ON':'OFF'),'sc-control'+(auto?' sc-selected':''),()=>{
    auto=!auto;autoLeft=auto?10:0;render();if(auto)later(autoContinue,250);
-  });autoBtn.disabled=busy||state.mode!=='base';
+  });autoBtn.disabled=busy||state.mode!=='base'||qaPriorState!==null;
   const turboBtn=button('TURBO '+(turbo?'ON':'OFF'),'sc-control'+(turbo?' sc-selected':''),()=>{turbo=!turbo;render();});turboBtn.disabled=busy;
   const sound=button(muted?'SOUND OFF':'SOUND ON','sc-control',()=>{muted=!muted;playCue();render();});
   sound.setAttribute('aria-pressed',String(!muted));
@@ -101,9 +104,36 @@ export function createSinCityPractice(doc=globalThis.document,options={}){
   cabinet.append(controls);content.append(cabinet);scene.append(content);
   const footer=el(doc,'p','sc-disclaimer','PRACTICE CREDITS ONLY · NO REAL WAGERS · NO CASH VALUE · PROVISIONAL UNVERIFIED ODDS');scene.append(footer);
   root.append(scene);
+  // TEMPORARY QA PANEL: remove this block and its preview helper after feature approval.
+  const qa=el(doc,'section','sc-qa-panel');qa.setAttribute('aria-label','Temporary bonus testing controls');
+  const qaTitle=el(doc,'strong','','BONUS TESTER · PRACTICE DEMO');
+  const qaNote=el(doc,'small','','Runs the real bonus presentation; practice-credit balance is restored when you end the test.');
+  const qaSelect=el(doc,'select','sc-qa-select');qaSelect.setAttribute('aria-label','Select bonus to test');
+  for(const feature of SIN_CITY_BONUS_PREVIEWS){const choice=el(doc,'option','',feature.label);choice.value=feature.id;choice.selected=feature.id===qaSelection;qaSelect.append(choice);}
+  qaSelect.value=qaSelection;qaSelect.disabled=busy||qaPriorState!==null;
+  qaSelect.addEventListener('change',()=>{qaSelection=qaSelect.value;});
+  const qaButton=button('▶ TEST SELECTED BONUS','sc-qa-button',startBonusTest);qaButton.disabled=busy||qaPriorState!==null;
+  const endButton=button('■ END BONUS TEST','sc-qa-end',endBonusTest);endButton.disabled=qaPriorState===null;
+  qa.append(qaTitle,qaNote,qaSelect,qaButton,endButton);
+  if(qaPriorState!==null)qa.append(el(doc,'span','sc-qa-active','TEST MODE · NO REAL CREDIT CHANGES · '+qaSelection.toUpperCase()));
+  root.append(qa);
   if(phase==='win'){scene.classList.add('sc-click-to-total');scene.addEventListener('click',event=>{if(event.target.closest?.('button'))return;showTotalWin();});}
   if(showBanner){const overlay=el(doc,'div','sc-feature-overlay');overlay.setAttribute('role','status');const picture=el(doc,'img');picture.src=art('features',showBanner);picture.alt=state.lastMessage;overlay.append(picture);root.append(overlay);}
   if(panel)showPanel();
+ }
+ function endBonusTest(){
+  if(qaPriorState===null)return;
+  clear();state=qaPriorState;qaPriorState=null;qaForcedStops=null;
+  auto=false;autoLeft=0;busy=false;pending=null;phase='idle';
+  visualBoard=null;showBanner='';highlightCells=[];winPaths=[];winIndex=0;stopped=0;render();
+ }
+ function startBonusTest(){
+  if(dead||busy||qaPriorState!==null)return;
+  const preview=makeSinCityBonusPreview(qaSelection,state);
+  qaPriorState=structuredClone(state);
+  qaForcedStops=preview.stops;
+  state=preview.state;auto=false;autoLeft=0;panel='';
+  step();
  }
  function autoContinue(){
   if(!auto||busy||dead)return;
@@ -218,7 +248,11 @@ export function createSinCityPractice(doc=globalThis.document,options={}){
   if(state.mode==='base'&&state.balance<state.stake){auto=false;render();return;}
   clear();showBanner='';winPaths=[];highlightCells=[];frame=0;stopped=0;changedCount=0;winIndex=0;
   spinningMode=state.mode;previousBalance=state.balance;
-  pending=nextRound(state,options.rng,options.pickStops?.(state));
+  const forced=qaForcedStops??options.pickStops?.(state);
+  qaForcedStops=null;
+  pending=nextRound(state,options.rng,forced);
+  // Feature testing uses a separate simulated state: do not award or consume credits.
+  if(qaPriorState!==null)pending.balance=state.balance;
   busy=true;phase='spinning';playCue();
   visualBoard=state.lastBoard.map(reel=>[...reel]);render();
   // Reel one settles at 0.75 s; each following reel exactly 0.5 s later.

@@ -2,7 +2,7 @@ name: Sin City High Rollers focused qualification
 on:
   push:
     branches:
-      - calibrate/sin-city-target-95-96
+      - feat/sin-city-bonus-presentation-sticky-multipliers
     paths:
       - 'clients/420bet-lobby/src/sin-city-*'
       - 'clients/420bet-lobby/src/main.js'

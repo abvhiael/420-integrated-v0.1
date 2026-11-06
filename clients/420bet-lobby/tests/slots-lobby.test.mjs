@@ -9,9 +9,9 @@ import {readFileSync} from 'node:fs';
 test('Slots lobby lists the completed Emerald Harvest machine with its own cabinet artwork',()=>{
  assert.equal(SLOT_MACHINES.length,3);
  assert.equal(SLOT_MACHINES[0].id,'emerald-harvest');
- assert.equal(SLOT_MACHINES[0].art,EMERALD_ASSETS.cabinet);
+ assert.equal(SLOT_MACHINES[0].art,'/assets/420bet/slots-lobby/emerald-harvest-lobby-cabinet.png');
  assert.equal(SLOT_MACHINES[1].id,'mary-jane-sticky-wilds');
- assert.match(SLOT_MACHINES[1].art,/mj-concept-cabinet\.webp$/);
+ assert.equal(SLOT_MACHINES[1].art,'/assets/420bet/slots-lobby/mary-janes-sticky-wilds-lobby-cabinet.png');
  const {document,window}=parseHTML('<html><body></body></html>');
  let chosen=null;
  const lobby=createSlotsLobby(document,machine=>{chosen=machine;});
@@ -21,8 +21,8 @@ test('Slots lobby lists the completed Emerald Harvest machine with its own cabin
  const link=lobby.querySelector('a.slots-machine-link');
  assert.equal(link.getAttribute('href'),'#game=slots&machine=emerald-harvest');
  assert.match(link.getAttribute('aria-label'),/Emerald Harvest/);
- assert.equal(link.querySelector('.slots-emerald-cabinet').getAttribute('src'),EMERALD_ASSETS.cabinet);
- assert.equal(link.querySelectorAll('.slots-emerald-reel-grid .slots-emerald-symbol img').length,20);
+ assert.equal(link.querySelector('.slots-machine-art img').getAttribute('src'),SLOT_MACHINES[0].art);
+ assert.equal(link.querySelectorAll('.slots-emerald-reel-grid .slots-emerald-symbol img').length,0);
  link.dispatchEvent(new window.Event('click',{bubbles:true,cancelable:true}));
  assert.equal(chosen?.id,'emerald-harvest');
 });
@@ -66,6 +66,8 @@ test('Emerald Harvest lobby preview shows a legitimate deterministic 5x4 gamepla
  assert.equal(SLOT_MACHINES[2].id,'dads-secret-stash');
  assert.equal(slotMachineFromHash('#game=slots&machine=dads-secret-stash')?.id,'dads-secret-stash');
  assert.match(cards[2].querySelector('img').getAttribute('src'),/dads-secret-stash/);
- assert(cards[0].querySelector('.slots-emerald-reel-grid'));
+ assert.equal(cards[0].querySelector('.slots-emerald-reel-grid'),null,'Emerald uses its approved static lobby cabinet');
+ assert.equal(cards[0].querySelector('img').getAttribute('src'),SLOT_MACHINES[0].art);
+ assert.equal(cards[1].querySelector('img').getAttribute('src'),SLOT_MACHINES[1].art);
  assert.equal(cards[1].querySelector('.slots-emerald-reel-grid'),null,'Mary Jane art remains untouched');
 });

@@ -75,7 +75,7 @@ test('Emerald Harvest lobby preview shows a legitimate deterministic 5x4 gamepla
 
 test('Cannabis Cowboy uses the uploaded cabinet asset and a preview-only independent route',()=>{
  assert.equal(SLOT_MACHINES[3].id,'cannabis-cowboy');
- assert.equal(SLOT_MACHINES[3].preview,true);
+ assert.equal(SLOT_MACHINES[3].practiceBeta,true);
  assert.equal(SLOT_MACHINES[3].art,'/assets/420bet/slots-lobby/cannabis-cowboy-lobby-cabinet.png');
  assert.equal(slotMachineFromHash('#game=slots&machine=cannabis-cowboy')?.id,'cannabis-cowboy');
  const {document,window}=parseHTML('<html><body></body></html>');
@@ -87,7 +87,7 @@ test('Cannabis Cowboy uses the uploaded cabinet asset and a preview-only indepen
  assert.equal(card.hidden,false);
  assert.equal(card.querySelector('img').getAttribute('src'),SLOT_MACHINES[3].art);
  const link=card.querySelector('a');
- assert.match(link.getAttribute('aria-label'),/Preview/);
+ assert.match(link.getAttribute('aria-label'),/Play/);
  link.dispatchEvent(new window.Event('click',{bubbles:true,cancelable:true}));
  assert.equal(selected?.id,'cannabis-cowboy');
  const main=readFileSync(new URL('../src/main.js',import.meta.url),'utf8');

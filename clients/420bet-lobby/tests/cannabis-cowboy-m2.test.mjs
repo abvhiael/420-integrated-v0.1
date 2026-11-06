@@ -35,7 +35,7 @@ test('M2 disables all round and bet controls and never presents credits as spend
 });
 test('M2 mounts a dedicated Cannabis Cowboy visual shell, leaving other machines alone',()=>{
  const main=readFileSync(new URL('../src/main.js',import.meta.url),'utf8');
- assert.match(main,/createCannabisCowboyShell\(document\)/);
+ assert.match(main,/createCannabisCowboyPractice\(document\)/);
  assert.match(main,/selectedSlotMachine\?\.id==='cannabis-cowboy'/);
  assert.match(main,/createMaryJanePractice\(document\)/);
  assert.match(main,/createDadsSecretStash\(document\)/);

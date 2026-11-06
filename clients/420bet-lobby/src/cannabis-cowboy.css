@@ -160,7 +160,7 @@
 .cc-game{
   --cc-screen-height:calc(100dvh - 82px);
   width:100%;max-width:100%;min-width:0;
-  display:grid;grid-template-rows:auto minmax(0,1fr) auto auto;
+  display:grid;grid-template-rows:auto minmax(0,1fr) auto auto auto;
   align-content:stretch;gap:clamp(4px,.85vh,11px);
   padding:clamp(7px,1.15vw,18px);
   overflow-x:clip;
@@ -259,4 +259,24 @@
 }
 @media (prefers-reduced-motion:reduce){
  .cc-game .cc-reel-track,.cc-game .cc-feature-overlay,.cc-game .cc-cell-glyph{animation:none!important;transition:none!important}
+}
+
+/* Match the ranch sky beneath the global game title bar without altering
+   other casino screens. The visual wallpaper extends edge-to-edge. */
+.immersive:has(.cc-game) .gamebar{
+ background:linear-gradient(105deg,#182b26,#392942 47%,#674344 76%,#283d27);
+ border-bottom:1px solid #b28c4b;
+ box-shadow:inset 0 -6px 12px #111b1590;
+ position:relative;z-index:2;
+}
+.immersive:has(.cc-game) .view-scroll{background:#12291c;min-height:0;scrollbar-color:#8ba55f #11291c}
+.cc-game .cc-symbol-grid{touch-action:manipulation}
+.cc-game .cc-panel,.cc-game .cc-middle,.cc-game .cc-console{backdrop-filter:blur(1px)}
+@media(min-width:1051px) and (max-height:760px){
+ .cc-game .cc-game-title{font-size:clamp(1.7rem,3vw,3.2rem)}
+ .cc-game .cc-title-banner{padding:2px 8px 4px}
+ .cc-game .cc-control{min-height:34px;min-width:34px}
+ .cc-game .cc-spin{height:44px;width:70px}
+ .cc-game .cc-readout strong{font-size:1rem}
+ .cc-game .cc-console{padding:4px}
 }

@@ -79,7 +79,7 @@ test('Authenticated table UI displays real snapshot values only, clears private 
  const view=createPokerRoomLive(document,{client:fake,autoPoll:false});
  await view.ready;await new Promise(setImmediate);
  assert.equal(view.dataset.mode,'authoritative-read-only');
- assert.equal(view.querySelectorAll('.pr-table-choice').length,1);
+ assert.equal(view.querySelectorAll('.pr-table-list .pr-table-choice').length,1);
  assert.equal(view.querySelectorAll('.pr-seat').length,2);
  assert.match(view.querySelector('.pr-pot').textContent,/80/);
  assert.equal(view.querySelectorAll('.pr-community .pr-card').length,3);

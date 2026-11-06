@@ -45,7 +45,7 @@ export function makeScatterBoard(rng=Math.random){
  for(let p=0;p<CELL_COUNT;p++){
   const roll=rng();
   if(!Number.isFinite(roll)||roll<0||roll>=1)throw new Error('Invalid scatter RNG');
-  if(roll<SCATTER_CHANCE)board[p]=SCATTER_SYMBOL;
+  if(roll>1-SCATTER_CHANCE)board[p]=SCATTER_SYMBOL;
  }
  return board;
 }

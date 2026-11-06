@@ -13,7 +13,8 @@ export const COWBOY_SYMBOLS=Object.freeze([
   Object.freeze({name:'Rolling Papers',glyph:'▤',kind:'papers'}),
   Object.freeze({name:'Cole Haze',glyph:'🤠',kind:'cole'}),
   Object.freeze({name:'Smoke Ring Wild',glyph:'◎',kind:'smoke-wild'}),
-  Object.freeze({name:'Tour Bus Scatter',glyph:'🚌',kind:'scatter'})
+  Object.freeze({name:'Tour Bus Scatter',glyph:'🚌',kind:'scatter'}),
+  Object.freeze({name:'Road Trip Ticket',glyph:'🎫',kind:'road-ticket'})
 ]);
 // Deliberately fixed presentation, never a random outcome or representation of a paid spin.
 export const COWBOY_PREVIEW_GRID=Object.freeze([

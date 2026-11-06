@@ -14,7 +14,7 @@ export function createSinCityPractice(doc=globalThis.document,options={}){
  const view=doc.defaultView||globalThis;
  const reduced=!!view.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
  const root=el(doc,'section','sc-game');root.dataset.practiceGame='sin-city-high-rollers';
- let state=initialState(),panel='',auto=false,autoLeft=0,turbo=false,muted=true,busy=false,dead=false,showBanner='',visualBoard=null,audioContext=null;
+ let state=options.initialState?structuredClone(options.initialState):initialState(),panel='',auto=false,autoLeft=0,turbo=false,muted=true,busy=false,dead=false,showBanner='',visualBoard=null,audioContext=null;
  let phase='idle',pending=null,stopped=0,changedCount=0,winIndex=0,highlightCells=[],winPaths=[],spinningMode='base',previousBalance=1000;
  // TEMPORARY QA controls; all demo credits are isolated and the original state is restored.
  let qaSelection='puff',qaPriorState=null,qaForcedStops=null;

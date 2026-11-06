@@ -89,7 +89,7 @@ test('Cannabis Cowboy is the fourth independently routed, preview-only machine',
  link.dispatchEvent(new window.Event('click',{bubbles:true,cancelable:true}));
  assert.equal(selected?.id,'cannabis-cowboy');
  const main=readFileSync(new URL('../src/main.js',import.meta.url),'utf8');
- assert.match(main,/selectedSlotMachine\\?\\.preview/);
+ assert.match(main,/selectedSlotMachine\?\.preview/);
  assert.match(main,/Preview · In development/);
 });
 

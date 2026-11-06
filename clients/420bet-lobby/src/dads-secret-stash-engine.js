@@ -20,7 +20,20 @@ export function modifier(grid,type,rng){let out=grid.slice(),label='';if(type===
 if(type==='family'){const event=choose(rng,['LOW SYMBOL UPGRADE','WILD GRAFFITI','SCATTER SCRAMBLE','GARAGE MAYHEM']);label=event;if(event==='LOW SYMBOL UPGRADE')out=out.map(s=>LOW.has(s)?choose(rng,[...PREMIUM]):s);if(event==='WILD GRAFFITI')out=replaceRandom(out,rng,s=>s!=='scatter'&&s!=='stash','wild',2+integer(rng,3));if(event==='SCATTER SCRAMBLE')out=replaceRandom(out,rng,s=>s!=='scatter','scatter',1+integer(rng,2));if(event==='GARAGE MAYHEM')out=replaceRandom(out,rng,s=>LOW.has(s),choose(rng,[...PREMIUM]),3+integer(rng,3));return {grid:out,label,multiplier:1};}
 if(type==='bud')return {grid:replaceRandom(out,rng,s=>s!=='wild'&&s!=='scatter'&&s!=='stash','wild',2+integer(rng,4)),label:'FETCH WILD!',multiplier:1};
 throw Error('Unknown modifier');}
-export function inspection(grid,rng){const spins=2+integer(rng,4),locked=new Map(grid.map((s,i)=>PREMIUM.has(s)?[i,s]:null).filter(Boolean));let total=0;const boards=[];for(let n=0;n<spins;n++){const next=board(rng);for(const [i,s] of locked)next[i]=s;next.forEach((s,i)=>{if(PREMIUM.has(s))locked.set(i,s);});const units=evaluate(next).units;total+=units;boards.push({grid:next,units});}return {label:'HOA INSPECTION',spins,boards,units:total,locked:[...locked.keys()]};}
+export function inspection(grid,rng){
+ const spins=2+integer(rng,4);
+ const locked=new Map(grid.map((s,i)=>PREMIUM.has(s)?[i,s]:null).filter(Boolean));
+ let total=0;const boards=[];
+ for(let n=0;n<spins;n++){
+  const next=board(rng),prior=new Set(locked.keys());
+  for(const [i,s] of locked)next[i]=s;
+  const newLocks=[];
+  next.forEach((s,i)=>{if(PREMIUM.has(s)&&!prior.has(i)){locked.set(i,s);newLocks.push(i);}});
+  const units=evaluate(next).units;total+=units;
+  boards.push({grid:next,units,newLocks,locked:[...locked.keys()]});
+ }
+ return {label:'HOA INSPECTION',spins,boards,units:total,locked:[...locked.keys()]};
+}
 // Practice-only Hold & Win: 3 initial crates, 3 respins, new prizes lock and
 // replenish the respins. The complete generated timeline determines the award;
 // the UI must replay every snapshot before returning to the base reels.
@@ -46,8 +59,33 @@ export function stashBonus(rng){
  return {spins:number,steps,prizes,units,filled:prizes.length,
   completed:prizes.length===slots.length,label:'SECRET STASH HOLD & WIN'};
 }
-export function freeBonus(rng){const spins=8+integer(rng,3)*7;let total=0,sticky=new Map();const boards=[];for(let spin=0;spin<spins;spin++){let grid=board(rng);for(const [i,s] of sticky)grid[i]=s;grid.forEach((s,i)=>{if(s==='wild')sticky.set(i,'wild');});const mult=Math.min(5,1+Math.floor(spin/4));const units=evaluate(grid).units*mult;total+=units;boards.push({grid,units,mult});}return {spins,boards,units:total,label:'FIVE MINUTES OF PEACE'};}
-export function mow(grid,rng){let current=grid.slice(),total=0;const boards=[];for(let n=0;n<3;n++){const hit=current.map((s,i)=>LOW.has(s)?i:-1).filter(i=>i>=0);if(!hit.length)break;const selected=hit.slice(0,Math.min(hit.length,3+integer(rng,3)));current=current.map((s,i)=>selected.includes(i)?draw(rng):s);const units=evaluate(current).units;total+=units;boards.push({grid:current,units});}return {label:'MOW THE LAWN',boards,units};}
+export function freeBonus(rng){
+ const spins=8+integer(rng,3)*7;let total=0;
+ const sticky=new Map(),boards=[];
+ for(let spin=0;spin<spins;spin++){
+  const grid=board(rng),previous=[...sticky.keys()];
+  for(const [i,s] of sticky)grid[i]=s;
+  const newWilds=[];
+  grid.forEach((s,i)=>{if(s==='wild'&&!sticky.has(i)){sticky.set(i,'wild');newWilds.push(i);}});
+  const mult=Math.min(5,1+Math.floor(spin/4));
+  const units=evaluate(grid).units*mult;total+=units;
+  boards.push({grid,units,mult,sticky:[...sticky.keys()],newWilds,previous});
+ }
+ return {spins,boards,units:Math.round(total*100)/100,label:'FIVE MINUTES OF PEACE'};
+}
+export function mow(grid,rng){
+ let current=grid.slice(),total=0;const boards=[];
+ for(let n=0;n<3;n++){
+  const hit=current.map((s,i)=>LOW.has(s)?i:-1).filter(i=>i>=0);
+  if(!hit.length)break;
+  const removed=hit.slice(0,Math.min(hit.length,3+integer(rng,3)));
+  const before=current.slice();
+  current=current.map((s,i)=>removed.includes(i)?draw(rng):s);
+  const units=evaluate(current).units;total+=units;
+  boards.push({grid:current.slice(),before,removed,units});
+ }
+ return {label:'MOW THE LAWN',boards,units:Math.round(total*100)/100};
+}
 export function newGame(){return {balance:1000,bet:1,rounds:0,last:null,history:[],message:'Gary needs five minutes in his garage.',mode:'practice'};}
 export function spin(state,rng=Math.random){if(!Number.isFinite(state.bet)||state.bet<=0||state.bet>50||state.bet>state.balance)throw Error('Invalid practice stake');const grid=board(rng),base=evaluate(grid),flags=triggerCharacters(grid,rng),events=[];let units=base.units;
 for(const type of ['jen','family','keller','bud']){if(!flags[type])continue;if(type==='keller'){const event=inspection(grid,rng);units+=event.units;events.push({type,...event});}else{const event=modifier(grid,type,rng);event.units=evaluate(event.grid).units*event.multiplier;units+=event.units;events.push({type,...event});}}

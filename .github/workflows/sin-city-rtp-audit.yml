@@ -26,6 +26,7 @@ jobs:
           RTP_SEEDS: '420,1337,20261106,314159,271828'
         run: |
           node tests/sin-city-rtp-audit.mjs | tee /tmp/sin-city-rtp-audit.log
+          SPINS_PER_SEED=500000 RTP_SEEDS=20261107,987654,543210,777777,424242 node tests/sin-city-rtp-audit.mjs | tee -a /tmp/sin-city-rtp-audit.log
           for wager in 1 50; do
             AUDIT_STAKE="$wager" SPINS_PER_SEED=100000 RTP_SEEDS=420,1337,20261106 node tests/sin-city-rtp-audit.mjs | tee -a /tmp/sin-city-rtp-audit.log
           done

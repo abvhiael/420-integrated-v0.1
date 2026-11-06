@@ -302,3 +302,18 @@ test('All bonus modes have animated steps and visible final results; Larry can o
  assert(overlay.includes('.dss-feature-result'));
  game.stopAnimation();
 });
+
+test('Larry remains above the header but behind reel frame and bonus board',()=>{
+ const css=readFileSync(new URL('../src/dads-secret-stash.css',import.meta.url),'utf8');
+ const layering=css.slice(css.lastIndexOf('/* Cabinet foreground occlusion:'));
+ assert.match(layering,/\.dss-header\{z-index:1\}/);
+ assert.match(layering,/\.dss-larry-panel\[data-mode="main"\]\{z-index:2;overflow:visible!important\}/);
+ assert.match(layering,/\.dss-reels,\.dss-hold-win\{position:relative;z-index:10;isolation:isolate\}/);
+ assert.match(layering,/\.dss-overlay\{z-index:20\}/);
+ assert.match(layering,/\.dss-feature-result\{z-index:25\}/);
+ const {document}=parseHTML('<html><body></body></html>');
+ const game=createDadsSecretStash(document);
+ assert(game.querySelector('.dss-scene .dss-larry-panel'));
+ assert(game.querySelector('.dss-scene .dss-reels'));
+ game.stopAnimation();
+});

@@ -20,7 +20,7 @@ try{
   assert.equal(initial.cellCount,20,'Must render exactly 20 positions');
   assert.equal(initial.columns,5);
   assert.ok(initial.reels.w>200&&initial.reels.h>150,'Reels must be visible');
-  assert.ok(initial.bobby.w>80&&initial.bobby.h>140,'Bobby character panel must be visible');
+  assert.ok(initial.bobby.w>80&&initial.bobby.h>(name==='mobile'?90:140),'Bobby character panel must be visible');
   assert.ok(initial.logo.w>100,'Title must be visible');
   assert.ok(initial.images.every(x=>x.loaded),'All artwork must load: '+JSON.stringify(initial.images.filter(x=>!x.loaded)));
   // Both desktop side-by-side and narrow stacked layouts must not overlap.

@@ -1,6 +1,7 @@
 import {createServer} from 'node:http';
 import {createPokerProjection,createPokerProjectionHandler} from './service.mjs';
 import {createCanonicalPokerReader} from './chain-reader.mjs';
+import {createPokerWalletAuth} from './auth.mjs';
 // Fails closed unless an externally qualified, pinned runtime manifest and a
 // distinct authenticated session issuer are configured.
 if(process.env.POKER_ENABLE_API!=='true')throw Error('Poker API disabled: activation gate not approved');
@@ -24,5 +25,12 @@ const expectedOrigin=process.env.POKER_ALLOWED_ORIGIN;
 if(typeof expectedOrigin!=='string'||!/^https:\/\/[a-z0-9.-]+(?::[0-9]+)?$/i.test(expectedOrigin))
  throw Error('Missing approved HTTPS poker origin');
 const handler=createPokerProjectionHandler(service,{origin:expectedOrigin});
-createServer(handler).listen(port,process.env.POKER_HOST||'127.0.0.1',
+const auth=createPokerWalletAuth({origin:expectedOrigin,chainId,secret});
+const httpHandler=(req,res)=>{
+ if(req.url==='/api/420bet/poker/v1/auth/challenge'||
+    req.url==='/api/420bet/poker/v1/auth/verify')
+  return auth.handle(req,res);
+ return handler(req,res);
+};
+createServer(httpHandler).listen(port,process.env.POKER_HOST||'127.0.0.1',
  ()=>console.log('420Bet read-only, authenticated poker projection listening on port '+port));

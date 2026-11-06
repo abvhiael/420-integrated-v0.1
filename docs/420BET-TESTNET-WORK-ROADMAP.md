@@ -137,7 +137,7 @@ Evidence-only ledger/certificate commits may inherit previous exact-SHA executab
 
 **Execution order:** TN-POKER-01 → TN-POKER-05-A/B (finalized public table state) → TN-POKER-05-C (authenticated private delivery) → TN-POKER-05-D (host/Cloudflare integration) → TN-POKER-05-E (two-account real browser smoke and adversarial proof). TN-POKER-02–04 remain separately mandatory for funded gameplay and production promotion. Purely local defects found during this work remain immediately actionable; do not defer local fixes solely because official network/approval evidence is unavailable.
 
-**Relevant source/runbook:** [Poker projection server runbook](../bet/POKER-PROJECTION-SERVER-RUNBOOK.md) · [Browser projection contract](../bet/POKER-BROWSER-AUTHORITATIVE-PROJECTION.md). The server and browser currently default to **read-only**, **fail closed**, and **not publicly activated**.
+**Relevant source/runbook:** [Poker projection server runbook](bet/POKER-PROJECTION-SERVER-RUNBOOK.md) · [Browser projection contract](bet/POKER-BROWSER-AUTHORITATIVE-PROJECTION.md). The server and browser currently default to **read-only**, **fail closed**, and **not publicly activated**.
 
 ## Poker tournaments — C1–C8 testnet handoff
 

@@ -77,7 +77,7 @@ export function createSinCityPractice(doc=globalThis.document,options={}){
   cabinet.append(reels);
   if(phase==='win'&&winPaths.length){
    const svg=doc.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('class','sc-win-lines');svg.setAttribute('viewBox','0 0 500 400');svg.setAttribute('preserveAspectRatio','none');svg.setAttribute('aria-label','Neon green winning way '+(winIndex+1)+' of '+winPaths.length);
-   const line=doc.createElementNS('http://www.w3.org/2000/svg','polyline');line.setAttribute('points',winPaths[winIndex].map(([r,row])=>(r*100+50)+','+(row*100+50)).join(' '));line.setAttribute('class','sc-win-polyline');svg.append(line);reels.append(svg);
+   const line=doc.createElementNS('http://www.w3.org/2000/svg','polyline');line.setAttribute('points',winPaths[winIndex].map(([r,row])=>(r*100+50)+','+(row*100+50)).join(' '));line.setAttribute('class','sc-win-polyline');line.setAttribute('pathLength','100');svg.append(line);reels.append(svg);
   }
   const result=el(doc,'div','sc-result',phase==='spinning'?'REELS SPINNING · '+stopped+' OF 5 STOPPED':phase==='announce'?state.lastMessage:phase==='transform'?'BONUS IN ACTION — WATCH THE SYMBOLS CHANGE':phase==='win'?'WINNING WAY '+(winIndex+1)+' OF '+winPaths.length+' · CLICK SCREEN FOR TOTAL':phase==='total'?'TOTAL WIN '+state.lastWin.toFixed(2)+' PRACTICE CREDITS':state.lastMessage);result.setAttribute('role','status');result.setAttribute('aria-live','polite');cabinet.append(result);
   const metrics=el(doc,'div','sc-metrics');

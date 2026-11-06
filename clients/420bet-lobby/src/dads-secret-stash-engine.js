@@ -4,7 +4,11 @@ export const SYMBOLS=Object.freeze(['gary','jen','tyler','emma','keller','bud','
 const WEIGHTS=Object.freeze([3,4,5,5,4,5,7,7,10,12,12,14,14,14,14,14,3,2,3,2]);
 // A separate low-Wild strip distribution applies only to free spins. The
 // main reel weights and primary paytable stay unchanged during calibration.
-export const FREE_WEIGHTS=Object.freeze(WEIGHTS.map((weight,i)=>SYMBOLS[i]==='wild'?2:weight));
+// Scatter Scramble can now award genuine free spins. Keep the established
+// 8/15/22 spins, six Sticky Wild cap and x1/x2/x4 ladder; reduce ONLY the
+// free-spin Wild's relative drawing weight to preserve the ~95.5% whole-game
+// target after those previously missing bonuses are paid.
+export const FREE_WEIGHTS=Object.freeze(WEIGHTS.map((weight,i)=>SYMBOLS[i]==='wild'?1.526:weight));
 export const FREE_STICKY_LIMIT=6;
 export const FREE_MULTIPLIER_STAGES=Object.freeze([1,2,4]);
 export const PAY=Object.freeze({gary:[0,.3,1,4],jen:[0,.25,.8,3],tyler:[0,.2,.65,2.5],emma:[0,.2,.65,2.5],keller:[0,.2,.65,2.5],bud:[0,.2,.65,2.5],jar:[0,.16,.5,2],bong:[0,.16,.5,2],pizza:[0,.1,.3,1],lighter:[0,.08,.25,.8],papers:[0,.08,.25,.8],A:[0,.05,.16,.5],K:[0,.05,.16,.5],Q:[0,.05,.16,.5],J:[0,.05,.16,.5],'10':[0,.05,.16,.5]});
@@ -17,7 +21,12 @@ export function choose(rng,items){return items[integer(rng,items.length)];}
 function weightedDraw(rng,weights){let n=integer(rng,weights.reduce((a,b)=>a+b,0));for(let i=0;i<SYMBOLS.length;i++){n-=weights[i];if(n<0)return SYMBOLS[i];}return '10';}
 export function draw(rng){return weightedDraw(rng,WEIGHTS);}
 export function board(rng){return Array.from({length:ROWS*COLS},()=>draw(rng));}
-const freeDraw=rng=>weightedDraw(rng,FREE_WEIGHTS);
+// Fractional free-spin weights require a continuous, unbiased weighted draw.
+// The base game's integer-weighted draw remains unchanged.
+const freeDraw=rng=>{let n=rand(rng)*FREE_WEIGHTS.reduce((a,b)=>a+b,0);
+ for(let i=0;i<SYMBOLS.length;i++){n-=FREE_WEIGHTS[i];if(n<0)return SYMBOLS[i];}
+ return '10';
+};
 const freeBoard=rng=>Array.from({length:ROWS*COLS},()=>freeDraw(rng));
 const freeNonWild=rng=>{let symbol;do{symbol=freeDraw(rng);}while(symbol==='wild');return symbol;};
 export function count(grid,symbol){return grid.filter(s=>s===symbol).length;}

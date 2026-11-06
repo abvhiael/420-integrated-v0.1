@@ -373,3 +373,47 @@ test('Family Chaos Wild Graffiti visibly changes the board before the win popup'
  assert.equal(game.querySelector('.dss-feature-result').hidden,true);
  game.stopAnimation();
 });
+
+test('Neon winning ways trace follows real matching positions and never replaces payout maths',()=>{
+ const grid=Array(20).fill('Q');
+ grid.splice(0,4,'A','wild','Q','Q');
+ grid.splice(4,4,'Q','A','Q','Q');
+ grid.splice(8,4,'Q','Q','A','Q');
+ grid.splice(12,4,'Q','Q','Q','Q');
+ const result=evaluate(grid);
+ const winning=result.wins.find(x=>x.symbol==='A');
+ assert(winning&&winning.matched===3&&winning.ways===2);
+ const {document,window}=parseHTML('<html><body></body></html>');
+ let elapsed=0,id=0;const jobs=[];
+ const game=createDadsSecretStash(document,{
+  rng:()=>.55,
+  setTimeout:(fn,ms)=>{const job={id:++id,at:elapsed+ms,fn,done:false};jobs.push(job);return job.id;},
+  clearTimeout:key=>{const job=jobs.find(x=>x.id===key);if(job)job.done=true;}
+ });
+ const advance=target=>{
+  let guard=0;
+  while(true){
+   if(guard++>1500)throw Error('Win trace did not settle');
+   jobs.sort((a,b)=>a.at-b.at);
+   const job=jobs.find(x=>!x.done&&x.at<=target);
+   if(!job)break;
+   job.done=true;elapsed=job.at;job.fn();
+  }
+  elapsed=target;
+ };
+ const spinButton=[...game.querySelectorAll('button')].find(x=>x.textContent.includes('SPIN'));
+ spinButton.dispatchEvent(new window.Event('click',{bubbles:true}));
+ assert(game.getState().last.base.wins.length>0);
+ advance(3300);
+ const trace=game.querySelector('.dss-win-trace');
+ assert.equal(trace.hidden,false,'Winning route must be visible after reel stop');
+ const polyline=trace.querySelector('.dss-win-line');
+ assert(polyline);
+ assert(polyline.getAttribute('points').split(' ').length>=3);
+ assert.match(game.querySelector('.dss-win-label').textContent,/WAYS/);
+ assert(game.querySelectorAll('.dss-paying-symbol').length>=3);
+ advance(5100);
+ assert.equal(trace.hidden,true,'Clear neon trace before next round or feature');
+ assert.equal(game.querySelectorAll('.dss-paying-symbol').length,0);
+ game.stopAnimation();
+});

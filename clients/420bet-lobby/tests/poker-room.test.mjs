@@ -37,7 +37,7 @@ test('Live Poker launch is dedicated and leaves tournament route unchanged',()=>
  const main=readFileSync(new URL('../src/main.js',import.meta.url),'utf8');
  const catalogue=readFileSync(new URL('../src/catalogue.js',import.meta.url),'utf8');
  assert(main.includes("active.id==='live-poker'"));
- assert(main.includes('createPokerRoomPreview(document)'));
+ assert(main.includes('createPokerRoomLive(document,{base:config.pokerApiBase'));
  assert(catalogue.includes("['live-poker','Live Poker','Poker'"));
  assert(catalogue.includes("['poker-tournaments','Poker Tournaments'"));
  const css=readFileSync(new URL('../src/poker-room.css',import.meta.url),'utf8');

@@ -1,4 +1,4 @@
-import {newGame,spin,MAX_WIN_MULTIPLIER} from './dads-secret-stash-engine.js';
+import {newGame,spin,SYMBOLS,MAX_WIN_MULTIPLIER} from './dads-secret-stash-engine.js';
 import {DSS_SYMBOL_ART,DSS_SYMBOL_LABELS,DSS_CAST_ART,DSS_TRANSITION_ART,DSS_FEATURE_ART,DSS_BACKGROUND_ART} from './dads-secret-stash-assets.js';
 const GLYPHS={gary:'😎',jen:'👩',tyler:'🎧',emma:'💜',keller:'📋',bud:'🐕',jar:'🫙',bong:'⚗️',pizza:'🍕',lighter:'🔥',papers:'📜',A:'A',K:'K',Q:'Q',J:'J','10':'10',wild:'🌿',scatter:'☮',stash:'📦',mower:'🚜'};
 const FEATURE_TITLES={jen:"OH SHIT, SHE'S HOME!",family:'FAMILY CHAOS!',keller:'HOA INSPECTION!',bud:'GOOD BOY BONUS!',free:'FIVE MINUTES OF PEACE!',stash:"DAD'S SECRET STASH!",mow:'MOW THE LAWN!'};
@@ -6,18 +6,19 @@ const FEATURE_PERSON={jen:'JEN',family:'TYLER & EMMA',keller:'MR. KELLER',bud:'B
 function el(doc,tag,cls,txt){const x=doc.createElement(tag);if(cls)x.className=cls;if(txt!==undefined)x.textContent=txt;return x;}
 export function createDadsSecretStash(doc=globalThis.document,options={}){
  const rng=options.rng??Math.random,setTimer=options.setTimeout??setTimeout,clearTimer=options.clearTimeout??clearTimeout;
- let state=newGame(),destroyed=false,busy=false,auto=false,autoLeft=0,currentTimer=null,events=[],eventIndex=0;
+ let state=newGame(),destroyed=false,busy=false,auto=false,autoLeft=0,currentTimer=null,events=[],eventIndex=0,spinTick=0;
  const root=el(doc,'section','dss-game');root.dataset.practiceGame='dads-secret-stash';
  const shell=el(doc,'div','dss-shell'),hero=el(doc,'header','dss-header');
  const logo=el(doc,'img','dss-logo');logo.src='/assets/420bet/dads-secret-stash/lobby.svg';logo.alt="Dad's Secret Stash — Gary in his recliner";
  hero.append(logo,el(doc,'p','dss-tag','SUBURBAN SURVIVAL. ONE JOINT AT A TIME.'));
  const scene=el(doc,'div','dss-scene'),reels=el(doc,'div','dss-reels');reels.setAttribute('aria-label','Five reels, four rows');
- const cells=Array.from({length:20},()=>{
+ const reelEls=Array.from({length:5},(_,i)=>{const column=el(doc,'div','dss-reel');column.dataset.reel=String(i);reels.append(column);return column;});
+ const cells=Array.from({length:20},(_,i)=>{
   const cell=el(doc,'div','dss-cell'),image=el(doc,'img','dss-symbol-image'),face=el(doc,'span','dss-symbol-fallback');
   image.alt='';image.decoding='async';image.draggable=false;
   image.addEventListener('load',()=>{image.hidden=false;face.hidden=true;});
   image.addEventListener('error',()=>{image.hidden=true;face.hidden=false;});
-  cell.append(image,face);reels.append(cell);return {cell,image,face};
+  cell.append(image,face);reelEls[Math.floor(i/4)].append(cell);return {cell,image,face};
  });
  const larry=el(doc,'img','dss-larry');larry.src='/assets/420bet/dads-secret-stash/characters/gary_main.png';larry.alt='';larry.setAttribute('aria-hidden','true');
  const status=el(doc,'div','dss-status','Practice only — simulated credits, no wallet or wagers');
@@ -50,7 +51,42 @@ export function createDadsSecretStash(doc=globalThis.document,options={}){
  showScene();
  scene.append(larry,reels,overlay);shell.append(hero,scene,status,message,controls,infoPanel);root.append(shell);
  const money=n=>Number(n).toFixed(2);
- function showGrid(grid){grid.forEach((s,i)=>{const cell=cells[i];cell.cell.dataset.symbol=s;cell.cell.title=DSS_SYMBOL_LABELS[s]??s;cell.cell.setAttribute('aria-label',DSS_SYMBOL_LABELS[s]??s);cell.face.textContent=GLYPHS[s]??s;cell.face.hidden=false;cell.image.hidden=true;cell.image.src=DSS_SYMBOL_ART[s]??'';});}
+ function setCell(i,s){
+ const cell=cells[i];cell.cell.dataset.symbol=s;cell.cell.title=DSS_SYMBOL_LABELS[s]??s;
+ cell.cell.setAttribute('aria-label',DSS_SYMBOL_LABELS[s]??s);
+ cell.face.textContent=GLYPHS[s]??s;
+ if(cell.image.getAttribute('src')===DSS_SYMBOL_ART[s])return;
+ cell.face.hidden=false;cell.image.hidden=true;cell.image.src=DSS_SYMBOL_ART[s]??'';
+}
+ function showGrid(grid){grid.forEach((s,i)=>setCell(i,s));}
+ // Visual cycling never uses the outcome RNG or changes the already-resolved result.
+ // Each of the five reel columns runs together; reel stops are exactly 500ms apart.
+ function animateSpin(finalGrid){
+  const stopTicks=[20,30,40,50,60]; // 50ms ticks: 1000, 1500, 2000, 2500, 3000ms
+  spinTick=0;
+  reelEls.forEach(reel=>{reel.classList.remove('dss-stopping');reel.classList.add('dss-spinning');});
+  const tick=()=>{
+   if(destroyed)return;
+   spinTick++;
+   for(let reel=0;reel<5;reel++){
+    if(spinTick>stopTicks[reel])continue;
+    if(spinTick===stopTicks[reel]){
+     for(let row=0;row<4;row++)setCell(reel*4+row,finalGrid[reel*4+row]);
+     reelEls[reel].classList.remove('dss-spinning');
+     reelEls[reel].classList.add('dss-stopping');
+    }else{
+     for(let row=0;row<4;row++)setCell(reel*4+row,SYMBOLS[(spinTick*3+reel*7+row*5)%SYMBOLS.length]);
+    }
+   }
+   if(spinTick<stopTicks[4])schedule(tick,50);
+   else{
+    reelEls.forEach(reel=>reel.classList.remove('dss-stopping'));
+    status.textContent='REELS STOPPED — SIMULATED RESULT';
+    schedule(nextEvent,150);
+   }
+  };
+  schedule(tick,50);
+ }
  function refresh(){balance.textContent='BALANCE '+money(state.balance);betLabel.textContent='BET '+money(state.bet);winLabel.textContent='WIN '+money(state.last?.win??0);round.textContent='SPINS '+state.rounds;message.textContent=state.message;lower.disabled=busy;higher.disabled=busy;play.disabled=busy||state.balance<state.bet;autoBtn.disabled=state.balance<state.bet&&!busy;}
  function schedule(fn,ms){currentTimer=setTimer(()=>{currentTimer=null;if(!destroyed)fn();},ms);}
  function finish(){busy=false;overlay.hidden=true;showScene('main');refresh();if(auto&&autoLeft>0&&state.balance>=state.bet){autoLeft--;schedule(start,400);}else{auto=false;autoLeft=0;autoBtn.textContent='AUTO ×10';}}
@@ -73,9 +109,9 @@ export function createDadsSecretStash(doc=globalThis.document,options={}){
   },500);
  },700);
 }
- function start(){if(destroyed||busy)return;if(state.balance<state.bet){state.message='Insufficient practice credits — reset to continue.';refresh();return;}busy=true;refresh();status.textContent='SIMULATED SPIN — NO TRANSACTION';state=spin(state,rng);showGrid(state.last.grid);events=state.last.events;eventIndex=0;schedule(nextEvent,420);}
+ function start(){if(destroyed||busy)return;if(state.balance<state.bet){state.message='Insufficient practice credits — reset to continue.';refresh();return;}busy=true;refresh();status.textContent='SIMULATED SPIN — NO TRANSACTION';state=spin(state,rng);events=state.last.events;eventIndex=0;animateSpin(state.last.grid);}
  const reset=btn('RESET PRACTICE CREDITS',()=>{if(busy)return;state=newGame();showScene('main');showGrid(Array(20).fill('jar'));refresh();});root.append(reset);
- root.stopAnimation=()=>{destroyed=true;auto=false;if(currentTimer!==null)clearTimer(currentTimer);currentTimer=null;};
+ root.stopAnimation=()=>{destroyed=true;auto=false;if(currentTimer!==null)clearTimer(currentTimer);currentTimer=null;reelEls.forEach(reel=>reel.classList.remove('dss-spinning','dss-stopping'));};
  root.getState=()=>state;
  showGrid(Array(20).fill('jar'));refresh();return root;
 }

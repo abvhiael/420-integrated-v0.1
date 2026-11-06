@@ -461,7 +461,7 @@ test('Temporary bonus preview launches real Hold & Win with NO bet, win, round, 
  const selector=game.querySelector('.dss-preview-select');
  const button=game.querySelector('.dss-preview-button');
  assert(selector&&button);
- selector.value='stash';
+ assert.equal(selector.querySelector('option').getAttribute('value'),'stash');
  button.dispatchEvent(new window.Event('click',{bubbles:true}));
  assert.equal(game.querySelector('.dss-overlay').hidden,false);
  assert.equal(button.disabled,true);
@@ -496,7 +496,7 @@ test('Temporary Family Chaos Wild Graffiti preview shows transformations without
   clearTimeout:key=>{const job=timers.find(x=>x.id===key);if(job)job.done=true;}
  });
  const before=JSON.stringify(game.getState());
- game.querySelector('.dss-preview-select').value='family-graffiti';
+ game.querySelector('.dss-preview-select option[value="family-graffiti"]').setAttribute('selected','');
  game.querySelector('.dss-preview-button').dispatchEvent(new window.Event('click',{bubbles:true}));
  const advance=target=>{
   let guard=0;

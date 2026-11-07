@@ -1150,3 +1150,21 @@
     font-size:clamp(.85rem,3.8vw,1.8rem);
   }
 }
+
+
+/* Mandatory visibility contract: browser UA [hidden] has lower precedence than
+   author display:flex/block rules. Road Trip and feature panels must never sit
+   over the board when the gameplay controller marks them hidden. */
+.cc-game[data-view="cannabis-cowboy"] [hidden]{
+  display:none !important;
+  pointer-events:none !important;
+}
+/* Keep interactive, active result screens over reels; no ghost panels beneath. */
+.cc-game[data-view="cannabis-cowboy"] .cc-bonus-total-splash:not([hidden]){
+  z-index:60;
+  pointer-events:auto;
+}
+.cc-game[data-view="cannabis-cowboy"] .cc-free-spin-button:not([hidden]){
+  z-index:40;
+  pointer-events:auto;
+}

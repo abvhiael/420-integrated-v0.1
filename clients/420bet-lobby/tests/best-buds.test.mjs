@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {parseHTML} from 'linkedom';
 import {readFileSync,existsSync} from 'node:fs';
-import {REELS,ROWS,LINES,BASE_STRIPS,boardAt,initialState,nextSpin,practiceBonus,evaluateLines,MAX_WIN_MULTIPLIER} from '../src/best-buds-engine.js';
+import {REELS,ROWS,LINES,BASE_STRIPS,boardAt,initialState,nextSpin,practiceBonus,evaluateLines,MAX_WIN_MULTIPLIER,FREE_WILD_MULTIPLIERS} from '../src/best-buds-engine.js';
 import {createBestBudsPractice} from '../src/best-buds-ui.js';
 
 test('exactly 25 distinct five-reel paths stay within the 3-row display',()=>{
@@ -98,4 +98,79 @@ test('all declared icon, symbol, logo and character art paths resolve in public 
  })){
   for(const file of files){if(!file.startsWith('icon_jackpot_'))assert.match(ui,new RegExp(file.replaceAll('.','\\.')));assert.ok(existsSync(new URL(folder+'/'+file,base)),folder+'/'+file);}
  }
+});
+
+test('Hold & Win displays locked coins throughout each manually initiated respin',()=>{
+ const {document,window}=parseHTML('<html><body></body></html>');
+ const root=createBestBudsPractice(document,{rng:()=>.99});
+ const click=label=>{const el=[...root.querySelectorAll('button')].find(b=>b.textContent===label);assert.ok(el,label);el.dispatchEvent(new window.Event('click',{bubbles:true}));};
+ const skip=()=>{root.querySelector('.bb-stage').dispatchEvent(new window.Event('click',{bubbles:true}));};
+ click('BONUS TEST');click('Trigger Hold & Win');
+ assert.equal(root.getGameState().mode,'hold');assert.equal(root.querySelectorAll('.bb-coin-locked').length,6);
+ click('RESPIN');
+ assert.equal(root.getPresentationState().phase,'spinning');
+ assert.equal(root.querySelectorAll('.bb-coin-locked').length,6,'previously landed coins remain visible while empty cells spin');
+ assert.equal(root.querySelectorAll('.bb-hold-cell-rolling').length,9);
+ skip();
+ assert.equal(root.getGameState().mode,'hold');
+ assert.equal(root.getGameState().respins,2);
+ assert.equal(root.querySelectorAll('.bb-coin-locked').length,6);
+ assert.equal(root.querySelectorAll('.bb-hold-cell-rolling').length,0);
+ click('RESPIN');skip();assert.equal(root.getGameState().respins,1);
+ click('RESPIN');skip();
+ assert.equal(root.getGameState().mode,'base');
+ assert.equal(root.getGameState().lastFeature,'hold-end');
+ assert.equal(root.querySelectorAll('.bb-coin-locked').length,6,'final Hold & Win result persists after payout');
+ root.stopAnimation();
+});
+test('manual respins reset to 3 when a new coin lands and do not charge credits',()=>{
+ let state=practiceBonus(initialState(),'collect',()=>.99);
+ const initialCredits=state.balance;
+ state=nextSpin(state,{force:'collect',rng:()=>.99});
+ assert.equal(state.mode,'hold');
+ assert.equal(state.respins,3);
+ assert.equal(state.holdNewKeys.length,1);
+ assert.equal(state.holdReveal.length,10);
+ assert.equal(state.balance,initialCredits);
+});
+test('Free Rides WILD portraits receive x2/x3/x5/x10 and winning lines apply max one badge',()=>{
+ assert.deepEqual([...FREE_WILD_MULTIPLIERS],[2,3,5,10]);
+ const board=Array.from({length:5},()=>['BONG','JOINT','PAPERS']);
+ board[1][1]='WILD1';board[2][1]='WILD2';
+ const ordinary=evaluateLines(board,2);
+ const boosted=evaluateLines(board,2,{wildMultipliers:{4:2,7:10}});
+ const baseline=ordinary.wins.find(w=>w.line===1);
+ const bonus=boosted.wins.find(w=>w.line===1);
+ assert.equal(bonus.wildMultiplier,10);
+ assert.equal(bonus.amount,baseline.amount*10);
+ let state=practiceBonus(initialState(),'wild10',()=>.99);
+ state=nextSpin(state,{rng:()=>.99,force:state.qa});
+ assert.equal(state.mode,'free');
+ assert.ok(Object.values(state.freeWildMultipliers).includes(10));
+ assert.ok(state.lastWins.some(w=>w.wildMultiplier===10));
+ assert.ok(state.roundGross<=state.roundBet*MAX_WIN_MULTIPLIER);
+ const {document,window}=parseHTML('<html><body></body></html>');
+ const root=createBestBudsPractice(document,{initialState:practiceBonus(initialState(),'wild10',()=>.99),rng:()=>.99});
+ const spin=[...root.querySelectorAll('button')].find(b=>b.textContent==='FREE SPIN');
+ spin.dispatchEvent(new window.Event('click',{bubbles:true}));
+ root.querySelector('.bb-stage').dispatchEvent(new window.Event('click',{bubbles:true}));
+ assert.ok(root.querySelectorAll('.bb-wild-multiplier').length>=3);
+ root.stopAnimation();
+});
+test('Buddy reaction pair is randomized once per three initiated spins and not per render',()=>{
+ const {document,window}=parseHTML('<html><body></body></html>');
+ const root=createBestBudsPractice(document,{rng:()=>.99});
+ const initial=root.getPresentationState().reactionPair;
+ const clickSpin=()=>{const b=[...root.querySelectorAll('button')].find(b=>b.textContent==='SPIN');assert.ok(b);b.dispatchEvent(new window.Event('click',{bubbles:true}));root.querySelector('.bb-stage').dispatchEvent(new window.Event('click',{bubbles:true}));if(root.getPresentationState().phase==='paylines')root.querySelector('.bb-stage').dispatchEvent(new window.Event('click',{bubbles:true}));};
+ clickSpin();assert.deepEqual(root.getPresentationState().reactionPair,initial);assert.equal(root.getPresentationState().reactionSpins,1);
+ clickSpin();assert.deepEqual(root.getPresentationState().reactionPair,initial);assert.equal(root.getPresentationState().reactionSpins,2);
+ clickSpin();assert.deepEqual(root.getPresentationState().reactionPair,initial);assert.equal(root.getPresentationState().reactionSpins,3);
+ clickSpin();assert.equal(root.getPresentationState().reactionSpins,1);
+ root.stopAnimation();
+});
+test('Best Buds CSS preserves opaque reels but makes the surrounding frame transparent',()=>{
+ const css=readFileSync(new URL('../src/best-buds.css',import.meta.url),'utf8');
+ assert.match(css,/\.bb-frame\s*\{[^}]*background:transparent/s);
+ assert.match(css,/\.bb-cell\s*\{[^}]*background:radial-gradient/s);
+ assert.match(css,/\.bb-header\s*\{[^}]*height:310px/s);
 });

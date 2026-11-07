@@ -391,11 +391,13 @@ main.immersive .view-scroll:has(.sc-game){background:transparent}
 @media(max-width:760px){
  .sc-game .sc-machine{grid-template-columns:minmax(0,1fr);gap:6px}
  .sc-game .sc-cabinet>.sc-masthead{
-  grid-template-columns:minmax(0,1fr) auto;gap:5px;
+  grid-template-columns:minmax(0,1fr);gap:0;
   height:72px;min-height:72px;
  }
  .sc-game .sc-cabinet>.sc-masthead .sc-logo{height:70px;max-height:70px}
- .sc-game .sc-cabinet>.sc-masthead .sc-ways{font-size:11px;padding:4px 5px}
+ /* The 1,024-ways stamp cannot push the logo off the board center on mobile.
+    Its information remains available in the game controls and INFO screen. */
+ .sc-game .sc-cabinet>.sc-masthead .sc-ways{display:none}
  .sc-game .sc-bonus-guide{
   grid-column:1;width:min(100%,380px);justify-self:center;
   margin:9px auto;padding:2px 0 0;

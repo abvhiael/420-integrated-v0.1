@@ -135,6 +135,16 @@ export function createCannabisCowboyPractice(doc=globalThis.document,options={})
    bonusSplash.setAttribute('aria-label','Endless Harvest Collected! '+format(total)+' credits won. Click anywhere to continue');
    return;
   }
+  if(kind==='road'){
+   // Full-scene Cole Haze Road Trip artwork contains its heading and continue
+   // prompt. Overlay only the authoritative total (credits × additive multiplier)
+   // onto the empty green plaque; retain the breakdown in the accessible label.
+   const payout=doc.createElement('strong');payout.className='cc-bonus-total-amount cc-road-splash-credits';
+   payout.textContent=format(total)+' CREDITS';
+   bonusSplash.append(payout);bonusSplash.hidden=false;
+   bonusSplash.setAttribute('aria-label','Road Trip Complete! '+format(credits)+' credits won, times '+multiplier+' multiplier, total '+format(total)+' credits. Click anywhere to continue');
+   return;
+  }
   const title=doc.createElement('strong');title.className='cc-bonus-total-title';
   title.textContent=kind==='road'?'ROAD TRIP COMPLETE':'ENDLESS HARVEST COMPLETE';
   const cowboy=doc.createElement('img');cowboy.className='cc-bonus-cowboy';

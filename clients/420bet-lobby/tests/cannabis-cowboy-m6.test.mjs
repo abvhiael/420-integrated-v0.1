@@ -62,14 +62,16 @@ test('M6 Road Trip is 5 stops with precommitted case values and one pick per sto
  assert.deepEqual(trip.stops.map(s=>s.name),ROAD_STOPS.map(s=>s.name));
  assert.equal(trip.stops.length,5);
  assert(trip.stops.every(s=>s.caseValues.length===3));
+ assert(trip.stops.every(s=>[2,3,5,10].includes(s.multiplier)&&s.caseValues[s.multiplierCase]===0));
  let picks=[],total=0;
  for(let i=0;i<5;i++){
   const result=chooseRoadCase(trip,picks,i%3);
   picks=result.picks;total=result.total;
   assert.equal(result.done,i===4);
   assert.equal(picks[i].award,trip.stops[i].caseValues[i%3]);
+  assert.equal(picks[i].multiplier,i%3===trip.stops[i].multiplierCase?trip.stops[i].multiplier:1);
  }
- assert.equal(total,picks.reduce((n,p)=>n+p.award,0));
+ assert.equal(total,picks.reduce((n,p)=>n+p.award,0)*picks.reduce((n,p)=>n*p.multiplier,1));
  assert.throws(()=>chooseRoadCase(trip,picks,0),/Invalid Road Trip progress/);
  assert.throws(()=>chooseRoadCase(trip,[],3),/Invalid case choice/);
  assert.deepEqual(createRoadTrip(20,seed(12)),trip,'case values predetermined by RNG');
@@ -133,8 +135,18 @@ test('base and free-spin screens both invoke staggered reel stops',()=>{
  h.root.querySelector('.cc-spin').dispatchEvent(new h.window.Event('click'));
  const phases=[];
  let guard=0;
- while(h.tasks.length&&guard++<8000){
+ while(guard++<8000){
+  if(h.root.getPracticeState().freeSpinReady){
+   h.root.querySelector('.cc-free-spin-button').dispatchEvent(new h.window.Event('click'));
+  }
+  if(h.root.getPracticeState().bonusSplashVisible){
+   h.root.querySelector('.cc-bonus-total-splash').dispatchEvent(new h.window.Event('click'));
+  }
   if(h.root.querySelectorAll('.cc-reel-rolling').length>0)phases.push(h.root.dataset.featurePhase);
+  if(!h.tasks.length){
+   if(!h.root.getPracticeState().busy)break;
+   continue;
+  }
   h.tasks.shift().fn();
  }
  assert(guard<8000);
@@ -185,4 +197,30 @@ test('all five Road Trip scenes and fifteen guitar-case PNGs are committed and l
   assert(bytes.length>1000,'missing or truncated asset '+asset);
   assert.equal(bytes.subarray(0,8).toString('hex'),'89504e470d0a1a0a','not a PNG '+asset);
  }
+});
+
+
+test('each Road Trip stop has exactly one hidden multiplier case and awards are stacked only at completion',()=>{
+ const trip=createRoadTrip(20,seed(74));
+ let picks=[],final;
+ for(let stop=0;stop<5;stop++){
+  const index=stop===0?trip.stops[stop].multiplierCase:
+   (stop===1?trip.stops[stop].multiplierCase:(trip.stops[stop].multiplierCase+1)%3);
+  final=chooseRoadCase(trip,picks,index);picks=final.picks;
+ }
+ assert.equal(picks.filter(p=>p.kind==='multiplier').length,2);
+ assert.equal(final.stackedMultiplier,picks[0].multiplier*picks[1].multiplier);
+ assert.equal(final.total,final.subtotal*final.stackedMultiplier);
+ assert(final.done);
+});
+test('Road Trip pick buttons keep original case artwork while revealing prizes',()=>{
+ const h=harness({roundOptions:{baseBoard:ticketBoard()}});
+ h.root.querySelector('.cc-spin').dispatchEvent(new h.window.Event('click'));
+ h.drain();
+ const first=h.root.querySelector('.cc-road-case');
+ first.dispatchEvent(new h.window.Event('click'));
+ assert.equal(h.root.querySelectorAll('.cc-road-case-art').length,3);
+ assert.equal(h.root.querySelectorAll('.cc-road-case-reveal').length,3);
+ assert(first.querySelector('.cc-road-case-art'));
+ h.root.stopAnimation();
 });

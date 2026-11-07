@@ -50,3 +50,14 @@
 }
 @media(max-height:690px) and (min-width:721px){.sb-menu{bottom:10px}.sb-menu-action{min-height:68px;gap:4px;font-size:13px}.sb-menu-icon{font-size:25px}.sb-chalkboard-heading{font-size:12px}.sb-chalkboard-date{font-size:8px}.sb-board-empty{font-size:11px}}
 @media(prefers-reduced-motion:reduce){.sb-menu-action{transition:none}}
+
+/* Provider-observed Game Lines: informational only, never selectable odds. */
+.sb-lines-caption{font-size:12px;font-weight:750;color:#b9f89a;line-height:1.55;margin:13px 0}
+.sb-lines-list{max-height:min(41dvh,390px);overflow-y:auto;display:grid;gap:8px;padding-right:4px;scrollbar-color:#568a36 #15261b}
+.sb-lines-empty{padding:16px;border:1px solid #bd9a54;border-radius:9px;background:#102717d9;font:700 13px/1.55 system-ui;color:#e7daa7}
+.sb-line-row{padding:11px 12px;border:1px solid #c5ac62;border-radius:10px;background:linear-gradient(#0c3326ec,#121e1ded);color:#fff1c5}
+.sb-line-heading{display:grid;gap:5px;font-size:13px}
+.sb-line-heading span{color:#b6e4a2;font-size:11px}
+.sb-price-list{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.sb-price{border:1px solid #74ce4b;background:#244321;border-radius:7px;color:#f9e8bc;padding:5px 7px;font:800 11px system-ui}
+@media(max-width:720px){.sb-lines-list{max-height:min(32dvh,260px)}.sb-line-heading{font-size:12px}}

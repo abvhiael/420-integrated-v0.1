@@ -184,12 +184,11 @@ test('free spins require player input and stay on coin-total splash until dismis
  assert.equal(root.getPracticeState().busy,true);
  const splash=root.querySelector('.cc-bonus-total-splash');
  assert.equal(splash.dataset.bonus,'harvest');
- assert.match(splash.textContent,/ENDLESS HARVEST COMPLETE/);
- assert.match(splash.textContent,/TOTAL BONUS WIN/);
- assert.match(splash.textContent,/CREDITS/);
- assert.match(splash.textContent,/CLICK ANYWHERE TO CONTINUE/);
- assert.match(splash.querySelector('.cc-bonus-cowboy').getAttribute('src'),/cannabis-cowboy-cole-haze\.png$/);
- assert.equal(splash.querySelector('.cc-bonus-total-amount').textContent,
+ assert.match(splash.getAttribute('aria-label'),/Endless Harvest Collected!/);
+ assert.match(splash.getAttribute('aria-label'),/Click anywhere to continue/);
+ assert.equal(splash.querySelectorAll('.cc-harvest-splash-credits').length,1);
+ assert.equal(splash.querySelectorAll('.cc-bonus-cowboy').length,0,'full scene already includes Cole Haze');
+ assert.equal(splash.querySelector('.cc-harvest-splash-credits').textContent,
   root.getPracticeState().bonusWin.toLocaleString('en-US')+' CREDITS');
  root.querySelector('.cc-bonus-total-splash').dispatchEvent(new window.Event('click'));
  assert.equal(root.getPracticeState().bonusSplashVisible,false);
@@ -241,4 +240,15 @@ test('Endless Harvest spin control uses approved illustrated PNG and opaque live
  assert.match(live,/\.cc-free-spin-last\{[\s\S]*?background:linear-gradient\(180deg,#542a11,#2f170b\)/);
  assert.match(live,/\.cc-free-spin-action\{[\s\S]*?opacity:0/);
  assert.match(live,/aspect-ratio:3 \/ 2/);
+});
+
+test('uploaded Endless Harvest Collected art backs the entire clickable bonus result screen',()=>{
+ const css=readFileSync(new URL('../src/cannabis-cowboy.css',import.meta.url),'utf8');
+ const art='/assets/420bet/cannabis-cowboy/cannabis-cowboy-endless-harvest-complete-splash.png';
+ const bytes=readFileSync(new URL('../public'+art,import.meta.url));
+ assert.equal(bytes.subarray(0,8).toString('hex'),'89504e470d0a1a0a');
+ const live=css.slice(css.lastIndexOf('/* Approved Cole Haze Endless Harvest Collected splash.'));
+ assert.match(live,/cannabis-cowboy-endless-harvest-complete-splash\.png/);
+ assert.match(live,/\.cc-harvest-splash-credits\{[\s\S]*?position:absolute;/);
+ assert.match(live,/pointer-events:none/);
 });

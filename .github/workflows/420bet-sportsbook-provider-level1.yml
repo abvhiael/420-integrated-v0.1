@@ -3,6 +3,9 @@ on:
   pull_request:
     paths:
       - 'clients/420bet-lobby/server/sportsbook-provider.mjs'
+      - 'clients/420bet-lobby/worker/index.js'
+      - 'clients/420bet-lobby/wrangler.jsonc'
+      - 'clients/420bet-lobby/tests/sportsbook-worker.test.mjs'
       - 'clients/420bet-lobby/functions/api/420bet/sportsbook/**'
       - 'clients/420bet-lobby/src/sportsbook-ui.js'
       - 'clients/420bet-lobby/src/sportsbook.css'
@@ -27,13 +30,23 @@ jobs:
         run: npm install --no-audit --no-fund
       - name: Provider adapter, privacy and Game Lines qualification
         working-directory: clients/420bet-lobby
-        run: node --test tests/sportsbook-provider.test.mjs tests/sportsbook-ui.test.mjs
+        run: node --test tests/sportsbook-provider.test.mjs tests/sportsbook-worker.test.mjs tests/sportsbook-ui.test.mjs
       - name: Validate Cloudflare Function entrypoints
         working-directory: clients/420bet-lobby
         run: |
           node --check functions/api/420bet/sportsbook/marquee.js
           node --check functions/api/420bet/sportsbook/lines.js
           node --check server/sportsbook-provider.mjs
+      - name: Validate Worker script syntax
+        working-directory: clients/420bet-lobby
+        run: node --check worker/index.js
       - name: Vite lobby build
         working-directory: clients/420bet-lobby
         run: npm run build
+      - name: Wrangler static-assets plus Worker entrypoint dry run
+        working-directory: clients/420bet-lobby
+        run: |
+          npx --yes wrangler@4 deploy --assets ./dist --name 420bet --dry-run --outdir /tmp/420bet-worker-dry-run
+          test -f /tmp/420bet-worker-dry-run/index.js
+          grep -q 'sports_feed_not_configured' /tmp/420bet-worker-dry-run/index.js
+

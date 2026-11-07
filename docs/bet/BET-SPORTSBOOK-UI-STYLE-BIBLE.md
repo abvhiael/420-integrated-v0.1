@@ -70,3 +70,23 @@ The Game Lines frontend requests `GET /api/420bet/sportsbook/lines`. This is del
 The provider's official API usage guide confirms free `/sports/{sport}/events` requests and chargeable `/sports/{sport}/odds` requests (one credit per region per market). **500 monthly free credits do not support continuously refreshed in-play multi-league prices.** A paid-odds ingester must use an independently configured, controlled scheduler and a persistent cross-region cache/budget authority before it is activated.
 
 The live deployment must verify the Cloudflare secret binding, route activation, endpoint response, source licensing and server-side quota monitoring. No live upstream request has been asserted solely by committing these files. No real-money wagering or production settlement is enabled.
+
+## Cloudflare Workers deployment correction (2026-11-07)
+
+**Confirmed actual deployment:** Cloudflare Workers Builds, production Worker **`420bet`**, root `/clients/420bet-lobby/`; existing build `npm install --no-audit --no-fund && npm run build` and deploy `npx wrangler deploy --assets ./dist --name 420bet ...`. This is *not* Cloudflare Pages; the previous `functions/api/...` files alone cannot activate API routes on this platform.
+
+The repository now supplies **`clients/420bet-lobby/wrangler.jsonc`** with `main: "./worker/index.js"`, the same Worker name `420bet`, an `ASSETS` binding targeting the existing `dist` build, and a narrowly scoped `assets.run_worker_first` route for `/api/420bet/sportsbook/*`. This keeps game/JS/image requests on direct asset serving instead of paying the overhead of a request-level middleware. The Worker code dispatches exactly:
+- `GET /api/420bet/sportsbook/marquee` to the existing quota-free sports events adapter, with `env.THE_ODDS_API_KEY` encrypted secret.
+- `GET /api/420bet/sportsbook/lines` to the existing *cache-only*, read-only Game Lines endpoint. **It will return HTTP 503** until a separately budgeted refresh job and `SPORTSBOOK_ODDS_CACHE` KV binding exist.
+
+No API key value is in the committed configuration. Cloudflare's **Production** settings screenshot established that the secret binding named `THE_ODDS_API_KEY` already exists and is encrypted. Wrangler `keep_vars:true` avoids overriding existing dashboard plaintext vars, and the Wrangler docs state that encrypted Worker secrets are preserved during ordinary deployments. The Worker config contains no `routes`, so the operator's existing custom-domain route is not replaced. The current Worker build/deploy command should automatically pick up `wrangler.jsonc` from the build root. **Do not create a second Cloudflare site** or switch this project to Pages.
+
+### After merging
+
+1. In **420bet → Production → Deployments**, check a successful build of the merge commit. The build log must bundle a Worker module (from `worker/index.js`), not only a static `dist` folder. If Workers Builds ignores the Wrangler config because of explicit dashboard CLI overrides, change **only** the deploy command to `npx wrangler deploy` (the checked-in config already supplies name, main, date and assets). Do not modify the production secret or domain.
+2. Open `https://420bet.420integrated.org/api/420bet/sportsbook/marquee`. Correct behavior is JSON with `source:"verified-sports-fixtures-v1"`, `events`, `observedAt`, and `expiresAt`; empty events is valid if none are scheduled today. HTML indicates a Worker routing/deployment issue; `sports_feed_not_configured` indicates a missing *runtime* secret; `sports_feed_unavailable` indicates a provider fetch/response failure. Make sure this matches the actual production deployment SHA.
+3. Open `https://420bet.420integrated.org/#game=sportsbook` and verify the original wallpaper, image assets and other casino games still work. The chalkboard populates only actual provider event names, not paid odds or invented lines.
+4. The `/api/420bet/sportsbook/lines` endpoint should still return `odds_cache_not_configured` until a bounded, shared KV/scheduled provider-odds ingestion is delivered. **That 503 is deliberate and not part of the Worker deployment bug.**
+5. If a deployment fails, roll back from the 420bet Worker's **Deployments** screen; do not reset all 420Integrated site builds.
+
+The focused Level 1 workflow tests direct API dispatch, unknown-route fail closed, preservation of casino assets, missing-secret behavior, and a Wrangler `--assets ./dist --name 420bet --dry-run` entrypoint bundle.

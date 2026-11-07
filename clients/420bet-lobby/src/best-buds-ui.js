@@ -93,7 +93,15 @@ export function createBestBudsPractice(doc=globalThis.document,options={}){
     }
     if(rolling){
      const strip=make(doc,'div','bb-roll-mask'),track=make(doc,'div','bb-roll-track');
-     for(let i=0;i<12;i++)track.append(sprite(doc,'reels',SYMBOL_ART[randomSymbol()],''));
+     // Nine-symbol strip, repeated exactly twice for a seamless loop.
+     // Each tile occupies one third of the 3-row visible reel, regardless
+     // of the art's intrinsic dimensions or the gameboard aspect ratio.
+     const sequence=Array.from({length:9},randomSymbol);
+     for(let i=0;i<18;i++){
+      const tile=make(doc,'div','bb-roll-tile');
+      tile.append(sprite(doc,'reels',SYMBOL_ART[sequence[i%9]],'','bb-roll-symbol'));
+      track.append(tile);
+     }
      strip.append(track);reel.append(strip);
     }
     reelGrid.append(reel);

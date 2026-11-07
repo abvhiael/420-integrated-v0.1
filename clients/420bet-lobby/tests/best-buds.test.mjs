@@ -318,3 +318,27 @@ test('INFO modal presents 25 exact source-of-truth paylines as SVG art',()=>{
  }
  root.stopAnimation();
 });
+
+test('rolling reel icons use exact 3-row cells rather than intrinsic image height',()=>{
+ const {document,window}=parseHTML('<html><body></body></html>');
+ const root=createBestBudsPractice(document,{rng:()=>.99});
+ const spin=[...root.querySelectorAll('button')].find(b=>b.textContent==='SPIN');
+ spin.dispatchEvent(new window.Event('click',{bubbles:true}));
+ assert.equal(root.getPresentationState().phase,'spinning');
+ assert.equal(root.querySelectorAll('.bb-roll-mask').length,5);
+ const strips=root.querySelectorAll('.bb-roll-track');
+ assert.equal(strips.length,5);
+ for(const strip of strips){
+  const tiles=strip.querySelectorAll('.bb-roll-tile');
+  assert.equal(tiles.length,18);
+  for(let i=0;i<9;i++){
+   assert.equal(tiles[i].querySelector('img').getAttribute('src'),tiles[i+9].querySelector('img').getAttribute('src'));
+  }
+ }
+ const css=readFileSync(new URL('../src/best-buds.css',import.meta.url),'utf8');
+ assert.match(css,/\.bb-reel-rolling \.bb-roll-track\s*\{[^}]*height:600%/s);
+ assert.match(css,/\.bb-reel-rolling \.bb-roll-tile\s*\{[^}]*flex:0 0 calc\(100% \/ 18\)/s);
+ assert.match(css,/\.bb-roll-tile > \.bb-roll-symbol\s*\{[^}]*width:84%;height:84%/s);
+ root.querySelector('.bb-stage').dispatchEvent(new window.Event('click',{bubbles:true}));
+ root.stopAnimation();
+});

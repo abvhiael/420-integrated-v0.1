@@ -16,7 +16,7 @@ const secureHeaders=Object.freeze({
 });
 const safeText=(s,max=65)=>typeof s==='string'&&s.length>0&&s.length<=max&&!/[<>\x00-\x1f]/.test(s);
 const validTime=x=>typeof x==='string'&&Number.isFinite(Date.parse(x))&&/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?Z$/.test(x);
-const day=(at,zone=ZONE)=>new Intl.DateTimeFormat('en-CA',{year:'numeric',month:'2-digit',day:'2-digit',timeZone:zone}).format(at);
+const day=(at,zone=ZONE)=>{const p=new Intl.DateTimeFormat('en-CA',{year:'numeric',month:'2-digit',day:'2-digit',timeZone:zone}).formatToParts(at);const get=k=>p.find(v=>v.type===k)?.value;return get('year')+'-'+get('month')+'-'+get('day');};
 const response=(status,body)=>new Response(JSON.stringify(body),{status,headers:secureHeaders});
 const isArray=x=>Array.isArray(x)&&x.length<=1000;
 export function providerEvent(raw,kind){
@@ -75,8 +75,7 @@ export async function fetchDailyFixtures(apiKey,{fetcher=globalThis.fetch,now=Da
   events
  };
 }
-const cache=new Map();
-function memoized(key,fn,clock,ttl=10*60000){
+function memoized(cache,key,fn,clock,ttl=10*60000){
  const prev=cache.get(key);
  if(prev&&prev.until>clock())return prev.promise;
  const promise=Promise.resolve().then(fn);
@@ -85,6 +84,7 @@ function memoized(key,fn,clock,ttl=10*60000){
  return promise;
 }
 export function createMarqueeHandler({fetcher=globalThis.fetch,clock=()=>Date.now()}={}){
+ const cache=new Map();
  return async function handle(context){
   const req=context.request;
   if(req.method!=='GET')return response(405,{error:'method_not_allowed'});
@@ -95,7 +95,7 @@ export function createMarqueeHandler({fetcher=globalThis.fetch,clock=()=>Date.no
   if(typeof secret!=='string'||secret.length<16)
    return response(503,{error:'sports_feed_not_configured'});
   try{
-   const result=await memoized('marquee:'+secret,()=>fetchDailyFixtures(secret,{fetcher,now:clock()}),clock);
+   const result=await memoized(cache,'marquee',()=>fetchDailyFixtures(secret,{fetcher,now:clock()}),clock);
    // Refresh observedAt from actual upstream fetch; never mislabel old cached data
    // as freshly fetched or extend its original expiry.
    if(Date.parse(result.expiresAt)<=clock())throw Error('cached source expired');

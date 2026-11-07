@@ -1007,7 +1007,7 @@ test('Jen Hide the Stash checks threshold, and base/added crates never double-tr
  assert.equal(insufficient.events.filter(x=>x.type==='stash').length,0,'Only two transformed crates must not award Hold & Win');
  assert.equal(insufficient.events.find(x=>x.type==='jen').awardedHoldAndWin,undefined);
 });
-test('Jen's comic announcement and complete grid display Hold & Win qualification',()=>{
+test("Jen’s comic announcement and complete grid display Hold & Win qualification",()=>{
  const ui=readFileSync(new URL('../src/dads-secret-stash-ui.js',import.meta.url),'utf8');
  assert.match(ui,/event\.stashCount\+' STASH CRATES! SECRET STASH HOLD & WIN UNLOCKED!'/);
  assert.match(ui,/event\.stashCount\+' STASH CRATES — HOLD & WIN UNLOCKED!'/);

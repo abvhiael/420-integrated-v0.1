@@ -144,6 +144,32 @@ export function createSinCityPractice(doc=globalThis.document,options={}){
    reels.append(col);}
   playArea.append(reels);
   const hotboxVisible=state.mode==='hotbox'||(phase==='spinning'&&spinningMode==='hotbox')||state.lastFeature==='hotbox-start';
+  if(!hotboxVisible){
+   const inFree=state.mode==='free'||(phase==='spinning'&&spinningMode==='free')||state.lastFeature==='free-end';
+   const payTable=inFree?FREE_PAYTABLE:PAYTABLE;
+   const paybox=el(doc,'aside','sc-ways-side');paybox.setAttribute('aria-label','Sin City ways paytable');
+   paybox.append(el(doc,'strong','sc-ways-heading',inFree?'FREE SPINS PAYTABLE':'GAME PAYTABLE'));
+   paybox.append(el(doc,'small','sc-ways-description','3 · 4 · 5 MATCHES FROM LEFT · MULTIPLES OF TOTAL BET'));
+   const header=el(doc,'div','sc-ways-tier sc-ways-tier-head');
+   for(const label of ['SYMBOL','3','4','5'])header.append(el(doc,'span','',label));
+   paybox.append(header);
+   const list=el(doc,'div','sc-ways-payout-list');
+   for(const [symbol,awards] of Object.entries(payTable)){
+    const row=el(doc,'div','sc-ways-tier');
+    row.dataset.symbol=symbol;
+    const symbolCell=el(doc,'span','sc-ways-symbol');
+    if(FILES[symbol]){
+     const pic=el(doc,'img');pic.src=art('symbols',FILES[symbol]);pic.alt='';pic.draggable=false;
+     symbolCell.append(pic);
+    }
+    symbolCell.append(el(doc,'span','sc-ways-symbol-name',symbol==='CAR'?'LOWRIDER':symbol==='ASH'?'ASHTRAY':symbol));
+    row.append(symbolCell);
+    for(const value of awards)row.append(el(doc,'span','sc-ways-amount',Number(value.toFixed(5)).toString()+'×'));
+    list.append(row);
+   }
+   paybox.append(list,el(doc,'small','sc-ways-footer',inFree?'ALL WILDS STICK · NATURAL ASHTRAYS & LOWRIDERS ONLY':'1,024 WAYS · WILD SUBSTITUTES FOR PAYING SYMBOLS'));
+   playArea.append(paybox);
+  }
   if(hotboxVisible){
    const paybox=el(doc,'aside','sc-hotbox-side');paybox.setAttribute('aria-label','Hotbox Respins payout schedule');
    paybox.append(el(doc,'strong','sc-hotbox-heading','HOTBOX PAYOUTS'),el(doc,'small','','COLLECT GEMS · WIN × TOTAL BET'));

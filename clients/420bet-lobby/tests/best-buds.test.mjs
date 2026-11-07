@@ -79,6 +79,8 @@ test('practice view uses uploaded art, QA button, staggered reel panels and clic
  hold.dispatchEvent(new window.Event('click',{bubbles:true}));
  assert.equal(root.getGameState().mode,'hold');
  assert.equal(root.querySelectorAll('.bb-coin-locked').length,6);
+ const start=[...root.querySelectorAll('button')].find(b=>b.textContent==='START HOLD & WIN');
+ assert.ok(start);start.dispatchEvent(new window.Event('click',{bubbles:true}));
  const spin=[...root.querySelectorAll('button')].find(b=>b.textContent==='RESPIN');
  spin.dispatchEvent(new window.Event('click',{bubbles:true}));
  assert.equal(root.getPresentationState().phase,'spinning');
@@ -107,6 +109,7 @@ test('Hold & Win displays locked coins throughout each manually initiated respin
  const skip=()=>{root.querySelector('.bb-stage').dispatchEvent(new window.Event('click',{bubbles:true}));};
  click('BONUS TEST');click('Trigger Hold & Win');
  assert.equal(root.getGameState().mode,'hold');assert.equal(root.querySelectorAll('.bb-coin-locked').length,6);
+ click('START HOLD & WIN');
  click('RESPIN');
  assert.equal(root.getPresentationState().phase,'spinning');
  assert.equal(root.querySelectorAll('.bb-coin-locked').length,6,'previously landed coins remain visible while empty cells spin');
@@ -204,7 +207,7 @@ test('Collect Smoke appears as a credit collection UI event on the triggered Hol
  click('RESPIN');
  assert.equal(root.querySelectorAll('.bb-hold-reel-spinning').length,5);
  assert.equal(root.querySelectorAll('.bb-hold-spin-window').length,6);
- assert.equal(root.querySelectorAll('.bb-hold-spin-tile').length,60);
+ assert.equal(root.querySelectorAll('.bb-hold-spin-tile').length,72);
  assert.equal(root.querySelectorAll('.bb-coin-locked').length,9);
  root.querySelector('.bb-stage').dispatchEvent(new window.Event('click',{bubbles:true}));
  assert.equal(root.getPresentationState().phase,'idle');
@@ -224,7 +227,7 @@ test('Hold reel stop has five independent columns and retains locked coins',()=>
  const root=createBestBudsPractice(document,{rng:()=>.99});
  const click=label=>{const b=[...root.querySelectorAll('button')].find(b=>b.textContent===label);b.dispatchEvent(new window.Event('click',{bubbles:true}));};
  click('BONUS TEST');click('Trigger Hold & Win');
- click('RESPIN');
+ click('START HOLD & WIN');click('RESPIN');
  assert.equal(root.querySelectorAll('.bb-hold-reel-spinning').length,5);
  assert.equal(root.querySelectorAll('.bb-coin-locked').length,6);
  root.querySelector('.bb-stage').dispatchEvent(new window.Event('click',{bubbles:true}));
@@ -274,6 +277,7 @@ test('Both reference panels remain visible during Hold & Win and free rides',()=
  const root=createBestBudsPractice(document,{rng:()=>.99});
  const button=label=>{const element=[...root.querySelectorAll('button')].find(b=>b.textContent===label);assert.ok(element,label);element.dispatchEvent(new window.Event('click',{bubbles:true}));};
  button('BONUS TEST');button('Trigger Hold & Win');
+ button('START HOLD & WIN');
  assert.equal(root.getGameState().mode,'hold');
  assert.equal(root.querySelectorAll('.bb-reference-panel').length,2);
  button('RESPIN');
@@ -348,6 +352,7 @@ test('INFO always exposes BACK TO GAME without losing credits, current bonus or 
  const root=createBestBudsPractice(document,{rng:()=>.99});
  const click=name=>{const b=[...root.querySelectorAll('button')].find(x=>x.textContent===name);assert.ok(b,name);b.dispatchEvent(new window.Event('click',{bubbles:true}));};
  click('BONUS TEST');click('Trigger Hold & Win');
+ click('START HOLD & WIN');
  const stateBefore=root.getGameState(),snapshot={balance:stateBefore.balance,mode:stateBefore.mode,respins:stateBefore.respins,hold:JSON.stringify(stateBefore.hold)};
  click('INFO / PAYTABLE');
  assert.equal(root.querySelector('[role="dialog"]')?.getAttribute('aria-modal'),'true');
@@ -365,5 +370,51 @@ test('INFO always exposes BACK TO GAME without losing credits, current bonus or 
  assert.equal(root.querySelector('.bb-modal-cover'),null);
  click('RESPIN');
  assert.equal(root.getPresentationState().phase,'spinning');
+ root.stopAnimation();
+});
+
+test('HOTBOX spinning strip is cell-scaled and repeats a matched six-icon cycle',()=>{
+ const {document,window}=parseHTML('<html><body></body></html>');
+ const root=createBestBudsPractice(document,{rng:()=>.99});
+ const click=label=>{const b=[...root.querySelectorAll('button')].find(v=>v.textContent===label);assert.ok(b,label);b.dispatchEvent(new window.Event('click',{bubbles:true}));};
+ click('BONUS TEST');click('Trigger Hold & Win');
+ assert.equal(root.getPresentationState().hotboxSplash,'trigger');
+ click('START HOLD & WIN');
+ click('RESPIN');
+ const strips=root.querySelectorAll('.bb-hold-spin-track');
+ assert.equal(strips.length,9);
+ for(const strip of strips){
+  const tiles=strip.querySelectorAll('.bb-hold-spin-tile');
+  assert.equal(tiles.length,12);
+  for(let i=0;i<6;i++)assert.equal(tiles[i].querySelector('img').getAttribute('src'),tiles[i+6].querySelector('img').getAttribute('src'));
+ }
+ const css=readFileSync(new URL('../src/best-buds.css',import.meta.url),'utf8');
+ assert.match(css,/\.bb-hold-cell-rolling \.bb-hold-spin-track\s*\{[^}]*height:1200%/s);
+ assert.match(css,/\.bb-hold-cell-rolling \.bb-hold-spin-tile\s*\{[^}]*flex:0 0 calc\(100% \/ 12\)/s);
+ assert.match(css,/\.bb-hold-spin-tile > \.bb-hold-spin-symbol\s*\{[^}]*width:76%;height:76%/s);
+ root.stopAnimation();
+});
+test('HOTBOX start and completion splashes pause play and display the credited bonus win',()=>{
+ const {document,window}=parseHTML('<html><body></body></html>');
+ const root=createBestBudsPractice(document,{rng:()=>.99});
+ const click=label=>{const b=[...root.querySelectorAll('button')].find(v=>v.textContent===label);assert.ok(b,label);b.dispatchEvent(new window.Event('click',{bubbles:true}));};
+ click('BONUS TEST');click('Trigger Hold & Win');
+ assert.equal(root.getPresentationState().hotboxSplash,'trigger');
+ assert.match(root.querySelector('.bb-hotbox-splash-img').getAttribute('src'),/bestbuds-hotbox-trigger\.png$/);
+ assert.equal(root.querySelectorAll('.bb-coin-locked').length,6);
+ click('START HOLD & WIN');
+ assert.equal(root.getPresentationState().hotboxSplash,null);
+ click('RESPIN');root.querySelector('.bb-stage').dispatchEvent(new window.Event('click',{bubbles:true}));
+ click('RESPIN');root.querySelector('.bb-stage').dispatchEvent(new window.Event('click',{bubbles:true}));
+ click('RESPIN');root.querySelector('.bb-stage').dispatchEvent(new window.Event('click',{bubbles:true}));
+ assert.equal(root.getGameState().lastFeature,'hold-end');
+ assert.equal(root.getPresentationState().hotboxSplash,'complete');
+ const total=root.getGameState().featureTotal;
+ assert.equal(root.querySelector('.bb-hotbox-total-credits').textContent,total.toFixed(2));
+ assert.match(root.querySelector('.bb-hotbox-splash-img').getAttribute('src'),/bestbuds-hotbox-complete\.png$/);
+ click('CLICK TO CONTINUE');
+ assert.equal(root.getPresentationState().hotboxSplash,null);
+ assert.equal(root.getGameState().lastFeature,'');
+ assert.equal(root.getGameState().balance,1000-root.getGameState().bet+total);
  root.stopAnimation();
 });

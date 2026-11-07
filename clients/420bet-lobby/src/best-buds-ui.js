@@ -18,12 +18,13 @@ export function createBestBudsPractice(doc=globalThis.document,options={}){
  const root=make(doc,'section','bb-game');root.dataset.practiceGame='best-buds-hotbox-road-trip';
  let state=options.initialState??initialState(),display=state.board,phase='idle',stopped=0,lineIndex=0;
  let modal='',qaMenu=false,dead=false,visualMode=state.mode,sessionSummary=null;
+ let hotboxSplash=null,pendingHotboxSplash=null;
  let previousHold=[];
  const timers=new Set();const reduced=!!view.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
  const later=(fn,ms)=>{if(dead)return;const id=view.setTimeout?.(()=>{timers.delete(id);if(!dead)fn();},ms);if(id!==undefined)timers.add(id);else fn();};
  const clear=()=>{for(const id of timers)view.clearTimeout?.(id);timers.clear();};
  root.stopAnimation=()=>{dead=true;clear();};
- root.getPresentationState=()=>({phase,stopped,lineIndex,mode:state.mode,feature:state.lastFeature,lastWin:state.lastWin,winCount:state.lastWins.length,respins:state.respins,freeLeft:state.freeLeft,qaMenu,summary:sessionSummary,collectSmokeEvent:state.collectSmokeEvent,holdShown:previousHold.length});
+ root.getPresentationState=()=>({phase,stopped,lineIndex,mode:state.mode,feature:state.lastFeature,lastWin:state.lastWin,winCount:state.lastWins.length,respins:state.respins,freeLeft:state.freeLeft,qaMenu,summary:sessionSummary,hotboxSplash,pendingHotboxSplash,collectSmokeEvent:state.collectSmokeEvent,holdShown:previousHold.length});
  root.getGameState=()=>state;
  const layout=()=>{
   if(dead)return;root.replaceChildren();
@@ -63,11 +64,15 @@ export function createBestBudsPractice(doc=globalThis.document,options={}){
       // position behave like a moving reel strip rather than a blinking coin.
       const mask=make(doc,'div','bb-hold-spin-window');
       const track=make(doc,'div','bb-hold-spin-track');
-      for(let i=0;i<10;i++){
+      // A one-cell viewport needs one-cell tiles. Duplicate a six-icon
+      // strip for a seamless scroll, rather than stretching ten images
+      // across a 300%-height track.
+      const symbols=['icon_hotbox_coin.png','icon_jackpot_mini.png',
+       'icon_hotbox_coin.png','icon_collect_smoke.png',
+       'icon_multiplier_x2.png','icon_hotbox_coin.png'];
+      for(let i=0;i<symbols.length*2;i++){
        const tile=make(doc,'div','bb-hold-spin-tile');
-       const art=i%5===0?'icon_collect_smoke.png':i%4===0?'icon_jackpot_mini.png':
-         i%3===0?'icon_multiplier_x2.png':'icon_hotbox_coin.png';
-       tile.append(sprite(doc,'ui',art,''));
+       tile.append(sprite(doc,'ui',symbols[i%symbols.length],'','bb-hold-spin-symbol'));
        track.append(tile);
       }
       mask.append(track);cell.append(mask);
@@ -150,7 +155,7 @@ export function createBestBudsPractice(doc=globalThis.document,options={}){
   if(qaMenu){
    const qa=make(doc,'div','bb-qa-panel');qa.append(make(doc,'strong','','PRACTICE BONUS TEST · NO REAL STAKES'));
    for(const [name,choice] of [['Trigger Hold & Win','hold'],['8 Free Rides','free'],['Collect Smoke','collect'],['Jackpot / Mystery','jackpot'],['Fill the Hotbox','fill'],['Test WILD ×10','wild10']]){
-    qa.append(button(doc,name,'bb-qa-option',()=>{clear();phase='idle';qaMenu=false;state=practiceBonus({...state,mode:'base'},choice,options.rng??Math.random);display=state.board;visualMode=state.mode;layout();}));
+    qa.append(button(doc,name,'bb-qa-option',()=>{clear();phase='idle';qaMenu=false;state=practiceBonus({...state,mode:'base'},choice,options.rng??Math.random);display=state.board;visualMode=state.mode;pendingHotboxSplash=null;hotboxSplash=choice==='hold'?'trigger':null;layout();}));
    }
    frame.append(qa);
   }
@@ -229,6 +234,32 @@ export function createBestBudsPractice(doc=globalThis.document,options={}){
    const shade=make(doc,'div','bb-summary');shade.append(make(doc,'h2','','ROAD TRIP COMPLETE!'),make(doc,'div','bb-summary-total',credit(sessionSummary)+' CREDITS'),make(doc,'span','','CLICK ANYWHERE TO CONTINUE'));
    shade.addEventListener('click',()=>{sessionSummary=null;layout();});screen.append(shade);
   }
+  if(hotboxSplash){
+   const isComplete=hotboxSplash==='complete';
+   const splash=make(doc,'div','bb-hotbox-splash bb-hotbox-splash-'+hotboxSplash);
+   splash.setAttribute('role','dialog');
+   splash.setAttribute('aria-modal','true');
+   splash.setAttribute('aria-label',isComplete?'HOTBOX HOLD & WIN bonus complete':'HOTBOX HOLD & WIN bonus triggered');
+   const art=make(doc,'div','bb-hotbox-splash-art');
+   const image=sprite(doc,'ui',isComplete?'bestbuds-hotbox-complete.png':'bestbuds-hotbox-trigger.png',isComplete?'HOTBOX BONUS COMPLETE artwork':'HOTBOX HOLD & WIN BONUS TRIGGERED artwork','bb-hotbox-splash-img');
+   image.addEventListener('error',()=>{image.style.display='none';art.classList.add('bb-hotbox-art-fallback');});
+   art.append(image);
+   const copy=make(doc,'div','bb-hotbox-splash-copy');
+   if(isComplete){
+    copy.append(make(doc,'strong','bb-hotbox-total-label','YOU WON'));
+    copy.append(make(doc,'div','bb-hotbox-total-credits',credit(state.featureTotal)));
+    copy.append(make(doc,'span','bb-hotbox-total-unit','CREDITS'));
+   }else{
+    copy.append(make(doc,'strong','bb-hotbox-trigger-label','HOTBOX HOLD & WIN!'));
+    copy.append(make(doc,'p','bb-hotbox-trigger-detail','3 RESPINS · EACH NEW COIN RESETS TO 3'));
+   }
+   art.append(copy);
+   const footer=make(doc,'div','bb-hotbox-splash-footer');
+   footer.append(button(doc,isComplete?'CLICK TO CONTINUE':'START HOLD & WIN','bb-hotbox-splash-button',dismissHotboxSplash));
+   splash.append(art,footer);
+   splash.addEventListener('click',dismissHotboxSplash);
+   screen.append(splash);
+  }
   root.append(screen);
  };
  function coinVisual(c){
@@ -242,6 +273,13 @@ export function createBestBudsPractice(doc=globalThis.document,options={}){
   else span.append(sprite(doc,'ui','icon_multiplier_x2.png','Multiplier'));
   return span;
  }
+ function dismissHotboxSplash(){
+  if(!hotboxSplash)return;
+  const finished=hotboxSplash==='complete';
+  hotboxSplash=null;
+  if(finished)state={...state,lastFeature:'',holdReveal:null,holdNewKeys:[]};
+  layout();
+ }
  function changeBet(delta){if(phase!=='idle'||state.mode!=='base')return;const bets=[.5,1,2,5,10,20,50];let i=bets.indexOf(state.bet);state={...state,bet:bets[Math.max(0,Math.min(bets.length-1,i+delta))]};layout();}
  function showWins(){
   if(state.lastWins.length&&visualMode!=='hold'&&state.lastFeature!=='hold-end'){
@@ -251,12 +289,13 @@ export function createBestBudsPractice(doc=globalThis.document,options={}){
  function scheduleLine(){later(()=>{if(phase!=='paylines')return;lineIndex++;if(lineIndex>=state.lastWins.length){finish();return;}layout();scheduleLine();},reduced?80:650);}
  function finish(){
   clear();phase='idle';stopped=REELS;
+  if(pendingHotboxSplash){hotboxSplash=pendingHotboxSplash;pendingHotboxSplash=null;}
   if(state.freeSummary!==null){sessionSummary=state.freeSummary;state={...state,freeSummary:null};}
   layout();
  }
  function skip(){if(phase==='spinning'){clear();stopped=REELS;display=state.board;showWins();}else if(phase==='paylines')finish();}
  function startSpin(){
-  if(dead||phase!=='idle'||sessionSummary!==null||modal)return;
+  if(dead||phase!=='idle'||sessionSummary!==null||modal||hotboxSplash)return;
   if(state.mode==='base'&&state.balance<state.bet)return;
   clear();qaMenu=false;
   // QA hold variants use a forced outcome on the FIRST bonus respin only.
@@ -265,6 +304,7 @@ export function createBestBudsPractice(doc=globalThis.document,options={}){
   previousHold=before.hold.map(c=>({...c}));
   const next=nextSpin(state,{rng:options.rng??Math.random,force});
   state=next;
+  pendingHotboxSplash=next.lastFeature==='hold-start'?'trigger':next.lastFeature==='hold-end'?'complete':null;
   visualMode=before.mode;
   display=before.board;
   phase='spinning';stopped=0;layout();

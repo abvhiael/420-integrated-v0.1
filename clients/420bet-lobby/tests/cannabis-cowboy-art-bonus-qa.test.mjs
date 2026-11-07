@@ -62,26 +62,48 @@ test('screen uses six composited scrolling column overlays and retains staggered
  assert.match(css,/cc-column-flow/);
  assert.equal(makeColumnReelStrip(document).querySelectorAll('img').length,16);
 });
-test('free-spin tester plays an actual feature without modifying credits or paid spin count',()=>{
+test('free-spin tester uses trigger and each manual spin without modifying balance',()=>{
  const h=makeHarness(),before=h.root.getPracticeState();
  const select=h.root.querySelector('.cc-bonus-select');
  select.querySelector('option[value="free"]').setAttribute('selected','selected');
  h.root.querySelector('.cc-bonus-preview-button').dispatchEvent(new h.window.Event('click'));
  assert.equal(h.root.getPracticeState().credits,before.credits);
  assert.equal(h.root.getPracticeState().round,before.round);
- h.drain();
- if(h.root.dataset.featurePhase==='win-review')h.root.querySelector('.cc-symbol-grid').dispatchEvent(new h.window.Event('click',{bubbles:true}));
- h.drain();
+ let steps=0,triggerSeen=false,spins=0,splashSeen=false;
+ while(steps++<15000){
+  const state=h.root.getPracticeState();
+  if(state.harvestTriggerVisible){
+   triggerSeen=true;
+   h.root.querySelector('.cc-harvest-trigger-splash').dispatchEvent(new h.window.Event('click'));
+  }else if(state.freeSpinReady){
+   spins++;
+   h.root.querySelector('.cc-free-spin-button').dispatchEvent(new h.window.Event('click'));
+  }else if(state.bonusSplashVisible){
+   splashSeen=true;
+   h.root.querySelector('.cc-bonus-total-splash').dispatchEvent(new h.window.Event('click'));
+  }else if(state.featurePhase==='win-review'){
+   h.root.querySelector('.cc-symbol-grid').dispatchEvent(new h.window.Event('click',{bubbles:true}));
+  }
+  if(!h.tasks.length&& !h.root.getPracticeState().busy)break;
+  if(h.tasks.length)h.tasks.shift().fn();
+ }
+ assert(steps<15000,'bonus preview must terminate');
+ assert(triggerSeen&&spins>=8&&splashSeen,'trigger, manual spins and completion splash visited');
  assert.equal(h.root.getPracticeState().credits,before.credits);
  assert.equal(h.root.getPracticeState().round,before.round);
- assert.equal(h.root.getPracticeState().busy,false,'feature preview must release spin controls after total win is acknowledged');
+ assert.equal(h.root.getPracticeState().busy,false);
  h.root.stopAnimation();
 });
-test('five-stop Road Trip tester reveals selectable cases but never credits the balance',()=>{
+test('five-stop Road Trip tester requires splash click and never credits practice balance',()=>{
  const h=makeHarness(),before=h.root.getPracticeState();
- const select=h.root.querySelector('.cc-bonus-select');select.querySelector('option[value="road"]').setAttribute('selected','selected');
+ const select=h.root.querySelector('.cc-bonus-select');
+ select.querySelector('option[value="road"]').setAttribute('selected','selected');
  h.root.querySelector('.cc-bonus-preview-button').dispatchEvent(new h.window.Event('click'));
  h.drain();
+ assert.equal(h.root.getPracticeState().roadTriggerVisible,true);
+ assert.equal(h.root.getPracticeState().roadActive,false);
+ assert.equal(h.root.querySelector('.cc-road-panel').hidden,true);
+ h.root.querySelector('.cc-road-trigger-splash').dispatchEvent(new h.window.Event('click'));
  assert.equal(h.root.getPracticeState().roadActive,true);
  for(let i=0;i<5;i++){
   const cases=h.root.querySelectorAll('.cc-road-case');assert.equal(cases.length,3);
@@ -89,6 +111,9 @@ test('five-stop Road Trip tester reveals selectable cases but never credits the 
   h.root.querySelector('.cc-road-next').dispatchEvent(new h.window.Event('click'));
   h.drain();
  }
+ assert.equal(h.root.getPracticeState().bonusSplashVisible,true);
+ assert.equal(h.root.getPracticeState().busy,true);
+ h.root.querySelector('.cc-bonus-total-splash').dispatchEvent(new h.window.Event('click'));
  assert.equal(h.root.getPracticeState().round,before.round);
  assert.equal(h.root.getPracticeState().credits,before.credits);
  assert.equal(h.root.getPracticeState().busy,false);

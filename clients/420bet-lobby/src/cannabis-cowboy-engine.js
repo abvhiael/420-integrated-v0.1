@@ -18,7 +18,7 @@ export const MAX_CLUSTER_MULTIPLIER=500;
 // A low-frequency wildcard replaces any paying symbol; no scatter/bonus triggers in M4.
 export const SYMBOL_WEIGHTS=Object.freeze([16,15,14,13,12,11,10,9,2]); // base: id 0..7 + wildcard
 export const HARVEST_SYMBOL_WEIGHTS=Object.freeze([...SYMBOL_WEIGHTS.slice(0,WILD_SYMBOL),SYMBOL_WEIGHTS[WILD_SYMBOL]*2]); // feature-only: twice the wild weight
-export const CLUSTER_PAYS=Object.freeze([
+const ORIGINAL_CLUSTER_PAYS=Object.freeze([
  Object.freeze([.4,.8,2.5,8,30]), // premium bud
  Object.freeze([.3,.6,2,6,20]),  // mason jar
  Object.freeze([.25,.5,1.5,5,15]), // guitar
@@ -28,12 +28,19 @@ export const CLUSTER_PAYS=Object.freeze([
  Object.freeze([.1,.2,.6,2,6]), // rolling papers
  Object.freeze([.5,1,3,10,40]) // Cole portrait
 ]);
+// M8 calibration: base clusters are 2.23x the original table; feature
+// clusters are 2.00x. Trigger odds, reels, wilds and Road Trip are unchanged.
+// Export the actual base table so the in-game paytable cannot drift from math.
+export const BASE_PAY_SCALE=2.23;
+export const HARVEST_PAY_SCALE=2.00;
+export const CLUSTER_PAYS=Object.freeze(ORIGINAL_CLUSTER_PAYS.map(row=>Object.freeze(row.map(v=>Number((v*BASE_PAY_SCALE).toFixed(5))))));
+export const HARVEST_CLUSTER_PAYS=Object.freeze(ORIGINAL_CLUSTER_PAYS.map(row=>Object.freeze(row.map(v=>Number((v*HARVEST_PAY_SCALE).toFixed(5))))));
 const validBoard=board=>Array.isArray(board)&&board.length===CELL_COUNT&&board.every(v=>Number.isInteger(v)&&v>=0&&v<=ROAD_SYMBOL);
 const assertBoard=board=>{if(!validBoard(board))throw new Error('A complete 48-symbol board is required');};
 const bracket=size=>size>=20?4:size>=15?3:size>=10?2:size>=7?1:0;
-export function clusterPayout(symbol,size,bet){
+export function clusterPayout(symbol,size,bet,bonusMode=false){
  if(!Number.isInteger(symbol)||symbol<0||symbol>=CLUSTER_PAYS.length||!Number.isInteger(size)||size<5||!Number.isSafeInteger(bet)||bet<0)throw new Error('Invalid cluster payout');
- return Math.round(CLUSTER_PAYS[symbol][bracket(size)]*bet);
+ return Math.round((bonusMode?HARVEST_CLUSTER_PAYS:CLUSTER_PAYS)[symbol][bracket(size)]*bet);
 }
 export function weightedSymbol(rng=Math.random,bonusMode=false){
  const v=rng();
@@ -157,7 +164,7 @@ export function resolveRound(initialBoard,bet,rng=Math.random,options={}){
    const harvestMultiplier=options.bonusMode?(bonuses.length?Math.max(...bonuses):1):(bonuses.length?Math.min(MAX_CLUSTER_MULTIPLIER,bonuses.reduce((a,b)=>a+b,0)):1);
    const smokeMultiplier=cluster.wildCount?SMOKE_RING_MULTIPLIER:1;
    const multiplier=Math.min(MAX_CLUSTER_MULTIPLIER,harvestMultiplier*smokeMultiplier);
-   const base=clusterPayout(cluster.symbol,cluster.size,bet);
+   const base=clusterPayout(cluster.symbol,cluster.size,bet,options.bonusMode===true);
    const payout=Math.round(base*multiplier);
    if(!Number.isSafeInteger(payout)||payout<0)throw new Error('Unsafe payout');
    paid.push({...cluster,multiplier,harvestMultiplier,smokeMultiplier,base,payout});

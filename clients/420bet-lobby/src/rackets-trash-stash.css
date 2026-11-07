@@ -1,0 +1,59 @@
+/* Racket's Trash Stash — isolated Slot #7 practice presentation */
+.rts-game{box-sizing:border-box;min-height:calc(100vh - 150px);color:#fff4da;font-family:system-ui,Arial,sans-serif;background:radial-gradient(ellipse at top,#59207a 0,#21112d 45%,#090e0d 100%);padding:14px clamp(10px,2vw,26px) 30px}
+.rts-game *{box-sizing:border-box}
+.rts-header{position:relative;max-width:1440px;min-height:118px;margin:auto;text-align:center;padding:18px 170px 14px 10px;background:linear-gradient(105deg,#121416b0,#63238088,#121416b0);border-radius:20px;border-bottom:4px solid #9afb2e}
+.rts-header h1{margin:0;font-size:clamp(25px,4vw,55px);line-height:1.06;font-weight:1000;letter-spacing:.03em;font-style:italic;color:#b7ff37;text-shadow:3px 4px #140624,0 0 15px #d22dff}
+.rts-header p{margin:8px 0;color:#ffc246;font-size:14px;font-weight:900;letter-spacing:.13em}
+.rts-mascot{position:absolute;right:8px;bottom:0;height:148px;max-width:185px;object-fit:contain;object-position:bottom}
+.rts-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,325px);gap:18px;max-width:1440px;margin:18px auto;align-items:start}
+.rts-main{min-width:0;padding:12px;border:4px solid #dba72f;border-radius:18px;background:#110a1bec;box-shadow:0 0 0 2px #81f43a,0 0 30px #9535e477}
+.rts-status{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;padding:5px 8px 15px;color:#e2ff88;font-size:clamp(11px,1.25vw,16px);font-weight:900}
+.rts-stage{aspect-ratio:5/3;position:relative;width:100%;background:#140d1f;border:4px solid #ffca58;border-radius:12px;overflow:hidden;box-shadow:0 0 20px #a2f12c77}
+.rts-grid{position:absolute;inset:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr))}
+.rts-reel{position:relative;display:grid;grid-template-rows:repeat(3,minmax(0,1fr));overflow:hidden;border-right:2px solid #a66b28}
+.rts-reel:last-child{border-right:0}
+.rts-cell{min-width:0;min-height:0;position:relative;display:grid;place-items:center;border-bottom:2px solid #8d5b26;background:radial-gradient(#362342,#110c20 85%);overflow:hidden}
+.rts-cell:last-of-type{border-bottom:0}
+.rts-cell img{width:100%;height:100%;max-height:96%;max-width:96%;object-fit:contain;filter:drop-shadow(0 2px 4px #000);user-select:none}
+.rts-spinning .rts-cell{opacity:.15}
+.rts-roll{position:absolute;inset:0;z-index:3;overflow:hidden;background:#170a28}
+.rts-roll-track{position:absolute;left:0;right:0;top:-400%;height:800%;display:flex;flex-direction:column;align-items:center;animation:rts-roll .36s linear infinite}
+.rts-roll-track img{width:100%;height:calc(100% / 24);flex:none;object-fit:contain;filter:blur(1px)}
+@keyframes rts-roll{from{transform:translateY(0)}to{transform:translateY(25%)}}
+.rts-lines{position:absolute;inset:0;width:100%;height:100%;z-index:6;pointer-events:none}
+.rts-win-line{stroke:#63ff14;fill:none;stroke-width:5;stroke-linejoin:round;stroke-linecap:round;filter:drop-shadow(0 0 4px #b2ff52) drop-shadow(0 0 8px #1afa18);stroke-dasharray:1000;animation:rts-draw .5s ease-out both}
+@keyframes rts-draw{from{stroke-dashoffset:1000}to{stroke-dashoffset:0}}
+.rts-win-note{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);z-index:7;background:#082009e8;color:#b9ff77;border:2px solid #a2ff35;border-radius:8px;font-weight:900;padding:5px 13px;white-space:nowrap}
+.rts-message{padding:12px 6px;text-align:center;font-size:clamp(13px,1.5vw,19px);min-height:49px;color:#ffce59;font-weight:900}
+.rts-controls{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:8px;color:#ffe9ac;font-size:15px;font-weight:800}
+.rts-game button{cursor:pointer;font:900 14px system-ui,Arial,sans-serif;color:#fff8dd;padding:10px 13px;background:linear-gradient(#60413f,#26162c);border:2px solid #f3b84b;border-radius:10px;box-shadow:0 3px 6px #050308}
+.rts-game button:disabled{opacity:.45;cursor:default}
+.rts-game button:hover:not(:disabled){filter:brightness(1.2)}
+.rts-game button:focus-visible{outline:3px solid #84ff36;outline-offset:3px}
+.rts-game .rts-spin-button{font-size:25px;min-width:125px;min-height:71px;background:#116c1d url('/assets/420bet/slots/rackets-trash-stash/ui/button_spin.png') center/contain no-repeat;color:transparent;border:0;text-shadow:none}
+.rts-controls button:nth-of-type(1){min-height:44px}
+.rts-controls button:nth-of-type(2){min-height:44px}
+.rts-controls button:nth-of-type(4){background:#285e36 url('/assets/420bet/slots/rackets-trash-stash/ui/button_autospins.png') center/contain no-repeat;color:transparent;min-width:130px;min-height:52px}
+.rts-controls button:last-child{background:#29272b url('/assets/420bet/slots/rackets-trash-stash/ui/button_info.png') center/contain no-repeat;color:transparent;min-width:65px;min-height:56px}
+.rts-side{display:flex;flex-direction:column;gap:14px}
+.rts-panel{border:3px solid #dda631;background:linear-gradient(140deg,#311637,#100d21);border-radius:15px;padding:13px;box-shadow:0 0 16px #6325ad88}
+.rts-panel h2{font-size:22px;margin:0 0 10px;color:#aeff50;text-shadow:1px 2px #2b0f30}
+.rts-panel p{font-size:12px;line-height:1.4;margin:6px 0 9px}
+.rts-payout-table{width:100%;border-collapse:collapse;font-size:12px;text-align:center}
+.rts-payout-table td,.rts-payout-table th{border-bottom:1px solid #644a57;padding:3px}
+.rts-payout-table img{width:40px;height:38px;object-fit:contain}
+.rts-payout-table th{color:#f5d05c}
+.rts-info{max-width:1150px;margin:22px auto;padding:24px;border:4px solid #fdc84b;border-radius:18px;background:#160e21;box-shadow:0 0 26px #a6f23455}
+.rts-info h2{color:#b7ff4c}
+.rts-info p{max-width:900px;line-height:1.55}
+.rts-game .rts-back{background:#24582a;color:#f4ffd8;font-size:18px;border:3px solid #bcff4d;margin:7px 0 17px}
+.rts-payline-map{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin:25px 0}
+.rts-payline-mini{padding:8px;border:1px solid #815e9f;border-radius:8px;text-align:center;background:#271630}
+.rts-payline-mini strong{font-size:12px;color:#ffcf64}
+.rts-payline-mini svg{display:block;width:100%;margin-top:5px}
+.rts-map-cell{fill:#23172c;stroke:#866f8b;stroke-width:1}
+.rts-map-line{fill:none;stroke:#6bff1b;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 2px #4eff15)}
+.rts-disclaimer{text-align:center;color:#dfd2c2;font-size:12px}
+@media(max-width:920px){.rts-layout{grid-template-columns:1fr}.rts-side{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.rts-payline-map{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(max-width:580px){.rts-header{padding:16px 10px 95px}.rts-mascot{height:97px;right:5px}.rts-side{grid-template-columns:1fr}.rts-payline-map{grid-template-columns:repeat(2,minmax(0,1fr))}.rts-main{padding:5px}.rts-controls{font-size:12px}}
+@media(prefers-reduced-motion:reduce){.rts-roll-track,.rts-win-line{animation:none}}

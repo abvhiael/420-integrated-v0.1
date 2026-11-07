@@ -52,3 +52,21 @@ The page makes one initial GET and re-reads every five minutes while mounted. It
 - Focused tests: `clients/420bet-lobby/tests/sportsbook-ui.test.mjs`.
 - Full route and each subpage remain **practice/view-only**. No wallet signing, betting, settlement or real-time odds enabled.
 - Reuse `docs/bet/BET-AUDIT-5D.1-SPORTSBOOK-ARCHITECTURE.md` and `docs/bet/BET-AUDIT-5D.3-ODDS-INGESTION-PROVENANCE.md` for future sportsbook backend work, rather than inventing a client-authoritative engine.
+
+## The Odds API adapter (2026-11-07)
+
+420Bet's public, *read-only* fixture provider is now implemented in the Cloudflare **Pages Functions** of the 420Bet lobby project:
+
+- `clients/420bet-lobby/functions/api/420bet/sportsbook/marquee.js`
+- `clients/420bet-lobby/functions/api/420bet/sportsbook/lines.js`
+- `clients/420bet-lobby/server/sportsbook-provider.mjs`
+
+The `THE_ODDS_API_KEY` binding is a **Cloudflare encrypted runtime secret** (never Vite `VITE_*`, browser config, or GitHub source). Pages must be deployed with **project root** `clients/420bet-lobby`, build `npm run build`, output `dist`, and Pages Functions enabled. If 420Bet instead runs as a Workers static-assets deployment, use a compatible Worker entrypoint and route; Pages Functions are not automatically compiled into a static-only Worker build. Production and Preview secret settings can differ. Validate that the live domain returns JSON rather than an SPA HTML fallback. Do not print or log upstream URLs containing the key.
+
+The chalkboard calls `GET /api/420bet/sportsbook/marquee`. The server fetches **quota-free** `/v4/sports/{sport}/events` for NHL, NBA, NFL, MLB and MLS (partial league outages permitted), filters to the current **America/Regina** calendar day, includes at most four genuinely listed future fixtures, labels every card scheduled rather than guessing “in-play”, and coalesces repeated requests within each isolate for ten minutes. This makes *no paid odds calls*. The public JSON is scoped to a strict text-only schema and contains no credential, wager, source signature or price. Provider observation supports factual display, not authorization under the existing SportsOddsIngestion420, signed source verifier and funded ticket contracts.
+
+The Game Lines frontend requests `GET /api/420bet/sportsbook/lines`. This is deliberately **KV-cache-only**, binding name `SPORTSBOOK_ODDS_CACHE`. Public website traffic can never directly trigger a billable `/odds` request: it returns 503 until a *separately scheduled and budget-controlled upstream ingestion process* has inserted a fresh `sportsbook:lines:v1` record. The record is `{source:"the-odds-api-v4-display-only",validUntil:<Unix milliseconds>,events:[{id,league,home,away,startsAt,prices:[{bookmaker,outcome,american,updatedAt}]}]}`. This remains non-clickable **bookmaker-observed indicative data**, not an executable sportsbook quote. No odds refresh job is deployed or represented as running by this implementation; first choose a schedule and enforce a central monthly quota gate, not request-driven cache miss fetching.
+
+The provider's official API usage guide confirms free `/sports/{sport}/events` requests and chargeable `/sports/{sport}/odds` requests (one credit per region per market). **500 monthly free credits do not support continuously refreshed in-play multi-league prices.** A paid-odds ingester must use an independently configured, controlled scheduler and a persistent cross-region cache/budget authority before it is activated.
+
+The live deployment must verify the Cloudflare secret binding, route activation, endpoint response, source licensing and server-side quota monitoring. No live upstream request has been asserted solely by committing these files. No real-money wagering or production settlement is enabled.

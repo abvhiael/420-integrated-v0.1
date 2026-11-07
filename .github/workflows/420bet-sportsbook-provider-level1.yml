@@ -1,0 +1,39 @@
+name: Sportsbook The Odds API targeted Level 1
+on:
+  pull_request:
+    paths:
+      - 'clients/420bet-lobby/server/sportsbook-provider.mjs'
+      - 'clients/420bet-lobby/functions/api/420bet/sportsbook/**'
+      - 'clients/420bet-lobby/src/sportsbook-ui.js'
+      - 'clients/420bet-lobby/src/sportsbook.css'
+      - 'clients/420bet-lobby/src/main.js'
+      - 'clients/420bet-lobby/tests/sportsbook-provider.test.mjs'
+      - 'docs/bet/BET-SPORTSBOOK-UI-STYLE-BIBLE.md'
+      - '.github/workflows/420bet-sportsbook-provider-level1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  sportsbook-provider-level1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install 420Bet lobby dependencies
+        working-directory: clients/420bet-lobby
+        run: npm install --no-audit --no-fund
+      - name: Provider adapter, privacy and Game Lines qualification
+        working-directory: clients/420bet-lobby
+        run: node --test tests/sportsbook-provider.test.mjs tests/sportsbook-ui.test.mjs
+      - name: Validate Cloudflare Function entrypoints
+        working-directory: clients/420bet-lobby
+        run: |
+          node --check functions/api/420bet/sportsbook/marquee.js
+          node --check functions/api/420bet/sportsbook/lines.js
+          node --check server/sportsbook-provider.mjs
+      - name: Vite lobby build
+        working-directory: clients/420bet-lobby
+        run: npm run build

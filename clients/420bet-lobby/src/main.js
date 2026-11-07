@@ -92,7 +92,7 @@ function render(){
     else if(active.id==='sportsbook'){
       const params=new URLSearchParams(location.hash.replace(/^#/,''));
       const tab=validSportsbookTab(params.get('tab'));
-      activePractice=createSportsbookView(document,{tab,marqueeEndpoint:config.sportsbookMarqueeEndpoint??'/api/420bet/sportsbook/marquee',onBack:close,onNavigate:next=>{
+      activePractice=createSportsbookView(document,{tab,marqueeEndpoint:config.sportsbookMarqueeEndpoint??'/api/420bet/sportsbook/marquee',linesEndpoint:config.sportsbookLinesEndpoint??'/api/420bet/sportsbook/lines',onBack:close,onNavigate:next=>{
         history.pushState(null,'',location.pathname+'#game=sportsbook'+(next?'&tab='+encodeURIComponent(next):''));
         stopPractice();render();
       }});

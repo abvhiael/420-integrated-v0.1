@@ -39,7 +39,7 @@ export function createCannabisCowboyPractice(doc=globalThis.document,options={})
  const info=root.querySelector('.cc-info-panel');
  info.setAttribute('aria-label','High Country Clusters practice rules');
  const infoCopy=info.querySelector('p');
- if(infoCopy)infoCopy.textContent='Practice only: 5 or more adjacent paying symbols form a cluster. Each tumble clears matches and refills the 6×8 board. Endless Harvest frames increase by +1 per winning hit to a maximum ×10 and Smoke Ring Wilds substitute for paying symbols. Landing 3, 4, 5 or 6+ tour bus scatters awards 8, 12, 16 or 20 Endless Harvest free spins. Harvest multiplier frames persist throughout the feature, but Wild symbols tumble normally and never stick. Retriggers are capped at 100 total free spins. Demo credits only; no wallet transactions or real wagering. Bonus paytables are not yet RTP certified. On the Road Again: 3 Road Trip tickets on the base spin trigger a five-stop guitar-case pick bonus. Pick one case per stop; one hidden case per stop carries a ×2, ×3, ×5 or ×10 multiplier, the others award credits, and collected multipliers are added together at journey end (for example ×2 + ×3 + ×10 = ×15). The six columns spin with staggered stops, and neon lines trace winning clusters. Click the board to skip cluster-count sequences, spin each free game manually, and click the final bonus total to continue.';
+ if(infoCopy)infoCopy.textContent='Practice only: 5 or more adjacent paying symbols form a cluster. Each tumble clears matches and refills the 6×8 board. Endless Harvest frames increase by +1 per winning hit to a maximum ×10 and Smoke Ring Wilds substitute for paying symbols. Landing 3, 4, 5 or 6+ tour bus scatters awards 8, 12, 16 or 20 Endless Harvest free spins. Harvest multiplier frames persist throughout the feature, but Wild symbols appear approximately twice as often in Endless Harvest and never stick. Retriggers are capped at 100 total free spins. Demo credits only; no wallet transactions or real wagering. Bonus paytables are not yet RTP certified. On the Road Again: 3 Road Trip tickets on the base spin trigger a five-stop guitar-case pick bonus. Pick one case per stop; one hidden case per stop carries a ×2, ×3, ×5 or ×10 multiplier, the others award credits, and collected multipliers are added together at journey end (for example ×2 + ×3 + ×10 = ×15). The six columns spin with staggered stops, and neon lines trace winning clusters. Click the board to skip cluster-count sequences, spin each free game manually, and click the final bonus total to continue.';
  const notice=root.querySelector('.cc-practice-notice');
  notice.textContent='PRACTICE ONLY · ENDLESS HARVEST FREE SPINS ACTIVE · NO REAL WAGERING';
  consoleBar.setAttribute('aria-label','Practice-credit controls');
@@ -346,7 +346,7 @@ export function createCannabisCowboyPractice(doc=globalThis.document,options={})
   let testSeed=(0xC04207 ^ Math.imul(previewRun,0x9e3779b1))>>>0;
   const testRng=()=>((testSeed=(Math.imul(1664525,testSeed)+1013904223)>>>0)/4294967296);
   const previewFeatureBoard=(spinNo)=>{
-   const b=Array.from({length:48},()=>weightedSymbol(testRng));
+   const b=Array.from({length:48},()=>weightedSymbol(testRng,true));
    const shapes=[[0,1,2,6,12],[0,6,12,13,14],[0,1,6,7,12,13],[0,1,2,3,7],[0,6,7,8,14]];
    const clusterCount=testRng()<.64?2:1;
    for(let cluster=0;cluster<clusterCount;cluster++){

@@ -158,7 +158,9 @@ export function createSportsbookView(doc=globalThis.document,{tab=null,onNavigat
      row.append(heading);
      const prices=create(doc,'div','sb-price-list');
      for(const p of e.prices.slice(0,4)){
-      prices.append(create(doc,'span','sb-price',p.bookmaker+' · '+p.outcome+' '+(p.american>0?'+':'')+p.american));
+      const tag=create(doc,'span','sb-price',p.bookmaker+' · '+p.outcome+' '+(p.american>0?'+':'')+p.american);
+      if(p.updatedAt)tag.title='Provider last observed: '+new Date(p.updatedAt).toLocaleString();
+      prices.append(tag);
      }row.append(prices);list.append(row);
     }
    }).catch(()=>{

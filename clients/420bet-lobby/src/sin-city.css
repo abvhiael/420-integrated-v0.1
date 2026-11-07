@@ -224,3 +224,65 @@ main.immersive .view-scroll:has(.sc-game){background:transparent}
  .sc-game .sc-complete-chips{width:70vw;height:52vw}
 }
 @media(prefers-reduced-motion:reduce){.sc-game .sc-free-complete-click{animation:none}}
+
+/* Free-spin completion: reserve separate non-overlapping rows for the
+   chips artwork, the entire winnings total, and the continue instruction. */
+.sc-game .sc-free-complete{
+ display:grid;
+ grid-template-columns:minmax(0,1fr);
+ grid-template-rows:auto auto auto;
+ align-content:center;
+ justify-items:center;
+ row-gap:clamp(14px,3dvh,26px);
+ overflow-y:auto;
+ overscroll-behavior:contain;
+ padding:clamp(18px,3dvh,38px) clamp(14px,3vw,32px);
+}
+.sc-game .sc-free-complete .sc-complete-chips{
+ grid-row:1;
+ position:relative;
+ flex:none;
+ width:min(46vw,310px);
+ height:clamp(125px,28dvh,230px);
+ max-height:230px;
+ min-height:0;
+ margin:0;
+ overflow:visible;
+}
+.sc-game .sc-free-complete .sc-complete-chip-art{
+ position:absolute;
+ inset:0;
+ width:100%;
+ height:100%;
+ object-fit:contain;
+}
+.sc-game .sc-free-complete .sc-free-complete-value{
+ grid-row:2;
+ position:relative;
+ z-index:2;
+ display:block;
+ width:100%;
+ max-width:640px;
+ margin:0;
+ padding:6px 8px;
+ line-height:1.25;
+ overflow-wrap:anywhere;
+ text-align:center;
+ isolation:isolate;
+}
+.sc-game .sc-free-complete .sc-free-complete-click{
+ grid-row:3;
+ position:relative;
+ margin:0;
+ text-align:center;
+}
+@media(max-width:760px){
+ .sc-game .sc-free-complete{row-gap:clamp(12px,2.4dvh,20px)}
+ .sc-game .sc-free-complete .sc-complete-chips{
+  width:min(70vw,265px);
+  height:clamp(125px,24dvh,190px);
+ }
+ .sc-game .sc-free-complete .sc-free-complete-value{
+  font-size:clamp(22px,6vw,36px);
+ }
+}

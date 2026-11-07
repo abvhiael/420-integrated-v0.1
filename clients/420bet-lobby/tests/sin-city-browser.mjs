@@ -38,6 +38,31 @@ try{
   assert.match(initial.wallpaper,/bg_las_vegas_strip/,'Vegas wallpaper must extend behind title bar');
   if(name==='desktop')assert.ok(initial.cabinet.bottom<=height,'Cabinet should fit vertically on a 900px desktop viewport: '+JSON.stringify(initial.cabinet));
   await page.screenshot({path:'qualification/sin-city/'+name+'.png',fullPage:true});
+  // Completion layout geometry: use exactly the same DOM classes and symbol
+  // asset as the real free-spin completion, without needing random bonus RNG.
+  const completion=await page.evaluate(()=>{
+   const host=document.querySelector('.sc-game');
+   const overlay=document.createElement('div');overlay.className='sc-free-complete';
+   const chips=document.createElement('div');chips.className='sc-complete-chips';
+   const image=document.createElement('img');image.className='sc-complete-chip-art';
+   image.src='/assets/420bet/sin-city-high-rollers/symbols/sym_chips.png';
+   const face=document.createElement('strong');face.className='sc-complete-chip-face';face.textContent='FREE SPINS COMPLETE';
+   chips.append(image,face);
+   const total=document.createElement('div');total.className='sc-free-complete-value';total.textContent='12345.67 PRACTICE CREDITS';
+   const next=document.createElement('p');next.className='sc-free-complete-click';next.textContent='CLICK TO CONTINUE';
+   overlay.append(chips,total,next);host.append(overlay);
+   const box=node=>{const r=node.getBoundingClientRect();return {top:r.top,bottom:r.bottom,height:r.height,left:r.left,right:r.right};};
+   return {chips:box(chips),total:box(total),next:box(next),overlay:box(overlay)};
+  });
+  assert.ok(completion.total.top>=completion.chips.bottom+8,
+   'Free spin total must render BELOW chip graphic with a visible gap: '+JSON.stringify(completion));
+  assert.ok(completion.next.top>=completion.total.bottom+8,
+   'Click to continue must render below the entire winnings total');
+  assert.ok(completion.total.bottom<=completion.overlay.bottom+1,
+   'Total credits must remain visible inside completion overlay');
+  await page.screenshot({path:'qualification/sin-city/'+name+'-free-complete.png',fullPage:true});
+  await page.evaluate(()=>document.querySelector('.sc-free-complete')?.remove());
+
   await page.locator('button').count?.();
   await page.evaluate(()=>{const b=[...document.querySelectorAll('.sc-control')].find(b=>b.textContent.includes('INFO'));b?.click();});
   await page.waitForSelector('.sc-modal');

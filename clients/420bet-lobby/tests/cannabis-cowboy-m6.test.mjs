@@ -119,7 +119,25 @@ test('interactive Road Trip reveals five guitar case choices, cannot double-pick
   const next=h.root.querySelector('.cc-road-next');
   assert(next);
   next.dispatchEvent(new h.window.Event('click'));
-  if(i===4)h.drain();
+  if(i===4){
+   const splash=h.root.querySelector('.cc-bonus-total-splash');
+   assert.equal(h.root.dataset.featurePhase,'road-outro');
+   assert.equal(h.root.getPracticeState().bonusSplashVisible,true);
+   assert.equal(h.root.getPracticeState().busy,true);
+   assert.equal(splash.dataset.bonus,'road');
+   assert.match(splash.textContent,/ROAD TRIP COMPLETE/);
+   assert.match(splash.textContent,/CREDITS WON/);
+   assert.match(splash.textContent,/STACKED MULTIPLIER/);
+   assert.match(splash.textContent,/TOTAL BONUS WIN/);
+   assert.match(splash.textContent,/CLICK ANYWHERE TO CONTINUE/);
+   assert.match(splash.querySelector('.cc-bonus-cowboy').getAttribute('src'),/cannabis-cowboy-cole-haze\.png$/);
+   const credits=h.root.getPracticeState().credits;
+   h.drain();
+   assert.equal(h.root.getPracticeState().credits,credits,'splash does not award twice');
+   assert.equal(h.root.getPracticeState().busy,true,'must wait for user click');
+   splash.querySelector('.cc-bonus-total-continue').dispatchEvent(new h.window.Event('click',{bubbles:true}));
+   assert.equal(h.root.getPracticeState().credits,credits,'click must not pay again');
+  }
  }
  const final=h.root.getPracticeState();
  assert.equal(final.roadStopsCompleted,5);

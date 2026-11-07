@@ -37,7 +37,7 @@ export function validateSportsbookMarquee(payload,now=Date.now()){
  const seen=new Set();
  const events=payload.events.map(e=>{
   if(!e||!eventId(e.id)||seen.has(e.id)||!clean(e.league,18)||
-   !clean(e.home)||!clean(e.away)||e.home===e.away||!iso(e.startsAt)||!['scheduled','in-progress'].includes(e.status))
+   !clean(e.home)||!clean(e.away)||e.home===e.away||!iso(e.startsAt)||!['scheduled','in-progress','start-time-passed'].includes(e.status))
    throw Error('Unverified marquee event');
   if(e.odds!==undefined||e.price!==undefined||e.line!==undefined||e.betId!==undefined)
    throw Error('Do not publish unqualified odds');
@@ -114,7 +114,9 @@ export function createSportsbookView(doc=globalThis.document,{tab=null,onNavigat
     row.append(create(doc,'span','sb-matchup-league',event.league),
       create(doc,'span','sb-matchup-teams',event.away+' vs '+event.home),
       create(doc,'span','sb-matchup-time',event.status==='in-progress'?'IN PLAY':
-       new Date(event.startsAt).toLocaleTimeString('en-CA',{hour:'numeric',minute:'2-digit',timeZone:data.timezone})));
+       event.status==='start-time-passed'?'STARTED':
+       new Date(event.startsAt).toLocaleString('en-CA',{month:'short',day:'numeric',
+        hour:'numeric',minute:'2-digit',timeZone:data.timezone})));
     lines.append(row);
    }
   }catch{if(!disposed&&serial===requestId)empty('Daily matchups will appear once the verified sports feed is connected.');}
@@ -162,7 +164,7 @@ export function createSportsbookView(doc=globalThis.document,{tab=null,onNavigat
    }).catch(()=>{
     if(!disposed&&serial===requestId)
      list.replaceChildren(create(doc,'p','sb-lines-empty',
-      'Bookmaker prices are unavailable until the budget-controlled odds cache is activated.'));
+      'Bookmaker observations are temporarily unavailable. Check the provider connection or monthly allowance.'));
    });
   }
   if(selected==='all-sports'){

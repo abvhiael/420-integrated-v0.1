@@ -114,6 +114,10 @@ export function createCannabisCowboyPractice(doc=globalThis.document,options={})
  const bonusSplash=doc.createElement('button');bonusSplash.type='button';bonusSplash.className='cc-bonus-total-splash';bonusSplash.hidden=true;
  bonusSplash.setAttribute('aria-label','Bonus complete; click anywhere to continue');
  root.querySelector('.cc-middle').append(bonusSplash);
+ const harvestTrigger=doc.createElement('button');harvestTrigger.type='button';
+ harvestTrigger.className='cc-harvest-trigger-splash';harvestTrigger.hidden=true;
+ harvestTrigger.setAttribute('aria-label','Endless Harvest free spins awarded. Click anywhere to continue to the first free spin');
+ root.querySelector('.cc-middle').append(harvestTrigger);
  const artRoot='/assets/420bet/cannabis-cowboy/';
  const renderFreeSpinButton=(number,total,previousWin)=>{
   freeSpinButton.replaceChildren();
@@ -280,12 +284,11 @@ export function createCannabisCowboyPractice(doc=globalThis.document,options={})
  };
  const startFreeSpins=()=>{
   if(!pendingFeature)return finish();
-  phase('intro');bonusIndex=0;bonusWin=0;lastFreeSpinWin=0;
+  phase('bonus-trigger');bonusIndex=0;bonusWin=0;lastFreeSpinWin=0;
   bonusSpins=pendingFeature.spins.slice();
-  hideEffects();
-  showFeature('ENDLESS HARVEST!',pendingFeature.initialSpins+' FREE SPINS AWARDED · WILDS TUMBLE NORMALLY');
-  status.textContent='ENDLESS HARVEST · '+pendingFeature.initialSpins+' FREE SPINS';
-  tick(()=>{hideFeature();beginFreeSpin();},reducedMotion?0:1800);
+  hideEffects();hideFeature();freeSpinButton.hidden=true;
+  harvestTrigger.hidden=false;
+  status.textContent='ENDLESS HARVEST · '+pendingFeature.initialSpins+' FREE SPINS AWARDED · CLICK TO CONTINUE';
  };
  const showRoadStop=()=>{
   if(!pendingRoad||dead)return;
@@ -353,6 +356,12 @@ export function createCannabisCowboyPractice(doc=globalThis.document,options={})
   status.textContent='ROAD TRIP BONUS TRIGGERED · FIVE STOPS';
   tick(()=>{hideFeature();showRoadStop();},reducedMotion?0:1900);
  };
+ harvestTrigger.addEventListener('click',event=>{
+  event.stopPropagation();
+  if(dead||featurePhase!=='bonus-trigger'||!pendingFeature||harvestTrigger.hidden)return;
+  harvestTrigger.hidden=true;
+  beginFreeSpin();
+ });
  freeSpinButton.addEventListener('click',event=>{
   event.stopPropagation();
   if(dead||featurePhase!=='bonus-ready'||!currentSpin||!pendingFeature)return;
@@ -365,7 +374,7 @@ export function createCannabisCowboyPractice(doc=globalThis.document,options={})
   bonusSplash.hidden=true;reviewDismissed=true;finish();
  });
  root.querySelector('.cc-middle').addEventListener('click',event=>{
-  if(dead||event.target.closest?.('.cc-free-spin-button,.cc-bonus-total-splash,.cc-road-panel'))return;
+  if(dead||event.target.closest?.('.cc-harvest-trigger-splash,.cc-free-spin-button,.cc-bonus-total-splash,.cc-road-panel'))return;
   if(featurePhase==='win-review'&&!reviewDismissed){
    reviewDismissed=true;reviewPanel.hidden=true;
    clearClusterPaths(root.querySelector('.cc-symbol-grid'));
@@ -428,7 +437,7 @@ export function createCannabisCowboyPractice(doc=globalThis.document,options={})
   pendingRoad=road;roadPicks=[];roadStarted=false;reviewDismissed=false;
   lastWinningClusters=[];lastWinningBoard=null;reviewPanel.hidden=true;roadPanel.hidden=true;
   pendingFeature=result.outcome.feature??null;bonusSpins=[];currentSpin=null;
-  finishedBonus=false;bonusIndex=0;bonusWin=0;lastFreeSpinWin=0;displayedSticky=[];activeCascade=null;freeSpinButton.hidden=true;bonusSplash.hidden=true;
+  finishedBonus=false;bonusIndex=0;bonusWin=0;lastFreeSpinWin=0;displayedSticky=[];activeCascade=null;freeSpinButton.hidden=true;bonusSplash.hidden=true;harvestTrigger.hidden=true;
   phase('base');
   root.querySelector('.cc-board-readonly').textContent='BASE-GAME PRACTICE';
   sync();
@@ -452,7 +461,7 @@ export function createCannabisCowboyPractice(doc=globalThis.document,options={})
  menu.title='Menu options coming in a later milestone';
  auto.title='Autoplay unavailable in this practice build';
  showBoard(session.board);sync();
- root.stopAnimation=()=>{dead=true;busy=false;queue=[];activeCascade=null;timerGeneration++;pendingFeature=null;pendingRoad=null;stopReels();roadPanel.hidden=true;reviewPanel.hidden=true;freeSpinButton.hidden=true;bonusSplash.hidden=true;hideFeature();hideEffects();if(handle!==null){cancel(handle);handle=null;}};
- root.getPracticeState=()=>({credits:session.credits,bet:session.bet,round:session.round,busy,lastWin,featurePhase,bonusIndex,bonusWin,lastFreeSpinWin,freeSpinCount:bonusSpins.length,bonusSplashVisible:!bonusSplash.hidden,freeSpinReady:featurePhase==='bonus-ready',roadStopsCompleted:roadPicks.length,roadActive:roadStarted&&!!pendingRoad,bonusPreview});
+ root.stopAnimation=()=>{dead=true;busy=false;queue=[];activeCascade=null;timerGeneration++;pendingFeature=null;pendingRoad=null;stopReels();roadPanel.hidden=true;reviewPanel.hidden=true;freeSpinButton.hidden=true;bonusSplash.hidden=true;harvestTrigger.hidden=true;hideFeature();hideEffects();if(handle!==null){cancel(handle);handle=null;}};
+ root.getPracticeState=()=>({credits:session.credits,bet:session.bet,round:session.round,busy,lastWin,featurePhase,bonusIndex,bonusWin,lastFreeSpinWin,freeSpinCount:bonusSpins.length,bonusSplashVisible:!bonusSplash.hidden,harvestTriggerVisible:!harvestTrigger.hidden,freeSpinReady:featurePhase==='bonus-ready',roadStopsCompleted:roadPicks.length,roadActive:roadStarted&&!!pendingRoad,bonusPreview});
  return root;
 }

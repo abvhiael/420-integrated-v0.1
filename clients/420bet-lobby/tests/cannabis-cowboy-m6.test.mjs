@@ -1,8 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
 import {parseHTML} from 'linkedom';
 import {createReelSequence,REEL_STOP_DELAYS,REEL_STOP_TIMES,drawClusterPaths,clearClusterPaths} from '../src/cannabis-cowboy-reels.js';
-import {createRoadTrip,chooseRoadCase,ROAD_STOPS} from '../src/cannabis-cowboy-road-trip.js';
+import {createRoadTrip,chooseRoadCase,ROAD_STOPS,roadStopBackground,roadCaseArtwork} from '../src/cannabis-cowboy-road-trip.js';
 import {createCannabisCowboyPractice} from '../src/cannabis-cowboy-game.js';
 import {CELL_COUNT,COLUMNS,ROAD_SYMBOL,SCATTER_SYMBOL,countRoadTickets,playPracticeRound,createPracticeSession} from '../src/cannabis-cowboy-engine.js';
 const seed=(initial=123456)=>{let state=initial>>>0;return ()=>((state=(Math.imul(1664525,state)+1013904223)>>>0)/4294967296)};
@@ -140,4 +141,33 @@ test('base and free-spin screens both invoke staggered reel stops',()=>{
  assert(phases.includes('base'),'base reels animated');
  assert(phases.includes('bonus-spin'),'free-spin reels animated');
  h.root.stopAnimation();
+});
+
+test('Road Trip provides five unique backgrounds and three unique image assets per stop',()=>{
+ const scenes=ROAD_STOPS.map((stop,i)=>roadStopBackground(i));
+ assert.equal(new Set(scenes).size,5);
+ assert(scenes.every(path=>path.startsWith('/assets/420bet/cannabis-cowboy/on-the-road-again/')));
+ for(let i=0;i<5;i++){
+  const cases=[0,1,2].map(j=>roadCaseArtwork(i,j));
+  assert.equal(new Set(cases).size,3);
+  assert(cases.every(path=>path.endsWith('.png')));
+ }
+ const h=harness({roundOptions:{baseBoard:ticketBoard()}});
+ h.root.querySelector('.cc-spin').dispatchEvent(new h.window.Event('click'));
+ h.drain();
+ assert.equal(h.root.querySelector('.cc-road-scene').getAttribute('src'),scenes[0]);
+ assert.equal(h.root.querySelectorAll('.cc-road-case-art').length,3);
+ assert.deepEqual([...h.root.querySelectorAll('.cc-road-case-art')].map(x=>x.getAttribute('src')),
+  [0,1,2].map(j=>roadCaseArtwork(0,j)));
+ h.root.stopAnimation();
+});
+test('Endless Harvest keeps multiplier labels in an independent overlay above reel masks',()=>{
+ const game=readFileSync(new URL('../src/cannabis-cowboy-game.js',import.meta.url),'utf8');
+ const css=readFileSync(new URL('../src/cannabis-cowboy.css',import.meta.url),'utf8');
+ assert.match(game,/multiplierLayer\.className='cc-multiplier-layer'/);
+ assert.match(game,/showMultiplierFrames\(fertile\)/);
+ assert.match(css,/\.cc-symbol-grid > \.cc-multiplier-layer\{[\s\S]*?z-index:22/);
+ assert.match(css,/\.cc-column-mask\{[\s\S]*?z-index:9/);
+ assert.match(game,/const previewRun=trial\?\+\+previewRuns:0/);
+ assert.match(game,/weightedSymbol\(testRng\)/);
 });

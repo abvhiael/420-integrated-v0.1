@@ -789,3 +789,57 @@
    width:100%;margin-left:0;margin-right:0;
  }
 }
+
+
+/* M10: choice-only Road Trip art floats directly over the scenic background. */
+.cc-game .cc-road-panel{background:#10160dd9;isolation:isolate}
+.cc-game .cc-road-scene{opacity:1;object-fit:cover;object-position:center}
+.cc-game .cc-road-cases{gap:clamp(7px,1.8vw,30px);align-items:center}
+.cc-game .cc-road-case{
+ position:relative;display:flex;flex-direction:column;justify-content:center;align-items:center;
+ padding:0;min-height:130px;background:transparent;border:0;border-radius:0;
+ box-shadow:none;filter:drop-shadow(0 8px 8px #000a);overflow:visible;
+}
+.cc-game .cc-road-case:not(:disabled):hover,
+.cc-game .cc-road-case:focus-visible{
+ transform:translateY(-8px) scale(1.03);box-shadow:none;
+ outline:2px solid #ffdf79;outline-offset:5px;border-radius:6px;
+}
+.cc-game .cc-road-case:disabled{opacity:1}
+.cc-game .cc-road-case.cc-road-chosen{border:0;box-shadow:none;filter:drop-shadow(0 0 14px #aaff74)}
+.cc-game .cc-road-case-art{height:clamp(94px,19vh,220px);width:100%;object-fit:contain}
+.cc-game .cc-road-case-caption{color:#fff3b3;background:#17140b9c;padding:3px 8px;border-radius:8px}
+.cc-game .cc-road-case-reveal{
+ position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);z-index:2;
+ display:block;min-width:max-content;padding:5px 10px;border:2px solid #f6d26a;
+ border-radius:10px;background:#183422f5;color:#ffebae;font-weight:900;
+ font-size:clamp(11px,1.1vw,17px);text-shadow:0 1px 3px black;
+}
+.cc-game .cc-road-location,.cc-game .cc-road-description,.cc-game .cc-road-total,
+.cc-game .cc-road-award{text-shadow:0 2px 7px #000,0 0 8px #000}
+.cc-game .cc-free-spin-button[hidden],.cc-game .cc-bonus-total-splash[hidden]{display:none!important}
+.cc-game .cc-free-spin-button{
+ position:absolute;z-index:40;left:50%;top:53%;transform:translate(-50%,-50%);
+ border:4px ridge #fae08b;border-radius:18px;padding:clamp(14px,2vw,26px) clamp(20px,3vw,45px);
+ color:#fff2b7;background:linear-gradient(140deg,#256134,#112d20);
+ box-shadow:0 0 20px #b8ff69bb,0 9px 24px #000a;
+ font:900 clamp(1rem,2vw,1.7rem) Georgia,serif;cursor:pointer;
+}
+.cc-game .cc-free-spin-button:hover,.cc-game .cc-free-spin-button:focus-visible{filter:brightness(1.2)}
+.cc-game .cc-bonus-total-splash{
+ position:absolute;z-index:60;inset:5%;width:90%;height:90%;border:7px ridge #e8be55;
+ border-radius:22px;background:radial-gradient(ellipse at 50% 20%,#587b34,#122b1c 60%,#24140b);
+ box-shadow:0 0 40px #edcb59,inset 0 0 45px #000c;color:#ffea9a;
+ display:flex;flex-direction:column;justify-content:center;align-items:center;gap:clamp(12px,2vh,26px);
+ cursor:pointer;text-align:center;font-family:Georgia,serif;
+}
+.cc-game .cc-bonus-total-title{font-size:clamp(1.15rem,3vw,3rem);font-weight:900}
+.cc-game .cc-bonus-total-amount{font-size:clamp(1.7rem,4.5vw,4.5rem);font-weight:900;color:#fbd05c;text-shadow:0 0 14px #ffbd42}
+.cc-game .cc-bonus-total-spins{font-size:clamp(.8rem,1.6vw,1.4rem)}
+.cc-game .cc-bonus-total-continue{font-size:clamp(.8rem,1.4vw,1.3rem);color:#c1ffa4;animation:cc-soft-pulse 1.8s ease-in-out infinite}
+@media(max-width:700px){
+ .cc-game .cc-road-case{min-height:95px;padding:0}
+ .cc-game .cc-road-case-art{height:clamp(70px,14vh,130px)}
+ .cc-game .cc-road-case-reveal{font-size:10px;padding:3px 4px}
+ .cc-game .cc-bonus-total-splash{inset:2%;width:96%;height:96%}
+}

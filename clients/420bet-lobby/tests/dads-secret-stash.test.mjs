@@ -1016,3 +1016,49 @@ test("Jen’s comic announcement and complete grid display Hold & Win qualificat
  const css=readFileSync(new URL('../src/dads-secret-stash.css',import.meta.url),'utf8');
  assert.match(css,/\.dss-reel \.dss-cell\.dss-trigger-stash/);
 });
+
+test('Jen HIDE THE STASH launches the actual Hold & Win board after the comic and crate transformations',()=>{
+ const pick=symbol=>{
+  for(let i=0;i<2000;i++)if(draw(()=>i/2000)===symbol)return i/2000;
+  throw Error('Missing draw for '+symbol);
+ };
+ const original=Array(20).fill('A');
+ original[0]='stash';original[4]='stash';
+ original[1]='jen';original[5]='jen';original[9]='jen';
+ const values=[...original.map(pick),.1,.0,.0,.0,.0];
+ const {document,window}=parseHTML('<html><body></body></html>');
+ let now=0,id=0;const queue=[];
+ const game=createDadsSecretStash(document,{
+  rng:()=>values.length?values.shift():.5,
+  setTimeout:(fn,ms)=>{const job={id:++id,when:now+ms,fn,done:false};queue.push(job);return job.id;},
+  clearTimeout:key=>{const job=queue.find(j=>j.id===key);if(job)job.done=true;}
+ });
+ const advance=until=>{
+  let guard=0;
+  while(true){
+   if(guard++>9000)throw Error('Jen-Hold sequence stalled');
+   queue.sort((a,b)=>a.when-b.when);
+   const next=queue.find(j=>!j.done&&j.when<=until);
+   if(!next)break;
+   next.done=true;now=next.when;next.fn();
+  }
+  now=until;
+ };
+ const button=game.querySelector('.dss-button.dss-spin');
+ button.dispatchEvent(new window.Event('click',{bubbles:true}));
+ const events=game.getState().last.events;
+ assert.deepEqual(events.map(e=>e.type),['jen','stash']);
+ advance(2800);
+ assert.equal(game.querySelector('.dss-comic-action').hidden,false,'Jen action gets the comic reveal');
+ assert.match(game.querySelector('.dss-comic-detail').textContent,/HOLD & WIN UNLOCKED/);
+ let revealedCrates=false,holdVisible=false;
+ for(let until=4300;until<=35000;until+=100){
+  advance(until);
+  revealedCrates ||=game.querySelectorAll('.dss-trigger-stash').length>=3;
+  holdVisible ||=!game.querySelector('.dss-hold-win').hidden;
+ }
+ assert(revealedCrates,'Complete modified grid should highlight qualifying crates');
+ assert(holdVisible,'Actual Hold & Win prize board must launch after Jen finishes');
+ assert.equal(game.getState().rounds,1,'One wager earns both linked feature presentations');
+ game.stopAnimation();
+});

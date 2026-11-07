@@ -213,12 +213,17 @@ test('Free Spins Complete remains on screen until explicitly clicked and shows w
   click('FREE SPIN');
   for(let i=0;i<100&&root.getPresentationState().phase!=='free-complete';i++)await new Promise(resolve=>setTimeout(resolve,100));
   assert.equal(root.getPresentationState().phase,'free-complete');
-  assert.ok(root.querySelector('.sc-complete-chip-art'));
-  assert.match(root.querySelector('.sc-complete-chip-face').textContent,/FREE SPINS COMPLETE/);
+  const splash=root.querySelector('.sc-sesh-complete');
+  assert.ok(splash,'The celebratory SESH COMPLETE splash must show at end of feature');
+  assert.match(splash.querySelector('.sc-sesh-bobby').getAttribute('src'),/features\/splash_sesh_complete_bobby\.png$/);
+  assert.match(splash.querySelector('.sc-sesh-title').textContent,/SESH COMPLETE!/);
+  assert.equal(root.querySelector('.sc-complete-chip-art'),null,'Old chips image must be gone');
   assert.match(root.querySelector('.sc-free-complete-value').textContent,/PRACTICE CREDITS/);
   assert.match(root.querySelector('.sc-free-complete-click').textContent,/CLICK TO CONTINUE/);
   const amount=root.getPresentationState().freeCompletedTotal;
   assert.ok(amount>=12);
+  assert.equal(splash.querySelector('.sc-free-complete-value').textContent,amount.toFixed(2)+' PRACTICE CREDITS',
+   'Feature total must be calculated dynamically, never baked into the artwork');
   await new Promise(resolve=>setTimeout(resolve,450));
   assert.equal(root.getPresentationState().phase,'free-complete','Completion must not auto-dismiss');
   root.querySelector('.sc-free-complete').dispatchEvent(new window.Event('click',{bubbles:true}));
@@ -285,5 +290,16 @@ test('external bonus trigger image remains available alongside Hotbox collection
   assert.ok(root.querySelector('.sc-cabinet .sc-hotbox-side'));
   assert.ok(root.querySelector('.sc-machine > .sc-bonus-guide > img'));
   assert.equal(root.querySelectorAll('.sc-symbol').length,20);
+ }finally{root.stopAnimation();}
+});
+
+test('neon cannabis-leaf spin control retains normal state transitions and is keyboard accessible',()=>{
+ const {root,click}=setup();
+ try{
+  const spin=root.querySelector('.sc-spin');
+  assert.ok(spin.classList.contains('sc-spin-leaf'));
+  assert.equal(spin.getAttribute('aria-label'),'Spin slot reels');
+  assert.equal(spin.textContent,'SPIN');
+  assert.equal(spin.disabled,false);
  }finally{root.stopAnimation();}
 });

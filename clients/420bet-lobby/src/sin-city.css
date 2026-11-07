@@ -332,3 +332,72 @@ main.immersive .view-scroll:has(.sc-game){background:transparent}
  .sc-game .sc-ways-symbol-name{font-size:11px}
  .sc-game .sc-ways-amount{font-size:11px}
 }
+
+/* Approved replacement assets, November 2026. Three independent desktop
+   columns preserve the square 5×4 reel grid and existing calibrated paytable:
+   Bobby | interactive cabinet (reels + paytable) | bonus-trigger artwork. */
+.sc-game .sc-machine{width:100%;min-width:0}
+.sc-game .sc-bonus-guide{
+ position:relative;z-index:2;align-self:start;min-width:0;
+ display:flex;justify-content:center;align-items:flex-start;
+ margin:0;padding:5px 2px;
+}
+.sc-game .sc-bonus-guide-art{
+ display:block;width:100%;height:auto;max-width:100%;max-height:min(74dvh,750px);
+ object-fit:contain;object-position:center top;
+ filter:drop-shadow(0 0 11px #ad34e0a8) drop-shadow(0 4px 14px #170520);
+}
+/* The shorter, longer logo is aligned with the width of the *reel board*,
+   not the surrounding game header or Bobby's portrait. */
+.sc-game .sc-cabinet>.sc-masthead{
+ position:relative;z-index:4;
+ display:grid;grid-template-columns:minmax(0,1fr) clamp(200px,20vw,245px);
+ gap:8px;align-items:center;
+ width:100%;max-width:none;height:108px;min-height:108px;
+ margin:0;padding:0;pointer-events:none;
+}
+.sc-game .sc-cabinet>.sc-masthead .sc-logo{
+ display:block;grid-column:1;align-self:center;
+ width:100%;max-width:none;height:106px;max-height:106px;
+ min-width:0;margin:0;padding:0;
+ object-fit:fill;
+ filter:drop-shadow(0 0 11px #eaa73e) drop-shadow(0 3px 7px #23062f);
+}
+.sc-game .sc-cabinet>.sc-masthead .sc-ways{
+ position:static;grid-column:2;justify-self:center;
+ margin:0;max-width:100%;white-space:nowrap;
+}
+@media(min-width:1280px){
+ .sc-game .sc-machine{
+  max-width:1760px;grid-template-columns:minmax(205px,20%) minmax(0,1fr) minmax(220px,21%);
+  gap:6px;align-items:start;
+ }
+ .sc-game .sc-mascot{align-self:stretch}
+ .sc-game .sc-bonus-guide{margin-top:3px}
+}
+@media(min-width:761px) and (max-width:1279px){
+ .sc-game .sc-machine{
+  grid-template-columns:minmax(180px,26%) minmax(0,1fr);
+  max-width:none;gap:6px;
+ }
+ .sc-game .sc-bonus-guide{
+  grid-column:2;justify-self:center;width:min(100%,410px);
+  margin:8px auto 0;
+ }
+ .sc-game .sc-cabinet>.sc-masthead{height:90px;min-height:90px}
+ .sc-game .sc-cabinet>.sc-masthead .sc-logo{height:88px;max-height:88px}
+}
+@media(max-width:760px){
+ .sc-game .sc-machine{grid-template-columns:minmax(0,1fr);gap:6px}
+ .sc-game .sc-cabinet>.sc-masthead{
+  grid-template-columns:minmax(0,1fr) auto;gap:5px;
+  height:72px;min-height:72px;
+ }
+ .sc-game .sc-cabinet>.sc-masthead .sc-logo{height:70px;max-height:70px}
+ .sc-game .sc-cabinet>.sc-masthead .sc-ways{font-size:11px;padding:4px 5px}
+ .sc-game .sc-bonus-guide{
+  grid-column:1;width:min(100%,380px);justify-self:center;
+  margin:9px auto;padding:2px 0 0;
+ }
+ .sc-game .sc-bonus-guide-art{max-height:none}
+}

@@ -160,7 +160,52 @@ export function createBestBudsPractice(doc=globalThis.document,options={}){
    }
    frame.append(qa);
   }
-  screen.append(frame);
+  // Keep both reference panels visible beside the actual playfield, so
+  // players can follow payouts and feature triggers without opening INFO.
+  const workspace=make(doc,'div','bb-workspace');
+  const sidebar=make(doc,'aside','bb-sidebar');
+  sidebar.setAttribute('aria-label','Best Buds paytable and bonus trigger information');
+  const payPanel=make(doc,'section','bb-reference-panel bb-pay-panel');
+  payPanel.append(make(doc,'h2','','PAYTABLE'),make(doc,'p','bb-panel-intro','25 fixed lines · awards are multiples of the total bet.'));
+  const payGrid=make(doc,'table','bb-side-paytable');
+  const head=make(doc,'tr');
+  for(const label of ['SYMBOL','3','4','5'])head.append(make(doc,'th','',label));
+  payGrid.append(head);
+  for(const [symbol,amounts] of Object.entries(PAYTABLE)){
+   const row=make(doc,'tr');
+   const symbolCell=make(doc,'td','bb-pay-symbol');
+   const image=SYMBOL_ART[symbol];
+   if(image)symbolCell.append(sprite(doc,'reels',image,''));
+   symbolCell.append(make(doc,'span','',symbol==='BUDDY1'?'BUDDY 1':symbol==='BUDDY2'?'BUDDY 2':symbol));
+   row.append(symbolCell);
+   for(const award of amounts)row.append(make(doc,'td','',String(award)+'×'));
+   payGrid.append(row);
+  }
+  payPanel.append(payGrid);
+  const bonusPanel=make(doc,'section','bb-reference-panel bb-feature-panel');
+  bonusPanel.append(make(doc,'h2','','BONUS TRIGGERS'));
+  const bonusRow=(file,title,body)=>{
+   const item=make(doc,'div','bb-feature-row');
+   item.append(sprite(doc,'ui',file,''));
+   const copy=make(doc,'div','bb-feature-copy');
+   copy.append(make(doc,'strong','',title),make(doc,'p','',body));
+   item.append(copy);return item;
+  };
+  // SCATTER uses the approved reel symbol, not an unrelated UI icon.
+  const freeRow=make(doc,'div','bb-feature-row');
+  freeRow.append(sprite(doc,'reels',SYMBOL_ART.SCATTER,''));
+  const freeCopy=make(doc,'div','bb-feature-copy');
+  freeCopy.append(make(doc,'strong','','3 VAN SCATTERS'),make(doc,'p','','8 Free Rides. Buddy WILDs award random ×2, ×3, ×5 or ×10; highest badge applies to each winning line.'));
+  freeRow.append(freeCopy);bonusPanel.append(freeRow);
+  bonusPanel.append(bonusRow('icon_hotbox_coin.png','6 HOTBOX COINS','Hold & Win starts with 3 respins. Each newly locked coin resets the count to 3.'));
+  bonusPanel.append(bonusRow('icon_collect_smoke.png','COLLECT SMOKE','Adds the values of the other locked ordinary coins. The collected ×total stays on its icon.'));
+  const jackpotRow=make(doc,'div','bb-jackpot-guide');
+  jackpotRow.append(make(doc,'strong','','JACKPOTS'));
+  jackpotRow.append(make(doc,'p','','MINI ×20 · MINOR ×50 · MAJOR ×200 · GRAND ×1000'));
+  bonusPanel.append(jackpotRow);
+  sidebar.append(payPanel,bonusPanel);
+  workspace.append(frame,sidebar);
+  screen.append(workspace);
   screen.append(make(doc,'p','bb-disclaimer','PRACTICE ONLY · CANDIDATE PAYTABLE · NO MONEY OR WALLET TRANSACTIONS'));
   if(modal){const overlay=make(doc,'div','bb-modal-cover'),dialog=make(doc,'section','bb-modal');
    dialog.setAttribute('role','dialog');dialog.setAttribute('aria-modal','true');

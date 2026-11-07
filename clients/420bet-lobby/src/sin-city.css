@@ -404,3 +404,84 @@ main.immersive .view-scroll:has(.sc-game){background:transparent}
  }
  .sc-game .sc-bonus-guide-art{max-height:none}
 }
+
+/* NEW SPIN: illuminated gold casino button, a genuine cannabis leaf silhouette,
+   and high-contrast red lettering. Reuses the approved reel Wild asset. */
+.sc-game .sc-spin.sc-spin-leaf{
+ position:relative;isolation:isolate;overflow:hidden;min-width:0;
+ display:flex;align-items:center;justify-content:center;
+ min-height:56px;padding:6px 4px;
+ border:3px ridge #fff0ad;border-radius:16px;
+ background:radial-gradient(ellipse at 47% 32%,#fff1b7 0%,#f4ca61 37%,#bf7e20 74%,#6a3817 100%);
+ color:#b50c21;font-size:clamp(13px,1.4vw,20px);
+ font-weight:1000;letter-spacing:.025em;line-height:1.08;text-align:center;
+ text-shadow:0 1px #ffefca,1px 0 #ffeab9,-1px 0 #ffeab9,0 2px 3px #862f17;
+ box-shadow:inset 0 2px 3px #fff9dd,inset 0 -4px 8px #67331c,0 0 12px #f5c541aa,0 3px 4px #130512;
+}
+.sc-game .sc-spin.sc-spin-leaf::before{
+ content:"";position:absolute;z-index:-1;inset:2px;
+ background:url('/assets/420bet/sin-city-high-rollers/symbols/sym_wild_leaf.png') center/auto 86% no-repeat;
+ opacity:.36;filter:drop-shadow(0 0 2px #217b17);
+ pointer-events:none;
+}
+.sc-game .sc-spin.sc-spin-leaf:active:not(:disabled){
+ transform:translateY(2px);
+ box-shadow:inset 0 4px 9px #693b1d,0 0 8px #f5c541;
+}
+.sc-game .sc-spin.sc-spin-leaf:focus-visible{outline:3px solid #a9ff89;outline-offset:3px}
+@media(max-width:760px){
+ .sc-game .sc-spin.sc-spin-leaf{min-height:52px;font-size:clamp(11px,3.5vw,17px);padding:5px 2px}
+}
+
+/* Bobby's SESH COMPLETE feature. The image contains NO baked-in winnings;
+   real totals, title and continue instruction are independent accessible text. */
+.sc-game .sc-free-complete.sc-sesh-complete{
+ display:grid;grid-template-columns:minmax(0,1fr);
+ grid-template-rows:minmax(0,auto) auto auto auto;
+ gap:clamp(8px,1.7dvh,16px);
+ align-content:center;justify-items:center;
+ padding:clamp(12px,2.6dvh,28px) clamp(12px,3vw,35px);
+ overflow-y:auto;overscroll-behavior:contain;
+ background:radial-gradient(ellipse at 50% 27%,#582264ee,#250d35f5 70%,#0e061bf9),
+ linear-gradient(140deg,#5a1b6e,#1b071c);
+ border:3px solid #f9cf62;
+ box-shadow:inset 0 0 30px #b93df17d,0 0 24px #a939c880;
+}
+.sc-game .sc-sesh-bobby{
+ grid-row:1;display:block;
+ width:min(94%,790px);height:auto;max-height:min(40dvh,320px);
+ min-width:0;object-fit:contain;object-position:center;
+ border:2px solid #edbc64;border-radius:18px;
+ box-shadow:0 0 24px #bb2df3a1,0 5px 16px #160720;
+ pointer-events:none;
+}
+.sc-game .sc-sesh-title{
+ grid-row:2;display:block;width:100%;margin:0;
+ color:#ffd874;font-size:clamp(27px,5.2vw,58px);line-height:1.04;
+ font-weight:1000;text-align:center;letter-spacing:.02em;
+ text-shadow:0 2px #572052,0 0 10px #9d39d5,0 0 23px #e6a541;
+}
+.sc-game .sc-sesh-complete .sc-free-complete-value{
+ grid-row:3;display:block;position:relative;z-index:2;
+ width:100%;max-width:710px;
+ margin:0;padding:8px 15px;
+ line-height:1.25;text-align:center;
+ font-size:clamp(21px,4vw,42px);font-variant-numeric:tabular-nums;
+ color:#a7ff8a;text-shadow:0 2px #180b15,0 0 16px #7aff6f;
+ background:linear-gradient(100deg,#2c0b40dc,#341547fa,#2b0c3cdd);
+ border:2px solid #f0c153;border-radius:13px;
+ box-shadow:inset 0 0 12px #6c2599,0 0 17px #b646c980;
+}
+.sc-game .sc-sesh-complete .sc-free-complete-click{
+ grid-row:4;display:block;margin:0;padding:5px 12px;
+ color:#ffe9b0;font-size:clamp(15px,2vw,25px);
+ letter-spacing:.09em;font-weight:900;
+ text-shadow:0 0 15px #f6bc70;
+}
+@media(max-width:760px){
+ .sc-game .sc-sesh-bobby{width:min(100%,460px);max-height:min(33dvh,235px)}
+ .sc-game .sc-sesh-title{font-size:clamp(24px,7vw,38px)}
+ .sc-game .sc-sesh-complete .sc-free-complete-value{font-size:clamp(19px,5.5vw,30px)}
+ .sc-game .sc-sesh-complete{gap:10px}
+}
+@media(prefers-reduced-motion:reduce){.sc-game .sc-sesh-complete .sc-free-complete-click{animation:none}}

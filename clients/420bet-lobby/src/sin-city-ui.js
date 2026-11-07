@@ -209,7 +209,9 @@ export function createSinCityPractice(doc=globalThis.document,options={}){
   info.disabled=menu.disabled=busy;
   const minus=button('−','sc-control',()=>{state={...state,stake:Math.max(1,state.stake-1)};render();});
   const plus=button('+','sc-control',()=>{state={...state,stake:Math.min(50,state.stake+1)};render();});
-  const spin=button(state.mode==='base'?'SPIN':state.mode==='free'?'FREE SPIN':'RESPIN','sc-spin',step);
+  const spin=button(state.mode==='base'?'SPIN':state.mode==='free'?'FREE SPIN':'RESPIN','sc-spin sc-spin-leaf',step);
+  spin.setAttribute('aria-label',state.mode==='base'?'Spin slot reels':state.mode==='free'?'Play next free spin':'Play next Hotbox respin');
+  spin.setAttribute('title',state.mode==='base'?'SPIN':state.mode==='free'?'FREE SPIN':'RESPIN');
   spin.disabled=busy||(!auto&&state.mode==='base'&&state.balance<state.stake);
   minus.disabled=plus.disabled=busy||auto||state.mode!=='base'||qaPriorState!==null;
   const autoBtn=button('AUTO '+(auto?'ON':'OFF'),'sc-control'+(auto?' sc-selected':''),()=>{
@@ -250,11 +252,22 @@ export function createSinCityPractice(doc=globalThis.document,options={}){
   root.append(qa);
   if(phase==='win'){scene.classList.add('sc-click-to-total');scene.addEventListener('click',event=>{if(event.target.closest?.('button'))return;showTotalWin();});}
   if(phase==='free-complete'){
-   const complete=el(doc,'div','sc-free-complete');complete.setAttribute('role','button');complete.setAttribute('tabindex','0');complete.setAttribute('aria-label','Free spins complete. Click to continue.');
-   const chips=el(doc,'div','sc-complete-chips');
-   const picture=el(doc,'img','sc-complete-chip-art');picture.src=art('symbols',FILES.CHIPS);picture.alt='Gold and purple casino chips';chips.append(picture);
-   chips.append(el(doc,'strong','sc-complete-chip-face','FREE SPINS COMPLETE'));
-   complete.append(chips,el(doc,'div','sc-free-complete-value',(state.freeCompletedTotal??state.freeSessionWin).toFixed(2)+' PRACTICE CREDITS'),el(doc,'p','sc-free-complete-click','CLICK TO CONTINUE'));
+   const complete=el(doc,'div','sc-free-complete sc-sesh-complete');
+   complete.setAttribute('role','button');complete.setAttribute('tabindex','0');
+   complete.setAttribute('aria-label','Sesh complete. Total free-spin winnings '+(state.freeCompletedTotal??state.freeSessionWin).toFixed(2)+' practice credits. Click anywhere to continue.');
+   const hero=el(doc,'img','sc-sesh-bobby');
+   hero.src=art('features','splash_sesh_complete_bobby.png');
+   hero.alt='Bobby Las Vegas celebrating and offering the player a joint';
+   hero.draggable=false;
+   hero.addEventListener('error',()=>{
+    // Use existing Bobby art until the approved new hero PNG has been uploaded.
+    if(!hero.dataset.fallback){hero.dataset.fallback='1';hero.src=art('characters','char_bobby_las_vegas_celebration.png');}
+   });
+   const title=el(doc,'strong','sc-sesh-title','SESH COMPLETE!');
+   const amount=el(doc,'div','sc-free-complete-value',(state.freeCompletedTotal??state.freeSessionWin).toFixed(2)+' PRACTICE CREDITS');
+   amount.setAttribute('aria-label','Total won during Chronic Sessions free spins');
+   const next=el(doc,'p','sc-free-complete-click','CLICK TO CONTINUE');
+   complete.append(hero,title,amount,next);
    complete.addEventListener('click',acknowledgeFreeComplete);
    complete.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();acknowledgeFreeComplete();}});
    root.append(complete);

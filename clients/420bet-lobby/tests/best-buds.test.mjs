@@ -95,7 +95,7 @@ test('all declared icon, symbol, logo and character art paths resolve in public 
  for(const [folder,files] of Object.entries({
   ui:['bestbuds-logo.png','icon_hotbox_coin.png','icon_collect_smoke.png','icon_multiplier_x2.png',...['mini','minor','major','grand'].map(x=>'icon_jackpot_'+x+'.png')],
   backgrounds:['bestbuds-bg-desert-sunset.png','bestbuds-bg-night-roadtrip.png'],
-  reels:['sym_bong.png','sym_joint.png','sym_chips.png','sym_record.png','sym_rollingpapers.png','sym_lighter.png','sym_sunglasses.png','sym_guitar.png','sym_leaf.png','sym_buddy1_portrait.png','sym_buddy2_portrait.png','sym_buddy1_wild.png','sym_buddy2_wild.png','sym_scatter_van.png','sym_hotbox_100.png'],
+  reels:['sym_bong.png','sym_joint.png','sym_chips.png','sym_record.png','sym_rollingpapers.png','sym_lighter.png','sym_sunglasses.png','sym_guitar.png','sym_leaf.png','sym_buddy1_portrait.png','sym_buddy2_portrait.png','sym_wild.svg','sym_scatter_van.png','sym_hotbox_100.png'],
   characters:['buddy1_laugh.png','buddy1_surprised.png','buddy1_big_win.png','buddy1_exhale.png','buddy1_skeptical.png','buddy1_thumbs_up.png','buddy2_peace.png','buddy2_inhale.png','buddy2_exhale.png','buddy2_surprised.png','buddy2_laugh.png','buddy2_celebrate.png']
  })){
   for(const file of files){if(folder!=='characters'&&!file.startsWith('icon_jackpot_'))assert.match(ui,new RegExp(file.replaceAll('.','\\.')));assert.ok(existsSync(new URL(folder+'/'+file,base)),folder+'/'+file);}
@@ -136,7 +136,7 @@ test('manual respins reset to 3 when a new coin lands and do not charge credits'
  assert.equal(state.holdReveal.length,10);
  assert.equal(state.balance,initialCredits);
 });
-test('Free Rides WILD portraits receive x2/x3/x5/x10 and winning lines apply max one badge',()=>{
+test('Free Rides dedicated WILD receives x2/x3/x5/x10 and winning lines apply max one badge',()=>{
  assert.deepEqual([...FREE_WILD_MULTIPLIERS],[2,3,5,10]);
  const board=Array.from({length:5},()=>['BONG','JOINT','PAPERS']);
  board[1][1]='WILD';board[2][1]='WILD';

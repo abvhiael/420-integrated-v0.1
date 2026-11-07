@@ -58,16 +58,29 @@ export async function fetchDailyFixtures(apiKey,{fetcher=globalThis.fetch,now=Da
  const currentDay=day(now),results=await Promise.allSettled(SPORTS.map(async kind=>{
   const url=providerUrl('/v4/sports/'+kind.key+'/events',apiKey);
   const {data}=await upstreamJSON(url,{fetcher});
-  return data.flatMap(item=>{const mapped=providerEvent(item,kind);
-   return mapped&&day(Date.parse(mapped.startsAt))===currentDay&&Date.parse(mapped.startsAt)>=now-120000
-    ?[{...mapped,priority:kind.priority}]:[];});
+  return data.flatMap(item=>{
+   const mapped=providerEvent(item,kind);
+   if(!mapped)return [];
+   const when=Date.parse(mapped.startsAt);
+   // The provider's event endpoint lists upcoming and some in-play events.
+   // Include recent starts without claiming the game is still live; if the
+   // current-day slate has ended, show the next 72 hours rather than a blank board.
+   if(when<now-3*3600000||when>now+72*3600000)return [];
+   return [{...mapped,priority:kind.priority,
+     status:when<now?'start-time-passed':'scheduled'}];
+  });
  }));
  if(!results.some(x=>x.status==='fulfilled'))throw Error('all fixture providers unavailable');
  const seen=new Set();
  const events=results.flatMap(x=>x.status==='fulfilled'?x.value:[])
-  .sort((a,b)=>Date.parse(a.startsAt)-Date.parse(b.startsAt)||a.priority-b.priority)
+  .sort((a,b)=>{
+   // Prefer today's listed games, then the next slate, ordered by start time.
+   const x=day(Date.parse(a.startsAt))===currentDay?0:1;
+   const y=day(Date.parse(b.startsAt))===currentDay?0:1;
+   return x-y||Date.parse(a.startsAt)-Date.parse(b.startsAt)||a.priority-b.priority;
+  })
   .filter(e=>{if(seen.has(e.id))return false;seen.add(e.id);return true;})
-  .slice(0,4).map(({priority,...e})=>({...e,status:'scheduled'}));
+  .slice(0,4).map(({priority,...e})=>e);
  return {
   source:'verified-sports-fixtures-v1',authority:'verified',
   date:currentDay,timezone:ZONE,

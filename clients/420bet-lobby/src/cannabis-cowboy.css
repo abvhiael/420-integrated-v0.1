@@ -1106,3 +1106,47 @@
   font-size:clamp(.85rem,3.5vw,1.75rem);
  }
 }
+
+
+/* Approved Cole Haze Road Trip Complete splash, with live credits in its
+   blank green plaque. Its heading and click-to-continue prompt are in the PNG. */
+.cc-game[data-view="cannabis-cowboy"] .cc-bonus-total-splash[data-bonus="road"]{
+  inset:1%;
+  width:98%;
+  height:98%;
+  max-height:none;
+  padding:0;
+  margin:0;
+  display:block;
+  border:0;
+  border-radius:9px;
+  overflow:hidden;
+  background:#122719 url('/assets/420bet/cannabis-cowboy/cannabis-cowboy-road-trip-complete-splash.png') center / 100% 100% no-repeat;
+  box-shadow:0 0 25px #000b;
+  cursor:pointer;
+}
+.cc-game[data-view="cannabis-cowboy"] .cc-bonus-total-splash[data-bonus="road"] .cc-road-splash-credits{
+  position:absolute;
+  top:63%;
+  left:22%;
+  width:56%;
+  height:16%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin:0;
+  padding:0 2%;
+  box-sizing:border-box;
+  color:#ffdb68;
+  background:transparent;
+  border:0;
+  font:900 clamp(1.2rem,3.5vw,3.8rem)/1 Georgia,serif;
+  text-shadow:0 3px 4px #0a1704,0 0 14px #cfb14c;
+  white-space:nowrap;
+  pointer-events:none;
+}
+@media(max-width:700px){
+  .cc-game[data-view="cannabis-cowboy"] .cc-bonus-total-splash[data-bonus="road"] .cc-road-splash-credits{
+    font-size:clamp(.85rem,3.8vw,1.8rem);
+  }
+}

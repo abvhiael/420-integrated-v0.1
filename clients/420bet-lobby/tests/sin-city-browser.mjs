@@ -26,6 +26,37 @@ try{
    assert.ok(col[3].bottom<=initial.reels.bottom+4,'Fourth row must be fully visible, not cropped');
   }
   assert.ok(initial.reels.w>200&&initial.reels.h>150,'Reels must be visible');
+  const artworkLayout=await page.evaluate(()=>{
+   const rect=node=>{const r=node.getBoundingClientRect();return {x:r.x,y:r.y,w:r.width,h:r.height,right:r.right,bottom:r.bottom};};
+   const cabinet=document.querySelector('.sc-cabinet');
+   const mast=cabinet.querySelector(':scope > .sc-masthead');
+   const logo=mast?.querySelector('.sc-logo');
+   const guide=document.querySelector('.sc-machine > .sc-bonus-guide img');
+   const paytable=cabinet.querySelector('.sc-ways-side');
+   return {
+    mast:mast&&rect(mast),logo:logo&&rect(logo),guide:guide&&rect(guide),
+    paytable:paytable&&rect(paytable),
+    logoLoaded:logo?.complete&&logo.naturalWidth>0,guideLoaded:guide?.complete&&guide.naturalWidth>0,
+    logoSrc:logo?.getAttribute('src'),guideSrc:guide?.getAttribute('src')
+   };
+  });
+  assert.ok(artworkLayout.mast,'Wide logo must be above reels inside cabinet');
+  assert.ok(artworkLayout.logoLoaded&&artworkLayout.guideLoaded,'Both newly uploaded PNGs must load');
+  assert.match(artworkLayout.logoSrc,/branding\/logo_sin_city_high_rollers\.png/);
+  assert.match(artworkLayout.guideSrc,/features\/bonus_triggers_sin_city_high_rollers\.png/);
+  if(name==='desktop'){
+   assert.ok(artworkLayout.guide.x>=artworkLayout.paytable.right-3,
+    'Bonus trigger graphic must be OUTSIDE the gameboard to the right of the paytable');
+   assert.ok(artworkLayout.logo.bottom<=initial.reels.y+5,
+    'Wide logo must sit immediately above reel area');
+   assert.ok(artworkLayout.logo.w>=initial.reels.w*.85,
+    'The new logo must be horizontally aligned to approximately reelboard width');
+   assert.ok(initial.reels.w>=425,'The third column must not make five reels too narrow');
+  }else{
+   assert.ok(artworkLayout.guide.y>=artworkLayout.paytable.bottom-3,
+    'On mobile, bonus trigger art must stack after the paytable');
+  }
+
   const payout=await page.evaluate(()=>{
    const panel=document.querySelector('.sc-play-area .sc-ways-side');
    const reel=document.querySelector('.sc-reels');

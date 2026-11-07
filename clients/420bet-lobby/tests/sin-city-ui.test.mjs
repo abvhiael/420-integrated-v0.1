@@ -260,3 +260,30 @@ test('during Hotbox the collection ladder replaces the general ways paytable',()
   assert.equal(root.querySelector('.sc-play-area .sc-ways-side'),null);
  }finally{root.stopAnimation();}
 });
+
+test('uploaded wide logo is anchored directly above gameboard and trigger art outside cabinet',()=>{
+ const {root}=setup();
+ try{
+  const cabinet=root.querySelector('.sc-cabinet'),mast=cabinet.querySelector(':scope > .sc-masthead');
+  assert.ok(mast,'Wide logo must be in the cabinet, above the reel grid');
+  const logo=mast.querySelector('.sc-logo');
+  assert.match(logo.getAttribute('src'),/\/branding\/logo_sin_city_high_rollers\.png$/);
+  assert.equal(root.querySelectorAll('.sc-logo').length,1);
+  const guide=root.querySelector('.sc-machine > .sc-bonus-guide');
+  assert.ok(guide,'Bonus trigger guide must be an external column, not inside the reels or paytable');
+  assert.equal(guide.parentElement,root.querySelector('.sc-machine'));
+  assert.ok(guide.previousElementSibling===cabinet,'Bonus guide must follow cabinet/paytable in visual order');
+  assert.match(guide.querySelector('img').getAttribute('src'),/\/features\/bonus_triggers_sin_city_high_rollers\.png$/);
+  assert.match(guide.querySelector('img').getAttribute('alt'),/Puff Puff Pass/);
+  assert.ok(cabinet.querySelector('.sc-ways-side'));
+  assert.equal(root.querySelectorAll('.sc-symbol').length,20);
+ }finally{root.stopAnimation();}
+});
+test('external bonus trigger image remains available alongside Hotbox collection panel',()=>{
+ const {root}=setup({initialState:{...initialState(),mode:'hotbox',respins:3,locked:[0,4,8]}});
+ try{
+  assert.ok(root.querySelector('.sc-cabinet .sc-hotbox-side'));
+  assert.ok(root.querySelector('.sc-machine > .sc-bonus-guide > img'));
+  assert.equal(root.querySelectorAll('.sc-symbol').length,20);
+ }finally{root.stopAnimation();}
+});

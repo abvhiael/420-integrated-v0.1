@@ -39,7 +39,7 @@ export function createCannabisCowboyPractice(doc=globalThis.document,options={})
  const info=root.querySelector('.cc-info-panel');
  info.setAttribute('aria-label','High Country Clusters practice rules');
  const infoCopy=info.querySelector('p');
- if(infoCopy)infoCopy.textContent='Practice only: 5 or more adjacent paying symbols form a cluster. Each tumble clears matches and refills the 6×8 board. Growing Harvest cells progress ×2→×32 and Smoke Ring Wilds substitute for paying symbols. Landing 3, 4, 5 or 6+ tour bus scatters awards 8, 12, 16 or 20 Endless Harvest free spins. Harvest multipliers and up to 8 sticky wilds persist throughout the feature. Retriggers are capped at 100 total free spins. Demo credits only; no wallet transactions or real wagering. Bonus paytables are not yet RTP certified. On the Road Again: 3 Road Trip tickets on the base spin trigger a five-stop guitar-case pick bonus. Pick one case per stop; its predetermined practice-credit value is revealed, and the five awards are paid once on completion. The six columns spin with staggered stops, and neon lines trace winning clusters. Click the game screen after winning-cluster review to reveal your TOTAL WIN.';
+ if(infoCopy)infoCopy.textContent='Practice only: 5 or more adjacent paying symbols form a cluster. Each tumble clears matches and refills the 6×8 board. Endless Harvest frames increase by +1 per winning hit to a maximum ×10 and Smoke Ring Wilds substitute for paying symbols. Landing 3, 4, 5 or 6+ tour bus scatters awards 8, 12, 16 or 20 Endless Harvest free spins. Harvest multipliers and up to 8 sticky wilds persist throughout the feature. Retriggers are capped at 100 total free spins. Demo credits only; no wallet transactions or real wagering. Bonus paytables are not yet RTP certified. On the Road Again: 3 Road Trip tickets on the base spin trigger a five-stop guitar-case pick bonus. Pick one case per stop; one hidden case per stop carries a ×2, ×3, ×5 or ×10 multiplier, the others award credits, and collected multipliers stack at journey end. The six columns spin with staggered stops, and neon lines trace winning clusters. Click the board to skip cluster-count sequences, spin each free game manually, and click the final bonus total to continue.';
  const notice=root.querySelector('.cc-practice-notice');
  notice.textContent='PRACTICE ONLY · ENDLESS HARVEST FREE SPINS ACTIVE · NO REAL WAGERING';
  consoleBar.setAttribute('aria-label','Practice-credit controls');
@@ -69,7 +69,7 @@ export function createCannabisCowboyPractice(doc=globalThis.document,options={})
    else delete cell.dataset.harvest;
   });
  };
- let busy=false,dead=false,handle=null,queue=[],lastWin=0;
+ let busy=false,dead=false,handle=null,queue=[],lastWin=0,timerGeneration=0,activeCascade=null;
  let bonusPreview=false,previewLastWin=0,previewRuns=0;
  let reelSequence=null,pendingRoad=null,roadPicks=[],roadStarted=false;
  let lastWinningClusters=[],lastWinningBoard=null,reviewDismissed=false;
@@ -109,6 +109,11 @@ export function createCannabisCowboyPractice(doc=globalThis.document,options={})
  featureOverlay.append(featureTitle,featureMessage);root.querySelector('.cc-middle').append(featureOverlay);
  const roadPanel=doc.createElement('section');roadPanel.className='cc-road-panel';roadPanel.hidden=true;roadPanel.setAttribute('aria-label','On the Road Again guitar case selections');
  root.querySelector('.cc-middle').append(roadPanel);
+ const freeSpinButton=doc.createElement('button');freeSpinButton.type='button';freeSpinButton.className='cc-free-spin-button';freeSpinButton.textContent='SPIN FREE GAME';freeSpinButton.hidden=true;
+ root.querySelector('.cc-middle').append(freeSpinButton);
+ const bonusSplash=doc.createElement('button');bonusSplash.type='button';bonusSplash.className='cc-bonus-total-splash';bonusSplash.hidden=true;
+ bonusSplash.setAttribute('aria-label','Endless Harvest complete; click to continue');
+ root.querySelector('.cc-middle').append(bonusSplash);
  const reviewPanel=doc.createElement('div');reviewPanel.className='cc-win-review';reviewPanel.hidden=true;reviewPanel.setAttribute('role','status');
  reviewPanel.textContent='NEON WINNING CLUSTERS · CLICK GAME SCREEN TO REVEAL TOTAL WIN';root.querySelector('.cc-middle').append(reviewPanel);
  const showFeature=(title,message)=>{featureTitle.textContent=title;featureMessage.textContent=message;featureOverlay.hidden=false;};
@@ -135,7 +140,8 @@ export function createCannabisCowboyPractice(doc=globalThis.document,options={})
   bonusSelect.disabled=busy;bonusButton.disabled=busy;
  };
  const tick=(fn,ms)=>{
-  handle=schedule(()=>{handle=null;if(!dead)fn();},ms);
+  const generation=++timerGeneration;
+  handle=schedule(()=>{if(generation!==timerGeneration)return;handle=null;if(!dead)fn();},ms);
  };
  const finish=()=>{
   if(pendingRoad&&!roadStarted){startRoadTrip();return;}
@@ -161,7 +167,7 @@ export function createCannabisCowboyPractice(doc=globalThis.document,options={})
    if(pendingFeature){startFreeSpins();return;}
    finish();return;
   }
-  const step=queue.shift();
+  const step=queue.shift();activeCascade=step;
   const highlighted=step.clusters.flatMap(x=>x.positions);
   const smokeRings=step.clusters.reduce((count,c)=>count+c.wildCount,0);
   const prior=displayedFertile.slice();
@@ -180,16 +186,21 @@ export function createCannabisCowboyPractice(doc=globalThis.document,options={})
     displayedFertile=step.fertile.slice();displayedSticky=step.lockedWilds??[];
     showBoard(step.after,[],displayedFertile,'drop',upgraded,displayedSticky);
     announce('MULTIPLIERS GROW · '+upgraded.map(p=>'×'+step.fertile[p]).slice(0,5).join('  '));
-    tick(()=>{hideEffects();advance();},timings.drop);
+    tick(()=>{hideEffects();activeCascade=null;advance();},timings.drop);
    },timings.burst);
   },timings.announce);
  };
  const finishFeature=()=>{
-  phase('outro');bonusCounter.hidden=true;hideEffects();
-  showFeature('ENDLESS HARVEST COMPLETE',format(pendingFeature.total)+' DEMO CREDITS WON · '+pendingFeature.played+' FREE SPINS');
-  status.textContent='BONUS COMPLETE · '+format(pendingFeature.total)+' DEMO CREDITS';
+  phase('outro');bonusCounter.hidden=true;hideEffects();hideFeature();freeSpinButton.hidden=true;
+  const coins=pendingFeature.total;
+  bonusSplash.replaceChildren();
+  const title=doc.createElement('strong');title.className='cc-bonus-total-title';title.textContent='ENDLESS HARVEST COMPLETE!';
+  const amount=doc.createElement('span');amount.className='cc-bonus-total-amount';amount.textContent=format(coins)+' COINS WON';
+  const spins=doc.createElement('span');spins.className='cc-bonus-total-spins';spins.textContent=pendingFeature.played+' FREE SPINS';
+  const continuation=doc.createElement('span');continuation.className='cc-bonus-total-continue';continuation.textContent='CLICK TO CONTINUE';
+  bonusSplash.append(title,amount,spins,continuation);bonusSplash.hidden=false;
+  status.textContent='BONUS COMPLETE · '+format(coins)+' COINS';
   finishedBonus=true;pendingFeature=null;
-  tick(finish,reducedMotion?0:2200);
  };
  const finishFreeSpin=()=>{
   if(!currentSpin)return;
@@ -205,7 +216,7 @@ export function createCannabisCowboyPractice(doc=globalThis.document,options={})
  };
  const beginFreeSpin=()=>{
   if(dead||!pendingFeature)return;
-  currentSpin=bonusSpins[bonusIndex];phase('bonus-spin');
+  currentSpin=bonusSpins[bonusIndex];phase('bonus-ready');
   const spin=currentSpin;
   displayedFertile=spin.initialFertile.slice();displayedSticky=spin.stickyBefore.slice();
   queue=spin.outcome.steps.slice();
@@ -213,8 +224,9 @@ export function createCannabisCowboyPractice(doc=globalThis.document,options={})
   root.querySelector('.cc-board-readonly').textContent='ENDLESS HARVEST';
   showBoard(spin.outcome.startingBoard,[],displayedFertile,'idle',[],displayedSticky);
   status.textContent='FREE SPIN '+spin.number+' OF '+pendingFeature.awarded;
-  showFeature('FREE SPIN '+spin.number,spin.scatters+' TOUR BUS SCATTERS · '+displayedSticky.length+' STICKY WILDS');
-  tick(()=>{hideFeature();runReels(spin.outcome.startingBoard,displayedSticky,advance);},reducedMotion?0:850);
+  hideFeature();freeSpinButton.hidden=false;
+  freeSpinButton.textContent='SPIN FREE GAME '+spin.number+' / '+pendingFeature.awarded;
+  status.textContent='FREE SPIN '+spin.number+' READY · CLICK SPIN FREE GAME';
  };
  const startFreeSpins=()=>{
   if(!pendingFeature)return finish();
@@ -237,7 +249,9 @@ export function createCannabisCowboyPractice(doc=globalThis.document,options={})
   heading.textContent=stop.scene+'  STOP '+(index+1)+' / 5 · '+stop.name.toUpperCase();
   const description=doc.createElement('p');description.className='cc-road-description';description.textContent=stop.description;
   const subtotal=doc.createElement('p');subtotal.className='cc-road-total';
-  subtotal.textContent='ROAD TRIP WIN: '+format(roadPicks.reduce((n,p)=>n+p.award,0))+' DEMO CREDITS';
+  const creditSubtotal=roadPicks.reduce((n,p)=>n+p.award,0);
+  const stacked=roadPicks.reduce((n,p)=>n*(p.multiplier??1),1);
+  subtotal.textContent='COLLECTED '+format(creditSubtotal)+' COINS · STACKED ×'+stacked+' · TOTAL '+format(creditSubtotal*stacked);
   const cases=doc.createElement('div');cases.className='cc-road-cases';
   for(let c=0;c<3;c++){
    const button=doc.createElement('button');button.type='button';button.className='cc-road-case';
@@ -252,11 +266,14 @@ export function createCannabisCowboyPractice(doc=globalThis.document,options={})
     const choice=chooseRoadCase(pendingRoad,roadPicks,c);roadPicks=choice.picks;
     for(const other of [...cases.querySelectorAll('button')]){
      other.disabled=true;
-     other.textContent='CASE · '+format(stop.caseValues[Number(other.dataset.index)])+' CREDITS';
+     const otherIndex=Number(other.dataset.index);
+      const reveal=doc.createElement('span');reveal.className='cc-road-case-reveal';
+      reveal.textContent=otherIndex===stop.multiplierCase?'×'+stop.multiplier+' MULTIPLIER':format(stop.caseValues[otherIndex])+' COINS';
+      other.append(reveal);
     }
     button.classList.add('cc-road-chosen');
     const message=doc.createElement('p');message.className='cc-road-award';
-    message.textContent='CASE '+(c+1)+' WINS '+format(choice.award)+' · ROAD TOTAL '+format(choice.total);
+    message.textContent=choice.kind==='multiplier'?'CASE '+(c+1)+' REVEALS ×'+choice.multiplier+' · STACKED ×'+choice.stackedMultiplier+' · TOTAL '+format(choice.total):'CASE '+(c+1)+' WINS '+format(choice.award)+' COINS · STACKED ×'+choice.stackedMultiplier+' · TOTAL '+format(choice.total);
     const next=doc.createElement('button');next.type='button';next.className='cc-road-next';
     next.textContent=choice.done?'FINISH THE ROAD TRIP':'NEXT STOP →';
     next.addEventListener('click',()=>{
@@ -267,7 +284,7 @@ export function createCannabisCowboyPractice(doc=globalThis.document,options={})
       if(!bonusPreview)session={...session,credits:session.credits+grand};
       lastWin+=grand;pendingRoad=null;roadPanel.hidden=true;
       status.textContent='ROAD TRIP COMPLETE · '+format(grand)+' DEMO CREDITS';
-      showFeature('ON THE ROAD AGAIN COMPLETE',format(grand)+' DEMO CREDITS ACROSS FIVE STOPS');
+      showFeature('ON THE ROAD AGAIN COMPLETE',format(grand)+' COINS · STACKED ×'+choice.stackedMultiplier);
       sync();tick(()=>{hideFeature();finish();},reducedMotion?0:1500);
      }else showRoadStop();
     });
@@ -284,12 +301,34 @@ export function createCannabisCowboyPractice(doc=globalThis.document,options={})
   status.textContent='ROAD TRIP BONUS TRIGGERED · FIVE STOPS';
   tick(()=>{hideFeature();showRoadStop();},reducedMotion?0:1900);
  };
- root.addEventListener('click',()=>{
-  if(root.dataset.featurePhase!=='win-review'||reviewDismissed)return;
-  reviewDismissed=true;reviewPanel.hidden=true;
-  clearClusterPaths(root.querySelector('.cc-symbol-grid'));
-  status.textContent='TOTAL WIN · '+format(lastWin)+' DEMO CREDITS';
-  finish();
+ freeSpinButton.addEventListener('click',event=>{
+  event.stopPropagation();
+  if(dead||featurePhase!=='bonus-ready'||!currentSpin||!pendingFeature)return;
+  freeSpinButton.hidden=true;phase('bonus-spin');
+  runReels(currentSpin.outcome.startingBoard,displayedSticky,advance);
+ });
+ bonusSplash.addEventListener('click',event=>{
+  event.stopPropagation();
+  if(dead||featurePhase!=='outro')return;
+  bonusSplash.hidden=true;reviewDismissed=true;finish();
+ });
+ root.querySelector('.cc-middle').addEventListener('click',event=>{
+  if(dead||event.target.closest?.('.cc-free-spin-button,.cc-bonus-total-splash,.cc-road-panel'))return;
+  if(featurePhase==='win-review'&&!reviewDismissed){
+   reviewDismissed=true;reviewPanel.hidden=true;
+   clearClusterPaths(root.querySelector('.cc-symbol-grid'));
+   status.textContent='TOTAL WIN · '+format(lastWin)+' DEMO CREDITS';finish();return;
+  }
+  if(activeCascade){
+   timerGeneration++;if(handle!==null){cancel(handle);handle=null;}
+   const finalStep=queue.length?queue[queue.length-1]:activeCascade;
+   queue=[];activeCascade=null;hideEffects();reviewDismissed=true;
+   displayedFertile=finalStep.fertile.slice();displayedSticky=finalStep.lockedWilds??[];
+   showBoard(finalStep.after,[],displayedFertile,'idle',[],displayedSticky);
+   if(featurePhase==='bonus-spin')finishFreeSpin();
+   else if(pendingFeature)startFreeSpins();
+   else finish();
+  }
  });
  const play=(testKind=null)=>{
   if(busy||dead||(!testKind&&session.credits<session.bet))return;
@@ -337,7 +376,7 @@ export function createCannabisCowboyPractice(doc=globalThis.document,options={})
   pendingRoad=road;roadPicks=[];roadStarted=false;reviewDismissed=false;
   lastWinningClusters=[];lastWinningBoard=null;reviewPanel.hidden=true;roadPanel.hidden=true;
   pendingFeature=result.outcome.feature??null;bonusSpins=[];currentSpin=null;
-  finishedBonus=false;bonusIndex=0;bonusWin=0;displayedSticky=[];
+  finishedBonus=false;bonusIndex=0;bonusWin=0;displayedSticky=[];activeCascade=null;freeSpinButton.hidden=true;bonusSplash.hidden=true;
   phase('base');
   root.querySelector('.cc-board-readonly').textContent='BASE-GAME PRACTICE';
   sync();
@@ -361,7 +400,7 @@ export function createCannabisCowboyPractice(doc=globalThis.document,options={})
  menu.title='Menu options coming in a later milestone';
  auto.title='Autoplay unavailable in this practice build';
  showBoard(session.board);sync();
- root.stopAnimation=()=>{dead=true;busy=false;queue=[];pendingFeature=null;pendingRoad=null;stopReels();roadPanel.hidden=true;reviewPanel.hidden=true;hideFeature();hideEffects();if(handle!==null){cancel(handle);handle=null;}};
- root.getPracticeState=()=>({credits:session.credits,bet:session.bet,round:session.round,busy,lastWin,featurePhase,bonusIndex,bonusWin,freeSpinCount:bonusSpins.length,roadStopsCompleted:roadPicks.length,roadActive:roadStarted&&!!pendingRoad,bonusPreview});
+ root.stopAnimation=()=>{dead=true;busy=false;queue=[];activeCascade=null;timerGeneration++;pendingFeature=null;pendingRoad=null;stopReels();roadPanel.hidden=true;reviewPanel.hidden=true;freeSpinButton.hidden=true;bonusSplash.hidden=true;hideFeature();hideEffects();if(handle!==null){cancel(handle);handle=null;}};
+ root.getPracticeState=()=>({credits:session.credits,bet:session.bet,round:session.round,busy,lastWin,featurePhase,bonusIndex,bonusWin,freeSpinCount:bonusSpins.length,bonusSplashVisible:!bonusSplash.hidden,freeSpinReady:featurePhase==='bonus-ready',roadStopsCompleted:roadPicks.length,roadActive:roadStarted&&!!pendingRoad,bonusPreview});
  return root;
 }

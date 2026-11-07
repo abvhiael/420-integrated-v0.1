@@ -340,3 +340,70 @@
 .bb-modal-toolbar .bb-close{float:none;margin-left:auto;font-size:22px;padding:6px 13px}
 .bb-modal-footer{position:sticky;bottom:-25px;z-index:8;display:flex;justify-content:center;padding:14px 0 8px;background:linear-gradient(#30144100,#301441 25%)}
 @media(max-width:540px){.bb-modal-toolbar{top:-25px;gap:5px}.bb-modal-toolbar h2{font-size:19px;flex-basis:100%}.bb-modal-toolbar .bb-close{margin-left:0}.bb-game .bb-back-to-game{padding:8px 12px}}
+
+/* HOTBOX Hold & Win: each animated cell is exactly one grid-cell viewport.
+   Two repetitions of six complete one-cell tiles loop seamlessly. */
+.bb-hold-cell-rolling .bb-hold-spin-window{position:absolute;inset:0;overflow:hidden;isolation:isolate}
+.bb-hold-cell-rolling .bb-hold-spin-track{
+ position:absolute;top:0;left:0;right:0;bottom:auto;
+ display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;
+ width:100%;height:1200%;
+ animation:bb-hotbox-cell-scroll .68s linear infinite;
+ transform:translate3d(0,0,0);will-change:transform;
+}
+.bb-hold-cell-rolling .bb-hold-spin-tile{
+ position:relative;display:grid;place-items:center;
+ flex:0 0 calc(100% / 12);width:100%;height:calc(100% / 12);
+ min-width:0;min-height:0;overflow:hidden;
+ background:radial-gradient(circle,#382041,#130a22 88%);
+}
+.bb-hold-cell-rolling .bb-hold-spin-tile > .bb-hold-spin-symbol{
+ position:absolute;inset:12%;width:76%;height:76%;
+ min-width:0;min-height:0;max-width:76%;max-height:76%;
+ object-fit:contain;object-position:center;filter:blur(.5px);
+}
+@keyframes bb-hotbox-cell-scroll{from{transform:translate3d(0,0,0)}to{transform:translate3d(0,-50%,0)}}
+@media(prefers-reduced-motion:reduce){.bb-hold-cell-rolling .bb-hold-spin-track{animation:none}}
+
+/* The supplied artwork sits above the same existing wallpaper fallback.
+   The closing total is true game-state text, not pixels baked into the art. */
+.bb-hotbox-splash{
+ position:absolute;inset:0;z-index:30;
+ display:flex;flex-direction:column;justify-content:center;align-items:center;
+ gap:12px;padding:22px;
+ background:radial-gradient(circle at 50% 45%,#391549f2,#0c0419fa 83%);
+ cursor:pointer;
+}
+.bb-hotbox-splash-art{
+ position:relative;width:min(1250px,96%);aspect-ratio:1536/499;
+ border:3px solid #f8c84d;border-radius:15px;
+ background:linear-gradient(130deg,#3d194dd9,#180727e8),
+ url('/assets/420bet/best-buds/backgrounds/bestbuds-bg-night-roadtrip.png') center/cover;
+ box-shadow:0 0 25px #ae4ee4,0 0 30px #41de50;overflow:hidden;
+}
+.bb-hotbox-splash-img{display:block;width:100%;height:100%;object-fit:fill}
+.bb-hotbox-splash-copy{position:absolute;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;pointer-events:none}
+.bb-hotbox-splash-complete .bb-hotbox-splash-copy{left:34.5%;top:60%;width:41%;height:33%}
+.bb-hotbox-total-label{font-size:clamp(12px,1.7vw,21px);color:#ffe498;text-shadow:0 2px #210c1d}
+.bb-hotbox-total-credits{font-weight:1000;color:#ffdb5f;font-variant-numeric:tabular-nums;font-size:clamp(30px,5.6vw,74px);line-height:1.05;text-shadow:0 3px 6px #1c0419,0 0 12px #6cfa4c}
+.bb-hotbox-total-unit{color:#e8ffa0;font-weight:900;font-size:clamp(11px,1.5vw,20px)}
+.bb-hotbox-splash-trigger .bb-hotbox-splash-copy{display:none}
+.bb-hotbox-art-fallback .bb-hotbox-splash-copy{display:flex}
+.bb-hotbox-splash-trigger .bb-hotbox-art-fallback .bb-hotbox-splash-copy{inset:8%;width:auto;height:auto}
+.bb-hotbox-trigger-label{font-size:clamp(22px,5vw,70px);color:#dfff6f;text-shadow:2px 4px #3d0b54}
+.bb-hotbox-trigger-detail{color:#ffe6a4;font-size:clamp(13px,2vw,28px);font-weight:900}
+.bb-hotbox-splash-footer{width:100%;display:flex;justify-content:center}
+.bb-game .bb-hotbox-splash-button{
+ border:3px solid #ffde55;border-radius:17px;
+ background:linear-gradient(#31bd2f,#0b5517);color:#fff9b1;
+ font-size:clamp(18px,2vw,28px);padding:12px 38px;
+ text-shadow:1px 2px #092e08;box-shadow:0 0 22px #4af63d;
+}
+@media(max-width:750px){
+ .bb-hotbox-splash{padding:10px}
+ .bb-hotbox-splash-art{width:100%;aspect-ratio:1536/499}
+ .bb-hotbox-splash-complete .bb-hotbox-splash-copy{top:57%;height:38%}
+ .bb-hotbox-total-credits{font-size:clamp(19px,5vw,36px)}
+ .bb-hotbox-total-label,.bb-hotbox-total-unit{font-size:10px}
+ .bb-game .bb-hotbox-splash-button{padding:9px 20px;font-size:18px}
+}

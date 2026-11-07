@@ -29,6 +29,8 @@ export function validateSportsbookMarquee(payload,now=Date.now()){
   !iso(payload.observedAt)||!iso(payload.expiresAt)||!isoDay(payload.date)||
   !clean(payload.timezone,64)||!Array.isArray(payload.events)||payload.events.length>4)
   throw Error('Unverified sportsbook fixture feed');
+ // Reject malformed/unsupported IANA zones before formatting any event times.
+ try{new Intl.DateTimeFormat('en-CA',{timeZone:payload.timezone});}catch{throw Error('Unverified fixture timezone');}
  const observed=Date.parse(payload.observedAt),expiry=Date.parse(payload.expiresAt);
  if(observed>now+30000||expiry<=now||expiry-observed>86400000||now-observed>86400000)
   throw Error('Stale sportsbook fixture feed');

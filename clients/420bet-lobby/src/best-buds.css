@@ -275,3 +275,25 @@
  .bb-workspace .bb-controls{gap:5px}
  .bb-workspace .bb-topline{font-size:10px}
 }
+
+/* Reel-frame fit: fixed proportional bounds prevent large art from overflowing. */
+.bb-reel-grid,.bb-reel,.bb-cell{min-width:0;min-height:0}
+.bb-cell{position:relative;overflow:hidden;contain:layout paint}
+.bb-cell > img{
+ position:absolute;inset:8%;width:84%;height:84%;
+ max-width:84%;max-height:84%;min-width:0;min-height:0;
+ display:block;object-fit:contain;object-position:center;
+}
+.bb-coin-kind{position:absolute;inset:0;min-width:0;min-height:0}
+.bb-coin-kind > img{
+ position:absolute;inset:7%;width:86%;height:86%;
+ min-width:0;min-height:0;max-width:86%;max-height:86%;
+ object-fit:contain;object-position:center;
+}
+.bb-roll-mask,.bb-hold-spin-window{min-width:0;min-height:0}
+.bb-roll-track img,.bb-hold-spin-tile img{max-width:90%;max-height:90%;object-fit:contain}
+.bb-modal{width:min(920px,100%);max-width:calc(100vw - 30px)}
+.bb-paylines-figure{margin:20px 0 10px;padding:12px;border:2px solid #c8ac52;border-radius:13px;background:#100b1d}
+.bb-paylines-figure figcaption{color:#c9ff8c;letter-spacing:.07em;font-size:14px;font-weight:900;margin:0 0 9px;text-align:center}
+.bb-paylines-image{display:block;width:100%;height:auto;max-height:none;object-fit:contain;border-radius:8px;background:#140d23}
+@media(max-width:540px){.bb-paylines-figure{padding:5px}.bb-paylines-figure figcaption{font-size:12px}}

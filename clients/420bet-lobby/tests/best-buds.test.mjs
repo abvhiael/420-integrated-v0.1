@@ -291,3 +291,29 @@ test('Wide desktop layout stays horizontally split; narrower viewports stack wit
  assert.match(css,/\.bb-workspace \.bb-stage\s*\{[^}]*height:clamp\(270px,44vh,435px\)/s);
  assert.match(css,/@media\(max-width:720px\)\s*\{\s*\.bb-workspace\{grid-template-columns:minmax\(0,1fr\)/s);
 });
+
+test('Reel images stay within individual cell bounds in compact layout',()=>{
+ const css=readFileSync(new URL('../src/best-buds.css',import.meta.url),'utf8');
+ assert.match(css,/\.bb-cell\s*\{position:relative;overflow:hidden;contain:layout paint\}/);
+ assert.match(css,/\.bb-cell > img\s*\{[^}]*position:absolute;inset:8%;width:84%;height:84%/s);
+ assert.match(css,/\.bb-coin-kind > img\s*\{[^}]*width:86%;height:86%/s);
+});
+test('INFO modal presents 25 exact source-of-truth paylines as SVG art',()=>{
+ const {document,window}=parseHTML('<html><body></body></html>');
+ const root=createBestBudsPractice(document);
+ const info=[...root.querySelectorAll('button')].find(b=>b.textContent==='INFO / PAYTABLE');
+ info.dispatchEvent(new window.Event('click',{bubbles:true}));
+ const img=root.querySelector('.bb-modal .bb-paylines-image');
+ assert.ok(img);
+ assert.equal(img.getAttribute('src'),'/assets/420bet/best-buds/ui/bestbuds-25-paylines.svg');
+ assert.match(img.getAttribute('alt'),/25 exact paylines/);
+ const svg=readFileSync(new URL('../public/assets/420bet/best-buds/ui/bestbuds-25-paylines.svg',import.meta.url),'utf8');
+ assert.equal((svg.match(/>LINE \d\d<\/text>/g)||[]).length,LINES.length);
+ const all=[...svg.matchAll(/<polyline points="([^"]+)" fill="none" stroke="[^"]+" stroke-width="3.5"/g)];
+ assert.equal(all.length,LINES.length);
+ for(let i=0;i<LINES.length;i++){
+  const ys=all[i][1].split(' ').map(pt=>Number(pt.split(',')[1]));
+  assert.deepEqual(ys,LINES[i].map(row=>+(39+(row+.5)*37).toFixed(2)),'payline '+(i+1));
+ }
+ root.stopAnimation();
+});

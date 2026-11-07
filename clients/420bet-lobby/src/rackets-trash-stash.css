@@ -19,7 +19,7 @@
 .rts-roll{position:absolute;inset:0;z-index:3;overflow:hidden;background:#170a28}
 .rts-roll-track{position:absolute;left:0;right:0;top:-400%;height:800%;display:flex;flex-direction:column;align-items:center;animation:rts-roll .36s linear infinite}
 .rts-roll-track img{width:100%;height:calc(100% / 24);flex:none;object-fit:contain;filter:blur(1px)}
-@keyframes rts-roll{from{transform:translateY(0)}to{transform:translateY(25%)}}
+@keyframes rts-roll{from{transform:translateY(0)}to{transform:translateY(50%)}}
 .rts-lines{position:absolute;inset:0;width:100%;height:100%;z-index:6;pointer-events:none}
 .rts-win-line{stroke:#63ff14;fill:none;stroke-width:5;stroke-linejoin:round;stroke-linecap:round;filter:drop-shadow(0 0 4px #b2ff52) drop-shadow(0 0 8px #1afa18);stroke-dasharray:1000;animation:rts-draw .5s ease-out both}
 @keyframes rts-draw{from{stroke-dashoffset:1000}to{stroke-dashoffset:0}}

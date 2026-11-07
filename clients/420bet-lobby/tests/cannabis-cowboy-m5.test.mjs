@@ -6,7 +6,7 @@ import {
  CELL_COUNT,COLUMNS,WILD_SYMBOL,SCATTER_SYMBOL,MAX_FREE_SPINS,SCATTER_CHANCE,
  FREE_SPIN_AWARDS,makeScatterBoard,countScatters,awardedFreeSpins,
  resolveRound,resolveEndlessHarvest,dropAndRefill,playPracticeRound,createPracticeSession,findClusters,
- SYMBOL_WEIGHTS,HARVEST_SYMBOL_WEIGHTS,weightedSymbol,makeScatterBoard
+ SYMBOL_WEIGHTS,HARVEST_SYMBOL_WEIGHTS,weightedSymbol
 } from '../src/cannabis-cowboy-engine.js';
 import {createCannabisCowboyPractice} from '../src/cannabis-cowboy-game.js';
 import {COWBOY_SYMBOLS} from '../src/cannabis-cowboy-ui.js';

@@ -165,7 +165,7 @@ test('one Lowrider triggers a multiplier, while zero Lowriders do not',()=>{
 
 test('calibrated paytables are explicit and free-spin ways are not silently using base payouts',()=>{
  assert.equal(BASE_WAYS_SCALE,.3125);
- assert.equal(FREE_WAYS_SCALE,.075);
+ assert.equal(FREE_WAYS_SCALE,.03375);
  assert.ok(FREE_PAYTABLE.BOBBY[2]<PAYTABLE.BOBBY[2]);
  const board=Array.from({length:5},()=>Array(4).fill('BUD'));
  const base=waysWins(board,2,PAYTABLE);

@@ -4,7 +4,8 @@ import {parseHTML} from 'linkedom';
 import {
  CELL_COUNT,COLUMNS,WILD_SYMBOL,SCATTER_SYMBOL,MAX_FREE_SPINS,SCATTER_CHANCE,
  FREE_SPIN_AWARDS,makeScatterBoard,countScatters,awardedFreeSpins,
- resolveRound,resolveEndlessHarvest,dropAndRefill,playPracticeRound,createPracticeSession,findClusters
+ resolveRound,resolveEndlessHarvest,dropAndRefill,playPracticeRound,createPracticeSession,findClusters,
+ SYMBOL_WEIGHTS,HARVEST_SYMBOL_WEIGHTS,weightedSymbol,makeScatterBoard
 } from '../src/cannabis-cowboy-engine.js';
 import {createCannabisCowboyPractice} from '../src/cannabis-cowboy-game.js';
 import {COWBOY_SYMBOLS} from '../src/cannabis-cowboy-ui.js';
@@ -190,4 +191,25 @@ test('Endless Harvest does not retain or pin any wilds, including newly landed w
  assert.equal(f.spins[1].outcome.startingBoard[0],second[0]);
  assert.equal(f.stickyWilds.length,0);
  assert(f.spins[0].outcome.steps[0].removed.includes(0),'winning wild is cleared like any other symbol');
+});
+
+test('Endless Harvest doubles only wild weighting on initial reels and cascade refills',()=>{
+ assert.equal(HARVEST_SYMBOL_WEIGHTS[WILD_SYMBOL],2*SYMBOL_WEIGHTS[WILD_SYMBOL]);
+ assert.deepEqual(HARVEST_SYMBOL_WEIGHTS.slice(0,WILD_SYMBOL),SYMBOL_WEIGHTS.slice(0,WILD_SYMBOL));
+ const baseTotal=SYMBOL_WEIGHTS.reduce((n,x)=>n+x,0);
+ const bonusTotal=HARVEST_SYMBOL_WEIGHTS.reduce((n,x)=>n+x,0);
+ const baseWildRate=SYMBOL_WEIGHTS[WILD_SYMBOL]/baseTotal;
+ const harvestWildRate=HARVEST_SYMBOL_WEIGHTS[WILD_SYMBOL]/bonusTotal;
+ assert(harvestWildRate>baseWildRate*1.9 && harvestWildRate<baseWildRate*2.05);
+ const threshold=1-3/bonusTotal;
+ assert.equal(weightedSymbol(()=>threshold,false),7,'base symbols not reweighted');
+ assert.equal(weightedSymbol(()=>threshold,true),WILD_SYMBOL,'bonus uses enlarged wild band');
+ const baseBoard=makeScatterBoard(()=>threshold,false);
+ const bonusBoard=makeScatterBoard(()=>threshold,true);
+ assert.equal(baseBoard.filter(x=>x===WILD_SYMBOL).length,0);
+ assert.equal(bonusBoard.filter(x=>x===WILD_SYMBOL).length,CELL_COUNT);
+ const board=patterned();for(const p of [0,1,6,7,12])board[p]=0;
+ const feature=resolveRound(board,20,()=>threshold,{bonusMode:true});
+ assert(feature.steps[0].refills.length>0);
+ assert(feature.steps[0].refills.every(pos=>feature.steps[0].after[pos]===WILD_SYMBOL),'bonus refills use feature wild weights');
 });

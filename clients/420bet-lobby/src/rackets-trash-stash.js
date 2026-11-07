@@ -79,12 +79,34 @@ export function createRacketsTrashStash(doc=globalThis.document,options={}){
  const rng=options.rng??Math.random,reduced=view.matchMedia?.('(prefers-reduced-motion: reduce)').matches??false;
  let board=spinBoard('base',rng),balance=1000,bet=1,phase='idle',info=false,autoplay=0,spins=0;
  let freeLeft=0,freeTotal=0,retriggers=0,wildProgress=0,multiplier=1,spinCount=0;
+ let testOpen=false,testScenario=null; // Separate practice-only QA controls; never purchases a bonus.
  let result={wins:[],total:0,collection:0},display=board,stopped=5,winIndex=0,dead=false;
  const timers=new Set();let lastMessage='Practice credits only · no real wagering';
  const delay=(fn,ms)=>{if(dead)return;const id=view.setTimeout?.(()=>{timers.delete(id);if(!dead)fn();},ms);if(id!==undefined)timers.add(id);else fn();};
  const clear=()=>{for(const id of timers)view.clearTimeout?.(id);timers.clear();};
  root.stopAnimation=()=>{dead=true;clear();};
- root.getGameState=()=>({board,balance,bet,phase,info,autoplay,spins,freeLeft,freeTotal,retriggers,wildProgress,multiplier,result,stopped,spinCount});
+ root.getGameState=()=>({board,balance,bet,phase,info,autoplay,spins,freeLeft,freeTotal,retriggers,wildProgress,multiplier,result,stopped,spinCount,testOpen,testScenario});
+ function startBonusTest(kind){
+  if(dead||info||phase!=='idle')return;
+  autoplay=0;testOpen=false;freeTotal=0;wildProgress=0;retriggers=0;multiplier=1;spinCount=0;
+  const setups={three:{spins:10,trigger:3},four:{spins:15,trigger:4},five:{spins:20,trigger:5},retrigger1:{spins:10,tier:1},retrigger2:{spins:10,tier:2},retrigger3:{spins:10,tier:3},collection:{spins:10,collection:true}};
+  const setup=setups[kind];if(!setup)return;
+  freeLeft=setup.spins;testScenario=kind;
+  if(setup.tier){retriggers=setup.tier;multiplier=[1,2,3,10][retriggers];}
+  // Display an actual qualifying BONUS layout before the free-spin feature begins.
+  if(setup.trigger){board=Array.from({length:5},()=>['TRASH','PIZZA','SEEDS']);
+   for(let r=0;r<setup.trigger;r++)board[r][1]='BONUS';display=board;
+   result={wins:[],total:0,collection:0};lastMessage='TEST · '+setup.trigger+' BONUS BAGS → '+freeLeft+' FREE SPINS';
+  }else{result={wins:[],total:0,collection:0};lastMessage=setup.collection?'TEST · WILD COLLECTS PRIZE JARS':'TEST · RETRIGGER '+retriggers+' · MULTIPLIER ×'+multiplier;}
+  render();
+ }
+ function bonusTestPanel(){
+  const panel=el(doc,'section','rts-test-panel');panel.append(el(doc,'h3','','BONUS TESTS · PRACTICE ONLY'));
+  const descriptions=[['three','3 BONUS · 10 FREE SPINS'],['four','4 BONUS · 15 FREE SPINS'],['five','5 BONUS · 20 FREE SPINS'],['retrigger1','RETRIGGER 1 · ×2'],['retrigger2','RETRIGGER 2 · ×3'],['retrigger3','RETRIGGER 3 · ×10'],['collection','WILD PRIZE COLLECTION']];
+  for(const [key,label] of descriptions)panel.append(btn(doc,label,()=>startBonusTest(key),'rts-test-choice'));
+  panel.append(el(doc,'p','','Test starts the selected practice feature without deducting credits. Spin to play the feature; bonus tests do not alter paid game odds.'));
+  return panel;
+ }
  const image=(path,alt,cls='')=>{const n=el(doc,'img',cls);n.src=ROOT+path;n.alt=alt;n.draggable=false;return n;};
  function render(){
   if(dead)return;
@@ -136,6 +158,9 @@ export function createRacketsTrashStash(doc=globalThis.document,options={}){
   auto.disabled=freeLeft>0&&!autoplay;
   controls.append(el(doc,'span','','BALANCE '+money(balance)),smaller,el(doc,'span','','BET '+money(bet)),larger,spin,auto,el(doc,'span','','WIN '+money(result.total)),btn(doc,'INFO',()=>{if(phase==='idle'){autoplay=0;info=true;render();}}));
   game.append(controls);
+  const tests=btn(doc,testOpen?'HIDE BONUS TESTS':'BONUS TESTS',()=>{if(phase!=='idle'||freeLeft>0)return;testOpen=!testOpen;render();},'rts-test-toggle');
+  tests.disabled=phase!=='idle'||freeLeft>0;
+  game.append(tests);if(testOpen)game.append(bonusTestPanel());
   const payouts=el(doc,'section','rts-panel');payouts.append(el(doc,'h2','','PAYOUTS'));
   payouts.append(el(doc,'p','','Values below are multiples of the bet per line (3 / 4 / 5 symbols).'));
   const table=el(doc,'table','rts-payout-table');const head=el(doc,'tr');
@@ -175,7 +200,7 @@ export function createRacketsTrashStash(doc=globalThis.document,options={}){
  }
  function endSpin(){
   phase='idle';
-  if(freeLeft===0&&retriggers){lastMessage='FEATURE COMPLETE · TOTAL '+money(freeTotal);retriggers=0;freeTotal=0;multiplier=1;wildProgress=0;}
+  if(freeLeft===0&&(retriggers||testScenario)){lastMessage='FEATURE COMPLETE · TOTAL '+money(freeTotal);retriggers=0;freeTotal=0;multiplier=1;wildProgress=0;testScenario=null;}
   render();
   if(autoplay>0){autoplay--;if(autoplay>0&&balance>=bet||autoplay>0&&freeLeft>0)delay(startSpin,250);else{autoplay=0;render();}}
  }
@@ -202,7 +227,15 @@ export function createRacketsTrashStash(doc=globalThis.document,options={}){
   const inFree=freeLeft>0;if(!inFree&&balance<bet){autoplay=0;return;}
   if(!inFree)balance=Math.round((balance-bet)*100)/100;
   phase='spinning';stopped=0;result={wins:[],total:0,collection:0};lastMessage=inFree?'FREE SPIN · ×'+multiplier:'RACKET IS SCAVENGING…';
-  const target=spinBoard(inFree?'free':'base',rng);render();
+  const target=spinBoard(inFree?'free':'base',rng);
+  if(inFree&&testScenario==='collection'){
+   // Deterministic demonstration: winning Wild on reel 1 and three prize jars
+   // on reels 2–4. The existing evaluator calculates actual collection value.
+   target[0][1]='WILD';target[1][1]='RACKET';target[2][1]='RACKET';
+   target[1][0]='BLUE075';target[2][0]='PURPLE15';target[3][0]='RED5';
+   testScenario=null;
+  }
+  render();
   const stop=()=>{if(dead)return;stopped++;if(stopped===5){settle(target);return;}render();delay(stop,reduced?15:220);};
   delay(stop,reduced?15:620);
  }

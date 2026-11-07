@@ -7,6 +7,10 @@ export const ROAD_STOPS=Object.freeze([
  Object.freeze({name:'Old Music Hall',scene:'🎸',description:'Play a tune for the travelling crowd'}),
  Object.freeze({name:'Last Light Lookout',scene:'🌅',description:'Bring the harvest home'})
 ]);
+export const ROAD_ART_ROOT='/assets/420bet/cannabis-cowboy/on-the-road-again/';
+export const ROAD_STOP_SLUGS=Object.freeze(['sunset-ridge','pine-creek','emerald-ranch','old-music-hall','last-light-lookout']);
+export const roadStopBackground=index=>ROAD_ART_ROOT+'ontheroad_bg_'+ROAD_STOP_SLUGS[index]+'.png';
+export const roadCaseArtwork=(stopIndex,caseIndex)=>ROAD_ART_ROOT+'guitarcase_'+ROAD_STOP_SLUGS[stopIndex]+'_'+String(caseIndex+1).padStart(2,'0')+'.png';
 export const ROAD_CASE_MULTIPLIERS=Object.freeze([0,0.5,1,1.5,2,3,4.2]);
 export const ROAD_CASE_COUNT=3;
 const sample=(rng)=>{const v=rng();if(!Number.isFinite(v)||v<0||v>=1)throw Error('Road Trip RNG outside [0,1)');return v;};

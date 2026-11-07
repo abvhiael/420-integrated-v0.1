@@ -34,20 +34,7 @@ export function qualify(grid){return {jen:count(grid,'jen')>=3,family:count(grid
 export function triggerCharacters(grid,rng){const flags=qualify(grid);return Object.fromEntries(Object.keys(flags).map(k=>[k,flags[k]&&rand(rng)<.25]));}
 export function evaluate(grid){if(grid.length!==20)throw Error('Expected five reels, four rows');let units=0;const wins=[];for(const [symbol,pay] of Object.entries(PAY)){let ways=1,matched=0;for(let reel=0;reel<COLS;reel++){const hits=grid.slice(reel*ROWS,reel*ROWS+ROWS).filter(x=>x===symbol||x==='wild').length;if(!hits)break;ways*=hits;matched++;}if(matched>=3){const multiplier=pay[matched-2];const amount=ways*multiplier;units+=amount;wins.push({symbol,matched,ways,amount});}}return {units,wins};}
 export function replaceRandom(grid,rng,eligible,replacement,n){const out=grid.slice(),available=out.map((s,i)=>eligible(s,i)?i:-1).filter(i=>i>=0);for(let k=0;k<n&&available.length;k++){const p=integer(rng,available.length);out[available.splice(p,1)[0]]=replacement;}return out;}
-export function modifier(grid,type,rng){let out=grid.slice(),label='';if(type==='jen'){const event=choose(rng,['HIDE THE STASH','PANIC WILDS','GARAGE CLEANUP','CAUGHT RED-HANDED']);label=event;if(event==='HIDE THE STASH'){
- // One fresh feature spin with the normal symbol weights, independent of the
- // triggering main spin. Carry every triggering crate into its original slot,
- // then add just 2–3 Jen crates. Freshly landed crates count as well.
- const spun=board(rng);
- const landedCrates=count(spun,'stash');
- const carriedIndices=grid.flatMap((s,i)=>s==='stash'?[i]:[]);
- for(const i of carriedIndices)spun[i]='stash';
- const before=count(spun,'stash'),addedRequested=2+integer(rng,2);
- out=replaceRandom(spun,rng,s=>s!=='scatter'&&s!=='stash','stash',addedRequested);
- return {grid:out,label,multiplier:1,featureSpin:true,
-  landedCrates,carriedCrates:carriedIndices.length,
-  addedCrates:count(out,'stash')-before,stashCount:count(out,'stash')};
-}if(event==='PANIC WILDS')out=replaceRandom(out,rng,s=>s!=='scatter'&&s!=='wild','wild',2+integer(rng,3));if(event==='GARAGE CLEANUP')out=out.map(s=>LOW.has(s)?choose(rng,[...PREMIUM]):s);return {grid:out,label,multiplier:event==='CAUGHT RED-HANDED'?2+integer(rng,2):1};}
+export function modifier(grid,type,rng){let out=grid.slice(),label='';if(type==='jen'){const event=choose(rng,['PANIC WILDS','GARAGE CLEANUP','CAUGHT RED-HANDED']);label=event;if(event==='PANIC WILDS')out=replaceRandom(out,rng,s=>s!=='scatter'&&s!=='wild','wild',2+integer(rng,3));if(event==='GARAGE CLEANUP')out=out.map(s=>LOW.has(s)?choose(rng,[...PREMIUM]):s);return {grid:out,label,multiplier:event==='CAUGHT RED-HANDED'?2+integer(rng,2):1};}
 if(type==='family'){const event=choose(rng,['LOW SYMBOL UPGRADE','WILD GRAFFITI','SCATTER SCRAMBLE','GARAGE MAYHEM']);label=event;if(event==='LOW SYMBOL UPGRADE')out=out.map(s=>LOW.has(s)?choose(rng,[...PREMIUM]):s);if(event==='WILD GRAFFITI')out=replaceRandom(out,rng,s=>s!=='scatter'&&s!=='stash','wild',2);if(event==='SCATTER SCRAMBLE')out=replaceRandom(out,rng,s=>s!=='scatter','scatter',1+integer(rng,2));if(event==='GARAGE MAYHEM')out=replaceRandom(out,rng,s=>LOW.has(s),choose(rng,[...PREMIUM]),3+integer(rng,3));return {grid:out,label,multiplier:1};}
 if(type==='bud')return {grid:replaceRandom(out,rng,s=>s!=='wild'&&s!=='scatter'&&s!=='stash','wild',3),label:'FETCH WILD!',multiplier:1};
 throw Error('Unknown modifier');}
@@ -181,20 +168,7 @@ export function spin(state,rng=Math.random){if(!Number.isFinite(state.bet)||stat
  // added scatters count toward the normal 3+ scatter free-spin trigger.
  // Evaluate that transformed board once, never issue duplicate free bonuses.
  let freeTriggerGrid=grid,freeTriggerSource='base';
- // Jen's feature spin counts its own landed crates, plus carried-over crates,
- // plus 2–3 newly placed crates. Qualification is intentionally not guaranteed.
- // Keep the transformed trigger board separate from the original reels and
- // award at most one Hold & Win feature per paid spin.
- let stashTriggerGrid=grid,stashTriggerSource='base';
 for(const type of ['jen','family','keller','bud']){if(!flags[type])continue;if(type==='keller'){const event=inspection(grid,rng);units+=event.units;events.push({type,...event});}else{const event=modifier(grid,type,rng);event.units=evaluate(event.grid).units*event.multiplier;
- if(type==='jen'&&event.label==='HIDE THE STASH'){
-  event.stashCount=count(event.grid,'stash');
-  event.awardedStashBonus=event.stashCount>=3;
-  if(event.awardedStashBonus){
-   stashTriggerGrid=event.grid;
-   stashTriggerSource='jen-hide-the-stash';
-  }
- }
  if(type==='family'&&event.label==='SCATTER SCRAMBLE'&&count(event.grid,'scatter')>=3){
   freeTriggerGrid=event.grid;
   freeTriggerSource='family-scatter-scramble';
@@ -203,7 +177,7 @@ for(const type of ['jen','family','keller','bud']){if(!flags[type])continue;if(t
  }
  units+=event.units;events.push({type,...event});}}
 if(count(freeTriggerGrid,'scatter')>=3){const event=freeBonus(rng);units+=event.units;events.push({type:'free',...event,triggerSource:freeTriggerSource,triggerScatterCount:count(freeTriggerGrid,'scatter')});}
-if(count(stashTriggerGrid,'stash')>=3){const crateCount=count(stashTriggerGrid,'stash');const event=stashBonus(rng,crateCount);units+=event.units;events.push({type:'stash',...event,triggerSource:stashTriggerSource,triggerStashCount:crateCount});}
+if(count(grid,'stash')>=3){const crateCount=count(grid,'stash');const event=stashBonus(rng,crateCount);units+=event.units;events.push({type:'stash',...event,triggerSource:'base',triggerStashCount:crateCount});}
 if(count(grid,'mower')>=3){const event=mow(grid,rng);units+=event.units;events.push({type:'mow',...event});}
 const win=Math.min(MAX_WIN_MULTIPLIER*state.bet,Math.round(units*state.bet*100)/100);
 const next={...state,balance:Math.round((state.balance-state.bet+win)*100)/100,rounds:state.rounds+1,last:{grid,base,flags,events,win,stake:state.bet},message:events.length?events.map(e=>e.label).join(' • '):win?'GARAGE WIN!':'Just five more minutes…'};next.history=[{stake:state.bet,win,events:events.map(e=>e.type)},...state.history].slice(0,20);return next;}

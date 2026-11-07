@@ -95,7 +95,7 @@ test('all declared icon, symbol, logo and character art paths resolve in public 
  for(const [folder,files] of Object.entries({
   ui:['bestbuds-logo.png','icon_hotbox_coin.png','icon_collect_smoke.png','icon_multiplier_x2.png',...['mini','minor','major','grand'].map(x=>'icon_jackpot_'+x+'.png')],
   backgrounds:['bestbuds-bg-desert-sunset.png','bestbuds-bg-night-roadtrip.png'],
-  reels:['sym_bong.png','sym_joint.png','sym_chips.png','sym_record.png','sym_rollingpapers.png','sym_lighter.png','sym_sunglasses.png','sym_guitar.png','sym_leaf.png','sym_buddy1_portrait.png','sym_buddy2_portrait.png','sym_wild.svg','sym_scatter_van.png','sym_hotbox_100.png'],
+  reels:['sym_bong.png','sym_joint.png','sym_chips.png','sym_record.png','sym_rollingpapers.png','sym_lighter.png','sym_sunglasses.png','sym_guitar.png','sym_leaf.png','sym_buddy1_portrait.png','sym_buddy2_portrait.png','sym_wild.png','sym_scatter_van.png','sym_hotbox_100.png'],
   characters:['buddy1_laugh.png','buddy1_surprised.png','buddy1_big_win.png','buddy1_exhale.png','buddy1_skeptical.png','buddy1_thumbs_up.png','buddy2_peace.png','buddy2_inhale.png','buddy2_exhale.png','buddy2_surprised.png','buddy2_laugh.png','buddy2_celebrate.png']
  })){
   for(const file of files){if(folder!=='characters'&&!file.startsWith('icon_jackpot_'))assert.match(ui,new RegExp(file.replaceAll('.','\\.')));assert.ok(existsSync(new URL(folder+'/'+file,base)),folder+'/'+file);}
@@ -467,10 +467,23 @@ test('INFO and right paytable explain the new distinct WILD artwork',()=>{
  assert.ok(!labels.includes('BUDDY 1 WILD')&&!labels.includes('BUDDY 2 WILD'));
  const wild=root.querySelector('.bb-wild-guide img');
  assert.ok(wild);
- assert.match(wild.getAttribute('src'),/sym_wild\.svg$/);
+ assert.match(wild.getAttribute('src'),/sym_wild\.png$/);
  const info=[...root.querySelectorAll('button')].find(b=>b.textContent==='INFO / PAYTABLE');
  info.dispatchEvent(new window.Event('click',{bubbles:true}));
  assert.match(root.querySelector('.bb-modal').textContent,/Only the green leaf WILD substitutes/);
- assert.ok(existsSync(new URL('../public/assets/420bet/best-buds/reels/sym_wild.svg',import.meta.url)));
+ assert.ok(existsSync(new URL('../public/assets/420bet/best-buds/reels/sym_wild.png',import.meta.url)));
+ root.stopAnimation();
+});
+
+test('uploaded WILD PNG is the active reel symbol, including paytable, animation, and free-spin bonus',()=>{
+ const {document,window}=parseHTML('<html><body></body></html>');
+ const root=createBestBudsPractice(document,{rng:()=>.99});
+ assert.equal(root.querySelector('.bb-wild-guide img').getAttribute('src'),'/assets/420bet/best-buds/reels/sym_wild.png');
+ const img=new URL('../public/assets/420bet/best-buds/reels/sym_wild.png',import.meta.url);
+ assert.ok(existsSync(img),'uploaded WILD PNG must exist in the public reels assets');
+ const spin=[...root.querySelectorAll('button')].find(b=>b.textContent==='SPIN');
+ spin.dispatchEvent(new window.Event('click',{bubbles:true}));
+ const wildSources=[...root.querySelectorAll('.bb-roll-track img')].map(v=>v.getAttribute('src'));
+ for(const src of wildSources.filter(v=>v.includes('sym_wild')))assert.ok(src.endsWith('/sym_wild.png'));
  root.stopAnimation();
 });

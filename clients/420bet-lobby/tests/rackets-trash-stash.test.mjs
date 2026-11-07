@@ -50,3 +50,35 @@ test('Racket game renders independent 5x3 reels, payout panel, bonus triggers, i
  assert.equal(root.querySelectorAll('.rts-reel').length,5);
  root.stopAnimation();
 });
+
+test('Bonus Tests exposes all seven feature scenarios and three bonus symbols start 10 free spins without debit',()=>{
+ const {document,window}=parseHTML('<html><body></body></html>');
+ const root=createRacketsTrashStash(document,{rng:()=>.35});
+ const tap=(label)=>{const b=[...root.querySelectorAll('button')].find(x=>x.textContent.trim()===label);assert.ok(b,label);b.dispatchEvent(new window.Event('click',{bubbles:true}));};
+ const initial=root.getGameState().balance;
+ tap('BONUS TESTS');
+ assert.equal(root.querySelectorAll('.rts-test-choice').length,7);
+ tap('3 BONUS · 10 FREE SPINS');
+ const state=root.getGameState();
+ assert.equal(state.freeLeft,10);
+ assert.equal(state.balance,initial);
+ assert.equal(state.testScenario,'three');
+ assert.equal(state.board.filter(reel=>reel.includes('BONUS')).length,3);
+ root.stopAnimation();
+});
+test('Bonus Tests can select multiplier tiers and prize-collection demo',()=>{
+ const {document,window}=parseHTML('<html><body></body></html>');
+ const root=createRacketsTrashStash(document,{rng:()=>.35});
+ const tap=(label)=>{const b=[...root.querySelectorAll('button')].find(x=>x.textContent.trim()===label);assert.ok(b,label);b.dispatchEvent(new window.Event('click',{bubbles:true}));};
+ tap('BONUS TESTS');tap('RETRIGGER 3 · ×10');
+ assert.equal(root.getGameState().multiplier,10);
+ assert.equal(root.getGameState().retriggers,3);
+ assert.equal(root.getGameState().freeLeft,10);
+ root.stopAnimation();
+ const root2=createRacketsTrashStash(document,{rng:()=>.35});
+ const tap2=(label)=>{const b=[...root2.querySelectorAll('button')].find(x=>x.textContent.trim()===label);assert.ok(b,label);b.dispatchEvent(new window.Event('click',{bubbles:true}));};
+ tap2('BONUS TESTS');tap2('WILD PRIZE COLLECTION');
+ assert.equal(root2.getGameState().testScenario,'collection');
+ assert.equal(root2.getGameState().freeLeft,10);
+ root2.stopAnimation();
+});

@@ -125,17 +125,18 @@ test('interactive Road Trip reveals five guitar case choices, cannot double-pick
    assert.equal(h.root.getPracticeState().bonusSplashVisible,true);
    assert.equal(h.root.getPracticeState().busy,true);
    assert.equal(splash.dataset.bonus,'road');
-   assert.match(splash.textContent,/ROAD TRIP COMPLETE/);
-   assert.match(splash.textContent,/CREDITS WON/);
-   assert.match(splash.textContent,/STACKED MULTIPLIER/);
-   assert.match(splash.textContent,/TOTAL BONUS WIN/);
-   assert.match(splash.textContent,/CLICK ANYWHERE TO CONTINUE/);
-   assert.match(splash.querySelector('.cc-bonus-cowboy').getAttribute('src'),/cannabis-cowboy-cole-haze\.png$/);
+   assert.match(splash.getAttribute('aria-label'),/Road Trip Complete!/);
+   assert.match(splash.getAttribute('aria-label'),/credits won, times \d+ multiplier/);
+   assert.match(splash.getAttribute('aria-label'),/Click anywhere to continue/);
+   assert.equal(splash.querySelectorAll('.cc-bonus-cowboy').length,0,'artwork already contains Cole Haze');
+   assert.equal(splash.querySelectorAll('.cc-road-splash-credits').length,1);
+   assert.equal(splash.querySelector('.cc-road-splash-credits').textContent,
+     h.root.getPracticeState().lastWin.toLocaleString('en-US')+' CREDITS');
    const credits=h.root.getPracticeState().credits;
    h.drain();
    assert.equal(h.root.getPracticeState().credits,credits,'splash does not award twice');
    assert.equal(h.root.getPracticeState().busy,true,'must wait for user click');
-   splash.querySelector('.cc-bonus-total-continue').dispatchEvent(new h.window.Event('click',{bubbles:true}));
+   splash.querySelector('.cc-road-splash-credits').dispatchEvent(new h.window.Event('click',{bubbles:true}));
    assert.equal(h.root.getPracticeState().credits,credits,'click must not pay again');
   }
  }
@@ -257,4 +258,15 @@ test('Road Trip adds 2x + 3x + 10x into 15x rather than multiplying to 60x',()=>
  assert.equal(final.stackedMultiplier,15);
  assert.equal(final.total,final.subtotal*15);
  assert(final.done);
+});
+
+test('approved Road Trip splash PNG is available and the final total occupies the blank plaque',()=>{
+ const css=readFileSync(new URL('../src/cannabis-cowboy.css',import.meta.url),'utf8');
+ const asset='/assets/420bet/cannabis-cowboy/cannabis-cowboy-road-trip-complete-splash.png';
+ const bytes=readFileSync(new URL('../public'+asset,import.meta.url));
+ assert.equal(bytes.subarray(0,8).toString('hex'),'89504e470d0a1a0a');
+ const active=css.slice(css.lastIndexOf('/* Approved Cole Haze Road Trip Complete splash'));
+ assert.match(active,/cannabis-cowboy-road-trip-complete-splash\.png/);
+ assert.match(active,/\.cc-road-splash-credits\{[\s\S]*?position:absolute;/);
+ assert.match(active,/pointer-events:none/);
 });

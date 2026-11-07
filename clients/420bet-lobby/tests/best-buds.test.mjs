@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {parseHTML} from 'linkedom';
 import {readFileSync,existsSync} from 'node:fs';
-import {REELS,ROWS,LINES,BASE_STRIPS,boardAt,initialState,nextSpin,practiceBonus,evaluateLines,MAX_WIN_MULTIPLIER,FREE_WILD_MULTIPLIERS} from '../src/best-buds-engine.js';
+import {REELS,ROWS,LINES,BASE_STRIPS,boardAt,initialState,nextSpin,practiceBonus,evaluateLines,MAX_WIN_MULTIPLIER,FREE_WILD_MULTIPLIERS,collectSmokeValue,hotboxTotalMultiplier} from '../src/best-buds-engine.js';
 import {createBestBudsPractice} from '../src/best-buds-ui.js';
 
 test('exactly 25 distinct five-reel paths stay within the 3-row display',()=>{
@@ -173,4 +173,56 @@ test('Best Buds CSS preserves opaque reels but makes the surrounding frame trans
  assert.match(css,/\.bb-frame\s*\{[^}]*background:transparent/s);
  assert.match(css,/\.bb-cell\s*\{[^}]*background:radial-gradient/s);
  assert.match(css,/\.bb-header\s*\{[^}]*height:310px/s);
+});
+
+test('Collect Smoke copies existing locked ordinary coin values into final Hold & Win payout',()=>{
+ const coins=[{key:0,kind:'coin',value:2},{key:1,kind:'coin',value:5},{key:2,kind:'jackpot',value:'MINI'}];
+ assert.equal(collectSmokeValue(coins),7);
+ assert.equal(hotboxTotalMultiplier([...coins,{key:3,kind:'collect',value:7}]),34);
+ const state=practiceBonus(initialState(),'collect',()=>.99);
+ const beforeTotal=collectSmokeValue(state.hold);
+ const next=nextSpin(state,{rng:()=>.99,force:state.qa});
+ assert.equal(next.mode,'hold');
+ const collect=next.hold.find(c=>c.kind==='collect');
+ assert.ok(collect,'Collect Smoke asset must land');
+ assert.equal(collect.value,beforeTotal);
+ assert.equal(next.collectSmokeEvent.multipliers,beforeTotal);
+ assert.equal(next.collectSmokeEvent.credits,beforeTotal*next.roundBet);
+ assert.equal(next.respins,3);
+ assert.equal(next.holdReveal.find(c=>c.key===collect.key)?.kind,'collect');
+ assert.match(next.message,/COLLECT SMOKE!/);
+ const withoutCollect=next.hold.filter(c=>c!==collect);
+ assert.equal(hotboxTotalMultiplier(next.hold)-hotboxTotalMultiplier(withoutCollect),beforeTotal);
+});
+test('Collect Smoke appears as a credit collection UI event on the triggered Hold & Win board',()=>{
+ const {document,window}=parseHTML('<html><body></body></html>');
+ const root=createBestBudsPractice(document,{rng:()=>.99});
+ const click=label=>{const b=[...root.querySelectorAll('button')].find(b=>b.textContent===label);assert.ok(b,label);b.dispatchEvent(new window.Event('click',{bubbles:true}));};
+ click('BONUS TEST');click('Collect Smoke');
+ assert.equal(root.getGameState().mode,'hold');
+ click('RESPIN');
+ assert.equal(root.querySelectorAll('.bb-hold-reel-spinning').length,5);
+ assert.equal(root.querySelectorAll('.bb-hold-spin-window').length,6);
+ assert.equal(root.querySelectorAll('.bb-hold-spin-tile').length,60);
+ assert.equal(root.querySelectorAll('.bb-coin-locked').length,9);
+ root.querySelector('.bb-stage').dispatchEvent(new window.Event('click',{bubbles:true}));
+ assert.equal(root.getPresentationState().phase,'idle');
+ assert.equal(root.querySelectorAll('.bb-collect-announcement').length,1);
+ assert.match(root.querySelector('.bb-collect-announcement').textContent,/COLLECT SMOKE!/);
+ assert.ok(root.getGameState().collectSmokeEvent.credits>0);
+ assert.equal(root.querySelectorAll('.bb-collect-coin').length,1);
+ assert.equal(root.getGameState().respins,3);
+ root.stopAnimation();
+});
+test('Hold reel stop has five independent columns and retains locked coins',()=>{
+ const {document,window}=parseHTML('<html><body></body></html>');
+ const root=createBestBudsPractice(document,{rng:()=>.99});
+ const click=label=>{const b=[...root.querySelectorAll('button')].find(b=>b.textContent===label);b.dispatchEvent(new window.Event('click',{bubbles:true}));};
+ click('BONUS TEST');click('Trigger Hold & Win');
+ click('RESPIN');
+ assert.equal(root.querySelectorAll('.bb-hold-reel-spinning').length,5);
+ assert.equal(root.querySelectorAll('.bb-coin-locked').length,6);
+ root.querySelector('.bb-stage').dispatchEvent(new window.Event('click',{bubbles:true}));
+ assert.equal(root.querySelectorAll('.bb-hold-reel-spinning').length,0);
+ root.stopAnimation();
 });

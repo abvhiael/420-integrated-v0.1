@@ -35,7 +35,7 @@ export function createBestBudsPractice(doc=globalThis.document,options={}){
  const later=(fn,ms)=>{if(dead)return;const id=view.setTimeout?.(()=>{timers.delete(id);if(!dead)fn();},ms);if(id!==undefined)timers.add(id);else fn();};
  const clear=()=>{for(const id of timers)view.clearTimeout?.(id);timers.clear();};
  root.stopAnimation=()=>{dead=true;clear();};
- root.getPresentationState=()=>({phase,stopped,lineIndex,mode:state.mode,feature:state.lastFeature,lastWin:state.lastWin,winCount:state.lastWins.length,respins:state.respins,freeLeft:state.freeLeft,qaMenu,summary:sessionSummary,reactionPair:[...reactionPair],reactionSpins,holdShown:previousHold.length});
+ root.getPresentationState=()=>({phase,stopped,lineIndex,mode:state.mode,feature:state.lastFeature,lastWin:state.lastWin,winCount:state.lastWins.length,respins:state.respins,freeLeft:state.freeLeft,qaMenu,summary:sessionSummary,collectSmokeEvent:state.collectSmokeEvent,reactionPair:[...reactionPair],reactionSpins,holdShown:previousHold.length});
  root.getGameState=()=>state;
  const layout=()=>{
   if(dead)return;root.replaceChildren();
@@ -62,19 +62,29 @@ export function createBestBudsPractice(doc=globalThis.document,options={}){
    const previous=new Map(oldCoins.map(c=>[c.key,c]));
    const final=new Map(newCoins.map(c=>[c.key,c]));
    for(let r=0;r<REELS;r++){
-    const reel=make(doc,'div','bb-reel bb-hold-reel');
+    const reel=make(doc,'div','bb-reel bb-hold-reel'+(phase==='spinning'&&r>=stopped?' bb-hold-reel-spinning':'')+(phase==='spinning'&&r<stopped?' bb-hold-reel-stopped':''));
     for(let y=0;y<ROWS;y++){
      const key=r*ROWS+y;
      const revealed=phase!=='spinning'||r<stopped;
      const coin=previous.get(key)??(revealed?final.get(key):null);
      const cell=make(doc,'div','bb-cell'+(coin?' bb-coin-locked':' bb-empty')+
-       (!coin&&phase==='spinning'&&!revealed?' bb-hold-cell-rolling':''));
+       (!coin&&phase==='spinning'&&!revealed?' bb-hold-cell-rolling':'')+
+       (coin&&revealed&&!previous.has(key)&&state.holdNewKeys.includes(key)?' bb-new-coin':'')+
+       (coin?.kind==='collect'&&revealed?' bb-collect-coin':''));
      if(coin)cell.append(coinVisual(coin));
      else if(phase==='spinning'&&!revealed){
-      const tumble=make(doc,'div','bb-hold-tumble');
-      tumble.append(sprite(doc,'ui','icon_hotbox_coin.png',''));
-      tumble.append(sprite(doc,'ui','icon_hotbox_coin.png',''));
-      cell.append(tumble);
+      // Repeated, vertically scrolling real artwork makes each unoccupied
+      // position behave like a moving reel strip rather than a blinking coin.
+      const mask=make(doc,'div','bb-hold-spin-window');
+      const track=make(doc,'div','bb-hold-spin-track');
+      for(let i=0;i<10;i++){
+       const tile=make(doc,'div','bb-hold-spin-tile');
+       const art=i%5===0?'icon_collect_smoke.png':i%4===0?'icon_jackpot_mini.png':
+         i%3===0?'icon_multiplier_x2.png':'icon_hotbox_coin.png';
+       tile.append(sprite(doc,'ui',art,''));
+       track.append(tile);
+      }
+      mask.append(track);cell.append(mask);
      }
      reel.append(cell);
     }
@@ -116,6 +126,15 @@ export function createBestBudsPractice(doc=globalThis.document,options={}){
    stage.append(make(doc,'div','bb-payline-note','LINE '+line.line+' · '+line.length+' '+line.symbol+' · +'+credit(line.amount)+(line.wildMultiplier>1?' (WILD ×'+line.wildMultiplier+')':'')+' · CLICK TO SKIP'));
   }
   frame.append(stage);
+  // On a Collect Smoke landing, the credit collection is called out
+  // immediately on the board as well as included in the final feature total.
+  if(state.collectSmokeEvent&&phase!=='spinning'){
+   const event=make(doc,'div','bb-collect-announcement');
+   event.append(sprite(doc,'ui','icon_collect_smoke.png','Collect Smoke'));
+   event.append(make(doc,'strong','','COLLECT SMOKE!'));
+   event.append(make(doc,'span','','+'+credit(state.collectSmokeEvent.credits)+' CREDITS · '+credit(state.collectSmokeEvent.multipliers)+'× BET'));
+   frame.append(event);
+  }
   if(state.mode==='hold'||(state.lastFeature==='hold-end'&&phase!=='spinning')){
    const count=(state.holdReveal??state.hold).length;
    const progress=make(doc,'div','bb-meter',state.mode==='hold'
@@ -148,6 +167,7 @@ export function createBestBudsPractice(doc=globalThis.document,options={}){
    dialog.append(button(doc,'×','bb-close',()=>{modal='';layout();}),make(doc,'h2','','BEST BUDS · RULES'));
    dialog.append(make(doc,'p','','Five reels, three rows, 25 fixed paylines. Three matching symbols from left to right win; the two Buddy WILDs substitute for ordinary symbols only. All 25 lines are included in the total bet.'));
    dialog.append(make(doc,'p','','6+ HOTBOX COINS trigger Hold & Win: start with 3 respins; every new locked coin resets to 3. At 10 and 13 coins, the latest coin may transform into Collect Smoke, a multiplier or a jackpot. Three van scatters on separate reels trigger 8 Free Rides. If both features trigger, Free Rides follow Hold & Win.'));
+   dialog.append(make(doc,'p','','Collect Smoke locks in place and adds the sum of the values of the other locked ordinary HOTBOX coins as a one-time extra award. The amount appears when the symbol lands, and is included in the final bonus payout. Jackpot and multiplier symbols are not part of that collection sum.'));
    dialog.append(make(doc,'p','','HOTBOX: MINI ×20, MINOR ×50, MAJOR ×200, GRAND ×1000. During Free Rides, each landed Buddy WILD receives a random ×2, ×3, ×5 or ×10 badge; the highest multiplier on each winning line applies once (never multiplied together). All winnings are bounded to ×5000 total bet per initiating round. Feature thresholds and paytable are uncalibrated practice mechanics.'));
    const table=make(doc,'table','bb-paytable'),tr=make(doc,'tr');
    for(const h of ['SYMBOL','3','4','5'])tr.append(make(doc,'th','',h));table.append(tr);
@@ -199,7 +219,7 @@ export function createBestBudsPractice(doc=globalThis.document,options={}){
   visualMode=before.mode;
   display=before.board;
   phase='spinning';stopped=0;layout();
-  const interval=reduced?30:240,begin=reduced?50:520;
+  const interval=reduced?65:330,begin=reduced?90:900;
   for(let r=1;r<=REELS;r++)later(()=>{
    if(phase!=='spinning')return;
    stopped=r;display=display.map((col,i)=>i===r-1?[...state.board[i]]:col);

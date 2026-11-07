@@ -1,7 +1,7 @@
 /* Cannabis Cowboy — approved-cabinet-inspired M2 visual preview, isolated from all other slots. */
 .cc-game{--cc-gold:#e2b752;--cc-green:#a3f47b;--cc-dark:#08150e;position:relative;isolation:isolate;min-height:100%;padding:clamp(12px,2.5vw,36px);box-sizing:border-box;overflow:hidden;color:#fbe9af;background:#101b18;font-family:system-ui,Arial,sans-serif}
 .cc-game *{box-sizing:border-box}
-.cc-ranch-wallpaper{position:absolute;z-index:-2;inset:0;pointer-events:none;background:radial-gradient(ellipse at 74% 25%,#ffdf98 0 3%,#ec8854 6%,transparent 24%),linear-gradient(180deg,#311f4b 0%,#8a4763 21%,#e58e58 38%,#473d48 43%,#173c2d 56%,#091d15 100%)}
+.cc-ranch-wallpaper{position:absolute;z-index:0;inset:0;pointer-events:none;background:radial-gradient(ellipse at 74% 25%,#ffdf98 0 3%,#ec8854 6%,transparent 24%),linear-gradient(180deg,#311f4b 0%,#8a4763 21%,#e58e58 38%,#473d48 43%,#173c2d 56%,#091d15 100%)}
 .cc-ranch-wallpaper::after{content:'';position:absolute;inset:40% 0 0;background:radial-gradient(ellipse at 35% 0%,#192c3c 0 12%,transparent 13%),radial-gradient(ellipse at 73% 9%,#172e31 0 18%,transparent 19%),repeating-linear-gradient(100deg,transparent 0 14px,#24502b 15px 20px,#0b271a 21px 25px),linear-gradient(0deg,#07170f,#16472b);opacity:.82;clip-path:polygon(0 25%,10% 13%,17% 24%,30% 3%,39% 18%,52% 4%,63% 26%,74% 7%,84% 24%,100% 10%,100% 100%,0 100%)}
 .cc-title-banner{text-align:center;margin:0 auto 17px;max-width:1120px;padding:0;background:transparent;border:0;box-shadow:none;text-shadow:none}
 .cc-game .cc-title-banner .cc-game-title{margin:0;padding:0;font:inherit;line-height:0;text-shadow:none}
@@ -509,3 +509,11 @@
     margin:0 auto;
   }
 }
+
+/* Keep the ranch sunset/landscape above the game background but below UI.
+   Negative z-index hid the wallpaper beneath the opaque .cc-game paint. */
+.cc-game > .cc-stage,
+.cc-game > .cc-console,
+.cc-game > .cc-practice-notice,
+.cc-game > .cc-round-status{position:relative;z-index:1}
+.cc-game > .cc-ranch-wallpaper{z-index:0}

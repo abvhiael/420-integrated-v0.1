@@ -1061,3 +1061,48 @@
    font-size:clamp(9px,2.2vw,13px);
  }
 }
+
+
+/* Approved Cole Haze Endless Harvest Collected splash.
+   The full scene contains all headings and the continue text, so render only
+   the dynamic credited award in the empty green total plaque. */
+.cc-game[data-view="cannabis-cowboy"] .cc-bonus-total-splash[data-bonus="harvest"]{
+  inset:1%;
+  width:98%;
+  height:98%;
+  max-height:none;
+  padding:0;
+  margin:0;
+  display:block;
+  border:0;
+  border-radius:9px;
+  overflow:hidden;
+  background:#122719 url('/assets/420bet/cannabis-cowboy/cannabis-cowboy-endless-harvest-complete-splash.png') center / 100% 100% no-repeat;
+  box-shadow:0 0 25px #000b;
+  cursor:pointer;
+}
+.cc-game[data-view="cannabis-cowboy"] .cc-bonus-total-splash[data-bonus="harvest"] .cc-harvest-splash-credits{
+  position:absolute;
+  top:69%;
+  left:18%;
+  width:64%;
+  height:15%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin:0;
+  padding:0 2%;
+  box-sizing:border-box;
+  color:#ffdd70;
+  background:transparent;
+  border:0;
+  font:900 clamp(1.2rem,3.25vw,3.5rem)/1 Georgia,serif;
+  text-shadow:0 3px 4px #0a1704,0 0 14px #cfb14c;
+  white-space:nowrap;
+  pointer-events:none;
+}
+@media(max-width:700px){
+ .cc-game[data-view="cannabis-cowboy"] .cc-bonus-total-splash[data-bonus="harvest"] .cc-harvest-splash-credits{
+  font-size:clamp(.85rem,3.5vw,1.75rem);
+ }
+}

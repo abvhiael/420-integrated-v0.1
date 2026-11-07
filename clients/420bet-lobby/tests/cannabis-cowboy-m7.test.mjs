@@ -82,3 +82,16 @@ test('Cannabis Cowboy paints ranch wallpaper on root, independently of descendan
  assert.match(css,/radial-gradient\(ellipse at 74% 25%/);
  assert.match(css,/background-position:center/);
 });
+
+
+test('M9 uses the committed PNG wallpaper across the game surface, not synthetic CSS scenery',()=>{
+ const {document}=parseHTML('<html><body></body></html>');
+ const root=createCannabisCowboyShell(document);
+ assert.equal(root.dataset.view,'cannabis-cowboy');
+ assert.match(css,/\.cc-game\[data-view="cannabis-cowboy"\]\{\s*background:#101b18 url\('\/assets\/420bet\/backgrounds\/420bet_slots_wallpaper\.png'\)/);
+ assert.match(css,/\.immersive:has\(\.cc-game\) \.view-scroll\{\s*background:#101b18 url\('\/assets\/420bet\/backgrounds\/420bet_slots_wallpaper\.png'\)/);
+ assert.match(css,/\.cc-game\[data-view="cannabis-cowboy"\] > \.cc-ranch-wallpaper,[\s\S]*?display:none/);
+ assert.ok(root.querySelector('.cc-left-rail .cc-paytable-table tbody'));
+ assert.equal(root.querySelector('.cc-stage').children.length,2);
+ assert.match(css,/grid-template-columns: minmax\(310px,325px\) minmax\(0,1fr\)/);
+});

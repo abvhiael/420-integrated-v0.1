@@ -161,3 +161,117 @@
  pointer-events:none;
 }
 @media(max-width:650px){.bb-coin-kind .bb-collect-value{font-size:clamp(9px,2.5vw,16px);padding:2px 3px;border-width:1px}}
+
+/* Wide-screen Slot #6: shorter reels, full-width playfield, always-visible right reference rail. */
+.bb-game{min-height:0}
+.bb-screen{
+ min-height:calc(100vh - 142px);
+ padding:8px 14px 16px;
+ background-size:cover;
+}
+.bb-header{
+ width:min(100%,1500px);
+ max-width:none;
+ height:clamp(108px,14vh,170px);
+ margin:0 auto 2px;
+ grid-template-columns:minmax(115px,1fr) minmax(260px,2.65fr) minmax(115px,1fr);
+ align-items:center;
+}
+.bb-header .bb-buddy{height:clamp(105px,13.5vh,165px)}
+.bb-header .bb-title-logo{height:clamp(108px,14vh,172px);max-width:780px}
+.bb-workspace{
+ display:grid;
+ grid-template-columns:minmax(0,1fr) clamp(280px,23vw,348px);
+ gap:14px;
+ width:100%;
+ max-width:1920px;
+ margin:0 auto;
+ align-items:start;
+}
+.bb-workspace .bb-frame{
+ min-width:0;width:100%;max-width:none;margin:0;
+ padding:8px 12px 12px;border-width:3px;border-radius:16px;
+}
+.bb-workspace .bb-stage{
+ width:100%;max-width:none;
+ height:clamp(270px,44vh,435px);
+ aspect-ratio:auto;
+ border-width:3px;
+}
+.bb-workspace .bb-topline{min-height:30px;margin-bottom:6px;padding:2px 8px}
+.bb-workspace .bb-message{min-height:22px;margin:7px auto 3px;font-size:clamp(12px,1.4vw,18px)}
+.bb-workspace .bb-controls{max-width:none;margin:7px auto;gap:8px}
+.bb-workspace .bb-extras{margin:6px auto}
+.bb-workspace .bb-game .bb-spin,.bb-workspace .bb-spin{min-width:132px;padding:7px 13px;font-size:clamp(18px,2vw,25px)}
+.bb-workspace .bb-meter{margin:7px auto;font-size:12px}
+.bb-workspace .bb-collect-announcement{margin-top:6px;padding:4px 10px}
+.bb-workspace .bb-collect-announcement img{height:38px;width:50px}
+.bb-sidebar{
+ display:flex;flex-direction:column;gap:10px;min-width:0;
+ align-self:stretch;
+}
+.bb-reference-panel{
+ padding:12px;
+ border:2px solid #e9ba55;border-radius:15px;
+ background:linear-gradient(150deg,#220c36ed,#0c1529ee);
+ color:#fff3ce;
+ box-shadow:0 0 13px #dc9b4a66;
+}
+.bb-reference-panel h2{
+ margin:0 0 5px;
+ color:#b7ff6b;
+ font-weight:1000;letter-spacing:.09em;
+ font-size:clamp(14px,1.3vw,19px);
+}
+.bb-panel-intro{margin:0 0 7px;font-size:11px;line-height:1.3;color:#f3dea6}
+.bb-side-paytable{width:100%;border-collapse:collapse;font-size:clamp(10px,.82vw,12px);font-variant-numeric:tabular-nums}
+.bb-side-paytable th{color:#b7ff75;border-bottom:1px solid #8e6b5f;text-align:right;padding:3px}
+.bb-side-paytable th:first-child{text-align:left}
+.bb-side-paytable td{padding:2px 3px;text-align:right;border-bottom:1px solid #936b5844;white-space:nowrap}
+.bb-side-paytable tr:last-child td{border-bottom:0}
+.bb-side-paytable .bb-pay-symbol{display:flex;align-items:center;gap:5px;text-align:left;font-weight:750}
+.bb-pay-symbol img{width:24px;height:24px;object-fit:contain;flex-shrink:0}
+.bb-feature-panel{padding:11px 12px}
+.bb-feature-row{
+ display:grid;grid-template-columns:48px minmax(0,1fr);align-items:center;
+ gap:8px;padding:7px 0;border-bottom:1px solid #936b5844;
+}
+.bb-feature-row>img{width:46px;height:46px;object-fit:contain}
+.bb-feature-copy{min-width:0}
+.bb-feature-copy strong{font-size:12px;letter-spacing:.025em;color:#ffe585}
+.bb-feature-copy p{font-size:11px;line-height:1.38;margin:2px 0 0;color:#fbf0d9}
+.bb-jackpot-guide{padding-top:8px}
+.bb-jackpot-guide strong{font-size:12px;color:#b7ff6b}
+.bb-jackpot-guide p{font-size:11px;line-height:1.4;margin:3px 0 0}
+.bb-screen .bb-disclaimer{margin:7px auto 0}
+@media(min-width:1600px){
+ .bb-workspace{grid-template-columns:minmax(0,1fr) 360px;gap:18px}
+ .bb-workspace .bb-stage{height:clamp(300px,46vh,480px)}
+ .bb-reference-panel{padding:14px}
+ .bb-side-paytable{font-size:12px}
+}
+@media(max-width:920px){
+ .bb-workspace{grid-template-columns:minmax(0,1fr) 270px;gap:9px}
+ .bb-reference-panel{padding:8px}
+ .bb-feature-row{grid-template-columns:38px minmax(0,1fr);gap:5px}
+ .bb-feature-row>img{width:36px;height:36px}
+ .bb-workspace .bb-stage{height:clamp(260px,39vh,385px)}
+ .bb-screen{padding:8px}
+}
+@media(max-width:720px){
+ .bb-workspace{grid-template-columns:minmax(0,1fr)}
+ .bb-sidebar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+ .bb-workspace .bb-stage{height:clamp(230px,34vh,340px)}
+ .bb-header{grid-template-columns:1fr 2.5fr 1fr}
+ .bb-reference-panel{padding:9px}
+ .bb-side-paytable{font-size:10px}
+ .bb-feature-row{grid-template-columns:35px 1fr}
+ .bb-feature-row>img{width:34px;height:34px}
+ .bb-feature-copy p{font-size:10px}
+}
+@media(max-width:480px){
+ .bb-sidebar{grid-template-columns:1fr}
+ .bb-workspace .bb-stage{height:clamp(210px,32vh,295px)}
+ .bb-workspace .bb-controls{gap:5px}
+ .bb-workspace .bb-topline{font-size:10px}
+}

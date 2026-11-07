@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {parseHTML} from 'linkedom';
 import {readFileSync,existsSync} from 'node:fs';
-import {REELS,ROWS,LINES,BASE_STRIPS,boardAt,initialState,nextSpin,practiceBonus,evaluateLines,MAX_WIN_MULTIPLIER,FREE_WILD_MULTIPLIERS,collectSmokeValue,hotboxTotalMultiplier} from '../src/best-buds-engine.js';
+import {REELS,ROWS,LINES,PAYTABLE,BASE_STRIPS,boardAt,initialState,nextSpin,practiceBonus,evaluateLines,MAX_WIN_MULTIPLIER,FREE_WILD_MULTIPLIERS,collectSmokeValue,hotboxTotalMultiplier} from '../src/best-buds-engine.js';
 import {createBestBudsPractice} from '../src/best-buds-ui.js';
 
 test('exactly 25 distinct five-reel paths stay within the 3-row display',()=>{
@@ -248,4 +248,46 @@ test('Collect Smoke multiplier overlay remains visible through later Hold & Win 
  root.querySelector('.bb-stage').dispatchEvent(new window.Event('click',{bubbles:true}));
  assert.equal(root.querySelector('.bb-collect-value').textContent,multiplier);
  root.stopAnimation();
+});
+
+test('Best Buds has a full-width, low-height playfield with two visible right-side reference boxes',()=>{
+ const {document,window}=parseHTML('<html><body></body></html>');
+ const root=createBestBudsPractice(document,{rng:()=>.99});
+ const workspace=root.querySelector('.bb-workspace');
+ assert.ok(workspace);
+ assert.equal(workspace.firstElementChild.classList.contains('bb-frame'),true);
+ assert.equal(workspace.lastElementChild.classList.contains('bb-sidebar'),true);
+ assert.equal(workspace.querySelectorAll('.bb-sidebar .bb-reference-panel').length,2);
+ const paytable=workspace.querySelector('.bb-pay-panel .bb-side-paytable');
+ assert.ok(paytable);
+ assert.equal(paytable.querySelectorAll('tr').length,Object.keys(PAYTABLE).length+1);
+ assert.equal(paytable.querySelectorAll('.bb-pay-symbol img').length,Object.keys(PAYTABLE).length);
+ const guide=workspace.querySelector('.bb-feature-panel');
+ for(const phrase of ['BONUS TRIGGERS','3 VAN SCATTERS','6 HOTBOX COINS','COLLECT SMOKE','MINI ×20','GRAND ×1000'])assert.ok(guide.textContent.includes(phrase),phrase);
+ assert.equal(workspace.querySelectorAll('.bb-reel').length,5);
+ assert.equal(workspace.querySelectorAll('.bb-cell').length,15);
+ root.stopAnimation();
+});
+test('Both reference panels remain visible during Hold & Win and free rides',()=>{
+ const {document,window}=parseHTML('<html><body></body></html>');
+ const root=createBestBudsPractice(document,{rng:()=>.99});
+ const button=label=>{const element=[...root.querySelectorAll('button')].find(b=>b.textContent===label);assert.ok(element,label);element.dispatchEvent(new window.Event('click',{bubbles:true}));};
+ button('BONUS TEST');button('Trigger Hold & Win');
+ assert.equal(root.getGameState().mode,'hold');
+ assert.equal(root.querySelectorAll('.bb-reference-panel').length,2);
+ button('RESPIN');
+ assert.equal(root.getPresentationState().phase,'spinning');
+ assert.equal(root.querySelectorAll('.bb-reference-panel').length,2);
+ root.querySelector('.bb-stage').dispatchEvent(new window.Event('click',{bubbles:true}));
+ button('BONUS TEST');button('8 Free Rides');
+ assert.equal(root.getGameState().mode,'free');
+ assert.equal(root.querySelectorAll('.bb-reference-panel').length,2);
+ root.stopAnimation();
+});
+test('Wide desktop layout stays horizontally split; narrower viewports stack without clipping',()=>{
+ const css=readFileSync(new URL('../src/best-buds.css',import.meta.url),'utf8');
+ assert.match(css,/\.bb-workspace\s*\{\s*display:grid;/);
+ assert.match(css,/grid-template-columns:minmax\(0,1fr\) clamp\(280px,23vw,348px\)/);
+ assert.match(css,/\.bb-workspace \.bb-stage\s*\{[^}]*height:clamp\(270px,44vh,435px\)/s);
+ assert.match(css,/@media\(max-width:720px\)\s*\{\s*\.bb-workspace\{grid-template-columns:minmax\(0,1fr\)/s);
 });

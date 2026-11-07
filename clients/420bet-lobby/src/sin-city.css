@@ -357,10 +357,11 @@ main.immersive .view-scroll:has(.sc-game){background:transparent}
  margin:0;padding:0;pointer-events:none;
 }
 .sc-game .sc-cabinet>.sc-masthead .sc-logo{
- display:block;grid-column:1;align-self:center;
- width:100%;max-width:none;height:106px;max-height:106px;
+ display:block;grid-column:1;align-self:center;justify-self:center;
+ width:100%;max-width:100%;height:106px;max-height:106px;
  min-width:0;margin:0;padding:0;
- object-fit:fill;
+ /* Contain, NEVER fill: render the approved PNG without distorting its ratio. */
+ object-fit:contain;object-position:center center;
  filter:drop-shadow(0 0 11px #eaa73e) drop-shadow(0 3px 7px #23062f);
 }
 .sc-game .sc-cabinet>.sc-masthead .sc-ways{

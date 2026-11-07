@@ -845,12 +845,10 @@
 }
 
 
-/* Transparent Cowboy play surface. Keep the existing illustrated ranch wallpaper
-   on .immersive, with no additional opaque paints between it and reel symbols.
-   These rules intentionally come after the older cabinet/cell gradients. */
+/* Cowboy cabinet stays transparent so the wallpaper shows around the playfield.
+   The actual 6x8 reel board and all 48 reel cells remain fully opaque for contrast. */
 .cc-game[data-view="cannabis-cowboy"] .cc-stage,
 .cc-game[data-view="cannabis-cowboy"] .cc-middle,
-.cc-game[data-view="cannabis-cowboy"] .cc-symbol-grid,
 .cc-game[data-view="cannabis-cowboy"] .cc-left-rail,
 .cc-game[data-view="cannabis-cowboy"] .cc-sidebar-brand{
   background:transparent;
@@ -860,19 +858,24 @@
   /* Retain the gold outer frame, footprint and layout. */
   box-shadow:0 0 25px #f7c04a77;
 }
+/* Fully opaque backing behind the tile gaps, unchanged grid geometry. */
+.cc-game[data-view="cannabis-cowboy"] .cc-symbol-grid{
+  background:#0c150e;
+  background-image:none;
+}
 .cc-game[data-view="cannabis-cowboy"] .cc-symbol-grid > .cc-cell,
 .cc-game[data-view="cannabis-cowboy"] .cc-symbol-grid > .cc-cell.cc-symbol-bud,
 .cc-game[data-view="cannabis-cowboy"] .cc-symbol-grid > .cc-cell.cc-symbol-cole,
 .cc-game[data-view="cannabis-cowboy"] .cc-symbol-grid > .cc-cell.cc-symbol-scatter,
 .cc-game[data-view="cannabis-cowboy"] .cc-symbol-grid > .cc-cell.cc-symbol-road-ticket,
 .cc-game[data-view="cannabis-cowboy"] .cc-symbol-grid > .cc-cell.cc-symbol-smoke-wild{
-  background:transparent;
-  background-image:none;
-  /* Visible tile borders keep the 6x8 layout legible over the landscape. */
-  box-shadow:inset 0 0 5px #07160c80;
+  background:#152019;
+  background-image:radial-gradient(circle at 50% 25%,#3f3d20,#152019 65%,#090e0a);
+  box-shadow:inset 0 0 12px #0009;
 }
 .cc-game[data-view="cannabis-cowboy"] .cc-symbol-grid > .cc-cell.cc-winning{
-  background:rgba(48,123,54,.22);
+  background:#124a22;
+  background-image:radial-gradient(circle at 50% 40%,#317d36,#124a22 80%);
   box-shadow:0 0 17px #8afb66,inset 0 0 13px #8bff61;
 }
 /* Information should NOT inherit the transparency of the game cabinet. */

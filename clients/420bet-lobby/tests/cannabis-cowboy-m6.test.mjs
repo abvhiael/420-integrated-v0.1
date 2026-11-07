@@ -108,6 +108,7 @@ test('interactive Road Trip reveals five guitar case choices, cannot double-pick
  const before=h.root.getPracticeState();
  h.root.querySelector('.cc-spin').dispatchEvent(new h.window.Event('click'));
  h.drain();
+ const triggeringSpinWin=h.root.getPracticeState().lastWin;
  assert.equal(h.root.getPracticeState().roadActive,true);
  assert.equal(h.root.querySelector('.cc-road-panel').hidden,false);
  for(let i=0;i<5;i++){
@@ -131,7 +132,7 @@ test('interactive Road Trip reveals five guitar case choices, cannot double-pick
    assert.equal(splash.querySelectorAll('.cc-bonus-cowboy').length,0,'artwork already contains Cole Haze');
    assert.equal(splash.querySelectorAll('.cc-road-splash-credits').length,1);
    assert.equal(splash.querySelector('.cc-road-splash-credits').textContent,
-     h.root.getPracticeState().lastWin.toLocaleString('en-US')+' CREDITS');
+     (h.root.getPracticeState().lastWin-triggeringSpinWin).toLocaleString('en-US')+' CREDITS');
    const credits=h.root.getPracticeState().credits;
    h.drain();
    assert.equal(h.root.getPracticeState().credits,credits,'splash does not award twice');

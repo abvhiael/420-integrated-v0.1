@@ -1,0 +1,31 @@
+name: Best Buds Slot 6 Level 1
+on:
+  pull_request:
+    paths:
+      - 'clients/420bet-lobby/src/best-buds-*'
+      - 'clients/420bet-lobby/src/main.js'
+      - 'clients/420bet-lobby/src/slots-lobby.js'
+      - 'clients/420bet-lobby/tests/best-buds.test.mjs'
+      - 'clients/420bet-lobby/tests/slots-lobby.test.mjs'
+      - '.github/workflows/best-buds-level1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  best-buds-l1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install lobby dependencies
+        working-directory: clients/420bet-lobby
+        run: npm install --no-audit --no-fund
+      - name: Run scoped Best Buds and Slots lobby tests
+        working-directory: clients/420bet-lobby
+        run: node --test tests/best-buds.test.mjs tests/slots-lobby.test.mjs
+      - name: Build browser lobby
+        working-directory: clients/420bet-lobby
+        run: npm run build

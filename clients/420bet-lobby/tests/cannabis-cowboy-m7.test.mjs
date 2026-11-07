@@ -162,3 +162,21 @@ test('Cowboy cabinet remains transparent but reel board, cells and information p
  assert.ok(root.querySelector('.cc-left-rail .cc-paytable'));
  assert.equal(root.querySelectorAll('.cc-sidebar-features .cc-panel').length,3);
 });
+
+
+test('M7 CSS respects hidden on Road Trip, feature overlays, spin button and completion splash',()=>{
+ const final=css.slice(css.lastIndexOf('/* Mandatory visibility contract:'));
+ assert.match(final,/\.cc-game\[data-view="cannabis-cowboy"\] \[hidden\]\{\s*display:none !important;/);
+ assert.match(final,/pointer-events:none !important/);
+ assert.match(final,/\.cc-bonus-total-splash:not\(\[hidden\]\)\{\s*z-index:60;/);
+ assert.match(final,/\.cc-free-spin-button:not\(\[hidden\]\)\{\s*z-index:40;/);
+ const {document}=parseHTML('<html><body></body></html>');
+ const root=createCannabisCowboyPractice(document,{reducedMotion:true});
+ for(const selector of ['.cc-road-panel','.cc-feature-overlay','.cc-free-spin-button','.cc-bonus-total-splash']){
+  const panel=root.querySelector(selector);
+  assert.ok(panel,selector+' exists');
+  assert.equal(panel.hidden,true,selector+' must be hidden in base mode');
+ }
+ assert.equal(root.getPracticeState().featurePhase,'none');
+ root.stopAnimation();
+});

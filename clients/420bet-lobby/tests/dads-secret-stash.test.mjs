@@ -974,7 +974,7 @@ test('Jen Hide the Stash awards Hold & Win when two original crates become four'
  const result=spin(newGame(),()=>calls.length?calls.shift():.5).last;
  assert.equal(result.grid.filter(x=>x==='stash').length,2);
  const jen=result.events.find(x=>x.type==='jen');
- assert(jen,'Jen's mystery modifier should trigger');
+ assert(jen,"Jen\u2019s mystery modifier should trigger");
  assert.equal(jen.label,'HIDE THE STASH');
  assert.equal(jen.grid.filter(x=>x==='stash').length,4);
  assert.equal(jen.awardedHoldAndWin,true);

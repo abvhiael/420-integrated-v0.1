@@ -678,3 +678,26 @@
 }
 /* Avoid duplicate multiplier labels inside cells: grid overlay is authoritative. */
 .cc-game .cc-cell > .cc-harvest-badge{display:none}
+
+
+/* On the Road Again: each stop has a distinct scenic background and three
+   transparent guitar-case picks; buttons stay usable if PNGs aren't uploaded. */
+.cc-game .cc-road-panel{isolation:isolate}
+.cc-game .cc-road-scene{
+  position:absolute;inset:0;z-index:0;
+  display:block;width:100%;height:100%;
+  object-fit:cover;object-position:center;
+  opacity:.72;pointer-events:none;
+}
+.cc-game .cc-road-scene[hidden],.cc-game .cc-road-case-art[hidden]{display:none}
+.cc-game .cc-road-panel > :not(.cc-road-scene){position:relative;z-index:1}
+.cc-game .cc-road-case{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:3px;min-width:0;
+}
+.cc-game .cc-road-case-art{
+  display:block;width:100%;height:clamp(50px,10vh,125px);
+  object-fit:contain;object-position:center;
+  pointer-events:none;
+}
+.cc-game .cc-road-case-caption{font-size:clamp(10px,.8vw,13px);line-height:1.2}

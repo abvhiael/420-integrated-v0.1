@@ -712,3 +712,80 @@
   gap:3px;
 }
 .cc-game .cc-multiplier-frame{position:relative;min-width:0;min-height:0}
+
+
+/* Cowboy stage composition: ONE shared cabinet for logo, paytable and reels.
+   Keep the entire cabinet/console left-aligned to reveal the character on the
+   right side of the new approved wallpaper. The reel/grid remain unchanged. */
+@media (min-width:1201px){
+ .cc-game[data-view="cannabis-cowboy"] .cc-stage,
+ .cc-game[data-view="cannabis-cowboy"] .cc-console{
+   width:min(1180px,calc(100% - clamp(240px,23vw,440px)));
+   max-width:none;
+   margin-left:0;
+   margin-right:auto;
+   justify-self:start;
+ }
+}
+@media (min-width:701px) and (max-width:1200px){
+ .cc-game[data-view="cannabis-cowboy"] .cc-stage,
+ .cc-game[data-view="cannabis-cowboy"] .cc-console{
+   width:100%;max-width:none;margin-left:0;margin-right:0;justify-self:start;
+ }
+}
+@media (min-width:701px){
+ .cc-game[data-view="cannabis-cowboy"] .cc-stage{
+   display:grid;
+   grid-template-columns:minmax(265px,305px) minmax(0,1fr);
+   gap:clamp(6px,.85vw,12px);
+   padding:clamp(7px,.65vw,11px);
+   border:8px ridge var(--cc-gold);
+   border-radius:19px;
+   background:linear-gradient(135deg,#503415,#18180f 25%,#472e17);
+   box-shadow:0 0 25px #f7c04a77,inset 0 0 24px #070c08;
+   box-sizing:border-box;
+   overflow:hidden;
+ }
+ .cc-game[data-view="cannabis-cowboy"] .cc-left-rail{
+   display:flex;
+   min-height:0;
+   gap:clamp(5px,.55vw,9px);
+   padding:0 2px 0 0;
+   overflow-y:auto;
+ }
+ .cc-game[data-view="cannabis-cowboy"] .cc-sidebar-brand .cc-title-logo{
+   width:100%;height:auto;max-height:clamp(104px,17vh,170px);
+   max-width:260px;object-fit:contain;
+ }
+ .cc-game[data-view="cannabis-cowboy"] .cc-middle{
+   border:0;
+   border-radius:9px;
+   background:transparent;
+   box-shadow:none;
+   padding:0;
+   min-height:0;
+ }
+ .cc-game[data-view="cannabis-cowboy"] .cc-left-rail .cc-paytable{
+   min-height:0;
+   overflow-x:hidden;
+   overflow-y:visible;
+ }
+ .cc-game[data-view="cannabis-cowboy"] .cc-left-rail .cc-paytable-table td,
+ .cc-game[data-view="cannabis-cowboy"] .cc-left-rail .cc-paytable-table thead th,
+ .cc-game[data-view="cannabis-cowboy"] .cc-left-rail .cc-paytable-table tbody th{
+   font-size:clamp(9px,.7vw,11px);
+ }
+}
+@media (min-width:701px) and (max-width:900px){
+ .cc-game[data-view="cannabis-cowboy"] .cc-stage{
+   grid-template-columns:minmax(210px,250px) minmax(0,1fr);
+ }
+}
+@media (max-width:700px){
+ .cc-game[data-view="cannabis-cowboy"] .cc-stage{
+   width:100%;margin:0;align-items:stretch;
+ }
+ .cc-game[data-view="cannabis-cowboy"] .cc-console{
+   width:100%;margin-left:0;margin-right:0;
+ }
+}

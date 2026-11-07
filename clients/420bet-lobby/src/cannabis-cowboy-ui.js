@@ -1,6 +1,7 @@
 // Cannabis Cowboy M2: nontransactional visual shell. M3 owns the outcome engine.
 export const COWBOY_ART=Object.freeze({
-  lobby:'/assets/420bet/slots-lobby/cannabis-cowboy-lobby-cabinet.png'
+  lobby:'/assets/420bet/slots-lobby/cannabis-cowboy-lobby-cabinet.png',
+  header:'/assets/420bet/cannabis-cowboy/cannabis-cowboy-logo-header.png'
 });
 export const COWBOY_ASSET_ROOT='/assets/420bet/cannabis-cowboy/';
 export const COWBOY_SYMBOL_ART=Object.freeze([
@@ -69,10 +70,11 @@ export function createCannabisCowboyShell(doc=globalThis.document){
  root.dataset.mode='visual-preview';root.setAttribute('aria-label','Cannabis Cowboy High Country Clusters 6 by 8 game screen');
  const scene=el(doc,'div','cc-ranch-wallpaper');scene.setAttribute('aria-hidden','true');
  const header=el(doc,'header','cc-title-banner');
- const eyebrow=el(doc,'span','cc-eyebrow','420BET · SLOT #4 · VISUAL PREVIEW');
- const heading=el(doc,'h1','cc-game-title','The Cannabis Cowboy');
- const sub=el(doc,'div','cc-game-subtitle','HIGH COUNTRY CLUSTERS');
- header.append(eyebrow,heading,sub);
+ const heading=el(doc,'h1','cc-game-title');
+ const logo=el(doc,'img','cc-title-logo');
+ logo.src=COWBOY_ART.header;logo.alt='Cannabis Cowboy';
+ logo.loading='eager';logo.decoding='async';logo.draggable=false;
+ heading.append(logo);header.append(heading);
  const cabinet=el(doc,'div','cc-stage');
  const left=el(doc,'aside','cc-left-rail');
  const portrait=el(doc,'div','cc-portrait');

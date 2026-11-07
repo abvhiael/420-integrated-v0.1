@@ -962,8 +962,15 @@ test('Comic result stays over the reels for precisely 1500ms before character fe
  assert.match(css,/\.dss-comic-title\{[^}]*font-size:clamp\(30px,5\.2vw,78px\)/);
 });
 
+const baseSlotWeights=[3,4,5,5,4,5,7,7,10,12,12,14,14,14,14,14,3,2,3,2];
+const mid=i=>(baseSlotWeights.slice(0,i).reduce((a,b)=>a+b,0)+baseSlotWeights[i]/2)/baseSlotWeights.reduce((a,b)=>a+b,0);
+test('HIDE THE STASH always adds at least three crates even with minimum RNG',()=>{
+ const modified=modifier(board(),'jen',seq(0));
+ assert.equal(modified.label,'HIDE THE STASH');
+ assert.equal(modified.grid.filter(s=>s==='stash').length,3);
+});
 test('Jen HIDE THE STASH awards exactly one Hold & Win from added crates',()=>{
- const draws=[mid(1),mid(1),mid(1),mid(18),...Array(16).fill(mid(11))];
+ const draws=[mid(1),mid(1),mid(1),...Array(17).fill(mid(11))];
  // 20 base draws, Jen qualification roll, modifier choice, crate count,
  // replacement positions, then Hold & Win RNG draws.
  const values=[...draws,0,0,0,0,0,...Array(100).fill(.975)];
@@ -971,7 +978,7 @@ test('Jen HIDE THE STASH awards exactly one Hold & Win from added crates',()=>{
  const after=spin(newGame(),()=>values[index++]??.975);
  const jen=after.last.events.find(e=>e.type==='jen');
  const stashEvents=after.last.events.filter(e=>e.type==='stash');
- assert.equal(after.last.grid.filter(s=>s==='stash').length,1);
+ assert.equal(after.last.grid.filter(s=>s==='stash').length,0);
  assert.equal(jen.label,'HIDE THE STASH');
  assert.equal(jen.awardedStashBonus,true);
  assert(jen.stashCount>=3);

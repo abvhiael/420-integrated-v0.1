@@ -1,7 +1,7 @@
 // Best Buds: Hotbox Road Trip — deterministic practice-only slot model.
 // Candidate values, NOT a certified RNG/RTP or real-money gambling implementation.
 export const REELS=5, ROWS=3, MAX_WIN_MULTIPLIER=5000;
-export const SYMBOLS=Object.freeze(['BONG','JOINT','CHIPS','RECORD','PAPERS','LIGHTER','SUNGLASSES','GUITAR','LEAF','BUDDY1','BUDDY2','WILD1','WILD2','SCATTER','HOTBOX']);
+export const SYMBOLS=Object.freeze(['BONG','JOINT','CHIPS','RECORD','PAPERS','LIGHTER','SUNGLASSES','GUITAR','LEAF','BUDDY1','BUDDY2','WILD','SCATTER','HOTBOX']);
 export const ORDINARY=Object.freeze(['BONG','JOINT','CHIPS','RECORD','PAPERS','LIGHTER','SUNGLASSES','GUITAR','LEAF','BUDDY1','BUDDY2']);
 export const PAYTABLE=Object.freeze({
  BUDDY1:[.5,1.5,5], BUDDY2:[.5,1.5,5], GUITAR:[.35,1,3], BONG:[.3,.8,2.5],
@@ -23,7 +23,7 @@ const pick=(n,rng)=>Math.floor(clamp(rng(),0,.9999999)*n);
 export const BASE_STRIPS=Object.freeze(Array.from({length:REELS},(_,r)=>{
  const s=Array.from({length:60},(_,i)=>ORDINARY[(i*7+Math.floor(i/3)+r*3)%ORDINARY.length]);
  // Consecutive windows never contain two SCATTER symbols on a given reel.
- for(const [i,v] of [[3,'SCATTER'],[10,'HOTBOX'],[15,'HOTBOX'],[22,'WILD1'],[27,'HOTBOX'],[33,'HOTBOX'],[39,'WILD2'],[46,'HOTBOX'],[53,'HOTBOX']])
+ for(const [i,v] of [[3,'SCATTER'],[10,'HOTBOX'],[15,'HOTBOX'],[22,'WILD'],[27,'HOTBOX'],[33,'HOTBOX'],[39,'WILD'],[46,'HOTBOX'],[53,'HOTBOX']])
   s[(i+r*4)%60]=v;
  return Object.freeze(s);
 }));
@@ -36,8 +36,8 @@ export const initialState=()=>({
  featureTotal:0,spinNumber:0,qa:null,holdReveal:null,holdNewKeys:[],collectSmokeEvent:null,freeWildMultipliers:{}
 });
 export const coinValue=(rng=Math.random)=>[.2,.4,.6,1,1.5,2,3,5,10][pick(9,rng)];
-// Both regular Buddy portraits and their dedicated WILD artwork substitute in every mode.
-export const isWild=s=>s==='BUDDY1'||s==='BUDDY2'||s==='WILD1'||s==='WILD2';
+// The standalone leaf WILD substitutes. Buddy 1/2 portraits pay as ordinary symbols.
+export const isWild=s=>s==='WILD';
 export function evaluateLines(board,bet,{wildMultipliers={}}={}){
  const wins=[];
  for(let p=0;p<LINES.length;p++){
@@ -167,12 +167,12 @@ export function nextSpin(previous,{rng=Math.random,stops=null,force=null}={}){
  }else if(force==='free'){
   for(let r=0;r<REELS;r++)for(let y=0;y<ROWS;y++)board[r][y]=r<3&&y===0?'SCATTER':ORDINARY[(r*3+y)%ORDINARY.length];
  }
- // Every Buddy portrait and WILD gets a free-spin multiplier badge.
+ // Only the dedicated leaf WILD receives a free-spin multiplier badge.
  // For each winning line, only the highest WILD multiplier on that line applies.
  s.freeWildMultipliers={};
  if(mode==='free'){
   if(force==='wild10'){
-   for(let r=0;r<3;r++)board[r][1]=r%2?'WILD2':'WILD1';
+   for(let r=0;r<3;r++)board[r][1]='WILD';
   }
   for(let r=0;r<REELS;r++)for(let y=0;y<ROWS;y++)
    if(isWild(board[r][y]))s.freeWildMultipliers[r*ROWS+y]=force==='wild10'?10:FREE_WILD_MULTIPLIERS[pick(FREE_WILD_MULTIPLIERS.length,rng)];

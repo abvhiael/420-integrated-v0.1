@@ -141,9 +141,9 @@ export function resolveRound(initialBoard,bet,rng=Math.random,options={}){
  const stored=options.initialFertile??Array(CELL_COUNT).fill(0);
  if(!Array.isArray(stored)||stored.length!==CELL_COUNT||stored.some(n=>!Number.isInteger(n)||n<0||(options.bonusMode?n>10:![0,2,4,8,16,32].includes(n))))throw new Error('Invalid fertile positions');
  let board=initialBoard.slice(),fertile=stored.slice(),total=0;
- const sticky=new Set(options.lockedWilds??[]);
+ // Wilds substitute during the current cluster only; Endless Harvest never pins them.
+ const sticky=new Set(options.bonusMode?[]:(options.lockedWilds??[]));
  if([...sticky].some(p=>!Number.isInteger(p)||p<0||p>=CELL_COUNT||board[p]!==WILD_SYMBOL))throw new Error('Invalid sticky wilds');
- if(options.bonusMode)board.forEach((v,p)=>{if(v===WILD_SYMBOL&&sticky.size<MAX_STICKY_WILDS)sticky.add(p);});
  const steps=[];
  for(let i=0;i<MAX_CASCADES;i++){
   const clusters=findClusters(board);
@@ -164,12 +164,10 @@ export function resolveRound(initialBoard,bet,rng=Math.random,options={}){
   }
   if(!Number.isSafeInteger(total+cascadeWin))throw new Error('Round exceeds safe credit accounting');
   total+=cascadeWin;
-  // A sticky wild participates in the payout and can grow its underlying cell,
-  // but is never cleared from the board during a feature.
+  // A wild participates in a payout but is cleared and refilled like other symbols.
   const awardedCells=new Set(paid.flatMap(c=>c.positions));
   for(const p of awardedCells)fertile[p]=options.bonusMode?Math.min(10,fertile[p]+1):(fertile[p]===0?2:Math.min(32,fertile[p]*2));
   const next=dropAndRefill(board,removed,rng,{lockedWilds:[...sticky]});
-  if(options.bonusMode)next.board.forEach((v,p)=>{if(v===WILD_SYMBOL&&sticky.size<MAX_STICKY_WILDS)sticky.add(p);});
   steps.push({index:i+1,before:board.slice(),clusters:paid,removed:[...removed].sort((a,b)=>a-b),after:next.board.slice(),refills:next.refills.slice(),fertile:fertile.slice(),lockedWilds:[...sticky].sort((a,b)=>a-b),cascadeWin,total});
   board=next.board;
  }
@@ -183,22 +181,21 @@ export function resolveEndlessHarvest(initialSpins,bet,rng=Math.random,options={
  const getBoard=options.boardFactory??(()=>makeScatterBoard(rng));
  const limit=options.maxSpins??MAX_FREE_SPINS;
  if(!Number.isInteger(limit)||limit<initialSpins||limit>MAX_FREE_SPINS)throw new Error('Invalid free-spin cap');
- let awarded=initialSpins,total=0,fertile=Array(CELL_COUNT).fill(0),sticky=[];
+ let awarded=initialSpins,total=0,fertile=Array(CELL_COUNT).fill(0);
  const spins=[];
  for(let n=1;n<=awarded&&n<=limit;n++){
   const board=getBoard(n).slice();assertBoard(board);
-  for(const p of sticky)board[p]=WILD_SYMBOL;
   const scatters=countScatters(board),possible=awardedFreeSpins(scatters);
   const retrigger=Math.min(possible,limit-awarded);
   awarded+=retrigger;
-  const initialFertile=fertile.slice(),stickyBefore=sticky.slice();
-  const outcome=resolveRound(board,bet,rng,{bonusMode:true,initialFertile,lockedWilds:stickyBefore});
+  const initialFertile=fertile.slice(),stickyBefore=[];
+  const outcome=resolveRound(board,bet,rng,{bonusMode:true,initialFertile});
   if(!Number.isSafeInteger(total+outcome.total))throw new Error('Unsafe feature credits');
   total+=outcome.total;
-  fertile=outcome.fertile.slice();sticky=outcome.lockedWilds.slice();
+  fertile=outcome.fertile.slice();
   spins.push({number:n,awarded,remaining:awarded-n,scatters,retrigger,stickyBefore,initialFertile,outcome,total});
  }
- return {initialSpins,spins,total,awarded,played:spins.length,stickyWilds:sticky,fertile,capReached:awarded===limit};
+ return {initialSpins,spins,total,awarded,played:spins.length,stickyWilds:[],fertile,capReached:awarded===limit};
 }
 export function createPracticeSession({credits=START_CREDITS,bet=20,board=null,rng=Math.random}={}){
  if(!Number.isSafeInteger(credits)||credits<0||!BET_CHOICES.includes(bet))throw new Error('Invalid practice session');

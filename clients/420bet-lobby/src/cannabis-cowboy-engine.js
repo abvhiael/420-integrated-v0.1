@@ -16,7 +16,8 @@ export const FREE_SPIN_AWARDS=Object.freeze({3:8,4:12,5:16,6:20});
 export const SMOKE_RING_MULTIPLIER=2;
 export const MAX_CLUSTER_MULTIPLIER=500;
 // A low-frequency wildcard replaces any paying symbol; no scatter/bonus triggers in M4.
-export const SYMBOL_WEIGHTS=Object.freeze([16,15,14,13,12,11,10,9,2]); // id 0..7 + wildcard
+export const SYMBOL_WEIGHTS=Object.freeze([16,15,14,13,12,11,10,9,2]); // base: id 0..7 + wildcard
+export const HARVEST_SYMBOL_WEIGHTS=Object.freeze([...SYMBOL_WEIGHTS.slice(0,WILD_SYMBOL),SYMBOL_WEIGHTS[WILD_SYMBOL]*2]); // feature-only: twice the wild weight
 export const CLUSTER_PAYS=Object.freeze([
  Object.freeze([.4,.8,2.5,8,30]), // premium bud
  Object.freeze([.3,.6,2,6,20]),  // mason jar
@@ -34,18 +35,19 @@ export function clusterPayout(symbol,size,bet){
  if(!Number.isInteger(symbol)||symbol<0||symbol>=CLUSTER_PAYS.length||!Number.isInteger(size)||size<5||!Number.isSafeInteger(bet)||bet<0)throw new Error('Invalid cluster payout');
  return Math.round(CLUSTER_PAYS[symbol][bracket(size)]*bet);
 }
-export function weightedSymbol(rng=Math.random){
+export function weightedSymbol(rng=Math.random,bonusMode=false){
  const v=rng();
  if(!Number.isFinite(v)||v<0||v>=1)throw new Error('RNG must return a number in [0,1)');
- const total=SYMBOL_WEIGHTS.reduce((a,b)=>a+b,0);
+ const weights=bonusMode?HARVEST_SYMBOL_WEIGHTS:SYMBOL_WEIGHTS;
+ const total=weights.reduce((a,b)=>a+b,0);
  let x=v*total;
- for(let i=0;i<SYMBOL_WEIGHTS.length;i++){x-=SYMBOL_WEIGHTS[i];if(x<0)return i;}
- return SYMBOL_WEIGHTS.length-1;
+ for(let i=0;i<weights.length;i++){x-=weights[i];if(x<0)return i;}
+ return weights.length-1;
 }
-export function makeBoard(rng=Math.random){return Array.from({length:CELL_COUNT},()=>weightedSymbol(rng));}
+export function makeBoard(rng=Math.random,bonusMode=false){return Array.from({length:CELL_COUNT},()=>weightedSymbol(rng,bonusMode));}
 // Scatter is sampled independently at the initial stop only, never awarded as a cluster.
-export function makeScatterBoard(rng=Math.random){
- const board=makeBoard(rng);
+export function makeScatterBoard(rng=Math.random,bonusMode=false){
+ const board=makeBoard(rng,bonusMode);
  for(let p=0;p<CELL_COUNT;p++){
   const roll=rng();
   if(!Number.isFinite(roll)||roll<0||roll>=1)throw new Error('Invalid scatter RNG');
@@ -128,7 +130,7 @@ export function dropAndRefill(board,removed,rng=Math.random,options={}){
    for(let r=bottom;r>=top;r--){
     const p=r*COLUMNS+c;
     if(at<survivors.length)result[p]=survivors[at++];
-    else{result[p]=weightedSymbol(rng);refills.push(p);}
+    else{result[p]=weightedSymbol(rng,options.bonusMode===true);refills.push(p);}
    }
   }
  }
@@ -167,7 +169,7 @@ export function resolveRound(initialBoard,bet,rng=Math.random,options={}){
   // A wild participates in a payout but is cleared and refilled like other symbols.
   const awardedCells=new Set(paid.flatMap(c=>c.positions));
   for(const p of awardedCells)fertile[p]=options.bonusMode?Math.min(10,fertile[p]+1):(fertile[p]===0?2:Math.min(32,fertile[p]*2));
-  const next=dropAndRefill(board,removed,rng,{lockedWilds:[...sticky]});
+  const next=dropAndRefill(board,removed,rng,{lockedWilds:[...sticky],bonusMode:options.bonusMode===true});
   steps.push({index:i+1,before:board.slice(),clusters:paid,removed:[...removed].sort((a,b)=>a-b),after:next.board.slice(),refills:next.refills.slice(),fertile:fertile.slice(),lockedWilds:[...sticky].sort((a,b)=>a-b),cascadeWin,total});
   board=next.board;
  }
@@ -178,7 +180,7 @@ export function resolveRound(initialBoard,bet,rng=Math.random,options={}){
 // awards extra credits while replaying these entries.
 export function resolveEndlessHarvest(initialSpins,bet,rng=Math.random,options={}){
  if(!Number.isInteger(initialSpins)||initialSpins<1||initialSpins>MAX_FREE_SPINS||!BET_CHOICES.includes(bet))throw new Error('Invalid free-spin award');
- const getBoard=options.boardFactory??(()=>makeScatterBoard(rng));
+ const getBoard=options.boardFactory??(()=>makeScatterBoard(rng,true));
  const limit=options.maxSpins??MAX_FREE_SPINS;
  if(!Number.isInteger(limit)||limit<initialSpins||limit>MAX_FREE_SPINS)throw new Error('Invalid free-spin cap');
  let awarded=initialSpins,total=0,fertile=Array(CELL_COUNT).fill(0);

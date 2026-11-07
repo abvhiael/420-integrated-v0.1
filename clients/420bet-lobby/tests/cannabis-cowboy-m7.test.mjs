@@ -101,3 +101,24 @@ test('M9 a single immersive wallpaper spans navigation and game without mismatch
  assert.match(css,/\.immersive:has\(\.cc-game\) \.view-scroll\{\s*background:transparent/);
  assert.match(css,/\.immersive:has\(\.cc-game\) \.cc-game\[data-view="cannabis-cowboy"\]\{\s*background:transparent/);
 });
+
+
+test('uploaded Cannabis Cowboy ranch wallpaper overlays shared base across the full immersive view',()=>{
+ const marker=css.lastIndexOf('/* Cannabis Cowboy approved ranch wallpaper');
+ assert.notEqual(marker,-1);
+ const activeRules=css.slice(marker);
+ assert.match(activeRules,/cannabis-cowboy\/cannabis-cowboy-wallpaper\.png/);
+ assert.match(activeRules,/backgrounds\/420bet_slots_wallpaper\.png/);
+ assert.ok(activeRules.indexOf('cannabis-cowboy/cannabis-cowboy-wallpaper.png')<
+           activeRules.indexOf('backgrounds/420bet_slots_wallpaper.png'),
+           'new wallpaper must be the first/top background image');
+ assert.match(activeRules,/background-size:cover,cover/);
+ assert.match(activeRules,/min-height:100dvh/);
+ assert.match(activeRules,/\.view-scroll,[\s\S]*?\.cc-game\[data-view="cannabis-cowboy"\]\{\s*background:transparent;/);
+ assert.match(activeRules,/\.cc-game > \.cc-ranch-wallpaper\{\s*display:none;/);
+ const {document}=parseHTML('<html><body></body></html>');
+ const root=createCannabisCowboyShell(document);
+ assert.ok(root.querySelector('.cc-left-rail .cc-title-logo'));
+ assert.ok(root.querySelector('.cc-left-rail .cc-paytable'));
+ assert.equal(root.querySelectorAll('.cc-cell').length,48);
+});

@@ -230,3 +230,50 @@ test('free-spin completion records only the free-round total and retains last mu
  assert.deepEqual(fresh.wildMultipliers,{});
  assert.equal(fresh.freeCompletedTotal,null);
 });
+
+test('five natural Ashtrays trigger Puff Wild propagation during Chronic Sessions and each Wild sticks',()=>{
+ const stops=FREE_STRIPS.map((strip,reel)=>{
+  for(let stop=0;stop<strip.length;stop++){
+   const window=Array.from({length:4},(_,row)=>strip[(stop+row)%strip.length]);
+   if(window.includes('ASH')&&!window.includes('CAR')&&!window.includes('SCATTER')&&window.some(v=>!['ASH','WILD','CAR','SCATTER','GEM'].includes(v)))return stop;
+  }
+  throw Error('Missing unambiguous Ashtray fixture on reel '+reel);
+ });
+ const original=visibleBoard(FREE_STRIPS,stops);
+ assert.equal(count(original,'ASH')>=5,true,'all five reels show natural Ashtrays');
+ const prior={...initialState(),mode:'free',freeRemaining:8,freePlayed:0};
+ const after=nextRound(prior,()=>.2,stops);
+ assert.equal(after.lastFeature,'puff');
+ assert.equal(after.lastReveal.changed.length,5,'every Ashtray reel should propagate a Wild');
+ for(const [r,row] of after.lastReveal.changed){
+  const key=r*ROWS+row;
+  assert.equal(after.lastReveal.before[r][row],original[r][row]);
+  assert.equal(after.lastBoard[r][row],'WILD');
+  assert.ok(after.sticky.includes(key),'new propagated Wild must stick at '+key);
+ }
+ const initialSticky=[...after.sticky];
+ const follow=nextRound(after,()=>.2,[0,7,14,21,28]);
+ for(const key of initialSticky){
+  const r=Math.floor(key/ROWS),row=key%ROWS;
+  assert.equal(follow.lastReveal.before[r][row],'WILD','previous Wild must persist on the next reel spin');
+  assert.equal(follow.lastBoard[r][row],'WILD');
+  assert.ok(follow.sticky.includes(key));
+ }
+});
+test('free-spin Puff conversion does not overwrite existing sticky Wilds or natural Lowriders',()=>{
+ const board=[
+  ['ASH','WILD','CAR','BUD'],['ASH','WILD','CAR','J'],['ASH','WILD','CAR','K'],
+  ['BUD','J','K','A'],['BUD','J','K','A']
+ ];
+ const outcome=puffPuffPass(board,()=>.1,{preserveFeatures:true});
+ assert.equal(outcome.changed.length,3);
+ for(let r=0;r<3;r++){
+  assert.equal(outcome.board[r][1],'WILD','held Wild remains in its original cell');
+  assert.equal(outcome.board[r][2],'CAR','natural Lowrider must remain for its separate feature');
+  assert.equal(outcome.board[r][0],'ASH','natural Ashtray should remain available for its own payout');
+  assert.equal(outcome.board[r][3],'WILD','eligible ordinary symbol is propagated');
+ }
+ const pay=waysWins(outcome.board,2,FREE_PAYTABLE,{wildExcludes:['ASH','CAR']});
+ assert.ok(pay.wins.some(win=>win.symbol==='ASH'),'natural Ashtrays still qualify for normal ways');
+ assert.ok(pay.wins.some(win=>win.symbol==='CAR'),'natural Lowriders still qualify for normal ways');
+});

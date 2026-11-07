@@ -67,15 +67,24 @@ export function waysWins(board,stake,table=PAYTABLE,{wildExcludes=[]}={}){
  }
  return {wins,total:round(total)};
 }
-export function puffPuffPass(board,rng=Math.random){
+export function puffPuffPass(board,rng=Math.random,{preserveFeatures=false}={}){
  const next=board.map(reel=>[...reel]);const changed=[];
  if(count(board,'ASH')<3)return {board:next,changed};
  // One wild substitution per affected reel; deterministic given RNG.
  for(let r=0;r<REELS;r++){
   if(!next[r].includes('ASH'))continue;
-  const choices=next[r].map((s,i)=>s==='SCATTER'||s==='GEM'?-1:i).filter(i=>i>=0);
+  const choices=next[r].map((symbol,row)=>{
+   // In free spins, never overwrite held Wilds or a natural Lowrider:
+   // both are independent features and must remain visibly in place.
+   if(symbol==='SCATTER'||symbol==='GEM'||(preserveFeatures&&(symbol==='WILD'||symbol==='CAR')))return -1;
+   return row;
+  }).filter(row=>row>=0);
   if(!choices.length)continue;
-  const row=choices[Math.floor(Math.min(.9999999,Math.max(0,rng()))*choices.length)];
+  // Prefer a regular symbol over an Ashtray, keeping natural ASH ways intact
+  // where possible while still guaranteeing propagation on ASH-only reels.
+  const preferred=preserveFeatures?choices.filter(row=>next[r][row]!=='ASH'):choices;
+  const pool=preferred.length?preferred:choices;
+  const row=pool[Math.floor(Math.min(.9999999,Math.max(0,rng()))*pool.length)];
   next[r][row]='WILD';changed.push([r,row]);
  }
  return {board:next,changed};
@@ -129,11 +138,19 @@ export function nextRound(previous,rng=Math.random,forcedStops){
    }
    s.sticky.sort((a,b)=>a-b);
   }
-  // Puff wild conversions belong to the base feature. Free spins keep only
-  // their bounded sticky-Wild mechanic; do not spread extra Wilds every spin.
-  const puff=isFree?{board,changed:[]}:puffPuffPass(board,rng);
+  // Ashtrays trigger Puff Puff Pass in BOTH base play and Chronic Sessions.
+  // Newly created free-spin Wilds lock immediately for the remaining feature.
+  // Natural Ashtray payouts still exclude Wild substitution below.
+  const puff=puffPuffPass(board,rng,{preserveFeatures:isFree});
   board=puff.board;
   changed=puff.changed;
+  if(isFree&&puff.changed.length){
+   for(const [r,row] of puff.changed){
+    const key=lockKey(r,row);
+    if(!s.sticky.includes(key))s.sticky.push(key);
+   }
+   s.sticky.sort((a,b)=>a-b);
+  }
   if(puff.changed.length)feature='puff';
   // The Lowrider itself is always a natural symbol. Its multiplier is marked
   // on an individual Wild, and persists in that Wild's position.

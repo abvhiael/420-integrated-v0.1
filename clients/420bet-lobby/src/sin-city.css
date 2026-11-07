@@ -286,3 +286,49 @@ main.immersive .view-scroll:has(.sc-game){background:transparent}
   font-size:clamp(22px,6vw,36px);
  }
 }
+
+/* Sin City always-visible game paytable occupies the right of the 5×4 reels.
+   During Hotbox, the collection ladder temporarily takes that same position. */
+.sc-game .sc-play-area:has(.sc-ways-side){grid-template-columns:minmax(0,1fr) clamp(200px,20vw,245px)}
+.sc-game .sc-ways-side{
+ min-width:0;max-height:420px;min-height:0;overflow:hidden;display:flex;flex-direction:column;
+ gap:5px;margin:6px 0 0;padding:8px 7px;
+ border:2px solid #e8b84e;border-radius:10px;
+ background:linear-gradient(170deg,#431849,#1c0c2c 45%,#130a1c);
+ color:#fcefbf;box-shadow:inset 0 0 19px #682772,0 0 8px #e6a84366;
+}
+.sc-game .sc-ways-heading{
+ text-align:center;font-size:clamp(13px,1.3vw,17px);font-weight:900;color:#ffe178;
+ text-shadow:0 0 10px #f4b93c;letter-spacing:.04em;
+}
+.sc-game .sc-ways-description,.sc-game .sc-ways-footer{
+ display:block;text-align:center;font-size:9px;line-height:1.35;color:#baff9c;
+}
+.sc-game .sc-ways-footer{padding-top:2px;border-top:1px solid #745982}
+.sc-game .sc-ways-tier{
+ display:grid;grid-template-columns:minmax(0,1.28fr) repeat(3,minmax(0,.72fr));
+ gap:3px;align-items:center;min-height:25px;
+ border-bottom:1px solid #654976;font-size:10px;font-variant-numeric:tabular-nums;
+}
+.sc-game .sc-ways-tier-head{
+ min-height:20px;flex:0 0 auto;color:#ffe5a4;font-weight:900;text-align:center;
+ border-bottom:2px solid #c89d46;
+}
+.sc-game .sc-ways-payout-list{min-height:0;flex:1;overflow-y:auto;overflow-x:hidden;scrollbar-width:thin}
+.sc-game .sc-ways-symbol{display:flex;align-items:center;min-width:0;gap:3px;overflow:hidden}
+.sc-game .sc-ways-symbol img{display:block;width:25px;height:25px;flex:0 0 25px;object-fit:contain}
+.sc-game .sc-ways-symbol-name{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;font-weight:800;font-size:9px}
+.sc-game .sc-ways-amount{color:#afff87;text-align:center;font-size:10px;white-space:nowrap}
+@media(min-width:761px) and (max-height:760px){
+ .sc-game .sc-ways-side{max-height:345px}
+ .sc-game .sc-ways-tier{min-height:23px}
+}
+@media(max-width:760px){
+ .sc-game .sc-play-area:has(.sc-ways-side){grid-template-columns:minmax(0,1fr)}
+ .sc-game .sc-ways-side{max-height:none;overflow:visible}
+ .sc-game .sc-ways-payout-list{max-height:240px;overflow-y:auto}
+ .sc-game .sc-ways-tier{grid-template-columns:minmax(0,1.35fr) repeat(3,minmax(0,.8fr));min-height:29px}
+ .sc-game .sc-ways-symbol img{width:27px;height:27px;flex-basis:27px}
+ .sc-game .sc-ways-symbol-name{font-size:11px}
+ .sc-game .sc-ways-amount{font-size:11px}
+}

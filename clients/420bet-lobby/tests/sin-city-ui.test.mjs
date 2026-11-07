@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {parseHTML} from 'linkedom';
 import {createSinCityPractice} from '../src/sin-city-ui.js';
-import {initialState,BASE_STRIPS,FREE_STRIPS} from '../src/sin-city-engine.js';
+import {initialState,BASE_STRIPS,FREE_STRIPS,PAYTABLE,FREE_PAYTABLE} from '../src/sin-city-engine.js';
 
 const setup=(options={})=>{
  const {document,window}=parseHTML('<html><body></body></html>');
@@ -225,5 +225,38 @@ test('Free Spins Complete remains on screen until explicitly clicked and shows w
   assert.equal(root.getPresentationState().phase,'idle');
   assert.equal(root.querySelector('.sc-free-complete'),null);
   assert.equal(root.getPresentationState().mode,'base');
+ }finally{root.stopAnimation();}
+});
+
+test('calibrated base paytable is permanently shown beside the five reels',()=>{
+ const {root}=setup();
+ try{
+  const panel=root.querySelector('.sc-play-area .sc-ways-side');
+  assert.ok(panel,'Game paytable must be present beside reels without opening INFO');
+  assert.ok(root.querySelector('.sc-play-area .sc-reels'));
+  assert.equal(panel.querySelectorAll('.sc-ways-tier:not(.sc-ways-tier-head)').length,Object.keys(PAYTABLE).length);
+  assert.match(panel.textContent,/GAME PAYTABLE/);
+  const row=panel.querySelector('[data-symbol="BOBBY"]');
+  assert.ok(row);
+  assert.ok(row.querySelector('img[src*="sym_bobby_wild.png"]'));
+  assert.ok(row.textContent.includes(Number(PAYTABLE.BOBBY[2].toFixed(5)).toString()+'×'));
+ }finally{root.stopAnimation();}
+});
+test('Chronic Sessions side paytable changes to calibrated free-spin payouts',()=>{
+ const {root}=setup({initialState:{...initialState(),mode:'free',freeRemaining:8}});
+ try{
+  const panel=root.querySelector('.sc-play-area .sc-ways-side');
+  assert.ok(panel);
+  assert.match(panel.textContent,/FREE SPINS PAYTABLE/);
+  assert.match(panel.textContent,/ALL WILDS STICK/);
+  assert.ok(panel.querySelector('[data-symbol="BOBBY"]').textContent.includes(Number(FREE_PAYTABLE.BOBBY[2].toFixed(5)).toString()+'×'));
+  assert.equal(root.querySelector('.sc-hotbox-side'),null);
+ }finally{root.stopAnimation();}
+});
+test('during Hotbox the collection ladder replaces the general ways paytable',()=>{
+ const {root}=setup({initialState:{...initialState(),mode:'hotbox',respins:3,locked:[0,5,8]}});
+ try{
+  assert.ok(root.querySelector('.sc-play-area .sc-hotbox-side'));
+  assert.equal(root.querySelector('.sc-play-area .sc-ways-side'),null);
  }finally{root.stopAnimation();}
 });

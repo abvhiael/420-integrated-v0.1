@@ -103,7 +103,7 @@ export function createCannabisCowboyShell(doc=globalThis.document){
  left.append(paytable);
  const features=el(doc,'div','cc-sidebar-features');
  features.append(panel(doc,'ENDLESS HARVEST',['3 scatters → 8 free spins · 4 → 12','5 → 16 · 6+ → 20'],'cc-feature-panel'));
- features.append(panel(doc,'SMOKE RING WILDS',['Sticky wilds during free spins'],'cc-feature-panel'));
+ features.append(panel(doc,'SMOKE RING WILDS',['Wilds substitute for matching symbols · no sticky wilds'],'cc-feature-panel'));
  features.append(panel(doc,'ON THE ROAD AGAIN',['3 Road Trip Tickets · five stops'],'cc-feature-panel'));
  left.append(features);
  cabinet.append(left,center);

@@ -125,6 +125,16 @@ export function createCannabisCowboyPractice(doc=globalThis.document,options={})
  };
  const showBonusSplash=(kind,credits,multiplier=1,total=credits,spins=0)=>{
   bonusSplash.replaceChildren();bonusSplash.dataset.bonus=kind;
+  if(kind==='harvest'){
+   // Approved full-scene Cole Haze art already includes the heading and
+   // CLICK TO CONTINUE. The blank green plaque is reserved for live credits.
+   const payout=doc.createElement('strong');payout.className='cc-bonus-total-amount cc-harvest-splash-credits';
+   payout.textContent=format(total)+' CREDITS';
+   bonusSplash.append(payout);
+   bonusSplash.hidden=false;
+   bonusSplash.setAttribute('aria-label','Endless Harvest Collected! '+format(total)+' credits won. Click anywhere to continue');
+   return;
+  }
   const title=doc.createElement('strong');title.className='cc-bonus-total-title';
   title.textContent=kind==='road'?'ROAD TRIP COMPLETE':'ENDLESS HARVEST COMPLETE';
   const cowboy=doc.createElement('img');cowboy.className='cc-bonus-cowboy';

@@ -13,6 +13,11 @@ test('Cannabis Cowboy M2 screen uses approved asset and has an isolated 6x8 stat
  assert.equal(COWBOY_PREVIEW_GRID.length,48);
  assert.equal(root.querySelectorAll('.cc-cell').length,48);
  assert.equal(root.querySelector('.cc-approved-cabinet').getAttribute('src'),COWBOY_ART.lobby);
+ const header=root.querySelector('.cc-title-banner');
+ assert.equal(header.querySelector('.cc-title-logo').getAttribute('src'),COWBOY_ART.header);
+ assert.equal(header.querySelector('.cc-title-logo').getAttribute('alt'),'Cannabis Cowboy');
+ assert.equal(header.querySelectorAll('img').length,1);
+ assert.equal(header.textContent.trim(),'','header contains only the transparent logo');
  assert.equal(root.querySelectorAll('.cc-right-rail .cc-panel').length,4);
  assert.match(root.textContent,/ENDLESS HARVEST/);
  assert.match(root.textContent,/SMOKE RING WILDS/);

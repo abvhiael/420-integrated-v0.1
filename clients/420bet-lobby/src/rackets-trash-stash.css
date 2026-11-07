@@ -57,3 +57,10 @@
 @media(max-width:920px){.rts-layout{grid-template-columns:1fr}.rts-side{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.rts-payline-map{grid-template-columns:repeat(4,minmax(0,1fr))}}
 @media(max-width:580px){.rts-header{padding:16px 10px 95px}.rts-mascot{height:97px;right:5px}.rts-side{grid-template-columns:1fr}.rts-payline-map{grid-template-columns:repeat(2,minmax(0,1fr))}.rts-main{padding:5px}.rts-controls{font-size:12px}}
 @media(prefers-reduced-motion:reduce){.rts-roll-track,.rts-win-line{animation:none}}
+
+/* QA-only bonus launcher; keeps original payout and bonus information panels intact. */
+.rts-game .rts-test-toggle{display:block;margin:15px auto 4px;padding:10px 24px;background:linear-gradient(115deg,#74258b,#32144f);border:3px solid #bc6aff;box-shadow:0 0 15px #a035ff77;color:#fff;font-size:15px}
+.rts-test-panel{margin:12px auto 16px;border:2px solid #be6cf7;border-radius:14px;padding:15px;background:linear-gradient(145deg,#321044,#130d25);display:flex;gap:9px;flex-wrap:wrap;align-items:center;justify-content:center}
+.rts-test-panel h3{margin:0 0 6px;width:100%;color:#d5ff80;text-align:center;font-size:19px}
+.rts-game .rts-test-choice{border-color:#99ff52;background:linear-gradient(125deg,#304c21,#2b1745);font-size:12px;padding:10px 12px}
+.rts-test-panel p{width:100%;font-size:12px;text-align:center;color:#e4d7f2;margin:7px 0 0}

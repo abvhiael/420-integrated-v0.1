@@ -1200,3 +1200,23 @@
  display:none!important;
  pointer-events:none!important;
 }
+
+
+/* Approved Cole Haze "On the Road Again!" trigger splash. Full image includes
+   FIVE STOPS / PICK A GUITAR CASE AT EACH STOP and awaits explicit dismissal. */
+.cc-game[data-view="cannabis-cowboy"] .cc-road-trigger-splash{
+ position:absolute;z-index:66;inset:1%;width:98%;height:98%;
+ margin:0;padding:0;border:0;border-radius:9px;overflow:hidden;
+ display:block;
+ background:#13261c url('/assets/420bet/cannabis-cowboy/cannabis-cowboy-road-trip-trigger-splash.png') center / 100% 100% no-repeat;
+ box-shadow:0 0 25px #000b;cursor:pointer;
+}
+.cc-game[data-view="cannabis-cowboy"] .cc-road-trigger-splash:not([hidden]){
+ pointer-events:auto;
+}
+.cc-game[data-view="cannabis-cowboy"] .cc-road-trigger-splash[hidden]{
+ display:none!important;pointer-events:none!important;
+}
+.cc-game[data-view="cannabis-cowboy"] .cc-road-trigger-splash:focus-visible{
+ outline:3px solid #ffe186;outline-offset:2px;
+}

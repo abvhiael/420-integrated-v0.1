@@ -2,7 +2,7 @@ name: Sin City RTP Monte Carlo qualification
 on:
   push:
     branches:
-      - calibrate/sin-city-sticky-multiplier-95-96
+      - calibrate/sin-city-ashtray-94-95
     paths:
       - 'clients/420bet-lobby/tests/sin-city-rtp-audit.mjs'
       - 'clients/420bet-lobby/src/sin-city-engine.js'

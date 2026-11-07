@@ -105,3 +105,46 @@
  .bb-header .bb-title-logo{height:115px}
 }
 @media(prefers-reduced-motion:reduce){.bb-hold-tumble{animation:none}}
+
+/* Hold & Win: continuous scrolling reel strips, left-to-right stop rhythm. */
+.bb-hold-cell-rolling{position:relative;overflow:hidden;isolation:isolate}
+.bb-hold-spin-window{position:absolute;inset:0;overflow:hidden;background:#16091f}
+.bb-hold-spin-track{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;
+  animation:bb-hold-continuous .55s linear infinite;
+  transform:translate3d(0,-100%,0);
+  will-change:transform;
+}
+.bb-hold-spin-tile{
+  flex:0 0 100%;width:100%;height:100%;display:grid;place-items:center;
+  background:radial-gradient(circle,#402056 4%,#100a1a 90%);
+  border-bottom:2px solid #b38737;
+}
+.bb-hold-spin-tile img{width:92%;height:92%;object-fit:contain;filter:drop-shadow(0 0 8px #dd9f44)}
+@keyframes bb-hold-continuous{
+  0%{transform:translate3d(0,-300%,0)}
+  100%{transform:translate3d(0,-100%,0)}
+}
+.bb-hold-reel-spinning .bb-hold-spin-track{animation-duration:.55s}
+.bb-hold-reel-spinning:nth-child(even) .bb-hold-spin-track{animation-duration:.47s}
+.bb-hold-reel-spinning .bb-coin-locked{z-index:3}
+.bb-hold-reel-stopped .bb-cell{animation:bb-reel-settle .28s ease-out}
+@keyframes bb-reel-settle{0%{filter:brightness(1.7);transform:translateY(-3px)}100%{filter:brightness(1);transform:translateY(0)}}
+.bb-new-coin{z-index:2;animation:bb-new-coin-flash .85s ease-out}
+@keyframes bb-new-coin-flash{0%{box-shadow:inset 0 0 45px 16px #fce45e}60%{box-shadow:inset 0 0 30px 8px #5cff48}100%{box-shadow:inset 0 0 0 0 transparent}}
+.bb-collect-coin{box-shadow:inset 0 0 14px #9959e8}
+.bb-collect-announcement{
+  display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;
+  margin:11px auto 0;padding:8px 14px;width:max-content;max-width:100%;
+  border:2px solid #ab86ff;border-radius:15px;
+  background:#220d38e6;color:#fff0bb;
+  text-shadow:0 1px 4px #12051e;
+  box-shadow:0 0 14px #8954f6;
+  animation:bb-collect-appear .35s ease-out;
+}
+.bb-collect-announcement img{height:60px;width:75px;object-fit:contain}
+.bb-collect-announcement strong{font-size:clamp(15px,2.2vw,23px)}
+.bb-collect-announcement span{font-size:clamp(13px,1.9vw,20px);font-weight:900;color:#8dff6b}
+@keyframes bb-collect-appear{from{transform:scale(.83);opacity:0}to{transform:scale(1);opacity:1}}
+@media(prefers-reduced-motion:reduce){.bb-hold-spin-track,.bb-new-coin,.bb-hold-reel-stopped .bb-cell,.bb-collect-announcement{animation:none}}

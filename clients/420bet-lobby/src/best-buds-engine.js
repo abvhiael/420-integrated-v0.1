@@ -33,7 +33,7 @@ export const initialState=()=>({
  balance:1000,bet:2,mode:'base',board:boardAt(BASE_STRIPS,[0,7,14,21,28]),
  lastWins:[],lastWin:0,lastFeature:'',message:'SPIN TO START YOUR ROAD TRIP',roundBet:2,roundGross:0,
  hold:[],respins:0,holdReturn:'base',pendingFree:0,freeLeft:0,freeTotal:0,freeSummary:null,
- featureTotal:0,spinNumber:0,qa:null,holdReveal:null,holdNewKeys:[],freeWildMultipliers:{}
+ featureTotal:0,spinNumber:0,qa:null,holdReveal:null,holdNewKeys:[],collectSmokeEvent:null,freeWildMultipliers:{}
 });
 export const coinValue=(rng=Math.random)=>[.2,.4,.6,1,1.5,2,3,5,10][pick(9,rng)];
 const isWild=s=>s==='WILD1'||s==='WILD2';
@@ -65,14 +65,26 @@ export function evaluateLines(board,bet,{wildMultipliers={}}={}){
 export const scatterCount=board=>board.filter(col=>col.includes('SCATTER')).length;
 export const coinPositions=board=>board.flatMap((col,r)=>col.flatMap((s,y)=>s==='HOTBOX'?[r*ROWS+y]:[]));
 export const randomStops=(rng=Math.random)=>BASE_STRIPS.map(s=>pick(s.length,rng));
-const clone=s=>({...s,board:s.board.map(col=>[...col]),hold:s.hold.map(v=>({...v})),holdReveal:s.holdReveal?.map(v=>({...v}))??null,holdNewKeys:[...(s.holdNewKeys??[])],freeWildMultipliers:{...(s.freeWildMultipliers??{})},lastWins:[],qa:null});
+const clone=s=>({...s,board:s.board.map(col=>[...col]),hold:s.hold.map(v=>({...v})),holdReveal:s.holdReveal?.map(v=>({...v}))??null,holdNewKeys:[...(s.holdNewKeys??[])],collectSmokeEvent:s.collectSmokeEvent?{...s.collectSmokeEvent}:null,freeWildMultipliers:{...(s.freeWildMultipliers??{})},lastWins:[],qa:null});
 const capAward=(s,amount)=>{
  const left=Math.max(0,cash(s.roundBet*MAX_WIN_MULTIPLIER-s.roundGross));
  const award=cash(Math.min(Math.max(0,amount),left));
  s.roundGross=cash(s.roundGross+award);s.balance=cash(s.balance+award);s.lastWin=award;
  return award;
 };
-const toBoard=arr=>Array.from({length:REELS},(_,r)=>Array.from({length:ROWS},(_,y)=>arr[r*ROWS+y]??null));
+// Each Collect Smoke pays a snapshot of the currently locked ordinary HOTBOX
+// coin multipliers. Prior Collect Smoke prizes do not collect themselves, and
+// jackpots and multiplier modifiers are excluded from the collection pool.
+export const collectSmokeValue=coins=>cash(coins.reduce((sum,c)=>sum+(c.kind==='coin'?c.value:0),0));
+export const hotboxTotalMultiplier=coins=>{
+ let total=0,multiplier=1;
+ for(const c of coins){
+  if(c.kind==='coin'||c.kind==='collect')total+=c.value;
+  else if(c.kind==='jackpot')total+=JACKPOTS[c.value];
+  else if(c.kind==='multiplier')multiplier*=c.value;
+ }
+ return cash(total*Math.min(multiplier,6));
+};
 function lockedCoin(s,key,rng){
  const jackpots=['MINI','MINOR','MAJOR','GRAND'];
  let kind='coin',value=coinValue(rng);
@@ -82,18 +94,11 @@ function lockedCoin(s,key,rng){
 function startHold(s,board,rng,returnTo='base'){
  s.mode='hold';s.holdReturn=returnTo;s.respins=3;
  s.hold=coinPositions(board).map(key=>lockedCoin(s,key,rng));
- s.holdReveal=s.hold.map(v=>({...v}));s.holdNewKeys=s.hold.map(v=>v.key);
+ s.holdReveal=s.hold.map(v=>({...v}));s.holdNewKeys=s.hold.map(v=>v.key);s.collectSmokeEvent=null;
  s.lastFeature='hold-start';s.message='HOTBOX HOLD & WIN — 3 RESPINS';
 }
 function finishHold(s){
- let total=0, multiplier=1;
- for(const c of s.hold){
-  if(c.kind==='coin')total+=c.value;
-  else if(c.kind==='jackpot')total+=JACKPOTS[c.value];
-  else if(c.kind==='collect')total+=c.value;
-  else if(c.kind==='multiplier')multiplier*=c.value;
- }
- total*=Math.min(multiplier,6);
+ const total=hotboxTotalMultiplier(s.hold);
  const paid=capAward(s,s.roundBet*total);
  s.featureTotal=paid;s.lastFeature='hold-end';s.message='HOTBOX COMPLETE · '+paid.toFixed(2)+' CREDITS';
  s.holdReveal=s.hold.map(v=>({...v}));s.hold=[];s.respins=0;
@@ -102,7 +107,7 @@ function finishHold(s){
 }
 export function nextSpin(previous,{rng=Math.random,stops=null,force=null}={}){
  const s=clone(previous),mode=s.mode;
- s.freeSummary=null;s.lastFeature='';s.lastWin=0;s.lastWins=[];
+ s.freeSummary=null;s.lastFeature='';s.lastWin=0;s.lastWins=[];s.collectSmokeEvent=null;
  if(mode==='base'){
   s.holdReveal=null;s.holdNewKeys=[];
   if(s.balance<s.bet){s.message='NOT ENOUGH PRACTICE CREDITS';return s;}
@@ -118,29 +123,39 @@ export function nextSpin(previous,{rng=Math.random,stops=null,force=null}={}){
   for(const key of candidates){
    if((force==='fill'||((force==='collect'||force==='jackpot')&&key===candidates[0]))||rng()<.105){
     let c=lockedCoin(s,key,rng);
-    if(force==='collect'&&key===candidates[0])c={key,kind:'collect',value:1};
+    if(force==='collect'&&key===candidates[0])c={key,kind:'collect',value:collectSmokeValue(s.hold)};
     if(force==='jackpot'&&key===candidates[0])c={key,kind:'jackpot',value:'MAJOR'};
     s.hold.push(c);
    }
   }
   s.hold.sort((a,b)=>a.key-b.key);
   s.holdNewKeys=s.hold.filter(c=>!occupied.has(c.key)).map(c=>c.key);
-  s.holdReveal=s.hold.map(v=>({...v}));
   if(s.holdNewKeys.length){
    s.respins=3;s.lastFeature='hold-hit';
-   // Milestones transform the most recently landed coin, with no duplication.
+   // At each threshold convert a newly landed coin, not whichever coin
+   // happened to sort last on the board. Its collection is a one-time
+   // snapshot of all OTHER locked ordinary coin values.
    for(const threshold of [10,13]){
     if(occupied.size<threshold&&s.hold.length>=threshold){
-     const last=s.hold.at(-1);
-     if(last.kind==='coin'&&force!=='fill'){
-      const roll=rng();if(roll<.33){last.kind='collect';last.value=cash(s.hold.filter(c=>c.kind==='coin'&&c!==last).reduce((a,c)=>a+c.value,0));}
-      else if(roll<.66){last.kind='multiplier';last.value=2;}
-      else {last.kind='jackpot';last.value='MINI';}
+     const coin=s.hold.find(c=>c.key===s.holdNewKeys.at(-1));
+     if(coin?.kind==='coin'&&force!=='fill'){
+      const roll=rng();
+      if(roll<.33){coin.kind='collect';coin.value=collectSmokeValue(s.hold.filter(c=>c!==coin));}
+      else if(roll<.66){coin.kind='multiplier';coin.value=2;}
+      else {coin.kind='jackpot';coin.value='MINI';}
      }
     }
    }
+   const newCollects=s.hold.filter(c=>s.holdNewKeys.includes(c.key)&&c.kind==='collect');
+   if(newCollects.length){
+    const sum=cash(newCollects.reduce((a,c)=>a+c.value,0));
+    s.collectSmokeEvent={multipliers:sum,credits:cash(sum*s.roundBet),keys:newCollects.map(c=>c.key)};
+    s.lastFeature='collect-smoke';
+   }
   }
-  s.message='HOTBOX · '+s.hold.length+'/15 COINS · '+s.respins+' RESPINS LEFT';
+  // Keep the final reveal in sync with milestone upgrades.
+  s.holdReveal=s.hold.map(v=>({...v}));
+  s.message=s.collectSmokeEvent?'COLLECT SMOKE! +'+s.collectSmokeEvent.credits.toFixed(2)+' CREDITS ADDED · '+s.respins+' RESPINS LEFT':'HOTBOX · '+s.hold.length+'/15 COINS · '+s.respins+' RESPINS LEFT';
   if(s.respins===0||s.hold.length===15)finishHold(s);
   return s;
  }
@@ -192,7 +207,7 @@ export const practiceBonus=(state,choice,rng=Math.random)=>{
   s.mode='free';s.freeLeft=2;s.freeTotal=0;s.qa='wild10';s.message='QA WILD MULTIPLIER · NEXT FREE RIDE';return s;
  }
  if(choice==='collect'||choice==='jackpot'||choice==='fill'){
-  s.mode='hold';s.respins=3;s.holdReturn='base';s.hold=Array.from({length:choice==='fill'?14:9},(_,key)=>({key,kind:'coin',value:coinValue(rng)}));s.holdReveal=s.hold.map(v=>({...v}));s.holdNewKeys=[];s.message='QA HOTBOX · TEST '+choice.toUpperCase();s.qa=choice;return s;
+  s.mode='hold';s.respins=3;s.holdReturn='base';s.hold=Array.from({length:choice==='fill'?14:9},(_,key)=>({key,kind:'coin',value:coinValue(rng)}));s.holdReveal=s.hold.map(v=>({...v}));s.holdNewKeys=[];s.collectSmokeEvent=null;s.message='QA HOTBOX · TEST '+choice.toUpperCase();s.qa=choice;return s;
  }
  return s;
 };

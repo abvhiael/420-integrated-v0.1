@@ -4,7 +4,7 @@ const SYMBOL_ART=Object.freeze({
  BONG:'sym_bong.png',JOINT:'sym_joint.png',CHIPS:'sym_chips.png',RECORD:'sym_record.png',
  PAPERS:'sym_rollingpapers.png',LIGHTER:'sym_lighter.png',SUNGLASSES:'sym_sunglasses.png',
  GUITAR:'sym_guitar.png',LEAF:'sym_leaf.png',BUDDY1:'sym_buddy1_portrait.png',
- BUDDY2:'sym_buddy2_portrait.png',WILD:'sym_wild.svg',SCATTER:'sym_scatter_van.png',HOTBOX:'sym_hotbox_100.png'
+ BUDDY2:'sym_buddy2_portrait.png',WILD:'sym_wild.png',SCATTER:'sym_scatter_van.png',HOTBOX:'sym_hotbox_100.png'
 });
 const asset=(group,name)=>ROOT+group+'/'+name;
 const make=(doc,tag,cls,text)=>{const el=doc.createElement(tag);if(cls)el.className=cls;if(text!==undefined)el.textContent=text;return el;};

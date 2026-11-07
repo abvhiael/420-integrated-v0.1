@@ -843,3 +843,43 @@
  .cc-game .cc-road-case-reveal{font-size:10px;padding:3px 4px}
  .cc-game .cc-bonus-total-splash{inset:2%;width:96%;height:96%}
 }
+
+
+/* Transparent Cowboy play surface. Keep the existing illustrated ranch wallpaper
+   on .immersive, with no additional opaque paints between it and reel symbols.
+   These rules intentionally come after the older cabinet/cell gradients. */
+.cc-game[data-view="cannabis-cowboy"] .cc-stage,
+.cc-game[data-view="cannabis-cowboy"] .cc-middle,
+.cc-game[data-view="cannabis-cowboy"] .cc-symbol-grid,
+.cc-game[data-view="cannabis-cowboy"] .cc-left-rail,
+.cc-game[data-view="cannabis-cowboy"] .cc-sidebar-brand{
+  background:transparent;
+  background-image:none;
+}
+.cc-game[data-view="cannabis-cowboy"] .cc-stage{
+  /* Retain the gold outer frame, footprint and layout. */
+  box-shadow:0 0 25px #f7c04a77;
+}
+.cc-game[data-view="cannabis-cowboy"] .cc-symbol-grid > .cc-cell,
+.cc-game[data-view="cannabis-cowboy"] .cc-symbol-grid > .cc-cell.cc-symbol-bud,
+.cc-game[data-view="cannabis-cowboy"] .cc-symbol-grid > .cc-cell.cc-symbol-cole,
+.cc-game[data-view="cannabis-cowboy"] .cc-symbol-grid > .cc-cell.cc-symbol-scatter,
+.cc-game[data-view="cannabis-cowboy"] .cc-symbol-grid > .cc-cell.cc-symbol-road-ticket,
+.cc-game[data-view="cannabis-cowboy"] .cc-symbol-grid > .cc-cell.cc-symbol-smoke-wild{
+  background:transparent;
+  background-image:none;
+  /* Visible tile borders keep the 6x8 layout legible over the landscape. */
+  box-shadow:inset 0 0 5px #07160c80;
+}
+.cc-game[data-view="cannabis-cowboy"] .cc-symbol-grid > .cc-cell.cc-winning{
+  background:rgba(48,123,54,.22);
+  box-shadow:0 0 17px #8afb66,inset 0 0 13px #8bff61;
+}
+/* Information should NOT inherit the transparency of the game cabinet. */
+.cc-game[data-view="cannabis-cowboy"] .cc-left-rail .cc-paytable,
+.cc-game[data-view="cannabis-cowboy"] .cc-left-rail .cc-sidebar-features .cc-panel{
+  background:#25180f;
+  background-image:linear-gradient(125deg,#492818,#20160f 50%,#36251a);
+  border:3px ridge #d7a44d;
+  box-shadow:0 0 15px #130b07,inset 0 0 19px #c19e2840;
+}

@@ -107,7 +107,7 @@ export function createRacketsTrashStash(doc=globalThis.document,options={}){
    }
    if(phase==='spinning'&&r>=stopped){
     const roll=el(doc,'div','rts-roll'),track=el(doc,'div','rts-roll-track');
-    const symbols=['TRASH','PIZZA','RACKET','COOLER','MUSHROOM','GLOVE','BLUE05','A','SEEDS','WILD'];
+    const symbols=['TRASH','PIZZA','RACKET','COOLER','MUSHROOM','GLOVE','BLUE05','A','SEEDS','WILD','K','PURPLE1'];
     for(let i=0;i<24;i++)track.append(image(ART[symbols[i%symbols.length]],''));
     roll.append(track);reel.append(roll);
    }

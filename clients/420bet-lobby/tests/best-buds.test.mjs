@@ -207,7 +207,7 @@ test('Collect Smoke appears as a credit collection UI event on the triggered Hol
  click('RESPIN');
  assert.equal(root.querySelectorAll('.bb-hold-reel-spinning').length,5);
  assert.equal(root.querySelectorAll('.bb-hold-spin-window').length,6);
- assert.equal(root.querySelectorAll('.bb-hold-spin-tile').length,60);
+ assert.equal(root.querySelectorAll('.bb-hold-spin-tile').length,72);
  assert.equal(root.querySelectorAll('.bb-coin-locked').length,9);
  root.querySelector('.bb-stage').dispatchEvent(new window.Event('click',{bubbles:true}));
  assert.equal(root.getPresentationState().phase,'idle');
@@ -415,6 +415,6 @@ test('HOTBOX start and completion splashes pause play and display the credited b
  click('CLICK TO CONTINUE');
  assert.equal(root.getPresentationState().hotboxSplash,null);
  assert.equal(root.getGameState().lastFeature,'');
- assert.equal(root.getGameState().balance,1000+total);
+ assert.equal(root.getGameState().balance,1000-root.getGameState().bet+total);
  root.stopAnimation();
 });

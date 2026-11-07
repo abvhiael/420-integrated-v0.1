@@ -964,29 +964,51 @@ test('Comic result stays over the reels for precisely 1500ms before character fe
 
 const baseSlotWeights=[3,4,5,5,4,5,7,7,10,12,12,14,14,14,14,14,3,2,3,2];
 const mid=i=>(baseSlotWeights.slice(0,i).reduce((a,b)=>a+b,0)+baseSlotWeights[i]/2)/baseSlotWeights.reduce((a,b)=>a+b,0);
-test('HIDE THE STASH always adds at least three crates even with minimum RNG',()=>{
- const modified=modifier(board(),'jen',seq(0));
- assert.equal(modified.label,'HIDE THE STASH');
- assert.equal(modified.grid.filter(s=>s==='stash').length,3);
+test('HIDE THE STASH uses one fresh spin, carries base crates, adds only two or three',()=>{
+ const source=board();source[0]='stash';
+ const min=modifier(source,'jen',seq(0));
+ assert.equal(min.featureSpin,true);
+ assert.equal(min.label,'HIDE THE STASH');
+ assert.equal(min.carriedCrates,1);
+ assert.equal(min.landedCrates,0);
+ assert.equal(min.addedCrates,2);
+ assert.equal(min.stashCount,3);
+ const max=modifier(source,'jen',seq(.24));
+ assert(max.addedCrates>=2&&max.addedCrates<=3);
+ assert.equal(max.stashCount,max.grid.filter(x=>x==='stash').length);
 });
-test('Jen HIDE THE STASH awards exactly one Hold & Win from added crates',()=>{
+test('Jen HIDE THE STASH can fail with two crates — no automatic bonus',()=>{
  const draws=[mid(1),mid(1),mid(1),...Array(17).fill(mid(11))];
- // 20 base draws, Jen qualification roll, modifier choice, crate count,
- // replacement positions, then Hold & Win RNG draws.
- const values=[...draws,0,0,0,0,0,...Array(100).fill(.975)];
- let index=0;
- const after=spin(newGame(),()=>values[index++]??.975);
+ let i=0;const values=[...draws,0,0,0,0,0,...Array(100).fill(0)];
+ const after=spin(newGame(),()=>values[i++]??0);
  const jen=after.last.events.find(e=>e.type==='jen');
- const stashEvents=after.last.events.filter(e=>e.type==='stash');
- assert.equal(after.last.grid.filter(s=>s==='stash').length,0);
  assert.equal(jen.label,'HIDE THE STASH');
+ assert.equal(jen.featureSpin,true);
+ assert.equal(jen.stashCount,2);
+ assert.equal(jen.awardedStashBonus,false);
+ assert.equal(after.last.events.filter(e=>e.type==='stash').length,0);
+ assert.match(comicActionCopy(jen).detail,/ONE EXTRA SPIN/);
+});
+test('Jen HIDE THE STASH carries one base crate to qualify with two new crates',()=>{
+ const draws=[mid(1),mid(1),mid(1),mid(18),...Array(16).fill(mid(11))];
+ let i=0;const values=[...draws,0,0,0,0,0,...Array(250).fill(0)];
+ const after=spin(newGame(),()=>values[i++]??0);
+ const jen=after.last.events.find(e=>e.type==='jen');
+ const stash=after.last.events.filter(e=>e.type==='stash');
+ assert.equal(jen.label,'HIDE THE STASH');
+ assert.equal(jen.carriedCrates,1);
+ assert.equal(jen.addedCrates,2);
+ assert.equal(jen.stashCount,3);
  assert.equal(jen.awardedStashBonus,true);
- assert(jen.stashCount>=3);
- assert.equal(stashEvents.length,1,'Do not run two Hold & Win bonuses');
- assert.equal(stashEvents[0].triggerSource,'jen-hide-the-stash');
- assert.equal(stashEvents[0].triggerStashCount,jen.stashCount);
- assert.equal(stashEvents[0].steps[0].board.filter(v=>v!==null).length,3);
- assert.match(comicActionCopy(jen).detail,/HOLD & WIN UNLOCKED/);
+ assert.equal(stash.length,1);
+ assert.equal(stash[0].triggerSource,'jen-hide-the-stash');
+ assert.equal(stash[0].triggerStashCount,3);
+ assert.equal(stash[0].steps[0].board.filter(v=>v!==null).length,3);
+});
+test('More crates at qualification seed more initial Hold & Win prize positions',()=>{
+ const bonus=stashBonus(seq(.975),5);
+ assert.equal(bonus.steps[0].board.filter(v=>v!==null).length,5);
+ assert.equal(bonus.steps[0].remaining,3);
 });
 test('An original three-crate spin awards just one base-trigger Hold & Win',()=>{
  const draws=[mid(18),mid(18),mid(18),...Array(17).fill(mid(11))];

@@ -32,7 +32,7 @@ export function createSinCityPractice(doc=globalThis.document,options={}){
   if(panel==='info'){
    modal.append(el(doc,'p','','5 reels × 4 rows · 1,024 always-active ways to win. Match three or more identical symbols from left to right; Wild substitutes for paying symbols, not scatters or gems.'));
    const headings=[
-    ['PUFF PUFF PASS','Three or more ashtray symbols: one eligible symbol on each affected reel becomes a Wild for this result.'],
+    ['PUFF PUFF PASS','Three or more natural Ashtrays on the board activate Wild propagation in both base spins and Chronic Sessions. One eligible symbol on each affected reel becomes a Wild. During free spins, those new Wilds stick until the feature ends; Ashtray ways still pay only for natural Ashtrays.'],
     ['HOTBOX RESPINS','Three or more emerald gems activate three respins. Every collected gem remains visible and locked while other symbols spin. New gems reset the counter to three. The collection pays once when the respins finish, with growing rewards from three gems through twenty.'],
     ['CHRONIC SESSIONS','Scatter symbols across 3, 4, or 5 reels trigger 8, 12, or 20 free spins. EVERY Wild that lands stays visible and locked for the remainder of the feature, up to all twenty positions. New qualifying scatters may retrigger five more spins, subject to a 50-spin limit.'],
     ['DROP IT LIKE IT\'S HOT','During free spins, ANY natural Lowrider assigns a 2×, 3×, 4× or 5× multiplier to an individual Wild. Its badge stays visible and applies to later free-spin ways wins. Highest active badge applies; multipliers do not stack. Wilds never substitute for Lowriders or Ashtrays.']

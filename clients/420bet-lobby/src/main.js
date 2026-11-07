@@ -13,6 +13,7 @@ import {createMaryJanePractice} from './mary-jane-ui.js';
 import {createDadsSecretStash} from './dads-secret-stash-ui.js';
 import {createSinCityPractice} from './sin-city-ui.js';
 import {createBestBudsPractice} from './best-buds-ui.js';
+import {createRacketsTrashStash} from './rackets-trash-stash.js';
 import {createSlotsLobby,slotMachineFromHash,slotMachinePath} from './slots-lobby.js';
 import {createCannabisCowboyShell} from './cannabis-cowboy-ui.js';
 import {createCannabisCowboyPractice} from './cannabis-cowboy-game.js';
@@ -31,6 +32,7 @@ import './pest-control.css';
 import './buzzkill.css';
 import './sin-city.css';
 import './best-buds.css';
+import './rackets-trash-stash.css';
 import './cannabis-cowboy.css';
 import {createNativePreview} from './previews.js';
 import {categories,resolveCatalogue,filterGames} from './catalogue.js';
@@ -76,7 +78,7 @@ function render(){
       if(selectedSlotMachine?.id==='cannabis-cowboy'){
         activePractice=createCannabisCowboyPractice(document);
         wrap.append(activePractice);
-      }else if(selectedSlotMachine){activePractice=selectedSlotMachine.id==='dads-secret-stash'?createDadsSecretStash(document):selectedSlotMachine.id==='mary-jane-sticky-wilds'?createMaryJanePractice(document):selectedSlotMachine.id==='sin-city-high-rollers'?createSinCityPractice(document):selectedSlotMachine.id==='best-buds-hotbox-road-trip'?createBestBudsPractice(document):createPractice('slots',document);wrap.append(activePractice);}
+      }else if(selectedSlotMachine){activePractice=selectedSlotMachine.id==='dads-secret-stash'?createDadsSecretStash(document):selectedSlotMachine.id==='mary-jane-sticky-wilds'?createMaryJanePractice(document):selectedSlotMachine.id==='sin-city-high-rollers'?createSinCityPractice(document):selectedSlotMachine.id==='best-buds-hotbox-road-trip'?createBestBudsPractice(document):selectedSlotMachine.id==='rackets-trash-stash'?createRacketsTrashStash(document):createPractice('slots',document);wrap.append(activePractice);}
       else wrap.append(createSlotsLobby(document,launchSlotMachine));
       main.append(wrap);
     }

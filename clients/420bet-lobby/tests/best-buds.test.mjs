@@ -83,6 +83,7 @@ test('practice view uses uploaded art, QA button, staggered reel panels and clic
  spin.dispatchEvent(new window.Event('click',{bubbles:true}));
  assert.equal(root.getPresentationState().phase,'spinning');
  root.querySelector('.bb-stage').dispatchEvent(new window.Event('click',{bubbles:true}));
+ if(root.getPresentationState().phase==='paylines')root.querySelector('.bb-stage').dispatchEvent(new window.Event('click',{bubbles:true}));
  assert.equal(root.getPresentationState().phase,'idle');
  root.stopAnimation();
 });

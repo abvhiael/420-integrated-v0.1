@@ -75,7 +75,7 @@ export function createBestBudsPractice(doc=globalThis.document,options={}){
    if(svg){
     svg.setAttribute('class','bb-win-overlay');svg.setAttribute('viewBox','0 0 500 300');svg.setAttribute('preserveAspectRatio','none');svg.setAttribute('aria-label','Winning payline '+line.line);
     const route=doc.createElementNS('http://www.w3.org/2000/svg','polyline');
-    route.setAttribute('points',line.rows.map((y,r)=>(50+r*100)+','+(50+y*100)).join(' '));
+    route.setAttribute('points',[[0,line.rows[0]],[...line.rows.map((y,r)=>[50+r*100,y])],[500,line.rows[4]]].flatMap(v=>Array.isArray(v[0])?v:[v]).map(([x,y])=>x+','+(50+y*100)).join(' '));
     route.setAttribute('class','bb-win-path');svg.append(route);stage.append(svg);
    }
    stage.append(make(doc,'div','bb-payline-note','LINE '+line.line+' · '+line.length+' '+line.symbol+' · +'+credit(line.amount)+' · CLICK TO SKIP'));

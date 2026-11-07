@@ -122,3 +122,23 @@ test('uploaded Cannabis Cowboy ranch wallpaper overlays shared base across the f
  assert.ok(root.querySelector('.cc-left-rail .cc-paytable'));
  assert.equal(root.querySelectorAll('.cc-cell').length,48);
 });
+
+
+test('Cowboy desktop layout puts logo, paytable and reel board inside one left-aligned cabinet',()=>{
+ const {document}=parseHTML('<html><body></body></html>');
+ const root=createCannabisCowboyShell(document);
+ const stage=root.querySelector('.cc-stage');
+ assert.equal(stage.children.length,2);
+ assert.equal(stage.children[0].className,'cc-left-rail');
+ assert.equal(stage.children[1].className,'cc-middle');
+ assert.equal(stage.querySelector('.cc-left-rail .cc-title-logo').getAttribute('src'),
+  '/assets/420bet/cannabis-cowboy/cannabis-cowboy-logo.png');
+ assert.ok(stage.querySelector('.cc-left-rail .cc-paytable-table'));
+ assert.equal(stage.querySelectorAll('.cc-symbol-grid > .cc-cell').length,48);
+ const desktop=css.slice(css.lastIndexOf('/* Cowboy stage composition:'));
+ assert.match(desktop,/width:min\(1180px,calc\(100% - clamp\(240px,23vw,440px\)\)\)/);
+ assert.match(desktop,/justify-self:start/);
+ assert.match(desktop,/border:8px ridge var\(--cc-gold\)/);
+ assert.match(desktop,/\.cc-middle\{[\s\S]*?border:0/);
+ assert.match(desktop,/\.cc-console\{[\s\S]*?width:100%/);
+});

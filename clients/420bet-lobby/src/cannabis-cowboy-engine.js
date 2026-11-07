@@ -139,7 +139,7 @@ export function resolveRound(initialBoard,bet,rng=Math.random,options={}){
  assertBoard(initialBoard);
  if(!BET_CHOICES.includes(bet))throw new Error('Unsupported practice wager');
  const stored=options.initialFertile??Array(CELL_COUNT).fill(0);
- if(!Array.isArray(stored)||stored.length!==CELL_COUNT||stored.some(n=>n!==0&&![2,4,8,16,32].includes(n)))throw new Error('Invalid fertile positions');
+ if(!Array.isArray(stored)||stored.length!==CELL_COUNT||stored.some(n=>!Number.isInteger(n)||n<0||(options.bonusMode?n>10:![0,2,4,8,16,32].includes(n))))throw new Error('Invalid fertile positions');
  let board=initialBoard.slice(),fertile=stored.slice(),total=0;
  const sticky=new Set(options.lockedWilds??[]);
  if([...sticky].some(p=>!Number.isInteger(p)||p<0||p>=CELL_COUNT||board[p]!==WILD_SYMBOL))throw new Error('Invalid sticky wilds');
@@ -152,7 +152,7 @@ export function resolveRound(initialBoard,bet,rng=Math.random,options={}){
   let cascadeWin=0;
   for(const cluster of clusters){
    const bonuses=cluster.positions.filter(p=>fertile[p]>0).map(p=>fertile[p]);
-   const harvestMultiplier=bonuses.length?Math.min(MAX_CLUSTER_MULTIPLIER,bonuses.reduce((a,b)=>a+b,0)):1;
+   const harvestMultiplier=options.bonusMode?(bonuses.length?Math.max(...bonuses):1):(bonuses.length?Math.min(MAX_CLUSTER_MULTIPLIER,bonuses.reduce((a,b)=>a+b,0)):1);
    const smokeMultiplier=cluster.wildCount?SMOKE_RING_MULTIPLIER:1;
    const multiplier=Math.min(MAX_CLUSTER_MULTIPLIER,harvestMultiplier*smokeMultiplier);
    const base=clusterPayout(cluster.symbol,cluster.size,bet);
@@ -167,7 +167,7 @@ export function resolveRound(initialBoard,bet,rng=Math.random,options={}){
   // A sticky wild participates in the payout and can grow its underlying cell,
   // but is never cleared from the board during a feature.
   const awardedCells=new Set(paid.flatMap(c=>c.positions));
-  for(const p of awardedCells)fertile[p]=fertile[p]===0?2:Math.min(32,fertile[p]*2);
+  for(const p of awardedCells)fertile[p]=options.bonusMode?Math.min(10,fertile[p]+1):(fertile[p]===0?2:Math.min(32,fertile[p]*2));
   const next=dropAndRefill(board,removed,rng,{lockedWilds:[...sticky]});
   if(options.bonusMode)next.board.forEach((v,p)=>{if(v===WILD_SYMBOL&&sticky.size<MAX_STICKY_WILDS)sticky.add(p);});
   steps.push({index:i+1,before:board.slice(),clusters:paid,removed:[...removed].sort((a,b)=>a-b),after:next.board.slice(),refills:next.refills.slice(),fertile:fertile.slice(),lockedWilds:[...sticky].sort((a,b)=>a-b),cascadeWin,total});

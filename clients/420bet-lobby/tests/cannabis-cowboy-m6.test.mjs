@@ -156,6 +156,9 @@ test('base and free-spin screens both invoke staggered reel stops',()=>{
  const phases=[];
  let guard=0;
  while(guard++<8000){
+  if(h.root.getPracticeState().harvestTriggerVisible){
+   h.root.querySelector('.cc-harvest-trigger-splash').dispatchEvent(new h.window.Event('click'));
+  }
   if(h.root.getPracticeState().freeSpinReady){
    h.root.querySelector('.cc-free-spin-button').dispatchEvent(new h.window.Event('click'));
   }

@@ -653,3 +653,28 @@
 .immersive:has(.cc-game) .cc-console,
 .immersive:has(.cc-game) .cc-practice-notice,
 .immersive:has(.cc-game) .cc-round-status{position:relative;z-index:1}
+
+
+/* Endless Harvest: stable per-cell multiplier borders above ALL spinning masks.
+   Unlike badges inside cc-cell, these never hide as columns rotate. */
+.cc-game .cc-symbol-grid > .cc-multiplier-layer{
+  position:absolute;inset:0;z-index:22;pointer-events:none;
+  overflow:visible;
+}
+.cc-game .cc-multiplier-frame{
+  position:absolute;display:block;
+  border:2px solid #bdff66;
+  border-radius:4px;
+  box-shadow:inset 0 0 0 1px #f4d365,0 0 7px #93ff68c2;
+  box-sizing:border-box;
+}
+.cc-game .cc-multiplier-value{
+  position:absolute;right:2px;top:2px;
+  background:#0c351eee;color:#f9e993;
+  border:1px solid #e9cd67;border-radius:5px;
+  padding:1px 4px;
+  font:900 clamp(9px,.82vw,13px)/1.15 system-ui,Arial,sans-serif;
+  text-shadow:0 1px 2px #07130b;
+}
+/* Avoid duplicate multiplier labels inside cells: grid overlay is authoritative. */
+.cc-game .cc-cell > .cc-harvest-badge{display:none}

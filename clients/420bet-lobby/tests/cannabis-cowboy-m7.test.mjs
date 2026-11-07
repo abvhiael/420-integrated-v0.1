@@ -72,3 +72,13 @@ test('ranch wallpaper remains visible behind game board rather than buried by op
  assert.match(css,/\.cc-ranch-wallpaper\{position:absolute;z-index:0;/);
  assert.match(css,/\.cc-game > \.cc-stage,[\s\S]*?z-index:1/);
 });
+
+test('Cannabis Cowboy paints ranch wallpaper on root, independently of descendant stacking',()=>{
+ const {document}=parseHTML('<html><body></body></html>');
+ const root=createCannabisCowboyShell(document);
+ assert.equal(root.dataset.view,'cannabis-cowboy');
+ assert.equal(root.querySelector('.cc-ranch-wallpaper')?.getAttribute('aria-hidden'),'true');
+ assert.match(css,/\.cc-game\[data-view="cannabis-cowboy"\]\{[\s\S]*?background-image:/);
+ assert.match(css,/radial-gradient\(ellipse at 74% 25%/);
+ assert.match(css,/background-position:center/);
+});

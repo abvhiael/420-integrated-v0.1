@@ -1,7 +1,7 @@
 // Cannabis Cowboy M2: nontransactional visual shell. M3 owns the outcome engine.
 export const COWBOY_ART=Object.freeze({
   lobby:'/assets/420bet/slots-lobby/cannabis-cowboy-lobby-cabinet.png',
-  header:'/assets/420bet/cannabis-cowboy/cannabis-cowboy-logo-header.png'
+  header:'/assets/420bet/cannabis-cowboy/cannabis-cowboy-logo.png'
 });
 export const COWBOY_ASSET_ROOT='/assets/420bet/cannabis-cowboy/';
 export const COWBOY_SYMBOL_ART=Object.freeze([
@@ -69,21 +69,13 @@ export function createCannabisCowboyShell(doc=globalThis.document){
  const root=el(doc,'section','cc-game');root.dataset.view='cannabis-cowboy';
  root.dataset.mode='visual-preview';root.setAttribute('aria-label','Cannabis Cowboy High Country Clusters 6 by 8 game screen');
  const scene=el(doc,'div','cc-ranch-wallpaper');scene.setAttribute('aria-hidden','true');
- const header=el(doc,'header','cc-title-banner');
- const heading=el(doc,'h1','cc-game-title');
+ const cabinet=el(doc,'div','cc-stage');
+ const left=el(doc,'aside','cc-left-rail');
+ const heading=el(doc,'h1','cc-game-title cc-sidebar-brand');
  const logo=el(doc,'img','cc-title-logo');
  logo.src=COWBOY_ART.header;logo.alt='Cannabis Cowboy';
  logo.loading='eager';logo.decoding='async';logo.draggable=false;
- heading.append(logo);header.append(heading);
- const cabinet=el(doc,'div','cc-stage');
- const left=el(doc,'aside','cc-left-rail');
- const portrait=el(doc,'div','cc-portrait');
- const approved=el(doc,'img','cc-approved-cabinet');
- approved.src=COWBOY_ART.lobby;approved.alt='Approved Cannabis Cowboy cabinet concept featuring Cole Haze with long silver hair, guitar, and mountain ranch';
- approved.loading='eager';approved.decoding='async';
- portrait.append(approved,el(doc,'span','cc-portrait-label','COLE HAZE'));
- left.append(portrait,panel(doc,'CLUSTER PAYS',['5+ matching adjacent symbols','Vertical and horizontal neighbors'], 'cc-feature-panel'));
- left.append(panel(doc,'GROWING HARVEST',['×2 · ×4 · ×8 · ×16 · ×32','Multipliers persist during free spins'], 'cc-feature-panel'));
+ heading.append(logo);left.append(heading);
  const center=el(doc,'main','cc-middle');
  const boardHeader=el(doc,'div','cc-board-header');
  boardHeader.append(el(doc,'span','','6 × 8 CLUSTER GRID'),el(doc,'span','cc-board-readonly','DISPLAY PREVIEW'));
@@ -100,10 +92,6 @@ export function createCannabisCowboyShell(doc=globalThis.document){
  });
  const bottom=el(doc,'div','cc-board-foot','THE HARVEST BEGINS IN M3');
  center.append(boardHeader,grid,bottom);
- const right=el(doc,'aside','cc-right-rail');
- right.append(panel(doc,'ENDLESS HARVEST',['3 SCATTERS  →  8 FREE SPINS','4 SCATTERS  →  12 FREE SPINS','5 SCATTERS  →  16 FREE SPINS','6+ SCATTERS → 20 FREE SPINS'],'cc-feature-panel'));
- right.append(panel(doc,'SMOKE RING WILDS',['Growing emerald wild multipliers','Sticky during the free spins'],'cc-feature-panel'));
- right.append(panel(doc,'ON THE ROAD AGAIN',['3 Road Trip Tickets · five stops','Pick a guitar case at each stop'],'cc-feature-panel'));
  const paytable=el(doc,'section','cc-panel cc-paytable');
  paytable.append(el(doc,'h3','cc-panel-title','CLUSTER PAYTABLE'));
  const help=el(doc,'p','cc-paytable-caption','Prize multiples of wager · 5+ connected symbols');
@@ -112,8 +100,13 @@ export function createCannabisCowboyShell(doc=globalThis.document){
  const headerRow=el(doc,'tr');for(const label of ['SYMBOL','5','7','10','15','20+'])headerRow.append(el(doc,'th','',label));
  const thead=el(doc,'thead');thead.append(headerRow);payoutTable.append(thead);
  const tbody=el(doc,'tbody');payoutTable.append(tbody);paytable.append(payoutTable);
- right.append(paytable);
- cabinet.append(left,center,right);
+ left.append(paytable);
+ const features=el(doc,'div','cc-sidebar-features');
+ features.append(panel(doc,'ENDLESS HARVEST',['3 scatters → 8 free spins · 4 → 12','5 → 16 · 6+ → 20'],'cc-feature-panel'));
+ features.append(panel(doc,'SMOKE RING WILDS',['Sticky wilds during free spins'],'cc-feature-panel'));
+ features.append(panel(doc,'ON THE ROAD AGAIN',['3 Road Trip Tickets · five stops'],'cc-feature-panel'));
+ left.append(features);
+ cabinet.append(left,center);
  const controls=el(doc,'div','cc-console');
  controls.setAttribute('aria-label','Preview-only control console');
  controls.append(readonlyButton(doc,'☰','cc-menu'));
@@ -143,6 +136,6 @@ export function createCannabisCowboyShell(doc=globalThis.document){
  dismiss.addEventListener('click',()=>{dialog.hidden=true;info.focus?.();});
  dialog.append(dismiss);controls.append(info,readonlyButton(doc,'AUTO','cc-auto'));
  const notice=el(doc,'p','cc-practice-notice','VISUAL PREVIEW ONLY · NO REAL OR PRACTICE WAGERING · M3 WILL ENABLE THE GAME ENGINE');
- root.append(scene,header,cabinet,controls,notice,dialog);
+ root.append(scene,cabinet,controls,notice,dialog);
  return root;
 }

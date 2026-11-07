@@ -540,3 +540,70 @@
 .cc-game[data-view="cannabis-cowboy"] > .cc-ranch-wallpaper::after{
   z-index:0;
 }
+
+
+/* M9: use the actual committed slots wallpaper bitmap, not the temporary
+   CSS sunset/mountain approximation. Cover the entire game surface. */
+.immersive:has(.cc-game) .view-scroll{
+  background:#101b18 url('/assets/420bet/backgrounds/420bet_slots_wallpaper.png') center center / cover no-repeat;
+}
+.cc-game[data-view="cannabis-cowboy"]{
+  background:#101b18 url('/assets/420bet/backgrounds/420bet_slots_wallpaper.png') center center / cover no-repeat;
+  background-size:cover;
+  background-position:center center;
+  background-repeat:no-repeat;
+}
+.cc-game[data-view="cannabis-cowboy"] > .cc-ranch-wallpaper,
+.cc-game[data-view="cannabis-cowboy"] > .cc-ranch-wallpaper::after{
+  display:none;
+  background:none;
+}
+/* The old layout allocated only 230px to six paytable columns. Give it
+   enough width, keep all five payout thresholds visible, and preserve the reels. */
+@media (min-width:1051px){
+  .cc-game .cc-stage{grid-template-columns: minmax(310px,325px) minmax(0,1fr)}
+}
+@media (min-width:701px) and (max-width:1050px){
+  .cc-game .cc-stage{grid-template-columns:minmax(260px,290px) minmax(0,1fr)}
+}
+.cc-game .cc-left-rail{min-width:0}
+.cc-game .cc-left-rail .cc-paytable{
+  display:block;
+  width:100%;
+  flex:0 0 auto;
+  overflow:visible;
+}
+.cc-game .cc-left-rail .cc-paytable-table{
+  width:100%;
+  table-layout:fixed;
+  border-collapse:collapse;
+}
+.cc-game .cc-left-rail .cc-paytable-table th:first-child{
+  width:36%;
+  min-width:0;
+}
+.cc-game .cc-left-rail .cc-paytable-table td,
+.cc-game .cc-left-rail .cc-paytable-table thead th{
+  font-size:clamp(9px,.66vw,11px);
+  padding:4px 2px;
+  white-space:nowrap;
+}
+.cc-game .cc-left-rail .cc-paytable-table tbody th{
+  width:100%;
+  max-width:none;
+  white-space:normal;
+  overflow-wrap:normal;
+  font-size:clamp(9px,.66vw,11px);
+  gap:4px;
+}
+.cc-game .cc-left-rail .cc-paytable-table tbody .cc-symbol-image{
+  width:22px;
+  height:24px;
+  flex:0 0 22px;
+}
+@media (max-width:700px){
+  .cc-game .cc-left-rail .cc-paytable{display:block;overflow:visible}
+  .cc-game .cc-left-rail .cc-paytable-table td,
+  .cc-game .cc-left-rail .cc-paytable-table thead th,
+  .cc-game .cc-left-rail .cc-paytable-table tbody th{font-size:clamp(9px,2.3vw,11px)}
+}

@@ -41,7 +41,7 @@ test('game-side paytable lists each paying symbol and all five actual pay bracke
  assert.equal(table.querySelectorAll('tbody tr:first-child td').length,5);
  assert.equal(table.querySelectorAll('tbody .cc-symbol-image').length,8);
  assert.equal(CLUSTER_PAYS.length,8);
- assert.match(table.textContent,/30×/);
+ assert.match(table.textContent,/66.9×/);
  assert.match(css,/cc-paytable-table/);
  assert.match(css,/spin-button-gold\.svg/);
  h.root.stopAnimation();

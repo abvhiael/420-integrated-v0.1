@@ -171,3 +171,18 @@ test('Endless Harvest keeps multiplier labels in an independent overlay above re
  assert.match(game,/const previewRun=trial\?\+\+previewRuns:0/);
  assert.match(game,/weightedSymbol\(testRng\)/);
 });
+
+
+test('all five Road Trip scenes and fifteen guitar-case PNGs are committed and loadable',()=>{
+ const paths=ROAD_STOPS.flatMap((_,index)=>[
+  roadStopBackground(index),
+  ...[0,1,2].map(caseIndex=>roadCaseArtwork(index,caseIndex))
+ ]);
+ assert.equal(paths.length,20);
+ assert.equal(new Set(paths).size,20);
+ for(const asset of paths){
+  const bytes=readFileSync(new URL('../public'+asset,import.meta.url));
+  assert(bytes.length>1000,'missing or truncated asset '+asset);
+  assert.equal(bytes.subarray(0,8).toString('hex'),'89504e470d0a1a0a','not a PNG '+asset);
+ }
+});

@@ -1,0 +1,52 @@
+/* BET-SPORTSBOOK-UI-01 · Approved Bud & Ball Lounge wallpaper.
+   No extra hero/title; no duplicated image logo; interactive overlays only. */
+.sportsbook-immersive{position:relative;width:100%;height:100dvh;overflow:hidden;background:#100b09}
+.sb-screen{--sb-leaf:#86ff38;--sb-gold:#f4c650;--sb-cream:#fff9e6;position:relative;isolation:isolate;width:100%;height:100dvh;min-height:570px;overflow:hidden;color:var(--sb-cream);font-family:system-ui,'Segoe UI',Arial,sans-serif;background:#100a07}
+.sb-screen *{box-sizing:border-box}
+.sb-artboard{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:max(100vw,177.586dvh);height:max(100dvh,56.31vw);z-index:-2;pointer-events:none;background:#1b0c05 url('/assets/420bet/sportsbook/sportsbook-wallpaper.png') center/100% 100% no-repeat}
+.sb-veil{position:absolute;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(180deg,#07030029,transparent 20%,transparent 65%,#0806002c)}
+.sb-screen button:focus-visible{outline:3px solid #ffe989;outline-offset:3px}
+.sb-back{position:absolute;left:clamp(10px,1.1vw,23px);top:clamp(10px,1.1vw,22px);z-index:5;border:1px solid #aaff68;border-radius:10px;padding:9px 13px;background:#0c1c13e5;color:#ffffe6;font:850 13px system-ui;box-shadow:0 0 12px #75e94966;cursor:pointer}
+.sb-back:hover{filter:brightness(1.2)}
+/* Coordinates correspond to the physical chalkboard in the approved 1648x928
+   16:9 artwork. Both artwork and board share the SAME scaled cover surface. */
+.sb-chalkboard{position:absolute;left:calc(50% - max(100vw,177.586dvh)*.5 + max(100vw,177.586dvh)*.689);top:calc(50% - max(100dvh,56.31vw)*.5 + max(100dvh,56.31vw)*.305);width:calc(max(100vw,177.586dvh)*.261);height:calc(max(100dvh,56.31vw)*.242);z-index:2;display:flex;flex-direction:column;gap:clamp(3px,.5vw,9px);padding:clamp(3px,.45vw,9px);overflow:hidden;text-align:left;background:transparent;color:#fff8e8;text-shadow:0 2px 4px #08170b}
+.sb-chalkboard-heading{margin:0;text-align:center;font:italic 900 clamp(10px,1.1vw,19px) Georgia,serif;letter-spacing:.06em;color:#f6df9a;white-space:nowrap}
+.sb-chalkboard-date{font:750 clamp(7px,.65vw,11px) system-ui;color:#c1f5a1;text-align:center;letter-spacing:.045em}
+.sb-board-lines{display:flex;flex-direction:column;justify-content:center;min-height:0;flex:1;gap:clamp(2px,.45vw,7px)}
+.sb-board-empty{margin:0 auto;max-width:93%;text-align:center;font:italic 700 clamp(9px,1.05vw,16px)/1.35 Georgia,serif;color:#f7e1ae}
+.sb-matchup{display:grid;grid-template-columns:minmax(25px,.58fr) minmax(0,2fr) minmax(37px,.75fr);gap:6px;align-items:center;border-bottom:1px solid #b3ad7980;padding:3px 0;color:#f4e6c9;font:650 clamp(8px,.87vw,14px)/1.15 'Segoe UI',system-ui}
+.sb-matchup-league{font-weight:850;color:#a7f76f}.sb-matchup-teams{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sb-matchup-time{text-align:right;color:#ffe066;font-weight:850;white-space:nowrap}
+/* Image is the canvas, seven accessible clickable HTML tiles replace the
+   illustrative old row. Buttons occupy its bottom 16% without a title block. */
+.sb-menu{position:absolute;z-index:4;left:6.8%;right:6.8%;bottom:clamp(19px,4.65dvh,52px);display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:clamp(5px,1.1vw,16px)}
+.sb-menu-action{min-height:clamp(80px,14vh,137px);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;padding:8px 3px;border:3px solid #8fff32;border-radius:21px;background:linear-gradient(#082d12f5,#020d0ae8 64%,#041309ed);box-shadow:0 0 0 1px #328320,0 0 15px #84f01ae3,inset 0 0 18px #236a27b5;color:#fff9e5;font:900 clamp(11px,1.35vw,23px) system-ui;cursor:pointer;text-shadow:0 2px 3px #060608;transition:transform .15s ease,filter .15s ease}
+.sb-menu-action:hover{transform:translateY(-5px);filter:brightness(1.2);box-shadow:0 0 26px #89ff48}
+.sb-menu-icon{font-size:clamp(23px,3vw,48px);line-height:1;color:#ffd652;filter:drop-shadow(0 0 5px #dfb035)}
+.sb-menu-label{white-space:nowrap;text-align:center}
+.sb-layer{position:absolute;left:7%;top:25%;z-index:3;width:min(680px,52vw);padding:clamp(22px,3vw,48px);border:2px solid #eac768;border-radius:21px;background:linear-gradient(145deg,#0c241beF,#110d0cf1 64%,#231315eF);box-shadow:0 0 24px #8bf04d66,inset 0 0 24px #335d264d}
+.sb-layer-kicker{font:800 11px system-ui;letter-spacing:.16em;color:#b6ff82}.sb-layer h1{font:italic 900 clamp(34px,4vw,64px) Georgia,serif;color:#f8d579;margin:11px 0}
+.sb-layer-lead{font:650 clamp(15px,1.25vw,20px)/1.55 system-ui;color:#fff4cf}.sb-layer-alert{font-size:13px;line-height:1.6;color:#daf3b9}
+.sb-layer-back{padding:11px 15px;border:2px solid #dcbb55;border-radius:12px;background:#193f28;color:#fff6df;font:850 14px system-ui;cursor:pointer}
+.sb-sports-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin:22px 0}
+.sb-sport-tile{display:grid;place-items:center;padding:10px 3px;gap:6px;border:1px solid #85f36d;border-radius:12px;background:#102819ed}
+.sb-sport-tile span{font-size:28px}.sb-sport-tile strong{font-size:12px}
+.art-bud-ball-sportsbook{background:linear-gradient(0deg,#10090774,#1a0b0716),url('/assets/420bet/sportsbook/sportsbook-wallpaper.png') center/cover!important;color:#ffe4a1!important;text-shadow:0 2px 9px #080508!important}
+@media(max-width:1150px){.sb-menu{left:3%;right:3%;gap:6px}.sb-menu-action{min-height:86px;border-width:2px;border-radius:13px;font-size:clamp(10px,1.35vw,14px)}.sb-menu-icon{font-size:26px}}
+@media(max-width:720px){
+ .sportsbook-immersive{overflow:auto}.sb-screen{height:100dvh;min-height:690px}
+ .sb-artboard{background-position:center}
+ .sb-back{top:9px;left:9px;font-size:11px;padding:7px 10px}
+ .sb-veil{background:linear-gradient(180deg,transparent,#07090233 38%,#07170cd6 69%,#07170cf5)}
+ /* Mobile crop cannot retain the mural's right-hand chalkboard. Offer a real
+    responsive board near the menu; still never invent odds or game fixtures. */
+ .sb-chalkboard{left:12px;right:12px;top:auto;bottom:242px;width:auto;height:115px;padding:9px 12px;background:#0e281bc9;border:2px solid #e5bd69;border-radius:12px}
+ .sb-chalkboard-heading{font-size:14px}.sb-chalkboard-date{font-size:10px}.sb-board-empty{font-size:13px}.sb-matchup{font-size:10px}
+ .sb-menu{left:10px;right:10px;bottom:12px;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+ .sb-menu-action{min-height:49px;flex-direction:row;justify-content:flex-start;gap:9px;padding:6px 12px;border-radius:10px;font-size:13px}
+ .sb-menu-icon{font-size:21px}.sb-menu-action:last-child{grid-column:1/-1}
+ .sb-layer{left:12px;right:12px;top:auto;bottom:14px;width:auto;max-width:none;padding:20px}
+ .sb-layer h1{font-size:37px}.sb-sports-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(max-height:690px) and (min-width:721px){.sb-menu{bottom:10px}.sb-menu-action{min-height:68px;gap:4px;font-size:13px}.sb-menu-icon{font-size:25px}.sb-chalkboard-heading{font-size:12px}.sb-chalkboard-date{font-size:8px}.sb-board-empty{font-size:11px}}
+@media(prefers-reduced-motion:reduce){.sb-menu-action{transition:none}}

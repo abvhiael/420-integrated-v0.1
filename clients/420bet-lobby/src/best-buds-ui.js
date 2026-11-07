@@ -218,6 +218,11 @@ export function createBestBudsPractice(doc=globalThis.document,options={}){
    for(const h of ['SYMBOL','3','4','5'])tr.append(make(doc,'th','',h));table.append(tr);
    for(const [key,pays] of Object.entries(PAYTABLE)){const r=make(doc,'tr');r.append(make(doc,'td','',key));for(const v of pays)r.append(make(doc,'td','',v+'×'));table.append(r);}
    dialog.append(table,make(doc,'p','','BONUS TEST enters simulated bonus states to inspect the mechanics. No deposit, bonus purchase, or real-world payout.'));
+   const guide=make(doc,'figure','bb-paylines-figure');
+   const guideImage=sprite(doc,'ui','bestbuds-25-paylines.svg','All 25 exact paylines on the five-reel three-row Best Buds grid','bb-paylines-image');
+   guideImage.loading='lazy';
+   guide.append(make(doc,'figcaption','','25 FIXED PAYLINES · LEFT TO RIGHT'),guideImage);
+   dialog.append(guide);
    overlay.append(dialog);screen.append(overlay);
   }
   if(sessionSummary!==null){

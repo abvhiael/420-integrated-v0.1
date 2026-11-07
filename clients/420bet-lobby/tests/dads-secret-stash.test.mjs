@@ -1048,15 +1048,24 @@ test('Jen HIDE THE STASH launches the actual Hold & Win board after the comic an
  button.dispatchEvent(new window.Event('click',{bubbles:true}));
  const events=game.getState().last.events;
  assert.deepEqual(events.map(e=>e.type),['jen','stash']);
- advance(2800);
- assert.equal(game.querySelector('.dss-comic-action').hidden,false,'Jen action gets the comic reveal');
- assert.match(game.querySelector('.dss-comic-detail').textContent,/HOLD & WIN UNLOCKED/);
- let revealedCrates=false,holdVisible=false;
- for(let until=4300;until<=35000;until+=100){
+ let comicSeen=false,revealedCrates=false,holdVisible=false,comicFinished=false;
+ // Initial paid-spin line traces can delay the cast introduction; observe
+ // each stage rather than assuming the character always starts at t=0.
+ for(let until=100;until<=50000;until+=100){
   advance(until);
+  const comic=!game.querySelector('.dss-comic-action').hidden;
+  if(comic){
+   comicSeen=true;
+   assert.match(game.querySelector('.dss-comic-detail').textContent,/HOLD & WIN UNLOCKED/);
+  }else if(comicSeen)comicFinished=true;
   revealedCrates ||=game.querySelectorAll('.dss-trigger-stash').length>=3;
-  holdVisible ||=!game.querySelector('.dss-hold-win').hidden;
+  if(!game.querySelector('.dss-hold-win').hidden){
+   assert(comicSeen&&comicFinished,'Comic and modified grid must precede Hold & Win');
+   holdVisible=true;
+   break;
+  }
  }
+ assert(comicSeen,'Jen should receive her action comic');
  assert(revealedCrates,'Complete modified grid should highlight qualifying crates');
  assert(holdVisible,'Actual Hold & Win prize board must launch after Jen finishes');
  assert.equal(game.getState().rounds,1,'One wager earns both linked feature presentations');

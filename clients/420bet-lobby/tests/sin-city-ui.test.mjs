@@ -222,8 +222,16 @@ test('Free Spins Complete remains on screen until explicitly clicked and shows w
   assert.match(root.querySelector('.sc-free-complete-click').textContent,/CLICK TO CONTINUE/);
   const amount=root.getPresentationState().freeCompletedTotal;
   assert.ok(amount>=12);
-  assert.equal(splash.querySelector('.sc-free-complete-value').textContent,amount.toFixed(2)+' PRACTICE CREDITS',
-   'Feature total must be calculated dynamically, never baked into the artwork');
+  assert.equal(splash.querySelector('.sc-sesh-live-number').textContent,
+   amount.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}),
+   'Only the correctly calculated win number may be overlaid into the blank artwork plaque');
+  assert.equal(splash.querySelector('.sc-sesh-live-units').textContent,'PRACTICE CREDITS');
+  assert.ok(splash.querySelector('.sc-sesh-stage .sc-sesh-bobby'));
+  assert.ok(splash.querySelector('.sc-sesh-stage .sc-free-complete-value'));
+  assert.ok(splash.querySelector('.sc-sesh-title').classList.contains('sc-sesh-sr-only'),
+   'Do not double-print the SESH COMPLETE lettering already inside the approved picture');
+  assert.ok(splash.querySelector('.sc-free-complete-click').classList.contains('sc-sesh-sr-only'),
+   'Do not double-print the continue instruction already inside the approved picture');
   await new Promise(resolve=>setTimeout(resolve,450));
   assert.equal(root.getPresentationState().phase,'free-complete','Completion must not auto-dismiss');
   root.querySelector('.sc-free-complete').dispatchEvent(new window.Event('click',{bubbles:true}));

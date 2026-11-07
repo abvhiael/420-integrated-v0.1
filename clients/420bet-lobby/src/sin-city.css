@@ -485,3 +485,67 @@ main.immersive .view-scroll:has(.sc-game){background:transparent}
  .sc-game .sc-sesh-complete{gap:10px}
 }
 @media(prefers-reduced-motion:reduce){.sc-game .sc-sesh-complete .sc-free-complete-click{animation:none}}
+
+/* The approved 1536×1024 SESH COMPLETE picture includes all headings and the
+   continue button, but leaves the central plaque blank for the actual win.
+   Overlay the server-free calculated practice credit amount in matching gold.
+   Container units scale the typography with the image, not with the viewport. */
+.sc-game .sc-free-complete.sc-sesh-complete{
+ display:flex;flex-direction:column;align-items:center;justify-content:center;
+ gap:0;padding:clamp(8px,1.5vh,16px);overflow:auto;
+}
+.sc-game .sc-sesh-stage{
+ position:relative;display:block;flex:none;
+ width:min(100%,1030px,calc((100dvh - 100px)*1.5));
+ max-width:100%;aspect-ratio:3 / 2;
+ container-type:inline-size;
+ margin:0 auto;overflow:visible;isolation:isolate;
+}
+.sc-game .sc-sesh-stage .sc-sesh-bobby{
+ display:block;position:absolute;inset:0;
+ width:100%;height:100%;max-height:none;
+ object-fit:contain;object-position:center;
+ margin:0;padding:0;border:none;border-radius:0;
+ box-shadow:none;pointer-events:none;
+}
+/* The purple marquee in the artwork occupies roughly x=23–78%, y=68–84%. */
+.sc-game .sc-sesh-stage .sc-free-complete-value{
+ position:absolute;z-index:3;
+ left:24%;top:69%;width:52%;height:12%;
+ display:flex;flex-direction:column;justify-content:center;align-items:center;
+ padding:0;margin:0;border:0;border-radius:0;
+ background:transparent;box-shadow:none;
+ color:#ffd56c;text-align:center;
+ text-shadow:0 1px 1px #5b2604,0 2px 0 #7d3907,0 0 8px #ffbf31,0 0 13px #e99b22;
+ pointer-events:none;
+}
+.sc-game .sc-sesh-live-number{
+ display:block;max-width:100%;white-space:nowrap;
+ font-family:Georgia,'Times New Roman',serif;
+ font-size:clamp(15px,4.3cqw,64px);font-weight:900;
+ letter-spacing:.005em;line-height:1.0;font-variant-numeric:tabular-nums;
+ color:#ffdc75;
+}
+.sc-game .sc-sesh-live-units{
+ display:block;white-space:nowrap;
+ font-size:clamp(8px,1.75cqw,26px);
+ font-weight:900;line-height:1.12;letter-spacing:.1em;
+ color:#ffe69b;
+}
+.sc-game .sc-sesh-sr-only{
+ position:absolute!important;width:1px!important;height:1px!important;
+ padding:0!important;margin:-1px!important;
+ overflow:hidden!important;clip:rect(0,0,0,0)!important;
+ white-space:nowrap!important;border:0!important;
+}
+@media(max-width:760px){
+ .sc-game .sc-free-complete.sc-sesh-complete{padding:6px}
+ .sc-game .sc-sesh-stage{
+  width:min(100%,calc((100dvh - 68px)*1.5));height:auto;aspect-ratio:3 / 2;
+ }
+ .sc-game .sc-sesh-stage .sc-free-complete-value{
+  left:23%;top:69%;width:54%;height:12%;
+ }
+ .sc-game .sc-sesh-live-number{font-size:clamp(12px,4.3cqw,44px)}
+ .sc-game .sc-sesh-live-units{font-size:clamp(7px,1.75cqw,18px)}
+}

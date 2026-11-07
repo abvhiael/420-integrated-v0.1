@@ -255,19 +255,28 @@ export function createSinCityPractice(doc=globalThis.document,options={}){
    const complete=el(doc,'div','sc-free-complete sc-sesh-complete');
    complete.setAttribute('role','button');complete.setAttribute('tabindex','0');
    complete.setAttribute('aria-label','Sesh complete. Total free-spin winnings '+(state.freeCompletedTotal??state.freeSessionWin).toFixed(2)+' practice credits. Click anywhere to continue.');
+   // Approved illustration already contains the SESH COMPLETE and CLICK TO
+   // CONTINUE lettering. Only the number is live, placed in its empty marquee.
+   const stage=el(doc,'div','sc-sesh-stage');
    const hero=el(doc,'img','sc-sesh-bobby');
    hero.src=art('features','splash_sesh_complete_bobby.png');
-   hero.alt='Bobby Las Vegas celebrating and offering the player a joint';
+   hero.alt='Bobby Las Vegas offering the player a joint. Sesh complete! Click to continue.';
    hero.draggable=false;
    hero.addEventListener('error',()=>{
-    // Use existing Bobby art until the approved new hero PNG has been uploaded.
+    // Keep an existing approved Bobby image until the replacement background is uploaded.
     if(!hero.dataset.fallback){hero.dataset.fallback='1';hero.src=art('characters','char_bobby_las_vegas_celebration.png');}
    });
-   const title=el(doc,'strong','sc-sesh-title','SESH COMPLETE!');
-   const amount=el(doc,'div','sc-free-complete-value',(state.freeCompletedTotal??state.freeSessionWin).toFixed(2)+' PRACTICE CREDITS');
+   const won=state.freeCompletedTotal??state.freeSessionWin;
+   const amount=el(doc,'div','sc-free-complete-value');
    amount.setAttribute('aria-label','Total won during Chronic Sessions free spins');
-   const next=el(doc,'p','sc-free-complete-click','CLICK TO CONTINUE');
-   complete.append(hero,title,amount,next);
+   const amountNumber=el(doc,'strong','sc-sesh-live-number',won.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}));
+   const amountUnits=el(doc,'span','sc-sesh-live-units','PRACTICE CREDITS');
+   amount.append(amountNumber,amountUnits);
+   stage.append(hero,amount);
+   // Screen-reader copy only: do not visually duplicate the words baked into artwork.
+   const title=el(doc,'strong','sc-sesh-title sc-sesh-sr-only','SESH COMPLETE!');
+   const next=el(doc,'p','sc-free-complete-click sc-sesh-sr-only','CLICK TO CONTINUE');
+   complete.append(stage,title,next);
    complete.addEventListener('click',acknowledgeFreeComplete);
    complete.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();acknowledgeFreeComplete();}});
    root.append(complete);

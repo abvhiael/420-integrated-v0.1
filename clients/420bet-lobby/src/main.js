@@ -6,6 +6,7 @@ import {createPokerRoomPreview} from './poker-room-ui.js';
 import {createPokerRoomLive} from './poker-live-ui.js';
 import {createPokerTournamentsPreview} from './poker-tournaments-ui.js';
 import {createFantasySportsView,validFantasyTab} from './fantasy-sports-ui.js';
+import {createSportsbookView,validSportsbookTab} from './sportsbook-ui.js';
 import {createPestControlTable} from './pest-control-ui.js';
 import {createBuzzkillPractice} from './buzzkill-ui.js';
 import {createMaryJanePractice} from './mary-jane-ui.js';
@@ -24,6 +25,7 @@ import './royal-kush.css';
 import './poker-room.css';
 import './poker-tournaments.css';
 import './fantasy-sports.css';
+import './sportsbook.css';
 import './pest-control.css';
 import './buzzkill.css';
 import './sin-city.css';
@@ -64,9 +66,9 @@ function restoreRoute(){
 function render(){
   app.replaceChildren();
   if(active){
-    const main=node('main',active.id==='roulette'?'immersive roulette-immersive':active.id==='blackjack'?'immersive blackjack-immersive':active.id==='video-poker'?'immersive royal-kush-immersive':active.id==='fantasy'?'immersive fantasy-immersive':'immersive');const bar=node('header','gamebar');
-    if(active.id!=='fantasy')bar.append(button(selectedSlotMachine?'← Slots Lobby':'← Return to Lobby',close,'return'),brandLink('game-brand'),node('strong','',selectedSlotMachine?.title??active.title));
-    const note=node('span','game-status',selectedSlotMachine?.practiceBeta?'Base game · Practice beta':selectedSlotMachine?.preview?'Preview · In development':active.id==='live-poker'?'Verified state required':active.id==='poker-tournaments'?'Testnet preview · no registration':['slots','roulette','blackjack','mines','crash','video-poker'].includes(active.id)?'Practice available':statusText[active.status]);if(active.id!=='fantasy'){bar.append(note);main.append(bar);}
+    const main=node('main',active.id==='roulette'?'immersive roulette-immersive':active.id==='blackjack'?'immersive blackjack-immersive':active.id==='video-poker'?'immersive royal-kush-immersive':active.id==='fantasy'?'immersive fantasy-immersive':active.id==='sportsbook'?'immersive sportsbook-immersive':'immersive');const bar=node('header','gamebar');
+    if(!['fantasy','sportsbook'].includes(active.id))bar.append(button(selectedSlotMachine?'← Slots Lobby':'← Return to Lobby',close,'return'),brandLink('game-brand'),node('strong','',selectedSlotMachine?.title??active.title));
+    const note=node('span','game-status',selectedSlotMachine?.practiceBeta?'Base game · Practice beta':selectedSlotMachine?.preview?'Preview · In development':active.id==='live-poker'?'Verified state required':active.id==='poker-tournaments'?'Testnet preview · no registration':['slots','roulette','blackjack','mines','crash','video-poker'].includes(active.id)?'Practice available':statusText[active.status]);if(!['fantasy','sportsbook'].includes(active.id)){bar.append(note);main.append(bar);}
     if(active.id==='slots'){
       const wrap=node('div','view-scroll');
       if(selectedSlotMachine?.id==='cannabis-cowboy'){
@@ -85,13 +87,22 @@ function render(){
       }});
       main.append(activePractice);
     }
+    else if(active.id==='sportsbook'){
+      const params=new URLSearchParams(location.hash.replace(/^#/,''));
+      const tab=validSportsbookTab(params.get('tab'));
+      activePractice=createSportsbookView(document,{tab,marqueeEndpoint:config.sportsbookMarqueeEndpoint??'/api/420bet/sportsbook/marquee',onBack:close,onNavigate:next=>{
+        history.pushState(null,'',location.pathname+'#game=sportsbook'+(next?'&tab='+encodeURIComponent(next):''));
+        stopPractice();render();
+      }});
+      main.append(activePractice);
+    }
     else if(active.id==='poker-tournaments'){activePractice=createPokerTournamentsPreview(document);const wrap=node('div','view-scroll');wrap.append(activePractice);main.append(wrap);}
     else if(active.id==='live-poker'){activePractice=createPokerRoomLive(document,{base:config.pokerApiBase??'/api/420bet/poker/v1'});const wrap=node('div','view-scroll');wrap.append(activePractice);main.append(wrap);}
     else if(active.id==='video-poker'){activePractice=createRoyalKushTable(document);const wrap=node('div','view-scroll');wrap.append(activePractice);main.append(wrap);}
     else if(active.category==='Casino'){activePractice=active.id==='roulette'?createCannabisRoulette(document):active.id==='blackjack'?createBlackjackTable(document):active.id==='mines'?createPestControlTable(document):active.id==='crash'?createBuzzkillPractice(document):createPractice(active.id,document);const wrap=node('div','view-scroll');wrap.append(activePractice);main.append(wrap);}
     else if(active.route){const frame=node('iframe','gameframe');frame.title=active.title+' game';frame.src=active.route;frame.setAttribute('allow','fullscreen');main.append(frame);}
     else {const nativePreview=createNativePreview(active.id);if(nativePreview){const wrap=node('div','view-scroll');wrap.append(nativePreview);main.append(wrap);}else{const preview=node('section','preview-screen');preview.append(node('p','eyebrow','420BET GAME PREVIEW'),node('div','preview-glyph',({'Casino':'✦','Poker':'♠','Fantasy':'★','Sportsbook':'◆'})[active.category]),node('h1','',active.title),node('p','','This game screen is being prepared. Its dedicated interface is not yet connected.'),node('p','preview-warning','Viewing only — wagering, wallet transactions and payouts are not enabled here.'));preview.append(button('Return to Lobby',close,'return'));main.append(preview);}}
-    const foot=node('footer','game-footer');foot.append(brandLink('footer-brand'),node('span','','420Bet · Practice and previews only — no wagering enabled.'));app.append(main);if(active.id!=='fantasy')app.append(foot);return;
+    const foot=node('footer','game-footer');foot.append(brandLink('footer-brand'),node('span','','420Bet · Practice and previews only — no wagering enabled.'));app.append(main);if(!['fantasy','sportsbook'].includes(active.id))app.append(foot);return;
   }
   const header=node('header','top');const brand=brandLink();header.append(brand,node('span','strap','THE GAME LOBBY'));const walletBar=node('div','wallet-bar');walletBar.setAttribute('aria-label','Wallet identity');if(walletState.account){walletBar.append(node('span','wallet-account',walletState.account.slice(0,6)+'…'+walletState.account.slice(-4)+' · chain '+(walletState.chainId??'unknown')));walletBar.append(button('Refresh history',()=>{void refreshHistory();},'wallet-action'));}else walletBar.append(button('Connect wallet',()=>{void wallet.connect().catch(()=>{historyError='Wallet connection was rejected or unavailable';render();});},'wallet-action'));header.append(walletBar);app.append(header);
   const main=node('main','lobby');const hero=node('section','hero');hero.append(node('p','eyebrow','WELCOME TO 420BET'),node('h1','', 'Pick your game. Find your groove.'),node('p','','Casino classics, poker, fantasy and sports — all in one place.'));main.append(hero);

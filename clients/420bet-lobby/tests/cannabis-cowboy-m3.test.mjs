@@ -27,9 +27,11 @@ test('48 positions, orthogonal only, diagonal contact not counted and clusters d
 });
 test('paytable brackets are total-spin multiples in integer demo credits',()=>{
  assert.equal(CLUSTER_PAYS.length,8);
- assert.equal(clusterPayout(0,5,20),8);
- assert.equal(clusterPayout(0,7,20),16);
- assert.equal(clusterPayout(7,20,20),800);
+ assert.equal(clusterPayout(0,5,20),18);
+ assert.equal(clusterPayout(0,7,20),36);
+ assert.equal(clusterPayout(7,20,20),1784);
+ assert.equal(clusterPayout(0,5,20,true),16);
+ assert.equal(clusterPayout(7,20,20,true),1600);
  assert.throws(()=>clusterPayout(0,4,20));
  assert.throws(()=>clusterPayout(99,5,20));
 });

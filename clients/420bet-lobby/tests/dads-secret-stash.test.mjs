@@ -632,8 +632,8 @@ test('Free spins use lighter Wild strips and bounded sticky accumulation without
 test('Recalibrated Stash prizes, Family Graffiti and Bud conversions preserve their features',()=>{
  const stash=stashBonus(()=>.975);
  assert.equal(stash.steps.length,4);
- assert(stash.prizes.every(x=>x<=6.6));
- assert.equal(stash.units,19.8);
+ assert(stash.prizes.every(x=>x<=6.11));
+ assert.equal(stash.units,18.33);
  const familyGrid=Array(20).fill('A');familyGrid[0]='tyler';familyGrid[1]='emma';
  const graffiti=modifier(familyGrid,'family',()=>.3);
  assert.equal(graffiti.label,'WILD GRAFFITI');
@@ -698,8 +698,8 @@ test('Free-spin reels stop at 1000/1500/2000/2500/3000ms and preserve all previo
 test('A ten-percent prize-only RTP adjustment leaves all other bonus mechanics untouched',()=>{
  const rng=()=>.975;
  const bonus=stashBonus(rng);
- assert.deepEqual(bonus.prizes,[6.6,6.6,6.6]);
- assert.equal(bonus.units,19.8);
+ assert.deepEqual(bonus.prizes,[6.11,6.11,6.11]);
+ assert.equal(bonus.units,18.33);
  assert.equal(bonus.steps.length,4);
  assert.equal(inspection(Array(20).fill('A'),rng).spins,5);
  assert.equal(mow(Array(20).fill('A'),rng).boards.length,5);

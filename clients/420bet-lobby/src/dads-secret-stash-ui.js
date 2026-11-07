@@ -18,7 +18,9 @@ const COMIC_ACTION_DETAILS=Object.freeze({
 });
 export function comicActionCopy(event){
  const title=event.type==='keller'?'HOA INSPECTION!':(event.label??FEATURE_TITLES[event.type]??'BONUS ACTION').toUpperCase().replace(/!*$/,'!');
- const detail=event.awardedFreeSpins?
+ const detail=event.awardedStashBonus?
+  event.stashCount+' STASH CRATES! SECRET STASH HOLD & WIN UNLOCKED!':
+  event.awardedFreeSpins?
   event.scatterCount+' SCATTERS! FIVE MINUTES OF PEACE FREE SPINS UNLOCKED!':
   (COMIC_ACTION_DETAILS[event.label]??COMIC_ACTION_DETAILS[event.type==='keller'?'HOA INSPECTION':event.label]??'BONUS FEATURE ACTIVATED!');
  return {title,detail};
@@ -531,10 +533,16 @@ export function createDadsSecretStash(doc=globalThis.document,options={}){
      showGrid(final);
      const transformed=new Set(changed);
      cells.forEach(({cell},i)=>cell.classList.toggle('dss-transformed',transformed.has(i)));
-     modifierActionDetail.textContent=event.awardedFreeSpins?
+     modifierActionDetail.textContent=event.awardedStashBonus?
+      event.stashCount+' STASH CRATES — HOLD & WIN UNLOCKED!':
+      event.awardedFreeSpins?
       event.scatterCount+' SCATTERS — FREE SPINS UNLOCKED!':
       (event.multiplier??1)>1?'×'+event.multiplier+' MULTIPLIER APPLIED':
       changed.length+' SYMBOL'+(changed.length===1?'':'S')+' TRANSFORMED';
+     if(event.awardedStashBonus){
+      cells.forEach(({cell},i)=>cell.classList.toggle('dss-transformed',final[i]==='stash'));
+      status.textContent=event.stashCount+' STASH CRATES — SECRET STASH HOLD & WIN AWARDED!';
+     }
      if(event.awardedFreeSpins){
       cells.forEach(({cell},i)=>cell.classList.toggle('dss-trigger-scatter',final[i]==='scatter'));
       status.textContent=event.scatterCount+' SCATTERS — FIVE MINUTES OF PEACE FREE SPINS AWARDED!';

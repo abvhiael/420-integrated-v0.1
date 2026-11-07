@@ -39,12 +39,12 @@ export function createCannabisCowboyPractice(doc=globalThis.document,options={})
  const info=root.querySelector('.cc-info-panel');
  info.setAttribute('aria-label','High Country Clusters practice rules');
  const infoCopy=info.querySelector('p');
- if(infoCopy)infoCopy.textContent='Practice only: 5 or more adjacent paying symbols form a cluster. Each tumble clears matches and refills the 6×8 board. Endless Harvest frames increase by +1 per winning hit to a maximum ×10 and Smoke Ring Wilds substitute for paying symbols. Landing 3, 4, 5 or 6+ tour bus scatters awards 8, 12, 16 or 20 Endless Harvest free spins. Harvest multipliers and up to 8 sticky wilds persist throughout the feature. Retriggers are capped at 100 total free spins. Demo credits only; no wallet transactions or real wagering. Bonus paytables are not yet RTP certified. On the Road Again: 3 Road Trip tickets on the base spin trigger a five-stop guitar-case pick bonus. Pick one case per stop; one hidden case per stop carries a ×2, ×3, ×5 or ×10 multiplier, the others award credits, and collected multipliers stack at journey end. The six columns spin with staggered stops, and neon lines trace winning clusters. Click the board to skip cluster-count sequences, spin each free game manually, and click the final bonus total to continue.';
+ if(infoCopy)infoCopy.textContent='Practice only: 5 or more adjacent paying symbols form a cluster. Each tumble clears matches and refills the 6×8 board. Endless Harvest frames increase by +1 per winning hit to a maximum ×10 and Smoke Ring Wilds substitute for paying symbols. Landing 3, 4, 5 or 6+ tour bus scatters awards 8, 12, 16 or 20 Endless Harvest free spins. Harvest multiplier frames persist throughout the feature, but Wild symbols tumble normally and never stick. Retriggers are capped at 100 total free spins. Demo credits only; no wallet transactions or real wagering. Bonus paytables are not yet RTP certified. On the Road Again: 3 Road Trip tickets on the base spin trigger a five-stop guitar-case pick bonus. Pick one case per stop; one hidden case per stop carries a ×2, ×3, ×5 or ×10 multiplier, the others award credits, and collected multipliers are added together at journey end (for example ×2 + ×3 + ×10 = ×15). The six columns spin with staggered stops, and neon lines trace winning clusters. Click the board to skip cluster-count sequences, spin each free game manually, and click the final bonus total to continue.';
  const notice=root.querySelector('.cc-practice-notice');
  notice.textContent='PRACTICE ONLY · ENDLESS HARVEST FREE SPINS ACTIVE · NO REAL WAGERING';
  consoleBar.setAttribute('aria-label','Practice-credit controls');
  root.querySelector('.cc-board-readonly').textContent='BASE-GAME PRACTICE';
- root.querySelector('.cc-board-foot').textContent='5+ ADJACENT · SMOKE RING WILD ×2 · GROWING HARVEST ×2→×32';
+ root.querySelector('.cc-board-foot').textContent='5+ ADJACENT · SMOKE RING WILD ×2 · ENDLESS HARVEST UP TO ×10';
  const status=doc.createElement('p');status.className='cc-round-status';status.setAttribute('aria-live','polite');
  status.textContent='Saddle up! Your base-game cluster engine is ready.';
  consoleBar.after(status);
@@ -233,7 +233,7 @@ export function createCannabisCowboyPractice(doc=globalThis.document,options={})
   phase('intro');bonusIndex=0;bonusWin=0;
   bonusSpins=pendingFeature.spins.slice();
   hideEffects();
-  showFeature('ENDLESS HARVEST!',pendingFeature.initialSpins+' FREE SPINS AWARDED · STICKY WILDS ACTIVE');
+  showFeature('ENDLESS HARVEST!',pendingFeature.initialSpins+' FREE SPINS AWARDED · WILDS TUMBLE NORMALLY');
   status.textContent='ENDLESS HARVEST · '+pendingFeature.initialSpins+' FREE SPINS';
   tick(()=>{hideFeature();beginFreeSpin();},reducedMotion?0:1800);
  };
@@ -250,7 +250,8 @@ export function createCannabisCowboyPractice(doc=globalThis.document,options={})
   const description=doc.createElement('p');description.className='cc-road-description';description.textContent=stop.description;
   const subtotal=doc.createElement('p');subtotal.className='cc-road-total';
   const creditSubtotal=roadPicks.reduce((n,p)=>n+p.award,0);
-  const stacked=roadPicks.reduce((n,p)=>n*(p.multiplier??1),1);
+  const multipliers=roadPicks.filter(p=>p.kind==='multiplier').map(p=>p.multiplier);
+  const stacked=multipliers.length?multipliers.reduce((n,value)=>n+value,0):1;
   subtotal.textContent='COLLECTED '+format(creditSubtotal)+' COINS · STACKED ×'+stacked+' · TOTAL '+format(creditSubtotal*stacked);
   const cases=doc.createElement('div');cases.className='cc-road-cases';
   for(let c=0;c<3;c++){
@@ -355,7 +356,7 @@ export function createCannabisCowboyPractice(doc=globalThis.document,options={})
     for(const offset of pattern)b[(row+Math.floor(offset/6))*6+col+offset%6]=symbol;
    }
    // Test previews allow naturally found incidental wins, never hardcode
-   // winnings or override the actual sticky-wild/harvest resolver.
+   // winnings or override the actual wild/harvest resolver.
    return b;
   };
   const trialOptions=trial?{

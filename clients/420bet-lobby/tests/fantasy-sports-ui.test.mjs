@@ -59,3 +59,12 @@ test('Existing 420Bet lobby launches a dedicated immersive fantasy route and pre
  assert(css.includes('@media(max-width:670px)'));
  assert(css.includes('prefers-reduced-motion'));
 });
+
+test('Approved native-resolution wallpaper asset is present and decodable as AVIF container',()=>{
+ const image=readFileSync(new URL('../public/assets/420bet/fantasy/fantasy-hockey-lounge.avif',import.meta.url));
+ assert(image.length>100000,'Must use full-resolution approved artwork, not a placeholder');
+ assert.equal(image.subarray(4,12).toString('ascii'),'ftypavif');
+ const css=readFileSync(new URL('../src/fantasy-sports.css',import.meta.url),'utf8');
+ assert(css.includes("background-size:cover")||css.includes('/cover no-repeat'));
+ assert(css.includes('.art-fantasy-lounge'));
+});

@@ -1,3 +1,4 @@
+import {readFileSync} from 'node:fs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {parseHTML} from 'linkedom';
@@ -226,4 +227,18 @@ test('Endless Harvest doubles only wild weighting on initial reels and cascade r
  const feature=resolveRound(board,20,()=>threshold,{bonusMode:true});
  assert(feature.steps[0].refills.length>0);
  assert(feature.steps[0].refills.every(pos=>feature.steps[0].after[pos]===WILD_SYMBOL),'bonus refills use feature wild weights');
+});
+
+
+test('Endless Harvest spin control uses approved illustrated PNG and opaque live counters',()=>{
+ const css=readFileSync(new URL('../src/cannabis-cowboy.css',import.meta.url),'utf8');
+ const path='/assets/420bet/cannabis-cowboy/cannabis-cowboy-endless-harvest-spin-button.png';
+ const asset=readFileSync(new URL('../public'+path,import.meta.url));
+ assert.equal(asset.subarray(0,8).toString('hex'),'89504e470d0a1a0a','approved button is a valid PNG');
+ const live=css.slice(css.lastIndexOf('/* Endless Harvest approved illustrated spin button'));
+ assert.match(live,/cannabis-cowboy-endless-harvest-spin-button\.png/);
+ assert.match(live,/\.cc-free-spin-progress\{[\s\S]*?background:linear-gradient\(180deg,#512809,#311909\)/);
+ assert.match(live,/\.cc-free-spin-last\{[\s\S]*?background:linear-gradient\(180deg,#542a11,#2f170b\)/);
+ assert.match(live,/\.cc-free-spin-action\{[\s\S]*?opacity:0/);
+ assert.match(live,/aspect-ratio:3 \/ 2/);
 });

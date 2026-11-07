@@ -34,7 +34,7 @@ export function qualify(grid){return {jen:count(grid,'jen')>=3,family:count(grid
 export function triggerCharacters(grid,rng){const flags=qualify(grid);return Object.fromEntries(Object.keys(flags).map(k=>[k,flags[k]&&rand(rng)<.25]));}
 export function evaluate(grid){if(grid.length!==20)throw Error('Expected five reels, four rows');let units=0;const wins=[];for(const [symbol,pay] of Object.entries(PAY)){let ways=1,matched=0;for(let reel=0;reel<COLS;reel++){const hits=grid.slice(reel*ROWS,reel*ROWS+ROWS).filter(x=>x===symbol||x==='wild').length;if(!hits)break;ways*=hits;matched++;}if(matched>=3){const multiplier=pay[matched-2];const amount=ways*multiplier;units+=amount;wins.push({symbol,matched,ways,amount});}}return {units,wins};}
 export function replaceRandom(grid,rng,eligible,replacement,n){const out=grid.slice(),available=out.map((s,i)=>eligible(s,i)?i:-1).filter(i=>i>=0);for(let k=0;k<n&&available.length;k++){const p=integer(rng,available.length);out[available.splice(p,1)[0]]=replacement;}return out;}
-export function modifier(grid,type,rng){let out=grid.slice(),label='';if(type==='jen'){const event=choose(rng,['HIDE THE STASH','PANIC WILDS','GARAGE CLEANUP','CAUGHT RED-HANDED']);label=event;if(event==='HIDE THE STASH')out=replaceRandom(out,rng,s=>s!=='scatter'&&s!=='stash','stash',2+integer(rng,4));if(event==='PANIC WILDS')out=replaceRandom(out,rng,s=>s!=='scatter'&&s!=='wild','wild',2+integer(rng,3));if(event==='GARAGE CLEANUP')out=out.map(s=>LOW.has(s)?choose(rng,[...PREMIUM]):s);return {grid:out,label,multiplier:event==='CAUGHT RED-HANDED'?2+integer(rng,2):1};}
+export function modifier(grid,type,rng){let out=grid.slice(),label='';if(type==='jen'){const event=choose(rng,['HIDE THE STASH','PANIC WILDS','GARAGE CLEANUP','CAUGHT RED-HANDED']);label=event;if(event==='HIDE THE STASH')out=replaceRandom(out,rng,s=>s!=='scatter'&&s!=='stash','stash',3+integer(rng,3));if(event==='PANIC WILDS')out=replaceRandom(out,rng,s=>s!=='scatter'&&s!=='wild','wild',2+integer(rng,3));if(event==='GARAGE CLEANUP')out=out.map(s=>LOW.has(s)?choose(rng,[...PREMIUM]):s);return {grid:out,label,multiplier:event==='CAUGHT RED-HANDED'?2+integer(rng,2):1};}
 if(type==='family'){const event=choose(rng,['LOW SYMBOL UPGRADE','WILD GRAFFITI','SCATTER SCRAMBLE','GARAGE MAYHEM']);label=event;if(event==='LOW SYMBOL UPGRADE')out=out.map(s=>LOW.has(s)?choose(rng,[...PREMIUM]):s);if(event==='WILD GRAFFITI')out=replaceRandom(out,rng,s=>s!=='scatter'&&s!=='stash','wild',2);if(event==='SCATTER SCRAMBLE')out=replaceRandom(out,rng,s=>s!=='scatter','scatter',1+integer(rng,2));if(event==='GARAGE MAYHEM')out=replaceRandom(out,rng,s=>LOW.has(s),choose(rng,[...PREMIUM]),3+integer(rng,3));return {grid:out,label,multiplier:1};}
 if(type==='bud')return {grid:replaceRandom(out,rng,s=>s!=='wild'&&s!=='scatter'&&s!=='stash','wild',3),label:'FETCH WILD!',multiplier:1};
 throw Error('Unknown modifier');}
@@ -167,7 +167,8 @@ export function spin(state,rng=Math.random){if(!Number.isFinite(state.bet)||stat
  // added scatters count toward the normal 3+ scatter free-spin trigger.
  // Evaluate that transformed board once, never issue duplicate free bonuses.
  let freeTriggerGrid=grid,freeTriggerSource='base';
- // Jen's HIDE THE STASH transformation can complete a three-crate trigger.
+ // Jen's HIDE THE STASH always places at least three crates, guaranteeing
+ // the transformation qualifies for the three-crate Hold & Win trigger.
  // Keep the transformed trigger board separate from the original reels and
  // award at most one Hold & Win feature per paid spin.
  let stashTriggerGrid=grid,stashTriggerSource='base';

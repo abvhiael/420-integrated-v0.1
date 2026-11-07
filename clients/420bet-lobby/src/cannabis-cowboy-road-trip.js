@@ -37,7 +37,9 @@ export function chooseRoadCase(trip,previous,caseIndex){
  const multiplier=kind==='multiplier'?stop.multiplier:1;
  const picks=[...previous.map(p=>({...p})),{stop:previous.length,caseIndex,award,kind,multiplier}];
  const subtotal=picks.reduce((n,p)=>n+p.award,0);
- const stackedMultiplier=picks.reduce((n,p)=>n*p.multiplier,1);
+ // Add collected multiplier values; without a multiplier case, keep a neutral 1×.
+ const multipliers=picks.filter(p=>p.kind==='multiplier').map(p=>p.multiplier);
+ const stackedMultiplier=multipliers.length?multipliers.reduce((n,value)=>n+value,0):1;
  const total=subtotal*stackedMultiplier;
  if(!Number.isSafeInteger(subtotal)||!Number.isSafeInteger(total)||!Number.isSafeInteger(stackedMultiplier))throw Error('Unsafe road trip total');
  return {picks,subtotal,stackedMultiplier,total,done:picks.length===trip.stops.length,award,kind,multiplier};

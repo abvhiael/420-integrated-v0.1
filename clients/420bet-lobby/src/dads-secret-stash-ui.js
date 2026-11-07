@@ -3,7 +3,26 @@ import {DSS_SYMBOL_ART,DSS_SYMBOL_LABELS,DSS_CAST_ART,DSS_TRANSITION_ART,DSS_FEA
 const GLYPHS={gary:'😎',jen:'👩',tyler:'🎧',emma:'💜',keller:'📋',bud:'🐕',jar:'🫙',bong:'⚗️',pizza:'🍕',lighter:'🔥',papers:'📜',A:'A',K:'K',Q:'Q',J:'J','10':'10',wild:'🌿',scatter:'☮',stash:'📦',mower:'🚜'};
 const FEATURE_TITLES={jen:"OH SHIT, SHE'S HOME!",family:'FAMILY CHAOS!',keller:'HOA INSPECTION!',bud:'GOOD BOY BONUS!',free:'FIVE MINUTES OF PEACE!',stash:"DAD'S SECRET STASH!",mow:'MOW THE LAWN!'};
 // Allow the 450ms slide-in to complete, then hold the character for over a full second.
-export const DSS_BONUS_PRESENTATION=Object.freeze({characterMs:1600,resultMs:1200});
+export const DSS_BONUS_PRESENTATION=Object.freeze({characterMs:1600,resultMs:1200,comicActionMs:1500});
+const COMIC_ACTION_DETAILS=Object.freeze({
+ 'HIDE THE STASH':'Extra stash crates are added to the reels!',
+ 'PANIC WILDS':'Random symbols transform into WILDS!',
+ 'GARAGE CLEANUP':'Low symbols are upgraded to premium symbols!',
+ 'CAUGHT RED-HANDED':'A surprise win multiplier kicks in!',
+ 'LOW SYMBOL UPGRADE':'Low symbols become premium symbols!',
+ 'WILD GRAFFITI':'Two symbols turn into WILDS!',
+ 'SCATTER SCRAMBLE':'Extra SCATTERS land — three or more unlock FREE SPINS!',
+ 'GARAGE MAYHEM':'Low symbols change into surprise premium symbols!',
+ 'FETCH WILD!':'Bud fetches three WILDS for the reels!',
+ 'HOA INSPECTION':'Five locked respins — premium symbols stay put!'
+});
+export function comicActionCopy(event){
+ const title=event.type==='keller'?'HOA INSPECTION!':(event.label??FEATURE_TITLES[event.type]??'BONUS ACTION').toUpperCase().replace(/!*$/,'!');
+ const detail=event.awardedFreeSpins?
+  event.scatterCount+' SCATTERS! FIVE MINUTES OF PEACE FREE SPINS UNLOCKED!':
+  (COMIC_ACTION_DETAILS[event.label]??COMIC_ACTION_DETAILS[event.type==='keller'?'HOA INSPECTION':event.label]??'BONUS FEATURE ACTIVATED!');
+ return {title,detail};
+}
 const FEATURE_PERSON={jen:'JEN',family:'TYLER & EMMA',keller:'MR. KELLER',bud:'BUD',free:'GARY',stash:'GARY',mow:'GARY'};
 function el(doc,tag,cls,txt){const x=doc.createElement(tag);if(cls)x.className=cls;if(txt!==undefined)x.textContent=txt;return x;}
 export function createDadsSecretStash(doc=globalThis.document,options={}){
@@ -112,7 +131,17 @@ export function createDadsSecretStash(doc=globalThis.document,options={}){
  const titleArt=el(doc,'img','dss-feature-title-art');titleArt.alt='';titleArt.hidden=true;
  const headline=el(doc,'h2','dss-announcement');
  const announcement=el(doc,'div','dss-announcement-stack');announcement.append(titleArt,headline);
- portrait.append(nameTag);overlay.append(backdrop,bubble,announcement,portrait);
+ portrait.append(nameTag);
+ // Full-screen comic action reveal belongs INSIDE the existing overlay, so the
+ // reel board remains obscured until the action card completes its 1.5s hold.
+ const comicCard=el(doc,'div','dss-comic-action');
+ comicCard.hidden=true;comicCard.setAttribute('role','status');
+ comicCard.setAttribute('aria-live','polite');
+ const comicBurst=el(doc,'div','dss-comic-burst');
+ const comicTitle=el(doc,'strong','dss-comic-title');
+ const comicDetail=el(doc,'span','dss-comic-detail');
+ comicBurst.append(comicTitle,comicDetail);comicCard.append(comicBurst);
+ overlay.append(backdrop,bubble,announcement,portrait,comicCard);
  function loadArt(img,url){if(!url){img.hidden=true;return;}img.hidden=false;img.src=url;img.addEventListener('error',()=>{img.hidden=true;},{once:true});}
  function showCast(type){
    for(const old of [...portrait.querySelectorAll('img')])old.remove();
@@ -292,7 +321,24 @@ export function createDadsSecretStash(doc=globalThis.document,options={}){
 }
  function refresh(){balance.textContent='BALANCE '+money(state.balance);betLabel.textContent='BET '+money(state.bet);winLabel.textContent='WIN '+money(state.last?.win??0);round.textContent='SPINS '+state.rounds;message.textContent=state.message;lower.disabled=busy;higher.disabled=busy;play.disabled=busy||state.balance<state.bet;autoBtn.disabled=state.balance<state.bet&&!busy;previewSelect.disabled=busy||auto;previewButton.disabled=busy||auto||state.mode!=='practice';}
  function schedule(fn,ms){currentTimer=setTimer(()=>{currentTimer=null;if(!destroyed)fn();},ms);}
- function finish(){busy=false;if(previewPriorState){state=previewPriorState;previewPriorState=null;}clearWinTrace();overlay.hidden=true;modifierAction.hidden=true;resultScreen.hidden=true;bonusHeader.hidden=true;scene.removeAttribute('data-bonus');cells.forEach(({cell})=>cell.classList.remove('dss-sticky','dss-locked','dss-new-lock','dss-clearing','dss-dropping','dss-win-flash','dss-transforming','dss-transformed'));holdWin.hidden=true;reels.hidden=false;showGrid(state.last?.grid??Array(20).fill('jar'));showScene('main');setFeature('main',state.last?.message??'Watch for 3 scatters, stash crates or lawnmowers.','5 REELS · 1,024 WAYS');refresh();status.textContent='Practice only — simulated credits, no wallet or wagers';if(auto&&autoLeft>0&&state.balance>=state.bet){autoLeft--;schedule(start,400);}else{auto=false;autoLeft=0;autoBtn.textContent='AUTO ×10';}}
+ function showComicAction(event,done){
+  const {title,detail}=comicActionCopy(event);
+  comicTitle.textContent=title;
+  comicDetail.textContent=detail;
+  comicCard.dataset.feature=event.type;
+  comicCard.dataset.action=event.label??event.type;
+  comicCard.hidden=false;
+  overlay.classList.add('dss-comic-active');
+  // Keep the existing overlay fully visible so underlying reels are concealed.
+  overlay.hidden=false;
+  status.textContent='COMIC ACTION REVEAL: '+title;
+  schedule(()=>{
+   comicCard.hidden=true;
+   overlay.classList.remove('dss-comic-active');
+   done();
+  },DSS_BONUS_PRESENTATION.comicActionMs);
+ }
+ function finish(){busy=false;if(previewPriorState){state=previewPriorState;previewPriorState=null;}clearWinTrace();overlay.hidden=true;comicCard.hidden=true;overlay.classList.remove('dss-comic-active');modifierAction.hidden=true;resultScreen.hidden=true;bonusHeader.hidden=true;scene.removeAttribute('data-bonus');cells.forEach(({cell})=>cell.classList.remove('dss-sticky','dss-locked','dss-new-lock','dss-clearing','dss-dropping','dss-win-flash','dss-transforming','dss-transformed'));holdWin.hidden=true;reels.hidden=false;showGrid(state.last?.grid??Array(20).fill('jar'));showScene('main');setFeature('main',state.last?.message??'Watch for 3 scatters, stash crates or lawnmowers.','5 REELS · 1,024 WAYS');refresh();status.textContent='Practice only — simulated credits, no wallet or wagers';if(auto&&autoLeft>0&&state.balance>=state.bet){autoLeft--;schedule(start,400);}else{auto=false;autoLeft=0;autoBtn.textContent='AUTO ×10';}}
  function showFeatureResult(event,done){
   const title=FEATURE_TITLES[event.type]??event.label??'FEATURE COMPLETE';
   resultTitle.textContent=title;
@@ -579,6 +625,7 @@ export function createDadsSecretStash(doc=globalThis.document,options={}){
   cells.forEach(x=>x.cell.classList.remove('dss-locked','dss-trigger-scatter'));
   if(eventIndex>=events.length){finish();return;}
   const event=events[eventIndex++];
+  comicCard.hidden=true;overlay.classList.remove('dss-comic-active');
   overlay.hidden=false;bubble.hidden=true;headline.textContent=FEATURE_TITLES[event.type]??event.label;
   showCast(event.type);showScene(['free','stash','mow'].includes(event.type)?event.type:'main');
   setFeature(event.type,'BONUS STARTING…',event.label??'');
@@ -587,9 +634,14 @@ export function createDadsSecretStash(doc=globalThis.document,options={}){
    bubble.textContent=event.type==='keller'?event.spins+' LOCKED RESPINS':event.type==='bud'?'FETCH WILD!':event.label;
    bubble.hidden=false;status.textContent='BONUS ANNOUNCEMENT: '+(event.label??event.type).toUpperCase();
    schedule(()=>{
-    overlay.hidden=true;
-    status.textContent='FEATURE PLAYING: '+(event.label??event.type).toUpperCase();
-    playFeatureSteps(event);
+    const play=()=>{
+     overlay.hidden=true;
+     status.textContent='FEATURE PLAYING: '+(event.label??event.type).toUpperCase();
+     playFeatureSteps(event);
+    };
+    if(['family','jen','bud','keller'].includes(event.type)){
+     showComicAction(event,play);
+    }else play();
    },DSS_BONUS_PRESENTATION.resultMs);
   },DSS_BONUS_PRESENTATION.characterMs);
  }

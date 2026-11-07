@@ -2,7 +2,7 @@ import test from 'node:test';import assert from 'node:assert/strict';import {par
 import {existsSync,readFileSync} from 'node:fs';
 import {SLOT_MACHINES,createSlotsLobby,slotMachineFromHash} from '../src/slots-lobby.js';
 import {newGame,draw,qualify,triggerCharacters,modifier,inspection,spin,evaluate,stashBonus,freeBonus,mow,makeBonusPreview,BONUS_PREVIEW_TYPES,FREE_WEIGHTS,FREE_STICKY_LIMIT,FREE_MULTIPLIER_STAGES,MOW_PAYOUT_FACTOR} from '../src/dads-secret-stash-engine.js';
-import {createDadsSecretStash,DSS_BONUS_PRESENTATION} from '../src/dads-secret-stash-ui.js';
+import {createDadsSecretStash,DSS_BONUS_PRESENTATION,comicActionCopy} from '../src/dads-secret-stash-ui.js';
 import {DSS_SYMBOL_ART,DSS_CAST_ART,DSS_TRANSITION_ART,DSS_BACKGROUND_ART,DSS_FEATURE_ART,DSS_LARRY_ART} from '../src/dads-secret-stash-assets.js';
 import {SYMBOLS} from '../src/dads-secret-stash-engine.js';
 const board=()=>Array(20).fill('A');const seq=(value)=>()=>value;
@@ -361,16 +361,16 @@ test('Family Chaos Wild Graffiti visibly changes the board before the win popup'
  const initial=game.getState().last.grid;
  const cells=[...game.querySelectorAll('.dss-cell')];
  // Base-game winning ways now play for 1.5s before Family Chaos starts.
- advance(7800);
+ advance(9300);
  assert.equal(game.querySelector('.dss-modifier-action').hidden,false);
  assert.deepEqual(cells.map(x=>x.dataset.symbol),initial,'Original reel symbols visible before graffiti');
- advance(9250);
+ advance(10750);
  assert(cells.some((x,i)=>x.dataset.symbol!==initial[i]),'At least one reel symbol transforms before the result');
  assert.equal(game.querySelector('.dss-feature-result').hidden,true,'Win popup must not obscure transformations');
- advance(11500);
+ advance(13000);
  assert.deepEqual(cells.map(x=>x.dataset.symbol),event.grid,'All changed reel positions should match calculated result');
  let sawTrace=false,sawResult=false;
- for(let time=11600;time<=30000;time+=100){
+ for(let time=13100;time<=31500;time+=100){
   advance(time);
   sawTrace ||= !game.querySelector('.dss-win-trace').hidden;
   sawResult ||= !game.querySelector('.dss-feature-result').hidden;
@@ -516,12 +516,12 @@ test('Temporary Family Chaos Wild Graffiti preview shows transformations without
   }
   now=target;
  };
- advance(3500);
+ advance(5000);
  assert.equal(game.querySelector('.dss-modifier-action').hidden,false);
  assert.equal(game.querySelector('.dss-modifier-action').dataset.outcome,'WILD GRAFFITI');
- advance(6800);
+ advance(8300);
  assert(game.querySelectorAll('.dss-transformed').length>=1);
- advance(28000);
+ advance(29500);
  assert.equal(JSON.stringify(game.getState()),before);
  game.stopAnimation();
 });
@@ -885,4 +885,79 @@ test('Family Chaos scatter award highlights matching symbols before the free-spi
  assert(ui.includes("cell.classList.remove('dss-locked','dss-trigger-scatter')"));
  const css=readFileSync(new URL('../src/dads-secret-stash.css',import.meta.url),'utf8');
  assert.match(css,/\.dss-reel \.dss-cell\.dss-trigger-scatter/);
+});
+
+test('All Jen, Family, Bud, and HOA comic titles explain the actual selected action',()=>{
+ assert.equal(DSS_BONUS_PRESENTATION.comicActionMs,1500);
+ const expected={
+  jen:['HIDE THE STASH','PANIC WILDS','GARAGE CLEANUP','CAUGHT RED-HANDED'],
+  family:['LOW SYMBOL UPGRADE','WILD GRAFFITI','SCATTER SCRAMBLE','GARAGE MAYHEM'],
+  bud:['FETCH WILD!'],
+  keller:['HOA INSPECTION']
+ };
+ for(const [type,labels] of Object.entries(expected)){
+  for(const label of labels){
+   const copy=comicActionCopy({type,label});
+   assert.match(copy.title,/^[A-Z0-9 !'-]+$/,'Action title should use bold uppercase copy');
+   assert(copy.detail.length>=22,'Each action needs a meaningful explanatory subtitle');
+   assert.notEqual(copy.detail,'BONUS FEATURE ACTIVATED!');
+  }
+ }
+ const unlock=comicActionCopy({type:'family',label:'SCATTER SCRAMBLE',awardedFreeSpins:true,scatterCount:4});
+ assert.match(unlock.detail,/4 SCATTERS/);
+ assert.match(unlock.detail,/FREE SPINS UNLOCKED/);
+});
+test('Comic result stays over the reels for precisely 1500ms before character feature actions begin',()=>{
+ for(const requested of ['family-graffiti','jen','bud','keller']){
+  const {document,window}=parseHTML('<html><body></body></html>');
+  let now=0,id=0;const tasks=[];
+  const game=createDadsSecretStash(document,{
+   rng:()=>.5,
+   setTimeout:(fn,ms)=>{const task={id:++id,at:now+ms,fn,done:false};tasks.push(task);return task.id;},
+   clearTimeout:key=>{const task=tasks.find(t=>t.id===key);if(task)task.done=true;}
+  });
+  const advance=until=>{
+   let guard=0;
+   while(true){
+    if(guard++>3000)throw Error('Comic action sequence did not settle');
+    tasks.sort((a,b)=>a.at-b.at);
+    const task=tasks.find(t=>!t.done&&t.at<=until);
+    if(!task)break;
+    task.done=true;now=task.at;task.fn();
+   }
+   now=until;
+  };
+  game.querySelector('.dss-preview-select option[value="'+requested+'"]').setAttribute('selected','');
+  game.querySelector('.dss-preview-button').dispatchEvent(new window.Event('click',{bubbles:true}));
+  const overlay=game.querySelector('.dss-overlay'),card=game.querySelector('.dss-comic-action');
+  assert.equal(overlay.hidden,false);
+  assert.equal(card.hidden,true);
+  advance(2799);
+  assert.equal(card.hidden,true,'Character intro still visible just before comic');
+  advance(2800);
+  assert.equal(card.hidden,false,'Comic must open after character splash');
+  assert.equal(overlay.hidden,false,'Cover reels during action reveal');
+  assert(overlay.classList.contains('dss-comic-active'));
+  assert(card.querySelector('.dss-comic-title').textContent.length>4);
+  assert(card.querySelector('.dss-comic-detail').textContent.length>15);
+  assert.equal(game.querySelector('.dss-feature-result').hidden,true);
+  advance(4299);
+  assert.equal(card.hidden,false,'Comic remains for the complete 1500ms');
+  assert.equal(overlay.hidden,false,'Reels remain concealed until comic ends');
+  advance(4300);
+  assert.equal(card.hidden,true,'Comic ends at 1500ms');
+  assert.equal(overlay.hidden,true,'Reel board revealed before its action plays');
+  assert(!overlay.classList.contains('dss-comic-active'));
+  if(requested==='family-graffiti'){
+   assert.equal(game.querySelector('.dss-modifier-action').hidden,false,'Graffiti starts after comic');
+  }else if(requested==='keller'){
+   assert.equal(game.querySelector('.dss-bonus-hud').hidden,false,'HOA respins begin after comic');
+  }
+  assert.equal(game.getState().rounds,0,'Comic demo cannot alter spin history');
+  game.stopAnimation();
+ }
+ const css=readFileSync(new URL('../src/dads-secret-stash.css',import.meta.url),'utf8');
+ assert.match(css,/\.dss-comic-action\[hidden\]\{display:none!important\}/);
+ assert.match(css,/\.dss-overlay\.dss-comic-active > :not\(\.dss-comic-action\)\{visibility:hidden\}/);
+ assert.match(css,/\.dss-comic-title\{[^}]*font-size:clamp\(30px,5\.2vw,78px\)/);
 });

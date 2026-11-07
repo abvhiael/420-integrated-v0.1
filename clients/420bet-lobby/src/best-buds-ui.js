@@ -185,7 +185,10 @@ export function createBestBudsPractice(doc=globalThis.document,options={}){
   const span=make(doc,'div','bb-coin-kind bb-kind-'+c.kind);
   if(c.kind==='coin'){span.append(sprite(doc,'ui','icon_hotbox_coin.png','Hotbox coin'),make(doc,'b','','×'+c.value));}
   else if(c.kind==='jackpot'){span.append(sprite(doc,'ui','icon_jackpot_'+c.value.toLowerCase()+'.png',c.value+' jackpot'));}
-  else if(c.kind==='collect')span.append(sprite(doc,'ui','icon_collect_smoke.png','Collect Smoke'));
+  else if(c.kind==='collect'){
+   span.append(sprite(doc,'ui','icon_collect_smoke.png','Collect Smoke'));
+   span.append(make(doc,'b','bb-collect-value','×'+credit(c.value)));
+  }
   else span.append(sprite(doc,'ui','icon_multiplier_x2.png','Multiplier'));
   return span;
  }

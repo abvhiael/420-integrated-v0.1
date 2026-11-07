@@ -112,7 +112,7 @@ test('Endless Harvest intro, all free-spin scenes, retrigger and end presentatio
    root.querySelector('.cc-free-spin-button').dispatchEvent(new window.Event('click'));
   }
   if(root.getPracticeState().bonusSplashVisible){
-   assert.match(root.querySelector('.cc-bonus-total-splash').textContent,/COINS WON/);
+   assert.match(root.querySelector('.cc-bonus-total-splash').textContent,/CREDITS/);
    root.querySelector('.cc-bonus-total-splash').dispatchEvent(new window.Event('click'));
   }
   if(!tasks.length&&root.getPracticeState().busy)continue;
@@ -169,13 +169,27 @@ test('free spins require player input and stay on coin-total splash until dismis
  assert(root.getPracticeState().freeSpinReady);
  assert.equal(root.getPracticeState().bonusIndex,0);
  assert(root.querySelector('.cc-free-spin-button').hidden===false);
+ assert.match(root.querySelector('.cc-free-spin-button').textContent,/FREE SPIN 1 OF 8/);
+ assert.match(root.querySelector('.cc-free-spin-button').textContent,/LAST SPIN: 0 CREDITS/);
  for(let i=0;i<8;i++){
-  root.querySelector('.cc-free-spin-button').dispatchEvent(new window.Event('click'));
+  const beforeSpin=root.getPracticeState();
+  const button=root.querySelector('.cc-free-spin-button');
+  assert.match(button.textContent,new RegExp('FREE SPIN '+(i+1)+' OF 8'));
+  if(i>0)assert.match(button.textContent,new RegExp('LAST SPIN: '+beforeSpin.lastFreeSpinWin.toLocaleString('en-US')+' CREDITS'));
+  button.dispatchEvent(new window.Event('click'));
   drain();
  }
  assert(root.getPracticeState().bonusSplashVisible);
  assert.equal(root.getPracticeState().busy,true);
- assert.match(root.querySelector('.cc-bonus-total-splash').textContent,/COINS WON/);
+ const splash=root.querySelector('.cc-bonus-total-splash');
+ assert.equal(splash.dataset.bonus,'harvest');
+ assert.match(splash.textContent,/ENDLESS HARVEST COMPLETE/);
+ assert.match(splash.textContent,/TOTAL BONUS WIN/);
+ assert.match(splash.textContent,/CREDITS/);
+ assert.match(splash.textContent,/CLICK ANYWHERE TO CONTINUE/);
+ assert.match(splash.querySelector('.cc-bonus-cowboy').getAttribute('src'),/cannabis-cowboy-cole-haze\.png$/);
+ assert.equal(splash.querySelector('.cc-bonus-total-amount').textContent,
+  root.getPracticeState().bonusWin.toLocaleString('en-US')+' CREDITS');
  root.querySelector('.cc-bonus-total-splash').dispatchEvent(new window.Event('click'));
  assert.equal(root.getPracticeState().bonusSplashVisible,false);
  assert.equal(root.getPracticeState().busy,false);

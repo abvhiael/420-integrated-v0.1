@@ -230,18 +230,13 @@ test('Road Trip adds 2x + 3x + 10x into 15x rather than multiplying to 60x',()=>
  trip.stops[0].multiplierCase=0;trip.stops[0].multiplier=2;
  trip.stops[1].multiplierCase=1;trip.stops[1].multiplier=3;
  trip.stops[2].multiplierCase=2;trip.stops[2].multiplier=10;
- let picks=[];
+ let picks=[],final;
  for(let i=0;i<5;i++){
   const index=i<3?i:(trip.stops[i].multiplierCase+1)%3;
-  picks=chooseRoadCase(trip,picks,index).picks;
+  final=chooseRoadCase(trip,picks,index);picks=final.picks;
  }
- const chosen=chooseRoadCase(createRoadTrip(20,seed(12)),[],0);
- assert(Number.isSafeInteger(chosen.total));
- const multipliers=picks.filter(p=>p.kind==='multiplier').map(p=>p.multiplier);
- assert.deepEqual(multipliers,[2,3,10]);
- assert.equal(multipliers.reduce((n,v)=>n+v,0),15);
- const subtotal=picks.reduce((n,p)=>n+p.award,0);
- assert(subtotal>=0);
- const additive= multipliers.reduce((n,v)=>n+v,0);
- assert.equal(subtotal*additive,subtotal*15);
+ assert.deepEqual(picks.filter(p=>p.kind==='multiplier').map(p=>p.multiplier),[2,3,10]);
+ assert.equal(final.stackedMultiplier,15);
+ assert.equal(final.total,final.subtotal*15);
+ assert(final.done);
 });

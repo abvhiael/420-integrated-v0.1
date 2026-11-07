@@ -167,7 +167,17 @@ export function spin(state,rng=Math.random){if(!Number.isFinite(state.bet)||stat
  // added scatters count toward the normal 3+ scatter free-spin trigger.
  // Evaluate that transformed board once, never issue duplicate free bonuses.
  let freeTriggerGrid=grid,freeTriggerSource='base';
+ // Jen's HIDE THE STASH transformation can complete a three-crate trigger.
+ // Keep the transformed trigger board separate from the original reels and
+ // award at most one Hold & Win feature per paid spin.
+ let stashTriggerGrid=grid,stashTriggerSource='base';
 for(const type of ['jen','family','keller','bud']){if(!flags[type])continue;if(type==='keller'){const event=inspection(grid,rng);units+=event.units;events.push({type,...event});}else{const event=modifier(grid,type,rng);event.units=evaluate(event.grid).units*event.multiplier;
+ if(type==='jen'&&event.label==='HIDE THE STASH'&&count(event.grid,'stash')>=3){
+  stashTriggerGrid=event.grid;
+  stashTriggerSource='jen-hide-the-stash';
+  event.awardedStashBonus=true;
+  event.stashCount=count(event.grid,'stash');
+ }
  if(type==='family'&&event.label==='SCATTER SCRAMBLE'&&count(event.grid,'scatter')>=3){
   freeTriggerGrid=event.grid;
   freeTriggerSource='family-scatter-scramble';
@@ -176,7 +186,7 @@ for(const type of ['jen','family','keller','bud']){if(!flags[type])continue;if(t
  }
  units+=event.units;events.push({type,...event});}}
 if(count(freeTriggerGrid,'scatter')>=3){const event=freeBonus(rng);units+=event.units;events.push({type:'free',...event,triggerSource:freeTriggerSource,triggerScatterCount:count(freeTriggerGrid,'scatter')});}
-if(count(grid,'stash')>=3){const event=stashBonus(rng);units+=event.units;events.push({type:'stash',...event});}
+if(count(stashTriggerGrid,'stash')>=3){const event=stashBonus(rng);units+=event.units;events.push({type:'stash',...event,triggerSource:stashTriggerSource,triggerStashCount:count(stashTriggerGrid,'stash')});}
 if(count(grid,'mower')>=3){const event=mow(grid,rng);units+=event.units;events.push({type:'mow',...event});}
 const win=Math.min(MAX_WIN_MULTIPLIER*state.bet,Math.round(units*state.bet*100)/100);
 const next={...state,balance:Math.round((state.balance-state.bet+win)*100)/100,rounds:state.rounds+1,last:{grid,base,flags,events,win,stake:state.bet},message:events.length?events.map(e=>e.label).join(' • '):win?'GARAGE WIN!':'Just five more minutes…'};next.history=[{stake:state.bet,win,events:events.map(e=>e.type)},...state.history].slice(0,20);return next;}

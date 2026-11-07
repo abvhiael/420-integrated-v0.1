@@ -162,7 +162,7 @@
 .cc-game{
   --cc-screen-height:calc(100dvh - 82px);
   width:100%;max-width:100%;min-width:0;
-  display:grid;grid-template-rows:auto minmax(0,1fr) auto auto auto;
+  display:grid;grid-template-rows:minmax(0,1fr) auto auto auto;
   align-content:stretch;gap:clamp(4px,.85vh,11px);
   padding:clamp(7px,1.15vw,18px);
   overflow-x:clip;
@@ -384,3 +384,72 @@
  to{transform:translate3d(0,-50%,0)}
 }
 @media(prefers-reduced-motion:reduce){.cc-game .cc-column-track{animation:none!important}}
+
+
+/* Cannabis Cowboy logo + paytable sidebar — reclaim the former header and right rail. */
+.cc-game .cc-stage{
+  grid-template-columns:minmax(230px,.84fr) minmax(0,3.55fr);
+  max-width:1600px;
+  align-items:stretch;
+}
+.cc-game .cc-left-rail{
+  display:flex;
+  flex-direction:column;
+  gap:clamp(5px,.65vw,10px);
+  overflow-y:auto;
+  overflow-x:hidden;
+  overscroll-behavior:contain;
+  scrollbar-width:thin;
+  scrollbar-color:#9c7635 #1a241a;
+}
+.cc-game .cc-sidebar-brand{
+  margin:0;
+  flex:0 0 auto;
+  padding:0;
+  line-height:0;
+  text-align:center;
+  background:transparent;
+  border:0;
+  box-shadow:none;
+  text-shadow:none;
+}
+.cc-game .cc-sidebar-brand .cc-title-logo{
+  display:block;
+  width:100%;
+  max-width:300px;
+  height:auto;
+  max-height:clamp(105px,21vh,235px);
+  object-fit:contain;
+  margin:0 auto;
+}
+.cc-game .cc-left-rail .cc-paytable{
+  display:block;
+  flex:0 0 auto;
+  overflow-x:auto;
+  overflow-y:visible;
+}
+.cc-game .cc-paytable-table th,.cc-game .cc-paytable-table td{
+  font-size:clamp(.52rem,.65vw,.72rem);
+}
+.cc-game .cc-paytable-table tbody th{
+  max-width:110px;
+  overflow-wrap:anywhere;
+}
+.cc-game .cc-sidebar-features{display:grid;grid-template-columns:1fr;gap:5px;flex:0 0 auto}
+.cc-game .cc-sidebar-features .cc-panel{padding:5px}
+.cc-game .cc-sidebar-features .cc-panel-line{margin:2px 0}
+.cc-game .cc-right-rail{display:none}
+@media (min-width:701px) and (max-width:1050px){
+  .cc-game .cc-stage{grid-template-columns:minmax(185px,.9fr) minmax(0,3.1fr)}
+  .cc-game .cc-left-rail{display:flex}
+  .cc-game .cc-sidebar-brand .cc-title-logo{max-height:140px}
+}
+@media (max-width:700px){
+  .cc-game .cc-stage{display:flex;flex-direction:column;gap:8px}
+  .cc-game .cc-middle{order:0}
+  .cc-game .cc-left-rail{display:flex;order:1;overflow:visible;max-height:none}
+  .cc-game .cc-sidebar-brand .cc-title-logo{max-height:125px}
+  .cc-game .cc-left-rail .cc-paytable{display:block;overflow-x:auto}
+  .cc-game .cc-sidebar-features{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .cc-game .cc-paytable-table th,.cc-game .cc-paytable-table td{font-size:.6rem}
+}

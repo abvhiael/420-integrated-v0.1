@@ -607,3 +607,19 @@
   .cc-game .cc-left-rail .cc-paytable-table thead th,
   .cc-game .cc-left-rail .cc-paytable-table tbody th{font-size:clamp(9px,2.3vw,11px)}
 }
+
+
+/* One continuous wallpaper across the 420Bet gamebar and gameplay viewport.
+   Keep children transparent so separate cover crops cannot break continuity. */
+.immersive:has(.cc-game){
+  background:#101b18 url('/assets/420bet/backgrounds/420bet_slots_wallpaper.png') center center / cover no-repeat;
+}
+.immersive:has(.cc-game) .gamebar{
+  background:rgba(10,20,14,.66);
+}
+.immersive:has(.cc-game) .view-scroll{
+  background:transparent;
+}
+.immersive:has(.cc-game) .cc-game[data-view="cannabis-cowboy"]{
+  background:transparent;
+}

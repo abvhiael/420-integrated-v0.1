@@ -1,19 +1,27 @@
-Cannabis Cowboy — On the Road Again asset folder
+Cannabis Cowboy — On the Road Again guitar cases
 
-Upload the 26 PNG files from cannabis-cowboy-on-the-road-again-assets.zip
-to this folder. The ZIP also contains a README.txt for your reference;
-the game uses the five individual backgrounds and 15 individual guitar
-case PNGs directly (sheets are optional).
+15 individual PNG assets, transparent 768x512 RGBA.
+Extracted from the supplied master sheet, with no art redesign.
 
-ontheroad_bg_sunset-ridge.png
-ontheroad_bg_pine-creek.png
-ontheroad_bg_emerald-ranch.png
-ontheroad_bg_old-music-hall.png
-ontheroad_bg_last-light-lookout.png
+GitHub destination:
+clients/420bet-lobby/public/assets/420bet/cannabis-cowboy/on-the-road-again/
 
-guitarcase_<stop-slug>_01.png
-guitarcase_<stop-slug>_02.png
-guitarcase_<stop-slug>_03.png
+Filename convention: guitarcase_<location>_<01|02|03>.png
+Rows in the source correspond to 01, 02, 03; columns correspond to:
+Sunset Ridge, Pine Creek, Emerald Ranch, Old Music Hall, Last Light Lookout.
 
-The 5 three-case sheets and guitarcase_master_sheet.png are included
-as asset references. The game tolerates missing files until uploaded.
+guitarcase_sunset-ridge_01.png
+guitarcase_pine-creek_01.png
+guitarcase_emerald-ranch_01.png
+guitarcase_old-music-hall_01.png
+guitarcase_last-light-lookout_01.png
+guitarcase_sunset-ridge_02.png
+guitarcase_pine-creek_02.png
+guitarcase_emerald-ranch_02.png
+guitarcase_old-music-hall_02.png
+guitarcase_last-light-lookout_02.png
+guitarcase_sunset-ridge_03.png
+guitarcase_pine-creek_03.png
+guitarcase_emerald-ranch_03.png
+guitarcase_old-music-hall_03.png
+guitarcase_last-light-lookout_03.png

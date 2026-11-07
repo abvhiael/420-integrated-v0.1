@@ -517,3 +517,26 @@
 .cc-game > .cc-practice-notice,
 .cc-game > .cc-round-status{position:relative;z-index:1}
 .cc-game > .cc-ranch-wallpaper{z-index:0}
+
+/* M8 wallpaper recovery: paint the sunset directly on the game's own
+   background so no descendant/negative z-index/stacking context can bury it.
+   Retain the landscape overlay as an optional visual enhancement. */
+.cc-game[data-view="cannabis-cowboy"]{
+  background-color:#101b18;
+  background-image:
+    radial-gradient(ellipse at 74% 25%,#ffdf98 0 3%,#ec8854 6%,transparent 24%),
+    linear-gradient(180deg,#311f4b 0%,#8a4763 21%,#e58e58 38%,#473d48 43%,#173c2d 56%,#091d15 100%);
+  background-size:cover;
+  background-position:center;
+  background-repeat:no-repeat;
+}
+.cc-game[data-view="cannabis-cowboy"] > .cc-ranch-wallpaper{
+  position:absolute;
+  inset:0;
+  z-index:0;
+  background:transparent;
+  pointer-events:none;
+}
+.cc-game[data-view="cannabis-cowboy"] > .cc-ranch-wallpaper::after{
+  z-index:0;
+}

@@ -95,3 +95,9 @@ test('M9 uses the committed PNG wallpaper across the game surface, not synthetic
  assert.equal(root.querySelector('.cc-stage').children.length,2);
  assert.match(css,/grid-template-columns: minmax\(310px,325px\) minmax\(0,1fr\)/);
 });
+
+test('M9 a single immersive wallpaper spans navigation and game without mismatched crops',()=>{
+ assert.match(css,/\.immersive:has\(\.cc-game\)\{\s*background:#101b18 url\('\/assets\/420bet\/backgrounds\/420bet_slots_wallpaper\.png'\) center center \/ cover no-repeat/);
+ assert.match(css,/\.immersive:has\(\.cc-game\) \.view-scroll\{\s*background:transparent/);
+ assert.match(css,/\.immersive:has\(\.cc-game\) \.cc-game\[data-view="cannabis-cowboy"\]\{\s*background:transparent/);
+});

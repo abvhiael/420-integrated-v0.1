@@ -882,7 +882,7 @@ test('Family Chaos scatter award highlights matching symbols before the free-spi
  const ui=readFileSync(new URL('../src/dads-secret-stash-ui.js',import.meta.url),'utf8');
  assert(ui.includes('event.scatterCount+\' SCATTERS — FREE SPINS UNLOCKED!\''));
  assert(ui.includes("cell.classList.toggle('dss-trigger-scatter',final[i]==='scatter')"));
- assert(ui.includes("cell.classList.remove('dss-locked','dss-trigger-scatter')"));
+ assert(ui.includes("cell.classList.remove('dss-locked','dss-trigger-scatter','dss-trigger-stash')"));
  const css=readFileSync(new URL('../src/dads-secret-stash.css',import.meta.url),'utf8');
  assert.match(css,/\.dss-reel \.dss-cell\.dss-trigger-scatter/);
 });

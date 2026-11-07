@@ -1,6 +1,6 @@
 import {createCannabisCowboyShell,COWBOY_SYMBOLS,cowboySymbolImage} from './cannabis-cowboy-ui.js';
 import {BET_CHOICES,CLUSTER_PAYS,weightedSymbol,createPracticeSession,playPracticeRound} from './cannabis-cowboy-engine.js';
-import {createRoadTrip,chooseRoadCase} from './cannabis-cowboy-road-trip.js';
+import {createRoadTrip,chooseRoadCase,roadStopBackground,roadCaseArtwork} from './cannabis-cowboy-road-trip.js';
 import {createReelSequence,drawClusterPaths,clearClusterPaths} from './cannabis-cowboy-reels.js';
 const format=n=>Number(n).toLocaleString('en-US');
 export function createCannabisCowboyPractice(doc=globalThis.document,options={}){
@@ -230,6 +230,10 @@ export function createCannabisCowboyPractice(doc=globalThis.document,options={})
   if(!pendingRoad||dead)return;
   const index=roadPicks.length,stop=pendingRoad.stops[index];
   roadPanel.replaceChildren();roadPanel.hidden=false;phase('road-trip');
+  const sceneArt=doc.createElement('img');sceneArt.className='cc-road-scene';
+  sceneArt.src=roadStopBackground(index);sceneArt.alt='';sceneArt.setAttribute('aria-hidden','true');
+  sceneArt.addEventListener('error',()=>{sceneArt.hidden=true;});
+  roadPanel.append(sceneArt);
   const heading=doc.createElement('h2');heading.className='cc-road-location';
   heading.textContent=stop.scene+'  STOP '+(index+1)+' / 5 · '+stop.name.toUpperCase();
   const description=doc.createElement('p');description.className='cc-road-description';description.textContent=stop.description;
@@ -238,7 +242,12 @@ export function createCannabisCowboyPractice(doc=globalThis.document,options={})
   const cases=doc.createElement('div');cases.className='cc-road-cases';
   for(let c=0;c<3;c++){
    const button=doc.createElement('button');button.type='button';button.className='cc-road-case';
-   button.textContent='🎸 GUITAR CASE '+(c+1);button.setAttribute('aria-label','Pick guitar case '+(c+1));button.dataset.index=String(c);
+   button.setAttribute('aria-label','Pick guitar case '+(c+1));button.dataset.index=String(c);
+   const caseArt=doc.createElement('img');caseArt.className='cc-road-case-art';
+   caseArt.src=roadCaseArtwork(index,c);caseArt.alt='';caseArt.setAttribute('aria-hidden','true');
+   caseArt.addEventListener('error',()=>{caseArt.hidden=true;});
+   const caseLabel=doc.createElement('span');caseLabel.className='cc-road-case-caption';caseLabel.textContent='GUITAR CASE '+(c+1);
+   button.append(caseArt,caseLabel);
    button.addEventListener('click',()=>{
     if(dead||!pendingRoad||roadPicks.length!==index||button.disabled)return;
     const choice=chooseRoadCase(pendingRoad,roadPicks,c);roadPicks=choice.picks;

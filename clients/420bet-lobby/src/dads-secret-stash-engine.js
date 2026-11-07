@@ -56,7 +56,7 @@ export function inspection(grid,rng){
 // replenish the respins. The complete generated timeline determines the award;
 // the UI must replay every snapshot before returning to the base reels.
 export function stashBonus(rng){
- const slots=Array(ROWS*COLS).fill(null),values=[.132,.33,.66,.99,1.32,1.98,3.3,6.6];
+ const slots=Array(ROWS*COLS).fill(null),values=[.12,.31,.61,.92,1.22,1.83,3.06,6.11];
  const start=[];
  for(let i=0;i<3;i++){
   const free=slots.map((v,k)=>v===null?k:-1).filter(k=>k>=0);

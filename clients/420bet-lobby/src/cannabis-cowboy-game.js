@@ -1,5 +1,5 @@
 import {createCannabisCowboyShell,COWBOY_SYMBOLS,cowboySymbolImage} from './cannabis-cowboy-ui.js';
-import {BET_CHOICES,CLUSTER_PAYS,createPracticeSession,playPracticeRound} from './cannabis-cowboy-engine.js';
+import {BET_CHOICES,CLUSTER_PAYS,weightedSymbol,createPracticeSession,playPracticeRound} from './cannabis-cowboy-engine.js';
 import {createRoadTrip,chooseRoadCase} from './cannabis-cowboy-road-trip.js';
 import {createReelSequence,drawClusterPaths,clearClusterPaths} from './cannabis-cowboy-reels.js';
 const format=n=>Number(n).toLocaleString('en-US');
@@ -58,6 +58,7 @@ export function createCannabisCowboyPractice(doc=globalThis.document,options={})
  const showBoard=(board,highlight=[],fertile=[],phase='idle',upgraded=[],sticky=[])=>{
   clearClusterPaths(root.querySelector('.cc-symbol-grid'));
   const wins=new Set(highlight),grown=new Set(upgraded),pins=new Set(sticky);
+  showMultiplierFrames(fertile);
   grid.forEach((cell,i)=>{
    setSymbol(cell,board[i]);cell.classList.toggle('cc-winning',wins.has(i));
    cell.classList.toggle('cc-harvest-upgrade',grown.has(i));
@@ -69,11 +70,34 @@ export function createCannabisCowboyPractice(doc=globalThis.document,options={})
   });
  };
  let busy=false,dead=false,handle=null,queue=[],lastWin=0;
- let bonusPreview=false,previewLastWin=0;
+ let bonusPreview=false,previewLastWin=0,previewRuns=0;
  let reelSequence=null,pendingRoad=null,roadPicks=[],roadStarted=false;
  let lastWinningClusters=[],lastWinningBoard=null,reviewDismissed=false;
  let pendingFeature=null,featurePhase='none',bonusIndex=0,bonusSpins=[],bonusWin=0,currentSpin=null,finishedBonus=false,displayedSticky=[];
  let displayedFertile=Array(grid.length).fill(0);
+
+ // Harvest multiplier frames are rendered ABOVE reel masks and kept separate
+ // from the changing symbols. Their positions remain anchored during spins.
+ const multiplierLayer=doc.createElement('div');
+ multiplierLayer.className='cc-multiplier-layer';
+ multiplierLayer.setAttribute('aria-label','Persistent Growing Harvest multipliers');
+ root.querySelector('.cc-symbol-grid').append(multiplierLayer);
+ const showMultiplierFrames=values=>{
+  const nodes=[];
+  values.forEach((value,index)=>{
+   if(!value)return;
+   const frame=doc.createElement('span');frame.className='cc-multiplier-frame';
+   frame.style.left=((index%6)*100/6)+'%';
+   frame.style.top=(Math.floor(index/6)*100/8)+'%';
+   frame.style.width=(100/6)+'%';frame.style.height=(100/8)+'%';
+   frame.dataset.position=String(index);
+   frame.dataset.multiplier=String(value);
+   const tag=doc.createElement('span');tag.className='cc-multiplier-value';tag.textContent='×'+value;
+   frame.append(tag);nodes.push(frame);
+  });
+  multiplierLayer.replaceChildren(...nodes);
+ };
+
  const reducedMotion=options.reducedMotion??false;
  const timings=reducedMotion?{start:0,announce:0,burst:0,drop:0}:{start:450,announce:1000,burst:520,drop:580};
  const effects=doc.createElement('div');effects.className='cc-effect-banner';effects.setAttribute('aria-live','polite');effects.hidden=true;
@@ -267,13 +291,24 @@ export function createCannabisCowboyPractice(doc=globalThis.document,options={})
   const fixture=Array.from({length:48},(_,i)=>(Math.floor(i/6)*3+i%6)%8);
   if(testKind==='free')for(const p of [0,1,2])fixture[p]=9;
   if(testKind==='road')for(const p of [0,1,2])fixture[p]=10;
-  // Repeatable QA feature boards avoid pathological RNG and do not use the
-  // normal wagering stream or mutate the player's round/credit balance.
-  let testSeed=0xC04207;
+  // Varied, reproducible QA previews: each click uses a fresh local seed.
+  // Every feature board is weighted randomness with occasional planted adjacent
+  // clusters; all awards still come exclusively from the actual cluster engine.
+  const previewRun=trial?++previewRuns:0;
+  let testSeed=(0xC04207 ^ Math.imul(previewRun,0x9e3779b1))>>>0;
   const testRng=()=>((testSeed=(Math.imul(1664525,testSeed)+1013904223)>>>0)/4294967296);
   const previewFeatureBoard=(spinNo)=>{
-   const b=Array.from({length:48},(_,i)=>(Math.floor(i/6)*3+i%6)%8);
-   if(spinNo===1)for(const p of [0,1,6,7,12])b[p]=0;
+   const b=Array.from({length:48},()=>weightedSymbol(testRng));
+   const shapes=[[0,1,2,6,12],[0,6,12,13,14],[0,1,6,7,12,13],[0,1,2,3,7],[0,6,7,8,14]];
+   const clusterCount=testRng()<.64?2:1;
+   for(let cluster=0;cluster<clusterCount;cluster++){
+    const pattern=shapes[Math.floor(testRng()*shapes.length)];
+    const col=Math.floor(testRng()*3),row=Math.floor(testRng()*5);
+    const symbol=Math.floor(testRng()*8);
+    for(const offset of pattern)b[(row+Math.floor(offset/6))*6+col+offset%6]=symbol;
+   }
+   // Test previews allow naturally found incidental wins, never hardcode
+   // winnings or override the actual sticky-wild/harvest resolver.
    return b;
   };
   const trialOptions=trial?{

@@ -87,9 +87,8 @@ export function createCannabisCowboyPractice(doc=globalThis.document,options={})
   values.forEach((value,index)=>{
    if(!value)return;
    const frame=doc.createElement('span');frame.className='cc-multiplier-frame';
-   frame.style.left=((index%6)*100/6)+'%';
-   frame.style.top=(Math.floor(index/6)*100/8)+'%';
-   frame.style.width=(100/6)+'%';frame.style.height=(100/8)+'%';
+   frame.style.gridColumn=String(index%6+1);
+   frame.style.gridRow=String(Math.floor(index/6)+1);
    frame.dataset.position=String(index);
    frame.dataset.multiplier=String(value);
    const tag=doc.createElement('span');tag.className='cc-multiplier-value';tag.textContent='×'+value;

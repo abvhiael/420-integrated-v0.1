@@ -19,7 +19,7 @@ test('single visible reel strip produces deterministic 5 by 3 outcomes',()=>{
 });
 test('winning line tracks its exact path and wild substitution only applies to ordinary symbols',()=>{
  const board=Array.from({length:REELS},()=>['BONG','JOINT','PAPERS']);
- board[1][1]='WILD1';board[2][1]='WILD2';
+ board[1][1]='WILD';board[2][1]='WILD';
  const result=evaluateLines(board,2);
  assert.ok(result.wins.some(w=>w.line===1&&w.length===5));
  assert.ok(result.amount>0);
@@ -139,7 +139,7 @@ test('manual respins reset to 3 when a new coin lands and do not charge credits'
 test('Free Rides WILD portraits receive x2/x3/x5/x10 and winning lines apply max one badge',()=>{
  assert.deepEqual([...FREE_WILD_MULTIPLIERS],[2,3,5,10]);
  const board=Array.from({length:5},()=>['BONG','JOINT','PAPERS']);
- board[1][1]='WILD1';board[2][1]='WILD2';
+ board[1][1]='WILD';board[2][1]='WILD';
  const ordinary=evaluateLines(board,2);
  const boosted=evaluateLines(board,2,{wildMultipliers:{4:2,7:10}});
  const baseline=ordinary.wins.find(w=>w.line===1);
@@ -419,11 +419,13 @@ test('HOTBOX start and completion splashes pause play and display the credited b
  root.stopAnimation();
 });
 
-test('both Buddy portraits are ALWAYS WILD, as are the special wild symbols',()=>{
- for(const symbol of ['BUDDY1','BUDDY2','WILD1','WILD2'])assert.equal(isWild(symbol),true,symbol);
- for(const symbol of ['HOTBOX','SCATTER','BONG','CHIPS','JOINT'])assert.equal(isWild(symbol),false,symbol);
+
+test('only standalone WILD substitutes; Buddy 1 and Buddy 2 are ordinary paying symbols',()=>{
+ assert.equal(isWild('WILD'),true);
+ for(const s of ['BUDDY1','BUDDY2','HOTBOX','SCATTER','BONG'])assert.equal(isWild(s),false,s);
+ assert.equal(BASE_STRIPS.every(strip=>strip.includes('WILD')&&!strip.includes('WILD1')&&!strip.includes('WILD2')),true);
 });
-test('reproduces the screenshot: two top-row Buddy 2 portraits substitute for CHIPS and PAY',()=>{
+test('two Buddy2 portraits followed by CHIPS do not win, but three Buddy2 portraits pay',()=>{
  const board=[
   ['BUDDY2','GUITAR','RECORD'],
   ['BUDDY2','SUNGLASSES','RECORD'],
@@ -431,35 +433,44 @@ test('reproduces the screenshot: two top-row Buddy 2 portraits substitute for CH
   ['JOINT','BUDDY1','LIGHTER'],
   ['PAPERS','JOINT','HOTBOX']
  ];
- const result=evaluateLines(board,2);
- const top=result.wins.find(w=>w.line===2);
- assert.ok(top,'top row must win CHIPS with two leading Buddy WILD portraits');
- assert.equal(top.symbol,'CHIPS');
- assert.equal(top.length,3);
- assert.equal(top.amount,0.5);
- assert.ok(result.amount>=0.5);
+ assert.equal(evaluateLines(board,2).wins.some(w=>w.line===2),false);
+ board[2][0]='BUDDY2';
+ const win=evaluateLines(board,2).wins.find(w=>w.line===2);
+ assert.ok(win);
+ assert.equal(win.symbol,'BUDDY2');
+ assert.equal(win.length,3);
+ assert.equal(win.amount,1); // 3 Buddy2 pays 0.5× a 2-credit total bet
 });
-test('free spins add random x2 x3 x5 x10 to landed Buddy portraits as well as special wilds',()=>{
+test('standalone WILD substitutes and multiplies only during free spins',()=>{
  const board=Array.from({length:5},()=>['CHIPS','JOINT','PAPERS']);
- board[0][0]='BUDDY2';board[1][0]='BUDDY1';
- const base=evaluateLines(board,2);
- const boosted=evaluateLines(board,2,{wildMultipliers:{0:3,3:10}});
- const ordinary=base.wins.find(w=>w.line===2);
- const multiplied=boosted.wins.find(w=>w.line===2);
- assert.ok(ordinary&&multiplied);
- assert.equal(multiplied.amount,ordinary.amount*10);
- const s=nextSpin({...initialState(),mode:'free',freeLeft:2},{stops:[0,0,0,0,0],rng:()=>.99,force:'wild10'});
- assert.equal(s.freeWildMultipliers[1],10); // forced reel 0 row 1 WILD1
- assert.ok(Object.values(s.freeWildMultipliers).every(v=>[2,3,5,10].includes(v)));
+ board[0][0]='WILD';board[1][0]='WILD';
+ const ordinary=evaluateLines(board,2).wins.find(w=>w.line===2);
+ const boosted=evaluateLines(board,2,{wildMultipliers:{0:3,3:10}}).wins.find(w=>w.line===2);
+ assert.ok(ordinary&&boosted);
+ assert.equal(boosted.amount,ordinary.amount*10);
+ const noWild=Array.from({length:5},()=>['CHIPS','JOINT','PAPERS']);
+ noWild[0][0]='BUDDY1';noWild[1][0]='BUDDY2';
+ assert.equal(evaluateLines(noWild,2,{wildMultipliers:{0:10,3:10}}).wins.some(w=>w.line===2),false);
+ let s=practiceBonus(initialState(),'wild10',()=>.99);
+ s=nextSpin(s,{rng:()=>.99,force:s.qa});
+ assert.ok(Object.values(s.freeWildMultipliers).includes(10));
+ for(const [key] of Object.entries(s.freeWildMultipliers)){
+  const r=Math.floor(Number(key)/ROWS),y=Number(key)%ROWS;
+  assert.equal(s.board[r][y],'WILD');
+ }
 });
-test('paytable labels and rules explicitly describe Buddy portraits as always-wild',()=>{
+test('INFO and right paytable explain the new distinct WILD artwork',()=>{
  const {document,window}=parseHTML('<html><body></body></html>');
  const root=createBestBudsPractice(document);
  const labels=[...root.querySelectorAll('.bb-pay-symbol')].map(c=>c.textContent);
- assert.ok(labels.includes('BUDDY 1 WILD'));
- assert.ok(labels.includes('BUDDY 2 WILD'));
+ assert.ok(labels.includes('BUDDY 1'));assert.ok(labels.includes('BUDDY 2'));
+ assert.ok(!labels.includes('BUDDY 1 WILD')&&!labels.includes('BUDDY 2 WILD'));
+ const wild=root.querySelector('.bb-wild-guide img');
+ assert.ok(wild);
+ assert.match(wild.getAttribute('src'),/sym_wild\\.svg$/);
  const info=[...root.querySelectorAll('button')].find(b=>b.textContent==='INFO / PAYTABLE');
  info.dispatchEvent(new window.Event('click',{bubbles:true}));
- assert.match(root.querySelector('.bb-modal').textContent,/ALWAYS WILD/);
+ assert.match(root.querySelector('.bb-modal').textContent,/Only the green leaf WILD substitutes/);
+ assert.ok(existsSync(new URL('../public/assets/420bet/best-buds/reels/sym_wild.svg',import.meta.url)));
  root.stopAnimation();
 });

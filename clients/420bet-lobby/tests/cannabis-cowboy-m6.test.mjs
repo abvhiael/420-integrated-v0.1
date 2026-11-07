@@ -109,6 +109,14 @@ test('interactive Road Trip reveals five guitar case choices, cannot double-pick
  h.root.querySelector('.cc-spin').dispatchEvent(new h.window.Event('click'));
  h.drain();
  const triggeringSpinWin=h.root.getPracticeState().lastWin;
+ assert.equal(h.root.getPracticeState().roadTriggerVisible,true,'Road Trip introduction must wait for user');
+ assert.equal(h.root.dataset.featurePhase,'road-trigger');
+ assert.equal(h.root.getPracticeState().roadActive,false,'cases stay locked before trigger dismissal');
+ assert.equal(h.root.querySelector('.cc-road-panel').hidden,true,'cases must not show under splash');
+ const creditsBeforeIntro=h.root.getPracticeState().credits;
+ h.root.querySelector('.cc-road-trigger-splash').dispatchEvent(new h.window.Event('click'));
+ assert.equal(h.root.getPracticeState().credits,creditsBeforeIntro,'trigger click never awards credits');
+ assert.equal(h.root.getPracticeState().roadTriggerVisible,false);
  assert.equal(h.root.getPracticeState().roadActive,true);
  assert.equal(h.root.querySelector('.cc-road-panel').hidden,false);
  for(let i=0;i<5;i++){
@@ -273,4 +281,18 @@ test('approved Road Trip splash PNG is available and the final total occupies th
  assert.match(active,/cannabis-cowboy-road-trip-complete-splash\.png/);
  assert.match(active,/\.cc-road-splash-credits\{[\s\S]*?position:absolute;/);
  assert.match(active,/pointer-events:none/);
+});
+
+test('Road Trip trigger splash uses uploaded Cole Haze image, hides when inactive and does not replace the ending',()=>{
+ const css=readFileSync(new URL('../src/cannabis-cowboy.css',import.meta.url),'utf8');
+ const path='/assets/420bet/cannabis-cowboy/cannabis-cowboy-road-trip-trigger-splash.png';
+ const bytes=readFileSync(new URL('../public'+path,import.meta.url));
+ assert.equal(bytes.subarray(0,8).toString('hex'),'89504e470d0a1a0a');
+ const recent=css.slice(css.lastIndexOf('/* Approved Cole Haze "On the Road Again!" trigger splash.'));
+ assert.match(recent,/cannabis-cowboy-road-trip-trigger-splash\.png/);
+ assert.match(recent,/\.cc-road-trigger-splash\[hidden\]\{\s*display:none!important;/);
+ assert.match(css,/cannabis-cowboy-road-trip-complete-splash\.png/);
+ const h=harness();
+ assert.equal(h.root.querySelector('.cc-road-trigger-splash').hidden,true);
+ h.root.stopAnimation();
 });

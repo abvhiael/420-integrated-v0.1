@@ -106,28 +106,31 @@ try{
   assert.match(initial.wallpaper,/bg_las_vegas_strip/,'Vegas wallpaper must extend behind title bar');
   if(name==='desktop')assert.ok(initial.cabinet.bottom<=height,'Cabinet should fit vertically on a 900px desktop viewport: '+JSON.stringify(initial.cabinet));
   await page.screenshot({path:'qualification/sin-city/'+name+'.png',fullPage:true});
-  // Check the actual SESH COMPLETE layout without waiting for a rare bonus.
-  // This mirrors the real DOM and keeps the win amount as live text.
+  // Reproduce the real stage geometry, keeping the number as live gold text.
+  // The PNG itself may be uploaded after this UI commit; Chrome checks layout
+  // with the existing Bobby image until it is installed at the same path.
   const completion=await page.evaluate(()=>{
    const host=document.querySelector('.sc-game');
    const overlay=document.createElement('div');overlay.className='sc-free-complete sc-sesh-complete';
+   const stage=document.createElement('div');stage.className='sc-sesh-stage';
    const hero=document.createElement('img');hero.className='sc-sesh-bobby';
    hero.src='/assets/420bet/sin-city-high-rollers/characters/char_bobby_las_vegas_celebration.png';
-   const heading=document.createElement('strong');heading.className='sc-sesh-title';heading.textContent='SESH COMPLETE!';
-   const total=document.createElement('div');total.className='sc-free-complete-value';total.textContent='12345.67 PRACTICE CREDITS';
-   const next=document.createElement('p');next.className='sc-free-complete-click';next.textContent='CLICK TO CONTINUE';
-   overlay.append(hero,heading,total,next);host.append(overlay);
-   const box=node=>{const r=node.getBoundingClientRect();return {top:r.top,bottom:r.bottom,height:r.height,left:r.left,right:r.right};};
-   return {hero:box(hero),heading:box(heading),total:box(total),next:box(next),overlay:box(overlay)};
+   const total=document.createElement('div');total.className='sc-free-complete-value';
+   const number=document.createElement('strong');number.className='sc-sesh-live-number';number.textContent='1,234.56';
+   const units=document.createElement('span');units.className='sc-sesh-live-units';units.textContent='PRACTICE CREDITS';
+   total.append(number,units);stage.append(hero,total);overlay.append(stage);host.append(overlay);
+   const box=node=>{const r=node.getBoundingClientRect();return {top:r.top,bottom:r.bottom,height:r.height,left:r.left,right:r.right,width:r.width};};
+   return {hero:box(hero),total:box(total),number:box(number),units:box(units),overlay:box(overlay),
+    stage:box(stage),color:getComputedStyle(number).color,background:getComputedStyle(total).backgroundColor};
   });
-  assert.ok(completion.heading.top>=completion.hero.bottom+3,
-   'SESH COMPLETE must appear below Bobby rather than covering his image: '+JSON.stringify(completion));
-  assert.ok(completion.total.top>=completion.heading.bottom+3,
-   'Live free-spin credit total must appear below SESH COMPLETE: '+JSON.stringify(completion));
-  assert.ok(completion.next.top>=completion.total.bottom+3,
-   'Click to continue must appear below the real winnings total');
-  assert.ok(completion.total.bottom<=completion.overlay.bottom+1,
-   'Total credits must remain visible inside the result splash');
+  assert.ok(completion.total.top>completion.hero.top+completion.hero.height*.66,
+   'Winning number should sit in the bottom central marquee: '+JSON.stringify(completion));
+  assert.ok(completion.total.bottom<completion.hero.bottom-10,
+   'Winning number should fit inside the illustration and not cover CLICK TO CONTINUE');
+  assert.ok(completion.number.top>=completion.total.top-2&&completion.units.bottom<=completion.total.bottom+2,
+   'Number and units must fit entirely inside the plaque');
+  assert.match(completion.color,/rgb\\(255, 220, 117\\)/,'The amount should be styled in matching gold');
+  assert.equal(completion.background,'rgba(0, 0, 0, 0)','Dynamic win must not cover the illustration with a separate panel');
   await page.screenshot({path:'qualification/sin-city/'+name+'-free-complete.png',fullPage:true});
   await page.evaluate(()=>document.querySelector('.sc-free-complete')?.remove());
 

@@ -357,10 +357,11 @@ main.immersive .view-scroll:has(.sc-game){background:transparent}
  margin:0;padding:0;pointer-events:none;
 }
 .sc-game .sc-cabinet>.sc-masthead .sc-logo{
- display:block;grid-column:1;align-self:center;
- width:100%;max-width:none;height:106px;max-height:106px;
+ display:block;grid-column:1;align-self:center;justify-self:center;
+ width:100%;max-width:100%;height:106px;max-height:106px;
  min-width:0;margin:0;padding:0;
- object-fit:fill;
+ /* Contain, NEVER fill: render the approved PNG without distorting its ratio. */
+ object-fit:contain;object-position:center center;
  filter:drop-shadow(0 0 11px #eaa73e) drop-shadow(0 3px 7px #23062f);
 }
 .sc-game .sc-cabinet>.sc-masthead .sc-ways{
@@ -390,11 +391,13 @@ main.immersive .view-scroll:has(.sc-game){background:transparent}
 @media(max-width:760px){
  .sc-game .sc-machine{grid-template-columns:minmax(0,1fr);gap:6px}
  .sc-game .sc-cabinet>.sc-masthead{
-  grid-template-columns:minmax(0,1fr) auto;gap:5px;
+  grid-template-columns:minmax(0,1fr);gap:0;
   height:72px;min-height:72px;
  }
  .sc-game .sc-cabinet>.sc-masthead .sc-logo{height:70px;max-height:70px}
- .sc-game .sc-cabinet>.sc-masthead .sc-ways{font-size:11px;padding:4px 5px}
+ /* The 1,024-ways stamp cannot push the logo off the board center on mobile.
+    Its information remains available in the game controls and INFO screen. */
+ .sc-game .sc-cabinet>.sc-masthead .sc-ways{display:none}
  .sc-game .sc-bonus-guide{
   grid-column:1;width:min(100%,380px);justify-self:center;
   margin:9px auto;padding:2px 0 0;

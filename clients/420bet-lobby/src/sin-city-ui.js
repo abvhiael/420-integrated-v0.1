@@ -78,12 +78,15 @@ export function createSinCityPractice(doc=globalThis.document,options={}){
   scene.setAttribute('aria-label','Sin City High Rollers interactive slot cabinet');
   const mast=el(doc,'header','sc-masthead');
   const logo=el(doc,'img','sc-logo');logo.src=art('branding','logo_sin_city_high_rollers.png');logo.alt='Sin City High Rollers Cannabis Edition';
-  mast.append(logo,el(doc,'span','sc-ways','1,024 WAYS'));scene.append(mast);
+  mast.append(logo,el(doc,'span','sc-ways','1,024 WAYS'));
   const content=el(doc,'div','sc-machine');
   const mascot=el(doc,'aside','sc-mascot');
   const portrait=el(doc,'img','sc-bobby');portrait.src=art('characters',state.lastFeature==='free-start'||state.lastFeature==='free-retrigger'?'char_bobby_las_vegas_celebration.png':state.lastFeature==='puff'?'char_bobby_las_vegas_smoking.png':'char_bobby_las_vegas_confident.png');portrait.alt='Bobby Las Vegas, fictional casino host';
   const name=el(doc,'div','sc-host-name','BOBBY LAS VEGAS');mascot.append(portrait,name);content.append(mascot);
   const cabinet=el(doc,'div','sc-cabinet');
+  // The newly uploaded horizontal logo sits directly above the reel board,
+  // rather than spanning the character and the surrounding game scene.
+  cabinet.append(mast);
   const top=el(doc,'div','sc-cabinet-top');
   const modeText=state.mode==='free'?'CHRONIC SESSIONS · '+state.freeRemaining+' FREE SPINS REMAINING':state.mode==='hotbox'?'HOTBOX · '+state.respins+' RESPINS LEFT · '+state.locked.length+' GEMS LOCKED':'PRACTICE PLAY';
   top.append(el(doc,'span','','SIN CITY HIGH ROLLERS'),el(doc,'span','sc-mode-label',modeText));
@@ -216,7 +219,17 @@ export function createSinCityPractice(doc=globalThis.document,options={}){
   const sound=button(muted?'SOUND OFF':'SOUND ON','sc-control',()=>{muted=!muted;playCue();render();});
   sound.setAttribute('aria-pressed',String(!muted));
   controls.append(info,menu,minus,spin,plus,autoBtn,turboBtn,sound);
-  cabinet.append(controls);content.append(cabinet);scene.append(content);
+  cabinet.append(controls);content.append(cabinet);
+  // This independently uploaded illustrated trigger guide is OUTSIDE the
+  // gameboard and paytable, in the next column to their right.
+  const bonusGuide=el(doc,'aside','sc-bonus-guide');
+  bonusGuide.setAttribute('aria-label','Sin City bonus round triggers');
+  const guideArt=el(doc,'img','sc-bonus-guide-art');
+  guideArt.src=art('features','bonus_triggers_sin_city_high_rollers.png');
+  guideArt.alt='Bonus triggers: Puff Puff Pass at 3 or more natural Ashtrays; Hotbox Respins at 3 or more Emerald Gems; Chronic Sessions at 3, 4, or 5 Scatters for 8, 12, or 20 free spins; and Drop It Like It’s Hot with any natural Lowrider during free spins for a 2× to 5× Sticky Wild multiplier.';
+  guideArt.draggable=false;
+  bonusGuide.append(guideArt);content.append(bonusGuide);
+  scene.append(content);
   const footer=el(doc,'p','sc-disclaimer','PRACTICE CREDITS ONLY · NO REAL WAGERS · NO CASH VALUE · PROVISIONAL UNVERIFIED ODDS');scene.append(footer);
   root.append(scene);
   // TEMPORARY QA PANEL: remove this block and its preview helper after feature approval.

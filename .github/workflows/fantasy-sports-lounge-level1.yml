@@ -1,0 +1,31 @@
+name: Fantasy Sports lounge targeted Level 1
+on:
+  pull_request:
+    paths:
+      - 'clients/420bet-lobby/src/fantasy-sports*'
+      - 'clients/420bet-lobby/public/assets/420bet/fantasy/**'
+      - 'clients/420bet-lobby/src/main.js'
+      - 'clients/420bet-lobby/tests/fantasy-sports-ui.test.mjs'
+      - 'docs/bet/BET-FANTASY-UI-STYLE-BIBLE.md'
+      - '.github/workflows/fantasy-sports-lounge-level1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  fantasy-sports-lounge:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install lobby dependencies
+        working-directory: clients/420bet-lobby
+        run: npm install --no-audit --no-fund
+      - name: Fantasy Sports full-screen UI and asset qualification
+        working-directory: clients/420bet-lobby
+        run: node --test tests/fantasy-sports-ui.test.mjs
+      - name: Build 420Bet lobby
+        working-directory: clients/420bet-lobby
+        run: npm run build

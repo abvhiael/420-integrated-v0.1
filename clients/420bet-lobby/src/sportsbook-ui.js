@@ -59,7 +59,7 @@ export async function loadSportsbookLines(endpoint,{fetcher=globalThis.fetch,now
  if(!sameOriginPath(endpoint)||typeof fetcher!=='function')throw Error('Odds display feed not configured');
  const res=await fetcher(endpoint,{method:'GET',credentials:'same-origin',mode:'same-origin',
   redirect:'error',cache:'no-store',headers:{Accept:'application/json'},signal});
- if(!res?.ok||!/^application\\/json(?:;|$)/i.test(res.headers?.get?.('content-type')??''))
+ if(!res?.ok||!/^application\/json(?:;|$)/i.test(res.headers?.get?.('content-type')??''))
   throw Error('Odds feed unavailable');
  const data=await res.json();
  if(!data||data.source!=='the-odds-api-v4-display-only'||

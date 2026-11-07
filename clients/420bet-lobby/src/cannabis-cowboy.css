@@ -1168,3 +1168,35 @@
   z-index:40;
   pointer-events:auto;
 }
+
+
+/* Full-scene Endless Harvest trigger art: the approved Cole Haze splash holds
+   until explicitly dismissed. Its built-in CLICK TO CONTINUE is the control. */
+.cc-game[data-view="cannabis-cowboy"] .cc-harvest-trigger-splash{
+ position:absolute;
+ z-index:65;
+ inset:1%;
+ width:98%;
+ height:98%;
+ margin:0;
+ padding:0;
+ display:block;
+ border:0;
+ border-radius:9px;
+ overflow:hidden;
+ background:#122719 url('/assets/420bet/cannabis-cowboy/cannabis-cowboy-endless-harvest-trigger-splash.png') center / 100% 100% no-repeat;
+ box-shadow:0 0 25px #000b;
+ cursor:pointer;
+}
+.cc-game[data-view="cannabis-cowboy"] .cc-harvest-trigger-splash:not([hidden]){
+ pointer-events:auto;
+}
+.cc-game[data-view="cannabis-cowboy"] .cc-harvest-trigger-splash:focus-visible{
+ outline:3px solid #ffe186;
+ outline-offset:2px;
+}
+/* The latest rules for [hidden] must win over display:block. */
+.cc-game[data-view="cannabis-cowboy"] .cc-harvest-trigger-splash[hidden]{
+ display:none!important;
+ pointer-events:none!important;
+}

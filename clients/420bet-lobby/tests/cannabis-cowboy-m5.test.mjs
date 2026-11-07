@@ -109,6 +109,10 @@ test('Endless Harvest intro, all free-spin scenes, retrigger and end presentatio
  assert(spin.disabled);
  let count=0;
  while(count++<3000){
+  if(root.getPracticeState().harvestTriggerVisible){
+   visited.push('bonus-trigger');
+   root.querySelector('.cc-harvest-trigger-splash').dispatchEvent(new window.Event('click'));
+  }
   if(root.getPracticeState().freeSpinReady){
    root.querySelector('.cc-free-spin-button').dispatchEvent(new window.Event('click'));
   }
@@ -121,7 +125,7 @@ test('Endless Harvest intro, all free-spin scenes, retrigger and end presentatio
   tasks.shift()();visited.push(root.dataset.featurePhase);
  }
  assert(count<3000,'feature replay finishes without runaway scheduling');
- assert(visited.includes('intro'),'intro banner was shown');
+ assert(visited.includes('bonus-trigger'),'new trigger artwork was shown');
  assert(visited.includes('bonus-spin'),'individual free spins were presented');
  assert(visited.includes('outro'),'end-of-feature result held on screen');
  assert.equal(root.getPracticeState().busy,false);
@@ -167,8 +171,16 @@ test('free spins require player input and stay on coin-total splash until dismis
  root.querySelector('.cc-spin').dispatchEvent(new window.Event('click'));
  const drain=()=>{let n=0;while(tasks.length&&n++<5000)tasks.shift()();assert(n<5000);};
  drain();
- assert(root.getPracticeState().freeSpinReady);
+ assert(root.getPracticeState().harvestTriggerVisible,'trigger image must wait for explicit click');
+ assert.equal(root.getPracticeState().featurePhase,'bonus-trigger');
+ assert.equal(root.getPracticeState().freeSpinReady,false,'no free spins before trigger dismissed');
+ assert(root.querySelector('.cc-free-spin-button').hidden);
  assert.equal(root.getPracticeState().bonusIndex,0);
+ const paidBeforeTrigger=root.getPracticeState().credits;
+ root.querySelector('.cc-harvest-trigger-splash').dispatchEvent(new window.Event('click'));
+ assert.equal(root.getPracticeState().credits,paidBeforeTrigger,'trigger click must never pay or wager again');
+ assert.equal(root.getPracticeState().harvestTriggerVisible,false);
+ assert(root.getPracticeState().freeSpinReady,'player must initiate spin 1 after dismissing trigger');
  assert(root.querySelector('.cc-free-spin-button').hidden===false);
  assert.match(root.querySelector('.cc-free-spin-button').textContent,/FREE SPIN 1 OF 8/);
  assert.match(root.querySelector('.cc-free-spin-button').textContent,/LAST SPIN: 0 CREDITS/);
@@ -251,4 +263,14 @@ test('uploaded Endless Harvest Collected art backs the entire clickable bonus re
  assert.match(live,/cannabis-cowboy-endless-harvest-complete-splash\.png/);
  assert.match(live,/\.cc-harvest-splash-credits\{[\s\S]*?position:absolute;/);
  assert.match(live,/pointer-events:none/);
+});
+
+test('Endless Harvest trigger art exists and remains separate from the collectible total splash',()=>{
+ const css=readFileSync(new URL('../src/cannabis-cowboy.css',import.meta.url),'utf8');
+ const asset='/assets/420bet/cannabis-cowboy/cannabis-cowboy-endless-harvest-trigger-splash.png';
+ const bytes=readFileSync(new URL('../public'+asset,import.meta.url));
+ assert.equal(bytes.subarray(0,8).toString('hex'),'89504e470d0a1a0a');
+ assert.match(css,/cannabis-cowboy-endless-harvest-trigger-splash\.png/);
+ assert.match(css,/\.cc-harvest-trigger-splash\[hidden\]\{\s*display:none!important;/);
+ assert.match(css,/cannabis-cowboy-endless-harvest-complete-splash\.png/);
 });

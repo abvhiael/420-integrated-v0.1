@@ -19,6 +19,8 @@ test('Wrangler config adds a Worker entrypoint while preserving the production n
  assert.equal(config.assets.not_found_handling,'single-page-application');
  assert.deepEqual(config.assets.run_worker_first,['/api/420bet/sportsbook/*']);
  assert.equal(config.keep_vars,true);
+ assert.equal(config.durable_objects.bindings[0].name,'SPORTSBOOK_ODDS_BUDGET');
+ assert.deepEqual(config.migrations[0].new_sqlite_classes,['SportsbookOddsBudget']);
  assert(!Object.hasOwn(config,'routes'));
  assert(!Object.hasOwn(config,'vars'));
  assert(!Object.hasOwn(config,'secrets'));
@@ -74,5 +76,24 @@ test('Actual Worker marquee route fails closed if Cloudflare production secret i
 test('Actual Worker lines route requires explicitly configured KV cache',async()=>{
  const r=await worker.fetch(req('/api/420bet/sportsbook/lines'),{THE_ODDS_API_KEY:'SECRET'});
  assert.equal(r.status,503);
- assert.equal((await json(r)).error,'odds_cache_not_configured');
+ assert.equal((await json(r)).error,'odds_budget_not_configured');
+});
+
+test('Production Worker exposes singleton odds Durable Object and routes requests without exposing secret',async()=>{
+ const {SportsbookOddsBudget}=await import('../worker/index.js');
+ assert.equal(typeof SportsbookOddsBudget,'function');
+ let calls=0;
+ const ctx={ASSETS:{fetch:async()=>new Response('html')},SPORTSBOOK_ODDS_BUDGET:{
+  getByName(name){
+   assert.equal(name,'420bet-free-odds-v1');
+   return{fetch:async request=>{
+    calls++;
+    assert.equal(new URL(request.url).pathname,'/internal/read-lines');
+    assert(!request.url.includes('THE_ODDS_API_KEY'));
+    return new Response(JSON.stringify({source:'test'}),{headers:{'Content-Type':'application/json'}});
+   }};
+  }
+ }};
+ const r=await worker.fetch(req('/api/420bet/sportsbook/lines'),ctx);
+ assert.equal(r.status,200);assert.equal((await r.json()).source,'test');assert.equal(calls,1);
 });

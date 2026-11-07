@@ -1,0 +1,57 @@
+/* Best Buds Slot #6 — isolated practice presentation */
+.bb-game{--bb-green:#59ff29;--bb-gold:#ffd954;color:#fff;font-family:system-ui,Arial,sans-serif;min-height:780px;isolation:isolate}
+.bb-game *{box-sizing:border-box}
+.bb-screen{position:relative;min-height:calc(100vh - 160px);padding:24px max(14px,calc((100% - 1180px)/2)) 30px;background:linear-gradient(180deg,rgba(28,3,41,.3),rgba(17,1,35,.86)),var(--bb-wallpaper) center/cover fixed;overflow:hidden}
+.bb-header{position:relative;display:grid;grid-template-columns:minmax(110px,1fr) minmax(320px,2.4fr) minmax(110px,1fr);align-items:end;justify-items:center;gap:8px;height:230px;max-width:1100px;margin:0 auto -5px;z-index:2}
+.bb-header img{object-fit:contain;max-width:100%;filter:drop-shadow(0 5px 10px #15031f)}
+.bb-title-logo{width:100%;height:200px;object-fit:contain;align-self:center}
+.bb-buddy{height:205px;width:100%;animation:bb-bob 2.8s ease-in-out infinite}
+.bb-buddy-two{animation-delay:-1.2s}
+@keyframes bb-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+.bb-frame{position:relative;z-index:1;width:min(1100px,100%);margin:auto;padding:15px 15px 20px;border:5px solid #f6b928;border-radius:28px;background:linear-gradient(145deg,#3b0f45,#19051d 35%,#341129 85%);box-shadow:0 0 0 3px #41df40,0 0 28px #ffdc30,0 18px 80px #11000a}
+.bb-topline{min-height:47px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:5px 14px;margin-bottom:9px;color:#fdf5b8;font-weight:900;text-shadow:1px 2px #210b25;font-size:clamp(10px,1.4vw,16px)}
+.bb-mode{color:var(--bb-green);text-align:center;font-size:clamp(11px,1.8vw,21px)}
+.bb-stage{position:relative;cursor:pointer;aspect-ratio:5/3;max-width:920px;width:100%;margin:0 auto;border:5px solid #ffc247;border-radius:13px;overflow:hidden;box-shadow:0 0 0 3px #7cff3d,0 0 30px #4bf43e;background:#180a26;touch-action:manipulation}
+.bb-reel-grid{position:absolute;inset:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr))}
+.bb-reel{position:relative;display:grid;grid-template-rows:repeat(3,minmax(0,1fr));min-width:0;overflow:hidden;border-right:2px solid #c7782e}
+.bb-reel:last-child{border-right:0}
+.bb-cell{position:relative;display:grid;place-items:center;min-width:0;min-height:0;border-bottom:2px solid #aa6429;background:radial-gradient(circle,#422049,#160a23 86%);overflow:hidden}
+.bb-cell:last-child{border-bottom:0}
+.bb-cell img{max-height:92%;max-width:92%;width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 2px 5px #0008)}
+.bb-reel-rolling .bb-cell{opacity:.16}
+.bb-roll-mask{position:absolute;inset:0;overflow:hidden;z-index:3;background:#1b0928}
+.bb-roll-track{position:absolute;left:0;right:0;top:-400%;height:800%;display:flex;flex-direction:column;align-items:center;justify-content:space-between;animation:bb-roll .36s linear infinite}
+.bb-roll-track img{height:8%;min-height:0;width:98%;object-fit:contain;filter:blur(1.2px)}
+@keyframes bb-roll{0%{transform:translateY(0)}100%{transform:translateY(25%)}}
+.bb-win-overlay{position:absolute;inset:0;width:100%;height:100%;z-index:5;overflow:visible;pointer-events:none}
+.bb-win-path{fill:none;stroke:#66ff17;stroke-width:5;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 3px #a9ff37) drop-shadow(0 0 8px #12e529);stroke-dasharray:1000;stroke-dashoffset:0;animation:bb-line .6s ease-out both}
+@keyframes bb-line{from{stroke-dashoffset:1000;opacity:.4}to{stroke-dashoffset:0;opacity:1}}
+.bb-payline-note{position:absolute;z-index:6;bottom:2%;left:50%;transform:translateX(-50%);max-width:92%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border:2px solid #adff55;border-radius:9px;background:#071309de;padding:6px 12px;color:#cfff8b;font-weight:900;text-align:center;font-size:clamp(10px,1.5vw,16px)}
+.bb-coin-locked{background:radial-gradient(circle,#4a3211,#1c0c22 80%);box-shadow:inset 0 0 12px #e7b228}
+.bb-empty{background:radial-gradient(circle,#342546,#100b19 85%)}
+.bb-coin-kind{position:relative;display:grid;place-items:center;width:100%;height:100%}
+.bb-coin-kind img{width:100%;height:100%;object-fit:contain}
+.bb-coin-kind b{position:absolute;bottom:2%;font-size:clamp(12px,2vw,23px);text-shadow:2px 3px 3px #000;background:#12200cbb;border-radius:10px;padding:0 5px;color:#fff29a}
+.bb-meter{max-width:920px;margin:12px auto;text-align:center;font-weight:800;color:#ecdc83;letter-spacing:.04em;font-size:13px}
+.bb-message{margin:12px auto 4px;max-width:920px;min-height:31px;text-align:center;color:#f7ee92;font-weight:900;font-size:clamp(13px,1.8vw,20px);text-shadow:0 2px #09010a}
+.bb-controls{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:center;margin:14px auto;max-width:960px}
+.bb-controls>div{font-weight:900;font-size:clamp(13px,1.7vw,18px);color:#fff2b6}
+.bb-bet{display:flex;align-items:center;gap:6px}.bb-bet-value{min-width:91px;text-align:center}
+.bb-game button{font-family:inherit;cursor:pointer;font-weight:900;border-radius:12px;border:2px solid #ffc742;color:#fff2bf;background:linear-gradient(#60401e,#2a1322);padding:10px 15px;box-shadow:0 3px 6px #0006}
+.bb-game button:hover:not(:disabled){filter:brightness(1.2)}
+.bb-game button:focus-visible{outline:3px solid #79ff4d;outline-offset:3px}
+.bb-game button:disabled{opacity:.5;cursor:default}
+.bb-game .bb-spin{background:linear-gradient(#38e632,#047812);border:4px solid #ffe46b;font-size:28px;min-width:150px;box-shadow:0 0 17px #39ed35;color:#fff5a7;text-shadow:1px 3px #05270c}
+.bb-extras{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin:10px auto}
+.bb-game .bb-qa-button{background:linear-gradient(#8d47a5,#46155b);border-color:#ecb1ff}
+.bb-qa-panel{margin:12px auto 0;max-width:880px;display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:8px;border:2px solid #ca6cde;border-radius:15px;padding:12px;background:#200b2fdc}
+.bb-qa-panel strong{flex-basis:100%;text-align:center;color:#ffe6a1}
+.bb-disclaimer{text-align:center;margin:15px auto 0;color:#f6eab7;font-size:12px;font-weight:700}
+.bb-modal-cover,.bb-summary{position:absolute;z-index:12;inset:0;background:#09060fe9;display:flex;align-items:center;justify-content:center;padding:20px}
+.bb-modal{background:linear-gradient(#301441,#130a1f);border:3px solid #f3c353;border-radius:19px;max-height:85vh;overflow:auto;width:min(720px,100%);padding:25px;box-shadow:0 0 28px #82ff40}
+.bb-modal h2{color:#f4ce59}.bb-modal p{line-height:1.6}.bb-close{float:right}
+.bb-paytable{border-collapse:collapse;width:100%;font-size:14px}.bb-paytable td,.bb-paytable th{padding:7px;border:1px solid #885e60;text-align:left}
+.bb-summary{cursor:pointer;flex-direction:column;text-align:center;gap:20px;background:radial-gradient(circle,#641e75f5,#12081af8);text-shadow:0 4px #220a20}
+.bb-summary h2{font-size:clamp(30px,5vw,72px);color:#eaff97}.bb-summary-total{font-size:clamp(32px,6vw,84px);font-weight:1000;color:#ffe871}
+@media(max-width:650px){.bb-screen{padding:12px 6px}.bb-header{height:116px;grid-template-columns:1fr 2fr 1fr}.bb-buddy{height:110px}.bb-title-logo{height:105px}.bb-frame{padding:7px;border-width:3px;border-radius:14px}.bb-topline{padding:4px}.bb-controls{justify-content:center}.bb-game .bb-spin{font-size:20px;min-width:120px}.bb-bet-button{padding:5px}.bb-qa-option{font-size:12px;padding:7px}.bb-message{min-height:22px}.bb-stage{border-width:3px}}
+@media(prefers-reduced-motion:reduce){.bb-buddy,.bb-roll-track,.bb-win-path{animation:none!important}}

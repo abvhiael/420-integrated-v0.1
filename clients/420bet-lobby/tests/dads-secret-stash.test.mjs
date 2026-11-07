@@ -9,7 +9,7 @@ const board=()=>Array(20).fill('A');const seq=(value)=>()=>value;
 test('Slot #3 routes to own page and lobby keeps three cabinets in view',()=>{assert(SLOT_MACHINES.length>=3);assert.equal(SLOT_MACHINES[2].id,'dads-secret-stash');assert.equal(slotMachineFromHash('#game=slots&machine=dads-secret-stash')?.title,"Dad's Secret Stash");const {document}=parseHTML('<html><body></body></html>');const lobby=createSlotsLobby(document);assert.equal(lobby.querySelectorAll('.slots-machine-card').length,SLOT_MACHINES.length);assert.equal([...lobby.querySelectorAll('.slots-machine-card')].filter(x=>!x.hidden).length,3);assert.equal(lobby.querySelectorAll('.slots-carousel-arrow').length,2);});
 test('Character conditions require exact thresholds',()=>{const jen=board();jen[0]=jen[1]=jen[2]='jen';assert.equal(qualify(jen).jen,true);jen[2]='A';assert.equal(qualify(jen).jen,false);const family=board();family[3]='tyler';family[4]='emma';assert.equal(qualify(family).family,true);const k=board();k[0]=k[1]=k[2]='keller';assert.equal(qualify(k).keller,true);const bud=board();bud[0]=bud[1]=bud[2]='bud';assert.equal(qualify(bud).bud,true);});
 test('25 percent conditional trigger independently applies to every feature',()=>{const grid=board();grid.splice(0,3,'jen','jen','jen');grid.splice(3,3,'keller','keller','keller');grid.splice(6,3,'bud','bud','bud');grid[9]='tyler';grid[10]='emma';assert.deepEqual(triggerCharacters(grid,seq(.249)),{jen:true,family:true,keller:true,bud:true});assert.deepEqual(triggerCharacters(grid,seq(.25)),{jen:false,family:false,keller:false,bud:false});});
-test('Jen outcome selectors and fetch wild preserve 5x4 grid',()=>{const grid=board();const jen=modifier(grid,'jen',seq(.3));assert.equal(jen.label,'PANIC WILDS');assert(jen.grid.filter(s=>s==='wild').length>=2);const bud=modifier(grid,'bud',seq(.5));assert.equal(bud.label,'FETCH WILD!');assert(bud.grid.filter(s=>s==='wild').length>=2);});
+test('Jen outcome selectors and fetch wild preserve 5x4 grid',()=>{const grid=board();const jen=modifier(grid,'jen',seq(.1));assert.equal(jen.label,'PANIC WILDS');assert(jen.grid.filter(s=>s==='wild').length>=2);const bud=modifier(grid,'bud',seq(.5));assert.equal(bud.label,'FETCH WILD!');assert(bud.grid.filter(s=>s==='wild').length>=2);});
 test('HOA inspection grants five locked-premium respins',()=>{const grid=board();grid[0]='gary';for(const n of [.0,.99]){const out=inspection(grid,seq(n));assert.equal(out.spins,5);assert.equal(out.boards.length,out.spins);assert(out.boards.every(b=>b.grid[0]==='gary'));}});
 test('Practice spin debits simulated stake, returns no wallet data, and is capped',()=>{const before=newGame(),after=spin(before,seq(.55));assert.equal(after.rounds,1);assert.equal(before.balance,1000);assert(after.balance>=999);assert(after.last.grid.length===20);assert(after.last.win<=10000*after.bet);assert(!('wallet' in after));assert.equal(evaluate(Array(20).fill('A')).wins.length>0,true);});
 test('New game renders controls and supports repeatable disposal',()=>{const {document}=parseHTML('<html><body></body></html>');const game=createDadsSecretStash(document);assert.equal(game.dataset.practiceGame,'dads-secret-stash');assert.equal(game.querySelectorAll('.dss-cell').length,20);assert.match(game.textContent,/SPIN/);assert.equal(typeof game.stopAnimation,'function');game.stopAnimation();});
@@ -890,7 +890,7 @@ test('Family Chaos scatter award highlights matching symbols before the free-spi
 test('All Jen, Family, Bud, and HOA comic titles explain the actual selected action',()=>{
  assert.equal(DSS_BONUS_PRESENTATION.comicActionMs,1500);
  const expected={
-  jen:['HIDE THE STASH','PANIC WILDS','GARAGE CLEANUP','CAUGHT RED-HANDED'],
+  jen:['PANIC WILDS','GARAGE CLEANUP','CAUGHT RED-HANDED'],
   family:['LOW SYMBOL UPGRADE','WILD GRAFFITI','SCATTER SCRAMBLE','GARAGE MAYHEM'],
   bud:['FETCH WILD!'],
   keller:['HOA INSPECTION']
@@ -964,46 +964,15 @@ test('Comic result stays over the reels for precisely 1500ms before character fe
 
 const baseSlotWeights=[3,4,5,5,4,5,7,7,10,12,12,14,14,14,14,14,3,2,3,2];
 const mid=i=>(baseSlotWeights.slice(0,i).reduce((a,b)=>a+b,0)+baseSlotWeights[i]/2)/baseSlotWeights.reduce((a,b)=>a+b,0);
-test('HIDE THE STASH uses one fresh spin, carries base crates, adds only two or three',()=>{
- const source=board();source[0]='stash';
- const min=modifier(source,'jen',seq(0));
- assert.equal(min.featureSpin,true);
- assert.equal(min.label,'HIDE THE STASH');
- assert.equal(min.carriedCrates,1);
- assert.equal(min.landedCrates,0);
- assert.equal(min.addedCrates,2);
- assert.equal(min.stashCount,3);
- const max=modifier(source,'jen',seq(.24));
- assert(max.addedCrates>=2&&max.addedCrates<=3);
- assert.equal(max.stashCount,max.grid.filter(x=>x==='stash').length);
-});
-test('Jen HIDE THE STASH can fail with two crates — no automatic bonus',()=>{
- const draws=[mid(1),mid(1),mid(1),...Array(17).fill(mid(11))];
- let i=0;const values=[...draws,0,0,0,0,0,...Array(100).fill(0)];
- const after=spin(newGame(),()=>values[i++]??0);
- const jen=after.last.events.find(e=>e.type==='jen');
- assert.equal(jen.label,'HIDE THE STASH');
- assert.equal(jen.featureSpin,true);
- assert.equal(jen.stashCount,2);
- assert.equal(jen.awardedStashBonus,false);
- assert.equal(after.last.events.filter(e=>e.type==='stash').length,0);
- assert.match(comicActionCopy(jen).detail,/ONE EXTRA SPIN/);
-});
-test('Jen HIDE THE STASH carries one base crate to qualify with two new crates',()=>{
- const draws=[mid(1),mid(1),mid(1),mid(18),...Array(16).fill(mid(11))];
- let i=0;const values=[...draws,0,0,0,0,0,...Array(250).fill(0)];
- const after=spin(newGame(),()=>values[i++]??0);
- const jen=after.last.events.find(e=>e.type==='jen');
- const stash=after.last.events.filter(e=>e.type==='stash');
- assert.equal(jen.label,'HIDE THE STASH');
- assert.equal(jen.carriedCrates,1);
- assert.equal(jen.addedCrates,2);
- assert.equal(jen.stashCount,3);
- assert.equal(jen.awardedStashBonus,true);
- assert.equal(stash.length,1);
- assert.equal(stash[0].triggerSource,'jen-hide-the-stash');
- assert.equal(stash[0].triggerStashCount,3);
- assert.equal(stash[0].steps[0].board.filter(v=>v!==null).length,3);
+test('Jen never selects the removed stash crate action',()=>{
+ const outcomes=new Set();
+ for(const rng of [0,.2,.34,.5,.67,.8,.999]){
+  const event=modifier(board(),'jen',seq(rng));
+  outcomes.add(event.label);
+  assert(!('featureSpin' in event));
+  assert(!('awardedStashBonus' in event));
+ }
+ assert.deepEqual([...outcomes].sort(),['CAUGHT RED-HANDED','GARAGE CLEANUP','PANIC WILDS']);
 });
 test('More crates at qualification seed more initial Hold & Win prize positions',()=>{
  const bonus=stashBonus(seq(.975),5);

@@ -106,10 +106,10 @@ test('Carousel wraps to the correct three cabinets in both directions',()=>{
  assert.equal(arrows[0].disabled,false);
  assert.equal(arrows[1].disabled,false);
  arrows[0].dispatchEvent(new window.Event('click',{bubbles:true}));
- assert.deepEqual(visible(),[titles[5],titles[0],titles[1]]);
+ assert.deepEqual(visible(),[titles[6],titles[0],titles[1]]);
  arrows[1].dispatchEvent(new window.Event('click',{bubbles:true}));
  assert.deepEqual(visible(),titles.slice(0,3));
- for(let i=0;i<6;i++)arrows[1].dispatchEvent(new window.Event('click',{bubbles:true}));
+ for(let i=0;i<7;i++)arrows[1].dispatchEvent(new window.Event('click',{bubbles:true}));
  assert.deepEqual(visible(),titles.slice(0,3));
  assert.equal(cards.filter(c=>!c.hidden).length,3);
 });

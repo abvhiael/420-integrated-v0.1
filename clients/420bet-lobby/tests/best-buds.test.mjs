@@ -211,6 +211,10 @@ test('Collect Smoke appears as a credit collection UI event on the triggered Hol
  assert.match(root.querySelector('.bb-collect-announcement').textContent,/COLLECT SMOKE!/);
  assert.ok(root.getGameState().collectSmokeEvent.credits>0);
  assert.equal(root.querySelectorAll('.bb-collect-coin').length,1);
+ const lockedCollect=root.querySelector('.bb-collect-coin');
+ const overlay=lockedCollect.querySelector('.bb-collect-value');
+ assert.ok(overlay,'collect multiplier must be displayed on top of the icon');
+ assert.equal(overlay.textContent,'×'+root.getGameState().collectSmokeEvent.multipliers.toFixed(2));
  assert.equal(root.getGameState().respins,3);
  root.stopAnimation();
 });
@@ -224,5 +228,24 @@ test('Hold reel stop has five independent columns and retains locked coins',()=>
  assert.equal(root.querySelectorAll('.bb-coin-locked').length,6);
  root.querySelector('.bb-stage').dispatchEvent(new window.Event('click',{bubbles:true}));
  assert.equal(root.querySelectorAll('.bb-hold-reel-spinning').length,0);
+ root.stopAnimation();
+});
+
+test('Collect Smoke multiplier overlay remains visible through later Hold & Win respins',()=>{
+ const {document,window}=parseHTML('<html><body></body></html>');
+ const root=createBestBudsPractice(document,{rng:()=>.99});
+ const click=name=>{
+  const btn=[...root.querySelectorAll('button')].find(x=>x.textContent===name);
+  assert.ok(btn,name);
+  btn.dispatchEvent(new window.Event('click',{bubbles:true}));
+ };
+ click('BONUS TEST');click('Collect Smoke');click('RESPIN');
+ root.querySelector('.bb-stage').dispatchEvent(new window.Event('click',{bubbles:true}));
+ const multiplier=root.querySelector('.bb-collect-value').textContent;
+ click('RESPIN');
+ assert.equal(root.querySelector('.bb-collect-value').textContent,multiplier,'locked collection retains its multiplier during subsequent reel motion');
+ assert.equal(root.querySelectorAll('.bb-collect-value').length,1);
+ root.querySelector('.bb-stage').dispatchEvent(new window.Event('click',{bubbles:true}));
+ assert.equal(root.querySelector('.bb-collect-value').textContent,multiplier);
  root.stopAnimation();
 });

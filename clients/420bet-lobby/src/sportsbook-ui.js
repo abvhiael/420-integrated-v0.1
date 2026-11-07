@@ -55,8 +55,32 @@ export async function loadSportsbookMarquee(endpoint,{fetcher=globalThis.fetch,n
   throw Error('Sportsbook feed unavailable');
  return validateSportsbookMarquee(await res.json(),now);
 }
+export async function loadSportsbookLines(endpoint,{fetcher=globalThis.fetch,now=Date.now(),signal}={}){
+ if(!sameOriginPath(endpoint)||typeof fetcher!=='function')throw Error('Odds display feed not configured');
+ const res=await fetcher(endpoint,{method:'GET',credentials:'same-origin',mode:'same-origin',
+  redirect:'error',cache:'no-store',headers:{Accept:'application/json'},signal});
+ if(!res?.ok||!/^application\\/json(?:;|$)/i.test(res.headers?.get?.('content-type')??''))
+  throw Error('Odds feed unavailable');
+ const data=await res.json();
+ if(!data||data.source!=='the-odds-api-v4-display-only'||
+  data.authority!=='provider-observed-not-wager-authority'||
+  !Number.isSafeInteger(data.validUntil)||data.validUntil<=now||data.validUntil>now+86400000||
+  !Array.isArray(data.events)||data.events.length>100)throw Error('Unverified bookmaker prices');
+ const events=data.events.map(e=>{
+  if(!e||!eventId(e.id)||!clean(e.league,20)||!clean(e.home)||!clean(e.away)||
+   !iso(e.startsAt)||!Array.isArray(e.prices)||e.prices.length>8)throw Error('Bad line data');
+  const prices=e.prices.map(p=>{
+   if(!p||!clean(p.bookmaker,50)||!clean(p.outcome,65)||
+     !Number.isFinite(p.american)||Math.abs(p.american)>100000||p.american===0||
+     (p.updatedAt!==null&&!iso(p.updatedAt)))throw Error('Bad provider price');
+   return {bookmaker:p.bookmaker,outcome:p.outcome,american:p.american,updatedAt:p.updatedAt};
+  });
+  return {id:e.id,league:e.league,home:e.home,away:e.away,startsAt:e.startsAt,prices};
+ });
+ return {validUntil:data.validUntil,events};
+}
 export function createSportsbookView(doc=globalThis.document,{tab=null,onNavigate=()=>{},onBack=()=>{},
- marqueeEndpoint='/api/420bet/sportsbook/marquee',fetcher=globalThis.fetch,clock=()=>Date.now(),
+ marqueeEndpoint='/api/420bet/sportsbook/marquee',linesEndpoint='/api/420bet/sportsbook/lines',fetcher=globalThis.fetch,clock=()=>Date.now(),
  autoRefresh=true}={}){
  const selected=validSportsbookTab(tab);
  const root=create(doc,'section','sb-screen'+(selected?' sb-section':' sb-home'));
@@ -113,6 +137,34 @@ export function createSportsbookView(doc=globalThis.document,{tab=null,onNavigat
   panel.append(create(doc,'div','sb-layer-kicker','420BET SPORTSBOOK · VIEW-ONLY PREVIEW'),
     create(doc,'h1','',page.label),create(doc,'p','sb-layer-lead',page.info),
     create(doc,'p','sb-layer-alert','Awaiting authoritative testnet sports data. Betting and transactions are disabled.'));
+  if(selected==='game-lines'){
+   const info=create(doc,'p','sb-lines-caption','Published bookmaker observations only · Not 420Bet betting quotes');
+   const list=create(doc,'div','sb-lines-list');
+   list.append(create(doc,'p','sb-lines-empty','Checking the read-only bookmaker feed…'));
+   panel.append(info,list);
+   const serial=++requestId;
+   controller=typeof AbortController==='function'?new AbortController():null;
+   root.ready=loadSportsbookLines(linesEndpoint,{fetcher,now:clock(),signal:controller?.signal}).then(data=>{
+    if(disposed||serial!==requestId)return;
+    list.replaceChildren();
+    if(!data.events.length)list.append(create(doc,'p','sb-lines-empty','No bookmaker prices published.'));
+    for(const e of data.events.slice(0,24)){
+     const row=create(doc,'article','sb-line-row');
+     const heading=create(doc,'div','sb-line-heading');
+     heading.append(create(doc,'strong','',e.league+' · '+e.away+' vs '+e.home),
+       create(doc,'span','',new Date(e.startsAt).toLocaleString('en-CA',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})));
+     row.append(heading);
+     const prices=create(doc,'div','sb-price-list');
+     for(const p of e.prices.slice(0,4)){
+      prices.append(create(doc,'span','sb-price',p.bookmaker+' · '+p.outcome+' '+(p.american>0?'+':'')+p.american));
+     }row.append(prices);list.append(row);
+    }
+   }).catch(()=>{
+    if(!disposed&&serial===requestId)
+     list.replaceChildren(create(doc,'p','sb-lines-empty',
+      'Bookmaker prices are unavailable until the budget-controlled odds cache is activated.'));
+   });
+  }
   if(selected==='all-sports'){
    const sports=create(doc,'div','sb-sports-grid');
    for(const sport of SPORTSBOOK_SPORTS){

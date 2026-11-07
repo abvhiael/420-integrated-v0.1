@@ -67,7 +67,7 @@ test('practice view uses uploaded art, QA button, staggered reel panels and clic
  const {document,window}=parseHTML('<html><body></body></html>');
  const root=createBestBudsPractice(document);
  assert.equal(root.dataset.practiceGame,'best-buds-hotbox-road-trip');
- assert.equal(root.querySelectorAll('.bb-buddy').length,2);
+ assert.equal(root.querySelectorAll('.bb-buddy').length,0);
  assert.match(root.querySelector('.bb-title-logo').getAttribute('src'),/bestbuds-logo\.png/);
  assert.equal(root.querySelectorAll('.bb-reel').length,5);
  assert.equal(root.querySelectorAll('.bb-cell').length,15);
@@ -157,15 +157,16 @@ test('Free Rides WILD portraits receive x2/x3/x5/x10 and winning lines apply max
  assert.ok(root.querySelectorAll('.bb-wild-multiplier').length>=3);
  root.stopAnimation();
 });
-test('Buddy reaction pair is randomized once per three initiated spins and not per render',()=>{
- const {document,window}=parseHTML('<html><body></body></html>');
+test('wide logo-only header does not render Buddy reaction portraits',()=>{
+ const {document}=parseHTML('<html><body></body></html>');
  const root=createBestBudsPractice(document,{rng:()=>.99});
- const initial=root.getPresentationState().reactionPair;
- const clickSpin=()=>{const b=[...root.querySelectorAll('button')].find(b=>b.textContent==='SPIN');assert.ok(b);b.dispatchEvent(new window.Event('click',{bubbles:true}));root.querySelector('.bb-stage').dispatchEvent(new window.Event('click',{bubbles:true}));if(root.getPresentationState().phase==='paylines')root.querySelector('.bb-stage').dispatchEvent(new window.Event('click',{bubbles:true}));};
- clickSpin();assert.deepEqual(root.getPresentationState().reactionPair,initial);assert.equal(root.getPresentationState().reactionSpins,1);
- clickSpin();assert.deepEqual(root.getPresentationState().reactionPair,initial);assert.equal(root.getPresentationState().reactionSpins,2);
- clickSpin();assert.deepEqual(root.getPresentationState().reactionPair,initial);assert.equal(root.getPresentationState().reactionSpins,3);
- clickSpin();assert.equal(root.getPresentationState().reactionSpins,1);
+ const header=root.querySelector('.bb-header');
+ assert.ok(header);
+ assert.equal(header.querySelectorAll('img').length,1);
+ assert.match(header.querySelector('img').getAttribute('src'),/bestbuds-logo\.png$/);
+ assert.equal(root.querySelectorAll('.bb-buddy').length,0);
+ const css=readFileSync(new URL('../src/best-buds.css',import.meta.url),'utf8');
+ assert.match(css,/\.bb-header\{display:flex;justify-content:center/);
  root.stopAnimation();
 });
 test('Best Buds CSS preserves opaque reels but makes the surrounding frame transparent',()=>{

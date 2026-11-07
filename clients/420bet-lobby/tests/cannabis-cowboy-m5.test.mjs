@@ -106,7 +106,18 @@ test('Endless Harvest intro, all free-spin scenes, retrigger and end presentatio
  assert.equal(root.getPracticeState().round,1);
  assert(spin.disabled);
  let count=0;
- while(tasks.length&&count++<3000){tasks.shift()();visited.push(root.dataset.featurePhase);}
+ while(count++<3000){
+  if(root.getPracticeState().freeSpinReady){
+   root.querySelector('.cc-free-spin-button').dispatchEvent(new window.Event('click'));
+  }
+  if(root.getPracticeState().bonusSplashVisible){
+   assert.match(root.querySelector('.cc-bonus-total-splash').textContent,/COINS WON/);
+   root.querySelector('.cc-bonus-total-splash').dispatchEvent(new window.Event('click'));
+  }
+  if(!tasks.length&&root.getPracticeState().busy)continue;
+  if(!tasks.length)break;
+  tasks.shift()();visited.push(root.dataset.featurePhase);
+ }
  assert(count<3000,'feature replay finishes without runaway scheduling');
  assert(visited.includes('intro'),'intro banner was shown');
  assert(visited.includes('bonus-spin'),'individual free spins were presented');
@@ -130,4 +141,42 @@ test('exit mid-feature cancels any future visual changes or duplicate awards',()
  for(const fn of tasks)fn();
  assert.equal(root.getPracticeState().credits,state.credits);
  assert(root.querySelector('.cc-feature-overlay').hidden);
+});
+
+
+test('Endless Harvest adds one per repeatedly hit frame with a 10x cap',()=>{
+ const b=patterned();
+ for(const p of [0,1,6,7,12])b[p]=0;
+ const result=resolveRound(b,20,seeded(73),{bonusMode:true,initialFertile:Array(CELL_COUNT).fill(9)});
+ assert(result.steps.length>0);
+ assert(result.fertile.every(x=>x>=9&&x<=10));
+ assert(result.steps.every(step=>step.clusters.every(cluster=>cluster.harvestMultiplier<=10)));
+ const once=resolveRound(b,20,seeded(73),{bonusMode:true});
+ assert(once.steps.length>0);
+ assert(once.steps[0].fertile.some(x=>x===1));
+});
+test('free spins require player input and stay on coin-total splash until dismissed',()=>{
+ const {document,window}=parseHTML('<html><body></body></html>'),tasks=[];
+ const root=createCannabisCowboyPractice(document,{
+  rng:seeded(22),credits:500,bet:20,reducedMotion:true,
+  setTimeout:fn=>{tasks.push(fn);return tasks.length;},clearTimeout:()=>{},
+  roundOptions:{baseBoard:withScatters(3),featureOptions:{boardFactory:()=>patterned()}}
+ });
+ root.querySelector('.cc-spin').dispatchEvent(new window.Event('click'));
+ const drain=()=>{let n=0;while(tasks.length&&n++<5000)tasks.shift()();assert(n<5000);};
+ drain();
+ assert(root.getPracticeState().freeSpinReady);
+ assert.equal(root.getPracticeState().bonusIndex,0);
+ assert(root.querySelector('.cc-free-spin-button').hidden===false);
+ for(let i=0;i<8;i++){
+  root.querySelector('.cc-free-spin-button').dispatchEvent(new window.Event('click'));
+  drain();
+ }
+ assert(root.getPracticeState().bonusSplashVisible);
+ assert.equal(root.getPracticeState().busy,true);
+ assert.match(root.querySelector('.cc-bonus-total-splash').textContent,/COINS WON/);
+ root.querySelector('.cc-bonus-total-splash').dispatchEvent(new window.Event('click'));
+ assert.equal(root.getPracticeState().bonusSplashVisible,false);
+ assert.equal(root.getPracticeState().busy,false);
+ root.stopAnimation();
 });

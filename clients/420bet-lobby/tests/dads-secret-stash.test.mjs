@@ -961,3 +961,58 @@ test('Comic result stays over the reels for precisely 1500ms before character fe
  assert.match(css,/\.dss-overlay\.dss-comic-active > :not\(\.dss-comic-action\)\{visibility:hidden\}/);
  assert.match(css,/\.dss-comic-title\{[^}]*font-size:clamp\(30px,5\.2vw,78px\)/);
 });
+
+test('Jen Hide the Stash awards Hold & Win when two original crates become four',()=>{
+ const pick=symbol=>{
+  for(let i=0;i<2000;i++)if(draw(()=>i/2000)===symbol)return i/2000;
+  throw Error('Cannot draw '+symbol);
+ };
+ const grid=Array(20).fill('A');
+ grid[0]='stash';grid[4]='stash';
+ grid[1]='jen';grid[5]='jen';grid[9]='jen';
+ const calls=[...grid.map(pick),.1,.0,.0,.0,.0]; // Jen qualifies, HIDE selected, two crates added.
+ const result=spin(newGame(),()=>calls.length?calls.shift():.5).last;
+ assert.equal(result.grid.filter(x=>x==='stash').length,2);
+ const jen=result.events.find(x=>x.type==='jen');
+ assert(jen,'Jen's mystery modifier should trigger');
+ assert.equal(jen.label,'HIDE THE STASH');
+ assert.equal(jen.grid.filter(x=>x==='stash').length,4);
+ assert.equal(jen.awardedHoldAndWin,true);
+ assert.equal(jen.stashCount,4);
+ const hold=result.events.filter(x=>x.type==='stash');
+ assert.equal(hold.length,1,'One Hold & Win bonus must be awarded');
+ assert.equal(hold[0].triggerSource,'jen-hide-the-stash');
+ assert.equal(hold[0].triggerStashCount,4);
+ assert(hold[0].steps.length>=4,'Real Hold & Win spins, not just an announcement');
+ assert(result.events.indexOf(jen)<result.events.indexOf(hold[0]),'Jen transformation must play before Hold & Win');
+ const expected=result.base.units+result.events.reduce((sum,x)=>sum+x.units,0);
+ assert.equal(result.win,Math.min(10000,Math.round(expected*100)/100),'Hold & Win award credited to the same practice spin');
+});
+test('Jen Hide the Stash checks threshold, and base/added crates never double-trigger',()=>{
+ const pick=symbol=>{
+  for(let i=0;i<2000;i++)if(draw(()=>i/2000)===symbol)return i/2000;
+  throw Error('Cannot draw '+symbol);
+ };
+ const run=(initialCrates,addedCount)=>{
+  const grid=Array(20).fill('A');
+  for(let i=0;i<initialCrates;i++)grid[i]='stash';
+  grid[8]='jen';grid[9]='jen';grid[10]='jen';
+  const rngs=[...grid.map(pick),.1,.0,addedCount===2?.0:.3,.0,.0,.0,.0];
+  const result=spin(newGame(),()=>rngs.length?rngs.shift():.5).last;
+  return result;
+ };
+ const already=run(3,2);
+ assert.equal(already.events.filter(x=>x.type==='stash').length,1,'Three base crates and added crates must award only once');
+ const insufficient=run(0,2);
+ assert.equal(insufficient.events.filter(x=>x.type==='stash').length,0,'Only two transformed crates must not award Hold & Win');
+ assert.equal(insufficient.events.find(x=>x.type==='jen').awardedHoldAndWin,undefined);
+});
+test('Jen's comic announcement and complete grid display Hold & Win qualification',()=>{
+ const ui=readFileSync(new URL('../src/dads-secret-stash-ui.js',import.meta.url),'utf8');
+ assert.match(ui,/event\.stashCount\+' STASH CRATES! SECRET STASH HOLD & WIN UNLOCKED!'/);
+ assert.match(ui,/event\.stashCount\+' STASH CRATES — HOLD & WIN UNLOCKED!'/);
+ assert.match(ui,/cell\.classList\.toggle\('dss-trigger-stash',final\[i\]==='stash'\)/);
+ assert.match(ui,/cell\.classList\.remove\('dss-locked','dss-trigger-scatter','dss-trigger-stash'\)/);
+ const css=readFileSync(new URL('../src/dads-secret-stash.css',import.meta.url),'utf8');
+ assert.match(css,/\.dss-reel \.dss-cell\.dss-trigger-stash/);
+});

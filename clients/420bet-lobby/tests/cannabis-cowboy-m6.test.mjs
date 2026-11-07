@@ -71,7 +71,7 @@ test('M6 Road Trip is 5 stops with precommitted case values and one pick per sto
   assert.equal(picks[i].award,trip.stops[i].caseValues[i%3]);
   assert.equal(picks[i].multiplier,i%3===trip.stops[i].multiplierCase?trip.stops[i].multiplier:1);
  }
- assert.equal(total,picks.reduce((n,p)=>n+p.award,0)*picks.reduce((n,p)=>n*p.multiplier,1));
+ assert.equal(total,picks.reduce((n,p)=>n+p.award,0)*(()=>{const m=picks.filter(p=>p.kind==='multiplier').map(p=>p.multiplier);return m.length?m.reduce((n,x)=>n+x,0):1;})());
  assert.throws(()=>chooseRoadCase(trip,picks,0),/Invalid Road Trip progress/);
  assert.throws(()=>chooseRoadCase(trip,[],3),/Invalid case choice/);
  assert.deepEqual(createRoadTrip(20,seed(12)),trip,'case values predetermined by RNG');
@@ -209,7 +209,7 @@ test('each Road Trip stop has exactly one hidden multiplier case and awards are 
   final=chooseRoadCase(trip,picks,index);picks=final.picks;
  }
  assert.equal(picks.filter(p=>p.kind==='multiplier').length,2);
- assert.equal(final.stackedMultiplier,picks[0].multiplier*picks[1].multiplier);
+ assert.equal(final.stackedMultiplier,picks[0].multiplier+picks[1].multiplier);
  assert.equal(final.total,final.subtotal*final.stackedMultiplier);
  assert(final.done);
 });
@@ -223,4 +223,25 @@ test('Road Trip pick buttons keep original case artwork while revealing prizes',
  assert.equal(h.root.querySelectorAll('.cc-road-case-reveal').length,3);
  assert(first.querySelector('.cc-road-case-art'));
  h.root.stopAnimation();
+});
+
+test('Road Trip adds 2x + 3x + 10x into 15x rather than multiplying to 60x',()=>{
+ const trip=createRoadTrip(20,seed(12));
+ trip.stops[0].multiplierCase=0;trip.stops[0].multiplier=2;
+ trip.stops[1].multiplierCase=1;trip.stops[1].multiplier=3;
+ trip.stops[2].multiplierCase=2;trip.stops[2].multiplier=10;
+ let picks=[];
+ for(let i=0;i<5;i++){
+  const index=i<3?i:(trip.stops[i].multiplierCase+1)%3;
+  picks=chooseRoadCase(trip,picks,index).picks;
+ }
+ const chosen=chooseRoadCase(createRoadTrip(20,seed(12)),[],0);
+ assert(Number.isSafeInteger(chosen.total));
+ const multipliers=picks.filter(p=>p.kind==='multiplier').map(p=>p.multiplier);
+ assert.deepEqual(multipliers,[2,3,10]);
+ assert.equal(multipliers.reduce((n,v)=>n+v,0),15);
+ const subtotal=picks.reduce((n,p)=>n+p.award,0);
+ assert(subtotal>=0);
+ const additive= multipliers.reduce((n,v)=>n+v,0);
+ assert.equal(subtotal*additive,subtotal*15);
 });

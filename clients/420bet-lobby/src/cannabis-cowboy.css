@@ -623,3 +623,33 @@
 .immersive:has(.cc-game) .cc-game[data-view="cannabis-cowboy"]{
   background:transparent;
 }
+
+
+/* Cannabis Cowboy approved ranch wallpaper (2026-11-06).
+   Paint above the shared casino base wallpaper, once across the whole screen.
+   No second image crop on the game, columns, panels, or scroll container. */
+.immersive:has(.cc-game){
+  background-color:#101b18;
+  background-image:
+    url('/assets/420bet/cannabis-cowboy/cannabis-cowboy-wallpaper.png'),
+    url('/assets/420bet/backgrounds/420bet_slots_wallpaper.png');
+  background-repeat:no-repeat,no-repeat;
+  background-size:cover,cover;
+  background-position:center center,center center;
+  min-height:100dvh;
+}
+.immersive:has(.cc-game) .view-scroll,
+.immersive:has(.cc-game) .cc-game[data-view="cannabis-cowboy"]{
+  background:transparent;
+}
+.immersive:has(.cc-game) .gamebar{
+  background:rgba(10,20,14,.65);
+}
+.immersive:has(.cc-game) .cc-game > .cc-ranch-wallpaper{
+  display:none;
+}
+/* All interactive content remains visually above the shared background layers. */
+.immersive:has(.cc-game) .cc-stage,
+.immersive:has(.cc-game) .cc-console,
+.immersive:has(.cc-game) .cc-practice-notice,
+.immersive:has(.cc-game) .cc-round-status{position:relative;z-index:1}

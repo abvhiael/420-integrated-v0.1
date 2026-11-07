@@ -31,7 +31,7 @@ test('scatter RNG stays deterministic and rejects invalid values',()=>{
  assert.equal(countScatters(makeScatterBoard(()=>0.9999)),48);
  assert.throws(()=>makeScatterBoard(()=>1),/RNG/);
 });
-test('free spins preserve fertile multiplier cells across rounds, never resetting within bonus',()=>{
+test('free spins preserve multiplier frames but never preserve wild symbols across rounds',()=>{
  const wildBoard=patterned();
  wildBoard[0]=WILD_SYMBOL;
  for(const p of [1,6,7,12])wildBoard[p]=0;
@@ -42,12 +42,12 @@ test('free spins preserve fertile multiplier cells across rounds, never resettin
  assert.equal(result.awarded,8);
  assert.equal(result.spins[0].outcome.startingBoard[0],WILD_SYMBOL);
  assert(result.spins[0].outcome.steps.length>0);
- assert(result.spins[0].outcome.lockedWilds.includes(0));
- assert(result.spins[1].stickyBefore.includes(0));
- assert.equal(result.spins[1].outcome.startingBoard[0],WILD_SYMBOL);
+ assert.deepEqual(result.spins[0].outcome.lockedWilds,[],'wild is not pinned');
+ assert.deepEqual(result.spins[1].stickyBefore,[],'no wild persists into next spin');
+ assert.equal(result.spins[1].outcome.startingBoard[0],plain[0],'next spin uses its own natural symbol');
  assert.deepEqual(result.spins[1].initialFertile,result.spins[0].outcome.fertile);
  assert.equal(result.spins.reduce((sum,s)=>sum+s.outcome.total,0),result.total);
- assert(result.spins.every(s=>s.outcome.lockedWilds.every(p=>s.outcome.board[p]===WILD_SYMBOL)));
+ assert(result.spins.every(s=>s.outcome.lockedWilds.length===0&&s.stickyBefore.length===0));
 });
 test('sticky rings are retained at exact coordinates, gravity refills only between locked boundaries',()=>{
  const b=patterned(),pins=[12,30];for(const p of pins)b[p]=WILD_SYMBOL;
@@ -179,4 +179,15 @@ test('free spins require player input and stay on coin-total splash until dismis
  assert.equal(root.getPracticeState().bonusSplashVisible,false);
  assert.equal(root.getPracticeState().busy,false);
  root.stopAnimation();
+});
+
+test('Endless Harvest does not retain or pin any wilds, including newly landed wilds',()=>{
+ const first=patterned();first[0]=WILD_SYMBOL;
+ for(const p of [1,6,7,12])first[p]=0;
+ const second=patterned();
+ const f=resolveEndlessHarvest(8,20,seeded(19),{boardFactory:n=>n===1?first:second});
+ assert(f.spins.every(spin=>spin.stickyBefore.length===0&&spin.outcome.lockedWilds.length===0));
+ assert.equal(f.spins[1].outcome.startingBoard[0],second[0]);
+ assert.equal(f.stickyWilds.length,0);
+ assert(f.spins[0].outcome.steps[0].removed.includes(0),'winning wild is cleared like any other symbol');
 });

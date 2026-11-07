@@ -64,3 +64,11 @@ test('M8 square tiles and 68-percent images are enforced for resting and both sp
  assert.equal(root.querySelectorAll('.cc-cell > .cc-symbol-image').length,48);
  assert.equal(root.querySelector('.cc-left-rail .cc-paytable')!==null,true);
 });
+
+test('ranch wallpaper remains visible behind game board rather than buried by opaque root',()=>{
+ const {document}=parseHTML('<html><body></body></html>');
+ const root=createCannabisCowboyShell(document);
+ assert.equal(root.querySelectorAll(':scope > .cc-ranch-wallpaper').length,1);
+ assert.match(css,/\.cc-ranch-wallpaper\{position:absolute;z-index:0;/);
+ assert.match(css,/\.cc-game > \.cc-stage,[\s\S]*?z-index:1/);
+});

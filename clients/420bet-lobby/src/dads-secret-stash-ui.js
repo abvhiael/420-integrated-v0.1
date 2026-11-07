@@ -5,7 +5,7 @@ const FEATURE_TITLES={jen:"OH SHIT, SHE'S HOME!",family:'FAMILY CHAOS!',keller:'
 // Allow the 450ms slide-in to complete, then hold the character for over a full second.
 export const DSS_BONUS_PRESENTATION=Object.freeze({characterMs:1600,resultMs:1200,comicActionMs:1500});
 const COMIC_ACTION_DETAILS=Object.freeze({
- 'HIDE THE STASH':'Extra stash crates are added to the reels!',
+ 'HIDE THE STASH':'One extra reel spin, with 2–3 added crates; 3+ crates unlock Hold & Win!',
  'PANIC WILDS':'Random symbols transform into WILDS!',
  'GARAGE CLEANUP':'Low symbols are upgraded to premium symbols!',
  'CAUGHT RED-HANDED':'A surprise win multiplier kicks in!',
@@ -20,6 +20,8 @@ export function comicActionCopy(event){
  const title=event.type==='keller'?'HOA INSPECTION!':(event.label??FEATURE_TITLES[event.type]??'BONUS ACTION').toUpperCase().replace(/!*$/,'!');
  const detail=event.awardedStashBonus?
   event.stashCount+' STASH CRATES! SECRET STASH HOLD & WIN UNLOCKED!':
+  event.featureSpin?
+  'ONE EXTRA SPIN! 2–3 ADDED CRATES. THREE OR MORE UNLOCK HOLD & WIN!':
   event.awardedFreeSpins?
   event.scatterCount+' SCATTERS! FIVE MINUTES OF PEACE FREE SPINS UNLOCKED!':
   (COMIC_ACTION_DETAILS[event.label]??COMIC_ACTION_DETAILS[event.type==='keller'?'HOA INSPECTION':event.label]??'BONUS FEATURE ACTIVATED!');
@@ -457,7 +459,7 @@ export function createDadsSecretStash(doc=globalThis.document,options={}){
    if(stoppedReel!==null)return;
    holdCount.textContent='RESPINS REMAINING: '+snapshot.remaining;
    showBonusHud('stash','RESPIN '+snapshot.number,'REMAINING '+snapshot.remaining);
-   holdTotal.textContent=snapshot.kind==='start'?'3 STASH PRIZES LOCKED — FIND MORE!':
+   holdTotal.textContent=snapshot.kind==='start'?snapshot.board.filter(v=>v!==null).length+' STASH PRIZES LOCKED — FIND MORE!':
     snapshot.newIndices.length?'NEW STASH FOUND! RESPINS RESET TO 3':'NO NEW PRIZE — RESPINS COUNT DOWN';
    setFeature('stash','Locked prizes stay on the board as respins continue.',
     'RESPINS '+snapshot.remaining+' · PRIZES '+snapshot.board.filter(v=>v!==null).length+'/20');
@@ -526,6 +528,44 @@ export function createDadsSecretStash(doc=globalThis.document,options={}){
    (event.multiplier??1)>1?'×'+event.multiplier+' WIN MULTIPLIER':'REEL EFFECT ACTIVATED';
   setFeature(event.type,'WATCH THE REELS TRANSFORM',modifierActionTitle.textContent);
   showBonusHud(event.type,'MYSTERY MODIFIER',event.label??'');
+  // HIDE THE STASH is a single genuine feature spin, not a sequence of
+  // individually replaced original symbols. Its predetermined outcome includes
+  // landed crates, carried crates and 2–3 Jen-added crates.
+  if(event.featureSpin){
+   modifierActionDetail.textContent='ONE EXTRA SPIN · 2–3 BONUS CRATES';
+   showBonusHud('jen','HIDE THE STASH · EXTRA SPIN','CRATES CARRY OVER');
+   let tick=0;
+   const stopTicks=[20,30,40,50,60];
+   reelEls.forEach(reel=>reel.classList.add('dss-spinning'));
+   const tickSpin=()=>{
+    tick++;
+    for(let reel=0;reel<5;reel++){
+     if(tick>stopTicks[reel])continue;
+     if(tick===stopTicks[reel]){
+      for(let row=0;row<4;row++)setCell(reel*4+row,final[reel*4+row]);
+      reelEls[reel].classList.remove('dss-spinning');
+     }else{
+      for(let row=0;row<4;row++)setCell(reel*4+row,SYMBOLS[(tick*3+reel*7+row*5)%SYMBOLS.length]);
+     }
+    }
+    if(tick<60){schedule(tickSpin,50);return;}
+    showGrid(final);
+    const qualified=Boolean(event.awardedStashBonus);
+    modifierActionDetail.textContent=event.stashCount+' CRATES TOTAL ('+event.carriedCrates+' CARRIED, '+event.landedCrates+' LANDED, '+event.addedCrates+' ADDED) — '+
+     (qualified?'HOLD & WIN UNLOCKED!':'NO HOLD & WIN THIS TIME');
+    status.textContent=qualified?'SECRET STASH HOLD & WIN AWARDED!':'HIDE THE STASH — NOT ENOUGH CRATES';
+    cells.forEach(({cell},i)=>cell.classList.toggle('dss-transformed',final[i]==='stash'));
+    schedule(()=>{
+     modifierAction.hidden=true;bonusHeader.hidden=true;
+     showFeatureResult(event,()=>{
+      cells.forEach(({cell})=>cell.classList.remove('dss-transformed'));
+      nextEvent();
+     });
+    },1400);
+   };
+   schedule(tickSpin,50);
+   return;
+  }
   // Give the player a clear view of the original grid and what will happen.
   schedule(()=>{
    const reveal=(index)=>{

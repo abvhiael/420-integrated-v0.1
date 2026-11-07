@@ -342,3 +342,28 @@ test('rolling reel icons use exact 3-row cells rather than intrinsic image heigh
  root.querySelector('.bb-stage').dispatchEvent(new window.Event('click',{bubbles:true}));
  root.stopAnimation();
 });
+
+test('INFO always exposes BACK TO GAME without losing credits, current bonus or board',()=>{
+ const {document,window}=parseHTML('<html><body></body></html>');
+ const root=createBestBudsPractice(document,{rng:()=>.99});
+ const click=name=>{const b=[...root.querySelectorAll('button')].find(x=>x.textContent===name);assert.ok(b,name);b.dispatchEvent(new window.Event('click',{bubbles:true}));};
+ click('BONUS TEST');click('Trigger Hold & Win');
+ const stateBefore=root.getGameState(),snapshot={balance:stateBefore.balance,mode:stateBefore.mode,respins:stateBefore.respins,hold:JSON.stringify(stateBefore.hold)};
+ click('INFO / PAYTABLE');
+ assert.equal(root.querySelector('[role="dialog"]')?.getAttribute('aria-modal'),'true');
+ const back=root.querySelectorAll('.bb-back-to-game');
+ assert.equal(back.length,2,'return button accessible at top and bottom of scrollable guide');
+ assert.equal(back[0].textContent,'BACK TO GAME');
+ back[0].dispatchEvent(new window.Event('click',{bubbles:true}));
+ assert.equal(root.querySelector('.bb-modal-cover'),null);
+ assert.equal(root.querySelectorAll('.bb-coin-locked').length,6);
+ const after=root.getGameState();
+ assert.equal(after.balance,snapshot.balance);assert.equal(after.mode,snapshot.mode);
+ assert.equal(after.respins,snapshot.respins);assert.equal(JSON.stringify(after.hold),snapshot.hold);
+ click('INFO / PAYTABLE');
+ root.querySelector('.bb-modal-footer .bb-back-to-game').dispatchEvent(new window.Event('click',{bubbles:true}));
+ assert.equal(root.querySelector('.bb-modal-cover'),null);
+ click('RESPIN');
+ assert.equal(root.getPresentationState().phase,'spinning');
+ root.stopAnimation();
+});

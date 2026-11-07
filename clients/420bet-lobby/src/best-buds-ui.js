@@ -203,7 +203,10 @@ export function createBestBudsPractice(doc=globalThis.document,options={}){
   screen.append(make(doc,'p','bb-disclaimer','PRACTICE ONLY · CANDIDATE PAYTABLE · NO MONEY OR WALLET TRANSACTIONS'));
   if(modal){const overlay=make(doc,'div','bb-modal-cover'),dialog=make(doc,'section','bb-modal');
    dialog.setAttribute('role','dialog');dialog.setAttribute('aria-modal','true');
-   dialog.append(button(doc,'×','bb-close',()=>{modal='';layout();}),make(doc,'h2','','BEST BUDS · RULES'));
+   const returnToGame=()=>{modal='';layout();};
+   const toolbar=make(doc,'div','bb-modal-toolbar');
+   toolbar.append(make(doc,'h2','','BEST BUDS · RULES'),button(doc,'BACK TO GAME','bb-back-to-game',returnToGame),button(doc,'×','bb-close',returnToGame));
+   dialog.append(toolbar);
    dialog.append(make(doc,'p','','Five reels, three rows, 25 fixed paylines. Three matching symbols from left to right win; the two Buddy WILDs substitute for ordinary symbols only. All 25 lines are included in the total bet.'));
    dialog.append(make(doc,'p','','6+ HOTBOX COINS trigger Hold & Win: start with 3 respins; every new locked coin resets to 3. At 10 and 13 coins, the latest coin may transform into Collect Smoke, a multiplier or a jackpot. Three van scatters on separate reels trigger 8 Free Rides. If both features trigger, Free Rides follow Hold & Win.'));
    dialog.append(make(doc,'p','','Collect Smoke locks in place and adds the sum of the values of the other locked ordinary HOTBOX coins as a one-time extra award. The amount appears when the symbol lands, and is included in the final bonus payout. Jackpot and multiplier symbols are not part of that collection sum.'));
@@ -217,6 +220,9 @@ export function createBestBudsPractice(doc=globalThis.document,options={}){
    guideImage.loading='lazy';
    guide.append(make(doc,'figcaption','','25 FIXED PAYLINES · LEFT TO RIGHT'),guideImage);
    dialog.append(guide);
+   const footer=make(doc,'div','bb-modal-footer');
+   footer.append(button(doc,'BACK TO GAME','bb-back-to-game',returnToGame));
+   dialog.append(footer);
    overlay.append(dialog);screen.append(overlay);
   }
   if(sessionSummary!==null){

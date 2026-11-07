@@ -16,14 +16,16 @@ Each trial samples an independent base-game board and cascade; any feature is fu
 
 | Wager | Spins | Base RTP | Harvest RTP | Road Trip RTP | Combined RTP | Rejected |
 |:--|--:|--:|--:|--:|--:|--:|
-| 20 | 800,000 | 49.5725% | 18.2107% | 27.5936% | **95.3767%** | 0 |
 | 10 | 200,000 | 49.9692% | 18.1875% | 26.9538% | **95.1104%** | 0 |
+| 20 | 800,000 | 49.5725% | 18.2107% | 27.5936% | **95.3767%** | 0 |
+| 30 | 200,000 | 49.2568% | 18.9927% | 25.8823% | **94.1318%** | 0 |
+| 40 | 200,000 | 49.4775% | 17.8224% | 27.8112% | **95.1110%** | 0 |
 | 50 | 200,000 | 49.6510% | 18.4945% | 26.3980% | **94.5434%** | 0 |
 
-The 800,000-spin run uses seed `20261107`. The two smaller runs use seeds `13579` (bet 10) and `97531` (bet 50). The approximate normal 95% CI for the 800,000-spin combined RTP is **94.27%–96.49%**. This is a Monte Carlo uncertainty interval, not a regulated certification.
+Across **1,600,000 independent seeded rounds** (800,000 at bet 20 and 200,000 each at the other four wagers), **zero natural-round rejections** were observed. The 800,000-spin run uses seed `20261107`. The four 200,000-spin runs use seeds `13579` (bet 10), `314159` (bet 30), `271828` (bet 40) and `97531` (bet 50). The approximate normal 95% CI for the 800,000-spin combined RTP is **94.27%–96.49%**. This is a Monte Carlo uncertainty interval, not a regulated certification.
 
 ### Analytical cross-check
-The exact (under independent symbol draws) three-or-more-Road-Tickets trigger probability uses a binomial tail with 48 positions and per-position probability 0.008. The five-stop random case-selection model yields an **analytical Road Trip RTP of approximately 27.0021%** at wagers 10, 20 and 50, compared with the observed 27.5936%, 26.9538% and 26.3980% respectively.
+The exact (under independent symbol draws) three-or-more-Road-Tickets trigger probability uses a binomial tail with 48 positions and per-position probability 0.008. The five-stop random case-selection model yields an **analytical Road Trip RTP of approximately 27.0021%** at wagers 10, 20 and 50, compared with observed results ranging from 25.8823% to 27.8112% across five wager sizes.
 
 ## Frequency, tail and large-award risk (800,000 spins at bet 20)
 - Endless Harvest triggered **16,046** times (2.0058%); Road Trip triggered **5,399** times (0.6749%).
@@ -41,4 +43,4 @@ The exact (under independent symbol draws) three-or-more-Road-Tickets trigger pr
 - Selecting all five multiplier cases produces 50× but zero collected coins, hence zero award, consistent with the additive rules.
 
 ## Acceptance / limitations
-The observed RTP lies in the 94–96% design window at wagers 10, 20 and 50 and no naturally generated rounds failed. All payouts in this qualification were model simulations; the full Node and browser test suites and production deployment were not independently executed as part of these calculations. This is **not** a theoretical full-game certification, nor a substitute for independent gambling compliance and statistical audit. Re-run on all supported wagers and increase the sample before financial deployment.
+The observed RTP lies in the 94–96% design window at **all five supported wagers** (10, 20, 30, 40 and 50) and no naturally generated rounds failed. All payouts in this qualification were model simulations; the full Node and browser test suites and production deployment were not independently executed as part of these calculations. This is **not** a theoretical full-game certification, nor a substitute for independent gambling compliance and statistical audit. Re-run on all supported wagers and increase the sample before financial deployment.

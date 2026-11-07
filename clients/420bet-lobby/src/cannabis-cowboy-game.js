@@ -118,6 +118,10 @@ export function createCannabisCowboyPractice(doc=globalThis.document,options={})
  harvestTrigger.className='cc-harvest-trigger-splash';harvestTrigger.hidden=true;
  harvestTrigger.setAttribute('aria-label','Endless Harvest free spins awarded. Click anywhere to continue to the first free spin');
  root.querySelector('.cc-middle').append(harvestTrigger);
+ const roadTrigger=doc.createElement('button');roadTrigger.type='button';
+ roadTrigger.className='cc-road-trigger-splash';roadTrigger.hidden=true;
+ roadTrigger.setAttribute('aria-label','On the Road Again! Five stops. Pick a guitar case at each stop. Click anywhere to continue');
+ root.querySelector('.cc-middle').append(roadTrigger);
  const artRoot='/assets/420bet/cannabis-cowboy/';
  const renderFreeSpinButton=(number,total,previousWin)=>{
   freeSpinButton.replaceChildren();
@@ -203,7 +207,7 @@ export function createCannabisCowboyPractice(doc=globalThis.document,options={})
   handle=schedule(()=>{if(generation!==timerGeneration)return;handle=null;if(!dead)fn();},ms);
  };
  const finish=()=>{
-  if(pendingRoad&&!roadStarted){startRoadTrip();return;}
+  if(pendingRoad&&!roadStarted){showRoadTrigger();return;}
   if(lastWin>0&&!reviewDismissed&&lastWinningBoard&&lastWinningClusters.length){
    phase('win-review');reviewPanel.hidden=false;
    showBoard(lastWinningBoard);
@@ -349,13 +353,23 @@ export function createCannabisCowboyPractice(doc=globalThis.document,options={})
   }
   roadPanel.append(heading,description,subtotal,cases);
  };
- const startRoadTrip=()=>{
-  if(!pendingRoad||roadStarted)return;
-  roadStarted=true;phase('road-trip');
-  showFeature('ON THE ROAD AGAIN!','FIVE STOPS · PICK ONE GUITAR CASE AT EACH');
-  status.textContent='ROAD TRIP BONUS TRIGGERED · FIVE STOPS';
-  tick(()=>{hideFeature();showRoadStop();},reducedMotion?0:1900);
+ const showRoadTrigger=()=>{
+  if(dead||!pendingRoad||roadStarted||featurePhase==='road-trigger')return;
+  phase('road-trigger');hideFeature();hideEffects();
+  roadPanel.hidden=true;freeSpinButton.hidden=true;harvestTrigger.hidden=true;
+  roadTrigger.hidden=false;
+  status.textContent='ON THE ROAD AGAIN! · FIVE STOPS · CLICK TO CONTINUE';
  };
+ const startRoadTrip=()=>{
+  if(dead||!pendingRoad||roadStarted)return;
+  roadStarted=true;roadTrigger.hidden=true;
+  hideFeature();hideEffects();showRoadStop();
+ };
+ roadTrigger.addEventListener('click',event=>{
+  event.stopPropagation();
+  if(dead||featurePhase!=='road-trigger'||!pendingRoad||roadTrigger.hidden)return;
+  startRoadTrip();
+ });
  harvestTrigger.addEventListener('click',event=>{
   event.stopPropagation();
   if(dead||featurePhase!=='bonus-trigger'||!pendingFeature||harvestTrigger.hidden)return;
@@ -374,7 +388,7 @@ export function createCannabisCowboyPractice(doc=globalThis.document,options={})
   bonusSplash.hidden=true;reviewDismissed=true;finish();
  });
  root.querySelector('.cc-middle').addEventListener('click',event=>{
-  if(dead||event.target.closest?.('.cc-harvest-trigger-splash,.cc-free-spin-button,.cc-bonus-total-splash,.cc-road-panel'))return;
+  if(dead||event.target.closest?.('.cc-road-trigger-splash,.cc-harvest-trigger-splash,.cc-free-spin-button,.cc-bonus-total-splash,.cc-road-panel'))return;
   if(featurePhase==='win-review'&&!reviewDismissed){
    reviewDismissed=true;reviewPanel.hidden=true;
    clearClusterPaths(root.querySelector('.cc-symbol-grid'));
@@ -437,7 +451,7 @@ export function createCannabisCowboyPractice(doc=globalThis.document,options={})
   pendingRoad=road;roadPicks=[];roadStarted=false;reviewDismissed=false;
   lastWinningClusters=[];lastWinningBoard=null;reviewPanel.hidden=true;roadPanel.hidden=true;
   pendingFeature=result.outcome.feature??null;bonusSpins=[];currentSpin=null;
-  finishedBonus=false;bonusIndex=0;bonusWin=0;lastFreeSpinWin=0;displayedSticky=[];activeCascade=null;freeSpinButton.hidden=true;bonusSplash.hidden=true;harvestTrigger.hidden=true;
+  finishedBonus=false;bonusIndex=0;bonusWin=0;lastFreeSpinWin=0;displayedSticky=[];activeCascade=null;freeSpinButton.hidden=true;bonusSplash.hidden=true;harvestTrigger.hidden=true;roadTrigger.hidden=true;
   phase('base');
   root.querySelector('.cc-board-readonly').textContent='BASE-GAME PRACTICE';
   sync();
@@ -461,7 +475,7 @@ export function createCannabisCowboyPractice(doc=globalThis.document,options={})
  menu.title='Menu options coming in a later milestone';
  auto.title='Autoplay unavailable in this practice build';
  showBoard(session.board);sync();
- root.stopAnimation=()=>{dead=true;busy=false;queue=[];activeCascade=null;timerGeneration++;pendingFeature=null;pendingRoad=null;stopReels();roadPanel.hidden=true;reviewPanel.hidden=true;freeSpinButton.hidden=true;bonusSplash.hidden=true;harvestTrigger.hidden=true;hideFeature();hideEffects();if(handle!==null){cancel(handle);handle=null;}};
- root.getPracticeState=()=>({credits:session.credits,bet:session.bet,round:session.round,busy,lastWin,featurePhase,bonusIndex,bonusWin,lastFreeSpinWin,freeSpinCount:bonusSpins.length,bonusSplashVisible:!bonusSplash.hidden,harvestTriggerVisible:!harvestTrigger.hidden,freeSpinReady:featurePhase==='bonus-ready',roadStopsCompleted:roadPicks.length,roadActive:roadStarted&&!!pendingRoad,bonusPreview});
+ root.stopAnimation=()=>{dead=true;busy=false;queue=[];activeCascade=null;timerGeneration++;pendingFeature=null;pendingRoad=null;stopReels();roadPanel.hidden=true;reviewPanel.hidden=true;freeSpinButton.hidden=true;bonusSplash.hidden=true;harvestTrigger.hidden=true;roadTrigger.hidden=true;hideFeature();hideEffects();if(handle!==null){cancel(handle);handle=null;}};
+ root.getPracticeState=()=>({credits:session.credits,bet:session.bet,round:session.round,busy,lastWin,featurePhase,bonusIndex,bonusWin,lastFreeSpinWin,freeSpinCount:bonusSpins.length,bonusSplashVisible:!bonusSplash.hidden,harvestTriggerVisible:!harvestTrigger.hidden,roadTriggerVisible:!roadTrigger.hidden,freeSpinReady:featurePhase==='bonus-ready',roadStopsCompleted:roadPicks.length,roadActive:roadStarted&&!!pendingRoad,bonusPreview});
  return root;
 }

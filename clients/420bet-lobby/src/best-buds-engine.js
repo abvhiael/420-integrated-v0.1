@@ -36,7 +36,8 @@ export const initialState=()=>({
  featureTotal:0,spinNumber:0,qa:null,holdReveal:null,holdNewKeys:[],collectSmokeEvent:null,freeWildMultipliers:{}
 });
 export const coinValue=(rng=Math.random)=>[.2,.4,.6,1,1.5,2,3,5,10][pick(9,rng)];
-const isWild=s=>s==='WILD1'||s==='WILD2';
+// Both regular Buddy portraits and their dedicated WILD artwork substitute in every mode.
+export const isWild=s=>s==='BUDDY1'||s==='BUDDY2'||s==='WILD1'||s==='WILD2';
 export function evaluateLines(board,bet,{wildMultipliers={}}={}){
  const wins=[];
  for(let p=0;p<LINES.length;p++){
@@ -166,7 +167,7 @@ export function nextSpin(previous,{rng=Math.random,stops=null,force=null}={}){
  }else if(force==='free'){
   for(let r=0;r<REELS;r++)for(let y=0;y<ROWS;y++)board[r][y]=r<3&&y===0?'SCATTER':ORDINARY[(r*3+y)%ORDINARY.length];
  }
- // Free Ride WILDs keep their character artwork, with a random multiplier badge.
+ // Every Buddy portrait and WILD gets a free-spin multiplier badge.
  // For each winning line, only the highest WILD multiplier on that line applies.
  s.freeWildMultipliers={};
  if(mode==='free'){

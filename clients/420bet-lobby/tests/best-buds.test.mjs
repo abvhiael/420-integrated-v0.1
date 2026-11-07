@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {parseHTML} from 'linkedom';
 import {readFileSync,existsSync} from 'node:fs';
-import {REELS,ROWS,LINES,PAYTABLE,BASE_STRIPS,boardAt,initialState,nextSpin,practiceBonus,evaluateLines,MAX_WIN_MULTIPLIER,FREE_WILD_MULTIPLIERS,collectSmokeValue,hotboxTotalMultiplier} from '../src/best-buds-engine.js';
+import {REELS,ROWS,LINES,PAYTABLE,BASE_STRIPS,boardAt,initialState,nextSpin,practiceBonus,evaluateLines,MAX_WIN_MULTIPLIER,FREE_WILD_MULTIPLIERS,collectSmokeValue,hotboxTotalMultiplier,isWild} from '../src/best-buds-engine.js';
 import {createBestBudsPractice} from '../src/best-buds-ui.js';
 
 test('exactly 25 distinct five-reel paths stay within the 3-row display',()=>{
@@ -416,5 +416,50 @@ test('HOTBOX start and completion splashes pause play and display the credited b
  assert.equal(root.getPresentationState().hotboxSplash,null);
  assert.equal(root.getGameState().lastFeature,'');
  assert.equal(root.getGameState().balance,1000-root.getGameState().bet+total);
+ root.stopAnimation();
+});
+
+test('both Buddy portraits are ALWAYS WILD, as are the special wild symbols',()=>{
+ for(const symbol of ['BUDDY1','BUDDY2','WILD1','WILD2'])assert.equal(isWild(symbol),true,symbol);
+ for(const symbol of ['HOTBOX','SCATTER','BONG','CHIPS','JOINT'])assert.equal(isWild(symbol),false,symbol);
+});
+test('reproduces the screenshot: two top-row Buddy 2 portraits substitute for CHIPS and PAY',()=>{
+ const board=[
+  ['BUDDY2','GUITAR','RECORD'],
+  ['BUDDY2','SUNGLASSES','RECORD'],
+  ['CHIPS','BUDDY1','HOTBOX'],
+  ['JOINT','BUDDY1','LIGHTER'],
+  ['PAPERS','JOINT','HOTBOX']
+ ];
+ const result=evaluateLines(board,2);
+ const top=result.wins.find(w=>w.line===2);
+ assert.ok(top,'top row must win CHIPS with two leading Buddy WILD portraits');
+ assert.equal(top.symbol,'CHIPS');
+ assert.equal(top.length,3);
+ assert.equal(top.amount,0.5);
+ assert.ok(result.amount>=0.5);
+});
+test('free spins add random x2 x3 x5 x10 to landed Buddy portraits as well as special wilds',()=>{
+ const board=Array.from({length:5},()=>['CHIPS','JOINT','PAPERS']);
+ board[0][0]='BUDDY2';board[1][0]='BUDDY1';
+ const base=evaluateLines(board,2);
+ const boosted=evaluateLines(board,2,{wildMultipliers:{0:3,3:10}});
+ const ordinary=base.wins.find(w=>w.line===2);
+ const multiplied=boosted.wins.find(w=>w.line===2);
+ assert.ok(ordinary&&multiplied);
+ assert.equal(multiplied.amount,ordinary.amount*10);
+ const s=nextSpin({...initialState(),mode:'free',freeLeft:2},{stops:[0,0,0,0,0],rng:()=>.99,force:'wild10'});
+ assert.equal(s.freeWildMultipliers[1],10); // forced reel 0 row 1 WILD1
+ assert.ok(Object.values(s.freeWildMultipliers).every(v=>[2,3,5,10].includes(v)));
+});
+test('paytable labels and rules explicitly describe Buddy portraits as always-wild',()=>{
+ const {document,window}=parseHTML('<html><body></body></html>');
+ const root=createBestBudsPractice(document);
+ const labels=[...root.querySelectorAll('.bb-pay-symbol')].map(c=>c.textContent);
+ assert.ok(labels.includes('BUDDY 1 WILD'));
+ assert.ok(labels.includes('BUDDY 2 WILD'));
+ const info=[...root.querySelectorAll('button')].find(b=>b.textContent==='INFO / PAYTABLE');
+ info.dispatchEvent(new window.Event('click',{bubbles:true}));
+ assert.match(root.querySelector('.bb-modal').textContent,/ALWAYS WILD/);
  root.stopAnimation();
 });

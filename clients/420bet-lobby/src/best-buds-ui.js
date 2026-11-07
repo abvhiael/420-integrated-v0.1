@@ -89,7 +89,7 @@ export function createBestBudsPractice(doc=globalThis.document,options={}){
      const cell=make(doc,'div','bb-cell'),s=display[r][y];
      if(s){
       cell.append(sprite(doc,'reels',SYMBOL_ART[s]??SYMBOL_ART.LEAF,s));
-      if((s==='WILD1'||s==='WILD2')&&state.freeWildMultipliers?.[r*ROWS+y]&&
+      if((s==='WILD1'||s==='WILD2'||s==='BUDDY1'||s==='BUDDY2')&&state.freeWildMultipliers?.[r*ROWS+y]&&
          (visualMode==='free'||state.lastFeature==='free-end'||state.mode==='free')){
        cell.append(make(doc,'b','bb-wild-multiplier','×'+state.freeWildMultipliers[r*ROWS+y]));
       }
@@ -175,7 +175,7 @@ export function createBestBudsPractice(doc=globalThis.document,options={}){
    const symbolCell=make(doc,'td','bb-pay-symbol');
    const image=SYMBOL_ART[symbol];
    if(image)symbolCell.append(sprite(doc,'reels',image,''));
-   symbolCell.append(make(doc,'span','',symbol==='BUDDY1'?'BUDDY 1':symbol==='BUDDY2'?'BUDDY 2':symbol));
+   symbolCell.append(make(doc,'span','',symbol==='BUDDY1'?'BUDDY 1 WILD':symbol==='BUDDY2'?'BUDDY 2 WILD':symbol));
    row.append(symbolCell);
    for(const award of amounts)row.append(make(doc,'td','',String(award)+'×'));
    payGrid.append(row);
@@ -194,7 +194,7 @@ export function createBestBudsPractice(doc=globalThis.document,options={}){
   const freeRow=make(doc,'div','bb-feature-row');
   freeRow.append(sprite(doc,'reels',SYMBOL_ART.SCATTER,''));
   const freeCopy=make(doc,'div','bb-feature-copy');
-  freeCopy.append(make(doc,'strong','','3 VAN SCATTERS'),make(doc,'p','','8 Free Rides. Buddy WILDs award random ×2, ×3, ×5 or ×10; highest badge applies to each winning line.'));
+  freeCopy.append(make(doc,'strong','','3 VAN SCATTERS'),make(doc,'p','','8 Free Rides. Buddy portraits and WILDs always substitute. During Free Rides each Buddy WILD awards random ×2, ×3, ×5 or ×10; highest badge applies to each winning line.'));
   freeRow.append(freeCopy);bonusPanel.append(freeRow);
   bonusPanel.append(bonusRow('icon_hotbox_coin.png','6 HOTBOX COINS','Hold & Win starts with 3 respins. Each newly locked coin resets the count to 3.'));
   bonusPanel.append(bonusRow('icon_collect_smoke.png','COLLECT SMOKE','Adds the values of the other locked ordinary coins. The collected ×total stays on its icon.'));
@@ -212,7 +212,7 @@ export function createBestBudsPractice(doc=globalThis.document,options={}){
    const toolbar=make(doc,'div','bb-modal-toolbar');
    toolbar.append(make(doc,'h2','','BEST BUDS · RULES'),button(doc,'BACK TO GAME','bb-back-to-game',returnToGame),button(doc,'×','bb-close',returnToGame));
    dialog.append(toolbar);
-   dialog.append(make(doc,'p','','Five reels, three rows, 25 fixed paylines. Three matching symbols from left to right win; the two Buddy WILDs substitute for ordinary symbols only. All 25 lines are included in the total bet.'));
+   dialog.append(make(doc,'p','','Five reels, three rows, 25 fixed paylines. Buddy 1 and Buddy 2 are ALWAYS WILD, including their portrait and special WILD artwork. They substitute for ordinary paying symbols on every spin. Three or more matching symbols from left to right pay; all 25 lines are included in the total bet.'));
    dialog.append(make(doc,'p','','6+ HOTBOX COINS trigger Hold & Win: start with 3 respins; every new locked coin resets to 3. At 10 and 13 coins, the latest coin may transform into Collect Smoke, a multiplier or a jackpot. Three van scatters on separate reels trigger 8 Free Rides. If both features trigger, Free Rides follow Hold & Win.'));
    dialog.append(make(doc,'p','','Collect Smoke locks in place and adds the sum of the values of the other locked ordinary HOTBOX coins as a one-time extra award. The amount appears when the symbol lands, and is included in the final bonus payout. Jackpot and multiplier symbols are not part of that collection sum.'));
    dialog.append(make(doc,'p','','HOTBOX: MINI ×20, MINOR ×50, MAJOR ×200, GRAND ×1000. During Free Rides, each landed Buddy WILD receives a random ×2, ×3, ×5 or ×10 badge; the highest multiplier on each winning line applies once (never multiplied together). All winnings are bounded to ×5000 total bet per initiating round. Feature thresholds and paytable are uncalibrated practice mechanics.'));

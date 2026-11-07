@@ -43,6 +43,26 @@ try{
   assert.ok(artworkLayout.mast,'Wide logo must be above reels inside cabinet');
   assert.ok(artworkLayout.logoLoaded&&artworkLayout.guideLoaded,'Both newly uploaded PNGs must load');
   assert.match(artworkLayout.logoSrc,/branding\/logo_sin_city_high_rollers\.png/);
+  const logoRendering=await page.evaluate(()=>{
+   const logo=document.querySelector('.sc-cabinet > .sc-masthead .sc-logo');
+   const board=document.querySelector('.sc-reels');
+   const css=getComputedStyle(logo);
+   const rect=logo.getBoundingClientRect(),boardRect=board.getBoundingClientRect();
+   const naturalRatio=logo.naturalWidth/logo.naturalHeight;
+   const fittedWidth=Math.min(rect.width,rect.height*naturalRatio);
+   const fittedHeight=fittedWidth/naturalRatio;
+   const fittedLeft=rect.left+(rect.width-fittedWidth)/2;
+   const fittedCenter=fittedLeft+fittedWidth/2;
+   return {fit:css.objectFit,position:css.objectPosition,naturalRatio,fittedRatio:fittedWidth/fittedHeight,
+    imageCenter:fittedCenter,boardCenter:boardRect.left+boardRect.width/2};
+  });
+  assert.equal(logoRendering.fit,'contain','Approved logo must never be stretched with object-fit:fill');
+  assert.equal(logoRendering.position,'50% 50%','Approved logo must be centered in its space');
+  assert.ok(Math.abs(logoRendering.fittedRatio-logoRendering.naturalRatio)<.001,
+    'Rendered logo must retain the original uploaded PNG aspect ratio');
+  assert.ok(Math.abs(logoRendering.imageCenter-logoRendering.boardCenter)<8,
+    'Approved logo must be centered horizontally over the five-reel board: '+JSON.stringify(logoRendering));
+
   assert.match(artworkLayout.guideSrc,/features\/bonus_triggers_sin_city_high_rollers\.png/);
   if(name==='desktop'){
    assert.ok(artworkLayout.guide.x>=artworkLayout.paytable.right-3,

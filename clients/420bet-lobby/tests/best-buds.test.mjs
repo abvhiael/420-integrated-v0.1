@@ -67,7 +67,7 @@ test('practice view uses uploaded art, QA button, staggered reel panels and clic
  const {document,window}=parseHTML('<html><body></body></html>');
  const root=createBestBudsPractice(document);
  assert.equal(root.dataset.practiceGame,'best-buds-hotbox-road-trip');
- assert.equal(root.querySelectorAll('.bb-buddy').length,2);
+ assert.equal(root.querySelectorAll('.bb-buddy').length,0);
  assert.match(root.querySelector('.bb-title-logo').getAttribute('src'),/bestbuds-logo\.png/);
  assert.equal(root.querySelectorAll('.bb-reel').length,5);
  assert.equal(root.querySelectorAll('.bb-cell').length,15);
@@ -96,7 +96,7 @@ test('all declared icon, symbol, logo and character art paths resolve in public 
   reels:['sym_bong.png','sym_joint.png','sym_chips.png','sym_record.png','sym_rollingpapers.png','sym_lighter.png','sym_sunglasses.png','sym_guitar.png','sym_leaf.png','sym_buddy1_portrait.png','sym_buddy2_portrait.png','sym_buddy1_wild.png','sym_buddy2_wild.png','sym_scatter_van.png','sym_hotbox_100.png'],
   characters:['buddy1_laugh.png','buddy1_surprised.png','buddy1_big_win.png','buddy1_exhale.png','buddy1_skeptical.png','buddy1_thumbs_up.png','buddy2_peace.png','buddy2_inhale.png','buddy2_exhale.png','buddy2_surprised.png','buddy2_laugh.png','buddy2_celebrate.png']
  })){
-  for(const file of files){if(!file.startsWith('icon_jackpot_'))assert.match(ui,new RegExp(file.replaceAll('.','\\.')));assert.ok(existsSync(new URL(folder+'/'+file,base)),folder+'/'+file);}
+  for(const file of files){if(folder!=='characters'&&!file.startsWith('icon_jackpot_'))assert.match(ui,new RegExp(file.replaceAll('.','\\.')));assert.ok(existsSync(new URL(folder+'/'+file,base)),folder+'/'+file);}
  }
 });
 
@@ -157,15 +157,16 @@ test('Free Rides WILD portraits receive x2/x3/x5/x10 and winning lines apply max
  assert.ok(root.querySelectorAll('.bb-wild-multiplier').length>=3);
  root.stopAnimation();
 });
-test('Buddy reaction pair is randomized once per three initiated spins and not per render',()=>{
- const {document,window}=parseHTML('<html><body></body></html>');
+test('wide logo-only header does not render Buddy reaction portraits',()=>{
+ const {document}=parseHTML('<html><body></body></html>');
  const root=createBestBudsPractice(document,{rng:()=>.99});
- const initial=root.getPresentationState().reactionPair;
- const clickSpin=()=>{const b=[...root.querySelectorAll('button')].find(b=>b.textContent==='SPIN');assert.ok(b);b.dispatchEvent(new window.Event('click',{bubbles:true}));root.querySelector('.bb-stage').dispatchEvent(new window.Event('click',{bubbles:true}));if(root.getPresentationState().phase==='paylines')root.querySelector('.bb-stage').dispatchEvent(new window.Event('click',{bubbles:true}));};
- clickSpin();assert.deepEqual(root.getPresentationState().reactionPair,initial);assert.equal(root.getPresentationState().reactionSpins,1);
- clickSpin();assert.deepEqual(root.getPresentationState().reactionPair,initial);assert.equal(root.getPresentationState().reactionSpins,2);
- clickSpin();assert.deepEqual(root.getPresentationState().reactionPair,initial);assert.equal(root.getPresentationState().reactionSpins,3);
- clickSpin();assert.equal(root.getPresentationState().reactionSpins,1);
+ const header=root.querySelector('.bb-header');
+ assert.ok(header);
+ assert.equal(header.querySelectorAll('img').length,1);
+ assert.match(header.querySelector('img').getAttribute('src'),/bestbuds-logo\.png$/);
+ assert.equal(root.querySelectorAll('.bb-buddy').length,0);
+ const css=readFileSync(new URL('../src/best-buds.css',import.meta.url),'utf8');
+ assert.match(css,/\.bb-header\{display:flex;justify-content:center/);
  root.stopAnimation();
 });
 test('Best Buds CSS preserves opaque reels but makes the surrounding frame transparent',()=>{

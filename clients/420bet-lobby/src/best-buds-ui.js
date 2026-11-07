@@ -12,39 +12,25 @@ const make=(doc,tag,cls,text)=>{const el=doc.createElement(tag);if(cls)el.classN
 const sprite=(doc,group,file,alt='',cls='')=>{const img=make(doc,'img',cls);img.src=asset(group,file);img.alt=alt;img.draggable=false;return img;};
 const button=(doc,title,klass,action)=>{const el=make(doc,'button',klass,title);el.type='button';el.addEventListener('click',action);return el;};
 const credit=n=>Number(n).toFixed(2);
-const REACTIONS={
- idle:['buddy1_laugh.png','buddy2_peace.png'], spin:['buddy1_skeptical.png','buddy2_inhale.png'],
- win:['buddy1_thumbs_up.png','buddy2_laugh.png'], hold:['buddy1_surprised.png','buddy2_surprised.png'],
- free:['buddy1_exhale.png','buddy2_exhale.png'], big:['buddy1_big_win.png','buddy2_celebrate.png']
-};
 const randomSymbol=()=>['BONG','JOINT','RECORD','CHIPS','PAPERS','GUITAR','LEAF','LIGHTER','SUNGLASSES'][Math.floor(Math.random()*9)];
 export function createBestBudsPractice(doc=globalThis.document,options={}){
  const view=doc.defaultView||globalThis;
  const root=make(doc,'section','bb-game');root.dataset.practiceGame='best-buds-hotbox-road-trip';
  let state=options.initialState??initialState(),display=state.board,phase='idle',stopped=0,lineIndex=0;
  let modal='',qaMenu=false,dead=false,visualMode=state.mode,sessionSummary=null;
- let previousHold=[],reactionPair=null,reactionSpins=0;
- const chooseReactions=()=>{
-  const one=['buddy1_laugh.png','buddy1_skeptical.png','buddy1_exhale.png','buddy1_surprised.png','buddy1_big_win.png','buddy1_thumbs_up.png'];
-  const two=['buddy2_peace.png','buddy2_inhale.png','buddy2_exhale.png','buddy2_surprised.png','buddy2_laugh.png','buddy2_celebrate.png'];
-  const rng=options.rng??Math.random;
-  reactionPair=[one[Math.floor(Math.min(.999999,rng())*one.length)],two[Math.floor(Math.min(.999999,rng())*two.length)]];
- };
- chooseReactions();
+ let previousHold=[];
  const timers=new Set();const reduced=!!view.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
  const later=(fn,ms)=>{if(dead)return;const id=view.setTimeout?.(()=>{timers.delete(id);if(!dead)fn();},ms);if(id!==undefined)timers.add(id);else fn();};
  const clear=()=>{for(const id of timers)view.clearTimeout?.(id);timers.clear();};
  root.stopAnimation=()=>{dead=true;clear();};
- root.getPresentationState=()=>({phase,stopped,lineIndex,mode:state.mode,feature:state.lastFeature,lastWin:state.lastWin,winCount:state.lastWins.length,respins:state.respins,freeLeft:state.freeLeft,qaMenu,summary:sessionSummary,collectSmokeEvent:state.collectSmokeEvent,reactionPair:[...reactionPair],reactionSpins,holdShown:previousHold.length});
+ root.getPresentationState=()=>({phase,stopped,lineIndex,mode:state.mode,feature:state.lastFeature,lastWin:state.lastWin,winCount:state.lastWins.length,respins:state.respins,freeLeft:state.freeLeft,qaMenu,summary:sessionSummary,collectSmokeEvent:state.collectSmokeEvent,holdShown:previousHold.length});
  root.getGameState=()=>state;
  const layout=()=>{
   if(dead)return;root.replaceChildren();
   const screen=make(doc,'div','bb-screen'+(state.mode==='hold'?' bb-hold':'')+(state.mode==='free'?' bb-free':''));
   screen.style.setProperty('--bb-wallpaper','url("'+asset('backgrounds',state.mode==='hold'||state.mode==='free'?'bestbuds-bg-night-roadtrip.png':'bestbuds-bg-desert-sunset.png')+'")');
   const header=make(doc,'header','bb-header');
-  header.append(sprite(doc,'characters',reactionPair[0],'Buddy 1 reaction','bb-buddy bb-buddy-one'));
   header.append(sprite(doc,'ui','bestbuds-logo.png','Best Buds: Hotbox Road Trip','bb-title-logo'));
-  header.append(sprite(doc,'characters',reactionPair[1],'Buddy 2 reaction','bb-buddy bb-buddy-two'));
   screen.append(header);
   const frame=make(doc,'div','bb-frame');
   const info=make(doc,'div','bb-topline');
@@ -259,10 +245,6 @@ export function createBestBudsPractice(doc=globalThis.document,options={}){
   if(dead||phase!=='idle'||sessionSummary!==null||modal)return;
   if(state.mode==='base'&&state.balance<state.bet)return;
   clear();qaMenu=false;
-  // A pair of randomly selected portraits persists across exactly three
-  // player-initiated spins; rendering and skipping never reroll reactions.
-  if(reactionSpins===3){chooseReactions();reactionSpins=0;}
-  reactionSpins++;
   // QA hold variants use a forced outcome on the FIRST bonus respin only.
   const force=state.qa;
   const before=state;

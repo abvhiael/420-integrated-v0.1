@@ -129,7 +129,7 @@ try{
    'Winning number should fit inside the illustration and not cover CLICK TO CONTINUE');
   assert.ok(completion.number.top>=completion.total.top-2&&completion.units.bottom<=completion.total.bottom+2,
    'Number and units must fit entirely inside the plaque');
-  assert.match(completion.color,/rgb\\(255, 220, 117\\)/,'The amount should be styled in matching gold');
+  assert.equal(completion.color,'rgb(255, 220, 117)','The amount should be styled in matching gold');
   assert.equal(completion.background,'rgba(0, 0, 0, 0)','Dynamic win must not cover the illustration with a separate panel');
   await page.screenshot({path:'qualification/sin-city/'+name+'-free-complete.png',fullPage:true});
   await page.evaluate(()=>document.querySelector('.sc-free-complete')?.remove());

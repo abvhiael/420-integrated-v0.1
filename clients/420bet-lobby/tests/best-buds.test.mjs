@@ -467,7 +467,7 @@ test('INFO and right paytable explain the new distinct WILD artwork',()=>{
  assert.ok(!labels.includes('BUDDY 1 WILD')&&!labels.includes('BUDDY 2 WILD'));
  const wild=root.querySelector('.bb-wild-guide img');
  assert.ok(wild);
- assert.match(wild.getAttribute('src'),/sym_wild\\.svg$/);
+ assert.match(wild.getAttribute('src'),/sym_wild\.svg$/);
  const info=[...root.querySelectorAll('button')].find(b=>b.textContent==='INFO / PAYTABLE');
  info.dispatchEvent(new window.Event('click',{bubbles:true}));
  assert.match(root.querySelector('.bb-modal').textContent,/Only the green leaf WILD substitutes/);

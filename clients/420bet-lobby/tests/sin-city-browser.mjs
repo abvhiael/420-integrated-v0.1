@@ -26,6 +26,23 @@ try{
    assert.ok(col[3].bottom<=initial.reels.bottom+4,'Fourth row must be fully visible, not cropped');
   }
   assert.ok(initial.reels.w>200&&initial.reels.h>150,'Reels must be visible');
+  const payout=await page.evaluate(()=>{
+   const panel=document.querySelector('.sc-play-area .sc-ways-side');
+   const reel=document.querySelector('.sc-reels');
+   const box=node=>{const r=node.getBoundingClientRect();return {x:r.x,y:r.y,right:r.right,bottom:r.bottom,w:r.width,h:r.height};};
+   return {side:panel?box(panel):null,reel:box(reel),tiers:panel?.querySelectorAll('.sc-ways-tier:not(.sc-ways-tier-head)').length,heading:panel?.querySelector('.sc-ways-heading')?.textContent};
+  });
+  assert.ok(payout.side,'The paytable must be visible without opening INFO');
+  assert.equal(payout.tiers,17,'Every paying symbol must have a live paytable row');
+  assert.equal(payout.heading,'GAME PAYTABLE');
+  if(name==='desktop'){
+   assert.ok(payout.side.x>=payout.reel.right+4,'Paytable must sit RIGHT of reels');
+   assert.ok(payout.side.w>=180,'Paytable must be readable');
+  }else{
+   assert.ok(payout.side.y>=payout.reel.bottom,'Paytable must stack BELOW reels on narrow screens');
+  }
+  assert.ok(payout.reel.w>200,'Adding paytable must not collapse reel width');
+
   assert.ok(initial.bobby.w>80&&initial.bobby.h>(name==='mobile'?90:140),'Bobby character panel must be visible');
   assert.ok(initial.logo.w>(name==='desktop'?370:100),'Title must be rendered large');
   if(name==='desktop')assert.ok(initial.portrait.w>=300,'Bobby must be the large dominant character illustration');

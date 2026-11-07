@@ -144,17 +144,17 @@ test('Cowboy desktop layout puts logo, paytable and reel board inside one left-a
 });
 
 
-test('Cowboy reel stage and symbol cells are transparent while left paytable and bonus panels stay opaque',()=>{
- const marker='/* Transparent Cowboy play surface.';
- const start=css.lastIndexOf(marker);
- assert(start>=0,'final transparency overrides must exist');
+test('Cowboy cabinet remains transparent but reel board, cells and information panels are opaque',()=>{
+ const start=css.lastIndexOf('/* Cowboy cabinet stays transparent');
+ assert(start>=0,'final paint overrides must exist');
  const live=css.slice(start);
- for(const name of ['cc-stage','cc-middle','cc-symbol-grid','cc-left-rail','cc-sidebar-brand']){
-  assert(live.includes('.cc-'+name),'missing transparent '+name);
+ for(const name of ['cc-stage','cc-middle','cc-left-rail','cc-sidebar-brand']){
+  assert(live.includes('.cc-'+name),'missing transparent cabinet part '+name);
  }
  assert.match(live,/\.cc-sidebar-brand\{\s*background:transparent;/);
- assert.match(live,/\.cc-symbol-grid > \.cc-cell,[\s\S]*?background:transparent;/);
- assert.match(live,/\.cc-cell\.cc-winning\{\s*background:rgba\(48,123,54,\.22\)/);
+ assert.match(live,/\.cc-symbol-grid\{\s*background:#0c150e;/);
+ assert.match(live,/\.cc-symbol-grid > \.cc-cell,[\s\S]*?background:#152019;/);
+ assert.match(live,/\.cc-cell\.cc-winning\{\s*background:#124a22;/);
  assert.match(live,/\.cc-left-rail \.cc-paytable,[\s\S]*?\.cc-left-rail \.cc-sidebar-features \.cc-panel\{\s*background:#25180f;/);
  const {document}=parseHTML('<html><body></body></html>');
  const root=createCannabisCowboyShell(document);

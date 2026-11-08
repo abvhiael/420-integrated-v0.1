@@ -2,7 +2,7 @@ import {readFileSync} from 'node:fs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {parseHTML} from 'linkedom';
-import {LINES,ART,JARS,PAY,BASE_POOL,FREE_POOL,FREE_UPGRADES,spinBoard,evaluate,createRacketsTrashStash,MAX_WIN} from '../src/rackets-trash-stash.js';
+import {LINES,ART,JARS,PAY,BASE_POOL,FREE_POOL,FREE_UPGRADES,spinBoard,evaluate,createRacketsTrashStash,MAX_WIN,awardWildRetriggers,WILDS_PER_RETRIGGER,SPINS_PER_RETRIGGER,MAX_RETRIGGER_SPINS,MAX_RETRIGGERS} from '../src/rackets-trash-stash.js';
 
 test('Racket has 20 valid complete payline paths and all uploaded reel art',()=>{
  assert.equal(LINES.length,20);
@@ -67,7 +67,7 @@ test('Bonus Tests exposes all seven feature scenarios and three bonus symbols st
  const tap=(label)=>{const b=[...root.querySelectorAll('button')].find(x=>x.textContent.trim()===label);assert.ok(b,label);b.dispatchEvent(new window.Event('click',{bubbles:true}));};
  const initial=root.getGameState().balance;
  tap('BONUS TESTS');
- assert.equal(root.querySelectorAll('.rts-test-choice').length,7);
+ assert.equal(root.querySelectorAll('.rts-test-choice').length,9);
  tap('3 BONUS · 10 FREE SPINS');
  const state=root.getGameState();
  assert.equal(state.freeLeft,10);
@@ -83,7 +83,7 @@ test('Bonus Tests can select multiplier tiers and prize-collection demo',()=>{
  tap('BONUS TESTS');tap('RETRIGGER 3 · ×10');
  assert.equal(root.getGameState().multiplier,10);
  assert.equal(root.getGameState().retriggers,3);
- assert.equal(root.getGameState().freeLeft,10);
+ assert.equal(root.getGameState().freeLeft,5);
  root.stopAnimation();
  const root2=createRacketsTrashStash(document,{rng:()=>.35});
  const tap2=(label)=>{const b=[...root2.querySelectorAll('button')].find(x=>x.textContent.trim()===label);assert.ok(b,label);b.dispatchEvent(new window.Event('click',{bubbles:true}));};
@@ -159,4 +159,38 @@ test('Recalibrated ordinary paytable preserves premium and low tiers',()=>{
  assert.deepEqual(PAY.A,[1.75,4.2,17.5]);
  assert.ok(PAY.RACKET[0]>PAY.TRASH[0]);
  assert.ok(PAY.TRASH[0]>PAY.A[0]);
+});
+
+test('Every fifth winning Wild awards five more spins, never more than 25 extra',()=>{
+ assert.equal(WILDS_PER_RETRIGGER,5);
+ assert.equal(SPINS_PER_RETRIGGER,5);
+ assert.equal(MAX_RETRIGGER_SPINS,25);
+ assert.equal(MAX_RETRIGGERS,5);
+ assert.deepEqual(awardWildRetriggers(0,0,4),{progress:4,retriggers:0,awardedSpins:0,multiplier:1});
+ assert.deepEqual(awardWildRetriggers(4,0,1),{progress:0,retriggers:1,awardedSpins:5,multiplier:2});
+ assert.deepEqual(awardWildRetriggers(3,1,7),{progress:0,retriggers:3,awardedSpins:10,multiplier:10});
+ assert.deepEqual(awardWildRetriggers(0,3,10),{progress:0,retriggers:5,awardedSpins:10,multiplier:10});
+ assert.deepEqual(awardWildRetriggers(0,4,55),{progress:0,retriggers:5,awardedSpins:5,multiplier:10});
+ assert.deepEqual(awardWildRetriggers(0,5,55),{progress:0,retriggers:5,awardedSpins:0,multiplier:10});
+ let progress=0,retriggers=0,awarded=0;
+ for(let i=0;i<100;i++){
+  const result=awardWildRetriggers(progress,retriggers,1);
+  progress=result.progress;retriggers=result.retriggers;awarded+=result.awardedSpins;
+ }
+ assert.equal(awarded,25);
+ assert.equal(retriggers,5);
+});
+test('Bonus Tests includes fourth and fifth retrigger tier, both at 5 spins and ×10',()=>{
+ const {document,window}=parseHTML('<html><body></body></html>');
+ for(const [label,tier] of [['RETRIGGER 4 · ×10',4],['RETRIGGER 5 · ×10',5]]){
+  const root=createRacketsTrashStash(document,{rng:()=>.35});
+  const tap=(name)=>{const b=[...root.querySelectorAll('button')].find(x=>x.textContent.trim()===name);assert.ok(b,name);b.dispatchEvent(new window.Event('click',{bubbles:true}));};
+  tap('BONUS TESTS');tap(label);
+  const state=root.getGameState();
+  assert.equal(state.retriggers,tier);
+  assert.equal(state.multiplier,10);
+  assert.equal(state.freeLeft,5);
+  assert.match(root.textContent,/WILD PROGRESS 0\/5/);
+  root.stopAnimation();
+ }
 });

@@ -16,6 +16,22 @@ async function fetchBudgetedLines({request,env}){
  }catch{return apiError(503,'budgeted_odds_unavailable');}
 }
 const BASE='/api/420bet/sportsbook/';
+export const SPORTSBOOK_WORKER_BUILD='sportsbook-worker-diagnostics-2026-11-08';
+function diagnostics(env){
+ // No outbound API calls, secret values, user identifiers or usage credits.
+ return new Response(JSON.stringify({
+  service:'420bet-sportsbook-worker',
+  revision:SPORTSBOOK_WORKER_BUILD,
+  workerRoutes:true,
+  oddsApiSecretConfigured:typeof env?.THE_ODDS_API_KEY==='string'&&env.THE_ODDS_API_KEY.length>=16,
+  oddsBudgetBindingConfigured:!!env?.SPORTSBOOK_ODDS_BUDGET,
+  assetsBindingConfigured:typeof env?.ASSETS?.fetch==='function',
+  marqueePath:BASE+'marquee',linesPath:BASE+'lines'
+ }),{status:200,headers:{
+  'Content-Type':'application/json; charset=utf-8',
+  'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'
+ }});
+}
 const apiError=(status,error)=>new Response(JSON.stringify({error}),{
  status,headers:{'Content-Type':'application/json; charset=utf-8',
  'Cache-Control':'no-store','X-Content-Type-Options':'nosniff',
@@ -24,6 +40,10 @@ const apiError=(status,error)=>new Response(JSON.stringify({error}),{
 export async function handle420BetWorker(request,env,ctx,{marqueeHandler=marquee,linesHandler=fetchBudgetedLines}={}){
  const url=new URL(request.url);
  if(url.pathname.startsWith(BASE)){
+  if(url.pathname===BASE+'status'){
+   if(request.method!=='GET'||url.search)return apiError(405,'invalid_status_request');
+   return diagnostics(env);
+  }
   if(url.pathname===BASE+'marquee')
    return marqueeHandler({request,env,waitUntil:ctx?.waitUntil?.bind(ctx)});
   if(url.pathname===BASE+'lines')

@@ -82,3 +82,36 @@ test('Bonus Tests can select multiplier tiers and prize-collection demo',()=>{
  assert.equal(root2.getGameState().freeLeft,10);
  root2.stopAnimation();
 });
+
+test('Staggered reel stops reveal the new outcome immediately, with no final board jump',()=>{
+ const {document,window}=parseHTML('<html><body></body></html>');
+ const jobs=new Map();let serial=0;
+ const clock={setTimeout(fn){const id=++serial;jobs.set(id,fn);return id;},clearTimeout(id){jobs.delete(id);}};
+ const tick=()=>{const [id,fn]=jobs.entries().next().value??[];assert.ok(fn,'expected queued reel stop');jobs.delete(id);fn();};
+ let draw=0;
+ const rng=()=>{draw++;return draw<=15?0:.91;};
+ const root=createRacketsTrashStash(document,{rng,clock});
+ const before=root.getGameState().display.map(reel=>[...reel]);
+ const spin=[...root.querySelectorAll('button')].find(b=>b.textContent==='SPIN');
+ assert.ok(spin);spin.dispatchEvent(new window.Event('click',{bubbles:true}));
+ let state=root.getGameState();
+ assert.equal(state.phase,'spinning');
+ const target=state.pendingBoard.map(reel=>[...reel]);
+ assert.notDeepEqual(target,before);
+ for(let r=0;r<4;r++){
+  tick();state=root.getGameState();
+  assert.equal(state.stopped,r+1);
+  assert.equal(state.phase,'spinning');
+  assert.deepEqual(state.display.slice(0,r+1),target.slice(0,r+1),'stopped reels must show their target');
+  assert.deepEqual(state.display.slice(r+1),before.slice(r+1),'still-spinning reels remain obscured');
+  assert.equal(root.querySelectorAll('.rts-spinning').length,4-r);
+  assert.equal(root.querySelector('.rts-reel:not(.rts-spinning) img').getAttribute('src').endsWith(ART[target[0][0]]),true);
+ }
+ tick();state=root.getGameState();
+ assert.equal(state.stopped,5);
+ assert.deepEqual(state.board,target);
+ assert.deepEqual(state.display,target);
+ assert.equal(state.pendingBoard,null);
+ assert.equal(root.querySelectorAll('.rts-spinning').length,0);
+ root.stopAnimation();
+});

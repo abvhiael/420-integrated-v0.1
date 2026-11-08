@@ -185,6 +185,7 @@ export function createRacketsTrashStash(doc=globalThis.document,options={}){
    el(doc,'p','','3 BONUS bags = 10 Free Spins; 4 = 15; 5 = 20. One per reel maximum.'),
    el(doc,'p','','During Free Spins, every fourth Wild used in a winning line adds 10 spins (maximum three retriggers). Multipliers advance ×2 → ×3 → ×10.'),
    el(doc,'p','','Every winning Wild also collects all prize jars visible on reels 2–5. Blue: ×0.5 / ×0.75 · Purple: ×1 / ×1.5 · Red: ×2.5 / ×5.'),
+   el(doc,'p','','FREE SPINS UPGRADES: A → Trash Can, K → Pizza, Q → Lighter, J → Seeds, 10 → Cooler, 9 → Mushrooms. Six Wild entries in base spins; three during Free Spins.'),
    el(doc,'p','',freeLeft?'FEATURE WIN '+money(freeTotal)+' · WILD PROGRESS '+wildProgress+'/4':'3+ consecutive prize jars on a line pay their summed values × total bet.'));
   side.append(payouts,bonus);layout.append(game,side);root.append(layout,el(doc,'p','rts-disclaimer','Practice game only. RTP not yet calibrated or certified; credits have no cash value.'));
  }

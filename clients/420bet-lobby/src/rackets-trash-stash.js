@@ -124,7 +124,7 @@ export function createRacketsTrashStash(doc=globalThis.document,options={}){
    for(let r=0;r<setup.trigger;r++)board[r][1]='BONUS';display=board;
    result={wins:[],total:0,collection:0};lastMessage='TEST · '+setup.trigger+' BONUS BAGS → '+freeLeft+' FREE SPINS';
   }else{result={wins:[],total:0,collection:0};lastMessage=setup.collection?'TEST · WILD COLLECTS PRIZE JARS':'TEST · RETRIGGER '+retriggers+' · MULTIPLIER ×'+multiplier;}
-  render();
+  phase='bonus-start';render();
  }
  function bonusTestPanel(){
   const panel=el(doc,'section','rts-test-panel');panel.append(el(doc,'h3','','BONUS TESTS · PRACTICE ONLY'));

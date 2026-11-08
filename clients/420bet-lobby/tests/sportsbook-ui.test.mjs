@@ -33,7 +33,7 @@ test('Unconnected daily feed fails closed; no invented matches, odds, times or b
  const {document}=parseHTML('<html><body></body></html>');
  const view=createSportsbookView(document,{fetcher:async()=>({ok:false}),autoRefresh:false,clock:()=>now});
  await view.ready;
- assert.match(view.querySelector('.sb-board-empty').textContent,/verified sports feed is connected/i);
+ assert.match(view.querySelector('.sb-board-empty').textContent,/Sportsbook marquee API returned an error/i);
  assert.equal(view.querySelectorAll('.sb-matchup').length,0);
  assert.equal(view.querySelectorAll('[data-wager]').length,0);
  assert.equal(view.querySelectorAll('.sb-chalkboard button').length,0);

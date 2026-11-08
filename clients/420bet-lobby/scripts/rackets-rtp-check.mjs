@@ -1,6 +1,6 @@
 // Reproducible practice-mode Monte Carlo using the actual Slot #7 engine.
 // Run from clients/420bet-lobby: node scripts/rackets-rtp-check.mjs 1000000
-import {spinBoard,evaluate,MAX_WIN} from '../src/rackets-trash-stash.js';
+import {spinBoard,evaluate,MAX_WIN,awardWildRetriggers,MAX_RETRIGGER_SPINS} from '../src/rackets-trash-stash.js';
 const count=Number(process.argv[2]??1000000);
 if(!Number.isSafeInteger(count)||count<1000||count>10000000)throw new Error('Specify between 1,000 and 10,000,000 paid spins');
 let seed=0x7bda420;
@@ -22,12 +22,11 @@ for(let i=0;i<count;i++){
   result.freeOrdinary+=freeWins.ordinary;result.freePrizes+=freeWins.prizes;
   result.wildCollection+=f.collection;freeTotal+=f.total;session+=f.total;
   result.freeSpins++;result.freeMaxSpin=Math.max(result.freeMaxSpin,f.total);
-  left--;wildProgress+=f.qualifyingWilds;
-  while(wildProgress>=4&&retriggers<3){
-   wildProgress-=4;retriggers++;result.retriggers++;
-   left+=10;multiplier=[1,2,3,10][retriggers];
-  }
-  if(retriggers===3)wildProgress=Math.min(wildProgress,3);
+  left--;
+  const next=awardWildRetriggers(wildProgress,retriggers,f.qualifyingWilds);
+  wildProgress=next.progress;
+  result.retriggers+=next.retriggers-retriggers;
+  retriggers=next.retriggers;multiplier=next.multiplier;left+=next.awardedSpins;
  }
  result.maxSession=Math.max(session,result.maxSession);
 }
@@ -35,6 +34,6 @@ const pct=n=>Number((100*n/count).toFixed(4));
 console.log(JSON.stringify({
  sample:{paidSpins:count,seed:'0x7bda420',bonuses:result.bonuses,freeSpins:result.freeSpins,retriggers:result.retriggers,bonusByScatter:result.bonusByScatter},
  rtp:{baseOrdinary:pct(result.baseOrdinary),basePrize:pct(result.basePrizes),freeOrdinary:pct(result.freeOrdinary),freePrize:pct(result.freePrizes),wildCollection:pct(result.wildCollection),overall:pct(baseTotal+freeTotal)},
- extremes:{maxBaseSpin:result.baseMaxSpin,maxFreeSpin:result.freeMaxSpin,maxFeature:result.maxSession,winCap:MAX_WIN},
+ extremes:{maxBaseSpin:result.baseMaxSpin,maxFreeSpin:result.freeMaxSpin,maxFeature:result.maxSession,winCap:MAX_WIN,maxAddedFreeSpins:MAX_RETRIGGER_SPINS},
  note:'Simulation only, not certified theoretical RTP. Bonus Tests are excluded.'
 },null,2));

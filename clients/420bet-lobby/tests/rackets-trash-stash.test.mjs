@@ -2,7 +2,7 @@ import {readFileSync} from 'node:fs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {parseHTML} from 'linkedom';
-import {LINES,ART,JARS,PAY,spinBoard,evaluate,createRacketsTrashStash,MAX_WIN} from '../src/rackets-trash-stash.js';
+import {LINES,ART,JARS,PAY,BASE_POOL,FREE_POOL,FREE_UPGRADES,spinBoard,evaluate,createRacketsTrashStash,MAX_WIN} from '../src/rackets-trash-stash.js';
 
 test('Racket has 20 valid complete payline paths and all uploaded reel art',()=>{
  assert.equal(LINES.length,20);
@@ -10,10 +10,19 @@ test('Racket has 20 valid complete payline paths and all uploaded reel art',()=>
  for(const key of ['RACKET','WILD','BONUS','BLUE05','BLUE075','PURPLE1','PURPLE15','RED25','RED5','TRASH','PIZZA','LIGHTER','GLOVE','SEEDS','BINOCULARS','COOLER','MUSHROOM','A','K','Q','J','TEN','NINE'])assert.ok(ART[key],key);
  assert.deepEqual(Object.values(JARS),[.5,.75,1,1.5,2.5,5]);
 });
-test('Base spins keep bonus symbols to at most one per reel and have no wilds',()=>{
+test('Base has six Wild weights, Free Spins have three, and Bonus is limited to one per reel',()=>{
+ assert.equal(BASE_POOL.filter(x=>x==='WILD').length,6);
+ assert.equal(FREE_POOL.filter(x=>x==='WILD').length,3);
+ assert.equal(BASE_POOL.filter(x=>x==='BONUS').length,1);
+ assert.equal(FREE_POOL.filter(x=>x==='BONUS').length,0);
  const board=spinBoard('base',()=>.999);
  assert.equal(board.length,5);
- for(const reel of board){assert.equal(reel.length,3);assert.ok(reel.filter(x=>x==='BONUS').length<=1);assert.ok(!reel.includes('WILD'));}
+ for(const reel of board){assert.equal(reel.length,3);assert.ok(reel.filter(x=>x==='BONUS').length<=1);assert.ok(reel.every(x=>x==='WILD'));}
+ const wildBoard=Array.from({length:5},()=>['TRASH','PIZZA','SEEDS']);
+ wildBoard[0][0]='WILD';wildBoard[1][0]='RACKET';wildBoard[2][0]='RACKET';
+ const win=evaluate(wildBoard,1,'base');
+ assert.ok(win.wins.some(w=>w.kind==='match'&&w.name==='RACKET'));
+ assert.equal(win.collection,0,'base Wilds substitute but never collect jars');
 });
 test('Three separate bonus reels award ten spins, and jar prizes pay their sum',()=>{
  const board=Array.from({length:5},()=>['A','K','Q']);
@@ -130,4 +139,24 @@ test('Approved Racket logo replaces the text title and the moonlit wallpaper is 
  assert.equal(root.querySelectorAll('.rts-reel').length,5);
  assert.match(root.textContent,/BONUS TRIGGERS/);
  root.stopAnimation();
+});
+
+test('Every low-paying symbol is replaced by its specified premium symbol in Free Spins',()=>{
+ assert.deepEqual(FREE_UPGRADES,{A:'TRASH',K:'PIZZA',Q:'LIGHTER',J:'SEEDS',TEN:'COOLER',NINE:'MUSHROOM'});
+ for(const low of Object.keys(FREE_UPGRADES))assert.equal(FREE_POOL.includes(low),false,low+' must never appear during Free Spins');
+ for(const upgraded of Object.values(FREE_UPGRADES))assert.ok(FREE_POOL.includes(upgraded));
+ assert.equal(FREE_POOL.length,48);
+ assert.equal(BASE_POOL.length,54);
+ assert.equal(BASE_POOL.filter(x=>x.startsWith('BLUE')).length,4);
+ assert.equal(BASE_POOL.filter(x=>x==='RED5').length,1);
+ const freeSpin=spinBoard('free',()=>.7);
+ assert.ok(freeSpin.flat().every(x=>!Object.hasOwn(FREE_UPGRADES,x)));
+});
+
+test('Recalibrated ordinary paytable preserves premium and low tiers',()=>{
+ assert.deepEqual(PAY.RACKET,[28,140,700]);
+ assert.deepEqual(PAY.TRASH,[11.2,35,168]);
+ assert.deepEqual(PAY.A,[1.75,4.2,17.5]);
+ assert.ok(PAY.RACKET[0]>PAY.TRASH[0]);
+ assert.ok(PAY.TRASH[0]>PAY.A[0]);
 });

@@ -33,7 +33,7 @@ test('Unconnected daily feed fails closed; no invented matches, odds, times or b
  const {document}=parseHTML('<html><body></body></html>');
  const view=createSportsbookView(document,{fetcher:async()=>({ok:false}),autoRefresh:false,clock:()=>now});
  await view.ready;
- assert.match(view.querySelector('.sb-board-empty').textContent,/verified sports feed is connected/i);
+ assert.match(view.querySelector('.sb-board-empty').textContent,/Sportsbook marquee API returned an error/i);
  assert.equal(view.querySelectorAll('.sb-matchup').length,0);
  assert.equal(view.querySelectorAll('[data-wager]').length,0);
  assert.equal(view.querySelectorAll('.sb-chalkboard button').length,0);
@@ -91,4 +91,27 @@ test('Sportsbook launcher is independent of fantasy, casino games and URLs',()=>
  assert(css.includes('.sb-chalkboard'));
  assert(css.includes('.sb-menu-action'));
  assert(css.includes('@media(max-width:720px)'));
+});
+
+test('HTTP failures explain the actual failing sportsbook layer instead of generic wait messages',async()=>{
+ const {document}=parseHTML('<html><body></body></html>');
+ const unavailable=async()=>({ok:false,status:503,
+  headers:{get:()=> 'application/json'},
+  json:async()=>({error:'sports_feed_not_configured'})});
+ const home=createSportsbookView(document,{fetcher:unavailable,autoRefresh:false});
+ await home.ready;
+ assert.match(home.querySelector('.sb-board-empty').textContent,/secret is missing/i);
+ home.stopAnimation();
+ const lineError=async()=>({ok:false,status:503,
+  headers:{get:()=> 'application/json'},
+  json:async()=>({error:'odds_budget_not_configured'})});
+ const lines=createSportsbookView(document,{tab:'game-lines',fetcher:lineError,autoRefresh:false});
+ await lines.ready;
+ assert.match(lines.querySelector('.sb-lines-empty').textContent,/budget binding/i);
+ lines.stopAnimation();
+ const html=async()=>({ok:true,status:200,headers:{get:()=> 'text/html'}});
+ const unbundled=createSportsbookView(document,{fetcher:html,autoRefresh:false});
+ await unbundled.ready;
+ assert.match(unbundled.querySelector('.sb-board-empty').textContent,/Worker route may not be deployed/i);
+ unbundled.stopAnimation();
 });

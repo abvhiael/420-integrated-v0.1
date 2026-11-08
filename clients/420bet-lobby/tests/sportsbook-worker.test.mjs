@@ -97,3 +97,22 @@ test('Production Worker exposes singleton odds Durable Object and routes request
  const r=await worker.fetch(req('/api/420bet/sportsbook/lines'),ctx);
  assert.equal(r.status,200);assert.equal((await r.json()).source,'test');assert.equal(calls,1);
 });
+
+test('Zero-credit production diagnostic reports routes and binding presence without disclosing secret',async()=>{
+ const secret='private-key-do-not-print';
+ const res=await worker.fetch(req('/api/420bet/sportsbook/status'),{
+  THE_ODDS_API_KEY:secret,
+  SPORTSBOOK_ODDS_BUDGET:{get:()=>{}},
+  ASSETS:{fetch:async()=>new Response('asset')}
+ });
+ assert.equal(res.status,200);
+ assert.equal(res.headers.get('Cache-Control'),'no-store');
+ const body=await res.text(),json=JSON.parse(body);
+ assert.equal(json.workerRoutes,true);
+ assert.equal(json.oddsApiSecretConfigured,true);
+ assert.equal(json.oddsBudgetBindingConfigured,true);
+ assert.equal(json.assetsBindingConfigured,true);
+ assert.match(json.revision,/2026-11-08/);
+ assert(!body.includes(secret));
+ assert(!body.includes('private-key'));
+});

@@ -1,6 +1,9 @@
 // Racket's Trash Stash · Slot #7 · practice credits only (no wallet activity).
 export const ROOT='/assets/420bet/slots/rackets-trash-stash/';
 export const ROWS=3,REELS=5,MAX_WIN=5000;
+// Free Spins pay 4x their underlying awards, in addition to the existing retrigger multiplier.
+// The ordinary-symbol paytable is recalibrated by 8% in both modes.
+export const FREE_SPINS_AWARD_BOOST=4;
 export const WILDS_PER_RETRIGGER=5,SPINS_PER_RETRIGGER=5,MAX_RETRIGGER_SPINS=25;
 export const MAX_RETRIGGERS=MAX_RETRIGGER_SPINS/SPINS_PER_RETRIGGER;
 export function awardWildRetriggers(progress,retriggers,newWilds){
@@ -31,7 +34,7 @@ MUSHROOM:'symbols/symbol_mushrooms.png',A:'symbols/symbol_a.png',
 K:'symbols/symbol_k.png',Q:'symbols/symbol_q.png',J:'symbols/symbol_j.png',
 TEN:'symbols/symbol_10.png',NINE:'symbols/symbol_9.png'
 });
-export const PAY=Object.freeze({"RACKET":[28,140,700],"TRASH":[11.2,35,168],"PIZZA":[9.8,28,126],"LIGHTER":[8.4,25.2,112],"GLOVE":[7,22.4,98],"SEEDS":[6.3,19.6,84],"BINOCULARS":[5.6,16.8,70],"COOLER":[4.9,14,56],"MUSHROOM":[4.2,11.2,42],"A":[1.75,4.2,17.5],"K":[1.75,4.2,17.5],"Q":[1.4,3.5,14],"J":[1.4,3.5,14],"TEN":[1.05,2.8,10.5],"NINE":[1.05,2.8,10.5]});
+export const PAY=Object.freeze({"RACKET":[30.24,151.2,756],"TRASH":[12.096,37.8,181.44],"PIZZA":[10.584,30.24,136.08],"LIGHTER":[9.072,27.216,120.96],"GLOVE":[7.56,24.192,105.84],"SEEDS":[6.804,21.168,90.72],"BINOCULARS":[6.048,18.144,75.6],"COOLER":[5.292,15.12,60.48],"MUSHROOM":[4.536,12.096,45.36],"A":[1.89,4.536,18.9],"K":[1.89,4.536,18.9],"Q":[1.512,3.78,15.12],"J":[1.512,3.78,15.12],"TEN":[1.134,3.024,11.34],"NINE":[1.134,3.024,11.34]});
 // Frequency-weighted draw pools. Six WILD entries in base (twice the three in Free Spins).
 // Extra blue jars tune base prize return; the free pool retains its original six jars.
 const COMMON=['RACKET','TRASH','PIZZA','LIGHTER','GLOVE','SEEDS','BINOCULARS','COOLER','MUSHROOM','A','K','Q','J','TEN','NINE',
@@ -55,13 +58,14 @@ export function spinBoard(mode='base',rng=Math.random){
  return grid;
 }
 export function evaluate(board,bet=1,mode='base',multiplier=1){
+ const awardMultiplier=multiplier*(mode==='free'?FREE_SPINS_AWARD_BOOST:1);
  const lineBet=bet/LINES.length,wins=[];let qualifyingWilds=new Set();
  LINES.forEach((rows,i)=>{
   const symbols=rows.map((y,r)=>board[r][y]);
   // Prize jars pay their summed total on a line starting at reel 1.
   let jars=0,sum=0;
   while(jars<REELS&&Object.hasOwn(JARS,symbols[jars]))sum+=JARS[symbols[jars++]];
-  if(jars>=3)wins.push({line:i+1,rows,amount:sum*bet*multiplier,kind:'prize',length:jars});
+  if(jars>=3)wins.push({line:i+1,rows,amount:sum*bet*awardMultiplier,kind:'prize',length:jars});
   if(!PAY[symbols[0]]&&!['WILD'].includes(symbols[0]))return;
   const candidates=symbols[0]==='WILD'?Object.keys(PAY):[symbols[0]];
   let best=null;
@@ -72,7 +76,7 @@ export function evaluate(board,bet=1,mode='base',multiplier=1){
     length++;
    }
    if(length<3)continue;
-   const amount=PAY[name][length-3]*lineBet*multiplier;
+   const amount=PAY[name][length-3]*lineBet*awardMultiplier;
    if(!best||best.amount<amount)best={line:i+1,rows,length,kind:'match',name,amount,wildPositions};
   }
   if(best){wins.push(best);best.wildPositions.forEach(r=>qualifyingWilds.add(r+':'+rows[r]));}
@@ -81,7 +85,7 @@ export function evaluate(board,bet=1,mode='base',multiplier=1){
  if(mode==='free'&&qualifyingWilds.size){
   let prizeSum=0;
   for(let r=1;r<REELS;r++)for(let y=0;y<ROWS;y++)prizeSum+=JARS[board[r][y]]??0;
-  collection=prizeSum*bet*qualifyingWilds.size*multiplier;
+  collection=prizeSum*bet*qualifyingWilds.size*awardMultiplier;
  }
  const total=Math.min(MAX_WIN*bet,wins.reduce((s,w)=>s+w.amount,0)+collection);
  const bonusReels=board.filter(reel=>reel.includes('BONUS')).length;
@@ -195,7 +199,7 @@ export function createRacketsTrashStash(doc=globalThis.document,options={}){
   bonus.append(el(doc,'h2','','BONUS TRIGGERS'),
    el(doc,'p','','3 BONUS bags = 10 Free Spins; 4 = 15; 5 = 20. One per reel maximum.'),
    el(doc,'p','','During Free Spins, every 5 Wilds used in winning lines award 5 extra Free Spins, up to 25 extra spins (5 retriggers). Multipliers advance ×2 → ×3 → ×10, remaining at ×10 for retriggers 4 and 5.'),
-   el(doc,'p','','Every winning Wild also collects all prize jars visible on reels 2–5. Blue: ×0.5 / ×0.75 · Purple: ×1 / ×1.5 · Red: ×2.5 / ×5.'),
+   el(doc,'p','','Every winning Wild also collects all prize jars visible on reels 2–5. During Free Spins, all wins receive a ×4 Stash Boost in addition to the retrigger multiplier. Jar faces: Blue ×0.5 / ×0.75 · Purple ×1 / ×1.5 · Red ×2.5 / ×5.'),
    el(doc,'p','','FREE SPINS UPGRADES: A → Trash Can, K → Pizza, Q → Lighter, J → Seeds, 10 → Cooler, 9 → Mushrooms. Six Wild entries in base spins; three during Free Spins.'),
    el(doc,'p','',freeLeft?'FEATURE WIN '+money(freeTotal)+' · WILD PROGRESS '+wildProgress+'/5 · EXTRA SPINS '+(retriggers*5)+'/25':'3+ consecutive prize jars on a line pay their summed values × total bet.'));
   side.append(payouts,bonus);layout.append(game,side);root.append(layout,el(doc,'p','rts-disclaimer','Practice game only. RTP not yet calibrated or certified; credits have no cash value.'));
@@ -204,10 +208,10 @@ export function createRacketsTrashStash(doc=globalThis.document,options={}){
   const panel=el(doc,'section','rts-info');
   panel.append(btn(doc,'← BACK TO GAME',()=>{info=false;render();},'rts-back'),el(doc,'h2','','HOW TO PLAY · PAYLINES'));
   panel.append(el(doc,'p','','5 reels × 3 rows · 20 fixed lines · awards pay left to right on consecutive reels. Highest ordinary-symbol win per line. Total wager is split equally across 20 lines.'));
-  panel.append(el(doc,'p','','BONUS: 3/4/5 BONUS bags on separate reels award 10/15/20 free spins. Every 5 Wild symbols used in winning combinations award 5 extra spins, capped at 25 additional Free Spins per feature (5 retriggers). The multiplier becomes ×2 on retrigger 1, ×3 on retrigger 2, and ×10 on retriggers 3–5.'));
+  panel.append(el(doc,'p','','BONUS: 3/4/5 BONUS bags on separate reels award 10/15/20 free spins. Every 5 Wild symbols used in winning combinations award 5 extra spins, capped at 25 additional Free Spins per feature (5 retriggers). The multiplier becomes ×2 on retrigger 1, ×3 on retrigger 2, and ×10 on retriggers 3–5. All Free Spins also pay a separate ×4 Stash Boost on ordinary wins, prize jar lines, and Wild collection.'));
   panel.append(el(doc,'p','','Prize jars: 3 or more consecutive jars on a line pay their summed values times total bet. Six Wilds are included in the base symbol pool; three in the Free Spins pool. Wilds substitute for normal symbols but not BONUS or prize jars. During Free Spins, each qualifying winning Wild collects all visible prize jars on reels 2–5.'));
   panel.append(el(doc,'p','','FREE SPIN SYMBOL UPGRADES: A → Trash Can · K → Pizza · Q → Lighter · J → Seeds · 10 → Cooler · 9 → Mushrooms. All low-paying symbols are removed from the Free Spins reel pool.'));
-  panel.append(el(doc,'p','','Estimated simulation RTP: about 95.6% at the current practice distribution. Not a certified theoretical RTP. The feature-test buttons are excluded from paid-spin RTP.'));
+  panel.append(el(doc,'p','','Target simulation RTP: 95–96% with the current fourfold Free Spins Stash Boost. Run the RTP simulation script to measure the current build; not a certified theoretical RTP. The feature-test buttons are excluded from paid-spin RTP.'));
   panel.append(el(doc,'p','','Only practice credits are used. No real-money betting, bonus purchases, financial transactions, or certified RTP are claimed.'));
   const map=el(doc,'div','rts-payline-map');
   LINES.forEach((rows,i)=>{

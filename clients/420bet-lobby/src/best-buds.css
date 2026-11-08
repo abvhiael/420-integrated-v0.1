@@ -280,8 +280,8 @@
 .bb-reel-grid,.bb-reel,.bb-cell{min-width:0;min-height:0}
 .bb-cell{position:relative;overflow:hidden;contain:layout paint}
 .bb-cell > img{
- position:absolute;inset:2%;width:96%;height:96%;
- max-width:96%;max-height:96%;min-width:0;min-height:0;
+ position:absolute;inset:-12.5%;width:125%;height:125%;
+ max-width:125%;max-height:125%;min-width:0;min-height:0;
  display:block;object-fit:contain;object-position:center;
 }
 .bb-coin-kind{position:absolute;inset:0;min-width:0;min-height:0}
@@ -322,8 +322,8 @@
  background:radial-gradient(circle,#352044 0%,#100a1f 88%);
 }
 .bb-reel-rolling .bb-roll-tile > .bb-roll-symbol{
- position:absolute;inset:2%;width:96%;height:96%;
- max-width:96%;max-height:96%;min-height:0;min-width:0;
+ position:absolute;inset:-12.5%;width:125%;height:125%;
+ max-width:125%;max-height:125%;min-height:0;min-width:0;
  display:block;object-fit:contain;object-position:center;
  filter:blur(.6px) drop-shadow(0 2px 5px #0008);
 }

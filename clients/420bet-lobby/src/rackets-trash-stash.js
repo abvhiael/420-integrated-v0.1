@@ -77,15 +77,18 @@ export function createRacketsTrashStash(doc=globalThis.document,options={}){
  const view=doc.defaultView??globalThis,root=el(doc,'section','rts-game');
  root.dataset.practiceGame='rackets-trash-stash';
  const rng=options.rng??Math.random,reduced=view.matchMedia?.('(prefers-reduced-motion: reduce)').matches??false;
+ const schedule=options.clock?.setTimeout??((fn,ms)=>view.setTimeout?.(fn,ms));
+ const cancel=options.clock?.clearTimeout??(id=>view.clearTimeout?.(id));
  let board=spinBoard('base',rng),balance=1000,bet=1,phase='idle',info=false,autoplay=0,spins=0;
  let freeLeft=0,freeTotal=0,retriggers=0,wildProgress=0,multiplier=1,spinCount=0;
  let testOpen=false,testScenario=null; // Separate practice-only QA controls; never purchases a bonus.
  let result={wins:[],total:0,collection:0},display=board,stopped=5,winIndex=0,dead=false;
+ let pendingBoard=null; // Keep the committed outcome separate from the currently visible reels.
  const timers=new Set();let lastMessage='Practice credits only · no real wagering';
- const delay=(fn,ms)=>{if(dead)return;const id=view.setTimeout?.(()=>{timers.delete(id);if(!dead)fn();},ms);if(id!==undefined)timers.add(id);else fn();};
- const clear=()=>{for(const id of timers)view.clearTimeout?.(id);timers.clear();};
+ const delay=(fn,ms)=>{if(dead)return;const id=schedule(()=>{timers.delete(id);if(!dead)fn();},ms);if(id!==undefined)timers.add(id);else fn();};
+ const clear=()=>{for(const id of timers)cancel(id);timers.clear();};
  root.stopAnimation=()=>{dead=true;clear();};
- root.getGameState=()=>({board,balance,bet,phase,info,autoplay,spins,freeLeft,freeTotal,retriggers,wildProgress,multiplier,result,stopped,spinCount,testOpen,testScenario});
+ root.getGameState=()=>({board,balance,bet,phase,info,autoplay,spins,freeLeft,freeTotal,retriggers,wildProgress,multiplier,result,display,pendingBoard,stopped,spinCount,testOpen,testScenario});
  function startBonusTest(kind){
   if(dead||info||phase!=='idle')return;
   autoplay=0;testOpen=false;freeTotal=0;wildProgress=0;retriggers=0;multiplier=1;spinCount=0;
@@ -205,7 +208,7 @@ export function createRacketsTrashStash(doc=globalThis.document,options={}){
   if(autoplay>0){autoplay--;if(autoplay>0&&balance>=bet||autoplay>0&&freeLeft>0)delay(startSpin,250);else{autoplay=0;render();}}
  }
  function settle(next){
-  board=next;display=board;
+  board=next;display=board;pendingBoard=null;
   const inFree=freeLeft>0;
   result=evaluate(board,bet,inFree?'free':'base',inFree?multiplier:1);
   balance+=result.total;spins++;spinCount++;if(inFree){freeLeft--;freeTotal+=result.total;
@@ -236,7 +239,17 @@ export function createRacketsTrashStash(doc=globalThis.document,options={}){
    testScenario=null;
   }
   render();
-  const stop=()=>{if(dead)return;stopped++;if(stopped===5){settle(target);return;}render();delay(stop,reduced?15:220);};
+  pendingBoard=target;
+  const stop=()=>{
+   if(dead)return;
+   // Reveal the already selected outcome reel-by-reel, not the prior spin's symbols.
+   // The final settle never causes a second visual switch because all five
+   // displayed reels already match the target when it runs.
+   display=display.map((reel,r)=>r===stopped?[...target[r]]:reel);
+   stopped++;
+   if(stopped===REELS){settle(target);return;}
+   render();delay(stop,reduced?15:220);
+  };
   delay(stop,reduced?15:620);
  }
  render();return root;

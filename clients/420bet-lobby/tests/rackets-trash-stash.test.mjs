@@ -217,3 +217,53 @@ test('Free Spins Stash Boost pays 4x before the existing retrigger multiplier',(
  assert.ok(Math.abs(winTier.collection/win.collection-3)<1e-8);
  assert.equal(evaluate(collect,1,'base').collection,0);
 });
+
+test('Approved splash assets pause bonus play and show the actual accumulated feature winnings',()=>{
+ const {document,window}=parseHTML('<html><body></body></html>');
+ const queue=new Map();let sequence=0;
+ const clock={setTimeout(fn){const id=++sequence;queue.set(id,fn);return id;},clearTimeout(id){queue.delete(id);}};
+ const tick=()=>{const next=queue.entries().next().value;assert.ok(next,'Expected a queued reel or win animation');const [id,fn]=next;queue.delete(id);fn();};
+ const advanceUntil=(ready)=>{for(let i=0;i<500&&!ready();i++)tick();assert.ok(ready(),'Game did not reach expected phase');};
+ const root=createRacketsTrashStash(document,{rng:()=>.5,clock});
+ const tap=(name)=>{const button=[...root.querySelectorAll('button')].find(b=>b.textContent.trim()===name);assert.ok(button,name);button.dispatchEvent(new window.Event('click',{bubbles:true}));};
+ const originalBalance=root.getGameState().balance;
+ tap('BONUS TESTS');tap('3 BONUS · 10 FREE SPINS');
+ let state=root.getGameState();
+ assert.equal(state.phase,'idle');
+ assert.equal(state.bonusStartPending,true);
+ // The start splash is shown on completion of the triggering spin, or immediately
+ // when entering a feature with the practice-only test control.
+ // A test-trigger uses the same splash entry point as a real bonus.
+ assert.equal(state.freeLeft,10);
+ assert.equal(root.getGameState().balance,originalBalance);
+ assert.equal(root.querySelector('.rts-splash-start').getAttribute('aria-label').includes('Click to start'),true);
+ assert.ok(root.querySelector('.rts-splash-start img').getAttribute('src').endsWith('/splashes/rackets-trash-stash-free-spins-start.png'));
+ root.querySelector('.rts-splash-start').dispatchEvent(new window.Event('click',{bubbles:true}));
+ assert.equal(root.getGameState().phase,'idle');
+ assert.equal(root.getGameState().bonusStartPending,false);
+ for(let i=0;i<10;i++){
+  tap('FREE SPIN');
+  advanceUntil(()=>['idle','bonus-complete'].includes(root.getGameState().phase));
+ }
+ state=root.getGameState();
+ assert.equal(state.phase,'bonus-complete');
+ assert.equal(state.freeLeft,0);
+ assert.equal(state.bonusActive,true);
+ assert.ok(state.completedBonusTotal>0);
+ assert.equal(state.completedBonusTotal,state.freeTotal);
+ const finish=root.querySelector('.rts-splash-complete');
+ assert.ok(finish);
+ assert.ok(finish.querySelector('img').getAttribute('src').endsWith('/splashes/rackets-trash-stash-free-spins-complete.png'));
+ assert.equal(finish.querySelector('.rts-splash-total').textContent,state.freeTotal.toFixed(2));
+ assert.equal(state.balance>originalBalance,true);
+ const payout=state.completedBonusTotal;
+ finish.dispatchEvent(new window.Event('click',{bubbles:true}));
+ state=root.getGameState();
+ assert.equal(state.phase,'idle');
+ assert.equal(state.bonusActive,false);
+ assert.equal(state.completedBonusTotal,null);
+ assert.equal(state.freeTotal,0);
+ assert.equal(root.querySelector('.rts-splash'),null);
+ assert.ok(payout>0);
+ root.stopAnimation();
+});

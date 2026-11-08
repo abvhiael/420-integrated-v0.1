@@ -300,7 +300,7 @@ test('Wide desktop layout stays horizontally split; narrower viewports stack wit
 test('Reel images stay within individual cell bounds in compact layout',()=>{
  const css=readFileSync(new URL('../src/best-buds.css',import.meta.url),'utf8');
  assert.match(css,/\.bb-cell\s*\{position:relative;overflow:hidden;contain:layout paint\}/);
- assert.match(css,/\.bb-cell > img\s*\{[^}]*position:absolute;inset:8%;width:84%;height:84%/s);
+ assert.match(css,/\.bb-cell > img\s*\{[^}]*position:absolute;inset:2%;width:96%;height:96%/s);
  assert.match(css,/\.bb-coin-kind > img\s*\{[^}]*width:86%;height:86%/s);
 });
 test('INFO modal presents 25 exact source-of-truth paylines as SVG art',()=>{
@@ -342,7 +342,7 @@ test('rolling reel icons use exact 3-row cells rather than intrinsic image heigh
  const css=readFileSync(new URL('../src/best-buds.css',import.meta.url),'utf8');
  assert.match(css,/\.bb-reel-rolling \.bb-roll-track\s*\{[^}]*height:600%/s);
  assert.match(css,/\.bb-reel-rolling \.bb-roll-tile\s*\{[^}]*flex:0 0 calc\(100% \/ 18\)/s);
- assert.match(css,/\.bb-roll-tile > \.bb-roll-symbol\s*\{[^}]*width:84%;height:84%/s);
+ assert.match(css,/\.bb-roll-tile > \.bb-roll-symbol\s*\{[^}]*width:96%;height:96%/s);
  root.querySelector('.bb-stage').dispatchEvent(new window.Event('click',{bubbles:true}));
  root.stopAnimation();
 });
@@ -539,4 +539,13 @@ test('Info panel and Free Rides splash do not overlap or reset bonus state',()=>
  click('BACK TO GAME');
  assert.equal(root.getGameState().freeLeft,8);
  root.stopAnimation();
+});
+
+test('Best Buds settled and spinning reel art scale matches and remains contained',()=>{
+ const css=readFileSync(new URL('../src/best-buds.css',import.meta.url),'utf8');
+ for(const selector of ['.bb-cell > img','.bb-reel-rolling .bb-roll-tile > .bb-roll-symbol']){
+  const cssBlock=css.slice(css.lastIndexOf(selector+'{'),css.indexOf('}',css.lastIndexOf(selector+'{'))+1);
+  assert.match(cssBlock,/inset:2%;width:96%;height:96%/);
+  assert.match(cssBlock,/object-fit:contain;object-position:center/);
+ }
 });

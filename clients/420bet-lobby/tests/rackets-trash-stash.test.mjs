@@ -1,3 +1,4 @@
+import {readFileSync} from 'node:fs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {parseHTML} from 'linkedom';
@@ -113,5 +114,20 @@ test('Staggered reel stops reveal the new outcome immediately, with no final boa
  assert.deepEqual(state.display,target);
  assert.equal(state.pendingBoard,null);
  assert.equal(root.querySelectorAll('.rts-spinning').length,0);
+ root.stopAnimation();
+});
+
+test('Approved Racket logo replaces the text title and the moonlit wallpaper is configured',()=>{
+ const {document}=parseHTML('<html><body></body></html>');
+ const root=createRacketsTrashStash(document,{rng:()=>.32});
+ const logo=root.querySelector('.rts-title-logo');
+ assert.ok(logo);
+ assert.equal(logo.getAttribute('src'),'/assets/420bet/slots/rackets-trash-stash/ui/rackets-trash-stash-logo.png');
+ assert.equal(root.querySelector('.rts-header h1').textContent,'');
+ const css=readFileSync(new URL('../src/rackets-trash-stash.css',import.meta.url),'utf8');
+ assert.ok(css.includes('/assets/420bet/slots/rackets-trash-stash/backgrounds/rackets-trash-stash-wallpaper.png'));
+ assert.match(css,/\.rts-title-logo\{/);
+ assert.equal(root.querySelectorAll('.rts-reel').length,5);
+ assert.match(root.textContent,/BONUS TRIGGERS/);
  root.stopAnimation();
 });

@@ -2,7 +2,7 @@ import {readFileSync} from 'node:fs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {parseHTML} from 'linkedom';
-import {LINES,ART,JARS,PAY,BASE_POOL,FREE_POOL,FREE_UPGRADES,spinBoard,evaluate,createRacketsTrashStash,MAX_WIN,awardWildRetriggers,WILDS_PER_RETRIGGER,SPINS_PER_RETRIGGER,MAX_RETRIGGER_SPINS,MAX_RETRIGGERS} from '../src/rackets-trash-stash.js';
+import {LINES,ART,JARS,PAY,BASE_POOL,FREE_POOL,FREE_UPGRADES,spinBoard,evaluate,createRacketsTrashStash,MAX_WIN,awardWildRetriggers,WILDS_PER_RETRIGGER,SPINS_PER_RETRIGGER,MAX_RETRIGGER_SPINS,MAX_RETRIGGERS,FREE_SPINS_AWARD_BOOST} from '../src/rackets-trash-stash.js';
 
 test('Racket has 20 valid complete payline paths and all uploaded reel art',()=>{
  assert.equal(LINES.length,20);
@@ -154,9 +154,9 @@ test('Every low-paying symbol is replaced by its specified premium symbol in Fre
 });
 
 test('Recalibrated ordinary paytable preserves premium and low tiers',()=>{
- assert.deepEqual(PAY.RACKET,[28,140,700]);
- assert.deepEqual(PAY.TRASH,[11.2,35,168]);
- assert.deepEqual(PAY.A,[1.75,4.2,17.5]);
+ assert.deepEqual(PAY.RACKET,[30.24,151.2,756]);
+ assert.deepEqual(PAY.TRASH,[12.096,37.8,181.44]);
+ assert.deepEqual(PAY.A,[1.89,4.536,18.9]);
  assert.ok(PAY.RACKET[0]>PAY.TRASH[0]);
  assert.ok(PAY.TRASH[0]>PAY.A[0]);
 });
@@ -193,4 +193,27 @@ test('Bonus Tests includes fourth and fifth retrigger tier, both at 5 spins and 
   assert.match(root.textContent,/WILD PROGRESS 0\/5/);
   root.stopAnimation();
  }
+});
+
+test('Free Spins Stash Boost pays 4x before the existing retrigger multiplier',()=>{
+ assert.equal(FREE_SPINS_AWARD_BOOST,4);
+ const matchBoard=Array.from({length:5},()=>['NINE','Q','J']);
+ matchBoard[0][0]='TRASH';matchBoard[1][0]='TRASH';matchBoard[2][0]='TRASH';
+ const base=evaluate(matchBoard,1,'base');
+ const free=evaluate(matchBoard,1,'free');
+ const tierThree=evaluate(matchBoard,1,'free',10);
+ assert.ok(base.total>0);
+ assert.ok(Math.abs(free.total/base.total-4)<1e-8);
+ assert.ok(Math.abs(tierThree.total/base.total-40)<1e-8);
+ const prizes=Array.from({length:5},()=>['Q','K','J']);
+ prizes[0][0]='BLUE05';prizes[1][0]='PURPLE1';prizes[2][0]='RED25';
+ assert.ok(Math.abs(evaluate(prizes,1,'free').total/evaluate(prizes,1,'base').total-4)<1e-8);
+ const collect=Array.from({length:5},()=>['Q','K','J']);
+ collect[0][0]='WILD';collect[1][0]='RACKET';collect[2][0]='RACKET';
+ collect[1][2]='BLUE05';
+ const win=evaluate(collect,1,'free');
+ const winTier=evaluate(collect,1,'free',3);
+ assert.ok(win.collection>0);
+ assert.ok(Math.abs(winTier.collection/win.collection-3)<1e-8);
+ assert.equal(evaluate(collect,1,'base').collection,0);
 });

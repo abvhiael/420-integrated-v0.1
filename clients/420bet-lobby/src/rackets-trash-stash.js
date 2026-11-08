@@ -20,17 +20,23 @@ MUSHROOM:'symbols/symbol_mushrooms.png',A:'symbols/symbol_a.png',
 K:'symbols/symbol_k.png',Q:'symbols/symbol_q.png',J:'symbols/symbol_j.png',
 TEN:'symbols/symbol_10.png',NINE:'symbols/symbol_9.png'
 });
-export const PAY=Object.freeze({RACKET:[2,10,50],TRASH:[.8,2.5,12],PIZZA:[.7,2,9],LIGHTER:[.6,1.8,8],GLOVE:[.5,1.6,7],SEEDS:[.45,1.4,6],BINOCULARS:[.4,1.2,5],COOLER:[.35,1,4],MUSHROOM:[.3,.8,3],A:[.25,.6,2.5],K:[.25,.6,2.5],Q:[.2,.5,2],J:[.2,.5,2],TEN:[.15,.4,1.5],NINE:[.15,.4,1.5]});
-const BASE=['RACKET','TRASH','PIZZA','LIGHTER','GLOVE','SEEDS','BINOCULARS','COOLER','MUSHROOM','A','K','Q','J','TEN','NINE',
+export const PAY=Object.freeze({"RACKET":[28,140,700],"TRASH":[11.2,35,168],"PIZZA":[9.8,28,126],"LIGHTER":[8.4,25.2,112],"GLOVE":[7,22.4,98],"SEEDS":[6.3,19.6,84],"BINOCULARS":[5.6,16.8,70],"COOLER":[4.9,14,56],"MUSHROOM":[4.2,11.2,42],"A":[1.75,4.2,17.5],"K":[1.75,4.2,17.5],"Q":[1.4,3.5,14],"J":[1.4,3.5,14],"TEN":[1.05,2.8,10.5],"NINE":[1.05,2.8,10.5]});
+// Frequency-weighted draw pools. Six WILD entries in base (twice the three in Free Spins).
+// Extra blue jars tune base prize return; the free pool retains its original six jars.
+const COMMON=['RACKET','TRASH','PIZZA','LIGHTER','GLOVE','SEEDS','BINOCULARS','COOLER','MUSHROOM','A','K','Q','J','TEN','NINE',
 'TRASH','PIZZA','LIGHTER','GLOVE','SEEDS','BINOCULARS','COOLER','MUSHROOM','A','K','Q','J','TEN','NINE',
-'A','K','Q','J','TEN','NINE','COOLER','MUSHROOM','TRASH','PIZZA',
-'BLUE05','BLUE075','PURPLE1','PURPLE15','RED25','RED5','BONUS'];
+'A','K','Q','J','TEN','NINE','COOLER','MUSHROOM','TRASH','PIZZA'];
+const ORIGINAL_JARS=['BLUE05','BLUE075','PURPLE1','PURPLE15','RED25','RED5'];
+export const BASE_POOL=Object.freeze([...COMMON,...ORIGINAL_JARS,'BLUE05','BLUE075','BONUS',...Array(6).fill('WILD')]);
+export const FREE_UPGRADES=Object.freeze({A:'TRASH',K:'PIZZA',Q:'LIGHTER',J:'SEEDS',TEN:'COOLER',NINE:'MUSHROOM'});
+export const FREE_POOL=Object.freeze([...COMMON.map(symbol=>FREE_UPGRADES[symbol]??symbol),...ORIGINAL_JARS,...Array(3).fill('WILD')]);
 export const asset=key=>ROOT+ART[key];
 const pick=(array,rng)=>array[Math.min(array.length-1,Math.floor(rng()*array.length))];
 export function spinBoard(mode='base',rng=Math.random){
- const pool=mode==='free'?BASE.filter(x=>x!=='BONUS').concat(['WILD','WILD','WILD']):BASE;
+ const pool=mode==='free'?FREE_POOL:BASE_POOL;
  const grid=Array.from({length:REELS},()=>Array.from({length:ROWS},()=>pick(pool,rng)));
- // At most one BONUS on each reel; wilds are exclusive to free spins.
+ // At most one BONUS on each reel. WILD is allowed in both modes, but the
+ // Wild prize-collection and retrigger features remain Free Spins exclusive.
  if(mode==='base')for(let r=0;r<REELS;r++){
   let found=false;
   for(let y=0;y<ROWS;y++)if(grid[r][y]==='BONUS'){if(found)grid[r][y]='SEEDS';else found=true;}
@@ -50,7 +56,7 @@ export function evaluate(board,bet=1,mode='base',multiplier=1){
   let best=null;
   for(const name of candidates){
    let length=0,wildPositions=[];
-   while(length<REELS&&(symbols[length]===name||(mode==='free'&&symbols[length]==='WILD'))){
+   while(length<REELS&&(symbols[length]===name||symbols[length]==='WILD')){
     if(symbols[length]==='WILD')wildPositions.push(length);
     length++;
    }
@@ -187,7 +193,9 @@ export function createRacketsTrashStash(doc=globalThis.document,options={}){
   panel.append(btn(doc,'← BACK TO GAME',()=>{info=false;render();},'rts-back'),el(doc,'h2','','HOW TO PLAY · PAYLINES'));
   panel.append(el(doc,'p','','5 reels × 3 rows · 20 fixed lines · awards pay left to right on consecutive reels. Highest ordinary-symbol win per line. Total wager is split equally across 20 lines.'));
   panel.append(el(doc,'p','','BONUS: 3/4/5 BONUS bags on separate reels award 10/15/20 free spins. Every fourth Wild used by a winning combination adds 10 spins, to a maximum of three retriggers. The free-spin multiplier then becomes ×2, ×3, and ×10.'));
-  panel.append(el(doc,'p','','Prize jars: 3 or more consecutive jars on a line pay their summed values times total bet. During free spins, each qualifying winning Wild collects all visible prize jars on reels 2–5. Wilds substitute for normal symbols but not BONUS or prize jars.'));
+  panel.append(el(doc,'p','','Prize jars: 3 or more consecutive jars on a line pay their summed values times total bet. Six Wilds are included in the base symbol pool; three in the Free Spins pool. Wilds substitute for normal symbols but not BONUS or prize jars. During Free Spins, each qualifying winning Wild collects all visible prize jars on reels 2–5.'));
+  panel.append(el(doc,'p','','FREE SPIN SYMBOL UPGRADES: A → Trash Can · K → Pizza · Q → Lighter · J → Seeds · 10 → Cooler · 9 → Mushrooms. All low-paying symbols are removed from the Free Spins reel pool.'));
+  panel.append(el(doc,'p','','Estimated simulation RTP: about 95.6% at the current practice distribution. Not a certified theoretical RTP. The feature-test buttons are excluded from paid-spin RTP.'));
   panel.append(el(doc,'p','','Only practice credits are used. No real-money betting, bonus purchases, financial transactions, or certified RTP are claimed.'));
   const map=el(doc,'div','rts-payline-map');
   LINES.forEach((rows,i)=>{

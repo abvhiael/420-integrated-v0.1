@@ -229,7 +229,7 @@ test('Approved splash assets pause bonus play and show the actual accumulated fe
  const originalBalance=root.getGameState().balance;
  tap('BONUS TESTS');tap('3 BONUS · 10 FREE SPINS');
  let state=root.getGameState();
- assert.equal(state.phase,'idle');
+ assert.equal(state.phase,'bonus-start');
  assert.equal(state.bonusStartPending,true);
  // The start splash is shown on completion of the triggering spin, or immediately
  // when entering a feature with the practice-only test control.

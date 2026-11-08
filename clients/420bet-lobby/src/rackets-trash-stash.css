@@ -1,8 +1,9 @@
 /* Racket's Trash Stash — isolated Slot #7 practice presentation */
-.rts-game{box-sizing:border-box;min-height:calc(100vh - 150px);color:#fff4da;font-family:system-ui,Arial,sans-serif;background:radial-gradient(ellipse at top,#59207a 0,#21112d 45%,#090e0d 100%);padding:14px clamp(10px,2vw,26px) 30px}
+.rts-game{box-sizing:border-box;min-height:calc(100vh - 150px);color:#fff4da;font-family:system-ui,Arial,sans-serif;background:linear-gradient(180deg,rgba(15,5,29,.27),rgba(14,6,24,.57)),url('/assets/420bet/slots/rackets-trash-stash/backgrounds/rackets-trash-stash-wallpaper.png') center top / cover no-repeat,radial-gradient(ellipse at top,#59207a 0,#21112d 45%,#090e0d 100%);padding:14px clamp(10px,2vw,26px) 30px}
 .rts-game *{box-sizing:border-box}
-.rts-header{position:relative;max-width:1440px;min-height:118px;margin:auto;text-align:center;padding:18px 170px 14px 10px;background:linear-gradient(105deg,#121416b0,#63238088,#121416b0);border-radius:20px;border-bottom:4px solid #9afb2e}
-.rts-header h1{margin:0;font-size:clamp(25px,4vw,55px);line-height:1.06;font-weight:1000;letter-spacing:.03em;font-style:italic;color:#b7ff37;text-shadow:3px 4px #140624,0 0 15px #d22dff}
+.rts-header{position:relative;max-width:1440px;min-height:190px;margin:auto;text-align:center;padding:12px 170px 14px 10px;background:linear-gradient(105deg,#121416b0,#63238088,#121416b0);border-radius:20px;border-bottom:4px solid #9afb2e}
+.rts-header h1{margin:0;display:flex;align-items:center;justify-content:center;min-width:0;line-height:1}
+.rts-title-logo{display:block;width:min(100%,650px);height:clamp(130px,18vw,245px);object-fit:contain;object-position:center;filter:drop-shadow(0 8px 13px #100519bd)}
 .rts-header p{margin:8px 0;color:#ffc246;font-size:14px;font-weight:900;letter-spacing:.13em}
 .rts-mascot{position:absolute;right:8px;bottom:0;height:148px;max-width:185px;object-fit:contain;object-position:bottom}
 .rts-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,325px);gap:18px;max-width:1440px;margin:18px auto;align-items:start}
@@ -55,7 +56,7 @@
 .rts-map-line{fill:none;stroke:#6bff1b;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 2px #4eff15)}
 .rts-disclaimer{text-align:center;color:#dfd2c2;font-size:12px}
 @media(max-width:920px){.rts-layout{grid-template-columns:1fr}.rts-side{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.rts-payline-map{grid-template-columns:repeat(4,minmax(0,1fr))}}
-@media(max-width:580px){.rts-header{padding:16px 10px 95px}.rts-mascot{height:97px;right:5px}.rts-side{grid-template-columns:1fr}.rts-payline-map{grid-template-columns:repeat(2,minmax(0,1fr))}.rts-main{padding:5px}.rts-controls{font-size:12px}}
+@media(max-width:580px){.rts-header{padding:10px 10px 68px;min-height:200px}.rts-title-logo{height:145px}.rts-mascot{height:97px;right:5px}.rts-side{grid-template-columns:1fr}.rts-payline-map{grid-template-columns:repeat(2,minmax(0,1fr))}.rts-main{padding:5px}.rts-controls{font-size:12px}}
 @media(prefers-reduced-motion:reduce){.rts-roll-track,.rts-win-line{animation:none}}
 
 /* QA-only bonus launcher; keeps original payout and bonus information panels intact. */

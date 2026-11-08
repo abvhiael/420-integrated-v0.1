@@ -116,7 +116,8 @@ export function createRacketsTrashStash(doc=globalThis.document,options={}){
   root.replaceChildren();
   const header=el(doc,'header','rts-header');
   const reaction=phase==='spinning'?'poses/racket_scavenging_searching_trash.png':result.collection?'poses/racket_pointing_at_prize_jar_highlight_value.png':result.total>=bet*10?'emotions/racket_jackpot_celebration.png':result.total>0?'emotions/racket_happy.png':freeLeft>0?'poses/racket_carrying_loot_hauling_prize.png':'poses/racket_idle_relaxed.png';
-  header.append(el(doc,'h1','','RACKET’S TRASH STASH'),el(doc,'p','','SCAVENGE · SNATCH · SCORE!'),image(reaction,'Racket the Raccoon reacting to gameplay','rts-mascot'));
+  const title=el(doc,'h1','rts-title');title.append(image('ui/rackets-trash-stash-logo.png',"Racket's Trash Stash",'rts-title-logo'));
+  header.append(title,el(doc,'p','','SCAVENGE · SNATCH · SCORE!'),image(reaction,'Racket the Raccoon reacting to gameplay','rts-mascot'));
   root.append(header);
   if(info){renderInfo();return;}
   const layout=el(doc,'div','rts-layout'),game=el(doc,'div','rts-main'),side=el(doc,'aside','rts-side');

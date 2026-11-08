@@ -47,20 +47,43 @@ export function validateSportsbookMarquee(payload,now=Date.now()){
  });
  return Object.freeze({date:payload.date,timezone:payload.timezone,observedAt:payload.observedAt,events});
 }
+export async function sportsbookResponseError(res,kind){
+ const status=Number(res?.status)||0;
+ let error='unknown';
+ if(/^application\/json(?:;|$)/i.test(res?.headers?.get?.('content-type')??'')){
+  try{
+   const data=await res.json();
+   if(typeof data?.error==='string'&&/^[a-z_]{3,60}$/.test(data.error))
+    error=data.error;
+  }catch{}
+ }
+ const messages={
+  sports_feed_not_configured:'The Odds API secret is missing from the running Worker.',
+  sports_feed_unavailable:'The Odds API is not returning usable fixture data.',
+  odds_budget_not_configured:'The deployed Worker has no sportsbook odds-budget binding.',
+  budgeted_odds_unavailable:'The odds-budget service could not complete its request.',
+  odds_budget_or_provider_unavailable:'No verified bookmaker observations are currently available.',
+  static_assets_unavailable:'The Worker static-assets binding is unavailable.'
+ };
+ return new Error((messages[error]||kind+' API returned an error')+
+  ' (HTTP '+(status||'unknown')+', '+error+').');
+}
 export async function loadSportsbookMarquee(endpoint,{fetcher=globalThis.fetch,now=Date.now(),signal}={}){
  if(!sameOriginPath(endpoint)||typeof fetcher!=='function')throw Error('Sportsbook feed not configured');
  const res=await fetcher(endpoint,{method:'GET',credentials:'same-origin',mode:'same-origin',
   redirect:'error',cache:'no-store',headers:{Accept:'application/json'},signal});
- if(!res?.ok||!/^application\/json(?:;|$)/i.test(res.headers?.get?.('content-type')??''))
-  throw Error('Sportsbook feed unavailable');
+ if(!res?.ok)return Promise.reject(await sportsbookResponseError(res,'Sportsbook marquee'));
+ if(!/^application\/json(?:;|$)/i.test(res.headers?.get?.('content-type')??''))
+  throw Error('Sportsbook marquee returned HTML instead of JSON: Worker route may not be deployed.');
  return validateSportsbookMarquee(await res.json(),now);
 }
 export async function loadSportsbookLines(endpoint,{fetcher=globalThis.fetch,now=Date.now(),signal}={}){
  if(!sameOriginPath(endpoint)||typeof fetcher!=='function')throw Error('Odds display feed not configured');
  const res=await fetcher(endpoint,{method:'GET',credentials:'same-origin',mode:'same-origin',
   redirect:'error',cache:'no-store',headers:{Accept:'application/json'},signal});
- if(!res?.ok||!/^application\/json(?:;|$)/i.test(res.headers?.get?.('content-type')??''))
-  throw Error('Odds feed unavailable');
+ if(!res?.ok)throw await sportsbookResponseError(res,'Game Lines');
+ if(!/^application\/json(?:;|$)/i.test(res.headers?.get?.('content-type')??''))
+  throw Error('Game Lines returned HTML instead of JSON: Worker route may not be deployed.');
  const data=await res.json();
  if(!data||data.source!=='the-odds-api-v4-display-only'||
   data.authority!=='provider-observed-not-wager-authority'||
@@ -119,7 +142,7 @@ export function createSportsbookView(doc=globalThis.document,{tab=null,onNavigat
         hour:'numeric',minute:'2-digit',timeZone:data.timezone})));
     lines.append(row);
    }
-  }catch{if(!disposed&&serial===requestId)empty('Daily matchups will appear once the verified sports feed is connected.');}
+  }catch(error){if(!disposed&&serial===requestId)empty(error?.message||'Sportsbook fixture feed unavailable.');}
   if(!disposed&&serial===requestId)schedule();
  }
  if(!selected){
@@ -163,10 +186,10 @@ export function createSportsbookView(doc=globalThis.document,{tab=null,onNavigat
       prices.append(tag);
      }row.append(prices);list.append(row);
     }
-   }).catch(()=>{
+   }).catch(error=>{
     if(!disposed&&serial===requestId)
      list.replaceChildren(create(doc,'p','sb-lines-empty',
-      'Bookmaker observations are temporarily unavailable. Check the provider connection or monthly allowance.'));
+      error?.message||'Bookmaker observations are temporarily unavailable.'));
    });
   }
   if(selected==='all-sports'){

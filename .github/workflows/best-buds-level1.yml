@@ -6,6 +6,7 @@ on:
       - 'clients/420bet-lobby/src/main.js'
       - 'clients/420bet-lobby/src/slots-lobby.js'
       - 'clients/420bet-lobby/tests/best-buds.test.mjs'
+      - 'clients/420bet-lobby/tests/best-buds-rtp-analysis.mjs'
       - 'clients/420bet-lobby/tests/slots-lobby.test.mjs'
       - '.github/workflows/best-buds-level1.yml'
   workflow_dispatch:
@@ -26,6 +27,9 @@ jobs:
       - name: Run scoped Best Buds and Slots lobby tests
         working-directory: clients/420bet-lobby
         run: node --test tests/best-buds.test.mjs tests/slots-lobby.test.mjs
+      - name: Reproduce 1 million paid-spin RTP and extreme-tail audit
+        working-directory: clients/420bet-lobby
+        run: node tests/best-buds-rtp-analysis.mjs 1000000 20261107
       - name: Build browser lobby
         working-directory: clients/420bet-lobby
         run: npm run build

@@ -26,10 +26,10 @@ test('winning line tracks its exact path and wild substitution only applies to o
  const nonpay=Array.from({length:REELS},()=>['SCATTER','HOTBOX','HOTBOX']);
  assert.equal(evaluateLines(nonpay,2).amount,0);
 });
-test('6 hotbox coins enter respins and only base spins consume a practice stake',()=>{
+test('3 hotbox coins enter respins and only base spins consume a practice stake',()=>{
  let s=initialState();const original=s.balance;
  s=nextSpin(s,{force:'hold',rng:()=>.99});
- assert.equal(s.mode,'hold');assert.equal(s.hold.length,6);assert.equal(s.respins,3);
+ assert.equal(s.mode,'hold');assert.equal(s.hold.length,3);assert.equal(s.respins,3);
  assert.equal(s.balance,original-s.bet);
  const after=s.balance;
  s=nextSpin(s,{rng:()=>.99});
@@ -78,7 +78,7 @@ test('practice view uses uploaded art, QA button, staggered reel panels and clic
  const hold=[...root.querySelectorAll('button')].find(b=>b.textContent==='Trigger Hold & Win');
  hold.dispatchEvent(new window.Event('click',{bubbles:true}));
  assert.equal(root.getGameState().mode,'hold');
- assert.equal(root.querySelectorAll('.bb-coin-locked').length,6);
+ assert.equal(root.querySelectorAll('.bb-coin-locked').length,3);
  const start=[...root.querySelectorAll('button')].find(b=>b.textContent==='START HOLD & WIN');
  assert.ok(start);start.dispatchEvent(new window.Event('click',{bubbles:true}));
  const spin=[...root.querySelectorAll('button')].find(b=>b.textContent==='RESPIN');
@@ -108,22 +108,22 @@ test('Hold & Win displays locked coins throughout each manually initiated respin
  const click=label=>{const el=[...root.querySelectorAll('button')].find(b=>b.textContent===label);assert.ok(el,label);el.dispatchEvent(new window.Event('click',{bubbles:true}));};
  const skip=()=>{root.querySelector('.bb-stage').dispatchEvent(new window.Event('click',{bubbles:true}));};
  click('BONUS TEST');click('Trigger Hold & Win');
- assert.equal(root.getGameState().mode,'hold');assert.equal(root.querySelectorAll('.bb-coin-locked').length,6);
+ assert.equal(root.getGameState().mode,'hold');assert.equal(root.querySelectorAll('.bb-coin-locked').length,3);
  click('START HOLD & WIN');
  click('RESPIN');
  assert.equal(root.getPresentationState().phase,'spinning');
- assert.equal(root.querySelectorAll('.bb-coin-locked').length,6,'previously landed coins remain visible while empty cells spin');
- assert.equal(root.querySelectorAll('.bb-hold-cell-rolling').length,9);
+ assert.equal(root.querySelectorAll('.bb-coin-locked').length,3,'previously landed coins remain visible while empty cells spin');
+ assert.equal(root.querySelectorAll('.bb-hold-cell-rolling').length,12);
  skip();
  assert.equal(root.getGameState().mode,'hold');
  assert.equal(root.getGameState().respins,2);
- assert.equal(root.querySelectorAll('.bb-coin-locked').length,6);
+ assert.equal(root.querySelectorAll('.bb-coin-locked').length,3);
  assert.equal(root.querySelectorAll('.bb-hold-cell-rolling').length,0);
  click('RESPIN');skip();assert.equal(root.getGameState().respins,1);
  click('RESPIN');skip();
  assert.equal(root.getGameState().mode,'base');
  assert.equal(root.getGameState().lastFeature,'hold-end');
- assert.equal(root.querySelectorAll('.bb-coin-locked').length,6,'final Hold & Win result persists after payout');
+ assert.equal(root.querySelectorAll('.bb-coin-locked').length,3,'final Hold & Win result persists after payout');
  root.stopAnimation();
 });
 test('manual respins reset to 3 when a new coin lands and do not charge credits',()=>{
@@ -145,7 +145,7 @@ test('Free Rides dedicated WILD receives x2/x3/x5/x10 and winning lines apply ma
  const baseline=ordinary.wins.find(w=>w.line===1);
  const bonus=boosted.wins.find(w=>w.line===1);
  assert.equal(bonus.wildMultiplier,10);
- assert.equal(bonus.amount,baseline.amount*10);
+ assert.ok(Math.abs(bonus.amount-baseline.amount*10)<1e-8);
  let state=practiceBonus(initialState(),'wild10',()=>.99);
  state=nextSpin(state,{rng:()=>.99,force:state.qa});
  assert.equal(state.mode,'free');
@@ -229,7 +229,7 @@ test('Hold reel stop has five independent columns and retains locked coins',()=>
  click('BONUS TEST');click('Trigger Hold & Win');
  click('START HOLD & WIN');click('RESPIN');
  assert.equal(root.querySelectorAll('.bb-hold-reel-spinning').length,5);
- assert.equal(root.querySelectorAll('.bb-coin-locked').length,6);
+ assert.equal(root.querySelectorAll('.bb-coin-locked').length,3);
  root.querySelector('.bb-stage').dispatchEvent(new window.Event('click',{bubbles:true}));
  assert.equal(root.querySelectorAll('.bb-hold-reel-spinning').length,0);
  root.stopAnimation();
@@ -267,7 +267,7 @@ test('Best Buds has a full-width, low-height playfield with two visible right-si
  assert.equal(paytable.querySelectorAll('tr').length,Object.keys(PAYTABLE).length+1);
  assert.equal(paytable.querySelectorAll('.bb-pay-symbol img').length,Object.keys(PAYTABLE).length);
  const guide=workspace.querySelector('.bb-feature-panel');
- for(const phrase of ['BONUS TRIGGERS','3 VAN SCATTERS','6 HOTBOX COINS','COLLECT SMOKE','MINI ×20','GRAND ×1000'])assert.ok(guide.textContent.includes(phrase),phrase);
+ for(const phrase of ['BONUS TRIGGERS','3 VAN SCATTERS','3 HOTBOX COINS','COLLECT SMOKE','MINI ×20','GRAND ×1000'])assert.ok(guide.textContent.includes(phrase),phrase);
  assert.equal(workspace.querySelectorAll('.bb-reel').length,5);
  assert.equal(workspace.querySelectorAll('.bb-cell').length,15);
  root.stopAnimation();
@@ -361,7 +361,7 @@ test('INFO always exposes BACK TO GAME without losing credits, current bonus or 
  assert.equal(back[0].textContent,'BACK TO GAME');
  back[0].dispatchEvent(new window.Event('click',{bubbles:true}));
  assert.equal(root.querySelector('.bb-modal-cover'),null);
- assert.equal(root.querySelectorAll('.bb-coin-locked').length,6);
+ assert.equal(root.querySelectorAll('.bb-coin-locked').length,3);
  const after=root.getGameState();
  assert.equal(after.balance,snapshot.balance);assert.equal(after.mode,snapshot.mode);
  assert.equal(after.respins,snapshot.respins);assert.equal(JSON.stringify(after.hold),snapshot.hold);
@@ -382,7 +382,7 @@ test('HOTBOX spinning strip is cell-scaled and repeats a matched six-icon cycle'
  click('START HOLD & WIN');
  click('RESPIN');
  const strips=root.querySelectorAll('.bb-hold-spin-track');
- assert.equal(strips.length,9);
+ assert.equal(strips.length,12);
  for(const strip of strips){
   const tiles=strip.querySelectorAll('.bb-hold-spin-tile');
   assert.equal(tiles.length,12);
@@ -401,7 +401,7 @@ test('HOTBOX start and completion splashes pause play and display the credited b
  click('BONUS TEST');click('Trigger Hold & Win');
  assert.equal(root.getPresentationState().hotboxSplash,'trigger');
  assert.match(root.querySelector('.bb-hotbox-splash-img').getAttribute('src'),/bestbuds-hotbox-trigger\.png$/);
- assert.equal(root.querySelectorAll('.bb-coin-locked').length,6);
+ assert.equal(root.querySelectorAll('.bb-coin-locked').length,3);
  click('START HOLD & WIN');
  assert.equal(root.getPresentationState().hotboxSplash,null);
  click('RESPIN');root.querySelector('.bb-stage').dispatchEvent(new window.Event('click',{bubbles:true}));
@@ -439,7 +439,7 @@ test('two Buddy2 portraits followed by CHIPS do not win, but three Buddy2 portra
  assert.ok(win);
  assert.equal(win.symbol,'BUDDY2');
  assert.equal(win.length,3);
- assert.equal(win.amount,1); // 3 Buddy2 pays 0.5× a 2-credit total bet
+ assert.equal(win.amount,Math.round(PAYTABLE.BUDDY2[0]*2*100)/100); // calibrated Buddy2 payout
 });
 test('standalone WILD substitutes and multiplies only during free spins',()=>{
  const board=Array.from({length:5},()=>['CHIPS','JOINT','PAPERS']);
@@ -548,4 +548,36 @@ test('Best Buds settled and spinning reel art scale matches and remains containe
   assert.match(cssBlock,/inset:-12.5%;width:125%;height:125%/);
   assert.match(cssBlock,/object-fit:contain;object-position:center/);
  }
+});
+
+test('rebalanced strips include all 11 ordinary symbols and exact feature counts on each reel',()=>{
+ for(const strip of BASE_STRIPS){
+  assert.equal(strip.length,60);
+  assert.equal(strip.filter(s=>s==='HOTBOX').length,3);
+  assert.equal(strip.filter(s=>s==='SCATTER').length,2);
+  assert.equal(strip.filter(s=>s==='WILD').length,3);
+  for(const symbol of Object.keys(PAYTABLE))assert.ok(strip.includes(symbol),symbol);
+ }
+});
+test('three HOTBOX coins naturally enter Hold & Win; two do not',()=>{
+ const stops=BASE_STRIPS.map(strip=>strip.indexOf('HOTBOX'));
+ const s=nextSpin(initialState(),{stops,rng:()=>.99});
+ assert.equal(s.mode,'hold');
+ assert.equal(s.hold.length,5);
+ const without=BASE_STRIPS.map((strip,r)=>r<2?strip.indexOf('HOTBOX'):strip.findIndex((_,i)=>strip.slice(i,i+3).every(v=>v!=='HOTBOX')));
+ const s2=nextSpin(initialState(),{stops:without,rng:()=>.99});
+ assert.equal(s2.mode,'base');
+});
+test('frequent three-scatter triggering remains reachable from ordinary reel stops',()=>{
+ const stops=BASE_STRIPS.map((strip,r)=>r<3?strip.indexOf('SCATTER'):strip.findIndex((_,i)=>strip.slice(i,i+3).every(v=>v!=='SCATTER')));
+ const s=nextSpin(initialState(),{stops,rng:()=>.99});
+ assert.equal(s.mode,'free');assert.equal(s.freeLeft,8);
+});
+test('extreme-tail awards are capped at 5000 times initiating wager even for 15 GRAND prizes',()=>{
+ const s={...initialState(),mode:'hold',roundBet:2,roundGross:0,hold:Array.from({length:15},(_,key)=>({key,kind:'jackpot',value:'GRAND'})),holdReveal:null,respins:3};
+ const after=nextSpin(s,{rng:()=>.99});
+ assert.equal(after.mode,'base');
+ assert.equal(after.featureTotal,10000);
+ assert.equal(after.balance,11000);
+ assert.ok(after.roundGross<=10000);
 });

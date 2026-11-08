@@ -1,12 +1,15 @@
 // Best Buds: Hotbox Road Trip — deterministic practice-only slot model.
 // Candidate values, NOT a certified RNG/RTP or real-money gambling implementation.
 export const REELS=5, ROWS=3, MAX_WIN_MULTIPLIER=5000;
+export const HOTBOX_TRIGGER=3, FREE_SCATTER_TRIGGER=3, HOLD_LAND_CHANCE=.065;
 export const SYMBOLS=Object.freeze(['BONG','JOINT','CHIPS','RECORD','PAPERS','LIGHTER','SUNGLASSES','GUITAR','LEAF','BUDDY1','BUDDY2','WILD','SCATTER','HOTBOX']);
 export const ORDINARY=Object.freeze(['BONG','JOINT','CHIPS','RECORD','PAPERS','LIGHTER','SUNGLASSES','GUITAR','LEAF','BUDDY1','BUDDY2']);
 export const PAYTABLE=Object.freeze({
- BUDDY1:[.5,1.5,5], BUDDY2:[.5,1.5,5], GUITAR:[.35,1,3], BONG:[.3,.8,2.5],
- CHIPS:[.25,.7,2],RECORD:[.2,.6,1.8],SUNGLASSES:[.2,.6,1.8],
- PAPERS:[.12,.4,1.2],LIGHTER:[.12,.4,1.2],JOINT:[.12,.4,1.2],LEAF:[.1,.3,1]
+ BUDDY1:[.7,2.1,7], BUDDY2:[.7,2.1,7],
+ GUITAR:[.49,1.4,4.2], BONG:[.42,1.12,3.5],
+ CHIPS:[.35,.98,2.8], RECORD:[.28,.84,2.52], SUNGLASSES:[.28,.84,2.52],
+ PAPERS:[.168,.56,1.68], LIGHTER:[.168,.56,1.68],
+ JOINT:[.168,.56,1.68], LEAF:[.14,.42,1.4]
 });
 export const JACKPOTS=Object.freeze({MINI:20,MINOR:50,MAJOR:200,GRAND:1000});
 export const FREE_WILD_MULTIPLIERS=Object.freeze([2,3,5,10]);
@@ -20,11 +23,21 @@ export const LINES=Object.freeze([
 const clamp=(n,min,max)=>Math.max(min,Math.min(max,n));
 const cash=n=>Math.round((n+Number.EPSILON)*100)/100;
 const pick=(n,rng)=>Math.floor(clamp(rng(),0,.9999999)*n);
+// Each 60-position reel uses a seeded deterministic shuffle of all 11 normal
+// symbols. Three HOTBOX, two SCATTER, and three dedicated WILD positions are
+// subsequently inserted, with stable spacing and no special-symbol collisions.
 export const BASE_STRIPS=Object.freeze(Array.from({length:REELS},(_,r)=>{
- const s=Array.from({length:60},(_,i)=>ORDINARY[(i*7+Math.floor(i/3)+r*3)%ORDINARY.length]);
- // Consecutive windows never contain two SCATTER symbols on a given reel.
- for(const [i,v] of [[3,'SCATTER'],[10,'HOTBOX'],[15,'HOTBOX'],[22,'WILD'],[27,'HOTBOX'],[33,'HOTBOX'],[39,'WILD'],[46,'HOTBOX'],[53,'HOTBOX']])
-  s[(i+r*4)%60]=v;
+ const s=Array.from({length:60},(_,i)=>ORDINARY[(i+r*3)%ORDINARY.length]);
+ let seed=(0x9e3779b9^((r+1)*0x85ebca6b))>>>0;
+ const shuffleRandom=()=>{seed^=seed<<13;seed^=seed>>>17;seed^=seed<<5;return(seed>>>0)/4294967296;};
+ for(let i=s.length-1;i>0;i--){
+  const j=Math.floor(shuffleRandom()*(i+1));
+  [s[i],s[j]]=[s[j],s[i]];
+ }
+ const offset=r*11;
+ for(const i of [7,27,47])s[(i+offset)%60]='HOTBOX';
+ for(const i of [15,35])s[(i+offset)%60]='SCATTER';
+ for(const i of [0,22,42])s[(i+offset)%60]='WILD';
  return Object.freeze(s);
 }));
 export const FREE_STRIPS=Object.freeze(BASE_STRIPS.map((strip,r)=>Object.freeze(strip.map((s,i)=>s==='HOTBOX'?ORDINARY[(i+r)%ORDINARY.length]:s))));
@@ -35,7 +48,7 @@ export const initialState=()=>({
  hold:[],respins:0,holdReturn:'base',pendingFree:0,freeLeft:0,freeTotal:0,freeSummary:null,
  featureTotal:0,spinNumber:0,qa:null,holdReveal:null,holdNewKeys:[],collectSmokeEvent:null,freeWildMultipliers:{}
 });
-export const coinValue=(rng=Math.random)=>[.2,.4,.6,1,1.5,2,3,5,10][pick(9,rng)];
+export const coinValue=(rng=Math.random)=>[.2,.4,.6,1,1.5,2,3,5,10][pick(9,rng)]*.5;
 // The standalone leaf WILD substitutes. Buddy 1/2 portraits pay as ordinary symbols.
 export const isWild=s=>s==='WILD';
 export function evaluateLines(board,bet,{wildMultipliers={}}={}){
@@ -122,7 +135,7 @@ export function nextSpin(previous,{rng=Math.random,stops=null,force=null}={}){
   const candidates=Array.from({length:15},(_,i)=>i).filter(i=>!occupied.has(i));
   // Three independently selected opportunities per respin. Existing coins remain locked.
   for(const key of candidates){
-   if((force==='fill'||((force==='collect'||force==='jackpot')&&key===candidates[0]))||rng()<.105){
+   if((force==='fill'||((force==='collect'||force==='jackpot')&&key===candidates[0]))||rng()<HOLD_LAND_CHANCE){
     let c=lockedCoin(s,key,rng);
     if(force==='collect'&&key===candidates[0])c={key,kind:'collect',value:collectSmokeValue(s.hold)};
     if(force==='jackpot'&&key===candidates[0])c={key,kind:'jackpot',value:'MAJOR'};
@@ -163,7 +176,7 @@ export function nextSpin(previous,{rng=Math.random,stops=null,force=null}={}){
  const strips=mode==='free'?FREE_STRIPS:BASE_STRIPS;
  const board=boardAt(strips,stops??randomStops(rng));
  if(force==='hold'){
-  for(let r=0;r<REELS;r++)for(let y=0;y<ROWS;y++)board[r][y]=r<3&&y<2?'HOTBOX':ORDINARY[(r*3+y)%ORDINARY.length];
+  for(let r=0;r<REELS;r++)for(let y=0;y<ROWS;y++)board[r][y]=r<3&&y===0?'HOTBOX':ORDINARY[(r*3+y)%ORDINARY.length];
  }else if(force==='free'){
   for(let r=0;r<REELS;r++)for(let y=0;y<ROWS;y++)board[r][y]=r<3&&y===0?'SCATTER':ORDINARY[(r*3+y)%ORDINARY.length];
  }
@@ -184,8 +197,8 @@ export function nextSpin(previous,{rng=Math.random,stops=null,force=null}={}){
  if(mode==='free'){s.freeLeft--;s.freeTotal=cash(s.freeTotal+paid);}
  const scatter=scatterCount(board),coins=coinPositions(board).length;
  // Hold has priority and the scatter feature is queued, never lost.
- if(mode==='base'&&scatter>=3)s.pendingFree=8;
- if(mode==='base'&&coins>=6){startHold(s,board,rng);return s;}
+ if(mode==='base'&&scatter>=FREE_SCATTER_TRIGGER)s.pendingFree=8;
+ if(mode==='base'&&coins>=HOTBOX_TRIGGER){startHold(s,board,rng);return s;}
  if(mode==='base'&&s.pendingFree){
   s.mode='free';s.freeLeft=s.pendingFree;s.pendingFree=0;s.freeTotal=0;
   s.lastFeature='free-start';s.message='8 FREE RIDES AWARDED!';

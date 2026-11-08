@@ -200,7 +200,7 @@ export function createBestBudsPractice(doc=globalThis.document,options={}){
   const freeCopy=make(doc,'div','bb-feature-copy');
   freeCopy.append(make(doc,'strong','','3 VAN SCATTERS'),make(doc,'p','','8 Free Rides. Only the leaf WILD substitutes; on Free Rides it awards random ×2, ×3, ×5 or ×10 (highest badge applies per line).'));
   freeRow.append(freeCopy);bonusPanel.append(freeRow);
-  bonusPanel.append(bonusRow('icon_hotbox_coin.png','6 HOTBOX COINS','Hold & Win starts with 3 respins. Each newly locked coin resets the count to 3.'));
+  bonusPanel.append(bonusRow('icon_hotbox_coin.png','3 HOTBOX COINS','Hold & Win starts with 3 respins. Each newly locked coin resets the count to 3.'));
   bonusPanel.append(bonusRow('icon_collect_smoke.png','COLLECT SMOKE','Adds the values of the other locked ordinary coins. The collected ×total stays on its icon.'));
   const jackpotRow=make(doc,'div','bb-jackpot-guide');
   jackpotRow.append(make(doc,'strong','','JACKPOTS'));
@@ -217,7 +217,7 @@ export function createBestBudsPractice(doc=globalThis.document,options={}){
    toolbar.append(make(doc,'h2','','BEST BUDS · RULES'),button(doc,'BACK TO GAME','bb-back-to-game',returnToGame),button(doc,'×','bb-close',returnToGame));
    dialog.append(toolbar);
    dialog.append(make(doc,'p','','Five reels, three rows, 25 fixed paylines. Buddy 1 and Buddy 2 are ordinary paying portrait symbols (3 = 0.5×, 4 = 1.5×, 5 = 5×). Only the green leaf WILD substitutes for ordinary symbols. During Free Rides, each WILD shows a random ×2, ×3, ×5 or ×10 multiplier. Three or more matching symbols from left to right pay; all 25 lines are included in the total bet.'));
-   dialog.append(make(doc,'p','','6+ HOTBOX COINS trigger Hold & Win: start with 3 respins; every new locked coin resets to 3. At 10 and 13 coins, the latest coin may transform into Collect Smoke, a multiplier or a jackpot. Three van scatters on separate reels trigger 8 Free Rides. If both features trigger, Free Rides follow Hold & Win.'));
+   dialog.append(make(doc,'p','','3+ HOTBOX COINS trigger Hold & Win: start with 3 respins; every new locked coin resets to 3. At 10 and 13 coins, the latest coin may transform into Collect Smoke, a multiplier or a jackpot. Three van scatters on separate reels trigger 8 Free Rides. If both features trigger, Free Rides follow Hold & Win.'));
    dialog.append(make(doc,'p','','Collect Smoke locks in place and adds the sum of the values of the other locked ordinary HOTBOX coins as a one-time extra award. The amount appears when the symbol lands, and is included in the final bonus payout. Jackpot and multiplier symbols are not part of that collection sum.'));
    dialog.append(make(doc,'p','','HOTBOX: MINI ×20, MINOR ×50, MAJOR ×200, GRAND ×1000. During Free Rides, each landed leaf WILD receives a random ×2, ×3, ×5 or ×10 badge; the highest multiplier on each winning line applies once (never multiplied together). All winnings are bounded to ×5000 total bet per initiating round. Feature thresholds and paytable are uncalibrated practice mechanics.'));
    const table=make(doc,'table','bb-paytable'),tr=make(doc,'tr');

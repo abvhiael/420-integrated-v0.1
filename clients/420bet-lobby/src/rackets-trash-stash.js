@@ -103,16 +103,18 @@ export function createRacketsTrashStash(doc=globalThis.document,options={}){
  let board=spinBoard('base',rng),balance=1000,bet=1,phase='idle',info=false,autoplay=0,spins=0;
  let freeLeft=0,freeTotal=0,retriggers=0,wildProgress=0,multiplier=1,spinCount=0;
  let testOpen=false,testScenario=null; // Separate practice-only QA controls; never purchases a bonus.
+ let bonusActive=false,bonusStartPending=false,completedBonusTotal=null;
  let result={wins:[],total:0,collection:0},display=board,stopped=5,winIndex=0,dead=false;
  let pendingBoard=null; // Keep the committed outcome separate from the currently visible reels.
  const timers=new Set();let lastMessage='Practice credits only · no real wagering';
  const delay=(fn,ms)=>{if(dead)return;const id=schedule(()=>{timers.delete(id);if(!dead)fn();},ms);if(id!==undefined)timers.add(id);else fn();};
  const clear=()=>{for(const id of timers)cancel(id);timers.clear();};
  root.stopAnimation=()=>{dead=true;clear();};
- root.getGameState=()=>({board,balance,bet,phase,info,autoplay,spins,freeLeft,freeTotal,retriggers,wildProgress,multiplier,result,display,pendingBoard,stopped,spinCount,testOpen,testScenario});
+ root.getGameState=()=>({board,balance,bet,phase,info,autoplay,spins,freeLeft,freeTotal,retriggers,wildProgress,multiplier,result,display,pendingBoard,stopped,spinCount,testOpen,testScenario,bonusActive,bonusStartPending,completedBonusTotal});
  function startBonusTest(kind){
   if(dead||info||phase!=='idle')return;
   autoplay=0;testOpen=false;freeTotal=0;wildProgress=0;retriggers=0;multiplier=1;spinCount=0;
+  bonusActive=true;bonusStartPending=true;completedBonusTotal=null;
   const setups={three:{spins:10,trigger:3},four:{spins:15,trigger:4},five:{spins:20,trigger:5},retrigger1:{spins:5,tier:1},retrigger2:{spins:5,tier:2},retrigger3:{spins:5,tier:3},retrigger4:{spins:5,tier:4},retrigger5:{spins:5,tier:5},collection:{spins:10,collection:true}};
   const setup=setups[kind];if(!setup)return;
   freeLeft=setup.spins;testScenario=kind;
@@ -132,6 +134,33 @@ export function createRacketsTrashStash(doc=globalThis.document,options={}){
   return panel;
  }
  const image=(path,alt,cls='')=>{const n=el(doc,'img',cls);n.src=ROOT+path;n.alt=alt;n.draggable=false;return n;};
+ function continueAutoplay(){
+  if(autoplay>0){
+   autoplay--;
+   if(autoplay>0&&(balance>=bet||freeLeft>0))delay(startSpin,250);
+   else{autoplay=0;render();}
+  }
+ }
+ function closeBonusSplash(){
+  if(phase==='bonus-start'){
+   bonusStartPending=false;phase='idle';render();
+   if(autoplay>0)delay(startSpin,250);
+  }else if(phase==='bonus-complete'){
+   phase='idle';bonusActive=false;completedBonusTotal=null;
+   retriggers=0;freeTotal=0;multiplier=1;wildProgress=0;testScenario=null;
+   render();continueAutoplay();
+  }
+ }
+ function renderBonusSplash(){
+  const starting=phase==='bonus-start';
+  const splash=btn(doc,'',closeBonusSplash,'rts-splash rts-splash-'+(starting?'start':'complete'));
+  splash.setAttribute('aria-label',starting?'Free Spins awarded. Click to start the bonus.':'Free Spins complete. Total won '+money(completedBonusTotal??freeTotal)+'. Click to return to the game.');
+  const artwork=el(doc,'span','rts-splash-art');
+  artwork.append(image('splashes/rackets-trash-stash-free-spins-'+(starting?'start':'complete')+'.png',starting?'Racket announces Free Spins':'Racket celebrates Free Spins complete'));
+  if(!starting)artwork.append(el(doc,'strong','rts-splash-total',money(completedBonusTotal??freeTotal)));
+  splash.append(artwork,el(doc,'span','rts-splash-instruction',starting?'CLICK ANYWHERE TO START':'CLICK ANYWHERE TO CONTINUE'));
+  return splash;
+ }
  function render(){
   if(dead)return;
   root.replaceChildren();
@@ -175,12 +204,12 @@ export function createRacketsTrashStash(doc=globalThis.document,options={}){
   game.append(stage,el(doc,'div','rts-message',lastMessage));
   const controls=el(doc,'div','rts-controls');
   const spin=btn(doc,phase==='spinning'?'SPINNING…':freeLeft>0?'FREE SPIN':'SPIN',()=>startSpin(),'rts-spin-button');
-  spin.disabled=phase==='spinning'||phase==='show-wins'||(freeLeft===0&&balance<bet);
+  spin.disabled=phase!=='idle'||(freeLeft===0&&balance<bet);
   const smaller=btn(doc,'−',()=>{bet=Math.max(.2,Math.round((bet-.2)*100)/100);render();});
   const larger=btn(doc,'+',()=>{bet=Math.min(50,Math.round((bet+.2)*100)/100);render();});
   smaller.disabled=larger.disabled=phase!=='idle'||freeLeft>0;
   const auto=btn(doc,autoplay?'STOP AUTO ('+autoplay+')':'AUTOSPINS',()=>{autoplay=autoplay?0:10;render();if(autoplay&&phase==='idle')startSpin();});
-  auto.disabled=freeLeft>0&&!autoplay;
+  auto.disabled=phase!=='idle'||(freeLeft>0&&!autoplay);
   controls.append(el(doc,'span','','BALANCE '+money(balance)),smaller,el(doc,'span','','BET '+money(bet)),larger,spin,auto,el(doc,'span','','WIN '+money(result.total)),btn(doc,'INFO',()=>{if(phase==='idle'){autoplay=0;info=true;render();}}));
   game.append(controls);
   const tests=btn(doc,testOpen?'HIDE BONUS TESTS':'BONUS TESTS',()=>{if(phase!=='idle'||freeLeft>0)return;testOpen=!testOpen;render();},'rts-test-toggle');
@@ -203,6 +232,7 @@ export function createRacketsTrashStash(doc=globalThis.document,options={}){
    el(doc,'p','','FREE SPINS UPGRADES: A → Trash Can, K → Pizza, Q → Lighter, J → Seeds, 10 → Cooler, 9 → Mushrooms. Six Wild entries in base spins; three during Free Spins.'),
    el(doc,'p','',freeLeft?'FEATURE WIN '+money(freeTotal)+' · WILD PROGRESS '+wildProgress+'/5 · EXTRA SPINS '+(retriggers*5)+'/25':'3+ consecutive prize jars on a line pay their summed values × total bet.'));
   side.append(payouts,bonus);layout.append(game,side);root.append(layout,el(doc,'p','rts-disclaimer','Practice game only. RTP not yet calibrated or certified; credits have no cash value.'));
+  if(phase==='bonus-start'||phase==='bonus-complete')root.append(renderBonusSplash());
  }
  function renderInfo(){
   const panel=el(doc,'section','rts-info');
@@ -227,10 +257,15 @@ export function createRacketsTrashStash(doc=globalThis.document,options={}){
   root.append(panel);
  }
  function endSpin(){
-  phase='idle';
-  if(freeLeft===0&&(retriggers||testScenario)){lastMessage='FEATURE COMPLETE · TOTAL '+money(freeTotal);retriggers=0;freeTotal=0;multiplier=1;wildProgress=0;testScenario=null;}
-  render();
-  if(autoplay>0){autoplay--;if(autoplay>0&&balance>=bet||autoplay>0&&freeLeft>0)delay(startSpin,250);else{autoplay=0;render();}}
+  if(bonusStartPending){
+   phase='bonus-start';render();return;
+  }
+  if(bonusActive&&freeLeft===0){
+   completedBonusTotal=freeTotal;
+   lastMessage='FEATURE COMPLETE · TOTAL '+money(completedBonusTotal);
+   phase='bonus-complete';render();return;
+  }
+  phase='idle';render();continueAutoplay();
  }
  function settle(next){
   board=next;display=board;pendingBoard=null;
@@ -241,7 +276,7 @@ export function createRacketsTrashStash(doc=globalThis.document,options={}){
    wildProgress=next.progress;retriggers=next.retriggers;multiplier=next.multiplier;
    freeLeft+=next.awardedSpins;
    if(next.awardedSpins)lastMessage='RETRIGGER! +'+next.awardedSpins+' FREE SPINS · ×'+multiplier+' · '+(retriggers*5)+'/25 EXTRA SPINS AWARDED';
-  }else if(result.trigger){freeLeft=result.trigger;freeTotal=0;retriggers=0;wildProgress=0;multiplier=1;spinCount=0;lastMessage='BONUS! '+freeLeft+' FREE SPINS AWARDED';}
+  }else if(result.trigger){freeLeft=result.trigger;freeTotal=0;retriggers=0;wildProgress=0;multiplier=1;spinCount=0;bonusActive=true;bonusStartPending=true;completedBonusTotal=null;lastMessage='BONUS! '+freeLeft+' FREE SPINS AWARDED';}
   else lastMessage=result.total?'WIN '+money(result.total):'NO WIN · KEEP SCAVENGING';
   if(result.collection)lastMessage='WILDS COLLECT PRIZES +'+money(result.collection)+' · '+lastMessage;
   if(result.wins.length){

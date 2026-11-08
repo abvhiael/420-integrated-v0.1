@@ -407,3 +407,37 @@
  .bb-hotbox-total-label,.bb-hotbox-total-unit{font-size:10px}
  .bb-game .bb-hotbox-splash-button{padding:9px 20px;font-size:18px}
 }
+
+/* Free Rides entry/exit art: wide matching Best Buds banners with live payout. */
+.bb-free-rides-splash .bb-free-rides-art{aspect-ratio:1672/465;width:min(1320px,97%);max-width:100%}
+.bb-free-rides-splash .bb-free-rides-art .bb-hotbox-splash-img{object-fit:fill}
+.bb-free-rides-copy{display:none;position:absolute;pointer-events:none;text-align:center}
+.bb-free-rides-splash-complete .bb-free-rides-copy{
+ display:flex;left:40.6%;top:51%;width:19%;height:25%;
+ flex-direction:column;align-items:center;justify-content:center;
+}
+.bb-free-rides-total-number{
+ font-size:clamp(25px,4vw,62px);font-weight:1000;
+ font-variant-numeric:tabular-nums;
+ line-height:1.05;color:#ffe66c;
+ text-shadow:0 3px 6px #210527,0 0 12px #46fb5e;
+}
+.bb-free-rides-total-unit{
+ color:#e7ffbc;font-size:clamp(9px,1.2vw,15px);font-weight:900;
+ text-shadow:0 2px 4px #180523;
+}
+.bb-free-rides-splash-trigger .bb-hotbox-art-fallback .bb-free-rides-copy{
+ display:flex;inset:10%;width:auto;height:auto;
+ flex-direction:column;align-items:center;justify-content:center;
+}
+.bb-free-rides-fallback-heading{color:#a7ff5d;font-size:clamp(25px,5vw,68px);text-shadow:0 3px #200734}
+.bb-free-rides-fallback-detail{color:#fff0ad;font-size:clamp(12px,2vw,22px);font-weight:900}
+.bb-free-rides-splash-complete .bb-hotbox-art-fallback .bb-free-rides-copy{
+ left:29%;width:42%;top:45%;height:42%;
+}
+@media(max-width:740px){
+ .bb-free-rides-splash{padding:8px}
+ .bb-free-rides-splash .bb-free-rides-art{width:100%}
+ .bb-free-rides-total-number{font-size:clamp(15px,4vw,30px)}
+ .bb-free-rides-total-unit{font-size:9px}
+}

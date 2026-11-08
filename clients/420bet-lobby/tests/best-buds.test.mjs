@@ -487,3 +487,56 @@ test('uploaded WILD PNG is the active reel symbol, including paytable, animation
  for(const src of wildSources.filter(v=>v.includes('sym_wild')))assert.ok(src.endsWith('/sym_wild.png'));
  root.stopAnimation();
 });
+
+test('Free Rides QA opens entry splash and player explicitly starts the eight spins',()=>{
+ const {document,window}=parseHTML('<html><body></body></html>');
+ const root=createBestBudsPractice(document,{rng:()=>.99});
+ const click=name=>{const el=[...root.querySelectorAll('button')].find(b=>b.textContent===name);assert.ok(el,name);el.dispatchEvent(new window.Event('click',{bubbles:true}));};
+ click('BONUS TEST');click('8 Free Rides');
+ assert.equal(root.getGameState().mode,'free');
+ assert.equal(root.getGameState().freeLeft,8);
+ assert.equal(root.getPresentationState().freeSplash,'trigger');
+ assert.match(root.querySelector('.bb-free-rides-splash-img')?.getAttribute('src')??root.querySelector('.bb-free-rides-splash .bb-hotbox-splash-img').getAttribute('src'),/bestbuds-free-rides-trigger\.png$/);
+ const credits=root.getGameState().balance;
+ click('START FREE RIDES');
+ assert.equal(root.getPresentationState().freeSplash,null);
+ assert.equal(root.getGameState().balance,credits);
+ click('FREE SPIN');assert.equal(root.getPresentationState().phase,'spinning');
+ root.querySelector('.bb-stage').dispatchEvent(new window.Event('click',{bubbles:true}));
+ if(root.getPresentationState().phase==='paylines')root.querySelector('.bb-stage').dispatchEvent(new window.Event('click',{bubbles:true}));
+ assert.equal(root.getGameState().freeLeft,7);
+ root.stopAnimation();
+});
+test('Free Rides completion banner presents real total and preserves balance until Continue',()=>{
+ const {document,window}=parseHTML('<html><body></body></html>');
+ const root=createBestBudsPractice(document,{rng:()=>.99});
+ const click=name=>{const el=[...root.querySelectorAll('button')].find(b=>b.textContent===name);assert.ok(el,name);el.dispatchEvent(new window.Event('click',{bubbles:true}));};
+ click('BONUS TEST');click('8 Free Rides');click('START FREE RIDES');
+ for(let i=0;i<8;i++){
+  click('FREE SPIN');
+  root.querySelector('.bb-stage').dispatchEvent(new window.Event('click',{bubbles:true}));
+  if(root.getPresentationState().phase==='paylines')root.querySelector('.bb-stage').dispatchEvent(new window.Event('click',{bubbles:true}));
+ }
+ assert.equal(root.getGameState().mode,'base');
+ assert.equal(root.getPresentationState().freeSplash,'complete');
+ const total=root.getPresentationState().summary;
+ assert.equal(root.querySelector('.bb-free-rides-total-number').textContent,total.toFixed(2));
+ assert.match(root.querySelector('.bb-free-rides-splash .bb-hotbox-splash-img').getAttribute('src'),/bestbuds-free-rides-complete\.png$/);
+ const balance=root.getGameState().balance;
+ click('CLICK TO CONTINUE');
+ assert.equal(root.getPresentationState().freeSplash,null);
+ assert.equal(root.getPresentationState().summary,null);
+ assert.equal(root.getGameState().balance,balance);
+ root.stopAnimation();
+});
+test('Info panel and Free Rides splash do not overlap or reset bonus state',()=>{
+ const {document,window}=parseHTML('<html><body></body></html>');
+ const root=createBestBudsPractice(document,{rng:()=>.99});
+ const click=name=>{const el=[...root.querySelectorAll('button')].find(b=>b.textContent===name);assert.ok(el,name);el.dispatchEvent(new window.Event('click',{bubbles:true}));};
+ click('BONUS TEST');click('8 Free Rides');click('START FREE RIDES');
+ click('INFO / PAYTABLE');
+ assert.equal(root.getGameState().freeLeft,8);
+ click('BACK TO GAME');
+ assert.equal(root.getGameState().freeLeft,8);
+ root.stopAnimation();
+});

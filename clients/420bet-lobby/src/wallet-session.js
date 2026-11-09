@@ -40,11 +40,12 @@ export function createWalletSessionClient({
   const session=await request('authenticate',{account,chainId:chain,nonce:challenge.nonce,signature});
   if(disposed||generation!==mine||session.account!==account||session.chainId!==chain||
     typeof session.token!=='string'||!/^[a-f0-9]{64}$/.test(session.token))throw Error('invalid session response');
-  current={token:session.token,account,chainId:chain};
+  if(!Number.isSafeInteger(session.expiresAt)||session.expiresAt<=Date.now())throw Error('expired login response');
+  current={token:session.token,account,chainId:chain,expiresAt:session.expiresAt};
   return {account,chainId:chain,readOnly:true};
  }
  async function status(){
-  const state=current;if(!state||disposed)throw Error('not authenticated');
+  const state=current;if(!state||disposed||state.expiresAt<=Date.now()){invalidate();throw Error('not authenticated');}
   const out=await request('status',{},state);
   if(current!==state||out.account!==state.account||out.chainId!==state.chainId||out.readOnly!==true)
    throw Error('stale or invalid session');
@@ -55,5 +56,5 @@ export function createWalletSessionClient({
   if(state)await request('revoke',{},state); // Propagate failure: do not claim remote revocation.
  }
  function dispose(){invalidate();disposed=true;for(const event of ['accountsChanged','chainChanged','disconnect'])provider.removeListener?.(event,listener);}
- return Object.freeze({connect,status,disconnect,dispose,get authenticated(){return !disposed&&Boolean(current);}});
+ return Object.freeze({connect,status,disconnect,dispose,get authenticated(){return !disposed&&Boolean(current&&current.expiresAt>Date.now());}});
 }

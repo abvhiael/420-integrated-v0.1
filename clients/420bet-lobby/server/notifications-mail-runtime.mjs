@@ -62,14 +62,19 @@ export async function createBetNotificationsMailRuntime({
   try{
    const before=await reader.readCheckpoint(env.BET_INDEXER_EVENT_CHECKPOINT);
    const observed=await reader.poll(before,{maxBlocks:64});
-   if(observed.reorganized)return false;
+   if(observed.reorganized)throw Error('canonical source reorganized during verification');
    const e=request.event;
    return observed.state.events.some(x=>x.chainId===e.chainId&&
     x.blockNumber===e.blockNumber&&x.blockHash===e.blockHash&&
     x.transactionHash===e.transactionHash&&x.logIndex===e.logIndex&&
     TYPE_NAMES[x.type]===request.kind&&
     (!x.account||x.account.toLowerCase()===e.account.toLowerCase()));
-  }catch{return false;}
+  }catch{
+   // No stale original can escape if the chain changes between the publisher
+   // scan and per-recipient verification. Freeze all transports durably.
+   await outbox.haltForReorg();
+   return false;
+  }
  };
  const providers={
   mail:create420MailProvider({origin:env.BET_MAIL_URL,

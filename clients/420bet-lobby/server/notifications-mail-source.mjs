@@ -23,20 +23,11 @@ export function createFinalizedBetNotificationPublisher({
   'independent Registry and private ownership authorities required');
  demand(typeof outbox?.enqueue==='function'&&typeof outbox?.haltForReorg==='function',
   'durable outbox required');
- return Object.freeze({async publish({maxBlocks=64}={}){
-  const approval=await verifyRegistry();
-  demand(approval?.result?.qualified===true&&approval.config,'unqualified Registry');
-  assertIndexerRegistryBinding(reader.config,approval.config);
-  const prior=await reader.readCheckpoint(checkpointPath);
-  const result=await reader.poll(prior,{maxBlocks});
-  if(result.reorganized){
-   await outbox.haltForReorg();
-   return {reorganized:true,queued:0,halted:true};
-  }
-  const previous=new Set(prior.events.map(key));
+ async function enqueueVerifiedEvents(approval,events,previousEvents=[]){
+  const previous=new Set(previousEvents.map(key));
   const sources=new Map(reader.config.contracts.map(s=>[s.address,s]));
   let queued=0,skipped=0;
-  for(const event of result.state.events){
+  for(const event of events){
    if(previous.has(key(event)))continue;
    const source=sources.get(event.contract),kind=TYPES[event.type];
    if(!source||source.role!==event.role||!VERTICAL[event.role]||!kind){skipped++;continue;}
@@ -75,10 +66,30 @@ export function createFinalizedBetNotificationPublisher({
     }
    }
   }
-  // Commit only after all verified owner deliveries have reached durable outbox.
-  // Crash before commit replays the same idempotent event keys.
-  if(typeof persistCheckpoint==='function')await persistCheckpoint(checkpointPath,result.state);
-  return {reorganized:false,queued,skipped,halted:false,
-   nextBlock:result.state.nextBlock??null,scanned:result.scanned??null};
- }});
+  return {queued,skipped};
+ }
+ return Object.freeze({
+  async replayCanonicalEvents(events){
+   demand(Array.isArray(events)&&events.length<=200000,'unverified replay events');
+   const approval=await verifyRegistry();
+   demand(approval?.result?.qualified===true&&approval.config,'unqualified Registry');
+   assertIndexerRegistryBinding(reader.config,approval.config);
+   return enqueueVerifiedEvents(approval,events,[]);
+  },
+  async publish({maxBlocks=64}={}){
+   const approval=await verifyRegistry();
+   demand(approval?.result?.qualified===true&&approval.config,'unqualified Registry');
+   assertIndexerRegistryBinding(reader.config,approval.config);
+   const prior=await reader.readCheckpoint(checkpointPath);
+   const result=await reader.poll(prior,{maxBlocks});
+   if(result.reorganized){
+    await outbox.haltForReorg();
+    return {reorganized:true,queued:0,halted:true};
+   }
+   const counts=await enqueueVerifiedEvents(approval,result.state.events,prior.events);
+   if(typeof persistCheckpoint==='function')await persistCheckpoint(checkpointPath,result.state);
+   return {reorganized:false,...counts,halted:false,
+    nextBlock:result.state.nextBlock??null,scanned:result.scanned??null};
+  }
+ });
 }

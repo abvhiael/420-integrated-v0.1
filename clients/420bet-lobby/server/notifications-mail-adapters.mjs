@@ -4,7 +4,7 @@ import {createHash} from 'node:crypto';
 const HEX=/^0x[0-9a-fA-F]{64}$/;
 const ACCT=/^0x[0-9a-fA-F]{40}$/;
 const ID=/^[a-zA-Z0-9._:-]{1,128}$/;
-const TENANT=/^[a-z][a-z0-9-]{1,39}$/;
+const TENANT=/^[a-z0-9][a-z0-9-]{1,39}$/;
 const KINDS=new Set(['wager-accepted','wager-settled','wager-voided','game-paused','game-resumed','reorg-retracted']);
 const CHANNELS=new Set(['notifications','mail']);
 const err=(reason)=>{throw Error('420Bet delivery: '+reason);};
@@ -33,6 +33,7 @@ export function makeBetDelivery({tenant,userId,channel,subscriptionId,recipient,
  requireValid(CHANNELS.has(channel),'invalid channel');
  requireValid(source==='420Indexer-finalized'&&finality==='finalized','non-final source rejected');
  str(policyVersion,'policy version');
+ requireValid(!event?.type||event.type===kind,'event type substitution');
  const verified=verifiedEnvelope({...event,type:kind});
  // The destination is an opaque owner-scoped 420Identity account or
  // Notifications subscription route. Never accept raw email addresses.

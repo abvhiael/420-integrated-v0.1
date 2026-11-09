@@ -16,13 +16,16 @@ func TestPersistentConsentRevocationAndVersionTombstone(t *testing.T){
  if s.Check(query()).Consent {t.Fatal("unknown subscription must deny")}
  v,err:=s.Apply(fixture(),0);if err!=nil{t.Fatal(err)}
  if v.Revision!=1||!s.Check(query()).Consent{t.Fatal("missing initial opt-in")}
+ if err=s.Close();err!=nil{t.Fatal(err)}
  s2,err:=Open(path);if err!=nil{t.Fatal(err)}
  if !s2.Check(query()).Consent {t.Fatal("restart lost consent")}
  v,err=s2.Revoke(query(),1);if err!=nil{t.Fatal(err)}
  if !v.Revoked||v.Consent||v.Active{t.Fatal("revocation not durable")}
+ if err=s2.Close();err!=nil{t.Fatal(err)}
  s3,err:=Open(path);if err!=nil{t.Fatal(err)}
  if allowed:=s3.Check(query());allowed.Consent||!allowed.Revoked{t.Fatal("revocation bypassed after restart")}
  if _,err=s3.Apply(fixture(),2);err==nil{t.Fatal("revoked subscription reactivated")}
+ defer s3.Close()
  if _,err=s3.Revoke(query(),1);err==nil{t.Fatal("stale revision accepted")}
 }
 func TestConsentFailClosedForCrossScopeAndMute(t *testing.T){

@@ -32,6 +32,7 @@ on:
       - 'clients/420bet-lobby/server/notifications-mail-runtime.mjs'
       - 'clients/420bet-lobby/tests/notifications-mail-runtime.test.mjs'
       - 'clients/420bet-lobby/tests/notifications-mail-source.test.mjs'
+      - 'clients/420bet-lobby/tests/reorg-compensation.test.mjs'
       - 'clients/420bet-lobby/tests/notifications-mail-integration.test.mjs'
       - 'clients/420bet-lobby/server/verify-registry.mjs'
       - 'clients/420bet-lobby/tests/registry-verifier.test.mjs'
@@ -88,6 +89,7 @@ jobs:
             clients/420bet-lobby/tests/identity-runtime.test.mjs \
             clients/420bet-lobby/tests/registry-verifier.test.mjs \
             clients/420bet-lobby/tests/notifications-mail-integration.test.mjs \
+            clients/420bet-lobby/tests/reorg-compensation.test.mjs \
             clients/420bet-lobby/tests/notifications-mail-source.test.mjs \
             clients/420bet-lobby/tests/notifications-mail-runtime.test.mjs \
             clients/420bet-lobby/tests/delivery-worker.test.mjs \
@@ -128,6 +130,7 @@ jobs:
           node --check clients/420bet-lobby/server/notifications-mail-outbox.mjs
           node --check clients/420bet-lobby/server/notifications-mail-source.mjs
           node --check clients/420bet-lobby/server/notifications-mail-runtime.mjs
+          node --check clients/420bet-lobby/tests/reorg-compensation.test.mjs
           node --check clients/420bet-lobby/tests/notifications-mail-integration.test.mjs
           node --check clients/420bet-lobby/tests/notifications-mail-source.test.mjs
           node --check clients/420bet-lobby/tests/notifications-mail-runtime.test.mjs

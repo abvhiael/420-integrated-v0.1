@@ -65,3 +65,48 @@ test('runtime refuses to start without independently supplied recipient/consent 
   BET_MAIL_URL:'https://mail.example/'};
  await assert.rejects(createBetNotificationsMailRuntime({env}),/qualified Identity, Notifications, consent and Mail providers required/);
 });
+
+test('running backend automatically polls revoked consent and cancels queued Mail before dispatch',async()=>{
+ const dir=await mkdtemp(join(tmpdir(),'bet7-revoke-timer-'));
+ const fx=sourceFixture();
+ const manifestPath=join(dir,'manifest.json');
+ await writeFile(manifestPath,JSON.stringify(fx.manifest));
+ const env={BET_INDEXER_EVENT_MANIFEST:manifestPath,
+  BET_INDEXER_EVENT_CHECKPOINT:join(dir,'checkpoint.json'),
+  BET_DELIVERY_OUTBOX_PATH:join(dir,'outbox.json'),
+  BET_MAIL_URL:'https://mail.example/',
+  BET_REVOCATION_POLL_MS:'250'};
+ let available=false,runtime;
+ const record={sequence:1,tenant:'420bet',userId:'subject-1',subscriptionId:'sub-1',
+  revision:2,reason:'revoked'};
+ try{
+  runtime=await createBetNotificationsMailRuntime({
+   env,verifyRegistry:async()=>fx.registry,readerFactory:()=>fx.reader,
+   resolveAudience:async()=>[{ownershipVerified:true,account:A(6),
+    gameVersionId:H(12),tenant:'420bet',userId:'subject-1',
+    subscriptions:[{channel:'mail',id:'sub-1',recipient:'recipient-1',policyVersion:'policy-1'}]}],
+   checkConsent:async req=>({tenant:req.tenant,userId:req.userId,subscriptionId:req.subscriptionId,
+    recipient:req.recipient,channel:req.channel,policyVersion:req.policyVersion,
+    active:true,muted:false,revoked:false,consent:true}),
+   readRevocations:async(cursor)=>available&&cursor===0?[record]:[],
+   authorizeMailActor:async()=>({sender:'sender-id',authorization:'Bearer '+'a'.repeat(40)}),
+   notifications:{deliverAuthenticated:async()=>{throw Error('unreachable')},
+    readReceipt:async()=>{throw Error('unreachable')},cancelDelivery:async()=>({cancelled:true})}
+  });
+  assert.equal((await runtime.publish()).queued,1);
+  assert.equal((await runtime.outbox.summary()).byStatus.pending,1);
+  available=true;
+  let cancelled=false;
+  for(let i=0;i<30;i++){
+   await new Promise(resolve=>setTimeout(resolve,25));
+   cancelled=(await runtime.outbox.summary()).byStatus.cancelled===1;
+   if(cancelled)break;
+  }
+  assert.equal(cancelled,true,'periodic consumer never cancelled withdrawn subscription');
+  assert.equal(await runtime.outbox.getRevocationCursor(),1);
+  assert.equal((await runtime.drain()).processed,0);
+ }finally{
+  if(runtime)await runtime.stop();
+  await rm(dir,{recursive:true,force:true});
+ }
+});

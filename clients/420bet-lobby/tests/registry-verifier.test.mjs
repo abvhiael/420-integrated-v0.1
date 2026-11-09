@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {keccak256} from 'viem';
+import {keccak256,verifyMessage} from 'viem';
+import {privateKeyToAccount} from 'viem/accounts';
 import {createBetRegistryVerifier,validateBetRegistryManifest,registryManifestDigest,assertIndexerRegistryBinding} from '../server/registry-verifier.mjs';
 const H=n=>'0x'+n.toString(16).padStart(64,'0'),A=n=>'0x'+n.toString(16).padStart(40,'0');
 const CODE='0x6001600055',RUNTIME=keccak256(CODE),chain='420';
@@ -174,4 +175,21 @@ test('wrong casino settlement source, incorrect wager ledger dependencies fail c
  f.client.readContract=old;
  f.game.settlement.address=A(200);
  assert.throws(()=>f.verified(),/approval digest/);
+});
+
+test('independent manifest approval checks genuine EIP-191 signature of immutable config digest',async()=>{
+ const f=fixture(),signer=privateKeyToAccount('0x'+'1'.repeat(64));
+ f.manifest.approvalAuthority=signer.address;
+ f.manifest.approvalSignature=await signer.signMessage({
+  message:'420Bet registry manifest v1\\n'+f.manifest.approvalDigest
+ });
+ f.client.verifyMessage=verifyMessage;
+ const valid=createBetRegistryVerifier({manifest:f.manifest,client:f.client,
+  trustedApprover:signer.address,requiredVerticals:['casino']});
+ assert.equal((await valid.verify()).qualified,true);
+ f.manifest.approvalSignature=await privateKeyToAccount('0x'+'2'.repeat(64)).signMessage({
+  message:'420Bet registry manifest v1\\n'+f.manifest.approvalDigest
+ });
+ await assert.rejects(createBetRegistryVerifier({manifest:f.manifest,client:f.client,
+  trustedApprover:signer.address,requiredVerticals:['casino']}).verify(),/signature not verified/);
 });

@@ -17,21 +17,7 @@ const proxy=async(uri,options)=>{
  const url=uri.replace('https://mail.local-qualification.invalid',actualMail)
   .replace('https://notifications.local-qualification.invalid',actualNotify);
  assert(url.startsWith(actualMail)||url.startsWith(actualNotify));
- const response=await fetch(url,options);
- if(url.startsWith(actualMail)&&new URL(url).pathname==='/v1/outbox'&&response.ok){
-  const reply=await response.clone().json();
-  const expected=JSON.parse(options.body);
-  process.stderr.write('Go Mail queue schema diagnostics '+JSON.stringify({
-   keys:Object.keys(reply),status:reply.status,idPattern:/^[A-Za-z0-9._:-]{1,128}$/.test(reply.id),
-   idempotencyMatches:reply.idempotency_key===expected.idempotency_key,
-   ownerMatches:reply.owner===expected.sender,recipientMatches:reply.recipient===expected.recipient
-  })+'\\n');
- }
- if(!response.ok){
-  const path=new URL(url).pathname;
-  process.stderr.write('Go HTTP boundary rejected '+(options?.method??'GET')+' '+path+' status='+response.status+'\\n');
- }
- return response;
+ return fetch(url,options);
 };
 const mailBroker=createVerified420MailActorBroker({
  origin:mailOrigin,sender:'sender-id',serviceToken:config.LOCAL_GO_MAIL_TOKEN,fetcher:proxy});
@@ -54,15 +40,7 @@ function request(channel){
    blockNumber:'24',blockHash:H(25),transactionHash:H(26),logIndex:'0'}};
 }
 const outboxArgs={path:config.LOCAL_GO_OUTBOX_PATH,verifyEvent:async()=>true,
- checkConsent:consent,providers:{mail:{
-  ...mail,deliver:async d=>{
-   try{return await mail.deliver(d);}
-   catch(error){
-    process.stderr.write('Go Mail adapter rejected receipt: '+String(error?.message).slice(0,150)+'\\n');
-    throw error;
-   }
-  }
- },notifications},baseBackoffMs:50};
+ checkConsent:consent,providers:{mail,notifications},baseBackoffMs:50};
 let outbox;
 try{
  await mailBroker.checkReadiness();

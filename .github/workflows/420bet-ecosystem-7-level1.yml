@@ -4,6 +4,9 @@ on:
     paths:
       - 'clients/420bet-lobby/server/ecosystem.mjs'
       - 'clients/420bet-lobby/server/wallet-identity-sessions.mjs'
+      - 'clients/420bet-lobby/server/wallet-session-http.mjs'
+      - 'clients/420bet-lobby/src/wallet-session.js'
+      - 'clients/420bet-lobby/tests/wallet-session-http.test.mjs'
       - 'clients/420bet-lobby/server/canonical-identity-eligibility.mjs'
       - 'clients/420bet-lobby/tests/wallet-identity-integration.test.mjs'
       - 'clients/420bet-lobby/server/indexer-event-*.mjs'

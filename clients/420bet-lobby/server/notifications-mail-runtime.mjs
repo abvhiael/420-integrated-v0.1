@@ -1,5 +1,6 @@
 import {readFile} from 'node:fs/promises';
 import {createRemoteBetOwnershipResolver} from './ownership-resolver.mjs';
+import {create420NotificationsConsentAuthority} from './notifications-consent-authority.mjs';
 import {createIndexerEventReader} from './indexer-event-reader.mjs';
 import {verifyConfiguredRegistry} from './verify-registry.mjs';
 import {openBetDeliveryOutbox} from './notifications-mail-outbox.mjs';
@@ -33,7 +34,10 @@ export async function createBetNotificationsMailRuntime({
   env.BET_OWNERSHIP_CHAIN_ID?createRemoteBetOwnershipResolver({
    origin:env.BET_OWNERSHIP_AUTHORITY_URL,bearerToken:env.BET_OWNERSHIP_AUTHORITY_TOKEN,
    chainId:env.BET_OWNERSHIP_CHAIN_ID,fetcher}):null);
- fail(typeof ownership==='function'&&typeof checkConsent==='function'&&
+ const consent=checkConsent??(env.BET_NOTIFICATIONS_CONSENT_URL&&env.BET_NOTIFICATIONS_CONSENT_TOKEN?
+  create420NotificationsConsentAuthority({origin:env.BET_NOTIFICATIONS_CONSENT_URL,
+   bearerToken:env.BET_NOTIFICATIONS_CONSENT_TOKEN,fetcher}):null);
+ fail(typeof ownership==='function'&&typeof consent==='function'&&
   typeof authorizeMailActor==='function'&&notifications&&
   ['deliverAuthenticated','readReceipt','cancelDelivery'].every(k=>typeof notifications[k]==='function'),
   'qualified Identity, Notifications, consent and Mail providers required');
@@ -60,7 +64,7 @@ export async function createBetNotificationsMailRuntime({
   notifications:create420NotificationsProvider(notifications)
  };
  const outbox=await openBetDeliveryOutbox({path:env.BET_DELIVERY_OUTBOX_PATH,
-  verifyEvent,checkConsent,providers});
+  verifyEvent,checkConsent:consent,providers});
  const publisher=createFinalizedBetNotificationPublisher({
   reader,checkpointPath:env.BET_INDEXER_EVENT_CHECKPOINT,
   verifyRegistry:()=>verifyRegistry({env,indexerManifest:manifest}),

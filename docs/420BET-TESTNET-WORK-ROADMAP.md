@@ -272,6 +272,14 @@ The remaining tournament network work is consolidated below. This supersedes the
 
 **Official testnet and operational acceptance:** deploy real 420Notifications and 420Bet backend behind TLS/private service routing, rotate/store genuine separate secrets, verify canonical Identity and subscription ownership against actual user actions, prove persistence across genuine deployment restarts, revoke and mute before/during delivery, demonstrate Mail/Notifications provider cancellation and receipts, retain audit evidence, independently approve privacy/retention and activation. No live subscriber, valid user opt-in, production ingress or release authorization is claimed.
 
+## TN-BET-7-REORG-COMPENSATION — live reorganization and cancellation recovery acceptance
+
+**Local implementation present / operational proof outstanding.** BET-AUDIT-7 now includes a verified full canonical replay, deterministic privacy-redacted corrections for already delivered orphaned notices, durable `replayPending` and cancellation retry markers, idempotent reprojection of replacement canonical events, receipt reconciliation of cancellations that lose an in-flight race, current opt-in check on corrections, and a prohibition against boolean-only resume.
+
+**Pre-testnet work:** test worst-case recovery beyond the bounded 32768-block rebuild window, atomicity/failover between persisted Indexer checkpoint and the outbox replay marker, source/ownership revocations during prolonged replay, actual provider-side idempotency and receipt race consistency, delivery of corrections after opt-in renewal, and separately verify that consent withdrawal itself never causes unsolicited compensations. Obtain current exact-SHA Node/Go CI and independent privacy/security review.
+
+**Official testnet acceptance:** demonstrate genuine finalized source reorganization, independent signed Registry and Indexer canonical rebuilding, correction to the exact verified owner and subscription using actual authenticated Mail/Notifications transport, cancellation of queued and provider-pending messages, a late delivered receipt recovery, crash injection at every durable step, metric alerting and monitored restart, plus signed release acceptance. No funded wagering or automatic live messaging is authorized.
+
 ## TN-BET-7-DELIVERY-WORKER — operational deployment and recovery qualification
 
 **OPEN live acceptance / repository implementation committed.** The BET-AUDIT-7 branch now contains a scheduled Node service entrypoint, serialized revocation → finalized event publication → delivery reconciliation, durable canonical event checkpoint commits after outbox enqueue, private atomic worker health/cycle checkpoint, bounded backoff, loopback monitoring, graceful shutdown and restart replay. It uses the existing single-writer outbox and authenticated Mail broker. No production process or testnet service was deployed.

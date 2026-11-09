@@ -15,6 +15,9 @@ on:
       - 'notifications/betconsent/**'
       - 'notifications/runtime/**'
       - 'notifications/cmd/notifications420/**'
+      - 'clients/420bet-lobby/server/delivery-worker.mjs'
+      - 'clients/420bet-lobby/server/run-delivery-worker.mjs'
+      - 'clients/420bet-lobby/tests/delivery-worker.test.mjs'
       - 'clients/420bet-lobby/server/mail-auth-broker.mjs'
       - 'clients/420bet-lobby/tests/mail-auth-broker.test.mjs'
       - 'clients/420bet-lobby/server/ownership-resolver.mjs'
@@ -87,6 +90,7 @@ jobs:
             clients/420bet-lobby/tests/notifications-mail-integration.test.mjs \
             clients/420bet-lobby/tests/notifications-mail-source.test.mjs \
             clients/420bet-lobby/tests/notifications-mail-runtime.test.mjs \
+            clients/420bet-lobby/tests/delivery-worker.test.mjs \
             clients/420bet-lobby/tests/mail-auth-broker.test.mjs \
             clients/420bet-lobby/tests/ownership-resolver.test.mjs \
             clients/420bet-lobby/tests/notifications-consent-authority.test.mjs \
@@ -109,6 +113,9 @@ jobs:
           node --check clients/420bet-lobby/server/wallet-signature-verifier.mjs
           node --check clients/420bet-lobby/server/identity-runtime.mjs
           node --check clients/420bet-lobby/server/registry-verifier.mjs
+          node --check clients/420bet-lobby/server/delivery-worker.mjs
+          node --check clients/420bet-lobby/server/run-delivery-worker.mjs
+          node --check clients/420bet-lobby/tests/delivery-worker.test.mjs
           node --check clients/420bet-lobby/server/mail-auth-broker.mjs
           node --check clients/420bet-lobby/tests/mail-auth-broker.test.mjs
           node --check clients/420bet-lobby/server/ownership-resolver.mjs

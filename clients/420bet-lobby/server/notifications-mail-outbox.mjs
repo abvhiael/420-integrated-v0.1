@@ -51,9 +51,11 @@ export async function openBetDeliveryOutbox({
     'invalid durable outbox');
   }catch(error){
    if(error?.code!=='ENOENT')throw error;
-   data={schema:1,items:{}};
+   data={schema:1,items:{},halted:false};
    await atomicWrite(path,data);
   }
+  assert(data.halted===undefined||typeof data.halted==='boolean','invalid durable halt state');
+  if(data.halted===undefined)data.halted=false;
   for(const [key,item] of Object.entries(data.items)){
    assert(key===item.delivery?.deliveryKey&&STATES.has(item.status),
     'invalid durable delivery item');
@@ -101,6 +103,7 @@ export async function openBetDeliveryOutbox({
   const d=makeBetDelivery(request);
   assert(await ensureConsent(d),'consent denied or withdrawn');
   return withWrite(async state=>{
+   assert(!state.halted,'canonical reorg halt active');
    const previous=state.items[d.deliveryKey];
    if(previous){
     assert(JSON.stringify(previous.delivery)===JSON.stringify(d),'idempotency conflict');
@@ -164,9 +167,18 @@ export async function openBetDeliveryOutbox({
    return total;
   });
  }
+ async function haltForReorg(){
+  return withWrite(async state=>{state.halted=true;return {halted:true};});
+ }
+ async function resumeAfterCanonicalReplay(verifyCanonicalRebuild){
+  assert(typeof verifyCanonicalRebuild==='function','trusted rebuild verification required');
+  assert((await verifyCanonicalRebuild())===true,'canonical rebuild not independently verified');
+  return withWrite(async state=>{state.halted=false;return {halted:false};});
+ }
  async function drain({limit=20}={}){
   assert(Number.isInteger(limit)&&limit>0&&limit<=100,'invalid delivery batch');
   const items=await withWrite(async state=>{
+   assert(!state.halted,'canonical reorg halt active');
    const t=clock(),out=[];
    for(const item of Object.values(state.items)){
     if(out.length>=limit)break;
@@ -226,5 +238,5 @@ export async function openBetDeliveryOutbox({
  async function get(key){await operation;return scrub(data.items[key]);}
  async function summary(){await operation;return {total:Object.keys(data.items).length,byStatus:counts(data)};}
  async function close(){await operation;closed=true;await rm(lock,{recursive:true});}
- return Object.freeze({enqueue,cancel,revokeSubscription,retractEvent,drain,get,summary,close});
+ return Object.freeze({enqueue,cancel,revokeSubscription,retractEvent,haltForReorg,resumeAfterCanonicalReplay,drain,get,summary,close});
 }

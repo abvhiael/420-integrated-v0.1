@@ -9,6 +9,7 @@ import (
 	"sync/atomic"
 
  "github.com/420integrated/420-integrated/notifications/betconsent"
+ "github.com/420integrated/420-integrated/notifications/betdelivery"
 )
 
 type IndexerProbe interface {
@@ -21,6 +22,7 @@ type Service struct {
 	probe IndexerProbe
 	ready atomic.Bool
  consent http.Handler
+ delivery http.Handler
 }
 
 func NewService(cfg Config, probe IndexerProbe) (*Service, error) {
@@ -59,9 +61,16 @@ func (s *Service) EnableBetConsent(store *betconsent.Store, readToken,writeToken
  return nil
 }
 
+func (s *Service) EnableBetDelivery(store *betdelivery.Store,consent *betconsent.Store,token string)error{
+ handler,err:=betdelivery.Handler(store,consent,token)
+ if err!=nil{return err}
+ s.delivery=handler
+ return nil
+}
 func (s *Service) Handler() http.Handler {
 	mux := http.NewServeMux()
  if s.consent!=nil {mux.Handle("/v1/420bet/subscriptions/",s.consent)}
+ if s.delivery!=nil {mux.Handle("/v1/420bet/deliveries/",s.delivery)}
 	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, _ *http.Request) {
 		writeJSON(w, http.StatusOK, map[string]any{
 			"service":   "420Notifications",

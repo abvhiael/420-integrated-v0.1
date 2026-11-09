@@ -9,6 +9,7 @@ import (
 	"time"
 
  "github.com/420integrated/420-integrated/notifications/betconsent"
+ "github.com/420integrated/420-integrated/notifications/betdelivery"
 
 	notifyruntime "github.com/420integrated/420-integrated/notifications/runtime"
 )
@@ -30,6 +31,11 @@ func main() {
   store,e:=betconsent.Open(path);if e!=nil{log.Fatal(e)}
   defer store.Close()
   if e=service.EnableBetConsent(store,readToken,writeToken);e!=nil{log.Fatal(e)}
+  if deliveryPath:=os.Getenv("NOTIFICATIONS_BET_DELIVERY_PATH");deliveryPath!="" {
+   ledger,e:=betdelivery.Open(deliveryPath);if e!=nil{log.Fatal(e)}
+   defer ledger.Close()
+   if e=service.EnableBetDelivery(ledger,store,mustEnv("NOTIFICATIONS_BET_DELIVERY_TOKEN"));e!=nil{log.Fatal(e)}
+  }
  }
  ctx, cancel := context.WithTimeout(context.Background(), cfg.RequestTimeout)
 	defer cancel()

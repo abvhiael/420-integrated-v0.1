@@ -72,3 +72,29 @@ The 420Bet backend's `notifications-revocation-consumer.mjs` validates the authe
 Configure `BET_MAIL_URL` (HTTPS root), `BET_MAIL_SENDER_ID` (approved 420Identity/Mail sender) and `BET_MAIL_ACTOR_TOKEN` (server-only token, 32+ characters). The composed runtime can still receive an explicitly trusted `authorizeMailActor` override for isolated tests/integrations. The broker never fabricates or mints a credential: a genuine Mail deployment must independently verify the token through its existing `Authenticate` implementation and the actor through `IdentityDirectory`. An attacker-provided header alone is not an acceptable deployed authentication provider.
 
 **Acceptance boundary:** local Go/Node qualification checks actor introspection, wrong sender, unavailable/rotated credentials, cross-tenant/recipient scoping, and runtime delivery composition. Actual independently controlled credential issuance and rotation, deployed 420Mail authentication implementation, network-hosted actor identity and final operational acceptance remain OPEN under `TN-BET-7-NOTIFY-MAIL`. No real credential, production send or independent approval is asserted.
+
+
+## BET-AUDIT-7 operational delivery worker — scheduled lifecycle (2026-11-09)
+
+`clients/420bet-lobby/server/delivery-worker.mjs` runs the server-only, single-writer operational loop: **(1)** reconcile the authenticated durable revocation feed, **(2)** verify/publish finalized Registry-bound Indexer events to the private outbox, **(3)** dispatch eligible Mail/Notifications deliveries and poll receipts, and **(4)** persist bounded monitoring checkpoints. The new Indexer reader `persistCheckpoint` method stores the canonical event cursor and event history only *after all selected deliveries are durably enqueued*. An interrupted checkpoint write replays idempotent outbox keys. A reorg halts the outbox and fails the worker cycle; resumption requires independent canonical replay approval, not a timer.
+
+The worker has configurable no-overlap scheduling, bounded exponential retry between cycles, private (0600) atomic fsync/rename monitoring checkpoints, an exclusive single-instance writer lock, interrupted-run detection/recovery counters, restart-safe outbox replay (including persisted `dispatching` → `retry`), revocation/remote-cancellation replay, explicit signal-driven shutdown and credential-free health/status data. Its internal state contains cycle timings, counts, last sanitized error category, processed-block position and delivery counts, **not** token material, recipient identity, transaction payloads or message contents.
+
+**Entrypoint:** `npm run worker:delivery` in `clients/420bet-lobby`. This is a **Node backend process**, not the Cloudflare static-asset Worker and not a browser route. Besides the validated BET-AUDIT-7 runtime variables, configure:
+
+| Variable | Behavior |
+| --- | --- |
+| `BET_NOTIFICATIONS_PROVIDER_MODULE` | Absolute, operator-approved private module exporting `notifications` or default object with `deliverAuthenticated`, `readReceipt`, `cancelDelivery` callbacks. No fabricated Notifications HTTP endpoint or default credentials. |
+| `BET_DELIVERY_WORKER_STATE_PATH` | Absolute private worker monitoring checkpoint path, distinct from outbox and Indexer checkpoint paths. |
+| `BET_DELIVERY_INTERVAL_MS` | Default 5000; 100–3600000 ms. |
+| `BET_DELIVERY_RETRY_MAX_MS` | Default 60000; retry backoff cap (must be at least interval). |
+| `BET_DELIVERY_STALE_AFTER_MS` | Default 30000; must be at least interval. |
+| `BET_DELIVERY_MAX_BLOCKS` / `BET_DELIVERY_DRAIN_LIMIT` | Defaults 64 / 20; bounded 1–64 blocks / 1–100 deliveries per cycle. |
+| `BET_DELIVERY_MONITOR_HOST` / `BET_DELIVERY_MONITOR_PORT` | Loopback only (`127.0.0.1` default), port 8427 by default. |
+| `BET_REVOCATION_POLL_MS` | Separate continuous consent polling interval; default 1000 ms. |
+
+**Monitoring:** `GET /healthz` reports worker process and last cycle status, `GET /readyz` returns HTTP 503 if its successful cycle is stale, a cycle has failed, or revocation health failed; `GET /metrics` returns sanitized counters and outbox statuses without private delivery envelopes. The monitor only binds to loopback; expose it to infrastructure monitoring through a separately secured proxy, not a public route. Readiness does not substitute for underlying independent service authorization or canonical network proof.
+
+**Crash recovery:** The outbox already persists retry state and cannot be opened by a second writer. Worker state records `inFlight` before processing and clears it after completion; an interrupted run is detected and its recovery counter incremented at next trusted startup. The same Indexer/outbox checkpoint prevents duplicate *logical* deliveries; downstream Mail/Notifications providers must honor idempotency keys for exactly-once external effects. An existing `.lock` is never stolen automatically: an operator must first establish that the old process is gone, then remove confirmed orphaned worker, outbox and Indexer lock files/directories if present. This fails closed instead of risking double dispatch. State files must reside on private, durable single-writer storage.
+
+**Not yet live:** A concrete independently qualified 420Notifications transport callback module, actual deployed Mail credentials, verified ownership/consent authorities, system supervisor deployment, external alerts, realistic crash/reorg/credential-rotation exercises and official testnet acceptance remain open in the canonical roadmap. Local source and tests do not prove an operational deployment.

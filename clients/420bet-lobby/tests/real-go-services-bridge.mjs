@@ -18,6 +18,15 @@ const proxy=async(uri,options)=>{
   .replace('https://notifications.local-qualification.invalid',actualNotify);
  assert(url.startsWith(actualMail)||url.startsWith(actualNotify));
  const response=await fetch(url,options);
+ if(url.startsWith(actualMail)&&new URL(url).pathname==='/v1/outbox'&&response.ok){
+  const reply=await response.clone().json();
+  const expected=JSON.parse(options.body);
+  process.stderr.write('Go Mail queue schema diagnostics '+JSON.stringify({
+   keys:Object.keys(reply),status:reply.status,idPattern:/^[A-Za-z0-9._:-]{1,128}$/.test(reply.id),
+   idempotencyMatches:reply.idempotency_key===expected.idempotency_key,
+   ownerMatches:reply.owner===expected.sender,recipientMatches:reply.recipient===expected.recipient
+  })+'\\n');
+ }
  if(!response.ok){
   const path=new URL(url).pathname;
   process.stderr.write('Go HTTP boundary rejected '+(options?.method??'GET')+' '+path+' status='+response.status+'\\n');

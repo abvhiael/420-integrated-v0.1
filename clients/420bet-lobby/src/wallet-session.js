@@ -48,7 +48,7 @@ export function createWalletSessionClient({
  }
  async function disconnect(){
   const state=current;invalidate();
-  if(state)try{await request('revoke',{},state);}catch{/* Local revocation cannot stand in for server revocation: TTL remains enforced. */}
+  if(state)await request('revoke',{},state); // Propagate failure: do not claim remote revocation.
  }
  function dispose(){invalidate();disposed=true;for(const event of ['accountsChanged','chainChanged','disconnect'])provider.removeListener?.(event,listener);}
  return Object.freeze({connect,status,disconnect,dispose,get authenticated(){return !disposed&&Boolean(current);}});

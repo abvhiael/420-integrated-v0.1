@@ -28,7 +28,11 @@ test('Worker proxies only approved same-origin route with operator backend authe
  const received=[],secret='z'.repeat(64);
  const env={BET_IDENTITY_ENABLED:'true',BET_SESSION_BACKEND_URL:'https://identity.example/',
   BET_SESSION_BACKEND_TOKEN:secret,ASSETS};
- const status=await worker.fetch(request('/api/420bet/session/capabilities'),env);
+ const status=await handle420BetWorker(request('/api/420bet/session/capabilities'),env,null,{sessionFetch:async(url,opts)=>{
+  assert.equal(url,'https://identity.example/api/420bet/session/ready');
+  assert.equal(opts.headers['X-Bet-Edge-Secret'],secret);
+  return new Response(JSON.stringify({ready:true}),{status:200,headers:{'content-type':'application/json'}});
+ }});
  assert.equal((await status.json()).readOnlyIdentityAvailable,true);
  const req=request('/api/420bet/session/challenge',{method:'POST',
   headers:{Origin:ORIGIN,'Content-Type':'application/json',Cookie:'should-not-be-forwarded'},body:'{}'});

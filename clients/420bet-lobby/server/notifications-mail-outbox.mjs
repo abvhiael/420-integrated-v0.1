@@ -305,10 +305,8 @@ export async function openBetDeliveryOutbox({
    return {halted:false,orphaned,corrections,cancelPending};
   });
  }
- async function resumeAfterCanonicalReplay(verifyCanonicalRebuild){
-  assert(typeof verifyCanonicalRebuild==='function','trusted rebuild verification required');
-  assert((await verifyCanonicalRebuild())===true,'canonical rebuild not independently verified');
-  return withWrite(async state=>{state.halted=false;return {halted:false};});
+ async function resumeAfterCanonicalReplay(recovery){
+  return reconcileCanonicalReplay(recovery);
  }
  async function drain({limit=20}={}){
   assert(Number.isInteger(limit)&&limit>0&&limit<=100,'invalid delivery batch');

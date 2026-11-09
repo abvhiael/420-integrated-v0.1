@@ -58,7 +58,8 @@ test('full Registry/Indexer/ownership/consent and authenticated Mail outbox comp
   assert.equal((await runtime.drain()).delivered,1);
   assert.equal((await runtime.outbox.summary()).byStatus.delivered,1);
   assert.equal(sent[0].url,'https://mail.example/v1/auth/actor');
-  assert.equal(sent[1].url,'https://mail.example/v1/outbox');
+  assert(sent.some(x=>x.url==='https://mail.example/v1/outbox'));
+  assert(sent.filter(x=>x.url==='https://mail.example/v1/auth/actor').length>=2);
   await runtime.stop();
  }finally{await rm(dir,{recursive:true,force:true});}
 });

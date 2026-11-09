@@ -38,7 +38,7 @@ A receipt contains `deliveryId`, `idempotencyKey`, `status` (`pending`, `deliver
 
 `NewDeliveryAPI(store, authenticate, consent, provenance)` requires three independently supplied functions: authenticated service identity, recipient ownership/consent, and canonical event provenance. An authenticated `DeliveryPrincipal` identifies the trusted service ID and tenant. `DeliveryConsent` must verify the requesting service's real authority over the recipient, subscription and canonical user and separately decide whether current consent is active. It returns `DeliveryDecision{Owner,Consent}`. New submissions require **both** flags and a fresh independently verified `DeliveryProvenance` check against canonical finalized Indexer/Registry evidence; receipt lookup and cancellation still require `Owner` even if consent has since been revoked. A tenant-wide token by itself does **not** establish ownership.
 
-`BearerServiceAuthenticator` is a constant-time authenticated single-service helper for local/private staging. It must be supplied a secret of at least 32 characters and an authorized server-side principal. The default `cmd/notifications420` **does not** install this helper or invent a subscriber/consent policy. Production needs approved key custody, authorization rotation, service-level rate limits and independent Identity/Notifications subscription binding before enabling the routes.
+`BearerServiceAuthenticator` is a constant-time authenticated single-service helper for local/private staging. It must be supplied a secret of at least 32 characters and an authorized server-side principal. The default `cmd/notifications420` **does not** enable the delivery API without all required settings. When configured, it installs the server credential authenticator and a strict, independent HTTPS owner/consent/provenance service transport; it never invents a positive subscription or policy. Production needs approved key custody, authorization rotation, service-level rate limits and independent Identity/Notifications subscription binding before enabling the routes.
 
 ## Durable storage and provider boundaries
 
@@ -51,3 +51,17 @@ The native API provides durable queueing, owner-scoped receipt reads, cancellati
 `go test ./notifications/...`, `go test -race ./notifications/...`, `go vet ./notifications/...` and `go build ./notifications/cmd/notifications420` run in `.github/workflows/notifications-audit.yml`. `delivery_api_test.go` covers authentication, readiness gate, cross-tenant/owner rejection, strict JSON, idempotency conflicts, privacy, cancellation with revoked consent, stale terminal state and persistence on restart.
 
 **Pre-testnet follow-on:** wire actual service-owned authenticated subscription/recipient authorization and a provider worker to the new API, add distributed store if multi-instance topology is chosen, complete the retry/dead-letter and reorg delivery recovery, and rerun multi-service integration tests. These are local engineering work, not claims of a live official network.
+
+## Optional real Go service configuration (all-or-nothing)
+
+The `notifications/cmd/notifications420` binary mounts native delivery routes only if **all five** environment variables are supplied; any partial configuration is a startup error:
+
+- `NOTIFICATIONS_DELIVERY_STORE` — absolute private single-writer durable receipt file path
+- `NOTIFICATIONS_DELIVERY_API_TOKEN` — at least 32-character internal 420Bet bearer secret, not browser-facing
+- `NOTIFICATIONS_DELIVERY_TENANT=420bet` — exact tenant binding
+- `NOTIFICATIONS_DELIVERY_AUTHORITY_URL` — independently approved HTTPS authority **root origin**
+- `NOTIFICATIONS_DELIVERY_AUTHORITY_TOKEN` — distinct server-to-server authority credential
+
+The authority is **not** yet deployed by this change. It must implement three POST checks, all authenticated with the authority token and all returning scoped JSON decisions: `/v1/notifications/owner`, `/v1/notifications/consent`, and `/v1/notifications/provenance`. Request JSON contains `principal:{ServiceID,Tenant}` (Go field names) and `delivery` (as above). Responses include `approved` plus exact `tenant,userId,subscriptionId,recipient,policyVersion,eventId,chainId,serviceId`. The Go client rejects transport failures, wrong chain/owner/tenant/subscription/version or scope, and unapproved responses. Ownership is independently rechecked for receipt lookup and cancellation. If consent is revoked, the owner may still cancel their already queued notice.
+
+An authenticated POST returning `pending` means **accepted to the private durable queue**, not delivered. Dispatch and external provider settlement remain the separate pre-testnet worker workstream. Activation also requires actual approved upstream identity/consent provenance authority and legitimate provider custody; a local positive fixture alone is not release acceptance.

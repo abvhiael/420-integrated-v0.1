@@ -4,6 +4,7 @@ on:
     paths:
       - 'clients/420bet-lobby/server/ecosystem.mjs'
       - 'clients/420bet-lobby/server/wallet-identity-sessions.mjs'
+      - 'clients/420bet-lobby/server/wallet-signature-verifier.mjs'
       - 'clients/420bet-lobby/server/wallet-session-http.mjs'
       - 'clients/420bet-lobby/src/wallet-session.js'
       - 'clients/420bet-lobby/tests/wallet-session-http.test.mjs'
@@ -35,6 +36,7 @@ jobs:
         run: |
           node --check clients/420bet-lobby/server/ecosystem.mjs
           node --check clients/420bet-lobby/server/wallet-identity-sessions.mjs
+          node --check clients/420bet-lobby/server/wallet-signature-verifier.mjs
           node --check clients/420bet-lobby/server/wallet-session-http.mjs
           node --check clients/420bet-lobby/src/wallet-session.js
           node --check clients/420bet-lobby/tests/wallet-session-http.test.mjs

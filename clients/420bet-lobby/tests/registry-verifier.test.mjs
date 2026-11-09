@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {keccak256} from 'viem';
-import {createBetRegistryVerifier,validateBetRegistryManifest} from '../server/registry-verifier.mjs';
+import {createBetRegistryVerifier,validateBetRegistryManifest,registryManifestDigest} from '../server/registry-verifier.mjs';
 const H=n=>'0x'+n.toString(16).padStart(64,'0'),A=n=>'0x'+n.toString(16).padStart(40,'0');
 const CODE='0x6001600055',RUNTIME=keccak256(CODE),chain='420';
 function fixture(){
@@ -19,8 +19,8 @@ function fixture(){
   authorizedRoles:[{action:'game-activate',scope:'game',principal:A(53)},
    {action:'wager-record',scope:'vault',scopeId:H(55),principal:A(54)}]};
  const manifest={schema:'bet-registry-manifest-v1',chainId:chain,genesisHash:H(400),
-  revision:'1',approved:true,approvalAuthority:'Independent policy authority',
-  approvalDigest:H(401),contracts,games:[game]};
+  revision:'1',approved:true,approvalAuthority:A(90),
+  approvalDigest:H(401),approvalSignature:'0x'+'c'.repeat(130),contracts,games:[game]};
  const states={
   getGame:{...Object.fromEntries(['gameId','gameVersionId','moduleVersionId','rulesetId','manifestHash'].map(k=>[k,game[k]])),
    randomnessProfileId:profiles.randomness.id,riskProfileId:profiles.risk.id,
@@ -32,9 +32,13 @@ function fixture(){
   getOperator:{operatorId:game.operatorId,operatorAccount:game.operatorAccount,
    manifestHash:game.operatorManifestHash,status:2,exists:true}
  };
- const calls=[],mutation={reorg:false,chain:420,code:{}};
+ const calls=[],mutation={reorg:false,chain:420,code:{},signature:true};
+ manifest.approvalDigest=registryManifestDigest(validateBetRegistryManifest(manifest));
  const client={
   getChainId:async()=>mutation.chain,
+  verifyMessage:async({address,message,signature})=>address===A(90)&&
+   message==='420Bet registry manifest v1\\n'+manifest.approvalDigest&&
+   signature===manifest.approvalSignature&&mutation.signature,
   getBlock:async({blockNumber,blockTag})=>{
    if(blockNumber===0n)return {number:0n,hash:manifest.genesisHash};
    if(blockTag==='finalized')return {number:500n,hash:H(501)};
@@ -66,11 +70,12 @@ function fixture(){
    throw Error('unknown function: '+functionName);
   }
  };
- return {manifest,contracts,game,profiles,states,mutation,calls,client};
+ return {manifest,contracts,game,profiles,states,mutation,calls,client,
+  verified:()=>createBetRegistryVerifier({manifest,client,trustedApprover:A(90)})};
 }
 test('canonical on-chain betting registries validate approved game, module, ruleset, settlement and roles',async()=>{
  const f=fixture();
- const out=await createBetRegistryVerifier({manifest:f.manifest,client:f.client}).verify();
+ const out=await f.verified().verify();
  assert.equal(out.qualified,true);assert.equal(out.readOnly,true);
  assert.equal(out.registryBlock,'500');assert.equal(out.games[0].id,f.game.id);
  assert.equal(out.games[0].settlement,f.game.settlement.address);
@@ -96,7 +101,7 @@ test('wrong chain, forged genesis and reorged finalized block all fail closed',a
  await assert.rejects(createBetRegistryVerifier({manifest:f.manifest,client:f.client}).verify(),/wrong chain/);
  f.mutation.chain=420;f.manifest.genesisHash=H(402);
  await assert.rejects(createBetRegistryVerifier({manifest:f.manifest,client:f.client}).verify(),/wrong genesis/);
- f.manifest.genesisHash=H(400);f.mutation.reorg=true;
+ f.manifest.genesisHash=H(400);f.manifest.approvalDigest=registryManifestDigest(validateBetRegistryManifest(f.manifest));f.mutation.reorg=true;
  await assert.rejects(createBetRegistryVerifier({manifest:f.manifest,client:f.client}).verify(),/reorg/);
 });
 test('missing on-chain game, wrong ruleset, wrong module code or unauthorized role denies',async()=>{
@@ -124,6 +129,7 @@ test('inactive module, invalid settlement implementation and inactive operator f
 test('optional canonical ProtocolRegistry service binding checked against actual implementation',async()=>{
  const f=fixture();
  f.game.protocolService={serviceId:H(60),version:1,manifestHash:H(61)};
+ f.manifest.approvalDigest=registryManifestDigest(validateBetRegistryManifest(f.manifest));
  const out=await createBetRegistryVerifier({manifest:f.manifest,client:f.client}).verify();
  assert(out.games.length===1);
  const original=f.client.readContract;
@@ -133,3 +139,13 @@ test('optional canonical ProtocolRegistry service binding checked against actual
  await assert.rejects(createBetRegistryVerifier({manifest:f.manifest,client:f.client}).verify(),/ProtocolRegistry service mismatch/);
 });
 export {fixture};
+
+test('missing external trust anchor, forged approval or changed module hash fail closed',async()=>{
+ const f=fixture();
+ assert.throws(()=>createBetRegistryVerifier({manifest:f.manifest,client:f.client}),/trusted approver/);
+ assert.throws(()=>createBetRegistryVerifier({manifest:f.manifest,client:f.client,trustedApprover:A(91)}),/wrong authority/);
+ f.mutation.signature=false;
+ await assert.rejects(f.verified().verify(),/signature not verified/);
+ f.mutation.signature=true;f.game.implementationCodeHash=H(901);
+ assert.throws(()=>f.verified(),/approval digest/);
+});

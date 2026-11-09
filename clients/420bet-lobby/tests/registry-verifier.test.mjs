@@ -104,51 +104,51 @@ test('invalid manifest and conflicting addresses/labels are denied before RPC',(
 test('wrong chain, forged genesis and reorged finalized block all fail closed',async()=>{
  const f=fixture();
  f.mutation.chain=421;
- await assert.rejects(createBetRegistryVerifier({manifest:f.manifest,client:f.client}).verify(),/wrong chain/);
+ await assert.rejects(f.verified().verify(),/wrong chain/);
  f.mutation.chain=420;f.manifest.genesisHash=H(402);
- await assert.rejects(createBetRegistryVerifier({manifest:f.manifest,client:f.client}).verify(),/wrong genesis/);
+ await assert.rejects(f.verified().verify(),/wrong genesis/);
  f.manifest.genesisHash=H(400);f.manifest.approvalDigest=registryManifestDigest(validateBetRegistryManifest(f.manifest));f.mutation.reorg=true;
- await assert.rejects(createBetRegistryVerifier({manifest:f.manifest,client:f.client}).verify(),/reorg/);
+ await assert.rejects(f.verified().verify(),/reorg/);
 });
 test('missing on-chain game, wrong ruleset, wrong module code or unauthorized role denies',async()=>{
  const f=fixture();
  f.states.getGame.status=3;
- await assert.rejects(createBetRegistryVerifier({manifest:f.manifest,client:f.client}).verify(),/paused/);
+ await assert.rejects(f.verified().verify(),/paused/);
  f.states.getGame.status=2;f.states.getGame.rulesetId=H(800);
- await assert.rejects(createBetRegistryVerifier({manifest:f.manifest,client:f.client}).verify(),/ruleset/);
+ await assert.rejects(f.verified().verify(),/ruleset/);
  f.states.getGame.rulesetId=f.game.rulesetId;f.mutation.code[f.game.implementation]='0x6002';
- await assert.rejects(createBetRegistryVerifier({manifest:f.manifest,client:f.client}).verify(),/runtime code hash/);
+ await assert.rejects(f.verified().verify(),/runtime code hash/);
  delete f.mutation.code[f.game.implementation];
  const orig=f.client.readContract;
  f.client.readContract=async args=>args.functionName==='isAuthorized'?false:orig(args);
- await assert.rejects(createBetRegistryVerifier({manifest:f.manifest,client:f.client}).verify(),/authorized role/);
+ await assert.rejects(f.verified().verify(),/authorized role/);
 });
 test('inactive module, invalid settlement implementation and inactive operator fail closed',async()=>{
  const f=fixture();
  f.states.getModule.status=3;
- await assert.rejects(createBetRegistryVerifier({manifest:f.manifest,client:f.client}).verify(),/module not approved/);
+ await assert.rejects(f.verified().verify(),/module not approved/);
  f.states.getModule.status=2;f.mutation.code[f.game.settlement.address]='0x';
- await assert.rejects(createBetRegistryVerifier({manifest:f.manifest,client:f.client}).verify(),/code absent/);
+ await assert.rejects(f.verified().verify(),/code absent/);
  delete f.mutation.code[f.game.settlement.address];f.states.getOperator.status=4;
- await assert.rejects(createBetRegistryVerifier({manifest:f.manifest,client:f.client}).verify(),/operator inactive/);
+ await assert.rejects(f.verified().verify(),/operator inactive/);
 });
 test('optional canonical ProtocolRegistry service binding checked against actual implementation',async()=>{
  const f=fixture();
  f.game.protocolService={serviceId:H(60),version:1,manifestHash:H(61)};
  f.manifest.approvalDigest=registryManifestDigest(validateBetRegistryManifest(f.manifest));
- const out=await createBetRegistryVerifier({manifest:f.manifest,client:f.client}).verify();
+ const out=await f.verified().verify();
  assert(out.games.length===1);
  const original=f.client.readContract;
  f.client.readContract=async args=>args.functionName==='getService'?{
   active:true,version:2,implementation:f.game.implementation,codeHash:RUNTIME
  }:original(args);
- await assert.rejects(createBetRegistryVerifier({manifest:f.manifest,client:f.client}).verify(),/ProtocolRegistry service mismatch/);
+ await assert.rejects(f.verified().verify(),/ProtocolRegistry service mismatch/);
 });
 export {fixture};
 
 test('missing external trust anchor, forged approval or changed module hash fail closed',async()=>{
  const f=fixture();
- assert.throws(()=>createBetRegistryVerifier({manifest:f.manifest,client:f.client}),/trusted approver/);
+ assert.throws(()=>createBetRegistryVerifier({manifest:f.manifest,client:f.client,requiredVerticals:['casino']}),/trusted approver/);
  assert.throws(()=>createBetRegistryVerifier({manifest:f.manifest,client:f.client,trustedApprover:A(91),requiredVerticals:['casino']}),/wrong authority/);
  f.mutation.signature=false;
  await assert.rejects(f.verified().verify(),/signature not verified/);
@@ -225,13 +225,14 @@ test('all four product classes require their own actual registered version/rules
   trustedApprover:A(90)}).verify();
  assert.equal(result.games.length,4);
  assert.deepEqual(new Set(result.games.map(x=>x.vertical)),new Set(['casino','poker','fantasy','sportsbook']));
+ const withFour=f.client.readContract;
  f.client.readContract=async p=>{
   if(p.functionName==='getGame'&&p.args[0]===more[2].gameVersionId)
    return {...f.states.getGame,gameId:more[2].gameId,
     gameVersionId:more[2].gameVersionId,moduleVersionId:more[2].moduleVersionId,
     rulesetId:more[2].rulesetId,manifestHash:more[2].manifestHash,
     gameMode:more[2].gameMode,productClass:3,status:2,exists:true};
-  return original(p);
+  return withFour(p);
  };
  await assert.rejects(createBetRegistryVerifier({manifest:f.manifest,client:f.client,
   trustedApprover:A(90)}).verify(),/vertical\/mode mismatch/);

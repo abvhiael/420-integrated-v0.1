@@ -95,3 +95,8 @@ Canonical roadmap: `docs/420NOTIFICATIONS-ROADMAP.md`.
 Infrastructure authority model: `docs/architecture/infrastructure/observability-status-operator-services.md`.
 
 Audit record: `docs/420NOTIFICATIONS-AUDIT.md`.
+
+
+## BET-AUDIT-7 private subscription bridge (optional, not activated by default)
+
+The existing `notifications420` process can host the new `notifications/betconsent` backend routes if `NOTIFICATIONS_BET_CONSENT_PATH`, `NOTIFICATIONS_BET_CONSENT_READ_TOKEN` and `NOTIFICATIONS_BET_CONSENT_WRITE_TOKEN` are configured. Reader and writer tokens must be different private service secrets; token possession does not prove end-user consent, so the write token belongs solely to an independently authorized consent-provisioning controller. Persistent single-writer JSON snapshots are mode 0600 with exclusive lock and permanent revocation tombstones. The authenticated `POST /v1/420bet/subscriptions/check` is consumed by 420Bet at enqueue and dispatch. `/apply` and `/revoke` require the separate writer token and monotonic revision. There is no public browser subscription API or multi-replica deployment capability. Test with `go test ./notifications/betconsent ./notifications/runtime` and the 420Bet Node consent tests; live and independent acceptance remains open.

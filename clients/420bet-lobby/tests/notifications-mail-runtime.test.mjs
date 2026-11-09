@@ -34,6 +34,7 @@ test('full Registry/Indexer/ownership/consent and authenticated Mail outbox comp
     gameVersionId:H(12),tenant:'420bet',userId:'subject-1',
     subscriptions:[{channel:'mail',id:'sub-1',
      recipient:'recipient-1',policyVersion:'policy-3'}]}],
+   readRevocations:async()=>[],
    checkConsent:async req=>({tenant:req.tenant,userId:req.userId,
     subscriptionId:req.subscriptionId,recipient:req.recipient,channel:req.channel,
     active:true,muted:false,revoked:false,consent:true,policyVersion:req.policyVersion}),

@@ -11,7 +11,7 @@ const validUrl=raw=>{
 };
 const ensure=(ok,msg)=>{if(!ok)throw Error(msg);};
 export function createRemoteBetIdentityAuthority({
- origin, bearerToken,chainId,policyVersion,fetcher=fetch,timeoutMs=8000
+ origin, bearerToken,chainId,policyVersion,policyApprovalDigest,fetcher=fetch,timeoutMs=8000
 }={}){
  const base=validUrl(origin);
  ensure(typeof bearerToken==='string'&&bearerToken.length>=32&&bearerToken.length<=4096&&
@@ -19,6 +19,8 @@ export function createRemoteBetIdentityAuthority({
  ensure(typeof chainId==='string'&&CHAIN.test(chainId),'invalid authority chain');
  ensure(typeof policyVersion==='string'&&/^[A-Za-z0-9][A-Za-z0-9._:-]{1,127}$/.test(policyVersion),
   'approved policy version required');
+ ensure(typeof policyApprovalDigest==='string'&&/^0x[0-9a-fA-F]{64}$/.test(policyApprovalDigest)&&
+  !/^0x0{64}$/.test(policyApprovalDigest),'independently approved policy digest required');
  ensure(Number.isSafeInteger(timeoutMs)&&timeoutMs>=100&&timeoutMs<=60000,'invalid provider timeout');
  async function post(path,params){
   const response=await fetcher(base+path,{method:'POST',redirect:'error',cache:'no-store',credentials:'omit',
@@ -47,10 +49,12 @@ export function createRemoteBetIdentityAuthority({
    requiredCredentialTypes.every(v=>HEX32.test(v)),'eligibility policy scope denied');
   const decision=await post('/v1/420bet/eligibility',{
    account:wallet,subjectId:subjectId.toLowerCase(),chainId,
-   requiredCredentialTypes,mode,expectedPolicyVersion:policyVersion
+   requiredCredentialTypes,mode,expectedPolicyVersion:policyVersion,
+   expectedPolicyApprovalDigest:policyApprovalDigest.toLowerCase()
   });
   ensure(decision.account===wallet&&decision.subjectId===subjectId.toLowerCase()&&
-   decision.chainId===chainId&&decision.policyVersion===policyVersion,
+   decision.chainId===chainId&&decision.policyVersion===policyVersion&&
+   decision.policyApprovalDigest===policyApprovalDigest.toLowerCase(),
    'eligibility provider identity/version mismatch');
   if(decision.authorized!==true||decision.revoked!==false)return {authorized:false,revoked:true};
   ensure(typeof decision.authorizationVersion==='string'&&decision.authorizationVersion.length>=1&&

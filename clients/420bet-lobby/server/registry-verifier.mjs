@@ -10,6 +10,7 @@ const GAME_STATUSES=['NONE','REGISTERED','ACTIVE','PAUSED','DEPRECATED'];
 const MODULE_STATUSES=['NONE','REGISTERED','APPROVED','PAUSED','DEPRECATED'];
 const OPERATOR_STATUSES=['NONE','REGISTERED','ACTIVE','PAUSED','REVOKED'];
 const PRODUCT_CLASSES={casino:1,sportsbook:2,fantasy:3,poker:4};
+const REQUIRED_SOURCE_ROLES=['casino-router','casino-settlement','poker-ledger','fantasy-contest','sports-tickets'];
 const ROLE_ACTIONS={
  'game-register':'BET_GAME_REGISTER','game-activate':'BET_GAME_ACTIVATE',
  'game-pause':'BET_GAME_PAUSE','module-approve':'BET_MODULE_APPROVE',
@@ -74,6 +75,18 @@ export const BET_REGISTRY_ABI=[
   inputs:[{type:'bytes32'}],outputs:[{type:'bytes32'}]}
 ];
 export const BET_REGISTRY_COMPONENT='registry-verifier-v1';
+export function assertIndexerRegistryBinding(indexerManifest,registryConfig){
+ requireValid(indexerManifest?.chainId===registryConfig.chainId,'Indexer chain mismatch');
+ requireValid(Array.isArray(indexerManifest.contracts),'Indexer sources missing');
+ const byRole=new Map(registryConfig.sources.map(x=>[x.role,x]));
+ requireValid(indexerManifest.contracts.length===byRole.size,'Indexer source set mismatch');
+ for(const source of indexerManifest.contracts){
+  const trusted=byRole.get(source.role);
+  requireValid(trusted&&trusted.id===source.id&&trusted.address===source.address?.toLowerCase()&&
+   trusted.fromBlock===source.fromBlock,'Indexer source not in approved Registry manifest');
+ }
+ return true;
+}
 export function validateBetRegistryManifest(raw){
  requireValid(raw&&typeof raw==='object'&&!Array.isArray(raw),'missing approved manifest');
  requireValid(raw.schema==='bet-registry-manifest-v1','unsupported manifest version');
@@ -100,6 +113,22 @@ export function validateBetRegistryManifest(raw){
  requireValid(new Set(Object.values(contracts).map(x=>x.address)).size===Object.keys(contracts).length,
   'registry contract address alias');
  requireValid(Array.isArray(raw.games)&&raw.games.length>0&&raw.games.length<=100,'invalid game manifest');
+ requireValid(Array.isArray(raw.sources)&&raw.sources.length===REQUIRED_SOURCE_ROLES.length,
+  'missing per-vertical Indexer source bindings');
+ const seenSourceIds=new Set(),sourceRoles=new Set(),sources=raw.sources.map(source=>{
+  requireValid(source&&REQUIRED_SOURCE_ROLES.includes(source.role),'unsupported Indexer source role');
+  requireValid(typeof source.id==='string'&&/^[a-z][a-z0-9-]{0,48}$/.test(source.id),
+   'invalid Indexer source ID');
+  requireValid(!seenSourceIds.has(source.id)&&!sourceRoles.has(source.role),'duplicate Indexer source binding');
+  seenSourceIds.add(source.id);sourceRoles.add(source.role);
+  requireValid(typeof source.fromBlock==='string'&&/^(0|[1-9][0-9]*)$/.test(source.fromBlock),
+   'invalid source deployment block');
+  return {id:source.id,role:source.role,address:normAddress(source.address,'source contract'),
+   runtimeHash:normHash(source.runtimeHash,'source runtime'),fromBlock:source.fromBlock};
+ });
+ for(const role of REQUIRED_SOURCE_ROLES)requireValid(sourceRoles.has(role),'missing '+role+' binding');
+ requireValid(new Set(sources.map(x=>x.address)).size===sources.length,
+  'shared source address or ambiguous role attribution');
  const ids=new Set(),versions=new Set(),games=raw.games.map(g=>{
   requireValid(g&&typeof g==='object'&&/^[a-z][a-z0-9-]{0,48}$/.test(g.id),'invalid game label');
   requireValid(Object.hasOwn(PRODUCT_CLASSES,g.vertical),'unsupported game vertical');
@@ -177,8 +206,12 @@ export function registryManifestDigest(config){
  const {approvalDigest,approvalAuthority,approvalSignature,...body}=config;
  return keccak256(toHex(stableStringify(body)));
 }
-export function createBetRegistryVerifier({manifest,client,trustedApprover}={}){
+export function createBetRegistryVerifier({manifest,client,trustedApprover,requiredVerticals=['casino','poker','fantasy','sportsbook']}={}){
  const config=validateBetRegistryManifest(manifest);
+ requireValid(Array.isArray(requiredVerticals)&&requiredVerticals.length>0&&
+  requiredVerticals.every(x=>Object.hasOwn(PRODUCT_CLASSES,x)),'unsupported required verticals');
+ for(const vertical of requiredVerticals)requireValid(config.games.some(x=>x.vertical===vertical),
+  'missing required game vertical: '+vertical);
  const signer=normAddress(trustedApprover,'trusted approver');
  requireValid(config.approvalAuthority===signer,'manifest approved by wrong authority');
  requireValid(registryManifestDigest(config)===config.approvalDigest,
@@ -217,6 +250,7 @@ export function createBetRegistryVerifier({manifest,client,trustedApprover}={}){
    }
   }
   for(const binding of Object.values(bindings))await checkCode(binding.address,binding.runtimeHash);
+  for(const source of config.sources)await checkCode(source.address,source.runtimeHash);
   const gameReg=bindings.gameRegistry.address,moduleReg=bindings.moduleRegistry.address,
    profileReg=bindings.profileRegistry.address,operatorReg=bindings.operatorRegistry.address,
    auth=bindings.authorization.address;

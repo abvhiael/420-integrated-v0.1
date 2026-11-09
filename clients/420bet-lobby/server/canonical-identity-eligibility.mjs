@@ -57,7 +57,7 @@ export function createCanonicalIdentityEligibility({
   const policy=await verifyPolicy({account:wallet,subjectId:subject,chainId,requiredCredentialTypes:[...required],mode});
   if(policy?.authorized!==true||policy.revoked!==false||
     typeof policy.authorizationVersion!=='string'||!policy.authorizationVersion)return {authorized:false,revoked:true};
-  return {...policy,authorized:true,revoked:false};
+  return {...policy,subjectId:subject,authorized:true,revoked:false};
  }
  return Object.freeze({verifyIdentity,identityAddress:dest,chainId,credentialTypes:Object.freeze(required),selector:SELECTOR});
 }

@@ -120,11 +120,13 @@ export async function openBetOperationalDeliveryWorker({
     // then outbound transport and provider receipt reconciliation.
     const revoke=await runtime.syncRevocations();
     const published=await runtime.publish({maxBlocks});
-    requireValid(published?.halted!==true&&published?.reorganized!==true,
-     'canonical reorg halt requires independent replay approval');
+    requireValid(published?.halted!==true&&
+     (published?.reorganized!==true||published?.recovered===true),
+     'canonical reorg halt requires independently verified full replay');
     const drained=await runtime.drain({limit:drainLimit});
     const summary=await runtime.outbox.summary();
-    requireValid(summary?.halted!==true,'outbox canonical halt active');
+    requireValid(summary?.halted!==true&&summary?.replayPending!==true,
+     'outbox canonical halt or incomplete replay');
     const completed={...snapshot(),inFlight:false,completed:state.completed+1,
      consecutiveFailures:0,lastCompletedAt:clock(),lastSuccessAt:clock(),lastErrorCode:null,
      lastPublish:{queued:published.queued??0,scanned:published.scanned??null,

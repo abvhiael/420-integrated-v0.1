@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {mkdtemp,readFile,rm,stat} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
+import {createHash} from 'node:crypto';
 import {makeBetDelivery,create420MailProvider,create420NotificationsProvider} from '../server/notifications-mail-adapters.mjs';
 import {openBetDeliveryOutbox} from '../server/notifications-mail-outbox.mjs';
 const A='0x'+'a'.repeat(40),H=n=>'0x'+n.toString(16).padStart(64,'0');
@@ -218,4 +219,22 @@ test('retracted delivered messages retain delivery receipts and report remote un
   assert.equal(record.retracted,true);
   await a.close();
  });
+});
+
+test('actual Go Mail deliberately redacts idempotency key; deterministic message ID still binds the receipt',async()=>{
+ const d=makeBetDelivery(request('mail'));
+ const id='mail_'+createHash('sha256').update(
+  '420/MAIL/MESSAGE/V1\0'+'bot-identity'+'\0'+d.recipient+'\0'+d.deliveryKey
+ ).digest('hex').slice(0,32);
+ let calls=0;
+ const base={id,owner:'bot-identity',recipient:d.recipient,status:'QUEUED'};
+ const provider=create420MailProvider({origin:'https://mail.example/',
+  authorizeActor:async()=>({sender:'bot-identity',authorization:'Bearer '+'a'.repeat(64)}),
+  fetcher:async()=>({ok:true,text:async()=>JSON.stringify(
+   calls++===0?base:{...base,status:'DELIVERED'})})});
+ assert.equal((await provider.deliver(d)).status,'delivered');
+ const forged=create420MailProvider({origin:'https://mail.example/',
+  authorizeActor:async()=>({sender:'bot-identity',authorization:'Bearer '+'a'.repeat(64)}),
+  fetcher:async()=>({ok:true,text:async()=>JSON.stringify({...base,id:'mail_'+ '0'.repeat(32)})})});
+ await assert.rejects(forged.deliver(d),/queue receipt mismatch/);
 });

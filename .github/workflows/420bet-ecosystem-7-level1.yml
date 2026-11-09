@@ -1,5 +1,8 @@
 name: BET-AUDIT-7 ecosystem reconciliation Level 1
 on:
+  push:
+    branches:
+      - audit/bet-audit-7-ecosystem-20261108
   pull_request:
     paths:
       - 'clients/420bet-lobby/server/ecosystem.mjs'

@@ -43,7 +43,7 @@ function fixture(){
    message==='420Bet registry manifest v1\\n'+manifest.approvalDigest&&
    signature===manifest.approvalSignature&&mutation.signature,
   getBlock:async({blockNumber,blockTag})=>{
-   if(blockNumber===0n)return {number:0n,hash:manifest.genesisHash};
+   if(blockNumber===0n)return {number:0n,hash:H(400)};
    if(blockTag==='finalized')return {number:500n,hash:H(501)};
    if(blockNumber===500n)return {number:500n,hash:mutation.reorg?H(999):H(501)};
    throw Error('unapproved block');

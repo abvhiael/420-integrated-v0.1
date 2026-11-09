@@ -47,7 +47,7 @@ export function createBetWalletSessions({
  async function authenticate({account,requestedChainId,nonce:challengeId,signature}){
   const a=scope(account,requestedChainId),t=now();clean(t);
   check(typeof challengeId==='string'&&TOKEN.test(challengeId)&&typeof signature==='string'&&
-   /^0x[0-9a-fA-F]{130}$/.test(signature),'invalid challenge response');
+   /^0x(?:[0-9a-fA-F]{2}){1,4096}$/.test(signature),'invalid challenge response');
   const c=challenges.get(challengeId);
   check(c&&c.account===a&&c.expiresAt>t&&c.epoch===epoch&&!c.used,'challenge expired or replayed');
   c.used=true;challenges.delete(challengeId); // Consume BEFORE the async verifier.
@@ -57,6 +57,7 @@ export function createBetWalletSessions({
   check(policy?.authorized===true&&policy?.revoked===false&&
     typeof policy.authorizationVersion==='string'&&policy.authorizationVersion.length>0,
     'canonical identity denied');
+  clean(now());check(sessions.size<10000,'session capacity exceeded');
   const key=nonce(),expiresAt=Math.min(t+sessionTtlMs,Number.isSafeInteger(policy.expiresAt)?policy.expiresAt:t+sessionTtlMs);
   check(expiresAt>now(),'identity expired');
   sessions.set(key,{account:a,chainId,version:policy.authorizationVersion,expiresAt,epoch});

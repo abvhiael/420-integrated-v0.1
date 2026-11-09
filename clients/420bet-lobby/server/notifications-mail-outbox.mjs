@@ -190,19 +190,46 @@ export async function openBetDeliveryOutbox({
   await operation;
   const selected=Object.values(data.items).filter(x=>x.remoteCancellationPending===true).slice(0,limit)
    .map(x=>({delivery:clone(x.delivery),receipt:clone(x.receipt)}));
-  let confirmed=0;
-  for(const item of selected){
+  let confirmed=0,deliveredLate=0,unconfirmed=0;
+  for(const candidate of selected){
+   const provider=providers[candidate.delivery.channel];
    try{
-    if((await providers[item.delivery.channel].cancel(item.delivery,item.receipt))?.cancelled===true){
+    const cancel=await provider.cancel(candidate.delivery,candidate.receipt);
+    if(cancel?.cancelled===true){
      await withWrite(async state=>{
-      const current=state.items[item.delivery.deliveryKey];
-      if(current?.remoteCancellationPending===true)current.remoteCancellationPending=false;
+      const item=state.items[candidate.delivery.deliveryKey];
+      if(item?.remoteCancellationPending)item.remoteCancellationPending=false;
      });
-     confirmed++;
+     confirmed++;continue;
     }
-   }catch{/* keep durable pending marker for next reconciliation */}
+    const observed=await provider.status(candidate.delivery,candidate.receipt);
+    assert(observed?.provider===(candidate.delivery.channel==='mail'?'420Mail':'420Notifications')&&
+     observed.externalId===candidate.receipt.externalId&&
+     ['delivered','cancelled','failed','pending'].includes(observed.status),
+     'unverified cancellation reconciliation receipt');
+    if(observed.status==='delivered'){
+     await withWrite(async state=>{
+      const item=state.items[candidate.delivery.deliveryKey];
+      if(!item?.remoteCancellationPending)return;
+      item.status='delivered';item.receipt=observed;item.remoteCancellationPending=false;
+      if(item.reorgRetracted){item.retracted=true;enqueueCorrectionInState(state,item);}
+      item.updatedAt=clock();
+     });
+     deliveredLate++;continue;
+    }
+    if(observed.status==='cancelled'||observed.status==='failed'){
+     await withWrite(async state=>{
+      const item=state.items[candidate.delivery.deliveryKey];
+      if(item?.remoteCancellationPending){
+       item.remoteCancellationPending=false;item.updatedAt=clock();
+      }
+     });
+     confirmed++;continue;
+    }
+    unconfirmed++;
+   }catch{unconfirmed++;/* durable retry marker persists */}
   }
-  return {attempted:selected.length,confirmed,unconfirmed:selected.length-confirmed};
+  return {attempted:selected.length,confirmed,deliveredLate,unconfirmed};
  }
  async function retractEvent(eventId){
   const affected=await withWrite(async state=>{
@@ -311,7 +338,19 @@ export async function openBetDeliveryOutbox({
    const result=await withWrite(async state=>{
     const item=state.items[key];
     if(!item)return null;
-    if(item.status==='cancelled')return {status:'cancelled'};
+    if(item.status==='cancelled'){
+     if((outcome?.status==='delivered'||outcome?.status==='pending')&&
+      outcome.provider===(d.channel==='mail'?'420Mail':'420Notifications')&&
+      typeof outcome.externalId==='string'&&outcome.externalId.length>0){
+      item.receipt=outcome;
+      if(outcome.status==='delivered'){
+       item.status='delivered';item.remoteCancellationPending=false;
+       if(item.reorgRetracted){item.retracted=true;enqueueCorrectionInState(state,item);}
+      }else item.remoteCancellationPending=true;
+      item.updatedAt=clock();
+     }
+     return {status:'cancelled'};
+    }
     if(outcome?.status==='cancelled'){item.status='cancelled';item.nextAttemptAt=null;}
     else if(outcome?.status==='delivered'){
      assert(outcome.provider=== (d.channel==='mail'?'420Mail':'420Notifications')&&

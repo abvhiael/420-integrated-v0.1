@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"net/http"
 	"sync/atomic"
+
+ "github.com/420integrated/420-integrated/notifications/betconsent"
 )
 
 type IndexerProbe interface {
@@ -18,6 +20,7 @@ type Service struct {
 	cfg   Config
 	probe IndexerProbe
 	ready atomic.Bool
+ consent http.Handler
 }
 
 func NewService(cfg Config, probe IndexerProbe) (*Service, error) {
@@ -48,8 +51,17 @@ func (s *Service) Qualify(ctx context.Context) error {
 	return nil
 }
 
+// EnableBetConsent installs the private HTTP boundary; absent configuration leaves it disabled.
+func (s *Service) EnableBetConsent(store *betconsent.Store, token string) error {
+ handler,err:=betconsent.Handler(store,token)
+ if err!=nil{return err}
+ s.consent=handler
+ return nil
+}
+
 func (s *Service) Handler() http.Handler {
 	mux := http.NewServeMux()
+ if s.consent!=nil {mux.Handle("/v1/420bet/subscriptions/",s.consent)}
 	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, _ *http.Request) {
 		writeJSON(w, http.StatusOK, map[string]any{
 			"service":   "420Notifications",

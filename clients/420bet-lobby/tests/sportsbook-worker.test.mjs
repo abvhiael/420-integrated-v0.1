@@ -17,7 +17,7 @@ test('Wrangler config adds a Worker entrypoint while preserving the production n
  assert.equal(config.assets.directory,'./dist');
  assert.equal(config.assets.binding,'ASSETS');
  assert.equal(config.assets.not_found_handling,'single-page-application');
- assert.deepEqual(config.assets.run_worker_first,['/api/420bet/sportsbook/*']);
+ assert.deepEqual(config.assets.run_worker_first,['/api/420bet/sportsbook/*','/api/420bet/session/*']);
  assert.equal(config.keep_vars,true);
  assert.equal(config.durable_objects.bindings[0].name,'SPORTSBOOK_ODDS_BUDGET');
  assert.deepEqual(config.migrations[0].new_sqlite_classes,['SportsbookOddsBudget']);

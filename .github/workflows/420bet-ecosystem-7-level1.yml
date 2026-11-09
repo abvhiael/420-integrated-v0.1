@@ -17,7 +17,7 @@ on:
       - 'clients/420bet-lobby/tests/sportsbook-worker.test.mjs'
       - 'clients/420bet-lobby/server/wallet-session-http.mjs'
       - 'clients/420bet-lobby/src/wallet-session.js'
-      - 'clients/420bet-lobby/tests/wallet-session-http.test.mjs clients/420bet-lobby/tests/wallet-session-worker.test.mjs clients/420bet-lobby/tests/identity-authority-provider.test.mjs clients/420bet-lobby/tests/identity-runtime.test.mjs clients/420bet-lobby/tests/sportsbook-worker.test.mjs'
+      - 'clients/420bet-lobby/tests/wallet-session-http.test.mjs'
       - 'clients/420bet-lobby/server/canonical-identity-eligibility.mjs'
       - 'clients/420bet-lobby/tests/wallet-identity-integration.test.mjs'
       - 'clients/420bet-lobby/server/indexer-event-*.mjs'
@@ -43,8 +43,18 @@ jobs:
       - name: Install scoped dependencies for real cryptographic signature tests
         working-directory: clients/420bet-lobby
         run: npm install --no-audit --no-fund
-      - name: Focused event reconciliation tests
-        run: node --test clients/420bet-lobby/tests/ecosystem.test.mjs clients/420bet-lobby/tests/indexer-event-reader.test.mjs clients/420bet-lobby/tests/history-service.test.mjs clients/420bet-lobby/tests/wallet-identity-integration.test.mjs clients/420bet-lobby/tests/wallet-session-http.test.mjs
+      - name: Focused Indexer and live-provider-equivalent Identity tests
+        run: |
+          node --test \
+            clients/420bet-lobby/tests/ecosystem.test.mjs \
+            clients/420bet-lobby/tests/indexer-event-reader.test.mjs \
+            clients/420bet-lobby/tests/history-service.test.mjs \
+            clients/420bet-lobby/tests/wallet-identity-integration.test.mjs \
+            clients/420bet-lobby/tests/wallet-session-http.test.mjs \
+            clients/420bet-lobby/tests/wallet-session-worker.test.mjs \
+            clients/420bet-lobby/tests/identity-authority-provider.test.mjs \
+            clients/420bet-lobby/tests/identity-runtime.test.mjs \
+            clients/420bet-lobby/tests/sportsbook-worker.test.mjs
       - name: Production Vite build
         working-directory: clients/420bet-lobby
         run: npm run build

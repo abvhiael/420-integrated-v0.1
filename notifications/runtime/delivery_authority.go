@@ -25,9 +25,12 @@ func NewHTTPDeliveryAuthority(endpoint,secret string,client *http.Client)(*HTTPD
  if err!=nil||u.Scheme!="https"||u.Hostname()==""||u.User!=nil||
   u.RawQuery!=""||u.Fragment!=""||(u.Path!=""&&u.Path!="/")||
   strings.Contains(u.Host,"@"){return nil,errors.New("delivery authority requires HTTPS root origin")}
- if len(secret)<32||len(secret)>4096{return nil,errors.New("invalid delivery authority bearer")}
+ if len(secret)<32||len(secret)>4096||strings.ContainsAny(secret,"\\r\\n "){return nil,errors.New("invalid delivery authority bearer")}
  if client==nil{client=&http.Client{Timeout:5*time.Second}}
  if client.Timeout<=0||client.Timeout>30*time.Second{return nil,errors.New("unsafe authority timeout")}
+ copied:=*client
+ copied.CheckRedirect=func(_ *http.Request,_ []*http.Request)error{return http.ErrUseLastResponse}
+ client=&copied
  return &HTTPDeliveryAuthority{origin:u.Scheme+"://"+u.Host,bearer:secret,httpClient:client},nil
 }
 type scopedApproval struct{

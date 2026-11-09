@@ -190,6 +190,7 @@ func Handler(store *Store,readToken,writeToken string) (http.Handler,error){
   if err:=decode(r,&request);err!=nil{write(w,400,map[string]string{"error":"invalid cursor"});return}
   events,err:=store.Revocations(request.After,request.Limit)
   if err!=nil{write(w,409,map[string]string{"error":"invalid cursor"});return}
+  if events==nil{events=[]Revocation{}}
   write(w,200,map[string]any{"events":events})
  })
  mux.HandleFunc("POST /v1/420bet/subscriptions/check",func(w http.ResponseWriter,r *http.Request){

@@ -80,3 +80,20 @@ test('event cursor commits after durable enqueue and crash before cursor commit 
  assert.equal(checkpoint.nextBlock,'100');
  assert.equal(commitCount,1);
 });
+
+test('Indexer integrity exception persists halt before any additional delivery can proceed',async()=>{
+ const roles=['casino-router','casino-settlement','poker-ledger','fantasy-contest','sports-tickets'];
+ const sources=roles.map((role,i)=>({id:'source-'+i,role,address:A(i+1),fromBlock:'1'}));
+ let halted=0;
+ const publisher=createFinalizedBetNotificationPublisher({
+  reader:{config:{chainId:'420',contracts:sources},readCheckpoint:async()=>({events:[]}),
+   poll:async()=>{throw Error('indexer reorg during scan')}},
+  checkpointPath:'/private/cp.json',
+  verifyRegistry:async()=>({result:{qualified:true},config:{chainId:'420',sources,
+   games:[{id:'casino-dice',vertical:'casino',gameVersionId:H(10)}]}}),
+  resolveAudience:async()=>{throw Error('must not resolve owner')},
+  outbox:{enqueue:async()=>{throw Error('must not enqueue')},haltForReorg:async()=>{halted++;}}
+ });
+ await assert.rejects(publisher.publish(),/reorg during scan/);
+ assert.equal(halted,1,'integrity exception did not halt delivery');
+});

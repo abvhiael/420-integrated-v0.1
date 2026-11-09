@@ -18,7 +18,7 @@ export function verifyIndexerManifest(config){
  demand(config&&typeof config==='object'&&!Array.isArray(config),'invalid manifest');
  uint(config.chainId);demand(BigInt(config.chainId)>0n,'invalid chain');
  const url=new URL(config.indexerUrl);
- demand(!url.username&&!url.password&&!url.search&&!url.hash&&
+ demand(!url.username&&!url.password&&!url.search&&!url.hash&&url.pathname==='/'&&
   (url.protocol==='https:'||(url.protocol==='http:'&&['localhost','127.0.0.1'].includes(url.hostname))),
   'indexer URL must be HTTPS or local HTTP');
  demand(Array.isArray(config.contracts)&&config.contracts.length>0&&config.contracts.length<=32,'invalid contracts');
@@ -97,21 +97,23 @@ export function createIndexerEventReader({manifest,fetcher=fetch,timeoutMs=12000
   demand(b.chainId===config.chainId&&b.number===number,'block identity mismatch');
   return {number,hash:hash(b.hash),parentHash:hash(b.parentHash)};
  }
- async function eventLogs(c,target,fromCursor,blockCache){
-  let cursor=fromCursor,latestCursor=cursor,stop=false,seen=new Set(),events=[];
+ async function eventLogs(c,start,target,fromCursor,blockCache){
+  let cursor=fromCursor,latestCursor=cursor,stop=false,seen=new Set(),events=[],lastPosition=null;
   for(let pageNumber=0;pageNumber<MAX_PAGES;pageNumber++){
    const page=await get('/v1/logs',{chainId:config.chainId,address:c.address,limit:200,direction:'asc',cursor});
    demand(Array.isArray(page.items)&&page.items.length<=200&&(page.nextCursor===null||typeof page.nextCursor==='string'),'invalid logs page');
    let within=true;
    for(const log of page.items){
     const number=uint(log.blockNumber);
+    demand(Number.isSafeInteger(log.transactionIndex)&&log.transactionIndex>=0&&Number.isSafeInteger(log.logIndex)&&log.logIndex>=0,'invalid log position');
+    const position=[number,BigInt(log.transactionIndex),BigInt(log.logIndex)];
+    if(lastPosition)demand(position.some((v,i)=>v>lastPosition[i]&&position.slice(0,i).every((p,j)=>p===lastPosition[j])),'indexer log ordering mismatch');
+    lastPosition=position;
     if(number>target){within=false;stop=true;break;}
-    if(number<BigInt(c.fromBlock))continue;
+    if(number<start||number<BigInt(c.fromBlock))continue;
     const stamp=log.transactionHash+':'+log.logIndex;
     demand(!seen.has(stamp),'duplicated indexer position');seen.add(stamp);
     demand(log.chainId===config.chainId&&address(log.address)===c.address,'cross-chain or wrong-emitter log');
-    demand(Number.isSafeInteger(log.transactionIndex)&&log.transactionIndex>=0&&
-      Number.isSafeInteger(log.logIndex)&&log.logIndex>=0,'invalid log position');
     const b=blockCache.get(log.blockNumber);
     demand(b&&same(log.blockHash,b.hash),'log block not canonical');
     const decoded=decodeKnownEvent(c.role,log);
@@ -156,7 +158,7 @@ export function createIndexerEventReader({manifest,fetcher=fetch,timeoutMs=12000
    prior=b.hash;
   }
   for(const contract of config.contracts){
-   const result=await eventLogs(contract,end,snapshot.cursors[contract.id],blockCache);
+   const result=await eventLogs(contract,start,end,snapshot.cursors[contract.id],blockCache);
    for(const evt of result.events)appendEvent(snapshot.events,evt);
    snapshot.cursors[contract.id]=result.cursor;
   }

@@ -102,6 +102,18 @@ function secureOrigin(value){
   u.pathname==='/'&&u.hostname,'provider must be HTTPS root origin');
  return u.origin;
 }
+// 420Mail HTTP deliberately strips idempotency_key, body and staging metadata.
+// Verify the public deterministic receipt ID instead of requesting that secret.
+function expectedMailMessageId(sender,recipient,idempotencyKey){
+ return 'mail_'+createHash('sha256').update(
+  '420/MAIL/MESSAGE/V1\\0'+sender+'\\0'+recipient+'\\0'+idempotencyKey
+ ).digest('hex').slice(0,32);
+}
+function receiptMatchesDelivery(result,d,sender){
+ return result.idempotency_key===d.deliveryKey||
+  (result.idempotency_key===undefined&&
+   result.id===expectedMailMessageId(sender,d.recipient,d.deliveryKey));
+}
 export function create420MailProvider({origin,authorizeActor,fetcher=fetch,timeoutMs=10000}={}){
  const base=secureOrigin(origin);
  requireValid(typeof authorizeActor==='function','trusted Mail actor authority required');
@@ -135,7 +147,7 @@ export function create420MailProvider({origin,authorizeActor,fetcher=fetch,timeo
     subject:d.title,body:d.body,source:'420/service/mail/v1'};
    const queued=await req('/v1/outbox','POST',actor.authorization,payload);
    requireValid(typeof queued.id==='string'&&ID.test(queued.id)&&
-    queued.idempotency_key===d.deliveryKey&&queued.owner===actor.sender&&
+    receiptMatchesDelivery(queued,d,actor.sender)&&queued.owner===actor.sender&&
     queued.recipient===d.recipient&&MAIL_STATUSES.has(queued.status),
     'Mail queue receipt mismatch');
    let result=queued;
@@ -143,7 +155,7 @@ export function create420MailProvider({origin,authorizeActor,fetcher=fetch,timeo
     result=await req('/v1/outbox/'+encodeURIComponent(queued.id)+'/process','POST',actor.authorization);
    }
    requireValid(result.id===queued.id&&result.owner===actor.sender&&
-    result.idempotency_key===d.deliveryKey&&MAIL_STATUSES.has(result.status),
+    receiptMatchesDelivery(result,d,actor.sender)&&MAIL_STATUSES.has(result.status),
     'Mail process receipt mismatch');
    if(result.status==='FAILED'||result.status==='CANCELLED')err('Mail delivery failed');
    // SENDING/RETRYING are not receipt-level proof of delivery.
@@ -163,7 +175,7 @@ export function create420MailProvider({origin,authorizeActor,fetcher=fetch,timeo
    requireValid(receipt?.externalId&&ID.test(receipt.externalId),'missing Mail receipt');
    const result=await req('/v1/outbox/'+encodeURIComponent(receipt.externalId),
     'GET',actor.authorization);
-   requireValid(result.id===receipt.externalId&&result.idempotency_key===d.deliveryKey&&
+   requireValid(result.id===receipt.externalId&&receiptMatchesDelivery(result,d,actor.sender)&&
     result.owner===actor.sender&&MAIL_STATUSES.has(result.status),
     'Mail receipt scope mismatch');
    return {provider:'420Mail',externalId:result.id,

@@ -141,29 +141,29 @@ func decode(r *http.Request,out any)error{
  return nil
 }
 func write(w http.ResponseWriter,code int,value any){w.Header().Set("Content-Type","application/json");w.Header().Set("Cache-Control","no-store");w.WriteHeader(code);_ =json.NewEncoder(w).Encode(value)}
-func Handler(store *Store,token string) (http.Handler,error){
- if store==nil||len(token)<32||len(token)>4096{return nil,errors.New("private subscription store and service credential required")}
+func Handler(store *Store,readToken,writeToken string) (http.Handler,error){
+ if store==nil||len(readToken)<32||len(readToken)>4096||len(writeToken)<32||len(writeToken)>4096||readToken==writeToken{return nil,errors.New("private subscription store and service credential required")}
  mux:=http.NewServeMux()
- authenticated:=func(w http.ResponseWriter,r *http.Request)bool{
+ authenticated:=func(w http.ResponseWriter,r *http.Request,token string)bool{
   given:=r.Header.Get("Authorization")
   if subtle.ConstantTimeCompare([]byte(given),[]byte("Bearer "+token))!=1 {write(w,403,map[string]string{"error":"access denied"});return false}
   return true
  }
  mux.HandleFunc("POST /v1/420bet/subscriptions/check",func(w http.ResponseWriter,r *http.Request){
-  if !authenticated(w,r){return}
+  if !authenticated(w,r,readToken){return}
   var c Check;if err:=decode(r,&c);err!=nil||!validCheck(c){write(w,400,map[string]string{"error":"invalid scope"});return}
   write(w,200,store.Check(c))
  })
  type mutation struct { Subscription Subscription `json:"subscription"`; ExpectedRevision uint64 `json:"expectedRevision"` }
  mux.HandleFunc("POST /v1/420bet/subscriptions/apply",func(w http.ResponseWriter,r *http.Request){
-  if !authenticated(w,r){return}
+  if !authenticated(w,r,writeToken){return}
   var m mutation;if err:=decode(r,&m);err!=nil{write(w,400,map[string]string{"error":"invalid request"});return}
   v,err:=store.Apply(m.Subscription,m.ExpectedRevision)
   if err!=nil{write(w,409,map[string]string{"error":fmt.Sprint(err)});return};write(w,200,v)
  })
  type revoke struct { Check Check `json:"check"`; ExpectedRevision uint64 `json:"expectedRevision"` }
  mux.HandleFunc("POST /v1/420bet/subscriptions/revoke",func(w http.ResponseWriter,r *http.Request){
-  if !authenticated(w,r){return}
+  if !authenticated(w,r,writeToken){return}
   var m revoke;if err:=decode(r,&m);err!=nil{write(w,400,map[string]string{"error":"invalid request"});return}
   v,err:=store.Revoke(m.Check,m.ExpectedRevision)
   if err!=nil{write(w,409,map[string]string{"error":fmt.Sprint(err)});return};write(w,200,v)

@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {keccak256} from 'viem';
-import {createBetRegistryVerifier,validateBetRegistryManifest,registryManifestDigest} from '../server/registry-verifier.mjs';
+import {createBetRegistryVerifier,validateBetRegistryManifest,registryManifestDigest,assertIndexerRegistryBinding} from '../server/registry-verifier.mjs';
 const H=n=>'0x'+n.toString(16).padStart(64,'0'),A=n=>'0x'+n.toString(16).padStart(40,'0');
 const CODE='0x6001600055',RUNTIME=keccak256(CODE),chain='420';
 function fixture(){
@@ -18,9 +18,11 @@ function fixture(){
   operatorManifestHash:H(39),gameMode:1,profiles,
   authorizedRoles:[{action:'game-activate',scope:'game',principal:A(53)},
    {action:'wager-record',scope:'vault',scopeId:H(55),principal:A(54)}]};
+ const sources=['casino-router','casino-settlement','poker-ledger','fantasy-contest','sports-tickets']
+  .map((role,i)=>({id:'engine-'+(i+1),role,address:A(70+i),runtimeHash:RUNTIME,fromBlock:'1'}));
  const manifest={schema:'bet-registry-manifest-v1',chainId:chain,genesisHash:H(400),
   revision:'1',approved:true,approvalAuthority:A(90),
-  approvalDigest:H(401),approvalSignature:'0x'+'c'.repeat(130),contracts,games:[game]};
+  approvalDigest:H(401),approvalSignature:'0x'+'c'.repeat(130),contracts,sources,games:[game]};
  const states={
   getGame:{...Object.fromEntries(['gameId','gameVersionId','moduleVersionId','rulesetId','manifestHash'].map(k=>[k,game[k]])),
    randomnessProfileId:profiles.randomness.id,riskProfileId:profiles.risk.id,
@@ -71,7 +73,7 @@ function fixture(){
   }
  };
  return {manifest,contracts,game,profiles,states,mutation,calls,client,
-  verified:()=>createBetRegistryVerifier({manifest,client,trustedApprover:A(90)})};
+  verified:()=>createBetRegistryVerifier({manifest,client,trustedApprover:A(90),requiredVerticals:['casino']})};
 }
 test('canonical on-chain betting registries validate approved game, module, ruleset, settlement and roles',async()=>{
  const f=fixture();
@@ -143,9 +145,20 @@ export {fixture};
 test('missing external trust anchor, forged approval or changed module hash fail closed',async()=>{
  const f=fixture();
  assert.throws(()=>createBetRegistryVerifier({manifest:f.manifest,client:f.client}),/trusted approver/);
- assert.throws(()=>createBetRegistryVerifier({manifest:f.manifest,client:f.client,trustedApprover:A(91)}),/wrong authority/);
+ assert.throws(()=>createBetRegistryVerifier({manifest:f.manifest,client:f.client,trustedApprover:A(91),requiredVerticals:['casino']}),/wrong authority/);
  f.mutation.signature=false;
  await assert.rejects(f.verified().verify(),/signature not verified/);
  f.mutation.signature=true;f.game.implementationCodeHash=H(901);
  assert.throws(()=>f.verified(),/approval digest/);
+});
+
+test('Indexer event source bindings require exact role/address/deployment height from signed Registry manifest',()=>{
+ const f=fixture();
+ const indexer={chainId:'420',contracts:f.manifest.sources.map(({id,role,address,fromBlock})=>({id,role,address,fromBlock}))};
+ assert.equal(assertIndexerRegistryBinding(indexer,validateBetRegistryManifest(f.manifest)),true);
+ assert.throws(()=>assertIndexerRegistryBinding({...indexer,chainId:'421'},
+  validateBetRegistryManifest(f.manifest)),/chain mismatch/);
+ assert.throws(()=>assertIndexerRegistryBinding({...indexer,contracts:indexer.contracts.map((x,i)=>
+  i===3?{...x,address:A(900)}:x)},validateBetRegistryManifest(f.manifest)),/not in approved/);
+ assert.throws(()=>createBetRegistryVerifier({manifest:f.manifest,client:f.client,trustedApprover:A(90)}),/missing required game vertical/);
 });

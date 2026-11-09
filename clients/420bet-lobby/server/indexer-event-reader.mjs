@@ -176,7 +176,12 @@ export function createIndexerEventReader({manifest,fetcher=fetch,timeoutMs=12000
   });
   return {state:snapshot,scanned:Number(end-start+1n),reorganized,complete:end>=uint(observedAgain.finality.safeHead)};
  }
- return {config,poll,readCheckpoint:file=>readCheckpoint(file,config)};
+ return {config,poll,readCheckpoint:file=>readCheckpoint(file,config),
+  persistCheckpoint:async(file,state)=>{
+   demand(state?.schema==='bet-indexer-checkpoint-v1'&&state.manifestHash===digest(config)&&
+    state.chainId===config.chainId,'refuse checkpoint from unverified manifest');
+   await persistCheckpoint(file,state);
+  }};
 }
 export async function synchronizeIndexerEvents({manifest,checkpointPath,fetcher,maxBlocks}){
  demand(typeof checkpointPath==='string'&&checkpointPath.length>0,'checkpoint path required');

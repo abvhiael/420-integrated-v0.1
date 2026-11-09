@@ -193,3 +193,46 @@ test('independent manifest approval checks genuine EIP-191 signature of immutabl
  await assert.rejects(createBetRegistryVerifier({manifest:f.manifest,client:f.client,
   trustedApprover:signer.address,requiredVerticals:['casino']}).verify(),/signature not verified/);
 });
+
+test('all four product classes require their own actual registered version/ruleset/module',async()=>{
+ const f=fixture(),more=[
+  ['poker','poker-nlhe',4,2],['fantasy','fantasy-contest',3,3],['sportsbook','sports-tickets',2,4]
+ ].map(([vertical,id,productClass,i])=>({
+  ...f.game,id,vertical,gameId:H(200+i),gameVersionId:H(210+i),
+  moduleId:H(220+i),moduleVersionId:H(230+i),rulesetId:H(240+i),
+  manifestHash:H(250+i),moduleManifestHash:H(260+i),
+  gameMode:vertical==='poker'?2:vertical==='fantasy'?3:4,
+  productClass
+ }));
+ f.manifest.games.push(...more);
+ f.manifest.approvalDigest=registryManifestDigest(validateBetRegistryManifest(f.manifest));
+ const original=f.client.readContract;
+ f.client.readContract=async p=>{
+  if(p.functionName==='getGame'){
+   const game=more.find(g=>g.gameVersionId===p.args[0]);
+   if(game)return {...f.states.getGame,gameId:game.gameId,gameVersionId:game.gameVersionId,
+    moduleVersionId:game.moduleVersionId,rulesetId:game.rulesetId,manifestHash:game.manifestHash,
+    productClass:game.productClass,gameMode:game.gameMode};
+  }
+  if(p.functionName==='getModule'){
+   const game=more.find(g=>g.moduleVersionId===p.args[0]);
+   if(game)return {...f.states.getModule,moduleId:game.moduleId,moduleVersionId:game.moduleVersionId,
+    manifestHash:game.moduleManifestHash};
+  }
+  return original(p);
+ };
+ const result=await createBetRegistryVerifier({manifest:f.manifest,client:f.client,
+  trustedApprover:A(90)}).verify();
+ assert.equal(result.games.length,4);
+ assert.deepEqual(new Set(result.games.map(x=>x.vertical)),new Set(['casino','poker','fantasy','sportsbook']));
+ f.client.readContract=async p=>{
+  if(p.functionName==='getGame'&&p.args[0]===more[2].gameVersionId)
+   return {...f.states.getGame,gameId:more[2].gameId,
+    gameVersionId:more[2].gameVersionId,moduleVersionId:more[2].moduleVersionId,
+    rulesetId:more[2].rulesetId,manifestHash:more[2].manifestHash,
+    gameMode:more[2].gameMode,productClass:3,status:2,exists:true};
+  return original(p);
+ };
+ await assert.rejects(createBetRegistryVerifier({manifest:f.manifest,client:f.client,
+  trustedApprover:A(90)}).verify(),/vertical\/mode mismatch/);
+});

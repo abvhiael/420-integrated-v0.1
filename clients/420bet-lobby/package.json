@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "test": "node --test tests/*.test.mjs",
-    "serve:history": "node server/serve.mjs"
+    "serve:history": "node server/serve.mjs",
+    "sync:indexer:events": "node server/sync-indexer-events.mjs"
   },
   "devDependencies": {
     "vite": "8.2.2",

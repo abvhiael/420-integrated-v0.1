@@ -3,7 +3,6 @@ package runtime
 import (
  "context"
  "crypto/rand"
- "crypto/sha256"
  "crypto/subtle"
  "encoding/hex"
  "encoding/json"
@@ -15,7 +14,6 @@ import (
  "regexp"
  "strings"
  "sync"
- "time"
 )
 
 // NativeDeliveryAPI is a private service-to-service API. It must never be

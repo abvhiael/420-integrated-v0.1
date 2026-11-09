@@ -1,5 +1,6 @@
 import {readFile} from 'node:fs/promises';
 import {createRemoteBetOwnershipResolver} from './ownership-resolver.mjs';
+import {createVerified420MailActorBroker} from './mail-auth-broker.mjs';
 import {create420NotificationsConsentAuthority} from './notifications-consent-authority.mjs';
 import {create420NotificationsRevocationReader,createBetRevocationConsumer} from './notifications-revocation-consumer.mjs';
 import {createIndexerEventReader} from './indexer-event-reader.mjs';
@@ -38,8 +39,11 @@ export async function createBetNotificationsMailRuntime({
  const consent=checkConsent??(env.BET_NOTIFICATIONS_CONSENT_URL&&env.BET_NOTIFICATIONS_CONSENT_TOKEN?
   create420NotificationsConsentAuthority({origin:env.BET_NOTIFICATIONS_CONSENT_URL,
    bearerToken:env.BET_NOTIFICATIONS_CONSENT_TOKEN,fetcher}):null);
+ const mailBroker=authorizeMailActor??(env.BET_MAIL_SENDER_ID&&env.BET_MAIL_ACTOR_TOKEN?
+  createVerified420MailActorBroker({origin:env.BET_MAIL_URL,
+   sender:env.BET_MAIL_SENDER_ID,serviceToken:env.BET_MAIL_ACTOR_TOKEN,fetcher}).authorizeActor:null);
  fail(typeof ownership==='function'&&typeof consent==='function'&&
-  typeof authorizeMailActor==='function'&&notifications&&
+  typeof mailBroker==='function'&&notifications&&
   ['deliverAuthenticated','readReceipt','cancelDelivery'].every(k=>typeof notifications[k]==='function'),
   'qualified Identity, Notifications, consent and Mail providers required');
  const manifest=JSON.parse(await readFile(env.BET_INDEXER_EVENT_MANIFEST,'utf8'));
@@ -61,7 +65,7 @@ export async function createBetNotificationsMailRuntime({
  };
  const providers={
   mail:create420MailProvider({origin:env.BET_MAIL_URL,
-   authorizeActor:authorizeMailActor,fetcher}),
+   authorizeActor:mailBroker,fetcher}),
   notifications:create420NotificationsProvider(notifications)
  };
  const outbox=await openBetDeliveryOutbox({path:env.BET_DELIVERY_OUTBOX_PATH,

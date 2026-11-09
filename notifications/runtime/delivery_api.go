@@ -25,7 +25,8 @@ type DeliveryPrincipal struct {
  Tenant string
 }
 type DeliveryAuthenticate func(context.Context, string) (DeliveryPrincipal, error)
-type DeliveryConsent func(context.Context, DeliveryPrincipal, DeliverySubmit) (bool, error)
+type DeliveryDecision struct { Owner bool; Consent bool }
+type DeliveryConsent func(context.Context, DeliveryPrincipal, DeliverySubmit) (DeliveryDecision, error)
 
 type DeliverySubmit struct {
  Tenant string `json:"tenant"`
@@ -154,19 +155,19 @@ func (s *DeliveryStore) save(next deliveryDisk) error {
  s.data=next;return nil
 }
 func (s *DeliveryStore) Enqueue(req DeliverySubmit)(DeliveryReceipt,int,error){
- if err:=validateDeliverySubmit(req);err!=nil{return DeliveryReceipt,0,err}
+ if err:=validateDeliverySubmit(req);err!=nil{return DeliveryReceipt{},0,err}
  s.mu.Lock();defer s.mu.Unlock()
- if s.closed{return DeliveryReceipt,0,errors.New("store closed")}
+ if s.closed{return DeliveryReceipt{},0,errors.New("store closed")}
  if prior,ok:=s.data.Records[req.IdempotencyKey];ok {
-  if prior.Request!=req {return DeliveryReceipt,0,errors.New("idempotency conflict")}
+  if prior.Request!=req {return DeliveryReceipt{},0,errors.New("idempotency conflict")}
   return prior.Receipt,http.StatusOK,nil
  }
- if len(s.data.Records)>=10000{return DeliveryReceipt,0,errors.New("delivery store at capacity")}
+ if len(s.data.Records)>=10000{return DeliveryReceipt{},0,errors.New("delivery store at capacity")}
  r:=DeliveryReceipt{ID:randomDeliveryID(),IdempotencyKey:req.IdempotencyKey,Status:"pending",Version:1}
  next:=deliveryDisk{Schema:1,Records:make(map[string]privateDeliveryRecord,len(s.data.Records)+1)}
  for k,v:=range s.data.Records{next.Records[k]=v}
  next.Records[req.IdempotencyKey]=privateDeliveryRecord{Receipt:r,Request:req}
- if err:=s.save(next);err!=nil{return DeliveryReceipt,0,err}
+ if err:=s.save(next);err!=nil{return DeliveryReceipt{},0,err}
  return r,http.StatusCreated,nil
 }
 func (s *DeliveryStore) Find(id string)(privateDeliveryRecord,bool){
@@ -248,8 +249,8 @@ func (a *DeliveryAPI) ServeHTTP(w http.ResponseWriter,r *http.Request){
   if req.Tenant!=p.Tenant||validateDeliverySubmit(req)!=nil{
    apiReply(w,403,map[string]string{"error":"scope_denied"});return
   }
-  approved,e:=a.consent(r.Context(),p,req)
-  if e!=nil||!approved{apiReply(w,403,map[string]string{"error":"consent_denied"});return}
+  decision,e:=a.consent(r.Context(),p,req)
+  if e!=nil||!decision.Owner||!decision.Consent{apiReply(w,403,map[string]string{"error":"consent_denied"});return}
   receipt,code,e:=a.store.Enqueue(req)
   if e!=nil{
    if e.Error()=="idempotency conflict"{apiReply(w,409,map[string]string{"error":"idempotency_conflict"})
@@ -275,14 +276,12 @@ func (a *DeliveryAPI) ServeHTTP(w http.ResponseWriter,r *http.Request){
  if !ok||rec.Request.Tenant!=p.Tenant{
   apiReply(w,404,map[string]string{"error":"not_found"});return
  }
- approved,e:=a.consent(r.Context(),p,rec.Request)
- if e!=nil||!approved {
-  // Revocation MUST still permit the authenticated former owner to cancel.
-  // Consent is not required for cancellation, but owner binding IS.
-  if !cancelling{apiReply(w,403,map[string]string{"error":"scope_denied"});return}
+ decision,e:=a.consent(r.Context(),p,rec.Request)
+ if e!=nil||!decision.Owner {
+  apiReply(w,403,map[string]string{"error":"scope_denied"});return
  }
- // The configured consent callback must bind this principal to the private
- // recipient and subscription, not merely check promotional opt-in.
+ // Consent may be revoked, but the verified owner must still be able
+ // to see and cancel the previous delivery receipt.
  if cancelling{
   receipt,e:=a.store.SetStatus(path,"cancelled")
   if e!=nil{apiReply(w,409,map[string]string{"error":"delivery_terminal"});return}

@@ -114,3 +114,38 @@ test('running backend automatically polls revoked consent and cancels queued Mai
   await rm(dir,{recursive:true,force:true});
  }
 });
+
+test('Indexer changes during recipient verification persist a halt and deny later dispatch',async()=>{
+ const dir=await mkdtemp(join(tmpdir(),'bet7-midscan-reorg-'));
+ const fx=sourceFixture();
+ const manifestPath=join(dir,'manifest.json');
+ await writeFile(manifestPath,JSON.stringify(fx.manifest));
+ const env={BET_INDEXER_EVENT_MANIFEST:manifestPath,
+  BET_INDEXER_EVENT_CHECKPOINT:join(dir,'checkpoint.json'),
+  BET_DELIVERY_OUTBOX_PATH:join(dir,'outbox.json'),
+  BET_MAIL_URL:'https://mail.example/',BET_REVOCATION_POLL_MS:'60000'};
+ let runtime,scans=0;
+ const unstable={...fx.reader,poll:async(...args)=>{
+  if(++scans===2)throw Error('canonical chain changed during verification');
+  return fx.reader.poll(...args);
+ }};
+ try{
+  runtime=await createBetNotificationsMailRuntime({
+   env,readerFactory:()=>unstable,verifyRegistry:async()=>fx.registry,
+   readRevocations:async()=>[],
+   resolveAudience:async()=>[{ownershipVerified:true,account:A(6),
+    gameVersionId:H(12),tenant:'420bet',userId:'subject-1',
+    subscriptions:[{channel:'mail',id:'sub-1',recipient:'recipient-1',policyVersion:'policy-1'}]}],
+   checkConsent:async req=>({tenant:req.tenant,userId:req.userId,subscriptionId:req.subscriptionId,
+    recipient:req.recipient,channel:req.channel,policyVersion:req.policyVersion,
+    active:true,muted:false,revoked:false,consent:true}),
+   authorizeMailActor:async()=>({sender:'sender-id',authorization:'Bearer '+'a'.repeat(40)}),
+   notifications:{deliverAuthenticated:async()=>{throw Error('unreachable')},
+    readReceipt:async()=>{throw Error('unreachable')},
+    cancelDelivery:async()=>({cancelled:false})}
+  });
+  await assert.rejects(runtime.publish(),/provenance not verified/);
+  assert.equal((await runtime.outbox.summary()).halted,true);
+  await assert.rejects(runtime.drain(),/reorg halt/);
+ }finally{if(runtime)await runtime.stop();await rm(dir,{recursive:true,force:true})}
+});

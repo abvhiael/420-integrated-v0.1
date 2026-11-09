@@ -82,6 +82,7 @@ export async function openBetDeliveryOutbox({
   return Object.freeze({
    key:item.delivery.deliveryKey,channel:item.delivery.channel,status:item.status,
    attempts:item.attempts,nextAttemptAt:item.nextAttemptAt,
+   retracted:item.retracted===true,
    receipt:item.receipt?{provider:item.receipt.provider,externalId:item.receipt.externalId,
     status:item.receipt.status}:null
   });
@@ -120,7 +121,7 @@ export async function openBetDeliveryOutbox({
  async function cancel(key){
   const result=await withWrite(async state=>{
    const item=state.items[key];assert(item,'unknown delivery');
-   if(item.status==='cancelled'||item.status==='dead_letter')return scrub(item);
+   if(item.status==='cancelled'||item.status==='dead_letter')return {record:scrub(item),delivery:clone(item.delivery),receipt:null};
    // Cancel BEFORE any external calls and retain cancellation tombstone.
    item.status='cancelled';item.nextAttemptAt=null;item.updatedAt=clock();
    return {record:scrub(item),delivery:clone(item.delivery),receipt:clone(item.receipt)};
@@ -142,7 +143,9 @@ export async function openBetDeliveryOutbox({
     const d=item.delivery;
     if(d.tenant===tenant&&d.userId===userId&&d.subscriptionId===subscriptionId&&
      item.status!=='cancelled'){
-     item.status='cancelled';item.nextAttemptAt=null;item.updatedAt=clock();
+     if(item.status==='delivered')item.retracted=true;
+     else{item.status='cancelled';item.nextAttemptAt=null;}
+     item.updatedAt=clock();
      list.push({delivery:clone(d),receipt:clone(item.receipt)});
     }
    }
@@ -156,16 +159,26 @@ export async function openBetDeliveryOutbox({
    remoteCancellationUnconfirmed:pending.filter(x=>x.receipt).length-confirmations};
  }
  async function retractEvent(eventId){
-  return withWrite(async state=>{
+  const affected=await withWrite(async state=>{
    assert(typeof eventId==='string'&&/^[a-f0-9]{64}$/.test(eventId),'invalid event key');
-   let total=0;
+   const affected=[];
    for(const item of Object.values(state.items)){
     if(item.delivery.eventId===eventId&&item.status!=='cancelled'){
-     item.status='cancelled';item.nextAttemptAt=null;item.updatedAt=clock();total++;
+     if(item.status==='delivered'){
+      item.retracted=true; // Preserve already-delivered receipt; cannot unsend.
+     }else{item.status='cancelled';item.nextAttemptAt=null;}
+     item.updatedAt=clock();
+     affected.push({delivery:clone(item.delivery),receipt:clone(item.receipt)});
     }
    }
-   return total;
+   return affected;
   });
+  let confirmed=0;
+  for(const item of affected)if(item.receipt){
+   try{if((await providers[item.delivery.channel].cancel(item.delivery,item.receipt))?.cancelled===true)confirmed++;}catch{}
+  }
+  return {affected:affected.length,remoteCancellationConfirmed:confirmed,
+   remoteCancellationUnconfirmed:affected.filter(x=>x.receipt).length-confirmed};
  }
  async function haltForReorg(){
   return withWrite(async state=>{state.halted=true;return {halted:true};});

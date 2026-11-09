@@ -2,6 +2,7 @@
 // servers, never fixtures pretending to be 420Mail or 420Notifications.
 import assert from 'node:assert/strict';
 import {openBetDeliveryOutbox} from '../server/notifications-mail-outbox.mjs';
+import {openBetOperationalDeliveryWorker} from '../server/delivery-worker.mjs';
 import {create420MailProvider,create420NotificationsProvider} from '../server/notifications-mail-adapters.mjs';
 import {createVerified420MailActorBroker} from '../server/mail-auth-broker.mjs';
 import {create420NotificationsConsentAuthority} from '../server/notifications-consent-authority.mjs';
@@ -61,13 +62,24 @@ try{
  outbox=await openBetDeliveryOutbox(outboxArgs);
  const oldMail=await outbox.enqueue(request('mail'));
  const oldPush=await outbox.enqueue(request('notifications'));
- const delivered=await outbox.drain();
+ const worker=await openBetOperationalDeliveryWorker({
+  runtime:{
+   syncRevocations:async()=>createBetRevocationConsumer({readRevocations,outbox}).sync(),
+   publish:async()=>({queued:0,scanned:0,nextBlock:'25'}),
+   drain:async options=>outbox.drain(options),outbox,
+   revocationHealth:()=>({failed:false}),stop:async()=>outbox.close()
+  },
+  statePath:config.LOCAL_GO_OUTBOX_PATH+'.worker.json',
+  intervalMs:100,staleAfterMs:1000
+ });
+ const delivered=(await worker.runOnce()).delivery;
+ assert.equal(worker.checkpoint().completed,1,'real HTTP cycle checkpoint not persisted');
  assert.equal(delivered.delivered,1,'real Go Mail outbox was not delivered: '+JSON.stringify({
   result:delivered,mail:await outbox.get(oldMail.key),push:await outbox.get(oldPush.key)}));
  assert.equal(delivered.pending,1,'Go Notifications forged a delivered receipt');
  assert.equal((await outbox.get(oldMail.key)).status,'delivered');
  assert.equal((await outbox.get(oldPush.key)).status,'pending_receipt');
- await outbox.close();
+ await worker.stop();outbox=null;
  outbox=await openBetDeliveryOutbox(outboxArgs);
  assert.equal((await outbox.get(oldMail.key)).status,'delivered');
  assert.equal((await outbox.get(oldPush.key)).status,'pending_receipt');

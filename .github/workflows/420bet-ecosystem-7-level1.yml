@@ -6,6 +6,8 @@ on:
       - 'clients/420bet-lobby/server/wallet-identity-sessions.mjs'
       - 'clients/420bet-lobby/server/wallet-signature-verifier.mjs'
       - 'clients/420bet-lobby/server/identity-runtime.mjs'
+      - 'clients/420bet-lobby/server/registry-verifier.mjs'
+      - 'clients/420bet-lobby/tests/registry-verifier.test.mjs'
       - 'clients/420bet-lobby/server/identity-authority-provider.mjs'
       - 'clients/420bet-lobby/server/serve-identity.mjs'
       - 'clients/420bet-lobby/worker/index.js'
@@ -54,6 +56,7 @@ jobs:
             clients/420bet-lobby/tests/wallet-session-worker.test.mjs \
             clients/420bet-lobby/tests/identity-authority-provider.test.mjs \
             clients/420bet-lobby/tests/identity-runtime.test.mjs \
+            clients/420bet-lobby/tests/registry-verifier.test.mjs \
             clients/420bet-lobby/tests/sportsbook-worker.test.mjs
       - name: Production Vite build
         working-directory: clients/420bet-lobby
@@ -64,6 +67,7 @@ jobs:
           node --check clients/420bet-lobby/server/wallet-identity-sessions.mjs
           node --check clients/420bet-lobby/server/wallet-signature-verifier.mjs
           node --check clients/420bet-lobby/server/identity-runtime.mjs
+          node --check clients/420bet-lobby/server/registry-verifier.mjs
           node --check clients/420bet-lobby/server/identity-authority-provider.mjs
           node --check clients/420bet-lobby/server/serve-identity.mjs
           node --check clients/420bet-lobby/worker/index.js

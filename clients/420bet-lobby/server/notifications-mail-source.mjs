@@ -42,7 +42,8 @@ export function createFinalizedBetNotificationPublisher({
    if(!source||source.role!==event.role||!VERTICAL[event.role]||!kind){skipped++;continue;}
    const audience=await resolveAudience({
     chainId:event.chainId,gameVersionId:event.gameVersionId,
-    sourceId:source.id,role:event.role,objectId:event.objectId,
+    sourceId:source.id,sourceAddress:source.address,role:event.role,objectId:event.objectId,
+    blockNumber:event.blockNumber,
     account:event.account,kind,blockHash:event.blockHash,
     transactionHash:event.transactionHash,logIndex:event.logIndex
    });

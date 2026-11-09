@@ -89,3 +89,27 @@ test('authenticated reader denies forgery, wrong tenant, cursor gap and provider
   fetcher:async()=>({ok:false})});
  await assert.rejects(outage(0),/unavailable/);
 });
+
+test('failed remote cancellation survives restart and is retried without re-sending',async()=>{
+ const dir=await mkdtemp(join(tmpdir(),'bet-revoke-'));let outbox;
+ let attempts=0;
+ const remote={deliver:async()=>({provider:'420Notifications',externalId:'remote-1',status:'pending'}),
+  status:async()=>({provider:'420Notifications',externalId:'remote-1',status:'pending'}),
+  cancel:async()=>({cancelled:++attempts>1})};
+ const openStore=()=>openBetDeliveryOutbox({path:join(dir,'outbox.json'),verifyEvent:async()=>true,
+  checkConsent:async request=>approvals(request),providers:{notifications:remote,mail:remote}});
+ try{
+  outbox=await openStore();
+  const deliveryRecord=await outbox.enqueue(delivery());
+  assert.equal((await outbox.drain()).pending,1);
+  const withdrawn=await outbox.revokeSubscription({...scope,sequence:1});
+  assert.equal(withdrawn.remoteCancellationUnconfirmed,1);
+  assert.equal((await outbox.get(deliveryRecord.key)).status,'cancelled');
+  await outbox.close();
+  outbox=await openStore();
+  const retry=await outbox.retryRemoteCancellations();
+  assert.equal(retry.confirmed,1);
+  assert.equal((await outbox.retryRemoteCancellations()).attempted,0);
+  assert.equal((await outbox.drain()).processed,0);
+ }finally{if(outbox)await outbox.close();await rm(dir,{recursive:true,force:true})}
+});

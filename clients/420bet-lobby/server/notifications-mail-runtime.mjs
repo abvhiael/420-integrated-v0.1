@@ -77,9 +77,13 @@ export async function createBetNotificationsMailRuntime({
   resolveAudience:ownership,outbox});
  return Object.freeze({outbox,
   // Always catch up revoked subscriptions before publishing or dispatching.
-  syncRevocations:args=>revocationConsumer.sync(args),
-  publish:async args=>{await revocationConsumer.sync();return publisher.publish(args);},
-  drain:async args=>{await revocationConsumer.sync();return outbox.drain(args);},
+  syncRevocations:async args=>{
+   const result=await revocationConsumer.sync(args);
+   const cancellation=await outbox.retryRemoteCancellations();
+   return {...result,remoteRetry:cancellation};
+  },
+  publish:async args=>{await revocationConsumer.sync();await outbox.retryRemoteCancellations();return publisher.publish(args);},
+  drain:async args=>{await revocationConsumer.sync();await outbox.retryRemoteCancellations();return outbox.drain(args);},
   // Invoke only from a trusted, authenticated 420Notifications revocation controller.
   revokeSubscription:scope=>outbox.revokeSubscription(scope),
   stop:()=>outbox.close()});

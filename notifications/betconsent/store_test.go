@@ -93,3 +93,19 @@ func TestRevocationFeedSeparateReadCredential(t *testing.T){
  if ask(writeToken)!=403{t.Fatal("writer token can read revocation feed")}
  if ask(read)!=200{t.Fatal("reader cannot access revocation feed")}
 }
+
+func TestExhaustedRevocationFeedReturnsEmptyArrayNotNull(t *testing.T){
+ s,e:=Open(filepath.Join(t.TempDir(),"subscriptions.json"));if e!=nil{t.Fatal(e)};defer s.Close()
+ token:="local-read-token-very-long-000000000000"
+ h,e:=Handler(s,token,"local-write-token-very-long-000000000000");if e!=nil{t.Fatal(e)}
+ req:=httptest.NewRequest(http.MethodPost,"/v1/420bet/subscriptions/revocations",
+  bytes.NewBufferString(`{"after":0,"limit":50}`))
+ req.Header.Set("Authorization","Bearer "+token)
+ response:=httptest.NewRecorder();h.ServeHTTP(response,req)
+ if response.Code!=200{t.Fatal(response.Code,response.Body.String())}
+ var result struct{Events []Revocation `json:"events"`}
+ if e=json.Unmarshal(response.Body.Bytes(),&result);e!=nil{t.Fatal(e)}
+ if !bytes.Contains(response.Body.Bytes(),[]byte(`"events":[]`)){
+  t.Fatalf("empty feed not an array: %s",response.Body.String())
+ }
+}

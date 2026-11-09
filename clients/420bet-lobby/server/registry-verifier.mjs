@@ -191,7 +191,7 @@ export function validateBetRegistryManifest(raw){
  });
  const result={schema:raw.schema,chainId:chainId.toString(),genesisHash,revision:revision.toString(),
   approvalDigest:manifestApproval,approvalAuthority,
-  approvalSignature:raw.approvalSignature.toLowerCase(),contracts,games};
+  approvalSignature:raw.approvalSignature.toLowerCase(),contracts,sources,games};
  return Object.freeze(result);
 }
 function fieldsMatch(actual,expected,names){

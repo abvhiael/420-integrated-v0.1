@@ -47,7 +47,7 @@ test('full Registry/Indexer/ownership/consent and authenticated Mail outbox comp
      url.endsWith('/v1/outbox')?{id:'mail-delivery',owner:'sender-id',
       recipient:'recipient-1',status:'QUEUED',idempotency_key:body.idempotency_key}:
       {id:'mail-delivery',owner:'sender-id',status:'DELIVERED',
-       idempotency_key:body?.idempotency_key??sent[0]&&JSON.parse(sent[0].opts.body).idempotency_key}
+       idempotency_key:body?.idempotency_key??JSON.parse(sent[0].opts.body).idempotency_key}
     )};
    }
   });

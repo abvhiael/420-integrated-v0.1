@@ -53,6 +53,19 @@ func (h HTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	switch {
+	case r.Method == http.MethodGet && r.URL.Path == "/v1/auth/actor":
+		// The actor is determined by Authenticate, never by a caller-supplied header
+		// or request body. ResolveIdentity checks that it is an actual Mail identity.
+		if h.Service.Identities == nil {
+			writeError(w, http.StatusServiceUnavailable, "SERVICE_UNAVAILABLE", "identity authority unavailable")
+			return
+		}
+		if err := h.Service.Identities.ResolveIdentity(r.Context(), actor); err != nil {
+			writeError(w, http.StatusUnauthorized, "UNAUTHORIZED", "sender identity not verified")
+			return
+		}
+		w.Header().Set("Cache-Control", "no-store")
+		writeJSON(w, http.StatusOK, map[string]any{"actor": actor, "service": ServiceID, "verified": true})
 	case r.Method == http.MethodPost && r.URL.Path == "/v1/messages":
 		h.send(w, r, actor)
 	case r.Method == http.MethodGet && r.URL.Path == "/v1/inbox":

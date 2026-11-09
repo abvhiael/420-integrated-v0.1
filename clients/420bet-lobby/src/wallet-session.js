@@ -2,7 +2,8 @@
 // This is NOT connected to casino wager controls or production capabilities.
 import {normalizeAccount,normalizeChain} from './wallet.js';
 export function createWalletSessionClient({
- provider,fetcher=fetch,endpoint='/api/420bet/session'
+ provider,fetcher=fetch,endpoint='/api/420bet/session',
+ expectedOrigin=typeof location==='object'?location.origin:null
 }={}){
  if(!provider?.request||typeof fetcher!=='function'||endpoint!=='/api/420bet/session')
   throw Error('invalid wallet session transport');
@@ -28,6 +29,7 @@ export function createWalletSessionClient({
   const chain=String(chainId);
   const challenge=await request('challenge',{account,chainId:chain});
   if(disposed||generation!==mine||typeof challenge?.message!=='string'||
+   (expectedOrigin!==null&&!challenge.message.startsWith('420Bet read-only session\\nOrigin: '+expectedOrigin+'\\n'))||
    !challenge.message.includes('Account: '+account+'\n')||
    !challenge.message.includes('Chain ID: '+chain+'\n'))throw Error('invalid wallet challenge');
   // The player explicitly initiates this login request; never sign on page load.

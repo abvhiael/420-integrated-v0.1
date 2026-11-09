@@ -1,6 +1,6 @@
 # BET-AUDIT-7 — 420Notifications / 420Mail delivery integration
 
-**Implementation:** `clients/420bet-lobby/server/notifications-mail-adapters.mjs`, `notifications-mail-outbox.mjs`, `notifications-mail-source.mjs`, `notifications-mail-runtime.mjs`.
+**Ownership resolver increment (2026-11-09):** `server/ownership-resolver.mjs` is now a concrete authenticated HTTPS client for `POST /v1/420bet/ownership/resolve`, not merely a caller-injected placeholder. It supplies the Registry-bound emitter address/source ID, chain, vertical, object ID, event kind, optional indexed account, game version, finalized block hash/height, transaction hash and log index. It refuses responses missing an authoritative finalized decision, precise event-scoped independent ownership proof, valid owner identity and tenant, nonrevoked subscriptions, or a fresh attestation (30-second max age). The endpoint is a proposed private service contract: **the server implementation, its independently qualified canonical membership/subject/consent data, deployed URL, token and genuine evidence are not yet present or proven.** Configuring a URL alone does not satisfy the real-ownership acceptance gate. Local behavior is covered by `tests/ownership-resolver.test.mjs`, pending CI qualification at the exact new SHA.\n\n**Implementation:** `clients/420bet-lobby/server/notifications-mail-adapters.mjs`, `notifications-mail-outbox.mjs`, `notifications-mail-source.mjs`, `notifications-mail-runtime.mjs`.
 
 **Disposition:** repository-side event, consent, Mail HTTP delivery, durable retry/revocation and Notifications adapter boundary implemented. **Not live**: no real qualified 420Notifications delivery ingress or externally certified private-owner/consent service, real 420Mail account/token broker or production provider endpoints are asserted. Testnet/operational acceptance is separately tracked as `TN-BET-7-NOTIFY-MAIL` in the canonical roadmap. No mail or push delivery is enabled by importing these modules.
 
@@ -31,7 +31,7 @@ There are no funds, balances, stake amounts, payout verdicts, player wallet addr
 | `BET_INDEXER_EVENT_CHECKPOINT` | Canonical private Indexer checkpoint with verified receipt/block history |
 | `BET_DELIVERY_OUTBOX_PATH` | Private durable, writable, single-writer outbox file path |
 | `BET_MAIL_URL` | Qualified authenticated HTTPS 420Mail root origin |
-| `resolveAudience` | Independently authenticated canonical ownership/recipient lookup |
+| `resolveAudience` | Explicit trusted override for integration tests or approved providers; otherwise use the built-in HTTPS ownership client |\n| `BET_OWNERSHIP_AUTHORITY_URL` / `BET_OWNERSHIP_AUTHORITY_TOKEN` / `BET_OWNERSHIP_CHAIN_ID` | Private HTTPS ownership authority origin, server-only bearer credential and exact chain for built-in client; all three required if no trusted override |
 | `checkConsent` | Tenant/subject/private subscription authority, freshly evaluated |
 | `authorizeMailActor` | Qualified Mail identity broker returning sender and server-only Authorization header |
 | `notifications.deliverAuthenticated/readReceipt/cancelDelivery` | Qualified 420Notifications actual delivery, receipt and revocation adapter |

@@ -68,12 +68,13 @@ export function decodeKnownEvent(role,log){
  const spec=EVENT_SPECS[role]?.find(s=>s.topic0===log.topics?.[0]?.toLowerCase());
  if(!spec)return null;
  if(!Array.isArray(log.topics)||log.topics.length!==spec.indexed+1||log.topics.some(t=>!WORD.test(t)))throw Error('invalid event topics');
- if(typeof log.data!=='string'||!HEX.test(log.data)||((log.data.length-2)/64)<spec.words||((log.data.length-2)%64)!==0)throw Error('invalid ABI event data');
+ if(typeof log.data!=='string'||!HEX.test(log.data)||((log.data.length-2)%64)!==0||((log.data.length-2)/64)<spec.words)throw Error('invalid ABI event data');
+ if(spec.type!=='FANTASY_ENTRY_ACCEPTED'&&((log.data.length-2)/64)!==spec.words)throw Error('noncanonical ABI event length');
  // Dynamic fantasy envelope is not decoded or emitted. ABI length and pointer must be valid.
  if(spec.type==='FANTASY_ENTRY_ACCEPTED'){
   const pointer=BigInt('0x'+log.data.slice(2+64*2,2+64*3));
   const len=BigInt('0x'+log.data.slice(2+64*3,2+64*4));
-  if(pointer!==96n||len>BigInt((log.data.length-2)/2-128)||((log.data.length-2)/2)%32!==0)throw Error('invalid dynamic event envelope');
+  if(pointer!==96n||len>4096n||BigInt((log.data.length-2)/2)!==128n+((len+31n)/32n)*32n)throw Error('invalid dynamic event envelope');
  }
  const word=log.topics[spec.idIndex].toLowerCase();
  const account=spec.accountIndex?('0x'+log.topics[spec.accountIndex].slice(-40).toLowerCase()):null;

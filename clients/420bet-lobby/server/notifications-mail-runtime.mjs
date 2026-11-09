@@ -1,4 +1,5 @@
 import {readFile} from 'node:fs/promises';
+import {createRemoteBetOwnershipResolver} from './ownership-resolver.mjs';
 import {createIndexerEventReader} from './indexer-event-reader.mjs';
 import {verifyConfiguredRegistry} from './verify-registry.mjs';
 import {openBetDeliveryOutbox} from './notifications-mail-outbox.mjs';
@@ -28,7 +29,11 @@ export async function createBetNotificationsMailRuntime({
   typeof env.BET_INDEXER_EVENT_CHECKPOINT==='string'&&
   typeof env.BET_DELIVERY_OUTBOX_PATH==='string'&&
   typeof env.BET_MAIL_URL==='string','missing approved paths or Mail endpoint');
- fail(typeof resolveAudience==='function'&&typeof checkConsent==='function'&&
+ const ownership=resolveAudience??(env.BET_OWNERSHIP_AUTHORITY_URL&&env.BET_OWNERSHIP_AUTHORITY_TOKEN&&
+  env.BET_OWNERSHIP_CHAIN_ID?createRemoteBetOwnershipResolver({
+   origin:env.BET_OWNERSHIP_AUTHORITY_URL,bearerToken:env.BET_OWNERSHIP_AUTHORITY_TOKEN,
+   chainId:env.BET_OWNERSHIP_CHAIN_ID,fetcher}):null);
+ fail(typeof ownership==='function'&&typeof checkConsent==='function'&&
   typeof authorizeMailActor==='function'&&notifications&&
   ['deliverAuthenticated','readReceipt','cancelDelivery'].every(k=>typeof notifications[k]==='function'),
   'qualified Identity, Notifications, consent and Mail providers required');
@@ -59,7 +64,7 @@ export async function createBetNotificationsMailRuntime({
  const publisher=createFinalizedBetNotificationPublisher({
   reader,checkpointPath:env.BET_INDEXER_EVENT_CHECKPOINT,
   verifyRegistry:()=>verifyRegistry({env,indexerManifest:manifest}),
-  resolveAudience,outbox});
+  resolveAudience:ownership,outbox});
  return Object.freeze({outbox,publish:publisher.publish,
   drain:args=>outbox.drain(args),stop:()=>outbox.close()});
 }

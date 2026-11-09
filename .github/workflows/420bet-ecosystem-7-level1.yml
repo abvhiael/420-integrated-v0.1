@@ -16,6 +16,7 @@ on:
       - 'clients/420bet-lobby/tests/ecosystem.test.mjs'
       - 'docs/bet/BET-AUDIT-7-ECOSYSTEM-INTEGRATIONS.md'
       - 'docs/bet/BET-AUDIT-7-INDEXER-WORKSTREAM.md'
+      - 'docs/bet/BET-AUDIT-7-WALLET-IDENTITY.md'
       - '.github/workflows/420bet-ecosystem-7-level1.yml'
   workflow_dispatch:
 jobs:

@@ -53,12 +53,13 @@ Tests use **explicit mock** signature and identity-policy callbacks; they establ
 | `BET_SESSION_BACKEND_TOKEN` | Shared backend-only bearer known to the Cloudflare Worker proxy and Node service; at least 32 characters |
 | `BET_SESSION_PORT`, `BET_SESSION_HOST` | Optional service port and bind host; defaults 8788 and loopback |
 
-The subject authority must serve two authenticated, privacy-limited POST endpoints:
+The subject authority must serve three authenticated, privacy-limited POST endpoints:
 
 - `/v1/wallet-subject` receives `{account,chainId}` and returns the matching `{account,chainId,subjectId,revoked:false}`, where `subjectId` is the **canonical existing Identity420 subject** and is not derived from the address.
+- `/v1/420bet/health` receives `{chainId,expectedPolicyVersion,expectedPolicyApprovalDigest}` and returns `{ready:true,chainId,policyVersion,policyApprovalDigest}` with the exact matching, independently approved policy identity. The Node server additionally verifies the configured RPC chain and deployed Identity420 bytecode hash at its edge-authenticated `GET /api/420bet/session/ready`; Cloudflare exposes the browser sign-in capability only when this live check passes. No readiness response authorizes a player or wager.
 - `/v1/420bet/eligibility` receives `{account,subjectId,chainId,requiredCredentialTypes,mode:"read-only",expectedPolicyVersion,expectedPolicyApprovalDigest}`. A valid positive response matches the same scopes, `policyVersion`, `policyApprovalDigest`, `authorized:true`, `revoked:false`, a changing `authorizationVersion`, and a bounded future `expiresAt` Unix epoch **milliseconds**. The service must re-evaluate negative and revoked policies on every call. No positive caching.
 
-The backend's Node HTTP service rejects requests that do not carry the independently configured `X-Bet-Edge-Secret` from the trusted Worker proxy. It rejects cross-origin requests and cookies, requires explicit bearer sessions for status/revocation, and never emits an account capability or wallet transaction.
+The Node service applies a bounded per-instance request-rate backstop (60 requests per client per minute), **not** a substitute for authoritative distributed edge/abuse limits. The backend's Node HTTP service rejects requests that do not carry the independently configured `X-Bet-Edge-Secret` from the trusted Worker proxy. It rejects cross-origin requests and cookies, requires explicit bearer sessions for status/revocation, and never emits an account capability or wallet transaction.
 
 ### Cloudflare Worker activation (requires genuine deployment)
 

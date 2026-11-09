@@ -64,5 +64,12 @@ export function createRemoteBetIdentityAuthority({
   return {authorized:true,revoked:false,authorizationVersion:
    policyVersion+':'+decision.authorizationVersion,expiresAt:decision.expiresAt};
  }
- return Object.freeze({resolveSubjectId,verifyPolicy,policyVersion});
+ async function checkReadiness(){
+  const result=await post('/v1/420bet/health',{chainId,expectedPolicyVersion:policyVersion,
+   expectedPolicyApprovalDigest:policyApprovalDigest.toLowerCase()});
+  ensure(result.ready===true&&result.chainId===chainId&&result.policyVersion===policyVersion&&
+   result.policyApprovalDigest===policyApprovalDigest.toLowerCase(),'eligibility authority not approved or ready');
+  return true;
+ }
+ return Object.freeze({resolveSubjectId,verifyPolicy,checkReadiness,policyVersion});
 }

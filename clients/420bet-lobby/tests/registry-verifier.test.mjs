@@ -106,6 +106,7 @@ test('wrong chain, forged genesis and reorged finalized block all fail closed',a
  f.mutation.chain=421;
  await assert.rejects(f.verified().verify(),/wrong chain/);
  f.mutation.chain=420;f.manifest.genesisHash=H(402);
+ f.manifest.approvalDigest=registryManifestDigest(validateBetRegistryManifest(f.manifest));
  await assert.rejects(f.verified().verify(),/wrong genesis/);
  f.manifest.genesisHash=H(400);f.manifest.approvalDigest=registryManifestDigest(validateBetRegistryManifest(f.manifest));f.mutation.reorg=true;
  await assert.rejects(f.verified().verify(),/reorg/);

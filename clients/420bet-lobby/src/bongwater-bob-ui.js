@@ -30,47 +30,84 @@ const awards=[5,10,20,35,50];
 const faces={idle:'bongwater-bob-01-default',loss:'bongwater-bob-06-side-eye',win:'bongwater-bob-04-laughing',big:'bongwater-bob-17-mind-blown',pick:'bongwater-bob-22-mischievous',free:'bongwater-bob-12-dizzy',end:'bongwater-bob-18-celebration'};
 export {evaluate,gridFrom,sample,pickThree,paylines,pays,base,bonusObjects};
 export function createBongwaterBobPractice(doc=globalThis.document){
- let credits=10000,bet=2,totalWin=0,mode='base',freeRemaining=0,freeGranted=0,freeTotal=0,busy=false,disposed=false;let pendingPick=null;
+ let credits=10000,bet=2,totalWin=0,mode='base',freeRemaining=0,freeGranted=0,freeTotal=0,busy=false,disposed=false;let pendingPick=null,testingMode=false;const spinTimers=new Set();let spinInterval=null;
  const root=el(doc,'section','bob-slot');root.setAttribute('aria-label',"Bongwater Bob's Bad Decisions — practice slot");
  const header=el(doc,'header','bob-slot-title');const logo=el(doc,'img');logo.src=img('branding','bongwater-bobs-bad-decisions-logo');logo.alt="Bongwater Bob's Bad Decisions";header.append(logo);
- const scene=el(doc,'div','bob-scene');const hero=el(doc,'img','bob-hero');hero.alt='Bongwater Bob';scene.append(hero);
+ const scene=el(doc,'div','bob-scene');
+ const right=el(doc,'aside','bob-side');
+ const paytable=el(doc,'section','bob-paytable');
+ const payHeading=el(doc,'h2','','BOB\'S TERRIBLE PAYTABLE');paytable.append(payHeading);
+ for(const [symbol,value] of Object.entries(pays)){
+  const row=el(doc,'div','bob-pay-row');const icon=el(doc,'img');icon.src=img('symbols',icons[symbol]);icon.alt='';
+  row.append(icon,el(doc,'span','',names[symbol]),el(doc,'strong','',value+'× LINE BET'));paytable.append(row);
+ }
+ const payFoot=el(doc,'p','','Five fixed paylines · WILD substitutes · 3 matching symbols to win');
+ paytable.append(payFoot);
+ const hero=el(doc,'img','bob-hero');hero.alt='Bongwater Bob';
+ right.append(paytable,hero);scene.append(right);
  const machine=el(doc,'div','bob-machine');const title=el(doc,'div','bob-reel-caption','THREE REELS · FIVE FIXED LINES');
  const board=el(doc,'div','bob-board');const tiles=[];for(let row=0;row<3;row++){for(let c=0;c<3;c++){const cell=el(doc,'div','bob-cell');const picture=el(doc,'img');picture.alt='';cell.append(picture);board.append(cell);tiles.push(picture);}}
  const status=el(doc,'div','bob-status');status.setAttribute('aria-live','polite');machine.append(title,board,status);scene.append(machine);
  const bonus=el(doc,'div','bob-bonus');bonus.hidden=true;scene.append(bonus);
  const panel=el(doc,'div','bob-panel');const creditLabel=el(doc,'div','bob-meter'),betLabel=el(doc,'div','bob-meter'),winLabel=el(doc,'div','bob-meter');
- const smaller=el(doc,'button','','BET −'),larger=el(doc,'button','','BET +'),spin=el(doc,'button','bob-spin','SPIN'),info=el(doc,'button','','INFO');[smaller,larger,spin,info].forEach(b=>b.type='button');panel.append(creditLabel,smaller,betLabel,larger,spin,winLabel,info);
+ const smaller=el(doc,'button','','BET −'),larger=el(doc,'button','','BET +'),spin=el(doc,'button','bob-spin','SPIN'),info=el(doc,'button','','INFO'),testPick=el(doc,'button','bob-test','TEST PICK BONUS'),testFree=el(doc,'button','bob-test','TEST FREE SPINS');
+ [smaller,larger,spin,info,testPick,testFree].forEach(b=>b.type='button');
+ panel.append(creditLabel,smaller,betLabel,larger,spin,winLabel,info,testPick,testFree);
  const details=el(doc,'div','bob-rules');details.hidden=true;details.textContent='Practice credits only. 3×3 reels, five fixed paylines. Three matching symbols on a line pay; Bob WILD substitutes for ordinary symbols. Three BAD DECISIONS symbols anywhere trigger a pick bonus: three different objects are sampled from nine, and the prize is chosen independently of the object artwork. Three ONE MORE HIT symbols anywhere award 8 free spins with 2× line wins. Retriggers award 8 more, with a maximum of 24 awarded spins. Reel strips and RTP are provisional and not certified.';
  root.append(header,scene,panel,details);
  const money=n=>n.toFixed(2);
  function face(key){hero.src=img('characters',faces[key]??faces.idle);}
  function wallpaper(kind){scene.style.backgroundImage='url("'+img('backgrounds',kind==='pick'?'bob-pick-bonus-wallpaper':kind==='free'?'bob-free-spins-wallpaper':'bob-base-game-wallpaper')+'")';}
- function paint(grid){for(let row=0;row<3;row++)for(let col=0;col<3;col++){const s=grid[col][row];const picture=tiles[row*3+col];picture.src=img('symbols',icons[s]);picture.alt=names[s];}}
- function meters(){creditLabel.textContent='CREDITS '+money(credits);betLabel.textContent='BET '+money(bet);winLabel.textContent='WIN '+money(totalWin);spin.textContent=mode==='free'?'FREE SPIN ('+freeRemaining+')':'SPIN';spin.disabled=busy||mode==='pick';smaller.disabled=larger.disabled=busy||mode!=='base';}
+ function paintColumn(col,values){for(let row=0;row<3;row++){const symbol=values[row],picture=tiles[row*3+col];picture.src=img('symbols',icons[symbol]);picture.alt=names[symbol];}}
+ function paint(grid){for(let c=0;c<3;c++)paintColumn(c,grid[c]);}
+ function schedule(fn,ms){const id=setTimeout(()=>{spinTimers.delete(id);if(!disposed)fn();},ms);spinTimers.add(id);}
+ function clearSpin(){if(spinInterval!==null){clearInterval(spinInterval);spinInterval=null;}for(const id of spinTimers)clearTimeout(id);spinTimers.clear();board.classList.remove('bob-reels-spinning');}
+ function animate(result,finished){
+  const strips=mode==='free'?freeStrips:base;let positions=strips.map(s=>rand(s.length));const stopped=[false,false,false];
+  board.classList.add('bob-reels-spinning');message('BOB IS MAKING QUESTIONABLE CHOICES...');
+  spinInterval=setInterval(()=>{if(disposed)return;for(let c=0;c<3;c++)if(!stopped[c]){positions[c]=(positions[c]+1)%strips[c].length;paintColumn(c,[0,1,2].map(offset=>strips[c][(positions[c]+offset)%strips[c].length]));}},65);
+  [900,1575,2250].forEach((duration,col)=>schedule(()=>{
+   stopped[col]=true;paintColumn(col,result.grid[col]);const column=board.querySelectorAll('.bob-cell:nth-child(3n + '+(col+1)+')');
+   for(const cell of column){cell.classList.remove('bob-reel-landed');void cell.offsetWidth;cell.classList.add('bob-reel-landed');}
+   if(col===2){clearSpin();finished();}
+  },duration));
+ }
+ function meters(){creditLabel.textContent='CREDITS '+money(credits);betLabel.textContent='BET '+money(bet);winLabel.textContent='WIN '+money(totalWin);spin.textContent=mode==='free'?'FREE SPIN ('+freeRemaining+')':'SPIN';spin.disabled=busy||mode==='pick';smaller.disabled=larger.disabled=busy||mode!=='base';testPick.disabled=testFree.disabled=busy||mode!=='base';}
  function message(s){status.textContent=s;}
- function finishFeature(){mode='base';freeRemaining=0;freeGranted=0;wallpaper('base');face('end');message('FREE SPINS COMPLETE! TOTAL '+money(freeTotal));meters();}
+ function finishFeature(){mode='base';freeRemaining=0;freeGranted=0;wallpaper('base');face('end');message('FREE SPINS COMPLETE! TOTAL '+money(freeTotal)+(testingMode?' · DEMO ONLY':''));testingMode=false;meters();}
+ function settle(result){
+  totalWin=result.total;if(!testingMode)credits+=result.total;if(mode==='free')freeTotal+=result.total;
+  face(result.total>=bet*20?'big':result.total>0?'win':'loss');
+  message(result.winners.length?result.winners.map(w=>'LINE '+w.line+' '+money(w.amount)).join(' · '):'BOB MADE ANOTHER BAD DECISION');
+  if(mode==='base'&&result.pick){pendingPick={options:pickThree(),award:choice(awards)*bet};mode='pick';wallpaper('pick');face('pick');showPick();}
+  else if(result.free){if(mode==='base'){mode='free';freeGranted=8;freeRemaining=8;freeTotal=0;wallpaper('free');face('free');message('JUST ONE MORE HIT! 8 FREE SPINS · 2× LINE WINS');}else{const additional=Math.min(8,24-freeGranted);freeGranted+=additional;freeRemaining+=additional;message(additional?'BOB FOUND '+additional+' MORE FREE SPINS!':'24 FREE SPINS MAXIMUM');}}
+  else if(mode==='free'&&freeRemaining===0)finishFeature();
+  busy=false;meters();
+ }
  function drawSpin(){
- if(disposed||busy||mode==='pick')return;
- if(mode==='base'&&credits<bet){message('NOT ENOUGH PRACTICE CREDITS');return;}
- if(mode==='base')credits-=bet;
- if(mode==='free')freeRemaining--;
- busy=true;meters();const result=sample(bet,mode==='free');paint(result.grid);totalWin=result.total;credits+=result.total;if(mode==='free')freeTotal+=result.total;
- face(result.total>=bet*20?'big':result.total>0?'win':'loss');
- message(result.winners.length?result.winners.map(w=>'LINE '+w.line+' '+money(w.amount)).join(' · '):'BOB MADE ANOTHER BAD DECISION');
- // Outcome and award are fixed before presentation; no animation affects results.
- if(mode==='base'&&result.pick){pendingPick={options:pickThree(),award:choice(awards)*bet};mode='pick';wallpaper('pick');face('pick');showPick();}
- else if(result.free){if(mode==='base'){mode='free';freeGranted=8;freeRemaining=8;freeTotal=0;wallpaper('free');face('free');message('JUST ONE MORE HIT! 8 FREE SPINS · 2× LINE WINS');}else{const additional=Math.min(8,24-freeGranted);freeGranted+=additional;freeRemaining+=additional;message(additional?'BOB FOUND '+additional+' MORE FREE SPINS!':'24 FREE SPINS MAXIMUM');}}
- else if(mode==='free'&&freeRemaining===0)finishFeature();
- busy=false;meters();
+  if(disposed||busy||mode==='pick')return;
+  if(mode==='base'&&credits<bet){message('NOT ENOUGH PRACTICE CREDITS');return;}
+  if(mode==='base')credits-=bet;
+  if(mode==='free')freeRemaining--;
+  busy=true;meters();
+  const result=sample(bet,mode==='free');
+  animate(result,()=>settle(result));
+ }
+ function startTest(kind){
+  if(disposed||busy||mode!=='base')return;
+  testingMode=true;totalWin=0;
+  if(kind==='pick'){pendingPick={options:pickThree(),award:choice(awards)*bet};mode='pick';wallpaper('pick');face('pick');showPick();message('TEST MODE: PICK ANY ONE OF THE THREE RANDOM PROPS');}
+  else {mode='free';freeGranted=8;freeRemaining=8;freeTotal=0;wallpaper('free');face('free');message('TEST MODE: EIGHT FREE SPINS, NO CREDIT CHANGES');}
+  meters();
  }
  function showPick(){
  bonus.replaceChildren();bonus.hidden=false;const branding=el(doc,'img','bob-bonus-logo');branding.src=img('branding','whats-the-worst-that-could-happen-logo');branding.alt="What's the Worst That Could Happen?";
- const heading=el(doc,'p','','PICK ONE TERRIBLE DECISION');const choices=el(doc,'div','bob-choices');for(const name of pendingPick.options){const b=el(doc,'button','bob-object');b.type='button';const picture=el(doc,'img');picture.src=img('bonus-objects','bonus-'+name);picture.alt=name.replaceAll('-',' ');b.append(picture);b.setAttribute('aria-label','Pick '+name.replaceAll('-',' '));b.addEventListener('click',()=>{if(mode!=='pick')return;const award=pendingPick.award;pendingPick=null;credits+=award;totalWin+=award;bonus.hidden=true;mode='base';wallpaper('base');face('big');message('WHAT COULD GO WRONG? YOU WON '+money(award)+' PRACTICE CREDITS!');meters();});choices.append(b);}bonus.append(branding,heading,choices);
+ const heading=el(doc,'p','','PICK ONE TERRIBLE DECISION');const choices=el(doc,'div','bob-choices');for(const name of pendingPick.options){const b=el(doc,'button','bob-object');b.type='button';const picture=el(doc,'img');picture.src=img('bonus-objects','bonus-'+name);picture.alt=name.replaceAll('-',' ');b.append(picture);b.setAttribute('aria-label','Pick '+name.replaceAll('-',' '));b.addEventListener('click',()=>{if(mode!=='pick')return;const award=pendingPick.award;pendingPick=null;if(!testingMode)credits+=award;totalWin+=award;bonus.hidden=true;mode='base';wallpaper('base');face('big');message('WHAT COULD GO WRONG? '+money(award)+(testingMode?' TEST CREDITS (DEMO ONLY)':' PRACTICE CREDITS!'));testingMode=false;meters();});choices.append(b);}bonus.append(branding,heading,choices);
  }
  smaller.addEventListener('click',()=>{bet=Math.max(.5,bet/2);meters();});
  larger.addEventListener('click',()=>{bet=Math.min(20,bet*2);meters();});
- spin.addEventListener('click',drawSpin);info.addEventListener('click',()=>{details.hidden=!details.hidden;});
+ spin.addEventListener('click',drawSpin);testPick.addEventListener('click',()=>startTest('pick'));testFree.addEventListener('click',()=>startTest('free'));info.addEventListener('click',()=>{details.hidden=!details.hidden;});
  wallpaper('base');face('idle');paint(gridFrom([0,5,10],base));message('ONE MORE HIT. WHAT COULD POSSIBLY GO WRONG?');meters();
- root.stopAnimation=()=>{disposed=true;};
+ root.stopAnimation=()=>{disposed=true;clearSpin();};
  return root;
 }

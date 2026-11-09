@@ -294,7 +294,7 @@ export async function openBetDeliveryOutbox({
   return Object.freeze({processed:items.length,delivered,failed,cancelled,pending});
  }
  async function get(key){await operation;return scrub(data.items[key]);}
- async function summary(){await operation;return {total:Object.keys(data.items).length,byStatus:counts(data)};}
+ async function summary(){await operation;return {total:Object.keys(data.items).length,byStatus:counts(data),halted:data.halted};}
  async function close(){await operation;closed=true;await rm(lock,{recursive:true});}
  return Object.freeze({enqueue,cancel,revokeSubscription,getRevocationCursor,retryRemoteCancellations,retractEvent,haltForReorg,resumeAfterCanonicalReplay,drain,get,summary,close});
 }

@@ -26,6 +26,7 @@ function fixture(){
       input.method==='eth_getCode'?'0x6001':'0x'+'0'.repeat(63)+'1';
     return {ok:true,text:async()=>JSON.stringify({jsonrpc:'2.0',id:1,result})};
    }
+   if(url.endsWith('/v1/420bet/health'))return {ok:true,text:async()=>JSON.stringify({ready:true,chainId:CHAIN,policyVersion:'bet-v1',policyApprovalDigest:D})};
    if(url.endsWith('/v1/wallet-subject')){
     return {ok:true,text:async()=>JSON.stringify({account:input.account,chainId:CHAIN,subjectId:S,revoked:false})};
    }
@@ -33,9 +34,9 @@ function fixture(){
     policyVersion:'bet-v1',policyApprovalDigest:D,authorized:true,revoked:false,
     authorizationVersion:'decision-1',expiresAt:Date.now()+60000})};
   }});
- async function http(route,body,secret=edge,headers={}){
+ async function http(route,body,secret=edge,headers={},method='POST'){
   const req=Readable.from([Buffer.from(JSON.stringify(body))]);
-  req.method='POST';req.url='/api/420bet/session/'+route;
+  req.method=method;req.url='/api/420bet/session/'+route;
   req.headers={origin:ORIGIN,'content-type':'application/json','x-bet-edge-secret':secret,...headers};
   let status,output;
   const res={headersSent:false,writeHead(code){status=code;this.headersSent=true},
@@ -58,6 +59,8 @@ test('runtime refuses implicit or unapproved Identity credentials and policy set
 });
 test('real EIP-191 signature, canonical on-chain read and policy authority create read-only session end-to-end',async()=>{
  const {runtime,http,calls}=fixture();
+ const ready=await http('ready',{},edge,{},'GET');
+ assert.equal(ready.status,200);assert.equal(ready.output.ready,true);
  const denied=await http('challenge',{account:account.address.toLowerCase(),chainId:CHAIN},'wrong');
  assert.equal(denied.status,403);
  const a=account.address.toLowerCase();

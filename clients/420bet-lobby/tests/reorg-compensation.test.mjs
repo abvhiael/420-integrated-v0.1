@@ -125,3 +125,43 @@ test('late delivered remote receipt after reorg cancellation queues exactly one 
   assert.equal((await a.summary()).correctionPending,1);
  }finally{await f.cleanup(a)}
 });
+
+test('in-flight provider delivery that finishes after reorg cancellation is retained and corrected',async t=>{
+ const f=await setup(t),a=await openBetDeliveryOutbox(f.args);
+ let entered;
+ const started=new Promise(resolve=>entered=resolve);
+ let finish;
+ const release=new Promise(resolve=>finish=resolve);
+ f.args.providers.mail.deliver=async d=>{
+  entered();
+  await release;
+  return {provider:'420Mail',externalId:'late-receipt',status:'delivered'};
+ };
+ try{
+  const sent=await a.enqueue(request(71));
+  const draining=a.drain();
+  await started;
+  await a.haltForReorg();
+  await a.reconcileCanonicalReplay({canonicalEventIds:[],verifyCanonicalRebuild:async()=>true});
+  await a.finishCanonicalReplay();
+  finish();
+  const outcome=await draining;
+  assert.equal(outcome.deliveredLate,1);
+  assert.equal(outcome.cancelled,0);
+  assert.equal((await a.get(sent.key)).status,'delivered');
+  assert.equal((await a.get(sent.key)).retracted,true);
+  assert.equal((await a.summary()).correctionPending,1);
+ }finally{finish?.();await f.cleanup(a)}
+});
+test('consent withdrawal retains historical delivered receipt without a retraction notice',async t=>{
+ const f=await setup(t),a=await openBetDeliveryOutbox(f.args);
+ try{
+  const first=await a.enqueue(request(85));
+  await a.drain();
+  const r=await a.revokeSubscription({tenant:'420bet',userId:'subject-1',subscriptionId:'sub-1'});
+  assert.equal(r.remoteCancellationUnconfirmed,0);
+  assert.equal((await a.get(first.key)).status,'delivered');
+  assert.equal((await a.get(first.key)).retracted,false);
+  assert.equal((await a.summary()).correctionPending,0);
+ }finally{await f.cleanup(a)}
+});

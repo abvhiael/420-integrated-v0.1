@@ -24,7 +24,7 @@ let runtime,worker,http;
 try{
  runtime=await createBetNotificationsMailRuntime({notifications});
  worker=await openBetOperationalDeliveryWorker({
-  runtime,statePath,
+  runtime,statePath,indexerCheckpointPath:required('BET_INDEXER_EVENT_CHECKPOINT'),
   intervalMs:bound('BET_DELIVERY_INTERVAL_MS',5000,100,3600000),
   retryMaxMs:bound('BET_DELIVERY_RETRY_MAX_MS',60000,100,3600000),
   staleAfterMs:bound('BET_DELIVERY_STALE_AFTER_MS',30000,100,86400000),
@@ -38,7 +38,10 @@ try{
  http=createServer(async(req,res)=>{
   const report=worker.health();
   const url=req.url?.split('?')[0];
-  const summary=url==='/metrics'?await runtime.outbox.summary():null;
+  let summary=null;
+  try{if(url==='/metrics')summary=await runtime.outbox.summary();}
+  catch{res.writeHead(503,{'Content-Type':'application/json','Cache-Control':'no-store'});
+   res.end(JSON.stringify({error:'monitor_unavailable'}));return;}
   if(req.method!=='GET'||!['/healthz','/readyz','/metrics'].includes(url)){
    res.writeHead(404,{'Content-Type':'application/json','Cache-Control':'no-store'});
    res.end(JSON.stringify({error:'not_found'}));return;

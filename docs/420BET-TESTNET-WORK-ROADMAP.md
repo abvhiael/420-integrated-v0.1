@@ -272,6 +272,12 @@ The remaining tournament network work is consolidated below. This supersedes the
 
 **Official testnet and operational acceptance:** deploy real 420Notifications and 420Bet backend behind TLS/private service routing, rotate/store genuine separate secrets, verify canonical Identity and subscription ownership against actual user actions, prove persistence across genuine deployment restarts, revoke and mute before/during delivery, demonstrate Mail/Notifications provider cancellation and receipts, retain audit evidence, independently approve privacy/retention and activation. No live subscriber, valid user opt-in, production ingress or release authorization is claimed.
 
+## TN-BET-7-E2E-LIVE — official testnet-only service and release evidence
+
+**DEFERRED TO LIVE TESTNET / INDEPENDENT OPERATORS — 2026-11-09.** Do not mistake local Go HTTP integration for production-equivalent, independently deployed service acceptance. The following require a running official testnet and/or external operators: actual immutable canonical Registry/Indexer chain/genesis/finality, genuine cross-vertical owner authority data, independently approved subject/opt-in identity and real sender credential issuance/rotation, persistent production Notifications/Mail endpoint deployment with supervisor monitoring and TLS, real receipt/signed delivery evidence, live reorg/orphan-event and in-flight-cancellation demonstrations, operational outage/alert/retention/rollback evidence, and external security/privacy/legal/release sign-off. Preserve these gates regardless of local test success.
+
+**Pre-testnet work remains actionable now:** actual Go service handler integration and persistence, 420Bet Node worker interoperability and adversarial spoof/replay/cancel/restart tests, reproducible exact-head CI with job receipts, plus any code-level defects identified. Do not list locally fixable defects as live-network blockers. No live wager, public Mail delivery or production activation is authorized.
+
 ## TN-BET-7-REORG-COMPENSATION — live reorganization and cancellation recovery acceptance
 
 **Local implementation present / operational proof outstanding.** BET-AUDIT-7 now includes a verified full canonical replay, deterministic privacy-redacted corrections for already delivered orphaned notices, durable `replayPending` and cancellation retry markers, idempotent reprojection of replacement canonical events, receipt reconciliation of cancellations that lose an in-flight race, current opt-in check on corrections, and a prohibition against boolean-only resume.

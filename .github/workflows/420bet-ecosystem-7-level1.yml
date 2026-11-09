@@ -38,6 +38,9 @@ on:
       - 'docs/bet/BET-AUDIT-7-ECOSYSTEM-INTEGRATIONS.md'
       - 'docs/bet/BET-AUDIT-7-INDEXER-WORKSTREAM.md'
       - 'docs/bet/BET-AUDIT-7-WALLET-IDENTITY.md'
+      - 'docs/bet/BET-AUDIT-7-REGISTRY-INTEGRATION.md'
+      - 'docs/bet/BET-AUDIT-7-NOTIFICATIONS-MAIL.md'
+      - 'docs/420BET-TESTNET-WORK-ROADMAP.md'
       - '.github/workflows/420bet-ecosystem-7-level1.yml'
   workflow_dispatch:
 jobs:
@@ -83,6 +86,9 @@ jobs:
           node --check clients/420bet-lobby/server/notifications-mail-outbox.mjs
           node --check clients/420bet-lobby/server/notifications-mail-source.mjs
           node --check clients/420bet-lobby/server/notifications-mail-runtime.mjs
+          node --check clients/420bet-lobby/tests/notifications-mail-integration.test.mjs
+          node --check clients/420bet-lobby/tests/notifications-mail-source.test.mjs
+          node --check clients/420bet-lobby/tests/notifications-mail-runtime.test.mjs
           node --check clients/420bet-lobby/server/verify-registry.mjs
           node --check clients/420bet-lobby/server/identity-authority-provider.mjs
           node --check clients/420bet-lobby/server/serve-identity.mjs

@@ -17,7 +17,12 @@ const proxy=async(uri,options)=>{
  const url=uri.replace('https://mail.local-qualification.invalid',actualMail)
   .replace('https://notifications.local-qualification.invalid',actualNotify);
  assert(url.startsWith(actualMail)||url.startsWith(actualNotify));
- return fetch(url,options);
+ const response=await fetch(url,options);
+ if(!response.ok){
+  const path=new URL(url).pathname;
+  process.stderr.write('Go HTTP boundary rejected '+(options?.method??'GET')+' '+path+' status='+response.status+'\\n');
+ }
+ return response;
 };
 const mailBroker=createVerified420MailActorBroker({
  origin:mailOrigin,sender:'sender-id',serviceToken:config.LOCAL_GO_MAIL_TOKEN,fetcher:proxy});
@@ -62,7 +67,8 @@ try{
  const oldMail=await outbox.enqueue(request('mail'));
  const oldPush=await outbox.enqueue(request('notifications'));
  const delivered=await outbox.drain();
- assert.equal(delivered.delivered,1,'real Go Mail outbox was not delivered');
+ assert.equal(delivered.delivered,1,'real Go Mail outbox was not delivered: '+JSON.stringify({
+  result:delivered,mail:await outbox.get(oldMail.key),push:await outbox.get(oldPush.key)}));
  assert.equal(delivered.pending,1,'Go Notifications forged a delivered receipt');
  assert.equal((await outbox.get(oldMail.key)).status,'delivered');
  assert.equal((await outbox.get(oldPush.key)).status,'pending_receipt');

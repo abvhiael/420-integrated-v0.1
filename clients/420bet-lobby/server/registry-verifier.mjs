@@ -59,6 +59,10 @@ export const BET_REGISTRY_ABI=[
  {type:'function',name:'modules',stateMutability:'view',inputs:[],outputs:[{type:'address'}]},
  {type:'function',name:'profiles',stateMutability:'view',inputs:[],outputs:[{type:'address'}]},
  {type:'function',name:'capabilityRegistry',stateMutability:'view',inputs:[],outputs:[{type:'address'}]},
+ {type:'function',name:'games',stateMutability:'view',inputs:[],outputs:[{type:'address'}]},
+ {type:'function',name:'operators',stateMutability:'view',inputs:[],outputs:[{type:'address'}]},
+ {type:'function',name:'betRegistry',stateMutability:'view',inputs:[],outputs:[{type:'address'}]},
+ {type:'function',name:'registry',stateMutability:'view',inputs:[],outputs:[{type:'address'}]},
  {type:'function',name:'isAuthorized',stateMutability:'view',
   inputs:[{name:'principal',type:'address'},{name:'actionId',type:'bytes32'},
    {name:'scopeHash',type:'bytes32'},{name:'amount',type:'uint256'}],
@@ -100,7 +104,7 @@ export function validateBetRegistryManifest(raw){
  requireValid(typeof raw.approvalSignature==='string'&&
   /^0x[0-9a-fA-F]{130}$/.test(raw.approvalSignature),'signed approval missing');
  requireValid(raw.contracts&&typeof raw.contracts==='object','missing registry bindings');
- const required=['gameRegistry','moduleRegistry','profileRegistry','operatorRegistry','authorization','capabilityRegistry'];
+ const required=['gameRegistry','moduleRegistry','profileRegistry','operatorRegistry','authorization','capabilityRegistry','wagerRegistry'];
  const contracts={};
  for(const role of required){
   const c=raw.contracts[role];requireValid(c&&typeof c==='object','missing '+role);
@@ -251,6 +255,8 @@ export function createBetRegistryVerifier({manifest,client,trustedApprover,requi
   }
   for(const binding of Object.values(bindings))await checkCode(binding.address,binding.runtimeHash);
   for(const source of config.sources)await checkCode(source.address,source.runtimeHash);
+  const router=config.sources.find(x=>x.role==='casino-router').address;
+  const settlementSource=config.sources.find(x=>x.role==='casino-settlement').address;
   const gameReg=bindings.gameRegistry.address,moduleReg=bindings.moduleRegistry.address,
    profileReg=bindings.profileRegistry.address,operatorReg=bindings.operatorRegistry.address,
    auth=bindings.authorization.address;
@@ -260,6 +266,17 @@ export function createBetRegistryVerifier({manifest,client,trustedApprover,requi
    requireValid(normAddress(await read(registry,'authorization'))===auth,'authorization dependency mismatch');
   requireValid(normAddress(await read(auth,'capabilityRegistry'))===bindings.capabilityRegistry.address,
    'capability Registry dependency mismatch');
+  requireValid(normAddress(await read(bindings.wagerRegistry.address,'authorization'))===auth,
+   'wager Registry authority mismatch');
+  for(const [method,expected] of Object.entries({
+   games:gameReg,modules:moduleReg,operators:operatorReg,
+   profiles:profileReg,authorization:auth,betRegistry:bindings.wagerRegistry.address
+  }))requireValid(normAddress(await read(router,method))===expected,
+   'casino router '+method+' dependency mismatch');
+  requireValid(normAddress(await read(settlementSource,'registry'))===bindings.wagerRegistry.address,
+   'settlement wager Registry mismatch');
+  requireValid(normAddress(await read(settlementSource,'authorization'))===auth,
+   'settlement authorization mismatch');
   const evidence=[];
   for(const game of config.games){
    const actual=await read(gameReg,'getGame',[game.gameVersionId]);
@@ -285,6 +302,8 @@ export function createBetRegistryVerifier({manifest,client,trustedApprover,requi
    // BetGameRegistry records a settlement *profile*, NOT a settlement address.
    // The approved manifest must independently bind the code-hashed settlement target.
    await checkCode(game.settlement.address,game.settlement.runtimeHash);
+   if(game.vertical==='casino')requireValid(game.settlement.address===settlementSource,
+    'casino settlement not pinned to canonical settlement engine');
    for(const p of Object.values(game.profiles)){
     const current=await read(profileReg,'getProfile',[p.id]);
     requireValid(current?.exists===true&&current.active===true,'inactive profile');

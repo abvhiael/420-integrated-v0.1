@@ -1,0 +1,201 @@
+// BET-AUDIT-7 — durable, single-writer, consent-scoped outbox.
+// A canonical finalized event never becomes a Mail or Notifications authority.
+import {mkdir,open,readFile,rename,rm,stat,chmod} from 'node:fs/promises';
+import {dirname,basename,join} from 'node:path';
+import {randomBytes} from 'node:crypto';
+import {makeBetDelivery} from './notifications-mail-adapters.mjs';
+const assert=(v,m)=>{if(!v)throw Error('420Bet outbox: '+m);};
+const STATES=new Set(['pending','dispatching','retry','pending_receipt','delivered','dead_letter','cancelled']);
+const CHANNELS=['mail','notifications'];
+const clone=v=>structuredClone(v);
+const now=()=>Date.now();
+const counts=v=>Object.fromEntries([...STATES].map(x=>[x,Object.values(v.items).filter(y=>y.status===x).length]));
+async function atomicWrite(path,data){
+ const dir=dirname(path),tmp=join(dir,'.'+basename(path)+'.'+randomBytes(8).toString('hex')+'.tmp');
+ let file;
+ try{
+  file=await open(tmp,'wx',0o600);
+  await file.writeFile(JSON.stringify(data),'utf8');await file.sync();await file.close();file=null;
+  await rename(tmp,path);await chmod(path,0o600);
+  const directory=await open(dir,'r');try{await directory.sync();}finally{await directory.close();}
+ }finally{if(file)await file.close();await rm(tmp,{force:true});}
+}
+export async function openBetDeliveryOutbox({
+ path,verifyEvent,checkConsent,providers,clock=now,
+ maxAttempts=4,baseBackoffMs=1000,maxBackoffMs=60000
+}={}){
+ assert(typeof path==='string'&&path.startsWith('/')&&!path.includes('\0'),'absolute outbox location required');
+ assert(typeof verifyEvent==='function'&&typeof checkConsent==='function','qualified event/consent authorities required');
+ assert(providers&&CHANNELS.every(k=>providers[k]&&
+  ['deliver','status','cancel'].every(op=>typeof providers[k][op]==='function')),
+  'qualified Notifications and Mail delivery adapters required');
+ assert(Number.isSafeInteger(maxAttempts)&&maxAttempts>=1&&maxAttempts<=10,'invalid retry count');
+ assert(Number.isSafeInteger(baseBackoffMs)&&baseBackoffMs>0&&
+  Number.isSafeInteger(maxBackoffMs)&&maxBackoffMs>=baseBackoffMs,'invalid retry backoff');
+ const parent=dirname(path);
+ await mkdir(parent,{recursive:true,mode:0o700});
+ const parentStat=await stat(parent);
+ assert((parentStat.mode&0o022)===0,'outbox parent is writable by group or others');
+ const lock=path+'.lock';
+ await mkdir(lock,{mode:0o700}); // Existing lock: fail closed; requires independent recovery.
+ let closed=false,data;
+ let operation=Promise.resolve();
+ try{
+  try{
+   const file=await stat(path);
+   assert((file.mode&0o077)===0&&file.isFile(),'outbox permissions unsafe');
+   const raw=await readFile(path,'utf8');
+   assert(raw.length<5_000_000,'outbox exceeds configured capacity');
+   data=JSON.parse(raw);
+   assert(data?.schema===1&&data.items&&typeof data.items==='object'&&!Array.isArray(data.items),
+    'invalid durable outbox');
+  }catch(error){
+   if(error?.code!=='ENOENT')throw error;
+   data={schema:1,items:{}};
+   await atomicWrite(path,data);
+  }
+  for(const [key,item] of Object.entries(data.items)){
+   assert(key===item.delivery?.deliveryKey&&STATES.has(item.status),
+    'invalid durable delivery item');
+   if(item.status==='dispatching'){
+    item.status='retry';item.nextAttemptAt=0;item.updatedAt=clock();
+   }
+  }
+  await atomicWrite(path,data);
+ }catch(e){await rm(lock,{recursive:true,force:true});throw e;}
+ const withWrite=fn=>{
+  const result=operation.then(async()=>{
+   assert(!closed,'outbox closed');
+   const snapshot=clone(data);
+   const out=await fn(snapshot);
+   await atomicWrite(path,snapshot);
+   data=snapshot;
+   return out;
+  });
+  operation=result.catch(()=>{});
+  return result;
+ };
+ function scrub(item){
+  if(!item)return null;
+  return Object.freeze({
+   key:item.delivery.deliveryKey,channel:item.delivery.channel,status:item.status,
+   attempts:item.attempts,nextAttemptAt:item.nextAttemptAt,
+   receipt:item.receipt?{provider:item.receipt.provider,externalId:item.receipt.externalId,
+    status:item.receipt.status}:null
+  });
+ }
+ async function ensureConsent(d){
+  const decision=await checkConsent({tenant:d.tenant,userId:d.userId,
+   subscriptionId:d.subscriptionId,recipient:d.recipient,channel:d.channel,
+   kind:d.kind,policyVersion:d.policyVersion});
+  return decision?.active===true&&decision.muted===false&&
+   decision.revoked===false&&decision.consent===true&&
+   decision.policyVersion===d.policyVersion&&decision.tenant===d.tenant&&
+   decision.userId===d.userId&&decision.subscriptionId===d.subscriptionId&&
+   decision.recipient===d.recipient&&decision.channel===d.channel;
+ }
+ async function enqueue(request){
+  // The verifier is external and must check the Indexer finalized event,
+  // approved Registry emitters, and canonical current hash before enqueue.
+  assert((await verifyEvent(request))===true,'event provenance not verified');
+  const d=makeBetDelivery(request);
+  assert(await ensureConsent(d),'consent denied or withdrawn');
+  return withWrite(async state=>{
+   const previous=state.items[d.deliveryKey];
+   if(previous){
+    assert(JSON.stringify(previous.delivery)===JSON.stringify(d),'idempotency conflict');
+    return {created:false,...scrub(previous)};
+   }
+   assert(Object.keys(state.items).length<10000,'outbox capacity exceeded');
+   const t=clock();assert(Number.isSafeInteger(t)&&t>0,'invalid clock');
+   const item={delivery:d,status:'pending',attempts:0,nextAttemptAt:t,
+    receipt:null,createdAt:t,updatedAt:t};
+   state.items[d.deliveryKey]=item;
+   return {created:true,...scrub(item)};
+  });
+ }
+ async function cancel(key){
+  return withWrite(async state=>{
+   const item=state.items[key];assert(item,'unknown delivery');
+   if(item.status==='cancelled'||item.status==='dead_letter')return scrub(item);
+   // Cancel BEFORE any external calls and retain cancellation tombstone.
+   item.status='cancelled';item.nextAttemptAt=null;item.updatedAt=clock();
+   return scrub(item);
+  });
+ }
+ async function retractEvent(eventId){
+  return withWrite(async state=>{
+   assert(typeof eventId==='string'&&/^[a-f0-9]{64}$/.test(eventId),'invalid event key');
+   let total=0;
+   for(const item of Object.values(state.items)){
+    if(item.delivery.eventId===eventId&&item.status!=='cancelled'){
+     item.status='cancelled';item.nextAttemptAt=null;item.updatedAt=clock();total++;
+    }
+   }
+   return total;
+  });
+ }
+ async function drain({limit=20}={}){
+  assert(Number.isInteger(limit)&&limit>0&&limit<=100,'invalid delivery batch');
+  const items=await withWrite(async state=>{
+   const t=clock(),out=[];
+   for(const item of Object.values(state.items)){
+    if(out.length>=limit)break;
+    if(!['pending','retry','pending_receipt'].includes(item.status)||item.nextAttemptAt>t)continue;
+    const action=item.status==='pending_receipt'?'status':'deliver';
+    item.status='dispatching';item.updatedAt=t;
+    out.push({delivery:clone(item.delivery),action,receipt:clone(item.receipt)});
+   }
+   return out;
+  });
+  let delivered=0,failed=0,cancelled=0,pending=0;
+  for(const candidate of items){
+   const d=candidate.delivery,key=d.deliveryKey;
+   let outcome=null,error=false;
+   try{
+    // Always recheck opt-in immediately before any transport.
+    if(!await ensureConsent(d)){outcome={status:'cancelled'};}
+    else if(candidate.action==='status'&&candidate.receipt)
+     outcome=await providers[d.channel].status(d,candidate.receipt);
+    else outcome=await providers[d.channel].deliver(d);
+   }catch{error=true;}
+   const result=await withWrite(async state=>{
+    const item=state.items[key];
+    if(!item)return null;
+    if(item.status==='cancelled')return {status:'cancelled'};
+    if(outcome?.status==='cancelled'){item.status='cancelled';item.nextAttemptAt=null;}
+    else if(outcome?.status==='delivered'){
+     assert(outcome.provider=== (d.channel==='mail'?'420Mail':'420Notifications')&&
+      typeof outcome.externalId==='string'&&outcome.externalId.length>0,
+      'unverified delivery receipt');
+     item.status='delivered';item.nextAttemptAt=null;item.receipt=outcome;
+    }else if(outcome?.status==='pending'){
+     assert(outcome.provider===(d.channel==='mail'?'420Mail':'420Notifications')&&
+      typeof outcome.externalId==='string'&&outcome.externalId.length>0,
+      'unverified pending receipt');
+     item.status='pending_receipt';item.receipt=outcome;
+     item.nextAttemptAt=clock()+Math.min(maxBackoffMs,baseBackoffMs);
+    }else{
+     item.attempts++;
+     if(item.attempts>=maxAttempts){item.status='dead_letter';item.nextAttemptAt=null;}
+     else{
+      item.status='retry';item.nextAttemptAt=clock()+Math.min(maxBackoffMs,
+       baseBackoffMs*2**(item.attempts-1));
+     }
+    }
+    item.updatedAt=clock();
+    return {status:item.status};
+   });
+   if(result?.status==='delivered')delivered++;
+   else if(result?.status==='cancelled'){cancelled++;
+    if(candidate.receipt)try{await providers[d.channel].cancel(d,candidate.receipt);}catch{/* tombstone remains; report to operator */}}
+   else if(result?.status==='pending_receipt')pending++;
+   else if(error||result?.status==='retry'||result?.status==='dead_letter')failed++;
+  }
+  return Object.freeze({processed:items.length,delivered,failed,cancelled,pending});
+ }
+ async function get(key){await operation;return scrub(data.items[key]);}
+ async function summary(){await operation;return {total:Object.keys(data.items).length,byStatus:counts(data)};}
+ async function close(){await operation;closed=true;await rm(lock,{recursive:true});}
+ return Object.freeze({enqueue,cancel,retractEvent,drain,get,summary,close});
+}

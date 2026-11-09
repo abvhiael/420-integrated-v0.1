@@ -43,7 +43,19 @@ type Check struct {
  Kind string `json:"kind"`
  PolicyVersion string `json:"policyVersion"`
 }
-type state struct { Schema int `json:"schema"`; Items map[string]Subscription `json:"items"` }
+type Revocation struct {
+ Sequence uint64 `json:"sequence"`
+ Tenant string `json:"tenant"`
+ UserID string `json:"userId"`
+ SubscriptionID string `json:"subscriptionId"`
+ Revision uint64 `json:"revision"`
+ Reason string `json:"reason"`
+}
+type state struct {
+ Schema int `json:"schema"`
+ Items map[string]Subscription `json:"items"`
+ Revocations []Revocation `json:"revocations,omitempty"`
+}
 type Store struct { mu sync.Mutex; path string; lock string; closed bool; data state }
 func key(tenant,user,sub string) string { return tenant+"|"+user+"|"+sub }
 func valid(s Subscription) bool {
@@ -71,6 +83,9 @@ func Open(path string)(*Store,error){
   if e=json.Unmarshal(b,&s.data);e!=nil{return nil,e}
   if s.data.Schema!=1||s.data.Items==nil{return nil,errors.New("invalid subscription schema")}
   for k,v:=range s.data.Items {if !valid(v)||k!=key(v.Tenant,v.UserID,v.SubscriptionID)||v.Revision==0{return nil,errors.New("invalid stored subscription")}}
+  for i,e:=range s.data.Revocations {
+   if e.Sequence!=uint64(i+1)||e.Tenant!="420bet"||!id.MatchString(e.UserID)||!id.MatchString(e.SubscriptionID)||e.Revision==0||e.Reason=="" {return nil,errors.New("invalid revocation log")}
+  }
  }else if !os.IsNotExist(err){return nil,err
  }else if err=s.persist(s.data);err!=nil{return nil,err}
  success=true
@@ -103,8 +118,13 @@ func (s *Store) Apply(v Subscription,expectedRevision uint64)(Subscription,error
  if exists&&(prior.Recipient!=v.Recipient||prior.Channel!=v.Channel){return Subscription{},errors.New("subscription destination immutable")}
  v.Revision=expectedRevision+1;v.UpdatedAt=time.Now().UnixMilli()
  if v.Revoked {v.Active=false;v.Consent=false}
- next:=state{Schema:1,Items:make(map[string]Subscription,len(s.data.Items)+1)}
+ next:=state{Schema:1,Items:make(map[string]Subscription,len(s.data.Items)+1),Revocations:append([]Revocation(nil),s.data.Revocations...)}
  for k,x:=range s.data.Items {next.Items[k]=x};next.Items[k]=v
+ if exists && prior.Active && prior.Consent && !prior.Muted &&
+  (!v.Active || !v.Consent || v.Muted || v.Revoked) {
+  next.Revocations=append(next.Revocations,Revocation{Sequence:uint64(len(next.Revocations)+1),
+   Tenant:v.Tenant,UserID:v.UserID,SubscriptionID:v.SubscriptionID,Revision:v.Revision,Reason:"consent_withdrawn"})
+ }
  if err:=s.persist(next);err!=nil{return Subscription{},err};s.data=next
  return v,nil
 }
@@ -118,8 +138,10 @@ func (s *Store) Revoke(c Check,expectedRevision uint64)(Subscription,error){
  if prior.Revision!=expectedRevision{return Subscription{},ErrConflict}
  if prior.Recipient!=c.Recipient||prior.Channel!=c.Channel||prior.PolicyVersion!=c.PolicyVersion{return Subscription{},errors.New("revocation scope mismatch")}
  prior.Revoked=true;prior.Active=false;prior.Consent=false;prior.Revision++;prior.UpdatedAt=time.Now().UnixMilli()
- next:=state{Schema:1,Items:make(map[string]Subscription,len(s.data.Items))}
+ next:=state{Schema:1,Items:make(map[string]Subscription,len(s.data.Items)),Revocations:append([]Revocation(nil),s.data.Revocations...)}
  for k,x:=range s.data.Items{next.Items[k]=x};next.Items[k]=prior
+ next.Revocations=append(next.Revocations,Revocation{Sequence:uint64(len(next.Revocations)+1),
+  Tenant:prior.Tenant,UserID:prior.UserID,SubscriptionID:prior.SubscriptionID,Revision:prior.Revision,Reason:"revoked"})
  if err:=s.persist(next);err!=nil{return Subscription{},err};s.data=next
  return prior,nil
 }
@@ -132,6 +154,19 @@ func (s *Store) Check(c Check) Subscription {
  if !ok||x.Recipient!=c.Recipient||x.Channel!=c.Channel||x.PolicyVersion!=c.PolicyVersion{return denied}
  return x
 }
+
+// Revocations returns strictly ordered, retained events. A consumer must persist
+// its own acknowledged cursor only after cancelling local deliveries.
+func (s *Store) Revocations(after uint64,limit int)([]Revocation,error){
+ if limit<1||limit>100{return nil,errors.New("invalid revocation batch limit")}
+ s.mu.Lock();defer s.mu.Unlock()
+ if s.closed{return nil,errors.New("subscription store closed")}
+ if after>uint64(len(s.data.Revocations)){return nil,errors.New("revocation cursor beyond tip")}
+ end:=after+uint64(limit)
+ if end>uint64(len(s.data.Revocations)){end=uint64(len(s.data.Revocations))}
+ return append([]Revocation(nil),s.data.Revocations[int(after):int(end)]...),nil
+}
+
 func decode(r *http.Request,out any)error{
  if r.ContentLength>8192{return errors.New("request too large")}
  d:=json.NewDecoder(io.LimitReader(r.Body,8193));d.DisallowUnknownFields()
@@ -149,6 +184,14 @@ func Handler(store *Store,readToken,writeToken string) (http.Handler,error){
   if subtle.ConstantTimeCompare([]byte(given),[]byte("Bearer "+token))!=1 {write(w,403,map[string]string{"error":"access denied"});return false}
   return true
  }
+ mux.HandleFunc("POST /v1/420bet/subscriptions/revocations",func(w http.ResponseWriter,r *http.Request){
+  if !authenticated(w,r,readToken){return}
+  var request struct { After uint64 `json:"after"`; Limit int `json:"limit"` }
+  if err:=decode(r,&request);err!=nil{write(w,400,map[string]string{"error":"invalid cursor"});return}
+  events,err:=store.Revocations(request.After,request.Limit)
+  if err!=nil{write(w,409,map[string]string{"error":"invalid cursor"});return}
+  write(w,200,map[string]any{"events":events})
+ })
  mux.HandleFunc("POST /v1/420bet/subscriptions/check",func(w http.ResponseWriter,r *http.Request){
   if !authenticated(w,r,readToken){return}
   var c Check;if err:=decode(r,&c);err!=nil||!validCheck(c){write(w,400,map[string]string{"error":"invalid scope"});return}

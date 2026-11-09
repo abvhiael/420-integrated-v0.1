@@ -7,7 +7,7 @@ const UINT=/^(0|[1-9][0-9]*)$/;
 const ID=/^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/;
 const ROLES=Object.freeze({
  'casino-router':'casino','casino-settlement':'casino',
- 'poker-ledger':'poker','fantasy-contest':'fantasy',
+ 'poker-ledger':'poker','poker-canonical':'poker','fantasy-contest':'fantasy',
  'sports-tickets':'sportsbook'
 });
 function requireValid(ok,message){if(!ok)throw Error('420Bet ownership: '+message);}

@@ -54,7 +54,7 @@ test('explicit client wallet login can only present verified read-only session',
    calls.push(method);
    if(method==='eth_requestAccounts')return [A];
    if(method==='eth_chainId')return '0x1a4';
-   if(method==='personal_sign'){assert.match(params[0],/No wagering/);return SIGN;}
+   if(method==='personal_sign'){assert.match(Buffer.from(params[0].slice(2),'hex').toString('utf8'),/No wagering/);return SIGN;}
    throw Error('unexpected method');
   }};
  const http=makeHttp();

@@ -156,3 +156,30 @@ test('Notifications adapter refuses fabricated receipt and requires explicit qua
  });
  await assert.rejects(forged.deliver(d),/receipt mismatch/);
 });
+
+test('explicit unsubscribe revokes only one tenant/user/subscription and reports remote cancellation truthfully',async()=>{
+ await withOutbox(async({path,options})=>{
+  let cancelled=0;
+  options.providers.notifications.deliver=async()=>({provider:'420Notifications',externalId:'r-1',status:'pending'});
+  options.providers.notifications.cancel=async()=>{cancelled++;return {cancelled:false};};
+  const a=await openBetDeliveryOutbox({path,...options});
+  const x=await a.enqueue(request());
+  await a.enqueue({...request(),subscriptionId:'other'});
+  assert.equal((await a.drain({limit:1})).pending,1);
+  const result=await a.revokeSubscription({tenant:'420bet',userId:'subject-v1',subscriptionId:'sub-1'});
+  assert.equal(result.locallyCancelled,1);
+  assert.equal(result.remoteCancellationUnconfirmed,1);
+  assert.equal(cancelled,1);
+  assert.equal((await a.get(x.key)).status,'cancelled');
+  assert.equal((await a.summary()).byStatus.cancelled,1);
+  await a.close();
+ });
+});
+test('same-origin delivery idempotency is per tenant and subscription, not globally merged across players',()=>{
+ const base=request();
+ const a=makeBetDelivery(base);
+ const b=makeBetDelivery({...base,userId:'subject-v2'});
+ const c=makeBetDelivery({...base,tenant:'another-tenant'});
+ assert.notEqual(a.deliveryKey,b.deliveryKey);assert.notEqual(a.deliveryKey,c.deliveryKey);
+ assert.equal(a.eventId,b.eventId);
+});

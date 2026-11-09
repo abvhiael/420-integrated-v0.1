@@ -14,7 +14,7 @@ const VERTICAL={'casino-router':'casino','casino-settlement':'casino',
 const demand=(v,m)=>{if(!v)throw Error('420Bet notification source: '+m);};
 const key=e=>[e.contract,e.transactionHash,e.logIndex,e.blockHash].join(':');
 export function createFinalizedBetNotificationPublisher({
- reader,checkpointPath,verifyRegistry,resolveAudience,outbox
+ reader,checkpointPath,verifyRegistry,resolveAudience,outbox,persistCheckpoint=reader?.persistCheckpoint
 }={}){
  demand(reader?.config&&typeof reader.readCheckpoint==='function'&&
   typeof reader.poll==='function'&&typeof checkpointPath==='string'&&checkpointPath,
@@ -75,6 +75,10 @@ export function createFinalizedBetNotificationPublisher({
     }
    }
   }
-  return {reorganized:false,queued,skipped,halted:false};
+  // Commit only after all verified owner deliveries have reached durable outbox.
+  // Crash before commit replays the same idempotent event keys.
+  if(typeof persistCheckpoint==='function')await persistCheckpoint(checkpointPath,result.state);
+  return {reorganized:false,queued,skipped,halted:false,
+   nextBlock:result.state.nextBlock??null,scanned:result.scanned??null};
  }});
 }

@@ -33,7 +33,7 @@ function sessionBackendUrl(env){
   return u.origin;
  }catch{return null;}
 }
-async function sessionProxy(request,env){
+async function sessionProxy(request,env,fetcher=fetch){
  const url=new URL(request.url);
  const route=url.pathname.slice(SESSION_BASE.length);
  if(!['challenge','authenticate','status','revoke'].includes(route)||url.search)return apiError(404,'unknown_session_endpoint');
@@ -52,7 +52,7 @@ async function sessionProxy(request,env){
   if(value)headers[output]=value;
  }
  try{
-  const result=await fetch(sessionBackendUrl(env)+url.pathname,{
+  const result=await fetcher(sessionBackendUrl(env)+url.pathname,{
    method:'POST',redirect:'manual',headers,body,signal:AbortSignal.timeout(12000)});
   if(![200,400,401,403,405,413,429,503].includes(result.status)||
    !result.headers.get('content-type')?.toLowerCase().startsWith('application/json'))
@@ -86,7 +86,7 @@ const apiError=(status,error)=>new Response(JSON.stringify({error}),{
  'Cache-Control':'no-store','X-Content-Type-Options':'nosniff',
  'Referrer-Policy':'no-referrer'}
 });
-export async function handle420BetWorker(request,env,ctx,{marqueeHandler=marquee,linesHandler=fetchBudgetedLines}={}){
+export async function handle420BetWorker(request,env,ctx,{marqueeHandler=marquee,linesHandler=fetchBudgetedLines,sessionFetch=fetch}={}){
  const url=new URL(request.url);
  if(url.pathname.startsWith(SESSION_BASE)){
   if(url.pathname===SESSION_BASE+'capabilities'){
@@ -94,7 +94,7 @@ export async function handle420BetWorker(request,env,ctx,{marqueeHandler=marquee
    return new Response(JSON.stringify({readOnlyIdentityAvailable:Boolean(sessionConfigured(env)&&sessionBackendUrl(env))}),{
     status:200,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});
   }
-  return sessionProxy(request,env);
+  return sessionProxy(request,env,sessionFetch);
  }
  if(url.pathname.startsWith(BASE)){
   if(url.pathname===BASE+'status'){

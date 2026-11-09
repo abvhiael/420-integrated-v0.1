@@ -131,14 +131,24 @@ export async function openBetDeliveryOutbox({
  async function cancel(key){
   const result=await withWrite(async state=>{
    const item=state.items[key];assert(item,'unknown delivery');
-   if(item.status==='cancelled'||item.status==='dead_letter')return {record:scrub(item),delivery:clone(item.delivery),receipt:null};
-   // Cancel BEFORE any external calls and retain cancellation tombstone.
+   if(item.status==='cancelled'||item.status==='dead_letter')
+    return {record:scrub(item),delivery:clone(item.delivery),receipt:null};
+   if(item.status==='delivered'){
+    item.retracted=true;item.updatedAt=clock();
+    return {record:scrub(item),delivery:clone(item.delivery),receipt:null};
+   }
+   // Persist the tombstone and provider-cancellation retry *before* external I/O.
    item.status='cancelled';item.nextAttemptAt=null;item.updatedAt=clock();
+   item.remoteCancellationPending=Boolean(item.receipt);
    return {record:scrub(item),delivery:clone(item.delivery),receipt:clone(item.receipt)};
   });
   if(result?.receipt){
    try{
     const cancelled=await providers[result.delivery.channel].cancel(result.delivery,result.receipt);
+    if(cancelled?.cancelled===true)await withWrite(async state=>{
+     const current=state.items[key];
+     if(current?.remoteCancellationPending)current.remoteCancellationPending=false;
+    });
     return {...result.record,remoteCancellationConfirmed:cancelled?.cancelled===true};
    }catch{return {...result.record,remoteCancellationConfirmed:false};}
   }
@@ -241,7 +251,10 @@ export async function openBetDeliveryOutbox({
     if(item.delivery.eventId===eventId&&item.status!=='cancelled'){
      if(item.status==='delivered'){
       item.retracted=true; // Preserve already-delivered receipt; cannot unsend.
-     }else{item.status='cancelled';item.nextAttemptAt=null;}
+     }else{
+      item.status='cancelled';item.nextAttemptAt=null;
+      item.remoteCancellationPending=Boolean(item.receipt);
+     }
      item.updatedAt=clock();
      affected.push({delivery:clone(item.delivery),receipt:clone(item.receipt)});
     }
@@ -250,7 +263,15 @@ export async function openBetDeliveryOutbox({
   });
   let confirmed=0;
   for(const item of affected)if(item.receipt){
-   try{if((await providers[item.delivery.channel].cancel(item.delivery,item.receipt))?.cancelled===true)confirmed++;}catch{}
+   try{
+    if((await providers[item.delivery.channel].cancel(item.delivery,item.receipt))?.cancelled===true){
+     confirmed++;
+     await withWrite(async state=>{
+      const current=state.items[item.delivery.deliveryKey];
+      if(current?.remoteCancellationPending)current.remoteCancellationPending=false;
+     });
+    }
+   }catch{/* unconfirmed remote cancellation stays durable */}
   }
   return {affected:affected.length,remoteCancellationConfirmed:confirmed,
    remoteCancellationUnconfirmed:affected.filter(x=>x.receipt).length-confirmed};
@@ -358,7 +379,10 @@ export async function openBetDeliveryOutbox({
      }
      return {status:'cancelled'};
     }
-    if(outcome?.status==='cancelled'){item.status='cancelled';item.nextAttemptAt=null;}
+    if(outcome?.status==='cancelled'){
+     item.status='cancelled';item.nextAttemptAt=null;
+     item.remoteCancellationPending=Boolean(item.receipt);
+    }
     else if(outcome?.status==='delivered'){
      assert(outcome.provider=== (d.channel==='mail'?'420Mail':'420Notifications')&&
       typeof outcome.externalId==='string'&&outcome.externalId.length>0,
@@ -383,7 +407,13 @@ export async function openBetDeliveryOutbox({
    });
    if(result?.status==='delivered')delivered++;
    else if(result?.status==='cancelled'){cancelled++;
-    if(candidate.receipt)try{await providers[d.channel].cancel(d,candidate.receipt);}catch{/* tombstone remains; report to operator */}}
+    if(candidate.receipt)try{
+     if((await providers[d.channel].cancel(d,candidate.receipt))?.cancelled===true)
+      await withWrite(async state=>{
+       const active=state.items[key];
+       if(active?.remoteCancellationPending)active.remoteCancellationPending=false;
+      });
+    }catch{/* durable pending marker remains for retry */}}
    else if(result?.status==='pending_receipt')pending++;
    else if(error||result?.status==='retry'||result?.status==='dead_letter')failed++;
   }

@@ -8,6 +8,8 @@ import (
 	"strconv"
 	"time"
 
+ "github.com/420integrated/420-integrated/notifications/betconsent"
+
 	notifyruntime "github.com/420integrated/420-integrated/notifications/runtime"
 )
 
@@ -22,7 +24,12 @@ func main() {
 	if err != nil { log.Fatal(err) }
 	service, err := notifyruntime.NewService(cfg, probe)
 	if err != nil { log.Fatal(err) }
-	ctx, cancel := context.WithTimeout(context.Background(), cfg.RequestTimeout)
+	if path:=os.Getenv("NOTIFICATIONS_BET_CONSENT_PATH");path!="" {
+  token:=mustEnv("NOTIFICATIONS_BET_CONSENT_TOKEN")
+  store,e:=betconsent.Open(path);if e!=nil{log.Fatal(e)}
+  if e=service.EnableBetConsent(store,token);e!=nil{log.Fatal(e)}
+ }
+ ctx, cancel := context.WithTimeout(context.Background(), cfg.RequestTimeout)
 	defer cancel()
 	if err := service.Qualify(ctx); err != nil { log.Fatalf("notifications startup qualification failed: %v", err) }
 	server := &http.Server{Addr: cfg.ListenAddr, Handler: service.Handler(), ReadHeaderTimeout: 5 * time.Second}

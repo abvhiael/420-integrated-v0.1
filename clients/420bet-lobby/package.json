@@ -10,6 +10,7 @@
     "serve:history": "node server/serve.mjs",
     "sync:indexer:events": "node server/sync-indexer-events.mjs",
     "serve:identity": "node server/serve-identity.mjs",
+    "worker:delivery": "node server/run-delivery-worker.mjs",
     "verify:registry": "node server/verify-registry.mjs"
   },
   "devDependencies": {

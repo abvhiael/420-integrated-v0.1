@@ -72,6 +72,19 @@ export function createBetIdentityRuntime({settings,fetcher=fetch,publicClient}={
   return remote.checkReadiness();
  }
  const handler=createBetSessionHttpHandler({origin:settings.origin,sessions,readiness});
+ // Per-instance backstop, not a replacement for globally enforced edge rate
+ // limits and abuse controls in the qualified deployment.
+ const requests=new Map();
+ function withinLimit(value){
+  const key=typeof value==='string'&&value.length>=3&&value.length<=128?value:'unknown';
+  const at=Date.now(),windowMs=60000;
+  if(requests.size>=10000)for(const [k,v] of requests)if(v.start+windowMs<=at)requests.delete(k);
+  if(requests.size>=10000&&!requests.has(key))return false;
+  const record=requests.get(key);
+  if(!record||record.start+windowMs<=at){requests.set(key,{start:at,count:1});return true;}
+  if(record.count>=60)return false;
+  record.count++;return true;
+ }
  // Cloudflare proxy authentication is mandatory before exposing this handler.
  function authorized(request){
   const token=request.headers['x-bet-edge-secret'];
@@ -82,6 +95,10 @@ export function createBetIdentityRuntime({settings,fetcher=fetch,publicClient}={
   if(!authorized(request)){
    response.writeHead(403,{'Content-Type':'application/json','Cache-Control':'no-store'});
    response.end('{"error":"upstream access denied"}');return;
+  }
+  if(!withinLimit(request.headers['x-bet-client-ip'])){
+   response.writeHead(429,{'Content-Type':'application/json','Cache-Control':'no-store','Retry-After':'60'});
+   response.end('{"error":"identity_rate_limited"}');return;
   }
   void handler(request,response).catch(()=>{
    if(!response.headersSent){response.writeHead(503,{'Content-Type':'application/json','Cache-Control':'no-store'});
